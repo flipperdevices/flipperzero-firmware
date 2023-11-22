@@ -182,7 +182,8 @@ void seader_send_card_detected(SeaderUartBridge* seader_uart, CardDetails_t* car
     ASN_STRUCT_FREE(asn_DEF_Payload, payload);
 }
 
-bool seader_unpack_pacs(SeaderCredential* seader_credential, uint8_t* buf, size_t size) {
+bool seader_unpack_pacs(Seader* seader, uint8_t* buf, size_t size) {
+    SeaderCredential* seader_credential = seader->credential;
     PAC_t* pac = 0;
     pac = calloc(1, sizeof *pac);
     assert(pac);
@@ -216,6 +217,8 @@ bool seader_unpack_pacs(SeaderCredential* seader_credential, uint8_t* buf, size_
             rtn = true;
         } else {
             // PACS too big (probably bad data)
+            view_dispatcher_send_custom_event(
+                seader->view_dispatcher, SeaderCustomEventWorkerExit);
         }
     }
 
@@ -266,7 +269,7 @@ bool seader_parse_version(SeaderWorker* seader_worker, uint8_t* buf, size_t size
 bool seader_parse_sam_response(Seader* seader, SamResponse_t* samResponse) {
     SeaderWorker* seader_worker = seader->worker;
     SeaderUartBridge* seader_uart = seader_worker->uart;
-    SeaderCredential* credential = seader->credential;
+    FURI_LOG_D(TAG, "seader_parse_sam_response");
 
     if(samResponse->size == 0) {
         if(requestPacs) {
@@ -275,10 +278,12 @@ bool seader_parse_sam_response(Seader* seader, SamResponse_t* samResponse) {
             requestPacs = false;
         } else {
             FURI_LOG_D(TAG, "samResponse %d, no action", samResponse->size);
+            view_dispatcher_send_custom_event(
+                seader->view_dispatcher, SeaderCustomEventWorkerExit);
         }
     } else if(seader_parse_version(seader_worker, samResponse->buf, samResponse->size)) {
         // no-op
-    } else if(seader_unpack_pacs(credential, samResponse->buf, samResponse->size)) {
+    } else if(seader_unpack_pacs(seader, samResponse->buf, samResponse->size)) {
         view_dispatcher_send_custom_event(seader->view_dispatcher, SeaderCustomEventWorkerExit);
     } else {
         memset(display, 0, sizeof(display));
@@ -297,6 +302,7 @@ bool seader_parse_response(Seader* seader, Response_t* response) {
         seader_parse_sam_response(seader, &response->choice.samResponse);
         break;
     default:
+        FURI_LOG_D(TAG, "non-sam response");
         break;
     };
     return false;
@@ -591,6 +597,7 @@ bool seader_worker_state_machine(
     case Payload_PR_errorResponse:
         FURI_LOG_W(TAG, "Error Response");
         processed = true;
+        view_dispatcher_send_custom_event(seader->view_dispatcher, SeaderCustomEventWorkerExit);
         break;
     default:
         FURI_LOG_W(TAG, "unhandled payload");
