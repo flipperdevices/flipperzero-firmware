@@ -16,6 +16,8 @@
 
 #define TAG "HexEditor"
 
+#define STEP 6u
+
 typedef struct {
     uint32_t file_offset;
     uint32_t file_read_bytes;
@@ -28,7 +30,6 @@ typedef struct {
 
 typedef struct {
     HexEditorModel* model;
-    FuriMutex** mutex;
 
     FuriMessageQueue* input_queue;
 
@@ -46,30 +47,44 @@ static void draw_callback(Canvas* canvas, void* ctx) {
     canvas_set_font(canvas, FontPrimary);
     canvas_draw_str(canvas, 0, 10, "Line and mode:");
 
-
     canvas_set_font(canvas, FontSecondary);
 
-    canvas_draw_str_aligned(
+    uint8_t com_str_offset = 0;
+    uint8_t local_offset = MAX(hex_editor->model->string_offset - 5, 0);
+    // TODO UTF ?
+    for(uint8_t i = 0; i < MIN((uint8_t)128 / STEP, furi_string_size(hex_editor->buffer)); i++) {
+        if(i + local_offset >= furi_string_size(hex_editor->buffer)) {
+            break;
+        }
+        char a = furi_string_get_char(hex_editor->buffer, i + local_offset);
+        canvas_draw_glyph(
+            canvas, 0 + com_str_offset + (STEP - canvas_glyph_width(canvas, a)) / 2, 20, a);
+
+        com_str_offset += STEP;
+    }
+
+    canvas_draw_icon(
         canvas,
-        0,
-        20,
-        AlignLeft,
-        AlignBottom,
-        furi_string_get_cstr(hex_editor->buffer) + hex_editor->model->string_offset);
-
-
-    canvas_draw_icon(canvas, 0, 20, &I_Pin_arrow_up_7x9);
+        0 + MIN(hex_editor->model->string_offset, 5) * STEP - 4 + STEP / 2,
+        21,
+        &I_Pin_arrow_up_7x9);
 
     if(hex_editor->model->mode) {
         elements_button_left(canvas, "ASCII -");
         elements_button_right(canvas, "ASCII +");
+        elements_button_center(canvas, "");
+
+        canvas_set_font(canvas, FontPrimary);
+        canvas_draw_str(canvas, 0, 45, "edit");
     } else {
         elements_button_left(canvas, "");
         elements_button_right(canvas, "");
+        elements_button_center(canvas, "chmod");
+
+        canvas_set_font(canvas, FontPrimary);
+        canvas_draw_str(canvas, 0, 45, "seek");
     }
 
-    canvas_set_font(canvas, FontPrimary);
-    canvas_draw_glyph(canvas, 0, 45, '0' + hex_editor->model->mode);
     canvas_draw_glyph(canvas, 30, 45, hex_editor->model->editable_char);
 }
 
@@ -88,8 +103,6 @@ static HexEditor* hex_editor_alloc() {
     memset(instance->model, 0x0, sizeof(HexEditorModel));
 
     instance->model->editable_char = ' ';
-
-    instance->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
 
     instance->input_queue = furi_message_queue_alloc(8, sizeof(InputEvent));
 
@@ -111,12 +124,10 @@ static void hex_editor_free(HexEditor* instance) {
     furi_record_close(RECORD_STORAGE);
 
     gui_remove_view_port(instance->gui, instance->view_port);
-    furi_record_close(RECORD_GUI);
     view_port_free(instance->view_port);
+    furi_record_close(RECORD_GUI);
 
     furi_message_queue_free(instance->input_queue);
-
-    furi_mutex_free(instance->mutex);
 
     if(instance->model->stream) buffered_file_stream_close(instance->model->stream);
 
@@ -131,20 +142,16 @@ static bool hex_editor_open_file(HexEditor* hex_editor, const char* file_path) {
     furi_assert(file_path);
 
     hex_editor->model->stream = buffered_file_stream_alloc(hex_editor->storage);
-    bool isOk = true;
 
-    do {
-        if(!buffered_file_stream_open(
-               hex_editor->model->stream, file_path, FSAM_READ_WRITE, FSOM_OPEN_EXISTING)) {
-            FURI_LOG_E(TAG, "Unable to open stream: %s", file_path);
-            isOk = false;
-            break;
-        };
+    if(!buffered_file_stream_open(
+           hex_editor->model->stream, file_path, FSAM_READ_WRITE, FSOM_OPEN_EXISTING)) {
+        FURI_LOG_E(TAG, "Unable to open stream: %s", file_path);
+        return false;
+    };
 
-        hex_editor->model->file_size = stream_size(hex_editor->model->stream);
-    } while(false);
+    hex_editor->model->file_size = stream_size(hex_editor->model->stream);
 
-    return isOk;
+    return true;
 }
 
 int32_t hex_editor_app(void* p) {
@@ -159,11 +166,13 @@ int32_t hex_editor_app(void* p) {
         if(p && strlen(p)) {
             furi_string_set(file_path, (const char*)p);
         } else {
-            furi_string_set(file_path, "/any");
+            // TODO bac to any
+            furi_string_set(file_path, "/any/nfc");
 
             DialogsFileBrowserOptions browser_options;
             dialog_file_browser_set_basic_options(&browser_options, "*", &I_edit_10px);
             browser_options.hide_ext = false;
+            browser_options.hide_dot_files = false;
 
             DialogsApp* dialogs = furi_record_open(RECORD_DIALOGS);
             bool res = dialog_file_browser_show(dialogs, file_path, file_path, &browser_options);
@@ -185,7 +194,7 @@ int32_t hex_editor_app(void* p) {
         }
 
         InputEvent event;
-        int8_t off;
+        int8_t offset_modifier;
         while(1) {
             // Выбираем событие из очереди в переменную event (ждем бесконечно долго, если очередь пуста)
             // и проверяем, что у нас получилось это сделать
@@ -196,12 +205,12 @@ int32_t hex_editor_app(void* p) {
             // Если нажата кнопка "назад", то выходим из цикла, а следовательно и из приложения
             if(event.type == InputTypeShort || event.type == InputTypeRepeat) {
                 if(!hex_editor->model->mode) {
-                    off = 1;
+                    offset_modifier = 1;
                     if(event.type == InputTypeRepeat) {
-                        off = 2;
+                        offset_modifier = 3;
                     }
                     if(event.key == InputKeyRight) {
-                        hex_editor->model->string_offset += off;
+                        hex_editor->model->string_offset += offset_modifier;
                         if(hex_editor->model->string_offset >=
                            furi_string_size(hex_editor->buffer)) {
                             // dengeros
@@ -210,12 +219,12 @@ int32_t hex_editor_app(void* p) {
                         }
                     }
                     if(event.key == InputKeyLeft) {
-                        if(hex_editor->model->string_offset - off < 0) {
+                        if(hex_editor->model->string_offset - offset_modifier < 0) {
                             // dengeros
                             hex_editor->model->string_offset +=
                                 furi_string_size(hex_editor->buffer);
                         }
-                        hex_editor->model->string_offset -= off;
+                        hex_editor->model->string_offset -= offset_modifier;
                     }
                     if(event.key == InputKeyDown) {
                         hex_editor->model->string_offset = 0;
@@ -225,7 +234,7 @@ int32_t hex_editor_app(void* p) {
                     }
                     if(event.key == InputKeyUp) {
                         hex_editor->model->string_offset = 0;
-                        // TODO asert
+
                         if(!stream_seek(hex_editor->model->stream, -1, StreamOffsetFromCurrent)) {
                             FURI_LOG_E(TAG, "Unable to seek stream");
                             break;
@@ -233,7 +242,6 @@ int32_t hex_editor_app(void* p) {
                         // NOT work on first line
                         stream_seek_to_char(
                             hex_editor->model->stream, '\n', StreamDirectionBackward);
-
 
                         if(!stream_seek_to_char(
                                hex_editor->model->stream, '\n', StreamDirectionBackward)) {
@@ -259,15 +267,15 @@ int32_t hex_editor_app(void* p) {
                         hex_editor->model->mode = 1;
                     }
                 } else {
-                    off = 1;
+                    offset_modifier = 1;
                     if(event.type == InputTypeRepeat) {
-                        off = 4;
+                        offset_modifier = 4;
                     }
                     if(event.key == InputKeyRight) {
-                        hex_editor->model->editable_char += off;
+                        hex_editor->model->editable_char += offset_modifier;
                     }
                     if(event.key == InputKeyLeft) {
-                        hex_editor->model->editable_char -= off;
+                        hex_editor->model->editable_char -= offset_modifier;
                     }
 
                     if(event.key == InputKeyOk) {
@@ -275,26 +283,47 @@ int32_t hex_editor_app(void* p) {
                             FURI_LOG_E(TAG, "Unable to seek stream");
                             break;
                         }
-                        stream_seek_to_char(
-                            hex_editor->model->stream, '\n', StreamDirectionBackward);
-                        stream_seek(
-                            hex_editor->model->stream,
-                            hex_editor->model->string_offset + 1,
-                            StreamOffsetFromCurrent);
+                        if(!stream_seek_to_char(
+                               hex_editor->model->stream, '\n', StreamDirectionBackward)) {
+                            FURI_LOG_E(TAG, "Unable to stream_seek_to_char n");
+                            // first line
+                            stream_seek(hex_editor->model->stream, 0, StreamOffsetFromStart);
+                            if(!stream_seek(
+                                   hex_editor->model->stream,
+                                   hex_editor->model->string_offset,
+                                   StreamOffsetFromCurrent)) {
+                                FURI_LOG_E(TAG, "Unable to seek string_offset");
+                            }
+                        } else {
+                            if(!stream_seek(
+                                   hex_editor->model->stream,
+                                   hex_editor->model->string_offset + 1,
+                                   StreamOffsetFromCurrent)) {
+                                FURI_LOG_E(TAG, "Unable to seek string_offset +1");
+                            }
+                        }
 
-                        stream_write_char(
-                            hex_editor->model->stream, hex_editor->model->editable_char);
+                        if(!stream_write_char(
+                               hex_editor->model->stream, hex_editor->model->editable_char)) {
+                            FURI_LOG_E(TAG, "Unable to stream_write_char");
+                            break;
+                        }
 
                         hex_editor->model->editable_char = ' ';
 
                         hex_editor->model->mode = 0;
 
-                        stream_seek_to_char(
-                            hex_editor->model->stream, '\n', StreamDirectionBackward);
-
-                        if(!stream_seek(hex_editor->model->stream, 1, StreamOffsetFromCurrent)) {
-                            FURI_LOG_E(TAG, "Unable to seek stream");
-                            break;
+                        if(!stream_seek_to_char(
+                               hex_editor->model->stream, '\n', StreamDirectionBackward)) {
+                            FURI_LOG_E(TAG, "Unable to stream_seek_to_char n 2");
+                            // first line
+                            stream_seek(hex_editor->model->stream, 0, StreamOffsetFromStart);
+                        } else {
+                            if(!stream_seek(
+                                   hex_editor->model->stream, 1, StreamOffsetFromCurrent)) {
+                                FURI_LOG_E(TAG, "Unable to seek stream");
+                                break;
+                            }
                         }
 
                         if(!stream_read_line(hex_editor->model->stream, hex_editor->buffer)) {
