@@ -53,9 +53,6 @@ NfcCommand felica_listener_run(NfcGenericEvent event, void* context) {
     furi_assert(context);
     furi_assert(event.protocol == NfcProtocolInvalid);
     furi_assert(event.event_data);
-    furi_assert(context);
-    furi_assert(event.protocol == NfcProtocolInvalid);
-    furi_assert(event.event_data);
 
     FelicaListener* instance = context;
     NfcEvent* nfc_event = event.event_data;
