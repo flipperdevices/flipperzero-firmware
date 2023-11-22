@@ -76,8 +76,8 @@ static void wiegand_scan_found(void *context)
     furi_hal_rtc_get_datetime(&datetime);
     snprintf(
         app->file_name,
-        25,
-        "%02d%02d%02d_%02d%02d%02d",
+        50,
+        "%02d_%02d_%02d_%02d_%02d_%02d",
         datetime.year,
         datetime.month,
         datetime.day,
