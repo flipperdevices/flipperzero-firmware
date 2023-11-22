@@ -51,7 +51,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - Added: [USB Consumer Control (By WithSecureLabs)](https://github.com/WithSecureLabs/usb-consumer-control)
 - Updated: [POCSAG Pager v1.1 (By XMasterx & Shmuma)](https://github.com/xMasterX/flipper-pager) - Decoder by htotoo
 - UL: fix ibutton info display (By krolchonok)
-- Updated: [Hangman v1.4 (By Evgeny Stepanischev & Eva Stepanischeva)](https://github.com/bolknote/Flipper-Zero-Hangman-Game)
 - Updated: [Questions v1.0 (By nikilark)](https://github.com/nikilark/flipper_questions)
 - Updated: [Video Poker v1.2 (By PixlEmly)](https://github.com/PixlEmly/flipperzero-firmware-testing/blob/420/applications/VideoPoker/poker.c) [Improve VideoPoker bet management #30 (By dsmatilla)](https://github.com/xMasterX/all-the-plugins/pull/30)
 - UL: [SubGHz fix feature name (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/f8546937c0fc6be5f1d94b8ba95f3adc486ed950)
@@ -60,6 +59,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [POCSAG Pager v1.1 (By XMasterx & Shmuma)](https://github.com/xMasterX/flipper-pager) - Fix subghz pocsag memory leak (By Willy-JL)
 - Updated: [ESP32 Evil Portal v0.2 (By bigbrodude6119)](https://github.com/bigbrodude6119/flipper-zero-evil-portal) - [Fix Cross Compatability Current VS NFC Refactors branch (By Leedave)](https://github.com/bigbrodude6119/flipper-zero-evil-portal/pull/49/commits/735b84d6d24578551fe92d69657899350800db1a)
 - Updated: [Authenticator/TOTP v5.9.0 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
+- Updated: [Hangman v1.4 (By Evgeny Stepanischev & Eva Stepanischeva)](https://github.com/bolknote/Flipper-Zero-Hangman-Game)
+- Updated: [HEX Editor v1.2 (By dunaevai135)](https://github.com/dunaevai135/flipper-zero-hex_editor)
 
 <a name="release">
 
