@@ -154,5 +154,5 @@ finally {
 }
 
 $cliHelpFileContent = Get-Content -Path $cliHelpFile -Raw
-$cliHelpFileContent = $cliHelpFileContent -replace '(?m)(-k <layout>.+Must be one of: )(.*)$', ('$1' + ($layouts -join ', '))
+$cliHelpFileContent = $cliHelpFileContent -replace '(?m)(-k <layout>.+Must be one of: )(.*)$', ('$1' + ($layouts -join ', ') + "`r")
 Set-Content -Path $cliHelpFile -Value $cliHelpFileContent -NoNewline -Force -Encoding Ascii | Out-Null
