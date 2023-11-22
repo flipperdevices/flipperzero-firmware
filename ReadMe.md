@@ -29,8 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM1120-2329-0.93.9-918d740](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-11-21 01:08 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-11-21 01:08 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-11-21 21:20 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-11-21 21:20 EST`
 - Updated: [Cross Remote v0.9 (By leedave)](https://github.com/leedave/Leeds-Flipper-Zero-Applications/tree/feature/xremote)
 - Updated: [ESP32 Camera Suite v1.4 (By CodyTolene)](https://github.com/CodyTolene/Flipper-Zero-Camera-Suite)
 - Updated: [Color Guess v1.2 (By leedave)](https://github.com/leedave/Leeds-Flipper-Zero-Applications)
@@ -57,6 +57,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Hangman v1.4 (By Evgeny Stepanischev & Eva Stepanischeva)](https://github.com/bolknote/Flipper-Zero-Hangman-Game)
 - Updated: [Questions v1.0 (By nikilark)](https://github.com/nikilark/flipper_questions)
 - Updated: [Video Poker v1.2 (By PixlEmly)](https://github.com/PixlEmly/flipperzero-firmware-testing/blob/420/applications/VideoPoker/poker.c) [Improve VideoPoker bet management #30 (By dsmatilla)](https://github.com/xMasterX/all-the-plugins/pull/30)
+- UL: [SubGHz fix feature name (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/f8546937c0fc6be5f1d94b8ba95f3adc486ed950)
 
 <a name="release">
 
