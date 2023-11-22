@@ -1,8 +1,8 @@
 #include "hangman.h"
 
 size_t hangman_string_length(const char* str) {
-    FuriString* furi_str = furi_string_alloc_set_str(str);
-    size_t len = furi_string_utf8_length(furi_str);
+    CONST furi_str = furi_string_alloc_set_str(str);
+    CONST len = furi_string_utf8_length(furi_str);
     furi_string_free(furi_str);
 
     return len;
@@ -35,17 +35,17 @@ void hangman_draw_gallows(Canvas* canvas, HangmanApp* app) {
 
 // This function was copied from Flipper Zero firmware
 void hangman_ok_button(Canvas* canvas, uint8_t y, const char* str) {
-    const uint8_t button_height = 12;
-    const uint8_t vertical_offset = 3;
-    const uint8_t horizontal_offset = 1;
-    const uint8_t string_width = canvas_glyph_width(canvas, ' ') * hangman_string_length(str);
-    const Icon* icon = &I_button_ok_7x7;
-    const uint8_t icon_h_offset = 3;
-    const uint8_t icon_width_with_offset = 7 + icon_h_offset;
-    const uint8_t icon_v_offset = 7 + vertical_offset;
-    const uint8_t button_width = string_width + horizontal_offset * 2 + icon_width_with_offset;
+    CONST button_height = 12;
+    CONST vertical_offset = 3;
+    CONST horizontal_offset = 1;
+    CONST string_width = canvas_glyph_width(canvas, ' ') * hangman_string_length(str);
+    CONST icon = &I_button_ok_7x7;
+    CONST icon_h_offset = 3;
+    CONST icon_width_with_offset = 7 + icon_h_offset;
+    CONST icon_v_offset = 7 + vertical_offset;
+    CONST button_width = string_width + horizontal_offset * 2 + icon_width_with_offset;
 
-    const uint8_t x = (canvas_width(canvas) - button_width) / 2;
+    CONST x = (canvas_width(canvas) - button_width) / 2;
 
     canvas_draw_box(canvas, x, y - button_height, button_width, button_height);
 
@@ -73,11 +73,13 @@ void hangman_window(Canvas* canvas, uint8_t x, uint8_t y, uint8_t w, uint8_t h) 
 }
 
 void hangman_text_window(Canvas* canvas, char* ok, char* txt) {
-    uint8_t txt_w = canvas_glyph_width(canvas, ' ') * hangman_string_length(txt);
+    CONST txt_w = canvas_glyph_width(canvas, ' ') * hangman_string_length(txt);
 
-    uint8_t cw = canvas_width(canvas);
-    uint8_t w = txt_w + 10, h = 34, y = 18;
-    uint8_t x = (cw - w) / 2;
+    CONST cw = canvas_width(canvas);
+    CONST w = txt_w + 10;
+    CONST h = 34;
+    CONST y = 18;
+    CONST x = (cw - w) / 2;
 
     hangman_window(canvas, x, y, w, h);
     hangman_ok_button(canvas, y + h, ok);

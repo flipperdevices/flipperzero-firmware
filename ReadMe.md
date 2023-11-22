@@ -29,8 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM1122-0026-0.93.9-fbed960](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-11-22 00:26 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-11-22 00:26 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-11-22 15:26 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-11-22 15:26 EST`
 - Updated: [Cross Remote v0.9 (By leedave)](https://github.com/leedave/Leeds-Flipper-Zero-Applications/tree/feature/xremote)
 - Updated: [ESP32 Camera Suite v1.4 (By CodyTolene)](https://github.com/CodyTolene/Flipper-Zero-Camera-Suite)
 - Updated: [Color Guess v1.2 (By leedave)](https://github.com/leedave/Leeds-Flipper-Zero-Applications)
@@ -41,26 +41,26 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [HEX Viewer v2.0 (By QtRoS)](https://github.com/QtRoS/flipperzero-firmware)
 - Updated: [Pomodoro Timer v1.2 (By sbrin)](https://github.com/sbrin/flipperzero_pomodoro)
 - Updated: [i2c Tools v1.2 (By NaejEL)](https://github.com/NaejEL/flipperzero-i2ctools)
-- Updated: [WiFi (Marauder) v6.5 (By 0xchocolate & tcpassos)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion)
 - Many more apps changed to use subtrees (By RogueMaster)
 - Updated: [ESP Flasher v1.3 (By 0xchocolate)](https://github.com/0xchocolate/flipperzero-esp-flasher)
 - Updated: [GPS v1.2 (By ezod)](https://github.com/ezod/flipperzero-gps) `Req: NMEA 0183` - Support for Deep Sleep (By Sil333033)
 - Updated: [Sub-GHz Remote (Refactored) + Configurator v1.3 (By gid9798)](https://github.com/DarkFlippers/SubGHz_Remote)
 - Updated: [SPI Mem Manager v1.2 (By drunkbatya)-OFW](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/spi_mem_manager) [Add XT25F128B details to the SPI memory manager app #74 (By dshcherb)](https://github.com/flipperdevices/flipperzero-good-faps/pull/74)
-- Reverted to: [WiFi (Marauder) v6.4 (By 0xchocolate & tcpassos)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) for this build. My apologies to those that had issues.
-- Updated: [Authenticator/TOTP v5.8.0 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
 - Updated: [WiFi (Marauder) v6.5 (By 0xchocolate & tcpassos)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion)
 - Updated: [ESP32 Gravity v1.0 (By chris-bc)](https://github.com/chris-bc/Flipper-Gravity)
 - Added: [USB Consumer Control (By WithSecureLabs)](https://github.com/WithSecureLabs/usb-consumer-control)
 - Updated: [POCSAG Pager v1.1 (By XMasterx & Shmuma)](https://github.com/xMasterX/flipper-pager) - Decoder by htotoo
 - UL: fix ibutton info display (By krolchonok)
-- Updated: [Hangman v1.4 (By Evgeny Stepanischev & Eva Stepanischeva)](https://github.com/bolknote/Flipper-Zero-Hangman-Game)
 - Updated: [Questions v1.0 (By nikilark)](https://github.com/nikilark/flipper_questions)
 - Updated: [Video Poker v1.2 (By PixlEmly)](https://github.com/PixlEmly/flipperzero-firmware-testing/blob/420/applications/VideoPoker/poker.c) [Improve VideoPoker bet management #30 (By dsmatilla)](https://github.com/xMasterX/all-the-plugins/pull/30)
 - UL: [SubGHz fix feature name (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/f8546937c0fc6be5f1d94b8ba95f3adc486ed950)
 - Updated: [ESP32 Evil Portal v0.2 (By bigbrodude6119)](https://github.com/bigbrodude6119/flipper-zero-evil-portal) [UL Version](https://github.com/xMasterX/all-the-plugins/tree/dev/non_catalog_apps/flipper_evil_portal)
 - Updated: [ESP Flasher v1.3 (By 0xchocolate)](https://github.com/0xchocolate/flipperzero-esp-flasher) Tweaks and Images (By Willy-JL)
 - Updated: [POCSAG Pager v1.1 (By XMasterx & Shmuma)](https://github.com/xMasterX/flipper-pager) - Fix subghz pocsag memory leak (By Willy-JL)
+- Updated: [ESP32 Evil Portal v0.2 (By bigbrodude6119)](https://github.com/bigbrodude6119/flipper-zero-evil-portal) - [Fix Cross Compatability Current VS NFC Refactors branch (By Leedave)](https://github.com/bigbrodude6119/flipper-zero-evil-portal/pull/49/commits/735b84d6d24578551fe92d69657899350800db1a)
+- Updated: [Authenticator/TOTP v5.9.0 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
+- Updated: [Hangman v1.4 (By Evgeny Stepanischev & Eva Stepanischeva)](https://github.com/bolknote/Flipper-Zero-Hangman-Game)
+- Updated: [HEX Editor v1.2 (By dunaevai135)](https://github.com/dunaevai135/flipper-zero-hex_editor)
 
 ## IN THIS BRANCH:
 

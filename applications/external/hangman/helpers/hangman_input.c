@@ -24,7 +24,7 @@ bool hangman_wait_close_window(HangmanApp* app) {
 
 bool hangman_menu_selection(HangmanApp* app) {
     InputEvent event;
-    int8_t menu_cnt = app->menu_cnt / 2;
+    const int8_t menu_cnt = app->menu_cnt / 2;
 
     for(;;) {
         if(furi_message_queue_get(app->event_queue, &event, 100) == FuriStatusOk) {

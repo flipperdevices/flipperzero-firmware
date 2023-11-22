@@ -13,9 +13,6 @@ App(
             name="base32",
         ),
         Lib(
-            name="timezone_utils",
-        ),
-        Lib(
             name="polyfills",
         ),
         Lib(
@@ -39,7 +36,7 @@ App(
     ],
     fap_author="Alexander Kopachov (akopachov)",
     fap_weburl="https://github.com/akopachov/flipper-zero_authenticator",
-    fap_version="5.8.0",
+    fap_version="5.9.0",
     fap_description="Software-based TOTP/HOTP authenticator for Flipper Zero device",
 )
 
