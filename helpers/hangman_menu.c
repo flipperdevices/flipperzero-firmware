@@ -1,10 +1,10 @@
 #include "hangman.h"
 
 char** hangman_menu_read(size_t* menu_size) {
-    Storage* storage = furi_record_open(RECORD_STORAGE);
+    CONST storage = furi_record_open(RECORD_STORAGE);
 
-    Stream* stream = file_stream_alloc(storage);
-    FuriString* line = furi_string_alloc();
+    CONST stream = file_stream_alloc(storage);
+    CONST line = furi_string_alloc();
 
     char** lines = NULL;
     size_t capacity = 0;

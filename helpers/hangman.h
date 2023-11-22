@@ -7,6 +7,8 @@
 
 #define HANGMAN_MENU_FILE APP_ASSETS_PATH("menu.txt")
 
+#define CONST const __auto_type
+
 #include "hangman_icons.h"
 
 #include <math.h>

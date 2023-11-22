@@ -2,16 +2,16 @@
 #include "helpers/hangman_fonts.h"
 
 char* hangman_get_random_word(const char* dict_file) {
-    Storage* storage = furi_record_open(RECORD_STORAGE);
+    CONST storage = furi_record_open(RECORD_STORAGE);
 
-    Stream* stream = file_stream_alloc(storage);
-    FuriString* line = furi_string_alloc();
+    CONST stream = file_stream_alloc(storage);
+    CONST line = furi_string_alloc();
 
     if(file_stream_open(stream, dict_file, FSAM_READ, FSOM_OPEN_EXISTING)) {
-        int32_t offset = furi_hal_random_get() % stream_size(stream);
+        CONST offset = furi_hal_random_get() % stream_size(stream);
 
         if(offset > 0) {
-            bool seek_result = stream_seek(stream, offset, StreamOffsetFromStart) &&
+            CONST seek_result = stream_seek(stream, offset, StreamOffsetFromStart) &&
                                stream_read_line(stream, line);
 
             if(!seek_result) {
@@ -25,7 +25,7 @@ char* hangman_get_random_word(const char* dict_file) {
 
     furi_string_trim(line, "\n");
 
-    char* word = strdup(furi_string_get_cstr(line));
+    CONST word = strdup(furi_string_get_cstr(line));
     furi_string_free(line);
     file_stream_close(stream);
     stream_free(stream);
@@ -38,15 +38,15 @@ void hangman_draw_keyboard(Canvas* canvas, HangmanApp* app) {
     canvas_set_color(canvas, ColorBlack);
 
     canvas_set_custom_u8g2_font(canvas, u8g2_font_6x12_t_cyrillic);
-    uint8_t glyph_w = canvas_glyph_width(canvas, ' ');
-    uint8_t glyph_h = canvas_current_font_height(canvas);
+    CONST glyph_w = canvas_glyph_width(canvas, ' ');
+    CONST glyph_h = canvas_current_font_height(canvas);
 
     for(uint8_t j = 0; j < app->lang->keyboard_rows; j++) {
-        uint8_t y = 29 + j * glyph_h * .94;
+        CONST y = 29 + j * glyph_h * .94;
 
         for(uint8_t i = 0; i < app->lang->keyboard_cols; i++) {
-            uint8_t x = 42 + i * glyph_w * 1.85;
-            uint8_t n = j * app->lang->keyboard_cols + i;
+            CONST x = 42 + i * glyph_w * 1.85;
+            CONST n = j * app->lang->keyboard_cols + i;
 
             if(n > app->lang->letters_cnt - 1) {
                 break;
@@ -75,15 +75,15 @@ void hangman_draw_keyboard(Canvas* canvas, HangmanApp* app) {
 void hangman_draw_word(Canvas* canvas, HangmanApp* app) {
     canvas_set_custom_u8g2_font(canvas, u8g2_font_6x13B_t_cyrillic);
 
-    uint8_t glyph_w = canvas_glyph_width(canvas, ' ');
-    uint8_t gap = app->lang->keyboard_gap;
+    CONST glyph_w = canvas_glyph_width(canvas, ' ');
+    CONST gap = app->lang->keyboard_gap;
 
-    uint8_t center_x = (canvas_width(canvas) - (glyph_w + gap) * strlen(app->word)) / 2;
+    CONST center_x = (canvas_width(canvas) - (glyph_w + gap) * strlen(app->word)) / 2;
 
-    uint8_t h = canvas_current_font_height(canvas);
+    CONST h = canvas_current_font_height(canvas);
     canvas_set_color(canvas, ColorBlack);
 
-    uint8_t word_len = strlen(app->word);
+    CONST word_len = strlen(app->word);
 
     for(uint8_t i = 0, x = center_x; i < word_len; i++) {
         if(app->opened[app->word[i] - app->lang->first_letter_offset]) {
@@ -108,26 +108,26 @@ void hangman_draw_menu(Canvas* canvas, HangmanApp* app) {
 
     uint8_t max_txt_w = 0;
     for(uint8_t i = 0; i < app->menu_cnt; i += 2) {
-        uint8_t txt_w = hangman_string_length(app->menu[i]);
+        CONST txt_w = hangman_string_length(app->menu[i]);
         if(txt_w > max_txt_w) {
             max_txt_w = txt_w;
         }
     }
 
     max_txt_w *= canvas_glyph_width(canvas, ' ');
-    uint8_t txt_h = canvas_current_font_height(canvas);
+    CONST txt_h = canvas_current_font_height(canvas);
 
-    uint8_t w = max_txt_w + 30;
-    uint8_t h = txt_h * app->menu_cnt / 2 + 6;
-    uint8_t x = (canvas_width(canvas) - w) / 2;
-    uint8_t y = (canvas_height(canvas) - h) / 2;
+    CONST w = max_txt_w + 30;
+    CONST h = txt_h * app->menu_cnt / 2 + 6;
+    CONST x = (canvas_width(canvas) - w) / 2;
+    CONST y = (canvas_height(canvas) - h) / 2;
 
     hangman_window(canvas, x, y, w, h);
 
-    uint8_t txt_x = (canvas_width(canvas) - max_txt_w) / 2;
+    CONST txt_x = (canvas_width(canvas) - max_txt_w) / 2;
 
     for(uint8_t i = 0, menu_item = 0; i < app->menu_cnt; i += 2, menu_item++) {
-        uint8_t txt_y = y + (menu_item + 1) * txt_h;
+        CONST txt_y = y + (menu_item + 1) * txt_h;
 
         canvas_set_color(canvas, ColorBlack);
 
@@ -141,7 +141,7 @@ void hangman_draw_menu(Canvas* canvas, HangmanApp* app) {
 }
 
 void hangman_render_callback(Canvas* canvas, void* ctx) {
-    HangmanApp* app = (HangmanApp*)ctx;
+    CONST app = (HangmanApp*)ctx;
 
     canvas_clear(canvas);
 
@@ -166,7 +166,7 @@ void hangman_render_callback(Canvas* canvas, void* ctx) {
 void hangman_input_callback(InputEvent* input_event, void* ctx) {
     furi_assert(ctx);
 
-    FuriMessageQueue* event_queue = ctx;
+    CONST event_queue = ctx;
     furi_message_queue_put(event_queue, input_event, FuriWaitForever);
 }
 
@@ -181,7 +181,7 @@ void hangman_choice_letter(HangmanApp* app) {
 
                 // Open the non-guessed letters
                 for(uint8_t i = 0; i < strlen(app->word); i++) {
-                    int letter = app->word[i] - app->lang->first_letter_offset;
+                    CONST letter = app->word[i] - app->lang->first_letter_offset;
 
                     if(app->opened[letter] != HangmanOpenedFound) {
                         app->opened[letter] = HangmanOpenedNotFound;
@@ -220,44 +220,44 @@ void hangman_clear_state(HangmanApp* app) {
 }
 
 int hangman_read_int(Stream* stream) {
-    FuriString* line = furi_string_alloc();
+    CONST line = furi_string_alloc();
 
     if(!stream_read_line(stream, line)) {
         furi_crash(NULL);
     }
 
-    int result = strtol(furi_string_get_cstr(line), NULL, 10);
+    CONST result = strtol(furi_string_get_cstr(line), NULL, 10);
     furi_string_free(line);
     return result;
 }
 
 char* hangman_read_str(Stream* stream) {
-    FuriString* line = furi_string_alloc();
+    CONST line = furi_string_alloc();
 
     if(!stream_read_line(stream, line)) {
         furi_crash(NULL);
     }
 
     furi_string_trim(line);
-    char* result = strdup(furi_string_get_cstr(line));
+    CONST result = strdup(furi_string_get_cstr(line));
     furi_string_free(line);
     return result;
 }
 
 char* hangman_add_asset_path(const char* filename) {
-    FuriString* full_path = furi_string_alloc_set_str(APP_ASSETS_PATH(""));
+    CONST full_path = furi_string_alloc_set_str(APP_ASSETS_PATH(""));
     furi_string_cat_str(full_path, filename);
 
-    const char* file_full_path = furi_string_get_cstr(full_path);
-    char* result = strdup(file_full_path);
+    CONST file_full_path = furi_string_get_cstr(full_path);
+    CONST result = strdup(file_full_path);
     furi_string_free(full_path);
     return result;
 }
 
 HangmanLangConfig* hangman_load_config(char* meta_file) {
-    Storage* storage = furi_record_open(RECORD_STORAGE);
-    Stream* stream = file_stream_alloc(storage);
-    FuriString* line = furi_string_alloc();
+    CONST storage = furi_record_open(RECORD_STORAGE);
+    CONST stream = file_stream_alloc(storage);
+    CONST line = furi_string_alloc();
     HangmanLangConfig* config = malloc(sizeof(HangmanLangConfig));
 
     if(!file_stream_open(stream, meta_file, FSAM_READ, FSOM_OPEN_EXISTING)) {
@@ -309,7 +309,7 @@ HangmanLangConfig* hangman_load_config(char* meta_file) {
 }
 
 void hangman_load_lang(HangmanApp* app) {
-    char* meta_file = hangman_add_asset_path(app->menu[app->menu_item * 2 + 1]);
+    CONST meta_file = hangman_add_asset_path(app->menu[app->menu_item * 2 + 1]);
     app->lang = hangman_load_config(meta_file);
     free(meta_file);
 }
