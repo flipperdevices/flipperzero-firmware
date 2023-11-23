@@ -47,27 +47,6 @@ void wiegand_add_info_26bit(FuriString *buffer)
     // 26 bit wiegand, the first bit is the even parity bit, which is
     // based on the next 12 bits.  The number of bits that are a 1 should
     // be even.
-    int parity = 0;
-    if (data[0])
-    {
-        parity = 1;
-    }
-    for (int i = 1; i < 13; i++)
-    {
-        if (data[i])
-        {
-            parity++;
-        }
-    }
-    if (parity % 2 == 0)
-    {
-        furi_string_cat_printf(buffer, "\nEven Parity (%d): OK", parity);
-    }
-    else
-    {
-        furi_string_cat_printf(buffer, "\nEven Parity (%d): ERROR", parity);
-    }
-
     // After the parity bit, the next 8 bits are the facility code.
     // Then the next 16 bits are the card id .
     furi_string_cat_printf(buffer, "\nFacility: ");
@@ -98,6 +77,27 @@ void wiegand_add_info_26bit(FuriString *buffer)
         }
     }
     furi_string_cat_printf(buffer, " (%ld)", dec);
+
+    int parity = 0;
+    if (data[0])
+    {
+        parity = 1;
+    }
+    for (int i = 1; i < 13; i++)
+    {
+        if (data[i])
+        {
+            parity++;
+        }
+    }
+    if (parity % 2 == 0)
+    {
+        furi_string_cat_printf(buffer, "\nEven Parity (%d): OK", parity);
+    }
+    else
+    {
+        furi_string_cat_printf(buffer, "\nEven Parity (%d): ERROR", parity);
+    }
 
     if (data[13])
     {
