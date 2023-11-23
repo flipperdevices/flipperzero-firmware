@@ -7,6 +7,8 @@
 
 #define HANGMAN_MENU_FILE APP_ASSETS_PATH("menu.txt")
 
+#define CONST const __auto_type
+
 #include "hangman_icons.h"
 
 #include <math.h>
@@ -37,7 +39,7 @@ typedef struct {
     uint8_t letters_cnt;
     uint8_t keyboard_cols;
     uint8_t keyboard_rows;
-    uint8_t keyboard_gap;
+    uint8_t word_letters_gap;
     uint16_t letters[HANGMAN_MAX_ALP_SIZE];
     char *message_ok, *message_won, *message_loose;
 } HangmanLangConfig;
