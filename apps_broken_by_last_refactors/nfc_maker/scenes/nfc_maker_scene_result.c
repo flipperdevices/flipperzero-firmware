@@ -1,4 +1,5 @@
 #include "../nfc_maker.h"
+#include <furi_hal_random.h>
 
 enum PopupEvent {
     PopupEventExit,
@@ -17,7 +18,7 @@ void nfc_maker_scene_result_on_enter(void* context) {
 
     FlipperFormat* file = flipper_format_file_alloc(furi_record_open(RECORD_STORAGE));
     FuriString* path = furi_string_alloc();
-    furi_string_printf(path, NFC_APP_FOLDER "/%s" NFC_APP_EXTENSION, app->save_buf);
+    furi_string_printf(path, NFC_MK_APP_FOLDER "/%s" NFC_MK_APP_EXTENSION, app->save_buf);
 
     uint32_t pages = 135;
     size_t size = pages * 4;
@@ -104,15 +105,15 @@ void nfc_maker_scene_result_on_enter(void* context) {
                 vcard,
                 "FN:%s%s%s\r\n",
                 app->small_buf1,
-                strnlen(app->small_buf2, SMALL_INPUT_LEN) ? " " : "",
+                newstrnlen(app->small_buf2, SMALL_INPUT_LEN) ? " " : "",
                 app->small_buf2);
-            if(strnlen(app->mail_buf, MAIL_INPUT_LEN)) {
+            if(newstrnlen(app->mail_buf, MAIL_INPUT_LEN)) {
                 furi_string_cat_printf(vcard, "EMAIL:%s\r\n", app->mail_buf);
             }
-            if(strnlen(app->phone_buf, PHONE_INPUT_LEN)) {
+            if(newstrnlen(app->phone_buf, PHONE_INPUT_LEN)) {
                 furi_string_cat_printf(vcard, "TEL:%s\r\n", app->phone_buf);
             }
-            if(strnlen(app->big_buf, BIG_INPUT_LEN)) {
+            if(newstrnlen(app->big_buf, BIG_INPUT_LEN)) {
                 furi_string_cat_printf(vcard, "URL:%s\r\n", app->big_buf);
             }
             furi_string_cat_printf(vcard, "END:VCARD\r\n");
@@ -127,7 +128,7 @@ void nfc_maker_scene_result_on_enter(void* context) {
             tnf = 0x01; // NFC Forum well-known type [NFC RTD]
             type = "\x55";
 
-            data_len = strnlen(app->big_buf, BIG_INPUT_LEN);
+            data_len = newstrnlen(app->big_buf, BIG_INPUT_LEN);
             payload_len = data_len + 1;
             payload = malloc(payload_len);
 
@@ -140,7 +141,7 @@ void nfc_maker_scene_result_on_enter(void* context) {
             tnf = 0x01; // NFC Forum well-known type [NFC RTD]
             type = "\x55";
 
-            data_len = strnlen(app->mail_buf, MAIL_INPUT_LEN);
+            data_len = newstrnlen(app->mail_buf, MAIL_INPUT_LEN);
             payload_len = data_len + 1;
             payload = malloc(payload_len);
 
@@ -153,7 +154,7 @@ void nfc_maker_scene_result_on_enter(void* context) {
             tnf = 0x01; // NFC Forum well-known type [NFC RTD]
             type = "\x55";
 
-            data_len = strnlen(app->phone_buf, PHONE_INPUT_LEN);
+            data_len = newstrnlen(app->phone_buf, PHONE_INPUT_LEN);
             payload_len = data_len + 1;
             payload = malloc(payload_len);
 
@@ -166,7 +167,7 @@ void nfc_maker_scene_result_on_enter(void* context) {
             tnf = 0x01; // NFC Forum well-known type [NFC RTD]
             type = "\x54";
 
-            data_len = strnlen(app->big_buf, BIG_INPUT_LEN);
+            data_len = newstrnlen(app->big_buf, BIG_INPUT_LEN);
             payload_len = data_len + 3;
             payload = malloc(payload_len);
 
@@ -181,7 +182,7 @@ void nfc_maker_scene_result_on_enter(void* context) {
             tnf = 0x01; // NFC Forum well-known type [NFC RTD]
             type = "\x55";
 
-            data_len = strnlen(app->big_buf, BIG_INPUT_LEN);
+            data_len = newstrnlen(app->big_buf, BIG_INPUT_LEN);
             payload_len = data_len + 1;
             payload = malloc(payload_len);
 
@@ -194,8 +195,8 @@ void nfc_maker_scene_result_on_enter(void* context) {
             tnf = 0x02; // Media-type [RFC 2046]
             type = "application/vnd.wfa.wsc";
 
-            uint8_t ssid_len = strnlen(app->small_buf1, SMALL_INPUT_LEN);
-            uint8_t pass_len = strnlen(app->small_buf2, SMALL_INPUT_LEN);
+            uint8_t ssid_len = newstrnlen(app->small_buf1, SMALL_INPUT_LEN);
+            uint8_t pass_len = newstrnlen(app->small_buf2, SMALL_INPUT_LEN);
             uint8_t data_len = ssid_len + pass_len;
             payload_len = data_len + 39;
             payload = malloc(payload_len);
