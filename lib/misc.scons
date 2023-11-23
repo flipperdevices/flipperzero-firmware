@@ -5,7 +5,6 @@ Import("env")
 env.Append(
     CPPPATH=[
         "#/lib/heatshrink",
-        "#/lib/micro-ecc",
         "#/lib/nanopb",
         "#/lib/u8g2",
     ],
@@ -13,7 +12,6 @@ env.Append(
         "PB_ENABLE_MALLOC",
     ],
     SDK_HEADERS=[
-        File("micro-ecc/uECC.h"),
         File("nanopb/pb.h"),
         File("nanopb/pb_decode.h"),
         File("nanopb/pb_encode.h"),
@@ -36,7 +34,6 @@ for lib in libs_recurse:
 libs_plain = [
     "u8g2",
     "nanopb",
-    "micro-ecc",
 ]
 
 for lib in libs_plain:
