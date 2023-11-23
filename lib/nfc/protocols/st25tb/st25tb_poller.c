@@ -157,7 +157,7 @@ NfcCommand st25tb_poller_success_handler(St25tbPoller* instance) {
     instance->st25tb_event.type = St25tbPollerEventTypeSuccess;
     command = instance->callback(instance->general_event, instance->context);
     furi_delay_ms(100);
-    instance->state = St25tbPollerStateSelect;
+    instance->state = St25tbPollerStateRequestMode;
 
     return command;
 }
