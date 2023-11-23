@@ -93,6 +93,12 @@ void subghz_protocol_decoder_pocsag_free(void* context) {
     SubGhzProtocolDecoderPocsag* instance = context;
     furi_string_free(instance->msg);
     furi_string_free(instance->done_msg);
+    if(instance->generic.result_msg != NULL) {
+        furi_string_free(instance->generic.result_msg);
+    }
+    if(instance->generic.result_ric != NULL) {
+        furi_string_free(instance->generic.result_ric);
+    }
     free(instance);
 }
 
