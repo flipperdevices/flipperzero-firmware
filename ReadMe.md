@@ -36,6 +36,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Hangman v1.4 (By Evgeny Stepanischev & Eva Stepanischeva)] <https://github.com/bolknote/Flipper-Zero-Hangman-Game>
 - OFW PR: [Add the "remove pairing" button to BLE hid #3237 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3237)
 - OFW PR: [HID app: Add new function key icons #3236 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3236)
+- OFW PR: Add the secret door animation #3233 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3233)
 
 <a name="release">
 
