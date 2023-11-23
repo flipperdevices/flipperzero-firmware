@@ -738,7 +738,22 @@ bool totp_config_file_ensure_latest_encryption(
     uint8_t pin_length) {
     bool result = true;
     if(plugin_state->crypto_settings.crypto_version < CRYPTO_LATEST_VERSION) {
-        FURI_LOG_I(LOGGING_TAG, "Migration to crypto v%d is needed", CRYPTO_LATEST_VERSION);
+        FURI_LOG_I(
+            LOGGING_TAG,
+            "Migration crypto from v%" PRIu8 " to v%" PRIu8 " is needed",
+            plugin_state->crypto_settings.crypto_version,
+            CRYPTO_LATEST_VERSION);
+
+#ifndef TOTP_OBSOLETE_CRYPTO_V1_COMPATIBILITY_ENABLED
+        if(plugin_state->crypto_settings.crypto_version == 1) {
+            furi_crash("Authenticator: Crypto v1 is not supported");
+        }
+#endif
+#ifndef TOTP_OBSOLETE_CRYPTO_V2_COMPATIBILITY_ENABLED
+        if(plugin_state->crypto_settings.crypto_version == 2) {
+            furi_crash("Authenticator: Crypto v2 is not supported");
+        }
+#endif
         char* backup_path = totp_config_file_backup(plugin_state);
         if(backup_path != NULL) {
             free(backup_path);

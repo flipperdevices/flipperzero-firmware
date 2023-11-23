@@ -129,7 +129,10 @@ static void hex_editor_free(HexEditor* instance) {
 
     furi_message_queue_free(instance->input_queue);
 
-    if(instance->model->stream) buffered_file_stream_close(instance->model->stream);
+    if(instance->model->stream) {
+        buffered_file_stream_close(instance->model->stream);
+        stream_free(instance->model->stream);
+    }
 
     furi_string_free(instance->buffer);
 
