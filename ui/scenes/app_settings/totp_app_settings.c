@@ -9,6 +9,7 @@
 #include "../../constants.h"
 #include "../../../services/config/config.h"
 #include "../../../services/convert/convert.h"
+#include "../../../services/kb_layouts/kb_layout_provider.h"
 #include <roll_value.h>
 #include "../../../config/app/config.h"
 #ifdef TOTP_BADBT_AUTOMATION_ENABLED
@@ -27,7 +28,6 @@ static const char* AUTOMATION_LIST[] = {
     "BT and USB"
 #endif
 };
-static const char* BAD_KB_LAYOUT_LIST[] = {"QWERTY", "AZERTY", "QWERTZ"};
 static const char* FONT_TEST_STR = "0123BCD";
 
 typedef enum {
@@ -50,6 +50,8 @@ typedef struct {
     AutomationMethod automation_method;
     uint16_t y_offset;
     AutomationKeyboardLayout automation_kb_layout;
+    uint8_t automation_kb_layout_count;
+    char automation_kb_layout_name[TOTP_KB_LAYOUT_NAME_MAX_LENGTH + 1];
     Control selected_control;
     uint8_t active_font_index;
     FontInfo* active_font;
@@ -80,6 +82,13 @@ static void update_formatted_automation_initial_delay(SceneState* scene_state) {
         (double)(scene_state->automation_initial_delay / 1000.0f));
 }
 
+static void update_formatted_automation_kb_layout_name(SceneState* scene_state) {
+    totp_kb_layout_provider_get_layout_name(
+        scene_state->automation_kb_layout,
+        &scene_state->automation_kb_layout_name[0],
+        sizeof(scene_state->automation_kb_layout_name));
+}
+
 void totp_scene_app_settings_activate(PluginState* plugin_state) {
     SceneState* scene_state = malloc(sizeof(SceneState));
     furi_check(scene_state != NULL);
@@ -93,8 +102,9 @@ void totp_scene_app_settings_activate(PluginState* plugin_state) {
     scene_state->notification_vibro = plugin_state->notification_method & NotificationMethodVibro;
     scene_state->automation_method =
         MIN(plugin_state->automation_method, COUNT_OF(AUTOMATION_LIST) - 1);
+    scene_state->automation_kb_layout_count = totp_kb_layout_provider_get_layouts_count();
     scene_state->automation_kb_layout =
-        MIN(plugin_state->automation_kb_layout, COUNT_OF(BAD_KB_LAYOUT_LIST) - 1);
+        MIN(plugin_state->automation_kb_layout, scene_state->automation_kb_layout_count - 1);
 
     scene_state->automation_initial_delay = plugin_state->automation_initial_delay;
     scene_state->total_fonts_count = totp_font_provider_get_fonts_count();
@@ -106,6 +116,7 @@ void totp_scene_app_settings_activate(PluginState* plugin_state) {
     }
 
     update_formatted_automation_initial_delay(scene_state);
+    update_formatted_automation_kb_layout_name(scene_state);
 }
 
 void totp_scene_app_settings_render(Canvas* const canvas, const PluginState* plugin_state) {
@@ -221,7 +232,7 @@ void totp_scene_app_settings_render(Canvas* const canvas, const PluginState* plu
             36,
             220 - scene_state->y_offset - group_offset,
             SCREEN_WIDTH - 36 - UI_CONTROL_VSCROLL_WIDTH,
-            BAD_KB_LAYOUT_LIST[scene_state->automation_kb_layout],
+            scene_state->automation_kb_layout_name,
             scene_state->selected_control == BadKeyboardLayoutSelect);
 
         canvas_draw_str_aligned(
@@ -325,8 +336,9 @@ bool totp_scene_app_settings_handle_event(
                     &scene_state->automation_kb_layout,
                     1,
                     0,
-                    COUNT_OF(BAD_KB_LAYOUT_LIST) - 1,
+                    scene_state->automation_kb_layout_count - 1,
                     RollOverflowBehaviorRoll);
+                update_formatted_automation_kb_layout_name(scene_state);
             } else if(scene_state->selected_control == AutomationDelaySelect) {
                 totp_roll_value_uint16_t(
                     &scene_state->automation_initial_delay,
@@ -369,8 +381,9 @@ bool totp_scene_app_settings_handle_event(
                     &scene_state->automation_kb_layout,
                     -1,
                     0,
-                    COUNT_OF(BAD_KB_LAYOUT_LIST) - 1,
+                    scene_state->automation_kb_layout_count - 1,
                     RollOverflowBehaviorRoll);
+                update_formatted_automation_kb_layout_name(scene_state);
             } else if(scene_state->selected_control == AutomationDelaySelect) {
                 totp_roll_value_uint16_t(
                     &scene_state->automation_initial_delay,

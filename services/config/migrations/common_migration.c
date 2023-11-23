@@ -1,7 +1,7 @@
 #include "common_migration.h"
 #include "../constants.h"
 #include "../../../types/token_info.h"
-#include "../../../types/automation_kb_layout.h"
+#include "../../kb_layouts/kb_layout_provider.h"
 #include <flipper_format/flipper_format_i.h>
 
 #define TOTP_OLD_CONFIG_KEY_BASE_IV "BaseIV"
@@ -98,18 +98,14 @@ bool totp_config_migrate_to_latest(
 
         flipper_format_rewind(fff_backup_data_file);
 
-        if(flipper_format_read_string(
-               fff_backup_data_file, TOTP_CONFIG_KEY_AUTOMATION_KB_LAYOUT, temp_str)) {
-            flipper_format_write_string(
-                fff_data_file, TOTP_CONFIG_KEY_AUTOMATION_KB_LAYOUT, temp_str);
-        } else {
-            uint32_t default_automation_kb_layout = AutomationKeyboardLayoutQWERTY;
-            flipper_format_write_uint32(
-                fff_data_file,
-                TOTP_CONFIG_KEY_AUTOMATION_KB_LAYOUT,
-                &default_automation_kb_layout,
-                1);
+        uint32_t kb_layout;
+        if(!flipper_format_read_uint32(
+               fff_backup_data_file, TOTP_CONFIG_KEY_AUTOMATION_KB_LAYOUT, &kb_layout, 1)) {
+            kb_layout = TOTP_DEFAULT_KB_LAYOUT;
         }
+
+        flipper_format_write_uint32(
+            fff_data_file, TOTP_CONFIG_KEY_AUTOMATION_KB_LAYOUT, &kb_layout, 1);
 
         flipper_format_rewind(fff_backup_data_file);
 
