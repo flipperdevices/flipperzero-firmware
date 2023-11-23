@@ -206,7 +206,6 @@ Header,+,lib/toolbox/path.h,,
 Header,+,lib/toolbox/pretty_format.h,,
 Header,+,lib/toolbox/protocols/protocol_dict.h,,
 Header,+,lib/toolbox/saved_struct.h,,
-Header,+,lib/toolbox/sha256.h,,
 Header,+,lib/toolbox/simple_array.h,,
 Header,+,lib/toolbox/stream/buffered_file_stream.h,,
 Header,+,lib/toolbox/stream/file_stream.h,,
@@ -2587,11 +2586,6 @@ Function,-,setkey,void,const char*
 Function,-,setlinebuf,int,FILE*
 Function,-,setstate,char*,char*
 Function,-,setvbuf,int,"FILE*, char*, int, size_t"
-Function,+,sha256,void,"const unsigned char*, unsigned int, unsigned char[32]"
-Function,+,sha256_finish,void,"sha256_context*, unsigned char[32]"
-Function,+,sha256_process,void,sha256_context*
-Function,+,sha256_start,void,sha256_context*
-Function,+,sha256_update,void,"sha256_context*, const unsigned char*, unsigned int"
 Function,+,signal_reader_alloc,SignalReader*,"const GpioPin*, uint32_t"
 Function,+,signal_reader_free,void,SignalReader*
 Function,+,signal_reader_set_polarity,void,"SignalReader*, SignalReaderPolarity"
