@@ -664,7 +664,11 @@ NfcCommand seader_worker_card_detect(
 
     OCTET_STRING_fromBuf(&cardDetails->csn, (const char*)uid, uid_len);
 
-    if(sak != 0 && atqa != NULL) {
+    if(sak == 0 && atqa == NULL) {
+        uint8_t protocol_bytes[] = {0x00, FrameProtocol_iclass};
+        OCTET_STRING_fromBuf(
+            &cardDetails->protocol, (const char*)protocol_bytes, sizeof(protocol_bytes));
+    } else {
         uint8_t protocol_bytes[] = {0x00, FrameProtocol_nfc};
         OCTET_STRING_fromBuf(
             &cardDetails->protocol, (const char*)protocol_bytes, sizeof(protocol_bytes));
@@ -674,11 +678,6 @@ NfcCommand seader_worker_card_detect(
 
         OCTET_STRING_t atqa_string = {.buf = atqa, .size = 2};
         cardDetails->atqa = &atqa_string;
-
-    } else {
-        uint8_t protocol_bytes[] = {0x00, FrameProtocol_iclass};
-        OCTET_STRING_fromBuf(
-            &cardDetails->protocol, (const char*)protocol_bytes, sizeof(protocol_bytes));
     }
 
     seader_send_card_detected(seader_uart, cardDetails);
