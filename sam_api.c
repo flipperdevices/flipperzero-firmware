@@ -32,7 +32,7 @@ bool seader_send_apdu(
         return false;
     }
 
-    uint8_t* apdu = malloc(APDU_HEADER_LEN + length);
+    uint8_t apdu[SEADER_UART_RX_BUF_SIZE];
     apdu[0] = CLA;
     apdu[1] = INS;
     apdu[2] = P1;
@@ -41,7 +41,6 @@ bool seader_send_apdu(
     memcpy(apdu + APDU_HEADER_LEN, payload, length);
 
     seader_ccid_XfrBlock(seader_uart, apdu, APDU_HEADER_LEN + length);
-    free(apdu);
     return true;
 }
 
@@ -177,9 +176,9 @@ void seader_send_card_detected(SeaderUartBridge* seader_uart, CardDetails_t* car
 
     seader_send_payload(seader_uart, payload, 0x44, 0x0a, 0x44);
 
-    ASN_STRUCT_FREE(asn_DEF_CardDetected, cardDetected);
-    ASN_STRUCT_FREE(asn_DEF_SamCommand, samCommand);
     ASN_STRUCT_FREE(asn_DEF_Payload, payload);
+    ASN_STRUCT_FREE(asn_DEF_SamCommand, samCommand);
+    ASN_STRUCT_FREE(asn_DEF_CardDetected, cardDetected);
 }
 
 bool seader_unpack_pacs(Seader* seader, uint8_t* buf, size_t size) {
