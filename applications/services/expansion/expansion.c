@@ -78,7 +78,7 @@ static size_t expansion_send_callback(const uint8_t* data, size_t data_size, voi
     return data_size;
 }
 
-static void expansion_send_error_response(Expansion* instance, ExpansionFrameError error) {
+static void expansion_send_status_response(Expansion* instance, ExpansionFrameError error) {
     ExpansionFrame frame = {
         .header.type = ExpansionFrameTypeStatus,
         .content.status.error = error,
@@ -138,7 +138,7 @@ static int32_t expansion_worker(void* context) {
                 // TODO: proper baud rate check
                 if(instance->frame.content.baud_rate.baud == 230400) {
                     // Send response on previous baud rate
-                    expansion_send_error_response(instance, ExpansionFrameErrorNone);
+                    expansion_send_status_response(instance, ExpansionFrameErrorNone);
                     // Set new baud rate
                     furi_hal_serial_set_br(instance->handle, 230400);
                     instance->session_state = ExpansionSessionStateNormal;
@@ -146,7 +146,7 @@ static int32_t expansion_worker(void* context) {
                 }
             }
 
-            expansion_send_error_response(instance, ExpansionFrameErrorUnknown);
+            expansion_send_status_response(instance, ExpansionFrameErrorUnknown);
 
             break;
         case ExpansionSessionStateNormal:
@@ -161,12 +161,12 @@ static int32_t expansion_worker(void* context) {
                     rpc_session_set_send_bytes_callback(
                         instance->rpc_session, expansion_rpc_send_callback);
 
-                    expansion_send_error_response(instance, ExpansionFrameErrorNone);
+                    expansion_send_status_response(instance, ExpansionFrameErrorNone);
                     break;
                 }
             }
 
-            expansion_send_error_response(instance, ExpansionFrameErrorUnknown);
+            expansion_send_status_response(instance, ExpansionFrameErrorUnknown);
 
             break;
         case ExpansionSessionStateRpc:
@@ -183,12 +183,12 @@ static int32_t expansion_worker(void* context) {
                    ExpansionFrameControlCommandStopRpc) {
                     rpc_session_close(instance->rpc_session);
                     instance->session_state = ExpansionSessionStateNormal;
-                    expansion_send_error_response(instance, ExpansionFrameErrorNone);
+                    expansion_send_status_response(instance, ExpansionFrameErrorNone);
                     break;
                 }
             }
 
-            expansion_send_error_response(instance, ExpansionFrameErrorUnknown);
+            expansion_send_status_response(instance, ExpansionFrameErrorUnknown);
             break;
         default:
             break;
