@@ -4,3 +4,4 @@
 *.cmd eol=crlf
 *.txt eol=crlf
 *.ir eol=crlf
+ReadMe.md merge=ours
