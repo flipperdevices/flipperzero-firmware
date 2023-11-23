@@ -41,11 +41,13 @@ void hangman_draw_keyboard(Canvas* canvas, HangmanApp* app) {
     CONST glyph_w = canvas_glyph_width(canvas, ' ');
     CONST glyph_h = canvas_current_font_height(canvas);
 
+    CONST gap = (canvas_width(canvas) - 42.) / (glyph_w * app->lang->keyboard_cols);
+
     for(uint8_t j = 0; j < app->lang->keyboard_rows; j++) {
         CONST y = 29 + j * glyph_h * .94;
 
         for(uint8_t i = 0; i < app->lang->keyboard_cols; i++) {
-            CONST x = 42 + i * glyph_w * 1.85;
+            CONST x = 42 + i * glyph_w * gap;
             CONST n = j * app->lang->keyboard_cols + i;
 
             if(n > app->lang->letters_cnt - 1) {
