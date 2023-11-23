@@ -1,14 +1,16 @@
-#include <furi.h>
 #include "u2f.h"
 #include "u2f_hid.h"
 #include "u2f_data.h"
+
+#include <furi.h>
 #include <furi_hal.h>
 #include <furi_hal_random.h>
 #include <littlefs/lfs_util.h> // for lfs_tobe32
 
-#include <micro-ecc/uECC.h>
 #include <mbedtls/sha256.h>
 #include <mbedtls/md.h>
+#include <mbedtls/ecdsa.h>
+#include <mbedtls/error.h>
 
 #define TAG "U2f"
 #define WORKER_TAG TAG "Worker"
@@ -25,15 +27,25 @@ typedef enum {
         0x08, // "dont-enforce-user-presence-and-sign" - send auth response even if user is missing
 } U2fAuthMode;
 
+#define U2F_HASH_SIZE 32
+#define U2F_NONCE_SIZE 32
+#define U2F_CHALLENGE_SIZE 32
+#define U2F_APP_ID_SIZE 32
+
+#define U2F_EC_KEY_SIZE 32
+#define U2F_EC_BIGNUM_SIZE 32
+#define U2F_EC_POINT_SIZE 65
+
 typedef struct {
     uint8_t format;
     uint8_t xy[64];
 } FURI_PACKED U2fPubKey;
+_Static_assert(sizeof(U2fPubKey) == U2F_EC_POINT_SIZE, "U2fPubKey size mismatch");
 
 typedef struct {
     uint8_t len;
-    uint8_t hash[32];
-    uint8_t nonce[32];
+    uint8_t hash[U2F_HASH_SIZE];
+    uint8_t nonce[U2F_NONCE_SIZE];
 } FURI_PACKED U2fKeyHandle;
 
 typedef struct {
@@ -42,8 +54,8 @@ typedef struct {
     uint8_t p1;
     uint8_t p2;
     uint8_t len[3];
-    uint8_t challenge[32];
-    uint8_t app_id[32];
+    uint8_t challenge[U2F_CHALLENGE_SIZE];
+    uint8_t app_id[U2F_APP_ID_SIZE];
 } FURI_PACKED U2fRegisterReq;
 
 typedef struct {
@@ -59,8 +71,8 @@ typedef struct {
     uint8_t p1;
     uint8_t p2;
     uint8_t len[3];
-    uint8_t challenge[32];
-    uint8_t app_id[32];
+    uint8_t challenge[U2F_CHALLENGE_SIZE];
+    uint8_t app_id[U2F_APP_ID_SIZE];
     U2fKeyHandle key_handle;
 } FURI_PACKED U2fAuthReq;
 
@@ -78,19 +90,20 @@ static const uint8_t state_user_missing[] = {0x69, 0x85};
 static const uint8_t state_wrong_data[] = {0x6A, 0x80};
 
 struct U2fData {
-    uint8_t device_key[32];
-    uint8_t cert_key[32];
+    uint8_t device_key[U2F_EC_KEY_SIZE];
+    uint8_t cert_key[U2F_EC_KEY_SIZE];
     uint32_t counter;
-    const struct uECC_Curve_t* p_curve;
     bool ready;
     bool user_present;
     U2fEvtCallback callback;
     void* context;
+    mbedtls_ecp_group group;
 };
 
-static int u2f_uecc_random(uint8_t* dest, unsigned size) {
+static int u2f_uecc_random_cb(void* context, uint8_t* dest, unsigned size) {
+    UNUSED(context);
     furi_hal_random_fill_buf(dest, size);
-    return 1;
+    return 0;
 }
 
 U2fData* u2f_alloc() {
@@ -99,6 +112,7 @@ U2fData* u2f_alloc() {
 
 void u2f_free(U2fData* U2F) {
     furi_assert(U2F);
+    mbedtls_ecp_group_free(&U2F->group);
     free(U2F);
 }
 
@@ -129,8 +143,8 @@ bool u2f_init(U2fData* U2F) {
         }
     }
 
-    U2F->p_curve = uECC_secp256r1();
-    uECC_set_rng(u2f_uecc_random);
+    mbedtls_ecp_group_init(&U2F->group);
+    mbedtls_ecp_group_load(&U2F->group, MBEDTLS_ECP_DP_SECP256R1);
 
     U2F->ready = true;
     return true;
@@ -171,21 +185,71 @@ static uint8_t u2f_der_encode_signature(uint8_t* der, uint8_t* sig) {
     der[0] = 0x30;
 
     uint8_t len = 2;
-    len += u2f_der_encode_int(der + len, sig, 32);
-    len += u2f_der_encode_int(der + len, sig + 32, 32);
+    len += u2f_der_encode_int(der + len, sig, U2F_HASH_SIZE);
+    len += u2f_der_encode_int(der + len, sig + U2F_HASH_SIZE, U2F_HASH_SIZE);
 
     der[1] = len - 2;
     return len;
 }
 
+static void
+    u2f_ecc_sign(mbedtls_ecp_group* grp, const uint8_t* key, uint8_t* hash, uint8_t* signature) {
+    mbedtls_mpi r, s, d;
+
+    mbedtls_mpi_init(&r);
+    mbedtls_mpi_init(&s);
+    mbedtls_mpi_init(&d);
+
+    furi_check(mbedtls_mpi_read_binary(&d, key, U2F_EC_KEY_SIZE) == 0);
+    furi_check(
+        mbedtls_ecdsa_sign(grp, &r, &s, &d, hash, U2F_HASH_SIZE, u2f_uecc_random_cb, NULL) == 0);
+    furi_check(mbedtls_mpi_write_binary(&r, signature, U2F_EC_BIGNUM_SIZE) == 0);
+    furi_check(
+        mbedtls_mpi_write_binary(&s, signature + U2F_EC_BIGNUM_SIZE, U2F_EC_BIGNUM_SIZE) == 0);
+
+    mbedtls_mpi_free(&r);
+    mbedtls_mpi_free(&s);
+    mbedtls_mpi_free(&d);
+}
+
+static void u2f_ecc_compute_public_key(
+    mbedtls_ecp_group* grp,
+    const uint8_t* private_key,
+    U2fPubKey* public_key) {
+    mbedtls_ecp_point Q;
+    mbedtls_mpi d;
+    size_t olen;
+
+    mbedtls_ecp_point_init(&Q);
+    mbedtls_mpi_init(&d);
+
+    furi_check(mbedtls_mpi_read_binary(&d, private_key, U2F_EC_KEY_SIZE) == 0);
+    furi_check(mbedtls_ecp_mul(grp, &Q, &d, &grp->G, u2f_uecc_random_cb, NULL) == 0);
+    furi_check(mbedtls_ecp_check_privkey(grp, &d) == 0);
+
+    furi_check(
+        mbedtls_ecp_point_write_binary(
+            grp,
+            &Q,
+            MBEDTLS_ECP_PF_UNCOMPRESSED,
+            &olen,
+            (unsigned char*)public_key,
+            sizeof(U2fPubKey)) == 0);
+
+    mbedtls_ecp_point_free(&Q);
+    mbedtls_mpi_free(&d);
+}
+
+///////////////////////////////////////////
+
 static uint16_t u2f_register(U2fData* U2F, uint8_t* buf) {
     U2fRegisterReq* req = (U2fRegisterReq*)buf;
     U2fRegisterResp* resp = (U2fRegisterResp*)buf;
     U2fKeyHandle handle;
-    uint8_t private[32];
+    uint8_t private[U2F_EC_KEY_SIZE];
     U2fPubKey pub_key;
-    uint8_t hash[32];
-    uint8_t signature[64];
+    uint8_t hash[U2F_HASH_SIZE];
+    uint8_t signature[U2F_EC_BIGNUM_SIZE * 2];
 
     if(u2f_data_check(false) == false) {
         U2F->ready = false;
@@ -201,48 +265,54 @@ static uint16_t u2f_register(U2fData* U2F, uint8_t* buf) {
     }
     U2F->user_present = false;
 
-    handle.len = 32 * 2;
+    handle.len = U2F_HASH_SIZE * 2;
+
     // Generate random nonce
     furi_hal_random_fill_buf(handle.nonce, 32);
 
-    mbedtls_md_context_t hmac_ctx;
-    mbedtls_md_init(&hmac_ctx);
-    mbedtls_md_setup(&hmac_ctx, mbedtls_md_info_from_type(MBEDTLS_MD_SHA256), 1);
-    mbedtls_md_hmac_starts(&hmac_ctx, U2F->device_key, sizeof(U2F->device_key));
+    {
+        mbedtls_md_context_t hmac_ctx;
+        mbedtls_md_init(&hmac_ctx);
+        mbedtls_md_setup(&hmac_ctx, mbedtls_md_info_from_type(MBEDTLS_MD_SHA256), 1);
+        mbedtls_md_hmac_starts(&hmac_ctx, U2F->device_key, sizeof(U2F->device_key));
 
-    // Generate private key
-    mbedtls_md_hmac_update(&hmac_ctx, req->app_id, 32);
-    mbedtls_md_hmac_update(&hmac_ctx, handle.nonce, sizeof(handle.nonce));
-    mbedtls_md_hmac_finish(&hmac_ctx, private);
+        // Generate private key
+        mbedtls_md_hmac_update(&hmac_ctx, req->app_id, sizeof(req->app_id));
+        mbedtls_md_hmac_update(&hmac_ctx, handle.nonce, sizeof(handle.nonce));
+        mbedtls_md_hmac_finish(&hmac_ctx, private);
 
-    mbedtls_md_hmac_reset(&hmac_ctx);
+        mbedtls_md_hmac_reset(&hmac_ctx);
 
-    // Generate private key handle
-    mbedtls_md_hmac_update(&hmac_ctx, private, sizeof(private));
-    mbedtls_md_hmac_update(&hmac_ctx, req->app_id, sizeof(req->app_id));
-    mbedtls_md_hmac_finish(&hmac_ctx, handle.hash);
+        // Generate private key handle
+        mbedtls_md_hmac_update(&hmac_ctx, private, sizeof(private));
+        mbedtls_md_hmac_update(&hmac_ctx, req->app_id, sizeof(req->app_id));
+        mbedtls_md_hmac_finish(&hmac_ctx, handle.hash);
+    }
 
     // Generate public key
-    pub_key.format = 0x04; // Uncompressed point
-    uECC_compute_public_key(private, pub_key.xy, U2F->p_curve);
+    u2f_ecc_compute_public_key(&U2F->group, private, &pub_key);
 
     // Generate signature
-    uint8_t reserved_byte = 0;
+    {
+        uint8_t reserved_byte = 0;
 
-    mbedtls_sha256_context sha_ctx;
+        mbedtls_sha256_context sha_ctx;
 
-    mbedtls_sha256_init(&sha_ctx);
-    mbedtls_sha256_starts(&sha_ctx, 0);
+        mbedtls_sha256_init(&sha_ctx);
+        mbedtls_sha256_starts(&sha_ctx, 0);
 
-    mbedtls_sha256_update(&sha_ctx, &reserved_byte, 1);
-    mbedtls_sha256_update(&sha_ctx, req->app_id, 32);
-    mbedtls_sha256_update(&sha_ctx, req->challenge, 32);
-    mbedtls_sha256_update(&sha_ctx, handle.hash, handle.len);
-    mbedtls_sha256_update(&sha_ctx, (uint8_t*)&pub_key, 65);
+        mbedtls_sha256_update(&sha_ctx, &reserved_byte, 1);
+        mbedtls_sha256_update(&sha_ctx, req->app_id, sizeof(req->app_id));
+        mbedtls_sha256_update(&sha_ctx, req->challenge, sizeof(req->challenge));
+        mbedtls_sha256_update(&sha_ctx, handle.hash, handle.len);
+        mbedtls_sha256_update(&sha_ctx, (uint8_t*)&pub_key, sizeof(U2fPubKey));
 
-    mbedtls_sha256_finish(&sha_ctx, hash);
+        mbedtls_sha256_finish(&sha_ctx, hash);
+        mbedtls_sha256_free(&sha_ctx);
+    }
 
-    uECC_sign(U2F->cert_key, hash, 32, signature, U2F->p_curve);
+    // Sign hash
+    u2f_ecc_sign(&U2F->group, U2F->cert_key, hash, signature);
 
     // Encode response message
     resp->reserved = 0x05;
@@ -258,12 +328,11 @@ static uint16_t u2f_register(U2fData* U2F, uint8_t* buf) {
 static uint16_t u2f_authenticate(U2fData* U2F, uint8_t* buf) {
     U2fAuthReq* req = (U2fAuthReq*)buf;
     U2fAuthResp* resp = (U2fAuthResp*)buf;
-    uint8_t priv_key[32];
+    uint8_t priv_key[U2F_EC_KEY_SIZE];
     uint8_t mac_control[32];
-    // hmac_sha256_context hmac_ctx;
     uint8_t flags = 0;
-    uint8_t hash[32];
-    uint8_t signature[64];
+    uint8_t hash[U2F_HASH_SIZE];
+    uint8_t signature[U2F_HASH_SIZE * 2];
     uint32_t be_u2f_counter;
 
     if(u2f_data_check(false) == false) {
@@ -288,36 +357,41 @@ static uint16_t u2f_authenticate(U2fData* U2F, uint8_t* buf) {
     be_u2f_counter = lfs_tobe32(U2F->counter + 1);
 
     // Generate hash
-    mbedtls_sha256_context sha_ctx;
+    {
+        mbedtls_sha256_context sha_ctx;
 
-    mbedtls_sha256_init(&sha_ctx);
-    mbedtls_sha256_starts(&sha_ctx, 0);
+        mbedtls_sha256_init(&sha_ctx);
+        mbedtls_sha256_starts(&sha_ctx, 0);
 
-    mbedtls_sha256_update(&sha_ctx, req->app_id, 32);
-    mbedtls_sha256_update(&sha_ctx, &flags, 1);
-    mbedtls_sha256_update(&sha_ctx, (uint8_t*)&(be_u2f_counter), 4);
-    mbedtls_sha256_update(&sha_ctx, req->challenge, 32);
+        mbedtls_sha256_update(&sha_ctx, req->app_id, sizeof(req->app_id));
+        mbedtls_sha256_update(&sha_ctx, &flags, 1);
+        mbedtls_sha256_update(&sha_ctx, (uint8_t*)&(be_u2f_counter), sizeof(be_u2f_counter));
+        mbedtls_sha256_update(&sha_ctx, req->challenge, sizeof(req->challenge));
 
-    mbedtls_sha256_finish(&sha_ctx, hash);
+        mbedtls_sha256_finish(&sha_ctx, hash);
+        mbedtls_sha256_free(&sha_ctx);
+    }
 
-    mbedtls_md_context_t hmac_ctx;
-    mbedtls_md_init(&hmac_ctx);
-    mbedtls_md_setup(&hmac_ctx, mbedtls_md_info_from_type(MBEDTLS_MD_SHA256), 1);
-    mbedtls_md_hmac_starts(&hmac_ctx, U2F->device_key, sizeof(U2F->device_key));
+    {
+        mbedtls_md_context_t hmac_ctx;
+        mbedtls_md_init(&hmac_ctx);
+        mbedtls_md_setup(&hmac_ctx, mbedtls_md_info_from_type(MBEDTLS_MD_SHA256), 1);
+        mbedtls_md_hmac_starts(&hmac_ctx, U2F->device_key, sizeof(U2F->device_key));
 
-    // Recover private key
-    mbedtls_md_hmac_update(&hmac_ctx, req->app_id, sizeof(req->app_id));
-    mbedtls_md_hmac_update(&hmac_ctx, req->key_handle.nonce, sizeof(req->key_handle.nonce));
-    mbedtls_md_hmac_finish(&hmac_ctx, priv_key);
+        // Recover private key
+        mbedtls_md_hmac_update(&hmac_ctx, req->app_id, sizeof(req->app_id));
+        mbedtls_md_hmac_update(&hmac_ctx, req->key_handle.nonce, sizeof(req->key_handle.nonce));
+        mbedtls_md_hmac_finish(&hmac_ctx, priv_key);
 
-    mbedtls_md_hmac_reset(&hmac_ctx);
+        mbedtls_md_hmac_reset(&hmac_ctx);
 
-    // Generate and verify private key handle
-    mbedtls_md_hmac_update(&hmac_ctx, priv_key, sizeof(priv_key));
-    mbedtls_md_hmac_update(&hmac_ctx, req->app_id, sizeof(req->app_id));
-    mbedtls_md_hmac_finish(&hmac_ctx, mac_control);
+        // Generate and verify private key handle
+        mbedtls_md_hmac_update(&hmac_ctx, priv_key, sizeof(priv_key));
+        mbedtls_md_hmac_update(&hmac_ctx, req->app_id, sizeof(req->app_id));
+        mbedtls_md_hmac_finish(&hmac_ctx, mac_control);
+    }
 
-    if(memcmp(req->key_handle.hash, mac_control, 32) != 0) {
+    if(memcmp(req->key_handle.hash, mac_control, sizeof(mac_control)) != 0) {
         FURI_LOG_W(TAG, "Wrong handle!");
         memcpy(&buf[0], state_wrong_data, 2);
         return 2;
@@ -328,7 +402,8 @@ static uint16_t u2f_authenticate(U2fData* U2F, uint8_t* buf) {
         return 2;
     }
 
-    uECC_sign(priv_key, hash, 32, signature, U2F->p_curve);
+    // Sign hash
+    u2f_ecc_sign(&U2F->group, priv_key, hash, signature);
 
     resp->user_present = flags;
     resp->counter = be_u2f_counter;
