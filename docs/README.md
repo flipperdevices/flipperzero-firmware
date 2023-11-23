@@ -8,6 +8,7 @@ This app combines your IR commands into a playlist that can be run with one clic
 - Add pauses inbetween commands 
 - Save your command chain / playlist to flipper
 - Disable LED effects if not wanted
+- Configure duration of IR Signals
 
 ## In Development
 - Ability to also add SubGhz commands 

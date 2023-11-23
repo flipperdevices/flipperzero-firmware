@@ -1,3 +1,6 @@
+## v1.0
+- Added option to change IR Signal Timing
+
 ## v0.9
 
 - New Repository for App 
