@@ -70,7 +70,7 @@ void hangman_draw_keyboard(Canvas* canvas, HangmanApp* app) {
                 canvas_draw_glyph(canvas, x, y, ch);
             }
 
-            if(app->opened[n]) {
+            if(app->opened[n] != HangmanOpenedInit) {
                 canvas_set_custom_u8g2_font(canvas, u8g2_font_6x12_t_cyrillic);
             }
         }
