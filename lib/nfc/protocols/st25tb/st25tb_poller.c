@@ -72,6 +72,7 @@ static NfcCommand st25tb_poller_select_handler(St25tbPoller* instance) {
         }
 
         instance->st25tb_event.type = St25tbPollerEventTypeReady;
+        instance->st25tb_event.data->ready.type = instance->data->type;
         command = instance->callback(instance->general_event, instance->context);
         instance->state = St25tbPollerStateRequestMode;
     } while(false);

@@ -36,9 +36,6 @@ static NfcCommand nfc_scene_read_poller_callback_st25tb(NfcGenericEvent event, v
             instance->nfc_device, NfcProtocolSt25tb, nfc_poller_get_data(instance->poller));
         view_dispatcher_send_custom_event(instance->view_dispatcher, NfcCustomEventPollerSuccess);
         return NfcCommandStop;
-    } else if(st25tb_event->type == St25tbPollerEventTypeFailure) {
-        view_dispatcher_send_custom_event(instance->view_dispatcher, NfcCustomEventPollerFailure);
-        return NfcCommandStop;
     }
 
     return NfcCommandContinue;
