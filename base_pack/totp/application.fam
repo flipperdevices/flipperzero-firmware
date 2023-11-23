@@ -7,7 +7,7 @@ App(
     requires=["gui", "cli", "dialogs", "storage", "input", "notification", "bt"],
     stack_size=2 * 1024,
     order=20,
-    fap_version="5.80",
+    fap_version="5.91",
     fap_author="Alexander Kopachov (@akopachov)",
     fap_description="Software-based TOTP/HOTP authenticator for Flipper Zero device",
     fap_weburl="https://github.com/akopachov/flipper-zero_authenticator",
@@ -18,9 +18,6 @@ App(
     fap_private_libs=[
         Lib(
             name="base32",
-        ),
-        Lib(
-            name="timezone_utils",
         ),
         Lib(
             name="polyfills",

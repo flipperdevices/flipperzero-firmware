@@ -6,6 +6,7 @@
 #include "services/crypto/crypto_facade.h"
 #include "ui/scene_director.h"
 #include "services/config/config.h"
+#include "services/kb_layouts/kb_layout_provider.h"
 #include "cli/cli_helpers.h"
 #include "workers/bt_type_code/bt_type_code.h"
 
@@ -65,4 +66,12 @@ static constexpr auto app_api_table = sort(create_array_t<sym_entry>(
     API_METHOD(totp_bt_type_code_worker_free, void, (TotpBtTypeCodeWorkerContext*)),
     API_METHOD(token_info_set_token_type_from_str, bool, (TokenInfo*, const FuriString*)),
     API_METHOD(token_info_set_token_counter_from_str, bool, (TokenInfo*, const FuriString*)),
-    API_METHOD(token_info_get_type_as_cstr, const char*, (const TokenInfo*))));
+    API_METHOD(token_info_get_type_as_cstr, const char*, (const TokenInfo*)),
+    API_METHOD(
+        totp_kb_layout_provider_get_layout_by_name,
+        bool,
+        (const char*, AutomationKeyboardLayout*)),
+    API_METHOD(
+        totp_kb_layout_provider_get_layout_name,
+        bool,
+        (AutomationKeyboardLayout, char*, size_t))));
