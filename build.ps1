@@ -97,6 +97,9 @@ foreach ($fbts in $FbtSwitch) {
 
     Write-Information 'Building without BadBT'
     Build-Run -FeaturesSuffix '_no-badbt' -CppDefine TOTP_NO_BADBT_AUTOMATION -FbtSwitch $fbts
+
+    Write-Information 'Building with CryptoV1 support'
+    Build-Run -FeaturesSuffix '_old-crypto-support' -CppDefine TOTP_OBSOLETE_CRYPTO_V1_COMPATIBILITY_ENABLED -FbtSwitch $fbts
 }
 
 Pop-Location
