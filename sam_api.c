@@ -7,10 +7,6 @@
 #define ASN1_PREFIX 6
 #define ASN1_DEBUG true
 
-#ifdef ASN1_DEBUG
-char payloadDebug[384] = {0};
-#endif
-
 static char display[SEADER_UART_RX_BUF_SIZE * 2 + 1] = {0};
 char asn1_log[SEADER_UART_RX_BUF_SIZE] = {0};
 bool requestPacs = true;
@@ -44,7 +40,7 @@ bool seader_send_apdu(
     return true;
 }
 
-static int seader_asn_to_string(const void* buffer, size_t size, void* app_key) {
+static int seader_print_struct_callback(const void* buffer, size_t size, void* app_key) {
     if(app_key) {
         char* str = (char*)app_key;
         size_t next = strlen(str);
@@ -69,9 +65,11 @@ void seader_send_payload(
 
 #ifdef ASN1_DEBUG
     if(er.encoded > -1) {
+        char payloadDebug[384] = {0};
         memset(payloadDebug, 0, sizeof(payloadDebug));
         (&asn_DEF_Payload)
-            ->op->print_struct(&asn_DEF_Payload, payload, 1, seader_asn_to_string, payloadDebug);
+            ->op->print_struct(
+                &asn_DEF_Payload, payload, 1, seader_print_struct_callback, payloadDebug);
         if(strlen(payloadDebug) > 0) {
             FURI_LOG_D(TAG, "Sending payload[%d %d %d]: %s", to, from, replyTo, payloadDebug);
         }
@@ -192,7 +190,8 @@ bool seader_unpack_pacs(Seader* seader, uint8_t* buf, size_t size) {
 
     if(rval.code == RC_OK) {
         char pacDebug[384] = {0};
-        (&asn_DEF_PAC)->op->print_struct(&asn_DEF_PAC, pac, 1, seader_asn_to_string, pacDebug);
+        (&asn_DEF_PAC)
+            ->op->print_struct(&asn_DEF_PAC, pac, 1, seader_print_struct_callback, pacDebug);
         if(strlen(pacDebug) > 0) {
             FURI_LOG_D(TAG, "Received pac: %s", pacDebug);
 
@@ -250,7 +249,7 @@ bool seader_parse_version(SeaderWorker* seader_worker, uint8_t* buf, size_t size
         char versionDebug[128] = {0};
         (&asn_DEF_SamVersion)
             ->op->print_struct(
-                &asn_DEF_SamVersion, version, 1, seader_asn_to_string, versionDebug);
+                &asn_DEF_SamVersion, version, 1, seader_print_struct_callback, versionDebug);
         if(strlen(versionDebug) > 0) {
             // FURI_LOG_D(TAG, "Received version: %s", versionDebug);
         }
@@ -276,7 +275,8 @@ bool seader_parse_sam_response(Seader* seader, SamResponse_t* samResponse) {
             sendRequestPacs(seader_uart);
             requestPacs = false;
         } else {
-            FURI_LOG_D(TAG, "samResponse %d, no action", samResponse->size);
+            FURI_LOG_D(
+                TAG, "samResponse %d, PACS already requested, pushing view", samResponse->size);
             view_dispatcher_send_custom_event(
                 seader->view_dispatcher, SeaderCustomEventWorkerExit);
         }
@@ -624,12 +624,13 @@ bool seader_process_success_response_i(
 
 #ifdef ASN1_DEBUG
         if(processed) {
+            char payloadDebug[384] = {0};
             memset(payloadDebug, 0, sizeof(payloadDebug));
             (&asn_DEF_Payload)
                 ->op->print_struct(
-                    &asn_DEF_Payload, payload, 1, seader_asn_to_string, payloadDebug);
+                    &asn_DEF_Payload, payload, 1, seader_print_struct_callback, payloadDebug);
             if(strlen(payloadDebug) > 0) {
-                FURI_LOG_D(TAG, "Received payload: %s", payloadDebug);
+                FURI_LOG_D(TAG, "Payload processed: %s", payloadDebug);
             }
         }
 #endif
