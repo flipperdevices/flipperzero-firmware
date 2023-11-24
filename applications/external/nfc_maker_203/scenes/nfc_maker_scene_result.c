@@ -1,4 +1,5 @@
 #include "../nfc_maker.h"
+#include <furi_hal_random.h>
 
 enum PopupEvent {
     PopupEventExit,
@@ -17,7 +18,7 @@ void nfc_maker_scene_result_on_enter(void* context) {
 
     FlipperFormat* file = flipper_format_file_alloc(furi_record_open(RECORD_STORAGE));
     FuriString* path = furi_string_alloc();
-    furi_string_printf(path, NFC_APP_FOLDER "/%s" NFC_APP_EXTENSION, app->name_buf);
+    furi_string_printf(path, NFC_MK_APP_FOLDER "/%s" NFC_MK_APP_EXTENSION, app->name_buf);
     do {
         if(!flipper_format_file_open_new(file, furi_string_get_cstr(path))) break;
 
@@ -125,7 +126,7 @@ void nfc_maker_scene_result_on_enter(void* context) {
             break;
         }
         case NfcMakerSceneHttps: {
-            uint8_t data_len = strnlen(app->text_buf, TEXT_INPUT_LEN);
+            uint8_t data_len = newstrnlen(app->text_buf, TEXT_INPUT_LEN);
             msg_len = data_len + 5;
 
             buf[23] = 0xD1;
@@ -138,7 +139,7 @@ void nfc_maker_scene_result_on_enter(void* context) {
             break;
         }
         case NfcMakerSceneMail: {
-            uint8_t data_len = strnlen(app->text_buf, TEXT_INPUT_LEN);
+            uint8_t data_len = newstrnlen(app->text_buf, TEXT_INPUT_LEN);
             msg_len = data_len + 5;
 
             buf[23] = 0xD1;
@@ -151,7 +152,7 @@ void nfc_maker_scene_result_on_enter(void* context) {
             break;
         }
         case NfcMakerScenePhone: {
-            uint8_t data_len = strnlen(app->text_buf, TEXT_INPUT_LEN);
+            uint8_t data_len = newstrnlen(app->text_buf, TEXT_INPUT_LEN);
             msg_len = data_len + 5;
 
             buf[23] = 0xD1;
@@ -164,7 +165,7 @@ void nfc_maker_scene_result_on_enter(void* context) {
             break;
         }
         case NfcMakerSceneText: {
-            uint8_t data_len = strnlen(app->text_buf, TEXT_INPUT_LEN);
+            uint8_t data_len = newstrnlen(app->text_buf, TEXT_INPUT_LEN);
             msg_len = data_len + 7;
 
             buf[23] = 0xD1;
@@ -179,7 +180,7 @@ void nfc_maker_scene_result_on_enter(void* context) {
             break;
         }
         case NfcMakerSceneUrl: {
-            uint8_t data_len = strnlen(app->text_buf, TEXT_INPUT_LEN);
+            uint8_t data_len = newstrnlen(app->text_buf, TEXT_INPUT_LEN);
             msg_len = data_len + 5;
 
             buf[23] = 0xD1;

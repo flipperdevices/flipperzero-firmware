@@ -71,8 +71,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [ShapShup v1.2 (By derskythe)](https://github.com/derskythe/flipperzero-shapshup)
 - OFW: [Fix NFC unit tests #3192 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3192)
 - OFW: [Infrared remote button index support #3180 (By gsurkov)](https://github.com/flipperdevices/flipperzero-firmware/pull/3180)
-- Refactor Update: [NFC Maker NTAG203 (by Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/343cb39d08f60b75b537e1a31100707935cf6e9d)
-- Refactor Update: [NFC Maker NTAG215 (by Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/343cb39d08f60b75b537e1a31100707935cf6e9d)
 - OFW PR: [NFC: Felica UID emulation #3190 (By RebornedBrain)](https://github.com/flipperdevices/flipperzero-firmware/pull/3190)
 - A few apps got minor fixes (By WIlly-JL): [Brainfuck v1.1 (By nymda)](https://github.com/nymda/FlipperZeroBrainfuck), [CLI Bridge (By ranchordo)](https://github.com/ranchordo/flipperzero-cli-bridge), [Flizzer Tracker (By LTVA1)](https://github.com/LTVA1/flizzer_tracker), [Music Tracker (By DrZlo13)](https://github.com/DrZlo13/flipper-zero-music-tracker), [Temp Sensors Reader 1.4 (By quen0n)](https://github.com/quen0n/Unitemp-Flipper-Zero-Plugin) & [WiFi (Deauther) V2 (By Timmotools)](https://github.com/Timmotools/flipperzero_esp8266_deautherv2)
 - Add nfc dynamic default save name to new app (By Willy-JL)
@@ -93,7 +91,9 @@ This software is for experimental purposes only and is not meant for any illegal
 - Added: [COGES NFC (For Coffee Machines) (By OFW + haisenteck)](https://github.com/haisenteck/flipperzero-Haisenteck/)
 - UL: [NFC Parsers bugfixes for Troyka and Social Card (By assasinfil)](https://github.com/DarkFlippers/unleashed-firmware/pull/655)
 - Update: [NFC Seader v2.0 (By bettse)](https://github.com/bettse/seader)
-- Refactor Update: [Enhanced Sub-Ghz Chat v1.2 (By twisted-pear)](https://github.com/twisted-pear/esubghz_chat) - Changes (By xMasterX)
+- Refactor Update: [Enhanced Sub-Ghz Chat v1.2 (By twisted-pear)](https://github.com/twisted-pear/esubghz_chat) - [(Changes By xMasterX)](https://github.com/xMasterX/all-the-plugins/commit/89e22ac9500886f98a7e96934686235f239767ef)
+- Refactor Update: [NFC Maker NTAG215 (by Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/343cb39d08f60b75b537e1a31100707935cf6e9d) - [(Changes By xMasterX)](https://github.com/xMasterX/all-the-plugins/commit/d2d908eea599192dd5ad428fe9d5684b3874a1a4)
+- Refactor Update: [NFC Maker NTAG203 (by Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/343cb39d08f60b75b537e1a31100707935cf6e9d) - [(Changes By RogueMaster Copying These changes By xMasterX)](https://github.com/xMasterX/all-the-plugins/commit/d2d908eea599192dd5ad428fe9d5684b3874a1a4)
 
 <a name="release">
 
@@ -453,6 +453,8 @@ $ ./fbt dolphin_ext
 - [Mx2125 Step Counter v1.0 (By 47lecoste a.k.a. grugnoymeme)](https://github.com/grugnoymeme/flipperzero-stepcounter-fap)
 - [Name Changer (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/488) (Change Flipper name)
 - [NFC Magic v1.2 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966) with [NFC Magic Gen4 Support #2238 (By nullableVoidPtr)](https://github.com/flipperdevices/flipperzero-firmware/pull/2238)
+- [NFC Maker NTAG203 (by Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/343cb39d08f60b75b537e1a31100707935cf6e9d)
+- [NFC Maker NTAG215 (by Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/343cb39d08f60b75b537e1a31100707935cf6e9d)
 - [NFC Seader v2.0 (By bettse)](https://github.com/bettse/seader)
 - [Nightstand Clock v1.1 (By nymda)](https://github.com/nymda/FlipperNightStand)
 - [Notes for FZ WIP (By AdrianN001)](https://github.com/AdrianN001/Flipper-Zero-Note-Application)
@@ -534,8 +536,6 @@ $ ./fbt dolphin_ext
 - If you can fix any of these, DM me on Discord for a surprise reward.
 - [Mifare Fuzzer v1.1 (By spheeere98)](https://github.com/spheeere98/mifare_fuzzer)
 - [Mifare Nested v1.5.2 (By AloneLiberty)](https://github.com/AloneLiberty/FlipperNested)
-- [NFC Maker NTAG203 (by Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/343cb39d08f60b75b537e1a31100707935cf6e9d)
-- [NFC Maker NTAG215 (by Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/343cb39d08f60b75b537e1a31100707935cf6e9d)
 - [NFC Relay WIP (By leommxj)](https://github.com/leommxj/nfc_relay)
 - [TAS Playback (By rcombs)](https://github.com/rcombs/tas-playback)
 - [VB Migration Assistant v1.2 (By GMMan)](https://github.com/GMMan/flipperzero-vb-migrate)

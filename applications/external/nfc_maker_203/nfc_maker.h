@@ -1,6 +1,3 @@
-#pragma once
-
-#include <furi.h>
 #include <gui/gui.h>
 #include <gui/view.h>
 #include <gui/modules/validators.h>
@@ -14,10 +11,11 @@
 #include "scenes/nfc_maker_scene.h"
 #include <lib/flipper_format/flipper_format.h>
 #include <toolbox/name_generator.h>
-#include <applications/main/nfc/nfc_app_i.h>
 #include <furi_hal_bt.h>
-#include "strnlen.h"
+#include "newstrnlen.h"
 
+#define NFC_MK_APP_FOLDER EXT_PATH("nfc")
+#define NFC_MK_APP_EXTENSION ".nfc"
 #define TEXT_INPUT_LEN 248
 
 typedef struct {

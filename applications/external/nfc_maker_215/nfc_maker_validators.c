@@ -2,15 +2,15 @@
 #include "nfc_maker_validators.h"
 #include <storage/storage.h>
 
-struct ValidatorIsFile {
+struct NFCMakerValidatorIsFile {
     char* app_path_folder;
     const char* app_extension;
     char* current_name;
 };
 
-bool validator_is_file_callback(const char* text, FuriString* error, void* context) {
+bool nfc_maker_validator_is_file_callback(const char* text, FuriString* error, void* context) {
     furi_assert(context);
-    ValidatorIsFile* instance = context;
+    NFCMakerValidatorIsFile* instance = context;
 
     if(instance->current_name != NULL) {
         if(strcmp(instance->current_name, text) == 0) {
@@ -34,11 +34,11 @@ bool validator_is_file_callback(const char* text, FuriString* error, void* conte
     return ret;
 }
 
-ValidatorIsFile* validator_is_file_alloc_init(
+NFCMakerValidatorIsFile* nfc_maker_validator_is_file_alloc_init(
     const char* app_path_folder,
     const char* app_extension,
     const char* current_name) {
-    ValidatorIsFile* instance = malloc(sizeof(ValidatorIsFile));
+    NFCMakerValidatorIsFile* instance = malloc(sizeof(NFCMakerValidatorIsFile));
 
     instance->app_path_folder = strdup(app_path_folder);
     instance->app_extension = app_extension;
@@ -49,7 +49,7 @@ ValidatorIsFile* validator_is_file_alloc_init(
     return instance;
 }
 
-void validator_is_file_free(ValidatorIsFile* instance) {
+void nfc_maker_validator_is_file_free(NFCMakerValidatorIsFile* instance) {
     furi_assert(instance);
     free(instance->app_path_folder);
     free(instance->current_name);

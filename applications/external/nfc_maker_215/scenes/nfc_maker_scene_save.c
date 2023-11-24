@@ -26,9 +26,10 @@ void nfc_maker_scene_save_on_enter(void* context) {
         BIG_INPUT_LEN,
         true);
 
-    ValidatorIsFile* validator_is_file =
-        validator_is_file_alloc_init(NFC_APP_FOLDER, NFC_APP_EXTENSION, NULL);
-    nfc_maker_text_input_set_validator(text_input, validator_is_file_callback, validator_is_file);
+    NFCMakerValidatorIsFile* validator_is_file =
+        nfc_maker_validator_is_file_alloc_init(NFC_MK_APP_FOLDER, NFC_MK_APP_EXTENSION, NULL);
+    nfc_maker_text_input_set_validator(
+        text_input, nfc_maker_validator_is_file_callback, validator_is_file);
 
     view_dispatcher_switch_to_view(app->view_dispatcher, NfcMakerViewTextInput);
 }
