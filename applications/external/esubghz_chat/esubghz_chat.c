@@ -610,17 +610,6 @@ int32_t esubghz_chat(const char* args) {
         goto err_alloc_worker;
     }
 
-    state->nfc_worker = nfc_worker_alloc();
-    if(state->nfc_worker == NULL) {
-        goto err_alloc_nworker;
-    }
-
-    state->nfc_dev_data = malloc(sizeof(NfcDeviceData));
-    if(state->nfc_dev_data == NULL) {
-        goto err_alloc_ndevdata;
-    }
-    memset(state->nfc_dev_data, 0, sizeof(NfcDeviceData));
-
     state->crypto_ctx = crypto_ctx_alloc();
     if(state->crypto_ctx == NULL) {
         goto err_alloc_crypto;
@@ -714,9 +703,6 @@ int32_t esubghz_chat(const char* args) {
         subghz_tx_rx_worker_stop(state->subghz_worker);
     }
 
-    /* if it is running, stop the NFC worker */
-    nfc_worker_stop(state->nfc_worker);
-
     err = 0;
 
     /* close GUI record */
@@ -739,12 +725,6 @@ int32_t esubghz_chat(const char* args) {
     crypto_explicit_bzero(state->key_hex_str, sizeof(state->key_hex_str));
     crypto_ctx_clear(state->crypto_ctx);
 
-    /* clear nfc data */
-    if(state->nfc_dev_data->parsed_data != NULL) {
-        furi_string_free(state->nfc_dev_data->parsed_data);
-    }
-    crypto_explicit_bzero(state->nfc_dev_data, sizeof(NfcDeviceData));
-
     /* deinit devices */
     radio_device_loader_end(state->subghz_device);
 
@@ -758,12 +738,6 @@ int32_t esubghz_chat(const char* args) {
     crypto_ctx_free(state->crypto_ctx);
 
 err_alloc_crypto:
-    free(state->nfc_dev_data);
-
-err_alloc_ndevdata:
-    nfc_worker_free(state->nfc_worker);
-
-err_alloc_nworker:
     subghz_tx_rx_worker_free(state->subghz_worker);
 
 err_alloc_worker:
