@@ -1,0 +1,42 @@
+name: Release
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    name: Bump and Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.11.0
+        with:
+          access_token: ${{ github.token }}
+
+      - uses: actions/checkout@v3
+
+      - name: Build Application
+        run: |
+          bash tools/build.sh -f unleashed
+          bash tools/build.sh -f xtreme
+          bash tools/build.sh -f rogue-master
+          bash tools/build.sh
+
+      - name: Bump Version and Push Tag
+        id: tag_version
+        uses: mathieudutour/github-tag-action@v6.1
+        with:
+          release_branches: main
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate Release Body
+        run: bash tools/release.sh
+
+      - name: Create a GitHub Release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ steps.tag_version.outputs.new_tag }}
+          name: ${{ steps.tag_version.outputs.new_tag }}
+          bodyFile: tools/release.md
+          artifacts: "build/dist/**"

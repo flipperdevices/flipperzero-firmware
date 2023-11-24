@@ -1,0 +1,11 @@
+App(
+    appid="crossy_road",
+    name="Crossy Road",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="crossy_road",
+    requires=["gui"],
+    stack_size=1 * 1024,
+    fap_category="Technologie Emergente",
+    fap_icon="crossy_road_10x.png",
+    fap_icon_assets="images",
+)
