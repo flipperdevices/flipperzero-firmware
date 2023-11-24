@@ -42,6 +42,9 @@ This procedure will explain how to configure the Pwnagotchi to use the PwnZero p
 7. Follow hardware setup shown in the doc/HardwareSetup.md to connect the devices
 8. Restart the Pwnagotchi and open the Flipagotchi app on the Flipper Zero
 
+### Setup note
+[Chrismettal](https://github.com/Chrismettal) has designed a "backpack" for the Flipper Zero which is a board that allows you to cleanly attach various devices to the Flipper. They have crated one for the Raspberry Pi Zero W which would be a great way to keep your Flipagotchi tidy! Here is a link to their [project](https://github.com/Chrismettal/flipper-zero-backpacks#raspberry-pi-zero-w).
+
 ## Development stages
 ### Stage 1: Simple display rendering
 - Stage 1 will focus on getting the Pwnagotchi display to render on the Flipper's display

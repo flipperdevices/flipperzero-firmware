@@ -19,16 +19,22 @@
 
 //Animation Theme Filenames must match the menu!
 const char* const anim_style_filenames[AnimStyleCount] = {
-    "%s/manifest_None.txt",       "%s/manifest.txt",          "%s/manifest_Minimal.txt",
-    "%s/manifest_420.txt",        "%s/manifest_42018.txt",    "%s/manifest_ALL.txt",
-    "%s/manifest_Anime.txt",      "%s/manifest_Anime420.txt", "%s/manifest_Anime42018.txt",
-    "%s/manifest_BMO.txt",        "%s/manifest_Cherry.txt",   "%s/manifest_CorpLogos.txt",
-    "%s/manifest_Custom1.txt",    "%s/manifest_Custom2.txt",  "%s/manifest_DBZ.txt",
-    "%s/manifest_Digim0n.txt",    "%s/manifest_Dolphin.txt",  "%s/manifest_Hackz.txt",
-    "%s/manifest_Mario.txt",      "%s/manifest_NYAN.txt",     "%s/manifest_OnePiece.txt",
-    "%s/manifest_P0kemon.txt",    "%s/manifest_RM18.txt",     "%s/manifest_RMSelect.txt",
-    "%s/manifest_RMSelect18.txt", "%s/manifest_SAO.txt",      "%s/manifest_Science.txt",
-    "%s/manifest_SJUMP.txt",      "%s/manifest_Squatch.txt",  "%s/manifest_Stock.txt",
+    "%s/manifest_None.txt",       "%s/manifest.txt",
+    "%s/manifest_Minimal.txt",    "%s/manifest_420.txt",
+    "%s/manifest_42018.txt",      "%s/manifest_ALL.txt",
+    "%s/manifest_Anime.txt",      "%s/manifest_Anime420.txt",
+    "%s/manifest_Anime42018.txt", "%s/manifest_BMO.txt",
+    "%s/manifest_Cherry.txt",     "%s/manifest_CorpLogos.txt",
+    "%s/manifest_Custom1.txt",    "%s/manifest_Custom2.txt",
+    "%s/manifest_DBZ.txt",        "%s/manifest_Digim0n.txt",
+    "%s/manifest_Dolphin.txt",    "%s/manifest_Hackz.txt",
+    "%s/manifest_Mario.txt",      "%s/manifest_Marvel.txt",
+    "%s/manifest_NYAN.txt",       "%s/manifest_OnePiece.txt",
+    "%s/manifest_P0kemon.txt",    "%s/manifest_RM18.txt",
+    "%s/manifest_RMSelect.txt",   "%s/manifest_RMSelect18.txt",
+    "%s/manifest_SAO.txt",        "%s/manifest_Science.txt",
+    "%s/manifest_SJUMP.txt",      "%s/manifest_Squatch.txt",
+    "%s/manifest_Stock.txt",      "%s/manifest_Virus.txt",
     "%s/manifest_WatchDogs.txt",
 };
 
