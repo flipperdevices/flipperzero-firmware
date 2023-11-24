@@ -72,6 +72,15 @@ static void xremote_scene_settings_set_save_settings(VariableItem* item) {
     app->save_settings = settings_value[index];
 }
 
+static void xremote_scene_settings_set_ir_timing(VariableItem* item) {
+    XRemote* app = variable_item_get_context(item);
+    uint32_t index = variable_item_get_current_value_index(item);
+
+    snprintf(app->ir_timing_char, 20, "%lu", (index * 100));
+    variable_item_set_current_value_text(item, app->ir_timing_char);
+    app->ir_timing = (index * 100);
+}
+
 void xremote_scene_settings_submenu_callback(void* context, uint32_t index) {
     XRemote* app = context;
     view_dispatcher_send_custom_event(app->view_dispatcher, index);
@@ -109,6 +118,14 @@ void xremote_scene_settings_on_enter(void* context) {
     value_index = value_index_uint32(app->save_settings, settings_value, 2);
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, settings_text[value_index]);
+
+    // Set Infrared Timer
+    item = variable_item_list_add(
+        app->variable_item_list, "IR Timing in ms:", 30, xremote_scene_settings_set_ir_timing, app);
+
+    variable_item_set_current_value_index(item, (uint8_t)(app->ir_timing / 100));
+    snprintf(app->ir_timing_char, 20, "%lu", app->ir_timing);
+    variable_item_set_current_value_text(item, app->ir_timing_char);
 
     view_dispatcher_switch_to_view(app->view_dispatcher, XRemoteViewIdSettings);
 }

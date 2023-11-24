@@ -34,6 +34,10 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [HEX Editor v1.2 (By dunaevai135)] <https://github.com/dunaevai135/flipper-zero-hex_editor>
 - Updated: [Authenticator/TOTP v5.9.1 (By akopachov)] <https://github.com/akopachov/flipper-zero_authenticator>
 - Updated: [Hangman v1.4 (By Evgeny Stepanischev & Eva Stepanischeva)] <https://github.com/bolknote/Flipper-Zero-Hangman-Game>
+- OFW PR: [Add the "remove pairing" button to BLE hid #3237 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3237)
+- OFW PR: [HID app: Add new function key icons #3236 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3236)
+- OFW PR: Add the secret door animation #3233 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3233)
+- Updated: [Cross Remote v1.0 (By leedave)](https://github.com/leedave/flipper-zero-cross-remote)
 
 ## IN THIS BRANCH:
 
@@ -373,7 +377,7 @@ $ ./fbt dolphin_ext
 - [Cookie Clicker v1.0 (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/hid/hid_cookie)
 - [Count Down Timer v1.2 (By 0w0mewo)](https://github.com/0w0mewo/fpz_cntdown_timer)
 - [Counter v1.2 (By Krulknul)](https://github.com/Krulknul/dolphin-counter) [Improved (By plasticuproject)](https://github.com/plasticuproject/dolphin-better-counter)
-- [Cross Remote v0.9 (By leedave)](https://github.com/leedave/flipper-zero-cross-remote)
+- [Cross Remote v1.0 (By leedave)](https://github.com/leedave/flipper-zero-cross-remote)
 - [Dab Timer v1.5 (By RogueMaster)](https://github.com/RogueMaster/flipperzero-dabtimer)
 - [DAP Link v1.1 (By DrZlo13)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/1897)
 - [DCF77 Transmitter v1.1 (By arha)](https://github.com/arha/flipper-dcf77)

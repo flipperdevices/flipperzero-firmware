@@ -57,6 +57,7 @@ void xremote_save_settings(void* context) {
     flipper_format_write_uint32(fff_file, XREMOTE_SETTINGS_KEY_LED, &app->led, 1);
     flipper_format_write_uint32(
         fff_file, XREMOTE_SETTINGS_KEY_SAVE_SETTINGS, &app->save_settings, 1);
+    flipper_format_write_uint32(fff_file, XREMOTE_SETTINGS_KEY_IR_TIMING, &app->ir_timing, 1);
 
     if(!flipper_format_rewind(fff_file)) {
         xremote_close_config_file(fff_file);
@@ -108,6 +109,7 @@ void xremote_read_settings(void* context) {
     flipper_format_read_uint32(fff_file, XREMOTE_SETTINGS_KEY_LED, &app->led, 1);
     flipper_format_read_uint32(
         fff_file, XREMOTE_SETTINGS_KEY_SAVE_SETTINGS, &app->save_settings, 1);
+    flipper_format_read_uint32(fff_file, XREMOTE_SETTINGS_KEY_IR_TIMING, &app->ir_timing, 1);
 
     flipper_format_rewind(fff_file);
 

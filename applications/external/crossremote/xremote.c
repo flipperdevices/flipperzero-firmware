@@ -47,6 +47,8 @@ XRemote* xremote_app_alloc() {
     app->led = 1;
     app->save_settings = 1;
     app->transmitting = 0;
+    app->ir_timing = 1000;
+    app->ir_timing_char = "1000";
 
     // Load configs
     xremote_read_settings(app);
