@@ -1,4 +1,3 @@
-// #include "md5.h"
 #include "md5_calc.h"
 
 #include <storage/filesystem_api_defines.h>

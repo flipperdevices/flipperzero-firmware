@@ -1,4 +1,3 @@
-#include "core/core_defines.h"
 #include <furi_hal_info.h>
 #include <furi_hal_region.h>
 #include <furi_hal_version.h>
@@ -48,19 +47,6 @@ void furi_hal_info_get(PropertyValueCallback out, char sep, void* context) {
         &property_context, "%d", 3, "hardware", "otp", "ver", furi_hal_version_get_otp_version());
     property_value_out(
         &property_context, "%lu", 2, "hardware", "timestamp", furi_hal_version_get_hw_timestamp());
-
-    struct {
-        const char* fmt;
-        const char** parts;
-        // void* (*get)(void);
-    } property_descriptors[] = {
-        {
-            .fmt = "%s",
-            .parts = (const char*[]){"hardware", "ver", NULL},
-        },
-    };
-
-    UNUSED(property_descriptors);
 
     // Board Revision
     property_value_out(
