@@ -7,10 +7,6 @@
 #define ASN1_PREFIX 6
 #define ASN1_DEBUG true
 
-#ifdef ASN1_DEBUG
-char payloadDebug[384] = {0};
-#endif
-
 static char display[SEADER_UART_RX_BUF_SIZE * 2 + 1] = {0};
 char asn1_log[SEADER_UART_RX_BUF_SIZE] = {0};
 bool requestPacs = true;
@@ -32,7 +28,7 @@ bool seader_send_apdu(
         return false;
     }
 
-    uint8_t* apdu = malloc(APDU_HEADER_LEN + length);
+    uint8_t apdu[SEADER_UART_RX_BUF_SIZE];
     apdu[0] = CLA;
     apdu[1] = INS;
     apdu[2] = P1;
@@ -41,11 +37,10 @@ bool seader_send_apdu(
     memcpy(apdu + APDU_HEADER_LEN, payload, length);
 
     seader_ccid_XfrBlock(seader_uart, apdu, APDU_HEADER_LEN + length);
-    free(apdu);
     return true;
 }
 
-static int seader_asn_to_string(const void* buffer, size_t size, void* app_key) {
+static int seader_print_struct_callback(const void* buffer, size_t size, void* app_key) {
     if(app_key) {
         char* str = (char*)app_key;
         size_t next = strlen(str);
@@ -70,9 +65,11 @@ void seader_send_payload(
 
 #ifdef ASN1_DEBUG
     if(er.encoded > -1) {
+        char payloadDebug[384] = {0};
         memset(payloadDebug, 0, sizeof(payloadDebug));
         (&asn_DEF_Payload)
-            ->op->print_struct(&asn_DEF_Payload, payload, 1, seader_asn_to_string, payloadDebug);
+            ->op->print_struct(
+                &asn_DEF_Payload, payload, 1, seader_print_struct_callback, payloadDebug);
         if(strlen(payloadDebug) > 0) {
             FURI_LOG_D(TAG, "Sending payload[%d %d %d]: %s", to, from, replyTo, payloadDebug);
         }
@@ -177,9 +174,9 @@ void seader_send_card_detected(SeaderUartBridge* seader_uart, CardDetails_t* car
 
     seader_send_payload(seader_uart, payload, 0x44, 0x0a, 0x44);
 
-    ASN_STRUCT_FREE(asn_DEF_CardDetected, cardDetected);
-    ASN_STRUCT_FREE(asn_DEF_SamCommand, samCommand);
     ASN_STRUCT_FREE(asn_DEF_Payload, payload);
+    ASN_STRUCT_FREE(asn_DEF_SamCommand, samCommand);
+    ASN_STRUCT_FREE(asn_DEF_CardDetected, cardDetected);
 }
 
 bool seader_unpack_pacs(Seader* seader, uint8_t* buf, size_t size) {
@@ -193,7 +190,8 @@ bool seader_unpack_pacs(Seader* seader, uint8_t* buf, size_t size) {
 
     if(rval.code == RC_OK) {
         char pacDebug[384] = {0};
-        (&asn_DEF_PAC)->op->print_struct(&asn_DEF_PAC, pac, 1, seader_asn_to_string, pacDebug);
+        (&asn_DEF_PAC)
+            ->op->print_struct(&asn_DEF_PAC, pac, 1, seader_print_struct_callback, pacDebug);
         if(strlen(pacDebug) > 0) {
             FURI_LOG_D(TAG, "Received pac: %s", pacDebug);
 
@@ -251,7 +249,7 @@ bool seader_parse_version(SeaderWorker* seader_worker, uint8_t* buf, size_t size
         char versionDebug[128] = {0};
         (&asn_DEF_SamVersion)
             ->op->print_struct(
-                &asn_DEF_SamVersion, version, 1, seader_asn_to_string, versionDebug);
+                &asn_DEF_SamVersion, version, 1, seader_print_struct_callback, versionDebug);
         if(strlen(versionDebug) > 0) {
             // FURI_LOG_D(TAG, "Received version: %s", versionDebug);
         }
@@ -277,7 +275,8 @@ bool seader_parse_sam_response(Seader* seader, SamResponse_t* samResponse) {
             sendRequestPacs(seader_uart);
             requestPacs = false;
         } else {
-            FURI_LOG_D(TAG, "samResponse %d, no action", samResponse->size);
+            FURI_LOG_D(
+                TAG, "samResponse %d, PACS already requested, pushing view", samResponse->size);
             view_dispatcher_send_custom_event(
                 seader->view_dispatcher, SeaderCustomEventWorkerExit);
         }
@@ -625,12 +624,13 @@ bool seader_process_success_response_i(
 
 #ifdef ASN1_DEBUG
         if(processed) {
+            char payloadDebug[384] = {0};
             memset(payloadDebug, 0, sizeof(payloadDebug));
             (&asn_DEF_Payload)
                 ->op->print_struct(
-                    &asn_DEF_Payload, payload, 1, seader_asn_to_string, payloadDebug);
+                    &asn_DEF_Payload, payload, 1, seader_print_struct_callback, payloadDebug);
             if(strlen(payloadDebug) > 0) {
-                FURI_LOG_D(TAG, "Received payload: %s", payloadDebug);
+                FURI_LOG_D(TAG, "Payload processed: %s", payloadDebug);
             }
         }
 #endif
@@ -663,27 +663,25 @@ NfcCommand seader_worker_card_detect(
     assert(cardDetails);
 
     OCTET_STRING_fromBuf(&cardDetails->csn, (const char*)uid, uid_len);
+    OCTET_STRING_t sak_string = {.buf = &sak, .size = 1};
+    OCTET_STRING_t atqa_string = {.buf = atqa, .size = 2};
+    uint8_t protocol_bytes[] = {0x00, 0x00};
 
-    if(sak != 0 && atqa != NULL) {
-        uint8_t protocol_bytes[] = {0x00, FrameProtocol_nfc};
+    if(sak == 0 && atqa == NULL) {
+        protocol_bytes[1] = FrameProtocol_iclass;
         OCTET_STRING_fromBuf(
             &cardDetails->protocol, (const char*)protocol_bytes, sizeof(protocol_bytes));
-
-        OCTET_STRING_t sak_string = {.buf = &sak, .size = 1};
-        cardDetails->sak = &sak_string;
-
-        OCTET_STRING_t atqa_string = {.buf = atqa, .size = 2};
-        cardDetails->atqa = &atqa_string;
-
     } else {
-        uint8_t protocol_bytes[] = {0x00, FrameProtocol_iclass};
+        protocol_bytes[1] = FrameProtocol_nfc;
         OCTET_STRING_fromBuf(
             &cardDetails->protocol, (const char*)protocol_bytes, sizeof(protocol_bytes));
+
+        cardDetails->sak = &sak_string;
+        cardDetails->atqa = &atqa_string;
     }
 
     seader_send_card_detected(seader_uart, cardDetails);
 
     ASN_STRUCT_FREE(asn_DEF_CardDetails, cardDetails);
-
     return NfcCommandContinue;
 }
