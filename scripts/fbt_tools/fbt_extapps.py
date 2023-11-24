@@ -58,7 +58,7 @@ class AppBuilder:
         )
         self.app_env.Append(
             CPPDEFINES=[
-                ("FAP_VERSION", f'"{".".join(map(str, self.app.fap_version))}"'),
+                ("FAP_VERSION", f'\\"{".".join(map(str, self.app.fap_version))}\\"'),
                 *self.app.cdefines,
             ],
         )
@@ -473,7 +473,19 @@ def AddAppLaunchTarget(env, appname, launch_target_name):
     components = _gather_app_components(env, appname)
     target = env.PhonyTarget(
         launch_target_name,
-        '${PYTHON3} "${APP_RUN_SCRIPT}" -p ${FLIP_PORT} ${EXTRA_ARGS} -s ${SOURCES} -t ${FLIPPER_FILE_TARGETS}',
+        [
+            [
+                "${PYTHON3}",
+                "${APP_RUN_SCRIPT}",
+                "-p",
+                "${FLIP_PORT}",
+                "${EXTRA_ARGS}",
+                "-s",
+                "${SOURCES}",
+                "-t",
+                "${FLIPPER_FILE_TARGETS}",
+            ]
+        ],
         source=components.deploy_sources.values(),
         FLIPPER_FILE_TARGETS=components.deploy_sources.keys(),
         EXTRA_ARGS=components.extra_launch_args,
