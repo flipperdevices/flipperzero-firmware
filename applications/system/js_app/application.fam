@@ -4,6 +4,7 @@ App(
     apptype=FlipperAppType.SYSTEM,
     entry_point="js_app",
     stack_size=2 * 1024,
+    resources="examples",
     order=0,
 )
 
