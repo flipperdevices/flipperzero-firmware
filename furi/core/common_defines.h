@@ -51,6 +51,10 @@ void __furi_critical_exit(__FuriCriticalInfo info);
 #define FURI_CRITICAL_EXIT() __furi_critical_exit(__furi_critical_info);
 #endif
 
+#ifndef FURI_CHECK_RETURN
+#define FURI_CHECK_RETURN __attribute__((__warn_unused_result__))
+#endif
+
 #ifdef __cplusplus
 }
 #endif
