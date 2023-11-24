@@ -38,6 +38,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW PR: [HID app: Add new function key icons #3236 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3236)
 - OFW PR: Add the secret door animation #3233 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3233)
 - Updated: [Cross Remote v1.0 (By leedave)](https://github.com/leedave/flipper-zero-cross-remote)
+- Updated: [POCSAG Pager v1.1 (By XMasterx & Shmuma)](https://github.com/xMasterX/flipper-pager) [(Update By Willy-JL / xMasterX)](https://github.com/xMasterX/all-the-plugins/commit/96bf264f6518c3989c30c1ca9c8f344f50d437bb)
 
 ## IN THIS BRANCH:
 
