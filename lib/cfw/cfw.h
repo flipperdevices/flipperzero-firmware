@@ -50,6 +50,7 @@ typedef enum {
     AnimStyleDolphin,
     AnimStyleHackz,
     AnimStyleMario,
+    AnimStyleMarvel,
     AnimStyleNYAN,
     AnimStyleOnePiece,
     AnimStyleP0kemon,
@@ -61,6 +62,7 @@ typedef enum {
     AnimStyleSJUMP,
     AnimStyleSquatch,
     AnimStyleStock,
+    AnimStyleVirus,
     AnimStyleWatchDogs,
     AnimStyleCount,
 } AnimStyle;
