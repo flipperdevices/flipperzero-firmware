@@ -7,6 +7,9 @@ env.Append(
     CPPPATH=[
         "#/lib/toolbox",
     ],
+    LINT_SOURCES=[
+        Dir("."),
+    ],
     SDK_HEADERS=[
         File("api_lock.h"),
         File("compress.h"),

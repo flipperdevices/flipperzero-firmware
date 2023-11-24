@@ -4,9 +4,7 @@ Import("env")
 
 env.Append(
     CPPPATH=[
-        "#/lib/heatshrink",
         "#/lib/nanopb",
-        "#/lib/u8g2",
     ],
     CPPDEFINES=[
         "PB_ENABLE_MALLOC",
@@ -19,32 +17,11 @@ env.Append(
 )
 
 
-libenv = env.Clone(FW_LIB_NAME="misc")
+libenv = env.Clone(FW_LIB_NAME="nanopb")
 libenv.ApplyLibFlags()
 
-sources = []
-
-libs_recurse = [
-    "update_util",
-]
-
-for lib in libs_recurse:
-    sources += libenv.GlobRecursive("*.c*", lib)
-
-libs_plain = [
-    "u8g2",
-    "nanopb",
-]
-
-for lib in libs_plain:
-    sources += Glob(
-        lib + "/*.c*",
-        exclude=GLOB_FILE_EXCLUSION,
-        source=True,
-    )
-
-sources += Glob(
-    "heatshrink/heatshrink_*.c*",
+sources = Glob(
+    "nanopb/*.c*",
     exclude=GLOB_FILE_EXCLUSION,
     source=True,
 )

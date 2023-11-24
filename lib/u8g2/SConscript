@@ -2,12 +2,7 @@ Import("env")
 
 env.Append(
     CPPPATH=[
-        "#/lib/drivers",
-    ],
-    SDK_HEADERS=[
-        File("cc1101_regs.h"),
-        File("st25r3916_reg.h"),
-        File("st25r3916.h"),
+        "#/lib/u8g2",
     ],
     LINT_SOURCES=[
         Dir("."),
@@ -15,10 +10,10 @@ env.Append(
 )
 
 
-libenv = env.Clone(FW_LIB_NAME="hwdrivers")
+libenv = env.Clone(FW_LIB_NAME="u8g2")
 libenv.ApplyLibFlags()
 
-sources = Glob("*.c", source=True)
+sources = libenv.GlobRecursive("*.c")
 
 lib = libenv.StaticLibrary("${FW_LIB_NAME}", sources)
 libenv.Install("${LIB_DIST_DIR}", lib)
