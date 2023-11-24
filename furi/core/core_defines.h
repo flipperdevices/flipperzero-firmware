@@ -111,6 +111,8 @@ extern "C" {
 
 #define FURI_SW_MEMBARRIER() asm volatile("" : : : "memory")
 
+#define FURI_CHECK_RETURN __attribute__((__warn_unused_result__))
+
 #ifdef __cplusplus
 }
 #endif
