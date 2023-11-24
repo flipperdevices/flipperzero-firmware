@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,48.0,,
+Version,+,48.1,,
 Header,+,applications/drivers/subghz/cc1101_ext/cc1101_ext_interconnect.h,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
@@ -90,6 +90,10 @@ Header,+,lib/libusb_stm32/inc/usb_std.h,,
 Header,+,lib/libusb_stm32/inc/usb_tmc.h,,
 Header,+,lib/libusb_stm32/inc/usbd_core.h,,
 Header,+,lib/mbedtls/include/mbedtls/des.h,,
+Header,+,lib/mbedtls/include/mbedtls/ecdh.h,,
+Header,+,lib/mbedtls/include/mbedtls/ecdsa.h,,
+Header,+,lib/mbedtls/include/mbedtls/ecp.h,,
+Header,+,lib/mbedtls/include/mbedtls/md.h,,
 Header,+,lib/mbedtls/include/mbedtls/md5.h,,
 Header,+,lib/mbedtls/include/mbedtls/sha1.h,,
 Header,+,lib/mbedtls/include/mbedtls/sha256.h,,
@@ -2071,9 +2075,75 @@ Function,-,mbedtls_des_key_set_parity,void,unsigned char[8]
 Function,-,mbedtls_des_setkey,void,"uint32_t[32], const unsigned char[8]"
 Function,-,mbedtls_des_setkey_dec,int,"mbedtls_des_context*, const unsigned char[8]"
 Function,-,mbedtls_des_setkey_enc,int,"mbedtls_des_context*, const unsigned char[8]"
+Function,-,mbedtls_ecdh_calc_secret,int,"mbedtls_ecdh_context*, size_t*, unsigned char*, size_t, int (*)(void*, unsigned char*, size_t), void*"
+Function,-,mbedtls_ecdh_can_do,int,mbedtls_ecp_group_id
+Function,-,mbedtls_ecdh_compute_shared,int,"mbedtls_ecp_group*, mbedtls_mpi*, const mbedtls_ecp_point*, const mbedtls_mpi*, int (*)(void*, unsigned char*, size_t), void*"
+Function,-,mbedtls_ecdh_free,void,mbedtls_ecdh_context*
+Function,-,mbedtls_ecdh_gen_public,int,"mbedtls_ecp_group*, mbedtls_mpi*, mbedtls_ecp_point*, int (*)(void*, unsigned char*, size_t), void*"
+Function,-,mbedtls_ecdh_get_params,int,"mbedtls_ecdh_context*, const mbedtls_ecp_keypair*, mbedtls_ecdh_side"
+Function,-,mbedtls_ecdh_init,void,mbedtls_ecdh_context*
+Function,-,mbedtls_ecdh_make_params,int,"mbedtls_ecdh_context*, size_t*, unsigned char*, size_t, int (*)(void*, unsigned char*, size_t), void*"
+Function,-,mbedtls_ecdh_make_public,int,"mbedtls_ecdh_context*, size_t*, unsigned char*, size_t, int (*)(void*, unsigned char*, size_t), void*"
+Function,-,mbedtls_ecdh_read_params,int,"mbedtls_ecdh_context*, const unsigned char**, const unsigned char*"
+Function,-,mbedtls_ecdh_read_public,int,"mbedtls_ecdh_context*, const unsigned char*, size_t"
+Function,-,mbedtls_ecdh_setup,int,"mbedtls_ecdh_context*, mbedtls_ecp_group_id"
+Function,-,mbedtls_ecdsa_can_do,int,mbedtls_ecp_group_id
+Function,-,mbedtls_ecdsa_free,void,mbedtls_ecdsa_context*
+Function,-,mbedtls_ecdsa_from_keypair,int,"mbedtls_ecdsa_context*, const mbedtls_ecp_keypair*"
+Function,-,mbedtls_ecdsa_genkey,int,"mbedtls_ecdsa_context*, mbedtls_ecp_group_id, int (*)(void*, unsigned char*, size_t), void*"
+Function,-,mbedtls_ecdsa_init,void,mbedtls_ecdsa_context*
+Function,-,mbedtls_ecdsa_read_signature,int,"mbedtls_ecdsa_context*, const unsigned char*, size_t, const unsigned char*, size_t"
+Function,-,mbedtls_ecdsa_read_signature_restartable,int,"mbedtls_ecdsa_context*, const unsigned char*, size_t, const unsigned char*, size_t, mbedtls_ecdsa_restart_ctx*"
+Function,-,mbedtls_ecdsa_sign,int,"mbedtls_ecp_group*, mbedtls_mpi*, mbedtls_mpi*, const mbedtls_mpi*, const unsigned char*, size_t, int (*)(void*, unsigned char*, size_t), void*"
+Function,-,mbedtls_ecdsa_sign_restartable,int,"mbedtls_ecp_group*, mbedtls_mpi*, mbedtls_mpi*, const mbedtls_mpi*, const unsigned char*, size_t, int (*)(void*, unsigned char*, size_t), void*, int (*)(void*, unsigned char*, size_t), void*, mbedtls_ecdsa_restart_ctx*"
+Function,-,mbedtls_ecdsa_verify,int,"mbedtls_ecp_group*, const unsigned char*, size_t, const mbedtls_ecp_point*, const mbedtls_mpi*, const mbedtls_mpi*"
+Function,-,mbedtls_ecdsa_verify_restartable,int,"mbedtls_ecp_group*, const unsigned char*, size_t, const mbedtls_ecp_point*, const mbedtls_mpi*, const mbedtls_mpi*, mbedtls_ecdsa_restart_ctx*"
+Function,-,mbedtls_ecdsa_write_signature,int,"mbedtls_ecdsa_context*, mbedtls_md_type_t, const unsigned char*, size_t, unsigned char*, size_t, size_t*, int (*)(void*, unsigned char*, size_t), void*"
+Function,-,mbedtls_ecdsa_write_signature_restartable,int,"mbedtls_ecdsa_context*, mbedtls_md_type_t, const unsigned char*, size_t, unsigned char*, size_t, size_t*, int (*)(void*, unsigned char*, size_t), void*, mbedtls_ecdsa_restart_ctx*"
+Function,-,mbedtls_ecp_check_privkey,int,"const mbedtls_ecp_group*, const mbedtls_mpi*"
+Function,-,mbedtls_ecp_check_pub_priv,int,"const mbedtls_ecp_keypair*, const mbedtls_ecp_keypair*, int (*)(void*, unsigned char*, size_t), void*"
+Function,-,mbedtls_ecp_check_pubkey,int,"const mbedtls_ecp_group*, const mbedtls_ecp_point*"
+Function,-,mbedtls_ecp_copy,int,"mbedtls_ecp_point*, const mbedtls_ecp_point*"
+Function,-,mbedtls_ecp_curve_info_from_grp_id,const mbedtls_ecp_curve_info*,mbedtls_ecp_group_id
+Function,-,mbedtls_ecp_curve_info_from_name,const mbedtls_ecp_curve_info*,const char*
+Function,-,mbedtls_ecp_curve_info_from_tls_id,const mbedtls_ecp_curve_info*,uint16_t
+Function,-,mbedtls_ecp_curve_list,const mbedtls_ecp_curve_info*,
+Function,-,mbedtls_ecp_export,int,"const mbedtls_ecp_keypair*, mbedtls_ecp_group*, mbedtls_mpi*, mbedtls_ecp_point*"
+Function,-,mbedtls_ecp_gen_key,int,"mbedtls_ecp_group_id, mbedtls_ecp_keypair*, int (*)(void*, unsigned char*, size_t), void*"
+Function,-,mbedtls_ecp_gen_keypair,int,"mbedtls_ecp_group*, mbedtls_mpi*, mbedtls_ecp_point*, int (*)(void*, unsigned char*, size_t), void*"
+Function,-,mbedtls_ecp_gen_keypair_base,int,"mbedtls_ecp_group*, const mbedtls_ecp_point*, mbedtls_mpi*, mbedtls_ecp_point*, int (*)(void*, unsigned char*, size_t), void*"
+Function,-,mbedtls_ecp_gen_privkey,int,"const mbedtls_ecp_group*, mbedtls_mpi*, int (*)(void*, unsigned char*, size_t), void*"
+Function,-,mbedtls_ecp_get_type,mbedtls_ecp_curve_type,const mbedtls_ecp_group*
+Function,-,mbedtls_ecp_group_copy,int,"mbedtls_ecp_group*, const mbedtls_ecp_group*"
+Function,-,mbedtls_ecp_group_free,void,mbedtls_ecp_group*
+Function,-,mbedtls_ecp_group_init,void,mbedtls_ecp_group*
+Function,-,mbedtls_ecp_group_load,int,"mbedtls_ecp_group*, mbedtls_ecp_group_id"
+Function,-,mbedtls_ecp_grp_id_list,const mbedtls_ecp_group_id*,
+Function,-,mbedtls_ecp_is_zero,int,mbedtls_ecp_point*
+Function,-,mbedtls_ecp_keypair_free,void,mbedtls_ecp_keypair*
+Function,-,mbedtls_ecp_keypair_init,void,mbedtls_ecp_keypair*
+Function,-,mbedtls_ecp_mul,int,"mbedtls_ecp_group*, mbedtls_ecp_point*, const mbedtls_mpi*, const mbedtls_ecp_point*, int (*)(void*, unsigned char*, size_t), void*"
+Function,-,mbedtls_ecp_mul_restartable,int,"mbedtls_ecp_group*, mbedtls_ecp_point*, const mbedtls_mpi*, const mbedtls_ecp_point*, int (*)(void*, unsigned char*, size_t), void*, mbedtls_ecp_restart_ctx*"
+Function,-,mbedtls_ecp_muladd,int,"mbedtls_ecp_group*, mbedtls_ecp_point*, const mbedtls_mpi*, const mbedtls_ecp_point*, const mbedtls_mpi*, const mbedtls_ecp_point*"
+Function,-,mbedtls_ecp_muladd_restartable,int,"mbedtls_ecp_group*, mbedtls_ecp_point*, const mbedtls_mpi*, const mbedtls_ecp_point*, const mbedtls_mpi*, const mbedtls_ecp_point*, mbedtls_ecp_restart_ctx*"
+Function,-,mbedtls_ecp_point_cmp,int,"const mbedtls_ecp_point*, const mbedtls_ecp_point*"
+Function,-,mbedtls_ecp_point_free,void,mbedtls_ecp_point*
+Function,-,mbedtls_ecp_point_init,void,mbedtls_ecp_point*
+Function,-,mbedtls_ecp_point_read_binary,int,"const mbedtls_ecp_group*, mbedtls_ecp_point*, const unsigned char*, size_t"
+Function,-,mbedtls_ecp_point_read_string,int,"mbedtls_ecp_point*, int, const char*, const char*"
+Function,-,mbedtls_ecp_point_write_binary,int,"const mbedtls_ecp_group*, const mbedtls_ecp_point*, int, size_t*, unsigned char*, size_t"
+Function,-,mbedtls_ecp_read_key,int,"mbedtls_ecp_group_id, mbedtls_ecp_keypair*, const unsigned char*, size_t"
+Function,-,mbedtls_ecp_set_zero,int,mbedtls_ecp_point*
+Function,-,mbedtls_ecp_tls_read_group,int,"mbedtls_ecp_group*, const unsigned char**, size_t"
+Function,-,mbedtls_ecp_tls_read_group_id,int,"mbedtls_ecp_group_id*, const unsigned char**, size_t"
+Function,-,mbedtls_ecp_tls_read_point,int,"const mbedtls_ecp_group*, mbedtls_ecp_point*, const unsigned char**, size_t"
+Function,-,mbedtls_ecp_tls_write_group,int,"const mbedtls_ecp_group*, size_t*, unsigned char*, size_t"
+Function,-,mbedtls_ecp_tls_write_point,int,"const mbedtls_ecp_group*, const mbedtls_ecp_point*, int, size_t*, unsigned char*, size_t"
+Function,-,mbedtls_ecp_write_key,int,"mbedtls_ecp_keypair*, unsigned char*, size_t"
 Function,-,mbedtls_internal_md5_process,int,"mbedtls_md5_context*, const unsigned char[64]"
 Function,-,mbedtls_internal_sha1_process,int,"mbedtls_sha1_context*, const unsigned char[64]"
 Function,-,mbedtls_internal_sha256_process,int,"mbedtls_sha256_context*, const unsigned char[64]"
+Function,-,mbedtls_md,int,"const mbedtls_md_info_t*, const unsigned char*, size_t, unsigned char*"
 Function,-,mbedtls_md5,int,"const unsigned char*, size_t, unsigned char[16]"
 Function,-,mbedtls_md5_clone,void,"mbedtls_md5_context*, const mbedtls_md5_context*"
 Function,-,mbedtls_md5_finish,int,"mbedtls_md5_context*, unsigned char[16]"
@@ -2081,6 +2151,70 @@ Function,-,mbedtls_md5_free,void,mbedtls_md5_context*
 Function,-,mbedtls_md5_init,void,mbedtls_md5_context*
 Function,-,mbedtls_md5_starts,int,mbedtls_md5_context*
 Function,-,mbedtls_md5_update,int,"mbedtls_md5_context*, const unsigned char*, size_t"
+Function,-,mbedtls_md_clone,int,"mbedtls_md_context_t*, const mbedtls_md_context_t*"
+Function,-,mbedtls_md_finish,int,"mbedtls_md_context_t*, unsigned char*"
+Function,-,mbedtls_md_free,void,mbedtls_md_context_t*
+Function,-,mbedtls_md_get_name,const char*,const mbedtls_md_info_t*
+Function,-,mbedtls_md_get_size,unsigned char,const mbedtls_md_info_t*
+Function,-,mbedtls_md_get_type,mbedtls_md_type_t,const mbedtls_md_info_t*
+Function,-,mbedtls_md_hmac,int,"const mbedtls_md_info_t*, const unsigned char*, size_t, const unsigned char*, size_t, unsigned char*"
+Function,-,mbedtls_md_hmac_finish,int,"mbedtls_md_context_t*, unsigned char*"
+Function,-,mbedtls_md_hmac_reset,int,mbedtls_md_context_t*
+Function,-,mbedtls_md_hmac_starts,int,"mbedtls_md_context_t*, const unsigned char*, size_t"
+Function,-,mbedtls_md_hmac_update,int,"mbedtls_md_context_t*, const unsigned char*, size_t"
+Function,-,mbedtls_md_info_from_ctx,const mbedtls_md_info_t*,const mbedtls_md_context_t*
+Function,-,mbedtls_md_info_from_string,const mbedtls_md_info_t*,const char*
+Function,-,mbedtls_md_info_from_type,const mbedtls_md_info_t*,mbedtls_md_type_t
+Function,-,mbedtls_md_init,void,mbedtls_md_context_t*
+Function,-,mbedtls_md_list,const int*,
+Function,-,mbedtls_md_setup,int,"mbedtls_md_context_t*, const mbedtls_md_info_t*, int"
+Function,-,mbedtls_md_starts,int,mbedtls_md_context_t*
+Function,-,mbedtls_md_update,int,"mbedtls_md_context_t*, const unsigned char*, size_t"
+Function,-,mbedtls_mpi_add_abs,int,"mbedtls_mpi*, const mbedtls_mpi*, const mbedtls_mpi*"
+Function,-,mbedtls_mpi_add_int,int,"mbedtls_mpi*, const mbedtls_mpi*, mbedtls_mpi_sint"
+Function,-,mbedtls_mpi_add_mpi,int,"mbedtls_mpi*, const mbedtls_mpi*, const mbedtls_mpi*"
+Function,-,mbedtls_mpi_bitlen,size_t,const mbedtls_mpi*
+Function,-,mbedtls_mpi_cmp_abs,int,"const mbedtls_mpi*, const mbedtls_mpi*"
+Function,-,mbedtls_mpi_cmp_int,int,"const mbedtls_mpi*, mbedtls_mpi_sint"
+Function,-,mbedtls_mpi_cmp_mpi,int,"const mbedtls_mpi*, const mbedtls_mpi*"
+Function,-,mbedtls_mpi_copy,int,"mbedtls_mpi*, const mbedtls_mpi*"
+Function,-,mbedtls_mpi_div_int,int,"mbedtls_mpi*, mbedtls_mpi*, const mbedtls_mpi*, mbedtls_mpi_sint"
+Function,-,mbedtls_mpi_div_mpi,int,"mbedtls_mpi*, mbedtls_mpi*, const mbedtls_mpi*, const mbedtls_mpi*"
+Function,-,mbedtls_mpi_exp_mod,int,"mbedtls_mpi*, const mbedtls_mpi*, const mbedtls_mpi*, const mbedtls_mpi*, mbedtls_mpi*"
+Function,-,mbedtls_mpi_fill_random,int,"mbedtls_mpi*, size_t, int (*)(void*, unsigned char*, size_t), void*"
+Function,-,mbedtls_mpi_free,void,mbedtls_mpi*
+Function,-,mbedtls_mpi_gcd,int,"mbedtls_mpi*, const mbedtls_mpi*, const mbedtls_mpi*"
+Function,-,mbedtls_mpi_gen_prime,int,"mbedtls_mpi*, size_t, int, int (*)(void*, unsigned char*, size_t), void*"
+Function,-,mbedtls_mpi_get_bit,int,"const mbedtls_mpi*, size_t"
+Function,-,mbedtls_mpi_grow,int,"mbedtls_mpi*, size_t"
+Function,-,mbedtls_mpi_init,void,mbedtls_mpi*
+Function,-,mbedtls_mpi_inv_mod,int,"mbedtls_mpi*, const mbedtls_mpi*, const mbedtls_mpi*"
+Function,-,mbedtls_mpi_is_prime_ext,int,"const mbedtls_mpi*, int, int (*)(void*, unsigned char*, size_t), void*"
+Function,-,mbedtls_mpi_lsb,size_t,const mbedtls_mpi*
+Function,-,mbedtls_mpi_lset,int,"mbedtls_mpi*, mbedtls_mpi_sint"
+Function,-,mbedtls_mpi_lt_mpi_ct,int,"const mbedtls_mpi*, const mbedtls_mpi*, unsigned*"
+Function,-,mbedtls_mpi_mod_int,int,"mbedtls_mpi_uint*, const mbedtls_mpi*, mbedtls_mpi_sint"
+Function,-,mbedtls_mpi_mod_mpi,int,"mbedtls_mpi*, const mbedtls_mpi*, const mbedtls_mpi*"
+Function,-,mbedtls_mpi_mul_int,int,"mbedtls_mpi*, const mbedtls_mpi*, mbedtls_mpi_uint"
+Function,-,mbedtls_mpi_mul_mpi,int,"mbedtls_mpi*, const mbedtls_mpi*, const mbedtls_mpi*"
+Function,-,mbedtls_mpi_random,int,"mbedtls_mpi*, mbedtls_mpi_sint, const mbedtls_mpi*, int (*)(void*, unsigned char*, size_t), void*"
+Function,-,mbedtls_mpi_read_binary,int,"mbedtls_mpi*, const unsigned char*, size_t"
+Function,-,mbedtls_mpi_read_binary_le,int,"mbedtls_mpi*, const unsigned char*, size_t"
+Function,-,mbedtls_mpi_read_string,int,"mbedtls_mpi*, int, const char*"
+Function,-,mbedtls_mpi_safe_cond_assign,int,"mbedtls_mpi*, const mbedtls_mpi*, unsigned char"
+Function,-,mbedtls_mpi_safe_cond_swap,int,"mbedtls_mpi*, mbedtls_mpi*, unsigned char"
+Function,-,mbedtls_mpi_set_bit,int,"mbedtls_mpi*, size_t, unsigned char"
+Function,-,mbedtls_mpi_shift_l,int,"mbedtls_mpi*, size_t"
+Function,-,mbedtls_mpi_shift_r,int,"mbedtls_mpi*, size_t"
+Function,-,mbedtls_mpi_shrink,int,"mbedtls_mpi*, size_t"
+Function,-,mbedtls_mpi_size,size_t,const mbedtls_mpi*
+Function,-,mbedtls_mpi_sub_abs,int,"mbedtls_mpi*, const mbedtls_mpi*, const mbedtls_mpi*"
+Function,-,mbedtls_mpi_sub_int,int,"mbedtls_mpi*, const mbedtls_mpi*, mbedtls_mpi_sint"
+Function,-,mbedtls_mpi_sub_mpi,int,"mbedtls_mpi*, const mbedtls_mpi*, const mbedtls_mpi*"
+Function,-,mbedtls_mpi_swap,void,"mbedtls_mpi*, mbedtls_mpi*"
+Function,-,mbedtls_mpi_write_binary,int,"const mbedtls_mpi*, unsigned char*, size_t"
+Function,-,mbedtls_mpi_write_binary_le,int,"const mbedtls_mpi*, unsigned char*, size_t"
+Function,-,mbedtls_mpi_write_string,int,"const mbedtls_mpi*, int, char*, size_t, size_t*"
 Function,-,mbedtls_platform_zeroize,void,"void*, size_t"
 Function,-,mbedtls_sha1,int,"const unsigned char*, size_t, unsigned char[20]"
 Function,-,mbedtls_sha1_clone,void,"mbedtls_sha1_context*, const mbedtls_sha1_context*"

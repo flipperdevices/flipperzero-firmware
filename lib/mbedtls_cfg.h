@@ -1,10 +1,15 @@
 #pragma once
 
-/*
- * Used in:
- *      library/aria.c
- *      library/bn_mul.h
- */
+/**
+* A subset of the mbedTLS configuration options that are relevant to the
+* Flipper Zero firmware and apps. They are built to "mbedtls" library you can 
+* link your apps with.
+* 
+* If you need more features, either bring the full mbedtls library into your
+* app using "fap_private_libs" or open an issue on GitHub to add them to the
+* default configuration.
+**/
+
 #define MBEDTLS_HAVE_ASM
 
 #define MBEDTLS_NO_UDBL_DIVISION
@@ -13,7 +18,7 @@
 #define MBEDTLS_DEPRECATED_WARNING
 
 #define MBEDTLS_AES_FEWER_TABLES
-// #define MBEDTLS_CHECK_RETURN_WARNING
+#define MBEDTLS_CHECK_RETURN_WARNING
 
 #define MBEDTLS_CIPHER_MODE_CBC
 #define MBEDTLS_CIPHER_MODE_CFB
@@ -45,8 +50,8 @@
 #define MBEDTLS_ECP_NIST_OPTIM
 
 #define MBEDTLS_GENPRIME
-#define MBEDTLS_PKCS1_V15
-#define MBEDTLS_PKCS1_V21
+// #define MBEDTLS_PKCS1_V15
+// #define MBEDTLS_PKCS1_V21
 
 #define MBEDTLS_MD_C
 
@@ -72,17 +77,14 @@
 #define MBEDTLS_AES_C
 #define MBEDTLS_MD5_C
 
-#define MBEDTLS_PEM_PARSE_C
-
-#define MBEDTLS_PEM_WRITE_C
+// #define MBEDTLS_PEM_PARSE_C
+// #define MBEDTLS_PEM_WRITE_C
 
 // #define MBEDTLS_PLATFORM_MEMORY
 // #define MBEDTLS_PLATFORM_C
-// #define MBEDTLS_PLATFORM_CALLOC_MACRO calloc
-// #define MBEDTLS_PLATFORM_FREE_MACRO free
 
-#define MBEDTLS_RIPEMD160_C
-#define MBEDTLS_RSA_C
+// #define MBEDTLS_RIPEMD160_C
+// #define MBEDTLS_RSA_C
 #define MBEDTLS_SHA224_C
 #define MBEDTLS_SHA256_C
 #define MBEDTLS_SHA1_C

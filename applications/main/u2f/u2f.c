@@ -15,6 +15,8 @@
 #define TAG "U2f"
 #define WORKER_TAG TAG "Worker"
 
+#define MCHECK(expr) furi_check((expr) == 0)
+
 #define U2F_CMD_REGISTER 0x01
 #define U2F_CMD_AUTHENTICATE 0x02
 #define U2F_CMD_VERSION 0x03
@@ -200,12 +202,10 @@ static void
     mbedtls_mpi_init(&s);
     mbedtls_mpi_init(&d);
 
-    furi_check(mbedtls_mpi_read_binary(&d, key, U2F_EC_KEY_SIZE) == 0);
-    furi_check(
-        mbedtls_ecdsa_sign(grp, &r, &s, &d, hash, U2F_HASH_SIZE, u2f_uecc_random_cb, NULL) == 0);
-    furi_check(mbedtls_mpi_write_binary(&r, signature, U2F_EC_BIGNUM_SIZE) == 0);
-    furi_check(
-        mbedtls_mpi_write_binary(&s, signature + U2F_EC_BIGNUM_SIZE, U2F_EC_BIGNUM_SIZE) == 0);
+    MCHECK(mbedtls_mpi_read_binary(&d, key, U2F_EC_KEY_SIZE));
+    MCHECK(mbedtls_ecdsa_sign(grp, &r, &s, &d, hash, U2F_HASH_SIZE, u2f_uecc_random_cb, NULL));
+    MCHECK(mbedtls_mpi_write_binary(&r, signature, U2F_EC_BIGNUM_SIZE));
+    MCHECK(mbedtls_mpi_write_binary(&s, signature + U2F_EC_BIGNUM_SIZE, U2F_EC_BIGNUM_SIZE));
 
     mbedtls_mpi_free(&r);
     mbedtls_mpi_free(&s);
@@ -223,18 +223,12 @@ static void u2f_ecc_compute_public_key(
     mbedtls_ecp_point_init(&Q);
     mbedtls_mpi_init(&d);
 
-    furi_check(mbedtls_mpi_read_binary(&d, private_key, U2F_EC_KEY_SIZE) == 0);
-    furi_check(mbedtls_ecp_mul(grp, &Q, &d, &grp->G, u2f_uecc_random_cb, NULL) == 0);
-    furi_check(mbedtls_ecp_check_privkey(grp, &d) == 0);
+    MCHECK(mbedtls_mpi_read_binary(&d, private_key, U2F_EC_KEY_SIZE));
+    MCHECK(mbedtls_ecp_mul(grp, &Q, &d, &grp->G, u2f_uecc_random_cb, NULL));
+    MCHECK(mbedtls_ecp_check_privkey(grp, &d));
 
-    furi_check(
-        mbedtls_ecp_point_write_binary(
-            grp,
-            &Q,
-            MBEDTLS_ECP_PF_UNCOMPRESSED,
-            &olen,
-            (unsigned char*)public_key,
-            sizeof(U2fPubKey)) == 0);
+    MCHECK(mbedtls_ecp_point_write_binary(
+        grp, &Q, MBEDTLS_ECP_PF_UNCOMPRESSED, &olen, (unsigned char*)public_key, sizeof(U2fPubKey)));
 
     mbedtls_ecp_point_free(&Q);
     mbedtls_mpi_free(&d);
@@ -273,20 +267,20 @@ static uint16_t u2f_register(U2fData* U2F, uint8_t* buf) {
     {
         mbedtls_md_context_t hmac_ctx;
         mbedtls_md_init(&hmac_ctx);
-        mbedtls_md_setup(&hmac_ctx, mbedtls_md_info_from_type(MBEDTLS_MD_SHA256), 1);
-        mbedtls_md_hmac_starts(&hmac_ctx, U2F->device_key, sizeof(U2F->device_key));
+        MCHECK(mbedtls_md_setup(&hmac_ctx, mbedtls_md_info_from_type(MBEDTLS_MD_SHA256), 1));
+        MCHECK(mbedtls_md_hmac_starts(&hmac_ctx, U2F->device_key, sizeof(U2F->device_key)));
 
         // Generate private key
-        mbedtls_md_hmac_update(&hmac_ctx, req->app_id, sizeof(req->app_id));
-        mbedtls_md_hmac_update(&hmac_ctx, handle.nonce, sizeof(handle.nonce));
-        mbedtls_md_hmac_finish(&hmac_ctx, private);
+        MCHECK(mbedtls_md_hmac_update(&hmac_ctx, req->app_id, sizeof(req->app_id)));
+        MCHECK(mbedtls_md_hmac_update(&hmac_ctx, handle.nonce, sizeof(handle.nonce)));
+        MCHECK(mbedtls_md_hmac_finish(&hmac_ctx, private));
 
-        mbedtls_md_hmac_reset(&hmac_ctx);
+        MCHECK(mbedtls_md_hmac_reset(&hmac_ctx));
 
         // Generate private key handle
-        mbedtls_md_hmac_update(&hmac_ctx, private, sizeof(private));
-        mbedtls_md_hmac_update(&hmac_ctx, req->app_id, sizeof(req->app_id));
-        mbedtls_md_hmac_finish(&hmac_ctx, handle.hash);
+        MCHECK(mbedtls_md_hmac_update(&hmac_ctx, private, sizeof(private)));
+        MCHECK(mbedtls_md_hmac_update(&hmac_ctx, req->app_id, sizeof(req->app_id)));
+        MCHECK(mbedtls_md_hmac_finish(&hmac_ctx, handle.hash));
     }
 
     // Generate public key
@@ -375,20 +369,21 @@ static uint16_t u2f_authenticate(U2fData* U2F, uint8_t* buf) {
     {
         mbedtls_md_context_t hmac_ctx;
         mbedtls_md_init(&hmac_ctx);
-        mbedtls_md_setup(&hmac_ctx, mbedtls_md_info_from_type(MBEDTLS_MD_SHA256), 1);
-        mbedtls_md_hmac_starts(&hmac_ctx, U2F->device_key, sizeof(U2F->device_key));
+        MCHECK(mbedtls_md_setup(&hmac_ctx, mbedtls_md_info_from_type(MBEDTLS_MD_SHA256), 1));
+        MCHECK(mbedtls_md_hmac_starts(&hmac_ctx, U2F->device_key, sizeof(U2F->device_key)));
 
         // Recover private key
-        mbedtls_md_hmac_update(&hmac_ctx, req->app_id, sizeof(req->app_id));
-        mbedtls_md_hmac_update(&hmac_ctx, req->key_handle.nonce, sizeof(req->key_handle.nonce));
-        mbedtls_md_hmac_finish(&hmac_ctx, priv_key);
+        MCHECK(mbedtls_md_hmac_update(&hmac_ctx, req->app_id, sizeof(req->app_id)));
+        MCHECK(mbedtls_md_hmac_update(
+            &hmac_ctx, req->key_handle.nonce, sizeof(req->key_handle.nonce)));
+        MCHECK(mbedtls_md_hmac_finish(&hmac_ctx, priv_key));
 
-        mbedtls_md_hmac_reset(&hmac_ctx);
+        MCHECK(mbedtls_md_hmac_reset(&hmac_ctx));
 
         // Generate and verify private key handle
-        mbedtls_md_hmac_update(&hmac_ctx, priv_key, sizeof(priv_key));
-        mbedtls_md_hmac_update(&hmac_ctx, req->app_id, sizeof(req->app_id));
-        mbedtls_md_hmac_finish(&hmac_ctx, mac_control);
+        MCHECK(mbedtls_md_hmac_update(&hmac_ctx, priv_key, sizeof(priv_key)));
+        MCHECK(mbedtls_md_hmac_update(&hmac_ctx, req->app_id, sizeof(req->app_id)));
+        MCHECK(mbedtls_md_hmac_finish(&hmac_ctx, mac_control));
     }
 
     if(memcmp(req->key_handle.hash, mac_control, sizeof(mac_control)) != 0) {
