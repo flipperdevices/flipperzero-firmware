@@ -1,6 +1,6 @@
 #include <core/common_defines.h>
 #include <furi_hal.h>
-#include "js_modules.h"
+#include "../js_modules.h"
 #include <m-array.h>
 
 #define TAG "js_uart"

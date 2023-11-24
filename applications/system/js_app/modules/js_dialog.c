@@ -1,5 +1,5 @@
 #include <core/common_defines.h>
-#include "js_modules.h"
+#include "../js_modules.h"
 #include <dialogs/dialogs.h>
 
 static bool js_dialog_msg_parse_params(struct mjs* mjs, const char** hdr, const char** msg) {

@@ -1,5 +1,5 @@
 #include <core/common_defines.h>
-#include "js_modules.h"
+#include "../js_modules.h"
 #include <furi_hal.h>
 
 typedef struct {

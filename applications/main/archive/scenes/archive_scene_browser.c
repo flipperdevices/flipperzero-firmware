@@ -9,8 +9,6 @@
 
 #define TAG "ArchiveSceneBrowser"
 
-#define JS_RUNNER_PATH EXT_PATH("apps/Tools/js_app.fap")
-
 #define SCENE_STATE_DEFAULT (0)
 #define SCENE_STATE_NEED_REFRESH (1)
 
@@ -33,7 +31,7 @@ static const char* archive_get_flipper_app_name(ArchiveFileTypeEnum file_type) {
     case ArchiveFileTypeUpdateManifest:
         return "UpdaterApp";
     case ArchiveFileTypeJS:
-        return JS_RUNNER_PATH;
+        return "JS Runner";
     default:
         return NULL;
     }

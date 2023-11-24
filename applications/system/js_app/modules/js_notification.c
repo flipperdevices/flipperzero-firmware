@@ -1,5 +1,5 @@
 #include <core/common_defines.h>
-#include "js_modules.h"
+#include "../js_modules.h"
 #include <notification/notification_messages.h>
 
 static void js_notify(struct mjs* mjs, const NotificationSequence* sequence) {
