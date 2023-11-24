@@ -62,7 +62,7 @@ void xremote_scene_transmit_send_ir_signal(XRemote* app, CrossRemoteItem* item) 
         app->ir_worker, infrared_worker_tx_get_signal_steady_callback, app);
     infrared_worker_tx_start(app->ir_worker);
     app->transmitting = true;
-    furi_thread_flags_wait(0, FuriFlagWaitAny, 1000);
+    furi_thread_flags_wait(0, FuriFlagWaitAny, app->ir_timing);
     xremote_scene_transmit_stop_ir_signal(app);
 }
 

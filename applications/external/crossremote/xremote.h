@@ -38,6 +38,8 @@ typedef struct {
     uint32_t led;
     uint32_t save_settings;
     uint32_t edit_item;
+    uint32_t ir_timing;
+    char* ir_timing_char;
     bool transmitting;
     char text_store[XREMOTE_TEXT_STORE_NUM][XREMOTE_TEXT_STORE_SIZE + 1];
 } XRemote;
