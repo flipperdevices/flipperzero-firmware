@@ -180,6 +180,7 @@ static void expansion_test_app_send_request(ExpansionTestApp* instance) {
         expansion_test_app_send_rpc_request(instance, &instance->msg);
         break;
     case ExpansionTestAppStateRpcExit:
+        furi_delay_ms(100);
         // expansion_test_app_send_control_request(instance, ExpansionFrameControlCommandStopRpc);
         break;
     default:
@@ -219,6 +220,7 @@ static void expansion_test_app_process_response(ExpansionTestApp* instance) {
         }
         break;
     case ExpansionTestAppStateRpcExit:
+        furi_delay_ms(100);
         break;
     default:
         furi_crash();
