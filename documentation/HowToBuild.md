@@ -8,7 +8,7 @@
 For development:
 
 - Git
-- VSCode
+- VSCode (Optional)
 
 ## Clone the Repository
 
@@ -17,7 +17,7 @@ You should clone with
 ```shell
 git clone --recursive https://github.com/RogueMaster/flipperzero-firmware-wPlugins.git
 ```
-## VSCode integration
+## VSCode integration (Optional)
 
 `fbt` includes basic development environment configuration for VS Code. Run `./fbt vscode_dist` to deploy it. That will copy the initial environment configuration to the `.vscode` folder. After that, you can use that configuration by starting VS Code and choosing the firmware root folder in the "File > Open Folder" menu.
 
