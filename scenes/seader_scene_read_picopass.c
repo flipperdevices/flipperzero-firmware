@@ -30,7 +30,12 @@ bool seader_scene_read_picopass_on_event(void* context, SceneManagerEvent event)
             seader->credential->type = SeaderCredentialTypePicopass;
             scene_manager_next_scene(seader->scene_manager, SeaderSceneReadCardSuccess);
             consumed = true;
+        } else if(event.event == SeaderCustomEventPollerSuccess) {
+            seader->credential->type = SeaderCredentialTypePicopass;
+            scene_manager_next_scene(seader->scene_manager, SeaderSceneReadCardSuccess);
+            consumed = true;
         }
+
     } else if(event.type == SceneManagerEventTypeBack) {
         scene_manager_search_and_switch_to_previous_scene(
             seader->scene_manager, SeaderSceneSamPresent);
