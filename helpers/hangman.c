@@ -1,6 +1,6 @@
 #include "hangman.h"
 
-char* hangman_get_random_word(const char* dict_file) {
+HangmanWord hangman_get_random_word(const char* dict_file, uint16_t unicode_base) {
     CONST storage = furi_record_open(RECORD_STORAGE);
 
     CONST stream = file_stream_alloc(storage);
@@ -23,8 +23,18 @@ char* hangman_get_random_word(const char* dict_file) {
     }
 
     furi_string_trim(line, "\n");
+    CONST binary_str = furi_string_get_cstr(line);
+    CONST len = strlen(binary_str);
 
-    CONST word = strdup(furi_string_get_cstr(line));
+    HangmanWord word;
+
+    word.len = len;
+    word.arr = malloc(len * sizeof(uint16_t));
+
+    for(size_t i = 0; i < len; i++) {
+        word.arr[i] = binary_str[i] + unicode_base;
+    }
+
     furi_string_free(line);
     file_stream_close(stream);
     stream_free(stream);
@@ -88,21 +98,17 @@ void hangman_draw_word(Canvas* canvas, HangmanApp* app) {
     CONST glyph_w = canvas_glyph_width(canvas, ' ');
     CONST gap = app->lang->word_letters_gap;
 
-    CONST center_x = (canvas_width(canvas) - (glyph_w + gap) * strlen(app->word)) / 2;
+    CONST center_x = (canvas_width(canvas) - (glyph_w + gap) * app->word.len) / 2;
 
     CONST h = canvas_current_font_height(canvas);
     canvas_set_color(canvas, ColorBlack);
 
-    CONST word_len = strlen(app->word);
-
-    for(uint8_t i = 0, x = center_x; i < word_len; i++) {
+    for(uint8_t i = 0, x = center_x; i < app->word.len; i++) {
         hangman_draw_glyph(canvas, x, h + 1, '_');
 
-        CONST l = app->word[i] + app->lang->unicode_base;
-
-        if(app->opened[hangman_l2p(app, l)]) {
+        if(app->opened[hangman_l2p(app, app->word.arr[i])]) {
             canvas_set_color(canvas, ColorBlack);
-            hangman_draw_glyph(canvas, x, h, l);
+            hangman_draw_glyph(canvas, x, h, app->word.arr[i]);
         }
 
         x += glyph_w + gap;
@@ -177,7 +183,29 @@ void hangman_input_callback(InputEvent* input_event, void* ctx) {
 }
 
 void hangman_choice_letter(HangmanApp* app) {
-    if(strchr(app->word, app->lang->letters[app->pos] - app->lang->unicode_base) == NULL) {
+    bool found = false;
+
+    for(size_t i = 0; i < app->word.len; i++) {
+        if(app->word.arr[i] == app->lang->letters[app->pos]) {
+            found = true;
+            break;
+        }
+    }
+
+    if(found) {
+        app->eog = HangmanGameWin;
+        app->opened[app->pos] = HangmanOpenedFound;
+
+        // Checking if all letters were opened
+        for(uint8_t i = 0; i < app->word.len; i++) {
+            CONST pos = hangman_l2p(app, app->word.arr[i]);
+
+            if(app->opened[pos] != HangmanOpenedFound) {
+                app->eog = HangmanGameOn;
+                break;
+            }
+        }
+    } else {
         if(app->opened[app->pos] != HangmanOpenedNotFound) {
             app->gallows_state++;
             app->opened[app->pos] = HangmanOpenedNotFound;
@@ -186,29 +214,13 @@ void hangman_choice_letter(HangmanApp* app) {
                 app->eog = HangmanGameLoose;
 
                 // Open the non-guessed letters
-                CONST len = strlen(app->word);
-
-                for(uint8_t i = 0; i < len; i++) {
-                    CONST pos = hangman_l2p(app, app->word[i] + app->lang->unicode_base);
+                for(size_t i = 0; i < app->word.len; i++) {
+                    CONST pos = hangman_l2p(app, app->word.arr[i]);
 
                     if(app->opened[pos] != HangmanOpenedFound) {
                         app->opened[pos] = HangmanOpenedNotFound;
                     }
                 }
-            }
-        }
-    } else {
-        app->eog = HangmanGameWin;
-        app->opened[app->pos] = HangmanOpenedFound;
-
-        // Checking if all letters were opened
-        CONST len = strlen(app->word);
-        for(uint8_t i = 0; i < len; i++) {
-            CONST pos = hangman_l2p(app, app->word[i] + app->lang->unicode_base);
-
-            if(app->opened[pos] != HangmanOpenedFound) {
-                app->eog = HangmanGameOn;
-                break;
             }
         }
     }
@@ -220,13 +232,13 @@ void hangman_clear_state(HangmanApp* app) {
     app->need_generate = false;
     app->eog = HangmanGameOn;
 
-    if(app->word != NULL) {
-        free(app->word);
+    if(app->word.arr != NULL) {
+        free(app->word.arr);
     }
 
     if(app->lang != NULL) {
         memset(app->opened, HangmanOpenedInit, HANGMAN_MAX_ALP_SIZE);
-        app->word = hangman_get_random_word(app->lang->dict_file);
+        app->word = hangman_get_random_word(app->lang->dict_file, app->lang->unicode_base);
     }
 }
 
@@ -363,8 +375,8 @@ void hangman_app_free(HangmanApp** app) {
 
     hangman_free_menu_data((*app)->menu, (*app)->menu_cnt);
 
-    if((*app)->word != NULL) {
-        free((*app)->word);
+    if((*app)->word.arr != NULL) {
+        free((*app)->word.arr);
     }
     if((*app)->lang != NULL) {
         free((*app)->lang->dict_file);

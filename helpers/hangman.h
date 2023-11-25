@@ -45,10 +45,15 @@ typedef struct {
 } HangmanLangConfig;
 
 typedef struct {
+    uint16_t* arr;
+    size_t len;
+} HangmanWord;
+
+typedef struct {
     Gui* gui;
     ViewPort* view_port;
     FuriMessageQueue* event_queue;
-    char* word;
+    HangmanWord word;
     uint8_t pos;
     uint8_t gallows_state;
     HangmanOpened opened[HANGMAN_MAX_ALP_SIZE];
