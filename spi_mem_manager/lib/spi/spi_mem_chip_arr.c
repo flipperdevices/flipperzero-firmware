@@ -1396,4 +1396,5 @@ const SPIMemChip SPIMemChips[] = {
     {0xA1, 0x40, 0x13, "FM25Q04A", 524288, 256, SPIMemChipVendorFudan, SPIMemChipWriteModePage},
     {0xA1, 0x40, 0x16, "FM25Q32", 4194304, 256, SPIMemChipVendorFudan, SPIMemChipWriteModePage},
     {0xE0, 0x40, 0x14, "GT25Q80A", 1048576, 256, SPIMemChipVendorGenitop, SPIMemChipWriteModePage},
-    {0xE0, 0x40, 0x13, "PN25F04A", 524288, 256, SPIMemChipVendorParagon, SPIMemChipWriteModePage}};
+    {0xE0, 0x40, 0x13, "PN25F04A", 524288, 256, SPIMemChipVendorParagon, SPIMemChipWriteModePage},
+    {0x0B, 0x40, 0x18, "XT25F128B", 16777216, 256, SPIMemChipVendorXTX, SPIMemChipWriteModePage}};
