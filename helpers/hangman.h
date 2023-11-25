@@ -88,5 +88,4 @@ bool hangman_wait_close_window(HangmanApp* app);
 bool hangman_menu_selection(HangmanApp* app);
 bool hangman_main_loop(HangmanApp* app);
 
-void hangman_set_font(Canvas* canvas, const uint8_t h, const uint16_t value);
-uint8_t hangman_draw_glyph(Canvas* canvas, const uint8_t x, const uint8_t y, const uint16_t value);
+void hangman_set_font(Canvas* canvas, const uint8_t h);

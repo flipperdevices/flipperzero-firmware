@@ -46,7 +46,7 @@ HangmanWord hangman_get_random_word(const char* dict_file, uint16_t unicode_base
 void hangman_draw_keyboard(Canvas* canvas, HangmanApp* app) {
     canvas_set_color(canvas, ColorBlack);
 
-    hangman_set_font(canvas, 12, 0);
+    hangman_set_font(canvas, 12);
     CONST glyph_w = canvas_glyph_width(canvas, ' ');
     CONST glyph_h = canvas_current_font_height(canvas);
 
@@ -73,10 +73,10 @@ void hangman_draw_keyboard(Canvas* canvas, HangmanApp* app) {
             if(n == app->pos) {
                 canvas_draw_box(canvas, x - 1, y - glyph_h + 2, glyph_w + 1, glyph_h);
                 canvas_set_color(canvas, ColorXOR);
-                hangman_draw_glyph(canvas, x, y, ch);
+                canvas_draw_glyph(canvas, x, y, ch);
                 canvas_set_color(canvas, ColorBlack);
             } else {
-                hangman_draw_glyph(canvas, x, y, ch);
+                canvas_draw_glyph(canvas, x, y, ch);
             }
         }
     }
@@ -93,7 +93,7 @@ uint8_t hangman_l2p(HangmanApp* app, uint16_t value) {
 }
 
 void hangman_draw_word(Canvas* canvas, HangmanApp* app) {
-    hangman_set_font(canvas, 13, 0);
+    hangman_set_font(canvas, 13);
 
     CONST glyph_w = canvas_glyph_width(canvas, ' ');
     CONST gap = app->lang->word_letters_gap;
@@ -104,11 +104,11 @@ void hangman_draw_word(Canvas* canvas, HangmanApp* app) {
     canvas_set_color(canvas, ColorBlack);
 
     for(uint8_t i = 0, x = center_x; i < app->word.len; i++) {
-        hangman_draw_glyph(canvas, x, h + 1, '_');
+        canvas_draw_glyph(canvas, x, h + 1, '_');
 
         if(app->opened[hangman_l2p(app, app->word.arr[i])]) {
             canvas_set_color(canvas, ColorBlack);
-            hangman_draw_glyph(canvas, x, h, app->word.arr[i]);
+            canvas_draw_glyph(canvas, x, h, app->word.arr[i]);
         }
 
         x += glyph_w + gap;
@@ -116,7 +116,7 @@ void hangman_draw_word(Canvas* canvas, HangmanApp* app) {
 }
 
 void hangman_draw_menu(Canvas* canvas, HangmanApp* app) {
-    hangman_set_font(canvas, 12, 0);
+    hangman_set_font(canvas, 12);
 
     uint8_t max_txt_w = 0;
     for(uint8_t i = 0; i < app->menu_cnt; i += 2) {
