@@ -1,41 +1,43 @@
 #!/usr/bin/env python3
 
-configs = []
-strings = ""
 
+def read_lang(name: str) -> set:
+    with open('../files/' + name) as file:
+        d, _, _, unicode_base, keyboard, *strings = [x.strip() for x in file]
 
-def read_lang(name: str) -> str:
-    with open('../files/' + name, 'r') as file:
-        d, _, _, unicode_base, keyboard, *strings = list(file)
-        letters = ''.join([chr(int(x, 16))
-                          for x in keyboard.split(' ')]) + ''.join(strings)
+        letters = {int(x, 16) for x in keyboard.split(' ')}
+        letters |= {ord(x) for x in ''.join(strings)}
 
         if unicode_base[0] == '+':
             unicode_base = int(unicode_base, 16)
 
-            with open('../files/' + d.strip(), 'rb') as dictionary:
+            with open('../files/' + d, 'rb') as dictionary:
                 for line in dictionary:
-                    letters += ''.join([chr(x + unicode_base)
-                                       for x in line.strip(b'\x0A')])
+                    letters |= {x + unicode_base for x in line.strip(b'\x0A')}
         else:
-            with open('../files/' + d.strip(), 'r') as dictionary:
-                letters += ''.join(dictionary)
+            letters |= {ord(x) for x in open('../files/' + d).read()}
 
-    return letters.replace("\n", "")
+    return letters
 
+
+letters = set()
 
 with open('../files/menu.txt', 'r') as file:
     for i, line in enumerate(file):
         if i & 1 == 0:
-            strings += line.strip()
+            letters |= {ord(x) for x in line}
         else:
-            strings += read_lang(line.strip())
+            letters |= read_lang(line.strip())
 
-uniq_codes = [ord(x) for x in set(strings)] + [10003, 10007, ord('_')]
-uniq_codes.sort()
+letters -= {ord("\n")}
+
+fonts = {
+    '6x12':  {10003, 10007, },
+    '6x13B': {ord('_'), },
+}
 
 cmd = 'bdfconv -v -f 1 -m "{0}" {1}.bdf -o {1}.c -n u8g2_font_{1} -d {1}.bdf'
-letters = ','.join([str(x) for x in uniq_codes])
 
-for x in ['6x12', '6x13B']:
-    print(cmd.format(letters, x)+"\n")
+for name, addon in fonts.items():
+    letters_str = ','.join([str(x) for x in sorted(letters | addon)])
+    print(cmd.format(letters_str, name)+"\n")
