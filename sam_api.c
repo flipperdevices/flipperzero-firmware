@@ -267,7 +267,6 @@ bool seader_parse_version(SeaderWorker* seader_worker, uint8_t* buf, size_t size
 bool seader_parse_sam_response(Seader* seader, SamResponse_t* samResponse) {
     SeaderWorker* seader_worker = seader->worker;
     SeaderUartBridge* seader_uart = seader_worker->uart;
-    FURI_LOG_D(TAG, "seader_parse_sam_response");
 
     if(samResponse->size == 0) {
         if(requestPacs) {
