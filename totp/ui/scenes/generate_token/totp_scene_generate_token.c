@@ -186,7 +186,8 @@ void totp_scene_generate_token_activate(PluginState* plugin_state) {
             scene_state->last_code,
             TokenDigitsCountMax + 1,
             scene_state->last_code_update_sync,
-            plugin_state->automation_kb_layout);
+            plugin_state->automation_kb_layout,
+            plugin_state->automation_initial_delay);
     }
 
     scene_state->active_font = totp_font_info_alloc();
@@ -209,7 +210,8 @@ void totp_scene_generate_token_activate(PluginState* plugin_state) {
             scene_state->last_code,
             TokenDigitsCountMax + 1,
             scene_state->last_code_update_sync,
-            plugin_state->automation_kb_layout);
+            plugin_state->automation_kb_layout,
+            plugin_state->automation_initial_delay);
     }
 #endif
     const TokenInfoIteratorContext* iterator_context =

@@ -64,6 +64,11 @@ typedef struct {
      */
     AutomationKeyboardLayout automation_kb_layout;
 
+    /**
+     * @brief Automation initial delay between "user initiated automation" and "code sending key-press events" events
+     */
+    uint16_t automation_initial_delay;
+
 #ifdef TOTP_BADBT_AUTOMATION_ENABLED
     /**
      * @brief Bad-Bluetooth worker context

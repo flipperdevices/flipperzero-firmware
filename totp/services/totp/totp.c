@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <math.h>
-#include <timezone_utils.h>
 #include "../../config/wolfssl/config.h"
 #include <wolfssl/wolfcrypt/hmac.h>
 #ifdef NO_INLINE
@@ -14,6 +13,21 @@
 #endif
 
 #define HMAC_MAX_RESULT_SIZE WC_SHA512_DIGEST_SIZE
+
+static int32_t timezone_offset_from_hours(float hours) {
+    return hours * 3600.0f;
+}
+
+static uint64_t timezone_offset_apply(uint64_t time, int32_t offset) {
+    uint64_t for_time_adjusted;
+    if(offset > 0) {
+        for_time_adjusted = time - offset;
+    } else {
+        for_time_adjusted = time + (-offset);
+    }
+
+    return for_time_adjusted;
+}
 
 /**
  * @brief Generates the timeblock for a time in seconds.
