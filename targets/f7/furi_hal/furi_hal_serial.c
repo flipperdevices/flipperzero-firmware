@@ -344,6 +344,7 @@ static void furi_hal_serial_lpuart_init(FuriHalSerialHandle* handle, uint32_t ba
 //###################END LPUART###################
 
 void furi_hal_serial_init(FuriHalSerialHandle* handle, uint32_t baud) {
+    furi_check(handle);
     if(handle->id == FuriHalSerialIdLpuart) {
         furi_hal_serial_lpuart_init(handle, baud);
     } else if(handle->id == FuriHalSerialIdUsart) {
@@ -352,6 +353,7 @@ void furi_hal_serial_init(FuriHalSerialHandle* handle, uint32_t baud) {
 }
 
 void furi_hal_serial_set_br(FuriHalSerialHandle* handle, uint32_t baud) {
+    furi_check(handle);
     if(handle->id == FuriHalSerialIdUsart) {
         if(LL_USART_IsEnabled(USART1)) {
             // Wait for transfer complete flag
@@ -383,6 +385,7 @@ void furi_hal_serial_set_br(FuriHalSerialHandle* handle, uint32_t baud) {
 }
 
 void furi_hal_serial_deinit(FuriHalSerialHandle* handle) {
+    furi_check(handle);
     furi_hal_serial_set_rx_callback(handle, NULL, NULL);
     if(handle->id == FuriHalSerialIdUsart) {
         if(furi_hal_bus_is_enabled(FuriHalBusUSART1)) {
@@ -410,6 +413,7 @@ void furi_hal_serial_deinit(FuriHalSerialHandle* handle) {
 }
 
 void furi_hal_serial_suspend(FuriHalSerialHandle* handle) {
+    furi_check(handle);
     if(handle->id == FuriHalSerialIdLpuart && LL_LPUART_IsEnabled(LPUART1)) {
         LL_LPUART_Disable(LPUART1);
     } else if(handle->id == FuriHalSerialIdUsart && LL_USART_IsEnabled(USART1)) {
@@ -419,6 +423,7 @@ void furi_hal_serial_suspend(FuriHalSerialHandle* handle) {
 }
 
 void furi_hal_serial_resume(FuriHalSerialHandle* handle) {
+    furi_check(handle);
     if(!furi_hal_serial[handle->id].enabled) {
         if(handle->id == FuriHalSerialIdLpuart) {
             LL_LPUART_Enable(LPUART1);
@@ -430,6 +435,7 @@ void furi_hal_serial_resume(FuriHalSerialHandle* handle) {
 }
 
 void furi_hal_serial_tx(FuriHalSerialHandle* handle, const uint8_t* buffer, size_t buffer_size) {
+    furi_check(handle);
     if(handle->id == FuriHalSerialIdUsart) {
         if(LL_USART_IsEnabled(USART1) == 0) return;
 
@@ -458,6 +464,7 @@ void furi_hal_serial_tx(FuriHalSerialHandle* handle, const uint8_t* buffer, size
 }
 
 void furi_hal_serial_tx_wait_complete(FuriHalSerialHandle* handle) {
+    furi_check(handle);
     if(handle->id == FuriHalSerialIdUsart) {
         if(LL_USART_IsEnabled(USART1) == 0) return;
 
@@ -559,6 +566,7 @@ void furi_hal_serial_dma_start(
     FuriHalSerialHandle* handle,
     FuriHalSerialDmaRxCallback callback,
     void* context) {
+    furi_check(handle);
     if(handle->id == FuriHalSerialIdUsart) {
         if(callback == NULL) {
             furi_hal_interrupt_set_isr(FuriHalInterruptIdUart1, NULL, NULL);

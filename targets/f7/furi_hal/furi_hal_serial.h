@@ -69,7 +69,7 @@ void furi_hal_serial_set_br(FuriHalSerialHandle* handle, uint32_t baud);
  */
 void furi_hal_serial_tx(FuriHalSerialHandle* handle, const uint8_t* buffer, size_t buffer_size);
 
-/** Wait transmission complete.
+/** Wait until transmission is completed
  *
  * Ensures that all data has been sent.
  *

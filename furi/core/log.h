@@ -47,9 +47,9 @@ typedef struct {
 } FuriLogHandler;
 
 /** Initialize logging */
-void furi_log_init();
+void furi_log_init(void);
 
-/** Add log tx callback
+/** Add log TX callback
  *
  * @param[in]  callback  The callback
  *
@@ -65,14 +65,14 @@ bool furi_log_add_handler(FuriLogHandler handler);
  */
 bool furi_log_remove_handler(FuriLogHandler handler);
 
-/** Transmit data throw log IO callbacks
+/** Transmit data through log IO callbacks
  *
  * @param[in]  data  The data
  * @param[in]  size  The size
  */
 void furi_log_tx(const uint8_t* data, size_t size);
 
-/** Transmit data throw log IO callbacks
+/** Transmit data through log IO callbacks
  *
  * @param[in]  data  The data, null-terminated C-string
  */
@@ -107,7 +107,7 @@ void furi_log_set_level(FuriLogLevel level);
  *
  * @return     The furi log level.
  */
-FuriLogLevel furi_log_get_level();
+FuriLogLevel furi_log_get_level(void);
 
 /** Log level to string
  *

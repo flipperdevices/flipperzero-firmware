@@ -98,16 +98,16 @@ typedef enum {
 } FuriHalRtcLogBaudRate;
 
 /** Early initialization */
-void furi_hal_rtc_init_early();
+void furi_hal_rtc_init_early(void);
 
 /** Early de-initialization */
-void furi_hal_rtc_deinit_early();
+void furi_hal_rtc_deinit_early(void);
 
 /** Initialize RTC subsystem */
-void furi_hal_rtc_init();
+void furi_hal_rtc_init(void);
 
 /** Force sync shadow registers */
-void furi_hal_rtc_sync_shadow();
+void furi_hal_rtc_sync_shadow(void);
 
 /** Get RTC register content
  *
@@ -134,7 +134,7 @@ void furi_hal_rtc_set_log_level(uint8_t level);
  *
  * @return     The Log Level value
  */
-uint8_t furi_hal_rtc_get_log_level();
+uint8_t furi_hal_rtc_get_log_level(void);
 
 /** Set logging device
  *
@@ -146,7 +146,7 @@ void furi_hal_rtc_set_log_device(FuriHalRtcLogDevice device);
  *
  * @return     The furi hal rtc log device.
  */
-FuriHalRtcLogDevice furi_hal_rtc_get_log_device();
+FuriHalRtcLogDevice furi_hal_rtc_get_log_device(void);
 
 /** Set logging baud rate
  *
@@ -158,7 +158,7 @@ void furi_hal_rtc_set_log_baud_rate(FuriHalRtcLogBaudRate baud_rate);
  *
  * @return     The furi hal rtc log baud rate.
  */
-FuriHalRtcLogBaudRate furi_hal_rtc_get_log_baud_rate();
+FuriHalRtcLogBaudRate furi_hal_rtc_get_log_baud_rate(void);
 
 /** Set RTC Flag
  *
@@ -190,7 +190,7 @@ void furi_hal_rtc_set_boot_mode(FuriHalRtcBootMode mode);
  *
  * @return     The RTC boot mode.
  */
-FuriHalRtcBootMode furi_hal_rtc_get_boot_mode();
+FuriHalRtcBootMode furi_hal_rtc_get_boot_mode(void);
 
 /** Set Heap Track mode
  *
@@ -202,7 +202,7 @@ void furi_hal_rtc_set_heap_track_mode(FuriHalRtcHeapTrackMode mode);
  *
  * @return     The RTC heap track mode.
  */
-FuriHalRtcHeapTrackMode furi_hal_rtc_get_heap_track_mode();
+FuriHalRtcHeapTrackMode furi_hal_rtc_get_heap_track_mode(void);
 
 /** Set locale units
  *
@@ -214,7 +214,7 @@ void furi_hal_rtc_set_locale_units(FuriHalRtcLocaleUnits value);
  *
  * @return     The RTC Locale Units.
  */
-FuriHalRtcLocaleUnits furi_hal_rtc_get_locale_units();
+FuriHalRtcLocaleUnits furi_hal_rtc_get_locale_units(void);
 
 /** Set RTC Locale Time Format
  *
@@ -226,7 +226,7 @@ void furi_hal_rtc_set_locale_timeformat(FuriHalRtcLocaleTimeFormat value);
  *
  * @return     The RTC Locale Time Format.
  */
-FuriHalRtcLocaleTimeFormat furi_hal_rtc_get_locale_timeformat();
+FuriHalRtcLocaleTimeFormat furi_hal_rtc_get_locale_timeformat(void);
 
 /** Set RTC Locale Date Format
  *
@@ -238,7 +238,7 @@ void furi_hal_rtc_set_locale_dateformat(FuriHalRtcLocaleDateFormat value);
  *
  * @return     The RTC Locale Date Format
  */
-FuriHalRtcLocaleDateFormat furi_hal_rtc_get_locale_dateformat();
+FuriHalRtcLocaleDateFormat furi_hal_rtc_get_locale_dateformat(void);
 
 /** Set RTC Date Time
  *
@@ -270,7 +270,7 @@ void furi_hal_rtc_set_fault_data(uint32_t value);
  *
  * @return     RTC Fault Data value
  */
-uint32_t furi_hal_rtc_get_fault_data();
+uint32_t furi_hal_rtc_get_fault_data(void);
 
 /** Set Pin Fails count
  *
@@ -282,13 +282,13 @@ void furi_hal_rtc_set_pin_fails(uint32_t value);
  *
  * @return     Pin Fails Count
  */
-uint32_t furi_hal_rtc_get_pin_fails();
+uint32_t furi_hal_rtc_get_pin_fails(void);
 
 /** Get UNIX Timestamp
  *
  * @return     Unix Timestamp in seconds from UNIX epoch start
  */
-uint32_t furi_hal_rtc_get_timestamp();
+uint32_t furi_hal_rtc_get_timestamp(void);
 
 /** Convert DateTime to UNIX timestamp
  *
