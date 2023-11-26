@@ -210,6 +210,13 @@ static bool hid_cc_input_callback(InputEvent* event, void* context) {
     return consumed;
 }
 
+void hid_cc_exit_callback(void* context) {
+    furi_assert(context);
+    HidCC* hid_cc = context;
+    with_view_model(
+        hid_cc->view, HidCCModel * model, { model->timer_click_enabled = false; }, true);
+}
+
 void hid_cc_set_cursor_position(HidCC* hid_cc, uint8_t x, uint8_t y, uint8_t repeat, uint8_t speed) {
     furi_assert(hid_cc);
     with_view_model(
@@ -232,6 +239,7 @@ HidCC* hid_cc_alloc(Hid* bt_hid) {
     view_allocate_model(hid_cc->view, ViewModelTypeLocking, sizeof(HidCCModel));
     view_set_draw_callback(hid_cc->view, hid_cc_draw_callback);
     view_set_input_callback(hid_cc->view, hid_cc_input_callback);
+    view_set_exit_callback(hid_cc->view, hid_cc_exit_callback);
 
     with_view_model(
         hid_cc->view,
@@ -247,6 +255,7 @@ HidCC* hid_cc_alloc(Hid* bt_hid) {
 
 void hid_cc_free(HidCC* hid_cc) {
     furi_assert(hid_cc);
+    furi_timer_stop(hid_cc->timer);
     furi_timer_free(hid_cc->timer);
     view_free(hid_cc->view);
     free(hid_cc);

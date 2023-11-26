@@ -151,6 +151,9 @@ Hid* hid_app_alloc_view(void* context) {
         0,
         128,
         64,
+        "iOS18:Settings/Accessibility\n"
+        "/AssistiveTouch=ON. Single-\n"
+        "Tap=Pass Through to App.\n\n"
         "While this app is running, go to\n"
         "your phone's bluetooth\n"
         "settings and discover devices.\n"
