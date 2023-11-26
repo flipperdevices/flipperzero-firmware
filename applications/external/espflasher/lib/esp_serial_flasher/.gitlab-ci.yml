@@ -136,4 +136,4 @@ push_to_the_components_registry:
     - if: '$FORCE_PUSH_COMPONENT == "1"'
   script:
     - pip install idf-component-manager
-    - python -m idf_component_manager upload-component --allow-existing --name=esp-serial-flasher --namespace=espressif
+    - python -m idf_component_manager upload-component --allow-existing --name=esp_serial_flasher --namespace=espressif

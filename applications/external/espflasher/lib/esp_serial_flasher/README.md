@@ -1,6 +1,6 @@
-# esp-serial-flasher
+# esp_serial_flasher
 
-`esp-serial-flasher` is a portable C library for flashing or loading apps to RAM of Espressif SoCs from other host microcontrollers.
+`esp_serial_flasher` is a portable C library for flashing or loading apps to RAM of Espressif SoCs from other host microcontrollers.
 
 ## Using the library
 Espressif SoCs are normally programmed via serial interface (UART). The port layer for the given host microcontroller has to be implemented if not available. Details can be found in section below.
@@ -64,7 +64,7 @@ Default: SERIAL_FLASHER_INTERFACE_UART
 
 * `MD5_ENABLED`
 
-If enabled, `esp-serial-flasher` is capable of verifying flash integrity after writing to flash.
+If enabled, `esp_serial_flasher` is capable of verifying flash integrity after writing to flash.
 
 Default: Enabled
 > Warning: As ROM bootloader of the ESP8266 does not support MD5_CHECK, this option has to be disabled!

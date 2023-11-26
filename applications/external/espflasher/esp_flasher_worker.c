@@ -231,13 +231,10 @@ static int32_t esp_flasher_flash_bin(void* context) {
     if(!err && app->turbospeed) {
         loader_port_debug_print("Increasing speed for faster flash\n");
         err = esp_loader_change_transmission_rate(921600);
-        if (err != ESP_LOADER_SUCCESS) {
+        if(err != ESP_LOADER_SUCCESS) {
             char err_msg[256];
             snprintf(
-                err_msg,
-                sizeof(err_msg),
-                "Cannot change transmission rate. Error: %u\n",
-                err);
+                err_msg, sizeof(err_msg), "Cannot change transmission rate. Error: %u\n", err);
             loader_port_debug_print(err_msg);
         }
         furi_hal_uart_set_br(FuriHalUartIdUSART1, 921600);
@@ -250,7 +247,7 @@ static int32_t esp_flasher_flash_bin(void* context) {
         }
         app->switch_fw = SwitchNotSet;
 
-        if (app->turbospeed) {
+        if(app->turbospeed) {
             loader_port_debug_print("Restoring transmission rate\n");
             furi_hal_uart_set_br(FuriHalUartIdUSART1, 115200);
         }

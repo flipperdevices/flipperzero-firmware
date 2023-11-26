@@ -9,7 +9,7 @@ menu "ESP serial flasher"
         prompt "Hardware interface to use for firmware download"
         default SERIAL_FLASHER_INTERFACE_UART
         help
-            esp-serial-flasher can work with UART and SPI interfaces.
+            esp_serial_flasher can work with UART and SPI interfaces.
 
         config SERIAL_FLASHER_INTERFACE_UART
             bool "UART"

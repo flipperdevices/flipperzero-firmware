@@ -21,7 +21,7 @@ App(
                 "src/protocol_uart.c",
                 "src/slip.c",
             ],
-            cincludes=["lib/esp-serial-flasher/private_include"],
+            cincludes=["lib/esp_serial_flasher/private_include"],
             cdefines=["SERIAL_FLASHER_INTERFACE_UART=1", "MD5_ENABLED=1", "SERIAL_FLASHER_WRITE_BLOCK_RETRIES=10"],
         ),
     ],

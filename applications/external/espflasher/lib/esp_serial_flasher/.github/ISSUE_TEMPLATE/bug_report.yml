@@ -5,7 +5,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        * Please ensure you are using the latest version of `esp-serial-flasher`.
+        * Please ensure you are using the latest version of `esp_serial_flasher`.
         * Try using one of the examples from the `examples` directory and following the example documentation.
         * If your board is a custom design, consider using our [free-of-charge schematic and PCB review service](https://www.espressif.com/en/contact-us/circuit-schematic-pcb-design-review).
         * If still experiencing issues, please provide as many details as possible below about your hardware and software setup.
