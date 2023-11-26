@@ -5,13 +5,14 @@
 #define ABOUT_TEXT                             \
     "Welcome to the Flipboard\n"               \
     "Signal! Quickly send to\n"                \
-    "and device! CURRENTLY\n"                  \
-    "hardcoded to 433MHz and\n"                \
-    "action...\n"                              \
-    "1:Princeton 52811C\n"                     \
-    "2:Princeton 528114\n"                     \
-    "3:Tesla_charge_AM270.sub\n"               \
-    "4:Tesla_charge_AM650.sub\n"               \
+    "and device!\n\n"                          \
+    "Be sure to put your .SUB\n"               \
+    "files in 'SD Card/subghz'\n"              \
+    "action 1: flip-a1.sub\n"                  \
+    "action 2: flip-a2.sub\n"                  \
+    "action 3: flip-a3.sub\n"                  \
+    "action 4: flip-a4.sub\n"                  \
+    "\n"                                       \
     "Optimized for FlipBoard\n"                \
     "v1.1 hardware --\n"                       \
     "see link below to order!\n"               \

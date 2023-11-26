@@ -2,8 +2,12 @@
 #include <lib/subghz/transmitter.h>
 #include <flipper_format/flipper_format_i.h>
 #include <lib/subghz/protocols/protocol_items.h>
+#include "signal.h"
+#include <storage/storage.h>
 
 #define FIRMWARE_SUBGHZ_UPDATED 1
+
+#define TAG "signal"
 
 #ifdef FIRMWARE_SUBGHZ_UPDATED
 #include <applications/drivers/subghz/cc1101_ext/cc1101_ext_interconnect.h>
@@ -30,12 +34,12 @@ static void set_signal(FuriString* sub_file_contents, FlipperFormat* flipper_for
 }
 
 void send_signal(
-    char* protocol,
-    uint32_t frequency,
     FuriString* sub_file_contents,
+    const char* protocol,
+    uint32_t frequency,
+    FuriHalSubGhzPreset preset,
     bool use_external_radio) {
     bool enable_5v = use_external_radio;
-    FuriHalSubGhzPreset preset = FuriHalSubGhzPresetOok650Async;
     const SubGhzDevice* device;
 
     subghz_devices_init();
@@ -96,3 +100,170 @@ void send_signal(
     UNUSED(sub_file_contents);
 }
 #endif
+
+struct Signal {
+    FuriString* sub_file_contents;
+    FuriString* protocol;
+    uint32_t frequency;
+    FuriHalSubGhzPreset preset;
+};
+
+typedef enum {
+    Unknown,
+    Raw,
+    Key,
+} FileType;
+
+static FuriHalSubGhzPreset signal_get_preset(FuriString* preset_str) {
+    const char* preset_name = furi_string_get_cstr(preset_str);
+    FuriHalSubGhzPreset preset = FuriHalSubGhzPresetIDLE;
+    if(!strcmp(preset_name, "FuriHalSubGhzPresetOok270Async")) {
+        preset = FuriHalSubGhzPresetOok270Async;
+    } else if(!strcmp(preset_name, "FuriHalSubGhzPresetOok650Async")) {
+        preset = FuriHalSubGhzPresetOok650Async;
+    } else if(!strcmp(preset_name, "FuriHalSubGhzPreset2FSKDev238Async")) {
+        preset = FuriHalSubGhzPreset2FSKDev238Async;
+    } else if(!strcmp(preset_name, "FuriHalSubGhzPreset2FSKDev476Async")) {
+        preset = FuriHalSubGhzPreset2FSKDev476Async;
+    } else if(!strcmp(preset_name, "FuriHalSubGhzPresetCustom")) {
+        preset = FuriHalSubGhzPresetCustom;
+    } else if(!strcmp(preset_name, "FuriHalSubGhzPresetMSK99_97KbAsync")) {
+        preset = FuriHalSubGhzPresetMSK99_97KbAsync;
+    } else if(!strcmp(preset_name, "FuriHalSubGhzPresetGFSK9_99KbAsync")) {
+        preset = FuriHalSubGhzPresetGFSK9_99KbAsync;
+    }
+    return preset;
+}
+
+Signal* signal_load_file(char* file_path) {
+    Signal* signal = (Signal*)malloc(sizeof(Signal));
+    signal->sub_file_contents = furi_string_alloc();
+    signal->protocol = furi_string_alloc();
+    signal->frequency = 0;
+    signal->preset = FuriHalSubGhzPresetOok650Async;
+
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    FlipperFormat* fff_data_file = flipper_format_file_alloc(storage);
+    FuriString* temp_str = furi_string_alloc();
+    uint32_t temp_data32;
+    FileType file_type = Unknown;
+    bool parsed = false;
+
+    if(flipper_format_file_open_existing(fff_data_file, file_path)) {
+        do {
+            if(!flipper_format_read_header(fff_data_file, temp_str, &temp_data32)) {
+                FURI_LOG_E(TAG, "Error reading header");
+                break;
+            }
+
+            if(strcmp(furi_string_get_cstr(temp_str), SUBGHZ_KEY_FILE_TYPE) == 0) {
+                file_type = Key;
+            } else if(strcmp(furi_string_get_cstr(temp_str), SUBGHZ_RAW_FILE_TYPE) == 0) {
+                file_type = Raw;
+            } else {
+                FURI_LOG_E(TAG, "Unknown file type: %s", furi_string_get_cstr(temp_str));
+                break;
+            }
+
+            if(!flipper_format_read_uint32(fff_data_file, "Frequency", &temp_data32, 1)) {
+                FURI_LOG_E(TAG, "Missing Frequency");
+                break;
+            }
+            signal->frequency = temp_data32;
+
+            if(!flipper_format_read_string(fff_data_file, "Preset", temp_str)) {
+                FURI_LOG_E(TAG, "Missing Preset");
+                break;
+            }
+            signal->preset = signal_get_preset(temp_str);
+            if(!signal->preset) {
+                FURI_LOG_E(TAG, "Unknown preset");
+                break;
+            }
+
+            if(!flipper_format_read_string(fff_data_file, "Protocol", temp_str)) {
+                FURI_LOG_E(TAG, "Missing Protocol");
+                break;
+            }
+            furi_string_set(signal->protocol, temp_str);
+
+            parsed = true;
+        } while(false);
+    } else {
+        FURI_LOG_E(TAG, "Error open file %s", file_path);
+    }
+
+    furi_string_free(temp_str);
+    flipper_format_free(fff_data_file);
+
+    if(parsed && file_type == Raw) {
+        furi_string_set(signal->sub_file_contents, temp_str);
+        furi_string_printf(
+            signal->sub_file_contents,
+            "Filetype: RAW File Load\r\n"
+            "Version: 1\r\n"
+            "Protocol: RAW\r\n"
+            "File_name: %s\r\n"
+            "Radio_device_name: cc1101_int\r\n",
+            file_path);
+    } else if(parsed && file_type == Key) {
+        File* file = storage_file_alloc(storage);
+        if(storage_file_open(file, file_path, FSAM_READ, FSOM_OPEN_EXISTING)) {
+            uint64_t file_size = storage_file_size(file);
+            char* file_contents = (char*)malloc(file_size + 1);
+            if(storage_file_read(file, file_contents, file_size) == file_size) {
+                file_contents[file_size] = '\0';
+                furi_string_set(signal->sub_file_contents, file_contents);
+            } else {
+                FURI_LOG_E(TAG, "Error reading file %s", file_path);
+                parsed = false;
+            }
+            free(file_contents);
+            storage_file_close(file);
+        } else {
+            FURI_LOG_E(TAG, "Error open file %s", file_path);
+            parsed = false;
+        }
+    }
+
+    if(!parsed) {
+        furi_string_free(signal->protocol);
+        free(signal);
+        signal = NULL;
+    }
+
+    furi_record_close(RECORD_STORAGE);
+    return signal;
+}
+
+/*
+    FuriString* file_path = furi_string_alloc();
+
+    DialogsFileBrowserOptions browser_options;
+    dialog_file_browser_set_basic_options(
+        &browser_options, SUBGHZ_APP_FILENAME_EXTENSION, &I_sub1_10px);
+    browser_options.base_path = SUBGHZ_APP_FOLDER;
+
+    // Input events and views are managed by file_select
+    bool res = dialog_file_browser_show(
+        subghz->dialogs, subghz->file_path, subghz->file_path, &browser_options);
+*/
+
+void signal_free(Signal* signal) {
+    if(signal) {
+        furi_string_free(signal->sub_file_contents);
+        furi_string_free(signal->protocol);
+        free(signal);
+    }
+}
+
+void signal_send(Signal* signal, bool use_external_radio) {
+    if(signal) {
+        send_signal(
+            signal->sub_file_contents,
+            furi_string_get_cstr(signal->protocol),
+            signal->frequency,
+            signal->preset,
+            use_external_radio);
+    }
+}

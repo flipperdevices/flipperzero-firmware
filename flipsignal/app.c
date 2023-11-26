@@ -53,65 +53,21 @@ static void flipboard_view_flip_signal_draw(Canvas* canvas, void* model) {
 static bool x(void* context, uint32_t event) {
     UNUSED(context);
     if(event == 1) {
-        FuriString* sub_file_contents = furi_string_alloc();
-        furi_string_printf(
-            sub_file_contents,
-            "Filetype: Flipper SubGhz Key File\r\n"
-            "Version: 1\r\n"
-            "Frequency: 433920000\r\n"
-            "Preset: FuriHalSubGhzPresetOok650Async\r\n"
-            "Protocol: Princeton\r\n"
-            "Bit: 24\r\n"
-            "Key: 00 00 00 00 00 52 81 1C\r\n"
-            "TE: 157\r\n");
-        send_signal("Princeton", 433920000, sub_file_contents, false);
-        furi_string_free(sub_file_contents);
+        Signal* signal = signal_load_file("/ext/subghz/flip-a1.sub");
+        signal_send(signal, false);
+        signal_free(signal);
     } else if(event == 2) {
-        FuriString* sub_file_contents = furi_string_alloc();
-        furi_string_printf(
-            sub_file_contents,
-            "Filetype: Flipper SubGhz Key File\r\n"
-            "Version: 1\r\n"
-            "Frequency: 433920000\r\n"
-            "Preset: FuriHalSubGhzPresetOok650Async\r\n"
-            "Protocol: Princeton\r\n"
-            "Bit: 24\r\n"
-            "Key: 00 00 00 00 00 52 81 14\r\n"
-            "TE: 157\r\n");
-        send_signal("Princeton", 433920000, sub_file_contents, false);
-        furi_string_free(sub_file_contents);
+        Signal* signal = signal_load_file("/ext/subghz/flip-a2.sub");
+        signal_send(signal, false);
+        signal_free(signal);
     } else if(event == 4) {
-        FuriString* sub_file_contents = furi_string_alloc();
-        // furi_string_printf(
-        //     sub_file_contents,
-        //     "Filetype: Flipper SubGhz Key File\r\n"
-        //     "Version: 1\r\n"
-        //     "Frequency: 433920000\r\n"
-        //     "Preset: FuriHalSubGhzPresetOok650Async\r\n"
-        //     "Protocol: Security+ 1.0\r\n"
-        //     "Bit: 42\r\n"
-        //     "Key: 63 A4 A7 6D E6 00 00 00\r\n");
-        // send_signal("Security+ 1.0", 433920000, sub_file_contents, false);
-        furi_string_printf(
-            sub_file_contents,
-            "Filetype: RAW File Load\r\n"
-            "Version: 1\r\n"
-            "Protocol: RAW\r\n"
-            "File_name: /ext/subghz/Tesla_charge_AM270.sub\r\n"
-            "Radio_device_name: cc1101_int\r\n");
-        send_signal("RAW", 315000000, sub_file_contents, false);
-        furi_string_free(sub_file_contents);
+        Signal* signal = signal_load_file("/ext/subghz/flip-a3.sub");
+        signal_send(signal, false);
+        signal_free(signal);
     } else if(event == 8) {
-        FuriString* sub_file_contents = furi_string_alloc();
-        furi_string_printf(
-            sub_file_contents,
-            "Filetype: RAW File Load\r\n"
-            "Version: 1\r\n"
-            "Protocol: RAW\r\n"
-            "File_name: /ext/subghz/Tesla_charge_AM650.sub\r\n"
-            "Radio_device_name: cc1101_int\r\n");
-        send_signal("RAW", 315000000, sub_file_contents, false);
-        furi_string_free(sub_file_contents);
+        Signal* signal = signal_load_file("/ext/subghz/flip-a4.sub");
+        signal_send(signal, false);
+        signal_free(signal);
     }
 
     return true;
