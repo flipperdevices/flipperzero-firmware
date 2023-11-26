@@ -227,11 +227,10 @@ static int32_t esp_flasher_flash_bin(void* context) {
         loader_port_debug_print(err_msg);
     }
 
-#if 0 // still getting packet drops with this
     // higher BR
-    if(!err) {
+    if(!err && app->turbospeed) {
         loader_port_debug_print("Increasing speed for faster flash\n");
-        err = esp_loader_change_transmission_rate(230400);
+        err = esp_loader_change_transmission_rate(921600);
         if (err != ESP_LOADER_SUCCESS) {
             char err_msg[256];
             snprintf(
@@ -241,9 +240,8 @@ static int32_t esp_flasher_flash_bin(void* context) {
                 err);
             loader_port_debug_print(err_msg);
         }
-        furi_hal_uart_set_br(FuriHalUartIdUSART1, 230400);
+        furi_hal_uart_set_br(FuriHalUartIdUSART1, 921600);
     }
-#endif
 
     if(!err) {
         loader_port_debug_print("Connected\n");
@@ -251,10 +249,12 @@ static int32_t esp_flasher_flash_bin(void* context) {
             _flash_all_files(app);
         }
         app->switch_fw = SwitchNotSet;
-#if 0
-        loader_port_debug_print("Restoring transmission rate\n");
-        furi_hal_uart_set_br(FuriHalUartIdUSART1, 115200);
-#endif
+
+        if (app->turbospeed) {
+            loader_port_debug_print("Restoring transmission rate\n");
+            furi_hal_uart_set_br(FuriHalUartIdUSART1, 115200);
+        }
+
         loader_port_debug_print(
             "Done flashing. Please reset the board manually if it doesn't auto-reset.\n");
 
