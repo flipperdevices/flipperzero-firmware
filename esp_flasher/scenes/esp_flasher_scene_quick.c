@@ -152,6 +152,7 @@ bool esp_flasher_scene_quick_on_event(void* context, SceneManagerEvent event) {
 
             app->reset = false;
             app->quickflash = true;
+            app->turbospeed = true;
             app->boot = enter_bootloader;
             scene_manager_next_scene(app->scene_manager, EspFlasherSceneConsoleOutput);
         }
