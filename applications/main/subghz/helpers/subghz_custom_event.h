@@ -92,6 +92,8 @@ typedef enum {
     SubGhzCustomEventSceneRpcSessionClose,
 
     SubGhzCustomEventViewReceiverOK,
+    SubGhzCustomEventViewReceiverOKLong,
+    SubGhzCustomEventViewReceiverOKRelease,
     SubGhzCustomEventViewReceiverConfig,
     SubGhzCustomEventViewReceiverBack,
     SubGhzCustomEventViewReceiverOffDisplay,

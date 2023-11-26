@@ -45,6 +45,9 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Hangman v1.5 (By Evgeny Stepanischev & Eva Stepanischeva)] <https://github.com/bolknote/Flipper-Zero-Hangman-Game>
 - Updated: [ESP Flasher v1.4 (By 0xchocolate)](https://github.com/0xchocolate/flipperzero-esp-flasher)
 - Updated: [Cookie Clicker v1.0 (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/hid/hid_cookie)
+- SubGHz: [Viewing a Key, turn Receive notification off and stop the Radio until Receive is fixed (By LeeroysHub)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/34f98ae687f72621a994a45978196f249004c0be)
+- SubGHz: [Long Press OK to TX Key in receiver. Better Rollback Attacks! (By LeeroysHub)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/a42430a57a9d78b6bc340b305f4208a7f6f556c7)
+- SubGHz: [Beep on TX for SubGHz & Remote (By LeeroysHub)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/ad0a273a71d7701af30df75c9174f3bdc3fd6e4a)
 
 <a name="release">
 
@@ -217,6 +220,8 @@ $ ./fbt dolphin_ext
 - SubGHz: [Add settings to subghz read functionality to allow setting RSSI threshold (raw only) (By PolymerPrints)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/184)
 - SubGHz: [Added custom radio presets for AM_Q (By Korai-Labs / ankris812)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/f43c22e01d3b857fb418c0c9114daf01b14563bd) [Documented (By user890104)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/995)
 - SubGHz: Auto Detect Raw in READ action (Needs To Be Enabled In Read Settings) [from perspecdev](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/152)
+- SubGHz: [Beep on TX for SubGHz & Remote (By LeeroysHub)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/ad0a273a71d7701af30df75c9174f3bdc3fd6e4a)
+- SubGHz: [Long Press OK to TX Key in receiver. Better Rollback Attacks! (By LeeroysHub)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/a42430a57a9d78b6bc340b305f4208a7f6f556c7)
 - SubGHz: Moved setting_user file to setting_user.txt! This makes it changable from IOS app. (By RogueMaster)
 - SubGHz: New frequency analyzer [(By ClusterM)](https://github.com/flipperdevices/flipperzero-firmware/pull/1501) [feedback mode (by darmiel)](https://github.com/darmiel/flipper-playlist/tree/feat/stealth-frequency-analyzer) [Quiet Mode (by Himura2la)](https://github.com/ClusterM/flipperzero-firmware/pull/1) [New frequency analyzer #1557 (By ClusterM)](https://github.com/flipperdevices/flipperzero-firmware/pull/1557)
 - SubGHz: Nicer SubGHz Chat via [CLI Bridge (By ranchordo)](https://github.com/ranchordo/flipperzero-cli-bridge) with "chat" command (Thanks ESurge and qqMajikpp)
@@ -225,6 +230,7 @@ $ ./fbt dolphin_ext
 - SubGHz: Region Locked -  To transmit to outside ranges (Unlock), use the CFW Settings or Extend Range app under Applications=>Settings.
 - SubGHz: [Transmit Indicator before Out of Region Frequency Use (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/e24d4a0689db555ae083fec23a471e878adb6cd4)
 - SubGHz: USE CFW Settings to use unlock from SD flag from [(cloudbreakdaniel)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/97db0dc91ee3dff812b4dec0618e3f198de14405).  Update `subghz/assets/extend_range.txt` with [this file](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/assets/resources/subghz/assets/extend_range.txt) on SD.  **UPDATE IGNORE FLAG TO TRUE TO UNLEASH YOUR FLIPPER!!**
+- SubGHz: [Viewing a Key, turn Receive notification off and stop the Radio until Receive is fixed (By LeeroysHub)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/34f98ae687f72621a994a45978196f249004c0be)
 - SubGHz: [X10 Protocol Decoder (By CodeAllNight/jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/subghz/protocols/x10)
 
 ## Games
