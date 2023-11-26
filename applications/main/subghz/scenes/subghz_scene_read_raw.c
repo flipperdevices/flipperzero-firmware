@@ -8,6 +8,15 @@
 #define RAW_FILE_NAME "R_"
 #define TAG "SubGhzSceneReadRAW"
 
+const NotificationSequence subghz_sequence_raw_beep = {
+    &message_vibro_on,
+    &message_note_c6,
+    &message_delay_50,
+    &message_sound_off,
+    &message_vibro_off,
+    NULL,
+};
+
 bool subghz_scene_read_raw_update_filename(SubGhz* subghz) {
     bool ret = false;
     //set the path to read the file
@@ -222,6 +231,7 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
                         "",
                         subghz_threshold_rssi_get(subghz->threshold_rssi));
                 } else {
+                    notification_message(subghz->notifications, &subghz_sequence_raw_beep);
                     if(scene_manager_has_previous_scene(subghz->scene_manager, SubGhzSceneSaved) ||
                        !scene_manager_has_previous_scene(subghz->scene_manager, SubGhzSceneStart)) {
                         dolphin_deed(DolphinDeedSubGhzSend);

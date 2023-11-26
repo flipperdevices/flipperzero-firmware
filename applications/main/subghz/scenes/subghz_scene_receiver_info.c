@@ -5,6 +5,17 @@
 
 #define TAG "SubGhzSceneReceiverInfo"
 
+uint32_t SavedHopperState;
+
+const NotificationSequence subghz_sequence_info_beep = {
+    &message_vibro_on,
+    &message_note_c6,
+    &message_delay_50,
+    &message_sound_off,
+    &message_vibro_off,
+    NULL,
+};
+
 void subghz_scene_receiver_info_callback(GuiButtonType result, InputType type, void* context) {
     furi_assert(context);
     SubGhz* subghz = context;
@@ -112,9 +123,20 @@ void subghz_scene_receiver_info_on_enter(void* context) {
 
     subghz_scene_receiver_info_draw_widget(subghz);
 
+    /* This does not work. The receiving does not happen, and they know it.
+       So, why do we turn on the notification that we receive?
+       THe user thinks its receiving, dont matter if SubGHZ is technically on.
     if(!subghz_history_get_text_space_left(subghz->history, NULL)) {
         subghz->state_notifications = SubGhzNotificationStateRx;
     }
+	*/
+
+    //I am turning off the Radio, if the FLipper people want to fix the bug they can!
+    subghz->state_notifications = SubGhzNotificationStateIDLE;
+    subghz_txrx_stop(subghz->txrx);
+    subghz_txrx_hopper_pause(subghz->txrx);
+    SavedHopperState = subghz_txrx_hopper_get_state(subghz->txrx);
+    subghz_txrx_hopper_set_state(subghz->txrx, SubGhzHopperStateOFF);
 }
 
 bool subghz_scene_receiver_info_on_event(void* context, SceneManagerEvent event) {
@@ -125,16 +147,17 @@ bool subghz_scene_receiver_info_on_event(void* context, SceneManagerEvent event)
                 return false;
             }
             //CC1101 Stop RX -> Start TX
-            subghz_txrx_hopper_pause(subghz->txrx);
+            // subghz_txrx_hopper_pause(subghz->txrx);
             if(!subghz_tx_start(
                    subghz,
                    subghz_history_get_raw_data(subghz->history, subghz->idx_menu_chosen))) {
-                subghz_txrx_rx_start(subghz->txrx);
-                subghz_txrx_hopper_unpause(subghz->txrx);
-                subghz->state_notifications = SubGhzNotificationStateRx;
+                // subghz_txrx_rx_start(subghz->txrx);
+                // subghz_txrx_hopper_unpause(subghz->txrx);
+                subghz->state_notifications = SubGhzNotificationStateIDLE;
             } else {
                 subghz->state_notifications = SubGhzNotificationStateTx;
             }
+            notification_message(subghz->notifications, &subghz_sequence_info_beep);
             return true;
         } else if(event.event == SubGhzCustomEventSceneReceiverInfoTxStop) {
             //CC1101 Stop Tx -> Start RX
@@ -144,21 +167,21 @@ bool subghz_scene_receiver_info_on_event(void* context, SceneManagerEvent event)
             subghz_scene_receiver_info_draw_widget(subghz);
 
             subghz_txrx_stop(subghz->txrx);
-            if(!scene_manager_has_previous_scene(subghz->scene_manager, SubGhzSceneDecodeRAW)) {
-                subghz_txrx_rx_start(subghz->txrx);
+            // if(!scene_manager_has_previous_scene(subghz->scene_manager, SubGhzSceneDecodeRAW)) {
+            // subghz_txrx_rx_start(subghz->txrx);
 
-                subghz_txrx_hopper_unpause(subghz->txrx);
-                if(!subghz_history_get_text_space_left(subghz->history, NULL)) {
-                    subghz->state_notifications = SubGhzNotificationStateRx;
-                }
-            }
+            // subghz_txrx_hopper_unpause(subghz->txrx);
+            // if(!subghz_history_get_text_space_left(subghz->history, NULL)) {
+            // subghz->state_notifications = SubGhzNotificationStateRx;
+            // }
+            // }
             return true;
         } else if(event.event == SubGhzCustomEventSceneReceiverInfoSave) {
             //CC1101 Stop RX -> Save
             subghz->state_notifications = SubGhzNotificationStateIDLE;
-            subghz_txrx_hopper_set_state(subghz->txrx, SubGhzHopperStateOFF);
+            // subghz_txrx_hopper_set_state(subghz->txrx, SubGhzHopperStateOFF);
 
-            subghz_txrx_stop(subghz->txrx);
+            // subghz_txrx_stop(subghz->txrx);
             if(!subghz_scene_receiver_info_update_parser(subghz)) {
                 return false;
             }
@@ -197,4 +220,10 @@ void subghz_scene_receiver_info_on_exit(void* context) {
 
     widget_reset(subghz->widget);
     subghz_txrx_reset_dynamic_and_custom_btns(subghz->txrx);
+
+    /* Proper fix now! Start the radio again. */
+    subghz->state_notifications = SubGhzNotificationStateRx;
+    subghz_txrx_hopper_set_state(subghz->txrx, SavedHopperState);
+    subghz_txrx_rx_start(subghz->txrx);
+    subghz_txrx_hopper_unpause(subghz->txrx);
 }

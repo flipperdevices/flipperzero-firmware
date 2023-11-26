@@ -4,6 +4,15 @@
 
 #define TAG "SubGhzSceneReceiver"
 
+const NotificationSequence subghz_sequence_beep = {
+    &message_vibro_on,
+    &message_note_c6,
+    &message_delay_50,
+    &message_sound_off,
+    &message_vibro_off,
+    NULL,
+};
+
 const NotificationSequence subghz_sequence_rx = {
     &message_green_255,
 
@@ -243,6 +252,37 @@ bool subghz_scene_receiver_on_event(void* context, SceneManagerEvent event) {
             dolphin_deed(DolphinDeedSubGhzReceiverInfo);
             consumed = true;
             break;
+        case SubGhzCustomEventViewReceiverOKLong:
+            //CC1101 Stop RX
+            subghz_txrx_stop(subghz->txrx);
+            subghz_txrx_hopper_pause(subghz->txrx);
+
+            //Start TX
+            if(!subghz_tx_start(
+                   subghz,
+                   subghz_history_get_raw_data(subghz->history, subghz->idx_menu_chosen))) {
+                subghz_txrx_rx_start(subghz->txrx);
+                subghz_txrx_hopper_unpause(subghz->txrx);
+                subghz->state_notifications = SubGhzNotificationStateRx;
+            } else {
+                notification_message(subghz->notifications, &subghz_sequence_beep);
+                subghz->state_notifications = SubGhzNotificationStateTx;
+            }
+            consumed = true;
+            break;
+        case SubGhzCustomEventViewReceiverOKRelease:
+            if(subghz->state_notifications == SubGhzNotificationStateTx) {
+                //CC1101 Stop Tx -> Start RX
+                subghz->state_notifications = SubGhzNotificationStateIDLE;
+                subghz_txrx_stop(subghz->txrx);
+                subghz_txrx_rx_start(subghz->txrx);
+                subghz_txrx_hopper_unpause(subghz->txrx);
+                if(!subghz_history_get_text_space_left(subghz->history, NULL)) {
+                    subghz->state_notifications = SubGhzNotificationStateRx;
+                }
+                consumed = true;
+                break;
+            }
         case SubGhzCustomEventViewReceiverDeleteItem:
             subghz->state_notifications = SubGhzNotificationStateRx;
 
@@ -278,34 +318,41 @@ bool subghz_scene_receiver_on_event(void* context, SceneManagerEvent event) {
             break;
         }
     } else if(event.type == SceneManagerEventTypeTick) {
-        if(subghz_txrx_hopper_get_state(subghz->txrx) != SubGhzHopperStateOFF) {
-            subghz_txrx_hopper_update(subghz->txrx);
-            subghz_scene_receiver_update_statusbar(subghz);
-        }
-
-        SubGhzThresholdRssiData ret_rssi = subghz_threshold_get_rssi_data(
-            subghz->threshold_rssi, subghz_txrx_radio_device_get_rssi(subghz->txrx));
-
-        subghz_receiver_rssi(subghz->subghz_receiver, ret_rssi.rssi);
-        subghz_protocol_decoder_bin_raw_data_input_rssi(
-            (SubGhzProtocolDecoderBinRAW*)subghz_txrx_get_decoder(subghz->txrx), ret_rssi.rssi);
-
-        switch(subghz->state_notifications) {
-        case SubGhzNotificationStateRx:
-            notification_message(subghz->notifications, &sequence_blink_cyan_10);
-            break;
-        case SubGhzNotificationStateRxDone:
-            if(!subghz_is_locked(subghz)) {
-                notification_message(subghz->notifications, &subghz_sequence_rx);
-            } else {
-                notification_message(subghz->notifications, &subghz_sequence_rx_locked);
+        if(subghz->state_notifications != SubGhzNotificationStateTx) {
+            if(subghz_txrx_hopper_get_state(subghz->txrx) != SubGhzHopperStateOFF) {
+                subghz_txrx_hopper_update(subghz->txrx);
+                subghz_scene_receiver_update_statusbar(subghz);
             }
-            subghz->state_notifications = SubGhzNotificationStateRx;
-            break;
-        default:
-            break;
+
+            SubGhzThresholdRssiData ret_rssi = subghz_threshold_get_rssi_data(
+                subghz->threshold_rssi, subghz_txrx_radio_device_get_rssi(subghz->txrx));
+
+            subghz_receiver_rssi(subghz->subghz_receiver, ret_rssi.rssi);
+            subghz_protocol_decoder_bin_raw_data_input_rssi(
+                (SubGhzProtocolDecoderBinRAW*)subghz_txrx_get_decoder(subghz->txrx),
+                ret_rssi.rssi);
         }
     }
+
+    switch(subghz->state_notifications) {
+    case SubGhzNotificationStateRx:
+        notification_message(subghz->notifications, &sequence_blink_cyan_10);
+        break;
+    case SubGhzNotificationStateRxDone:
+        if(!subghz_is_locked(subghz)) {
+            notification_message(subghz->notifications, &subghz_sequence_rx);
+        } else {
+            notification_message(subghz->notifications, &subghz_sequence_rx_locked);
+        }
+        subghz->state_notifications = SubGhzNotificationStateRx;
+        break;
+    case SubGhzNotificationStateTx:
+        notification_message(subghz->notifications, &sequence_blink_magenta_10);
+        break;
+    default:
+        break;
+    }
+
     return consumed;
 }
 

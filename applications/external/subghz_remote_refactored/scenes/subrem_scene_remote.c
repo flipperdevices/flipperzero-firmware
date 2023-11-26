@@ -5,6 +5,15 @@
 
 #define TAG "SubRemScenRemote"
 
+const NotificationSequence subghz_sequence_subremote_beep = {
+    &message_vibro_on,
+    &message_note_c6,
+    &message_delay_50,
+    &message_sound_off,
+    &message_vibro_off,
+    NULL,
+};
+
 void subrem_scene_remote_callback(SubRemCustomEvent event, void* context) {
     furi_assert(context);
     SubGhzRemoteApp* app = context;
@@ -63,6 +72,9 @@ bool subrem_scene_remote_on_event(void* context, SceneManagerEvent event) {
             event.event == SubRemCustomEventViewRemoteStartLEFT ||
             event.event == SubRemCustomEventViewRemoteStartRIGHT ||
             event.event == SubRemCustomEventViewRemoteStartOK) {
+            //Beep and Vibrate so its inline with my SubGHZ app changes.
+            notification_message(app->notifications, &subghz_sequence_subremote_beep);
+
             // Start sending sub
             subrem_tx_stop_sub(app, true);
 
