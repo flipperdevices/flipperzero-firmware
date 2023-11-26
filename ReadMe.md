@@ -75,7 +75,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [ShapShup v1.2 (By derskythe)](https://github.com/derskythe/flipperzero-shapshup)
 - OFW: [Fix NFC unit tests #3192 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3192)
 - OFW: [Infrared remote button index support #3180 (By gsurkov)](https://github.com/flipperdevices/flipperzero-firmware/pull/3180)
-- OFW PR: [NFC: Felica UID emulation #3190 (By RebornedBrain)](https://github.com/flipperdevices/flipperzero-firmware/pull/3190)
 - A few apps got minor fixes (By WIlly-JL): [Brainfuck v1.1 (By nymda)](https://github.com/nymda/FlipperZeroBrainfuck), [CLI Bridge (By ranchordo)](https://github.com/ranchordo/flipperzero-cli-bridge), [Flizzer Tracker (By LTVA1)](https://github.com/LTVA1/flizzer_tracker), [Music Tracker (By DrZlo13)](https://github.com/DrZlo13/flipper-zero-music-tracker), [Temp Sensors Reader 1.4 (By quen0n)](https://github.com/quen0n/Unitemp-Flipper-Zero-Plugin) & [WiFi (Deauther) V2 (By Timmotools)](https://github.com/Timmotools/flipperzero_esp8266_deautherv2)
 - Add nfc dynamic default save name to new app (By Willy-JL)
 - Misc app fixes (By xMasterX)
@@ -98,6 +97,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - Refactor Update: [NFC Maker NTAG215 (by Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/343cb39d08f60b75b537e1a31100707935cf6e9d) - [(Changes By xMasterX)](https://github.com/xMasterX/all-the-plugins/commit/d2d908eea599192dd5ad428fe9d5684b3874a1a4)
 - Refactor Update: [NFC Maker NTAG203 (by Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/343cb39d08f60b75b537e1a31100707935cf6e9d) - [(Changes By RogueMaster Copying These changes By xMasterX)](https://github.com/xMasterX/all-the-plugins/commit/d2d908eea599192dd5ad428fe9d5684b3874a1a4)
 - Updated: [PicoPass (iClass) v1.8 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass) [Picopass rework. Part 1 #68 (By gornekich)](https://github.com/flipperdevices/flipperzero-good-faps/pull/68)
+- OFW: [NFC: Felica UID emulation #3190 (By RebornedBrain)](https://github.com/flipperdevices/flipperzero-firmware/pull/3190)
+- OFW: [Mifare Classic fixes #3221 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3221)
 
 <a name="release">
 
