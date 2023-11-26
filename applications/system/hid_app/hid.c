@@ -57,8 +57,6 @@ static void hid_submenu_callback(void* context, uint32_t index) {
     } else if(index == HidSubmenuIndexPushToTalk) {
         app->view_id = HidViewPushToTalkMenu;
         view_dispatcher_switch_to_view(app->view_dispatcher, HidViewPushToTalkMenu);
-        // app->view_id = HidViewPushToTalk;
-        // view_dispatcher_switch_to_view(app->view_dispatcher, HidViewPushToTalk);
     }
 }
 
@@ -232,12 +230,12 @@ Hid* hid_app_alloc_view(void* context) {
         hid_mouse_jiggler_get_view(app->hid_mouse_jiggler));
 
     // PushToTalk view
-    app->hid_ptt = hid_ptt_alloc(app);
-    view_set_previous_callback(hid_ptt_get_menu_view(app->hid_ptt), hid_menu_view);
+    app->hid_ptt_menu = hid_ptt_menu_alloc(app);
+    view_set_previous_callback(hid_ptt_menu_get_view(app->hid_ptt_menu), hid_menu_view);
     view_dispatcher_add_view(
-      app->view_dispatcher, HidViewPushToTalkMenu, hid_ptt_get_menu_view(app->hid_ptt));
+      app->view_dispatcher, HidViewPushToTalkMenu, hid_ptt_menu_get_view(app->hid_ptt_menu));
+    app->hid_ptt = hid_ptt_alloc(app);
     view_set_previous_callback(hid_ptt_get_view(app->hid_ptt), hid_ptt_menu_view);
-    // view_set_previous_callback(hid_ptt_get_view(app->hid_ptt), hid_menu_view);
     view_dispatcher_add_view(
         app->view_dispatcher, HidViewPushToTalk, hid_ptt_get_view(app->hid_ptt));
 
@@ -272,6 +270,7 @@ void hid_free(Hid* app) {
     view_dispatcher_remove_view(app->view_dispatcher, HidViewMouseJiggler);
     hid_mouse_jiggler_free(app->hid_mouse_jiggler);
     view_dispatcher_remove_view(app->view_dispatcher, HidViewPushToTalkMenu);
+    hid_ptt_menu_free(app->hid_ptt_menu);
     view_dispatcher_remove_view(app->view_dispatcher, HidViewPushToTalk);
     hid_ptt_free(app->hid_ptt);
     view_dispatcher_remove_view(app->view_dispatcher, BtHidViewTikShorts);
