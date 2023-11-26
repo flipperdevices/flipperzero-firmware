@@ -3,7 +3,7 @@
 #include "../picopass_keys.h"
 
 enum {
-    PicopassSceneReadCardDictStandart,
+    PicopassSceneReadCardDictStandard,
     PicopassSceneReadCardDictElite,
 };
 
@@ -78,7 +78,7 @@ void picopass_scene_read_card_on_enter(void* context) {
     picopass->dict = nfc_dict_alloc(
         PICOPASS_ICLASS_STANDARD_DICT_FLIPPER_NAME, NfcDictModeOpenExisting, PICOPASS_KEY_LEN);
     scene_manager_set_scene_state(
-        picopass->scene_manager, PicopassSceneReadCard, PicopassSceneReadCardDictStandart);
+        picopass->scene_manager, PicopassSceneReadCard, PicopassSceneReadCardDictStandard);
     // Start worker
     picopass->poller = picopass_poller_alloc(picopass->nfc);
     picopass_poller_start(picopass->poller, picopass_read_card_worker_callback, picopass);
@@ -120,7 +120,7 @@ void picopass_scene_read_card_on_exit(void* context) {
     // Clear view
     popup_reset(picopass->popup);
     scene_manager_set_scene_state(
-        picopass->scene_manager, PicopassSceneReadCard, PicopassSceneReadCardDictStandart);
+        picopass->scene_manager, PicopassSceneReadCard, PicopassSceneReadCardDictStandard);
 
     picopass_blink_stop(picopass);
 }
