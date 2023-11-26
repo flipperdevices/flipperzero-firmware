@@ -187,7 +187,8 @@ void lfrfid_hitag_worker_stop(LFRFIDHitagWorker* worker) {
 }
 
 //------------------------------------------------------------------ READ TAG: TIMER & DMA callback functions ------------------------------------------------------------------
-static void lfrfid_hitag_worker_capture_in_cc_callback(bool level, uint32_t duration, void* context) {
+static void
+    lfrfid_hitag_worker_capture_in_cc_callback(bool level, uint32_t duration, void* context) {
     LfRfidHitagCaptureData* capData = context;
 
     //check if there is a new pair available: pulse + period
@@ -207,17 +208,17 @@ static void lfrfid_hitag_worker_capture_in_cc_callback(bool level, uint32_t dura
 static void lfrfid_hitag_worker_carrier_out_dma_callback(bool half, void* dma_context) {
     LFRFIDHitagWorker* worker = (LFRFIDHitagWorker*)dma_context;
     worker->DMAeventCount++;
-	
-    if (half){
+
+    if(half) {
         furi_event_flag_set(worker->events, 1 << LFRFIDHitagWorkerSignalHalfTransfer);
     } else {
         furi_event_flag_set(worker->events, 1 << LFRFIDHitagWorkerSignalTransferComplete);
     }
 }
 
-
 //------------------------------------------------------------------ EMULATE TAG: TIMER callback functions)------------------------------------------------------------------
-static void lfrfid_hitag_worker_carrier_in_callback(bool level, uint32_t duration, void* capture_context){
+static void
+    lfrfid_hitag_worker_carrier_in_callback(bool level, uint32_t duration, void* capture_context) {
     UNUSED(level);
 
     LfRfidHitagCaptureData* capData = capture_context;
@@ -227,9 +228,7 @@ static void lfrfid_hitag_worker_carrier_in_callback(bool level, uint32_t duratio
     varint_pair_pack(capData->pair, true, duration);
     //but send anyhow, doesn't matter that it's not a pair
     buffer_stream_send_from_isr(
-        capData->stream,
-        varint_pair_get_data(capData->pair),
-        varint_pair_get_size(capData->pair));
+        capData->stream, varint_pair_get_data(capData->pair), varint_pair_get_size(capData->pair));
     varint_pair_reset(capData->pair);
 }
 
@@ -827,7 +826,7 @@ static int32_t lfrfid_hitag_worker_emulate_thread(void* thread_context) {
     capData->stream = buffer_stream_alloc(EMULATE_BUFFER_SIZE, EMULATE_BUFFER_COUNT);
     capData->pair = varint_pair_alloc();
     capData->capCounter = 0;
-    
+
     //init dmaData for emulate mode:
     uint16_t dmaLen = 0;
     TimerDMAData* dataDMA = malloc(sizeof(TimerDMAData));
@@ -1519,7 +1518,11 @@ static int32_t lfrfid_hitag_worker_read_thread(void* thread_context) {
 
     //start TIM1 with DMA function
     furi_hal_rfid_rtf_carrier_out_start(
-        dataDMA->timer_buffer_arr, dataDMA->timer_buffer_ccr, DMA_BUFFER_SIZE, lfrfid_hitag_worker_carrier_out_dma_callback, worker);
+        dataDMA->timer_buffer_arr,
+        dataDMA->timer_buffer_ccr,
+        DMA_BUFFER_SIZE,
+        lfrfid_hitag_worker_carrier_out_dma_callback,
+        worker);
 
     // start capture
     LfRfidHitagCaptureData* capData = malloc(sizeof(LfRfidHitagCaptureData));
