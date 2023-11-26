@@ -116,7 +116,7 @@ bool subghz_scene_transmitter_on_event(void* context, SceneManagerEvent event) {
         }
     } else if(event.type == SceneManagerEventTypeTick) {
         if(subghz->state_notifications == SubGhzNotificationStateTx) {
-            notification_message(subghz->notifications, &sequence_blink_magenta_10);
+            notification_message(subghz->notifications, &sequence_blink_red_10);
         }
         return true;
     }

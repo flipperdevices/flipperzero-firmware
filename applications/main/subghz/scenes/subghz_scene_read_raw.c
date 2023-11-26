@@ -366,7 +366,7 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
             subghz_protocol_raw_save_to_file_pause(decoder_raw, !ret_rssi.is_above);
             break;
         case SubGhzNotificationStateTx:
-            notification_message(subghz->notifications, &sequence_blink_magenta_10);
+            notification_message(subghz->notifications, &sequence_blink_red_10);
             subghz_read_raw_update_sin(subghz->subghz_read_raw);
             break;
         default:
