@@ -9,8 +9,6 @@
 
 #include "led_driver.h"
 
-#include "ws2812b_tester_app_icons.h"
-
 #define TAG "WS2812B-Tester"
 
 // Our application menu has 2 items.
@@ -486,7 +484,7 @@ static LedTesterApp* led_tester_app_alloc() {
         0,
         128,
         64,
-        "This is a WS2812B LED tester\n\nConnect WS2812B LED data\nwire to GPIO pin on Flipper.\n\nThe 3V3 pin has a 1200mA\nmax current (~4 watts). The\n5V pin has a 1000mA max\ncurrent (5 watts).\n\nauthors: @codeallnight and\nZ3BRO!\n\nhttps://discord.com/invite/NsjCvqwPAd\nhttps://youtube.com/@MrDerekJamison");
+        "This is a WS2812B LED tester\n\nConnect WS2812B LED data\nwire to GPIO pin on Flipper.\n\nThe 3V3 pin has a 1200mA\nmax current (~4 watts). The\n5V pin has a 1000mA max\ncurrent (5 watts).\n\nauthors: @codeallnight and\nZ3BRO!\n\nhttps://discord.com/invite/NsjCvqwPAd\nhttps://youtube.com/@MrDerekJamison\n\n");
     view_set_previous_callback(
         widget_get_view(app->widget_about), led_tester_navigation_submenu_callback);
     view_dispatcher_add_view(
