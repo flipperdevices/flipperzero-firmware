@@ -389,7 +389,7 @@ static LFRFIDWorkerReadState lfrfid_worker_read_rtf( //reader talks first
 
 static void lfrfid_worker_mode_read_process(LFRFIDWorker* worker) {
     ProtocolId read_result = PROTOCOL_NO;
-    LFRFIDWorkerReadState state;
+    LFRFIDWorkerReadState state = LFRFIDWorkerReadOK;
     LFRFIDFeature feature;
 
     if(worker->read_type == LFRFIDWorkerReadTypePSKOnly) {
