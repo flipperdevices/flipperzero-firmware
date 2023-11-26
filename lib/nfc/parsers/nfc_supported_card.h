@@ -16,6 +16,7 @@ typedef enum {
     NfcSupportedCardTypeTwoCities,
     NfcSupportedCardTypeAllInOne,
     NfcSupportedCardTypeOpal,
+    NfcSupportedCardTypeMyki,
 
     NfcSupportedCardTypeEnd,
 } NfcSupportedCardType;
