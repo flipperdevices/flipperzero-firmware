@@ -219,12 +219,6 @@ esp_loader_error_t loader_mem_data_cmd(const uint8_t *data, uint32_t size);
 
 esp_loader_error_t loader_mem_end_cmd(uint32_t entrypoint);
 
-esp_loader_error_t loader_mem_begin_cmd(uint32_t offset, uint32_t size, uint32_t blocks_to_write, uint32_t block_size);
-
-esp_loader_error_t loader_mem_data_cmd(const uint8_t *data, uint32_t size);
-
-esp_loader_error_t loader_mem_end_cmd(uint32_t entrypoint);
-
 esp_loader_error_t loader_write_reg_cmd(uint32_t address, uint32_t value, uint32_t mask, uint32_t delay_us);
 
 esp_loader_error_t loader_read_reg_cmd(uint32_t address, uint32_t *reg);
