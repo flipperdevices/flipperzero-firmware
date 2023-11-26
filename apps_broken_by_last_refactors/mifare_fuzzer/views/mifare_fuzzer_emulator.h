@@ -5,6 +5,8 @@
 #include <gui/view.h>
 #include <gui/elements.h>
 
+#include "lib/nfc/protocols/iso14443_3a/iso14443_3a.h"
+
 typedef void (*MifareFuzzerEmulatorCallback)(MifareFuzzerEvent event, void* context);
 
 typedef enum MifareCard {
@@ -33,7 +35,7 @@ typedef struct MifareFuzzerEmulatorModel {
     const char* mifare_card_dsc;
     MifareFuzzerAttack attack;
     const char* attack_dsc;
-    FuriHalNfcDevData nfc_dev_data;
+    Iso14443_3aData nfc_data;
     bool is_attacking;
     uint8_t tick_num;
     uint8_t ticks_between_cards;
@@ -57,9 +59,9 @@ void mifare_fuzzer_emulator_set_callback(
     MifareFuzzerEmulatorCallback callback,
     void* context);
 
-void mifare_fuzzer_emulator_set_nfc_dev_data(
+void mifare_fuzzer_emulator_set_nfc_data(
     MifareFuzzerEmulator* mifare_fuzzer_emulator,
-    FuriHalNfcDevData nfc_dev_data);
+    Iso14443_3aData nfc_data);
 
 void mifare_fuzzer_emulator_set_ticks_between_cards(
     MifareFuzzerEmulator* mifare_fuzzer_emulator,

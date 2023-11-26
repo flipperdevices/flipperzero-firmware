@@ -68,7 +68,6 @@ struct MifareFuzzerApp {
 
     MifareCard card;
     MifareFuzzerAttack attack;
-    FuriHalNfcDevData nfc_dev_data;
     FuriString* app_folder;
     FuriString* file_path;
     FuriString* uid_str;

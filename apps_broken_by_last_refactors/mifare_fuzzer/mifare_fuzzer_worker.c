@@ -1,4 +1,3 @@
-
 #include "mifare_fuzzer_worker.h"
 
 /// @brief mifare_fuzzer_worker_alloc()
@@ -9,6 +8,10 @@ MifareFuzzerWorker* mifare_fuzzer_worker_alloc() {
     mifare_fuzzer_worker->thread = furi_thread_alloc_ex(
         "MifareFuzzerWorker", 8192, mifare_fuzzer_worker_task, mifare_fuzzer_worker);
     mifare_fuzzer_worker->state = MifareFuzzerWorkerStateStop;
+
+    mifare_fuzzer_worker->nfc = nfc_alloc();
+    mifare_fuzzer_worker->nfc_device = nfc_device_alloc();
+
     return mifare_fuzzer_worker;
 }
 
@@ -17,6 +20,10 @@ MifareFuzzerWorker* mifare_fuzzer_worker_alloc() {
 void mifare_fuzzer_worker_free(MifareFuzzerWorker* mifare_fuzzer_worker) {
     furi_assert(mifare_fuzzer_worker);
     furi_thread_free(mifare_fuzzer_worker->thread);
+
+    nfc_free(mifare_fuzzer_worker->nfc);
+    nfc_device_free(mifare_fuzzer_worker->nfc_device);
+
     free(mifare_fuzzer_worker);
 }
 
@@ -45,14 +52,19 @@ int32_t mifare_fuzzer_worker_task(void* context) {
     MifareFuzzerWorker* mifare_fuzzer_worker = context;
 
     if(mifare_fuzzer_worker->state == MifareFuzzerWorkerStateEmulate) {
-        FuriHalNfcDevData params = mifare_fuzzer_worker->nfc_dev_data;
+        const Iso14443_3aData* data =
+            nfc_device_get_data(mifare_fuzzer_worker->nfc_device, NfcProtocolIso14443_3a);
 
-        furi_hal_nfc_exit_sleep();
+        mifare_fuzzer_worker->nfc_listener =
+            nfc_listener_alloc(mifare_fuzzer_worker->nfc, NfcProtocolIso14443_3a, data);
+        nfc_listener_start(mifare_fuzzer_worker->nfc_listener, NULL, NULL);
+
         while(mifare_fuzzer_worker->state == MifareFuzzerWorkerStateEmulate) {
-            furi_hal_nfc_listen(params.uid, params.uid_len, params.atqa, params.sak, false, 500);
             furi_delay_ms(50);
         }
-        furi_hal_nfc_sleep();
+
+        nfc_listener_stop(mifare_fuzzer_worker->nfc_listener);
+        nfc_listener_free(mifare_fuzzer_worker->nfc_listener);
     }
 
     mifare_fuzzer_worker->state = MifareFuzzerWorkerStateStop;
@@ -70,18 +82,27 @@ bool mifare_fuzzer_worker_is_emulating(MifareFuzzerWorker* mifare_fuzzer_worker)
     return false;
 }
 
-/// @brief mifare_fuzzer_worker_set_nfc_dev_data()
+/// @brief mifare_fuzzer_worker_set_nfc_data()
 /// @param mifare_fuzzer_worker
-/// @param nfc_dev_data
-void mifare_fuzzer_worker_set_nfc_dev_data(
+/// @param nfc_data
+void mifare_fuzzer_worker_set_nfc_data(
     MifareFuzzerWorker* mifare_fuzzer_worker,
-    FuriHalNfcDevData nfc_dev_data) {
-    mifare_fuzzer_worker->nfc_dev_data = nfc_dev_data;
+    Iso14443_3aData nfc_data) {
+    Iso14443_3aData* nfc_14a_data = iso14443_3a_alloc();
+    nfc_14a_data->uid_len = nfc_data.uid_len;
+    memcpy(nfc_14a_data->uid, nfc_data.uid, nfc_data.uid_len);
+    memcpy(nfc_14a_data->atqa, nfc_data.atqa, ATQA_LEN);
+    nfc_14a_data->sak = nfc_data.sak;
+
+    nfc_device_clear(mifare_fuzzer_worker->nfc_device);
+    nfc_device_set_data(mifare_fuzzer_worker->nfc_device, NfcProtocolIso14443_3a, nfc_14a_data);
+
+    iso14443_3a_free(nfc_14a_data);
 }
 
-/// @brief mifare_fuzzer_worker_get_nfc_dev_data()
+/// @brief mifare_fuzzer_worker_get_nfc_data()
 /// @param mifare_fuzzer_worker
 /// @return
-FuriHalNfcDevData mifare_fuzzer_worker_get_nfc_dev_data(MifareFuzzerWorker* mifare_fuzzer_worker) {
-    return mifare_fuzzer_worker->nfc_dev_data;
+Iso14443_3aData mifare_fuzzer_worker_get_nfc_data(MifareFuzzerWorker* mifare_fuzzer_worker) {
+    return mifare_fuzzer_worker->nfc_data;
 }
