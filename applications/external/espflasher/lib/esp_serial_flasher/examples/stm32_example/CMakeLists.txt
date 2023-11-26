@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 
 set(FLASHER_DIR ${CMAKE_CURRENT_LIST_DIR}/../..)
-set(CMAKE_TOOLCHAIN_FILE ${FLASHER_DIR}/submodules/stm32-cmake/cmake/stm32_gcc.cmake)
+set(CMAKE_TOOLCHAIN_FILE ${FLASHER_DIR}/submodules/stm32_cmake/cmake/stm32_gcc.cmake)
 
 project(stm32_flasher C ASM)
 
