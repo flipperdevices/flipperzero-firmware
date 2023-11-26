@@ -18,10 +18,8 @@ void hangman_draw_utf8_str(Canvas* canvas, uint8_t x, uint8_t y, const char* str
 
         if(state == FuriStringUTF8StateStarting) {
             canvas_draw_glyph(canvas, x, y, value);
-
             // Only one-byte glyphs supported by canvas_glyph_width
-            x += value <= 0xFF ? canvas_glyph_width(canvas, value) :
-                                 canvas_glyph_width(canvas, ' ');
+            x += canvas_glyph_width(canvas, value <= 0xFF ? value : ' ');
         }
     }
 }
