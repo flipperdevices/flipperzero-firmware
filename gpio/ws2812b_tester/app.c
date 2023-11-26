@@ -38,6 +38,7 @@ typedef struct {
     uint8_t led_pin_index; // The index of the pin we are using to control the LEDs
     uint32_t led_count; // The number of LEDs
     uint8_t led_pattern_index; // The pattern index
+    int8_t led_divisor; // The speed divisor (1-4, -1 = stopped)
     uint8_t led_max_brightness; // The maximum brightness (0-100)
     uint8_t timer_counter; // The current timer counter (used for auto-scrolling)
     bool enable_5v; // Enable 5V output
@@ -183,13 +184,26 @@ static void led_tester_setting_led_count_change(VariableItem* item) {
 // Settings for configuring which LED pattern to use.
 static const char* setting_led_pattern_config_label = "LED Pattern";
 static char* setting_led_pattern_names[] =
-    {"Red", "Green", "Blue", "White", "RGBW", "GBWR", "BWRG", "WRGB", "Rotate"};
+    {"Red", "Green", "Blue", "White", "RGBW", "GBWR", "BWRG", "WRGB"};
 static void led_tester_setting_led_pattern_change(VariableItem* item) {
     LedTesterApp* app = variable_item_get_context(item);
     LedTesterModel* model = app->model;
     uint8_t index = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, setting_led_pattern_names[index]);
     model->led_pattern_index = index;
+    led_tester_settings_updated(app);
+}
+
+// Settings for configuring which LED speed to use.
+static const char* setting_led_speed_config_label = "LED Speed";
+static int16_t setting_led_speed_values[] = {-1, 3, 2, 1};
+static char* setting_led_speed_names[] = {"Stopped", "Slow", "Medium", "Fast"};
+static void led_tester_setting_led_speed_change(VariableItem* item) {
+    LedTesterApp* app = variable_item_get_context(item);
+    LedTesterModel* model = app->model;
+    uint8_t index = variable_item_get_current_value_index(item);
+    variable_item_set_current_value_text(item, setting_led_speed_names[index]);
+    model->led_divisor = setting_led_speed_values[index];
     led_tester_settings_updated(app);
 }
 
@@ -237,6 +251,10 @@ static bool led_tester_custom_event_callback(void* context, uint32_t event) {
     if(event == LedTesterEventTimer) {
         app->model->timer_counter++;
     }
+
+    uint8_t offset = (app->model->led_divisor == -1) ?
+                         0 :
+                         (app->model->timer_counter / app->model->led_divisor) & 0x3;
 
     uint32_t rgb[4] = {0};
     switch(app->model->led_pattern_index) {
@@ -288,16 +306,20 @@ static bool led_tester_custom_event_callback(void* context, uint32_t event) {
         rgb[2] = 0x00FF00;
         rgb[3] = 0x0000FF;
         break;
-    case 8: // Rotate
-        rgb[(app->model->timer_counter + 0) & 0x3] = 0xFFFFFF;
-        rgb[(app->model->timer_counter + 1) & 0x3] = 0xFF0000;
-        rgb[(app->model->timer_counter + 2) & 0x3] = 0x00FF00;
-        rgb[(app->model->timer_counter + 3) & 0x3] = 0x0000FF;
-        break;
     default:
         break;
     }
 
+    // Rotate the pattern
+    for(int i = 0; i < offset; i++) {
+        uint32_t tmp = rgb[3];
+        rgb[3] = rgb[2];
+        rgb[2] = rgb[1];
+        rgb[1] = rgb[0];
+        rgb[0] = tmp;
+    }
+
+    // If deinit, turn off the LEDs
     if(event == LedTesterEventDeinit) {
         rgb[0] = 0;
         rgb[1] = 0;
@@ -343,7 +365,7 @@ void led_tester_enter_leds_callback(void* _context) {
     // Hack, we use a global to access the app object.
     LedTesterApp* app = (LedTesterApp*)global_app;
     app->timer = furi_timer_alloc(led_tester_timer_callback, FuriTimerTypePeriodic, app);
-    furi_timer_start(app->timer, 500);
+    furi_timer_start(app->timer, 250);
     view_dispatcher_send_custom_event(app->view_dispatcher, LedTesterEventInitialized);
 }
 
@@ -440,6 +462,18 @@ static LedTesterApp* led_tester_app_alloc() {
     variable_item_set_current_value_text(
         item, setting_led_pattern_names[setting_led_pattern_index]);
     app->model->led_pattern_index = setting_led_pattern_index;
+
+    // Speed
+    item = variable_item_list_add(
+        app->variable_item_list,
+        setting_led_speed_config_label,
+        COUNT_OF(setting_led_speed_names),
+        led_tester_setting_led_speed_change,
+        app);
+    uint8_t setting_led_speed_index = 0;
+    variable_item_set_current_value_index(item, setting_led_speed_index);
+    variable_item_set_current_value_text(item, setting_led_speed_names[setting_led_speed_index]);
+    app->model->led_divisor = setting_led_speed_values[setting_led_speed_index];
 
     // Brightness
     item = variable_item_list_add(
