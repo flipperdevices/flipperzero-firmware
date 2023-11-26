@@ -11,6 +11,7 @@ enum SubmenuIndex {
     SubmenuIndexAppB,
     SubmenuIndexCustom,
     SubmenuIndexFlash,
+    SubmenuIndexFlashTurbo,
 };
 
 static void esp_flasher_scene_browse_callback(void* context, uint32_t index) {
@@ -147,6 +148,8 @@ static void esp_flasher_scene_browse_callback(void* context, uint32_t index) {
         view_dispatcher_send_custom_event(app->view_dispatcher, EspFlasherEventRefreshSubmenu);
         break;
     case SubmenuIndexFlash:
+    case SubmenuIndexFlashTurbo:
+        app->turbospeed = (index == SubmenuIndexFlashTurbo); // faster baudrate toggle
         // count how many options are selected
         app->num_selected_flash_options = 0;
         for(bool* option = &app->selected_flash_options[SelectedFlashBoot];
@@ -177,8 +180,10 @@ static void esp_flasher_scene_browse_callback(void* context, uint32_t index) {
 #define STR_APP_A "FirmwareA(" TOSTRING(ESP_ADDR_APP_A) ")"
 #define STR_APP_B "FirmwareB(" TOSTRING(ESP_ADDR_APP_B) ")"
 #define STR_CUSTOM "Custom"
-#define STR_FLASH_S3 "[>] FLASH (ESP32-S3)"
-#define STR_FLASH "[>] FLASH"
+#define STR_FLASH_S3 "[>] FLASH - slow (S3)"
+#define STR_FLASH "[>] FLASH - slow"
+#define STR_FLASH_TURBO_S3 "[>] FLASH - fast (S3)"
+#define STR_FLASH_TURBO "[>] FLASH - fast"
 static void _refresh_submenu(EspFlasherApp* app) {
     Submenu* submenu = app->submenu;
 
@@ -246,6 +251,12 @@ static void _refresh_submenu(EspFlasherApp* app) {
     // TODO: custom addr
     //submenu_add_item(
     //    submenu, app->selected_flash_options[SelectedFlashCustom] ? STR_SELECT " " STR_CUSTOM : STR_UNSELECT " " STR_CUSTOM, SubmenuIndexCustom, esp_flasher_scene_browse_callback, app);
+    submenu_add_item(
+        submenu,
+        app->selected_flash_options[SelectedFlashS3Mode] ? STR_FLASH_TURBO_S3 : STR_FLASH_TURBO,
+        SubmenuIndexFlashTurbo,
+        esp_flasher_scene_browse_callback,
+        app);
     submenu_add_item(
         submenu,
         app->selected_flash_options[SelectedFlashS3Mode] ? STR_FLASH_S3 : STR_FLASH,

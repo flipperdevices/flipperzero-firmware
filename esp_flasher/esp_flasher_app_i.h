@@ -64,6 +64,7 @@ struct EspFlasherApp {
     Submenu* submenu;
 
     EspFlasherUart* uart;
+    bool turbospeed;
 
     bool reset;
     bool boot;
