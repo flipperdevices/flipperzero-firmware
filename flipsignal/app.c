@@ -53,21 +53,21 @@ static void flipboard_view_flip_signal_draw(Canvas* canvas, void* model) {
 static bool x(void* context, uint32_t event) {
     UNUSED(context);
     if(event == 1) {
-        Signal* signal = signal_load_file("/ext/subghz/flip-a1.sub");
-        signal_send(signal, false);
-        signal_free(signal);
+        SubGhzSignal* signal = subghz_signal_load_file("/ext/subghz/flip-a1.sub");
+        subghz_signal_send(signal, false);
+        subghz_signal_free(signal);
     } else if(event == 2) {
-        Signal* signal = signal_load_file("/ext/subghz/flip-a2.sub");
-        signal_send(signal, false);
-        signal_free(signal);
+        SubGhzSignal* signal = subghz_signal_load_file("/ext/subghz/flip-a2.sub");
+        subghz_signal_send(signal, false);
+        subghz_signal_free(signal);
     } else if(event == 4) {
-        Signal* signal = signal_load_file("/ext/subghz/flip-a3.sub");
-        signal_send(signal, false);
-        signal_free(signal);
+        SubGhzSignal* signal = subghz_signal_load_file("/ext/subghz/flip-a3.sub");
+        subghz_signal_send(signal, false);
+        subghz_signal_free(signal);
     } else if(event == 8) {
-        Signal* signal = signal_load_file("/ext/subghz/flip-a4.sub");
-        signal_send(signal, false);
-        signal_free(signal);
+        SubGhzSignal* signal = subghz_signal_load_file("/ext/subghz/flip-a4.sub");
+        subghz_signal_send(signal, false);
+        subghz_signal_free(signal);
     }
 
     return true;

@@ -2,17 +2,27 @@
 #include <lib/subghz/transmitter.h>
 #include <flipper_format/flipper_format_i.h>
 #include <lib/subghz/protocols/protocol_items.h>
-#include "signal.h"
+#include "subghz_signal.h"
+#include "app_config.h"
 #include <storage/storage.h>
 
-#define FIRMWARE_SUBGHZ_UPDATED 1
-
-#define TAG "signal"
-
-#ifdef FIRMWARE_SUBGHZ_UPDATED
+#ifdef FIRMWARE_SUPPORTS_SUBGHZ
 #include <applications/drivers/subghz/cc1101_ext/cc1101_ext_interconnect.h>
 #include <lib/subghz/devices/cc1101_int/cc1101_int_interconnect.h>
 #include <devices/devices.h>
+
+struct SubGhzSignal {
+    FuriString* sub_file_contents;
+    FuriString* protocol;
+    uint32_t frequency;
+    FuriHalSubGhzPreset preset;
+};
+
+typedef enum {
+    Unknown,
+    Raw,
+    Key,
+} FileType;
 
 static void subghz_radio_device_power_on() {
     uint8_t attempts = 5;
@@ -33,7 +43,7 @@ static void set_signal(FuriString* sub_file_contents, FlipperFormat* flipper_for
     stream_seek(stream, 0, StreamOffsetFromStart);
 }
 
-void send_signal(
+static void send_signal(
     FuriString* sub_file_contents,
     const char* protocol,
     uint32_t frequency,
@@ -90,29 +100,18 @@ void send_signal(
 }
 #else
 void send_signal(
-    char* protocol,
-    uint32_t frequency,
     FuriString* sub_file_contents,
+    const char* protocol,
+    uint32_t frequency,
+    FuriHalSubGhzPreset preset,
     bool use_external_radio) {
     FURI_LOG_D("FlipSignal", "TODO: Send %s signal", protocol);
-    UNUSED(use_external_radio);
-    UNUSED(frequency);
     UNUSED(sub_file_contents);
+    UNUSED(frequency);
+    UNUSED(preset);
+    UNUSED(use_external_radio);
 }
 #endif
-
-struct Signal {
-    FuriString* sub_file_contents;
-    FuriString* protocol;
-    uint32_t frequency;
-    FuriHalSubGhzPreset preset;
-};
-
-typedef enum {
-    Unknown,
-    Raw,
-    Key,
-} FileType;
 
 static FuriHalSubGhzPreset signal_get_preset(FuriString* preset_str) {
     const char* preset_name = furi_string_get_cstr(preset_str);
@@ -135,8 +134,8 @@ static FuriHalSubGhzPreset signal_get_preset(FuriString* preset_str) {
     return preset;
 }
 
-Signal* signal_load_file(char* file_path) {
-    Signal* signal = (Signal*)malloc(sizeof(Signal));
+SubGhzSignal* subghz_signal_load_file(char* file_path) {
+    SubGhzSignal* signal = (SubGhzSignal*)malloc(sizeof(SubGhzSignal));
     signal->sub_file_contents = furi_string_alloc();
     signal->protocol = furi_string_alloc();
     signal->frequency = 0;
@@ -236,7 +235,29 @@ Signal* signal_load_file(char* file_path) {
     return signal;
 }
 
+void subghz_signal_free(SubGhzSignal* signal) {
+    if(signal) {
+        furi_string_free(signal->sub_file_contents);
+        furi_string_free(signal->protocol);
+        free(signal);
+    }
+}
+
+void subghz_signal_send(SubGhzSignal* signal, bool use_external_radio) {
+    if(signal) {
+        send_signal(
+            signal->sub_file_contents,
+            furi_string_get_cstr(signal->protocol),
+            signal->frequency,
+            signal->preset,
+            use_external_radio);
+    }
+}
+
 /*
+
+Future file browser example:
+
     FuriString* file_path = furi_string_alloc();
 
     DialogsFileBrowserOptions browser_options;
@@ -247,23 +268,5 @@ Signal* signal_load_file(char* file_path) {
     // Input events and views are managed by file_select
     bool res = dialog_file_browser_show(
         subghz->dialogs, subghz->file_path, subghz->file_path, &browser_options);
+
 */
-
-void signal_free(Signal* signal) {
-    if(signal) {
-        furi_string_free(signal->sub_file_contents);
-        furi_string_free(signal->protocol);
-        free(signal);
-    }
-}
-
-void signal_send(Signal* signal, bool use_external_radio) {
-    if(signal) {
-        send_signal(
-            signal->sub_file_contents,
-            furi_string_get_cstr(signal->protocol),
-            signal->frequency,
-            signal->preset,
-            use_external_radio);
-    }
-}

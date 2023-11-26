@@ -23,4 +23,4 @@
 #include "./common/leds.h"
 #include "./common/speaker.h"
 
-#include "./signal.h"
+#include "./subghz_signal.h"
