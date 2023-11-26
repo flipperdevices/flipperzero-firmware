@@ -1,0 +1,63 @@
+name: Tests
+
+on: [push, pull_request]
+
+env:
+  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+  BUILD_TYPE: Release
+
+jobs:
+  test-ubuntu:
+    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        family: [C0, F0, F1, F2, F3, F4, F7, G0, G4, H7, L0, L1, L4, L5, U5, WB, WL, MP1]
+      fail-fast: false
+
+    steps:
+    - uses: actions/checkout@v2
+      
+    - name: Install ARM toolchain
+      run: sudo apt-get install gcc-arm-none-eabi binutils-arm-none-eabi 
+
+    - name: Create build directory for tests/fetch
+      run: cmake -E make_directory ${{runner.workspace}}/tests/fetch/build
+
+    - name: Configure tests/fetch
+      shell: bash
+      working-directory: ${{runner.workspace}}/tests/fetch/build
+      run: cmake -DTEST_FAMILIES=${{ matrix.family }} $GITHUB_WORKSPACE/tests/fetch/
+
+    - name: Build tests/fetch
+      working-directory: ${{runner.workspace}}/tests/fetch/build
+      shell: bash
+      run: cmake --build . --config $BUILD_TYPE
+
+    - name: Create build directory for tests/cmsis
+      run: cmake -E make_directory ${{runner.workspace}}/tests/cmsis/build
+      if: ${{ matrix.family != 'MP1' }}
+
+    - name: Configure tests/cmsis
+      shell: bash
+      working-directory: ${{runner.workspace}}/tests/cmsis/build
+      run: cmake -DTEST_FAMILIES=${{ matrix.family }} -DFETCH_ST_SOURCES=TRUE $GITHUB_WORKSPACE/tests/cmsis/
+      if: ${{ matrix.family != 'MP1' }}
+
+    - name: Build tests/cmsis
+      working-directory: ${{runner.workspace}}/tests/cmsis/build
+      shell: bash
+      run: cmake --build . --config $BUILD_TYPE
+      if: ${{ matrix.family != 'MP1' }}
+
+    - name: Create build directory for tests/hal
+      run: cmake -E make_directory ${{runner.workspace}}/tests/hal/build
+
+    - name: Configure tests/hal
+      shell: bash
+      working-directory: ${{runner.workspace}}/tests/hal/build
+      run: cmake -DTEST_FAMILIES=${{ matrix.family }} -DFETCH_ST_SOURCES=TRUE $GITHUB_WORKSPACE/tests/hal/
+
+    - name: Build tests/hal
+      working-directory: ${{runner.workspace}}/tests/hal/build
+      shell: bash
+      run: cmake --build . --config $BUILD_TYPE
