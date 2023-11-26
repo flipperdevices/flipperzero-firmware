@@ -2,6 +2,13 @@
 
 #include "furi_hal.h"
 
+#include <xtreme.h>
+
+#define UART_CH \
+    (xtreme_settings.uart_esp_channel == UARTDefault ? FuriHalUartIdUSART1 : FuriHalUartIdLPUART1)
+#define BAUDRATE (115200)
+#define FAST_BAUDRATE (921600)
+
 #define RX_BUF_SIZE (2048)
 
 typedef struct EspFlasherUart EspFlasherUart;
