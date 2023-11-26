@@ -14,6 +14,8 @@ struct HidPushToTalk {
     Hid* hid;
 };
 
+typedef void (*PushToTalkActionCallback)(HidPushToTalk* hid_ptt);
+
 typedef struct {
     bool left_pressed;
     bool up_pressed;
@@ -29,6 +31,11 @@ typedef struct {
     size_t appIndex;
     size_t window_position;
     HidTransport transport;
+    PushToTalkActionCallback callback_trigger_mute;
+    PushToTalkActionCallback callback_trigger_camera;
+    PushToTalkActionCallback callback_trigger_hand;
+    PushToTalkActionCallback callback_start_ptt;
+    PushToTalkActionCallback callback_stop_ptt;
 } HidPushToTalkModel;
 
 enum HidPushToTalkAppIndex {
@@ -39,6 +46,105 @@ enum HidPushToTalkAppIndex {
     HidPushToTalkAppIndexSize,
 };
 
+static void hid_ptt_start_ptt_meet_zoom(HidPushToTalk* hid_ptt) {
+    hid_hal_keyboard_press(hid_ptt->hid, HID_KEYBOARD_SPACEBAR);
+}
+static void hid_ptt_stop_ptt_meet_zoom(HidPushToTalk* hid_ptt) {
+    hid_hal_keyboard_release(hid_ptt->hid, HID_KEYBOARD_SPACEBAR);
+}
+static void hid_ptt_trigger_mute_macos_meet(HidPushToTalk* hid_ptt) {
+    hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_GUI | HID_KEYBOARD_D);
+    hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_GUI | HID_KEYBOARD_D);
+}
+static void hid_ptt_trigger_mute_linux_meet(HidPushToTalk* hid_ptt) {
+    hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_CTRL | HID_KEYBOARD_D);
+    hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_CTRL | HID_KEYBOARD_D);
+}
+static void hid_ptt_trigger_camera_macos_meet(HidPushToTalk* hid_ptt) {
+    hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_GUI | HID_KEYBOARD_E);
+    hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_GUI | HID_KEYBOARD_E);
+}
+static void hid_ptt_trigger_camera_linux_meet(HidPushToTalk* hid_ptt) {
+    hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_CTRL | HID_KEYBOARD_E);
+    hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_CTRL | HID_KEYBOARD_E );
+}
+static void hid_ptt_trigger_hand_macos_meet(HidPushToTalk* hid_ptt) {
+    hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_GUI | KEY_MOD_LEFT_CTRL |HID_KEYBOARD_H);
+    hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_GUI | KEY_MOD_LEFT_CTRL |HID_KEYBOARD_H);
+}
+static void hid_ptt_trigger_hand_linux_meet(HidPushToTalk* hid_ptt) {
+    hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_CTRL | KEY_MOD_LEFT_ALT |HID_KEYBOARD_H);
+    hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_CTRL | KEY_MOD_LEFT_ALT |HID_KEYBOARD_H);
+}
+static void hid_ptt_trigger_mute_macos_zoom(HidPushToTalk* hid_ptt) {
+    hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_GUI| KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_A);
+    hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_GUI| KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_A);
+}
+static void hid_ptt_trigger_mute_linux_zoom(HidPushToTalk* hid_ptt) {
+    hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_ALT | HID_KEYBOARD_A);
+    hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_ALT | HID_KEYBOARD_A);
+}
+static void hid_ptt_trigger_camera_macos_zoom(HidPushToTalk* hid_ptt) {
+    hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_GUI| KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_V);
+    hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_GUI| KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_V);
+}
+static void hid_ptt_trigger_camera_linux_zoom(HidPushToTalk* hid_ptt) {
+    hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_ALT | HID_KEYBOARD_V);
+    hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_ALT | HID_KEYBOARD_V);
+}
+static void hid_ptt_trigger_hand_macos_zoom(HidPushToTalk* hid_ptt) {
+    hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_GUI| HID_KEYBOARD_Y);
+    hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_GUI| HID_KEYBOARD_Y);
+}
+static void hid_ptt_trigger_hand_linux_zoom(HidPushToTalk* hid_ptt) {
+    hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_ALT | HID_KEYBOARD_Y);
+    hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_ALT | HID_KEYBOARD_Y);
+}
+static void hid_ptt_start_ptt_macos_skype(HidPushToTalk* hid_ptt) {
+    hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_GUI| KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_M);
+    hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_GUI| KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_M);
+}
+static void hid_ptt_start_ptt_linux_skype(HidPushToTalk* hid_ptt) {
+    hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_CTRL | HID_KEYBOARD_M);
+    hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_CTRL | HID_KEYBOARD_M );
+}
+static void hid_ptt_stop_ptt_macos_skype(HidPushToTalk* hid_ptt) {
+    hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_GUI| KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_M);
+    hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_GUI| KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_M);
+}
+static void hid_ptt_stop_ptt_linux_skype(HidPushToTalk* hid_ptt) {
+    hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_CTRL | HID_KEYBOARD_M);
+    hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_CTRL | HID_KEYBOARD_M);
+}
+static void hid_ptt_trigger_mute_macos_skype(HidPushToTalk* hid_ptt) {
+    hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_GUI| KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_M);
+    hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_GUI| KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_M);
+}
+static void hid_ptt_trigger_mute_linux_skype(HidPushToTalk* hid_ptt) {
+    hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_CTRL | HID_KEYBOARD_M);
+    hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_CTRL | HID_KEYBOARD_M);
+}
+static void hid_ptt_trigger_camera_macos_skype(HidPushToTalk* hid_ptt) {
+    hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_GUI| KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_K);
+    hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_GUI| KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_K);
+}
+static void hid_ptt_trigger_camera_linux_skype(HidPushToTalk* hid_ptt) {
+    hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_CTRL| KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_K);
+    hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_CTRL| KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_K);
+}
+static void hid_ptt_trigger_mute_facetime(HidPushToTalk* hid_ptt) {
+    hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_GUI| KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_M);
+    hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_GUI| KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_M);
+}
+static void hid_ptt_start_ptt_facetime(HidPushToTalk* hid_ptt) {
+    hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_GUI| KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_M);
+    hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_GUI| KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_M );
+}
+static void hid_ptt_stop_ptt_facetime(HidPushToTalk* hid_ptt) {
+    hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_GUI| KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_M);
+    hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_GUI| KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_M);
+}
+
 static void hid_ptt_menu_callback(void* context, uint32_t osIndex, FuriString* osLabel, uint32_t appIndex, FuriString* appLabel) {
     furi_assert(context);
     HidPushToTalk* hid_ptt = context;
@@ -48,12 +154,65 @@ static void hid_ptt_menu_callback(void* context, uint32_t osIndex, FuriString* o
             furi_string_set(model->app, appLabel);
             model->osIndex = osIndex;
             model->appIndex = appIndex;
+            model->callback_trigger_mute   = NULL;
+            model->callback_trigger_camera = NULL;
+            model->callback_trigger_hand   = NULL;
+            model->callback_start_ptt      = NULL;
+            model->callback_stop_ptt       = NULL;
+            if(osIndex == HidPushToTalkMacOS) {
+                switch(appIndex) {
+                case HidPushToTalkAppIndexGoogleMeet:
+                    model->callback_trigger_mute   = hid_ptt_trigger_mute_macos_meet;
+                    model->callback_trigger_camera = hid_ptt_trigger_camera_macos_meet;
+                    model->callback_trigger_hand   = hid_ptt_trigger_hand_macos_meet;
+                    model->callback_start_ptt      = hid_ptt_start_ptt_meet_zoom;
+                    model->callback_stop_ptt       = hid_ptt_stop_ptt_meet_zoom;
+                    break;
+                case HidPushToTalkAppIndexZoom:
+                    model->callback_trigger_mute   = hid_ptt_trigger_mute_macos_zoom;
+                    model->callback_trigger_camera = hid_ptt_trigger_camera_macos_zoom;
+                    model->callback_trigger_hand   = hid_ptt_trigger_hand_macos_zoom;
+                    model->callback_start_ptt      = hid_ptt_start_ptt_meet_zoom;
+                    model->callback_stop_ptt       = hid_ptt_stop_ptt_meet_zoom;
+                    break;
+                case HidPushToTalkAppIndexFaceTime:
+                    model->callback_trigger_mute   = hid_ptt_trigger_mute_facetime;
+                    model->callback_start_ptt      = hid_ptt_start_ptt_facetime;
+                    model->callback_stop_ptt       = hid_ptt_stop_ptt_facetime;
+                    break;
+                case HidPushToTalkAppIndexSkype:
+                    model->callback_trigger_mute   = hid_ptt_trigger_mute_macos_skype;
+                    model->callback_trigger_camera = hid_ptt_trigger_camera_macos_skype;
+                    model->callback_start_ptt      = hid_ptt_start_ptt_macos_skype;
+                    model->callback_stop_ptt       = hid_ptt_stop_ptt_macos_skype;
+                    break;
+                }
+            } else if (osIndex == HidPushToTalkLinux) {
+                switch(appIndex) {
+                case HidPushToTalkAppIndexGoogleMeet:
+                    model->callback_trigger_mute   = hid_ptt_trigger_mute_linux_meet;
+                    model->callback_trigger_camera = hid_ptt_trigger_camera_linux_meet;
+                    model->callback_trigger_hand   = hid_ptt_trigger_hand_linux_meet;
+                    model->callback_start_ptt      = hid_ptt_start_ptt_meet_zoom;
+                    model->callback_stop_ptt       = hid_ptt_stop_ptt_meet_zoom;
+                    break;
+                case HidPushToTalkAppIndexZoom:
+                    model->callback_trigger_mute   = hid_ptt_trigger_mute_linux_zoom;
+                    model->callback_trigger_camera = hid_ptt_trigger_camera_linux_zoom;
+                    model->callback_trigger_hand   = hid_ptt_trigger_hand_linux_zoom;
+                    model->callback_start_ptt      = hid_ptt_start_ptt_meet_zoom;
+                    model->callback_stop_ptt       = hid_ptt_stop_ptt_meet_zoom;
+                    break;
+                case HidPushToTalkAppIndexSkype:
+                    model->callback_trigger_mute   = hid_ptt_trigger_mute_linux_skype;
+                    model->callback_trigger_camera = hid_ptt_trigger_camera_linux_skype;
+                    model->callback_start_ptt      = hid_ptt_start_ptt_linux_skype;
+                    model->callback_stop_ptt       = hid_ptt_stop_ptt_linux_skype;
+                    break;
+                }
+            }
         }, true);
-    // view_set_draw_callback(hid_ptt_menu->view, hid_ptt_draw_callback);
-    // view_set_input_callback(hid_ptt_menu->view, hid_ptt_input_callback);
-    // view_set_orientation(hid_ptt_menu->view, ViewOrientationVerticalFlip);
     view_dispatcher_switch_to_view(hid_ptt->hid->view_dispatcher, HidViewPushToTalk);
-    // view_dispatcher_switch_to_view(hid_ptt_menu->hid->view_dispatcher, HidViewMovie);
 }
 
 static void hid_ptt_draw_camera(Canvas* canvas, uint8_t x, uint8_t y) {
@@ -144,7 +303,7 @@ static void hid_ptt_draw_callback(Canvas* canvas, void* context) {
         elements_slightly_rounded_box(canvas, x_1 + 3, y_2 + 2, 13, 13);
         canvas_set_color(canvas, ColorWhite);
     }
-    if (model->appIndex != HidPushToTalkAppIndexFaceTime && model->appIndex != HidPushToTalkAppIndexSkype) {
+    if (model->callback_trigger_hand) {
         canvas_draw_icon(canvas, x_1 + 4, y_2 + 3, &I_Hand_8x10);
     }
     canvas_set_color(canvas, ColorBlack);
@@ -155,7 +314,7 @@ static void hid_ptt_draw_callback(Canvas* canvas, void* context) {
         elements_slightly_rounded_box(canvas, x_3 + 3, y_2 + 2, 13, 13);
         canvas_set_color(canvas, ColorWhite);
     }
-    if (model->appIndex != HidPushToTalkAppIndexFaceTime) {
+    if (model->callback_trigger_camera) {
         hid_ptt_draw_camera(canvas, x_3 + 4, y_2 + 5);
         // canvas_draw_icon(canvas, x_3 + 11, y_2 + 5, &I_ButtonLeft_4x7);
         // canvas_draw_box(canvas, x_3 + 4, y_2 + 5, 7, 7);
@@ -202,100 +361,6 @@ static void hid_ptt_draw_callback(Canvas* canvas, void* context) {
     canvas_set_color(canvas, ColorBlack);
 }
 
-static void hid_ptt_trigger_mute(HidPushToTalk* hid_ptt, HidPushToTalkModel * model) {
-    if(model->appIndex == HidPushToTalkAppIndexGoogleMeet && model->osIndex == HidPushToTalkMacOS) {
-        hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_GUI | HID_KEYBOARD_D);
-        hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_GUI | HID_KEYBOARD_D );
-    } else if(model->appIndex == HidPushToTalkAppIndexGoogleMeet && model->osIndex == HidPushToTalkLinux) {
-        hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_CTRL | HID_KEYBOARD_D);
-        hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_CTRL | HID_KEYBOARD_D );
-    } else if(model->appIndex == HidPushToTalkAppIndexZoom && model->osIndex == HidPushToTalkMacOS) {
-        hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_GUI| KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_A);
-        hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_GUI| KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_A );
-    } else if(model->appIndex == HidPushToTalkAppIndexFaceTime) {
-        hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_GUI| KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_M);
-        hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_GUI| KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_M );
-    } else if(model->appIndex == HidPushToTalkAppIndexSkype && model->osIndex == HidPushToTalkMacOS) {
-        hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_GUI| KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_M);
-        hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_GUI| KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_M );
-    } else if(model->appIndex == HidPushToTalkAppIndexSkype && model->osIndex == HidPushToTalkLinux) {
-        hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_CTRL | HID_KEYBOARD_M);
-        hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_CTRL | HID_KEYBOARD_M );
-    }
-}
-
-static void hid_ptt_trigger_camera(HidPushToTalk* hid_ptt, HidPushToTalkModel * model) {
-    if(model->appIndex == HidPushToTalkAppIndexGoogleMeet && model->osIndex == HidPushToTalkMacOS) {
-        hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_GUI | HID_KEYBOARD_E);
-        hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_GUI | HID_KEYBOARD_E );
-    } else if(model->appIndex == HidPushToTalkAppIndexGoogleMeet && model->osIndex == HidPushToTalkLinux) {
-        hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_CTRL | HID_KEYBOARD_E);
-        hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_CTRL | HID_KEYBOARD_E );
-    } else if(model->appIndex == HidPushToTalkAppIndexZoom && model->osIndex == HidPushToTalkMacOS) {
-        hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_GUI| KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_V);
-        hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_GUI| KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_V );
-    } else if(model->appIndex == HidPushToTalkAppIndexZoom && model->osIndex == HidPushToTalkLinux) {
-        hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_ALT | HID_KEYBOARD_V);
-        hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_ALT | HID_KEYBOARD_V );
-    } else if(model->appIndex == HidPushToTalkAppIndexSkype && model->osIndex == HidPushToTalkMacOS) {
-        hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_GUI| KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_K);
-        hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_GUI| KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_K );
-    } else if(model->appIndex == HidPushToTalkAppIndexSkype && model->osIndex == HidPushToTalkLinux) {
-        hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_CTRL| KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_K);
-        hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_CTRL| KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_K );
-    }
-}
-
-static void hid_ptt_trigger_hand(HidPushToTalk* hid_ptt, HidPushToTalkModel * model) {
-    if(model->appIndex == HidPushToTalkAppIndexGoogleMeet && model->osIndex == HidPushToTalkMacOS) {
-        hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_GUI | KEY_MOD_LEFT_CTRL |HID_KEYBOARD_H);
-        hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_GUI | KEY_MOD_LEFT_CTRL |HID_KEYBOARD_H);
-    } else if(model->appIndex == HidPushToTalkAppIndexGoogleMeet && model->osIndex == HidPushToTalkLinux) {
-        hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_CTRL | KEY_MOD_LEFT_ALT |HID_KEYBOARD_H);
-        hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_CTRL | KEY_MOD_LEFT_ALT |HID_KEYBOARD_H);
-    } else if(model->appIndex == HidPushToTalkAppIndexZoom && model->osIndex == HidPushToTalkMacOS) {
-        hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_GUI| HID_KEYBOARD_Y);
-        hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_GUI| HID_KEYBOARD_Y );
-    } else if(model->appIndex == HidPushToTalkAppIndexZoom && model->osIndex == HidPushToTalkLinux) {
-        hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_ALT | HID_KEYBOARD_Y);
-        hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_ALT | HID_KEYBOARD_Y );
-    }
-}
-
-static void hid_ptt_start_ptt(HidPushToTalk* hid_ptt, HidPushToTalkModel * model) {
-    if(model->appIndex == HidPushToTalkAppIndexGoogleMeet) {
-        hid_hal_keyboard_press(hid_ptt->hid, HID_KEYBOARD_SPACEBAR);
-    } else if(model->appIndex == HidPushToTalkAppIndexZoom) {
-        hid_hal_keyboard_press(hid_ptt->hid, HID_KEYBOARD_SPACEBAR);
-    } else if(model->appIndex == HidPushToTalkAppIndexFaceTime) {
-        hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_GUI| KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_M);
-        hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_GUI| KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_M );
-    } else if(model->appIndex == HidPushToTalkAppIndexSkype && model->osIndex == HidPushToTalkMacOS) {
-        hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_GUI| KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_M);
-        hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_GUI| KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_M );
-    } else if(model->appIndex == HidPushToTalkAppIndexSkype && model->osIndex == HidPushToTalkLinux) {
-        hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_CTRL | HID_KEYBOARD_M);
-        hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_CTRL | HID_KEYBOARD_M );   
-    }
-}
-
-static void hid_ptt_stop_ptt(HidPushToTalk* hid_ptt, HidPushToTalkModel * model) {
-    if(model->appIndex == HidPushToTalkAppIndexGoogleMeet) {
-        hid_hal_keyboard_release(hid_ptt->hid, HID_KEYBOARD_SPACEBAR);
-    } else if(model->appIndex == HidPushToTalkAppIndexZoom) {
-        hid_hal_keyboard_release(hid_ptt->hid, HID_KEYBOARD_SPACEBAR);
-    } else if(model->appIndex == HidPushToTalkAppIndexFaceTime) {
-        hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_GUI| KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_M);
-        hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_GUI| KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_M );
-    } else if(model->appIndex == HidPushToTalkAppIndexSkype && model->osIndex == HidPushToTalkMacOS) {
-        hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_GUI| KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_M);
-        hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_GUI| KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_M );
-    } else if(model->appIndex == HidPushToTalkAppIndexSkype && model->osIndex == HidPushToTalkLinux) {
-        hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_CTRL | HID_KEYBOARD_M);
-        hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_CTRL | HID_KEYBOARD_M );
-    }
-}
-
 static void hid_ptt_process(HidPushToTalk* hid_ptt, InputEvent* event) {
     with_view_model(
         hid_ptt->view,
@@ -315,7 +380,7 @@ static void hid_ptt_process(HidPushToTalk* hid_ptt, InputEvent* event) {
                 } else if(event->key == InputKeyOk) {
                     model->ptt_pressed = true;
                     if (!model->mic_pressed && model->muted){
-                        hid_ptt_start_ptt(hid_ptt, model);
+                        model->callback_start_ptt ? model->callback_start_ptt(hid_ptt):0;
                     }
                 } else if(event->key == InputKeyBack) {
                     model->mic_pressed = true;
@@ -340,9 +405,9 @@ static void hid_ptt_process(HidPushToTalk* hid_ptt, InputEvent* event) {
                     model->ptt_pressed = false;
                     if(!model->mic_pressed) {
                         if (model->muted) {
-                            hid_ptt_stop_ptt(hid_ptt, model);
+                            model->callback_stop_ptt ? model->callback_stop_ptt(hid_ptt):0;
                         } else {
-                            hid_ptt_trigger_mute(hid_ptt, model);
+                            model->callback_trigger_mute ? model->callback_trigger_mute(hid_ptt):0;
                             model->muted = true;
                         }
                     }
@@ -352,11 +417,11 @@ static void hid_ptt_process(HidPushToTalk* hid_ptt, InputEvent* event) {
             } else if(event->type == InputTypeShort && !model->ptt_pressed) {
                 if(event->key == InputKeyBack ) { // no changes if PTT is pressed
                     model->muted = !model->muted;
-                    hid_ptt_trigger_mute(hid_ptt, model);
+                    model->callback_trigger_mute ? model->callback_trigger_mute(hid_ptt):0;
                 } else if(event->key == InputKeyRight) {
-                    hid_ptt_trigger_camera(hid_ptt, model);
+                    model->callback_trigger_camera ? model->callback_trigger_camera(hid_ptt):0;
                 } else if(event->key == InputKeyLeft) {
-                    hid_ptt_trigger_hand(hid_ptt, model);
+                    model->callback_trigger_hand ? model->callback_trigger_hand(hid_ptt):0;
                 }
             } else if(event->type == InputTypeLong && event->key == InputKeyRight) {
                 model->muted = !model->muted;

@@ -210,20 +210,31 @@ void ptt_menu_add_item_to_list(
         true);
 }
 
-// void ptt_menu_add_item(
-//     HidPushToTalkMenu* hid_ptt_menu,
-//     const char* label,
-//     uint32_t index) {
-//     PushToTalkMenuItem* item = NULL;
-//     furi_assert(label);
-//     furi_assert(hid_ptt_menu);
-//
+// // Supports only ±1
+// static void hid_ptt_shift_app(HidPushToTalkMenuModel * model, int shift) {
+//     UNUSED(model);
+//     UNUSED(shift);
+//     // int i = (short) model->appIndex;
+//     // if (i + shift >= HidPttAppIndexSize) {
+//     //     model->appIndex = 0;
+//     // } else if(i + shift <= 0) {
+//     //     model->appIndex = HidPttAppIndexSize - 1;
+//     // } else {
+//     //     model->appIndex += shift;
+//     // }
+//     // // Avoid showing facetime if not macos
+//     // if (model->appIndex == HidPttAppIndexFaceTime && !model->is_mac_os) {
+//     //     hid_ptt_shift_app(model, shift);
+//     // }
+// }
+
+// void ptt_menu_shift_list(HidPushToTalkMenu* hid_ptt_menu, bool forward)
+//     UNUSED(forward);
 //     with_view_model(
 //         hid_ptt_menu->view, HidPushToTalkMenuModel * model,
 //         {
-//             item = PushToTalkMenuListArray_push_new(model->items);
-//             furi_string_set_str(item->label, label);
-//             item->index = index;
+//             UNUSED(model);
+//             // PushToTalkMenuList* list = &model->lists[model->list_position];
 //         },
 //         true);
 // }
@@ -308,14 +319,14 @@ static bool hid_ptt_menu_input_callback(InputEvent* event, void* context) {
             consumed = true;
             ptt_menu_process_down(hid_ptt_menu);
             break;
-        // case InputKeyLeft:
-        //     consumed = true;
-        //     // hid_ptt_change_os(hid_ptt_menu, false);
-        //     break;
-        // case InputKeyRight:
-        //     consumed = true;
-        //     // hid_ptt_change_os(hid_ptt_menu, false);
-        //     break;
+        case InputKeyLeft:
+            consumed = true;
+            // ptt_menu_shift_list(hid_ptt_menu, false);
+            break;
+        case InputKeyRight:
+            consumed = true;
+            // ptt_menu_shift_list(hid_ptt_menu, true);
+            break;
         case InputKeyOk:
             consumed = true;
             ptt_menu_process_ok(hid_ptt_menu);
