@@ -1,3 +1,0 @@
-[submodule "lib/esp-serial-flasher"]
-	path = lib/esp-serial-flasher
-	url = git@github.com:0xchocolate/esp-serial-flasher.git
