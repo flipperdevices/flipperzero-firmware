@@ -54,36 +54,6 @@ typedef struct {
     PushToTalkMenuItemArray_t items;
 } PushToTalkMenuList;
 
-// static void PushToTalkMenuList_init(PushToTalkMenuList* list) {
-//     list->label = furi_string_alloc();
-//     list->index = 0;
-//     PushToTalkMenuItemArray_init(list->items);
-// }
-
-// static void PushToTalkMenuList_init_set(PushToTalkMenuList* list, const PushToTalkMenuList* src) {
-//     list->label = furi_string_alloc_set(src->label);
-//     list->index = src->index;
-// }
-
-// static void PushToTalkMenuList_set(PushToTalkMenuList* list, const PushToTalkMenuList* src) {
-//     furi_string_set(list->label, src->label);
-//     list->index = src->index;
-// }
-
-// static void PushToTalkMenuList_clear(PushToTalkMenuList* list) {
-//     furi_string_free(list->label);
-// }
-
-// ARRAY_DEF(
-//     PushToTalkMenuListArray,
-//     PushToTalkMenuList,
-//     (INIT(API_2(PushToTalkMenuList_init)),
-//      SET(API_6(PushToTalkMenuList_set)),
-//      INIT_SET(API_6(PushToTalkMenuList_init_set)),
-//      CLEAR(API_2(PushToTalkMenuList_clear))))
-
-//
-
 typedef struct {
     size_t list_position;
     size_t position;
@@ -91,19 +61,6 @@ typedef struct {
     PushToTalkMenuList *lists;
     int lists_count;
 } HidPushToTalkMenuModel;
-
-// static void hid_ptt_change_os(HidPushToTalk* hid_ptt_menu, bool vibro) {
-//     with_view_model(
-//         hid_ptt_menu->view,
-//         HidPushToTalkMenuModel * model,
-//         if (model->position != HidPushToTalkpositionFaceTime) {
-//             model->is_mac_os = !model->is_mac_os;
-//             if (vibro){
-//                 notification_message(hid_ptt_menu->hid->notifications, &sequence_single_vibro);
-//             }
-//         },
-//     true);
-// }
 
 static void hid_ptt_menu_draw_list(Canvas* canvas, void* context, const PushToTalkMenuItemArray_t items) {
     furi_assert(context);
@@ -271,48 +228,50 @@ void ptt_menu_add_item_to_list(
 //         true);
 // }
 
-// void ptt_menu_process_up(HidPushToTalkMenu* hid_ptt_menu) {
-//     with_view_model(
-//         hid_ptt_menu->view, HidPushToTalkMenuModel * model,
-//         {
-//             const size_t items_on_screen = 3;
-//             const size_t items_size = PushToTalkMenuListArray_size(model->items);
+void ptt_menu_process_up(HidPushToTalkMenu* hid_ptt_menu) {
+    with_view_model(
+        hid_ptt_menu->view, HidPushToTalkMenuModel * model,
+        {
+            PushToTalkMenuList* list = &model->lists[model->list_position];
+            const size_t items_on_screen = 3;
+            const size_t items_size = PushToTalkMenuItemArray_size(list->items);
 
-//             if(model->position > 0) {
-//                 model->position--;
-//                 if((model->position == model->window_position) && (model->window_position > 0)) {
-//                     model->window_position--;
-//                 }
-//             } else {
-//                 model->position = items_size - 1;
-//                 if(model->position > items_on_screen - 1) {
-//                     model->window_position = model->position - (items_on_screen - 1);
-//                 }
-//             }
-//         },
-//         true);
-// }
+            if(model->position > 0) {
+                model->position--;
+                if((model->position == model->window_position) && (model->window_position > 0)) {
+                    model->window_position--;
+                }
+            } else {
+                model->position = items_size - 1;
+                if(model->position > items_on_screen - 1) {
+                    model->window_position = model->position - (items_on_screen - 1);
+                }
+            }
+        },
+        true);
+}
 
-// void ptt_menu_process_down(HidPushToTalkMenu* hid_ptt_menu) {
-//     with_view_model(
-//         hid_ptt_menu->view, HidPushToTalkMenuModel * model,
-//         {
-//             const size_t items_on_screen = 3;
-//             const size_t items_size = PushToTalkMenuListArray_size(model->items);
+void ptt_menu_process_down(HidPushToTalkMenu* hid_ptt_menu) {
+    with_view_model(
+        hid_ptt_menu->view, HidPushToTalkMenuModel * model,
+        {
+            PushToTalkMenuList* list = &model->lists[model->list_position];
+            const size_t items_on_screen = 3;
+            const size_t items_size = PushToTalkMenuItemArray_size(list->items);
 
-//             if(model->position < items_size - 1) {
-//                 model->position++;
-//                 if((model->position - model->window_position > items_on_screen - 2) &&
-//                    (model->window_position < items_size - items_on_screen)) {
-//                     model->window_position++;
-//                 }
-//             } else {
-//                 model->position = 0;
-//                 model->window_position = 0;
-//             }
-//         },
-//         true);
-// }
+            if(model->position < items_size - 1) {
+                model->position++;
+                if((model->position - model->window_position > items_on_screen - 2) &&
+                   (model->window_position < items_size - items_on_screen)) {
+                    model->window_position++;
+                }
+            } else {
+                model->position = 0;
+                model->window_position = 0;
+            }
+        },
+        true);
+}
 
 void ptt_menu_process_ok(HidPushToTalkMenu* hid_ptt_menu) {
 
@@ -341,14 +300,14 @@ static bool hid_ptt_menu_input_callback(InputEvent* event, void* context) {
     bool consumed = false;
     if(event->type == InputTypeShort) {
         switch(event->key) {
-        // case InputKeyUp:
-        //     consumed = true;
-        //     ptt_menu_process_up(hid_ptt_menu);
-        //     break;
-        // case InputKeyDown:
-        //     consumed = true;
-        //     ptt_menu_process_down(hid_ptt_menu);
-        //     break;
+        case InputKeyUp:
+            consumed = true;
+            ptt_menu_process_up(hid_ptt_menu);
+            break;
+        case InputKeyDown:
+            consumed = true;
+            ptt_menu_process_down(hid_ptt_menu);
+            break;
         // case InputKeyLeft:
         //     consumed = true;
         //     // hid_ptt_change_os(hid_ptt_menu, false);
@@ -364,14 +323,14 @@ static bool hid_ptt_menu_input_callback(InputEvent* event, void* context) {
         default:
             break;
         }
-    // } else if(event->type == InputTypeRepeat) {
-    //     if(event->key == InputKeyUp) {
-    //         consumed = true;
-    //         ptt_menu_process_up(hid_ptt_menu);
-    //     } else if(event->key == InputKeyDown) {
-    //         consumed = true;
-    //         ptt_menu_process_down(hid_ptt_menu);
-    //     }
+    } else if(event->type == InputTypeRepeat) {
+        if(event->key == InputKeyUp) {
+            consumed = true;
+            ptt_menu_process_up(hid_ptt_menu);
+        } else if(event->key == InputKeyDown) {
+            consumed = true;
+            ptt_menu_process_down(hid_ptt_menu);
+        }
     }
     return consumed;
 }
@@ -380,29 +339,6 @@ View* hid_ptt_menu_get_view(HidPushToTalkMenu* hid_ptt_menu) {
     furi_assert(hid_ptt_menu);
     return hid_ptt_menu->view;
 }
-
-// Submenu* submenu_alloc() {
-//     Submenu* submenu = malloc(sizeof(Submenu));
-//     submenu->view = view_alloc();
-//     view_set_context(submenu->view, submenu);
-//     view_allocate_model(submenu->view, ViewModelTypeLocking, sizeof(SubmenuModel));
-//     view_set_draw_callback(submenu->view, submenu_view_draw_callback);
-//     view_set_input_callback(submenu->view, submenu_view_input_callback);
-
-//     with_view_model(
-//         submenu->view,
-//         SubmenuModel * model,
-//         {
-//             SubmenuItemArray_init(model->items);
-//             model->position = 0;
-//             model->window_position = 0;
-//             model->header = furi_string_alloc();
-//         },
-//         true);
-
-//     return submenu;
-// }
-
 
 HidPushToTalkMenu* hid_ptt_menu_alloc(Hid* hid) {
     HidPushToTalkMenu* hid_ptt_menu = malloc(sizeof(HidPushToTalkMenu));
