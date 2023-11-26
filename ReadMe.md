@@ -44,6 +44,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Patreon Build Update: Manifest Switcher ALL build updated to include Marvel & Virus animations.
 - Updated: [Hangman v1.5 (By Evgeny Stepanischev & Eva Stepanischeva)] <https://github.com/bolknote/Flipper-Zero-Hangman-Game>
 - Updated: [ESP Flasher v1.4 (By 0xchocolate)](https://github.com/0xchocolate/flipperzero-esp-flasher)
+- Updated: [Cookie Clicker v1.0 (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/hid/hid_cookie)
 
 <a name="release">
 

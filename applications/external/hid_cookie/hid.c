@@ -150,6 +150,9 @@ Hid* hid_app_alloc_view(void* context) {
         0,
         128,
         64,
+        "iOS17:Settings/Accessibility\n"
+        "/AssistiveTouch=ON. Single-\n"
+        "Tap=Pass Through to App.\n\n"
         "While this app is running, go to\n"
         "your phone's bluetooth\n"
         "settings and discover devices.\n"
@@ -300,7 +303,17 @@ int32_t hid_cookie_ble_app(void* p) {
     // Wait 2nd core to update nvm storage
     furi_delay_ms(200);
 
+    // Migrate data from old sd-card folder
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+
+    storage_common_migrate(
+        storage,
+        EXT_PATH("apps/Tools/" HID_BT_KEYS_STORAGE_NAME),
+        APP_DATA_PATH(HID_BT_KEYS_STORAGE_NAME));
+
     bt_keys_storage_set_storage_path(app->bt, APP_DATA_PATH(HID_BT_KEYS_STORAGE_NAME));
+
+    furi_record_close(RECORD_STORAGE);
 
     if(!bt_set_profile(app->bt, BtProfileHidKeyboard)) {
         FURI_LOG_E(TAG, "Failed to switch to HID profile");
