@@ -8,12 +8,13 @@ enum SubGhzSettingIndex {
     SubGhzSettingIndexHopping,
     SubGhzSettingIndexModulation,
     SubGhzSettingIndexBinRAW,
+    SubGhzSettingIndexRepeater,
+    SubGhzSettingIndexSound,
     SubGhzSettingIndexIgnoreStarline,
     SubGhzSettingIndexIgnoreCars,
     SubGhzSettingIndexIgnoreMagellan,
     SubGhzSettingIndexIgnorePrinceton,
     SubGhzSettingIndexIgnoreNiceFlorS,
-    SubGhzSettingIndexSound,
     SubGhzSettingIndexResetToDefault,
     SubGhzSettingIndexLock,
     SubGhzSettingIndexRAWThresholdRSSI,
@@ -49,6 +50,7 @@ const float raw_threshold_rssi_value[RAW_THRESHOLD_RSSI_COUNT] = {
 };
 
 #define COMBO_BOX_COUNT 2
+#define REPEATER_BOX_COUNT 4
 
 const uint32_t hopping_value[COMBO_BOX_COUNT] = {
     SubGhzHopperStateOFF,
@@ -65,9 +67,23 @@ const uint32_t bin_raw_value[COMBO_BOX_COUNT] = {
     SubGhzProtocolFlag_Decodable | SubGhzProtocolFlag_BinRAW,
 };
 
+const uint32_t repeater_value[REPEATER_BOX_COUNT] = {
+    SubGhzRepeaterOff,
+    SubGhzRepeaterOn,
+    SubGhzRepeaterOnLong,
+    SubGhzRepeaterOnShort,
+};
+
 const char* const combobox_text[COMBO_BOX_COUNT] = {
     "OFF",
     "ON",
+};
+
+const char* const repeater_box_text[REPEATER_BOX_COUNT] = {
+    "OFF",
+    "Normal",
+    "Long",
+    "Short",
 };
 
 static void
@@ -247,6 +263,44 @@ static void subghz_scene_receiver_config_set_bin_raw(VariableItem* item) {
     subghz->last_settings->filter = subghz->filter;
 }
 
+static void subghz_scene_receiver_config_set_repeater(VariableItem* item) {
+    SubGhz* subghz = variable_item_get_context(item);
+    uint8_t index = variable_item_get_current_value_index(item);
+
+    variable_item_set_current_value_text(item, repeater_box_text[index]);
+    subghz_txrx_repeater_set_state(&subghz->repeater, repeater_value[index]);
+
+    //Change BinRAW to ON or OFF as required, and remember whether I changed it! (Put back for the user.)
+    if(repeater_value[index] != SubGhzRepeaterOff) {
+        subghz->last_settings->RepeaterState = repeater_value[index];
+
+        if((bin_raw_value[variable_item_get_current_value_index(subghz->BIN_Raw_menu)] &
+            SubGhzProtocolFlag_BinRAW) == SubGhzProtocolFlag_BinRAW) {
+            //BinRAW is on, repeater is on.
+        } else {
+            //Repeater is on, Binraw is Off.
+            subghz->BINRawStateChanged = true;
+            variable_item_set_current_value_index(
+                subghz->BIN_Raw_menu, 1 /*Index of ON in BIN_Raw menu!*/);
+            subghz_scene_receiver_config_set_bin_raw(subghz->BIN_Raw_menu);
+        }
+        variable_item_set_locked(
+            subghz->BIN_Raw_menu, true, "Turn off\n Repeater!\n to do\n that!");
+    } else {
+        subghz->last_settings->RepeaterState = SubGhzRepeaterOff;
+
+        //Put BinRAW back how it was, if we changed it.
+        if(subghz->BINRawStateChanged) {
+            subghz->BINRawStateChanged = false;
+            variable_item_set_current_value_index(
+                subghz->BIN_Raw_menu, 0 /*Index of OFF in BIN_Raw menu!*/);
+            subghz_scene_receiver_config_set_bin_raw(subghz->BIN_Raw_menu);
+        }
+        variable_item_set_locked(
+            subghz->BIN_Raw_menu, false, "Turn off\n Repeater!\n to do\n that!");
+    }
+}
+
 static void subghz_scene_receiver_config_set_raw_threshold_rssi(VariableItem* item) {
     SubGhz* subghz = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
@@ -307,7 +361,9 @@ static void subghz_scene_receiver_config_var_list_enter_callback(void* context, 
 
         subghz->last_settings->frequency = preset.frequency;
         subghz->last_settings->preset_index = preset_index;
-
+        subghz->last_settings->RepeaterState = SubGhzRepeaterOff;
+        subghz_txrx_repeater_set_state(&subghz->repeater, SubGhzRepeaterOff);
+        subghz->BINRawStateChanged = false;
         subghz_threshold_rssi_set(subghz->threshold_rssi, raw_threshold_rssi_value[default_index]);
         subghz->filter = bin_raw_value[0];
         subghz->ignore_filter = 0x00;
@@ -338,6 +394,11 @@ void subghz_scene_receiver_config_on_enter(void* context) {
     uint8_t value_index;
     SubGhzSetting* setting = subghz_txrx_get_setting(subghz->txrx);
     SubGhzRadioPreset preset = subghz_txrx_get_preset(subghz->txrx);
+
+    //This gets checked a few times, so lets cache this.
+    bool IsReadRAWScene =
+        (scene_manager_get_scene_state(subghz->scene_manager, SubGhzSceneReadRAW) ==
+         SubGhzCustomEventManagerSet);
 
     item = variable_item_list_add(
         subghz->variable_item_list,
@@ -371,8 +432,7 @@ void subghz_scene_receiver_config_on_enter(void* context) {
     variable_item_set_current_value_text(
         item, subghz_setting_get_preset_name(setting, value_index));
 
-    if(scene_manager_get_scene_state(subghz->scene_manager, SubGhzSceneReadRAW) !=
-       SubGhzCustomEventManagerSet) {
+    if(!IsReadRAWScene) {
         // Hopping
         item = variable_item_list_add(
             subghz->variable_item_list,
@@ -386,11 +446,10 @@ void subghz_scene_receiver_config_on_enter(void* context) {
         variable_item_set_current_value_text(item, combobox_text[value_index]);
     }
 
-    if(scene_manager_get_scene_state(subghz->scene_manager, SubGhzSceneReadRAW) !=
-       SubGhzCustomEventManagerSet) {
+    if(!IsReadRAWScene) {
         item = variable_item_list_add(
             subghz->variable_item_list,
-            "Bin RAW",
+            "RAW Receive",
             COMBO_BOX_COUNT,
             subghz_scene_receiver_config_set_bin_raw,
             subghz);
@@ -398,10 +457,45 @@ void subghz_scene_receiver_config_on_enter(void* context) {
         value_index = value_index_uint32(subghz->filter, bin_raw_value, COMBO_BOX_COUNT);
         variable_item_set_current_value_index(item, value_index);
         variable_item_set_current_value_text(item, combobox_text[value_index]);
+        subghz->BIN_Raw_menu = item;
     }
 
-    if(scene_manager_get_scene_state(subghz->scene_manager, SubGhzSceneReadRAW) !=
-       SubGhzCustomEventManagerSet) {
+    /* Repeater Menu. With the Repeater, you can relay a key. 
+       To Use, select the frequency (or hopper) and enable Repeater.
+       Any keys decoded with BinRAW will be transmitted as soon as they are received.
+       Ill leave the uses of this one up to your imagination! */
+    if(!IsReadRAWScene) {
+        item = variable_item_list_add(
+            subghz->variable_item_list,
+            "Repeater",
+            REPEATER_BOX_COUNT,
+            subghz_scene_receiver_config_set_repeater,
+            subghz);
+        value_index = value_index_uint32(
+            subghz_txrx_repeater_get_state(&subghz->repeater), repeater_value, REPEATER_BOX_COUNT);
+        variable_item_set_current_value_index(item, value_index);
+        //variable_item_set_current_value_text(item, repeater_box_text[value_index]);
+        //Instead of setting the text, Im calling the callback. That sets the text, and the bin raw on off and locked!
+        subghz_scene_receiver_config_set_repeater(item);
+        //Remember if the user set BinRAW on or if I did with the repeater!
+        subghz->BINRawStateChanged =
+            (subghz->last_settings->filter !=
+             (SubGhzProtocolFlag_Decodable | SubGhzProtocolFlag_BinRAW));
+    }
+
+    // Enable speaker, will send all incoming noises and signals to speaker so you can listen how your remote sounds like :)
+    item = variable_item_list_add(
+        subghz->variable_item_list,
+        "Sound",
+        COMBO_BOX_COUNT,
+        subghz_scene_receiver_config_set_speaker,
+        subghz);
+    value_index = value_index_uint32(
+        subghz_txrx_speaker_get_state(subghz->txrx), speaker_value, COMBO_BOX_COUNT);
+    variable_item_set_current_value_index(item, value_index);
+    variable_item_set_current_value_text(item, combobox_text[value_index]);
+
+    if(!IsReadRAWScene) {
         item = variable_item_list_add(
             subghz->variable_item_list,
             "Ignore Starline",
@@ -463,20 +557,7 @@ void subghz_scene_receiver_config_on_enter(void* context) {
         variable_item_set_current_value_text(item, combobox_text[value_index]);
     }
 
-    // Enable speaker, will send all incoming noises and signals to speaker so you can listen how your remote sounds like :)
-    item = variable_item_list_add(
-        subghz->variable_item_list,
-        "Sound",
-        COMBO_BOX_COUNT,
-        subghz_scene_receiver_config_set_speaker,
-        subghz);
-    value_index = value_index_uint32(
-        subghz_txrx_speaker_get_state(subghz->txrx), speaker_value, COMBO_BOX_COUNT);
-    variable_item_set_current_value_index(item, value_index);
-    variable_item_set_current_value_text(item, combobox_text[value_index]);
-
-    if(scene_manager_get_scene_state(subghz->scene_manager, SubGhzSceneReadRAW) !=
-       SubGhzCustomEventManagerSet) {
+    if(!IsReadRAWScene) {
         // Reset to default
         variable_item_list_add(subghz->variable_item_list, "Reset to default", 1, NULL, NULL);
 
@@ -485,8 +566,7 @@ void subghz_scene_receiver_config_on_enter(void* context) {
             subghz_scene_receiver_config_var_list_enter_callback,
             subghz);
     }
-    if(scene_manager_get_scene_state(subghz->scene_manager, SubGhzSceneReadRAW) !=
-       SubGhzCustomEventManagerSet) {
+    if(!IsReadRAWScene) {
         // Lock keyboard
         variable_item_list_add(subghz->variable_item_list, "Lock Keyboard", 1, NULL, NULL);
         variable_item_list_set_enter_callback(
@@ -495,8 +575,7 @@ void subghz_scene_receiver_config_on_enter(void* context) {
             subghz);
     }
 
-    if(scene_manager_get_scene_state(subghz->scene_manager, SubGhzSceneReadRAW) ==
-       SubGhzCustomEventManagerSet) {
+    if(IsReadRAWScene) {
         item = variable_item_list_add(
             subghz->variable_item_list,
             "RSSI Threshold:",
@@ -532,6 +611,15 @@ bool subghz_scene_receiver_config_on_event(void* context, SceneManagerEvent even
 
 void subghz_scene_receiver_config_on_exit(void* context) {
     SubGhz* subghz = context;
+
+    //If the Repeater changed the BinRAW settings, put them back now. That will ensure it loads correctly!
+    if(subghz->BINRawStateChanged & (subghz->repeater != SubGhzRepeaterOff)) {
+        //Bit hacky, but works well.
+        subghz->last_settings->filter = bin_raw_value[0 /*BinRAW Off*/];
+        subghz->BINRawStateChanged = false;
+    }
+    subghz->BIN_Raw_menu = NULL;
+
     variable_item_list_set_selected_item(subghz->variable_item_list, 0);
     variable_item_list_reset(subghz->variable_item_list);
 #ifdef FURI_DEBUG

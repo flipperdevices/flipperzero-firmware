@@ -19,6 +19,7 @@
 #define SUBGHZ_LAST_SETTING_FIELD_IGNORE_FILTER "IgnoreFilter"
 #define SUBGHZ_LAST_SETTING_FIELD_FILTER "Filter"
 #define SUBGHZ_LAST_SETTING_FIELD_RSSI_THRESHOLD "RSSI"
+#define SUBGHZ_LAST_SETTING_FIELD_REPEATER "Repeater"
 
 SubGhzLastSettings* subghz_last_settings_alloc(void) {
     SubGhzLastSettings* instance = malloc(sizeof(SubGhzLastSettings));
@@ -44,6 +45,7 @@ void subghz_last_settings_load(SubGhzLastSettings* instance, size_t preset_count
     bool temp_external_module_power_amp = false;
     bool temp_timestamp_file_names = false;
     bool temp_enable_hopping = false;
+    uint32_t temp_RepeaterState = false;
     uint32_t temp_ignore_filter = 0;
     uint32_t temp_filter = 0;
     float temp_rssi = 0;
@@ -106,6 +108,9 @@ void subghz_last_settings_load(SubGhzLastSettings* instance, size_t preset_count
             1);
         filter_was_read = flipper_format_read_uint32(
             fff_data_file, SUBGHZ_LAST_SETTING_FIELD_FILTER, (uint32_t*)&temp_filter, 1);
+        flipper_format_read_uint32(
+            fff_data_file, SUBGHZ_LAST_SETTING_FIELD_REPEATER, (uint32_t*)&temp_RepeaterState, 1);
+
     } else {
         FURI_LOG_E(TAG, "Error open file %s", SUBGHZ_LAST_SETTINGS_PATH);
     }
@@ -126,6 +131,7 @@ void subghz_last_settings_load(SubGhzLastSettings* instance, size_t preset_count
         // See bin_raw_value in applications/main/subghz/scenes/subghz_scene_receiver_config.c
         instance->filter = SubGhzProtocolFlag_Decodable;
         instance->rssi = SUBGHZ_RAW_THRESHOLD_MIN;
+        instance->RepeaterState = SubGhzRepeaterOff;
     } else {
         instance->frequency = temp_frequency;
         instance->frequency_analyzer_feedback_level =
@@ -161,6 +167,7 @@ void subghz_last_settings_load(SubGhzLastSettings* instance, size_t preset_count
 
         instance->rssi = rssi_was_read ? temp_rssi : SUBGHZ_RAW_THRESHOLD_MIN;
         instance->enable_hopping = temp_enable_hopping;
+        instance->RepeaterState = temp_RepeaterState;
         instance->ignore_filter = ignore_filter_was_read ? temp_ignore_filter : 0x00;
 #if SUBGHZ_LAST_SETTING_SAVE_BIN_RAW
         instance->filter = filter_was_read ? temp_filter : SubGhzProtocolFlag_Decodable;
@@ -268,6 +275,10 @@ bool subghz_last_settings_save(SubGhzLastSettings* instance) {
         }
         if(!flipper_format_insert_or_update_uint32(
                file, SUBGHZ_LAST_SETTING_FIELD_FILTER, &instance->filter, 1)) {
+            break;
+        }
+        if(!flipper_format_insert_or_update_uint32(
+               file, SUBGHZ_LAST_SETTING_FIELD_REPEATER, &instance->RepeaterState, 1)) {
             break;
         }
         saved = true;

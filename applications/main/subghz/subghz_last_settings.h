@@ -27,6 +27,7 @@ typedef struct {
     // saved so as not to change the version
     bool timestamp_file_names;
     bool enable_hopping;
+    uint32_t RepeaterState;
     uint32_t ignore_filter;
     uint32_t filter;
     float rssi;

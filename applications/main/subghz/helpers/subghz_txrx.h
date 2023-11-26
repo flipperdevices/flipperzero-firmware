@@ -199,6 +199,22 @@ void subghz_txrx_speaker_set_state(SubGhzTxRx* instance, SubGhzSpeakerState stat
 SubGhzSpeakerState subghz_txrx_speaker_get_state(SubGhzTxRx* instance);
 
 /**
+ * Set state repeater
+ * 
+ * @param instance Pointer to a SubGhzTxRx 
+ * @param state State speaker
+ */
+void subghz_txrx_repeater_set_state(SubGhzRepeater* instance, SubGhzRepeater state);
+
+/**
+ * Get state repeater
+ * 
+ * @param instance Pointer to a SubGhzRepeater 
+ * @return SubGhzRepeater
+ */
+SubGhzRepeater subghz_txrx_repeater_get_state(SubGhzRepeater* instance);
+
+/**
  * load decoder by name protocol
  * 
  * @param instance Pointer to a SubGhzTxRx

@@ -64,6 +64,7 @@ typedef struct {
     FuriString* progress_str;
     bool hopping_enabled;
     bool bin_raw_enabled;
+    bool repeater_enabled;
     SubGhzReceiverHistory* history;
     uint16_t idx;
     uint16_t list_offset;
@@ -204,7 +205,8 @@ void subghz_view_receiver_add_data_statusbar(
     const char* preset_str,
     const char* history_stat_str,
     bool hopping_enabled,
-    bool bin_raw_enabled) {
+    bool bin_raw_enabled,
+    bool repeater_enabled) {
     furi_assert(subghz_receiver);
     with_view_model(
         subghz_receiver->view,
@@ -215,6 +217,7 @@ void subghz_view_receiver_add_data_statusbar(
             furi_string_set(model->history_stat_str, history_stat_str);
             model->hopping_enabled = hopping_enabled;
             model->bin_raw_enabled = bin_raw_enabled;
+            model->repeater_enabled = repeater_enabled;
         },
         true);
 }
@@ -325,11 +328,14 @@ void subghz_view_receiver_draw(Canvas* canvas, SubGhzViewReceiverModel* model) {
                 (model->device_type == SubGhzRadioDeviceTypeInternal) ? &I_Scanning_123x52 :
                                                                         &I_Fishing_123x52);
             canvas_set_font(canvas, FontPrimary);
-            if(model->hopping_enabled) {
+            if(model->repeater_enabled) {
+                canvas_draw_str(canvas, 59, 46, "Repeater...");
+            } else if(model->hopping_enabled) {
                 canvas_draw_str(canvas, 59, 46, "Hopper scan...");
             } else {
                 canvas_draw_str(canvas, 59, 46, "Fixed scan...");
             }
+
             //canvas_draw_line(canvas, 46, 51, 125, 51);
             canvas_set_font(canvas, FontSecondary);
 
@@ -576,6 +582,7 @@ void subghz_view_receiver_exit(void* context) {
                 model->nodraw = false;
                 model->hopping_enabled = false;
                 model->bin_raw_enabled = false;
+                model->repeater_enabled = false;
         },
         false);
     furi_timer_stop(subghz_receiver->timer);
@@ -614,6 +621,7 @@ SubGhzViewReceiver* subghz_view_receiver_alloc() {
             model->history = malloc(sizeof(SubGhzReceiverHistory));
             model->hopping_enabled = false;
             model->bin_raw_enabled = false;
+            model->repeater_enabled = false;
             SubGhzReceiverMenuItemArray_init(model->history->data);
         },
         true);

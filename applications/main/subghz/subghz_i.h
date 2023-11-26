@@ -84,6 +84,12 @@ struct SubGhz {
     SubGhzProtocolFlag ignore_filter;
     FuriString* error_str;
     SubGhzLock lock;
+    SubGhzRepeater repeater;
+    FlipperFormat* repeater_tx;
+    uint32_t RepeaterTXLength;
+    uint32_t RepeaterStartTime;
+    VariableItem* BIN_Raw_menu;
+    bool BINRawStateChanged;
 
     SecureData* secure_data;
 
