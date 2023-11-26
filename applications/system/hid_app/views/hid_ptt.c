@@ -2,6 +2,7 @@
 #include "hid_ptt_menu.h"
 #include <gui/elements.h>
 #include <notification/notification_messages.h>
+#include <gui/modules/widget.h>
 #include "../hid.h"
 #include "../views.h"
 
@@ -12,6 +13,7 @@
 struct HidPushToTalk {
     View* view;
     Hid* hid;
+    Widget* help;
 };
 
 typedef void (*PushToTalkActionCallback)(HidPushToTalk* hid_ptt);
@@ -426,6 +428,10 @@ static void hid_ptt_process(HidPushToTalk* hid_ptt, InputEvent* event) {
             } else if(event->type == InputTypeLong && event->key == InputKeyRight) {
                 model->muted = !model->muted;
                 notification_message(hid_ptt->hid->notifications, &sequence_single_vibro);
+            } else if(event->type == InputTypeLong && event->key == InputKeyLeft) {
+                notification_message(hid_ptt->hid->notifications, &sequence_single_vibro);
+                model->left_pressed = false;
+                view_dispatcher_switch_to_view(hid_ptt->hid->view_dispatcher, HidViewPushToTalkHelp);
             }
             //LED
             if (!model->muted || (model->ptt_pressed)) {
@@ -456,6 +462,11 @@ View* hid_ptt_get_view(HidPushToTalk* hid_ptt) {
     return hid_ptt->view;
 }
 
+static uint32_t hid_ptt_view(void* context) {
+    UNUSED(context);
+    return HidViewPushToTalk;
+}
+
 HidPushToTalk* hid_ptt_alloc(Hid* hid) {
     HidPushToTalk* hid_ptt = malloc(sizeof(HidPushToTalk));
     hid_ptt->hid = hid;
@@ -484,12 +495,27 @@ HidPushToTalk* hid_ptt_alloc(Hid* hid) {
     ptt_menu_add_item_to_list(hid->hid_ptt_menu, HidPushToTalkMacOS, "Skype",       HidPushToTalkAppIndexSkype,      hid_ptt_menu_callback, hid_ptt);
     ptt_menu_add_item_to_list(hid->hid_ptt_menu, HidPushToTalkLinux, "Skype",       HidPushToTalkAppIndexSkype,      hid_ptt_menu_callback, hid_ptt);
     ptt_menu_add_item_to_list(hid->hid_ptt_menu, HidPushToTalkMacOS, "FaceTime",    HidPushToTalkAppIndexFaceTime,   hid_ptt_menu_callback, hid_ptt);
+
+    hid_ptt->help = widget_alloc();
+    view_set_previous_callback(widget_get_view(hid_ptt->help), hid_ptt_view);
+    view_dispatcher_add_view(hid->view_dispatcher, HidViewPushToTalkHelp, widget_get_view(hid_ptt->help));
+    const char *msg = 
+    "To operate properly flipper microphone "
+    "status must be in sync with your computer.\n"
+    "Hold > to change mic status.\n"
+    "Hold < to open this help.\n"
+    "Press BACK to switch mic on/off.\n"
+    "Hold 'o' for PTT mode (mic will be off once you release 'o')\n"
+    "Hold BACK to exit.";
+    widget_add_text_scroll_element(hid_ptt->help, 0, 0, 128, 64, msg);
+
     return hid_ptt;
 }
 
 void hid_ptt_free(HidPushToTalk* hid_ptt) {
     furi_assert(hid_ptt);
     notification_message(hid_ptt->hid->notifications, &sequence_reset_red);
+    widget_free(hid_ptt->help);
     view_free(hid_ptt->view);
     free(hid_ptt);
 }
