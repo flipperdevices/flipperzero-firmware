@@ -106,7 +106,7 @@ static void hid_ptt_menu_draw_list(Canvas* canvas, void* context, const PushToTa
 
         position++;
     }
-    elements_scrollbar_pos(canvas, 128 , 17, 49, model->position, PushToTalkMenuItemArray_size(items));
+    elements_scrollbar_pos(canvas, 128 , 17, 46, model->position, PushToTalkMenuItemArray_size(items));
 }
 
 PushToTalkMenuList * hid_ptt_menu_get_list_at_index(
