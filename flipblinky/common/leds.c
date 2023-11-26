@@ -1,10 +1,6 @@
 #include "leds_i.h"
 
-#ifdef USE_LED_DRIVER
-#undef USE_LED_DRIVER
-#endif
-// Uncomment the next line to use the LED driver instead of bit-banging the LEDs.
-#define USE_LED_DRIVER 1
+#include "../app_config.h"
 
 // Bit-banging the WS2812b LEDs is a bit tricky. The timing is very strict.
 // Hopefully, we will update to a better solution in the future.
@@ -23,8 +19,10 @@ typedef struct {
 FlipboardLeds* flipboard_leds_alloc() {
     FlipboardLeds* leds = malloc(sizeof(FlipboardLeds));
 #ifdef USE_LED_DRIVER
+    FURI_LOG_D(TAG, "Using LED driver");
     leds->led_driver = led_driver_alloc(LED_COUNT, pin_ws2812_leds);
 #else
+    FURI_LOG_D(TAG, "Using Bit-bang LEDs");
     furi_hal_gpio_init_simple(pin_ws2812_leds, GpioModeOutputPushPull);
     leds->led_driver = NULL;
 #endif
