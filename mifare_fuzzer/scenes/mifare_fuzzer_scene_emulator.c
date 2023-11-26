@@ -41,19 +41,21 @@ void mifare_fuzzer_scene_emulator_on_enter(void* context) {
     mifare_fuzzer_emulator_set_ticks_between_cards(
         app->emulator_view, emulator->ticks_between_cards);
     // init default card data
-    FuriHalNfcDevData nfc_dev_data;
-    nfc_dev_data.atqa[0] = 0x00;
-    nfc_dev_data.atqa[1] = 0x00;
-    nfc_dev_data.sak = 0x00;
+    Iso14443_3aData nfc_data;
+    nfc_data.atqa[0] = 0x00;
+    nfc_data.atqa[1] = 0x00;
+    nfc_data.sak = 0x00;
     if(app->card == MifareCardUltralight) {
-        nfc_dev_data.uid_len = 0x07;
+        nfc_data.uid_len = 0x07;
     } else {
-        nfc_dev_data.uid_len = 0x04;
+        nfc_data.uid_len = 0x04;
     }
-    for(uint32_t i = 0; i < nfc_dev_data.uid_len; i++) {
-        nfc_dev_data.uid[i] = 0x00;
+    for(uint32_t i = 0; i < nfc_data.uid_len; i++) {
+        nfc_data.uid[i] = 0x00;
     }
-    mifare_fuzzer_emulator_set_nfc_dev_data(app->emulator_view, nfc_dev_data);
+
+    mifare_fuzzer_emulator_set_nfc_data(app->emulator_view, nfc_data);
+
     // init other vars
     attack_step = 0;
 
@@ -67,7 +69,7 @@ void mifare_fuzzer_scene_emulator_on_enter(void* context) {
 /// @return
 bool mifare_fuzzer_scene_emulator_on_event(void* context, SceneManagerEvent event) {
     //FURI_LOG_D(TAG, "mifare_fuzzer_scene_emulator_on_event()");
-    FuriHalNfcDevData nfc_dev_data;
+    Iso14443_3aData nfc_data;
 
     MifareFuzzerApp* app = context;
     MifareFuzzerEmulator* emulator = app->emulator_view;
@@ -84,27 +86,27 @@ bool mifare_fuzzer_scene_emulator_on_event(void* context, SceneManagerEvent even
             // Set card type
             // TODO: Move somewhere else, I do not like this to be there
             if(app->card == MifareCardClassic1k) {
-                nfc_dev_data.atqa[0] = 0x04;
-                nfc_dev_data.atqa[1] = 0x00;
-                nfc_dev_data.sak = 0x08;
-                nfc_dev_data.uid_len = 0x04;
+                nfc_data.atqa[0] = 0x04;
+                nfc_data.atqa[1] = 0x00;
+                nfc_data.sak = 0x08;
+                nfc_data.uid_len = 0x04;
             } else if(app->card == MifareCardClassic4k) {
-                nfc_dev_data.atqa[0] = 0x02;
-                nfc_dev_data.atqa[1] = 0x00;
-                nfc_dev_data.sak = 0x18;
-                nfc_dev_data.uid_len = 0x04;
+                nfc_data.atqa[0] = 0x02;
+                nfc_data.atqa[1] = 0x00;
+                nfc_data.sak = 0x18;
+                nfc_data.uid_len = 0x04;
             } else if(app->card == MifareCardUltralight) {
-                nfc_dev_data.atqa[0] = 0x44;
-                nfc_dev_data.atqa[1] = 0x00;
-                nfc_dev_data.sak = 0x00;
-                nfc_dev_data.uid_len = 0x07;
+                nfc_data.atqa[0] = 0x44;
+                nfc_data.atqa[1] = 0x00;
+                nfc_data.sak = 0x00;
+                nfc_data.uid_len = 0x07;
             }
 
             // Set UIDs
             if(app->attack == MifareFuzzerAttackTestValues) {
                 // Load test UIDs
-                for(uint8_t i = 0; i < nfc_dev_data.uid_len; i++) {
-                    nfc_dev_data.uid[i] = id_uid_test[attack_step][i];
+                for(uint8_t i = 0; i < nfc_data.uid_len; i++) {
+                    nfc_data.uid[i] = id_uid_test[attack_step][i];
                 }
                 // Next UIDs on next loop
                 if(attack_step >= 8) {
@@ -121,13 +123,13 @@ bool mifare_fuzzer_scene_emulator_on_event(void* context, SceneManagerEvent even
 
                     // TODO: Manufacture-code must be selectable from a list
                     // use a fixed manufacture-code for now: 0x04 = NXP Semiconductors Germany
-                    nfc_dev_data.uid[0] = 0x04;
-                    for(uint8_t i = 1; i < nfc_dev_data.uid_len; i++) {
-                        nfc_dev_data.uid[i] = (furi_hal_random_get() & 0xFF);
+                    nfc_data.uid[0] = 0x04;
+                    for(uint8_t i = 1; i < nfc_data.uid_len; i++) {
+                        nfc_data.uid[i] = (furi_hal_random_get() & 0xFF);
                     }
                 } else {
-                    for(uint8_t i = 0; i < nfc_dev_data.uid_len; i++) {
-                        nfc_dev_data.uid[i] = (furi_hal_random_get() & 0xFF);
+                    for(uint8_t i = 0; i < nfc_data.uid_len; i++) {
+                        nfc_data.uid[i] = (furi_hal_random_get() & 0xFF);
                     }
                 }
             } else if(app->attack == MifareFuzzerAttackLoadUidsFromFile) {
@@ -155,21 +157,21 @@ bool mifare_fuzzer_scene_emulator_on_event(void* context, SceneManagerEvent even
 
                 // parse string to UID
                 // TODO: a better validation on input?
-                for(uint8_t i = 0; i < nfc_dev_data.uid_len; i++) {
+                for(uint8_t i = 0; i < nfc_data.uid_len; i++) {
                     if(i <= ((furi_string_size(app->uid_str) - 1) / 2)) {
                         char temp_str[3];
                         temp_str[0] = furi_string_get_cstr(app->uid_str)[i * 2];
                         temp_str[1] = furi_string_get_cstr(app->uid_str)[i * 2 + 1];
                         temp_str[2] = '\0';
-                        nfc_dev_data.uid[i] = (uint8_t)strtol(temp_str, NULL, 16);
+                        nfc_data.uid[i] = (uint8_t)strtol(temp_str, NULL, 16);
                     } else {
-                        nfc_dev_data.uid[i] = 0x00;
+                        nfc_data.uid[i] = 0x00;
                     }
                 }
             }
 
-            mifare_fuzzer_worker_set_nfc_dev_data(app->worker, nfc_dev_data);
-            mifare_fuzzer_emulator_set_nfc_dev_data(app->emulator_view, nfc_dev_data);
+            mifare_fuzzer_worker_set_nfc_data(app->worker, nfc_data);
+            mifare_fuzzer_emulator_set_nfc_data(app->emulator_view, nfc_data);
 
             // Reset tick_counter
             tick_counter = 0;

@@ -48,52 +48,28 @@ static int32_t uart_worker(void* context) {
                 if(uart->handle_rx_data_cb) {
                     uart->handle_rx_data_cb(uart->rx_buf, len, uart->app);
 
-                    if(uart->app->has_command_queue) {
-                        if(uart->app->command_index < 1) {
-                            if(0 == strncmp(
-                                        SET_AP_CMD,
-                                        uart->app->command_queue[uart->app->command_index],
-                                        strlen(SET_AP_CMD))) {
-                                FuriString* out_data = furi_string_alloc();
-
-                                furi_string_cat(out_data, "setap=");
-                                furi_string_cat(out_data, (char*)uart->app->ap_name);
-
-                                evil_portal_uart_tx(
-                                    (uint8_t*)(furi_string_get_cstr(out_data)),
-                                    strlen(furi_string_get_cstr(out_data)));
-                                evil_portal_uart_tx((uint8_t*)("\n"), 1);
-
-                                uart->app->sent_ap = true;
-
-                                free(out_data);
-                                free(uart->app->ap_name);
-                            }
-
-                            uart->app->command_index = 0;
-                            uart->app->has_command_queue = false;
-                            uart->app->command_queue[0] = "";
-                        }
-                    }
-
+                    furi_mutex_acquire(uart->app->portal_logs_mutex, FuriWaitForever);
                     if(uart->app->sent_reset == false) {
                         furi_string_cat(uart->app->portal_logs, (char*)uart->rx_buf);
                     }
 
-                    if(furi_string_utf8_length(uart->app->portal_logs) > 4000) {
+                    if(furi_string_size(uart->app->portal_logs) > 4000) {
                         write_logs(uart->app->portal_logs);
                         furi_string_reset(uart->app->portal_logs);
                     }
+                    furi_mutex_release(uart->app->portal_logs_mutex);
                 } else {
                     uart->rx_buf[len] = '\0';
+                    furi_mutex_acquire(uart->app->portal_logs_mutex, FuriWaitForever);
                     if(uart->app->sent_reset == false) {
                         furi_string_cat(uart->app->portal_logs, (char*)uart->rx_buf);
                     }
 
-                    if(furi_string_utf8_length(uart->app->portal_logs) > 4000) {
+                    if(furi_string_size(uart->app->portal_logs) > 4000) {
                         write_logs(uart->app->portal_logs);
                         furi_string_reset(uart->app->portal_logs);
                     }
+                    furi_mutex_release(uart->app->portal_logs_mutex);
                 }
             }
         }
@@ -128,7 +104,6 @@ Evil_PortalUart* evil_portal_uart_init(Evil_PortalApp* app) {
         furi_hal_uart_init(UART_CH, app->BAUDRATE);
     }
 
-    furi_hal_console_disable();
     if(app->BAUDRATE == 0) {
         app->BAUDRATE = 115200;
     }

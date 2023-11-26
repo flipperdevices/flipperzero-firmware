@@ -1,0 +1,15 @@
+App(
+    appid="wardriver",
+    name="[ESP32GPS] Wardriver",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="wardriver_app",
+    stack_size=2048,
+    fap_icon="lookingglass.png",
+    fap_category="WiFi",
+    fap_author="@Sil333033",
+    fap_weburl="https://github.com/Flipper-XFW/Xtreme-Apps/tree/dev/wardriver",
+    fap_version="1.0",
+    fap_description="Sniff WiFi access points with GPS location coordinates",
+    fap_icon_assets="icons",
+    fap_icon_assets_symbol="wardriver",
+)

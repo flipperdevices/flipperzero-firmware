@@ -30,6 +30,14 @@ typedef struct {
 
 typedef enum { KNOTS, KPH, MPH, INVALID } SpeedUnit;
 
+typedef enum {
+    CHANGE_BAUDRATE,
+    CHANGE_BACKLIGHT,
+    CHANGE_DEEPSLEEP,
+    CHANGE_SPEEDUNIT,
+    NORMAL
+} ViewState;
+
 typedef struct {
     FuriMutex* mutex;
     FuriThread* thread;
@@ -38,9 +46,10 @@ typedef struct {
 
     NotificationApp* notifications;
     uint32_t baudrate;
-    bool changing_baudrate;
-    bool backlight_on;
+    bool backlight_enabled;
+    bool deep_sleep_enabled;
     SpeedUnit speed_units;
+    ViewState view_state;
 
     GpsStatus status;
 } GpsUart;

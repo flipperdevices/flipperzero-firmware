@@ -28,6 +28,8 @@ static void gps_uart_serial_init(GpsUart* gps_uart) {
 
     furi_hal_uart_set_irq_cb(UART_CH, gps_uart_on_irq_cb, gps_uart);
     furi_hal_uart_set_br(UART_CH, gps_uart->baudrate);
+
+    furi_hal_uart_tx(UART_CH, (uint8_t*)"wakey wakey\r\n", strlen("wakey wakey\r\n"));
 }
 
 static void gps_uart_serial_deinit(GpsUart* gps_uart) {
@@ -211,9 +213,10 @@ GpsUart* gps_uart_enable() {
     gps_uart->notifications = furi_record_open(RECORD_NOTIFICATION);
 
     gps_uart->baudrate = gps_baudrates[current_gps_baudrate];
-    gps_uart->changing_baudrate = false;
-    gps_uart->backlight_on = false;
     gps_uart->speed_units = KNOTS;
+    gps_uart->backlight_enabled = false;
+    gps_uart->deep_sleep_enabled = false;
+    gps_uart->view_state = NORMAL;
 
     gps_uart_init_thread(gps_uart);
 

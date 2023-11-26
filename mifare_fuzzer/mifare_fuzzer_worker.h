@@ -2,6 +2,10 @@
 #include <furi.h>
 #include <furi_hal.h>
 
+#include <nfc/nfc_device.h>
+#include <nfc/nfc_listener.h>
+#include <nfc/protocols/iso14443_3a/iso14443_3a.h>
+
 typedef enum MifareFuzzerWorkerState {
     MifareFuzzerWorkerStateEmulate,
     MifareFuzzerWorkerStateStop,
@@ -13,7 +17,10 @@ typedef enum MifareFuzzerWorkerState {
 typedef struct MifareFuzzerWorker {
     FuriThread* thread;
     MifareFuzzerWorkerState state;
-    FuriHalNfcDevData nfc_dev_data;
+    Iso14443_3aData nfc_data;
+    NfcListener* nfc_listener;
+    NfcDevice* nfc_device;
+    Nfc* nfc;
 } MifareFuzzerWorker;
 
 // worker
@@ -25,7 +32,7 @@ void mifare_fuzzer_worker_start(MifareFuzzerWorker* mifare_fuzzer_worker);
 int32_t mifare_fuzzer_worker_task(void* context);
 //
 bool mifare_fuzzer_worker_is_emulating(MifareFuzzerWorker* mifare_fuzzer_worker);
-void mifare_fuzzer_worker_set_nfc_dev_data(
+void mifare_fuzzer_worker_set_nfc_data(
     MifareFuzzerWorker* mifare_fuzzer_worker,
-    FuriHalNfcDevData nfc_dev_data);
-FuriHalNfcDevData mifare_fuzzer_worker_get_nfc_dev_data(MifareFuzzerWorker* mifare_fuzzer_worker);
+    Iso14443_3aData nfc_data);
+Iso14443_3aData mifare_fuzzer_worker_get_nfc_data(MifareFuzzerWorker* mifare_fuzzer_worker);
