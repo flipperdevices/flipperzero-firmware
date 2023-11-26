@@ -71,8 +71,7 @@ static void hid_ptt_menu_draw_list(Canvas* canvas, void* context, const PushToTa
     canvas_set_font(canvas, FontSecondary);
     size_t position = 0;
     PushToTalkMenuItemArray_it_t it;
-    for(PushToTalkMenuItemArray_it(it, items); !PushToTalkMenuItemArray_end_p(it);
-        PushToTalkMenuItemArray_next(it)) {
+    for(PushToTalkMenuItemArray_it(it, items); !PushToTalkMenuItemArray_end_p(it); PushToTalkMenuItemArray_next(it)) {
         const size_t item_position = position - model->window_position;
         const size_t items_on_screen = 3;
         uint8_t y_offset = 16;
@@ -157,15 +156,12 @@ void ptt_menu_add_list(
     uint32_t index) {
     furi_assert(label);
     furi_assert(hid_ptt_menu);
-    FURI_LOG_I(TAG, "Adding list: %s [%li]", label, index);
     with_view_model(
         hid_ptt_menu->view, HidPushToTalkMenuModel * model,
         {
             if (model->lists_count == 0) {
-                FURI_LOG_I(TAG, "List array doesn't exist, creating");
                 model->lists = (PushToTalkMenuList *)malloc(sizeof(PushToTalkMenuList));
             } else {
-                FURI_LOG_I(TAG, "List array exists (%i), extending", model->lists_count);
                 model->lists = (PushToTalkMenuList *)realloc(model->lists, (model->lists_count + 1) * sizeof(PushToTalkMenuList));
             }
             if (model->lists == NULL) {
@@ -210,34 +206,70 @@ void ptt_menu_add_item_to_list(
         true);
 }
 
-// // Supports only ±1
-// static void hid_ptt_shift_app(HidPushToTalkMenuModel * model, int shift) {
-//     UNUSED(model);
-//     UNUSED(shift);
-//     // int i = (short) model->appIndex;
-//     // if (i + shift >= HidPttAppIndexSize) {
-//     //     model->appIndex = 0;
-//     // } else if(i + shift <= 0) {
-//     //     model->appIndex = HidPttAppIndexSize - 1;
-//     // } else {
-//     //     model->appIndex += shift;
-//     // }
-//     // // Avoid showing facetime if not macos
-//     // if (model->appIndex == HidPttAppIndexFaceTime && !model->is_mac_os) {
-//     //     hid_ptt_shift_app(model, shift);
-//     // }
-// }
+void ptt_menu_shift_list(HidPushToTalkMenu* hid_ptt_menu, int shift){
+    size_t new_position = 0;
+    uint32_t index = 0;
+    with_view_model(
+        hid_ptt_menu->view, HidPushToTalkMenuModel * model,
+        {
+            int new_list_position = (short) model->list_position + shift;
+            if (new_list_position >= model->lists_count) {
+                new_list_position = 0;
+            } else if (new_list_position < 0) {
+                new_list_position = model->lists_count - 1;
+            }
+            PushToTalkMenuList* list = &model->lists[model->list_position];
+            PushToTalkMenuList* new_list = &model->lists[new_list_position];
+            size_t new_window_position = model->window_position;
+            const size_t items_size = PushToTalkMenuItemArray_size(new_list->items);
+            size_t position = 0;
+            // Find item index from current list
+            PushToTalkMenuItemArray_it_t it;
+            for(PushToTalkMenuItemArray_it(it, list->items); !PushToTalkMenuItemArray_end_p(it); PushToTalkMenuItemArray_next(it)) {
+                if (position == model->position){
+                    index = PushToTalkMenuItemArray_cref(it)->index;
+                    break;
+                }
+                position++;
+            }
+            // Try to find item with the same index in a new list
+            position = 0;
+            bool item_exists_in_new_list = false;
+            for(PushToTalkMenuItemArray_it(it, new_list->items); !PushToTalkMenuItemArray_end_p(it); PushToTalkMenuItemArray_next(it)) {
+                if (PushToTalkMenuItemArray_cref(it)->index == index) {
+                    item_exists_in_new_list = true;
+                    new_position = position;
+                    break;
+                }
+                position++;
+            }
 
-// void ptt_menu_shift_list(HidPushToTalkMenu* hid_ptt_menu, bool forward)
-//     UNUSED(forward);
-//     with_view_model(
-//         hid_ptt_menu->view, HidPushToTalkMenuModel * model,
-//         {
-//             UNUSED(model);
-//             // PushToTalkMenuList* list = &model->lists[model->list_position];
-//         },
-//         true);
-// }
+            // This list item is not presented in a new list, let's try to keep position as is.
+            // If it's out of range for the new list set it to the end
+            if (!item_exists_in_new_list) {
+                new_position = items_size - 1 < model->position ? items_size - 1 : model->position;
+            }
+
+            // Tune window position. As we have 3 items on screen, keep focus centered
+            const size_t items_on_screen = 3;
+
+            if (new_position >= items_size - 1) {
+                if (items_size < items_on_screen + 1) {
+                    new_window_position = 0;
+                } else {
+                    new_window_position = items_size - items_on_screen - 1;
+                }
+            } else if (new_position < items_on_screen - 1) {
+                new_window_position = 0;
+            } else {
+                new_window_position = new_position/items_on_screen + 1;
+            }
+            model->list_position = new_list_position;
+            model->position = new_position;
+            model->window_position = new_window_position;
+        },
+        true);
+}
 
 void ptt_menu_process_up(HidPushToTalkMenu* hid_ptt_menu) {
     with_view_model(
@@ -285,11 +317,8 @@ void ptt_menu_process_down(HidPushToTalkMenu* hid_ptt_menu) {
 }
 
 void ptt_menu_process_ok(HidPushToTalkMenu* hid_ptt_menu) {
-
     PushToTalkMenuList* list = NULL;
-    
     PushToTalkMenuItem* item = NULL;
-
     with_view_model(
         hid_ptt_menu->view, HidPushToTalkMenuModel * model,
         {
@@ -321,11 +350,11 @@ static bool hid_ptt_menu_input_callback(InputEvent* event, void* context) {
             break;
         case InputKeyLeft:
             consumed = true;
-            // ptt_menu_shift_list(hid_ptt_menu, false);
+            ptt_menu_shift_list(hid_ptt_menu, -1);
             break;
         case InputKeyRight:
             consumed = true;
-            // ptt_menu_shift_list(hid_ptt_menu, true);
+            ptt_menu_shift_list(hid_ptt_menu, +1);
             break;
         case InputKeyOk:
             consumed = true;

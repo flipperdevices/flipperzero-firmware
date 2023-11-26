@@ -476,7 +476,7 @@ HidPushToTalk* hid_ptt_alloc(Hid* hid) {
 
     FURI_LOG_I(TAG, "Calling adding list");
     ptt_menu_add_list(hid->hid_ptt_menu, "macOS", HidPushToTalkMacOS);
-    ptt_menu_add_list(hid->hid_ptt_menu, "Windows / Linux", HidPushToTalkLinux);
+    ptt_menu_add_list(hid->hid_ptt_menu, "Win/Linux", HidPushToTalkLinux);
     ptt_menu_add_item_to_list(hid->hid_ptt_menu, HidPushToTalkMacOS, "Google Meet", HidPushToTalkAppIndexGoogleMeet, hid_ptt_menu_callback, hid_ptt);
     ptt_menu_add_item_to_list(hid->hid_ptt_menu, HidPushToTalkLinux, "Google Meet", HidPushToTalkAppIndexGoogleMeet, hid_ptt_menu_callback, hid_ptt);
     ptt_menu_add_item_to_list(hid->hid_ptt_menu, HidPushToTalkMacOS, "Zoom",        HidPushToTalkAppIndexZoom,       hid_ptt_menu_callback, hid_ptt);
