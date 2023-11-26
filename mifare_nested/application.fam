@@ -1,5 +1,5 @@
 App(
-    appid="mifare_nested",
+    appid=".mifare_nested",
     name="Mifare Nested",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="mifare_nested_app",
