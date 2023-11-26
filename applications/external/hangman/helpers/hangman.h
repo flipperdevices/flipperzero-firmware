@@ -45,10 +45,15 @@ typedef struct {
 } HangmanLangConfig;
 
 typedef struct {
+    uint16_t* arr;
+    size_t len;
+} HangmanWord;
+
+typedef struct {
     Gui* gui;
     ViewPort* view_port;
     FuriMessageQueue* event_queue;
-    char* word;
+    HangmanWord word;
     uint8_t pos;
     uint8_t gallows_state;
     HangmanOpened opened[HANGMAN_MAX_ALP_SIZE];
@@ -83,5 +88,4 @@ bool hangman_wait_close_window(HangmanApp* app);
 bool hangman_menu_selection(HangmanApp* app);
 bool hangman_main_loop(HangmanApp* app);
 
-void hangman_set_font(Canvas* canvas, const uint8_t h, const uint16_t value);
-uint8_t hangman_draw_glyph(Canvas* canvas, const uint8_t x, const uint8_t y, const uint16_t value);
+void hangman_set_font(Canvas* canvas, const uint8_t h);
