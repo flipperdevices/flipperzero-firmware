@@ -312,11 +312,11 @@ static bool led_tester_custom_event_callback(void* context, uint32_t event) {
 
     // Rotate the pattern
     for(int i = 0; i < offset; i++) {
-        uint32_t tmp = rgb[3];
-        rgb[3] = rgb[2];
-        rgb[2] = rgb[1];
-        rgb[1] = rgb[0];
-        rgb[0] = tmp;
+        uint32_t tmp = rgb[0];
+        rgb[0] = rgb[1];
+        rgb[1] = rgb[2];
+        rgb[2] = rgb[3];
+        rgb[3] = tmp;
     }
 
     // If deinit, turn off the LEDs
