@@ -91,7 +91,7 @@ bool subrem_scene_remote_on_event(void* context, SceneManagerEvent event) {
                 }
                 subrem_view_remote_set_state(
                     app->subrem_remote_view, SubRemViewRemoteStateSending, chosen_sub);
-                notification_message(app->notifications, &sequence_blink_start_magenta);
+                notification_message(app->notifications, &sequence_blink_start_red);
             } else {
                 subrem_view_remote_set_state(
                     app->subrem_remote_view, SubRemViewRemoteStateIdle, 0);
