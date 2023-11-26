@@ -181,9 +181,8 @@ void flipboard_do_effect(FlipboardModel* model) {
  * @param context The Flipboard* context.
  * @param old_key The previous key state.
  * @param new_key The new key state.
- * @return true if the key event was handled, false otherwise.
  */
-bool flipboard_debounced_switch(void* context, uint8_t old_key, uint8_t new_key) {
+void flipboard_debounced_switch(void* context, uint8_t old_key, uint8_t new_key) {
     Flipboard* app = (Flipboard*)context;
     FlipboardModel* model = flipboard_get_model(app);
     uint8_t reduced_new_key = flipboard_model_reduce(model, new_key, false);
@@ -231,8 +230,6 @@ bool flipboard_debounced_switch(void* context, uint8_t old_key, uint8_t new_key)
         fbm->show_details_counter = detail_counter_ticks;
         flipboard_reset_effect(model);
     }
-
-    return true;
 }
 
 /**

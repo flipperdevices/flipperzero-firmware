@@ -183,10 +183,11 @@ void flipboard_model_set_custom_data(FlipboardModel* model, void* custom_data) {
 }
 
 /**
- * @brief __gui_redraw is called to redraw the GUI.
- * @details __gui_redraw is an intenal function called that redraws the GUI.
+ * @brief flipboard_model_update_gui is called to redraw the GUI.
+ * @details flipboard_model_update_gui forces a redraw of the GUI.
 */
-static void __gui_redraw() {
+void flipboard_model_update_gui(FlipboardModel* model) {
+    UNUSED(model);
     Gui* gui = furi_record_open(RECORD_GUI);
     gui_direct_draw_acquire(gui);
     gui_direct_draw_release(gui);
@@ -199,8 +200,7 @@ static void __gui_redraw() {
  * @param model The FlipboardModel.
 */
 static void flipboard_model_tick(void* context) {
-    UNUSED(context);
-    __gui_redraw();
+    flipboard_model_update_gui((FlipboardModel*)context);
 }
 
 /**
@@ -217,6 +217,7 @@ void flipboard_model_set_gui_refresh_speed_ms(FlipboardModel* model, uint32_t up
             furi_timer_free(model->gui_refresh_timer);
             model->gui_refresh_timer = NULL;
         }
+        flipboard_model_update_gui(model);
         return;
     }
 

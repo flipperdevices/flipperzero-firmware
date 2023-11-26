@@ -36,15 +36,17 @@ void flipboard_view_flip_keyboard_draw(Canvas* canvas, void* model) {
     furi_string_printf(action_text, "%02d", action);
 
     canvas_set_bitmap_mode(canvas, 1);
+
     canvas_set_font(canvas, FontPrimary);
     canvas_draw_str(canvas, 21, 12, "PRESS BUTTONS");
+
     canvas_draw_icon(canvas, 5, 19, icon1);
     canvas_draw_icon(canvas, 36, 19, icon2);
     canvas_draw_icon(canvas, 67, 19, icon3);
     canvas_draw_icon(canvas, 98, 19, icon4);
+
     canvas_set_font(canvas, FontPrimary);
     canvas_draw_str(canvas, 33, 60, "ACTION:");
-    canvas_set_font(canvas, FontPrimary);
     canvas_draw_str(canvas, 84, 60, furi_string_get_cstr(action_text));
 
     furi_string_free(action_text);
@@ -55,9 +57,8 @@ void flipboard_view_flip_keyboard_draw(Canvas* canvas, void* model) {
  * @param context The Flipboard* context.
  * @param old_key The previous key state.
  * @param new_key The new key state.
- * @return true if the key event was handled, false otherwise.
  */
-bool flipboard_debounced_switch(void* context, uint8_t old_button, uint8_t new_button) {
+void flipboard_debounced_switch(void* context, uint8_t old_button, uint8_t new_button) {
     Flipboard* app = (Flipboard*)context;
     FlipboardModel* model = flipboard_get_model(app);
     uint8_t reduced_new_button = flipboard_model_reduce(model, new_button, false);
@@ -65,13 +66,13 @@ bool flipboard_debounced_switch(void* context, uint8_t old_button, uint8_t new_b
     FURI_LOG_D(
         TAG, "SW EVENT: old=%d new=%d reduced=%d", old_button, new_button, reduced_new_button);
 
+    flipboard_model_update_gui(model);
+
     ButtonModel* bm = flipboard_model_get_button_model(model, reduced_new_button);
     flipboard_model_set_colors(model, bm, new_button);
     flipboard_model_send_keystrokes(model, bm);
     flipboard_model_send_text(model, bm);
     flipboard_model_play_tone(model, bm);
-
-    return true;
 }
 
 /**
@@ -82,7 +83,7 @@ void flipboard_enter_callback(void* context) {
     FlipboardModel* fm = flipboard_get_model((Flipboard*)context);
     flipboard_model_set_button_monitor(fm, flipboard_debounced_switch, (Flipboard*)context);
     flipboard_model_set_colors(fm, NULL, 0x0);
-    flipboard_model_set_gui_refresh_speed_ms(fm, 100);
+    flipboard_model_set_gui_refresh_speed_ms(fm, 0);
 }
 
 /**

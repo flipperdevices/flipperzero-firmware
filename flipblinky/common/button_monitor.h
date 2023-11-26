@@ -13,7 +13,7 @@
 #include <furi_hal.h>
 
 typedef struct ButtonMonitor ButtonMonitor;
-typedef bool (*ButtonMonitorEventCallback)(void* context, uint8_t old_key, uint8_t new_key);
+typedef void (*ButtonMonitorEventCallback)(void* context, uint8_t old_key, uint8_t new_key);
 
 typedef enum {
     SwitchId1 = 1,

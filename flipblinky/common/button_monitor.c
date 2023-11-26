@@ -115,11 +115,11 @@ static int32_t button_monitor_worker(void* context) {
             pins = button_monitor_get_debounced_pin_status();
             FURI_LOG_D("TAG", "pins: %d", pins);
             if(pins != button_monitor->last_pins) {
-                if(button_monitor->callback) {
-                    button_monitor->callback(
-                        button_monitor->context, button_monitor->last_pins, pins);
-                }
+                SwitchIds prev_pins = button_monitor->last_pins;
                 button_monitor->last_pins = pins;
+                if(button_monitor->callback) {
+                    button_monitor->callback(button_monitor->context, prev_pins, pins);
+                }
             }
         }
         furi_delay_ms(1);

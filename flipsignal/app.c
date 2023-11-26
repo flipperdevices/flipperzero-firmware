@@ -96,9 +96,8 @@ static void flipboard_model_send_signal(FlipboardModel* model, ButtonModel* bm) 
  * @param context The Flipboard* context.
  * @param old_key The previous key state.
  * @param new_key The new key state.
- * @return true if the key event was handled, false otherwise.
  */
-static bool flipboard_debounced_switch(void* context, uint8_t old_button, uint8_t new_button) {
+static void flipboard_debounced_switch(void* context, uint8_t old_button, uint8_t new_button) {
     Flipboard* app = (Flipboard*)context;
     FlipboardModel* model = flipboard_get_model(app);
     uint8_t reduced_new_button = flipboard_model_reduce(model, new_button, false);
@@ -106,12 +105,12 @@ static bool flipboard_debounced_switch(void* context, uint8_t old_button, uint8_
     FURI_LOG_D(
         TAG, "SW EVENT: old=%d new=%d reduced=%d", old_button, new_button, reduced_new_button);
 
+    flipboard_model_update_gui(model);
+
     ButtonModel* bm = flipboard_model_get_button_model(model, reduced_new_button);
     flipboard_model_set_colors(model, bm, new_button);
     flipboard_model_play_tone(model, bm);
     flipboard_model_send_signal(model, bm);
-
-    return true;
 }
 
 /**

@@ -133,6 +133,12 @@ void* flipboard_model_get_custom_data(FlipboardModel* model);
 void flipboard_model_set_custom_data(FlipboardModel* model, void* custom_data);
 
 /**
+ * @brief flipboard_model_update_gui redraws the GUI.
+ * @param model The FlipboardModel.
+*/
+void flipboard_model_update_gui(FlipboardModel* model);
+
+/**
  * @brief flipboard_model_get_gui_refresh_speed_ms gets the GUI refresh speed in milliseconds.
  * @details flipboard_model_get_gui_refresh_speed_ms gets the GUI refresh speed in milliseconds.
  * The GUI refresh speed is the rate at which the GUI is updated.  The GUI is updated
