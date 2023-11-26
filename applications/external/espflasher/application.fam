@@ -11,7 +11,7 @@ App(
     fap_category="GPIO",
     fap_private_libs=[
         Lib(
-            name="esp-serial-flasher",
+            name="esp_serial_flasher",
             fap_include_paths=["include"],
             sources=[
                 "src/esp_loader.c",
