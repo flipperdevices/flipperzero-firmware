@@ -60,8 +60,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [ESP32 Evil Portal v0.2 (By bigbrodude6119)](https://github.com/bigbrodude6119/flipper-zero-evil-portal) Changes for CFW Settings UART Customizations
 - SubGHz: [Sound State saved in settings (By LeeroysHub)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/9694ece01f1abad51f3efaaf0fb94e6795a54063)
 - SubGHz: [Crash Fix Can't Listen after TX in TX only (By LeeroysHub)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/3e10ebd6c0914040223c40f5063f89fb1925880f)
-- Updated: [Hangman v1.5 (By Evgeny Stepanischev & Eva Stepanischeva)] <https://github.com/bolknote/Flipper-Zero-Hangman-Game>
-- Updated: [HEX Editor v1.3 (By dunaevai135)] <https://github.com/dunaevai135/flipper-zero-hex_editor>
+- Updated: [Hangman v1.5 (By Evgeny Stepanischev & Eva Stepanischeva)](https://github.com/bolknote/Flipper-Zero-Hangman-Game)
+- Updated: [HEX Editor v1.3 (By dunaevai135)](https://github.com/dunaevai135/flipper-zero-hex_editor)
 
 <a name="release">
 
