@@ -10,7 +10,7 @@
 
 #define LOGITECH_MAX_CHANNEL 85
 #define COUNT_THRESHOLD 2
-#define DEFAULT_SAMPLE_TIME 8000
+#define DEFAULT_SAMPLE_TIME 4000
 #define MAX_ADDRS 100
 #define MAX_CONFIRMED 32
 
@@ -426,21 +426,19 @@ int32_t nrfsniff_app(void* p) {
 
                         break;
                     case InputKeyBack:
-                        if(event.input.type == InputTypeLong) {
-                            if(nrf_ready) {
-                                if(sniffing_state) {
-                                    wrap_up(storage, notification);
-                                }
-                            } else {
-                                if(nrf24_check_connected(nrf24_HANDLE)) {
-                                    nrf_ready = true;
-                                } else {
-                                    nrf_ready = false;
-                                    FURI_LOG_E(TAG, "NRF24 not connected");
-                                }
+                        if(nrf_ready) {
+                            if(sniffing_state) {
+                                wrap_up(storage, notification);
                             }
-                            processing = false;
+                        } else {
+                            if(nrf24_check_connected(nrf24_HANDLE)) {
+                                nrf_ready = true;
+                            } else {
+                                nrf_ready = false;
+                                FURI_LOG_E(TAG, "NRF24 not connected");
+                            }
                         }
+                        processing = false;
                         break;
                     default:
                         break;
