@@ -193,7 +193,6 @@ bool subghz_scene_receiver_info_on_event(void* context, SceneManagerEvent event)
             subghz->state_notifications = SubGhzNotificationStateIDLE;
             subghz_txrx_stop(subghz->txrx);
             subghz_txrx_hopper_pause(subghz->txrx);
-            subghz_txrx_hopper_set_state(subghz->txrx, SubGhzHopperStateOFF);
 
             if(subghz_txrx_protocol_is_serializable(subghz->txrx)) {
                 subghz_file_name_clear(subghz);

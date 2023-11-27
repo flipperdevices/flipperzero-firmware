@@ -219,8 +219,14 @@ SubGhz* subghz_alloc(bool alloc_for_tx_only) {
 
     subghz->secure_data = malloc(sizeof(SecureData));
 
-    //Put the Listen after TX back to what the user selected..
+    //Put the Listen after TX back to what the user selected.
     subghz->ListenAfterTX = subghz->last_settings->enable_listen_after_tx;
+
+    //Put the Speaker Back to what the user selected.
+    subghz_txrx_speaker_set_state(
+        subghz->txrx,
+        subghz->last_settings->enable_sound ? SubGhzSpeakerStateEnable :
+                                              SubGhzSpeakerStateDisable);
 
     if(!alloc_for_tx_only) {
         subghz->ignore_filter = subghz->last_settings->ignore_filter;
@@ -419,3 +425,4 @@ int32_t subghz_app(void* p) {
 
     return 0;
 }
+

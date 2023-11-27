@@ -255,6 +255,7 @@ static void subghz_scene_receiver_config_set_speaker(VariableItem* item) {
 
     variable_item_set_current_value_text(item, combobox_text[index]);
     subghz_txrx_speaker_set_state(subghz->txrx, speaker_value[index]);
+    subghz->last_settings->enable_sound = (speaker_value[index] == SubGhzSpeakerStateEnable);
 }
 
 static void subghz_scene_receiver_config_set_bin_raw(VariableItem* item) {
@@ -518,16 +519,18 @@ void subghz_scene_receiver_config_on_enter(void* context) {
         Im sure theres a milion other ways you can set this up to do other stuff, but the Wake Up is easy now!
         Time to imagine the other uses, and make sure we can accomdateg them! 
     */
-    item = variable_item_list_add(
-        subghz->variable_item_list,
-        "Listen after TX",
-        COMBO_BOX_COUNT,
-        subghz_scene_receiver_config_set_listen_after_tx,
-        subghz);
-    value_index =
-        value_index_uint32(subghz->ListenAfterTX, listen_after_tx_value, COMBO_BOX_COUNT);
-    variable_item_set_current_value_index(item, value_index);
-    variable_item_set_current_value_text(item, combobox_text[value_index]);
+    if(!subghz->raw_send_only) { //Cant switch to receive if the app is opened TX only! (We never get here either, but just to be safe!)
+        item = variable_item_list_add(
+            subghz->variable_item_list,
+            "Listen after TX",
+            COMBO_BOX_COUNT,
+            subghz_scene_receiver_config_set_listen_after_tx,
+            subghz);
+        value_index =
+            value_index_uint32(subghz->ListenAfterTX, listen_after_tx_value, COMBO_BOX_COUNT);
+        variable_item_set_current_value_index(item, value_index);
+        variable_item_set_current_value_text(item, combobox_text[value_index]);
+    }
 
     if(!IsReadRAWScene) {
         item = variable_item_list_add(

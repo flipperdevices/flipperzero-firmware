@@ -258,7 +258,7 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
 
             //Go back to the Scan/Repeater if the Listen After TX flag is on.
-            if(subghz->ListenAfterTX) {
+            if(subghz->ListenAfterTX & !subghz->raw_send_only) {
                 //needed save?
                 if((subghz_rx_key_state_get(subghz) == SubGhzRxKeyStateAddKey) ||
                    (subghz_rx_key_state_get(subghz) == SubGhzRxKeyStateBack)) {
