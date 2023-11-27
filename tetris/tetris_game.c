@@ -9,6 +9,8 @@
 #include <dolphin/dolphin.h>
 #include "tetris_icons.h"
 
+#include <assets_icons.h>
+
 #define BORDER_OFFSET 1
 #define MARGIN_OFFSET 3
 #define BLOCK_HEIGHT 6
