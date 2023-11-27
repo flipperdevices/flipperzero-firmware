@@ -14,7 +14,7 @@
 void subghz_blink_start(SubGhz* subghz) {
     furi_assert(subghz);
     notification_message(subghz->notifications, &sequence_blink_stop);
-    notification_message(subghz->notifications, &sequence_blink_start_red);
+    notification_message(subghz->notifications, &sequence_blink_start_magenta);
 }
 
 void subghz_blink_stop(SubGhz* subghz) {
