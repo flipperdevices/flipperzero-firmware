@@ -1,3 +1,8 @@
+## v1.4
+
+Turbo mode (gotta go fast)! The app now supports flashing as fast as possible (921600 baud with built-in retries). In my testing, this sped up a 1:37min flash to 23 seconds. Now we can't go back to the slow way!
+
+
 ## v1.3
 
 No functionality changes. Fixed the build by removing deprecated API calls that weren't needed.

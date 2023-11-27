@@ -504,9 +504,19 @@ void subghz_txrx_speaker_set_state(SubGhzTxRx* instance, SubGhzSpeakerState stat
     instance->speaker_state = state;
 }
 
+void subghz_txrx_repeater_set_state(SubGhzRepeater* instance, SubGhzRepeater state) {
+    furi_assert(instance);
+    *instance = state;
+}
+
 SubGhzSpeakerState subghz_txrx_speaker_get_state(SubGhzTxRx* instance) {
     furi_assert(instance);
     return instance->speaker_state;
+}
+
+SubGhzRepeater subghz_txrx_repeater_get_state(SubGhzRepeater* instance) {
+    furi_assert(instance);
+    return *instance;
 }
 
 bool subghz_txrx_load_decoder_by_name_protocol(SubGhzTxRx* instance, const char* name_protocol) {

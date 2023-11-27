@@ -102,3 +102,11 @@ typedef enum {
     SubGhzDecodeRawStateLoading,
     SubGhzDecodeRawStateLoaded,
 } SubGhzDecodeRawState;
+
+/** SubGhz Repeater */
+typedef enum {
+    SubGhzRepeaterOff,
+    SubGhzRepeaterOn,
+    SubGhzRepeaterOnLong,
+    SubGhzRepeaterOnShort,
+} SubGhzRepeater;

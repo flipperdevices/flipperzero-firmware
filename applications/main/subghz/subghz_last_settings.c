@@ -19,6 +19,8 @@
 #define SUBGHZ_LAST_SETTING_FIELD_IGNORE_FILTER "IgnoreFilter"
 #define SUBGHZ_LAST_SETTING_FIELD_FILTER "Filter"
 #define SUBGHZ_LAST_SETTING_FIELD_RSSI_THRESHOLD "RSSI"
+#define SUBGHZ_LAST_SETTING_FIELD_REPEATER "Repeater"
+#define SUBGHZ_LAST_SETTING_FIELD_LISTEN_AFTER_TX "ListenAfterTX"
 
 SubGhzLastSettings* subghz_last_settings_alloc(void) {
     SubGhzLastSettings* instance = malloc(sizeof(SubGhzLastSettings));
@@ -44,6 +46,8 @@ void subghz_last_settings_load(SubGhzLastSettings* instance, size_t preset_count
     bool temp_external_module_power_amp = false;
     bool temp_timestamp_file_names = false;
     bool temp_enable_hopping = false;
+    bool temp_enable_listen_after_tx = false;
+    uint32_t temp_RepeaterState = false;
     uint32_t temp_ignore_filter = 0;
     uint32_t temp_filter = 0;
     float temp_rssi = 0;
@@ -106,6 +110,14 @@ void subghz_last_settings_load(SubGhzLastSettings* instance, size_t preset_count
             1);
         filter_was_read = flipper_format_read_uint32(
             fff_data_file, SUBGHZ_LAST_SETTING_FIELD_FILTER, (uint32_t*)&temp_filter, 1);
+        flipper_format_read_uint32(
+            fff_data_file, SUBGHZ_LAST_SETTING_FIELD_REPEATER, (uint32_t*)&temp_RepeaterState, 1);
+        flipper_format_read_bool(
+            fff_data_file,
+            SUBGHZ_LAST_SETTING_FIELD_LISTEN_AFTER_TX,
+            (bool*)&temp_enable_listen_after_tx,
+            1);
+
     } else {
         FURI_LOG_E(TAG, "Error open file %s", SUBGHZ_LAST_SETTINGS_PATH);
     }
@@ -122,10 +134,12 @@ void subghz_last_settings_load(SubGhzLastSettings* instance, size_t preset_count
         instance->timestamp_file_names = false;
         instance->external_module_power_amp = false;
         instance->enable_hopping = false;
+        instance->enable_listen_after_tx = false;
         instance->ignore_filter = 0x00;
         // See bin_raw_value in applications/main/subghz/scenes/subghz_scene_receiver_config.c
         instance->filter = SubGhzProtocolFlag_Decodable;
         instance->rssi = SUBGHZ_RAW_THRESHOLD_MIN;
+        instance->RepeaterState = SubGhzRepeaterOff;
     } else {
         instance->frequency = temp_frequency;
         instance->frequency_analyzer_feedback_level =
@@ -161,6 +175,8 @@ void subghz_last_settings_load(SubGhzLastSettings* instance, size_t preset_count
 
         instance->rssi = rssi_was_read ? temp_rssi : SUBGHZ_RAW_THRESHOLD_MIN;
         instance->enable_hopping = temp_enable_hopping;
+        instance->enable_listen_after_tx = temp_enable_listen_after_tx;
+        instance->RepeaterState = temp_RepeaterState;
         instance->ignore_filter = ignore_filter_was_read ? temp_ignore_filter : 0x00;
 #if SUBGHZ_LAST_SETTING_SAVE_BIN_RAW
         instance->filter = filter_was_read ? temp_filter : SubGhzProtocolFlag_Decodable;
@@ -270,6 +286,17 @@ bool subghz_last_settings_save(SubGhzLastSettings* instance) {
                file, SUBGHZ_LAST_SETTING_FIELD_FILTER, &instance->filter, 1)) {
             break;
         }
+        if(!flipper_format_insert_or_update_uint32(
+               file, SUBGHZ_LAST_SETTING_FIELD_REPEATER, &instance->RepeaterState, 1)) {
+            break;
+        }
+        if(!flipper_format_insert_or_update_bool(
+               file,
+               SUBGHZ_LAST_SETTING_FIELD_LISTEN_AFTER_TX,
+               &instance->enable_listen_after_tx,
+               1)) {
+            break;
+        }
         saved = true;
     } while(0);
 
@@ -303,7 +330,7 @@ void subghz_last_settings_log(SubGhzLastSettings* instance) {
         TAG,
         "Frequency: %03ld.%02ld, FeedbackLevel: %ld, FATrigger: %.2f, External: %s, ExtPower: %s, TimestampNames: %s, ExtPowerAmp: %s,\n"
         "Hopping: %s,\nPreset: %ld, RSSI: %.2f, "
-        "Starline: %s, Cars: %s, Magellan: %s, NiceFloR-S: %s, BinRAW: %s",
+        "Starline: %s, Cars: %s, Magellan: %s, NiceFloR-S: %s, BinRAW: %s, Repeater: %lu, ListenAfterTX %s",
         instance->frequency / 1000000 % 1000,
         instance->frequency / 10000 % 100,
         instance->frequency_analyzer_feedback_level,
@@ -323,5 +350,7 @@ void subghz_last_settings_log(SubGhzLastSettings* instance) {
             instance->ignore_filter, SubGhzProtocolFlag_Magellan),
         subghz_last_settings_log_filter_get_index(
             instance->ignore_filter, SubGhzProtocolFlag_NiceFlorS),
-        subghz_last_settings_log_filter_get_index(instance->filter, SubGhzProtocolFlag_BinRAW));
+        subghz_last_settings_log_filter_get_index(instance->filter, SubGhzProtocolFlag_BinRAW),
+        instance->RepeaterState,
+        bool_to_char(instance->enable_listen_after_tx));
 }

@@ -112,8 +112,6 @@ void subghz_scene_receiver_info_draw_widget(SubGhz* subghz) {
         widget_add_string_element(
             subghz->widget, 13, 8, AlignLeft, AlignBottom, FontSecondary, "Error history parse.");
     }
-
-    view_dispatcher_switch_to_view(subghz->view_dispatcher, SubGhzViewIdWidget);
 }
 
 void subghz_scene_receiver_info_on_enter(void* context) {
@@ -122,6 +120,7 @@ void subghz_scene_receiver_info_on_enter(void* context) {
     subghz_custom_btns_reset();
 
     subghz_scene_receiver_info_draw_widget(subghz);
+    view_dispatcher_switch_to_view(subghz->view_dispatcher, SubGhzViewIdWidget);
 
     /* This does not work. The receiving does not happen, and they know it.
        So, why do we turn on the notification that we receive?
@@ -162,11 +161,24 @@ bool subghz_scene_receiver_info_on_event(void* context, SceneManagerEvent event)
         } else if(event.event == SubGhzCustomEventSceneReceiverInfoTxStop) {
             //CC1101 Stop Tx -> Start RX
             subghz->state_notifications = SubGhzNotificationStateIDLE;
-
-            widget_reset(subghz->widget);
-            subghz_scene_receiver_info_draw_widget(subghz);
-
             subghz_txrx_stop(subghz->txrx);
+
+            //Go back to the Scan/Repeater if the Listen After TX flag is on.
+            if(subghz->ListenAfterTX) {
+                if(scene_manager_has_previous_scene(
+                       subghz->scene_manager, SubGhzSceneReceiverInfo)) {
+                    //Scene exists, go back to it
+                    scene_manager_search_and_switch_to_previous_scene(
+                        subghz->scene_manager, SubGhzSceneReceiver);
+                } else {
+                    //Scene not started, start it now.
+                    scene_manager_next_scene(subghz->scene_manager, SubGhzSceneReceiver);
+                }
+            } else {
+                widget_reset(subghz->widget);
+                subghz_scene_receiver_info_draw_widget(subghz);
+            }
+
             // if(!scene_manager_has_previous_scene(subghz->scene_manager, SubGhzSceneDecodeRAW)) {
             // subghz_txrx_rx_start(subghz->txrx);
 
