@@ -255,6 +255,7 @@ static void subghz_scene_receiver_config_set_speaker(VariableItem* item) {
 
     variable_item_set_current_value_text(item, combobox_text[index]);
     subghz_txrx_speaker_set_state(subghz->txrx, speaker_value[index]);
+    subghz->last_settings->enable_sound = (speaker_value[index] == SubGhzSpeakerStateEnable);
 }
 
 static void subghz_scene_receiver_config_set_bin_raw(VariableItem* item) {

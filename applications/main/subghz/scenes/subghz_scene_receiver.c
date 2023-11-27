@@ -261,11 +261,15 @@ void subghz_scene_receiver_on_enter(void* context) {
     }
 
     // Check if hopping was enabled, and restart the radio.
-    if(subghz->last_settings->enable_hopping) {
-        subghz_txrx_hopper_set_state(subghz->txrx, SubGhzHopperStateRunning);
-    } else {
-        subghz_txrx_hopper_set_state(subghz->txrx, SubGhzHopperStateOFF);
-    }
+    subghz_txrx_hopper_set_state(
+        subghz->txrx,
+        subghz->last_settings->enable_hopping ? SubGhzHopperStateRunning : SubGhzHopperStateOFF);
+
+    // Check if Sound was enabled, and restart the Speaker.
+    subghz_txrx_speaker_set_state(
+        subghz->txrx,
+        subghz->last_settings->enable_sound ? SubGhzSpeakerStateEnable :
+                                              SubGhzSpeakerStateDisable);
 
     /* Proper fix now! Start the radio again. */
     subghz_txrx_rx_start(subghz->txrx);
