@@ -256,6 +256,27 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
             subghz_txrx_stop(subghz->txrx);
             subghz_read_raw_stop_send(subghz->subghz_read_raw);
             consumed = true;
+
+            //Go back to the Scan/Repeater if the Listen After TX flag is on.
+            if(subghz->ListenAfterTX) {
+                //needed save?
+                if((subghz_rx_key_state_get(subghz) == SubGhzRxKeyStateAddKey) ||
+                   (subghz_rx_key_state_get(subghz) == SubGhzRxKeyStateBack)) {
+                    subghz_rx_key_state_set(subghz, SubGhzRxKeyStateExit);
+                    scene_manager_next_scene(subghz->scene_manager, SubGhzSceneNeedSavingRX);
+                } else {
+                    if(scene_manager_has_previous_scene(
+                           subghz->scene_manager, SubGhzSceneReceiver)) {
+                        //Scene exists, go back to it
+                        scene_manager_search_and_switch_to_previous_scene(
+                            subghz->scene_manager, SubGhzSceneReceiver);
+                    } else {
+                        //Scene not started, start it now.
+                        scene_manager_next_scene(subghz->scene_manager, SubGhzSceneReceiver);
+                    }
+                }
+            };
+
             break;
 
         case SubGhzCustomEventViewReadRAWIDLE:

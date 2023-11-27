@@ -56,6 +56,9 @@ void subghz_scene_transmitter_on_enter(void* context) {
     subghz_view_transmitter_set_callback(
         subghz->subghz_transmitter, subghz_scene_transmitter_callback, subghz);
 
+    //Put the Listen after TX back to what the user selected..
+    subghz->ListenAfterTX = subghz->last_settings->enable_listen_after_tx;
+
     subghz->state_notifications = SubGhzNotificationStateIDLE;
     view_dispatcher_switch_to_view(subghz->view_dispatcher, SubGhzViewIdTransmitter);
 }
@@ -88,6 +91,19 @@ bool subghz_scene_transmitter_on_event(void* context, SceneManagerEvent event) {
                 subghz_txrx_stop(subghz->txrx);
                 furi_hal_subghz_set_rolling_counter_mult(tmp_counter);
             }
+
+            //Go back to the Scan/Repeater if the Listen After TX flag is on.
+            if(subghz->ListenAfterTX) {
+                if(scene_manager_has_previous_scene(subghz->scene_manager, SubGhzSceneReceiver)) {
+                    //Scene exists, go back to it
+                    scene_manager_search_and_switch_to_previous_scene(
+                        subghz->scene_manager, SubGhzSceneReceiver);
+                } else {
+                    //Scene not started, start it now.
+                    scene_manager_next_scene(subghz->scene_manager, SubGhzSceneReceiver);
+                }
+            };
+
             return true;
         } else if(event.event == SubGhzCustomEventViewTransmitterBack) {
             subghz->state_notifications = SubGhzNotificationStateIDLE;

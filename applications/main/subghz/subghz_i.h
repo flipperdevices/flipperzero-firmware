@@ -90,6 +90,7 @@ struct SubGhz {
     uint32_t RepeaterStartTime;
     VariableItem* BIN_Raw_menu;
     bool BINRawStateChanged;
+    bool ListenAfterTX;
 
     SecureData* secure_data;
 

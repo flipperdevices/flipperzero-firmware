@@ -10,6 +10,7 @@ enum SubGhzSettingIndex {
     SubGhzSettingIndexBinRAW,
     SubGhzSettingIndexRepeater,
     SubGhzSettingIndexSound,
+    SubGhzSettingIndexListenAfterTX,
     SubGhzSettingIndexIgnoreStarline,
     SubGhzSettingIndexIgnoreCars,
     SubGhzSettingIndexIgnoreMagellan,
@@ -72,6 +73,11 @@ const uint32_t repeater_value[REPEATER_BOX_COUNT] = {
     SubGhzRepeaterOn,
     SubGhzRepeaterOnLong,
     SubGhzRepeaterOnShort,
+};
+
+const uint32_t listen_after_tx_value[COMBO_BOX_COUNT] = {
+    false,
+    true,
 };
 
 const char* const combobox_text[COMBO_BOX_COUNT] = {
@@ -261,6 +267,17 @@ static void subghz_scene_receiver_config_set_bin_raw(VariableItem* item) {
 
     // We can set here, but during subghz_last_settings_save filter was changed to ignore BinRAW
     subghz->last_settings->filter = subghz->filter;
+}
+
+static void subghz_scene_receiver_config_set_listen_after_tx(VariableItem* item) {
+    SubGhz* subghz = variable_item_get_context(item);
+    uint8_t index = variable_item_get_current_value_index(item);
+
+    variable_item_set_current_value_text(item, combobox_text[index]);
+    subghz->ListenAfterTX = listen_after_tx_value[index];
+
+    // We can set here, but during subghz_last_settings_save filter was changed to ignore BinRAW
+    subghz->last_settings->enable_listen_after_tx = subghz->ListenAfterTX;
 }
 
 static void subghz_scene_receiver_config_set_repeater(VariableItem* item) {
@@ -492,6 +509,23 @@ void subghz_scene_receiver_config_on_enter(void* context) {
         subghz);
     value_index = value_index_uint32(
         subghz_txrx_speaker_get_state(subghz->txrx), speaker_value, COMBO_BOX_COUNT);
+    variable_item_set_current_value_index(item, value_index);
+    variable_item_set_current_value_text(item, combobox_text[value_index]);
+
+    /* And now we have the WakeUp commmand for the Repeater. Set this, record the wake up code from the car.
+        take wake up command to fob, play back and be in repeater or read to get the key to open and start.
+        Power of Repeated command may have to be played with in future so cars dont detect too much power from key.
+        Im sure theres a milion other ways you can set this up to do other stuff, but the Wake Up is easy now!
+        Time to imagine the other uses, and make sure we can accomdateg them! 
+    */
+    item = variable_item_list_add(
+        subghz->variable_item_list,
+        "Listen after TX",
+        COMBO_BOX_COUNT,
+        subghz_scene_receiver_config_set_listen_after_tx,
+        subghz);
+    value_index =
+        value_index_uint32(subghz->ListenAfterTX, listen_after_tx_value, COMBO_BOX_COUNT);
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, combobox_text[value_index]);
 

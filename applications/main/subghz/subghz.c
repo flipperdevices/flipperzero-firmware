@@ -217,6 +217,9 @@ SubGhz* subghz_alloc(bool alloc_for_tx_only) {
 
     subghz->secure_data = malloc(sizeof(SecureData));
 
+    //Put the Listen after TX back to what the user selected..
+    subghz->ListenAfterTX = subghz->last_settings->enable_listen_after_tx;
+
     if(!alloc_for_tx_only) {
         subghz->ignore_filter = subghz->last_settings->ignore_filter;
         subghz->filter = subghz->last_settings->filter;
