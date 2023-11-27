@@ -470,7 +470,7 @@ bool subghz_scene_receiver_on_event(void* context, SceneManagerEvent event) {
         subghz->state_notifications = SubGhzNotificationStateRx;
         break;
     case SubGhzNotificationStateTx:
-        notification_message(subghz->notifications, &sequence_blink_red_10);
+        notification_message(subghz->notifications, &sequence_blink_magenta_10);
         break;
     default:
         break;
