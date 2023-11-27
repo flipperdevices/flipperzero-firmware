@@ -559,12 +559,14 @@ static NfcCommand mf_ultralight_poller_handler_request_write_data(MfUltralightPo
         }
 
         if(!instance->auth_context.auth_success) {
+            instance->mfu_event.type = MfUltralightPollerEventTypeCardLocked;
             check_passed = false;
             break;
         }
 
         const MfUltralightPage staticlock_page = tag_data->page[2];
         if(staticlock_page.data[2] != 0 || staticlock_page.data[3] != 0) {
+            instance->mfu_event.type = MfUltralightPollerEventTypeCardLocked;
             check_passed = false;
             break;
         }
@@ -574,6 +576,7 @@ static NfcCommand mf_ultralight_poller_handler_request_write_data(MfUltralightPo
             const MfUltralightPage dynlock_page = tag_data->page[dynlock_num];
 
             if(dynlock_page.data[0] != 0 || dynlock_page.data[1] != 0) {
+                instance->mfu_event.type = MfUltralightPollerEventTypeCardLocked;
                 check_passed = false;
                 break;
             }

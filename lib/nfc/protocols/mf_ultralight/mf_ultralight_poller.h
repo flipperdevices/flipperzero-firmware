@@ -24,6 +24,7 @@ typedef enum {
     MfUltralightPollerEventTypeReadFailed, /**< Poller failed to read card. */
     MfUltralightPollerEventTypeRequestWriteData, /**< Poller request card data for write operation. */
     MfUltralightPollerEventTypeCardMismatch, /**< Type of card for writing differs from presented one. */
+    MfUltralightPollerEventTypeCardLocked, /**< Presented card is locked by password, AUTH0 or lock bytes. */
     MfUltralightPollerEventTypeWriteSuccess, /**< Poller wrote card successfully. */
     MfUltralightPollerEventTypeWriteFail, /**< Poller failed to write card. */
 } MfUltralightPollerEventType;
