@@ -49,6 +49,7 @@ typedef union {
 
 typedef enum {
     MfUltralightPollerStateIdle,
+    MfUltralightPollerStateRequestMode,
     MfUltralightPollerStateReadVersion,
     MfUltralightPollerStateDetectMfulC,
     MfUltralightPollerStateDetectNtag203,
@@ -61,6 +62,10 @@ typedef enum {
     MfUltralightPollerStateTryDefaultPass,
     MfUltralightPollerStateReadFailed,
     MfUltralightPollerStateReadSuccess,
+    MfUltralightPollerStateRequestWriteData,
+    MfUltralightPollerStateWritePages,
+    MfUltralightPollerStateWriteFail,
+    MfUltralightPollerStateWriteSuccess,
 
     MfUltralightPollerStateNum,
 } MfUltralightPollerState;
