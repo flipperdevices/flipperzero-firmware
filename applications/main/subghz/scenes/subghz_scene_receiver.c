@@ -328,7 +328,6 @@ bool subghz_scene_receiver_on_event(void* context, SceneManagerEvent event) {
             subghz->state_notifications = SubGhzNotificationStateIDLE;
             subghz_txrx_stop(subghz->txrx);
             subghz_txrx_hopper_pause(subghz->txrx);
-            subghz_txrx_hopper_set_state(subghz->txrx, SubGhzHopperStateOFF);
 
             // Show file info, scene: receiver_info
             scene_manager_next_scene(subghz->scene_manager, SubGhzSceneReceiverInfo);
@@ -383,7 +382,22 @@ bool subghz_scene_receiver_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
             break;
         case SubGhzCustomEventViewReceiverConfig:
+
             // Actually signals are received but SubGhzNotificationStateRx is not working inside Config Scene
+
+            /* ^^^ This is the comment that started all this crap for me! No, signals are not received, 
+                the decode cant send to the history in the background. Info has to be active scene. 
+            T   his could be changed, but for now lets just make the radio behave as the interface does!
+
+                Making the worker call subghz_scene_add_to_history_callback and making it work properly probably is best in long run.
+            */
+
+            //I am turning off the Radio, if the FLipper people want to fix the bug they can!
+            subghz->state_notifications = SubGhzNotificationStateIDLE;
+            subghz_txrx_stop(subghz->txrx);
+            subghz_txrx_hopper_pause(subghz->txrx);
+
+            //Start the config scene.
             scene_manager_set_scene_state(
                 subghz->scene_manager, SubGhzViewIdReceiver, SubGhzCustomEventManagerSet);
             scene_manager_next_scene(subghz->scene_manager, SubGhzSceneReceiverConfig);
@@ -456,7 +470,7 @@ bool subghz_scene_receiver_on_event(void* context, SceneManagerEvent event) {
         subghz->state_notifications = SubGhzNotificationStateRx;
         break;
     case SubGhzNotificationStateTx:
-        notification_message(subghz->notifications, &sequence_blink_magenta_10);
+        notification_message(subghz->notifications, &sequence_blink_red_10);
         break;
     default:
         break;
