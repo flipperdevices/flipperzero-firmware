@@ -50,24 +50,75 @@ static void flipboard_view_flip_signal_draw(Canvas* canvas, void* model) {
     furi_string_free(action_text);
 }
 
-static bool x(void* context, uint32_t event) {
-    UNUSED(context);
+/**
+ * @brief This method sends a subghz signal.
+ * @details This method can send a subghz signal from a .SUB file (both RAW 
+ * and protocols are supported).
+ * @param model The FlipboardModel* context.
+ * @param filename The filename of the signal to send.
+ */
+static void send_subghz(FlipboardModel* model, char* filename) {
+    // TODO: Add cancel API for subghz RAW by using ButtonMonitor.
+    FlipboardLeds* leds = flipboard_model_get_leds(model);
+    SubGhzSignal* signal = subghz_signal_load_file(filename);
+    flipboard_status_led(leds, true);
+    subghz_signal_send(signal, false);
+    flipboard_status_led(leds, false);
+    subghz_signal_free(signal);
+}
+
+/**
+ * @brief This method sends an infrared signal.
+ * @details This method can send an infrared signal from a .IR file.
+ * @param model The FlipboardModel* context.
+ * @param filename The filename of the signal to send.
+ * @param action_name The action to send (matches the name parameter in the file).
+ * @return true if the signal was sent, false otherwise.
+ */
+static bool send_ir(FlipboardModel* model, char* filename, char* action_name) {
+    bool sent_signal = false;
+    ButtonMonitor* button_monitor = flipboard_model_get_button_monitor(model);
+    FlipboardLeds* leds = flipboard_model_get_leds(model);
+    InfraredSignal* ir_signal = infrared_signal_load_file(filename, action_name);
+    do {
+        flipboard_status_led(leds, true);
+        sent_signal |= infrared_signal_send(ir_signal);
+        flipboard_status_led(leds, false);
+    } while(infrared_signal_load_next(ir_signal) &&
+            button_monitor_get_last_status(button_monitor));
+    infrared_signal_free(ir_signal);
+    return sent_signal;
+}
+
+/**
+ * @brief This method is invoked when a custom event is received.
+ * @param context The Flipboard* context.
+ * @param event The event to handle.
+ * @return true if the event was handled, false otherwise.
+ */
+static bool custom_event_handler(void* context, uint32_t event) {
+    FlipboardModel* model = flipboard_get_model((Flipboard*)context);
+
     if(event == 1) {
-        SubGhzSignal* signal = subghz_signal_load_file("/ext/subghz/flip-a1.sub");
-        subghz_signal_send(signal, false);
-        subghz_signal_free(signal);
+        send_subghz(model, "/ext/subghz/flip-a1.sub");
+        if(!send_ir(model, "/ext/infrared/flipboard.ir", "Flip-a1")) {
+            send_ir(model, "/ext/infrared/assets/tv.ir", "Power");
+        }
     } else if(event == 2) {
-        SubGhzSignal* signal = subghz_signal_load_file("/ext/subghz/flip-a2.sub");
-        subghz_signal_send(signal, false);
-        subghz_signal_free(signal);
+        send_subghz(model, "/ext/subghz/flip-a2.sub");
+        if(!send_ir(model, "/ext/infrared/flipboard.ir", "Flip-a2")) {
+            send_ir(model, "/ext/infrared/assets/tv.ir", "Mute");
+        }
     } else if(event == 4) {
-        SubGhzSignal* signal = subghz_signal_load_file("/ext/subghz/flip-a3.sub");
-        subghz_signal_send(signal, false);
-        subghz_signal_free(signal);
+        send_subghz(model, "/ext/subghz/flip-a3.sub");
+        if(!send_ir(model, "/ext/infrared/flipboard.ir", "Flip-a3")) {
+            send_ir(model, "/ext/infrared/assets/tv.ir", "Ch_prev");
+        }
     } else if(event == 8) {
-        SubGhzSignal* signal = subghz_signal_load_file("/ext/subghz/flip-a4.sub");
-        subghz_signal_send(signal, false);
-        subghz_signal_free(signal);
+        send_subghz(model, "/ext/subghz/flip-a4.sub");
+        if(!send_ir(model, "/ext/infrared/flipboard.ir", "Flip-a4")) {
+            send_ir(model, "/ext/infrared/assets/tv.ir", "Ch_next");
+        }
     }
 
     return true;
@@ -178,7 +229,9 @@ int32_t flipboard_signal_app(void* p) {
         0,
         get_primary_view);
     view_dispatcher = flipboard_get_view_dispatcher(app);
-    view_dispatcher_set_custom_event_callback(flipboard_get_view_dispatcher(app), x);
+    view_dispatcher_set_event_callback_context(flipboard_get_view_dispatcher(app), app);
+    view_dispatcher_set_custom_event_callback(
+        flipboard_get_view_dispatcher(app), custom_event_handler);
     view_dispatcher_run(flipboard_get_view_dispatcher(app));
     flipboard_free(app);
 
