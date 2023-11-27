@@ -52,10 +52,10 @@ static void key_menu_cb(void* context, uint32_t index) {
         view_dispatcher_send_custom_event(state->view_dispatcher, ESubGhzChatEvent_KeyMenuGenKey);
         break;
 
-    // case ESubGhzChatKeyMenuItems_ReadKeyFromNfc:
-    //     view_dispatcher_send_custom_event(
-    //         state->view_dispatcher, ESubGhzChatEvent_KeyMenuReadKeyFromNfc);
-    //     break;
+        // case ESubGhzChatKeyMenuItems_ReadKeyFromNfc:
+        //     view_dispatcher_send_custom_event(
+        //         state->view_dispatcher, ESubGhzChatEvent_KeyMenuReadKeyFromNfc);
+        //     break;
 
     default:
         break;
@@ -140,12 +140,12 @@ bool scene_on_event_key_menu(void* context, SceneManagerEvent event) {
             consumed = true;
             break;
 
-        /* switch to hex key read scene */
-        // case ESubGhzChatEvent_KeyMenuReadKeyFromNfc:
-        //     scene_manager_next_scene(state->scene_manager, ESubGhzChatScene_KeyReadPopup);
-        //     consumed = true;
-        //     break;
-        // }
+            /* switch to hex key read scene */
+            // case ESubGhzChatEvent_KeyMenuReadKeyFromNfc:
+            //     scene_manager_next_scene(state->scene_manager, ESubGhzChatScene_KeyReadPopup);
+            //     consumed = true;
+            //     break;
+        }
 
         break;
 

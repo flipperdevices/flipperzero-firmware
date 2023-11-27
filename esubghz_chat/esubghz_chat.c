@@ -758,12 +758,12 @@ int32_t esubghz_chat(const char* args) {
     crypto_ctx_free(state->crypto_ctx);
 
 err_alloc_crypto:
-    // free(state->nfc_dev_data);
+    //     free(state->nfc_dev_data);
 
-err_alloc_ndevdata:
-    // nfc_worker_free(state->nfc_worker);
+    // err_alloc_ndevdata:
+    //     nfc_worker_free(state->nfc_worker);
 
-err_alloc_nworker:
+    // err_alloc_nworker:
     subghz_tx_rx_worker_free(state->subghz_worker);
 
 err_alloc_worker:
