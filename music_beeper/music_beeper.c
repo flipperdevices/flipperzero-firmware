@@ -8,10 +8,13 @@
 #include <dialogs/dialogs.h>
 #include <storage/storage.h>
 
+#include <assets_icons.h>
+
 #define TAG "MusicBeeper"
 
-#define MUSIC_BEEPER_APP_PATH_FOLDER ANY_PATH("music_player")
+#define MUSIC_BEEPER_APP_PATH EXT_PATH("apps_data/music_player")
 #define MUSIC_BEEPER_APP_EXTENSION "*"
+#define MUSIC_BEEPER_EXAMPLE_FILE "Marble_Machine.fmf"
 
 #define MUSIC_BEEPER_SEMITONE_HISTORY_SIZE 4
 
@@ -180,7 +183,7 @@ static void render_callback(Canvas* canvas, void* ctx) {
 
     // note stack view_port
     x_pos = 73;
-    y_pos = 0;
+    y_pos = 0; //-V1048
     canvas_set_color(canvas, ColorBlack);
     canvas_set_font(canvas, FontPrimary);
     canvas_draw_frame(canvas, x_pos, y_pos, 49, 64);
@@ -258,7 +261,7 @@ MusicBeeper* music_beeper_alloc() {
     MusicBeeper* instance = malloc(sizeof(MusicBeeper));
 
     instance->model = malloc(sizeof(MusicBeeperModel));
-    instance->model->volume = 4;
+    instance->model->volume = 3;
 
     instance->model_mutex = furi_mutex_alloc(FuriMutexTypeNormal);
 
@@ -307,17 +310,31 @@ int32_t music_beeper_app(void* p) {
         if(p && strlen(p)) {
             furi_string_set(file_path, (const char*)p);
         } else {
-            furi_string_set(file_path, MUSIC_BEEPER_APP_PATH_FOLDER);
+            Storage* storage = furi_record_open(RECORD_STORAGE);
+            storage_common_migrate(
+                storage, EXT_PATH("music_player"), MUSIC_BEEPER_APP_PATH);
+
+            if(!storage_common_exists(storage, MUSIC_BEEPER_APP_PATH "/" MUSIC_BEEPER_EXAMPLE_FILE)) {
+                storage_common_copy(
+                    storage,
+                    APP_ASSETS_PATH(MUSIC_BEEPER_EXAMPLE_FILE),
+                    MUSIC_BEEPER_APP_PATH "/" MUSIC_BEEPER_EXAMPLE_FILE);
+            }
+            furi_record_close(RECORD_STORAGE);
+
+            furi_string_set(file_path, MUSIC_BEEPER_APP_PATH);
 
             DialogsFileBrowserOptions browser_options;
             dialog_file_browser_set_basic_options(
                 &browser_options, MUSIC_BEEPER_APP_EXTENSION, &I_music_10px);
             browser_options.hide_ext = false;
+            browser_options.base_path = MUSIC_BEEPER_APP_PATH;
 
             DialogsApp* dialogs = furi_record_open(RECORD_DIALOGS);
             bool res = dialog_file_browser_show(dialogs, file_path, file_path, &browser_options);
 
             furi_record_close(RECORD_DIALOGS);
+
             if(!res) {
                 FURI_LOG_E(TAG, "No file selected");
                 break;
