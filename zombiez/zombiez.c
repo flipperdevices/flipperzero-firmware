@@ -382,7 +382,7 @@ int32_t zombiez_game_app(void* p) {
                 tick(plugin_state);
             }
         }
-        
+
         furi_mutex_release(plugin_state->mutex);
         view_port_update(view_port);
     }
