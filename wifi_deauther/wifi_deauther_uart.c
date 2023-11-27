@@ -4,7 +4,6 @@
 #include <FreeRTOS.h>
 #include <stream_buffer.h>
 
-#define UART_CH (FuriHalUartIdUSART1)
 #define BAUDRATE (115200)
 
 struct WifideautherUart {
@@ -55,6 +54,7 @@ static int32_t uart_worker(void* context) {
         }
     }
 
+    furi_hal_uart_set_irq_cb(UART_CH, NULL, NULL);
     furi_stream_buffer_free(uart->rx_stream);
 
     return 0;
@@ -77,7 +77,12 @@ WifideautherUart* wifi_deauther_uart_init(WifideautherApp* app) {
 
     furi_thread_start(uart->rx_thread);
 
-    furi_hal_console_disable();
+    if(UART_CH == FuriHalUartIdUSART1) {
+        furi_hal_console_disable();
+    } else if(UART_CH == FuriHalUartIdLPUART1) {
+        furi_hal_uart_init(UART_CH, BAUDRATE);
+    }
+
     furi_hal_uart_set_br(UART_CH, BAUDRATE);
     furi_hal_uart_set_irq_cb(UART_CH, wifi_deauther_uart_on_irq_cb, uart);
 
@@ -91,8 +96,11 @@ void wifi_deauther_uart_free(WifideautherUart* uart) {
     furi_thread_join(uart->rx_thread);
     furi_thread_free(uart->rx_thread);
 
-    furi_hal_uart_set_irq_cb(UART_CH, NULL, NULL);
-    furi_hal_console_enable();
+    if(UART_CH == FuriHalUartIdLPUART1) {
+        furi_hal_uart_deinit(UART_CH);
+    } else {
+        furi_hal_console_enable();
+    }
 
     free(uart);
 }
