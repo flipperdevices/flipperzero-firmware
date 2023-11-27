@@ -14,6 +14,7 @@
 #include "mjs_string.h"
 #include "mjs_util.h"
 #include "mjs_tok.h"
+#include <furi.h>
 
 const char* mjs_typeof(mjs_val_t v) {
     return mjs_stringify_type(mjs_get_type(v));
@@ -93,8 +94,6 @@ void mjs_fprintf(mjs_val_t v, struct mjs* mjs, FILE* fp) {
     mjs_jprintf(v, mjs, &out);
 }
 
-#if MJS_ENABLE_DEBUG
-
 MJS_PRIVATE const char* opcodetostr(uint8_t opcode) {
     static const char* names[] = {
         "NOP",
@@ -143,24 +142,27 @@ MJS_PRIVATE const char* opcodetostr(uint8_t opcode) {
     return name;
 }
 
-MJS_PRIVATE size_t mjs_disasm_single(const uint8_t* code, size_t i) {
+MJS_PRIVATE size_t
+    mjs_disasm_single(const uint8_t* code, size_t i, MjsPrintCallback print_cb, void* print_ctx) {
     char buf[40];
     size_t start_i = i;
     size_t llen;
     uint64_t n;
 
-    snprintf(buf, sizeof(buf), "\t%-3u %-8s", (unsigned)i, opcodetostr(code[i]));
+    furi_assert(print_cb);
+
+    snprintf(buf, sizeof(buf), "%-3u\t%-8s", (unsigned)i, opcodetostr(code[i]));
 
     switch(code[i]) {
     case OP_PUSH_FUNC: {
         cs_varint_decode(&code[i + 1], ~0, &n, &llen);
-        LOG(LL_VERBOSE_DEBUG, ("%s %04u", buf, (unsigned)(i - n)));
+        print_cb(print_ctx, "%s %04u", buf, (unsigned)(i - n));
         i += llen;
         break;
     }
     case OP_PUSH_INT: {
         cs_varint_decode(&code[i + 1], ~0, &n, &llen);
-        LOG(LL_VERBOSE_DEBUG, ("%s\t%lu", buf, (unsigned long)n));
+        print_cb(print_ctx, "%s\t%lu", buf, (unsigned long)n);
         i += llen;
         break;
     }
@@ -169,15 +171,15 @@ MJS_PRIVATE size_t mjs_disasm_single(const uint8_t* code, size_t i) {
         uint64_t arg_no;
         cs_varint_decode(&code[i + 1], ~0, &arg_no, &llen);
         cs_varint_decode(&code[i + llen + 1], ~0, &n, &llen2);
-        LOG(LL_VERBOSE_DEBUG,
-            ("%s\t[%.*s] %u", buf, (int)n, code + i + 1 + llen + llen2, (unsigned)arg_no));
+        print_cb(
+            print_ctx, "%s\t[%.*s] %u", buf, (int)n, code + i + 1 + llen + llen2, (unsigned)arg_no);
         i += llen + llen2 + n;
         break;
     }
     case OP_PUSH_STR:
     case OP_PUSH_DBL: {
         cs_varint_decode(&code[i + 1], ~0, &n, &llen);
-        LOG(LL_VERBOSE_DEBUG, ("%s\t[%.*s]", buf, (int)n, code + i + 1 + llen));
+        print_cb(print_ctx, "%s\t[%.*s]", buf, (int)n, code + i + 1 + llen);
         i += llen + n;
         break;
     }
@@ -187,10 +189,11 @@ MJS_PRIVATE size_t mjs_disasm_single(const uint8_t* code, size_t i) {
     case OP_JMP_FALSE:
     case OP_JMP_NEUTRAL_FALSE: {
         cs_varint_decode(&code[i + 1], ~0, &n, &llen);
-        LOG(LL_VERBOSE_DEBUG,
-            ("%s\t%u",
-             buf,
-             (unsigned)(i + n + llen + 1 /* becaue i will be incremented on the usual terms */)));
+        print_cb(
+            print_ctx,
+            "%s\t%u",
+            buf,
+            (unsigned)(i + n + llen + 1 /* becaue i will be incremented on the usual terms */));
         i += llen;
         break;
     }
@@ -199,12 +202,13 @@ MJS_PRIVATE size_t mjs_disasm_single(const uint8_t* code, size_t i) {
         uint64_t n1, n2;
         cs_varint_decode(&code[i + 1], ~0, &n1, &l1);
         cs_varint_decode(&code[i + l1 + 1], ~0, &n2, &l2);
-        LOG(LL_VERBOSE_DEBUG,
-            ("%s\tB:%lu C:%lu (%d)",
-             buf,
-             (unsigned long)(i + 1 /* OP_LOOP */ + l1 + n1),
-             (unsigned long)(i + 1 /* OP_LOOP */ + l1 + l2 + n2),
-             (int)i));
+        print_cb(
+            print_ctx,
+            "%s\tB:%lu C:%lu (%d)",
+            buf,
+            (unsigned long)(i + 1 /* OP_LOOP */ + l1 + n1),
+            (unsigned long)(i + 1 /* OP_LOOP */ + l1 + l2 + n2),
+            (int)i);
         i += l1 + l2;
         break;
     }
@@ -258,7 +262,7 @@ MJS_PRIVATE size_t mjs_disasm_single(const uint8_t* code, size_t i) {
         case TOK_URSHIFT_ASSIGN:  name = ">>>="; break;
       }
         /* clang-format on */
-        LOG(LL_VERBOSE_DEBUG, ("%s\t%s", buf, name));
+        print_cb(print_ctx, "%s\t%s", buf, name);
         i++;
         break;
     }
@@ -272,28 +276,29 @@ MJS_PRIVATE size_t mjs_disasm_single(const uint8_t* code, size_t i) {
             &code[i + 1 + MJS_HDR_ITEM_MAP_OFFSET * sizeof(total_size)],
             sizeof(map_offset));
         i += sizeof(mjs_header_item_t) * MJS_HDR_ITEMS_CNT;
-        LOG(LL_VERBOSE_DEBUG,
-            ("%s\t[%s] end:%lu map_offset: %lu",
-             buf,
-             &code[i + 1],
-             (unsigned long)start + total_size,
-             (unsigned long)start + map_offset));
+        print_cb(
+            print_ctx,
+            "%s\t[%s] end:%lu map_offset: %lu",
+            buf,
+            &code[i + 1],
+            (unsigned long)start + total_size,
+            (unsigned long)start + map_offset);
         i += strlen((char*)(code + i + 1)) + 1;
         break;
     }
     default:
-        LOG(LL_VERBOSE_DEBUG, ("%s", buf));
+        print_cb(print_ctx, "%s", buf);
         break;
     }
     return i - start_i;
 }
 
-void mjs_disasm(const uint8_t* code, size_t len) {
+void mjs_disasm(const uint8_t* code, size_t len, MjsPrintCallback print_cb, void* print_ctx) {
     size_t i, start = 0;
     mjs_header_item_t map_offset = 0, total_size = 0;
 
     for(i = 0; i < len; i++) {
-        size_t delta = mjs_disasm_single(code, i);
+        size_t delta = mjs_disasm_single(code, i, print_cb, print_ctx);
         if(code[i] == OP_BCODE_HEADER) {
             start = i;
             memcpy(&total_size, &code[i + 1], sizeof(total_size));
@@ -312,37 +317,48 @@ void mjs_disasm(const uint8_t* code, size_t len) {
     }
 }
 
-static void mjs_dump_obj_stack(const char* name, const struct mbuf* m, struct mjs* mjs) {
+void mjs_disasm_all(struct mjs* mjs, MjsPrintCallback print_cb, void* print_ctx) {
+    int parts_cnt = mjs_bcode_parts_cnt(mjs);
+    for(int i = 0; i < parts_cnt; i++) {
+        struct mjs_bcode_part* bp = mjs_bcode_part_get(mjs, i);
+        mjs_disasm((uint8_t*)bp->data.p, bp->data.len, print_cb, print_ctx);
+    }
+}
+
+static void mjs_dump_obj_stack(
+    struct mjs* mjs,
+    const char* name,
+    const struct mbuf* m,
+    MjsPrintCallback print_cb,
+    void* print_ctx) {
     char buf[50];
     size_t i, n;
     n = mjs_stack_size(m);
-    LOG(LL_VERBOSE_DEBUG, ("%12s (%d elems): ", name, (int)n));
+    print_cb(print_ctx, "%12s (%d elems): ", name, (int)n);
     for(i = 0; i < n; i++) {
         mjs_sprintf(((mjs_val_t*)m->buf)[i], mjs, buf, sizeof(buf));
-        LOG(LL_VERBOSE_DEBUG, ("%34s", buf));
+        print_cb(print_ctx, "%34s", buf);
     }
 }
 
-void mjs_dump(struct mjs* mjs, int do_disasm) {
-    LOG(LL_VERBOSE_DEBUG, ("------- MJS VM DUMP BEGIN"));
-    mjs_dump_obj_stack("DATA_STACK", &mjs->stack, mjs);
-    mjs_dump_obj_stack("CALL_STACK", &mjs->call_stack, mjs);
-    mjs_dump_obj_stack("SCOPES", &mjs->scopes, mjs);
-    mjs_dump_obj_stack("LOOP_OFFSETS", &mjs->loop_addresses, mjs);
-    mjs_dump_obj_stack("ARG_STACK", &mjs->arg_stack, mjs);
+void mjs_dump(struct mjs* mjs, int do_disasm, MjsPrintCallback print_cb, void* print_ctx) {
+    print_cb(print_ctx, "------- MJS VM DUMP BEGIN");
+    mjs_dump_obj_stack(mjs, "DATA_STACK", &mjs->stack, print_cb, print_ctx);
+    mjs_dump_obj_stack(mjs, "CALL_STACK", &mjs->call_stack, print_cb, print_ctx);
+    mjs_dump_obj_stack(mjs, "SCOPES", &mjs->scopes, print_cb, print_ctx);
+    mjs_dump_obj_stack(mjs, "LOOP_OFFSETS", &mjs->loop_addresses, print_cb, print_ctx);
+    mjs_dump_obj_stack(mjs, "ARG_STACK", &mjs->arg_stack, print_cb, print_ctx);
     if(do_disasm) {
         int parts_cnt = mjs_bcode_parts_cnt(mjs);
         int i;
-        LOG(LL_VERBOSE_DEBUG, ("%23s", "CODE:"));
+        print_cb(print_ctx, "%23s", "CODE:");
         for(i = 0; i < parts_cnt; i++) {
             struct mjs_bcode_part* bp = mjs_bcode_part_get(mjs, i);
-            mjs_disasm((uint8_t*)bp->data.p, bp->data.len);
+            mjs_disasm((uint8_t*)bp->data.p, bp->data.len, print_cb, print_ctx);
         }
     }
-    LOG(LL_VERBOSE_DEBUG, ("------- MJS VM DUMP END"));
+    print_cb(print_ctx, "------- MJS VM DUMP END");
 }
-
-#endif
 
 MJS_PRIVATE int mjs_check_arg(
     struct mjs* mjs,

@@ -2266,7 +2266,9 @@ Function,+,mjs_call,mjs_err_t,"mjs*, mjs_val_t*, mjs_val_t, mjs_val_t, int, ..."
 Function,+,mjs_create,mjs*,void*
 Function,+,mjs_del,int,"mjs*, mjs_val_t, const char*, size_t"
 Function,+,mjs_destroy,void,mjs*
+Function,-,mjs_disasm_all,void,"mjs*, MjsPrintCallback, void*"
 Function,+,mjs_disown,int,"mjs*, mjs_val_t*"
+Function,-,mjs_dump,void,"mjs*, int, MjsPrintCallback, void*"
 Function,+,mjs_exec,mjs_err_t,"mjs*, const char*, mjs_val_t*"
 Function,+,mjs_exec_file,mjs_err_t,"mjs*, const char*, mjs_val_t*"
 Function,+,mjs_exit,void,mjs*

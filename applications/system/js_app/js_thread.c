@@ -3,6 +3,7 @@
 #include <loader/firmware_api/firmware_api.h>
 #include <flipper_application/api_hashtable/api_hashtable.h>
 #include <flipper_application/plugins/composite_resolver.h>
+#include <furi_hal.h>
 #include "plugin_api/app_api_interface.h"
 #include "js_thread.h"
 #include "js_thread_i.h"
@@ -209,6 +210,22 @@ static void mjs_global_to_hex_string(struct mjs* mjs) {
     mjs_return(mjs, ret);
 }
 
+static void js_dump_write_callback(void* ctx, const char* format, ...) {
+    File* file = ctx;
+    furi_assert(ctx);
+
+    FuriString* str = furi_string_alloc();
+
+    va_list args;
+    va_start(args, format);
+    furi_string_vprintf(str, format, args);
+    furi_string_cat(str, "\n");
+    va_end(args);
+
+    storage_file_write(file, furi_string_get_cstr(str), furi_string_size(str));
+    furi_string_free(str);
+}
+
 static int32_t js_thread(void* arg) {
     JsThread* worker = arg;
     worker->resolver = composite_api_resolver_alloc();
@@ -237,6 +254,25 @@ static int32_t js_thread(void* arg) {
     mjs_set_flags_poller(mjs, mjs_exit_flag_poll);
 
     mjs_err_t err = mjs_exec_file(mjs, furi_string_get_cstr(worker->path), NULL);
+
+    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
+        FuriString* dump_path = furi_string_alloc_set(worker->path);
+        furi_string_cat(dump_path, ".lst");
+
+        Storage* storage = furi_record_open(RECORD_STORAGE);
+        File* file = storage_file_alloc(storage);
+
+        if(storage_file_open(
+               file, furi_string_get_cstr(dump_path), FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
+            mjs_disasm_all(mjs, js_dump_write_callback, file);
+        }
+
+        storage_file_close(file);
+        storage_file_free(file);
+        furi_record_close(RECORD_STORAGE);
+
+        furi_string_free(dump_path);
+    }
 
     if(err != MJS_OK) {
         FURI_LOG_E(TAG, "Exec error: %s", mjs_strerror(mjs, err));

@@ -13,17 +13,15 @@
 extern "C" {
 #endif /* __cplusplus */
 
+typedef void (*MjsPrintCallback)(void* ctx, const char* format, ...);
+
 const char* mjs_typeof(mjs_val_t v);
 
 void mjs_fprintf(mjs_val_t v, struct mjs* mjs, FILE* fp);
 void mjs_sprintf(mjs_val_t v, struct mjs* mjs, char* buf, size_t buflen);
 
-#if MJS_ENABLE_DEBUG
-
-void mjs_disasm(const uint8_t* code, size_t len);
-void mjs_dump(struct mjs* mjs, int do_disasm);
-
-#endif
+void mjs_disasm_all(struct mjs* mjs, MjsPrintCallback print_cb, void* print_ctx);
+void mjs_dump(struct mjs* mjs, int do_disasm, MjsPrintCallback print_cb, void* print_ctx);
 
 /*
  * Returns the filename corresponding to the given bcode offset.

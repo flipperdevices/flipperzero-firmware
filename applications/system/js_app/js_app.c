@@ -5,7 +5,7 @@
 #include <toolbox/path.h>
 #include <assets_icons.h>
 
-#define TAG "MJS app"
+#define TAG "JS app"
 
 typedef struct {
     JsThread* js_thread;
