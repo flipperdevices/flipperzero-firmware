@@ -55,8 +55,8 @@ Settings* load_settings() {
     if(storage_common_stat(storage, CONFIG_FILE_PATH, NULL) != FSE_OK) {
         if(flipper_format_file_open_new(file, CONFIG_FILE_PATH)) {
             save_settings_file(file, settings);
+            flipper_format_file_close(file);
         }
-        flipper_format_file_close(file);
     } else {
         if(flipper_format_file_open_existing(file, CONFIG_FILE_PATH)) {
             uint32_t value;
@@ -78,8 +78,8 @@ Settings* load_settings() {
                     strcpy(settings->save_event, furi_string_get_cstr(text_event_value));
                 }
             }
+            flipper_format_file_close(file);
         }
-        flipper_format_file_close(file);
     }
 
     furi_string_free(text_ssid_value);
