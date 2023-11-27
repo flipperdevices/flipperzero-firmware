@@ -119,11 +119,11 @@ bool scene_on_event_key_display(void* context, SceneManagerEvent event) {
             consumed = true;
             break;
 
-        /* open key sharing popup */
-        // case ESubGhzChatEvent_KeyDisplayShare:
-        //     scene_manager_next_scene(state->scene_manager, ESubGhzChatScene_KeySharePopup);
-        //     consumed = true;
-        //     break;
+            /* open key sharing popup */
+            // case ESubGhzChatEvent_KeyDisplayShare:
+            //     scene_manager_next_scene(state->scene_manager, ESubGhzChatScene_KeySharePopup);
+            //     consumed = true;
+            //     break;
         }
         break;
 

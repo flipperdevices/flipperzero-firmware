@@ -311,10 +311,10 @@ int32_t music_beeper_app(void* p) {
             furi_string_set(file_path, (const char*)p);
         } else {
             Storage* storage = furi_record_open(RECORD_STORAGE);
-            storage_common_migrate(
-                storage, EXT_PATH("music_player"), MUSIC_BEEPER_APP_PATH);
+            storage_common_migrate(storage, EXT_PATH("music_player"), MUSIC_BEEPER_APP_PATH);
 
-            if(!storage_common_exists(storage, MUSIC_BEEPER_APP_PATH "/" MUSIC_BEEPER_EXAMPLE_FILE)) {
+            if(!storage_common_exists(
+                   storage, MUSIC_BEEPER_APP_PATH "/" MUSIC_BEEPER_EXAMPLE_FILE)) {
                 storage_common_copy(
                     storage,
                     APP_ASSETS_PATH(MUSIC_BEEPER_EXAMPLE_FILE),
