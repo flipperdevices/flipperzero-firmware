@@ -1,8 +1,8 @@
 #include "ifttt_virtual_button.h"
 
-#define IFTTT_FOLDER "/ext/ifttt"
-#define IFTTT_CONFIG_FOLDER "/ext/ifttt/config"
-const char* CONFIG_FILE_PATH = "/ext/ifttt/config/config.settings";
+#define IFTTT_FOLDER "/ext/apps_data/ifttt"
+#define IFTTT_CONFIG_FOLDER "/ext/apps_data/ifttt/config"
+const char* CONFIG_FILE_PATH = "/ext/apps_data/ifttt/config/config.settings";
 
 #define FLIPPERZERO_SERIAL_BAUD 115200
 typedef enum ESerialCommand { ESerialCommand_Config } ESerialCommand;
@@ -38,44 +38,29 @@ void save_settings_file(FlipperFormat* file, Settings* settings) {
 Settings* load_settings() {
     Settings* settings = malloc(sizeof(Settings));
 
+    settings->save_ssid = "";
+    settings->save_password = "";
+    settings->save_key = "";
+    settings->save_event = "";
+
     Storage* storage = furi_record_open(RECORD_STORAGE);
     FlipperFormat* file = flipper_format_file_alloc(storage);
 
-    FuriString* string_value;
-    string_value = furi_string_alloc();
-    FuriString* text_ssid_value;
-    text_ssid_value = furi_string_alloc();
-    FuriString* text_password_value;
-    text_password_value = furi_string_alloc();
-    FuriString* text_key_value;
-    text_key_value = furi_string_alloc();
-    FuriString* text_event_value;
-    text_event_value = furi_string_alloc();
+    FuriString* string_value = furi_string_alloc();
+    FuriString* text_ssid_value = furi_string_alloc();
+    FuriString* text_password_value = furi_string_alloc();
+    FuriString* text_key_value = furi_string_alloc();
+    FuriString* text_event_value = furi_string_alloc();
 
     if(storage_common_stat(storage, CONFIG_FILE_PATH, NULL) != FSE_OK) {
-        if(!flipper_format_file_open_new(file, CONFIG_FILE_PATH)) {
-            flipper_format_file_close(file);
-        } else {
-            settings->save_ssid = malloc(1);
-            settings->save_password = malloc(1);
-            settings->save_key = malloc(1);
-            settings->save_event = malloc(1);
-
-            settings->save_ssid[0] = '\0';
-            settings->save_password[0] = '\0';
-            settings->save_key[0] = '\0';
-            settings->save_event[0] = '\0';
-
+        if(flipper_format_file_open_new(file, CONFIG_FILE_PATH)) {
             save_settings_file(file, settings);
             flipper_format_file_close(file);
         }
     } else {
-        if(!flipper_format_file_open_existing(file, CONFIG_FILE_PATH)) {
-            flipper_format_file_close(file);
-        } else {
+        if(flipper_format_file_open_existing(file, CONFIG_FILE_PATH)) {
             uint32_t value;
-            if(!flipper_format_read_header(file, string_value, &value)) {
-            } else {
+            if(flipper_format_read_header(file, string_value, &value)) {
                 if(flipper_format_read_string(file, CONF_SSID, text_ssid_value)) {
                     settings->save_ssid = malloc(furi_string_size(text_ssid_value) + 1);
                     strcpy(settings->save_ssid, furi_string_get_cstr(text_ssid_value));
