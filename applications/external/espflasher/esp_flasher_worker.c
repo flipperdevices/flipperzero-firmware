@@ -227,17 +227,20 @@ static int32_t esp_flasher_flash_bin(void* context) {
         loader_port_debug_print(err_msg);
     }
 
-    // higher BR
+    uint32_t start_time = furi_get_tick();
     if(!err && app->turbospeed) {
+        loader_port_debug_print("Connected\n");
+
         loader_port_debug_print("Increasing speed for faster flash\n");
-        err = esp_loader_change_transmission_rate(921600);
+        err = esp_loader_change_transmission_rate(FAST_BAUDRATE);
         if(err != ESP_LOADER_SUCCESS) {
             char err_msg[256];
             snprintf(
                 err_msg, sizeof(err_msg), "Cannot change transmission rate. Error: %u\n", err);
             loader_port_debug_print(err_msg);
+            return 0;
         }
-        furi_hal_uart_set_br(FuriHalUartIdUSART1, 921600);
+        furi_hal_uart_set_br(UART_CH, FAST_BAUDRATE);
     }
 
     if(!err) {
@@ -249,8 +252,15 @@ static int32_t esp_flasher_flash_bin(void* context) {
 
         if(app->turbospeed) {
             loader_port_debug_print("Restoring transmission rate\n");
-            furi_hal_uart_set_br(FuriHalUartIdUSART1, 115200);
+            furi_hal_uart_set_br(UART_CH, DEFAULT_BAUDRATE);
         }
+
+        FuriString* flash_time =
+            furi_string_alloc_printf("Flash took: %lds\n", (furi_get_tick() - start_time) / 1000);
+
+        loader_port_debug_print(furi_string_get_cstr(flash_time));
+
+        furi_string_free(flash_time);
 
         loader_port_debug_print(
             "Done flashing. Please reset the board manually if it doesn't auto-reset.\n");

@@ -36,8 +36,8 @@ const struct {
     uint8_t value;
     const char* name;
 } pp_prefixes[] = {
-    {0x01, "New Device"},
-    {0x07, "Not Your Device"},
+    {0x07, "New Device"},
+    {0x01, "Not Your Device"},
     {0x05, "New Airtag"},
 };
 const uint8_t pp_prefixes_count = COUNT_OF(pp_prefixes);

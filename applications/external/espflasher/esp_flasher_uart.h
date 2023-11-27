@@ -2,6 +2,13 @@
 
 #include "furi_hal.h"
 
+#include <cfw.h>
+
+#define UART_CH \
+    (CFW_SETTINGS()->uart_esp_channel == UARTDefault ? FuriHalUartIdUSART1 : FuriHalUartIdLPUART1)
+#define DEFAULT_BAUDRATE (115200)
+#define FAST_BAUDRATE (921600)
+
 #define RX_BUF_SIZE (2048)
 
 typedef struct EspFlasherUart EspFlasherUart;

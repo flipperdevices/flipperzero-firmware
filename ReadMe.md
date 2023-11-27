@@ -27,10 +27,10 @@ This software is for experimental purposes only and is not meant for any illegal
 
 <a name="latest">
 
-## Latest Updates - [PATREON: Latest Release RM1126-1406-0.93.9-e6dc7f5](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
+## Latest Updates - [PATREON: Latest Release RM1126-2335-0.93.9-5967131](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-11-26 22:01 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-11-26 22:01 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-11-26 23:35 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-11-26 23:35 EST`
 - Updated: [HEX Editor v1.2 (By dunaevai135)] <https://github.com/dunaevai135/flipper-zero-hex_editor>
 - Updated: [Authenticator/TOTP v5.9.1 (By akopachov)] <https://github.com/akopachov/flipper-zero_authenticator>
 - OFW PR: [Add the "remove pairing" button to BLE hid #3237 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3237)
@@ -55,7 +55,9 @@ This software is for experimental purposes only and is not meant for any illegal
 - Added: [FlipBoard Blinky v1.0 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
 - Added: [FlipBoard Keyboard v1.0 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
 - Added: [FlipBoard Signal v1.0 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
-- Updated: [WiFi (Marauder) v6.5 (By 0xchocolate & tcpassos)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) [Add samsung and all spam #43 (By justcallmekoko)](https://github.com/0xchocolate/flipperzero-wifi-marauder/pull/43)
+- Updated: [WiFi (Marauder) v6.5 (By 0xchocolate & tcpassos)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) [Add samsung and all spam #43 (By justcallmekoko)](https://github.com/0xchocolate/flipperzero-wifi-marauder/pull/43) & Changes for CFW Settings UART Customizations / Save PCAPs (By Sil333033 & Willy-JL)
+- Updated: [ESP Flasher v1.4 (By 0xchocolate)](https://github.com/0xchocolate/flipperzero-esp-flasher) (Minor Changes By Sil333033)
+- Updated: [BLE Spam v4.2 (By Willy-JL & ECTO-1A & Spooks4576 with research from xMasterX; OFW API thanks to noproto)](https://github.com/noproto/apple_ble_spam_ofw) (Minor Changes By Willy-JL)
 
 ## IN THIS BRANCH:
 
