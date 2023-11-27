@@ -327,7 +327,7 @@ int32_t mousejacker_app(void* p) {
         furi_hal_power_enable_otg();
         furi_delay_ms(10);
     }
-    
+
     nrf24_init();
 
     PluginEvent event;
@@ -385,7 +385,6 @@ int32_t mousejacker_app(void* p) {
                 }
             }
         }
-
 
         furi_mutex_release(plugin_state->mutex);
         view_port_update(view_port);

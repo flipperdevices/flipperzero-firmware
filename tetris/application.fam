@@ -11,5 +11,5 @@ App(
     fap_author="@xMasterX & @jeffplang & @noiob",
     fap_version="1.2",
     fap_description="Tetris Game",
-    fap_icon_assets="assets"
+    fap_icon_assets="assets",
 )
