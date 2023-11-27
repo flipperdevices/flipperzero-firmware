@@ -1,7 +1,6 @@
 #pragma once
 
 #include "furi_hal.h"
-#include "evil_portal_app.h"
 
 #define RX_BUF_SIZE (320)
 

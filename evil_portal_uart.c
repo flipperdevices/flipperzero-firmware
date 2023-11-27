@@ -1,7 +1,6 @@
 #include "evil_portal_app_i.h"
 #include "evil_portal_uart.h"
 #include "helpers/evil_portal_storage.h"
-#include "helpers/evil_portal_commands.h"
 
 struct Evil_PortalUart {
     Evil_PortalApp* app;
@@ -49,39 +48,28 @@ static int32_t uart_worker(void* context) {
                 if(uart->handle_rx_data_cb) {
                     uart->handle_rx_data_cb(uart->rx_buf, len, uart->app);
 
-                    if(uart->app->has_command_queue) {
-                        if(uart->app->command_index < 1) {
-                            if(0 == strncmp(
-                                        SET_AP_CMD,
-                                        uart->app->command_queue[uart->app->command_index],
-                                        strlen(SET_AP_CMD))) {
-                                uart->app->sent_ap = evil_portal_set_ap_name(uart->app->ap_name);
-                            }
-
-                            uart->app->command_index = 0;
-                            uart->app->has_command_queue = false;
-                            uart->app->command_queue[0] = "";
-                        }
-                    }
-
+                    furi_mutex_acquire(uart->app->portal_logs_mutex, FuriWaitForever);
                     if(uart->app->sent_reset == false) {
                         furi_string_cat(uart->app->portal_logs, (char*)uart->rx_buf);
                     }
 
-                    if(furi_string_utf8_length(uart->app->portal_logs) > 4000) {
-                        write_logs(uart->app->storage, uart->app->portal_logs);
+                    if(furi_string_size(uart->app->portal_logs) > 4000) {
+                        write_logs(uart->app->portal_logs);
                         furi_string_reset(uart->app->portal_logs);
                     }
+                    furi_mutex_release(uart->app->portal_logs_mutex);
                 } else {
                     uart->rx_buf[len] = '\0';
+                    furi_mutex_acquire(uart->app->portal_logs_mutex, FuriWaitForever);
                     if(uart->app->sent_reset == false) {
                         furi_string_cat(uart->app->portal_logs, (char*)uart->rx_buf);
                     }
 
-                    if(furi_string_utf8_length(uart->app->portal_logs) > 4000) {
-                        write_logs(uart->app->storage, uart->app->portal_logs);
+                    if(furi_string_size(uart->app->portal_logs) > 4000) {
+                        write_logs(uart->app->portal_logs);
                         furi_string_reset(uart->app->portal_logs);
                     }
+                    furi_mutex_release(uart->app->portal_logs_mutex);
                 }
             }
         }
@@ -121,6 +109,8 @@ Evil_PortalUart* evil_portal_uart_init(Evil_PortalApp* app) {
     }
     furi_hal_uart_set_br(UART_CH, app->BAUDRATE);
     furi_hal_uart_set_irq_cb(UART_CH, evil_portal_uart_on_irq_cb, uart);
+
+    //evil_portal_uart_tx((uint8_t*)("XFW#EVILPORTAL=1\n"), strlen("XFW#EVILPORTAL=1\n"));
 
     return uart;
 }

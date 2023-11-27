@@ -16,7 +16,6 @@
 #include <gui/view_stack.h>
 #include <dialogs/dialogs.h>
 #include <cfw.h>
-#include <storage/storage.h>
 
 #define NUM_MENU_ITEMS (6)
 
@@ -32,12 +31,9 @@ struct Evil_PortalApp {
     Gui* gui;
     ViewDispatcher* view_dispatcher;
     SceneManager* scene_manager;
-    Storage* storage;
 
     FuriString* portal_logs;
-    const char* command_queue[1];
-    int command_index;
-    bool has_command_queue;
+    FuriMutex* portal_logs_mutex;
 
     FuriString* text_box_store;
     size_t text_box_store_strlen;
@@ -58,14 +54,15 @@ struct Evil_PortalApp {
     bool is_custom_tx_string;
     bool focus_console_start;
     bool show_stopscan_tip;
-    bool sent_ap;
-    bool sent_html;
     bool sent_reset;
     int BAUDRATE;
+    char text_store[2][128 + 1];
 
-    // AP SSID length can be maximum 32.
-    // Make the buffer 33 to accommodate the terminator char.
-    char ap_name[33];
+    bool capture_line;
+    FuriString* captured_line;
+
+    uint8_t* index_html;
+    uint8_t* ap_name;
 };
 
 typedef enum {
