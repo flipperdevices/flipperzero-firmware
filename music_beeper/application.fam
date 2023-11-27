@@ -1,0 +1,17 @@
+App(
+    appid="music_beeper",
+    name="Music Beeper",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="music_beeper_app",
+    cdefines=["APP_MUSIC_BEEPER"],
+    requires=[
+        "gui",
+        "dialogs",
+    ],
+    provides=["music_beeper_start"],
+    stack_size=2 * 1024,
+    order=45,
+    fap_icon="music_10px.png",
+    fap_icon_assets="icons",
+    fap_category="Media",
+)
