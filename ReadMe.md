@@ -29,9 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM1126-2335-0.93.9-5967131](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-11-27 12:37 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-11-27 12:37 EST`
-- Updated: [HEX Editor v1.2 (By dunaevai135)] <https://github.com/dunaevai135/flipper-zero-hex_editor>
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-11-27 14:45 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-11-27 14:45 EST`
 - Updated: [Authenticator/TOTP v5.9.1 (By akopachov)] <https://github.com/akopachov/flipper-zero_authenticator>
 - OFW PR: [Add the "remove pairing" button to BLE hid #3237 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3237)
 - OFW PR: [HID app: Add new function key icons #3236 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3236)
@@ -42,7 +41,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - Patreon Build Update: New set for Marvel added to Manifest Switcher & Builds. [(Animations By steveballantyne)](https://github.com/steveballantyne)
 - Patreon Build Update: New set for Virus added to Manifest Switcher & Builds. [(Animations By Kuronons)](https://github.com/Kuronons/FZ_graphics/tree/main/Animations/Virus)
 - Patreon Build Update: Manifest Switcher ALL build updated to include Marvel & Virus animations.
-- Updated: [Hangman v1.5 (By Evgeny Stepanischev & Eva Stepanischeva)] <https://github.com/bolknote/Flipper-Zero-Hangman-Game>
 - Updated: [ESP Flasher v1.4 (By 0xchocolate)](https://github.com/0xchocolate/flipperzero-esp-flasher)
 - Updated: [Cookie Clicker v1.0 (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/hid/hid_cookie)
 - SubGHz: [Viewing a Key, turn Receive notification off and stop the Radio until Receive is fixed (By LeeroysHub)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/34f98ae687f72621a994a45978196f249004c0be)
@@ -62,6 +60,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [ESP32 Evil Portal v0.2 (By bigbrodude6119)](https://github.com/bigbrodude6119/flipper-zero-evil-portal) Changes for CFW Settings UART Customizations
 - SubGHz: [Sound State saved in settings (By LeeroysHub)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/9694ece01f1abad51f3efaaf0fb94e6795a54063)
 - SubGHz: [Crash Fix Can't Listen after TX in TX only (By LeeroysHub)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/3e10ebd6c0914040223c40f5063f89fb1925880f)
+- Updated: [Hangman v1.5 (By Evgeny Stepanischev & Eva Stepanischeva)](https://github.com/bolknote/Flipper-Zero-Hangman-Game)
+- Updated: [HEX Editor v1.3 (By dunaevai135)](https://github.com/dunaevai135/flipper-zero-hex_editor)
 
 ## IN THIS BRANCH:
 
@@ -451,7 +451,7 @@ $ ./fbt dolphin_ext
 - [GPIO Reader v1.1 (Aurelilc) (By aureli1c)](https://github.com/aureli1c/flipperzero_GPIO_read)
 - [GPIO w I2C (By gornekich)-OFW] with [I²C-Scanner #1431 (By GitChris3004)](https://github.com/flipperdevices/flipperzero-firmware/pull/1431) and [read EEPROM of SFP Modules using I2C (By marcusju)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/198)
 - [GPS v1.2 (By ezod)](https://github.com/ezod/flipperzero-gps) `Req: NMEA 0183`
-- [HEX Editor v1.2 (By dunaevai135)](https://github.com/dunaevai135/flipper-zero-hex_editor)
+- [HEX Editor v1.3 (By dunaevai135)](https://github.com/dunaevai135/flipper-zero-hex_editor)
 - [HEX Viewer v2.0 (By QtRoS)](https://github.com/QtRoS/flipperzero-firmware)
 - [i2c Tools v1.2 (By NaejEL)](https://github.com/NaejEL/flipperzero-i2ctools)
 - [iButton Fuzzer (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/507) [(Original By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware)
