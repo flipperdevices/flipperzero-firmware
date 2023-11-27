@@ -50,7 +50,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - SubGHz: [Beep on TX for SubGHz & Remote (By LeeroysHub)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/ad0a273a71d7701af30df75c9174f3bdc3fd6e4a)
 - NFC: [Support for Myki (By LeeroysHub)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/d9d4a734066608b0007810ce72c4c817f15a847a)
 - SubGHz: [Repeater (By LeeroysHub)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/45180dc8570f87b116d428ee7085d1541cc82ac0)
-- SubGHz: [Fix: Wake Up! Listen after TX to save wake up commands (By LeeroysHub)](https://github.com/LeeroysHub/RM-Flipper/commit/e50702d9499e204ba6cd06022b1d98cd3859dbb5)
+- SubGHz: [Wake Up! Listen after TX to save wake up commands (By LeeroysHub)](https://github.com/LeeroysHub/RM-Flipper/commit/e50702d9499e204ba6cd06022b1d98cd3859dbb5)
+- SubGHz: [Fixes for stop the Radio until Receive is fixed (By LeeroysHub)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/46190f824a9397a9ce92735ee6fdcf0c1533cd51)
 
 <a name="release">
 
@@ -236,6 +237,7 @@ $ ./fbt dolphin_ext
 - SubGHz: [Transmit Indicator before Out of Region Frequency Use (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/e24d4a0689db555ae083fec23a471e878adb6cd4)
 - SubGHz: USE CFW Settings to use unlock from SD flag from [(cloudbreakdaniel)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/97db0dc91ee3dff812b4dec0618e3f198de14405).  Update `subghz/assets/extend_range.txt` with [this file](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/assets/resources/subghz/assets/extend_range.txt) on SD.  **UPDATE IGNORE FLAG TO TRUE TO UNLEASH YOUR FLIPPER!!**
 - SubGHz: [Viewing a Key, turn Receive notification off and stop the Radio until Receive is fixed (By LeeroysHub)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/34f98ae687f72621a994a45978196f249004c0be)
+- SubGHz: [Wake Up! Listen after TX to save wake up commands (By LeeroysHub)](https://github.com/LeeroysHub/RM-Flipper/commit/e50702d9499e204ba6cd06022b1d98cd3859dbb5)
 - SubGHz: [X10 Protocol Decoder (By CodeAllNight/jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/subghz/protocols/x10)
 
 ## Games
