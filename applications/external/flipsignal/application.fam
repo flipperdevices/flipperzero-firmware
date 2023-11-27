@@ -1,0 +1,17 @@
+App(
+    appid="flipboard_signal",
+    name="FlipBoard Signal",
+    apptype=FlipperAppType.EXTERNAL,
+    sources=[
+        "*.c",
+    ],
+    entry_point="flipboard_signal_app",
+    stack_size=4 * 1024,
+    fap_icon="flipsignal.png",
+    fap_category="GPIO/FlipBoard",
+    fap_icon_assets="assets",
+    fap_author="jamisonderek",
+    fap_weburl="https://github.com/jamisonderek/flipboard",
+    fap_version=(1, 0),
+    fap_description="FlipBoard Signal turns your FlipBoard into a signal sender.",
+)
