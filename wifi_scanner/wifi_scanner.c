@@ -26,8 +26,6 @@
 #define WIFI_APP_LOG_E(format, ...)
 #endif // WIFI_APP_DEBUG
 
-#define DISABLE_CONSOLE !WIFI_APP_DEBUG
-
 #define ENABLE_MODULE_POWER 1
 #define ENABLE_MODULE_DETECTION 1
 
@@ -809,10 +807,6 @@ typedef enum ESerialCommand {
 } ESerialCommand;
 
 void send_serial_command(ESerialCommand command) {
-#if !DISABLE_CONSOLE
-    return;
-#endif
-
     uint8_t data[1] = {0};
 
     switch(command) {

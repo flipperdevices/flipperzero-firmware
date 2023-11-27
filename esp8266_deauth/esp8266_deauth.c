@@ -11,7 +11,12 @@
 //#include <notification/notification_messages.h>
 //#include <stdlib.h>
 
+#include <xtreme.h>
+
 #include "FlipperZeroWiFiDeauthModuleDefines.h"
+
+#define UART_CH \
+    (xtreme_settings.uart_esp_channel == UARTDefault ? FuriHalUartIdUSART1 : FuriHalUartIdLPUART1)
 
 #define DEAUTH_APP_DEBUG 0
 
@@ -26,7 +31,6 @@
 #define DEAUTH_APP_LOG_E(format, ...)
 #endif // WIFI_APP_DEBUG
 
-#define DISABLE_CONSOLE !DEAUTH_APP_DEBUG
 #define ENABLE_MODULE_POWER 1
 #define ENABLE_MODULE_DETECTION 1
 
@@ -387,9 +391,11 @@ int32_t esp8266_deauth_app(void* p) {
     DEAUTH_APP_LOG_I("UART thread allocated");
 
     // Enable uart listener
-#if DISABLE_CONSOLE
-    furi_hal_console_disable();
-#endif
+    if(UART_CH == FuriHalUartIdUSART1) {
+        furi_hal_console_disable();
+    } else if(UART_CH == FuriHalUartIdLPUART1) {
+        furi_hal_uart_init(UART_CH, FLIPPERZERO_SERIAL_BAUD);
+    }
     furi_hal_uart_set_br(FuriHalUartIdUSART1, FLIPPERZERO_SERIAL_BAUD);
     furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, uart_on_irq_cb, app);
     DEAUTH_APP_LOG_I("UART Listener created");
@@ -505,9 +511,11 @@ int32_t esp8266_deauth_app(void* p) {
     furi_hal_gpio_init(&gpio_ext_pb3, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
     furi_hal_gpio_init(&gpio_ext_pa4, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
 
-#if DISABLE_CONSOLE
-    furi_hal_console_enable();
-#endif
+    if(UART_CH == FuriHalUartIdLPUART1) {
+        furi_hal_uart_deinit(UART_CH);
+    } else {
+        furi_hal_console_enable();
+    }
 
     //*app->m_originalBufferLocation = app->m_originalBuffer;
 
