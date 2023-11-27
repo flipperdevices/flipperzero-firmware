@@ -25,14 +25,14 @@ NfcCommand
     } else if(mfu_event->type == MfUltralightPollerEventTypeRequestWriteData) {
         mfu_event->data->write_data =
             nfc_device_get_data(instance->nfc_device, NfcProtocolMfUltralight);
-    } else if(mfu_event->type == MfUltralightPollerEventTypeWriteSuccess) {
-        view_dispatcher_send_custom_event(instance->view_dispatcher, NfcCustomEventPollerSuccess);
-        command = NfcCommandStop;
     } else if(mfu_event->type == MfUltralightPollerEventTypeCardMismatch) {
         view_dispatcher_send_custom_event(instance->view_dispatcher, NfcCustomEventWrongCard);
-        command = NfcCommandStop;
-    } else if(mfu_event->type == MfUltralightPollerEventTypeWriteFail) {
+    } else if(mfu_event->type == MfUltralightPollerEventTypeCardLocked) {
         view_dispatcher_send_custom_event(instance->view_dispatcher, NfcCustomEventPollerFailure);
+    } else if(mfu_event->type == MfUltralightPollerEventTypeWriteFail) {
+        command = NfcCommandStop;
+    } else if(mfu_event->type == MfUltralightPollerEventTypeWriteSuccess) {
+        view_dispatcher_send_custom_event(instance->view_dispatcher, NfcCustomEventPollerSuccess);
         command = NfcCommandStop;
     }
     return command;

@@ -26,7 +26,7 @@ void nfc_scene_mf_ultralight_write_initial_fail_on_enter(void* context) {
         AlignLeft,
         AlignTop,
         FontSecondary,
-        "Card protected\nby password\nor AUTHLIM");
+        "Card protected by\npassword, AUTH0\nor lock bits");
 
     widget_add_button_element(
         widget,
