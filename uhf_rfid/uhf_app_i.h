@@ -27,6 +27,8 @@
 
 #include <uhf_rfid_icons.h>
 
+#include <assets_icons.h>
+
 #define UHF_TEXT_STORE_SIZE 128
 // #define UHF_APPS_DATA_FOLDER EXT_PATH("apps_data")
 // #define UHF_APPS_STORAGE_FOLDER

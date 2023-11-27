@@ -3,6 +3,8 @@
 #include <flipper_format/flipper_format.h>
 #include <uhf_rfid_icons.h>
 
+#include <assets_icons.h>
+
 #define TAG "UHFDevice"
 
 static const char* uhf_file_header = "Flipper UHF RFID device";
