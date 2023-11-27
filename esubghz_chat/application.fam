@@ -1,5 +1,5 @@
 App(
-    appid=".esubghz_chat",
+    appid="esubghz_chat",
     name="Enhanced Sub-Ghz Chat",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="esubghz_chat",
