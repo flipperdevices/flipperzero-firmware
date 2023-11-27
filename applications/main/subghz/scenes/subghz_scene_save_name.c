@@ -8,8 +8,6 @@
 
 #define MAX_TEXT_INPUT_LEN 23
 
-uint32_t SavedHopperState2; //3 Strikes its out and Ill change the model!
-
 void subghz_scene_save_name_text_input_callback(void* context) {
     furi_assert(context);
     SubGhz* subghz = context;
@@ -121,13 +119,6 @@ void subghz_scene_save_name_on_enter(void* context) {
     furi_string_free(file_name);
     furi_string_free(dir_name);
 
-    //I am turning off the Radio, if the FLipper people want to fix the bug they can!
-    subghz->state_notifications = SubGhzNotificationStateIDLE;
-    subghz_txrx_stop(subghz->txrx);
-    subghz_txrx_hopper_pause(subghz->txrx);
-    SavedHopperState2 = subghz_txrx_hopper_get_state(subghz->txrx);
-    subghz_txrx_hopper_set_state(subghz->txrx, SubGhzHopperStateOFF);
-
     view_dispatcher_switch_to_view(subghz->view_dispatcher, SubGhzViewIdTextInput);
 }
 
@@ -224,12 +215,6 @@ void subghz_scene_save_name_on_exit(void* context) {
     void* validator_context = text_input_get_validator_callback_context(subghz->text_input);
     text_input_set_validator(subghz->text_input, NULL, NULL);
     validator_is_file_free(validator_context);
-
-    /* Proper fix now! Start the radio again. */
-    subghz->state_notifications = SubGhzNotificationStateRx;
-    subghz_txrx_hopper_set_state(subghz->txrx, SavedHopperState2);
-    subghz_txrx_rx_start(subghz->txrx);
-    subghz_txrx_hopper_unpause(subghz->txrx);
 
     // Clear view
     text_input_reset(subghz->text_input);

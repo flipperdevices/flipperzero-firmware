@@ -5,8 +5,6 @@
 
 #define TAG "SubGhzSceneReceiverInfo"
 
-uint32_t SavedHopperState;
-
 const NotificationSequence subghz_sequence_info_beep = {
     &message_vibro_on,
     &message_note_c6,
@@ -129,13 +127,6 @@ void subghz_scene_receiver_info_on_enter(void* context) {
         subghz->state_notifications = SubGhzNotificationStateRx;
     }
 	*/
-
-    //I am turning off the Radio, if the FLipper people want to fix the bug they can!
-    subghz->state_notifications = SubGhzNotificationStateIDLE;
-    subghz_txrx_stop(subghz->txrx);
-    subghz_txrx_hopper_pause(subghz->txrx);
-    SavedHopperState = subghz_txrx_hopper_get_state(subghz->txrx);
-    subghz_txrx_hopper_set_state(subghz->txrx, SubGhzHopperStateOFF);
 }
 
 bool subghz_scene_receiver_info_on_event(void* context, SceneManagerEvent event) {
@@ -198,6 +189,12 @@ bool subghz_scene_receiver_info_on_event(void* context, SceneManagerEvent event)
                 return false;
             }
 
+            //I am turning off the Radio, if the FLipper people want to fix the bug they can!
+            subghz->state_notifications = SubGhzNotificationStateIDLE;
+            subghz_txrx_stop(subghz->txrx);
+            subghz_txrx_hopper_pause(subghz->txrx);
+            subghz_txrx_hopper_set_state(subghz->txrx, SubGhzHopperStateOFF);
+
             if(subghz_txrx_protocol_is_serializable(subghz->txrx)) {
                 subghz_file_name_clear(subghz);
 
@@ -232,10 +229,4 @@ void subghz_scene_receiver_info_on_exit(void* context) {
 
     widget_reset(subghz->widget);
     subghz_txrx_reset_dynamic_and_custom_btns(subghz->txrx);
-
-    /* Proper fix now! Start the radio again. */
-    subghz->state_notifications = SubGhzNotificationStateRx;
-    subghz_txrx_hopper_set_state(subghz->txrx, SavedHopperState);
-    subghz_txrx_rx_start(subghz->txrx);
-    subghz_txrx_hopper_unpause(subghz->txrx);
 }
