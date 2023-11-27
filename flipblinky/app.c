@@ -109,7 +109,7 @@ void flipboard_reset_effect(FlipboardModel* model) {
     }
 
     if(fbm->effect_id == 1) {
-        backlight_force_off();
+        backlight_off();
     } else {
         backlight_on();
     }
