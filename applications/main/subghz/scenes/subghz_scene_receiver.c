@@ -260,15 +260,17 @@ void subghz_scene_receiver_on_enter(void* context) {
         subghz->state_notifications = SubGhzNotificationStateRx;
     }
 
-    // Check if hopping was enabled
+    // Check if hopping was enabled, and restart the radio.
     if(subghz->last_settings->enable_hopping) {
         subghz_txrx_hopper_set_state(subghz->txrx, SubGhzHopperStateRunning);
     } else {
         subghz_txrx_hopper_set_state(subghz->txrx, SubGhzHopperStateOFF);
     }
 
+    /* Proper fix now! Start the radio again. */
     subghz_txrx_rx_start(subghz->txrx);
     subghz_view_receiver_set_idx_menu(subghz->subghz_receiver, subghz->idx_menu_chosen);
+    subghz_txrx_hopper_unpause(subghz->txrx);
 
     //to use a universal decoder, we are looking for a link to it
     furi_check(
@@ -322,6 +324,12 @@ bool subghz_scene_receiver_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
             break;
         case SubGhzCustomEventViewReceiverOK:
+            //I am turning off the Radio, if the FLipper people want to fix the bug they can!
+            subghz->state_notifications = SubGhzNotificationStateIDLE;
+            subghz_txrx_stop(subghz->txrx);
+            subghz_txrx_hopper_pause(subghz->txrx);
+            subghz_txrx_hopper_set_state(subghz->txrx, SubGhzHopperStateOFF);
+
             // Show file info, scene: receiver_info
             scene_manager_next_scene(subghz->scene_manager, SubGhzSceneReceiverInfo);
             dolphin_deed(DolphinDeedSubGhzReceiverInfo);
