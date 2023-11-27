@@ -118,6 +118,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [Mifare Classic fixes #3221 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3221)
 - Update: [NFC Seader v2.0 (By bettse)](https://github.com/bettse/seader)
 - Refactor Update: [Mifare Fuzzer v1.2 (By spheeere98)](https://github.com/spheeere98/mifare_fuzzer) (Changes By Sil333033)
+- OFW PR: [Ntag21x write #3246 (By RebornedBrain)](https://github.com/flipperdevices/flipperzero-firmware/pull/3246)
 
 <a name="release">
 
