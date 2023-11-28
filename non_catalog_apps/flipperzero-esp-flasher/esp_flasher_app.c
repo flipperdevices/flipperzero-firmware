@@ -69,6 +69,8 @@ EspFlasherApp* esp_flasher_app_alloc() {
     app->reset = false;
     app->boot = false;
 
+    app->turbospeed = false;
+
     scene_manager_next_scene(app->scene_manager, EspFlasherSceneStart);
 
     return app;
@@ -116,7 +118,6 @@ int32_t esp_flasher_app(void* p) {
     UNUSED(p);
 
     uint8_t attempts = 0;
-    bool otg_was_enabled = furi_hal_power_is_otg_enabled();
     while(!furi_hal_power_is_otg_enabled() && attempts++ < 5) {
         furi_hal_power_enable_otg();
         furi_delay_ms(10);
@@ -133,7 +134,7 @@ int32_t esp_flasher_app(void* p) {
 
     esp_flasher_app_free(esp_flasher_app);
 
-    if(furi_hal_power_is_otg_enabled() && !otg_was_enabled) {
+    if(furi_hal_power_is_otg_enabled()) {
         furi_hal_power_disable_otg();
     }
 

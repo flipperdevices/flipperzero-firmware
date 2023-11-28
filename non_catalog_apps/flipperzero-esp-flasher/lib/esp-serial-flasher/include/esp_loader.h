@@ -64,8 +64,9 @@ typedef enum {
     ESP32C2_CHIP = 5,
     ESP32H4_CHIP = 6,
     ESP32H2_CHIP = 7,
-    ESP_MAX_CHIP = 8,
-    ESP_UNKNOWN_CHIP = 8
+    ESP32C6_CHIP = 8,
+    ESP_MAX_CHIP = 9,
+    ESP_UNKNOWN_CHIP = 9
 } target_chip_t;
 
 /**
@@ -87,21 +88,6 @@ typedef struct {
     uint32_t size;
     uint8_t *data;
 } esp_loader_bin_segment_t;
-
-/**
- * @brief SPI pin configuration arguments
- */
-typedef union {
-    struct {
-        uint32_t pin_clk: 6;
-        uint32_t pin_q:   6;
-        uint32_t pin_d:   6;
-        uint32_t pin_cs:  6;
-        uint32_t pin_hd:  6;
-        uint32_t zero:    2;
-    };
-    uint32_t val;
-} esp_loader_spi_config_t;
 
 /**
  * @brief Connection arguments

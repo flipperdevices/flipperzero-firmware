@@ -64,7 +64,16 @@ else()
     target_include_directories(flasher PUBLIC include port PRIVATE private_include)
 
     if(PORT STREQUAL "STM32")
-        target_link_libraries(flasher PUBLIC stm_cube)
+        stm32_get_chip_info(${STM32_CHIP} FAMILY DEVICE_FAMILY DEVICE DEVICE_CODE)
+        if(DEFINED CORE_USED)
+            string(APPEND DEVICE_FAMILY ::${CORE_USED})
+            string(APPEND DEVICE_CODE ::${CORE_USED})
+        endif()
+        target_link_libraries(flasher PRIVATE
+            HAL::STM32::${DEVICE_FAMILY}::GPIO
+            HAL::STM32::${DEVICE_FAMILY}::UART
+            CMSIS::STM32::${DEVICE_CODE}
+        )
         target_sources(flasher PRIVATE port/stm32_port.c)
     elseif(PORT STREQUAL "RASPBERRY_PI")
         find_library(pigpio_LIB pigpio)
@@ -116,4 +125,21 @@ else()
             SERIAL_FLASHER_BOOT_HOLD_TIME_MS=50
         )
     endif()
+endif()
+
+if (DEFINED CONFIG_SERIAL_FLASHER_WRITE_BLOCK_RETRIES)
+    target_compile_definitions(${target}
+    PUBLIC
+        SERIAL_FLASHER_WRITE_BLOCK_RETRIES=${CONFIG_SERIAL_FLASHER_WRITE_BLOCK_RETRIES}
+    )
+elseif (DEFINED SERIAL_FLASHER_WRITE_BLOCK_RETRIES)
+    target_compile_definitions(${target}
+    PUBLIC
+        SERIAL_FLASHER_WRITE_BLOCK_RETRIES=${SERIAL_FLASHER_WRITE_BLOCK_RETRIES}
+    )
+else()
+    target_compile_definitions(${target}
+    PUBLIC
+        SERIAL_FLASHER_WRITE_BLOCK_RETRIES=3
+    )
 endif()

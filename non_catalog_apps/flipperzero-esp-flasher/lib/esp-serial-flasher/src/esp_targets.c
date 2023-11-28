@@ -33,11 +33,13 @@ typedef struct {
 
 #define ESP8266_SPI_REG_BASE 0x60000200
 #define ESP32S2_SPI_REG_BASE 0x3f402000
+#define ESP32C6_SPI_REG_BASE 0x60003000
 #define ESP32xx_SPI_REG_BASE 0x60002000
 #define ESP32_SPI_REG_BASE   0x3ff42000
 
 static esp_loader_error_t spi_config_esp32(uint32_t efuse_base, uint32_t *spi_config);
 static esp_loader_error_t spi_config_esp32xx(uint32_t efuse_base, uint32_t *spi_config);
+static esp_loader_error_t spi_config_unsupported(uint32_t efuse_base, uint32_t *spi_config);
 
 static const esp_target_t esp_target[ESP_MAX_CHIP] = {
 
@@ -55,6 +57,7 @@ static const esp_target_t esp_target[ESP_MAX_CHIP] = {
         .efuse_base = 0,            // Not used
         .chip_magic_value  = { 0xfff0c101, 0 },
         .read_spi_config = NULL,    // Not used
+        .encryption_in_begin_flash_cmd = false,
     },
 
     // ESP32
@@ -71,6 +74,7 @@ static const esp_target_t esp_target[ESP_MAX_CHIP] = {
         .efuse_base = 0x3ff5A000,
         .chip_magic_value  = { 0x00f01d83, 0 },
         .read_spi_config = spi_config_esp32,
+        .encryption_in_begin_flash_cmd = false,
     },
 
     // ESP32S2
@@ -87,6 +91,7 @@ static const esp_target_t esp_target[ESP_MAX_CHIP] = {
         .efuse_base = 0x3f41A000,
         .chip_magic_value  = { 0x000007c6, 0 },
         .read_spi_config = spi_config_esp32xx,
+        .encryption_in_begin_flash_cmd = true,
     },
 
     // ESP32C3
@@ -103,6 +108,7 @@ static const esp_target_t esp_target[ESP_MAX_CHIP] = {
         .efuse_base = 0x60008800,
         .chip_magic_value = { 0x6921506f, 0x1b31506f },
         .read_spi_config = spi_config_esp32xx,
+        .encryption_in_begin_flash_cmd = true,
     },
 
     // ESP32S3
@@ -119,6 +125,7 @@ static const esp_target_t esp_target[ESP_MAX_CHIP] = {
         .efuse_base = 0x60007000,
         .chip_magic_value = { 0x00000009, 0 },
         .read_spi_config = spi_config_esp32xx,
+        .encryption_in_begin_flash_cmd = true,
     },
 
     // ESP32C2
@@ -135,6 +142,7 @@ static const esp_target_t esp_target[ESP_MAX_CHIP] = {
         .efuse_base = 0x60008800,
         .chip_magic_value = { 0x6f51306f, 0x7c41a06f },
         .read_spi_config = spi_config_esp32xx,
+        .encryption_in_begin_flash_cmd = true,
     },
     // ESP32H4
     {
@@ -150,6 +158,7 @@ static const esp_target_t esp_target[ESP_MAX_CHIP] = {
         .efuse_base = 0x6001A000,
         .chip_magic_value = {0xca26cc22, 0x6881b06f}, // ESP32H4-BETA1, ESP32H4-BETA2
         .read_spi_config = spi_config_esp32xx,
+        .encryption_in_begin_flash_cmd = true,
     },
     // ESP32H2
     {
@@ -165,6 +174,23 @@ static const esp_target_t esp_target[ESP_MAX_CHIP] = {
         .efuse_base = 0x6001A000,
         .chip_magic_value = {0xd7b73e80, 0},
         .read_spi_config = spi_config_esp32xx,
+        .encryption_in_begin_flash_cmd = true,
+    },
+    // ESP32C6
+    {
+        .regs = {
+            .cmd  = ESP32C6_SPI_REG_BASE + 0x00,
+            .usr  = ESP32C6_SPI_REG_BASE + 0x18,
+            .usr1 = ESP32C6_SPI_REG_BASE + 0x1c,
+            .usr2 = ESP32C6_SPI_REG_BASE + 0x20,
+            .w0   = ESP32C6_SPI_REG_BASE + 0x58,
+            .mosi_dlen = ESP32C6_SPI_REG_BASE + 0x24,
+            .miso_dlen = ESP32C6_SPI_REG_BASE + 0x28,
+        },
+        .efuse_base = 0x600B0800,
+        .chip_magic_value = { 0x2CE0806F, 0 },
+        .read_spi_config = spi_config_unsupported,
+        .encryption_in_begin_flash_cmd = true,
     },
 };
 
@@ -257,7 +283,15 @@ static esp_loader_error_t spi_config_esp32xx(uint32_t efuse_base, uint32_t *spi_
     return ESP_LOADER_SUCCESS;
 }
 
-bool encryption_in_begin_flash_cmd(target_chip_t target)
+// Some newer chips like the esp32c6 do not support configurable SPI
+static esp_loader_error_t spi_config_unsupported(uint32_t efuse_base, uint32_t *spi_config)
 {
-    return target == ESP32_CHIP || target == ESP8266_CHIP;
+    (void)(efuse_base); // UNUSED param
+    *spi_config = 0;
+    return ESP_LOADER_SUCCESS;
+}
+
+bool encryption_in_begin_flash_cmd(const target_chip_t target)
+{
+    return esp_target[target].encryption_in_begin_flash_cmd;
 }

@@ -59,13 +59,11 @@ esp_loader_error_t loader_flash_begin_cmd(uint32_t offset,
                                           uint32_t blocks_to_write,
                                           bool encryption)
 {
-    uint32_t encryption_size = encryption ? sizeof(uint32_t) : 0;
-
     flash_begin_command_t flash_begin_cmd = {
         .common = {
             .direction = WRITE_DIRECTION,
             .command = FLASH_BEGIN,
-            .size = CMD_SIZE(flash_begin_cmd) - encryption_size,
+            .size = CMD_SIZE(flash_begin_cmd) - (encryption ? 0 : sizeof(uint32_t)),
             .checksum = 0
         },
         .erase_size = erase_size,
@@ -77,7 +75,9 @@ esp_loader_error_t loader_flash_begin_cmd(uint32_t offset,
 
     s_sequence_number = 0;
 
-    return send_cmd(&flash_begin_cmd, sizeof(flash_begin_cmd) - encryption_size, NULL);
+    return send_cmd(&flash_begin_cmd,
+                    sizeof(flash_begin_cmd) - (encryption ? 0 : sizeof(uint32_t)),
+                    NULL);
 }
 
 
@@ -297,5 +297,5 @@ esp_loader_error_t loader_spi_parameters(uint32_t total_size)
 
 __attribute__ ((weak)) void loader_port_debug_print(const char *str)
 {
- (void)(str);
+    (void) str;
 }
