@@ -4,8 +4,11 @@
 
 bool kml_open_file(Storage* storage, KMLFile* kml, const char* path) {
     kml->file = storage_file_alloc(storage);
-    if(!storage_file_open(kml->file, path, FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
-        FURI_LOG_E(TAG, "failed to open KML file %s", path);
+    FS_Error e = storage_file_open(kml->file, path, FSAM_WRITE, FSOM_CREATE_ALWAYS);
+    if(e != FSE_OK) {
+	// must call close() even if the operation fails
+        FURI_LOG_E(TAG, "failed to open KML file %s: %s", path, filesystem_api_error_get_desc(e));
+	storage_file_close(kml->file);
         storage_file_free(kml->file);
         return false;
     }
@@ -34,22 +37,40 @@ bool kml_open_file(Storage* storage, KMLFile* kml, const char* path) {
                             "        <altitudeMode>absolute</altitudeMode>\n"
                             "        <coordinates>\n";
 
-    if(!storage_file_write(kml->file, kml_intro, strlen(kml_intro))) {
+    e = storage_file_write(kml->file, kml_intro, strlen(kml_intro));
+    if(e != FSE_OK) {
+	FURI_LOG_E(TAG, "failed to write KML starting header! error %d", e);
         storage_file_close(kml->file);
         storage_file_free(kml->file);
         return false;
     }
 
+    // keeps track of writes for periodic flushes
+    kml->write_counter = 0;
+    FURI_LOG_I(TAG, "file opened successfully");
     return true;
 }
 
 bool kml_add_path_point(KMLFile* kml, double lat, double lon, uint32_t alt) {
     // KML is longitude then latitude for some reason
     FuriString* point = furi_string_alloc_printf("          %f,%f,%lu\n", lon, lat, alt);
-    if(!storage_file_write(kml->file, furi_string_get_cstr(point), furi_string_size(point))) {
+    FS_Error e = storage_file_write(kml->file, furi_string_get_cstr(point), furi_string_size(point));
+    if(e != FSE_OK) {
+	FURI_LOG_E(TAG, "failed to write line, error %s (%d)", filesystem_api_error_get_desc(e), e);
         return false;
     }
 
+    furi_string_free(point);
+
+    kml->write_counter += 1;
+    if (kml->write_counter == 16) {
+	if (!storage_file_sync(kml->file)) {
+	    FURI_LOG_E(TAG, "failed to periodic flush file!");
+	}
+	// reset
+	kml->write_counter = 0;
+    }
+    
     return true;
 }
 
@@ -60,7 +81,9 @@ bool kml_close_file(KMLFile* kml) {
                             "  </Document>\n"
                             "</kml>";
 
-    if(!storage_file_write(kml->file, kml_outro, strlen(kml_outro))) {
+    FS_Error e = storage_file_write(kml->file, kml_outro, strlen(kml_outro));
+    if(e != FSE_OK) {
+	FURI_LOG_E(TAG, "failed to close file, error %s (%d)", filesystem_api_error_get_desc(e), e);
         storage_file_close(kml->file);
         storage_file_free(kml->file);
         return false;

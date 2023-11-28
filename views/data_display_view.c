@@ -19,10 +19,11 @@ typedef struct {
 
 static void draw_buttons(Canvas* canvas, void* model) {
     DataDisplayViewModel* m = model;
-    elements_button_left(canvas, "Config");
+
     if(m->log_state == UbloxLogStateLogging) {
         elements_button_right(canvas, "Stop Log");
     } else {
+	elements_button_left(canvas, "Config");
         elements_button_right(canvas, "Start Log");
     }
 }

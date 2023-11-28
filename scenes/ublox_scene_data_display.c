@@ -42,16 +42,24 @@ void ublox_scene_data_display_on_enter(void* context) {
         ublox->worker, UbloxWorkerStateRead, ublox_scene_data_display_worker_callback, ublox);
 }
 
+// TODO: lock buttons feature
 bool ublox_scene_data_display_on_event(void* context, SceneManagerEvent event) {
     Ublox* ublox = context;
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == GuiButtonTypeLeft) {
-            ublox_worker_stop(ublox->worker);
-            scene_manager_next_scene(ublox->scene_manager, UbloxSceneDataDisplayConfig);
-            consumed = true;
+	    // You can only config the worker when it's not logging,
+	    // because that's actually pretty complicated to implement
+	    // (and confusing too because the worker has to restart if
+	    // it's going to keep logging)
 
+	    if (ublox->log_state == UbloxLogStateNone) {
+		ublox_worker_stop(ublox->worker);
+		scene_manager_next_scene(ublox->scene_manager, UbloxSceneDataDisplayConfig);
+		consumed = true;
+	    }
+	    
         } else if(event.event == GuiButtonTypeRight) {
             if(data_display_get_state(ublox->data_display) != DataDisplayGPSNotFound) {
                 FURI_LOG_I(TAG, "right button");
@@ -85,6 +93,7 @@ bool ublox_scene_data_display_on_event(void* context, SceneManagerEvent event) {
         } else if(event.event == UbloxWorkerEventFailed) {
             FURI_LOG_I(TAG, "UbloxWorkerEventFailed");
             data_display_set_state(ublox->data_display, DataDisplayGPSNotFound);
+	    ublox->log_state = UbloxLogStateStopLogging;
         }
     }
     return consumed;

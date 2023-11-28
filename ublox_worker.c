@@ -49,24 +49,18 @@ void ublox_worker_stop(UbloxWorker* ublox_worker) {
     furi_assert(ublox);
     //FURI_LOG_I(TAG, "worker_stop: %p", ublox);
 
-    /*FuriThreadState state = furi_thread_get_state(ublox_worker->thread);
-  if (state == FuriThreadStateStopped) {
-      FURI_LOG_I(TAG, "worker state stopped");
-  } else if (state == FuriThreadStateStarting) {
-      FURI_LOG_I(TAG, "worker state starting");
-  } else if (state == FuriThreadStateRunning) {
-      FURI_LOG_I(TAG, "worker state running");
-      }*/
-
     // close the logfile if currently logging
     //FURI_LOG_I(TAG, "log state: %d", ublox->log_state);
-    if(ublox->log_state == UbloxLogStateLogging) {
+
+    /*if(ublox->log_state == UbloxLogStateLogging) {
         FURI_LOG_I(TAG, "closing log file on worker stop");
-        ublox->log_state = UbloxLogStateNone;
+        ublox->log_state = UbloxLogStateStopLogging;
+	FURI_LOG_I(TAG, "state changed");
         if(!kml_close_file(&(ublox->kmlfile))) {
             FURI_LOG_E(TAG, "failed to close KML file!");
         }
-    }
+	}*/
+    
     if(furi_thread_get_state(ublox_worker->thread) != FuriThreadStateStopped) {
         ublox_worker_change_state(ublox_worker, UbloxWorkerStateStop);
         furi_thread_join(ublox_worker->thread);
@@ -147,14 +141,18 @@ void ublox_worker_read_nav_messages(void* context) {
     // We only start logging at the same time we restart the worker.
     if(ublox->log_state == UbloxLogStateStartLogging) {
         FURI_LOG_I(TAG, "start logging");
+	
         // assemble full logfile pathname
-        FuriString* fullname = furi_string_alloc();
+        //FuriString* fullname = furi_string_alloc_set("/ext/ublox_kml/dat.kml");
+	FuriString* fullname = furi_string_alloc();
         path_concat(furi_string_get_cstr(ublox->logfile_folder), ublox->text_store, fullname);
         FURI_LOG_I(TAG, "fullname is %s", furi_string_get_cstr(fullname));
 
         if(!kml_open_file(ublox->storage, &(ublox->kmlfile), furi_string_get_cstr(fullname))) {
-            FURI_LOG_E(TAG, "failed to open KML file %s!", furi_string_get_cstr(fullname));
+            //FURI_LOG_E(TAG, "failed to open KML file %s!", furi_string_get_cstr(fullname));
             ublox->log_state = UbloxLogStateNone;
+	    ublox_worker->callback(UbloxWorkerEventLogStateChanged, ublox_worker->context);
+	    return;
         }
         ublox->log_state = UbloxLogStateLogging;
         furi_string_free(fullname);
@@ -206,6 +204,7 @@ void ublox_worker_read_nav_messages(void* context) {
         bool odo = ublox_worker_read_odo(ublox_worker);
 
         if(pvt && odo) {
+	    // if we got good data, do stuff
             ublox_worker->callback(UbloxWorkerEventDataReady, ublox_worker->context);
 
             if(ublox->log_state == UbloxLogStateLogging) {
@@ -224,19 +223,22 @@ void ublox_worker_read_nav_messages(void* context) {
 
         while(furi_get_tick() - ticks <
               furi_ms_to_ticks(((ublox->data_display_state).refresh_rate * 1000))) {
-            // putting this here (should) make the logging response faster
-            if(ublox->log_state == UbloxLogStateStopLogging) {
-                FURI_LOG_I(TAG, "stop logging");
-                if(!kml_close_file(&(ublox->kmlfile))) {
-                    FURI_LOG_E(TAG, "failed to close KML file!");
-                }
-                ublox->log_state = UbloxLogStateNone;
-                ublox_worker->callback(UbloxWorkerEventLogStateChanged, ublox_worker->context);
-            }
-            if(ublox_worker->state != UbloxWorkerStateRead) {
-                return;
-            }
+	    // putting these *inside* the loop makes it respond faster
+	    if(ublox_worker->state != UbloxWorkerStateRead) {
+		return;
+	    }
+	    
+	    if(ublox->log_state == UbloxLogStateStopLogging) {
+		FURI_LOG_I(TAG, "stop logging");
+		if(!kml_close_file(&(ublox->kmlfile))) {
+		    FURI_LOG_E(TAG, "failed to close KML file!");
+		}
+		ublox->log_state = UbloxLogStateNone;
+		ublox_worker->callback(UbloxWorkerEventLogStateChanged, ublox_worker->context);
+	    }
         }
+
+
     }
 }
 
