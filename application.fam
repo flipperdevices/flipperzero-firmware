@@ -1,0 +1,17 @@
+App(
+    appid="meal_pager",
+    name="Restaurant Pager Trigger",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="meal_pager_app",
+    cdefines=["APP_MEAL_PAGER"],
+    requires=[
+        "gui",
+        "storage",
+    ],
+    stack_size=2 * 1024,
+    order=10,
+    fap_libs=["assets"],
+    fap_icon="icons/meal_pager_10px.png",
+    fap_icon_assets="icons",
+    fap_category="Sub-Ghz",
+)
