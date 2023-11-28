@@ -1,40 +1,50 @@
 #include "../wiegand.h"
 
-void wiegand_data_scene_save_name_text_input_callback(void* context) {
-    App* app = context;
+void wiegand_data_scene_save_name_text_input_callback(void *context)
+{
+    App *app = context;
     view_dispatcher_send_custom_event(app->view_dispatcher, WiegandDataSceneSaveFileEvent);
 }
 
-void ensure_dir_exists(Storage* storage) {
+void ensure_dir_exists(Storage *storage)
+{
     // If apps_data directory doesn't exist, create it.
-    if(!storage_dir_exists(storage, WIEGAND_APPS_DATA_FOLDER)) {
+    if (!storage_dir_exists(storage, WIEGAND_APPS_DATA_FOLDER))
+    {
         FURI_LOG_I(TAG, "Creating directory: %s", WIEGAND_APPS_DATA_FOLDER);
         storage_simply_mkdir(storage, WIEGAND_APPS_DATA_FOLDER);
-    } else {
+    }
+    else
+    {
         FURI_LOG_I(TAG, "Directory exists: %s", WIEGAND_APPS_DATA_FOLDER);
     }
 
     // If wiegand directory doesn't exist, create it.
-    if(!storage_dir_exists(storage, WIEGAND_SAVE_FOLDER)) {
+    if (!storage_dir_exists(storage, WIEGAND_SAVE_FOLDER))
+    {
         FURI_LOG_I(TAG, "Creating directory: %s", WIEGAND_SAVE_FOLDER);
         storage_simply_mkdir(storage, WIEGAND_SAVE_FOLDER);
-    } else {
+    }
+    else
+    {
         FURI_LOG_I(TAG, "Directory exists: %s", WIEGAND_SAVE_FOLDER);
     }
 }
 
-void wiegand_save(void* context) {
-    App* app = context;
-    FuriString* buffer = furi_string_alloc(1024);
-    FuriString* file_path = furi_string_alloc();
+void wiegand_save(void *context)
+{
+    App *app = context;
+    FuriString *buffer = furi_string_alloc(1024);
+    FuriString *file_path = furi_string_alloc();
     furi_string_printf(
         file_path, "%s/%s%s", WIEGAND_SAVE_FOLDER, app->file_name, WIEGAND_SAVE_EXTENSION);
 
-    Storage* storage = furi_record_open(RECORD_STORAGE);
+    Storage *storage = furi_record_open(RECORD_STORAGE);
     ensure_dir_exists(storage);
-    File* data_file = storage_file_alloc(storage);
-    if(storage_file_open(
-           data_file, furi_string_get_cstr(file_path), FSAM_WRITE, FSOM_OPEN_ALWAYS)) {
+    File *data_file = storage_file_alloc(storage);
+    if (storage_file_open(
+            data_file, furi_string_get_cstr(file_path), FSAM_WRITE, FSOM_OPEN_ALWAYS))
+    {
         furi_string_printf(buffer, "Filetype: Flipper Wiegand Key File\n");
         storage_file_write(data_file, furi_string_get_cstr(buffer), furi_string_size(buffer));
         furi_string_printf(buffer, "Version: 1\n");
@@ -44,7 +54,8 @@ void wiegand_save(void* context) {
         furi_string_printf(buffer, "Bits: %d\n", bit_count);
         storage_file_write(data_file, furi_string_get_cstr(buffer), furi_string_size(buffer));
         furi_string_printf(buffer, "RAW_Data: ");
-        for(int i = 0; i < bit_count; i++) {
+        for (int i = 0; i < bit_count; i++)
+        {
             furi_string_cat_printf(
                 buffer,
                 "D%d %ld %ld ",
@@ -52,7 +63,27 @@ void wiegand_save(void* context) {
                 data_fall[i] - data_fall[0],
                 data_rise[i] - data_fall[0]);
         }
+
         furi_string_push_back(buffer, '\n');
+        storage_file_write(data_file, furi_string_get_cstr(buffer), furi_string_size(buffer));
+
+        furi_string_printf(buffer, "PACS_Binary: ");
+        for (int i = 0; i < bit_count; i++)
+        {
+            furi_string_cat_printf(buffer, "%d", data[i] ? 1 : 0);
+        }
+
+        furi_string_push_back(buffer, '\n');
+        storage_file_write(data_file, furi_string_get_cstr(buffer), furi_string_size(buffer));
+
+        furi_string_printf(buffer, "PM3_Command: hf ic encode --bin ");
+
+        for (int i = 0; i < bit_count; i++)
+        {
+            furi_string_cat_printf(buffer, "%d", data[i] ? 1 : 0);
+        }
+
+        furi_string_cat_printf(buffer, " --ki 0\n");
         storage_file_write(data_file, furi_string_get_cstr(buffer), furi_string_size(buffer));
         storage_file_close(data_file);
     }
@@ -63,16 +94,17 @@ void wiegand_save(void* context) {
     furi_string_free(buffer);
 }
 
-void wiegand_save_scene_on_enter(void* context) {
-    App* app = context;
+void wiegand_save_scene_on_enter(void *context)
+{
+    App *app = context;
     text_input_reset(app->text_input);
 
     FuriHalRtcDateTime datetime;
     furi_hal_rtc_get_datetime(&datetime);
     snprintf(
         app->file_name,
-        25,
-        "%02d%02d%02d_%02d%02d%02d",
+        50,
+        "%02d_%02d_%02d_%02d_%02d_%02d",
         datetime.year,
         datetime.month,
         datetime.day,
@@ -93,12 +125,15 @@ void wiegand_save_scene_on_enter(void* context) {
     view_dispatcher_switch_to_view(app->view_dispatcher, WiegandTextInputView);
 }
 
-bool wiegand_save_scene_on_event(void* context, SceneManagerEvent event) {
-    App* app = context;
+bool wiegand_save_scene_on_event(void *context, SceneManagerEvent event)
+{
+    App *app = context;
     bool consumed = false;
-    switch(event.type) {
+    switch (event.type)
+    {
     case SceneManagerEventTypeCustom:
-        switch(event.event) {
+        switch (event.event)
+        {
         case WiegandDataSceneSaveFileEvent:
             wiegand_save(app);
             data_saved = true;
