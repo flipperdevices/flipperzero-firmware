@@ -34,8 +34,6 @@ void evil_portal_read_index_html(void* context) {
                 buf_ptr += now_read;
             }
             *buf_ptr = '\0';
-            buf_ptr++;
-            free(buf_ptr);
         }
         storage_file_close(index_html);
         storage_file_free(index_html);
@@ -96,8 +94,6 @@ void evil_portal_read_ap_name(void* context) {
                 buf_ptr += now_read;
             }
             *buf_ptr = '\0';
-            buf_ptr++;
-            free(buf_ptr);
         }
         storage_file_close(ap_name);
         storage_file_free(ap_name);
