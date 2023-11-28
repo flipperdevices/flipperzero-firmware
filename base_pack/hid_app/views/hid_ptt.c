@@ -353,7 +353,7 @@ static void hid_ptt_menu_callback(void* context, uint32_t osIndex, FuriString* o
             case HidPushToTalkAppIndexTeamSpeak:
                 app_specific_help =
                     "TeamSpeak:\n"
-                    "To make keys working bind them in discord settings.\n\n"
+                    "To make keys working bind them in TeamSpeak settings.\n\n"
                 ;
                 break;
             case HidPushToTalkAppIndexTeams:
