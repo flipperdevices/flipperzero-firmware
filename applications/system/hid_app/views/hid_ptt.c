@@ -510,6 +510,11 @@ HidPushToTalk* hid_ptt_alloc(Hid* hid) {
 void hid_ptt_free(HidPushToTalk* hid_ptt) {
     furi_assert(hid_ptt);
     notification_message(hid_ptt->hid->notifications, &sequence_reset_red);
+    with_view_model(
+    hid_ptt->view, HidPushToTalkModel * model, {
+        furi_string_free(model->os);
+        furi_string_free(model->app);
+    }, true);
     view_dispatcher_remove_view(hid_ptt->hid->view_dispatcher, HidViewPushToTalkHelp);
     widget_reset(hid_ptt->help);
     widget_free(hid_ptt->help);
