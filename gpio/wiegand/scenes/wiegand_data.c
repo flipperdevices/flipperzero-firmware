@@ -296,8 +296,8 @@ void wiegand_data_scene_on_enter(void *context)
             furi_string_push_back(buffer, '\n');
         }
     }
-    furi_string_cat_printf(buffer, "\nPulse: %ld us", (data_rise[0] - data_fall[0]) / 64);
-    furi_string_cat_printf(buffer, "\nPeriod: %ld us", (data_fall[1] - data_fall[0]) / 64);
+    // furi_string_cat_printf(buffer, "\nPulse: %ld us", (data_rise[0] - data_fall[0]) / 64);
+    // furi_string_cat_printf(buffer, "\nPeriod: %ld us", (data_fall[1] - data_fall[0]) / 64);
     wiegand_add_info(buffer);
     for (int i = 0; i < bit_count;)
     {
