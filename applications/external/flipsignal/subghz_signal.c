@@ -189,7 +189,7 @@ SubGhzSignal* subghz_signal_load_file(char* file_path) {
             parsed = true;
         } while(false);
     } else {
-        FURI_LOG_E(TAG, "Error open file %s", file_path);
+        FURI_LOG_E(TAG, "Error opening file %s", file_path);
     }
 
     furi_string_free(temp_str);

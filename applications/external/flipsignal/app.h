@@ -24,3 +24,4 @@
 #include "./common/speaker.h"
 
 #include "./subghz_signal.h"
+#include "./infrared_signal.h"

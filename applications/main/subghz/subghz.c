@@ -90,7 +90,7 @@ static void subghz_load_custom_presets(SubGhzSetting* setting) {
 #endif
 }
 
-SubGhz* subghz_alloc(bool alloc_for_tx_only) {
+SubGhz* subghz_alloc(bool raw_send_only) {
     SubGhz* subghz = malloc(sizeof(SubGhz));
 
     subghz->file_path = furi_string_alloc();
@@ -119,7 +119,27 @@ SubGhz* subghz_alloc(bool alloc_for_tx_only) {
 #endif
     subghz->txrx = subghz_txrx_alloc();
 
-    if(!alloc_for_tx_only) {
+    //Load settings from history now.
+    SubGhzSetting* setting = subghz_txrx_get_setting(subghz->txrx);
+    subghz_load_custom_presets(setting);
+
+    // Load last used values for Read, Read RAW, etc. or default
+    subghz->last_settings = subghz_last_settings_alloc();
+    size_t preset_count = subghz_setting_get_preset_count(setting);
+    subghz_last_settings_load(subghz->last_settings, preset_count);
+#ifdef FURI_DEBUG
+    subghz_last_settings_log(subghz->last_settings);
+#endif
+
+    //If the user has Listen after TX on in the Config, we want to load as normal.
+    //That way, we can have all our functionality even if loaded from browser.
+    //If Listen after TX isnt on, the FAP will load as raw_send_only.
+    bool ListenAfterTX = subghz->last_settings->enable_listen_after_tx;
+
+    //Put the Listen after TX back to what the user selected.
+    subghz->ListenAfterTX = ListenAfterTX;
+
+    if(!raw_send_only || ListenAfterTX) {
         // SubMenu
         subghz->submenu = submenu_alloc();
         view_dispatcher_add_view(
@@ -136,7 +156,7 @@ SubGhz* subghz_alloc(bool alloc_for_tx_only) {
     subghz->popup = popup_alloc();
     view_dispatcher_add_view(
         subghz->view_dispatcher, SubGhzViewIdPopup, popup_get_view(subghz->popup));
-    if(!alloc_for_tx_only) {
+    if(!raw_send_only || ListenAfterTX) {
         // Text Input
         subghz->text_input = text_input_alloc();
         view_dispatcher_add_view(
@@ -165,7 +185,7 @@ SubGhz* subghz_alloc(bool alloc_for_tx_only) {
         subghz->view_dispatcher,
         SubGhzViewIdTransmitter,
         subghz_view_transmitter_get_view(subghz->subghz_transmitter));
-    if(!alloc_for_tx_only) {
+    if(!raw_send_only || ListenAfterTX) {
         // Variable Item List
         subghz->variable_item_list = variable_item_list_alloc();
         view_dispatcher_add_view(
@@ -182,7 +202,7 @@ SubGhz* subghz_alloc(bool alloc_for_tx_only) {
             subghz_frequency_analyzer_get_view(subghz->subghz_frequency_analyzer));
     }
     // Read RAW
-    subghz->subghz_read_raw = subghz_read_raw_alloc(alloc_for_tx_only);
+    subghz->subghz_read_raw = subghz_read_raw_alloc(raw_send_only);
     view_dispatcher_add_view(
         subghz->view_dispatcher,
         SubGhzViewIdReadRAW,
@@ -194,18 +214,7 @@ SubGhz* subghz_alloc(bool alloc_for_tx_only) {
     //init TxRx & Protocol & History & KeyBoard
     subghz_unlock(subghz);
 
-    SubGhzSetting* setting = subghz_txrx_get_setting(subghz->txrx);
-
-    subghz_load_custom_presets(setting);
-
-    // Load last used values for Read, Read RAW, etc. or default
-    subghz->last_settings = subghz_last_settings_alloc();
-    size_t preset_count = subghz_setting_get_preset_count(setting);
-    subghz_last_settings_load(subghz->last_settings, preset_count);
-#ifdef FURI_DEBUG
-    subghz_last_settings_log(subghz->last_settings);
-#endif
-    if(!alloc_for_tx_only) {
+    if(!raw_send_only || ListenAfterTX) {
 #if SUBGHZ_LAST_SETTING_SAVE_PRESET
         subghz_txrx_set_preset_internal(
             subghz->txrx, subghz->last_settings->frequency, subghz->last_settings->preset_index);
@@ -219,16 +228,13 @@ SubGhz* subghz_alloc(bool alloc_for_tx_only) {
 
     subghz->secure_data = malloc(sizeof(SecureData));
 
-    //Put the Listen after TX back to what the user selected.
-    subghz->ListenAfterTX = subghz->last_settings->enable_listen_after_tx;
-
     //Put the Speaker Back to what the user selected.
     subghz_txrx_speaker_set_state(
         subghz->txrx,
         subghz->last_settings->enable_sound ? SubGhzSpeakerStateEnable :
                                               SubGhzSpeakerStateDisable);
 
-    if(!alloc_for_tx_only) {
+    if(!raw_send_only || ListenAfterTX) {
         subghz->ignore_filter = subghz->last_settings->ignore_filter;
         subghz->filter = subghz->last_settings->filter;
     } else {
@@ -238,7 +244,7 @@ SubGhz* subghz_alloc(bool alloc_for_tx_only) {
     subghz_txrx_receiver_set_filter(subghz->txrx, subghz->filter);
     subghz_txrx_set_need_save_callback(subghz->txrx, subghz_save_to_file, subghz);
 
-    if(!alloc_for_tx_only) {
+    if(!raw_send_only || ListenAfterTX) {
         if(!float_is_equal(subghz->last_settings->rssi, 0)) {
             subghz_threshold_rssi_set(subghz->threshold_rssi, subghz->last_settings->rssi);
         } else {
@@ -255,7 +261,7 @@ SubGhz* subghz_alloc(bool alloc_for_tx_only) {
     return subghz;
 }
 
-void subghz_free(SubGhz* subghz, bool alloc_for_tx_only) {
+void subghz_free(SubGhz* subghz, bool raw_send_only) {
     furi_assert(subghz);
 
     if(subghz->rpc_ctx) {
@@ -269,7 +275,8 @@ void subghz_free(SubGhz* subghz, bool alloc_for_tx_only) {
     subghz_txrx_stop(subghz->txrx);
     subghz_txrx_sleep(subghz->txrx);
 
-    if(!alloc_for_tx_only) {
+    bool ListenAfterTX = subghz->last_settings->enable_listen_after_tx;
+    if(!raw_send_only) {
         // Receiver
         view_dispatcher_remove_view(subghz->view_dispatcher, SubGhzViewIdReceiver);
         subghz_view_receiver_free(subghz->subghz_receiver);
@@ -292,7 +299,7 @@ void subghz_free(SubGhz* subghz, bool alloc_for_tx_only) {
     // Transmitter
     view_dispatcher_remove_view(subghz->view_dispatcher, SubGhzViewIdTransmitter);
     subghz_view_transmitter_free(subghz->subghz_transmitter);
-    if(!alloc_for_tx_only) {
+    if(!raw_send_only || ListenAfterTX) {
         // Variable Item List
         view_dispatcher_remove_view(subghz->view_dispatcher, SubGhzViewIdVariableItemList);
         variable_item_list_free(subghz->variable_item_list);
@@ -304,7 +311,7 @@ void subghz_free(SubGhz* subghz, bool alloc_for_tx_only) {
     // Read RAW
     view_dispatcher_remove_view(subghz->view_dispatcher, SubGhzViewIdReadRAW);
     subghz_read_raw_free(subghz->subghz_read_raw);
-    if(!alloc_for_tx_only) {
+    if(!raw_send_only || ListenAfterTX) {
         // Submenu
         view_dispatcher_remove_view(subghz->view_dispatcher, SubGhzViewIdMenu);
         submenu_free(subghz->submenu);
@@ -328,7 +335,7 @@ void subghz_free(SubGhz* subghz, bool alloc_for_tx_only) {
     // threshold rssi
     subghz_threshold_rssi_free(subghz->threshold_rssi);
 
-    if(!alloc_for_tx_only) {
+    if(!raw_send_only || ListenAfterTX) {
         subghz_history_free(subghz->history);
     }
 
@@ -353,20 +360,16 @@ void subghz_free(SubGhz* subghz, bool alloc_for_tx_only) {
 }
 
 int32_t subghz_app(void* p) {
-    bool alloc_for_tx;
+    bool raw_send_only;
     if(p && strlen(p)) {
-        alloc_for_tx = true;
+        raw_send_only = true;
     } else {
-        alloc_for_tx = false;
+        raw_send_only = false;
     }
 
-    SubGhz* subghz = subghz_alloc(alloc_for_tx);
-
-    if(alloc_for_tx) {
-        subghz->raw_send_only = true;
-    } else {
-        subghz->raw_send_only = false;
-    }
+    SubGhz* subghz = subghz_alloc(raw_send_only);
+    subghz->raw_send_only = raw_send_only;
+    subghz->raw_send_only_old = raw_send_only;
 
     // Check argument and run corresponding scene
     if(p && strlen(p)) {
@@ -421,8 +424,7 @@ int32_t subghz_app(void* p) {
 
     furi_hal_power_suppress_charge_exit();
 
-    subghz_free(subghz, alloc_for_tx);
+    subghz_free(subghz, subghz->raw_send_only_old);
 
     return 0;
 }
-

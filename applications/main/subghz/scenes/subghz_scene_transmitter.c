@@ -59,7 +59,7 @@ void subghz_scene_transmitter_on_enter(void* context) {
         subghz->subghz_transmitter, subghz_scene_transmitter_callback, subghz);
 
     //Put the Listen after TX back to what the user selected..
-    subghz->ListenAfterTX = subghz->last_settings->enable_listen_after_tx;
+    //subghz->ListenAfterTX = subghz->last_settings->enable_listen_after_tx;
 
     subghz->state_notifications = SubGhzNotificationStateIDLE;
     view_dispatcher_switch_to_view(subghz->view_dispatcher, SubGhzViewIdTransmitter);
