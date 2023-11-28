@@ -267,7 +267,6 @@ bool seader_parse_version(SeaderWorker* seader_worker, uint8_t* buf, size_t size
 bool seader_parse_sam_response(Seader* seader, SamResponse_t* samResponse) {
     SeaderWorker* seader_worker = seader->worker;
     SeaderUartBridge* seader_uart = seader_worker->uart;
-    FURI_LOG_D(TAG, "seader_parse_sam_response");
 
     if(samResponse->size == 0) {
         if(requestPacs) {
@@ -283,7 +282,7 @@ bool seader_parse_sam_response(Seader* seader, SamResponse_t* samResponse) {
     } else if(seader_parse_version(seader_worker, samResponse->buf, samResponse->size)) {
         // no-op
     } else if(seader_unpack_pacs(seader, samResponse->buf, samResponse->size)) {
-        view_dispatcher_send_custom_event(seader->view_dispatcher, SeaderCustomEventWorkerExit);
+        view_dispatcher_send_custom_event(seader->view_dispatcher, SeaderCustomEventPollerSuccess);
     } else {
         memset(display, 0, sizeof(display));
         for(uint8_t i = 0; i < samResponse->size; i++) {
