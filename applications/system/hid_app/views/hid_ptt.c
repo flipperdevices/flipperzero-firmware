@@ -48,6 +48,7 @@ enum HidPushToTalkAppIndex {
     HidPushToTalkAppIndexDiscord,
     HidPushToTalkAppIndexTeamSpeak,
     HidPushToTalkAppIndexTeams,
+    HidPushToTalkAppIndexJamulus,
     HidPushToTalkAppIndexSize,
 };
 
@@ -205,6 +206,18 @@ static void hid_ptt_trigger_camera_linux_teams(HidPushToTalk* hid_ptt) {
     hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_CTRL | KEY_MOD_LEFT_SHIFT |HID_KEYBOARD_O);
 }
 
+// Jamulus
+static void hid_ptt_trigger_mute_jamulus(HidPushToTalk* hid_ptt) {
+    hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_ALT | HID_KEYBOARD_M);
+    hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_ALT | HID_KEYBOARD_M);
+}
+static void hid_ptt_start_ptt_jamulus(HidPushToTalk* hid_ptt) {
+    hid_ptt_trigger_mute_jamulus(hid_ptt);
+}
+static void hid_ptt_stop_ptt_jamulus(HidPushToTalk* hid_ptt) {
+    hid_ptt_trigger_mute_jamulus(hid_ptt);
+}
+
 static void hid_ptt_menu_callback(void* context, uint32_t osIndex, FuriString* osLabel, uint32_t appIndex, FuriString* appLabel) {
     furi_assert(context);
     HidPushToTalk* hid_ptt = context;
@@ -264,6 +277,11 @@ static void hid_ptt_menu_callback(void* context, uint32_t osIndex, FuriString* o
                     model->callback_start_ptt      = hid_ptt_start_ptt_macos_teams;
                     model->callback_stop_ptt       = hid_ptt_stop_ptt_macos_teams;
                     break;
+                case HidPushToTalkAppIndexJamulus:
+                    model->callback_trigger_mute   = hid_ptt_trigger_mute_jamulus;
+                    model->callback_start_ptt      = hid_ptt_start_ptt_jamulus;
+                    model->callback_stop_ptt       = hid_ptt_stop_ptt_jamulus;
+                    break;
                 }
             } else if (osIndex == HidPushToTalkLinux) {
                 switch(appIndex) {
@@ -303,6 +321,11 @@ static void hid_ptt_menu_callback(void* context, uint32_t osIndex, FuriString* o
                     model->callback_trigger_hand   = hid_ptt_trigger_camera_linux_skype;
                     model->callback_start_ptt      = hid_ptt_start_ptt_linux_teams;
                     model->callback_stop_ptt       = hid_ptt_stop_ptt_linux_teams;
+                    break;
+                case HidPushToTalkAppIndexJamulus:
+                    model->callback_trigger_mute   = hid_ptt_trigger_mute_jamulus;
+                    model->callback_start_ptt      = hid_ptt_start_ptt_jamulus;
+                    model->callback_stop_ptt       = hid_ptt_stop_ptt_jamulus;
                     break;
                 }
             }
@@ -636,6 +659,8 @@ HidPushToTalk* hid_ptt_alloc(Hid* hid) {
     ptt_menu_add_item_to_list(hid->hid_ptt_menu, HidPushToTalkLinux, "TeamSpeak",   HidPushToTalkAppIndexTeamSpeak,  hid_ptt_menu_callback, hid_ptt);
     ptt_menu_add_item_to_list(hid->hid_ptt_menu, HidPushToTalkMacOS, "Teams",       HidPushToTalkAppIndexTeams,      hid_ptt_menu_callback, hid_ptt);
     ptt_menu_add_item_to_list(hid->hid_ptt_menu, HidPushToTalkLinux, "Teams",       HidPushToTalkAppIndexTeams,      hid_ptt_menu_callback, hid_ptt);
+    ptt_menu_add_item_to_list(hid->hid_ptt_menu, HidPushToTalkMacOS, "Jamulus",     HidPushToTalkAppIndexJamulus,    hid_ptt_menu_callback, hid_ptt);
+    ptt_menu_add_item_to_list(hid->hid_ptt_menu, HidPushToTalkLinux, "Jamulus",     HidPushToTalkAppIndexJamulus,    hid_ptt_menu_callback, hid_ptt);
 
     hid_ptt->help = widget_alloc();
     view_set_previous_callback(widget_get_view(hid_ptt->help), hid_ptt_view);
