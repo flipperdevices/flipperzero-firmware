@@ -16,7 +16,7 @@ enum HidDebugSubmenuIndex {
     HidSubmenuIndexMouse,
     HidSubmenuIndexMouseClicker,
     HidSubmenuIndexMouseJiggler,
-    HidSubmenuIndexPtt,
+    HidSubmenuIndexPushToTalk,
 };
 
 static void hid_submenu_callback(void* context, uint32_t index) {
@@ -54,9 +54,9 @@ static void hid_submenu_callback(void* context, uint32_t index) {
     } else if(index == HidSubmenuIndexMouseJiggler) {
         app->view_id = HidViewMouseJiggler;
         view_dispatcher_switch_to_view(app->view_dispatcher, HidViewMouseJiggler);
-    } else if(index == HidSubmenuIndexPtt) {
-        app->view_id = HidViewPtt;
-        view_dispatcher_switch_to_view(app->view_dispatcher, HidViewPtt);
+    } else if(index == HidSubmenuIndexPushToTalk) {
+        app->view_id = HidViewPushToTalkMenu;
+        view_dispatcher_switch_to_view(app->view_dispatcher, HidViewPushToTalkMenu);
     }
 }
 
@@ -91,6 +91,11 @@ static uint32_t hid_menu_view(void* context) {
 static uint32_t hid_exit(void* context) {
     UNUSED(context);
     return VIEW_NONE;
+}
+
+static uint32_t hid_ptt_menu_view(void* context) {
+    UNUSED(context);
+    return HidViewPushToTalkMenu;
 }
 
 Hid* hid_alloc(HidTransport transport) {
@@ -151,7 +156,7 @@ Hid* hid_alloc(HidTransport transport) {
         hid_submenu_callback,
         app);
     submenu_add_item(
-        app->device_type_submenu, "PTT", HidSubmenuIndexPtt, hid_submenu_callback, app);
+        app->device_type_submenu, "PushToTalk", HidSubmenuIndexPushToTalk, hid_submenu_callback, app);
     view_set_previous_callback(submenu_get_view(app->device_type_submenu), hid_exit);
     view_dispatcher_add_view(
         app->view_dispatcher, HidViewSubmenu, submenu_get_view(app->device_type_submenu));
@@ -224,11 +229,15 @@ Hid* hid_app_alloc_view(void* context) {
         HidViewMouseJiggler,
         hid_mouse_jiggler_get_view(app->hid_mouse_jiggler));
 
-    // Ptt view
-    app->hid_ptt = hid_ptt_alloc(app);
-    view_set_previous_callback(hid_ptt_get_view(app->hid_ptt), hid_menu_view);
+    // PushToTalk view
+    app->hid_ptt_menu = hid_ptt_menu_alloc(app);
+    view_set_previous_callback(hid_ptt_menu_get_view(app->hid_ptt_menu), hid_menu_view);
     view_dispatcher_add_view(
-      app->view_dispatcher, HidViewPtt, hid_ptt_get_view(app->hid_ptt));
+      app->view_dispatcher, HidViewPushToTalkMenu, hid_ptt_menu_get_view(app->hid_ptt_menu));
+    app->hid_ptt = hid_ptt_alloc(app);
+    view_set_previous_callback(hid_ptt_get_view(app->hid_ptt), hid_ptt_menu_view);
+    view_dispatcher_add_view(
+        app->view_dispatcher, HidViewPushToTalk, hid_ptt_get_view(app->hid_ptt));
 
     return app;
 }
@@ -260,7 +269,9 @@ void hid_free(Hid* app) {
     hid_mouse_clicker_free(app->hid_mouse_clicker);
     view_dispatcher_remove_view(app->view_dispatcher, HidViewMouseJiggler);
     hid_mouse_jiggler_free(app->hid_mouse_jiggler);
-    view_dispatcher_remove_view(app->view_dispatcher, HidViewPtt);
+    view_dispatcher_remove_view(app->view_dispatcher, HidViewPushToTalkMenu);
+    hid_ptt_menu_free(app->hid_ptt_menu);
+    view_dispatcher_remove_view(app->view_dispatcher, HidViewPushToTalk);
     hid_ptt_free(app->hid_ptt);
     view_dispatcher_remove_view(app->view_dispatcher, BtHidViewTikShorts);
     hid_tikshorts_free(app->hid_tikshorts);
