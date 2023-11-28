@@ -196,7 +196,6 @@ void picopass_blink_stop(Picopass* picopass) {
 
 void picopass_show_loading_popup(void* context, bool show) {
     Picopass* picopass = context;
-
     if(show) {
         // Raise timer priority so that animations can play
         furi_timer_set_thread_priority(FuriTimerThreadPriorityElevated);
