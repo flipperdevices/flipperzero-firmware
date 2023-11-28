@@ -493,16 +493,17 @@ HidPushToTalk* hid_ptt_alloc(Hid* hid) {
     hid_ptt->help = widget_alloc();
     view_set_previous_callback(widget_get_view(hid_ptt->help), hid_ptt_view);
     view_dispatcher_add_view(hid->view_dispatcher, HidViewPushToTalkHelp, widget_get_view(hid_ptt->help));
-    const char *msg = 
+    FuriString *msg = furi_string_alloc();
+    furi_string_cat_printf(msg,
     "To operate properly flipper microphone "
     "status must be in sync with your computer.\n"
     "Hold > to change mic status.\n"
     "Hold < to open this help.\n"
     "Press BACK to switch mic on/off.\n"
     "Hold 'o' for PTT mode (mic will be off once you release 'o')\n"
-    "Hold BACK to exit.";
-    widget_add_text_scroll_element(hid_ptt->help, 0, 0, 128, 64, msg);
-
+    "Hold BACK to exit.");
+    widget_add_text_scroll_element(hid_ptt->help, 0, 0, 128, 64, furi_string_get_cstr(msg));
+    furi_string_free(msg);
     return hid_ptt;
 }
 
@@ -510,6 +511,7 @@ void hid_ptt_free(HidPushToTalk* hid_ptt) {
     furi_assert(hid_ptt);
     notification_message(hid_ptt->hid->notifications, &sequence_reset_red);
     view_dispatcher_remove_view(hid_ptt->hid->view_dispatcher, HidViewPushToTalkHelp);
+    widget_reset(hid_ptt->help);
     widget_free(hid_ptt->help);
     view_free(hid_ptt->view);
     free(hid_ptt);
