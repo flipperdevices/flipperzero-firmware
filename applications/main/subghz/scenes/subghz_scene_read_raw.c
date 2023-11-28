@@ -156,7 +156,7 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
                 scene_manager_next_scene(subghz->scene_manager, SubGhzSceneNeedSaving);
             } else {
                 //Restore default setting
-                if(subghz->raw_send_only) {
+                if(subghz->raw_send_only || subghz->ListenAfterTX) {
                     subghz_txrx_set_default_preset(subghz->txrx, 0);
                 } else {
                     subghz_txrx_set_default_preset(subghz->txrx, subghz->last_settings->frequency);
@@ -258,11 +258,15 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
 
             //Go back to the Scan/Repeater if the Listen After TX flag is on.
-            if(subghz->ListenAfterTX & !subghz->raw_send_only) {
+            if(subghz->ListenAfterTX) { /*   && !subghz->raw_send_only) {  
+                ^^ This is the bug fix that caused all these changes, didnt like it! */
+                //We are switching to Receive, so change this now.
+                subghz->raw_send_only = false;
+
                 //needed save?
                 if((subghz_rx_key_state_get(subghz) == SubGhzRxKeyStateAddKey) ||
                    (subghz_rx_key_state_get(subghz) == SubGhzRxKeyStateBack)) {
-                    subghz_rx_key_state_set(subghz, SubGhzRxKeyStateExit);
+                    subghz_rx_key_state_set(subghz, SubGhzRxKeyStateIDLE);
                     scene_manager_next_scene(subghz->scene_manager, SubGhzSceneNeedSavingRX);
                 } else {
                     if(scene_manager_has_previous_scene(

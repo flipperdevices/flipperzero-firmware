@@ -77,6 +77,7 @@ struct SubGhz {
     SubGhzFrequencyAnalyzer* subghz_frequency_analyzer;
     SubGhzReadRAW* subghz_read_raw;
     bool raw_send_only;
+    bool raw_send_only_old;
 
     SubGhzLastSettings* last_settings;
 

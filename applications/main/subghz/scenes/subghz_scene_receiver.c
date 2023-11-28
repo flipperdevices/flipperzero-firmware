@@ -322,8 +322,29 @@ bool subghz_scene_receiver_on_event(void* context, SceneManagerEvent event) {
             } else {
                 subghz_rx_key_state_set(subghz, SubGhzRxKeyStateIDLE);
                 subghz_txrx_set_default_preset(subghz->txrx, subghz->last_settings->frequency);
-                scene_manager_search_and_switch_to_previous_scene(
-                    subghz->scene_manager, SubGhzSceneStart);
+
+                //The user could have come from the Start Scene, or birect through Send RAW only then Listen TX.
+                //Go back to the right scene!
+
+                //Did the user come from the Start Menu or Browser loading a Sub file?
+                if(scene_manager_has_previous_scene(subghz->scene_manager, SubGhzSceneStart)) {
+                    //Scene exists, go back to it
+                    scene_manager_search_and_switch_to_previous_scene(
+                        subghz->scene_manager, SubGhzSceneStart);
+                } else {
+                    //We came through transmitter or Send RAW scenes. go back to them!
+                    //if(subghz_get_load_type_file(subghz) == SubGhzLoadTypeFileRaw) {
+                    //Load Raw TX
+                    //    subghz_rx_key_state_set(subghz, SubGhzRxKeyStateRAWLoad);
+                    if(subghz_key_load(subghz, furi_string_get_cstr(subghz->file_path), false)) {
+                        scene_manager_previous_scene(subghz->scene_manager);
+                    } else {
+                        //Go to Start Scene!
+                        scene_manager_next_scene(subghz->scene_manager, SubGhzSceneStart);
+                    }
+                }
+
+                //scene_manager_search_and_switch_to_previous_scene(subghz->scene_manager, SubGhzSceneStart);
             }
             consumed = true;
             break;
