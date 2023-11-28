@@ -44,6 +44,7 @@ enum HidPushToTalkAppIndex {
     HidPushToTalkAppIndexDiscord,
     HidPushToTalkAppIndexFaceTime,
     HidPushToTalkAppIndexGoogleMeet,
+    HidPushToTalkAppIndexGoogleHangouts,
     HidPushToTalkAppIndexJamulus,
     HidPushToTalkAppIndexSignal,
     HidPushToTalkAppIndexSkype,
@@ -115,6 +116,24 @@ static void hid_ptt_trigger_hand_linux_zoom(HidPushToTalk* hid_ptt) {
 static void hid_ptt_trigger_cmd_shift_m(HidPushToTalk* hid_ptt) {
     hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_GUI| KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_M);
     hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_GUI| KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_M);
+}
+
+// Hangouts HidPushToTalkAppIndexGoogleHangouts
+static void hid_ptt_trigger_mute_macos_hangouts(HidPushToTalk* hid_ptt) {
+    hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_GUI | HID_KEYBOARD_D);
+    hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_GUI | HID_KEYBOARD_D);
+}
+static void hid_ptt_trigger_mute_linux_hangouts(HidPushToTalk* hid_ptt) {
+    hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_CTRL | HID_KEYBOARD_D);
+    hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_CTRL | HID_KEYBOARD_D);
+}
+static void hid_ptt_trigger_camera_macos_hangouts(HidPushToTalk* hid_ptt) { // and hand in teams
+    hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_GUI | HID_KEYBOARD_E);
+    hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_GUI | HID_KEYBOARD_E);
+}
+static void hid_ptt_trigger_camera_linux_hangouts(HidPushToTalk* hid_ptt) { // and hand in teams
+    hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_CTRL | HID_KEYBOARD_E);
+    hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_CTRL | HID_KEYBOARD_E);
 }
 
 // Signal
@@ -272,6 +291,12 @@ static void hid_ptt_menu_callback(void* context, uint32_t osIndex, FuriString* o
                     model->callback_start_ptt      = hid_ptt_trigger_cmd_shift_m;
                     model->callback_stop_ptt       = hid_ptt_trigger_cmd_shift_m;
                     break;
+                case HidPushToTalkAppIndexGoogleHangouts:
+                    model->callback_trigger_mute   = hid_ptt_trigger_mute_macos_hangouts;
+                    model->callback_trigger_camera = hid_ptt_trigger_camera_macos_hangouts;
+                    model->callback_start_ptt      = hid_ptt_trigger_mute_macos_hangouts;
+                    model->callback_stop_ptt       = hid_ptt_trigger_mute_macos_hangouts;
+                    break;
                 case HidPushToTalkAppIndexGoogleMeet:
                     model->callback_trigger_mute   = hid_ptt_trigger_mute_macos_meet;
                     model->callback_trigger_camera = hid_ptt_trigger_camera_macos_meet;
@@ -333,6 +358,12 @@ static void hid_ptt_menu_callback(void* context, uint32_t osIndex, FuriString* o
                     model->callback_trigger_mute   = hid_ptt_trigger_mute_linux_discord;
                     model->callback_start_ptt      = hid_ptt_start_ptt_linux_discord;
                     model->callback_stop_ptt       = hid_ptt_stop_ptt_linux_discord;
+                    break;
+                case HidPushToTalkAppIndexGoogleHangouts:
+                    model->callback_trigger_mute   = hid_ptt_trigger_mute_linux_hangouts;
+                    model->callback_trigger_camera = hid_ptt_trigger_camera_linux_hangouts;
+                    model->callback_start_ptt      = hid_ptt_trigger_mute_linux_hangouts;
+                    model->callback_stop_ptt       = hid_ptt_trigger_mute_linux_hangouts;
                     break;
                 case HidPushToTalkAppIndexGoogleMeet:
                     model->callback_trigger_mute   = hid_ptt_trigger_mute_linux_meet;
@@ -707,27 +738,29 @@ HidPushToTalk* hid_ptt_alloc(Hid* hid) {
     FURI_LOG_I(TAG, "Calling adding list");
     ptt_menu_add_list(hid->hid_ptt_menu, "macOS", HidPushToTalkMacOS);
     ptt_menu_add_list(hid->hid_ptt_menu, "Win/Linux", HidPushToTalkLinux);
-    ptt_menu_add_item_to_list(hid->hid_ptt_menu, HidPushToTalkMacOS, "Google Meet",  HidPushToTalkAppIndexGoogleMeet,  hid_ptt_menu_callback, hid_ptt);
-    ptt_menu_add_item_to_list(hid->hid_ptt_menu, HidPushToTalkLinux, "Google Meet",  HidPushToTalkAppIndexGoogleMeet,  hid_ptt_menu_callback, hid_ptt);
-    ptt_menu_add_item_to_list(hid->hid_ptt_menu, HidPushToTalkMacOS, "Discord",      HidPushToTalkAppIndexDiscord,     hid_ptt_menu_callback, hid_ptt);
-    ptt_menu_add_item_to_list(hid->hid_ptt_menu, HidPushToTalkLinux, "Discord",      HidPushToTalkAppIndexDiscord,     hid_ptt_menu_callback, hid_ptt);
-    ptt_menu_add_item_to_list(hid->hid_ptt_menu, HidPushToTalkMacOS, "FaceTime",     HidPushToTalkAppIndexFaceTime,    hid_ptt_menu_callback, hid_ptt);
-    ptt_menu_add_item_to_list(hid->hid_ptt_menu, HidPushToTalkMacOS, "Jamulus",      HidPushToTalkAppIndexJamulus,     hid_ptt_menu_callback, hid_ptt);
-    ptt_menu_add_item_to_list(hid->hid_ptt_menu, HidPushToTalkLinux, "Jamulus",      HidPushToTalkAppIndexJamulus,     hid_ptt_menu_callback, hid_ptt);
-    ptt_menu_add_item_to_list(hid->hid_ptt_menu, HidPushToTalkMacOS, "Signal",       HidPushToTalkAppIndexSignal,      hid_ptt_menu_callback, hid_ptt);
-    ptt_menu_add_item_to_list(hid->hid_ptt_menu, HidPushToTalkLinux, "Signal",       HidPushToTalkAppIndexSignal,      hid_ptt_menu_callback, hid_ptt);
-    ptt_menu_add_item_to_list(hid->hid_ptt_menu, HidPushToTalkMacOS, "Skype",        HidPushToTalkAppIndexSkype,       hid_ptt_menu_callback, hid_ptt);
-    ptt_menu_add_item_to_list(hid->hid_ptt_menu, HidPushToTalkLinux, "Skype",        HidPushToTalkAppIndexSkype,       hid_ptt_menu_callback, hid_ptt);
-    ptt_menu_add_item_to_list(hid->hid_ptt_menu, HidPushToTalkMacOS, "Slack Call",   HidPushToTalkAppIndexSlackCall,   hid_ptt_menu_callback, hid_ptt);
-    ptt_menu_add_item_to_list(hid->hid_ptt_menu, HidPushToTalkLinux, "Slack Call",   HidPushToTalkAppIndexSlackCall,   hid_ptt_menu_callback, hid_ptt);
-    ptt_menu_add_item_to_list(hid->hid_ptt_menu, HidPushToTalkMacOS, "Slack Hubble", HidPushToTalkAppIndexSlackHubble, hid_ptt_menu_callback, hid_ptt);
-    ptt_menu_add_item_to_list(hid->hid_ptt_menu, HidPushToTalkLinux, "Slack Hubble", HidPushToTalkAppIndexSlackHubble, hid_ptt_menu_callback, hid_ptt);
-    ptt_menu_add_item_to_list(hid->hid_ptt_menu, HidPushToTalkMacOS, "TeamSpeak",    HidPushToTalkAppIndexTeamSpeak,   hid_ptt_menu_callback, hid_ptt);
-    ptt_menu_add_item_to_list(hid->hid_ptt_menu, HidPushToTalkLinux, "TeamSpeak",    HidPushToTalkAppIndexTeamSpeak,   hid_ptt_menu_callback, hid_ptt);
-    ptt_menu_add_item_to_list(hid->hid_ptt_menu, HidPushToTalkMacOS, "Teams",        HidPushToTalkAppIndexTeams,       hid_ptt_menu_callback, hid_ptt);
-    ptt_menu_add_item_to_list(hid->hid_ptt_menu, HidPushToTalkLinux, "Teams",        HidPushToTalkAppIndexTeams,       hid_ptt_menu_callback, hid_ptt);
-    ptt_menu_add_item_to_list(hid->hid_ptt_menu, HidPushToTalkMacOS, "Zoom",         HidPushToTalkAppIndexZoom,        hid_ptt_menu_callback, hid_ptt);
-    ptt_menu_add_item_to_list(hid->hid_ptt_menu, HidPushToTalkLinux, "Zoom",         HidPushToTalkAppIndexZoom,        hid_ptt_menu_callback, hid_ptt);
+    ptt_menu_add_item_to_list(hid->hid_ptt_menu, HidPushToTalkMacOS, "Google Meet",     HidPushToTalkAppIndexGoogleMeet,     hid_ptt_menu_callback, hid_ptt);
+    ptt_menu_add_item_to_list(hid->hid_ptt_menu, HidPushToTalkLinux, "Google Meet",     HidPushToTalkAppIndexGoogleMeet,     hid_ptt_menu_callback, hid_ptt);
+    ptt_menu_add_item_to_list(hid->hid_ptt_menu, HidPushToTalkMacOS, "Google Hangouts", HidPushToTalkAppIndexGoogleHangouts, hid_ptt_menu_callback, hid_ptt);
+    ptt_menu_add_item_to_list(hid->hid_ptt_menu, HidPushToTalkLinux, "Google Hangouts", HidPushToTalkAppIndexGoogleHangouts, hid_ptt_menu_callback, hid_ptt);
+    ptt_menu_add_item_to_list(hid->hid_ptt_menu, HidPushToTalkMacOS, "Discord",         HidPushToTalkAppIndexDiscord,        hid_ptt_menu_callback, hid_ptt);
+    ptt_menu_add_item_to_list(hid->hid_ptt_menu, HidPushToTalkLinux, "Discord",         HidPushToTalkAppIndexDiscord,        hid_ptt_menu_callback, hid_ptt);
+    ptt_menu_add_item_to_list(hid->hid_ptt_menu, HidPushToTalkMacOS, "FaceTime",        HidPushToTalkAppIndexFaceTime,       hid_ptt_menu_callback, hid_ptt);
+    ptt_menu_add_item_to_list(hid->hid_ptt_menu, HidPushToTalkMacOS, "Jamulus",         HidPushToTalkAppIndexJamulus,        hid_ptt_menu_callback, hid_ptt);
+    ptt_menu_add_item_to_list(hid->hid_ptt_menu, HidPushToTalkLinux, "Jamulus",         HidPushToTalkAppIndexJamulus,        hid_ptt_menu_callback, hid_ptt);
+    ptt_menu_add_item_to_list(hid->hid_ptt_menu, HidPushToTalkMacOS, "Signal",          HidPushToTalkAppIndexSignal,         hid_ptt_menu_callback, hid_ptt);
+    ptt_menu_add_item_to_list(hid->hid_ptt_menu, HidPushToTalkLinux, "Signal",          HidPushToTalkAppIndexSignal,         hid_ptt_menu_callback, hid_ptt);
+    ptt_menu_add_item_to_list(hid->hid_ptt_menu, HidPushToTalkMacOS, "Skype",           HidPushToTalkAppIndexSkype,          hid_ptt_menu_callback, hid_ptt);
+    ptt_menu_add_item_to_list(hid->hid_ptt_menu, HidPushToTalkLinux, "Skype",           HidPushToTalkAppIndexSkype,          hid_ptt_menu_callback, hid_ptt);
+    ptt_menu_add_item_to_list(hid->hid_ptt_menu, HidPushToTalkMacOS, "Slack Call",      HidPushToTalkAppIndexSlackCall,      hid_ptt_menu_callback, hid_ptt);
+    ptt_menu_add_item_to_list(hid->hid_ptt_menu, HidPushToTalkLinux, "Slack Call",      HidPushToTalkAppIndexSlackCall,      hid_ptt_menu_callback, hid_ptt);
+    ptt_menu_add_item_to_list(hid->hid_ptt_menu, HidPushToTalkMacOS, "Slack Hubble",    HidPushToTalkAppIndexSlackHubble,    hid_ptt_menu_callback, hid_ptt);
+    ptt_menu_add_item_to_list(hid->hid_ptt_menu, HidPushToTalkLinux, "Slack Hubble",    HidPushToTalkAppIndexSlackHubble,    hid_ptt_menu_callback, hid_ptt);
+    ptt_menu_add_item_to_list(hid->hid_ptt_menu, HidPushToTalkMacOS, "TeamSpeak",       HidPushToTalkAppIndexTeamSpeak,      hid_ptt_menu_callback, hid_ptt);
+    ptt_menu_add_item_to_list(hid->hid_ptt_menu, HidPushToTalkLinux, "TeamSpeak",       HidPushToTalkAppIndexTeamSpeak,      hid_ptt_menu_callback, hid_ptt);
+    ptt_menu_add_item_to_list(hid->hid_ptt_menu, HidPushToTalkMacOS, "Teams",           HidPushToTalkAppIndexTeams,          hid_ptt_menu_callback, hid_ptt);
+    ptt_menu_add_item_to_list(hid->hid_ptt_menu, HidPushToTalkLinux, "Teams",           HidPushToTalkAppIndexTeams,          hid_ptt_menu_callback, hid_ptt);
+    ptt_menu_add_item_to_list(hid->hid_ptt_menu, HidPushToTalkMacOS, "Zoom",            HidPushToTalkAppIndexZoom,           hid_ptt_menu_callback, hid_ptt);
+    ptt_menu_add_item_to_list(hid->hid_ptt_menu, HidPushToTalkLinux, "Zoom",            HidPushToTalkAppIndexZoom,           hid_ptt_menu_callback, hid_ptt);
 
     hid_ptt->help = widget_alloc();
     view_set_previous_callback(widget_get_view(hid_ptt->help), hid_ptt_view);
