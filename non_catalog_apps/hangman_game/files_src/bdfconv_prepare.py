@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 
 
+import os
+
+DIR = os.path.dirname(__file__) + '/../files/'
+
 def convert_to_ranges(nums: list) -> str:
     ranges = []
     start = None
@@ -23,7 +27,7 @@ def convert_to_ranges(nums: list) -> str:
 
 
 def read_lang(name: str) -> set:
-    with open('../files/' + name) as file:
+    with open(DIR + name) as file:
         d, _, _, unicode_base, keyboard, *strings = [x.strip() for x in file]
 
         letters = {int(x, 16) for x in keyboard.split(' ')}
@@ -32,18 +36,18 @@ def read_lang(name: str) -> set:
         if unicode_base[0] == '+':
             unicode_base = int(unicode_base, 16)
 
-            with open('../files/' + d, 'rb') as dictionary:
+            with open(DIR + d, 'rb') as dictionary:
                 for line in dictionary:
                     letters |= {x + unicode_base for x in line.strip(b'\x0A')}
         else:
-            letters |= {ord(x) for x in open('../files/' + d).read()}
+            letters |= {ord(x) for x in open(DIR + d).read()}
 
     return letters
 
 
 letters = set()
 
-with open('../files/menu.txt', 'r') as file:
+with open(DIR + 'menu.txt', 'r') as file:
     for i, line in enumerate(file):
         if i & 1 == 0:
             letters |= {ord(x) for x in line}
