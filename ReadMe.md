@@ -40,8 +40,8 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 | NFC/RFID detector | ![Tools Badge] |  | [![Official Badge]](https://lab.flipper.net/apps/nfc_rfid_detector) |
 | Simple Clock | ![Tools Badge] | [original by CompaqDisc](https://gist.github.com/CompaqDisc/4e329c501bd03c1e801849b81f48ea61), timer by GMMan, included in OFW<br>Part of UFW as main app [sources](https://github.com/DarkFlippers/unleashed-firmware/tree/dev/applications/main/clock_app) | [![Official Badge]](https://lab.flipper.net/apps/clock) |
 | Weather Station | ![SubGhz Badge] | added External Radio Support | [![Official Badge]](https://lab.flipper.net/apps/weather_station) |
-| USB Keyboard & Mouse | ![USB Badge] | Renamed, added Mouse `Clicker`/`Jiggler` | [![Official Badge]](https://lab.flipper.net/apps/hid_usb) |
-| Bluetooth Remote | ![BT Badge] | Renamed, added Mouse `Clicker`/`Jiggler` & `Tikshorts` | [![Official Badge]](https://lab.flipper.net/apps/hid_ble) |
+| USB Keyboard & Mouse | ![USB Badge] | Renamed, added Mouse `Clicker`/`Jiggler`, Added `PTT`, `Movie` by @hryamzik | [![Official Badge]](https://lab.flipper.net/apps/hid_usb) |
+| Bluetooth Remote | ![BT Badge] | Renamed, added Mouse `Clicker`/`Jiggler` & `Tikshorts`, Added `PTT`, `Movie` by @hryamzik | [![Official Badge]](https://lab.flipper.net/apps/hid_ble) |
 | USB Mass Storage | ![USB Badge] | [by hedger & nminaylov](https://github.com/flipperdevices/flipperzero-good-faps) | [![Official Badge]](https://lab.flipper.net/apps/mass_storage) |
 | Snake Game | ![Games Badge] |  | [![Official Badge]](https://lab.flipper.net/apps/snake_game) |
 | Music Player | ![Media Badge] |  | [![Official Badge]](https://lab.flipper.net/apps/music_player) |
