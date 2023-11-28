@@ -686,9 +686,9 @@ void hid_ptt_set_connected_status(HidPushToTalk* hid_ptt, bool connected) {
     furi_assert(hid_ptt);
     with_view_model(
         hid_ptt->view, HidPushToTalkModel * model, {
-            model->connected = connected;
-            if (!connected) {
+            if (!connected && model->connected) {
                 notification_message(hid_ptt->hid->notifications, &sequence_single_vibro);
             }
+            model->connected = connected;
         }, true);
 }
