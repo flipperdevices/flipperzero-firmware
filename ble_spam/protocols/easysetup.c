@@ -63,6 +63,8 @@ const struct {
     {0x1D, "Silver Watch6 Cyan 44mm"},
     {0x1E, "Black Watch6 Classic 43m"},
     {0x20, "Green Watch6 Classic 43m"},
+    {0xEC, "Black Watch6 Golf Edition"},
+    {0xEF, "Black Watch6 TB Edition"},
 };
 const uint8_t watch_models_count = COUNT_OF(watch_models);
 
