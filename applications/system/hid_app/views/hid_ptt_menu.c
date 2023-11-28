@@ -257,12 +257,12 @@ void ptt_menu_shift_list(HidPushToTalkMenu* hid_ptt_menu, int shift){
                 if (items_size < items_on_screen + 1) {
                     new_window_position = 0;
                 } else {
-                    new_window_position = items_size - items_on_screen - 1;
+                    new_window_position = items_size - items_on_screen;
                 }
             } else if (new_position < items_on_screen - 1) {
                 new_window_position = 0;
             } else {
-                new_window_position = new_position/items_on_screen + 1;
+                new_window_position = new_position - 1;
             }
             model->list_position = new_list_position;
             model->position = new_position;
