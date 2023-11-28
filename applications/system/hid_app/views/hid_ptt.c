@@ -256,7 +256,7 @@ static void hid_ptt_draw_callback(Canvas* canvas, void* context) {
     canvas_draw_line(canvas, 63, 105, 63, 114);
     canvas_draw_icon(canvas, 7, 107, &I_Hold_15x5);
     canvas_draw_icon(canvas, 24, 105, &I_BtnLeft_9x9);
-    canvas_draw_icon(canvas, 34, 108, &I_for_help_28x5);
+    canvas_draw_icon(canvas, 34, 108, &I_for_help_27x5);
     canvas_draw_icon(canvas, 0, 115, &I_Help_exit_64x9);
     canvas_draw_icon(canvas, 24, 115, &I_BtnBackV_9x9);
     
@@ -509,6 +509,7 @@ HidPushToTalk* hid_ptt_alloc(Hid* hid) {
 void hid_ptt_free(HidPushToTalk* hid_ptt) {
     furi_assert(hid_ptt);
     notification_message(hid_ptt->hid->notifications, &sequence_reset_red);
+    view_dispatcher_remove_view(hid_ptt->hid->view_dispatcher, HidViewPushToTalkHelp);
     widget_free(hid_ptt->help);
     view_free(hid_ptt->view);
     free(hid_ptt);
