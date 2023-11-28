@@ -23,7 +23,7 @@ void evil_portal_read_index_html(void* context) {
         File* index_html = storage_file_alloc(storage);
         if(storage_file_open(
                index_html, EVIL_PORTAL_INDEX_SAVE_PATH, FSAM_READ, FSOM_OPEN_EXISTING)) {
-            app->index_html = malloc((size_t)fi.size);
+            app->index_html = malloc((size_t)fi.size + 1);
             uint8_t* buf_ptr = app->index_html;
             size_t read = 0;
             while(read < fi.size) {
@@ -33,7 +33,7 @@ void evil_portal_read_index_html(void* context) {
                 read += now_read;
                 buf_ptr += now_read;
             }
-            free(buf_ptr);
+            *buf_ptr = '\0';
         }
         storage_file_close(index_html);
         storage_file_free(index_html);
@@ -94,8 +94,6 @@ void evil_portal_read_ap_name(void* context) {
                 buf_ptr += now_read;
             }
             *buf_ptr = '\0';
-            buf_ptr++;
-            free(buf_ptr);
         }
         storage_file_close(ap_name);
         storage_file_free(ap_name);

@@ -1,20 +1,6 @@
 #include "../evil_portal_app_i.h"
 #include "../helpers/evil_portal_storage.h"
 
-void evil_portal_show_loading_popup(Evil_PortalApp* app, bool show) {
-    ViewStack* view_stack = app->view_stack;
-    Loading* loading = app->loading;
-    if(show) {
-        // Raise timer priority so that animations can play
-        furi_timer_set_thread_priority(FuriTimerThreadPriorityElevated);
-        view_stack_add_view(view_stack, loading_get_view(loading));
-    } else {
-        view_stack_remove_view(view_stack, loading_get_view(loading));
-        // Restore default timer priority
-        furi_timer_set_thread_priority(FuriTimerThreadPriorityNormal);
-    }
-}
-
 void evil_portal_scene_select_html_on_enter(void* context) {
     Evil_PortalApp* app = context;
     DialogsFileBrowserOptions browser_options;
@@ -33,9 +19,7 @@ void evil_portal_scene_select_html_on_enter(void* context) {
 
     if(success) {
         //Replace HTML File
-        evil_portal_show_loading_popup(app, true);
         evil_portal_replace_index_html(app->file_path);
-        evil_portal_show_loading_popup(app, false);
     }
 
     scene_manager_search_and_switch_to_previous_scene(app->scene_manager, Evil_PortalSceneStart);
