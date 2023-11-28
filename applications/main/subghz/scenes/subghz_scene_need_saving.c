@@ -22,7 +22,7 @@ void subghz_scene_need_saving_on_enter(void* context) {
         AlignCenter,
         AlignCenter,
         FontPrimary,
-        "Exit and Discard List of Keys?"); //We honestly dont know where we are goin anymore, so many states!
+        "Exit and Discard?"); //We honestly dont know where we are goin anymore, so many states!
 
     widget_add_string_multiline_element(
         subghz->widget,
