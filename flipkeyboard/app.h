@@ -14,6 +14,8 @@
 #include "./common/backlight.h"
 #include "./common/button_config.h"
 #include "./common/button_monitor.h"
+#include "./common/config_colors.h"
+#include "./common/custom_event.h"
 #include "./common/flipboard.h"
 #include "./common/flipboard_file.h"
 #include "./common/flipboard_model.h"

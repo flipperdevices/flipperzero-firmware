@@ -24,7 +24,6 @@ FlipboardModel*
     if(model->backlight_always_on) {
         backlight_on();
     }
-    flipboard_leds_reset(model->leds);
 
     flipboard_model_load(model);
 

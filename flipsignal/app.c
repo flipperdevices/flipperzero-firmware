@@ -91,40 +91,6 @@ static bool send_ir(FlipboardModel* model, char* filename, char* action_name) {
 }
 
 /**
- * @brief This method is invoked when a custom event is received.
- * @param context The Flipboard* context.
- * @param event The event to handle.
- * @return true if the event was handled, false otherwise.
- */
-static bool custom_event_handler(void* context, uint32_t event) {
-    FlipboardModel* model = flipboard_get_model((Flipboard*)context);
-
-    if(event == 1) {
-        send_subghz(model, "/ext/subghz/flip-a1.sub");
-        if(!send_ir(model, "/ext/infrared/flipboard.ir", "Flip-a1")) {
-            send_ir(model, "/ext/infrared/assets/tv.ir", "Power");
-        }
-    } else if(event == 2) {
-        send_subghz(model, "/ext/subghz/flip-a2.sub");
-        if(!send_ir(model, "/ext/infrared/flipboard.ir", "Flip-a2")) {
-            send_ir(model, "/ext/infrared/assets/tv.ir", "Mute");
-        }
-    } else if(event == 4) {
-        send_subghz(model, "/ext/subghz/flip-a3.sub");
-        if(!send_ir(model, "/ext/infrared/flipboard.ir", "Flip-a3")) {
-            send_ir(model, "/ext/infrared/assets/tv.ir", "Ch_prev");
-        }
-    } else if(event == 8) {
-        send_subghz(model, "/ext/subghz/flip-a4.sub");
-        if(!send_ir(model, "/ext/infrared/flipboard.ir", "Flip-a4")) {
-            send_ir(model, "/ext/infrared/assets/tv.ir", "Ch_next");
-        }
-    }
-
-    return true;
-}
-
-/**
  * @brief This method transmits a signal associated with the button.
  * @param model The FlipboardModel* context.
  * @param bm The ButtonModel* context.
@@ -139,7 +105,7 @@ static void flipboard_model_send_signal(FlipboardModel* model, ButtonModel* bm) 
 
     uint8_t btn = button_model_get_button_id(bm);
 
-    view_dispatcher_send_custom_event(view_dispatcher, btn);
+    view_dispatcher_send_custom_event(view_dispatcher, CustomEventButtonPress + btn);
 }
 
 /**
@@ -202,6 +168,89 @@ static View* get_primary_view(void* context) {
     FlipboardModelRef* ref = (FlipboardModelRef*)view_get_model(view_primary);
     ref->model = model;
     return view_primary;
+}
+
+/**
+ * @brief This method is invoked when the app menu is loaded.
+ * @details This method is invoked when the app menu is loaded.  It is used to
+ *         display a startup animation.
+ * @param model The FlipboardModel* context.
+ */
+static void loaded_app_menu(FlipboardModel* model) {
+    static bool initial_load = true;
+    FlipboardLeds* leds = flipboard_model_get_leds(model);
+    UNUSED(color_names);
+    UNUSED(color_values);
+    if(initial_load) {
+        flipboard_leds_reset(leds);
+        flipboard_leds_set(leds, LedId1, LedColorRed);
+        flipboard_leds_update(leds);
+        furi_delay_ms(100);
+
+        flipboard_leds_set(leds, LedId2, LedColorCyan);
+        flipboard_leds_update(leds);
+        furi_delay_ms(100);
+
+        flipboard_leds_set(leds, LedId3, LedColorMagenta);
+        flipboard_leds_update(leds);
+        furi_delay_ms(100);
+
+        flipboard_leds_set(leds, LedId4, LedColorViolet);
+        flipboard_leds_update(leds);
+        furi_delay_ms(100);
+
+        flipboard_leds_set(leds, LedId1, LedColorBlack);
+        flipboard_leds_update(leds);
+        furi_delay_ms(100);
+
+        flipboard_leds_set(leds, LedId2, LedColorBlack);
+        flipboard_leds_update(leds);
+        furi_delay_ms(100);
+
+        flipboard_leds_set(leds, LedId3, LedColorBlack);
+        flipboard_leds_update(leds);
+        furi_delay_ms(100);
+        initial_load = false;
+    }
+
+    flipboard_leds_reset(leds);
+    flipboard_leds_update(leds);
+}
+
+/**
+ * @brief This method is invoked when a custom event is received.
+ * @param context The Flipboard* context.
+ * @param event The event to handle.
+ * @return true if the event was handled, false otherwise.
+ */
+static bool custom_event_handler(void* context, uint32_t event) {
+    FlipboardModel* model = flipboard_get_model((Flipboard*)context);
+
+    if(event == CustomEventAppMenuEnter) {
+        loaded_app_menu(model);
+    } else if(event == CustomEventButtonPress + 1) {
+        send_subghz(model, "/ext/subghz/flip-a1.sub");
+        if(!send_ir(model, "/ext/infrared/flipboard.ir", "Flip-a1")) {
+            send_ir(model, "/ext/infrared/assets/tv.ir", "Power");
+        }
+    } else if(event == CustomEventButtonPress + 2) {
+        send_subghz(model, "/ext/subghz/flip-a2.sub");
+        if(!send_ir(model, "/ext/infrared/flipboard.ir", "Flip-a2")) {
+            send_ir(model, "/ext/infrared/assets/tv.ir", "Mute");
+        }
+    } else if(event == CustomEventButtonPress + 4) {
+        send_subghz(model, "/ext/subghz/flip-a3.sub");
+        if(!send_ir(model, "/ext/infrared/flipboard.ir", "Flip-a3")) {
+            send_ir(model, "/ext/infrared/assets/tv.ir", "Ch_prev");
+        }
+    } else if(event == CustomEventButtonPress + 8) {
+        send_subghz(model, "/ext/subghz/flip-a4.sub");
+        if(!send_ir(model, "/ext/infrared/flipboard.ir", "Flip-a4")) {
+            send_ir(model, "/ext/infrared/assets/tv.ir", "Ch_next");
+        }
+    }
+
+    return true;
 }
 
 /**

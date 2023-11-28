@@ -317,6 +317,67 @@ void flipboard_blinky_model_free(FlipboardBlinkyModel* fbm) {
 }
 
 /**
+ * @brief This method is invoked when the app menu is loaded.
+ * @details This method is invoked when the app menu is loaded.  It is used to
+ *         display a startup animation.
+ * @param model The FlipboardModel* context.
+ */
+static void loaded_app_menu(FlipboardModel* model) {
+    static bool initial_load = true;
+    FlipboardLeds* leds = flipboard_model_get_leds(model);
+    UNUSED(color_names);
+    UNUSED(color_values);
+    if(initial_load) {
+        for(int i = 0; i < 2; i++) {
+            flipboard_leds_set(leds, LedId1, LedColorRed);
+            flipboard_leds_set(leds, LedId2, LedColorCyan);
+            flipboard_leds_set(leds, LedId3, LedColorMagenta);
+            flipboard_leds_set(leds, LedId4, LedColorViolet);
+            flipboard_leds_update(leds);
+            furi_delay_ms(100);
+            flipboard_leds_set(leds, LedId2, LedColorRed);
+            flipboard_leds_set(leds, LedId3, LedColorCyan);
+            flipboard_leds_set(leds, LedId4, LedColorMagenta);
+            flipboard_leds_set(leds, LedId1, LedColorViolet);
+            flipboard_leds_update(leds);
+            furi_delay_ms(100);
+            flipboard_leds_set(leds, LedId3, LedColorRed);
+            flipboard_leds_set(leds, LedId4, LedColorCyan);
+            flipboard_leds_set(leds, LedId1, LedColorMagenta);
+            flipboard_leds_set(leds, LedId2, LedColorViolet);
+            flipboard_leds_update(leds);
+            furi_delay_ms(100);
+            flipboard_leds_set(leds, LedId4, LedColorRed);
+            flipboard_leds_set(leds, LedId1, LedColorCyan);
+            flipboard_leds_set(leds, LedId2, LedColorMagenta);
+            flipboard_leds_set(leds, LedId3, LedColorViolet);
+            flipboard_leds_update(leds);
+            furi_delay_ms(100);
+        }
+        initial_load = false;
+    }
+
+    flipboard_leds_reset(leds);
+    flipboard_leds_update(leds);
+}
+
+/**
+ * @brief This method is invoked when a custom event is received.
+ * @param context The Flipboard* context.
+ * @param event The event to handle.
+ * @return true if the event was handled, false otherwise.
+ */
+static bool custom_event_handler(void* context, uint32_t event) {
+    FlipboardModel* model = flipboard_get_model((Flipboard*)context);
+
+    if(event == CustomEventAppMenuEnter) {
+        loaded_app_menu(model);
+    }
+
+    return true;
+}
+
+/**
  * @brief This method is invoked when the FlipboardBlinky app is launched.
  * @param _p Unused.
  * @return 0.
@@ -353,7 +414,9 @@ int32_t flipboard_blinky_app(void* _p) {
     flipboard_model_set_custom_data(model, fbm);
     fbm->effect_id = 2;
     flipboard_reset_effect(model);
-
+    view_dispatcher_set_event_callback_context(flipboard_get_view_dispatcher(app), app);
+    view_dispatcher_set_custom_event_callback(
+        flipboard_get_view_dispatcher(app), custom_event_handler);
     view_dispatcher_run(flipboard_get_view_dispatcher(app));
 
     flipboard_blinky_model_free(fbm);
