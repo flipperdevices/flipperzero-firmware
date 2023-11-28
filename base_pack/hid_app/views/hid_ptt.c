@@ -52,6 +52,7 @@ enum HidPushToTalkAppIndex {
     HidPushToTalkAppIndexSlackHubble,
     HidPushToTalkAppIndexTeams,
     HidPushToTalkAppIndexTeamSpeak,
+    HidPushToTalkAppIndexWebex,
     HidPushToTalkAppIndexZoom,
     HidPushToTalkAppIndexSize,
 };
@@ -147,15 +148,7 @@ static void hid_ptt_trigger_camera_signal(HidPushToTalk* hid_ptt) {
 }
 
 // skype
-static void hid_ptt_start_ptt_linux_skype(HidPushToTalk* hid_ptt) {
-    hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_CTRL | HID_KEYBOARD_M);
-    hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_CTRL | HID_KEYBOARD_M);
-}
-static void hid_ptt_stop_ptt_linux_skype(HidPushToTalk* hid_ptt) {
-    hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_CTRL | HID_KEYBOARD_M);
-    hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_CTRL | HID_KEYBOARD_M);
-}
-static void hid_ptt_trigger_mute_linux_skype(HidPushToTalk* hid_ptt) {
+static void hid_ptt_trigger_mute_linux_skype(HidPushToTalk* hid_ptt) { // and webex
     hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_CTRL | HID_KEYBOARD_M);
     hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_CTRL | HID_KEYBOARD_M);
 }
@@ -264,6 +257,22 @@ static void hid_ptt_trigger_mute_jamulus(HidPushToTalk* hid_ptt) {
     hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_ALT | HID_KEYBOARD_M);
 }
 
+// webex
+
+
+static void hid_ptt_trigger_camera_webex(HidPushToTalk* hid_ptt) {
+    hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_CTRL| KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_V);
+    hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_CTRL| KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_V);
+}
+static void hid_ptt_trigger_hand_macos_webex(HidPushToTalk* hid_ptt) {
+    hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_GUI | KEY_MOD_RIGHT_SHIFT | HID_KEYBOARD_R);
+    hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_GUI | KEY_MOD_RIGHT_SHIFT | HID_KEYBOARD_R);
+}
+static void hid_ptt_trigger_hand_linux_webex(HidPushToTalk* hid_ptt) {
+    hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_CTRL | KEY_MOD_RIGHT_SHIFT | HID_KEYBOARD_R);
+    hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_CTRL | KEY_MOD_RIGHT_SHIFT | HID_KEYBOARD_R);
+}
+
 static void hid_ptt_menu_callback(void* context, uint32_t osIndex, FuriString* osLabel, uint32_t appIndex, FuriString* appLabel) {
     furi_assert(context);
     HidPushToTalk* hid_ptt = context;
@@ -344,6 +353,13 @@ static void hid_ptt_menu_callback(void* context, uint32_t osIndex, FuriString* o
                     model->callback_start_ptt      = hid_ptt_trigger_mute_macos_slack_hubble;
                     model->callback_stop_ptt       = hid_ptt_trigger_mute_macos_slack_hubble;
                     break;
+                case HidPushToTalkAppIndexWebex:
+                    model->callback_trigger_mute   = hid_ptt_trigger_cmd_shift_m;
+                    model->callback_trigger_camera = hid_ptt_trigger_camera_webex;
+                    model->callback_trigger_hand   = hid_ptt_trigger_hand_macos_webex;
+                    model->callback_start_ptt      = hid_ptt_trigger_cmd_shift_m;
+                    model->callback_stop_ptt       = hid_ptt_trigger_cmd_shift_m;
+                    break;
                 case HidPushToTalkAppIndexZoom:
                     model->callback_trigger_mute   = hid_ptt_trigger_mute_macos_zoom;
                     model->callback_trigger_camera = hid_ptt_trigger_camera_macos_zoom;
@@ -398,8 +414,8 @@ static void hid_ptt_menu_callback(void* context, uint32_t osIndex, FuriString* o
                 case HidPushToTalkAppIndexSkype:
                     model->callback_trigger_mute   = hid_ptt_trigger_mute_linux_skype;
                     model->callback_trigger_camera = hid_ptt_trigger_camera_linux_skype;
-                    model->callback_start_ptt      = hid_ptt_start_ptt_linux_skype;
-                    model->callback_stop_ptt       = hid_ptt_stop_ptt_linux_skype;
+                    model->callback_start_ptt      = hid_ptt_trigger_mute_linux_skype;
+                    model->callback_stop_ptt       = hid_ptt_trigger_mute_linux_skype;
                     break;
                 case HidPushToTalkAppIndexSlackCall:
                     model->callback_trigger_mute   = hid_ptt_trigger_mute_slack_call;
@@ -418,6 +434,13 @@ static void hid_ptt_menu_callback(void* context, uint32_t osIndex, FuriString* o
                     model->callback_trigger_hand   = hid_ptt_trigger_hand_linux_zoom;
                     model->callback_start_ptt      = hid_ptt_start_ptt_meet_zoom;
                     model->callback_stop_ptt       = hid_ptt_stop_ptt_meet_zoom;
+                    break;
+                case HidPushToTalkAppIndexWebex:
+                    model->callback_trigger_mute   = hid_ptt_trigger_mute_linux_skype;
+                    model->callback_trigger_camera = hid_ptt_trigger_camera_webex;
+                    model->callback_trigger_hand   = hid_ptt_trigger_hand_linux_webex;
+                    model->callback_start_ptt      = hid_ptt_trigger_mute_linux_skype;
+                    model->callback_stop_ptt       = hid_ptt_trigger_mute_linux_skype;
                     break;
                 }
             }
@@ -761,6 +784,8 @@ HidPushToTalk* hid_ptt_alloc(Hid* hid) {
     ptt_menu_add_item_to_list(hid->hid_ptt_menu, HidPushToTalkLinux, "Teams",           HidPushToTalkAppIndexTeams,          hid_ptt_menu_callback, hid_ptt);
     ptt_menu_add_item_to_list(hid->hid_ptt_menu, HidPushToTalkMacOS, "Zoom",            HidPushToTalkAppIndexZoom,           hid_ptt_menu_callback, hid_ptt);
     ptt_menu_add_item_to_list(hid->hid_ptt_menu, HidPushToTalkLinux, "Zoom",            HidPushToTalkAppIndexZoom,           hid_ptt_menu_callback, hid_ptt);
+    ptt_menu_add_item_to_list(hid->hid_ptt_menu, HidPushToTalkMacOS, "Webex",           HidPushToTalkAppIndexWebex,          hid_ptt_menu_callback, hid_ptt);
+    ptt_menu_add_item_to_list(hid->hid_ptt_menu, HidPushToTalkLinux, "Webex",           HidPushToTalkAppIndexWebex,          hid_ptt_menu_callback, hid_ptt);
 
     hid_ptt->help = widget_alloc();
     view_set_previous_callback(widget_get_view(hid_ptt->help), hid_ptt_view);
