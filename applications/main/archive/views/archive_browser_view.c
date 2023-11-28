@@ -635,7 +635,13 @@ static bool archive_view_input(InputEvent* event, void* context) {
                 bool favorites = archive_get_tab(browser) == ArchiveTabFavorites;
                 bool folder = selected->type == ArchiveFileTypeFolder;
 
-                if(event->type == InputTypeShort) {
+                if(event->type == InputTypeLong || event->type == InputTypeRepeat) {
+                    if(move_fav_mode) {
+                        browser->callback(ArchiveBrowserEventSaveFavMove, browser->context);
+                    } else if(folder || favorites) {
+                        browser->callback(ArchiveBrowserEventFileMenuOpen, browser->context);
+                    }
+                } else if(event->type == InputTypeShort || event->type == InputTypeRelease) {
                     if(favorites) {
                         if(move_fav_mode) {
                             browser->callback(ArchiveBrowserEventSaveFavMove, browser->context);
@@ -647,14 +653,8 @@ static bool archive_view_input(InputEvent* event, void* context) {
                     } else {
                         browser->callback(ArchiveBrowserEventFileMenuOpen, browser->context);
                     }
-                } else if(event->type == InputTypeLong) {
-                    if(move_fav_mode) {
-                        browser->callback(ArchiveBrowserEventSaveFavMove, browser->context);
-                    } else if(folder || favorites) {
-                        browser->callback(ArchiveBrowserEventFileMenuOpen, browser->context);
-                    }
                 }
-            } else if(event->type == InputTypeLong) {
+            } else if(event->type == InputTypeLong || event->type == InputTypeRepeat) {
                 browser->callback(ArchiveBrowserEventFileMenuOpen, browser->context);
             }
         }

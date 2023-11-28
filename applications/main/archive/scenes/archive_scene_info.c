@@ -6,7 +6,7 @@
 void archive_scene_info_widget_callback(GuiButtonType result, InputType type, void* context) {
     furi_assert(context);
     ArchiveApp* app = (ArchiveApp*)context;
-    if(type == InputTypeShort) {
+    if(type == InputTypeShort || type == InputTypeLong) {
         view_dispatcher_send_custom_event(app->view_dispatcher, result);
     }
 }
