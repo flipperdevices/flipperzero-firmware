@@ -51,7 +51,13 @@ esp_loader_error_t send_cmd(const void *cmd_data, uint32_t size, uint32_t *reg_v
     RETURN_ON_ERROR( SLIP_send((const uint8_t *)cmd_data, size) );
     RETURN_ON_ERROR( SLIP_send_delimiter() );
 
-    return check_response(command, reg_value, &response, sizeof(response));
+    const uint8_t response_cnt = command == SYNC ? 8 : 1;
+    
+    for (uint8_t recv_cnt = 0; recv_cnt < response_cnt; recv_cnt++) {
+        RETURN_ON_ERROR(check_response(command, reg_value, &response, sizeof(response)));
+    }
+
+    return ESP_LOADER_SUCCESS;
 }
 
 

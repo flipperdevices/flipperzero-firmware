@@ -25,13 +25,13 @@
 #define DEFAULT_BAUDRATE 115200
 
 /* Get UART DTS entry used as flash interface */
-static const struct device *esp_uart_dev = DEVICE_DT_GET(DT_ALIAS(uart1));
+static const struct device *esp_uart_dev = DEVICE_DT_GET(DT_ALIAS(uart));
 /* Get GPIO pin connected to the ESP's enable pin. */
 static const struct gpio_dt_spec esp_enable_spec = GPIO_DT_SPEC_GET(DT_ALIAS(en), gpios);
 /* Get GPIO pin  connected to the ESP's boot pin. */
 static const struct gpio_dt_spec esp_boot_spec = GPIO_DT_SPEC_GET(DT_ALIAS(boot), gpios);
 
-void main(void)
+int main(void)
 {
 	example_binaries_t bin;
 
@@ -75,7 +75,7 @@ void main(void)
 		flash_binary(bin.app.data,  bin.app.size,  bin.app.addr);
 	}
 
-	loader_port_change_transmission_rate(DEFAULT_BAUDRATE);
+	esp_loader_reset_target();
 
-	loader_port_reset_target();
+	return 0;
 }

@@ -2,7 +2,7 @@
 
 ## Overview
 
-Example demonstrates how to flash ESP32 from another STM32 (host MCU) using esp_serial_flash component API. STM32F4-Discovery board is used in this example, as STM32F407VG has FLASH memory large enough to fit the whole hello-world example of ESP32. Binaries to be flashed from host MCU to ESP32 can be found in `binaries` directory and converted into C-arrays during build process. USART1 is dedicated for communication with ESP32, whereas, USART2 can be used for debug purposes by attaching UART-to-USB bridge.
+Example demonstrates how to flash ESP32 from another STM32 (host MCU) using esp_serial_flash component API. WeActStudio [MiniSTM32H7xx](https://github.com/WeActStudio/MiniSTM32H7xx) board is used in this example, as STM32H743VIT has FLASH memory large enough to fit all the example binaries to be flashed from host MCU to ESP32 which can be found in `binaries` directory and converted into C-arrays during build process. USART1 is dedicated for communication with ESP32, whereas, USART2 can be used for debug purposes by attaching UART-to-USB bridge.
 
 Following steps are performed in order to re-program target's memory:
 
@@ -15,7 +15,7 @@ Note: In addition, to steps mentioned above, `esp_loader_change_transmission_rat
 
 ## Hardware Required
 
-* STM32F4-Discovery board. 
+* WeActStudio [MiniSTM32H7xx](https://github.com/WeActStudio/MiniSTM32H7xx) board with the STM32H743VIT chip
 * A development board with ESP32 SoC (e.g. ESP-WROVER-KIT, ESP32-DevKitC, etc.).
 * One or two USB cables for power supply and programming.
 
@@ -25,12 +25,12 @@ Table below shows connection between STM32 and ESP32.
 
 | STM32 (host) | ESP32 (slave) |
 |:------------:|:-------------:|
-|    PB5       |      IO0      |
-|    PB4       |      RST      |
-|    PB6       |      RX0      |
-|    PB7       |      TX0      |
+|    PB12      |      IO0      |
+|    PB13      |      RST      |
+|    PB14      |      RX0      |
+|    PB15      |      TX0      |
 
-Optionally, UART-to-USB bridge can be connected to PD5(RX) and PD6(TX) for debug purposes.
+Optionally, UART-to-USB bridge can be connected to PA3(RX) and PA2(TX) for debug purposes.
 
 ## Build and flash
 
@@ -42,18 +42,11 @@ mkdir build && cd build
 ```
 Run cmake (with appropriate parameters) and build: 
 ```
-cmake -DTOOLCHAIN_PREFIX="/path_to_toolchain" -DSTM32Cube_DIR="path_to_stm32Cube" -DSTM32_CHIP="STM32F407VG" -DPORT="STM32" .. && cmake --build .
+cmake -DSTM32_TOOLCHAIN_PATH="path_to_toolchain" -DSTM32_CUBE_H7_PATH="path_to_cube_libraries" .. && cmake --build .
 ```
 
-Binaries to be flashed are placed in separate folder (binaries.c) for each possible target and converted to C-array. Without explicitly enabling MD5 check, flash integrity verification is disabled by default.
+Binaries to be flashed are placed in separate folder (binaries.c) for each possible target and converted to C-array. Flash integrity verification is enabled by default.
 
 For more details regarding to esp_serial_flasher configuration and STM32 support, please refer to top level [README.md](../../README.md).
 
-Note: CMake 3.13 or later is required.
-
-## STM32CubeMx configuration
-
-Following configuration was used to generate STM32 `cmake` based project:
-* Project tab: Toolchain/IDE - Other toolchain (GPDSC)
-* Code Generator tab: Add necessary files as reference in the toolchain project configuration file
-
+> Note: CMake 3.16 or later is required.

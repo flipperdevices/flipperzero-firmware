@@ -2,8 +2,8 @@
 
 ## Overview
 
-This sample code demonstrates how to flash ESP32/ESP32-S2/ESP8266 from another (host) MCU using
-esp_serial_flash component API. In this case, ESP32 is also used as host MCU.
+This sample code demonstrates how to flash an Espressif SoC from another (host) MCU using
+esp_serial_flash component API. In this case, the ESP32 is used as host MCU.
 Binaries to be flashed from host MCU to another Espressif SoC can be found in `binaries` folder
 and are converted into C-array during build process.
 
@@ -11,7 +11,7 @@ Following steps are performed in order to re-program target's memory:
 
 1. Peripherals are initialized (GPIO for BOOT and EN pins and UART).
 2. UART1 (can be changed) through which new binary will be transfered is initialized.
-3. Host puts slave device into boot mode tries to connect by calling `esp_loader_connect()`.
+3. Host puts target device into boot mode tries to connect by calling `esp_loader_connect()`.
 4. Binary file is opened and its size is acquired, as it has to be known before flashing.
 5. Then `esp_loader_flash_start()` is called to enter flashing mode and erase amount of memory to be flashed.
 6. `esp_loader_flash_write()` function is called repeatedly until the whole binary image is transfered.
@@ -23,31 +23,33 @@ phase, and can be changed before calling `esp_loader_connect`, if necessary.
 
 ## Hardware Required
 
-* Two development boards with ESP32 SoC (e.g., ESP32-DevKitC, ESP-WROVER-KIT, etc.).
+* Any supported Espressif SoC board for the target
+* An ESP32-DevKitC board for the host
 * One or two USB cables for power supply and programming.
 
 ## Hardware connection
 
-Table below shows connection between two ESP32 devices.
+Table below shows connection between the two devices:
 
-| ESP32 (host) | ESP32 (slave) |
-|:------------:|:-------------:|
-|    IO4       |      IO0      |
-|    IO2       |     RESET     |
-|    IO9       |      TX0      |
-|    IO10      |      RX0      |
-
-Note: interconnection is the same for all three targets (slaves).
+| ESP32 (host) | Espressif SoC (target) |
+|:------------:|:----------------------:|
+|    IO4       |           IO0          |
+|    IO2       |          RESET         |
+|    IO9       |           TX0          |
+|    IO10      |           RX0          |
 
 ## Build and flash
 
-To run the example, type the following command:
+To run the example, type the following commands:
 
 ```c
-west build -p -b esp32
+west init
+west update
+west build -p -b <supported board>
 west flash
 west espressif monitor
 ```
+>**Note:** You can find the supported boards in the boards folder.
 
 (To exit the serial monitor, type ``ctrl-c``.)
 

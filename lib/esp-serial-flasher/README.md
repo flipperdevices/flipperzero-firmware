@@ -21,6 +21,7 @@ Supported **target** microcontrollers:
 - ESP32-C3
 - ESP32-C2
 - ESP32-H2
+- ESP32-C6
 
 Supported hardware interfaces:
 - UART
@@ -68,6 +69,12 @@ If enabled, `esp-serial-flasher` is capable of verifying flash integrity after w
 Default: Enabled
 > Warning: As ROM bootloader of the ESP8266 does not support MD5_CHECK, this option has to be disabled!
 
+* `SERIAL_FLASHER_WRITE_BLOCK_RETRIES`
+
+This configures the amount of retries for writing blocks either to target flash or RAM.
+
+Default: 3
+
 * `SERIAL_FLASHER_RESET_HOLD_TIME_MS`
 
 This is the time for which the reset pin is asserted when doing a hard reset in milliseconds.
@@ -102,24 +109,26 @@ git submodule update --init
 
 In addition to configuration parameters mentioned above, following definitions has to be set:
 
-- TOOLCHAIN_PREFIX: path to arm toolchain (i.e /home/user/gcc-arm-none-eabi-9-2019-q4-major)
-- STM32Cube_DIR: path to STM32 Cube libraries (i.e /home/user/STM32Cube/Repository/STM32Cube_FW_F4_V1.25.0)
+- STM32_TOOLCHAIN_PATH: path to arm toolchain (i.e /home/user/gcc-arm-none-eabi-9-2019-q4-major)
+- STM32_CUBE_<CHIP_FAMILY>_PATH: path to STM32 Cube libraries (i.e /home/user/STM32Cube/Repository/STM32Cube_FW_F4_V1.25.0)
 - STM32_CHIP: name of STM32 for which project should be compiled (i.e STM32F407VG)
+- CORE_USED: core used on multicore devices (i.e. M7 or M4 on some STM32H7 chips)
 - PORT: STM32
 
 This can be achieved by passing definitions to the command line, such as:
 
 ```
-cmake -DTOOLCHAIN_PREFIX="/path_to_toolchain" -DSTM32Cube_DIR="path_to_stm32Cube" -DSTM32_CHIP="STM32F407VG" -DPORT="STM32" .. && cmake --build .
+cmake -DSTM32_TOOLCHAIN_PATH="path_to_toolchain" -DSTM32_CUBE_<CHIP_FAMILY>_PATH="path_to_cube_libraries" -DSTM32_CHIP="STM32F407VG" -DPORT="STM32" .. && cmake --build .
 ```
 
 Alternatively, those variables can be set in the top level `cmake` directory:
 
 ```
-set(TOOLCHAIN_PREFIX    path_to_toolchain)
-set(STM32Cube_DIR       path_to_stm32_HAL)
-set(STM32_CHIP          STM32F407VG)
-set(PORT                STM32)
+set(STM32_TOOLCHAIN_PATH path_to_toolchain)
+set(STM32_CUBE_H7_PATH path_to_cube_libraries)
+set(STM32_CHIP STM32H743VI)
+set(CORE_USED M7)
+set(PORT STM32)
 ```
 
 ### Zephyr support

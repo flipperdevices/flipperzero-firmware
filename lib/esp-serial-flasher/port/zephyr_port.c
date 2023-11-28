@@ -139,7 +139,7 @@ static uint64_t s_time_end;
 
 void loader_port_start_timer(uint32_t ms)
 {
-    s_time_end = sys_clock_timeout_end_calc(Z_TIMEOUT_MS(ms));
+    s_time_end = sys_timepoint_calc(Z_TIMEOUT_MS(ms)).tick;
 }
 
 uint32_t loader_port_remaining_time(void)
