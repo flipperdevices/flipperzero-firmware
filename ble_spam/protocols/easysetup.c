@@ -56,6 +56,8 @@ const struct {
     {0x16, "Gray Watch5 Pro 45mm"},
     {0x17, "White Watch5 44mm"},
     {0x18, "White & Black Watch5"},
+    {0xE4, "Black Watch5 Golf Edition"},
+    {0xE5, "White Watch5 Gold Edition"},
     {0x1B, "Black Watch6 Pink 40mm"},
     {0x1C, "Gold Watch6 Gold 40mm"},
     {0x1D, "Silver Watch6 Cyan 44mm"},
