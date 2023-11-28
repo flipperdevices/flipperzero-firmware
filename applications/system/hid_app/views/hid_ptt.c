@@ -45,9 +45,13 @@ enum HidPushToTalkAppIndex {
     HidPushToTalkAppIndexZoom,
     HidPushToTalkAppIndexFaceTime,
     HidPushToTalkAppIndexSkype,
+    HidPushToTalkAppIndexDiscord,
+    HidPushToTalkAppIndexTeamSpeak,
+    HidPushToTalkAppIndexTeams,
     HidPushToTalkAppIndexSize,
 };
 
+// meet, zoom
 static void hid_ptt_start_ptt_meet_zoom(HidPushToTalk* hid_ptt) {
     hid_hal_keyboard_press(hid_ptt->hid, HID_KEYBOARD_SPACEBAR);
 }
@@ -102,49 +106,103 @@ static void hid_ptt_trigger_hand_linux_zoom(HidPushToTalk* hid_ptt) {
     hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_ALT | HID_KEYBOARD_Y);
     hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_ALT | HID_KEYBOARD_Y);
 }
-static void hid_ptt_start_ptt_macos_skype(HidPushToTalk* hid_ptt) {
+
+// this one is widely used across different apps
+static void hid_ptt_trigger_cmd_shift_m(HidPushToTalk* hid_ptt) {
     hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_GUI| KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_M);
     hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_GUI| KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_M);
 }
+
+// skype
 static void hid_ptt_start_ptt_linux_skype(HidPushToTalk* hid_ptt) {
     hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_CTRL | HID_KEYBOARD_M);
     hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_CTRL | HID_KEYBOARD_M );
-}
-static void hid_ptt_stop_ptt_macos_skype(HidPushToTalk* hid_ptt) {
-    hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_GUI| KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_M);
-    hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_GUI| KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_M);
 }
 static void hid_ptt_stop_ptt_linux_skype(HidPushToTalk* hid_ptt) {
     hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_CTRL | HID_KEYBOARD_M);
     hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_CTRL | HID_KEYBOARD_M);
 }
-static void hid_ptt_trigger_mute_macos_skype(HidPushToTalk* hid_ptt) {
-    hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_GUI| KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_M);
-    hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_GUI| KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_M);
-}
 static void hid_ptt_trigger_mute_linux_skype(HidPushToTalk* hid_ptt) {
     hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_CTRL | HID_KEYBOARD_M);
     hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_CTRL | HID_KEYBOARD_M);
 }
-static void hid_ptt_trigger_camera_macos_skype(HidPushToTalk* hid_ptt) {
+static void hid_ptt_trigger_camera_macos_skype(HidPushToTalk* hid_ptt) { // and hand in teams
     hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_GUI| KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_K);
     hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_GUI| KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_K);
 }
-static void hid_ptt_trigger_camera_linux_skype(HidPushToTalk* hid_ptt) {
+static void hid_ptt_trigger_camera_linux_skype(HidPushToTalk* hid_ptt) { // and hand in teams
     hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_CTRL| KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_K);
     hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_CTRL| KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_K);
 }
-static void hid_ptt_trigger_mute_facetime(HidPushToTalk* hid_ptt) {
-    hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_GUI| KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_M);
-    hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_GUI| KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_M);
+
+// discord
+static void hid_ptt_trigger_mute_macos_discord(HidPushToTalk* hid_ptt) {
+    hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_GUI | KEY_MOD_RIGHT_GUI | KEY_MOD_RIGHT_ALT | KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_M);
+    hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_GUI | KEY_MOD_RIGHT_GUI | KEY_MOD_RIGHT_ALT | KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_M);
 }
-static void hid_ptt_start_ptt_facetime(HidPushToTalk* hid_ptt) {
-    hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_GUI| KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_M);
-    hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_GUI| KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_M );
+static void hid_ptt_start_ptt_macos_discord(HidPushToTalk* hid_ptt) { // and TeamSpeak
+    hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_GUI | KEY_MOD_RIGHT_GUI | KEY_MOD_RIGHT_ALT | KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_P);
 }
-static void hid_ptt_stop_ptt_facetime(HidPushToTalk* hid_ptt) {
-    hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_GUI| KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_M);
-    hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_GUI| KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_M);
+static void hid_ptt_stop_ptt_macos_discord(HidPushToTalk* hid_ptt) { // and TeamSpeak
+    hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_GUI | KEY_MOD_RIGHT_GUI | KEY_MOD_RIGHT_ALT | KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_P);
+}
+static void hid_ptt_trigger_mute_linux_discord(HidPushToTalk* hid_ptt) {
+    hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_CTRL | KEY_MOD_RIGHT_CTRL | KEY_MOD_RIGHT_ALT | KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_M);
+    hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_CTRL | KEY_MOD_RIGHT_CTRL | KEY_MOD_RIGHT_ALT | KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_M);
+}
+static void hid_ptt_start_ptt_linux_discord(HidPushToTalk* hid_ptt) { // and TeamSpeak
+    hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_CTRL | KEY_MOD_RIGHT_CTRL | KEY_MOD_RIGHT_ALT | KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_P);
+}
+static void hid_ptt_stop_ptt_linux_discord(HidPushToTalk* hid_ptt) { // and TeamSpeak
+    hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_CTRL | KEY_MOD_RIGHT_CTRL | KEY_MOD_RIGHT_ALT | KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_P);
+}
+
+// teamspeak
+static void hid_ptt_trigger_mute_macos_teamspeak(HidPushToTalk* hid_ptt) {
+    hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_GUI | KEY_MOD_RIGHT_GUI | KEY_MOD_RIGHT_ALT | KEY_MOD_RIGHT_SHIFT | HID_KEYBOARD_M);
+    hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_GUI | KEY_MOD_RIGHT_GUI | KEY_MOD_RIGHT_ALT | KEY_MOD_RIGHT_SHIFT | HID_KEYBOARD_M);
+}
+static void hid_ptt_start_ptt_macos_teamspeak(HidPushToTalk* hid_ptt) {
+    hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_GUI | KEY_MOD_RIGHT_GUI | KEY_MOD_RIGHT_ALT | KEY_MOD_RIGHT_SHIFT | HID_KEYBOARD_P);
+}
+static void hid_ptt_stop_ptt_macos_teamspeak(HidPushToTalk* hid_ptt) {
+    hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_GUI | KEY_MOD_RIGHT_GUI | KEY_MOD_RIGHT_ALT | KEY_MOD_RIGHT_SHIFT | HID_KEYBOARD_P);   
+}
+static void hid_ptt_trigger_mute_linux_teamspeak(HidPushToTalk* hid_ptt) {
+    hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_CTRL | KEY_MOD_RIGHT_CTRL | KEY_MOD_RIGHT_ALT | KEY_MOD_RIGHT_SHIFT | HID_KEYBOARD_M);
+    hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_CTRL | KEY_MOD_RIGHT_CTRL | KEY_MOD_RIGHT_ALT | KEY_MOD_RIGHT_SHIFT | HID_KEYBOARD_M);
+}
+static void hid_ptt_start_ptt_linux_teamspeak(HidPushToTalk* hid_ptt) {
+    hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_CTRL | KEY_MOD_RIGHT_CTRL | KEY_MOD_RIGHT_ALT | KEY_MOD_RIGHT_SHIFT | HID_KEYBOARD_P);
+}
+static void hid_ptt_stop_ptt_linux_teamspeak(HidPushToTalk* hid_ptt) {
+    hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_CTRL | KEY_MOD_RIGHT_CTRL | KEY_MOD_RIGHT_ALT | KEY_MOD_RIGHT_SHIFT | HID_KEYBOARD_P);   
+}
+
+// teams
+static void hid_ptt_start_ptt_macos_teams(HidPushToTalk* hid_ptt) {
+    hid_hal_keyboard_press(hid_ptt->hid, KEY_MOD_LEFT_GUI|HID_KEYBOARD_SPACEBAR);
+}
+static void hid_ptt_start_ptt_linux_teams(HidPushToTalk* hid_ptt) {
+    hid_hal_keyboard_press(hid_ptt->hid, KEY_MOD_LEFT_CTRL|HID_KEYBOARD_SPACEBAR);
+}
+static void hid_ptt_stop_ptt_macos_teams(HidPushToTalk* hid_ptt) {
+    hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_GUI|HID_KEYBOARD_SPACEBAR);
+}
+static void hid_ptt_stop_ptt_linux_teams(HidPushToTalk* hid_ptt) {
+    hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_CTRL|HID_KEYBOARD_SPACEBAR);
+}
+static void hid_ptt_trigger_mute_linux_teams(HidPushToTalk* hid_ptt) {
+    hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_CTRL| KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_M);
+    hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_CTRL| KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_M);
+}
+static void hid_ptt_trigger_camera_macos_teams(HidPushToTalk* hid_ptt) {
+    hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_GUI | KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_O);
+    hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_GUI | KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_O);
+}
+static void hid_ptt_trigger_camera_linux_teams(HidPushToTalk* hid_ptt) {
+    hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_CTRL | KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_O);
+    hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_CTRL | KEY_MOD_LEFT_SHIFT |HID_KEYBOARD_O);
 }
 
 static void hid_ptt_menu_callback(void* context, uint32_t osIndex, FuriString* osLabel, uint32_t appIndex, FuriString* appLabel) {
@@ -161,6 +219,7 @@ static void hid_ptt_menu_callback(void* context, uint32_t osIndex, FuriString* o
             model->callback_trigger_hand   = NULL;
             model->callback_start_ptt      = NULL;
             model->callback_stop_ptt       = NULL;
+            FURI_LOG_E(TAG, "appIndex: %lu", appIndex);
             if(osIndex == HidPushToTalkMacOS) {
                 switch(appIndex) {
                 case HidPushToTalkAppIndexGoogleMeet:
@@ -178,15 +237,32 @@ static void hid_ptt_menu_callback(void* context, uint32_t osIndex, FuriString* o
                     model->callback_stop_ptt       = hid_ptt_stop_ptt_meet_zoom;
                     break;
                 case HidPushToTalkAppIndexFaceTime:
-                    model->callback_trigger_mute   = hid_ptt_trigger_mute_facetime;
-                    model->callback_start_ptt      = hid_ptt_start_ptt_facetime;
-                    model->callback_stop_ptt       = hid_ptt_stop_ptt_facetime;
+                    model->callback_trigger_mute   = hid_ptt_trigger_cmd_shift_m;
+                    model->callback_start_ptt      = hid_ptt_trigger_cmd_shift_m;
+                    model->callback_stop_ptt       = hid_ptt_trigger_cmd_shift_m;
                     break;
                 case HidPushToTalkAppIndexSkype:
-                    model->callback_trigger_mute   = hid_ptt_trigger_mute_macos_skype;
+                    model->callback_trigger_mute   = hid_ptt_trigger_cmd_shift_m;
                     model->callback_trigger_camera = hid_ptt_trigger_camera_macos_skype;
-                    model->callback_start_ptt      = hid_ptt_start_ptt_macos_skype;
-                    model->callback_stop_ptt       = hid_ptt_stop_ptt_macos_skype;
+                    model->callback_start_ptt      = hid_ptt_trigger_cmd_shift_m;
+                    model->callback_stop_ptt       = hid_ptt_trigger_cmd_shift_m;
+                    break;
+                case HidPushToTalkAppIndexDiscord:
+                    model->callback_trigger_mute   = hid_ptt_trigger_mute_macos_discord;
+                    model->callback_start_ptt      = hid_ptt_start_ptt_macos_discord;
+                    model->callback_stop_ptt       = hid_ptt_stop_ptt_macos_discord;
+                    break;
+                case HidPushToTalkAppIndexTeamSpeak:
+                    model->callback_trigger_mute   = hid_ptt_trigger_mute_macos_teamspeak;
+                    model->callback_start_ptt      = hid_ptt_start_ptt_macos_teamspeak;
+                    model->callback_stop_ptt       = hid_ptt_stop_ptt_macos_teamspeak;
+                    break;
+                case HidPushToTalkAppIndexTeams:
+                    model->callback_trigger_mute   = hid_ptt_trigger_cmd_shift_m;
+                    model->callback_trigger_camera = hid_ptt_trigger_camera_macos_teams;
+                    model->callback_trigger_hand   = hid_ptt_trigger_camera_macos_skype;
+                    model->callback_start_ptt      = hid_ptt_start_ptt_macos_teams;
+                    model->callback_stop_ptt       = hid_ptt_stop_ptt_macos_teams;
                     break;
                 }
             } else if (osIndex == HidPushToTalkLinux) {
@@ -211,8 +287,72 @@ static void hid_ptt_menu_callback(void* context, uint32_t osIndex, FuriString* o
                     model->callback_start_ptt      = hid_ptt_start_ptt_linux_skype;
                     model->callback_stop_ptt       = hid_ptt_stop_ptt_linux_skype;
                     break;
+                case HidPushToTalkAppIndexDiscord:
+                    model->callback_trigger_mute   = hid_ptt_trigger_mute_linux_discord;
+                    model->callback_start_ptt      = hid_ptt_start_ptt_linux_discord;
+                    model->callback_stop_ptt       = hid_ptt_stop_ptt_linux_discord;
+                    break;
+                case HidPushToTalkAppIndexTeamSpeak:
+                    model->callback_trigger_mute   = hid_ptt_trigger_mute_linux_teamspeak;
+                    model->callback_start_ptt      = hid_ptt_start_ptt_linux_teamspeak;
+                    model->callback_stop_ptt       = hid_ptt_stop_ptt_linux_teamspeak;
+                    break;
+                case HidPushToTalkAppIndexTeams:
+                    model->callback_trigger_mute   = hid_ptt_trigger_mute_linux_teams;
+                    model->callback_trigger_camera = hid_ptt_trigger_camera_linux_teams;
+                    model->callback_trigger_hand   = hid_ptt_trigger_camera_linux_skype;
+                    model->callback_start_ptt      = hid_ptt_start_ptt_linux_teams;
+                    model->callback_stop_ptt       = hid_ptt_stop_ptt_linux_teams;
+                    break;
                 }
             }
+
+            char *app_specific_help = "";
+            switch(appIndex) {
+            case HidPushToTalkAppIndexGoogleMeet:
+                app_specific_help =
+                    "Google Meet:\n"
+                    "This feature is off by default in your audio settings "
+                    "and may not work for Windows users who use their screen "
+                    "reader. In this situation, the spacebar performs a different action.\n\n"
+                ;
+                break;
+            case HidPushToTalkAppIndexDiscord:
+                app_specific_help =
+                    "Discord:\n"
+                    "1. Under App Settings, click Voice & Video. Under Input Mode, "
+                    "check the box next to Push to Talk.\n"
+                    "2. Scroll down to SHORTCUT, click Record Keybinder.\n"
+                    "3. Press PTT in the app to bind it."
+                    "4. Go to Keybinds and assign mute button.\n\n"
+                ;
+                break;
+            case HidPushToTalkAppIndexTeamSpeak:
+                app_specific_help =
+                    "TeamSpeak:\n"
+                    "To make keys working bind them in discord settings.\n\n"
+                ;
+                break;
+            case HidPushToTalkAppIndexTeams:
+                app_specific_help =
+                    "Teams:\n"
+                    "Go to Settings > Privacy. Make sure Keyboard shortcut to unmute is toggled on.\n\n"
+                ;
+                break;
+            }
+            
+            FuriString *msg = furi_string_alloc();
+            furi_string_cat_printf(msg,
+            "%sGeneral:\n"
+            "To operate properly flipper microphone "
+            "status must be in sync with your computer.\n"
+            "Hold > to change mic status.\n"
+            "Hold < to open this help.\n"
+            "Press BACK to switch mic on/off.\n"
+            "Hold 'o' for PTT mode (mic will be off once you release 'o')\n"
+            "Hold BACK to exit.", app_specific_help);
+            widget_add_text_scroll_element(hid_ptt->help, 0, 0, 128, 64, furi_string_get_cstr(msg));
+            furi_string_free(msg);
         }, true);
     view_dispatcher_switch_to_view(hid_ptt->hid->view_dispatcher, HidViewPushToTalk);
 }
@@ -444,6 +584,7 @@ static bool hid_ptt_input_callback(InputEvent* event, void* context) {
     if(event->type == InputTypeLong && event->key == InputKeyBack) {
         hid_hal_keyboard_release_all(hid_ptt->hid);
         notification_message(hid_ptt->hid->notifications, &sequence_double_vibro);
+        widget_reset(hid_ptt->help);
     } else {
         consumed = true;
         hid_ptt_process(hid_ptt, event);
@@ -489,21 +630,16 @@ HidPushToTalk* hid_ptt_alloc(Hid* hid) {
     ptt_menu_add_item_to_list(hid->hid_ptt_menu, HidPushToTalkMacOS, "Skype",       HidPushToTalkAppIndexSkype,      hid_ptt_menu_callback, hid_ptt);
     ptt_menu_add_item_to_list(hid->hid_ptt_menu, HidPushToTalkLinux, "Skype",       HidPushToTalkAppIndexSkype,      hid_ptt_menu_callback, hid_ptt);
     ptt_menu_add_item_to_list(hid->hid_ptt_menu, HidPushToTalkMacOS, "FaceTime",    HidPushToTalkAppIndexFaceTime,   hid_ptt_menu_callback, hid_ptt);
+    ptt_menu_add_item_to_list(hid->hid_ptt_menu, HidPushToTalkMacOS, "Discord",     HidPushToTalkAppIndexDiscord,    hid_ptt_menu_callback, hid_ptt);
+    ptt_menu_add_item_to_list(hid->hid_ptt_menu, HidPushToTalkLinux, "Discord",     HidPushToTalkAppIndexDiscord,    hid_ptt_menu_callback, hid_ptt);
+    ptt_menu_add_item_to_list(hid->hid_ptt_menu, HidPushToTalkMacOS, "TeamSpeak",   HidPushToTalkAppIndexTeamSpeak,  hid_ptt_menu_callback, hid_ptt);
+    ptt_menu_add_item_to_list(hid->hid_ptt_menu, HidPushToTalkLinux, "TeamSpeak",   HidPushToTalkAppIndexTeamSpeak,  hid_ptt_menu_callback, hid_ptt);
+    ptt_menu_add_item_to_list(hid->hid_ptt_menu, HidPushToTalkMacOS, "Teams",       HidPushToTalkAppIndexTeams,      hid_ptt_menu_callback, hid_ptt);
+    ptt_menu_add_item_to_list(hid->hid_ptt_menu, HidPushToTalkLinux, "Teams",       HidPushToTalkAppIndexTeams,      hid_ptt_menu_callback, hid_ptt);
 
     hid_ptt->help = widget_alloc();
     view_set_previous_callback(widget_get_view(hid_ptt->help), hid_ptt_view);
     view_dispatcher_add_view(hid->view_dispatcher, HidViewPushToTalkHelp, widget_get_view(hid_ptt->help));
-    FuriString *msg = furi_string_alloc();
-    furi_string_cat_printf(msg,
-    "To operate properly flipper microphone "
-    "status must be in sync with your computer.\n"
-    "Hold > to change mic status.\n"
-    "Hold < to open this help.\n"
-    "Press BACK to switch mic on/off.\n"
-    "Hold 'o' for PTT mode (mic will be off once you release 'o')\n"
-    "Hold BACK to exit.");
-    widget_add_text_scroll_element(hid_ptt->help, 0, 0, 128, 64, furi_string_get_cstr(msg));
-    furi_string_free(msg);
     return hid_ptt;
 }
 
@@ -516,7 +652,6 @@ void hid_ptt_free(HidPushToTalk* hid_ptt) {
         furi_string_free(model->app);
     }, true);
     view_dispatcher_remove_view(hid_ptt->hid->view_dispatcher, HidViewPushToTalkHelp);
-    widget_reset(hid_ptt->help);
     widget_free(hid_ptt->help);
     view_free(hid_ptt->view);
     free(hid_ptt);
@@ -525,5 +660,10 @@ void hid_ptt_free(HidPushToTalk* hid_ptt) {
 void hid_ptt_set_connected_status(HidPushToTalk* hid_ptt, bool connected) {
     furi_assert(hid_ptt);
     with_view_model(
-        hid_ptt->view, HidPushToTalkModel * model, { model->connected = connected; }, true);
+        hid_ptt->view, HidPushToTalkModel * model, {
+            model->connected = connected;
+            if (!connected) {
+                notification_message(hid_ptt->hid->notifications, &sequence_single_vibro);
+            }
+        }, true);
 }
