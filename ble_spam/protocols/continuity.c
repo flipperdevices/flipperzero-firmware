@@ -827,10 +827,12 @@ static void pp_color_callback(void* _ctx, uint32_t index) {
     ContinuityCfg* cfg = &payload->cfg.continuity;
     uint8_t model_index = 0;
     uint8_t colors_count = 0;
-    for(; model_index < pp_models_count; model_index++) {
-        if(cfg->data.proximity_pair.model == pp_models[model_index].value) {
-            colors_count = pp_models[model_index].colors_count;
-            break;
+    if(payload->mode == PayloadModeValue) {
+        for(; model_index < pp_models_count; model_index++) {
+            if(cfg->data.proximity_pair.model == pp_models[model_index].value) {
+                colors_count = pp_models[model_index].colors_count;
+                break;
+            }
         }
     }
     if(index == colors_count) {
