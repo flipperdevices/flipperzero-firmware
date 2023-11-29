@@ -34,7 +34,8 @@ typedef struct {
     FuriHalRtcLocaleUnits locale_units : 1;
     FuriHalRtcLocaleTimeFormat locale_timeformat : 1;
     FuriHalRtcLocaleDateFormat locale_dateformat : 2;
-    uint8_t reserved : 6;
+    FuriHalRtcLocaleKeyboardFormat locale_keyboardformat : 2;
+    uint8_t reserved : 4;
 } SystemReg;
 
 _Static_assert(sizeof(SystemReg) == 4, "SystemReg size mismatch");
@@ -284,6 +285,19 @@ FuriHalRtcLocaleDateFormat furi_hal_rtc_get_locale_dateformat() {
     uint32_t data_reg = furi_hal_rtc_get_register(FuriHalRtcRegisterSystem);
     SystemReg* data = (SystemReg*)&data_reg;
     return data->locale_dateformat;
+}
+
+void furi_hal_rtc_set_locale_keyboardformat(FuriHalRtcLocaleKeyboardFormat value) {
+    uint32_t data_reg = furi_hal_rtc_get_register(FuriHalRtcRegisterSystem);
+    SystemReg* data = (SystemReg*)&data_reg;
+    data->locale_keyboardformat = value;
+    furi_hal_rtc_set_register(FuriHalRtcRegisterSystem, data_reg);
+}
+
+FuriHalRtcLocaleKeyboardFormat furi_hal_rtc_get_locale_keyboardformat() {
+    uint32_t data_reg = furi_hal_rtc_get_register(FuriHalRtcRegisterSystem);
+    SystemReg* data = (SystemReg*)&data_reg;
+    return data->locale_keyboardformat;
 }
 
 void furi_hal_rtc_set_datetime(FuriHalRtcDateTime* datetime) {

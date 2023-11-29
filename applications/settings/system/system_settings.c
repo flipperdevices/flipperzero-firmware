@@ -123,6 +123,24 @@ static void date_format_changed(VariableItem* item) {
     locale_set_date_format(date_format_value[index]);
 }
 
+const char* const keyboard_format_text[] = {
+    "QWERTY",
+    "QWERTZ",
+    "AZERTY",
+};
+
+const uint32_t keyboard_format_value[] = {
+    LocaleKeyboardFormatQWERTY,
+    LocaleKeyboardFormatQWERTZ,
+    LocaleKeyboardFormatAZERTY,
+};
+
+static void keyboard_format_changed(VariableItem* item) {
+    uint8_t index = variable_item_get_current_value_index(item);
+    variable_item_set_current_value_text(item, keyboard_format_text[index]);
+    locale_set_keyboard_format(keyboard_format_value[index]);
+}
+
 const char* const hand_mode[] = {
     "Righty",
     "Lefty",
@@ -219,6 +237,17 @@ SystemSettings* system_settings_alloc() {
         locale_get_date_format(), date_format_value, COUNT_OF(date_format_value));
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, date_format_text[value_index]);
+
+    item = variable_item_list_add(
+        app->var_item_list,
+        "Keyboard",
+        COUNT_OF(keyboard_format_text),
+        keyboard_format_changed,
+        app);
+    value_index = value_index_uint32(
+        locale_get_keyboard_format(), keyboard_format_value, COUNT_OF(keyboard_format_value));
+    variable_item_set_current_value_index(item, value_index);
+    variable_item_set_current_value_text(item, keyboard_format_text[value_index]);
 
     item = variable_item_list_add(
         app->var_item_list, "Log Level", COUNT_OF(log_level_text), log_level_changed, app);

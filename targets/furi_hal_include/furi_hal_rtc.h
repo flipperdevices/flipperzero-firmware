@@ -79,6 +79,12 @@ typedef enum {
     FuriHalRtcLocaleDateFormatYMD = 2, /**< Year/Month/Day */
 } FuriHalRtcLocaleDateFormat;
 
+typedef enum {
+    FuriHalRtcLocaleKeyboardFormatQWERTY = 0, /**< QWERTY */
+    FuriHalRtcLocaleKeyboardFormatQWERTZ = 1, /**< QWERTZ */
+    FuriHalRtcLocaleKeyboardFormatAZERTY = 2, /**< AZERTY */
+} FuriHalRtcLocaleKeyboardFormat;
+
 /** Early initialization */
 void furi_hal_rtc_init_early();
 
@@ -197,6 +203,18 @@ void furi_hal_rtc_set_locale_dateformat(FuriHalRtcLocaleDateFormat value);
  * @return     The RTC Locale Date Format
  */
 FuriHalRtcLocaleDateFormat furi_hal_rtc_get_locale_dateformat();
+
+/** Set Locale Keyboard Format
+ *
+ * @param[in]  value  The Locale Keyboard Format
+ */
+void furi_hal_rtc_set_locale_keyboardformat(FuriHalRtcLocaleKeyboardFormat value);
+
+/** Get Locale Date Format
+ *
+ * @return     The Locale Keyboard Format
+ */
+FuriHalRtcLocaleKeyboardFormat furi_hal_rtc_get_locale_keyboardformat();
 
 /** Set RTC Date Time
  *

@@ -24,6 +24,12 @@ typedef enum {
     LocaleDateFormatYMD = 2, /**< Year/Month/Day */
 } LocaleDateFormat;
 
+typedef enum {
+    LocaleKeyboardFormatQWERTY = 0, /**< QWERTY */
+    LocaleKeyboardFormatQWERTZ = 1, /**< QWERTZ */
+    LocaleKeyboardFormatAZERTY = 2, /**< AZERTY */
+} LocaleKeyboardFormat;
+
 /** Get Locale measurement units
  *
  * @return     The locale measurement units.
@@ -101,6 +107,18 @@ void locale_format_date(
     const FuriHalRtcDateTime* datetime,
     const LocaleDateFormat format,
     const char* separator);
+
+/** Get Locale keyboard format
+ *
+ * @return     The locale keyboard format.
+ */
+LocaleKeyboardFormat locale_get_keyboard_format();
+
+/** Set locale keyboard format
+ *
+ * @param[in]  format  The locale keyboard format.
+ */
+void locale_set_keyboard_format(LocaleKeyboardFormat format);
 
 #ifdef __cplusplus
 }
