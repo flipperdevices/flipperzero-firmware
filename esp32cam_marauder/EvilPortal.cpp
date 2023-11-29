@@ -3,11 +3,26 @@
 AsyncWebServer server(80);
 
 EvilPortal::EvilPortal() {
+}
+
+void EvilPortal::setup() {
   this->runServer = false;
   this->name_received = false;
   this->password_received = false;
   this->has_html = false;
   this->has_ap = false;
+
+  html_files = new LinkedList<String>();
+
+  html_files->add("Back");
+
+  #ifdef HAS_SD
+    if (sd_obj.supported) {
+      sd_obj.listDirToLinkedList(html_files, "/", "html");
+
+      Serial.println("Evil Portal Found " + (String)html_files->size() + " HTML files");
+    }
+  #endif
 }
 
 bool EvilPortal::begin(LinkedList<ssid>* ssids, LinkedList<AccessPoint>* access_points) {
@@ -62,7 +77,20 @@ void EvilPortal::setupServer() {
   Serial.println("web server up");
 }
 
+void EvilPortal::setHtmlFromSerial() {
+  Serial.println("Setting HTML from serial...");
+  const char *htmlStr = Serial.readString().c_str();
+  strncpy(index_html, htmlStr, strlen(htmlStr));
+  this->has_html = true;
+  this->using_serial_html = true;
+  Serial.println("html set");
+}
+
 bool EvilPortal::setHtml() {
+  if (this->using_serial_html) {
+    Serial.println("html previously set");
+    return true;
+  }
   Serial.println("Setting HTML...");
   #ifndef WRITE_PACKETS_SERIAL
     File html_file = sd_obj.getFile("/" + this->target_html_name);

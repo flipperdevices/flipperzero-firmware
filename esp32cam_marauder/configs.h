@@ -22,7 +22,34 @@
   //#define XIAO_ESP32_S3
   //// END BOARD TARGETS
 
-  #define MARAUDER_VERSION "v0.13.4"
+  #define MARAUDER_VERSION "v0.13.5"
+
+  //// HARDWARE NAMES
+  #ifdef MARAUDER_M5STICKC
+    #define HARDWARE_NAME "M5Stick-C Plus"
+  #elif defined(MARAUDER_MINI)
+    #define HARDWARE_NAME "Marauder Mini"
+  #elif defined(MARAUDER_V4)
+    #define HARDWARE_NAME "Marauder v4"
+  #elif defined(MARAUDER_V6)
+    #define HARDWARE_NAME "Marauder v6"
+  #elif defined(MARAUDER_V6_1)
+    #define HARDWARE_NAME "Marauder v6.1"
+  #elif defined(MARAUDER_KIT)
+    #define HARDWARE_NAME "Marauder Kit"
+  #elif defined(MARAUDER_FLIPPER)
+    #define HARDWARE_NAME "Flipper Zero Dev Board"
+  #elif defined(ESP32_LDDB)
+    #define HARDWARE_NAME "ESP32 LDDB"
+  #elif defined(MARAUDER_DEV_BOARD_PRO)
+    #define HARDWARE_NAME "Flipper Zero Dev Board Pro"
+  #elif defined(XIAO_ESP32_S3)
+    #define HARDWARE_NAME "XIAO ESP32 S3"
+  #else
+    #define HARDWARE_NAME "ESP32"
+  #endif
+
+  //// END HARDWARE NAMES
 
  //// BOARD FEATURES
   #ifdef MARAUDER_M5STICKC
