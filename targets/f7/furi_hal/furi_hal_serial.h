@@ -77,17 +77,26 @@ void furi_hal_serial_tx(FuriHalSerialHandle* handle, const uint8_t* buffer, size
  */
 void furi_hal_serial_tx_wait_complete(FuriHalSerialHandle* handle);
 
+/** Serial events */
+typedef enum {
+    FuriHalSerialRxEventRx, /**< Data available and must be picked up */
+    FuriHalSerialRxEventEnd, /**< Bus idle detected, data may be available (check data_len) */
+} FuriHalSerialRxEvent;
+
 /** Receive callback
  *
  * @warning    Callback will be called in interrupt context, ensure thread
  *             safety on your side.
  * @param      handle   Serial handle
- * @param      data     Received data
+ * @param      event    FuriHalSerialRxEvent
  * @param      context  Callback context provided earlier
  */
-typedef void (*FuriHalSerialRxCallback)(FuriHalSerialHandle* handle, uint8_t data, void* context);
+typedef void (*FuriHalSerialRxCallback)(
+    FuriHalSerialHandle* handle,
+    FuriHalSerialRxEvent event,
+    void* context);
 
-/** Sets Serial Receive callback
+/** Start and sets Serial Receive callback
  *
  * @warning Callback will be called in interrupt context, ensure thread safety on your side
  *
@@ -95,10 +104,27 @@ typedef void (*FuriHalSerialRxCallback)(FuriHalSerialHandle* handle, uint8_t dat
  * @param      callback  callback pointer
  * @param      context   callback context
  */
-void furi_hal_serial_set_rx_callback(
+void furi_hal_serial_rx_start(
     FuriHalSerialHandle* handle,
     FuriHalSerialRxCallback callback,
     void* context);
+
+/** Stop Serial Receive
+ *
+ * @param      handle    Serial handle
+ */
+void furi_hal_serial_rx_stop(FuriHalSerialHandle* handle);
+
+/** Get data Serial receive
+ *
+ * @warning    This function must be called only from the callback
+ *             FuriHalSerialRxCallback
+ *
+ * @param      handle  Serial handle
+ *
+ * @return     data
+ */
+uint8_t furi_hal_serial_rx(FuriHalSerialHandle* handle);
 
 /* DMA based Serial API */
 
@@ -126,7 +152,7 @@ typedef void (*FuriHalSerialDmaRxCallback)(
     size_t data_len,
     void* context);
 
-/** Sets Serial event callback receive DMA
+/** Start and sets Serial event callback receive DMA 
  *
  * @param      handle    Serial handle
  * @param      callback  callback pointer
@@ -136,6 +162,12 @@ void furi_hal_serial_dma_rx_start(
     FuriHalSerialHandle* handle,
     FuriHalSerialDmaRxCallback callback,
     void* context);
+
+/** Stop Serial receive DMA
+ *
+ * @param      handle    Serial handle
+ */
+void furi_hal_serial_dma_rx_stop(FuriHalSerialHandle* handle);
 
 /** Get data Serial receive DMA
  *
