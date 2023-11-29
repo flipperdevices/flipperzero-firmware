@@ -2,6 +2,7 @@
 #include <gui/elements.h>
 #include <assets_icons.h>
 #include <furi.h>
+#include <locale/locale.h>
 
 struct TextInput {
     View* view;
@@ -39,7 +40,7 @@ static const uint8_t keyboard_row_count = 3;
 #define ENTER_KEY '\r'
 #define BACKSPACE_KEY '\b'
 
-static const TextInputKey keyboard_keys_row_1[] = {
+static const TextInputKey qwerty_keyboard_keys_row_1[] = {
     {'q', 1, 8},
     {'w', 10, 8},
     {'e', 19, 8},
@@ -56,7 +57,7 @@ static const TextInputKey keyboard_keys_row_1[] = {
     {'3', 120, 8},
 };
 
-static const TextInputKey keyboard_keys_row_2[] = {
+static const TextInputKey qwerty_keyboard_keys_row_2[] = {
     {'a', 1, 20},
     {'s', 10, 20},
     {'d', 19, 20},
@@ -72,7 +73,7 @@ static const TextInputKey keyboard_keys_row_2[] = {
     {'6', 120, 20},
 };
 
-static const TextInputKey keyboard_keys_row_3[] = {
+static const TextInputKey qwerty_keyboard_keys_row_3[] = {
     {'z', 1, 32},
     {'x', 10, 32},
     {'c', 19, 32},
@@ -87,18 +88,153 @@ static const TextInputKey keyboard_keys_row_3[] = {
     {'9', 120, 32},
 };
 
+static const TextInputKey* qwerty[] = {
+    qwerty_keyboard_keys_row_1,
+    qwerty_keyboard_keys_row_2,
+    qwerty_keyboard_keys_row_3,
+};
+
+static const TextInputKey qwertz_keyboard_keys_row_1[] = {
+    {'q', 1, 8},
+    {'w', 10, 8},
+    {'e', 19, 8},
+    {'r', 28, 8},
+    {'t', 37, 8},
+    {'z', 46, 8},
+    {'u', 55, 8},
+    {'i', 64, 8},
+    {'o', 73, 8},
+    {'p', 82, 8},
+    {'0', 91, 8},
+    {'1', 100, 8},
+    {'2', 110, 8},
+    {'3', 120, 8},
+};
+
+static const TextInputKey qwertz_keyboard_keys_row_3[] = {
+    {'y', 1, 32},
+    {'x', 10, 32},
+    {'c', 19, 32},
+    {'v', 28, 32},
+    {'b', 37, 32},
+    {'n', 46, 32},
+    {'m', 55, 32},
+    {'_', 64, 32},
+    {ENTER_KEY, 74, 23},
+    {'7', 100, 32},
+    {'8', 110, 32},
+    {'9', 120, 32},
+};
+
+static const TextInputKey* qwertz[] = {
+    qwertz_keyboard_keys_row_1,
+    qwerty_keyboard_keys_row_2,
+    qwertz_keyboard_keys_row_3,
+};
+
+static const TextInputKey azerty_keyboard_keys_row_1[] = {
+    {'a', 1, 8},
+    {'z', 10, 8},
+    {'e', 19, 8},
+    {'r', 28, 8},
+    {'t', 37, 8},
+    {'y', 46, 8},
+    {'u', 55, 8},
+    {'i', 64, 8},
+    {'o', 73, 8},
+    {'p', 82, 8},
+    {'0', 91, 8},
+    {'1', 100, 8},
+    {'2', 110, 8},
+    {'3', 120, 8},
+};
+
+static const TextInputKey azerty_keyboard_keys_row_2[] = {
+    {'q', 1, 20},
+    {'s', 10, 20},
+    {'d', 19, 20},
+    {'f', 28, 20},
+    {'g', 37, 20},
+    {'h', 46, 20},
+    {'j', 55, 20},
+    {'k', 64, 20},
+    {'l', 73, 20},
+    {BACKSPACE_KEY, 82, 12},
+    {'4', 100, 20},
+    {'5', 110, 20},
+    {'6', 120, 20},
+};
+
+static const TextInputKey azerty_keyboard_keys_row_3[] = {
+    {'w', 1, 32},
+    {'x', 10, 32},
+    {'c', 19, 32},
+    {'v', 28, 32},
+    {'b', 37, 32},
+    {'n', 46, 32},
+    {'_', 55, 32},
+    {'m', 64, 32},
+    {ENTER_KEY, 74, 23},
+    {'7', 100, 32},
+    {'8', 110, 32},
+    {'9', 120, 32},
+};
+
+static const TextInputKey* azerty[] = {
+    azerty_keyboard_keys_row_1,
+    azerty_keyboard_keys_row_2,
+    azerty_keyboard_keys_row_3,
+};
+
 static uint8_t get_row_size(uint8_t row_index) {
     uint8_t row_size = 0;
+    LocaleKeyboardFormat format = (LocaleKeyboardFormat)furi_hal_rtc_get_locale_keyboardformat();
 
-    switch(row_index + 1) {
-    case 1:
-        row_size = COUNT_OF(keyboard_keys_row_1);
+    switch(format) {
+    case LocaleKeyboardFormatQWERTY:
+        switch(row_index + 1) {
+        case 1:
+            row_size = COUNT_OF(qwerty_keyboard_keys_row_1);
+            break;
+        case 2:
+            row_size = COUNT_OF(qwerty_keyboard_keys_row_2);
+            break;
+        case 3:
+            row_size = COUNT_OF(qwerty_keyboard_keys_row_3);
+            break;
+        default:
+            furi_crash();
+        }
         break;
-    case 2:
-        row_size = COUNT_OF(keyboard_keys_row_2);
+    case LocaleKeyboardFormatQWERTZ:
+        switch(row_index + 1) {
+        case 1:
+            row_size = COUNT_OF(qwertz_keyboard_keys_row_1);
+            break;
+        case 2:
+            row_size = COUNT_OF(qwerty_keyboard_keys_row_2);
+            break;
+        case 3:
+            row_size = COUNT_OF(qwertz_keyboard_keys_row_3);
+            break;
+        default:
+            furi_crash();
+        }
         break;
-    case 3:
-        row_size = COUNT_OF(keyboard_keys_row_3);
+    case LocaleKeyboardFormatAZERTY:
+        switch(row_index + 1) {
+        case 1:
+            row_size = COUNT_OF(azerty_keyboard_keys_row_1);
+            break;
+        case 2:
+            row_size = COUNT_OF(azerty_keyboard_keys_row_2);
+            break;
+        case 3:
+            row_size = COUNT_OF(azerty_keyboard_keys_row_3);
+            break;
+        default:
+            furi_crash();
+        }
         break;
     default:
         furi_crash();
@@ -109,20 +245,24 @@ static uint8_t get_row_size(uint8_t row_index) {
 
 static const TextInputKey* get_row(uint8_t row_index) {
     const TextInputKey* row = NULL;
+    const TextInputKey** keyboard;
+    LocaleKeyboardFormat format = (LocaleKeyboardFormat)furi_hal_rtc_get_locale_keyboardformat();
 
-    switch(row_index + 1) {
-    case 1:
-        row = keyboard_keys_row_1;
+    switch(format) {
+    case LocaleKeyboardFormatQWERTY:
+        keyboard = qwerty;
         break;
-    case 2:
-        row = keyboard_keys_row_2;
+    case LocaleKeyboardFormatQWERTZ:
+        keyboard = qwertz;
         break;
-    case 3:
-        row = keyboard_keys_row_3;
+    case LocaleKeyboardFormatAZERTY:
+        keyboard = azerty;
         break;
     default:
         furi_crash();
     }
+
+    row = keyboard[row_index];
 
     return row;
 }
