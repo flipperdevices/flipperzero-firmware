@@ -1,6 +1,6 @@
 #include "GameBoyAdvanceCartridge.h"
 #include "save.h"
-#include "soc/rtc_wdt.h"
+// #include "soc/rtc_wdt.h"
 
 
 GameBoyAdvanceCartridge::GameBoyAdvanceCartridge()
@@ -212,91 +212,77 @@ void GameBoyAdvanceCartridge::headerROM_GBA(bool printInfo = true)
         cartID[3] = char(sdBuffer[0xAF]);
 
         //  TODO: Implement MemoryFile
-        MemoryFile myFile(gba, sizeof(gba));
-
-        if (myFile.open())
-        {
-            // Loop through file
-            while (myFile.available())
-            {
+        // MemoryFile myFile(gba, sizeof(gba));
+        File myFile = SPIFFS.open("/titles/gba.txt", FILE_READ);
+        if(myFile) {
+            while (myFile.available()) {
                 // Skip first line with name
                 skip_line(&myFile);
-
                 // Skip over the CRC checksum
-                myFile.seekCur(9);
+                myFile.seek( myFile.position() + 9);
 
                 // Read 4 bytes into String, do it one at a time so byte order doesn't get mixed up
                 sprintf(tempStr, "%c", myFile.read());
-                for (byte i = 0; i < 3; i++)
-                {
+                for (byte i = 0; i < 3; i++) {
                     sprintf(tempStr2, "%c", myFile.read());
                     strcat(tempStr, tempStr2);
                 }
-
-                // Check if string is a match
-                if (strcmp(tempStr, cartID) == 0)
-                {
+                if (strcmp(tempStr, cartID) == 0) {
                     // Rewind to start of entry
-                    rewind_line(myFile);
+                    rewind_line(&myFile);
 
-                    // Display database
                     // Read game name
-                    get_line(this->gameTitle, &myFile, 96);
+                    get_line((uint8_t*)this->gameTitle, &myFile, 96);
 
-                    // Skip over the CRC checksum
-                    myFile.seekCur(9);
+                    myFile.seek( myFile.position() + 9);
 
                     // Read 4 bytes into String, do it one at a time so byte order doesn't get mixed up
                     sprintf(tempStr, "%c", myFile.read());
-                    for (byte i = 0; i < 3; i++)
-                    {
-                        sprintf(tempStr2, "%c", myFile.read());
-                        strcat(tempStr, tempStr2);
+                    for (byte i = 0; i < 3; i++) {
+                    sprintf(tempStr2, "%c", myFile.read());
+                    strcat(tempStr, tempStr2);
                     }
 
                     // Skip the , in the file
-                    myFile.seekCur(1);
+                    myFile.seek( myFile.position() + 1);
+
 
                     // Read the next ascii character and subtract 48 to convert to decimal
                     cartSize = myFile.read() - 48;
                     // Remove leading 0 for single digit cart sizes
-                    if (cartSize != 0)
-                    {
-                        cartSize = cartSize * 10 + myFile.read() - 48;
-                    }
-                    else
-                    {
-                        cartSize = myFile.read() - 48;
+                    if (cartSize != 0) {
+                    cartSize = cartSize * 10 + myFile.read() - 48;
+                    } else {
+                    cartSize = myFile.read() - 48;
                     }
 
                     // Skip the , in the file
-                    myFile.seekCur(1);
+                    myFile.seek( myFile.position() + 1);
 
                     // Read save type into string
-                    get_line(saveTypeStr, &myFile, 14);
-
+                    get_line((uint8_t*)saveTypeStr, &myFile, 14);
+                    
                     // skip third empty line
                     skip_line(&myFile);
 
                     this->romSize = cartSize;
-                    
+                        
                     transferJSON["success"] = 1;
                     transferJSON["message"] = "";
                     transferJSON["title"] = this->gameTitle;
                     transferJSON["serial"] = tempStr;
                     transferJSON["RAMSize"] = "";
                     transferJSON["ROMSize"] = this->romSize;
-                }
-                // If no match advance and try again
-                else
-                {
-                    // skip rest of line
+
+                    break;
+                } else {
+                    // If no match, skip rest of the line and third empty line
                     skip_line(&myFile);
-                    // skip third empty line
                     skip_line(&myFile);
                 }
             }
-            // Close the file:
+
+            // Close the file
             myFile.close();
         }
 
