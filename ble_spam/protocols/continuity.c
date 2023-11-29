@@ -827,7 +827,9 @@ static void pp_color_callback(void* _ctx, uint32_t index) {
     ContinuityCfg* cfg = &payload->cfg.continuity;
     uint8_t model_index = 0;
     uint8_t colors_count = 0;
-    if(payload->mode == PayloadModeValue) {
+    if(payload->mode == PayloadModeValue ||
+       (payload->mode == PayloadModeBruteforce &&
+        cfg->data.proximity_pair.bruteforce_mode == ContinuityPpBruteforceColor)) {
         for(; model_index < pp_models_count; model_index++) {
             if(cfg->data.proximity_pair.model == pp_models[model_index].value) {
                 colors_count = pp_models[model_index].colors_count;
@@ -865,7 +867,9 @@ void scene_continuity_pp_color_on_enter(void* _ctx) {
 
     bool found = false;
     uint8_t colors_count = 0;
-    if(payload->mode == PayloadModeValue) {
+    if(payload->mode == PayloadModeValue ||
+       (payload->mode == PayloadModeBruteforce &&
+        cfg->data.proximity_pair.bruteforce_mode == ContinuityPpBruteforceColor)) {
         for(uint8_t i = 0; i < pp_models_count; i++) {
             if(cfg->data.proximity_pair.model == pp_models[i].value) {
                 colors_count = pp_models[i].colors_count;
