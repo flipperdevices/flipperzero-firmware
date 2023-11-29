@@ -268,6 +268,7 @@ static void subghz_scene_receiver_config_set_bin_raw(VariableItem* item) {
 
     // We can set here, but during subghz_last_settings_save filter was changed to ignore BinRAW
     subghz->last_settings->filter = subghz->filter;
+    subghz->BINRawStateChanged = false;
 }
 
 static void subghz_scene_receiver_config_set_listen_after_tx(VariableItem* item) {
@@ -297,25 +298,31 @@ static void subghz_scene_receiver_config_set_repeater(VariableItem* item) {
             //BinRAW is on, repeater is on.
         } else {
             //Repeater is on, Binraw is Off.
-            subghz->BINRawStateChanged = true;
             variable_item_set_current_value_index(
                 subghz->BIN_Raw_menu, 1 /*Index of ON in BIN_Raw menu!*/);
             subghz_scene_receiver_config_set_bin_raw(subghz->BIN_Raw_menu);
+            subghz->BINRawStateChanged = true;
         }
+
+        //Lock the BinRAW menu, Flipper doesnt understand everything so BinRAW makes very key send.
         variable_item_set_locked(
             subghz->BIN_Raw_menu, true, "Turn off\n Repeater!\n to do\n that!");
+        /* REPEATER LOCK BINRAW */
     } else {
         subghz->last_settings->RepeaterState = SubGhzRepeaterOff;
 
         //Put BinRAW back how it was, if we changed it.
         if(subghz->BINRawStateChanged) {
-            subghz->BINRawStateChanged = false;
             variable_item_set_current_value_index(
                 subghz->BIN_Raw_menu, 0 /*Index of OFF in BIN_Raw menu!*/);
             subghz_scene_receiver_config_set_bin_raw(subghz->BIN_Raw_menu);
+            subghz->BINRawStateChanged = false;
         }
+
+        //Lock the BinRAW menu, Flipper doesnt understand everything so BinRAW makes very key send.
         variable_item_set_locked(
             subghz->BIN_Raw_menu, false, "Turn off\n Repeater!\n to do\n that!");
+        /* REPEATER LOCK BINRAW */
     }
 }
 
@@ -494,7 +501,7 @@ void subghz_scene_receiver_config_on_enter(void* context) {
             subghz_txrx_repeater_get_state(&subghz->repeater), repeater_value, REPEATER_BOX_COUNT);
         variable_item_set_current_value_index(item, value_index);
         //variable_item_set_current_value_text(item, repeater_box_text[value_index]);
-        //Instead of setting the text, Im calling the callback. That sets the text, and the bin raw on off and locked!
+        //Instead of setting the text, Im calling the callback. That sets the text, and the bin raw on off!
         subghz_scene_receiver_config_set_repeater(item);
         //Remember if the user set BinRAW on or if I did with the repeater!
         subghz->BINRawStateChanged =

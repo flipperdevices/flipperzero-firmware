@@ -1,5 +1,7 @@
 ADD_SCENE(continuity_pp_model, ContinuityPpModel)
 ADD_SCENE(continuity_pp_model_custom, ContinuityPpModelCustom)
+ADD_SCENE(continuity_pp_color, ContinuityPpColor)
+ADD_SCENE(continuity_pp_color_custom, ContinuityPpColorCustom)
 ADD_SCENE(continuity_pp_prefix, ContinuityPpPrefix)
 ADD_SCENE(continuity_pp_prefix_custom, ContinuityPpPrefixCustom)
 ADD_SCENE(continuity_na_action, ContinuityNaAction)
