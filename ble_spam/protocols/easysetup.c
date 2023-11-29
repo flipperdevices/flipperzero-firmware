@@ -4,7 +4,7 @@
 // Hacked together by @Willy-JL and @Spooks4576
 // Research by @Spooks4576
 
-const struct {
+static const struct {
     uint32_t value;
     const char* name;
 } buds_models[] = {
@@ -29,9 +29,9 @@ const struct {
     {0xAE073A, "Black & White Buds2"},
     {0x011716, "Sleek Black Buds2"},
 };
-const uint8_t buds_models_count = COUNT_OF(buds_models);
+static const uint8_t buds_models_count = COUNT_OF(buds_models);
 
-const struct {
+static const struct {
     uint8_t value;
     const char* name;
 } watch_models[] = {
@@ -66,7 +66,7 @@ const struct {
     {0xEC, "Black Watch6 Golf Edition"},
     {0xEF, "Black Watch6 TB Edition"},
 };
-const uint8_t watch_models_count = COUNT_OF(watch_models);
+static const uint8_t watch_models_count = COUNT_OF(watch_models);
 
 static const char* type_names[EasysetupTypeCOUNT] = {
     [EasysetupTypeBuds] = "EasySetup Buds",
@@ -81,7 +81,7 @@ static uint8_t packet_sizes[EasysetupTypeCOUNT] = {
     [EasysetupTypeBuds] = 31,
     [EasysetupTypeWatch] = 15,
 };
-void make_packet(uint8_t* out_size, uint8_t** out_packet, Payload* payload) {
+static void make_packet(uint8_t* out_size, uint8_t** out_packet, Payload* payload) {
     EasysetupCfg* cfg = payload ? &payload->cfg.easysetup : NULL;
 
     EasysetupType type;
@@ -269,7 +269,7 @@ static void extra_config(Ctx* ctx) {
     EasysetupCfg* cfg = &payload->cfg.easysetup;
     VariableItemList* list = ctx->variable_item_list;
     VariableItem* item;
-    size_t value_index;
+    uint8_t value_index;
 
     switch(cfg->type) {
     case EasysetupTypeBuds: {

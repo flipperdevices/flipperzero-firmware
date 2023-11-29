@@ -30,9 +30,9 @@ const struct {
     {0x1220, "Beats Fit Pro"},
     {0x1620, "Beats Studio Buds+"},
 };
-const uint8_t pp_models_count = COUNT_OF(pp_models);
+static const uint8_t pp_models_count = COUNT_OF(pp_models);
 
-const struct {
+static const struct {
     uint8_t value;
     const char* name;
 } pp_prefixes[] = {
@@ -40,9 +40,9 @@ const struct {
     {0x01, "Not Your Device"},
     {0x05, "New Airtag"},
 };
-const uint8_t pp_prefixes_count = COUNT_OF(pp_prefixes);
+static const uint8_t pp_prefixes_count = COUNT_OF(pp_prefixes);
 
-const struct {
+static const struct {
     uint8_t value;
     const char* name;
 } na_actions[] = {
@@ -59,7 +59,7 @@ const struct {
     {0x0D, "HomeKit AppleTV Setup"},
     {0x2B, "AppleID for AppleTV?"},
 };
-const uint8_t na_actions_count = COUNT_OF(na_actions);
+static const uint8_t na_actions_count = COUNT_OF(na_actions);
 
 static const char* type_names[ContinuityTypeCOUNT] = {
     [ContinuityTypeAirDrop] = "AirDrop",
@@ -401,7 +401,7 @@ static void extra_config(Ctx* ctx) {
     ContinuityCfg* cfg = &payload->cfg.continuity;
     VariableItemList* list = ctx->variable_item_list;
     VariableItem* item;
-    size_t value_index;
+    uint8_t value_index;
 
     switch(cfg->type) {
     case ContinuityTypeProximityPair: {
