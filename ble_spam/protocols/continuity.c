@@ -28,7 +28,13 @@ static const ContinuityColor colors_powerbeats_3[] = {
 };
 static const ContinuityColor colors_powerbeats_pro[] = {
     {0x00, "White"},
-    {0x01, "Black"},
+    {0x02, "Yellowish Green"},
+    {0x03, "Blue"},
+    {0x04, "Black"},
+    {0x05, "Pink"},
+    {0x06, "Red"},
+    {0x0B, "Gray ?"},
+    {0x0D, "Sky Blue"},
 };
 static const ContinuityColor colors_beats_solo_pro[] = {
     {0x00, "White"},
@@ -45,8 +51,16 @@ static const ContinuityColor colors_beats_x[] = {
 static const ContinuityColor colors_beats_studio_3[] = {
     {0x00, "White"},
     {0x01, "Black"},
-    {0x03, "Red"},
-    {0x43, "White marble"},
+    {0x02, "Red"},
+    {0x03, "Blue"},
+    {0x18, "Shadow Gray"},
+    {0x19, "Desert Sand"},
+    {0x25, "Black / Red"},
+    {0x26, "Midnight Black"},
+    {0x27, "Desert Sand 2"},
+    {0x28, "Clear blue/ gold"},
+    {0x42, "Green Forest camo"},
+    {0x43, "White Camo"},
 };
 static const ContinuityColor colors_beats_studio_pro[] = {
     {0x00, "White"},
