@@ -24,9 +24,12 @@ From a local clone of this repo, you can also build the app yourself using ufbt.
 
 For app feedback, bugs, and feature requests, please [create an issue here](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion/issues).
 
-You can find me (0xchocolate) on discord as @cococode#6011.
+You can find me (0xchocolate) on discord as @cococode.
 
-If you'd like to donate to the app development effort:  
+If you'd like to donate to the app development effort:
+
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/O4O1R7X6K)
+
 **ETH**: `0xf32A1F0CD6122C97d8953183E53cB889cc087C9b`  
 **BTC**: `bc1qtw7s25cwdkuaups22yna8sttfxn0usm2f35wc3`
 
