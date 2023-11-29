@@ -4,7 +4,7 @@
 // Hacked together by @Willy-JL and @Spooks4576
 // Documentation at https://developers.google.com/nearby/fast-pair/specifications/introduction
 
-const struct {
+static const struct {
     uint32_t value;
     const char* name;
 } models[] = {
@@ -529,7 +529,7 @@ const struct {
     {0xB37A62, "Tesla"},
     {0x92ADC9, "Ton Upgrade Netflix"},
 };
-const uint16_t models_count = COUNT_OF(models);
+static const uint16_t models_count = COUNT_OF(models);
 
 static const char* get_name(const Payload* payload) {
     UNUSED(payload);

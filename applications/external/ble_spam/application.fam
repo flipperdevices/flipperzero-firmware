@@ -3,7 +3,7 @@ App(
     name="BLE Spam",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="ble_spam",
-    stack_size=5 * 1024,
+    stack_size=6 * 1024,
     fap_icon="ble_spam_10px.png",
     fap_category="Bluetooth",
     fap_icon_assets="icons",
