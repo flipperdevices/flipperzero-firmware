@@ -29,8 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM1129-0153-0.93.9-a974084](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-11-29 01:53 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-11-29 01:53 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-11-29 18:53 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-11-29 18:53 EST`
 - Updated: [Authenticator/TOTP v5.9.1 (By akopachov)] <https://github.com/akopachov/flipper-zero_authenticator>
 - OFW PR: [Add the "remove pairing" button to BLE hid #3237 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3237)
 - OFW PR: [HID app: Add new function key icons #3236 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3236)
@@ -69,6 +69,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - SubGHz: [Menu Return Bug Fix & Lock BinRAW Cleanup (By LeeroysHub)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/4d747faf913136766f33b4c557799920e11c7136)
 - Updated: [BLE Spam v4.2 (By Willy-JL & ECTO-1A & Spooks4576 with research from xMasterX; OFW API thanks to noproto)](https://github.com/noproto/apple_ble_spam_ofw) (Changes By Mr-Proxy-source & xAstroBoy & Willy-JL)
 - Updated: [Bluetooth/USB Remote v1.6 (By Cutch)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/1330)
+- UL: [add 303.9 frequency (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/ff41d262dc1dab11763dd8ba436e2abbb83aed54)
 
 <a name="release">
 
