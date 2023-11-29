@@ -20,7 +20,12 @@
 
 void xremote_get_version(char* version, size_t length) {
     snprintf(
-        version, length, "%d.%d.%d", XREMOTE_FAP_MAJOR, XREMOTE_FAP_MINOR, XREMOTE_BUILD_NUMBER);
+        version,
+        length,
+        "%d.%d.%d",
+        XREMOTE_VERSION_MAJ,
+        XREMOTE_VERSION_MIN,
+        XREMOTE_BUILD_NUMBER);
 }
 
 static uint32_t xremote_view_exit_callback(void* context) {

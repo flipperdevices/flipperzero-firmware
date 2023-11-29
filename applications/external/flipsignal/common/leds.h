@@ -33,8 +33,8 @@ FlipboardLeds* flipboard_leds_alloc();
 void flipboard_leds_free(FlipboardLeds* leds);
 
 /**
- * @brief Resets the LEDs to their default colors.
- * @details This method resets the LEDs data to their default color pattern.
+ * @brief Resets the LEDs to their default color pattern (off).
+ * @details This method resets the LEDs data to their default color pattern (off).
  * You must still call flipboard_leds_update to update the LEDs.
  * @param leds The FlipboardLeds struct to reset.
 */
