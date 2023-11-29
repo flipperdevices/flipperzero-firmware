@@ -111,6 +111,15 @@ App(
 )
 
 App(
+    appid="sonicare_parser",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="sonicare_plugin_ep",
+    targets=["f7"],
+    requires=["nfc"],
+    sources=["plugins/supported_cards/sonicare.c"],
+)
+
+App(
     appid="nfc_start",
     targets=["f7"],
     apptype=FlipperAppType.STARTUP,
