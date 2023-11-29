@@ -62,7 +62,6 @@ static const ContinuityColor colors_beats_studio_3[] = {
     {0x42, "Green Forest camo"},
     {0x43, "White Camo"},
 };
-
 static const ContinuityColor colors_beats_studio_pro[] = {
     {0x00, "White"},
     {0x01, "Black"},
