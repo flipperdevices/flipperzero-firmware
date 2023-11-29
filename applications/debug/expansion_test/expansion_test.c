@@ -11,10 +11,15 @@
 
 #include <flipper.pb.h>
 
+#include <storage/storage.h>
 #include <expansion/expansion.h>
 #include <expansion/expansion_protocol.h>
 
 #define TAG "ExpansionTest"
+
+#define TEST_DIR_PATH EXT_PATH(TAG)
+#define TEST_FILE_NAME "test.txt"
+#define TEST_FILE_PATH EXT_PATH(TAG "/" TEST_FILE_NAME)
 
 #define HOST_SERIAL_ID (FuriHalSerialIdLpuart)
 #define MODULE_SERIAL_ID (FuriHalSerialIdUsart)
@@ -26,22 +31,14 @@ typedef enum {
 
 #define EXPANSION_TEST_APP_ALL_FLAGS (ExpansionTestAppFlagData | ExpansionTestAppFlagExit)
 
-typedef enum {
-    ExpansionTestAppStateHandShake,
-    ExpansionTestAppStateStartRpc,
-    ExpansionTestAppStateRpcMkDir,
-    ExpansionTestAppStateRpcExit,
-    ExpansionTestAppStateError,
-} ExpansionTestAppState;
-
 typedef struct {
     FuriThreadId thread_id;
     Expansion* expansion;
     FuriHalSerialHandle* handle;
     FuriStreamBuffer* buf;
     ExpansionFrame frame;
-    ExpansionTestAppState state;
     PB_Main msg;
+    Storage* storage;
 } ExpansionTestApp;
 
 static void expansion_test_app_serial_rx_callback(uint8_t data, void* context) {
@@ -52,7 +49,7 @@ static void expansion_test_app_serial_rx_callback(uint8_t data, void* context) {
 
 static ExpansionTestApp* expansion_test_app_alloc() {
     ExpansionTestApp* instance = malloc(sizeof(ExpansionTestApp));
-    instance->buf = furi_stream_buffer_alloc(64, 1);
+    instance->buf = furi_stream_buffer_alloc(sizeof(ExpansionFrame), 1);
     return instance;
 }
 
@@ -115,134 +112,221 @@ static size_t
     return data_size;
 }
 
-static void
+static bool
+    expansion_test_app_send_status_response(ExpansionTestApp* instance, ExpansionFrameError error) {
+    ExpansionFrame frame = {
+        .header.type = ExpansionFrameTypeStatus,
+        .content.status.error = error,
+    };
+    return expansion_frame_encode(&frame, expansion_test_app_send_callback, instance);
+}
+
+static bool
     expansion_test_app_send_baud_rate_request(ExpansionTestApp* instance, uint32_t baud_rate) {
     ExpansionFrame frame = {
         .header.type = ExpansionFrameTypeBaudRate,
         .content.baud_rate.baud = baud_rate,
     };
-    expansion_frame_encode(&frame, expansion_test_app_send_callback, instance);
+    return expansion_frame_encode(&frame, expansion_test_app_send_callback, instance);
 }
 
-static void expansion_test_app_send_control_request(
+static bool expansion_test_app_send_control_request(
     ExpansionTestApp* instance,
     ExpansionFrameControlCommand command) {
     ExpansionFrame frame = {
         .header.type = ExpansionFrameTypeControl,
         .content.control.command = command,
     };
-    expansion_frame_encode(&frame, expansion_test_app_send_callback, instance);
+    return expansion_frame_encode(&frame, expansion_test_app_send_callback, instance);
 }
 
-// static void expansion_test_app_send_data_request(
-//     ExpansionTestApp* instance,
-//     const uint8_t* data,
-//     size_t data_size) {
-//     furi_assert(data_size <= EXPANSION_MAX_DATA_SIZE);
-//
-//     ExpansionFrame frame = {
-//         .header.type = ExpansionFrameTypeData,
-//         .content.data.size = data_size,
-//     };
-//
-//     memcpy(frame.content.data.bytes, data, data_size);
-//     expansion_frame_encode(&frame, expansion_test_app_send_callback, instance);
-// }
+static bool expansion_test_app_send_data_request(
+    ExpansionTestApp* instance,
+    const uint8_t* data,
+    size_t data_size) {
+    furi_assert(data_size <= EXPANSION_MAX_DATA_SIZE);
 
-static void expansion_test_app_send_rpc_request(ExpansionTestApp* instance, PB_Main* message) {
-    ExpansionFrame frame;
-    frame.header.type = ExpansionFrameTypeData;
+    ExpansionFrame frame = {
+        .header.type = ExpansionFrameTypeData,
+        .content.data.size = data_size,
+    };
 
-    pb_ostream_t stream =
-        pb_ostream_from_buffer(frame.content.data.bytes, sizeof(frame.content.data.bytes));
-    pb_encode_ex(&stream, &PB_Main_msg, message, PB_ENCODE_DELIMITED);
+    memcpy(frame.content.data.bytes, data, data_size);
+    return expansion_frame_encode(&frame, expansion_test_app_send_callback, instance);
+}
+
+static bool expansion_test_app_rpc_encode_callback(
+    pb_ostream_t* stream,
+    const pb_byte_t* data,
+    size_t data_size) {
+    ExpansionTestApp* instance = stream->state;
+
+    size_t size_sent = 0;
+
+    while(size_sent < data_size) {
+        const size_t current_size = MIN(data_size - size_sent, EXPANSION_MAX_DATA_SIZE);
+        if(!expansion_test_app_send_data_request(instance, data + size_sent, current_size)) break;
+        if(!expansion_frame_decode(&instance->frame, expansion_test_app_receive_callback, instance))
+            break;
+        if(!(instance->frame.header.type == ExpansionFrameTypeStatus &&
+             instance->frame.content.status.error == ExpansionFrameErrorNone))
+            break;
+
+        size_sent += current_size;
+    }
+
+    return size_sent == data_size;
+}
+
+static bool expansion_test_app_send_rpc_request(ExpansionTestApp* instance, PB_Main* message) {
+    pb_ostream_t stream = {
+        .callback = expansion_test_app_rpc_encode_callback,
+        .state = instance,
+        .max_size = SIZE_MAX,
+        .bytes_written = 0,
+        .errmsg = NULL,
+    };
+
+    const bool success = pb_encode_ex(&stream, &PB_Main_msg, message, PB_ENCODE_DELIMITED);
     pb_release(&PB_Main_msg, message);
-
-    frame.content.data.size = stream.bytes_written;
-    expansion_frame_encode(&frame, expansion_test_app_send_callback, instance);
+    return success;
 }
 
-static void expansion_test_app_send_request(ExpansionTestApp* instance) {
-    switch(instance->state) {
-    case ExpansionTestAppStateHandShake:
-        expansion_test_app_send_baud_rate_request(instance, 230400);
-        break;
-    case ExpansionTestAppStateStartRpc:
-        expansion_test_app_send_control_request(instance, ExpansionFrameControlCommandStartRpc);
-        break;
-    case ExpansionTestAppStateRpcMkDir:
-        instance->msg.command_id = 1;
+static bool expansion_test_app_receive_rpc_request(ExpansionTestApp* instance, PB_Main* message) {
+    bool success = false;
+
+    do {
+        if(!expansion_frame_decode(&instance->frame, expansion_test_app_receive_callback, instance))
+            break;
+        if(!expansion_test_app_send_status_response(instance, ExpansionFrameErrorNone)) break;
+        if(instance->frame.header.type != ExpansionFrameTypeData) break;
+        pb_istream_t stream = pb_istream_from_buffer(
+            instance->frame.content.data.bytes, instance->frame.content.data.size);
+        if(!pb_decode_ex(&stream, &PB_Main_msg, message, PB_DECODE_DELIMITED)) break;
+        success = true;
+    } while(false);
+
+    return success;
+}
+
+static bool expansion_test_app_handshake(ExpansionTestApp* instance) {
+    bool success = false;
+
+    do {
+        if(!expansion_test_app_send_baud_rate_request(instance, 230400)) break;
+        if(!expansion_frame_decode(&instance->frame, expansion_test_app_receive_callback, instance))
+            break;
+        if(!(instance->frame.header.type == ExpansionFrameTypeStatus &&
+             instance->frame.content.status.error == ExpansionFrameErrorNone))
+            break;
+        furi_hal_serial_set_br(instance->handle, 230400);
+        success = true;
+    } while(false);
+
+    return success;
+}
+
+static bool expansion_test_app_start_rpc(ExpansionTestApp* instance) {
+    bool success = false;
+
+    do {
+        if(!expansion_test_app_send_control_request(instance, ExpansionFrameControlCommandStartRpc))
+            break;
+        if(!expansion_frame_decode(&instance->frame, expansion_test_app_receive_callback, instance))
+            break;
+        if(!(instance->frame.header.type == ExpansionFrameTypeStatus &&
+             instance->frame.content.status.error == ExpansionFrameErrorNone))
+            break;
+        success = true;
+    } while(false);
+
+    return success;
+}
+
+static bool expansion_test_app_rpc_mkdir(ExpansionTestApp* instance) {
+    bool success = false;
+
+    instance->msg.command_id = 1;
+    instance->msg.command_status = PB_CommandStatus_OK;
+    instance->msg.which_content = PB_Main_storage_mkdir_request_tag;
+    instance->msg.has_next = false;
+    instance->msg.content.storage_mkdir_request.path = TEST_DIR_PATH;
+
+    do {
+        if(!expansion_test_app_send_rpc_request(instance, &instance->msg)) break;
+        if(!expansion_test_app_receive_rpc_request(instance, &instance->msg)) break;
+        if(!(instance->msg.command_status == PB_CommandStatus_OK &&
+             instance->msg.which_content == PB_Main_empty_tag))
+            break;
+        success = true;
+    } while(false);
+
+    return success;
+}
+
+// TODO: Implement multi-chunk RPC messages?
+static bool expansion_test_app_rpc_write(ExpansionTestApp* instance) {
+    bool success = false;
+
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    File* file = storage_file_alloc(storage);
+
+    do {
+        if(!storage_file_open(file, APP_ASSETS_PATH(TEST_FILE_NAME), FSAM_READ, FSOM_OPEN_EXISTING))
+            break;
+
+        const uint64_t file_size = storage_file_size(file);
+
+        instance->msg.command_id = 2;
         instance->msg.command_status = PB_CommandStatus_OK;
-        instance->msg.which_content = PB_Main_storage_mkdir_request_tag;
+        instance->msg.which_content = PB_Main_storage_write_request_tag;
         instance->msg.has_next = false;
-        instance->msg.content.storage_mkdir_request.path = "/ext/External_rpc_test";
+        instance->msg.content.storage_write_request.path = TEST_FILE_PATH;
+        instance->msg.content.storage_write_request.has_file = true;
+        instance->msg.content.storage_write_request.file.data =
+            malloc(PB_BYTES_ARRAY_T_ALLOCSIZE(file_size));
+        instance->msg.content.storage_write_request.file.data->size = file_size;
 
-        expansion_test_app_send_rpc_request(instance, &instance->msg);
-        break;
-    case ExpansionTestAppStateRpcExit:
-        furi_delay_ms(100);
-        // expansion_test_app_send_control_request(instance, ExpansionFrameControlCommandStopRpc);
-        break;
-    default:
-        furi_crash();
-    }
-}
+        const size_t bytes_read = storage_file_read(
+            file, instance->msg.content.storage_write_request.file.data->bytes, file_size);
 
-static void expansion_test_app_process_response(ExpansionTestApp* instance) {
-    // TODO: check return value
-    expansion_frame_decode(&instance->frame, expansion_test_app_receive_callback, instance);
-
-    const ExpansionFrameType frame_type = instance->frame.header.type;
-
-    switch(instance->state) {
-    case ExpansionTestAppStateHandShake:
-        if(frame_type == ExpansionFrameTypeStatus) {
-            if(instance->frame.content.status.error == ExpansionFrameErrorNone) {
-                furi_hal_serial_set_br(instance->handle, 230400);
-                instance->state = ExpansionTestAppStateStartRpc;
-                furi_delay_ms(100);
-            }
+        if(bytes_read != file_size) {
+            pb_release(&PB_Main_msg, &instance->msg);
+            break;
         }
-        break;
-    case ExpansionTestAppStateStartRpc:
-        if(frame_type == ExpansionFrameTypeStatus) {
-            if(instance->frame.content.status.error == ExpansionFrameErrorNone) {
-                instance->state = ExpansionTestAppStateRpcMkDir;
-            }
-        }
-        break;
-    case ExpansionTestAppStateRpcMkDir:
-        if(frame_type == ExpansionFrameTypeStatus) {
-            if(instance->frame.content.status.error == ExpansionFrameErrorNone) {
-                // Nothing, really
-                instance->state = ExpansionTestAppStateRpcExit;
-            }
-        }
-        break;
-    case ExpansionTestAppStateRpcExit:
-        furi_delay_ms(100);
-        break;
-    default:
-        furi_crash();
-    }
+
+        if(!expansion_test_app_send_rpc_request(instance, &instance->msg)) break;
+        if(!expansion_test_app_receive_rpc_request(instance, &instance->msg)) break;
+        if(!(instance->msg.command_status == PB_CommandStatus_OK &&
+             instance->msg.which_content == PB_Main_empty_tag))
+            break;
+        success = true;
+    } while(false);
+
+    storage_file_free(file);
+    furi_record_close(RECORD_STORAGE);
+
+    return success;
 }
 
 int32_t expansion_test_app(void* p) {
     UNUSED(p);
 
-    ExpansionTestApp* app = expansion_test_app_alloc();
-    expansion_test_app_start(app);
+    ExpansionTestApp* instance = expansion_test_app_alloc();
+    expansion_test_app_start(instance);
 
-    // Give the other side time to react
+    // TODO: Host should respond with a ready Heartbeat
     furi_delay_ms(100);
 
-    while(true) {
-        expansion_test_app_send_request(app);
-        expansion_test_app_process_response(app);
-    }
+    do {
+        if(!expansion_test_app_handshake(instance)) break;
+        if(!expansion_test_app_start_rpc(instance)) break;
+        if(!expansion_test_app_rpc_mkdir(instance)) break;
+        if(!expansion_test_app_rpc_write(instance)) break;
+    } while(false);
 
-    expansion_test_app_stop(app);
-    expansion_test_app_free(app);
+    expansion_test_app_stop(instance);
+    expansion_test_app_free(instance);
 
     return 0;
 }

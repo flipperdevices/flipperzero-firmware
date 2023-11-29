@@ -13,7 +13,7 @@
 #define TAG "ExpansionSrv"
 
 #define EXPANSION_INACTIVE_TIMEOUT_MS (250U)
-#define EXPANSION_BUFFER_SIZE (64U)
+#define EXPANSION_BUFFER_SIZE (sizeof(ExpansionFrame))
 
 typedef enum {
     ExpansionStateDisabled,
@@ -45,23 +45,24 @@ struct Expansion {
     ExpansionState state;
     ExpansionSessionState session_state;
     ExpansionSessionExitReason exit_reason;
-    ExpansionFrame frame;
+    ExpansionFrame rx_frame;
+    FuriStreamBuffer* rx_buf;
+    FuriSemaphore* tx_semaphore;
     FuriMutex* state_mutex;
     FuriThread* worker_thread;
-    FuriStreamBuffer* buf;
     FuriHalSerialId serial_id;
-    FuriHalSerialHandle* handle;
+    FuriHalSerialHandle* serial_handle;
     RpcSession* rpc_session;
 };
 
 static void expansion_detect_callback(void* context);
 
-// Called in uart IRQ context
+// Called in UART IRQ context
 static void expansion_serial_rx_callback(uint8_t data, void* context) {
     furi_assert(context);
     Expansion* instance = context;
 
-    furi_stream_buffer_send(instance->buf, &data, sizeof(data), 0);
+    furi_stream_buffer_send(instance->rx_buf, &data, sizeof(data), 0);
     furi_thread_flags_set(furi_thread_get_id(instance->worker_thread), ExpansionFlagData);
 }
 
@@ -72,7 +73,7 @@ static size_t expansion_receive_callback(uint8_t* data, size_t data_size, void* 
 
     while(true) {
         received_size += furi_stream_buffer_receive(
-            instance->buf, data + received_size, data_size - received_size, 0);
+            instance->rx_buf, data + received_size, data_size - received_size, 0);
 
         if(received_size == data_size) break;
 
@@ -98,10 +99,7 @@ static size_t expansion_receive_callback(uint8_t* data, size_t data_size, void* 
 
 static size_t expansion_send_callback(const uint8_t* data, size_t data_size, void* context) {
     Expansion* instance = context;
-
-    // TODO: Do not call it from RPC thread!
-    furi_hal_serial_tx(instance->handle, data, data_size);
-
+    furi_hal_serial_tx(instance->serial_handle, data, data_size);
     return data_size;
 }
 
@@ -114,8 +112,6 @@ static void expansion_send_status_response(Expansion* instance, ExpansionFrameEr
     expansion_frame_encode(&frame, expansion_send_callback, instance);
 }
 
-// Can be called in Rpc session thread context OR in expansion worker context
-// TODO: Do not call it from RPC thread!
 static void
     expansion_send_data_response(Expansion* instance, const uint8_t* data, size_t data_size) {
     furi_assert(data_size <= EXPANSION_MAX_DATA_SIZE);
@@ -131,16 +127,19 @@ static void
 
 // Called in Rpc session thread context
 static void expansion_rpc_send_callback(void* context, uint8_t* data, size_t data_size) {
-    // TODO: split big data across several packets
-    furi_assert(data_size <= EXPANSION_MAX_DATA_SIZE);
     Expansion* instance = context;
-    // TODO: Do not allow sending data directly from RPC thread context !!!!
-    expansion_send_data_response(instance, data, data_size);
+    for(size_t sent_data_size = 0; sent_data_size < data_size;) {
+        furi_semaphore_acquire(instance->tx_semaphore, FuriWaitForever);
+        const size_t current_data_size = MIN(data_size - sent_data_size, EXPANSION_MAX_DATA_SIZE);
+        expansion_send_data_response(instance, data + sent_data_size, current_data_size);
+        sent_data_size += current_data_size;
+    }
 }
 
 static void expansion_rpc_session_open(Expansion* instance) {
     Rpc* rpc = furi_record_open(RECORD_RPC);
     instance->rpc_session = rpc_session_open(rpc, RpcOwnerUnknown);
+    instance->tx_semaphore = furi_semaphore_alloc(1, 1);
 
     rpc_session_set_context(instance->rpc_session, instance);
     rpc_session_set_send_bytes_callback(instance->rpc_session, expansion_rpc_send_callback);
@@ -148,6 +147,7 @@ static void expansion_rpc_session_open(Expansion* instance) {
 
 static void expansion_rpc_session_close(Expansion* instance) {
     rpc_session_close(instance->rpc_session);
+    furi_semaphore_free(instance->tx_semaphore);
     furi_record_close(RECORD_RPC);
 }
 
@@ -157,29 +157,30 @@ static int32_t expansion_worker(void* context) {
 
     furi_hal_serial_control_set_expansion_callback(instance->serial_id, NULL, NULL);
 
-    instance->handle = furi_hal_serial_control_acquire(instance->serial_id);
-    furi_check(instance->handle);
+    instance->serial_handle = furi_hal_serial_control_acquire(instance->serial_id);
+    furi_check(instance->serial_handle);
 
-    instance->buf = furi_stream_buffer_alloc(EXPANSION_BUFFER_SIZE, 1);
+    instance->rx_buf = furi_stream_buffer_alloc(EXPANSION_BUFFER_SIZE, 1);
     instance->session_state = ExpansionSessionStateHandShake;
     instance->exit_reason = ExpansionSessionExitReasonUnknown;
 
-    furi_hal_serial_init(instance->handle, EXPANSION_DEFAULT_BAUD_RATE);
-    furi_hal_serial_set_rx_callback(instance->handle, expansion_serial_rx_callback, instance);
+    furi_hal_serial_init(instance->serial_handle, EXPANSION_DEFAULT_BAUD_RATE);
+    furi_hal_serial_set_rx_callback(
+        instance->serial_handle, expansion_serial_rx_callback, instance);
 
     while(true) {
-        if(!expansion_frame_decode(&instance->frame, expansion_receive_callback, instance)) {
+        if(!expansion_frame_decode(&instance->rx_frame, expansion_receive_callback, instance)) {
             break;
         }
 
         if(instance->session_state == ExpansionSessionStateHandShake) {
-            if(instance->frame.header.type == ExpansionFrameTypeBaudRate) {
+            if(instance->rx_frame.header.type == ExpansionFrameTypeBaudRate) {
                 // TODO: proper baud rate check
-                if(instance->frame.content.baud_rate.baud == 230400) {
+                if(instance->rx_frame.content.baud_rate.baud == 230400) {
                     // Send response on previous baud rate
                     expansion_send_status_response(instance, ExpansionFrameErrorNone);
                     // Set new baud rate
-                    furi_hal_serial_set_br(instance->handle, 230400);
+                    furi_hal_serial_set_br(instance->serial_handle, 230400);
                     instance->session_state = ExpansionSessionStateNormal;
                     // Go to the next iteration
                     continue;
@@ -187,8 +188,8 @@ static int32_t expansion_worker(void* context) {
             }
 
         } else if(instance->session_state == ExpansionSessionStateNormal) {
-            if(instance->frame.header.type == ExpansionFrameTypeControl) {
-                if(instance->frame.content.control.command ==
+            if(instance->rx_frame.header.type == ExpansionFrameTypeControl) {
+                if(instance->rx_frame.content.control.command ==
                    ExpansionFrameControlCommandStartRpc) {
                     instance->session_state = ExpansionSessionStateRpc;
                     expansion_rpc_session_open(instance);
@@ -199,25 +200,24 @@ static int32_t expansion_worker(void* context) {
             }
 
         } else if(instance->session_state == ExpansionSessionStateRpc) {
-            if(instance->frame.header.type == ExpansionFrameTypeData) {
+            if(instance->rx_frame.header.type == ExpansionFrameTypeData) {
+                expansion_send_status_response(instance, ExpansionFrameErrorNone);
+
                 const size_t size_consumed = rpc_session_feed(
                     instance->rpc_session,
-                    instance->frame.content.data.bytes,
-                    instance->frame.content.data.size,
+                    instance->rx_frame.content.data.bytes,
+                    instance->rx_frame.content.data.size,
                     EXPANSION_INACTIVE_TIMEOUT_MS);
 
-                if(size_consumed != instance->frame.content.data.size) {
-                    // Send HOLD response
-                    // Restart the RPC session
-                } else {
-                    expansion_send_status_response(instance, ExpansionFrameErrorNone);
+                if(size_consumed != instance->rx_frame.content.data.size) {
+                    furi_crash("Oopsie daisy");
                 }
 
                 // Go to the next iteration
                 continue;
 
-            } else if(instance->frame.header.type == ExpansionFrameTypeControl) {
-                if(instance->frame.content.control.command ==
+            } else if(instance->rx_frame.header.type == ExpansionFrameTypeControl) {
+                if(instance->rx_frame.content.control.command ==
                    ExpansionFrameControlCommandStopRpc) {
                     expansion_rpc_session_close(instance);
                     instance->session_state = ExpansionSessionStateNormal;
@@ -225,6 +225,13 @@ static int32_t expansion_worker(void* context) {
                     // Go to the next iteration
                     continue;
                 }
+            } else if(instance->rx_frame.header.type == ExpansionFrameTypeStatus) {
+                if(instance->rx_frame.content.status.error == ExpansionFrameErrorNone) {
+                    furi_semaphore_release(instance->tx_semaphore);
+                }
+
+                // Go to the next iteration
+                continue;
             }
 
         } else {
@@ -239,8 +246,8 @@ static int32_t expansion_worker(void* context) {
         expansion_rpc_session_close(instance);
     }
 
-    furi_hal_serial_control_release(instance->handle);
-    furi_stream_buffer_free(instance->buf);
+    furi_hal_serial_control_release(instance->serial_handle);
+    furi_stream_buffer_free(instance->rx_buf);
 
     if(instance->exit_reason == ExpansionSessionExitReasonTimeout) {
         // Thread exited due to timeout, and no disable request was issued by user code

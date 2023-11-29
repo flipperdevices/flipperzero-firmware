@@ -11,7 +11,7 @@
 extern "C" {
 #endif
 
-#define EXPANSION_MAX_DATA_SIZE (64)
+#define EXPANSION_MAX_DATA_SIZE (64U)
 
 typedef enum {
     ExpansionFrameTypeHeartbeat = 1,
