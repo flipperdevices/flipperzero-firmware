@@ -62,10 +62,11 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Hangman v1.5 (By Evgeny Stepanischev & Eva Stepanischeva)](https://github.com/bolknote/Flipper-Zero-Hangman-Game)
 - Updated: [HEX Editor v1.3 (By dunaevai135)](https://github.com/dunaevai135/flipper-zero-hex_editor)
 - SubGHz: [Load Sub from Browser respects ListenAfterTX (By LeeroysHub)](https://github.com/LeeroysHub/RM-Flipper/commit/242e06cd6e5e68bccba6b1b5c4273c41b953b0cc)
+- Updated: [ESP32 Evil Portal v0.2 (By bigbrodude6119)](https://github.com/bigbrodude6119/flipper-zero-evil-portal) Changes for CFW Settings UART Customizations, Overflow and Memory Fixes (By Willy-JL)
 - Updated: [FlipBoard Blinky v1.0 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
 - Updated: [FlipBoard Keyboard v1.0 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
 - Updated: [FlipBoard Signal v1.0 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
-- Updated: [ESP32 Evil Portal v0.2 (By bigbrodude6119)](https://github.com/bigbrodude6119/flipper-zero-evil-portal) Changes for CFW Settings UART Customizations, Overflow and Memory Fixes (By Willy-JL)
+- Updated: [XRemote v1.2 (By kala13x)](https://github.com/kala13x/flipper-xremote)
 
 <a name="release">
 
@@ -520,7 +521,7 @@ $ ./fbt dolphin_ext
 - [Wifi Mapping (By carvilsi)](https://github.com/carvilsi/flipper0-wifi-map/tree/main) `Req: ESP32`
 - [Wii EC Analyzer v1.1 (By csBlueChip)](https://github.com/csBlueChip/FlipperZero_WiiEC)
 - [Wire Tester v1.1 (By unixispower)](https://gitlab.com/unixispower/flipper-wire-tester)
-- [XRemote v1.1.2 (By kala13x)](https://github.com/kala13x/flipper-xremote)
+- [XRemote v1.2 (By kala13x)](https://github.com/kala13x/flipper-xremote)
 
 ## Current Bounties $$ (Sorted By Difficulty - Easiest to Hardest)
 
