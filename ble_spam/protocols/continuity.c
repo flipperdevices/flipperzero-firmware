@@ -863,18 +863,21 @@ void scene_continuity_pp_color_on_enter(void* _ctx) {
 
     bool found = false;
     uint8_t colors_count = 0;
-    for(uint8_t i = 0; i < pp_models_count; i++) {
-        if(cfg->data.proximity_pair.model == pp_models[i].value) {
-            colors_count = pp_models[i].colors_count;
-            for(uint8_t j = 0; j < colors_count; j++) {
-                submenu_add_item(submenu, pp_models[i].colors[j].name, j, pp_color_callback, ctx);
-                if(!found && value &&
-                   cfg->data.proximity_pair.color == pp_models[i].colors[j].value) {
-                    found = true;
-                    selected = j;
+    if(payload->mode == PayloadModeValue) {
+        for(uint8_t i = 0; i < pp_models_count; i++) {
+            if(cfg->data.proximity_pair.model == pp_models[i].value) {
+                colors_count = pp_models[i].colors_count;
+                for(uint8_t j = 0; j < colors_count; j++) {
+                    submenu_add_item(
+                        submenu, pp_models[i].colors[j].name, j, pp_color_callback, ctx);
+                    if(!found && value &&
+                       cfg->data.proximity_pair.color == pp_models[i].colors[j].value) {
+                        found = true;
+                        selected = j;
+                    }
                 }
+                break;
             }
-            break;
         }
     }
     submenu_add_item(submenu, "Custom", colors_count, pp_color_callback, ctx);
