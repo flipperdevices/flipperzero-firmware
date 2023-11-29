@@ -1,7 +1,6 @@
 #include "../wifi_marauder_app_i.h"
 #include "wifi_marauder_script_worker.h"
 
-
 WifiMarauderScriptWorker* wifi_marauder_script_worker_alloc() {
     WifiMarauderScriptWorker* worker = malloc(sizeof(WifiMarauderScriptWorker));
     if(worker == NULL) {
