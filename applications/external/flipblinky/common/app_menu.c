@@ -1,5 +1,7 @@
 #include "app_menu_i.h"
 
+static ViewDispatcher* global_view_dispatcher;
+
 /**
  * @brief      Callback for navigation events, used to exit application.
  * @details    This function is called when user press back button.  We return VIEW_NONE to
@@ -40,6 +42,30 @@ static void app_menu_callback(void* context, uint32_t index) {
 }
 
 /**
+ * @brief      Callback for when submenu view is displayed.
+ * @details    This function is called when submenu view is displayed.  We use
+ *          view_dispatcher_send_custom_event to send CustomEventAppMenuEnter event.
+ * @param      _context  Unused parameter. 
+*/
+static void app_menu_enter_callback(void* _context) {
+    // context is Submenu, which cannot access the global_view_dispatcher.
+    UNUSED(_context);
+    view_dispatcher_send_custom_event(global_view_dispatcher, CustomEventAppMenuEnter);
+}
+
+/**
+ * @brief      Callback for when submenu view is exited.
+ * @details    This function is called when submenu view is exited.  We use
+ *         view_dispatcher_send_custom_event to send CustomEventAppMenuExit event.
+ * @param      _context  Unused parameter. 
+*/
+static void app_menu_exit_callback(void* _context) {
+    // context is Submenu, which cannot access the global_view_dispatcher.
+    UNUSED(_context);
+    view_dispatcher_send_custom_event(global_view_dispatcher, CustomEventAppMenuExit);
+}
+
+/**
  * @brief      Allocate and initialize AppMenu structure.
  * @details    This function allocate and initialize AppMenu structure.  It also allocate
  *           and initialize submenu structure.
@@ -49,8 +75,11 @@ static void app_menu_callback(void* context, uint32_t index) {
 AppMenu* app_menu_alloc(ViewDispatcher* view_dispatcher) {
     AppMenu* menu = (AppMenu*)malloc(sizeof(AppMenu));
     menu->view_dispatcher = view_dispatcher;
+    global_view_dispatcher = view_dispatcher;
     menu->submenu = submenu_alloc();
     ViewIdsArray_init(menu->view_ids);
+    view_set_enter_callback(submenu_get_view(menu->submenu), app_menu_enter_callback);
+    view_set_exit_callback(submenu_get_view(menu->submenu), app_menu_exit_callback);
     view_set_previous_callback(submenu_get_view(menu->submenu), navigation_exit);
     view_dispatcher_add_view(
         menu->view_dispatcher, FLIPBOARD_APP_MENU_VIEW_ID, submenu_get_view(menu->submenu));

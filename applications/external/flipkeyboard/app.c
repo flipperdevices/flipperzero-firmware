@@ -118,6 +118,57 @@ View* get_primary_view(void* context) {
 }
 
 /**
+ * @brief This method is invoked when the app menu is loaded.
+ * @details This method is invoked when the app menu is loaded.  It is used to
+ *         display a startup animation.
+ * @param model The FlipboardModel* context.
+ */
+static void loaded_app_menu(FlipboardModel* model) {
+    static bool initial_load = true;
+    FlipboardLeds* leds = flipboard_model_get_leds(model);
+    UNUSED(color_names);
+    UNUSED(color_values);
+    if(initial_load) {
+        for(int i = 0; i < 7; i++) {
+            flipboard_leds_set(leds, LedId1, (1 << (16 + i)));
+            flipboard_leds_set(leds, LedId2, (1 << (0 + i)));
+            flipboard_leds_set(leds, LedId3, (1 << (8 + i)));
+            flipboard_leds_set(leds, LedId4, (1 << (0 + i)) | (1 << (8 + i)));
+            flipboard_leds_update(leds);
+            furi_delay_ms(100);
+        }
+        for(int i = 7; i > 0; i--) {
+            flipboard_leds_set(leds, LedId1, (1 << (16 + i)));
+            flipboard_leds_set(leds, LedId2, (1 << (0 + i)));
+            flipboard_leds_set(leds, LedId3, (1 << (8 + i)));
+            flipboard_leds_set(leds, LedId4, (1 << (0 + i)) | (1 << (8 + i)));
+            flipboard_leds_update(leds);
+            furi_delay_ms(100);
+        }
+        initial_load = false;
+    }
+
+    flipboard_leds_reset(leds);
+    flipboard_leds_update(leds);
+}
+
+/**
+ * @brief This method is invoked when a custom event is received.
+ * @param context The Flipboard* context.
+ * @param event The event to handle.
+ * @return true if the event was handled, false otherwise.
+ */
+static bool custom_event_handler(void* context, uint32_t event) {
+    FlipboardModel* model = flipboard_get_model((Flipboard*)context);
+
+    if(event == CustomEventAppMenuEnter) {
+        loaded_app_menu(model);
+    }
+
+    return true;
+}
+
+/**
  * @brief This method is invoked when the FlipboardKeyboard app is launched.
  * @param p Unused.
  * @return 0.
@@ -141,6 +192,9 @@ int32_t flipboard_keyboard_app(void* p) {
         shift_keys,
         COUNT_OF(keys) / 12,
         get_primary_view);
+    view_dispatcher_set_event_callback_context(flipboard_get_view_dispatcher(app), app);
+    view_dispatcher_set_custom_event_callback(
+        flipboard_get_view_dispatcher(app), custom_event_handler);
     view_dispatcher_run(flipboard_get_view_dispatcher(app));
     flipboard_free(app);
 
