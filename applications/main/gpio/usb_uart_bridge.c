@@ -130,7 +130,7 @@ static void usb_uart_serial_init(UsbUartBridge* usb_uart, uint8_t uart_ch) {
     furi_assert(usb_uart->serial_handle);
 
     furi_hal_serial_init(usb_uart->serial_handle, 115200);
-    furi_hal_serial_dma_start(usb_uart->serial_handle, usb_uart_on_irq_rx_dma_cb, usb_uart);
+    furi_hal_serial_dma_rx_start(usb_uart->serial_handle, usb_uart_on_irq_rx_dma_cb, usb_uart);
 }
 
 static void usb_uart_serial_deinit(UsbUartBridge* usb_uart) {

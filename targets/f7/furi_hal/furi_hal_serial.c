@@ -27,7 +27,6 @@ static FuriHalSerial furi_hal_serial[FuriHalSerialIdMax] = {0};
 
 static size_t furi_hal_serial_dma_bytes_available(FuriHalSerialId ch);
 
-//###################USART######################
 static void furi_hal_serial_usart_irq_callback() {
     if(LL_USART_IsActiveFlag_RXNE_RXFNE(USART1)) {
         if(furi_hal_serial[FuriHalSerialIdUsart].rx_byte_callback) {
@@ -184,9 +183,7 @@ static void furi_hal_serial_uasrt_init(FuriHalSerialHandle* handle, uint32_t bau
     LL_USART_DisableIT_ERROR(USART1);
     furi_hal_serial[handle->id].enabled = true;
 }
-//###################END USART###################
 
-//###################LPUART######################
 static void furi_hal_serial_lpuart_irq_callback() {
     if(LL_LPUART_IsActiveFlag_RXNE_RXFNE(LPUART1)) {
         if(furi_hal_serial[FuriHalSerialIdLpuart].rx_byte_callback) {
@@ -341,7 +338,6 @@ static void furi_hal_serial_lpuart_init(FuriHalSerialHandle* handle, uint32_t ba
     LL_LPUART_DisableIT_ERROR(LPUART1);
     furi_hal_serial[handle->id].enabled = true;
 }
-//###################END LPUART###################
 
 void furi_hal_serial_init(FuriHalSerialHandle* handle, uint32_t baud) {
     furi_check(handle);
@@ -562,7 +558,7 @@ size_t furi_hal_serial_dma_rx(FuriHalSerialHandle* handle, uint8_t* data, size_t
     return i;
 }
 
-void furi_hal_serial_dma_start(
+void furi_hal_serial_dma_rx_start(
     FuriHalSerialHandle* handle,
     FuriHalSerialDmaRxCallback callback,
     void* context) {

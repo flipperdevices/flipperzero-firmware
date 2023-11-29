@@ -106,42 +106,45 @@ void furi_hal_serial_set_rx_callback(
 
 /** Serial DMA events */
 typedef enum {
-    FuriHalSerialDmaRxEventRx,
-    FuriHalSerialDmaRxEventEnd,
+    FuriHalSerialDmaRxEventRx, /**< Data available and must be picked up */
+    FuriHalSerialDmaRxEventEnd, /**< Bus idle detected, data may be available (check data_len) */
 } FuriHalSerialDmaRxEvent;
 
 /** Receive DMA callback
  *
  * @warning    DMA Callback will be called in interrupt context, ensure thread
  *             safety on your side.
- * @param      handle       Serial handle
- * @param      ev           FuriHalSerialDmaRxEvent
- * @param      data_len     Received data
- * @param      context      Callback context provided earlier
+ *
+ * @param      handle    Serial handle
+ * @param      event     FuriHalSerialDmaRxEvent
+ * @param      data_len  Received data
+ * @param      context   Callback context provided earlier
  */
 typedef void (*FuriHalSerialDmaRxCallback)(
     FuriHalSerialHandle* handle,
-    FuriHalSerialDmaRxEvent ev,
+    FuriHalSerialDmaRxEvent event,
     size_t data_len,
     void* context);
 
-/**
- * Sets Serial event callback receive DMA
- * @param   handle      Serial handle
- * @param   callback    callback pointer
- * @param   context     callback context
+/** Sets Serial event callback receive DMA
+ *
+ * @param      handle    Serial handle
+ * @param      callback  callback pointer
+ * @param      context   callback context
  */
-void furi_hal_serial_dma_start(
+void furi_hal_serial_dma_rx_start(
     FuriHalSerialHandle* handle,
     FuriHalSerialDmaRxCallback callback,
     void* context);
 
 /** Get data Serial receive DMA
- * @warning   This function is called only from the callback FuriHalSerialDmaRxCallback
- *  
- * @param   handle      Serial handle
- * @param   data        pointer to data buffer
- * @param   len         get data size (in bytes)
+ *
+ * @warning    This function must be called only from the callback
+ *             FuriHalSerialDmaRxCallback
+ *
+ * @param      handle  Serial handle
+ * @param      data    pointer to data buffer
+ * @param      len     get data size (in bytes)
  *
  * @return     size actual data receive (in bytes)
  */
