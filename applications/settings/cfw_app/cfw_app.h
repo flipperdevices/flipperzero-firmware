@@ -42,6 +42,10 @@
 
 ARRAY_DEF(CharList, char*)
 
+//For the Dolphin Manifest Switcher Menu.
+typedef struct ManifestInfo ManifestInfo;
+ARRAY_DEF(ManifestFilesArray, ManifestInfo*, M_POD_OPLIST)
+
 static const struct {
     char* name;
     RgbColor color;
