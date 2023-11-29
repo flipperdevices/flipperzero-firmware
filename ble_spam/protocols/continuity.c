@@ -6,29 +6,86 @@
 // Nearby Action IDs and Documentation at https://github.com/furiousMAC/continuity/
 // Proximity Pair IDs from https://github.com/ECTO-1A/AppleJuice/
 
-const struct {
+typedef struct {
+    uint8_t value;
+    const char* name;
+} ContinuityColor;
+
+static const ContinuityColor colors_white[] = {
+    {0x00, "White"},
+};
+static const ContinuityColor colors_beats_flex[] = {
+    {0x00, "White"},
+    {0x01, "Black"},
+};
+static const ContinuityColor colors_beats_solo_3[] = {
+    {0x00, "White"},
+    {0x01, "Black"},
+};
+static const ContinuityColor colors_powerbeats_3[] = {
+    {0x00, "White"},
+    {0x01, "Black"},
+};
+static const ContinuityColor colors_powerbeats_pro[] = {
+    {0x00, "White"},
+    {0x01, "Black"},
+};
+static const ContinuityColor colors_beats_solo_pro[] = {
+    {0x00, "White"},
+    {0x01, "Black"},
+};
+static const ContinuityColor colors_beats_studio_buds[] = {
+    {0x00, "White"},
+    {0x01, "Black"},
+};
+static const ContinuityColor colors_beats_x[] = {
+    {0x00, "White"},
+    {0x01, "Black"},
+};
+static const ContinuityColor colors_beats_studio_3[] = {
+    {0x00, "White"},
+    {0x01, "Black"},
+    {0x03, "Red"},
+    {0x43, "White marble"},
+};
+static const ContinuityColor colors_beats_studio_pro[] = {
+    {0x00, "White"},
+    {0x01, "Black"},
+};
+static const ContinuityColor colors_beats_fit_pro[] = {
+    {0x00, "White"},
+    {0x01, "Black"},
+};
+static const ContinuityColor colors_beats_studio_buds_[] = {
+    {0x00, "White"},
+    {0x01, "Black"},
+};
+
+static const struct {
     uint16_t value;
     const char* name;
+    const ContinuityColor* colors;
+    const uint8_t colors_count;
 } pp_models[] = {
-    {0x0E20, "AirPods Pro"},
-    {0x0620, "Beats Solo 3"},
-    {0x0A20, "AirPods Max"},
-    {0x1020, "Beats Flex"},
-    {0x0055, "Airtag"},
-    {0x0030, "Hermes Airtag"},
-    {0x0220, "AirPods"},
-    {0x0F20, "AirPods 2nd Gen"},
-    {0x1320, "AirPods 3rd Gen"},
-    {0x1420, "AirPods Pro 2nd Gen"},
-    {0x0320, "Powerbeats 3"},
-    {0x0B20, "Powerbeats Pro"},
-    {0x0C20, "Beats Solo Pro"},
-    {0x1120, "Beats Studio Buds"},
-    {0x0520, "Beats X"},
-    {0x0920, "Beats Studio 3"},
-    {0x1720, "Beats Studio Pro"},
-    {0x1220, "Beats Fit Pro"},
-    {0x1620, "Beats Studio Buds+"},
+    {0x0E20, "AirPods Pro", colors_white, COUNT_OF(colors_white)},
+    {0x0A20, "AirPods Max", colors_white, COUNT_OF(colors_white)},
+    {0x0055, "Airtag", colors_white, COUNT_OF(colors_white)},
+    {0x0030, "Hermes Airtag", colors_white, COUNT_OF(colors_white)},
+    {0x0220, "AirPods", colors_white, COUNT_OF(colors_white)},
+    {0x0F20, "AirPods 2nd Gen", colors_white, COUNT_OF(colors_white)},
+    {0x1320, "AirPods 3rd Gen", colors_white, COUNT_OF(colors_white)},
+    {0x1420, "AirPods Pro 2nd Gen", colors_white, COUNT_OF(colors_white)},
+    {0x1020, "Beats Flex", colors_beats_flex, COUNT_OF(colors_beats_flex)},
+    {0x0620, "Beats Solo 3", colors_beats_solo_3, COUNT_OF(colors_beats_solo_3)},
+    {0x0320, "Powerbeats 3", colors_powerbeats_3, COUNT_OF(colors_powerbeats_3)},
+    {0x0B20, "Powerbeats Pro", colors_powerbeats_pro, COUNT_OF(colors_powerbeats_pro)},
+    {0x0C20, "Beats Solo Pro", colors_beats_solo_pro, COUNT_OF(colors_beats_solo_pro)},
+    {0x1120, "Beats Studio Buds", colors_beats_studio_buds, COUNT_OF(colors_beats_studio_buds)},
+    {0x0520, "Beats X", colors_beats_x, COUNT_OF(colors_beats_x)},
+    {0x0920, "Beats Studio 3", colors_beats_studio_3, COUNT_OF(colors_beats_studio_3)},
+    {0x1720, "Beats Studio Pro", colors_beats_studio_pro, COUNT_OF(colors_beats_studio_pro)},
+    {0x1220, "Beats Fit Pro", colors_beats_fit_pro, COUNT_OF(colors_beats_fit_pro)},
+    {0x1620, "Beats Studio Buds+", colors_beats_studio_buds_, COUNT_OF(colors_beats_studio_buds_)},
 };
 static const uint8_t pp_models_count = COUNT_OF(pp_models);
 
@@ -139,16 +196,32 @@ static void make_packet(uint8_t* _size, uint8_t** _packet, Payload* payload) {
 
     case ContinuityTypeProximityPair: {
         uint16_t model;
+        uint8_t color;
         switch(payload ? payload->mode : PayloadModeRandom) {
         case PayloadModeRandom:
-        default:
-            model = pp_models[rand() % pp_models_count].value;
+        default: {
+            uint8_t model_index = rand() % pp_models_count;
+            uint8_t color_index = rand() % pp_models[model_index].colors_count;
+            model = pp_models[model_index].value;
+            color = pp_models[model_index].colors[color_index].value;
             break;
+        }
         case PayloadModeValue:
             model = cfg->data.proximity_pair.model;
+            color = cfg->data.proximity_pair.color;
             break;
         case PayloadModeBruteforce:
-            model = cfg->data.proximity_pair.model = payload->bruteforce.value;
+            switch(cfg->data.proximity_pair.bruteforce_mode) {
+            case ContinuityPpBruteforceModel:
+            default:
+                model = cfg->data.proximity_pair.model = payload->bruteforce.value;
+                color = cfg->data.proximity_pair.color;
+                break;
+            case ContinuityPpBruteforceColor:
+                model = cfg->data.proximity_pair.model;
+                color = cfg->data.proximity_pair.color = payload->bruteforce.value;
+                break;
+            }
             break;
         }
 
@@ -169,7 +242,7 @@ static void make_packet(uint8_t* _size, uint8_t** _packet, Payload* payload) {
         packet[i++] = ((rand() % 10) << 4) + (rand() % 10); // Buds Battery Level
         packet[i++] = ((rand() % 8) << 4) + (rand() % 10); // Charing Status and Battery Case Level
         packet[i++] = (rand() % 256); // Lid Open Counter
-        packet[i++] = 0x00; // Device Color
+        packet[i++] = color; // Device Color
         packet[i++] = 0x00;
         furi_hal_random_fill_buf(&packet[i], 16); // Encrypted Payload
         i += 16;
@@ -290,6 +363,7 @@ static void make_packet(uint8_t* _size, uint8_t** _packet, Payload* payload) {
 enum {
     _ConfigPpExtraStart = ConfigExtraStart,
     ConfigPpModel,
+    ConfigPpColor,
     ConfigPpPrefix,
     ConfigPpCOUNT,
 };
@@ -315,6 +389,10 @@ static void config_callback(void* _ctx, uint32_t index) {
         switch(index) {
         case ConfigPpModel:
             scene_manager_next_scene(ctx->scene_manager, SceneContinuityPpModel);
+            break;
+        case ConfigPpColor:
+            if(payload->mode != PayloadModeRandom)
+                scene_manager_next_scene(ctx->scene_manager, SceneContinuityPpColor);
             break;
         case ConfigPpPrefix:
             scene_manager_next_scene(ctx->scene_manager, SceneContinuityPpPrefix);
@@ -356,18 +434,38 @@ static void config_callback(void* _ctx, uint32_t index) {
     }
 }
 static void pp_model_changed(VariableItem* item) {
-    Payload* payload = variable_item_get_context(item);
+    Ctx* ctx = variable_item_get_context(item);
+    Payload* payload = &ctx->attack->payload;
     ContinuityCfg* cfg = &payload->cfg.continuity;
     uint8_t index = variable_item_get_current_value_index(item);
     if(index) {
         index--;
-        payload->mode = PayloadModeValue;
+        if(payload->mode != PayloadModeBruteforce ||
+           cfg->data.proximity_pair.bruteforce_mode == ContinuityPpBruteforceModel)
+            payload->mode = PayloadModeValue;
         cfg->data.proximity_pair.model = pp_models[index].value;
         variable_item_set_current_value_text(item, pp_models[index].name);
     } else {
         payload->mode = PayloadModeRandom;
         variable_item_set_current_value_text(item, "Random");
     }
+    scene_manager_set_scene_state(ctx->scene_manager, SceneConfig, ConfigPpModel);
+    scene_manager_previous_scene(ctx->scene_manager);
+    scene_manager_next_scene(ctx->scene_manager, SceneConfig);
+}
+static void pp_color_changed(VariableItem* item) {
+    Payload* payload = variable_item_get_context(item);
+    ContinuityCfg* cfg = &payload->cfg.continuity;
+    uint8_t index = variable_item_get_current_value_index(item);
+    if(payload->mode != PayloadModeBruteforce ||
+       cfg->data.proximity_pair.bruteforce_mode == ContinuityPpBruteforceColor)
+        payload->mode = PayloadModeValue;
+    uint8_t model_index = 0;
+    for(; model_index < pp_models_count; model_index++) {
+        if(cfg->data.proximity_pair.model == pp_models[model_index].value) break;
+    }
+    cfg->data.proximity_pair.color = pp_models[model_index].colors[index].value;
+    variable_item_set_current_value_text(item, pp_models[model_index].colors[index].name);
 }
 static void pp_prefix_changed(VariableItem* item) {
     Payload* payload = variable_item_get_context(item);
@@ -405,21 +503,36 @@ static void extra_config(Ctx* ctx) {
 
     switch(cfg->type) {
     case ContinuityTypeProximityPair: {
-        item = variable_item_list_add(
-            list, "Model Code", pp_models_count + 1, pp_model_changed, payload);
+        item =
+            variable_item_list_add(list, "Model Code", pp_models_count + 1, pp_model_changed, ctx);
         const char* model_name = NULL;
         char model_name_buf[5];
+        const char* color_name = NULL;
+        char color_name_buf[3];
+        uint8_t colors_count;
+        uint8_t value_index_color;
         switch(payload->mode) {
         case PayloadModeRandom:
         default:
             model_name = "Random";
             value_index = 0;
+            color_name = "Random";
+            colors_count = 1;
+            value_index_color = 0;
             break;
         case PayloadModeValue:
             for(uint8_t i = 0; i < pp_models_count; i++) {
                 if(cfg->data.proximity_pair.model == pp_models[i].value) {
                     model_name = pp_models[i].name;
                     value_index = i + 1;
+                    colors_count = pp_models[i].colors_count;
+                    for(uint8_t j = 0; j < colors_count; j++) {
+                        if(cfg->data.proximity_pair.color == pp_models[i].colors[j].value) {
+                            color_name = pp_models[i].colors[j].name;
+                            value_index_color = j;
+                            break;
+                        }
+                    }
                     break;
                 }
             }
@@ -428,15 +541,59 @@ static void extra_config(Ctx* ctx) {
                     model_name_buf, sizeof(model_name_buf), "%04X", cfg->data.proximity_pair.model);
                 model_name = model_name_buf;
                 value_index = pp_models_count + 1;
+                colors_count = 0;
+            }
+            if(!color_name) {
+                snprintf(
+                    color_name_buf, sizeof(color_name_buf), "%02X", cfg->data.proximity_pair.color);
+                color_name = color_name_buf;
+                value_index_color = colors_count;
             }
             break;
         case PayloadModeBruteforce:
-            model_name = "Bruteforce";
-            value_index = pp_models_count + 1;
+            switch(cfg->data.proximity_pair.bruteforce_mode) {
+            case ContinuityPpBruteforceModel:
+            default:
+                model_name = "Bruteforce";
+                value_index = pp_models_count + 1;
+                snprintf(
+                    color_name_buf, sizeof(color_name_buf), "%02X", cfg->data.proximity_pair.color);
+                color_name = color_name_buf;
+                colors_count = 1;
+                value_index_color = 0;
+                break;
+            case ContinuityPpBruteforceColor:
+                for(uint8_t i = 0; i < pp_models_count; i++) {
+                    if(cfg->data.proximity_pair.model == pp_models[i].value) {
+                        model_name = pp_models[i].name;
+                        value_index = i + 1;
+                        colors_count = pp_models[i].colors_count;
+                        break;
+                    }
+                }
+                if(!model_name) {
+                    snprintf(
+                        model_name_buf,
+                        sizeof(model_name_buf),
+                        "%04X",
+                        cfg->data.proximity_pair.model);
+                    model_name = model_name_buf;
+                    value_index = pp_models_count + 1;
+                    colors_count = 0;
+                }
+                color_name = "Bruteforce";
+                value_index_color = colors_count;
+                break;
+            }
             break;
         }
         variable_item_set_current_value_index(item, value_index);
         variable_item_set_current_value_text(item, model_name);
+
+        item =
+            variable_item_list_add(list, "Device Color", colors_count, pp_color_changed, payload);
+        variable_item_set_current_value_index(item, value_index_color);
+        variable_item_set_current_value_text(item, color_name);
 
         item = variable_item_list_add(
             list, "Prefix", pp_prefixes_count + 1, pp_prefix_changed, payload);
@@ -569,10 +726,13 @@ static void pp_model_callback(void* _ctx, uint32_t index) {
         payload->bruteforce.counter = 0;
         payload->bruteforce.value = cfg->data.proximity_pair.model;
         payload->bruteforce.size = 2;
+        cfg->data.proximity_pair.bruteforce_mode = ContinuityPpBruteforceModel;
         scene_manager_previous_scene(ctx->scene_manager);
         break;
     default:
-        payload->mode = PayloadModeValue;
+        if(payload->mode != PayloadModeBruteforce ||
+           cfg->data.proximity_pair.bruteforce_mode == ContinuityPpBruteforceModel)
+            payload->mode = PayloadModeValue;
         cfg->data.proximity_pair.model = pp_models[index - 1].value;
         scene_manager_previous_scene(ctx->scene_manager);
         break;
@@ -585,6 +745,9 @@ void scene_continuity_pp_model_on_enter(void* _ctx) {
     Submenu* submenu = ctx->submenu;
     uint32_t selected = 0;
     submenu_reset(submenu);
+    bool value = payload->mode == PayloadModeValue ||
+                 (payload->mode == PayloadModeBruteforce &&
+                  cfg->data.proximity_pair.bruteforce_mode != ContinuityPpBruteforceModel);
 
     submenu_add_item(submenu, "Random", 0, pp_model_callback, ctx);
     if(payload->mode == PayloadModeRandom) {
@@ -594,19 +757,18 @@ void scene_continuity_pp_model_on_enter(void* _ctx) {
     bool found = false;
     for(uint8_t i = 0; i < pp_models_count; i++) {
         submenu_add_item(submenu, pp_models[i].name, i + 1, pp_model_callback, ctx);
-        if(!found && payload->mode == PayloadModeValue &&
-           cfg->data.proximity_pair.model == pp_models[i].value) {
+        if(!found && value && cfg->data.proximity_pair.model == pp_models[i].value) {
             found = true;
             selected = i + 1;
         }
     }
     submenu_add_item(submenu, "Custom", pp_models_count + 1, pp_model_callback, ctx);
-    if(!found && payload->mode == PayloadModeValue) {
+    if(!found && value) {
         selected = pp_models_count + 1;
     }
 
     submenu_add_item(submenu, "Bruteforce", pp_models_count + 2, pp_model_callback, ctx);
-    if(payload->mode == PayloadModeBruteforce) {
+    if(!value && payload->mode == PayloadModeBruteforce) {
         selected = pp_models_count + 2;
     }
 
@@ -627,7 +789,9 @@ static void pp_model_custom_callback(void* _ctx) {
     Ctx* ctx = _ctx;
     Payload* payload = &ctx->attack->payload;
     ContinuityCfg* cfg = &payload->cfg.continuity;
-    payload->mode = PayloadModeValue;
+    if(payload->mode != PayloadModeBruteforce ||
+       cfg->data.proximity_pair.bruteforce_mode == ContinuityPpBruteforceModel)
+        payload->mode = PayloadModeValue;
     cfg->data.proximity_pair.model = (ctx->byte_store[0] << 0x08) + (ctx->byte_store[1] << 0x00);
     scene_manager_previous_scene(ctx->scene_manager);
     scene_manager_previous_scene(ctx->scene_manager);
@@ -654,6 +818,120 @@ bool scene_continuity_pp_model_custom_on_event(void* _ctx, SceneManagerEvent eve
     return false;
 }
 void scene_continuity_pp_model_custom_on_exit(void* _ctx) {
+    UNUSED(_ctx);
+}
+
+static void pp_color_callback(void* _ctx, uint32_t index) {
+    Ctx* ctx = _ctx;
+    Payload* payload = &ctx->attack->payload;
+    ContinuityCfg* cfg = &payload->cfg.continuity;
+    uint8_t model_index = 0;
+    uint8_t colors_count = 0;
+    for(; model_index < pp_models_count; model_index++) {
+        if(cfg->data.proximity_pair.model == pp_models[model_index].value) {
+            colors_count = pp_models[model_index].colors_count;
+            break;
+        }
+    }
+    if(index == colors_count) {
+        scene_manager_next_scene(ctx->scene_manager, SceneContinuityPpColorCustom);
+    } else if(index == colors_count + 1U) {
+        payload->mode = PayloadModeBruteforce;
+        payload->bruteforce.counter = 0;
+        payload->bruteforce.value = cfg->data.proximity_pair.color;
+        payload->bruteforce.size = 1;
+        cfg->data.proximity_pair.bruteforce_mode = ContinuityPpBruteforceColor;
+        scene_manager_previous_scene(ctx->scene_manager);
+    } else {
+        if(payload->mode != PayloadModeBruteforce ||
+           cfg->data.proximity_pair.bruteforce_mode == ContinuityPpBruteforceColor)
+            payload->mode = PayloadModeValue;
+        cfg->data.proximity_pair.color = pp_models[model_index].colors[index].value;
+        scene_manager_previous_scene(ctx->scene_manager);
+    }
+}
+void scene_continuity_pp_color_on_enter(void* _ctx) {
+    Ctx* ctx = _ctx;
+    Payload* payload = &ctx->attack->payload;
+    ContinuityCfg* cfg = &payload->cfg.continuity;
+    Submenu* submenu = ctx->submenu;
+    uint32_t selected = 0;
+    submenu_reset(submenu);
+    bool value = payload->mode == PayloadModeValue ||
+                 (payload->mode == PayloadModeBruteforce &&
+                  cfg->data.proximity_pair.bruteforce_mode != ContinuityPpBruteforceColor);
+
+    bool found = false;
+    uint8_t colors_count = 0;
+    for(uint8_t i = 0; i < pp_models_count; i++) {
+        if(cfg->data.proximity_pair.model == pp_models[i].value) {
+            colors_count = pp_models[i].colors_count;
+            for(uint8_t j = 0; j < colors_count; j++) {
+                submenu_add_item(submenu, pp_models[i].colors[j].name, j, pp_color_callback, ctx);
+                if(!found && value &&
+                   cfg->data.proximity_pair.color == pp_models[i].colors[j].value) {
+                    found = true;
+                    selected = j;
+                }
+            }
+            break;
+        }
+    }
+    submenu_add_item(submenu, "Custom", colors_count, pp_color_callback, ctx);
+    if(!found && value) {
+        selected = colors_count;
+    }
+
+    submenu_add_item(submenu, "Bruteforce", colors_count + 1, pp_color_callback, ctx);
+    if(!value && payload->mode == PayloadModeBruteforce) {
+        selected = colors_count + 1;
+    }
+
+    submenu_set_selected_item(submenu, selected);
+
+    view_dispatcher_switch_to_view(ctx->view_dispatcher, ViewSubmenu);
+}
+bool scene_continuity_pp_color_on_event(void* _ctx, SceneManagerEvent event) {
+    UNUSED(_ctx);
+    UNUSED(event);
+    return false;
+}
+void scene_continuity_pp_color_on_exit(void* _ctx) {
+    UNUSED(_ctx);
+}
+
+static void pp_color_custom_callback(void* _ctx) {
+    Ctx* ctx = _ctx;
+    Payload* payload = &ctx->attack->payload;
+    ContinuityCfg* cfg = &payload->cfg.continuity;
+    if(payload->mode != PayloadModeBruteforce ||
+       cfg->data.proximity_pair.bruteforce_mode == ContinuityPpBruteforceColor)
+        payload->mode = PayloadModeValue;
+    cfg->data.proximity_pair.color = (ctx->byte_store[0] << 0x00);
+    scene_manager_previous_scene(ctx->scene_manager);
+    scene_manager_previous_scene(ctx->scene_manager);
+}
+void scene_continuity_pp_color_custom_on_enter(void* _ctx) {
+    Ctx* ctx = _ctx;
+    Payload* payload = &ctx->attack->payload;
+    ContinuityCfg* cfg = &payload->cfg.continuity;
+    ByteInput* byte_input = ctx->byte_input;
+
+    byte_input_set_header_text(byte_input, "Enter custom Device Color");
+
+    ctx->byte_store[0] = (cfg->data.proximity_pair.color >> 0x00) & 0xFF;
+
+    byte_input_set_result_callback(
+        byte_input, pp_color_custom_callback, NULL, ctx, (void*)ctx->byte_store, 1);
+
+    view_dispatcher_switch_to_view(ctx->view_dispatcher, ViewByteInput);
+}
+bool scene_continuity_pp_color_custom_on_event(void* _ctx, SceneManagerEvent event) {
+    UNUSED(_ctx);
+    UNUSED(event);
+    return false;
+}
+void scene_continuity_pp_color_custom_on_exit(void* _ctx) {
     UNUSED(_ctx);
 }
 

@@ -19,11 +19,18 @@ typedef enum {
     ContinuityTypeCOUNT
 } ContinuityType;
 
+typedef enum {
+    ContinuityPpBruteforceModel,
+    ContinuityPpBruteforceColor,
+} ContinuityPpBruteforce;
+
 typedef struct {
     ContinuityType type;
     union {
         struct {
+            ContinuityPpBruteforce bruteforce_mode;
             uint16_t model;
+            uint8_t color;
             uint8_t prefix;
         } proximity_pair;
         struct {
