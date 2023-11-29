@@ -68,6 +68,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [ESP32 Evil Portal v0.2 (By bigbrodude6119)](https://github.com/bigbrodude6119/flipper-zero-evil-portal) Changes for CFW Settings UART Customizations, Overflow and Memory Fixes (By Willy-JL)
 - SubGHz: [Menu Return Bug Fix & Lock BinRAW Cleanup (By LeeroysHub)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/4d747faf913136766f33b4c557799920e11c7136)
 - Updated: [BLE Spam v4.2 (By Willy-JL & ECTO-1A & Spooks4576 with research from xMasterX; OFW API thanks to noproto)](https://github.com/noproto/apple_ble_spam_ofw) (Changes By Mr-Proxy-source & xAstroBoy & Willy-JL)
+- Updated: [Bluetooth/USB Remote v1.6 (By Cutch)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/1330)
 
 <a name="release">
 

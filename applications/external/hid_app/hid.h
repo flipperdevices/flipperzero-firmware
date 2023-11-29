@@ -27,6 +27,7 @@
 #include "views/hid_tikshorts.h"
 #include "views/hid_camera.h"
 #include "views/hid_ptt.h"
+#include "views/hid_ptt_menu.h"
 
 #include "hid_path.h"
 
@@ -54,7 +55,8 @@ struct Hid {
     HidMouseJiggler* hid_mouse_jiggler;
     HidTikShorts* hid_tikshorts;
     HidCamera* hid_camera;
-    HidPtt* hid_ptt;
+    HidPushToTalk* hid_ptt;
+    HidPushToTalkMenu* hid_ptt_menu;
 
     HidTransport transport;
     uint32_t view_id;
