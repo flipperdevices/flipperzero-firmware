@@ -30,11 +30,6 @@ To accommodate more characters on a small display, some characters are called up
 
 ![kbf](https://user-images.githubusercontent.com/122148894/212286637-7063f1ee-c6ff-46b9-8dc5-79a5f367fab1.png)
 
-## Supported send AT commands
-In the "Send AT command" mode, the keyboard settings are changed for the convenience of entering AT commands.
-
-![AT](https://user-images.githubusercontent.com/122148894/230785072-319fe5c9-deca-49f9-bfe4-5ace89d38d53.png)
-
 ## Hex mode
 Hexadecimal mode is useful for working with simple binary protocols.
 You can see the bytes being received in hexadecimal in the terminal window.
