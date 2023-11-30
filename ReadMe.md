@@ -4,7 +4,7 @@
 &nbsp;<a href='https://shop.rogue-master.net/' target='_blank'><img src='https://rogue-master.net/img/Merch.png' alt='RM Merch'' title='RM Merch'></a>
 &nbsp;<a href='https://github.com/RogueMaster/awesome-flipperzero-withModules' target='_blank'><img src='https://rogue-master.net/img/Resources.png' alt='More Research / Assets' title='More Research / Assets'></a></h1>
 
-# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1122-1715-0.93.9-5358c54.tgz&channel=RM1122-1715-0.93.9-5358c54&version=0.93.9) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1122-1715-0.93.9-5358c54-NoAnim.tgz&channel=RM1122-1715-0.93.9-5358c54-NoAnim&version=0.93.9)
+# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1130-1445-0.93.9-d9db571.tgz&channel=RM1130-1445-0.93.9-d9db571&version=0.93.9) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1130-1445-0.93.9-d9db571-NoAnim.tgz&channel=RM1130-1445-0.93.9-d9db571-NoAnim&version=0.93.9)
 
 ## Thank you so much to our RM Pro/SUPER Patreon supporters! Because of people like you, we are able to offer the best and most up-to-date Flipper Zero Firmware!
 
@@ -31,49 +31,6 @@ This software is for experimental purposes only and is not meant for any illegal
 
 - Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-11-30 14:21 EST`
 - Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-11-30 14:21 EST`
-- Updated: [Authenticator/TOTP v5.9.1 (By akopachov)] <https://github.com/akopachov/flipper-zero_authenticator>
-- OFW PR: [Add the "remove pairing" button to BLE hid #3237 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3237)
-- OFW PR: [HID app: Add new function key icons #3236 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3236)
-- OFW PR: Add the secret door animation #3233 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3233)
-- Updated: [Cross Remote v1.0 (By leedave)](https://github.com/leedave/flipper-zero-cross-remote)
-- Updated: [POCSAG Pager v1.1 (By XMasterx & Shmuma)](https://github.com/xMasterX/flipper-pager) [(Update By Willy-JL / xMasterX)](https://github.com/xMasterX/all-the-plugins/commit/96bf264f6518c3989c30c1ca9c8f344f50d437bb)
-- Patreon Build Update: Dolphin, RM Minimal and Stock builds updated to have the new Secret Door animation. Manifest Switcher builds updated to include Secret Door animation in the respective sets.
-- Patreon Build Update: New set for Marvel added to Manifest Switcher & Builds. [(Animations By steveballantyne)](https://github.com/steveballantyne)
-- Patreon Build Update: New set for Virus added to Manifest Switcher & Builds. [(Animations By Kuronons)](https://github.com/Kuronons/FZ_graphics/tree/main/Animations/Virus)
-- Patreon Build Update: Manifest Switcher ALL build updated to include Marvel & Virus animations.
-- Updated: [ESP Flasher v1.4 (By 0xchocolate)](https://github.com/0xchocolate/flipperzero-esp-flasher)
-- Updated: [Cookie Clicker v1.0 (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/hid/hid_cookie)
-- SubGHz: [Viewing a Key, turn Receive notification off and stop the Radio until Receive is fixed (By LeeroysHub)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/34f98ae687f72621a994a45978196f249004c0be)
-- SubGHz: [Long Press OK to TX Key in receiver. Better Rollback Attacks! (By LeeroysHub)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/a42430a57a9d78b6bc340b305f4208a7f6f556c7)
-- SubGHz: [Beep on TX for SubGHz & Remote (By LeeroysHub)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/ad0a273a71d7701af30df75c9174f3bdc3fd6e4a)
-- NFC: [Support for Myki (By LeeroysHub)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/d9d4a734066608b0007810ce72c4c817f15a847a)
-- SubGHz: [Repeater (By LeeroysHub)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/45180dc8570f87b116d428ee7085d1541cc82ac0)
-- SubGHz: [Wake Up! Listen after TX to save wake up commands (By LeeroysHub)](https://github.com/LeeroysHub/RM-Flipper/commit/e50702d9499e204ba6cd06022b1d98cd3859dbb5)
-- SubGHz: [Fixes for stop the Radio until Receive is fixed (By LeeroysHub)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/46190f824a9397a9ce92735ee6fdcf0c1533cd51)
-- Added: [FlipBoard Blinky v1.0 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
-- Added: [FlipBoard Keyboard v1.0 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
-- Added: [FlipBoard Signal v1.0 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
-- Updated: [WiFi (Marauder) v6.5 (By 0xchocolate & tcpassos)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) [Add samsung and all spam #43 (By justcallmekoko)](https://github.com/0xchocolate/flipperzero-wifi-marauder/pull/43) & Changes for CFW Settings UART Customizations / Save PCAPs (By Sil333033 & Willy-JL)
-- Updated: [ESP Flasher v1.4 (By 0xchocolate)](https://github.com/0xchocolate/flipperzero-esp-flasher) (Minor Changes By Sil333033)
-- Updated: Marauder 0.13.5 bins (New BINS provided by Willy-JL)
-- SubGHz: [Sound State saved in settings (By LeeroysHub)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/9694ece01f1abad51f3efaaf0fb94e6795a54063)
-- SubGHz: [Crash Fix Can't Listen after TX in TX only (By LeeroysHub)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/3e10ebd6c0914040223c40f5063f89fb1925880f)
-- Updated: [Hangman v1.5 (By Evgeny Stepanischev & Eva Stepanischeva)](https://github.com/bolknote/Flipper-Zero-Hangman-Game)
-- Updated: [HEX Editor v1.3 (By dunaevai135)](https://github.com/dunaevai135/flipper-zero-hex_editor)
-- SubGHz: [Load Sub from Browser respects ListenAfterTX (By LeeroysHub)](https://github.com/LeeroysHub/RM-Flipper/commit/242e06cd6e5e68bccba6b1b5c4273c41b953b0cc)
-- Updated: [XRemote v1.2 (By kala13x)](https://github.com/kala13x/flipper-xremote)
-- Updated: [ESP32 Evil Portal v0.2 (By bigbrodude6119)](https://github.com/bigbrodude6119/flipper-zero-evil-portal) Changes for CFW Settings UART Customizations, Overflow and Memory Fixes (By Willy-JL)
-- SubGHz: [Menu Return Bug Fix & Lock BinRAW Cleanup (By LeeroysHub)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/4d747faf913136766f33b4c557799920e11c7136)
-- Updated: [BLE Spam v4.2 (By Willy-JL & ECTO-1A & Spooks4576 with research from xMasterX; OFW API thanks to noproto)](https://github.com/noproto/apple_ble_spam_ofw) (Changes By Mr-Proxy-source & xAstroBoy & Willy-JL)
-- Updated: [Bluetooth/USB Remote v1.6 (By Cutch)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/1330)
-- UL: [add 303.9 frequency (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/ff41d262dc1dab11763dd8ba436e2abbb83aed54)
-- Updated: [ESP32CAM Marauder v0.6.5 (By 0xchocolate & eried)](https://github.com/eried/flipperzero-mayhem)
-- Updated: [PicoPass (iClass) v1.6 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass) [Picopass: Create folder before loclass #78 (By bettse)](https://github.com/flipperdevices/flipperzero-good-faps/pull/78)
-- [Animations Menu: Create list from SD Card, no more hard coded menu! (By LeeroysHub)](https://github.com/LeeroysHub/RM-Flipper/commit/15abca894949f5e0b80416ed72697b8a529de9d4) - Due to this animation change, be prepared to have to re-choose your desired animation build.
-- Updated: [FlipBoard Blinky v1.0 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
-- Updated: [FlipBoard Keyboard v1.0 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
-- Updated: [FlipBoard Signal v1.0 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
-- OFW: [Allows you to use UCS-2 in canvas_glyph_width #3226 (By boknote)](https://github.com/flipperdevices/flipperzero-firmware/pull/3226)
 
 <a name="release">
 
@@ -541,4 +498,4 @@ $ ./fbt dolphin_ext
 - [Desktop Favorite Binds To Allow Opening Custom Game Menu. Whomever can complete this gets 3 months of subscriber builds. Patrons can DM me to add their monthly towards this bounty.](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/756)
 - `Bluetooth Audio` APP to allow flipper to pair to external speaker or headphones for wav/mp3 playback ($200 USD in ETH or BTC) (Don't think this is possible)
 
-# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1122-1715-0.93.9-5358c54.tgz&channel=RM1122-1715-0.93.9-5358c54&version=0.93.9) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1122-1715-0.93.9-5358c54-NoAnim.tgz&channel=RM1122-1715-0.93.9-5358c54-NoAnim&version=0.93.9)
+# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1130-1445-0.93.9-d9db571.tgz&channel=RM1130-1445-0.93.9-d9db571&version=0.93.9) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1130-1445-0.93.9-d9db571-NoAnim.tgz&channel=RM1130-1445-0.93.9-d9db571-NoAnim&version=0.93.9)
