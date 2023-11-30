@@ -27,10 +27,10 @@ This software is for experimental purposes only and is not meant for any illegal
 
 <a name="latest">
 
-## Latest Updates - [PATREON: Latest Release RM1129-0153-0.93.9-a974084](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
+## Latest Updates - [PATREON: Latest Release RM1130-1421-0.93.9-ca67429](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-11-30 14:02 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-11-30 14:02 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-11-30 14:21 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-11-30 14:21 EST`
 - Updated: [Authenticator/TOTP v5.9.1 (By akopachov)] <https://github.com/akopachov/flipper-zero_authenticator>
 - OFW PR: [Add the "remove pairing" button to BLE hid #3237 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3237)
 - OFW PR: [HID app: Add new function key icons #3236 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3236)
@@ -69,7 +69,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: [add 303.9 frequency (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/ff41d262dc1dab11763dd8ba436e2abbb83aed54)
 - Updated: [ESP32CAM Marauder v0.6.5 (By 0xchocolate & eried)](https://github.com/eried/flipperzero-mayhem)
 - Updated: [PicoPass (iClass) v1.6 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass) [Picopass: Create folder before loclass #78 (By bettse)](https://github.com/flipperdevices/flipperzero-good-faps/pull/78)
-- [Animations Menu: Create list from SD Card, no more hard coded menu! (By LeeroysHub)](https://github.com/LeeroysHub/RM-Flipper/commit/15abca894949f5e0b80416ed72697b8a529de9d4)
+- [Animations Menu: Create list from SD Card, no more hard coded menu! (By LeeroysHub)](https://github.com/LeeroysHub/RM-Flipper/commit/15abca894949f5e0b80416ed72697b8a529de9d4) - Due to this animation change, be prepared to have to re-choose your desired animation build.
 - Updated: [FlipBoard Blinky v1.0 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
 - Updated: [FlipBoard Keyboard v1.0 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
 - Updated: [FlipBoard Signal v1.0 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
