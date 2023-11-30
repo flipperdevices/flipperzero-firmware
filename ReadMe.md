@@ -71,6 +71,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [FlipBoard Blinky v1.0 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
 - Updated: [FlipBoard Keyboard v1.0 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
 - Updated: [FlipBoard Signal v1.0 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
+- Updated: [PicoPass (iClass) v1.6 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass) [Picopass: Create folder before loclass #78 (By bettse)](https://github.com/flipperdevices/flipperzero-good-faps/pull/78)
 
 <a name="release">
 
