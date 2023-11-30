@@ -527,6 +527,7 @@ static NfcCommand mf_ultralight_poller_handler_try_default_pass(MfUltralightPoll
 static NfcCommand mf_ultralight_poller_handler_read_fail(MfUltralightPoller* instance) {
     FURI_LOG_D(TAG, "Read Failed");
     iso14443_3a_poller_halt(instance->iso14443_3a_poller);
+    instance->mfu_event.type = MfUltralightPollerEventTypeReadFailed;
     instance->mfu_event.data->error = instance->error;
     NfcCommand command = instance->callback(instance->general_event, instance->context);
     instance->state = MfUltralightPollerStateIdle;
