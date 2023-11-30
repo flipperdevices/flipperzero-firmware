@@ -174,6 +174,9 @@ static void meal_pager_retekess_t119_generate_station(void* context, uint32_t st
     for (u_int32_t i = app->current_pager;i <= app->last_pager; i++) {
         meal_pager_retekess_t119_generate_pager(app, stationId, i, ff);
         //furi_thread_flags_wait(0, FuriFlagWaitAny, 1);
+        if (app->stop_transmit) {
+            break;
+        }
     }
 }
 
@@ -188,6 +191,9 @@ void meal_pager_retekess_t119_generate_all(void* context) {
     for (u_int32_t i = app->current_station;i <= app->last_station; i++) {
         meal_pager_retekess_t119_generate_station(app, i, ff);
         //furi_thread_flags_wait(0, FuriFlagWaitAny, 100);
+        if (app->stop_transmit) {
+            break;
+        }
     }
 
     meal_pager_save_subghz_buffer_stop(app, ff);

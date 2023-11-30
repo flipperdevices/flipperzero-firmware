@@ -52,6 +52,7 @@ typedef struct {
     char* last_pager_char;
     uint32_t current_station;
     uint32_t current_pager;
+    bool stop_transmit;
 } Meal_Pager;
 
 typedef enum {
