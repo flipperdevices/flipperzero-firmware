@@ -60,9 +60,10 @@ static void flipboard_view_flip_signal_draw(Canvas* canvas, void* model) {
 static void send_subghz(FlipboardModel* model, char* filename) {
     // TODO: Add cancel API for subghz RAW by using ButtonMonitor.
     FlipboardLeds* leds = flipboard_model_get_leds(model);
+    Resources* resources = flipboard_model_get_resources(model);
     SubGhzSignal* signal = subghz_signal_load_file(filename);
     flipboard_status_led(leds, true);
-    subghz_signal_send(signal, false);
+    subghz_signal_send(signal, false, resources);
     flipboard_status_led(leds, false);
     subghz_signal_free(signal);
 }

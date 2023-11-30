@@ -11,6 +11,7 @@
 // The WS2812b LEDs that are connected to PC3.
 #define LED_COUNT 4
 struct FlipboardLeds {
+    Resources* resources;
     uint32_t color[LED_COUNT];
     LedDriver* led_driver;
 };
