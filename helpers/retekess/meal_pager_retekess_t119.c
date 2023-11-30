@@ -124,7 +124,7 @@ void reverse(char* str) {
     }
 }
  
-void meal_pager_retekess_t119_generate_pager(void* context, char* stationId, uint32_t pager) {
+static void meal_pager_retekess_t119_generate_pager(void* context, char* stationId, uint32_t pager, FlipperFormat* ff) {
     Meal_Pager* app = context;
     char pagerId[11];
     //char stationPagerId[25];
@@ -156,12 +156,13 @@ void meal_pager_retekess_t119_generate_pager(void* context, char* stationId, uin
     char* manchester = encManchester(fullId, 0);
     FURI_LOG_D(TAG, "Manchester: %s", manchester);
     char* rawSignal = genRawData(200, 600, manchester);
-    FURI_LOG_D(TAG, "Raw Data: %s", rawSignal);
+    FURI_LOG_D(TAG, "RAW_Data: %s", rawSignal);
+    flipper_format_write_string_cstr(ff, "RAW_Data", rawSignal);
     free(manchester);
     free(rawSignal);
 }
 
-void meal_pager_retekess_t119_generate_station(void* context, uint32_t station) {
+static void meal_pager_retekess_t119_generate_station(void* context, uint32_t station, FlipperFormat* ff) {
     Meal_Pager* app = context;
     FURI_LOG_D(TAG, "Generating T119 Data for Station %lu", station);
     app->current_station = station;
@@ -171,7 +172,7 @@ void meal_pager_retekess_t119_generate_station(void* context, uint32_t station) 
     reverse(stationId);
     meal_pager_transmit_model_set_station(app->meal_pager_transmit, app->current_station);
     for (u_int32_t i = app->current_pager;i <= app->last_pager; i++) {
-        meal_pager_retekess_t119_generate_pager(app, stationId, i);
+        meal_pager_retekess_t119_generate_pager(app, stationId, i, ff);
         //furi_thread_flags_wait(0, FuriFlagWaitAny, 1);
     }
 }
@@ -182,9 +183,13 @@ void meal_pager_retekess_t119_generate_all(void* context) {
     app->current_pager = 1;
     app->current_station = app->first_station;
 
+    FlipperFormat* ff = meal_pager_save_subghz_buffer_file_start(app);
+
     for (u_int32_t i = app->current_station;i <= app->last_station; i++) {
-        meal_pager_retekess_t119_generate_station(app, i);
+        meal_pager_retekess_t119_generate_station(app, i, ff);
         //furi_thread_flags_wait(0, FuriFlagWaitAny, 100);
     }
+
+    meal_pager_save_subghz_buffer_stop(app, ff);
 }
 

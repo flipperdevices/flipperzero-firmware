@@ -14,4 +14,5 @@ App(
     fap_icon="icons/meal_pager_10px.png",
     fap_icon_assets="icons",
     fap_category="Sub-Ghz",
+    fap_version="0.1",
 )

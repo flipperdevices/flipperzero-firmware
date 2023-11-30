@@ -20,6 +20,16 @@
 #define MEAL_PAGER_SETTINGS_KEY_LED "Led"
 #define MEAL_PAGER_SETTINGS_KEY_SPEAKER "Speaker"
 #define MEAL_PAGER_SETTINGS_KEY_SAVE_SETTINGS "SaveSettings"
+#define MEAL_PAGER_TMP_FILE CONFIG_FILE_DIRECTORY_PATH "/tmp.sub"
+#define MEAL_PAGER_SUBGHZ_FILE_TYPE "Flipper SubGhz RAW File"
+#define MEAL_PAGER_SUBGHZ_FILE_VERSION 1
+#define MEAL_PAGER_SUBGHZ_FILE_FREQUENCY "433920000"
+#define MEAL_PAGER_SUBGHZ_FILE_PRESET "FuriHalSubGhzPresetOok650Async"
+#define MEAL_PAGER_SUBGHZ_FILE_Protocol "RAW"
+
+FlipperFormat* meal_pager_save_subghz_buffer_file_start(void* context);
+
+void meal_pager_save_subghz_buffer_stop(void* context, FlipperFormat* ff);
 
 void meal_pager_save_settings(void* context);
 void meal_pager_read_settings(void* context);
