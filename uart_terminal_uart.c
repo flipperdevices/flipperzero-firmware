@@ -1,9 +1,6 @@
 #include "uart_terminal_app_i.h"
 #include "uart_terminal_uart.h"
 
-//#define UART_CH (FuriHalUartIdUSART1)
-//#define BAUDRATE (115200)
-
 struct UART_TerminalUart {
     UART_TerminalApp* app;
     FuriThread* rx_thread;
@@ -56,8 +53,8 @@ static int32_t uart_worker(void* context) {
     return 0;
 }
 
-void uart_terminal_uart_tx(uint8_t* data, size_t len) {
-    furi_hal_uart_tx(UART_CH, data, len);
+void uart_terminal_uart_tx(uint8_t uart_ch, uint8_t* data, size_t len) {
+    furi_hal_uart_tx(uart_ch, data, len);
 }
 
 UART_TerminalUart* uart_terminal_uart_init(UART_TerminalApp* app) {
@@ -73,12 +70,18 @@ UART_TerminalUart* uart_terminal_uart_init(UART_TerminalApp* app) {
 
     furi_thread_start(uart->rx_thread);
 
-    furi_hal_console_disable();
     if(app->BAUDRATE == 0) {
         app->BAUDRATE = 115200;
     }
-    furi_hal_uart_set_br(UART_CH, app->BAUDRATE);
-    furi_hal_uart_set_irq_cb(UART_CH, uart_terminal_uart_on_irq_cb, uart);
+
+    if(app->uart_ch == FuriHalUartIdUSART1) {
+        furi_hal_console_disable();
+		furi_hal_uart_set_br(app->uart_ch, app->BAUDRATE);
+    } else if(app->uart_ch == FuriHalUartIdLPUART1) {
+        furi_hal_uart_init(app->uart_ch, app->BAUDRATE);
+    }
+
+    furi_hal_uart_set_irq_cb(app->uart_ch, uart_terminal_uart_on_irq_cb, uart);
 
     return uart;
 }
@@ -90,8 +93,10 @@ void uart_terminal_uart_free(UART_TerminalUart* uart) {
     furi_thread_join(uart->rx_thread);
     furi_thread_free(uart->rx_thread);
 
-    furi_hal_uart_set_irq_cb(UART_CH, NULL, NULL);
-    furi_hal_console_enable();
+    furi_hal_uart_set_irq_cb(uart->app->uart_ch, NULL, NULL);
+
+    if(uart->app->uart_ch == FuriHalUartIdUSART1)
+        furi_hal_console_enable();
 
     free(uart);
 }
