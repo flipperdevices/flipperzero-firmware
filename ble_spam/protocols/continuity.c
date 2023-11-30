@@ -58,7 +58,8 @@ static const ContinuityColor colors_beats_studio_3[] = {
     {0x25, "Black / Red"},
     {0x26, "Midnight Black"},
     {0x27, "Desert Sand 2"},
-    {0x28, "Clear blue/ gold"},
+    {0x28, "Gray"},
+    {0x29, "Clear blue/ gold"},
     {0x42, "Green Forest camo"},
     {0x43, "White Camo"},
 };
@@ -71,8 +72,11 @@ static const ContinuityColor colors_beats_fit_pro[] = {
     {0x01, "Black"},
 };
 static const ContinuityColor colors_beats_studio_buds_[] = {
-    {0x00, "White"},
-    {0x01, "Black"},
+    {0x00, "Black"},
+    {0x01, "White"},
+    {0x02, "Transparent"},
+    {0x03, "Silver"},
+    {0x04, "Pink"},
 };
 
 static const struct {
