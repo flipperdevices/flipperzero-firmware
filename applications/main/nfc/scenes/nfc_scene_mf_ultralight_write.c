@@ -26,8 +26,10 @@ NfcCommand nfc_scene_mf_ultralight_write_worker_callback(NfcGenericEvent event, 
             nfc_device_get_data(instance->nfc_device, NfcProtocolMfUltralight);
     } else if(mfu_event->type == MfUltralightPollerEventTypeCardMismatch) {
         view_dispatcher_send_custom_event(instance->view_dispatcher, NfcCustomEventWrongCard);
+        command = NfcCommandStop;
     } else if(mfu_event->type == MfUltralightPollerEventTypeCardLocked) {
         view_dispatcher_send_custom_event(instance->view_dispatcher, NfcCustomEventPollerFailure);
+        command = NfcCommandStop;
     } else if(mfu_event->type == MfUltralightPollerEventTypeWriteFail) {
         command = NfcCommandStop;
     } else if(mfu_event->type == MfUltralightPollerEventTypeWriteSuccess) {
@@ -92,7 +94,6 @@ bool nfc_scene_mf_ultralight_write_on_event(void* context, SceneManagerEvent eve
             scene_manager_next_scene(instance->scene_manager, NfcSceneMfUltralightWriteSuccess);
             consumed = true;
         } else if(event.event == NfcCustomEventPollerFailure) {
-            //  scene_manager_set_scene_state()
             scene_manager_next_scene(instance->scene_manager, NfcSceneMfUltralightWriteFail);
             consumed = true;
         }
