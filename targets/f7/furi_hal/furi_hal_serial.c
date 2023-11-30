@@ -32,24 +32,52 @@ static void furi_hal_serial_rx_configure(
     void* context);
 
 static void furi_hal_serial_usart_irq_callback() {
-    if(LL_USART_IsActiveFlag_RXNE_RXFNE(USART1)) {
+    FuriHalSerialRxEvent event = 0;
+    if(!(USART1->ISR & (USART_ISR_ORE | USART_ISR_NE | USART_ISR_FE | USART_ISR_PE))) {
+        //if no errors
+        if(USART1->ISR & USART_ISR_RXNE_RXFNE) {
+            event |= FuriHalSerialRxEventRx;
+        }
+
+        if(USART1->ISR & USART_ISR_IDLE) {
+            USART1->ICR |= USART_ICR_IDLECF;
+            event |= FuriHalSerialRxEventEnd;
+        }
+    } else {
+        //if errors
+        if(USART1->ISR & USART_ISR_ORE) {
+            USART1->ICR |= USART_ICR_ORECF;
+            event |= FuriHalSerialRxEventOverrunError;
+        }
+        if(USART1->ISR & USART_ISR_NE) {
+            USART1->ICR |= USART_ICR_NECF;
+            event |= FuriHalSerialRxEventNoiseLineError;
+        }
+        if(USART1->ISR & USART_ISR_FE) {
+            USART1->ICR |= USART_ICR_FECF;
+            event |= FuriHalSerialRxEventFrameError;
+        }
+        if(USART1->ISR & USART_ISR_PE) {
+            USART1->ICR |= USART_ICR_PECF;
+            event |= FuriHalSerialRxEventFrameError;
+        }
+    }
+
+    if(furi_hal_serial[FuriHalSerialIdUsart].buffer_rx_ptr == NULL) {
         if(furi_hal_serial[FuriHalSerialIdUsart].rx_byte_callback) {
             furi_hal_serial[FuriHalSerialIdUsart].rx_byte_callback(
                 furi_hal_serial[FuriHalSerialIdUsart].handle,
-                FuriHalSerialRxEventRx,
+                event,
                 furi_hal_serial[FuriHalSerialIdUsart].context);
         }
-    } else if(LL_USART_IsActiveFlag_IDLE(USART1)) {
-        LL_USART_ClearFlag_IDLE(USART1);
+    } else {
         if(furi_hal_serial[FuriHalSerialIdUsart].rx_dma_callback) {
             furi_hal_serial[FuriHalSerialIdUsart].rx_dma_callback(
                 furi_hal_serial[FuriHalSerialIdUsart].handle,
-                FuriHalSerialDmaRxEventEnd,
+                event,
                 furi_hal_serial_dma_bytes_available(FuriHalSerialIdUsart),
                 furi_hal_serial[FuriHalSerialIdUsart].context);
         }
-    } else if(LL_USART_IsActiveFlag_ORE(USART1)) {
-        LL_USART_ClearFlag_ORE(USART1);
     }
 }
 
@@ -66,7 +94,7 @@ static void furi_hal_serial_usart_dma_rx_isr() {
             if(furi_hal_serial[FuriHalSerialIdUsart].rx_dma_callback) {
                 furi_hal_serial[FuriHalSerialIdUsart].rx_dma_callback(
                     furi_hal_serial[FuriHalSerialIdUsart].handle,
-                    FuriHalSerialDmaRxEventRx,
+                    FuriHalSerialRxEventRx,
                     furi_hal_serial_dma_bytes_available(FuriHalSerialIdUsart),
                     furi_hal_serial[FuriHalSerialIdUsart].context);
             }
@@ -80,7 +108,7 @@ static void furi_hal_serial_usart_dma_rx_isr() {
             if(furi_hal_serial[FuriHalSerialIdUsart].rx_dma_callback) {
                 furi_hal_serial[FuriHalSerialIdUsart].rx_dma_callback(
                     furi_hal_serial[FuriHalSerialIdUsart].handle,
-                    FuriHalSerialDmaRxEventRx,
+                    FuriHalSerialRxEventRx,
                     furi_hal_serial_dma_bytes_available(FuriHalSerialIdUsart),
                     furi_hal_serial[FuriHalSerialIdUsart].context);
             }
@@ -189,6 +217,54 @@ static void furi_hal_serial_uasrt_init(FuriHalSerialHandle* handle, uint32_t bau
 }
 
 static void furi_hal_serial_lpuart_irq_callback() {
+    FuriHalSerialRxEvent event = 0;
+    if(!(LPUART1->ISR & (USART_ISR_ORE | USART_ISR_NE | USART_ISR_FE | USART_ISR_PE))) {
+        //if no errors
+        if(LPUART1->ISR & USART_ISR_RXNE_RXFNE) {
+            event |= FuriHalSerialRxEventRx;
+        }
+
+        if(LPUART1->ISR & USART_ISR_IDLE) {
+            LPUART1->ICR |= USART_ICR_IDLECF;
+            event |= FuriHalSerialRxEventEnd;
+        }
+    } else {
+        //if errors
+        if(LPUART1->ISR & USART_ISR_ORE) {
+            LPUART1->ICR |= USART_ICR_ORECF;
+            event |= FuriHalSerialRxEventOverrunError;
+        }
+        if(LPUART1->ISR & USART_ISR_NE) {
+            LPUART1->ICR |= USART_ICR_NECF;
+            event |= FuriHalSerialRxEventNoiseLineError;
+        }
+        if(LPUART1->ISR & USART_ISR_FE) {
+            LPUART1->ICR |= USART_ICR_FECF;
+            event |= FuriHalSerialRxEventFrameError;
+        }
+        if(LPUART1->ISR & USART_ISR_PE) {
+            LPUART1->ICR |= USART_ICR_PECF;
+            event |= FuriHalSerialRxEventFrameError;
+        }
+    }
+
+    if(furi_hal_serial[FuriHalSerialIdLpuart].buffer_rx_ptr == NULL) {
+        if(furi_hal_serial[FuriHalSerialIdLpuart].rx_byte_callback) {
+            furi_hal_serial[FuriHalSerialIdLpuart].rx_byte_callback(
+                furi_hal_serial[FuriHalSerialIdLpuart].handle,
+                event,
+                furi_hal_serial[FuriHalSerialIdLpuart].context);
+        }
+    } else {
+        if(furi_hal_serial[FuriHalSerialIdLpuart].rx_dma_callback) {
+            furi_hal_serial[FuriHalSerialIdLpuart].rx_dma_callback(
+                furi_hal_serial[FuriHalSerialIdLpuart].handle,
+                event,
+                furi_hal_serial_dma_bytes_available(FuriHalSerialIdLpuart),
+                furi_hal_serial[FuriHalSerialIdLpuart].context);
+        }
+    }
+
     if(LL_LPUART_IsActiveFlag_RXNE_RXFNE(LPUART1)) {
         if(furi_hal_serial[FuriHalSerialIdLpuart].rx_byte_callback) {
             furi_hal_serial[FuriHalSerialIdLpuart].rx_byte_callback(
@@ -201,7 +277,7 @@ static void furi_hal_serial_lpuart_irq_callback() {
         if(furi_hal_serial[FuriHalSerialIdLpuart].rx_dma_callback) {
             furi_hal_serial[FuriHalSerialIdLpuart].rx_dma_callback(
                 furi_hal_serial[FuriHalSerialIdLpuart].handle,
-                FuriHalSerialDmaRxEventEnd,
+                FuriHalSerialRxEventEnd,
                 furi_hal_serial_dma_bytes_available(FuriHalSerialIdLpuart),
                 furi_hal_serial[FuriHalSerialIdLpuart].context);
         }
@@ -223,7 +299,7 @@ static void furi_hal_serial_lpuart_dma_rx_isr() {
             if(furi_hal_serial[FuriHalSerialIdLpuart].rx_dma_callback) {
                 furi_hal_serial[FuriHalSerialIdLpuart].rx_dma_callback(
                     furi_hal_serial[FuriHalSerialIdLpuart].handle,
-                    FuriHalSerialDmaRxEventRx,
+                    FuriHalSerialRxEventRx,
                     furi_hal_serial_dma_bytes_available(FuriHalSerialIdLpuart),
                     furi_hal_serial[FuriHalSerialIdLpuart].context);
             }
@@ -237,7 +313,7 @@ static void furi_hal_serial_lpuart_dma_rx_isr() {
             if(furi_hal_serial[FuriHalSerialIdLpuart].rx_dma_callback) {
                 furi_hal_serial[FuriHalSerialIdLpuart].rx_dma_callback(
                     furi_hal_serial[FuriHalSerialIdLpuart].handle,
-                    FuriHalSerialDmaRxEventRx,
+                    FuriHalSerialRxEventRx,
                     furi_hal_serial_dma_bytes_available(FuriHalSerialIdLpuart),
                     furi_hal_serial[FuriHalSerialIdLpuart].context);
             }
@@ -478,6 +554,37 @@ void furi_hal_serial_tx_wait_complete(FuriHalSerialHandle* handle) {
     }
 }
 
+static void furi_hal_serial_event_init(FuriHalSerialHandle* handle, FuriHalSerialRxEvent event) {
+    if(event != FuriHalSerialRxEventOffError) {
+        if(event & FuriHalSerialRxEventEnd) {
+            if(handle->id == FuriHalSerialIdUsart) {
+                LL_USART_EnableIT_IDLE(USART1);
+            } else if(handle->id == FuriHalSerialIdLpuart) {
+                LL_LPUART_EnableIT_IDLE(LPUART1);
+            }
+        }
+
+        if(event & (FuriHalSerialRxEventOverrunError | FuriHalSerialRxEventFrameError |
+                    FuriHalSerialRxEventNoiseLineError)) {
+            if(handle->id == FuriHalSerialIdUsart) {
+                LL_USART_EnableIT_ERROR(USART1);
+            } else if(handle->id == FuriHalSerialIdLpuart) {
+                LL_LPUART_EnableIT_ERROR(LPUART1);
+            }
+        }
+    }
+}
+
+static void furi_hal_serial_event_deinit(FuriHalSerialHandle* handle) {
+    if(handle->id == FuriHalSerialIdUsart) {
+        if(LL_USART_IsEnabledIT_IDLE(USART1)) LL_USART_DisableIT_IDLE(USART1);
+        if(LL_USART_IsEnabledIT_ERROR(USART1)) LL_USART_DisableIT_ERROR(USART1);
+    } else if(handle->id == FuriHalSerialIdLpuart) {
+        if(LL_LPUART_IsEnabledIT_IDLE(LPUART1)) LL_LPUART_DisableIT_IDLE(LPUART1);
+        if(LL_LPUART_IsEnabledIT_ERROR(LPUART1)) LL_LPUART_DisableIT_ERROR(LPUART1);
+    }
+}
+
 static void furi_hal_serial_rx_configure(
     FuriHalSerialHandle* handle,
     FuriHalSerialRxCallback callback,
@@ -520,9 +627,12 @@ static void furi_hal_serial_rx_configure(
 void furi_hal_serial_rx_start(
     FuriHalSerialHandle* handle,
     FuriHalSerialRxCallback callback,
-    void* context) {
+    void* context,
+    FuriHalSerialRxEvent event) {
     furi_check(handle);
     furi_check(callback);
+
+    furi_hal_serial_event_init(handle, event);
 
     furi_hal_serial_rx_configure(handle, callback, context);
 
@@ -534,6 +644,7 @@ void furi_hal_serial_rx_start(
 
 void furi_hal_serial_rx_stop(FuriHalSerialHandle* handle) {
     furi_check(handle);
+    furi_hal_serial_event_deinit(handle);
     furi_hal_serial_rx_configure(handle, NULL, NULL);
 }
 
@@ -632,10 +743,12 @@ static void furi_hal_serial_dma_configure(
 void furi_hal_serial_dma_rx_start(
     FuriHalSerialHandle* handle,
     FuriHalSerialDmaRxCallback callback,
-    void* context) {
+    void* context,
+    FuriHalSerialRxEvent event) {
     furi_check(handle);
     furi_check(callback);
 
+    furi_hal_serial_event_init(handle, event);
     furi_hal_serial_dma_configure(handle, callback, context);
 
     //assign different functions to different usarts
@@ -646,5 +759,6 @@ void furi_hal_serial_dma_rx_start(
 
 void furi_hal_serial_dma_rx_stop(FuriHalSerialHandle* handle) {
     furi_check(handle);
+    furi_hal_serial_event_deinit(handle);
     furi_hal_serial_dma_configure(handle, NULL, NULL);
 }

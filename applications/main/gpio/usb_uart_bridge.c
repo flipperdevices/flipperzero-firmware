@@ -79,22 +79,23 @@ static int32_t usb_uart_tx_thread(void* context);
 
 static void usb_uart_on_irq_rx_dma_cb(
     FuriHalSerialHandle* handle,
-    FuriHalSerialDmaRxEvent ev,
+    FuriHalSerialRxEvent ev,
     size_t size,
     void* context) {
     UsbUartBridge* usb_uart = (UsbUartBridge*)context;
 
-    UNUSED(ev);
-    uint8_t data[FURI_HAL_SERIAL_DMA_BUFFER_SIZE] = {0};
-    do {
-        size_t ret = furi_hal_serial_dma_rx(
-            handle,
-            data,
-            (size > FURI_HAL_SERIAL_DMA_BUFFER_SIZE) ? FURI_HAL_SERIAL_DMA_BUFFER_SIZE : size);
-        furi_stream_buffer_send(usb_uart->rx_stream, data, ret, 0);
-        size -= ret;
-    } while(size);
-    furi_thread_flags_set(furi_thread_get_id(usb_uart->thread), WorkerEvtRxDone);
+    if(ev & (FuriHalSerialRxEventRx | FuriHalSerialRxEventEnd)) {
+        uint8_t data[FURI_HAL_SERIAL_DMA_BUFFER_SIZE] = {0};
+        do {
+            size_t ret = furi_hal_serial_dma_rx(
+                handle,
+                data,
+                (size > FURI_HAL_SERIAL_DMA_BUFFER_SIZE) ? FURI_HAL_SERIAL_DMA_BUFFER_SIZE : size);
+            furi_stream_buffer_send(usb_uart->rx_stream, data, ret, 0);
+            size -= ret;
+        } while(size);
+        furi_thread_flags_set(furi_thread_get_id(usb_uart->thread), WorkerEvtRxDone);
+    }
 }
 
 static void usb_uart_vcp_init(UsbUartBridge* usb_uart, uint8_t vcp_ch) {
@@ -130,7 +131,8 @@ static void usb_uart_serial_init(UsbUartBridge* usb_uart, uint8_t uart_ch) {
     furi_assert(usb_uart->serial_handle);
 
     furi_hal_serial_init(usb_uart->serial_handle, 115200);
-    furi_hal_serial_dma_rx_start(usb_uart->serial_handle, usb_uart_on_irq_rx_dma_cb, usb_uart);
+    furi_hal_serial_dma_rx_start(
+        usb_uart->serial_handle, usb_uart_on_irq_rx_dma_cb, usb_uart, FuriHalSerialRxEventOffError);
 }
 
 static void usb_uart_serial_deinit(UsbUartBridge* usb_uart) {

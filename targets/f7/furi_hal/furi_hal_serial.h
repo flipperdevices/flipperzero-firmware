@@ -79,8 +79,13 @@ void furi_hal_serial_tx_wait_complete(FuriHalSerialHandle* handle);
 
 /** Serial events */
 typedef enum {
-    FuriHalSerialRxEventRx, /**< Data available and must be picked up */
-    FuriHalSerialRxEventEnd, /**< Bus idle detected, data may be available (check data_len) */
+    FuriHalSerialRxEventOffError = (1 << 0), /**< Bus OFF detected error */
+    FuriHalSerialRxEventRx = (1 << 1), /**< Data available and must be picked up */
+    FuriHalSerialRxEventEnd =
+        (1 << 2), /**< Bus idle detected, data may be available (check data_len) */
+    FuriHalSerialRxEventFrameError = (1 << 3), /**< Bus FE detected, frame error */
+    FuriHalSerialRxEventNoiseLineError = (1 << 4), /**< Bus NE detected, noise line */
+    FuriHalSerialRxEventOverrunError = (1 << 5), /**< Bus ORE detected, overrun error */
 } FuriHalSerialRxEvent;
 
 /** Receive callback
@@ -103,11 +108,13 @@ typedef void (*FuriHalSerialRxCallback)(
  * @param      handle    Serial handle
  * @param      callback  callback pointer
  * @param      context   callback context
+ * @param      event     FuriHalSerialRxEvent
  */
 void furi_hal_serial_rx_start(
     FuriHalSerialHandle* handle,
     FuriHalSerialRxCallback callback,
-    void* context);
+    void* context,
+    FuriHalSerialRxEvent event);
 
 /** Stop Serial Receive
  *
@@ -130,12 +137,6 @@ uint8_t furi_hal_serial_rx(FuriHalSerialHandle* handle);
 
 #define FURI_HAL_SERIAL_DMA_BUFFER_SIZE (256u)
 
-/** Serial DMA events */
-typedef enum {
-    FuriHalSerialDmaRxEventRx, /**< Data available and must be picked up */
-    FuriHalSerialDmaRxEventEnd, /**< Bus idle detected, data may be available (check data_len) */
-} FuriHalSerialDmaRxEvent;
-
 /** Receive DMA callback
  *
  * @warning    DMA Callback will be called in interrupt context, ensure thread
@@ -148,7 +149,7 @@ typedef enum {
  */
 typedef void (*FuriHalSerialDmaRxCallback)(
     FuriHalSerialHandle* handle,
-    FuriHalSerialDmaRxEvent event,
+    FuriHalSerialRxEvent event,
     size_t data_len,
     void* context);
 
@@ -161,7 +162,8 @@ typedef void (*FuriHalSerialDmaRxCallback)(
 void furi_hal_serial_dma_rx_start(
     FuriHalSerialHandle* handle,
     FuriHalSerialDmaRxCallback callback,
-    void* context);
+    void* context,
+    FuriHalSerialRxEvent event);
 
 /** Stop Serial receive DMA
  *

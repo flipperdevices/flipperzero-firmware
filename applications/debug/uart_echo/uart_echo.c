@@ -42,9 +42,15 @@ typedef enum {
     WorkerEventReserved = (1 << 0), // Reserved for StreamBuffer internal event
     WorkerEventStop = (1 << 1),
     WorkerEventRx = (1 << 2),
+    WorkerEventRxEnd = (1 << 3),
+    WorkerEventRxORE = (1 << 4),
+    WorkerEventRxFE = (1 << 5),
+    WorkerEventRxNE = (1 << 6),
 } WorkerEventFlags;
 
-#define WORKER_EVENTS_MASK (WorkerEventStop | WorkerEventRx)
+#define WORKER_EVENTS_MASK                                                                     \
+    (WorkerEventStop | WorkerEventRx | WorkerEventRxEnd | WorkerEventRxORE | WorkerEventRxFE | \
+     WorkerEventRxNE)
 
 const NotificationSequence sequence_notification = {
     &message_display_backlight_on,
@@ -98,10 +104,34 @@ static void
     furi_assert(context);
     UNUSED(handle);
     UartEchoApp* app = context;
-    if(event == FuriHalSerialRxEventRx) {
+    volatile FuriHalSerialRxEvent event_copy = event;
+    UNUSED(event_copy);
+    if(event & FuriHalSerialRxEventRx) {
         uint8_t data = furi_hal_serial_rx(handle);
         furi_stream_buffer_send(app->rx_stream, &data, 1, 0);
         furi_thread_flags_set(furi_thread_get_id(app->worker_thread), WorkerEventRx);
+    }
+
+    if(event & FuriHalSerialRxEventEnd) {
+        //idle line detected, packet transmission may have ended
+        furi_thread_flags_set(furi_thread_get_id(app->worker_thread), WorkerEventRxEnd);
+    }
+
+    if(event & (FuriHalSerialRxEventFrameError | FuriHalSerialRxEventNoiseLineError |
+                FuriHalSerialRxEventOverrunError)) {
+        //error detected
+        WorkerEventFlags flag = 0;
+        if(event & FuriHalSerialRxEventFrameError) {
+            flag |= WorkerEventRxFE;
+        }
+        if(event & FuriHalSerialRxEventNoiseLineError) {
+            flag |= WorkerEventRxNE;
+        }
+        if(event & FuriHalSerialRxEventOverrunError) {
+            flag |= WorkerEventRxORE;
+        }
+
+        furi_thread_flags_set(furi_thread_get_id(app->worker_thread), flag);
     }
 }
 
@@ -180,6 +210,22 @@ static int32_t uart_echo_worker(void* context) {
             with_view_model(
                 app->view, UartDumpModel * model, { UNUSED(model); }, true);
         }
+
+        if(events & WorkerEventRxEnd) {
+            furi_hal_serial_tx(app->serial_handle, (uint8_t*)"\r\nDetect IDLE\r\n", 15);
+        }
+
+        if(events & (WorkerEventRxORE | WorkerEventRxFE | WorkerEventRxNE)) {
+            if(events & WorkerEventRxORE) {
+                furi_hal_serial_tx(app->serial_handle, (uint8_t*)"\r\nDetect ORE\r\n", 14);
+            }
+            if(events & WorkerEventRxFE) {
+                furi_hal_serial_tx(app->serial_handle, (uint8_t*)"\r\nDetect FE\r\n", 13);
+            }
+            if(events & WorkerEventRxNE) {
+                furi_hal_serial_tx(app->serial_handle, (uint8_t*)"\r\nDetect NE\r\n", 13);
+            }
+        }
     }
 
     return 0;
@@ -228,7 +274,13 @@ static UartEchoApp* uart_echo_app_alloc(uint32_t baudrate) {
     app->serial_handle = furi_hal_serial_control_acquire(FuriHalSerialIdUsart);
     furi_check(app->serial_handle);
     furi_hal_serial_init(app->serial_handle, baudrate);
-    furi_hal_serial_rx_start(app->serial_handle, uart_echo_on_irq_cb, app);
+
+    furi_hal_serial_rx_start(
+        app->serial_handle,
+        uart_echo_on_irq_cb,
+        app,
+        (FuriHalSerialRxEventFrameError | FuriHalSerialRxEventNoiseLineError |
+         FuriHalSerialRxEventEnd | FuriHalSerialRxEventOverrunError));
 
     return app;
 }
