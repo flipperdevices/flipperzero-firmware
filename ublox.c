@@ -71,7 +71,7 @@ Ublox* ublox_alloc() {
     (ublox->data_display_state).view_mode = UbloxDataDisplayViewModeHandheld;
     (ublox->data_display_state).refresh_rate = 2;
     (ublox->data_display_state).notify_mode = UbloxDataDisplayNotifyOn;
-
+    (ublox->data_display_state).backlight_mode = UbloxDataDisplayBacklightDefault;
     (ublox->device_state).odometer_mode = UbloxOdometerModeRunning;
     // "suitable for most applications" according to u-blox.
     (ublox->device_state).platform_model = UbloxPlatformModelPortable;
@@ -140,7 +140,9 @@ int32_t ublox_app(void* p) {
     // TODO: this is breaking the backlight timeout for everything
     // else: test by opening ublox, then leaving and opening DAP
     // Link. DAP Link should force the backlight on but doesn't.
-    notification_message_block(ublox->notifications, &sequence_display_backlight_enforce_auto);
+    if ((ublox->data_display_state).backlight_mode == UbloxDataDisplayBacklightOn) {
+	notification_message_block(ublox->notifications, &sequence_display_backlight_enforce_auto);
+    }
 
     ublox_free(ublox);
 
