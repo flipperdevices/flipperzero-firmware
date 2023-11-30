@@ -75,6 +75,7 @@ bool ublox_scene_data_display_on_event(void* context, SceneManagerEvent event) {
             }
 
         } else if(event.event == UbloxWorkerEventDataReady) {
+
             if((ublox->data_display_state).notify_mode == UbloxDataDisplayNotifyOn) {
                 notification_message(ublox->notifications, &sequence_new_reading);
             }
@@ -93,7 +94,9 @@ bool ublox_scene_data_display_on_event(void* context, SceneManagerEvent event) {
         } else if(event.event == UbloxWorkerEventFailed) {
             FURI_LOG_I(TAG, "UbloxWorkerEventFailed");
             data_display_set_state(ublox->data_display, DataDisplayGPSNotFound);
-	    ublox->log_state = UbloxLogStateStopLogging;
+	    if(ublox->log_state == UbloxLogStateLogging) {
+		ublox->log_state = UbloxLogStateStopLogging;
+	    }
         }
     }
     return consumed;

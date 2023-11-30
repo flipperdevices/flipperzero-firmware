@@ -188,7 +188,7 @@ void ublox_worker_read_nav_messages(void* context) {
         uint32_t ticks = furi_get_tick();
         // we interrupt with checking the state to help reduce
         // lag. it's not perfect, but it does overall improve things.
-        bool pvt = ublox_worker_read_pvt(ublox_worker);
+        bool got_pvt = ublox_worker_read_pvt(ublox_worker);
 
         if(ublox_worker->state != UbloxWorkerStateRead) break;
         // clearing makes the second read much faster
@@ -196,12 +196,12 @@ void ublox_worker_read_nav_messages(void* context) {
 
         if(ublox_worker->state != UbloxWorkerStateRead) break;
 
-        bool odo = ublox_worker_read_odo(ublox_worker);
+        bool got_odo = ublox_worker_read_odo(ublox_worker);
 
-        if(pvt && odo) {
+        if(got_pvt && got_odo) {
 	    // if we got good data, do stuff
             ublox_worker->callback(UbloxWorkerEventDataReady, ublox_worker->context);
-
+	    FURI_LOG_I(TAG, "sent callback");
 	    // if logging, add point
             if(ublox->log_state == UbloxLogStateLogging) {
                 if(!kml_add_path_point(
@@ -218,6 +218,7 @@ void ublox_worker_read_nav_messages(void* context) {
             ublox_worker->callback(UbloxWorkerEventFailed, ublox_worker->context);
         }
 
+	FURI_LOG_I(TAG, "going into loop");
         while(furi_get_tick() - ticks <
               furi_ms_to_ticks(((ublox->data_display_state).refresh_rate * 1000))) {
 	    // putting these *inside* the loop makes it respond faster
@@ -232,11 +233,10 @@ void ublox_worker_read_nav_messages(void* context) {
 		    FURI_LOG_E(TAG, "failed to close KML file!");
 		}
 		ublox->log_state = UbloxLogStateNone;
-		FURI_LOG_I(TAG, "state in tick loop: %d", ublox->log_state);
 		ublox_worker->callback(UbloxWorkerEventLogStateChanged, ublox_worker->context);
 	    }
         }
-
+	FURI_LOG_I(TAG, "finished loop");
 
     }
 }
@@ -455,7 +455,6 @@ bool ublox_worker_read_pvt(UbloxWorker* ublox_worker) {
             .magDec = (frame_rx->payload[88]) | (frame_rx->payload[89] << 8),
             .magAcc = (frame_rx->payload[90]) | (frame_rx->payload[91] << 8),
         };
-
         // Using a local variable for nav_pvt is fine, because nav_pvt in
         // the Ublox struct is also not a pointer, so this assignment
         // effectively compiles to a memcpy.
