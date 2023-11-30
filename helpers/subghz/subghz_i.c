@@ -28,17 +28,6 @@ void subghz_set_default_preset(SubGhz* subghz) {
         0);
 }*/
 
-/*void subghz_blink_start(SubGhz* subghz) {
-    furi_assert(subghz);
-    notification_message(subghz->notifications, &sequence_blink_stop);
-    notification_message(subghz->notifications, &sequence_blink_start_magenta);
-}*/
-
-/*void subghz_blink_stop(SubGhz* subghz) {
-    furi_assert(subghz);
-    notification_message(subghz->notifications, &sequence_blink_stop);
-}*/
-
 /*bool subghz_tx_start(SubGhz* subghz, FlipperFormat* flipper_format) {
     switch(subghz_txrx_tx_start(subghz->txrx, flipper_format)) {
     case SubGhzTxRxStartTxStateErrorParserOthers:

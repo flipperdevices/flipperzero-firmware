@@ -93,7 +93,7 @@ void subghz_txrx_free(SubGhzTxRx* instance);
  * @param flipper_format Pointer to a FlipperFormat
  * @return SubGhzTxRxStartTxState 
  */
-//SubGhzTxRxStartTxState subghz_txrx_tx_start(SubGhzTxRx* instance, FlipperFormat* flipper_format);
+SubGhzTxRxStartTxState subghz_txrx_tx_start(SubGhzTxRx* instance, FlipperFormat* flipper_format);
 
 /**
  * Start RX CC1101
@@ -107,7 +107,7 @@ void subghz_txrx_free(SubGhzTxRx* instance);
  * 
  * @param instance Pointer to a SubGhzTxRx
  */
-//void subghz_txrx_stop(SubGhzTxRx* instance);
+void subghz_txrx_stop(SubGhzTxRx* instance);
 
 /**
  * Set sleep mode CC1101
@@ -165,7 +165,7 @@ void subghz_txrx_free(SubGhzTxRx* instance);
  * 
  * @param instance Pointer to a SubGhzTxRx 
  */
-//void subghz_txrx_speaker_off(SubGhzTxRx* instance);
+void subghz_txrx_speaker_off(SubGhzTxRx* instance);
 
 /**
  * Speaker mute
@@ -179,7 +179,7 @@ void subghz_txrx_free(SubGhzTxRx* instance);
  * 
  * @param instance Pointer to a SubGhzTxRx 
  */
-//void subghz_txrx_speaker_unmute(SubGhzTxRx* instance);
+void subghz_txrx_speaker_unmute(SubGhzTxRx* instance);
 
 /**
  * Set state speaker
