@@ -7,6 +7,7 @@ typedef struct Resources Resources;
 typedef enum {
     ResourceIdSubGhzSignal,
     ResourceIdLedDriver,
+    ResourceIdInfrared,
 } ResourceId;
 
 /**

@@ -79,8 +79,9 @@ static void send_subghz(FlipboardModel* model, char* filename) {
 static bool send_ir(FlipboardModel* model, char* filename, char* action_name) {
     bool sent_signal = false;
     ButtonMonitor* button_monitor = flipboard_model_get_button_monitor(model);
+    Resources* resources = flipboard_model_get_resources(model);
     FlipboardLeds* leds = flipboard_model_get_leds(model);
-    InfraredSignal* ir_signal = infrared_signal_load_file(filename, action_name);
+    InfraredSignal* ir_signal = infrared_signal_load_file(filename, action_name, resources);
     do {
         flipboard_status_led(leds, true);
         sent_signal |= infrared_signal_send(ir_signal);
