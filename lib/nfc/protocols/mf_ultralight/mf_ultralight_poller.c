@@ -551,6 +551,7 @@ static NfcCommand mf_ultralight_poller_handler_read_success(MfUltralightPoller* 
 
 static NfcCommand mf_ultralight_poller_handler_request_write_data(MfUltralightPoller* instance) {
     FURI_LOG_D(TAG, "Check writing capability");
+    NfcCommand command = NfcCommandContinue;
     MfUltralightPollerState next_state = MfUltralightPollerStateWritePages;
     instance->current_page = 4;
 
@@ -596,12 +597,13 @@ static NfcCommand mf_ultralight_poller_handler_request_write_data(MfUltralightPo
     } while(false);
 
     if(!check_passed) {
-        instance->callback(instance->general_event, instance->context);
+        iso14443_3a_poller_halt(instance->iso14443_3a_poller);
+        command = instance->callback(instance->general_event, instance->context);
         next_state = MfUltralightPollerStateWriteFail;
     }
 
     instance->state = next_state;
-    return NfcCommandContinue;
+    return command;
 }
 
 static NfcCommand mf_ultralight_poller_handler_write_pages(MfUltralightPoller* instance) {
