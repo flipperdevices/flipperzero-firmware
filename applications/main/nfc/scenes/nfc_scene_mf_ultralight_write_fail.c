@@ -1,6 +1,6 @@
 #include "../nfc_app_i.h"
 
-void nfc_scene_mf_ultralight_write_initial_fail_widget_callback(
+void nfc_scene_mf_ultralight_write_fail_widget_callback(
     GuiButtonType result,
     InputType type,
     void* context) {
@@ -10,7 +10,7 @@ void nfc_scene_mf_ultralight_write_initial_fail_widget_callback(
     }
 }
 
-void nfc_scene_mf_ultralight_write_initial_fail_on_enter(void* context) {
+void nfc_scene_mf_ultralight_write_fail_on_enter(void* context) {
     NfcApp* instance = context;
     Widget* widget = instance->widget;
 
@@ -32,14 +32,14 @@ void nfc_scene_mf_ultralight_write_initial_fail_on_enter(void* context) {
         widget,
         GuiButtonTypeLeft,
         "Finish",
-        nfc_scene_mf_ultralight_write_initial_fail_widget_callback,
+        nfc_scene_mf_ultralight_write_fail_widget_callback,
         instance);
 
     // Setup and start worker
     view_dispatcher_switch_to_view(instance->view_dispatcher, NfcViewWidget);
 }
 
-bool nfc_scene_mf_ultralight_write_initial_fail_on_event(void* context, SceneManagerEvent event) {
+bool nfc_scene_mf_ultralight_write_fail_on_event(void* context, SceneManagerEvent event) {
     NfcApp* instance = context;
     bool consumed = false;
 
@@ -55,7 +55,7 @@ bool nfc_scene_mf_ultralight_write_initial_fail_on_event(void* context, SceneMan
     return consumed;
 }
 
-void nfc_scene_mf_ultralight_write_initial_fail_on_exit(void* context) {
+void nfc_scene_mf_ultralight_write_fail_on_exit(void* context) {
     NfcApp* instance = context;
 
     widget_reset(instance->widget);

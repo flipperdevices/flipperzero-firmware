@@ -157,7 +157,7 @@ static bool
         scene_manager_next_scene(instance->scene_manager, NfcSceneMfUltralightUnlockMenu);
         return true;
     } else if(event == SubmenuIndexWrite) {
-        scene_manager_next_scene(instance->scene_manager, NfcSceneMfUltralightWriteInitial);
+        scene_manager_next_scene(instance->scene_manager, NfcSceneMfUltralightWrite);
         return true;
     }
     return false;

@@ -3,12 +3,11 @@
 #include <nfc/protocols/mf_ultralight/mf_ultralight_poller.h>
 
 enum {
-    NfcSceneMfUltralightWriteInitialStateCardSearch,
-    NfcSceneMfUltralightWriteInitialStateCardFound,
+    NfcSceneMfUltralightWriteStateCardSearch,
+    NfcSceneMfUltralightWriteStateCardFound,
 };
 
-NfcCommand
-    nfc_scene_mf_ultralight_write_initial_worker_callback(NfcGenericEvent event, void* context) {
+NfcCommand nfc_scene_mf_ultralight_write_worker_callback(NfcGenericEvent event, void* context) {
     furi_assert(context);
     furi_assert(event.event_data);
     furi_assert(event.protocol == NfcProtocolMfUltralight);
@@ -38,13 +37,13 @@ NfcCommand
     return command;
 }
 
-static void nfc_scene_mf_ultralight_write_initial_setup_view(NfcApp* instance) {
+static void nfc_scene_mf_ultralight_write_setup_view(NfcApp* instance) {
     Popup* popup = instance->popup;
     popup_reset(popup);
     uint32_t state =
-        scene_manager_get_scene_state(instance->scene_manager, NfcSceneMfUltralightWriteInitial);
+        scene_manager_get_scene_state(instance->scene_manager, NfcSceneMfUltralightWrite);
 
-    if(state == NfcSceneMfUltralightWriteInitialStateCardSearch) {
+    if(state == NfcSceneMfUltralightWriteStateCardSearch) {
         popup_set_text(
             instance->popup, "Apply the initial\ncard only", 128, 32, AlignRight, AlignCenter);
         popup_set_icon(instance->popup, 0, 8, &I_NFC_manual_60x50);
@@ -56,26 +55,25 @@ static void nfc_scene_mf_ultralight_write_initial_setup_view(NfcApp* instance) {
     view_dispatcher_switch_to_view(instance->view_dispatcher, NfcViewPopup);
 }
 
-void nfc_scene_mf_ultralight_write_initial_on_enter(void* context) {
+void nfc_scene_mf_ultralight_write_on_enter(void* context) {
     NfcApp* instance = context;
     dolphin_deed(DolphinDeedNfcEmulate);
 
     scene_manager_set_scene_state(
         instance->scene_manager,
-        NfcSceneMfUltralightWriteInitial,
-        NfcSceneMfUltralightWriteInitialStateCardSearch);
-    nfc_scene_mf_ultralight_write_initial_setup_view(instance);
+        NfcSceneMfUltralightWrite,
+        NfcSceneMfUltralightWriteStateCardSearch);
+    nfc_scene_mf_ultralight_write_setup_view(instance);
 
     // Setup and start worker
     FURI_LOG_D("WMFU", "Card searching...");
     instance->poller = nfc_poller_alloc(instance->nfc, NfcProtocolMfUltralight);
-    nfc_poller_start(
-        instance->poller, nfc_scene_mf_ultralight_write_initial_worker_callback, instance);
+    nfc_poller_start(instance->poller, nfc_scene_mf_ultralight_write_worker_callback, instance);
 
     nfc_blink_emulate_start(instance);
 }
 
-bool nfc_scene_mf_ultralight_write_initial_on_event(void* context, SceneManagerEvent event) {
+bool nfc_scene_mf_ultralight_write_on_event(void* context, SceneManagerEvent event) {
     NfcApp* instance = context;
     bool consumed = false;
 
@@ -83,9 +81,9 @@ bool nfc_scene_mf_ultralight_write_initial_on_event(void* context, SceneManagerE
         if(event.event == NfcCustomEventCardDetected) {
             scene_manager_set_scene_state(
                 instance->scene_manager,
-                NfcSceneMfUltralightWriteInitial,
-                NfcSceneMfUltralightWriteInitialStateCardFound);
-            nfc_scene_mf_ultralight_write_initial_setup_view(instance);
+                NfcSceneMfUltralightWrite,
+                NfcSceneMfUltralightWriteStateCardFound);
+            nfc_scene_mf_ultralight_write_setup_view(instance);
             consumed = true;
         } else if(event.event == NfcCustomEventWrongCard) {
             scene_manager_next_scene(instance->scene_manager, NfcSceneMfUltralightWrongCard);
@@ -103,7 +101,7 @@ bool nfc_scene_mf_ultralight_write_initial_on_event(void* context, SceneManagerE
     return consumed;
 }
 
-void nfc_scene_mf_ultralight_write_initial_on_exit(void* context) {
+void nfc_scene_mf_ultralight_write_on_exit(void* context) {
     NfcApp* instance = context;
 
     nfc_poller_stop(instance->poller);
@@ -111,8 +109,8 @@ void nfc_scene_mf_ultralight_write_initial_on_exit(void* context) {
 
     scene_manager_set_scene_state(
         instance->scene_manager,
-        NfcSceneMfUltralightWriteInitial,
-        NfcSceneMfUltralightWriteInitialStateCardSearch);
+        NfcSceneMfUltralightWrite,
+        NfcSceneMfUltralightWriteStateCardSearch);
     // Clear view
     popup_reset(instance->popup);
 
