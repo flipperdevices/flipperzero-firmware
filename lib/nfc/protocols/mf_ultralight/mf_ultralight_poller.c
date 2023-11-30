@@ -225,18 +225,21 @@ static NfcCommand mf_ultralight_poller_handler_idle(MfUltralightPoller* instance
     instance->tearing_flag_total = 3;
     instance->pages_read = 0;
     instance->state = MfUltralightPollerStateRequestMode;
+    instance->current_page = 0;
     return NfcCommandContinue;
 }
 
 static NfcCommand mf_ultralight_poller_handler_request_mode(MfUltralightPoller* instance) {
+    NfcCommand command = NfcCommandContinue;
+
     instance->mfu_event.type = MfUltralightPollerEventTypeRequestMode;
     instance->mfu_event.data->poller_mode = MfUltralightPollerModeRead;
 
-    instance->callback(instance->general_event, instance->context);
+    command = instance->callback(instance->general_event, instance->context);
     instance->mode = instance->mfu_event.data->poller_mode;
 
     instance->state = MfUltralightPollerStateReadVersion;
-    return NfcCommandContinue;
+    return command;
 }
 
 static NfcCommand mf_ultralight_poller_handler_read_version(MfUltralightPoller* instance) {
