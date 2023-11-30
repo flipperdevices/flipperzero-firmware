@@ -21,9 +21,8 @@
 #include "./common/flipboard_file.h"
 #include "./common/flipboard_model.h"
 #include "./common/flipboard_model_ref.h"
+#include "./common/infrared_signal.h"
 #include "./common/keyboard.h"
 #include "./common/leds.h"
 #include "./common/speaker.h"
 #include "./common/subghz_signal.h"
-
-#include "./infrared_signal.h"

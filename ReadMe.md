@@ -68,11 +68,11 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Bluetooth/USB Remote v1.6 (By Cutch)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/1330)
 - UL: [add 303.9 frequency (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/ff41d262dc1dab11763dd8ba436e2abbb83aed54)
 - Updated: [ESP32CAM Marauder v0.6.5 (By 0xchocolate & eried)](https://github.com/eried/flipperzero-mayhem)
+- Updated: [PicoPass (iClass) v1.6 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass) [Picopass: Create folder before loclass #78 (By bettse)](https://github.com/flipperdevices/flipperzero-good-faps/pull/78)
+- [Animations Menu: Create list from SD Card, no more hard coded menu! (By LeeroysHub)](https://github.com/LeeroysHub/RM-Flipper/commit/15abca894949f5e0b80416ed72697b8a529de9d4)
 - Updated: [FlipBoard Blinky v1.0 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
 - Updated: [FlipBoard Keyboard v1.0 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
 - Updated: [FlipBoard Signal v1.0 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
-- Updated: [PicoPass (iClass) v1.6 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass) [Picopass: Create folder before loclass #78 (By bettse)](https://github.com/flipperdevices/flipperzero-good-faps/pull/78)
-- [Animations Menu: Create list from SD Card, no more hard coded menu! (By LeeroysHub)](https://github.com/LeeroysHub/RM-Flipper/commit/15abca894949f5e0b80416ed72697b8a529de9d4)
 
 <a name="release">
 

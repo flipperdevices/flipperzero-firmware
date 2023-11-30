@@ -8,6 +8,7 @@
 #include "infrared_signal.h"
 
 struct InfraredSignal {
+    Resources* resources;
     FlipperFormat* fff_data_file;
     char* action;
     InfraredMessage message;
@@ -18,35 +19,43 @@ struct InfraredSignal {
     float duty_cycle;
 };
 
-bool infrared_signal_send(InfraredSignal* signal) {
-    if(!signal) {
-        FURI_LOG_E(TAG, "No signal to send");
-        return false;
+/**
+ * @brief Load an infrared signal (action) from a file.  
+ * @details Load an infrared signal (action) from a file.  The first signal is loaded and ready for sending.
+ * @param file_path The path to the file to load.
+ * @param action The name of the action to load from the file.
+ * @param resources The resources to use for sending the signal.
+*/
+InfraredSignal* infrared_signal_load_file(char* file_path, char* action, Resources* resources) {
+    InfraredSignal* signal = (InfraredSignal*)malloc(sizeof(InfraredSignal));
+    signal->resources = resources;
+    signal->action = action;
+    signal->message.protocol = InfraredProtocolUnknown;
+    signal->timings_count = 0;
+
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    signal->fff_data_file = flipper_format_file_alloc(storage);
+
+    if(flipper_format_file_open_existing(signal->fff_data_file, file_path)) {
+        if(!infrared_signal_load_next(signal)) {
+            FURI_LOG_E(TAG, "Error '%s' not found in file '%s'.", action, file_path);
+            infrared_signal_free(signal);
+            signal = NULL;
+        }
+    } else {
+        FURI_LOG_E(TAG, "Error opening file '%s'", file_path);
+        infrared_signal_free(signal);
+        signal = NULL;
     }
 
-    if(signal->timings_count > 0) {
-        FURI_LOG_D(TAG, "Sending raw signal with count %ld", signal->timings_count);
-        infrared_send_raw_ext(
-            signal->timings,
-            signal->timings_count,
-            signal->start_from_mark,
-            signal->frequency,
-            signal->duty_cycle);
-        return true;
-    } else if(signal->message.protocol != InfraredProtocolUnknown) {
-        FURI_LOG_D(
-            TAG,
-            "Sending protocol signal with address %ld, command %ld",
-            signal->message.address,
-            signal->message.command);
-        infrared_send(&signal->message, 5);
-        return true;
-    }
-
-    FURI_LOG_E(TAG, "Unknown signal protocol");
-    return false;
+    return signal;
 }
 
+/**
+ * @brief Load the next infrared signal (action) from the file.
+ * @param signal The signal to load from.
+ * @return True if the signal was loaded, false if there are no more signals.
+*/
 bool infrared_signal_load_next(InfraredSignal* signal) {
     if(!signal) {
         return false;
@@ -141,30 +150,48 @@ bool infrared_signal_load_next(InfraredSignal* signal) {
     return parsed;
 }
 
-InfraredSignal* infrared_signal_load_file(char* file_path, char* action) {
-    InfraredSignal* signal = (InfraredSignal*)malloc(sizeof(InfraredSignal));
-    signal->action = action;
-    signal->message.protocol = InfraredProtocolUnknown;
-    signal->timings_count = 0;
-
-    Storage* storage = furi_record_open(RECORD_STORAGE);
-    signal->fff_data_file = flipper_format_file_alloc(storage);
-
-    if(flipper_format_file_open_existing(signal->fff_data_file, file_path)) {
-        if(!infrared_signal_load_next(signal)) {
-            FURI_LOG_E(TAG, "Error '%s' not found in file '%s'.", action, file_path);
-            infrared_signal_free(signal);
-            signal = NULL;
-        }
-    } else {
-        FURI_LOG_E(TAG, "Error opening file '%s'", file_path);
-        infrared_signal_free(signal);
-        signal = NULL;
+/**
+ * @brief Send the infrared signal (action) to the IR LED.
+ * @param signal The signal to send.
+ * @return True if the signal was sent, false if there was an error.
+*/
+bool infrared_signal_send(InfraredSignal* signal) {
+    if(!signal) {
+        FURI_LOG_E(TAG, "No signal to send");
+        return false;
     }
 
-    return signal;
+    resources_acquire(signal->resources, ResourceIdInfrared, FuriWaitForever);
+    if(signal->timings_count > 0) {
+        FURI_LOG_D(TAG, "Sending raw signal with count %ld", signal->timings_count);
+        infrared_send_raw_ext(
+            signal->timings,
+            signal->timings_count,
+            signal->start_from_mark,
+            signal->frequency,
+            signal->duty_cycle);
+        resources_release(signal->resources, ResourceIdInfrared);
+        return true;
+    } else if(signal->message.protocol != InfraredProtocolUnknown) {
+        FURI_LOG_D(
+            TAG,
+            "Sending protocol signal with address %ld, command %ld",
+            signal->message.address,
+            signal->message.command);
+        infrared_send(&signal->message, 5);
+        resources_release(signal->resources, ResourceIdInfrared);
+        return true;
+    }
+
+    resources_release(signal->resources, ResourceIdInfrared);
+    FURI_LOG_E(TAG, "Unknown signal protocol");
+    return false;
 }
 
+/**
+ * @brief Free the memory used by the signal.
+ * @param signal The signal to free.
+*/
 void infrared_signal_free(InfraredSignal* signal) {
     if(signal) {
         if(signal->fff_data_file) {
