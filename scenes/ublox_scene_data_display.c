@@ -102,13 +102,6 @@ bool ublox_scene_data_display_on_event(void* context, SceneManagerEvent event) {
 void ublox_scene_data_display_on_exit(void* context) {
     Ublox* ublox = context;
 
-    /*if(ublox->log_state == UbloxLogStateLogging) {
-	FURI_LOG_I(TAG, "stop logging on exit");
-	ublox->log_state = UbloxLogStateStopLogging;
-	//while (ublox->log_state != UbloxLogStateNone);
-	//furi_delay_ms(500);
-	}*/
-
     ublox_worker_stop(ublox->worker);
 
     data_display_reset(ublox->data_display);

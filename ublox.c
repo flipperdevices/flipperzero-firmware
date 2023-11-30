@@ -64,21 +64,9 @@ Ublox* ublox_alloc() {
     ublox->storage = furi_record_open(RECORD_STORAGE);
 
     ublox->log_state = UbloxLogStateNone;
-    // This is better than "/ext/apps_data/ublox" like we were using before
-    ublox->logfile_folder = furi_string_alloc_set("/ext/ublox_kml");
+    // files do actually belong here
+    ublox->logfile_folder = furi_string_alloc_set(STORAGE_APP_DATA_PATH_PREFIX);
 
-    /*File* file = storage_file_alloc(ublox->storage);
-    FS_Error e = storage_file_open(file, "/ext/ublox_kml/big_chungus", FSAM_WRITE, FSOM_CREATE_ALWAYS);
-    if(e != FSE_OK) {
-	// must call close() even if the operation fails
-        FURI_LOG_E("ublox", "failed to open file: %s", filesystem_api_error_get_desc(e));
-	
-    } else {
-	FURI_LOG_I("ublox", "opened file");
-    }
-    storage_file_close(file);
-    storage_file_free(file);
-    */
     // Establish default data display state
     (ublox->data_display_state).view_mode = UbloxDataDisplayViewModeHandheld;
     (ublox->data_display_state).refresh_rate = 2;

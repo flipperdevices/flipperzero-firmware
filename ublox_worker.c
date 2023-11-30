@@ -47,23 +47,22 @@ void ublox_worker_stop(UbloxWorker* ublox_worker) {
     furi_assert(ublox_worker->thread);
     Ublox* ublox = ublox_worker->context;
     furi_assert(ublox);
-    //FURI_LOG_I(TAG, "worker_stop: %p", ublox);
-
-    // close the logfile if currently logging
-    //FURI_LOG_I(TAG, "log state: %d", ublox->log_state);
-
-    /*if(ublox->log_state == UbloxLogStateLogging) {
-        FURI_LOG_I(TAG, "closing log file on worker stop");
-        ublox->log_state = UbloxLogStateStopLogging;
-	FURI_LOG_I(TAG, "state changed");
-        if(!kml_close_file(&(ublox->kmlfile))) {
-            FURI_LOG_E(TAG, "failed to close KML file!");
-        }
-	}*/
     
     if(furi_thread_get_state(ublox_worker->thread) != FuriThreadStateStopped) {
         ublox_worker_change_state(ublox_worker, UbloxWorkerStateStop);
         furi_thread_join(ublox_worker->thread);
+    }
+
+    // Now that the worker thread is dead, we can access these
+    // safely. We have to have this separate from the nav_messages()
+    // function because of state.
+    if (ublox->log_state == UbloxLogStateLogging) {
+	FURI_LOG_I(TAG, "closing file in worker_stop()");
+	if(!kml_close_file(&(ublox->kmlfile))) {
+	    FURI_LOG_E(TAG, "failed to close KML file!");
+	}
+	// and revert the state
+	ublox->log_state = UbloxLogStateNone;
     }
 }
 
@@ -89,10 +88,8 @@ void clear_ublox_data() {
         if(!furi_hal_i2c_trx(
                &furi_hal_i2c_handle_external,
                UBLOX_I2C_ADDRESS << 1,
-               tx,
-               1,
-               &response,
-               1,
+               tx, 1,
+               &response, 1,
                furi_ms_to_ticks(I2C_TIMEOUT_MS))) {
             // if the GPS is disconnected during this loop, this will
             // loop forever, we must make that not happen. 30 loops is
@@ -107,13 +104,12 @@ void clear_ublox_data() {
 
 int32_t ublox_worker_task(void* context) {
     UbloxWorker* ublox_worker = context;
-
+    
     furi_hal_i2c_acquire(&furi_hal_i2c_handle_external);
 
     if(ublox_worker->state == UbloxWorkerStateRead) {
         ublox_worker_read_nav_messages(context);
     } else if(ublox_worker->state == UbloxWorkerStateSyncTime) {
-        FURI_LOG_I(TAG, "sync time");
         ublox_worker_sync_to_gps_time(ublox_worker);
     } else if(ublox_worker->state == UbloxWorkerStateResetOdometer) {
         ublox_worker_reset_odo(ublox_worker);
@@ -143,13 +139,12 @@ void ublox_worker_read_nav_messages(void* context) {
         FURI_LOG_I(TAG, "start logging");
 	
         // assemble full logfile pathname
-        //FuriString* fullname = furi_string_alloc_set("/ext/ublox_kml/dat.kml");
 	FuriString* fullname = furi_string_alloc();
         path_concat(furi_string_get_cstr(ublox->logfile_folder), ublox->text_store, fullname);
         FURI_LOG_I(TAG, "fullname is %s", furi_string_get_cstr(fullname));
 
         if(!kml_open_file(ublox->storage, &(ublox->kmlfile), furi_string_get_cstr(fullname))) {
-            //FURI_LOG_E(TAG, "failed to open KML file %s!", furi_string_get_cstr(fullname));
+            FURI_LOG_E(TAG, "failed to open KML file %s!", furi_string_get_cstr(fullname));
             ublox->log_state = UbloxLogStateNone;
 	    ublox_worker->callback(UbloxWorkerEventLogStateChanged, ublox_worker->context);
 	    return;
@@ -207,6 +202,7 @@ void ublox_worker_read_nav_messages(void* context) {
 	    // if we got good data, do stuff
             ublox_worker->callback(UbloxWorkerEventDataReady, ublox_worker->context);
 
+	    // if logging, add point
             if(ublox->log_state == UbloxLogStateLogging) {
                 if(!kml_add_path_point(
                        &(ublox->kmlfile),
@@ -218,6 +214,7 @@ void ublox_worker_read_nav_messages(void* context) {
                 }
             }
         } else {
+	    // bad data
             ublox_worker->callback(UbloxWorkerEventFailed, ublox_worker->context);
         }
 
@@ -227,13 +224,15 @@ void ublox_worker_read_nav_messages(void* context) {
 	    if(ublox_worker->state != UbloxWorkerStateRead) {
 		return;
 	    }
-	    
+
+	    // if logging stop is requested, do it
 	    if(ublox->log_state == UbloxLogStateStopLogging) {
-		FURI_LOG_I(TAG, "stop logging");
+		FURI_LOG_I(TAG, "stop logging in tick loop");
 		if(!kml_close_file(&(ublox->kmlfile))) {
 		    FURI_LOG_E(TAG, "failed to close KML file!");
 		}
 		ublox->log_state = UbloxLogStateNone;
+		FURI_LOG_I(TAG, "state in tick loop: %d", ublox->log_state);
 		ublox_worker->callback(UbloxWorkerEventLogStateChanged, ublox_worker->context);
 	    }
         }

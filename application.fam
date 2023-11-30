@@ -3,7 +3,6 @@ App(
     name="u-blox GPS",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="ublox_app",
-    cdefines=["APP_UBLOX"],
     requires=[
         "gui",
 	"i2c",
