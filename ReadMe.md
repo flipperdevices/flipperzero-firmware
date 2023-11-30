@@ -73,6 +73,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [FlipBoard Blinky v1.0 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
 - Updated: [FlipBoard Keyboard v1.0 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
 - Updated: [FlipBoard Signal v1.0 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
+- OFW: [Allows you to use UCS-2 in canvas_glyph_width #3226 (By boknote)](https://github.com/flipperdevices/flipperzero-firmware/pull/3226)
 
 <a name="release">
 
