@@ -179,7 +179,10 @@ fbtenv_download_toolchain_tar()
 {
     echo "Downloading toolchain:";
     mkdir -p "$FBT_TOOLCHAIN_PATH/toolchain" || return 1;
-    "$FBT_DOWNLOADER" "$FBT_TOOLCHAIN_PATH/toolchain/$TOOLCHAIN_TAR.part" "$TOOLCHAIN_URL" || echo "Failed to download $TOOLCHAIN_URL" && return 1;
+    "$FBT_DOWNLOADER" "$FBT_TOOLCHAIN_PATH/toolchain/$TOOLCHAIN_TAR.part" "$TOOLCHAIN_URL" || {
+        echo "Failed to download $TOOLCHAIN_URL";
+        return 1;
+    };
     # restoring oroginal filename if file downloaded successfully
     mv "$FBT_TOOLCHAIN_PATH/toolchain/$TOOLCHAIN_TAR.part" "$FBT_TOOLCHAIN_PATH/toolchain/$TOOLCHAIN_TAR"
     echo "done";
