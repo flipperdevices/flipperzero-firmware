@@ -12,13 +12,7 @@
 #define CFW_DESKTOP_SELECT_STEALTH_ICON 9
 #define CFW_DESKTOP_SELECT_TOP_BAR 10
 
-const char* const anim_style_names[AnimStyleCount] = {
-    "None",      "Default",      "Minimal", "420",        "420+18",        "ALL",      "Anime",
-    "Anime+420", "Anime+420+18", "BMO",     "Cherry 18+", "Corp Logos",    "Custom 1", "Custom 2",
-    "DBZ",       "Digim0n",      "Dolphin", "Hackz",      "Mario",         "Marvel",   "NYAN",
-    "One Piece", "P0kemon",      "RM 18+",  "RM Select",  "RM Select 18+", "SAO",      "Science",
-    "SJUMP",     "Squatch",      "Stock",   "Virus",      "WatchDogs",
-};
+#define FILE_NAME_LEN_MAX 256
 
 #define BATTERY_VIEW_COUNT 7
 const char* const battery_view_count_text[BATTERY_VIEW_COUNT] =
@@ -34,6 +28,11 @@ const uint32_t displayBatteryPercentage_value[BATTERY_VIEW_COUNT] = {
     DISPLAY_BATTERY_NONE};
 
 uint8_t origBattDisp_value = 0;
+
+//This can move to the model later if needed, but ^^ Battery gets away with it and I dont see the problem with a "global" in a FAP (except for convention)
+uint8_t ManifestFileCount;
+CharList_t ManifestFileNames;
+CharList_t ManifestMenuNames;
 
 #define CFW_DESKTOP_ICON_STYLE_COUNT 2
 
@@ -73,8 +72,8 @@ static void cfw_app_scene_interface_desktop_var_item_list_callback(void* context
 static void cfw_app_scene_interface_desktop_anim_style_changed(VariableItem* item) {
     CfwApp* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
-    variable_item_set_current_value_text(item, anim_style_names[index]);
-    CFW_SETTINGS()->anim_style = index;
+    variable_item_set_current_value_text(item, *CharList_get(ManifestMenuNames, index));
+    CFW_SETTINGS()->manifest_name = *CharList_get(ManifestFileNames, index);
     app->save_settings = true;
 }
 
@@ -169,14 +168,69 @@ void cfw_app_scene_interface_desktop_on_enter(void* context) {
     origIconStyle_value = app->desktop.icon_style;
     origBattDisp_value = app->desktop.displayBatteryPercentage;
 
+    //Initialization.
+    ManifestFileCount = 0;
+    CharList_init(ManifestFileNames);
+    CharList_init(ManifestMenuNames);
+
+    //Open up Storage.
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    File* folder = storage_file_alloc(storage);
+    FileInfo info;
+    char* name = malloc(FILE_NAME_LEN_MAX);
+    uint8_t current_manifest = 0;
+
+    //Lets walk the dolphin folder and get the filenamess.
+    if(storage_dir_open(folder, EXT_PATH("dolphin"))) {
+        while(storage_dir_read(folder, &info, name, FILE_NAME_LEN_MAX)) {
+            if(!(info.flags & FSF_DIRECTORY)) {
+                //Get a FuriString for all the string operations.
+                char* filenametmp = strdup(name);
+
+                //Are we on a manifest>
+                if(strncasecmp(filenametmp, "manifest", 8) == 0) {
+                    if(strlen(filenametmp) == 12) {
+                        //Add to the list of names.
+                        CharList_push_back(ManifestFileNames, filenametmp);
+                        CharList_push_back(ManifestMenuNames, "Default");
+                        ManifestFileCount++;
+                    } else {
+                        //Allocate memory for the menuname
+                        char* menuname = malloc(strlen(filenametmp) - 12);
+                        snprintf(menuname, strlen(filenametmp) - 12, "%s", filenametmp + 9);
+
+                        //Sanity Check.
+                        if(strcmp(menuname, "") != 0) {
+                            //Add to the list of names.
+                            CharList_push_at(ManifestFileNames, ManifestFileCount, filenametmp);
+                            CharList_push_at(ManifestMenuNames, ManifestFileCount, menuname);
+
+                            //Select in menu if its our manifest.
+                            if(strcmp(filenametmp, cfw_settings->manifest_name) == 0)
+                                current_manifest = ManifestFileCount;
+
+                            //Count the added Files.
+                            ManifestFileCount++;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    //Close up and free.
+    free(name);
+    storage_file_free(folder);
+
+    //Add items to list.
     item = variable_item_list_add(
         var_item_list,
         "Animations",
-        AnimStyleCount,
+        ManifestFileCount,
         cfw_app_scene_interface_desktop_anim_style_changed,
         app);
-    variable_item_set_current_value_index(item, cfw_settings->anim_style);
-    variable_item_set_current_value_text(item, anim_style_names[cfw_settings->anim_style]);
+    variable_item_set_current_value_index(item, current_manifest);
+    variable_item_set_current_value_text(item, *CharList_get(ManifestMenuNames, current_manifest));
 
     item = variable_item_list_add(
         var_item_list,

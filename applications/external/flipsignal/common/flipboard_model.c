@@ -12,13 +12,14 @@ FlipboardModel*
     flipboard_model_alloc(char* app_name, bool single_button_mode, ButtonModelFields fields) {
     FlipboardModel* model = (FlipboardModel*)malloc(sizeof(FlipboardModel));
     model->name = app_name;
+    model->resources = resources_alloc();
     model->button_model_fields = fields;
     model->single_button_mode = single_button_mode;
     model->keyboard = flipboard_keyboard_alloc();
     model->speaker = speaker_alloc();
     model->button_monitor = NULL;
     model->gui_refresh_timer = NULL;
-    model->leds = flipboard_leds_alloc();
+    model->leds = flipboard_leds_alloc(model->resources);
     model->backlight_always_on = true;
     model->custom_data = NULL;
     if(model->backlight_always_on) {
@@ -38,6 +39,10 @@ FlipboardModel*
 */
 void flipboard_model_free(FlipboardModel* model) {
     flipboard_model_save(model, model->button_model_fields);
+
+    if(model->resources) {
+        resources_free(model->resources);
+    }
 
     if(model->speaker) {
         speaker_free(model->speaker);
@@ -75,6 +80,10 @@ void flipboard_model_free(FlipboardModel* model) {
 */
 char* flipboard_model_get_name(FlipboardModel* model) {
     return model->name;
+}
+
+Resources* flipboard_model_get_resources(FlipboardModel* model) {
+    return model->resources;
 }
 
 /**
