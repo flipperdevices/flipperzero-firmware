@@ -63,7 +63,7 @@ static const ContinuityColor colors_powerbeats_3[] = {
     {0x14, "Gray"},
     {0x15, "Deep Blue"},
     {0x17, "Dark with Gold Logo"},
-    {}};
+};
 static const ContinuityColor colors_powerbeats_pro[] = {
     {0x00, "White"},
     {0x02, "Yellowish Green"},
