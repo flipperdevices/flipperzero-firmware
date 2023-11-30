@@ -4,7 +4,7 @@
 #include <string.h>
 #include <storage/storage.h>
 #include <flipper_format/flipper_format_i.h>
-#include "../meal_pager.h"
+#include "../meal_pager_i.h"
 
 #define MEAL_PAGER_SETTINGS_FILE_VERSION 1
 #define CONFIG_FILE_DIRECTORY_PATH EXT_PATH("apps_data/meal_pager")

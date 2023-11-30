@@ -1,6 +1,4 @@
 #include "meal_pager_haptic.h"
-#include "../meal_pager.h"
-
 
 void meal_pager_play_happy_bump(void* context) {
     Meal_Pager* app = context;

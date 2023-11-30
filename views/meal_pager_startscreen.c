@@ -1,4 +1,6 @@
-#include "../meal_pager.h"
+#include "meal_pager_startscreen.h"
+
+#include "../meal_pager_i.h"
 #include <furi.h>
 #include <furi_hal.h>
 #include <input/input.h>

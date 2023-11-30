@@ -1,4 +1,4 @@
-#include "../meal_pager.h"
+#include "../meal_pager_i.h"
 #include "../helpers/meal_pager_custom_event.h"
 #include "../views/meal_pager_startscreen.h"
 

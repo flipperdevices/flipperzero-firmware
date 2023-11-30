@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "../../meal_pager.h"
+#include "../../meal_pager_i.h"
 
 char* encManchester(const char* bits, int mode);
 
