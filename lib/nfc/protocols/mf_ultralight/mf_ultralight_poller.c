@@ -561,37 +561,38 @@ static NfcCommand mf_ultralight_poller_handler_request_write_data(MfUltralightPo
     const MfUltralightData* tag_data = instance->data;
     uint32_t features = mf_ultralight_get_feature_support_set(tag_data->type);
 
-    bool check_passed = true;
+    bool check_passed = false;
     do {
         if(write_data->type != tag_data->type) {
+            FURI_LOG_D(TAG, "Incorrect tag type");
             instance->mfu_event.type = MfUltralightPollerEventTypeCardMismatch;
-            check_passed = false;
             break;
         }
 
         if(!instance->auth_context.auth_success) {
+            FURI_LOG_D(TAG, "Unknown password");
             instance->mfu_event.type = MfUltralightPollerEventTypeCardLocked;
-            check_passed = false;
             break;
         }
 
         const MfUltralightPage staticlock_page = tag_data->page[2];
         if(staticlock_page.data[2] != 0 || staticlock_page.data[3] != 0) {
+            FURI_LOG_D(TAG, "Static lock bits are set");
             instance->mfu_event.type = MfUltralightPollerEventTypeCardLocked;
-            check_passed = false;
             break;
         }
 
         if(mf_ultralight_support_feature(features, MfUltralightFeatureSupportDynamicLock)) {
             uint8_t dynlock_num = mf_ultralight_get_config_page_num(tag_data->type) - 1;
             const MfUltralightPage dynlock_page = tag_data->page[dynlock_num];
-
             if(dynlock_page.data[0] != 0 || dynlock_page.data[1] != 0) {
+                FURI_LOG_D(TAG, "Dynamic lock bits are set");
                 instance->mfu_event.type = MfUltralightPollerEventTypeCardLocked;
-                check_passed = false;
                 break;
             }
         }
+
+        check_passed = true;
     } while(false);
 
     if(!check_passed) {
