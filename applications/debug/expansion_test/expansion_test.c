@@ -13,9 +13,12 @@
 
 #include <storage/storage.h>
 #include <expansion/expansion.h>
+#include <notification/notification_messages.h>
 #include <expansion/expansion_protocol.h>
 
 #define TAG "ExpansionTest"
+
+#define EXPANSION_INACTIVE_TIMEOUT_MS (250U)
 
 #define TEST_DIR_PATH EXT_PATH(TAG)
 #define TEST_FILE_NAME "test.txt"
@@ -105,9 +108,8 @@ static size_t expansion_test_app_receive_callback(uint8_t* data, size_t data_siz
             instance->buf, data + received_size, data_size - received_size, 0);
         if(received_size == data_size) break;
 
-        const uint32_t flags =
-            furi_thread_flags_wait(EXPANSION_TEST_APP_ALL_FLAGS, FuriFlagWaitAny, FuriWaitForever);
-        // TODO: Some way to exit out of this function on request
+        const uint32_t flags = furi_thread_flags_wait(
+            EXPANSION_TEST_APP_ALL_FLAGS, FuriFlagWaitAny, EXPANSION_INACTIVE_TIMEOUT_MS);
         UNUSED(flags);
     }
 
@@ -219,6 +221,19 @@ static bool expansion_test_app_receive_rpc_request(ExpansionTestApp* instance, P
         pb_istream_t stream = pb_istream_from_buffer(
             instance->frame.content.data.bytes, instance->frame.content.data.size);
         if(!pb_decode_ex(&stream, &PB_Main_msg, message, PB_DECODE_DELIMITED)) break;
+        success = true;
+    } while(false);
+
+    return success;
+}
+
+static bool expansion_test_app_wait_ready(ExpansionTestApp* instance) {
+    bool success = false;
+
+    do {
+        if(!expansion_frame_decode(&instance->frame, expansion_test_app_receive_callback, instance))
+            break;
+        if(instance->frame.header.type != ExpansionFrameTypeHeartbeat) break;
         success = true;
     } while(false);
 
@@ -343,7 +358,7 @@ static bool expansion_test_app_idle(ExpansionTestApp* instance, uint32_t num_cyc
         if(!expansion_frame_decode(&instance->frame, expansion_test_app_receive_callback, instance))
             break;
         if(instance->frame.header.type != ExpansionFrameTypeHeartbeat) break;
-        furi_delay_ms(200);
+        furi_delay_ms(EXPANSION_INACTIVE_TIMEOUT_MS - 50);
     }
 
     return num_cycles_done == num_cycles;
@@ -370,12 +385,10 @@ int32_t expansion_test_app(void* p) {
     ExpansionTestApp* instance = expansion_test_app_alloc();
     expansion_test_app_start(instance);
 
-    // TODO: Host should respond with a ready Heartbeat
-    furi_delay_ms(100);
-
     bool success = false;
 
     do {
+        if(!expansion_test_app_wait_ready(instance)) break;
         if(!expansion_test_app_handshake(instance)) break;
         if(!expansion_test_app_start_rpc(instance)) break;
         if(!expansion_test_app_rpc_mkdir(instance)) break;
@@ -391,7 +404,9 @@ int32_t expansion_test_app(void* p) {
     expansion_test_app_free(instance);
 
     if(!success) {
-        furi_crash("Test sequence failed");
+        NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
+        notification_message(notification, &sequence_error);
+        furi_record_close(RECORD_NOTIFICATION);
     }
 
     return 0;

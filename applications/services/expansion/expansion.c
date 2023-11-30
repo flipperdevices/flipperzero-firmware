@@ -23,10 +23,8 @@ typedef enum {
 
 typedef enum {
     ExpansionSessionStateHandShake,
-    ExpansionSessionStateNormal,
-    ExpansionSessionStateRpc,
-
-    ExpansionSessionStateCount,
+    ExpansionSessionStateConnected,
+    ExpansionSessionStateRpcActive,
 } ExpansionSessionState;
 
 typedef enum {
@@ -141,7 +139,8 @@ static void expansion_rpc_send_callback(void* context, uint8_t* data, size_t dat
     Expansion* instance = context;
 
     for(size_t sent_data_size = 0; sent_data_size < data_size;) {
-        if(furi_semaphore_acquire(instance->tx_semaphore, EXPANSION_INACTIVE_TIMEOUT_MS) != FuriStatusOk) {
+        if(furi_semaphore_acquire(instance->tx_semaphore, EXPANSION_INACTIVE_TIMEOUT_MS) !=
+           FuriStatusOk) {
             // TODO: this should not set ExitReason to User
             furi_thread_flags_set(furi_thread_get_id(instance->worker_thread), ExpansionFlagStop);
             break;
@@ -188,7 +187,7 @@ static bool expansion_handle_session_state_handshake(Expansion* instance) {
         if(instance->rx_frame.header.type != ExpansionFrameTypeBaudRate) break;
         const uint32_t baud_rate = instance->rx_frame.content.baud_rate.baud;
         if(expansion_is_supported_baud_rate(baud_rate)) {
-            instance->session_state = ExpansionSessionStateNormal;
+            instance->session_state = ExpansionSessionStateConnected;
             // Send response on previous baud rate
             if(!expansion_send_status_response(instance, ExpansionFrameErrorNone)) break;
             furi_hal_serial_set_br(instance->serial_handle, baud_rate);
@@ -202,14 +201,14 @@ static bool expansion_handle_session_state_handshake(Expansion* instance) {
     return success;
 }
 
-static bool expansion_handle_session_state_normal(Expansion* instance) {
+static bool expansion_handle_session_state_connected(Expansion* instance) {
     bool success = false;
 
     do {
         if(instance->rx_frame.header.type == ExpansionFrameTypeControl) {
             if(instance->rx_frame.content.control.command != ExpansionFrameControlCommandStartRpc)
                 break;
-            instance->session_state = ExpansionSessionStateRpc;
+            instance->session_state = ExpansionSessionStateRpcActive;
             if(!expansion_rpc_session_open(instance)) break;
             if(!expansion_send_status_response(instance, ExpansionFrameErrorNone)) break;
 
@@ -225,7 +224,7 @@ static bool expansion_handle_session_state_normal(Expansion* instance) {
     return success;
 }
 
-static bool expansion_handle_session_state_rpc(Expansion* instance) {
+static bool expansion_handle_session_state_rpc_active(Expansion* instance) {
     bool success = false;
 
     do {
@@ -242,7 +241,7 @@ static bool expansion_handle_session_state_rpc(Expansion* instance) {
         } else if(instance->rx_frame.header.type == ExpansionFrameTypeControl) {
             if(instance->rx_frame.content.control.command != ExpansionFrameControlCommandStopRpc)
                 break;
-            instance->session_state = ExpansionSessionStateNormal;
+            instance->session_state = ExpansionSessionStateConnected;
             expansion_rpc_session_close(instance);
             if(!expansion_send_status_response(instance, ExpansionFrameErrorNone)) break;
 
@@ -262,14 +261,19 @@ static bool expansion_handle_session_state_rpc(Expansion* instance) {
     return success;
 }
 
-typedef bool (*ExpansionSessionStateHandler)(Expansion* instance);
-
-static const ExpansionSessionStateHandler
-    expansion_session_state_handlers[ExpansionSessionStateCount] = {
+static inline void expansion_state_machine(Expansion* instance) {
+    static bool (*const expansion_session_state_handlers[])(Expansion*) = {
         [ExpansionSessionStateHandShake] = expansion_handle_session_state_handshake,
-        [ExpansionSessionStateNormal] = expansion_handle_session_state_normal,
-        [ExpansionSessionStateRpc] = expansion_handle_session_state_rpc,
-};
+        [ExpansionSessionStateConnected] = expansion_handle_session_state_connected,
+        [ExpansionSessionStateRpcActive] = expansion_handle_session_state_rpc_active,
+    };
+
+    while(true) {
+        if(!expansion_frame_decode(&instance->rx_frame, expansion_receive_callback, instance))
+            break;
+        if(!expansion_session_state_handlers[instance->session_state](instance)) break;
+    }
+}
 
 static int32_t expansion_worker(void* context) {
     furi_assert(context);
@@ -288,13 +292,11 @@ static int32_t expansion_worker(void* context) {
     furi_hal_serial_set_rx_callback(
         instance->serial_handle, expansion_serial_rx_callback, instance);
 
-    while(true) {
-        if(!expansion_frame_decode(&instance->rx_frame, expansion_receive_callback, instance))
-            break;
-        if(!expansion_session_state_handlers[instance->session_state](instance)) break;
+    if(expansion_send_heartbeat(instance)) {
+        expansion_state_machine(instance);
     }
 
-    if(instance->session_state == ExpansionSessionStateRpc) {
+    if(instance->session_state == ExpansionSessionStateRpcActive) {
         expansion_rpc_session_close(instance);
     }
 
