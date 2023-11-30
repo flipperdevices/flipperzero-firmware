@@ -7,7 +7,7 @@
 #define TAG "CfwSettings"
 
 CfwSettings cfw_settings = {
-    .anim_style = AnimStyleDefault, // List
+    .manifest_name = "manifest.txt", // File Name of Manifest to use.
     .menu_style = MenuStyleList, // List
     .game_menu_style = MenuStyleWii, // List
     .start_point = 0, // First Item
@@ -31,9 +31,12 @@ void CFW_SETTINGS_LOAD() {
     CfwSettings* x = &cfw_settings;
     Storage* storage = furi_record_open(RECORD_STORAGE);
     FlipperFormat* file = flipper_format_file_alloc(storage);
+    FuriString* manifest_name = furi_string_alloc();
+
     if(flipper_format_file_open_existing(file, CFW_SETTINGS_PATH)) {
         flipper_format_rewind(file);
-        flipper_format_read_uint32(file, "anim_style", (uint32_t*)&x->anim_style, 1);
+        flipper_format_read_string(file, "manifest_name", manifest_name);
+        x->manifest_name = strdup(furi_string_get_cstr(manifest_name));
         flipper_format_rewind(file);
         flipper_format_read_uint32(file, "menu_style", (uint32_t*)&x->menu_style, 1);
         flipper_format_rewind(file);
@@ -66,6 +69,7 @@ void CFW_SETTINGS_LOAD() {
         flipper_format_rewind(file);
         flipper_format_read_uint32(file, "lcd_style", (uint32_t*)&x->lcd_style, 1);
     }
+    furi_string_free(manifest_name);
     flipper_format_free(file);
     furi_record_close(RECORD_STORAGE);
 
@@ -84,7 +88,9 @@ void CFW_SETTINGS_SAVE() {
         // uint32_t e;
         // u = x->menu_style;
         // e = CLAMP(u, MenuStyleCount - 1U, 0U);
-        flipper_format_write_uint32(file, "anim_style", (uint32_t*)&x->anim_style, 1);
+        FuriString* manifest_name;
+        manifest_name = furi_string_alloc_set_str(x->manifest_name);
+        flipper_format_write_string(file, "manifest_name", manifest_name);
         flipper_format_write_uint32(file, "menu_style", (uint32_t*)&x->menu_style, 1);
         flipper_format_write_uint32(file, "game_menu_style", (uint32_t*)&x->game_menu_style, 1);
         flipper_format_write_uint32(file, "start_point", &x->start_point, 1);
@@ -103,6 +109,7 @@ void CFW_SETTINGS_SAVE() {
             file, "uart_general_channel", (uint32_t*)&x->uart_general_channel, 1);
         flipper_format_write_bool(file, "rgb_backlight", &x->rgb_backlight, 1);
         flipper_format_write_uint32(file, "lcd_style", (uint32_t*)&x->lcd_style, 1);
+        furi_string_free(manifest_name);
     }
     flipper_format_free(file);
     furi_record_close(RECORD_STORAGE);

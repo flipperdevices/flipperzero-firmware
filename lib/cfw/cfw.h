@@ -64,6 +64,7 @@ typedef enum {
     AnimStyleStock,
     AnimStyleVirus,
     AnimStyleWatchDogs,
+    AnimStyleLeeroy,
     AnimStyleCount,
 } AnimStyle;
 
@@ -80,7 +81,7 @@ typedef enum {
 } UARTChannel;
 
 typedef struct {
-    AnimStyle anim_style;
+    char* manifest_name;
     MenuStyle menu_style;
     MenuStyle game_menu_style;
     uint32_t start_point;
