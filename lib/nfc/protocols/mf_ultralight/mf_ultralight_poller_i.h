@@ -85,6 +85,7 @@ struct MfUltralightPoller {
     uint8_t counters_total;
     uint8_t tearing_flag_read;
     uint8_t tearing_flag_total;
+    uint16_t current_page;
     MfUltralightError error;
 
     NfcGenericEvent general_event;
