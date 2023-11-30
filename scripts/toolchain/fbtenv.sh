@@ -27,7 +27,7 @@ fbtenv_show_usage()
 
 fbtenv_curl()
 {
-    curl --progress-bar -SLo "$1" "$2";
+    curl --progress-bar -SLo "$1" "$2" -w "%{http_code}" | grep -q 200;
 }
 
 fbtenv_wget()
@@ -138,9 +138,8 @@ fbtenv_get_kernel_type()
         return 1;
     fi
     if [ "$SYS_TYPE" = "Darwin" ]; then
-        fbtenv_check_rosetta || return 1;
-        TOOLCHAIN_ARCH_DIR="$FBT_TOOLCHAIN_PATH/toolchain/x86_64-darwin";
-        TOOLCHAIN_URL="https://update.flipperzero.one/builds/toolchain/gcc-arm-none-eabi-12.3-x86_64-darwin-flipper-$FBT_TOOLCHAIN_VERSION.tar.gz";
+        TOOLCHAIN_ARCH_DIR="$FBT_TOOLCHAIN_PATH/toolchain/$ARCH_TYPE-darwin";
+        TOOLCHAIN_URL="https://update.flipperzero.one/builds/toolchain/gcc-arm-none-eabi-12.3-$ARCH_TYPE-darwin-flipper-$FBT_TOOLCHAIN_VERSION.tar.gz";
     elif [ "$SYS_TYPE" = "Linux" ]; then
         TOOLCHAIN_ARCH_DIR="$FBT_TOOLCHAIN_PATH/toolchain/x86_64-linux";
         TOOLCHAIN_URL="https://update.flipperzero.one/builds/toolchain/gcc-arm-none-eabi-12.3-x86_64-linux-flipper-$FBT_TOOLCHAIN_VERSION.tar.gz";
@@ -150,18 +149,6 @@ fbtenv_get_kernel_type()
     else
         echo "Your system configuration is not supported. Sorry.. Please report us your configuration.";
         return 1;
-    fi
-    return 0;
-}
-
-fbtenv_check_rosetta()
-{
-    if [ "$ARCH_TYPE" = "arm64" ]; then
-        if ! pgrep -q oahd; then
-            echo "Flipper Zero Toolchain needs Rosetta2 to run under Apple Silicon";
-            echo "Please install it by typing 'softwareupdate --install-rosetta --agree-to-license'";
-            return 1;
-        fi
     fi
     return 0;
 }
@@ -192,7 +179,7 @@ fbtenv_download_toolchain_tar()
 {
     echo "Downloading toolchain:";
     mkdir -p "$FBT_TOOLCHAIN_PATH/toolchain" || return 1;
-    "$FBT_DOWNLOADER" "$FBT_TOOLCHAIN_PATH/toolchain/$TOOLCHAIN_TAR.part" "$TOOLCHAIN_URL" || return 1;
+    "$FBT_DOWNLOADER" "$FBT_TOOLCHAIN_PATH/toolchain/$TOOLCHAIN_TAR.part" "$TOOLCHAIN_URL" || echo "Failed to download $TOOLCHAIN_URL" && return 1;
     # restoring oroginal filename if file downloaded successfully
     mv "$FBT_TOOLCHAIN_PATH/toolchain/$TOOLCHAIN_TAR.part" "$FBT_TOOLCHAIN_PATH/toolchain/$TOOLCHAIN_TAR"
     echo "done";
