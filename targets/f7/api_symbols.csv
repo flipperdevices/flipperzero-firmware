@@ -722,7 +722,7 @@ Function,+,canvas_draw_str_aligned,void,"Canvas*, uint8_t, uint8_t, Align, Align
 Function,+,canvas_draw_triangle,void,"Canvas*, uint8_t, uint8_t, uint8_t, uint8_t, CanvasDirection"
 Function,+,canvas_draw_xbm,void,"Canvas*, uint8_t, uint8_t, uint8_t, uint8_t, const uint8_t*"
 Function,+,canvas_get_font_params,const CanvasFontParameters*,"const Canvas*, Font"
-Function,+,canvas_glyph_width,uint8_t,"Canvas*, char"
+Function,+,canvas_glyph_width,uint8_t,"Canvas*, uint16_t"
 Function,+,canvas_height,uint8_t,const Canvas*
 Function,+,canvas_invert_color,void,Canvas*
 Function,+,canvas_reset,void,Canvas*
