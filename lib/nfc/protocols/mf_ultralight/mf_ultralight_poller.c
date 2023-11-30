@@ -598,22 +598,26 @@ static NfcCommand mf_ultralight_poller_handler_request_write_data(MfUltralightPo
 }
 
 static NfcCommand mf_ultralight_poller_handler_write_pages(MfUltralightPoller* instance) {
-    FURI_LOG_D(TAG, "Writing...");
     NfcCommand command = NfcCommandContinue;
-    MfUltralightPollerState next_state = MfUltralightPollerStateWriteSuccess;
 
-    const MfUltralightData* write_data = instance->mfu_event.data->write_data;
-    uint8_t end_page = mf_ultralight_get_config_page_num(write_data->type) - 1;
-    for(uint8_t i = 4; i < end_page; i++) {
-        MfUltralightError error =
-            mf_ultralight_poller_write_page(instance, i, &write_data->page[i]);
+    do {
+        const MfUltralightData* write_data = instance->mfu_event.data->write_data;
+        uint8_t end_page = mf_ultralight_get_config_page_num(write_data->type) - 1;
+        if(instance->current_page == end_page) {
+            instance->state = MfUltralightPollerStateWriteSuccess;
+            break;
+        }
+        FURI_LOG_D(TAG, "Writing page %d", instance->current_page);
+        MfUltralightError error = mf_ultralight_poller_write_page(
+            instance, instance->current_page, &write_data->page[instance->current_page]);
         if(error != MfUltralightErrorNone) {
-            next_state = MfUltralightPollerStateWriteFail;
+            instance->state = MfUltralightPollerStateWriteFail;
             instance->error = error;
             break;
         }
-    }
-    instance->state = next_state;
+        instance->current_page++;
+    } while(false);
+
     return command;
 }
 
