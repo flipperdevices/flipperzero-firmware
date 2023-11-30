@@ -550,8 +550,9 @@ static NfcCommand mf_ultralight_poller_handler_read_success(MfUltralightPoller* 
 }
 
 static NfcCommand mf_ultralight_poller_handler_request_write_data(MfUltralightPoller* instance) {
-    FURI_LOG_D(TAG, "TX data check");
+    FURI_LOG_D(TAG, "Check writing capability");
     MfUltralightPollerState next_state = MfUltralightPollerStateWritePages;
+    instance->current_page = 4;
 
     instance->mfu_event.type = MfUltralightPollerEventTypeRequestWriteData;
     instance->callback(instance->general_event, instance->context);
