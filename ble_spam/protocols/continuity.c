@@ -10,7 +10,6 @@ typedef struct {
     uint8_t value;
     const char* name;
 } ContinuityColor;
-
 static const ContinuityColor colors_white[] = {
     {0x00, "White"},
 };
@@ -21,6 +20,30 @@ static const ContinuityColor colors_beats_flex[] = {
 static const ContinuityColor colors_beats_solo_3[] = {
     {0x00, "White"},
     {0x01, "Black"},
+    {0x6, "Gray"},
+    {0x7, "Gold/White"},
+    {0x8, "Rose Gold"},
+    {0x09, "Black"},
+    {0xE, "Violet/White"},
+    {0xF, "Bright Red"},
+    {0x12, "Dark Red"},
+    {0x13, "Swamp Green"},
+    {0x14, "Dark Gray"},
+    {0x15, "Dark Blue"},
+    {0x1D, "Rose Gold 2"},
+    {0x20, "Blue/Green"},
+    {0x21, "Purple/Orange"},
+    {0x22, "Deep Blue/ Light blue"},
+    {0x23, "Magenta/Light Fuchsia"},
+    {0x25, "Black/Red"},
+    {0x2A, "Gray / Disney LTD"},
+    {0x2E, "Pinkish white"},
+    {0x3D, "Red/Blue"},
+    {0x3E, "Yellow/Blue"},
+    {0x3F, "White/Red"},
+    {0x40, "Purple/White"},
+    {0x5B, "Gold"},
+    {0x5C, "Silver"},
 };
 static const ContinuityColor colors_powerbeats_3[] = {
     {0x00, "White"},
