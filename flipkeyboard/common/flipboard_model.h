@@ -11,6 +11,7 @@
 #include <furi.h>
 #include "button_monitor.h"
 #include "button_model.h"
+#include "resources.h"
 #include "speaker.h"
 
 typedef struct FlipboardModel FlipboardModel;
@@ -45,6 +46,14 @@ void flipboard_model_free(FlipboardModel* model);
  * @return The name of the FlipboardModel.
 */
 char* flipboard_model_get_name(FlipboardModel* model);
+
+/**
+ * @brief flipboard_model_get_resources gets the Resources for the FlipboardModel.
+ * @details flipboard_model_get_resources gets the Resources for the FlipboardModel.
+ * @param model The FlipboardModel.
+ * @return The Resources for the FlipboardModel.
+*/
+Resources* flipboard_model_get_resources(FlipboardModel* model);
 
 /**
  * @brief flipboard_model_get_single_button_mode gets the single button mode

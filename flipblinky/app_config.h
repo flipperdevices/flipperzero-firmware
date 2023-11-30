@@ -5,6 +5,8 @@
 // Uncomment the next line to use the LED driver, or comment to use bit-banging the WS2812B LEDs.
 #define USE_LED_DRIVER 1
 
+#define FIRMWARE_SUPPORTS_SUBGHZ 1
+
 #define ABOUT_TEXT                             \
     "Welcome to the Flipboard\n"               \
     "blinky!  Optimized for\n"                 \

@@ -24,6 +24,9 @@ struct FlipboardModel {
     // The name of the model (used for saving and loading)
     char* name;
 
+    // The resources for the model (used for hardware access)
+    Resources* resources;
+
     // HID keyboard driver
     FlipboardKeyboard* keyboard;
 

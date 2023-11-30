@@ -1,15 +1,16 @@
 #include <furi.h>
-#include <lib/subghz/transmitter.h>
 #include <flipper_format/flipper_format_i.h>
-#include <lib/subghz/protocols/protocol_items.h>
-#include "subghz_signal.h"
-#include "app_config.h"
 #include <storage/storage.h>
+#include <lib/subghz/protocols/protocol_items.h>
+#include <lib/subghz/transmitter.h>
+
+#include "../app_config.h"
+#include "subghz_signal.h"
 
 #ifdef FIRMWARE_SUPPORTS_SUBGHZ
 #include <applications/drivers/subghz/cc1101_ext/cc1101_ext_interconnect.h>
-#include <lib/subghz/devices/cc1101_int/cc1101_int_interconnect.h>
 #include <devices/devices.h>
+#include <lib/subghz/devices/cc1101_int/cc1101_int_interconnect.h>
 
 struct SubGhzSignal {
     FuriString* sub_file_contents;
@@ -24,6 +25,9 @@ typedef enum {
     Key,
 } FileType;
 
+/**
+ * @brief Turns on the +5V rail to the external radio.
+*/
 static void subghz_radio_device_power_on() {
     uint8_t attempts = 5;
     while(--attempts > 0) {
@@ -32,17 +36,33 @@ static void subghz_radio_device_power_on() {
     }
 }
 
+/**
+ * @brief Turns off the +5V rail to the external radio.
+*/
 static void subghz_radio_device_power_off() {
     if(furi_hal_power_is_otg_enabled()) furi_hal_power_disable_otg();
 }
 
-static void set_signal(FuriString* sub_file_contents, FlipperFormat* flipper_format) {
+/**
+ * @brief Populates a flipper_format with the contents of a FuriString.
+ * @param flipper_format The flipper_format to populate.
+ * @param contents The FuriString to populate the flipper_format with.
+*/
+static void __flipper_format_populate(FlipperFormat* flipper_format, FuriString* contents) {
     Stream* stream = flipper_format_get_raw_stream(flipper_format);
     stream_clean(stream);
-    stream_write_cstring(stream, furi_string_get_cstr(sub_file_contents));
+    stream_write_cstring(stream, furi_string_get_cstr(contents));
     stream_seek(stream, 0, StreamOffsetFromStart);
 }
 
+/**
+ * @brief Sends a signal using the SubGhz module.
+ * @param sub_file_contents The contents of the signal file (can be RAW or Protocol).
+ * @param protocol The protocol to use.
+ * @param frequency The frequency to use.
+ * @param preset The preset to use.
+ * @param use_external_radio Currently only the internal radio is supported (please use 'false').  Whether or not to use the external radio.  
+*/
 static void send_signal(
     FuriString* sub_file_contents,
     const char* protocol,
@@ -57,6 +77,7 @@ static void send_signal(
         if(enable_5v) {
             subghz_radio_device_power_on();
         }
+        // TODO: I haven't tested EXT, so not sure if there is additional setup required.
         device = subghz_devices_get_by_name(SUBGHZ_DEVICE_CC1101_EXT_NAME);
     } else {
         device = subghz_devices_get_by_name(SUBGHZ_DEVICE_CC1101_INT_NAME);
@@ -66,10 +87,11 @@ static void send_signal(
     subghz_environment_set_protocol_registry(environment, (void*)&subghz_protocol_registry);
     SubGhzTransmitter* transmitter = subghz_transmitter_alloc_init(environment, protocol);
     FlipperFormat* flipper_format = flipper_format_string_alloc();
-    set_signal(sub_file_contents, flipper_format);
+    __flipper_format_populate(flipper_format, sub_file_contents);
     subghz_transmitter_deserialize(transmitter, flipper_format);
     subghz_devices_begin(device);
     subghz_devices_reset(device);
+    // TODO: I haven't testing Custom preset, so not sure if there is additional setup required.
     subghz_devices_load_preset(device, preset, NULL);
     frequency = subghz_devices_set_frequency(device, frequency);
 
@@ -78,10 +100,10 @@ static void send_signal(
     // Send
     furi_hal_power_suppress_charge_enter();
     if(subghz_devices_start_async_tx(device, subghz_transmitter_yield, transmitter)) {
+        // TODO: Allow cancelling the transmission when button is no longer pressed.
         while(!(subghz_devices_is_async_complete_tx(device))) {
             furi_delay_ms(100);
         }
-
         subghz_devices_stop_async_tx(device);
     }
 
@@ -113,6 +135,11 @@ void send_signal(
 }
 #endif
 
+/**
+ * @brief Converts a string to a FuriHalSubGhzPreset.
+ * @param preset_str The string to convert.
+ * @return The FuriHalSubGhzPreset.
+*/
 static FuriHalSubGhzPreset signal_get_preset(FuriString* preset_str) {
     const char* preset_name = furi_string_get_cstr(preset_str);
     FuriHalSubGhzPreset preset = FuriHalSubGhzPresetIDLE;
@@ -134,12 +161,17 @@ static FuriHalSubGhzPreset signal_get_preset(FuriString* preset_str) {
     return preset;
 }
 
+/**
+ * @brief Loads a SubGhzSignal from a file (supports RAW and Protocol .SUB files)
+ * @param file_path The path to the file to load.
+ * @return The loaded SubGhzSignal. Be sure to call subghz_signal_free.
+*/
 SubGhzSignal* subghz_signal_load_file(char* file_path) {
     SubGhzSignal* signal = (SubGhzSignal*)malloc(sizeof(SubGhzSignal));
     signal->sub_file_contents = furi_string_alloc();
     signal->protocol = furi_string_alloc();
     signal->frequency = 0;
-    signal->preset = FuriHalSubGhzPresetOok650Async;
+    signal->preset = FuriHalSubGhzPresetIDLE;
 
     Storage* storage = furi_record_open(RECORD_STORAGE);
     FlipperFormat* fff_data_file = flipper_format_file_alloc(storage);
@@ -203,6 +235,7 @@ SubGhzSignal* subghz_signal_load_file(char* file_path) {
             "Version: 1\r\n"
             "Protocol: RAW\r\n"
             "File_name: %s\r\n"
+            // TODO: I haven't tested EXT, so not sure if there is additional setup required.
             "Radio_device_name: cc1101_int\r\n",
             file_path);
     } else if(parsed && file_type == Key) {
@@ -226,8 +259,7 @@ SubGhzSignal* subghz_signal_load_file(char* file_path) {
     }
 
     if(!parsed) {
-        furi_string_free(signal->protocol);
-        free(signal);
+        subghz_signal_free(signal);
         signal = NULL;
     }
 
@@ -235,38 +267,39 @@ SubGhzSignal* subghz_signal_load_file(char* file_path) {
     return signal;
 }
 
+/**
+ * @brief Frees a SubGhzSignal.
+ * @param signal The SubGhzSignal to free.
+*/
 void subghz_signal_free(SubGhzSignal* signal) {
     if(signal) {
-        furi_string_free(signal->sub_file_contents);
-        furi_string_free(signal->protocol);
+        if(signal->sub_file_contents) {
+            furi_string_free(signal->sub_file_contents);
+            signal->sub_file_contents = NULL;
+        }
+        if(signal->protocol) {
+            furi_string_free(signal->protocol);
+            signal->protocol = NULL;
+        }
         free(signal);
     }
 }
 
-void subghz_signal_send(SubGhzSignal* signal, bool use_external_radio) {
+/**
+ * @brief Sends a SubGhzSignal.
+ * @param signal The SubGhzSignal to send.
+ * @param use_external_radio Currently only the internal radio is supported (please use 'false').  Whether or not to use the external radio.
+ * @param resources Resources used for sending the signal.
+*/
+void subghz_signal_send(SubGhzSignal* signal, bool use_external_radio, Resources* resources) {
     if(signal) {
+        resources_acquire(resources, ResourceIdSubGhzSignal, FuriWaitForever);
         send_signal(
             signal->sub_file_contents,
             furi_string_get_cstr(signal->protocol),
             signal->frequency,
             signal->preset,
             use_external_radio);
+        resources_release(resources, ResourceIdSubGhzSignal);
     }
 }
-
-/*
-
-Future file browser example:
-
-    FuriString* file_path = furi_string_alloc();
-
-    DialogsFileBrowserOptions browser_options;
-    dialog_file_browser_set_basic_options(
-        &browser_options, SUBGHZ_APP_FILENAME_EXTENSION, &I_sub1_10px);
-    browser_options.base_path = SUBGHZ_APP_FOLDER;
-
-    // Input events and views are managed by file_select
-    bool res = dialog_file_browser_show(
-        subghz->dialogs, subghz->file_path, subghz->file_path, &browser_options);
-
-*/

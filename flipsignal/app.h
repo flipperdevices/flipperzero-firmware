@@ -24,6 +24,6 @@
 #include "./common/keyboard.h"
 #include "./common/leds.h"
 #include "./common/speaker.h"
+#include "./common/subghz_signal.h"
 
-#include "./subghz_signal.h"
 #include "./infrared_signal.h"
