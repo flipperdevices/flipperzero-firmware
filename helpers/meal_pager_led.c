@@ -1,7 +1,4 @@
 #include "meal_pager_led.h"
-#include "../meal_pager.h"
-
-
 
 void meal_pager_led_set_rgb(void* context, int red, int green, int blue) {
     Meal_Pager* app = context;

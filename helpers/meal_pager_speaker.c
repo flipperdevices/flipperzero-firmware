@@ -1,5 +1,4 @@
 #include "meal_pager_speaker.h"
-#include "../meal_pager.h"
 
 #define NOTE_INPUT 587.33f
 

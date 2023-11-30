@@ -1,4 +1,4 @@
-#include "../meal_pager.h"
+#include "../meal_pager_i.h"
 #include "../helpers/meal_pager_custom_event.h"
 #include "../helpers/retekess/meal_pager_retekess_t119.h"
 #include "../views/meal_pager_transmit.h"
@@ -20,6 +20,8 @@ void meal_pager_scene_transmit_on_enter(void* context) {
     meal_pager_transmit_set_callback(app->meal_pager_transmit, meal_pager_transmit_callback, app);
     view_dispatcher_switch_to_view(app->view_dispatcher, Meal_PagerViewIdTransmit);
     meal_pager_retekess_t119_generate_all(app);
+    FURI_LOG_D(TAG, "Generated tmp.sub");
+
 }
 
 bool meal_pager_scene_transmit_on_event(void* context, SceneManagerEvent event) {

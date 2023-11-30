@@ -1,4 +1,4 @@
-#include "../meal_pager.h"
+#include "../meal_pager_i.h"
 #include <lib/toolbox/value_index.h>
 
 enum SettingsIndex {
