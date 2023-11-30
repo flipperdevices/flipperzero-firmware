@@ -103,6 +103,15 @@ static size_t expansion_send_callback(const uint8_t* data, size_t data_size, voi
     return data_size;
 }
 
+static void expansion_send_heartbeat(Expansion* instance) {
+    ExpansionFrame frame = {
+        .header.type = ExpansionFrameTypeHeartbeat,
+        .content.heartbeat = {},
+    };
+
+    expansion_frame_encode(&frame, expansion_send_callback, instance);
+}
+
 static void expansion_send_status_response(Expansion* instance, ExpansionFrameError error) {
     ExpansionFrame frame = {
         .header.type = ExpansionFrameTypeStatus,
@@ -197,6 +206,9 @@ static int32_t expansion_worker(void* context) {
                     // Go to the next iteration
                     continue;
                 }
+            } else if(instance->rx_frame.header.type == ExpansionFrameTypeHeartbeat) {
+                expansion_send_heartbeat(instance);
+                continue;
             }
 
         } else if(instance->session_state == ExpansionSessionStateRpc) {
@@ -232,10 +244,15 @@ static int32_t expansion_worker(void* context) {
 
                 // Go to the next iteration
                 continue;
+
+            } else if(instance->rx_frame.header.type == ExpansionFrameTypeHeartbeat) {
+                expansion_send_heartbeat(instance);
+                // Go to the next iteration
+                continue;
             }
 
         } else {
-            furi_crash();
+            break;
         }
 
         // In any confusing situation, respond with an error
