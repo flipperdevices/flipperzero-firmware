@@ -28,7 +28,13 @@ static const ContinuityColor colors_powerbeats_3[] = {
 };
 static const ContinuityColor colors_powerbeats_pro[] = {
     {0x00, "White"},
-    {0x01, "Black"},
+    {0x02, "Yellowish Green"},
+    {0x03, "Blue"},
+    {0x04, "Black"},
+    {0x05, "Pink"},
+    {0x06, "Red"},
+    {0x0B, "Gray ?"},
+    {0x0D, "Sky Blue"},
 };
 static const ContinuityColor colors_beats_solo_pro[] = {
     {0x00, "White"},
@@ -45,8 +51,16 @@ static const ContinuityColor colors_beats_x[] = {
 static const ContinuityColor colors_beats_studio_3[] = {
     {0x00, "White"},
     {0x01, "Black"},
-    {0x03, "Red"},
-    {0x43, "White marble"},
+    {0x02, "Red"},
+    {0x03, "Blue"},
+    {0x18, "Shadow Gray"},
+    {0x19, "Desert Sand"},
+    {0x25, "Black / Red"},
+    {0x26, "Midnight Black"},
+    {0x27, "Desert Sand 2"},
+    {0x28, "Clear blue/ gold"},
+    {0x42, "Green Forest camo"},
+    {0x43, "White Camo"},
 };
 static const ContinuityColor colors_beats_studio_pro[] = {
     {0x00, "White"},
@@ -438,6 +452,10 @@ static void pp_model_changed(VariableItem* item) {
     Payload* payload = &ctx->attack->payload;
     ContinuityCfg* cfg = &payload->cfg.continuity;
     uint8_t index = variable_item_get_current_value_index(item);
+    const char* color_name = NULL;
+    char color_name_buf[3];
+    uint8_t colors_count;
+    uint8_t value_index_color;
     if(index) {
         index--;
         if(payload->mode != PayloadModeBruteforce ||
@@ -445,13 +463,36 @@ static void pp_model_changed(VariableItem* item) {
             payload->mode = PayloadModeValue;
         cfg->data.proximity_pair.model = pp_models[index].value;
         variable_item_set_current_value_text(item, pp_models[index].name);
+        colors_count = pp_models[index].colors_count;
+        if(payload->mode == PayloadModeValue) {
+            for(uint8_t j = 0; j < colors_count; j++) {
+                if(cfg->data.proximity_pair.color == pp_models[index].colors[j].value) {
+                    color_name = pp_models[index].colors[j].name;
+                    value_index_color = j;
+                    break;
+                }
+            }
+            if(!color_name) {
+                snprintf(
+                    color_name_buf, sizeof(color_name_buf), "%02X", cfg->data.proximity_pair.color);
+                color_name = color_name_buf;
+                value_index_color = colors_count;
+            }
+        } else {
+            color_name = "Bruteforce";
+            value_index_color = colors_count;
+        }
     } else {
         payload->mode = PayloadModeRandom;
         variable_item_set_current_value_text(item, "Random");
+        color_name = "Random";
+        colors_count = 1;
+        value_index_color = 0;
     }
-    scene_manager_set_scene_state(ctx->scene_manager, SceneConfig, ConfigPpModel);
-    scene_manager_previous_scene(ctx->scene_manager);
-    scene_manager_next_scene(ctx->scene_manager, SceneConfig);
+    item = variable_item_list_get(ctx->variable_item_list, ConfigPpColor);
+    variable_item_set_values_count(item, colors_count);
+    variable_item_set_current_value_index(item, value_index_color);
+    variable_item_set_current_value_text(item, color_name);
 }
 static void pp_color_changed(VariableItem* item) {
     Payload* payload = variable_item_get_context(item);
