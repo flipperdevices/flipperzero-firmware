@@ -258,6 +258,27 @@ void sendRequestPacs(SeaderUartBridge* seader_uart) {
     ASN_STRUCT_FREE(asn_DEF_Payload, payload);
 }
 
+void seader_worker_send_serial_number(SeaderWorker* seader_worker) {
+    SeaderUartBridge* seader_uart = seader_worker->uart;
+    SamCommand_t* samCommand = 0;
+    samCommand = calloc(1, sizeof *samCommand);
+    assert(samCommand);
+
+    samCommand->present = SamCommand_PR_serialNumber;
+
+    Payload_t* payload = 0;
+    payload = calloc(1, sizeof *payload);
+    assert(payload);
+
+    payload->present = Payload_PR_samCommand;
+    payload->choice.samCommand = *samCommand;
+
+    seader_send_payload(seader_uart, payload, 0x44, 0x0a, 0x44);
+
+    ASN_STRUCT_FREE(asn_DEF_SamCommand, samCommand);
+    ASN_STRUCT_FREE(asn_DEF_Payload, payload);
+}
+
 void seader_worker_send_version(SeaderWorker* seader_worker) {
     SeaderUartBridge* seader_uart = seader_worker->uart;
     SamCommand_t* samCommand = 0;
@@ -386,7 +407,7 @@ bool seader_parse_version(SeaderWorker* seader_worker, uint8_t* buf, size_t size
             ->op->print_struct(
                 &asn_DEF_SamVersion, version, 1, seader_print_struct_callback, versionDebug);
         if(strlen(versionDebug) > 0) {
-            // FURI_LOG_D(TAG, "Received version: %s", versionDebug);
+            FURI_LOG_D(TAG, "Received version: %s", versionDebug);
         }
         if(version->version.size == 2) {
             memcpy(seader_worker->sam_version, version->version.buf, version->version.size);
@@ -397,6 +418,16 @@ bool seader_parse_version(SeaderWorker* seader_worker, uint8_t* buf, size_t size
 
     ASN_STRUCT_FREE(asn_DEF_SamVersion, version);
     return rtn;
+}
+
+bool seader_parse_serial_number(uint8_t* buf, size_t size) {
+    memset(display, 0, sizeof(display));
+    for(uint8_t i = 0; i < size; i++) {
+        snprintf(display + (i * 2), sizeof(display), "%02x", buf[i]);
+    }
+
+    FURI_LOG_D(TAG, "Received serial: %s", display);
+    return (size == 12);
 }
 
 bool seader_parse_sam_response(Seader* seader, SamResponse_t* samResponse) {
@@ -415,6 +446,8 @@ bool seader_parse_sam_response(Seader* seader, SamResponse_t* samResponse) {
                 seader->view_dispatcher, SeaderCustomEventWorkerExit);
         }
     } else if(seader_parse_version(seader_worker, samResponse->buf, samResponse->size)) {
+        seader_worker_send_serial_number(seader_worker);
+    } else if(seader_parse_serial_number(samResponse->buf, samResponse->size)) {
         // no-op
     } else if(seader_unpack_pacs(seader, samResponse->buf, samResponse->size)) {
         view_dispatcher_send_custom_event(seader->view_dispatcher, SeaderCustomEventPollerSuccess);

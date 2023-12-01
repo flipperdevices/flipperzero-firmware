@@ -15,6 +15,7 @@
 #include "RequestPacs.h"
 #include <NULL.h>
 #include "CardDetected.h"
+#include "NoArguments.h"
 #include <constr_CHOICE.h>
 
 #ifdef __cplusplus
@@ -26,7 +27,8 @@ typedef enum SamCommand_PR {
 	SamCommand_PR_NOTHING,	/* No components present */
 	SamCommand_PR_requestPacs,
 	SamCommand_PR_version,
-	SamCommand_PR_cardDetected
+	SamCommand_PR_cardDetected,
+	SamCommand_PR_serialNumber
 } SamCommand_PR;
 
 /* SamCommand */
@@ -36,6 +38,7 @@ typedef struct SamCommand {
 		RequestPacs_t	 requestPacs;
 		NULL_t	 version;
 		CardDetected_t	 cardDetected;
+		NoArguments_t	 serialNumber;
 	} choice;
 	
 	/* Context for parsing across buffer boundaries */
@@ -45,7 +48,7 @@ typedef struct SamCommand {
 /* Implementation */
 extern asn_TYPE_descriptor_t asn_DEF_SamCommand;
 extern asn_CHOICE_specifics_t asn_SPC_SamCommand_specs_1;
-extern asn_TYPE_member_t asn_MBR_SamCommand_1[3];
+extern asn_TYPE_member_t asn_MBR_SamCommand_1[4];
 extern asn_per_constraints_t asn_PER_type_SamCommand_constr_1;
 
 #ifdef __cplusplus
