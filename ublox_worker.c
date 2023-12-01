@@ -176,7 +176,6 @@ void ublox_worker_read_nav_messages(void* context) {
                 return;
             }
         }
-        //furi_delay_ms(500);
     }
 
     // clear data so we don't an error on startup
