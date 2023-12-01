@@ -78,5 +78,4 @@ FUNC_OBJ_INS_DEF(
     (order_by, SubGhzFrequencyAnalyzerLogOrderBy))
 #define M_OPL_SubGhzFrequencyAnalyzerLogItemArray_compare_by_t() \
     FUNC_OBJ_INS_OPLIST(SubGhzFrequencyAnalyzerLogItemArray_compare_by, M_DEFAULT_OPLIST)
-
 #pragma GCC diagnostic pop

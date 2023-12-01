@@ -398,7 +398,7 @@ static void rpc_system_storage_read_process(const PB_Main* request, void* contex
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Warray-bounds"
                 response->content.storage_read_response.file.data =
-                    malloc(PB_BYTES_ARRAY_T_ALLOCSIZE(3));
+                    malloc(PB_BYTES_ARRAY_T_ALLOCSIZE(0));
 #pragma GCC diagnostic pop
                 response->content.storage_read_response.file.data->size = 0;
                 response->content.storage_read_response.has_file = true;
