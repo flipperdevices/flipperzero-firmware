@@ -52,6 +52,7 @@ Meal_Pager* meal_pager_app_alloc() {
     app->first_pager_char = "0";
     app->last_pager = 31;
     app->last_pager_char = "31";
+    app->stop_transmit = false;
 
     // Used for File Browser
     app->dialogs = furi_record_open(RECORD_DIALOGS);

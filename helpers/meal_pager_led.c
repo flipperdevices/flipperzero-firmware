@@ -1,5 +1,22 @@
 #include "meal_pager_led.h"
 
+void meal_pager_blink_start_subghz(Meal_Pager* app) {
+    furi_assert(app);
+    notification_message(app->notification, &sequence_blink_stop);
+    notification_message(app->notification, &sequence_blink_start_magenta);
+}
+
+void meal_pager_blink_start_compile(Meal_Pager* app) {
+    furi_assert(app);
+    notification_message(app->notification, &sequence_blink_stop);
+    notification_message(app->notification, &sequence_blink_start_yellow);
+}
+
+void meal_pager_blink_stop(Meal_Pager* app) {
+    furi_assert(app);
+    notification_message(app->notification, &sequence_blink_stop);
+}
+
 void meal_pager_led_set_rgb(void* context, int red, int green, int blue) {
     Meal_Pager* app = context;
     if (app->led != 1) {
