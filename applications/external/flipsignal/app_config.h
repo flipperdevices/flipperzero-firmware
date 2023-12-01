@@ -6,6 +6,7 @@
 #define USE_LED_DRIVER 1
 
 #define FIRMWARE_SUPPORTS_SUBGHZ 1
+#define APP_USES_SUBGHZ_PROTOCOL_ITEMS 1
 
 #define ABOUT_TEXT                             \
     "Welcome to the Flipboard\n"               \
