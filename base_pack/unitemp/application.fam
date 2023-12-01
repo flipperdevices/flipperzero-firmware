@@ -9,7 +9,7 @@ App(
     stack_size=2 * 1024,
     order=100,
     fap_description = "Universal temperature sensors reader",
-    fap_version="1.4",
+    fap_version="1.5",
     fap_author = "@quen0n & (fixes by @xMasterX)",
     fap_weburl = "https://github.com/quen0n/unitemp-flipperzero",
     fap_category="GPIO",
