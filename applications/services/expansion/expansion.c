@@ -193,7 +193,7 @@ static bool expansion_handle_session_state_handshake(Expansion* instance) {
             furi_hal_serial_set_br(instance->serial_handle, baud_rate);
 
         } else {
-            if(!expansion_send_status_response(instance, ExpansionFrameErrorUnknown)) break;
+            if(!expansion_send_status_response(instance, ExpansionFrameErrorBaudRate)) break;
         }
         success = true;
     } while(false);
