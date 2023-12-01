@@ -29,8 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM1201-0111-0.93.9-1bb504e](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-12-01 01:11 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-12-01 01:11 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-12-01 16:57 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-12-01 16:57 EST`
 - Updated: [BLE Spam v4.4 (By Willy-JL & ECTO-1A & Spooks4576 with research from xMasterX; OFW API thanks to noproto)](https://github.com/noproto/apple_ble_spam_ofw)
 - Variable List Item Get Function, Variable List Item Set Header Function & CFW App Scene Refresh Cleanup (By Willy-JL)
 - Updated: [UART Terminal v1.3 (By cool4uma)](https://github.com/cool4uma/UART_Terminal) [Hex mode in UART Terminal #32 (By rnadyrshin)](https://github.com/xMasterX/all-the-plugins/pull/32)
@@ -95,6 +95,11 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW PR: [Ntag21x write #3246 (By RebornedBrain)](https://github.com/flipperdevices/flipperzero-firmware/pull/3246)
 - Updated: [NFC Magic v1.2 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966) [Nfc Magic rework #67 (By gornekich)](https://github.com/flipperdevices/flipperzero-good-faps/pull/67) [NFC Magic fix gen4 detection #71 (By gornekich)](https://github.com/flipperdevices/flipperzero-good-faps/pull/71) [Specify in error scene that only Gen1 magic and Gen4 UMCs are supported #75 (By kitsunehunter)](https://github.com/flipperdevices/flipperzero-good-faps/pull/75)
 - NFC: [Parser for Philips Sonicare toothbrush heads (By Sil333033, Research By Cyrill Künzi)](https://kuenzi.dev/toothbrush/)
+- OFW: [Mifare Classic nested auth support #3238 (By augustozanellato)](https://github.com/flipperdevices/flipperzero-firmware/pull/3238)
+- OFW: [ST25TB poller refining + write support #3239 (By augustozanellato)](https://github.com/flipperdevices/flipperzero-firmware/pull/3239)
+- OFW: [Libraries cleanup; u2f crypto rework to use mbedtls #3234 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/3234)
+- UL: [Merge Fix for NFC Supported Card Kazan (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/99d657fcfbd4155a82f7eec3bd1b54851d131e4d)
+- UL: [NFC: Fix keeloq decoding order (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/159aef022bed497b65e1a955ef9c9dbe036f4612)
 
 <a name="release">
 
