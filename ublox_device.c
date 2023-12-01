@@ -131,3 +131,70 @@ void ublox_frame_free(UbloxFrame* frame) {
     FURI_LOG_I(TAG, "frame free: frame == NULL");
     }*/
 }
+
+UbloxMessage* ublox_worker_i2c_transfer(UbloxMessage* message_tx, uint8_t read_length) {
+    if(!furi_hal_i2c_is_device_ready(
+           &furi_hal_i2c_handle_external,
+           UBLOX_I2C_ADDRESS << 1,
+           furi_ms_to_ticks(I2C_TIMEOUT_MS))) {
+        FURI_LOG_E(TAG, "device not ready");
+        return NULL;
+    }
+
+    // Either our I2C implementation is broken or the GPS's is, so we
+    // end up reading a lot more data than we need to. That means that
+    // the I2C comm code for this app is a little bit of a hack, but
+    // it works fine and is fast enough, so I don't really care. It
+    // certainly doesn't break the GPS.
+    if(!furi_hal_i2c_tx(
+           &furi_hal_i2c_handle_external,
+           UBLOX_I2C_ADDRESS << 1,
+           message_tx->message,
+           message_tx->length,
+           furi_ms_to_ticks(I2C_TIMEOUT_MS))) {
+        FURI_LOG_E(TAG, "error writing message to GPS");
+        return NULL;
+    }
+    uint8_t* response = malloc((size_t)read_length);
+    // The GPS sends 0xff until it has a complete message to respond
+    // with. We have to wait until it stops sending that. (Why this
+    // works is a little bit...uh, well, I don't know. Shouldn't reading
+    // more bytes make it so that the data is completely read out and no
+    // longer available?)
+
+    //FURI_LOG_I(TAG, "start ticks at %lu", furi_get_tick()); // returns ms
+    while(true) {
+        if(!furi_hal_i2c_rx(
+               &furi_hal_i2c_handle_external,
+               UBLOX_I2C_ADDRESS << 1,
+               response,
+               1,
+               furi_ms_to_ticks(I2C_TIMEOUT_MS))) {
+            FURI_LOG_E(TAG, "error reading first byte of response");
+            free(response);
+            return NULL;
+        }
+
+        // checking with 0xb5 prevents strange bursts of junk data from becoming an issue.
+        if(response[0] != 0xff && response[0] == 0xb5) {
+            //FURI_LOG_I(TAG, "read rest of message at %lu", furi_get_tick());
+            if(!furi_hal_i2c_rx(
+                   &furi_hal_i2c_handle_external,
+                   UBLOX_I2C_ADDRESS << 1,
+                   &(response[1]),
+                   read_length - 1, // first byte already read
+                   furi_ms_to_ticks(I2C_TIMEOUT_MS))) {
+                FURI_LOG_E(TAG, "error reading rest of response");
+                free(response);
+                return NULL;
+            }
+            break;
+        }
+        furi_delay_ms(1);
+    }
+
+    UbloxMessage* message_rx = malloc(sizeof(UbloxMessage));
+    message_rx->message = response;
+    message_rx->length = read_length;
+    return message_rx; // message_rx->message needs to be freed later
+}

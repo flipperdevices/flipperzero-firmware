@@ -253,7 +253,7 @@ void ublox_worker_sync_to_gps_time(void* context) {
     UbloxMessage* message_tx = ublox_frame_to_bytes(&frame_tx);
 
     UbloxMessage* message_rx =
-        ublox_worker_i2c_transfer(message_tx, UBX_NAV_TIMEUTC_MESSAGE_LENGTH);
+        ublox_i2c_transfer(message_tx, UBX_NAV_TIMEUTC_MESSAGE_LENGTH);
     if(message_rx == NULL) {
         FURI_LOG_E(TAG, "get_gps_time transfer failed");
         ublox_worker_change_state(ublox_worker, UbloxWorkerStateStop);
@@ -303,72 +303,6 @@ FuriString* print_uint8_array(uint8_t* array, int length) {
     return s;
 }
 
-UbloxMessage* ublox_worker_i2c_transfer(UbloxMessage* message_tx, uint8_t read_length) {
-    if(!furi_hal_i2c_is_device_ready(
-           &furi_hal_i2c_handle_external,
-           UBLOX_I2C_ADDRESS << 1,
-           furi_ms_to_ticks(I2C_TIMEOUT_MS))) {
-        FURI_LOG_E(TAG, "device not ready");
-        return NULL;
-    }
-
-    // Either our I2C implementation is broken or the GPS's is, so we
-    // end up reading a lot more data than we need to. That means that
-    // the I2C comm code for this app is a little bit of a hack, but
-    // it works fine and is fast enough, so I don't really care. It
-    // certainly doesn't break the GPS.
-    if(!furi_hal_i2c_tx(
-           &furi_hal_i2c_handle_external,
-           UBLOX_I2C_ADDRESS << 1,
-           message_tx->message,
-           message_tx->length,
-           furi_ms_to_ticks(I2C_TIMEOUT_MS))) {
-        FURI_LOG_E(TAG, "error writing message to GPS");
-        return NULL;
-    }
-    uint8_t* response = malloc((size_t)read_length);
-    // The GPS sends 0xff until it has a complete message to respond
-    // with. We have to wait until it stops sending that. (Why this
-    // works is a little bit...uh, well, I don't know. Shouldn't reading
-    // more bytes make it so that the data is completely read out and no
-    // longer available?)
-
-    //FURI_LOG_I(TAG, "start ticks at %lu", furi_get_tick()); // returns ms
-    while(true) {
-        if(!furi_hal_i2c_rx(
-               &furi_hal_i2c_handle_external,
-               UBLOX_I2C_ADDRESS << 1,
-               response,
-               1,
-               furi_ms_to_ticks(I2C_TIMEOUT_MS))) {
-            FURI_LOG_E(TAG, "error reading first byte of response");
-            free(response);
-            return NULL;
-        }
-
-        // checking with 0xb5 prevents strange bursts of junk data from becoming an issue.
-        if(response[0] != 0xff && response[0] == 0xb5) {
-            //FURI_LOG_I(TAG, "read rest of message at %lu", furi_get_tick());
-            if(!furi_hal_i2c_rx(
-                   &furi_hal_i2c_handle_external,
-                   UBLOX_I2C_ADDRESS << 1,
-                   &(response[1]),
-                   read_length - 1, // first byte already read
-                   furi_ms_to_ticks(I2C_TIMEOUT_MS))) {
-                FURI_LOG_E(TAG, "error reading rest of response");
-                free(response);
-                return NULL;
-            }
-            break;
-        }
-        furi_delay_ms(1);
-    }
-
-    UbloxMessage* message_rx = malloc(sizeof(UbloxMessage));
-    message_rx->message = response;
-    message_rx->length = read_length;
-    return message_rx; // message_rx->message needs to be freed later
-}
 
 bool ublox_worker_read_pvt(UbloxWorker* ublox_worker) {
     //FURI_LOG_I(TAG, "mem free before PVT read: %u", memmgr_get_free_heap());
@@ -383,7 +317,7 @@ bool ublox_worker_read_pvt(UbloxWorker* ublox_worker) {
     UbloxMessage* message_tx = ublox_frame_to_bytes(frame_tx);
     ublox_frame_free(frame_tx);
 
-    UbloxMessage* message_rx = ublox_worker_i2c_transfer(message_tx, UBX_NAV_PVT_MESSAGE_LENGTH);
+    UbloxMessage* message_rx = ublox_i2c_transfer(message_tx, UBX_NAV_PVT_MESSAGE_LENGTH);
     ublox_message_free(message_tx);
     if(message_rx == NULL) {
         FURI_LOG_E(TAG, "read_pvt transfer failed");
@@ -475,7 +409,7 @@ bool ublox_worker_read_odo(UbloxWorker* ublox_worker) {
     UbloxMessage* message_tx = ublox_frame_to_bytes(frame_tx);
     ublox_frame_free(frame_tx);
 
-    UbloxMessage* message_rx = ublox_worker_i2c_transfer(message_tx, UBX_NAV_ODO_MESSAGE_LENGTH);
+    UbloxMessage* message_rx = ublox_i2c_transfer(message_tx, UBX_NAV_ODO_MESSAGE_LENGTH);
     ublox_message_free(message_tx);
     if(message_rx == NULL) {
         FURI_LOG_E(TAG, "read_odo transfer failed");
@@ -526,7 +460,7 @@ bool ublox_worker_init_gps(UbloxWorker* ublox_worker) {
     UbloxMessage* pms_message_tx = ublox_frame_to_bytes(&pms_frame_tx);
 
     UbloxMessage* pms_message_rx =
-        ublox_worker_i2c_transfer(pms_message_tx, UBX_CFG_PMS_MESSAGE_LENGTH);
+        ublox_i2c_transfer(pms_message_tx, UBX_CFG_PMS_MESSAGE_LENGTH);
     ublox_message_free(pms_message_tx);
     if(pms_message_rx == NULL) {
         FURI_LOG_E(TAG, "CFG-PMS read transfer failed");
@@ -543,7 +477,7 @@ bool ublox_worker_init_gps(UbloxWorker* ublox_worker) {
 
     pms_message_tx = ublox_frame_to_bytes(&pms_frame_tx);
 
-    UbloxMessage* ack = ublox_worker_i2c_transfer(pms_message_tx, UBX_ACK_ACK_MESSAGE_LENGTH);
+    UbloxMessage* ack = ublox_i2c_transfer(pms_message_tx, UBX_ACK_ACK_MESSAGE_LENGTH);
     if(ack == NULL) {
         FURI_LOG_E(TAG, "ACK after CFG-PMS set transfer failed");
         return false;
@@ -564,7 +498,7 @@ bool ublox_worker_init_gps(UbloxWorker* ublox_worker) {
     UbloxMessage* odo_message_tx = ublox_frame_to_bytes(&odo_frame_tx);
 
     UbloxMessage* odo_message_rx =
-        ublox_worker_i2c_transfer(odo_message_tx, UBX_CFG_ODO_MESSAGE_LENGTH);
+        ublox_i2c_transfer(odo_message_tx, UBX_CFG_ODO_MESSAGE_LENGTH);
     ublox_message_free(odo_message_tx);
     if(odo_message_rx == NULL) {
         FURI_LOG_E(TAG, "CFG-ODO transfer failed");
@@ -583,7 +517,7 @@ bool ublox_worker_init_gps(UbloxWorker* ublox_worker) {
 
     odo_message_tx = ublox_frame_to_bytes(&odo_frame_tx);
 
-    ack = ublox_worker_i2c_transfer(odo_message_tx, UBX_ACK_ACK_MESSAGE_LENGTH);
+    ack = ublox_i2c_transfer(odo_message_tx, UBX_ACK_ACK_MESSAGE_LENGTH);
     if(ack == NULL) {
         FURI_LOG_E(TAG, "ACK after CFG-ODO set transfer failed");
         return false;
@@ -604,7 +538,7 @@ bool ublox_worker_init_gps(UbloxWorker* ublox_worker) {
     UbloxMessage* nav5_message_tx = ublox_frame_to_bytes(&nav5_frame_tx);
 
     UbloxMessage* nav5_message_rx =
-        ublox_worker_i2c_transfer(nav5_message_tx, UBX_CFG_NAV5_MESSAGE_LENGTH);
+        ublox_i2c_transfer(nav5_message_tx, UBX_CFG_NAV5_MESSAGE_LENGTH);
     ublox_message_free(nav5_message_tx);
 
     if(nav5_message_rx == NULL) {
@@ -624,7 +558,7 @@ bool ublox_worker_init_gps(UbloxWorker* ublox_worker) {
 
     nav5_message_tx = ublox_frame_to_bytes(&nav5_frame_tx);
 
-    ack = ublox_worker_i2c_transfer(nav5_message_tx, UBX_ACK_ACK_MESSAGE_LENGTH);
+    ack = ublox_i2c_transfer(nav5_message_tx, UBX_ACK_ACK_MESSAGE_LENGTH);
     if(ack == NULL) {
         FURI_LOG_E(TAG, "ACK after CFG-NAV5 set transfer failed");
         return false;
@@ -647,7 +581,7 @@ void ublox_worker_reset_odo(UbloxWorker* ublox_worker) {
     odo_frame_tx.payload = NULL;
     UbloxMessage* odo_message_tx = ublox_frame_to_bytes(&odo_frame_tx);
 
-    UbloxMessage* ack = ublox_worker_i2c_transfer(odo_message_tx, UBX_ACK_ACK_MESSAGE_LENGTH);
+    UbloxMessage* ack = ublox_i2c_transfer(odo_message_tx, UBX_ACK_ACK_MESSAGE_LENGTH);
 
     ublox_message_free(odo_message_tx);
 
