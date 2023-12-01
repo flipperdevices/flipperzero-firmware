@@ -6,6 +6,7 @@
 
 typedef struct {
     uint32_t model;
+    uint16_t _model_index;
 } FastpairCfg;
 
 extern const Protocol protocol_fastpair;

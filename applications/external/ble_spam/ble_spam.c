@@ -327,6 +327,7 @@ typedef struct {
     bool resume;
     bool advertising;
     uint8_t delay;
+    uint8_t mac[GAP_MAC_ADDR_SIZE];
     FuriThread* thread;
     int8_t index;
     bool ignore_bruteforce;
@@ -366,10 +367,9 @@ static int32_t adv_thread(void* _ctx) {
     uint8_t size;
     uint16_t delay;
     uint8_t* packet;
-    uint8_t mac[GAP_MAC_ADDR_SIZE];
     Payload* payload = &attacks[state->index].payload;
     const Protocol* protocol = attacks[state->index].protocol;
-    if(!payload->random_mac) furi_hal_random_fill_buf(mac, sizeof(mac));
+    if(!payload->random_mac) furi_hal_random_fill_buf(state->mac, sizeof(state->mac));
     if(state->ctx.led_indicator) start_blink(state);
 
     while(state->advertising) {
@@ -386,9 +386,9 @@ static int32_t adv_thread(void* _ctx) {
         napi_furi_hal_bt_custom_adv_set(packet, size);
         free(packet);
 
-        if(payload->random_mac) furi_hal_random_fill_buf(mac, sizeof(mac));
+        if(payload->random_mac) furi_hal_random_fill_buf(state->mac, sizeof(state->mac));
         delay = delays[state->delay];
-        napi_furi_hal_bt_custom_adv_start(delay, delay, 0x00, mac, 0x1F);
+        napi_furi_hal_bt_custom_adv_start(delay, delay, 0x00, state->mac, 0x1F);
         furi_thread_flags_wait(true, FuriFlagWaitAny, delay);
         napi_furi_hal_bt_custom_adv_stop();
     }
@@ -552,7 +552,7 @@ static void draw_callback(Canvas* canvas, void* _ctx) {
             "App+Spam: \e#WillyJL\e#\n"
             "Apple+Crash: \e#ECTO-1A\e#\n"
             "Android+Win: \e#Spooks4576\e#\n"
-            "                                   Version \e#4.2\e#",
+            "                                   Version \e#4.4\e#",
             false);
         break;
     default: {
@@ -722,10 +722,10 @@ static bool input_callback(InputEvent* input, void* _ctx) {
                     napi_furi_hal_bt_custom_adv_set(packet, size);
                     free(packet);
 
-                    uint8_t mac[GAP_MAC_ADDR_SIZE];
-                    furi_hal_random_fill_buf(mac, sizeof(mac));
+                    if(payload->random_mac || input->type == InputTypeLong)
+                        furi_hal_random_fill_buf(state->mac, sizeof(state->mac));
                     uint16_t delay = delays[state->delay];
-                    napi_furi_hal_bt_custom_adv_start(delay, delay, 0x00, mac, 0x1F);
+                    napi_furi_hal_bt_custom_adv_start(delay, delay, 0x00, state->mac, 0x1F);
                     if(state->ctx.led_indicator)
                         notification_message(state->ctx.notification, &solid_message);
                     furi_delay_ms(10);

@@ -73,16 +73,32 @@ bool cfw_app_scene_protocols_frequencies_hopper_on_event(void* context, SceneMan
                 *FrequencyList_get(app->subghz_hopper_freqs, app->subghz_hopper_index);
             FrequencyList_it_t it;
             FrequencyList_it(it, app->subghz_hopper_freqs);
+            size_t removed = 0;
             while(!FrequencyList_end_p(it)) {
                 if(*FrequencyList_ref(it) == value) {
                     FrequencyList_remove(app->subghz_hopper_freqs, it);
+                    removed++;
                 } else {
                     FrequencyList_next(it);
                 }
             }
             app->save_subghz_frequencies = true;
-            scene_manager_previous_scene(app->scene_manager);
-            scene_manager_next_scene(app->scene_manager, CfwAppSceneProtocolsFrequenciesHopper);
+            VariableItem* item =
+                variable_item_list_get(app->var_item_list, VarItemListIndexHopperFrequency);
+            variable_item_set_values_count(item, FrequencyList_size(app->subghz_hopper_freqs));
+            if(FrequencyList_size(app->subghz_hopper_freqs)) {
+                app->subghz_hopper_index -= removed;
+                uint32_t value =
+                    *FrequencyList_get(app->subghz_hopper_freqs, app->subghz_hopper_index);
+                char text[10] = {0};
+                snprintf(
+                    text, sizeof(text), "%lu.%02lu", value / 1000000, (value % 1000000) / 10000);
+                variable_item_set_current_value_text(item, text);
+            } else {
+                app->subghz_hopper_index = 0;
+                variable_item_set_current_value_text(item, "None");
+            }
+            variable_item_set_current_value_index(item, app->subghz_hopper_index);
             break;
         case VarItemListIndexAddHopperFreq:
             scene_manager_set_scene_state(

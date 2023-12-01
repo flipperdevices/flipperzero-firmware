@@ -9,18 +9,16 @@
 #include <gui/view_dispatcher.h>
 #include <gui/scene_manager.h>
 #include <gui/modules/text_box.h>
+#include <gui/modules/widget.h>
 #include <gui/modules/variable_item_list.h>
 #include "uart_text_input.h"
+#include "uart_hex_input.h"
 
-#include <cfw.h>
-
-#define NUM_MENU_ITEMS (5)
+#define START_MENU_ITEMS (7)
+#define SETUP_MENU_ITEMS (3)
 
 #define UART_TERMINAL_TEXT_BOX_STORE_SIZE (4096)
 #define UART_TERMINAL_TEXT_INPUT_STORE_SIZE (512)
-#define UART_CH                                                                  \
-    (CFW_SETTINGS()->uart_general_channel == UARTDefault ? FuriHalUartIdUSART1 : \
-                                                           FuriHalUartIdLPUART1)
 
 struct UART_TerminalApp {
     Gui* gui;
@@ -32,23 +30,33 @@ struct UART_TerminalApp {
     size_t text_box_store_strlen;
     TextBox* text_box;
     UART_TextInput* text_input;
-
+    UART_TextInput* hex_input;
+    Widget* widget;
     VariableItemList* var_item_list;
-
+    VariableItemList* setup_var_item_list;
     UART_TerminalUart* uart;
+
+    int setup_selected_menu_index;
+    int setup_selected_option_index[SETUP_MENU_ITEMS];
     int selected_menu_index;
-    int selected_option_index[NUM_MENU_ITEMS];
+    int selected_option_index[START_MENU_ITEMS];
     const char* selected_tx_string;
+
     bool is_command;
     bool is_custom_tx_string;
-    bool focus_console_start;
-    bool show_stopscan_tip;
+    bool hex_mode;
+    uint8_t uart_ch;
+    uint8_t new_uart_ch;
     int BAUDRATE;
+    int NEW_BAUDRATE;
     int TERMINAL_MODE; //1=AT mode, 0=other mode
 };
 
 typedef enum {
     UART_TerminalAppViewVarItemList,
+    UART_TerminalAppViewSetup,
     UART_TerminalAppViewConsoleOutput,
     UART_TerminalAppViewTextInput,
+    UART_TerminalAppViewHexInput,
+    UART_TerminalAppViewHelp,
 } UART_TerminalAppView;
