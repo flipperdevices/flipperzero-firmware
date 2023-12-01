@@ -39,18 +39,23 @@ void nfc_scene_mf_ultralight_write_fail_on_enter(void* context) {
     view_dispatcher_switch_to_view(instance->view_dispatcher, NfcViewWidget);
 }
 
+static bool nfc_scene_mf_ultralight_write_fail_move_to_back_scene(const NfcApp* const instance) {
+    bool was_saved = scene_manager_has_previous_scene(instance->scene_manager, NfcSceneSavedMenu);
+    uint32_t scene_id = was_saved ? NfcSceneSavedMenu : NfcSceneReadMenu;
+
+    return scene_manager_search_and_switch_to_previous_scene(instance->scene_manager, scene_id);
+}
+
 bool nfc_scene_mf_ultralight_write_fail_on_event(void* context, SceneManagerEvent event) {
     NfcApp* instance = context;
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == GuiButtonTypeLeft) {
-            consumed = scene_manager_search_and_switch_to_previous_scene(
-                instance->scene_manager, NfcSceneSavedMenu);
+            consumed = nfc_scene_mf_ultralight_write_fail_move_to_back_scene(instance);
         }
     } else if(event.type == SceneManagerEventTypeBack) {
-        consumed = scene_manager_search_and_switch_to_previous_scene(
-            instance->scene_manager, NfcSceneSavedMenu);
+        consumed = nfc_scene_mf_ultralight_write_fail_move_to_back_scene(instance);
     }
     return consumed;
 }
