@@ -4,7 +4,7 @@
 #include <infrared_transmit.h>
 #include <storage/storage.h>
 
-#include "app_config.h"
+#include "../app_config.h"
 #include "infrared_signal.h"
 
 struct InfraredSignal {
