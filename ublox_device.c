@@ -132,7 +132,7 @@ void ublox_frame_free(UbloxFrame* frame) {
     }*/
 }
 
-UbloxMessage* ublox_worker_i2c_transfer(UbloxMessage* message_tx, uint8_t read_length) {
+UbloxMessage* ublox_i2c_transfer(UbloxMessage* message_tx, uint8_t read_length) {
     if(!furi_hal_i2c_is_device_ready(
            &furi_hal_i2c_handle_external,
            UBLOX_I2C_ADDRESS << 1,
