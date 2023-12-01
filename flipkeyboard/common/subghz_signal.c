@@ -1,16 +1,21 @@
 #include <furi.h>
 #include <flipper_format/flipper_format_i.h>
 #include <storage/storage.h>
-#include <lib/subghz/protocols/protocol_items.h>
 #include <lib/subghz/transmitter.h>
 
 #include "../app_config.h"
 #include "subghz_signal.h"
 
 #ifdef FIRMWARE_SUPPORTS_SUBGHZ
-#include <applications/drivers/subghz/cc1101_ext/cc1101_ext_interconnect.h>
 #include <devices/devices.h>
-#include <lib/subghz/devices/cc1101_int/cc1101_int_interconnect.h>
+#ifdef APP_USES_SUBGHZ_PROTOCOL_ITEMS
+#include <lib/subghz/protocols/protocol_items.h>
+#endif
+//#include <applications/drivers/subghz/cc1101_ext/cc1101_ext_interconnect.h>
+//#include <lib/subghz/devices/cc1101_int/cc1101_int_interconnect.h>
+
+#define SUBGHZ_DEVICE_CC1101_EXT_NAME "cc1101_ext"
+#define SUBGHZ_DEVICE_CC1101_INT_NAME "cc1101_int"
 
 struct SubGhzSignal {
     FuriString* sub_file_contents;
@@ -84,7 +89,9 @@ static void send_signal(
     }
 
     SubGhzEnvironment* environment = subghz_environment_alloc();
+#ifdef APP_USES_SUBGHZ_PROTOCOL_ITEMS
     subghz_environment_set_protocol_registry(environment, (void*)&subghz_protocol_registry);
+#endif
     SubGhzTransmitter* transmitter = subghz_transmitter_alloc_init(environment, protocol);
     FlipperFormat* flipper_format = flipper_format_string_alloc();
     __flipper_format_populate(flipper_format, sub_file_contents);
