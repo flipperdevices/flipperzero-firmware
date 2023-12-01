@@ -100,6 +100,8 @@ If you are using a browser that does not support the Web Serial API, you will ne
 
 ### Building with VSCode (Visual Studio Code) 
 
+This is the recommended configuration if you are going to be editing the existing applications or writing your own.  You will get code completion and be able to step into the firmware code, finding out how a specific function works.
+
 Prerequisites:
 - [Install Python](https://www.python.org/downloads/)
 - [Install GIT tools](https://git-scm.com/downloads)
@@ -147,6 +149,43 @@ Build and deploy the application:
   - Step 5: The application should get built, the FAP installed on the Flipper Zero, and then the application should get launched.
 
 ### Building with FBT
+
+If you prefer a different editor, then using FBT may be a good option.  FBT is a command line tool that can build the firmware and applications.  This is the same tool used by VSCode.
+
+Prerequisites:
+- [Install Python](https://www.python.org/downloads/)
+- [Install GIT tools](https://git-scm.com/downloads)
+
+Configure FBT:
+- Step 1: Make sure you have installed the above prerequisites.
+- Step 2: Create a folder called `repos` in your home directory.  You can use any folder you want, but this tutorial assumes you are using `/repos` folder.
+- Step 3: Clone the Flipboard repository.
+  - Step 3a: Open a command prompt.
+  - Step 3b: Change directory to your `/repos` folder.
+  - Step 3c: Clone the flipboard repository `git clone https://github.com/jamisonderek/flipboard.git`
+- Step 4: Clone the firmware repository recursively.
+  - Step 4a: Open a command prompt.
+  - Step 4b: Change directory to your `/repos` folder.
+  - Step 4c: Clone the firmware repository you would like to run on your Flipper.
+    - Official: `git clone --recursive https://github.com/flipperdevices/flipperzero-firmware.git`
+    - Unleashed: `git clone --recursive https://github.com/DarkFlippers/unleashed-firmware.git`
+    - RogueMaster: `git clone --recursive https://github.com/RogueMaster/flipperzero-firmware-wPlugins.git roguemaster-firmware`
+    - Xtreme: `git clone --recursive https://github.com/Flipper-XFW/Xtreme-Firmware.git`
+- Step 5: Deploy the firmware
+  - Step 5a: Connect your Flipper to the computer.
+  - Step 5b: Open a command prompt.
+  - Step 5c: Change directory to the firmware repository you cloned.
+  - Step 5d: Run the command `./fbt FORCE=1 flash_usb_full`
+- Step 6: Copy the applications from the flipboard repository to the firmware repository's `application_user` folder.
+  - Step 6a: Copy the folder `flipblinky` from `/repos/flipboard/flipblinky` to `./applications_user/flipblinky`.
+  - Step 6b: Copy the folder `flipsignal` from `/repos/flipboard/flipsignal` to `./applications_user/flipsignal`.
+  - Step 6c: Copy the folder `flipkeyboard` from `/repos/flipboard/flipkeyboard` to `./applications_user/flipkeyboard`.
+
+Build and deploy the application:
+  - Step 1: Connect your Flipper to the computer.
+  - Step 2: Open a command prompt.
+  - Step 3: Change directory to the firmware repository you cloned.
+  - Step 4: Run the command `./fbt launch APPSRC=./applications_user/flipblinky/app.c` (or whichever application you want to build)
 
 ### Building with UFBT
 
