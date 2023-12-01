@@ -161,7 +161,7 @@ Configure FBT:
 - Step 2: Create a folder called `repos` in your home directory.  You can use any folder you want, but this tutorial assumes you are using `/repos` folder.
 - Step 3: Clone the Flipboard repository.
   - Step 3a: Open a command prompt.
-  - Step 3b: Change directory to your `/repos` folder.
+  - Step 3b: Change directory to your `/repos` folder (`cd /repros`).
   - Step 3c: Clone the flipboard repository `git clone https://github.com/jamisonderek/flipboard.git`
 - Step 4: Clone the firmware repository recursively.
   - Step 4a: Open a command prompt.
@@ -188,6 +188,26 @@ Build and deploy the application:
   - Step 4: Run the command `./fbt launch APPSRC=./applications_user/flipblinky/app.c` (or whichever application you want to build)
 
 ### Building with UFBT
+
+Prerequisites:
+- [Install Python](https://www.python.org/downloads/)
+- [Install GIT tools](https://git-scm.com/downloads)
+
+Prepare environment:
+- Step 1: Make sure you have installed the above prerequisites.
+- Step 2: Create a folder called `repos` in your home directory.  You can use any folder you want, but this tutorial assumes you are using `/repos` folder.
+- Step 3: Clone the Flipboard repository.
+  - Step 3a: Open a command prompt.
+  - Step 3b: Change directory to your `/repos` folder (`cd /repros`).
+  - Step 3c: Clone the flipboard repository `git clone https://github.com/jamisonderek/flipboard.git`
+- Step 4: Install ubft tool.
+  - Linux & macOS: `python3 -m pip install --upgrade ufbt`
+  - Windows: `py -m pip install --upgrade ufbt`
+- Step 5: Build and deploy the application.
+  - Step 5a: Connect your Flipper to the computer.
+  - Step 5b: Open a command prompt.
+  - Step 5c: Change directory to the flipboard application. (`cd /repos/flipboard/flipblinky`)
+  - Step 5d: Run the command `ufbt launch`.
 
 ## Running the application
 
