@@ -714,7 +714,11 @@ bool seader_process_success_response_i(
 
         processed = seader_worker_state_machine(seader, payload, online, spc);
     } else {
-        FURI_LOG_D(TAG, "Failed to decode APDU payload");
+        memset(display, 0, sizeof(display));
+        for(uint8_t i = 0; i < len; i++) {
+            snprintf(display + (i * 2), sizeof(display), "%02x", apdu[i]);
+        }
+        FURI_LOG_D(TAG, "Failed to decode APDU payload: [%s]", display);
     }
 
     ASN_STRUCT_FREE(asn_DEF_Payload, payload);
