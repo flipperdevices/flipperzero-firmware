@@ -79,7 +79,7 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 | HC-SR04 Distance sensor | ![GPIO Badge] | Ported and modified by @xMasterX | [(original by Sanqui)](https://github.com/Sanqui/flipperzero-firmware/tree/hc_sr04) - How to connect -> (5V -> VCC) / (GND -> GND) / (13\|TX -> Trig) / (14\|RX -> Echo) | ![None Badge] |
 | **Unitemp Temperature sensors reader** | ![GPIO Badge] | [by quen0n](https://github.com/quen0n/unitemp-flipperzero) | DHT11/22, DS18B20, BMP280, HTU21x and more | [![Author Badge]](https://lab.flipper.net/apps/unitemp) |
 | Lightmeter | ![GPIO Badge] | [by oleksiikutuzov](https://github.com/oleksiikutuzov/flipperzero-lightmeter) |  | [![Author Badge]](https://lab.flipper.net/apps/lightmeter) |
-| **UART Terminal** | ![GPIO Badge] | [by cool4uma](https://github.com/cool4uma/UART_Terminal/tree/main) |  | [![UFW Badge]](https://lab.flipper.net/apps/uart_terminal) |
+| **UART Terminal** | ![GPIO Badge] | [by cool4uma](https://github.com/cool4uma/UART_Terminal/tree/main) | New mode, other improvements by @rnadyrshin | [![UFW Badge]](https://lab.flipper.net/apps/uart_terminal) |
 | **SWD Probe** | ![GPIO Badge] | [by g3gg0](https://github.com/g3gg0/flipper-swd_probe) |  | [![UFW Badge]](https://lab.flipper.net/apps/swd_probe) |
 | ESP32-CAM -> Camera Suite | ![GPIO Badge] | [by CodyTolene](https://github.com/CodyTolene/Flipper-Zero-Camera-Suite) |  | [![Author Badge]](https://lab.flipper.net/apps/camera_suite) |
 | WAV Player | ![Media Badge] | [OFW: DrZlo13](https://github.com/flipperdevices/flipperzero-firmware/tree/zlo/wav-player) | Fixed and improved by [LTVA1](https://github.com/LTVA1/wav_player) -> Also outputs audio on `PA6` `3(A6)` pin | [![UFW Badge]](https://lab.flipper.net/apps/wav_player) |
