@@ -172,19 +172,22 @@ Alias("fap_dist", fap_dist)
 
 fap_deploy = distenv.PhonyTarget(
     "fap_deploy",
-    [
+    Action(
         [
-            "${PYTHON3}",
-            "${FBT_SCRIPT_DIR}/storage.py",
-            "-p",
-            "${FLIP_PORT}",
-            "send",
-            "${SOURCE}",
-            "/ext/apps",
+            [
+                "${PYTHON3}",
+                "${FBT_SCRIPT_DIR}/storage.py",
+                "-p",
+                "${FLIP_PORT}",
+                "send",
+                "${SOURCE}",
+                "/ext/apps",
+            ]
         ]
-    ],
+    ),
     source=firmware_env.Dir(("${RESOURCES_ROOT}/apps")),
 )
+Depends(fap_deploy, firmware_env["FW_RESOURCES_MANIFEST"])
 
 
 # Target for bundling core2 package for qFlipper
@@ -260,7 +263,7 @@ distenv.PhonyTarget(
 distenv.PhonyTarget(
     "debug_other_blackmagic",
     "${GDBPYCOM}",
-    GDBOPTS="${GDBOPTS_BASE}  ${GDBOPTS_BLACKMAGIC}",
+    GDBOPTS="${GDBOPTS_BASE} ${GDBOPTS_BLACKMAGIC}",
     GDBREMOTE="${BLACKMAGIC_ADDR}",
     GDBPYOPTS=debug_other_opts,
 )
@@ -275,23 +278,27 @@ distenv.PhonyTarget(
 # Linter
 distenv.PhonyTarget(
     "lint",
-    "${PYTHON3} ${FBT_SCRIPT_DIR}/lint.py check ${LINT_SOURCES}",
+    [["${PYTHON3}", "${FBT_SCRIPT_DIR}/lint.py", "check", "${LINT_SOURCES}"]],
     LINT_SOURCES=[n.srcnode() for n in firmware_env["LINT_SOURCES"]],
 )
 
 distenv.PhonyTarget(
     "format",
-    "${PYTHON3} ${FBT_SCRIPT_DIR}/lint.py format ${LINT_SOURCES}",
+    [["${PYTHON3}", "${FBT_SCRIPT_DIR}/lint.py", "format", "${LINT_SOURCES}"]],
     LINT_SOURCES=[n.srcnode() for n in firmware_env["LINT_SOURCES"]],
 )
 
-# PY_LINT_SOURCES contains recursively-built modules' SConscript files + application manifests
+# PY_LINT_SOURCES contains recursively-built modules' SConscript files
 # Here we add additional Python files residing in repo root
 firmware_env.Append(
     PY_LINT_SOURCES=[
         # Py code folders
         "site_scons",
         "scripts",
+        "applications",
+        "applications_user",
+        "assets",
+        "targets",
         # Extra files
         "SConstruct",
         "firmware.scons",
@@ -301,7 +308,10 @@ firmware_env.Append(
 
 
 black_commandline = "@${PYTHON3} -m black ${PY_BLACK_ARGS} ${PY_LINT_SOURCES}"
-black_base_args = ["--include", '"\\.scons|\\.py|SConscript|SConstruct"']
+black_base_args = [
+    "--include",
+    '"(\\.scons|\\.py|SConscript|SConstruct|\\.fam)$"',
+]
 
 distenv.PhonyTarget(
     "lint_py",
@@ -322,10 +332,14 @@ distenv.PhonyTarget(
 )
 
 # Start Flipper CLI via PySerial's miniterm
-distenv.PhonyTarget("cli", "${PYTHON3} ${FBT_SCRIPT_DIR}/serial_cli.py -p ${FLIP_PORT}")
+distenv.PhonyTarget(
+    "cli", [["${PYTHON3}", "${FBT_SCRIPT_DIR}/serial_cli.py", "-p", "${FLIP_PORT}"]]
+)
 
 # Update WiFi devboard firmware
-distenv.PhonyTarget("devboard_flash", "${PYTHON3} ${FBT_SCRIPT_DIR}/wifi_board.py")
+distenv.PhonyTarget(
+    "devboard_flash", [["${PYTHON3}", "${FBT_SCRIPT_DIR}/wifi_board.py"]]
+)
 
 
 # Find blackmagic probe
@@ -360,5 +374,5 @@ distenv.Alias("vscode_dist", vscode_dist)
 # Configure shell with build tools
 distenv.PhonyTarget(
     "env",
-    "@echo $( ${FBT_SCRIPT_DIR}/toolchain/fbtenv.sh $)",
+    "@echo $( ${FBT_SCRIPT_DIR.abspath}/toolchain/fbtenv.sh $)",
 )
