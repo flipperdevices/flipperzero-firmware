@@ -9,7 +9,11 @@
             { "path": "esp32_marauder.ino.bootloader.bin", "offset": 4096 },
             { "path": "esp32_marauder.ino.partitions.bin", "offset": 32768 },
             { "path": "boot_app0.bin", "offset": 57344 },
-            { "path": "MALVEKE.ino.bin", "offset": 65536 }
+            { "path": "MALVEKE.ino.bin", "offset": 65536 },
+            {
+              "path": "esp32_marauder.spiffs.bin",
+              "offset": 3211264
+            }
         ]
       }
     ]

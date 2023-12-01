@@ -172,29 +172,18 @@ void setup()
 {
   Serial.begin(115200);
   Serial1.begin(115200, SERIAL_8N1, 17, 18);
-  // unsigned long waitForStreamMode = millis() + 3000;
-  // while (waitForStreamMode > millis()) {
-  //   if (Serial.available())  // if we receive anything, just switch to another mode
-  //   {
-  //     switch (Serial.read()) {
-  //       case 'c':
-  //         gb_camera_setup();
-  //         for (;;)
-  //           gb_camera_loop();
-  //       case 'g':
-  //         gameboy_setup();
-  //         for (;;)
-  //           gameboy_loop();
-  //       break;
-  //       case 's':
-  //         gb_live_camera_setup();
-  //         for (;;)
-  //           gb_live_camera_loop();
-  //       case 'w':  // Marauder
-  //         goto continue_to_marauder;
-  //     }
-  //   }
-  // }
+  unsigned long waitForStreamMode = millis() + 1000;
+ while (waitForStreamMode > millis()) {
+    if (Serial.available())  // if we receive anything, just switch to another mode
+    {
+      switch (Serial.read()) {
+        case 'c':
+          gb_camera_setup();
+          for (;;)
+            gb_camera_loop();
+      }
+    }
+ }
   // continue_to_marauder:;
   #ifdef MARAUDER_M5STICKC
     axp192_obj.begin();

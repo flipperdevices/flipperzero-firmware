@@ -1,9 +1,15 @@
 <script>
-import { nextTick, onBeforeUnmount, onMounted, ref } from "vue";
-import GameBoyColor from "./components/GameBoyColor.vue";
-import HexInput from "./components/HexInput.vue";
-import Button from './components/Button.vue';
-import Select from './components/Select.vue';
+import { nextTick, onBeforeUnmount, onMounted, ref, defineAsyncComponent } from "vue";
+// import GameBoyColor from "./components/GameBoyColor.vue";
+// import HexInput from "./components/HexInput.vue";
+// import Button from './components/Button.vue';
+// import Select from './components/Select.vue';
+
+const AsyncGameBoyColor = defineAsyncComponent(() => import('./components/GameBoyColor.vue') )
+const AsyncHexInput = defineAsyncComponent(() => import('./components/HexInput.vue') )
+const AsyncButton = defineAsyncComponent(() => import('./components/Button.vue') )
+const AsyncSelect = defineAsyncComponent(() => import('./components/Select.vue') )
+
 
 let interval = true;
 
@@ -28,7 +34,7 @@ export default {
   //     dumpText: ''
   //   }
   // },
-  components: { HexInput, GameBoyColor, Button, Select },
+  components: { AsyncHexInput, AsyncGameBoyColor, AsyncButton, AsyncSelect },
   setup() {
     const container = ref(null);
     const dumpText = ref("");
@@ -482,7 +488,7 @@ export default {
           class="flex flex-col items-start justify-between  xl:hidden bg-white rounded-md p-2 mb-4 mx-12 border border-gray-300 shadow-md"
         >
           <div class="text-xs font-bold mr-4 mb-2">Color Palette</div>
-          <Select
+          <AsyncSelect
             v-model="palette"
             @change="onChangePalette">
             <option value="grayscale">Grayscale</option>
@@ -498,11 +504,11 @@ export default {
             <option value="grafixkidgray">Grafixkid Gray</option>
             <option value="grafixkidgreen">Grafixkid Green</option>
             <option value="blackzero">Game Boy (Black Zero) palette</option>
-          </Select>
+          </AsyncSelect>
         </div>
-        <GameBoyColor @press-button="onPressButton">
+        <AsyncGameBoyColor @press-button="onPressButton">
           <canvas ref="canvasRef" style="width: 210px; height: 190px"></canvas>
-        </GameBoyColor>
+        </AsyncGameBoyColor>
       </div>
 
       <div class="flex-col ml-1 w-96 hidden xl:flex" style="height:580px">
@@ -510,7 +516,7 @@ export default {
           class="flex flex-col items-start justify-between bg-white rounded-md p-2 mb-2 border border-gray-300 shadow-md"
         >
         <div class="text-xs font-bold mr-4 mb-2">Color Palette</div>
-          <Select v-model="palette" @change="onChangePalette">
+          <AsyncSelect v-model="palette" @change="onChangePalette">
             <option value="grayscale">Grayscale</option>
             <option value="dmg">Original Game Boy</option>
             <option value="gameboypocket">Game Boy Pocket</option>
@@ -524,12 +530,12 @@ export default {
             <option value="grafixkidgray">Grafixkid Gray</option>
             <option value="grafixkidgreen">Grafixkid Green</option>
             <option value="blackzero">Game Boy (Black Zero) palette</option>
-          </Select>
+          </AsyncSelect>
         </div>
-        <HexInput v-model="dumpText" class="h-full" />
+        <AsyncHexInput v-model="dumpText" class="h-full" />
         <div class="flex-1 flex justify-end my-2">
-          <Button v-if="!isTransfered" :disabled="loading" @click="onImport">Import</Button>
-          <Button v-else @click="onRestart">Restart</Button>
+          <AsyncButton v-if="!isTransfered" :disabled="loading" @click="onImport">Import</AsyncButton>
+          <AsyncButton v-else @click="onRestart">Restart</AsyncButton>
         </div>
       </div>
     </div>

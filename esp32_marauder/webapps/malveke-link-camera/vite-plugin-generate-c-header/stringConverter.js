@@ -74,7 +74,7 @@ export function prepareBinary(data) {
   return Buffer.from(data);
 }
 
-export function convertToString(data, colNum, filename) {
+export function convertToString(data, colNum, filename, prefix = '') {
   let resultString = "";
   const conversionType = "HEX0";
   const endianness = "le";
@@ -86,8 +86,8 @@ export function convertToString(data, colNum, filename) {
   const multiLine = true;
 
   resultString += `// array size is ${dataLength}\r\n`;
-  resultString += `#define ${filename}_len ${dataLength}\n\n`;
-  resultString += `static const uint8_t ${filename}[] PROGMEM = {\r\n  `;
+  resultString += `#define ${prefix}${filename}_len ${dataLength}\n\n`;
+  resultString += `static const uint8_t ${prefix}${filename}[] PROGMEM = {\r\n  `;
   resultString += stringConverter.convert(
     actualDataLength,
     bytesPerPixel,

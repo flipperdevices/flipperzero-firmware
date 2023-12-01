@@ -76,6 +76,7 @@ void EvilPortal::setupServer() {
   });
   Serial.println("web server up");
 }
+
 void EvilPortal::setHtmlFromSerial() {
   Serial.println("Setting HTML from serial...");
   const char *htmlStr = Serial.readString().c_str();
