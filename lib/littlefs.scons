@@ -1,8 +1,11 @@
+from fbt.util import GLOB_FILE_EXCLUSION
+
 Import("env")
 
 env.Append(
     CPPPATH=[
         "#/lib/littlefs",
+        "#/lib/cfw",
     ],
 )
 
@@ -16,6 +19,12 @@ libenv.Append(
 )
 
 sources = Glob("littlefs/*.c", source=True)
+
+libs_recurse = [
+    "cfw",
+]
+for lib in libs_recurse:
+    sources += libenv.GlobRecursive("*.c*", lib)
 
 lib = libenv.StaticLibrary("${FW_LIB_NAME}", sources)
 libenv.Install("${LIB_DIST_DIR}", lib)
