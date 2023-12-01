@@ -15,7 +15,6 @@ and 10-series too. I've only tested the app with a u-blox SAM-M8Q
 module from SparkFun. 
 
 ## Wiring
-
 Connect your GPS to the 3V3, GND, and I2C pins on the Flipper. If you
 have a Qwiic GPS and a cable, these are the colors:
 
@@ -25,7 +24,6 @@ have a Qwiic GPS and a cable, these are the colors:
 | Black       | GND         |
 | Blue        | C1 (SDA)    |
 | Yellow      | C0 (SCL)    |
-
 
 # Features
 ## Handheld data display
@@ -42,17 +40,20 @@ handheld displays more info:
   - `G+D`: Dead-reckoning and GNSS combined
   - `TO`: Time-only
 - `Od`: Odometer since last reset. The odometer is inside the GPS.
-- `L`: Logging (`Y` = enabled, `N` = disabled)
 - `Lat`: Latitude in degrees to 4 decimal digits
 - `Lon`: Longitude in degrees to 4 decimal digits
-- `Alt`: Altitude
+- `Alt`: Altitude above sea level
 - `Head`: Heading of motion. This is calculated in the GPS by
   tracking motion, so if you're not moving, it won't be remotely
   accurate.
-- `UTC`: Time in UTC
+- `Time`: Current **Flipper** time, which might be inaccurate!
+- `Batt`: Current Flipper battery charge.
 
 All fields that can be localized will be converted to imperial or
 metric units, depending on what you've set in Flipper's Settings.
+
+The log button (accessed by the right-hand button on the d-pad)
+indicates the logging state.
 
 ## Car data display
 ![u-blox app car data display](screenshots/data_display_car.png)
@@ -71,6 +72,8 @@ panel.
 
 - `Refresh Rate`: How often the data display should be updated
 - `Display Mode`: Handheld or car
+- `Backlight`: Keep the display backlight always on or let it run on
+  the default timeout
 - `Notify`: If on, blink the LED on data display updates
 - `Platform Model`: Model used by the GPS's "Navigation
   Engine". "Portable" is fine for most applications, but the other
@@ -84,8 +87,13 @@ Press the right button on the data display to start logging. You'll be
 prompted to input a filename, and then logging will start. Files are
 saved to `apps_data/ublox` on the SD card. The app logs to KML format,
 and you can view them with a tool like [this
-one](https://www.doogal.co.uk/KmlViewer). Press the right button to
-stop logging. Logging will also stop if you leave the data display.
+one](https://www.doogal.co.uk/KmlViewer). Press the right button again
+to stop logging.
+
+You cannot configure the GPS during logging, and leaving the data
+display will also stop logging. If the GPS disconnects or becomes
+unreachable, logging will stop and all data will be saved. The log
+file is flushed every 16 writes in case a disk problem arises.
 
 ## Time synchronization
 ![u-blox app time synchronization display](screenshots/sync_time.png)
