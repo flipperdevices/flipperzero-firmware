@@ -2029,7 +2029,6 @@ Function,+,protocol_dict_get_write_data,_Bool,"ProtocolDict*, size_t, void*"
 Function,+,protocol_dict_render_brief_data,void,"ProtocolDict*, FuriString*, size_t"
 Function,+,protocol_dict_render_data,void,"ProtocolDict*, FuriString*, size_t"
 Function,+,protocol_dict_set_data,void,"ProtocolDict*, size_t, const uint8_t*, size_t"
-Function,-,pselect,int,"int, fd_set*, fd_set*, fd_set*, const timespec*, const sigset_t*"
 Function,-,pulse_reader_alloc,PulseReader*,"const GpioPin*, uint32_t"
 Function,-,pulse_reader_free,void,PulseReader*
 Function,-,pulse_reader_receive,uint32_t,"PulseReader*, int"
@@ -2120,7 +2119,6 @@ Function,+,scene_manager_stop,void,SceneManager*
 Function,+,sd_api_get_fs_type_text,const char*,SDFsType
 Function,-,secure_getenv,char*,const char*
 Function,-,seed48,unsigned short*,unsigned short[3]
-Function,-,select,int,"int, fd_set*, fd_set*, fd_set*, timeval*"
 Function,-,serial_svc_is_started,_Bool,
 Function,-,serial_svc_notify_buffer_is_empty,void,
 Function,-,serial_svc_set_callbacks,void,"uint16_t, SerialServiceEventCallback, void*"
@@ -2536,7 +2534,6 @@ Variable,-,__sf,__FILE[3],
 Variable,-,__sglue,_glue,
 Variable,-,__stdio_exit_handler,void (*)(),
 Variable,+,_ctype_,const char[],
-Variable,-,_daylight,int,
 Variable,+,_impure_data,_reent,
 Variable,+,_impure_ptr,_reent*,
 Variable,-,_sys_errlist,const char*[],

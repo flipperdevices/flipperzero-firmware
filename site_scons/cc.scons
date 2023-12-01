@@ -44,5 +44,6 @@ ENV.AppendUnique(
         "-mfpu=fpv4-sp-d16",
         "-mlittle-endian",
         "-mthumb",
+        "-Wl,--no-warn-rwx-segment",
     ],
 )
