@@ -1,5 +1,5 @@
-#ifndef gameboy_h
-#define gameboy_h
+#ifndef Gameboy_h
+#define Gameboy_h
 
 #include <Arduino.h>
 #include <ArduinoJson.h>

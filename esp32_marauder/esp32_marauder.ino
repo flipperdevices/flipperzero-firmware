@@ -4,11 +4,6 @@ Flash Frequency: 80MHz
 Partition Scheme: Minimal SPIFFS
 https://www.online-utility.org/image/convert/to/XBM
 */
-#include "GameBoyCartridge.h"
-#include "GameBoyAdvanceCartridge.h"
-#include "GameBoyCameraServer.h"
-#include "GameboyLiveCamera.h"
-
 #include "configs.h"
 
 #ifndef HAS_SCREEN
@@ -18,6 +13,9 @@ https://www.online-utility.org/image/convert/to/XBM
 
 #include <WiFi.h>
 //#include "Web.h"
+#include "GameBoyCartridge.h"
+#include "GameBoyAdvanceCartridge.h"
+#include "GameboyLiveCamera.h"
 #include "EvilPortal.h"
 #include <Wire.h>
 #include "esp_wifi.h"
@@ -143,7 +141,6 @@ uint32_t currentTime  = 0;
 
 GameBoyCartridge gameboy_cartridge;
 GameBoyAdvanceCartridge gameboy_advance_cartridge;
-GameBoyCameraServer gameboy_camera_server;
 GameboyLiveCamera gameboy_live_camera;
 
 void backlightOn() {
@@ -247,7 +244,6 @@ void setup()
   //  MALVEKE
   gameboy_cartridge.begin();
   gameboy_advance_cartridge.begin();
-  gameboy_camera_server.begin();
   gameboy_live_camera.begin();
   //Serial.println("\n\nHello, World!\n");
 
@@ -341,6 +337,7 @@ void setup()
   #else
     return;
   #endif
+  evil_portal_obj.setup();
 
   #ifdef HAS_BATTERY
     battery_obj.RunSetup();
@@ -435,15 +432,14 @@ void loop()
   
   //if ((!do_draw) && (wifi_scan_obj.currentScanMode != ESP_UPDATE))
   //{
-  if(!gameboy_cartridge.isRestoringRAM() && !gameboy_camera_server.isRunning()){
+  if(!gameboy_cartridge.isRestoringRAM()){
   cli_obj.main(currentTime);
   }
 
   gameboy_cartridge.main();
   gameboy_advance_cartridge.main();
-  gameboy_camera_server.main();
   gameboy_live_camera.main();
-  if(!gameboy_live_camera.isRunning() && !gameboy_camera_server.isRunning() && !gameboy_cartridge.isWrittingRAM() && !gameboy_cartridge.isWrittingROM() && !gameboy_cartridge.isRestoringRAM()) {
+  if(!gameboy_live_camera.isRunning() && !gameboy_cartridge.isWrittingRAM() && !gameboy_cartridge.isWrittingROM() && !gameboy_cartridge.isRestoringRAM()) {
   #ifdef HAS_SCREEN
     display_obj.main(wifi_scan_obj.currentScanMode);
   #endif
@@ -478,6 +474,8 @@ void loop()
     flipper_led.main();
   #elif defined(XIAO_ESP32_S3)
     xiao_led.main();
+  #elif defined(MARAUDER_M5STICKC)
+    stickc_led.main();
   #else
     led_obj.main(currentTime);
   #endif

@@ -1,5 +1,5 @@
 #include "GameBoyCartridge.h"
-#include "soc/rtc_wdt.h"
+// #include "soc/rtc_wdt.h"
 #include "GameboyServer.h"
 #include <FS.h>
 
