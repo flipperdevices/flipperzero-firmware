@@ -61,7 +61,7 @@ void hex_viewer_startscreen_draw(Canvas* canvas, HexViewerStartscreenModel* mode
                 width,
                 0,
                 ROW_HEIGHT * HEX_VIEWER_LINES_ON_SCREEN,
-                first_line_on_screen, // TODO
+                first_line_on_screen,
                 line_count - (HEX_VIEWER_LINES_ON_SCREEN - 1));
         }
 
@@ -128,7 +128,7 @@ bool hex_viewer_startscreen_input(InputEvent* event, void* context) {
     furi_assert(context);
     HexViewerStartscreen* instance = context;
     HexViewer* app = instance->context; // TO so good, but works
-    // TODO InputTypeShort?
+
     if(event->type == InputTypeRelease || event->type == InputTypeRepeat) {
         switch(event->key) {
         case InputKeyBack:
