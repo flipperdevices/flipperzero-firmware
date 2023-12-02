@@ -7,6 +7,7 @@
 
 typedef struct KMLFile {
     File* file;
+    int write_counter;
 } KMLFile;
 
 /**

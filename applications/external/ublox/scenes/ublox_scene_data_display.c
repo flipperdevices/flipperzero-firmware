@@ -42,15 +42,23 @@ void ublox_scene_data_display_on_enter(void* context) {
         ublox->worker, UbloxWorkerStateRead, ublox_scene_data_display_worker_callback, ublox);
 }
 
+// TODO: lock buttons feature
 bool ublox_scene_data_display_on_event(void* context, SceneManagerEvent event) {
     Ublox* ublox = context;
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == GuiButtonTypeLeft) {
-            ublox_worker_stop(ublox->worker);
-            scene_manager_next_scene(ublox->scene_manager, UbloxSceneDataDisplayConfig);
-            consumed = true;
+            // You can only config the worker when it's not logging,
+            // because that's actually pretty complicated to implement
+            // (and confusing too because the worker has to restart if
+            // it's going to keep logging)
+
+            if(ublox->log_state == UbloxLogStateNone) {
+                ublox_worker_stop(ublox->worker);
+                scene_manager_next_scene(ublox->scene_manager, UbloxSceneDataDisplayConfig);
+                consumed = true;
+            }
 
         } else if(event.event == GuiButtonTypeRight) {
             if(data_display_get_state(ublox->data_display) != DataDisplayGPSNotFound) {
@@ -85,6 +93,9 @@ bool ublox_scene_data_display_on_event(void* context, SceneManagerEvent event) {
         } else if(event.event == UbloxWorkerEventFailed) {
             FURI_LOG_I(TAG, "UbloxWorkerEventFailed");
             data_display_set_state(ublox->data_display, DataDisplayGPSNotFound);
+            if(ublox->log_state == UbloxLogStateLogging) {
+                ublox->log_state = UbloxLogStateStopLogging;
+            }
         }
     }
     return consumed;
@@ -92,13 +103,6 @@ bool ublox_scene_data_display_on_event(void* context, SceneManagerEvent event) {
 
 void ublox_scene_data_display_on_exit(void* context) {
     Ublox* ublox = context;
-
-    /*if(ublox->log_state == UbloxLogStateLogging) {
-	FURI_LOG_I(TAG, "stop logging on exit");
-	ublox->log_state = UbloxLogStateStopLogging;
-	//while (ublox->log_state != UbloxLogStateNone);
-	//furi_delay_ms(500);
-	}*/
 
     ublox_worker_stop(ublox->worker);
 

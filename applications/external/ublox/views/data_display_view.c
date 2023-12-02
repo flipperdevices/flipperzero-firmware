@@ -19,10 +19,11 @@ typedef struct {
 
 static void draw_buttons(Canvas* canvas, void* model) {
     DataDisplayViewModel* m = model;
-    elements_button_left(canvas, "Config");
+
     if(m->log_state == UbloxLogStateLogging) {
         elements_button_right(canvas, "Stop Log");
     } else {
+        elements_button_left(canvas, "Config");
         elements_button_right(canvas, "Start Log");
     }
 }
@@ -80,7 +81,9 @@ static void data_display_draw_callback(Canvas* canvas, void* model) {
         }
         canvas_draw_str(canvas, 77, 9, furi_string_get_cstr(s));
 
-        canvas_set_font(canvas, FontPrimary);
+        // Former logging indicator
+        // We now use just the button as the indicator
+        /*canvas_set_font(canvas, FontPrimary);
         canvas_draw_str(canvas, 112, 9, "L:");
 
         canvas_set_font(canvas, FontSecondary);
@@ -88,7 +91,7 @@ static void data_display_draw_callback(Canvas* canvas, void* model) {
             canvas_draw_str(canvas, 122, 9, "Y"); // yes
         } else {
             canvas_draw_str(canvas, 122, 9, "N"); // no
-        }
+	    }*/
 
         /*** Draw latitude ***/
         canvas_set_font(canvas, FontPrimary);
@@ -127,31 +130,27 @@ static void data_display_draw_callback(Canvas* canvas, void* model) {
         furi_string_printf(s, "%.0f", (double)(message.headMot / 1e5));
         canvas_draw_str(canvas, 105, 35, furi_string_get_cstr(s));
 
-        /*** Draw time ***/
+        /*** Draw time and battery ***/
+        // Note that these are not retrieved from an external state
+        // variable, because they don't have to be.
         canvas_set_font(canvas, FontPrimary);
-        canvas_draw_str(canvas, 0, 48, "UTC:");
+        canvas_draw_str(canvas, 0, 48, "Time:");
+
+        FuriHalRtcDateTime datetime;
+        furi_hal_rtc_get_datetime(&datetime);
+        locale_format_time(s, &datetime, locale_get_time_format(), false);
 
         canvas_set_font(canvas, FontSecondary);
-        FuriHalRtcDateTime datetime = {
-            .hour = message.hour,
-            .minute = message.min,
-            .second = message.sec,
-        };
+        canvas_draw_str(canvas, 30, 48, furi_string_get_cstr(s));
 
-        FuriString* s2 = furi_string_alloc();
-        // built-in date functions make strings that are too long
-        if(locale_get_date_format() == LocaleDateFormatDMY) {
-            furi_string_printf(s, "%u/%u/'%u ", message.day, message.month, (message.year % 100));
-        } else if(locale_get_date_format() == LocaleDateFormatMDY) {
-            furi_string_printf(s, "%u/%u/'%u ", message.month, message.day, (message.year % 100));
-        } else if(locale_get_date_format() == LocaleDateFormatYMD) {
-            furi_string_printf(s, "'%u/%u/%u ", (message.year % 100), message.month, message.day);
-        }
-        locale_format_time(s2, &datetime, locale_get_time_format(), false);
-        furi_string_cat(s, s2);
-        furi_string_free(s2);
+        // draw Flipper battery charge
+        canvas_set_font(canvas, FontPrimary);
+        canvas_draw_str(canvas, 75, 48, "Batt:");
 
-        canvas_draw_str(canvas, 27, 48, furi_string_get_cstr(s));
+        canvas_set_font(canvas, FontSecondary);
+        furi_string_printf(s, "%u%%", furi_hal_power_get_pct());
+        canvas_draw_str(canvas, 101, 48, furi_string_get_cstr(s));
+
         furi_string_free(s);
 
     } else if(m->state == DataDisplayCarMode) {

@@ -5,6 +5,7 @@
 #include <stdbool.h>
 
 #include <furi.h>
+#include <furi_hal.h>
 
 #define UBLOX_I2C_ADDRESS 0x42
 #define I2C_TIMEOUT_MS 20
@@ -150,3 +151,5 @@ UbloxFrame* ublox_bytes_to_frame(UbloxMessage* message);
 
 void ublox_message_free(UbloxMessage* message);
 void ublox_frame_free(UbloxFrame* frame);
+
+UbloxMessage* ublox_i2c_transfer(UbloxMessage* message_tx, uint8_t read_length);

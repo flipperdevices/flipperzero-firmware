@@ -6,7 +6,7 @@ The FlipKeyboard application turns your Flipper Zero into a musical, light-up ke
 
 ## Configuration
 
-<img src="./gallery/02-key-config-key.png" width="200px">
+<img src="./gallery/02-key-config-action.png" width="200px">
 
 Go to "Config" in the app menu to set up the buttons. You’ll see different key combos. Use the "up" and "down" buttons to scroll. Press "ok" to pick one. Press "back" to return to the main menu.
 
