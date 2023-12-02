@@ -1,6 +1,6 @@
 #include "keyboard_i.h"
 
-#define PRESS_DELAY_MS 5
+#define PRESS_DELAY_MS 20
 #define RELEASE_DELAY_MS 5
 
 /**
@@ -80,7 +80,14 @@ void flipboard_keyboard_send_char(FlipboardKeyboard* keyboard, char ch) {
 void flipboard_keyboard_send_text(FlipboardKeyboard* keyboard, const char* message) {
     if(message != NULL) {
         for(size_t i = 0; i < strlen(message); i++) {
-            flipboard_keyboard_send_char(keyboard, message[i]);
+            // For now, we don't send the Paragraph symbol, but instead do an enter.
+            if(message[i] == 0xb6) {
+                // NOTE: New line will map to Enter by HID_ASCII_TO_KEY.
+                char new_line = '\n';
+                flipboard_keyboard_send_char(keyboard, new_line);
+            } else {
+                flipboard_keyboard_send_char(keyboard, message[i]);
+            }
         }
     }
 }
