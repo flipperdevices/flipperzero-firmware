@@ -110,6 +110,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Atomic Dice Roller v1.1 (By nmrr)](https://github.com/nmrr/flipperzero-atomicdiceroller) [Rework (By xMasterX)](https://github.com/xMasterX/all-the-plugins/commit/84c97f69d9d1e03ea4ebe28b78f9bbd27f214511)
 - Updated: [Temp Sensors Reader 1.5 (By quen0n)](https://github.com/quen0n/Unitemp-Flipper-Zero-Plugin) [Changes From xMasterX](https://github.com/xMasterX/all-the-plugins/tree/dev/base_pack/unitemp)
 - OFW: [Fixed error when reading an iso15693 nfc tag with no blocks #3229 (By pborsutzki)](https://github.com/flipperdevices/flipperzero-firmware/pull/3229)
+- Fix mbedtls api leaks (By Willy-JL)
 
 <a name="release">
 
