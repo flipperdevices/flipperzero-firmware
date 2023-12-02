@@ -554,7 +554,7 @@ static void furi_hal_subghz_async_tx_refill(uint32_t* buffer, size_t samples) {
             buffer++;
             samples--;
         } else if(level_duration_is_reset(ld)) {
-            if(!is_odd) buffer--;
+            if(!is_odd && (buffer != furi_hal_subghz_async_tx.buffer)) buffer--;
             *buffer = 0;
             buffer++;
             samples--;
