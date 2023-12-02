@@ -1,6 +1,6 @@
 #pragma once
 
-#define UBLOX_VERSION_APP "0.1"
+#define UBLOX_VERSION_APP "0.3"
 #define UBLOX_DEVELOPED "liamhays"
 #define UBLOX_GITHUB "https://github.com/liamhays/ublox"
 
@@ -48,8 +48,10 @@ typedef enum {
 
 typedef struct UbloxDataDisplayState {
     UbloxDataDisplayViewMode view_mode;
+    UbloxDataDisplayBacklightMode backlight_mode;
     UbloxDataDisplayRefreshRate refresh_rate;
     UbloxDataDisplayNotifyMode notify_mode;
+
 } UbloxDataDisplayState;
 
 typedef struct UbloxDeviceState {

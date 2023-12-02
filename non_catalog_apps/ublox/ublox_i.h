@@ -53,6 +53,7 @@ struct Ublox {
     UbloxLogState log_state;
     FuriString* logfile_folder;
     char text_store[100];
+    
     Ublox_NAV_PVT_Message nav_pvt;
     Ublox_NAV_ODO_Message nav_odo;
     Ublox_NAV_TIMEUTC_Message nav_timeutc;
