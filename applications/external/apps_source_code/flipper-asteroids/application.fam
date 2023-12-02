@@ -1,0 +1,17 @@
+App(
+    appid="asteroids",
+    name="Asteroids",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="asteroids_app_entry",
+    cdefines=["APP_ASTEROIDS"],
+    requires=["gui"],
+    stack_size=8 * 1024,
+    order=50,
+    fap_icon="appicon.png",
+    fap_icon_assets="assets",
+    fap_category="Games",
+    fap_author="@antirez & @SimplyMinimal",
+    fap_weburl="https://github.com/antirez/flipper-asteroids",
+    fap_version="1.1",
+    fap_description="Asteroids game",
+)

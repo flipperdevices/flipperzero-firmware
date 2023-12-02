@@ -1,0 +1,16 @@
+App(
+    appid="gameoflife",
+    name="Game of Life",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="game_of_life_app",
+    cdefines=["APP_GAMEOFLIFE_GAME"],
+    requires=["gui"],
+    stack_size=2 * 1024,
+    order=110,
+    fap_icon="golIcon.png",
+    fap_category="Games",
+    fap_author="@tgxn (original by @itsyourbedtime)",
+    fap_weburl="https://github.com/tgxn/flipperzero-firmware/blob/dev/applications/game_of_life/game_of_life.c",
+    fap_version="1.1",
+    fap_description="Life, is a cellular automaton devised by the British mathematician John Horton Conway in 1970.",
+)

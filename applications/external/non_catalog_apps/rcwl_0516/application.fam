@@ -1,0 +1,14 @@
+App(
+    appid="rcwl_0516",
+    name="[RCWL-0516] Motion Sensor",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="rcwl_0516",
+    cdefines=["RCWL_0516"],
+    requires=[
+        "gui",
+    ],
+    stack_size=1 * 1024,
+    order=90,
+    fap_icon="mot_10x.png",
+    fap_category="GPIO",
+)

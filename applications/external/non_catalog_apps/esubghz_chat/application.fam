@@ -1,0 +1,16 @@
+App(
+    appid="esubghz_chat",
+    name="Enhanced Sub-Ghz Chat",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="esubghz_chat",
+    requires=[
+        "gui",
+        "subghz",
+    ],
+    stack_size=8 * 1024,
+    fap_category="Sub-GHz",
+    fap_libs=["mbedtls"],
+    fap_icon="assets/chat_10px.png",
+    fap_icon_assets="assets",
+    fap_icon_assets_symbol="esubghz_chat",
+)

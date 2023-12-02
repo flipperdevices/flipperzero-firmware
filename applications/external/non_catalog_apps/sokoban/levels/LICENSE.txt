@@ -1,0 +1,5 @@
+This application include several Sokoban level sets.
+
+All of them are freely distributed in http://sokobano.de/.
+
+Copyright information for each set can be found in the corresponding file.

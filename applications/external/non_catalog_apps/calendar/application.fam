@@ -1,0 +1,13 @@
+App(
+    appid="calendar",
+    apptype=FlipperAppType.EXTERNAL,
+    name="Calendar",
+    entry_point="calendar_app",
+    stack_size=1 * 1024,
+    fap_icon="icon.png",
+    fap_category="Tools",
+    requires=[
+        "gui",
+        "dolphin",
+    ],
+)

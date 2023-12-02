@@ -1,0 +1,18 @@
+# For details & more options, see documentation/AppManifests.md in firmware repo
+
+App(
+    appid="secret_toggle",  # Must be unique
+    name="Secret Toggle",  # Displayed in menus
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="secret_toggle_app",
+    cdefines=["APP_SECRETTOGGLE"],
+    stack_size=2 * 1024,
+    fap_category="Games",
+    # Optional values
+    # fap_version="0.1",
+    fap_icon="secret_toggle_icon.png",  # 10x10 1-bit PNG
+    fap_description="A game that toggles squares.",
+    fap_author="@nostrumuva",
+    fap_weburl="https://github.com/nostrumuva/secret_toggle.git",
+    fap_icon_assets="images",  # Image assets to compile for this application
+)

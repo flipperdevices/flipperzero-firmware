@@ -1,0 +1,14 @@
+App(
+    appid="flipperscope",
+    name="Scope",
+    fap_author="anfractuosity",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="scope_main",
+    requires=["gui"],
+    stack_size=1 * 1024,
+    fap_category="GPIO",
+    fap_icon="scope_10px.png",
+    fap_icon_assets="icons",
+    fap_version="0.2",
+    fap_description="Oscilloscope application - apply signal to pin 16/PC0, with a voltage ranging from 0V to 2.5V and ground to pin 18/GND"
+)

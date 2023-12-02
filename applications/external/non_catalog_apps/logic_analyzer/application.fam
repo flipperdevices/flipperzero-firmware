@@ -1,0 +1,17 @@
+App(
+    appid="logic_analyzer",
+    name="Logic Analyzer",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="logic_analyzer_app_main",
+    cdefines=["APP_LOGIC_ANALYZER"],
+    requires=["gui", "storage", "dialogs"],
+    stack_size=2 * 1024,
+    order=10,
+    fap_icon="icons/app.png",
+    fap_category="GPIO",
+    fap_icon_assets="icons",
+    fap_author="@g3gg0",
+    fap_weburl="https://github.com/g3gg0/flipper-logic_analyzer",
+    fap_version="1.0",
+    fap_description="Use flipper as Openbench Logic Sniffer (ols) logic analyzer in PulseView",
+)

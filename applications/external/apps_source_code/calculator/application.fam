@@ -1,0 +1,16 @@
+App(
+    appid="calculator",
+    name="Calculator",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="calculator_app",
+    cdefines=["APP_CALCULATOR"],
+    requires=["gui"],
+    stack_size=1 * 1024,
+    order=45,
+    fap_icon="calcIcon.png",
+    fap_category="Tools",
+    fap_author="@n-o-T-I-n-s-a-n-e",
+    fap_weburl="https://github.com/n-o-T-I-n-s-a-n-e",
+    fap_version="1.1",
+    fap_description="Calculator, that can calculate simple expressions",
+)

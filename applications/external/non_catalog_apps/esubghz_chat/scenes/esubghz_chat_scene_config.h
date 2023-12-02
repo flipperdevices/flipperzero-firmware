@@ -1,0 +1,7 @@
+ADD_SCENE(esubghz_chat, freq_input, FreqInput)
+ADD_SCENE(esubghz_chat, key_menu, KeyMenu)
+ADD_SCENE(esubghz_chat, pass_input, PassInput)
+ADD_SCENE(esubghz_chat, hex_key_input, HexKeyInput)
+ADD_SCENE(esubghz_chat, chat_input, ChatInput)
+ADD_SCENE(esubghz_chat, chat_box, ChatBox)
+ADD_SCENE(esubghz_chat, key_display, KeyDisplay)

@@ -1,0 +1,17 @@
+App(
+    appid="slotmachine",
+    name="Slot Machine",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="slotmachine_app",
+    cdefines=["APP_SLOTMACHINE"],
+    requires=["gui"],
+    stack_size=1 * 1024,
+    fap_icon="ddgame_icon.png",
+    order=30,
+    fap_category="Games",
+    fap_icon_assets="assets",
+    fap_author="@Daniel-dev-s",
+    fap_weburl="https://github.com/Daniel-dev-s/flipperzero-slots",
+    fap_version="1.2",
+    fap_description="Simple Slots simulator game",
+)
