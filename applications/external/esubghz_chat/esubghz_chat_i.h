@@ -12,7 +12,7 @@
 #include <gui/modules/text_input.h>
 #include <notification/notification_messages.h>
 #include <lib/subghz/subghz_tx_rx_worker.h>
-#include "helpers/sha256.h"
+#include <mbedtls/sha256.h>
 
 #include "crypto_wrapper.h"
 #include "scenes/esubghz_chat_scene.h"

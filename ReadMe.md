@@ -87,7 +87,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [USB Mass Storage v1.3 (By nminaylov)](https://github.com/flipperdevices/flipperzero-good-faps/tree/nm/usb_mass_storage_app/mass_storage) [Based on OFW#1060 (By kevinwallace)](https://github.com/flipperdevices/flipperzero-firmware/pull/1060)
 - Added: [COGES NFC (For Coffee Machines) (By OFW + haisenteck)](https://github.com/haisenteck/flipperzero-Haisenteck/)
 - UL: [NFC Parsers bugfixes for Troyka and Social Card (By assasinfil)](https://github.com/DarkFlippers/unleashed-firmware/pull/655)
-- Refactor Update: [Enhanced Sub-Ghz Chat v1.2 (By twisted-pear)](https://github.com/twisted-pear/esubghz_chat) - [(Changes By xMasterX)](https://github.com/xMasterX/all-the-plugins/commit/89e22ac9500886f98a7e96934686235f239767ef)
 - Refactor Update: [NFC Maker NTAG215 (by Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/343cb39d08f60b75b537e1a31100707935cf6e9d) - [(Changes By xMasterX)](https://github.com/xMasterX/all-the-plugins/commit/d2d908eea599192dd5ad428fe9d5684b3874a1a4)
 - Refactor Update: [NFC Maker NTAG203 (by Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/343cb39d08f60b75b537e1a31100707935cf6e9d) - [(Changes By RogueMaster Copying These changes By xMasterX)](https://github.com/xMasterX/all-the-plugins/commit/d2d908eea599192dd5ad428fe9d5684b3874a1a4)
 - Updated: [PicoPass (iClass) v1.8 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass) [Picopass rework. Part 1 #68 (By gornekich)](https://github.com/flipperdevices/flipperzero-good-faps/pull/68)
@@ -103,6 +102,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: [Merge Fix for NFC Supported Card Kazan (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/99d657fcfbd4155a82f7eec3bd1b54851d131e4d)
 - UL: [NFC: Fix keeloq decoding order (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/159aef022bed497b65e1a955ef9c9dbe036f4612)
 - OFW: [Ntag21x write #3246 (By RebornedBrain)](https://github.com/flipperdevices/flipperzero-firmware/pull/3246)
+- Refactor Update: [Enhanced Sub-Ghz Chat v1.2 (By twisted-pear)](https://github.com/twisted-pear/esubghz_chat) - [(Changes By xMasterX)](https://github.com/xMasterX/all-the-plugins/commit/89e22ac9500886f98a7e96934686235f239767ef) [More Rework (By xMasterX)](https://github.com/xMasterX/all-the-plugins/commit/ca7b2113197312304a12e39c851d9bd2cd92583e)
 
 <a name="release">
 
