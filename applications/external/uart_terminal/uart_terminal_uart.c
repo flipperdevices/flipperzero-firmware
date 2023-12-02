@@ -95,7 +95,10 @@ void uart_terminal_uart_free(UART_TerminalUart* uart) {
 
     furi_hal_uart_set_irq_cb(uart->app->uart_ch, NULL, NULL);
 
-    if(uart->app->uart_ch == FuriHalUartIdUSART1) furi_hal_console_enable();
+    if(uart->app->uart_ch == FuriHalUartIdUSART1)
+        furi_hal_console_enable();
+    else
+        furi_hal_uart_deinit(uart->app->uart_ch);
 
     free(uart);
 }
