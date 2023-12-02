@@ -554,14 +554,9 @@ static void furi_hal_subghz_async_tx_refill(uint32_t* buffer, size_t samples) {
             buffer++;
             samples--;
         } else if(level_duration_is_reset(ld)) {
-            if(is_odd) {
-                *buffer = 0;
-                buffer++;
-            } else {
-                buffer--;
-                *buffer = 0;
-            }
-
+            if(!is_odd) buffer--;
+            *buffer = 0;
+            buffer++;
             samples--;
             LL_DMA_DisableIT_HT(SUBGHZ_DMA_CH1_DEF);
             LL_DMA_DisableIT_TC(SUBGHZ_DMA_CH1_DEF);
@@ -590,6 +585,7 @@ static void furi_hal_subghz_async_tx_refill(uint32_t* buffer, size_t samples) {
 
             uint32_t duration = level_duration_get_duration(ld);
             furi_assert(duration > 0);
+            //supports durations greater than 2 us
             uint32_t duration_temp = duration - 1;
             *buffer = duration_temp;
             buffer++;
@@ -756,6 +752,7 @@ bool furi_hal_subghz_is_async_tx_complete() {
 void furi_hal_subghz_stop_async_tx() {
     furi_assert(
         furi_hal_subghz.state == SubGhzStateAsyncTx ||
+        furi_hal_subghz.state == SubGhzStateAsyncTxLast ||
         furi_hal_subghz.state == SubGhzStateAsyncTxEnd);
 
     // Shutdown radio
