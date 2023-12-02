@@ -1,7 +1,15 @@
 #include "../uart_terminal_app_i.h"
 
 // Command action type
-typedef enum { NO_ACTION = 0, OPEN_SETUP, OPEN_PORT, SEND_CMD, SEND_AT_CMD, SEND_FAST_CMD, OPEN_HELP } ActionType;
+typedef enum {
+    NO_ACTION = 0,
+    OPEN_SETUP,
+    OPEN_PORT,
+    SEND_CMD,
+    SEND_AT_CMD,
+    SEND_FAST_CMD,
+    OPEN_HELP
+} ActionType;
 // Command availability in different modes
 typedef enum { OFF = 0, TEXT_MODE = 1, HEX_MODE = 2, BOTH_MODES = 3 } ModeMask;
 
@@ -24,14 +32,16 @@ static const UART_TerminalItem items[START_MENU_ITEMS] = {
     {"Send packet", {""}, 1, SEND_CMD, HEX_MODE},
     {"Send command", {""}, 1, SEND_CMD, TEXT_MODE},
     {"Send AT command", {""}, 1, SEND_AT_CMD, TEXT_MODE},
-    {"Fast cmd", 
+    {"Fast cmd",
      {"help", "uptime", "date", "df -h", "ps", "dmesg", "reboot", "poweroff"},
-     8, SEND_FAST_CMD, TEXT_MODE},
+     8,
+     SEND_FAST_CMD,
+     TEXT_MODE},
     {"Help", {""}, 1, OPEN_HELP, BOTH_MODES},
 };
 
 static uint8_t menu_items_num = 0;
-static uint8_t item_indexes[START_MENU_ITEMS] = { 0 };
+static uint8_t item_indexes[START_MENU_ITEMS] = {0};
 
 static void uart_terminal_scene_start_var_list_enter_callback(void* context, uint32_t index) {
     furi_assert(context);
@@ -49,8 +59,7 @@ static void uart_terminal_scene_start_var_list_enter_callback(void* context, uin
     app->is_custom_tx_string = false;
     app->selected_menu_index = index;
 
-    switch (item->action)
-    {
+    switch(item->action) {
     case OPEN_SETUP:
         view_dispatcher_send_custom_event(app->view_dispatcher, UART_TerminalEventSetup);
         return;
@@ -64,10 +73,11 @@ static void uart_terminal_scene_start_var_list_enter_callback(void* context, uin
         }
 
         if(app->hex_mode) {
-            view_dispatcher_send_custom_event(app->view_dispatcher, UART_TerminalEventStartKeyboardHex);
-        }
-        else {
-            view_dispatcher_send_custom_event(app->view_dispatcher, UART_TerminalEventStartKeyboardText);
+            view_dispatcher_send_custom_event(
+                app->view_dispatcher, UART_TerminalEventStartKeyboardHex);
+        } else {
+            view_dispatcher_send_custom_event(
+                app->view_dispatcher, UART_TerminalEventStartKeyboardText);
         }
         return;
     case OPEN_PORT:
@@ -136,7 +146,7 @@ void uart_terminal_scene_start_on_enter(void* context) {
     variable_item_list_set_selected_item(
         var_item_list, scene_manager_get_scene_state(app->scene_manager, UART_TerminalSceneStart));
 
-	view_dispatcher_switch_to_view(app->view_dispatcher, UART_TerminalAppViewVarItemList);
+    view_dispatcher_switch_to_view(app->view_dispatcher, UART_TerminalAppViewVarItemList);
 }
 
 bool uart_terminal_scene_start_on_event(void* context, SceneManagerEvent event) {

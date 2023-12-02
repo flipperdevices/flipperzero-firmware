@@ -76,7 +76,7 @@ UART_TerminalUart* uart_terminal_uart_init(UART_TerminalApp* app) {
 
     if(app->uart_ch == FuriHalUartIdUSART1) {
         furi_hal_console_disable();
-		furi_hal_uart_set_br(app->uart_ch, app->BAUDRATE);
+        furi_hal_uart_set_br(app->uart_ch, app->BAUDRATE);
     } else if(app->uart_ch == FuriHalUartIdLPUART1) {
         furi_hal_uart_init(app->uart_ch, app->BAUDRATE);
     }
