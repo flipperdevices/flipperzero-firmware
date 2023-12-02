@@ -1,0 +1,25 @@
+App(
+    appid="dap_link",
+    name="[SWD-JTAG] DAP Link",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="dap_link_app",
+    requires=[
+        "gui",
+        "dialogs",
+    ],
+    stack_size=4 * 1024,
+    fap_description="Enables use of Flipper as a debug probe for ARM devices, implements the CMSIS-DAP protocol",
+    fap_version="1.1",
+    fap_icon="dap_link.png",
+    fap_category="GPIO",
+    fap_private_libs=[
+        Lib(
+            name="free-dap",
+            cincludes=["."],
+            sources=[
+                "dap.c",
+            ],
+        ),
+    ],
+    fap_icon_assets="icons",
+)

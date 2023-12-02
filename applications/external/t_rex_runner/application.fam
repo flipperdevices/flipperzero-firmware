@@ -1,0 +1,17 @@
+App(
+    appid="t_rex_runner",
+    name="T-Rex runner",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="trexrunner_app",
+    cdefines=["APP_TREXRUNNER"],
+    requires=["gui"],
+    stack_size=8 * 1024,
+    fap_category="Games",
+    fap_icon="trexrunner_icon.png",
+    fap_icon_assets="assets",
+    order=36,
+    fap_author="@Rrycbarm",
+    fap_weburl="https://github.com/Rrycbarm/t-rex-runner",
+    fap_version="1.3",
+    fap_description="Play the port of the Chrome browser T-Rex game on your Flipper Zero.",
+)

@@ -1,0 +1,188 @@
+# For most projects, this workflow file will not need changing; you simply need
+# to commit it to your repository.
+#
+# You may wish to alter this file to override the set of languages analyzed,
+# or to provide custom queries or build logic.
+#
+# ******** NOTE ********
+# We have attempted to detect the languages in your repository. Please check
+# the `language` matrix defined below to confirm you have the correct set of
+# supported CodeQL languages.
+#
+name: "CodeQL"
+
+on:
+  push:
+    branches: ["master", "feat/ci"]
+  pull_request:
+    # The branches below must be a subset of the branches above
+    branches: ["master"]
+  schedule:
+    - cron: "43 14 * * *"
+  workflow_dispatch:
+
+jobs:
+  analyze:
+    name: Analyze
+    # Runner size impacts CodeQL analysis time. To learn more, please see:
+    #   - https://gh.io/recommended-hardware-resources-for-running-codeql
+    #   - https://gh.io/supported-runners-and-hardware-resources
+    #   - https://gh.io/using-larger-runners
+    # Consider using larger runners for possible analysis time improvements.
+    runs-on: "ubuntu-latest"
+    timeout-minutes: 360
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language: ["cpp"]
+        # CodeQL supports [ 'cpp', 'csharp', 'go', 'java', 'javascript', 'python', 'ruby', 'swift' ]
+        # Use only 'java' to analyze code written in Java, Kotlin or both
+        # Use only 'javascript' to analyze code written in JavaScript, TypeScript or both
+        # Learn more about CodeQL language support at https://aka.ms/codeql-docs/language-support
+    env:
+      REPO_SELF: ${{ vars.REPO_SELF }}
+      OFW_PATH: "applications_user/subbrute"
+      RELATIVE_PATH: "applications/external/subbrute"
+      CURRENT_VERSION: ${{ vars.RELEASE_VERSION }}
+      RELEASE_VERSION: ${{ vars.RELEASE_VERSION }}
+      TOKEN: ${{ secrets.DEPENDABOT }}
+      REF_NAME: ${{ github.ref_name }}
+
+    steps:
+      - name: Checkout Firmware Files
+        uses: actions/checkout@v3
+        with:
+          repository: "${{ vars.REPO_UNLEASHED }}"
+          clean: "true"
+          submodules: "true"
+          ref: "dev"
+          fetch-depth: "0"
+
+      - name: Checkout Repo Files
+        uses: actions/checkout@v3
+        with:
+          repository: "${{ vars.REPO_SELF }}"
+          clean: "true"
+          submodules: "true"
+          path: "${{ env.OFW_PATH }}"
+          fetch-depth: "0"
+
+      - name: Remove other apps
+        shell: pwsh
+        if: ${{ success() }}
+        # rm to remove problem FAP which includes non-existent files
+        run: |
+          Remove-Item -Force -Recurse ./applications/debug -ErrorAction SilentlyContinue
+          Remove-Item -Force -Recurse ./applications/examples -ErrorAction SilentlyContinue
+
+      - name: Set refname
+        env:
+          REF_NAME: ${{ env.REF_NAME }}
+        shell: pwsh
+        run: |
+          $ReleaseVersion = ([string]::IsNullOrWhitespace($env:REF_NAME) ? 'dev' : $env:REF_NAME)
+          Write-Output ('REF_NAME={0}' -f $ReleaseVersion) >> $env:GITHUB_ENV
+
+      # Initializes the CodeQL tools for scanning.
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v2
+        with:
+          languages: ${{ matrix.language }}
+          setup-python-dependencies: true
+          #debug: true
+          # If you wish to specify custom queries, you can do so here or in a config file.
+          # By default, queries listed here will override any specified in a config file.
+          # Prefix the list here with "+" to use these queries and those in the config file.
+
+          # For more details on CodeQL's query packs, refer to: https://docs.github.com/en/code-security/code-scanning/automatically-scanning-your-code-for-vulnerabilities-and-errors/configuring-code-scanning#using-queries-in-ql-packs
+          # queries: security-extended,security-and-quality
+
+      # - name: Restore cached FW
+      #   id: cache-fw-restore
+      #   uses: actions/cache/restore@v3
+      #   with:
+      #     path: |
+      #       ./build
+      #       ./dist
+      #       ./firmware
+      #     key: ${{ runner.os }}-fw
+
+      - name: Build Firmware
+        shell: bash
+        if: ${{ success() }}
+        env:
+          FBT_NO_SYNC: 0
+          DIST_SUFFIX: "codeql"
+          WORKFLOW_BRANCH_OR_TAG: release-cfw
+        run: |
+          ./fbt COMPACT=1 DEBUG=0 FBT_NO_SYNC=${{ env.FBT_NO_SYNC }}
+
+      - name: Build FAPs
+        shell: bash
+        if: ${{ success() }}
+        env:
+          FBT_NO_SYNC: 0
+          DIST_SUFFIX: "codeql"
+          WORKFLOW_BRANCH_OR_TAG: release-cfw
+        # rm to remove problem FAP which includes non-existent files
+        run: |
+          ./fbt COMPACT=1 DEBUG=0 FBT_NO_SYNC=${{ env.FBT_NO_SYNC }} fap_dist
+
+      # - name: Save cached FW
+      #   id: cache-primes-save
+      #   uses: actions/cache/save@v3
+      #   with:
+      #     path: |
+      #       ./build
+      #       ./dist
+      #       ./firmware
+      #     key: ${{ steps.cache-fw-restore.outputs.cache-primary-key }}
+
+      # Autobuild attempts to build any compiled languages (C/C++, C#, Go, Java, or Swift).
+      # If this step fails, then you should remove it and run the build manually (see below)
+      #- name: Autobuild
+      #  run: |
+      #     echo "Run, Build Application using script"
+      #     ls -lha
+      #     ./fbt
+      # uses: github/codeql-action/autobuild@v2
+      - name: Resolve CodeQL Build Env
+        uses: github/codeql-action/resolve-environment@v2
+        with:
+          language: ${{ matrix.language }}
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
+        env:
+          REF_NAME: ${{ env.REF_NAME }}
+          CHECKOUT_PATH: ${{ env.OFW_PATH }}
+        with:
+          category: "/language:${{matrix.language}}"
+          token: ${{ secrets.DEPENDABOT }}
+          # Must be used only with sha
+          #ref: ${{ env.REF_NAME }}
+          #sha: ${{ github.sha }}
+          output: "a${{ env.CHECKOUT_PATH }}/.github/results.sarif"
+          check_name: "_"
+          upload-database: false
+          upload: "failure-only"
+          checkout_path: "${{ github.workspace }}/${{ env.CHECKOUT_PATH }}"
+
+      - name: Upload CodeQL SARIF
+        uses: github/codeql-action/upload-sarif@v2
+        env:
+          REF_NAME: ${{ env.REF_NAME }}
+          CHECKOUT_PATH: ${{ env.OFW_PATH }}
+        with:
+          category: "/language:${{matrix.language}}"
+          #token: ${{ secrets.DEPENDABOT }}
+          # Must be used only with sha
+          #ref: ${{ env.REF_NAME }}
+          #sha: ${{ github.sha }}
+          sarif_file: "a${{ env.CHECKOUT_PATH }}/.github/results.sarif"
+          checkout_path: "${{ github.workspace }}/${{ env.CHECKOUT_PATH }}"

@@ -1,0 +1,46 @@
+name: Check for New Firmware
+
+on:
+  schedule:
+    - cron: '42 10 * * 0'
+  workflow_dispatch:
+
+jobs:
+  getversion:
+    name: Check for New Firmware
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.check.outputs.version }}
+    steps:
+      - name: Checkout Flipper Zero Firmware
+        uses: actions/checkout@v3
+        with:
+          repository: 'flipperdevices/flipperzero-firmware'
+          fetch-depth: 0
+          # we don't need submodules yet - fbt will get them if we build
+          # submodules: true
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          path: 'applications_user/qrcode_app'
+          token: ${{ secrets.CustomGithubToken }}
+          fetch-depth: 0
+      - name: Check Version
+        id: check
+        shell: bash
+        run: applications_user/qrcode_app/scripts/check-firmware.sh "$GITHUB_WORKSPACE"
+      - name: Build
+        if: ${{ steps.check.outputs.version }}
+        shell: bash
+        run: |
+          git checkout "${{ steps.check.outputs.version }}"
+          ./fbt fap_qrcode
+          [ -e build/f7-firmware-D/.extapps/qrcode.fap ]
+      - name: Update Firmware Version
+        if: ${{ steps.check.outputs.version }}
+        shell: bash
+        run: applications_user/qrcode_app/scripts/update-firmware.sh "${{ steps.check.outputs.version }}"
+        env:
+          GIT_USER_NAME: ${{ secrets.GitUserName }}
+          GIT_USER_EMAIL: ${{ secrets.GitUserEmail }}
+          GITHUB_TOKEN: ${{ secrets.CustomGithubToken }}

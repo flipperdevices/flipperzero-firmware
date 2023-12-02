@@ -1,0 +1,18 @@
+App(
+    appid="brainfuck",
+    name="Brainfuck",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="brainfuck_app",
+    requires=[
+        "storage",
+        "gui",
+    ],
+    stack_size=8 * 1024,
+    fap_icon="bfico.png",
+    fap_category="Tools",
+    fap_icon_assets="icons",
+    fap_author="@nymda",
+    fap_weburl="https://github.com/nymda/FlipperZeroBrainfuck",
+    fap_version="1.2",
+    fap_description="Brainfuck language interpreter",
+)

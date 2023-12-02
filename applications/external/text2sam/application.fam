@@ -1,0 +1,21 @@
+App(
+    appid="text2sam",
+    name="Text to SAM",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="sam_app",
+    cdefines=["APP_SAM"],
+    # requires=["gui",],
+    requires=[
+        "gui",
+        "dialogs",
+    ],
+    stack_size=4 * 1024,
+    # stack_size=2 * 1024,
+    fap_icon="icon.png",
+    fap_category="Media",
+    order=20,
+    fap_author="@Round-Pi & (Fixes by @Willy-JL)",
+    fap_weburl="https://github.com/Round-Pi/flipperzero-text2sam",
+    fap_version="1.2",
+    fap_description="Convert text to speech on your Flipper Zero with SAM (Software Automatic Mouth).",
+)

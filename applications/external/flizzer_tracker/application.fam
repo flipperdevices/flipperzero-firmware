@@ -1,0 +1,16 @@
+App(
+    appid="flizzer_tracker",
+    name="Flizzer Tracker",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="flizzer_tracker_app",
+    cdefines=["APP_FLIZZER_TRACKER"],
+    stack_size=2 * 1024,
+    order=90,
+    fap_version=(0, 4),
+    fap_description="An advanced Flipper Zero chiptune tracker with 4 channels",
+    fap_author="LTVA",
+    fap_weburl="https://github.com/LTVA1/flizzer_tracker",
+    fap_icon="flizzer_tracker.png",
+    fap_icon_assets="images",
+    fap_category="Media",
+)

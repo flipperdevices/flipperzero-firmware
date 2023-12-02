@@ -1,0 +1,14 @@
+App(
+    appid="flipper_atomicdiceroller",
+    name="[J305] Atomic Dice Roller",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="flipper_atomicdiceroller_app",
+    cdefines=["APP_ATOMICDICEROLLER"],
+    requires=[
+        "gui",
+    ],
+    stack_size=2 * 1024,
+    fap_icon="atomicdiceroller.png",
+    fap_libs=["mbedtls"],
+    fap_category="GPIO",
+)

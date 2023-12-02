@@ -1,0 +1,1 @@
+Your objective is to achieve the highest score possible by pressing the OK button at the precise moment. Be careful not to touch cactuses with the dinosaur, as doing so will result in losing the game.

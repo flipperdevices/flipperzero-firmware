@@ -1,0 +1,16 @@
+sourcecode:
+  type: git
+  location:
+    origin: https://github.com/xtruan/flipper-chess.git
+    commit_sha: c340eb5ec6a68f9e1213d725002d25812bbe989b
+description: "How about a nice game of chess?"
+changelog: "v1.9.0 - Gameplay enhancements and bug fixes"
+author: "@xtruan"
+screenshots:
+  - "./catalog/startscreen.png"
+  - "./catalog/menu.png"
+  - "./catalog/game2.png"
+  - "./catalog/game3.png"
+  - "./catalog/game4.png"
+  - "./catalog/game5.png"
+  - "./catalog/settings.png"

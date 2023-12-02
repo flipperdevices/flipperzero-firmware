@@ -1,0 +1,16 @@
+App(
+    appid="evil_portal",
+    name="[ESP32] Evil Portal",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="evil_portal_app",
+    cdefines=["APP_EVIL_PORTAL"],
+    requires=["gui"],
+    stack_size=1 * 1024,
+    order=90,
+    resources="resources",
+    fap_author="bigbrodude6119",
+    fap_description="Create an evil captive portal Wi-Fi access point",
+    fap_icon_assets="icons",
+    fap_icon="icons/evil_portal_10px.png",
+    fap_category="WiFi",
+)

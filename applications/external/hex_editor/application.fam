@@ -1,0 +1,18 @@
+App(
+    appid="hex_editor",
+    name="HEX Editor",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="hex_editor_app",
+    requires=[
+        "gui",
+        "dialogs",
+    ],
+    stack_size=2 * 1024,
+    fap_icon="icons/edit_10px.png",
+    fap_category="Tools",
+    fap_icon_assets="icons",
+    fap_author="@dunaevai135",
+    fap_weburl="https://github.com/dunaevai135/flipper-zero-hex_editor",
+    fap_version="1.3",
+    fap_description="Read text files line by line and edit them without a computer or smartphone.",
+)

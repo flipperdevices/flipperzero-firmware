@@ -1,0 +1,6 @@
+ADD_SCENE(uart_terminal, start, Start)
+ADD_SCENE(uart_terminal, setup, Setup)
+ADD_SCENE(uart_terminal, console_output, ConsoleOutput)
+ADD_SCENE(uart_terminal, text_input, TextInput)
+ADD_SCENE(uart_terminal, hex_input, HexInput)
+ADD_SCENE(uart_terminal, help, Help)

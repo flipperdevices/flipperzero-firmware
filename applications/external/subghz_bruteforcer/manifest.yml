@@ -1,0 +1,15 @@
+sourcecode:
+  type: git
+  location:
+    origin: https://github.com/derskythe/flipperzero-subbrute
+    commit_sha: 7666ee61a5c4f3a85dd0eded24c2e73b2f5bc4a9
+    subdir: subbrute
+description: "@README.md"
+changelog: "v3.8.0 - OFW SDK support"
+author: "@DerSkythe @xMasterX @gid9798"
+screenshots:
+  - "screenshots/screenshot_01.png"
+  - "screenshots/screenshot_02.png"
+  - "screenshots/screenshot_03.png"
+  - "screenshots/screenshot_04.png"
+  - "screenshots/screenshot_05.png"

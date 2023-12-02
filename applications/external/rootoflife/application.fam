@@ -1,0 +1,18 @@
+App(
+    appid="roots_of_life",
+    name="Roots of Life",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="roots_of_life_game_app",
+    cdefines=["APP_ROOTS_OF_LIFE_GAME"],
+    requires=["gui"],
+    stack_size=1 * 1024,
+    order=30,
+    fap_icon="roots_of_life_10px.png",
+    fap_category="Games",
+    fap_icon_assets="images",
+    fap_icon_assets_symbol="roots_of_life_game",
+    fap_author="@Xorboo",
+    fap_weburl="https://github.com/Xorboo/root-of-life",
+    fap_version="1.1",
+    fap_description="A zen-puzzle game for FlipperZero, puzzle made on GlobalGameJam23 (theme: Roots)",
+)

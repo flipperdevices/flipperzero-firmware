@@ -1,0 +1,17 @@
+App(
+    appid="etch",
+    name="Etch a Sketch",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="etch_a_sketch_app",
+    cdefines=["APP_ETCH_A_SKETCH"],
+    requires=["gui"],
+    stack_size=2 * 1024,
+    order=175,
+    fap_icon="etch-a-sketch-icon.png",
+    fap_category="Media",
+    fap_icon_assets="assets",
+    fap_author="@SimplyMinimal",
+    fap_weburl="https://github.com/SimplyMinimal/FlipperZero-Etch-A-Sketch",
+    fap_version="1.0",
+    fap_description="Turn the Flipper Zero into an Etch A Sketch",
+)

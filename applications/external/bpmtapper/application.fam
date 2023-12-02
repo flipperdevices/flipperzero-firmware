@@ -1,0 +1,16 @@
+App(
+    appid="bpm_tapper",
+    name="BPM Tapper",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="bpm_tapper_app",
+    requires=["gui"],
+    stack_size=2 * 1024,
+    fap_icon="bpm_10px.png",
+    fap_category="Media",
+    fap_icon_assets="icons",
+    order=15,
+    fap_author="@panki27",
+    fap_weburl="https://github.com/panki27/bpm-tapper",
+    fap_version="1.1",
+    fap_description="Tap center button to measure BPM",
+)

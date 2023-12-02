@@ -1,0 +1,14 @@
+App(
+    appid="radar_scanner",
+    name="[RCWL0516] Radar Scan",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="app_radar_scanner",
+    requires=["gui"],
+    stack_size=1 * 1024,
+    fap_icon="icon.png",
+    fap_category="GPIO",
+    fap_author="@MatthewKuKanich",
+    fap_weburl="https://github.com/MatthewKuKanich/flipper-radar",
+    fap_version="2.0",
+    fap_description="Detects the movement of living things using radar",
+)

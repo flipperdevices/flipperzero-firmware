@@ -1,0 +1,35 @@
+App(
+    appid="esp_flasher",
+    name="[ESP] ESP Flasher",
+    fap_version=(1, 4),
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="esp_flasher_app",
+    requires=["gui"],
+    stack_size=4 * 1024,
+    order=90,
+    resources="resources",
+    fap_icon="wifi_10px.png",
+    fap_category="GPIO",
+    fap_private_libs=[
+        Lib(
+            name="esp-serial-flasher",
+            fap_include_paths=["include"],
+            sources=[
+                "src/esp_loader.c",
+                "src/esp_targets.c",
+                "src/md5_hash.c",
+                "src/protocol_common.c",
+                "src/protocol_uart.c",
+                "src/slip.c",
+            ],
+            cincludes=["lib/esp-serial-flasher/private_include"],
+            cdefines=[
+                "SERIAL_FLASHER_INTERFACE_UART=1",
+                "MD5_ENABLED=1",
+                "SERIAL_FLASHER_WRITE_BLOCK_RETRIES=10",
+            ],
+        ),
+    ],
+    cdefines=["SERIAL_FLASHER_INTERFACE_UART=1"],
+    fap_icon_assets="assets",
+)

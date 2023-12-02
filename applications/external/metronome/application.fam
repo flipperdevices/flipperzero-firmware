@@ -1,0 +1,17 @@
+App(
+    appid="metronome",
+    name="Metronome",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="metronome_app",
+    requires=[
+        "gui",
+    ],
+    fap_icon="metronome_10x.png",
+    fap_icon_assets="icons",
+    fap_category="Media",
+    stack_size=2 * 1024,
+    order=20,
+    fap_author="@panki27 & @xMasterX",
+    fap_version="1.1",
+    fap_description="Metronome app",
+)

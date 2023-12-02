@@ -1,0 +1,11 @@
+App(
+    appid="gpio_reader_b",
+    name="[GPIO] Reader (biotinker)",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="gpio_app",
+    requires=["gui"],
+    stack_size=1 * 1024,
+    order=50,
+    fap_category="GPIO",
+    fap_icon="icon.png",
+)

@@ -1,0 +1,15 @@
+App(
+    appid="flipp_pomodoro",
+    name="Pomodoro Timer",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="flipp_pomodoro_app",
+    requires=["gui", "notification", "dolphin"],
+    stack_size=1 * 1024,
+    fap_category="Tools",
+    fap_icon_assets="images",
+    fap_icon="flipp_pomodoro_10.png",
+    fap_author="@Th3Un1q3",
+    fap_weburl="https://github.com/Th3Un1q3/flipp_pomodoro",
+    fap_version="1.3",
+    fap_description="Boost Your Productivity with the Pomodoro Timer",
+)

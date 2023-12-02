@@ -1,0 +1,17 @@
+App(
+    appid="flipper_geiger",
+    name="[J305] Geiger Counter",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="flipper_geiger_app",
+    cdefines=["APP_GEIGER"],
+    requires=[
+        "gui",
+    ],
+    stack_size=2 * 1024,
+    fap_icon="geiger.png",
+    fap_category="GPIO",
+    fap_author="@nmrr",
+    fap_weburl="https://github.com/nmrr/flipperzero-geigercounter",
+    fap_version="1.1",
+    fap_description="Works with J305 Geiger tube on external board",
+)
