@@ -23,7 +23,9 @@ while read repo branch subdir; do
         result="$(bash .utils/subtree-subdir-helper.sh "${path}" "${repo}" "${branch}" "${subdir}" merge 2>&1 | tee /proc/self/fd/69)"
     fi
     if grep "Automatic merge failed; fix conflicts and then commit the result." <<< "$result" > /dev/null; then
+        echo "MERGE_MSG: Merge ${path} from ${repo}"
         echo "Waiting for current index to be resolved..."
+        notify-send -a Git -i git "Subtree merge failed" "Resolve current index to continue" &> /dev/null | true
         while ! git diff --quiet || ! git diff --cached --quiet || ! git merge HEAD &> /dev/null; do
             sleep 1
         done
