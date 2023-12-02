@@ -438,30 +438,35 @@ ButtonConfig* button_config_alloc(
         if(i == 15) {
             furi_string_cat_printf(button_name, "all buttons");
         } else {
+            furi_string_cat_printf(button_name, "button");
+            if(i != 1 && i != 2 && i != 4 && i != 8) {
+                furi_string_cat_printf(button_name, "s");
+            }
+            furi_string_cat_printf(button_name, " ");
             int btn = 0;
             if(i & 1) {
-                furi_string_cat_printf(button_name, "btn1");
+                furi_string_cat_printf(button_name, "1");
                 btn |= 1;
                 if(btn != i) {
                     furi_string_cat_printf(button_name, ", ");
                 }
             }
             if(i & 2) {
-                furi_string_cat_printf(button_name, "btn2");
+                furi_string_cat_printf(button_name, "2");
                 btn |= 2;
                 if(btn != i) {
                     furi_string_cat_printf(button_name, ", ");
                 }
             }
             if(i & 4) {
-                furi_string_cat_printf(button_name, "btn3");
+                furi_string_cat_printf(button_name, "3");
                 btn |= 4;
                 if(btn != i) {
                     furi_string_cat_printf(button_name, ", ");
                 }
             }
             if(i & 8) {
-                furi_string_cat_printf(button_name, "btn4");
+                furi_string_cat_printf(button_name, "4");
                 btn |= 8;
             }
         }
