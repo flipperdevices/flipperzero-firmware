@@ -16,7 +16,7 @@
 
 #define NA 0
 
-#include <cfw.h>
+#include <cfw/cfw.h>
 
 #define UART_CH \
     (CFW_SETTINGS()->uart_esp_channel == UARTDefault ? FuriHalUartIdUSART1 : FuriHalUartIdLPUART1)

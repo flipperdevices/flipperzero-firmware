@@ -1,7 +1,7 @@
 #include "wifi_marauder_app_i.h"
 #include "wifi_marauder_uart.h"
 
-#include <cfw.h>
+#include <cfw/cfw.h>
 #define CFW_UART_CH \
     (CFW_SETTINGS()->uart_esp_channel == UARTDefault ? FuriHalUartIdUSART1 : FuriHalUartIdLPUART1)
 bool cfw_uart = false;

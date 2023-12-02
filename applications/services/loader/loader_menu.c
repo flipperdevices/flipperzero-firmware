@@ -4,7 +4,7 @@
 #include <gui/modules/submenu.h>
 #include <assets_icons.h>
 #include <applications.h>
-#include <cfw.h>
+#include <cfw/cfw.h>
 
 #include "loader.h"
 #include "loader_menu.h"

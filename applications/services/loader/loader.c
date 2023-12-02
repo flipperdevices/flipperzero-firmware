@@ -4,7 +4,7 @@
 #include <applications.h>
 #include <storage/storage.h>
 #include <furi_hal.h>
-#include <cfw.h>
+#include <cfw/cfw.h>
 #include <dialogs/dialogs.h>
 #include <toolbox/path.h>
 #include <flipper_application/flipper_application.h>

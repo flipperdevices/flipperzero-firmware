@@ -30,9 +30,9 @@
 #include <power/power_service/power.h>
 #include <rgb_backlight.h>
 #include <m-array.h>
-#include "namespoof.h"
+#include <cfw/cfw.h>
+#include <cfw/namespoof.h>
 #include "cfw_icons.h"
-#include <cfw.h>
 #include <applications.h>
 #include <desktop/desktop_settings.h>
 #include "helpers/passport_settings.h"

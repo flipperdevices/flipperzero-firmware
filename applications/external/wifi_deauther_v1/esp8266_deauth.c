@@ -10,7 +10,7 @@
 //#include <notification/notification.h>
 //#include <notification/notification_messages.h>
 //#include <stdlib.h>
-#include <cfw.h>
+#include <cfw/cfw.h>
 
 #include "FlipperZeroWiFiDeauthModuleDefines.h"
 

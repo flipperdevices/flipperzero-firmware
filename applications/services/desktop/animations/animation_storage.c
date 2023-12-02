@@ -5,7 +5,7 @@
 #include <core/dangerous_defines.h>
 #include <storage/storage.h>
 #include <gui/icon_i.h>
-#include <cfw.h>
+#include <cfw/cfw.h>
 
 #include "animation_manager.h"
 #include "animation_storage.h"
