@@ -13,17 +13,17 @@ void evil_portal_read_index_html(void* context) {
     Storage* storage = evil_portal_open_storage();
     FileInfo fi;
 
-    /*if(!storage_common_exists(storage, EVIL_PORTAL_INDEX_SAVE_PATH)) {
+    if(!storage_common_exists(storage, EVIL_PORTAL_INDEX_SAVE_PATH)) {
         FuriString* tmp = furi_string_alloc_set(EVIL_PORTAL_INDEX_DEFAULT_PATH);
         evil_portal_replace_index_html(tmp);
         furi_string_free(tmp);
-    }*/
+    }
 
     if(storage_common_stat(storage, EVIL_PORTAL_INDEX_SAVE_PATH, &fi) == FSE_OK) {
         File* index_html = storage_file_alloc(storage);
         if(storage_file_open(
                index_html, EVIL_PORTAL_INDEX_SAVE_PATH, FSAM_READ, FSOM_OPEN_EXISTING)) {
-            app->index_html = malloc((size_t)fi.size);
+            app->index_html = malloc((size_t)fi.size + 1);
             uint8_t* buf_ptr = app->index_html;
             size_t read = 0;
             while(read < fi.size) {
@@ -33,7 +33,7 @@ void evil_portal_read_index_html(void* context) {
                 read += now_read;
                 buf_ptr += now_read;
             }
-            free(buf_ptr);
+            *buf_ptr = '\0';
         }
         storage_file_close(index_html);
         storage_file_free(index_html);
@@ -94,8 +94,6 @@ void evil_portal_read_ap_name(void* context) {
                 buf_ptr += now_read;
             }
             *buf_ptr = '\0';
-            buf_ptr++;
-            free(buf_ptr);
         }
         storage_file_close(ap_name);
         storage_file_free(ap_name);
