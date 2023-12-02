@@ -111,6 +111,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Temp Sensors Reader 1.5 (By quen0n)](https://github.com/quen0n/Unitemp-Flipper-Zero-Plugin) [Changes From xMasterX](https://github.com/xMasterX/all-the-plugins/tree/dev/base_pack/unitemp)
 - OFW: [Fixed error when reading an iso15693 nfc tag with no blocks #3229 (By pborsutzki)](https://github.com/flipperdevices/flipperzero-firmware/pull/3229)
 - Fix mbedtls api leaks (By Willy-JL)
+- Fix for CFW lib (Idea By Willy-JL, With Changes By RogueMaster)
 
 <a name="release">
 

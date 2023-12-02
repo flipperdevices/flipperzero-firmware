@@ -34,6 +34,7 @@
         "nanopb",
         "update_util",
         "heatshrink",
+        "cfw",
         "flipperformat",
         "flipper18"
     ],

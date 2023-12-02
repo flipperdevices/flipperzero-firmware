@@ -1,11 +1,5 @@
 Import("env")
 
-env.Append(
-    LINT_SOURCES=[
-        Dir("cfw"),
-    ],
-)
-
 
 env.Append(
     CPPPATH=[
@@ -13,9 +7,6 @@ env.Append(
         "#/lib",  # TODO FL-3553: remove!
         # Ugly hack
         Dir("../assets/compiled"),
-    ],
-    SDK_HEADERS=[
-        File("cfw/cfw.h"),
     ],
 )
 
@@ -50,6 +41,7 @@ libs = env.BuildModules(
         "nanopb",
         "update_util",
         "heatshrink",
+        "cfw",
     ],
 )
 
