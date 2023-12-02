@@ -27,3 +27,9 @@ extern const SceneManagerHandlers uart_terminal_scene_handlers;
 #define ADD_SCENE(prefix, name, id) void prefix##_scene_##name##_on_exit(void* context);
 #include "uart_terminal_scene_config.h"
 #undef ADD_SCENE
+
+#define UART_PINS_ITEM_IDX (0)
+#define BAUDRATE_ITEM_IDX (1)
+#define HEX_MODE_ITEM_IDX (2)
+
+#define DEFAULT_BAUDRATE_OPT_IDX (18)
