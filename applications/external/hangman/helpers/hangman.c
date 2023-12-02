@@ -120,17 +120,17 @@ void hangman_draw_menu(Canvas* canvas, HangmanApp* app) {
 
     uint8_t max_txt_w = 0;
     for(uint8_t i = 0; i < app->menu_cnt; i += 2) {
-        CONST txt_w = hangman_string_length(app->menu[i]);
-        if(txt_w > max_txt_w) {
-            max_txt_w = txt_w;
-        }
+        max_txt_w = MAX(max_txt_w, hangman_string_length(app->menu[i]));
     }
 
     max_txt_w *= canvas_glyph_width(canvas, ' ');
     CONST txt_h = canvas_current_font_height(canvas);
 
+    CONST menu_cnt = app->menu_cnt / 2;
+    CONST rows = MIN(menu_cnt, HANGMAN_MAX_MENU_SIZE);
+
     CONST w = max_txt_w + 30;
-    CONST h = txt_h * app->menu_cnt / 2 + 6;
+    CONST h = txt_h * rows + 6;
     CONST x = (canvas_width(canvas) - w) / 2;
     CONST y = (canvas_height(canvas) - h) / 2;
 
@@ -138,8 +138,13 @@ void hangman_draw_menu(Canvas* canvas, HangmanApp* app) {
 
     CONST txt_x = (canvas_width(canvas) - max_txt_w) / 2;
 
-    for(uint8_t i = 0, menu_item = 0; i < app->menu_cnt; i += 2, menu_item++) {
-        CONST txt_y = y + (menu_item + 1) * txt_h;
+    if (menu_cnt > HANGMAN_MAX_MENU_SIZE) {
+        elements_scrollbar(canvas, app->menu_item, menu_cnt);
+    }
+
+    for (uint8_t i = 0; i < rows; i++) {
+        CONST txt_y = y + (i + 1) * txt_h;
+        CONST menu_item = app->menu_frame_position + i;
 
         canvas_set_color(canvas, ColorBlack);
 
@@ -148,7 +153,7 @@ void hangman_draw_menu(Canvas* canvas, HangmanApp* app) {
             canvas_invert_color(canvas);
         }
 
-        hangman_draw_utf8_str(canvas, txt_x, txt_y, app->menu[i]);
+        hangman_draw_utf8_str(canvas, txt_x, txt_y, app->menu[menu_item * 2]);
     }
 }
 
@@ -339,6 +344,7 @@ HangmanApp* hangman_app_alloc() {
     HangmanApp* app = malloc(sizeof(HangmanApp));
     furi_hal_random_init();
     app->menu_item = 0;
+    app->menu_frame_position = 0;
 
     app->menu = hangman_menu_read(&app->menu_cnt);
     if(app->menu_cnt & 1 || app->menu_cnt < 2) {
