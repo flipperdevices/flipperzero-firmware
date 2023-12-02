@@ -41,13 +41,27 @@ bool hangman_menu_selection(HangmanApp* app) {
                     return false;
 
                 case InputKeyUp:
-                    if(--app->menu_item < 0) {
+                    app->menu_item--;
+
+                    if(app->menu_item < 0) {
                         app->menu_item = menu_cnt - 1;
+                        app->menu_frame_position = MAX(0U, menu_cnt - HANGMAN_MAX_MENU_SIZE);
+                    } else if(app->menu_item < app->menu_frame_position) {
+                        app->menu_frame_position--;
                     }
                     break;
                 case InputKeyDown:
-                    if(++app->menu_item > menu_cnt - 1) {
+                    app->menu_item++;
+
+                    if(app->menu_item > menu_cnt - 1) {
                         app->menu_item = 0;
+                        app->menu_frame_position = 0;
+                    } else {
+                        const int8_t frame_bot = app->menu_frame_position + HANGMAN_MAX_MENU_SIZE;
+
+                        if(app->menu_item >= frame_bot) {
+                            app->menu_frame_position++;
+                        }
                     }
                     break;
                 default:
