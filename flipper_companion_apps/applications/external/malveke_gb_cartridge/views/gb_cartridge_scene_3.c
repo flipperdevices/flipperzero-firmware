@@ -229,6 +229,9 @@ bool gb_cartridge_scene_3_input(InputEvent* event, void* context) {
                         UNUSED(model);
                         GBCartridge* app = (GBCartridge*)instance->context;
                         UNUSED(app);
+                        model->total_ram = 0;
+                        model->transfered = 0;
+                        model->elapsed_time = 0;
                         // Unregister rx callback
                         uart_set_handle_rx_data_cb(app->uart, NULL);
                         uart_set_handle_rx_data_cb(app->lp_uart, NULL);
@@ -300,9 +303,9 @@ void gb_cartridge_scene_3_enter(void* context) {
             // gb_cartridge_scene_3_model_init(model);
             // model->cart_dump_ram_filename  = app->cart_dump_ram_filename;
             // model->cart_dump_ram_extension = app->cart_dump_ram_extension;
-            // char *filename = strrchr(sequential_file_resolve_path(app->storage, MALVEKE_APP_FOLDER, app->cart_dump_ram_filename, app->cart_dump_ram_extension), '/');
+            // char *filename = strrchr(sequential_file_resolve_path(app->storage, MALVEKE_APP_FOLDER_RAMS, app->cart_dump_ram_filename, app->cart_dump_ram_extension), '/');
             // filename++;
-            char *filename = sequential_file_resolve_path(app->storage, MALVEKE_APP_FOLDER, app->cart_dump_ram_filename, app->cart_dump_ram_extension);
+            char *filename = sequential_file_resolve_path(app->storage, MALVEKE_APP_FOLDER_RAMS, app->cart_dump_ram_filename, app->cart_dump_ram_extension);
             model->cart_dump_ram_filename_sequential =  filename;
             app->is_writing_ram = true;
              // Register callbacks to receive data

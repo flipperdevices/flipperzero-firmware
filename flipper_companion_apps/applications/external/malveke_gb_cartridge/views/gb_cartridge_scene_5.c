@@ -52,10 +52,10 @@ static bool select_ram_file(GBCartridge *app, File *file)
 {
     bool result = false;
     FuriString *file_path = furi_string_alloc();
-    furi_string_set(file_path, MALVEKE_APP_FOLDER);
+    furi_string_set(file_path, MALVEKE_APP_FOLDER_RAMS);
     DialogsFileBrowserOptions browser_options;
     dialog_file_browser_set_basic_options(&browser_options, "sav", NULL);
-    browser_options.base_path = MALVEKE_APP_FOLDER;
+    browser_options.base_path = MALVEKE_APP_FOLDER_RAMS;
     browser_options.skip_assets = true;
 
     // Input events and views are managed by file_browser

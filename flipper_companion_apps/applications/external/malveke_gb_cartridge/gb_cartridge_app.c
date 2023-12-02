@@ -25,6 +25,23 @@ GBCartridge* gb_cartridge_app_app_alloc() {
     app->storage = furi_record_open(RECORD_STORAGE);
     app->notification = furi_record_open(RECORD_NOTIFICATION);
     
+    //  Create MALVEKE dir
+    if(storage_common_stat(app->storage, MALVEKE_APP_FOLDER, NULL) == FSE_NOT_EXIST) {
+        storage_simply_mkdir(app->storage, MALVEKE_APP_FOLDER);
+    }
+    //  Create MALVEKE RAM dir
+    if(storage_common_stat(app->storage, MALVEKE_APP_FOLDER_RAMS, NULL) == FSE_NOT_EXIST) {
+        storage_simply_mkdir(app->storage, MALVEKE_APP_FOLDER_RAMS);
+    }
+    //  Create MALVEKE ROM dir
+    if(storage_common_stat(app->storage, MALVEKE_APP_FOLDER_ROMS, NULL) == FSE_NOT_EXIST) {
+        storage_simply_mkdir(app->storage, MALVEKE_APP_FOLDER_ROMS);
+    }
+    //  Create MALVEKE Photos dir
+    if(storage_common_stat(app->storage, MALVEKE_APP_FOLDER_PHOTOS, NULL) == FSE_NOT_EXIST) {
+        storage_simply_mkdir(app->storage, MALVEKE_APP_FOLDER_PHOTOS);
+    }
+    
     //Turn backlight on, believe me this makes testing your app easier
     notification_message(app->notification, &sequence_display_backlight_on);
 
@@ -47,6 +64,14 @@ GBCartridge* gb_cartridge_app_app_alloc() {
     app->led = 1;
     app->save_settings = 1;
 
+    app->cart_title = " - ";
+    app->cart_dump_rom_filename  = "malveke_rom";
+    app->cart_dump_rom_extension = "gb";
+
+    app->cart_dump_ram_filename = "malveke_ram";
+    app->cart_dump_ram_extension = "sav";
+
+
     // Used for File Browser
     app->dialogs = furi_record_open(RECORD_DIALOGS);
     app->file_path = furi_string_alloc();
@@ -56,11 +81,7 @@ GBCartridge* gb_cartridge_app_app_alloc() {
 
     app->uart = usart_init(app);
     app->lp_uart = lp_uart_init(app);
-    
-    FURI_LOG_I(TAG, "Hola1!");
-    FURI_LOG_D(TAG, "Hola2!");
-    FURI_LOG_E(TAG, "Hola3!");
-    FURI_LOG_W(TAG, "Hola4!");
+
     
     view_dispatcher_add_view(app->view_dispatcher, GBCartridgeViewIdMenu, variable_item_list_get_view(app->submenu));
     app->gb_cartridge_startscreen = gb_cartridge_startscreen_alloc();

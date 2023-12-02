@@ -220,6 +220,11 @@ bool gb_cartridge_scene_2_input(InputEvent* event, void* context) {
                         UNUSED(model);
                         GBCartridge* app = (GBCartridge*)instance->context;
                         UNUSED(app);
+
+                        model->total_rom = 0;
+                        model->transfered = 0;
+                        model->elapsed_time = 0;
+
                         // // Unregister rx callback
                         uart_set_handle_rx_data_cb(app->uart, NULL);
                         uart_set_handle_rx_data_cb(app->lp_uart, NULL);
@@ -295,7 +300,7 @@ void gb_cartridge_scene_2_enter(void* context) {
             model->total_rom =  app->rom_banks * 16 * 1024;
             // char *filename = strrchr(model->cart_dump_rom_filename_sequential, '/');
             // filename++;
-            char *filename = sequential_file_resolve_path(app->storage, MALVEKE_APP_FOLDER, app->cart_dump_rom_filename, model->cart_dump_rom_extension);
+            char *filename = sequential_file_resolve_path(app->storage, MALVEKE_APP_FOLDER_ROMS, app->cart_dump_rom_filename, model->cart_dump_rom_extension);
             model->cart_dump_rom_filename_sequential =  filename;
              // Register callbacks to receive data
             uart_set_handle_rx_data_cb(app->uart, gameboy_rom_backup_handle_rx_data_cb); // setup callback for general log rx thread

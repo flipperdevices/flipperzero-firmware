@@ -27,9 +27,6 @@
 
 #define TAG "GBCartridge"
 
-#define SUBGHZ_APP_EXTENSION ".sub"
-#define SUBGHZ_APP_FOLDER ANY_PATH("subghz")
-
 #define MALVEKE_APP_FOLDER_USER "apps_data/malveke"
 #define MALVEKE_APP_FOLDER EXT_PATH(MALVEKE_APP_FOLDER_USER)
 #define MALVEKE_APP_FOLDER_ROMS MALVEKE_APP_FOLDER "/roms"
