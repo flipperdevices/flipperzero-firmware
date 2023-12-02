@@ -140,8 +140,8 @@ int32_t ublox_app(void* p) {
     // TODO: this is breaking the backlight timeout for everything
     // else: test by opening ublox, then leaving and opening DAP
     // Link. DAP Link should force the backlight on but doesn't.
-    if ((ublox->data_display_state).backlight_mode == UbloxDataDisplayBacklightOn) {
-	notification_message_block(ublox->notifications, &sequence_display_backlight_enforce_auto);
+    if((ublox->data_display_state).backlight_mode == UbloxDataDisplayBacklightOn) {
+        notification_message_block(ublox->notifications, &sequence_display_backlight_enforce_auto);
     }
 
     ublox_free(ublox);

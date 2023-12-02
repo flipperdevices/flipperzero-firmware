@@ -49,17 +49,17 @@ bool ublox_scene_data_display_on_event(void* context, SceneManagerEvent event) {
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == GuiButtonTypeLeft) {
-	    // You can only config the worker when it's not logging,
-	    // because that's actually pretty complicated to implement
-	    // (and confusing too because the worker has to restart if
-	    // it's going to keep logging)
+            // You can only config the worker when it's not logging,
+            // because that's actually pretty complicated to implement
+            // (and confusing too because the worker has to restart if
+            // it's going to keep logging)
 
-	    if (ublox->log_state == UbloxLogStateNone) {
-		ublox_worker_stop(ublox->worker);
-		scene_manager_next_scene(ublox->scene_manager, UbloxSceneDataDisplayConfig);
-		consumed = true;
-	    }
-	    
+            if(ublox->log_state == UbloxLogStateNone) {
+                ublox_worker_stop(ublox->worker);
+                scene_manager_next_scene(ublox->scene_manager, UbloxSceneDataDisplayConfig);
+                consumed = true;
+            }
+
         } else if(event.event == GuiButtonTypeRight) {
             if(data_display_get_state(ublox->data_display) != DataDisplayGPSNotFound) {
                 FURI_LOG_I(TAG, "right button");
@@ -75,7 +75,6 @@ bool ublox_scene_data_display_on_event(void* context, SceneManagerEvent event) {
             }
 
         } else if(event.event == UbloxWorkerEventDataReady) {
-
             if((ublox->data_display_state).notify_mode == UbloxDataDisplayNotifyOn) {
                 notification_message(ublox->notifications, &sequence_new_reading);
             }
@@ -94,9 +93,9 @@ bool ublox_scene_data_display_on_event(void* context, SceneManagerEvent event) {
         } else if(event.event == UbloxWorkerEventFailed) {
             FURI_LOG_I(TAG, "UbloxWorkerEventFailed");
             data_display_set_state(ublox->data_display, DataDisplayGPSNotFound);
-	    if(ublox->log_state == UbloxLogStateLogging) {
-		ublox->log_state = UbloxLogStateStopLogging;
-	    }
+            if(ublox->log_state == UbloxLogStateLogging) {
+                ublox->log_state = UbloxLogStateStopLogging;
+            }
         }
     }
     return consumed;

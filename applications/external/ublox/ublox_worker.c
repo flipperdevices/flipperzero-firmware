@@ -47,7 +47,7 @@ void ublox_worker_stop(UbloxWorker* ublox_worker) {
     furi_assert(ublox_worker->thread);
     Ublox* ublox = ublox_worker->context;
     furi_assert(ublox);
-    
+
     if(furi_thread_get_state(ublox_worker->thread) != FuriThreadStateStopped) {
         ublox_worker_change_state(ublox_worker, UbloxWorkerStateStop);
         furi_thread_join(ublox_worker->thread);
@@ -56,13 +56,13 @@ void ublox_worker_stop(UbloxWorker* ublox_worker) {
     // Now that the worker thread is dead, we can access these
     // safely. We have to have this separate from the nav_messages()
     // function because of state.
-    if (ublox->log_state == UbloxLogStateLogging) {
-	FURI_LOG_I(TAG, "closing file in worker_stop()");
-	if(!kml_close_file(&(ublox->kmlfile))) {
-	    FURI_LOG_E(TAG, "failed to close KML file!");
-	}
-	// and revert the state
-	ublox->log_state = UbloxLogStateNone;
+    if(ublox->log_state == UbloxLogStateLogging) {
+        FURI_LOG_I(TAG, "closing file in worker_stop()");
+        if(!kml_close_file(&(ublox->kmlfile))) {
+            FURI_LOG_E(TAG, "failed to close KML file!");
+        }
+        // and revert the state
+        ublox->log_state = UbloxLogStateNone;
     }
 }
 
@@ -88,8 +88,10 @@ void clear_ublox_data() {
         if(!furi_hal_i2c_trx(
                &furi_hal_i2c_handle_external,
                UBLOX_I2C_ADDRESS << 1,
-               tx, 1,
-               &response, 1,
+               tx,
+               1,
+               &response,
+               1,
                furi_ms_to_ticks(I2C_TIMEOUT_MS))) {
             // if the GPS is disconnected during this loop, this will
             // loop forever, we must make that not happen. 30 loops is
@@ -104,7 +106,7 @@ void clear_ublox_data() {
 
 int32_t ublox_worker_task(void* context) {
     UbloxWorker* ublox_worker = context;
-    
+
     furi_hal_i2c_acquire(&furi_hal_i2c_handle_external);
 
     if(ublox_worker->state == UbloxWorkerStateRead) {
@@ -137,17 +139,17 @@ void ublox_worker_read_nav_messages(void* context) {
     // We only start logging at the same time we restart the worker.
     if(ublox->log_state == UbloxLogStateStartLogging) {
         FURI_LOG_I(TAG, "start logging");
-	
+
         // assemble full logfile pathname
-	FuriString* fullname = furi_string_alloc();
+        FuriString* fullname = furi_string_alloc();
         path_concat(furi_string_get_cstr(ublox->logfile_folder), ublox->text_store, fullname);
         FURI_LOG_I(TAG, "fullname is %s", furi_string_get_cstr(fullname));
 
         if(!kml_open_file(ublox->storage, &(ublox->kmlfile), furi_string_get_cstr(fullname))) {
             FURI_LOG_E(TAG, "failed to open KML file %s!", furi_string_get_cstr(fullname));
             ublox->log_state = UbloxLogStateNone;
-	    ublox_worker->callback(UbloxWorkerEventLogStateChanged, ublox_worker->context);
-	    return;
+            ublox_worker->callback(UbloxWorkerEventLogStateChanged, ublox_worker->context);
+            return;
         }
         ublox->log_state = UbloxLogStateLogging;
         furi_string_free(fullname);
@@ -198,10 +200,10 @@ void ublox_worker_read_nav_messages(void* context) {
         bool got_odo = ublox_worker_read_odo(ublox_worker);
 
         if(got_pvt && got_odo) {
-	    // if we got good data, do stuff
+            // if we got good data, do stuff
             ublox_worker->callback(UbloxWorkerEventDataReady, ublox_worker->context);
-	    FURI_LOG_I(TAG, "sent callback");
-	    // if logging, add point
+            FURI_LOG_I(TAG, "sent callback");
+            // if logging, add point
             if(ublox->log_state == UbloxLogStateLogging) {
                 if(!kml_add_path_point(
                        &(ublox->kmlfile),
@@ -213,30 +215,29 @@ void ublox_worker_read_nav_messages(void* context) {
                 }
             }
         } else {
-	    // bad data
+            // bad data
             ublox_worker->callback(UbloxWorkerEventFailed, ublox_worker->context);
         }
 
-	FURI_LOG_I(TAG, "going into loop");
+        FURI_LOG_I(TAG, "going into loop");
         while(furi_get_tick() - ticks <
               furi_ms_to_ticks(((ublox->data_display_state).refresh_rate * 1000))) {
-	    // putting these *inside* the loop makes it respond faster
-	    if(ublox_worker->state != UbloxWorkerStateRead) {
-		return;
-	    }
+            // putting these *inside* the loop makes it respond faster
+            if(ublox_worker->state != UbloxWorkerStateRead) {
+                return;
+            }
 
-	    // if logging stop is requested, do it
-	    if(ublox->log_state == UbloxLogStateStopLogging) {
-		FURI_LOG_I(TAG, "stop logging in tick loop");
-		if(!kml_close_file(&(ublox->kmlfile))) {
-		    FURI_LOG_E(TAG, "failed to close KML file!");
-		}
-		ublox->log_state = UbloxLogStateNone;
-		ublox_worker->callback(UbloxWorkerEventLogStateChanged, ublox_worker->context);
-	    }
+            // if logging stop is requested, do it
+            if(ublox->log_state == UbloxLogStateStopLogging) {
+                FURI_LOG_I(TAG, "stop logging in tick loop");
+                if(!kml_close_file(&(ublox->kmlfile))) {
+                    FURI_LOG_E(TAG, "failed to close KML file!");
+                }
+                ublox->log_state = UbloxLogStateNone;
+                ublox_worker->callback(UbloxWorkerEventLogStateChanged, ublox_worker->context);
+            }
         }
-	FURI_LOG_I(TAG, "finished loop");
-
+        FURI_LOG_I(TAG, "finished loop");
     }
 }
 
@@ -251,8 +252,7 @@ void ublox_worker_sync_to_gps_time(void* context) {
     frame_tx.payload = NULL;
     UbloxMessage* message_tx = ublox_frame_to_bytes(&frame_tx);
 
-    UbloxMessage* message_rx =
-        ublox_i2c_transfer(message_tx, UBX_NAV_TIMEUTC_MESSAGE_LENGTH);
+    UbloxMessage* message_rx = ublox_i2c_transfer(message_tx, UBX_NAV_TIMEUTC_MESSAGE_LENGTH);
     if(message_rx == NULL) {
         FURI_LOG_E(TAG, "get_gps_time transfer failed");
         ublox_worker_change_state(ublox_worker, UbloxWorkerStateStop);
@@ -301,7 +301,6 @@ FuriString* print_uint8_array(uint8_t* array, int length) {
 
     return s;
 }
-
 
 bool ublox_worker_read_pvt(UbloxWorker* ublox_worker) {
     //FURI_LOG_I(TAG, "mem free before PVT read: %u", memmgr_get_free_heap());
@@ -458,8 +457,7 @@ bool ublox_worker_init_gps(UbloxWorker* ublox_worker) {
     pms_frame_tx.payload = NULL;
     UbloxMessage* pms_message_tx = ublox_frame_to_bytes(&pms_frame_tx);
 
-    UbloxMessage* pms_message_rx =
-        ublox_i2c_transfer(pms_message_tx, UBX_CFG_PMS_MESSAGE_LENGTH);
+    UbloxMessage* pms_message_rx = ublox_i2c_transfer(pms_message_tx, UBX_CFG_PMS_MESSAGE_LENGTH);
     ublox_message_free(pms_message_tx);
     if(pms_message_rx == NULL) {
         FURI_LOG_E(TAG, "CFG-PMS read transfer failed");
@@ -496,8 +494,7 @@ bool ublox_worker_init_gps(UbloxWorker* ublox_worker) {
     odo_frame_tx.payload = NULL;
     UbloxMessage* odo_message_tx = ublox_frame_to_bytes(&odo_frame_tx);
 
-    UbloxMessage* odo_message_rx =
-        ublox_i2c_transfer(odo_message_tx, UBX_CFG_ODO_MESSAGE_LENGTH);
+    UbloxMessage* odo_message_rx = ublox_i2c_transfer(odo_message_tx, UBX_CFG_ODO_MESSAGE_LENGTH);
     ublox_message_free(odo_message_tx);
     if(odo_message_rx == NULL) {
         FURI_LOG_E(TAG, "CFG-ODO transfer failed");

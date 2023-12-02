@@ -23,7 +23,7 @@ static void draw_buttons(Canvas* canvas, void* model) {
     if(m->log_state == UbloxLogStateLogging) {
         elements_button_right(canvas, "Stop Log");
     } else {
-	elements_button_left(canvas, "Config");
+        elements_button_left(canvas, "Config");
         elements_button_right(canvas, "Start Log");
     }
 }
@@ -81,8 +81,8 @@ static void data_display_draw_callback(Canvas* canvas, void* model) {
         }
         canvas_draw_str(canvas, 77, 9, furi_string_get_cstr(s));
 
-	// Former logging indicator
-	// We now use just the button as the indicator
+        // Former logging indicator
+        // We now use just the button as the indicator
         /*canvas_set_font(canvas, FontPrimary);
         canvas_draw_str(canvas, 112, 9, "L:");
 
@@ -131,28 +131,28 @@ static void data_display_draw_callback(Canvas* canvas, void* model) {
         canvas_draw_str(canvas, 105, 35, furi_string_get_cstr(s));
 
         /*** Draw time and battery ***/
-	// Note that these are not retrieved from an external state
-	// variable, because they don't have to be.
-	canvas_set_font(canvas, FontPrimary);
-	canvas_draw_str(canvas, 0, 48, "Time:");
-	
-	FuriHalRtcDateTime datetime;
-	furi_hal_rtc_get_datetime(&datetime);
-	locale_format_time(s, &datetime, locale_get_time_format(), false);
+        // Note that these are not retrieved from an external state
+        // variable, because they don't have to be.
+        canvas_set_font(canvas, FontPrimary);
+        canvas_draw_str(canvas, 0, 48, "Time:");
 
-	canvas_set_font(canvas, FontSecondary);
-	canvas_draw_str(canvas, 30, 48, furi_string_get_cstr(s));
+        FuriHalRtcDateTime datetime;
+        furi_hal_rtc_get_datetime(&datetime);
+        locale_format_time(s, &datetime, locale_get_time_format(), false);
 
-	// draw Flipper battery charge
-	canvas_set_font(canvas, FontPrimary);
-	canvas_draw_str(canvas, 75, 48, "Batt:");
+        canvas_set_font(canvas, FontSecondary);
+        canvas_draw_str(canvas, 30, 48, furi_string_get_cstr(s));
 
-	canvas_set_font(canvas, FontSecondary);
-	furi_string_printf(s, "%u%%", furi_hal_power_get_pct());
-	canvas_draw_str(canvas, 101, 48, furi_string_get_cstr(s));
-	
-	furi_string_free(s);
-	
+        // draw Flipper battery charge
+        canvas_set_font(canvas, FontPrimary);
+        canvas_draw_str(canvas, 75, 48, "Batt:");
+
+        canvas_set_font(canvas, FontSecondary);
+        furi_string_printf(s, "%u%%", furi_hal_power_get_pct());
+        canvas_draw_str(canvas, 101, 48, furi_string_get_cstr(s));
+
+        furi_string_free(s);
+
     } else if(m->state == DataDisplayCarMode) {
         Ublox_NAV_PVT_Message message = m->nav_pvt;
         Ublox_NAV_ODO_Message nav_odo = m->nav_odo;

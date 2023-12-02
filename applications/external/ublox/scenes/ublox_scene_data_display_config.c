@@ -161,13 +161,14 @@ static void ublox_scene_data_display_config_set_display_view_mode(VariableItem* 
     (ublox->data_display_state).view_mode = display_view_mode_value[index];
 }
 
-static uint8_t ublox_scene_data_display_config_next_backlight_mode(const UbloxDataDisplayBacklightMode value,
-								   void* context) {
+static uint8_t ublox_scene_data_display_config_next_backlight_mode(
+    const UbloxDataDisplayBacklightMode value,
+    void* context) {
     furi_assert(context);
 
     uint8_t index = 0;
     for(int i = 0; i < BACKLIGHT_MODE_COUNT; i++) {
-	if(value == backlight_mode_value[i]) {
+        if(value == backlight_mode_value[i]) {
             index = i;
             break;
         } else {
@@ -185,11 +186,11 @@ static void ublox_scene_data_display_config_set_backlight_mode(VariableItem* ite
     (ublox->data_display_state).backlight_mode = backlight_mode_value[index];
 
     if((ublox->data_display_state).backlight_mode == UbloxDataDisplayBacklightOn) {
-	// backlight on
-	notification_message_block(ublox->notifications, &sequence_display_backlight_enforce_on);
+        // backlight on
+        notification_message_block(ublox->notifications, &sequence_display_backlight_enforce_on);
     } else if((ublox->data_display_state).backlight_mode == UbloxDataDisplayBacklightDefault) {
-	// backlight default
-	notification_message_block(ublox->notifications, &sequence_display_backlight_enforce_auto);
+        // backlight default
+        notification_message_block(ublox->notifications, &sequence_display_backlight_enforce_auto);
     }
 }
 
