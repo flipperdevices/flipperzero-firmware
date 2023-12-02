@@ -40,10 +40,10 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [u-blox GPS v0.3 (By liamhays)](https://github.com/liamhays/ublox)
 - OFW: [HID app: Add new function key icons #3236 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3236)
 - OFW: [Add the 'remove pairing' button to BLE hid #3237 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3237)
-- Updated: [Hangman v1.5 (By Evgeny Stepanischev & Eva Stepanischeva)](https://github.com/bolknote/Flipper-Zero-Hangman-Game)
 - [Animations: Faster Code & Free Manifest List on Exit (By LeeroysHub)](https://github.com/LeeroysHub/RM-Flipper/commit/368aa032ec80aa47c8dc782a2b2729b4c4ea6c99)
 - OFW: [SubGhz: fix count bit for detect gate_tx protocol #3253 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/3253)
 - Updated: [Sub-GHz Playlist (By darmiel)](https://github.com/darmiel/flipper-playlist) Fix some subghz playlist memory leaks (By Willy-JL)
+- Updated: [Hangman v1.5 (By Evgeny Stepanischev & Eva Stepanischeva)](https://github.com/bolknote/Flipper-Zero-Hangman-Game)
 
 <a name="release">
 
