@@ -982,6 +982,7 @@ void CommandLine::runCommand(String input) {
         gameboy_advance_cartridge.headerROM_GBA(true);
       }
     } else if(cmd_args.get(0) == GAMEBOY_LIVE_CAMERA_CMD) {
+      
       int cont_sw = this->argSearch(&cmd_args, "-E");
       if (cont_sw == -1) {
         cont_sw = this->argSearch(&cmd_args, "-e");
@@ -990,9 +991,14 @@ void CommandLine::runCommand(String input) {
           if(cont_sw == -1) {
             cont_sw = this->argSearch(&cmd_args, "-d");
             if(cont_sw == -1) {
-              //  Start
-              gameboy_live_camera.start();
-              delay(400);
+              cont_sw = this->argSearch(&cmd_args, "-T");
+              if (cont_sw == -1) {
+                //  Start
+                gameboy_live_camera.start();
+                delay(400);
+              } else {
+                gameboy_live_camera.taked_picture = true;
+              }
             } else {
               gameboy_live_camera.disableDithering();
             }

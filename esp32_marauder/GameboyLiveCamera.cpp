@@ -1,7 +1,7 @@
 #include "GameboyLiveCamera.h"
 
 unsigned char raw_buffer[FRAME_SIZE]; // max( 16*8*14*8, 16*14*16 ) sensor pixels , tile bytes
-static uint8_t GBCAM_BUFFER[GBCAM_W * GBCAM_H];
+static unsigned char GBCAM_BUFFER[14336];
 
 HardwareSerial Serial3(3);
 
@@ -24,6 +24,7 @@ void GameboyLiveCamera::start()
     this->unk3 = 0xBF;
     this->dithering = true;
     this->rotate90 = false;
+    this->taked_picture = false;
 
     pinMode(GAMEBOY_RST, OUTPUT);
     pinMode(GAMEBOY_CLK, OUTPUT);
@@ -222,7 +223,6 @@ void GameboyLiveCamera::readPicture(bool is_thumbnail)
         i++;
     }
     const int gb_pal_colors[4] = {255, 168, 80, 0};
-    //  Envía imagen pero quedan columnas separadas
     int y, x;
     for (uint8_t y = 0; y < GBCAM_H; y++)
     {
@@ -243,20 +243,36 @@ void GameboyLiveCamera::readPicture(bool is_thumbnail)
                 int x_ = 7 - ((x + (7 - j)) & 7);
 
                 int color = ((data >> x_) & 1) | (((data2 >> x_) << 1) & 2);
-
                 // Check if the color is 2 or 3
-                if (color == 2 || color == 3)
+                if (color == 2 || color == 3) 
                 {
-                    c |= 1 << j;
+                    c |= 1 << j; // (Black color)
                 }
                 else
                 {
-                    c &= ~(1 << j); // Establece el bit j en 0
+                    c &= ~(1 << j); // Establece el bit j en 0 (White color)
+                }
+                if(this->taked_picture) {
+                    int bufindex = (y*GBCAM_W+x+j);
+                    GBCAM_BUFFER[bufindex] = gb_pal_colors[color];
                 }
             }
             Serial1.print(c); // Imprimir el valor de c para colores 2 o 3
         }
         Serial1.flush();
+    }
+     if(this->taked_picture) {
+        Serial.print("JSON:{\"type\":\"gbcampicture\",\"data\":[");
+        for (uint16_t i = 0; i <= sizeof(raw_buffer); i++)
+        {
+            Serial.print(raw_buffer[i]);
+            if(i < sizeof(raw_buffer) -1) {
+                Serial.print(",");
+            }
+        }
+        Serial.print("]}");
+        Serial.println();
+        this->taked_picture = false;
     }
     this->setWaitMode();
 }
