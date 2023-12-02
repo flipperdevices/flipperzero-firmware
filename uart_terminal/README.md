@@ -1,4 +1,4 @@
-# UART Terminal for Flipper Zero
+# UART Terminal for Flipper Zero 
 [Flipper Zero](https://flipperzero.one/) app to control various devices via UART interface.
 ## Download fap
 | **FW Official** | **FW Unleashed** |
@@ -42,7 +42,6 @@ Copy the contents of the repository to the applications_user/uart_terminal folde
 
 Or use the tool [uFBT](https://github.com/flipperdevices/flipperzero-ufbt) for building applications for Flipper Zero.
 
-Download ready [fap](https://github.com/playmean/fap-list)
 
 ## How it works
 
@@ -53,6 +52,7 @@ Download ready [fap](https://github.com/playmean/fap-list)
 ![2f](https://user-images.githubusercontent.com/122148894/211161456-4d2be15b-4a05-4450-a62e-edcaab3772fd.jpg)
 
 
+![4f](https://user-images.githubusercontent.com/122148894/211161461-4507120b-42df-441f-9e01-e4517aa83537.jpg)
 
 ## INFO:
 

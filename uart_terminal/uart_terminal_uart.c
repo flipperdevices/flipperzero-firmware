@@ -48,7 +48,6 @@ static int32_t uart_worker(void* context) {
         }
     }
 
-    furi_hal_uart_set_irq_cb(UART_CH, NULL, NULL);
     furi_stream_buffer_free(uart->rx_stream);
 
     return 0;
