@@ -3,7 +3,7 @@
 #include <furi_hal.h>
 #include <notification/notification_messages.h>
 
-#include <xtreme.h>
+#include <xtreme/xtreme.h>
 
 #define UART_CH \
     (xtreme_settings.uart_nmea_channel == UARTDefault ? FuriHalUartIdUSART1 : FuriHalUartIdLPUART1)

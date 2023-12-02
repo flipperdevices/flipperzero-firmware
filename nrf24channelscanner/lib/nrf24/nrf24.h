@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <furi_hal_spi.h>
 #if __has_include("xtreme.h") 
-#include <xtreme.h>
+#include <xtreme/xtreme.h>
 #endif
 
 #ifdef __cplusplus

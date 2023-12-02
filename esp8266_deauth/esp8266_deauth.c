@@ -11,7 +11,7 @@
 //#include <notification/notification_messages.h>
 //#include <stdlib.h>
 
-#include <xtreme.h>
+#include <xtreme/xtreme.h>
 
 #include "FlipperZeroWiFiDeauthModuleDefines.h"
 

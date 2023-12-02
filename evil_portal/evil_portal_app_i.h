@@ -16,7 +16,7 @@
 #include <gui/view_stack.h>
 #include <dialogs/dialogs.h>
 
-#include <xtreme.h>
+#include <xtreme/xtreme.h>
 
 #define NUM_MENU_ITEMS (6)
 

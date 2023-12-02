@@ -6,7 +6,7 @@
 #include <notification/notification_messages.h>
 #include <assets_icons.h>
 #include <toolbox/stream/file_stream.h>
-#include <xtreme.h>
+#include <xtreme/xtreme.h>
 
 #include "helpers/minmea.h"
 #include "wardriver_icons.h"

@@ -2,7 +2,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <furi_hal_spi.h>
-#include <xtreme.h>
+#include <xtreme/xtreme.h>
 
 #ifdef __cplusplus
 extern "C" {

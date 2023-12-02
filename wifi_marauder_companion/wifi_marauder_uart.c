@@ -1,7 +1,7 @@
 #include "wifi_marauder_app_i.h"
 #include "wifi_marauder_uart.h"
 
-#include <xtreme.h>
+#include <xtreme/xtreme.h>
 #define XTREME_UART_CH \
     (xtreme_settings.uart_esp_channel == UARTDefault ? FuriHalUartIdUSART1 : FuriHalUartIdLPUART1)
 bool xtreme_uart = false;

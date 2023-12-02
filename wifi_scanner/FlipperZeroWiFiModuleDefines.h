@@ -16,7 +16,7 @@
 
 #define NA 0
 
-#include <xtreme.h>
+#include <xtreme/xtreme.h>
 
 #define UART_CH \
     (xtreme_settings.uart_esp_channel == UARTDefault ? FuriHalUartIdUSART1 : FuriHalUartIdLPUART1)
