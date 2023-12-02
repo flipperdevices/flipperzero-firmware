@@ -123,7 +123,7 @@ bool hex_viewer_open_file(void* context, const char* file_path) {
     // TODO Separate function?
     if(hex_viewer->model->stream) {
         buffered_file_stream_close(hex_viewer->model->stream);
-        stream_free(hex_viewer->model->stream); // TODO Check
+        stream_free(hex_viewer->model->stream);
         hex_viewer->model->file_offset = 0;
     }
 
