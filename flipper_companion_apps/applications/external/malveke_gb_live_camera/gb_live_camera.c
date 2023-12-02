@@ -40,7 +40,8 @@ void get_timefilename(FuriString* name) {
     furi_hal_rtc_get_datetime(&datetime);
     furi_string_printf(
         name,
-        EXT_PATH("DCIM/%.4d%.2d%.2d-%.2d%.2d%.2d.bmp"),
+        "%s/%.4d%.2d%.2d-%.2d%.2d%.2d.bmp",
+        MALVEKE_APP_FOLDER_PHOTOS,
         datetime.year,
         datetime.month,
         datetime.day,
@@ -61,8 +62,16 @@ static void save_image(void* context) {
     // storage_file_alloc gives to us a File pointer using the Storage API.
     File* file = storage_file_alloc(storage);
 
-    if(storage_common_stat(storage, IMAGE_FILE_DIRECTORY_PATH, NULL) == FSE_NOT_EXIST) {
-        storage_simply_mkdir(storage, IMAGE_FILE_DIRECTORY_PATH);
+    // if(storage_common_stat(storage, IMAGE_FILE_DIRECTORY_PATH, NULL) == FSE_NOT_EXIST) {
+    //     storage_simply_mkdir(storage, IMAGE_FILE_DIRECTORY_PATH);
+    // }
+     //  Create MALVEKE dir
+    if(storage_common_stat(storage, MALVEKE_APP_FOLDER, NULL) == FSE_NOT_EXIST) {
+        storage_simply_mkdir(storage, MALVEKE_APP_FOLDER);
+    }
+    //  Create MALVEKE Photos dir
+    if(storage_common_stat(storage, MALVEKE_APP_FOLDER_PHOTOS, NULL) == FSE_NOT_EXIST) {
+        storage_simply_mkdir(storage, MALVEKE_APP_FOLDER_PHOTOS);
     }
 
     // create file name
