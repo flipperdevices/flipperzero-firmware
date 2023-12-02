@@ -47,6 +47,8 @@ function onLog() {
         <DeviceWidget :manifest="manifest" @update-state="onUpdateState" @log="onLog"></DeviceWidget>
       </Dialog>
     </div>
+
+    <canvas id="confetti-canvas"></canvas>
   </div>
 </template>
 

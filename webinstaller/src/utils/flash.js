@@ -6,6 +6,8 @@ import {
 import { sleep } from "./sleep";
 import { Terminal } from "xterm";
 import { FitAddon } from 'xterm-addon-fit';
+import ConfettiGenerator from "confetti-js";
+
 
 
 const resetTransport = async (transport) => {
@@ -265,4 +267,9 @@ export const flash = async (
     state: FlashStateType.FINISHED,
     message: "All done!",
   });
+  const confetti = new ConfettiGenerator({target: 'confetti-canvas'});
+  confetti.render();
+  setTimeout(()=> {
+    confetti.clear();
+  },5000);
 };

@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "confetti-js": "^0.0.18",
     "esptool-js": "^0.3.1",
     "improv-wifi-serial-sdk": "^2.5.0",
     "vue": "^3.3.4",
