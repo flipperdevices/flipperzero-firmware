@@ -670,6 +670,22 @@ void GameBoyCartridge::rd_wr_mreq_off(void)
 
 void GameBoyCartridge::readROM_GB()
 {
+    // buffer_obj = Buffer();
+    this->writtingRAM = false;
+    this->writtingROM = false;
+    this->lastByte = 0;
+    this->cartridgeType = 0;
+    this->romSize = 0;
+    this->romBanks = 0;
+    this->ramSize = 0;
+    this->ramBanks = 0;
+    this->sramSize = 0;
+    this->romEndAddress = 0x7FFF;
+    this->sramBanks = 0;
+    this->romType = 0;
+    this->currentBank = 0;
+
+    this->headerROM_GB(false);
     transferJSON.clear();
     this->romEndAddress = 0x7FFF;
     this->romAddress = 0;
@@ -884,6 +900,18 @@ byte GameBoyCartridge::readByteSRAM_GB(uint16_t myAddress)
     __asm__("nop\n\t"
             "nop\n\t"
             "nop\n\t"
+            "nop\n\t"
+            "nop\n\t"
+            "nop\n\t"
+            "nop\n\t"
+            "nop\n\t"
+            "nop\n\t"
+            "nop\n\t"
+            "nop\n\t"
+            "nop\n\t"
+            "nop\n\t"
+            "nop\n\t"
+            "nop\n\t"
             "nop\n\t");
     // Pull CS, CLK (for FRAM MOD) LOW
     cs_mreqPin_low;
@@ -896,6 +924,18 @@ byte GameBoyCartridge::readByteSRAM_GB(uint16_t myAddress)
     phiPin_low;
 
     __asm__("nop\n\t"
+            "nop\n\t"
+            "nop\n\t"
+            "nop\n\t"
+            "nop\n\t"
+            "nop\n\t"
+            "nop\n\t"
+            "nop\n\t"
+            "nop\n\t"
+            "nop\n\t"
+            "nop\n\t"
+            "nop\n\t"
+            "nop\n\t"
             "nop\n\t"
             "nop\n\t"
             "nop\n\t");
@@ -927,11 +967,40 @@ byte GameBoyCartridge::readByteSRAM_GB(uint16_t myAddress)
     __asm__("nop\n\t"
             "nop\n\t"
             "nop\n\t"
+            "nop\n\t"
+            "nop\n\t"
+            "nop\n\t"
+            "nop\n\t"
+            "nop\n\t"
+            "nop\n\t"
+            "nop\n\t"
+            "nop\n\t"
+            "nop\n\t"
+            "nop\n\t"
+            "nop\n\t"
+            "nop\n\t"
             "nop\n\t");
     return tempByte;
 }
 void GameBoyCartridge::readSRAM_GB()
 {
+    // buffer_obj = Buffer();
+    this->writtingRAM = false;
+    this->writtingROM = false;
+    this->lastByte = 0;
+    this->cartridgeType = 0;
+    this->romSize = 0;
+    this->romBanks = 0;
+    this->ramSize = 0;
+    this->ramBanks = 0;
+    this->sramSize = 0;
+    this->romEndAddress = 0x7FFF;
+    this->sramBanks = 0;
+    this->romType = 0;
+    this->currentBank = 0;
+
+
+    this->headerROM_GB(false);
     transferJSON.clear();
     // Initialize progress bar
     this->processedProgressBar = 0;
@@ -1724,8 +1793,8 @@ void GameBoyCartridge::main()
                 // Serial1.write(sdBuffer, 512);
                 Serial.write(sdBuffer, 512);
                 // Serial.flush();
-                this->romAddress += 1;
-                this->processedProgressBar += 1;
+                this->romAddress += 512;
+                this->processedProgressBar += 512;
 
                 
                 // transferJSON["transfered"] = this->processedProgressBar;
