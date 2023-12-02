@@ -1,5 +1,14 @@
 # FlipKeyboard
 
+- [Overview](#overview)
+- [Configuration](#configuration)
+- [Running the app](#running-the-app)
+- [Tutorials](#tutorials)
+  - [Video tutorials](#video-tutorials)
+  - [Written tutorials](#written-tutorials)
+
+## Overview
+
 <img src="./gallery/01-key-main-menu.png" width="200px">
 
 The FlipKeyboard application turns your Flipper Zero into a musical, light-up keyboard, that connects via USB to a computer. It uses the FlipBoard to provide the keys and the LEDs. The application is written in C and uses the flipboard common code for the majority of the functionality.
