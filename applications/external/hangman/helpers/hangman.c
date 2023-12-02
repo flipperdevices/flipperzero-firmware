@@ -138,11 +138,11 @@ void hangman_draw_menu(Canvas* canvas, HangmanApp* app) {
 
     CONST txt_x = (canvas_width(canvas) - max_txt_w) / 2;
 
-    if (menu_cnt > HANGMAN_MAX_MENU_SIZE) {
+    if(menu_cnt > HANGMAN_MAX_MENU_SIZE) {
         elements_scrollbar(canvas, app->menu_item, menu_cnt);
     }
 
-    for (uint8_t i = 0; i < rows; i++) {
+    for(uint8_t i = 0; i < rows; i++) {
         CONST txt_y = y + (i + 1) * txt_h;
         CONST menu_item = app->menu_frame_position + i;
 
