@@ -3,7 +3,7 @@
 #define HANGMAN_GALLOWS_MAX_STATE 7
 #define HANGMAN_GALLOWS_INIT_STATE 0
 #define HANGMAN_MAX_ALP_SIZE 0xFF
-#define HANGMAN_MAX_MENU_SIZE 5
+#define HANGMAN_MAX_MENU_SIZE 3U
 
 #define HANGMAN_MENU_FILE APP_ASSETS_PATH("menu.txt")
 
@@ -62,6 +62,7 @@ typedef struct {
     HangmanLangConfig* lang;
     bool menu_show;
     int8_t menu_item;
+    uint8_t menu_frame_position;
     size_t menu_cnt;
     char** menu;
 } HangmanApp;
