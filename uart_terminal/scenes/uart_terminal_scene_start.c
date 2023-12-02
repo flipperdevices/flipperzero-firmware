@@ -148,23 +148,23 @@ bool uart_terminal_scene_start_on_event(void* context, SceneManagerEvent event) 
         if(event.event == UART_TerminalEventSetup) {
             scene_manager_set_scene_state(
                 app->scene_manager, UART_TerminalSceneStart, app->selected_menu_index);
-            scene_manager_next_scene(app->scene_manager, UART_TerminalAppViewSetup);
+            scene_manager_next_scene(app->scene_manager, UART_TerminalSceneSetup);
         } else if(event.event == UART_TerminalEventStartKeyboardText) {
             scene_manager_set_scene_state(
                 app->scene_manager, UART_TerminalSceneStart, app->selected_menu_index);
-            scene_manager_next_scene(app->scene_manager, UART_TerminalAppViewTextInput);
+            scene_manager_next_scene(app->scene_manager, UART_TerminalSceneTextInput);
         } else if(event.event == UART_TerminalEventStartKeyboardHex) {
             scene_manager_set_scene_state(
                 app->scene_manager, UART_TerminalSceneStart, app->selected_menu_index);
-            scene_manager_next_scene(app->scene_manager, UART_TerminalAppViewHexInput);
+            scene_manager_next_scene(app->scene_manager, UART_TerminalSceneHexInput);
         } else if(event.event == UART_TerminalEventStartConsole) {
             scene_manager_set_scene_state(
                 app->scene_manager, UART_TerminalSceneStart, app->selected_menu_index);
-            scene_manager_next_scene(app->scene_manager, UART_TerminalAppViewConsoleOutput);
+            scene_manager_next_scene(app->scene_manager, UART_TerminalSceneConsoleOutput);
         } else if(event.event == UART_TerminalEventStartHelp) {
             scene_manager_set_scene_state(
                 app->scene_manager, UART_TerminalSceneStart, app->selected_menu_index);
-            scene_manager_next_scene(app->scene_manager, UART_TerminalAppViewHelp);
+            scene_manager_next_scene(app->scene_manager, UART_TerminalSceneHelp);
         }
         consumed = true;
     } else if(event.type == SceneManagerEventTypeTick) {

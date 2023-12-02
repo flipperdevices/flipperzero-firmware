@@ -33,7 +33,6 @@ struct UART_TerminalApp {
     ByteInput* hex_input;
     Widget* widget;
     VariableItemList* var_item_list;
-    VariableItemList* setup_var_item_list;
     UART_TerminalUart* uart;
 
     int setup_selected_menu_index;
@@ -54,7 +53,6 @@ struct UART_TerminalApp {
 
 typedef enum {
     UART_TerminalAppViewVarItemList,
-    UART_TerminalAppViewSetup,
     UART_TerminalAppViewConsoleOutput,
     UART_TerminalAppViewTextInput,
     UART_TerminalAppViewHexInput,

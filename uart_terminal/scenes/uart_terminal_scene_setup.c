@@ -65,7 +65,7 @@ static void uart_terminal_scene_setup_var_list_change_callback(VariableItem* ite
 
 void uart_terminal_scene_setup_on_enter(void* context) {
     UART_TerminalApp* app = context;
-    VariableItemList* var_item_list = app->setup_var_item_list;
+    VariableItemList* var_item_list = app->var_item_list;
 
     variable_item_list_set_enter_callback(
         var_item_list, uart_terminal_scene_setup_var_list_enter_callback, app);
@@ -86,7 +86,7 @@ void uart_terminal_scene_setup_on_enter(void* context) {
     variable_item_list_set_selected_item(
         var_item_list, scene_manager_get_scene_state(app->scene_manager, UART_TerminalSceneSetup));
 
-    view_dispatcher_switch_to_view(app->view_dispatcher, UART_TerminalAppViewSetup);
+    view_dispatcher_switch_to_view(app->view_dispatcher, UART_TerminalAppViewVarItemList);
 }
 
 bool uart_terminal_scene_setup_on_event(void* context, SceneManagerEvent event) {
@@ -97,7 +97,7 @@ bool uart_terminal_scene_setup_on_event(void* context, SceneManagerEvent event) 
     if(event.type == SceneManagerEventTypeCustom) {
         consumed = true;
     } else if(event.type == SceneManagerEventTypeTick) {
-        app->setup_selected_menu_index = variable_item_list_get_selected_item_index(app->setup_var_item_list);
+        app->setup_selected_menu_index = variable_item_list_get_selected_item_index(app->var_item_list);
         consumed = true;
     }
 
@@ -106,5 +106,5 @@ bool uart_terminal_scene_setup_on_event(void* context, SceneManagerEvent event) 
 
 void uart_terminal_scene_setup_on_exit(void* context) {
     UART_TerminalApp* app = context;
-    variable_item_list_reset(app->setup_var_item_list);
+    variable_item_list_reset(app->var_item_list);
 }

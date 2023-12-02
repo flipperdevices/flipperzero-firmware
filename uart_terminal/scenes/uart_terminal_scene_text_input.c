@@ -53,7 +53,7 @@ bool uart_terminal_scene_text_input_on_event(void* context, SceneManagerEvent ev
         if(event.event == UART_TerminalEventStartConsole) {
             // Point to custom string to send
             app->selected_tx_string = app->text_input_store;
-            scene_manager_next_scene(app->scene_manager, UART_TerminalAppViewConsoleOutput);
+            scene_manager_next_scene(app->scene_manager, UART_TerminalSceneConsoleOutput);
             consumed = true;
         }
     }
