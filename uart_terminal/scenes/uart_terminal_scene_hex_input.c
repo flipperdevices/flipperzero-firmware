@@ -10,16 +10,16 @@ void uart_terminal_scene_hex_input_on_enter(void* context) {
     UART_TerminalApp* app = context;
 
     // Setup view
-    UART_TextInput* text_input = app->hex_input;
+    ByteInput* hex_input = app->hex_input;
     // Add help message to header
-    uart_hex_input_set_header_text(text_input, "Send HEX packet to UART");
-    uart_hex_input_set_result_callback(
-        text_input,
+    byte_input_set_header_text(hex_input, "Send HEX packet to UART");
+    byte_input_set_result_callback(
+        hex_input,
         uart_terminal_scene_hex_input_callback,
+        NULL,
         app,
         app->text_input_store,
-        UART_TERMINAL_TEXT_INPUT_STORE_SIZE,
-        false);
+        UART_TERMINAL_TEXT_INPUT_STORE_SIZE);
 
     view_dispatcher_switch_to_view(app->view_dispatcher, UART_TerminalAppViewHexInput);
 }
@@ -43,5 +43,6 @@ bool uart_terminal_scene_hex_input_on_event(void* context, SceneManagerEvent eve
 void uart_terminal_scene_hex_input_on_exit(void* context) {
     UART_TerminalApp* app = context;
 
-    uart_hex_input_reset(app->text_input);
+    byte_input_set_result_callback(app->hex_input, NULL, NULL, NULL, NULL, 0);
+    byte_input_set_header_text(app->hex_input, "");
 }
