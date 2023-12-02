@@ -10,7 +10,7 @@
 #include <furi_hal_power.h>
 #include <locale/locale.h>
 #include <toolbox/crc32_calc.h>
-#include <lib/toolbox/md5.h>
+#include "helpers/md5.h"
 
 #define SCREEN_SIZE_X 128
 #define SCREEN_SIZE_Y 64

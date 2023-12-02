@@ -1,6 +1,6 @@
 #include <furi_hal.h>
 #include <lib/mlib/m-dict.h>
-#include <toolbox/sha256.h>
+#include "helpers/sha256.h"
 
 #ifndef FURI_HAL_CRYPTO_ADVANCED_AVAIL
 #include "crypto/gcm.h"
