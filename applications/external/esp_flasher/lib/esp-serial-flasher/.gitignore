@@ -1,6 +1,0 @@
-build
-sdkconfig
-sdkconfig.old
-empty_file.bin
-binaries.c
-*.lock

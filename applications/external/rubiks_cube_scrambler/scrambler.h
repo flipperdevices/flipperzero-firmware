@@ -1,2 +1,0 @@
-void scrambleReplace();
-char* printData();
