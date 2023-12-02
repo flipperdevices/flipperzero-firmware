@@ -29,8 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM1201-0111-0.93.9-1bb504e](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-12-02 00:49 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-12-02 00:49 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-12-02 01:11 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-12-02 01:11 EST`
 - Updated: [BLE Spam v4.4 (By Willy-JL & ECTO-1A & Spooks4576 with research from xMasterX; OFW API thanks to noproto)](https://github.com/noproto/apple_ble_spam_ofw)
 - Variable List Item Get Function, Variable List Item Set Header Function & CFW App Scene Refresh Cleanup (By Willy-JL)
 - Updated: [UART Terminal v1.3 (By cool4uma)](https://github.com/cool4uma/UART_Terminal) [Hex mode in UART Terminal #32 (By rnadyrshin)](https://github.com/xMasterX/all-the-plugins/pull/32)
@@ -105,6 +105,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [Ntag21x write #3246 (By RebornedBrain)](https://github.com/flipperdevices/flipperzero-firmware/pull/3246)
 - Refactor Update: [Enhanced Sub-Ghz Chat v1.2 (By twisted-pear)](https://github.com/twisted-pear/esubghz_chat) - [(Changes By xMasterX)](https://github.com/xMasterX/all-the-plugins/commit/89e22ac9500886f98a7e96934686235f239767ef) [More Rework (By xMasterX)](https://github.com/xMasterX/all-the-plugins/commit/ca7b2113197312304a12e39c851d9bd2cd92583e)
 - Updated: [Atomic Dice Roller v1.1 (By nmrr)](https://github.com/nmrr/flipperzero-atomicdiceroller) [Rework (By xMasterX)](https://github.com/xMasterX/all-the-plugins/commit/84c97f69d9d1e03ea4ebe28b78f9bbd27f214511)
+- Updated: [Temp Sensors Reader 1.5 (By quen0n)](https://github.com/quen0n/Unitemp-Flipper-Zero-Plugin) [Changes From xMasterX](https://github.com/xMasterX/all-the-plugins/tree/dev/base_pack/unitemp)
 
 <a name="release">
 

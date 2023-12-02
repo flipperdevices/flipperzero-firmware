@@ -42,7 +42,7 @@
 //Версия приложения
 #define UNITEMP_APP_VER "1.4"
 //Путь хранения файлов плагина
-#define APP_PATH_FOLDER EXT_PATH("apps_data/unitemp")
+#define APP_PATH_FOLDER "/ext/apps_data/unitemp"
 //Имя файла с настройками
 #define APP_FILENAME_SETTINGS "settings.cfg"
 //Имя файла с датчиками
@@ -67,6 +67,7 @@ typedef enum {
     UT_PRESSURE_MM_HG,
     UT_PRESSURE_IN_HG,
     UT_PRESSURE_KPA,
+    UT_PRESSURE_HPA,
 
     UT_PRESSURE_COUNT
 } pressureMeasureUnit;
@@ -143,6 +144,12 @@ void unitemp_pascalToKPa(Sensor* sensor);
  * @brief Конвертация давления из паскалей в дюйм рт.ст.
  * 
  * @param sensor Указатель на датчик
+ */
+void unitemp_pascalToHPa(Sensor* sensor);
+/**
+ * 
+ * Mod BySepa - linktr.ee/BySepa
+ * 
  */
 void unitemp_pascalToInHg(Sensor* sensor);
 
