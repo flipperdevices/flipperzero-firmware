@@ -13,7 +13,7 @@
 #include <notification/notification_messages.h>
 // #include <lib/nfc/nfc_worker.h>
 #include <lib/subghz/subghz_tx_rx_worker.h>
-#include <toolbox/sha256.h>
+#include <mbedtls/sha256.h>
 
 #include "crypto_wrapper.h"
 #include "scenes/esubghz_chat_scene.h"
