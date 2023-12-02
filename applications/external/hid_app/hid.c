@@ -71,11 +71,11 @@ static void hid_submenu_callback(void* context, uint32_t index) {
     } else if(index == HidSubmenuIndexCamera) {
         app->view_id = HidViewCamera;
         view_dispatcher_switch_to_view(app->view_dispatcher, HidViewCamera);
-    } else if(index == HidSubmenuIndexRemovePairing) {
-        bt_hid_remove_pairing(app->bt);
     } else if(index == HidSubmenuIndexPushToTalk) {
         app->view_id = HidViewPushToTalkMenu;
         view_dispatcher_switch_to_view(app->view_dispatcher, HidViewPushToTalkMenu);
+    } else if(index == HidSubmenuIndexRemovePairing) {
+        bt_hid_remove_pairing(app->bt);
     }
 }
 
