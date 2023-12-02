@@ -1,9 +1,14 @@
 #!/bin/bash
 set -e
 
+if [ "$(git rev-parse --show-prefix)" != "" ]; then
+    echo "Must be in root of git repo!"
+    exit
+fi
+
 if [ "$1" = "" ] || [ "$2" = "" ]; then
-    echo "Usage 1: git add-subtree <path> <repo url> <branch> [subdir]"
-    echo "Usage 2: git add-subtree <path> <repo url>/tree/<branch>[/subdir]"
+    echo "Usage 1: <path> <repo url> <branch> [subdir]"
+    echo "Usage 2: <path> <repo url>/tree/<branch>[/subdir]"
     exit
 fi
 path="${1%/}"

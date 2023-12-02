@@ -1,6 +1,11 @@
 #!/bin/bash
 set -e
 
+if [ "$(git rev-parse --show-prefix)" != "" ]; then
+    echo "Must be in root of git repo!"
+    exit
+fi
+
 if [ "${1}" = "" ] || [ "${2}" = "" ] || [ "${3}" = "" ] || [ "${4}" = "" ] || [ "${5}" = "" ]; then
     echo "Usage: <path> <repo url> <branch> <subdir> <action>"
     exit

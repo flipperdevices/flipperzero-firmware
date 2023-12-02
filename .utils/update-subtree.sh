@@ -1,7 +1,17 @@
 #!/bin/bash
 set -e
 
-path="${GIT_PREFIX%/}"
+if [ "$(git rev-parse --show-prefix)" != "" ]; then
+    echo "Must be in root of git repo!"
+    exit
+fi
+
+if [ "${1}" = "" ]; then
+    echo "Usage: <path>"
+    exit
+fi
+path="${1}"
+
 while read repo branch subdir; do
     if [ "${repo:0:1}" = "#" ]; then
         continue
@@ -18,4 +28,4 @@ while read repo branch subdir; do
             sleep 1
         done
     fi
-done < "${GIT_PREFIX}.gitsubtree"
+done < "${path}/.gitsubtree"

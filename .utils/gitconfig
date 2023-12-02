@@ -1,4 +1,0 @@
-[alias]
-    add-subtree = "!bash .utils/add-subtree.sh"
-    update-subtree = "!bash .utils/update-subtree.sh"
-    bulk-update-subtrees = "!bash .utils/bulk-update-subtrees.sh"
