@@ -1,3 +1,13 @@
+## v1.3
+- New systems in RFID Fuzzer:
+    - IoProxXSF
+    - Paradox
+    - Indala26
+    - Viking
+    - Pyramid
+    - Keri
+    - Jablotron
+- Fixes for new API
 ## v1.2
 - Fixes for new auto-naming system
 ## v1.1
