@@ -119,7 +119,7 @@ static const ContinuityColor colors_beats_fit_pro[] = {
     {0x02, "Pink"},
     {0x03, "Grey/White"},
     {0x04, "Full Pink"},
-    {0x05 "Neon Green"},
+    {0x05, "Neon Green"},
     {0x06, "Night Blue"},
     {0x07, "Light Pink"},
     {0x08, "Brown"},
