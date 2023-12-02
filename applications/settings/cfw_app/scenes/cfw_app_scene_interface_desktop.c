@@ -29,10 +29,13 @@ const uint32_t displayBatteryPercentage_value[BATTERY_VIEW_COUNT] = {
 
 uint8_t origBattDisp_value = 0;
 
-//This can move to the model later if needed, but ^^ Battery gets away with it and I dont see the problem with a "global" in a FAP (except for convention)
-uint8_t ManifestFileCount;
-CharList_t ManifestFileNames;
-CharList_t ManifestMenuNames;
+//Dolphin Manifest Switcher menu.
+struct ManifestInfo {
+    char* FileName;
+    char* MenuName;
+};
+uint8_t ManifestFileCount; //Anymore than 255 manifests and kaboom!
+ManifestFilesArray_t ManifestFiles;
 
 #define CFW_DESKTOP_ICON_STYLE_COUNT 2
 
@@ -72,8 +75,9 @@ static void cfw_app_scene_interface_desktop_var_item_list_callback(void* context
 static void cfw_app_scene_interface_desktop_anim_style_changed(VariableItem* item) {
     CfwApp* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
-    variable_item_set_current_value_text(item, *CharList_get(ManifestMenuNames, index));
-    CFW_SETTINGS()->manifest_name = *CharList_get(ManifestFileNames, index);
+    ManifestInfo* CurrentManifest = *ManifestFilesArray_get(ManifestFiles, index);
+    variable_item_set_current_value_text(item, CurrentManifest->MenuName);
+    CFW_SETTINGS()->manifest_name = CurrentManifest->FileName;
     app->save_settings = true;
 }
 
@@ -170,8 +174,7 @@ void cfw_app_scene_interface_desktop_on_enter(void* context) {
 
     //Initialization.
     ManifestFileCount = 0;
-    CharList_init(ManifestFileNames);
-    CharList_init(ManifestMenuNames);
+    ManifestFilesArray_init(ManifestFiles);
 
     //Open up Storage.
     Storage* storage = furi_record_open(RECORD_STORAGE);
@@ -184,29 +187,35 @@ void cfw_app_scene_interface_desktop_on_enter(void* context) {
     if(storage_dir_open(folder, EXT_PATH("dolphin"))) {
         while(storage_dir_read(folder, &info, name, FILE_NAME_LEN_MAX)) {
             if(!(info.flags & FSF_DIRECTORY)) {
-                //Get a FuriString for all the string operations.
-                char* filenametmp = strdup(name);
+                //Create the struct to add to the array of Manifests.
+                ManifestInfo* NewManifestInfo = malloc(sizeof(ManifestInfo));
+                NewManifestInfo->FileName = strdup(name);
 
                 //Are we on a manifest>
-                if(strncasecmp(filenametmp, "manifest", 8) == 0) {
-                    if(strlen(filenametmp) == 12) {
+                if(strncasecmp(NewManifestInfo->FileName, "manifest", 8) == 0) {
+                    if(strlen(NewManifestInfo->FileName) == 12) {
+                        //Default Manifest on every Flipper (You'd Hope!)
+                        NewManifestInfo->MenuName = "Default";
+
                         //Add to the list of names.
-                        CharList_push_back(ManifestFileNames, filenametmp);
-                        CharList_push_back(ManifestMenuNames, "Default");
+                        ManifestFilesArray_push_back(ManifestFiles, NewManifestInfo);
                         ManifestFileCount++;
                     } else {
                         //Allocate memory for the menuname
-                        char* menuname = malloc(strlen(filenametmp) - 12);
-                        snprintf(menuname, strlen(filenametmp) - 12, "%s", filenametmp + 9);
+                        NewManifestInfo->MenuName = malloc(strlen(NewManifestInfo->FileName) - 12);
+                        snprintf(
+                            NewManifestInfo->MenuName,
+                            strlen(NewManifestInfo->FileName) - 12,
+                            "%s",
+                            NewManifestInfo->FileName + 9);
 
                         //Sanity Check.
-                        if(strcmp(menuname, "") != 0) {
-                            //Add to the list of names.
-                            CharList_push_at(ManifestFileNames, ManifestFileCount, filenametmp);
-                            CharList_push_at(ManifestMenuNames, ManifestFileCount, menuname);
+                        if(strcmp(NewManifestInfo->MenuName, "") != 0) {
+                            //Add to the list of Manifests.
+                            ManifestFilesArray_push_back(ManifestFiles, NewManifestInfo);
 
                             //Select in menu if its our manifest.
-                            if(strcmp(filenametmp, cfw_settings->manifest_name) == 0)
+                            if(strcmp(NewManifestInfo->FileName, cfw_settings->manifest_name) == 0)
                                 current_manifest = ManifestFileCount;
 
                             //Count the added Files.
@@ -230,7 +239,8 @@ void cfw_app_scene_interface_desktop_on_enter(void* context) {
         cfw_app_scene_interface_desktop_anim_style_changed,
         app);
     variable_item_set_current_value_index(item, current_manifest);
-    variable_item_set_current_value_text(item, *CharList_get(ManifestMenuNames, current_manifest));
+    ManifestInfo* CurrentManifest = *ManifestFilesArray_get(ManifestFiles, current_manifest);
+    variable_item_set_current_value_text(item, CurrentManifest->MenuName);
 
     item = variable_item_list_add(
         var_item_list,
@@ -406,6 +416,14 @@ void cfw_app_scene_interface_desktop_on_exit(void* context) {
     CfwApp* app = context;
     variable_item_list_reset(app->var_item_list);
     DESKTOP_SETTINGS_SAVE(&app->desktop);
+
+    //Free the Manifest List.
+    ManifestFilesArray_it_t ManifestFiles_it;
+    for(ManifestFilesArray_it(ManifestFiles_it, ManifestFiles);
+        !ManifestFilesArray_end_p(ManifestFiles_it);
+        ManifestFilesArray_next(ManifestFiles_it)) {
+        free(*ManifestFilesArray_cref(ManifestFiles_it));
+    }
 
     if((app->desktop.icon_style != origIconStyle_value) ||
        (app->desktop.displayBatteryPercentage != origBattDisp_value)) {
