@@ -10,7 +10,7 @@
 #include <furi_hal_power.h>
 #include <locale/locale.h>
 #include <toolbox/crc32_calc.h>
-#include "helpers/md5.h"
+#include <mbedtls/md5.h>
 
 #define SCREEN_SIZE_X 128
 #define SCREEN_SIZE_Y 64
@@ -137,12 +137,13 @@ int32_t flipper_atomicdiceroller_app() {
     FuriTimer* timerPause = furi_timer_alloc(clock_tick_pause, FuriTimerTypePeriodic, event_queue);
 
     // ENABLE 5V pin
-    // Enable 5v power, multiple attempts to avoid issues with power chip protection false triggering
     uint8_t attempts = 0;
+    bool otg_was_enabled = furi_hal_power_is_otg_enabled();
     while(!furi_hal_power_is_otg_enabled() && attempts++ < 5) {
         furi_hal_power_enable_otg();
         furi_delay_ms(10);
     }
+
     uint8_t diceBuffer[64];
     for(uint8_t i = 0; i < 64; i++) diceBuffer[i] = 0;
 
@@ -154,10 +155,11 @@ int32_t flipper_atomicdiceroller_app() {
     uint8_t method = 0;
 
     // MD5
-    md5_context* md5_ctx = malloc(sizeof(md5_context));
+    mbedtls_md5_context md5_ctx;
     uint8_t* hash = malloc(sizeof(uint8_t) * 16);
     uint8_t* bufferTim2 = malloc(4);
-    md5_starts(md5_ctx);
+    mbedtls_md5_init(&md5_ctx);
+    mbedtls_md5_starts(&md5_ctx);
 
     uint8_t pause = 0;
 
@@ -209,7 +211,7 @@ int32_t flipper_atomicdiceroller_app() {
                             diceBufferPositionWrite = 0;
                             diceBufferPositionRead = 0;
                             diceBufferCounter = 0;
-                            md5_starts(md5_ctx);
+                            mbedtls_md5_starts(&md5_ctx);
                             tickCounter = 0;
                             furi_mutex_acquire(mutexVal.mutex, FuriWaitForever);
                             mutexVal.method = 1;
@@ -281,12 +283,12 @@ int32_t flipper_atomicdiceroller_app() {
                         bufferTim2[1] = (uint8_t)(tick >> 16);
                         bufferTim2[2] = (uint8_t)(tick >> 8);
                         bufferTim2[3] = (uint8_t)tick;
-                        md5_update(md5_ctx, bufferTim2, 4);
+                        mbedtls_md5_update(&md5_ctx, bufferTim2, 4);
 
                         tickCounter++;
 
                         if(tickCounter == 32) {
-                            md5_finish(md5_ctx, hash);
+                            mbedtls_md5_finish(&md5_ctx, hash);
                             uint8_t localDice = 0;
 
                             for(uint8_t i = 0; i < 16; i++) {
@@ -308,7 +310,7 @@ int32_t flipper_atomicdiceroller_app() {
                                 }
                             }
 
-                            md5_starts(md5_ctx);
+                            mbedtls_md5_starts(&md5_ctx);
                             tickCounter = 0;
                         }
                     }
@@ -324,19 +326,21 @@ int32_t flipper_atomicdiceroller_app() {
     LL_TIM_DisableCounter(TIM2);
     furi_hal_bus_disable(FuriHalBusTIM2);
 
-    free(md5_ctx);
+    mbedtls_md5_free(&md5_ctx);
+    //free(md5_ctx);
     free(bufferTim2);
     free(hash);
 
     furi_record_close(RECORD_NOTIFICATION);
 
-    // Disable 5v power
-    if(furi_hal_power_is_otg_enabled()) {
+    if(furi_hal_power_is_otg_enabled() && !otg_was_enabled) {
         furi_hal_power_disable_otg();
     }
 
     furi_hal_gpio_disable_int_callback(&gpio_ext_pa7);
     furi_hal_gpio_remove_int_callback(&gpio_ext_pa7);
+
+    furi_hal_gpio_init_simple(&gpio_ext_pa7, GpioModeAnalog);
 
     furi_message_queue_free(event_queue);
     furi_mutex_free(mutexVal.mutex);

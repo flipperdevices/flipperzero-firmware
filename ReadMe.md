@@ -104,6 +104,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: [NFC: Fix keeloq decoding order (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/159aef022bed497b65e1a955ef9c9dbe036f4612)
 - OFW: [Ntag21x write #3246 (By RebornedBrain)](https://github.com/flipperdevices/flipperzero-firmware/pull/3246)
 - Refactor Update: [Enhanced Sub-Ghz Chat v1.2 (By twisted-pear)](https://github.com/twisted-pear/esubghz_chat) - [(Changes By xMasterX)](https://github.com/xMasterX/all-the-plugins/commit/89e22ac9500886f98a7e96934686235f239767ef) [More Rework (By xMasterX)](https://github.com/xMasterX/all-the-plugins/commit/ca7b2113197312304a12e39c851d9bd2cd92583e)
+- Updated: [Atomic Dice Roller v1.1 (By nmrr)](https://github.com/nmrr/flipperzero-atomicdiceroller) [Rework (By xMasterX)](https://github.com/xMasterX/all-the-plugins/commit/84c97f69d9d1e03ea4ebe28b78f9bbd27f214511)
 
 <a name="release">
 
