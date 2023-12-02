@@ -36,4 +36,15 @@ NOTE: For this demo, not all keys are on the on-screen keyboard; you may need to
 
 <img src="./gallery/banner.png">
 
-Make sure your FlipBoard is connected to your Flipper Zero.  Choose the "Flipboard Keyboard" option to launch the app.  You should see the FlipBoard LEDs light up.  Press the buttons to see the LEDs change color.  If your computer is connected to your Flipper Zero, you should see keystrokes and Messages get entered on the computer.
+Make sure your FlipBoard is connected to your Flipper Zero.  Choose the "Flipboard Keyboard" option to launch the app.  You should see the FlipBoard LEDs do their start-up sequence.  Press the buttons to see the LEDs change color & hear the tones get played.  If your computer is connected to your Flipper Zero, you should see keystrokes and Messages get entered on the computer.
+
+## Tutorials
+
+### Video tutorials
+[![Flipper Zero: Customizing the FlipKeyboard app](https://img.youtube.com/vi/xCiqXHF7-Wo/0.jpg)](https://www.youtube.com/watch?v=xCiqXHF7-Wo)
+<br/>[Flipper Zero: Customizing the FlipKeyboard app](https://www.youtube.com/watch?v=xCiqXHF7-Wo)
+
+### Written tutorials
+
+- [Learn about the file format of the configuration files](tutorials/file-format.md)
+- [Edit the Message that is typed](tutorials/message.md)
