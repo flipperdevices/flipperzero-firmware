@@ -37,7 +37,7 @@
 #define SUBGHZ_DEVICE_CC1101_EXT_ASYNC_TX_BUFFER_FULL (256)
 #define SUBGHZ_DEVICE_CC1101_EXT_ASYNC_TX_BUFFER_HALF \
     (SUBGHZ_DEVICE_CC1101_EXT_ASYNC_TX_BUFFER_FULL / 2)
-#define SUBGHZ_DEVICE_CC1101_EXT_ASYNC_TX_GUARD_TIME 999 << 1
+#define SUBGHZ_DEVICE_CC1101_EXT_ASYNC_TX_GUARD_TIME 999 >> 1
 
 /** SubGhz state */
 typedef enum {
@@ -581,6 +581,7 @@ static void subghz_device_cc1101_ext_async_tx_refill(uint32_t* buffer, size_t sa
             buffer++;
             samples--;
         } else if(level_duration_is_reset(ld)) {
+            if(is_odd) buffer--;
             *buffer = 0;
             buffer++;
             samples--;
@@ -606,7 +607,8 @@ static void subghz_device_cc1101_ext_async_tx_refill(uint32_t* buffer, size_t sa
 
             uint32_t duration = level_duration_get_duration(ld);
             furi_assert(duration > 0);
-            *buffer = duration >> 1;
+            //supports durations greater than 4 us
+            *buffer = (duration >> 1) - 1;
             buffer++;
             samples--;
         }
