@@ -16,6 +16,7 @@ LoclassWriter* loclass_writer_alloc() {
     LoclassWriter* instance = malloc(sizeof(LoclassWriter));
     Storage* storage = furi_record_open(RECORD_STORAGE);
     instance->file_stream = buffered_file_stream_alloc(storage);
+    storage_simply_mkdir(storage, STORAGE_APP_DATA_PATH_PREFIX);
     if(!buffered_file_stream_open(
            instance->file_stream, LOCLASS_LOGS_PATH, FSAM_WRITE, FSOM_OPEN_APPEND)) {
         buffered_file_stream_close(instance->file_stream);
