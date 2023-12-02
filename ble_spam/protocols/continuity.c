@@ -10,6 +10,7 @@ typedef struct {
     uint8_t value;
     const char* name;
 } ContinuityColor;
+
 static const ContinuityColor colors_white[] = {
     {0x00, "White"},
 };
