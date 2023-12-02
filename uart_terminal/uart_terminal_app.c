@@ -67,9 +67,12 @@ UART_TerminalApp* uart_terminal_app_alloc() {
     view_dispatcher_add_view(
         app->view_dispatcher, UART_TerminalAppViewTextInput, text_input_get_view(app->text_input));
 
-    app->hex_input = byte_input_alloc();
+    app->hex_input = uart_hex_input_alloc();
     view_dispatcher_add_view(
-        app->view_dispatcher, UART_TerminalAppViewHexInput, byte_input_get_view(app->hex_input));
+        app->view_dispatcher,
+        UART_TerminalAppViewHexInput,
+        uart_hex_input_get_view(app->hex_input)
+        );
 
     app->setup_selected_option_index[BAUDRATE_ITEM_IDX] = DEFAULT_BAUDRATE_OPT_IDX;
 
@@ -93,7 +96,7 @@ void uart_terminal_app_free(UART_TerminalApp* app) {
     text_box_free(app->text_box);
     furi_string_free(app->text_box_store);
     text_input_free(app->text_input);
-    byte_input_free(app->hex_input);
+    uart_hex_input_free(app->hex_input);
 
     // View dispatcher
     view_dispatcher_free(app->view_dispatcher);

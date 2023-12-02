@@ -12,7 +12,7 @@
 #include <gui/modules/widget.h>
 #include <gui/modules/variable_item_list.h>
 #include <gui/modules/text_input.h>
-#include <gui/modules/byte_input.h>
+#include "uart_hex_input.h"
 
 #define START_MENU_ITEMS (7)
 #define SETUP_MENU_ITEMS (3)
@@ -30,7 +30,7 @@ struct UART_TerminalApp {
     size_t text_box_store_strlen;
     TextBox* text_box;
     TextInput* text_input;
-    ByteInput* hex_input;
+    UART_TextInput* hex_input;
     Widget* widget;
     VariableItemList* var_item_list;
     UART_TerminalUart* uart;
