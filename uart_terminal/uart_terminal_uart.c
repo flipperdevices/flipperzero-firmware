@@ -97,6 +97,8 @@ void uart_terminal_uart_free(UART_TerminalUart* uart) {
 
     if(uart->app->uart_ch == FuriHalUartIdUSART1)
         furi_hal_console_enable();
+    else
+        furi_hal_uart_deinit(uart->app->uart_ch);
 
     free(uart);
 }
