@@ -67,10 +67,11 @@ static bool seader_credential_load(SeaderCredential* cred, FuriString* path, boo
         // The order is reversed for storage and for the user opening the file
         uint64_t swapped = __builtin_bswap64(cred->credential);
         cred->credential = swapped;
+
         // Optional SIO/Diversifier
         flipper_format_read_hex(file, "SIO", cred->sio, sizeof(cred->sio));
         flipper_format_read_hex(file, "Diversifier", cred->diversifier, sizeof(cred->diversifier));
-        // seader->credential->type = SeaderCredentialTypeVirtual;
+
         parsed = true;
     } while(false);
 
@@ -85,8 +86,8 @@ static bool seader_credential_load(SeaderCredential* cred, FuriString* path, boo
             dialog_message_show_storage_error(cred->dialogs, "Can not parse\nfile");
         }
     }
-    if (parsed) {
-      FURI_LOG_I(TAG, "PACS: (%d) %016llx", cred->bit_length, cred->credential);
+    if(parsed) {
+        FURI_LOG_I(TAG, "PACS: (%d) %016llx", cred->bit_length, cred->credential);
     }
 
     furi_string_free(temp_str);

@@ -154,13 +154,13 @@ bool seader_worker_process_sam_message(Seader* seader, CCID_Message* message) {
 void seader_worker_virtual_credential(Seader* seader) {
     SeaderWorker* seader_worker = seader->worker;
 
-    uint8_t csn[PICOPASS_BLOCK_LEN] = {0xf8, 0x7c, 0xd7, 0x12, 0xff, 0xff, 0x12, 0xe0};
-
     // Detect card
-    seader_worker_card_detect(seader, 0, NULL, csn, sizeof(PicopassSerialNum), NULL, 0);
+    seader_worker_card_detect(
+        seader, 0, NULL, seader->credential->diversifier, sizeof(PicopassSerialNum), NULL, 0);
 
     bool running = true;
-    uint8_t loops = 0;
+    // Max times the loop will run with no message to process
+    uint8_t dead_loops = 20;
 
     while(running) {
         if(furi_mutex_acquire(seader_worker->mq_mutex, 0) == FuriStatusOk) {
@@ -173,7 +173,6 @@ void seader_worker_virtual_credential(Seader* seader) {
                     furi_message_queue_get(seader_worker->messages, &seaderApdu, FuriWaitForever);
                 if(status != FuriStatusOk) {
                     FURI_LOG_W(TAG, "furi_message_queue_get fail %d", status);
-                    seader_worker->stage = SeaderPollerEventTypeComplete;
                     view_dispatcher_send_custom_event(
                         seader->view_dispatcher, SeaderCustomEventWorkerExit);
                 }
@@ -184,16 +183,22 @@ void seader_worker_virtual_credential(Seader* seader) {
                     FURI_LOG_I(TAG, "Response false");
                     running = false;
                 }
-
-                // fake being SR
-                // picopass commands
-                // pacs
             }
             furi_mutex_release(seader_worker->mq_mutex);
+        } else {
+            dead_loops--;
+            furi_delay_ms(100);
+            running = (dead_loops > 0);
+            FURI_LOG_D(
+                TAG, "Dead loops: %d -> Running: %s", dead_loops, running ? "true" : "false");
         }
-        furi_delay_ms(100);
-        loops++;
-        running = (loops < 10);
+        running = (seader_worker->stage != SeaderPollerEventTypeComplete);
+    }
+
+    if(dead_loops > 0) {
+        view_dispatcher_send_custom_event(seader->view_dispatcher, SeaderCustomEventPollerSuccess);
+    } else {
+        view_dispatcher_send_custom_event(seader->view_dispatcher, SeaderCustomEventWorkerExit);
     }
 }
 

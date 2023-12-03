@@ -14,7 +14,6 @@ void seader_scene_virtual_credential_on_enter(void* context) {
     popup_set_header(popup, "Processing\nvirtual\npicopass", 68, 30, AlignLeft, AlignTop);
 
     // Start worker
-    seader_credential_clear(seader->credential);
     seader->credential->type = SeaderCredentialTypeVirtual;
     seader_worker_start(
         seader->worker,
@@ -32,7 +31,11 @@ bool seader_scene_virtual_credential_on_event(void* context, SceneManagerEvent e
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SeaderCustomEventWorkerExit) {
-            seader->credential->type = SeaderCredentialTypePicopass;
+            seader->credential->type = SeaderCredentialTypeVirtual;
+            scene_manager_next_scene(seader->scene_manager, SeaderSceneReadCardSuccess);
+            consumed = true;
+        } else if(event.event == SeaderCustomEventPollerSuccess) {
+            seader->credential->type = SeaderCredentialTypeVirtual;
             scene_manager_next_scene(seader->scene_manager, SeaderSceneReadCardSuccess);
             consumed = true;
         }

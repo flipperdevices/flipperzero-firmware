@@ -37,6 +37,8 @@ void seader_scene_read_card_success_on_enter(void* context) {
 
         if(credential->type == SeaderCredentialTypeNone) {
             furi_string_set(type_str, "Unknown");
+        } else if(credential->type == SeaderCredentialTypeVirtual) {
+            furi_string_set(type_str, "Virtual");
         } else if(credential->type == SeaderCredentialType14A) {
             furi_string_set(type_str, "14443A");
         } else if(credential->type == SeaderCredentialTypePicopass) {
