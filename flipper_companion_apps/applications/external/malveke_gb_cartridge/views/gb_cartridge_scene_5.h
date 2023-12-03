@@ -10,7 +10,7 @@ typedef void (*GBCartridgeScene5Callback)(GBCartridgeCustomEvent event, void* co
 void gb_cartridge_scene_5_set_callback(
     GBCartridgeScene5* instance,
     GBCartridgeScene5Callback callback,
-    void * context);
+    void* context);
 
 GBCartridgeScene5* gb_cartridge_scene_5_alloc();
 

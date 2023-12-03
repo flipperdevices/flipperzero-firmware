@@ -13,7 +13,7 @@ typedef enum {
     GBCartridgeCustomEventScene1Right,
     GBCartridgeCustomEventScene1Ok,
     GBCartridgeCustomEventScene1Back,
-    
+
     GBCartridgeCustomEventScene2Up,
     GBCartridgeCustomEventScene2Down,
     GBCartridgeCustomEventScene2Left,
@@ -63,7 +63,8 @@ static inline uint32_t gb_cartridge_custom_menu_event_pack(uint16_t type, int16_
     GBCartridgeCustomEventMenu event = {.content = {.type = type, .value = value}};
     return event.packed_value;
 }
-static inline void gb_cartridge_custom_menu_event_unpack(uint32_t packed_value, uint16_t* type, int16_t* value) {
+static inline void
+    gb_cartridge_custom_menu_event_unpack(uint32_t packed_value, uint16_t* type, int16_t* value) {
     GBCartridgeCustomEventMenu event = {.packed_value = packed_value};
     if(type) *type = event.content.type;
     if(value) *value = event.content.value;

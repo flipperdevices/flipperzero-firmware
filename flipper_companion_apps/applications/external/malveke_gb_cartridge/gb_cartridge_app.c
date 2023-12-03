@@ -24,7 +24,7 @@ GBCartridge* gb_cartridge_app_app_alloc() {
     app->gui = furi_record_open(RECORD_GUI);
     app->storage = furi_record_open(RECORD_STORAGE);
     app->notification = furi_record_open(RECORD_NOTIFICATION);
-    
+
     //  Create MALVEKE dir
     if(storage_common_stat(app->storage, MALVEKE_APP_FOLDER, NULL) == FSE_NOT_EXIST) {
         storage_simply_mkdir(app->storage, MALVEKE_APP_FOLDER);
@@ -41,7 +41,7 @@ GBCartridge* gb_cartridge_app_app_alloc() {
     if(storage_common_stat(app->storage, MALVEKE_APP_FOLDER_PHOTOS, NULL) == FSE_NOT_EXIST) {
         storage_simply_mkdir(app->storage, MALVEKE_APP_FOLDER_PHOTOS);
     }
-    
+
     //Turn backlight on, believe me this makes testing your app easier
     notification_message(app->notification, &sequence_display_backlight_on);
 
@@ -51,9 +51,12 @@ GBCartridge* gb_cartridge_app_app_alloc() {
 
     app->scene_manager = scene_manager_alloc(&gb_cartridge_scene_handlers, app);
     view_dispatcher_set_event_callback_context(app->view_dispatcher, app);
-    view_dispatcher_set_navigation_event_callback(app->view_dispatcher, gb_cartridge_app_navigation_event_callback);
-    view_dispatcher_set_tick_event_callback(app->view_dispatcher, gb_cartridge_app_tick_event_callback, 100);
-    view_dispatcher_set_custom_event_callback(app->view_dispatcher, gb_cartridge_app_custom_event_callback);
+    view_dispatcher_set_navigation_event_callback(
+        app->view_dispatcher, gb_cartridge_app_navigation_event_callback);
+    view_dispatcher_set_tick_event_callback(
+        app->view_dispatcher, gb_cartridge_app_tick_event_callback, 100);
+    view_dispatcher_set_custom_event_callback(
+        app->view_dispatcher, gb_cartridge_app_custom_event_callback);
     app->submenu = variable_item_list_alloc();
 
     // Set defaults, in case no config loaded
@@ -65,12 +68,11 @@ GBCartridge* gb_cartridge_app_app_alloc() {
     app->save_settings = 1;
 
     app->cart_title = " - ";
-    app->cart_dump_rom_filename  = "malveke_rom";
+    app->cart_dump_rom_filename = "malveke_rom";
     app->cart_dump_rom_extension = "gb";
 
     app->cart_dump_ram_filename = "malveke_ram";
     app->cart_dump_ram_extension = "sav";
-
 
     // Used for File Browser
     app->dialogs = furi_record_open(RECORD_DIALOGS);
@@ -82,32 +84,53 @@ GBCartridge* gb_cartridge_app_app_alloc() {
     app->uart = usart_init(app);
     app->lp_uart = lp_uart_init(app);
 
-    
-    view_dispatcher_add_view(app->view_dispatcher, GBCartridgeViewIdMenu, variable_item_list_get_view(app->submenu));
+    view_dispatcher_add_view(
+        app->view_dispatcher, GBCartridgeViewIdMenu, variable_item_list_get_view(app->submenu));
     app->gb_cartridge_startscreen = gb_cartridge_startscreen_alloc();
-    view_dispatcher_add_view(app->view_dispatcher, GBCartridgeViewIdStartscreen, gb_cartridge_startscreen_get_view(app->gb_cartridge_startscreen));
+    view_dispatcher_add_view(
+        app->view_dispatcher,
+        GBCartridgeViewIdStartscreen,
+        gb_cartridge_startscreen_get_view(app->gb_cartridge_startscreen));
     app->gb_cartridge_scene_1 = gb_cartridge_scene_1_alloc();
-    view_dispatcher_add_view(app->view_dispatcher, GBCartridgeViewIdScene1, gb_cartridge_scene_1_get_view(app->gb_cartridge_scene_1));
+    view_dispatcher_add_view(
+        app->view_dispatcher,
+        GBCartridgeViewIdScene1,
+        gb_cartridge_scene_1_get_view(app->gb_cartridge_scene_1));
     app->gb_cartridge_scene_2 = gb_cartridge_scene_2_alloc();
-    view_dispatcher_add_view(app->view_dispatcher, GBCartridgeViewIdScene2, gb_cartridge_scene_2_get_view(app->gb_cartridge_scene_2));
+    view_dispatcher_add_view(
+        app->view_dispatcher,
+        GBCartridgeViewIdScene2,
+        gb_cartridge_scene_2_get_view(app->gb_cartridge_scene_2));
     app->gb_cartridge_scene_3 = gb_cartridge_scene_3_alloc();
-    view_dispatcher_add_view(app->view_dispatcher, GBCartridgeViewIdScene3, gb_cartridge_scene_3_get_view(app->gb_cartridge_scene_3));
+    view_dispatcher_add_view(
+        app->view_dispatcher,
+        GBCartridgeViewIdScene3,
+        gb_cartridge_scene_3_get_view(app->gb_cartridge_scene_3));
     app->gb_cartridge_scene_4 = gb_cartridge_scene_4_alloc();
-    view_dispatcher_add_view(app->view_dispatcher, GBCartridgeViewIdScene4, gb_cartridge_scene_4_get_view(app->gb_cartridge_scene_4));
+    view_dispatcher_add_view(
+        app->view_dispatcher,
+        GBCartridgeViewIdScene4,
+        gb_cartridge_scene_4_get_view(app->gb_cartridge_scene_4));
     app->gb_cartridge_scene_5 = gb_cartridge_scene_5_alloc();
-    view_dispatcher_add_view(app->view_dispatcher, GBCartridgeViewIdScene5, gb_cartridge_scene_5_get_view(app->gb_cartridge_scene_5));
-    
+    view_dispatcher_add_view(
+        app->view_dispatcher,
+        GBCartridgeViewIdScene5,
+        gb_cartridge_scene_5_get_view(app->gb_cartridge_scene_5));
+
     // app->button_menu = button_menu_alloc();
     // view_dispatcher_add_view(app->view_dispatcher, GBCartridgeViewIdScene3, button_menu_get_view(app->button_menu));
-    
+
     app->variable_item_list = variable_item_list_alloc();
-    view_dispatcher_add_view(app->view_dispatcher, GBCartridgeViewIdSettings, variable_item_list_get_view(app->variable_item_list));
+    view_dispatcher_add_view(
+        app->view_dispatcher,
+        GBCartridgeViewIdSettings,
+        variable_item_list_get_view(app->variable_item_list));
 
     //End Scene Additions
 
     //  Enable 5v
     furi_hal_power_enable_otg();
-    furi_delay_ms(1); 
+    furi_delay_ms(1);
     return app;
 }
 
@@ -126,12 +149,12 @@ void gb_cartridge_app_app_free(GBCartridge* app) {
     view_dispatcher_free(app->view_dispatcher);
     furi_record_close(RECORD_GUI);
     furi_record_close(RECORD_STORAGE);
-    
+
     app->gui = NULL;
     app->notification = NULL;
     app->storage = NULL;
 
-    //  
+    //
     uart_free(app->uart);
     uart_free(app->lp_uart);
     // Close File Browser
@@ -156,16 +179,16 @@ int32_t gb_cartridge_app(void* p) {
     // furi_delay_ms(200);
 
     GBCartridge* app = gb_cartridge_app_app_alloc();
-    
+
     // if user hasn't confirmed whether to save pcaps and logs to sdcard, then prompt when scene starts
     // app->need_to_prompt_settings_init =
     //     (!storage_file_exists(app->storage, SAVE_PCAP_SETTING_FILEPATH) ||
     //      !storage_file_exists(app->storage, SAVE_LOGS_SETTING_FILEPATH));
 
-
     view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
-    
-    scene_manager_next_scene(app->scene_manager, GBCartridgeSceneStartscreen); //Start with start screen
+
+    scene_manager_next_scene(
+        app->scene_manager, GBCartridgeSceneStartscreen); //Start with start screen
     //scene_manager_next_scene(app->scene_manager, GBCartridgeSceneMenu); //if you want to directly start with Menu
     // scene_manager_next_scene(app->scene_manager, GBCartridgeSceneScene_4);
 
@@ -173,7 +196,7 @@ int32_t gb_cartridge_app(void* p) {
 
     view_dispatcher_run(app->view_dispatcher);
     gb_cartridge_save_settings(app);
-    
+
     furi_hal_power_suppress_charge_exit();
     gb_cartridge_app_app_free(app);
     // if(furi_hal_power_is_otg_enabled()) {
@@ -181,6 +204,3 @@ int32_t gb_cartridge_app(void* p) {
     // }
     return 0;
 }
-
-
-

@@ -8,8 +8,8 @@
 #include <notification/notification_messages.h>
 #include "../helpers/gb_cartridge_speaker.h"
 #include "../helpers/sequential_file.h"
-#include <stdio.h>   // Para sprintf
-#include <string.h>  // Para strlen
+#include <stdio.h> // Para sprintf
+#include <string.h> // Para strlen
 
 struct GBCartridgeScene2 {
     View* view;
@@ -43,11 +43,11 @@ void dump_handle_rx_data_cb(uint8_t* buf, size_t len, void* context) {
     with_view_model(
         instance->gb_cartridge_scene_2->view,
         GameBoyCartridgeROMBackupModel * model,
-        { 
+        {
             model->transfered += len;
             uint64_t current_time = furi_hal_rtc_get_timestamp();
             model->elapsed_time = current_time - model->start_time;
-            if (current_time - last_toggle_time >= 0.2) {
+            if(current_time - last_toggle_time >= 0.2) {
                 model->rx_active = !model->rx_active;
                 last_toggle_time = current_time;
             }
@@ -109,7 +109,7 @@ void gameboy_rom_backup_handle_rx_data_cb(uint8_t* buf, size_t len, void* contex
                     model->romBanks = 0;
                 }
             }
-            if (strcmp(model->event_type, "success") == 0) {
+            if(strcmp(model->event_type, "success") == 0) {
                 model->progress = 100;
                 // cJSON* total = cJSON_GetObjectItemCaseSensitive(json, "total");
                 // if(cJSON_IsNumber(total)) {
@@ -124,13 +124,15 @@ void gameboy_rom_backup_handle_rx_data_cb(uint8_t* buf, size_t len, void* contex
         true);
 }
 static void drawProgressBar(Canvas* canvas, int progress) {
-    for(int x = 0; x < 64 - 14 - UI_PADDING - UI_PADDING -UI_PADDING - UI_PADDING; x += 5) {
+    for(int x = 0; x < 64 - 14 - UI_PADDING - UI_PADDING - UI_PADDING - UI_PADDING; x += 5) {
         for(int row = 0; row < 20; row += 5) {
             if(progress > 0) {
-                canvas_draw_box(canvas, 14 /*ARROW*/ + UI_PADDING + 2+ x + 4, /*45*/ 26 + row, 4, 4);
+                canvas_draw_box(
+                    canvas, 14 /*ARROW*/ + UI_PADDING + 2 + x + 4, /*45*/ 26 + row, 4, 4);
                 progress--;
             } else {
-                canvas_draw_frame(canvas, 14 /*ARROW*/ + UI_PADDING + 2+ x + 4, /*45*/ 26 + row, 4, 4);
+                canvas_draw_frame(
+                    canvas, 14 /*ARROW*/ + UI_PADDING + 2 + x + 4, /*45*/ 26 + row, 4, 4);
             }
         }
     }
@@ -143,7 +145,7 @@ void gb_cartridge_scene_2_draw(Canvas* canvas, GameBoyCartridgeROMBackupModel* m
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
     canvas_set_font(canvas, FontKeyboard);
-    canvas_draw_frame(canvas, 0, 23, (128/2), 25);
+    canvas_draw_frame(canvas, 0, 23, (128 / 2), 25);
 
     canvas_set_bitmap_mode(canvas, 1);
     canvas_set_font(canvas, FontPrimary);
@@ -156,31 +158,41 @@ void gb_cartridge_scene_2_draw(Canvas* canvas, GameBoyCartridgeROMBackupModel* m
     canvas_draw_str_aligned(canvas, 128 / 2, 0, AlignCenter, AlignTop, progressText);
     canvas_set_font(canvas, FontSecondary);
 
-    char *filename = strrchr(model->cart_dump_rom_filename_sequential, '/');
+    char* filename = strrchr(model->cart_dump_rom_filename_sequential, '/');
     filename++;
 
-    canvas_draw_str_aligned(canvas, 128/2, 12, AlignCenter, AlignTop, filename);
+    canvas_draw_str_aligned(canvas, 128 / 2, 12, AlignCenter, AlignTop, filename);
 
     char total_rom_str[20]; // Declarar un buffer para almacenar la versión en cadena del entero
-    snprintf(total_rom_str, sizeof(total_rom_str), "of %.2lf MiB", (double)(model->total_rom / 1024.0 / 1024.0));
+    snprintf(
+        total_rom_str,
+        sizeof(total_rom_str),
+        "of %.2lf MiB",
+        (double)(model->total_rom / 1024.0 / 1024.0));
 
     char transfered_rom_str[20];
-    snprintf(transfered_rom_str, sizeof(transfered_rom_str), "%.2lf MiB", (double)(model->transfered / 1024.0 / 1024.0));
-
+    snprintf(
+        transfered_rom_str,
+        sizeof(transfered_rom_str),
+        "%.2lf MiB",
+        (double)(model->transfered / 1024.0 / 1024.0));
 
     // Calcula la Tasa de Transferencia en KiB/s
     char transfer_rate_str[20];
-    if(model->transfered>0 && model->elapsed_time > 0) {
-        double transfer_rate_kibps = (double)model->transfered / ((double)model->elapsed_time ) / (double)1024.0;
+    if(model->transfered > 0 && model->elapsed_time > 0) {
+        double transfer_rate_kibps =
+            (double)model->transfered / ((double)model->elapsed_time) / (double)1024.0;
         snprintf(transfer_rate_str, sizeof(transfer_rate_str), "%.2lf KiB/s", transfer_rate_kibps);
     } else {
         snprintf(transfer_rate_str, sizeof(transfer_rate_str), "0 KiB/s");
     }
-    
 
-    canvas_draw_str_aligned(canvas, (128/2) + UI_PADDING, 22 + 2, AlignLeft, AlignTop, transfered_rom_str);
-    canvas_draw_str_aligned(canvas, (128/2) + UI_PADDING, 30 + 2, AlignLeft, AlignTop, total_rom_str);
-    canvas_draw_str_aligned(canvas, (128/2) + UI_PADDING, 38 + 2, AlignLeft, AlignTop, transfer_rate_str);
+    canvas_draw_str_aligned(
+        canvas, (128 / 2) + UI_PADDING, 22 + 2, AlignLeft, AlignTop, transfered_rom_str);
+    canvas_draw_str_aligned(
+        canvas, (128 / 2) + UI_PADDING, 30 + 2, AlignLeft, AlignTop, total_rom_str);
+    canvas_draw_str_aligned(
+        canvas, (128 / 2) + UI_PADDING, 38 + 2, AlignLeft, AlignTop, transfer_rate_str);
 
     if(model->rx_active) {
         canvas_draw_icon_ex(canvas, UI_PADDING, 28, &I_ArrowUpFilled_14x15, IconRotation180);
@@ -191,7 +203,10 @@ void gb_cartridge_scene_2_draw(Canvas* canvas, GameBoyCartridgeROMBackupModel* m
     char totalText[32];
     snprintf(totalText, sizeof(totalText), "%d", model->total_rom);
 
-    drawProgressBar(canvas, (progress * UI_PROGRESS_ROWS * UI_PROGRESS_COLS) / 100); // Pinta las primeras 10 cajas de negro
+    drawProgressBar(
+        canvas,
+        (progress * UI_PROGRESS_ROWS * UI_PROGRESS_COLS) /
+            100); // Pinta las primeras 10 cajas de negro
 
     elements_button_center(canvas, "Start");
 }
@@ -209,66 +224,71 @@ static void gb_cartridge_scene_2_model_init(GameBoyCartridgeROMBackupModel* cons
 bool gb_cartridge_scene_2_input(InputEvent* event, void* context) {
     furi_assert(context);
     GBCartridgeScene2* instance = context;
-    
-    if (event->type == InputTypeRelease) {
+
+    if(event->type == InputTypeRelease) {
         switch(event->key) {
-            case InputKeyBack:
-                with_view_model(
-                    instance->view,
-                    GameBoyCartridgeROMBackupModel * model,
-                    {
-                        UNUSED(model);
-                        GBCartridge* app = (GBCartridge*)instance->context;
-                        UNUSED(app);
+        case InputKeyBack:
+            with_view_model(
+                instance->view,
+                GameBoyCartridgeROMBackupModel * model,
+                {
+                    UNUSED(model);
+                    GBCartridge* app = (GBCartridge*)instance->context;
+                    UNUSED(app);
 
-                        model->total_rom = 0;
-                        model->transfered = 0;
-                        model->elapsed_time = 0;
+                    model->total_rom = 0;
+                    model->transfered = 0;
+                    model->elapsed_time = 0;
 
-                        // // Unregister rx callback
-                        uart_set_handle_rx_data_cb(app->uart, NULL);
-                        uart_set_handle_rx_data_cb(app->lp_uart, NULL);
-                        //  Close file
-                        app->is_writing_rom = false;
-                        if(app->cart_rom && storage_file_is_open(app->cart_rom)) {
-                            storage_file_close(app->cart_rom);
-                        }
-                        notification_message(app->notification, &sequence_display_backlight_enforce_auto);
-                        instance->callback(GBCartridgeCustomEventScene2Back, instance->context);
-                    },
-                    true);
-                break;
-            case InputKeyUp:
-            case InputKeyDown:
-            case InputKeyLeft:
-            case InputKeyRight:
+                    // // Unregister rx callback
+                    uart_set_handle_rx_data_cb(app->uart, NULL);
+                    uart_set_handle_rx_data_cb(app->lp_uart, NULL);
+                    //  Close file
+                    app->is_writing_rom = false;
+                    if(app->cart_rom && storage_file_is_open(app->cart_rom)) {
+                        storage_file_close(app->cart_rom);
+                    }
+                    notification_message(
+                        app->notification, &sequence_display_backlight_enforce_auto);
+                    instance->callback(GBCartridgeCustomEventScene2Back, instance->context);
+                },
+                true);
             break;
-            case InputKeyOk:
-                with_view_model(
-                    instance->view,
-                    GameBoyCartridgeROMBackupModel * model,
-                    {
-                        GBCartridge* app = ((GBCartridge*)instance->context);
-                        UNUSED(app);
-                        model->start_time = furi_hal_rtc_get_timestamp(); // Registra el tiempo de inicio
-                        app->cart_rom = storage_file_alloc(app->storage);
-
-                        if(storage_file_open(app->cart_rom, model->cart_dump_rom_filename_sequential, FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
-                            const char gbcartridge_command[] = "gbcartridge -d -o\n";
-                            uart_tx((uint8_t*)gbcartridge_command, strlen(gbcartridge_command));
-                        } else {
-                            dialog_message_show_storage_error(app->dialogs, "Cannot open dump file");
-                        }
-                    },
-                    true);
-                    
-                
+        case InputKeyUp:
+        case InputKeyDown:
+        case InputKeyLeft:
+        case InputKeyRight:
             break;
-            case InputKeyMAX:
-                break;
+        case InputKeyOk:
+            with_view_model(
+                instance->view,
+                GameBoyCartridgeROMBackupModel * model,
+                {
+                    GBCartridge* app = ((GBCartridge*)instance->context);
+                    UNUSED(app);
+                    model->start_time =
+                        furi_hal_rtc_get_timestamp(); // Registra el tiempo de inicio
+                    app->cart_rom = storage_file_alloc(app->storage);
+
+                    if(storage_file_open(
+                           app->cart_rom,
+                           model->cart_dump_rom_filename_sequential,
+                           FSAM_WRITE,
+                           FSOM_CREATE_ALWAYS)) {
+                        const char gbcartridge_command[] = "gbcartridge -d -o\n";
+                        uart_tx((uint8_t*)gbcartridge_command, strlen(gbcartridge_command));
+                    } else {
+                        dialog_message_show_storage_error(app->dialogs, "Cannot open dump file");
+                    }
+                },
+                true);
+
+            break;
+        case InputKeyMAX:
+            break;
         }
     }
-    
+
     return true;
 }
 
@@ -295,28 +315,33 @@ void gb_cartridge_scene_2_enter(void* context) {
         app->gb_cartridge_scene_2->view,
         GameBoyCartridgeROMBackupModel * model,
         {
-            model->cart_dump_rom_filename  = app->cart_dump_rom_filename;
+            model->cart_dump_rom_filename = app->cart_dump_rom_filename;
             model->cart_dump_rom_extension = app->cart_dump_rom_extension;
-            model->total_rom =  app->rom_banks * 16 * 1024;
+            model->total_rom = app->rom_banks * 16 * 1024;
             // char *filename = strrchr(model->cart_dump_rom_filename_sequential, '/');
             // filename++;
-            char *filename = sequential_file_resolve_path(app->storage, MALVEKE_APP_FOLDER_ROMS, app->cart_dump_rom_filename, model->cart_dump_rom_extension);
-            model->cart_dump_rom_filename_sequential =  filename;
-             // Register callbacks to receive data
-            uart_set_handle_rx_data_cb(app->uart, gameboy_rom_backup_handle_rx_data_cb); // setup callback for general log rx thread
-            uart_set_handle_rx_data_cb(app->lp_uart, dump_handle_rx_data_cb); // setup callback for general log rx thread
+            char* filename = sequential_file_resolve_path(
+                app->storage,
+                MALVEKE_APP_FOLDER_ROMS,
+                app->cart_dump_rom_filename,
+                model->cart_dump_rom_extension);
+            model->cart_dump_rom_filename_sequential = filename;
+            // Register callbacks to receive data
+            uart_set_handle_rx_data_cb(
+                app->uart,
+                gameboy_rom_backup_handle_rx_data_cb); // setup callback for general log rx thread
+            uart_set_handle_rx_data_cb(
+                app->lp_uart, dump_handle_rx_data_cb); // setup callback for general log rx thread
             app->is_writing_rom = true;
         },
         false);
-   
-
-   
 }
 
 GBCartridgeScene2* gb_cartridge_scene_2_alloc() {
     GBCartridgeScene2* instance = malloc(sizeof(GBCartridgeScene2));
     instance->view = view_alloc();
-    view_allocate_model(instance->view, ViewModelTypeLocking, sizeof(GameBoyCartridgeROMBackupModel));
+    view_allocate_model(
+        instance->view, ViewModelTypeLocking, sizeof(GameBoyCartridgeROMBackupModel));
     view_set_context(instance->view, instance);
     view_set_draw_callback(instance->view, (ViewDrawCallback)gb_cartridge_scene_2_draw);
     view_set_input_callback(instance->view, gb_cartridge_scene_2_input);
@@ -326,17 +351,14 @@ GBCartridgeScene2* gb_cartridge_scene_2_alloc() {
     with_view_model(
         instance->view,
         GameBoyCartridgeROMBackupModel * model,
-        {
-            gb_cartridge_scene_2_model_init(model);
-        },
+        { gb_cartridge_scene_2_model_init(model); },
         true);
-    
+
     return instance;
 }
 
 void gb_cartridge_scene_2_free(GBCartridgeScene2* instance) {
     furi_assert(instance);
-
 
     view_free(instance->view);
     free(instance);
@@ -345,7 +367,5 @@ void gb_cartridge_scene_2_free(GBCartridgeScene2* instance) {
 View* gb_cartridge_scene_2_get_view(GBCartridgeScene2* instance) {
     furi_assert(instance);
 
-
     return instance->view;
 }
-

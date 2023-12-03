@@ -21,8 +21,8 @@ const uint32_t gameboy_rom_option_value[2] = {
     GBCartridgeRomOptionGBC,
 };
 
-void toUpperCase(char *str) {
-    while (*str) {
+void toUpperCase(char* str) {
+    while(*str) {
         *str = toupper((unsigned char)*str);
         str++;
     }
@@ -71,12 +71,12 @@ void gb_cartridge_scene_menu_on_enter(void* context) {
     // app->gameboy_rom_option_selected_index = value_index_uint32(app->gameboy_rom_option_selected_index, gameboy_rom_option_value, 2);
     // variable_item_set_current_value_index(item, app->gameboy_rom_option_selected_index);
     // variable_item_set_current_value_text(item, rom_option_uppercase(app->gameboy_rom_option_selected_index));
-    
 
     variable_item_list_add(app->submenu, "Write RAM", 1, NULL, NULL);
     // variable_item_list_add(app->submenu, "Settings", 1, NULL, NULL);
 
-    variable_item_list_set_enter_callback(app->submenu, gb_cartridge_scene_menu_submenu_callback, app);
+    variable_item_list_set_enter_callback(
+        app->submenu, gb_cartridge_scene_menu_submenu_callback, app);
 
     view_dispatcher_switch_to_view(app->view_dispatcher, GBCartridgeViewIdMenu);
 }
@@ -95,24 +95,24 @@ bool gb_cartridge_scene_menu_on_event(void* context, SceneManagerEvent event) {
                 app->scene_manager, GBCartridgeSceneMenu, SubmenuIndexScene1);
             scene_manager_next_scene(app->scene_manager, GBCartridgeSceneScene_1);
             return true;
-        } else if (event.event == SubmenuIndexScene2) {
+        } else if(event.event == SubmenuIndexScene2) {
             scene_manager_set_scene_state(
                 app->scene_manager, GBCartridgeSceneMenu, SubmenuIndexScene2);
             scene_manager_next_scene(app->scene_manager, GBCartridgeSceneScene_2);
             return true;
-        } else if (event.event == SubmenuIndexScene3) {
+        } else if(event.event == SubmenuIndexScene3) {
             scene_manager_set_scene_state(
                 app->scene_manager, GBCartridgeSceneMenu, SubmenuIndexScene3);
             scene_manager_next_scene(app->scene_manager, GBCartridgeSceneScene_3);
-        } else if (event.event == SubmenuIndexScene4) {
+        } else if(event.event == SubmenuIndexScene4) {
             scene_manager_set_scene_state(
                 app->scene_manager, GBCartridgeSceneMenu, SubmenuIndexScene4);
             scene_manager_next_scene(app->scene_manager, GBCartridgeSceneScene_4);
-        } else if (event.event == SubmenuIndexScene5) {
+        } else if(event.event == SubmenuIndexScene5) {
             scene_manager_set_scene_state(
                 app->scene_manager, GBCartridgeSceneMenu, SubmenuIndexScene5);
             scene_manager_next_scene(app->scene_manager, GBCartridgeSceneScene_5);
-        } else if (event.event == SubmenuIndexSettings) {
+        } else if(event.event == SubmenuIndexSettings) {
             scene_manager_set_scene_state(
                 app->scene_manager, GBCartridgeSceneMenu, SubmenuIndexSettings);
             scene_manager_next_scene(app->scene_manager, GBCartridgeSceneSettings);

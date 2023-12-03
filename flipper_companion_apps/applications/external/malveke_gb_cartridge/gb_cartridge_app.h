@@ -33,7 +33,6 @@
 #define MALVEKE_APP_FOLDER_RAMS MALVEKE_APP_FOLDER "/rams"
 #define MALVEKE_APP_FOLDER_PHOTOS MALVEKE_APP_FOLDER "/photos"
 
-
 #define UI_PADDING 3
 #define UI_PROGRESS_COLS 8
 #define UI_PROGRESS_ROWS 4
@@ -47,7 +46,6 @@
 #ifndef MIN
 #define MIN(a, b) ((a) < (b)) ? (a) : (b)
 #endif
-
 
 typedef struct {
     Gui* gui;
@@ -64,10 +62,10 @@ typedef struct {
     GBCartridgeScene3* gb_cartridge_scene_3;
     GBCartridgeScene4* gb_cartridge_scene_4;
     GBCartridgeScene5* gb_cartridge_scene_5;
-    
+
     DialogsApp* dialogs; // File Browser
     FuriString* file_path; // File Browser
-    uint32_t haptic; 
+    uint32_t haptic;
     uint32_t speaker;
     uint32_t led;
     uint32_t save_settings;
@@ -98,7 +96,6 @@ typedef struct {
     int ram_banks;
 
 } GBCartridge;
-
 
 typedef enum {
     GBCartridgeViewIdStartscreen,
@@ -135,5 +132,3 @@ typedef enum {
     GBCartridgeRomOptionGB,
     GBCartridgeRomOptionGBC,
 } GBCartridgeRomOptionState;
-
-

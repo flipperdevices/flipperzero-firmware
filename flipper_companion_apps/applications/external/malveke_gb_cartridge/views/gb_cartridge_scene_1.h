@@ -3,12 +3,9 @@
 #include <gui/view.h>
 #include "../helpers/gb_cartridge_custom_event.h"
 
-
 typedef struct GBCartridgeScene1 GBCartridgeScene1;
 
 typedef void (*GBCartridgeScene1Callback)(GBCartridgeCustomEvent event, void* context);
-
-
 
 void gb_cartridge_scene_1_set_callback(
     GBCartridgeScene1* gb_cartridge_scene_1,
