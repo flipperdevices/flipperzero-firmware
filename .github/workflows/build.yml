@@ -42,16 +42,6 @@ jobs:
           # Set to 'release' to build for latest published release version
           sdk-channel: release
           app-dir: ./flipper_companion_apps/applications/external/malveke_pokemon_trading/
-      - name: Release
-        uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/tags/')
-        with:
-          files: |
-            ${{ steps.build-app-gb-cartridge.outputs.fap-artifacts }}
-            ${{ steps.build-app-link-camera.outputs.fap-artifacts }}
-            ${{ steps.build-app-live-camera.outputs.fap-artifacts }}
-            ${{ steps.build-build-app-gba-cartridge.outputs.fap-artifacts }}
-            ${{ steps.build-app-pokemon-trading.outputs.fap-artifacts }}
       - name: Upload app artifacts GB Cartridge
         uses: actions/upload-artifact@v3
         with:
@@ -77,3 +67,13 @@ jobs:
         with:
           name: ${{ github.event.repository.name }}-${{ steps.build-app-pokemon-trading.outputs.suffix }}
           path: ${{ steps.build-app-pokemon-trading.outputs.fap-artifacts }}
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: |
+            ${{ steps.build-app-gb-cartridge.outputs.fap-artifacts }}
+            ${{ steps.build-app-link-camera.outputs.fap-artifacts }}
+            ${{ steps.build-app-live-camera.outputs.fap-artifacts }}
+            ${{ steps.build-build-app-gba-cartridge.outputs.fap-artifacts }}
+            ${{ steps.build-app-pokemon-trading.outputs.fap-artifacts }}
