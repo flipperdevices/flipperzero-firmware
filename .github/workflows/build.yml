@@ -13,6 +13,7 @@ jobs:
         with:
           # Set to 'release' to build for latest published release version
           sdk-channel: release
+          app-dir: ./flipper_companion_apps/applications/external/malveke_gb_cartridge/
       - name: Upload app artifacts
         uses: actions/upload-artifact@v3
         with:
