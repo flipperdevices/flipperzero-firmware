@@ -154,7 +154,7 @@ bool seader_worker_process_sam_message(Seader* seader, CCID_Message* message) {
 void seader_worker_virtual_credential(Seader* seader) {
     SeaderWorker* seader_worker = seader->worker;
 
-    uint8_t csn[8] = {0xf8, 0x7c, 0xd7, 0x12, 0xff, 0xff, 0x12, 0xe0};
+    uint8_t csn[PICOPASS_BLOCK_LEN] = {0xf8, 0x7c, 0xd7, 0x12, 0xff, 0xff, 0x12, 0xe0};
 
     // Detect card
     seader_worker_card_detect(seader, 0, NULL, csn, sizeof(PicopassSerialNum), NULL, 0);
