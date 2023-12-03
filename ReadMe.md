@@ -100,7 +100,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [PicoPass (iClass) v1.8 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass) [Picopass rework. Part 1 #68 (By gornekich)](https://github.com/flipperdevices/flipperzero-good-faps/pull/68)
 - OFW: [NFC: Felica UID emulation #3190 (By RebornedBrain)](https://github.com/flipperdevices/flipperzero-firmware/pull/3190)
 - OFW: [Mifare Classic fixes #3221 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3221)
-- Update: [NFC Seader v2.0 (By bettse)](https://github.com/bettse/seader)
 - Refactor Update: [Mifare Fuzzer v1.2 (By spheeere98)](https://github.com/spheeere98/mifare_fuzzer) (Changes By Sil333033)
 - Updated: [NFC Magic v1.2 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966) [Nfc Magic rework #67 (By gornekich)](https://github.com/flipperdevices/flipperzero-good-faps/pull/67) [NFC Magic fix gen4 detection #71 (By gornekich)](https://github.com/flipperdevices/flipperzero-good-faps/pull/71) [Specify in error scene that only Gen1 magic and Gen4 UMCs are supported #75 (By kitsunehunter)](https://github.com/flipperdevices/flipperzero-good-faps/pull/75)
 - NFC: [Parser for Philips Sonicare toothbrush heads (By Sil333033, Research By Cyrill Künzi)](https://kuenzi.dev/toothbrush/)
@@ -116,6 +115,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [Fixed error when reading an iso15693 nfc tag with no blocks #3229 (By pborsutzki)](https://github.com/flipperdevices/flipperzero-firmware/pull/3229)
 - Fix mbedtls api leaks (By Willy-JL) & Fix for CFW lib (Idea By Willy-JL, With Changes By RogueMaster)
 - OFW: [nfc: m1k-based Aime (non-AIC) card support #3241 (By magicnat)](https://github.com/flipperdevices/flipperzero-firmware/pull/3241)
+- Update: [NFC Seader v2.0 (By bettse)](https://github.com/bettse/seader)
 
 <a name="release">
 
