@@ -191,7 +191,7 @@ void seader_worker_virtual_credential(Seader* seader) {
             }
             furi_mutex_release(seader_worker->mq_mutex);
         }
-        furi_delay_ms(1000);
+        furi_delay_ms(100);
         loops++;
         running = (loops < 10);
     }
