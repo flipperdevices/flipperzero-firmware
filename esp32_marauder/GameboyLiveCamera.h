@@ -54,7 +54,7 @@ class GameboyLiveCamera {
     LinkedList<String> parseCommand(String input, char* delim);
 
   public:
-    bool taked_picture;
+    bool take_a_picture;
     GameboyLiveCamera();
     void main();
     void begin();

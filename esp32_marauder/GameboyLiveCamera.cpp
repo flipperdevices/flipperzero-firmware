@@ -24,7 +24,7 @@ void GameboyLiveCamera::start()
     this->unk3 = 0xBF;
     this->dithering = true;
     this->rotate90 = false;
-    this->taked_picture = false;
+    this->take_a_picture = false;
 
     pinMode(GAMEBOY_RST, OUTPUT);
     pinMode(GAMEBOY_CLK, OUTPUT);
@@ -252,7 +252,7 @@ void GameboyLiveCamera::readPicture(bool is_thumbnail)
                 {
                     c &= ~(1 << j); // Establece el bit j en 0 (White color)
                 }
-                if(this->taked_picture) {
+                if(this->take_a_picture) {
                     int bufindex = (y*GBCAM_W+x+j);
                     GBCAM_BUFFER[bufindex] = gb_pal_colors[color];
                 }
@@ -261,7 +261,7 @@ void GameboyLiveCamera::readPicture(bool is_thumbnail)
         }
         Serial1.flush();
     }
-     if(this->taked_picture) {
+     if(this->take_a_picture) {
         Serial.print("JSON:{\"type\":\"gbcampicture\",\"data\":[");
         for (uint16_t i = 0; i <= sizeof(raw_buffer); i++)
         {
@@ -272,7 +272,7 @@ void GameboyLiveCamera::readPicture(bool is_thumbnail)
         }
         Serial.print("]}");
         Serial.println();
-        this->taked_picture = false;
+        this->take_a_picture = false;
     }
     this->setWaitMode();
 }
