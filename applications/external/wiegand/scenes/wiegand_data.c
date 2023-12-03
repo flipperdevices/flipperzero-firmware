@@ -33,24 +33,9 @@ void wiegand_add_info_26bit(FuriString* buffer) {
     // 26 bit wiegand, the first bit is the even parity bit, which is
     // based on the next 12 bits.  The number of bits that are a 1 should
     // be even.
-    int parity = 0;
-    if(data[0]) {
-        parity = 1;
-    }
-    for(int i = 1; i < 13; i++) {
-        if(data[i]) {
-            parity++;
-        }
-    }
-    if(parity % 2 == 0) {
-        furi_string_cat_printf(buffer, "\nEven Parity (%d): OK", parity);
-    } else {
-        furi_string_cat_printf(buffer, "\nEven Parity (%d): ERROR", parity);
-    }
-
     // After the parity bit, the next 8 bits are the facility code.
     // Then the next 16 bits are the card id .
-    furi_string_cat_printf(buffer, "\nFacility: 0x");
+    furi_string_cat_printf(buffer, "\nFacility: ");
     int code = 0;
     int count = 0;
     uint32_t dec = 0;
@@ -70,10 +55,25 @@ void wiegand_add_info_26bit(FuriString* buffer) {
         }
         // Parity, then 8 bit facility code, then id.
         if(i == 9) {
-            furi_string_cat_printf(buffer, "\nId: 0x");
+            furi_string_cat_printf(buffer, "\nCard: ");
         }
     }
     furi_string_cat_printf(buffer, " (%ld)", dec);
+
+    int parity = 0;
+    if(data[0]) {
+        parity = 1;
+    }
+    for(int i = 1; i < 13; i++) {
+        if(data[i]) {
+            parity++;
+        }
+    }
+    if(parity % 2 == 0) {
+        furi_string_cat_printf(buffer, "\nEven Parity (%d): OK", parity);
+    } else {
+        furi_string_cat_printf(buffer, "\nEven Parity (%d): ERROR", parity);
+    }
 
     if(data[13]) {
         parity = 1;
@@ -114,7 +114,7 @@ void wiegand_add_info_24bit(FuriString* buffer) {
         if(i == 8) {
             furi_string_cat_printf(buffer, " (%ld)", dec);
             dec = 0;
-            furi_string_cat_printf(buffer, "\nId: 0x");
+            furi_string_cat_printf(buffer, "\nCard: 0x");
         }
     }
     furi_string_cat_printf(buffer, " (%ld)", dec);
@@ -134,7 +134,7 @@ void wiegand_add_info_48bit(FuriString* buffer) {
         code = code << 1;
         code |= data[i] ? 1 : 0;
     }
-    furi_string_cat_printf(buffer, "\nCompany: %lX (%ld)", code, code);
+    furi_string_cat_printf(buffer, "\nFacility: %lX (%ld)", code, code);
 
     // 23 bit card id (bits 25-47; data[24..46]).
     code = 0;
@@ -147,6 +147,51 @@ void wiegand_add_info_48bit(FuriString* buffer) {
     // TODO: Add the 3 parity checks.
 }
 
+void wiegand_add_info_35bit(FuriString* buffer) {
+    // We assume this is HID 35 bit Corporate 1000 - C1k35s format.
+
+    // 12 bits company code
+    uint32_t code = 0;
+    for(int i = 2; i <= 13; i++) {
+        code = code << 1;
+        code |= data[i] ? 1 : 0;
+    }
+    furi_string_cat_printf(buffer, "\nFacility: %lX (%ld)", code, code);
+
+    // 20 bit card id
+    code = 0;
+    for(int i = 14; i <= 33; i++) {
+        code = code << 1;
+        code |= data[i] ? 1 : 0;
+    }
+    furi_string_cat_printf(buffer, "\nCard: %lX (%ld)", code, code);
+}
+
+void wiegand_add_info_36bit(FuriString* buffer) {
+    // We assume this is HID 36 bit Keyscan - C15001 format.
+
+    // 10 bits OEM
+    uint32_t oem = 0;
+    for(int i = 1; i <= 10; i++) {
+        oem = (oem << 1) | (data[i] ? 1 : 0);
+    }
+    furi_string_cat_printf(buffer, "\nOEM: %lX (%ld)", oem, oem);
+
+    // 8 bits facility code
+    uint32_t facilityCode = 0;
+    for(int i = 11; i <= 18; i++) {
+        facilityCode = (facilityCode << 1) | (data[i] ? 1 : 0);
+    }
+    furi_string_cat_printf(buffer, "\nFacility: %lX (%ld)", facilityCode, facilityCode);
+
+    // 16 bits card ID
+    uint32_t cardID = 0;
+    for(int i = 19; i <= 34; i++) {
+        cardID = (cardID << 1) | (data[i] ? 1 : 0);
+    }
+    furi_string_cat_printf(buffer, "\nCard: %lX (%ld)", cardID, cardID);
+}
+
 void wiegand_add_info(FuriString* buffer) {
     furi_string_push_back(buffer, '\n');
     if(bit_count == 4 || bit_count == 8) {
@@ -155,6 +200,10 @@ void wiegand_add_info(FuriString* buffer) {
         wiegand_add_info_26bit(buffer);
     } else if(bit_count == 24) {
         wiegand_add_info_24bit(buffer);
+    } else if(bit_count == 35) {
+        wiegand_add_info_35bit(buffer);
+    } else if(bit_count == 36) {
+        wiegand_add_info_36bit(buffer);
     } else if(bit_count == 48) {
         wiegand_add_info_48bit(buffer);
     }
@@ -182,8 +231,8 @@ void wiegand_data_scene_on_enter(void* context) {
             furi_string_push_back(buffer, '\n');
         }
     }
-    furi_string_cat_printf(buffer, "\nPulse: %ld us", (data_rise[0] - data_fall[0]) / 64);
-    furi_string_cat_printf(buffer, "\nPeriod: %ld us", (data_fall[1] - data_fall[0]) / 64);
+    // furi_string_cat_printf(buffer, "\nPulse: %ld us", (data_rise[0] - data_fall[0]) / 64);
+    // furi_string_cat_printf(buffer, "\nPeriod: %ld us", (data_fall[1] - data_fall[0]) / 64);
     wiegand_add_info(buffer);
     for(int i = 0; i < bit_count;) {
         uint32_t pulse = (data_rise[i] - data_fall[i]) / 64;
