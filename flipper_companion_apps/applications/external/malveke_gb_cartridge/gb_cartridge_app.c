@@ -78,8 +78,6 @@ GBCartridge* gb_cartridge_app_app_alloc() {
     app->dialogs = furi_record_open(RECORD_DIALOGS);
     app->file_path = furi_string_alloc();
 
-    // Load configs
-    gb_cartridge_read_settings(app);
 
     app->uart = usart_init(app);
     app->lp_uart = lp_uart_init(app);
@@ -195,7 +193,6 @@ int32_t gb_cartridge_app(void* p) {
     furi_hal_power_suppress_charge_enter();
 
     view_dispatcher_run(app->view_dispatcher);
-    gb_cartridge_save_settings(app);
 
     furi_hal_power_suppress_charge_exit();
     gb_cartridge_app_app_free(app);

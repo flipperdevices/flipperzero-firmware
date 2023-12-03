@@ -13,6 +13,11 @@
 #include <gui/modules/variable_item_list.h>
 #include <gui/modules/button_menu.h>
 #include <gui/modules/dialog_ex.h>
+#include <stdlib.h>
+#include <string.h>
+#include <storage/storage.h>
+#include <flipper_format/flipper_format_i.h>
+
 #include "scenes/gb_cartridge_scene.h"
 #include "views/gb_cartridge_startscreen.h"
 #include "views/gb_cartridge_scene_1.h"
@@ -20,7 +25,6 @@
 #include "views/gb_cartridge_scene_3.h"
 #include "views/gb_cartridge_scene_4.h"
 #include "views/gb_cartridge_scene_5.h"
-#include "helpers/gb_cartridge_storage.h"
 #include "uart.h"
 #include "helpers/cJSON.h"
 #include "malveke_notifications.h"
