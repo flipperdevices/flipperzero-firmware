@@ -187,7 +187,6 @@ void seader_worker_virtual_credential(Seader* seader) {
             furi_mutex_release(seader_worker->mq_mutex);
         } else {
             dead_loops--;
-            furi_delay_ms(100);
             running = (dead_loops > 0);
             FURI_LOG_D(
                 TAG, "Dead loops: %d -> Running: %s", dead_loops, running ? "true" : "false");
@@ -196,6 +195,7 @@ void seader_worker_virtual_credential(Seader* seader) {
     }
 
     if(dead_loops > 0) {
+        FURI_LOG_D(TAG, "Final dead loops: %d", dead_loops);
         view_dispatcher_send_custom_event(seader->view_dispatcher, SeaderCustomEventPollerSuccess);
     } else {
         view_dispatcher_send_custom_event(seader->view_dispatcher, SeaderCustomEventWorkerExit);
