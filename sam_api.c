@@ -339,32 +339,6 @@ void seader_send_nfc_rx(SeaderUartBridge* seader_uart, uint8_t* buffer, size_t l
     ASN_STRUCT_FREE(asn_DEF_Response, response);
 }
 
-static uint16_t seader_worker_picopass_update_ccitt(uint16_t crcSeed, uint8_t dataByte) {
-    uint16_t crc = crcSeed;
-    uint8_t dat = dataByte;
-
-    dat ^= (uint8_t)(crc & 0xFFU);
-    dat ^= (dat << 4);
-
-    crc = (crc >> 8) ^ (((uint16_t)dat) << 8) ^ (((uint16_t)dat) << 3) ^ (((uint16_t)dat) >> 4);
-
-    return crc;
-}
-
-static uint16_t seader_worker_picopass_calculate_ccitt(
-    uint16_t preloadValue,
-    const uint8_t* buf,
-    uint16_t length) {
-    uint16_t crc = preloadValue;
-    uint16_t index;
-
-    for(index = 0; index < length; index++) {
-        crc = seader_worker_picopass_update_ccitt(crc, buf[index]);
-    }
-
-    return crc;
-}
-
 uint8_t read4Block6[] = {0x06, 0x06, 0x45, 0x56};
 uint8_t read4Block9[] = {0x06, 0x09, 0xB2, 0xAE};
 uint8_t read4Block10[] = {0x06, 0x0A, 0x29, 0x9C};
@@ -389,19 +363,17 @@ void seader_capture_sio(BitBuffer* tx_buffer, BitBuffer* rx_buffer, SeaderCreden
 
 PicopassError seader_worker_fake_epurse_update(BitBuffer* tx_buffer, BitBuffer* rx_buffer) {
     const uint8_t* buffer = bit_buffer_get_data(tx_buffer);
-    uint8_t fake_response[10];
+    uint8_t fake_response[8];
     memset(fake_response, 0, sizeof(fake_response));
     memcpy(fake_response + 0, buffer + 6, 4);
     memcpy(fake_response + 4, buffer + 2, 4);
 
-    uint16_t crc = seader_worker_picopass_calculate_ccitt(0xE012, fake_response, 8);
-    memcpy(fake_response + 8, &crc, sizeof(uint16_t));
-
     bit_buffer_append_bytes(rx_buffer, fake_response, sizeof(fake_response));
+    iso13239_crc_append(Iso13239CrcTypePicopass, rx_buffer);
 
     memset(display, 0, sizeof(display));
-    for(uint8_t i = 0; i < sizeof(fake_response); i++) {
-        snprintf(display + (i * 2), sizeof(display), "%02x", fake_response[i]);
+    for(uint8_t i = 0; i < bit_buffer_get_size_bytes(rx_buffer); i++) {
+        snprintf(display + (i * 2), sizeof(display), "%02x", bit_buffer_get_data(rx_buffer)[i]);
     }
     FURI_LOG_I(TAG, "Fake update E-Purse response: %s", display);
 

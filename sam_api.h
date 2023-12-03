@@ -1,5 +1,7 @@
 #pragma once
 
+#include <nfc/helpers/iso13239_crc.h>
+
 #include "seader_i.h"
 #include "seader_credential.h"
 #include "seader_bridge.h"
