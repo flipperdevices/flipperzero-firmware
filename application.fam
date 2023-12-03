@@ -25,6 +25,7 @@ App(
 #            command="asn1c -D ${FAP_SRC_DIR}/lib/asn1 -no-gen-example -pdu=all ${FAP_SRC_DIR}/seader.asn1"
 #        ),
 #    ),
+    fap_libs=["mbedtls"],
     fap_private_libs=[
         Lib(
             name="asn1",
