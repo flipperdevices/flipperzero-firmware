@@ -7,6 +7,7 @@
 
 **User Manual:** [Instruction Booklet](./MALVEKE_Instruction_Booklet.pdf)
 
+**Firmware**: [Install Firmware MALVEKE](./webinstaller/README.md)
 <picture>
     <source media="(prefers-color-scheme: dark)" srcset="./assets/logo.png">
     <source media="(prefers-color-scheme: light)" srcset="./assets/logo-b.png">
