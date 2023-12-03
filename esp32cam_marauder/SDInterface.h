@@ -41,6 +41,7 @@ class SDInterface {
     bool initSD();
 
     void listDir(String str_dir);
+    void listDirToLinkedList(LinkedList<String>* file_names, String str_dir = "/", String ext = "");
     File getFile(String path);
     void addPacket(uint8_t* buf, uint32_t len, bool log = false);
     void openCapture(String file_name = "");

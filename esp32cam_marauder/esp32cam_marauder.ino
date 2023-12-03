@@ -387,6 +387,8 @@ void setup()
     }
   #endif
 
+  evil_portal_obj.setup();
+
   #ifdef HAS_BATTERY
     battery_obj.RunSetup();
   #endif

@@ -222,6 +222,86 @@ MenuFunctions::MenuFunctions()
       }
     }
   }
+
+  // GFX Function to build a list showing all EP HTML Files
+  void MenuFunctions::selectEPHTMLGFX() {
+    extern EvilPortal evil_portal_obj;
+  
+    lv_obj_t * list1 = lv_list_create(lv_scr_act(), NULL);
+    lv_obj_set_size(list1, 160, 200);
+    lv_obj_set_width(list1, LV_HOR_RES);
+    lv_obj_align(list1, NULL, LV_ALIGN_CENTER, 0, 0);
+  
+    lv_obj_t * list_btn;
+  
+    lv_obj_t * label;
+  
+    list_btn = lv_list_add_btn(list1, LV_SYMBOL_CLOSE, text09);
+    lv_obj_set_event_cb(list_btn, html_list_cb);
+  
+    for (int i = 1; i < evil_portal_obj.html_files->size(); i++) {
+      char buf[evil_portal_obj.html_files->get(i).length() + 1] = {};
+      evil_portal_obj.html_files->get(i).toCharArray(buf, evil_portal_obj.html_files->get(i).length() + 1);
+      
+      list_btn = lv_list_add_btn(list1, LV_SYMBOL_FILE, buf);
+      lv_btn_set_checkable(list_btn, true);
+      lv_obj_set_event_cb(list_btn, html_list_cb);
+  
+      if (i == evil_portal_obj.selected_html_index)
+        lv_btn_toggle(list_btn);
+    }
+  }
+
+  void html_list_cb(lv_obj_t * btn, lv_event_t event) {
+    extern EvilPortal evil_portal_obj;
+    extern MenuFunctions menu_function_obj;
+  
+    String btn_text = lv_list_get_btn_text(btn);
+    String display_string = "";
+    
+    if (event == LV_EVENT_CLICKED) {
+      if (btn_text != text09) {
+      }
+      else {
+        Serial.println("Exiting...");
+        lv_obj_del_async(lv_obj_get_parent(lv_obj_get_parent(btn)));
+  
+        for (int i = 1; i < evil_portal_obj.html_files->size(); i++) {
+          if (i == evil_portal_obj.selected_html_index) {
+            Serial.println("Selected: " + (String)evil_portal_obj.html_files->get(i));
+          }
+        }
+  
+        printf("LV_EVENT_CANCEL\n");
+        menu_function_obj.deinitLVGL();
+        wifi_scan_obj.StartScan(WIFI_SCAN_OFF);
+        display_obj.exit_draw = true; // set everything back to normal
+      }
+    }
+    
+    if (event == LV_EVENT_VALUE_CHANGED) {      
+      if (lv_btn_get_state(btn) == LV_BTN_STATE_CHECKED_RELEASED) {
+        for (int i = 1; i < evil_portal_obj.html_files->size(); i++) {
+          if (evil_portal_obj.html_files->get(i) == btn_text) {
+            Serial.println("Setting HTML: " + (String)evil_portal_obj.html_files->get(i));
+            evil_portal_obj.selected_html_index = i;
+            evil_portal_obj.target_html_name = (String)evil_portal_obj.html_files->get(i);
+          }
+        }
+
+        // Deselect buttons that were previously selected
+        lv_obj_t * list = lv_obj_get_parent(btn);
+
+        lv_obj_t * next_btn = lv_obj_get_child(list, NULL);
+        while (next_btn != NULL) {
+          if (next_btn != btn) {
+            lv_btn_set_state(next_btn, LV_BTN_STATE_RELEASED);
+          }
+          next_btn = lv_obj_get_child(list, next_btn);
+        }
+      }
+    }
+  }
   
   // GFX Function to build a list showing all APs scanned
   void MenuFunctions::addAPGFX(){
@@ -508,6 +588,7 @@ void MenuFunctions::main(uint32_t currentTime)
           (wifi_scan_obj.currentScanMode == BT_ATTACK_SOUR_APPLE) ||
           (wifi_scan_obj.currentScanMode == BT_ATTACK_SWIFTPAIR_SPAM) ||
           (wifi_scan_obj.currentScanMode == BT_ATTACK_SPAM_ALL) ||
+          (wifi_scan_obj.currentScanMode == BT_ATTACK_SAMSUNG_SPAM) ||
           (wifi_scan_obj.currentScanMode == BT_SCAN_WAR_DRIVE) ||
           (wifi_scan_obj.currentScanMode == BT_SCAN_WAR_DRIVE_CONT) ||
           (wifi_scan_obj.currentScanMode == BT_SCAN_SKIMMERS))
@@ -567,6 +648,7 @@ void MenuFunctions::main(uint32_t currentTime)
           (wifi_scan_obj.currentScanMode == BT_ATTACK_SOUR_APPLE) ||
           (wifi_scan_obj.currentScanMode == BT_ATTACK_SWIFTPAIR_SPAM) ||
           (wifi_scan_obj.currentScanMode == BT_ATTACK_SPAM_ALL) ||
+          (wifi_scan_obj.currentScanMode == BT_ATTACK_SAMSUNG_SPAM) ||
           (wifi_scan_obj.currentScanMode == BT_SCAN_WAR_DRIVE) ||
           (wifi_scan_obj.currentScanMode == BT_SCAN_WAR_DRIVE_CONT) ||
           (wifi_scan_obj.currentScanMode == BT_SCAN_SKIMMERS) ||
@@ -1083,7 +1165,6 @@ void MenuFunctions::displaySetting(String key, Menu* menu, int index) {
     
 }
 
-
 // Function to build the menus
 void MenuFunctions::RunSetup()
 {
@@ -1122,6 +1203,9 @@ void MenuFunctions::RunSetup()
   wifiGeneralMenu.list = new LinkedList<MenuNode>();
   wifiAPMenu.list = new LinkedList<MenuNode>();
 
+  // WiFi HTML menu stuff
+  htmlMenu.list = new LinkedList<MenuNode>();
+
   // Bluetooth menu stuff
   bluetoothSnifferMenu.list = new LinkedList<MenuNode>();
   bluetoothAttackMenu.list = new LinkedList<MenuNode>();
@@ -1155,6 +1239,7 @@ void MenuFunctions::RunSetup()
   #ifdef HAS_GPS
     gpsInfoMenu.name = "GPS Data";
   #endif  
+  htmlMenu.name = "EP HTML List";
 
   // Build Main Menu
   mainMenu.parentMenu = NULL;
@@ -1361,7 +1446,72 @@ void MenuFunctions::RunSetup()
       wifi_scan_obj.StartScan(LV_ADD_SSID, TFT_RED);  
       addStationGFX();
     });
+    this->addNodes(&wifiGeneralMenu, "Select EP HTML File", TFT_CYAN, NULL, KEYBOARD_ICO, [this](){
+      display_obj.clearScreen(); 
+      wifi_scan_obj.currentScanMode = LV_ADD_SSID; 
+      wifi_scan_obj.StartScan(LV_ADD_SSID, TFT_RED);  
+      selectEPHTMLGFX();
+    });
   #else
+    this->addNodes(&wifiGeneralMenu, "Select EP HTML File", TFT_CYAN, NULL, KEYBOARD_ICO, [this](){
+      this->changeMenu(&htmlMenu);
+      #ifdef HAS_BUTTONS
+        #if !(defined(MARAUDER_V6) || defined(MARAUDER_V6_1))
+          while(true) {
+            if (d_btn.justPressed()) {
+              if (evil_portal_obj.selected_html_index > 0)
+                evil_portal_obj.selected_html_index--;
+              else
+                evil_portal_obj.selected_html_index = evil_portal_obj.html_files->size() - 1;
+
+              //Serial.println("Setting button text as " + evil_portal_obj.html_files->get(evil_portal_obj.selected_html_index));
+              this->htmlMenu.list->set(0, MenuNode{evil_portal_obj.html_files->get(evil_portal_obj.selected_html_index), false, TFT_CYAN, 0, NULL, true, NULL});
+              this->buildButtons(&htmlMenu);
+              this->displayCurrentMenu();
+            }
+            #ifndef MARAUDER_M5STICKC
+              if (u_btn.justPressed()) {
+                if (evil_portal_obj.selected_html_index < evil_portal_obj.html_files->size() - 1)
+                  evil_portal_obj.selected_html_index++;
+                else
+                  evil_portal_obj.selected_html_index = 0;
+
+                //Serial.println("Setting button text as " + evil_portal_obj.html_files->get(evil_portal_obj.selected_html_index));
+                this->htmlMenu.list->set(0, MenuNode{evil_portal_obj.html_files->get(evil_portal_obj.selected_html_index), false, TFT_CYAN, 0, NULL, true, NULL});
+                this->buildButtons(&htmlMenu, 0, evil_portal_obj.html_files->get(evil_portal_obj.selected_html_index));
+                this->displayCurrentMenu();
+              }
+            #endif
+            if (c_btn.justPressed()) {
+              if (evil_portal_obj.html_files->get(evil_portal_obj.selected_html_index) != "Back") {
+                evil_portal_obj.target_html_name = evil_portal_obj.html_files->get(evil_portal_obj.selected_html_index);
+                Serial.println("Set Evil Portal HTML as " + evil_portal_obj.target_html_name);
+                evil_portal_obj.using_serial_html = false;
+              }
+              this->changeMenu(htmlMenu.parentMenu);
+              break;
+            }
+          }
+        #endif
+      #endif
+    });
+
+    htmlMenu.parentMenu = &wifiGeneralMenu;
+    this->addNodes(&htmlMenu, text09, TFT_LIGHTGREY, NULL, 0, [this]() {
+      this->changeMenu(htmlMenu.parentMenu);
+    });
+
+    /*int loopLimit = min(evil_portal_obj.html_files->size(), BUTTON_ARRAY_LEN);
+
+    for (int i = 0; i < loopLimit - 1; i++) {
+      this->addNodes(&htmlMenu, evil_portal_obj.html_files->get(i), TFT_CYAN, NULL, 0, [this, i]() {
+        evil_portal_obj.target_html_name = (String)evil_portal_obj.html_files->get(i);
+        Serial.println("Set Evil Portal HTML as " + evil_portal_obj.target_html_name);
+        evil_portal_obj.using_serial_html = false;
+        this->changeMenu(htmlMenu.parentMenu);
+      });
+    }*/
+
     // Select APs on Mini
     this->addNodes(&wifiGeneralMenu, text_table1[56], TFT_NAVY, NULL, KEYBOARD_ICO, [this](){
       wifiAPMenu.list->clear();
@@ -1474,6 +1624,11 @@ void MenuFunctions::RunSetup()
     display_obj.clearScreen();
     this->drawStatusBar();
     wifi_scan_obj.StartScan(BT_ATTACK_SWIFTPAIR_SPAM, TFT_CYAN);
+  });
+  this->addNodes(&bluetoothAttackMenu, "Samsung BLE Spam", TFT_RED, NULL, GENERAL_APPS, [this]() {
+    display_obj.clearScreen();
+    this->drawStatusBar();
+    wifi_scan_obj.StartScan(BT_ATTACK_SAMSUNG_SPAM, TFT_RED);
   });
   this->addNodes(&bluetoothAttackMenu, "BLE Spam All", TFT_MAGENTA, NULL, DEAUTH_SNIFF, [this]() {
     display_obj.clearScreen();
@@ -1629,9 +1784,10 @@ void MenuFunctions::addNodes(Menu * menu, String name, uint16_t color, Menu * ch
 {
   TFT_eSPI_Button new_button;
   menu->list->add(MenuNode{name, false, color, place, &new_button, selected, callable});
+  //menu->list->add(MenuNode{name, false, color, place, selected, callable});
 }
 
-void MenuFunctions::buildButtons(Menu * menu, int starting_index)
+void MenuFunctions::buildButtons(Menu * menu, int starting_index, String button_name)
 {
   if (menu->list != NULL)
   {
@@ -1640,7 +1796,10 @@ void MenuFunctions::buildButtons(Menu * menu, int starting_index)
     {
       TFT_eSPI_Button new_button;
       char buf[menu->list->get(starting_index + i).name.length() + 1] = {};
-      menu->list->get(starting_index + i).name.toCharArray(buf, menu->list->get(starting_index + i).name.length() + 1);
+      if (button_name != "")
+        menu->list->get(starting_index + i).name.toCharArray(buf, menu->list->get(starting_index + i).name.length() + 1);
+      else
+        button_name.toCharArray(buf, button_name.length() + 1);
       display_obj.key[i].initButton(&display_obj.tft,
                                     KEY_X + 0 * (KEY_W + KEY_SPACING_X),
                                     KEY_Y + i * (KEY_H + KEY_SPACING_Y), // x, y, w, h, outline, fill, text
