@@ -87,7 +87,10 @@ HexViewer* hex_viewer_app_alloc() {
 void hex_viewer_app_free(HexViewer* app) {
     furi_assert(app);
 
-    if(app->model->stream) buffered_file_stream_close(app->model->stream);
+    if(app->model->stream) {
+        buffered_file_stream_close(app->model->stream);
+        stream_free(app->model->stream);
+    }
 
     // Scene manager
     scene_manager_free(app->scene_manager);

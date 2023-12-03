@@ -43,7 +43,6 @@ typedef struct {
     Stream* stream;
 } HexViewerModel;
 
-// TODO Clean
 typedef struct {
     HexViewerModel* model;
 
