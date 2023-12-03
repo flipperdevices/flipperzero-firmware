@@ -56,7 +56,7 @@ This is HID 35 bit Corporate 1000 - C1k35s format. The first bit is odd parity 2
 
 ## W36: 36-bit Wiegand
 
-This is decode HID 35 bit Keyscan - C15001 format. The first bit is an even parity bit. The next 10 bits are the OEM number. The next 8 bits are the facility code. The next 16 bits are the card number. The last bit is an odd parity bit.
+This is decode HID 36 bit Keyscan - C15001 format. The first bit is an even parity bit. The next 10 bits are the OEM number. The next 8 bits are the facility code. The next 16 bits are the card number. The last bit is an odd parity bit.
 Other 36 bit credentials may be decoded incorrectly.
 
 ## W48: 48-bit Wiegand
