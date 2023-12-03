@@ -177,14 +177,13 @@ void seader_worker_virtual_credential(Seader* seader) {
                     view_dispatcher_send_custom_event(
                         seader->view_dispatcher, SeaderCustomEventWorkerExit);
                 }
-            if(seader_process_success_response_i(
-                   seader, seaderApdu.buf, seaderApdu.len, true, NULL)) {
-                // no-op
-            } else {
-                FURI_LOG_I(TAG, "Response false");
-                running = false;
-            }
-
+                if(seader_process_success_response_i(
+                       seader, seaderApdu.buf, seaderApdu.len, true, NULL)) {
+                    // no-op
+                } else {
+                    FURI_LOG_I(TAG, "Response false");
+                    running = false;
+                }
 
                 // fake being SR
                 // picopass commands

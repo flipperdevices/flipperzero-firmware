@@ -11,8 +11,66 @@ static char display[SEADER_UART_RX_BUF_SIZE * 2 + 1] = {0};
 char asn1_log[SEADER_UART_RX_BUF_SIZE] = {0};
 bool requestPacs = true;
 
+uint8_t read4Block6[] = {0x06, 0x06, 0x45, 0x56};
+uint8_t read4Block9[] = {0x06, 0x09, 0xB2, 0xAE};
+uint8_t read4Block10[] = {0x06, 0x0A, 0x29, 0x9C};
+uint8_t read4Block13[] = {0x06, 0x0D, 0x96, 0xE8};
+uint8_t updateBlock2[] = {RFAL_PICOPASS_CMD_UPDATE, 0x02};
+
 void* calloc(size_t count, size_t size) {
     return malloc(count * size);
+}
+
+// Forward declarations
+void seader_send_nfc_rx(SeaderUartBridge* seader_uart, uint8_t* buffer, size_t len);
+PicopassError seader_worker_fake_epurse_update(BitBuffer* tx_buffer, BitBuffer* rx_buffer);
+static uint16_t seader_worker_picopass_calculate_ccitt(
+    uint16_t preloadValue,
+    const uint8_t* buf,
+    uint16_t length);
+
+void seader_picopass_state_machine(Seader* seader, uint8_t* buffer, size_t len) {
+    SeaderWorker* seader_worker = seader->worker;
+    SeaderUartBridge* seader_uart = seader_worker->uart;
+
+    BitBuffer* tx_buffer = bit_buffer_alloc(len);
+    bit_buffer_append_bytes(tx_buffer, buffer, len);
+    BitBuffer* rx_buffer = bit_buffer_alloc(SEADER_POLLER_MAX_BUFFER_SIZE);
+    uint8_t sr_aia[PICOPASS_BLOCK_LEN + 2] = {
+        0xFF, 0xff, 0xff, 0xff, 0xFF, 0xFf, 0xff, 0xFF, 0x00, 0x00};
+    uint8_t epurse[PICOPASS_BLOCK_LEN] = {0xff, 0xff, 0xff, 0xff, 0xe3, 0xff, 0xff, 0xff};
+
+    do {
+        switch(buffer[0]) {
+        case RFAL_PICOPASS_CMD_READ_OR_IDENTIFY:
+            // append_bytes(rx, seader->[picopass]->AA1[buffer[1]].data, PICOPASS_BLOCK_LEN);
+            if(buffer[1] == 5) { // TODO: _INDEX
+                uint16_t crc = seader_worker_picopass_calculate_ccitt(0xE012, sr_aia, 8);
+                memcpy(sr_aia + 8, &crc, sizeof(uint16_t));
+                bit_buffer_append_bytes(rx_buffer, sr_aia, sizeof(sr_aia));
+            }
+            break;
+        case RFAL_PICOPASS_CMD_UPDATE:
+            seader_worker_fake_epurse_update(tx_buffer, rx_buffer);
+            break;
+        case RFAL_PICOPASS_CMD_READCHECK_KD:
+            if(buffer[1] == 2) { // TODO: _INDEX
+                bit_buffer_append_bytes(rx_buffer, epurse, sizeof(epurse));
+            }
+            break;
+        case RFAL_PICOPASS_CMD_CHECK:
+
+            break;
+        }
+
+        seader_send_nfc_rx(
+            seader_uart,
+            (uint8_t*)bit_buffer_get_data(rx_buffer),
+            bit_buffer_get_size_bytes(rx_buffer));
+
+    } while(false);
+    bit_buffer_free(tx_buffer);
+    bit_buffer_free(rx_buffer);
 }
 
 bool seader_send_apdu(
@@ -339,12 +397,6 @@ void seader_send_nfc_rx(SeaderUartBridge* seader_uart, uint8_t* buffer, size_t l
     ASN_STRUCT_FREE(asn_DEF_Response, response);
 }
 
-uint8_t read4Block6[] = {0x06, 0x06, 0x45, 0x56};
-uint8_t read4Block9[] = {0x06, 0x09, 0xB2, 0xAE};
-uint8_t read4Block10[] = {0x06, 0x0A, 0x29, 0x9C};
-uint8_t read4Block13[] = {0x06, 0x0D, 0x96, 0xE8};
-uint8_t updateBlock2[] = {0x87, 0x02}; // TODO
-
 void seader_capture_sio(BitBuffer* tx_buffer, BitBuffer* rx_buffer, SeaderCredential* credential) {
     const uint8_t* buffer = bit_buffer_get_data(tx_buffer);
     size_t len = bit_buffer_get_size_bytes(tx_buffer);
@@ -491,7 +543,9 @@ void seader_parse_nfc_command_transmit(
         frameProtocol);
 #endif
 
-    if(frameProtocol == FrameProtocol_iclass) {
+    if(seader->credential->type == SeaderCredentialTypeVirtual) {
+        seader_picopass_state_machine(seader, nfcSend->data.buf, nfcSend->data.size);
+    } else if(frameProtocol == FrameProtocol_iclass) {
         seader_iso15693_transmit(
             seader, spc->picopass_poller, nfcSend->data.buf, nfcSend->data.size);
     } else if(frameProtocol == FrameProtocol_nfc) {

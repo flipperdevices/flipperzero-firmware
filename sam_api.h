@@ -6,6 +6,7 @@
 #include "seader_credential.h"
 #include "seader_bridge.h"
 #include "seader_worker.h"
+#include "protocol/rfal_picopass.h"
 
 #include <Payload.h>
 
