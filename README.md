@@ -5,6 +5,7 @@
 
 **Get one:** [Tindie Store](https://www.tindie.com/products/efuentealba/malveke-game-boy-tools-for-flipper-zero/)
 
+**User Manual:** [Instruction Booklet](./MALVEKE_Instruction_Booklet.pdf)
 
 <picture>
     <source media="(prefers-color-scheme: dark)" srcset="./assets/logo.png">
