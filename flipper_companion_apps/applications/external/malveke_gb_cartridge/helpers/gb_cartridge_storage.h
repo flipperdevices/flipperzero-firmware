@@ -14,5 +14,5 @@
 #define BOILERPLATE_SETTINGS_KEY_SPEAKER "Speaker"
 #define BOILERPLATE_SETTINGS_KEY_SAVE_SETTINGS "SaveSettings"
 
-void gb_cartridge_save_settings(void* context);
-void gb_cartridge_read_settings(void* context);
+// void gb_cartridge_save_settings(void* context);
+// void gb_cartridge_read_settings(void* context);
