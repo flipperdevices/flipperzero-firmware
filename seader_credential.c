@@ -9,17 +9,6 @@
 #include <lfrfid/lfrfid_dict_file.h>
 
 #define TAG "SeaderCredential"
-#define PICOPASS_BLOCK_LEN 8
-
-#define CSN_INDEX 0
-#define CFG_INDEX 1
-#define EPURSE_INDEX 2
-#define KD_INDEX 3
-#define KC_INDEX 4
-#define AIA_INDEX 5
-#define PACS_CFG_INDEX 6
-#define PACS_INDEX 7
-#define SR_SIO_INDEX 10
 
 static const char* seader_file_header = "Flipper Seader Credential";
 static const uint32_t seader_file_version = 1;

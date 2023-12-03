@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <storage/storage.h>
 #include <dialogs/dialogs.h>
+#include "protocol/picopass_protocol.h"
 
 #define SEADER_CRED_NAME_MAX_LEN 22
 #define SEADER_APP_EXTENSION ".credential"
