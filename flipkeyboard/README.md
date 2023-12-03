@@ -55,6 +55,7 @@ Make sure your FlipBoard is connected to your Flipper Zero.  Choose the "Flipboa
 
 ### Written tutorials
 
+- [Play a song; Happy Birthday!](tutorials/song.md)
 - [Learn about the file format of the configuration files](tutorials/file-format.md)
 - [Edit the Message that is typed](tutorials/message.md)
-- [Custom button action](tutorials/custom-button-action.md)
+- [Write a custom button action for when button 3+4 are pressed](tutorials/custom-button-action.md)
