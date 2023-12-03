@@ -112,6 +112,15 @@ App(
 )
 
 App(
+    appid="aime_parser",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="aime_plugin_ep",
+    targets=["f7"],
+    requires=["nfc"],
+    sources=["plugins/supported_cards/aime.c"],
+)
+
+App(
     appid="sonicare_parser",
     apptype=FlipperAppType.PLUGIN,
     entry_point="sonicare_plugin_ep",
