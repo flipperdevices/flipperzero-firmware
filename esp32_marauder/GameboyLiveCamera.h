@@ -40,6 +40,7 @@ class GameboyLiveCamera {
     void ramDisable();
     void updateMatrixRegisters();
     unsigned int waitPictureReady(void);
+    unsigned int calculateExposureTime(unsigned char* capturedImage, int imageSize);
 
     
 

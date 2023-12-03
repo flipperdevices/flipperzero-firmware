@@ -1,0 +1,5 @@
+{
+    "configuration": "JTAGAdapter=default,CDCOnBoot=default,MSCOnBoot=default,DFUOnBoot=default,UploadMode=default,PSRAM=disabled,PartitionScheme=huge_app,CPUFreq=240,FlashMode=qio,FlashFreq=80,FlashSize=4M,UploadSpeed=921600,DebugLevel=none,EraseFlash=none",
+    "board": "esp32:esp32:esp32s2",
+    "port": "/dev/tty.usbmodemflip_Acereadn1"
+}
