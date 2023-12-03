@@ -78,7 +78,6 @@ GBCartridge* gb_cartridge_app_app_alloc() {
     app->dialogs = furi_record_open(RECORD_DIALOGS);
     app->file_path = furi_string_alloc();
 
-
     app->uart = usart_init(app);
     app->lp_uart = lp_uart_init(app);
 
