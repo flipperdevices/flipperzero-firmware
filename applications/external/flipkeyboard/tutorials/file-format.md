@@ -55,7 +55,7 @@ The KeystrokeCount value is the number of keystrokes to send to the computer whe
 # Download the file
 You can download the file to your computer using qFlipper, edit it using a text editor, then upload the changes to the Flipper Zero.
 
-- Click on the Files tab
+- Click on the Files tab in qFlipper
 - Open `SD Card`
 - Open `apps_data`
 - Open `flipboard`

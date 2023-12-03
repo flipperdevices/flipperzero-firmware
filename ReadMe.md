@@ -27,16 +27,13 @@ This software is for experimental purposes only and is not meant for any illegal
 
 <a name="latest">
 
-## Latest Updates - [PATREON: Latest Release RM1202-0325-0.93.9-14363f7](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
+## Latest Updates - [PATREON: Latest Release RM1203-0124-0.93.9-17d9754](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-12-02 15:10 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-12-02 15:10 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-12-03 01:24 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-12-03 01:24 EST`
 - Updated: [BLE Spam v4.4 (By Willy-JL & ECTO-1A & Spooks4576 with research from xMasterX; OFW API thanks to noproto)](https://github.com/noproto/apple_ble_spam_ofw)
 - Variable List Item Get Function, Variable List Item Set Header Function & CFW App Scene Refresh Cleanup (By Willy-JL)
 - Updated: [UART Terminal v1.3 (By cool4uma)](https://github.com/cool4uma/UART_Terminal) [Hex mode in UART Terminal #32 (By rnadyrshin)](https://github.com/xMasterX/all-the-plugins/pull/32)
-- Updated: [FlipBoard Blinky v1.0 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
-- Updated: [FlipBoard Keyboard v1.0 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
-- Updated: [FlipBoard Signal v1.0 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
 - Updated: [u-blox GPS v0.3 (By liamhays)](https://github.com/liamhays/ublox)
 - OFW: [HID app: Add new function key icons #3236 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3236)
 - OFW: [Add the 'remove pairing' button to BLE hid #3237 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3237)
@@ -47,6 +44,9 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [HEX Viewer v2.0 (By QtRoS)](https://github.com/QtRoS/flipperzero-firmware)
 - Updated: [BLE Spam v4.4 (By Willy-JL & ECTO-1A & Spooks4576 with research from xMasterX; OFW API thanks to noproto)](https://github.com/noproto/apple_ble_spam_ofw) - Changes from xMasterX repository
 - Updated: [UART Terminal v1.3 (By cool4uma)](https://github.com/cool4uma/UART_Terminal) - Changes from xMasterX repository
+- Updated: [FlipBoard Blinky v1.0 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
+- Updated: [FlipBoard Keyboard v1.0 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
+- Updated: [FlipBoard Signal v1.0 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
 
 ## IN THIS BRANCH:
 
