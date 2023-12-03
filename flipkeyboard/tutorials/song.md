@@ -79,3 +79,19 @@ Choose the `Flipboard Keyboard` option.  Press the buttons to play the song.
 - [Join Discord Server](https://discord.gg/H89Jzjty6m)
 
 - Share your song in the `#flipboard` channel.
+
+- Here is an example of "Jingle Bells":
+
+  - Start from G. Do NOT program sharps (like G#).
+  - 1=**G4** `1000`, 2=**A4** `0200`, 3=**B4** `1200`, 4=**C5** `0040`, 5=**D5** `1040`, 6=**E5** `0240`, 7=**F5** `1240`, 8=**G5** `0008`, 9=**A5** `1001`.
+
+```
+  "Da-shing-through-the-snow" (16541) "in a one horse o-pen sleigh" (1116542) 
+  "O'er the fields we go" (27653) "Lau-ghing all the way" (88756) 
+  "Bells on bob-tail ring" (16541) "ma-king spi-rits bright" (16542) 
+  "what fun it is to ride and sing" (22765888) "a slei-ghing song to-night! Oh" (8987548) 
+  "Jin-gle bells jin-gle bells" (666666) "jin-gle all the way" (68456) 
+  "Oh! What fun it is to ride" (7777766) "in a one-horse o-pen sleigh" (66655658) 
+  "jin-gle bells jin-gle bells" (666666) "jin-gle all the way" (68456) 
+  "Oh! what fun it is to ride" (7777766) "in a one horse o-pen sleigh" (6688754).
+```
