@@ -1,4 +1,4 @@
-# [MALVEKE] ***GAME BOY*** Cartridge (GB/GBC)
+# MALVEKE **GAME BOY** Cartridge (GB/GBC)
 
 ## Introduction
 MALVEKE app, its Interacts with GAME BOY and GAME BOY Color cartridges. You can Dump & Restore RAM and ROM.
@@ -16,7 +16,7 @@ These instructions assume that you are starting at the Flipper Zero desktop. Oth
 - Press the **OK** button on the Flipper to open the main menu.
 - Choose **Applications** from the menu.
 - Choose **GPIO** from the submenu.
-- Choose **[MALVEKE] GAME BOY Cartridge (GB/GBC)**
+- Choose **MALVEKE GAME BOY Cartridge (GB/GBC)**
 - If the **MALVEKE** board and the cartridge are connected, The Flipper Zero will show the loading screen of the application.
 - Press the **OK** to enter to menu.
 - Press the **Back** to back to principal menu.
