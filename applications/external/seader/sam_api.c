@@ -619,20 +619,20 @@ bool seader_process_success_response_i(
     asn_dec_rval_t rval =
         asn_decode(0, ATS_DER, &asn_DEF_Payload, (void**)&payload, apdu + 6, len - 6);
     if(rval.code == RC_OK) {
-        processed = seader_worker_state_machine(seader, payload, online, spc);
-
 #ifdef ASN1_DEBUG
-        if(processed) {
+        if(online == false) {
             char payloadDebug[384] = {0};
             memset(payloadDebug, 0, sizeof(payloadDebug));
             (&asn_DEF_Payload)
                 ->op->print_struct(
                     &asn_DEF_Payload, payload, 1, seader_print_struct_callback, payloadDebug);
             if(strlen(payloadDebug) > 0) {
-                FURI_LOG_D(TAG, "Payload processed: %s", payloadDebug);
+                FURI_LOG_D(TAG, "Payload: %s", payloadDebug);
             }
         }
 #endif
+
+        processed = seader_worker_state_machine(seader, payload, online, spc);
     } else {
         FURI_LOG_D(TAG, "Failed to decode APDU payload");
     }
