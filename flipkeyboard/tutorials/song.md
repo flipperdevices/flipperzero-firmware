@@ -1,4 +1,4 @@
-# Song
+# Play a song using FlipKeyboard tones
 
 ## Introduction
 
@@ -73,3 +73,9 @@ Choose the `Flipboard Keyboard` option.  Press the buttons to play the song.
   - [0 2 4 0]
   - [0 0 0 8]
   - [0 2 4 0]
+
+## Step 5: Create your own song and share it with us!
+
+- [Join Discord Server](https://discord.gg/H89Jzjty6m)
+
+- Share your song in the `#flipboard` channel.
