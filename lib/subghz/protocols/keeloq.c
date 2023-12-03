@@ -963,16 +963,29 @@ static void subghz_protocol_keeloq_check_remote_controller(
     // If we are in BFT / Aprimatic programming mode we will set previous remembered counter and skip mf keys check
     ProgMode prog_mode = subghz_custom_btn_get_prog_mode();
     if(prog_mode == PROG_MODE_OFF) {
-        // Check key AN-Motors
-        if((key_hop >> 24) == ((key_hop >> 16) & 0x00ff) &&
-           (key_fix >> 28) == ((key_hop >> 12) & 0x0f) && (key_hop & 0xFFF) == 0x404) {
-            *manufacture_name = "AN-Motors";
-            keystore->mfname = *manufacture_name;
-            instance->cnt = key_hop >> 16;
-        } else if((key_hop & 0xFFF) == (0x000) && (key_fix >> 28) == ((key_hop >> 12) & 0x0f)) {
-            *manufacture_name = "HCS101";
-            keystore->mfname = *manufacture_name;
-            instance->cnt = key_hop >> 16;
+        if(keystore->mfname == 0x0) {
+            keystore->mfname = "";
+        }
+        if(*manufacture_name == 0x0) {
+            *manufacture_name = "";
+        }
+
+        // Case when we have no mf name means that we are checking for the first time and we have to check all conditions
+        if((strlen(keystore->mfname) < 1) && strlen(*manufacture_name) < 1) {
+            // Check key AN-Motors
+            if((key_hop >> 24) == ((key_hop >> 16) & 0x00ff) &&
+               (key_fix >> 28) == ((key_hop >> 12) & 0x0f) && (key_hop & 0xFFF) == 0x404) {
+                *manufacture_name = "AN-Motors";
+                keystore->mfname = *manufacture_name;
+                instance->cnt = key_hop >> 16;
+            } else if((key_hop & 0xFFF) == (0x000) && (key_fix >> 28) == ((key_hop >> 12) & 0x0f)) {
+                *manufacture_name = "HCS101";
+                keystore->mfname = *manufacture_name;
+                instance->cnt = key_hop >> 16;
+            } else {
+                subghz_protocol_keeloq_check_remote_controller_selector(
+                    instance, key_fix, key_hop, keystore, manufacture_name);
+            }
         } else {
             subghz_protocol_keeloq_check_remote_controller_selector(
                 instance, key_fix, key_hop, keystore, manufacture_name);
