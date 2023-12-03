@@ -25,7 +25,7 @@ https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/assets/442927/a1d06e1f
 
 </div>
 
-### Features
+## Features
 - Read info from GAME BOY/GAME BOY Color Cartridges
 - Backing up and restoring your saves (RAM)
 - Backing up and restoring your games (ROM) (WIP)
