@@ -18,6 +18,8 @@
 #define TAG "FuriHalSubGhz"
 
 static uint32_t furi_hal_subghz_debug_gpio_buff[2];
+#define FURI_HAL_SUBGHZ_TX_GPIO gpio_ext_pc3
+#define FURI_HAL_SUBGHZ_ASYNC_MIRROR_GPIO gpio_ext_pa7
 
 /* DMA Channels definition */
 #define SUBGHZ_DMA DMA2
@@ -554,7 +556,15 @@ static void furi_hal_subghz_async_tx_refill(uint32_t* buffer, size_t samples) {
             buffer++;
             samples--;
         } else if(level_duration_is_reset(ld)) {
-            if(!is_odd && (buffer != furi_hal_subghz_async_tx.buffer)) buffer--;
+            if(!is_odd) { //if upload ends low. then we stop the transmission on it
+                if(buffer ==
+                   furi_hal_subghz_async_tx
+                       .buffer) { //if reset to the beginning of the array, then we move it to the end, thereby zeroing out the last low level in upload
+                    buffer[API_HAL_SUBGHZ_ASYNC_TX_BUFFER_FULL - 1] = 0;
+                } else {
+                    buffer--;
+                }
+            }
             *buffer = 0;
             buffer++;
             samples--;
@@ -586,15 +596,14 @@ static void furi_hal_subghz_async_tx_refill(uint32_t* buffer, size_t samples) {
             uint32_t duration = level_duration_get_duration(ld);
             furi_assert(duration > 0);
             //supports durations greater than 2 us
-            uint32_t duration_temp = duration - 1;
-            *buffer = duration_temp;
+            *buffer = duration - 1;
             buffer++;
             samples--;
 
             if(is_odd) {
-                furi_hal_subghz_async_tx.duty_high += duration_temp;
+                furi_hal_subghz_async_tx.duty_high += duration;
             } else {
-                furi_hal_subghz_async_tx.duty_low += duration_temp;
+                furi_hal_subghz_async_tx.duty_low += duration;
             }
         }
     }

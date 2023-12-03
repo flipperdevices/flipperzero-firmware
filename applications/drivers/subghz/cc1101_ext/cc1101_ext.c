@@ -581,7 +581,13 @@ static void subghz_device_cc1101_ext_async_tx_refill(uint32_t* buffer, size_t sa
             buffer++;
             samples--;
         } else if(level_duration_is_reset(ld)) {
-            if(is_odd && (buffer != subghz_device_cc1101_ext->async_tx.buffer)) buffer--;
+            if(is_odd) {
+                if(buffer == subghz_device_cc1101_ext->async_tx.buffer) {
+                    buffer[SUBGHZ_DEVICE_CC1101_EXT_ASYNC_TX_BUFFER_FULL] = 0;
+                } else {
+                    buffer--;
+                }
+            }
             *buffer = 0;
             buffer++;
             samples--;
