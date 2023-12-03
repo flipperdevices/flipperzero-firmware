@@ -30,6 +30,10 @@ App(
             name="asn1",
             cflags=["-Wno-error"],
         ),
+        Lib(
+            name="loclass",
+            cflags=["-O3"],
+        ),
     ],
     fap_weburl="https://seader.ericbetts.dev",
     fap_icon_assets="icons",
