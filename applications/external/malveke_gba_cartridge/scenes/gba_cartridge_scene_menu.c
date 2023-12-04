@@ -20,7 +20,8 @@ void gba_cartridge_scene_menu_on_enter(void* context) {
     // variable_item_list_add(app->submenu, "Write ROM", 1, NULL, NULL);
     // variable_item_list_add(app->submenu, "Write RAM", 1, NULL, NULL);
 
-    variable_item_list_set_enter_callback(app->submenu, gba_cartridge_scene_menu_submenu_callback, app);
+    variable_item_list_set_enter_callback(
+        app->submenu, gba_cartridge_scene_menu_submenu_callback, app);
 
     view_dispatcher_switch_to_view(app->view_dispatcher, GBACartridgeViewIdMenu);
 }
@@ -39,7 +40,7 @@ bool gba_cartridge_scene_menu_on_event(void* context, SceneManagerEvent event) {
                 app->scene_manager, GBACartridgeSceneMenu, SubmenuIndexScene1);
             scene_manager_next_scene(app->scene_manager, GBACartridgeSceneScene_1);
             return true;
-        } 
+        }
     }
     return false;
 }

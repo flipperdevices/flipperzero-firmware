@@ -57,7 +57,6 @@
 
 #include "cJSON.h"
 
-
 /* define our own boolean type */
 #ifdef true
 #undef true

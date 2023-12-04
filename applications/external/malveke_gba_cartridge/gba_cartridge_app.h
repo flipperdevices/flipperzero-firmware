@@ -32,7 +32,6 @@
 #define MALVEKE_APP_FOLDER_RAMS MALVEKE_APP_FOLDER "/rams"
 #define MALVEKE_APP_FOLDER_PHOTOS MALVEKE_APP_FOLDER "/photos"
 
-
 #define UI_PADDING 3
 #define UI_PROGRESS_COLS 8
 #define UI_PROGRESS_ROWS 4
@@ -50,7 +49,7 @@ typedef struct {
     VariableItemList* variable_item_list;
     GBACartridgeStartscreen* gba_cartridge_startscreen;
     GBACartridgeScene1* gba_cartridge_scene_1;
-    
+
     DialogsApp* dialogs; // File Browser
     FuriString* file_path; // File Browser
     ButtonMenu* button_menu; // Button Menu
@@ -68,7 +67,6 @@ typedef struct {
     File* cart_rom;
     File* cart_ram;
 
-
     FuriThread* thread;
     bool is_writing_rom;
     bool is_writing_ram;
@@ -78,13 +76,8 @@ typedef struct {
 
 } GBACartridge;
 
-
 typedef enum {
     GBACartridgeViewIdStartscreen,
     GBACartridgeViewIdMenu,
     GBACartridgeViewIdScene1,
 } GBACartridgeViewId;
-
-
-
-

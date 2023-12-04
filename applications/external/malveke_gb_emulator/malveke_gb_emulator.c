@@ -1,15 +1,13 @@
 #include "malveke_gb_emulator.h"
 #include <malveke_gb_emulator_icons.h>
 
-
-
 static void malveke_gb_emulator_view_draw_callback(Canvas* canvas, void* _model) {
     UartDumpModel* model = _model;
 
     // Prepare canvas
     canvas_set_color(canvas, ColorBlack);
     canvas_draw_frame(canvas, 0, 0, FRAME_WIDTH, FRAME_HEIGTH);
-    
+
     for(size_t p = 0; p < FRAME_BUFFER_LENGTH; ++p) {
         uint8_t x = p % ROW_BUFFER_LENGTH; // 0 .. 15
         uint8_t y = p / ROW_BUFFER_LENGTH; // 0 .. 63
@@ -21,7 +19,7 @@ static void malveke_gb_emulator_view_draw_callback(Canvas* canvas, void* _model)
         }
     }
 
-    if (!model->initialized){
+    if(!model->initialized) {
         canvas_draw_icon(canvas, 60, 7, &I_malveke_67x49);
         canvas_set_font(canvas, FontSecondary);
 
@@ -30,7 +28,7 @@ static void malveke_gb_emulator_view_draw_callback(Canvas* canvas, void* _model)
         canvas_draw_str(canvas, 4, 35, "MALVEKE");
         canvas_set_font(canvas, FontSecondary);
         canvas_draw_str(canvas, 4, 44, "into Flipper");
-        elements_button_center(canvas, "Ok"); 
+        elements_button_center(canvas, "Ok");
         // canvas_set_font(canvas, FontPrimary);
         // canvas_draw_str(canvas, 8, 28, "GAME BOY");
         // canvas_draw_icon(canvas, 76, 8, &I_gbcam_48x49);
@@ -40,42 +38,50 @@ static void malveke_gb_emulator_view_draw_callback(Canvas* canvas, void* _model)
         // canvas_draw_str(canvas, 8, 38, "CAMERA...");
         // canvas_set_font(canvas, FontSecondary);
         // canvas_draw_str(canvas, 9, 47, "Insert Cartridge");
-        // elements_button_center(canvas, "Ok"); 
+        // elements_button_center(canvas, "Ok");
     }
 }
-
 
 static bool malveke_gb_emulator_view_input_callback(InputEvent* event, void* context) {
     UartEchoApp* instance = context;
     UNUSED(instance);
-    if (event->type == InputTypePress){
-        if (event->key == InputKeyUp){
+    if(event->type == InputTypePress) {
+        if(event->key == InputKeyUp) {
             const char gbemulator_command_up[] = "U\n";
-            furi_hal_uart_tx(FuriHalUartIdUSART1, (uint8_t*)gbemulator_command_up, strlen(gbemulator_command_up));
-        }
-        else if (event->key == InputKeyDown){
+            furi_hal_uart_tx(
+                FuriHalUartIdUSART1,
+                (uint8_t*)gbemulator_command_up,
+                strlen(gbemulator_command_up));
+        } else if(event->key == InputKeyDown) {
             const char gbemulator_command_down[] = "D\n";
-            furi_hal_uart_tx(FuriHalUartIdUSART1, (uint8_t*)gbemulator_command_down, strlen(gbemulator_command_down));
-        }
-        else if (event->key == InputKeyRight){
+            furi_hal_uart_tx(
+                FuriHalUartIdUSART1,
+                (uint8_t*)gbemulator_command_down,
+                strlen(gbemulator_command_down));
+        } else if(event->key == InputKeyRight) {
             const char gbemulator_command_right[] = ">\n";
-            furi_hal_uart_tx(FuriHalUartIdUSART1, (uint8_t*)gbemulator_command_right, strlen(gbemulator_command_right));
-        }
-        else if (event->key == InputKeyLeft){
+            furi_hal_uart_tx(
+                FuriHalUartIdUSART1,
+                (uint8_t*)gbemulator_command_right,
+                strlen(gbemulator_command_right));
+        } else if(event->key == InputKeyLeft) {
             const char gbemulator_command_left[] = "<\n";
-            furi_hal_uart_tx(FuriHalUartIdUSART1, (uint8_t*)gbemulator_command_left, strlen(gbemulator_command_left));
-        }
-        else if (event->key == InputKeyOk){
+            furi_hal_uart_tx(
+                FuriHalUartIdUSART1,
+                (uint8_t*)gbemulator_command_left,
+                strlen(gbemulator_command_left));
+        } else if(event->key == InputKeyOk) {
             with_view_model(
                 instance->view,
                 UartDumpModel * model,
                 {
                     const char gbemulator_command_OK[] = "S\n";
-                    furi_hal_uart_tx(FuriHalUartIdUSART1, (uint8_t*)gbemulator_command_OK, strlen(gbemulator_command_OK));  
+                    furi_hal_uart_tx(
+                        FuriHalUartIdUSART1,
+                        (uint8_t*)gbemulator_command_OK,
+                        strlen(gbemulator_command_OK));
                 },
                 false);
-
-            
         }
     }
     return false;
@@ -99,36 +105,39 @@ static void malveke_gb_emulator_on_irq_cb(UartIrqEvent ev, uint8_t data, void* c
 }
 
 static void process_ringbuffer(UartDumpModel* model, uint8_t byte) {
-
     //// 1. Phase: filling the ringbuffer
-    if (model->ringbuffer_index == 0 && byte != 'Y'){ // First char has to be 'Y' in the buffer.
+    if(model->ringbuffer_index == 0 && byte != 'Y') { // First char has to be 'Y' in the buffer.
         return;
     }
-    
-    if (model->ringbuffer_index == 1 && byte != ':'){ // Second char has to be ':' in the buffer or reset.
+
+    if(model->ringbuffer_index == 1 &&
+       byte != ':') { // Second char has to be ':' in the buffer or reset.
         model->ringbuffer_index = 0;
         process_ringbuffer(model, byte);
         return;
     }
 
-    model->row_ringbuffer[model->ringbuffer_index] = byte; // Assign current byte to the ringbuffer;
+    model->row_ringbuffer[model->ringbuffer_index] =
+        byte; // Assign current byte to the ringbuffer;
     ++model->ringbuffer_index; // Increment the ringbuffer index
 
-    if (model->ringbuffer_index < RING_BUFFER_LENGTH){ // Let's wait 'till the buffer fills.
+    if(model->ringbuffer_index < RING_BUFFER_LENGTH) { // Let's wait 'till the buffer fills.
         return;
     }
 
     //// 2. Phase: flushing the ringbuffer to the framebuffer
     model->ringbuffer_index = 0; // Let's reset the ringbuffer
     model->initialized = true; // We've successfully established the connection
-    size_t row_start_index = model->row_ringbuffer[2] * ROW_BUFFER_LENGTH; // Third char will determine the row number
+    size_t row_start_index =
+        model->row_ringbuffer[2] * ROW_BUFFER_LENGTH; // Third char will determine the row number
 
-    if (row_start_index > LAST_ROW_INDEX){ // Failsafe
+    if(row_start_index > LAST_ROW_INDEX) { // Failsafe
         row_start_index = 0;
     }
 
-    for (size_t i = 0; i < ROW_BUFFER_LENGTH; ++i) {
-        model->pixels[row_start_index + i] = model->row_ringbuffer[i+3]; // Writing the remaining 16 bytes into the frame buffer
+    for(size_t i = 0; i < ROW_BUFFER_LENGTH; ++i) {
+        model->pixels[row_start_index + i] =
+            model->row_ringbuffer[i + 3]; // Writing the remaining 16 bytes into the frame buffer
     }
 }
 
@@ -152,7 +161,8 @@ static int32_t malveke_gb_emulator_worker(void* context) {
                 if(length > 0) {
                     with_view_model(
                         app->view,
-                        UartDumpModel * model, {
+                        UartDumpModel * model,
+                        {
                             for(size_t i = 0; i < length; i++) {
                                 process_ringbuffer(model, data[i]);
                             }
@@ -162,7 +172,8 @@ static int32_t malveke_gb_emulator_worker(void* context) {
             } while(length > 0);
 
             notification_message(app->notification, &sequence_notification);
-            with_view_model(app->view, UartDumpModel * model, { UNUSED(model); }, true);
+            with_view_model(
+                app->view, UartDumpModel * model, { UNUSED(model); }, true);
         }
     }
 
@@ -204,7 +215,8 @@ static UartEchoApp* malveke_gb_emulator_app_alloc() {
     view_dispatcher_add_view(app->view_dispatcher, 0, app->view);
     view_dispatcher_switch_to_view(app->view_dispatcher, 0);
 
-    app->worker_thread = furi_thread_alloc_ex("UsbUartWorker", 2048, malveke_gb_emulator_worker, app);
+    app->worker_thread =
+        furi_thread_alloc_ex("UsbUartWorker", 2048, malveke_gb_emulator_worker, app);
     furi_thread_start(app->worker_thread);
 
     // Enable uart listener (UART & UART1)
@@ -215,7 +227,7 @@ static UartEchoApp* malveke_gb_emulator_app_alloc() {
     furi_hal_uart_set_irq_cb(FuriHalUartIdLPUART1, malveke_gb_emulator_on_irq_cb, app);
     // furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, malveke_gb_emulator_on_irq_cb, app);
     furi_hal_power_enable_otg();
-    furi_delay_ms(1); 
+    furi_delay_ms(1);
     return app;
 }
 
@@ -253,7 +265,7 @@ int32_t malveke_gb_emulator_app(void* p) {
     UartEchoApp* app = malveke_gb_emulator_app_alloc();
     view_dispatcher_run(app->view_dispatcher);
     malveke_gb_emulator_app_free(app);
-    
+
     furi_hal_power_disable_otg();
 
     return 0;

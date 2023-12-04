@@ -5,12 +5,13 @@
 
 #include "furi_hal.h"
 
-
 #define RX_BUF_SIZE (1024)
 
 typedef struct Uart Uart;
 
-void uart_set_handle_rx_data_cb(Uart* uart, void (*handle_rx_data_cb)(uint8_t* buf, size_t len, void* context));
+void uart_set_handle_rx_data_cb(
+    Uart* uart,
+    void (*handle_rx_data_cb)(uint8_t* buf, size_t len, void* context));
 void uart_tx(uint8_t* data, size_t len);
 void lp_uart_tx(uint8_t* data, size_t len);
 Uart* usart_init(void* app);

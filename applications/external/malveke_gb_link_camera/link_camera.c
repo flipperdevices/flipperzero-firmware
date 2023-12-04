@@ -6,21 +6,18 @@
 QRCode qrcode;
 uint8_t qrcodeData[((((4 * 8 + 17) * (4 * 8 + 17)) + 7) / 8)];
 
-static uint32_t link_camera_exit(void *context)
-{
+static uint32_t link_camera_exit(void* context) {
     UNUSED(context);
     return VIEW_NONE;
 }
 
-static void view_draw_callback(Canvas *canvas, void *_model)
-{
-    LinkCameraModel *model = _model;
+static void view_draw_callback(Canvas* canvas, void* _model) {
+    LinkCameraModel* model = _model;
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
     canvas_set_font(canvas, FontPrimary);
 
-    if (model->connected)
-    {
+    if(model->connected) {
         // canvas_draw_str_aligned(canvas, 128/2, 64/3, AlignCenter, AlignCenter, "Connected");
         // canvas_draw_str_aligned(canvas, 128/2, 64/2, AlignCenter, AlignCenter, model->ip);
         /*
@@ -77,9 +74,7 @@ static void view_draw_callback(Canvas *canvas, void *_model)
         canvas_draw_str(canvas, 2, 50, "Host");
         canvas_set_font(canvas, FontSecondary);
         canvas_draw_str(canvas, 2, 60, model->ip);
-    }
-    else
-    {
+    } else {
         canvas_draw_icon(canvas, 60, 7, &I_malveke_67x49);
         canvas_set_font(canvas, FontSecondary);
 
@@ -102,14 +97,11 @@ static void view_draw_callback(Canvas *canvas, void *_model)
     //     // canvas_draw_str(canvas, 20, 54, "U0T - RX");
     // }
 }
-static bool view_input_callback(InputEvent *event, void *context)
-{
-    LinkCameraApp *instance = context;
+static bool view_input_callback(InputEvent* event, void* context) {
+    LinkCameraApp* instance = context;
     UNUSED(instance);
-    if (event->type == InputTypePress)
-    {
-        if (event->key == InputKeyBack)
-        {
+    if(event->type == InputTypePress) {
+        if(event->key == InputKeyBack) {
             uart_set_handle_rx_data_cb(instance->uart, NULL);
             uart_free(instance->uart);
 
@@ -117,31 +109,21 @@ static bool view_input_callback(InputEvent *event, void *context)
             furi_delay_ms(100);
             furi_hal_power_enable_external_3_3v();
             furi_delay_ms(200);
-        }
-        else if (event->key == InputKeyOk)
-        {
-
+        } else if(event->key == InputKeyOk) {
             furi_hal_power_disable_external_3_3v();
             furi_delay_ms(100);
             furi_hal_power_enable_external_3_3v();
             furi_delay_ms(200);
 
             with_view_model(
-                instance->view,
-                LinkCameraModel * model,
-                {
-                    model->initialized = true;
-                },
-                true);
-            uart_tx((uint8_t *)("c"), 1);
-            uart_tx((uint8_t *)("\n"), 1);
-
+                instance->view, LinkCameraModel * model, { model->initialized = true; }, true);
+            uart_tx((uint8_t*)("c"), 1);
+            uart_tx((uint8_t*)("\n"), 1);
         }
     }
     return false;
 }
-static void link_camera_free(LinkCameraApp *app)
-{
+static void link_camera_free(LinkCameraApp* app) {
     furi_assert(app);
     // Free views
     view_dispatcher_remove_view(app->view_dispatcher, 0);
@@ -154,61 +136,44 @@ static void link_camera_free(LinkCameraApp *app)
     // Free rest
     free(app);
 }
-void handle_rx_data_cb(uint8_t *buf, size_t len, void *context)
-{
+void handle_rx_data_cb(uint8_t* buf, size_t len, void* context) {
     furi_assert(context);
     UNUSED(len);
     // UNUSED(buf);
-    LinkCameraApp *instance = (LinkCameraApp *)context;
+    LinkCameraApp* instance = (LinkCameraApp*)context;
 
     // FURI_LOG_I("UART", "[in]: %s", (char*)buf);
     with_view_model(
         instance->view,
         LinkCameraModel * model,
         {
-            cJSON *json = cJSON_Parse((char *)buf);
-            if (json == NULL)
-            {
-            }
-            else
-            {
-                cJSON *type = cJSON_GetObjectItemCaseSensitive(json, "type");
-                if (cJSON_IsString(type) && (type->valuestring != NULL))
-                {
+            cJSON* json = cJSON_Parse((char*)buf);
+            if(json == NULL) {
+            } else {
+                cJSON* type = cJSON_GetObjectItemCaseSensitive(json, "type");
+                if(cJSON_IsString(type) && (type->valuestring != NULL)) {
                     model->event_type = strdup(type->valuestring);
-                }
-                else
-                {
+                } else {
                     model->event_type = "None";
                 }
 
-                if (strcmp(model->event_type, "connected") == 0)
-                {
-                    cJSON *ip = cJSON_GetObjectItemCaseSensitive(json, "ip");
-                    if (cJSON_IsString(ip) && (ip->valuestring != NULL))
-                    {
+                if(strcmp(model->event_type, "connected") == 0) {
+                    cJSON* ip = cJSON_GetObjectItemCaseSensitive(json, "ip");
+                    if(cJSON_IsString(ip) && (ip->valuestring != NULL)) {
                         model->ip = strdup(ip->valuestring);
-                    }
-                    else
-                    {
+                    } else {
                         model->ip = "0.0.0.0";
                     }
-                    cJSON *ssid = cJSON_GetObjectItemCaseSensitive(json, "ssid");
-                    if (cJSON_IsString(ssid) && (ssid->valuestring != NULL))
-                    {
+                    cJSON* ssid = cJSON_GetObjectItemCaseSensitive(json, "ssid");
+                    if(cJSON_IsString(ssid) && (ssid->valuestring != NULL)) {
                         model->ssid = strdup(ssid->valuestring);
-                    }
-                    else
-                    {
+                    } else {
                         model->ssid = " - ";
                     }
-                    cJSON *password = cJSON_GetObjectItemCaseSensitive(json, "password");
-                    if (cJSON_IsString(password) && (password->valuestring != NULL))
-                    {
+                    cJSON* password = cJSON_GetObjectItemCaseSensitive(json, "password");
+                    if(cJSON_IsString(password) && (password->valuestring != NULL)) {
                         model->password = strdup(password->valuestring);
-                    }
-                    else
-                    {
+                    } else {
                         model->password = "******";
                     }
                     model->connected = true;
@@ -217,9 +182,8 @@ void handle_rx_data_cb(uint8_t *buf, size_t len, void *context)
         },
         true);
 }
-static LinkCameraApp *link_camera_alloc()
-{
-    LinkCameraApp *app = malloc(sizeof(LinkCameraApp));
+static LinkCameraApp* link_camera_alloc() {
+    LinkCameraApp* app = malloc(sizeof(LinkCameraApp));
     // Gui
     app->gui = furi_record_open(RECORD_GUI);
     app->storage = furi_record_open(RECORD_STORAGE);
@@ -261,11 +225,10 @@ static LinkCameraApp *link_camera_alloc()
     return app;
 }
 
-int32_t link_camera_app(void *p)
-{
+int32_t link_camera_app(void* p) {
     UNUSED(p);
 
-    LinkCameraApp *app = link_camera_alloc();
+    LinkCameraApp* app = link_camera_alloc();
     view_dispatcher_run(app->view_dispatcher);
     link_camera_free(app);
 

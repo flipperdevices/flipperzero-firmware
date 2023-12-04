@@ -11,7 +11,6 @@ struct GBACartridgeStartscreen {
     void* context;
 };
 
-
 typedef struct {
     int some_value;
 } GBACartridgeStartscreenModel;
@@ -55,17 +54,16 @@ void gba_cartridge_startscreen_draw(Canvas* canvas, GBACartridgeStartscreenModel
     UNUSED(model);
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
-    
-    
-    canvas_draw_icon(canvas, 0 /*128/2 - (42/2)*/, 64/2 - (64/2), &I_cartridge_gba_42x64);
+
+    canvas_draw_icon(canvas, 0 /*128/2 - (42/2)*/, 64 / 2 - (64 / 2), &I_cartridge_gba_42x64);
 
     canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str_aligned(canvas, 64 + 20, 6, AlignCenter, AlignTop, "Connect Malveke"); 
+    canvas_draw_str_aligned(canvas, 64 + 20, 6, AlignCenter, AlignTop, "Connect Malveke");
     canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str_aligned(canvas, 64+ 20, 18, AlignCenter, AlignTop, "to the Flipper and"); 
-    canvas_draw_str_aligned(canvas, 64+ 20, 28, AlignCenter, AlignTop, "and Insert GBA");
-    canvas_draw_str_aligned(canvas, 64+ 20, 38, AlignCenter, AlignTop, "Cartridge");
-    elements_button_center(canvas, "Ok"); 
+    canvas_draw_str_aligned(canvas, 64 + 20, 18, AlignCenter, AlignTop, "to the Flipper and");
+    canvas_draw_str_aligned(canvas, 64 + 20, 28, AlignCenter, AlignTop, "and Insert GBA");
+    canvas_draw_str_aligned(canvas, 64 + 20, 38, AlignCenter, AlignTop, "Cartridge");
+    elements_button_center(canvas, "Ok");
 }
 
 static void gba_cartridge_startscreen_model_init(GBACartridgeStartscreenModel* const model) {
@@ -73,37 +71,38 @@ static void gba_cartridge_startscreen_model_init(GBACartridgeStartscreenModel* c
 }
 
 bool gba_cartridge_startscreen_input(InputEvent* event, void* context) {
-    furi_assert(context); 
+    furi_assert(context);
     GBACartridgeStartscreen* instance = context;
-    if (event->type == InputTypeRelease) {
+    if(event->type == InputTypeRelease) {
         switch(event->key) {
-            case InputKeyBack:
-                with_view_model(
-                    instance->view,
-                    GBACartridgeStartscreenModel * model,
-                    {
-                        UNUSED(model);
-                        instance->callback(GBACartridgeCustomEventStartscreenBack, instance->context);
-                    },
-                    true);
-                break;
-            case InputKeyLeft:
-            case InputKeyRight:
-            case InputKeyUp:
-            case InputKeyDown:
-            case InputKeyOk:
-                notification_message(((GBACartridge*)instance->context)->notification, &sequence_alarm);
-                with_view_model(
-                    instance->view,
-                    GBACartridgeStartscreenModel* model,
-                    {
-                        UNUSED(model);
-                        instance->callback(GBACartridgeCustomEventStartscreenOk, instance->context);
-                    },
-                    true);
-                break;
-            case InputKeyMAX:
-                break;
+        case InputKeyBack:
+            with_view_model(
+                instance->view,
+                GBACartridgeStartscreenModel * model,
+                {
+                    UNUSED(model);
+                    instance->callback(GBACartridgeCustomEventStartscreenBack, instance->context);
+                },
+                true);
+            break;
+        case InputKeyLeft:
+        case InputKeyRight:
+        case InputKeyUp:
+        case InputKeyDown:
+        case InputKeyOk:
+            notification_message(
+                ((GBACartridge*)instance->context)->notification, &sequence_alarm);
+            with_view_model(
+                instance->view,
+                GBACartridgeStartscreenModel * model,
+                {
+                    UNUSED(model);
+                    instance->callback(GBACartridgeCustomEventStartscreenOk, instance->context);
+                },
+                true);
+            break;
+        case InputKeyMAX:
+            break;
         }
     }
     return true;
@@ -119,17 +118,15 @@ void gba_cartridge_startscreen_enter(void* context) {
     with_view_model(
         instance->view,
         GBACartridgeStartscreenModel * model,
-        {
-            gba_cartridge_startscreen_model_init(model);
-        },
-        true
-    );
+        { gba_cartridge_startscreen_model_init(model); },
+        true);
 }
 
 GBACartridgeStartscreen* gba_cartridge_startscreen_alloc() {
     GBACartridgeStartscreen* instance = malloc(sizeof(GBACartridgeStartscreen));
     instance->view = view_alloc();
-    view_allocate_model(instance->view, ViewModelTypeLocking, sizeof(GBACartridgeStartscreenModel));
+    view_allocate_model(
+        instance->view, ViewModelTypeLocking, sizeof(GBACartridgeStartscreenModel));
     view_set_context(instance->view, instance); // furi_assert crashes in events without this
     view_set_draw_callback(instance->view, (ViewDrawCallback)gba_cartridge_startscreen_draw);
     view_set_input_callback(instance->view, gba_cartridge_startscreen_input);
@@ -139,12 +136,9 @@ GBACartridgeStartscreen* gba_cartridge_startscreen_alloc() {
     with_view_model(
         instance->view,
         GBACartridgeStartscreenModel * model,
-        {
-            gba_cartridge_startscreen_model_init(model);
-        },
-        true
-    );
-    
+        { gba_cartridge_startscreen_model_init(model); },
+        true);
+
     return instance;
 }
 
@@ -152,12 +146,7 @@ void gba_cartridge_startscreen_free(GBACartridgeStartscreen* instance) {
     furi_assert(instance);
 
     with_view_model(
-        instance->view,
-        GBACartridgeStartscreenModel * model,
-        {
-            UNUSED(model);
-        },
-        true);
+        instance->view, GBACartridgeStartscreenModel * model, { UNUSED(model); }, true);
     view_free(instance->view);
     free(instance);
 }
@@ -166,4 +155,3 @@ View* gba_cartridge_startscreen_get_view(GBACartridgeStartscreen* instance) {
     furi_assert(instance);
     return instance->view;
 }
-
