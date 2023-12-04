@@ -1,4 +1,4 @@
-# [MALVEKE] Pokemon Trading
+# MALVEKE Pokemon Trading
 
 ## Introduction
 
