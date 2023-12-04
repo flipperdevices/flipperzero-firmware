@@ -18,8 +18,6 @@
 #define TAG "FuriHalSubGhz"
 
 static uint32_t furi_hal_subghz_debug_gpio_buff[2];
-#define FURI_HAL_SUBGHZ_TX_GPIO gpio_ext_pc3
-#define FURI_HAL_SUBGHZ_ASYNC_MIRROR_GPIO gpio_ext_pa7
 
 /* DMA Channels definition */
 #define SUBGHZ_DMA DMA2
@@ -36,8 +34,8 @@ typedef enum {
     SubGhzStateIdle, /**< Idle, energy save mode */
 
     SubGhzStateAsyncRx, /**< Async RX started */
-    SubGhzStateAsyncTxLast, /**< Async TX continue, DMA completed and timer got last value to go */
     SubGhzStateAsyncTx, /**< Async TX started, DMA and timer is on */
+    SubGhzStateAsyncTxLast, /**< Async TX continue, DMA completed and timer got last value to go */
     SubGhzStateAsyncTxEnd, /**< Async TX complete, cleanup needed */
 
 } SubGhzState;
