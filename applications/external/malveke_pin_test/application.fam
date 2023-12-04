@@ -1,0 +1,14 @@
+App(
+    appid="malveke_pin_test",
+    name="PIN Test",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="malveke_pin_test_app",
+    stack_size=1*1024,
+    fap_icon="icons/icon.png",
+    fap_icon_assets="icons",
+    fap_category="GPIO/MALVEKE",
+    fap_author="Esteban Fuentealba",
+    fap_weburl="https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/",
+    fap_version=(1, 0),
+    fap_description="Used for MALVEKE PIN TEST?",
+)

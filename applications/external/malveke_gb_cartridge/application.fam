@@ -1,0 +1,14 @@
+App(
+    appid="malveke_gb_cartridge",
+    name="GAME BOY Cartridge (GB/GBC)",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="gb_cartridge_app",
+    stack_size=2 * 1024,
+    fap_icon="icons/icon.png",
+    fap_icon_assets="icons",
+    fap_category="GPIO/MALVEKE",
+    fap_author="Esteban Fuentealba",
+    fap_weburl="https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero",
+    fap_version=(1, 0),
+    fap_description="This application is a GAME BOY Emulator (POC).",
+)

@@ -63,8 +63,8 @@ static void wiegand_scan_found(void* context) {
     furi_hal_rtc_get_datetime(&datetime);
     snprintf(
         app->file_name,
-        25,
-        "%02d%02d%02d_%02d%02d%02d",
+        50,
+        "%02d_%02d_%02d_%02d_%02d_%02d",
         datetime.year,
         datetime.month,
         datetime.day,
@@ -98,8 +98,8 @@ static void wiegand_scan_timer_callback(void* context) {
     FURI_CRITICAL_ENTER();
     if(duration > 25 * one_millisecond) {
         if(bit_count == 4 || bit_count == 8 || bit_count == 24 || bit_count == 26 ||
-           bit_count == 32 || bit_count == 34 || bit_count == 37 || bit_count == 40 ||
-           bit_count == 48) {
+           bit_count == 32 || bit_count == 34 || bit_count == 35 || bit_count == 36 ||
+           bit_count == 37 || bit_count == 40 || bit_count == 48) {
             wiegand_stop_scan(app);
             found = true;
         } else {

@@ -1,0 +1,14 @@
+App(
+    appid="malveke_gba_cartridge",
+    name="GAME BOY ADVANCE Cartridge",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="gba_cartridge_app",
+    stack_size=2 * 1024,
+    fap_icon="icons/icon.png",
+    fap_icon_assets="icons",
+    fap_category="GPIO/MALVEKE",
+    fap_author="Esteban Fuentealba",
+    fap_version=(1, 0),
+    fap_weburl="https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero",
+    fap_description="Read info from GAME BOY ADVANCE Cartridges. Backing up and restoring your saves (RAM) (WIP). Backing up and restoring your games (ROM) (WIP).",
+)
