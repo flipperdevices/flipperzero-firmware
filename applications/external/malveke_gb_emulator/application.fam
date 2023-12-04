@@ -3,7 +3,7 @@ App(
     name="GAME BOY Emulator",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="malveke_gb_emulator_app",
-    stack_size=1*1024,
+    stack_size=1 * 1024,
     fap_icon="icons/icon.png",
     fap_icon_assets="icons",
     fap_category="GPIO/MALVEKE",
