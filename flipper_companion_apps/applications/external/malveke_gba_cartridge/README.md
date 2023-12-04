@@ -19,7 +19,7 @@
 
 ### Features
 - Read info from GAME BOY ADVANCE Cartridges
-- Backing up and restoring your saves (RAM)
+- Backing up and restoring your saves (RAM) (WIP)
 - Backing up and restoring your games (ROM) (WIP)
 
 
