@@ -40,15 +40,6 @@ App(
 )
 
 App(
-    appid="myki_parser",
-    apptype=FlipperAppType.PLUGIN,
-    entry_point="myki_plugin_ep",
-    targets=["f7"],
-    requires=["nfc"],
-    sources=["plugins/supported_cards/myki.c"],
-)
-
-App(
     appid="troika_parser",
     apptype=FlipperAppType.PLUGIN,
     entry_point="troika_plugin_ep",
@@ -121,12 +112,39 @@ App(
 )
 
 App(
+    appid="myki_parser",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="myki_plugin_ep",
+    targets=["f7"],
+    requires=["nfc"],
+    sources=["plugins/supported_cards/myki.c"],
+)
+
+App(
     appid="sonicare_parser",
     apptype=FlipperAppType.PLUGIN,
     entry_point="sonicare_plugin_ep",
     targets=["f7"],
     requires=["nfc"],
     sources=["plugins/supported_cards/sonicare.c"],
+)
+
+App(
+    appid="saflok_parser",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="saflok_plugin_ep",
+    targets=["f7"],
+    requires=["nfc"],
+    sources=["plugins/supported_cards/saflok.c"],
+)
+
+App(
+    appid="mykey_parser",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="mykey_plugin_ep",
+    targets=["f7"],
+    requires=["nfc"],
+    sources=["plugins/supported_cards/mykey.c"],
 )
 
 App(
