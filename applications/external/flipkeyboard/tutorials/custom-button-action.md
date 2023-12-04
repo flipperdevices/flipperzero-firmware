@@ -124,5 +124,5 @@ Here is a handy [table of Alt+codes](https://i.pinimg.com/originals/df/cf/09/dfc
 - Step 7: Build the firmware & launch the app
 
   - Step 7a: Make sure the Flipper is connected and that nothing is using the serial port (close qFlipper, CLI windows, etc.)
-  - Step 7a: Open a build task window in Visual Studio Code by pressing `Ctrl+Shift+B`.
-  - Step 7b: Choose `[Debug] Launch App on Flipper`
+  - Step 7b: Open a build task window in Visual Studio Code by pressing `Ctrl+Shift+B`.
+  - Step 7c: Choose `[Debug] Launch App on Flipper`

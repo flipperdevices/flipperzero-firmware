@@ -1,4 +1,4 @@
-# Play a song using FlipKeyboard tones
+# Tutorial: Play a song using FlipKeyboard tones
 
 ## Introduction
 
