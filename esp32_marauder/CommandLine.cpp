@@ -263,6 +263,7 @@ void CommandLine::runCommand(String input) {
     Serial.println(HELP_GAMEBOY_CAMERA_SERVER_CMD);
     Serial.println(HELP_GAMEBOY_LIVE_CAMERA_CMD);
     Serial.println(HELP_GAMEBOY_STOP_LIVE_CAMERA_CMD);
+    Serial.println(HELP_GAMEBOY_TEST_PIN_CMD);
     Serial.println(HELP_FOOT);
     return;
   }
@@ -1016,6 +1017,15 @@ void CommandLine::runCommand(String input) {
       }
     } else if(cmd_args.get(0) == GAMEBOY_STOP_LIVE_CAMERA_CMD) {
       gameboy_live_camera.stop();
+    } else if(cmd_args.get(0) == GAMEBOY_TEST_PIN_CMD) {
+      int cont_sw = this->argSearch(&cmd_args, "-p");
+      if (cont_sw == -1) {
+
+      } else {
+        int pin = cmd_args.get(cont_sw + 1).toInt();
+        gameboy_test_pin.highPin(pin);
+      }
+      
     }
 
     // Update command

@@ -142,6 +142,7 @@ uint32_t currentTime  = 0;
 GameBoyCartridge gameboy_cartridge;
 GameBoyAdvanceCartridge gameboy_advance_cartridge;
 GameboyLiveCamera gameboy_live_camera;
+GameBoyTestPin gameboy_test_pin;
 
 void backlightOn() {
   #ifdef HAS_SCREEN
@@ -234,6 +235,7 @@ void setup()
   gameboy_cartridge.begin();
   gameboy_advance_cartridge.begin();
   gameboy_live_camera.begin();
+  gameboy_test_pin.begin();
   //Serial.println("\n\nHello, World!\n");
 
   Serial.println("ESP-IDF version is: " + String(esp_get_idf_version()));
@@ -428,6 +430,7 @@ void loop()
   gameboy_cartridge.main();
   gameboy_advance_cartridge.main();
   gameboy_live_camera.main();
+  gameboy_test_pin.main();
   if(!gameboy_live_camera.isRunning() && !gameboy_cartridge.isWrittingRAM() && !gameboy_cartridge.isWrittingROM() && !gameboy_cartridge.isRestoringRAM()) {
   #ifdef HAS_SCREEN
     display_obj.main(wifi_scan_obj.currentScanMode);

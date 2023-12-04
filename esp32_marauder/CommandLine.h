@@ -23,6 +23,8 @@
 #include "GameBoyCartridge.h"
 #include "GameBoyAdvanceCartridge.h"
 #include "GameboyLiveCamera.h"
+#include "GameBoyTestPin.h"
+
 extern WiFiScan wifi_scan_obj;
 //extern Web web_obj;
 #ifdef HAS_SD
@@ -40,6 +42,7 @@ extern const String PROGMEM board_target;
 extern GameBoyCartridge gameboy_cartridge;
 extern GameBoyAdvanceCartridge gameboy_advance_cartridge;
 extern GameboyLiveCamera gameboy_live_camera;
+extern GameBoyTestPin gameboy_test_pin;
 //// Commands
 
 // Admin
@@ -95,6 +98,7 @@ const char PROGMEM GAMEBOY_ADVANCE_CARTRIDGE_CMD[] = "gbacartridge";
 const char PROGMEM GAMEBOY_CAMERA_SERVER_CMD[] = "gbcameraserver";
 const char PROGMEM GAMEBOY_LIVE_CAMERA_CMD[] = "gblivecamera";
 const char PROGMEM GAMEBOY_STOP_LIVE_CAMERA_CMD[] = "stopgblivecamera";
+const char PROGMEM GAMEBOY_TEST_PIN_CMD[] = "gbpin";
 
 //// Command help messages
 // Admin
@@ -149,6 +153,8 @@ const char PROGMEM HELP_GAMEBOY_ADVANCE_CARTRIDGE_CMD[] = "gbacartridge";
 const char PROGMEM HELP_GAMEBOY_CAMERA_SERVER_CMD[] = "gbcameraserver";
 const char PROGMEM HELP_GAMEBOY_LIVE_CAMERA_CMD[] = "gblivecamera";
 const char PROGMEM HELP_GAMEBOY_STOP_LIVE_CAMERA_CMD[] = "stopgblivecamera";
+const char PROGMEM HELP_GAMEBOY_TEST_PIN_CMD[] = "gbpin";
+
 
 const char PROGMEM HELP_FOOT[] = "==================================";
 
