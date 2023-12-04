@@ -518,11 +518,9 @@ MU_TEST(test_lfrfid_protocol_fdxb_read_simple) {
             uint32_t length, period;
             pulse_glue_pop(pulse_glue, &length, &period);
 
-            printf("true: %ld\n", period);
             protocol = protocol_dict_decoders_feed(dict, true, period);
             if(protocol != PROTOCOL_NO) break;
 
-            printf("false: %ld\n", length - period);
             protocol = protocol_dict_decoders_feed(dict, false, length - period);
             if(protocol != PROTOCOL_NO) break;
         }
