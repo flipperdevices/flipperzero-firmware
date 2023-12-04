@@ -7,16 +7,9 @@ This is a Pokemon exchange application from Flipper Zero to Game Boy (Generació
 It is a Proof of Concept (POC) for using views, GPIO, and FURI (Flipper Universal Registry Implementation).
 
 
-## Connection: Flipper Zero GPIO - Game Boy
+## MALVEKE for Flipper Zero with Cable Link.
 
-The pins should be connected as follows:
-
-| Cable Game Link (Socket) | Flipper Zero GPIO |
-| ------------------------ | ----------------- |
-| 6 (GND)                  | 8 (GND)           |
-| 5 (CLK)                  | 6 (B2)            |
-| 3 (SI)                   | 7 (C3)            |
-| 2 (SO)                   | 5 (B3)            |
+Connect your ***GAME BOY*** through the link cable to the **EXT1** port on the **MALVEKE** board.
 
 ## How does it work?
 
