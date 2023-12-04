@@ -148,6 +148,15 @@ App(
 )
 
 App(
+    appid="mizip_parser",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="mizip_plugin_ep",
+    targets=["f7"],
+    requires=["nfc"],
+    sources=["plugins/supported_cards/mizip.c"],
+)
+
+App(
     appid="nfc_start",
     targets=["f7"],
     apptype=FlipperAppType.STARTUP,
