@@ -99,7 +99,6 @@ These instructions assume that you are starting at the Flipper Zero desktop. Oth
 - [ ] Refactor Code
 - [ ] Documentation
 - [ ] Save transfered imagen in Flipper Zero
-- [ ] Refactor Code
 
 <p align='center'>
 <br />

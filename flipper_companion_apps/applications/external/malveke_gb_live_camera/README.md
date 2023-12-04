@@ -73,7 +73,7 @@ These instructions assume that you are starting at the Flipper Zero desktop. Oth
     </p>
 
 - Press the `LEFT`/`RIGHT` buttons to change the exposure value.
-- Press the `OK` button to take a picture. The image will be saved in the `DCIM` folder. 
+- Press the `OK` button to take a picture. The image will be saved in the `SD Card/apps_data/malveke/photos` folder. 
 
 
 

@@ -1,4 +1,4 @@
-# 🐬 Flipper Zero - Pokemon Trading in Game Boy
+# [MALVEKE] Pokemon Trading
 
 ## Introduction
 
