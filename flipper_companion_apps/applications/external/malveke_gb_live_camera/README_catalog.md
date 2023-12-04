@@ -17,5 +17,5 @@ These instructions assume that you are starting at the Flipper Zero desktop. Oth
 - Press the **OK** button to take a picture. The image will be saved in the **SD Card/apps_data/malveke/photos** folder. 
 
 ## TODO
-- [ ] Add automatic exposure calculation.
-- [ ] Refactor Code
+- Add automatic exposure calculation.
+- Refactor Code

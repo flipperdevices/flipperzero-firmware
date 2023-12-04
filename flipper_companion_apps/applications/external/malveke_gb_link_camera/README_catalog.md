@@ -20,6 +20,6 @@ These instructions assume that you are starting at the Flipper Zero desktop. Oth
 - In web you can Change palette and with button **A** Download image
 
 ## TODO
-- [ ] Refactor Code
-- [ ] Documentation
-- [ ] Save transfered imagen in Flipper Zero
+- Refactor Code
+- Documentation
+- Save transfered imagen in Flipper Zero
