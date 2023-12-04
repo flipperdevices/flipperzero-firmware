@@ -80,6 +80,7 @@ static bool malveke_gb_emulator_view_input_callback(InputEvent* event, void* con
                         FuriHalUartIdUSART1,
                         (uint8_t*)gbemulator_command_OK,
                         strlen(gbemulator_command_OK));
+                    UNUSED(model);
                 },
                 false);
         }
