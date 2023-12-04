@@ -634,7 +634,6 @@ static void furi_hal_subghz_async_tx_timer_isr() {
         LL_TIM_ClearFlag_UPDATE(TIM2);
         if(LL_TIM_GetAutoReload(TIM2) == 0) {
             if(furi_hal_subghz.state == SubGhzStateAsyncTx) {
-                //forcibly pulls the pin to the ground so that there is no carrier
                 furi_hal_subghz.state = SubGhzStateAsyncTxLast;
                 LL_DMA_DisableChannel(SUBGHZ_DMA_CH1_DEF);
             } else if(furi_hal_subghz.state == SubGhzStateAsyncTxLast) {
