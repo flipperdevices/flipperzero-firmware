@@ -998,7 +998,7 @@ void CommandLine::runCommand(String input) {
                 gameboy_live_camera.start();
                 delay(400);
               } else {
-                gameboy_live_camera.taked_picture = true;
+                gameboy_live_camera.take_a_picture = true;
               }
             } else {
               gameboy_live_camera.disableDithering();
