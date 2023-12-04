@@ -9,13 +9,14 @@ static void gb_live_camera_view_draw_callback(Canvas* canvas, void* _model) {
     // Prepare canvas
 
     char show_pin[20];
-    snprintf(show_pin, sizeof(show_pin), "PIN: %d", model->pin );
+    snprintf(show_pin, sizeof(show_pin), "%d", model->pin );
 
 
     canvas_set_color(canvas, ColorBlack);
-    canvas_draw_frame(canvas, 0, 0, FRAME_WIDTH, FRAME_HEIGTH);
-    canvas_draw_str(canvas, 8, 28, show_pin);
-    // canvas_draw_str(canvas, 60, 28,(char*) model->pin);
+    canvas_set_font(canvas, FontSecondary);
+    canvas_draw_str(canvas, 37, 35, "PIN:");
+    canvas_set_font(canvas, FontBigNumbers);
+    canvas_draw_str(canvas, 57, 38, show_pin);
 
     
 }
@@ -83,6 +84,20 @@ static bool gb_live_camera_view_input_callback(InputEvent* event, void* context)
                     }
                 },
                 true);
+        } else if (event->key == InputKeyOk){
+            for(int i = 2; i <= 31; i++) {
+                    with_view_model(
+                    app->view,
+                    UartDumpModel * model,
+                    {
+                        model->pin = i;
+                        char gbpin_start_command[80]; // A reasonably sized buffer.
+                        snprintf(gbpin_start_command, sizeof(gbpin_start_command), "gbpin -p %d\n", model->pin);
+                        furi_hal_uart_tx(FuriHalUartIdUSART1, (uint8_t*)gbpin_start_command, strlen(gbpin_start_command));
+
+                    }, true);
+                furi_delay_ms(600);
+            }
         }
     }
     return false;
