@@ -6,6 +6,7 @@ App(
     stack_size=2 * 1024,
     fap_category="GPIO/MALVEKE",
     fap_icon="pokemon_10px.png",
+    fap_icon_assets="assets",
     fap_author="Esteban Fuentealba",
     fap_weburl="https://github.com/EstebanFuentealba",
     fap_version=(1, 4),
