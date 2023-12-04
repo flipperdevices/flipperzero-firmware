@@ -1,0 +1,25 @@
+name: Build Firmware MALVEKE
+on:
+  push:
+    tags:
+      - "v*.*.*"
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.10' 
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
+      - run: echo "🖥️ The workflow is now ready to test your code on the runner."
+      - run: cd ${{ github.workspace }}
+      - run: pip install --root-user-action=ignore esptool
+      - run: esptool --chip esp32s2 elf2image \
+          --flash_mode dio \
+          --flash_freq 80m \
+          --flash_size 4MB \
+          -o ./MALVEKE.ino.bin
+      - run: echo "🍏 This job's status is ${{ job.status }}."

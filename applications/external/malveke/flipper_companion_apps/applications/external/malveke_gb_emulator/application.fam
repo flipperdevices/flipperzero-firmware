@@ -1,0 +1,17 @@
+App(
+    appid="malveke_gb_emulator",
+    name="[MALVEKE] Emulator",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="malveke_gb_emulator_app",
+    cdefines=["APP_EMULATOR"],
+    requires=["gui"],
+    stack_size=1*1024,
+    order=1,
+    fap_libs=["assets"],
+	fap_icon="icons/icon.png",
+    fap_icon_assets="icons",
+    fap_category="GPIO",
+	fap_description="GAME BOY Emulator (POC).",
+	fap_author="Esteban Fuentealba",
+	fap_weburl="https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/"
+)

@@ -1,0 +1,39 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+@font-face {
+  font-family: 'haxrcorp-4089';
+  src: url('./assets/haxrcorp-4089.ttf');
+}
+
+@font-face {
+  font-family: 'ShareTechMono-Regular';
+  src: url('./assets/ShareTechMono-Regular.ttf');
+}
+
+@font-face {
+  font-family: 'Share Tech';
+  src: url('./assets/ShareTech-Regular.ttf');
+}
+@font-face {
+  font-family: 'Born2bSportyV2';
+  src: url('./assets/Born2bSportyV2.ttf');
+}
+.pattern {
+  background-image: url(/malveke_pattern.png);
+  background-size: 100px;
+}
+html, body {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+}
+body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #000;
+  overflow: auto;
+}

@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "ios": "c",
+        "string.h": "c"
+    }
+}

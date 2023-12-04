@@ -1,0 +1,8 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.pattern {
+    background-image: url(/malveke_pattern.png.gz);
+    background-size: 100px;
+}
