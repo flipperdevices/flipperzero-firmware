@@ -2,8 +2,6 @@
 
 #include <gui/view.h>
 #include "../helpers/gb_cartridge_custom_event.h"
-
-// #include <assets_icons.h>
 #include <malveke_gb_cartridge_icons.h>
 
 typedef struct GBCartridgeStartscreen GBCartridgeStartscreen;
