@@ -3,6 +3,8 @@
 #include <notification/notification_messages.h>
 #include <dolphin/dolphin.h>
 
+#include "hid_icons.h"
+
 #define TAG "HidApp"
 
 enum HidDebugSubmenuIndex {
@@ -60,7 +62,7 @@ static void hid_submenu_callback(void* context, uint32_t index) {
         app->view_id = HidViewMouseJiggler;
         view_dispatcher_switch_to_view(app->view_dispatcher, HidViewMouseJiggler);
     } else if(index == HidSubmenuIndexRemovePairing) {
-        bt_hid_remove_pairing(app->bt);
+        view_dispatcher_switch_to_view(app->view_dispatcher, HidViewUnpairConfirm);
     }
 }
 
@@ -84,7 +86,7 @@ static void bt_hid_connection_status_changed_callback(BtStatus status, void* con
     hid_tiktok_set_connected_status(hid->hid_tiktok, connected);
 }
 
-static void hid_dialog_callback(DialogExResult result, void* context) {
+static void hid_exit_dialog_callback(DialogExResult result, void* context) {
     furi_assert(context);
     Hid* app = context;
     if(result == DialogExResultLeft) {
@@ -94,6 +96,22 @@ static void hid_dialog_callback(DialogExResult result, void* context) {
     } else if(result == DialogExResultCenter) {
         view_dispatcher_switch_to_view(app->view_dispatcher, HidViewSubmenu);
     }
+}
+
+static void hid_unpair_dialog_callback(DialogExResult result, void* context) {
+    furi_assert(context);
+    Hid* app = context;
+    if(result == DialogExResultRight) {
+        bt_hid_remove_pairing(app->bt);
+        view_dispatcher_switch_to_view(app->view_dispatcher, HidViewUnpairSuccess);
+    } else if(result == DialogExResultLeft) {
+        view_dispatcher_switch_to_view(app->view_dispatcher, HidViewSubmenu);
+    }
+}
+
+static void hid_app_forget_dev_success_popup_callback(void* context) {
+    Hid* app = context;
+    view_dispatcher_switch_to_view(app->view_dispatcher, HidViewSubmenu);
 }
 
 static uint32_t hid_exit_confirm_view(void* context) {
@@ -178,16 +196,39 @@ Hid* hid_alloc(HidTransport transport) {
 Hid* hid_app_alloc_view(void* context) {
     furi_assert(context);
     Hid* app = context;
-    // Dialog view
-    app->dialog = dialog_ex_alloc();
-    dialog_ex_set_result_callback(app->dialog, hid_dialog_callback);
-    dialog_ex_set_context(app->dialog, app);
-    dialog_ex_set_left_button_text(app->dialog, "Exit");
-    dialog_ex_set_right_button_text(app->dialog, "Stay");
-    dialog_ex_set_center_button_text(app->dialog, "Menu");
-    dialog_ex_set_header(app->dialog, "Close Current App?", 16, 12, AlignLeft, AlignTop);
+    // Exit dialog view
+    app->exit_dialog = dialog_ex_alloc();
+    dialog_ex_set_result_callback(app->exit_dialog, hid_exit_dialog_callback);
+    dialog_ex_set_context(app->exit_dialog, app);
+    dialog_ex_set_left_button_text(app->exit_dialog, "Exit");
+    dialog_ex_set_right_button_text(app->exit_dialog, "Stay");
+    dialog_ex_set_center_button_text(app->exit_dialog, "Menu");
+    dialog_ex_set_header(app->exit_dialog, "Close Current App?", 16, 12, AlignLeft, AlignTop);
     view_dispatcher_add_view(
-        app->view_dispatcher, HidViewExitConfirm, dialog_ex_get_view(app->dialog));
+        app->view_dispatcher, HidViewExitConfirm, dialog_ex_get_view(app->exit_dialog));
+
+    // Un-pair dialog view
+    app->unpair_dialog = dialog_ex_alloc();
+    dialog_ex_set_result_callback(app->unpair_dialog, hid_unpair_dialog_callback);
+    dialog_ex_set_context(app->unpair_dialog, app);
+    dialog_ex_set_header(app->unpair_dialog, "Unpair All Devices?", 64, 3, AlignCenter, AlignTop);
+    dialog_ex_set_text(
+        app->unpair_dialog, "All previous pairings\nwill be lost!", 64, 22, AlignCenter, AlignTop);
+    dialog_ex_set_left_button_text(app->unpair_dialog, "Back");
+    dialog_ex_set_right_button_text(app->unpair_dialog, "Unpair");
+    view_dispatcher_add_view(
+        app->view_dispatcher, HidViewUnpairConfirm, dialog_ex_get_view(app->unpair_dialog));
+
+    // Un-pair success popup view
+    app->popup = popup_alloc();
+    popup_set_icon(app->popup, 32, 5, &I_DolphinNice_96x59);
+    popup_set_header(app->popup, "Done", 14, 15, AlignLeft, AlignTop);
+    popup_set_timeout(app->popup, 1500);
+    popup_set_context(app->popup, app);
+    popup_set_callback(app->popup, hid_app_forget_dev_success_popup_callback);
+    popup_enable_timeout(app->popup);
+    view_dispatcher_add_view(
+        app->view_dispatcher, HidViewUnpairSuccess, popup_get_view(app->popup));
 
     // Keynote view
     app->hid_keynote = hid_keynote_alloc(app);
@@ -252,7 +293,9 @@ void hid_free(Hid* app) {
     view_dispatcher_remove_view(app->view_dispatcher, HidViewSubmenu);
     submenu_free(app->device_type_submenu);
     view_dispatcher_remove_view(app->view_dispatcher, HidViewExitConfirm);
-    dialog_ex_free(app->dialog);
+    view_dispatcher_remove_view(app->view_dispatcher, HidViewUnpairConfirm);
+    view_dispatcher_remove_view(app->view_dispatcher, HidViewUnpairSuccess);
+    popup_free(app->popup);
     view_dispatcher_remove_view(app->view_dispatcher, HidViewKeynote);
     hid_keynote_free(app->hid_keynote);
     view_dispatcher_remove_view(app->view_dispatcher, HidViewKeyboard);

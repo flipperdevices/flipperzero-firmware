@@ -39,7 +39,9 @@ struct Hid {
     NotificationApp* notifications;
     ViewDispatcher* view_dispatcher;
     Submenu* device_type_submenu;
-    DialogEx* dialog;
+    DialogEx* exit_dialog;
+    DialogEx* unpair_dialog;
+    Popup* popup;
     HidKeynote* hid_keynote;
     HidKeyboard* hid_keyboard;
     HidMedia* hid_media;
