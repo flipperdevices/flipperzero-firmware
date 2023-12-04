@@ -34,6 +34,7 @@ typedef enum {
     SubGhzStateIdle, /**< Idle, energy save mode */
 
     SubGhzStateAsyncRx, /**< Async RX started */
+
     SubGhzStateAsyncTx, /**< Async TX started, DMA and timer is on */
     SubGhzStateAsyncTxLast, /**< Async TX continue, DMA completed and timer got last value to go */
     SubGhzStateAsyncTxEnd, /**< Async TX complete, cleanup needed */
