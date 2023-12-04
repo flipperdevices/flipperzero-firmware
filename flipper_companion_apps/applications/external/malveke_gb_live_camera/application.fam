@@ -11,7 +11,7 @@ App(
 	fap_icon="icons/icon.png",
     fap_icon_assets="icons",
     fap_category="GPIO",
-	fap_description="ESP32 GAME BOY CAMERA live feed and photo capture, use left/right for exposition and center for saving a screenshot.",
+	fap_description="Insert a GAME BOY Camera cartridge, you can use it as a camera and take snapshots from the Flipper Zero.",
 	fap_author="Esteban Fuentealba",
 	fap_weburl="https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/"
 )
