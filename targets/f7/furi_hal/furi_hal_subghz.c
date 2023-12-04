@@ -17,13 +17,13 @@
 
 #define TAG "FuriHalSubGhz"
 
-static uint32_t furi_hal_subghz_debug_gpio_buff[2];
+static uint32_t furi_hal_subghz_debug_gpio_buff[2] = {0};
 
 /* DMA Channels definition */
-#define SUBGHZ_DMA DMA2
-#define SUBGHZ_DMA_CH1_CHANNEL LL_DMA_CHANNEL_1
-#define SUBGHZ_DMA_CH2_CHANNEL LL_DMA_CHANNEL_2
-#define SUBGHZ_DMA_CH1_IRQ FuriHalInterruptIdDma2Ch1
+#define SUBGHZ_DMA (DMA2)
+#define SUBGHZ_DMA_CH1_CHANNEL (LL_DMA_CHANNEL_1)
+#define SUBGHZ_DMA_CH2_CHANNEL (LL_DMA_CHANNEL_2)
+#define SUBGHZ_DMA_CH1_IRQ (FuriHalInterruptIdDma2Ch1)
 #define SUBGHZ_DMA_CH1_DEF SUBGHZ_DMA, SUBGHZ_DMA_CH1_CHANNEL
 #define SUBGHZ_DMA_CH2_DEF SUBGHZ_DMA, SUBGHZ_DMA_CH2_CHANNEL
 
@@ -593,8 +593,9 @@ static void furi_hal_subghz_async_tx_refill(uint32_t* buffer, size_t samples) {
             }
 
             uint32_t duration = level_duration_get_duration(ld);
-            furi_assert(duration > 0);
-            //supports durations greater than 2 us
+            // Lowest possible value is 2us
+            if(duration < 2) duration = 2;
+            // Subtract 1 since we counting from 0
             *buffer = duration - 1;
             buffer++;
             samples--;
@@ -692,10 +693,10 @@ bool furi_hal_subghz_start_async_tx(FuriHalSubGhzAsyncTxCallback callback, void*
     furi_hal_bus_enable(FuriHalBusTIM2);
 
     // Configure TIM2
-    LL_TIM_SetPrescaler(TIM2, 64 - 1);
     LL_TIM_SetCounterMode(TIM2, LL_TIM_COUNTERMODE_UP);
-    LL_TIM_SetAutoReload(TIM2, 1000);
     LL_TIM_SetClockDivision(TIM2, LL_TIM_CLOCKDIVISION_DIV1);
+    LL_TIM_SetAutoReload(TIM2, 1000);
+    LL_TIM_SetPrescaler(TIM2, 64 - 1);
     LL_TIM_SetClockSource(TIM2, LL_TIM_CLOCKSOURCE_INTERNAL);
     LL_TIM_EnableARRPreload(TIM2);
 

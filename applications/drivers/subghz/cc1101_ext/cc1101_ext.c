@@ -18,14 +18,14 @@
 
 #define TAG "SubGhzDeviceCc1101Ext"
 
-#define SUBGHZ_DEVICE_CC1101_EXT_TX_GPIO &gpio_ext_pb2
+#define SUBGHZ_DEVICE_CC1101_EXT_TX_GPIO (&gpio_ext_pb2)
 
 /* DMA Channels definition */
-#define SUBGHZ_DEVICE_CC1101_EXT_DMA DMA2
-#define SUBGHZ_DEVICE_CC1101_EXT_DMA_CH3_CHANNEL LL_DMA_CHANNEL_3
-#define SUBGHZ_DEVICE_CC1101_EXT_DMA_CH4_CHANNEL LL_DMA_CHANNEL_4
-#define SUBGHZ_DEVICE_CC1101_EXT_DMA_CH5_CHANNEL LL_DMA_CHANNEL_5
-#define SUBGHZ_DEVICE_CC1101_EXT_DMA_CH3_IRQ FuriHalInterruptIdDma2Ch3
+#define SUBGHZ_DEVICE_CC1101_EXT_DMA (DMA2)
+#define SUBGHZ_DEVICE_CC1101_EXT_DMA_CH3_CHANNEL (LL_DMA_CHANNEL_3)
+#define SUBGHZ_DEVICE_CC1101_EXT_DMA_CH4_CHANNEL (LL_DMA_CHANNEL_4)
+#define SUBGHZ_DEVICE_CC1101_EXT_DMA_CH5_CHANNEL (LL_DMA_CHANNEL_5)
+#define SUBGHZ_DEVICE_CC1101_EXT_DMA_CH3_IRQ (FuriHalInterruptIdDma2Ch3)
 #define SUBGHZ_DEVICE_CC1101_EXT_DMA_CH3_DEF \
     SUBGHZ_DEVICE_CC1101_EXT_DMA, SUBGHZ_DEVICE_CC1101_EXT_DMA_CH3_CHANNEL
 #define SUBGHZ_DEVICE_CC1101_EXT_DMA_CH4_DEF \
@@ -34,10 +34,10 @@
     SUBGHZ_DEVICE_CC1101_EXT_DMA, SUBGHZ_DEVICE_CC1101_EXT_DMA_CH5_CHANNEL
 
 /** Low level buffer dimensions and guard times */
-#define SUBGHZ_DEVICE_CC1101_EXT_ASYNC_TX_BUFFER_FULL (256)
+#define SUBGHZ_DEVICE_CC1101_EXT_ASYNC_TX_BUFFER_FULL (256u)
 #define SUBGHZ_DEVICE_CC1101_EXT_ASYNC_TX_BUFFER_HALF \
     (SUBGHZ_DEVICE_CC1101_EXT_ASYNC_TX_BUFFER_FULL / 2)
-#define SUBGHZ_DEVICE_CC1101_EXT_ASYNC_TX_GUARD_TIME 999 >> 1
+#define SUBGHZ_DEVICE_CC1101_EXT_ASYNC_TX_GUARD_TIME (999u >> 1)
 
 /** SubGhz state */
 typedef enum {
@@ -612,8 +612,10 @@ static void subghz_device_cc1101_ext_async_tx_refill(uint32_t* buffer, size_t sa
             }
 
             uint32_t duration = level_duration_get_duration(ld);
-            furi_assert(duration > 0);
-            //supports durations greater than 4 us
+            // Lowest possible value is 4us
+            if(duration < 4) duration = 4;
+            // Divide by 2 since timer resolution is 2us
+            // Subtract 1 since we counting from 0
             *buffer = (duration >> 1) - 1;
             buffer++;
             samples--;
