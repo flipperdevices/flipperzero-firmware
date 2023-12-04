@@ -20,7 +20,7 @@ const manifest = {
         { "path": "MALVEKE.ino.bin", "offset": 0x10000 }, //  app0
         {
           "path": "esp32_marauder.spiffs.bin",
-          "offset": 0x310000
+          "offset": 0x00310000
         }
       ],
     },
