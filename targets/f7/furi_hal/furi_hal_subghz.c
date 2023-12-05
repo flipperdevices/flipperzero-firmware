@@ -36,7 +36,6 @@ typedef enum {
     SubGhzStateAsyncRx, /**< Async RX started */
 
     SubGhzStateAsyncTx, /**< Async TX started, DMA and timer is on */
-    SubGhzStateAsyncTxLast, /**< Async TX continue, DMA completed and timer got last value to go */
     SubGhzStateAsyncTxEnd, /**< Async TX complete, cleanup needed */
 
 } SubGhzState;
@@ -527,79 +526,79 @@ void furi_hal_subghz_stop_async_rx() {
     furi_hal_gpio_init(&gpio_cc1101_g0, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
 }
 
+typedef enum {
+    FuriHalSubGhzAsyncTxMiddlewareStateIdle,
+    FuriHalSubGhzAsyncTxMiddlewareStateReset,
+    FuriHalSubGhzAsyncTxMiddlewareStateRun,
+} FuriHalSubGhzAsyncTxMiddlewareState;
+
+typedef struct {
+    FuriHalSubGhzAsyncTxMiddlewareState state;
+    bool is_odd_level;
+    uint32_t adder_duration;
+} FuriHalSubGhzAsyncTxMiddleware;
+
 typedef struct {
     uint32_t* buffer;
     FuriHalSubGhzAsyncTxCallback callback;
     void* callback_context;
     uint64_t duty_high;
     uint64_t duty_low;
+    FuriHalSubGhzAsyncTxMiddleware middleware;
 } FuriHalSubGhzAsyncTx;
 
-typedef enum {
-    FuriHalSubGhzAsyncTxPackerStateIdle,
-    FuriHalSubGhzAsyncTxPackerStateReset,
-    FuriHalSubGhzAsyncTxPackerStateRun,
-} FuriHalSubGhzAsyncTxPackerState;
-
-typedef struct {
-    FuriHalSubGhzAsyncTxPackerState state;
-    bool is_odd_level;
-    uint32_t adder_duration;
-} FuriHalSubGhzAsyncTxPacker;
-
 static FuriHalSubGhzAsyncTx furi_hal_subghz_async_tx = {0};
-static FuriHalSubGhzAsyncTxPacker furi_hal_subghz_async_tx_packer = {0};
 
-void furi_hal_subghz_async_tx_packer_idle(FuriHalSubGhzAsyncTxPacker* packer) {
-    packer->state = FuriHalSubGhzAsyncTxPackerStateIdle;
-    packer->is_odd_level = false;
-    packer->adder_duration = 0;
+void furi_hal_subghz_async_tx_middleware_idle(FuriHalSubGhzAsyncTxMiddleware* middleware) {
+    middleware->state = FuriHalSubGhzAsyncTxMiddlewareStateIdle;
+    middleware->is_odd_level = false;
+    middleware->adder_duration = 0;
 }
 
-static inline uint32_t furi_hal_subghz_async_tx_packer_get_duration(
-    FuriHalSubGhzAsyncTxPacker* packer,
+static inline uint32_t furi_hal_subghz_async_tx_middleware_get_duration(
+    FuriHalSubGhzAsyncTxMiddleware* middleware,
     FuriHalSubGhzAsyncTxCallback callback) {
     uint32_t ret = 0;
     bool is_level = false;
 
-    if(packer->state == FuriHalSubGhzAsyncTxPackerStateReset) return 0;
+    if(middleware->state == FuriHalSubGhzAsyncTxMiddlewareStateReset) return 0;
 
     while(1) {
         LevelDuration ld = callback(furi_hal_subghz_async_tx.callback_context);
         if(level_duration_is_reset(ld)) {
-            packer->state = FuriHalSubGhzAsyncTxPackerStateReset;
-            if(!packer->is_odd_level) {
+            middleware->state = FuriHalSubGhzAsyncTxMiddlewareStateReset;
+            if(!middleware->is_odd_level) {
                 return 0;
             } else {
-                return packer->adder_duration;
+                return middleware->adder_duration;
             }
         } else if(level_duration_is_wait(ld)) {
-            packer->is_odd_level = !packer->is_odd_level;
-            ret = packer->adder_duration + API_HAL_SUBGHZ_ASYNC_TX_GUARD_TIME;
-            packer->adder_duration = 0;
+            middleware->is_odd_level = !middleware->is_odd_level;
+            ret = middleware->adder_duration + API_HAL_SUBGHZ_ASYNC_TX_GUARD_TIME;
+            middleware->adder_duration = 0;
             return ret;
         }
 
         is_level = level_duration_get_level(ld);
 
-        if(packer->state == FuriHalSubGhzAsyncTxPackerStateIdle) {
-            if(is_level != packer->is_odd_level) {
-                packer->state = FuriHalSubGhzAsyncTxPackerStateRun;
-                packer->is_odd_level = is_level;
-                packer->adder_duration = 0;
+        if(middleware->state == FuriHalSubGhzAsyncTxMiddlewareStateIdle) {
+            if(is_level != middleware->is_odd_level) {
+                middleware->state = FuriHalSubGhzAsyncTxMiddlewareStateRun;
+                middleware->is_odd_level = is_level;
+                middleware->adder_duration = 0;
             } else {
                 continue;
             }
         }
 
-        if(packer->state == FuriHalSubGhzAsyncTxPackerStateRun) {
-            if(is_level == packer->is_odd_level) {
-                packer->adder_duration += level_duration_get_duration(ld);
+        if(middleware->state == FuriHalSubGhzAsyncTxMiddlewareStateRun) {
+            if(is_level == middleware->is_odd_level) {
+                middleware->adder_duration += level_duration_get_duration(ld);
                 continue;
             } else {
-                packer->is_odd_level = is_level;
-                ret = packer->adder_duration;
-                packer->adder_duration = level_duration_get_duration(ld);
+                middleware->is_odd_level = is_level;
+                ret = middleware->adder_duration;
+                middleware->adder_duration = level_duration_get_duration(ld);
                 return ret;
             }
         }
@@ -610,8 +609,8 @@ static void furi_hal_subghz_async_tx_refill(uint32_t* buffer, size_t samples) {
     furi_assert(furi_hal_subghz.state == SubGhzStateAsyncTx);
 
     while(samples > 0) {
-        volatile uint32_t duration = furi_hal_subghz_async_tx_packer_get_duration(
-            &furi_hal_subghz_async_tx_packer, furi_hal_subghz_async_tx.callback);
+        volatile uint32_t duration = furi_hal_subghz_async_tx_middleware_get_duration(
+            &furi_hal_subghz_async_tx.middleware, furi_hal_subghz_async_tx.callback);
         if(duration == 0) {
             *buffer = 0;
             buffer++;
@@ -662,15 +661,8 @@ static void furi_hal_subghz_async_tx_timer_isr() {
         LL_TIM_ClearFlag_UPDATE(TIM2);
         if(LL_TIM_GetAutoReload(TIM2) == 0) {
             if(furi_hal_subghz.state == SubGhzStateAsyncTx) {
-                furi_hal_subghz.state = SubGhzStateAsyncTxLast;
-                LL_DMA_DisableChannel(SUBGHZ_DMA_CH1_DEF);
-            } else if(furi_hal_subghz.state == SubGhzStateAsyncTxLast) {
                 furi_hal_subghz.state = SubGhzStateAsyncTxEnd;
-                //forcibly pulls the pin to the ground so that there is no carrier
-                furi_hal_gpio_init(&gpio_cc1101_g0, GpioModeInput, GpioPullDown, GpioSpeedLow);
-                LL_TIM_DisableCounter(TIM2);
-            } else {
-                furi_crash();
+                LL_DMA_DisableChannel(SUBGHZ_DMA_CH1_DEF);
             }
         }
     }
@@ -740,7 +732,7 @@ bool furi_hal_subghz_start_async_tx(FuriHalSubGhzAsyncTxCallback callback, void*
 
     furi_hal_interrupt_set_isr(FuriHalInterruptIdTIM2, furi_hal_subghz_async_tx_timer_isr, NULL);
 
-    furi_hal_subghz_async_tx_packer_idle(&furi_hal_subghz_async_tx_packer);
+    furi_hal_subghz_async_tx_middleware_idle(&furi_hal_subghz_async_tx.middleware);
     furi_hal_subghz_async_tx_refill(
         furi_hal_subghz_async_tx.buffer, API_HAL_SUBGHZ_ASYNC_TX_BUFFER_FULL);
 
@@ -783,14 +775,26 @@ bool furi_hal_subghz_start_async_tx(FuriHalSubGhzAsyncTxCallback callback, void*
 }
 
 bool furi_hal_subghz_is_async_tx_complete() {
-    return furi_hal_subghz.state == SubGhzStateAsyncTxEnd;
+    if(furi_hal_subghz.state == SubGhzStateAsyncTxEnd) {
+        size_t count = 0;
+        for(size_t i = 0; i < 2; i++) {
+            if(LL_TIM_GetAutoReload(TIM2) == 0 && LL_TIM_GetCounter(TIM2) == 0) count++;
+            furi_delay_us(1);
+        }
+        return count == 2;
+    } else {
+        return false;
+    }
 }
 
 void furi_hal_subghz_stop_async_tx() {
     furi_assert(
         furi_hal_subghz.state == SubGhzStateAsyncTx ||
-        furi_hal_subghz.state == SubGhzStateAsyncTxLast ||
         furi_hal_subghz.state == SubGhzStateAsyncTxEnd);
+
+    //forcibly pulls the pin to the ground so that there is no carrier
+    furi_hal_gpio_init(&gpio_cc1101_g0, GpioModeInput, GpioPullDown, GpioSpeedLow);
+    // LL_TIM_DisableCounter(TIM2);
 
     // Shutdown radio
     furi_hal_subghz_idle();
