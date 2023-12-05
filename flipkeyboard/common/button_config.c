@@ -286,14 +286,29 @@ static void item_clicked(void* context, uint32_t index) {
         return;
     }
 
-    if(index > message_index && index < keystroke_index) {
-        uint32_t item = (index - message_index);
-        if(item % 2 == 0) {
+    if(index < keystroke_index) {
+        uint32_t count = button_model_get_keystrokes_count(bm);
+
+        int32_t item = count - ((keystroke_index - index) / 2);
+
+        FURI_LOG_D(
+            "Flipboard",
+            "Keystroke clicked?  item=%ld   count=%ld   keystroke_index=%d   index=%ld",
+            item,
+            count,
+            keystroke_index,
+            index);
+
+        if(item < 0) {
+            FURI_LOG_D("Flipboard", "Not keystroke clicked. Ignorning");
+            return;
+        }
+
+        if(index % 2 == 0) {
             FURI_LOG_D("Flipboard", "Count clicked.  Ignorning");
             return;
         }
 
-        item = item / 2;
         ButtonConfig* button_config = (ButtonConfig*)button_model_get_button_config(bm);
         if(button_config->keystroke_selector == NULL) {
             return;
@@ -348,19 +363,19 @@ static void populate_variable_item_list(ButtonConfig* button_config, ButtonModel
         item_index++;
     }
 
-    if(flipboard_model_get_button_model_fields(button_config->model) & ButtonModelFieldMessage) {
-        variable_item_list_add(button_config->item_list, "Message", 0, NULL, NULL);
-        variable_item_list_set_enter_callback(button_config->item_list, item_clicked, bm);
-        button_model_set_message_index(bm, item_index);
-        item_index++;
-    }
-
     if(flipboard_model_get_button_model_fields(button_config->model) &
        ButtonModelFieldKeystrokes) {
         item_index += populate_variable_item_list_keystrokes(button_config, bm);
         variable_item_list_add(button_config->item_list, "Add Keystroke", 0, NULL, NULL);
         variable_item_list_set_enter_callback(button_config->item_list, item_clicked, bm);
         button_model_set_keystroke_index(bm, item_index);
+        item_index++;
+    }
+
+    if(flipboard_model_get_button_model_fields(button_config->model) & ButtonModelFieldMessage) {
+        variable_item_list_add(button_config->item_list, "Message 1", 0, NULL, NULL);
+        variable_item_list_set_enter_callback(button_config->item_list, item_clicked, bm);
+        button_model_set_message_index(bm, item_index);
         item_index++;
     }
 }
