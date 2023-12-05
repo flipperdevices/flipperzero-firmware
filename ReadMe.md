@@ -57,6 +57,9 @@ This software is for experimental purposes only and is not meant for any illegal
 - Added: [MALVEKE Pokemon Trading v1.4 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external/malveke_pokemon_trading) `Req: Malveke` (Uses Different GPIO Than Standard Pokemon Trader App)
 - Added: [MALVEKE PIN Test v1.0 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external/malveke_pin_test) `Req: Malveke`
 - Updated: [ESP32CAM Marauder v0.6.5 (By 0xchocolate & eried)](https://github.com/eried/flipperzero-mayhem)
+- UL: SubGHz: [Fix Keeloq (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/10444b943e31fc03aa34e40f74e1c89760783541)
+- UL: SubGHz: [Fix SecPlus (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/c41604137974c70689a8a89f8c86ae76f43123c3)
+- UL: [Add keys to mf_classic_dict.nfc #660 (By knlcory)](https://github.com/DarkFlippers/unleashed-firmware/pull/660)
 
 ## IN THIS BRANCH:
 
