@@ -134,7 +134,7 @@ Iso14443_3bError iso14443_3b_poller_activate(Iso14443_3bPoller* instance, Iso144
         if(bit_buffer_get_size_bytes(instance->rx_buffer) != 1) {
             FURI_LOG_W(
                 TAG,
-                "Unexpected ATTRIB response length: %d",
+                "Unexpected ATTRIB response length: %zu",
                 bit_buffer_get_size_bytes(instance->rx_buffer));
         }
 
