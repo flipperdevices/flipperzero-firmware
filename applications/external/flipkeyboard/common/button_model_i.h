@@ -25,7 +25,7 @@ struct ButtonModel {
     uint8_t keystroke_index;
 
     // Message to send when this key is pressed
-    FuriString* message;
+    FuriString* message[4];
 
     // Temp buffer for editing message
     char* temp_buffer;

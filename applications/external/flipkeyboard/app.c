@@ -1,7 +1,6 @@
 #include "app.h"
 #include "app_config.h"
 #include "app_keyboard_layout.h"
-// #include <assets_icons.h>
 
 /**
  * @brief This method handles Flipper D-Pad input when in the FlipboardKeyboard mode.
@@ -70,8 +69,12 @@ void flipboard_debounced_switch(void* context, uint8_t old_button, uint8_t new_b
 
     ButtonModel* bm = flipboard_model_get_button_model(model, reduced_new_button);
     flipboard_model_set_colors(model, bm, new_button);
-    flipboard_model_send_keystrokes(model, bm);
-    flipboard_model_send_text(model, bm);
+    if(!flipboard_model_send_keystrokes(model, bm)) {
+        //  If keystrokes did not send any messages, then we will send them in order.
+        for(int i = 0; i < 4; i++) {
+            flipboard_model_send_text(model, bm, i);
+        }
+    }
     flipboard_model_play_tone(model, bm);
 }
 

@@ -32,7 +32,11 @@ Open `flipkeyboard\app_keyboard_layout.h` and scroll down until you find the key
 
 ## Step 5: Replace the button with the new button
 
-If you don't know the HID name, place your cursor after HID_KEYBOARD_ and press `Ctrl+Space` to see a list of all of the HID names.  In this case, we want to replace the `HID_KEYBOARD_POWER` with `HID_KEYBOARD_PRINT_SCREEN`.  We also want to replace the `I_power_25x10` with `I_prtsc_25x10`.  The final code should look like the following...
+If you don't know the HID name, place your cursor after HID_KEYBOARD_ and press `Ctrl+Space` to see a list of all of the HID names.  In this case, we want to replace the `HID_KEYBOARD_POWER` with `HID_KEYBOARD_PRINT_SCREEN`.  The new value you choose must be listed in the `keystroke_values[]` array in the `flipkeyboard\common\config_keystroke.h` file.  The `config_keystroke.h` file contains the list of all of the keystrokes that are displayed using the `VariableItemList` when the selecting with the left/right arrow keys.  The `VariableItemList` module from `#include <gui/modules/variable_item_list.h>` has a limit of around 255 items (which are all being used) so if you want to add a new value in `keystroke_values[]` you also need to remove a value.  Be sure that `keystroke_names[]` lists the items in the same order as `keystroke_values[]`.
+
+We also want to replace the icon `I_power_25x10` with `I_prtsc_25x10`.  
+
+The final code should look like the following...
 
 ```c
     {.code = HID_KEYBOARD_PRINT_SCREEN, .ch = 0, .icon = &I_prtsc_25x10},
