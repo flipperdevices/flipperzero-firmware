@@ -8,7 +8,7 @@
 #include <gui/modules/widget.h>
 #include <gui/modules/submenu.h>
 #include <gui/modules/text_input.h>
-#include <toolbox/name_generator.h>
+// #include <lib/toolbox/random_name.h>
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
 #include <dialogs/dialogs.h>
