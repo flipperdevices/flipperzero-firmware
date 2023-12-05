@@ -17,10 +17,11 @@
 extern "C" {
 #endif
 
-/** Low level buffer dimensions and guard times */
-#define API_HAL_SUBGHZ_ASYNC_TX_BUFFER_FULL (256)
-#define API_HAL_SUBGHZ_ASYNC_TX_BUFFER_HALF (API_HAL_SUBGHZ_ASYNC_TX_BUFFER_FULL / 2)
-#define API_HAL_SUBGHZ_ASYNC_TX_GUARD_TIME (999u)
+/** Various subghz defines */
+#define FURI_HAL_SUBGHZ_TIMER_RESOLUTION (1u)
+#define FURI_HAL_SUBGHZ_ASYNC_TX_BUFFER_FULL (256u)
+#define FURI_HAL_SUBGHZ_ASYNC_TX_BUFFER_HALF (FURI_HAL_SUBGHZ_ASYNC_TX_BUFFER_FULL / 2)
+#define FURI_HAL_SUBGHZ_ASYNC_TX_GUARD_TIME (999u)
 
 /** Switchable Radio Paths */
 typedef enum {

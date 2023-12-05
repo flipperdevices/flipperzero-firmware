@@ -574,7 +574,7 @@ static inline uint32_t furi_hal_subghz_async_tx_middleware_get_duration(
             }
         } else if(level_duration_is_wait(ld)) {
             middleware->is_odd_level = !middleware->is_odd_level;
-            ret = middleware->adder_duration + API_HAL_SUBGHZ_ASYNC_TX_GUARD_TIME;
+            ret = middleware->adder_duration + FURI_HAL_SUBGHZ_ASYNC_TX_GUARD_TIME;
             middleware->adder_duration = 0;
             return ret;
         }
@@ -643,13 +643,13 @@ static void furi_hal_subghz_async_tx_dma_isr() {
     if(LL_DMA_IsActiveFlag_HT1(SUBGHZ_DMA)) {
         LL_DMA_ClearFlag_HT1(SUBGHZ_DMA);
         furi_hal_subghz_async_tx_refill(
-            furi_hal_subghz_async_tx.buffer, API_HAL_SUBGHZ_ASYNC_TX_BUFFER_HALF);
+            furi_hal_subghz_async_tx.buffer, FURI_HAL_SUBGHZ_ASYNC_TX_BUFFER_HALF);
     }
     if(LL_DMA_IsActiveFlag_TC1(SUBGHZ_DMA)) {
         LL_DMA_ClearFlag_TC1(SUBGHZ_DMA);
         furi_hal_subghz_async_tx_refill(
-            furi_hal_subghz_async_tx.buffer + API_HAL_SUBGHZ_ASYNC_TX_BUFFER_HALF,
-            API_HAL_SUBGHZ_ASYNC_TX_BUFFER_HALF);
+            furi_hal_subghz_async_tx.buffer + FURI_HAL_SUBGHZ_ASYNC_TX_BUFFER_HALF,
+            FURI_HAL_SUBGHZ_ASYNC_TX_BUFFER_HALF);
     }
 #else
 #error Update this code. Would you kindly?
@@ -684,7 +684,7 @@ bool furi_hal_subghz_start_async_tx(FuriHalSubGhzAsyncTxCallback callback, void*
     furi_hal_subghz_async_tx.duty_high = 0;
 
     furi_hal_subghz_async_tx.buffer =
-        malloc(API_HAL_SUBGHZ_ASYNC_TX_BUFFER_FULL * sizeof(uint32_t));
+        malloc(FURI_HAL_SUBGHZ_ASYNC_TX_BUFFER_FULL * sizeof(uint32_t));
 
     // Connect CC1101_GD0 to TIM2 as output
     furi_hal_gpio_init_ex(
@@ -700,7 +700,7 @@ bool furi_hal_subghz_start_async_tx(FuriHalSubGhzAsyncTxCallback callback, void*
     dma_config.MemoryOrM2MDstIncMode = LL_DMA_MEMORY_INCREMENT;
     dma_config.PeriphOrM2MSrcDataSize = LL_DMA_PDATAALIGN_WORD;
     dma_config.MemoryOrM2MDstDataSize = LL_DMA_MDATAALIGN_WORD;
-    dma_config.NbData = API_HAL_SUBGHZ_ASYNC_TX_BUFFER_FULL;
+    dma_config.NbData = FURI_HAL_SUBGHZ_ASYNC_TX_BUFFER_FULL;
     dma_config.PeriphRequest = LL_DMAMUX_REQ_TIM2_UP;
     dma_config.Priority = LL_DMA_MODE_NORMAL;
     LL_DMA_Init(SUBGHZ_DMA_CH1_DEF, &dma_config);
@@ -734,7 +734,7 @@ bool furi_hal_subghz_start_async_tx(FuriHalSubGhzAsyncTxCallback callback, void*
 
     furi_hal_subghz_async_tx_middleware_idle(&furi_hal_subghz_async_tx.middleware);
     furi_hal_subghz_async_tx_refill(
-        furi_hal_subghz_async_tx.buffer, API_HAL_SUBGHZ_ASYNC_TX_BUFFER_FULL);
+        furi_hal_subghz_async_tx.buffer, FURI_HAL_SUBGHZ_ASYNC_TX_BUFFER_FULL);
 
     LL_TIM_EnableDMAReq_UPDATE(TIM2);
     LL_TIM_CC_EnableChannel(TIM2, LL_TIM_CHANNEL_CH2);
@@ -776,10 +776,11 @@ bool furi_hal_subghz_start_async_tx(FuriHalSubGhzAsyncTxCallback callback, void*
 
 bool furi_hal_subghz_is_async_tx_complete() {
     if(furi_hal_subghz.state == SubGhzStateAsyncTxEnd) {
+        // In order to ensure that transmission complete we need to check that timer is not counting anymore
         size_t count = 0;
         for(size_t i = 0; i < 2; i++) {
             if(LL_TIM_GetAutoReload(TIM2) == 0 && LL_TIM_GetCounter(TIM2) == 0) count++;
-            furi_delay_us(1);
+            furi_delay_us(FURI_HAL_SUBGHZ_TIMER_RESOLUTION);
         }
         return count == 2;
     } else {
