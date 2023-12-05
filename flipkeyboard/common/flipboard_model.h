@@ -206,16 +206,18 @@ void flipboard_model_set_colors(FlipboardModel* model, ButtonModel* bm, uint8_t 
  * @details flipboard_model_send_keystrokes sends keystrokes to the host.
  * @param model The FlipboardModel.
  * @param bm The ButtonModel for the button that was pressed.
+ * @return True if any "messages" (Msg1-Msg4) were also sent.
 */
-void flipboard_model_send_keystrokes(FlipboardModel* model, ButtonModel* bm);
+bool flipboard_model_send_keystrokes(FlipboardModel* model, ButtonModel* bm);
 
 /**
  * @brief flipboard_model_send_text sends text to the host.
  * @details flipboard_model_send_text sends text to the host.
  * @param model The FlipboardModel.
  * @param bm The ButtonModel for the button that was pressed.
+ * @param message_number The message number to send (0-3).
 */
-void flipboard_model_send_text(FlipboardModel* model, ButtonModel* bm);
+void flipboard_model_send_text(FlipboardModel* model, ButtonModel* bm, uint8_t message_number);
 
 /**
  * @brief flipboard_model_reduce reduces the button presses to a single button.

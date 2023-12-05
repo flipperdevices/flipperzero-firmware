@@ -9,9 +9,10 @@
 
 #define ABOUT_TEXT                             \
     "Welcome to the Flipboard\n"               \
-    "keyboard!  Optimized for\n"               \
-    "FlipBoard v1.1 hardware --\n"             \
-    "see link below to order!\n"               \
+    "keyboard 1.1\n"                           \
+    "Optimized for FlipBoard\n"                \
+    "hardware, see link below\n"               \
+    "to order!\n"                              \
     "Created by @MakeItHackin\n"               \
     "and @CodeAllNight!\n"                     \
     "https://discord.com/invite/NsjCvqwPAd\n"  \

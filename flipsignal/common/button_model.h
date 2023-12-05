@@ -137,9 +137,10 @@ Keystroke button_model_get_keystroke(ButtonModel* model, uint8_t index);
 /**
  * @brief Gets the message for the button.
  * @param model The model to get the message for.
+ * @param message_number The message number to get.
  * @return The message for the button.
  */
-FuriString* button_model_get_message(ButtonModel* model);
+FuriString* button_model_get_message(ButtonModel* model, uint8_t message_number);
 
 /**
  * @brief Sets the HEX color when the button is not pressed.
@@ -224,8 +225,9 @@ bool button_model_remove_last_keystroke(ButtonModel* model);
  * be considered as empty string.
  * @param model The model to set the message for.
  * @param message The message for the button.
+ * @param message_number The message number to set.
  */
-void button_model_set_message(ButtonModel* model, const char* message);
+void button_model_set_message(ButtonModel* model, const char* message, uint8_t message_number);
 
 /**
  * @brief Saves the button model to a FlipperFormat.

@@ -17,7 +17,10 @@ ButtonModel* button_model_alloc(uint8_t button_id) {
     model->frequency = 0.0f;
     model->keystrokes_count = 0;
     model->keystrokes = NULL;
-    model->message = NULL;
+    model->message[0] = NULL;
+    model->message[1] = NULL;
+    model->message[2] = NULL;
+    model->message[3] = NULL;
     model->message_index = 0;
     model->temp_buffer_size = 30;
     model->temp_buffer = (char*)malloc(sizeof(char) * model->temp_buffer_size);
@@ -49,8 +52,11 @@ void button_model_free(ButtonModel* model) {
     if(model->keystrokes) {
         free(model->keystrokes);
     }
-    if(model->message) {
-        furi_string_free(model->message);
+    for(int i = 0; i < 4; i++) {
+        if(model->message[i]) {
+            furi_string_free(model->message[i]);
+            model->message[i] = NULL;
+        }
     }
     if(model->temp_buffer) {
         free(model->temp_buffer);
@@ -185,14 +191,15 @@ Keystroke button_model_get_keystroke(ButtonModel* model, uint8_t index) {
 /**
  * @brief Gets the message for the button.
  * @param model The model to get the message for.
+ * @param message_number The message number to get.
  * @return The message for the button.
  */
-FuriString* button_model_get_message(ButtonModel* model) {
-    if(model == NULL) {
+FuriString* button_model_get_message(ButtonModel* model, uint8_t message_number) {
+    if(model == NULL || message_number >= 4) {
         return NULL;
     }
 
-    return model->message;
+    return model->message[message_number];
 }
 
 /**
@@ -327,25 +334,26 @@ bool button_model_remove_last_keystroke(ButtonModel* model) {
  * be considered as empty string.
  * @param model The model to set the message for.
  * @param message The message for the button.
+ * @param message_number The message number to set.
  */
-void button_model_set_message(ButtonModel* model, const char* message) {
+void button_model_set_message(ButtonModel* model, const char* message, uint8_t message_number) {
     if(message != NULL && message[0] == ' ') {
         // Hack since we can't clear the message.
         message++;
     }
 
     if(message == NULL || message[0] == '\0') {
-        if(model->message) {
-            furi_string_free(model->message);
+        if(model->message[message_number]) {
+            furi_string_free(model->message[message_number]);
         }
-        model->message = NULL;
+        model->message[message_number] = NULL;
         return;
     }
 
-    if(model->message == NULL) {
-        model->message = furi_string_alloc();
+    if(model->message[message_number] == NULL) {
+        model->message[message_number] = furi_string_alloc();
     }
-    furi_string_set(model->message, message);
+    furi_string_set(model->message[message_number], message);
 }
 
 /**
@@ -388,20 +396,43 @@ bool button_model_save(ButtonModel* model, FlipperFormat* flipper_format, Button
         return false;
     }
 
-    FuriString* str = button_model_get_message(model);
     if((fields & ButtonModelFieldMessage)) {
-        FuriString* temp_str = NULL;
-        if(str == NULL) {
-            temp_str = furi_string_alloc();
-        }
-        if(!flipper_format_write_string(flipper_format, "Message", str ? str : temp_str)) {
-            if(temp_str) {
-                furi_string_free(temp_str);
+        FuriString* empty_str = furi_string_alloc();
+
+        FuriString* str = button_model_get_message(model, 0);
+        if(!flipper_format_write_string(flipper_format, "Message", str ? str : empty_str)) {
+            if(empty_str) {
+                furi_string_free(empty_str);
             }
             return false;
         }
-        if(temp_str) {
-            furi_string_free(temp_str);
+
+        str = button_model_get_message(model, 1);
+        if(!flipper_format_write_string(flipper_format, "Message2", str ? str : empty_str)) {
+            if(empty_str) {
+                furi_string_free(empty_str);
+            }
+            return false;
+        }
+
+        str = button_model_get_message(model, 2);
+        if(!flipper_format_write_string(flipper_format, "Message3", str ? str : empty_str)) {
+            if(empty_str) {
+                furi_string_free(empty_str);
+            }
+            return false;
+        }
+
+        str = button_model_get_message(model, 3);
+        if(!flipper_format_write_string(flipper_format, "Message4", str ? str : empty_str)) {
+            if(empty_str) {
+                furi_string_free(empty_str);
+            }
+            return false;
+        }
+
+        if(empty_str) {
+            furi_string_free(empty_str);
         }
     }
 
@@ -484,7 +515,33 @@ static void button_model_load_fields(ButtonModel* model, FlipperFormat* flipper_
 
     if(flipper_format_read_string(flipper_format, "Message", message)) {
         if(furi_string_size(message)) {
-            button_model_set_message(model, furi_string_get_cstr(message));
+            button_model_set_message(model, furi_string_get_cstr(message), 0);
+        }
+    }
+
+    if(flipper_format_read_string(flipper_format, "Message2", message)) {
+        if(furi_string_size(message)) {
+            button_model_set_message(model, furi_string_get_cstr(message), 1);
+        }
+
+        if(flipper_format_read_string(flipper_format, "Message3", message)) {
+            if(furi_string_size(message)) {
+                button_model_set_message(model, furi_string_get_cstr(message), 2);
+            }
+        }
+
+        if(flipper_format_read_string(flipper_format, "Message4", message)) {
+            if(furi_string_size(message)) {
+                button_model_set_message(model, furi_string_get_cstr(message), 3);
+            }
+        }
+    } else {
+        // Message 2 not found, so legacy format.  Rewind to being of ButtonId.
+        flipper_format_rewind(flipper_format);
+        while(flipper_format_read_uint32(flipper_format, "ButtonId", &data32, 1)) {
+            if(data32 == button_model_get_button_id(model)) {
+                break;
+            }
         }
     }
 

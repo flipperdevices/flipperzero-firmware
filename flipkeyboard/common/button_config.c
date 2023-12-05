@@ -202,14 +202,47 @@ static uint8_t
 /**
  * @brief message_updated is called when the text message is updated.
  * @param context The ButtonModel.
+ * @param index The index of the message that was updated.
  */
-static void message_updated(void* context) {
+static void message_updated(void* context, uint8_t index) {
     ButtonModel* bm = (ButtonModel*)context;
     ButtonConfig* button_config = (ButtonConfig*)button_model_get_button_config(bm);
     furi_assert(button_config);
-    button_model_set_message(bm, button_model_get_temp_buffer(bm));
+    button_model_set_message(bm, button_model_get_temp_buffer(bm), index);
     view_dispatcher_switch_to_view(
         button_config->view_dispatcher, button_config->view_item_list_id);
+}
+
+/**
+ * @brief message_updated is called when the text message 1 is updated.
+ * @param context The ButtonModel.
+ */
+static void message1_updated(void* context) {
+    message_updated(context, 0);
+}
+
+/**
+ * @brief message_updated is called when the text message 2 is updated.
+ * @param context The ButtonModel.
+ */
+static void message2_updated(void* context) {
+    message_updated(context, 1);
+}
+
+/**
+ * @brief message_updated is called when the text message 3 is updated.
+ * @param context The ButtonModel.
+ */
+static void message3_updated(void* context) {
+    message_updated(context, 2);
+}
+
+/**
+ * @brief message_updated is called when the text message 4 is updated.
+ * @param context The ButtonModel.
+ */
+static void message4_updated(void* context) {
+    message_updated(context, 3);
 }
 
 /**
@@ -231,6 +264,54 @@ static void keystroke_selector_callback(uint16_t button_code, void* context) {
 }
 
 /**
+ * @brief item_message_clicked is called when a message is clicked in the config menu.
+ * @details item_message_clicked is called when an item is clicked in the config menu.
+ * It displays an enter message dialog and will store the message in the ButtonModel.
+ * @param bm The ButtonModel.
+ * @param message_number The message number to edit.
+*/
+static void item_message_clicked(ButtonModel* bm, uint8_t message_number) {
+    FURI_LOG_D("Flipboard", "Message index clicked");
+    ButtonConfig* button_config = (ButtonConfig*)button_model_get_button_config(bm);
+    furi_assert(button_config);
+
+    text_input_set_header_text(
+        button_config->text_input,
+        (message_number == 0) ? "Enter message 1" :
+        (message_number == 1) ? "Enter message 2" :
+        (message_number == 2) ? "Enter message 3" :
+                                "Enter message 4");
+    if(button_model_get_message(bm, message_number)) {
+        strncpy(
+            button_model_get_temp_buffer(bm),
+            furi_string_get_cstr(button_model_get_message(bm, message_number)),
+            button_model_get_temp_buffer_size(bm) - 1);
+    } else {
+        button_model_get_temp_buffer(bm)[0] = 0;
+    }
+
+    view_set_previous_callback(
+        text_input_get_view(button_config->text_input),
+        get_menu_callback(button_config->view_item_list_id));
+
+    text_input_set_result_callback(
+        button_config->text_input,
+        (message_number == 0) ? message1_updated :
+        (message_number == 1) ? message2_updated :
+        (message_number == 2) ? message3_updated :
+                                message4_updated,
+        bm,
+        button_model_get_temp_buffer(bm),
+        button_model_get_temp_buffer_size(bm),
+        false);
+
+    view_dispatcher_switch_to_view(
+        button_config->view_dispatcher, button_config->view_text_input_id);
+
+    return;
+}
+
+/**
  * @brief item_clicked is called when an item is clicked in the config menu.
  * @details item_clicked is called when an item is clicked in the config menu.
  * It determines which item was clicked and switches to the appropriate view,
@@ -241,36 +322,8 @@ static void keystroke_selector_callback(uint16_t button_code, void* context) {
 static void item_clicked(void* context, uint32_t index) {
     ButtonModel* bm = (ButtonModel*)context;
     uint8_t message_index = button_model_get_message_index(bm);
-    if(index == message_index) {
-        FURI_LOG_D("Flipboard", "Message index clicked");
-        ButtonConfig* button_config = (ButtonConfig*)button_model_get_button_config(bm);
-        furi_assert(button_config);
-
-        text_input_set_header_text(button_config->text_input, "Enter message");
-        if(button_model_get_message(bm)) {
-            strncpy(
-                button_model_get_temp_buffer(bm),
-                furi_string_get_cstr(button_model_get_message(bm)),
-                button_model_get_temp_buffer_size(bm) - 1);
-        } else {
-            button_model_get_temp_buffer(bm)[0] = 0;
-        }
-
-        view_set_previous_callback(
-            text_input_get_view(button_config->text_input),
-            get_menu_callback(button_config->view_item_list_id));
-
-        text_input_set_result_callback(
-            button_config->text_input,
-            message_updated,
-            bm,
-            button_model_get_temp_buffer(bm),
-            button_model_get_temp_buffer_size(bm),
-            false);
-
-        view_dispatcher_switch_to_view(
-            button_config->view_dispatcher, button_config->view_text_input_id);
-
+    if(index >= message_index && index < message_index + 4u) {
+        item_message_clicked(bm, index - message_index);
         return;
     }
 
@@ -376,6 +429,24 @@ static void populate_variable_item_list(ButtonConfig* button_config, ButtonModel
         variable_item_list_add(button_config->item_list, "Message 1", 0, NULL, NULL);
         variable_item_list_set_enter_callback(button_config->item_list, item_clicked, bm);
         button_model_set_message_index(bm, item_index);
+        item_index++;
+    }
+
+    if(flipboard_model_get_button_model_fields(button_config->model) & ButtonModelFieldMessage) {
+        variable_item_list_add(button_config->item_list, "Message 2", 0, NULL, NULL);
+        variable_item_list_set_enter_callback(button_config->item_list, item_clicked, bm);
+        item_index++;
+    }
+
+    if(flipboard_model_get_button_model_fields(button_config->model) & ButtonModelFieldMessage) {
+        variable_item_list_add(button_config->item_list, "Message 3", 0, NULL, NULL);
+        variable_item_list_set_enter_callback(button_config->item_list, item_clicked, bm);
+        item_index++;
+    }
+
+    if(flipboard_model_get_button_model_fields(button_config->model) & ButtonModelFieldMessage) {
+        variable_item_list_add(button_config->item_list, "Message 4", 0, NULL, NULL);
+        variable_item_list_set_enter_callback(button_config->item_list, item_clicked, bm);
         item_index++;
     }
 }
