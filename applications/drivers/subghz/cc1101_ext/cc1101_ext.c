@@ -45,6 +45,7 @@ typedef enum {
     SubGhzDeviceCC1101ExtStateIdle, /**< Idle, energy save mode */
     SubGhzDeviceCC1101ExtStateAsyncRx, /**< Async RX started */
     SubGhzDeviceCC1101ExtStateAsyncTx, /**< Async TX started, DMA and timer is on */
+    SubGhzDeviceCC1101ExtStateAsyncTxLast, /**< Async TX continue, DMA completed and timer got last value to go */
     SubGhzDeviceCC1101ExtStateAsyncTxEnd, /**< Async TX complete, cleanup needed */
 } SubGhzDeviceCC1101ExtState;
 
@@ -55,13 +56,25 @@ typedef enum {
     SubGhzDeviceCC1101ExtRegulationTxRx, /**TxRx*/
 } SubGhzDeviceCC1101ExtRegulation;
 
+typedef enum {
+    SubGhzDeviceCC1101ExtAsyncTxPackerStateIdle,
+    SubGhzDeviceCC1101ExtAsyncTxPackerStateReset,
+    SubGhzDeviceCC1101ExtAsyncTxPackerStateRun,
+} SubGhzDeviceCC1101ExtAsyncTxPackerState;
+
+typedef struct {
+    SubGhzDeviceCC1101ExtAsyncTxPackerState state;
+    bool is_odd_level;
+    uint32_t adder_duration;
+} SubGhzDeviceCC1101ExtAsyncTxPacker;
+
 typedef struct {
     uint32_t* buffer;
-    LevelDuration carry_ld;
     SubGhzDeviceCC1101ExtCallback callback;
     void* callback_context;
     uint32_t gpio_tx_buff[2];
     uint32_t debug_gpio_buff[2];
+    SubGhzDeviceCC1101ExtAsyncTxPacker packer;
 } SubGhzDeviceCC1101ExtAsyncTx;
 
 typedef struct {
@@ -563,31 +576,70 @@ void subghz_device_cc1101_ext_stop_async_rx() {
     furi_hal_gpio_init(subghz_device_cc1101_ext->g0_pin, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
 }
 
-static void subghz_device_cc1101_ext_async_tx_refill(uint32_t* buffer, size_t samples) {
-    furi_assert(subghz_device_cc1101_ext->state == SubGhzDeviceCC1101ExtStateAsyncTx);
-    while(samples > 0) {
-        bool is_odd = samples % 2;
-        LevelDuration ld;
-        if(level_duration_is_reset(subghz_device_cc1101_ext->async_tx.carry_ld)) {
-            ld = subghz_device_cc1101_ext->async_tx.callback(
-                subghz_device_cc1101_ext->async_tx.callback_context);
-        } else {
-            ld = subghz_device_cc1101_ext->async_tx.carry_ld;
-            subghz_device_cc1101_ext->async_tx.carry_ld = level_duration_reset();
+void subghz_device_cc1101_ext_async_tx_packer_idle(SubGhzDeviceCC1101ExtAsyncTxPacker* packer) {
+    packer->state = SubGhzDeviceCC1101ExtAsyncTxPackerStateIdle;
+    packer->is_odd_level = false;
+    packer->adder_duration = 0;
+}
+
+static inline uint32_t subghz_device_cc1101_ext_async_tx_packer_get_duration(
+    SubGhzDeviceCC1101ExtAsyncTxPacker* packer,
+    SubGhzDeviceCC1101ExtCallback callback) {
+    uint32_t ret = 0;
+    bool is_level = false;
+
+    if(packer->state == SubGhzDeviceCC1101ExtAsyncTxPackerStateReset) return 0;
+
+    while(1) {
+        LevelDuration ld = callback(subghz_device_cc1101_ext->async_tx.callback_context);
+        if(level_duration_is_reset(ld)) {
+            packer->state = SubGhzDeviceCC1101ExtAsyncTxPackerStateReset;
+            if(!packer->is_odd_level) {
+                return 0;
+            } else {
+                return packer->adder_duration;
+            }
+        } else if(level_duration_is_wait(ld)) {
+            packer->is_odd_level = !packer->is_odd_level;
+            ret = packer->adder_duration + SUBGHZ_DEVICE_CC1101_EXT_ASYNC_TX_GUARD_TIME;
+            packer->adder_duration = 0;
+            return ret;
         }
 
-        if(level_duration_is_wait(ld)) {
-            *buffer = SUBGHZ_DEVICE_CC1101_EXT_ASYNC_TX_GUARD_TIME;
-            buffer++;
-            samples--;
-        } else if(level_duration_is_reset(ld)) {
-            if(is_odd) {
-                if(buffer == subghz_device_cc1101_ext->async_tx.buffer) {
-                    buffer[SUBGHZ_DEVICE_CC1101_EXT_ASYNC_TX_BUFFER_FULL] = 0;
-                } else {
-                    buffer--;
-                }
+        is_level = level_duration_get_level(ld);
+
+        if(packer->state == SubGhzDeviceCC1101ExtAsyncTxPackerStateIdle) {
+            if(is_level != packer->is_odd_level) {
+                packer->state = SubGhzDeviceCC1101ExtAsyncTxPackerStateRun;
+                packer->is_odd_level = is_level;
+                packer->adder_duration = 0;
+            } else {
+                continue;
             }
+        }
+
+        if(packer->state == SubGhzDeviceCC1101ExtAsyncTxPackerStateRun) {
+            if(is_level == packer->is_odd_level) {
+                packer->adder_duration += level_duration_get_duration(ld);
+                continue;
+            } else {
+                packer->is_odd_level = is_level;
+                ret = packer->adder_duration;
+                packer->adder_duration = level_duration_get_duration(ld);
+                return ret;
+            }
+        }
+    }
+}
+
+static void subghz_device_cc1101_ext_async_tx_refill(uint32_t* buffer, size_t samples) {
+    furi_assert(subghz_device_cc1101_ext->state == SubGhzDeviceCC1101ExtStateAsyncTx);
+
+    while(samples > 0) {
+        volatile uint32_t duration = subghz_device_cc1101_ext_async_tx_packer_get_duration(
+            &subghz_device_cc1101_ext->async_tx.packer,
+            subghz_device_cc1101_ext->async_tx.callback);
+        if(duration == 0) {
             *buffer = 0;
             buffer++;
             samples--;
@@ -596,22 +648,6 @@ static void subghz_device_cc1101_ext_async_tx_refill(uint32_t* buffer, size_t sa
             LL_TIM_EnableIT_UPDATE(TIM17);
             break;
         } else {
-            bool level = level_duration_get_level(ld);
-
-            // Inject guard time if level is incorrect
-            if(is_odd != level) {
-                *buffer = SUBGHZ_DEVICE_CC1101_EXT_ASYNC_TX_GUARD_TIME;
-                buffer++;
-                samples--;
-
-                // Special case: prevent buffer overflow if sample is last
-                if(samples == 0) {
-                    subghz_device_cc1101_ext->async_tx.carry_ld = ld;
-                    break;
-                }
-            }
-
-            uint32_t duration = level_duration_get_duration(ld);
             // Lowest possible value is 4us
             if(duration < 4) duration = 4;
             // Divide by 2 since timer resolution is 2us
@@ -648,12 +684,18 @@ static void subghz_device_cc1101_ext_async_tx_dma_isr() {
 static void subghz_device_cc1101_ext_async_tx_timer_isr() {
     if(LL_TIM_IsActiveFlag_UPDATE(TIM17)) {
         if(LL_TIM_GetAutoReload(TIM17) == 0) {
-            LL_DMA_DisableChannel(SUBGHZ_DEVICE_CC1101_EXT_DMA_CH3_DEF);
-            furi_hal_gpio_write(subghz_device_cc1101_ext->g0_pin, false);
-            if(subghz_device_cc1101_ext->async_mirror_pin != NULL)
-                furi_hal_gpio_write(subghz_device_cc1101_ext->async_mirror_pin, false);
-            LL_TIM_DisableCounter(TIM17);
-            subghz_device_cc1101_ext->state = SubGhzDeviceCC1101ExtStateAsyncTxEnd;
+            if(subghz_device_cc1101_ext->state == SubGhzDeviceCC1101ExtStateAsyncTx) {
+                LL_DMA_DisableChannel(SUBGHZ_DEVICE_CC1101_EXT_DMA_CH3_DEF);
+                subghz_device_cc1101_ext->state = SubGhzDeviceCC1101ExtStateAsyncTxLast;
+            } else if(subghz_device_cc1101_ext->state == SubGhzDeviceCC1101ExtStateAsyncTxLast) {
+                subghz_device_cc1101_ext->state = SubGhzDeviceCC1101ExtStateAsyncTxEnd;
+                furi_hal_gpio_write(subghz_device_cc1101_ext->g0_pin, false);
+                if(subghz_device_cc1101_ext->async_mirror_pin != NULL)
+                    furi_hal_gpio_write(subghz_device_cc1101_ext->async_mirror_pin, false);
+                LL_TIM_DisableCounter(TIM17);
+            } else {
+                furi_crash();
+            }
         }
         LL_TIM_ClearFlag_UPDATE(TIM17);
     }
@@ -703,16 +745,17 @@ bool subghz_device_cc1101_ext_start_async_tx(SubGhzDeviceCC1101ExtCallback callb
 
     // Configure TIM
     // Set the timer resolution to 2 us
-    LL_TIM_SetPrescaler(TIM17, (64 << 1) - 1);
     LL_TIM_SetCounterMode(TIM17, LL_TIM_COUNTERMODE_UP);
-    LL_TIM_SetAutoReload(TIM17, 0xFFFF);
     LL_TIM_SetClockDivision(TIM17, LL_TIM_CLOCKDIVISION_DIV1);
+    LL_TIM_SetAutoReload(TIM17, 500);
+    LL_TIM_SetPrescaler(TIM17, (64 << 1) - 1);
     LL_TIM_SetClockSource(TIM17, LL_TIM_CLOCKSOURCE_INTERNAL);
-    LL_TIM_DisableARRPreload(TIM17);
+    LL_TIM_EnableARRPreload(TIM17);
 
     furi_hal_interrupt_set_isr(
         FuriHalInterruptIdTim1TrgComTim17, subghz_device_cc1101_ext_async_tx_timer_isr, NULL);
 
+    subghz_device_cc1101_ext_async_tx_packer_idle(&subghz_device_cc1101_ext->async_tx.packer);
     subghz_device_cc1101_ext_async_tx_refill(
         subghz_device_cc1101_ext->async_tx.buffer, SUBGHZ_DEVICE_CC1101_EXT_ASYNC_TX_BUFFER_FULL);
 
@@ -775,6 +818,7 @@ bool subghz_device_cc1101_ext_is_async_tx_complete() {
 void subghz_device_cc1101_ext_stop_async_tx() {
     furi_assert(
         subghz_device_cc1101_ext->state == SubGhzDeviceCC1101ExtStateAsyncTx ||
+        subghz_device_cc1101_ext->state == SubGhzDeviceCC1101ExtStateAsyncTxLast ||
         subghz_device_cc1101_ext->state == SubGhzDeviceCC1101ExtStateAsyncTxEnd);
 
     // Shutdown radio

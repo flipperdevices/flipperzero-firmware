@@ -304,10 +304,10 @@ static LevelDuration subghz_hal_async_tx_test_yield(void* context) {
             furi_crash("Yield after reset");
         }
     } else if(test->type == SubGhzHalAsyncTxTestTypeResetEnd) {
-        if(test->pos < API_HAL_SUBGHZ_ASYNC_TX_BUFFER_FULL - 1) {
+        if(test->pos < API_HAL_SUBGHZ_ASYNC_TX_BUFFER_FULL) {
             test->pos++;
             return level_duration_make(is_odd, SUBGHZ_HAL_TEST_DURATION);
-        } else if(test->pos == API_HAL_SUBGHZ_ASYNC_TX_BUFFER_FULL - 1) {
+        } else if(test->pos == API_HAL_SUBGHZ_ASYNC_TX_BUFFER_FULL) {
             test->pos++;
             return level_duration_reset();
         } else {

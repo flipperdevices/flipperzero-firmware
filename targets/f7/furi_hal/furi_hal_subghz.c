@@ -529,41 +529,90 @@ void furi_hal_subghz_stop_async_rx() {
 
 typedef struct {
     uint32_t* buffer;
-    LevelDuration carry_ld;
     FuriHalSubGhzAsyncTxCallback callback;
     void* callback_context;
     uint64_t duty_high;
     uint64_t duty_low;
 } FuriHalSubGhzAsyncTx;
 
+typedef enum {
+    FuriHalSubGhzAsyncTxPackerStateIdle,
+    FuriHalSubGhzAsyncTxPackerStateReset,
+    FuriHalSubGhzAsyncTxPackerStateRun,
+} FuriHalSubGhzAsyncTxPackerState;
+
+typedef struct {
+    FuriHalSubGhzAsyncTxPackerState state;
+    bool is_odd_level;
+    uint32_t adder_duration;
+} FuriHalSubGhzAsyncTxPacker;
+
 static FuriHalSubGhzAsyncTx furi_hal_subghz_async_tx = {0};
+static FuriHalSubGhzAsyncTxPacker furi_hal_subghz_async_tx_packer = {0};
+
+void furi_hal_subghz_async_tx_packer_idle(FuriHalSubGhzAsyncTxPacker* packer) {
+    packer->state = FuriHalSubGhzAsyncTxPackerStateIdle;
+    packer->is_odd_level = false;
+    packer->adder_duration = 0;
+}
+
+static inline uint32_t furi_hal_subghz_async_tx_packer_get_duration(
+    FuriHalSubGhzAsyncTxPacker* packer,
+    FuriHalSubGhzAsyncTxCallback callback) {
+    uint32_t ret = 0;
+    bool is_level = false;
+
+    if(packer->state == FuriHalSubGhzAsyncTxPackerStateReset) return 0;
+
+    while(1) {
+        LevelDuration ld = callback(furi_hal_subghz_async_tx.callback_context);
+        if(level_duration_is_reset(ld)) {
+            packer->state = FuriHalSubGhzAsyncTxPackerStateReset;
+            if(!packer->is_odd_level) {
+                return 0;
+            } else {
+                return packer->adder_duration;
+            }
+        } else if(level_duration_is_wait(ld)) {
+            packer->is_odd_level = !packer->is_odd_level;
+            ret = packer->adder_duration + API_HAL_SUBGHZ_ASYNC_TX_GUARD_TIME;
+            packer->adder_duration = 0;
+            return ret;
+        }
+
+        is_level = level_duration_get_level(ld);
+
+        if(packer->state == FuriHalSubGhzAsyncTxPackerStateIdle) {
+            if(is_level != packer->is_odd_level) {
+                packer->state = FuriHalSubGhzAsyncTxPackerStateRun;
+                packer->is_odd_level = is_level;
+                packer->adder_duration = 0;
+            } else {
+                continue;
+            }
+        }
+
+        if(packer->state == FuriHalSubGhzAsyncTxPackerStateRun) {
+            if(is_level == packer->is_odd_level) {
+                packer->adder_duration += level_duration_get_duration(ld);
+                continue;
+            } else {
+                packer->is_odd_level = is_level;
+                ret = packer->adder_duration;
+                packer->adder_duration = level_duration_get_duration(ld);
+                return ret;
+            }
+        }
+    }
+}
 
 static void furi_hal_subghz_async_tx_refill(uint32_t* buffer, size_t samples) {
     furi_assert(furi_hal_subghz.state == SubGhzStateAsyncTx);
-    while(samples > 0) {
-        bool is_odd = samples % 2;
-        LevelDuration ld;
-        if(level_duration_is_reset(furi_hal_subghz_async_tx.carry_ld)) {
-            ld = furi_hal_subghz_async_tx.callback(furi_hal_subghz_async_tx.callback_context);
-        } else {
-            ld = furi_hal_subghz_async_tx.carry_ld;
-            furi_hal_subghz_async_tx.carry_ld = level_duration_reset();
-        }
 
-        if(level_duration_is_wait(ld)) {
-            *buffer = API_HAL_SUBGHZ_ASYNC_TX_GUARD_TIME;
-            buffer++;
-            samples--;
-        } else if(level_duration_is_reset(ld)) {
-            if(!is_odd) { //if upload ends low. then we stop the transmission on it
-                if(buffer ==
-                   furi_hal_subghz_async_tx
-                       .buffer) { //if reset to the beginning of the array, then we move it to the end, thereby zeroing out the last low level in upload
-                    buffer[API_HAL_SUBGHZ_ASYNC_TX_BUFFER_FULL - 1] = 0;
-                } else {
-                    buffer--;
-                }
-            }
+    while(samples > 0) {
+        volatile uint32_t duration = furi_hal_subghz_async_tx_packer_get_duration(
+            &furi_hal_subghz_async_tx_packer, furi_hal_subghz_async_tx.callback);
+        if(duration == 0) {
             *buffer = 0;
             buffer++;
             samples--;
@@ -572,39 +621,18 @@ static void furi_hal_subghz_async_tx_refill(uint32_t* buffer, size_t samples) {
             LL_TIM_EnableIT_UPDATE(TIM2);
             break;
         } else {
-            bool level = level_duration_get_level(ld);
-
-            // Inject guard time if level is incorrect
-            if(is_odd == level) {
-                *buffer = API_HAL_SUBGHZ_ASYNC_TX_GUARD_TIME;
-                buffer++;
-                samples--;
-                if(is_odd) {
-                    furi_hal_subghz_async_tx.duty_high += API_HAL_SUBGHZ_ASYNC_TX_GUARD_TIME;
-                } else {
-                    furi_hal_subghz_async_tx.duty_low += API_HAL_SUBGHZ_ASYNC_TX_GUARD_TIME;
-                }
-
-                // Special case: prevent buffer overflow if sample is last
-                if(samples == 0) {
-                    furi_hal_subghz_async_tx.carry_ld = ld;
-                    break;
-                }
-            }
-
-            uint32_t duration = level_duration_get_duration(ld);
             // Lowest possible value is 2us
             if(duration < 2) duration = 2;
             // Subtract 1 since we counting from 0
             *buffer = duration - 1;
             buffer++;
             samples--;
+        }
 
-            if(is_odd) {
-                furi_hal_subghz_async_tx.duty_high += duration;
-            } else {
-                furi_hal_subghz_async_tx.duty_low += duration;
-            }
+        if(samples % 2) {
+            furi_hal_subghz_async_tx.duty_high += duration;
+        } else {
+            furi_hal_subghz_async_tx.duty_low += duration;
         }
     }
 }
@@ -712,6 +740,7 @@ bool furi_hal_subghz_start_async_tx(FuriHalSubGhzAsyncTxCallback callback, void*
 
     furi_hal_interrupt_set_isr(FuriHalInterruptIdTIM2, furi_hal_subghz_async_tx_timer_isr, NULL);
 
+    furi_hal_subghz_async_tx_packer_idle(&furi_hal_subghz_async_tx_packer);
     furi_hal_subghz_async_tx_refill(
         furi_hal_subghz_async_tx.buffer, API_HAL_SUBGHZ_ASYNC_TX_BUFFER_FULL);
 
