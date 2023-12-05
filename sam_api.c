@@ -59,6 +59,7 @@ void seader_picopass_state_machine(Seader* seader, uint8_t* buffer, size_t len) 
     uint8_t pacs_sr_cfg[PICOPASS_BLOCK_LEN] = {0xA3, 0x03, 0x03, 0x03, 0x00, 0x03, 0xe0, 0x14};
 
     uint8_t tmac[4] = {};
+    uint8_t cc_p[12] = {};
     uint8_t div_key[PICOPASS_BLOCK_LEN] = {};
     uint8_t offset; // for READ4
 
@@ -83,8 +84,9 @@ void seader_picopass_state_machine(Seader* seader, uint8_t* buffer, size_t len) 
         case RFAL_PICOPASS_CMD_CHECK:
             loclass_iclass_calc_div_key(
                 seader->credential->diversifier, picopass_iclass_key, div_key, false);
-            LoclassState_t cipher_state = loclass_opt_doTagMAC_1(epurse, div_key);
-            loclass_opt_doTagMAC_2(cipher_state, buffer + 1, tmac, div_key);
+            memcpy(cc_p, epurse, PICOPASS_BLOCK_LEN);
+            memcpy(cc_p+8, buffer+1, PICOPASS_MAC_LEN);
+            loclass_opt_doTagMAC(cc_p, div_key, tmac);
             bit_buffer_append_bytes(rx_buffer, tmac, sizeof(tmac));
             break;
         case RFAL_PICOPASS_CMD_READ4:
