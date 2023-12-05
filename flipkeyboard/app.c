@@ -1,7 +1,6 @@
 #include "app.h"
 #include "app_config.h"
 #include "app_keyboard_layout.h"
-// #include <assets_icons.h>
 
 /**
  * @brief This method handles Flipper D-Pad input when in the FlipboardKeyboard mode.
