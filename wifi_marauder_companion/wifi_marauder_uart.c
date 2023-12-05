@@ -53,14 +53,19 @@ void wifi_marauder_uart_on_irq_cb(UartIrqEvent ev, uint8_t data, void* context) 
             // We are trying to match a pcap delimiter
             const char* pcap_begin = "%PCAP_BEGIN%";
             const char* pcap_close = "%PCAP_CLOSE%";
-            if(data == pcap_begin[uart->pcap_test_idx] || data == pcap_close[uart->pcap_test_idx]) {
+            if(data == pcap_begin[uart->pcap_test_idx] ||
+               data == pcap_close[uart->pcap_test_idx]) {
                 // Received char matches next char in a pcap delimiter, append to buffer
                 uart->pcap_test_buf[uart->pcap_test_idx++] = data;
                 if(uart->pcap_test_idx == sizeof(uart->pcap_test_buf)) {
                     // Buffer reached max length, parse what delimiter this is and discard buffer
-                    if(!memcmp(uart->pcap_test_buf, (void*)pcap_begin, sizeof(uart->pcap_test_buf))) {
+                    if(!memcmp(
+                           uart->pcap_test_buf, (void*)pcap_begin, sizeof(uart->pcap_test_buf))) {
                         uart->pcap = true;
-                    } else if(!memcmp(uart->pcap_test_buf, (void*)pcap_close, sizeof(uart->pcap_test_buf))) {
+                    } else if(!memcmp(
+                                  uart->pcap_test_buf,
+                                  (void*)pcap_close,
+                                  sizeof(uart->pcap_test_buf))) {
                         uart->pcap = false;
                     }
                     uart->pcap_test_idx = 0;
@@ -70,10 +75,12 @@ void wifi_marauder_uart_on_irq_cb(UartIrqEvent ev, uint8_t data, void* context) 
             } else {
                 // Received char doesn't match any expected next char, send old buffer
                 if(uart->pcap) {
-                    furi_stream_buffer_send(uart->pcap_stream, uart->pcap_test_buf, uart->pcap_test_idx, 0);
+                    furi_stream_buffer_send(
+                        uart->pcap_stream, uart->pcap_test_buf, uart->pcap_test_idx, 0);
                     furi_thread_flags_set(furi_thread_get_id(uart->rx_thread), WorkerEvtPcapDone);
                 } else {
-                    furi_stream_buffer_send(uart->rx_stream, uart->pcap_test_buf, uart->pcap_test_idx, 0);
+                    furi_stream_buffer_send(
+                        uart->rx_stream, uart->pcap_test_buf, uart->pcap_test_idx, 0);
                     furi_thread_flags_set(furi_thread_get_id(uart->rx_thread), WorkerEvtRxDone);
                 }
                 // Reset buffer and try parsing this char from scratch
@@ -112,7 +119,8 @@ static int32_t uart_worker(void* context) {
             }
         }
         if(events & WorkerEvtPcapDone) {
-            size_t len = furi_stream_buffer_receive(uart->pcap_stream, uart->rx_buf, RX_BUF_SIZE, 0);
+            size_t len =
+                furi_stream_buffer_receive(uart->pcap_stream, uart->rx_buf, RX_BUF_SIZE, 0);
             if(len > 0) {
                 if(uart->handle_rx_pcap_cb) uart->handle_rx_pcap_cb(uart->rx_buf, len, uart->app);
             }
