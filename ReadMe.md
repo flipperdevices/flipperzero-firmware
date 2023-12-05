@@ -59,6 +59,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [FlipBoard Keyboard v1.0 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
 - UL: [Add keys to mf_classic_dict.nfc #660 (By knlcory)](https://github.com/DarkFlippers/unleashed-firmware/pull/660)
 - NFC: [Bubbleland Play Card - keys from Bubble Land Arcade (By CaitSith2)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/a13fc836252d11618a356c30b60cd02a48d5c72e)
+- Updated: [WiFi (Marauder) v6.5 (By 0xchocolate & tcpassos)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) - Experimental PCAP on main USART Support (By Willy-JL)
 
 <a name="release">
 
