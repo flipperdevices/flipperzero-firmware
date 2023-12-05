@@ -579,7 +579,7 @@ void subghz_device_cc1101_ext_stop_async_rx() {
 void subghz_device_cc1101_ext_async_tx_packer_idle(SubGhzDeviceCC1101ExtAsyncTxPacker* packer) {
     packer->state = SubGhzDeviceCC1101ExtAsyncTxPackerStateIdle;
     packer->is_odd_level = false;
-    packer->adder_duration = 0;
+    packer->adder_duration = SUBGHZ_DEVICE_CC1101_EXT_ASYNC_TX_GUARD_TIME;
 }
 
 static inline uint32_t subghz_device_cc1101_ext_async_tx_packer_get_duration(
@@ -612,7 +612,8 @@ static inline uint32_t subghz_device_cc1101_ext_async_tx_packer_get_duration(
             if(is_level != packer->is_odd_level) {
                 packer->state = SubGhzDeviceCC1101ExtAsyncTxPackerStateRun;
                 packer->is_odd_level = is_level;
-                packer->adder_duration = 0;
+                packer->adder_duration = level_duration_get_duration(ld);
+                return SUBGHZ_DEVICE_CC1101_EXT_ASYNC_TX_GUARD_TIME;
             } else {
                 continue;
             }
@@ -686,15 +687,11 @@ static void subghz_device_cc1101_ext_async_tx_timer_isr() {
         if(LL_TIM_GetAutoReload(TIM17) == 0) {
             if(subghz_device_cc1101_ext->state == SubGhzDeviceCC1101ExtStateAsyncTx) {
                 LL_DMA_DisableChannel(SUBGHZ_DEVICE_CC1101_EXT_DMA_CH3_DEF);
-                subghz_device_cc1101_ext->state = SubGhzDeviceCC1101ExtStateAsyncTxLast;
-            } else if(subghz_device_cc1101_ext->state == SubGhzDeviceCC1101ExtStateAsyncTxLast) {
                 subghz_device_cc1101_ext->state = SubGhzDeviceCC1101ExtStateAsyncTxEnd;
                 furi_hal_gpio_write(subghz_device_cc1101_ext->g0_pin, false);
                 if(subghz_device_cc1101_ext->async_mirror_pin != NULL)
                     furi_hal_gpio_write(subghz_device_cc1101_ext->async_mirror_pin, false);
                 LL_TIM_DisableCounter(TIM17);
-            } else {
-                furi_crash();
             }
         }
         LL_TIM_ClearFlag_UPDATE(TIM17);
@@ -750,7 +747,7 @@ bool subghz_device_cc1101_ext_start_async_tx(SubGhzDeviceCC1101ExtCallback callb
     LL_TIM_SetAutoReload(TIM17, 500);
     LL_TIM_SetPrescaler(TIM17, (64 << 1) - 1);
     LL_TIM_SetClockSource(TIM17, LL_TIM_CLOCKSOURCE_INTERNAL);
-    LL_TIM_EnableARRPreload(TIM17);
+    LL_TIM_DisableARRPreload(TIM17);
 
     furi_hal_interrupt_set_isr(
         FuriHalInterruptIdTim1TrgComTim17, subghz_device_cc1101_ext_async_tx_timer_isr, NULL);
@@ -801,7 +798,6 @@ bool subghz_device_cc1101_ext_start_async_tx(SubGhzDeviceCC1101ExtCallback callb
 
     // Start counter
     LL_TIM_EnableDMAReq_UPDATE(TIM17);
-    LL_TIM_GenerateEvent_UPDATE(TIM17);
 
     subghz_device_cc1101_ext_tx();
 

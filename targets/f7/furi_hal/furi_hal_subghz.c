@@ -663,6 +663,9 @@ static void furi_hal_subghz_async_tx_timer_isr() {
             if(furi_hal_subghz.state == SubGhzStateAsyncTx) {
                 furi_hal_subghz.state = SubGhzStateAsyncTxEnd;
                 LL_DMA_DisableChannel(SUBGHZ_DMA_CH1_DEF);
+                //forcibly pulls the pin to the ground so that there is no carrier
+                furi_hal_gpio_init(&gpio_cc1101_g0, GpioModeInput, GpioPullDown, GpioSpeedLow);
+                LL_TIM_DisableCounter(TIM2);
             }
         }
     }
@@ -717,7 +720,7 @@ bool furi_hal_subghz_start_async_tx(FuriHalSubGhzAsyncTxCallback callback, void*
     LL_TIM_SetAutoReload(TIM2, 1000);
     LL_TIM_SetPrescaler(TIM2, 64 - 1);
     LL_TIM_SetClockSource(TIM2, LL_TIM_CLOCKSOURCE_INTERNAL);
-    LL_TIM_EnableARRPreload(TIM2);
+    LL_TIM_DisableARRPreload(TIM2);
 
     // Configure TIM2 CH2
     LL_TIM_OC_InitTypeDef TIM_OC_InitStruct = {0};
@@ -740,7 +743,6 @@ bool furi_hal_subghz_start_async_tx(FuriHalSubGhzAsyncTxCallback callback, void*
     LL_TIM_CC_EnableChannel(TIM2, LL_TIM_CHANNEL_CH2);
 
     // Start counter
-    LL_TIM_GenerateEvent_UPDATE(TIM2);
 #ifdef FURI_HAL_SUBGHZ_TX_GPIO
     furi_hal_gpio_write(&FURI_HAL_SUBGHZ_TX_GPIO, true);
 #endif
@@ -775,27 +777,13 @@ bool furi_hal_subghz_start_async_tx(FuriHalSubGhzAsyncTxCallback callback, void*
 }
 
 bool furi_hal_subghz_is_async_tx_complete() {
-    if(furi_hal_subghz.state == SubGhzStateAsyncTxEnd) {
-        // In order to ensure that transmission complete we need to check that timer is not counting anymore
-        size_t count = 0;
-        for(size_t i = 0; i < 2; i++) {
-            if(LL_TIM_GetAutoReload(TIM2) == 0 && LL_TIM_GetCounter(TIM2) == 0) count++;
-            furi_delay_us(FURI_HAL_SUBGHZ_TIMER_RESOLUTION);
-        }
-        return count == 2;
-    } else {
-        return false;
-    }
+    return furi_hal_subghz.state == SubGhzStateAsyncTxEnd;
 }
 
 void furi_hal_subghz_stop_async_tx() {
     furi_assert(
         furi_hal_subghz.state == SubGhzStateAsyncTx ||
         furi_hal_subghz.state == SubGhzStateAsyncTxEnd);
-
-    //forcibly pulls the pin to the ground so that there is no carrier
-    furi_hal_gpio_init(&gpio_cc1101_g0, GpioModeInput, GpioPullDown, GpioSpeedLow);
-    // LL_TIM_DisableCounter(TIM2);
 
     // Shutdown radio
     furi_hal_subghz_idle();
