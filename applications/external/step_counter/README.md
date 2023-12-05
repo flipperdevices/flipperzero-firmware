@@ -26,4 +26,4 @@ TODO List:
 - [ ] Add a management of the possible errors           
 - [ ] Add the possibility to restart the counting             
 - [ ] Add the possibility to set a daily/weekly GOAL to reach
-- [ ] Add the possibility to save dayly results in files at the path: apps_data/stepcounter, to comtìpare them and improve (interacting with calendar FAP? maybe...)
+- [ ] Add the possibility to save dayly results in files at the path: apps_data/stepcounter
