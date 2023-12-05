@@ -40,12 +40,9 @@ This software is for experimental purposes only and is not meant for any illegal
 - [Animations: Faster Code & Free Manifest List on Exit (By LeeroysHub)](https://github.com/LeeroysHub/RM-Flipper/commit/368aa032ec80aa47c8dc782a2b2729b4c4ea6c99)
 - OFW: [SubGhz: fix count bit for detect gate_tx protocol #3253 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/3253)
 - Updated: [Sub-GHz Playlist (By darmiel)](https://github.com/darmiel/flipper-playlist) Fix some subghz playlist memory leaks (By Willy-JL)
-- Updated: [Hangman v1.5 (By Evgeny Stepanischev & Eva Stepanischeva)](https://github.com/bolknote/Flipper-Zero-Hangman-Game)
 - Updated: [HEX Viewer v2.0 (By QtRoS)](https://github.com/QtRoS/flipperzero-firmware)
 - Updated: [BLE Spam v4.4 (By Willy-JL & ECTO-1A & Spooks4576 with research from xMasterX; OFW API thanks to noproto)](https://github.com/noproto/apple_ble_spam_ofw) - Changes from xMasterX repository
 - Updated: [UART Terminal v1.3 (By cool4uma)](https://github.com/cool4uma/UART_Terminal) - Changes from xMasterX repository
-- Updated: [FlipBoard Blinky v1.0 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
-- Updated: [FlipBoard Signal v1.0 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
 - UL: [Fix keeloq null pointer if unknown (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/9bf8f1015d6b4bc03478cbc8ad9e761ab3cc0be4)
 - Updated: [Wiegand Reader v1.3 (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/gpio)
 - Added: [MALVEKE GAME BOY Cartridge (GB/GBC) v1.0 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external/malveke_gb_cartridge) `Req: Malveke`
@@ -61,7 +58,13 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [FlipBoard Keyboard v1.0 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
 - UL: [Add keys to mf_classic_dict.nfc #660 (By knlcory)](https://github.com/DarkFlippers/unleashed-firmware/pull/660)
 - NFC: [Bubbleland Play Card - keys from Bubble Land Arcade (By CaitSith2)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/a13fc836252d11618a356c30b60cd02a48d5c72e)
-- OFW: [NFC fixes #3264 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3264)
+- UL: [Add keys to mf_classic_dict.nfc #660 (By knlcory)](https://github.com/DarkFlippers/unleashed-firmware/pull/660)
+- NFC: [Bubbleland Play Card - keys from Bubble Land Arcade (By CaitSith2)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/a13fc836252d11618a356c30b60cd02a48d5c72e)
+- Updated: [WiFi (Marauder) v6.5 (By 0xchocolate & tcpassos)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) - Experimental PCAP on main USART Support (By Willy-JL)
+- Updated: [FlipBoard Blinky v1.0 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
+- Updated: [FlipBoard Signal v1.0 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
+- Updated: [FlipBoard Keyboard v1.1 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
+- Updated: [Hangman v1.5 (By Evgeny Stepanischev & Eva Stepanischeva)](https://github.com/bolknote/Flipper-Zero-Hangman-Game)
 
 ## IN THIS BRANCH:
 
@@ -132,6 +135,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Update: [NFC Seader v2.0 (By bettse)](https://github.com/bettse/seader)
 - NFC: [Parsers for Saflok and Mykey (From noproto)](https://github.com/noproto/flipper_kdf)
 - NFC: [Parser for Mizip (From zProAle)](https://github.com/noproto/flipper_kdf/pull/3)
+- OFW: [NFC fixes #3264 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3264)
 
 <a name="release">
 
@@ -457,7 +461,7 @@ $ ./fbt dolphin_ext
 - [Flashlight v1.1 (By xMasterX)](https://github.com/xMasterX/flipper-flashlight)
 - [Flipagotchi WIP (By Matt-London)](https://github.com/Matt-London/pwnagotchi-flipper)
 - [FlipBoard Blinky v1.0 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
-- [FlipBoard Keyboard v1.0 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
+- [FlipBoard Keyboard v1.1 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
 - [FlipBoard Signal v1.0 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
 - [FlipBIP Crypto Wallet v1.14 (By xtruan)](https://github.com/xtruan/FlipBIP)
 - [Flizzer Tracker v0.4 (By LTVA1)](https://github.com/LTVA1/flizzer_tracker)

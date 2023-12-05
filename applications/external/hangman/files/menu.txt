@@ -2,7 +2,9 @@ Anime
 anime.bolk
 English
 english.bolk
-Русский
-russian.bolk
 Español
 spanish.bolk
+Русский
+russian.bolk
+Татар теле
+tatar.bolk

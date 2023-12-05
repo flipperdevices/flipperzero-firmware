@@ -23,6 +23,10 @@
 uint16_t keystroke_values[] = {
     HID_KEYBOARD_NONE, // Not mapped
     1, // Delay
+    0xF1, // Message 1
+    0xF2, // Message 2
+    0xF3, // Message 3
+    0xF4, // Message 4
 
     // hid_keymap
     HID_KEYBOARD_L_CTRL, // HID_KEYBOARD_L_CTRL
@@ -285,10 +289,10 @@ uint16_t keystroke_values[] = {
     HID_KEYBOARD_INTERNATIONAL_7, // HID_KEYBOARD_INTERNATIONAL_7
     HID_KEYBOARD_INTERNATIONAL_8, // HID_KEYBOARD_INTERNATIONAL_8
     HID_KEYBOARD_INTERNATIONAL_9, // HID_KEYBOARD_INTERNATIONAL_9
-    HID_KEYBOARD_LANG_1, // HID_KEYBOARD_LANG_1
-    HID_KEYBOARD_LANG_2, // HID_KEYBOARD_LANG_2
-    HID_KEYBOARD_LANG_3, // HID_KEYBOARD_LANG_3
-    HID_KEYBOARD_LANG_4, // HID_KEYBOARD_LANG_4
+    // HID_KEYBOARD_LANG_1, // HID_KEYBOARD_LANG_1
+    // HID_KEYBOARD_LANG_2, // HID_KEYBOARD_LANG_2
+    // HID_KEYBOARD_LANG_3, // HID_KEYBOARD_LANG_3
+    // HID_KEYBOARD_LANG_4, // HID_KEYBOARD_LANG_4
     // HID_KEYBOARD_LANG_5, // HID_KEYBOARD_LANG_5
     // HID_KEYBOARD_LANG_6, // HID_KEYBOARD_LANG_6
     // HID_KEYBOARD_LANG_7, // HID_KEYBOARD_LANG_7
@@ -302,7 +306,7 @@ uint16_t keystroke_values[] = {
  *  the index of the keystroke in the keystroke_names array.
 */
 char* keystroke_names[] = {
-    "None",      "Delay",
+    "None",      "Delay",   "Msg 1",       "Msg 2",       "Msg 3",     "Msg 4",
 
     "L-CTRL",    "R-CTRL",  "L-SHIFT",     "R-SHIFT",     "L-ALT",     "R-ALT",   "L-WIN",
     "R-WIN",
@@ -376,12 +380,9 @@ char* keystroke_names[] = {
     "F20",       "F21",     "F22",         "F23",         "F24",
 
     "INTL 1",    "INTL 2",  "INTL 3",      "INTL 4",      "INTL 5",    "INTL 6",  "INTL 7",
-    "INTL 8",    "INTL 9",  "LANG 1",      "LANG 2",      "LANG 3",    "LANG 4",
-    // "LANG 5",
-    // "LANG 6",
-    // "LANG 7",
-    // "LANG 8",
-    // "LANG 9",
+    "INTL 8",    "INTL 9",
+    // "LANG 1",      "LANG 2",      "LANG 3",    "LANG 4",
+    // "LANG 5", "LANG 6", "LANG 7", "LANG 8", "LANG 9",
 };
 
 /**
