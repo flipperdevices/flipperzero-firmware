@@ -85,7 +85,7 @@ void seader_picopass_state_machine(Seader* seader, uint8_t* buffer, size_t len) 
             loclass_iclass_calc_div_key(
                 seader->credential->diversifier, picopass_iclass_key, div_key, false);
             memcpy(cc_p, epurse, PICOPASS_BLOCK_LEN);
-            memcpy(cc_p+8, buffer+1, PICOPASS_MAC_LEN);
+            memcpy(cc_p + 8, buffer + 1, PICOPASS_MAC_LEN);
             loclass_opt_doTagMAC(cc_p, div_key, tmac);
             bit_buffer_append_bytes(rx_buffer, tmac, sizeof(tmac));
             break;
