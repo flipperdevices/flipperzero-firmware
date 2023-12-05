@@ -238,7 +238,7 @@ void hangman_clear_state(HangmanApp* app) {
 
     memset(app->opened, HangmanOpenedInit, HANGMAN_MAX_ALP_SIZE);
     free(app->word.arr);
-    app->word = (HangmanWord) {NULL, 0};
+    app->word = (HangmanWord){NULL, 0};
 
     if(app->lang != NULL) {
         app->word = hangman_get_random_word(app->lang->dict_file, app->lang->unicode_base);
