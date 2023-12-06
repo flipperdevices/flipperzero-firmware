@@ -52,6 +52,7 @@ typedef struct {
     Widget* widget_about; // The about screen
     FuriTimer* timer; // Timer for automatic updating the LEDs
     LedTesterModel* model; // The model
+    LedDriver* led_driver; // The LED driver
 } LedTesterApp;
 
 // Hack so that we can access the application object from a variable_item_list on_enter/exit callback.
@@ -170,7 +171,7 @@ static const char* setting_led_count_config_label = "LED Count";
 static uint16_t setting_led_count_values[] =
     {1, 2, 3, 4, 5, 6, 7, 8, 16, 32, 64, 128, 256, 512, 1024};
 static char* setting_led_count_names[] =
-    {"1", "2", "3", "4", "5", "6", "7", "8", "16", "32", "64", "128", "256"};
+    {"1", "2", "3", "4", "5", "6", "7", "8", "16", "32", "64", "128", "256", "512", "1024"};
 static uint8_t setting_led_count_default_index = 3; // 4 LEDs
 static void led_tester_setting_led_count_change(VariableItem* item) {
     LedTesterApp* app = variable_item_get_context(item);
@@ -334,20 +335,14 @@ static bool led_tester_custom_event_callback(void* context, uint32_t event) {
                  ((rgb[i] & 0xFF) * app->model->led_max_brightness / 100);
     }
 
-    LedDriver* led_driver = led_driver_alloc(256, pin);
-
-    // Set all LEDs to off
-    for(size_t i = 0; i < 256; i++) {
-        led_driver_set_led(led_driver, i, 0);
-    }
+    led_driver_set_pin(app->led_driver, pin);
 
     // Set the LEDs to the pattern
     for(size_t i = 0; i < app->model->led_count; i++) {
-        led_driver_set_led(led_driver, i, rgb[i % 4]);
+        led_driver_set_led(app->led_driver, i, rgb[i % 4]);
     }
 
-    led_driver_transmit(led_driver);
-    led_driver_free(led_driver);
+    led_driver_transmit(app->led_driver, false);
 
     return true;
 }
@@ -437,6 +432,8 @@ static LedTesterApp* led_tester_app_alloc() {
     variable_item_set_current_value_index(item, setting_led_pin_index);
     variable_item_set_current_value_text(item, setting_led_pin_names[setting_led_pin_index]);
     app->model->led_pin_index = setting_led_pin_index;
+    app->led_driver =
+        led_driver_alloc(MAX_LED_COUNT, setting_led_pin_values[setting_led_pin_index]);
 
     // Count
     item = variable_item_list_add(
@@ -518,7 +515,7 @@ static LedTesterApp* led_tester_app_alloc() {
         0,
         128,
         64,
-        "This is a WS2812B LED tester\nVersion 1.5\nConnect WS2812B LED data\nwire to GPIO pin on Flipper.\n\nThe 3V3 pin has a 1200mA\nmax current (~4 watts). The\n5V pin has a 1000mA max\ncurrent (5 watts).\n\nauthors: @codeallnight and\nZ3BRO!\n\nhttps://discord.com/invite/NsjCvqwPAd\nhttps://youtube.com/@MrDerekJamison\n\n");
+        "This is a WS2812B LED tester\nVersion 1.6\nConnect WS2812B LED data\nwire to GPIO pin on Flipper.\n\nThe 3V3 pin has a 1200mA\nmax current (~4 watts). The\n5V pin has a 1000mA max\ncurrent (5 watts).\n\nauthors: @codeallnight and\nZ3BRO!\n\nhttps://discord.com/invite/NsjCvqwPAd\nhttps://youtube.com/@MrDerekJamison\n\n");
     view_set_previous_callback(
         widget_get_view(app->widget_about), led_tester_navigation_submenu_callback);
     view_dispatcher_add_view(
@@ -533,6 +530,7 @@ static LedTesterApp* led_tester_app_alloc() {
  * @param      app  The led tester application object.
 */
 static void led_tester_app_free(LedTesterApp* app) {
+    led_driver_free(app->led_driver);
     view_dispatcher_remove_view(app->view_dispatcher, LedTesterViewAbout);
     widget_free(app->widget_about);
     view_dispatcher_remove_view(app->view_dispatcher, LedTesterViewLeds);
