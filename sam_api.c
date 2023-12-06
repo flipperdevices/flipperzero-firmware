@@ -130,6 +130,12 @@ bool seader_send_apdu(
     apdu[4] = length;
     memcpy(apdu + APDU_HEADER_LEN, payload, length);
 
+    memset(display, 0, sizeof(display));
+    for(uint8_t i = 0; i < APDU_HEADER_LEN + length; i++) {
+        snprintf(display + (i * 2), sizeof(display), "%02x", apdu[i]);
+    }
+    FURI_LOG_D(TAG, "seader_send_apdu %s", display);
+
     seader_ccid_XfrBlock(seader_uart, apdu, APDU_HEADER_LEN + length);
     return true;
 }
