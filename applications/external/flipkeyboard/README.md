@@ -55,6 +55,7 @@ Make sure your FlipBoard is connected to your Flipper Zero.  Choose the "Flipboa
 
 ### Written tutorials
 
+- [Advanced data entry](tutorials/advanced-data-entry.md)
 - [Play a song; Happy Birthday / Jingle Bells!](tutorials/song.md)
 - [Learn about the file format of the configuration files](tutorials/file-format.md)
 - [Edit the Message that is typed](tutorials/message.md)
