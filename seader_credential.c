@@ -9,17 +9,6 @@
 #include <lfrfid/lfrfid_dict_file.h>
 
 #define TAG "SeaderCredential"
-#define PICOPASS_BLOCK_LEN 8
-
-#define CSN_INDEX 0
-#define CFG_INDEX 1
-#define EPURSE_INDEX 2
-#define KD_INDEX 3
-#define KC_INDEX 4
-#define AIA_INDEX 5
-#define PACS_CFG_INDEX 6
-#define PACS_INDEX 7
-#define SR_SIO_INDEX 10
 
 static const char* seader_file_header = "Flipper Seader Credential";
 static const uint32_t seader_file_version = 1;
@@ -78,9 +67,11 @@ static bool seader_credential_load(SeaderCredential* cred, FuriString* path, boo
         // The order is reversed for storage and for the user opening the file
         uint64_t swapped = __builtin_bswap64(cred->credential);
         cred->credential = swapped;
+
         // Optional SIO/Diversifier
         flipper_format_read_hex(file, "SIO", cred->sio, sizeof(cred->sio));
         flipper_format_read_hex(file, "Diversifier", cred->diversifier, sizeof(cred->diversifier));
+
         parsed = true;
     } while(false);
 
@@ -95,7 +86,9 @@ static bool seader_credential_load(SeaderCredential* cred, FuriString* path, boo
             dialog_message_show_storage_error(cred->dialogs, "Can not parse\nfile");
         }
     }
-    FURI_LOG_I(TAG, "PACS: (%d) %016llx", cred->bit_length, cred->credential);
+    if(parsed) {
+        FURI_LOG_I(TAG, "PACS: (%d) %016llx", cred->bit_length, cred->credential);
+    }
 
     furi_string_free(temp_str);
     flipper_format_free(file);
@@ -164,7 +157,7 @@ bool seader_credential_save_mfc(SeaderCredential* cred, const char* name) {
         0x45,
         0x41,
         0x54};
-    uint8_t sectorn_trailer[16] = {
+    uint8_t section_trailer[16] = {
         0xff,
         0xff,
         0xff,
@@ -312,8 +305,8 @@ bool seader_credential_save_mfc(SeaderCredential* cred, const char* name) {
                 if(!flipper_format_write_hex(
                        file,
                        furi_string_get_cstr(temp_str),
-                       sectorn_trailer,
-                       sizeof(sectorn_trailer))) {
+                       section_trailer,
+                       sizeof(section_trailer))) {
                     block_saved = false;
                 }
                 break;
@@ -414,7 +407,7 @@ bool seader_credential_save(SeaderCredential* cred, const char* name) {
             furi_string_cat_printf(temp_str, "/%s%s", name, ".picopass");
         } else {
             furi_string_printf(
-                temp_str, "%s/%s%s", STORAGE_APP_DATA_PATH_PREFIX, name, ".picopass");
+                temp_str, "%s/%s%s", EXT_PATH("apps_data/picopass"), name, ".picopass");
         }
 
         FURI_LOG_D(TAG, "Save as Picopass [%s]", furi_string_get_cstr(temp_str));

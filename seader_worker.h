@@ -17,6 +17,7 @@ typedef enum {
     SeaderWorkerStateReady,
     // Main worker states
     SeaderWorkerStateCheckSam,
+    SeaderWorkerStateVirtualCredential,
     // Transition
     SeaderWorkerStateStop,
 } SeaderWorkerState;
