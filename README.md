@@ -1,6 +1,6 @@
 <p align="center">Advanced IR Remote App for Flipper Device</p>
 <p align="center">
-    <img src="https://github.com/kala13x/flipper-xremote/blob/main/screens/flipperzero.png" alt="XRemote">
+    <img src="https://github.com/kala13x/flipper-xremote/blob/main/.flipcorg/banner.png" alt="XRemote">
 </p>
 
 ## Idea
