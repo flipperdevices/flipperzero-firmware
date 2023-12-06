@@ -22,14 +22,14 @@
     }
 }*/
 
-/*static void subghz_txrx_radio_device_power_off(SubGhzTxRx* instance) {
+static void subghz_txrx_radio_device_power_off(SubGhzTxRx* instance) {
     UNUSED(instance);
     if(furi_hal_power_is_otg_enabled()) furi_hal_power_disable_otg();
-}*/
+}
 
 SubGhzTxRx* subghz_txrx_alloc() {
     SubGhzTxRx* instance = malloc(sizeof(SubGhzTxRx));
-    /*instance->setting = subghz_setting_alloc();
+    instance->setting = subghz_setting_alloc();
     subghz_setting_load(instance->setting, EXT_PATH("subghz/assets/setting_user"));
 
     instance->preset = malloc(sizeof(SubGhzRadioPreset));
@@ -39,14 +39,14 @@ SubGhzTxRx* subghz_txrx_alloc() {
 
     instance->txrx_state = SubGhzTxRxStateSleep;
 
-    subghz_txrx_hopper_set_state(instance, SubGhzHopperStateOFF);
-    subghz_txrx_speaker_set_state(instance, SubGhzSpeakerStateDisable);
-*/
+    //subghz_txrx_hopper_set_state(instance, SubGhzHopperStateOFF);
+    //subghz_txrx_speaker_set_state(instance, SubGhzSpeakerStateDisable);
+
     instance->worker = subghz_worker_alloc();
-/*    instance->fff_data = flipper_format_string_alloc();
+/*    instance->fff_data = flipper_format_string_alloc(); */
 
     instance->environment = subghz_environment_alloc();
-    instance->is_database_loaded =
+    /*instance->is_database_loaded =
         subghz_environment_load_keystore(instance->environment, SUBGHZ_KEYSTORE_DIR_NAME);
     subghz_environment_load_keystore(instance->environment, SUBGHZ_KEYSTORE_DIR_USER_NAME);
     subghz_environment_set_came_atomo_rainbow_table_file_name(
@@ -77,21 +77,21 @@ SubGhzTxRx* subghz_txrx_alloc() {
 void subghz_txrx_free(SubGhzTxRx* instance) {
     furi_assert(instance);
 
-    /*if(instance->radio_device_type != SubGhzRadioDeviceTypeInternal) {
+    if(instance->radio_device_type != SubGhzRadioDeviceTypeInternal) {
         subghz_txrx_radio_device_power_off(instance);
         subghz_devices_end(instance->radio_device);
     }
 
     subghz_devices_deinit();
-*/
+
     subghz_worker_free(instance->worker);
-/*    subghz_receiver_free(instance->receiver);
+    //subghz_receiver_free(instance->receiver);
     subghz_environment_free(instance->environment);
-    flipper_format_free(instance->fff_data);
+    /*flipper_format_free(instance->fff_data);*/
     furi_string_free(instance->preset->name);
     subghz_setting_free(instance->setting);
 
-    free(instance->preset);*/
+    free(instance->preset);
     free(instance);
 }
 
@@ -100,7 +100,7 @@ void subghz_txrx_free(SubGhzTxRx* instance) {
     return instance->is_database_loaded;
 }*/
 
-/*void subghz_txrx_set_preset(
+void subghz_txrx_set_preset(
     SubGhzTxRx* instance,
     const char* preset_name,
     uint32_t frequency,
@@ -112,7 +112,7 @@ void subghz_txrx_free(SubGhzTxRx* instance) {
     preset->frequency = frequency;
     preset->data = preset_data;
     preset->data_size = preset_data_size;
-}*/
+}
 
 /*const char* subghz_txrx_get_preset_name(SubGhzTxRx* instance, const char* preset) {
     UNUSED(instance);
@@ -156,13 +156,13 @@ void subghz_txrx_free(SubGhzTxRx* instance) {
     }
 }*/
 
-/*static void subghz_txrx_begin(SubGhzTxRx* instance, uint8_t* preset_data) {
+static void subghz_txrx_begin(SubGhzTxRx* instance, uint8_t* preset_data) {
     furi_assert(instance);
     subghz_devices_reset(instance->radio_device);
     subghz_devices_idle(instance->radio_device);
     subghz_devices_load_preset(instance->radio_device, FuriHalSubGhzPresetCustom, preset_data);
     instance->txrx_state = SubGhzTxRxStateIDLE;
-}*/
+}
 
 /*static uint32_t subghz_txrx_rx(SubGhzTxRx* instance, uint32_t frequency) {
     furi_assert(instance);
@@ -211,7 +211,7 @@ static void subghz_txrx_idle(SubGhzTxRx* instance) {
     instance->txrx_state = SubGhzTxRxStateSleep;
 }*/
 
-/*static bool subghz_txrx_tx(SubGhzTxRx* instance, uint32_t frequency) {
+static bool subghz_txrx_tx(SubGhzTxRx* instance, uint32_t frequency) {
     furi_assert(instance);
     furi_assert(instance->txrx_state != SubGhzTxRxStateSleep);
     subghz_devices_idle(instance->radio_device);
@@ -224,7 +224,7 @@ static void subghz_txrx_idle(SubGhzTxRx* instance) {
     }
 
     return ret;
-}*/
+}
 
 SubGhzTxRxStartTxState subghz_txrx_tx_start(SubGhzTxRx* instance, FlipperFormat* flipper_format) {
     furi_assert(instance);
@@ -236,7 +236,7 @@ SubGhzTxRxStartTxState subghz_txrx_tx_start(SubGhzTxRx* instance, FlipperFormat*
     FuriString* temp_str = furi_string_alloc();
     uint32_t repeat = 200;
     UNUSED(repeat);
-    /*do {
+    do {
         if(!flipper_format_rewind(flipper_format)) {
             FURI_LOG_E(TAG, "Rewind error");
             break;
@@ -250,7 +250,7 @@ SubGhzTxRxStartTxState subghz_txrx_tx_start(SubGhzTxRx* instance, FlipperFormat*
             break;
         }
         ret = SubGhzTxRxStartTxStateOk;
-
+        
         SubGhzRadioPreset* preset = instance->preset;
         instance->transmitter =
             subghz_transmitter_alloc_init(instance->environment, furi_string_get_cstr(temp_str));
@@ -262,7 +262,7 @@ SubGhzTxRxStartTxState subghz_txrx_tx_start(SubGhzTxRx* instance, FlipperFormat*
                     subghz_txrx_begin(
                         instance,
                         subghz_setting_get_preset_data_by_name(
-                            instance->setting, furi_string_get_cstr(preset->name)));
+                            instance->setting, furi_string_get_cstr(preset->name))); 
                     if(preset->frequency) {
                         if(!subghz_txrx_tx(instance, preset->frequency)) {
                             FURI_LOG_E(TAG, "Only Rx");
@@ -271,13 +271,13 @@ SubGhzTxRxStartTxState subghz_txrx_tx_start(SubGhzTxRx* instance, FlipperFormat*
                     } else {
                         ret = SubGhzTxRxStartTxStateErrorParserOthers;
                     }
-
+        
                 } else {
                     FURI_LOG_E(
                         TAG, "Unknown name preset \" %s \"", furi_string_get_cstr(preset->name));
                     ret = SubGhzTxRxStartTxStateErrorParserOthers;
                 }
-
+                
                 if(ret == SubGhzTxRxStartTxStateOk) {
                     //Start TX
                     subghz_devices_start_async_tx(
@@ -295,8 +295,7 @@ SubGhzTxRxStartTxState subghz_txrx_tx_start(SubGhzTxRx* instance, FlipperFormat*
                 subghz_txrx_idle(instance);
             }
         }
-
-    } while(false);*/
+    } while(false);
     furi_string_free(temp_str);
     return ret;
 }
@@ -439,7 +438,7 @@ void subghz_txrx_stop(SubGhzTxRx* instance) {
     }
 }*/
 
-/*void subghz_txrx_speaker_on(SubGhzTxRx* instance) {
+void subghz_txrx_speaker_on(SubGhzTxRx* instance) {
     furi_assert(instance);
     if(instance->speaker_state == SubGhzSpeakerStateEnable) {
         if(furi_hal_speaker_acquire(30)) {
@@ -448,7 +447,7 @@ void subghz_txrx_stop(SubGhzTxRx* instance) {
             instance->speaker_state = SubGhzSpeakerStateDisable;
         }
     }
-}*/
+}
 
 void subghz_txrx_speaker_off(SubGhzTxRx* instance) {
     furi_assert(instance);

@@ -1,6 +1,7 @@
 /* Reduced variant of the Flipper Zero SubGhz Class */
 
 #include "subghz_i.h"
+#include "../meal_pager_storage.h"
 
 static SubGhz* subghz_alloc() {
     SubGhz* subghz = malloc(sizeof(SubGhz));
@@ -29,6 +30,13 @@ void subghz_send(void* context) {
 
     Storage* storage = furi_record_open(RECORD_STORAGE);
     FlipperFormat* ff = flipper_format_file_alloc(storage);
+
+    if(!flipper_format_file_open_existing(ff, MEAL_PAGER_TMP_FILE)) {
+        //totp_close_config_file(fff_file);
+        FURI_LOG_E(TAG, "Error creating new file %s", MEAL_PAGER_TMP_FILE);
+        furi_record_close(RECORD_STORAGE);
+        return;
+    }
 
     subghz_txrx_tx_start(subghz->txrx, ff);
 

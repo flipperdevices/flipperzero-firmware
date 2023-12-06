@@ -50,12 +50,12 @@ void subghz_txrx_free(SubGhzTxRx* instance);
  * @param preset_data Data of preset
  * @param preset_data_size Size of preset data
  */
-/*void subghz_txrx_set_preset(
+void subghz_txrx_set_preset(
     SubGhzTxRx* instance,
     const char* preset_name,
     uint32_t frequency,
     uint8_t* preset_data,
-    size_t preset_data_size);*/
+    size_t preset_data_size);
 
 /**
  * Get name of preset
@@ -158,7 +158,7 @@ void subghz_txrx_stop(SubGhzTxRx* instance);
  * 
  * @param instance Pointer to a SubGhzTxRx 
  */
-//void subghz_txrx_speaker_on(SubGhzTxRx* instance);
+void subghz_txrx_speaker_on(SubGhzTxRx* instance);
 
 /**
  * Speaker off
