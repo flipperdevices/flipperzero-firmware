@@ -1,0 +1,11 @@
+REM iPhone must be unlocked and on the homescreen
+
+GUI SPACE
+DELAY 300
+STRING safari
+ENTER
+DELAY 1000
+GUI L
+STRING flipperzero.one
+DELAY 500
+ENTER
