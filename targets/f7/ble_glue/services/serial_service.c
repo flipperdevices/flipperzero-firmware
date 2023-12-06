@@ -23,8 +23,8 @@ static const BleGattCharacteristicParams ble_svc_serial_chars[SerialSvcGattChara
     [SerialSvcGattCharacteristicRx] =
         {.name = "RX",
          .data_prop_type = FlipperGattCharacteristicDataFixed,
-         .data.fixed.length = ble_svc_serial_DATA_LEN_MAX,
-         .uuid.Char_UUID_128 = ble_svc_serial_RX_CHAR_UUID,
+         .data.fixed.length = BLE_SVC_SERIAL_DATA_LEN_MAX,
+         .uuid.Char_UUID_128 = BLE_SVC_SERIAL_RX_CHAR_UUID,
          .uuid_type = UUID_TYPE_128,
          .char_properties = CHAR_PROP_WRITE_WITHOUT_RESP | CHAR_PROP_WRITE | CHAR_PROP_READ,
          .security_permissions = ATTR_PERMISSION_AUTHEN_READ | ATTR_PERMISSION_AUTHEN_WRITE,
@@ -33,7 +33,7 @@ static const BleGattCharacteristicParams ble_svc_serial_chars[SerialSvcGattChara
     [SerialSvcGattCharacteristicTx] =
         {.name = "TX",
          .data_prop_type = FlipperGattCharacteristicDataFixed,
-         .data.fixed.length = ble_svc_serial_DATA_LEN_MAX,
+         .data.fixed.length = BLE_SVC_SERIAL_DATA_LEN_MAX,
          .uuid.Char_UUID_128 = ble_svc_serial_TX_CHAR_UUID,
          .uuid_type = UUID_TYPE_128,
          .char_properties = CHAR_PROP_READ | CHAR_PROP_INDICATE,
@@ -44,7 +44,7 @@ static const BleGattCharacteristicParams ble_svc_serial_chars[SerialSvcGattChara
         {.name = "Flow control",
          .data_prop_type = FlipperGattCharacteristicDataFixed,
          .data.fixed.length = sizeof(uint32_t),
-         .uuid.Char_UUID_128 = ble_svc_serial_FLOW_CONTROL_UUID,
+         .uuid.Char_UUID_128 = BLE_SVC_SERIAL_FLOW_CONTROL_UUID,
          .uuid_type = UUID_TYPE_128,
          .char_properties = CHAR_PROP_READ | CHAR_PROP_NOTIFY,
          .security_permissions = ATTR_PERMISSION_AUTHEN_READ,
@@ -54,7 +54,7 @@ static const BleGattCharacteristicParams ble_svc_serial_chars[SerialSvcGattChara
         .name = "RPC status",
         .data_prop_type = FlipperGattCharacteristicDataFixed,
         .data.fixed.length = sizeof(uint32_t),
-        .uuid.Char_UUID_128 = ble_svc_serial_RPC_STATUS_UUID,
+        .uuid.Char_UUID_128 = BLE_SVC_SERIAL_RPC_STATUS_UUID,
         .uuid_type = UUID_TYPE_128,
         .char_properties = CHAR_PROP_READ | CHAR_PROP_WRITE | CHAR_PROP_NOTIFY,
         .security_permissions = ATTR_PERMISSION_AUTHEN_READ | ATTR_PERMISSION_AUTHEN_WRITE,
@@ -231,7 +231,7 @@ void ble_svc_serial_stop(BleServiceSerial* serial_svc) {
 }
 
 bool ble_svc_serial_update_tx(BleServiceSerial* serial_svc, uint8_t* data, uint16_t data_len) {
-    if(data_len > ble_svc_serial_DATA_LEN_MAX) {
+    if(data_len > BLE_SVC_SERIAL_DATA_LEN_MAX) {
         return false;
     }
 

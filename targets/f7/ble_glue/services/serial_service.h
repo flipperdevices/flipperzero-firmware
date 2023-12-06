@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#define ble_svc_serial_DATA_LEN_MAX (486)
+#define BLE_SVC_SERIAL_DATA_LEN_MAX (486)
 #define ble_svc_serial_CHAR_VALUE_LEN_MAX (243)
 
 #ifdef __cplusplus
