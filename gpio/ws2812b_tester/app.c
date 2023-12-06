@@ -260,28 +260,24 @@ static bool led_tester_custom_event_callback(void* context, uint32_t event) {
     uint32_t rgb[4] = {0};
     switch(app->model->led_pattern_index) {
     case 0: // RED
-        rgb[0] = 0xFF0000;
-        rgb[1] = rgb[0];
-        rgb[2] = rgb[0];
-        rgb[3] = rgb[0];
+        for(size_t i = 0; i < COUNT_OF(rgb); i++) {
+            rgb[i] = 0xFF0000;
+        }
         break;
     case 1: // GREEN
-        rgb[0] = 0x00FF00;
-        rgb[1] = rgb[0];
-        rgb[2] = rgb[0];
-        rgb[3] = rgb[0];
+        for(size_t i = 0; i < COUNT_OF(rgb); i++) {
+            rgb[i] = 0x00FF00;
+        }
         break;
     case 2: // BLUE
-        rgb[0] = 0x0000FF;
-        rgb[1] = rgb[0];
-        rgb[2] = rgb[0];
-        rgb[3] = rgb[0];
+        for(size_t i = 0; i < COUNT_OF(rgb); i++) {
+            rgb[i] = 0x0000FF;
+        }
         break;
     case 3: // WHITE
-        rgb[0] = 0xFFFFFF;
-        rgb[1] = rgb[0];
-        rgb[2] = rgb[0];
-        rgb[3] = rgb[0];
+        for(size_t i = 0; i < COUNT_OF(rgb); i++) {
+            rgb[i] = 0xFFFFFF;
+        }
         break;
     case 4: // RGBW
         rgb[0] = 0xFF0000;
@@ -312,24 +308,23 @@ static bool led_tester_custom_event_callback(void* context, uint32_t event) {
     }
 
     // Rotate the pattern
-    for(int i = 0; i < offset; i++) {
+    for(size_t i = 0; i < offset; i++) {
         uint32_t tmp = rgb[0];
-        rgb[0] = rgb[1];
-        rgb[1] = rgb[2];
-        rgb[2] = rgb[3];
-        rgb[3] = tmp;
+        for(size_t j = 0; j < COUNT_OF(rgb) - 1; j++) {
+            rgb[j] = rgb[j + 1];
+        }
+        rgb[COUNT_OF(rgb) - 1] = tmp;
     }
 
     // If deinit, turn off the LEDs
     if(event == LedTesterEventDeinit) {
-        rgb[0] = 0;
-        rgb[1] = 0;
-        rgb[2] = 0;
-        rgb[3] = 0;
+        for(size_t i = 0; i < COUNT_OF(rgb); i++) {
+            rgb[i] = 0;
+        }
     }
 
     // Scale the brightness
-    for(size_t i = 0; i < 4; i++) {
+    for(size_t i = 0; i < COUNT_OF(rgb); i++) {
         rgb[i] = (((rgb[i] >> 16) & 0xFF) * app->model->led_max_brightness / 100) << 16 |
                  (((rgb[i] >> 8) & 0xFF) * app->model->led_max_brightness / 100) << 8 |
                  ((rgb[i] & 0xFF) * app->model->led_max_brightness / 100);
@@ -340,7 +335,7 @@ static bool led_tester_custom_event_callback(void* context, uint32_t event) {
 
     // Set the LEDs to the pattern
     for(size_t i = 0; i < app->model->led_count; i++) {
-        led_driver_set_led(app->led_driver, i, rgb[i % 4]);
+        led_driver_set_led(app->led_driver, i, rgb[i % COUNT_OF(rgb)]);
     }
     // Turn off any remaining LEDs
     for(size_t i = app->model->led_count; i < MAX_LED_COUNT; i++) {
