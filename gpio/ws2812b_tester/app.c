@@ -333,6 +333,7 @@ static bool led_tester_custom_event_callback(void* context, uint32_t event) {
         rgb[i] = (((rgb[i] >> 16) & 0xFF) * app->model->led_max_brightness / 100) << 16 |
                  (((rgb[i] >> 8) & 0xFF) * app->model->led_max_brightness / 100) << 8 |
                  ((rgb[i] & 0xFF) * app->model->led_max_brightness / 100);
+        // rgb[i] = (rgb[i] & 0x0F0F0F); // For Debugging, just use lower 4-bits.
     }
 
     led_driver_set_pin(app->led_driver, pin);
@@ -340,6 +341,10 @@ static bool led_tester_custom_event_callback(void* context, uint32_t event) {
     // Set the LEDs to the pattern
     for(size_t i = 0; i < app->model->led_count; i++) {
         led_driver_set_led(app->led_driver, i, rgb[i % 4]);
+    }
+    // Turn off any remaining LEDs
+    for(size_t i = app->model->led_count; i < MAX_LED_COUNT; i++) {
+        led_driver_set_led(app->led_driver, i, 0);
     }
 
     led_driver_transmit(app->led_driver, false);
@@ -515,7 +520,7 @@ static LedTesterApp* led_tester_app_alloc() {
         0,
         128,
         64,
-        "This is a WS2812B LED tester\nVersion 1.6\nConnect WS2812B LED data\nwire to GPIO pin on Flipper.\n\nThe 3V3 pin has a 1200mA\nmax current (~4 watts). The\n5V pin has a 1000mA max\ncurrent (5 watts).\n\nauthors: @codeallnight and\nZ3BRO!\n\nhttps://discord.com/invite/NsjCvqwPAd\nhttps://youtube.com/@MrDerekJamison\n\n");
+        "This is a WS2812B LED tester\nVersion 1.7\nConnect WS2812B LED data\nwire to GPIO pin on Flipper.\n\nThe 3V3 pin has a 1200mA\nmax current (~4 watts). The\n5V pin has a 1000mA max\ncurrent (5 watts).\n\nauthors: @codeallnight and\nZ3BRO!\n\nhttps://discord.com/invite/NsjCvqwPAd\nhttps://youtube.com/@MrDerekJamison\n\n");
     view_set_previous_callback(
         widget_get_view(app->widget_about), led_tester_navigation_submenu_callback);
     view_dispatcher_add_view(

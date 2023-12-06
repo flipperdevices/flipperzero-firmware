@@ -13,7 +13,7 @@
 // We store the HIGH/LOW durations (2 values) for each color bit (24 bits per LED)
 #define LED_DRIVER_BUFFER_SIZE (MAX_LED_COUNT * 2 * 24)
 // We use a setinel value to figure out when the timer is complete.
-#define LED_DRIVER_TIMER_SETINEL 0xFFU
+#define LED_DRIVER_TIMER_SETINEL 0xFFFFU
 
 /** 64 transitions per us @ 64MHz.  Our timing is in NANO_SECONDS */
 #define LED_DRIVER_TIMER_NANOSECOND (1000U / (SystemCoreClock / 1000000U))
@@ -22,6 +22,7 @@
 #define LED_DRIVER_T1H 800U
 #define LED_DRIVER_T0L 850U
 #define LED_DRIVER_T1L 450U
+#define LED_DRIVER_TRESETL 55 * 1000U
 
 // Wait for 35ms for the DMA to complete. NOTE: 1000 leds*(850ns+450ns)*24 = 32ms
 #define LED_DRIVER_SETINEL_WAIT_MS 35
@@ -33,7 +34,7 @@ struct LedDriver {
     const GpioPin* gpio;
     uint32_t gpio_buf[2]; // On/Off for GPIO
 
-    uint8_t timer_buffer[LED_DRIVER_BUFFER_SIZE + 2];
+    uint16_t timer_buffer[LED_DRIVER_BUFFER_SIZE + 2];
     uint32_t write_pos;
     uint32_t read_pos;
     bool dirty;
@@ -74,7 +75,7 @@ static void led_driver_init_dma_led_transition_timer(LedDriver* led_driver) {
     led_driver->dma_led_transition_timer.MemoryOrM2MDstAddress =
         (uint32_t)led_driver->timer_buffer;
     led_driver->dma_led_transition_timer.MemoryOrM2MDstIncMode = LL_DMA_MEMORY_INCREMENT;
-    led_driver->dma_led_transition_timer.MemoryOrM2MDstDataSize = LL_DMA_MDATAALIGN_BYTE;
+    led_driver->dma_led_transition_timer.MemoryOrM2MDstDataSize = LL_DMA_MDATAALIGN_HALFWORD;
     // Data
     led_driver->dma_led_transition_timer.Mode = LL_DMA_MODE_NORMAL;
     led_driver->dma_led_transition_timer.NbData = LED_DRIVER_BUFFER_SIZE;
@@ -210,7 +211,7 @@ static void led_driver_add_period(LedDriver* led_driver, uint16_t duration_ns) {
         FURI_LOG_E("Demo", "reload_value: %ld", reload_value);
     }
     furi_check(reload_value > 0);
-    furi_check(reload_value < 256);
+    furi_check(reload_value < 256 * 256);
 
     led_driver_add_period_length(led_driver, reload_value - 1);
 }
@@ -249,13 +250,15 @@ void led_driver_transmit(LedDriver* led_driver, bool transmit_if_clean) {
     const uint32_t bit_set = led_driver->gpio->pin << GPIO_BSRR_BS0_Pos;
     const uint32_t bit_reset = led_driver->gpio->pin << GPIO_BSRR_BR0_Pos;
 
-    // Always start with HIGH
-    led_driver->gpio_buf[0] = bit_set;
-    led_driver->gpio_buf[1] = bit_reset;
+    // Always start with LOW (reset)
+    led_driver->gpio_buf[0] = bit_reset;
+    led_driver->gpio_buf[1] = bit_set;
 
     for(size_t i = 0; i < LED_DRIVER_BUFFER_SIZE; i++) {
         led_driver->timer_buffer[i] = LED_DRIVER_TIMER_SETINEL;
     }
+
+    led_driver_add_period(led_driver, LED_DRIVER_TRESETL);
     for(size_t i = 0; i < led_driver->count_leds; i++) {
         led_driver_add_color(led_driver, led_driver->led_data[i]);
     }
