@@ -62,6 +62,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Sokoban v1.1 (By Racso)](https://github.com/Racso/fzero-apps), [Ultimate Tic-Tac-Toe (By Racso)](https://github.com/Racso/fzero-apps) & [Zero v1.3 (By Racso)](https://github.com/Racso/fzero-apps)
 - Updated: [Malveke APP Icons (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero)
 - Updated: [FlipBoard Signal v1.0 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
+- Added: [WS2812B LED Tester App (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/gpio/ws2812b_tester)
 
 <a name="release">
 
@@ -524,6 +525,7 @@ $ ./fbt dolphin_ext
 - [Wifi Mapping (By carvilsi)](https://github.com/carvilsi/flipper0-wifi-map/tree/main) `Req: ESP32`
 - [Wii EC Analyzer v1.1 (By csBlueChip)](https://github.com/csBlueChip/FlipperZero_WiiEC)
 - [Wire Tester v1.1 (By unixispower)](https://gitlab.com/unixispower/flipper-wire-tester)
+- [WS2812B LED Tester App (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/gpio/ws2812b_tester)
 - [XRemote v1.2 (By kala13x)](https://github.com/kala13x/flipper-xremote)
 
 ## Current Bounties $$ (Sorted By Difficulty - Easiest to Hardest)

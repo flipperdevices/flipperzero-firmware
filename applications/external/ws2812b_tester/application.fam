@@ -1,0 +1,13 @@
+App(
+    appid="ws2812b_tester_app",
+    name="WS2812B LED Tester App",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="ws2812b_led_tester_app",
+    stack_size=4 * 1024,
+    fap_icon="app.png",
+    fap_category="GPIO",
+    fap_author="jamisonderek",
+    fap_weburl="https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/gpio/ws2812b_tester",
+    fap_version=(1, 7),
+    fap_description="WS2812B LED Tester App.  This is intended to test that WS2812B LEDs are functioning correctly.",
+)
