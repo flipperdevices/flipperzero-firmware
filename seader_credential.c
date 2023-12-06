@@ -407,7 +407,7 @@ bool seader_credential_save(SeaderCredential* cred, const char* name) {
             furi_string_cat_printf(temp_str, "/%s%s", name, ".picopass");
         } else {
             furi_string_printf(
-                temp_str, "%s/%s%s", STORAGE_APP_DATA_PATH_PREFIX, name, ".picopass");
+                temp_str, "%s/%s%s", EXT_PATH("apps_data/picopass"), name, ".picopass");
         }
 
         FURI_LOG_D(TAG, "Save as Picopass [%s]", furi_string_get_cstr(temp_str));
