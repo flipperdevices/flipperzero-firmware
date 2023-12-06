@@ -58,32 +58,40 @@ with open(DIR + "menu.txt", "r") as file:
 letters -= {ord("\n")}
 
 fonts = {
-    "6x12": ("6x12", {
-        10003,
-        10007,
-    }),
-    "6x13B": ("6x13B-patched", {
-        ord("_"),
-    }),
+    "6x12": (
+        "6x12",
+        {
+            10003,
+            10007,
+        },
+    ),
+    "6x13B": (
+        "6x13B-patched",
+        {
+            ord("_"),
+        },
+    ),
 }
 
-print(r"""
-(\
-    declare -A L=( [Y]=04ae [uni018F]=04d8 [afii10147]=04e8);\
-    fgrep -v ENDFONT 6x13B.bdf | awk "{if(/^CHARS /)print \$1 FS \$2+${#L[@]}+3;else print}"
+print(
+    r"""
+(
+    declare -A L=( [Y]=04ae [uni018F]=04d8 [afii10147]=04e8);
+    awk "!/ENDFONT/ {if (/^CHARS /) print \$1 FS \$2+${#L[@]}+3; else print}" 6x13B.bdf
     for key in "${!L[@]}"; do
         awk "/CHAR $key\$/,/END/{print}" 6x13B.bdf|
         sed "s/^ENC.*/ENCODING $((16#${L[$key]}))/;s/^START.*/STARTCHAR uni${L[$key]}/"
-        echo -e "STARTCHAR uni04ba\nENCODING 1210\nSWIDTH 426 0\nDWIDTH 6 0\nBBX 6 13 0 -2";\
-        echo -e "BITMAP\n00\n00\nC0\nC0\nC0\nC0\nC0\nFC\nCC\nCC\nCC\n00\n00\nENDCHAR";\
-        echo -e "STARTCHAR uni04a2\nENCODING 1186\nSWIDTH 426 0\nDWIDTH 6 0\nBBX 6 13 0 -2";\
-        echo -e "BITMAP\n00\n00\nD8\nD8\nD8\nD8\nF8\nD8\nD8\nD8\nDC\n04\n00\nENDCHAR";\
-        echo -e "STARTCHAR uni0496\nENCODING 1174\nSWIDTH 426 0\nDWIDTH 6 0\nBBX 6 13 0 -2";\
-        echo -e "BITMAP\n00\n00\nA8\nA8\nA8\nF8\n20\nF8\nA8\nA8\nAC\n04\n00\nENDCHAR";\
-    done;\
-    echo ENDFONT\
+    done;
+    echo -e "STARTCHAR uni04ba\nENCODING 1210\nSWIDTH 426 0\nDWIDTH 6 0\nBBX 6 13 0 -2
+BITMAP\n00\n00\nC0\nC0\nC0\nC0\nC0\nFC\nCC\nCC\nCC\n00\n00\nENDCHAR
+STARTCHAR uni04a2\nENCODING 1186\nSWIDTH 426 0\nDWIDTH 6 0\nBBX 6 13 0 -2
+BITMAP\n00\n00\nD8\nD8\nD8\nD8\nF8\nD8\nD8\nD8\nDC\n04\n00\nENDCHAR
+STARTCHAR uni0496\nENCODING 1174\nSWIDTH 426 0\nDWIDTH 6 0\nBBX 6 13 0 -2
+BITMAP\n00\n00\nA8\nA8\nA8\nF8\n20\nF8\nA8\nA8\nAC\n04\n00\nENDCHAR
+ENDFONT"
 ) > 6x13B-patched.bdf
-""")
+"""
+)
 
 cmd = '../bdfconv/bdfconv -v -f 1 -m "{0}" {2}.bdf -o {1}.c -n u8g2_font_{1}'
 
