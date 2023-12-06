@@ -6,6 +6,7 @@ enum SubmenuIndex {
     SubmenuIndexChangeKey,
     SubmenuIndexWrite,
     SubmenuIndexEmulate,
+    SubmenuIndexSavePartial,
 };
 
 void picopass_scene_card_menu_submenu_callback(void* context, uint32_t index) {
@@ -17,29 +18,57 @@ void picopass_scene_card_menu_submenu_callback(void* context, uint32_t index) {
 void picopass_scene_card_menu_on_enter(void* context) {
     Picopass* picopass = context;
     Submenu* submenu = picopass->submenu;
+    PicopassPacs* pacs = &picopass->dev->dev_data.pacs;
+    PicopassBlock* AA1 = picopass->dev->dev_data.AA1;
 
-    submenu_add_item(
-        submenu, "Save", SubmenuIndexSave, picopass_scene_card_menu_submenu_callback, picopass);
-    submenu_add_item(
-        submenu,
-        "Save as LFRFID",
-        SubmenuIndexSaveAsLF,
-        picopass_scene_card_menu_submenu_callback,
-        picopass);
-    submenu_add_item(
-        submenu, "Write", SubmenuIndexWrite, picopass_scene_card_menu_submenu_callback, picopass);
-    submenu_add_item(
-        submenu,
-        "Emulate",
-        SubmenuIndexEmulate,
-        picopass_scene_card_menu_submenu_callback,
-        picopass);
-    submenu_add_item(
-        submenu,
-        "Change Key",
-        SubmenuIndexChangeKey,
-        picopass_scene_card_menu_submenu_callback,
-        picopass);
+    bool sio = 0x30 == AA1[PICOPASS_ICLASS_PACS_CFG_BLOCK_INDEX].data[0];
+
+    if(pacs->se_enabled) {
+        if(sio) {
+            submenu_add_item(
+                submenu,
+                "Save",
+                SubmenuIndexSave,
+                picopass_scene_card_menu_submenu_callback,
+                picopass);
+
+        } else {
+            submenu_add_item(
+                submenu,
+                "Save Partial",
+                SubmenuIndexSavePartial,
+                picopass_scene_card_menu_submenu_callback,
+                picopass);
+        }
+    } else {
+        submenu_add_item(
+            submenu, "Save", SubmenuIndexSave, picopass_scene_card_menu_submenu_callback, picopass);
+        submenu_add_item(
+            submenu,
+            "Save as LFRFID",
+            SubmenuIndexSaveAsLF,
+            picopass_scene_card_menu_submenu_callback,
+            picopass);
+
+        submenu_add_item(
+            submenu,
+            "Write",
+            SubmenuIndexWrite,
+            picopass_scene_card_menu_submenu_callback,
+            picopass);
+        submenu_add_item(
+            submenu,
+            "Emulate",
+            SubmenuIndexEmulate,
+            picopass_scene_card_menu_submenu_callback,
+            picopass);
+        submenu_add_item(
+            submenu,
+            "Change Key",
+            SubmenuIndexChangeKey,
+            picopass_scene_card_menu_submenu_callback,
+            picopass);
+    }
 
     submenu_set_selected_item(
         picopass->submenu,
@@ -54,6 +83,12 @@ bool picopass_scene_card_menu_on_event(void* context, SceneManagerEvent event) {
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SubmenuIndexSave) {
+            scene_manager_set_scene_state(
+                picopass->scene_manager, PicopassSceneCardMenu, SubmenuIndexSave);
+            scene_manager_next_scene(picopass->scene_manager, PicopassSceneSaveName);
+            picopass->dev->format = PicopassDeviceSaveFormatHF;
+            consumed = true;
+        } else if(event.event == SubmenuIndexSavePartial) {
             scene_manager_set_scene_state(
                 picopass->scene_manager, PicopassSceneCardMenu, SubmenuIndexSave);
             scene_manager_next_scene(picopass->scene_manager, PicopassSceneSaveName);
