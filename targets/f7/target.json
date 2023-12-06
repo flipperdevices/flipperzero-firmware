@@ -28,7 +28,6 @@
         "fatfs",
         "littlefs",
         "subghz",
-        "flipperformat",
         "toolbox",
         "nfc",
         "digital_signal",
@@ -42,12 +41,15 @@
         "one_wire",
         "ibutton",
         "music_worker",
-        "misc",
         "mbedtls",
         "lfrfid",
         "flipper_application",
-        "flipperformat",
         "toolbox",
+        "u8g2",
+        "nanopb",
+        "update_util",
+        "heatshrink",
+        "flipperformat",
         "flipper7"
     ]
 }
