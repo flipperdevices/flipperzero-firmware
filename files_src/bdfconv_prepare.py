@@ -75,13 +75,13 @@ fonts = {
 
 print(
     r"""
-(\
-    declare -A L=( [Y]=04ae [uni018F]=04d8 [afii10147]=04e8);\
+(
+    declare -A L=( [Y]=04ae [uni018F]=04d8 [afii10147]=04e8);
     awk "!/ENDFONT/ {if (/^CHARS /) print \$1 FS \$2+${#L[@]}+3; else print}" 6x13B.bdf
     for key in "${!L[@]}"; do
         awk "/CHAR $key\$/,/END/{print}" 6x13B.bdf|
         sed "s/^ENC.*/ENCODING $((16#${L[$key]}))/;s/^START.*/STARTCHAR uni${L[$key]}/"
-    done;\
+    done;
     echo -e "STARTCHAR uni04ba\nENCODING 1210\nSWIDTH 426 0\nDWIDTH 6 0\nBBX 6 13 0 -2
 BITMAP\n00\n00\nC0\nC0\nC0\nC0\nC0\nFC\nCC\nCC\nCC\n00\n00\nENDCHAR
 STARTCHAR uni04a2\nENCODING 1186\nSWIDTH 426 0\nDWIDTH 6 0\nBBX 6 13 0 -2
