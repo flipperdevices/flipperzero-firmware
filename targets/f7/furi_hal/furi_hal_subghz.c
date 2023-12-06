@@ -617,13 +617,22 @@ static void furi_hal_subghz_async_tx_refill(uint32_t* buffer, size_t samples) {
             samples--;
             LL_DMA_DisableIT_HT(SUBGHZ_DMA_CH1_DEF);
             LL_DMA_DisableIT_TC(SUBGHZ_DMA_CH1_DEF);
+            if(LL_DMA_IsActiveFlag_HT1(SUBGHZ_DMA)) {
+                LL_DMA_ClearFlag_HT1(SUBGHZ_DMA);
+            }
+            if(LL_DMA_IsActiveFlag_TC1(SUBGHZ_DMA)) {
+                LL_DMA_ClearFlag_TC1(SUBGHZ_DMA);
+            }
             LL_TIM_EnableIT_UPDATE(TIM2);
             break;
         } else {
             // Lowest possible value is 2us
-            if(duration < 2) duration = 2;
-            // Subtract 1 since we counting from 0
-            *buffer = duration - 1;
+            if(duration > 2) {
+                // Subtract 1 since we counting from 0
+                *buffer = duration - 1;
+            } else {
+                *buffer = 1;
+            }
             buffer++;
             samples--;
         }

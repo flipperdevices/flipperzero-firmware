@@ -231,7 +231,7 @@ typedef struct {
     size_t pos;
 } SubGhzHalAsyncTxTest;
 
-#define SUBGHZ_HAL_TEST_DURATION 2
+#define SUBGHZ_HAL_TEST_DURATION 3
 
 static LevelDuration subghz_hal_async_tx_test_yield(void* context) {
     SubGhzHalAsyncTxTest* test = context;
