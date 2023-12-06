@@ -36,7 +36,7 @@ static char software_revision[DEVICE_INFO_SOFTWARE_REV_SIZE] = {0};
 
 static bool
     dev_info_char_data_callback(const void* context, const uint8_t** data, uint16_t* data_len) {
-    *data_len = strlen(context);
+    *data_len = (uint16_t)strlen(context); //-V1029
     if(data) {
         *data = (const uint8_t*)context;
     }
