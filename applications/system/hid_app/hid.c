@@ -25,11 +25,11 @@ static void bt_hid_remove_pairing(Bt* bt) {
     // Wait 2nd core to update nvm storage
     furi_delay_ms(200);
 
-    furi_hal_bt_stop_advertising();
+    furi_hal_ble_stop_advertising();
 
     bt_forget_bonded_devices(bt);
 
-    furi_hal_bt_start_advertising();
+    furi_hal_ble_start_advertising();
 }
 
 static void hid_submenu_callback(void* context, uint32_t index) {
