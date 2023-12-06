@@ -1,6 +1,6 @@
 # Tutorial: Changing a keystroke button
 
-![message-keyboard](./keystrokes-keyboard.png)
+![keystrokes-keyboard](./keystrokes-keyboard.png)
 
 ## Overview
 
@@ -54,4 +54,4 @@ NOTE: If you want to use a character instead of an icon, set the **.icon** to `N
 
 ## Step 7: Your new button should display & choose the correct option when selected!
 
-![message-keyboard](./prtsc-keystrokes-keyboard.png)
+![prtsc-keystrokes-keyboard](./prtsc-keystrokes-keyboard.png)
