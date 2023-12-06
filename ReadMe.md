@@ -61,6 +61,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [FlipBoard Keyboard v1.1 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
 - Updated: [Hangman v1.5 (By Evgeny Stepanischev & Eva Stepanischeva)](https://github.com/bolknote/Flipper-Zero-Hangman-Game)
 - Updated: [Sokoban v1.1 (By Racso)](https://github.com/Racso/fzero-apps), [Ultimate Tic-Tac-Toe (By Racso)](https://github.com/Racso/fzero-apps) & [Zero v1.3 (By Racso)](https://github.com/Racso/fzero-apps)
+- Updated: [Malveke APP Icons (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero)
 
 <a name="release">
 
