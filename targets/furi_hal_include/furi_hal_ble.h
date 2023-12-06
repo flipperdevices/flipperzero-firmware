@@ -82,7 +82,7 @@ bool furi_hal_ble_check_profile_type(
  *
  * @return          instance of profile, NULL on failure
 */
-FuriHalBleProfileBase* furi_hal_ble_start_app(
+FURI_WARN_UNUSED FuriHalBleProfileBase* furi_hal_ble_start_app(
     const FuriHalBleProfileConfig* profile_config,
     GapEventCallback event_cb,
     void* context);
@@ -102,7 +102,7 @@ void furi_hal_ble_reinit();
  *
  * @return          instance of profile, NULL on failure
 */
-FuriHalBleProfileBase* furi_hal_ble_change_app(
+FURI_WARN_UNUSED FuriHalBleProfileBase* furi_hal_ble_change_app(
     const FuriHalBleProfileConfig* profile_config,
     GapEventCallback event_cb,
     void* context);

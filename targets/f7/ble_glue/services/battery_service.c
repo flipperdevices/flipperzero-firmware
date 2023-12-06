@@ -164,7 +164,7 @@ bool ble_svc_battery_update_power_state(BleServiceBattery* battery_svc, bool cha
         &power_state);
 }
 
-void ble_svc_battery_state_update(uint8_t battery_level, bool charging) {
+void ble_svc_battery_state_update(uint8_t* battery_level, bool* charging) {
     if(!instances_initialized) {
         return;
     }
@@ -173,7 +173,11 @@ void ble_svc_battery_state_update(uint8_t battery_level, bool charging) {
     for(BatterySvcInstanceList_it(it, instances); !BatterySvcInstanceList_end_p(it);
         BatterySvcInstanceList_next(it)) {
         BleServiceBattery* battery_svc = *BatterySvcInstanceList_ref(it);
-        ble_svc_battery_update_level(battery_svc, battery_level);
-        ble_svc_battery_update_power_state(battery_svc, charging);
+        if(battery_level) {
+            ble_svc_battery_update_level(battery_svc, *battery_level);
+        }
+        if(charging) {
+            ble_svc_battery_update_power_state(battery_svc, *charging);
+        }
     }
 }

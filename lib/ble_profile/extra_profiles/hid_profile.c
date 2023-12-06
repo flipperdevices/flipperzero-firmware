@@ -1,5 +1,6 @@
 #include "hid_profile.h"
 
+#include "core/common_defines.h"
 #include <furi_hal_usb_hid.h>
 #include <services/dev_info_service.h>
 #include <services/battery_service.h>
@@ -7,7 +8,6 @@
 
 #include <furi.h>
 #include <usb_hid.h>
-// #include <ble/core/ble_std.h>
 #include <ble/ble.h>
 
 #define furi_hal_ble_INFO_BASE_USB_SPECIFICATION (0x0101)
@@ -35,18 +35,18 @@ typedef struct {
     uint8_t mods;
     uint8_t reserved;
     uint8_t key[ble_profile_hid_KB_MAX_KEYS];
-} __attribute__((__packed__)) FuriHalBtHidKbReport;
+} FURI_PACKED FuriHalBtHidKbReport;
 
 typedef struct {
     uint8_t btn;
     int8_t x;
     int8_t y;
     int8_t wheel;
-} __attribute__((__packed__)) FuriHalBtHidMouseReport;
+} FURI_PACKED FuriHalBtHidMouseReport;
 
 typedef struct {
     uint16_t key[ble_profile_hid_CONSUMER_MAX_KEYS];
-} __attribute__((__packed__)) FuriHalBtHidConsumerReport;
+} FURI_PACKED FuriHalBtHidConsumerReport;
 
 // keyboard+mouse+consumer hid report
 static const uint8_t ble_profile_hid_report_map_data[] = {

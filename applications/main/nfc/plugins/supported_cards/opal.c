@@ -28,6 +28,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "core/common_defines.h"
 #include "nfc_supported_card_plugin.h"
 
 #include <flipper_application/flipper_application.h>
@@ -61,7 +62,7 @@ static const char* opal_usages[14] = {
 };
 
 // Opal file 0x7 structure. Assumes a little-endian CPU.
-typedef struct __attribute__((__packed__)) {
+typedef struct FURI_PACKED {
     uint32_t serial : 32;
     uint8_t check_digit : 4;
     bool blocked : 1;

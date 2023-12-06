@@ -64,6 +64,11 @@ static ViewPort* bt_pin_code_view_port_alloc(Bt* bt) {
 
 static void bt_pin_code_show(Bt* bt, uint32_t pin_code) {
     bt->pin_code = pin_code;
+    if(!bt->pin_code_view_port) {
+        // Pin code view port
+        bt->pin_code_view_port = bt_pin_code_view_port_alloc(bt);
+        gui_add_view_port(bt->gui, bt->pin_code_view_port, GuiLayerFullscreen);
+    }
     notification_message(bt->notification, &sequence_display_backlight_on);
     gui_view_port_send_to_front(bt->gui, bt->pin_code_view_port);
     view_port_enabled_set(bt->pin_code_view_port, true);
@@ -71,7 +76,7 @@ static void bt_pin_code_show(Bt* bt, uint32_t pin_code) {
 
 static void bt_pin_code_hide(Bt* bt) {
     bt->pin_code = 0;
-    if(view_port_is_enabled(bt->pin_code_view_port)) {
+    if(bt->pin_code_view_port && view_port_is_enabled(bt->pin_code_view_port)) {
         view_port_enabled_set(bt->pin_code_view_port, false);
     }
 }
@@ -80,6 +85,9 @@ static bool bt_pin_code_verify_event_handler(Bt* bt, uint32_t pin) {
     furi_assert(bt);
     notification_message(bt->notification, &sequence_display_backlight_on);
     FuriString* pin_str;
+    if(!bt->dialog_message) {
+        bt->dialog_message = dialog_message_alloc();
+    }
     dialog_message_set_icon(bt->dialog_message, &I_BLE_Pairing_128x64, 0, 0);
     pin_str = furi_string_alloc_printf("Verify code\n%06lu", pin);
     dialog_message_set_text(
@@ -134,18 +142,14 @@ Bt* bt_alloc() {
 
     // Setup statusbar view port
     bt->statusbar_view_port = bt_statusbar_view_port_alloc(bt);
-    // Pin code view port
-    bt->pin_code_view_port = bt_pin_code_view_port_alloc(bt);
     // Notification
     bt->notification = furi_record_open(RECORD_NOTIFICATION);
     // Gui
     bt->gui = furi_record_open(RECORD_GUI);
     gui_add_view_port(bt->gui, bt->statusbar_view_port, GuiLayerStatusBarLeft);
-    gui_add_view_port(bt->gui, bt->pin_code_view_port, GuiLayerFullscreen);
 
     // Dialogs
     bt->dialogs = furi_record_open(RECORD_DIALOGS);
-    bt->dialog_message = dialog_message_alloc();
 
     // Power
     bt->power = furi_record_open(RECORD_POWER);
@@ -331,6 +335,9 @@ static void bt_statusbar_update(Bt* bt) {
 }
 
 static void bt_show_warning(Bt* bt, const char* text) {
+    if(!bt->dialog_message) {
+        bt->dialog_message = dialog_message_alloc();
+    }
     dialog_message_set_text(bt->dialog_message, text, 64, 28, AlignCenter, AlignCenter);
     dialog_message_set_buttons(bt->dialog_message, "Quit", NULL, NULL);
     dialog_message_show(bt->dialogs, bt->dialog_message);

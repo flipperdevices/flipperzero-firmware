@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <furi_ble/profile_interface.h>
+#include <core/common_defines.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -29,7 +30,8 @@ typedef void (*BtStatusChangedCallback)(BtStatus status, void* context);
  *
  * @return          true on success
  */
-FuriHalBleProfileBase* bt_profile_start(Bt* bt, const FuriHalBleProfileConfig* profile_config);
+FURI_WARN_UNUSED FuriHalBleProfileBase*
+    bt_profile_start(Bt* bt, const FuriHalBleProfileConfig* profile_config);
 
 /** Stop current BLE Profile and restore default profile
  * @note Call of this function leads to 2nd core restart

@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,50.0,,
+Version,+,51.0,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
 Header,+,applications/services/cli/cli_vcp.h,,
@@ -613,7 +613,7 @@ Function,+,ble_service_event_dispatcher_register_handler,GapSvcEventHandler*,"Bl
 Function,-,ble_service_event_dispatcher_reset,void,
 Function,+,ble_service_event_dispatcher_unregister_handler,void,GapSvcEventHandler*
 Function,+,ble_svc_battery_start,BleServiceBattery*,_Bool
-Function,+,ble_svc_battery_state_update,void,"uint8_t, _Bool"
+Function,+,ble_svc_battery_state_update,void,"uint8_t*, _Bool*"
 Function,+,ble_svc_battery_stop,void,BleServiceBattery*
 Function,+,ble_svc_battery_update_level,_Bool,"BleServiceBattery*, uint8_t"
 Function,+,ble_svc_battery_update_power_state,_Bool,"BleServiceBattery*, _Bool"

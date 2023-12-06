@@ -281,11 +281,11 @@ void furi_hal_ble_stop_advertising() {
 }
 
 void furi_hal_ble_update_battery_level(uint8_t battery_level) {
-    ble_svc_battery_state_update(battery_level, false); // FIXME
+    ble_svc_battery_state_update(&battery_level, NULL);
 }
 
 void furi_hal_ble_update_power_state(bool charging) {
-    ble_svc_battery_state_update(0, charging); // FIXME
+    ble_svc_battery_state_update(NULL, &charging);
 }
 
 void furi_hal_ble_get_key_storage_buff(uint8_t** key_buff_addr, uint16_t* key_buff_size) {

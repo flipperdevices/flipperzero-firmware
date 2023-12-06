@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdint.h>
+#include <core/common_defines.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -21,7 +22,7 @@ void ble_service_event_dispatcher_init();
 void ble_service_event_dispatcher_reset();
 
 // Add a handler to the list of handlers
-GapSvcEventHandler*
+FURI_WARN_UNUSED GapSvcEventHandler*
     ble_service_event_dispatcher_register_handler(BleServiceEventHandlerCb handler, void* context);
 
 // Remove a handler from the list of handlers
