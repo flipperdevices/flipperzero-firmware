@@ -51,6 +51,7 @@ enum PicopassCustomEvent {
     PicopassCustomEventDictAttackUpdateView,
     PicopassCustomEventLoclassGotMac,
     PicopassCustomEventLoclassGotStandardKey,
+    PicopassCustomEventNrMacSaved,
 
     PicopassCustomEventPollerSuccess,
     PicopassCustomEventPollerFail,
