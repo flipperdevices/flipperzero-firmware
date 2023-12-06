@@ -1,3 +1,4 @@
+#include "picopass_i.h"
 #include "picopass_poller_i.h"
 
 #include "../loclass/optimized_cipher.h"
@@ -95,7 +96,7 @@ NfcCommand picopass_poller_pre_auth_handler(PicopassPoller* instance) {
             instance->data->AA1[PICOPASS_CSN_BLOCK_INDEX].data[7]);
 
         PicopassBlock block = {};
-        error = picopass_poller_read_block(instance, 1, &block);
+        error = picopass_poller_read_block(instance, PICOPASS_CONFIG_BLOCK_INDEX, &block);
         if(error != PicopassErrorNone) {
             instance->state = PicopassPollerStateFail;
             break;
@@ -115,6 +116,27 @@ NfcCommand picopass_poller_pre_auth_handler(PicopassPoller* instance) {
             instance->data->AA1[PICOPASS_CONFIG_BLOCK_INDEX].data[5],
             instance->data->AA1[PICOPASS_CONFIG_BLOCK_INDEX].data[6],
             instance->data->AA1[PICOPASS_CONFIG_BLOCK_INDEX].data[7]);
+
+        error = picopass_poller_read_block(instance, PICOPASS_SECURE_EPURSE_BLOCK_INDEX, &block);
+        if(error != PicopassErrorNone) {
+            instance->state = PicopassPollerStateFail;
+            break;
+        }
+        memcpy(
+            instance->data->AA1[PICOPASS_SECURE_EPURSE_BLOCK_INDEX].data,
+            block.data,
+            sizeof(PicopassBlock));
+        FURI_LOG_D(
+            TAG,
+            "epurse %02x%02x%02x%02x%02x%02x%02x%02x",
+            instance->data->AA1[PICOPASS_SECURE_EPURSE_BLOCK_INDEX].data[0],
+            instance->data->AA1[PICOPASS_SECURE_EPURSE_BLOCK_INDEX].data[1],
+            instance->data->AA1[PICOPASS_SECURE_EPURSE_BLOCK_INDEX].data[2],
+            instance->data->AA1[PICOPASS_SECURE_EPURSE_BLOCK_INDEX].data[3],
+            instance->data->AA1[PICOPASS_SECURE_EPURSE_BLOCK_INDEX].data[4],
+            instance->data->AA1[PICOPASS_SECURE_EPURSE_BLOCK_INDEX].data[5],
+            instance->data->AA1[PICOPASS_SECURE_EPURSE_BLOCK_INDEX].data[6],
+            instance->data->AA1[PICOPASS_SECURE_EPURSE_BLOCK_INDEX].data[7]);
 
         error = picopass_poller_read_block(instance, 5, &block);
         if(error != PicopassErrorNone) {
@@ -165,10 +187,114 @@ NfcCommand picopass_poller_check_security(PicopassPoller* instance) {
 
     if(instance->data->pacs.se_enabled) {
         FURI_LOG_D(TAG, "SE enabled");
-        instance->state = PicopassPollerStateFail;
+        instance->state = PicopassPollerStateNrMacAuth;
     } else {
         instance->state = PicopassPollerStateAuth;
     }
+    return command;
+}
+
+NfcCommand picopass_poller_nr_mac_auth(PicopassPoller* instance) {
+    NfcCommand command = NfcCommandContinue;
+    Picopass* picopass = instance->context;
+    PicopassDevice* dev = picopass->dev;
+
+    uint8_t* csn = instance->data->AA1[PICOPASS_CSN_BLOCK_INDEX].data;
+    uint8_t* epurse = instance->data->AA1[PICOPASS_SECURE_EPURSE_BLOCK_INDEX].data;
+
+    FuriString* temp_str = furi_string_alloc();
+    FuriString* filename = furi_string_alloc();
+    FlipperFormat* file = flipper_format_file_alloc(dev->storage);
+    PicopassMac mac = {};
+
+    for(size_t i = 0; i < PICOPASS_BLOCK_LEN; i++) {
+        furi_string_cat_printf(filename, "%02x", csn[i]);
+    }
+    furi_string_cat_printf(filename, "_");
+    for(size_t i = 0; i < PICOPASS_BLOCK_LEN; i++) {
+        furi_string_cat_printf(filename, "%02x", epurse[i]);
+    }
+
+    furi_string_printf(
+        temp_str, "%s/%s%s", STORAGE_APP_DATA_PATH_PREFIX, furi_string_get_cstr(filename), ".mac");
+
+    FURI_LOG_D(TAG, "Looking for %s", furi_string_get_cstr(temp_str));
+    uint8_t nr_mac[PICOPASS_BLOCK_LEN];
+
+    // Presume failure unless all steps are successful and the state is made "read block"
+    instance->state = PicopassPollerStateFail;
+    do {
+        //check for file
+        if(!flipper_format_file_open_existing(file, furi_string_get_cstr(temp_str))) break;
+        // FURI_LOG_D(TAG, "Found %s", furi_string_get_cstr(temp_str));
+
+        furi_string_printf(temp_str, "NR-MAC");
+        if(!flipper_format_read_hex(
+               file, furi_string_get_cstr(temp_str), nr_mac, PICOPASS_BLOCK_LEN))
+            break;
+        memcpy(mac.data, nr_mac + 4, PICOPASS_MAC_LEN);
+        /*
+        FURI_LOG_D(
+            TAG,
+            "Read nr-mac: %02x %02x %02x %02x %02x %02x %02x %02x",
+            nr_mac[0],
+            nr_mac[1],
+            nr_mac[2],
+            nr_mac[3],
+            nr_mac[4],
+            nr_mac[5],
+            nr_mac[6],
+            nr_mac[7]);
+        FURI_LOG_D(
+            TAG, "MAC: %02x %02x %02x %02x", mac.data[0], mac.data[1], mac.data[2], mac.data[3]);
+        */
+
+        uint8_t ccnr[12] = {};
+        PicopassReadCheckResp read_check_resp = {};
+        PicopassError error = picopass_poller_read_check(instance, &read_check_resp);
+        if(error == PicopassErrorTimeout) {
+            instance->event.type = PicopassPollerEventTypeCardLost;
+            instance->callback(instance->event, instance->context);
+            instance->state = PicopassPollerStateDetect;
+            break;
+        } else if(error != PicopassErrorNone) {
+            FURI_LOG_E(TAG, "Read check failed: %d", error);
+            break;
+        }
+        memcpy(ccnr, read_check_resp.data, sizeof(PicopassReadCheckResp)); // last 4 bytes left 0
+
+        /*
+        FURI_LOG_D(
+            TAG,
+            "CCNR: %02x %02x %02x %02x %02x %02x %02x %02x",
+            ccnr[0],
+            ccnr[1],
+            ccnr[2],
+            ccnr[3],
+            ccnr[4],
+            ccnr[5],
+            ccnr[6],
+            ccnr[7]);
+            */
+
+        //use mac
+        PicopassCheckResp check_resp = {};
+        error = picopass_poller_check(instance, nr_mac, &mac, &check_resp);
+        if(error == PicopassErrorNone) {
+            memcpy(instance->mac.data, mac.data, sizeof(PicopassMac));
+            if(instance->mode == PicopassPollerModeRead) {
+                picopass_poller_prepare_read(instance);
+                instance->state = PicopassPollerStateReadBlock;
+                // Set to non-zero keys to allow emulation
+                memset(instance->data->AA1[PICOPASS_SECURE_KD_BLOCK_INDEX].data, 0xff, PICOPASS_BLOCK_LEN);
+                memset(instance->data->AA1[PICOPASS_SECURE_KC_BLOCK_INDEX].data, 0xff, PICOPASS_BLOCK_LEN);
+            }
+        }
+
+    } while(false);
+    furi_string_free(temp_str);
+    furi_string_free(filename);
+    flipper_format_free(file);
 
     return command;
 }
@@ -234,7 +360,7 @@ NfcCommand picopass_poller_auth_handler(PicopassPoller* instance) {
         loclass_opt_doReaderMAC(ccnr, div_key, mac.data);
 
         PicopassCheckResp check_resp = {};
-        error = picopass_poller_check(instance, &mac, &check_resp);
+        error = picopass_poller_check(instance, NULL, &mac, &check_resp);
         if(error == PicopassErrorNone) {
             FURI_LOG_I(TAG, "Found key");
             memcpy(instance->mac.data, mac.data, sizeof(PicopassMac));
@@ -457,6 +583,7 @@ static const PicopassPollerStateHandler picopass_poller_state_handler[PicopassPo
     [PicopassPollerStateSelect] = picopass_poller_select_handler,
     [PicopassPollerStatePreAuth] = picopass_poller_pre_auth_handler,
     [PicopassPollerStateCheckSecurity] = picopass_poller_check_security,
+    [PicopassPollerStateNrMacAuth] = picopass_poller_nr_mac_auth,
     [PicopassPollerStateAuth] = picopass_poller_auth_handler,
     [PicopassPollerStateReadBlock] = picopass_poller_read_block_handler,
     [PicopassPollerStateWriteBlock] = picopass_poller_write_block_handler,
