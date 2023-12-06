@@ -61,3 +61,4 @@ Make sure your FlipBoard is connected to your Flipper Zero.  Choose the "Flipboa
 - [Write a custom button action for when button 3+4 are pressed](tutorials/custom-button-action.md)
 - [Change a Keystroke button](tutorials/swap-keystroke-button.md)
 - [Add a new Keystroke row](tutorials/add-keystroke-row.md)
+- [Add a new startup sequence](tutorials/led-startup-sequence.md)
