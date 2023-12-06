@@ -1,7 +1,7 @@
 #include "bt_carrier_test.h"
 #include "bt_test.h"
 #include "bt_test_types.h"
-#include <furi_hal_bt.h>
+#include <furi_hal_ble.h>
 
 struct BtCarrierTest {
     BtTest* bt_test;
@@ -34,19 +34,19 @@ static BtTestParamValue bt_param_power[] = {
 static void bt_carrier_test_start(BtCarrierTest* bt_carrier_test) {
     furi_assert(bt_carrier_test);
     if(bt_carrier_test->mode == BtTestModeRx) {
-        furi_hal_bt_start_packet_rx(bt_carrier_test->channel, 1);
+        furi_hal_ble_start_packet_rx(bt_carrier_test->channel, 1);
         furi_timer_start(bt_carrier_test->timer, furi_kernel_get_tick_frequency() / 4);
     } else if(bt_carrier_test->mode == BtTestModeTxHopping) {
-        furi_hal_bt_start_tone_tx(bt_carrier_test->channel, bt_carrier_test->power);
+        furi_hal_ble_start_tone_tx(bt_carrier_test->channel, bt_carrier_test->power);
         furi_timer_start(bt_carrier_test->timer, furi_kernel_get_tick_frequency() * 2);
     } else if(bt_carrier_test->mode == BtTestModeTx) {
-        furi_hal_bt_start_tone_tx(bt_carrier_test->channel, bt_carrier_test->power);
+        furi_hal_ble_start_tone_tx(bt_carrier_test->channel, bt_carrier_test->power);
     }
 }
 
 static void bt_carrier_test_switch_channel(BtCarrierTest* bt_carrier_test) {
     furi_assert(bt_carrier_test);
-    furi_hal_bt_stop_tone_tx();
+    furi_hal_ble_stop_tone_tx();
     uint8_t channel_i = 0;
     if(bt_carrier_test->channel == BtTestChannel2402) {
         bt_carrier_test->channel = BtTestChannel2440;
@@ -58,7 +58,7 @@ static void bt_carrier_test_switch_channel(BtCarrierTest* bt_carrier_test) {
         bt_carrier_test->channel = BtTestChannel2402;
         channel_i = 0;
     }
-    furi_hal_bt_start_tone_tx(bt_carrier_test->channel, bt_carrier_test->power);
+    furi_hal_ble_start_tone_tx(bt_carrier_test->channel, bt_carrier_test->power);
     bt_test_set_current_value_index(bt_carrier_test->bt_param_channel, channel_i);
     bt_test_set_current_value_text(
         bt_carrier_test->bt_param_channel, bt_param_channel[channel_i].str);
@@ -67,12 +67,12 @@ static void bt_carrier_test_switch_channel(BtCarrierTest* bt_carrier_test) {
 static void bt_carrier_test_stop(BtCarrierTest* bt_carrier_test) {
     furi_assert(bt_carrier_test);
     if(bt_carrier_test->mode == BtTestModeTxHopping) {
-        furi_hal_bt_stop_tone_tx();
+        furi_hal_ble_stop_tone_tx();
         furi_timer_stop(bt_carrier_test->timer);
     } else if(bt_carrier_test->mode == BtTestModeTx) {
-        furi_hal_bt_stop_tone_tx();
+        furi_hal_ble_stop_tone_tx();
     } else if(bt_carrier_test->mode == BtTestModeRx) {
-        furi_hal_bt_stop_packet_test();
+        furi_hal_ble_stop_packet_test();
         furi_timer_stop(bt_carrier_test->timer);
     }
 }
@@ -105,7 +105,7 @@ static void bt_carrier_test_param_channel(BtTestParam* param) {
 static void bt_carrier_test_change_state_callback(BtTestState state, void* context) {
     furi_assert(context);
     BtCarrierTest* bt_carrier_test = context;
-    furi_hal_bt_stop_tone_tx();
+    furi_hal_ble_stop_tone_tx();
     if(state == BtTestStateStarted) {
         bt_carrier_test_start(bt_carrier_test);
     } else if(state == BtTestStateStopped) {
@@ -123,7 +123,7 @@ static void bt_test_carrier_timer_callback(void* context) {
     furi_assert(context);
     BtCarrierTest* bt_carrier_test = context;
     if(bt_carrier_test->mode == BtTestModeRx) {
-        bt_test_set_rssi(bt_carrier_test->bt_test, furi_hal_bt_get_rssi());
+        bt_test_set_rssi(bt_carrier_test->bt_test, furi_hal_ble_get_rssi());
     } else if(bt_carrier_test->mode == BtTestModeTxHopping) {
         bt_carrier_test_switch_channel(bt_carrier_test);
     }

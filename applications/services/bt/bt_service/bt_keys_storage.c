@@ -1,7 +1,7 @@
 #include "bt_keys_storage.h"
 
 #include <furi.h>
-#include <furi_hal_bt.h>
+#include <furi_hal_ble.h>
 #include <lib/toolbox/saved_struct.h>
 #include <storage/storage.h>
 
@@ -20,12 +20,12 @@ bool bt_keys_storage_delete(BtKeysStorage* instance) {
     furi_assert(instance);
 
     bool delete_succeed = false;
-    bool bt_is_active = furi_hal_bt_is_active();
+    bool bt_is_active = furi_hal_ble_is_active();
 
-    furi_hal_bt_stop_advertising();
-    delete_succeed = furi_hal_bt_clear_white_list();
+    furi_hal_ble_stop_advertising();
+    delete_succeed = furi_hal_ble_clear_white_list();
     if(bt_is_active) {
-        furi_hal_bt_start_advertising();
+        furi_hal_ble_start_advertising();
     }
 
     return delete_succeed;
@@ -36,7 +36,7 @@ BtKeysStorage* bt_keys_storage_alloc(const char* keys_storage_path) {
 
     BtKeysStorage* instance = malloc(sizeof(BtKeysStorage));
     // Set default nvm ram parameters
-    furi_hal_bt_get_key_storage_buff(&instance->nvm_sram_buff, &instance->nvm_sram_buff_size);
+    furi_hal_ble_get_key_storage_buff(&instance->nvm_sram_buff, &instance->nvm_sram_buff_size);
     // Set key storage file
     instance->file_path = furi_string_alloc();
     furi_string_set_str(instance->file_path, keys_storage_path);
@@ -88,14 +88,14 @@ bool bt_keys_storage_load(BtKeysStorage* instance) {
         }
 
         // Load saved data to ram
-        furi_hal_bt_nvm_sram_sem_acquire();
+        furi_hal_ble_nvm_sram_sem_acquire();
         bool data_loaded = saved_struct_load(
             furi_string_get_cstr(instance->file_path),
             instance->nvm_sram_buff,
             payload_size,
             BT_KEYS_STORAGE_MAGIC,
             BT_KEYS_STORAGE_VERSION);
-        furi_hal_bt_nvm_sram_sem_release();
+        furi_hal_ble_nvm_sram_sem_release();
         if(!data_loaded) {
             FURI_LOG_E(TAG, "Failed to load struct");
             break;
@@ -127,14 +127,14 @@ bool bt_keys_storage_update(BtKeysStorage* instance, uint8_t* start_addr, uint32
             break;
         }
 
-        furi_hal_bt_nvm_sram_sem_acquire();
+        furi_hal_ble_nvm_sram_sem_acquire();
         bool data_updated = saved_struct_save(
             furi_string_get_cstr(instance->file_path),
             instance->nvm_sram_buff,
             new_size,
             BT_KEYS_STORAGE_MAGIC,
             BT_KEYS_STORAGE_VERSION);
-        furi_hal_bt_nvm_sram_sem_release();
+        furi_hal_ble_nvm_sram_sem_release();
         if(!data_updated) {
             FURI_LOG_E(TAG, "Failed to update key storage");
             break;

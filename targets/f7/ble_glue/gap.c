@@ -1,6 +1,7 @@
 #include "gap.h"
 
 #include "app_common.h"
+#include "furi_ble/event_dispatcher.h"
 #include <ble/ble.h>
 
 #include <furi_hal.h>
@@ -505,6 +506,10 @@ bool gap_init(GapConfig* config, GapEventCallback on_event_cb, void* context) {
     // Set callback
     gap->on_event_cb = on_event_cb;
     gap->context = context;
+
+    // Register BLE event handler
+    ble_service_event_dispatcher_init();
+
     return true;
 }
 
@@ -533,6 +538,8 @@ void gap_thread_stop() {
         furi_mutex_free(gap->state_mutex);
         furi_message_queue_free(gap->command_queue);
         furi_timer_free(gap->advertise_timer);
+
+        ble_service_event_dispatcher_reset();
         free(gap);
         gap = NULL;
     }

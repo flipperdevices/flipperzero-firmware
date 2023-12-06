@@ -178,7 +178,7 @@ static bool update_task_manage_radiostack(UpdateTask* update_task) {
     update_task_set_progress(update_task, UpdateTaskStageRadioBusy, 10);
     bool success = false;
     do {
-        CHECK_RESULT(ble_glue_wait_for_c2_start(FURI_HAL_BT_C2_START_TIMEOUT));
+        CHECK_RESULT(ble_glue_wait_for_c2_start(furi_hal_ble_C2_START_TIMEOUT));
 
         const BleGlueC2Info* c2_state = ble_glue_get_c2_info();
 
@@ -206,7 +206,7 @@ static bool update_task_manage_radiostack(UpdateTask* update_task) {
                 furi_hal_rtc_set_flag(FuriHalRtcFlagC2Update);
                 update_task_set_progress(update_task, UpdateTaskStageProgress, 20);
 
-                CHECK_RESULT(furi_hal_bt_ensure_c2_mode(BleGlueC2ModeFUS));
+                CHECK_RESULT(furi_hal_ble_ensure_c2_mode(BleGlueC2ModeFUS));
                 /* ...system will restart here. */
                 update_task_wait_for_restart(update_task);
             }
@@ -229,7 +229,7 @@ static bool update_task_manage_radiostack(UpdateTask* update_task) {
                      * Let's start it up to check its version */
                     FURI_LOG_W(TAG, "Starting stack to check full version");
                     update_task_set_progress(update_task, UpdateTaskStageProgress, 50);
-                    CHECK_RESULT(furi_hal_bt_ensure_c2_mode(BleGlueC2ModeStack));
+                    CHECK_RESULT(furi_hal_ble_ensure_c2_mode(BleGlueC2ModeStack));
                     /* ...system will restart here. */
                     update_task_wait_for_restart(update_task);
                 }

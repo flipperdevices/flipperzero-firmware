@@ -29,7 +29,7 @@ struct STOP_EXTERNING_ME {};
 #include <furi_hal_power.h>
 #include <furi_hal_interrupt.h>
 #include <furi_hal_version.h>
-#include <furi_hal_bt.h>
+#include <furi_hal_ble.h>
 #include <furi_hal_spi.h>
 #include <furi_hal_flash.h>
 #include <furi_hal_vibro.h>

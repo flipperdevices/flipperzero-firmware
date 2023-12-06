@@ -6,7 +6,7 @@
 #include <assets_icons.h>
 #include <furi_hal_version.h>
 #include <furi_hal_region.h>
-#include <furi_hal_bt.h>
+#include <furi_hal_ble.h>
 #include <furi_hal_info.h>
 
 typedef DialogMessageButton (*AboutDialogScreen)(DialogsApp* dialogs, DialogMessage* message);

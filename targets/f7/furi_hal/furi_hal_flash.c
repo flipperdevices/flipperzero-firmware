@@ -1,5 +1,5 @@
 #include <furi_hal_flash.h>
-#include <furi_hal_bt.h>
+#include <furi_hal_ble.h>
 #include <furi_hal_power.h>
 #include <furi_hal_cortex.h>
 #include <furi.h>
@@ -181,10 +181,10 @@ static void furi_hal_flash_begin_with_core2(bool erase_flag) {
 
 static void furi_hal_flash_begin(bool erase_flag) {
     /* Acquire dangerous ops mutex */
-    furi_hal_bt_lock_core2();
+    furi_hal_ble_lock_core2();
 
     /* If Core2 is running use IPC locking */
-    if(furi_hal_bt_is_alive()) {
+    if(furi_hal_ble_is_alive()) {
         furi_hal_flash_begin_with_core2(erase_flag);
     } else {
         furi_hal_flash_unlock();
@@ -216,14 +216,14 @@ static void furi_hal_flash_end_with_core2(bool erase_flag) {
 
 static void furi_hal_flash_end(bool erase_flag) {
     /* If Core2 is running - use IPC locking */
-    if(furi_hal_bt_is_alive()) {
+    if(furi_hal_ble_is_alive()) {
         furi_hal_flash_end_with_core2(erase_flag);
     } else {
         furi_hal_flash_lock();
     }
 
     /* Release dangerous ops mutex */
-    furi_hal_bt_unlock_core2();
+    furi_hal_ble_unlock_core2();
 }
 
 static void furi_hal_flush_cache(void) {

@@ -7,11 +7,11 @@
 extern "C" {
 #endif
 
-void dev_info_svc_start();
+typedef struct BleServiceDevInfo BleServiceDevInfo;
 
-void dev_info_svc_stop();
+BleServiceDevInfo* ble_svc_dev_info_start();
 
-bool dev_info_svc_is_started();
+void ble_svc_dev_info_stop(BleServiceDevInfo* service);
 
 #ifdef __cplusplus
 }

@@ -48,7 +48,7 @@ void furi_hal_init() {
     furi_hal_i2c_init();
     furi_hal_power_init();
     furi_hal_light_init();
-    furi_hal_bt_init();
+    furi_hal_ble_init();
     furi_hal_memory_init();
 
 #ifndef FURI_RAM_EXEC

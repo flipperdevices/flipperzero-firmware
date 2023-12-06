@@ -1,6 +1,8 @@
 #include "ble_glue.h"
 #include "app_common.h"
 #include "ble_app.h"
+// #include "event_dispatcher.h"
+
 #include <ble/ble.h>
 #include <hci_tl.h>
 
@@ -59,7 +61,7 @@ void ble_glue_set_key_storage_changed_callback(
 /* TL hook to catch hardfaults */
 
 int32_t ble_glue_TL_SYS_SendCmd(uint8_t* buffer, uint16_t size) {
-    if(furi_hal_bt_get_hardfault_info()) {
+    if(furi_hal_ble_get_hardfault_info()) {
         furi_crash("ST(R) Copro(R) HardFault");
     }
 
@@ -73,7 +75,7 @@ void shci_register_io_bus(tSHciIO* fops) {
 }
 
 static int32_t ble_glue_TL_BLE_SendCmd(uint8_t* buffer, uint16_t size) {
-    if(furi_hal_bt_get_hardfault_info()) {
+    if(furi_hal_ble_get_hardfault_info()) {
         furi_crash("ST(R) Copro(R) HardFault");
     }
 
@@ -383,18 +385,20 @@ static void ble_glue_clear_shared_memory() {
 }
 
 void ble_glue_thread_stop() {
-    if(ble_glue) {
-        FuriThreadId thread_id = furi_thread_get_id(ble_glue->thread);
-        furi_assert(thread_id);
-        furi_thread_flags_set(thread_id, BLE_GLUE_FLAG_KILL_THREAD);
-        furi_thread_join(ble_glue->thread);
-        furi_thread_free(ble_glue->thread);
-        // Free resources
-        furi_mutex_free(ble_glue->shci_mtx);
-        ble_glue_clear_shared_memory();
-        free(ble_glue);
-        ble_glue = NULL;
+    if(!ble_glue) {
+        return;
     }
+
+    FuriThreadId thread_id = furi_thread_get_id(ble_glue->thread);
+    furi_assert(thread_id);
+    furi_thread_flags_set(thread_id, BLE_GLUE_FLAG_KILL_THREAD);
+    furi_thread_join(ble_glue->thread);
+    furi_thread_free(ble_glue->thread);
+    // Free resources
+    furi_mutex_free(ble_glue->shci_mtx);
+    ble_glue_clear_shared_memory();
+    free(ble_glue);
+    ble_glue = NULL;
 }
 
 // Wrap functions

@@ -7,15 +7,18 @@
 extern "C" {
 #endif
 
-void battery_svc_start();
+typedef struct BleServiceBattery BleServiceBattery;
 
-void battery_svc_stop();
+BleServiceBattery* ble_svc_battery_start(bool auto_update);
 
-bool battery_svc_is_started();
+void ble_svc_battery_stop(BleServiceBattery* service);
 
-bool battery_svc_update_level(uint8_t battery_level);
+bool ble_svc_battery_update_level(BleServiceBattery* service, uint8_t battery_level);
 
-bool battery_svc_update_power_state();
+bool ble_svc_battery_update_power_state(BleServiceBattery* service, bool charging);
+
+// Global function, callable without a service instance - will update all services with auto_update
+void ble_svc_battery_state_update(uint8_t battery_level, bool charging);
 
 #ifdef __cplusplus
 }

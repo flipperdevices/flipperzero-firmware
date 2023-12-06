@@ -6,6 +6,7 @@
 #include <ble/ble.h>
 #include "bt_settings.h"
 #include "bt_service/bt.h"
+#include <profiles/serial_profile.h>
 
 static void bt_cli_command_hci_info(Cli* cli, FuriString* args, void* context) {
     UNUSED(cli);
@@ -13,7 +14,7 @@ static void bt_cli_command_hci_info(Cli* cli, FuriString* args, void* context) {
     UNUSED(context);
     FuriString* buffer;
     buffer = furi_string_alloc();
-    furi_hal_bt_dump_state(buffer);
+    furi_hal_ble_dump_state(buffer);
     printf("%s", furi_string_get_cstr(buffer));
     furi_string_free(buffer);
 }
@@ -35,17 +36,17 @@ static void bt_cli_command_carrier_tx(Cli* cli, FuriString* args, void* context)
 
         Bt* bt = furi_record_open(RECORD_BT);
         bt_disconnect(bt);
-        furi_hal_bt_reinit();
+        furi_hal_ble_reinit();
         printf("Transmitting carrier at %d channel at %d dB power\r\n", channel, power);
         printf("Press CTRL+C to stop\r\n");
-        furi_hal_bt_start_tone_tx(channel, 0x19 + power);
+        furi_hal_ble_start_tone_tx(channel, 0x19 + power);
 
         while(!cli_cmd_interrupt_received(cli)) {
             furi_delay_ms(250);
         }
-        furi_hal_bt_stop_tone_tx();
+        furi_hal_ble_stop_tone_tx();
 
-        bt_set_profile(bt, BtProfileSerial);
+        bt_profile_restore_default(bt);
         furi_record_close(RECORD_BT);
     } while(false);
 }
@@ -62,21 +63,21 @@ static void bt_cli_command_carrier_rx(Cli* cli, FuriString* args, void* context)
 
         Bt* bt = furi_record_open(RECORD_BT);
         bt_disconnect(bt);
-        furi_hal_bt_reinit();
+        furi_hal_ble_reinit();
         printf("Receiving carrier at %d channel\r\n", channel);
         printf("Press CTRL+C to stop\r\n");
 
-        furi_hal_bt_start_packet_rx(channel, 1);
+        furi_hal_ble_start_packet_rx(channel, 1);
 
         while(!cli_cmd_interrupt_received(cli)) {
             furi_delay_ms(250);
-            printf("RSSI: %6.1f dB\r", (double)furi_hal_bt_get_rssi());
+            printf("RSSI: %6.1f dB\r", (double)furi_hal_ble_get_rssi());
             fflush(stdout);
         }
 
-        furi_hal_bt_stop_packet_test();
+        furi_hal_ble_stop_packet_test();
 
-        bt_set_profile(bt, BtProfileSerial);
+        bt_profile_restore_default(bt);
         furi_record_close(RECORD_BT);
     } while(false);
 }
@@ -109,22 +110,22 @@ static void bt_cli_command_packet_tx(Cli* cli, FuriString* args, void* context) 
 
         Bt* bt = furi_record_open(RECORD_BT);
         bt_disconnect(bt);
-        furi_hal_bt_reinit();
+        furi_hal_ble_reinit();
         printf(
             "Transmitting %d pattern packet at %d channel at %d M datarate\r\n",
             pattern,
             channel,
             datarate);
         printf("Press CTRL+C to stop\r\n");
-        furi_hal_bt_start_packet_tx(channel, pattern, datarate);
+        furi_hal_ble_start_packet_tx(channel, pattern, datarate);
 
         while(!cli_cmd_interrupt_received(cli)) {
             furi_delay_ms(250);
         }
-        furi_hal_bt_stop_packet_test();
-        printf("Transmitted %lu packets", furi_hal_bt_get_transmitted_packets());
+        furi_hal_ble_stop_packet_test();
+        printf("Transmitted %lu packets", furi_hal_ble_get_transmitted_packets());
 
-        bt_set_profile(bt, BtProfileSerial);
+        bt_profile_restore_default(bt);
         furi_record_close(RECORD_BT);
     } while(false);
 }
@@ -146,20 +147,20 @@ static void bt_cli_command_packet_rx(Cli* cli, FuriString* args, void* context) 
 
         Bt* bt = furi_record_open(RECORD_BT);
         bt_disconnect(bt);
-        furi_hal_bt_reinit();
+        furi_hal_ble_reinit();
         printf("Receiving packets at %d channel at %d M datarate\r\n", channel, datarate);
         printf("Press CTRL+C to stop\r\n");
-        furi_hal_bt_start_packet_rx(channel, datarate);
+        furi_hal_ble_start_packet_rx(channel, datarate);
 
         while(!cli_cmd_interrupt_received(cli)) {
             furi_delay_ms(250);
-            printf("RSSI: %03.1f dB\r", (double)furi_hal_bt_get_rssi());
+            printf("RSSI: %03.1f dB\r", (double)furi_hal_ble_get_rssi());
             fflush(stdout);
         }
-        uint16_t packets_received = furi_hal_bt_stop_packet_test();
+        uint16_t packets_received = furi_hal_ble_stop_packet_test();
         printf("Received %hu packets", packets_received);
 
-        bt_set_profile(bt, BtProfileSerial);
+        bt_profile_restore_default(bt);
         furi_record_close(RECORD_BT);
     } while(false);
 }
@@ -169,7 +170,7 @@ static void bt_cli_print_usage() {
     printf("bt <cmd> <args>\r\n");
     printf("Cmd list:\r\n");
     printf("\thci_info\t - HCI info\r\n");
-    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug) && furi_hal_bt_is_testing_supported()) {
+    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug) && furi_hal_ble_is_testing_supported()) {
         printf("\ttx_carrier <channel:0-39> <power:0-6>\t - start tx carrier test\r\n");
         printf("\trx_carrier <channel:0-39>\t - start rx carrier test\r\n");
         printf(
@@ -196,7 +197,7 @@ static void bt_cli(Cli* cli, FuriString* args, void* context) {
             bt_cli_command_hci_info(cli, args, NULL);
             break;
         }
-        if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug) && furi_hal_bt_is_testing_supported()) {
+        if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug) && furi_hal_ble_is_testing_supported()) {
             if(furi_string_cmp_str(cmd, "tx_carrier") == 0) {
                 bt_cli_command_carrier_tx(cli, args, NULL);
                 break;
@@ -219,7 +220,7 @@ static void bt_cli(Cli* cli, FuriString* args, void* context) {
     } while(false);
 
     if(bt_settings.enabled) {
-        furi_hal_bt_start_advertising();
+        furi_hal_ble_start_advertising();
     }
 
     furi_string_free(cmd);

@@ -19,6 +19,7 @@ App(
     apptype=FlipperAppType.EXTERNAL,
     entry_point="hid_ble_app",
     stack_size=1 * 1024,
+    fap_libs=["ble_profile"],
     fap_description="Use Flipper as a HID remote control over Bluetooth",
     fap_version="1.0",
     fap_category="Bluetooth",

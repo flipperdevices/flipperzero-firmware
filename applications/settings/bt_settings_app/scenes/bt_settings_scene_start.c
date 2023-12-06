@@ -1,5 +1,5 @@
 #include "../bt_settings_app.h"
-#include <furi_hal_bt.h>
+#include <furi_hal_ble.h>
 
 enum BtSetting {
     BtSettingOff,
@@ -39,7 +39,7 @@ void bt_settings_scene_start_on_enter(void* context) {
     VariableItemList* var_item_list = app->var_item_list;
     VariableItem* item;
 
-    if(furi_hal_bt_is_ble_gatt_gap_supported()) {
+    if(furi_hal_ble_is_gatt_gap_supported()) {
         item = variable_item_list_add(
             var_item_list,
             "Bluetooth",
@@ -70,12 +70,12 @@ bool bt_settings_scene_start_on_event(void* context, SceneManagerEvent event) {
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == BtSettingOn) {
-            furi_hal_bt_start_advertising();
+            furi_hal_ble_start_advertising();
             app->settings.enabled = true;
             consumed = true;
         } else if(event.event == BtSettingOff) {
             app->settings.enabled = false;
-            furi_hal_bt_stop_advertising();
+            furi_hal_ble_stop_advertising();
             consumed = true;
         } else if(event.event == BtSettingsCustomEventForgetDevices) {
             scene_manager_next_scene(app->scene_manager, BtSettingsAppSceneForgetDevConfirm);

@@ -1,21 +1,32 @@
 #include "bt_i.h"
+#include <profiles/serial_profile.h>
 
-bool bt_set_profile(Bt* bt, BtProfile profile) {
+FuriHalBleProfileBase* bt_profile_start(Bt* bt, const FuriHalBleProfileConfig* profile_config) {
     furi_assert(bt);
 
     // Send message
-    bool result = false;
+    // bool result = false;
+    FuriHalBleProfileBase* profile_instance = NULL;
+
     BtMessage message = {
         .lock = api_lock_alloc_locked(),
         .type = BtMessageTypeSetProfile,
-        .data.profile = profile,
-        .result = &result};
+        .data.profile_config = profile_config,
+        // .result = &result,
+        .profile_instance = &profile_instance,
+    };
     furi_check(
         furi_message_queue_put(bt->message_queue, &message, FuriWaitForever) == FuriStatusOk);
     // Wait for unlock
     api_lock_wait_unlock_and_free(message.lock);
 
-    return result;
+    bt->current_profile = profile_instance;
+    return profile_instance;
+}
+
+bool bt_profile_restore_default(Bt* bt) {
+    bt->current_profile = bt_profile_start(bt, ble_profile_serial);
+    return bt->current_profile != NULL;
 }
 
 void bt_disconnect(Bt* bt) {

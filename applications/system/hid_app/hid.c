@@ -1,4 +1,6 @@
 #include "hid.h"
+#include <extra_profiles/hid_profile.h>
+#include <profiles/serial_profile.h>
 #include "views.h"
 #include <notification/notification_messages.h>
 #include <dolphin/dolphin.h>
@@ -260,7 +262,7 @@ void hid_free(Hid* app) {
 void hid_hal_keyboard_press(Hid* instance, uint16_t event) {
     furi_assert(instance);
     if(instance->transport == HidTransportBle) {
-        furi_hal_bt_hid_kb_press(event);
+        ble_profile_hid_kb_press(instance->ble_hid_profile, event);
     } else if(instance->transport == HidTransportUsb) {
         furi_hal_hid_kb_press(event);
     } else {
@@ -271,7 +273,7 @@ void hid_hal_keyboard_press(Hid* instance, uint16_t event) {
 void hid_hal_keyboard_release(Hid* instance, uint16_t event) {
     furi_assert(instance);
     if(instance->transport == HidTransportBle) {
-        furi_hal_bt_hid_kb_release(event);
+        ble_profile_hid_kb_release(instance->ble_hid_profile, event);
     } else if(instance->transport == HidTransportUsb) {
         furi_hal_hid_kb_release(event);
     } else {
@@ -282,7 +284,7 @@ void hid_hal_keyboard_release(Hid* instance, uint16_t event) {
 void hid_hal_keyboard_release_all(Hid* instance) {
     furi_assert(instance);
     if(instance->transport == HidTransportBle) {
-        furi_hal_bt_hid_kb_release_all();
+        ble_profile_hid_kb_release_all(instance->ble_hid_profile);
     } else if(instance->transport == HidTransportUsb) {
         furi_hal_hid_kb_release_all();
     } else {
@@ -293,7 +295,7 @@ void hid_hal_keyboard_release_all(Hid* instance) {
 void hid_hal_consumer_key_press(Hid* instance, uint16_t event) {
     furi_assert(instance);
     if(instance->transport == HidTransportBle) {
-        furi_hal_bt_hid_consumer_key_press(event);
+        ble_profile_hid_consumer_key_press(instance->ble_hid_profile, event);
     } else if(instance->transport == HidTransportUsb) {
         furi_hal_hid_consumer_key_press(event);
     } else {
@@ -304,7 +306,7 @@ void hid_hal_consumer_key_press(Hid* instance, uint16_t event) {
 void hid_hal_consumer_key_release(Hid* instance, uint16_t event) {
     furi_assert(instance);
     if(instance->transport == HidTransportBle) {
-        furi_hal_bt_hid_consumer_key_release(event);
+        ble_profile_hid_consumer_key_release(instance->ble_hid_profile, event);
     } else if(instance->transport == HidTransportUsb) {
         furi_hal_hid_consumer_key_release(event);
     } else {
@@ -315,7 +317,7 @@ void hid_hal_consumer_key_release(Hid* instance, uint16_t event) {
 void hid_hal_consumer_key_release_all(Hid* instance) {
     furi_assert(instance);
     if(instance->transport == HidTransportBle) {
-        furi_hal_bt_hid_consumer_key_release_all();
+        ble_profile_hid_consumer_key_release_all(instance->ble_hid_profile);
     } else if(instance->transport == HidTransportUsb) {
         furi_hal_hid_kb_release_all();
     } else {
@@ -326,7 +328,7 @@ void hid_hal_consumer_key_release_all(Hid* instance) {
 void hid_hal_mouse_move(Hid* instance, int8_t dx, int8_t dy) {
     furi_assert(instance);
     if(instance->transport == HidTransportBle) {
-        furi_hal_bt_hid_mouse_move(dx, dy);
+        ble_profile_hid_mouse_move(instance->ble_hid_profile, dx, dy);
     } else if(instance->transport == HidTransportUsb) {
         furi_hal_hid_mouse_move(dx, dy);
     } else {
@@ -337,7 +339,7 @@ void hid_hal_mouse_move(Hid* instance, int8_t dx, int8_t dy) {
 void hid_hal_mouse_scroll(Hid* instance, int8_t delta) {
     furi_assert(instance);
     if(instance->transport == HidTransportBle) {
-        furi_hal_bt_hid_mouse_scroll(delta);
+        ble_profile_hid_mouse_scroll(instance->ble_hid_profile, delta);
     } else if(instance->transport == HidTransportUsb) {
         furi_hal_hid_mouse_scroll(delta);
     } else {
@@ -348,7 +350,7 @@ void hid_hal_mouse_scroll(Hid* instance, int8_t delta) {
 void hid_hal_mouse_press(Hid* instance, uint16_t event) {
     furi_assert(instance);
     if(instance->transport == HidTransportBle) {
-        furi_hal_bt_hid_mouse_press(event);
+        ble_profile_hid_mouse_press(instance->ble_hid_profile, event);
     } else if(instance->transport == HidTransportUsb) {
         furi_hal_hid_mouse_press(event);
     } else {
@@ -359,7 +361,7 @@ void hid_hal_mouse_press(Hid* instance, uint16_t event) {
 void hid_hal_mouse_release(Hid* instance, uint16_t event) {
     furi_assert(instance);
     if(instance->transport == HidTransportBle) {
-        furi_hal_bt_hid_mouse_release(event);
+        ble_profile_hid_mouse_release(instance->ble_hid_profile, event);
     } else if(instance->transport == HidTransportUsb) {
         furi_hal_hid_mouse_release(event);
     } else {
@@ -370,7 +372,7 @@ void hid_hal_mouse_release(Hid* instance, uint16_t event) {
 void hid_hal_mouse_release_all(Hid* instance) {
     furi_assert(instance);
     if(instance->transport == HidTransportBle) {
-        furi_hal_bt_hid_mouse_release_all();
+        ble_profile_hid_mouse_release_all(instance->ble_hid_profile);
     } else if(instance->transport == HidTransportUsb) {
         furi_hal_hid_mouse_release(HID_MOUSE_BTN_LEFT);
         furi_hal_hid_mouse_release(HID_MOUSE_BTN_RIGHT);
@@ -422,9 +424,11 @@ int32_t hid_ble_app(void* p) {
 
     furi_record_close(RECORD_STORAGE);
 
-    furi_check(bt_set_profile(app->bt, BtProfileHidKeyboard));
+    app->ble_hid_profile = bt_profile_start(app->bt, ble_profile_hid);
 
-    furi_hal_bt_start_advertising();
+    furi_check(app->ble_hid_profile);
+
+    furi_hal_ble_start_advertising();
     bt_set_status_changed_callback(app->bt, bt_hid_connection_status_changed_callback, app);
 
     dolphin_deed(DolphinDeedPluginStart);
@@ -440,7 +444,7 @@ int32_t hid_ble_app(void* p) {
 
     bt_keys_storage_set_default_path(app->bt);
 
-    furi_check(bt_set_profile(app->bt, BtProfileSerial));
+    furi_check(bt_profile_restore_default(app->bt));
 
     hid_free(app);
 

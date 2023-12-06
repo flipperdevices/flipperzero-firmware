@@ -6,7 +6,7 @@
 #include <furi_hal_power.h>
 #include <furi_hal_rtc.h>
 #include <furi_hal_debug.h>
-#include <furi_hal_bt.h>
+#include <furi_hal_ble.h>
 #include <stdio.h>
 
 #include <FreeRTOS.h>
@@ -87,7 +87,7 @@ static void __furi_print_stack_info() {
 }
 
 static void __furi_print_bt_stack_info() {
-    const FuriHalBtHardfaultInfo* fault_info = furi_hal_bt_get_hardfault_info();
+    const FuriHalBtHardfaultInfo* fault_info = furi_hal_ble_get_hardfault_info();
     if(fault_info == NULL) {
         furi_hal_console_puts("\r\n\tcore2: not faulted");
     } else {
