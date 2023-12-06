@@ -157,7 +157,7 @@ bool seader_credential_save_mfc(SeaderCredential* cred, const char* name) {
         0x45,
         0x41,
         0x54};
-    uint8_t sectorn_trailer[16] = {
+    uint8_t section_trailer[16] = {
         0xff,
         0xff,
         0xff,
@@ -305,8 +305,8 @@ bool seader_credential_save_mfc(SeaderCredential* cred, const char* name) {
                 if(!flipper_format_write_hex(
                        file,
                        furi_string_get_cstr(temp_str),
-                       sectorn_trailer,
-                       sizeof(sectorn_trailer))) {
+                       section_trailer,
+                       sizeof(section_trailer))) {
                     block_saved = false;
                 }
                 break;
