@@ -47,8 +47,7 @@ static void t5577_write_opcode(uint8_t value) {
 
 static void t5577_write_reset() {
     t5577_write_gap(T5577_TIMING_START_GAP);
-    t5577_write_bit(1);
-    t5577_write_bit(0);
+    t5577_write_opcode(T5577_OPCODE_RESET);
 }
 
 static void t5577_write_block(uint8_t block, bool lock_bit, uint32_t data) {
