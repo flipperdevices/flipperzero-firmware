@@ -60,9 +60,9 @@ Button name | Description
 
 ## Installation options
 
-1. Install the latest stable version directly from the [application catalog](https://lab.flipper.net/apps/flipper_xremote).
-
-2. Manually install using `.fap` file:  
+1. Install the latest stable version directly from the official [application catalog](https://lab.flipper.net/apps/flipper_xremote).
+2. Install on any firmware from the community driven application catalog [FlipC](https://flipc.org/kala13x/flipper-xremote).
+3. Manually install using `.fap` file:  
    - Download the `.fap` file from the [Releases](https://github.com/kala13x/flipper-xremote/releases) section of this repository.
    - Write the `.fap` file to an SD card using [qFlipper](https://docs.flipper.net/qflipper) or any your preferred SD card writer.
 
