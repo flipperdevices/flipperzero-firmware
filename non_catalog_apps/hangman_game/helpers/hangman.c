@@ -138,11 +138,11 @@ void hangman_draw_menu(Canvas* canvas, HangmanApp* app) {
 
     CONST txt_x = (canvas_width(canvas) - max_txt_w) / 2;
 
-    if (menu_cnt > HANGMAN_MAX_MENU_SIZE) {
+    if(menu_cnt > HANGMAN_MAX_MENU_SIZE) {
         elements_scrollbar(canvas, app->menu_item, menu_cnt);
     }
 
-    for (uint8_t i = 0; i < rows; i++) {
+    for(uint8_t i = 0; i < rows; i++) {
         CONST txt_y = y + (i + 1) * txt_h;
         CONST menu_item = app->menu_frame_position + i;
 
@@ -234,17 +234,17 @@ void hangman_choice_letter(HangmanApp* app) {
 void hangman_clear_state(HangmanApp* app) {
     app->pos = 0;
     app->gallows_state = HANGMAN_GALLOWS_INIT_STATE;
-    app->need_generate = false;
     app->eog = HangmanGameOn;
 
-    if(app->word.arr != NULL) {
-        free(app->word.arr);
-    }
+    memset(app->opened, HangmanOpenedInit, HANGMAN_MAX_ALP_SIZE);
+    free(app->word.arr);
+    app->word = (HangmanWord){NULL, 0};
 
     if(app->lang != NULL) {
-        memset(app->opened, HangmanOpenedInit, HANGMAN_MAX_ALP_SIZE);
         app->word = hangman_get_random_word(app->lang->dict_file, app->lang->unicode_base);
     }
+
+    app->need_generate = false;
 }
 
 int hangman_read_int(Stream* stream) {
@@ -381,9 +381,8 @@ void hangman_app_free(HangmanApp** app) {
 
     hangman_free_menu_data((*app)->menu, (*app)->menu_cnt);
 
-    if((*app)->word.arr != NULL) {
-        free((*app)->word.arr);
-    }
+    free((*app)->word.arr);
+
     if((*app)->lang != NULL) {
         free((*app)->lang->dict_file);
         free((*app)->lang->message_ok);
