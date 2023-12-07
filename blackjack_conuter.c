@@ -41,8 +41,8 @@ static void app_draw_callback(Canvas* canvas, void* ctx) {
     canvas_draw_str(canvas, 60, 20, count_str);
 
     canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str(canvas, 12, 33, "From 2 to 7 (Press Up)");
-    canvas_draw_str(canvas, 17, 43, "For 8 & 9 (Press Ok)");
+    canvas_draw_str(canvas, 13, 33, "From 2 to 7 (Press Up)");
+    canvas_draw_str(canvas, 18, 43, "For 8 & 9 (Press Ok)");
     canvas_draw_str(canvas, 3, 53, "From 10 to Ace (Press Down)");
 
     canvas_draw_str(canvas, -1, 63, "Wait vibration when count's hot");
