@@ -151,13 +151,67 @@ bool seader_worker_process_sam_message(Seader* seader, CCID_Message* message) {
     return false;
 }
 
+void seader_worker_virtual_credential(Seader* seader) {
+    SeaderWorker* seader_worker = seader->worker;
+
+    // Detect card
+    seader_worker_card_detect(
+        seader, 0, NULL, seader->credential->diversifier, sizeof(PicopassSerialNum), NULL, 0);
+
+    bool running = true;
+    // Max times the loop will run with no message to process
+    uint8_t dead_loops = 20;
+
+    while(running) {
+        if(furi_mutex_acquire(seader_worker->mq_mutex, 0) == FuriStatusOk) {
+            uint32_t count = furi_message_queue_get_count(seader_worker->messages);
+            if(count > 0) {
+                FURI_LOG_D(TAG, "MessageQueue: %ld messages", count);
+
+                SeaderAPDU seaderApdu = {};
+                FuriStatus status =
+                    furi_message_queue_get(seader_worker->messages, &seaderApdu, FuriWaitForever);
+                if(status != FuriStatusOk) {
+                    FURI_LOG_W(TAG, "furi_message_queue_get fail %d", status);
+                    view_dispatcher_send_custom_event(
+                        seader->view_dispatcher, SeaderCustomEventWorkerExit);
+                }
+                if(seader_process_success_response_i(
+                       seader, seaderApdu.buf, seaderApdu.len, true, NULL)) {
+                    // no-op
+                } else {
+                    FURI_LOG_I(TAG, "Response false");
+                    running = false;
+                }
+            }
+            furi_mutex_release(seader_worker->mq_mutex);
+        } else {
+            dead_loops--;
+            running = (dead_loops > 0);
+            FURI_LOG_D(
+                TAG, "Dead loops: %d -> Running: %s", dead_loops, running ? "true" : "false");
+        }
+        running = (seader_worker->stage != SeaderPollerEventTypeComplete);
+    }
+
+    if(dead_loops > 0) {
+        FURI_LOG_D(TAG, "Final dead loops: %d", dead_loops);
+    } else {
+        view_dispatcher_send_custom_event(seader->view_dispatcher, SeaderCustomEventWorkerExit);
+    }
+}
+
 int32_t seader_worker_task(void* context) {
     SeaderWorker* seader_worker = context;
+    Seader* seader = seader_worker->context;
     SeaderUartBridge* seader_uart = seader_worker->uart;
 
     if(seader_worker->state == SeaderWorkerStateCheckSam) {
         FURI_LOG_D(TAG, "Check for SAM");
         seader_ccid_check_for_sam(seader_uart);
+    } else if(seader_worker->state == SeaderWorkerStateVirtualCredential) {
+        FURI_LOG_D(TAG, "Virtual Credential");
+        seader_worker_virtual_credential(seader);
     }
     seader_worker_change_state(seader_worker, SeaderWorkerStateReady);
 

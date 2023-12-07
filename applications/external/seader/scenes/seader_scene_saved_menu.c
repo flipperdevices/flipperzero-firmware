@@ -3,6 +3,7 @@
 enum SubmenuIndex {
     SubmenuIndexDelete,
     SubmenuIndexInfo,
+    SubmenuIndexVirtual,
 };
 
 void seader_scene_saved_menu_submenu_callback(void* context, uint32_t index) {
@@ -13,13 +14,22 @@ void seader_scene_saved_menu_submenu_callback(void* context, uint32_t index) {
 
 void seader_scene_saved_menu_on_enter(void* context) {
     Seader* seader = context;
+    SeaderCredential* credential = seader->credential;
     Submenu* submenu = seader->submenu;
-    UNUSED(submenu);
 
     submenu_add_item(
         submenu, "Delete", SubmenuIndexDelete, seader_scene_saved_menu_submenu_callback, seader);
     submenu_add_item(
         submenu, "Info", SubmenuIndexInfo, seader_scene_saved_menu_submenu_callback, seader);
+
+    if(credential->sio[0] == 0x30) {
+        submenu_add_item(
+            submenu,
+            "Virtual",
+            SubmenuIndexVirtual,
+            seader_scene_saved_menu_submenu_callback,
+            seader);
+    }
 
     submenu_set_selected_item(
         seader->submenu,
@@ -40,6 +50,9 @@ bool seader_scene_saved_menu_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
         } else if(event.event == SubmenuIndexInfo) {
             scene_manager_next_scene(seader->scene_manager, SeaderSceneCredentialInfo);
+            consumed = true;
+        } else if(event.event == SubmenuIndexVirtual) {
+            scene_manager_next_scene(seader->scene_manager, SeaderSceneVirtualCredential);
             consumed = true;
         }
     }
