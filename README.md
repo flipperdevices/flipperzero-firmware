@@ -24,6 +24,6 @@
 Contributions to enhance the game or fix bugs are welcome. Please feel free to fork this repository, make changes, and create a pull request.
 
 ## License
-This project is licensed under [LICENSE]. Please see the `LICENSE` file for more details.
+This project is licensed under MIT License. Please click [here](LICENSE) for more details.
 
 Enjoy the game on your Flipper Zero!
