@@ -17,7 +17,7 @@ static void vibration_hot_count() {
     furi_hal_vibro_on(true);
     furi_delay_ms(1500);
     furi_hal_vibro_on(false);
-    notificationString = "";
+    notification_message = "";
     return;
 }
 
