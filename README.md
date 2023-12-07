@@ -3,6 +3,9 @@
 ## Overview
 "Guess the Number" is a simple yet engaging game designed for the Flipper Zero device. This game challenges players to guess a randomly generated number within a specified range.
 
+## Preview
+![Click me to see a brief video](https://streamable.com/b6iusj)
+
 ## Features
 - Random number generation using Flipper Zero's hardware capabilities.
 - Intuitive interface with up/down keys for guessing and back key to restart the game.
