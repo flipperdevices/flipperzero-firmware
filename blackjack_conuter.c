@@ -12,7 +12,7 @@
 int count = 0; // Corretto il nome della variabile
 
 static void vibration_hot_count() {
-    notificationString = "Hot Count Threshold!";
+    notification_message = "Hot Count Threshold!";
     furi_hal_vibro_on(false);
     furi_hal_vibro_on(true);
     furi_delay_ms(1500);
@@ -37,7 +37,7 @@ static void app_draw_callback(Canvas* canvas, void* ctx) {
     char count_str[5];
     snprintf(count_str, 5, "%d", count);
 
-    int text_width = canvas_text_width(canvas, count_str);
+    int text_width = canvas_glyph_width(canvas, count_str);
     int x = (128 - text_width) / 2;
     int y = 40; // Posizione y per centrare il testo in basso
 
