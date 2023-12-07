@@ -114,26 +114,27 @@ void ble_app_get_key_storage_buff(uint8_t** addr, uint16_t* size) {
 }
 
 void ble_app_thread_stop() {
-    if(ble_app) {
-        FuriThreadId thread_id = furi_thread_get_id(ble_app->thread);
-        furi_assert(thread_id);
-        furi_thread_flags_set(thread_id, BLE_APP_FLAG_KILL_THREAD);
-        furi_thread_join(ble_app->thread);
-        furi_thread_free(ble_app->thread);
-        // Free resources
-        furi_mutex_free(ble_app->hci_mtx);
-        furi_semaphore_free(ble_app->hci_sem);
-        free(ble_app);
-        ble_app = NULL;
-        memset(&ble_app_cmd_buffer, 0, sizeof(ble_app_cmd_buffer));
+    if(!ble_app) {
+        return;
     }
+    FuriThreadId thread_id = furi_thread_get_id(ble_app->thread);
+    furi_assert(thread_id);
+    furi_thread_flags_set(thread_id, BLE_APP_FLAG_KILL_THREAD);
+    furi_thread_join(ble_app->thread);
+    furi_thread_free(ble_app->thread);
+    // Free resources
+    furi_mutex_free(ble_app->hci_mtx);
+    furi_semaphore_free(ble_app->hci_sem);
+    free(ble_app);
+    ble_app = NULL;
+    memset(&ble_app_cmd_buffer, 0, sizeof(ble_app_cmd_buffer));
 }
 
 static int32_t ble_app_hci_thread(void* arg) {
     UNUSED(arg);
     uint32_t flags = 0;
 
-    while(1) {
+    while(true) {
         flags = furi_thread_flags_wait(BLE_APP_FLAG_ALL, FuriFlagWaitAny, FuriWaitForever);
         if(flags & BLE_APP_FLAG_KILL_THREAD) {
             break;
@@ -150,10 +151,14 @@ static int32_t ble_app_hci_thread(void* arg) {
 void hci_notify_asynch_evt(void* pdata) {
     UNUSED(pdata);
     furi_check(ble_app);
+    FURI_LOG_W(TAG, "hci_notify_asynch_evt");
     FuriThreadId thread_id = furi_thread_get_id(ble_app->thread);
     furi_assert(thread_id);
     furi_thread_flags_set(thread_id, BLE_APP_FLAG_HCI_EVENT);
 }
+
+///////////////////////////////////////////////////////////////////////////////
+// AN5289, 4.9
 
 void hci_cmd_resp_release(uint32_t flag) {
     UNUSED(flag);
@@ -165,6 +170,8 @@ void hci_cmd_resp_wait(uint32_t timeout) {
     furi_check(ble_app);
     furi_check(furi_semaphore_acquire(ble_app->hci_sem, timeout) == FuriStatusOk);
 }
+
+///////////////////////////////////////////////////////////////////////////////
 
 static void ble_app_hci_event_handler(void* pPayload) {
     SVCCTL_UserEvtFlowStatus_t svctl_return_status;

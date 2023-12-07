@@ -3,6 +3,7 @@
 #include "ble_app.h"
 // #include "event_dispatcher.h"
 
+#include "core/mutex.h"
 #include <ble/ble.h>
 #include <hci_tl.h>
 
@@ -34,6 +35,7 @@ static uint8_t ble_glue_ble_spare_event_buff[sizeof(TL_PacketHeader_t) + TL_EVT_
 
 typedef struct {
     FuriMutex* shci_mtx;
+    FuriSemaphore* shci_sem;
     FuriThread* thread;
     BleGlueStatus status;
     BleGlueKeyStorageChangedCallback callback;
@@ -89,6 +91,22 @@ void hci_register_io_bus(tHciIO* fops) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// AN5289, 4.9
+
+void shci_cmd_resp_wait(uint32_t timeout) {
+    FURI_LOG_I(TAG, "shci_cmd_resp_wait");
+    furi_check(ble_glue);
+    furi_check(furi_semaphore_acquire(ble_glue->shci_sem, timeout) == FuriStatusOk);
+}
+
+void shci_cmd_resp_release(uint32_t flag) {
+    UNUSED(flag);
+    FURI_LOG_I(TAG, "shci_cmd_resp_release");
+    furi_check(ble_glue);
+    furi_check(furi_semaphore_release(ble_glue->shci_sem) == FuriStatusOk);
+}
+
+///////////////////////////////////////////////////////////////////////////////
 
 void ble_glue_init() {
     ble_glue = malloc(sizeof(BleGlue));
@@ -105,6 +123,7 @@ void ble_glue_init() {
     TL_Init();
 
     ble_glue->shci_mtx = furi_mutex_alloc(FuriMutexTypeNormal);
+    ble_glue->shci_sem = furi_semaphore_alloc(1, 0);
 
     // FreeRTOS system task creation
     ble_glue->thread = furi_thread_alloc_ex("BleShciDriver", 1024, ble_glue_shci_thread, ble_glue);
@@ -396,6 +415,7 @@ void ble_glue_thread_stop() {
     furi_thread_free(ble_glue->thread);
     // Free resources
     furi_mutex_free(ble_glue->shci_mtx);
+    furi_semaphore_free(ble_glue->shci_sem);
     ble_glue_clear_shared_memory();
     free(ble_glue);
     ble_glue = NULL;
@@ -421,15 +441,18 @@ static int32_t ble_glue_shci_thread(void* context) {
 
 void shci_notify_asynch_evt(void* pdata) {
     UNUSED(pdata);
-    if(ble_glue) {
-        FuriThreadId thread_id = furi_thread_get_id(ble_glue->thread);
-        furi_assert(thread_id);
-        furi_thread_flags_set(thread_id, BLE_GLUE_FLAG_SHCI_EVENT);
+    if(!ble_glue) {
+        return;
     }
+
+    FURI_LOG_W(TAG, "shci_notify_asynch_evt");
+    FuriThreadId thread_id = furi_thread_get_id(ble_glue->thread);
+    furi_assert(thread_id);
+    furi_thread_flags_set(thread_id, BLE_GLUE_FLAG_SHCI_EVENT);
 }
 
 bool ble_glue_reinit_c2() {
-    return SHCI_C2_Reinit() == SHCI_Success;
+    return (SHCI_C2_Reinit() == SHCI_Success);
 }
 
 BleGlueCommandResult ble_glue_fus_stack_delete() {
