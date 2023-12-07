@@ -28,26 +28,15 @@
 /* Time, in ms, to wait for mode transition before crashing */
 #define C2_MODE_SWITCH_TIMEOUT 10000
 
-#define furi_hal_ble_HARDFAULT_INFO_MAGIC 0x1170FD0F
-
 typedef struct {
     FuriMutex* core2_mtx;
-    FuriTimer* hardfault_check_timer;
     FuriHalBtStack stack;
 } FuriHalBt;
 
 static FuriHalBt furi_hal_ble = {
     .core2_mtx = NULL,
-    .hardfault_check_timer = NULL,
     .stack = FuriHalBtStackUnknown,
 };
-
-static void furi_hal_ble_hardfault_check(void* context) {
-    UNUSED(context);
-    if(furi_hal_ble_get_hardfault_info()) {
-        furi_crash("ST(R) Copro(R) HardFault");
-    }
-}
 
 void furi_hal_ble_init() {
     furi_hal_bus_enable(FuriHalBusHSEM);
@@ -59,12 +48,6 @@ void furi_hal_ble_init() {
     if(!furi_hal_ble.core2_mtx) {
         furi_hal_ble.core2_mtx = furi_mutex_alloc(FuriMutexTypeNormal);
         furi_assert(furi_hal_ble.core2_mtx);
-    }
-
-    if(!furi_hal_ble.hardfault_check_timer) {
-        furi_hal_ble.hardfault_check_timer =
-            furi_timer_alloc(furi_hal_ble_hardfault_check, FuriTimerTypePeriodic, NULL);
-        furi_timer_start(furi_hal_ble.hardfault_check_timer, 5000);
     }
 
     // Explicitly tell that we are in charge of CLK48 domain
@@ -168,6 +151,7 @@ bool furi_hal_ble_is_testing_supported() {
 }
 
 static FuriHalBleProfileBase* current_profile = NULL;
+static GapConfig current_config = {0};
 
 bool furi_hal_ble_check_profile_type(
     FuriHalBleProfileBase* profile,
@@ -197,10 +181,9 @@ FuriHalBleProfileBase* furi_hal_ble_start_app(
             break;
         }
 
-        GapConfig config;
-        profile_config->get_gap_config(&config);
+        profile_config->get_gap_config(&current_config);
 
-        if(!gap_init(&config, event_cb, context)) {
+        if(!gap_init(&current_config, event_cb, context)) {
             gap_thread_stop();
             FURI_LOG_E(TAG, "Failed to init GAP");
             break;
@@ -422,13 +405,4 @@ bool furi_hal_ble_ensure_c2_mode(BleGlueC2Mode mode) {
 
     FURI_LOG_E(TAG, "Failed to switch C2 mode: %d", fw_start_res);
     return false;
-}
-
-const FuriHalBtHardfaultInfo* furi_hal_ble_get_hardfault_info() {
-    /* AN5289, 4.8.2 */
-    const FuriHalBtHardfaultInfo* info = (FuriHalBtHardfaultInfo*)(SRAM2A_BASE);
-    if(info->magic != furi_hal_ble_HARDFAULT_INFO_MAGIC) {
-        return NULL;
-    }
-    return info;
 }

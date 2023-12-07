@@ -121,6 +121,19 @@ BleGlueCommandResult ble_glue_fus_get_status();
 
 BleGlueCommandResult ble_glue_fus_wait_operation();
 
+typedef struct {
+    uint32_t magic;
+    uint32_t source_pc;
+    uint32_t source_lr;
+    uint32_t source_sp;
+} BleGlueHardfaultInfo;
+
+/** Get hardfault info
+ *
+ * @return     hardfault info. NULL if no hardfault
+ */
+const BleGlueHardfaultInfo* ble_glue_get_hardfault_info();
+
 #ifdef __cplusplus
 }
 #endif

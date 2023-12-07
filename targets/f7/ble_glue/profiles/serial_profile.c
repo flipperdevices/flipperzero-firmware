@@ -10,8 +10,8 @@
 typedef struct {
     FuriHalBleProfileBase base;
 
-    BleServiceBattery* battery_svc;
     BleServiceDevInfo* dev_info_svc;
+    BleServiceBattery* battery_svc;
     BleServiceSerial* serial_svc;
 } BleProfileSerial;
 _Static_assert(offsetof(BleProfileSerial, base) == 0, "Wrong layout");
@@ -21,8 +21,8 @@ static FuriHalBleProfileBase* ble_profile_serial_start() {
 
     profile->base.config = ble_profile_serial;
 
-    profile->battery_svc = ble_svc_battery_start(true);
     profile->dev_info_svc = ble_svc_dev_info_start();
+    profile->battery_svc = ble_svc_battery_start(true);
     profile->serial_svc = ble_svc_serial_start();
 
     return &profile->base;

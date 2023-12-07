@@ -4,6 +4,7 @@
 // #include "event_dispatcher.h"
 
 #include "core/mutex.h"
+#include "core/timer.h"
 #include <ble/ble.h>
 #include <hci_tl.h>
 
@@ -15,6 +16,10 @@
 #include <furi_hal.h>
 
 #define TAG "Core2"
+
+#define BLE_GLUE_HARDFAULT_CHECK_PERIOD_MS 5000
+
+#define BLE_GLUE_HARDFAULT_INFO_MAGIC 0x1170FD0F
 
 #define BLE_GLUE_FLAG_SHCI_EVENT (1UL << 0)
 #define BLE_GLUE_FLAG_KILL_THREAD (1UL << 1)
@@ -41,6 +46,7 @@ typedef struct {
     BleGlueKeyStorageChangedCallback callback;
     BleGlueC2Info c2_info;
     void* context;
+    FuriTimer* hardfault_check_timer;
 } BleGlue;
 
 static BleGlue* ble_glue = NULL;
@@ -58,52 +64,11 @@ void ble_glue_set_key_storage_changed_callback(
     ble_glue->context = context;
 }
 
-///////////////////////////////////////////////////////////////////////////////
-
-/* TL hook to catch hardfaults */
-
-int32_t ble_glue_TL_SYS_SendCmd(uint8_t* buffer, uint16_t size) {
-    if(furi_hal_ble_get_hardfault_info()) {
+static void furi_hal_ble_hardfault_check(void* context) {
+    UNUSED(context);
+    if(ble_glue_get_hardfault_info()) {
         furi_crash("ST(R) Copro(R) HardFault");
     }
-
-    return TL_SYS_SendCmd(buffer, size);
-}
-
-void shci_register_io_bus(tSHciIO* fops) {
-    /* Register IO bus services */
-    fops->Init = TL_SYS_Init;
-    fops->Send = ble_glue_TL_SYS_SendCmd;
-}
-
-static int32_t ble_glue_TL_BLE_SendCmd(uint8_t* buffer, uint16_t size) {
-    if(furi_hal_ble_get_hardfault_info()) {
-        furi_crash("ST(R) Copro(R) HardFault");
-    }
-
-    return TL_BLE_SendCmd(buffer, size);
-}
-
-void hci_register_io_bus(tHciIO* fops) {
-    /* Register IO bus services */
-    fops->Init = TL_BLE_Init;
-    fops->Send = ble_glue_TL_BLE_SendCmd;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// AN5289, 4.9
-
-void shci_cmd_resp_wait(uint32_t timeout) {
-    FURI_LOG_I(TAG, "shci_cmd_resp_wait");
-    furi_check(ble_glue);
-    furi_check(furi_semaphore_acquire(ble_glue->shci_sem, timeout) == FuriStatusOk);
-}
-
-void shci_cmd_resp_release(uint32_t flag) {
-    UNUSED(flag);
-    FURI_LOG_I(TAG, "shci_cmd_resp_release");
-    furi_check(ble_glue);
-    furi_check(furi_semaphore_release(ble_glue->shci_sem) == FuriStatusOk);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -111,6 +76,9 @@ void shci_cmd_resp_release(uint32_t flag) {
 void ble_glue_init() {
     ble_glue = malloc(sizeof(BleGlue));
     ble_glue->status = BleGlueStatusStartup;
+    ble_glue->hardfault_check_timer =
+        furi_timer_alloc(furi_hal_ble_hardfault_check, FuriTimerTypePeriodic, NULL);
+    furi_timer_start(ble_glue->hardfault_check_timer, BLE_GLUE_HARDFAULT_CHECK_PERIOD_MS);
 
 #ifdef BLE_GLUE_DEBUG
     APPD_Init();
@@ -416,6 +384,8 @@ void ble_glue_thread_stop() {
     // Free resources
     furi_mutex_free(ble_glue->shci_mtx);
     furi_semaphore_free(ble_glue->shci_sem);
+
+    furi_timer_free(ble_glue->hardfault_check_timer);
     ble_glue_clear_shared_memory();
     free(ble_glue);
     ble_glue = NULL;
@@ -506,3 +476,28 @@ BleGlueCommandResult ble_glue_fus_wait_operation() {
         }
     }
 }
+
+const BleGlueHardfaultInfo* ble_glue_get_hardfault_info() {
+    /* AN5289, 4.8.2 */
+    const BleGlueHardfaultInfo* info = (BleGlueHardfaultInfo*)(SRAM2A_BASE);
+    if(info->magic != BLE_GLUE_HARDFAULT_INFO_MAGIC) {
+        return NULL;
+    }
+    return info;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// AN5289, 4.9
+
+// void shci_cmd_resp_wait(uint32_t timeout) {
+//     FURI_LOG_I(TAG, "shci_cmd_resp_wait");
+//     furi_check(ble_glue);
+//     furi_check(furi_semaphore_acquire(ble_glue->shci_sem, timeout) == FuriStatusOk);
+// }
+
+// void shci_cmd_resp_release(uint32_t flag) {
+//     UNUSED(flag);
+//     FURI_LOG_I(TAG, "shci_cmd_resp_release");
+//     furi_check(ble_glue);
+//     furi_check(furi_semaphore_release(ble_glue->shci_sem) == FuriStatusOk);
+// }
