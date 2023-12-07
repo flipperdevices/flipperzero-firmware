@@ -118,11 +118,9 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: [NFC Parsers bugfixes for Troyka and Social Card (By assasinfil)](https://github.com/DarkFlippers/unleashed-firmware/pull/655)
 - Refactor Update: [NFC Maker NTAG215 (by Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/343cb39d08f60b75b537e1a31100707935cf6e9d) - [(Changes By xMasterX)](https://github.com/xMasterX/all-the-plugins/commit/d2d908eea599192dd5ad428fe9d5684b3874a1a4)
 - Refactor Update: [NFC Maker NTAG203 (by Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/343cb39d08f60b75b537e1a31100707935cf6e9d) - [(Changes By RogueMaster Copying These changes By xMasterX)](https://github.com/xMasterX/all-the-plugins/commit/d2d908eea599192dd5ad428fe9d5684b3874a1a4)
-- Updated: [PicoPass (iClass) v1.8 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass) [Picopass rework. Part 1 #68 (By gornekich)](https://github.com/flipperdevices/flipperzero-good-faps/pull/68)
 - OFW: [NFC: Felica UID emulation #3190 (By RebornedBrain)](https://github.com/flipperdevices/flipperzero-firmware/pull/3190)
 - OFW: [Mifare Classic fixes #3221 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3221)
 - Refactor Update: [Mifare Fuzzer v1.2 (By spheeere98)](https://github.com/spheeere98/mifare_fuzzer) (Changes By Sil333033)
-- Updated: [NFC Magic v1.2 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966) [Nfc Magic rework #67 (By gornekich)](https://github.com/flipperdevices/flipperzero-good-faps/pull/67) [NFC Magic fix gen4 detection #71 (By gornekich)](https://github.com/flipperdevices/flipperzero-good-faps/pull/71) [Specify in error scene that only Gen1 magic and Gen4 UMCs are supported #75 (By kitsunehunter)](https://github.com/flipperdevices/flipperzero-good-faps/pull/75)
 - NFC: [Parser for Philips Sonicare toothbrush heads (By Sil333033, Research By Cyrill Künzi)](https://kuenzi.dev/toothbrush/)
 - OFW: [Mifare Classic nested auth support #3238 (By augustozanellato)](https://github.com/flipperdevices/flipperzero-firmware/pull/3238)
 - OFW: [ST25TB poller refining + write support #3239 (By augustozanellato)](https://github.com/flipperdevices/flipperzero-firmware/pull/3239)
@@ -136,10 +134,13 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [Fixed error when reading an iso15693 nfc tag with no blocks #3229 (By pborsutzki)](https://github.com/flipperdevices/flipperzero-firmware/pull/3229)
 - Fix mbedtls api leaks (By Willy-JL) & Fix for CFW lib (Idea By Willy-JL, With Changes By RogueMaster)
 - OFW: [nfc: m1k-based Aime (non-AIC) card support #3241 (By magicnat)](https://github.com/flipperdevices/flipperzero-firmware/pull/3241)
-- Update: [NFC Seader v2.0 (By bettse)](https://github.com/bettse/seader)
 - NFC: [Parsers for Saflok and Mykey (From noproto)](https://github.com/noproto/flipper_kdf)
 - NFC: [Parser for Mizip (From zProAle)](https://github.com/noproto/flipper_kdf/pull/3)
 - OFW: [NFC fixes #3264 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3264)
+- Updated: [NFC Magic v1.3 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966) [Nfc Magic rework #67 (By gornekich)](https://github.com/flipperdevices/flipperzero-good-faps/pull/67) [NFC Magic fix gen4 detection #71 (By gornekich)](https://github.com/flipperdevices/flipperzero-good-faps/pull/71) [Specify in error scene that only Gen1 magic and Gen4 UMCs are supported #75 (By kitsunehunter)](https://github.com/flipperdevices/flipperzero-good-faps/pull/75)
+- UL: [Nfc parsers #655 (By assasinfil)](https://github.com/DarkFlippers/unleashed-firmware/pull/655)
+- Updated: [PicoPass (iClass) v1.9 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass) [Picopass rework. Part 1 #68 (By gornekich)](https://github.com/flipperdevices/flipperzero-good-faps/pull/68)
+- Update: [NFC Seader v2.1 (By bettse)](https://github.com/bettse/seader)
 
 <a name="release">
 
@@ -519,10 +520,10 @@ $ ./fbt dolphin_ext
 - [Mx2125 Dual-Axis Accelerometer (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/gpio)
 - [Mx2125 Step Counter v1.0 (By 47lecoste a.k.a. grugnoymeme)](https://github.com/grugnoymeme/flipperzero-stepcounter-fap)
 - [Name Changer (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/488) (Change Flipper name)
-- [NFC Magic v1.2 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966) with [NFC Magic Gen4 Support #2238 (By nullableVoidPtr)](https://github.com/flipperdevices/flipperzero-firmware/pull/2238)
+- [NFC Magic v1.3 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966) with [NFC Magic Gen4 Support #2238 (By nullableVoidPtr)](https://github.com/flipperdevices/flipperzero-firmware/pull/2238)
 - [NFC Maker NTAG203 (by Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/343cb39d08f60b75b537e1a31100707935cf6e9d)
 - [NFC Maker NTAG215 (by Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/343cb39d08f60b75b537e1a31100707935cf6e9d)
-- [NFC Seader v2.0 (By bettse)](https://github.com/bettse/seader)
+- [NFC Seader v2.1 (By bettse)](https://github.com/bettse/seader)
 - [Nightstand Clock v1.1 (By nymda)](https://github.com/nymda/FlipperNightStand)
 - [Notes for FZ WIP (By AdrianN001)](https://github.com/AdrianN001/Flipper-Zero-Note-Application)
 - [NRF Sniff v1.1 (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/nrfsniff) ([Pin Out](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/tree/420/applications/nrfsniff) from nocomp/Frog/UberGuidoZ) `Req: NRF24`
@@ -536,7 +537,7 @@ $ ./fbt dolphin_ext
 - [PC Monitor v1.0 (By TheSainEyereg)](https://github.com/TheSainEyereg/flipper-pc-monitor) _Req: [Backend](https://github.com/TheSainEyereg/flipper-pc-monitor-backend)_
 - [Pet a Dolphin (By ugeneSmile)](https://github.com/EugeneSmile/PetADolphin)
 - [pForth (By twisted-pear)](https://github.com/twisted-pear/f0forth)
-- [PicoPass (iClass) v1.8 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass) [PicoPass Emulation (By nvx)](https://github.com/nvx/flipperzero-firmware/tree/picopass_emulation)
+- [PicoPass (iClass) v1.9 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass) [PicoPass Emulation (By nvx)](https://github.com/nvx/flipperzero-firmware/tree/picopass_emulation)
 - [Plantower PMSx003 sensor reader (By 3cky)](https://github.com/3cky/flipperzero-airmon) `Req: Plantower PMS5003/PMS7003/PMS9003`
 - [POCSAG Pager v1.2 (By XMasterx & Shmuma)](https://github.com/xMasterX/flipper-pager)
 - [Pokemon Trading v1.4 (By EstebanFuentealba & kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
