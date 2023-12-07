@@ -249,6 +249,11 @@ static bool led_tester_custom_event_callback(void* context, uint32_t event) {
     LedTesterApp* app = (LedTesterApp*)context;
     const GpioPin* pin = setting_led_pin_values[app->model->led_pin_index];
 
+    if(!app->led_driver) {
+        FURI_LOG_E(TAG, "led_driver is NULL.  Custom event %lu ignored.", event);
+        return false;
+    }
+
     if(event == LedTesterEventTimer) {
         app->model->timer_counter++;
     }
@@ -344,6 +349,11 @@ static bool led_tester_custom_event_callback(void* context, uint32_t event) {
 
     led_driver_transmit(app->led_driver, false);
 
+    if(event == LedTesterEventDeinit) {
+        led_driver_free(app->led_driver);
+        app->led_driver = NULL;
+    }
+
     return true;
 }
 
@@ -362,6 +372,8 @@ void led_tester_enter_leds_callback(void* _context) {
     app->timer = furi_timer_alloc(led_tester_timer_callback, FuriTimerTypePeriodic, app);
     furi_timer_start(app->timer, 250);
     view_dispatcher_send_custom_event(app->view_dispatcher, LedTesterEventInitialized);
+    app->led_driver =
+        led_driver_alloc(MAX_LED_COUNT, setting_led_pin_values[app->model->led_pin_index]);
 }
 
 /**
@@ -432,8 +444,6 @@ static LedTesterApp* led_tester_app_alloc() {
     variable_item_set_current_value_index(item, setting_led_pin_index);
     variable_item_set_current_value_text(item, setting_led_pin_names[setting_led_pin_index]);
     app->model->led_pin_index = setting_led_pin_index;
-    app->led_driver =
-        led_driver_alloc(MAX_LED_COUNT, setting_led_pin_values[setting_led_pin_index]);
 
     // Count
     item = variable_item_list_add(
@@ -530,7 +540,6 @@ static LedTesterApp* led_tester_app_alloc() {
  * @param      app  The led tester application object.
 */
 static void led_tester_app_free(LedTesterApp* app) {
-    led_driver_free(app->led_driver);
     view_dispatcher_remove_view(app->view_dispatcher, LedTesterViewAbout);
     widget_free(app->widget_about);
     view_dispatcher_remove_view(app->view_dispatcher, LedTesterViewLeds);

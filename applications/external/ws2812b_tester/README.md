@@ -23,6 +23,9 @@ This application has three submenu items:
 The "About" menu item contains information about the application.
 
 # Updates
+- Version 1.8
+  - Renamed app to fit on Flipper Zero main menu screen
+  - Improved initialization to only happen when configuring the LEDs
 - Version 1.7
   - Added blanking TRESET (LOW) signal before sending data to LEDs.
   - Increased timer_buffer to uint16 to support blanking signal duration.  Maybe there is a better way to do the initial low & save memory?

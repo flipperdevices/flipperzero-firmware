@@ -29,8 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM1206-0037-0.93.9-7816bcf](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-12-06 18:41 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-12-06 18:41 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-12-06 22:57 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-12-06 22:57 EST`
 - Updated: [BLE Spam v4.4 (By Willy-JL & ECTO-1A & Spooks4576 with research from xMasterX; OFW API thanks to noproto)](https://github.com/noproto/apple_ble_spam_ofw)
 - Variable List Item Get Function, Variable List Item Set Header Function & CFW App Scene Refresh Cleanup (By Willy-JL)
 - Updated: [UART Terminal v1.3 (By cool4uma)](https://github.com/cool4uma/UART_Terminal) [Hex mode in UART Terminal #32 (By rnadyrshin)](https://github.com/xMasterX/all-the-plugins/pull/32)
@@ -63,6 +63,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Malveke APP Icons (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero)
 - Updated: [FlipBoard Signal v1.0 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
 - Added: [WS2812B LED Tester App (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/gpio/ws2812b_tester)
+- Updated: [WS2812B LED Tester App (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/gpio/ws2812b_tester)
 
 <a name="release">
 
