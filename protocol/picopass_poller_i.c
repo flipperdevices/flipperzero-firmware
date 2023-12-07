@@ -161,15 +161,20 @@ PicopassError
 
 PicopassError picopass_poller_check(
     PicopassPoller* instance,
+    uint8_t* nr,
     PicopassMac* mac,
     PicopassCheckResp* check_resp) {
     PicopassError ret = PicopassErrorNone;
+    uint8_t null_arr[4] = {};
 
     do {
         bit_buffer_reset(instance->tx_buffer);
         bit_buffer_append_byte(instance->tx_buffer, RFAL_PICOPASS_CMD_CHECK);
-        uint8_t null_arr[4] = {};
-        bit_buffer_append_bytes(instance->tx_buffer, null_arr, sizeof(null_arr));
+        if(nr) {
+            bit_buffer_append_bytes(instance->tx_buffer, nr, 4);
+        } else {
+            bit_buffer_append_bytes(instance->tx_buffer, null_arr, sizeof(null_arr));
+        }
         bit_buffer_append_bytes(instance->tx_buffer, mac->data, sizeof(PicopassMac));
 
         NfcError error = nfc_poller_trx(

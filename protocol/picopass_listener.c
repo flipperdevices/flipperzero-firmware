@@ -1,3 +1,4 @@
+#include "picopass_i.h"
 #include "picopass_listener_i.h"
 #include "picopass_keys.h"
 
@@ -299,6 +300,61 @@ PicopassListenerCommand
     return command;
 }
 
+PicopassListenerCommand picopass_listener_save_mac(PicopassListener* instance, uint8_t* rx_data) {
+    PicopassListenerCommand command = PicopassListenerCommandSilent;
+    Picopass* picopass = instance->context;
+
+    PicopassDevice* dev = picopass->dev;
+
+    const uint8_t* csn = instance->data->AA1[PICOPASS_CSN_BLOCK_INDEX].data;
+    const uint8_t* epurse = instance->data->AA1[PICOPASS_SECURE_EPURSE_BLOCK_INDEX].data;
+
+    FuriString* temp_str = furi_string_alloc();
+    FuriString* filename = furi_string_alloc();
+    FlipperFormat* file = flipper_format_file_alloc(dev->storage);
+
+    for(size_t i = 0; i < PICOPASS_BLOCK_LEN; i++) {
+        furi_string_cat_printf(filename, "%02x", csn[i]);
+    }
+    furi_string_cat_printf(filename, "_");
+    for(size_t i = 0; i < PICOPASS_BLOCK_LEN; i++) {
+        furi_string_cat_printf(filename, "%02x", epurse[i]);
+    }
+
+    furi_string_printf(
+        temp_str, "%s/%s%s", STORAGE_APP_DATA_PATH_PREFIX, furi_string_get_cstr(filename), ".mac");
+    do {
+        // Open file
+        if(!flipper_format_file_open_always(file, furi_string_get_cstr(temp_str))) break;
+
+        if(!flipper_format_write_hex(file, "NR-MAC", rx_data + 1, PICOPASS_BLOCK_LEN)) break;
+
+        FURI_LOG_D(
+            TAG,
+            "Saved nr-mac: %02x %02x %02x %02x %02x %02x %02x %02x",
+            // Skip command byte [0]
+            rx_data[1],
+            rx_data[2],
+            rx_data[3],
+            rx_data[4],
+            rx_data[5],
+            rx_data[6],
+            rx_data[7],
+            rx_data[8]);
+
+        notification_message(picopass->notifications, &sequence_double_vibro);
+        command = PicopassListenerCommandStop;
+        view_dispatcher_send_custom_event(
+            picopass->view_dispatcher, PicopassCustomEventNrMacSaved);
+    } while(0);
+
+    furi_string_free(temp_str);
+    furi_string_free(filename);
+    flipper_format_free(file);
+
+    return command;
+}
+
 PicopassListenerCommand
     picopass_listener_check_handler_emulation(PicopassListener* instance, BitBuffer* buf) {
     PicopassListenerCommand command = PicopassListenerCommandSilent;
@@ -310,23 +366,31 @@ PicopassListenerCommand
         // Since nr isn't const in loclass_opt_doBothMAC_2() copy buffer
         uint8_t rx_data[9] = {};
         bit_buffer_write_bytes(buf, rx_data, sizeof(rx_data));
-        loclass_opt_doBothMAC_2(instance->cipher_state, &rx_data[1], rmac, tmac, key);
+        bool no_key = picopass_is_memset(key, 0x00, PICOPASS_BLOCK_LEN);
+
+        if(no_key) {
+            // We're emulating a partial dump of an iClass SE card and should capture the NR and MAC
+            command = picopass_listener_save_mac(instance, rx_data);
+            break;
+        } else {
+            loclass_opt_doBothMAC_2(instance->cipher_state, &rx_data[1], rmac, tmac, key);
 
 #ifndef PICOPASS_DEBUG_IGNORE_BAD_RMAC
-        if(memcmp(&rx_data[5], rmac, 4)) {
-            // Bad MAC from reader, do not send a response.
-            FURI_LOG_I(TAG, "Got bad MAC from reader");
-            // Reset the cipher state since we don't do it in READCHECK
-            picopass_listener_init_cipher_state(instance);
-            break;
-        }
+            if(memcmp(&rx_data[5], rmac, PICOPASS_MAC_LEN)) {
+                // Bad MAC from reader, do not send a response.
+                FURI_LOG_I(TAG, "Got bad MAC from reader");
+                // Reset the cipher state since we don't do it in READCHECK
+                picopass_listener_init_cipher_state(instance);
+                break;
+            }
 #endif
 
-        bit_buffer_copy_bytes(instance->tx_buffer, tmac, sizeof(tmac));
-        NfcError error = nfc_listener_tx(instance->nfc, instance->tx_buffer);
-        if(error != NfcErrorNone) {
-            FURI_LOG_D(TAG, "Failed tx update response: %d", error);
-            break;
+            bit_buffer_copy_bytes(instance->tx_buffer, tmac, sizeof(tmac));
+            NfcError error = nfc_listener_tx(instance->nfc, instance->tx_buffer);
+            if(error != NfcErrorNone) {
+                FURI_LOG_D(TAG, "Failed tx update response: %d", error);
+                break;
+            }
         }
 
         command = PicopassListenerCommandProcessed;
