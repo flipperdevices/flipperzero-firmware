@@ -17,4 +17,4 @@ You need to copy your `flipboard.ir` file into your `SD Card/infrared` folder.  
 - Action 4 will run `Flip4.sub` and then send IR signal `Flip4`.  If IR signal does not exist, it will send IR TV signal "Ch_next".
 
 ## Updates
-- V1.1: Flipper keyboard doesn't have a dash, so renamed the files to `Flip1.sub`, `Flip2.sub`, `Flip3.sub`, `Flip4.sub` and the IR entries to `Flip1`, `Flip2`, `Flip3`, `Flip4`.
+- V2.0 (was called v1.1): Flipper keyboard doesn't have a dash, so renamed the files to `Flip1.sub`, `Flip2.sub`, `Flip3.sub`, `Flip4.sub` and the IR entries to `Flip1`, `Flip2`, `Flip3`, `Flip4`.

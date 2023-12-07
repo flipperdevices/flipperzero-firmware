@@ -10,7 +10,7 @@
 
 #define ABOUT_TEXT                             \
     "Welcome to the Flipboard\n"               \
-    "Signal v1.1!\n"                           \
+    "Signal v2.0!\n"                           \
     "Quickly send to any device!\n\n"          \
     "Be sure to put your .SUB\n"               \
     "files in 'SD Card/subghz'\n"              \
