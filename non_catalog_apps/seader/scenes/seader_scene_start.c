@@ -64,5 +64,5 @@ bool seader_scene_start_on_event(void* context, SceneManagerEvent event) {
 
 void seader_scene_start_on_exit(void* context) {
     Seader* seader = context;
-    submenu_reset(seader->submenu);
+    popup_reset(seader->popup);
 }

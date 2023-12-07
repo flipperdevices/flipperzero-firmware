@@ -8,6 +8,16 @@
 #define PICOPASS_MAC_LEN 4
 #define PICOPASS_KEY_LEN 8
 
+#define CSN_INDEX 0
+#define CFG_INDEX 1
+#define EPURSE_INDEX 2
+#define KD_INDEX 3
+#define KC_INDEX 4
+#define AIA_INDEX 5
+#define PACS_CFG_INDEX 6
+#define PACS_INDEX 7
+#define SR_SIO_INDEX 10
+
 #define PICOPASS_FDT_LISTEN_FC (1000)
 
 #ifdef __cplusplus

@@ -1,9 +1,14 @@
 #pragma once
 
+#include <nfc/helpers/iso13239_crc.h>
+#include <optimized_ikeys.h>
+#include <optimized_cipher.h>
+
 #include "seader_i.h"
 #include "seader_credential.h"
 #include "seader_bridge.h"
 #include "seader_worker.h"
+#include "protocol/rfal_picopass.h"
 
 #include <Payload.h>
 
