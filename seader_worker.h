@@ -17,6 +17,7 @@ typedef enum {
     SeaderWorkerStateReady,
     // Main worker states
     SeaderWorkerStateCheckSam,
+    SeaderWorkerStateVirtualCredential,
     // Transition
     SeaderWorkerStateStop,
 } SeaderWorkerState;
@@ -60,7 +61,7 @@ void seader_worker_start(
     void* context);
 
 void seader_worker_stop(SeaderWorker* seader_worker);
-void seader_worker_process_sam_message(Seader* seader, CCID_Message* message);
+bool seader_worker_process_sam_message(Seader* seader, CCID_Message* message);
 void seader_worker_send_version(SeaderWorker* seader_worker);
 
 NfcCommand seader_worker_poller_callback_iso14443_4a(NfcGenericEvent event, void* context);
