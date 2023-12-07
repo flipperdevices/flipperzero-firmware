@@ -91,6 +91,28 @@ static void process_guess(DemoData* data) {
     }
 }
 
+static void handle_input(InputKey key, DemoData* data, bool* processing) {
+    switch(key) {
+    case InputKeyUp:
+        data->player_guess = data->player_guess < 99 ? data->player_guess + 1 : 0;
+        break;
+    case InputKeyDown:
+        data->player_guess = data->player_guess > 0 ? data->player_guess - 1 : 99;
+        break;
+    case InputKeyOk:
+        process_guess(data); // Process guess
+        break;
+    case InputKeyBack:
+        reset_game(data); // Reset game
+        break;
+    case InputKeyLeft:
+        *processing = false; // Signal to exit the main loop
+        break;
+    default:
+        break;
+    }
+}
+
 int32_t guess_number_app(void* p) {
     UNUSED(p);
 
@@ -112,24 +134,8 @@ int32_t guess_number_app(void* p) {
     bool processing = true;
     do {
         if(furi_message_queue_get(demo_context->queue, &event, FuriWaitForever) == FuriStatusOk) {
-            switch(event.type) {
-            case DemoEventTypeKey:
-                if(event.input.type == InputTypeShort) {
-                    if(event.input.key == InputKeyUp) {
-                        demo_context->data->player_guess++;
-                    } else if(event.input.key == InputKeyDown) {
-                        demo_context->data->player_guess--;
-                    } else if(event.input.key == InputKeyOk) {
-                        process_guess(demo_context->data);
-                    } else if(event.input.key == InputKeyBack) {
-                        reset_game(demo_context->data);
-                    } else if(event.input.key == InputKeyLeft) {
-                        processing = false;
-                    }
-                }
-                break;
-            default:
-                break;
+            if(event.type == DemoEventTypeKey && event.input.type == InputTypeShort) {
+                handle_input(event.input.key, demo_context->data, &processing);
             }
             view_port_update(view_port);
         } else {
