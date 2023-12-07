@@ -12,14 +12,16 @@
 int count = 0; // Corretto il nome della variabile
 
 static void vibration_hot_count() {
-    notification_message = "Hot Count Threshold!";
+    char notification_message[50]; // Assumendo che la lunghezza massima della stringa sia 50
+    strcpy(notification_message, "Hot Count Threshold!");
     furi_hal_vibro_on(false);
     furi_hal_vibro_on(true);
     furi_delay_ms(1500);
     furi_hal_vibro_on(false);
-    notification_message = "";
+    strcpy(notification_message, "");
     return;
 }
+
 
 static void app_draw_callback(Canvas* canvas, void* ctx) {
     UNUSED(ctx);
