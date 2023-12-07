@@ -8,6 +8,7 @@
 #include <stdio.h>
 
 #define HOT_COUNT_THRESHOLD 4
+#define BLACKJACK_MENU_TITLE "BlackJack Counter"
 
 int count = 0;
 
@@ -27,17 +28,25 @@ static void app_draw_callback(Canvas* canvas, void* ctx) {
     UNUSED(ctx);
 
     canvas_clear(canvas);
+    
+    canvas_set_color(canvas, ColorBlack);
+    canvas_set_bitmap_mode(canvas, 1);
+    canvas_set_font(canvas, FontPrimary);
+    canvas_draw_str(canvas, 15, 8, BLACKJACK_MENU_TITLE);
+    
     char count_str[5];
     snprintf(count_str, 5, "%d", count);
-    canvas_draw_str(canvas, 55, 21, count_str);
+    canvas_set_bitmap_mode(canvas, 1);
+    canvas_set_font(canvas, FontPrimary);
+    canvas_draw_str(canvas, 60, 20, count_str);
 
-    canvas_draw_str(canvas, 1, 40, "For Cards # 2 to 7 = +1 (Press Up)");
-    canvas_draw_str(canvas, 5, 47, "For 8 & 9 = 0 (Press Ok)");
-    canvas_draw_str(canvas, 1, 54, "From 10 to Ace = -1 (Press Down)");
+    canvas_set_font(canvas, FontSecondary);
+    canvas_draw_str(canvas, 12, 33, "From 2 to 7 (Press Up)");
+    canvas_draw_str(canvas, 17, 43, "For 8 & 9 (Press Ok)");
+    canvas_draw_str(canvas, 3, 53, "From 10 to Ace (Press Down)");
 
-    canvas_draw_str(canvas, 0, 61, "Wait for the vibration when count is hot");
+    canvas_draw_str(canvas, -1, 63, "Wait vibration when count's hot");
 }
-
 
 
 static void app_input_callback(InputEvent* input_event, void* ctx) {
