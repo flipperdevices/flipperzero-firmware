@@ -1,19 +1,12 @@
-/**
- * @file led_driver.c
- * @brief WS2812B LED Driver
- * @details This driver uses DMA and TIM2 AAR to drive WS2812B LEDs.  There is no circular buffer, 
- * so all of the data is loaded into memory at the beginning.  We are able to driver 256 LEDs.
- * 
-*/
-
 #include <stm32wbxx_ll_dma.h>
 
 #include "led_driver.h"
 
+#define MAX_LED_COUNT 4
 // We store the HIGH/LOW durations (2 values) for each color bit (24 bits per LED)
 #define LED_DRIVER_BUFFER_SIZE (MAX_LED_COUNT * 2 * 24)
 // We use a setinel value to figure out when the timer is complete.
-#define LED_DRIVER_TIMER_SETINEL 0xFFFFU
+#define LED_DRIVER_TIMER_SETINEL 0xFFU
 
 /** 64 transitions per us @ 64MHz.  Our timing is in NANO_SECONDS */
 #define LED_DRIVER_TIMER_NANOSECOND (1000U / (SystemCoreClock / 1000000U))
@@ -22,7 +15,6 @@
 #define LED_DRIVER_T1H 800U
 #define LED_DRIVER_T0L 850U
 #define LED_DRIVER_T1L 450U
-#define LED_DRIVER_TRESETL 55 * 1000U
 
 // Wait for 35ms for the DMA to complete. NOTE: 1000 leds*(850ns+450ns)*24 = 32ms
 #define LED_DRIVER_SETINEL_WAIT_MS 35
@@ -34,10 +26,9 @@ struct LedDriver {
     const GpioPin* gpio;
     uint32_t gpio_buf[2]; // On/Off for GPIO
 
-    uint16_t timer_buffer[LED_DRIVER_BUFFER_SIZE + 2];
+    uint8_t timer_buffer[LED_DRIVER_BUFFER_SIZE + 2];
     uint32_t write_pos;
     uint32_t read_pos;
-    bool dirty;
 
     uint32_t count_leds;
     uint32_t* led_data;
@@ -75,7 +66,7 @@ static void led_driver_init_dma_led_transition_timer(LedDriver* led_driver) {
     led_driver->dma_led_transition_timer.MemoryOrM2MDstAddress =
         (uint32_t)led_driver->timer_buffer;
     led_driver->dma_led_transition_timer.MemoryOrM2MDstIncMode = LL_DMA_MEMORY_INCREMENT;
-    led_driver->dma_led_transition_timer.MemoryOrM2MDstDataSize = LL_DMA_MDATAALIGN_HALFWORD;
+    led_driver->dma_led_transition_timer.MemoryOrM2MDstDataSize = LL_DMA_MDATAALIGN_BYTE;
     // Data
     led_driver->dma_led_transition_timer.Mode = LL_DMA_MODE_NORMAL;
     led_driver->dma_led_transition_timer.NbData = LED_DRIVER_BUFFER_SIZE;
@@ -92,7 +83,6 @@ LedDriver* led_driver_alloc(int count_leds, const GpioPin* gpio) {
     led_driver_init_dma_gpio_update(led_driver, gpio);
     led_driver_init_dma_led_transition_timer(led_driver);
     led_driver->led_data = malloc(MAX_LED_COUNT * sizeof(uint32_t));
-    led_driver->dirty = true;
 
     led_driver->count_leds = count_leds;
 
@@ -106,15 +96,6 @@ void led_driver_free(LedDriver* led_driver) {
     free(led_driver);
 }
 
-void led_driver_set_pin(LedDriver* led_driver, const GpioPin* gpio) {
-    if(led_driver->gpio == gpio) {
-        return;
-    }
-
-    led_driver_init_dma_gpio_update(led_driver, gpio);
-    led_driver->dirty = true;
-}
-
 uint32_t led_driver_set_led(LedDriver* led_driver, uint32_t index, uint32_t rrggbb) {
     furi_assert(led_driver);
     if(index >= led_driver->count_leds) {
@@ -123,8 +104,6 @@ uint32_t led_driver_set_led(LedDriver* led_driver, uint32_t index, uint32_t rrgg
 
     uint32_t previous = led_driver->led_data[index];
     led_driver->led_data[index] = rrggbb;
-    led_driver->dirty |= previous != rrggbb;
-
     return previous;
 }
 
@@ -211,7 +190,7 @@ static void led_driver_add_period(LedDriver* led_driver, uint16_t duration_ns) {
         FURI_LOG_E("Demo", "reload_value: %ld", reload_value);
     }
     furi_check(reload_value > 0);
-    furi_check(reload_value < 256 * 256);
+    furi_check(reload_value < 256);
 
     led_driver_add_period_length(led_driver, reload_value - 1);
 }
@@ -232,17 +211,11 @@ static void led_driver_add_color(LedDriver* led_driver, uint32_t rrggbb) {
     }
 }
 
-void led_driver_transmit(LedDriver* led_driver, bool transmit_if_clean) {
+void led_driver_transmit(LedDriver* led_driver) {
     furi_assert(led_driver);
 
     furi_assert(!led_driver->read_pos);
     furi_assert(!led_driver->write_pos);
-
-    if(!transmit_if_clean && !led_driver->dirty) {
-        FURI_LOG_D("LED_DRIVER", "Skipping transmit");
-        return;
-    }
-    FURI_LOG_D("LED_DRIVER", "Transmit");
 
     furi_hal_gpio_init(led_driver->gpio, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
     furi_hal_gpio_write(led_driver->gpio, false);
@@ -250,15 +223,13 @@ void led_driver_transmit(LedDriver* led_driver, bool transmit_if_clean) {
     const uint32_t bit_set = led_driver->gpio->pin << GPIO_BSRR_BS0_Pos;
     const uint32_t bit_reset = led_driver->gpio->pin << GPIO_BSRR_BR0_Pos;
 
-    // Always start with LOW (reset)
-    led_driver->gpio_buf[0] = bit_reset;
-    led_driver->gpio_buf[1] = bit_set;
+    // Always start with HIGH
+    led_driver->gpio_buf[0] = bit_set;
+    led_driver->gpio_buf[1] = bit_reset;
 
     for(size_t i = 0; i < LED_DRIVER_BUFFER_SIZE; i++) {
         led_driver->timer_buffer[i] = LED_DRIVER_TIMER_SETINEL;
     }
-
-    led_driver_add_period(led_driver, LED_DRIVER_TRESETL);
     for(size_t i = 0; i < led_driver->count_leds; i++) {
         led_driver_add_color(led_driver, led_driver->led_data[i]);
     }
@@ -279,5 +250,59 @@ void led_driver_transmit(LedDriver* led_driver, bool transmit_if_clean) {
     memset(led_driver->timer_buffer, LED_DRIVER_TIMER_SETINEL, LED_DRIVER_BUFFER_SIZE);
     led_driver->read_pos = 0;
     led_driver->write_pos = 0;
-    led_driver->dirty = false;
 }
+
+/*
+int32_t main_led_test(void* _p) {
+    UNUSED(_p);
+
+    uint16_t num_leds = MAX_LED_COUNT;
+    LedDriver* led_driver = led_driver_alloc(num_leds, &gpio_ext_pc3);
+
+    uint32_t* data[80];
+    for(int i = 0; i < 80; i++) {
+        data[i] = malloc(16 * 16 * sizeof(uint32_t));
+    }
+
+    for(int j = 0; j < num_leds; j++) {
+        uint8_t red = rand() % 2;
+        uint8_t green = rand() % 4;
+        uint8_t blue = rand() % 4;
+        data[0][j] = red << 16 | green << 8 | blue;
+    }
+    data[0][0] = 0x000F00;
+
+    for(int i = 1; i < 80; i++) {
+        for(int j = 1; j < num_leds; j++) {
+            uint8_t red = rand() % 2;
+            uint8_t green = rand() % 4;
+            uint8_t blue = rand() % 4;
+            data[i][j] = red << 16 | green << 8 | blue;
+            data[i][j] = data[i - 1][j - 1];
+        }
+        data[i][0] = data[i - 1][num_leds - 1];
+        // for(int j = 0; j < num_leds; j++) {
+        //     if(data[i - 1][j] == 0x000F00) {
+        //         data[i][j] = 0x000F00;
+        //     }
+        // }
+        data[i][rand() % num_leds] = 0x000F00;
+    }
+
+    int counter = 0;
+    while(true) {
+        uint32_t i = counter++ % 80;
+        for(int j = 0; j < num_leds; j++) {
+            led_driver_set_led(led_driver, j, data[i][j]);
+        }
+        led_driver_transmit(led_driver);
+        furi_delay_ms(20);
+    }
+
+    for(int i = 0; i < 80; i++) {
+        free(data[i]);
+    }
+
+    return 0;
+}
+*/
