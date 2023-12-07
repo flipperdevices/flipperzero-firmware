@@ -1,0 +1,15 @@
+App(
+    appid="blackjack_counter",
+    name="BlackJack Counter",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="blackjack_counter_main",
+    requires=[
+        "gui",
+        "input",
+        "notification"
+    ],
+    stack_size=2 * 1024,
+    fap_icon="ico_10x10.png",
+    fap_category="Experimental",
+    fap_description="Simple application to keep the count of blackjack cards during the game."
+)
