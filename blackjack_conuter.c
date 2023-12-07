@@ -33,7 +33,7 @@ static void app_draw_callback(Canvas* canvas, void* ctx) {
 
     canvas_draw_str(canvas, 0, 54, "Cards # 2 to 7= +1 (Up), 8 & 9= 0 (Ok), and 10 to Ace= -1 (Down)");
 
-    canvas_draw_str(canvas, 0, 60, "Vibrates the running count when count is hot");
+    canvas_draw_str(canvas, 0, 60, "Wait for the vibration when count is hot");
 }
 
 
