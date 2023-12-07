@@ -1,53 +1,42 @@
 #include "../wiegand.h"
 
-FuriTimer *timer = NULL;
+FuriTimer* timer = NULL;
 
-static void wiegand_scan_isr_d0(void *context)
-{
+static void wiegand_scan_isr_d0(void* context) {
     UNUSED(context);
     uint32_t time = DWT->CYCCNT;
     bool rise = furi_hal_gpio_read(pinD0);
 
     data[bit_count] = 0;
 
-    if (rise)
-    {
+    if(rise) {
         data_rise[bit_count] = time;
-        if (bit_count < MAX_BITS)
-        {
+        if(bit_count < MAX_BITS) {
             bit_count++;
         }
-    }
-    else
-    {
+    } else {
         data_fall[bit_count] = time;
     }
 }
 
-static void wiegand_scan_isr_d1(void *context)
-{
+static void wiegand_scan_isr_d1(void* context) {
     UNUSED(context);
     uint32_t time = DWT->CYCCNT;
     bool rise = furi_hal_gpio_read(pinD1);
 
     data[bit_count] = 1;
 
-    if (rise)
-    {
+    if(rise) {
         data_rise[bit_count] = time;
-        if (bit_count < MAX_BITS)
-        {
+        if(bit_count < MAX_BITS) {
             bit_count++;
         }
-    }
-    else
-    {
+    } else {
         data_fall[bit_count] = time;
     }
 }
 
-static void wiegand_start_scan(void *context)
-{
+static void wiegand_start_scan(void* context) {
     UNUSED(context);
     data_saved = false;
     bit_count = 0;
@@ -58,8 +47,7 @@ static void wiegand_start_scan(void *context)
     furi_timer_start(timer, 100);
 }
 
-static void wiegand_stop_scan(void *context)
-{
+static void wiegand_stop_scan(void* context) {
     UNUSED(context);
     furi_hal_gpio_remove_int_callback(pinD0);
     furi_hal_gpio_remove_int_callback(pinD1);
@@ -68,9 +56,8 @@ static void wiegand_stop_scan(void *context)
     furi_timer_stop(timer);
 }
 
-static void wiegand_scan_found(void *context)
-{
-    App *app = context;
+static void wiegand_scan_found(void* context) {
+    App* app = context;
 
     FuriHalRtcDateTime datetime;
     furi_hal_rtc_get_datetime(&datetime);
@@ -96,14 +83,12 @@ static void wiegand_scan_found(void *context)
     wiegand_start_scan(app);
 }
 
-static void wiegand_scan_timer_callback(void *context)
-{
-    App *app = context;
+static void wiegand_scan_timer_callback(void* context) {
+    App* app = context;
     uint32_t duration = DWT->CYCCNT;
     const uint32_t one_millisecond = 64000;
 
-    if (bit_count == 0)
-    {
+    if(bit_count == 0) {
         return;
     }
 
@@ -111,32 +96,26 @@ static void wiegand_scan_timer_callback(void *context)
 
     bool found = false;
     FURI_CRITICAL_ENTER();
-    if (duration > 25 * one_millisecond)
-    {
-        if (bit_count == 4 || bit_count == 8 || bit_count == 24 || bit_count == 26 ||
-            bit_count == 32 || bit_count == 34 || bit_count == 35 || bit_count == 36 ||
-            bit_count == 37 || bit_count == 40 || bit_count == 48)
-        {
+    if(duration > 25 * one_millisecond) {
+        if(bit_count == 4 || bit_count == 8 || bit_count == 24 || bit_count == 26 ||
+           bit_count == 32 || bit_count == 34 || bit_count == 35 || bit_count == 36 ||
+           bit_count == 37 || bit_count == 40 || bit_count == 48) {
             wiegand_stop_scan(app);
             found = true;
-        }
-        else
-        {
+        } else {
             // No data, clear
             bit_count = 0;
         }
     }
     FURI_CRITICAL_EXIT();
 
-    if (found)
-    {
+    if(found) {
         wiegand_scan_found(app);
     }
 }
 
-void wiegand_scan_scene_on_enter(void *context)
-{
-    App *app = context;
+void wiegand_scan_scene_on_enter(void* context) {
+    App* app = context;
     timer = furi_timer_alloc(wiegand_scan_timer_callback, FuriTimerTypePeriodic, app);
     widget_reset(app->widget);
     widget_add_string_element(app->widget, 0, 0, AlignLeft, AlignTop, FontPrimary, "Scan Wiegand");
@@ -152,9 +131,8 @@ void wiegand_scan_scene_on_enter(void *context)
     view_dispatcher_switch_to_view(app->view_dispatcher, WiegandWidgetView);
 }
 
-void wiegand_scan_scene_on_exit(void *context)
-{
-    App *app = context;
+void wiegand_scan_scene_on_exit(void* context) {
+    App* app = context;
     wiegand_stop_scan(app);
     furi_timer_free(timer);
 }
