@@ -34,6 +34,59 @@ void picopass_device_set_name(PicopassDevice* dev, const char* name) {
     strlcpy(dev->dev_name, name, PICOPASS_DEV_NAME_MAX_LEN);
 }
 
+// For use with Seader's virtual card processing.
+static bool picopass_device_save_file_seader(
+    PicopassDevice* dev,
+    FlipperFormat* file,
+    FuriString* file_path) {
+    furi_assert(dev);
+    PicopassPacs* pacs = &dev->dev_data.pacs;
+    PicopassBlock* AA1 = dev->dev_data.AA1;
+    bool result = false;
+
+    const char* seader_file_header = "Flipper Seader Credential";
+    const uint32_t seader_file_version = 1;
+
+    do {
+        FURI_LOG_D(
+            TAG,
+            "Save %s %ld to %s",
+            seader_file_header,
+            seader_file_version,
+            furi_string_get_cstr(file_path));
+        if(!flipper_format_file_open_always(file, furi_string_get_cstr(file_path))) break;
+        if(!flipper_format_write_header_cstr(file, seader_file_header, seader_file_version)) break;
+        if(!flipper_format_write_uint32(file, "Bits", (uint32_t*)&pacs->bitLength, 1)) break;
+        if(!flipper_format_write_hex(file, "Credential", pacs->credential, PICOPASS_BLOCK_LEN))
+            break;
+
+        FURI_LOG_D(TAG, "Pre-sio");
+        // Seader only captures 64 byte SIO so I'm going to leave it at that
+        uint8_t sio[64];
+
+        // TODO: save SR vs SE more properly
+        if(pacs->sio) { // SR
+            for(uint8_t i = 0; i < 8; i++) {
+                memcpy(sio + (i * 8), AA1[10 + i].data, PICOPASS_BLOCK_LEN);
+            }
+            if(!flipper_format_write_hex(file, "SIO", sio, sizeof(sio))) break;
+        } else if(pacs->se_enabled) { //SE
+            for(uint8_t i = 0; i < 8; i++) {
+                memcpy(sio + (i * 8), AA1[6 + i].data, PICOPASS_BLOCK_LEN);
+            }
+            if(!flipper_format_write_hex(file, "SIO", sio, sizeof(sio))) break;
+        }
+        FURI_LOG_D(TAG, "post sio");
+        if(!flipper_format_write_hex(
+               file, "Diversifier", AA1[PICOPASS_CSN_BLOCK_INDEX].data, PICOPASS_BLOCK_LEN))
+            break;
+
+        result = true;
+    } while(false);
+
+    return result;
+}
+
 static bool picopass_device_save_file_lfrfid(PicopassDevice* dev, FuriString* file_path) {
     furi_assert(dev);
     PicopassPacs* pacs = &dev->dev_data.pacs;
@@ -151,11 +204,13 @@ static bool picopass_device_save_file(
                 }
             }
             if(!block_saved) break;
+            saved = true;
         } else if(dev->format == PicopassDeviceSaveFormatLF) {
             saved = picopass_device_save_file_lfrfid(dev, temp_str);
+        } else if(dev->format == PicopassDeviceSaveFormatSeader) {
+            saved = picopass_device_save_file_seader(dev, file, temp_str);
         }
-        saved = true;
-    } while(0);
+    } while(false);
 
     if(!saved) {
         dialog_message_show_storage_error(dev->dialogs, "Can not save\nfile");
@@ -171,6 +226,9 @@ bool picopass_device_save(PicopassDevice* dev, const char* dev_name) {
             dev, dev_name, STORAGE_APP_DATA_PATH_PREFIX, PICOPASS_APP_EXTENSION, true);
     } else if(dev->format == PicopassDeviceSaveFormatLF) {
         return picopass_device_save_file(dev, dev_name, ANY_PATH("lfrfid"), ".rfid", true);
+    } else if(dev->format == PicopassDeviceSaveFormatSeader) {
+        return picopass_device_save_file(
+            dev, dev_name, EXT_PATH("apps_data/seader"), ".credential", true);
     }
 
     return false;
