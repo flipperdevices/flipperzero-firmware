@@ -3,7 +3,7 @@ layout: home
 ---
 <script src="https://cdn.jsdelivr.net/npm/anchor-js/anchor.min.js"></script>
 
-A [Flipper Zero](https://flipperzero.one/) application (aka "fap") to interface with a SAM from the Flipper Zero over UART.
+A [Flipper Zero](https://flipperzero.one/) application (aka "fap") to interface with a SAM from the Flipper Zero over UART.  Latest release on the [App Catalog](https://lab.flipper.net/apps/seader).
 
 # FAQ
 

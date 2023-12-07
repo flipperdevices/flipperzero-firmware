@@ -16,10 +16,15 @@ App(
     #            command="asn1c -D ${FAP_SRC_DIR}/lib/asn1 -no-gen-example -pdu=all ${FAP_SRC_DIR}/seader.asn1"
     #        ),
     #    ),
+    fap_libs=["mbedtls"],
     fap_private_libs=[
         Lib(
             name="asn1",
             cflags=["-Wno-error"],
+        ),
+        Lib(
+            name="loclass",
+            cflags=["-O3"],
         ),
     ],
     fap_icon_assets="icons",
@@ -27,6 +32,6 @@ App(
     fap_author="bettse",
     # fap_weburl="https://seader.ericbetts.dev",
     fap_weburl="https://github.com/bettse/seader/",
-    fap_version=(2, 0),
+    fap_version=(2, 1),
     fap_description="Interface with a SAM from the Flipper Zero over UART",
 )
