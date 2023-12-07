@@ -21,32 +21,16 @@ static void vibration_hot_count() {
     return;
 }
 
-// static void app_draw_callback(Canvas* canvas, void* ctx) {
-//     UNUSED(ctx);
-
-//     canvas_clear(canvas);
-//     char count_str[5];
-//     snprintf(count_str, 5, "%d", count); // Converti il conteggio in stringa per disegnarlo
-//     canvas_draw_str(canvas, 44, 24, count_str);
-// }
-
 static void app_draw_callback(Canvas* canvas, void* ctx) {
     UNUSED(ctx);
 
     canvas_clear(canvas);
     char count_str[5];
-    snprintf(count_str, 5, "%d", count);
+    snprintf(count_str, 5, "%d", count); // Converti il conteggio in stringa per disegnarlo
+    canvas_draw_str(canvas, 44, 24, count_str);
 
-    int text_width = canvas_glyph_width(canvas, count_str);
-    int x = (128 - text_width) / 2;
-    int y = 40; // Posizione y per centrare il testo in basso
-
-    canvas_draw_str(canvas, x, y, count_str);
-
-    // Aggiungi le informazioni sul conteggio delle carte
     canvas_draw_str(canvas, 0, 54, "Cards # 2-7= +1, 8 & 9= 0, and 10-Ace= -1");
 
-    // Aggiungi la descrizione della vibrazione quando il conteggio è "hot"
     canvas_draw_str(canvas, 0, 60, "Vibrates the running count in pulses when count is hot");
 }
 
