@@ -231,23 +231,23 @@ static bool custom_event_handler(void* context, uint32_t event) {
     if(event == CustomEventAppMenuEnter) {
         loaded_app_menu(model);
     } else if(event == CustomEventButtonPress + 1) {
-        send_subghz(model, "/ext/subghz/flip-a1.sub");
-        if(!send_ir(model, "/ext/infrared/flipboard.ir", "Flip-a1")) {
+        send_subghz(model, "/ext/subghz/flip1.sub");
+        if(!send_ir(model, "/ext/infrared/flipboard.ir", "Flip1")) {
             send_ir(model, "/ext/infrared/assets/tv.ir", "Power");
         }
     } else if(event == CustomEventButtonPress + 2) {
-        send_subghz(model, "/ext/subghz/flip-a2.sub");
-        if(!send_ir(model, "/ext/infrared/flipboard.ir", "Flip-a2")) {
+        send_subghz(model, "/ext/subghz/flip2.sub");
+        if(!send_ir(model, "/ext/infrared/flipboard.ir", "Flip2")) {
             send_ir(model, "/ext/infrared/assets/tv.ir", "Mute");
         }
     } else if(event == CustomEventButtonPress + 4) {
-        send_subghz(model, "/ext/subghz/flip-a3.sub");
-        if(!send_ir(model, "/ext/infrared/flipboard.ir", "Flip-a3")) {
+        send_subghz(model, "/ext/subghz/flip3.sub");
+        if(!send_ir(model, "/ext/infrared/flipboard.ir", "Flip3")) {
             send_ir(model, "/ext/infrared/assets/tv.ir", "Ch_prev");
         }
     } else if(event == CustomEventButtonPress + 8) {
-        send_subghz(model, "/ext/subghz/flip-a4.sub");
-        if(!send_ir(model, "/ext/infrared/flipboard.ir", "Flip-a4")) {
+        send_subghz(model, "/ext/subghz/flip4.sub");
+        if(!send_ir(model, "/ext/infrared/flipboard.ir", "Flip4")) {
             send_ir(model, "/ext/infrared/assets/tv.ir", "Ch_next");
         }
     }
