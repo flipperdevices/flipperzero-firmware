@@ -1,9 +1,9 @@
 App(
     appid="ws2812b_tester_app",
-    name="WS2812B LED Tester App",
+    name="WS2812B LED Tester",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="ws2812b_led_tester_app",
-    fap_version=(1, 7),
+    fap_version=(1, 8),
     stack_size=4 * 1024,
     requires=[
         "gui",
