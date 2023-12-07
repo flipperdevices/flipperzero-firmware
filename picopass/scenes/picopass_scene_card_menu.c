@@ -3,6 +3,7 @@
 enum SubmenuIndex {
     SubmenuIndexSave,
     SubmenuIndexSaveAsLF,
+    SubmenuIndexSaveAsSeader,
     SubmenuIndexChangeKey,
     SubmenuIndexWrite,
     SubmenuIndexEmulate,
@@ -31,7 +32,12 @@ void picopass_scene_card_menu_on_enter(void* context) {
                 SubmenuIndexSave,
                 picopass_scene_card_menu_submenu_callback,
                 picopass);
-
+            submenu_add_item(
+                submenu,
+                "Save in Seader fmt",
+                SubmenuIndexSaveAsSeader,
+                picopass_scene_card_menu_submenu_callback,
+                picopass);
         } else {
             submenu_add_item(
                 submenu,
@@ -49,7 +55,14 @@ void picopass_scene_card_menu_on_enter(void* context) {
             SubmenuIndexSaveAsLF,
             picopass_scene_card_menu_submenu_callback,
             picopass);
-
+        if(pacs->sio) { // SR
+            submenu_add_item(
+                submenu,
+                "Save in Seader fmt",
+                SubmenuIndexSaveAsSeader,
+                picopass_scene_card_menu_submenu_callback,
+                picopass);
+        }
         submenu_add_item(
             submenu,
             "Write",
@@ -93,6 +106,12 @@ bool picopass_scene_card_menu_on_event(void* context, SceneManagerEvent event) {
                 picopass->scene_manager, PicopassSceneCardMenu, SubmenuIndexSave);
             scene_manager_next_scene(picopass->scene_manager, PicopassSceneSaveName);
             picopass->dev->format = PicopassDeviceSaveFormatHF;
+            consumed = true;
+        } else if(event.event == SubmenuIndexSaveAsSeader) {
+            scene_manager_set_scene_state(
+                picopass->scene_manager, PicopassSceneCardMenu, event.event);
+            scene_manager_next_scene(picopass->scene_manager, PicopassSceneSaveName);
+            picopass->dev->format = PicopassDeviceSaveFormatSeader;
             consumed = true;
         } else if(event.event == SubmenuIndexSaveAsLF) {
             scene_manager_set_scene_state(
