@@ -16,7 +16,7 @@ static void vibration_hot_count() {
     strcpy(notification_message, "Hot Count Threshold!");
     furi_hal_vibro_on(false);
     furi_hal_vibro_on(true);
-    furi_delay_ms(1500);
+    furi_delay_ms(200);
     furi_hal_vibro_on(false);
     strcpy(notification_message, "");
     return;
@@ -29,11 +29,13 @@ static void app_draw_callback(Canvas* canvas, void* ctx) {
     canvas_clear(canvas);
     char count_str[5];
     snprintf(count_str, 5, "%d", count);
-    canvas_draw_str(canvas, 44, 24, count_str);
+    canvas_draw_str(canvas, 55, 21, count_str);
 
-    canvas_draw_str(canvas, 0, 54, "Cards # 2 to 7= +1 (Up), 8 & 9= 0 (Ok), and 10 to Ace= -1 (Down)");
+    canvas_draw_str(canvas, 1, 40, "For Cards # 2 to 7 = +1 (Press Up)");
+    canvas_draw_str(canvas, 5, 47, "For 8 & 9 = 0 (Press Ok)");
+    canvas_draw_str(canvas, 1, 54, "From 10 to Ace = -1 (Press Down)");
 
-    canvas_draw_str(canvas, 0, 60, "Wait for the vibration when count is hot");
+    canvas_draw_str(canvas, 0, 61, "Wait for the vibration when count is hot");
 }
 
 
@@ -94,4 +96,3 @@ int32_t blackjack_counter_main(void* p) {
 
     return 0;
 }
-
