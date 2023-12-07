@@ -135,7 +135,7 @@ static void meal_pager_retekess_t119_generate_pager(void* context, char* station
     //char action[2];
     //action[0] = '0'; // 0 = ring, 1 = mute
     //action[1] = '\0';
-    FURI_LOG_D(TAG, "Generating T119 Data for Pager %lu", pager);
+    //FURI_LOG_D(TAG, "Generating T119 Data for Pager %lu", pager);
     app->current_pager = pager;
     meal_pager_transmit_model_set_pager(app->meal_pager_transmit, app->current_pager);
     uint32ToBinaray(pager, pagerId, 10);
@@ -147,16 +147,16 @@ static void meal_pager_retekess_t119_generate_pager(void* context, char* station
     //FURI_LOG_D(TAG, "Action Bin: %s", actionId);
     customConcat(fullId, stationId);
     customConcat(fullId, pagerId);
-    FURI_LOG_D(TAG, "Result %s", fullId);
+    //FURI_LOG_D(TAG, "Result %s", fullId);
     //FURI_LOG_D(TAG, "Station & Pager: %s", stationPagerId);
     //FURI_LOG_D(TAG, "Station & Pager: %s", stationPagerId);
     customConcat(fullId, actionId);
-    FURI_LOG_D(TAG, "CustomConcat: %s", fullId);
+    //FURI_LOG_D(TAG, "CustomConcat: %s", fullId);
     //FURI_LOG_D(TAG, "Station & Pager & Action: %s", fullId);
     char* manchester = encManchester(fullId, 0);
-    FURI_LOG_D(TAG, "Manchester: %s", manchester);
+    //FURI_LOG_D(TAG, "Manchester: %s", manchester);
     char* rawSignal = genRawData(200, 600, manchester);
-    FURI_LOG_D(TAG, "RAW_Data: %s", rawSignal);
+    //FURI_LOG_D(TAG, "RAW_Data: %s", rawSignal);
     flipper_format_write_string_cstr(ff, "RAW_Data", rawSignal);
     free(manchester);
     free(rawSignal);
@@ -164,7 +164,7 @@ static void meal_pager_retekess_t119_generate_pager(void* context, char* station
 
 static void meal_pager_retekess_t119_generate_station(void* context, uint32_t station, FlipperFormat* ff) {
     Meal_Pager* app = context;
-    FURI_LOG_D(TAG, "Generating T119 Data for Station %lu", station);
+    FURI_LOG_D(TAG, "Generating T119 Data for Station %lu. Pagers From %lu to %lu", station, app->first_pager, app->last_pager);
     app->current_station = station;
     app->current_pager = app->first_pager;
     char stationId[14];
