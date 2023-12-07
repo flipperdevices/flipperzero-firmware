@@ -31,9 +31,9 @@ static void app_draw_callback(Canvas* canvas, void* ctx) {
     snprintf(count_str, 5, "%d", count);
     canvas_draw_str(canvas, 44, 24, count_str);
 
-    canvas_draw_str(canvas, 0, 54, "Cards # 2-7= +1, 8 & 9= 0, and 10-Ace= -1");
+    canvas_draw_str(canvas, 0, 54, "Cards # 2 to 7= +1 (Up), 8 & 9= 0 (Ok), and 10 to Ace= -1 (Down)");
 
-    canvas_draw_str(canvas, 0, 60, "Vibrates the running count in pulses when count is hot");
+    canvas_draw_str(canvas, 0, 60, "Vibrates the running count when count is hot");
 }
 
 
