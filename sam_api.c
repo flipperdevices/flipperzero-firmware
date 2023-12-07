@@ -312,6 +312,13 @@ bool seader_unpack_pacs(Seader* seader, uint8_t* buf, size_t size) {
             seader_credential->credential = __builtin_bswap64(seader_credential->credential);
             seader_credential->credential = seader_credential->credential >>
                                             (64 - seader_credential->bit_length);
+
+            FURI_LOG_D(
+                TAG,
+                "credential (%d) %016llx",
+                seader_credential->bit_length,
+                seader_credential->credential);
+
             rtn = true;
         } else {
             // PACS too big (probably bad data)

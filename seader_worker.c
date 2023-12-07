@@ -196,7 +196,6 @@ void seader_worker_virtual_credential(Seader* seader) {
 
     if(dead_loops > 0) {
         FURI_LOG_D(TAG, "Final dead loops: %d", dead_loops);
-        view_dispatcher_send_custom_event(seader->view_dispatcher, SeaderCustomEventPollerSuccess);
     } else {
         view_dispatcher_send_custom_event(seader->view_dispatcher, SeaderCustomEventWorkerExit);
     }
