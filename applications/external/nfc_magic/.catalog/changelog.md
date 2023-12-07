@@ -1,3 +1,6 @@
+## 1.3
+ - Fix incorrect gen4 password usage
+
 ## 1.2
  - Minimal changes for recent API updates
 
