@@ -9,10 +9,10 @@
 
 #define HOT_COUNT_THRESHOLD 4
 
-int count = 0; // Corretto il nome della variabile
+int count = 0;
 
 static void vibration_hot_count() {
-    char notification_message[50]; // Assumendo che la lunghezza massima della stringa sia 50
+    char notification_message[50];
     strcpy(notification_message, "Hot Count Threshold!");
     furi_hal_vibro_on(false);
     furi_hal_vibro_on(true);
@@ -28,7 +28,7 @@ static void app_draw_callback(Canvas* canvas, void* ctx) {
 
     canvas_clear(canvas);
     char count_str[5];
-    snprintf(count_str, 5, "%d", count); // Converti il conteggio in stringa per disegnarlo
+    snprintf(count_str, 5, "%d", count);
     canvas_draw_str(canvas, 44, 24, count_str);
 
     canvas_draw_str(canvas, 0, 54, "Cards # 2-7= +1, 8 & 9= 0, and 10-Ace= -1");
