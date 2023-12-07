@@ -1,3 +1,16 @@
+/**
+ * @file guess_the_number.c
+ * @brief A simple game where the player guesses a number between 0 and 99.
+ *
+ * This file contains the implementation of the "guess the number" game.
+ * The game prompts the player to guess a number between 0 and 99 and provides feedback
+ * on whether the guess is too high, too low, or correct. The player can use the up and down
+ * keys to adjust their guess, the ok key to check their guess, the back key to reset the game,
+ * and the left key to exit the game.
+ *
+ * The game is implemented using the Furi framework and includes functions for handling input,
+ * rendering the game screen, and processing the player's guess.
+ */
 #include <furi.h>
 #include <stdlib.h>
 #include <gui/gui.h>
