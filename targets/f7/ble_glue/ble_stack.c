@@ -89,7 +89,7 @@ bool ble_stack_init() {
 
     do {
         // Configure NVM store for pairing data
-        if((status = SHCI_C2_Config((SHCI_C2_CONFIG_Cmd_Param_t*)&config_param) != SHCI_Success)) {
+        if((status = SHCI_C2_Config((SHCI_C2_CONFIG_Cmd_Param_t*)&config_param))) {
             FURI_LOG_E(TAG, "Failed to configure 2nd core: %d", status);
             break;
         }

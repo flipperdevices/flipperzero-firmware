@@ -400,7 +400,7 @@ void cli_command_ps(Cli* cli, FuriString* args, void* context) {
         TaskControlBlock* tcb = (TaskControlBlock*)threads_ids[i];
         size_t thread_heap = memmgr_heap_get_thread_memory(threads_ids[i]);
         printf(
-            "%-17s %-20s %-6.2f %-5u 0x%-11lx %-6zu %-8lu %-8lu\r\n",
+            "%-17s %-20s %-6.2f %-5d 0x%-11lx %-6zu %-8lu %-8lu\r\n",
             furi_thread_get_appid(threads_ids[i]),
             furi_thread_get_name(threads_ids[i]),
             (double)run_times[i] / 1000,

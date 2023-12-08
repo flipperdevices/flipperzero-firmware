@@ -526,7 +526,7 @@ uint32_t furi_thread_enumerate(
 
             for(i = 0U; (i < count) && (i < array_item_count); i++) {
                 thread_array[i] = (FuriThreadId)task[i].xHandle;
-                if(run_time_array) {
+                if(run_time_array) { //-V1051
                     run_time_array[i] =
                         ((uint64_t)task[i].ulRunTimeCounter * 100000) / total_run_time;
                 }
