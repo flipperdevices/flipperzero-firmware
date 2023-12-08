@@ -74,7 +74,7 @@ def chunkArr(boolArr: list[int], chunks: int):
     Referenced from: https://www.geeksforgeeks.org/break-list-chunks-size-n-python/
     """
     for i in range(0, len(boolArr), chunks):
-        yield boolArr[i:i + chunks]
+        yield boolArr[i : i + chunks]
 
 
 def boolArrToXBM(img: list[int]) -> list[int]:
@@ -93,11 +93,11 @@ def boolArrToXBM(img: list[int]) -> list[int]:
         byteVal = 0
         for i in range(len(byte)):
             bit = byte[i]
-            byteVal |= (bit << i)
-        
+            byteVal |= bit << i
+
         # Now we have the assembled byte
         xbm.append(byteVal)
-    
+
     return xbm
 
 
@@ -117,14 +117,14 @@ def saveXBM(path: str, imgName: str, height: int, width: int, xbm: list[int]) ->
         saveFile.write("#define {}_height {}\n".format(imgName, height))
         # Write width
         saveFile.write("#define {}_width {}\n".format(imgName, width))
-        
+
         # Write beginning of bitmap
         saveFile.write("static uint8_t " + imgName + r"_xbm[] = {" + "\n")
 
         # Loop through each xbm and write it to the list
         for byte in xbm:
             saveFile.write("\t{},\n".format(hex(byte)))
-        
+
         # Close the bitmap array
         saveFile.write("};\n")
 
