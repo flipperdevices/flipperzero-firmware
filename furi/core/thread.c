@@ -522,7 +522,7 @@ uint32_t furi_thread_enumerate(
                 thread_array[i] = (FuriThreadId)task[i].xHandle;
                 if(run_time_array) {
                     run_time_array[i] =
-                        (uint32_t)(task[i].ulRunTimeCounter * 100000) / total_run_time;
+                        ((uint64_t)task[i].ulRunTimeCounter * 100000) / total_run_time;
                 }
             }
             count = i;
