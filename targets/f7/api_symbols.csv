@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,51.1,,
+Version,+,52.0,,
 Header,+,applications/drivers/subghz/cc1101_ext/cc1101_ext_interconnect.h,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
@@ -660,30 +660,11 @@ Function,+,bit_lib_set_bit,void,"uint8_t*, size_t, _Bool"
 Function,+,bit_lib_set_bits,void,"uint8_t*, size_t, uint8_t, uint8_t"
 Function,+,bit_lib_test_parity,_Bool,"const uint8_t*, size_t, uint8_t, BitLibParity, uint8_t"
 Function,+,bit_lib_test_parity_32,_Bool,"uint32_t, BitLibParity"
-Function,+,ble_app_get_key_storage_buff,void,"uint8_t**, uint16_t*"
-Function,+,ble_app_init,_Bool,
-Function,+,ble_app_thread_stop,void,
 Function,+,ble_gatt_characteristic_delete,void,"uint16_t, BleGattCharacteristicInstance*"
 Function,+,ble_gatt_characteristic_init,void,"uint16_t, const BleGattCharacteristicParams*, BleGattCharacteristicInstance*"
 Function,+,ble_gatt_characteristic_update,_Bool,"uint16_t, BleGattCharacteristicInstance*, const void*"
 Function,+,ble_gatt_service_add,_Bool,"uint8_t, const Service_UUID_t*, uint8_t, uint8_t, uint16_t*"
 Function,+,ble_gatt_service_delete,_Bool,uint16_t
-Function,+,ble_glue_force_c2_mode,BleGlueCommandResult,BleGlueC2Mode
-Function,-,ble_glue_fus_get_status,BleGlueCommandResult,
-Function,-,ble_glue_fus_stack_delete,BleGlueCommandResult,
-Function,-,ble_glue_fus_stack_install,BleGlueCommandResult,"uint32_t, uint32_t"
-Function,-,ble_glue_fus_wait_operation,BleGlueCommandResult,
-Function,+,ble_glue_get_c2_info,const BleGlueC2Info*,
-Function,-,ble_glue_get_c2_status,BleGlueStatus,
-Function,-,ble_glue_get_hardfault_info,const BleGlueHardfaultInfo*,
-Function,+,ble_glue_init,void,
-Function,+,ble_glue_is_alive,_Bool,
-Function,+,ble_glue_is_radio_stack_ready,_Bool,
-Function,+,ble_glue_reinit_c2,_Bool,
-Function,+,ble_glue_set_key_storage_changed_callback,void,"BleGlueKeyStorageChangedCallback, void*"
-Function,+,ble_glue_start,_Bool,
-Function,+,ble_glue_thread_stop,void,
-Function,+,ble_glue_wait_for_c2_start,_Bool,int32_t
 Function,-,ble_profile_hid_consumer_key_press,_Bool,"FuriHalBleProfileBase*, uint16_t"
 Function,-,ble_profile_hid_consumer_key_release,_Bool,"FuriHalBleProfileBase*, uint16_t"
 Function,-,ble_profile_hid_consumer_key_release_all,_Bool,FuriHalBleProfileBase*
@@ -703,6 +684,9 @@ Function,-,ble_service_event_dispatcher_init,void,
 Function,+,ble_service_event_dispatcher_register_handler,GapSvcEventHandler*,"BleServiceEventHandlerCb, void*"
 Function,-,ble_service_event_dispatcher_reset,void,
 Function,+,ble_service_event_dispatcher_unregister_handler,void,GapSvcEventHandler*
+Function,-,ble_stack_deinit,void,
+Function,-,ble_stack_get_key_storage_buff,void,"uint8_t**, uint16_t*"
+Function,-,ble_stack_init,_Bool,
 Function,+,ble_svc_battery_start,BleServiceBattery*,_Bool
 Function,+,ble_svc_battery_state_update,void,"uint8_t*, _Bool*"
 Function,+,ble_svc_battery_stop,void,BleServiceBattery*
@@ -721,6 +705,22 @@ Function,+,ble_svc_serial_set_rpc_active,void,"BleServiceSerial*, _Bool"
 Function,+,ble_svc_serial_start,BleServiceSerial*,
 Function,+,ble_svc_serial_stop,void,BleServiceSerial*
 Function,+,ble_svc_serial_update_tx,_Bool,"BleServiceSerial*, uint8_t*, uint16_t"
+Function,+,ble_system_force_c2_mode,BleGlueCommandResult,BleGlueC2Mode
+Function,-,ble_system_fus_get_status,BleGlueCommandResult,
+Function,-,ble_system_fus_stack_delete,BleGlueCommandResult,
+Function,-,ble_system_fus_stack_install,BleGlueCommandResult,"uint32_t, uint32_t"
+Function,-,ble_system_fus_wait_operation,BleGlueCommandResult,
+Function,+,ble_system_get_c2_info,const BleGlueC2Info*,
+Function,-,ble_system_get_c2_status,BleGlueStatus,
+Function,-,ble_system_get_hardfault_info,const BleGlueHardfaultInfo*,
+Function,+,ble_system_init,void,
+Function,+,ble_system_is_alive,_Bool,
+Function,+,ble_system_is_radio_stack_ready,_Bool,
+Function,+,ble_system_reinit_c2,_Bool,
+Function,+,ble_system_set_key_storage_changed_callback,void,"BleGlueKeyStorageChangedCallback, void*"
+Function,-,ble_system_start,_Bool,
+Function,-,ble_system_stop,void,
+Function,+,ble_system_wait_for_c2_start,_Bool,int32_t
 Function,-,bsearch,void*,"const void*, const void*, size_t, size_t, __compar_fn_t"
 Function,+,bt_disconnect,void,Bt*
 Function,+,bt_forget_bonded_devices,void,Bt*

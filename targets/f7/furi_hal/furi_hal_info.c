@@ -195,7 +195,7 @@ void furi_hal_info_get(PropertyValueCallback out, char sep, void* context) {
     }
 
     if(furi_hal_ble_is_alive()) {
-        const BleGlueC2Info* ble_c2_info = ble_glue_get_c2_info();
+        const BleGlueC2Info* ble_c2_info = ble_system_get_c2_info();
         property_value_out(&property_context, NULL, 2, "radio", "alive", "true");
         property_value_out(
             &property_context,

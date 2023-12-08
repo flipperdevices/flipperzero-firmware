@@ -7,6 +7,10 @@
 
 #define GAP_MAC_ADDR_SIZE (6)
 
+/*
+ *
+ */
+
 #ifdef __cplusplus
 extern "C" {
 #endif

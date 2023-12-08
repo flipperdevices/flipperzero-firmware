@@ -1,3 +1,4 @@
+#include "ble_system.h"
 #include "core/check.h"
 #include "gap.h"
 #include <furi_hal_ble.h>
@@ -39,6 +40,7 @@ static FuriHalBt furi_hal_ble = {
 };
 
 void furi_hal_ble_init() {
+    FURI_LOG_I(TAG, "Start BT initialization");
     furi_hal_bus_enable(FuriHalBusHSEM);
     furi_hal_bus_enable(FuriHalBusIPCC);
     furi_hal_bus_enable(FuriHalBusAES2);
@@ -54,7 +56,7 @@ void furi_hal_ble_init() {
     furi_check(LL_HSEM_1StepLock(HSEM, CFG_HW_CLK48_CONFIG_SEMID) == 0);
 
     // Start Core2
-    ble_glue_init();
+    ble_system_init();
 }
 
 void furi_hal_ble_lock_core2() {
@@ -98,9 +100,8 @@ bool furi_hal_ble_start_radio_stack() {
 
     do {
         // Wait until C2 is started or timeout
-        if(!ble_glue_wait_for_c2_start(furi_hal_ble_C2_START_TIMEOUT)) {
+        if(!ble_system_wait_for_c2_start(furi_hal_ble_C2_START_TIMEOUT)) {
             FURI_LOG_E(TAG, "Core2 start failed");
-            ble_glue_thread_stop();
             break;
         }
 
@@ -110,17 +111,17 @@ bool furi_hal_ble_start_radio_stack() {
         }
 
         // Check whether we support radio stack
-        const BleGlueC2Info* c2_info = ble_glue_get_c2_info();
+        const BleGlueC2Info* c2_info = ble_system_get_c2_info();
         if(!furi_hal_ble_radio_stack_is_supported(c2_info)) {
             FURI_LOG_E(TAG, "Unsupported radio stack");
             // Don't stop SHCI for crypto enclave support
             break;
         }
         // Starting radio stack
-        if(!ble_glue_start()) {
+        if(!ble_system_start()) {
             FURI_LOG_E(TAG, "Failed to start radio stack");
-            ble_glue_thread_stop();
-            ble_app_thread_stop();
+            ble_stack_deinit();
+            ble_system_stop();
             break;
         }
         res = true;
@@ -172,7 +173,7 @@ FuriHalBleProfileBase* furi_hal_ble_start_app(
     furi_check(current_profile == NULL);
 
     do {
-        if(!ble_glue_is_radio_stack_ready()) {
+        if(!ble_system_is_radio_stack_ready()) {
             FURI_LOG_E(TAG, "Can't start BLE App - radio stack did not start");
             break;
         }
@@ -212,14 +213,15 @@ void furi_hal_ble_reinit() {
     hci_reset();
 
     FURI_LOG_I(TAG, "Stop BLE related RTOS threads");
-    ble_app_thread_stop();
     gap_thread_stop();
+    ble_stack_deinit();
 
     FURI_LOG_I(TAG, "Reset SHCI");
-    furi_check(ble_glue_reinit_c2());
+    furi_check(ble_system_reinit_c2());
+    ble_system_stop();
 
+    // enterprise delay
     furi_delay_ms(100);
-    ble_glue_thread_stop();
 
     furi_hal_bus_disable(FuriHalBusHSEM);
     furi_hal_bus_disable(FuriHalBusIPCC);
@@ -227,9 +229,7 @@ void furi_hal_ble_reinit() {
     furi_hal_bus_disable(FuriHalBusPKA);
     furi_hal_bus_disable(FuriHalBusCRC);
 
-    FURI_LOG_I(TAG, "Start BT initialization");
     furi_hal_ble_init();
-
     furi_hal_ble_start_radio_stack();
     furi_hal_power_insomnia_exit();
 }
@@ -272,14 +272,14 @@ void furi_hal_ble_update_power_state(bool charging) {
 }
 
 void furi_hal_ble_get_key_storage_buff(uint8_t** key_buff_addr, uint16_t* key_buff_size) {
-    ble_app_get_key_storage_buff(key_buff_addr, key_buff_size);
+    ble_stack_get_key_storage_buff(key_buff_addr, key_buff_size);
 }
 
 void furi_hal_ble_set_key_storage_change_callback(
     BleGlueKeyStorageChangedCallback callback,
     void* context) {
     furi_assert(callback);
-    ble_glue_set_key_storage_changed_callback(callback, context);
+    ble_system_set_key_storage_changed_callback(callback, context);
 }
 
 void furi_hal_ble_nvm_sram_sem_acquire() {
@@ -328,7 +328,7 @@ void furi_hal_ble_dump_state(FuriString* buffer) {
 }
 
 bool furi_hal_ble_is_alive() {
-    return ble_glue_is_alive();
+    return ble_system_is_alive();
 }
 
 void furi_hal_ble_start_tone_tx(uint8_t channel, uint8_t power) {
@@ -393,7 +393,7 @@ void furi_hal_ble_stop_rx() {
 }
 
 bool furi_hal_ble_ensure_c2_mode(BleGlueC2Mode mode) {
-    BleGlueCommandResult fw_start_res = ble_glue_force_c2_mode(mode);
+    BleGlueCommandResult fw_start_res = ble_system_force_c2_mode(mode);
     if(fw_start_res == BleGlueCommandResultOK) {
         return true;
     } else if(fw_start_res == BleGlueCommandResultRestartPending) {

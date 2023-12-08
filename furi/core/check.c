@@ -87,7 +87,7 @@ static void __furi_print_stack_info() {
 }
 
 static void __furi_print_bt_stack_info() {
-    const BleGlueHardfaultInfo* fault_info = ble_glue_get_hardfault_info();
+    const BleGlueHardfaultInfo* fault_info = ble_system_get_hardfault_info();
     if(fault_info == NULL) {
         furi_hal_console_puts("\r\n\tcore2: not faulted");
     } else {

@@ -10,8 +10,8 @@
 #include <gap.h>
 // #include <services/serial_service.h>
 #include <furi_ble/profile_interface.h>
-#include <ble_glue.h>
-#include <ble_app.h>
+#include <ble_system.h>
+#include <ble_stack.h>
 
 // #include <furi_hal_ble_serial.h>
 
