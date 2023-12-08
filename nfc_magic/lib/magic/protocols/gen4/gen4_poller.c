@@ -171,6 +171,8 @@ NfcCommand gen4_poller_request_mode_handler(Gen4Poller* instance) {
         instance->state = Gen4PollerStateRequestWriteData;
     } else if(instance->gen4_event_data.request_mode.mode == Gen4PollerModeSetPassword) {
         instance->state = Gen4PollerStateChangePassword;
+    } else if(instance->gen4_event_data.request_mode.mode == Gen4PollerModeSetDefaultConfig) {
+        instance->state = Gen4PollerStateSetDefaultConfig;
     } else {
         instance->state = Gen4PollerStateFail;
     }
