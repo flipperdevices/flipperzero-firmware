@@ -31,6 +31,7 @@ This software is for experimental purposes only and is not meant for any illegal
 
 - Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-12-07 20:52 EST`
 - Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-12-07 20:52 EST`
+- SubGHz: [Fix repeater crash on known protocol key TX (By LeeroysHub)](https://github.com/LeeroysHub/RM-Flipper/commit/4b310755dd56fca6f96851a012fd94b05f46c933)
 
 ## IN THIS BRANCH:
 
