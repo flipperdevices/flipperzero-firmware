@@ -137,7 +137,7 @@ void subghz_txrx_stop(SubGhzTxRx* instance);
  * @param instance Pointer to a SubGhzTxRx
  * @param state State hopper
  */
-//void subghz_txrx_hopper_set_state(SubGhzTxRx* instance, SubGhzHopperState state);
+void subghz_txrx_hopper_set_state(SubGhzTxRx* instance, SubGhzHopperState state);
 
 /**
  * Unpause hopper
@@ -187,7 +187,7 @@ void subghz_txrx_speaker_unmute(SubGhzTxRx* instance);
  * @param instance Pointer to a SubGhzTxRx 
  * @param state State speaker
  */
-//void subghz_txrx_speaker_set_state(SubGhzTxRx* instance, SubGhzSpeakerState state);
+void subghz_txrx_speaker_set_state(SubGhzTxRx* instance, SubGhzSpeakerState state);
 
 /**
  * Get state speaker
@@ -296,7 +296,7 @@ void subghz_txrx_speaker_unmute(SubGhzTxRx* instance);
 * @param name Name of external radio device
 * @return bool True if is connected to the external radio device
 */
-//bool subghz_txrx_radio_device_is_external_connected(SubGhzTxRx* instance, const char* name);
+bool subghz_txrx_radio_device_is_external_connected(SubGhzTxRx* instance, const char* name);
 
 /* Set the selected radio device to use
 *
@@ -304,8 +304,8 @@ void subghz_txrx_speaker_unmute(SubGhzTxRx* instance);
 * @param radio_device_type Radio device type
 * @return SubGhzRadioDeviceType Type of installed radio device
 */
-/*SubGhzRadioDeviceType
-    subghz_txrx_radio_device_set(SubGhzTxRx* instance, SubGhzRadioDeviceType radio_device_type);*/
+SubGhzRadioDeviceType
+    subghz_txrx_radio_device_set(SubGhzTxRx* instance, SubGhzRadioDeviceType radio_device_type);
 
 /* Get the selected radio device to use
 *

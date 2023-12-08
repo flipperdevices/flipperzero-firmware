@@ -16,6 +16,7 @@ void meal_pager_scene_transmit_on_enter(void* context) {
     Meal_Pager* app = context;
     FURI_LOG_D(TAG, "Type is %lu", app->pager_type);
 
+    app->stop_transmit = false;
     meal_pager_blink_start_compile(app);
     meal_pager_transmit_model_set_type(app->meal_pager_transmit, app->pager_type);
     meal_pager_transmit_model_set_station(app->meal_pager_transmit, app->current_station);
@@ -23,11 +24,11 @@ void meal_pager_scene_transmit_on_enter(void* context) {
     meal_pager_transmit_set_callback(app->meal_pager_transmit, meal_pager_transmit_callback, app);
     view_dispatcher_switch_to_view(app->view_dispatcher, Meal_PagerViewIdTransmit);
     meal_pager_retekess_t119_generate_all(app);
-
-    meal_pager_blink_start_subghz(app);
-    app->stop_transmit = false;
     FURI_LOG_D(TAG, "Generated tmp.sub");
+    meal_pager_blink_start_subghz(app);
+    FURI_LOG_D(TAG, "Start Transmitting");
     subghz_send(app);
+    FURI_LOG_D(TAG, "Finished Transmitting");
     meal_pager_blink_stop(app);
 }
 
