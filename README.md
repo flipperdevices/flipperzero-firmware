@@ -13,6 +13,7 @@
 - Random number generation using Flipper Zero's hardware capabilities.
 - Intuitive interface with up/down keys for guessing and back key to restart the game.
 - Immediate feedback on guesses – whether they're too high, too low, or correct.
+- Use of Flipper Zero's LED, vibration and speaker to enhance the game experience.
 
 ## Installation
 1. Clone this repository to your local machine.
