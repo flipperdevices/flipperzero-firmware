@@ -21,7 +21,7 @@ bool ble_svc_hid_update_input_report(
     uint8_t* data,
     uint16_t len);
 
-// Expects data to be of length ble_svc_hid_INFO_LEN (4 bytes)
+// Expects data to be of length BLE_SVC_HID_INFO_LEN (4 bytes)
 bool ble_svc_hid_update_info(BleServiceHid* service, uint8_t* data);
 
 #ifdef __cplusplus

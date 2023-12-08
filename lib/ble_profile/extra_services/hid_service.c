@@ -9,18 +9,18 @@
 
 #define TAG "BleHid"
 
-#define ble_svc_hid_REPORT_MAP_MAX_LEN (255)
-#define ble_svc_hid_REPORT_MAX_LEN (255)
-#define ble_svc_hid_REPORT_REF_LEN (2)
-#define ble_svc_hid_INFO_LEN (4)
-#define ble_svc_hid_CONTROL_POINT_LEN (1)
+#define BLE_SVC_HID_REPORT_MAP_MAX_LEN (255)
+#define BLE_SVC_HID_REPORT_MAX_LEN (255)
+#define BLE_SVC_HID_REPORT_REF_LEN (2)
+#define BLE_SVC_HID_INFO_LEN (4)
+#define BLE_SVC_HID_CONTROL_POINT_LEN (1)
 
-#define ble_svc_hid_INPUT_REPORT_COUNT (3)
-#define ble_svc_hid_OUTPUT_REPORT_COUNT (0)
-#define ble_svc_hid_FEATURE_REPORT_COUNT (0)
-#define ble_svc_hid_REPORT_COUNT                                        \
-    (ble_svc_hid_INPUT_REPORT_COUNT + ble_svc_hid_OUTPUT_REPORT_COUNT + \
-     ble_svc_hid_FEATURE_REPORT_COUNT)
+#define BLE_SVC_HID_INPUT_REPORT_COUNT (3)
+#define BLE_SVC_HID_OUTPUT_REPORT_COUNT (0)
+#define BLE_SVC_HID_FEATURE_REPORT_COUNT (0)
+#define BLE_SVC_HID_REPORT_COUNT                                        \
+    (BLE_SVC_HID_INPUT_REPORT_COUNT + BLE_SVC_HID_OUTPUT_REPORT_COUNT + \
+     BLE_SVC_HID_FEATURE_REPORT_COUNT)
 
 typedef enum {
     HidSvcGattCharacteristicProtocolMode = 0,
@@ -67,7 +67,7 @@ static bool ble_svc_hid_report_data_callback(
         *data = report_data->data_ptr;
         *data_len = report_data->data_len;
     } else {
-        *data_len = ble_svc_hid_REPORT_MAP_MAX_LEN;
+        *data_len = BLE_SVC_HID_REPORT_MAP_MAX_LEN;
     }
     return false;
 }
@@ -97,7 +97,7 @@ static const BleGattCharacteristicParams ble_svc_hid_chars[HidSvcGattCharacteris
     [HidSvcGattCharacteristicInfo] =
         {.name = "HID Information",
          .data_prop_type = FlipperGattCharacteristicDataFixed,
-         .data.fixed.length = ble_svc_hid_INFO_LEN,
+         .data.fixed.length = BLE_SVC_HID_INFO_LEN,
          .data.fixed.ptr = NULL,
          .uuid.Char_UUID_16 = HID_INFORMATION_CHAR_UUID,
          .uuid_type = UUID_TYPE_16,
@@ -108,7 +108,7 @@ static const BleGattCharacteristicParams ble_svc_hid_chars[HidSvcGattCharacteris
     [HidSvcGattCharacteristicCtrlPoint] =
         {.name = "HID Control Point",
          .data_prop_type = FlipperGattCharacteristicDataFixed,
-         .data.fixed.length = ble_svc_hid_CONTROL_POINT_LEN,
+         .data.fixed.length = BLE_SVC_HID_CONTROL_POINT_LEN,
          .uuid.Char_UUID_16 = HID_CONTROL_POINT_CHAR_UUID,
          .uuid_type = UUID_TYPE_16,
          .char_properties = CHAR_PROP_WRITE_WITHOUT_RESP,
@@ -120,7 +120,7 @@ static const BleGattCharacteristicParams ble_svc_hid_chars[HidSvcGattCharacteris
 static const BleGattCharacteristicDescriptorParams ble_svc_hid_char_descr_template = {
     .uuid_type = UUID_TYPE_16,
     .uuid.Char_UUID_16 = REPORT_REFERENCE_DESCRIPTOR_UUID,
-    .max_length = ble_svc_hid_REPORT_REF_LEN,
+    .max_length = BLE_SVC_HID_REPORT_REF_LEN,
     .data_callback.fn = ble_svc_hid_char_desc_data_callback,
     .security_permissions = ATTR_PERMISSION_NONE,
     .access_permissions = ATTR_ACCESS_READ_WRITE,
@@ -144,9 +144,9 @@ static const BleGattCharacteristicParams ble_svc_hid_report_template = {
 struct BleServiceHid {
     uint16_t svc_handle;
     BleGattCharacteristicInstance chars[HidSvcGattCharacteristicCount];
-    BleGattCharacteristicInstance input_report_chars[ble_svc_hid_INPUT_REPORT_COUNT];
-    BleGattCharacteristicInstance output_report_chars[ble_svc_hid_OUTPUT_REPORT_COUNT];
-    BleGattCharacteristicInstance feature_report_chars[ble_svc_hid_FEATURE_REPORT_COUNT];
+    BleGattCharacteristicInstance input_report_chars[BLE_SVC_HID_INPUT_REPORT_COUNT];
+    BleGattCharacteristicInstance output_report_chars[BLE_SVC_HID_OUTPUT_REPORT_COUNT];
+    BleGattCharacteristicInstance feature_report_chars[BLE_SVC_HID_FEATURE_REPORT_COUNT];
     GapSvcEventHandler* event_handler;
 };
 
@@ -183,8 +183,8 @@ BleServiceHid* ble_svc_hid_start() {
            &ble_svc_hid_uuid,
            PRIMARY_SERVICE,
            2 + /* protocol mode */
-               (4 * ble_svc_hid_INPUT_REPORT_COUNT) + (3 * ble_svc_hid_OUTPUT_REPORT_COUNT) +
-               (3 * ble_svc_hid_FEATURE_REPORT_COUNT) + 1 + 2 + 2 +
+               (4 * BLE_SVC_HID_INPUT_REPORT_COUNT) + (3 * BLE_SVC_HID_OUTPUT_REPORT_COUNT) +
+               (3 * BLE_SVC_HID_FEATURE_REPORT_COUNT) + 1 + 2 + 2 +
                2, /* Service + Report Map + HID Information + HID Control Point */
            &hid_svc->svc_handle)) {
         free(hid_svc);
@@ -222,9 +222,9 @@ BleServiceHid* ble_svc_hid_start() {
     } HidSvcReportCharProps;
 
     HidSvcReportCharProps hid_report_chars[] = {
-        {0x01, ble_svc_hid_INPUT_REPORT_COUNT, hid_svc->input_report_chars},
-        {0x02, ble_svc_hid_OUTPUT_REPORT_COUNT, hid_svc->output_report_chars},
-        {0x03, ble_svc_hid_FEATURE_REPORT_COUNT, hid_svc->feature_report_chars},
+        {0x01, BLE_SVC_HID_INPUT_REPORT_COUNT, hid_svc->input_report_chars},
+        {0x02, BLE_SVC_HID_OUTPUT_REPORT_COUNT, hid_svc->output_report_chars},
+        {0x03, BLE_SVC_HID_FEATURE_REPORT_COUNT, hid_svc->feature_report_chars},
     };
 
     for(size_t report_type_idx = 0; report_type_idx < COUNT_OF(hid_report_chars);
@@ -268,7 +268,7 @@ bool ble_svc_hid_update_input_report(
     uint16_t len) {
     furi_assert(data);
     furi_assert(hid_svc);
-    furi_assert(input_report_num < ble_svc_hid_INPUT_REPORT_COUNT);
+    furi_assert(input_report_num < BLE_SVC_HID_INPUT_REPORT_COUNT);
 
     HidSvcDataWrapper report_data = {
         .data_ptr = data,
@@ -300,9 +300,9 @@ void ble_svc_hid_stop(BleServiceHid* hid_svc) {
     } HidSvcReportCharProps;
 
     HidSvcReportCharProps hid_report_chars[] = {
-        {ble_svc_hid_INPUT_REPORT_COUNT, hid_svc->input_report_chars},
-        {ble_svc_hid_OUTPUT_REPORT_COUNT, hid_svc->output_report_chars},
-        {ble_svc_hid_FEATURE_REPORT_COUNT, hid_svc->feature_report_chars},
+        {BLE_SVC_HID_INPUT_REPORT_COUNT, hid_svc->input_report_chars},
+        {BLE_SVC_HID_OUTPUT_REPORT_COUNT, hid_svc->output_report_chars},
+        {BLE_SVC_HID_FEATURE_REPORT_COUNT, hid_svc->feature_report_chars},
     };
 
     for(size_t report_type_idx = 0; report_type_idx < COUNT_OF(hid_report_chars);

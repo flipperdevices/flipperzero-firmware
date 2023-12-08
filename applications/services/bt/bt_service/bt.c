@@ -1,8 +1,8 @@
 #include "bt_i.h"
 #include "bt_keys_storage.h"
 
-#include "core/check.h"
-#include "furi_hal_ble.h"
+#include <core/check.h>
+#include <furi_hal_ble.h>
 #include <services/battery_service.h>
 #include <notification/notification_messages.h>
 #include <gui/elements.h>
