@@ -1,5 +1,9 @@
 # Xtreme-Apps
-Bundle of external apps tweaked for Xtreme
+Bundle of external apps tweaked for Xtreme.
+
+> [!IMPORTANT]
+> These apps are already included with all Xtreme Firmware releases.
+> This repository serves only as a way to keep them updated and maintained easier.
 
 ### Why?
 Apps we use for Xtreme are all modified (some lots more than others). This includes:
