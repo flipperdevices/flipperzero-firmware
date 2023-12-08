@@ -162,20 +162,12 @@ static void subghz_scene_add_to_history_callback(
                 FURI_LOG_E(TAG, "Missing TE");
                 return;
             } else {
+                //Save our TX variables now, start TX on the next tick event so the we arent tangled with the worker.
                 subghz->RepeaterTXLength = tmpTe;
-                subghz->RepeaterStartTime = furi_get_tick();
+                subghz->state_notifications = SubGhzNotificationStateTx;
+                notification_message(subghz->notifications, &subghz_sequence_repeat);
                 FURI_LOG_I(TAG, "Key Received, Transmitting now.");
             }
-
-            //CC1101 Stop RX -> Start TX
-            if(!subghz_tx_start(subghz, subghz->repeater_tx)) {
-                subghz_txrx_rx_start(subghz->txrx);
-                subghz_txrx_hopper_unpause(subghz->txrx);
-                subghz->state_notifications = SubGhzNotificationStateRx;
-            } else {
-                subghz->state_notifications = SubGhzNotificationStateTx;
-            }
-            notification_message(subghz->notifications, &subghz_sequence_repeat);
         } else {
             if(subghz_history_add_to_history(history, decoder_base, &preset)) {
                 furi_string_reset(item_name);
@@ -440,44 +432,55 @@ bool subghz_scene_receiver_on_event(void* context, SceneManagerEvent event) {
             break;
         }
     } else if(event.type == SceneManagerEventTypeTick) {
-        if(subghz->RepeaterTXLength > 0) {
-            uint32_t tmp = furi_get_tick() - subghz->RepeaterStartTime;
-            uint8_t RepeatMultiplier = (subghz->repeater == SubGhzRepeaterOnShort) ? 1 :        //No repeats, 1 key Tx
+        if(subghz->state_notifications != SubGhzNotificationStateTx) {
+            //Do the receive stuff, the repeater TX logic is here now!
+            if(subghz_txrx_hopper_get_state(subghz->txrx) != SubGhzHopperStateOFF) {
+                subghz_txrx_hopper_update(subghz->txrx);
+                subghz_scene_receiver_update_statusbar(subghz);
+            }
+
+            SubGhzThresholdRssiData ret_rssi = subghz_threshold_get_rssi_data(
+                subghz->threshold_rssi, subghz_txrx_radio_device_get_rssi(subghz->txrx));
+
+            subghz_receiver_rssi(subghz->subghz_receiver, ret_rssi.rssi);
+            subghz_protocol_decoder_bin_raw_data_input_rssi(
+                (SubGhzProtocolDecoderBinRAW*)subghz_txrx_get_decoder(subghz->txrx),
+                ret_rssi.rssi);
+        } else {
+            //Start or Stop TX?
+            if(subghz->RepeaterStartTime == 0) {
+                subghz->RepeaterStartTime = furi_get_tick();
+
+                //CC1101 Stop RX -> Start TX
+                if(!subghz_tx_start(subghz, subghz->repeater_tx)) {
+                    subghz_txrx_rx_start(subghz->txrx);
+                    subghz_txrx_hopper_unpause(subghz->txrx);
+                    subghz->state_notifications = SubGhzNotificationStateRx;
+                }
+            } else {
+                uint32_t tmp = furi_get_tick() - subghz->RepeaterStartTime;
+                uint8_t RepeatMultiplier = (subghz->repeater == SubGhzRepeaterOnShort) ? 1 :        //No repeats, 1 key Tx
                                        (subghz->repeater == SubGhzRepeaterOnLong)  ? 7 :        //Long Repeat
                                                                                      3;         //Normal Repeat
-            if(tmp > furi_ms_to_ticks(subghz->RepeaterTXLength) * RepeatMultiplier) {
-                /* AAAAARGH! The FLipper cant tell me how long the receive was happening.
+                if(tmp > furi_ms_to_ticks(subghz->RepeaterTXLength) * RepeatMultiplier) {
+                    /* AAAAARGH! The FLipper cant tell me how long the receive was happening.
                    I can find the minimum time to transmit a key though, so Ive just doubled it to get the key
                    to send OK to a receiver. It works on my car, by who knows how it will work on devices that look at TX time1
                    At least the key is guaranteed to be transmitted up to TWICE! Regardless of Te of a Key
                     
                     This is the best repeaterv the flipper can do without diving deeper into the firmware for some big changes!
                 */
-                FURI_LOG_I(TAG, "TXLength: %lu TxTime: %lu", subghz->RepeaterTXLength, tmp);
+                    FURI_LOG_I(TAG, "TXLength: %lu TxTime: %lu", subghz->RepeaterTXLength, tmp);
 
-                subghz_txrx_stop(subghz->txrx);
-                subghz->RepeaterTXLength = 0;
-                subghz->RepeaterStartTime = 0;
-                subghz->ignore_filter = 0x00;
-                subghz_txrx_rx_start(subghz->txrx);
-                subghz_txrx_hopper_unpause(subghz->txrx);
-                subghz->state_notifications = SubGhzNotificationStateRx;
-                //notification_message(subghz->notifications, &subghz_sequence_repeat);
-            }
-        } else {
-            if(subghz->state_notifications != SubGhzNotificationStateTx) {
-                if(subghz_txrx_hopper_get_state(subghz->txrx) != SubGhzHopperStateOFF) {
-                    subghz_txrx_hopper_update(subghz->txrx);
-                    subghz_scene_receiver_update_statusbar(subghz);
+                    subghz_txrx_stop(subghz->txrx);
+                    subghz->RepeaterTXLength = 0;
+                    subghz->RepeaterStartTime = 0;
+                    subghz->ignore_filter = 0x00;
+                    subghz_txrx_rx_start(subghz->txrx);
+                    subghz_txrx_hopper_unpause(subghz->txrx);
+                    subghz->state_notifications = SubGhzNotificationStateRx;
+                    //notification_message(subghz->notifications, &subghz_sequence_repeat);
                 }
-
-                SubGhzThresholdRssiData ret_rssi = subghz_threshold_get_rssi_data(
-                    subghz->threshold_rssi, subghz_txrx_radio_device_get_rssi(subghz->txrx));
-
-                subghz_receiver_rssi(subghz->subghz_receiver, ret_rssi.rssi);
-                subghz_protocol_decoder_bin_raw_data_input_rssi(
-                    (SubGhzProtocolDecoderBinRAW*)subghz_txrx_get_decoder(subghz->txrx),
-                    ret_rssi.rssi);
             }
         }
     }
