@@ -6,7 +6,7 @@ struct SubGhzTxRx {
     SubGhzWorker* worker;
 
     SubGhzEnvironment* environment;
-    /*SubGhzReceiver* receiver;*/
+    SubGhzReceiver* receiver;
     SubGhzTransmitter* transmitter;
     /*SubGhzProtocolDecoderBase* decoder_result;
     FlipperFormat* fff_data;
@@ -14,11 +14,11 @@ struct SubGhzTxRx {
     SubGhzRadioPreset* preset;
     SubGhzSetting* setting;
 
- /*   uint8_t hopper_timeout;
+    uint8_t hopper_timeout;
     uint8_t hopper_idx_frequency;
     bool is_database_loaded;
     SubGhzHopperState hopper_state;
-*/
+
     SubGhzTxRxState txrx_state;
     SubGhzSpeakerState speaker_state;
     const SubGhzDevice* radio_device;

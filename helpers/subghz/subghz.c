@@ -33,7 +33,7 @@ void subghz_send(void* context) {
 
     if(!flipper_format_file_open_existing(ff, MEAL_PAGER_TMP_FILE)) {
         //totp_close_config_file(fff_file);
-        FURI_LOG_E(TAG, "Error creating new file %s", MEAL_PAGER_TMP_FILE);
+        FURI_LOG_E(TAG, "Error reading Temp File %s", MEAL_PAGER_TMP_FILE);
         furi_record_close(RECORD_STORAGE);
         return;
     }
