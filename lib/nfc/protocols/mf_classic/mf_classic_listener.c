@@ -34,6 +34,7 @@ static void mf_classic_listener_reset_state(MfClassicListener* instance) {
     instance->cmd_in_progress = false;
     instance->current_cmd_handler_idx = 0;
     instance->transfer_value = 0;
+    instance->transfer_valid = false;
     instance->value_cmd = MfClassicValueCommandInvalid;
 }
 
@@ -154,7 +155,7 @@ static MfClassicListenerCommand
         uint32_t nt_num = nfc_util_bytes2num(instance->auth_context.nt.data, sizeof(MfClassicNt));
         uint32_t secret_poller = ar_num ^ crypto1_word(instance->crypto, 0, 0);
         if(secret_poller != prng_successor(nt_num, 64)) {
-            FURI_LOG_D(
+            FURI_LOG_T(
                 TAG, "Wrong reader key: %08lX != %08lX", secret_poller, prng_successor(nt_num, 64));
             mf_classic_listener_reset_state(instance);
             break;
@@ -272,6 +273,17 @@ static MfClassicListenerCommand mf_classic_listener_write_block_second_part_hand
 
         if(mf_classic_is_sector_trailer(block_num)) {
             MfClassicSectorTrailer* sec_tr = (MfClassicSectorTrailer*)&block;
+
+            // Check if any writing is allowed
+            if(!mf_classic_is_allowed_access(
+                   instance->data, block_num, key_type, MfClassicActionKeyAWrite) &&
+               !mf_classic_is_allowed_access(
+                   instance->data, block_num, key_type, MfClassicActionKeyBWrite) &&
+               !mf_classic_is_allowed_access(
+                   instance->data, block_num, key_type, MfClassicActionACWrite)) {
+                break;
+            }
+
             if(mf_classic_is_allowed_access(
                    instance->data, block_num, key_type, MfClassicActionKeyAWrite)) {
                 bit_buffer_write_bytes_mid(buff, sec_tr->key_a.data, 0, sizeof(MfClassicKey));
@@ -338,6 +350,7 @@ static MfClassicListenerCommand
             break;
         }
 
+        instance->transfer_valid = true;
         instance->cmd_in_progress = true;
         instance->current_cmd_handler_idx++;
         command = MfClassicListenerCommandAck;
@@ -382,6 +395,7 @@ static MfClassicListenerCommand
         }
 
         instance->transfer_value += data;
+        instance->transfer_valid = true;
 
         instance->cmd_in_progress = true;
         instance->current_cmd_handler_idx++;
@@ -411,6 +425,7 @@ static MfClassicListenerCommand
         mf_classic_value_to_block(
             instance->transfer_value, block_num, &instance->data->block[block_num]);
         instance->transfer_value = 0;
+        instance->transfer_valid = false;
 
         command = MfClassicListenerCommandAck;
     } while(false);
@@ -463,6 +478,13 @@ static const MfClassicListenerCmd mf_classic_listener_cmd_handlers[] = {
     {
         .cmd_start_byte = MF_CLASSIC_CMD_HALT_MSB,
         .cmd_len_bits = 2 * 8,
+        .command_num = COUNT_OF(mf_classic_listener_halt_handlers),
+        .handler = mf_classic_listener_halt_handlers,
+    },
+    {
+        // This crutch is necessary since some devices (like Pixel) send 15-bit "HALT" command ...
+        .cmd_start_byte = MF_CLASSIC_CMD_HALT_MSB,
+        .cmd_len_bits = 15,
         .command_num = COUNT_OF(mf_classic_listener_halt_handlers),
         .handler = mf_classic_listener_halt_handlers,
     },
@@ -581,7 +603,13 @@ NfcCommand mf_classic_listener_run(NfcGenericEvent event, void* context) {
         if(mfc_command == MfClassicListenerCommandAck) {
             mf_classic_listener_send_short_frame(instance, MF_CLASSIC_CMD_ACK);
         } else if(mfc_command == MfClassicListenerCommandNack) {
-            mf_classic_listener_send_short_frame(instance, MF_CLASSIC_CMD_NACK);
+            // Calculate nack based on the transfer buffer validity
+            uint8_t nack = MF_CLASSIC_CMD_NACK;
+            if(!instance->transfer_valid) {
+                nack += MF_CLASSIC_CMD_NACK_TRANSFER_INVALID;
+            }
+
+            mf_classic_listener_send_short_frame(instance, nack);
         } else if(mfc_command == MfClassicListenerCommandSilent) {
             command = NfcCommandReset;
         } else if(mfc_command == MfClassicListenerCommandSleep) {
