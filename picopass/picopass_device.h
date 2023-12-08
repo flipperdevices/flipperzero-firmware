@@ -70,6 +70,7 @@ typedef enum {
 typedef enum {
     PicopassDeviceSaveFormatHF,
     PicopassDeviceSaveFormatLF,
+    PicopassDeviceSaveFormatSeader,
 } PicopassDeviceSaveFormat;
 
 typedef enum {
