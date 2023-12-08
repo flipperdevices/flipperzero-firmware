@@ -1,0 +1,13 @@
+App(
+    appid="guess_the_number",
+    name="Guess The Number",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="guess_number_app",
+    stack_size=2 * 1024,
+    fap_category="Games",
+    fap_icon="images/appicon.png",
+    fap_author="kWAYTV",
+    fap_weburl="https://github.com/kWAYTV/guess-the-number-fz",
+    fap_version=(1, 0),
+    fap_description="This game challenges players to guess a randomly generated number within a specified range.",
+)

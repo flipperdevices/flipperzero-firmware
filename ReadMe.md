@@ -4,7 +4,7 @@
 &nbsp;<a href='https://shop.rogue-master.net/' target='_blank'><img src='https://rogue-master.net/img/Merch.png' alt='RM Merch'' title='RM Merch'></a>
 &nbsp;<a href='https://github.com/RogueMaster/awesome-flipperzero-withModules' target='_blank'><img src='https://rogue-master.net/img/Resources.png' alt='More Research / Assets' title='More Research / Assets'></a></h1>
 
-# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1130-1445-0.93.9-d9db571.tgz&channel=RM1130-1445-0.93.9-d9db571&version=0.93.9) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1130-1445-0.93.9-d9db571-NoAnim.tgz&channel=RM1130-1445-0.93.9-d9db571-NoAnim&version=0.93.9)
+# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1207-2110-0.93.9-a815d93.tgz&channel=RM1207-2110-0.93.9-a815d93&version=0.93.9) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1207-2110-0.93.9-a815d93-NoAnim.tgz&channel=RM1207-2110-0.93.9-a815d93-NoAnim&version=0.93.9)
 
 ## Thank you so much to our RM Pro/SUPER Patreon supporters! Because of people like you, we are able to offer the best and most up-to-date Flipper Zero Firmware!
 
@@ -27,48 +27,10 @@ This software is for experimental purposes only and is not meant for any illegal
 
 <a name="latest">
 
-## Latest Updates - [PATREON: Latest Release RM1206-0037-0.93.9-7816bcf](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
+## Latest Updates - [PATREON: Latest Release RM1207-2052-0.93.9-1465a2d](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-12-06 22:57 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-12-06 22:57 EST`
-- Updated: [BLE Spam v4.4 (By Willy-JL & ECTO-1A & Spooks4576 with research from xMasterX; OFW API thanks to noproto)](https://github.com/noproto/apple_ble_spam_ofw)
-- Variable List Item Get Function, Variable List Item Set Header Function & CFW App Scene Refresh Cleanup (By Willy-JL)
-- Updated: [UART Terminal v1.3 (By cool4uma)](https://github.com/cool4uma/UART_Terminal) [Hex mode in UART Terminal #32 (By rnadyrshin)](https://github.com/xMasterX/all-the-plugins/pull/32)
-- Updated: [u-blox GPS v0.3 (By liamhays)](https://github.com/liamhays/ublox)
-- OFW: [HID app: Add new function key icons #3236 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3236)
-- OFW: [Add the 'remove pairing' button to BLE hid #3237 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3237)
-- [Animations: Faster Code & Free Manifest List on Exit (By LeeroysHub)](https://github.com/LeeroysHub/RM-Flipper/commit/368aa032ec80aa47c8dc782a2b2729b4c4ea6c99)
-- OFW: [SubGhz: fix count bit for detect gate_tx protocol #3253 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/3253)
-- Updated: [Sub-GHz Playlist (By darmiel)](https://github.com/darmiel/flipper-playlist) Fix some subghz playlist memory leaks (By Willy-JL)
-- Updated: [HEX Viewer v2.0 (By QtRoS)](https://github.com/QtRoS/flipperzero-firmware)
-- Updated: [BLE Spam v4.4 (By Willy-JL & ECTO-1A & Spooks4576 with research from xMasterX; OFW API thanks to noproto)](https://github.com/noproto/apple_ble_spam_ofw) - Changes from xMasterX repository
-- Updated: [UART Terminal v1.3 (By cool4uma)](https://github.com/cool4uma/UART_Terminal) - Changes from xMasterX repository
-- UL: [Fix keeloq null pointer if unknown (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/9bf8f1015d6b4bc03478cbc8ad9e761ab3cc0be4)
-- Updated: [Wiegand Reader v1.3 (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/gpio)
-- Added: [MALVEKE GAME BOY Cartridge (GB/GBC) v1.0 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external/malveke_gb_cartridge) `Req: Malveke`
-- Added: [MALVEKE GAME BOY Emulator v1.0 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external/malveke_gb_emulator) `Req: Malveke`
-- Added: [MALVEKE GAME BOY Link-Camera v1.0 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external/malveke_gb_link_camera) `Req: Malveke`
-- Added: [MALVEKE GB Live Camera v1.0 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external/malveke_gb_live_camera) `Req: Malveke`
-- Added: [MALVEKE GAME BOY ADVANCE Cartridge v1.0 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external/malveke_gba_cartridge) `Req: Malveke`
-- Added: [MALVEKE Pokemon Trading v1.4 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external/malveke_pokemon_trading) `Req: Malveke` (Uses Different GPIO Than Standard Pokemon Trader App)
-- Added: [MALVEKE PIN Test v1.0 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external/malveke_pin_test) `Req: Malveke`
-- Updated: [ESP32CAM Marauder v0.6.5 (By 0xchocolate & eried)](https://github.com/eried/flipperzero-mayhem)
-- UL: SubGHz: [Fix Keeloq (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/10444b943e31fc03aa34e40f74e1c89760783541)
-- UL: SubGHz: [Fix SecPlus (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/c41604137974c70689a8a89f8c86ae76f43123c3)
-- Updated: [FlipBoard Keyboard v1.0 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
-- UL: [Add keys to mf_classic_dict.nfc #660 (By knlcory)](https://github.com/DarkFlippers/unleashed-firmware/pull/660)
-- NFC: [Bubbleland Play Card - keys from Bubble Land Arcade (By CaitSith2)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/a13fc836252d11618a356c30b60cd02a48d5c72e)
-- UL: [Add keys to mf_classic_dict.nfc #660 (By knlcory)](https://github.com/DarkFlippers/unleashed-firmware/pull/660)
-- NFC: [Bubbleland Play Card - keys from Bubble Land Arcade (By CaitSith2)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/a13fc836252d11618a356c30b60cd02a48d5c72e)
-- Updated: [WiFi (Marauder) v6.5 (By 0xchocolate & tcpassos)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) - Experimental PCAP on main USART Support (By Willy-JL)
-- Updated: [FlipBoard Blinky v1.0 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
-- Updated: [FlipBoard Keyboard v1.1 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
-- Updated: [Hangman v1.5 (By Evgeny Stepanischev & Eva Stepanischeva)](https://github.com/bolknote/Flipper-Zero-Hangman-Game)
-- Updated: [Sokoban v1.1 (By Racso)](https://github.com/Racso/fzero-apps), [Ultimate Tic-Tac-Toe (By Racso)](https://github.com/Racso/fzero-apps) & [Zero v1.3 (By Racso)](https://github.com/Racso/fzero-apps)
-- Updated: [Malveke APP Icons (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero)
-- Added: [WS2812B LED Tester v1.8 (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/gpio/ws2812b_tester)
-- Updated: [WS2812B LED Tester v1.8 (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/gpio/ws2812b_tester)
-- Updated: [FlipBoard Signal v2.0 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-12-07 20:52 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-12-07 20:52 EST`
 
 ## IN THIS BRANCH:
 
@@ -354,6 +316,7 @@ $ ./fbt dolphin_ext
 - [Five Nights at Flipper's (By sillygir1)](https://github.com/sillygir1/flipperzero-fnaf)
 - [Flappy Bird v1.1 (By DroomOne)](https://github.com/DroomOne/flipperzero-firmware/tree/dev/applications/flappy_bird) [Flappy: Border hitboxes, bigger Pilars (By TQMatvey)](https://github.com/DarkFlippers/unleashed-firmware/pull/114) [Increase pilars line width to improve visibility (By ahumeniy)](https://github.com/DarkFlippers/unleashed-firmware/pull/140)
 - [Game of Life v1.1 (Updated to work by tgxn) (By itsyourbedtime)](https://github.com/tgxn/flipperzero-firmware/blob/dev/applications/game_of_life/game_of_life.c)
+- [Guess The Number (By kWAYTV)](https://github.com/kWAYTV/guess-the-number-fz)
 - [Hangman v1.5 (By Evgeny Stepanischev & Eva Stepanischeva)](https://github.com/bolknote/Flipper-Zero-Hangman-Game) [With Anime Dictionary (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/9f0385f14547be5a3bdbc85323399e8b01b27607)
 - [Heap Defence v1.1 (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/fc776446de9fdd553b221c02668b925b689378d8) [(original by wquinoa & Vedmein)](https://github.com/Vedmein/flipperzero-firmware/tree/hd/svisto-perdelki)
 - [JetPack v1.1 (by timstrasser)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/1164e4d214efa38847e08c6387bf53578bc0d366)
@@ -619,4 +582,4 @@ $ ./fbt dolphin_ext
 - [Desktop Favorite Binds To Allow Opening Custom Game Menu. Whomever can complete this gets 3 months of subscriber builds. Patrons can DM me to add their monthly towards this bounty.](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/756)
 - `Bluetooth Audio` APP to allow flipper to pair to external speaker or headphones for wav/mp3 playback ($200 USD in ETH or BTC) (Don't think this is possible)
 
-# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1130-1445-0.93.9-d9db571.tgz&channel=RM1130-1445-0.93.9-d9db571&version=0.93.9) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1130-1445-0.93.9-d9db571-NoAnim.tgz&channel=RM1130-1445-0.93.9-d9db571-NoAnim&version=0.93.9)
+# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1207-2110-0.93.9-a815d93.tgz&channel=RM1207-2110-0.93.9-a815d93&version=0.93.9) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1207-2110-0.93.9-a815d93-NoAnim.tgz&channel=RM1207-2110-0.93.9-a815d93-NoAnim&version=0.93.9)
