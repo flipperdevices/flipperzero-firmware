@@ -225,6 +225,12 @@ void furi_thread_set_priority(FuriThread* thread, FuriThreadPriority priority) {
     thread->priority = priority;
 }
 
+FuriThreadPriority furi_thread_get_priority(FuriThread* thread) {
+    furi_assert(thread);
+    TaskHandle_t hTask = furi_thread_get_id(thread);
+    return (FuriThreadPriority)uxTaskPriorityGet(hTask);
+}
+
 void furi_thread_set_current_priority(FuriThreadPriority priority) {
     UBaseType_t new_priority = priority ? priority : FuriThreadPriorityNormal;
     vTaskPrioritySet(NULL, new_priority);

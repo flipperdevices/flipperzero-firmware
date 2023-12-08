@@ -138,6 +138,13 @@ void furi_thread_set_context(FuriThread* thread, void* context);
  */
 void furi_thread_set_priority(FuriThread* thread, FuriThreadPriority priority);
 
+/** Get FuriThread priority
+ *
+ * @param      thread   FuriThread instance
+ * @return     FuriThreadPriority value
+ */
+FuriThreadPriority furi_thread_get_priority(FuriThread* thread);
+
 /** Set current thread priority
  *
  * @param      priority FuriThreadPriority value

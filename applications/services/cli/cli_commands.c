@@ -404,7 +404,7 @@ void cli_command_ps(Cli* cli, FuriString* args, void* context) {
             furi_thread_get_appid(threads_ids[i]),
             furi_thread_get_name(threads_ids[i]),
             (double)run_times[i] / 1000,
-            furi_thread_get_current_priority(threads_ids[i]),
+            furi_thread_get_priority(threads_ids[i]),
             (uint32_t)tcb->pxStack,
             thread_heap == MEMMGR_HEAP_UNKNOWN ? 0u : thread_heap,
             (uint32_t)(tcb->pxEndOfStack - tcb->pxStack + 1) * sizeof(StackType_t),
