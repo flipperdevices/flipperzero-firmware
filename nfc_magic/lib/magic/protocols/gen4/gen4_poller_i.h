@@ -49,6 +49,7 @@ typedef enum {
     Gen4PollerStateWrite,
     Gen4PollerStateWipe,
     Gen4PollerStateChangePassword,
+    Gen4PollerStateSetDefaultConfig,
     Gen4PollerStateSuccess,
     Gen4PollerStateFail,
 

@@ -5,6 +5,7 @@
 #include <nfc/nfc_poller.h>
 
 #include <furi/furi.h>
+#include <stdbool.h>
 
 #define GEN4_POLLER_THREAD_FLAG_DETECTED (1U << 0)
 
@@ -439,6 +440,36 @@ NfcCommand gen4_poller_write_handler(Gen4Poller* instance) {
     return command;
 }
 
+NfcCommand gen4_poller_set_default_config_handler(Gen4Poller* instance) {
+    NfcCommand command = NfcCommandContinue;
+
+    memcpy(instance->config, gen4_poller_default_config, sizeof(gen4_poller_default_config));
+
+    do {
+        instance->gen4_event.type = Gen4PollerEventTypeRequestSetDefaultConfig;
+        command = instance->callback(instance->gen4_event, instance->context);
+        if(command != NfcCommandContinue) break;
+
+        memcpy(instance->config, gen4_poller_default_config, sizeof(gen4_poller_default_config));
+
+        Gen4PollerError error = gen4_poller_set_config(
+            instance,
+            instance->password,
+            instance->config,
+            sizeof(gen4_poller_default_config),
+            false);
+        if(error != Gen4PollerErrorNone) {
+            FURI_LOG_E(TAG, "Failed to set default config: %d", error);
+            instance->state = Gen4PollerStateFail;
+            break;
+        }
+
+        instance->state = Gen4PollerStateSuccess;
+    } while(false);
+
+    return command;
+}
+
 NfcCommand gen4_poller_change_password_handler(Gen4Poller* instance) {
     NfcCommand command = NfcCommandContinue;
 
@@ -493,6 +524,7 @@ static const Gen4PollerStateHandler gen4_poller_state_handlers[Gen4PollerStateNu
     [Gen4PollerStateRequestWriteData] = gen4_poller_request_write_data_handler,
     [Gen4PollerStateWrite] = gen4_poller_write_handler,
     [Gen4PollerStateWipe] = gen4_poller_wipe_handler,
+    [Gen4PollerStateSetDefaultConfig] = gen4_poller_set_default_config_handler,
     [Gen4PollerStateChangePassword] = gen4_poller_change_password_handler,
     [Gen4PollerStateSuccess] = gen4_poller_success_handler,
     [Gen4PollerStateFail] = gen4_poller_fail_handler,

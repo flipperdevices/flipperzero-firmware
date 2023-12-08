@@ -28,6 +28,7 @@ typedef enum {
     Gen4PollerEventTypeRequestMode,
     Gen4PollerEventTypeRequestDataToWrite,
     Gen4PollerEventTypeRequestNewPassword,
+    Gen4PollerEventTypeRequestSetDefaultConfig,
 
     Gen4PollerEventTypeSuccess,
     Gen4PollerEventTypeFail,
