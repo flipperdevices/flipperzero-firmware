@@ -1,6 +1,6 @@
 #include "battery_service.h"
 #include "app_common.h"
-#include "core/check.h"
+#include <core/check.h>
 #include <furi_ble/gatt.h>
 
 #include <ble/ble.h>

@@ -1,7 +1,7 @@
 #include "cli_commands.h"
 #include "cli_command_gpio.h"
 
-#include "core/thread.h"
+#include <core/thread.h>
 #include <furi_hal.h>
 #include <furi_hal_info.h>
 #include <task_control_block.h>

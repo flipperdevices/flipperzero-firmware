@@ -403,7 +403,7 @@ int32_t bt_srv(void* p) {
 
     if(furi_hal_rtc_get_boot_mode() != FuriHalRtcBootModeNormal) {
         FURI_LOG_W(TAG, "Skipping start in special boot mode");
-        ble_system_wait_for_c2_start(furi_hal_ble_C2_START_TIMEOUT);
+        ble_system_wait_for_c2_start(FURI_HAL_BLE_C2_START_TIMEOUT);
         furi_record_create(RECORD_BT, bt);
         return 0;
     }

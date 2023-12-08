@@ -178,7 +178,7 @@ static bool update_task_manage_radiostack(UpdateTask* update_task) {
     update_task_set_progress(update_task, UpdateTaskStageRadioBusy, 10);
     bool success = false;
     do {
-        CHECK_RESULT(ble_system_wait_for_c2_start(furi_hal_ble_C2_START_TIMEOUT));
+        CHECK_RESULT(ble_system_wait_for_c2_start(FURI_HAL_BLE_C2_START_TIMEOUT));
 
         const BleGlueC2Info* c2_state = ble_system_get_c2_info();
 

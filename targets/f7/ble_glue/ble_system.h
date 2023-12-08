@@ -17,7 +17,7 @@ typedef enum {
     BleGlueC2ModeStack,
 } BleGlueC2Mode;
 
-#define ble_system_MAX_VERSION_STRING_LEN 20
+#define BLE_MAX_VERSION_STRING_LEN 20
 typedef struct {
     BleGlueC2Mode mode;
     /**
@@ -33,7 +33,7 @@ typedef struct {
     uint8_t MemorySizeSram1; /*< Multiple of 1K */
     uint8_t MemorySizeFlash; /*< Multiple of 4K */
     uint8_t StackType;
-    char StackTypeString[ble_system_MAX_VERSION_STRING_LEN];
+    char StackTypeString[BLE_MAX_VERSION_STRING_LEN];
     /**
      * Fus Info
      */

@@ -1,6 +1,6 @@
 #include "ble_stack.h"
 
-#include "core/check.h"
+#include <core/check.h>
 #include <ble/ble.h>
 #include <interface/patterns/ble_thread/tl/hci_tl.h>
 #include <interface/patterns/ble_thread/shci/shci.h>

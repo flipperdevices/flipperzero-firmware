@@ -236,7 +236,7 @@ bool ble_svc_serial_update_tx(BleServiceSerial* serial_svc, uint8_t* data, uint1
     }
 
     for(uint16_t remained = data_len; remained > 0;) {
-        uint8_t value_len = MIN(ble_svc_serial_CHAR_VALUE_LEN_MAX, remained);
+        uint8_t value_len = MIN(BLE_SVC_SERIAL_CHAR_VALUE_LEN_MAX, remained);
         uint16_t value_offset = data_len - remained;
         remained -= value_len;
 

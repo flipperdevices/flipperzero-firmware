@@ -1,5 +1,5 @@
 #include "event_dispatcher.h"
-#include "core/check.h"
+#include <core/check.h>
 #include <furi.h>
 #include <ble/ble.h>
 

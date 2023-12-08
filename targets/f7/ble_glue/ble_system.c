@@ -166,7 +166,7 @@ static void ble_system_update_c2_fw_info() {
     local_info->StackType = wireless_info.StackType;
     snprintf(
         local_info->StackTypeString,
-        ble_system_MAX_VERSION_STRING_LEN,
+        BLE_MAX_VERSION_STRING_LEN,
         "%d.%d.%d:%s",
         local_info->VersionMajor,
         local_info->VersionMinor,

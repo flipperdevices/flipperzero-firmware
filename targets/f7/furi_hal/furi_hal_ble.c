@@ -1,6 +1,6 @@
 #include "ble_system.h"
-#include "core/check.h"
-#include "gap.h"
+#include <core/check.h>
+#include <gap.h>
 #include <furi_hal_ble.h>
 #include <furi_ble/profile_interface.h>
 
@@ -15,8 +15,6 @@
 
 #include <furi_hal_version.h>
 #include <furi_hal_power.h>
-// #include <ble_profile_hid.h>
-// #include <furi_hal_ble_serial.h>
 #include <furi_hal_bus.c>
 #include <services/battery_service.h>
 #include <furi.h>
@@ -72,14 +70,14 @@ void furi_hal_ble_unlock_core2() {
 static bool furi_hal_ble_radio_stack_is_supported(const BleGlueC2Info* info) {
     bool supported = false;
     if(info->StackType == INFO_STACK_TYPE_BLE_LIGHT) {
-        if(info->VersionMajor >= furi_hal_ble_STACK_VERSION_MAJOR &&
-           info->VersionMinor >= furi_hal_ble_STACK_VERSION_MINOR) {
+        if(info->VersionMajor >= FURI_HAL_BLE_STACK_VERSION_MAJOR &&
+           info->VersionMinor >= FURI_HAL_BLE_STACK_VERSION_MINOR) {
             furi_hal_ble.stack = FuriHalBtStackLight;
             supported = true;
         }
     } else if(info->StackType == INFO_STACK_TYPE_BLE_FULL) {
-        if(info->VersionMajor >= furi_hal_ble_STACK_VERSION_MAJOR &&
-           info->VersionMinor >= furi_hal_ble_STACK_VERSION_MINOR) {
+        if(info->VersionMajor >= FURI_HAL_BLE_STACK_VERSION_MAJOR &&
+           info->VersionMinor >= FURI_HAL_BLE_STACK_VERSION_MINOR) {
             furi_hal_ble.stack = FuriHalBtStackFull;
             supported = true;
         }
@@ -100,7 +98,7 @@ bool furi_hal_ble_start_radio_stack() {
 
     do {
         // Wait until C2 is started or timeout
-        if(!ble_system_wait_for_c2_start(furi_hal_ble_C2_START_TIMEOUT)) {
+        if(!ble_system_wait_for_c2_start(FURI_HAL_BLE_C2_START_TIMEOUT)) {
             FURI_LOG_E(TAG, "Core2 start failed");
             break;
         }

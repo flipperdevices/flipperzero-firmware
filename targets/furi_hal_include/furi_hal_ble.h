@@ -15,9 +15,9 @@
 
 // #include <furi_hal_ble_serial.h>
 
-#define furi_hal_ble_STACK_VERSION_MAJOR (1)
-#define furi_hal_ble_STACK_VERSION_MINOR (12)
-#define furi_hal_ble_C2_START_TIMEOUT 1000
+#define FURI_HAL_BLE_STACK_VERSION_MAJOR (1)
+#define FURI_HAL_BLE_STACK_VERSION_MINOR (12)
+#define FURI_HAL_BLE_C2_START_TIMEOUT 1000
 
 #ifdef __cplusplus
 extern "C" {
