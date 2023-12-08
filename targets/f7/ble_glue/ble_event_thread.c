@@ -27,12 +27,11 @@ static int32_t ble_event_thread(void* context) {
         flags =
             furi_thread_flags_wait(BLE_EVENT_THREAD_FLAG_ALL, FuriFlagWaitAny, FuriWaitForever);
         if(flags & BLE_EVENT_THREAD_FLAG_SHCI_EVENT) {
-            FURI_LOG_W(TAG, "shci_user_evt_proc");
-
+            // FURI_LOG_W(TAG, "shci_user_evt_proc");
             shci_user_evt_proc();
         }
         if(flags & BLE_EVENT_THREAD_FLAG_HCI_EVENT) {
-            FURI_LOG_W(TAG, "hci_user_evt_proc");
+            // FURI_LOG_W(TAG, "hci_user_evt_proc");
             hci_user_evt_proc();
         }
         if(flags & BLE_EVENT_THREAD_FLAG_KILL_THREAD) {
@@ -49,7 +48,7 @@ void shci_notify_asynch_evt(void* pdata) {
         return;
     }
 
-    FURI_LOG_W(TAG, "shci_notify_asynch_evt");
+    // FURI_LOG_W(TAG, "shci_notify_asynch_evt");
     FuriThreadId thread_id = furi_thread_get_id(event_thread);
     furi_assert(thread_id);
     furi_thread_flags_set(thread_id, BLE_EVENT_THREAD_FLAG_SHCI_EVENT);
@@ -58,7 +57,7 @@ void shci_notify_asynch_evt(void* pdata) {
 void hci_notify_asynch_evt(void* pdata) {
     UNUSED(pdata);
     furi_check(event_thread);
-    FURI_LOG_W(TAG, "hci_notify_asynch_evt");
+    // FURI_LOG_W(TAG, "hci_notify_asynch_evt");
     FuriThreadId thread_id = furi_thread_get_id(event_thread);
     furi_assert(thread_id);
     furi_thread_flags_set(thread_id, BLE_EVENT_THREAD_FLAG_HCI_EVENT);

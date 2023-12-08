@@ -256,10 +256,16 @@ uint32_t furi_thread_flags_wait(uint32_t flags, uint32_t options, uint32_t timeo
  * @brief Enumerate threads
  * 
  * @param thread_array array of FuriThreadId, where thread ids will be stored
+ * @param run_time_array array of uint32_t, where thread run time will be stored. 
+ *                       Values are a fraction of thread's runtime multiplied by 1000.
+ *                       For example, if a thread has 1.5% of runtime, the value will be 1500.
  * @param array_items array size
  * @return uint32_t threads count
  */
-uint32_t furi_thread_enumerate(FuriThreadId* thread_array, uint32_t array_items);
+uint32_t furi_thread_enumerate(
+    FuriThreadId* thread_array,
+    uint32_t* run_time_array,
+    uint32_t array_item_count);
 
 /**
  * @brief Get thread name

@@ -451,14 +451,14 @@ const BleGlueHardfaultInfo* ble_system_get_hardfault_info() {
 // AN5289, 4.9
 
 void shci_cmd_resp_wait(uint32_t timeout) {
-    FURI_LOG_I(TAG, "shci_cmd_resp_wait");
+    // FURI_LOG_I(TAG, "shci_cmd_resp_wait");
     furi_check(ble_glue);
     furi_check(furi_semaphore_acquire(ble_glue->shci_sem, timeout) == FuriStatusOk);
 }
 
 void shci_cmd_resp_release(uint32_t flag) {
     UNUSED(flag);
-    FURI_LOG_I(TAG, "shci_cmd_resp_release");
+    // FURI_LOG_I(TAG, "shci_cmd_resp_release");
     furi_check(ble_glue);
     furi_check(furi_semaphore_release(ble_glue->shci_sem) == FuriStatusOk);
 }

@@ -28,7 +28,11 @@
 /* Heap size determined automatically by linker */
 // #define configTOTAL_HEAP_SIZE                    ((size_t)0)
 #define configMAX_TASK_NAME_LEN (32)
-#define configGENERATE_RUN_TIME_STATS 0
+
+#define configGENERATE_RUN_TIME_STATS 1
+#define portGET_RUN_TIME_COUNTER_VALUE() (xTaskGetTickCount())
+#define portCONFIGURE_TIMER_FOR_RUN_TIME_STATS()
+
 #define configUSE_TRACE_FACILITY 1
 #define configUSE_16_BIT_TICKS 0
 #define configUSE_MUTEXES 1

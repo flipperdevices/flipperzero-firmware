@@ -12,6 +12,7 @@
 #include <furi_hal_console.h>
 
 #include <FreeRTOS.h>
+#include <stdint.h>
 #include <task.h>
 
 #define TAG "FuriThread"
@@ -498,23 +499,31 @@ uint32_t furi_thread_flags_wait(uint32_t flags, uint32_t options, uint32_t timeo
     return (rflags);
 }
 
-uint32_t furi_thread_enumerate(FuriThreadId* thread_array, uint32_t array_items) {
+uint32_t furi_thread_enumerate(
+    FuriThreadId* thread_array,
+    uint32_t* run_time_array,
+    uint32_t array_item_count) {
     uint32_t i, count;
     TaskStatus_t* task;
 
-    if(FURI_IS_IRQ_MODE() || (thread_array == NULL) || (array_items == 0U)) {
+    if(FURI_IS_IRQ_MODE() || (thread_array == NULL) || (array_item_count == 0U)) {
         count = 0U;
     } else {
         vTaskSuspendAll();
 
         count = uxTaskGetNumberOfTasks();
         task = pvPortMalloc(count * sizeof(TaskStatus_t));
+        uint32_t total_run_time;
 
         if(task != NULL) {
-            count = uxTaskGetSystemState(task, count, NULL);
+            count = uxTaskGetSystemState(task, count, &total_run_time);
 
-            for(i = 0U; (i < count) && (i < array_items); i++) {
+            for(i = 0U; (i < count) && (i < array_item_count); i++) {
                 thread_array[i] = (FuriThreadId)task[i].xHandle;
+                if(run_time_array) {
+                    run_time_array[i] =
+                        (uint32_t)(task[i].ulRunTimeCounter * 100000) / total_run_time;
+                }
             }
             count = i;
         }
