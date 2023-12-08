@@ -6,6 +6,9 @@
 ## Preview
 [Click me to see a brief video](https://streamable.com/b6iusj)
 
+## Boilerplate
+[This app was created using leedave's boilerplate](https://github.com/leedave/flipper-zero-fap-boilerplate)
+
 ## Features
 - Random number generation using Flipper Zero's hardware capabilities.
 - Intuitive interface with up/down keys for guessing and back key to restart the game.
