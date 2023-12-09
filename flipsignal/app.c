@@ -233,7 +233,7 @@ static bool custom_event_handler(void* context, uint32_t event) {
         if(!send_ir(model, "/ext/infrared/flipboard.ir", "Flip1")) {
             send_ir(model, "/ext/infrared/assets/tv.ir", "Power");
         }
-    } else if(event == CustomEventFlipboardButtonPress + (1 | 2 | 0 | 0)) {
+    } else if(event == CustomEventFlipboardButtonPress + (0 | 2 | 0 | 0)) {
         send_subghz(model, "/ext/subghz/flip2.sub");
         if(!send_ir(model, "/ext/infrared/flipboard.ir", "Flip2")) {
             send_ir(model, "/ext/infrared/assets/tv.ir", "Mute");
