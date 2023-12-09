@@ -15,17 +15,20 @@ static void meal_pager_close_config_file(FlipperFormat* file) {
     flipper_format_free(file);
 }
 
-FlipperFormat* meal_pager_save_subghz_buffer_file_start(void* context) {
+FlipperFormat* meal_pager_save_subghz_buffer_file_start(void* context, Storage* storage) {
     // SubGhz TXRX can only be loaded with files, makes sense as to save RAM
     Meal_Pager* app = context;
     UNUSED(app);
     FURI_LOG_D(TAG, "Creating Temp File");
-    Storage* storage = furi_record_open(RECORD_STORAGE);
+    //Storage* storage = furi_record_open(RECORD_STORAGE);
     FlipperFormat* ff = flipper_format_file_alloc(storage);
 
     // Overwrite wont work, so delete first
     if(storage_file_exists(storage, MEAL_PAGER_TMP_FILE)) {
-        storage_simply_remove(storage, MEAL_PAGER_TMP_FILE);
+        bool stored = storage_simply_remove(storage, MEAL_PAGER_TMP_FILE);
+        if (!stored) {
+            FURI_LOG_D(TAG, "Cannot remove file, seems to be open");
+        }
     }
 
     // Open File, create if not exists

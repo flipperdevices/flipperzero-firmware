@@ -27,7 +27,7 @@
 #define MEAL_PAGER_SUBGHZ_FILE_PRESET "FuriHalSubGhzPresetOok650Async"
 #define MEAL_PAGER_SUBGHZ_FILE_Protocol "RAW"
 
-FlipperFormat* meal_pager_save_subghz_buffer_file_start(void* context);
+FlipperFormat* meal_pager_save_subghz_buffer_file_start(void* context, Storage* storage);
 
 void meal_pager_save_subghz_buffer_stop(void* context, FlipperFormat* ff);
 
