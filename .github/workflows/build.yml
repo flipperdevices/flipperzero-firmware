@@ -3,7 +3,7 @@ on: [push, pull_request]
 jobs:
   ufbt-build-action:
     runs-on: ubuntu-latest
-    name: 'ufbt: Build for Dev branch (XFW-DEV)'
+    name: "ufbt: Build for Dev branch (XFW-DEV)"
     steps:
       - name: Checkout
         uses: actions/checkout@v4
