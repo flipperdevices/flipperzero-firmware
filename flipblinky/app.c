@@ -9,6 +9,9 @@
 // will be displayed after an action.
 #define MESSAGE_DISPLAY_TIME_MS 1900
 
+// The effect to initially use when the "Flipboard Blinky" view is shown.
+#define INITIAL_EFFECT_ID 2
+
 /**
  * @brief This method handles Flipper D-Pad input when in the FlipboardBlinky mode.
  * @param _event The InputEvent* to handle.
@@ -258,7 +261,7 @@ void flipboard_tick_callback(void* context) {
 void flipboard_enter_callback(void* context) {
     FlipboardModel* fm = flipboard_get_model((Flipboard*)context);
     FlipboardBlinkyModel* fbm = flipboard_model_get_custom_data(fm);
-    fbm->effect_id = 2;
+    fbm->effect_id = INITIAL_EFFECT_ID;
     flipboard_reset_effect(fm);
     flipboard_model_set_button_monitor(fm, flipboard_debounced_switch, (Flipboard*)context);
     furi_timer_start(fbm->timer, furi_ms_to_ticks(fbm->period_ms));
