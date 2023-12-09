@@ -30,7 +30,7 @@ void subghz_send(void* context) {
 
     subghz_load_protocol_from_file(subghz);
 
-    Storage* storage = furi_record_open(RECORD_STORAGE);
+    /*Storage* storage = furi_record_open(RECORD_STORAGE);
     FlipperFormat* ff = flipper_format_file_alloc(storage);
 
     if(!flipper_format_file_open_existing(ff, MEAL_PAGER_TMP_FILE)) {
@@ -38,16 +38,16 @@ void subghz_send(void* context) {
         FURI_LOG_E(TAG, "Error reading Temp File %s", MEAL_PAGER_TMP_FILE);
         furi_record_close(RECORD_STORAGE);
         return;
-    }
+    }*/
 
     //subghz_txrx_tx_start(subghz->txrx, ff);
     subghz_txrx_tx_start(subghz->txrx, subghz_txrx_get_fff_data(subghz->txrx)); //Seems like it must be done this way
 
-    flipper_format_rewind(ff);
+    /*flipper_format_rewind(ff);
     flipper_format_file_close(ff);
     flipper_format_free(ff);
 
-    furi_record_close(RECORD_STORAGE);
+    furi_record_close(RECORD_STORAGE);*/
 
 
     subghz_free(subghz);
