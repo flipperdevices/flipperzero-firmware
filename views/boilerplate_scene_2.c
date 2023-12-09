@@ -56,6 +56,7 @@ static void boilerplate_scene_2_model_init(BoilerplateScene2Model *const model)
     model->target_number = furi_hal_random_get() % 100;
     model->player_guess = 50;
     strcpy(model->game_message, "");
+    dolphin_deed(DolphinDeedPluginGameStart);
 }
 
 bool boilerplate_scene_2_input(InputEvent *event, void *context)
@@ -153,6 +154,7 @@ bool boilerplate_scene_2_input(InputEvent *event, void *context)
                         strcpy(model->game_message, "You win!");
                         boilerplate_play_win_sound(instance->context);
                         boilerplate_led_set_rgb(instance->context, 0, 255, 0);
+                        dolphin_deed(DolphinDeedPluginGameWin);
                     }
                     else
                     {
