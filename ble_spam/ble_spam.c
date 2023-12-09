@@ -620,7 +620,7 @@ int32_t ble_spam(void* p) {
     state->thread = furi_thread_alloc();
     furi_thread_set_callback(state->thread, adv_thread);
     furi_thread_set_context(state->thread, state);
-    furi_thread_set_stack_size(state->thread, 4096);
+    furi_thread_set_stack_size(state->thread, 2048);
     state->ctx.led_indicator = true;
     state->lock_timer = furi_timer_alloc(lock_timer_callback, FuriTimerTypeOnce, state);
 
