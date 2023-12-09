@@ -12,7 +12,7 @@ jobs:
         id: build-app
         with:
           sdk-url: https://cloud.cynthialabs.net/s/sGHsQB94a9x5CRs/download?path=/&files=XFW-DEV_@845ADD5-sdk.zip
-          ufbt-args: --verbose --hw-target=f7
+          ufbt-args: "--hw-target=f7"
       - name: Upload app artifacts
         uses: actions/upload-artifact@v3
         with:
