@@ -1,7 +1,7 @@
 #include "subghz_i.h"
 
 //#include "assets_icons.h"
-//#include "subghz/types.h"
+#include "subghz/types.h"
 #include <math.h>
 #include <furi.h>
 #include <furi_hal.h>
@@ -16,7 +16,7 @@
 #include <lib/toolbox/stream/stream.h>
 #include <lib/subghz/protocols/raw.h>
 
-#define TAG "SubGhz"
+//#define TAG "SubGhz"
 /*
 void subghz_set_default_preset(SubGhz* subghz) {
     furi_assert(subghz);
@@ -45,10 +45,10 @@ void subghz_set_default_preset(SubGhz* subghz) {
     return false;
 }*/
 
-/*bool subghz_key_load(SubGhz* subghz, const char* file_path, bool show_dialog) {
+bool subghz_key_load(SubGhz* subghz, const char* file_path) { //, bool show_dialog) {
     furi_assert(subghz);
     furi_assert(file_path);
-
+    
     Storage* storage = furi_record_open(RECORD_STORAGE);
     FlipperFormat* fff_data_file = flipper_format_file_alloc(storage);
     Stream* fff_data_stream =
@@ -57,7 +57,7 @@ void subghz_set_default_preset(SubGhz* subghz) {
     SubGhzLoadKeyState load_key_state = SubGhzLoadKeyStateParseErr;
     FuriString* temp_str = furi_string_alloc();
     uint32_t temp_data32;
-
+    
     do {
         stream_clean(fff_data_stream);
         if(!flipper_format_file_open_existing(fff_data_file, file_path)) {
@@ -143,12 +143,12 @@ void subghz_set_default_preset(SubGhz* subghz) {
 
         if(subghz_txrx_load_decoder_by_name_protocol(
                subghz->txrx, furi_string_get_cstr(temp_str))) {
-            //SubGhzProtocolStatus status = subghz_protocol_decoder_base_deserialize(
-            //    subghz_txrx_get_decoder(subghz->txrx), fff_data);
-            //if(status != SubGhzProtocolStatusOk) {
-            //    load_key_state = SubGhzLoadKeyStateProtocolDescriptionErr;
-            //    break;
-            //}
+            SubGhzProtocolStatus status = subghz_protocol_decoder_base_deserialize(
+                subghz_txrx_get_decoder(subghz->txrx), fff_data);
+            if(status != SubGhzProtocolStatusOk) {
+                load_key_state = SubGhzLoadKeyStateProtocolDescriptionErr;
+                break;
+            }
         } else {
             FURI_LOG_E(TAG, "Protocol not found");
             break;
@@ -163,15 +163,15 @@ void subghz_set_default_preset(SubGhz* subghz) {
 
     switch(load_key_state) {
     case SubGhzLoadKeyStateParseErr:
-        if(show_dialog) {
-            dialog_message_show_storage_error(subghz->dialogs, "Cannot parse\nfile");
-        }
+        //if(show_dialog) {
+        //    dialog_message_show_storage_error(subghz->dialogs, "Cannot parse\nfile");
+        //}
         return false;
     case SubGhzLoadKeyStateProtocolDescriptionErr:
-        if(show_dialog) {
-            dialog_message_show_storage_error(
-                subghz->dialogs, "Error in protocol\nparameters\ndescription");
-        }
+        //if(show_dialog) {
+        //    dialog_message_show_storage_error(
+        //        subghz->dialogs, "Error in protocol\nparameters\ndescription");
+        //}
         return false;
 
     case SubGhzLoadKeyStateOK:
@@ -181,19 +181,22 @@ void subghz_set_default_preset(SubGhz* subghz) {
         furi_crash("SubGhz: Unknown load_key_state.");
         return false;
     }
-}*/
+    return false;
+}
 
 /*SubGhzLoadTypeFile subghz_get_load_type_file(SubGhz* subghz) {
     furi_assert(subghz);
     return subghz->load_type_file;
 }*/
 
-/*bool subghz_load_protocol_from_file(SubGhz* subghz) {
+bool subghz_load_protocol_from_file(SubGhz* subghz) {
     furi_assert(subghz);
 
-    FuriString* file_path = furi_string_alloc();
+    //FuriString* file_path = furi_string_alloc();
 
-    DialogsFileBrowserOptions browser_options;
+    bool res = false;
+
+    /*DialogsFileBrowserOptions browser_options;
     dialog_file_browser_set_basic_options(
         &browser_options, SUBGHZ_APP_FILENAME_EXTENSION, &I_sub1_10px);
     browser_options.base_path = SUBGHZ_APP_FOLDER;
@@ -202,14 +205,15 @@ void subghz_set_default_preset(SubGhz* subghz) {
     bool res = dialog_file_browser_show(
         subghz->dialogs, subghz->file_path, subghz->file_path, &browser_options);
 
-    if(res) {
-        res = subghz_key_load(subghz, furi_string_get_cstr(subghz->file_path), true);
-    }
+    if(res) {*/
+        //res = subghz_key_load(subghz, furi_string_get_cstr(subghz->file_path), true);
+       res = subghz_key_load(subghz, MEAL_PAGER_TMP_FILE); //, true);
+    //}
 
-    furi_string_free(file_path);
+    //furi_string_free(file_path);
 
     return res;
-}*/
+}
 
 /*bool subghz_file_available(SubGhz* subghz) {
     furi_assert(subghz);
