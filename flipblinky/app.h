@@ -30,5 +30,5 @@ typedef struct FlipboardBlinkyModel {
     uint8_t effect_counter;
     uint8_t effect_id;
     uint8_t max_effect_id;
-    uint32_t show_details_counter;
+    uint32_t show_details_until;
 } FlipboardBlinkyModel;
