@@ -35,7 +35,7 @@ typedef struct {
     DialogsApp* dialogs;
     uint64_t credential;
     size_t bit_length;
-    uint8_t sio[64];
+    uint8_t sio[128];
     uint8_t diversifier[8];
     SeaderCredentialType type;
     SeaderCredentialSaveFormat save_format;

@@ -17,6 +17,7 @@ SeaderCredential* seader_credential_alloc() {
     SeaderCredential* seader_dev = malloc(sizeof(SeaderCredential));
     seader_dev->credential = 0;
     seader_dev->bit_length = 0;
+    memset(seader_dev->sio, 0xff, sizeof(seader_dev->sio));
     seader_dev->storage = furi_record_open(RECORD_STORAGE);
     seader_dev->dialogs = furi_record_open(RECORD_DIALOGS);
     seader_dev->load_path = furi_string_alloc();

@@ -18,6 +18,8 @@ uint8_t read4Block6[] = {RFAL_PICOPASS_CMD_READ4, 0x06, 0x45, 0x56};
 uint8_t read4Block9[] = {RFAL_PICOPASS_CMD_READ4, 0x09, 0xB2, 0xAE};
 uint8_t read4Block10[] = {RFAL_PICOPASS_CMD_READ4, 0x0A, 0x29, 0x9C};
 uint8_t read4Block13[] = {RFAL_PICOPASS_CMD_READ4, 0x0D, 0x96, 0xE8};
+//uint8_t read4Block14[] = {RFAL_PICOPASS_CMD_READ4, 0x0E, 0x0d, 0xda};
+
 uint8_t updateBlock2[] = {RFAL_PICOPASS_CMD_UPDATE, 0x02};
 
 void* calloc(size_t count, size_t size) {
@@ -54,9 +56,11 @@ void seader_picopass_state_machine(Seader* seader, uint8_t* buffer, size_t len) 
     bit_buffer_append_bytes(tx_buffer, buffer, len);
     BitBuffer* rx_buffer = bit_buffer_alloc(SEADER_POLLER_MAX_BUFFER_SIZE);
 
+    uint8_t config[PICOPASS_BLOCK_LEN] = {0x12, 0xff, 0xff, 0xff, 0x7f, 0x1f, 0xff, 0x3c};
     uint8_t sr_aia[PICOPASS_BLOCK_LEN] = {0xFF, 0xff, 0xff, 0xff, 0xFF, 0xFf, 0xff, 0xFF};
     uint8_t epurse[PICOPASS_BLOCK_LEN] = {0xff, 0xff, 0xff, 0xff, 0xe3, 0xff, 0xff, 0xff};
     uint8_t pacs_sr_cfg[PICOPASS_BLOCK_LEN] = {0xA3, 0x03, 0x03, 0x03, 0x00, 0x03, 0xe0, 0x14};
+    uint8_t zeroes[PICOPASS_BLOCK_LEN] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 
     uint8_t tmac[4] = {};
     uint8_t cc_p[12] = {};
@@ -70,6 +74,12 @@ void seader_picopass_state_machine(Seader* seader, uint8_t* buffer, size_t len) 
                 bit_buffer_append_bytes(rx_buffer, sr_aia, sizeof(sr_aia));
             } else if(buffer[1] == PACS_CFG_INDEX) {
                 bit_buffer_append_bytes(rx_buffer, pacs_sr_cfg, sizeof(pacs_sr_cfg));
+            } else { // What i've seen is 0c 12
+                offset = buffer[1] - SEADER_ICLASS_SR_SIO_BASE_BLOCK;
+                bit_buffer_append_bytes(
+                    rx_buffer,
+                    seader->credential->sio + (PICOPASS_BLOCK_LEN * offset),
+                    PICOPASS_BLOCK_LEN);
             }
             iso13239_crc_append(Iso13239CrcTypePicopass, rx_buffer);
             break;
@@ -90,11 +100,25 @@ void seader_picopass_state_machine(Seader* seader, uint8_t* buffer, size_t len) 
             bit_buffer_append_bytes(rx_buffer, tmac, sizeof(tmac));
             break;
         case RFAL_PICOPASS_CMD_READ4:
-            offset = buffer[1] - SEADER_ICLASS_SR_SIO_BASE_BLOCK;
-            bit_buffer_append_bytes(
-                rx_buffer,
-                seader->credential->sio + (PICOPASS_BLOCK_LEN * offset),
-                PICOPASS_BLOCK_LEN * 4);
+            if(buffer[1] < SEADER_ICLASS_SR_SIO_BASE_BLOCK) {
+                if(buffer[1] == PACS_CFG_INDEX) {
+                    bit_buffer_append_bytes(rx_buffer, pacs_sr_cfg, sizeof(pacs_sr_cfg));
+                    bit_buffer_append_bytes(rx_buffer, zeroes, sizeof(zeroes));
+                    bit_buffer_append_bytes(rx_buffer, zeroes, sizeof(zeroes));
+                    bit_buffer_append_bytes(rx_buffer, zeroes, sizeof(zeroes));
+                }
+            } else {
+                offset = buffer[1] - SEADER_ICLASS_SR_SIO_BASE_BLOCK;
+                bit_buffer_append_bytes(
+                    rx_buffer,
+                    seader->credential->sio + (PICOPASS_BLOCK_LEN * offset),
+                    PICOPASS_BLOCK_LEN * 4);
+            }
+            iso13239_crc_append(Iso13239CrcTypePicopass, rx_buffer);
+            break;
+        case RFAL_PICOPASS_CMD_PAGESEL:
+            // this should be considered an attempt, but realisticly not working
+            bit_buffer_append_bytes(rx_buffer, config, sizeof(config));
             iso13239_crc_append(Iso13239CrcTypePicopass, rx_buffer);
             break;
         }
