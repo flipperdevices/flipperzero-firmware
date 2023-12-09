@@ -1,4 +1,4 @@
-name: "FAP: Build and lint"
+name: "FAP: Build (XFW-DEV)"
 on: [push, pull_request]
 jobs:
   ufbt-build-action:
