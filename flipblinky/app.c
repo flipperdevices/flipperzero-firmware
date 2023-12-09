@@ -420,11 +420,11 @@ int32_t flipboard_blinky_app(void* _p) {
     FlipboardModel* model = flipboard_get_model(app);
     FlipboardBlinkyModel* fbm = flipboard_blinky_model_alloc(model);
     flipboard_model_set_custom_data(model, fbm);
-    fbm->effect_id = 2;
-    flipboard_reset_effect(model);
+
     view_dispatcher_set_event_callback_context(flipboard_get_view_dispatcher(app), app);
     view_dispatcher_set_custom_event_callback(
         flipboard_get_view_dispatcher(app), custom_event_handler);
+
     view_dispatcher_run(flipboard_get_view_dispatcher(app));
 
     flipboard_blinky_model_free(fbm);
