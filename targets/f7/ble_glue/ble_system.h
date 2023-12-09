@@ -79,7 +79,7 @@ bool ble_system_is_alive();
  *
  * @return     true if it reported before reaching timeout
  */
-bool ble_system_wait_for_c2_start(int32_t timeout);
+bool ble_system_wait_for_c2_start(int32_t timeout_ms);
 
 BleGlueStatus ble_system_get_c2_status();
 

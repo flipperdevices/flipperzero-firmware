@@ -4,6 +4,7 @@
 // #include "event_dispatcher.h"
 #include "ble_event_thread.h"
 
+#include <furi_hal_cortex.h>
 #include <core/mutex.h>
 #include <core/timer.h>
 #include <ble/ble.h>
@@ -204,30 +205,28 @@ static void ble_system_dump_stack_info() {
         c2_info->MemorySizeFlash);
 }
 
-bool ble_system_wait_for_c2_start(int32_t timeout) {
+bool ble_system_wait_for_c2_start(int32_t timeout_ms) {
     bool started = false;
 
+    FuriHalCortexTimer timer = furi_hal_cortex_timer_get(timeout_ms * 1000);
     do {
+        furi_delay_tick(1);
         started = ble_glue->status == BleGlueStatusC2Started;
-        if(!started) {
-            timeout--;
-            furi_delay_tick(1);
-        }
-    } while(!started && (timeout > 0));
+    } while(!started && !furi_hal_cortex_timer_is_expired(timer));
 
-    if(started) {
-        FURI_LOG_I(
-            TAG,
-            "C2 boot completed, mode: %s",
-            ble_glue->c2_info.mode == BleGlueC2ModeFUS ? "FUS" : "Stack");
-        ble_system_update_c2_fw_info();
-        ble_system_dump_stack_info();
-    } else {
+    if(!started) {
         FURI_LOG_E(TAG, "C2 startup failed");
         ble_glue->status = BleGlueStatusBroken;
+        return false;
     }
 
-    return started;
+    FURI_LOG_I(
+        TAG,
+        "C2 boot completed, mode: %s",
+        ble_glue->c2_info.mode == BleGlueC2ModeFUS ? "FUS" : "Stack");
+    ble_system_update_c2_fw_info();
+    ble_system_dump_stack_info();
+    return true;
 }
 
 bool ble_system_start() {
@@ -237,31 +236,27 @@ bool ble_system_start() {
         return false;
     }
 
-    bool ret = false;
-    if(ble_stack_init()) {
-        FURI_LOG_I(TAG, "Radio stack started");
-        ble_glue->status = BleGlueStatusRadioStackRunning;
-        ret = true;
-    } else {
+    if(!ble_stack_init()) {
         FURI_LOG_E(TAG, "Radio stack startup failed");
         ble_glue->status = BleGlueStatusRadioStackMissing;
         ble_stack_deinit();
+        return false;
     }
 
-    return ret;
+    FURI_LOG_I(TAG, "Radio stack started");
+    ble_glue->status = BleGlueStatusRadioStackRunning;
+    return true;
 }
 
 void ble_system_stop() {
-    if(!ble_glue) {
-        return;
-    }
+    furi_assert(ble_glue);
 
     ble_event_thread_stop();
     // Free resources
     furi_mutex_free(ble_glue->shci_mtx);
     furi_semaphore_free(ble_glue->shci_sem);
-
     furi_timer_free(ble_glue->hardfault_check_timer);
+
     ble_system_clear_shared_memory();
     free(ble_glue);
     ble_glue = NULL;
