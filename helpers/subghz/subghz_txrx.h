@@ -64,7 +64,7 @@ void subghz_txrx_set_preset(
  * @param preset String of preset 
  * @return const char*  Name of preset
  */
-//const char* subghz_txrx_get_preset_name(SubGhzTxRx* instance, const char* preset);
+const char* subghz_txrx_get_preset_name(SubGhzTxRx* instance, const char* preset);
 
 /**
  * Get of preset
@@ -204,7 +204,7 @@ void subghz_txrx_speaker_set_state(SubGhzTxRx* instance, SubGhzSpeakerState stat
  * @param name_protocol Name protocol
  * @return bool True if the decoder is loaded 
  */
-//bool subghz_txrx_load_decoder_by_name_protocol(SubGhzTxRx* instance, const char* name_protocol);
+bool subghz_txrx_load_decoder_by_name_protocol(SubGhzTxRx* instance, const char* name_protocol);
 
 /**
  * Get decoder
@@ -212,7 +212,7 @@ void subghz_txrx_speaker_set_state(SubGhzTxRx* instance, SubGhzSpeakerState stat
  * @param instance Pointer to a SubGhzTxRx
  * @return SubGhzProtocolDecoderBase* Pointer to a SubGhzProtocolDecoderBase
  */
-//SubGhzProtocolDecoderBase* subghz_txrx_get_decoder(SubGhzTxRx* instance);
+SubGhzProtocolDecoderBase* subghz_txrx_get_decoder(SubGhzTxRx* instance);
 
 /**
  * Set callback for save data
@@ -232,7 +232,7 @@ void subghz_txrx_speaker_set_state(SubGhzTxRx* instance, SubGhzSpeakerState stat
  * @param instance Pointer to a SubGhzTxRx
  * @return FlipperFormat* 
  */
-//FlipperFormat* subghz_txrx_get_fff_data(SubGhzTxRx* instance);
+FlipperFormat* subghz_txrx_get_fff_data(SubGhzTxRx* instance);
 
 /**
  * Get pointer to a SugGhzSetting
@@ -240,7 +240,7 @@ void subghz_txrx_speaker_set_state(SubGhzTxRx* instance, SubGhzSpeakerState stat
  * @param instance Pointer to a SubGhzTxRx
  * @return SubGhzSetting* 
  */
-//SubGhzSetting* subghz_txrx_get_setting(SubGhzTxRx* instance);
+SubGhzSetting* subghz_txrx_get_setting(SubGhzTxRx* instance);
 
 /**
  * Is it possible to save this protocol
@@ -326,11 +326,11 @@ SubGhzRadioDeviceType
 * @param instance Pointer to a SubGhzTxRx
 * @return const char* Name of installed radio device
 */
-//const char* subghz_txrx_radio_device_get_name(SubGhzTxRx* instance);
+const char* subghz_txrx_radio_device_get_name(SubGhzTxRx* instance);
 
 /* Get get intelligence whether frequency the selected radio device to use
 *
 * @param instance Pointer to a SubGhzTxRx
 * @return bool True if the frequency is valid
 */
-//bool subghz_txrx_radio_device_is_frequecy_valid(SubGhzTxRx* instance, uint32_t frequency);
+bool subghz_txrx_radio_device_is_frequecy_valid(SubGhzTxRx* instance, uint32_t frequency);

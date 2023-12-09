@@ -43,7 +43,7 @@ SubGhzTxRx* subghz_txrx_alloc() {
     subghz_txrx_speaker_set_state(instance, SubGhzSpeakerStateDisable);
 
     instance->worker = subghz_worker_alloc();
-/*    instance->fff_data = flipper_format_string_alloc(); */
+    instance->fff_data = flipper_format_string_alloc(); 
 
     instance->environment = subghz_environment_alloc();
     instance->is_database_loaded =
@@ -90,7 +90,7 @@ void subghz_txrx_free(SubGhzTxRx* instance) {
     subghz_worker_free(instance->worker);
     subghz_receiver_free(instance->receiver);
     subghz_environment_free(instance->environment);
-    /*flipper_format_free(instance->fff_data);*/
+    flipper_format_free(instance->fff_data);
     furi_string_free(instance->preset->name);
     subghz_setting_free(instance->setting);
 
@@ -117,7 +117,7 @@ void subghz_txrx_set_preset(
     preset->data_size = preset_data_size;
 }
 
-/*const char* subghz_txrx_get_preset_name(SubGhzTxRx* instance, const char* preset) {
+const char* subghz_txrx_get_preset_name(SubGhzTxRx* instance, const char* preset) {
     UNUSED(instance);
     const char* preset_name = "";
     if(!strcmp(preset, "FuriHalSubGhzPresetOok270Async")) {
@@ -134,7 +134,7 @@ void subghz_txrx_set_preset(
         FURI_LOG_E(TAG, "Unknown preset");
     }
     return preset_name;
-}*/
+}
 
 /*SubGhzRadioPreset subghz_txrx_get_preset(SubGhzTxRx* instance) {
     furi_assert(instance);
@@ -244,6 +244,7 @@ SubGhzTxRxStartTxState subghz_txrx_tx_start(SubGhzTxRx* instance, FlipperFormat*
     
     FURI_LOG_D(TAG, "starting loop in subghz_txrx_tx_start");
     do {
+        FURI_LOG_D(TAG, "looping");
         if(!flipper_format_rewind(flipper_format)) {
             FURI_LOG_E(TAG, "Rewind error");
             break;
@@ -256,6 +257,7 @@ SubGhzTxRxStartTxState subghz_txrx_tx_start(SubGhzTxRx* instance, FlipperFormat*
             FURI_LOG_E(TAG, "Unable Repeat");
             break;
         }
+        //FURI_LOG_D(TAG, "File loaded");
         ret = SubGhzTxRxStartTxStateOk;
         
         SubGhzRadioPreset* preset = instance->preset;
@@ -263,18 +265,24 @@ SubGhzTxRxStartTxState subghz_txrx_tx_start(SubGhzTxRx* instance, FlipperFormat*
             subghz_transmitter_alloc_init(instance->environment, furi_string_get_cstr(temp_str));
 
         if(instance->transmitter) {
+            FURI_LOG_D(TAG, "transmitter found");
             if(subghz_transmitter_deserialize(instance->transmitter, flipper_format) ==
                SubGhzProtocolStatusOk) {
+            //if (false) {
+                FURI_LOG_D(TAG, "deserialization");
                 if(strcmp(furi_string_get_cstr(preset->name), "") != 0) {
+                    FURI_LOG_D(TAG, "got preset name");
                     subghz_txrx_begin(
                         instance,
                         subghz_setting_get_preset_data_by_name(
                             instance->setting, furi_string_get_cstr(preset->name))); 
+                    FURI_LOG_D(TAG, "loaded preset by name");
                     if(preset->frequency) {
                         if(!subghz_txrx_tx(instance, preset->frequency)) {
                             FURI_LOG_E(TAG, "Only Rx");
                             ret = SubGhzTxRxStartTxStateErrorOnlyRx;
                         }
+                        FURI_LOG_D(TAG, "got frequency");
                     } else {
                         ret = SubGhzTxRxStartTxStateErrorParserOthers;
                     }
@@ -287,17 +295,20 @@ SubGhzTxRxStartTxState subghz_txrx_tx_start(SubGhzTxRx* instance, FlipperFormat*
                 
                 if(ret == SubGhzTxRxStartTxStateOk) {
                     //Start TX
+                    FURI_LOG_D(TAG, "starting Async TX");
                     subghz_devices_start_async_tx(
                         instance->radio_device, subghz_transmitter_yield, instance->transmitter);
                 }
             } else {
+                FURI_LOG_D(TAG, "no deserialization");
                 ret = SubGhzTxRxStartTxStateErrorParserOthers;
             }
         } else {
             ret = SubGhzTxRxStartTxStateErrorParserOthers;
         }
         if(ret != SubGhzTxRxStartTxStateOk) {
-            subghz_transmitter_free(instance->transmitter);
+            FURI_LOG_D(TAG, "state not ok");
+            //subghz_transmitter_free(instance->transmitter); // Crashes here
             if(instance->txrx_state != SubGhzTxRxStateIDLE) {
                 subghz_txrx_idle(instance);
             }
@@ -344,15 +355,15 @@ static void subghz_txrx_tx_stop(SubGhzTxRx* instance) {
     subghz_txrx_speaker_off(instance);
 }
 
-/*FlipperFormat* subghz_txrx_get_fff_data(SubGhzTxRx* instance) {
+FlipperFormat* subghz_txrx_get_fff_data(SubGhzTxRx* instance) {
     furi_assert(instance);
     return instance->fff_data;
-}*/
+}
 
-/*SubGhzSetting* subghz_txrx_get_setting(SubGhzTxRx* instance) {
+SubGhzSetting* subghz_txrx_get_setting(SubGhzTxRx* instance) {
     furi_assert(instance);
     return instance->setting;
-}*/
+}
 
 void subghz_txrx_stop(SubGhzTxRx* instance) {
     furi_assert(instance);
@@ -496,7 +507,7 @@ void subghz_txrx_speaker_set_state(SubGhzTxRx* instance, SubGhzSpeakerState stat
     return instance->speaker_state;
 }*/
 
-/*bool subghz_txrx_load_decoder_by_name_protocol(SubGhzTxRx* instance, const char* name_protocol) {
+bool subghz_txrx_load_decoder_by_name_protocol(SubGhzTxRx* instance, const char* name_protocol) {
     furi_assert(instance);
     furi_assert(name_protocol);
     bool res = false;
@@ -506,12 +517,12 @@ void subghz_txrx_speaker_set_state(SubGhzTxRx* instance, SubGhzSpeakerState stat
         res = true;
     }
     return res;
-}*/
+}
 
-/*SubGhzProtocolDecoderBase* subghz_txrx_get_decoder(SubGhzTxRx* instance) {
+SubGhzProtocolDecoderBase* subghz_txrx_get_decoder(SubGhzTxRx* instance) {
     furi_assert(instance);
     return instance->decoder_result;
-}*/
+}
 
 /*bool subghz_txrx_protocol_is_serializable(SubGhzTxRx* instance) {
     furi_assert(instance);
@@ -608,12 +619,12 @@ SubGhzRadioDeviceType
     return subghz_devices_get_rssi(instance->radio_device);
 }*/
 
-/*const char* subghz_txrx_radio_device_get_name(SubGhzTxRx* instance) {
+const char* subghz_txrx_radio_device_get_name(SubGhzTxRx* instance) {
     furi_assert(instance);
     return subghz_devices_get_name(instance->radio_device);
-}*/
+}
 
-/*bool subghz_txrx_radio_device_is_frequecy_valid(SubGhzTxRx* instance, uint32_t frequency) {
+bool subghz_txrx_radio_device_is_frequecy_valid(SubGhzTxRx* instance, uint32_t frequency) {
     furi_assert(instance);
     return subghz_devices_is_frequency_valid(instance->radio_device, frequency);
-}*/
+}

@@ -1,7 +1,7 @@
 /* Reduced variant of the Flipper Zero SubGhz Class */
 
 #include "subghz_i.h"
-#include "../meal_pager_storage.h"
+//#include "../meal_pager_storage.h"
 
 static SubGhz* subghz_alloc() {
     SubGhz* subghz = malloc(sizeof(SubGhz));
@@ -28,6 +28,8 @@ void subghz_send(void* context) {
     UNUSED(context);
     SubGhz* subghz = subghz_alloc();
 
+    subghz_load_protocol_from_file(subghz);
+
     Storage* storage = furi_record_open(RECORD_STORAGE);
     FlipperFormat* ff = flipper_format_file_alloc(storage);
 
@@ -38,7 +40,8 @@ void subghz_send(void* context) {
         return;
     }
 
-    subghz_txrx_tx_start(subghz->txrx, ff);
+    //subghz_txrx_tx_start(subghz->txrx, ff);
+    subghz_txrx_tx_start(subghz->txrx, subghz_txrx_get_fff_data(subghz->txrx)); //Seems like it must be done this way
 
     flipper_format_rewind(ff);
     flipper_format_file_close(ff);

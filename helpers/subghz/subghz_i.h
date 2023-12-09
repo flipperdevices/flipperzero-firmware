@@ -4,6 +4,7 @@
 #include "subghz_error_type.h"
 #include <lib/subghz/types.h>
 #include "subghz.h"
+#include "../meal_pager_storage.h"
 
 /*#include "views/receiver.h"
 #include "views/transmitter.h"
@@ -38,6 +39,8 @@
 
 #define SUBGHZ_MAX_LEN_NAME 64
 
+typedef struct SubGhz SubGhz;
+
 struct SubGhz {
     SubGhzTxRx* txrx;
     FuriString* file_path;
@@ -57,7 +60,7 @@ struct SubGhz {
     //SubGhzThresholdRssi* threshold_rssi;
     //SubGhzRxKeyState rx_key_state;
     //SubGhzHistory* history;
-    //SubGhzLoadTypeFile load_type_file;
+    SubGhzLoadTypeFile load_type_file;
     //void* rpc_ctx;
 };
 
@@ -68,8 +71,8 @@ struct SubGhz {
 //bool subghz_tx_start(SubGhz* subghz, FlipperFormat* flipper_format);
 //void subghz_dialog_message_show_only_rx(SubGhz* subghz);
 
-//bool subghz_key_load(SubGhz* subghz, const char* file_path, bool show_dialog);
-//bool subghz_load_protocol_from_file(SubGhz* subghz);
+bool subghz_key_load(SubGhz* subghz, const char* file_path); //, bool show_dialog);
+bool subghz_load_protocol_from_file(SubGhz* subghz);
 //bool subghz_file_available(SubGhz* subghz);
 //SubGhzLoadTypeFile subghz_get_load_type_file(SubGhz* subghz);
 
