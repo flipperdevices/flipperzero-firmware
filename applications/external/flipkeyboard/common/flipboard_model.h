@@ -1,5 +1,3 @@
-#pragma once
-
 /**
  * @file   flipboard_model.h
  * @brief  The flipboard model.
@@ -8,9 +6,12 @@
  * text, playing tones, etc.
 */
 
+#pragma once
+
 #include <furi.h>
+
+#include "action_model.h"
 #include "button_monitor.h"
-#include "button_model.h"
 #include "resources.h"
 #include "speaker.h"
 
@@ -28,7 +29,7 @@ typedef struct ButtonModel ButtonModel;
  * @return A pointer to a FlipboardModel.
 */
 FlipboardModel*
-    flipboard_model_alloc(char* app_name, bool single_button_mode, ButtonModelFields fields);
+    flipboard_model_alloc(char* app_name, bool single_button_mode, ActionModelFields fields);
 
 /**
  * @brief flipboard_model_free frees a FlipboardModel.
@@ -66,23 +67,23 @@ Resources* flipboard_model_get_resources(FlipboardModel* model);
 bool flipboard_model_get_single_button_mode(FlipboardModel* model);
 
 /**
- * @brief flipboard_model_get_button_model_fields gets the fields of the
+ * @brief flipboard_model_get_action_model_fields gets the fields of the
  * button settings that apply for this application.
  * @param model The FlipboardModel.
  * @return The fields of the button settings that apply for this application.
 */
-ButtonModelFields flipboard_model_get_button_model_fields(FlipboardModel* model);
+ActionModelFields flipboard_model_get_action_model_fields(FlipboardModel* model);
 
 /**
- * @brief flipboard_model_get_button_model gets the ButtonModel for a given button.
- * @brief flipboard_model_get_button_model gets the ButtonModel for a given button. 
- * For single buttons, the valid indexes are 0, 1, 3, 7.  For multi buttons, the valid indexes
+ * @brief flipboard_model_get_action_model gets the ActionModel for a given action.
+ * @brief flipboard_model_get_action_model gets the ActionModel for a given action. 
+ * For single buttons, the valid indexes are 0, 1, 3, 7.  For multi-buttons, the valid indexes
  * are 0-15.  This function may return NULL, if there is no setting.
  * @param model The FlipboardModel.
  * @param button The button.
- * @return The ButtonModel for the button.
+ * @return The ActionModel for the action.
 */
-ButtonModel* flipboard_model_get_button_model(FlipboardModel* model, uint8_t button);
+ActionModel* flipboard_model_get_action_model(FlipboardModel* model, uint8_t button);
 
 /**
  * @brief flipboard_model_get_button_monitor gets the ButtonMonitor for the FlipboardModel.
@@ -158,18 +159,18 @@ void flipboard_model_update_gui(FlipboardModel* model);
 void flipboard_model_set_gui_refresh_speed_ms(FlipboardModel* model, uint32_t update_rate_ms);
 
 /**
- * @brief flipboard_model_set_button_model sets the ButtonModel for a given button.
- * @details flipboard_model_set_button_model sets the ButtonModel for a given button.
- * For single buttons, the valid indexes are 0, 1, 3, 7.  For multi buttons, the valid indexes
- * are 0-15.  The ButtonModel is used to configure the button settings.
+ * @brief flipboard_model_set_action_model sets the ButtonModel for a given action.
+ * @details flipboard_model_set_action_model sets the ButtonModel for a given action.
+ * For single buttons, the valid indexes are 0, 1, 3, 7.  For multi-buttons, the valid indexes
+ * are 0-15.  The ActionModel is used to configure the action settings.
  * @param model The FlipboardModel.
- * @param index The index of the button.
- * @param button_model The ButtonModel for the button.
+ * @param index The index of the action.
+ * @param action_model The ActionModel for the action.
 */
-void flipboard_model_set_button_model(
+void flipboard_model_set_action_model(
     FlipboardModel* model,
     uint8_t index,
-    ButtonModel* button_model);
+    ActionModel* action_model);
 
 /**
  * @brief flipboard_model_set_button_monitor sets the ButtonMonitor for the FlipboardModel.
@@ -187,37 +188,51 @@ void flipboard_model_set_button_monitor(
 /**
  * @brief flipboard_model_play_tone plays a tone on the FlipboardModel speaker.
  * @param model The FlipboardModel.
- * @param bm The ButtonModel for the button that was pressed.
+ * @param action_model The ActionModel for the action.
 */
-void flipboard_model_play_tone(FlipboardModel* model, ButtonModel* bm);
+void flipboard_model_play_tone(FlipboardModel* model, ActionModel* action_model);
+
+/**
+ * @brief flipboard_model_set_backlight sets the backlight.
+ * @details flipboard_model_set_backlight sets the backlight.
+ * @param model The FlipboardModel.
+ * @param light_on If true, the backlight is turned on, otherwise it is turned off.
+*/
+void flipboard_model_set_backlight(FlipboardModel* model, bool light_on);
 
 /**
  * @brief flipboard_model_set_colors sets the colors for the FlipboardModel.
  * @details flipboard_model_set_colors sets the colors for the FlipboardModel.
  * The colors are used to set the color of the LEDs for each button.
  * @param model The FlipboardModel.
- * @param bm The ButtonModel for the button that was pressed.
+ * @param action_model The ActionModel for the action.
  * @param new_button The button that was pressed.
 */
-void flipboard_model_set_colors(FlipboardModel* model, ButtonModel* bm, uint8_t new_button);
+void flipboard_model_set_colors(
+    FlipboardModel* model,
+    ActionModel* action_model,
+    uint8_t new_button);
 
 /**
  * @brief flipboard_model_send_keystrokes sends keystrokes to the host.
  * @details flipboard_model_send_keystrokes sends keystrokes to the host.
  * @param model The FlipboardModel.
- * @param bm The ButtonModel for the button that was pressed.
+ * @param action_model The ActionModel for the action.
  * @return True if any "messages" (Msg1-Msg4) were also sent.
 */
-bool flipboard_model_send_keystrokes(FlipboardModel* model, ButtonModel* bm);
+bool flipboard_model_send_keystrokes(FlipboardModel* model, ActionModel* action_model);
 
 /**
  * @brief flipboard_model_send_text sends text to the host.
  * @details flipboard_model_send_text sends text to the host.
  * @param model The FlipboardModel.
- * @param bm The ButtonModel for the button that was pressed.
+ * @param action_model The ActionModel for the action.
  * @param message_number The message number to send (0-3).
 */
-void flipboard_model_send_text(FlipboardModel* model, ButtonModel* bm, uint8_t message_number);
+void flipboard_model_send_text(
+    FlipboardModel* model,
+    ActionModel* action_model,
+    uint8_t message_number);
 
 /**
  * @brief flipboard_model_reduce reduces the button presses to a single button.

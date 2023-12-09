@@ -9,22 +9,20 @@
  * @return A pointer to a FlipboardModel.
 */
 FlipboardModel*
-    flipboard_model_alloc(char* app_name, bool single_button_mode, ButtonModelFields fields) {
+    flipboard_model_alloc(char* app_name, bool single_button_mode, ActionModelFields fields) {
     FlipboardModel* model = (FlipboardModel*)malloc(sizeof(FlipboardModel));
     model->name = app_name;
     model->resources = resources_alloc();
-    model->button_model_fields = fields;
+    model->action_model_fields = fields;
     model->single_button_mode = single_button_mode;
     model->keyboard = flipboard_keyboard_alloc();
     model->speaker = speaker_alloc();
     model->button_monitor = NULL;
     model->gui_refresh_timer = NULL;
     model->leds = flipboard_leds_alloc(model->resources);
-    model->backlight_always_on = true;
+    model->backlight = backlight_alloc();
+    backlight_on(model->backlight);
     model->custom_data = NULL;
-    if(model->backlight_always_on) {
-        backlight_on();
-    }
 
     flipboard_model_load(model);
 
@@ -38,7 +36,7 @@ FlipboardModel*
  * @param model The FlipboardModel to free.
 */
 void flipboard_model_free(FlipboardModel* model) {
-    flipboard_model_save(model, model->button_model_fields);
+    flipboard_model_save(model, model->action_model_fields);
 
     if(model->resources) {
         resources_free(model->resources);
@@ -48,8 +46,8 @@ void flipboard_model_free(FlipboardModel* model) {
         speaker_free(model->speaker);
     }
 
-    if(model->backlight_always_on) {
-        backlight_off();
+    if(model->backlight) {
+        backlight_free(model->backlight);
     }
 
     if(model->button_monitor) {
@@ -97,27 +95,27 @@ bool flipboard_model_get_single_button_mode(FlipboardModel* model) {
 }
 
 /**
- * @brief flipboard_model_get_button_model_fields gets the fields of the
+ * @brief flipboard_model_get_action_model_fields gets the fields of the
  * key settings that apply for this application.
  * @param model The FlipboardModel.
  * @return The fields of the key settings that apply for this application.
 */
-ButtonModelFields flipboard_model_get_button_model_fields(FlipboardModel* model) {
-    return model->button_model_fields;
+ActionModelFields flipboard_model_get_action_model_fields(FlipboardModel* model) {
+    return model->action_model_fields;
 }
 
 /**
- * @brief flipboard_model_get_button_model gets the ButtonModel for a given key.
- * @brief flipboard_model_get_button_model gets the ButtonModel for a given key. 
- * For single button keys, the valid indexes are 0, 1, 3, 7.  For multi button keys, the
+ * @brief flipboard_model_get_action_model gets the ButtonModel for a given key.
+ * @brief flipboard_model_get_action_model gets the ButtonModel for a given key. 
+ * For single button keys, the valid indexes are 0, 1, 3, 7.  For multi-button keys, the
  * valid indexes are 0-15.  This function may return NULL, if there is no setting.
  * @param model The FlipboardModel.
  * @param key The key.
- * @return The ButtonModel for the key.
+ * @return The ActionModel for the key.
 */
-ButtonModel* flipboard_model_get_button_model(FlipboardModel* model, uint8_t key) {
+ActionModel* flipboard_model_get_action_model(FlipboardModel* model, uint8_t key) {
     furi_assert(key < 16);
-    return model->button_model[key];
+    return model->action_model[key];
 }
 
 /**
@@ -237,19 +235,19 @@ void flipboard_model_set_gui_refresh_speed_ms(FlipboardModel* model, uint32_t up
 }
 
 /**
- * @brief flipboard_model_set_button_model sets the ButtonModel for a given button.
- * @details flipboard_model_set_button_model sets the ButtonModel for a given button.
+ * @brief flipboard_model_set_action_model sets the ActionModel for a given action.
+ * @details flipboard_model_set_action_model sets the ActionModel for a given action.
  * For single buttons, the valid indexes are 0, 1, 3, 7.  For multi buttons, the valid indexes
- * are 0-15.  The ButtonModel is used to configure the button settings.
+ * are 0-15.  The ActionModel is used to configure the action settings.
  * @param model The FlipboardModel.
- * @param index The index of the button.
- * @param button_model The ButtonModel for the button.
+ * @param index The index of the action.
+ * @param button_model The ActionModel for the action.
 */
-void flipboard_model_set_button_model(
+void flipboard_model_set_action_model(
     FlipboardModel* model,
     uint8_t index,
-    ButtonModel* button_model) {
-    model->button_model[index] = button_model;
+    ActionModel* action_model) {
+    model->action_model[index] = action_model;
 }
 
 /**
@@ -278,11 +276,25 @@ void flipboard_model_set_button_monitor(
 /**
  * @brief flipboard_model_play_tone plays a tone on the FlipboardModel speaker.
  * @param model The FlipboardModel.
- * @param bm The ButtonModel for the button that was pressed.
+ * @param action_model The ActionModel for the action.
 */
-void flipboard_model_play_tone(FlipboardModel* model, ButtonModel* bm) {
+void flipboard_model_play_tone(FlipboardModel* model, ActionModel* action_model) {
     Speaker* speaker = flipboard_model_get_speaker(model);
-    speaker_set_frequency(speaker, button_model_get_frequency(bm));
+    speaker_set_frequency(speaker, action_model_get_frequency(action_model));
+}
+
+/**
+ * @brief flipboard_model_set_backlight sets the backlight.
+ * @details flipboard_model_set_backlight sets the backlight.
+ * @param model The FlipboardModel.
+ * @param light_on If true, the backlight is turned on, otherwise it is turned off.
+*/
+void flipboard_model_set_backlight(FlipboardModel* model, bool light_on) {
+    if(light_on) {
+        backlight_on(model->backlight);
+    } else {
+        backlight_off(model->backlight);
+    }
 }
 
 /**
@@ -290,20 +302,20 @@ void flipboard_model_play_tone(FlipboardModel* model, ButtonModel* bm) {
  * @details flipboard_model_set_colors sets the colors for the FlipboardModel.
  * The colors are used to set the color of the LEDs for each button.
  * @param model The FlipboardModel.
- * @param bm The ButtonModel for the button that was pressed.
- * @param new_button The button that was pressed.
+ * @param action_model The ActionModel for the action.
+ * @param new_key The keys that were pressed.
 */
-void flipboard_model_set_colors(FlipboardModel* model, ButtonModel* bm, uint8_t new_key) {
+void flipboard_model_set_colors(FlipboardModel* model, ActionModel* action_model, uint8_t new_key) {
     FlipboardLeds* leds = flipboard_model_get_leds(model);
-    uint32_t color = bm ? button_model_get_color_down(bm) : 0xFFFFFF;
-    ButtonModel* bm1 = flipboard_model_get_button_model(model, SwitchId1);
-    ButtonModel* bm2 = flipboard_model_get_button_model(model, SwitchId2);
-    ButtonModel* bm3 = flipboard_model_get_button_model(model, SwitchId3);
-    ButtonModel* bm4 = flipboard_model_get_button_model(model, SwitchId4);
-    uint32_t color1 = bm1 ? button_model_get_color_up(bm1) : 0x000000;
-    uint32_t color2 = bm2 ? button_model_get_color_up(bm2) : 0x000000;
-    uint32_t color3 = bm3 ? button_model_get_color_up(bm3) : 0x000000;
-    uint32_t color4 = bm4 ? button_model_get_color_up(bm4) : 0x000000;
+    uint32_t color = action_model ? action_model_get_color_down(action_model) : 0xFFFFFF;
+    ActionModel* am1 = flipboard_model_get_action_model(model, SwitchId1);
+    ActionModel* am2 = flipboard_model_get_action_model(model, SwitchId2);
+    ActionModel* am3 = flipboard_model_get_action_model(model, SwitchId3);
+    ActionModel* am4 = flipboard_model_get_action_model(model, SwitchId4);
+    uint32_t color1 = am1 ? action_model_get_color_up(am1) : 0x000000;
+    uint32_t color2 = am2 ? action_model_get_color_up(am2) : 0x000000;
+    uint32_t color3 = am3 ? action_model_get_color_up(am3) : 0x000000;
+    uint32_t color4 = am4 ? action_model_get_color_up(am4) : 0x000000;
     color1 = (new_key & LedId1) ? color : color1;
     color2 = (new_key & LedId2) ? color : color2;
     color3 = (new_key & LedId3) ? color : color3;
@@ -319,15 +331,15 @@ void flipboard_model_set_colors(FlipboardModel* model, ButtonModel* bm, uint8_t 
  * @brief flipboard_model_send_keystrokes sends keystrokes to the host.
  * @details flipboard_model_send_keystrokes sends keystrokes to the host.
  * @param model The FlipboardModel.
- * @param bm The ButtonModel for the button that was pressed.
+ * @param action_model The ActionModel for the button that was pressed.
  * @return True if any "messages" (Msg1-Msg4) were also sent.
 */
-bool flipboard_model_send_keystrokes(FlipboardModel* model, ButtonModel* bm) {
+bool flipboard_model_send_keystrokes(FlipboardModel* model, ActionModel* action_model) {
     bool sent_messages = false;
-    uint8_t keystroke_count = button_model_get_keystrokes_count(bm);
+    uint8_t keystroke_count = action_model_get_keystrokes_count(action_model);
     uint16_t modifiers = 0;
     for(int i = 0; i < keystroke_count; i++) {
-        Keystroke keystroke = button_model_get_keystroke(bm, i);
+        Keystroke keystroke = action_model_get_keystroke(action_model, i);
         if(keystroke.button_code == 0 || keystroke.count == 0) {
             continue;
         }
@@ -343,7 +355,7 @@ bool flipboard_model_send_keystrokes(FlipboardModel* model, ButtonModel* bm) {
             keystroke.button_code >= 0xf1 &&
             keystroke.button_code <= 0xf4) { // 0xf1 = Message 1 ... 0xf4 = Message 4
             for(int j = 0; j < keystroke.count; j++) {
-                flipboard_model_send_text(model, bm, keystroke.button_code - 0xf1);
+                flipboard_model_send_text(model, action_model, keystroke.button_code - 0xf1);
             }
             sent_messages = true;
             continue;
@@ -390,11 +402,14 @@ bool flipboard_model_send_keystrokes(FlipboardModel* model, ButtonModel* bm) {
  * @brief flipboard_model_send_text sends text to the host.
  * @details flipboard_model_send_text sends text to the host.
  * @param model The FlipboardModel.
- * @param bm The ButtonModel for the button that was pressed.
+ * @param action_model The ActionModel for the action.
  * @param message_number The message number to send (0-3).
 */
-void flipboard_model_send_text(FlipboardModel* model, ButtonModel* bm, uint8_t message_number) {
-    FuriString* message = button_model_get_message(bm, message_number);
+void flipboard_model_send_text(
+    FlipboardModel* model,
+    ActionModel* action_model,
+    uint8_t message_number) {
+    FuriString* message = action_model_get_message(action_model, message_number);
     if(message) {
         flipboard_keyboard_send_text(
             flipboard_model_get_keyboard(model), furi_string_get_cstr(message));

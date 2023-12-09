@@ -1,8 +1,5 @@
 #include "keyboard_i.h"
 
-#define PRESS_DELAY_MS 20
-#define RELEASE_DELAY_MS 5
-
 /**
  * @brief Allocates a new flipboard keyboard.
  * @details Allocates a new flipboard keyboard. The keyboard is

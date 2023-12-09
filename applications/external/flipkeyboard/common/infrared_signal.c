@@ -1,11 +1,4 @@
-#include <furi.h>
-#include <flipper_format/flipper_format_i.h>
-#include <infrared.h>
-#include <infrared_transmit.h>
-#include <storage/storage.h>
-
-#include "../app_config.h"
-#include "infrared_signal.h"
+#include "infrared_signal_i.h"
 
 struct InfraredSignal {
     Resources* resources;
@@ -21,10 +14,11 @@ struct InfraredSignal {
 
 /**
  * @brief Load an infrared signal (action) from a file.  
- * @details Load an infrared signal (action) from a file.  The first signal is loaded and ready for sending.
+ * @note The first signal is loaded and ready for sending.
  * @param file_path The path to the file to load.
  * @param action The name of the action to load from the file.
  * @param resources The resources to use for sending the signal.
+ * @return The loaded signal, or NULL if there was an error.
 */
 InfraredSignal* infrared_signal_load_file(char* file_path, char* action, Resources* resources) {
     InfraredSignal* signal = (InfraredSignal*)malloc(sizeof(InfraredSignal));
@@ -132,7 +126,7 @@ bool infrared_signal_load_next(InfraredSignal* signal) {
                 break;
             }
 
-            // TODO: How is this supposed to be determined?
+            // TODO: How is infrared start_from_mark supposed to be determined?
             signal->start_from_mark = true;
         } else {
             FURI_LOG_E(TAG, "Unknown type field: %s", furi_string_get_cstr(temp_str));
@@ -146,6 +140,8 @@ bool infrared_signal_load_next(InfraredSignal* signal) {
         signal->timings_count = 0;
         signal->message.protocol = InfraredProtocolUnknown;
     }
+
+    furi_string_free(temp_str);
 
     return parsed;
 }

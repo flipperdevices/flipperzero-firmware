@@ -1,11 +1,16 @@
-#pragma once
-
 /**
  * @file app_menu.h
  * @brief This file contains the AppMenu type and related functions.
  * @details This file contains the AppMenu type and related functions.
  * The app_menu module is used to create and show the main application menu.
+ * 
+ * FLIPBOARD_APP_MENU_VIEW_ID is used to identify the main application menu view.
+ * Exiting this menu (Back button) exits the application.
+ * CustomEventAppMenuEnter happens on displaying main application menu.
+ * CustomEventAppMenuExit happens on exit.
  */
+
+#pragma once
 
 #include <gui/view.h>
 #include <gui/view_dispatcher.h>

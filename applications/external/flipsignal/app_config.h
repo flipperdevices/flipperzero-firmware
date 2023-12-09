@@ -10,19 +10,19 @@
 
 #define ABOUT_TEXT                             \
     "Welcome to the Flipboard\n"               \
-    "Signal v2.0!\n"                           \
+    "Signal v3.0!\n"                           \
     "Quickly send to any device!\n\n"          \
     "Be sure to put your .SUB\n"               \
     "files in 'SD Card/subghz'\n"              \
     "action 1: Flip1.sub\n"                    \
     "action 2: Flip2.sub\n"                    \
-    "action 3: Flip3.sub\n"                    \
-    "action 4: Flip4.sub\n\n"                  \
+    "action 4: Flip4.sub\n"                    \
+    "action 8: Flip8.sub\n\n"                  \
     "Name IR file Flipboard.ir\n"              \
     "action 1: Flip1\n"                        \
     "action 2: Flip2\n"                        \
-    "action 3: Flip3\n"                        \
-    "action 4: Flip4\n\n"                      \
+    "action 4: Flip4\n"                        \
+    "action 8: Flip8\n\n"                      \
     "Optimized for FlipBoard\n"                \
     "hardware --\n"                            \
     "see link below to order!\n"               \

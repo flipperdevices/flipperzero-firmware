@@ -5,7 +5,10 @@
 #include <gui/modules/text_input.h>
 #include <gui/modules/variable_item_list.h>
 
-#include "button_config.h"
+#include "../app_config.h"
+
+#include "action_config.h"
+#define DEFINE_COLOR_NAMES_AND_VALUES "action_config_i.h"
 #include "config_colors.h"
 #include "config_keystroke.h"
 #include "config_tones.h"
@@ -13,15 +16,15 @@
 #include "keystroke_selector.h"
 #include "menu_callback.h"
 
-struct ButtonConfig {
+struct ActionConfig {
     FlipboardModel* model;
     ViewDispatcher* view_dispatcher;
 
-    // menu_buttons is used for showing a list of buttons to be configured.
-    Submenu* menu_buttons;
-    uint32_t view_menu_buttons_id;
+    // menu_actionss is used for showing a list of action to be configured.
+    Submenu* menu_actions;
+    uint32_t view_menu_actions_id;
 
-    // item_list is used for showing the configurations of a button.
+    // item_list is used for showing the configurations of an action.
     VariableItemList* item_list;
     uint32_t view_item_list_id;
 
@@ -39,3 +42,5 @@ typedef struct {
     uint8_t key;
     uint8_t index;
 } VariableItemContext;
+
+static void populate_variable_item_list(ActionConfig* button_config, ActionModel* bm);

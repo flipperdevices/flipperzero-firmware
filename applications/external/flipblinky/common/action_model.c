@@ -1,17 +1,13 @@
-#include "button_model_i.h"
-
-static ButtonModelFields
-    button_model_load_has_id(uint16_t button_id, FlipperFormat* flipper_format);
-static void button_model_load_fields(ButtonModel* model, FlipperFormat* flipper_format);
+#include "action_model_i.h"
 
 /**
- * @brief Allocates a new button model.
- * @param button_id The button id for the model.
- * @return The new button model.
+ * @brief Allocates a new action model.
+ * @param action_id The action id for the model.
+ * @return The new action model.
  */
-ButtonModel* button_model_alloc(uint8_t button_id) {
-    ButtonModel* model = malloc(sizeof(ButtonModel));
-    model->button_id = button_id;
+ActionModel* action_model_alloc(uint8_t action_id) {
+    ActionModel* model = malloc(sizeof(ActionModel));
+    model->action_id = action_id;
     model->color_up = 0x000000;
     model->color_down = 0x000000;
     model->frequency = 0.0f;
@@ -28,27 +24,27 @@ ButtonModel* button_model_alloc(uint8_t button_id) {
 }
 
 /**
- * @brief Allocates a new button model from a FlipperFormat.
- * @param button_id The button id for the model.
+ * @brief Allocates a new action model from a FlipperFormat.
+ * @param action_id The action id for the model.
  * @param flipper_format The FlipperFormat to load from.
- * @return The new button model.
+ * @return The new action model.
 */
-ButtonModel* button_model_alloc_from_ff(uint8_t button_id, FlipperFormat* flipper_format) {
-    ButtonModelFields fields = button_model_load_has_id(button_id, flipper_format);
-    if(fields == ButtonModelFieldNone) {
+ActionModel* action_model_alloc_from_ff(uint8_t action_id, FlipperFormat* flipper_format) {
+    ActionModelFields fields = action_model_load_has_id(action_id, flipper_format);
+    if(fields == ActionModelFieldNone) {
         return NULL;
     }
 
-    ButtonModel* model = button_model_alloc(button_id);
-    button_model_load_fields(model, flipper_format);
+    ActionModel* model = action_model_alloc(action_id);
+    action_model_load_fields(model, flipper_format);
     return model;
 }
 
 /**
- * @brief Frees a button model.
+ * @brief Frees a action model.
  * @param model The model to free.
  */
-void button_model_free(ButtonModel* model) {
+void action_model_free(ActionModel* model) {
     if(model->keystrokes) {
         free(model->keystrokes);
     }
@@ -65,29 +61,29 @@ void button_model_free(ButtonModel* model) {
 }
 
 /**
- * @brief Gets the button id for the model.
- * @param model The model to get the button id for.
- * @return The button id for the model.
+ * @brief Gets the action id for the model.
+ * @param model The model to get the action id for.
+ * @return The action id for the model.
  */
-uint8_t button_model_get_button_id(ButtonModel* model) {
-    return model->button_id;
+uint8_t action_model_get_action_id(ActionModel* model) {
+    return model->action_id;
 }
 
 /**
- * @brief Gets the HEX color when the button is not pressed.
+ * @brief Gets the HEX color when the action is not pressed.
  * @param model The model to get the color for.
- * @return The hex color for when button is up.
+ * @return The hex color for when action is up.
  */
-uint32_t button_model_get_color_up(ButtonModel* model) {
+uint32_t action_model_get_color_up(ActionModel* model) {
     return model->color_up;
 }
 
 /**
- * @brief Gets the HEX color when the button is pressed.
+ * @brief Gets the HEX color when the action is pressed.
  * @param model The model to get the color for.
- * @return The hex color for when button is pressed down.
+ * @return The hex color for when action is pressed down.
  */
-uint32_t button_model_get_color_down(ButtonModel* model) {
+uint32_t action_model_get_color_down(ActionModel* model) {
     return model->color_down;
 }
 
@@ -96,7 +92,7 @@ uint32_t button_model_get_color_down(ButtonModel* model) {
  * @param model The model to get the message index for.
  * @return The index of the menu item for editing the message.
  */
-uint8_t button_model_get_message_index(ButtonModel* model) {
+uint8_t action_model_get_message_index(ActionModel* model) {
     return model->message_index;
 }
 
@@ -105,7 +101,7 @@ uint8_t button_model_get_message_index(ButtonModel* model) {
  * @param model The model to get the keystroke index for.
  * @return The index of the menu item for adding a keystroke.
  */
-uint8_t button_model_get_keystroke_index(ButtonModel* model) {
+uint8_t action_model_get_keystroke_index(ActionModel* model) {
     return model->keystroke_index;
 }
 
@@ -114,7 +110,7 @@ uint8_t button_model_get_keystroke_index(ButtonModel* model) {
  * @param model The model to get the temp buffer for.
  * @return The temp buffer for editing the message.
  */
-char* button_model_get_temp_buffer(ButtonModel* model) {
+char* action_model_get_temp_buffer(ActionModel* model) {
     return model->temp_buffer;
 }
 
@@ -123,7 +119,7 @@ char* button_model_get_temp_buffer(ButtonModel* model) {
  * @param model The model to get the temp buffer size for.
  * @return The size of the temp buffer for editing the message.
  */
-size_t button_model_get_temp_buffer_size(ButtonModel* model) {
+size_t action_model_get_temp_buffer_size(ActionModel* model) {
     return model->temp_buffer_size;
 }
 
@@ -132,25 +128,25 @@ size_t button_model_get_temp_buffer_size(ButtonModel* model) {
  * @param model The model to get the temp index for.
  * @return The index of the item being edited.
  */
-uint8_t button_model_get_temp_index(ButtonModel* model) {
+uint8_t action_model_get_temp_index(ActionModel* model) {
     return model->temp_index;
 }
 
 /**
- * @brief Gets the button config associated with this model.
- * @param model The model to get the button config for.
- * @return The button config associated with this model.
+ * @brief Gets the action config associated with this model.
+ * @param model The model to get the action config for.
+ * @return The action config associated with this model.
  */
-void* button_model_get_button_config(ButtonModel* model) {
-    return model->button_config;
+void* action_model_get_action_config(ActionModel* model) {
+    return model->action_config;
 }
 
 /**
- * @brief Gets the frequency for the button, in Hz.
+ * @brief Gets the frequency for the action, in Hz.
  * @param model The model to get the frequency for.
- * @return The frequency for the button.
+ * @return The frequency for the action.
  */
-float button_model_get_frequency(ButtonModel* model) {
+float action_model_get_frequency(ActionModel* model) {
     if(model == NULL) {
         return 0.0f;
     }
@@ -159,11 +155,11 @@ float button_model_get_frequency(ButtonModel* model) {
 }
 
 /**
- * @brief Gets the number of keystrokes for the button.
+ * @brief Gets the number of keystrokes for the action.
  * @param model The model to get the keystrokes count for.
- * @return The number of keystrokes for the button.
+ * @return The number of keystrokes for the action.
  */
-uint8_t button_model_get_keystrokes_count(ButtonModel* model) {
+uint8_t action_model_get_keystrokes_count(ActionModel* model) {
     if(model == NULL) {
         return 0;
     }
@@ -177,7 +173,7 @@ uint8_t button_model_get_keystrokes_count(ButtonModel* model) {
  * @param index The index of the keystroke to get.
  * @return The keystroke at the given index.
  */
-Keystroke button_model_get_keystroke(ButtonModel* model, uint8_t index) {
+Keystroke action_model_get_keystroke(ActionModel* model, uint8_t index) {
     if(index < model->keystrokes_count) {
         return model->keystrokes[index];
     }
@@ -189,12 +185,12 @@ Keystroke button_model_get_keystroke(ButtonModel* model, uint8_t index) {
 }
 
 /**
- * @brief Gets the message for the button.
+ * @brief Gets the message for the action.
  * @param model The model to get the message for.
  * @param message_number The message number to get.
- * @return The message for the button.
+ * @return The message for the action.
  */
-FuriString* button_model_get_message(ButtonModel* model, uint8_t message_number) {
+FuriString* action_model_get_message(ActionModel* model, uint8_t message_number) {
     if(model == NULL || message_number >= 4) {
         return NULL;
     }
@@ -203,20 +199,20 @@ FuriString* button_model_get_message(ButtonModel* model, uint8_t message_number)
 }
 
 /**
- * @brief Sets the HEX color when the button is not pressed.
+ * @brief Sets the HEX color when the action is not pressed.
  * @param model The model to set the color for.
- * @param color_up The hex color for when button is up.
+ * @param color_up The hex color for when action is up.
  */
-void button_model_set_color_up(ButtonModel* model, uint32_t color_up) {
+void action_model_set_color_up(ActionModel* model, uint32_t color_up) {
     model->color_up = color_up;
 }
 
 /**
- * @brief Sets the HEX color when the button is pressed.
+ * @brief Sets the HEX color when the action is pressed.
  * @param model The model to set the color for.
- * @param color_down The hex color for when button is pressed down.
+ * @param color_down The hex color for when action is pressed down.
  */
-void button_model_set_color_down(ButtonModel* model, uint32_t color_down) {
+void action_model_set_color_down(ActionModel* model, uint32_t color_down) {
     model->color_down = color_down;
 }
 
@@ -225,7 +221,7 @@ void button_model_set_color_down(ButtonModel* model, uint32_t color_down) {
  * @param model The model to set the message index for.
  * @param index The index of the menu item for editing the message.
  */
-void button_model_set_message_index(ButtonModel* model, uint8_t index) {
+void action_model_set_message_index(ActionModel* model, uint8_t index) {
     model->message_index = index;
 }
 
@@ -234,7 +230,7 @@ void button_model_set_message_index(ButtonModel* model, uint8_t index) {
  * @param model The model to set the keystroke index for.
  * @param index The index of the menu item for adding a keystroke.
  */
-void button_model_set_keystroke_index(ButtonModel* model, uint8_t index) {
+void action_model_set_keystroke_index(ActionModel* model, uint8_t index) {
     model->keystroke_index = index;
 }
 
@@ -242,38 +238,38 @@ void button_model_set_keystroke_index(ButtonModel* model, uint8_t index) {
  * @brief Sets the index of the item being edited.
  * @param model The model to set the temp index for.
  */
-void button_model_set_temp_index(ButtonModel* model, uint8_t index) {
+void action_model_set_temp_index(ActionModel* model, uint8_t index) {
     model->temp_index = index;
 }
 
 /**
- * @brief Sets the button config associated with this model.
- * @param model The model to set the button config for.
- * @param button_config The button config associated with this model.
+ * @brief Sets the action config associated with this model.
+ * @param model The model to set the action config for.
+ * @param action_config The action config associated with this model.
  */
-void button_model_set_button_config(ButtonModel* model, void* button_config) {
-    model->button_config = button_config;
+void action_model_set_action_config(ActionModel* model, void* action_config) {
+    model->action_config = action_config;
 }
 
 /**
- * @brief Sets the frequency for the button, in Hz.
+ * @brief Sets the frequency for the action, in Hz.
  * @param model The model to set the frequency for.
- * @param frequency The frequency for the button.
+ * @param frequency The frequency for the action.
  */
-void button_model_set_frequency(ButtonModel* model, float frequency) {
+void action_model_set_frequency(ActionModel* model, float frequency) {
     model->frequency = frequency;
 }
 
 /**
- * @brief Sets the keystrokes and count for the button.
+ * @brief Sets the keystrokes and count for the action.
  * @param model The model to set the keystrokes count for.
  * @param index The index of the keystroke to set.
  * @param button_code The key code to send when this key is pressed.
  * @param count The number of keystrokes for the button.
  * @return True if the keystroke was set, false otherwise.
  */
-bool button_model_set_keystroke(
-    ButtonModel* model,
+bool action_model_set_keystroke(
+    ActionModel* model,
     uint8_t index,
     uint16_t button_code,
     uint8_t count) {
@@ -287,12 +283,12 @@ bool button_model_set_keystroke(
 }
 
 /**
- * @brief Appends a keystroke to the button.
+ * @brief Appends a keystroke to the action.
  * @param model The model to append the keystroke to.
  * @param button_code The key code to send when this key is pressed.
  * @param count The number of keystrokes for the button.
  */
-void button_model_append_keystroke(ButtonModel* model, uint16_t button_code, uint8_t count) {
+void action_model_append_keystroke(ActionModel* model, uint16_t button_code, uint8_t count) {
     model->keystrokes_count++;
     if(model->keystrokes == NULL) {
         model->keystrokes = malloc(sizeof(Keystroke));
@@ -305,11 +301,11 @@ void button_model_append_keystroke(ButtonModel* model, uint16_t button_code, uin
 }
 
 /**
- * @brief Removes the last keystroke from the button.
+ * @brief Removes the last keystroke from the action.
  * @param model The model to remove the keystroke from.
  * @return True if the keystroke was removed, false otherwise.
  */
-bool button_model_remove_last_keystroke(ButtonModel* model) {
+bool action_model_remove_last_keystroke(ActionModel* model) {
     if(model->keystrokes == NULL || model->keystrokes_count == 0) {
         return false;
     }
@@ -329,14 +325,14 @@ bool button_model_remove_last_keystroke(ButtonModel* model) {
 }
 
 /**
- * @brief Sets the message for the button.
- * @details Sets the message for the button. If the message is a space character, it will be
+ * @brief Sets the message for the action.
+ * @details Sets the message for the action. If the message is a space character, it will be
  * be considered as empty string.
  * @param model The model to set the message for.
- * @param message The message for the button.
+ * @param message The message for the action.
  * @param message_number The message number to set.
  */
-void button_model_set_message(ButtonModel* model, const char* message, uint8_t message_number) {
+void action_model_set_message(ActionModel* model, const char* message, uint8_t message_number) {
     if(message != NULL && message[0] == ' ') {
         // Hack since we can't clear the message.
         message++;
@@ -357,19 +353,19 @@ void button_model_set_message(ButtonModel* model, const char* message, uint8_t m
 }
 
 /**
- * @brief Saves the button model to a FlipperFormat.
+ * @brief Saves the action model to a FlipperFormat.
  * @param model The model to save.
  * @param flipper_format The FlipperFormat to save to.
  * @param fields The fields to save.
  * @return True if the model was saved, false otherwise.
  */
-bool button_model_save(ButtonModel* model, FlipperFormat* flipper_format, ButtonModelFields fields) {
+bool action_model_save(ActionModel* model, FlipperFormat* flipper_format, ActionModelFields fields) {
     if(!flipper_format_write_comment_cstr(flipper_format, "")) {
         return false;
     }
 
-    uint32_t data32 = model->button_id;
-    if(!flipper_format_write_uint32(flipper_format, "ButtonId", &data32, 1)) {
+    uint32_t data32 = model->action_id;
+    if(!flipper_format_write_uint32(flipper_format, "ActionId", &data32, 1)) {
         return false;
     }
 
@@ -378,28 +374,28 @@ bool button_model_save(ButtonModel* model, FlipperFormat* flipper_format, Button
         return false;
     }
 
-    data32 = button_model_get_color_up(model);
-    if((fields & ButtonModelFieldColorUp) &&
+    data32 = action_model_get_color_up(model);
+    if((fields & ActionModelFieldColorUp) &&
        !flipper_format_write_uint32(flipper_format, "ColorUp", &data32, 1)) {
         return false;
     }
 
-    data32 = button_model_get_color_down(model);
-    if((fields & ButtonModelFieldColorDown) &&
+    data32 = action_model_get_color_down(model);
+    if((fields & ActionModelFieldColorDown) &&
        !flipper_format_write_uint32(flipper_format, "ColorDown", &data32, 1)) {
         return false;
     }
 
-    float dataf = button_model_get_frequency(model);
-    if((fields & ButtonModelFieldFrequency) &&
+    float dataf = action_model_get_frequency(model);
+    if((fields & ActionModelFieldFrequency) &&
        !flipper_format_write_float(flipper_format, "Frequency", &dataf, 1)) {
         return false;
     }
 
-    if((fields & ButtonModelFieldMessage)) {
+    if((fields & ActionModelFieldMessage)) {
         FuriString* empty_str = furi_string_alloc();
 
-        FuriString* str = button_model_get_message(model, 0);
+        FuriString* str = action_model_get_message(model, 0);
         if(!flipper_format_write_string(flipper_format, "Message", str ? str : empty_str)) {
             if(empty_str) {
                 furi_string_free(empty_str);
@@ -407,7 +403,7 @@ bool button_model_save(ButtonModel* model, FlipperFormat* flipper_format, Button
             return false;
         }
 
-        str = button_model_get_message(model, 1);
+        str = action_model_get_message(model, 1);
         if(!flipper_format_write_string(flipper_format, "Message2", str ? str : empty_str)) {
             if(empty_str) {
                 furi_string_free(empty_str);
@@ -415,7 +411,7 @@ bool button_model_save(ButtonModel* model, FlipperFormat* flipper_format, Button
             return false;
         }
 
-        str = button_model_get_message(model, 2);
+        str = action_model_get_message(model, 2);
         if(!flipper_format_write_string(flipper_format, "Message3", str ? str : empty_str)) {
             if(empty_str) {
                 furi_string_free(empty_str);
@@ -423,7 +419,7 @@ bool button_model_save(ButtonModel* model, FlipperFormat* flipper_format, Button
             return false;
         }
 
-        str = button_model_get_message(model, 3);
+        str = action_model_get_message(model, 3);
         if(!flipper_format_write_string(flipper_format, "Message4", str ? str : empty_str)) {
             if(empty_str) {
                 furi_string_free(empty_str);
@@ -436,17 +432,17 @@ bool button_model_save(ButtonModel* model, FlipperFormat* flipper_format, Button
         }
     }
 
-    uint16_t size = button_model_get_keystrokes_count(model);
+    uint16_t size = action_model_get_keystrokes_count(model);
     data32 = size;
-    if((fields & ButtonModelFieldKeystrokes) &&
+    if((fields & ActionModelFieldKeystrokes) &&
        !flipper_format_write_uint32(flipper_format, "KeystrokeCount", &data32, 1)) {
         return false;
     }
 
-    if((fields & ButtonModelFieldKeystrokes) && size != 0) {
+    if((fields & ActionModelFieldKeystrokes) && size != 0) {
         uint32_t* info = malloc(sizeof(uint32_t) * 2 * size);
         for(uint8_t i = 0; i < size; i++) {
-            Keystroke keystroke = button_model_get_keystroke(model, i);
+            Keystroke keystroke = action_model_get_keystroke(model, i);
             info[i * 2] = (uint32_t)keystroke.button_code;
             info[i * 2 + 1] = (uint32_t)keystroke.count;
         }
@@ -461,42 +457,51 @@ bool button_model_save(ButtonModel* model, FlipperFormat* flipper_format, Button
 }
 
 /**
- * @brief Searches a FlipperFormat for a KeyId/ButtonId and returns the Fields.
- * @param button_id The button id to search for.
+ * @brief Searches a FlipperFormat for a ActionId/KeyId/ButtonId and returns the Fields.
+ * @param action_id The action id to search for.
  * @param flipper_format The FlipperFormat to search in.
- * @return The fields that were loaded (ButtonModelFieldNone if not found)
+ * @return The fields that were loaded (ActionModelFieldNone if not found)
 */
-static ButtonModelFields
-    button_model_load_has_id(uint16_t button_id, FlipperFormat* flipper_format) {
+static ActionModelFields
+    action_model_load_has_id(uint16_t action_id, FlipperFormat* flipper_format) {
     uint32_t data32;
     flipper_format_rewind(flipper_format);
-    while(flipper_format_read_uint32(flipper_format, "ButtonId", &data32, 1)) {
-        if(data32 == button_id) {
+    while(flipper_format_read_uint32(flipper_format, "ActionId", &data32, 1)) {
+        if(data32 == action_id) {
             if(flipper_format_read_uint32(flipper_format, "Fields", &data32, 1)) {
-                return (ButtonModelFields)data32;
+                return (ActionModelFields)data32;
             }
-            return (ButtonModelFields)ButtonModelFieldNone;
+            return (ActionModelFields)ActionModelFieldNone;
+        }
+    }
+    flipper_format_rewind(flipper_format);
+    while(flipper_format_read_uint32(flipper_format, "ButtonId", &data32, 1)) {
+        if(data32 == action_id) {
+            if(flipper_format_read_uint32(flipper_format, "Fields", &data32, 1)) {
+                return (ActionModelFields)data32;
+            }
+            return (ActionModelFields)ActionModelFieldNone;
         }
     }
     flipper_format_rewind(flipper_format);
     while(flipper_format_read_uint32(flipper_format, "KeyId", &data32, 1)) {
-        if(data32 == button_id) {
+        if(data32 == action_id) {
             if(flipper_format_read_uint32(flipper_format, "Fields", &data32, 1)) {
-                return (ButtonModelFields)data32;
+                return (ActionModelFields)data32;
             }
-            return (ButtonModelFields)ButtonModelFieldNone;
+            return (ActionModelFields)ActionModelFieldNone;
         }
     }
 
-    return (ButtonModelFields)ButtonModelFieldNone;
+    return (ActionModelFields)ActionModelFieldNone;
 }
 
 /**
- * @brief Loads the button model from a FlipperFormat.
+ * @brief Loads the action model from a FlipperFormat.
  * @param model The model to load.
  * @param flipper_format The FlipperFormat to load from.
 */
-static void button_model_load_fields(ButtonModel* model, FlipperFormat* flipper_format) {
+static void action_model_load_fields(ActionModel* model, FlipperFormat* flipper_format) {
     uint32_t data32;
     float dataf;
     FuriString* message = furi_string_alloc();
@@ -515,34 +520,29 @@ static void button_model_load_fields(ButtonModel* model, FlipperFormat* flipper_
 
     if(flipper_format_read_string(flipper_format, "Message", message)) {
         if(furi_string_size(message)) {
-            button_model_set_message(model, furi_string_get_cstr(message), 0);
+            action_model_set_message(model, furi_string_get_cstr(message), 0);
         }
     }
 
     if(flipper_format_read_string(flipper_format, "Message2", message)) {
         if(furi_string_size(message)) {
-            button_model_set_message(model, furi_string_get_cstr(message), 1);
+            action_model_set_message(model, furi_string_get_cstr(message), 1);
         }
 
         if(flipper_format_read_string(flipper_format, "Message3", message)) {
             if(furi_string_size(message)) {
-                button_model_set_message(model, furi_string_get_cstr(message), 2);
+                action_model_set_message(model, furi_string_get_cstr(message), 2);
             }
         }
 
         if(flipper_format_read_string(flipper_format, "Message4", message)) {
             if(furi_string_size(message)) {
-                button_model_set_message(model, furi_string_get_cstr(message), 3);
+                action_model_set_message(model, furi_string_get_cstr(message), 3);
             }
         }
     } else {
-        // Message 2 not found, so legacy format.  Rewind to being of ButtonId.
-        flipper_format_rewind(flipper_format);
-        while(flipper_format_read_uint32(flipper_format, "ButtonId", &data32, 1)) {
-            if(data32 == button_model_get_button_id(model)) {
-                break;
-            }
-        }
+        // Message 2 not found, so legacy format.  Rewind to being of Id.
+        action_model_load_has_id(model->action_id, flipper_format);
     }
 
     if(flipper_format_read_uint32(flipper_format, "KeystrokeCount", &data32, 1)) {
@@ -553,7 +553,7 @@ static void button_model_load_fields(ButtonModel* model, FlipperFormat* flipper_
             if(flipper_format_read_uint32(flipper_format, "Keystrokes", info, num_ints)) {
                 for(uint8_t i = 0; i < num_entries; i++) {
                     if(info[i * 2]) {
-                        button_model_append_keystroke(model, info[i * 2], info[i * 2 + 1]);
+                        action_model_append_keystroke(model, info[i * 2], info[i * 2 + 1]);
                     }
                 }
             }
@@ -565,15 +565,15 @@ static void button_model_load_fields(ButtonModel* model, FlipperFormat* flipper_
 }
 
 /**
- * @brief Loads the button model from a FlipperFormat.
+ * @brief Loads the action model from a FlipperFormat.
  * @param model The model to load.
  * @param flipper_format The FlipperFormat to load from.
- * @return The fields that were loaded (ButtonModelFieldNone if not found)
+ * @return The fields that were loaded (ActionModelFieldNone if not found)
 */
-ButtonModelFields button_model_load(ButtonModel* model, FlipperFormat* flipper_format) {
-    ButtonModelFields fields = button_model_load_has_id(model->button_id, flipper_format);
+ActionModelFields action_model_load(ActionModel* model, FlipperFormat* flipper_format) {
+    ActionModelFields fields = action_model_load_has_id(model->action_id, flipper_format);
     if(fields) {
-        button_model_load_fields(model, flipper_format);
+        action_model_load_fields(model, flipper_format);
     }
 
     return fields;

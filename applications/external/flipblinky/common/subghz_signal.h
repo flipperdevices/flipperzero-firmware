@@ -1,6 +1,17 @@
+/**
+ * @file subghz_signal.h
+ * @brief This file contains the subghz_signal module.
+ * @details This file contains the subghz_signal module.  The subghz_signal module is
+ * responsible for sending SubGhz signals (both RAW and Protocol .SUB files).
+ *
+ * If your build environment supports #include <lib/subghz/protocols/protocol_items.h> then please add:
+ * #define FIRMWARE_SUPPORTS_SUBGHZ 1
+*/
+
 #pragma once
 
 #include <furi.h>
+
 #include "resources.h"
 
 typedef struct SubGhzSignal SubGhzSignal;

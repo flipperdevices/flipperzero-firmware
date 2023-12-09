@@ -10,9 +10,9 @@
 #include <gui/modules/variable_item_list.h>
 #include "flipboard_keyboard_icons.h"
 
+#include "./common/action_config.h"
 #include "./common/app_menu.h"
 #include "./common/backlight.h"
-#include "./common/button_config.h"
 #include "./common/button_monitor.h"
 #include "./common/config_colors.h"
 #include "./common/custom_event.h"

@@ -4,23 +4,23 @@ This repository contains common code used by Flipboard projects.  Please let us 
 
 File names are prefixed with the component name, e.g. `app_menu_i.h` is the private header for the `app_menu` component, while `app_menu.h` is the public header.
 
+## action_config
+
+The ActionConfig module is used to configure the actions (what happens when a the buttons are pressed) on the flipboard.
+
+## action_model
+
+This ActionModel type is used to store the settings for a action. For example the color, frequency, message, and keystrokes to use when an action occurs (like pressing button 2+4).
+
+- _TODO: Should this allow for extra data to be stored with the action?_
+
 ## app_menu
 
 The AppMenu module is used to create and show the main application menu.
 
 ## backlight
 
-The Backlight module is responsible for controlling the backlight.  You can turn the backlight on, off, or force it off.
-
-## button_config
-
-The ButtonConfig module is used to configure the buttons on the flipboard.
-
-## button_model
-
-This ButtonModel  type is used to store the settings for a button. For example the color, frequency, message, and keystrokes to use when a button is pressed.
-
-- _TODO: Should this allow for extra data to be stored with the button?_
+The Backlight module is responsible for controlling the backlight.  You can turn the backlight on or off.
 
 ## button_monitor
 
@@ -37,6 +37,10 @@ config_keystroke.h contains the configuration of the keystrokes.  You can add ne
 ## config_tones
 
 config_tones.h contains the configuration of the tones.  The tones are a set of frequencies that can be played on the buzzer.  The tones (in Hz) are defined in the tone_values array.  The index of the tone in this array is the same as the index of the tone in the tone_names array.
+
+## custom_event
+
+custom_event.h contains the enumeration of custom events that can be sent.
 
 ## flipboard
 
@@ -61,6 +65,10 @@ The FlipboardModel contains all the data needed for the flipboard application.  
 
 FlipboardModelRef is a reference to a FlipboardModel, used to pass a FlipboardModel to UI components that cant take a pointer to an existing FlipboardModel.
 
+## infrared_signal
+
+The InfraredSignal module is used to send IR signals using the IR LED on the Flipper.
+
 ## keyboard
 
 A Keyboard module is used to send key codes to the host using the USB cable connected to the Flipper Zero.
@@ -68,6 +76,10 @@ A Keyboard module is used to send key codes to the host using the USB cable conn
 ## keystroke_selector
 
 The KeystrokeSelector module is used to select a keystroke. The view will display a grid of keys. The user can scroll through the keys using the dpad buttons. The user can select a key by pressing the OK button. The view will call a callback when a key is selected.
+
+## led_driver
+
+The LedDriver module is used to control the addressable LEDs on the flipboard using the timer API.  This API is used by the leds module.
 
 ## leds
 
@@ -80,3 +92,7 @@ The MenuCallback module is used to return a specific view id from ViewNavigation
 ## speaker
 
 The Speaker module is used to play tones on the internal Flipper Zero speaker.
+
+## subshz_signal
+
+The SubghzSignal module is used to send subghz signals using the subghz radio on the Flipper Zero.

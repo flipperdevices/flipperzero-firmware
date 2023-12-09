@@ -18,7 +18,7 @@ Flipboard* flipboard_alloc(
     char* app_name,
     char* primary_item_name,
     char* about_text,
-    ButtonModelFields fields,
+    ActionModelFields fields,
     bool single_mode_button,
     bool attach_keyboard,
     KeystrokeSelectorKey* keys,
@@ -38,14 +38,14 @@ Flipboard* flipboard_alloc(
     view_dispatcher_attach_to_gui(app->view_dispatcher, gui, ViewDispatcherTypeFullscreen);
     view_dispatcher_set_event_callback_context(app->view_dispatcher, app);
 
-    app->button_config =
-        button_config_alloc(app->model, FlipboardViewConfigureId, keys, shift_keys, rows);
+    app->action_config =
+        action_config_alloc(app->model, FlipboardViewConfigureId, keys, shift_keys, rows);
 
-    button_config_register_dispatcher(app->button_config, app->view_dispatcher);
-    button_config_register_variable_item_list(app->button_config, FlipboardViewConfigureSubviewId);
-    button_config_register_text_input(app->button_config, FlipboardViewConfigureTextInputId);
-    button_config_register_keystroke_selector(
-        app->button_config, FlipboardViewConfigureKeystrokeSelectorId);
+    action_config_register_dispatcher(app->action_config, app->view_dispatcher);
+    action_config_register_variable_item_list(app->action_config, FlipboardViewConfigureSubviewId);
+    action_config_register_text_input(app->action_config, FlipboardViewConfigureTextInputId);
+    action_config_register_keystroke_selector(
+        app->action_config, FlipboardViewConfigureKeystrokeSelectorId);
 
     app->view_primary = get_primary_view(app);
 
@@ -53,8 +53,8 @@ Flipboard* flipboard_alloc(
     app_menu_add_item(
         app->app_menu,
         "Config",
-        button_config_get_view(app->button_config),
-        button_config_get_view_id(app->button_config));
+        action_config_get_view(app->action_config),
+        action_config_get_view_id(app->action_config));
 
     app_menu_add_item(app->app_menu, primary_item_name, app->view_primary, FlipboardViewPrimaryId);
 
@@ -77,8 +77,8 @@ void flipboard_free(Flipboard* app) {
     flipboard_model_free(app->model);
 
     view_free(app->view_primary);
-    if(app->button_config) {
-        button_config_free(app->button_config);
+    if(app->action_config) {
+        action_config_free(app->action_config);
     }
     widget_free(app->widget_about);
     app_menu_free(app->app_menu);
@@ -122,9 +122,9 @@ View* flipboard_get_primary_view(Flipboard* app) {
  * @param view The view to override the config view with.
 */
 void flipboard_override_config_view(Flipboard* app, View* view) {
-    if(app->button_config) {
-        button_config_free(app->button_config);
-        app->button_config = NULL;
+    if(app->action_config) {
+        action_config_free(app->action_config);
+        app->action_config = NULL;
     }
     view_dispatcher_remove_view(app->view_dispatcher, FlipboardViewConfigureId);
     view_dispatcher_add_view(app->view_dispatcher, FlipboardViewConfigureId, view);

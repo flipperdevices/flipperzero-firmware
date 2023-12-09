@@ -29,10 +29,13 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM1207-2052-0.93.9-1465a2d](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-12-07 20:52 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-12-07 20:52 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-12-09 13:00 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-12-09 13:00 EST`
 - SubGHz: [Fix repeater crash on known protocol key TX & Long press OK to TX (By LeeroysHub)](https://github.com/LeeroysHub/RM-Flipper/commit/4b310755dd56fca6f96851a012fd94b05f46c933)
 - Updated: [BLE Spam v4.4 (By Willy-JL & ECTO-1A & Spooks4576 with research from xMasterX; OFW API thanks to noproto)](https://github.com/noproto/apple_ble_spam_ofw)
+- [FlipBoard Blinky v2.1 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
+- [FlipBoard Keyboard v2.0 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
+- [FlipBoard Signal v3.1 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
 
 <a name="release">
 
@@ -358,9 +361,9 @@ $ ./fbt dolphin_ext
 - [FAP Boilerplate (By leedave)](https://github.com/leedave/flipper-zero-fap-boilerplate)
 - [Flashlight v1.1 (By xMasterX)](https://github.com/xMasterX/flipper-flashlight)
 - [Flipagotchi WIP (By Matt-London)](https://github.com/Matt-London/pwnagotchi-flipper)
-- [FlipBoard Blinky v1.0 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
-- [FlipBoard Keyboard v1.1 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
-- [FlipBoard Signal v1.0 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
+- [FlipBoard Blinky v2.1 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
+- [FlipBoard Keyboard v2.0 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
+- [FlipBoard Signal v3.1 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
 - [FlipBIP Crypto Wallet v1.14 (By xtruan)](https://github.com/xtruan/FlipBIP)
 - [Flizzer Tracker v0.4 (By LTVA1)](https://github.com/LTVA1/flizzer_tracker)
 - [FM Radio v1.1 (By coolshrimp)](https://github.com/coolshrimp/flipperzero-firmware-wPlugins/tree/420/applications/external/fm_radio)

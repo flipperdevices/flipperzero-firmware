@@ -9,9 +9,9 @@
 #include <gui/modules/widget.h>
 #include <gui/modules/variable_item_list.h>
 
+#include "./common/action_config.h"
 #include "./common/app_menu.h"
 #include "./common/backlight.h"
-#include "./common/button_config.h"
 #include "./common/button_monitor.h"
 #include "./common/config_colors.h"
 #include "./common/custom_event.h"
@@ -30,5 +30,5 @@ typedef struct FlipboardBlinkyModel {
     uint8_t effect_counter;
     uint8_t effect_id;
     uint8_t max_effect_id;
-    uint32_t show_details_counter;
+    uint32_t show_details_until;
 } FlipboardBlinkyModel;

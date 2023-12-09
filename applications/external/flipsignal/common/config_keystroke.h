@@ -1,5 +1,3 @@
-#pragma once
-
 /**
  * @file     config_keystroke.h
  * @brief    The configuration of the keystrokes.
@@ -13,12 +11,15 @@
  * keystroke.  This array should start at value 0, and increment by 1s.
 */
 
+#pragma once
+
 #include <furi_hal.h>
 
 /**
  * @brief    The HID values of the keystrokes.
  * @details  The index of the keystroke in this array is the same as
- *  the index of the keystroke in the keystroke_names array.
+ *  the index of the keystroke in the keystroke_names array.  
+ * @note     The VariableItemList has a max size of 255 entries.
 */
 uint16_t keystroke_values[] = {
     HID_KEYBOARD_NONE, // Not mapped
@@ -304,6 +305,7 @@ uint16_t keystroke_values[] = {
  * @brief    The HID values of the keystrokes.
  * @details  The index of the keystroke in this array is the same as
  *  the index of the keystroke in the keystroke_names array.
+ * @note     The VariableItemList has a max size of 255 entries.
 */
 char* keystroke_names[] = {
     "None",      "Delay",   "Msg 1",       "Msg 2",       "Msg 3",     "Msg 4",

@@ -5,6 +5,13 @@
 #include <gui/modules/widget.h>
 #include <furi.h>
 
+// The screen only refreshes a few times a second, so this is the minimum time the message
+// will be displayed after an action.
+#define MESSAGE_DISPLAY_TIME_MS 1900
+
+// The effect to initially use when the "Flipboard Blinky" view is shown.
+#define INITIAL_EFFECT_ID 2
+
 /**
  * @brief This method handles Flipper D-Pad input when in the FlipboardBlinky mode.
  * @param _event The InputEvent* to handle.
@@ -28,7 +35,8 @@ void flipboard_view_flip_keyboard_draw(Canvas* canvas, void* model) {
     canvas_draw_icon(canvas, 1, 1, &I_nametag);
 
     FlipboardBlinkyModel* fbm = flipboard_model_get_custom_data(my_model->model);
-    if(fbm->show_details_counter > 0) {
+
+    if(fbm->show_details_until && (furi_get_tick() < fbm->show_details_until)) {
         canvas_set_color(canvas, ColorWhite);
         canvas_draw_box(canvas, 0, 48, 128, 64 - 48);
         canvas_set_color(canvas, ColorBlack);
@@ -42,7 +50,6 @@ void flipboard_view_flip_keyboard_draw(Canvas* canvas, void* model) {
         canvas_set_font(canvas, FontSecondary);
         canvas_draw_str(canvas, 1, 61, furi_string_get_cstr(str));
         furi_string_free(str);
-        fbm->show_details_counter--;
     }
 }
 
@@ -109,9 +116,9 @@ void flipboard_reset_effect(FlipboardModel* model) {
     }
 
     if(fbm->effect_id == 1) {
-        backlight_off();
+        flipboard_model_set_backlight(model, false);
     } else {
-        backlight_on();
+        flipboard_model_set_backlight(model, true);
     }
 }
 
@@ -186,50 +193,55 @@ void flipboard_debounced_switch(void* context, uint8_t old_key, uint8_t new_key)
     Flipboard* app = (Flipboard*)context;
     FlipboardModel* model = flipboard_get_model(app);
     uint8_t reduced_new_key = flipboard_model_reduce(model, new_key, false);
-    uint32_t detail_counter_ticks = 20;
+    uint32_t detail_counter_ticks = furi_get_tick() + MESSAGE_DISPLAY_TIME_MS;
 
     FURI_LOG_D(TAG, "SW EVENT: old=%d new=%d reduced=%d", old_key, new_key, reduced_new_key);
 
     FlipboardBlinkyModel* fbm = flipboard_model_get_custom_data(model);
-    if((new_key == 1) || (new_key == 3)) {
-        // Faster by 5ms
+    if((new_key == (1 | 0 | 0 | 0)) || (new_key == (1 | 2 | 0 | 0))) {
+        // Faster by 5ms is left button pressed.  Faster by 20ms if both (button 1+button 2) pressed.
         uint32_t delay = (new_key == 1) ? 5 : 20;
         if(fbm->period_ms > delay) {
             fbm->period_ms -= delay;
+
+            // Don't go faster than 50ms
             if(fbm->period_ms < 50) {
                 fbm->period_ms = 50;
             }
+
             furi_timer_start(fbm->timer, furi_ms_to_ticks(fbm->period_ms));
-            fbm->show_details_counter = detail_counter_ticks;
+            fbm->show_details_until = detail_counter_ticks;
         }
-    } else if(new_key == 2) {
+    } else if(new_key == (0 | 2 | 0 | 0)) {
         // Slower by 20ms
         uint32_t delay = 20;
         fbm->period_ms += delay;
         furi_timer_start(fbm->timer, furi_ms_to_ticks(fbm->period_ms));
-        fbm->show_details_counter = detail_counter_ticks;
-    } else if(new_key == 4) {
+        fbm->show_details_until = detail_counter_ticks;
+    } else if(new_key == (0 | 0 | 4 | 0)) {
         // Previous effect
         fbm->effect_id--;
         if(fbm->effect_id < 1) {
             fbm->effect_id = fbm->max_effect_id;
         }
-        fbm->show_details_counter = detail_counter_ticks;
+        fbm->show_details_until = detail_counter_ticks;
         flipboard_reset_effect(model);
-    } else if(new_key == 8) {
+    } else if(new_key == (0 | 0 | 0 | 8)) {
         // Next effect
         fbm->effect_id++;
         if(fbm->effect_id > fbm->max_effect_id) {
             fbm->effect_id = 1;
         }
-        fbm->show_details_counter = detail_counter_ticks;
+        fbm->show_details_until = detail_counter_ticks;
         flipboard_reset_effect(model);
-    } else if(new_key == 12) {
-        // Our first effect is off.
+    } else if(new_key == (0 | 0 | 4 | 8)) {
+        // Switch to our first effect ("off" when both right buttons are pressed).
         fbm->effect_id = 1;
-        fbm->show_details_counter = detail_counter_ticks;
+        fbm->show_details_until = detail_counter_ticks;
         flipboard_reset_effect(model);
     }
+
+    flipboard_model_update_gui(model);
 }
 
 /**
@@ -249,11 +261,11 @@ void flipboard_tick_callback(void* context) {
 void flipboard_enter_callback(void* context) {
     FlipboardModel* fm = flipboard_get_model((Flipboard*)context);
     FlipboardBlinkyModel* fbm = flipboard_model_get_custom_data(fm);
-    fbm->effect_id = 2;
+    fbm->effect_id = INITIAL_EFFECT_ID;
     flipboard_reset_effect(fm);
     flipboard_model_set_button_monitor(fm, flipboard_debounced_switch, (Flipboard*)context);
     furi_timer_start(fbm->timer, furi_ms_to_ticks(fbm->period_ms));
-    flipboard_model_set_gui_refresh_speed_ms(fm, 0);
+    flipboard_model_set_gui_refresh_speed_ms(fm, 500);
 }
 
 /**
@@ -301,7 +313,7 @@ FlipboardBlinkyModel* flipboard_blinky_model_alloc(FlipboardModel* context) {
     fbm->period_ms = 200;
     fbm->effect_id = 1;
     fbm->max_effect_id = 6;
-    fbm->show_details_counter = 0;
+    fbm->show_details_until = 0;
     return fbm;
 }
 
@@ -325,8 +337,6 @@ void flipboard_blinky_model_free(FlipboardBlinkyModel* fbm) {
 static void loaded_app_menu(FlipboardModel* model) {
     static bool initial_load = true;
     FlipboardLeds* leds = flipboard_model_get_leds(model);
-    UNUSED(color_names);
-    UNUSED(color_values);
     if(initial_load) {
         for(int i = 0; i < 2; i++) {
             flipboard_leds_set(leds, LedId1, LedColorRed);
@@ -384,10 +394,8 @@ static bool custom_event_handler(void* context, uint32_t event) {
 */
 int32_t flipboard_blinky_app(void* _p) {
     UNUSED(_p);
-    furi_check(COUNT_OF(color_names));
-    furi_check(COUNT_OF(color_values));
 
-    ButtonModelFields fields = ButtonModelFieldNone;
+    ActionModelFields fields = ActionModelFieldNone;
     bool single_mode_button = true;
     bool attach_keyboard = false;
 
@@ -412,11 +420,11 @@ int32_t flipboard_blinky_app(void* _p) {
     FlipboardModel* model = flipboard_get_model(app);
     FlipboardBlinkyModel* fbm = flipboard_blinky_model_alloc(model);
     flipboard_model_set_custom_data(model, fbm);
-    fbm->effect_id = 2;
-    flipboard_reset_effect(model);
+
     view_dispatcher_set_event_callback_context(flipboard_get_view_dispatcher(app), app);
     view_dispatcher_set_custom_event_callback(
         flipboard_get_view_dispatcher(app), custom_event_handler);
+
     view_dispatcher_run(flipboard_get_view_dispatcher(app));
 
     flipboard_blinky_model_free(fbm);

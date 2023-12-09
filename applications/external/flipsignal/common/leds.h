@@ -1,5 +1,3 @@
-#pragma once
-
 /**
  * @file leds.h
  * @brief This file contains methods to control the LEDs on the flipboard.
@@ -7,7 +5,10 @@
  * and also the status LED.
 */
 
+#pragma once
+
 #include <furi.h>
+
 #include "resources.h"
 
 typedef struct FlipboardLeds FlipboardLeds;

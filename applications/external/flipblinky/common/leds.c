@@ -1,15 +1,5 @@
 #include "leds_i.h"
 
-#include "../app_config.h"
-
-// Bit-banging the WS2812b LEDs is a bit tricky. The timing is very strict.
-// Hopefully, we will update to a better solution in the future.
-#define DWT_CYCCNT (0xE0001004UL)
-typedef struct {
-    volatile uint32_t COUNT; /*!< E0001000 + Offset: 0x004 (R/W)  Cycle Count Register */
-} DWT_Internal;
-#define DWT_ACCESS ((DWT_Internal*)DWT_CYCCNT)
-
 /**
  * @brief Allocates a FlipboardLeds struct.
  * @details This method allocates a FlipboardLeds struct.  This is used to
@@ -19,15 +9,19 @@ typedef struct {
 */
 FlipboardLeds* flipboard_leds_alloc(Resources* resources) {
     FlipboardLeds* leds = malloc(sizeof(FlipboardLeds));
+
 #ifdef USE_LED_DRIVER
-    FURI_LOG_D(TAG, "Using LED driver");
     leds->resources = resources;
     leds->led_driver = led_driver_alloc(LED_COUNT, pin_ws2812_leds);
 #else
-    FURI_LOG_D(TAG, "Using Bit-bang LEDs");
+    // If our bit-bang code is interrupted, the LED colors could become 0xFFFFFF and drain too much current?
+    FURI_LOG_E(TAG, "WARNING: Using Bit-bang LEDs. Colors may be wrong. Only use for a few LEDs!");
+    furi_assert(
+        LED_COUNT < 16, "Bit-bang LEDs only supports up to 16 LEDs for MAX CURRENT safety.");
     furi_hal_gpio_init_simple(pin_ws2812_leds, GpioModeOutputPushPull);
     leds->led_driver = NULL;
 #endif
+
     furi_hal_gpio_init_simple(pin_status_led, GpioModeOutputPushPull);
     flipboard_leds_reset(leds);
     return leds;
