@@ -797,7 +797,7 @@ int32_t ble_spam(void* p) {
     state->thread = furi_thread_alloc();
     furi_thread_set_callback(state->thread, adv_thread);
     furi_thread_set_context(state->thread, state);
-    furi_thread_set_stack_size(state->thread, 4096);
+    furi_thread_set_stack_size(state->thread, 2048);
     napi_hci_send_req = (int (*)(struct hci_request*, uint8_t))(
         (uintptr_t)(scan_memory_for_sequence(TARGET_SEQUENCE)) | 0x01);
     state->ctx.led_indicator = true;

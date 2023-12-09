@@ -1,3 +1,12 @@
+## 1.9
+ - Fix bug (#77) with loclass
+ - Better loclass notes
+ - Read card using nr-mac
+ - Save as Seader format
+## 1.8
+ - Minimal changes for recent API updates
+## 1.7
+ - Rework application with new NFC API
 ## 1.6
  - Faster loclass response collection
  - Save as LF for all bit lengths

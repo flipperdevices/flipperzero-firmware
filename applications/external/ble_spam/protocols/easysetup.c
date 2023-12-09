@@ -398,7 +398,6 @@ void scene_easysetup_buds_model_on_enter(void* _ctx) {
     EasysetupCfg* cfg = &payload->cfg.easysetup;
     Submenu* submenu = ctx->submenu;
     uint32_t selected = 0;
-    submenu_reset(submenu);
 
     submenu_add_item(submenu, "Random", 0, buds_model_callback, ctx);
     if(payload->mode == PayloadModeRandom) {
@@ -434,7 +433,8 @@ bool scene_easysetup_buds_model_on_event(void* _ctx, SceneManagerEvent event) {
     return false;
 }
 void scene_easysetup_buds_model_on_exit(void* _ctx) {
-    UNUSED(_ctx);
+    Ctx* ctx = _ctx;
+    submenu_reset(ctx->submenu);
 }
 
 static void buds_model_custom_callback(void* _ctx) {
@@ -470,7 +470,9 @@ bool scene_easysetup_buds_model_custom_on_event(void* _ctx, SceneManagerEvent ev
     return false;
 }
 void scene_easysetup_buds_model_custom_on_exit(void* _ctx) {
-    UNUSED(_ctx);
+    Ctx* ctx = _ctx;
+    byte_input_set_result_callback(ctx->byte_input, NULL, NULL, NULL, NULL, 0);
+    byte_input_set_header_text(ctx->byte_input, "");
 }
 
 static void watch_model_callback(void* _ctx, uint32_t index) {
@@ -505,7 +507,6 @@ void scene_easysetup_watch_model_on_enter(void* _ctx) {
     EasysetupCfg* cfg = &payload->cfg.easysetup;
     Submenu* submenu = ctx->submenu;
     uint32_t selected = 0;
-    submenu_reset(submenu);
 
     submenu_add_item(submenu, "Random", 0, watch_model_callback, ctx);
     if(payload->mode == PayloadModeRandom) {
@@ -541,7 +542,8 @@ bool scene_easysetup_watch_model_on_event(void* _ctx, SceneManagerEvent event) {
     return false;
 }
 void scene_easysetup_watch_model_on_exit(void* _ctx) {
-    UNUSED(_ctx);
+    Ctx* ctx = _ctx;
+    submenu_reset(ctx->submenu);
 }
 
 static void watch_model_custom_callback(void* _ctx) {

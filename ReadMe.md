@@ -32,6 +32,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-12-07 20:52 EST`
 - Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-12-07 20:52 EST`
 - SubGHz: [Fix repeater crash on known protocol key TX & Long press OK to TX (By LeeroysHub)](https://github.com/LeeroysHub/RM-Flipper/commit/4b310755dd56fca6f96851a012fd94b05f46c933)
+- Updated: [BLE Spam v4.4 (By Willy-JL & ECTO-1A & Spooks4576 with research from xMasterX; OFW API thanks to noproto)](https://github.com/noproto/apple_ble_spam_ofw)
 
 <a name="release">
 
