@@ -1,0 +1,27 @@
+name: "FAP: Build and lint"
+on: [push, pull_request]
+jobs:
+  ufbt-build-action:
+    runs-on: ubuntu-latest
+    name: 'ufbt: Build for Dev branch (XFW-DEV)'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Build with ufbt (XFW-DEV)
+        uses: flipperdevices/flipperzero-ufbt-action@v0.1
+        id: build-app
+        with:
+          sdk-url: https://cloud.cynthialabs.net/s/sGHsQB94a9x5CRs/download?path=/&files=XFW-DEV_@845ADD5-sdk.zip
+          sdk-channel: dev
+      - name: Upload app artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ github.event.repository.name }}-${{ steps.build-app.outputs.suffix }}
+          path: ${{ steps.build-app.outputs.fap-artifacts }}
+      # You can remove this step if you don't want to check source code formatting
+      - name: Lint sources
+        uses: flipperdevices/flipperzero-ufbt-action@v0.1
+        with:
+          # skip SDK setup, we already did it in previous step
+          skip-setup: true
+          task: lint
