@@ -34,10 +34,10 @@ void boilerplate_scene_1_draw(Canvas* canvas, BoilerplateScene1Model* model) {
     canvas_draw_str_aligned(canvas, 0, 8, AlignLeft, AlignTop, "Instructions:"); 
 
     canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str_aligned(canvas, 0, 22, AlignLeft, AlignTop, " Up/Down - Guess");
-    canvas_draw_str_aligned(canvas, 0, 32, AlignLeft, AlignTop, " Ok - Check");
-    canvas_draw_str_aligned(canvas, 0, 42, AlignLeft, AlignTop, " Left - Reset");
-    canvas_draw_str_aligned(canvas, 0, 52, AlignLeft, AlignTop, " Back - Exit");
+    canvas_draw_str_aligned(canvas, 0, 22, AlignLeft, AlignTop, " Ok - Check guess");
+    canvas_draw_str_aligned(canvas, 0, 32, AlignLeft, AlignTop, " Up/Down - Add/Substract");
+    canvas_draw_str_aligned(canvas, 0, 42, AlignLeft, AlignTop, " L/R - Fast Add/Substract");
+    canvas_draw_str_aligned(canvas, 0, 52, AlignLeft, AlignTop, " Back - Exit to menu");
 }
 
 static void boilerplate_scene_1_model_init(BoilerplateScene1Model* const model) {
@@ -136,4 +136,3 @@ View* boilerplate_scene_1_get_view(BoilerplateScene1* instance) {
     furi_assert(instance);
     return instance->view;
 }
-
