@@ -191,7 +191,6 @@ void flipboard_debounced_switch(void* context, uint8_t old_key, uint8_t new_key)
     FlipboardModel* model = flipboard_get_model(app);
     uint8_t reduced_new_key = flipboard_model_reduce(model, new_key, false);
     uint32_t detail_counter_ticks = furi_get_tick() + MESSAGE_DISPLAY_TIME_MS;
-    FURI_LOG_D(TAG, "detail_counter_ticks=%lu", detail_counter_ticks);
 
     FURI_LOG_D(TAG, "SW EVENT: old=%d new=%d reduced=%d", old_key, new_key, reduced_new_key);
 
