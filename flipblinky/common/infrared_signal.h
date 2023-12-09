@@ -1,16 +1,27 @@
+/**
+ * @file infrared_signal.h
+ * @brief This file contains the infrared signal module.
+ * @details This file contains the infrared signal module for sending infrared signals from a file.
+ * Both raw and parsed signals are supported.  The file can be in either format "IR signals file"
+ * or "IR library file".
+ * @name There is no 'infrared_signal_alloc' function.  Use 'infrared_signal_load_file'.
+*/
+
 #pragma once
 
 #include <furi.h>
+
 #include "resources.h"
 
 typedef struct InfraredSignal InfraredSignal;
 
 /**
  * @brief Load an infrared signal (action) from a file.  
- * @details Load an infrared signal (action) from a file.  The first signal is loaded and ready for sending.
+ * @note The first signal is loaded and ready for sending.
  * @param file_path The path to the file to load.
  * @param action The name of the action to load from the file.
  * @param resources The resources to use for sending the signal.
+ * @return The loaded signal, or NULL if there was an error.
 */
 InfraredSignal* infrared_signal_load_file(char* path, char* action, Resources* resources);
 

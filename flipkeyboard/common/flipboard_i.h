@@ -2,8 +2,9 @@
 
 #include <gui/view_dispatcher.h>
 #include <gui/modules/widget.h>
+
+#include "action_config.h"
 #include "app_menu.h"
-#include "button_config.h"
 #include "flipboard.h"
 #include "flipboard_model.h"
 #include "keyboard.h"
@@ -18,7 +19,7 @@ struct Flipboard {
     ViewDispatcher* view_dispatcher;
 
     AppMenu* app_menu;
-    ButtonConfig* button_config;
+    ActionConfig* action_config;
     View* view_primary;
     Widget* widget_about;
 

@@ -12,5 +12,5 @@ ARRAY_DEF(ViewIdsArray, uint32_t, M_PTR_OPLIST);
 struct AppMenu {
     ViewDispatcher* view_dispatcher;
     Submenu* submenu;
-    ViewIdsArray_t view_ids;
+    ViewIdsArray_t view_ids; // List of view ids for each menu item
 };

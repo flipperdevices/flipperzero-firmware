@@ -109,9 +109,9 @@ void flipboard_reset_effect(FlipboardModel* model) {
     }
 
     if(fbm->effect_id == 1) {
-        backlight_off();
+        flipboard_model_set_backlight(model, false);
     } else {
-        backlight_on();
+        flipboard_model_set_backlight(model, true);
     }
 }
 
@@ -325,8 +325,6 @@ void flipboard_blinky_model_free(FlipboardBlinkyModel* fbm) {
 static void loaded_app_menu(FlipboardModel* model) {
     static bool initial_load = true;
     FlipboardLeds* leds = flipboard_model_get_leds(model);
-    UNUSED(color_names);
-    UNUSED(color_values);
     if(initial_load) {
         for(int i = 0; i < 2; i++) {
             flipboard_leds_set(leds, LedId1, LedColorRed);
@@ -384,10 +382,8 @@ static bool custom_event_handler(void* context, uint32_t event) {
 */
 int32_t flipboard_blinky_app(void* _p) {
     UNUSED(_p);
-    furi_check(COUNT_OF(color_names));
-    furi_check(COUNT_OF(color_values));
 
-    ButtonModelFields fields = ButtonModelFieldNone;
+    ActionModelFields fields = ActionModelFieldNone;
     bool single_mode_button = true;
     bool attach_keyboard = false;
 

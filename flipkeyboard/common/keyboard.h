@@ -1,10 +1,10 @@
-#pragma once
-
 /**
  * @file keyboard.h
  * @brief A keyboard that can be used to send key codes to the host using the 
  * USB cable connected to the Flipper Zero.
 */
+
+#pragma once
 
 #include <furi.h>
 #include <furi_hal.h>

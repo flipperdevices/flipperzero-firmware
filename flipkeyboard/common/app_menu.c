@@ -1,5 +1,9 @@
 #include "app_menu_i.h"
 
+/**
+ * @brief      Global ViewDispatcher pointer.  
+ * @details    This global is due to submenu context being fixed to submenu.
+*/
 static ViewDispatcher* global_view_dispatcher;
 
 /**

@@ -1,5 +1,3 @@
-#pragma once
-
 /**
  * @file flipboard.h
  * @brief The main Flipboard application.
@@ -12,9 +10,12 @@
  * If you have custom data, you can use flipboard_model_set_custom_data.
 */
 
+#pragma once
+
 #include <gui/view.h>
 #include <gui/view_dispatcher.h>
-#include "button_model.h"
+
+#include "action_model.h"
 #include "keystroke_selector.h"
 
 typedef struct Flipboard Flipboard;
@@ -43,7 +44,7 @@ Flipboard* flipboard_alloc(
     char* app_name,
     char* primary_item_name,
     char* about_text,
-    ButtonModelFields fields,
+    ActionModelFields fields,
     bool single_mode_button,
     bool attach_keyboard,
     KeystrokeSelectorKey* keys,

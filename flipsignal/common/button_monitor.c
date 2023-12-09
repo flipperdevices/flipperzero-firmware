@@ -1,12 +1,10 @@
 #include "button_monitor_i.h"
 
-// Left to right order of the switches.
+// Left to right order of the switches on the FlipBoard.
 const GpioPin* const pin_sw1 = &gpio_ext_pb2;
 const GpioPin* const pin_sw2 = &gpio_ext_pb3;
 const GpioPin* const pin_sw3 = &gpio_ext_pa4;
 const GpioPin* const pin_sw4 = &gpio_ext_pa6;
-
-static int32_t button_monitor_worker(void* context);
 
 /**
  * @brief Allocates a new button monitor.
@@ -90,8 +88,8 @@ static SwitchIds button_monitor_get_pin_status() {
 static SwitchIds button_monitor_get_debounced_pin_status() {
     SwitchIds pin_status = 0;
     uint32_t counter = 0;
-    furi_delay_ms(50);
-    while(counter < 100) {
+    furi_delay_ms(DEBOUNCE_WAIT_MS);
+    while(counter < DEBOUNCE_SAME_MIN_COUNT) {
         SwitchIds new_pin_status = button_monitor_get_pin_status();
         if(pin_status != new_pin_status) {
             counter = 0;

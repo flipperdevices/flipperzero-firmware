@@ -95,19 +95,19 @@ static bool send_ir(FlipboardModel* model, char* filename, char* action_name) {
 /**
  * @brief This method transmits a signal associated with the button.
  * @param model The FlipboardModel* context.
- * @param bm The ButtonModel* context.
+ * @param action_model The ActionModel* context.
  */
 static ViewDispatcher* view_dispatcher = NULL;
-static void flipboard_model_send_signal(FlipboardModel* model, ButtonModel* bm) {
+static void flipboard_model_send_signal(FlipboardModel* model, ActionModel* action_model) {
     UNUSED(model);
-    if(bm == NULL) {
+    if(action_model == NULL) {
         // Key up event.
         return;
     }
 
-    uint8_t btn = button_model_get_button_id(bm);
+    uint8_t action = action_model_get_action_id(action_model);
 
-    view_dispatcher_send_custom_event(view_dispatcher, CustomEventButtonPress + btn);
+    view_dispatcher_send_custom_event(view_dispatcher, CustomEventFlipboardButtonPress + action);
 }
 
 /**
@@ -126,10 +126,10 @@ static void flipboard_debounced_switch(void* context, uint8_t old_button, uint8_
 
     flipboard_model_update_gui(model);
 
-    ButtonModel* bm = flipboard_model_get_button_model(model, reduced_new_button);
-    flipboard_model_set_colors(model, bm, new_button);
-    flipboard_model_play_tone(model, bm);
-    flipboard_model_send_signal(model, bm);
+    ActionModel* action_model = flipboard_model_get_action_model(model, reduced_new_button);
+    flipboard_model_set_colors(model, action_model, new_button);
+    flipboard_model_play_tone(model, action_model);
+    flipboard_model_send_signal(model, action_model);
 }
 
 /**
@@ -181,8 +181,6 @@ static View* get_primary_view(void* context) {
 static void loaded_app_menu(FlipboardModel* model) {
     static bool initial_load = true;
     FlipboardLeds* leds = flipboard_model_get_leds(model);
-    UNUSED(color_names);
-    UNUSED(color_values);
     if(initial_load) {
         flipboard_leds_reset(leds);
         flipboard_leds_set(leds, LedId1, LedColorRed);
@@ -230,24 +228,24 @@ static bool custom_event_handler(void* context, uint32_t event) {
 
     if(event == CustomEventAppMenuEnter) {
         loaded_app_menu(model);
-    } else if(event == CustomEventButtonPress + 1) {
+    } else if(event == CustomEventFlipboardButtonPress + 1) {
         send_subghz(model, "/ext/subghz/flip1.sub");
         if(!send_ir(model, "/ext/infrared/flipboard.ir", "Flip1")) {
             send_ir(model, "/ext/infrared/assets/tv.ir", "Power");
         }
-    } else if(event == CustomEventButtonPress + 2) {
+    } else if(event == CustomEventFlipboardButtonPress + 2) {
         send_subghz(model, "/ext/subghz/flip2.sub");
         if(!send_ir(model, "/ext/infrared/flipboard.ir", "Flip2")) {
             send_ir(model, "/ext/infrared/assets/tv.ir", "Mute");
         }
-    } else if(event == CustomEventButtonPress + 4) {
-        send_subghz(model, "/ext/subghz/flip3.sub");
-        if(!send_ir(model, "/ext/infrared/flipboard.ir", "Flip3")) {
-            send_ir(model, "/ext/infrared/assets/tv.ir", "Ch_prev");
-        }
-    } else if(event == CustomEventButtonPress + 8) {
+    } else if(event == CustomEventFlipboardButtonPress + 4) {
         send_subghz(model, "/ext/subghz/flip4.sub");
         if(!send_ir(model, "/ext/infrared/flipboard.ir", "Flip4")) {
+            send_ir(model, "/ext/infrared/assets/tv.ir", "Ch_prev");
+        }
+    } else if(event == CustomEventFlipboardButtonPress + 8) {
+        send_subghz(model, "/ext/subghz/flip8.sub");
+        if(!send_ir(model, "/ext/infrared/flipboard.ir", "Flip8")) {
             send_ir(model, "/ext/infrared/assets/tv.ir", "Ch_next");
         }
     }
@@ -263,8 +261,8 @@ static bool custom_event_handler(void* context, uint32_t event) {
 int32_t flipboard_signal_app(void* p) {
     UNUSED(p);
 
-    ButtonModelFields fields = ButtonModelFieldColorDown | ButtonModelFieldColorUp |
-                               ButtonModelFieldFrequency;
+    ActionModelFields fields = ActionModelFieldColorDown | ActionModelFieldColorUp |
+                               ActionModelFieldFrequency;
     bool single_mode_button = true;
     bool attach_keyboard = false;
 
