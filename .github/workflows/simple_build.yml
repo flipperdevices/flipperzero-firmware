@@ -11,8 +11,8 @@ jobs:
         uses: flipperdevices/flipperzero-ufbt-action@v0.1
         id: build-app
         with:
-          ufbt-args: --hw-target f7
           sdk-url: https://cloud.cynthialabs.net/s/sGHsQB94a9x5CRs/download?path=/&files=XFW-DEV_@845ADD5-sdk.zip
+          ufbt-args: hw-target f7
       - name: Upload app artifacts
         uses: actions/upload-artifact@v3
         with:
