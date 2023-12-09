@@ -251,7 +251,6 @@ static int32_t usb_uart_worker(void* context) {
                 }
                 usb_uart->cfg.flow_pins = usb_uart->cfg_new.flow_pins;
                 events |= WorkerEvtCtrlLineSet;
-                123132132
             }
             if(usb_uart->cfg.software_de_re != usb_uart->cfg_new.software_de_re) {
                 usb_uart->cfg.software_de_re = usb_uart->cfg_new.software_de_re;
