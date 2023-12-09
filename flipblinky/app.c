@@ -195,24 +195,27 @@ void flipboard_debounced_switch(void* context, uint8_t old_key, uint8_t new_key)
     FURI_LOG_D(TAG, "SW EVENT: old=%d new=%d reduced=%d", old_key, new_key, reduced_new_key);
 
     FlipboardBlinkyModel* fbm = flipboard_model_get_custom_data(model);
-    if((new_key == 1) || (new_key == 3)) {
-        // Faster by 5ms
+    if((new_key == (1 | 0 | 0 | 0)) || (new_key == (1 | 2 | 0 | 0))) {
+        // Faster by 5ms is left button pressed.  Faster by 20ms if both (button 1+button 2) pressed.
         uint32_t delay = (new_key == 1) ? 5 : 20;
         if(fbm->period_ms > delay) {
             fbm->period_ms -= delay;
+
+            // Don't go faster than 50ms
             if(fbm->period_ms < 50) {
                 fbm->period_ms = 50;
             }
+
             furi_timer_start(fbm->timer, furi_ms_to_ticks(fbm->period_ms));
             fbm->show_details_until = detail_counter_ticks;
         }
-    } else if(new_key == 2) {
+    } else if(new_key == (0 | 2 | 0 | 0)) {
         // Slower by 20ms
         uint32_t delay = 20;
         fbm->period_ms += delay;
         furi_timer_start(fbm->timer, furi_ms_to_ticks(fbm->period_ms));
         fbm->show_details_until = detail_counter_ticks;
-    } else if(new_key == 4) {
+    } else if(new_key == (0 | 0 | 4 | 0)) {
         // Previous effect
         fbm->effect_id--;
         if(fbm->effect_id < 1) {
@@ -220,7 +223,7 @@ void flipboard_debounced_switch(void* context, uint8_t old_key, uint8_t new_key)
         }
         fbm->show_details_until = detail_counter_ticks;
         flipboard_reset_effect(model);
-    } else if(new_key == 8) {
+    } else if(new_key == (0 | 0 | 0 | 8)) {
         // Next effect
         fbm->effect_id++;
         if(fbm->effect_id > fbm->max_effect_id) {
@@ -228,8 +231,8 @@ void flipboard_debounced_switch(void* context, uint8_t old_key, uint8_t new_key)
         }
         fbm->show_details_until = detail_counter_ticks;
         flipboard_reset_effect(model);
-    } else if(new_key == 12) {
-        // Our first effect is off.
+    } else if(new_key == (0 | 0 | 4 | 8)) {
+        // Switch to our first effect ("off" when both right buttons are pressed).
         fbm->effect_id = 1;
         fbm->show_details_until = detail_counter_ticks;
         flipboard_reset_effect(model);
