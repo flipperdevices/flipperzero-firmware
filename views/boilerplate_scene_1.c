@@ -34,10 +34,10 @@ void boilerplate_scene_1_draw(Canvas* canvas, BoilerplateScene1Model* model) {
     canvas_draw_str_aligned(canvas, 0, 8, AlignLeft, AlignTop, "Instructions:"); 
 
     canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str_aligned(canvas, 0, 22, AlignLeft, AlignTop, " Ok - Check guess");
-    canvas_draw_str_aligned(canvas, 0, 32, AlignLeft, AlignTop, " Up/Down - Add/Substract");
-    canvas_draw_str_aligned(canvas, 0, 42, AlignLeft, AlignTop, " L/R - Fast Add/Substract");
-    canvas_draw_str_aligned(canvas, 0, 52, AlignLeft, AlignTop, " Back - Exit to menu");
+    canvas_draw_str_aligned(canvas, 0, 22, AlignLeft, AlignTop, "Ok - Check guess");
+    canvas_draw_str_aligned(canvas, 0, 32, AlignLeft, AlignTop, "Up/Down - Adjust guess");
+    canvas_draw_str_aligned(canvas, 0, 42, AlignLeft, AlignTop, "Left/Right - Large adjust");
+    canvas_draw_str_aligned(canvas, 0, 52, AlignLeft, AlignTop, "Back - Tap: Reset, Hold: Exit");
 }
 
 static void boilerplate_scene_1_model_init(BoilerplateScene1Model* const model) {
