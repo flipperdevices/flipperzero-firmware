@@ -5,59 +5,29 @@
 #include <gui/icon.h>
 #include <gui/view.h>
 
-#include "button_model.h"
+#include "action_model.h"
 #include "keystroke_selector.h"
+
+#define KEYSTROKE_SELECTOR_DEFAULT_TOP_ROW 2
+#define KEYSTROKE_SELECTOR_DISPLAYED_ROWS 5
+#define KEYSTROKE_SELECTOR_DISPLAYED_WIDTH 10
+#define KEYSTROKE_SELECTOR_DISPLAYED_HEIGHT 13
+#define KEYSTROKE_SELECTOR_GLYPH_HEIGHT_OFFSET 10
+#define KEYSTROKE_SELECTOR_IMAGE_HEIGHT_OFFSET 1
+#define KEYSTROKE_SELECTOR_COLS 12
 
 struct KeystrokeSelector {
     View* view_keystroke_selector;
-    ButtonModel* bm;
+    ActionModel* action_model;
 };
 
-typedef struct KeystrokeSelectorModel {
-    // The total number of rows.
-    uint8_t rows;
+typedef struct KeystrokeSelectorModel KeystrokeSelectorModel;
 
-    // The total number of columns.
-    uint8_t cols;
+typedef struct KeystrokeSelectorKeyResult KeystrokeSelectorKeyResult;
 
-    // An array of all the keys.
-    KeystrokeSelectorKey* keys;
+static KeystrokeSelectorKeyResult
+    keystroke_selector_model_find_key(KeystrokeSelectorModel* model, uint16_t key_code);
 
-    // The current row to show at the top of the view.
-    uint8_t top_row;
+static void keystroke_selector_draw_callback(Canvas* canvas, void* context);
 
-    // The current column where the cursor is.
-    uint8_t current_col;
-
-    // The current row where the cursor is.
-    uint8_t current_row;
-
-    // Any modifiers that should be sent with the keystroke (CTRL, SHIFT, etc.)
-    uint16_t modifiers;
-
-    // The callback to call when a key is selected.
-    KeystrokeSelectorCallback callback;
-
-    // The context to pass to the callback.
-    void* callback_context;
-} KeystrokeSelectorModel;
-
-typedef struct KeystrokeSelectorKeyResult {
-    // The code that should be sent to the host.
-    uint16_t code;
-
-    // The character that should be displayed on the key.
-    char ch;
-
-    // The icon that should be displayed on the key (set ch to 0).
-    const Icon* icon;
-
-    // The starting column of the key.
-    uint8_t col;
-
-    // The row of the key.
-    uint8_t row;
-
-    // The width of the key.
-    uint8_t width;
-} KeystrokeSelectorKeyResult;
+static bool keystroke_selector_input_callback(InputEvent* event, void* context);

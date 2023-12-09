@@ -1,5 +1,3 @@
-#pragma once
-
 /**
  * @file button_monitor.h
  * @brief This file contains the ButtonMonitor type and related functions.
@@ -8,6 +6,8 @@
  * Flipboard. The ButtonMonitor runs in its own thread and calls a callback
  * when a button event occurs.
 */
+
+#pragma once
 
 #include <furi.h>
 #include <furi_hal.h>

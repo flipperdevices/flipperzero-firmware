@@ -67,15 +67,15 @@ void flipboard_debounced_switch(void* context, uint8_t old_button, uint8_t new_b
 
     flipboard_model_update_gui(model);
 
-    ButtonModel* bm = flipboard_model_get_button_model(model, reduced_new_button);
-    flipboard_model_set_colors(model, bm, new_button);
-    if(!flipboard_model_send_keystrokes(model, bm)) {
+    ActionModel* action_model = flipboard_model_get_action_model(model, reduced_new_button);
+    flipboard_model_set_colors(model, action_model, new_button);
+    if(!flipboard_model_send_keystrokes(model, action_model)) {
         //  If keystrokes did not send any messages, then we will send them in order.
         for(int i = 0; i < 4; i++) {
-            flipboard_model_send_text(model, bm, i);
+            flipboard_model_send_text(model, action_model, i);
         }
     }
-    flipboard_model_play_tone(model, bm);
+    flipboard_model_play_tone(model, action_model);
 }
 
 /**
@@ -129,8 +129,6 @@ View* get_primary_view(void* context) {
 static void loaded_app_menu(FlipboardModel* model) {
     static bool initial_load = true;
     FlipboardLeds* leds = flipboard_model_get_leds(model);
-    UNUSED(color_names);
-    UNUSED(color_values);
     if(initial_load) {
         for(int i = 0; i < 7; i++) {
             flipboard_leds_set(leds, LedId1, (1 << (16 + i)));
@@ -179,7 +177,7 @@ static bool custom_event_handler(void* context, uint32_t event) {
 int32_t flipboard_keyboard_app(void* p) {
     UNUSED(p);
 
-    ButtonModelFields fields = ButtonModelFieldAll;
+    ActionModelFields fields = ActionModelFieldAll;
     bool single_mode_button = false;
     bool attach_keyboard = true;
     // attach_keyboard = false;

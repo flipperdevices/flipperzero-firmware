@@ -31,3 +31,7 @@ Find `flipboard_reset_effect` and scroll to the bottom of the function, just bef
 
 If you choose to have a different effect than just scrolling, find `flipboard_do_effect` and scroll the the bottom of the function, just before the `default:` statement.  You will want to add your new case statement here.  The case number **must match** the number you used in `flipboard_reset_effect`.  If you need to define variables, be sure to wrap your code in `{ ... }`.  Your routine should set fbm->colors[0..3] to the correct hex RGB values.
 
+
+## Updates
+
+- Version 2.1 : Overlay message displays when buttons are clicked for a couple seconds.

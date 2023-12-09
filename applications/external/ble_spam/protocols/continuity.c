@@ -844,7 +844,6 @@ void scene_continuity_pp_model_on_enter(void* _ctx) {
     ContinuityCfg* cfg = &payload->cfg.continuity;
     Submenu* submenu = ctx->submenu;
     uint32_t selected = 0;
-    submenu_reset(submenu);
     bool value = payload->mode == PayloadModeValue ||
                  (payload->mode == PayloadModeBruteforce &&
                   cfg->data.proximity_pair.bruteforce_mode != ContinuityPpBruteforceModel);
@@ -882,7 +881,8 @@ bool scene_continuity_pp_model_on_event(void* _ctx, SceneManagerEvent event) {
     return false;
 }
 void scene_continuity_pp_model_on_exit(void* _ctx) {
-    UNUSED(_ctx);
+    Ctx* ctx = _ctx;
+    submenu_reset(ctx->submenu);
 }
 
 static void pp_model_custom_callback(void* _ctx) {
@@ -918,7 +918,9 @@ bool scene_continuity_pp_model_custom_on_event(void* _ctx, SceneManagerEvent eve
     return false;
 }
 void scene_continuity_pp_model_custom_on_exit(void* _ctx) {
-    UNUSED(_ctx);
+    Ctx* ctx = _ctx;
+    byte_input_set_result_callback(ctx->byte_input, NULL, NULL, NULL, NULL, 0);
+    byte_input_set_header_text(ctx->byte_input, "");
 }
 
 static void pp_color_callback(void* _ctx, uint32_t index) {
@@ -960,7 +962,6 @@ void scene_continuity_pp_color_on_enter(void* _ctx) {
     ContinuityCfg* cfg = &payload->cfg.continuity;
     Submenu* submenu = ctx->submenu;
     uint32_t selected = 0;
-    submenu_reset(submenu);
     bool value = payload->mode == PayloadModeValue ||
                  (payload->mode == PayloadModeBruteforce &&
                   cfg->data.proximity_pair.bruteforce_mode != ContinuityPpBruteforceColor);
@@ -1006,7 +1007,8 @@ bool scene_continuity_pp_color_on_event(void* _ctx, SceneManagerEvent event) {
     return false;
 }
 void scene_continuity_pp_color_on_exit(void* _ctx) {
-    UNUSED(_ctx);
+    Ctx* ctx = _ctx;
+    submenu_reset(ctx->submenu);
 }
 
 static void pp_color_custom_callback(void* _ctx) {
@@ -1041,7 +1043,9 @@ bool scene_continuity_pp_color_custom_on_event(void* _ctx, SceneManagerEvent eve
     return false;
 }
 void scene_continuity_pp_color_custom_on_exit(void* _ctx) {
-    UNUSED(_ctx);
+    Ctx* ctx = _ctx;
+    byte_input_set_result_callback(ctx->byte_input, NULL, NULL, NULL, NULL, 0);
+    byte_input_set_header_text(ctx->byte_input, "");
 }
 
 static void pp_prefix_callback(void* _ctx, uint32_t index) {
@@ -1069,7 +1073,6 @@ void scene_continuity_pp_prefix_on_enter(void* _ctx) {
     Submenu* submenu = ctx->submenu;
     uint32_t selected = 0;
     bool found = false;
-    submenu_reset(submenu);
 
     submenu_add_item(submenu, "Automatic", 0, pp_prefix_callback, ctx);
     if(cfg->data.proximity_pair.prefix == 0x00) {
@@ -1099,7 +1102,8 @@ bool scene_continuity_pp_prefix_on_event(void* _ctx, SceneManagerEvent event) {
     return false;
 }
 void scene_continuity_pp_prefix_on_exit(void* _ctx) {
-    UNUSED(_ctx);
+    Ctx* ctx = _ctx;
+    submenu_reset(ctx->submenu);
 }
 
 static void pp_prefix_custom_callback(void* _ctx) {
@@ -1131,7 +1135,9 @@ bool scene_continuity_pp_prefix_custom_on_event(void* _ctx, SceneManagerEvent ev
     return false;
 }
 void scene_continuity_pp_prefix_custom_on_exit(void* _ctx) {
-    UNUSED(_ctx);
+    Ctx* ctx = _ctx;
+    byte_input_set_result_callback(ctx->byte_input, NULL, NULL, NULL, NULL, 0);
+    byte_input_set_header_text(ctx->byte_input, "");
 }
 
 static void na_action_callback(void* _ctx, uint32_t index) {
@@ -1166,7 +1172,6 @@ void scene_continuity_na_action_on_enter(void* _ctx) {
     ContinuityCfg* cfg = &payload->cfg.continuity;
     Submenu* submenu = ctx->submenu;
     uint32_t selected = 0;
-    submenu_reset(submenu);
 
     submenu_add_item(submenu, "Random", 0, na_action_callback, ctx);
     if(payload->mode == PayloadModeRandom) {
@@ -1202,7 +1207,8 @@ bool scene_continuity_na_action_on_event(void* _ctx, SceneManagerEvent event) {
     return false;
 }
 void scene_continuity_na_action_on_exit(void* _ctx) {
-    UNUSED(_ctx);
+    Ctx* ctx = _ctx;
+    submenu_reset(ctx->submenu);
 }
 
 static void na_action_custom_callback(void* _ctx) {
@@ -1235,7 +1241,9 @@ bool scene_continuity_na_action_custom_on_event(void* _ctx, SceneManagerEvent ev
     return false;
 }
 void scene_continuity_na_action_custom_on_exit(void* _ctx) {
-    UNUSED(_ctx);
+    Ctx* ctx = _ctx;
+    byte_input_set_result_callback(ctx->byte_input, NULL, NULL, NULL, NULL, 0);
+    byte_input_set_header_text(ctx->byte_input, "");
 }
 
 static void na_flags_callback(void* _ctx) {
@@ -1269,4 +1277,6 @@ void scene_continuity_na_flags_on_exit(void* _ctx) {
     Payload* payload = &ctx->attack->payload;
     ContinuityCfg* cfg = &payload->cfg.continuity;
     cfg->data.nearby_action.flags = (ctx->byte_store[0] << 0x00);
+    byte_input_set_result_callback(ctx->byte_input, NULL, NULL, NULL, NULL, 0);
+    byte_input_set_header_text(ctx->byte_input, "");
 }

@@ -1,5 +1,3 @@
-#pragma once
-
 /**
  * @file    config_tones.h
  * @brief   Configuration file for the tones.
@@ -8,6 +6,8 @@
  * defined in the tone_values array.  The index of the tone in this array is
  * the same as the index of the tone in the tone_names array.
 */
+
+#pragma once
 
 /**
  * @brief    The frequency of the tones in HZ.
@@ -65,6 +65,22 @@ float tone_values[] = {
     1479.98, // F#6
     1567.98, // G6
     1661.22, // G#6
+    1760.00, // A6
+    1864.66, // A#6
+    1975.53, // B6
+    //
+    2093.00, // C7
+    2217.46, // C#7
+    2349.32, // D7
+    2489.02, // D#7
+    2637.02, // E7
+    2793.83, // F7
+    2959.96, // F#7
+    3135.96, // G7
+    3322.44, // G#7
+    3520.00, // A7
+    3729.31, // A#7
+    3951.07, // B7
 };
 
 /**
@@ -72,8 +88,14 @@ float tone_values[] = {
  * @details  The index of the tone in this array is the same as
  *  the index of the tone in the tone_values array.
 */
-char* tone_names[] = {"Off", "C3",  "C#3", "D3",  "D#3", "E3",  "F3",  "F#3", "G3",  "G#3",
-                      "A3",  "A#3", "B3",  "C4",  "C#4", "D4",  "D#4", "E4",  "F4",  "F#4",
-                      "G4",  "G#4", "A4",  "A#4", "B4",  "C5",  "C#5", "D5",  "D#5", "E5",
-                      "F5",  "F#5", "G5",  "G#5", "A5",  "A#5", "B5",  "C6",  "C#6", "D6",
-                      "D#6", "E6",  "F6",  "F#6", "G6",  "G#6", "A6",  "A#6", "B6"};
+char* tone_names[] = {"Off", //
+                      "C3",  "C#3", "D3",  "D#3", "E3",  "F3", //
+                      "F#3", "G3",  "G#3", "A3",  "A#3", "B3", //
+                      "C4",  "C#4", "D4",  "D#4", "E4",  "F4", //
+                      "F#4", "G4",  "G#4", "A4",  "A#4", "B4", //
+                      "C5",  "C#5", "D5",  "D#5", "E5",  "F5", //
+                      "F#5", "G5",  "G#5", "A5",  "A#5", "B5", //
+                      "C6",  "C#6", "D6",  "D#6", "E6",  "F6", //
+                      "F#6", "G6",  "G#6", "A6",  "A#6", "B6", //
+                      "C7",  "C#7", "D7",  "D#7", "E7",  "F7", //
+                      "F#7", "G7",  "G#7", "A7",  "A#7", "B7"};

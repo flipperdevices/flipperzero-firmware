@@ -111,7 +111,6 @@ void scene_swiftpair_name_on_enter(void* _ctx) {
     Payload* payload = &ctx->attack->payload;
     SwiftpairCfg* cfg = &payload->cfg.swiftpair;
     TextInput* text_input = ctx->text_input;
-    text_input_reset(text_input);
 
     text_input_set_header_text(text_input, "Press back for random");
 
@@ -131,5 +130,6 @@ bool scene_swiftpair_name_on_event(void* _ctx, SceneManagerEvent event) {
     return false;
 }
 void scene_swiftpair_name_on_exit(void* _ctx) {
-    UNUSED(_ctx);
+    Ctx* ctx = _ctx;
+    text_input_reset(ctx->text_input);
 }

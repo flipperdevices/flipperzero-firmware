@@ -1,5 +1,3 @@
-#pragma once
-
 /**
  * @file keystroke_selector.h
  * @brief A view that allows the user to select a keystroke.
@@ -8,17 +6,23 @@
  * the OK button. The view will call a callback when a key is selected.
 */
 
+#pragma once
+
 #include <gui/view.h>
-#include "button_model.h"
+
+#include "action_model.h"
 
 typedef struct KeystrokeSelector KeystrokeSelector;
 typedef struct KeystrokeSelectorKey KeystrokeSelectorKey;
 
+/**
+ * @brief We expose our internals here, so an app_keyboard_layout.h file can be created.
+*/
 struct KeystrokeSelectorKey {
     // The code that should be sent to the host.
     uint16_t code;
 
-    // The character that should be displayed on the key.
+    // The character that should be displayed on the key (set icon to NULL).
     char ch;
 
     // The icon that should be displayed on the key (set ch to 0).

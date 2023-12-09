@@ -353,7 +353,6 @@ bool subghz_scene_receiver_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
             break;
         case SubGhzCustomEventViewReceiverOKLong:
-            //CC1101 Stop RX
             subghz_txrx_stop(subghz->txrx);
             subghz_txrx_hopper_pause(subghz->txrx);
 
@@ -370,6 +369,7 @@ bool subghz_scene_receiver_on_event(void* context, SceneManagerEvent event) {
             }
             consumed = true;
             break;
+
         case SubGhzCustomEventViewReceiverOKRelease:
             if(subghz->state_notifications == SubGhzNotificationStateTx) {
                 //CC1101 Stop Tx -> Start RX
@@ -383,6 +383,7 @@ bool subghz_scene_receiver_on_event(void* context, SceneManagerEvent event) {
                 consumed = true;
                 break;
             }
+
         case SubGhzCustomEventViewReceiverDeleteItem:
             subghz->state_notifications = SubGhzNotificationStateRx;
 
@@ -447,16 +448,19 @@ bool subghz_scene_receiver_on_event(void* context, SceneManagerEvent event) {
             subghz_protocol_decoder_bin_raw_data_input_rssi(
                 (SubGhzProtocolDecoderBinRAW*)subghz_txrx_get_decoder(subghz->txrx),
                 ret_rssi.rssi);
-        } else {
+        } else if(subghz->repeater != SubGhzRepeaterOff) {
             //Start or Stop TX?
             if(subghz->RepeaterStartTime == 0) {
-                subghz->RepeaterStartTime = furi_get_tick();
+                if(subghz->RepeaterTXLength >
+                   0) { //We could be holding TX on a key we received, switched to repeater, and TXed wih keys on the list.
+                    subghz->RepeaterStartTime = furi_get_tick();
 
-                //CC1101 Stop RX -> Start TX
-                if(!subghz_tx_start(subghz, subghz->repeater_tx)) {
-                    subghz_txrx_rx_start(subghz->txrx);
-                    subghz_txrx_hopper_unpause(subghz->txrx);
-                    subghz->state_notifications = SubGhzNotificationStateRx;
+                    //CC1101 Stop RX -> Start TX
+                    if(!subghz_tx_start(subghz, subghz->repeater_tx)) {
+                        subghz_txrx_rx_start(subghz->txrx);
+                        subghz_txrx_hopper_unpause(subghz->txrx);
+                        subghz->state_notifications = SubGhzNotificationStateRx;
+                    }
                 }
             } else {
                 uint32_t tmp = furi_get_tick() - subghz->RepeaterStartTime;

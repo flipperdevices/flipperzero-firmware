@@ -216,7 +216,6 @@ void scene_lovespouse_mode_on_enter(void* _ctx) {
     LovespouseCfg* cfg = &payload->cfg.lovespouse;
     Submenu* submenu = ctx->submenu;
     uint32_t selected = 0;
-    submenu_reset(submenu);
 
     submenu_add_item(submenu, "Random", 0, mode_callback, ctx);
     if(payload->mode == PayloadModeRandom) {
@@ -252,7 +251,8 @@ bool scene_lovespouse_mode_on_event(void* _ctx, SceneManagerEvent event) {
     return false;
 }
 void scene_lovespouse_mode_on_exit(void* _ctx) {
-    UNUSED(_ctx);
+    Ctx* ctx = _ctx;
+    submenu_reset(ctx->submenu);
 }
 
 static void mode_custom_callback(void* _ctx) {
@@ -288,5 +288,7 @@ bool scene_lovespouse_mode_custom_on_event(void* _ctx, SceneManagerEvent event) 
     return false;
 }
 void scene_lovespouse_mode_custom_on_exit(void* _ctx) {
-    UNUSED(_ctx);
+    Ctx* ctx = _ctx;
+    byte_input_set_result_callback(ctx->byte_input, NULL, NULL, NULL, NULL, 0);
+    byte_input_set_header_text(ctx->byte_input, "");
 }
