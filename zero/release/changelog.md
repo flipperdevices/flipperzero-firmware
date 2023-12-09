@@ -1,3 +1,6 @@
+## v1.4
+- Fixed error when updating to the latest API version.
+
 ## v1.3
 - Replaced player letters with icons.
 

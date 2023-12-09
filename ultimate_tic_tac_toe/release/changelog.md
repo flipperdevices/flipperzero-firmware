@@ -1,3 +1,6 @@
+## v1.1
+- Fixed error when updating to the latest API version.
+
 ## v1.0
 
 - Initial release.
