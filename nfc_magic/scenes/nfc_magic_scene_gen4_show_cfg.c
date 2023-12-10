@@ -26,12 +26,14 @@ void nfc_magic_scene_gen4_show_cfg_on_enter(void* context) {
         }
         furi_string_cat_printf(temp_config, "%02X ", instance->gen4_config_display[i]);
     }
+    furi_string_cat_printf(temp_config, "\n");
 
     widget_add_string_element(widget, 3, 4, AlignLeft, AlignTop, FontPrimary, "Gen4 Config");
-    widget_add_string_multiline_element(
-        widget, 3, 17, AlignLeft, AlignTop, FontSecondary, furi_string_get_cstr(temp_config));
-    // widget_add_button_element(
-    //     widget, GuiButtonTypeLeft, "Exit", nfc_magic_scene_gen4_show_cfg_widget_callback, instance);
+
+    widget_add_text_scroll_element(widget, 3, 17, 124, 50, furi_string_get_cstr(temp_config));
+
+    widget_add_button_element(
+        widget, GuiButtonTypeLeft, "Exit", nfc_magic_scene_gen4_show_cfg_widget_callback, instance);
 
     furi_string_free(temp_config);
     view_dispatcher_switch_to_view(instance->view_dispatcher, NfcMagicAppViewWidget);
