@@ -49,6 +49,11 @@ typedef enum {
     Gen4PollerStateWrite,
     Gen4PollerStateWipe,
     Gen4PollerStateChangePassword,
+
+    Gen4PollerStateSetDefaultConfig,
+    Gen4PollerStateGetCurrentConfig,
+    Gen4PollerStateGetRevision,
+
     Gen4PollerStateSuccess,
     Gen4PollerStateFail,
 
@@ -95,6 +100,12 @@ Gen4PollerError gen4_poller_write_block(
 
 Gen4PollerError
     gen4_poller_change_password(Gen4Poller* instance, uint32_t pwd_current, uint32_t pwd_new);
+
+Gen4PollerError
+    gen4_poller_get_revision(Gen4Poller* instance, uint32_t password, uint8_t* revision_result);
+
+Gen4PollerError
+    gen4_poller_get_config(Gen4Poller* instance, uint32_t password, uint8_t* config_result);
 
 #ifdef __cplusplus
 }
