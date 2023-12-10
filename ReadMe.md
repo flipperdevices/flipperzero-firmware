@@ -278,7 +278,7 @@ $ ./fbt dolphin_ext
 - [Snake v1.7 (By OlegSchwann)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/829) (With updates from DrZlo13, xMasterX, QtRoS and RogueMaster) [Snake Score Saving (By JuanJakobo)](https://github.com/flipperdevices/flipperzero-firmware/pull/1922) [Turns anywhere (By TQMatvey)](https://github.com/DarkFlippers/unleashed-firmware/pull/125) [Food Spawns Anywwhere (By TQMatvey)](https://github.com/DarkFlippers/unleashed-firmware/pull/130)
 - [Snake 2.0 v2.1 (By Willzvul)](https://github.com/Willzvul/Snake_2.0/)
 - [Solitaire v1.1.4 (By teeebor)](https://github.com/teeebor/flipper_games)
-- [Sokoban v1.1 (By Racso)](https://github.com/Racso/fzero-apps)
+- [Sokoban v1.2 (By Racso)](https://github.com/Racso/fzero-apps)
 - [Space Impact WIP v0.2 (By Ka3u6y6a)](https://github.com/Ka3u6y6a/flipper-zero-space-impact)
 - [Sudoku v1.1 (By profelis)](https://github.com/profelis/fz-sudoku)
 - [SUPER-CHIP Emulator (By Milk-Cool)](https://github.com/Milk-Cool/fz-schip)
@@ -288,10 +288,10 @@ $ ./fbt dolphin_ext
 - [Tetris v1.3 (By jeffplang)](https://github.com/jeffplang/flipperzero-firmware/tree/tetris_game/applications/tetris_game)
 - [Tic-Tac-Toe Multi v1.1 (By RouNNdeL)](https://github.com/RouNNdeL/flipper-tictactoe-multi)
 - [Tic Tac Toe v1.1 (By gotnull)](https://github.com/gotnull/flipperzero-firmware-wPlugins)
-- [Ultimate Tic-Tac-Toe (By Racso)](https://github.com/Racso/fzero-apps)
+- [Ultimate Tic-Tac-Toe v1.1 (By Racso)](https://github.com/Racso/fzero-apps)
 - [Video Poker v1.2 (By PixlEmly)](https://github.com/PixlEmly/flipperzero-firmware-testing/blob/420/applications/VideoPoker/poker.c)
 - [Yatzee v1.1 (By emfleak)](https://github.com/emfleak/flipperzero-yatzee)
-- [Zero v1.3 (By Racso)](https://github.com/Racso/fzero-apps)
+- [Zero v1.4 (By Racso)](https://github.com/Racso/fzero-apps)
 - [Zombiez v1.1 (Reworked By DevMilanIan)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/240) [(Original By Dooskington)](https://github.com/Dooskington/flipperzero-zombiez)
 
 ## Plugins
