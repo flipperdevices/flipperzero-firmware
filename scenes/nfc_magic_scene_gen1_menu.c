@@ -21,7 +21,7 @@ void nfc_magic_scene_gen1_menu_on_enter(void* context) {
         submenu, "Wipe", SubmenuIndexWipe, nfc_magic_scene_gen1_menu_submenu_callback, instance);
 
     submenu_set_selected_item(
-        submenu, scene_manager_get_scene_state(instance->scene_manager, NfcMagicSceneGen4Menu));
+        submenu, scene_manager_get_scene_state(instance->scene_manager, NfcMagicSceneGen1Menu));
     view_dispatcher_switch_to_view(instance->view_dispatcher, NfcMagicAppViewMenu);
 }
 
@@ -37,7 +37,7 @@ bool nfc_magic_scene_gen1_menu_on_event(void* context, SceneManagerEvent event) 
             scene_manager_next_scene(instance->scene_manager, NfcMagicSceneWipe);
             consumed = true;
         }
-        scene_manager_set_scene_state(instance->scene_manager, NfcMagicSceneGen4Menu, event.event);
+        scene_manager_set_scene_state(instance->scene_manager, NfcMagicSceneGen1Menu, event.event);
     } else if(event.type == SceneManagerEventTypeBack) {
         consumed = scene_manager_search_and_switch_to_previous_scene(
             instance->scene_manager, NfcMagicSceneStart);
