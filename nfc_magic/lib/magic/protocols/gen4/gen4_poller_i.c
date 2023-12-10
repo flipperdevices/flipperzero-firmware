@@ -1,5 +1,7 @@
 #include "gen4_poller_i.h"
 
+#include "bit_buffer.h"
+#include "core/log.h"
 #include <nfc/protocols/iso14443_3a/iso14443_3a_poller.h>
 #include <nfc/helpers/nfc_util.h>
 
@@ -12,6 +14,9 @@
 #define GEN4_CMD_SET_CFG (0xF0)
 #define GEN4_CMD_FUSE_CFG (0xF1)
 #define GEN4_CMD_SET_PWD (0xFE)
+
+#define CONFIG_SIZE (32)
+#define REVISION_SIZE (2)
 
 static Gen4PollerError gen4_poller_process_error(Iso14443_3aError error) {
     Gen4PollerError ret = Gen4PollerErrorNone;
@@ -26,10 +31,7 @@ static Gen4PollerError gen4_poller_process_error(Iso14443_3aError error) {
 }
 
 Gen4PollerError
-    gen4_poller_get_config(Gen4Poller* instance, uint32_t password, const uint8_t* config_result) {
-    // ЗАПИХНИ в буфер результат после получения его в функции, или переделай
-    UNUSED(config_result);
-
+    gen4_poller_get_config(Gen4Poller* instance, uint32_t password, uint8_t* config_result) {
     Gen4PollerError ret = Gen4PollerErrorNone;
     bit_buffer_reset(instance->tx_buffer);
 
@@ -49,22 +51,18 @@ Gen4PollerError
         }
 
         size_t rx_bytes = bit_buffer_get_size_bytes(instance->rx_buffer);
-        if(rx_bytes != 30) {
+        if(rx_bytes != CONFIG_SIZE) {
             ret = Gen4PollerErrorProtocol;
             break;
         }
+        bit_buffer_write_bytes(instance->rx_buffer, config_result, CONFIG_SIZE);
     } while(false);
 
     return ret;
 }
 
-Gen4PollerError gen4_poller_get_revision(
-    Gen4Poller* instance,
-    uint32_t password,
-    const uint8_t* revision_result) {
-    // ЗАПИХНИ в буфер результат после получения его в функции, или переделай
-    UNUSED(revision_result);
-
+Gen4PollerError
+    gen4_poller_get_revision(Gen4Poller* instance, uint32_t password, uint8_t* revision_result) {
     Gen4PollerError ret = Gen4PollerErrorNone;
     bit_buffer_reset(instance->tx_buffer);
 
@@ -88,6 +86,7 @@ Gen4PollerError gen4_poller_get_revision(
             ret = Gen4PollerErrorProtocol;
             break;
         }
+        bit_buffer_write_bytes(instance->rx_buffer, revision_result, REVISION_SIZE);
     } while(false);
 
     return ret;
