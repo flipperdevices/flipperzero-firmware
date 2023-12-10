@@ -28,7 +28,6 @@ typedef enum {
     Gen4PollerEventTypeRequestMode,
     Gen4PollerEventTypeRequestDataToWrite,
     Gen4PollerEventTypeRequestNewPassword,
-    Gen4PollerEventTypeRequestSetDefaultConfig,
 
     Gen4PollerEventTypeSuccess,
     Gen4PollerEventTypeFail,
@@ -38,7 +37,10 @@ typedef enum {
     Gen4PollerModeWipe,
     Gen4PollerModeWrite,
     Gen4PollerModeSetPassword,
-    Gen4PollerModeSetDefaultConfig,
+
+    Gen4PollerModeSetDefaultCFG,
+    Gen4PollerModeGetCFG,
+    Gen4PollerModeGetRevision,
 } Gen4PollerMode;
 
 typedef struct {
@@ -58,6 +60,9 @@ typedef union {
     Gen4PollerEventDataRequestMode request_mode;
     Gen4PollerEventDataRequestDataToWrite request_data;
     Gen4PollerEventDataRequestNewPassword request_password;
+
+    uint8_t display_config[30];
+    uint8_t revision_data[2];
 } Gen4PollerEventData;
 
 typedef struct {

@@ -25,7 +25,11 @@ static Gen4PollerError gen4_poller_process_error(Iso14443_3aError error) {
     return ret;
 }
 
-Gen4PollerError gen4_poller_get_config(Gen4Poller* instance, uint32_t password) {
+Gen4PollerError
+    gen4_poller_get_config(Gen4Poller* instance, uint32_t password, const uint8_t* config_result) {
+    // ЗАПИХНИ в буфер результат после получения его в функции, или переделай
+    UNUSED(config_result);
+
     Gen4PollerError ret = Gen4PollerErrorNone;
     bit_buffer_reset(instance->tx_buffer);
 
@@ -54,7 +58,13 @@ Gen4PollerError gen4_poller_get_config(Gen4Poller* instance, uint32_t password) 
     return ret;
 }
 
-Gen4PollerError gen4_poller_get_revision(Gen4Poller* instance, uint32_t password) {
+Gen4PollerError gen4_poller_get_revision(
+    Gen4Poller* instance,
+    uint32_t password,
+    const uint8_t* revision_result) {
+    // ЗАПИХНИ в буфер результат после получения его в функции, или переделай
+    UNUSED(revision_result);
+
     Gen4PollerError ret = Gen4PollerErrorNone;
     bit_buffer_reset(instance->tx_buffer);
 
