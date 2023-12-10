@@ -40,7 +40,6 @@ static void config_callback(void* _ctx, uint32_t index) {
 void scene_config_on_enter(void* _ctx) {
     Ctx* ctx = _ctx;
     VariableItemList* list = ctx->variable_item_list;
-    variable_item_list_reset(list);
 
     // Add item to be used as attack name header
     //variable_item_list_add(list, ctx->attack->title, 0, NULL, NULL);
@@ -73,5 +72,6 @@ bool scene_config_on_event(void* _ctx, SceneManagerEvent event) {
 }
 
 void scene_config_on_exit(void* _ctx) {
-    UNUSED(_ctx);
+    Ctx* ctx = _ctx;
+    variable_item_list_reset(ctx->variable_item_list);
 }
