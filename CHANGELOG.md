@@ -1,4 +1,6 @@
 # Unitemp changelog
+## Unitemp 1.3
+- New FZ API satisfaction
 ## Unitemp 1.2
 - New sensor - BME680 (temperature, humidity, pressure)
 - New sensor - MAX31855 (temperature on termocouple)
