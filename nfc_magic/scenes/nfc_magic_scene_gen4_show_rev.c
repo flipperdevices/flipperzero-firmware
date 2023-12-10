@@ -1,5 +1,7 @@
 #include "../nfc_magic_app_i.h"
 
+#define REVISION_SIZE (5)
+
 void nfc_magic_scene_gen4_show_rev_widget_callback(
     GuiButtonType result,
     InputType type,
@@ -18,8 +20,8 @@ void nfc_magic_scene_gen4_show_rev_on_enter(void* context) {
     notification_message(instance->notifications, &sequence_success);
 
     FuriString* temp_revision = furi_string_alloc();
-    for(size_t i = 0; i < 2; i++) {
-        furi_string_cat_printf(temp_revision, "%02X", instance->gen4_revision_display[i]);
+    for(size_t i = REVISION_SIZE - 2; i < REVISION_SIZE; i++) {
+        furi_string_cat_printf(temp_revision, "%02X ", instance->gen4_revision_display[i]);
     }
 
     widget_add_icon_element(widget, 73, 17, &I_DolphinCommon_56x48);

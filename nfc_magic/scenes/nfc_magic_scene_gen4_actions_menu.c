@@ -1,4 +1,5 @@
 #include "../nfc_magic_app_i.h"
+#include "furi_hal_rtc.h"
 
 enum SubmenuIndex {
     SubmenuIndexAuthenticate,
@@ -29,12 +30,14 @@ void nfc_magic_scene_gen4_actions_menu_on_enter(void* context) {
         SubmenuIndexSetStandartConfig,
         nfc_magic_scene_gen4_actions_menu_submenu_callback,
         instance);
-    submenu_add_item(
-        submenu,
-        "Get config",
-        SubmenuIndexGetConfig,
-        nfc_magic_scene_gen4_actions_menu_submenu_callback,
-        instance);
+    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
+        submenu_add_item(
+            submenu,
+            "Get config",
+            SubmenuIndexGetConfig,
+            nfc_magic_scene_gen4_actions_menu_submenu_callback,
+            instance);
+    }
     submenu_add_item(
         submenu,
         "Get revision",

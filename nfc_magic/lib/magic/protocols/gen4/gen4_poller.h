@@ -61,8 +61,8 @@ typedef union {
     Gen4PollerEventDataRequestDataToWrite request_data;
     Gen4PollerEventDataRequestNewPassword request_password;
 
-    uint8_t display_config[30];
-    uint8_t revision_data[2];
+    uint8_t display_config[32];
+    uint8_t revision_data[5];
 } Gen4PollerEventData;
 
 typedef struct {

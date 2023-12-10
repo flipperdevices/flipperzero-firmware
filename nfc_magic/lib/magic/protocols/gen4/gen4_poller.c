@@ -473,7 +473,6 @@ NfcCommand gen4_poller_set_default_cfg_handler(Gen4Poller* instance) {
     NfcCommand command = NfcCommandContinue;
 
     do {
-        // TODO!!!!!
         Gen4PollerError error = gen4_poller_set_config(
             instance,
             instance->password,
@@ -497,7 +496,6 @@ NfcCommand gen4_poller_get_current_cfg_handler(Gen4Poller* instance) {
 
     do {
         uint8_t the_config[30] = {};
-        // TODO!!!!! gen4_poller_get_current_cfg is not finished!!!!
         Gen4PollerError error = gen4_poller_get_config(instance, instance->password, the_config);
         if(error != Gen4PollerErrorNone) {
             FURI_LOG_E(TAG, "Failed to get current config: %d", error);
@@ -517,8 +515,7 @@ NfcCommand gen4_poller_get_revision_handler(Gen4Poller* instance) {
     NfcCommand command = NfcCommandContinue;
 
     do {
-        uint8_t the_revision[2] = {0, 0};
-        // TODO!!!!! gen4_poller_get_revision is not finised!!!!
+        uint8_t the_revision[5] = {0};
         Gen4PollerError error =
             gen4_poller_get_revision(instance, instance->password, the_revision);
         if(error != Gen4PollerErrorNone) {

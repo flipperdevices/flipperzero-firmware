@@ -1,5 +1,7 @@
 #include "../nfc_magic_app_i.h"
 
+#define CONFIG_SIZE (32)
+
 void nfc_magic_scene_gen4_show_cfg_widget_callback(
     GuiButtonType result,
     InputType type,
@@ -18,16 +20,18 @@ void nfc_magic_scene_gen4_show_cfg_on_enter(void* context) {
     notification_message(instance->notifications, &sequence_success);
 
     FuriString* temp_config = furi_string_alloc();
-    for(size_t i = 0; i < 30; i++) {
-        furi_string_cat_printf(temp_config, "%02X", instance->gen4_config_display[i]);
+    for(size_t i = 0; i < CONFIG_SIZE; i++) {
+        if((i != 0) && (i % 8 == 0)) {
+            furi_string_cat_printf(temp_config, "\n");
+        }
+        furi_string_cat_printf(temp_config, "%02X ", instance->gen4_config_display[i]);
     }
 
-    widget_add_icon_element(widget, 73, 17, &I_DolphinCommon_56x48);
     widget_add_string_element(widget, 3, 4, AlignLeft, AlignTop, FontPrimary, "Gen4 Config");
     widget_add_string_multiline_element(
         widget, 3, 17, AlignLeft, AlignTop, FontSecondary, furi_string_get_cstr(temp_config));
-    widget_add_button_element(
-        widget, GuiButtonTypeLeft, "Exit", nfc_magic_scene_gen4_show_cfg_widget_callback, instance);
+    // widget_add_button_element(
+    //     widget, GuiButtonTypeLeft, "Exit", nfc_magic_scene_gen4_show_cfg_widget_callback, instance);
 
     furi_string_free(temp_config);
     view_dispatcher_switch_to_view(instance->view_dispatcher, NfcMagicAppViewWidget);

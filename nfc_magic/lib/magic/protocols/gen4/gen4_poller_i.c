@@ -16,7 +16,7 @@
 #define GEN4_CMD_SET_PWD (0xFE)
 
 #define CONFIG_SIZE (32)
-#define REVISION_SIZE (2)
+#define REVISION_SIZE (5)
 
 static Gen4PollerError gen4_poller_process_error(Iso14443_3aError error) {
     Gen4PollerError ret = Gen4PollerErrorNone;

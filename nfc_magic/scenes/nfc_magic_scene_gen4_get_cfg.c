@@ -88,7 +88,7 @@ bool nfc_magic_scene_gen4_get_cfg_on_event(void* context, SceneManagerEvent even
             nfc_magic_scene_gen4_get_cfg_setup_view(instance);
             consumed = true;
         } else if(event.event == NfcMagicCustomEventWorkerSuccess) {
-            scene_manager_next_scene(instance->scene_manager, NfcMagicSceneSuccess);
+            scene_manager_next_scene(instance->scene_manager, NfcMagicSceneGen4ShowCFG);
             consumed = true;
         } else if(event.event == NfcMagicCustomEventWorkerFail) {
             scene_manager_next_scene(instance->scene_manager, NfcMagicSceneGen4Fail);
