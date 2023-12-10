@@ -26,6 +26,12 @@ void nfc_magic_scene_gen4_actions_menu_on_enter(void* context) {
         instance);
     submenu_add_item(
         submenu,
+        "Get Revision",
+        SubmenuIndexGetRevision,
+        nfc_magic_scene_gen4_actions_menu_submenu_callback,
+        instance);
+    submenu_add_item(
+        submenu,
         "Set Standart Config",
         SubmenuIndexSetStandartConfig,
         nfc_magic_scene_gen4_actions_menu_submenu_callback,
@@ -38,12 +44,6 @@ void nfc_magic_scene_gen4_actions_menu_on_enter(void* context) {
             nfc_magic_scene_gen4_actions_menu_submenu_callback,
             instance);
     }
-    submenu_add_item(
-        submenu,
-        "Get Revision",
-        SubmenuIndexGetRevision,
-        nfc_magic_scene_gen4_actions_menu_submenu_callback,
-        instance);
 
     submenu_set_selected_item(
         submenu,
