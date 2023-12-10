@@ -20,27 +20,27 @@ void nfc_magic_scene_gen4_actions_menu_on_enter(void* context) {
     Submenu* submenu = instance->submenu;
     submenu_add_item(
         submenu,
-        "Auth with password",
+        "Auth With Password",
         SubmenuIndexAuthenticate,
         nfc_magic_scene_gen4_actions_menu_submenu_callback,
         instance);
     submenu_add_item(
         submenu,
-        "Set standart config",
+        "Set Standart Config",
         SubmenuIndexSetStandartConfig,
         nfc_magic_scene_gen4_actions_menu_submenu_callback,
         instance);
     if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
         submenu_add_item(
             submenu,
-            "Get config",
+            "Get Config",
             SubmenuIndexGetConfig,
             nfc_magic_scene_gen4_actions_menu_submenu_callback,
             instance);
     }
     submenu_add_item(
         submenu,
-        "Get revision",
+        "Get Revision",
         SubmenuIndexGetRevision,
         nfc_magic_scene_gen4_actions_menu_submenu_callback,
         instance);

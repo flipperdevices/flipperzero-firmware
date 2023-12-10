@@ -17,7 +17,7 @@ void nfc_magic_scene_gen4_fail_on_enter(void* context) {
     widget_add_string_element(
         widget, 7, 4, AlignLeft, AlignTop, FontPrimary, "Something gone wrong!");
     widget_add_string_multiline_element(
-        widget, 7, 17, AlignLeft, AlignTop, FontSecondary, "Problems with\ncard communications.");
+        widget, 7, 17, AlignLeft, AlignTop, FontSecondary, "No response. Maybe\nnot Gen4 card?");
 
     widget_add_button_element(
         widget, GuiButtonTypeLeft, "Back", nfc_magic_scene_gen4_fail_widget_callback, instance);
