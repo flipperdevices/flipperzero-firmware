@@ -1,3 +1,4 @@
+#include "core/log.h"
 #include "gen4_poller_i.h"
 #include <nfc/protocols/iso14443_3a/iso14443_3a.h>
 #include <nfc/protocols/iso14443_3a/iso14443_3a_poller.h>
@@ -495,7 +496,8 @@ NfcCommand gen4_poller_get_current_cfg_handler(Gen4Poller* instance) {
     NfcCommand command = NfcCommandContinue;
 
     do {
-        uint8_t the_config[30] = {};
+        uint8_t the_config[32] = {};
+
         Gen4PollerError error = gen4_poller_get_config(instance, instance->password, the_config);
         if(error != Gen4PollerErrorNone) {
             FURI_LOG_E(TAG, "Failed to get current config: %d", error);
