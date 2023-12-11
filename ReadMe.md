@@ -105,10 +105,10 @@ This software is for experimental purposes only and is not meant for any illegal
 - NFC: [Parsers for Saflok and Mykey (From noproto)](https://github.com/noproto/flipper_kdf)
 - NFC: [Parser for Mizip (From zProAle)](https://github.com/noproto/flipper_kdf/pull/3)
 - OFW: [NFC fixes #3264 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3264)
-- Updated: [NFC Magic v1.3 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966) [Nfc Magic rework #67 (By gornekich)](https://github.com/flipperdevices/flipperzero-good-faps/pull/67) [NFC Magic fix gen4 detection #71 (By gornekich)](https://github.com/flipperdevices/flipperzero-good-faps/pull/71) [Specify in error scene that only Gen1 magic and Gen4 UMCs are supported #75 (By kitsunehunter)](https://github.com/flipperdevices/flipperzero-good-faps/pull/75)
 - UL: [Nfc parsers #655 (By assasinfil)](https://github.com/DarkFlippers/unleashed-firmware/pull/655)
 - Updated: [PicoPass (iClass) v1.9 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass) [Picopass rework. Part 1 #68 (By gornekich)](https://github.com/flipperdevices/flipperzero-good-faps/pull/68)
 - Update: [NFC Seader v2.1 (By bettse)](https://github.com/bettse/seader)
+- Updated: [NFC Magic v1.4 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966) [Nfc Magic rework #67 (By gornekich)](https://github.com/flipperdevices/flipperzero-good-faps/pull/67) [NFC Magic fix gen4 detection #71 (By gornekich)](https://github.com/flipperdevices/flipperzero-good-faps/pull/71) [Specify in error scene that only Gen1 magic and Gen4 UMCs are supported #75 (By kitsunehunter)](https://github.com/flipperdevices/flipperzero-good-faps/pull/75) [UI / Scenes (By xMasterX) & Poller functions, minor UI fixes (By Leptopt1los)](https://github.com/xMasterX/all-the-plugins/commit/d70f146f15a6bab2272d4ebfe37001d7d5f0f556)
 
 <a name="release">
 
@@ -489,7 +489,7 @@ $ ./fbt dolphin_ext
 - [Mx2125 Dual-Axis Accelerometer (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/gpio)
 - [Mx2125 Step Counter v1.0 (By 47lecoste a.k.a. grugnoymeme)](https://github.com/grugnoymeme/flipperzero-stepcounter-fap)
 - [Name Changer (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/488) (Change Flipper name)
-- [NFC Magic v1.3 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966) with [NFC Magic Gen4 Support #2238 (By nullableVoidPtr)](https://github.com/flipperdevices/flipperzero-firmware/pull/2238)
+- [NFC Magic v1.4 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966) with [NFC Magic Gen4 Support #2238 (By nullableVoidPtr)](https://github.com/flipperdevices/flipperzero-firmware/pull/2238)
 - [NFC Maker NTAG203 (by Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/343cb39d08f60b75b537e1a31100707935cf6e9d)
 - [NFC Maker NTAG215 (by Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/343cb39d08f60b75b537e1a31100707935cf6e9d)
 - [NFC Seader v2.1 (By bettse)](https://github.com/bettse/seader)
