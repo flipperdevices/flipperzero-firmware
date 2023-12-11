@@ -37,6 +37,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [FlipBoard Keyboard v2.0 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
 - Updated: [FlipBoard Signal v3.1 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
 - Updated: [Hangman v1.5 (By Evgeny Stepanischev & Eva Stepanischeva)](https://github.com/bolknote/Flipper-Zero-Hangman-Game)
+- [Update Wifi-Stealer_ORG.txt #1005 (By 3ldidi94)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/1005)
 
 <a name="release">
 
