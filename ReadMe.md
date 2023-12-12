@@ -115,6 +115,9 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [PicoPass (iClass) v1.9 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass) [Picopass rework. Part 1 #68 (By gornekich)](https://github.com/flipperdevices/flipperzero-good-faps/pull/68)
 - Updated: [NFC Magic v1.4 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966) [Nfc Magic rework #67 (By gornekich)](https://github.com/flipperdevices/flipperzero-good-faps/pull/67) [NFC Magic fix gen4 detection #71 (By gornekich)](https://github.com/flipperdevices/flipperzero-good-faps/pull/71) [Specify in error scene that only Gen1 magic and Gen4 UMCs are supported #75 (By kitsunehunter)](https://github.com/flipperdevices/flipperzero-good-faps/pull/75) [UI / Scenes (By xMasterX) & Poller functions, minor UI fixes (By Leptopt1los)](https://github.com/xMasterX/all-the-plugins/commit/d70f146f15a6bab2272d4ebfe37001d7d5f0f556)
 - Update: [NFC Seader v2.1 (By bettse)](https://github.com/bettse/seader)
+- OFW: [NFC NTAG and ISO14443-3b reading fix #3285 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3285)
+- OFW: [Cleanup RTC registers on factory reset #3288 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3288)
+- OFW: [FuriHal: various GPIO improvements #3260 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3260)
 
 <a name="release">
 
