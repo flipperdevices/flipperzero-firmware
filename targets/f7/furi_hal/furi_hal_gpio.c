@@ -5,6 +5,11 @@
 #include <stm32wbxx_ll_comp.h>
 #include <stm32wbxx_ll_pwr.h>
 
+static uint32_t furi_hal_gpio_invalid_argument_crash() {
+    furi_crash("Invalid argument");
+    return 0;
+}
+
 #define GPIO_PORT_MAP(port, prefix)    \
     (((port) == (GPIOA)) ? prefix##A : \
      ((port) == (GPIOB)) ? prefix##B : \
@@ -12,7 +17,7 @@
      ((port) == (GPIOD)) ? prefix##D : \
      ((port) == (GPIOE)) ? prefix##E : \
      ((port) == (GPIOH)) ? prefix##H : \
-                           *(uint32_t*)0x0)
+                           furi_hal_gpio_invalid_argument_crash())
 
 #define GPIO_PIN_MAP(pin, prefix)               \
     (((pin) == (LL_GPIO_PIN_0))  ? prefix##0 :  \
@@ -31,7 +36,7 @@
      ((pin) == (LL_GPIO_PIN_13)) ? prefix##13 : \
      ((pin) == (LL_GPIO_PIN_14)) ? prefix##14 : \
      ((pin) == (LL_GPIO_PIN_15)) ? prefix##15 : \
-                                   *(uint32_t*)0x0)
+                                   furi_hal_gpio_invalid_argument_crash())
 
 #define GET_SYSCFG_EXTI_PORT(port) GPIO_PORT_MAP(port, LL_SYSCFG_EXTI_PORT)
 #define GET_SYSCFG_EXTI_LINE(pin) GPIO_PIN_MAP(pin, LL_SYSCFG_EXTI_LINE)
