@@ -29,14 +29,19 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM1209-1317-0.93.9-e1ac6a9](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-12-10 23:53 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-12-10 23:53 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-12-11 16:40 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-12-11 16:40 EST`
 - SubGHz: [Fix repeater crash on known protocol key TX & Long press OK to TX (By LeeroysHub)](https://github.com/LeeroysHub/RM-Flipper/commit/4b310755dd56fca6f96851a012fd94b05f46c933)
 - Updated: [BLE Spam v4.4 (By Willy-JL & ECTO-1A & Spooks4576 with research from xMasterX; OFW API thanks to noproto)](https://github.com/noproto/apple_ble_spam_ofw)
 - Updated: [FlipBoard Blinky v2.1 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
 - Updated: [FlipBoard Keyboard v2.0 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
-- Updated: [FlipBoard Signal v3.1 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
 - Updated: [Hangman v1.5 (By Evgeny Stepanischev & Eva Stepanischeva)](https://github.com/bolknote/Flipper-Zero-Hangman-Game)
+- Updated: [FlipBoard Signal v3.1 (By jamisonderek)](https://github.com/jamisonderek/flipboard) bumped version in app
+- Updated: [Sokoban v1.2 (By Racso)](https://github.com/Racso/fzero-apps) Bumped version only.
+- Updated: [Ultimate Tic-Tac-Toe v1.1 (By Racso)](https://github.com/Racso/fzero-apps) Bumped version only.
+- Updated: [Zero v1.4 (By Racso)](https://github.com/Racso/fzero-apps) Bumped version only.
+- Updated: [Authenticator/TOTP v5.9.1 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator) Exit on short back press (By Willy-JL)
+- [Update Wifi-Stealer_ORG.txt #1005 (By 3ldidi94)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/1005)
 
 ## IN THIS BRANCH:
 
