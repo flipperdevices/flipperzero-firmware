@@ -3,6 +3,8 @@
 #include <gui/modules/validators.h>
 #include <toolbox/path.h>
 
+#define TAG "SeaderSceneSaveName"
+
 void seader_scene_save_name_text_input_callback(void* context) {
     Seader* seader = context;
 
@@ -52,7 +54,9 @@ bool seader_scene_save_name_on_event(void* context, SceneManagerEvent event) {
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SeaderCustomEventTextInputDone) {
-            if(strcmp(seader->credential->name, "") != 0) {
+            if(seader->credential->save_format == SeaderCredentialSaveFormatAgnostic &&
+               strcmp(seader->credential->name, "") != 0) {
+                FURI_LOG_D(TAG, "Delete existing named credential [%s]", seader->credential->name);
                 seader_credential_delete(seader->credential, true);
             }
             strlcpy(seader->credential->name, seader->text_store, strlen(seader->text_store) + 1);
