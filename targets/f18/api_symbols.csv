@@ -83,7 +83,7 @@ Header,+,lib/mbedtls/include/mbedtls/ecp.h,,
 Header,+,lib/mbedtls/include/mbedtls/md.h,,
 Header,+,lib/mbedtls/include/mbedtls/md5.h,,
 Header,+,lib/mbedtls/include/mbedtls/sha1.h,,
-Header,+,lib/micro-ecc/uECC.h,,
+Header,+,lib/mbedtls/include/mbedtls/sha256.h,,
 Header,+,lib/mjs/mjs_array_public.h,,
 Header,+,lib/mjs/mjs_core_public.h,,
 Header,+,lib/mjs/mjs_exec_public.h,,
@@ -91,7 +91,6 @@ Header,+,lib/mjs/mjs_object_public.h,,
 Header,+,lib/mjs/mjs_primitive_public.h,,
 Header,+,lib/mjs/mjs_string_public.h,,
 Header,+,lib/mjs/mjs_util_public.h,,
-Header,+,lib/mbedtls/include/mbedtls/sha256.h,,
 Header,+,lib/mlib/m-algo.h,,
 Header,+,lib/mlib/m-array.h,,
 Header,+,lib/mlib/m-bptree.h,,
@@ -1933,8 +1932,8 @@ Function,+,mjs_print_error,void,"mjs*, FILE*, const char*, int"
 Function,+,mjs_return,void,"mjs*, mjs_val_t"
 Function,+,mjs_set,mjs_err_t,"mjs*, mjs_val_t, const char*, size_t, mjs_val_t"
 Function,+,mjs_set_errorf,mjs_err_t,"mjs*, mjs_err_t, const char*, ..."
-Function,+,mjs_set_ffi_resolver,void,"mjs*, mjs_ffi_resolver_t*, void*"
 Function,+,mjs_set_exec_flags_poller,void,"mjs*, mjs_flags_poller_t"
+Function,+,mjs_set_ffi_resolver,void,"mjs*, mjs_ffi_resolver_t*, void*"
 Function,-,mjs_set_generate_jsc,void,"mjs*, int"
 Function,+,mjs_set_v,mjs_err_t,"mjs*, mjs_val_t, mjs_val_t, mjs_val_t"
 Function,+,mjs_sprintf,void,"mjs_val_t, mjs*, char*, size_t"

@@ -27,12 +27,9 @@
         "assets",
         "one_wire",
         "music_worker",
-<<<<<<< HEAD
         "mjs",
         "misc",
-=======
         "mbedtls",
->>>>>>> dev
         "flipper_application",
         "toolbox",
         "u8g2",

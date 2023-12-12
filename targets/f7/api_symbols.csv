@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,49.3,,
+Version,+,49.2,,
 Header,+,applications/drivers/subghz/cc1101_ext/cc1101_ext_interconnect.h,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
@@ -2104,7 +2104,9 @@ Function,-,mbedtls_ecdsa_init,void,mbedtls_ecdsa_context*
 Function,-,mbedtls_ecdsa_read_signature,int,"mbedtls_ecdsa_context*, const unsigned char*, size_t, const unsigned char*, size_t"
 Function,-,mbedtls_ecdsa_read_signature_restartable,int,"mbedtls_ecdsa_context*, const unsigned char*, size_t, const unsigned char*, size_t, mbedtls_ecdsa_restart_ctx*"
 Function,-,mbedtls_ecdsa_sign,int,"mbedtls_ecp_group*, mbedtls_mpi*, mbedtls_mpi*, const mbedtls_mpi*, const unsigned char*, size_t, int (*)(void*, unsigned char*, size_t), void*"
+Function,-,mbedtls_ecdsa_sign_restartable,int,"mbedtls_ecp_group*, mbedtls_mpi*, mbedtls_mpi*, const mbedtls_mpi*, const unsigned char*, size_t, int (*)(void*, unsigned char*, size_t), void*, int (*)(void*, unsigned char*, size_t), void*, mbedtls_ecdsa_restart_ctx*"
 Function,-,mbedtls_ecdsa_verify,int,"mbedtls_ecp_group*, const unsigned char*, size_t, const mbedtls_ecp_point*, const mbedtls_mpi*, const mbedtls_mpi*"
+Function,-,mbedtls_ecdsa_verify_restartable,int,"mbedtls_ecp_group*, const unsigned char*, size_t, const mbedtls_ecp_point*, const mbedtls_mpi*, const mbedtls_mpi*, mbedtls_ecdsa_restart_ctx*"
 Function,-,mbedtls_ecdsa_write_signature,int,"mbedtls_ecdsa_context*, mbedtls_md_type_t, const unsigned char*, size_t, unsigned char*, size_t, size_t*, int (*)(void*, unsigned char*, size_t), void*"
 Function,-,mbedtls_ecdsa_write_signature_restartable,int,"mbedtls_ecdsa_context*, mbedtls_md_type_t, const unsigned char*, size_t, unsigned char*, size_t, size_t*, int (*)(void*, unsigned char*, size_t), void*, mbedtls_ecdsa_restart_ctx*"
 Function,-,mbedtls_ecp_check_privkey,int,"const mbedtls_ecp_group*, const mbedtls_mpi*"
@@ -2115,6 +2117,7 @@ Function,-,mbedtls_ecp_curve_info_from_grp_id,const mbedtls_ecp_curve_info*,mbed
 Function,-,mbedtls_ecp_curve_info_from_name,const mbedtls_ecp_curve_info*,const char*
 Function,-,mbedtls_ecp_curve_info_from_tls_id,const mbedtls_ecp_curve_info*,uint16_t
 Function,-,mbedtls_ecp_curve_list,const mbedtls_ecp_curve_info*,
+Function,-,mbedtls_ecp_export,int,"const mbedtls_ecp_keypair*, mbedtls_ecp_group*, mbedtls_mpi*, mbedtls_ecp_point*"
 Function,-,mbedtls_ecp_gen_key,int,"mbedtls_ecp_group_id, mbedtls_ecp_keypair*, int (*)(void*, unsigned char*, size_t), void*"
 Function,-,mbedtls_ecp_gen_keypair,int,"mbedtls_ecp_group*, mbedtls_mpi*, mbedtls_ecp_point*, int (*)(void*, unsigned char*, size_t), void*"
 Function,-,mbedtls_ecp_gen_keypair_base,int,"mbedtls_ecp_group*, const mbedtls_ecp_point*, mbedtls_mpi*, mbedtls_ecp_point*, int (*)(void*, unsigned char*, size_t), void*"
@@ -2168,11 +2171,11 @@ Function,-,mbedtls_md_hmac_finish,int,"mbedtls_md_context_t*, unsigned char*"
 Function,-,mbedtls_md_hmac_reset,int,mbedtls_md_context_t*
 Function,-,mbedtls_md_hmac_starts,int,"mbedtls_md_context_t*, const unsigned char*, size_t"
 Function,-,mbedtls_md_hmac_update,int,"mbedtls_md_context_t*, const unsigned char*, size_t"
+Function,-,mbedtls_md_info_from_ctx,const mbedtls_md_info_t*,const mbedtls_md_context_t*
 Function,-,mbedtls_md_info_from_string,const mbedtls_md_info_t*,const char*
 Function,-,mbedtls_md_info_from_type,const mbedtls_md_info_t*,mbedtls_md_type_t
 Function,-,mbedtls_md_init,void,mbedtls_md_context_t*
 Function,-,mbedtls_md_list,const int*,
-Function,-,mbedtls_md_process,int,"mbedtls_md_context_t*, const unsigned char*"
 Function,-,mbedtls_md_setup,int,"mbedtls_md_context_t*, const mbedtls_md_info_t*, int"
 Function,-,mbedtls_md_starts,int,mbedtls_md_context_t*
 Function,-,mbedtls_md_update,int,"mbedtls_md_context_t*, const unsigned char*, size_t"
