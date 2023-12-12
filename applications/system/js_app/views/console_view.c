@@ -34,7 +34,6 @@ static void console_view_draw_callback(Canvas* canvas, void* _model) {
 static bool console_view_input_callback(InputEvent* event, void* context) {
     UNUSED(event);
     UNUSED(context);
-    // TODO: -> сallback -> queue -> mjs thread
     return false;
 }
 

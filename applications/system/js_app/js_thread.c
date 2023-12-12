@@ -301,7 +301,7 @@ static int32_t js_thread(void* arg) {
 }
 
 JsThread* js_thread_run(const char* script_path, JsThreadCallback callback, void* context) {
-    JsThread* worker = malloc(sizeof(JsThread));
+    JsThread* worker = malloc(sizeof(JsThread)); //-V799
     worker->path = furi_string_alloc_set(script_path);
     worker->thread = furi_thread_alloc_ex("JsThread", 8 * 1024, js_thread, worker);
     worker->app_callback = callback;

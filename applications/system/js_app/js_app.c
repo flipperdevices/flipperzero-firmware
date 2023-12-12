@@ -128,4 +128,4 @@ int32_t js_app(void* arg) {
 
     js_app_free(app);
     return 0;
-}
+} //-V773

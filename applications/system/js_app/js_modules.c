@@ -52,7 +52,7 @@ mjs_val_t js_module_require(JsModules* modules, const char* name, size_t name_le
     FuriString* module_name = furi_string_alloc_set_str(name);
     // Check if module is already installed
     JsModuleData* module_inst = JsModuleDict_get(modules->module_dict, module_name);
-    if(module_inst) {
+    if(module_inst) { //-V547
         furi_string_free(module_name);
         mjs_prepend_errorf(
             modules->mjs, MJS_BAD_ARGS_ERROR, "\"%s\" module is already installed", name);
@@ -61,7 +61,7 @@ mjs_val_t js_module_require(JsModules* modules, const char* name, size_t name_le
 
     bool module_found = false;
     // Check built-in modules
-    for(size_t i = 0; i < COUNT_OF(modules_builtin); i++) {
+    for(size_t i = 0; i < COUNT_OF(modules_builtin); i++) { //-V1008
         size_t name_compare_len = strlen(modules_builtin[i].name);
 
         if(name_compare_len != name_len) {
@@ -111,12 +111,12 @@ mjs_val_t js_module_require(JsModules* modules, const char* name, size_t name_le
     if(module_found) {
         module_inst = JsModuleDict_get(modules->module_dict, module_name);
         furi_assert(module_inst);
-        if(module_inst->create) {
+        if(module_inst->create) { //-V779
             module_inst->context = module_inst->create(modules->mjs, &module_object);
         }
     }
 
-    if(module_object == MJS_UNDEFINED) {
+    if(module_object == MJS_UNDEFINED) { //-V547
         mjs_prepend_errorf(modules->mjs, MJS_BAD_ARGS_ERROR, "\"%s\" module load fail", name);
     }
 
