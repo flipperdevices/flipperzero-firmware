@@ -2,7 +2,7 @@
 
 enum SubmenuIndex {
     SubmenuIndexMfUlUnlockMenuReader,
-    SubmenuIndexMfUlUnlockMenuAmeebo,
+    SubmenuIndexMfUlUnlockMenuAmiibo,
     SubmenuIndexMfUlUnlockMenuXiaomi,
     SubmenuIndexMfUlUnlockMenuManual,
 };
@@ -29,8 +29,8 @@ void nfc_scene_mf_ultralight_unlock_menu_on_enter(void* context) {
     }
     submenu_add_item(
         submenu,
-        "Auth As Ameebo",
-        SubmenuIndexMfUlUnlockMenuAmeebo,
+        "Auth As Amiibo",
+        SubmenuIndexMfUlUnlockMenuAmiibo,
         nfc_scene_mf_ultralight_unlock_menu_submenu_callback,
         nfc);
     submenu_add_item(
@@ -58,7 +58,7 @@ bool nfc_scene_mf_ultralight_unlock_menu_on_event(void* context, SceneManagerEve
             nfc->mf_ul_auth->type = MfUltralightAuthTypeManual;
             scene_manager_next_scene(nfc->scene_manager, NfcSceneMfUltralightKeyInput);
             consumed = true;
-        } else if(event.event == SubmenuIndexMfUlUnlockMenuAmeebo) {
+        } else if(event.event == SubmenuIndexMfUlUnlockMenuAmiibo) {
             nfc->mf_ul_auth->type = MfUltralightAuthTypeAmiibo;
             scene_manager_next_scene(nfc->scene_manager, NfcSceneMfUltralightUnlockWarn);
             consumed = true;
