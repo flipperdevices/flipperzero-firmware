@@ -112,8 +112,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [NFC fixes #3264 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3264)
 - UL: [Nfc parsers #655 (By assasinfil)](https://github.com/DarkFlippers/unleashed-firmware/pull/655)
 - Updated: [PicoPass (iClass) v1.9 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass) [Picopass rework. Part 1 #68 (By gornekich)](https://github.com/flipperdevices/flipperzero-good-faps/pull/68)
-- Update: [NFC Seader v2.1 (By bettse)](https://github.com/bettse/seader)
 - Updated: [NFC Magic v1.4 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966) [Nfc Magic rework #67 (By gornekich)](https://github.com/flipperdevices/flipperzero-good-faps/pull/67) [NFC Magic fix gen4 detection #71 (By gornekich)](https://github.com/flipperdevices/flipperzero-good-faps/pull/71) [Specify in error scene that only Gen1 magic and Gen4 UMCs are supported #75 (By kitsunehunter)](https://github.com/flipperdevices/flipperzero-good-faps/pull/75) [UI / Scenes (By xMasterX) & Poller functions, minor UI fixes (By Leptopt1los)](https://github.com/xMasterX/all-the-plugins/commit/d70f146f15a6bab2272d4ebfe37001d7d5f0f556)
+- Update: [NFC Seader v2.1 (By bettse)](https://github.com/bettse/seader)
 
 <a name="release">
 
