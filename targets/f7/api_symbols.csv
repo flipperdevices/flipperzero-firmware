@@ -1414,6 +1414,7 @@ Function,-,furi_hal_rtc_init_early,void,
 Function,+,furi_hal_rtc_is_flag_set,_Bool,FuriHalRtcFlag
 Function,+,furi_hal_rtc_is_leap_year,_Bool,uint16_t
 Function,+,furi_hal_rtc_reset_flag,void,FuriHalRtcFlag
+Function,+,furi_hal_rtc_reset_registers,void,
 Function,+,furi_hal_rtc_set_boot_mode,void,FuriHalRtcBootMode
 Function,+,furi_hal_rtc_set_datetime,void,FuriHalRtcDateTime*
 Function,+,furi_hal_rtc_set_fault_data,void,uint32_t
