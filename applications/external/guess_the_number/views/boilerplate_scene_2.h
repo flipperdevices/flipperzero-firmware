@@ -10,7 +10,7 @@ typedef void (*BoilerplateScene2Callback)(BoilerplateCustomEvent event, void* co
 void boilerplate_scene_2_set_callback(
     BoilerplateScene2* instance,
     BoilerplateScene2Callback callback,
-    void * context);
+    void* context);
 
 BoilerplateScene2* boilerplate_scene_2_alloc();
 

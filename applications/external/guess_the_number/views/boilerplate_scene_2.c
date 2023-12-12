@@ -9,30 +9,29 @@
 #include "../helpers/boilerplate_speaker.h"
 #include "../helpers/boilerplate_led.h"
 
-struct BoilerplateScene2
-{
-    View *view;
+struct BoilerplateScene2 {
+    View* view;
     BoilerplateScene2Callback callback;
-    void *context;
+    void* context;
 };
 
-typedef struct
-{
-    char *buffer;
+typedef struct {
+    char* buffer;
     int target_number, player_guess;
     char game_message[50];
 } BoilerplateScene2Model;
 
-void boilerplate_scene_2_set_callback(BoilerplateScene2 *instance, BoilerplateScene2Callback callback, void *context)
-{
+void boilerplate_scene_2_set_callback(
+    BoilerplateScene2* instance,
+    BoilerplateScene2Callback callback,
+    void* context) {
     furi_assert(instance);
     furi_assert(callback);
     instance->callback = callback;
     instance->context = context;
 }
 
-void boilerplate_scene_2_draw(Canvas *canvas, BoilerplateScene2Model *model)
-{
+void boilerplate_scene_2_draw(Canvas* canvas, BoilerplateScene2Model* model) {
     canvas_clear(canvas);
 
     canvas_set_color(canvas, ColorBlack);
@@ -50,8 +49,7 @@ void boilerplate_scene_2_draw(Canvas *canvas, BoilerplateScene2Model *model)
     canvas_draw_str_aligned(canvas, 0, 50, AlignLeft, AlignTop, model->game_message);
 }
 
-static void boilerplate_scene_2_model_init(BoilerplateScene2Model *const model)
-{
+static void boilerplate_scene_2_model_init(BoilerplateScene2Model* const model) {
     // Set the target number to a random number between 0 and 100
     model->target_number = furi_hal_random_get() % 100;
     model->player_guess = 50;
@@ -59,13 +57,11 @@ static void boilerplate_scene_2_model_init(BoilerplateScene2Model *const model)
     dolphin_deed(DolphinDeedPluginGameStart);
 }
 
-bool boilerplate_scene_2_input(InputEvent *event, void *context)
-{
+bool boilerplate_scene_2_input(InputEvent* event, void* context) {
     furi_assert(context);
-    BoilerplateScene2 *instance = context;
+    BoilerplateScene2* instance = context;
 
-    if (event->type == InputTypeLong && event->key == InputKeyBack)
-    {
+    if(event->type == InputTypeLong && event->key == InputKeyBack) {
         with_view_model(
             instance->view,
             BoilerplateScene2Model * model,
@@ -79,8 +75,7 @@ bool boilerplate_scene_2_input(InputEvent *event, void *context)
         return true;
     }
 
-    if (event->type == InputTypeShort && event->key == InputKeyBack)
-    {
+    if(event->type == InputTypeShort && event->key == InputKeyBack) {
         with_view_model(
             instance->view,
             BoilerplateScene2Model * model,
@@ -95,10 +90,8 @@ bool boilerplate_scene_2_input(InputEvent *event, void *context)
         return true;
     }
 
-    if (event->type == InputTypePress)
-    {
-        switch (event->key)
-        {
+    if(event->type == InputTypePress) {
+        switch(event->key) {
         case InputKeyUp:
             with_view_model(
                 instance->view,
@@ -149,16 +142,15 @@ bool boilerplate_scene_2_input(InputEvent *event, void *context)
                 BoilerplateScene2Model * model,
                 {
                     // Process the guess
-                    if (model->target_number == model->player_guess)
-                    {
+                    if(model->target_number == model->player_guess) {
                         strcpy(model->game_message, "You win!");
                         boilerplate_play_win_sound(instance->context);
                         boilerplate_led_set_rgb(instance->context, 0, 255, 0);
                         dolphin_deed(DolphinDeedPluginGameWin);
-                    }
-                    else
-                    {
-                        strcpy(model->game_message, model->target_number > model->player_guess ? "Too low!" : "Too high!");
+                    } else {
+                        strcpy(
+                            model->game_message,
+                            model->target_number > model->player_guess ? "Too low!" : "Too high!");
                         boilerplate_led_set_rgb(instance->context, 255, 0, 0);
                     }
                     boilerplate_play_button_press(instance->context);
@@ -170,11 +162,8 @@ bool boilerplate_scene_2_input(InputEvent *event, void *context)
         case InputKeyMAX:
             break;
         }
-    }
-    else if (event->type == InputTypeRelease)
-    {
-        switch (event->key)
-        {
+    } else if(event->type == InputTypeRelease) {
+        switch(event->key) {
         case InputKeyUp:
         case InputKeyDown:
         case InputKeyLeft:
@@ -192,22 +181,19 @@ bool boilerplate_scene_2_input(InputEvent *event, void *context)
     return true;
 }
 
-void boilerplate_scene_2_exit(void *context)
-{
+void boilerplate_scene_2_exit(void* context) {
     furi_assert(context);
-    Boilerplate *app = context;
+    Boilerplate* app = context;
     boilerplate_stop_all_sound(app);
 }
 
-void boilerplate_scene_2_enter(void *context)
-{
+void boilerplate_scene_2_enter(void* context) {
     furi_assert(context);
     dolphin_deed(DolphinDeedPluginStart);
 }
 
-BoilerplateScene2 *boilerplate_scene_2_alloc()
-{
-    BoilerplateScene2 *instance = malloc(sizeof(BoilerplateScene2));
+BoilerplateScene2* boilerplate_scene_2_alloc() {
+    BoilerplateScene2* instance = malloc(sizeof(BoilerplateScene2));
     instance->view = view_alloc();
     view_allocate_model(instance->view, ViewModelTypeLocking, sizeof(BoilerplateScene2Model));
     view_set_context(instance->view, instance);
@@ -218,23 +204,19 @@ BoilerplateScene2 *boilerplate_scene_2_alloc()
     with_view_model(
         instance->view,
         BoilerplateScene2Model * model,
-        {
-            boilerplate_scene_2_model_init(model);
-        },
+        { boilerplate_scene_2_model_init(model); },
         true);
 
     return instance;
 }
 
-void boilerplate_scene_2_free(BoilerplateScene2 *instance)
-{
+void boilerplate_scene_2_free(BoilerplateScene2* instance) {
     furi_assert(instance);
     view_free(instance->view);
     free(instance);
 }
 
-View *boilerplate_scene_2_get_view(BoilerplateScene2 *instance)
-{
+View* boilerplate_scene_2_get_view(BoilerplateScene2* instance) {
     furi_assert(instance);
     return instance->view;
 }

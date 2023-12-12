@@ -14,11 +14,23 @@ void boilerplate_scene_menu_submenu_callback(void* context, uint32_t index) {
 void boilerplate_scene_menu_on_enter(void* context) {
     Boilerplate* app = context;
 
-    submenu_add_item(app->submenu, "Play", SubmenuIndexScene2, boilerplate_scene_menu_submenu_callback, app);
-    submenu_add_item(app->submenu, "How to play",SubmenuIndexScene1, boilerplate_scene_menu_submenu_callback, app);
-    submenu_add_item(app->submenu, "Settings", SubmenuIndexSettings, boilerplate_scene_menu_submenu_callback, app);
+    submenu_add_item(
+        app->submenu, "Play", SubmenuIndexScene2, boilerplate_scene_menu_submenu_callback, app);
+    submenu_add_item(
+        app->submenu,
+        "How to play",
+        SubmenuIndexScene1,
+        boilerplate_scene_menu_submenu_callback,
+        app);
+    submenu_add_item(
+        app->submenu,
+        "Settings",
+        SubmenuIndexSettings,
+        boilerplate_scene_menu_submenu_callback,
+        app);
 
-    submenu_set_selected_item(app->submenu, scene_manager_get_scene_state(app->scene_manager, BoilerplateSceneMenu));
+    submenu_set_selected_item(
+        app->submenu, scene_manager_get_scene_state(app->scene_manager, BoilerplateSceneMenu));
 
     view_dispatcher_switch_to_view(app->view_dispatcher, BoilerplateViewIdMenu);
 }
@@ -37,12 +49,12 @@ bool boilerplate_scene_menu_on_event(void* context, SceneManagerEvent event) {
                 app->scene_manager, BoilerplateSceneMenu, SubmenuIndexScene1);
             scene_manager_next_scene(app->scene_manager, BoilerplateSceneScene_1);
             return true;
-        } else if (event.event == SubmenuIndexScene2) {
+        } else if(event.event == SubmenuIndexScene2) {
             scene_manager_set_scene_state(
                 app->scene_manager, BoilerplateSceneMenu, SubmenuIndexScene2);
             scene_manager_next_scene(app->scene_manager, BoilerplateSceneScene_2);
             return true;
-        } else if (event.event == SubmenuIndexSettings) {
+        } else if(event.event == SubmenuIndexSettings) {
             scene_manager_set_scene_state(
                 app->scene_manager, BoilerplateSceneMenu, SubmenuIndexSettings);
             scene_manager_next_scene(app->scene_manager, BoilerplateSceneSettings);
