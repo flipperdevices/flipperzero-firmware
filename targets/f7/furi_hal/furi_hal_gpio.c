@@ -72,9 +72,11 @@ void furi_hal_gpio_init_ex(
     const GpioPull pull,
     const GpioSpeed speed,
     const GpioAltFn alt_fn) {
-    uint32_t sys_exti_port = GET_SYSCFG_EXTI_PORT(gpio->port);
-    uint32_t sys_exti_line = GET_SYSCFG_EXTI_LINE(gpio->pin);
-    uint32_t exti_line = GET_EXTI_LINE(gpio->pin);
+    const uint32_t sys_exti_port = GET_SYSCFG_EXTI_PORT(gpio->port);
+    const uint32_t sys_exti_line = GET_SYSCFG_EXTI_LINE(gpio->pin);
+    const uint32_t exti_line = GET_EXTI_LINE(gpio->pin);
+    const uint32_t pwr_port = GET_PWR_PORT(gpio->port);
+    const uint32_t pwr_pin = GET_PWR_PIN(gpio->pin);
 
     // Configure gpio with interrupts disabled
     FURI_CRITICAL_ENTER();
@@ -99,18 +101,18 @@ void furi_hal_gpio_init_ex(
     switch(pull) {
     case GpioPullNo:
         LL_GPIO_SetPinPull(gpio->port, gpio->pin, LL_GPIO_PULL_NO);
-        LL_PWR_DisableGPIOPullUp(GET_PWR_PORT(gpio->port), GET_PWR_PIN(gpio->pin));
-        LL_PWR_DisableGPIOPullDown(GET_PWR_PORT(gpio->port), GET_PWR_PIN(gpio->pin));
+        LL_PWR_DisableGPIOPullUp(pwr_port, pwr_pin);
+        LL_PWR_DisableGPIOPullDown(pwr_port, pwr_pin);
         break;
     case GpioPullUp:
         LL_GPIO_SetPinPull(gpio->port, gpio->pin, LL_GPIO_PULL_UP);
-        LL_PWR_DisableGPIOPullDown(GET_PWR_PORT(gpio->port), GET_PWR_PIN(gpio->pin));
-        LL_PWR_EnableGPIOPullUp(GET_PWR_PORT(gpio->port), GET_PWR_PIN(gpio->pin));
+        LL_PWR_DisableGPIOPullDown(pwr_port, pwr_pin);
+        LL_PWR_EnableGPIOPullUp(pwr_port, pwr_pin);
         break;
     case GpioPullDown:
         LL_GPIO_SetPinPull(gpio->port, gpio->pin, LL_GPIO_PULL_DOWN);
-        LL_PWR_DisableGPIOPullUp(GET_PWR_PORT(gpio->port), GET_PWR_PIN(gpio->pin));
-        LL_PWR_EnableGPIOPullDown(GET_PWR_PORT(gpio->port), GET_PWR_PIN(gpio->pin));
+        LL_PWR_DisableGPIOPullUp(pwr_port, pwr_pin);
+        LL_PWR_EnableGPIOPullDown(pwr_port, pwr_pin);
         break;
     default:
         furi_crash("Incorrect GpioPull");
