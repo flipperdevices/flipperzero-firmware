@@ -17,6 +17,8 @@
 
 #include "cs_time.h"
 
+#if CS_ENABLE_STDIO
+
 #ifndef _WIN32
 #include <stddef.h>
 /*
@@ -50,9 +52,9 @@ double cs_time(void) {
    * thus, we need to convert to seconds and adjust amount (subtract 11644473600
    * seconds)
    */
-    now =
-        (double)(((int64_t)ftime.dwLowDateTime + ((int64_t)ftime.dwHighDateTime << 32)) / 10000000.0) -
-        11644473600;
+    now = (double)(((int64_t)ftime.dwLowDateTime + ((int64_t)ftime.dwHighDateTime << 32)) /
+                   10000000.0) -
+          11644473600;
 #endif /* _WIN32 */
     return now;
 }
@@ -85,3 +87,5 @@ double cs_timegm(const struct tm* tm) {
                                  + (year_for_leap + 299) / 400))); /* Except 400s. */
     return rt < 0 ? -1 : (double)rt;
 }
+
+#endif

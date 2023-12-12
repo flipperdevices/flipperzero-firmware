@@ -220,7 +220,7 @@ mjs_err_t mjs_set_errorf(struct mjs* mjs, mjs_err_t err, const char* fmt, ...);
 
 void mjs_exit(struct mjs* mjs);
 
-void mjs_set_flags_poller(struct mjs* mjs, mjs_flags_poller_t poller);
+void mjs_set_exec_flags_poller(struct mjs* mjs, mjs_flags_poller_t poller);
 
 void* mjs_get_context(struct mjs* mjs);
 

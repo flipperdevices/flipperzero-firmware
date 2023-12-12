@@ -142,8 +142,8 @@ void mjs_exit(struct mjs* mjs) {
     mjs->error = MJS_NEED_EXIT;
 }
 
-void mjs_set_flags_poller(struct mjs* mjs, mjs_flags_poller_t poller) {
-    mjs->flags_poller = poller;
+void mjs_set_exec_flags_poller(struct mjs* mjs, mjs_flags_poller_t poller) {
+    mjs->exec_flags_poller = poller;
 }
 
 void* mjs_get_context(struct mjs* mjs) {

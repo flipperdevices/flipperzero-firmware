@@ -25,14 +25,14 @@
 #define ENDL "\n"
 #endif
 
-#define MJS_EXPOSE_PRIVATE // TODO:
+#ifndef MJS_EXPOSE_PRIVATE
+#define MJS_EXPOSE_PRIVATE 1
+#endif
 
-#ifdef MJS_EXPOSE_PRIVATE
+#if MJS_EXPOSE_PRIVATE
 #define MJS_PRIVATE
-#define MJS_EXTERN extern
 #else
 #define MJS_PRIVATE static
-#define MJS_EXTERN static
 #endif
 
 #ifndef ARRAY_SIZE

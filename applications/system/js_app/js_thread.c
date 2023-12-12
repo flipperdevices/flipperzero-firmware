@@ -20,7 +20,7 @@ struct JsThread {
     JsModules* modules;
 };
 
-static void mjs_str_print(FuriString* msg_str, struct mjs* mjs) {
+static void js_str_print(FuriString* msg_str, struct mjs* mjs) {
     size_t num_args = mjs_nargs(mjs);
     for(size_t i = 0; i < num_args; i++) {
         char* name = NULL;
@@ -40,9 +40,9 @@ static void mjs_str_print(FuriString* msg_str, struct mjs* mjs) {
     }
 }
 
-static void mjs_print(struct mjs* mjs) {
+static void js_print(struct mjs* mjs) {
     FuriString* msg_str = furi_string_alloc();
-    mjs_str_print(msg_str, mjs);
+    js_str_print(msg_str, mjs);
 
     printf("%s\r\n", furi_string_get_cstr(msg_str));
 
@@ -57,39 +57,39 @@ static void mjs_print(struct mjs* mjs) {
     mjs_return(mjs, MJS_UNDEFINED);
 }
 
-static void mjs_console_log(struct mjs* mjs) {
+static void js_console_log(struct mjs* mjs) {
     FuriString* msg_str = furi_string_alloc();
-    mjs_str_print(msg_str, mjs);
+    js_str_print(msg_str, mjs);
     FURI_LOG_I(TAG, "%s", furi_string_get_cstr(msg_str));
     furi_string_free(msg_str);
     mjs_return(mjs, MJS_UNDEFINED);
 }
 
-static void mjs_console_warn(struct mjs* mjs) {
+static void js_console_warn(struct mjs* mjs) {
     FuriString* msg_str = furi_string_alloc();
-    mjs_str_print(msg_str, mjs);
+    js_str_print(msg_str, mjs);
     FURI_LOG_W(TAG, "%s", furi_string_get_cstr(msg_str));
     furi_string_free(msg_str);
     mjs_return(mjs, MJS_UNDEFINED);
 }
 
-static void mjs_console_error(struct mjs* mjs) {
+static void js_console_error(struct mjs* mjs) {
     FuriString* msg_str = furi_string_alloc();
-    mjs_str_print(msg_str, mjs);
+    js_str_print(msg_str, mjs);
     FURI_LOG_E(TAG, "%s", furi_string_get_cstr(msg_str));
     furi_string_free(msg_str);
     mjs_return(mjs, MJS_UNDEFINED);
 }
 
-static void mjs_console_debug(struct mjs* mjs) {
+static void js_console_debug(struct mjs* mjs) {
     FuriString* msg_str = furi_string_alloc();
-    mjs_str_print(msg_str, mjs);
+    js_str_print(msg_str, mjs);
     FURI_LOG_D(TAG, "%s", furi_string_get_cstr(msg_str));
     furi_string_free(msg_str);
     mjs_return(mjs, MJS_UNDEFINED);
 }
 
-static void mjs_exit_flag_poll(struct mjs* mjs) {
+static void js_exit_flag_poll(struct mjs* mjs) {
     uint32_t flags = furi_thread_flags_wait(ThreadEventStop, FuriFlagWaitAny, 0);
     if(flags & FuriFlagError) {
         return;
@@ -137,7 +137,7 @@ uint32_t js_flags_wait(struct mjs* mjs, uint32_t flags_mask, uint32_t timeout) {
     return flags;
 }
 
-static void mjs_delay(struct mjs* mjs) {
+static void js_delay(struct mjs* mjs) {
     bool args_correct = false;
     int ms = 0;
 
@@ -157,7 +157,7 @@ static void mjs_delay(struct mjs* mjs) {
     mjs_return(mjs, MJS_UNDEFINED);
 }
 
-static void* my_dlsym(void* handle, const char* name) {
+static void* js_dlsym(void* handle, const char* name) {
     CompositeApiResolver* resolver = handle;
     Elf32_Addr addr = 0;
     uint32_t hash = elf_symbolname_hash(name);
@@ -171,7 +171,7 @@ static void* my_dlsym(void* handle, const char* name) {
     return (void*)addr;
 }
 
-static void mjs_ffi_address(struct mjs* mjs) {
+static void js_ffi_address(struct mjs* mjs) {
     mjs_val_t name_v = mjs_arg(mjs, 0);
     size_t len;
     const char* name = mjs_get_string(mjs, &name_v, &len);
@@ -179,7 +179,7 @@ static void mjs_ffi_address(struct mjs* mjs) {
     mjs_return(mjs, mjs_mk_foreign(mjs, addr));
 }
 
-static void mjs_require(struct mjs* mjs) {
+static void js_require(struct mjs* mjs) {
     mjs_val_t name_v = mjs_arg(mjs, 0);
     size_t len;
     const char* name = mjs_get_string(mjs, &name_v, &len);
@@ -194,7 +194,7 @@ static void mjs_require(struct mjs* mjs) {
     mjs_return(mjs, req_object);
 }
 
-static void mjs_global_to_string(struct mjs* mjs) {
+static void js_global_to_string(struct mjs* mjs) {
     double num = mjs_get_int(mjs, mjs_arg(mjs, 0));
     char tmp_str[] = "-2147483648";
     itoa(num, tmp_str, 10);
@@ -202,7 +202,7 @@ static void mjs_global_to_string(struct mjs* mjs) {
     mjs_return(mjs, ret);
 }
 
-static void mjs_global_to_hex_string(struct mjs* mjs) {
+static void js_global_to_hex_string(struct mjs* mjs) {
     double num = mjs_get_int(mjs, mjs_arg(mjs, 0));
     char tmp_str[] = "-FFFFFFFF";
     itoa(num, tmp_str, 16);
@@ -235,23 +235,23 @@ static int32_t js_thread(void* arg) {
     struct mjs* mjs = mjs_create(worker);
     worker->modules = js_modules_create(mjs, worker->resolver);
     mjs_val_t global = mjs_get_global(mjs);
-    mjs_set(mjs, global, "print", ~0, MFS_MK_FN(mjs_print));
-    mjs_set(mjs, global, "delay", ~0, MFS_MK_FN(mjs_delay));
-    mjs_set(mjs, global, "to_string", ~0, MFS_MK_FN(mjs_global_to_string));
-    mjs_set(mjs, global, "to_hex_string", ~0, MFS_MK_FN(mjs_global_to_hex_string));
-    mjs_set(mjs, global, "ffi_address", ~0, MFS_MK_FN(mjs_ffi_address));
-    mjs_set(mjs, global, "require", ~0, MFS_MK_FN(mjs_require));
+    mjs_set(mjs, global, "print", ~0, MFS_MK_FN(js_print));
+    mjs_set(mjs, global, "delay", ~0, MFS_MK_FN(js_delay));
+    mjs_set(mjs, global, "to_string", ~0, MFS_MK_FN(js_global_to_string));
+    mjs_set(mjs, global, "to_hex_string", ~0, MFS_MK_FN(js_global_to_hex_string));
+    mjs_set(mjs, global, "ffi_address", ~0, MFS_MK_FN(js_ffi_address));
+    mjs_set(mjs, global, "require", ~0, MFS_MK_FN(js_require));
 
     mjs_val_t console_obj = mjs_mk_object(mjs);
-    mjs_set(mjs, console_obj, "log", ~0, MFS_MK_FN(mjs_console_log));
-    mjs_set(mjs, console_obj, "warn", ~0, MFS_MK_FN(mjs_console_warn));
-    mjs_set(mjs, console_obj, "error", ~0, MFS_MK_FN(mjs_console_error));
-    mjs_set(mjs, console_obj, "debug", ~0, MFS_MK_FN(mjs_console_debug));
+    mjs_set(mjs, console_obj, "log", ~0, MFS_MK_FN(js_console_log));
+    mjs_set(mjs, console_obj, "warn", ~0, MFS_MK_FN(js_console_warn));
+    mjs_set(mjs, console_obj, "error", ~0, MFS_MK_FN(js_console_error));
+    mjs_set(mjs, console_obj, "debug", ~0, MFS_MK_FN(js_console_debug));
     mjs_set(mjs, global, "console", ~0, console_obj);
 
-    mjs_set_ffi_resolver(mjs, my_dlsym, worker->resolver);
+    mjs_set_ffi_resolver(mjs, js_dlsym, worker->resolver);
 
-    mjs_set_flags_poller(mjs, mjs_exit_flag_poll);
+    mjs_set_exec_flags_poller(mjs, js_exit_flag_poll);
 
     mjs_err_t err = mjs_exec_file(mjs, furi_string_get_cstr(worker->path), NULL);
 

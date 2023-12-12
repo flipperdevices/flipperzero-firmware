@@ -967,8 +967,8 @@ MJS_PRIVATE mjs_err_t mjs_execute(struct mjs* mjs, size_t off, mjs_val_t* res) {
             break;
         }
 
-        if(mjs->flags_poller) {
-            mjs->flags_poller(mjs);
+        if(mjs->exec_flags_poller) {
+            mjs->exec_flags_poller(mjs);
         }
 
         if(mjs->error != MJS_OK) {

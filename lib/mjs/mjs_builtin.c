@@ -15,17 +15,6 @@
 #include "mjs_string.h"
 #include "mjs_util.h"
 
-static void mjs_print(struct mjs* mjs) {
-    size_t i, num_args = mjs_nargs(mjs);
-    for(i = 0; i < num_args; i++) {
-        mjs_fprintf(mjs_arg(mjs, i), mjs, stdout);
-        putchar(' ');
-    }
-    putchar('\n');
-    mjs_return(mjs, MJS_UNDEFINED);
-    (void)mjs;
-}
-
 /*
  * If the file with the given filename was already loaded, returns the
  * corresponding bcode part; otherwise returns NULL.
@@ -136,7 +125,6 @@ void mjs_init_builtin(struct mjs* mjs, mjs_val_t obj) {
     mjs_set(mjs, obj, "global", ~0, obj);
 
     mjs_set(mjs, obj, "load", ~0, mjs_mk_foreign_func(mjs, (mjs_func_ptr_t)mjs_load));
-    // mjs_set(mjs, obj, "print", ~0, mjs_mk_foreign_func(mjs, (mjs_func_ptr_t)mjs_print));
     mjs_set(mjs, obj, "ffi", ~0, mjs_mk_foreign_func(mjs, (mjs_func_ptr_t)mjs_ffi_call));
     mjs_set(
         mjs, obj, "ffi_cb_free", ~0, mjs_mk_foreign_func(mjs, (mjs_func_ptr_t)mjs_ffi_cb_free));

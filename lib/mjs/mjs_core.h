@@ -81,7 +81,7 @@ struct mjs {
     void* dlsym_handle;
     ffi_cb_args_t* ffi_cb_args; /* List of FFI args descriptors */
     size_t cur_bcode_offset;
-    mjs_flags_poller_t flags_poller;
+    mjs_flags_poller_t exec_flags_poller;
     void* context;
 
     struct gc_arena object_arena;

@@ -22,7 +22,7 @@
 #include "platform.h"
 
 #ifndef C_DISABLE_BUILTIN_SNPRINTF
-#define C_DISABLE_BUILTIN_SNPRINTF 0
+#define C_DISABLE_BUILTIN_SNPRINTF 1
 #endif
 
 #include "mg_mem.h"
