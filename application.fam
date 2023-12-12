@@ -1,0 +1,9 @@
+App(
+    appid="nfc_playlist",
+    name="nfc playlist",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="nfc_playlist_main",
+    requires=["gui", "nfx"],
+    stack_size=4 * 1024,
+    fap_category="NFC",
+)
