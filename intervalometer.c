@@ -18,7 +18,7 @@
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
 
-#include <intervalometer_icons.h>
+#include <ir_intervalometer_icons.h>
 
 // app ui scenes
 enum flipvalo_ui_scene {
