@@ -254,7 +254,7 @@ You can learn more about it in the following video. [**Analyzing the Different V
 
 ## Board for Flipper Zero with PortData EXT Link.
 
-For the Flipper Zero board, a [PortData EXT Link](https://es.aliexpress.com/item/1005004116983895.html) and a 2x8  [prototype board](https://es.aliexpress.com/item/32478242317.html) were used.
+For the Flipper Zero board, a [PortData EXT Link](https://s.click.aliexpress.com/e/_Dm3EqlR) and a 2x8  [prototype board](https://s.click.aliexpress.com/e/_DETrjpL) were used.
 
 <p align='center'>
 <br />
