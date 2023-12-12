@@ -121,6 +121,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [NFC NTAG and ISO14443-3b reading fix #3285 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3285)
 - OFW: [Cleanup RTC registers on factory reset #3288 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3288)
 - OFW: [FuriHal: various GPIO improvements #3260 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3260)
+- [Fix edge case -- 0.5% of UIDs got wrong result #4 (By henrygab)](https://github.com/noproto/flipper_kdf/pull/4)
 
 <a name="release">
 
