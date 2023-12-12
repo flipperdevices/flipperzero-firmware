@@ -1928,7 +1928,7 @@ Function,+,mjs_nargs,int,mjs*
 Function,+,mjs_next,mjs_val_t,"mjs*, mjs_val_t, mjs_val_t*"
 Function,+,mjs_own,void,"mjs*, mjs_val_t*"
 Function,+,mjs_prepend_errorf,mjs_err_t,"mjs*, mjs_err_t, const char*, ..."
-Function,+,mjs_print_error,void,"mjs*, FILE*, const char*, int"
+Function,-,mjs_print_error,void,"mjs*, FILE*, const char*, int"
 Function,+,mjs_return,void,"mjs*, mjs_val_t"
 Function,+,mjs_set,mjs_err_t,"mjs*, mjs_val_t, const char*, size_t, mjs_val_t"
 Function,+,mjs_set_errorf,mjs_err_t,"mjs*, mjs_err_t, const char*, ..."

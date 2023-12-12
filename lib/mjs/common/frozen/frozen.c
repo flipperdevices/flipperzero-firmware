@@ -883,7 +883,7 @@ int json_unescape(const char* src, int slen, char* dst, int dlen) {
                     if(dst < dend) *dst = hexdec(src + 3);
                     src += 4;
                 } else {
-                    /* Complex \uXXXX escapes drag utf8 lib... Do it at some stage */
+                    /* Complex \uXX XX escapes drag utf8 lib... Do it at some stage */
                     return JSON_STRING_INVALID;
                 }
             } else if((p = (char*)strchr(esc1, *src)) != NULL) {

@@ -87,7 +87,7 @@ static int snquote(char* buf, size_t size, const char* s, size_t len) {
             if(buf < limit) *buf++ = specials[*s - '\b'];
             continue;
         } else if((unsigned char)*s < '\b' || (*s > '\r' && *s < ' ')) {
-            i += 6 /* \uXXXX */;
+            i += 6 /* \uXX XX */;
             if(buf < limit) *buf++ = '\\';
             buf = append_hex(buf, limit, (uint8_t)*s);
             continue;
@@ -150,7 +150,7 @@ MJS_PRIVATE mjs_err_t to_json_or_debug(
     case MJS_TYPE_FOREIGN:
         /* For those types, regular `mjs_to_string()` works */
         {
-            /* TODO: refactor: mjs_to_string allocates memory every time */
+            /* refactor: mjs_to_string allocates memory every time */
             char* p = NULL;
             int need_free = 0;
             rcode = mjs_to_string(mjs, &v, &p, &len, &need_free);
