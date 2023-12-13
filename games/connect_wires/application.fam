@@ -1,0 +1,10 @@
+App(
+    appid="flipper_game_connect_wires",
+    name="Connect Wires",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="flipper_game_connect_wires",
+    requires=["gui"],
+    stack_size=8 * 1024,
+    fap_category="Games",
+    fap_icon="flipper_game_connect_wires_10x.png",
+)
