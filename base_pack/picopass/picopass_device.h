@@ -19,7 +19,7 @@
 #endif
 #define LOCLASS_MACS_TO_COLLECT (LOCLASS_NUM_CSNS * LOCLASS_NUM_PER_CSN)
 
-#define PICOPASS_DEV_NAME_MAX_LEN 22
+#define PICOPASS_DEV_NAME_MAX_LEN 129
 #define PICOPASS_READER_DATA_MAX_SIZE 64
 #define PICOPASS_MAX_APP_LIMIT 32
 
@@ -119,7 +119,7 @@ typedef struct {
     Storage* storage;
     DialogsApp* dialogs;
     PicopassDeviceData dev_data;
-    char dev_name[PICOPASS_DEV_NAME_MAX_LEN + 1];
+    char dev_name[PICOPASS_DEV_NAME_MAX_LEN];
     FuriString* load_path;
     PicopassDeviceSaveFormat format;
     PicopassLoadingCallback loading_cb;
