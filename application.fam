@@ -3,7 +3,7 @@ App(
     name="NFC Playlist",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="nfc_playlist_main",
-    requires=["gui", "nfx"],
+    requires=["gui", "nfc"],
     stack_size=4 * 1024,
     fap_category="NFC",
 )
