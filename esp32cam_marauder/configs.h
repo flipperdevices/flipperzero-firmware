@@ -22,7 +22,7 @@
   //#define XIAO_ESP32_S3
   //// END BOARD TARGETS
 
-  #define MARAUDER_VERSION "v0.13.5"
+  #define MARAUDER_VERSION "v0.13.5 r1"
 
   //// HARDWARE NAMES
   #ifdef MARAUDER_M5STICKC
@@ -139,7 +139,7 @@
   #ifdef MARAUDER_FLIPPER
     //#define FLIPPER_ZERO_HAT
     //#define HAS_BATTERY
-    //#define HAS_BT
+    #define HAS_BT
     //#define HAS_BUTTONS
     //#define HAS_NEOPIXEL_LED
     //#define HAS_PWR_MGMT
