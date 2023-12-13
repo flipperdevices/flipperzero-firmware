@@ -100,7 +100,8 @@ bool seader_scene_read_card_success_on_event(void* context, SceneManagerEvent ev
             consumed = true;
         }
     } else if(event.type == SceneManagerEventTypeBack) {
-        scene_manager_search_and_switch_to_previous_scene(seader->scene_manager, SeaderSceneStart);
+        scene_manager_search_and_switch_to_previous_scene(
+            seader->scene_manager, SeaderSceneSamPresent);
         consumed = true;
     }
     return consumed;
