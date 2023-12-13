@@ -5,7 +5,7 @@ struct QRCodeData
 {
   bool valid;
   int dataType;
-  uint8_t payload[1024];
+  uint8_t payload[256];
   int payloadLen;
 };
 
