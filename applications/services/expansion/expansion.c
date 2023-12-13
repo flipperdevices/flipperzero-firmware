@@ -80,7 +80,15 @@ static size_t expansion_receive_callback(uint8_t* data, size_t data_size, void* 
         const uint32_t flags = furi_thread_flags_wait(
             EXPANSION_ALL_FLAGS, FuriFlagWaitAny, EXPANSION_INACTIVE_TIMEOUT_MS);
 
-        if(flags & ExpansionFlagStop) {
+        if(flags == FuriFlagErrorTimeout) {
+            //  Did not receive any flags, exiting due to timeout
+            instance->exit_reason = ExpansionSessionExitReasonTimeout;
+            break;
+        } else if(flags & FuriFlagError) {
+            //  Error occurred, exiting due to error
+            instance->exit_reason = ExpansionSessionExitReasonError;
+            break;
+        } else if(flags & ExpansionFlagStop) {
             // Exiting due to explicit request
             instance->exit_reason = ExpansionSessionExitReasonUser;
             break;
