@@ -126,6 +126,7 @@ bool furi_hal_ble_start_radio_stack() {
     } while(false);
     furi_mutex_release(furi_hal_ble.core2_mtx);
 
+    gap_extra_beacon_init();
     return res;
 }
 
@@ -403,4 +404,24 @@ bool furi_hal_ble_ensure_c2_mode(BleGlueC2Mode mode) {
 
     FURI_LOG_E(TAG, "Failed to switch C2 mode: %d", fw_start_res);
     return false;
+}
+
+bool furi_hal_ble_extra_beacon_set_data(const uint8_t* data, uint8_t len) {
+    return gap_extra_beacon_set_data(data, len);
+}
+
+uint8_t furi_hal_ble_extra_beacon_get_data(uint8_t* data) {
+    return gap_extra_beacon_get_data(data);
+}
+
+bool furi_hal_ble_extra_beacon_start(const GapExtraBeaconConfig* config) {
+    return gap_extra_beacon_start(config);
+}
+
+bool furi_hal_ble_extra_beacon_stop() {
+    return gap_extra_beacon_stop();
+}
+
+bool furi_hal_ble_extra_beacon_is_active() {
+    return gap_extra_beacon_get_state() == GapExtraBeaconStateStarted;
 }

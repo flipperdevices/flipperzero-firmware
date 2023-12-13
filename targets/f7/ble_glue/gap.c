@@ -1,18 +1,20 @@
 #include "gap.h"
 
 #include "app_common.h"
+#include <core/mutex.h>
 #include "furi_ble/event_dispatcher.h"
 #include <ble/ble.h>
 
 #include <furi_hal.h>
 #include <furi.h>
+#include <stdint.h>
 
-#define TAG "BtGap"
+#define TAG "BleGap"
 
 #define FAST_ADV_TIMEOUT 30000
 #define INITIAL_ADV_TIMEOUT 60000
 
-#define GAP_INTERVAL_TO_MS(x) (uint16_t)((x)*1.25)
+#define GAP_CONN_INTERVAL_TO_MS(x) (uint16_t)((x)*1.25)
 
 typedef struct {
     uint16_t gap_svc_handle;
@@ -64,7 +66,7 @@ static void gap_verify_connection_parameters(Gap* gap) {
         TAG,
         "Connection parameters: Connection Interval: %d (%d ms), Slave Latency: %d, Supervision Timeout: %d",
         gap->connection_params.conn_interval,
-        GAP_INTERVAL_TO_MS(gap->connection_params.conn_interval),
+        GAP_CONN_INTERVAL_TO_MS(gap->connection_params.conn_interval),
         gap->connection_params.slave_latency,
         gap->connection_params.supervisor_timeout);
 
@@ -373,6 +375,8 @@ static void gap_advertise_start(GapState new_state) {
     uint16_t min_interval;
     uint16_t max_interval;
 
+    FURI_LOG_I(TAG, "Start: %d", new_state);
+
     if(new_state == GapStateAdvFast) {
         min_interval = 0x80; // 80 ms
         max_interval = 0xa0; // 100 ms
@@ -416,6 +420,7 @@ static void gap_advertise_start(GapState new_state) {
 }
 
 static void gap_advertise_stop() {
+    FURI_LOG_I(TAG, "Stop");
     tBleStatus ret;
     if(gap->state > GapStateIdle) {
         if(gap->state == GapStateConnected) {

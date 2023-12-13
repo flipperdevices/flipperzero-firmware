@@ -34,7 +34,7 @@ static const BleGattCharacteristicParams ble_svc_serial_chars[SerialSvcGattChara
         {.name = "TX",
          .data_prop_type = FlipperGattCharacteristicDataFixed,
          .data.fixed.length = BLE_SVC_SERIAL_DATA_LEN_MAX,
-         .uuid.Char_UUID_128 = ble_svc_serial_TX_CHAR_UUID,
+         .uuid.Char_UUID_128 = BLE_SVC_SERIAL_TX_CHAR_UUID,
          .uuid_type = UUID_TYPE_128,
          .char_properties = CHAR_PROP_READ | CHAR_PROP_INDICATE,
          .security_permissions = ATTR_PERMISSION_AUTHEN_READ,

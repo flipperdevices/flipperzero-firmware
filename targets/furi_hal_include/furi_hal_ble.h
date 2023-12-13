@@ -5,15 +5,15 @@
 
 #pragma once
 
+#include "core/string.h"
 #include <furi.h>
 #include <stdbool.h>
 #include <gap.h>
-// #include <services/serial_service.h>
+#include <extra_beacon.h>
 #include <furi_ble/profile_interface.h>
 #include <ble_system.h>
 #include <ble_stack.h>
-
-// #include <furi_hal_ble_serial.h>
+#include <stdint.h>
 
 #define FURI_HAL_BLE_STACK_VERSION_MAJOR (1)
 #define FURI_HAL_BLE_STACK_VERSION_MINOR (12)
@@ -233,6 +233,46 @@ uint32_t furi_hal_ble_get_transmitted_packets();
  * @param[in]  mode  mode to switch into
  */
 bool furi_hal_ble_ensure_c2_mode(BleGlueC2Mode mode);
+
+/** Extra beacon API */
+
+/** Set extra beacon data
+ *
+ * @param[in]  data  data to set
+ * @param[in]  len   data length. Must be <= EXTRA_BEACON_MAX_DATA_SIZE
+ *
+ * @return     true on success
+ */
+bool furi_hal_ble_extra_beacon_set_data(const uint8_t* data, uint8_t len);
+
+/** Get last configured extra beacon data
+ *
+ * @param      data  data to write to. Must be at least EXTRA_BEACON_MAX_DATA_SIZE bytes long
+ *
+ * @return     data length
+ */
+uint8_t furi_hal_ble_extra_beacon_get_data(uint8_t* data);
+
+/** Start extra beacon
+ * Beacon must be stopped before calling this function
+ *
+ * @param[in]  config  extra beacon config
+ *
+ * @return     true on success
+ */
+bool furi_hal_ble_extra_beacon_start(const GapExtraBeaconConfig* config);
+
+/** Stop extra beacon
+ *
+ * @return     true on success
+ */
+bool furi_hal_ble_extra_beacon_stop();
+
+/** Check if extra beacon is active
+ *
+ * @return     extra beacon state
+ */
+bool furi_hal_ble_extra_beacon_is_active();
 
 #ifdef __cplusplus
 }
