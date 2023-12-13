@@ -81,9 +81,3 @@ typedef enum {
 } WorkerEventFlags;
 
 #define WORKER_EVENTS_MASK (WorkerEventStop | WorkerEventRx)
-
-const NotificationSequence sequence_notification = {
-    &message_display_backlight_on,
-    &message_delay_10,
-    NULL,
-};
