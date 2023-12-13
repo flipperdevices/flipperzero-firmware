@@ -31,7 +31,7 @@ PicopassDevice* picopass_device_alloc() {
 void picopass_device_set_name(PicopassDevice* dev, const char* name) {
     furi_assert(dev);
 
-    strlcpy(dev->dev_name, name, PICOPASS_DEV_NAME_MAX_LEN);
+    strlcpy(dev->dev_name, name, sizeof(dev->dev_name));
 }
 
 // For use with Seader's virtual card processing.
@@ -343,7 +343,7 @@ bool picopass_file_select(PicopassDevice* dev) {
         FuriString* filename;
         filename = furi_string_alloc();
         path_extract_filename(dev->load_path, filename, true);
-        strncpy(dev->dev_name, furi_string_get_cstr(filename), PICOPASS_DEV_NAME_MAX_LEN);
+        strlcpy(dev->dev_name, furi_string_get_cstr(filename), sizeof(dev->dev_name));
         res = picopass_device_load_data(dev, dev->load_path, true);
         if(res) {
             picopass_device_set_name(dev, dev->dev_name);
