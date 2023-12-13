@@ -1,5 +1,5 @@
 App(
-    appid="flipper_game_connect_wires",
+    appid="game_connect_wires",
     name="Connect Wires",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="flipper_game_connect_wires",
