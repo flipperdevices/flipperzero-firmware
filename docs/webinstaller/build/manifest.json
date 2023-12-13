@@ -1,6 +1,5 @@
 {
   "name": "MayhemFirmware",
-  "version": "v0.13.3",
   "builds": [
     {
       "chipFamily": "ESP32",
