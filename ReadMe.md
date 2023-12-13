@@ -48,6 +48,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [SubGhz: changed the name of the button when sending RAW to SubGhz #3275 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/3275)
 - Added: [Connect Wires v1.0 (By AlexTaran)](https://github.com/AlexTaran/flipperzero)
 - Updated: [MALVEKE GB Live Camera v1.1 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external/malveke_gb_live_camera)
+- UL: fix key display newline [for Came Atomo] (By xMasterX)
 
 <a name="release">
 
