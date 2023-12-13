@@ -47,6 +47,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Guess The Number v1.1 (By kWAYTV)](https://github.com/kWAYTV/guess-the-number-fz)
 - OFW: [SubGhz: changed the name of the button when sending RAW to SubGhz #3275 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/3275)
 - Added: [Connect Wires v1.0 (By AlexTaran)](https://github.com/AlexTaran/flipperzero)
+- Updated: [MALVEKE GB Live Camera v1.1 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external/malveke_gb_live_camera)
 
 <a name="release">
 
@@ -408,7 +409,7 @@ $ ./fbt dolphin_ext
 - [MALVEKE GAME BOY Cartridge (GB/GBC) v1.0 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external/malveke_gb_cartridge) `Req: Malveke`
 - [MALVEKE GAME BOY Emulator v1.0 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external/malveke_gb_emulator) `Req: Malveke`
 - [MALVEKE GAME BOY Link-Camera v1.0 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external/malveke_gb_link_camera) `Req: Malveke`
-- [MALVEKE GB Live Camera v1.0 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external/malveke_gb_live_camera) `Req: Malveke`
+- [MALVEKE GB Live Camera v1.1 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external/malveke_gb_live_camera) `Req: Malveke`
 - [MALVEKE PIN Test v1.0 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external/malveke_pin_test) `Req: Malveke`
 - [MALVEKE Pokemon Trading v1.4 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external/malveke_pokemon_trading) `Req: Malveke` (Uses Different GPIO Than Standard Pokemon Trader App)
 - [MAX31855 (By skotopes)](https://github.com/skotopes/flipperzero_max31855)
