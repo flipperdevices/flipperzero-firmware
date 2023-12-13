@@ -82,7 +82,7 @@ static void hid_mouse_jiggler_timer_callback(void* context) {
                 model->counter++;
                 hid_hal_mouse_move(
                     hid_mouse_jiggler->hid,
-                    (model->counter % 2 == 0) ? MOUSE_MOVE_TINY : -MOUSE_MOVE_TINY,
+                    (model->counter % 2 == 0) ? MOUSE_MOVE_SHORT : -MOUSE_MOVE_SHORT,
                     0);
             }
         },

@@ -41,8 +41,19 @@ button  | function
 **Ok** *[short short]*  | Roll the dice
 **Left** *[long press]* | Set CRC32 as hash method
 **Right** *[long press]* | Set MD5 as hash method
+**Up** *[long press]* | Set 0-1 as output range (coin flipper)
+**Down** *[long press]* | Set 1-6 as output range (dice roller)
 **Back** *[long press]*  | Exit
 
 If you don't want to build this application, just simply copy **flipper_atomicdiceroller.fap** on your **Flipper Zero** 
 
 Build has been made with official toolchain, **API Mismatch** error may appear if you are using custom firmware. You can bypass this error but the program may crash.
+
+## Changelog
+
+* 2023-12-13
+  * Output range can be selected, other range will be added later
+  * MD5 library is now a local library because this library has been removed in the toolchain
+
+* 2023-08-05
+  * Initial release

@@ -10,7 +10,7 @@
 #include <furi_hal_power.h>
 #include <locale/locale.h>
 #include <toolbox/crc32_calc.h>
-#include <mbedtls/md5.h>
+#include "md5.h"
 
 #define SCREEN_SIZE_X 128
 #define SCREEN_SIZE_Y 64
@@ -32,10 +32,12 @@ typedef struct {
 typedef struct {
     FuriMutex* mutex;
     uint32_t cps;
-    uint32_t diceAvailiable;
+    uint8_t diceAvailiable;
     uint8_t dice;
     uint8_t method;
     uint8_t pause;
+    uint8_t tickCounter;
+    uint8_t range;
 } mutexStruct;
 
 static void draw_callback(Canvas* canvas, void* ctx) {
@@ -50,18 +52,70 @@ static void draw_callback(Canvas* canvas, void* ctx) {
     snprintf(buffer, sizeof(buffer), "%ld cps", mutexDraw.cps);
     canvas_draw_str_aligned(canvas, 0, 10, AlignLeft, AlignBottom, buffer);
 
-    snprintf(buffer, sizeof(buffer), "%lu/64", mutexDraw.diceAvailiable);
+    snprintf(buffer, sizeof(buffer), "%u/64", mutexDraw.diceAvailiable);
     canvas_draw_str_aligned(canvas, SCREEN_SIZE_X, 10, AlignRight, AlignBottom, buffer);
 
-    if(mutexDraw.method == 0)
-        canvas_draw_str_aligned(canvas, 0, 20, AlignLeft, AlignBottom, "Hash: CRC32");
-    else
-        canvas_draw_str_aligned(canvas, 0, 20, AlignLeft, AlignBottom, "Hash: MD5");
+    if(mutexDraw.method == 0) {
+        if(mutexDraw.tickCounter < 2) {
+            buffer[0] = '-';
+            buffer[1] = '-';
+            buffer[2] = '-';
+            buffer[3] = '\0';
+        } else if(mutexDraw.tickCounter < 4) {
+            buffer[0] = '+';
+            buffer[1] = '-';
+            buffer[2] = '-';
+            buffer[3] = '\0';
+        } else if(mutexDraw.tickCounter < 6) {
+            buffer[0] = '+';
+            buffer[1] = '+';
+            buffer[2] = '-';
+            buffer[3] = '\0';
+        } else {
+            buffer[0] = '+';
+            buffer[1] = '+';
+            buffer[2] = '+';
+            buffer[3] = '\0';
+        }
+    } else {
+        if(mutexDraw.tickCounter < 8) {
+            buffer[0] = '-';
+            buffer[1] = '-';
+            buffer[2] = '-';
+            buffer[3] = '\0';
+        } else if(mutexDraw.tickCounter < 16) {
+            buffer[0] = '+';
+            buffer[1] = '-';
+            buffer[2] = '-';
+            buffer[3] = '\0';
+        } else if(mutexDraw.tickCounter < 24) {
+            buffer[0] = '+';
+            buffer[1] = '+';
+            buffer[2] = '-';
+            buffer[3] = '\0';
+        } else {
+            buffer[0] = '+';
+            buffer[1] = '+';
+            buffer[2] = '+';
+            buffer[3] = '\0';
+        }
+    }
+    canvas_draw_str_aligned(canvas, SCREEN_SIZE_X - 5, 20, AlignRight, AlignBottom, buffer);
 
-    if(mutexDraw.dice != 0 && mutexDraw.pause == 0) {
+    if(mutexDraw.method == 0)
+        canvas_draw_str_aligned(canvas, 0, 22, AlignLeft, AlignBottom, "Hash: CRC32");
+    else
+        canvas_draw_str_aligned(canvas, 0, 22, AlignLeft, AlignBottom, "Hash: MD5");
+
+    if(mutexDraw.range == 0)
+        canvas_draw_str_aligned(canvas, 0, 34, AlignLeft, AlignBottom, "Range: 0-1");
+    else
+        canvas_draw_str_aligned(canvas, 0, 34, AlignLeft, AlignBottom, "Range: 1-6");
+
+    if(mutexDraw.pause == 0) {
         canvas_set_font(canvas, FontBigNumbers);
         snprintf(buffer, sizeof(buffer), "%u", mutexDraw.dice);
-        canvas_draw_str_aligned(canvas, SCREEN_SIZE_X / 2, 50, AlignCenter, AlignBottom, buffer);
+        canvas_draw_str_aligned(canvas, SCREEN_SIZE_X / 2, 54, AlignCenter, AlignBottom, buffer);
     }
 }
 
@@ -114,6 +168,8 @@ int32_t flipper_atomicdiceroller_app() {
     mutexVal.dice = 0;
     mutexVal.diceAvailiable = 0;
     mutexVal.method = 0;
+    mutexVal.tickCounter = 0;
+    mutexVal.range = 0;
     uint32_t counter = 0;
 
     mutexVal.mutex = furi_mutex_alloc(FuriMutexTypeNormal);
@@ -137,12 +193,7 @@ int32_t flipper_atomicdiceroller_app() {
     FuriTimer* timerPause = furi_timer_alloc(clock_tick_pause, FuriTimerTypePeriodic, event_queue);
 
     // ENABLE 5V pin
-    uint8_t attempts = 0;
-    bool otg_was_enabled = furi_hal_power_is_otg_enabled();
-    while(!furi_hal_power_is_otg_enabled() && attempts++ < 5) {
-        furi_hal_power_enable_otg();
-        furi_delay_ms(10);
-    }
+    furi_hal_power_enable_otg();
 
     uint8_t diceBuffer[64];
     for(uint8_t i = 0; i < 64; i++) diceBuffer[i] = 0;
@@ -153,13 +204,13 @@ int32_t flipper_atomicdiceroller_app() {
     uint8_t tickCounter = 0;
     uint32_t CRC32 = 0;
     uint8_t method = 0;
+    uint8_t range = 0;
 
     // MD5
-    mbedtls_md5_context md5_ctx;
+    md5_context* md5_ctx = malloc(sizeof(md5_context));
     uint8_t* hash = malloc(sizeof(uint8_t) * 16);
     uint8_t* bufferTim2 = malloc(4);
-    mbedtls_md5_init(&md5_ctx);
-    mbedtls_md5_starts(&md5_ctx);
+    md5_starts(md5_ctx);
 
     uint8_t pause = 0;
 
@@ -200,8 +251,9 @@ int32_t flipper_atomicdiceroller_app() {
                             tickCounter = 0;
                             furi_mutex_acquire(mutexVal.mutex, FuriWaitForever);
                             mutexVal.method = 0;
-                            mutexVal.dice = 0;
+                            mutexVal.pause = 1;
                             mutexVal.diceAvailiable = 0;
+                            mutexVal.tickCounter = 0;
                             furi_mutex_release(mutexVal.mutex);
                             screenRefresh = 1;
                         }
@@ -211,12 +263,45 @@ int32_t flipper_atomicdiceroller_app() {
                             diceBufferPositionWrite = 0;
                             diceBufferPositionRead = 0;
                             diceBufferCounter = 0;
-                            mbedtls_md5_starts(&md5_ctx);
+                            md5_starts(md5_ctx);
                             tickCounter = 0;
                             furi_mutex_acquire(mutexVal.mutex, FuriWaitForever);
                             mutexVal.method = 1;
-                            mutexVal.dice = 0;
+                            mutexVal.pause = 1;
                             mutexVal.diceAvailiable = 0;
+                            mutexVal.tickCounter = 0;
+                            furi_mutex_release(mutexVal.mutex);
+                            screenRefresh = 1;
+                        }
+                    } else if(event.input.key == InputKeyUp && event.input.type == InputTypeLong) {
+                        if(range > 0) {
+                            range--;
+                            diceBufferPositionWrite = 0;
+                            diceBufferPositionRead = 0;
+                            diceBufferCounter = 0;
+                            md5_starts(md5_ctx);
+                            tickCounter = 0;
+                            furi_mutex_acquire(mutexVal.mutex, FuriWaitForever);
+                            mutexVal.pause = 1;
+                            mutexVal.diceAvailiable = 0;
+                            mutexVal.tickCounter = 0;
+                            mutexVal.range = range;
+                            furi_mutex_release(mutexVal.mutex);
+                            screenRefresh = 1;
+                        }
+                    } else if(event.input.key == InputKeyDown && event.input.type == InputTypeLong) {
+                        if(range < 1) {
+                            range++;
+                            diceBufferPositionWrite = 0;
+                            diceBufferPositionRead = 0;
+                            diceBufferCounter = 0;
+                            md5_starts(md5_ctx);
+                            tickCounter = 0;
+                            furi_mutex_acquire(mutexVal.mutex, FuriWaitForever);
+                            mutexVal.pause = 1;
+                            mutexVal.diceAvailiable = 0;
+                            mutexVal.tickCounter = 0;
+                            mutexVal.range = range;
                             furi_mutex_release(mutexVal.mutex);
                             screenRefresh = 1;
                         }
@@ -225,6 +310,7 @@ int32_t flipper_atomicdiceroller_app() {
             } else if(event.type == ClockEventTypeTick) {
                 furi_mutex_acquire(mutexVal.mutex, FuriWaitForever);
                 mutexVal.cps = counter;
+                mutexVal.tickCounter = tickCounter;
                 furi_mutex_release(mutexVal.mutex);
 
                 counter = 0;
@@ -251,13 +337,9 @@ int32_t flipper_atomicdiceroller_app() {
                         tickCounter++;
 
                         if(tickCounter == 8) {
-                            uint8_t localDice = CRC32 & 0b111;
+                            if(range == 0) {
+                                uint8_t localDice = CRC32 & 0b1;
 
-                            if(localDice == 0 || localDice == 7) {
-                                localDice = (diceBuffer[diceBufferPositionRead] >> 3) & 0b111;
-                            }
-
-                            if(localDice >= 1 && localDice <= 6) {
                                 diceBuffer[diceBufferPositionWrite] = localDice;
                                 diceBufferCounter++;
                                 if(diceBufferPositionWrite != 63)
@@ -270,29 +352,13 @@ int32_t flipper_atomicdiceroller_app() {
                                 furi_mutex_release(mutexVal.mutex);
 
                                 screenRefresh = 1;
-                            }
+                            } else if(range == 1) {
+                                uint8_t localDice = CRC32 & 0b111;
 
-                            CRC32 = 0;
-                            tickCounter = 0;
-                        }
-                    }
-                    // MD5
-                    else {
-                        uint32_t tick = TIM2->CNT;
-                        bufferTim2[0] = (uint8_t)(tick >> 24);
-                        bufferTim2[1] = (uint8_t)(tick >> 16);
-                        bufferTim2[2] = (uint8_t)(tick >> 8);
-                        bufferTim2[3] = (uint8_t)tick;
-                        mbedtls_md5_update(&md5_ctx, bufferTim2, 4);
+                                if(localDice == 0 || localDice == 7) {
+                                    localDice = (diceBuffer[diceBufferPositionRead] >> 3) & 0b111;
+                                }
 
-                        tickCounter++;
-
-                        if(tickCounter == 32) {
-                            mbedtls_md5_finish(&md5_ctx, hash);
-                            uint8_t localDice = 0;
-
-                            for(uint8_t i = 0; i < 16; i++) {
-                                localDice = hash[i] & 0b111;
                                 if(localDice >= 1 && localDice <= 6) {
                                     diceBuffer[diceBufferPositionWrite] = localDice;
                                     diceBufferCounter++;
@@ -306,11 +372,65 @@ int32_t flipper_atomicdiceroller_app() {
                                     furi_mutex_release(mutexVal.mutex);
 
                                     screenRefresh = 1;
-                                    break;
                                 }
                             }
 
-                            mbedtls_md5_starts(&md5_ctx);
+                            CRC32 = 0;
+                            tickCounter = 0;
+                        }
+                    }
+                    // MD5
+                    else {
+                        uint32_t tick = TIM2->CNT;
+                        bufferTim2[0] = (uint8_t)(tick >> 24);
+                        bufferTim2[1] = (uint8_t)(tick >> 16);
+                        bufferTim2[2] = (uint8_t)(tick >> 8);
+                        bufferTim2[3] = (uint8_t)tick;
+                        md5_update(md5_ctx, bufferTim2, 4);
+
+                        tickCounter++;
+
+                        if(tickCounter == 32) {
+                            md5_finish(md5_ctx, hash);
+                            uint8_t localDice = 0;
+
+                            for(uint8_t i = 0; i < 16; i++) {
+                                if(range == 0) {
+                                    localDice = hash[i] & 0b1;
+                                    diceBuffer[diceBufferPositionWrite] = localDice;
+                                    diceBufferCounter++;
+                                    if(diceBufferPositionWrite != 63)
+                                        diceBufferPositionWrite++;
+                                    else
+                                        diceBufferPositionWrite = 0;
+
+                                    furi_mutex_acquire(mutexVal.mutex, FuriWaitForever);
+                                    mutexVal.diceAvailiable = diceBufferCounter;
+                                    furi_mutex_release(mutexVal.mutex);
+
+                                    screenRefresh = 1;
+                                    break;
+                                } else if(range == 1) {
+                                    localDice = hash[i] & 0b111;
+                                    if(localDice >= 1 && localDice <= 6) {
+                                        diceBuffer[diceBufferPositionWrite] = localDice;
+                                        diceBufferCounter++;
+                                        if(diceBufferPositionWrite != 63)
+                                            diceBufferPositionWrite++;
+                                        else
+                                            diceBufferPositionWrite = 0;
+
+                                        furi_mutex_acquire(mutexVal.mutex, FuriWaitForever);
+                                        mutexVal.diceAvailiable = diceBufferCounter;
+                                        furi_mutex_release(mutexVal.mutex);
+
+                                        screenRefresh = 1;
+                                        break;
+                                    }
+                                }
+                            }
+
+                            md5_starts(md5_ctx);
                             tickCounter = 0;
                         }
                     }
@@ -326,21 +446,16 @@ int32_t flipper_atomicdiceroller_app() {
     LL_TIM_DisableCounter(TIM2);
     furi_hal_bus_disable(FuriHalBusTIM2);
 
-    mbedtls_md5_free(&md5_ctx);
-    //free(md5_ctx);
+    free(md5_ctx);
     free(bufferTim2);
     free(hash);
 
     furi_record_close(RECORD_NOTIFICATION);
 
-    if(furi_hal_power_is_otg_enabled() && !otg_was_enabled) {
-        furi_hal_power_disable_otg();
-    }
+    furi_hal_power_disable_otg();
 
     furi_hal_gpio_disable_int_callback(&gpio_ext_pa7);
     furi_hal_gpio_remove_int_callback(&gpio_ext_pa7);
-
-    furi_hal_gpio_init_simple(&gpio_ext_pa7, GpioModeAnalog);
 
     furi_message_queue_free(event_queue);
     furi_mutex_free(mutexVal.mutex);
