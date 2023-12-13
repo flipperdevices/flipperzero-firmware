@@ -1,6 +1,6 @@
 # "Connect Wires" game for Flipper Zero
 - famous puzzle concept
-- play on 3 different complecity levels
+- play on 3 different complexity levels
 
 ![Easy mode](screenshots/1.png)
 ![Hard mode](screenshots/2.png)
