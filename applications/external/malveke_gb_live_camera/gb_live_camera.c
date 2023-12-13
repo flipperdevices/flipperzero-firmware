@@ -239,8 +239,6 @@ static int32_t gb_live_camera_worker(void* context) {
                         false);
                 }
             } while(length > 0);
-
-            notification_message(app->notification, &sequence_notification);
             with_view_model(
                 app->view, UartDumpModel * model, { UNUSED(model); }, true);
         }
@@ -263,6 +261,8 @@ static UartEchoApp* gb_live_camera_app_alloc() {
     view_dispatcher_enable_queue(app->view_dispatcher);
     view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
 
+    //  Turn backlight on
+    notification_message(app->notification, &sequence_display_backlight_enforce_on);
     // Views
     app->view = view_alloc();
     view_set_context(app->view, app);
@@ -310,6 +310,7 @@ static void gb_live_camera_app_free(UartEchoApp* app) {
     furi_hal_uart_set_irq_cb(FuriHalUartIdLPUART1, NULL, NULL);
     furi_hal_uart_deinit(FuriHalUartIdLPUART1);
 
+    notification_message(app->notification, &sequence_display_backlight_enforce_auto);
     // Free views
     view_dispatcher_remove_view(app->view_dispatcher, 0);
 
