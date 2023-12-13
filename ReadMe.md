@@ -46,6 +46,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [IR Intervalometer for Sony Cameras v1.2 (By Nitepone)](https://github.com/Nitepone/flipper-intervalometer) Bumped version only.
 - Updated: [Guess The Number v1.1 (By kWAYTV)](https://github.com/kWAYTV/guess-the-number-fz)
 - OFW: [SubGhz: changed the name of the button when sending RAW to SubGhz #3275 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/3275)
+- Added: [Connect Wires v1.0 (By AlexTaran)](https://github.com/AlexTaran/flipperzero)
 
 <a name="release">
 
@@ -251,6 +252,7 @@ $ ./fbt dolphin_ext
 - [Chess Clock (By ihatecsv)](https://github.com/ihatecsv/flipper_chess_clock)
 - [City Bloxx (By Milk-Cool)](https://github.com/Milk-Cool/fz-citybloxx)
 - [Color Guess v1.2 (By leedave)](https://github.com/leedave/Leeds-Flipper-Zero-Applications)
+- [Connect Wires v1.0 (By AlexTaran)](https://github.com/AlexTaran/flipperzero)
 - [Dice (RM) Including SEX/WAR/8BALL/WEED/DRINK DICE v2.1 (By RogueMaster)](https://github.com/RogueMaster/flipperzero-dice)
 - [DnD Dice v1.3 (By Ka3u6y6a)](https://github.com/Ka3u6y6a/flipper-zero-dice)
 - [Doom v1.1 (By p4nic4ttack)](https://github.com/p4nic4ttack/doom-flipper-zero/) (ported and fixed by xMasterX & Svarich & hedger)
