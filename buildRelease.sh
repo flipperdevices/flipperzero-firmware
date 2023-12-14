@@ -14,6 +14,9 @@ cp -rf .blank_files/animation_managerBLANK.c applications/services/desktop/anima
 ./fbt updater_package
 mv dist/f7-C/f7-update-RM420FAP "RM$DATE_VAR-$TIME_VAR-NoAnim"
 rm -rf assets/resources/dolphin/*
+cp -rf .blank_files/MjK_blank_128x64 assets/resources/dolphin/
+cp -rf .blank_files/manifest_None.txt assets/resources/dolphin/manifest_None.txt
+cp -rf .blank_files/manifest_None.txt assets/resources/dolphin/manifest.txt
 cd assets/resources
 tar -cf "../../RM$DATE_VAR-$TIME_VAR-NoAnim/resources.tar" *
 cd ../../
