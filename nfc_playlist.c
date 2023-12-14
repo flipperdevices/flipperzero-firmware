@@ -32,7 +32,7 @@ typedef struct {
    ViewDispatcher* view_dispatcher;
    Submenu* menu;
    Popup* popup;
-   NfcPlaylistWorker* nfc_worker;
+   int emulate_timeout;
 } NfcPlaylist;
 
 /** all custom events */
@@ -42,8 +42,6 @@ typedef enum { NfcPlaylistEvent_ShowPopupOne } NfcPlaylistEvent;
 
 /** indices for menu items */
 typedef enum { NfcPlaylistMenuSelection_One } NfcPlaylistMenuSelection;
-
-int emulate_timeout = 2000;
 
 /** main menu callback - sends a custom event to the scene manager based on the menu selection */
 void nfc_playlist_menu_callback_main_menu(void* context, uint32_t index) {
@@ -61,6 +59,7 @@ void nfc_playlist_scene_on_enter_main_menu(void* context) {
    FURI_LOG_T(TAG, "nfc_playlist_scene_on_enter_main_menu");
    NfcPlaylist* app = context;
    submenu_reset(app->menu);
+   submenu_set_header(app->menu, "NFC Playlist");
    submenu_add_item(
       app->menu,
       "Start",
@@ -108,7 +107,6 @@ void nfc_playlist_scene_on_enter_popup_emulating(void* context) {
    Stream* stream = file_stream_alloc(storage);
    FuriString* line = furi_string_alloc();
    NfcPlaylistWorker* nfc_worker = nfc_playlist_worker_alloc();
-   app->nfc_worker = nfc_worker;
    // Read file
    if(file_stream_open(stream, APP_DATA_PATH("playlist.txt"), FSAM_READ, FSOM_OPEN_EXISTING)) {
       popup_reset(app->popup);
@@ -122,10 +120,10 @@ void nfc_playlist_scene_on_enter_popup_emulating(void* context) {
          popup_set_text(app->popup, str, 64, 30, AlignCenter, AlignTop);
          view_dispatcher_switch_to_view(app->view_dispatcher, NfcPlaylistView_Popup);
 
-         nfc_playlist_worker_set_nfc_data(nfc_worker, (char*)furi_string_get_cstr(line));
+         nfc_playlist_worker_set_nfc_data(nfc_worker, str);
          nfc_playlist_worker_start(nfc_worker);
 
-         furi_delay_ms(emulate_timeout);
+         furi_delay_ms(app->emulate_timeout);
 
          nfc_playlist_worker_stop(nfc_worker);
          furi_string_reset(line);
@@ -138,6 +136,7 @@ void nfc_playlist_scene_on_enter_popup_emulating(void* context) {
    furi_string_free(line);
    file_stream_close(stream);
    stream_free(stream);
+   nfc_playlist_worker_free(nfc_worker);
    // Close storage
    furi_record_close(RECORD_STORAGE);
 
@@ -276,6 +275,8 @@ int32_t nfc_playlist_main(void* p) {
    scene_manager_next_scene(app->scene_manager, NfcPlaylistScene_MainMenu);
    FURI_LOG_D(TAG, "Starting dispatcher...");
    view_dispatcher_run(app->view_dispatcher);
+
+   app->emulate_timeout = 2000;
 
    // free all memory
    FURI_LOG_I(TAG, "Test app finishing...");
