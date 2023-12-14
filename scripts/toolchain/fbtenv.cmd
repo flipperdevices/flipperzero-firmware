@@ -13,7 +13,7 @@ if not ["%FBT_NOENV%"] == [""] (
     exit /b 0
 )
 
-set "FLIPPER_TOOLCHAIN_VERSION=23"
+set "FLIPPER_TOOLCHAIN_VERSION=24"
 
 if ["%FBT_TOOLCHAIN_PATH%"] == [""] (
     set "FBT_TOOLCHAIN_PATH=%FBT_ROOT%"
@@ -43,10 +43,10 @@ if defined FBT_VERBOSE (
 )
 
 set "HOME=%USERPROFILE%"
-set "PYTHONHOME=%FBT_TOOLCHAIN_ROOT%"
+set "PYTHONHOME=%FBT_TOOLCHAIN_ROOT%\python"
 set "PYTHONPATH="
 set "PYTHONNOUSERSITE=1"
-set "PATH=%FBT_TOOLCHAIN_ROOT%\bin;%PATH%"
+set "PATH=%FBT_TOOLCHAIN_ROOT%\bin;%FBT_TOOLCHAIN_ROOT%\python;%PATH%"
 set "PROMPT=(fbt) %PROMPT%"
 
 :already_set
