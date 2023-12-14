@@ -259,6 +259,14 @@ uint32_t furi_hal_rtc_get_timestamp();
  */
 uint32_t furi_hal_rtc_datetime_to_timestamp(FuriHalRtcDateTime* datetime);
 
+/** Convert UNIX timestamp to DateTime
+ *
+ * @param[in]      timestamp  UNIX Timestamp in seconds from UNIX epoch start
+ *
+ * @param[out]      timestamp   The datetime, UTC+0
+ */
+void furi_hal_rtc_timestamp_to_datetime(uint32_t timestamp, FuriHalRtcDateTime* datetime);
+
 /** Gets the number of days in the year according to the Gregorian calendar.
  *
  * @param year Input year.
