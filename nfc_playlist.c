@@ -1,4 +1,5 @@
 #include <furi.h>
+#include <string.h>
 
 #include <storage/storage.h>
 #include <toolbox/stream/stream.h>
@@ -32,7 +33,9 @@ typedef struct {
    ViewDispatcher* view_dispatcher;
    Submenu* menu;
    Popup* popup;
+   NfcPlaylistWorker* nfc_worker;
    int emulate_timeout;
+   bool cancel_emulate;
 } NfcPlaylist;
 
 /** all custom events */
@@ -48,9 +51,9 @@ void nfc_playlist_menu_callback_main_menu(void* context, uint32_t index) {
    FURI_LOG_T(TAG, "nfc_playlist_menu_callback_main_menu");
    NfcPlaylist* app = context;
    switch(index) {
-   case NfcPlaylistMenuSelection_One:
-      scene_manager_handle_custom_event(app->scene_manager, NfcPlaylistEvent_ShowPopupOne);
-      break;
+      case NfcPlaylistMenuSelection_One:
+         scene_manager_handle_custom_event(app->scene_manager, NfcPlaylistEvent_ShowPopupOne);
+         break;
    }
 }
 
@@ -75,17 +78,17 @@ bool nfc_playlist_scene_on_event_main_menu(void* context, SceneManagerEvent even
    NfcPlaylist* app = context;
    bool consumed = false;
    switch(event.type) {
-   case SceneManagerEventTypeCustom:
-      switch(event.event) {
-      case NfcPlaylistEvent_ShowPopupOne:
-         scene_manager_next_scene(app->scene_manager, NfcPlaylistScene_FirstPopup);
-         consumed = true;
+      case SceneManagerEventTypeCustom:
+         switch(event.event) {
+            case NfcPlaylistEvent_ShowPopupOne:
+               scene_manager_next_scene(app->scene_manager, NfcPlaylistScene_FirstPopup);
+               consumed = true;
+               break;
+         }
          break;
-      }
-      break;
-   default: // eg. SceneManagerEventTypeBack, SceneManagerEventTypeTick
-      consumed = false;
-      break;
+      default: // eg. SceneManagerEventTypeBack, SceneManagerEventTypeTick
+         consumed = false;
+         break;
    }
    return consumed;
 }
@@ -106,26 +109,37 @@ void nfc_playlist_scene_on_enter_popup_emulating(void* context) {
    Storage* storage = furi_record_open(RECORD_STORAGE);
    Stream* stream = file_stream_alloc(storage);
    FuriString* line = furi_string_alloc();
-   NfcPlaylistWorker* nfc_worker = nfc_playlist_worker_alloc();
+   app->nfc_worker = nfc_playlist_worker_alloc();
    // Read file
    if(file_stream_open(stream, APP_DATA_PATH("playlist.txt"), FSAM_READ, FSOM_OPEN_EXISTING)) {
       popup_reset(app->popup);
+      popup_set_context(app->popup, app);
+      popup_set_header(app->popup, "Emulating", 64, 10, AlignCenter, AlignTop);
+      view_dispatcher_switch_to_view(app->view_dispatcher, NfcPlaylistView_Popup);
       // read the file line by line and print the text
-      while(stream_read_line(stream, line)) {
+      while(stream_read_line(stream, line) && !app->cancel_emulate) {
 
-         char* str = (char*)furi_string_get_cstr(line);
-         
-         popup_set_context(app->popup, app);
-         popup_set_header(app->popup, "Emulating", 64, 10, AlignCenter, AlignTop);
-         popup_set_text(app->popup, str, 64, 30, AlignCenter, AlignTop);
-         view_dispatcher_switch_to_view(app->view_dispatcher, NfcPlaylistView_Popup);
+         char* file_path = (char*)furi_string_get_cstr(line);
+         char* file_name = strrchr(file_path, (int)"/");
 
-         nfc_playlist_worker_set_nfc_data(nfc_worker, str);
-         nfc_playlist_worker_start(nfc_worker);
+         popup_set_text(app->popup, file_name, 64, 30, AlignCenter, AlignTop);
 
-         furi_delay_ms(app->emulate_timeout);
+         nfc_playlist_worker_set_nfc_data(app->nfc_worker, file_path);
+         nfc_playlist_worker_start(app->nfc_worker);
 
-         nfc_playlist_worker_stop(nfc_worker);
+         int time_counter_ms = app->emulate_timeout;
+         while(nfc_playlist_worker_is_emulating(app->nfc_worker)) {
+            furi_delay_ms(50);
+            time_counter_ms -= 50;
+            if (time_counter_ms <= 0) {
+               break;
+            }
+         }
+
+         if (nfc_playlist_worker_is_emulating(app->nfc_worker)) {
+            nfc_playlist_worker_stop(app->nfc_worker);
+         }
+
          furi_string_reset(line);
 
       }
@@ -136,7 +150,9 @@ void nfc_playlist_scene_on_enter_popup_emulating(void* context) {
    furi_string_free(line);
    file_stream_close(stream);
    stream_free(stream);
-   nfc_playlist_worker_free(nfc_worker);
+   nfc_playlist_worker_free(app->nfc_worker);
+   app->nfc_worker = NULL;
+   app->cancel_emulate = false;
    // Close storage
    furi_record_close(RECORD_STORAGE);
 
@@ -154,6 +170,10 @@ bool nfc_playlist_scene_on_event_popup_emulating(void* context, SceneManagerEven
 void nfc_playlist_scene_on_exit_popup_emulating(void* context) {
    FURI_LOG_T(TAG, "nfc_playlist_scene_on_exit_popup_emulating");
    NfcPlaylist* app = context;
+   if (nfc_playlist_worker_is_emulating(app->nfc_worker)) {
+      nfc_playlist_worker_stop(app->nfc_worker);
+      app->cancel_emulate = true;
+   }
    popup_reset(app->popup);
 }
 
@@ -212,6 +232,7 @@ void nfc_playlist_view_dispatcher_init(NfcPlaylist* app) {
    app->menu = submenu_alloc();
    app->popup = popup_alloc();
    app->emulate_timeout = 2000;
+   app->cancel_emulate = false;
 
    // assign callback that pass events from views to the scene manager
    FURI_LOG_D(TAG, "nfc_playlist_view_dispatcher_init setting callbacks");
@@ -267,7 +288,7 @@ int32_t nfc_playlist_main(void* p) {
    nfc_playlist_set_log_level();
 
    // create the app context struct, scene manager, and view dispatcher
-   FURI_LOG_I(TAG, "Test app starting...");
+   FURI_LOG_I(TAG, "NFC PLaylist starting...");
    NfcPlaylist* app = nfc_playlist_init();
 
    // set the scene and launch the main loop
@@ -278,7 +299,7 @@ int32_t nfc_playlist_main(void* p) {
    view_dispatcher_run(app->view_dispatcher);
 
    // free all memory
-   FURI_LOG_I(TAG, "Test app finishing...");
+   FURI_LOG_I(TAG, "NFC PLaylist finishing...");
    furi_record_close(RECORD_GUI);
    nfc_playlist_free(app);
 

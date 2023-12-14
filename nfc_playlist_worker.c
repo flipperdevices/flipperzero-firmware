@@ -54,25 +54,25 @@ int32_t nfc_playlist_worker_task(void* context) {
     if(nfc_playlist_worker->state == NfcPlaylistWorkerState_Emulating) {
 
         nfc_playlist_worker->nfc_listener =
-            nfc_listener_alloc(nfc_playlist_worker->nfc, 
-                nfc_playlist_worker->nfc_protocol, 
+            nfc_listener_alloc(nfc_playlist_worker->nfc,
+                nfc_playlist_worker->nfc_protocol,
                 nfc_device_get_data(nfc_playlist_worker->nfc_device, nfc_playlist_worker->nfc_protocol)
             );
         nfc_listener_start(nfc_playlist_worker->nfc_listener, NULL, NULL);
 
 
-        int counter = 0;
-        while(true) {
-            furi_delay_ms(50);
-            counter++;
-            if (counter == 100) {
-                break;
-            }
-        }
-
-        // while(nfc_playlist_worker->state == NfcPlaylistWorkerState_Emulating) {
+        // int counter = 0;
+        // while(true) {
         //     furi_delay_ms(50);
+        //     counter++;
+        //     if (counter == 100) {
+        //         break;
+        //     }
         // }
+
+        while(nfc_playlist_worker->state == NfcPlaylistWorkerState_Emulating) {
+            furi_delay_ms(50);
+        }
 
         nfc_listener_stop(nfc_playlist_worker->nfc_listener);
         nfc_listener_free(nfc_playlist_worker->nfc_listener);
@@ -99,7 +99,7 @@ bool nfc_playlist_worker_is_emulating(NfcPlaylistWorker* nfc_playlist_worker) {
 void nfc_playlist_worker_set_nfc_data(NfcPlaylistWorker* nfc_playlist_worker, char* file_path) {
 
     FURI_LOG_I("NfcPlaylistWorker", "nfc_playlist_worker_set_nfc_data: %s", file_path);
-    
+
     nfc_device_clear(nfc_playlist_worker->nfc_device);
     nfc_device_load(nfc_playlist_worker->nfc_device, file_path);
 
