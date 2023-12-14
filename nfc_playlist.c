@@ -114,7 +114,7 @@ void nfc_playlist_scene_on_enter_popup_emulating(void* context) {
       while(stream_read_line(stream, line)) {
 
          char* str = (char*)furi_string_get_cstr(line);
-
+         
          popup_set_context(app->popup, app);
          popup_set_header(app->popup, "Emulating", 64, 10, AlignCenter, AlignTop);
          popup_set_text(app->popup, str, 64, 30, AlignCenter, AlignTop);
@@ -211,6 +211,7 @@ void nfc_playlist_view_dispatcher_init(NfcPlaylist* app) {
    FURI_LOG_D(TAG, "nfc_playlist_view_dispatcher_init allocating views");
    app->menu = submenu_alloc();
    app->popup = popup_alloc();
+   app->emulate_timeout = 2000;
 
    // assign callback that pass events from views to the scene manager
    FURI_LOG_D(TAG, "nfc_playlist_view_dispatcher_init setting callbacks");
@@ -275,8 +276,6 @@ int32_t nfc_playlist_main(void* p) {
    scene_manager_next_scene(app->scene_manager, NfcPlaylistScene_MainMenu);
    FURI_LOG_D(TAG, "Starting dispatcher...");
    view_dispatcher_run(app->view_dispatcher);
-
-   app->emulate_timeout = 2000;
 
    // free all memory
    FURI_LOG_I(TAG, "Test app finishing...");
