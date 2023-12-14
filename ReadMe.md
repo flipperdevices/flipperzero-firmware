@@ -29,8 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM1212-1647-0.93.9-7a40d84](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-12-13 17:58 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-12-13 17:58 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-12-14 12:55 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-12-14 12:55 EST`
 - SubGHz: [Fix repeater crash on known protocol key TX & Long press OK to TX (By LeeroysHub)](https://github.com/LeeroysHub/RM-Flipper/commit/4b310755dd56fca6f96851a012fd94b05f46c933)
 - Updated: [BLE Spam v4.4 (By Willy-JL & ECTO-1A & Spooks4576 with research from xMasterX; OFW API thanks to noproto)](https://github.com/noproto/apple_ble_spam_ofw)
 - Updated: [FlipBoard Blinky v2.1 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
@@ -51,6 +51,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: fix key display newline [for Came Atomo] (By xMasterX)
 - UL: Updated: [Bluetooth/USB Remote v1.6 (By Cutch)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/1330) Minor range of mouse movement update (By xMasterX)
 - Updated: [Atomic Dice Roller v1.1 (By nmrr)](https://github.com/nmrr/flipperzero-atomicdiceroller) MD5 library updates.
+- OFW: [Update CLI MOTD #3292 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3292)
 
 ## IN THIS BRANCH:
 
@@ -128,6 +129,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [PicoPass (iClass) v1.9 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass) [Picopass rework. Part 1 #68 (By gornekich)](https://github.com/flipperdevices/flipperzero-good-faps/pull/68) [PicoPass: Hopefully fix name buffer size issues (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/9058c0c6a9980f84f6436673f9d3fbbc82cb3f81)
 - Update: [NFC Seader v2.1 (By bettse)](https://github.com/bettse/seader)
 - OFW: [MFC emulation fix #3291 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3291)
+- OFW: [Umarsh transport cards parser #3277 (By Leptopt1los)](https://github.com/flipperdevices/flipperzero-firmware/pull/3277)
+- OFW: [Add MyKey parser #3262 (By augustozanellato)](https://github.com/flipperdevices/flipperzero-firmware/pull/3262) (Was already in RM)
 
 <a name="release">
 
