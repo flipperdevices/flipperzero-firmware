@@ -9,7 +9,7 @@ At the moment it reads the files and in what order from a txt file in the apps_d
 
 ## TODO:
 
-- [ ] Add basic UI
+- [x] Add basic UI
 - [ ] Add the ability to adjust time between cards
 - [ ] Add the ability to adjust card queue from within the app
 - [ ] Make it so you can pause, stop and continue the running of the cards
