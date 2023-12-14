@@ -29,8 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM1212-1647-0.93.9-7a40d84](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-12-14 12:03 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-12-14 12:03 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-12-14 18:18 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-12-14 18:18 EST`
 - SubGHz: [Fix repeater crash on known protocol key TX & Long press OK to TX (By LeeroysHub)](https://github.com/LeeroysHub/RM-Flipper/commit/4b310755dd56fca6f96851a012fd94b05f46c933)
 - Updated: [BLE Spam v4.4 (By Willy-JL & ECTO-1A & Spooks4576 with research from xMasterX; OFW API thanks to noproto)](https://github.com/noproto/apple_ble_spam_ofw)
 - Updated: [FlipBoard Blinky v2.1 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
@@ -51,7 +51,9 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: fix key display newline [for Came Atomo] (By xMasterX)
 - UL: Updated: [Bluetooth/USB Remote v1.6 (By Cutch)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/1330) Minor range of mouse movement update (By xMasterX)
 - Updated: [Atomic Dice Roller v1.1 (By nmrr)](https://github.com/nmrr/flipperzero-atomicdiceroller) MD5 library updates.
+- [Add CTRL-ENTER keycode combo to ducky script #1009 (By 3ldidi94)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/1009)
 - OFW: [Update CLI MOTD #3292 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3292)
+- [Fix for no animations build to not crash CFW Settings when showing Animations options in CFW Settings => Interface => Desktop. (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/a0b23d34f95e3b7900fd9549583b276c61e4a3b1)
 
 <a name="release">
 
