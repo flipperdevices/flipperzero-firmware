@@ -918,9 +918,7 @@ bool scene_continuity_pp_model_custom_on_event(void* _ctx, SceneManagerEvent eve
     return false;
 }
 void scene_continuity_pp_model_custom_on_exit(void* _ctx) {
-    Ctx* ctx = _ctx;
-    byte_input_set_result_callback(ctx->byte_input, NULL, NULL, NULL, NULL, 0);
-    byte_input_set_header_text(ctx->byte_input, "");
+    UNUSED(_ctx);
 }
 
 static void pp_color_callback(void* _ctx, uint32_t index) {
@@ -1043,9 +1041,7 @@ bool scene_continuity_pp_color_custom_on_event(void* _ctx, SceneManagerEvent eve
     return false;
 }
 void scene_continuity_pp_color_custom_on_exit(void* _ctx) {
-    Ctx* ctx = _ctx;
-    byte_input_set_result_callback(ctx->byte_input, NULL, NULL, NULL, NULL, 0);
-    byte_input_set_header_text(ctx->byte_input, "");
+    UNUSED(_ctx);
 }
 
 static void pp_prefix_callback(void* _ctx, uint32_t index) {
@@ -1135,9 +1131,7 @@ bool scene_continuity_pp_prefix_custom_on_event(void* _ctx, SceneManagerEvent ev
     return false;
 }
 void scene_continuity_pp_prefix_custom_on_exit(void* _ctx) {
-    Ctx* ctx = _ctx;
-    byte_input_set_result_callback(ctx->byte_input, NULL, NULL, NULL, NULL, 0);
-    byte_input_set_header_text(ctx->byte_input, "");
+    UNUSED(_ctx);
 }
 
 static void na_action_callback(void* _ctx, uint32_t index) {
@@ -1241,9 +1235,7 @@ bool scene_continuity_na_action_custom_on_event(void* _ctx, SceneManagerEvent ev
     return false;
 }
 void scene_continuity_na_action_custom_on_exit(void* _ctx) {
-    Ctx* ctx = _ctx;
-    byte_input_set_result_callback(ctx->byte_input, NULL, NULL, NULL, NULL, 0);
-    byte_input_set_header_text(ctx->byte_input, "");
+    UNUSED(_ctx);
 }
 
 static void na_flags_callback(void* _ctx) {
@@ -1277,6 +1269,4 @@ void scene_continuity_na_flags_on_exit(void* _ctx) {
     Payload* payload = &ctx->attack->payload;
     ContinuityCfg* cfg = &payload->cfg.continuity;
     cfg->data.nearby_action.flags = (ctx->byte_store[0] << 0x00);
-    byte_input_set_result_callback(ctx->byte_input, NULL, NULL, NULL, NULL, 0);
-    byte_input_set_header_text(ctx->byte_input, "");
 }

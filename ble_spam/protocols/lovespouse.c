@@ -288,7 +288,5 @@ bool scene_lovespouse_mode_custom_on_event(void* _ctx, SceneManagerEvent event) 
     return false;
 }
 void scene_lovespouse_mode_custom_on_exit(void* _ctx) {
-    Ctx* ctx = _ctx;
-    byte_input_set_result_callback(ctx->byte_input, NULL, NULL, NULL, NULL, 0);
-    byte_input_set_header_text(ctx->byte_input, "");
+    UNUSED(_ctx);
 }
