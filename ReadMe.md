@@ -52,7 +52,9 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: Updated: [Bluetooth/USB Remote v1.6 (By Cutch)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/1330) Minor range of mouse movement update (By xMasterX)
 - Updated: [Atomic Dice Roller v1.1 (By nmrr)](https://github.com/nmrr/flipperzero-atomicdiceroller) MD5 library updates.
 - OFW: [Update CLI MOTD #3292 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3292)
+- [VarItemList change locked state without new msg (By Willy-JL)]
 - Added: [Motion Mouse v1.0 (By nminaylov)](https://github.com/flipperdevices/flipperzero-good-faps/tree/nm/motion_mouse_app) `Req: ICM42688`
+- NFC: [Misc. keys from hotels & library cards in Germany (By icemirr0r)]
 
 ## IN THIS BRANCH:
 
@@ -132,7 +134,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [MFC emulation fix #3291 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3291)
 - OFW: [Umarsh transport cards parser #3277 (By Leptopt1los)](https://github.com/flipperdevices/flipperzero-firmware/pull/3277)
 - OFW: [Add MyKey parser #3262 (By augustozanellato)](https://github.com/flipperdevices/flipperzero-firmware/pull/3262) (Was already in RM)
-- VarItemList change locked state without new msg (By Willy-JL)
 
 <a name="release">
 
