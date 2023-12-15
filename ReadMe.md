@@ -131,6 +131,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [MFC emulation fix #3291 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3291)
 - OFW: [Umarsh transport cards parser #3277 (By Leptopt1los)](https://github.com/flipperdevices/flipperzero-firmware/pull/3277)
 - OFW: [Add MyKey parser #3262 (By augustozanellato)](https://github.com/flipperdevices/flipperzero-firmware/pull/3262) (Was already in RM)
+- VarItemList change locked state without new msg (By Willy-JL)
 
 <a name="release">
 
