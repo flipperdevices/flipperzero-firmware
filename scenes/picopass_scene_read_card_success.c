@@ -52,12 +52,6 @@ void picopass_scene_read_card_success_on_enter(void* context) {
         if(pacs->se_enabled) {
             furi_string_cat_printf(credential_str, "SE enabled");
 
-            widget_add_button_element(
-                widget,
-                GuiButtonTypeRight,
-                "More",
-                picopass_scene_read_card_success_widget_callback,
-                picopass);
         } else if(!hid_csn) {
             furi_string_cat_printf(credential_str, "Non-HID CSN");
         }
@@ -68,6 +62,13 @@ void picopass_scene_read_card_success_on_enter(void* context) {
             "Menu",
             picopass_scene_read_card_success_widget_callback,
             picopass);
+        widget_add_button_element(
+            widget,
+            GuiButtonTypeRight,
+            "More",
+            picopass_scene_read_card_success_widget_callback,
+            picopass);
+
     } else if(empty) {
         furi_string_cat_printf(wiegand_str, "Empty");
         widget_add_button_element(
