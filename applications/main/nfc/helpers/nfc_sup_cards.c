@@ -145,26 +145,7 @@ static const NfcSupportedCardsPlugin*
 
         path_concat(NFC_SUPPORTED_CARDS_PLUGINS_PATH, instance->file_name, instance->file_path);
 
-        if(instance->app) flipper_application_free(instance->app);
-        instance->app = flipper_application_alloc(instance->storage, firmware_api_interface);
-
-        if(flipper_application_preload(instance->app, furi_string_get_cstr(instance->file_path)) !=
-           FlipperApplicationPreloadStatusSuccess)
-            continue;
-        if(!flipper_application_is_plugin(instance->app)) continue;
-
-        if(flipper_application_map_to_memory(instance->app) != FlipperApplicationLoadStatusSuccess)
-            continue;
-
-        const FlipperAppPluginDescriptor* descriptor =
-            flipper_application_plugin_get_descriptor(instance->app);
-
-        if(descriptor == NULL) continue;
-
-        if(strcmp(descriptor->appid, NFC_SUPPORTED_CARD_PLUGIN_APP_ID) != 0) continue;
-        if(descriptor->ep_api_version != NFC_SUPPORTED_CARD_PLUGIN_API_VERSION) continue;
-
-        plugin = descriptor->entry_point;
+        plugin = nfc_sup_cards_get_plugin(instance, instance->file_path);
     } while(plugin == NULL); //-V654
 
     return plugin;
