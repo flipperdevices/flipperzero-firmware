@@ -1,4 +1,5 @@
 #include "../nfc_app_i.h"
+#include <coges_nfc_icons.h>
 #include <dolphin/dolphin.h>
 
 void nfc_scene_detect_scan_callback(NfcScannerEvent event, void* context) {
@@ -37,6 +38,7 @@ bool nfc_scene_detect_on_event(void* context, SceneManagerEvent event) {
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == NfcCustomEventWorkerExit) {
             if(instance->protocols_detected_num > 1) {
+                notification_message(instance->notifications, &sequence_single_vibro);
                 scene_manager_next_scene(instance->scene_manager, NfcSceneSelectProtocol);
             } else {
                 scene_manager_next_scene(instance->scene_manager, NfcSceneRead);

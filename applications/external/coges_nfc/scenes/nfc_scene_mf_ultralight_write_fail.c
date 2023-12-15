@@ -1,7 +1,7 @@
 #include "../nfc_app_i.h"
 #include <coges_nfc_icons.h>
 
-void nfc_scene_mf_classic_write_initial_fail_widget_callback(
+void nfc_scene_mf_ultralight_write_fail_widget_callback(
     GuiButtonType result,
     InputType type,
     void* context) {
@@ -11,7 +11,7 @@ void nfc_scene_mf_classic_write_initial_fail_widget_callback(
     }
 }
 
-void nfc_scene_mf_classic_write_initial_fail_on_enter(void* context) {
+void nfc_scene_mf_ultralight_write_fail_on_enter(void* context) {
     NfcApp* instance = context;
     Widget* widget = instance->widget;
 
@@ -27,36 +27,41 @@ void nfc_scene_mf_classic_write_initial_fail_on_enter(void* context) {
         AlignLeft,
         AlignTop,
         FontSecondary,
-        "Not all sectors\nwere written\ncorrectly.");
+        "Card protected by\npassword, AUTH0\nor lock bits");
 
     widget_add_button_element(
         widget,
         GuiButtonTypeLeft,
         "Finish",
-        nfc_scene_mf_classic_write_initial_fail_widget_callback,
+        nfc_scene_mf_ultralight_write_fail_widget_callback,
         instance);
 
     // Setup and start worker
     view_dispatcher_switch_to_view(instance->view_dispatcher, NfcViewWidget);
 }
 
-bool nfc_scene_mf_classic_write_initial_fail_on_event(void* context, SceneManagerEvent event) {
+static bool nfc_scene_mf_ultralight_write_fail_move_to_back_scene(const NfcApp* const instance) {
+    bool was_saved = scene_manager_has_previous_scene(instance->scene_manager, NfcSceneSavedMenu);
+    uint32_t scene_id = was_saved ? NfcSceneSavedMenu : NfcSceneReadMenu;
+
+    return scene_manager_search_and_switch_to_previous_scene(instance->scene_manager, scene_id);
+}
+
+bool nfc_scene_mf_ultralight_write_fail_on_event(void* context, SceneManagerEvent event) {
     NfcApp* instance = context;
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == GuiButtonTypeLeft) {
-            consumed = scene_manager_search_and_switch_to_previous_scene(
-                instance->scene_manager, NfcSceneSavedMenu);
+            consumed = nfc_scene_mf_ultralight_write_fail_move_to_back_scene(instance);
         }
     } else if(event.type == SceneManagerEventTypeBack) {
-        consumed = scene_manager_search_and_switch_to_previous_scene(
-            instance->scene_manager, NfcSceneSavedMenu);
+        consumed = nfc_scene_mf_ultralight_write_fail_move_to_back_scene(instance);
     }
     return consumed;
 }
 
-void nfc_scene_mf_classic_write_initial_fail_on_exit(void* context) {
+void nfc_scene_mf_ultralight_write_fail_on_exit(void* context) {
     NfcApp* instance = context;
 
     widget_reset(instance->widget);

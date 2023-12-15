@@ -1,4 +1,5 @@
 #include "../nfc_app_i.h"
+#include <coges_nfc_icons.h>
 
 void nfc_scene_delete_success_popup_callback(void* context) {
     NfcApp* nfc = context;

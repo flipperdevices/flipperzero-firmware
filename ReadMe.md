@@ -112,6 +112,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [nfc_util: little endian bytes2num functions added #3287 (By Leptopt1los)](https://github.com/flipperdevices/flipperzero-firmware/pull/3287)
 - OFW: [MFC emulation fix #3291 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3291)
 - OFW: [NFC Plugins loading rework #3295 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3295)
+- Updated: [COGES NFC (For Coffee Machines) (By OFW + haisenteck)](https://github.com/haisenteck/flipperzero-Haisenteck/)
 
 <a name="release">
 

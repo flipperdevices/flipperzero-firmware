@@ -1,4 +1,5 @@
 #include "../nfc_app_i.h"
+#include <coges_nfc_icons.h>
 
 NfcCommand
     nfc_scene_mf_ultralight_capture_pass_worker_callback(NfcGenericEvent event, void* context) {

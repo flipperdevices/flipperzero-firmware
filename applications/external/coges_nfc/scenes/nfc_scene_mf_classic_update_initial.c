@@ -1,4 +1,5 @@
 #include "../nfc_app_i.h"
+#include <coges_nfc_icons.h>
 
 #include <nfc/protocols/mf_classic/mf_classic_poller.h>
 

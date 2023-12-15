@@ -1,4 +1,5 @@
 #include "../nfc_app_i.h"
+#include <coges_nfc_icons.h>
 
 #define NFC_SCENE_MF_CLASSIC_KEYS_MAX (100)
 
