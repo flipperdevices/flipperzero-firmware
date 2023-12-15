@@ -164,7 +164,7 @@ void nfc_supported_cards_load_cache(NfcSupportedCards* instance) {
         while(true) {
             const NfcSupportedCardsPlugin* plugin =
                 nfc_supported_cards_get_next_plugin(instance->load_context);
-            if(plugin == NULL) break; //-V547
+            if(plugin == NULL) break; //-V779
 
             FURI_LOG_D(
                 TAG,
@@ -192,7 +192,7 @@ void nfc_supported_cards_load_cache(NfcSupportedCards* instance) {
             FURI_LOG_D(TAG, "Plugins not found");
             instance->load_state = NfcSupportedCardsLoadStateFail;
         } else {
-            FURI_LOG_D(TAG, "Loaded %d plugins", plugins_loaded);
+            FURI_LOG_D(TAG, "Loaded %zu plugins", plugins_loaded);
             instance->load_state = NfcSupportedCardsLoadStateSuccess;
         }
 
