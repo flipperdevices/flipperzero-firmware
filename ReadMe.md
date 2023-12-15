@@ -34,6 +34,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - [VarItemList change locked state without new msg (By Willy-JL)]
 - Added: [Motion Mouse v1.0 (By nminaylov)](https://github.com/flipperdevices/flipperzero-good-faps/tree/nm/motion_mouse_app) `Req: ICM42688`
 - NFC: [Misc. keys from hotels & library cards in Germany (By icemirr0r)]
+- Updated: [BLE Spam v4.4 (By Willy-JL & ECTO-1A & Spooks4576 with research from xMasterX; OFW API thanks to noproto)](https://github.com/noproto/apple_ble_spam_ofw)
 
 <a name="release">
 
