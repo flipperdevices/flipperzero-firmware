@@ -157,7 +157,7 @@ static void nfc_protocol_support_scene_read_on_enter(NfcApp* instance) {
     instance->poller = nfc_poller_alloc(instance->nfc, protocol);
 
     view_dispatcher_switch_to_view(instance->view_dispatcher, NfcViewPopup);
-    nfc_sup_cards_load_cache(instance->nfc_sup_cards);
+    nfc_supported_cards_load_cache(instance->nfc_supported_cards);
 
     // Start poller with the appropriate callback
     nfc_protocol_support[protocol]->scene_read.on_enter(instance);
@@ -180,7 +180,7 @@ static bool nfc_protocol_support_scene_read_on_event(NfcApp* instance, SceneMana
             nfc_poller_stop(instance->poller);
             nfc_poller_free(instance->poller);
             bool card_read =
-                nfc_sup_cards_read(instance->nfc_sup_cards, instance->nfc_device, instance->nfc);
+                nfc_supported_cards_read(instance->nfc_supported_cards, instance->nfc_device, instance->nfc);
             if(card_read) {
                 notification_message(instance->notifications, &sequence_success);
                 scene_manager_next_scene(instance->scene_manager, NfcSceneReadSuccess);
@@ -305,7 +305,7 @@ static void nfc_protocol_support_scene_read_success_on_enter(NfcApp* instance) {
     Widget* widget = instance->widget;
 
     FuriString* temp_str = furi_string_alloc();
-    if(nfc_sup_cards_parse(instance->nfc_sup_cards, instance->nfc_device, temp_str)) {
+    if(nfc_supported_cards_parse(instance->nfc_supported_cards, instance->nfc_device, temp_str)) {
         widget_add_text_scroll_element(
             instance->widget, 0, 0, 128, 52, furi_string_get_cstr(temp_str));
     } else {
