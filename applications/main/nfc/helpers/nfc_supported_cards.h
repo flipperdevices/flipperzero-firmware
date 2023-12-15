@@ -1,3 +1,9 @@
+/**
+ * @file nfc_supported_cards.h
+ * @brief Supported card plugin loader interface.
+ *
+ * @see nfc_supported_card_plugin.h for instructions on adding a new plugin.
+ */
 #pragma once
 
 #include <core/string.h>
