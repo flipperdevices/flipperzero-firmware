@@ -1,21 +1,12 @@
 #include "t5577.h"
-#include <furi.h>
-#include <furi_hal_rfid.h>
 
-#define T5577_TIMING_WAIT_TIME 400
-#define T5577_TIMING_START_GAP 30
-#define T5577_TIMING_WRITE_GAP 18
-#define T5577_TIMING_DATA_0 24
-#define T5577_TIMING_DATA_1 56
-#define T5577_TIMING_PROGRAM 700
-
-#define T5577_OPCODE_PAGE_0 0b10
-#define T5577_OPCODE_PAGE_1 0b11
-#define T5577_OPCODE_RESET 0b00
+static inline void t5577_furi_delay_clocks(uint32_t clocks) {
+    // T = 1/f => 1 / 125khz == 8 microseconds;
+    furi_delay_us(clocks * 8);
+}
 
 static void t5577_start() {
     furi_hal_rfid_tim_read_start(125000, 0.5);
-
     // do not ground the antenna
     furi_hal_rfid_pin_pull_release();
 }
@@ -25,19 +16,16 @@ static void t5577_stop() {
     furi_hal_rfid_pins_reset();
 }
 
-static void t5577_write_gap(uint32_t gap_time) {
+static void t5577_write_gap(uint32_t clocks) {
     furi_hal_rfid_tim_read_pause();
-    furi_delay_us(gap_time * 8);
+    t5577_furi_delay_clocks(clocks);
     furi_hal_rfid_tim_read_continue();
 }
 
 static void t5577_write_bit(bool value) {
-    if(value) {
-        furi_delay_us(T5577_TIMING_DATA_1 * 8);
-    } else {
-        furi_delay_us(T5577_TIMING_DATA_0 * 8);
-    }
-    t5577_write_gap(T5577_TIMING_WRITE_GAP);
+    uint32_t clocks = (value) ? T5577_BIT_1_CLOCKS : T5577_BIT_0_CLOCKS;
+    t5577_furi_delay_clocks(clocks);
+    t5577_write_gap(T5577_WRITE_GAP_CLOCKS);
 }
 
 static void t5577_write_opcode(uint8_t value) {
@@ -46,45 +34,49 @@ static void t5577_write_opcode(uint8_t value) {
 }
 
 static void t5577_write_reset() {
-    t5577_write_gap(T5577_TIMING_START_GAP);
+    t5577_write_gap(T5577_START_GAP_CLOCKS);
     t5577_write_opcode(T5577_OPCODE_RESET);
+    t5577_furi_delay_clocks(T5577_INITIAL_WAIT_CLOCKS);
 }
 
-static void t5577_write_block(uint8_t block, bool lock_bit, uint32_t data) {
-    furi_delay_us(T5577_TIMING_WAIT_TIME * 8);
+static void t5577_write_block(uint8_t page, uint8_t block, bool lock_bit, uint32_t data) {
+    // Then we send a write gap to set write mode
+    t5577_write_gap(T5577_START_GAP_CLOCKS);
 
-    // start gap
-    t5577_write_gap(T5577_TIMING_START_GAP);
-
-    // opcode for page 0
-    t5577_write_opcode(T5577_OPCODE_PAGE_0);
-
-    // lock bit
+    uint8_t selected_page = (page == 0) ? T5577_OPCODE_PAGE_0 : T5577_OPCODE_PAGE_1;
+    t5577_write_opcode(selected_page);
     t5577_write_bit(lock_bit);
 
-    // data
-    for(uint8_t i = 0; i < 32; i++) {
-        t5577_write_bit((data >> (31 - i)) & 1);
-    }
+    // Send Block Data
+    for(uint8_t i = 0; i < 32; i++) t5577_write_bit(data >> (31 - i));
 
-    // block address
-    t5577_write_bit((block >> 2) & 1);
-    t5577_write_bit((block >> 1) & 1);
-    t5577_write_bit((block >> 0) & 1);
+    // Block address -> All blocks in T5577 are 8: 0 to 7
+    t5577_write_bit(block >> 2);
+    t5577_write_bit(block >> 1);
+    t5577_write_bit(block >> 0);
 
-    furi_delay_us(T5577_TIMING_PROGRAM * 8);
+    t5577_furi_delay_clocks(T5577_PROGRAM_CLOCKS);
 
-    furi_delay_us(T5577_TIMING_WAIT_TIME * 8);
-    t5577_write_reset();
+    // After programmed, the fob returns in read mode
+    // If we wrote block 0 we need to reload configurations
+    if(block == 0) t5577_write_reset();
 }
 
-void t5577_write(LFRFIDT5577* data) {
+void t5577_write(LFRFIDT5577* data, uint8_t page) {
+    furi_assert(data);
+    furi_assert(page == 0 || page == 1);
+
     t5577_start();
-    FURI_CRITICAL_ENTER();
-    for(size_t i = 0; i < data->blocks_to_write; i++) {
-        t5577_write_block(i, false, data->block[i]);
+    {
+        FURI_CRITICAL_ENTER();
+
+        // After the fob is entered in the field, we wait for loading configuration
+        t5577_furi_delay_clocks(T5577_INITIAL_WAIT_CLOCKS);
+
+        for(uint8_t i = 0; i < data->blocks_to_write; i++)
+            t5577_write_block(page, i, false, data->block[i]);
+
+        FURI_CRITICAL_EXIT();
     }
-    t5577_write_reset();
-    FURI_CRITICAL_EXIT();
     t5577_stop();
 }

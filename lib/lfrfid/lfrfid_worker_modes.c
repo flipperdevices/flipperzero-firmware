@@ -515,7 +515,7 @@ static void lfrfid_worker_mode_write_process(LFRFIDWorker* worker) {
     if(can_be_written) {
         while(!lfrfid_worker_check_for_stop(worker)) {
             FURI_LOG_D(TAG, "Data write");
-            t5577_write(&request->t5577);
+            t5577_write(&request->t5577, 0);
 
             ProtocolId read_result = PROTOCOL_NO;
             LFRFIDWorkerReadState state = lfrfid_worker_read_internal(

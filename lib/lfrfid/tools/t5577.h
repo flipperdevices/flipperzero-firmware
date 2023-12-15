@@ -2,6 +2,9 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include <furi.h>
+#include <furi_hal_rfid.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -39,17 +42,39 @@ extern "C" {
 #define LFRFID_T5577_BITRATE_RF_128 0x001C0000
 #define LFRFID_T5577_TESTMODE_DISABLED 0x60000000
 
+/****************************************/
+
+// Required clocks to load configurations, time must be >= 3ms
+#define T5577_INITIAL_WAIT_CLOCKS 400
+
+// Required clocks to write block, typical time is around 5.6ms
+#define T5577_PROGRAM_CLOCKS 700
+
+#define T5577_START_GAP_CLOCKS 30
+#define T5577_WRITE_GAP_CLOCKS 18
+#define T5577_BIT_0_CLOCKS 24
+#define T5577_BIT_1_CLOCKS 56
+
+/****************************************/
+
+#define T5577_OPCODE_PAGE_0 0b10
+#define T5577_OPCODE_PAGE_1 0b11
+#define T5577_OPCODE_RESET 0b00
+
+/****************************************/
+
 typedef struct {
     uint32_t block[LFRFID_T5577_BLOCK_COUNT];
-    uint32_t blocks_to_write;
+    uint8_t blocks_to_write;
 } LFRFIDT5577;
 
 /**
  * @brief Write T5577 tag data to tag
  * 
- * @param data 
+ * @param data  T5577 data structure containing blocks to write
+ * @param page  Page where to write (0 <= page <= 1)
  */
-void t5577_write(LFRFIDT5577* data);
+void t5577_write(LFRFIDT5577* data, uint8_t page);
 
 #ifdef __cplusplus
 }
