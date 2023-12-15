@@ -29,8 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM1214-2300-0.93.9-efe2e04](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-12-14 23:00 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-12-14 23:00 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-12-15 13:15 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-12-15 13:15 EST`
 - [VarItemList change locked state without new msg (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/179bc126ae3c96b42753fc391760c9232d21dcd6)
 - Added: [Motion Mouse v1.0 (By nminaylov)](https://github.com/flipperdevices/flipperzero-good-faps/tree/nm/motion_mouse_app) `Req: ICM42688`
 - NFC: [Misc. keys from hotels & library cards in Germany (By icemirr0r)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/3fd89b2255dd2cc1ee1bc14eefc982b8366efa7c)
@@ -110,10 +110,12 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [FuriHal: various GPIO improvements #3260 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3260)
 - [Fix edge case -- 0.5% of UIDs got wrong result #4 (By henrygab)](https://github.com/noproto/flipper_kdf/pull/4)
 - Update: [NFC Seader v2.1 (By bettse)](https://github.com/bettse/seader)
-- OFW: [MFC emulation fix #3291 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3291)
 - OFW: [Umarsh transport cards parser #3277 (By Leptopt1los)](https://github.com/flipperdevices/flipperzero-firmware/pull/3277)
 - OFW: [Add MyKey parser #3262 (By augustozanellato)](https://github.com/flipperdevices/flipperzero-firmware/pull/3262) (Was already in RM)
 - Updated: [PicoPass (iClass) v1.10 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass) [Picopass rework. Part 1 #68 (By gornekich)](https://github.com/flipperdevices/flipperzero-good-faps/pull/68) [PicoPass: Hopefully fix name buffer size issues (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/9058c0c6a9980f84f6436673f9d3fbbc82cb3f81) [Picopass save partial #85 (By bettse)](https://github.com/flipperdevices/flipperzero-good-faps/pull/85)
+- OFW: [nfc_util: little endian bytes2num functions added #3287 (By Leptopt1los)](https://github.com/flipperdevices/flipperzero-firmware/pull/3287)
+- OFW: [MFC emulation fix #3291 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3291)
+- OFW: [NFC Plugins loading rework #3295 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3295)
 
 <a name="release">
 
