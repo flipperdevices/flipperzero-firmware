@@ -20,6 +20,11 @@ This is a Pokemon exchange application from Flipper Zero to Game Boy [(Generacti
 
 It currently trades a Pokemon based on your choice of Pokemon, Level, Stats and 4 Moves.
 
+## Hardware Interface
+The Game Boy is connected to the Flipper Zero's GPIO pins via a GBC style Game Link Cable. A Flipper GPIO module with a proper Game Link Cable connector [is available here](https://www.tindie.com/products/kbembedded/game-link-gpio-module-for-flipper-zero-game-boy/)!
+
+Details on the hardware interface, as well as how to create your own adapter board, can be found in the [How Does It Work](#how-does-it-work) section below.
+
 ## Installation Directions
 
 This project is intended to be overlaid on top of an existing firmware repo,  in my case the **Release 0.79.1** version.
