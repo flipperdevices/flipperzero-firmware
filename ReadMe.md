@@ -109,11 +109,11 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [Cleanup RTC registers on factory reset #3288 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3288)
 - OFW: [FuriHal: various GPIO improvements #3260 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3260)
 - [Fix edge case -- 0.5% of UIDs got wrong result #4 (By henrygab)](https://github.com/noproto/flipper_kdf/pull/4)
-- Updated: [PicoPass (iClass) v1.9 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass) [Picopass rework. Part 1 #68 (By gornekich)](https://github.com/flipperdevices/flipperzero-good-faps/pull/68) [PicoPass: Hopefully fix name buffer size issues (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/9058c0c6a9980f84f6436673f9d3fbbc82cb3f81)
 - Update: [NFC Seader v2.1 (By bettse)](https://github.com/bettse/seader)
 - OFW: [MFC emulation fix #3291 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3291)
 - OFW: [Umarsh transport cards parser #3277 (By Leptopt1los)](https://github.com/flipperdevices/flipperzero-firmware/pull/3277)
 - OFW: [Add MyKey parser #3262 (By augustozanellato)](https://github.com/flipperdevices/flipperzero-firmware/pull/3262) (Was already in RM)
+- Updated: [PicoPass (iClass) v1.10 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass) [Picopass rework. Part 1 #68 (By gornekich)](https://github.com/flipperdevices/flipperzero-good-faps/pull/68) [PicoPass: Hopefully fix name buffer size issues (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/9058c0c6a9980f84f6436673f9d3fbbc82cb3f81) [Picopass save partial #85 (By bettse)](https://github.com/flipperdevices/flipperzero-good-faps/pull/85)
 
 <a name="release">
 
@@ -514,7 +514,7 @@ $ ./fbt dolphin_ext
 - [PC Monitor v1.0 (By TheSainEyereg)](https://github.com/TheSainEyereg/flipper-pc-monitor) _Req: [Backend](https://github.com/TheSainEyereg/flipper-pc-monitor-backend)_
 - [Pet a Dolphin (By ugeneSmile)](https://github.com/EugeneSmile/PetADolphin)
 - [pForth (By twisted-pear)](https://github.com/twisted-pear/f0forth)
-- [PicoPass (iClass) v1.9 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass) [PicoPass Emulation (By nvx)](https://github.com/nvx/flipperzero-firmware/tree/picopass_emulation)
+- [PicoPass (iClass) v1.10 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass) [PicoPass Emulation (By nvx)](https://github.com/nvx/flipperzero-firmware/tree/picopass_emulation)
 - [Plantower PMSx003 sensor reader (By 3cky)](https://github.com/3cky/flipperzero-airmon) `Req: Plantower PMS5003/PMS7003/PMS9003`
 - [POCSAG Pager v1.2 (By XMasterx & Shmuma)](https://github.com/xMasterX/flipper-pager)
 - [Pokemon Trading v1.4 (By EstebanFuentealba & kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
