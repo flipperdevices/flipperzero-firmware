@@ -27,10 +27,10 @@ This software is for experimental purposes only and is not meant for any illegal
 
 <a name="latest">
 
-## Latest Updates - [PATREON: Latest Release RM1214-2300-0.93.9-efe2e04](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
+## Latest Updates - [PATREON: Latest Release RM1215-1315-0.93.9-b0c3c53](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-12-14 23:00 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-12-14 23:00 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-12-15 13:15 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-12-15 13:15 EST`
 - [VarItemList change locked state without new msg (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/179bc126ae3c96b42753fc391760c9232d21dcd6)
 - Added: [Motion Mouse v1.0 (By nminaylov)](https://github.com/flipperdevices/flipperzero-good-faps/tree/nm/motion_mouse_app) `Req: ICM42688`
 - NFC: [Misc. keys from hotels & library cards in Germany (By icemirr0r)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/3fd89b2255dd2cc1ee1bc14eefc982b8366efa7c)
