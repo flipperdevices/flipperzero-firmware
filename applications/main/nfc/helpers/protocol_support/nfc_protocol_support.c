@@ -179,8 +179,8 @@ static bool nfc_protocol_support_scene_read_on_event(NfcApp* instance, SceneMana
         } else if(event.event == NfcCustomEventPollerIncomplete) {
             nfc_poller_stop(instance->poller);
             nfc_poller_free(instance->poller);
-            bool card_read =
-                nfc_supported_cards_read(instance->nfc_supported_cards, instance->nfc_device, instance->nfc);
+            bool card_read = nfc_supported_cards_read(
+                instance->nfc_supported_cards, instance->nfc_device, instance->nfc);
             if(card_read) {
                 notification_message(instance->notifications, &sequence_success);
                 scene_manager_next_scene(instance->scene_manager, NfcSceneReadSuccess);
