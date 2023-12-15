@@ -164,12 +164,8 @@ void nfc_supported_cards_load_cache(NfcSupportedCards* instance) {
         while(true) {
             const NfcSupportedCardsPlugin* plugin =
                 nfc_supported_cards_get_next_plugin(instance->load_context);
-            if(plugin == NULL) break; //-V779
+            if(plugin == NULL) break; //-V547
 
-            FURI_LOG_D(
-                TAG,
-                "Load cache for plugin %s",
-                furi_string_get_cstr(instance->load_context->file_path));
             NfcSupportedCardsPluginCache plugin_cache = {};
             plugin_cache.path = furi_string_alloc_set(instance->load_context->file_path);
             plugin_cache.protocol = plugin->protocol;
