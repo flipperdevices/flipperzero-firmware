@@ -60,16 +60,6 @@ int32_t nfc_playlist_worker_task(void* context) {
             );
         nfc_listener_start(nfc_playlist_worker->nfc_listener, NULL, NULL);
 
-
-        // int counter = 0;
-        // while(true) {
-        //     furi_delay_ms(50);
-        //     counter++;
-        //     if (counter == 100) {
-        //         break;
-        //     }
-        // }
-
         while(nfc_playlist_worker->state == NfcPlaylistWorkerState_Emulating) {
             furi_delay_ms(50);
         }

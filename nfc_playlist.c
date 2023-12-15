@@ -34,6 +34,7 @@ typedef struct {
    Popup* popup;
    NfcPlaylistWorker* nfc_worker;
    int emulate_timeout;
+   int emulate_delay;
 } NfcPlaylist;
 
 // All custom events
@@ -111,34 +112,63 @@ void nfc_playlist_scene_on_enter_popup_emulating(void* context) {
    if(file_stream_open(stream, APP_DATA_PATH("playlist.txt"), FSAM_READ, FSOM_OPEN_EXISTING)) {
       popup_reset(app->popup);
       popup_set_context(app->popup, app);
-      popup_set_header(app->popup, "Emulating", 64, 10, AlignCenter, AlignTop);
+      popup_set_header(app->popup, "Emulating:", 64, 10, AlignCenter, AlignTop);
       view_dispatcher_switch_to_view(app->view_dispatcher, NfcPlaylistView_Popup);
+   
+      int file_position = 0;
       // read the file line by line and print the text
       while(stream_read_line(stream, line)) {
+         if (app->emulate_delay > 0) {
+            if (file_position > 0) {
+               int time_counter_delay_ms = app->emulate_delay;
+               do {
+                  char display_text[30];
+                  snprintf(display_text, 30, "%s\n\n%ds", "Delaying...", (time_counter_delay_ms/1000));
+                  popup_set_text(app->popup, display_text, 64, 25, AlignCenter, AlignTop);
+                  furi_delay_ms(500);
+                  time_counter_delay_ms -= 500;
+               } while(time_counter_delay_ms > 0);
+            } else {
+               file_position++;
+            }            
+         }
+         
          char* file_path = (char*)furi_string_get_cstr(line);
          char* file_name = &strrchr(file_path, '/')[1];
          int time_counter_ms = app->emulate_timeout;
 
-         nfc_playlist_worker_set_nfc_data(app->nfc_worker, file_path);
-         nfc_playlist_worker_start(app->nfc_worker);
+         if (storage_file_exists(storage, file_path) == false) {
+            char* text = strcat(file_name, "\nnot found");
+            int size = (strlen(text) + 4);
+            char display_text[size];
 
-         do {
+            do {
+               snprintf(display_text, size, "%s\n%ds", file_name, (time_counter_ms/1000));
+               popup_set_text(app->popup, display_text, 64, 25, AlignCenter, AlignTop);
+               furi_delay_ms(500);
+               time_counter_ms -= 500;
+            } while(time_counter_ms > 0);
+         } else {
+            nfc_playlist_worker_set_nfc_data(app->nfc_worker, file_path);
+            nfc_playlist_worker_start(app->nfc_worker);
+            
             int size = (strlen(file_name) + 4);
             char display_text[size];
-            snprintf(display_text, size, "%s\n%ds", file_name, (time_counter_ms/1000));
-            popup_set_text(app->popup, display_text, 64, 25, AlignCenter, AlignTop);
-            furi_delay_ms(500);
-            time_counter_ms -= 500;
-            if (time_counter_ms <= 0) {
-               break;
+            
+            do {
+               snprintf(display_text, size, "%s\n%ds", file_name, (time_counter_ms/1000));
+               popup_set_text(app->popup, display_text, 64, 25, AlignCenter, AlignTop);
+               furi_delay_ms(500);
+               time_counter_ms -= 500;
+               if (time_counter_ms <= 0) {
+                  break;
+               }
+            } while(nfc_playlist_worker_is_emulating(app->nfc_worker));
+
+            if (nfc_playlist_worker_is_emulating(app->nfc_worker)) {
+               nfc_playlist_worker_stop(app->nfc_worker);
             }
-         } while(nfc_playlist_worker_is_emulating(app->nfc_worker));
-
-         if (nfc_playlist_worker_is_emulating(app->nfc_worker)) {
-            nfc_playlist_worker_stop(app->nfc_worker);
          }
-
-         furi_string_reset(line);
       }
    } else {
       FURI_LOG_E(TAG, "Failed to open file");
@@ -223,7 +253,8 @@ void nfc_playlist_view_dispatcher_init(NfcPlaylist* app) {
    FURI_LOG_D(TAG, "nfc_playlist_view_dispatcher_init allocating views");
    app->submenu = submenu_alloc();
    app->popup = popup_alloc();
-   app->emulate_timeout = 4000;
+   app->emulate_timeout = 5000;
+   app->emulate_delay = 2000;
 
    // assign callback that pass events from views to the scene manager
    FURI_LOG_D(TAG, "nfc_playlist_view_dispatcher_init setting callbacks");
