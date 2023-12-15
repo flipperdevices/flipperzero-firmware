@@ -51,7 +51,7 @@
 
 #include <nfc/nfc_device.h>
 #include <nfc/helpers/nfc_data_generator.h>
-#include <nfc/helpers/nfc_dict.h>
+#include <toolbox/keys_dict.h>
 
 #include <gui/modules/validators.h>
 #include <toolbox/path.h>
@@ -79,7 +79,7 @@ typedef enum {
 } NfcRpcState;
 
 typedef struct {
-    NfcDict* dict;
+    KeysDict* dict;
     uint8_t sectors_total;
     uint8_t sectors_read;
     uint8_t current_sector;
