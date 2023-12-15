@@ -1,3 +1,6 @@
+## 1.10
+ - Fix missing folder in readme
+ - Allow partial save for any read failure
 ## 1.9
  - Fix bug (#77) with loclass
  - Better loclass notes
