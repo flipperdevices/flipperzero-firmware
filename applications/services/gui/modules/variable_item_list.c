@@ -594,9 +594,10 @@ void variable_item_set_current_value_text(VariableItem* item, const char* curren
 
 void variable_item_set_locked(VariableItem* item, bool locked, const char* locked_message) {
     item->locked = locked;
-    if(locked) {
-        furi_assert(locked_message);
+    if(locked_message) {
         furi_string_set(item->locked_message, locked_message);
+    } else if(locked && furi_string_empty(item->locked_message)) {
+        furi_string_set(item->locked_message, "Locked!");
     }
 }
 
