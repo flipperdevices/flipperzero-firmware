@@ -4,7 +4,7 @@
 &nbsp;<a href='https://shop.rogue-master.net/' target='_blank'><img src='https://rogue-master.net/img/Merch.png' alt='RM Merch'' title='RM Merch'></a>
 &nbsp;<a href='https://github.com/RogueMaster/awesome-flipperzero-withModules' target='_blank'><img src='https://rogue-master.net/img/Resources.png' alt='More Research / Assets' title='More Research / Assets'></a></h1>
 
-# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1207-2110-0.93.9-a815d93.tgz&channel=RM1207-2110-0.93.9-a815d93&version=0.93.9) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1207-2110-0.93.9-a815d93-NoAnim.tgz&channel=RM1207-2110-0.93.9-a815d93-NoAnim&version=0.93.9)
+# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1214-1846-0.93.9-29a6a37.tgz&channel=RM1214-1846-0.93.9-29a6a37&version=0.93.9) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1214-1846-0.93.9-29a6a37-NoAnim.tgz&channel=RM1214-1846-0.93.9-29a6a37-NoAnim&version=0.93.9)
 
 ## Thank you so much to our RM Pro/SUPER Patreon supporters! Because of people like you, we are able to offer the best and most up-to-date Flipper Zero Firmware!
 
@@ -29,32 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM1214-1825-0.93.9-b3feec7(https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-12-14 18:25 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-12-14 18:25 EST`
-- SubGHz: [Fix repeater crash on known protocol key TX & Long press OK to TX (By LeeroysHub)](https://github.com/LeeroysHub/RM-Flipper/commit/4b310755dd56fca6f96851a012fd94b05f46c933)
-- Updated: [BLE Spam v4.4 (By Willy-JL & ECTO-1A & Spooks4576 with research from xMasterX; OFW API thanks to noproto)](https://github.com/noproto/apple_ble_spam_ofw)
-- Updated: [FlipBoard Blinky v2.1 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
-- Updated: [FlipBoard Keyboard v2.0 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
-- Updated: [Hangman v1.5 (By Evgeny Stepanischev & Eva Stepanischeva)](https://github.com/bolknote/Flipper-Zero-Hangman-Game)
-- Updated: [FlipBoard Signal v3.1 (By jamisonderek)](https://github.com/jamisonderek/flipboard) bumped version in app
-- Updated: [Sokoban v1.2 (By Racso)](https://github.com/Racso/fzero-apps) Bumped version only.
-- Updated: [Ultimate Tic-Tac-Toe v1.1 (By Racso)](https://github.com/Racso/fzero-apps) Bumped version only.
-- Updated: [Zero v1.4 (By Racso)](https://github.com/Racso/fzero-apps) Bumped version only.
-- Updated: [Authenticator/TOTP v5.9.1 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator) Exit on short back press (By Willy-JL)
-- [Update Wifi-Stealer_ORG.txt #1005 (By 3ldidi94)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/1005)
-- Added: [BlackJack Counter v1.0 (By grugnoymeme)](https://github.com/grugnoymeme/flipperzero-blackjack_counter-fap)
-- Updated: [IR Intervalometer for Sony Cameras v1.2 (By Nitepone)](https://github.com/Nitepone/flipper-intervalometer) Bumped version only.
-- Updated: [Guess The Number v1.1 (By kWAYTV)](https://github.com/kWAYTV/guess-the-number-fz)
-- OFW: [SubGhz: changed the name of the button when sending RAW to SubGhz #3275 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/3275)
-- Added: [Connect Wires v1.0 (By AlexTaran)](https://github.com/AlexTaran/flipperzero)
-- Updated: [MALVEKE GB Live Camera v1.1 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external/malveke_gb_live_camera)
-- UL: fix key display newline [for Came Atomo] (By xMasterX)
-- UL: Updated: [Bluetooth/USB Remote v1.6 (By Cutch)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/1330) Minor range of mouse movement update (By xMasterX)
-- Updated: [Atomic Dice Roller v1.1 (By nmrr)](https://github.com/nmrr/flipperzero-atomicdiceroller) MD5 library updates.
-- [Add CTRL-ENTER keycode combo to ducky script #1009 (By 3ldidi94)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/1009)
-- OFW: [Update CLI MOTD #3292 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3292)
-- [Fix for no animations build to not crash CFW Settings when showing Animations options in CFW Settings => Interface => Desktop. (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/a0b23d34f95e3b7900fd9549583b276c61e4a3b1)
-
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-12-14 19:33 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-12-14 19:33 EST`
 <a name="release">
 
 ## Install Latest Release
@@ -532,4 +508,4 @@ $ ./fbt dolphin_ext
 - [Desktop Favorite Binds To Allow Opening Custom Game Menu. Whomever can complete this gets 3 months of subscriber builds. Patrons can DM me to add their monthly towards this bounty.](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/756)
 - `Bluetooth Audio` APP to allow flipper to pair to external speaker or headphones for wav/mp3 playback ($200 USD in ETH or BTC) (Don't think this is possible)
 
-# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1207-2110-0.93.9-a815d93.tgz&channel=RM1207-2110-0.93.9-a815d93&version=0.93.9) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1207-2110-0.93.9-a815d93-NoAnim.tgz&channel=RM1207-2110-0.93.9-a815d93-NoAnim&version=0.93.9)
+# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1214-1846-0.93.9-29a6a37.tgz&channel=RM1214-1846-0.93.9-29a6a37&version=0.93.9) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1214-1846-0.93.9-29a6a37-NoAnim.tgz&channel=RM1214-1846-0.93.9-29a6a37-NoAnim&version=0.93.9)
