@@ -1,5 +1,6 @@
 #include "expansion.h"
 
+#include <furi_hal_power.h>
 #include <furi_hal_serial.h>
 #include <furi_hal_serial_control.h>
 
@@ -108,6 +109,7 @@ static size_t expansion_receive_callback(uint8_t* data, size_t data_size, void* 
 static size_t expansion_send_callback(const uint8_t* data, size_t data_size, void* context) {
     Expansion* instance = context;
     furi_hal_serial_tx(instance->serial_handle, data, data_size);
+    furi_hal_serial_tx_wait_complete(instance->serial_handle);
     return data_size;
 }
 
@@ -287,6 +289,8 @@ static int32_t expansion_worker(void* context) {
     furi_assert(context);
     Expansion* instance = context;
 
+    furi_hal_power_insomnia_enter();
+
     furi_hal_serial_control_set_expansion_callback(instance->serial_id, NULL, NULL);
 
     instance->serial_handle = furi_hal_serial_control_acquire(instance->serial_id);
@@ -311,15 +315,18 @@ static int32_t expansion_worker(void* context) {
     furi_hal_serial_control_release(instance->serial_handle);
     furi_stream_buffer_free(instance->rx_buf);
 
-    if(instance->exit_reason == ExpansionSessionExitReasonTimeout) {
-        // Thread exited due to timeout, and no disable request was issued by user code
-        // Re-enable the expansion detection interrupt and be ready to establish a new connection
-        furi_mutex_acquire(instance->state_mutex, FuriWaitForever);
-        instance->state = ExpansionStateEnabled;
-        furi_hal_serial_control_set_expansion_callback(
-            instance->serial_id, expansion_detect_callback, instance);
-        furi_mutex_release(instance->state_mutex);
-    }
+    // TODO: do we really need to disable expansion callback?
+    // if(instance->exit_reason == ExpansionSessionExitReasonTimeout) {
+    // Thread exited due to timeout, and no disable request was issued by user code
+    // Re-enable the expansion detection interrupt and be ready to establish a new connection
+    furi_mutex_acquire(instance->state_mutex, FuriWaitForever);
+    instance->state = ExpansionStateEnabled;
+    furi_hal_serial_control_set_expansion_callback(
+        instance->serial_id, expansion_detect_callback, instance);
+    furi_mutex_release(instance->state_mutex);
+    // }
+
+    furi_hal_power_insomnia_exit();
 
     return 0;
 }
