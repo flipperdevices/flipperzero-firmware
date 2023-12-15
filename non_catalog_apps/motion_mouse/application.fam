@@ -1,0 +1,9 @@
+App(
+    appid="motion_mouse",
+    name="[ICM42688] Motion Mouse",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="motion_mouse_app",
+    stack_size=4 * 1024,
+    fap_icon_assets="assets",
+    fap_category="GPIO",
+)
