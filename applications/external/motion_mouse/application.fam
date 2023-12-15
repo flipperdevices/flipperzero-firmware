@@ -1,0 +1,13 @@
+App(
+    appid="motion_mouse",
+    name="Motion Mouse",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="motion_mouse_app",
+    stack_size=4 * 1024,
+    fap_icon_assets="assets",
+    fap_category="GPIO",
+    fap_author="nminaylov",
+    fap_weburl="https://github.com/flipperdevices/flipperzero-good-faps/tree/nm/motion_mouse_app",
+    fap_version=(1, 0),
+    fap_description="Turns flipper with ICM42688 module into air mouse",
+)
