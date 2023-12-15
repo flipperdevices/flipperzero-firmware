@@ -166,7 +166,7 @@ void nfc_supported_cards_load_cache(NfcSupportedCards* instance) {
                 nfc_supported_cards_get_next_plugin(instance->load_context);
             if(plugin == NULL) break; //-V547
 
-            NfcSupportedCardsPluginCache plugin_cache = {};
+            NfcSupportedCardsPluginCache plugin_cache = {}; //-V779
             plugin_cache.path = furi_string_alloc_set(instance->load_context->file_path);
             plugin_cache.protocol = plugin->protocol;
             if(plugin->verify) {
