@@ -15,7 +15,7 @@ struct KeysDict {
     size_t total_keys;
 };
 
-static inline void __add_ending_new_line(KeysDict* instance) {
+static inline void keys_dict_add_ending_new_line(KeysDict* instance) {
     if(stream_seek(instance->stream, -1, StreamOffsetFromEnd)) {
         uint8_t last_char = 0;
 
@@ -29,9 +29,10 @@ static inline void __add_ending_new_line(KeysDict* instance) {
     }
 }
 
-static inline bool __read_key_line(KeysDict* instance, FuriString* line, bool* is_endfile) {
-    if(stream_read_line(instance->stream, line) == false)
+static bool keys_dict_read_key_line(KeysDict* instance, FuriString* line, bool* is_endfile) {
+    if(stream_read_line(instance->stream, line) == false) {
         *is_endfile = true;
+    }
 
     else {
         FURI_LOG_T(
@@ -39,7 +40,9 @@ static inline bool __read_key_line(KeysDict* instance, FuriString* line, bool* i
 
         bool is_comment = furi_string_get_char(line, 0) == '#';
 
-        if(!is_comment) furi_string_left(line, instance->key_size_symbols - 1);
+        if(!is_comment) {
+            furi_string_left(line, instance->key_size_symbols - 1);
+        }
 
         bool is_correct_size = furi_string_size(line) == instance->key_size_symbols - 1;
 
@@ -85,11 +88,12 @@ KeysDict* keys_dict_alloc(const char* path, KeysDictMode mode, size_t key_size) 
     bool file_exists =
         buffered_file_stream_open(instance->stream, path, FSAM_READ_WRITE, open_mode);
 
-    if(!file_exists)
+    if(!file_exists) {
         buffered_file_stream_close(instance->stream);
-    else
+    } else {
         // Eventually add new line character in the last line to avoid skipping keys
-        __add_ending_new_line(instance);
+        keys_dict_add_ending_new_line(instance);
+    }
 
     FuriString* line = furi_string_alloc();
 
@@ -98,8 +102,10 @@ KeysDict* keys_dict_alloc(const char* path, KeysDictMode mode, size_t key_size) 
     // In this loop we only count the entries in the file
     // We prefer not to load the whole file in memory for space reasons
     while(file_exists && !is_endfile) {
-        bool read_key = __read_key_line(instance, line, &is_endfile);
-        if(read_key) instance->total_keys++;
+        bool read_key = keys_dict_read_key_line(instance, line, &is_endfile);
+        if(read_key) {
+            instance->total_keys++;
+        }
     }
     stream_rewind(instance->stream);
     FURI_LOG_I(TAG, "Loaded dictionary with %u keys", instance->total_keys);
@@ -173,7 +179,7 @@ static bool keys_dict_get_next_key_str(KeysDict* instance, FuriString* key) {
 
     furi_string_reset(key);
 
-    while(!key_read && !is_endfile) key_read = __read_key_line(instance, key, &is_endfile);
+    while(!key_read && !is_endfile) key_read = keys_dict_read_key_line(instance, key, &is_endfile);
 
     return key_read;
 }
@@ -219,7 +225,8 @@ static bool keys_dict_is_key_present_str(KeysDict* instance, FuriString* key) {
 
     while(!line_found && !is_endfile)
         line_found = // The line is found if the line was read and the key is equal to the line
-            (__read_key_line(instance, line, &is_endfile)) && (furi_string_equal(key, line));
+            (keys_dict_read_key_line(instance, line, &is_endfile)) &&
+            (furi_string_equal(key, line));
 
     furi_string_free(line);
 
@@ -299,11 +306,15 @@ bool keys_dict_delete_key(KeysDict* instance, const uint8_t* key, size_t key_siz
     stream_rewind(instance->stream);
 
     while(!key_removed && !is_endfile) {
-        if(!keys_dict_get_next_key(instance, temp_key, key_size)) break;
+        if(!keys_dict_get_next_key(instance, temp_key, key_size)) {
+            break;
+        }
 
         if(memcmp(temp_key, key, key_size) == 0) {
             stream_seek(instance->stream, -instance->key_size_symbols, StreamOffsetFromCurrent);
-            if(stream_delete(instance->stream, instance->key_size_symbols) == false) break;
+            if(stream_delete(instance->stream, instance->key_size_symbols) == false) {
+                break;
+            }
             instance->total_keys--;
             key_removed = true;
         }
