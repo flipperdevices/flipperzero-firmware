@@ -8,7 +8,6 @@
 #include "nfc_protocol_support.h"
 
 #include "nfc/nfc_app_i.h"
-#include "nfc/helpers/nfc_supported_cards.h"
 
 #include "nfc_protocol_support_defs.h"
 #include "nfc_protocol_support_gui_common.h"

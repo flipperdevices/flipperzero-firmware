@@ -1,6 +1,5 @@
 #include "nfc/nfc_app_i.h"
 
-#include "nfc/helpers/nfc_supported_cards.h"
 #include "nfc/helpers/protocol_support/nfc_protocol_support_gui_common.h"
 
 void nfc_scene_supported_card_on_enter(void* context) {
