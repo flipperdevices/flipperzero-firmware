@@ -7,7 +7,7 @@
 
 #include <gui/gui.h>
 #include <gui/view.h>
-#include <coges_coges_coges_nfc_icons.h>
+#include <coges_nfc_icons.h>
 #include <gui/view_dispatcher.h>
 #include <gui/scene_manager.h>
 #include <cli/cli.h>

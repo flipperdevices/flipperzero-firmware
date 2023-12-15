@@ -1,5 +1,5 @@
 #include "nfc_app_i.h"
-#include "coges_coges_coges_nfc_icons.h"
+#include "coges_nfc_icons.h"
 
 #include <dolphin/dolphin.h>
 
