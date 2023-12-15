@@ -31,9 +31,9 @@ This software is for experimental purposes only and is not meant for any illegal
 
 - Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-12-14 19:33 EST`
 - Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-12-14 19:33 EST`
-- [VarItemList change locked state without new msg (By Willy-JL)]
+- [VarItemList change locked state without new msg (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/179bc126ae3c96b42753fc391760c9232d21dcd6)
 - Added: [Motion Mouse v1.0 (By nminaylov)](https://github.com/flipperdevices/flipperzero-good-faps/tree/nm/motion_mouse_app) `Req: ICM42688`
-- NFC: [Misc. keys from hotels & library cards in Germany (By icemirr0r)]
+- NFC: [Misc. keys from hotels & library cards in Germany (By icemirr0r)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/3fd89b2255dd2cc1ee1bc14eefc982b8366efa7c)
 - Updated: [BLE Spam v4.4 (By Willy-JL & ECTO-1A & Spooks4576 with research from xMasterX; OFW API thanks to noproto)](https://github.com/noproto/apple_ble_spam_ofw)
 
 ## IN THIS BRANCH:
