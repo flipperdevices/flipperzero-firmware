@@ -19,7 +19,7 @@ NOTE: If the screen says “Got std key” AND stays on 0/18, then loclass isn't
 
 1. Download the loclass log (_sdcard/apps_data/picopass/.loclass.log_) from your Flipper Zero.
 2. Use [loclass.ericbetts.dev](https://loclass.ericbetts.dev/) or a tool of your choice to calculate the key
-3. Copy the key to _iclass_elite_dict_user.txt_ and place in _sdcard/apps_data/picopass/_
+3. Copy the key to _iclass_elite_dict_user.txt_ and place in _sdcard/apps_data/picopass/assets/_
 4. Run _Elite Dict. Attack_ from the picopass main menu
 5. Present card to the back of the Flipper Zero.
 
