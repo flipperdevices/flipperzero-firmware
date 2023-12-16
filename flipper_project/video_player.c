@@ -8,6 +8,7 @@
 #include <furi_hal.h>
 #include <cli/cli.h>
 #include <gui/gui.h>
+#include "furi_hal_rtc.h"
 
 void draw_callback(Canvas* canvas, void* ctx) {
     PlayerViewModel* model = (PlayerViewModel*)ctx;
@@ -75,8 +76,7 @@ bool open_file_stream(Stream* stream) {
     return result;
 }
 
-void draw_progress_bar(VideoPlayerApp* player)
-{
+void draw_progress_bar(VideoPlayerApp* player) {
     canvas_set_color(player->canvas, ColorWhite);
     canvas_draw_box(player->canvas, 0, 57, 128, 7);
     canvas_set_color(player->canvas, ColorBlack);
@@ -84,15 +84,18 @@ void draw_progress_bar(VideoPlayerApp* player)
     canvas_draw_box(player->canvas, 1, 59, player->progress, 4);
 }
 
-void draw_all(VideoPlayerApp* player)
-{
+void draw_all(VideoPlayerApp* player) {
     canvas_reset(player->canvas);
 
     canvas_draw_xbm(
-        player->canvas, player->width == 128 ? 0 : (128 - player->width) / 2, 0, player->width, player->height, player->image_buffer);
+        player->canvas,
+        player->width == 128 ? 0 : (128 - player->width) / 2,
+        0,
+        player->width,
+        player->height,
+        player->image_buffer);
 
-    if(player->seeking)
-    {
+    if(player->seeking) {
         draw_progress_bar(player);
     }
 
@@ -117,7 +120,6 @@ int32_t video_player_app(void* p) {
         } else {
             player->quit = true;
             exit = true;
-            //goto end;
         }
 
         if(!(player->quit)) {
@@ -127,32 +129,41 @@ int32_t video_player_app(void* p) {
 
             if(strcmp(header, "BND!VID") != 0) {
                 player->quit = true;
-                //goto end;
             }
 
             stream_read(player->stream, (uint8_t*)&player->version, sizeof(player->version));
             stream_read(player->stream, (uint8_t*)&player->num_frames, sizeof(player->num_frames));
             stream_read(
-                player->stream, (uint8_t*)&player->audio_chunk_size, sizeof(player->audio_chunk_size));
-            stream_read(player->stream, (uint8_t*)&player->sample_rate, sizeof(player->sample_rate));
+                player->stream,
+                (uint8_t*)&player->audio_chunk_size,
+                sizeof(player->audio_chunk_size));
+            stream_read(
+                player->stream, (uint8_t*)&player->sample_rate, sizeof(player->sample_rate));
             stream_read(player->stream, &player->height, sizeof(player->height));
             stream_read(player->stream, &player->width, sizeof(player->width));
 
             player->header_size = stream_tell(player->stream);
 
             player->buffer = (uint8_t*)malloc(
-                player->audio_chunk_size * 2 + (uint32_t)player->height * (uint32_t)player->width / 8);
+                player->audio_chunk_size * 2 +
+                (uint32_t)player->height * (uint32_t)player->width / 8);
             memset(
                 player->buffer,
                 0,
-                player->audio_chunk_size * 2 + (uint32_t)player->height * (uint32_t)player->width / 8);
+                player->audio_chunk_size * 2 +
+                    (uint32_t)player->height * (uint32_t)player->width / 8);
 
             player->image_buffer_length = (uint32_t)player->height * (uint32_t)player->width / 8;
             player->audio_buffer = (uint8_t*)&player->buffer[player->image_buffer_length];
             player->image_buffer = player->buffer;
 
-            player->frame_size = player->audio_chunk_size + player->image_buffer_length; //for seeking
+            player->fake_audio_buffer = (uint8_t*)malloc(player->audio_chunk_size * 2);
+
+            player->frame_size =
+                player->audio_chunk_size + player->image_buffer_length; //for seeking
             player->frames_per_turn = player->num_frames / 126;
+
+            player->silent = furi_hal_rtc_is_flag_set(FuriHalRtcFlagStealthMode);
         }
 
         if(furi_hal_speaker_acquire(1000)) {
@@ -207,13 +218,16 @@ int32_t video_player_app(void* p) {
 
                     if(event.input.key == InputKeyLeft) {
                         player->seeking = true;
-                        int32_t seek = CLAMP((int32_t)stream_tell(player->stream) - player->frames_per_turn * player->frame_size, (int32_t)player->num_frames * player->frame_size + player->header_size, player->header_size);
+                        int32_t seek = CLAMP(
+                            (int32_t)stream_tell(player->stream) -
+                                player->frames_per_turn * player->frame_size,
+                            (int32_t)player->num_frames * player->frame_size + player->header_size,
+                            player->header_size);
                         stream_seek(player->stream, seek, StreamOffsetFromStart);
 
                         player->progress = (uint8_t)((int64_t)stream_tell(player->stream) * (int64_t)126 / ((int64_t)player->num_frames * (int64_t)player->frame_size + (int64_t)player->header_size));
 
-                        if(event.input.type == InputTypeRelease)
-                        {
+                        if(event.input.type == InputTypeRelease) {
                             player->seeking = false;
                         }
 
@@ -223,13 +237,16 @@ int32_t video_player_app(void* p) {
 
                     if(event.input.key == InputKeyRight) {
                         player->seeking = true;
-                        int32_t seek = CLAMP((int32_t)stream_tell(player->stream) + player->frames_per_turn * player->frame_size, (int32_t)player->num_frames * player->frame_size + player->header_size, player->header_size);
+                        int32_t seek = CLAMP(
+                            (int32_t)stream_tell(player->stream) +
+                                player->frames_per_turn * player->frame_size,
+                            (int32_t)player->num_frames * player->frame_size + player->header_size,
+                            player->header_size);
                         stream_seek(player->stream, seek, StreamOffsetFromStart);
 
                         player->progress = (uint8_t)((int64_t)stream_tell(player->stream) * (int64_t)126 / ((int64_t)player->num_frames * (int64_t)player->frame_size + (int64_t)player->header_size));
 
-                        if(event.input.type == InputTypeRelease)
-                        {
+                        if(event.input.type == InputTypeRelease) {
                             player->seeking = false;
                         }
 
@@ -247,11 +264,18 @@ int32_t video_player_app(void* p) {
                 }
 
                 if(event.type == EventType1stHalf) {
-                    //reading image+sound data in one pass since in this case image buffer and first part of audio buffer are continuous chunk of memory; should probably improve FPS
-                    stream_read(
-                        player->stream,
-                        player->image_buffer,
-                        player->image_buffer_length + player->audio_chunk_size);
+                    uint8_t* audio_buffer = player->audio_buffer;
+
+                    stream_read(player->stream, player->image_buffer, player->image_buffer_length);
+
+                    if(player->silent) {
+                        stream_read(
+                            player->stream, player->fake_audio_buffer, player->audio_chunk_size);
+                    }
+
+                    else {
+                        stream_read(player->stream, audio_buffer, player->audio_chunk_size);
+                    }
 
                     player->frames_played++;
 
@@ -262,7 +286,15 @@ int32_t video_player_app(void* p) {
                     uint8_t* audio_buffer = &player->audio_buffer[player->audio_chunk_size];
 
                     stream_read(player->stream, player->image_buffer, player->image_buffer_length);
-                    stream_read(player->stream, audio_buffer, player->audio_chunk_size);
+
+                    if(player->silent) {
+                        stream_read(
+                            player->stream, player->fake_audio_buffer, player->audio_chunk_size);
+                    }
+
+                    else {
+                        stream_read(player->stream, audio_buffer, player->audio_chunk_size);
+                    }
 
                     player->frames_played++;
 

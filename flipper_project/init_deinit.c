@@ -57,9 +57,12 @@ void deinit_player(VideoPlayerApp* player) {
     stream_free(player->stream);
     furi_record_close(RECORD_STORAGE);
 
-    if(player->buffer)
-    {
+    if(player->buffer) {
         free(player->buffer);
+    }
+
+    if(player->fake_audio_buffer) {
+        free(player->fake_audio_buffer);
     }
 
     furi_pubsub_unsubscribe(player->input, player->input_subscription);
