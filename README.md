@@ -10,7 +10,7 @@ To set the playlist you need to create a file in ext/apps_data/nfc_playlist call
 
 ## TODO:
 - [x] Add basic UI
-- [ ] Add checks for files that are not NFC and missing file and add a display for them
-- [ ] Add the ability to adjust time between cards
+- [X] Add checks for files that are not NFC and missing file and add a display for them
+- [X] Add the ability to adjust time between cards
 - [ ] Add the ability to adjust card queue from within the app
 - [ ] Make it so you can pause, stop and continue the running of the cards
