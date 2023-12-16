@@ -40,8 +40,6 @@ static void bad_kb_draw_callback(Canvas* canvas, void* _model) {
     canvas_draw_str(
         canvas, 2, 8 + canvas_current_font_height(canvas), furi_string_get_cstr(disp_str));
 
-    furi_string_reset(disp_str);
-
     canvas_draw_icon(canvas, 22, 24, &I_UsbTree_48x22);
 
     if((state == BadKbStateIdle) || (state == BadKbStateDone) ||
@@ -79,76 +77,85 @@ static void bad_kb_draw_callback(Canvas* canvas, void* _model) {
         canvas_draw_str_aligned(canvas, 127, 43, AlignRight, AlignBottom, "ERROR");
     } else if(state == BadKbStateScriptError) {
         canvas_draw_icon(canvas, 4, 26, &I_Error_18x18);
-        canvas_set_font(canvas, FontPrimary);
-        canvas_draw_str_aligned(canvas, 127, 33, AlignRight, AlignBottom, "ERROR:");
-        canvas_set_font(canvas, FontSecondary);
-        furi_string_printf(disp_str, "line %u", model->state.error_line);
+        furi_string_printf(disp_str, "line %zu", model->state.error_line);
         canvas_draw_str_aligned(
             canvas, 127, 46, AlignRight, AlignBottom, furi_string_get_cstr(disp_str));
-        furi_string_reset(disp_str);
         furi_string_set_str(disp_str, model->state.error);
         elements_string_fit_width(canvas, disp_str, canvas_width(canvas));
         canvas_draw_str_aligned(
             canvas, 127, 56, AlignRight, AlignBottom, furi_string_get_cstr(disp_str));
-        furi_string_reset(disp_str);
+        canvas_set_font(canvas, FontPrimary);
+        canvas_draw_str_aligned(canvas, 127, 33, AlignRight, AlignBottom, "ERROR:");
     } else if(state == BadKbStateIdle) {
         canvas_draw_icon(canvas, 4, 26, &I_Smile_18x18);
+        furi_string_printf(disp_str, "0/%zu", model->state.line_nb);
+        canvas_draw_str_aligned(
+            canvas, 124, 47, AlignRight, AlignBottom, furi_string_get_cstr(disp_str));
         canvas_set_font(canvas, FontBigNumbers);
-        canvas_draw_str_aligned(canvas, 114, 40, AlignRight, AlignBottom, "0");
-        canvas_draw_icon(canvas, 117, 26, &I_Percent_10x14);
+        canvas_draw_str_aligned(canvas, 112, 37, AlignRight, AlignBottom, "0");
+        canvas_draw_icon(canvas, 115, 23, &I_Percent_10x14);
     } else if(state == BadKbStateRunning) {
         if(model->anim_frame == 0) {
             canvas_draw_icon(canvas, 4, 23, &I_EviSmile1_18x21);
         } else {
             canvas_draw_icon(canvas, 4, 23, &I_EviSmile2_18x21);
         }
+        furi_string_printf(disp_str, "%zu/%zu", model->state.line_cur, model->state.line_nb);
+        canvas_draw_str_aligned(
+            canvas, 124, 47, AlignRight, AlignBottom, furi_string_get_cstr(disp_str));
         canvas_set_font(canvas, FontBigNumbers);
         furi_string_printf(
             disp_str, "%u", ((model->state.line_cur - 1) * 100) / model->state.line_nb);
         canvas_draw_str_aligned(
-            canvas, 114, 40, AlignRight, AlignBottom, furi_string_get_cstr(disp_str));
-        furi_string_reset(disp_str);
-        canvas_draw_icon(canvas, 117, 26, &I_Percent_10x14);
+            canvas, 112, 37, AlignRight, AlignBottom, furi_string_get_cstr(disp_str));
+        canvas_draw_icon(canvas, 115, 23, &I_Percent_10x14);
     } else if(state == BadKbStateDone) {
         canvas_draw_icon(canvas, 4, 23, &I_EviSmile1_18x21);
+        furi_string_printf(disp_str, "%zu/%zu", model->state.line_nb, model->state.line_nb);
+        canvas_draw_str_aligned(
+            canvas, 124, 47, AlignRight, AlignBottom, furi_string_get_cstr(disp_str));
         canvas_set_font(canvas, FontBigNumbers);
-        canvas_draw_str_aligned(canvas, 114, 40, AlignRight, AlignBottom, "100");
-        furi_string_reset(disp_str);
-        canvas_draw_icon(canvas, 117, 26, &I_Percent_10x14);
+        canvas_draw_str_aligned(canvas, 112, 37, AlignRight, AlignBottom, "100");
+        canvas_draw_icon(canvas, 115, 23, &I_Percent_10x14);
     } else if(state == BadKbStateDelay) {
         if(model->anim_frame == 0) {
             canvas_draw_icon(canvas, 4, 23, &I_EviWaiting1_18x21);
         } else {
             canvas_draw_icon(canvas, 4, 23, &I_EviWaiting2_18x21);
         }
+        uint32_t delay = model->state.delay_remain / 10;
+        if(delay) {
+            furi_string_printf(disp_str, "Delay %lus", delay);
+            canvas_draw_str_aligned(
+                canvas, 4, 61, AlignLeft, AlignBottom, furi_string_get_cstr(disp_str));
+        }
+        furi_string_printf(disp_str, "%zu/%zu", model->state.line_cur, model->state.line_nb);
+        canvas_draw_str_aligned(
+            canvas, 124, 47, AlignRight, AlignBottom, furi_string_get_cstr(disp_str));
         canvas_set_font(canvas, FontBigNumbers);
         furi_string_printf(
             disp_str, "%u", ((model->state.line_cur - 1) * 100) / model->state.line_nb);
         canvas_draw_str_aligned(
-            canvas, 114, 40, AlignRight, AlignBottom, furi_string_get_cstr(disp_str));
-        furi_string_reset(disp_str);
-        canvas_draw_icon(canvas, 117, 26, &I_Percent_10x14);
-        canvas_set_font(canvas, FontSecondary);
-        furi_string_printf(disp_str, "delay %lus", model->state.delay_remain);
-        canvas_draw_str_aligned(
-            canvas, 127, 50, AlignRight, AlignBottom, furi_string_get_cstr(disp_str));
-        furi_string_reset(disp_str);
+            canvas, 112, 37, AlignRight, AlignBottom, furi_string_get_cstr(disp_str));
+        canvas_draw_icon(canvas, 115, 23, &I_Percent_10x14);
     } else if((state == BadKbStatePaused) || (state == BadKbStateWaitForBtn)) {
         if(model->anim_frame == 0) {
             canvas_draw_icon(canvas, 4, 23, &I_EviWaiting1_18x21);
         } else {
             canvas_draw_icon(canvas, 4, 23, &I_EviWaiting2_18x21);
         }
+        if(state != BadKbStateWaitForBtn) {
+            canvas_draw_str_aligned(canvas, 4, 61, AlignLeft, AlignBottom, "Paused");
+        }
+        furi_string_printf(disp_str, "%zu/%zu", model->state.line_cur, model->state.line_nb);
+        canvas_draw_str_aligned(
+            canvas, 124, 47, AlignRight, AlignBottom, furi_string_get_cstr(disp_str));
         canvas_set_font(canvas, FontBigNumbers);
         furi_string_printf(
             disp_str, "%u", ((model->state.line_cur - 1) * 100) / model->state.line_nb);
         canvas_draw_str_aligned(
-            canvas, 114, 40, AlignRight, AlignBottom, furi_string_get_cstr(disp_str));
-        furi_string_reset(disp_str);
-        canvas_draw_icon(canvas, 117, 26, &I_Percent_10x14);
-        canvas_set_font(canvas, FontSecondary);
-        canvas_draw_str_aligned(canvas, 127, 50, AlignRight, AlignBottom, "Paused");
-        furi_string_reset(disp_str);
+            canvas, 112, 37, AlignRight, AlignBottom, furi_string_get_cstr(disp_str));
+        canvas_draw_icon(canvas, 115, 23, &I_Percent_10x14);
     } else {
         canvas_draw_icon(canvas, 4, 26, &I_Clock_18x18);
     }
