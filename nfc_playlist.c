@@ -20,9 +20,6 @@ typedef enum {
    NfcPlaylistScene_count
 } NfcPlaylistScene;
 
-// IDs for the view used by the app
-typedef enum { NfcPlaylistView_Menu, NfcPlaylistView_Popup } NfcPlaylistView;
-
 // The app context struct
 typedef struct {
    SceneManager* scene_manager;
@@ -30,28 +27,28 @@ typedef struct {
    VariableItemList* variable_item_list;
    Popup* popup;
    NfcPlaylistWorker* nfc_worker;
-   int emulate_timeout; uint8_t emulate_timeout_index;
-   int emulate_delay; uint8_t emulate_delay_index;
+   uint8_t emulate_timeout;
+   uint8_t emulate_delay;
 } NfcPlaylist;
-
-// All custom events
-typedef enum { NfcPlaylistEvent_ShowEmulatingPopup } NfcPlaylistEvent;
 
 // All options for the emulate timeout and delay
 const int options_emulate_timeout[] = { 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000 };
 const int options_emulate_delay[] = { 0000, 1000, 2000, 3000, 4000, 5000 };
 
 /* main menu scene */
-
 // Indices for menu items
-typedef enum { NfcPlaylistMenuSelection_Start, NfcPlaylistMenuSelection_Settings } NfcPlaylistMenuSelection;
+typedef enum { NfcPlaylistSettings_Timeout, NfcPlaylistSettings_Delay, NfcPlaylistMenuSelection_Start } NfcPlaylistMenuSelection;
+// All custom events
+typedef enum { NfcPlaylistEvent_ShowEmulatingPopup } NfcPlaylistEvent;
+// IDs for the view used by the app
+typedef enum { NfcPlaylistView_Menu, NfcPlaylistView_Popup } NfcPlaylistView;
 
 // Main menu callback - sends a custom event to the scene manager based on the menu selection
 void nfc_playlist_menu_callback_main_menu(void* context, uint32_t index) {
    FURI_LOG_T(TAG, "nfc_playlist_menu_callback_main_menu");
    NfcPlaylist* app = context;
    switch(index) {
-      case 0:
+      case NfcPlaylistMenuSelection_Start:
          scene_manager_handle_custom_event(app->scene_manager, NfcPlaylistEvent_ShowEmulatingPopup);
          break;
       default:
@@ -66,21 +63,18 @@ static void nfc_playlist_settings_change_callback(VariableItem* item) {
    uint8_t option_value_index = variable_item_get_current_value_index(item);
 
    switch(current_option) {
-   case 1: ;
-      app->emulate_timeout = options_emulate_timeout[option_value_index];
-      app->emulate_timeout_index = option_value_index;
-      char emulate_timeout_text[9];
-      snprintf(emulate_timeout_text, 9, "%d", (app->emulate_timeout/1000));
-      variable_item_set_current_value_text(item, (char*)emulate_timeout_text);
-
-      break;
-   case 2: ;
-      app->emulate_delay = options_emulate_delay[option_value_index];
-      app->emulate_delay_index = option_value_index;
-      char emulate_delay_text[9];
-      snprintf(emulate_delay_text, 9, "%d", (app->emulate_delay/1000));
-      variable_item_set_current_value_text(item, (char*)emulate_delay_text);
-      break;
+      case NfcPlaylistSettings_Timeout: ;
+         app->emulate_timeout = option_value_index;
+         char emulate_timeout_text[9];
+         snprintf(emulate_timeout_text, 9, "%d", (options_emulate_timeout[option_value_index]/1000));
+         variable_item_set_current_value_text(item, (char*)emulate_timeout_text);
+         break;
+      case NfcPlaylistSettings_Delay: ;
+         app->emulate_delay = option_value_index;
+         char emulate_delay_text[9];
+         snprintf(emulate_delay_text, 9, "%d", (options_emulate_delay[option_value_index]/1000));
+         variable_item_set_current_value_text(item, (char*)emulate_delay_text);
+         break;
    }
 }
 
@@ -88,33 +82,28 @@ static void nfc_playlist_settings_change_callback(VariableItem* item) {
 void nfc_playlist_scene_on_enter_main_menu(void* context) {
    FURI_LOG_T(TAG, "nfc_playlist_scene_on_enter_main_menu");
    NfcPlaylist* app = context;
-
-   // make a variable item list that goes up in 2
-
    variable_item_list_set_header(app->variable_item_list, "NFC Playlist");
-   variable_item_list_add(app->variable_item_list, "Start", 0, NULL, NULL);
    VariableItem* emulation_timeout_settings = variable_item_list_add(
       app->variable_item_list,
-      "Emulation timeout",
+      "Timeout",
       10,
       nfc_playlist_settings_change_callback,
       app);
-   variable_item_set_current_value_index(emulation_timeout_settings, app->emulate_timeout_index);
+   variable_item_set_current_value_index(emulation_timeout_settings, app->emulate_timeout);
    char emulation_timeout_settings_text[9];
-   snprintf(emulation_timeout_settings_text, 9, "%d", (app->emulate_timeout/1000));
+   snprintf(emulation_timeout_settings_text, 9, "%d", (options_emulate_timeout[app->emulate_timeout]/1000));
    variable_item_set_current_value_text(emulation_timeout_settings, (char*)emulation_timeout_settings_text);
-
    VariableItem* emulation_delay_settings = variable_item_list_add(
       app->variable_item_list,
-      "Emulation delay",
+      "Delay",
       6,
       nfc_playlist_settings_change_callback,
       app);
-   variable_item_set_current_value_index(emulation_delay_settings, app->emulate_delay_index);
+   variable_item_set_current_value_index(emulation_delay_settings, app->emulate_delay);
    char emulation_delay_settings_text[9];
-   snprintf(emulation_delay_settings_text, 9, "%d", (app->emulate_delay/1000));
+   snprintf(emulation_delay_settings_text, 9, "%d", (options_emulate_delay[app->emulate_delay]/1000));
    variable_item_set_current_value_text(emulation_delay_settings, (char*)emulation_delay_settings_text);
-
+   variable_item_list_add(app->variable_item_list, "Start", 0, NULL, NULL);
    variable_item_list_set_enter_callback(app->variable_item_list, nfc_playlist_menu_callback_main_menu, app);
    view_dispatcher_switch_to_view(app->view_dispatcher, NfcPlaylistView_Menu);
 }
@@ -162,13 +151,13 @@ void nfc_playlist_scene_on_enter_popup_emulating(void* context) {
       popup_set_context(app->popup, app);
       popup_set_header(app->popup, "Emulating:", 64, 10, AlignCenter, AlignTop);
       view_dispatcher_switch_to_view(app->view_dispatcher, NfcPlaylistView_Popup);
-   
+
       int file_position = 0;
       // read the file line by line and print the text
       while(stream_read_line(stream, line)) {
-         if (app->emulate_delay > 0) {
+         if (options_emulate_delay[app->emulate_delay] > 0) {
             if (file_position > 0) {
-               int time_counter_delay_ms = app->emulate_delay;
+               int time_counter_delay_ms = options_emulate_timeout[app->emulate_delay];
                do {
                   char display_text[30];
                   snprintf(display_text, 30, "%s\n\n%ds", "Delaying...", (time_counter_delay_ms/1000));
@@ -178,47 +167,51 @@ void nfc_playlist_scene_on_enter_popup_emulating(void* context) {
                } while(time_counter_delay_ms > 0);
             } else {
                file_position++;
-            }            
+            }
          }
-         
+
          char* file_path = (char*)furi_string_get_cstr(line);
          char* file_name = &strrchr(file_path, '/')[1];
-         int time_counter_ms = app->emulate_timeout;
+         int time_counter_ms = options_emulate_timeout[app->emulate_timeout];
 
          if (storage_file_exists(storage, file_path) == false) {
-            char* text = strcat(file_name, "\nnot found");
-            int size = (strlen(text) + 4);
-            char display_text[size];
+            char* popup_text_unformatted = strcat(file_name, "\nnot found");
+            int popup_text_size = (strlen(popup_text_unformatted) + 4);
+            char popup_text[popup_text_size];
 
             do {
-               snprintf(display_text, size, "%s\n%ds", file_name, (time_counter_ms/1000));
-               popup_set_text(app->popup, display_text, 64, 25, AlignCenter, AlignTop);
+               snprintf(popup_text, popup_text_size, "%s\n%ds", file_name, (time_counter_ms/1000));
+               popup_set_text(app->popup, popup_text, 64, 25, AlignCenter, AlignTop);
                furi_delay_ms(500);
                time_counter_ms -= 500;
             } while(time_counter_ms > 0);
          } else {
             nfc_playlist_worker_set_nfc_data(app->nfc_worker, file_path);
             nfc_playlist_worker_start(app->nfc_worker);
-            
-            int size = (strlen(file_name) + 4);
-            char display_text[size];
-            
+
+            int popup_text_size = (strlen(file_name) + 4);
+            char popup_text[popup_text_size];
+
             do {
-               snprintf(display_text, size, "%s\n%ds", file_name, (time_counter_ms/1000));
-               popup_set_text(app->popup, display_text, 64, 25, AlignCenter, AlignTop);
+               snprintf(popup_text, popup_text_size, "%s\n%ds", file_name, (time_counter_ms/1000));
+               popup_set_text(app->popup, popup_text, 64, 25, AlignCenter, AlignTop);
                furi_delay_ms(500);
                time_counter_ms -= 500;
-               if (time_counter_ms <= 0) {
-                  break;
-               }
-            } while(nfc_playlist_worker_is_emulating(app->nfc_worker));
+            } while(nfc_playlist_worker_is_emulating(app->nfc_worker) && time_counter_ms > 0);
 
             if (nfc_playlist_worker_is_emulating(app->nfc_worker)) {
                nfc_playlist_worker_stop(app->nfc_worker);
             }
          }
       }
+      popup_reset(app->popup);
+      scene_manager_previous_scene(app->scene_manager);
    } else {
+      popup_reset(app->popup);
+      popup_set_context(app->popup, app);
+      popup_set_header(app->popup, "Error:", 64, 10, AlignCenter, AlignTop);
+      popup_set_text(app->popup, "Failed to open file\n/ext/apps_data/nfc_playlist/playlist.txt", 64, 25, AlignCenter, AlignTop);
+      view_dispatcher_switch_to_view(app->view_dispatcher, NfcPlaylistView_Popup);
       FURI_LOG_E(TAG, "Failed to open file");
    }
    // Free/close resources
@@ -229,9 +222,6 @@ void nfc_playlist_scene_on_enter_popup_emulating(void* context) {
    app->nfc_worker = NULL;
    // Close storage
    furi_record_close(RECORD_STORAGE);
-
-   popup_reset(app->popup);
-   scene_manager_previous_scene(app->scene_manager);
 }
 
 bool nfc_playlist_scene_on_event_popup_emulating(void* context, SceneManagerEvent event) {
@@ -301,10 +291,8 @@ void nfc_playlist_view_dispatcher_init(NfcPlaylist* app) {
    FURI_LOG_D(TAG, "nfc_playlist_view_dispatcher_init allocating views");
    app->variable_item_list = variable_item_list_alloc();
    app->popup = popup_alloc();
-   app->emulate_timeout = 5000;
-   app->emulate_timeout_index = 4;
-   app->emulate_delay = 0000;
-   app->emulate_delay_index = 0;
+   app->emulate_timeout = 4;
+   app->emulate_delay = 0;
 
    // assign callback that pass events from views to the scene manager
    FURI_LOG_D(TAG, "nfc_playlist_view_dispatcher_init setting callbacks");
