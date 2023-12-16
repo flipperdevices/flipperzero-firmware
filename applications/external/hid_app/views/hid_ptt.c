@@ -104,12 +104,8 @@ static void hid_ptt_trigger_camera_linux_zoom(HidPushToTalk* hid_ptt) {
     hid_hal_keyboard_press(hid_ptt->hid, KEY_MOD_LEFT_ALT | HID_KEYBOARD_V);
     hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_ALT | HID_KEYBOARD_V);
 }
-static void hid_ptt_trigger_hand_macos_zoom(HidPushToTalk* hid_ptt) {
-    hid_hal_keyboard_press(hid_ptt->hid, KEY_MOD_LEFT_GUI | HID_KEYBOARD_Y);
-    hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_GUI | HID_KEYBOARD_Y);
-}
-static void hid_ptt_trigger_hand_linux_zoom(HidPushToTalk* hid_ptt) {
-    hid_hal_keyboard_press(hid_ptt->hid, KEY_MOD_LEFT_ALT | HID_KEYBOARD_Y);
+static void hid_ptt_trigger_hand_zoom(HidPushToTalk* hid_ptt) {
+    hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_ALT | HID_KEYBOARD_Y);
     hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_ALT | HID_KEYBOARD_Y);
 }
 
@@ -427,9 +423,9 @@ static void hid_ptt_menu_callback(
                 case HidPushToTalkAppIndexZoom:
                     model->callback_trigger_mute = hid_ptt_trigger_mute_macos_zoom;
                     model->callback_trigger_camera = hid_ptt_trigger_camera_macos_zoom;
-                    model->callback_trigger_hand = hid_ptt_trigger_hand_macos_zoom;
-                    model->callback_start_ptt = hid_ptt_start_ptt_meet_zoom;
-                    model->callback_stop_ptt = hid_ptt_stop_ptt_meet_zoom;
+                    model->callback_trigger_hand   = hid_ptt_trigger_hand_zoom;
+                    model->callback_start_ptt      = hid_ptt_start_ptt_meet_zoom;
+                    model->callback_stop_ptt       = hid_ptt_stop_ptt_meet_zoom;
                     break;
                 }
             } else if(osIndex == HidPushToTalkLinux) {
@@ -495,9 +491,9 @@ static void hid_ptt_menu_callback(
                 case HidPushToTalkAppIndexZoom:
                     model->callback_trigger_mute = hid_ptt_trigger_mute_linux_zoom;
                     model->callback_trigger_camera = hid_ptt_trigger_camera_linux_zoom;
-                    model->callback_trigger_hand = hid_ptt_trigger_hand_linux_zoom;
-                    model->callback_start_ptt = hid_ptt_start_ptt_meet_zoom;
-                    model->callback_stop_ptt = hid_ptt_stop_ptt_meet_zoom;
+                    model->callback_trigger_hand   = hid_ptt_trigger_hand_zoom;
+                    model->callback_start_ptt      = hid_ptt_start_ptt_meet_zoom;
+                    model->callback_stop_ptt       = hid_ptt_stop_ptt_meet_zoom;
                     break;
                 case HidPushToTalkAppIndexWebex:
                     model->callback_trigger_mute = hid_ptt_trigger_mute_linux_skype;
