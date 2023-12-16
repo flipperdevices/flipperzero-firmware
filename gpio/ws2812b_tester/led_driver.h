@@ -1,7 +1,7 @@
 #include <furi.h>
 #include <furi_hal.h>
 
-#define MAX_LED_COUNT 1024
+#define MAX_LED_COUNT 512
 
 typedef struct LedDriver LedDriver;
 
