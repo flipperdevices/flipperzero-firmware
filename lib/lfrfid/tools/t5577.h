@@ -2,14 +2,12 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include <furi.h>
-#include <furi_hal_rfid.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 #define LFRFID_T5577_BLOCK_COUNT 8
+#define LFRFID_T5577_PAGE_COUNT 2
 
 // T5577 block 0 definitions, thanks proxmark3!
 #define LFRFID_T5577_POR_DELAY 0x00000001
@@ -41,27 +39,6 @@ extern "C" {
 #define LFRFID_T5577_BITRATE_RF_100 0x00180000
 #define LFRFID_T5577_BITRATE_RF_128 0x001C0000
 #define LFRFID_T5577_TESTMODE_DISABLED 0x60000000
-
-/****************************************/
-
-// Required clocks to load configurations, time must be >= 3ms
-#define T5577_INITIAL_WAIT_CLOCKS 400
-
-// Required clocks to write block, typical time is around 5.6ms
-#define T5577_PROGRAM_CLOCKS 700
-
-#define T5577_START_GAP_CLOCKS 30
-#define T5577_WRITE_GAP_CLOCKS 18
-#define T5577_BIT_0_CLOCKS 24
-#define T5577_BIT_1_CLOCKS 56
-
-/****************************************/
-
-#define T5577_OPCODE_PAGE_0 0b10
-#define T5577_OPCODE_PAGE_1 0b11
-#define T5577_OPCODE_RESET 0b00
-
-/****************************************/
 
 typedef struct {
     uint32_t block[LFRFID_T5577_BLOCK_COUNT];

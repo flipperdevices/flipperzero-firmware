@@ -1,5 +1,29 @@
 #include "t5577.h"
 
+#include <furi.h>
+#include <furi_hal_rfid.h>
+
+/****************************************/
+
+// Required clocks to load configurations, time must be >= 3ms
+#define T5577_INITIAL_WAIT_CLOCKS 400
+
+// Required clocks to write block, typical time is around 5.6ms
+#define T5577_PROGRAM_CLOCKS 700
+
+#define T5577_START_GAP_CLOCKS 30
+#define T5577_WRITE_GAP_CLOCKS 18
+#define T5577_BIT_0_CLOCKS 24
+#define T5577_BIT_1_CLOCKS 56
+
+/****************************************/
+
+#define T5577_OPCODE_PAGE_0 0b10
+#define T5577_OPCODE_PAGE_1 0b11
+#define T5577_OPCODE_RESET 0b00
+
+/****************************************/
+
 static inline void t5577_furi_delay_clocks(uint32_t clocks) {
     // T = 1/f => 1 / 125khz == 8 microseconds;
     furi_delay_us(clocks * 8);
@@ -48,7 +72,9 @@ static void t5577_write_block(uint8_t page, uint8_t block, bool lock_bit, uint32
     t5577_write_bit(lock_bit);
 
     // Send Block Data
-    for(uint8_t i = 0; i < 32; i++) t5577_write_bit(data >> (31 - i));
+    for(uint8_t i = 0; i < 32; i++) {
+        t5577_write_bit(data >> (31 - i));
+    }
 
     // Block address -> All blocks in T5577 are 8: 0 to 7
     t5577_write_bit(block >> 2);
@@ -59,12 +85,15 @@ static void t5577_write_block(uint8_t page, uint8_t block, bool lock_bit, uint32
 
     // After programmed, the fob returns in read mode
     // If we wrote block 0 we need to reload configurations
-    if(block == 0) t5577_write_reset();
+    if(block == 0) {
+        t5577_write_reset();
+    }
 }
 
 void t5577_write(LFRFIDT5577* data, uint8_t page) {
     furi_assert(data);
-    furi_assert(page == 0 || page == 1);
+    furi_assert(data->blocks_to_write <= LFRFID_T5577_BLOCK_COUNT);
+    furi_assert(page < LFRFID_T5577_PAGE_COUNT);
 
     t5577_start();
     {
@@ -73,8 +102,9 @@ void t5577_write(LFRFIDT5577* data, uint8_t page) {
         // After the fob is entered in the field, we wait for loading configuration
         t5577_furi_delay_clocks(T5577_INITIAL_WAIT_CLOCKS);
 
-        for(uint8_t i = 0; i < data->blocks_to_write; i++)
+        for(uint8_t i = 0; i < data->blocks_to_write; i++) {
             t5577_write_block(page, i, false, data->block[i]);
+        }
 
         FURI_CRITICAL_EXIT();
     }
