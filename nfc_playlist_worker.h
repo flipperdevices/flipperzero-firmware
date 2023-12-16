@@ -1,7 +1,6 @@
 #pragma once
 #include <furi.h>
 #include <furi_hal.h>
-
 #include <nfc/nfc.h>
 #include <nfc/nfc_device.h>
 #include <nfc/nfc_listener.h>
