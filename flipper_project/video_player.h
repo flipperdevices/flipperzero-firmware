@@ -21,6 +21,7 @@ typedef enum {
     EventTypeInput,
     EventType1stHalf,
     EventType2ndHalf,
+    EventTypeJustRedraw,
 } EventType;
 
 typedef struct {
@@ -69,9 +70,17 @@ typedef struct {
 
     uint32_t frames_played;
 
+    int32_t frame_size;
+    int32_t header_size; //for seeking
+    int32_t frames_per_turn; //frames / 126, how many frames to wind forwards/backwards when seeking
+
+    uint8_t progress;
+
     bool playing;
     
     bool quit;
+
+    bool seeking; //to display progress bar
 } VideoPlayerApp;
 
 typedef struct {
