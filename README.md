@@ -23,3 +23,17 @@ Available from: https://github.com/kbembedded/flipper-gblink
 
 ## Use example
 See https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Pokemon-Trading
+
+To include this in a Flipper Zero application, add this repo as a submodule in the `lib/` directory of the application source. Then add the following to `application.fam`:
+```
+App(
+...
+    fap_private_libs=[
+        Lib(
+            name="flipper-gblink",
+            sources=["gblink.c"],
+        ),
+    ],
+...
+)
+```
