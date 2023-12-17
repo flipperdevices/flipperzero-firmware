@@ -1,5 +1,9 @@
 # Changelog - Patch Notes
 
+## Version 1.5
+- **Add Features:** Incorporate flipper-gblink library; Add support for MALVEKE board as well as custom pin selection; If MALVEKE board is detected, default to that pinout, otherwise use the original documented pinout.
+- **BUG:** The current MALVEKE pinout and interrupt use breaks the OK button after entering the trade screen.
+
 ## Version 1.4
 - **Bug Fixes:** More robust trade logic fixes issues with names, remove ability to use numbers in Pokemon/Trainer names as the game itself will not allow that, fix trade animation not always being animated, make FAP icon 1bpp.
 - **Add Features:** Implement trade patch list that Game Boy expects and uses, add ability to return to main menu to modify a Pokemon traded to the Flipper and re-enter trade without the Game Boy needing to power cycle and re-connect through the Link Club, add back debug logging.
