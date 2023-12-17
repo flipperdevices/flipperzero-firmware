@@ -118,11 +118,11 @@ This software is for experimental purposes only and is not meant for any illegal
 - Update: [NFC Seader v2.1 (By bettse)](https://github.com/bettse/seader)
 - OFW: [Umarsh transport cards parser #3277 (By Leptopt1los)](https://github.com/flipperdevices/flipperzero-firmware/pull/3277)
 - OFW: [Add MyKey parser #3262 (By augustozanellato)](https://github.com/flipperdevices/flipperzero-firmware/pull/3262) (Was already in RM)
-- Updated: [PicoPass (iClass) v1.10 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass) [Picopass rework. Part 1 #68 (By gornekich)](https://github.com/flipperdevices/flipperzero-good-faps/pull/68) [PicoPass: Hopefully fix name buffer size issues (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/9058c0c6a9980f84f6436673f9d3fbbc82cb3f81) [Picopass save partial #85 (By bettse)](https://github.com/flipperdevices/flipperzero-good-faps/pull/85)
 - OFW: [nfc_util: little endian bytes2num functions added #3287 (By Leptopt1los)](https://github.com/flipperdevices/flipperzero-firmware/pull/3287)
 - OFW: [MFC emulation fix #3291 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3291)
 - OFW: [NFC Plugins loading rework #3295 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3295)
 - Updated: [COGES NFC (For Coffee Machines) (By OFW + haisenteck)](https://github.com/haisenteck/flipperzero-Haisenteck/) (second update to fix missing dependancies)
+- Updated: [PicoPass (iClass) v1.10 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass) [Rework. Part 1 #68 (By gornekich)](https://github.com/flipperdevices/flipperzero-good-faps/pull/68) [Hopefully fix name buffer size issues (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/9058c0c6a9980f84f6436673f9d3fbbc82cb3f81) [Save partial #85 (By bettse)](https://github.com/flipperdevices/flipperzero-good-faps/pull/85) [More info view (raw bytes) #86 (By bettse)](https://github.com/flipperdevices/flipperzero-good-faps/pull/86)
 
 <a name="release">
 
