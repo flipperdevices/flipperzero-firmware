@@ -2,14 +2,16 @@
 
 ## Introduction
 
+Now supports MALVEKE board!
+
 This is a Pokemon exchange application from Flipper Zero to Game Boy (Generación I). Flipper Zero emulates a "Slave" Game Boy connected to a Game Link Cable to be able to exchange any Pokemon from the First Generation (Red, Blue, Yellow) to a real Game Boy.
 
-It is a Proof of Concept (POC) for using views, GPIO, and FURI (Flipper Universal Registry Implementation).
+If a MALVEKE board is plugged in to GPIO before starting the app, the app will default to using the MALVEKE EXT1 interface.
 
 
 ## Connection: Flipper Zero GPIO - Game Boy
 
-The pins should be connected as follows:
+The original pinout is as follows:
 
 | Cable Game Link (Socket) | Flipper Zero GPIO |
 | ------------------------ | ----------------- |
@@ -17,6 +19,9 @@ The pins should be connected as follows:
 | 5 (CLK)                  | 6 (B2)            |
 | 3 (SI)                   | 7 (C3)            |
 | 2 (SO)                   | 5 (B3)            |
+
+Using the "Select Pinout" option, the Original, MALVEKE, or any custom pin configuration can be selected.
+
 
 ## How does it work?
 
@@ -34,5 +39,3 @@ The Game Boy link protocol is synchronous and requires the slave device to respo
 ##  Tested In
 - Game Boy Color (GBC)
 - Game Boy Advance (GBA)
-
-

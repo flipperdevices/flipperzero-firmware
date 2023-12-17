@@ -11,6 +11,7 @@
 #include "pokemon_ot_id.h"
 #include "pokemon_ot_name.h"
 #include "pokemon_trade.h"
+#include "pokemon_pins.h"
 
 static void scene_change_from_main_cb(void* context, uint32_t index) {
     PokemonFap* pokemon_fap = (PokemonFap*)context;
@@ -95,6 +96,12 @@ void main_menu_scene_on_enter(void* context) {
         pokemon_fap->submenu, buf, SelectOTNameScene, scene_change_from_main_cb, pokemon_fap);
     submenu_add_item(
         pokemon_fap->submenu, "Trade PKMN", TradeScene, scene_change_from_main_cb, pokemon_fap);
+    submenu_add_item(
+        pokemon_fap->submenu,
+        "Select Pinout",
+        SelectPinsScene,
+        scene_change_from_main_cb,
+        pokemon_fap);
 
     submenu_set_selected_item(
         pokemon_fap->submenu,
@@ -128,6 +135,7 @@ void (*const pokemon_scene_on_enter_handlers[])(void*) = {
     select_ot_id_scene_on_enter,
     select_ot_name_scene_on_enter,
     trade_scene_on_enter,
+    select_pins_scene_on_enter,
 };
 
 void (*const pokemon_scene_on_exit_handlers[])(void*) = {
@@ -143,9 +151,11 @@ void (*const pokemon_scene_on_exit_handlers[])(void*) = {
     select_ot_id_scene_on_exit,
     select_ot_name_scene_on_exit,
     null_scene_on_exit,
+    select_pins_scene_on_exit,
 };
 
 bool (*const pokemon_scene_on_event_handlers[])(void*, SceneManagerEvent) = {
+    null_scene_on_event,
     null_scene_on_event,
     null_scene_on_event,
     null_scene_on_event,

@@ -83,13 +83,10 @@
 
 #include <gui/view.h>
 #include <pokemon_icons.h>
+#include <gblink.h>
 
 #include "../pokemon_app.h"
 #include "trade_patch_list.h"
-
-#define GAME_BOY_CLK gpio_ext_pb2
-#define GAME_BOY_SI gpio_ext_pc3
-#define GAME_BOY_SO gpio_ext_pb3
 
 #define DELAY_MICROSECONDS 15
 #define PKMN_BLANK 0x00
@@ -167,6 +164,8 @@ struct trade_ctx {
     TradeBlock* input_block;
     const PokemonTable* pokemon_table;
     struct patch_list* patch_list;
+    void* gblink_handle;
+    struct gblink_pins* gblink_pins;
 };
 
 /* These are the needed variables for the draw callback */
@@ -629,7 +628,7 @@ static uint8_t getTradeCentreResponse(struct trade_ctx* trade) {
     return send;
 }
 
-void transferBit(void* context) {
+static void transferBit(void* context, uint8_t in_byte) {
     furi_assert(context);
 
     struct trade_ctx* trade = (struct trade_ctx*)context;
@@ -638,58 +637,23 @@ void transferBit(void* context) {
     with_view_model(
         trade->view, struct trade_model * model, { status = model->gameboy_status; }, false);
 
-    /* Shift data in every clock */
-    trade->in_data <<= 1;
-    trade->in_data |= furi_hal_gpio_read(&GAME_BOY_SI);
-    trade->shift++;
+    trade->in_data = in_byte;
 
     /* Once a byte of data has been shifted in, process it */
-    if(trade->shift == 8) {
-        trade->shift = 0;
-        switch(status) {
-        case GAMEBOY_CONN_FALSE:
-            trade->out_data = getConnectResponse(trade);
-            break;
-        case GAMEBOY_CONN_TRUE:
-            trade->out_data = getMenuResponse(trade);
-            break;
-        case GAMEBOY_COLOSSEUM:
-            trade->out_data = trade->in_data;
-            break;
-        /* Every other state is trade related */
-        default:
-            trade->out_data = getTradeCentreResponse(trade);
-            break;
-        }
-    }
-}
-
-void input_clk_gameboy(void* context) {
-    furi_assert(context);
-
-    struct trade_ctx* trade = (struct trade_ctx*)context;
-    static uint32_t time;
-    /* Clocks idle between bytes is nominally 430 us long for burst data,
-     * 15 ms for idle polling (e.g. waiting for menu selection), some oddball
-     * 2 ms gaps that appears between one 0xFE byte from the Game Boy every trade;
-     * clock period is nominally 122 us.
-     * Therefore, if we haven't seen a clock in 500 us, reset our bit counter.
-     * Note that, this should never actually be a concern, but it is an additional
-     * safeguard against desyncing.
-     */
-    const uint32_t time_ticks = furi_hal_cortex_instructions_per_microsecond() * 500;
-
-    if(furi_hal_gpio_read(&GAME_BOY_CLK)) {
-        if((DWT->CYCCNT - time) > time_ticks) {
-            trade->in_data = 0;
-            trade->shift = 0;
-        }
-        transferBit(trade);
-        time = DWT->CYCCNT;
-    } else {
-        /* On the falling edge of each clock, set up the next bit */
-        furi_hal_gpio_write(&GAME_BOY_SO, !!(trade->out_data & 0x80));
-        trade->out_data <<= 1;
+    switch(status) {
+    case GAMEBOY_CONN_FALSE:
+        gblink_transfer(trade->gblink_handle, getConnectResponse(trade));
+        break;
+    case GAMEBOY_CONN_TRUE:
+        gblink_transfer(trade->gblink_handle, getMenuResponse(trade));
+        break;
+    case GAMEBOY_COLOSSEUM:
+        gblink_transfer(trade->gblink_handle, in_byte);
+        break;
+    /* Every other state is trade related */
+    default:
+        gblink_transfer(trade->gblink_handle, getTradeCentreResponse(trade));
+        break;
     }
 }
 
@@ -697,6 +661,7 @@ void trade_enter_callback(void* context) {
     furi_assert(context);
     struct trade_ctx* trade = (struct trade_ctx*)context;
     struct trade_model* model;
+    struct gblink_def gblink_def = {0};
 
     model = view_get_model(trade->view);
 
@@ -713,9 +678,15 @@ void trade_enter_callback(void* context) {
 
     view_commit_model(trade->view, true);
 
-    trade->in_data = 0;
-    trade->out_data = 0;
-    trade->shift = 0;
+    /* TODO: This should be moved further back to struct pokemon_fap for whole
+     * app flexibility since it would probably be written to by a different scene
+     */
+    gblink_def.pins = trade->gblink_pins;
+    gblink_def.callback = transferBit;
+    gblink_def.cb_context = trade;
+
+    trade->gblink_handle = gblink_alloc(&gblink_def);
+    gblink_nobyte_set(trade->gblink_handle, SERIAL_NO_DATA_BYTE);
 
     /* Every 250 ms, trigger a draw update. 250 ms was chosen so that during
      * the trade process, each update can flip the LED and screen to make the
@@ -723,18 +694,6 @@ void trade_enter_callback(void* context) {
      */
     trade->draw_timer = furi_timer_alloc(trade_draw_timer_callback, FuriTimerTypePeriodic, trade);
     furi_timer_start(trade->draw_timer, furi_ms_to_ticks(250));
-
-    // B3 (Pin6) / SO (2)
-    furi_hal_gpio_write(&GAME_BOY_SO, false);
-    furi_hal_gpio_init(&GAME_BOY_SO, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
-    // B2 (Pin5) / SI (3)
-    furi_hal_gpio_write(&GAME_BOY_SI, false);
-    furi_hal_gpio_init(&GAME_BOY_SI, GpioModeInput, GpioPullUp, GpioSpeedVeryHigh);
-    // // C3 (Pin7) / CLK (5)
-    furi_hal_gpio_init(&GAME_BOY_CLK, GpioModeInterruptRiseFall, GpioPullUp, GpioSpeedVeryHigh);
-    furi_hal_gpio_remove_int_callback(&GAME_BOY_CLK);
-
-    furi_hal_gpio_add_int_callback(&GAME_BOY_CLK, input_clk_gameboy, trade);
 
     /* Create a trade patch list from the current trade block */
     plist_create(&(trade->patch_list), trade->trade_block);
@@ -758,9 +717,8 @@ void trade_exit_callback(void* context) {
     furi_timer_free(trade->draw_timer);
     trade->draw_timer = NULL;
 
-    /* Unset our interrupt callback */
-    furi_hal_gpio_remove_int_callback(&GAME_BOY_CLK);
-    disconnect_pin(&GAME_BOY_CLK);
+    /* Unset the pin settings */
+    gblink_free(trade->gblink_handle);
 
     /* Destroy the patch list, it is allocated on the enter callback */
     plist_free(trade->patch_list);
@@ -770,6 +728,7 @@ void trade_exit_callback(void* context) {
 void* trade_alloc(
     TradeBlock* trade_block,
     const PokemonTable* table,
+    struct gblink_pins* gblink_pins,
     ViewDispatcher* view_dispatcher,
     uint32_t view_id) {
     furi_assert(trade_block);
@@ -782,6 +741,7 @@ void* trade_alloc(
     trade->input_block = malloc(sizeof(TradeBlock));
     trade->pokemon_table = table;
     trade->patch_list = NULL;
+    trade->gblink_pins = gblink_pins;
 
     view_set_context(trade->view, trade);
     view_allocate_model(trade->view, ViewModelTypeLockFree, sizeof(struct trade_model));

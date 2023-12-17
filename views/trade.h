@@ -9,6 +9,7 @@
 void* trade_alloc(
     TradeBlock* trade_block,
     const PokemonTable* table,
+    struct gblink_pins* gblink_pins,
     ViewDispatcher* view_dispatcher,
     uint32_t view_id);
 
