@@ -16,6 +16,7 @@
 #include <gui/modules/loading.h>
 #include <gui/modules/text_input.h>
 #include <gui/modules/byte_input.h>
+#include <gui/modules/text_box.h>
 #include <gui/modules/widget.h>
 
 #include <input/input.h>
@@ -100,6 +101,7 @@ struct Picopass {
     Loading* loading;
     TextInput* text_input;
     ByteInput* byte_input;
+    TextBox* text_box;
     Widget* widget;
     DictAttack* dict_attack;
     Loclass* loclass;
@@ -115,6 +117,7 @@ typedef enum {
     PicopassViewLoading,
     PicopassViewTextInput,
     PicopassViewByteInput,
+    PicopassViewTextBox,
     PicopassViewWidget,
     PicopassViewDictAttack,
     PicopassViewLoclass,
