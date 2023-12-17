@@ -26,7 +26,6 @@ typedef struct {
    ViewDispatcher* view_dispatcher;
    VariableItemList* variable_item_list;
    Popup* popup;
-   NfcPlaylistWorker* nfc_worker;
    uint8_t emulate_timeout;
    uint8_t emulate_delay;
 } NfcPlaylist;
@@ -65,14 +64,14 @@ static void nfc_playlist_settings_change_callback(VariableItem* item) {
    switch(current_option) {
       case NfcPlaylistSettings_Timeout: ;
          app->emulate_timeout = option_value_index;
-         char emulate_timeout_text[9];
-         snprintf(emulate_timeout_text, 9, "%d", (options_emulate_timeout[option_value_index]/1000));
+         char emulate_timeout_text[10];
+         snprintf(emulate_timeout_text, 10, "%ds", (options_emulate_timeout[option_value_index]/1000));
          variable_item_set_current_value_text(item, (char*)emulate_timeout_text);
          break;
       case NfcPlaylistSettings_Delay: ;
          app->emulate_delay = option_value_index;
-         char emulate_delay_text[9];
-         snprintf(emulate_delay_text, 9, "%d", (options_emulate_delay[option_value_index]/1000));
+         char emulate_delay_text[10];
+         snprintf(emulate_delay_text, 10, "%ds", (options_emulate_delay[option_value_index]/1000));
          variable_item_set_current_value_text(item, (char*)emulate_delay_text);
          break;
    }
@@ -90,8 +89,8 @@ void nfc_playlist_scene_on_enter_main_menu(void* context) {
       nfc_playlist_settings_change_callback,
       app);
    variable_item_set_current_value_index(emulation_timeout_settings, app->emulate_timeout);
-   char emulation_timeout_settings_text[9];
-   snprintf(emulation_timeout_settings_text, 9, "%d", (options_emulate_timeout[app->emulate_timeout]/1000));
+   char emulation_timeout_settings_text[10];
+   snprintf(emulation_timeout_settings_text, 10, "%ds", (options_emulate_timeout[app->emulate_timeout]/1000));
    variable_item_set_current_value_text(emulation_timeout_settings, (char*)emulation_timeout_settings_text);
    VariableItem* emulation_delay_settings = variable_item_list_add(
       app->variable_item_list,
@@ -100,8 +99,8 @@ void nfc_playlist_scene_on_enter_main_menu(void* context) {
       nfc_playlist_settings_change_callback,
       app);
    variable_item_set_current_value_index(emulation_delay_settings, app->emulate_delay);
-   char emulation_delay_settings_text[9];
-   snprintf(emulation_delay_settings_text, 9, "%d", (options_emulate_delay[app->emulate_delay]/1000));
+   char emulation_delay_settings_text[10];
+   snprintf(emulation_delay_settings_text, 10, "%ds", (options_emulate_delay[app->emulate_delay]/1000));
    variable_item_set_current_value_text(emulation_delay_settings, (char*)emulation_delay_settings_text);
    variable_item_list_add(app->variable_item_list, "Start", 0, NULL, NULL);
    variable_item_list_set_enter_callback(app->variable_item_list, nfc_playlist_menu_callback_main_menu, app);
@@ -144,7 +143,7 @@ void nfc_playlist_scene_on_enter_popup_emulating(void* context) {
    Storage* storage = furi_record_open(RECORD_STORAGE);
    Stream* stream = file_stream_alloc(storage);
    FuriString* line = furi_string_alloc();
-   app->nfc_worker = nfc_playlist_worker_alloc();
+   NfcPlaylistWorker* nfc_worker = nfc_playlist_worker_alloc();
    // Read file
    if(file_stream_open(stream, APP_DATA_PATH("playlist.txt"), FSAM_READ, FSOM_OPEN_EXISTING)) {
       popup_reset(app->popup);
@@ -186,8 +185,8 @@ void nfc_playlist_scene_on_enter_popup_emulating(void* context) {
                time_counter_ms -= 500;
             } while(time_counter_ms > 0);
          } else {
-            nfc_playlist_worker_set_nfc_data(app->nfc_worker, file_path);
-            nfc_playlist_worker_start(app->nfc_worker);
+            nfc_playlist_worker_set_nfc_data(nfc_worker, file_path);
+            nfc_playlist_worker_start(nfc_worker);
 
             int popup_text_size = (strlen(file_name) + 4);
             char popup_text[popup_text_size];
@@ -197,10 +196,10 @@ void nfc_playlist_scene_on_enter_popup_emulating(void* context) {
                popup_set_text(app->popup, popup_text, 64, 25, AlignCenter, AlignTop);
                furi_delay_ms(500);
                time_counter_ms -= 500;
-            } while(nfc_playlist_worker_is_emulating(app->nfc_worker) && time_counter_ms > 0);
+            } while(nfc_playlist_worker_is_emulating(nfc_worker) && time_counter_ms > 0);
 
-            if (nfc_playlist_worker_is_emulating(app->nfc_worker)) {
-               nfc_playlist_worker_stop(app->nfc_worker);
+            if (nfc_playlist_worker_is_emulating(nfc_worker)) {
+               nfc_playlist_worker_stop(nfc_worker);
             }
          }
       }
@@ -218,8 +217,7 @@ void nfc_playlist_scene_on_enter_popup_emulating(void* context) {
    furi_string_free(line);
    file_stream_close(stream);
    stream_free(stream);
-   nfc_playlist_worker_free(app->nfc_worker);
-   app->nfc_worker = NULL;
+   nfc_playlist_worker_free(nfc_worker);
    // Close storage
    furi_record_close(RECORD_STORAGE);
 }
