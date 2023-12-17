@@ -39,6 +39,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [WiFi (Marauder) v6.6 (By 0xchocolate & tcpassos)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion)
 - Updated: [Video Player v0.2 (By LTVA1)](https://github.com/LTVA1/flipper-zero-video-player)
 - Updated: [WS2812B LED Tester v1.8 (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/gpio/ws2812b_tester)
+- Removed: [MALVEKE Pokemon Trading v1.4 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external/malveke_pokemon_trading) `Req: Malveke` (Uses Different GPIO Than Standard Pokemon Trader App)
+- Updated: [Pokemon Trading v1.5 (By EstebanFuentealba & kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
 
 <a name="release">
 
@@ -402,7 +404,6 @@ $ ./fbt dolphin_ext
 - [MALVEKE GAME BOY Link-Camera v1.0 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external/malveke_gb_link_camera) `Req: Malveke`
 - [MALVEKE GB Live Camera v1.1 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external/malveke_gb_live_camera) `Req: Malveke`
 - [MALVEKE PIN Test v1.0 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external/malveke_pin_test) `Req: Malveke`
-- [MALVEKE Pokemon Trading v1.4 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external/malveke_pokemon_trading) `Req: Malveke` (Uses Different GPIO Than Standard Pokemon Trader App)
 - [MAX31855 (By skotopes)](https://github.com/skotopes/flipperzero_max31855)
 - [Metronome v1.1 (By panki27)](https://github.com/panki27/Metronome)
 - [Mfkey32 v1.1 (By noproto)](https://github.com/noproto/FlipperMfkey)
@@ -446,7 +447,7 @@ $ ./fbt dolphin_ext
 - [PicoPass (iClass) v1.6 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass) [PicoPass Emulation (By nvx)](https://github.com/nvx/flipperzero-firmware/tree/picopass_emulation)
 - [Plantower PMSx003 sensor reader (By 3cky)](https://github.com/3cky/flipperzero-airmon) `Req: Plantower PMS5003/PMS7003/PMS9003`
 - [POCSAG Pager v1.2 (By XMasterx & Shmuma)](https://github.com/xMasterX/flipper-pager)
-- [Pokemon Trading v1.4 (By EstebanFuentealba & kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
+- [Pokemon Trading v1.5 (By EstebanFuentealba & kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
 - [Pomodoro Timer v1.2 (By sbrin)](https://github.com/sbrin/flipperzero_pomodoro)
 - [Pomodoro 2 v1.3 (By Th3Un1q3)](https://github.com/Th3Un1q3/flipp_pomodoro)
 - [Protocol Visualizer v1.1 (By antirez)](https://github.com/antirez/protoview)
