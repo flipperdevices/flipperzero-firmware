@@ -2136,6 +2136,20 @@ static void trade_block_free(TradeBlock* trade) {
     free(trade);
 }
 
+/* The MALVEKE board has an esp32 which is set to TX on the flipper's default
+ * UART pins. If this pin shows signs of something connected, assume a MALVEKE
+ * board is being used.
+ */
+static bool detect_malveke(void) {
+    bool rc;
+
+    furi_hal_gpio_init(&gpio_usart_rx, GpioModeInput, GpioPullDown, GpioSpeedVeryHigh);
+    rc = furi_hal_gpio_read(&gpio_usart_rx);
+    furi_hal_gpio_init_simple(&gpio_usart_rx, GpioModeAnalog);
+
+    return rc;
+}
+
 PokemonFap* pokemon_alloc() {
     PokemonFap* pokemon_fap = (PokemonFap*)malloc(sizeof(PokemonFap));
 
@@ -2157,6 +2171,11 @@ PokemonFap* pokemon_alloc() {
     // Set up defaults
     pokemon_fap->curr_pokemon = 0;
     pokemon_fap->curr_stats = 0;
+    pokemon_fap->malveke_detected = detect_malveke();
+    memcpy(
+        &pokemon_fap->pins,
+        &common_pinouts[pokemon_fap->malveke_detected],
+        sizeof(struct gblink_pins));
 
     // Set up trade party struct
     pokemon_fap->trade_block = trade_block_alloc();
@@ -2189,6 +2208,7 @@ PokemonFap* pokemon_alloc() {
     pokemon_fap->trade = trade_alloc(
         pokemon_fap->trade_block,
         pokemon_fap->pokemon_table,
+        &pokemon_fap->pins,
         pokemon_fap->view_dispatcher,
         AppViewTrade);
 

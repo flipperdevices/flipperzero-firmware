@@ -10,6 +10,7 @@
 #include <gui/modules/submenu.h>
 #include <gui/modules/text_input.h>
 #include <gui/modules/variable_item_list.h>
+#include <gblink.h>
 
 #include "pokemon_data.h"
 
@@ -74,6 +75,10 @@ struct pokemon_fap {
      * pokemon data rather than the full 6 member party data.
      */
     TradeBlock* trade_block;
+
+    /* Pin definition to actual Game Link Cable interface */
+    struct gblink_pins pins;
+    int malveke_detected;
 
     /* The currently selected pokemon */
     int curr_pokemon;

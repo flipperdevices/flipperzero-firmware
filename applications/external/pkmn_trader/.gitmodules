@@ -1,0 +1,3 @@
+[submodule "lib/flipper-gblink"]
+	path = lib/flipper-gblink
+	url = https://github.com/kbembedded/flipper-gblink

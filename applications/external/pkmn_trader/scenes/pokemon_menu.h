@@ -18,6 +18,7 @@ typedef enum {
     SelectOTIDScene,
     SelectOTNameScene,
     TradeScene,
+    SelectPinsScene,
     SceneCount,
 } AppScene;
 
