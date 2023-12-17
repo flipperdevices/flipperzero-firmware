@@ -23,6 +23,8 @@ It currently trades a Pokemon based on your choice of Pokemon, Level, Stats and 
 ## Hardware Interface
 The Game Boy is connected to the Flipper Zero's GPIO pins via a GBC style Game Link Cable. A Flipper GPIO module with a proper Game Link Cable connector [is available here](https://www.tindie.com/products/kbembedded/game-link-gpio-module-for-flipper-zero-game-boy/)!
 
+Additionally, the [MALVEKE - GAME BOY Tools for Flipper Zero](https://www.tindie.com/products/efuentealba/malveke-game-boy-tools-for-flipper-zero/) is supported by this tool.
+
 Details on the hardware interface, as well as how to create your own adapter board, can be found in the [How Does It Work](#how-does-it-work) section below.
 
 ## Installation Directions
@@ -53,6 +55,7 @@ And use [**qFlipper**](https://flipperzero.one/update) to copy the generated **p
 
 These instructions assume that you are starting at the Flipper Zero desktop. Otherwise, press the Back button until you are at the desktop.
 
+- If using a MALVEKE board, plug it in to the GPIO header now. The app will auto-detect and select the correct pinout to support the MALVEKE EXT1 interface. If using the Flipper GB Link board, or any other pinout, they can be connected to the Flipper Zero now, or at any point in the future.
 - Press the `OK` button on the Flipper to open the main menu.
 - Choose `Applications` from the menu.
 - Choose `GPIO` from the submenu.
