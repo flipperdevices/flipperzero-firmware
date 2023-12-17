@@ -2,27 +2,25 @@
 
 #define TAG "TPMSRelearn"
 
-enum TPMSRelearnSetting
-{
+enum TPMSRelearnSetting {
     TPMSRelearnSettingOff,
     TPMSRelearnSettingOn,
     TPMSRelearnSettingNum,
 };
 
-const char *const relearn_setting_text[TPMSRelearnSettingNum] = {
+const char* const relearn_setting_text[TPMSRelearnSettingNum] = {
     "OFF",
     "ON",
 };
 
-enum TPMSRelearnType
-{
+enum TPMSRelearnType {
     TPMSRelearnCommon, // Just signal without data
     // TPMSRelearnGM_FORD,
     // TPMSRelearnAnotherOEM,
     TPMSRelearnTypeNum,
 };
 
-const char *const relearn_type_text[TPMSRelearnTypeNum] = {
+const char* const relearn_type_text[TPMSRelearnTypeNum] = {
     "Common",
 };
 
@@ -49,11 +47,10 @@ static void tpms_scene_relearn_type_callback(VariableItem* item) {
     variable_item_set_current_value_text(item, relearn_type_text[index]);
 }
 
-void tpms_scene_relearn_config_on_enter(void *context)
-{
-    TPMSApp *app = context;
-    VariableItemList *var_item_list = app->variable_item_list;
-    VariableItem *item;
+void tpms_scene_relearn_config_on_enter(void* context) {
+    TPMSApp* app = context;
+    VariableItemList* var_item_list = app->variable_item_list;
+    VariableItem* item;
 
     item = variable_item_list_add(
         var_item_list,
@@ -72,20 +69,18 @@ void tpms_scene_relearn_config_on_enter(void *context)
 
     view_dispatcher_switch_to_view(app->view_dispatcher, TPMSViewVariableItemList);
 }
-bool tpms_scene_relearn_config_on_event(void *context, SceneManagerEvent event)
-{
-    TPMSApp *app = context;
+bool tpms_scene_relearn_config_on_event(void* context, SceneManagerEvent event) {
+    TPMSApp* app = context;
     UNUSED(app);
     bool consumed = false;
 
-    if (event.type == SceneManagerEventTypeCustom){
+    if(event.type == SceneManagerEventTypeCustom) {
     }
     return consumed;
 }
 
-void tpms_scene_relearn_config_on_exit(void *context)
-{
-    TPMSApp *app = context;
+void tpms_scene_relearn_config_on_exit(void* context) {
+    TPMSApp* app = context;
     variable_item_list_set_selected_item(app->variable_item_list, 0);
     variable_item_list_reset(app->variable_item_list);
 }

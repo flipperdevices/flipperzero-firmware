@@ -24,15 +24,14 @@
 
 typedef struct TPMSApp TPMSApp;
 
-struct TPMSTxRx
-{
-    SubGhzWorker *worker;
+struct TPMSTxRx {
+    SubGhzWorker* worker;
 
-    const SubGhzDevice *radio_device;
-    SubGhzEnvironment *environment;
-    SubGhzReceiver *receiver;
-    SubGhzRadioPreset *preset;
-    TPMSHistory *history;
+    const SubGhzDevice* radio_device;
+    SubGhzEnvironment* environment;
+    SubGhzReceiver* receiver;
+    SubGhzRadioPreset* preset;
+    TPMSHistory* history;
     uint16_t idx_menu_chosen;
     TPMSTxRxState txrx_state;
     TPMSHopperState hopper_state;
@@ -43,35 +42,34 @@ struct TPMSTxRx
 
 typedef struct TPMSTxRx TPMSTxRx;
 
-struct TPMSApp
-{
-    Gui *gui;
-    ViewDispatcher *view_dispatcher;
-    TPMSTxRx *txrx;
-    SceneManager *scene_manager;
-    NotificationApp *notifications;
-    VariableItemList *variable_item_list;
-    Submenu *submenu;
-    Widget *widget;
-    TPMSReceiver *tpms_receiver;
-    TPMSReceiverInfo *tpms_receiver_info;
+struct TPMSApp {
+    Gui* gui;
+    ViewDispatcher* view_dispatcher;
+    TPMSTxRx* txrx;
+    SceneManager* scene_manager;
+    NotificationApp* notifications;
+    VariableItemList* variable_item_list;
+    Submenu* submenu;
+    Widget* widget;
+    TPMSReceiver* tpms_receiver;
+    TPMSReceiverInfo* tpms_receiver_info;
     TPMSLock lock;
-    SubGhzSetting *setting;
+    SubGhzSetting* setting;
     TPMSRelearn relearn;
     TPMSRelearnType relearn_type;
 };
 
 void tpms_preset_init(
-    void *context,
-    const char *preset_name,
+    void* context,
+    const char* preset_name,
     uint32_t frequency,
-    uint8_t *preset_data,
+    uint8_t* preset_data,
     size_t preset_data_size);
-bool tpms_set_preset(TPMSApp *app, const char *preset);
-void tpms_get_frequency_modulation(TPMSApp *app, FuriString *frequency, FuriString *modulation);
-void tpms_begin(TPMSApp *app, uint8_t *preset_data);
-uint32_t tpms_rx(TPMSApp *app, uint32_t frequency);
-void tpms_idle(TPMSApp *app);
-void tpms_rx_end(TPMSApp *app);
-void tpms_sleep(TPMSApp *app);
-void tpms_hopper_update(TPMSApp *app);
+bool tpms_set_preset(TPMSApp* app, const char* preset);
+void tpms_get_frequency_modulation(TPMSApp* app, FuriString* frequency, FuriString* modulation);
+void tpms_begin(TPMSApp* app, uint8_t* preset_data);
+uint32_t tpms_rx(TPMSApp* app, uint32_t frequency);
+void tpms_idle(TPMSApp* app);
+void tpms_rx_end(TPMSApp* app);
+void tpms_sleep(TPMSApp* app);
+void tpms_hopper_update(TPMSApp* app);
