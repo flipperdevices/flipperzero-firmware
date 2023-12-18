@@ -1,5 +1,9 @@
 # Changelog
 
+## [v3.10.0](https://github.com/DarkFlippers/flipperzero-subbrute/tree/v3.10.0) (2023-11-04)
+
+[Full Changelog](https://github.com/DarkFlippers/flipperzero-subbrute/compare/v3.9.2...v3.10.0)
+
 ## [v3.9.2](https://github.com/DarkFlippers/flipperzero-subbrute/tree/v3.9.2) (2023-11-04)
 
 [Full Changelog](https://github.com/DarkFlippers/flipperzero-subbrute/compare/v3.9.1...v3.9.2)
