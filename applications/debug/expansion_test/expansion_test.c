@@ -110,7 +110,9 @@ static size_t expansion_test_app_receive_callback(uint8_t* data, size_t data_siz
 
         const uint32_t flags = furi_thread_flags_wait(
             EXPANSION_TEST_APP_ALL_FLAGS, FuriFlagWaitAny, EXPANSION_INACTIVE_TIMEOUT_MS);
-        UNUSED(flags);
+
+        // Exit on any error
+        if(flags & FuriFlagError) break;
     }
 
     return received_size;
@@ -121,6 +123,7 @@ static size_t
     ExpansionTestApp* instance = context;
 
     furi_hal_serial_tx(instance->handle, data, data_size);
+    furi_hal_serial_tx_wait_complete(instance->handle);
 
     return data_size;
 }

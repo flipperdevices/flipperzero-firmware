@@ -81,13 +81,14 @@ static size_t expansion_receive_callback(uint8_t* data, size_t data_size, void* 
         const uint32_t flags = furi_thread_flags_wait(
             EXPANSION_ALL_FLAGS, FuriFlagWaitAny, EXPANSION_INACTIVE_TIMEOUT_MS);
 
-        if(flags == FuriFlagErrorTimeout) {
-            //  Did not receive any flags, exiting due to timeout
-            instance->exit_reason = ExpansionSessionExitReasonTimeout;
-            break;
-        } else if(flags & FuriFlagError) {
-            //  Error occurred, exiting due to error
-            instance->exit_reason = ExpansionSessionExitReasonError;
+        if(flags & FuriFlagError) {
+            if(flags == FuriFlagErrorTimeout) {
+                // Exiting due to timeout
+                instance->exit_reason = ExpansionSessionExitReasonTimeout;
+            } else {
+                // Exiting due to an unspecified error
+                instance->exit_reason = ExpansionSessionExitReasonError;
+            }
             break;
         } else if(flags & ExpansionFlagStop) {
             // Exiting due to explicit request
@@ -96,10 +97,6 @@ static size_t expansion_receive_callback(uint8_t* data, size_t data_size, void* 
         } else if(flags & ExpansionFlagData) {
             // Go to buffer reading
             continue;
-        } else {
-            // Did not receive any flags, exiting due to timeout
-            instance->exit_reason = ExpansionSessionExitReasonTimeout;
-            break;
         }
     }
 
@@ -300,6 +297,9 @@ static int32_t expansion_worker(void* context) {
     instance->session_state = ExpansionSessionStateHandShake;
     instance->exit_reason = ExpansionSessionExitReasonUnknown;
 
+    // TODO: Skip garbage input caused by RX pin perturbations
+    furi_delay_ms(5);
+
     furi_hal_serial_init(instance->serial_handle, EXPANSION_DEFAULT_BAUD_RATE);
     furi_hal_serial_set_rx_callback(
         instance->serial_handle, expansion_serial_rx_callback, instance);
@@ -315,16 +315,11 @@ static int32_t expansion_worker(void* context) {
     furi_hal_serial_control_release(instance->serial_handle);
     furi_stream_buffer_free(instance->rx_buf);
 
-    // TODO: do we really need to disable expansion callback?
-    // if(instance->exit_reason == ExpansionSessionExitReasonTimeout) {
-    // Thread exited due to timeout, and no disable request was issued by user code
-    // Re-enable the expansion detection interrupt and be ready to establish a new connection
     furi_mutex_acquire(instance->state_mutex, FuriWaitForever);
     instance->state = ExpansionStateEnabled;
     furi_hal_serial_control_set_expansion_callback(
         instance->serial_id, expansion_detect_callback, instance);
     furi_mutex_release(instance->state_mutex);
-    // }
 
     furi_hal_power_insomnia_exit();
 
