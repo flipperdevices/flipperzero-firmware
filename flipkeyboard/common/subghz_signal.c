@@ -6,6 +6,13 @@
 #include "../app_config.h"
 #include "subghz_signal.h"
 
+struct SubGhzSignal {
+    FuriString* sub_file_contents;
+    FuriString* protocol;
+    uint32_t frequency;
+    FuriHalSubGhzPreset preset;
+};
+
 #ifdef FIRMWARE_SUPPORTS_SUBGHZ
 #include <devices/devices.h>
 #ifdef APP_USES_SUBGHZ_PROTOCOL_ITEMS
@@ -16,13 +23,6 @@
 
 #define SUBGHZ_DEVICE_CC1101_EXT_NAME "cc1101_ext"
 #define SUBGHZ_DEVICE_CC1101_INT_NAME "cc1101_int"
-
-struct SubGhzSignal {
-    FuriString* sub_file_contents;
-    FuriString* protocol;
-    uint32_t frequency;
-    FuriHalSubGhzPreset preset;
-};
 
 typedef enum {
     Unknown,
@@ -127,20 +127,6 @@ static void send_signal(
     subghz_transmitter_free(transmitter);
     subghz_environment_free(environment);
 }
-#else
-void send_signal(
-    FuriString* sub_file_contents,
-    const char* protocol,
-    uint32_t frequency,
-    FuriHalSubGhzPreset preset,
-    bool use_external_radio) {
-    FURI_LOG_D("FlipSignal", "TODO: Send %s signal", protocol);
-    UNUSED(sub_file_contents);
-    UNUSED(frequency);
-    UNUSED(preset);
-    UNUSED(use_external_radio);
-}
-#endif
 
 /**
  * @brief Converts a string to a FuriHalSubGhzPreset.
@@ -167,6 +153,20 @@ static FuriHalSubGhzPreset signal_get_preset(FuriString* preset_str) {
     }
     return preset;
 }
+#else
+void send_signal(
+    FuriString* sub_file_contents,
+    const char* protocol,
+    uint32_t frequency,
+    FuriHalSubGhzPreset preset,
+    bool use_external_radio) {
+    FURI_LOG_D("FlipSignal", "TODO: Send %s signal", protocol);
+    UNUSED(sub_file_contents);
+    UNUSED(frequency);
+    UNUSED(preset);
+    UNUSED(use_external_radio);
+}
+#endif
 
 /**
  * @brief Loads a SubGhzSignal from a file (supports RAW and Protocol .SUB files)
@@ -174,6 +174,7 @@ static FuriHalSubGhzPreset signal_get_preset(FuriString* preset_str) {
  * @return The loaded SubGhzSignal. Be sure to call subghz_signal_free.
 */
 SubGhzSignal* subghz_signal_load_file(char* file_path) {
+#ifdef FIRMWARE_SUPPORTS_SUBGHZ
     SubGhzSignal* signal = (SubGhzSignal*)malloc(sizeof(SubGhzSignal));
     signal->sub_file_contents = furi_string_alloc();
     signal->protocol = furi_string_alloc();
@@ -272,6 +273,12 @@ SubGhzSignal* subghz_signal_load_file(char* file_path) {
 
     furi_record_close(RECORD_STORAGE);
     return signal;
+#else
+    UNUSED(file_path);
+    FURI_LOG_E(TAG, "SubGhzSignal not supported");
+    furi_assert(false);
+    return NULL;
+#endif
 }
 
 /**
