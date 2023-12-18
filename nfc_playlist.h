@@ -1,8 +1,6 @@
 #pragma once
-
 #include <furi.h>
 #include <string.h>
-
 #include <gui/gui.h>
 #include <gui/view_dispatcher.h>
 #include <gui/scene_manager.h>
@@ -30,6 +28,6 @@ typedef struct {
 } NfcPlaylist;
 
 static const int options_emulate_timeout[] = { 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000 };
-const int default_emulate_timeout = 4;
+static const int default_emulate_timeout = 4;
 static const int options_emulate_delay[] = { 0, 1000, 2000, 3000, 4000, 5000 };
-const int default_emulate_delay = 0;
+static const int default_emulate_delay = 0;
