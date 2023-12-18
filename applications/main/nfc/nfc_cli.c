@@ -12,8 +12,25 @@ static void nfc_cli_print_usage() {
     printf("Usage:\r\n");
     printf("nfc <cmd>\r\n");
     printf("Cmd list:\r\n");
+    printf("\tdetect\t - detect NFC tag\r\n");
     if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
         printf("\tfield\t - turn field on\r\n");
+    }
+}
+
+static void nfc_cli_detect(Cli* cli, FuriString* args) {
+    UNUSED(args);
+    // Check if nfc worker is not busy
+    if(furi_hal_nfc_is_hal_ready() != FuriHalNfcErrorNone) {
+        printf("NFC chip failed to start\r\n");
+        return;
+    }
+
+    printf(".\r\n");
+    printf("Press Ctrl+C to abort\r\n\n");
+
+    while(!cli_cmd_interrupt_received(cli)) {
+        furi_delay_ms(50);
     }
 }
 
@@ -48,6 +65,10 @@ static void nfc_cli(Cli* cli, FuriString* args, void* context) {
     do {
         if(!args_read_string_and_trim(args, cmd)) {
             nfc_cli_print_usage();
+            break;
+        }
+        if(furi_string_cmp_str(cmd, "detect") == 0) {
+            nfc_cli_detect(cli, args);
             break;
         }
         if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
