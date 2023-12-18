@@ -13,13 +13,13 @@ static bool picopass_read_card_change_dict(Picopass* picopass) {
     do {
         uint32_t scene_state =
             scene_manager_get_scene_state(picopass->scene_manager, PicopassSceneReadCard);
-        nfc_dict_free(picopass->dict);
+        keys_dict_free(picopass->dict);
         picopass->dict = NULL;
         if(scene_state == PicopassSceneReadCardDictElite) break;
-        if(!nfc_dict_check_presence(PICOPASS_ICLASS_ELITE_DICT_FLIPPER_NAME)) break;
+        if(!keys_dict_check_presence(PICOPASS_ICLASS_ELITE_DICT_FLIPPER_NAME)) break;
 
-        picopass->dict = nfc_dict_alloc(
-            PICOPASS_ICLASS_ELITE_DICT_FLIPPER_NAME, NfcDictModeOpenExisting, PICOPASS_KEY_LEN);
+        picopass->dict = keys_dict_alloc(
+            PICOPASS_ICLASS_ELITE_DICT_FLIPPER_NAME, KeysDictModeOpenExisting, PICOPASS_KEY_LEN);
         scene_manager_set_scene_state(
             picopass->scene_manager, PicopassSceneReadCard, PicopassSceneReadCardDictElite);
         success = true;
@@ -39,9 +39,9 @@ NfcCommand picopass_read_card_worker_callback(PicopassPollerEvent event, void* c
     } else if(event.type == PicopassPollerEventTypeRequestKey) {
         uint8_t key[PICOPASS_KEY_LEN] = {};
         bool is_key_provided = true;
-        if(!nfc_dict_get_next_key(picopass->dict, key, PICOPASS_KEY_LEN)) {
+        if(!keys_dict_get_next_key(picopass->dict, key, PICOPASS_KEY_LEN)) {
             if(picopass_read_card_change_dict(picopass)) {
-                is_key_provided = nfc_dict_get_next_key(picopass->dict, key, PICOPASS_KEY_LEN);
+                is_key_provided = keys_dict_get_next_key(picopass->dict, key, PICOPASS_KEY_LEN);
             } else {
                 is_key_provided = false;
             }
@@ -75,8 +75,8 @@ void picopass_scene_read_card_on_enter(void* context) {
     popup_set_header(popup, "Detecting\npicopass\ncard", 68, 30, AlignLeft, AlignTop);
     popup_set_icon(popup, 0, 3, &I_RFIDDolphinReceive_97x61);
 
-    picopass->dict = nfc_dict_alloc(
-        PICOPASS_ICLASS_STANDARD_DICT_FLIPPER_NAME, NfcDictModeOpenExisting, PICOPASS_KEY_LEN);
+    picopass->dict = keys_dict_alloc(
+        PICOPASS_ICLASS_STANDARD_DICT_FLIPPER_NAME, KeysDictModeOpenExisting, PICOPASS_KEY_LEN);
     scene_manager_set_scene_state(
         picopass->scene_manager, PicopassSceneReadCard, PicopassSceneReadCardDictStandard);
     // Start worker
@@ -111,7 +111,7 @@ void picopass_scene_read_card_on_exit(void* context) {
     Picopass* picopass = context;
 
     if(picopass->dict) {
-        nfc_dict_free(picopass->dict);
+        keys_dict_free(picopass->dict);
         picopass->dict = NULL;
     }
     picopass_poller_stop(picopass->poller);
