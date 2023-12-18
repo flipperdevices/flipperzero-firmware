@@ -139,3 +139,13 @@ uint32_t flipboard_navigation_show_app_menu(void* context) {
     UNUSED(context);
     return FLIPBOARD_APP_MENU_VIEW_ID;
 }
+
+/**
+ * @brief Sends a custom event to the Flipboard application.
+ * @param app The Flipboard application.
+ * @param event_id The id of the event to send.
+*/
+void flipboard_send_custom_event(Flipboard* app, uint32_t event_id) {
+    ViewDispatcher* dispatcher = flipboard_get_view_dispatcher(app);
+    view_dispatcher_send_custom_event(dispatcher, event_id);
+}
