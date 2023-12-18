@@ -95,6 +95,7 @@ class GameBoyCartridge {
     void headerROM_GB(bool printInfo);
     void readROM_GB();
     void readSRAM_GB();
+    void printSRAM_GB(AsyncResponseStream *response);
     void writeByteSRAM_GB(uint16_t address, uint8_t myData);
     void writeROM_GB();
     void writeRAM_GB();

@@ -178,10 +178,16 @@ void setup()
     if (Serial.available())  // if we receive anything, just switch to another mode
     {
       switch (Serial.read()) {
+        /*
         case 'c':
           gb_camera_setup();
           for (;;)
             gb_camera_loop();
+        case '3':
+          gb_camera_export_setup();
+          for (;;)
+            gb_camera_export_loop();
+        */
       }
     }
  }

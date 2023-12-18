@@ -12,6 +12,7 @@ const AsyncSelect = defineAsyncComponent(() => import('./components/Select.vue')
 
 
 let interval = true;
+let inverted = false;
 
 // Tile Constants
 const TILE_PIXEL_WIDTH = 8;
@@ -152,7 +153,6 @@ export default {
       const pixel_y_offset = TILE_PIXEL_HEIGHT * tile_y_offset * pixel_height;
 
       var ctx = canvas.getContext("2d");
-
       // pixels along the tile's x axis
       for (var i = 0; i < TILE_PIXEL_WIDTH; i++) {
         for (var j = 0; j < TILE_PIXEL_HEIGHT; j++) {
@@ -185,7 +185,6 @@ export default {
       if (h > 0) {
         canvas.height = h;
       }
-
       tiles.value.forEach(function (pixels, index) {
         // Gameboy Tile Offset
         var tile_x_offset = index % TILES_PER_LINE;
@@ -364,7 +363,21 @@ export default {
         await sleep(1000);
       }
     }
+    function invertColors() {
+      const canvas = canvasRef.value;
+      var ctx = canvas.getContext("2d");
+      var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      var data = imageData.data;
 
+      for (var i = 0; i < data.length; i += 4) {
+        data[i] = 255 - data[i];         // Componente rojo
+        data[i + 1] = 255 - data[i + 1]; // Componente verde
+        data[i + 2] = 255 - data[i + 2]; // Componente azul
+        // Mantener el componente alfa (transparencia) sin cambios
+      }
+
+      ctx.putImageData(imageData, 0, 0);
+    }
     function getRGBValue(pixels, index) {
       const palette = [0xffffff, 0xaaaaaa, 0x555555, 0x000000];
       const value = palette[pixels[index]];
@@ -412,10 +425,19 @@ export default {
     }
 
     function onPressButton(btn) {
+      const canvas = canvasRef.value;
+      const ctx = canvas.getContext('2d')
       switch (btn) {
+        case 'B':
+          inverted = !inverted;
+          if(inverted) {
+            invertColors()
+          } else {
+            onImport();
+          }
+        break;
         case "A":
           const scaleFactor = 2;
-          const canvas = canvasRef.value;
           // const context = canvas.getContext('2d');
 
           // const initialHeight = TILE_PIXEL_HEIGHT * Math.ceil(tiles.value.length / TILES_PER_LINE);
@@ -427,6 +449,7 @@ export default {
 
           // paintTileScaled(tiles.value, 0, context, scaleFactor, tilesPerLine);
           let link = document.createElement("a");
+          link.target = '_blank';
           link.download = `gb-camera-${new Date().getTime()}.png`;
           link.href = canvas.toDataURL();
           link.click();
