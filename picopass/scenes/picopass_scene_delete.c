@@ -11,7 +11,7 @@ void picopass_scene_delete_on_enter(void* context) {
     Picopass* picopass = context;
 
     // Setup Custom Widget view
-    char temp_str[64];
+    char temp_str[141];
     snprintf(temp_str, sizeof(temp_str), "\e#Delete %s?\e#", picopass->dev->dev_name);
     widget_add_text_box_element(
         picopass->widget, 0, 0, 128, 23, AlignCenter, AlignCenter, temp_str, false);
