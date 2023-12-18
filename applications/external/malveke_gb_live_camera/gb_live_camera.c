@@ -239,6 +239,8 @@ static int32_t gb_live_camera_worker(void* context) {
                         false);
                 }
             } while(length > 0);
+
+            notification_message(app->notification, &sequence_notification);
             with_view_model(
                 app->view, UartDumpModel * model, { UNUSED(model); }, true);
         }
@@ -263,6 +265,7 @@ static UartEchoApp* gb_live_camera_app_alloc() {
 
     //  Turn backlight on
     notification_message(app->notification, &sequence_display_backlight_enforce_on);
+
     // Views
     app->view = view_alloc();
     view_set_context(app->view, app);
