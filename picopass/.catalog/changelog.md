@@ -1,3 +1,6 @@
+## 1.11
+ - Update working with keys with new API
+ - Display more tag information
 ## 1.10
  - Fix missing folder in readme
  - Allow partial save for any read failure
