@@ -4,8 +4,8 @@
 enum SubmenuIndex {
     SubmenuIndexAuthenticate,
     SubmenuIndexSetStandartConfig,
-    SubmenuIndexGetRevision,
-    SubmenuIndexGetConfig
+    SubmenuIndexGetConfig,
+    SubmenuIndexGetRevision
 };
 
 void nfc_magic_scene_gen4_actions_menu_submenu_callback(void* context, uint32_t index) {
@@ -26,14 +26,14 @@ void nfc_magic_scene_gen4_actions_menu_on_enter(void* context) {
         instance);
     submenu_add_item(
         submenu,
-        "Set Standart Config",
-        SubmenuIndexSetStandartConfig,
+        "Get Revision",
+        SubmenuIndexGetRevision,
         nfc_magic_scene_gen4_actions_menu_submenu_callback,
         instance);
     submenu_add_item(
         submenu,
-        "Get Revision",
-        SubmenuIndexGetRevision,
+        "Set Standart Config",
+        SubmenuIndexSetStandartConfig,
         nfc_magic_scene_gen4_actions_menu_submenu_callback,
         instance);
     if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
@@ -62,11 +62,11 @@ bool nfc_magic_scene_gen4_actions_menu_on_event(void* context, SceneManagerEvent
         } else if(event.event == SubmenuIndexSetStandartConfig) {
             scene_manager_next_scene(instance->scene_manager, NfcMagicSceneGen4SetCFG);
             consumed = true;
-        } else if(event.event == SubmenuIndexGetRevision) {
-            scene_manager_next_scene(instance->scene_manager, NfcMagicSceneGen4Revision);
-            consumed = true;
         } else if(event.event == SubmenuIndexGetConfig) {
             scene_manager_next_scene(instance->scene_manager, NfcMagicSceneGen4GetCFG);
+            consumed = true;
+        } else if(event.event == SubmenuIndexGetRevision) {
+            scene_manager_next_scene(instance->scene_manager, NfcMagicSceneGen4Revision);
             consumed = true;
         }
         scene_manager_set_scene_state(
