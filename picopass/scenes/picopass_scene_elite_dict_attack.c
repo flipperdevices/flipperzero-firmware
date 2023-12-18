@@ -22,26 +22,26 @@ static bool picopass_elite_dict_attack_change_dict(Picopass* picopass) {
     do {
         uint32_t scene_state =
             scene_manager_get_scene_state(picopass->scene_manager, PicopassSceneEliteDictAttack);
-        nfc_dict_free(picopass->dict);
+        keys_dict_free(picopass->dict);
         picopass->dict = NULL;
         if(scene_state == PicopassSceneEliteDictAttackDictElite) break;
         if(scene_state == PicopassSceneEliteDictAttackDictEliteUser) {
-            if(!nfc_dict_check_presence(PICOPASS_ICLASS_STANDARD_DICT_FLIPPER_NAME)) break;
-            picopass->dict = nfc_dict_alloc(
+            if(!keys_dict_check_presence(PICOPASS_ICLASS_STANDARD_DICT_FLIPPER_NAME)) break;
+            picopass->dict = keys_dict_alloc(
                 PICOPASS_ICLASS_STANDARD_DICT_FLIPPER_NAME,
-                NfcDictModeOpenExisting,
+                KeysDictModeOpenExisting,
                 PICOPASS_KEY_LEN);
             scene_state = PicopassSceneEliteDictAttackDictStandard;
         } else if(scene_state == PicopassSceneEliteDictAttackDictStandard) {
-            if(!nfc_dict_check_presence(PICOPASS_ICLASS_ELITE_DICT_FLIPPER_NAME)) break;
-            picopass->dict = nfc_dict_alloc(
+            if(!keys_dict_check_presence(PICOPASS_ICLASS_ELITE_DICT_FLIPPER_NAME)) break;
+            picopass->dict = keys_dict_alloc(
                 PICOPASS_ICLASS_ELITE_DICT_FLIPPER_NAME,
-                NfcDictModeOpenExisting,
+                KeysDictModeOpenExisting,
                 PICOPASS_KEY_LEN);
             scene_state = PicopassSceneEliteDictAttackDictElite;
         }
         picopass->dict_attack_ctx.card_detected = true;
-        picopass->dict_attack_ctx.total_keys = nfc_dict_get_total_keys(picopass->dict);
+        picopass->dict_attack_ctx.total_keys = keys_dict_get_total_keys(picopass->dict);
         picopass->dict_attack_ctx.current_key = 0;
         picopass->dict_attack_ctx.name = picopass_dict_name[scene_state];
         scene_manager_set_scene_state(
@@ -63,9 +63,9 @@ NfcCommand picopass_elite_dict_attack_worker_callback(PicopassPollerEvent event,
     } else if(event.type == PicopassPollerEventTypeRequestKey) {
         uint8_t key[PICOPASS_KEY_LEN] = {};
         bool is_key_provided = true;
-        if(!nfc_dict_get_next_key(picopass->dict, key, PICOPASS_KEY_LEN)) {
+        if(!keys_dict_get_next_key(picopass->dict, key, PICOPASS_KEY_LEN)) {
             if(picopass_elite_dict_attack_change_dict(picopass)) {
-                is_key_provided = nfc_dict_get_next_key(picopass->dict, key, PICOPASS_KEY_LEN);
+                is_key_provided = keys_dict_get_next_key(picopass->dict, key, PICOPASS_KEY_LEN);
                 view_dispatcher_send_custom_event(
                     picopass->view_dispatcher, PicopassCustomEventDictAttackUpdateView);
             } else {
@@ -137,24 +137,26 @@ void picopass_scene_elite_dict_attack_on_enter(void* context) {
     // Setup dict attack context
     uint32_t state = PicopassSceneEliteDictAttackDictEliteUser;
 
-    bool use_user_dict = nfc_dict_check_presence(PICOPASS_ICLASS_ELITE_DICT_USER_NAME);
+    bool use_user_dict = keys_dict_check_presence(PICOPASS_ICLASS_ELITE_DICT_USER_NAME);
     if(use_user_dict) {
-        picopass->dict = nfc_dict_alloc(
-            PICOPASS_ICLASS_ELITE_DICT_USER_NAME, NfcDictModeOpenExisting, PICOPASS_KEY_LEN);
-        if(nfc_dict_get_total_keys(picopass->dict) == 0) {
-            nfc_dict_free(picopass->dict);
+        picopass->dict = keys_dict_alloc(
+            PICOPASS_ICLASS_ELITE_DICT_USER_NAME, KeysDictModeOpenExisting, PICOPASS_KEY_LEN);
+        if(keys_dict_get_total_keys(picopass->dict) == 0) {
+            keys_dict_free(picopass->dict);
             use_user_dict = false;
         }
     }
     if(use_user_dict) {
         state = PicopassSceneEliteDictAttackDictEliteUser;
     } else {
-        picopass->dict = nfc_dict_alloc(
-            PICOPASS_ICLASS_STANDARD_DICT_FLIPPER_NAME, NfcDictModeOpenExisting, PICOPASS_KEY_LEN);
+        picopass->dict = keys_dict_alloc(
+            PICOPASS_ICLASS_STANDARD_DICT_FLIPPER_NAME,
+            KeysDictModeOpenExisting,
+            PICOPASS_KEY_LEN);
         state = PicopassSceneEliteDictAttackDictStandard;
     }
     picopass->dict_attack_ctx.card_detected = true;
-    picopass->dict_attack_ctx.total_keys = nfc_dict_get_total_keys(picopass->dict);
+    picopass->dict_attack_ctx.total_keys = keys_dict_get_total_keys(picopass->dict);
     picopass->dict_attack_ctx.current_key = 0;
     picopass->dict_attack_ctx.name = picopass_dict_name[state];
     scene_manager_set_scene_state(picopass->scene_manager, PicopassSceneEliteDictAttack, state);
@@ -218,7 +220,7 @@ void picopass_scene_elite_dict_attack_on_exit(void* context) {
     Picopass* picopass = context;
 
     if(picopass->dict) {
-        nfc_dict_free(picopass->dict);
+        keys_dict_free(picopass->dict);
         picopass->dict = NULL;
     }
     picopass->dict_attack_ctx.current_key = 0;
