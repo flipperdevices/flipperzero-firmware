@@ -1,7 +1,5 @@
 #include "nfc_playlist_worker.h"
 
-/// @brief nfc_playlist_worker_alloc()
-/// @return
 NfcPlaylistWorker* nfc_playlist_worker_alloc() {
     NfcPlaylistWorker* nfc_playlist_worker = malloc(sizeof(NfcPlaylistWorker));
     // Worker thread attributes
@@ -15,8 +13,6 @@ NfcPlaylistWorker* nfc_playlist_worker_alloc() {
     return nfc_playlist_worker;
 }
 
-/// @brief nfc_playlist_worker_free()
-/// @param nfc_playlist_worker
 void nfc_playlist_worker_free(NfcPlaylistWorker* nfc_playlist_worker) {
     furi_assert(nfc_playlist_worker);
     furi_thread_free(nfc_playlist_worker->thread);
@@ -27,8 +23,6 @@ void nfc_playlist_worker_free(NfcPlaylistWorker* nfc_playlist_worker) {
     free(nfc_playlist_worker);
 }
 
-/// @brief nfc_playlist_worker_stop()
-/// @param nfc_playlist_worker
 void nfc_playlist_worker_stop(NfcPlaylistWorker* nfc_playlist_worker) {
     furi_assert(nfc_playlist_worker);
     if(nfc_playlist_worker->state != NfcPlaylistWorkerState_Stopped) {
@@ -37,17 +31,12 @@ void nfc_playlist_worker_stop(NfcPlaylistWorker* nfc_playlist_worker) {
     }
 }
 
-/// @brief nfc_playlist_worker_start()
-/// @param nfc_playlist_worker
 void nfc_playlist_worker_start(NfcPlaylistWorker* nfc_playlist_worker) {
     furi_assert(nfc_playlist_worker);
     nfc_playlist_worker->state = NfcPlaylistWorkerState_Emulating;
     furi_thread_start(nfc_playlist_worker->thread);
 }
 
-/// @brief nfc_playlist_worker_task()
-/// @param context
-/// @return
 int32_t nfc_playlist_worker_task(void* context) {
     NfcPlaylistWorker* nfc_playlist_worker = context;
 
@@ -73,9 +62,6 @@ int32_t nfc_playlist_worker_task(void* context) {
     return 0;
 }
 
-/// @brief nfc_playlist_worker_is_emulating()
-/// @param nfc_playlist_worker
-/// @return
 bool nfc_playlist_worker_is_emulating(NfcPlaylistWorker* nfc_playlist_worker) {
     if(nfc_playlist_worker->state == NfcPlaylistWorkerState_Emulating) {
         return true;
@@ -83,9 +69,6 @@ bool nfc_playlist_worker_is_emulating(NfcPlaylistWorker* nfc_playlist_worker) {
     return false;
 }
 
-/// @brief nfc_playlist_worker_set_nfc_data()
-/// @param nfc_playlist_worker
-/// @param nfc_data
 void nfc_playlist_worker_set_nfc_data(NfcPlaylistWorker* nfc_playlist_worker, char* file_path) {
 
     FURI_LOG_I("NfcPlaylistWorker", "nfc_playlist_worker_set_nfc_data: %s", file_path);
@@ -96,9 +79,6 @@ void nfc_playlist_worker_set_nfc_data(NfcPlaylistWorker* nfc_playlist_worker, ch
     nfc_playlist_worker->nfc_protocol = nfc_device_get_protocol(nfc_playlist_worker->nfc_device);
 }
 
-/// @brief nfc_playlist_worker_get_nfc_data()
-/// @param nfc_playlist_worker
-/// @return
 NfcDeviceData* nfc_playlist_worker_get_nfc_data(NfcPlaylistWorker* nfc_playlist_worker) {
     return nfc_playlist_worker->nfc_data;
 }
