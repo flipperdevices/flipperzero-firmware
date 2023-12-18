@@ -135,6 +135,7 @@ void espprinter_setup() {
   pinMode(GB_MISO, OUTPUT);
   pinMode(GB_MOSI, INPUT);
   pinMode(GB_SCLK, INPUT);
+  pinMode(GB_SD, INPUT);
   resetValues();
   // Setup Clock Interrupt
   attachInterrupt(GB_SCLK, gbClockHit, RISING);

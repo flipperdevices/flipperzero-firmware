@@ -39,6 +39,9 @@ SDA  V_SPI_HD   9
 #ifndef GB_SCLK
 #define GB_SCLK 1
 #endif
+#ifndef GB_SD
+#define GB_SD 7
+#endif
 
 
 const char* AGB_Header_ROM_Sizes[] = {
