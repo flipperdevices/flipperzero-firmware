@@ -151,3 +151,22 @@ void flipboard_status_led(FlipboardLeds* leds, bool glow) {
     UNUSED(leds);
     furi_hal_gpio_write(pin_status_led, glow);
 }
+
+/**
+ * @brief Adjusts the brightness of a color.
+ * @details This method adjusts the brightness of a color.
+ * @param color The color to adjust.
+ * @param brightness The brightness to adjust the color to (0-255).
+ * @return The adjusted color.
+*/
+uint32_t adjust_color_brightness(uint32_t color, uint8_t brightness) {
+    uint32_t red = (color & 0xFF0000) >> 16;
+    uint32_t green = (color & 0x00FF00) >> 8;
+    uint32_t blue = (color & 0x0000FF);
+
+    red = (red * brightness) / 255;
+    green = (green * brightness) / 255;
+    blue = (blue * brightness) / 255;
+
+    return (red << 16) | (green << 8) | blue;
+}
