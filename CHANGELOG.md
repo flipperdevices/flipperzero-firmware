@@ -4,6 +4,10 @@
 
 [Full Changelog](https://github.com/DarkFlippers/flipperzero-subbrute/compare/v3.9.2...v3.10.0)
 
+**Fixed bugs:**
+
+- NULL pointer exception on existing dump BF save [\#50](https://github.com/DarkFlippers/flipperzero-subbrute/pull/50) ([derskythe](https://github.com/derskythe))
+
 ## [v3.9.2](https://github.com/DarkFlippers/flipperzero-subbrute/tree/v3.9.2) (2023-11-04)
 
 [Full Changelog](https://github.com/DarkFlippers/flipperzero-subbrute/compare/v3.9.1...v3.9.2)
