@@ -5,14 +5,11 @@
 #include <lib/subghz/transmitter.h>
 #include <lib/subghz/receiver.h>
 #include <lib/subghz/environment.h>
-
-#define SUBBRUTE_TEXT_STORE_SIZE 256
+#include "helpers/subbrute_radio_device_loader.h"
 
 #define SUBBRUTE_MAX_LEN_NAME 64
 #define SUBBRUTE_PATH EXT_PATH("subghz")
 #define SUBBRUTE_FILE_EXT ".sub"
-
-#define SUBBRUTE_PAYLOAD_SIZE 16
 
 typedef enum {
     SubBruteFileResultUnknown,
@@ -42,6 +39,7 @@ typedef struct {
     SubGhzReceiver* receiver;
     SubGhzProtocolDecoderBase* decoder_result;
     SubGhzEnvironment* environment;
+    const SubGhzDevice* radio_device;
 
     // Attack state
     SubBruteAttacks attack;
@@ -52,11 +50,12 @@ typedef struct {
     uint64_t key_from_file;
     uint64_t current_key_from_file;
     bool two_bytes;
+
     // Index of group to bruteforce in loaded file
     uint8_t bit_index;
 } SubBruteDevice;
 
-SubBruteDevice* subbrute_device_alloc();
+SubBruteDevice* subbrute_device_alloc(const SubGhzDevice* radio_device);
 void subbrute_device_free(SubBruteDevice* instance);
 
 bool subbrute_device_save_file(SubBruteDevice* instance, const char* key_name);

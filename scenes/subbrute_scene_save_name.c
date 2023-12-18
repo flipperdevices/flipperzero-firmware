@@ -1,6 +1,6 @@
 #include "../subbrute_i.h"
 #include "subbrute_scene.h"
-#include <lib/toolbox/random_name.h>
+#include <toolbox/name_generator.h>
 
 #define TAG "SubBruteSceneSaveFile"
 
@@ -9,7 +9,10 @@ void subbrute_scene_save_name_on_enter(void* context) {
 
     // Setup view
     TextInput* text_input = instance->text_input;
-    set_random_name(instance->text_store, sizeof(instance->text_store));
+    name_generator_make_auto(
+        instance->text_store,
+        sizeof(instance->text_store),
+        subbrute_protocol_file(instance->device->protocol_info->file));
 
     text_input_set_header_text(text_input, "Name of file");
     text_input_set_result_callback(
@@ -44,7 +47,7 @@ bool subbrute_scene_save_name_on_event(void* context, SceneManagerEvent event) {
         FURI_LOG_D(TAG, "Saving: %s", instance->text_store);
 #endif
         bool success = false;
-        if(strcmp(instance->text_store, "")) {
+        if(strcmp(instance->text_store, "") != 0) {
             furi_string_reset(instance->file_path);
             furi_string_cat_printf(
                 instance->file_path,

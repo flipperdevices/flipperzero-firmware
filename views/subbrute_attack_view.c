@@ -1,13 +1,11 @@
 #include "subbrute_attack_view.h"
 #include "../subbrute_i.h"
-#include "../subbrute_protocols.h"
 #include "../helpers/gui_top_buttons.h"
 
 #include <input/input.h>
 #include <gui/elements.h>
-#include <gui/icon.h>
 #include <gui/icon_animation.h>
-#include <assets_icons.h>
+#include <subghz_bruteforcer_icons.h>
 
 #define TAG "SubBruteAttackView"
 
@@ -19,14 +17,14 @@ struct SubBruteAttackView {
     uint64_t max_value;
     uint64_t current_step;
     bool is_attacking;
-    uint8_t extra_repeats;
+    // uint8_t extra_repeats;
 };
 
 typedef struct {
     SubBruteAttacks attack_type;
     uint64_t max_value;
     uint64_t current_step;
-    uint8_t extra_repeats;
+    uint8_t repeat_count;
     bool is_attacking;
     IconAnimation* icon;
 } SubBruteAttackViewModel;
@@ -126,10 +124,10 @@ bool subbrute_attack_view_input(InputEvent* event, void* context) {
                 model->current_step = instance->current_step;
                 model->is_attacking = instance->is_attacking;
             },
-            true);
+            update);
     }
 
-    return true;
+    return update;
 }
 
 SubBruteAttackView* subbrute_attack_view_alloc() {
@@ -146,7 +144,7 @@ SubBruteAttackView* subbrute_attack_view_alloc() {
             model->icon = icon_animation_alloc(&A_Sub1ghz_14);
             view_tie_icon_animation(instance->view, model->icon);
         },
-        true);
+        false);
 
     view_set_draw_callback(instance->view, (ViewDrawCallback)subbrute_attack_view_draw);
     view_set_input_callback(instance->view, subbrute_attack_view_input);
@@ -163,18 +161,20 @@ SubBruteAttackView* subbrute_attack_view_alloc() {
 
 void subbrute_attack_view_enter(void* context) {
     furi_assert(context);
-
-#ifdef FURI_DEBUG
-    FURI_LOG_D(TAG, "subbrute_attack_view_enter");
-#endif
+    SubBruteAttackView* instance = context;
+    with_view_model(
+        instance->view,
+        SubBruteAttackViewModel * model,
+        {
+            if(model->is_attacking) {
+                icon_animation_start(model->icon);
+            }
+        },
+        true);
 }
 
 void subbrute_attack_view_free(SubBruteAttackView* instance) {
     furi_assert(instance);
-
-#ifdef FURI_DEBUG
-    FURI_LOG_D(TAG, "subbrute_attack_view_free");
-#endif
 
     with_view_model(
         instance->view,
@@ -226,7 +226,7 @@ void subbrute_attack_view_init_values(
     instance->max_value = max_value;
     instance->current_step = current_step;
     instance->is_attacking = is_attacking;
-    instance->extra_repeats = extra_repeats;
+    // instance->extra_repeats = extra_repeats;
 
     with_view_model(
         instance->view,
@@ -236,7 +236,7 @@ void subbrute_attack_view_init_values(
             model->attack_type = index;
             model->current_step = current_step;
             model->is_attacking = is_attacking;
-            model->extra_repeats = extra_repeats;
+            model->repeat_count = extra_repeats;
             if(is_attacking) {
                 icon_animation_start(model->icon);
             } else {
@@ -308,7 +308,7 @@ void subbrute_attack_view_draw(Canvas* canvas, void* context) {
             buffer,
             sizeof(buffer),
             "x%d",
-            model->extra_repeats + subbrute_protocol_repeats_count(model->attack_type));
+            model->repeat_count); // + subbrute_protocol_repeats_count(model->attack_type));
         canvas_draw_str_aligned(canvas, 60, 6, AlignCenter, AlignCenter, buffer);
 
         elements_button_left(canvas, "-1");
@@ -328,14 +328,14 @@ void subbrute_attack_view_draw(Canvas* canvas, void* context) {
             canvas, x - icon_width_with_offset, y - icon_v_offset, model->icon);
         // Progress bar
         // Resolution: 128x64 px
-        float progress_value = (float)model->current_step / model->max_value;
+        float progress_value = (float)model->current_step / (float)model->max_value;
         elements_progress_bar(canvas, 8, 37, 110, progress_value > 1 ? 1 : progress_value);
 
         snprintf(
             buffer,
             sizeof(buffer),
             "x%d",
-            model->extra_repeats + subbrute_protocol_repeats_count(model->attack_type));
+            model->repeat_count); // + subbrute_protocol_repeats_count(model->attack_type));
         canvas_draw_str(canvas, 4, y - 8, buffer);
         canvas_draw_str(canvas, 4, y - 1, "repeats");
 

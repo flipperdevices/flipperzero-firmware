@@ -46,7 +46,7 @@ void subbrute_scene_setup_attack_on_enter(void* context) {
         instance->device->max_value,
         instance->device->current_step,
         false,
-        instance->device->extra_repeats);
+        subbrute_worker_get_repeats(instance->worker));
 
     instance->current_view = SubBruteViewAttack;
     subbrute_attack_view_set_callback(view, subbrute_scene_setup_attack_callback, instance);

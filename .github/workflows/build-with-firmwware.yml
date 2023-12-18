@@ -9,7 +9,7 @@ on:
         required: false
         type: string
   release:
-    types: [created,prereleased]
+    types: [created, prereleased]
   push:
     paths:
       - .github/workflows/build-with-firmware.yml
@@ -18,35 +18,36 @@ permissions:
   contents: write
   packages: write
 
+concurrency:
+  group: firmware-build-${{ vars.FIRMWARE_VERSION }}-${{ vars.RELEASE_VERSION }}
+  cancel-in-progress: false
+
 jobs:
   build-and-upload:
-    # runs-on: [self-hosted, linux]
     runs-on: ubuntu-latest
-    concurrency:
-      group: firmware-build-${{ vars.FIRMWARE_VERSION }}-${{ vars.RELEASE_VERSION }}
-      cancel-in-progress: false
     env:
       REPO_SELF: ${{ vars.REPO_SELF }}
-      IGNORED_PATH: "applications_user/subbrute"
+      OFW_PATH: "applications_user/subbrute"
       RELATIVE_PATH: "applications/external/subbrute"
       CURRENT_VERSION: ${{ vars.RELEASE_VERSION }}
       RELEASE_VERSION: ${{ vars.RELEASE_VERSION }}
-      ZIP_NAME: ''
-      ZIP_TAG: ''
-      TGZ_NAME: ''
-      TGZ_TAG: ''
+      ZIP_NAME: ""
+      ZIP_TAG: ""
+      TGZ_NAME: ""
+      TGZ_TAG: ""
     strategy:
       fail-fast: false
       matrix:
-        firmware: [unlshd]
+        firmware: [unlshd, official]
         include:
           - firmware: unlshd
             url: ${{ vars.REPO_UNLEASHED }}
             version: ${{ vars.FIRMWARE_VERSION }}
-            src-included: 1
-          #- firmware: official
-          #  url: ${{ vars.REPO_OFFICIAL }}
-          #  version: "official"
+            src-included: 0
+          - firmware: official
+            url: ${{ vars.REPO_OFFICIAL }}
+            version: "official"
+            src-included: 0
     steps:
       - name: Set version
         env:
@@ -72,7 +73,7 @@ jobs:
           repository: "${{ vars.REPO_SELF }}"
           clean: "true"
           submodules: "true"
-          path: "${{ env.IGNORED_PATH }}"
+          path: "${{ env.OFW_PATH }}"
 
       - name: Print vars about state or repo if Unleashed
         if: ${{ matrix.src-included == 1 }}
@@ -81,7 +82,7 @@ jobs:
           git log --pretty=format:'%s by %C(yellow)%an%Creset (%ad)%n %n%b' --date=local --abbrev-commit --max-count=1
           git submodule set-branch --branch master '${{ env.RELATIVE_PATH }}'
           git submodule sync '${{ env.RELATIVE_PATH }}'
-          cd '${{ env.RELATIVE_PATH }}'
+          cd '${{ env.OFW_PATH }}'
           if ( '${{ env.CURRENT_VERSION }}' -ne '${{ env.RELEASE_VERSION }}' ) {
             Write-Output '::warning title=Different version::Current version is ${{ env.CURRENT_VERSION }} but we trying to build ${{ env.RELEASE_VERSION }}'
             git checkout tags/v${{ env.RELEASE_VERSION }} -b tmp-build
@@ -105,7 +106,7 @@ jobs:
         shell: pwsh
         run: |
           git log --pretty=format:'%s by %C(yellow)%an%Creset (%ad)%n %n%b' --date=local --abbrev-commit --max-count=1
-          cd '${{ env.IGNORED_PATH }}'
+          cd '${{ env.OFW_PATH }}'
 
           if ( '${{ env.CURRENT_VERSION }}' -ne '${{ env.RELEASE_VERSION }}' ) {
             Write-Output '::warning title=Different version::Current version is ${{ env.CURRENT_VERSION }} but we trying to build ${{ env.RELEASE_VERSION }}'
@@ -137,17 +138,17 @@ jobs:
       #        key: 'fbt=${{ env.FIRMWARE_VERSION }}'
       #
       - name: Remove other apps
-        shell: bash
+        shell: pwsh
         if: ${{ success() }}
-        # rm to remove problem FAP which includes non existent files
+        # rm to remove problem FAP which includes non-existent files
         run: |
-          rm -Rf ./applications/debug ./applications/examples
-          mkdir ./tmp
-          mv ./applications/external/application.fam ./tmp/
-          mv -f ./applications/external/subbrute/ ./tmp/
-          rm -Rf ./applications/external/*
-          mv -f ./tmp/* ./applications/external/
-          rm -Rf ./tmp/
+          Remove-Item -Force -Recurse ./applications/debug -ErrorAction SilentlyContinue
+          Remove-Item -Force -Recurse ./applications/examples -ErrorAction SilentlyContinue
+      #          New-Item -Force ./tmp -ItemType Directory -ErrorAction SilentlyContinue
+      #          Copy-Item -Force -Recurse ./applications/external/subbrute/ ./tmp/ -ErrorAction SilentlyContinue
+      #          Remove-Item -Force -Recurse ./applications/external/* -ErrorAction SilentlyContinue
+      #          Copy-Item -Force -Recurse /tmp/* ./applications/external/ -ErrorAction SilentlyContinue
+      #          Remove-Item -Force -Recurse ./tmp -ErrorAction SilentlyContinue
 
       - name: Build Firmware
         shell: bash
@@ -166,7 +167,7 @@ jobs:
           FBT_NO_SYNC: 0
           DIST_SUFFIX: ${{ matrix.version }}
           WORKFLOW_BRANCH_OR_TAG: release-cfw
-          # rm to remove problem FAP which includes non existent files
+          # rm to remove problem FAP which includes non-existent files
         run: |
           ./fbt COMPACT=1 DEBUG=0 FBT_NO_SYNC=0 fap_dist
 

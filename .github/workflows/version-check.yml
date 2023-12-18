@@ -43,6 +43,7 @@ jobs:
           ./.github/check-version.ps1 '${{ env.FIRMWARE_VERSION }}' '${{ env.RELEASE_VERSION }}' '${{ env.REPO_SELF }}' '${{ env.REPO_UNLEASHED }}' | %{ Write-Output($_) >> $Env:GITHUB_ENV }
       - name: Print env values
         run: env
+
       - name: Create release if necessary
         if: ${{ success() && (env.RELEASE_TYPE == 2  || env.RELEASE_TYPE == 1 )}}
         uses: ./.github/actions/make-release
