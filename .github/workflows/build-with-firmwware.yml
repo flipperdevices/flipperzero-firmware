@@ -104,6 +104,8 @@ jobs:
 
       - name: Get SHA of our application
         shell: pwsh
+        env:
+          GITHUB_TOKEN: ${{ secrets.FLIPPER_TOKEN }}
         run: |
           $fwInfo = ((gh release view --json tagName,url -R ${{ matrix.url }}) | ConvertFrom-Json)
           cd '${{ env.APP_PATH }}'
