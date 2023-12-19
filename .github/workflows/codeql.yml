@@ -12,11 +12,11 @@
 name: "CodeQL"
 
 on:
-  push:
-    branches: ["master", "feat/ci"]
-  pull_request:
+#  push:
+#    branches: ["master", "feat/ci"]
+#  pull_request:
     # The branches below must be a subset of the branches above
-    branches: ["master"]
+#    branches: ["master"]
   schedule:
     - cron: "43 14 * * *"
   workflow_dispatch:
