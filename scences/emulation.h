@@ -3,7 +3,7 @@
 #include <storage/storage.h>
 #include <toolbox/stream/stream.h>
 #include <toolbox/stream/file_stream.h>
-#include <nfc_playlist_worker.h>
+#include <lib/worker/nfc_playlist_worker.h>
 #include <gui/gui.h>
 #include <gui/view_dispatcher.h>
 #include <gui/scene_manager.h>
