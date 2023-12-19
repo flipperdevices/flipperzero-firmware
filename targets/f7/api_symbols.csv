@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,49.2,,
+Version,+,50.0,,
 Header,+,applications/drivers/subghz/cc1101_ext/cc1101_ext_interconnect.h,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
@@ -121,7 +121,6 @@ Header,+,lib/nanopb/pb_encode.h,,
 Header,+,lib/nfc/helpers/iso13239_crc.h,,
 Header,+,lib/nfc/helpers/iso14443_crc.h,,
 Header,+,lib/nfc/helpers/nfc_data_generator.h,,
-Header,+,lib/nfc/helpers/nfc_dict.h,,
 Header,+,lib/nfc/helpers/nfc_util.h,,
 Header,+,lib/nfc/nfc.h,,
 Header,+,lib/nfc/nfc_device.h,,
@@ -211,6 +210,7 @@ Header,+,lib/toolbox/crc32_calc.h,,
 Header,+,lib/toolbox/dir_walk.h,,
 Header,+,lib/toolbox/float_tools.h,,
 Header,+,lib/toolbox/hex.h,,
+Header,+,lib/toolbox/keys_dict.h,,
 Header,+,lib/toolbox/manchester_decoder.h,,
 Header,+,lib/toolbox/manchester_encoder.h,,
 Header,+,lib/toolbox/name_generator.h,,
@@ -1421,6 +1421,7 @@ Function,-,furi_hal_rtc_init_early,void,
 Function,+,furi_hal_rtc_is_flag_set,_Bool,FuriHalRtcFlag
 Function,+,furi_hal_rtc_is_leap_year,_Bool,uint16_t
 Function,+,furi_hal_rtc_reset_flag,void,FuriHalRtcFlag
+Function,+,furi_hal_rtc_reset_registers,void,
 Function,+,furi_hal_rtc_set_boot_mode,void,FuriHalRtcBootMode
 Function,+,furi_hal_rtc_set_datetime,void,FuriHalRtcDateTime*
 Function,+,furi_hal_rtc_set_fault_data,void,uint32_t
@@ -1973,6 +1974,15 @@ Function,-,j1f,float,float
 Function,-,jn,double,"int, double"
 Function,-,jnf,float,"int, float"
 Function,-,jrand48,long,unsigned short[3]
+Function,+,keys_dict_add_key,_Bool,"KeysDict*, const uint8_t*, size_t"
+Function,+,keys_dict_alloc,KeysDict*,"const char*, KeysDictMode, size_t"
+Function,+,keys_dict_check_presence,_Bool,const char*
+Function,+,keys_dict_delete_key,_Bool,"KeysDict*, const uint8_t*, size_t"
+Function,+,keys_dict_free,void,KeysDict*
+Function,+,keys_dict_get_next_key,_Bool,"KeysDict*, uint8_t*, size_t"
+Function,+,keys_dict_get_total_keys,size_t,KeysDict*
+Function,+,keys_dict_is_key_present,_Bool,"KeysDict*, const uint8_t*, size_t"
+Function,+,keys_dict_rewind,_Bool,KeysDict*
 Function,-,l64a,char*,long
 Function,-,labs,long,long
 Function,-,lcong48,void,unsigned short[7]
@@ -2522,15 +2532,6 @@ Function,+,nfc_device_save,_Bool,"NfcDevice*, const char*"
 Function,+,nfc_device_set_data,void,"NfcDevice*, NfcProtocol, const NfcDeviceData*"
 Function,+,nfc_device_set_loading_callback,void,"NfcDevice*, NfcLoadingCallback, void*"
 Function,+,nfc_device_set_uid,_Bool,"NfcDevice*, const uint8_t*, size_t"
-Function,+,nfc_dict_add_key,_Bool,"NfcDict*, const uint8_t*, size_t"
-Function,+,nfc_dict_alloc,NfcDict*,"const char*, NfcDictMode, size_t"
-Function,+,nfc_dict_check_presence,_Bool,const char*
-Function,+,nfc_dict_delete_key,_Bool,"NfcDict*, const uint8_t*, size_t"
-Function,+,nfc_dict_free,void,NfcDict*
-Function,+,nfc_dict_get_next_key,_Bool,"NfcDict*, uint8_t*, size_t"
-Function,+,nfc_dict_get_total_keys,uint32_t,NfcDict*
-Function,+,nfc_dict_is_key_present,_Bool,"NfcDict*, const uint8_t*, size_t"
-Function,+,nfc_dict_rewind,_Bool,NfcDict*
 Function,+,nfc_felica_listener_set_sensf_res_data,NfcError,"Nfc*, const uint8_t*, const uint8_t, const uint8_t*, const uint8_t"
 Function,+,nfc_free,void,Nfc*
 Function,+,nfc_iso14443a_listener_set_col_res_data,NfcError,"Nfc*, uint8_t*, uint8_t, uint8_t*, uint8_t"
@@ -2569,6 +2570,7 @@ Function,+,nfc_set_mask_receive_time_fc,void,"Nfc*, uint32_t"
 Function,+,nfc_start,void,"Nfc*, NfcEventCallback, void*"
 Function,+,nfc_stop,void,Nfc*
 Function,+,nfc_util_bytes2num,uint64_t,"const uint8_t*, uint8_t"
+Function,+,nfc_util_bytes2num_little_endian,uint64_t,"const uint8_t*, uint8_t"
 Function,+,nfc_util_even_parity32,uint8_t,uint32_t
 Function,+,nfc_util_num2bytes,void,"uint64_t, uint8_t, uint8_t*"
 Function,+,nfc_util_odd_parity,void,"const uint8_t*, uint8_t*, uint8_t"
