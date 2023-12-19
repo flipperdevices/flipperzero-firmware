@@ -1,5 +1,5 @@
-name: "Build for Firmware"
-run-name: "Build ${{ inputs.DEPLOY_TARGET }} triggered ${{ github.EVENT_NAME }} by @${{ github.ACTOR }}"
+name: "Build with Firmware"
+run-name: "Build ${{ inputs.DEPLOY_TARGET }} triggered by ${{ github.EVENT_NAME }} (@${{ github.ACTOR }})"
 
 on:
   workflow_dispatch:
@@ -118,10 +118,10 @@ jobs:
             $releaseVersion = $releaseVersion.Substring(1)
           }
           
+          Write-Output "::notice title=${{ matrix.firmware }} PREV_TAG::$latestTag"
           Write-Output "::notice title=${{ matrix.firmware }} RELEASE_VERSION::$releaseVersion"
           Write-Output "::notice title=${{ matrix.firmware }} SHA::$sha"
           Write-Output ('::notice title=${{ matrix.firmware }} FW_VERSION::{0}' -f $fwInfo.tagName)
-          Write-Output "::notice title=${{ matrix.firmware }} PREV_TAG::$latestTag"
           
           Write-Output ('RELEASE_VERSION={0}' -f $releaseVersion) >> $env:GITHUB_ENV
           Write-Output ('SHA={0}' -f $sha) >> $env:GITHUB_ENV
