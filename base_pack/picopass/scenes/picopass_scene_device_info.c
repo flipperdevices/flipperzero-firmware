@@ -77,6 +77,12 @@ void picopass_scene_device_info_on_enter(void* context) {
         "Back",
         picopass_scene_device_info_widget_callback,
         picopass);
+    widget_add_button_element(
+        picopass->widget,
+        GuiButtonTypeRight,
+        "More",
+        picopass_scene_device_info_widget_callback,
+        picopass);
 
     view_dispatcher_switch_to_view(picopass->view_dispatcher, PicopassViewWidget);
 }
@@ -88,6 +94,9 @@ bool picopass_scene_device_info_on_event(void* context, SceneManagerEvent event)
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == GuiButtonTypeLeft) {
             consumed = scene_manager_previous_scene(picopass->scene_manager);
+        } else if(event.event == GuiButtonTypeRight) {
+            scene_manager_next_scene(picopass->scene_manager, PicopassSceneMoreInfo);
+            consumed = true;
         } else if(event.event == PicopassCustomEventViewExit) {
             view_dispatcher_switch_to_view(picopass->view_dispatcher, PicopassViewWidget);
             consumed = true;

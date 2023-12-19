@@ -43,7 +43,8 @@ void picopass_scene_read_card_success_on_enter(void* context) {
         AA1[PICOPASS_ICLASS_PACS_CFG_BLOCK_INDEX].data, 0x00, PICOPASS_BLOCK_LEN);
     bool empty = picopass_is_memset(
         AA1[PICOPASS_ICLASS_PACS_CFG_BLOCK_INDEX].data, 0xFF, PICOPASS_BLOCK_LEN);
-    bool sio = 0x30 == AA1[PICOPASS_ICLASS_PACS_CFG_BLOCK_INDEX].data[0];
+    bool SE = 0x30 == AA1[PICOPASS_ICLASS_PACS_CFG_BLOCK_INDEX].data[0];
+    bool configCard = (AA1[PICOPASS_ICLASS_PACS_CFG_BLOCK_INDEX].data[7] >> 2 & 3) == 2;
 
     if(no_key) {
         furi_string_cat_printf(wiegand_str, "Read Failed");
@@ -68,7 +69,8 @@ void picopass_scene_read_card_success_on_enter(void* context) {
             "More",
             picopass_scene_read_card_success_widget_callback,
             picopass);
-
+    } else if(configCard) {
+        furi_string_cat_printf(wiegand_str, "Config Card");
     } else if(empty) {
         furi_string_cat_printf(wiegand_str, "Empty");
         widget_add_button_element(
@@ -79,7 +81,7 @@ void picopass_scene_read_card_success_on_enter(void* context) {
             picopass);
     } else if(pacs->bitLength == 0 || pacs->bitLength == 255) {
         // Neither of these are valid.  Indicates the block was all 0x00 or all 0xff
-        if(sio) {
+        if(SE) {
             furi_string_cat_printf(wiegand_str, "SIO");
         } else {
             furi_string_cat_printf(wiegand_str, "Invalid PACS");
