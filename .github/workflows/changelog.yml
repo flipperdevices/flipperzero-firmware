@@ -33,18 +33,27 @@ jobs:
           repo: ${{ github.repository }}
           output: CHANGELOG.md
           unreleased: false
+          issues: true
+          prWoLabels: true
           stripGeneratorNotice: true
+          verbose: true
+          breakingLabels: true
+          enhancementLabels: true
+          bugLabels: true
+          deprecatedLabels: true
+          removedLabels: true
+          securityLabels: true
 
       - name: "Show CHANGELOG.md"
         run: cat CHANGELOG.md
 
-      - name: "Commit changes"
-        uses: stefanzweifel/git-auto-commit-action@v4
-        with:
-          commit_message: "docs: update `CHANGELOG.md`"
-          file_pattern: "*.md"
-          branch: ${{ github.ref_name }}
-          commit_options: '--no-verify --signoff'
-          # skip_dirty_check: true
-          # skip_checkout: true
-          # skip_fetch: true
+#      - name: "Commit changes"
+#        uses: stefanzweifel/git-auto-commit-action@v4
+#        with:
+#          commit_message: "docs: update `CHANGELOG.md`"
+#          file_pattern: "*.md"
+#          branch: ${{ github.ref_name }}
+#          commit_options: '--no-verify --signoff'
+#          # skip_dirty_check: true
+#          # skip_checkout: true
+#          # skip_fetch: true
