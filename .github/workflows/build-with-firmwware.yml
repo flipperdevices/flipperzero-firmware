@@ -52,34 +52,22 @@ jobs:
             version: "official"
             src-included: 0
     steps:
-      - name: Set version
-        env:
-          INPUT_VERSION: ${{ inputs.version }}
-          CURRENT_VERSION: ${{ env.CURRENT_VERSION }}
-        shell: pwsh
-        run: |
-          $releaseVersion = ([string]::IsNullOrWhitespace($env:INPUT_VERSION) ? $env:CURRENT_VERSION : $env:INPUT_VERSION)
-          if ( $releaseVersion.StartsWith('v') ) {
-            $releaseVersion = $releaseVersion.Substring(1)
-          }
-          Write-Output ('RELEASE_VERSION={0}' -f $releaseVersion) >> $env:GITHUB_ENV
-
       - name: Copy Firmware Files
         uses: actions/checkout@v3
         with:
           repository: ${{ matrix.url }}
-          clean: "true"
-          submodules: "true"
-          ref: "dev"
+          clean: true
+          submodules: true
+          ref: dev
 
       - name: Copy Repo Files
         if: ${{ matrix.src-included == 0 }}
         uses: actions/checkout@v3
         with:
           repository: ${{ vars.REPO_SELF }}
-          clean: "true"
-          submodules: "true"
-          path: "${{ env.APP_PATH }}"
+          clean: true
+          submodules: true
+          path: ${{ env.APP_PATH }}
 
       #    - name: Restore FBT
       #      id: cache-restore
@@ -101,14 +89,32 @@ jobs:
           Remove-Item -Force -Recurse ./applications/examples -ErrorAction SilentlyContinue
           Remove-Item -Force -Recurse ${{ env.RELATIVE_PATH }} -ErrorAction SilentlyContinue
 
-      - name: Get SHA of our application
+      - name: Get SHA of our application and release version
         shell: pwsh
         env:
           GITHUB_TOKEN: ${{ secrets.FLIPPER_TOKEN }}
+          INPUT_VERSION: ${{ inputs.version }}
+          CURRENT_VERSION: ${{ env.CURRENT_VERSION }}
         run: |
           $fwInfo = ((gh release view --json tagName,url -R ${{ matrix.url }}) | ConvertFrom-Json)
           cd '${{ env.APP_PATH }}'
           $sha = (git rev-parse --verify HEAD)
+          
+          $releaseVersion = $env:INPUT_VERSION
+
+          if ( [string]::IsNullOrWhitespace($env:INPUT_VERSION) ) {
+            $latestTag = ((gh release view --json tagName,url -R ${{ vars.REPO_SELF }}) | ConvertFrom-Json ).tagName
+            $lastIndex = $latestTag.LastIndexOf('.')
+            $minorValue = $latestTag($latestTag.LastIndexOf('.'))
+            $minorValue = [Convert]::ToInt32($minorValue) + 1
+            $latestTag = $latestTag.Substring(0, $lastIndex)
+            $releaseVersion = ('{0}.{1}', $latestTag, $minorValue)
+          }
+          if ( $releaseVersion.StartsWith('v') ) {
+            $releaseVersion = $releaseVersion.Substring(1)
+          }
+          
+          Write-Output ('RELEASE_VERSION={0}' -f $releaseVersion) >> $env:GITHUB_ENV
           Write-Output ('SHA={0}' -f $sha) >> $env:GITHUB_ENV
           Write-Output ('FW_VERSION={0}' -f $fwInfo.tagName) >> $env:GITHUB_ENV
 
