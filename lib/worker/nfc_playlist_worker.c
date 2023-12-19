@@ -70,12 +70,8 @@ bool nfc_playlist_worker_is_emulating(NfcPlaylistWorker* nfc_playlist_worker) {
 }
 
 void nfc_playlist_worker_set_nfc_data(NfcPlaylistWorker* nfc_playlist_worker, char* file_path) {
-
-    FURI_LOG_I("NfcPlaylistWorker", "nfc_playlist_worker_set_nfc_data: %s", file_path);
-
     nfc_device_clear(nfc_playlist_worker->nfc_device);
     nfc_device_load(nfc_playlist_worker->nfc_device, file_path);
-
     nfc_playlist_worker->nfc_protocol = nfc_device_get_protocol(nfc_playlist_worker->nfc_device);
 }
 
