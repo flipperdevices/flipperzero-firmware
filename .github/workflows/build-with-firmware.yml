@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: "Enter version to build or left empty for current version"
+        description: "Enter version to build or left empty for the NEXT version"
         required: false
         type: string
   push:
@@ -47,7 +47,7 @@ jobs:
             src-included: 0
           - firmware: official
             url: ${{ vars.REPO_OFFICIAL }}
-            version: "official"
+            version: official
             src-included: 0
     steps:
       - name: Copy Firmware Files
@@ -80,7 +80,6 @@ jobs:
       #
       - name: Remove other apps
         shell: pwsh
-        if: ${{ success() }}
         # rm to remove problem FAP which includes non-existent files
         run: |
           Remove-Item -Force -Recurse ./applications/debug -ErrorAction SilentlyContinue
