@@ -1,9 +1,10 @@
 App(
-    appid="motion_mouse",
-    name="Motion Mouse",
+    appid="air_mouse2",
+    name="Air Mouse 2",
     apptype=FlipperAppType.EXTERNAL,
-    entry_point="motion_mouse_app",
+    entry_point="air_mouse2_app",
     stack_size=4 * 1024,
+    fap_icon="airmouse_10x10.png",
     fap_icon_assets="assets",
     fap_category="GPIO",
     fap_author="nminaylov",

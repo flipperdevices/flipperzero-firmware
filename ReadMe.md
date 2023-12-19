@@ -47,7 +47,10 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [FlipBoard Keyboard v2.0 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
 - Updated: [FlipBoard Signal v3.1 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
 - OFW: [Added UTF-8 support to Flipper Zero canvas API #3297 (By bolknote)](https://github.com/flipperdevices/flipperzero-firmware/pull/3297)
-- OFW: [USART Bridge: added support for software control of DE/RE pins #3280 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/3280)
+- Updated: [Hangman v1.5 (By Evgeny Stepanischev & Eva Stepanischeva)](https://github.com/bolknote/Flipper-Zero-Hangman-Game)
+- Updated: [Sub-GHz Bruteforcer v3.9.1 (By Ganapati/xMasterX/derskythe)](https://github.com/derskythe/flipperzero-subbrute/tree/master)
+- Updated: [ESP32CAM Marauder v0.6.6 (By 0xchocolate & eried)](https://github.com/eried/flipperzero-mayhem)
+- Updated: Motion Mouse to be named: [Air Mouse 2 v1.0 (By nminaylov)](https://github.com/flipperdevices/flipperzero-good-faps/tree/nm/motion_mouse_app) `Req: ICM42688` They decided to take the same name as Air Mouse.
 
 ## IN THIS BRANCH:
 
@@ -133,6 +136,7 @@ This software is for experimental purposes only and is not meant for any illegal
 kitsunehunter)](https://github.com/flipperdevices/flipperzero-good-faps/pull/89) [config SE problem #90 (By 
 bettse)](https://github.com/flipperdevices/flipperzero-good-faps/pull/90)
 - Updated: [COGES NFC (For Coffee Machines) (By OFW + haisenteck)](https://github.com/haisenteck/flipperzero-Haisenteck/) (second update to fix missing dependancies)
+- OFW: [USART Bridge: added support for software control of DE/RE pins #3280 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/3280)
 - OFW: [ufbt: changed toolchain environment invocation #3300 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3300)
 - OFW: [Keys Dict: fix PVS warnings #3299 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3299)
 
@@ -395,7 +399,8 @@ $ ./fbt dolphin_ext
 ## Plugins
 
 - [Advanced Wifi Sniffer (By Sil333033)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/c8e5c3bd8b353092c7fd5b7ed0327d044ee53b74)
-- [Air Mouse (By ginkage)](https://github.com/ginkage/FlippAirMouse/)
+- [Air Mouse v0.6 (By ginkage)](https://github.com/ginkage/FlippAirMouse/) `Req: BMI160`
+- [Air Mouse 2 v1.0 (By nminaylov)](https://github.com/flipperdevices/flipperzero-good-faps/tree/nm/motion_mouse_app) `Req: ICM42688`
 - [Analog Clock v1.1 (By scrolltex)](https://github.com/scrolltex/flipper_analog_clock)
 - [APRS Cln Hello World (By NSV47)](https://github.com/NSV47/APRS_hello_world_clean)
 - [Atomic Dice Roller v1.1 (By nmrr)](https://github.com/nmrr/flipperzero-atomicdiceroller)
@@ -451,7 +456,7 @@ $ ./fbt dolphin_ext
 - [ESP32 Gravity v1.0 (By chris-bc)](https://github.com/chris-bc/Flipper-Gravity)
 - [ESP32 WIFI Mapping (By carvilsi)](https://github.com/carvilsi/flipper0-wifi-map) `Req: ESP32` & [ESP32 FW](https://github.com/carvilsi/esp32-wifi-map)
 - [ESP32CAM Camera v1.0.0 (By Z4urce & eried)](https://github.com/eried/flipperzero-mayhem)
-- [ESP32CAM Marauder v0.6.5 (By 0xchocolate & eried)](https://github.com/eried/flipperzero-mayhem)
+- [ESP32CAM Marauder v0.6.6 (By 0xchocolate & eried)](https://github.com/eried/flipperzero-mayhem)
 - [ESP32CAM Morse Flasher v0.1 (By eried)](https://github.com/eried/flipperzero-mayhem)
 - [ESP32CAM Motion Detection v0.1 (By eried)](https://github.com/eried/flipperzero-mayhem)
 - [ESP32CAM Nanny Cam v0.1 (By eried)](https://github.com/eried/flipperzero-mayhem)
@@ -506,7 +511,6 @@ $ ./fbt dolphin_ext
 - [MH-Z19 UART (By skotopes)](https://github.com/skotopes/flipperzero_mhz19_uart)
 - [Mifare Fuzzer v1.2 (By spheeere98)](https://github.com/spheeere98/mifare_fuzzer)
 - [Morse Code v1.1 (By wh00hw)](https://github.com/DarkFlippers/unleashed-firmware/pull/144)
-- [Motion Mouse v1.0 (By nminaylov)](https://github.com/flipperdevices/flipperzero-good-faps/tree/nm/motion_mouse_app) `Req: ICM42688`
 - [Mouse Jacker v1.1 (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/mousejacker) ([Pin Out](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/tree/420/applications/mousejacker) from nocomp/Frog/UberGuidoZ) `Req: NRF24`
 - [Mouse Jacker for MS Mouse (Remixed By coded-with-claws)](https://github.com/coded-with-claws/flipperzero-tools/tree/main/applications_user/mousejacker_ms) `Req: NRF24`
 - [Mouse Jiggler v1.1 (By Jacob-Tate)](https://github.com/Jacob-Tate/flipperzero-firmware/blob/dev/applications/mouse_jiggler/mouse_jiggler.c) (Original By MuddleBox)
