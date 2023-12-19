@@ -195,6 +195,10 @@ bool picopass_scene_read_card_success_on_event(void* context, SceneManagerEvent 
             consumed = scene_manager_search_and_switch_to_another_scene(
                 picopass->scene_manager, PicopassSceneStart);
         }
+    } else if(event.type == SceneManagerEventTypeBack) {
+        scene_manager_search_and_switch_to_previous_scene(
+            picopass->scene_manager, PicopassSceneStart);
+        consumed = true;
     }
     return consumed;
 }
