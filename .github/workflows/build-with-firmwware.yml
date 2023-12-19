@@ -103,6 +103,8 @@ jobs:
 
           if ( [string]::IsNullOrWhitespace($env:INPUT_VERSION) ) {
             $latestTag = ((gh release view --json tagName,url -R ${{ vars.REPO_SELF }}) | ConvertFrom-Json ).tagName
+            Write-Output "::notice title=Latest tag::$latestTag"
+            
             $lastIndex = $latestTag.LastIndexOf('.')
             
             $minorValue = $latestTag.Substring($latestTag.LastIndexOf('.') + 1)
