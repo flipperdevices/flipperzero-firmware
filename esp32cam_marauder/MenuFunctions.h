@@ -1,3 +1,5 @@
+#pragma once
+
 #ifndef MenuFunctions_h
 #define MenuFunctions_h
 

@@ -1,3 +1,5 @@
+#pragma once
+
 #ifndef WiFiScan_h
 #define WiFiScan_h
 
@@ -88,6 +90,8 @@
 #define BT_ATTACK_SWIFTPAIR_SPAM 37
 #define BT_ATTACK_SPAM_ALL 38
 #define BT_ATTACK_SAMSUNG_SPAM 39
+#define WIFI_SCAN_GPS_NMEA 40
+#define BT_ATTACK_GOOGLE_SPAM 41
 
 #define GRAPH_REFRESH 100
 
@@ -160,7 +164,7 @@ class WiFiScan
     bool force_pmkid = false;
     bool force_probe = false;
     bool save_pcap = false;
-  
+
     int x_pos; //position along the graph x axis
     float y_pos_x; //current graph y axis position of X value
     float y_pos_x_old = 120; //old y axis position of X value
@@ -217,7 +221,7 @@ class WiFiScan
       int16_t seqctl;
       unsigned char payload[];
     } __attribute__((packed)) WifiMgmtHdr;
-    
+
     typedef struct {
       uint8_t payload[0];
       WifiMgmtHdr hdr;
@@ -225,7 +229,7 @@ class WiFiScan
 
     // barebones packet
     uint8_t packet[128] = { 0x80, 0x00, 0x00, 0x00, //Frame Control, Duration
-                    /*4*/   0xff, 0xff, 0xff, 0xff, 0xff, 0xff, //Destination address 
+                    /*4*/   0xff, 0xff, 0xff, 0xff, 0xff, 0xff, //Destination address
                     /*10*/  0x01, 0x02, 0x03, 0x04, 0x05, 0x06, //Source address - overwritten later
                     /*16*/  0x01, 0x02, 0x03, 0x04, 0x05, 0x06, //BSSID - overwritten to the same as the source address
                     /*22*/  0xc0, 0x6c, //Seq-ctl
@@ -236,7 +240,7 @@ class WiFiScan
                     /*36*/  0x00
                     };
 
-    uint8_t prob_req_packet[128] = {0x40, 0x00, 0x00, 0x00, 
+    uint8_t prob_req_packet[128] = {0x40, 0x00, 0x00, 0x00,
                                   0xff, 0xff, 0xff, 0xff, 0xff, 0xff, // Destination
                                   0x01, 0x02, 0x03, 0x04, 0x05, 0x06, // Source
                                   0xff, 0xff, 0xff, 0xff, 0xff, 0xff, // Dest
@@ -312,6 +316,7 @@ class WiFiScan
     void broadcastSetSSID(uint32_t current_time, const char* ESSID);
     void RunAPScan(uint8_t scan_mode, uint16_t color);
     void RunGPSInfo();
+    void RunGPSNmea();
     void RunMimicFlood(uint8_t scan_mode, uint16_t color);
     void RunPwnScan(uint8_t scan_mode, uint16_t color);
     void RunBeaconScan(uint8_t scan_mode, uint16_t color);
@@ -385,7 +390,7 @@ class WiFiScan
     void StopScan(uint8_t scan_mode);
     const char* generateRandomName();
     //void addLog(String log, int len);
-    
+
     static void getMAC(char *addr, uint8_t* data, uint16_t offset);
     static void pwnSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type);
     static void beaconSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type);

@@ -1,3 +1,5 @@
+#pragma once
+
 #ifndef __AXP192_H__
 #define __AXP192_H__
 

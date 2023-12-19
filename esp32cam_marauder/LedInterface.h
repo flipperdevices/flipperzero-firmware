@@ -1,3 +1,5 @@
+#pragma once
+
 #ifndef LedInterface_h
 #define LedInterface_h
 
@@ -34,7 +36,7 @@ class LedInterface {
     void ledOff();
     void attackLed();
     void sniffLed();
-  
+
   public:
     LedInterface();
 
@@ -44,8 +46,8 @@ class LedInterface {
     void setMode(uint8_t);
     void setColor(int r, int g, int b);
     uint8_t getMode();
-    
-  
+
+
 };
 
 #endif

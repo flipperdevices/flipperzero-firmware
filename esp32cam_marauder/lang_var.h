@@ -1,3 +1,5 @@
+#pragma once
+
 #ifndef lang_var_h
 #define lang_var_h
 
