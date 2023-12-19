@@ -94,11 +94,12 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.FLIPPER_TOKEN }}
           INPUT_VERSION: ${{ inputs.version }}
         run: |
+          Write-Output "::notice title=Version Number::v${{ inputs.version }}"
           $fwInfo = ((gh release view --json tagName,url -R ${{ matrix.url }}) | ConvertFrom-Json)
           cd '${{ env.APP_PATH }}'
           $sha = (git rev-parse --verify HEAD)
           
-          $releaseVersion = $env:INPUT_VERSION
+          $releaseVersion = "$env:INPUT_VERSION"
 
           if ( [string]::IsNullOrWhitespace($env:INPUT_VERSION) ) {
             $latestTag = ((gh release view --json tagName,url -R ${{ vars.REPO_SELF }}) | ConvertFrom-Json ).tagName
@@ -108,7 +109,7 @@ jobs:
             $minorValue = [Convert]::ToInt32($minorValue) + 1
             $latestTag = $latestTag.Substring(0, $lastIndex)
             
-            $releaseVersion = ('{0}.{1}', $latestTag, $minorValue)
+            $releaseVersion = ('{0}.{1}', $latestTag, $minorValue.ToString())
           }
           if ( $releaseVersion.StartsWith('v') ) {
             $releaseVersion = $releaseVersion.Substring(1)
