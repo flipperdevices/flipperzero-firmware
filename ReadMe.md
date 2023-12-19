@@ -49,6 +49,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [Added UTF-8 support to Flipper Zero canvas API #3297 (By bolknote)](https://github.com/flipperdevices/flipperzero-firmware/pull/3297)
 - Updated: [Hangman v1.5 (By Evgeny Stepanischev & Eva Stepanischeva)](https://github.com/bolknote/Flipper-Zero-Hangman-Game)
 - Updated: [Sub-GHz Bruteforcer v3.9.1 (By Ganapati/xMasterX/derskythe)](https://github.com/derskythe/flipperzero-subbrute/tree/master)
+- Updated: [ESP32CAM Marauder v0.6.6 (By 0xchocolate & eried)](https://github.com/eried/flipperzero-mayhem)
 
 <a name="release">
 
@@ -366,7 +367,7 @@ $ ./fbt dolphin_ext
 - [ESP32 Gravity v1.0 (By chris-bc)](https://github.com/chris-bc/Flipper-Gravity)
 - [ESP32 WIFI Mapping (By carvilsi)](https://github.com/carvilsi/flipper0-wifi-map) `Req: ESP32` & [ESP32 FW](https://github.com/carvilsi/esp32-wifi-map)
 - [ESP32CAM Camera v1.0.0 (By Z4urce & eried)](https://github.com/eried/flipperzero-mayhem)
-- [ESP32CAM Marauder v0.6.5 (By 0xchocolate & eried)](https://github.com/eried/flipperzero-mayhem)
+- [ESP32CAM Marauder v0.6.6 (By 0xchocolate & eried)](https://github.com/eried/flipperzero-mayhem)
 - [ESP32CAM Morse Flasher v0.1 (By eried)](https://github.com/eried/flipperzero-mayhem)
 - [ESP32CAM Motion Detection v0.1 (By eried)](https://github.com/eried/flipperzero-mayhem)
 - [ESP32CAM Nanny Cam v0.1 (By eried)](https://github.com/eried/flipperzero-mayhem)
