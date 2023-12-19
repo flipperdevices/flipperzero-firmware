@@ -38,7 +38,6 @@ jobs:
       TGZ_TAG: ""
       SHA: ""
       FW_VERSION: ""
-      FW_URL: ""
     strategy:
       fail-fast: false
       matrix:
@@ -112,7 +111,6 @@ jobs:
           $sha = (git rev-parse --verify HEAD)
           Write-Output ('SHA={0}' -f $sha) >> $env:GITHUB_ENV
           Write-Output ('FW_VERSION={0}' -f $fwInfo.tagName) >> $env:GITHUB_ENV
-          Write-Output ('FW_URL={0}' -f $fwInfo.url) >> $env:GITHUB_ENV
 
       - name: Build Firmware
         shell: bash
@@ -150,7 +148,7 @@ jobs:
         if: ${{ success() }}
         shell: pwsh
         env:
-          APP_NAME: "subghz_bruteforcer_${{ env.RELEASE_VERSION }}_${{ matrix.firmware }}"
+          APP_NAME: "subghz_bruteforcer_${{ env.RELEASE_VERSION }}"
         run: |
           function Format-Bytes {
             param(
@@ -170,8 +168,14 @@ jobs:
                   }
               }
           }
-          $zipName = ('{0}.zip' -f $env:APP_NAME)
-          $tgzName = ('{0}.tgz' -f $env:APP_NAME)
+          $appName = $env:APP_NAME
+          if ( '${{ matrix.firmware }}' -eq 'unlshd' ) {
+            $appName = ('{0}_${{ env.FW_VERSION }}' -f $appName)
+          } else {
+            $appName = ('{0}_${{ matrix.firmware}}-${{ env.FW_VERSION }}' -f $appName)
+          }
+          $zipName = ('{0}.zip' -f $appName)
+          $tgzName = ('{0}.tgz' -f $appName)
           $fapName = 'subghz_bruteforcer.fap'
           $dstFap = "./$fapName"
           $appDir = "dist/f7-C/apps/Sub-GHz"
@@ -212,7 +216,7 @@ jobs:
           $json = (gh api -H $mime -H $api /repos/${{ github.REPOSITORY }}/releases) | ConvertFrom-Json
           $tagExists = ($json.GetEnumerator() | Where-Object { $_.tag_name -eq 'v${{ env.RELEASE_VERSION }}' }) -ne $null
           if ( $tagExists -eq $false ) {
-            gh api --method POST -H $mime -H $api /repos/${{ github.REPOSITORY }}/releases -f tag_name='v${{ env.RELEASE_VERSION }}' -f target_commitish='${{ env.SHA }}' -f body='Firmware version: [${{ env.FW_VERSION }}](${{ env.FW_URL }}) ' -f name='v${{ env.RELEASE_VERSION }}' -F draft=true -F prerelease=false -F generate_release_notes=true  
+            gh api --method POST -H $mime -H $api /repos/${{ github.REPOSITORY }}/releases -f tag_name='v${{ env.RELEASE_VERSION }}' -f target_commitish='${{ env.SHA }}' -f name='v${{ env.RELEASE_VERSION }}' -F draft=true -F prerelease=false -F generate_release_notes=true  
           }          
           gh release upload 'v${{ env.RELEASE_VERSION }}' '${{ env.ZIP_NAME }}#${{ env.ZIP_TAG }}' '${{ env.TGZ_NAME }}#${{ env.TGZ_TAG }}' --clobber -R ${{ env.REPO_SELF }}
           gh release edit 'v${{ env.RELEASE_VERSION }}' --draft=false -R ${{ env.REPO_SELF }}
