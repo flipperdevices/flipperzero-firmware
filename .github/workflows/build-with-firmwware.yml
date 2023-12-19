@@ -105,10 +105,10 @@ jobs:
       - name: Get SHA of our application
         shell: pwsh
         run: |
+          $fwInfo = ((gh release view --json tagName,url -R ${{ matrix.url }}) | ConvertFrom-Json)
           cd '${{ env.APP_PATH }}'
-          $fwInfo = ((gh release view --json tagName -R DarkFlippers/unleashed-firmware) | ConvertFrom-Json)
           $sha = (git rev-parse --verify HEAD)
-          Write-Output ('RELEASE_VERSION={0}' -f $sha) >> $env:GITHUB_ENV
+          Write-Output ('SHA={0}' -f $sha) >> $env:GITHUB_ENV
           Write-Output ('FW_VERSION={0}' -f $fwInfo.tagName) >> $env:GITHUB_ENV
           Write-Output ('FW_URL={0}' -f $fwInfo.url) >> $env:GITHUB_ENV
 
