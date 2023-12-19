@@ -236,7 +236,10 @@ void hangman_clear_state(HangmanApp* app) {
     app->gallows_state = HANGMAN_GALLOWS_INIT_STATE;
     app->eog = HangmanGameOn;
 
-    memset(app->opened, HangmanOpenedInit, sizeof(HangmanOpened) * HANGMAN_MAX_ALP_SIZE);
+    for(int i = 0; i < HANGMAN_MAX_ALP_SIZE; i++) {
+        app->opened[i] = HangmanOpenedInit;
+    }
+
     free(app->word.arr);
     app->word = (HangmanWord){NULL, 0};
 
