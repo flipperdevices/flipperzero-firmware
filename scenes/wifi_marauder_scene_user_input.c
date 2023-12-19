@@ -91,7 +91,7 @@ void wifi_marauder_scene_user_input_ok_callback(void* context) {
         break;
     }
 
-    scene_manager_previous_scene(app->scene_manager);
+    view_dispatcher_send_custom_event(app->view_dispatcher, WifiMarauderEventPrevScene);
 }
 
 void wifi_marauder_scene_user_input_on_enter(void* context) {
@@ -143,9 +143,19 @@ void wifi_marauder_scene_user_input_on_enter(void* context) {
 }
 
 bool wifi_marauder_scene_user_input_on_event(void* context, SceneManagerEvent event) {
-    UNUSED(context);
-    UNUSED(event);
-    return false;
+    WifiMarauderApp* app = context;
+
+    bool consumed = false;
+
+    if(event.type == SceneManagerEventTypeCustom) {
+        if(event.event == WifiMarauderEventPrevScene) {
+            scene_manager_previous_scene(app->scene_manager);
+            consumed = true;
+        }
+    }
+
+    return consumed;
+
 }
 
 void wifi_marauder_scene_user_input_on_exit(void* context) {
