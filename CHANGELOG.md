@@ -1,4 +1,44 @@
-# Changelog
+ ## [v3.9.5](https://github.com/DarkFlippers/flipperzero-subbrute/tree/v3.9.5) (2023-12-19)
+
+[Full Changelog](https://github.com/DarkFlippers/flipperzero-subbrute/compare/v3.9.4...v3.9.5)
+
+**Implemented enhancements:**
+
+- Update codeql.yml and disable on push events [\#57](https://github.com/DarkFlippers/flipperzero-subbrute/pull/57) ([derskythe](https://github.com/derskythe))
+
+**Fixed bugs:**
+
+- fix: Improve formatting of subbrute\_protocol\_calc\_max\_value declaration [\#58](https://github.com/DarkFlippers/flipperzero-subbrute/pull/58) ([derskythe](https://github.com/derskythe))
+
+**Merged pull requests:**
+
+- Merge pull request \#51 from DarkFlippers/master [\#59](https://github.com/DarkFlippers/flipperzero-subbrute/pull/59) ([derskythe](https://github.com/derskythe))
+- docs: Add extensive documentation in code comments [\#56](https://github.com/DarkFlippers/flipperzero-subbrute/pull/56) ([derskythe](https://github.com/derskythe))
+- Sync [\#51](https://github.com/DarkFlippers/flipperzero-subbrute/pull/51) ([derskythe](https://github.com/derskythe))
+
+## [v3.9.4](https://github.com/DarkFlippers/flipperzero-subbrute/tree/v3.9.4) (2023-12-19)
+
+[Full Changelog](https://github.com/DarkFlippers/flipperzero-subbrute/compare/v3.9.3...v3.9.4)
+
+**Merged pull requests:**
+
+- Add workflow to automatically close stale issues and PRs [\#54](https://github.com/DarkFlippers/flipperzero-subbrute/pull/54) ([derskythe](https://github.com/derskythe))
+
+## [v3.9.3](https://github.com/DarkFlippers/flipperzero-subbrute/tree/v3.9.3) (2023-12-19)
+
+[Full Changelog](https://github.com/DarkFlippers/flipperzero-subbrute/compare/v3.10.0...v3.9.3)
+
+**Implemented enhancements:**
+
+- Modify GitHub workflow to generate releases [\#53](https://github.com/DarkFlippers/flipperzero-subbrute/pull/53) ([derskythe](https://github.com/derskythe))
+
+**Merged pull requests:**
+
+- CI/CD fixes [\#52](https://github.com/DarkFlippers/flipperzero-subbrute/pull/52) ([derskythe](https://github.com/derskythe))
+
+## [v3.10.0](https://github.com/DarkFlippers/flipperzero-subbrute/tree/v3.10.0) (2023-11-04)
+
+[Full Changelog](https://github.com/DarkFlippers/flipperzero-subbrute/compare/v3.9.2...v3.10.0)
 
 ## [v3.9.2](https://github.com/DarkFlippers/flipperzero-subbrute/tree/v3.9.2) (2023-11-04)
 
@@ -101,7 +141,7 @@
 
 ## [v3.2.4](https://github.com/DarkFlippers/flipperzero-subbrute/tree/v3.2.4) (2023-06-09)
 
-[Full Changelog](https://github.com/DarkFlippers/flipperzero-subbrute/compare/v3.2.2...v3.2.4)
+[Full Changelog](https://github.com/DarkFlippers/flipperzero-subbrute/compare/v3.2.3...v3.2.4)
 
 **Closed issues:**
 
@@ -112,13 +152,13 @@
 - fix update new version of firmware [\#17](https://github.com/DarkFlippers/flipperzero-subbrute/pull/17) ([derskythe](https://github.com/derskythe))
 - Feat/ci [\#16](https://github.com/DarkFlippers/flipperzero-subbrute/pull/16) ([derskythe](https://github.com/derskythe))
 
-## [v3.2.2](https://github.com/DarkFlippers/flipperzero-subbrute/tree/v3.2.2) (2023-03-31)
-
-[Full Changelog](https://github.com/DarkFlippers/flipperzero-subbrute/compare/v3.2.3...v3.2.2)
-
 ## [v3.2.3](https://github.com/DarkFlippers/flipperzero-subbrute/tree/v3.2.3) (2023-03-31)
 
-[Full Changelog](https://github.com/DarkFlippers/flipperzero-subbrute/compare/v3.2.1...v3.2.3)
+[Full Changelog](https://github.com/DarkFlippers/flipperzero-subbrute/compare/v3.2.2...v3.2.3)
+
+## [v3.2.2](https://github.com/DarkFlippers/flipperzero-subbrute/tree/v3.2.2) (2023-03-31)
+
+[Full Changelog](https://github.com/DarkFlippers/flipperzero-subbrute/compare/v3.2.1...v3.2.2)
 
 **Merged pull requests:**
 
@@ -151,6 +191,3 @@
 - add honeywell protocol [\#4](https://github.com/DarkFlippers/flipperzero-subbrute/pull/4) ([s0u7f1r3](https://github.com/s0u7f1r3))
 - Feat/existing file two bytes [\#3](https://github.com/DarkFlippers/flipperzero-subbrute/pull/3) ([derskythe](https://github.com/derskythe))
 - Feat/more repeats [\#1](https://github.com/DarkFlippers/flipperzero-subbrute/pull/1) ([derskythe](https://github.com/derskythe))
-
-
-
