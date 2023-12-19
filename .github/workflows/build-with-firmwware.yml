@@ -56,11 +56,11 @@ jobs:
           CURRENT_VERSION: ${{ env.CURRENT_VERSION }}
         shell: pwsh
         run: |
-          $ReleaseVersion = ([string]::IsNullOrWhitespace($env:INPUT_VERSION) ? $env:CURRENT_VERSION : $env:INPUT_VERSION)
-          if ( $ReleaseVersion.StartsWith('v') ) {
-            $ReleaseVersion = $ReleaseVersion.Substring(1)
+          $releaseVersion = ([string]::IsNullOrWhitespace($env:INPUT_VERSION) ? $env:CURRENT_VERSION : $env:INPUT_VERSION)
+          if ( $releaseVersion.StartsWith('v') ) {
+            $releaseVersion = $releaseVersion.Substring(1)
           }
-          Write-Output ('RELEASE_VERSION={0}' -f $ReleaseVersion) >> $env:GITHUB_ENV
+          Write-Output ('RELEASE_VERSION={0}' -f $releaseVersion) >> $env:GITHUB_ENV
 
       - name: Copy Firmware Files
         uses: actions/checkout@v3
@@ -98,13 +98,13 @@ jobs:
             }
           }
 
-          $Output = (git log --pretty=format:'%s by %C(yellow)%an%Creset (%ad)%n %n%b' --date=local --abbrev-commit --max-count=1)
+          $output = (git log --pretty=format:'%s by %C(yellow)%an%Creset (%ad)%n %n%b' --date=local --abbrev-commit --max-count=1)
 
           if ( $LASTEXITCODE -ne 0 ) {
             Write-Error '::error title=Invalid checkout::Invalid checkout'
             exit 1
           }
-          Write-Output ('::notice title=Git output::{0}' -f $Output)
+          Write-Output ('::notice title=Git output::{0}' -f $output)
 
       - name: Print vars about state or repo if Official
         if: ${{ matrix.src-included == 0 }}
@@ -123,13 +123,13 @@ jobs:
               exit 1
             }
           } else {
-            $Output = (git log --pretty=format:'%s by %C(yellow)%an%Creset (%ad)%n %n%b' --date=local --abbrev-commit --max-count=1)
+            $output = (git log --pretty=format:'%s by %C(yellow)%an%Creset (%ad)%n %n%b' --date=local --abbrev-commit --max-count=1)
 
             if ( $LASTEXITCODE -ne 0 ) {
               Write-Error '::error title=Invalid checkout::Invalid checkout'
               exit 1
             }
-            Write-Output ('::notice title=Git output::{0}' -f $Output)
+            Write-Output ('::notice title=Git output::{0}' -f $output)
           }
 
       #    - name: Restore FBT
@@ -150,11 +150,6 @@ jobs:
         run: |
           Remove-Item -Force -Recurse ./applications/debug -ErrorAction SilentlyContinue
           Remove-Item -Force -Recurse ./applications/examples -ErrorAction SilentlyContinue
-      #          New-Item -Force ./tmp -ItemType Directory -ErrorAction SilentlyContinue
-      #          Copy-Item -Force -Recurse ./applications/external/subbrute/ ./tmp/ -ErrorAction SilentlyContinue
-      #          Remove-Item -Force -Recurse ./applications/external/* -ErrorAction SilentlyContinue
-      #          Copy-Item -Force -Recurse /tmp/* ./applications/external/ -ErrorAction SilentlyContinue
-      #          Remove-Item -Force -Recurse ./tmp -ErrorAction SilentlyContinue
 
       - name: Build Firmware
         shell: bash
@@ -205,43 +200,43 @@ jobs:
                           return "$number B"
                       }
                       else {
-                          $num = $number / [int64]"1$($sizes[$x-1])"
-                          $num = "{0:N2}" -f $num
-                          return "$num $($sizes[$x-1])"
+                          $formattedNumber = $number / [int64]"1$($sizes[$x-1])"
+                          $formattedNumber = "{0:N2}" -f $formattedNumber
+                          return "$formattedNumber $($sizes[$x-1])"
                       }
                   }
               }
           }
-          $ZipName = ('{0}.zip' -f $env:APP_NAME)
-          $TgzName = ('{0}.tgz' -f $env:APP_NAME)
-          $FapName = 'subghz_bruteforcer.fap'
-          $DstFap = "./$FapName"
-          $AppDir = "dist/f7-C/apps/Sub-GHz"
+          $zipName = ('{0}.zip' -f $env:APP_NAME)
+          $tgzName = ('{0}.tgz' -f $env:APP_NAME)
+          $fapName = 'subghz_bruteforcer.fap'
+          $dstFap = "./$fapName"
+          $appDir = "dist/f7-C/apps/Sub-GHz"
 
-          if (!(Test-Path -Path "$AppDir/$FapName" -PathType Leaf)) {
+          if (!(Test-Path -Path "$appDir/$fapName" -PathType Leaf)) {
               Write-Error '::error title=Files not found::Cannot find files in location'
               exit 1
           }
 
-          $Size = (Get-Item -Path "$AppDir/$FapName" | Get-ItemPropertyValue -Name Length)
-          Write-Output ('Filesize: {0}' -f (Format-Bytes $Size))
-          Copy-Item -Force -Verbose -Path "$AppDir/$FapName" -Destination $DstFap
+          $size = (Get-Item -Path "$appDir/$fapName" | Get-ItemPropertyValue -Name Length)
+          Write-Output ('Filesize: {0}' -f (Format-Bytes $size))
+          Copy-Item -Force -Verbose -Path "$appDir/$fapName" -Destination $dstFap
 
-          zip -r -qq $ZipName $DstFap
-          tar zcf $TgzName $DstFap
+          zip -r -qq $zipName $dstFap
+          tar zcf $tgzName $dstFap
 
-          if ( !(Test-Path -Path $ZipName -PathType Leaf) -or !(Test-Path -Path $TgzName -PathType Leaf) ) {
+          if ( !(Test-Path -Path $zipName -PathType Leaf) -or !(Test-Path -Path $tgzName -PathType Leaf) ) {
               Write-Error '::error title=Files not found::Cannot find files in location'
               exit 1
           }
 
-          $ZipSize = Format-Bytes (Get-Item -Path $ZipName).Length
-          $TgzSize = Format-Bytes (Get-Item -Path $TgzName ).Length
+          $zipSize = Format-Bytes (Get-Item -Path $zipName).Length
+          $tgzSize = Format-Bytes (Get-Item -Path $tgzName ).Length
 
-          Write-Output ('ZIP_NAME={0}' -f $ZipName) >> $env:GITHUB_ENV
-          Write-Output ('TGZ_NAME={0}' -f $TgzName ) >> $env:GITHUB_ENV
-          Write-Output ('ZIP_TAG={0} ({1})' -f $ZipName, $ZipSize) >> $env:GITHUB_ENV
-          Write-Output ('TGZ_TAG={0} ({1})' -f $TgzName , $TgzSize) >> $env:GITHUB_ENV
+          Write-Output ('ZIP_NAME={0}' -f $zipName) >> $env:GITHUB_ENV
+          Write-Output ('TGZ_NAME={0}' -f $tgzName ) >> $env:GITHUB_ENV
+          Write-Output ('ZIP_TAG={0} ({1})' -f $zipName, $zipSize) >> $env:GITHUB_ENV
+          Write-Output ('TGZ_TAG={0} ({1})' -f $tgzName , $tgzSize) >> $env:GITHUB_ENV
 
       - name: Upload assets
         if: ${{ success() && env.ZIP_NAME != '' }}
@@ -249,8 +244,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.FLIPPER_TOKEN }}
         run: |
-          $Url = (gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" /repos/${{ github.REPOSITORY }}/releases/tags/${{ env.RELEASE_VERSION }}) | ConvertFrom-Json -AsHashtable
-          if ( [string]::IsNullOrWhitespace($Url) ) {
+          $url = (gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" /repos/${{ github.REPOSITORY }}/releases/tags/${{ env.RELEASE_VERSION }}) | ConvertFrom-Json -AsHashtable
+          if ( [string]::IsNullOrWhitespace($url) ) {
             gh release create v${{ env.RELEASE_VERSION }} --generate-notes --draft -R ${{ env.REPO_SELF }}  
           }          
           gh release upload 'v${{ env.RELEASE_VERSION }}' '${{ env.ZIP_NAME }}#${{ env.ZIP_TAG }}' '${{ env.TGZ_NAME }}#${{ env.TGZ_TAG }}' --clobber -R ${{ env.REPO_SELF }}
