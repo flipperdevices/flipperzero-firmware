@@ -252,8 +252,10 @@ uint32_t furi_hal_rtc_get_pin_fails();
 uint32_t furi_hal_rtc_get_timestamp();
 
 /** Convert DateTime to UNIX timestamp
+ * 
+ * @warning    Mind timezone when perform conversion
  *
- * @param      datetime  The datetime
+ * @param      datetime  The datetime (UTC)
  *
  * @return     UNIX Timestamp in seconds from UNIX epoch start
  */
@@ -261,9 +263,10 @@ uint32_t furi_hal_rtc_datetime_to_timestamp(FuriHalRtcDateTime* datetime);
 
 /** Convert UNIX timestamp to DateTime
  *
- * @param[in]      timestamp  UNIX Timestamp in seconds from UNIX epoch start
+ * @warning    Mind timezone when perform conversion
  *
- * @param[out]      timestamp   The datetime, UTC+0
+ * @param[in]  timestamp  UNIX Timestamp in seconds from UNIX epoch start
+ * @param[out] datetime   The datetime (UTC)
  */
 void furi_hal_rtc_timestamp_to_datetime(uint32_t timestamp, FuriHalRtcDateTime* datetime);
 
