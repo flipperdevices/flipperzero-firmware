@@ -14,15 +14,37 @@ typedef struct {
     uint64_t b;
 } MfClassicKeyPair;
 
+typedef struct {
+    MfClassicKeyPair* keys;
+    uint32_t verify_sector;
+} MizipCardConfig;
+
 static MfClassicKeyPair mizip_1k_keys[] = {
     {.a = 0xa0a1a2a3a4a5, .b = 0xb4c132439eef}, // 000
     {.a = 0x000000000000, .b = 0x000000000000}, // 001
     {.a = 0x000000000000, .b = 0x000000000000}, // 002
     {.a = 0x000000000000, .b = 0x000000000000}, // 003
     {.a = 0x000000000000, .b = 0x000000000000}, // 004
+    {.a = 0x0222179AB995, .b = 0x13321774F9B5}, // 005
+    {.a = 0xB25CBD76A7B4, .b = 0x7571359B4274}, // 006
+    {.a = 0xDA857B4907CC, .b = 0xD26B856175F7}, // 007
+    {.a = 0x16D85830C443, .b = 0x8F790871A21E}, // 008
+    {.a = 0x88BD5098FC82, .b = 0xFCD0D77745E4}, // 009
+    {.a = 0x983349449D78, .b = 0xEA2631FBDEDD}, // 010
+    {.a = 0xC599F962F3D9, .b = 0x949B70C14845}, // 011
+    {.a = 0x72E668846BE8, .b = 0x45490B5AD707}, // 012
+    {.a = 0xBCA105E5685E, .b = 0x248DAF9D674D}, // 013
+    {.a = 0x4F6FE072D1FD, .b = 0x4250A05575FA}, // 014
+    {.a = 0x56438ABE8152, .b = 0x59A45912B311}, // 015
 };
 
-const uint8_t verify_sector = 0;
+static MfClassicKeyPair mizip_mini_keys[] = {
+    {.a = 0xa0a1a2a3a4a5, .b = 0xb4c132439eef}, // 000
+    {.a = 0x000000000000, .b = 0x000000000000}, // 001
+    {.a = 0x000000000000, .b = 0x000000000000}, // 002
+    {.a = 0x000000000000, .b = 0x000000000000}, // 003
+    {.a = 0x000000000000, .b = 0x000000000000}, // 004
+};
 
 //KDF
 void mizip_generate_key(uint8_t* uid, uint8_t keyA[4][KEY_LENGTH], uint8_t keyB[4][KEY_LENGTH]) {
@@ -52,16 +74,34 @@ void mizip_generate_key(uint8_t* uid, uint8_t keyA[4][KEY_LENGTH], uint8_t keyB[
     }
 }
 
-//Fix get uid
-static bool mizip_verify(Nfc* nfc) {
+static bool mizip_get_card_config(MizipCardConfig* config, MfClassicType type) {
+    bool success = true;
+
+    if(type == MfClassicType1k) {
+        config->verify_sector = 0;
+        config->keys = mizip_1k_keys;
+    } else if(type == MfClassicTypeMini) {
+        config->verify_sector = 0;
+        config->keys = mizip_mini_keys;
+    } else {
+        success = false;
+    }
+
+    return success;
+}
+
+static bool mizip_verify_type(Nfc* nfc, MfClassicType type) {
     bool verified = false;
 
     do {
-        const uint8_t block_num = mf_classic_get_first_block_num_of_sector(verify_sector);
-        FURI_LOG_D(TAG, "Verifying sector %i", verify_sector);
+        MizipCardConfig cfg = {};
+        if(!mizip_get_card_config(&cfg, type)) break;
+
+        const uint8_t block_num = mf_classic_get_first_block_num_of_sector(cfg.verify_sector);
+        FURI_LOG_D(TAG, "Verifying sector %li", cfg.verify_sector);
 
         MfClassicKey key = {0};
-        nfc_util_num2bytes(mizip_1k_keys[verify_sector].b, COUNT_OF(key.data), key.data);
+        nfc_util_num2bytes(cfg.keys[cfg.verify_sector].b, COUNT_OF(key.data), key.data);
 
         MfClassicAuthContext auth_context;
         MfClassicError error =
@@ -78,6 +118,10 @@ static bool mizip_verify(Nfc* nfc) {
     return verified;
 }
 
+static bool mizip_verify(Nfc* nfc) {
+    return mizip_verify_type(nfc, MfClassicType1k) || mizip_verify_type(nfc, MfClassicTypeMini);
+}
+
 static bool mizip_read(Nfc* nfc, NfcDevice* device) {
     FURI_LOG_D(TAG, "Entering MiZIP KDF");
     furi_assert(nfc);
@@ -92,7 +136,11 @@ static bool mizip_read(Nfc* nfc, NfcDevice* device) {
         MfClassicType type = MfClassicTypeMini;
         MfClassicError error = mf_classic_poller_sync_detect_type(nfc, &type);
         if(error != MfClassicErrorNone) break;
+
+        //temp fix but fix mf_classic_poller_sync_detect_type because view type mfclassic1k and not verify mfmini
         data->type = MfClassicTypeMini;
+        MizipCardConfig cfg = {};
+        if(!mizip_get_card_config(&cfg, data->type)) break;
 
         uint8_t uid[UID_LENGTH];
         memcpy(uid, data->iso14443_3a_data->uid, UID_LENGTH);
@@ -102,17 +150,17 @@ static bool mizip_read(Nfc* nfc, NfcDevice* device) {
         mizip_generate_key(uid, keyA, keyB);
 
         for(size_t i = 0; i < mf_classic_get_total_sectors_num(data->type); i++) {
-            if(mizip_1k_keys[i].a == 0x000000000000 && mizip_1k_keys[i].b == 0x000000000000) {
-                mizip_1k_keys[i].a = nfc_util_bytes2num(keyA[i], KEY_LENGTH);
-                mizip_1k_keys[i].b = nfc_util_bytes2num(keyB[i], KEY_LENGTH);
+            if(cfg.keys[i].a == 0x000000000000 && cfg.keys[i].b == 0x000000000000) {
+                cfg.keys[i].a = nfc_util_bytes2num(keyA[i], KEY_LENGTH);
+                cfg.keys[i].b = nfc_util_bytes2num(keyB[i], KEY_LENGTH);
             }
         }
 
         MfClassicDeviceKeys keys = {};
         for(size_t i = 0; i < mf_classic_get_total_sectors_num(data->type); i++) {
-            nfc_util_num2bytes(mizip_1k_keys[i].a, sizeof(MfClassicKey), keys.key_a[i].data);
+            nfc_util_num2bytes(cfg.keys[i].a, sizeof(MfClassicKey), keys.key_a[i].data);
             FURI_BIT_SET(keys.key_a_mask, i);
-            nfc_util_num2bytes(mizip_1k_keys[i].b, sizeof(MfClassicKey), keys.key_b[i].data);
+            nfc_util_num2bytes(cfg.keys[i].b, sizeof(MfClassicKey), keys.key_b[i].data);
             FURI_BIT_SET(keys.key_b_mask, i);
         }
 
@@ -141,11 +189,15 @@ static bool mizip_parse(const NfcDevice* device, FuriString* parsed_data) {
     bool parsed = false;
 
     do {
+        // Verify card type
+        MizipCardConfig cfg = {};
+        if(!mizip_get_card_config(&cfg, data->type)) break;
+
         // Verify key
         MfClassicSectorTrailer* sec_tr =
-            mf_classic_get_sector_trailer_by_sector(data, verify_sector);
+            mf_classic_get_sector_trailer_by_sector(data, cfg.verify_sector);
         uint64_t key = nfc_util_bytes2num(sec_tr->key_b.data, 6);
-        if(key != mizip_1k_keys[verify_sector].b) return false;
+        if(key != cfg.keys[cfg.verify_sector].b) return false;
 
         //Get UID
         uint8_t uid[UID_LENGTH];

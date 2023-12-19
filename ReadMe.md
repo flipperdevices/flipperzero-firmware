@@ -139,6 +139,7 @@ bettse)](https://github.com/flipperdevices/flipperzero-good-faps/pull/90)
 - OFW: [USART Bridge: added support for software control of DE/RE pins #3280 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/3280)
 - OFW: [ufbt: changed toolchain environment invocation #3300 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3300)
 - OFW: [Keys Dict: fix PVS warnings #3299 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3299)
+- NFC: [Parser / KDF for mizip and mykey updated & addition of hi and microel (By zProAle)](https://github.com/zProAle/my_flipper_kdf)
 
 <a name="release">
 
@@ -274,6 +275,7 @@ $ ./fbt dolphin_ext
 - Infrared: Universal AC, Audio, Fans & Projectors from [amec0e / Unleashed](https://github.com/DarkFlippers/unleashed-firmware)
 - NFC: [Added additional aid GeldKarte (for emv) (thanks to haisenteck) (From Korai-Labs / ankris812)](https://github.com/Korai-Labs/Korai)
 - NFC: [Extra NFC Mifare Keys (By Korai-Labs / ankris812)](https://github.com/Korai-Labs/Korai)
+- NFC: [Parser / KDF for mizip and mykey updated & addition of hi and microel (By zProAle)](https://github.com/zProAle/my_flipper_kdf)
 - NFC: [Parser for Mizip (From zProAle)](https://github.com/noproto/flipper_kdf/pull/3)
 - NFC: [Parser for Philips Sonicare toothbrush heads (By Sil333033, Research By Cyrill Künzi)](https://kuenzi.dev/toothbrush/)
 - NFC: [Parsers for Saflok and Mykey (From noproto)](https://github.com/noproto/flipper_kdf)
