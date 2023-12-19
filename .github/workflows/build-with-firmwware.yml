@@ -56,6 +56,9 @@ jobs:
         shell: pwsh
         run: |
           $ReleaseVersion = ([string]::IsNullOrWhitespace($env:INPUT_VERSION) ? $env:CURRENT_VERSION : $env:INPUT_VERSION)
+          if ( $ReleaseVersion.StartsWith('v') ) {
+            $ReleaseVersion = $ReleaseVersion.Substring(1)
+          }
           Write-Output ('RELEASE_VERSION={0}' -f $ReleaseVersion) >> $env:GITHUB_ENV
 
       - name: Copy Firmware Files
@@ -85,8 +88,9 @@ jobs:
           cd '${{ env.OFW_PATH }}'
           if ( '${{ env.CURRENT_VERSION }}' -ne '${{ env.RELEASE_VERSION }}' ) {
             Write-Output '::warning title=Different version::Current version is ${{ env.CURRENT_VERSION }} but we trying to build ${{ env.RELEASE_VERSION }}'
+            
             git checkout tags/v${{ env.RELEASE_VERSION }} -b tmp-build
-
+            
             if ( $LASTEXITCODE -ne 0 ) {
               Write-Error '::error title=Cannot checkout to this version::Error during execution checkout to this tag ${{ env.RELEASE_VERSION }}'
               exit 1
@@ -110,6 +114,7 @@ jobs:
 
           if ( '${{ env.CURRENT_VERSION }}' -ne '${{ env.RELEASE_VERSION }}' ) {
             Write-Output '::warning title=Different version::Current version is ${{ env.CURRENT_VERSION }} but we trying to build ${{ env.RELEASE_VERSION }}'
+            
             git checkout tags/v${{ env.RELEASE_VERSION }} -b tmp-build
 
             if ( $LASTEXITCODE -ne 0 ) {
