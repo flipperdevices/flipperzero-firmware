@@ -323,7 +323,7 @@ static int32_t usb_uart_tx_thread(void* context) {
                 furi_hal_uart_tx(usb_uart->cfg.uart_ch, data, len);
 
                 if(usb_uart->cfg.software_de_re != 0) {
-                    //todo fix as there will be a new USART API
+                    //TODO: FL-3276 port to new USART API
                     if(usb_uart->cfg.uart_ch == FuriHalUartIdUSART1) {
                         while(!LL_USART_IsActiveFlag_TC(USART1))
                             ;
