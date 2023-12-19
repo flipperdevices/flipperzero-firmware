@@ -61,6 +61,10 @@ void deinit_player(VideoPlayerApp* player) {
         free(player->buffer);
     }
 
+    if(player->fake_audio_buffer) {
+        free(player->fake_audio_buffer);
+    }
+
     furi_pubsub_unsubscribe(player->input, player->input_subscription);
 
     player->canvas = NULL;
