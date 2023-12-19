@@ -49,8 +49,13 @@ bool nfc_magic_scene_gen4_menu_on_event(void* context, SceneManagerEvent event) 
         }
         scene_manager_set_scene_state(instance->scene_manager, NfcMagicSceneGen4Menu, event.event);
     } else if(event.type == SceneManagerEventTypeBack) {
-        consumed = scene_manager_search_and_switch_to_previous_scene(
-            instance->scene_manager, NfcMagicSceneStart);
+        if(instance->gen4_password != 0) {
+            consumed = scene_manager_search_and_switch_to_previous_scene(
+                instance->scene_manager, NfcMagicSceneGen4ActionsMenu);
+        } else {
+            consumed = scene_manager_search_and_switch_to_previous_scene(
+                instance->scene_manager, NfcMagicSceneStart);
+        }
     }
 
     return consumed;
