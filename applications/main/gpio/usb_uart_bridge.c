@@ -6,7 +6,7 @@
 #include <furi_hal.h>
 #include <furi_hal_usb_cdc.h>
 
-//todo fix as there will be a new USART API
+//TODO: FL-3276 port to new USART API
 #include <stm32wbxx_ll_lpuart.h>
 #include <stm32wbxx_ll_usart.h>
 
