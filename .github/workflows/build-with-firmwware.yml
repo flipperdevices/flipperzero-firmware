@@ -93,7 +93,7 @@ jobs:
             git checkout tags/v${{ env.RELEASE_VERSION }} -b tmp-build
             
             if ( $LASTEXITCODE -ne 0 ) {
-              Write-Error '::warning title=Cannot checkout to this version::Error during execution checkout to this tag ${{ env.RELEASE_VERSION }}'
+              Write-Output '::warning title=Cannot checkout to this version::Error during execution checkout to this tag ${{ env.RELEASE_VERSION }}'
               #exit 1
             }
           } else {
@@ -119,7 +119,7 @@ jobs:
             git checkout tags/v${{ env.RELEASE_VERSION }} -b tmp-build
 
             if ( $LASTEXITCODE -ne 0 ) {
-              Write-Error '::warning title=Cannot checkout to this version::Error during execution checkout to this tag ${{ env.RELEASE_VERSION }}'
+              Write-Output '::warning title=Cannot checkout to this version::Error during execution checkout to this tag ${{ env.RELEASE_VERSION }}'
               #exit 1
             }
           } else {
