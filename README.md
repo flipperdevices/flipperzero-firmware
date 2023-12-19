@@ -9,7 +9,7 @@ When you start the app there is a start button when pressed starts the playlist
 To set the playlist you need to create a file in ext/apps_data/nfc_playlist called playlist.txt you can find an example of the file in the repository
 
 ## Know problems:
-- Unable to press any buttons while emulating as they are unresponsive and if you spam them it crashes the app
+- Unable to press any buttons while emulating as they are unresponsive and if you spam them it crashes the app (cause has been located and a fix is being made)
 - Emulating UI can be a bit janky not displaying as intended 100% of the time
 
 ## TODO:
