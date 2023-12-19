@@ -95,7 +95,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.FLIPPER_TOKEN }}
           INPUT_VERSION: ${{ inputs.version }}
         run: |
-          Write-Output "::notice title=Version Number::v${{ inputs.version }}"
+          Write-Output "::notice title=Input Version Number::v${{ inputs.version }}"
           $fwInfo = ((gh release view --json tagName,url -R ${{ matrix.url }}) | ConvertFrom-Json)
           cd '${{ env.APP_PATH }}'
           $sha = (git rev-parse --verify HEAD)
