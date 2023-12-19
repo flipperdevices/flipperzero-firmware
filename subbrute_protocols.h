@@ -356,6 +356,4 @@ void subbrute_protocol_file_generate_file(
  *
  * @return The maximum value that can be generated based on the attack parameters (uint64_t).
  */
-uint64_t
-    subbrute_protocol_calc_max_value(SubBruteAttacks attack_type, uint8_t bits, bool two_bytes);
-    subbrute_protocol_calc_max_value(SubBruteAttacks attack_type, uint8_t bits, bool two_bytes);
+uint64_t subbrute_protocol_calc_max_value(SubBruteAttacks attack_type, uint8_t bits, bool two_bytes);
