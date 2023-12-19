@@ -257,7 +257,7 @@ static int32_t usb_uart_worker(void* context) {
                 if(usb_uart->cfg.software_de_re != 0) {
                     furi_hal_gpio_write(USB_USART_DE_RE_PIN, true);
                     furi_hal_gpio_init(
-                        USB_USART_DE_RE_PIN, GpioModeOutputOpenDrain, GpioPullUp, GpioSpeedMedium);
+                        USB_USART_DE_RE_PIN, GpioModeOutputPushPull, GpioPullNo, GpioSpeedMedium);
                 } else {
                     furi_hal_gpio_init(
                         USB_USART_DE_RE_PIN, GpioModeAnalog, GpioPullNo, GpioSpeedLow);

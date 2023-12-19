@@ -27,7 +27,7 @@ static const uint32_t baudrate_list[] = {
     460800,
     921600,
 };
-static const char* software_de_re[] = {"None", "4:OD"};
+static const char* software_de_re[] = {"None", "4"};
 
 bool gpio_scene_usb_uart_cfg_on_event(void* context, SceneManagerEvent event) {
     GpioApp* app = context;
