@@ -93,18 +93,18 @@ jobs:
             git checkout tags/v${{ env.RELEASE_VERSION }} -b tmp-build
             
             if ( $LASTEXITCODE -ne 0 ) {
-              Write-Error '::error title=Cannot checkout to this version::Error during execution checkout to this tag ${{ env.RELEASE_VERSION }}'
+              Write-Error '::warning title=Cannot checkout to this version::Error during execution checkout to this tag ${{ env.RELEASE_VERSION }}'
+              #exit 1
+            }
+          } else {
+            $output = (git log --pretty=format:'%s by %C(yellow)%an%Creset (%ad)%n %n%b' --date=local --abbrev-commit --max-count=1)
+
+            if ( $LASTEXITCODE -ne 0 ) {
+              Write-Error '::error title=Invalid checkout::Invalid checkout'
               exit 1
             }
+            Write-Output ('::notice title=Git output::{0}' -f $output)
           }
-
-          $output = (git log --pretty=format:'%s by %C(yellow)%an%Creset (%ad)%n %n%b' --date=local --abbrev-commit --max-count=1)
-
-          if ( $LASTEXITCODE -ne 0 ) {
-            Write-Error '::error title=Invalid checkout::Invalid checkout'
-            exit 1
-          }
-          Write-Output ('::notice title=Git output::{0}' -f $output)
 
       - name: Print vars about state or repo if Official
         if: ${{ matrix.src-included == 0 }}
@@ -119,8 +119,8 @@ jobs:
             git checkout tags/v${{ env.RELEASE_VERSION }} -b tmp-build
 
             if ( $LASTEXITCODE -ne 0 ) {
-              Write-Error '::error title=Cannot checkout to this version::Error during execution checkout to this tag ${{ env.RELEASE_VERSION }}'
-              exit 1
+              Write-Error '::warning title=Cannot checkout to this version::Error during execution checkout to this tag ${{ env.RELEASE_VERSION }}'
+              #exit 1
             }
           } else {
             $output = (git log --pretty=format:'%s by %C(yellow)%an%Creset (%ad)%n %n%b' --date=local --abbrev-commit --max-count=1)
@@ -246,7 +246,9 @@ jobs:
         run: |
           $url = (gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" /repos/${{ github.REPOSITORY }}/releases/tags/v${{ env.RELEASE_VERSION }}) | ConvertFrom-Json -AsHashtable
           if ( [string]::IsNullOrWhitespace($url.name) ) {
-            gh release create v${{ env.RELEASE_VERSION }} --generate-notes --draft -R ${{ env.REPO_SELF }}  
+            $sha = (git rev-parse --verify HEAD)
+            gh api --method POST -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" /repos/${{ github.REPOSITORY }}/releases -f tag_name='v${{ env.RELEASE_VERSION }}' -f target_commitish="$sha" -f name='v${{ env.RELEASE_VERSION }}' -F draft=true -F prerelease=false -F generate_release_notes=true
+            #gh release create v${{ env.RELEASE_VERSION }} --generate-notes -f target_commitish='master' --draft -R ${{ env.REPO_SELF }}  
           }          
           gh release upload 'v${{ env.RELEASE_VERSION }}' '${{ env.ZIP_NAME }}#${{ env.ZIP_TAG }}' '${{ env.TGZ_NAME }}#${{ env.TGZ_TAG }}' --clobber -R ${{ env.REPO_SELF }}
           gh release edit 'v${{ env.RELEASE_VERSION }}' --draft=false -R ${{ env.REPO_SELF }}
