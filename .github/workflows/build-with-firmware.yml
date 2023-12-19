@@ -123,7 +123,7 @@ jobs:
           
           Write-Output "::notice title=${{ matrix.firmware }} RELEASE_VERSION::$releaseVersion"
           Write-Output "::notice title=${{ matrix.firmware }} SHA::$sha"
-          Write-Output "::notice title=${{ matrix.firmware }} FW_VERSION::$fwInfo.tagName"
+          Write-Output ('::notice title=${{ matrix.firmware }} FW_VERSION::{0}' -f $fwInfo.tagName)
           Write-Output "::notice title=${{ matrix.firmware }} PREV_TAG::$latestTag"
           
           Write-Output ('RELEASE_VERSION={0}' -f $releaseVersion) >> $env:GITHUB_ENV
