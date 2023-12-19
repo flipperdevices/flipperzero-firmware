@@ -8,9 +8,9 @@ on:
         description: "Enter version to build or left empty for the NEXT version"
         required: false
         type: string
-  push:
-    paths:
-      - .github/workflows/build-with-firmware.yml
+#  push:
+#    paths:
+#      - .github/workflows/build-with-firmware.yml
 
 permissions:
   contents: write
