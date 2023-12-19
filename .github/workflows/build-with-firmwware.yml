@@ -104,7 +104,7 @@ jobs:
             $latestTag = ((gh release view --json tagName,url -R ${{ vars.REPO_SELF }}) | ConvertFrom-Json ).tagName
             $lastIndex = $latestTag.LastIndexOf('.')
             
-            $minorValue = $latestTag.Substring($latestTag.LastIndexOf('.'))
+            $minorValue = $latestTag.Substring($latestTag.LastIndexOf('.') + 1)
             $minorValue = [Convert]::ToInt32($minorValue) + 1
             $latestTag = $latestTag.Substring(0, $lastIndex)
             
