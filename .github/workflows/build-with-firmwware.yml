@@ -105,9 +105,11 @@ jobs:
           if ( [string]::IsNullOrWhitespace($env:INPUT_VERSION) ) {
             $latestTag = ((gh release view --json tagName,url -R ${{ vars.REPO_SELF }}) | ConvertFrom-Json ).tagName
             $lastIndex = $latestTag.LastIndexOf('.')
-            $minorValue = $latestTag($latestTag.LastIndexOf('.'))
+            
+            $minorValue = $latestTag.Substring($latestTag.LastIndexOf('.'))
             $minorValue = [Convert]::ToInt32($minorValue) + 1
             $latestTag = $latestTag.Substring(0, $lastIndex)
+            
             $releaseVersion = ('{0}.{1}', $latestTag, $minorValue)
           }
           if ( $releaseVersion.StartsWith('v') ) {
