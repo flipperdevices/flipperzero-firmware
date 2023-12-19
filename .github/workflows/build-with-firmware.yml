@@ -1,5 +1,5 @@
 name: "Build for Firmware"
-run-name: "Build ${{ inputs.DEPLOY_TARGET }} by @${{ github.ACTOR }}"
+run-name: "Build ${{ inputs.DEPLOY_TARGET }} triggered ${{ github.EVENT_NAME }} by @${{ github.ACTOR }}"
 
 on:
   workflow_dispatch:
@@ -8,8 +8,6 @@ on:
         description: "Enter version to build or left empty for current version"
         required: false
         type: string
-#  release:
-#    types: [created, prereleased]
   push:
     paths:
       - .github/workflows/build-with-firmware.yml
