@@ -191,7 +191,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.FLIPPER_TOKEN }}
         run: |
-          $url = (gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" /repos/${{ github.REPOSITORY }}/releases/tags/v${{ env.RELEASE_VERSION }}) | ConvertFrom-Json -AsHashtable
+          $url = (gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" /repos/${{ github.REPOSITORY }}/releases/tags/v${{ env.RELEASE_VERSION }} >$null 2>&1) | ConvertFrom-Json -AsHashtable -ErrorAction SilentlyContinue
           if ( [string]::IsNullOrWhitespace($url.name) ) {
             $sha = (git rev-parse --verify HEAD)
             gh api --method POST -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" /repos/${{ github.REPOSITORY }}/releases -f tag_name='v${{ env.RELEASE_VERSION }}' -f target_commitish="$sha" -f name='v${{ env.RELEASE_VERSION }}' -F draft=true -F prerelease=false -F generate_release_notes=true
