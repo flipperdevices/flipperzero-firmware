@@ -18,9 +18,9 @@ permissions:
   contents: write
   packages: write
 
-concurrency:
-  group: firmware-build-${{ vars.FIRMWARE_VERSION }}-${{ vars.RELEASE_VERSION }}
-  cancel-in-progress: false
+#concurrency:
+#  group: firmware-build-${{ vars.FIRMWARE_VERSION }}-${{ vars.RELEASE_VERSION }}
+#  cancel-in-progress: false
 
 jobs:
   build-and-upload:
@@ -29,8 +29,7 @@ jobs:
       REPO_SELF: ${{ vars.REPO_SELF }}
       APP_PATH: "applications_user/subbrute"
       RELATIVE_PATH: "applications/external/subbrute"
-      CURRENT_VERSION: ${{ vars.RELEASE_VERSION }}
-      RELEASE_VERSION: ${{ vars.RELEASE_VERSION }}
+      RELEASE_VERSION: ""
       APP_NAME: ""
       ZIP_NAME: ""
       ZIP_TAG: ""
@@ -94,7 +93,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.FLIPPER_TOKEN }}
           INPUT_VERSION: ${{ inputs.version }}
-          CURRENT_VERSION: ${{ env.CURRENT_VERSION }}
         run: |
           $fwInfo = ((gh release view --json tagName,url -R ${{ matrix.url }}) | ConvertFrom-Json)
           cd '${{ env.APP_PATH }}'
