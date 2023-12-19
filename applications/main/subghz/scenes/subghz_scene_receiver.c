@@ -154,16 +154,21 @@ static void subghz_scene_add_to_history_callback(
             subghz_protocol_decoder_base_serialize(decoder_base, subghz->repeater_tx, &preset);
 
             uint32_t tmpTe = 300;
+            uint32_t tmpBits = 1000;
             if(!flipper_format_rewind(subghz->repeater_tx)) {
                 FURI_LOG_E(TAG, "Rewind error");
                 return;
             }
-            if(!flipper_format_read_uint32(subghz->repeater_tx, "TE", (uint32_t*)&tmpTe, 1)) {
+            if(!flipper_format_read_uint32(subghz->repeater_tx, "Bit", (uint32_t*)&tmpBits, 1)) {
+                FURI_LOG_E(TAG, "Missing Bit");
+                return;
+            } else if(!flipper_format_read_uint32(
+                          subghz->repeater_tx, "TE", (uint32_t*)&tmpTe, 1)) {
                 FURI_LOG_E(TAG, "Missing TE");
                 return;
             } else {
                 //Save our TX variables now, start TX on the next tick event so the we arent tangled with the worker.
-                subghz->RepeaterTXLength = tmpTe;
+                subghz->RepeaterTXLength = tmpTe * (tmpBits + 1) / 1000;
                 subghz->state_notifications = SubGhzNotificationStateTx;
                 notification_message(subghz->notifications, &subghz_sequence_repeat);
                 FURI_LOG_I(TAG, "Key Received, Transmitting now.");
@@ -463,17 +468,11 @@ bool subghz_scene_receiver_on_event(void* context, SceneManagerEvent event) {
                 }
             } else {
                 uint32_t tmp = furi_get_tick() - subghz->RepeaterStartTime;
-                uint8_t RepeatMultiplier = (subghz->repeater == SubGhzRepeaterOnShort) ? 1 :        //No repeats, 1 key Tx
-                                       (subghz->repeater == SubGhzRepeaterOnLong)  ? 7 :        //Long Repeat
-                                                                                     3;         //Normal Repeat
+                uint8_t RepeatMultiplier = (subghz->repeater == SubGhzRepeaterOnShort) ? 2 :        //2 key Tx
+                                       (subghz->repeater == SubGhzRepeaterOnLong)  ? 10 :        //10x Repeat
+                                                                                     5;         //5x Repeat
+
                 if(tmp > furi_ms_to_ticks(subghz->RepeaterTXLength) * RepeatMultiplier) {
-                    /* AAAAARGH! The FLipper cant tell me how long the receive was happening.
-                   I can find the minimum time to transmit a key though, so Ive just doubled it to get the key
-                   to send OK to a receiver. It works on my car, by who knows how it will work on devices that look at TX time1
-                   At least the key is guaranteed to be transmitted up to TWICE! Regardless of Te of a Key
-                    
-                    This is the best repeaterv the flipper can do without diving deeper into the firmware for some big changes!
-                */
                     FURI_LOG_I(TAG, "TXLength: %lu TxTime: %lu", subghz->RepeaterTXLength, tmp);
 
                     subghz_txrx_stop(subghz->txrx);

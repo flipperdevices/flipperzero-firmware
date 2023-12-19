@@ -51,6 +51,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Sub-GHz Bruteforcer v3.9.1 (By Ganapati/xMasterX/derskythe)](https://github.com/derskythe/flipperzero-subbrute/tree/master)
 - Updated: [ESP32CAM Marauder v0.6.6 (By 0xchocolate & eried)](https://github.com/eried/flipperzero-mayhem)
 - Updated: Motion Mouse to be named: [Air Mouse 2 v1.0 (By nminaylov)](https://github.com/flipperdevices/flipperzero-good-faps/tree/nm/motion_mouse_app) `Req: ICM42688` They decided to take the same name as Air Mouse.
+- SubGHz: [Repeater: Use actual Time it takes to TX a Key as TX Length (By LeeroysHub)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/4bb9e085d88f477ce252f52df12050412220aa47)
 
 <a name="release">
 
