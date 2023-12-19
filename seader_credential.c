@@ -17,6 +17,7 @@ SeaderCredential* seader_credential_alloc() {
     SeaderCredential* seader_dev = malloc(sizeof(SeaderCredential));
     seader_dev->credential = 0;
     seader_dev->bit_length = 0;
+    memset(seader_dev->sio, 0xff, sizeof(seader_dev->sio));
     seader_dev->storage = furi_record_open(RECORD_STORAGE);
     seader_dev->dialogs = furi_record_open(RECORD_DIALOGS);
     seader_dev->load_path = furi_string_alloc();
@@ -378,7 +379,7 @@ bool seader_credential_save_agnostic(SeaderCredential* cred, const char* name) {
     return saved;
 }
 
-bool seader_credential_save(SeaderCredential* cred, const char* name) {
+bool seader_credential_save_picopass(SeaderCredential* cred, const char* name) {
     uint8_t zero[PICOPASS_BLOCK_LEN] = {0};
     uint8_t csn[PICOPASS_BLOCK_LEN] = {0x7a, 0xf5, 0x31, 0x13, 0xfe, 0xff, 0x12, 0xe0};
     uint8_t cfg[PICOPASS_BLOCK_LEN] = {0x12, 0xff, 0xff, 0xff, 0x7f, 0x1f, 0xff, 0x3c};
@@ -387,6 +388,210 @@ bool seader_credential_save(SeaderCredential* cred, const char* name) {
     uint8_t aia[PICOPASS_BLOCK_LEN] = {0xFF, 0xff, 0xff, 0xff, 0xFF, 0xFf, 0xff, 0xFF};
     uint8_t pacs_cfg[PICOPASS_BLOCK_LEN] = {0x03, 0x03, 0x03, 0x03, 0x00, 0x03, 0xe0, 0x14};
 
+    bool use_load_path = true;
+    bool saved = false;
+    bool withSIO = cred->save_format == SeaderCredentialSaveFormatSR;
+    FlipperFormat* file = flipper_format_file_alloc(cred->storage);
+    FuriString* temp_str = furi_string_alloc();
+
+    if(use_load_path && !furi_string_empty(cred->load_path)) {
+        // Get directory name
+        path_extract_dirname(furi_string_get_cstr(cred->load_path), temp_str);
+        // Make path to file to save
+        furi_string_cat_printf(temp_str, "/%s%s", name, ".picopass");
+    } else {
+        furi_string_printf(temp_str, "%s/%s%s", EXT_PATH("apps_data/picopass"), name, ".picopass");
+    }
+
+    FURI_LOG_D(TAG, "Save as Picopass [%s]", furi_string_get_cstr(temp_str));
+    uint64_t sentinel = 1ULL << cred->bit_length;
+    uint64_t swapped = __builtin_bswap64(cred->credential | sentinel);
+    // FURI_LOG_D(TAG, "PACS: (%d) %016llx | %016llx => %016llx", cred->bit_length, cred->credential, sentinel, swapped);
+    do {
+        if(!flipper_format_file_open_always(file, furi_string_get_cstr(temp_str))) break;
+        if(!flipper_format_write_header_cstr(file, "Flipper Picopass device", 1)) break;
+        if(!flipper_format_write_comment_cstr(file, "Picopass blocks generated from Seader app"))
+            break;
+
+        bool block_saved = true;
+        for(size_t i = 0; i < 20; i++) {
+            furi_string_printf(temp_str, "Block %d", i);
+            switch(i) {
+            case CSN_INDEX:
+                if(withSIO) {
+                    if(!flipper_format_write_hex(
+                           file,
+                           furi_string_get_cstr(temp_str),
+                           cred->diversifier,
+                           PICOPASS_BLOCK_LEN)) {
+                        block_saved = false;
+                    }
+                } else {
+                    if(!flipper_format_write_hex(
+                           file, furi_string_get_cstr(temp_str), csn, sizeof(csn))) {
+                        block_saved = false;
+                    }
+                }
+                break;
+            case EPURSE_INDEX:
+                if(!flipper_format_write_hex(
+                       file, furi_string_get_cstr(temp_str), epurse, PICOPASS_BLOCK_LEN)) {
+                    block_saved = false;
+                }
+                break;
+            case KD_INDEX:
+                if(!flipper_format_write_hex(
+                       file, furi_string_get_cstr(temp_str), debit_key, PICOPASS_BLOCK_LEN)) {
+                    block_saved = false;
+                }
+                break;
+            case AIA_INDEX:
+                if(!flipper_format_write_hex(
+                       file, furi_string_get_cstr(temp_str), aia, PICOPASS_BLOCK_LEN)) {
+                    block_saved = false;
+                }
+                break;
+            case CFG_INDEX:
+                if(!flipper_format_write_hex(
+                       file, furi_string_get_cstr(temp_str), cfg, sizeof(cfg))) {
+                    block_saved = false;
+                }
+                break;
+            case PACS_CFG_INDEX:
+                if(withSIO) {
+                    pacs_cfg[0] = 0xA3;
+                }
+                if(!flipper_format_write_hex(
+                       file, furi_string_get_cstr(temp_str), pacs_cfg, sizeof(pacs_cfg))) {
+                    block_saved = false;
+                }
+                break;
+            case PACS_INDEX:
+                if(!flipper_format_write_hex(
+                       file,
+                       furi_string_get_cstr(temp_str),
+                       (uint8_t*)&swapped,
+                       PICOPASS_BLOCK_LEN)) {
+                    block_saved = false;
+                }
+                break;
+            case SR_SIO_INDEX:
+            case SR_SIO_INDEX + 1:
+            case SR_SIO_INDEX + 2:
+            case SR_SIO_INDEX + 3:
+            case SR_SIO_INDEX + 4:
+            case SR_SIO_INDEX + 5:
+            case SR_SIO_INDEX + 6:
+            case SR_SIO_INDEX + 7:
+                if(withSIO) {
+                    if(!flipper_format_write_hex(
+                           file,
+                           furi_string_get_cstr(temp_str),
+                           cred->sio + ((i - SR_SIO_INDEX) * PICOPASS_BLOCK_LEN),
+                           PICOPASS_BLOCK_LEN)) {
+                        block_saved = false;
+                    }
+                } else {
+                    if(!flipper_format_write_hex(
+                           file, furi_string_get_cstr(temp_str), zero, sizeof(zero))) {
+                        block_saved = false;
+                    }
+                }
+                break;
+            default:
+                if(!flipper_format_write_hex(
+                       file, furi_string_get_cstr(temp_str), zero, sizeof(zero))) {
+                    block_saved = false;
+                }
+                break;
+            };
+            if(!block_saved) {
+                break;
+            }
+        }
+        saved = true;
+    } while(false);
+
+    if(!saved) {
+        dialog_message_show_storage_error(cred->dialogs, "Can not save\nfile");
+    }
+
+    furi_string_free(temp_str);
+    flipper_format_free(file);
+    return saved;
+}
+
+bool seader_credential_save_rfid(SeaderCredential* cred, const char* name) {
+    bool result = false;
+    FuriString* file_path = furi_string_alloc();
+    furi_string_printf(file_path, "%s/%s%s", ANY_PATH("lfrfid"), name, ".rfid");
+    ProtocolDict* dict = protocol_dict_alloc(lfrfid_protocols, LFRFIDProtocolMax);
+    ProtocolId protocol = LFRFIDProtocolHidGeneric;
+
+    FURI_LOG_D(TAG, "Original (%d): %016llx", cred->bit_length, cred->credential);
+    uint64_t target = 0;
+    if(cred->bit_length == 26) {
+        //3 bytes
+        protocol = LFRFIDProtocolH10301;
+        // Remove parity
+        target = (cred->credential >> 1) & 0xFFFFFF;
+        // Reverse order since it'll get reversed again
+        target = __builtin_bswap64(target) >> (64 - 24);
+    } else if(cred->bit_length < 44) {
+        // https://gist.github.com/blark/e8f125e402f576bdb7e2d7b3428bdba6
+        protocol = LFRFIDProtocolHidGeneric;
+        uint64_t sentinel = 1ULL << cred->bit_length;
+        if(cred->bit_length <= 36) {
+            uint64_t header = 1ULL << 37;
+            FURI_LOG_D(
+                TAG,
+                "Prox Format (%d): %011llx",
+                cred->bit_length,
+                cred->credential | sentinel | header);
+            target = __builtin_bswap64((cred->credential | sentinel | header) << 4) >> (64 - 48);
+        } else {
+            target = __builtin_bswap64(cred->credential << 4) >> (64 - 48);
+        }
+    } else {
+        //8 bytes
+        protocol = LFRFIDProtocolHidExGeneric;
+        target = cred->credential;
+        target = __builtin_bswap64(target);
+    }
+
+    FURI_LOG_D(TAG, "LFRFID (%d): %016llx", cred->bit_length, target);
+    size_t data_size = protocol_dict_get_data_size(dict, protocol);
+    uint8_t* data = malloc(data_size);
+    if(data_size < 8) {
+        memcpy(data, (void*)&target, data_size);
+    } else {
+        // data_size 12 for LFRFIDProtocolHidExGeneric
+        memcpy(data + 4, (void*)&target, 8);
+    }
+    protocol_dict_set_data(dict, protocol, data, data_size);
+    free(data);
+
+    result = lfrfid_dict_file_save(dict, protocol, furi_string_get_cstr(file_path));
+
+    FuriString* briefStr;
+    briefStr = furi_string_alloc();
+    protocol_dict_render_brief_data(dict, briefStr, protocol);
+    FURI_LOG_D(TAG, "LFRFID Brief: %s", furi_string_get_cstr(briefStr));
+    furi_string_free(briefStr);
+
+    if(result) {
+        FURI_LOG_D(TAG, "Written: %d", result);
+    } else {
+        FURI_LOG_D(TAG, "Failed to write");
+    }
+
+    furi_string_free(file_path);
+    protocol_dict_free(dict);
+
+    return result;
+}
+
+bool seader_credential_save(SeaderCredential* cred, const char* name) {
     if(cred->save_format == SeaderCredentialSaveFormatAgnostic) {
         return seader_credential_save_agnostic(cred, name);
     } else if(cred->save_format == SeaderCredentialSaveFormatMFC) {
@@ -394,207 +599,9 @@ bool seader_credential_save(SeaderCredential* cred, const char* name) {
     } else if(
         cred->save_format == SeaderCredentialSaveFormatPicopass ||
         cred->save_format == SeaderCredentialSaveFormatSR) {
-        bool use_load_path = true;
-        bool saved = false;
-        bool withSIO = cred->save_format == SeaderCredentialSaveFormatSR;
-        FlipperFormat* file = flipper_format_file_alloc(cred->storage);
-        FuriString* temp_str = furi_string_alloc();
-
-        if(use_load_path && !furi_string_empty(cred->load_path)) {
-            // Get directory name
-            path_extract_dirname(furi_string_get_cstr(cred->load_path), temp_str);
-            // Make path to file to save
-            furi_string_cat_printf(temp_str, "/%s%s", name, ".picopass");
-        } else {
-            furi_string_printf(
-                temp_str, "%s/%s%s", EXT_PATH("apps_data/picopass"), name, ".picopass");
-        }
-
-        FURI_LOG_D(TAG, "Save as Picopass [%s]", furi_string_get_cstr(temp_str));
-        uint64_t sentinel = 1ULL << cred->bit_length;
-        uint64_t swapped = __builtin_bswap64(cred->credential | sentinel);
-        // FURI_LOG_D(TAG, "PACS: (%d) %016llx | %016llx => %016llx", cred->bit_length, cred->credential, sentinel, swapped);
-        do {
-            if(!flipper_format_file_open_always(file, furi_string_get_cstr(temp_str))) break;
-            if(!flipper_format_write_header_cstr(file, "Flipper Picopass device", 1)) break;
-            if(!flipper_format_write_comment_cstr(
-                   file, "Picopass blocks generated from Seader app"))
-                break;
-
-            bool block_saved = true;
-            for(size_t i = 0; i < 20; i++) {
-                furi_string_printf(temp_str, "Block %d", i);
-                switch(i) {
-                case CSN_INDEX:
-                    if(withSIO) {
-                        if(!flipper_format_write_hex(
-                               file,
-                               furi_string_get_cstr(temp_str),
-                               cred->diversifier,
-                               PICOPASS_BLOCK_LEN)) {
-                            block_saved = false;
-                        }
-                    } else {
-                        if(!flipper_format_write_hex(
-                               file, furi_string_get_cstr(temp_str), csn, sizeof(csn))) {
-                            block_saved = false;
-                        }
-                    }
-                    break;
-                case EPURSE_INDEX:
-                    if(!flipper_format_write_hex(
-                           file, furi_string_get_cstr(temp_str), epurse, PICOPASS_BLOCK_LEN)) {
-                        block_saved = false;
-                    }
-                    break;
-                case KD_INDEX:
-                    if(!flipper_format_write_hex(
-                           file, furi_string_get_cstr(temp_str), debit_key, PICOPASS_BLOCK_LEN)) {
-                        block_saved = false;
-                    }
-                    break;
-                case AIA_INDEX:
-                    if(!flipper_format_write_hex(
-                           file, furi_string_get_cstr(temp_str), aia, PICOPASS_BLOCK_LEN)) {
-                        block_saved = false;
-                    }
-                    break;
-                case CFG_INDEX:
-                    if(!flipper_format_write_hex(
-                           file, furi_string_get_cstr(temp_str), cfg, sizeof(cfg))) {
-                        block_saved = false;
-                    }
-                    break;
-                case PACS_CFG_INDEX:
-                    if(withSIO) {
-                        pacs_cfg[0] = 0xA3;
-                    }
-                    if(!flipper_format_write_hex(
-                           file, furi_string_get_cstr(temp_str), pacs_cfg, sizeof(pacs_cfg))) {
-                        block_saved = false;
-                    }
-                    break;
-                case PACS_INDEX:
-                    if(!flipper_format_write_hex(
-                           file,
-                           furi_string_get_cstr(temp_str),
-                           (uint8_t*)&swapped,
-                           PICOPASS_BLOCK_LEN)) {
-                        block_saved = false;
-                    }
-                    break;
-                case SR_SIO_INDEX:
-                case SR_SIO_INDEX + 1:
-                case SR_SIO_INDEX + 2:
-                case SR_SIO_INDEX + 3:
-                case SR_SIO_INDEX + 4:
-                case SR_SIO_INDEX + 5:
-                case SR_SIO_INDEX + 6:
-                case SR_SIO_INDEX + 7:
-                    if(withSIO) {
-                        if(!flipper_format_write_hex(
-                               file,
-                               furi_string_get_cstr(temp_str),
-                               cred->sio + ((i - SR_SIO_INDEX) * PICOPASS_BLOCK_LEN),
-                               PICOPASS_BLOCK_LEN)) {
-                            block_saved = false;
-                        }
-                    } else {
-                        if(!flipper_format_write_hex(
-                               file, furi_string_get_cstr(temp_str), zero, sizeof(zero))) {
-                            block_saved = false;
-                        }
-                    }
-                    break;
-                default:
-                    if(!flipper_format_write_hex(
-                           file, furi_string_get_cstr(temp_str), zero, sizeof(zero))) {
-                        block_saved = false;
-                    }
-                    break;
-                };
-                if(!block_saved) {
-                    break;
-                }
-            }
-            saved = true;
-        } while(false);
-
-        if(!saved) {
-            dialog_message_show_storage_error(cred->dialogs, "Can not save\nfile");
-        }
-
-        furi_string_free(temp_str);
-        flipper_format_free(file);
-        return saved;
+        return seader_credential_save_picopass(cred, name);
     } else if(cred->save_format == SeaderCredentialSaveFormatRFID) {
-        bool result = false;
-        FuriString* file_path = furi_string_alloc();
-        furi_string_printf(file_path, "%s/%s%s", ANY_PATH("lfrfid"), name, ".rfid");
-        ProtocolDict* dict = protocol_dict_alloc(lfrfid_protocols, LFRFIDProtocolMax);
-        ProtocolId protocol = LFRFIDProtocolHidGeneric;
-
-        FURI_LOG_D(TAG, "Original (%d): %016llx", cred->bit_length, cred->credential);
-        uint64_t target = 0;
-        if(cred->bit_length == 26) {
-            //3 bytes
-            protocol = LFRFIDProtocolH10301;
-            // Remove parity
-            target = (cred->credential >> 1) & 0xFFFFFF;
-            // Reverse order since it'll get reversed again
-            target = __builtin_bswap64(target) >> (64 - 24);
-        } else if(cred->bit_length < 44) {
-            // https://gist.github.com/blark/e8f125e402f576bdb7e2d7b3428bdba6
-            protocol = LFRFIDProtocolHidGeneric;
-            uint64_t sentinel = 1ULL << cred->bit_length;
-            if(cred->bit_length <= 36) {
-                uint64_t header = 1ULL << 37;
-                FURI_LOG_D(
-                    TAG,
-                    "Prox Format (%d): %011llx",
-                    cred->bit_length,
-                    cred->credential | sentinel | header);
-                target = __builtin_bswap64((cred->credential | sentinel | header) << 4) >>
-                         (64 - 48);
-            } else {
-                target = __builtin_bswap64(cred->credential << 4) >> (64 - 48);
-            }
-        } else {
-            //8 bytes
-            protocol = LFRFIDProtocolHidExGeneric;
-            target = cred->credential;
-            target = __builtin_bswap64(target);
-        }
-
-        FURI_LOG_D(TAG, "LFRFID (%d): %016llx", cred->bit_length, target);
-        size_t data_size = protocol_dict_get_data_size(dict, protocol);
-        uint8_t* data = malloc(data_size);
-        if(data_size < 8) {
-            memcpy(data, (void*)&target, data_size);
-        } else {
-            // data_size 12 for LFRFIDProtocolHidExGeneric
-            memcpy(data + 4, (void*)&target, 8);
-        }
-        protocol_dict_set_data(dict, protocol, data, data_size);
-        free(data);
-
-        result = lfrfid_dict_file_save(dict, protocol, furi_string_get_cstr(file_path));
-
-        FuriString* briefStr;
-        briefStr = furi_string_alloc();
-        protocol_dict_render_brief_data(dict, briefStr, protocol);
-        FURI_LOG_D(TAG, "LFRFID Brief: %s", furi_string_get_cstr(briefStr));
-        furi_string_free(briefStr);
-
-        if(result) {
-            FURI_LOG_D(TAG, "Written: %d", result);
-        } else {
-            FURI_LOG_D(TAG, "Failed to write");
-        }
-
-        furi_string_free(file_path);
-        protocol_dict_free(dict);
-        return result;
+        return seader_credential_save_rfid(cred, name);
     }
     return false;
 }

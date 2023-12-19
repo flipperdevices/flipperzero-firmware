@@ -52,6 +52,7 @@ void seader_ccid_check_for_sam(SeaderUartBridge* seader_uart) {
     hasSAM = false; // If someone is calling this, reset sam state
     powered[0] = false;
     powered[1] = false;
+    retries = 3;
     seader_ccid_GetSlotStatus(seader_uart, 0);
 }
 
@@ -154,7 +155,6 @@ size_t seader_ccid_process(Seader* seader, uint8_t* cmd, size_t cmd_len) {
                 if(hasSAM && sam_slot == 0) {
                     break;
                 }
-                retries = 0;
                 sequence[0] = 0;
                 seader_ccid_IccPowerOn(seader_uart, 0);
                 break;
@@ -178,7 +178,6 @@ size_t seader_ccid_process(Seader* seader, uint8_t* cmd, size_t cmd_len) {
                 if(hasSAM && sam_slot == 1) {
                     break;
                 }
-                retries = 0;
                 sequence[1] = 0;
                 seader_ccid_IccPowerOn(seader_uart, 1);
                 break;
