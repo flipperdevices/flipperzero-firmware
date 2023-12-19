@@ -92,3 +92,10 @@ void flipboard_override_config_view(Flipboard* app, View* view);
  * @return The view id for the application menu (it should be 0.)
 */
 uint32_t flipboard_navigation_show_app_menu(void* context);
+
+/**
+ * @brief Sends a custom event to the Flipboard application.
+ * @param app The Flipboard application.
+ * @param event_id The id of the event to send.
+*/
+void flipboard_send_custom_event(Flipboard* app, uint32_t event_id);

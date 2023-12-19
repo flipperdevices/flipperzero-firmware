@@ -42,7 +42,11 @@ This software is for experimental purposes only and is not meant for any illegal
 - Removed: [MALVEKE Pokemon Trading v1.4 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external/malveke_pokemon_trading) `Req: Malveke` (Uses Different GPIO Than Standard Pokemon Trader App)
 - Updated: [Pokemon Trading v1.5 (By EstebanFuentealba & kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
 - Updated: [MALVEKE GB Live Camera v1.1 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external/malveke_gb_live_camera) `Req: Malveke`
-- MFC Keys Updates (By Willy-JL) & Dupe Removal (By RogueMaster)
+- NFC: [MFC Keys Updates (By Willy-JL) & Dupe Removal (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/69bb24a7bfe22c20a2d8886f840f677c554d69ad)
+- Updated: [FlipBoard Blinky v2.1 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
+- Updated: [FlipBoard Keyboard v2.0 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
+- Updated: [FlipBoard Signal v3.1 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
+- OFW: [Added UTF-8 support to Flipper Zero canvas API #3297 (By bolknote)](https://github.com/flipperdevices/flipperzero-firmware/pull/3297)
 
 ## IN THIS BRANCH:
 

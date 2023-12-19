@@ -66,3 +66,12 @@ void flipboard_leds_update(FlipboardLeds* leds);
  * @param glow True to turn the status LED on, false to turn it off.
 */
 void flipboard_status_led(FlipboardLeds* leds, bool glow);
+
+/**
+ * @brief Adjusts the brightness of a color.
+ * @details This method adjusts the brightness of a color.
+ * @param color The color to adjust.
+ * @param brightness The brightness to adjust the color to (0-255).
+ * @return The adjusted color.
+*/
+uint32_t adjust_color_brightness(uint32_t color, uint8_t brightness);
