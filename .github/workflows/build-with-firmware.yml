@@ -232,7 +232,7 @@ jobs:
           $json = (gh api -H $mime -H $api /repos/${{ github.REPOSITORY }}/releases) | ConvertFrom-Json
           $tagExists = ($json.GetEnumerator() | Where-Object { $_.tag_name -eq 'v${{ env.RELEASE_VERSION }}' }) -ne $null
           if ( $tagExists -eq $false ) {
-            gh api --method POST -H $mime -H $api /repos/${{ github.REPOSITORY }}/releases -f tag_name='v${{ env.RELEASE_VERSION }}' -f target_commitish='${{ env.SHA }}' -f name='v${{ env.RELEASE_VERSION }}' -f body='## What's Changed\r\n**Full Changelog**: https://github.com/${{ env.REPO_SELF }}/compare/v${{ env.RELEASE_VERSION }}..${{ env.PREV_TAG }}' -F draft=true -F prerelease=false -F generate_release_notes=false  
+            gh api --method POST -H $mime -H $api /repos/${{ github.REPOSITORY }}/releases -f tag_name='v${{ env.RELEASE_VERSION }}' -f target_commitish='${{ env.SHA }}' -f name='v${{ env.RELEASE_VERSION }}' -f body="## What's Changed\r\n**Full Changelog**: https://github.com/${{ env.REPO_SELF }}/compare/${{ env.PREV_TAG }}..v${{ env.RELEASE_VERSION }}" -F draft=true -F prerelease=false -F generate_release_notes=false  
             gh api --method POST -H $mime -H $api /repos/${{ github.REPOSITORY }}/releases/generate-notes -f tag_name='v${{ env.RELEASE_VERSION }}' -f target_commitish='${{ env.SHA }}' -f previous_tag_name='${{ env.PREV_TAG }}'
           }          
           gh release upload 'v${{ env.RELEASE_VERSION }}' '${{ env.ZIP_NAME }}#${{ env.ZIP_TAG }}' '${{ env.TGZ_NAME }}#${{ env.TGZ_TAG }}' --clobber -R ${{ env.REPO_SELF }}
