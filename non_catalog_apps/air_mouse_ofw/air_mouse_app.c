@@ -3,7 +3,7 @@
 #include <gui/gui.h>
 #include <dialogs/dialogs.h>
 #include "imu_mouse.h"
-#include "motion_mouse_icons.h"
+#include "air_mouse_icons.h"
 
 #define TAG "SensorModule"
 
@@ -29,7 +29,7 @@ static void render_callback(Canvas* canvas, void* ctx) {
     canvas_draw_icon(canvas, 83 + 14, 11, &I_Right_mouse_icon_9x9);
 
     canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str(canvas, 0, 14, "Motion Mouse");
+    canvas_draw_str(canvas, 0, 14, "Air Mouse");
     canvas_set_font(canvas, FontSecondary);
     canvas_draw_str(canvas, 0, 56, "Press Back to exit");
 }
@@ -82,7 +82,7 @@ static void sensor_module_free(SensorModuleApp* app) {
     free(app);
 }
 
-int32_t motion_mouse_app(void* arg) {
+int32_t air_mouse_app(void* arg) {
     UNUSED(arg);
     SensorModuleApp* app = sensor_module_alloc();
 
