@@ -195,7 +195,7 @@ jobs:
           $api = "X-GitHub-Api-Version: 2022-11-28"
           #$url = (gh api -H $mime -H $api /repos/${{ github.REPOSITORY }}/releases/tags/v${{ env.RELEASE_VERSION }} >$null 2>&1) | ConvertFrom-Json -AsHashtable -ErrorAction SilentlyContinue
           $json = (gh api -H $mime -H $api /repos/${{ github.REPOSITORY }}/releases) | ConvertFrom-Json
-          $tagExists = ($json.GetEnumerator() | Where-Object { $_.tag_name -eq 'v3.19.2' }) -ne $null
+          $tagExists = ($json.GetEnumerator() | Where-Object { $_.tag_name -eq 'v${{ env.RELEASE_VERSION }}' }) -ne $null
           if ( $tagExists -eq $true ) {
             $sha = (git rev-parse --verify HEAD)
             gh api --method POST -H $mime -H $api /repos/${{ github.REPOSITORY }}/releases -f tag_name='v${{ env.RELEASE_VERSION }}' -f target_commitish="$sha" -f name='v${{ env.RELEASE_VERSION }}' -F draft=true -F prerelease=false -F generate_release_notes=true
