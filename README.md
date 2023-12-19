@@ -3,7 +3,7 @@
 ![Tests](https://github.com/ObKo/stm32-cmake/workflows/Tests/badge.svg)
 
 This project is used to develop applications for the STM32 - ST's ARM Cortex-Mx MCUs.
-It uses cmake and GCC, along with newlib (libc), STM32Cube. Supports F0 F1 F2 F3 F4 F7 G0 G4 H7 L0 L1 L4 L5 U5 WB WL device families.
+It uses cmake and GCC, along with newlib (libc), STM32Cube. Supports C0 F0 F1 F2 F3 F4 F7 G0 G4 H7 L0 L1 L4 L5 U5 WB WL device families.
 
 ## Requirements
 
@@ -56,14 +56,14 @@ The most important set of variables which needs to be set can be found in the fo
 These configuration options need to be set for the build process to work properly:
 
 * `STM32_CUBE_<FAMILY>_PATH` - path to STM32Cube directory, where `<FAMILY>` is one
-   of `F0 F1 F2 F3 F4 F7 G0 G4 H7 L0 L1 L4 L5 U5 WB WL` **default**: `/opt/STM32Cube<FAMILY>`
+   of `C0 F0 F1 F2 F3 F4 F7 G0 G4 H7 L0 L1 L4 L5 U5 WB WL` **default**: `/opt/STM32Cube<FAMILY>`
 
 These configuration variables are optional:
 
 * `STM32_TOOLCHAIN_PATH` - where toolchain is located, **default**: `/usr`. Alternatively
   you can add the folder containing the toolchain binaries to the system path. If both are given,
   the `STM32_TOOLCHAIN_PATH` setting takes precedence
-* `TARGET_TRIPLET` - toolchain target triplet, **default**: `arm-none-eabi`
+* `STM32_TARGET_TRIPLET` - toolchain target triplet, **default**: `arm-none-eabi`
 * `FREERTOS_PATH` - Path to the FreeRTOS kernel when compiling with a RTOS. Does not need to be
    specified when using CMSIS
 
@@ -74,7 +74,7 @@ If you have access to a Unix shell, which is the default terminal on Linux, or t
 
 ```sh
 export STM32_TOOLCHAIN_PATH="<ToolchainPath>"
-export TARGET_TRIPLET=arm-none-eabi
+export STM32_TARGET_TRIPLET=arm-none-eabi
 export STM32_CUBE_<FAMILY>_PATH="<PathToCubeRoot>"
 ```
 
@@ -86,7 +86,7 @@ On Windows, you can use a Powershell script `path_helper.ps1`to set up the envir
 
 ```sh
 $env:STM32_TOOLCHAIN_PATH = "<ToolchainPath>"
-$env:TARGET_TRIPLET = arm-none-eabi
+$env:STM32_TARGET_TRIPLET = arm-none-eabi
 $env:STM32_CUBE_<FAMILY>_PATH="<PathToCubeRoot>"
 ```
 
@@ -109,6 +109,7 @@ STM32WB is a multi-cores device even if the second core is not accessible by end
 CMSIS consists of three main components:
 
 * Family-specific headers, e.g. `stm32f4xx.h`
+* Peripheral access layer header and source, e.g. `system_stm32f4xx.[c|h]`
 * Device type-specific startup sources (e.g. `startup_stm32f407xx.s`) (if ASM language is enabled)
 * Device-specific linker scripts which requires information about memory sizes (if ASM language is enabled)
 
@@ -118,12 +119,12 @@ Every CMSIS component is CMake's target (aka library), which defines compiler de
 add_executable(stm32-template main.c)
 target_link_libraries(stm32-template CMSIS::STM32::F407VG)
 ```
-That will add include directories, startup source, linker script and compiler flags to your executable.
+That will add include directories, peripheral layer files, startup source, linker script and compiler flags to your executable.
 
 CMSIS creates the following targets:
 
 * `CMSIS::STM32::<FAMILY>` (e.g. `CMSIS::STM32::F4`) - common includes, compiler flags and defines for family
-* `CMSIS::STM32::<TYPE>` (e.g. `CMSIS::STM32::F407xx`) - common startup source for device type, depends on `CMSIS::STM32::<FAMILY>`
+* `CMSIS::STM32::<TYPE>` (e.g. `CMSIS::STM32::F407xx`) - common startup source for device type and peripheral access layer files, depends on `CMSIS::STM32::<FAMILY>`
 * `CMSIS::STM32::<DEVICE>` (e.g. `CMSIS::STM32::F407VG`) - linker script for device, depends on `CMSIS::STM32::<TYPE>`
 
 So, if you don't need linker script, you can link only `CMSIS::STM32::<TYPE>` library and provide your own script using `stm32_add_linker_script` function

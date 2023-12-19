@@ -1,4 +1,17 @@
 set(STM32_ALL_DEVICES
+    C011D6
+    C011F4
+    C011F6
+    C011J4
+    C011J6
+    C031C4
+    C031C6
+    C031F4
+    C031F6
+    C031G4
+    C031G6
+    C031K4
+    C031K6
     F030C6
     F030C8
     F030CC

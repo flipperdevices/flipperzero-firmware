@@ -43,7 +43,7 @@ foreach(COMP ${CMSIS_FIND_COMPONENTS})
     endif()
 
     # Component is not RTOS component, so check whether it is a family component
-    string(REGEX MATCH "^STM32([FGHLMUW]P?[0-9BL])([0-9A-Z][0-9M][A-Z][0-9A-Z])?_?(M0PLUS|M4|M7)?.*$" COMP ${COMP})
+    string(REGEX MATCH "^STM32([CFGHLMUW]P?[0-9BL])([0-9A-Z][0-9M][A-Z][0-9A-Z])?_?(M0PLUS|M4|M7)?.*$" COMP ${COMP})
     if(CMAKE_MATCH_1)
         list(APPEND CMSIS_FIND_COMPONENTS_FAMILIES ${COMP})
     endif()
@@ -113,7 +113,7 @@ foreach(COMP ${CMSIS_FIND_COMPONENTS_FAMILIES})
     string(TOLOWER ${COMP} COMP_L)
     string(TOUPPER ${COMP} COMP)
     
-    string(REGEX MATCH "^STM32([FGHLMUW]P?[0-9BL])([0-9A-Z][0-9M][A-Z][0-9A-Z])?_?(M0PLUS|M4|M7)?.*$" COMP ${COMP})
+    string(REGEX MATCH "^STM32([CFGHLMUW]P?[0-9BL])([0-9A-Z][0-9M][A-Z][0-9A-Z])?_?(M0PLUS|M4|M7)?.*$" COMP ${COMP})
     # CMAKE_MATCH_<n> contains n'th subexpression
     # CMAKE_MATCH_0 contains full match
 
