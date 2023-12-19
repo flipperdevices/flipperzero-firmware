@@ -8,8 +8,8 @@ on:
         description: "Enter version to build or left empty for current version"
         required: false
         type: string
-  release:
-    types: [created, prereleased]
+#  release:
+#    types: [created, prereleased]
   push:
     paths:
       - .github/workflows/build-with-firmware.yml
