@@ -9,11 +9,17 @@ void subbrute_scene_save_name_on_enter(void* context) {
 
     // Setup view
     TextInput* text_input = instance->text_input;
-    name_generator_make_auto(
-        instance->text_store,
-        sizeof(instance->text_store),
-        subbrute_protocol_file(instance->device->protocol_info->file));
-
+    if(instance->device->attack == SubBruteAttackLoadFile) {
+        name_generator_make_auto(
+            instance->text_store,
+            sizeof(instance->text_store),
+            subbrute_protocol_file(instance->device->file_protocol_info->file));
+    } else {
+        name_generator_make_auto(
+            instance->text_store,
+            sizeof(instance->text_store),
+            subbrute_protocol_file(instance->device->protocol_info->file));
+    }
     text_input_set_header_text(text_input, "Name of file");
     text_input_set_result_callback(
         text_input,
