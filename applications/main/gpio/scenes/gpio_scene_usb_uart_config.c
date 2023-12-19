@@ -168,7 +168,7 @@ void gpio_scene_usb_uart_cfg_on_enter(void* context) {
     line_ensure_flow_invariant(app);
 
     item = variable_item_list_add(
-        var_item_list, "Soft DE/RE", COUNT_OF(software_de_re), line_software_de_re_cb, app);
+        var_item_list, "DE/RE Pin", COUNT_OF(software_de_re), line_software_de_re_cb, app);
     variable_item_set_current_value_index(item, app->usb_uart_cfg->software_de_re);
     variable_item_set_current_value_text(item, software_de_re[app->usb_uart_cfg->software_de_re]);
 
