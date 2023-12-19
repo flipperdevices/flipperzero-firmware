@@ -18,6 +18,12 @@ static void select_type_1_callback(VariableItem* item) {
 
     variable_item_set_current_value_text(item, pokemon_fap->type_list[index].name);
     pokemon_fap->trade_block->party[0].type[0] = pokemon_fap->type_list[index].index;
+
+    FURI_LOG_D(
+        TAG,
+        "[type] Set type1 to %s",
+        pokemon_named_list_get_name_from_index(
+            pokemon_fap->type_list, pokemon_fap->type_list[index].index));
 }
 
 static void select_type_2_callback(VariableItem* item) {
@@ -26,6 +32,12 @@ static void select_type_2_callback(VariableItem* item) {
 
     variable_item_set_current_value_text(item, pokemon_fap->type_list[index].name);
     pokemon_fap->trade_block->party[0].type[1] = pokemon_fap->type_list[index].index;
+
+    FURI_LOG_D(
+        TAG,
+        "[type] Set type2 to %s",
+        pokemon_named_list_get_name_from_index(
+            pokemon_fap->type_list, pokemon_fap->type_list[index].index));
 }
 
 void select_type_scene_on_exit(void* context) {

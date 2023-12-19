@@ -20,9 +20,23 @@ This is a Pokemon exchange application from Flipper Zero to Game Boy [(Generacti
 
 It currently trades a Pokemon based on your choice of Pokemon, Level, Stats and 4 Moves.
 
+## Hardware Interface
+The Game Boy is connected to the Flipper Zero's GPIO pins via a GBC style Game Link Cable. The [Flipper GB Link module](https://www.tindie.com/products/kbembedded/game-link-gpio-module-for-flipper-zero-game-boy/) is an easy way to connect a Game Boy via a Game Link Cable to the Flipper Zero.
+<p align='center'>
+<a href="https://www.tindie.com/stores/kbembedded/?ref=offsite_badges&utm_source=sellers_kbembedded&utm_medium=badges&utm_campaign=badge_large"><img src="https://d2ss6ovg47m0r5.cloudfront.net/badges/tindie-larges.png" alt="I sell on Tindie" width="200" height="104"></a>
+</p>
+
+Additionally, the [MALVEKE - GAME BOY Tools for Flipper Zero](https://www.tindie.com/products/efuentealba/malveke-game-boy-tools-for-flipper-zero/) is supported by this tool.
+
+<p align='center'>
+<a href="https://www.tindie.com/stores/efuentealba/?ref=offsite_badges&utm_source=sellers_efuentealba&utm_medium=badges&utm_campaign=badge_large"><img src="https://d2ss6ovg47m0r5.cloudfront.net/badges/tindie-larges.png" alt="I sell on Tindie" width="200" height="104"></a>
+</p>
+
+Details on the hardware interface, as well as how to create your own adapter board, can be found in the [How Does It Work](#how-does-it-work) section below.
+
 ## Installation Directions
 
-This project is intended to be overlayed on top of an existing firmware repo,  in my case the **Release 0.79.1** version.
+This project is intended to be overlaid on top of an existing firmware repo,  in my case the **Release 0.79.1** version.
 
 - Clone the [Flipper Zero firmware repository](https://github.com/flipperdevices/flipperzero-firmware). Refer to [this tutorial](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/firmware/updating/README.md) for updating the firmware.
 - Copy the "pokemon" folder into the `/applications_user/pokemon` folder in your firmware.
@@ -48,6 +62,7 @@ And use [**qFlipper**](https://flipperzero.one/update) to copy the generated **p
 
 These instructions assume that you are starting at the Flipper Zero desktop. Otherwise, press the Back button until you are at the desktop.
 
+- If using a MALVEKE board, plug it in to the GPIO header now. The app will auto-detect and select the correct pinout to support the MALVEKE EXT1 interface. If using the Flipper GB Link board, or any other pinout, they can be connected to the Flipper Zero now, or at any point in the future.
 - Press the `OK` button on the Flipper to open the main menu.
 - Choose `Applications` from the menu.
 - Choose `GPIO` from the submenu.
@@ -87,7 +102,7 @@ These instructions assume that you are starting at the Flipper Zero desktop. Oth
         <br />
     </p>
 
-- The `Select Moves` menu is used to pick the set the traded Pokemon's moves. They are pre-populated with the moveset that the Pokemon would know at level 1. Selecting a move slot will bring up an alphabetical index of moves. Additionally, `No Move` and `Default` can be quickliy selected. Note that any move after the first `No Move` is ignored. 
+- The `Select Moves` menu is used to pick the set the traded Pokemon's moves. They are pre-populated with the moveset that the Pokemon would know at level 1. Selecting a move slot will bring up an alphabetical index of moves. Additionally, `No Move` and `Default` can be quickly selected. Note that any move after the first `No Move` is ignored. 
 
     <p align='center'>
         <br />
@@ -115,7 +130,7 @@ These instructions assume that you are starting at the Flipper Zero desktop. Oth
 - The Pokemon's stats can also be influenced. The current settings are:
   - `Random IV, Zero EV` Mimics stats of a caught wild Pokemon.
   - `Random IV, Max EV / Level` IV is randomized, but EV is set to the maximum a trained Pokemon could be for its current level.
-  - `Randon IV, Max EV` IV is randomized, EV is set to the abosolute max for a perfectly trained Pokemon.
+  - `Randon IV, Max EV` IV is randomized, EV is set to the absolute max for a perfectly trained Pokemon.
   - `Max IV, Zero EV` Mimics stats of a caught wild Pokemon, but with the maximum IV possible.
   - `Max IV, Max EV / Level` IV is max, EV is set to the maximum a trained Pokemon could be for its current level.
   - `Max IV, Max EV` Absolutely perfect and overly powerful Pokemon.
@@ -126,7 +141,7 @@ These instructions assume that you are starting at the Flipper Zero desktop. Oth
         <br />
     </p>
 
-- The `OT ID#` and `OT Name` of the Pokemon can also be set. The `OT ID#` must be between `0` and `65535`. Setting the `OT ID#` and `OT Name` to the same as your current trainer's causes the game to believe it was a wild caught Pokemon and not one that was traded. This means high level Pokmon will still obey you without badges, but, will not get the experience boost of a traded Pokemon.
+- The `OT ID#` and `OT Name` of the Pokemon can also be set. The `OT ID#` must be between `0` and `65535`. Setting the `OT ID#` and `OT Name` to the same as your current trainer's causes the game to believe it was a wild caught Pokemon and not one that was traded. This means high level Pokemon will still obey you without badges, but, will not get the experience boost of a traded Pokemon.
 
     <p align='center'>
         <br />
@@ -220,6 +235,8 @@ These instructions assume that you are starting at the Flipper Zero desktop. Oth
         <img src="./docs/images/flipper-zero-flat-12.png" width="400" /><br />
     </p>
 
+- Once the trade is complete, both the **Game Boy** and the **Flipper Zero** will return to the `WAITING` state. If the **Game Boy** selects `CANCEL`, the **Flipper Zero** will return to the `READY` state. The <img src="./docs/images/back.png" /> BACK button can be pressed to return to the main menu. The traded Pokemon can be modified, or completely changed, if desired. Once the **Flipper Zero** Re-enters the Trade screen, and the **Game Boy** re-selects the trade table in-game, another trade can be completed. This allows for trading multiple Pokemon without having to reset the **Game Boy** each time.
+
     If the Flipper Zero gets stuck at the end of the exchange, you must reboot it by pressing the <img src="./docs/images/left.png" /> LEFT + <img src="./docs/images/back.png" /> BACK key combination.
 
     <p align='center'>
@@ -252,7 +269,7 @@ You can learn more about it in the following video. [**Analyzing the Different V
 
 ## Board for Flipper Zero with PortData EXT Link.
 
-For the Flipper Zero board, a [PortData EXT Link](https://es.aliexpress.com/item/1005004116983895.html) and a 2x8  [prototype board](https://es.aliexpress.com/item/32478242317.html) were used.
+For the Flipper Zero board, a [PortData EXT Link](https://s.click.aliexpress.com/e/_Dm3EqlR) and a 2x8  [prototype board](https://s.click.aliexpress.com/e/_DETrjpL) were used.
 
 <p align='center'>
 <br />
@@ -322,14 +339,13 @@ For each image, the color `#aaa` was transformed to `#fff` so that Flipper Zero 
 - Game Boy Advance (GBA)
 
 ## Contributors
-<a href="https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Pokemon-Trading/">EstebanFuentealba</a><br />
-<a href="https://github.com/R4g3D/Flipper-Zero-Game-Boy-Pokemon-Trading/">R4g3D</a><br />
-<a href="https://github.com/kbembedded/Flipper-Zero-Game-Boy-Pokemon-Trading/">kbembedded</a>
+[![Contributors](https://contrib.rocks/image?repo=EstebanFuentealba/Flipper-Zero-Game-Boy-Pokemon-Trading)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Pokemon-Trading/graphs/contributors)
+
 
 ## Links
 
 - [Flipper Zero firmware source code](https://github.com/flipperdevices/flipperzero-firmware)
-- Adan Scotney's pokemon [trade protocol specification](http://www.adanscotney.com/2014/01/spoofing-pokemon-trades-with-stellaris.html) and implementation
+- Adan Scotney's Pokemon [trade protocol specification](http://www.adanscotney.com/2014/01/spoofing-pokemon-trades-with-stellaris.html) and implementation
 - Derek Jamison - [Youtube Channel](https://www.youtube.com/@MrDerekJamison)
 - Matt Penny - [GBPlay Blog](https://blog.gbplay.io/)
 - [Pokémon data structure (Generation I)](<https://bulbapedia.bulbagarden.net/wiki/Pok%C3%A9mon_data_structure_(Generation_I)>)

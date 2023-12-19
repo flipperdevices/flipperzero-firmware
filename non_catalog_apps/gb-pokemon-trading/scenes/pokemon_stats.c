@@ -19,6 +19,8 @@ static void select_stats_selected_callback(void* context, uint32_t index) {
 
     pokemon_trade_block_recalculate_stats_from_level(pokemon_fap);
 
+    FURI_LOG_D(TAG, "[stats] Set stats to %s", stats_text[index]);
+
     scene_manager_previous_scene(pokemon_fap->scene_manager);
 }
 

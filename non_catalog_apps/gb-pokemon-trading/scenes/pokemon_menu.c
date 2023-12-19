@@ -11,6 +11,7 @@
 #include "pokemon_ot_id.h"
 #include "pokemon_ot_name.h"
 #include "pokemon_trade.h"
+#include "pokemon_pins.h"
 
 static void scene_change_from_main_cb(void* context, uint32_t index) {
     PokemonFap* pokemon_fap = (PokemonFap*)context;
@@ -37,6 +38,14 @@ void main_menu_scene_on_enter(void* context) {
      * highlighted meny item.
      */
     scene_manager_set_scene_state(pokemon_fap->scene_manager, SelectMoveScene, 0);
+
+    /* HACK: Since we may have come from trade view, we cannot assume that
+     * pokemon_fap->curr_pokemon is correct.
+     * The proper way to do this would be to instead of tracking curr_pokemon
+     * separately, have it always be derived fro the current trade_block.
+     */
+    pokemon_fap->curr_pokemon = pokemon_table_get_num_from_index(
+        pokemon_fap->pokemon_table, pokemon_fap->trade_block->party_members[0]);
 
     submenu_reset(pokemon_fap->submenu);
 
@@ -87,6 +96,12 @@ void main_menu_scene_on_enter(void* context) {
         pokemon_fap->submenu, buf, SelectOTNameScene, scene_change_from_main_cb, pokemon_fap);
     submenu_add_item(
         pokemon_fap->submenu, "Trade PKMN", TradeScene, scene_change_from_main_cb, pokemon_fap);
+    submenu_add_item(
+        pokemon_fap->submenu,
+        "Select Pinout",
+        SelectPinsScene,
+        scene_change_from_main_cb,
+        pokemon_fap);
 
     submenu_set_selected_item(
         pokemon_fap->submenu,
@@ -120,6 +135,7 @@ void (*const pokemon_scene_on_enter_handlers[])(void*) = {
     select_ot_id_scene_on_enter,
     select_ot_name_scene_on_enter,
     trade_scene_on_enter,
+    select_pins_scene_on_enter,
 };
 
 void (*const pokemon_scene_on_exit_handlers[])(void*) = {
@@ -135,9 +151,11 @@ void (*const pokemon_scene_on_exit_handlers[])(void*) = {
     select_ot_id_scene_on_exit,
     select_ot_name_scene_on_exit,
     null_scene_on_exit,
+    select_pins_scene_on_exit,
 };
 
 bool (*const pokemon_scene_on_event_handlers[])(void*, SceneManagerEvent) = {
+    null_scene_on_event,
     null_scene_on_event,
     null_scene_on_event,
     null_scene_on_event,

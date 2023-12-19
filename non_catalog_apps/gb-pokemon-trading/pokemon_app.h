@@ -10,6 +10,7 @@
 #include <gui/modules/submenu.h>
 #include <gui/modules/text_input.h>
 #include <gui/modules/variable_item_list.h>
+#include <gblink.h>
 
 #include "pokemon_data.h"
 
@@ -44,22 +45,12 @@ struct named_list {
 
 typedef struct named_list NamedList;
 
-typedef enum {
-    GAMEBOY_INITIAL,
-    GAMEBOY_READY,
-    GAMEBOY_WAITING,
-    GAMEBOY_TRADE_READY,
-    GAMEBOY_SEND,
-    GAMEBOY_PENDING,
-    GAMEBOY_TRADING
-} render_gameboy_state_t;
-
 struct pokemon_fap {
     ViewDispatcher* view_dispatcher;
 
     /* View ports for each of the application's steps */
     View* select_view;
-    View* trade_view;
+    void* trade;
 
     /* Scene manager */
     SceneManager* scene_manager;
@@ -85,6 +76,10 @@ struct pokemon_fap {
      */
     TradeBlock* trade_block;
 
+    /* Pin definition to actual Game Link Cable interface */
+    struct gblink_pins pins;
+    int malveke_detected;
+
     /* The currently selected pokemon */
     int curr_pokemon;
 
@@ -104,6 +99,8 @@ typedef enum {
     AppViewTrade,
     AppViewExitConfirm,
 } AppView;
+
+int pokemon_table_get_num_from_index(const PokemonTable* table, uint8_t index);
 
 int pokemon_named_list_get_num_elements(const NamedList* list);
 

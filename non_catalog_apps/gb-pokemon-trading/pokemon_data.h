@@ -13,6 +13,7 @@
  * GB/Z80. e.g. a uint16_t value of 0x2c01 translates to 0x012c.
  * Need to use __builtin_bswap16(val) to switch between Flipper and Pokemon.
  */
+/* This is 44 bytes in memory */
 struct __attribute__((__packed__)) pokemon_structure {
     uint8_t index;
     uint16_t hp; // Calculated from level
@@ -50,7 +51,9 @@ struct __attribute__((__packed__)) name {
     unsigned char str[11];
 };
 
+/* This is 415 bytes in memory/transmitted */
 struct __attribute__((__packed__)) trade_data_block {
+    /* TODO: Change this to use struct name above */
     unsigned char trainer_name[11];
     uint8_t party_cnt;
     /* Only the first pokemon is ever used even though there are 7 bytes here.

@@ -36,6 +36,8 @@ static bool select_ot_id_input_validator(const char* text, FuriString* error, vo
         pokemon_fap->trade_block->party[0].ot_id = ot_id_16;
     }
 
+    FURI_LOG_D(TAG, "[ot_id] Set OT ID to %05d", (uint16_t)ot_id);
+
     return rc;
 }
 
