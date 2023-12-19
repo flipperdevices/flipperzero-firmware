@@ -27,7 +27,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       REPO_SELF: ${{ vars.REPO_SELF }}
-      OFW_PATH: "applications_user/subbrute"
+      APP_PATH: "applications_user/subbrute"
       RELATIVE_PATH: "applications/external/subbrute"
       CURRENT_VERSION: ${{ vars.RELEASE_VERSION }}
       RELEASE_VERSION: ${{ vars.RELEASE_VERSION }}
@@ -36,6 +36,9 @@ jobs:
       ZIP_TAG: ""
       TGZ_NAME: ""
       TGZ_TAG: ""
+      SHA: ""
+      FW_VERSION: ""
+      FW_URL: ""
     strategy:
       fail-fast: false
       matrix:
@@ -77,7 +80,7 @@ jobs:
           repository: ${{ vars.REPO_SELF }}
           clean: "true"
           submodules: "true"
-          path: "${{ env.OFW_PATH }}"
+          path: "${{ env.APP_PATH }}"
 
       #    - name: Restore FBT
       #      id: cache-restore
@@ -97,6 +100,17 @@ jobs:
         run: |
           Remove-Item -Force -Recurse ./applications/debug -ErrorAction SilentlyContinue
           Remove-Item -Force -Recurse ./applications/examples -ErrorAction SilentlyContinue
+          Remove-Item -Force -Recurse ${{ env.RELATIVE_PATH }} -ErrorAction SilentlyContinue
+
+      - name: Get SHA of our application
+        shell: pwsh
+        run: |
+          cd '${{ env.APP_PATH }}'
+          $fwInfo = ((gh release view --json tagName -R DarkFlippers/unleashed-firmware) | ConvertFrom-Json)
+          $sha = (git rev-parse --verify HEAD)
+          Write-Output ('RELEASE_VERSION={0}' -f $sha) >> $env:GITHUB_ENV
+          Write-Output ('FW_VERSION={0}' -f $fwInfo.tagName) >> $env:GITHUB_ENV
+          Write-Output ('FW_URL={0}' -f $fwInfo.url) >> $env:GITHUB_ENV
 
       - name: Build Firmware
         shell: bash
@@ -193,13 +207,10 @@ jobs:
         run: |
           $mime = "Accept: application/vnd.github+json"
           $api = "X-GitHub-Api-Version: 2022-11-28"
-          #$url = (gh api -H $mime -H $api /repos/${{ github.REPOSITORY }}/releases/tags/v${{ env.RELEASE_VERSION }} >$null 2>&1) | ConvertFrom-Json -AsHashtable -ErrorAction SilentlyContinue
           $json = (gh api -H $mime -H $api /repos/${{ github.REPOSITORY }}/releases) | ConvertFrom-Json
           $tagExists = ($json.GetEnumerator() | Where-Object { $_.tag_name -eq 'v${{ env.RELEASE_VERSION }}' }) -ne $null
-          if ( $tagExists -eq $true ) {
-            $sha = (git rev-parse --verify HEAD)
-            gh api --method POST -H $mime -H $api /repos/${{ github.REPOSITORY }}/releases -f tag_name='v${{ env.RELEASE_VERSION }}' -f target_commitish="$sha" -f name='v${{ env.RELEASE_VERSION }}' -F draft=true -F prerelease=false -F generate_release_notes=true
-            #gh release create v${{ env.RELEASE_VERSION }} --generate-notes -f target_commitish='master' --draft -R ${{ env.REPO_SELF }}  
+          if ( $tagExists -eq $false ) {
+            gh api --method POST -H $mime -H $api /repos/${{ github.REPOSITORY }}/releases -f tag_name='v${{ env.RELEASE_VERSION }}' -f target_commitish='${{ env.SHA }}' -f body='Firmware version: [${{ env.FW_VERSION }}](${{ env.FW_URL }}) ' -f name='v${{ env.RELEASE_VERSION }}' -F draft=true -F prerelease=false -F generate_release_notes=true  
           }          
           gh release upload 'v${{ env.RELEASE_VERSION }}' '${{ env.ZIP_NAME }}#${{ env.ZIP_TAG }}' '${{ env.TGZ_NAME }}#${{ env.TGZ_TAG }}' --clobber -R ${{ env.REPO_SELF }}
           gh release edit 'v${{ env.RELEASE_VERSION }}' --draft=false -R ${{ env.REPO_SELF }}
