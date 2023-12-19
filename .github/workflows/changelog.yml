@@ -33,16 +33,8 @@ jobs:
           repo: ${{ github.repository }}
           output: CHANGELOG.md
           unreleased: false
-          issues: true
-          prWoLabels: true
           stripGeneratorNotice: true
           verbose: true
-          breakingLabels: true
-          enhancementLabels: true
-          bugLabels: true
-          deprecatedLabels: true
-          removedLabels: true
-          securityLabels: true
 
       - name: "Show CHANGELOG.md"
         run: cat CHANGELOG.md
