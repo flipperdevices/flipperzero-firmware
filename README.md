@@ -19,7 +19,7 @@ You just need to install the [latest firmware](https://github.com/DarkFlippers/u
 <br />
 You can also download the [release](https://github.com/derskythe/flipperzero-subbrute/releases/latest) and unzip/untar it to the `SD Card/apps/Sub-GHz` directory.
 <br />
-> **Warning**
+> [!WARNING]
 > 
 > The application is not compatible with the official firmware version.
 > Also, it has not been tested on other firmware versions other than [Unleashed Firmware](https://github.com/DarkFlippers/unleashed-firmware) and [OFW](https://github.com/flipperdevices/flipperzero-firmware).
@@ -104,7 +104,7 @@ The negative side of increasing the number of repetitions will be a longer key f
 
 ### UNILARM
 
-> **Note**
+> [!NOTE]
 > 
 > Only dip switch combinations, not full 25bit bruteforce
 
@@ -113,7 +113,7 @@ The negative side of increasing the number of repetitions will be a longer key f
 
 ### SMC5326
 
-> **Note**
+> [!NOTE]
 > 
 > Only dip switch combinations, not full 25bit bruteforce
 
@@ -122,7 +122,7 @@ The negative side of increasing the number of repetitions will be a longer key f
 
 ### PT2260
 
-> **Note**
+> [!NOTE]
 > 
 > Only for 8 dip switch remote, not full 24bit bruteforce
 
