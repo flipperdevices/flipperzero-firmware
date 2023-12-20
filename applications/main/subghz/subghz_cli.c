@@ -581,7 +581,7 @@ void subghz_cli_command_decode_raw(Cli* cli, FuriString* args, void* context) {
 }
 
 static FuriHalSubGhzPreset subghz_cli_get_preset_name(const char* preset_name) {
-    FuriHalSubGhzPreset preset = FuriHalSubGhzPresetOok650Async;
+    FuriHalSubGhzPreset preset = FuriHalSubGhzPresetIDLE;
     if(!strcmp(preset_name, "FuriHalSubGhzPresetOok270Async")) {
         preset = FuriHalSubGhzPresetOok270Async;
     } else if(!strcmp(preset_name, "FuriHalSubGhzPresetOok650Async")) {
@@ -598,7 +598,7 @@ static FuriHalSubGhzPreset subghz_cli_get_preset_name(const char* preset_name) {
     return preset;
 }
 
-void subghz_cli_command_tx_from_file(Cli* cli, FuriString* args, void* context) {
+void subghz_cli_command_tx_from_file(Cli* cli, FuriString* args, void* context) { // -V524
     UNUSED(context);
     FuriString* file_name;
     file_name = furi_string_alloc();
