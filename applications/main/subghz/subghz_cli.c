@@ -643,7 +643,9 @@ void subghz_cli_command_tx_from_file(Cli* cli, FuriString* args, void* context) 
         if(furi_string_size(args)) {
             if(!args_read_string_and_trim(args, file_name)) {
                 cli_print_usage(
-                    "subghz tx_from_file: ", "<file_name: path_file>", furi_string_get_cstr(args));
+                    "subghz tx_from_file: ",
+                    "<file_name: path_file> <Repeat count> <Device: 0 - CC1101_INT, 1 - CC1101_EXT>",
+                    furi_string_get_cstr(args));
                 break;
             }
         }
@@ -654,7 +656,7 @@ void subghz_cli_command_tx_from_file(Cli* cli, FuriString* args, void* context) 
                 printf("sscanf returned %d, repeat: %lu device: %lu\r\n", ret, repeat, device_ind);
                 cli_print_usage(
                     "subghz tx_from_file:",
-                    "<Repeat count> <Device: 0 - CC1101_INT, 1 - CC1101_EXT>",
+                    "<file_name: path_file> <Repeat count> <Device: 0 - CC1101_INT, 1 - CC1101_EXT>",
                     furi_string_get_cstr(args));
                 break;
             }
@@ -662,19 +664,19 @@ void subghz_cli_command_tx_from_file(Cli* cli, FuriString* args, void* context) 
 
         device = subghz_cli_command_get_device(&device_ind);
         if(device == NULL) {
-            printf("subghz tx_from_file: \033[0;31merror device not found\033[0m\r\n");
+            printf("subghz tx_from_file: \033[0;31mError device not found\033[0m\r\n");
             break;
         }
 
         if(!flipper_format_file_open_existing(fff_data_file, furi_string_get_cstr(file_name))) {
             printf(
-                "subghz tx_from_file: \033[0;31merror open file\033[0m %s\r\n",
+                "subghz tx_from_file: \033[0;31mError open file\033[0m %s\r\n",
                 furi_string_get_cstr(file_name));
             break;
         }
 
         if(!flipper_format_read_header(fff_data_file, temp_str, &temp_data32)) {
-            printf("subghz tx_from_file: \033[0;31mmissing or incorrect header\033[0m\r\n");
+            printf("subghz tx_from_file: \033[0;31mMissing or incorrect header\033[0m\r\n");
             break;
         }
 
@@ -682,42 +684,64 @@ void subghz_cli_command_tx_from_file(Cli* cli, FuriString* args, void* context) 
             (!strcmp(furi_string_get_cstr(temp_str), SUBGHZ_RAW_FILE_TYPE))) &&
            temp_data32 == SUBGHZ_KEY_FILE_VERSION) {
         } else {
-            printf("subghz tx_from_file: \033[0;31mtype or version mismatch\033[0m\r\n");
+            printf("subghz tx_from_file: \033[0;31mType or version mismatch\033[0m\r\n");
             break;
         }
 
         //Load frequency
         if(!flipper_format_read_uint32(fff_data_file, "Frequency", &frequency, 1)) {
-            printf("subghz tx_from_file: \033[0;31mmissing Frequency\033[0m\r\n");
+            printf("subghz tx_from_file: \033[0;31mMissing Frequency\033[0m\r\n");
             break;
         }
 
         if(!subghz_devices_is_frequency_valid(device, frequency)) {
-            printf("subghz tx_from_file: \033[0;31mfrequency not supported\033[0m\r\n");
+            printf("subghz tx_from_file: \033[0;31mFrequency not supported\033[0m\r\n");
             break;
         }
 
         //Load preset
         if(!flipper_format_read_string(fff_data_file, "Preset", temp_str)) {
-            printf("subghz tx_from_file: \033[0;31mmissing Preset\033[0m\r\n");
+            printf("subghz tx_from_file: \033[0;31mMissing Preset\033[0m\r\n");
             break;
         }
 
-        // furi_string_set_str(temp_str, subghz_cli_get_preset_name(furi_string_get_cstr(temp_str)));
-        // if(!strcmp(furi_string_get_cstr(temp_str), "")) {
-        //     printf("subghz tx_from_file: \033[0;31mPreset not supported\033[0m\r\n");
-        //     break;
-        // }
-
         subghz_devices_begin(device);
         subghz_devices_reset(device);
-        subghz_devices_load_preset(
-            device, subghz_cli_get_preset_name(furi_string_get_cstr(temp_str)), NULL);
+
+        if(!strcmp(furi_string_get_cstr(temp_str), "FuriHalSubGhzPresetCustom")) {
+            uint8_t* custom_preset_data;
+            uint32_t custom_preset_data_size;
+            if(!flipper_format_get_value_count(fff_data_file, "Custom_preset_data", &temp_data32))
+                break;
+            if(!temp_data32 || (temp_data32 % 2)) {
+                printf("subghz tx_from_file: \033[0;31mCustom_preset_data size error\033[0m\r\n");
+                break;
+            }
+            custom_preset_data_size = sizeof(uint8_t) * temp_data32;
+            custom_preset_data = malloc(custom_preset_data_size);
+            if(!flipper_format_read_hex(
+                   fff_data_file,
+                   "Custom_preset_data",
+                   custom_preset_data,
+                   custom_preset_data_size)) {
+                printf("subghz tx_from_file: \033[0;31mCustom_preset_data read error\033[0m\r\n");
+                break;
+            }
+            subghz_devices_load_preset(
+                device,
+                subghz_cli_get_preset_name(furi_string_get_cstr(temp_str)),
+                custom_preset_data);
+            free(custom_preset_data);
+        } else {
+            subghz_devices_load_preset(
+                device, subghz_cli_get_preset_name(furi_string_get_cstr(temp_str)), NULL);
+        }
+
         subghz_devices_set_frequency(device, frequency);
 
         //Load protocol
         if(!flipper_format_read_string(fff_data_file, "Protocol", temp_str)) {
-            printf("subghz tx_from_file: \033[0;31mmissing protocol\033[0m\r\n");
+            printf("subghz tx_from_file: \033[0;31mMissing protocol\033[0m\r\n");
             break;
         }
 
@@ -730,7 +754,7 @@ void subghz_cli_command_tx_from_file(Cli* cli, FuriString* args, void* context) 
             transmitter =
                 subghz_transmitter_alloc_init(environment, furi_string_get_cstr(temp_str));
             if(transmitter == NULL) {
-                printf("subghz tx_from_file: \033[0;31merror transmitter\033[0m\r\n");
+                printf("subghz tx_from_file: \033[0;31mError transmitter\033[0m\r\n");
                 is_init_protocol = false;
             }
 
@@ -738,7 +762,7 @@ void subghz_cli_command_tx_from_file(Cli* cli, FuriString* args, void* context) 
                 status = subghz_transmitter_deserialize(transmitter, fff_data_raw);
                 if(status != SubGhzProtocolStatusOk) {
                     printf(
-                        "subghz tx_from_file: \033[0;31merror deserialize protocol\033[0m %d\r\n",
+                        "subghz tx_from_file: \033[0;31mError deserialize protocol\033[0m %d\r\n",
                         status);
                     is_init_protocol = false;
                 }
@@ -750,14 +774,14 @@ void subghz_cli_command_tx_from_file(Cli* cli, FuriString* args, void* context) 
             transmitter =
                 subghz_transmitter_alloc_init(environment, furi_string_get_cstr(temp_str));
             if(transmitter == NULL) {
-                printf("subghz tx_from_file: \033[0;31merror transmitter\033[0m\r\n");
+                printf("subghz tx_from_file: \033[0;31mError transmitter\033[0m\r\n");
                 is_init_protocol = false;
             }
             if(is_init_protocol) {
                 status = subghz_transmitter_deserialize(transmitter, fff_data_file);
                 if(status != SubGhzProtocolStatusOk) {
                     printf(
-                        "subghz tx_from_file: \033[0;31merror deserialize protocol\033[0m %d\r\n",
+                        "subghz tx_from_file: \033[0;31mError deserialize protocol\033[0m %d\r\n",
                         status);
                     is_init_protocol = false;
                 }
