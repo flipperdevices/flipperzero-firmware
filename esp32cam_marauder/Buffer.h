@@ -1,3 +1,5 @@
+#pragma once
+
 #ifndef Buffer_h
 #define Buffer_h
 
@@ -28,7 +30,7 @@ class Buffer {
     void write(uint32_t n);
     void write(uint16_t n);
     void write(uint8_t* buf, uint32_t len);
-    
+
     uint8_t* bufA;
     uint8_t* bufB;
 

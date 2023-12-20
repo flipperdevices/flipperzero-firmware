@@ -1,3 +1,5 @@
+#pragma once
+
 #ifndef flipperLED_h
 #define flipperLED_h
 

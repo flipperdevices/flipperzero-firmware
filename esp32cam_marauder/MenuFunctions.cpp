@@ -500,7 +500,8 @@ void MenuFunctions::main(uint32_t currentTime)
       (wifi_scan_obj.currentScanMode == OTA_UPDATE) ||
       (wifi_scan_obj.currentScanMode == ESP_UPDATE) ||
       (wifi_scan_obj.currentScanMode == SHOW_INFO) ||
-      (wifi_scan_obj.currentScanMode == WIFI_SCAN_GPS_DATA)) {
+      (wifi_scan_obj.currentScanMode == WIFI_SCAN_GPS_DATA) ||
+      (wifi_scan_obj.currentScanMode == WIFI_SCAN_GPS_NMEA)) {
     if (wifi_scan_obj.orient_display) {
       this->orientDisplay();
       wifi_scan_obj.orient_display = false;
@@ -558,7 +559,8 @@ void MenuFunctions::main(uint32_t currentTime)
         (wifi_scan_obj.currentScanMode != OTA_UPDATE) &&
         (wifi_scan_obj.currentScanMode != ESP_UPDATE) &&
         (wifi_scan_obj.currentScanMode != SHOW_INFO) &&
-        (wifi_scan_obj.currentScanMode != WIFI_SCAN_GPS_DATA))
+        (wifi_scan_obj.currentScanMode != WIFI_SCAN_GPS_DATA) &&
+        (wifi_scan_obj.currentScanMode != WIFI_SCAN_GPS_NMEA))
     {
       // Stop the current scan
       if ((wifi_scan_obj.currentScanMode == WIFI_SCAN_PROBE) ||
@@ -589,6 +591,7 @@ void MenuFunctions::main(uint32_t currentTime)
           (wifi_scan_obj.currentScanMode == BT_ATTACK_SWIFTPAIR_SPAM) ||
           (wifi_scan_obj.currentScanMode == BT_ATTACK_SPAM_ALL) ||
           (wifi_scan_obj.currentScanMode == BT_ATTACK_SAMSUNG_SPAM) ||
+          (wifi_scan_obj.currentScanMode == BT_ATTACK_GOOGLE_SPAM) ||
           (wifi_scan_obj.currentScanMode == BT_SCAN_WAR_DRIVE) ||
           (wifi_scan_obj.currentScanMode == BT_SCAN_WAR_DRIVE_CONT) ||
           (wifi_scan_obj.currentScanMode == BT_SCAN_SKIMMERS))
@@ -618,7 +621,8 @@ void MenuFunctions::main(uint32_t currentTime)
         (wifi_scan_obj.currentScanMode != OTA_UPDATE) &&
         (wifi_scan_obj.currentScanMode != ESP_UPDATE) &&
         (wifi_scan_obj.currentScanMode != SHOW_INFO) &&
-        (wifi_scan_obj.currentScanMode != WIFI_SCAN_GPS_DATA))
+        (wifi_scan_obj.currentScanMode != WIFI_SCAN_GPS_DATA) &&
+        (wifi_scan_obj.currentScanMode != WIFI_SCAN_GPS_NMEA))
     {
       // Stop the current scan
       if ((wifi_scan_obj.currentScanMode == WIFI_SCAN_PROBE) ||
@@ -649,6 +653,7 @@ void MenuFunctions::main(uint32_t currentTime)
           (wifi_scan_obj.currentScanMode == BT_ATTACK_SWIFTPAIR_SPAM) ||
           (wifi_scan_obj.currentScanMode == BT_ATTACK_SPAM_ALL) ||
           (wifi_scan_obj.currentScanMode == BT_ATTACK_SAMSUNG_SPAM) ||
+          (wifi_scan_obj.currentScanMode == BT_ATTACK_GOOGLE_SPAM) ||
           (wifi_scan_obj.currentScanMode == BT_SCAN_WAR_DRIVE) ||
           (wifi_scan_obj.currentScanMode == BT_SCAN_WAR_DRIVE_CONT) ||
           (wifi_scan_obj.currentScanMode == BT_SCAN_SKIMMERS) ||
@@ -1630,6 +1635,11 @@ void MenuFunctions::RunSetup()
     this->drawStatusBar();
     wifi_scan_obj.StartScan(BT_ATTACK_SAMSUNG_SPAM, TFT_RED);
   });
+  this->addNodes(&bluetoothAttackMenu, "Google BLE Spam", TFT_PURPLE, NULL, LANGUAGE, [this]() {
+    display_obj.clearScreen();
+    this->drawStatusBar();
+    wifi_scan_obj.StartScan(BT_ATTACK_GOOGLE_SPAM, TFT_RED);
+  });
   this->addNodes(&bluetoothAttackMenu, "BLE Spam All", TFT_MAGENTA, NULL, DEAUTH_SNIFF, [this]() {
     display_obj.clearScreen();
     this->drawStatusBar();
@@ -1666,6 +1676,12 @@ void MenuFunctions::RunSetup()
         wifi_scan_obj.currentScanMode = WIFI_SCAN_GPS_DATA;
         this->changeMenu(&gpsInfoMenu);
         wifi_scan_obj.StartScan(WIFI_SCAN_GPS_DATA, TFT_CYAN);
+      });
+
+      this->addNodes(&deviceMenu, "NMEA Stream", TFT_ORANGE, NULL, GPS_MENU, [this]() {
+        wifi_scan_obj.currentScanMode = WIFI_SCAN_GPS_NMEA;
+        this->changeMenu(&gpsInfoMenu);
+        wifi_scan_obj.StartScan(WIFI_SCAN_GPS_NMEA, TFT_ORANGE);
       });
 
       // GPS Info Menu

@@ -1,3 +1,5 @@
+#pragma once
+
 #ifndef xiaoLED_H
 #define xiaoLED_H
 

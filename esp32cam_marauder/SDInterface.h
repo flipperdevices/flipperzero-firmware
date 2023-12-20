@@ -1,3 +1,5 @@
+#pragma once
+
 #ifndef SDInterface_h
 #define SDInterface_h
 
@@ -37,7 +39,7 @@ class SDInterface {
     bool do_save = true;
 
     String card_sz;
-  
+
     bool initSD();
 
     void listDir(String str_dir);

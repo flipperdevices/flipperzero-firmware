@@ -1,3 +1,5 @@
+#pragma once
+
 #ifndef stickcLED_H
 #define stickcLED_H
 
