@@ -10,7 +10,13 @@ It also give information on the RAM and CCRAM available
 
 Update the list `STM32_SUPPORTED_FAMILIES_LONG_NAME` located in the cmake/stm32/common.cmake file
 
+## Update cube, cmsis and hal version in utilities.cmake
 
+The versions to use can be found as follow:
+ - Cube version : a valid tag from the repo https://github.com/STMicroelectronics/STM32Cube${FAMILY}
+ - Cmsis version : a valid tag from the repo https://github.com/STMicroelectronics/cmsis_device_${FAMILY_L}
+ - Hal version : a valid tag from the repo https://github.com/STMicroelectronics/stm32${FAMILY_L}xx_hal_driver
+ 
 ## Add family to CI
 
 Update the cmake.yml workflow file to include the new family
