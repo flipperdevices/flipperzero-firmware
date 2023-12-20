@@ -16,6 +16,7 @@ FORWARDED_ENV_VARIABLES = [
     # CI/CD variables
     "WORKFLOW_BRANCH_OR_TAG",
     "DIST_SUFFIX",
+    "FORCE_NO_DIRTY",
     # Python & other tools
     "HOME",
     "APPDATA",
