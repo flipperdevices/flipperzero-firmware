@@ -1,11 +1,13 @@
 #pragma once
 #include <furi.h>
+#include <furi_hal.h>
 #include <string.h>
 #include <gui/gui.h>
 #include <gui/view_dispatcher.h>
 #include <gui/scene_manager.h>
 #include <gui/modules/popup.h>
 #include <gui/modules/variable_item_list.h>
+#include <lib/worker/nfc_playlist_worker.h>
 
 typedef enum {
    NfcPlaylistView_Menu,
@@ -23,6 +25,8 @@ typedef struct {
    ViewDispatcher* view_dispatcher;
    VariableItemList* variable_item_list;
    Popup* popup;
+   FuriThread* thread;
+   NfcPlaylistWorker* nfc_playlist_worker;
    uint8_t emulate_timeout;
    uint8_t emulate_delay;
 } NfcPlaylist;

@@ -12,3 +12,9 @@
 void nfc_playlist_emulation_scene_on_enter(void* context);
 bool nfc_playlist_emulation_scene_on_event(void* context, SceneManagerEvent event);
 void nfc_playlist_emulation_scene_on_exit(void* context);
+
+void nfc_playlist_emulation_setup(void* context);
+void nfc_playlist_emulation_free(NfcPlaylist* nfc_playlist);
+void nfc_playlist_emulation_start(NfcPlaylist* nfc_playlist);
+void nfc_playlist_emulation_stop(NfcPlaylist* nfc_playlist);
+int32_t nfc_playlist_emulation_task(void* context);
