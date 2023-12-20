@@ -29,18 +29,20 @@ static void nfc_playlist_settings_change_callback(VariableItem* item) {
     uint8_t option_value_index = variable_item_get_current_value_index(item);
 
     switch(current_option) {
-        case NfcPlaylistSettings_Timeout: ;
+        case NfcPlaylistSettings_Timeout: {
             nfc_playlist->emulate_timeout = option_value_index;
             char emulate_timeout_text[10];
-            snprintf(emulate_timeout_text, 10, "%ds", (options_emulate_timeout[option_value_index]/1000));
+            snprintf(emulate_timeout_text, 10, "%ds", options_emulate_timeout[option_value_index]);
             variable_item_set_current_value_text(item, (char*)emulate_timeout_text);
             break;
-        case NfcPlaylistSettings_Delay: ;
+        }
+        case NfcPlaylistSettings_Delay: {
             nfc_playlist->emulate_delay = option_value_index;
             char emulate_delay_text[10];
-            snprintf(emulate_delay_text, 10, "%ds", (options_emulate_delay[option_value_index]/1000));
+            snprintf(emulate_delay_text, 10, "%ds", options_emulate_delay[option_value_index]);
             variable_item_set_current_value_text(item, (char*)emulate_delay_text);
             break;
+        }
         default:
             break;
    }
@@ -52,24 +54,24 @@ void nfc_playlist_main_menu_scene_on_enter(void* context) {
 
     VariableItem* emulation_timeout_settings = variable_item_list_add(
         nfc_playlist->variable_item_list,
-        "Timeout",
-        10,
+        "Emulate time",
+        (sizeof(options_emulate_timeout)/sizeof(options_emulate_timeout[0])),
         nfc_playlist_settings_change_callback,
         nfc_playlist);
     variable_item_set_current_value_index(emulation_timeout_settings, nfc_playlist->emulate_timeout);
     char emulation_timeout_settings_text[10];
-    snprintf(emulation_timeout_settings_text, 10, "%ds", (options_emulate_timeout[nfc_playlist->emulate_timeout]/1000));
+    snprintf(emulation_timeout_settings_text, 10, "%ds", options_emulate_timeout[nfc_playlist->emulate_timeout]);
     variable_item_set_current_value_text(emulation_timeout_settings, (char*)emulation_timeout_settings_text);
 
     VariableItem* emulation_delay_settings = variable_item_list_add(
         nfc_playlist->variable_item_list,
-        "Delay",
-        6,
+        "Delay time",
+        (sizeof(options_emulate_delay)/sizeof(options_emulate_delay[0])),
         nfc_playlist_settings_change_callback,
         nfc_playlist);
     variable_item_set_current_value_index(emulation_delay_settings, nfc_playlist->emulate_delay);
     char emulation_delay_settings_text[10];
-    snprintf(emulation_delay_settings_text, 10, "%ds", (options_emulate_delay[nfc_playlist->emulate_delay]/1000));
+    snprintf(emulation_delay_settings_text, 10, "%ds", options_emulate_delay[nfc_playlist->emulate_delay]);
     variable_item_set_current_value_text(emulation_delay_settings, (char*)emulation_delay_settings_text);
 
     variable_item_list_add(nfc_playlist->variable_item_list, "Start", 0, NULL, NULL);

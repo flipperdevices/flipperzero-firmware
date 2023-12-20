@@ -21,7 +21,7 @@ void nfc_playlist_emulation_scene_on_enter(void* context) {
         while(stream_read_line(stream, line)) {
             if (options_emulate_delay[nfc_playlist->emulate_delay] > 0) {
                 if (file_position > 0) {
-                    int time_counter_delay_ms = options_emulate_delay[nfc_playlist->emulate_delay];
+                    int time_counter_delay_ms = (options_emulate_delay[nfc_playlist->emulate_delay] * 1000);
                     do {
                         char display_text[30];
                         snprintf(display_text, 30, "%s\n\n%ds", "Delaying...", (time_counter_delay_ms/1000));
@@ -36,7 +36,7 @@ void nfc_playlist_emulation_scene_on_enter(void* context) {
 
             char* file_path = (char*)furi_string_get_cstr(line);
             char* file_name = &strrchr(file_path, '/')[1];
-            int time_counter_ms = options_emulate_timeout[nfc_playlist->emulate_timeout];
+            int time_counter_ms = (options_emulate_timeout[nfc_playlist->emulate_timeout] * 1000);
 
             if (storage_file_exists(storage, file_path) == false) {
                 char const* popup_text_unformatted = strcat(file_name, "\nnot found");
