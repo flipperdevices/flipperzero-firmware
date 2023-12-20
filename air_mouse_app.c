@@ -3,7 +3,7 @@
 #include <gui/gui.h>
 #include <dialogs/dialogs.h>
 #include "imu_mouse.h"
-#include "air_mouse_icons.h"
+#include "air_mouse_ofw_icons.h"
 
 #define TAG "SensorModule"
 
