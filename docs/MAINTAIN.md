@@ -10,6 +10,10 @@ It also give information on the RAM and CCRAM available
 
 Update the list `STM32_SUPPORTED_FAMILIES_LONG_NAME` located in the cmake/stm32/common.cmake file
 
+## Add devices to list of devices in devices.cmake
+
+Add all known devices to the list of all devices
+
 ## Update cube, cmsis and hal version in utilities.cmake
 
 The versions to use can be found as follow:
