@@ -79,7 +79,7 @@ static size_t expansion_receive_callback(uint8_t* data, size_t data_size, void* 
         if(received_size == data_size) break;
 
         const uint32_t flags = furi_thread_flags_wait(
-            EXPANSION_ALL_FLAGS, FuriFlagWaitAny, EXPANSION_INACTIVE_TIMEOUT_MS);
+            EXPANSION_ALL_FLAGS, FuriFlagWaitAny, furi_ms_to_ticks(EXPANSION_INACTIVE_TIMEOUT_MS));
 
         if(flags & FuriFlagError) {
             if(flags == FuriFlagErrorTimeout) {
@@ -146,7 +146,8 @@ static void expansion_rpc_send_callback(void* context, uint8_t* data, size_t dat
     Expansion* instance = context;
 
     for(size_t sent_data_size = 0; sent_data_size < data_size;) {
-        if(furi_semaphore_acquire(instance->tx_semaphore, EXPANSION_INACTIVE_TIMEOUT_MS) !=
+        if(furi_semaphore_acquire(
+               instance->tx_semaphore, furi_ms_to_ticks(EXPANSION_INACTIVE_TIMEOUT_MS)) !=
            FuriStatusOk) {
             // TODO: this should not set ExitReason to User
             furi_thread_flags_set(furi_thread_get_id(instance->worker_thread), ExpansionFlagStop);
@@ -282,6 +283,20 @@ static inline void expansion_state_machine(Expansion* instance) {
     }
 }
 
+static void expansion_worker_pending_callback(void* context, uint32_t arg) {
+    furi_assert(context);
+    UNUSED(arg);
+
+    Expansion* instance = context;
+    furi_thread_join(instance->worker_thread);
+
+    furi_mutex_acquire(instance->state_mutex, FuriWaitForever);
+    instance->state = ExpansionStateEnabled;
+    furi_hal_serial_control_set_expansion_callback(
+        instance->serial_id, expansion_detect_callback, instance);
+    furi_mutex_release(instance->state_mutex);
+}
+
 static int32_t expansion_worker(void* context) {
     furi_assert(context);
     Expansion* instance = context;
@@ -315,13 +330,12 @@ static int32_t expansion_worker(void* context) {
     furi_hal_serial_control_release(instance->serial_handle);
     furi_stream_buffer_free(instance->rx_buf);
 
-    furi_mutex_acquire(instance->state_mutex, FuriWaitForever);
-    instance->state = ExpansionStateEnabled;
-    furi_hal_serial_control_set_expansion_callback(
-        instance->serial_id, expansion_detect_callback, instance);
-    furi_mutex_release(instance->state_mutex);
-
     furi_hal_power_insomnia_exit();
+
+    furi_timer_pending_callback(
+        expansion_worker_pending_callback,
+        instance,
+        furi_ms_to_ticks(EXPANSION_INACTIVE_TIMEOUT_MS));
 
     return 0;
 }
