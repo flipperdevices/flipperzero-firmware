@@ -1,0 +1,13 @@
+App(
+    appid="programmercalc",
+    name="Programmer Calculator",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="calculator_app",
+    stack_size=1 * 1024,
+    fap_icon="calcIcon.png",
+    fap_category="Tools",
+    fap_author="armixz",
+    fap_weburl="https://github.com/armixz/Flipper-Zero-Programmer-Calculator",
+    fap_version="0.7",
+    fap_description="Calculator, for Programmers!",
+)
