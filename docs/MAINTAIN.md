@@ -23,4 +23,5 @@ The versions to use can be found as follow:
  
 ## Add family to CI
 
+Add the file stm32${FAMILY_L}xx_hal_conf.h file to the root folder of each test. (A template is provided in the corresponding HAL)
 Update the cmake.yml workflow file to include the new family
