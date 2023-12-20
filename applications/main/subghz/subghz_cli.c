@@ -608,6 +608,7 @@ void subghz_cli_command_tx_from_file(Cli* cli, FuriString* args, void* context) 
 
     Storage* storage = furi_record_open(RECORD_STORAGE);
     FlipperFormat* fff_data_file = flipper_format_file_alloc(storage);
+    FlipperFormat* fff_data_raw = flipper_format_string_alloc();
     FuriString* temp_str;
     temp_str = furi_string_alloc();
     uint32_t temp_data32;
@@ -720,19 +721,63 @@ void subghz_cli_command_tx_from_file(Cli* cli, FuriString* args, void* context) 
             break;
         }
 
-        //addd RAW
-        if(!flipper_format_insert_or_update_uint32(fff_data_file, "Repeat", &repeat, 1)) {
-            printf("subghz tx_from_file: \033[0;31repeat no insert\033[0m\r\n");
-            break;
+        SubGhzProtocolStatus status;
+        bool is_init_protocol = true;
+        if(!strcmp(furi_string_get_cstr(temp_str), "RAW")) { // if RAW protocol
+            subghz_protocol_raw_gen_fff_data(
+                fff_data_raw, furi_string_get_cstr(file_name), subghz_devices_get_name(device));
+
+            transmitter =
+                subghz_transmitter_alloc_init(environment, furi_string_get_cstr(temp_str));
+            if(transmitter == NULL) {
+                printf("subghz tx_from_file: \033[0;31merror transmitter\033[0m\r\n");
+                is_init_protocol = false;
+            }
+
+            if(is_init_protocol) {
+                status = subghz_transmitter_deserialize(transmitter, fff_data_raw);
+                if(status != SubGhzProtocolStatusOk) {
+                    printf(
+                        "subghz tx_from_file: \033[0;31merror deserialize protocol\033[0m %d\r\n",
+                        status);
+                    is_init_protocol = false;
+                }
+            }
+
+        } else { //if not RAW protocol
+            flipper_format_insert_or_update_uint32(fff_data_file, "Repeat", &repeat, 1);
+
+            transmitter =
+                subghz_transmitter_alloc_init(environment, furi_string_get_cstr(temp_str));
+            if(transmitter == NULL) {
+                printf("subghz tx_from_file: \033[0;31merror transmitter\033[0m\r\n");
+                is_init_protocol = false;
+            }
+            if(is_init_protocol) {
+                status = subghz_transmitter_deserialize(transmitter, fff_data_file);
+                if(status != SubGhzProtocolStatusOk) {
+                    printf(
+                        "subghz tx_from_file: \033[0;31merror deserialize protocol\033[0m %d\r\n",
+                        status);
+                    is_init_protocol = false;
+                }
+            }
+
+            flipper_format_delete_key(fff_data_file, "Repeat");
         }
-        check_file = true;
 
-        transmitter = subghz_transmitter_alloc_init(environment, furi_string_get_cstr(temp_str));
-        subghz_transmitter_deserialize(transmitter, fff_data_file);
+        if(is_init_protocol) {
+            check_file = true;
+        } else {
+            subghz_devices_sleep(device);
+            subghz_devices_end(device);
+            subghz_transmitter_free(transmitter);
+        }
 
-        flipper_format_delete_key(fff_data_file, "Repeat");
-        
     } while(false);
+
+    flipper_format_free(fff_data_file);
+    furi_record_close(RECORD_STORAGE);
 
     if(check_file) {
         furi_hal_power_suppress_charge_enter();
@@ -742,18 +787,30 @@ void subghz_cli_command_tx_from_file(Cli* cli, FuriString* args, void* context) 
             furi_string_get_cstr(file_name),
             frequency,
             furi_string_get_cstr(temp_str));
-        if(subghz_devices_start_async_tx(device, subghz_transmitter_yield, transmitter)) {
-            while(!(
-                subghz_devices_is_async_complete_tx(device) || cli_cmd_interrupt_received(cli))) {
-                printf(".");
-                fflush(stdout);
-                furi_delay_ms(333);
-            }
-            subghz_devices_stop_async_tx(device);
+        do {
+            if(subghz_devices_start_async_tx(device, subghz_transmitter_yield, transmitter)) {
+                while(
+                    !(subghz_devices_is_async_complete_tx(device) ||
+                      cli_cmd_interrupt_received(cli))) {
+                    printf(".");
+                    fflush(stdout);
+                    furi_delay_ms(333);
+                }
+                subghz_devices_stop_async_tx(device);
 
-        } else {
-            printf("Transmission on this frequency is restricted in your region\r\n");
-        }
+            } else {
+                printf("Transmission on this frequency is restricted in your region\r\n");
+            }
+
+            if(!strcmp(furi_string_get_cstr(temp_str), "RAW")) {
+                subghz_transmitter_stop(transmitter);
+                repeat--;
+                if(!cli_cmd_interrupt_received(cli) && repeat)
+                    subghz_transmitter_deserialize(transmitter, fff_data_raw);
+            }
+
+        } while(!cli_cmd_interrupt_received(cli) &&
+                (repeat && !strcmp(furi_string_get_cstr(temp_str), "RAW")));
 
         subghz_devices_sleep(device);
         subghz_devices_end(device);
@@ -763,10 +820,9 @@ void subghz_cli_command_tx_from_file(Cli* cli, FuriString* args, void* context) 
 
         subghz_transmitter_free(transmitter);
     }
+    flipper_format_free(fff_data_raw);
     furi_string_free(file_name);
     furi_string_free(temp_str);
-    flipper_format_free(fff_data_file);
-    furi_record_close(RECORD_STORAGE);
     subghz_devices_deinit();
     subghz_environment_free(environment);
 }
@@ -784,7 +840,7 @@ static void subghz_cli_command_print_usage() {
     printf("\trx_raw <frequency:in Hz>\t - Receive RAW\r\n");
     printf("\tdecode_raw <file_name: path_RAW_file>\t - Testing\r\n");
     printf(
-        "\ttx_from_file <file_name: path_file> <repeat: count> <device: 0 - CC1101_INT, 1 - CC1101_EXT>\t - Кransfer from file\r\n");
+        "\ttx_from_file <file_name: path_file> <repeat: count> <device: 0 - CC1101_INT, 1 - CC1101_EXT>\t - Transfer from file\r\n");
 
     if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
         printf("\r\n");
