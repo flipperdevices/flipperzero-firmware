@@ -2,6 +2,8 @@
  - Update working with keys with new API
  - Display more tag information
  - Add additional keys to elite dict
+ - Correct config card detection so it doesn't happen for SE cards (read using nr-mac partial read)
+ - Have back button go to start menu instead of read retry
 ## 1.10
  - Fix missing folder in readme
  - Allow partial save for any read failure
