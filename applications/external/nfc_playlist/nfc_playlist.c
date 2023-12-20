@@ -38,7 +38,8 @@ static bool nfc_playlist_back_event_callback(void* context) {
 static NfcPlaylist* nfc_playlist_alloc() {
     NfcPlaylist* nfc_playlist = malloc(sizeof(NfcPlaylist));
     furi_assert(nfc_playlist);
-    nfc_playlist->scene_manager = scene_manager_alloc(&nfc_playlist_scene_manager_handlers, nfc_playlist);
+    nfc_playlist->scene_manager =
+        scene_manager_alloc(&nfc_playlist_scene_manager_handlers, nfc_playlist);
 
     nfc_playlist->view_dispatcher = view_dispatcher_alloc();
     view_dispatcher_enable_queue(nfc_playlist->view_dispatcher);
@@ -49,12 +50,18 @@ static NfcPlaylist* nfc_playlist_alloc() {
     nfc_playlist->emulate_delay = default_emulate_delay;
 
     view_dispatcher_set_event_callback_context(nfc_playlist->view_dispatcher, nfc_playlist);
-    view_dispatcher_set_custom_event_callback(nfc_playlist->view_dispatcher, nfc_playlist_custom_callback);
-    view_dispatcher_set_navigation_event_callback(nfc_playlist->view_dispatcher, nfc_playlist_back_event_callback);
+    view_dispatcher_set_custom_event_callback(
+        nfc_playlist->view_dispatcher, nfc_playlist_custom_callback);
+    view_dispatcher_set_navigation_event_callback(
+        nfc_playlist->view_dispatcher, nfc_playlist_back_event_callback);
 
-    view_dispatcher_add_view(nfc_playlist->view_dispatcher, NfcPlaylistView_Menu, variable_item_list_get_view(nfc_playlist->variable_item_list));
+    view_dispatcher_add_view(
+        nfc_playlist->view_dispatcher,
+        NfcPlaylistView_Menu,
+        variable_item_list_get_view(nfc_playlist->variable_item_list));
 
-    view_dispatcher_add_view(nfc_playlist->view_dispatcher, NfcPlaylistView_Popup, popup_get_view(nfc_playlist->popup));
+    view_dispatcher_add_view(
+        nfc_playlist->view_dispatcher, NfcPlaylistView_Popup, popup_get_view(nfc_playlist->popup));
 
     return nfc_playlist;
 }
@@ -71,17 +78,18 @@ static void nfc_playlist_free(NfcPlaylist* nfc_playlist) {
 }
 
 int32_t nfc_playlist_main(void* p) {
-   UNUSED(p);
+    UNUSED(p);
 
-   NfcPlaylist* nfc_playlist = nfc_playlist_alloc();
+    NfcPlaylist* nfc_playlist = nfc_playlist_alloc();
 
-   Gui* gui = furi_record_open(RECORD_GUI);
-   view_dispatcher_attach_to_gui(nfc_playlist->view_dispatcher, gui, ViewDispatcherTypeFullscreen);
-   scene_manager_next_scene(nfc_playlist->scene_manager, NfcPlaylistScene_MainMenu);
-   view_dispatcher_run(nfc_playlist->view_dispatcher);
+    Gui* gui = furi_record_open(RECORD_GUI);
+    view_dispatcher_attach_to_gui(
+        nfc_playlist->view_dispatcher, gui, ViewDispatcherTypeFullscreen);
+    scene_manager_next_scene(nfc_playlist->scene_manager, NfcPlaylistScene_MainMenu);
+    view_dispatcher_run(nfc_playlist->view_dispatcher);
 
-   furi_record_close(RECORD_GUI);
-   nfc_playlist_free(nfc_playlist);
+    furi_record_close(RECORD_GUI);
+    nfc_playlist_free(nfc_playlist);
 
-   return 0;
+    return 0;
 }
