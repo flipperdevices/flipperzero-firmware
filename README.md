@@ -47,7 +47,7 @@ cd ~/path/to/root-directory eg. ~/Xtreme-Firmware
 
 ## Usage 💡
 
-- The FAP application is available in the release channel (Todo).
+- The FAP application is available in [flipc.org](https://flipc.org/armixz/Flipper-Zero-Programmer-Calculator).
 - Use the keypad to input numbers.
 - Toggle between different modes using MODE key.
 - View results on the display.
