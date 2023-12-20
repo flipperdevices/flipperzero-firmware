@@ -155,7 +155,6 @@ bool wifi_marauder_scene_user_input_on_event(void* context, SceneManagerEvent ev
     }
 
     return consumed;
-
 }
 
 void wifi_marauder_scene_user_input_on_exit(void* context) {

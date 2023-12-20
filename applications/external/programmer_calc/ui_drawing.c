@@ -3,7 +3,6 @@
 #include "utilities.h"
 #include "calculator.h"
 
-
 void generate_calculator_layout(Canvas* canvas) {
     canvas_draw_box(canvas, 0, 126, 64, 2);
     canvas_draw_box(canvas, 0, 113, 64, 1);
@@ -17,7 +16,7 @@ void generate_calculator_layout(Canvas* canvas) {
     canvas_draw_box(canvas, 25, 73, 1, 55);
     canvas_draw_box(canvas, 62, 47, 2, 81);
     canvas_draw_box(canvas, 37, 73, 2, 55);
-    
+
     canvas_set_font(canvas, FontPrimary);
     canvas_draw_str(canvas, 5, 111, "1");
     canvas_set_font(canvas, FontPrimary);
@@ -57,7 +56,7 @@ void generate_calculator_layout(Canvas* canvas) {
     canvas_draw_str(canvas, 42, 124, "CLR");
     canvas_set_font(canvas, FontSecondary);
     canvas_draw_str(canvas, 5, 124, "<");
-    
+
     canvas_set_font(canvas, FontSecondary);
     // canvas_draw_str(canvas, 15, 71, "Dec -> Bin");
     canvas_draw_box(canvas, 0, 47, 64, 2);
@@ -68,10 +67,10 @@ void generate_calculator_layout(Canvas* canvas) {
     // canvas_draw_str(canvas, 11, 11, "Calculator");
     // canvas_draw_frame(canvas, 0, 1, 62, 13);
     // canvas_draw_frame(canvas, 1, 14, 62, 31);
-    
+
     canvas_set_font(canvas, FontSecondary);
     canvas_draw_str(canvas, 5, 38, "");
-    
+
     // for (int i = 0; i < 64; i++){
     //     if (i%2 == 0){
     //         canvas_draw_dot(canvas, i, 46);
@@ -86,7 +85,7 @@ void generate_calculator_layout(Canvas* canvas) {
 }
 
 void draw_highlighted_cell(Canvas* canvas, short x, short y, short width, short height) {
-    canvas_set_color(canvas, ColorBlack);  // Set the color for highlighting
+    canvas_set_color(canvas, ColorBlack); // Set the color for highlighting
     canvas_draw_box(canvas, x, y, width, height);
 }
 
@@ -143,7 +142,7 @@ void calculator_draw_callback(Canvas* canvas, void* ctx) {
 
     // Draw new input with ">" label or mode selection prompt
     char inputLabel[MAX_TEXT_LENGTH + 3]; // Adjusted size for "> "
-    
+
     snprintf(inputLabel, sizeof(inputLabel), "$> %s", calculator_state->text);
     canvas_draw_str(canvas, 5, 39, inputLabel);
     // Define the cell dimensions for each row and column
@@ -166,52 +165,59 @@ void calculator_draw_callback(Canvas* canvas, void* ctx) {
     // }
     const char* modeStr = "";
     switch(calculator_state->mode) {
-        case ModeDecToBin:
-            modeStr = " 1: Dec >> Bin";
-            break;
-        case ModeDecToHex:
-            modeStr = "2: Dec >> Hex";
-            break;
-        case ModeDecToChar:
-            modeStr = "3: Dec >> Char";
-            break;
-        case ModeHexToBin:
-            modeStr = "4: Hex >> Bin";
-            break;
-        case ModeHexToDec:
-            modeStr = "5: Hex >> Dec";
-            break;
-        case ModeBinToDec:
-            modeStr = "6: Bin >> Dec";
-            break;
-        case ModeBinToHex:
-            modeStr = "7: Bin >> Hex";
-            break;
-        default:
-            modeStr = "      waiting ...";
-            break;
+    case ModeDecToBin:
+        modeStr = " 1: Dec >> Bin";
+        break;
+    case ModeDecToHex:
+        modeStr = "2: Dec >> Hex";
+        break;
+    case ModeDecToChar:
+        modeStr = "3: Dec >> Char";
+        break;
+    case ModeHexToBin:
+        modeStr = "4: Hex >> Bin";
+        break;
+    case ModeHexToDec:
+        modeStr = "5: Hex >> Dec";
+        break;
+    case ModeBinToDec:
+        modeStr = "6: Bin >> Dec";
+        break;
+    case ModeBinToHex:
+        modeStr = "7: Bin >> Hex";
+        break;
+    default:
+        modeStr = "      waiting ...";
+        break;
     }
     canvas_draw_str(canvas, 4, 71, modeStr);
     short cursorX = 2;
     short cursorY = 47; // Starting Y position
 
-    for (int i = 0; i < calculator_state->position.y; i++) {
+    for(int i = 0; i < calculator_state->position.y; i++) {
         cursorY += cellDimensions[i][0][1]; // Add the height of each previous row
     }
 
-    for (int i = 0; i < calculator_state->position.x; i++) {
-        cursorX += cellDimensions[calculator_state->position.y][i][0]; // Add the width of each previous column
+    for(int i = 0; i < calculator_state->position.x; i++) {
+        cursorX += cellDimensions[calculator_state->position.y][i]
+                                 [0]; // Add the width of each previous column
     }
 
-    short cellWidth = cellDimensions[calculator_state->position.y][calculator_state->position.x][0];
-    short cellHeight = cellDimensions[calculator_state->position.y][calculator_state->position.x][1];
+    short cellWidth =
+        cellDimensions[calculator_state->position.y][calculator_state->position.x][0];
+    short cellHeight =
+        cellDimensions[calculator_state->position.y][calculator_state->position.x][1];
 
     // Draw the highlighted cell
     draw_highlighted_cell(canvas, cursorX, cursorY, cellWidth, cellHeight);
 
     // Determine the content to display in the cell
     char cellContent[2]; // Buffer to hold the cell content
-    snprintf(cellContent, sizeof(cellContent), "%c", getKeyAtPosition(calculator_state->position.x, calculator_state->position.y));
+    snprintf(
+        cellContent,
+        sizeof(cellContent),
+        "%c",
+        getKeyAtPosition(calculator_state->position.x, calculator_state->position.y));
 
     // Calculate center position for the text
     short textX = cursorX + (cellWidth - calculateStringWidth(cellContent, 2)) / 1;
