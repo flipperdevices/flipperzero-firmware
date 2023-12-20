@@ -2,13 +2,13 @@
 #include "calculator.h"
 
 char getKeyAtPosition(short x, short y) {
-    // Handle the first two rows which span the full width and have only one column
+    // Handle the first two rows
     if(y == 0) {
-        return '*'; // Hex to Decimal
+        return '*'; // MODE
     }
 
     if(y == 1) {
-        return ' '; // Hex to Decimal
+        return ' '; // MODE display
     }
     // Handle the keys for the remaining rows
     // Assuming the layout has 5 columns for rows 3 to 5, and 4 columns for the last row

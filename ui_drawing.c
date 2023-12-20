@@ -92,7 +92,7 @@ void draw_highlighted_cell(Canvas* canvas, short x, short y, short width, short 
 
 void displayResultInTwoLines(Canvas* canvas, char* result, int x, int y) {
     if(strlen(result) > 11) {
-        char line1[12]; // Buffer for the first line (12 chars + null terminator)
+        char line1[12]; // Buffer for the first line (11 chars + null terminator)
         strncpy(line1, result, 11);
         line1[11] = '\0'; // Terminate the first line correctly
 
@@ -101,7 +101,7 @@ void displayResultInTwoLines(Canvas* canvas, char* result, int x, int y) {
         canvas_draw_str(canvas, x, y, line1); // First line
         canvas_draw_str(canvas, x, y + 11, line2); // Second line
     } else {
-        canvas_draw_str(canvas, x, y, result); // Single line if 12 characters or less
+        canvas_draw_str(canvas, x, y, result); // Single line if 11 characters or less
     }
 }
 
@@ -134,36 +134,29 @@ void calculator_draw_callback(Canvas* canvas, void* ctx) {
     } else if(calculator_state->mode == ModeBinToHex) {
         snprintf(resultLabel, sizeof(resultLabel), "Hex: %s", calculator_state->hexResult);
     } else {
-        // If no mode is selected, you can display a default message or leave it empty
+        // If no mode is selected, display a default message
         strncpy(resultLabel, " Click MODE> P Calc v0.7", sizeof(resultLabel));
     }
 
     // Display the result, splitting into two lines if necessary
     displayResultInTwoLines(canvas, resultLabel, 5, 12);
 
-    // Draw new input with ">" label or mode selection prompt
-    char inputLabel[MAX_TEXT_LENGTH + 3]; // Adjusted size for "> "
+    // Draw new input with ">" label
+    char inputLabel[MAX_TEXT_LENGTH + 3];
     
     snprintf(inputLabel, sizeof(inputLabel), "$> %s", calculator_state->text);
     canvas_draw_str(canvas, 5, 39, inputLabel);
     // Define the cell dimensions for each row and column
     const short cellDimensions[6][5][2] = {
         // {Width, Height} for each cell
-        {{12, 14}, {0, 0}, {0, 0}, {0, 0}, {0, 0}}, // Row 1 (One column)
-        {{9, 13}, {0, 0}, {0, 0}, {0, 0}, {0, 0}}, // Row 2 (One column)
+        {{12, 14}, {0, 0}, {0, 0}, {0, 0}, {0, 0}}, // Row 1
+        {{9, 13}, {0, 0}, {0, 0}, {0, 0}, {0, 0}},  // Row 2
         {{12, 13}, {12, 13}, {12, 13}, {12, 13}, {12, 13}}, // Row 3
         {{12, 13}, {12, 13}, {12, 13}, {12, 13}, {12, 13}}, // Row 4
         {{12, 13}, {12, 13}, {12, 13}, {12, 13}, {12, 13}}, // Row 5
-        {{12, 13}, {12, 13}, {12, 13}, {24, 13}, {0, 0}}, // Row 6, with different width for column 4
+        {{12, 13}, {12, 13}, {12, 13}, {24, 13}, {0, 0}},   // Row 6
     };
 
-    // Display mode indicator next to the mode if selected
-    // short modeIndicatorX = 2; // X position for mode indicator
-    // if(calculator_state->mode == ModeHexToDec) {
-    //     canvas_draw_str(canvas, modeIndicatorX, 59, "  *"); // Draw star next to Hex -> Dec
-    // } else if(calculator_state->mode == ModeDecToBin) {
-    //     canvas_draw_str(canvas, modeIndicatorX, 71, "  *"); // Draw star next to Dec -> Bin
-    // }
     const char* modeStr = "";
     switch(calculator_state->mode) {
         case ModeDecToBin:
@@ -193,7 +186,7 @@ void calculator_draw_callback(Canvas* canvas, void* ctx) {
     }
     canvas_draw_str(canvas, 4, 71, modeStr);
     short cursorX = 2;
-    short cursorY = 47; // Starting Y position
+    short cursorY = 47;
 
     for (int i = 0; i < calculator_state->position.y; i++) {
         cursorY += cellDimensions[i][0][1]; // Add the height of each previous row

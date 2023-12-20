@@ -66,7 +66,7 @@ void handle_short_press(Calculator* calculator_state, ViewPort* view_port, Input
             break;
         case InputKeyOk:
             if(calculator_state->position.y == 0) {
-                toggle_mode(calculator_state); // Toggle the mode on row 1 (previously row 2) click
+                toggle_mode(calculator_state);
             } else {
                 char key = getKeyAtPosition(calculator_state->position.x, calculator_state->position.y);
                 handle_key_press(calculator_state, key);
@@ -101,7 +101,6 @@ void handle_key_press(Calculator* calculator_state, char key) {
     switch(key) {
         case '=':
             // Logic for '=' key
-            // Example: Perform calculation
             strncpy(calculator_state->originalInput, calculator_state->text, MAX_TEXT_LENGTH);
             calculate(calculator_state);
             // calculator_state->text[0] = '\0';
@@ -112,8 +111,8 @@ void handle_key_press(Calculator* calculator_state, char key) {
             calculator_state->text[0] = '\0';
             calculator_state->textLength = 0;
             calculator_state->binaryResult[0] = '\0';  // Clear binary result
-            calculator_state->decResult[0] = '\0';  // Clear binary result
-            calculator_state->charResult[0] = '\0';  // Clear binary result
+            calculator_state->decResult[0] = '\0';     // Clear binary result
+            calculator_state->charResult[0] = '\0';    // Clear binary result
             calculator_state->hexResult[0] = '\0';     // Clear hex result
             calculator_state->newInputStarted = false;
             break;
@@ -124,7 +123,6 @@ void handle_key_press(Calculator* calculator_state, char key) {
             }
             calculator_state->newInputStarted = false;
             break;
-        // Add cases for other keys as needed
         default:
             // Default logic for number and operator keys
             if(calculator_state->newInputStarted) {
