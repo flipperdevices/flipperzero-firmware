@@ -52,6 +52,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [ESP32CAM Marauder v0.6.6 (By 0xchocolate & eried)](https://github.com/eried/flipperzero-mayhem)
 - Updated: Motion Mouse to be named: [Air Mouse 2 v1.0 (By nminaylov)](https://github.com/flipperdevices/flipperzero-good-faps/tree/nm/motion_mouse_app) `Req: ICM42688` They decided to take the same name as Air Mouse.
 - SubGHz: [Repeater: Use actual Time it takes to TX a Key as TX Length (By LeeroysHub)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/4bb9e085d88f477ce252f52df12050412220aa47)
+- Added: [Programmer Calculator v0.7 (By armixz)](https://github.com/armixz/Flipper-Zero-Programmer-Calculator)
 
 ## IN THIS BRANCH:
 
@@ -545,6 +546,7 @@ $ ./fbt dolphin_ext
 - [Pokemon Trading v1.5 (By EstebanFuentealba & kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
 - [Pomodoro Timer v1.2 (By sbrin)](https://github.com/sbrin/flipperzero_pomodoro)
 - [Pomodoro 2 v1.3 (By Th3Un1q3)](https://github.com/Th3Un1q3/flipp_pomodoro)
+- [Programmer Calculator v0.7 (By armixz)](https://github.com/armixz/Flipper-Zero-Programmer-Calculator)
 - [Protocol Visualizer v1.1 (By antirez)](https://github.com/antirez/protoview)
 - [UHF RFID WIP v1.1 (By frux-c)](https://github.com/frux-c/uhf_rfid) `Req: M100 or QM100`
 - [QR Code v2.0 (By bmatcuk)](https://github.com/bmatcuk/flipperzero-qrcode)
