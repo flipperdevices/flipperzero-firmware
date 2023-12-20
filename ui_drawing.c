@@ -135,7 +135,7 @@ void calculator_draw_callback(Canvas* canvas, void* ctx) {
         snprintf(resultLabel, sizeof(resultLabel), "Hex: %s", calculator_state->hexResult);
     } else {
         // If no mode is selected, you can display a default message or leave it empty
-        strncpy(resultLabel, " Click MODE> P Calc v0.1", sizeof(resultLabel));
+        strncpy(resultLabel, " Click MODE> P Calc v0.7", sizeof(resultLabel));
     }
 
     // Display the result, splitting into two lines if necessary
