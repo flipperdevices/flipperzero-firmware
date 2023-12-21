@@ -12,6 +12,8 @@
 
 #include <furi.h>
 
+#define USART1_SET_OVERSAMPLING LL_USART_OVERSAMPLING_16
+
 typedef struct {
     uint8_t* buffer_rx_ptr;
     size_t buffer_rx_index_write;
@@ -201,7 +203,7 @@ static void furi_hal_serial_uasrt_init(FuriHalSerialHandle* handle, uint32_t bau
     USART_InitStruct.Parity = LL_USART_PARITY_NONE;
     USART_InitStruct.TransferDirection = LL_USART_DIRECTION_TX_RX;
     USART_InitStruct.HardwareFlowControl = LL_USART_HWCONTROL_NONE;
-    USART_InitStruct.OverSampling = LL_USART_OVERSAMPLING_16;
+    USART_InitStruct.OverSampling = USART1_SET_OVERSAMPLING;
     LL_USART_Init(USART1, &USART_InitStruct);
     LL_USART_EnableFIFO(USART1);
     LL_USART_ConfigAsyncMode(USART1);
@@ -428,8 +430,76 @@ void furi_hal_serial_init(FuriHalSerialHandle* handle, uint32_t baud) {
     }
 }
 
+static uint32_t furi_hal_serial_get_prescaler(FuriHalSerialHandle* handle, uint32_t baud) {
+    uint32_t uartclk = LL_RCC_GetUSARTClockFreq(LL_RCC_USART1_CLKSOURCE);
+    uint32_t divisor = (uartclk / baud);
+    uint32_t prescaler = 0;
+    if(handle->id == FuriHalSerialIdUsart) {
+        if(USART1_SET_OVERSAMPLING == LL_USART_OVERSAMPLING_16) {
+            divisor = (divisor / 16) >> 12;
+        } else {
+            divisor = (divisor / 8) >> 12;
+        }
+        if(divisor < 1) {
+            prescaler = LL_USART_PRESCALER_DIV1;
+        } else if(divisor < 2) {
+            prescaler = LL_USART_PRESCALER_DIV2;
+        } else if(divisor < 4) {
+            prescaler = LL_USART_PRESCALER_DIV4;
+        } else if(divisor < 6) {
+            prescaler = LL_USART_PRESCALER_DIV6;
+        } else if(divisor < 8) {
+            prescaler = LL_USART_PRESCALER_DIV8;
+        } else if(divisor < 10) {
+            prescaler = LL_USART_PRESCALER_DIV10;
+        } else if(divisor < 12) {
+            prescaler = LL_USART_PRESCALER_DIV12;
+        } else if(divisor < 16) {
+            prescaler = LL_USART_PRESCALER_DIV16;
+        } else if(divisor < 32) {
+            prescaler = LL_USART_PRESCALER_DIV32;
+        } else if(divisor < 64) {
+            prescaler = LL_USART_PRESCALER_DIV64;
+        } else if(divisor < 128) {
+            prescaler = LL_USART_PRESCALER_DIV128;
+        } else {
+            prescaler = LL_USART_PRESCALER_DIV256;
+        }
+    } else if(handle->id == FuriHalSerialIdLpuart) {
+        divisor >>= 12;
+        if(divisor < 1) {
+            prescaler = LL_LPUART_PRESCALER_DIV1;
+        } else if(divisor < 2) {
+            prescaler = LL_LPUART_PRESCALER_DIV2;
+        } else if(divisor < 4) {
+            prescaler = LL_LPUART_PRESCALER_DIV4;
+        } else if(divisor < 6) {
+            prescaler = LL_LPUART_PRESCALER_DIV6;
+        } else if(divisor < 8) {
+            prescaler = LL_LPUART_PRESCALER_DIV8;
+        } else if(divisor < 10) {
+            prescaler = LL_LPUART_PRESCALER_DIV10;
+        } else if(divisor < 12) {
+            prescaler = LL_LPUART_PRESCALER_DIV12;
+        } else if(divisor < 16) {
+            prescaler = LL_LPUART_PRESCALER_DIV16;
+        } else if(divisor < 32) {
+            prescaler = LL_LPUART_PRESCALER_DIV32;
+        } else if(divisor < 64) {
+            prescaler = LL_LPUART_PRESCALER_DIV64;
+        } else if(divisor < 128) {
+            prescaler = LL_LPUART_PRESCALER_DIV128;
+        } else {
+            prescaler = LL_LPUART_PRESCALER_DIV256;
+        }
+    }
+
+    return prescaler;
+}
+
 void furi_hal_serial_set_br(FuriHalSerialHandle* handle, uint32_t baud) {
     furi_check(handle);
+    uint32_t prescaler = furi_hal_serial_get_prescaler(handle, baud);
     if(handle->id == FuriHalSerialIdUsart) {
         if(LL_USART_IsEnabled(USART1)) {
             // Wait for transfer complete flag
@@ -437,8 +507,8 @@ void furi_hal_serial_set_br(FuriHalSerialHandle* handle, uint32_t baud) {
                 ;
             LL_USART_Disable(USART1);
             uint32_t uartclk = LL_RCC_GetUSARTClockFreq(LL_RCC_USART1_CLKSOURCE);
-            LL_USART_SetBaudRate(
-                USART1, uartclk, LL_USART_PRESCALER_DIV1, LL_USART_OVERSAMPLING_16, baud);
+            LL_USART_SetPrescaler(USART1, prescaler);
+            LL_USART_SetBaudRate(USART1, uartclk, prescaler, USART1_SET_OVERSAMPLING, baud);
             LL_USART_Enable(USART1);
         }
     } else if(handle->id == FuriHalSerialIdLpuart) {
@@ -448,13 +518,8 @@ void furi_hal_serial_set_br(FuriHalSerialHandle* handle, uint32_t baud) {
                 ;
             LL_LPUART_Disable(LPUART1);
             uint32_t uartclk = LL_RCC_GetLPUARTClockFreq(LL_RCC_LPUART1_CLKSOURCE);
-            if(uartclk / baud > 4095) {
-                LL_LPUART_SetPrescaler(LPUART1, LL_LPUART_PRESCALER_DIV32);
-                LL_LPUART_SetBaudRate(LPUART1, uartclk, LL_LPUART_PRESCALER_DIV32, baud);
-            } else {
-                LL_LPUART_SetPrescaler(LPUART1, LL_LPUART_PRESCALER_DIV1);
-                LL_LPUART_SetBaudRate(LPUART1, uartclk, LL_LPUART_PRESCALER_DIV1, baud);
-            }
+            LL_LPUART_SetPrescaler(LPUART1, prescaler);
+            LL_LPUART_SetBaudRate(LPUART1, uartclk, prescaler, baud);
             LL_LPUART_Enable(LPUART1);
         }
     }
