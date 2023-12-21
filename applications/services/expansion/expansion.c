@@ -185,7 +185,7 @@ static void expansion_rpc_session_close(Expansion* instance) {
 
 static inline bool expansion_is_supported_baud_rate(uint32_t baud_rate) {
     // TODO: Should this be in furi_hal_serial?
-    return baud_rate >= 9600UL && baud_rate <= 1000000UL;
+    return baud_rate >= 9600UL && baud_rate <= 921600UL;
 }
 
 static bool expansion_handle_session_state_handshake(Expansion* instance) {
@@ -290,11 +290,14 @@ static void expansion_worker_pending_callback(void* context, uint32_t arg) {
     Expansion* instance = context;
     furi_thread_join(instance->worker_thread);
 
-    furi_mutex_acquire(instance->state_mutex, FuriWaitForever);
-    instance->state = ExpansionStateEnabled;
-    furi_hal_serial_control_set_expansion_callback(
-        instance->serial_id, expansion_detect_callback, instance);
-    furi_mutex_release(instance->state_mutex);
+    // Do not re-enable detection interrup on user-requested exit
+    if(instance->exit_reason != ExpansionSessionExitReasonUser) {
+        furi_mutex_acquire(instance->state_mutex, FuriWaitForever);
+        instance->state = ExpansionStateEnabled;
+        furi_hal_serial_control_set_expansion_callback(
+            instance->serial_id, expansion_detect_callback, instance);
+        furi_mutex_release(instance->state_mutex);
+    }
 }
 
 static int32_t expansion_worker(void* context) {
