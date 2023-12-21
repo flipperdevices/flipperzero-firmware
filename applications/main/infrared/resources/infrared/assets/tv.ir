@@ -1,7 +1,7 @@
 Filetype: IR library file
 Version: 1
-# Last Updated 29th Oct, 2023
-# Last Checked 29th Oct, 2023
+# Last Updated 21st Dec, 2023
+# Last Checked 21st Dec, 2023
 #
 name: Power
 type: parsed
@@ -2460,40 +2460,8 @@ protocol: NEC
 address: 38 00 00 00
 command: 1C 00 00 00
 #
-# Philips OLED 934/12
-#
-name: Power
-type: parsed
-protocol: RC6
-address: 00 00 00 00
-command: 0C 00 00 00
-# 
 name: Mute
 type: parsed
-protocol: RC6
-address: 00 00 00 00
-command: 0D 00 00 00
-# 
-name: Vol_up
-type: parsed
-protocol: RC6
-address: 00 00 00 00
-command: 10 00 00 00
-# 
-name: Vol_dn
-type: parsed
-protocol: RC6
-address: 00 00 00 00
-command: 11 00 00 00
-# 
-name: Ch_next
-type: parsed
-protocol: RC6
-address: 00 00 00 00
-command: 20 00 00 00
-# 
-name: Ch_prev
-type: parsed
-protocol: RC6
-address: 00 00 00 00
-command: 21 00 00 00
+protocol: NEC
+address: 38 00 00 00
+command: 04 00 00 00

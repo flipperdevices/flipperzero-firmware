@@ -29,8 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM1220-2112-0.93.9-1169adb](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-12-20 21:12 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-12-20 21:12 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-12-21 12:05 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-12-21 12:05 EST`
 - OFW: [Add AC's Carrier 42QG5A580SC and AUX YKR-H/006E #3284 (By gusdleon)](https://github.com/flipperdevices/flipperzero-firmware/pull/3284)
 - OFW: [added new TV Philips OLED 934/12 #3293 (By MarcelSchm)](https://github.com/flipperdevices/flipperzero-firmware/pull/3293)
 - For BT/USB Remote: [PTT: fixed 'raise hand' for zoom on mac #33 (By hryamzik)](https://github.com/xMasterX/all-the-plugins/pull/33)
@@ -58,6 +58,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: [SubGHz: faac rcxt add manually (not tested) (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/eaae5da51914a5ac5132d3540dda81c8a79c158d)
 - UL: [IR: change percent on number #672 (By krolchonok)](https://github.com/DarkFlippers/unleashed-firmware/pull/672)
 - Updated: [SPI Mem Manager v1.3 (By drunkbatya)-OFW](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/spi_mem_manager) [Added XM25QH64C and XM25QH128A support for spi mem manger app. #94 (By 5unr153)](https://github.com/flipperdevices/flipperzero-good-faps/pull/94)
+- [Updated infrared assets #677 (By amec0e)](https://github.com/DarkFlippers/unleashed-firmware/pull/677)
 
 ## IN THIS BRANCH:
 
