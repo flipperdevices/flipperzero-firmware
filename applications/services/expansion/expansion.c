@@ -11,7 +11,7 @@
 #include "expansion_settings.h"
 #include "expansion_protocol.h"
 
-#define TAG "ExpansionWorker"
+#define TAG "ExpansionSrv"
 
 #define EXPANSION_INACTIVE_TIMEOUT_MS (250U)
 #define EXPANSION_BUFFER_SIZE (sizeof(ExpansionFrame))
@@ -194,6 +194,9 @@ static bool expansion_handle_session_state_handshake(Expansion* instance) {
     do {
         if(instance->rx_frame.header.type != ExpansionFrameTypeBaudRate) break;
         const uint32_t baud_rate = instance->rx_frame.content.baud_rate.baud;
+
+        FURI_LOG_D(TAG, "Proposed baud rate: %lu", baud_rate);
+
         if(expansion_is_supported_baud_rate(baud_rate)) {
             instance->session_state = ExpansionSessionStateConnected;
             // Send response on previous baud rate
@@ -202,6 +205,7 @@ static bool expansion_handle_session_state_handshake(Expansion* instance) {
 
         } else {
             if(!expansion_send_status_response(instance, ExpansionFrameErrorBaudRate)) break;
+            FURI_LOG_E(TAG, "Bad baud rate");
         }
         success = true;
     } while(false);
@@ -290,6 +294,8 @@ static void expansion_worker_pending_callback(void* context, uint32_t arg) {
     Expansion* instance = context;
     furi_thread_join(instance->worker_thread);
 
+    FURI_LOG_D(TAG, "Service stopped");
+
     // Do not re-enable detection interrup on user-requested exit
     if(instance->exit_reason != ExpansionSessionExitReasonUser) {
         furi_mutex_acquire(instance->state_mutex, FuriWaitForever);
@@ -303,6 +309,8 @@ static void expansion_worker_pending_callback(void* context, uint32_t arg) {
 static int32_t expansion_worker(void* context) {
     furi_assert(context);
     Expansion* instance = context;
+
+    FURI_LOG_D(TAG, "Service started");
 
     furi_hal_power_insomnia_enter();
 
@@ -395,6 +403,8 @@ void expansion_enable(Expansion* instance, FuriHalSerialId serial_id) {
         instance->serial_id, expansion_detect_callback, instance);
 
     furi_mutex_release(instance->state_mutex);
+
+    FURI_LOG_D(TAG, "Detection enabled");
 }
 
 void expansion_disable(Expansion* instance) {
@@ -404,6 +414,7 @@ void expansion_disable(Expansion* instance) {
         furi_thread_flags_set(furi_thread_get_id(instance->worker_thread), ExpansionFlagStop);
         furi_thread_join(instance->worker_thread);
     } else if(instance->state == ExpansionStateEnabled) {
+        FURI_LOG_D(TAG, "Detection disabled");
         furi_hal_serial_control_set_expansion_callback(instance->serial_id, NULL, NULL);
     }
 
