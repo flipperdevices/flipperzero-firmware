@@ -58,42 +58,38 @@ bool decToBin(const char* decString, char* binaryResult, size_t resultSize) {
 }
 
 bool decToHex(const char* decString, char* hexResult, size_t resultSize) {
+    if (decString == NULL || hexResult == NULL || resultSize == 0) {
+        return false;
+    }
+
     char* end;
-    long num = strtol(decString, &end, 10);
+    unsigned long num = strtoul(decString, &end, 10);
 
-    if (*end != '\0' || num < 0) {
-        return false; // Invalid decimal number
+    if (*end != '\0' || *decString == '\0') {
+        return false; // Check for valid input
     }
 
-    if (num == 0) {
-        strncpy(hexResult, "0", resultSize);
-        return true;
+    // Calculate required buffer size
+    size_t requiredSize = 1;
+    unsigned long tempNum = num;
+
+    while (tempNum >= 16) {
+        requiredSize++;
+        tempNum /= 16;
     }
 
-    char hex[17]; // Maximum 16 hex digits + null terminator
-    int index = 0;
+    if (requiredSize + 1 > resultSize) { // +1 for null terminator
+        return false;
+    }
 
-    while (num > 0 && index < 16) {
+    hexResult[requiredSize] = '\0';
+
+    // Convert to hexadecimal in reverse order
+    do {
         int remainder = num % 16;
-        if (remainder < 10) {
-            hex[index++] = '0' + remainder;
-        } else {
-            hex[index++] = 'A' + (remainder - 10);
-        }
+        hexResult[--requiredSize] = (remainder < 10) ? ('0' + remainder) : ('A' + (remainder - 10));
         num /= 16;
-    }
-
-    hex[index] = '\0'; // Null-terminate
-
-    // Reverse the hex string
-    for (int i = 0; i < index / 2; i++) {
-        char temp = hex[i];
-        hex[i] = hex[index - 1 - i];
-        hex[index - 1 - i] = temp;
-    }
-
-    strncpy(hexResult, hex, resultSize - 1);
-    hexResult[resultSize - 1] = '\0';
+    } while (num > 0);
 
     return true;
 }
