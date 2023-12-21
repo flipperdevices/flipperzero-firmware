@@ -2,6 +2,7 @@
 #include <furi_hal.h>
 
 #include <gui/gui.h>
+#include <gui/elements.h>
 #include <input/input.h>
 
 //This arrays contains the font itself. You can use any u8g2 font you want
@@ -71,10 +72,26 @@ static void app_draw_callback(Canvas* canvas, void* ctx) {
     canvas_clear(canvas);
 
     canvas_set_custom_u8g2_font(canvas, u8g2_font_4x6_t_cyrillic);
+    uint8_t height = canvas_current_font_height(canvas);
 
-    canvas_draw_str(canvas, 0, 6, "This is a tiny custom font");
-    canvas_draw_str(canvas, 0, 12, "012345.?! ,:;\"\'@#$%");
-    canvas_draw_str(canvas, 0, 18, "И немного юникода");
+    canvas_draw_str(canvas, 0, height * 1, "This is a tiny custom font");
+    canvas_draw_str(canvas, 0, height * 2, "012345.?! ,:;\"\'@#$%");
+
+    FuriString* cutted_str = furi_string_alloc_set("Scrollable text, Юникод...");
+    uint16_t str_width = canvas_string_width(canvas, furi_string_get_cstr(cutted_str));
+
+    FuriString* str = furi_string_alloc_set("This is ");
+    furi_string_cat(str, cutted_str);
+    furi_string_cat_str(str, " выводится");
+
+    elements_scrollable_text_line(canvas, 0, height * 3, str_width, str, 9, true);
+    furi_string_free(cutted_str);
+    furi_string_free(str);
+
+    furi_string_set_str(str, "Check the width, Юникод выводится");
+    elements_string_fit_width(canvas, str, str_width);
+    canvas_draw_str(canvas, 0, height * 4, furi_string_get_cstr(str));
+    furi_string_free(str);
 }
 
 static void app_input_callback(InputEvent* input_event, void* ctx) {
