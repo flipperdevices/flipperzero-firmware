@@ -17,8 +17,8 @@ void generate_calculator_layout(Canvas* canvas) {
 
     // display
     canvas_draw_frame(canvas, 0, 0, 64, 49);  // display frame 
-    canvas_draw_frame(canvas, 2, 2, 60, 30);  // output  frame
-    canvas_draw_frame(canvas, 2, 33, 60, 14); // input   frame
+    canvas_draw_frame(canvas, 2, 2, 60, 31);  // output  frame
+    canvas_draw_frame(canvas, 2, 34, 60, 13); // input   frame
 
     // Horizonal and Vertical lines
     drawElement(canvas, NULL, 0, 48, 64, 2, 0);  // H line 1
@@ -74,20 +74,38 @@ void draw_highlighted_cell(Canvas* canvas, short x, short y, short width, short 
     canvas_draw_box(canvas, x, y, width, height);
 }
 
-void displayResultInTwoLines(Canvas* canvas, char* result, int x, int y) {
-    if(strlen(result) > 11) {
-        char line1[12]; // Buffer for the first line (12 chars + null terminator)
+void displayResult(Canvas* canvas, char* result, int x, int y) {
+    int length = strlen(result);
+    int lineSpacing = 9; // Reduced line spacing
+
+    if (length > 22) {
+        char line1[12];
         strncpy(line1, result, 11);
-        line1[11] = '\0'; // Terminate the first line correctly
+        line1[11] = '\0';
 
-        const char* line2 = result + 11; // Pointer to the second part of the string
+        char line2[12];
+        strncpy(line2, result + 11, 11);
+        line2[11] = '\0';
 
-        canvas_draw_str(canvas, x, y, line1); // First line
-        canvas_draw_str(canvas, x, y + 11, line2); // Second line
+        const char* line3 = result + 22;
+
+        canvas_draw_str(canvas, x, y, line1);
+        canvas_draw_str(canvas, x, y + lineSpacing, line2);
+        canvas_draw_str(canvas, x, y + 2 * lineSpacing, line3);
+    } else if (length > 11) {
+        char line1[12];
+        strncpy(line1, result, 11);
+        line1[11] = '\0';
+
+        const char* line2 = result + 11;
+
+        canvas_draw_str(canvas, x, y, line1);
+        canvas_draw_str(canvas, x, y + lineSpacing, line2);
     } else {
-        canvas_draw_str(canvas, x, y, result); // Single line if 12 characters or less
+        canvas_draw_str(canvas, x, y, result); // Single line if 11 characters or less
     }
 }
+
 
 void calculator_draw_callback(Canvas* canvas, void* ctx) {
     furi_assert(ctx);
@@ -119,11 +137,11 @@ void calculator_draw_callback(Canvas* canvas, void* ctx) {
         snprintf(resultLabel, sizeof(resultLabel), "Hex: %s", calculator_state->hexResult);
     } else {
         // If no mode is selected, you can display a default message or leave it empty
-        strncpy(resultLabel, " Click MODE> P Calc v0.7", sizeof(resultLabel));
+        strncpy(resultLabel, "Click MODE Programmer Calc v0.8", sizeof(resultLabel));
     }
 
     // Display the result, splitting into two lines if necessary
-    displayResultInTwoLines(canvas, resultLabel, 5, 13);
+    displayResult(canvas, resultLabel, 5, 12);
 
     // Draw new input with ">" label or mode selection prompt
     char inputLabel[MAX_TEXT_LENGTH + 3]; // Adjusted size for "> "
