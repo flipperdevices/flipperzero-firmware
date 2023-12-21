@@ -21,6 +21,7 @@ void nfc_playlist_emulation_scene_on_enter(void* context) {
         while(stream_read_line(stream, line)) {
             if (options_emulate_delay[nfc_playlist->emulate_delay] > 0) {
                 if (file_position > 0) {
+                    start_error_blink(nfc_playlist);
                     int time_counter_delay_ms = (options_emulate_delay[nfc_playlist->emulate_delay] * 1000);
                     do {
                         char display_text[30];
@@ -39,6 +40,7 @@ void nfc_playlist_emulation_scene_on_enter(void* context) {
             int time_counter_ms = (options_emulate_timeout[nfc_playlist->emulate_timeout] * 1000);
 
             if (storage_file_exists(storage, file_path) == false) {
+                start_error_blink(nfc_playlist);
                 char const* popup_text_unformatted = strcat(file_name, "\nnot found");
                 int popup_text_size = (strlen(popup_text_unformatted) + 4);
                 char popup_text[popup_text_size];
@@ -50,6 +52,7 @@ void nfc_playlist_emulation_scene_on_enter(void* context) {
                     time_counter_ms -= 500;
                 } while(time_counter_ms > 0);
             } else {
+                start_normal_blink(nfc_playlist);
                 nfc_playlist_worker_set_nfc_data(nfc_worker, file_path);
                 nfc_playlist_worker_start(nfc_worker);
 
@@ -62,14 +65,12 @@ void nfc_playlist_emulation_scene_on_enter(void* context) {
                     furi_delay_ms(500);
                     time_counter_ms -= 500;
                 } while(nfc_playlist_worker_is_emulating(nfc_worker) && time_counter_ms > 0);
-
-                if (nfc_playlist_worker_is_emulating(nfc_worker)) {
-                    nfc_playlist_worker_stop(nfc_worker);
-                }
+                nfc_playlist_worker_stop(nfc_worker);
             }
         }
         popup_reset(nfc_playlist->popup);
         scene_manager_previous_scene(nfc_playlist->scene_manager);
+        stop_blink(nfc_playlist);
     } else {
         popup_reset(nfc_playlist->popup);
         popup_set_context(nfc_playlist->popup, nfc_playlist);

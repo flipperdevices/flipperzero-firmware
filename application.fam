@@ -13,5 +13,8 @@ App(
         Lib(
             name="worker",
         ),
+        Lib(
+            name="led",
+        ),
     ],
 )

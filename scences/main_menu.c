@@ -8,6 +8,7 @@ typedef enum {
 typedef enum {
     NfcPlaylistSettings_Timeout,
     NfcPlaylistSettings_Delay,
+    NfcPlaylistSettings_LedIndicator,
     NfcPlaylistMenuSelection_Start
 } NfcPlaylistMenuSelection;
 
@@ -43,6 +44,10 @@ static void nfc_playlist_settings_change_callback(VariableItem* item) {
             variable_item_set_current_value_text(item, (char*)emulate_delay_text);
             break;
         }
+        case NfcPlaylistSettings_LedIndicator:
+            nfc_playlist->emulate_led_indicator = option_value_index;
+            variable_item_set_current_value_text(item, nfc_playlist->emulate_led_indicator ? "ON" : "OFF");
+            break;
         default:
             break;
    }
@@ -73,6 +78,16 @@ void nfc_playlist_main_menu_scene_on_enter(void* context) {
     char emulation_delay_settings_text[10];
     snprintf(emulation_delay_settings_text, 10, "%ds", options_emulate_delay[nfc_playlist->emulate_delay]);
     variable_item_set_current_value_text(emulation_delay_settings, (char*)emulation_delay_settings_text);
+
+    // add bool setting
+    VariableItem* emulation_led_indicator_settings = variable_item_list_add(
+        nfc_playlist->variable_item_list,
+        "LED Indicator",
+        2,
+        nfc_playlist_settings_change_callback,
+        nfc_playlist);
+    variable_item_set_current_value_index(emulation_led_indicator_settings, nfc_playlist->emulate_led_indicator);
+    variable_item_set_current_value_text(emulation_led_indicator_settings, nfc_playlist->emulate_led_indicator ? "ON" : "OFF");
 
     variable_item_list_add(nfc_playlist->variable_item_list, "Start", 0, NULL, NULL);
     variable_item_list_set_enter_callback(nfc_playlist->variable_item_list, nfc_playlist_menu_callback, nfc_playlist);
