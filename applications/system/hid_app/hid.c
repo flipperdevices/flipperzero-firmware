@@ -2,7 +2,6 @@
 #include "views.h"
 #include <notification/notification_messages.h>
 #include <dolphin/dolphin.h>
-
 #include "hid_icons.h"
 
 #define TAG "HidApp"
@@ -19,7 +18,22 @@ enum HidDebugSubmenuIndex {
     HidSubmenuIndexRemovePairing,
 };
 
-static void bt_hid_remove_pairing(Bt* bt) {
+bool hid_custom_event_callback(void* context, uint32_t event) {
+    furi_assert(context);
+    Hid* app = context;
+    return scene_manager_handle_custom_event(app->scene_manager, event);
+}
+
+bool hid_back_event_callback(void* context) {
+    furi_assert(context);
+    Hid* app = context;
+    FURI_LOG_D("HID", "Back event");
+    scene_manager_next_scene(app->scene_manager, HidSceneExitConfirm);
+    return true;
+}
+
+void bt_hid_remove_pairing(Hid* app) {
+    Bt* bt = app->bt;
     bt_disconnect(bt);
 
     // Wait 2nd core to update nvm storage
@@ -62,7 +76,7 @@ static void hid_submenu_callback(void* context, uint32_t index) {
         app->view_id = HidViewMouseJiggler;
         view_dispatcher_switch_to_view(app->view_dispatcher, HidViewMouseJiggler);
     } else if(index == HidSubmenuIndexRemovePairing) {
-        view_dispatcher_switch_to_view(app->view_dispatcher, HidViewUnpairConfirm);
+        scene_manager_next_scene(app->scene_manager, HidSceneUnpair);
     }
 }
 
@@ -84,39 +98,6 @@ static void bt_hid_connection_status_changed_callback(BtStatus status, void* con
     hid_mouse_clicker_set_connected_status(hid->hid_mouse_clicker, connected);
     hid_mouse_jiggler_set_connected_status(hid->hid_mouse_jiggler, connected);
     hid_tiktok_set_connected_status(hid->hid_tiktok, connected);
-}
-
-static void hid_exit_dialog_callback(DialogExResult result, void* context) {
-    furi_assert(context);
-    Hid* app = context;
-    if(result == DialogExResultLeft) {
-        view_dispatcher_stop(app->view_dispatcher);
-    } else if(result == DialogExResultRight) {
-        view_dispatcher_switch_to_view(app->view_dispatcher, app->view_id); // Show last view
-    } else if(result == DialogExResultCenter) {
-        view_dispatcher_switch_to_view(app->view_dispatcher, HidViewSubmenu);
-    }
-}
-
-static void hid_unpair_dialog_callback(DialogExResult result, void* context) {
-    furi_assert(context);
-    Hid* app = context;
-    if(result == DialogExResultRight) {
-        bt_hid_remove_pairing(app->bt);
-        view_dispatcher_switch_to_view(app->view_dispatcher, HidViewUnpairSuccess);
-    } else if(result == DialogExResultLeft) {
-        view_dispatcher_switch_to_view(app->view_dispatcher, HidViewSubmenu);
-    }
-}
-
-static void hid_app_forget_dev_success_popup_callback(void* context) {
-    Hid* app = context;
-    view_dispatcher_switch_to_view(app->view_dispatcher, HidViewSubmenu);
-}
-
-static uint32_t hid_exit_confirm_view(void* context) {
-    UNUSED(context);
-    return HidViewExitConfirm;
 }
 
 static uint32_t hid_exit(void* context) {
@@ -141,6 +122,12 @@ Hid* hid_alloc(HidTransport transport) {
     app->view_dispatcher = view_dispatcher_alloc();
     view_dispatcher_enable_queue(app->view_dispatcher);
     view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
+    view_dispatcher_set_navigation_event_callback(app->view_dispatcher, hid_back_event_callback);
+    view_dispatcher_set_event_callback_context(app->view_dispatcher, app);
+
+    // Scene Manager
+    app->scene_manager = scene_manager_alloc(&hid_scene_handlers, app);
+
     // Device Type Submenu view
     app->device_type_submenu = submenu_alloc();
     submenu_add_item(
@@ -189,81 +176,48 @@ Hid* hid_alloc(HidTransport transport) {
     view_dispatcher_add_view(
         app->view_dispatcher, HidViewSubmenu, submenu_get_view(app->device_type_submenu));
     app->view_id = HidViewSubmenu;
-    view_dispatcher_switch_to_view(app->view_dispatcher, app->view_id);
     return app;
 }
 
 Hid* hid_app_alloc_view(void* context) {
     furi_assert(context);
     Hid* app = context;
-    // Exit dialog view
-    app->exit_dialog = dialog_ex_alloc();
-    dialog_ex_set_result_callback(app->exit_dialog, hid_exit_dialog_callback);
-    dialog_ex_set_context(app->exit_dialog, app);
-    dialog_ex_set_left_button_text(app->exit_dialog, "Exit");
-    dialog_ex_set_right_button_text(app->exit_dialog, "Stay");
-    dialog_ex_set_center_button_text(app->exit_dialog, "Menu");
-    dialog_ex_set_header(app->exit_dialog, "Close Current App?", 16, 12, AlignLeft, AlignTop);
-    view_dispatcher_add_view(
-        app->view_dispatcher, HidViewExitConfirm, dialog_ex_get_view(app->exit_dialog));
 
-    // Un-pair dialog view
-    app->unpair_dialog = dialog_ex_alloc();
-    dialog_ex_set_result_callback(app->unpair_dialog, hid_unpair_dialog_callback);
-    dialog_ex_set_context(app->unpair_dialog, app);
-    dialog_ex_set_header(app->unpair_dialog, "Unpair All Devices?", 64, 3, AlignCenter, AlignTop);
-    dialog_ex_set_text(
-        app->unpair_dialog, "All previous pairings\nwill be lost!", 64, 22, AlignCenter, AlignTop);
-    dialog_ex_set_left_button_text(app->unpair_dialog, "Back");
-    dialog_ex_set_right_button_text(app->unpair_dialog, "Unpair");
-    view_dispatcher_add_view(
-        app->view_dispatcher, HidViewUnpairConfirm, dialog_ex_get_view(app->unpair_dialog));
+    // Dialog view
+    app->dialog = dialog_ex_alloc();
+    view_dispatcher_add_view(app->view_dispatcher, HidViewDialog, dialog_ex_get_view(app->dialog));
 
-    // Un-pair success popup view
+    // Popup view
     app->popup = popup_alloc();
-    popup_set_icon(app->popup, 32, 5, &I_DolphinNice_96x59);
-    popup_set_header(app->popup, "Done", 14, 15, AlignLeft, AlignTop);
-    popup_set_timeout(app->popup, 1500);
-    popup_set_context(app->popup, app);
-    popup_set_callback(app->popup, hid_app_forget_dev_success_popup_callback);
-    popup_enable_timeout(app->popup);
-    view_dispatcher_add_view(
-        app->view_dispatcher, HidViewUnpairSuccess, popup_get_view(app->popup));
+    view_dispatcher_add_view(app->view_dispatcher, HidViewPopup, popup_get_view(app->popup));
 
     // Keynote view
     app->hid_keynote = hid_keynote_alloc(app);
-    view_set_previous_callback(hid_keynote_get_view(app->hid_keynote), hid_exit_confirm_view);
     view_dispatcher_add_view(
         app->view_dispatcher, HidViewKeynote, hid_keynote_get_view(app->hid_keynote));
 
     // Keyboard view
     app->hid_keyboard = hid_keyboard_alloc(app);
-    view_set_previous_callback(hid_keyboard_get_view(app->hid_keyboard), hid_exit_confirm_view);
     view_dispatcher_add_view(
         app->view_dispatcher, HidViewKeyboard, hid_keyboard_get_view(app->hid_keyboard));
 
     // Media view
     app->hid_media = hid_media_alloc(app);
-    view_set_previous_callback(hid_media_get_view(app->hid_media), hid_exit_confirm_view);
     view_dispatcher_add_view(
         app->view_dispatcher, HidViewMedia, hid_media_get_view(app->hid_media));
 
     // TikTok view
     app->hid_tiktok = hid_tiktok_alloc(app);
-    view_set_previous_callback(hid_tiktok_get_view(app->hid_tiktok), hid_exit_confirm_view);
     view_dispatcher_add_view(
         app->view_dispatcher, BtHidViewTikTok, hid_tiktok_get_view(app->hid_tiktok));
 
     // Mouse view
     app->hid_mouse = hid_mouse_alloc(app);
-    view_set_previous_callback(hid_mouse_get_view(app->hid_mouse), hid_exit_confirm_view);
     view_dispatcher_add_view(
         app->view_dispatcher, HidViewMouse, hid_mouse_get_view(app->hid_mouse));
 
     // Mouse clicker view
     app->hid_mouse_clicker = hid_mouse_clicker_alloc(app);
-    view_set_previous_callback(
-        hid_mouse_clicker_get_view(app->hid_mouse_clicker), hid_exit_confirm_view);
     view_dispatcher_add_view(
         app->view_dispatcher,
         HidViewMouseClicker,
@@ -271,8 +225,6 @@ Hid* hid_app_alloc_view(void* context) {
 
     // Mouse jiggler view
     app->hid_mouse_jiggler = hid_mouse_jiggler_alloc(app);
-    view_set_previous_callback(
-        hid_mouse_jiggler_get_view(app->hid_mouse_jiggler), hid_exit_confirm_view);
     view_dispatcher_add_view(
         app->view_dispatcher,
         HidViewMouseJiggler,
@@ -292,9 +244,9 @@ void hid_free(Hid* app) {
     // Free views
     view_dispatcher_remove_view(app->view_dispatcher, HidViewSubmenu);
     submenu_free(app->device_type_submenu);
-    view_dispatcher_remove_view(app->view_dispatcher, HidViewExitConfirm);
-    view_dispatcher_remove_view(app->view_dispatcher, HidViewUnpairConfirm);
-    view_dispatcher_remove_view(app->view_dispatcher, HidViewUnpairSuccess);
+    view_dispatcher_remove_view(app->view_dispatcher, HidViewDialog);
+    dialog_ex_free(app->dialog);
+    view_dispatcher_remove_view(app->view_dispatcher, HidViewPopup);
     popup_free(app->popup);
     view_dispatcher_remove_view(app->view_dispatcher, HidViewKeynote);
     hid_keynote_free(app->hid_keynote);
@@ -310,6 +262,7 @@ void hid_free(Hid* app) {
     hid_mouse_jiggler_free(app->hid_mouse_jiggler);
     view_dispatcher_remove_view(app->view_dispatcher, BtHidViewTikTok);
     hid_tiktok_free(app->hid_tiktok);
+    scene_manager_free(app->scene_manager);
     view_dispatcher_free(app->view_dispatcher);
 
     // Close records
@@ -450,6 +403,8 @@ int32_t hid_usb_app(void* p) {
     UNUSED(p);
     Hid* app = hid_alloc(HidTransportUsb);
     app = hid_app_alloc_view(app);
+    FURI_LOG_D("HID", "Starting as USB app");
+
     FuriHalUsbInterface* usb_mode_prev = furi_hal_usb_get_config();
     furi_hal_usb_unlock();
     furi_check(furi_hal_usb_set_config(&usb_hid, NULL) == true);
@@ -457,6 +412,8 @@ int32_t hid_usb_app(void* p) {
     bt_hid_connection_status_changed_callback(BtStatusConnected, app);
 
     dolphin_deed(DolphinDeedPluginStart);
+
+    scene_manager_next_scene(app->scene_manager, HidSceneMain);
 
     view_dispatcher_run(app->view_dispatcher);
 
@@ -471,6 +428,8 @@ int32_t hid_ble_app(void* p) {
     UNUSED(p);
     Hid* app = hid_alloc(HidTransportBle);
     app = hid_app_alloc_view(app);
+
+    FURI_LOG_D("HID", "Starting as BLE app");
 
     bt_disconnect(app->bt);
 
@@ -495,6 +454,8 @@ int32_t hid_ble_app(void* p) {
     bt_set_status_changed_callback(app->bt, bt_hid_connection_status_changed_callback, app);
 
     dolphin_deed(DolphinDeedPluginStart);
+
+    scene_manager_next_scene(app->scene_manager, HidSceneMain);
 
     view_dispatcher_run(app->view_dispatcher);
 
