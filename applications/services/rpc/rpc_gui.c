@@ -40,7 +40,6 @@ _Static_assert(
     InputTypeRepeat == (int32_t)PB_Gui_InputType_REPEAT,
     "InputTypeRepeat != PB_Gui_InputType_REPEAT");
 
-
 #define TAG "RpcGui"
 
 typedef enum {
