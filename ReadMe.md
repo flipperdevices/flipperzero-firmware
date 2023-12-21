@@ -53,6 +53,10 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: Motion Mouse to be named: [Air Mouse 2 v1.0 (By nminaylov)](https://github.com/flipperdevices/flipperzero-good-faps/tree/nm/motion_mouse_app) `Req: ICM42688` They decided to take the same name as Air Mouse.
 - SubGHz: [Repeater: Use actual Time it takes to TX a Key as TX Length (By LeeroysHub)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/4bb9e085d88f477ce252f52df12050412220aa47)
 - Added: [Programmer Calculator v0.7 (By armixz)](https://github.com/armixz/Flipper-Zero-Programmer-Calculator)
+- UL: [SubGHz: better history element removal (By Willy-JL)](https://github.com/DarkFlippers/unleashed-firmware/commit/8fa21c49b2ee49aadd28d713f586880469e3bff1)
+- UL: [SubGHz: testing dynamic limit based on freeheap + RPC (By Willy-JL)](https://github.com/DarkFlippers/unleashed-firmware/commit/77f458fb6ea27057962f3767bd54a5bc5253276e)
+- UL: [SubGHz: faac rcxt add manually (not tested) (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/eaae5da51914a5ac5132d3540dda81c8a79c158d)
+- UL: [IR: change percent on number #672 (By krolchonok)](https://github.com/DarkFlippers/unleashed-firmware/pull/672)
 
 <a name="release">
 
