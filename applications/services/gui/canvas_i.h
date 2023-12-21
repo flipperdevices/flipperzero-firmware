@@ -9,6 +9,10 @@
 #include <u8g2.h>
 #include <toolbox/compress.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /** Canvas structure
  */
 struct Canvas {
@@ -97,3 +101,7 @@ void canvas_draw_u8g2_bitmap(
     uint8_t height,
     const uint8_t* bitmap,
     IconRotation rotation);
+
+#ifdef __cplusplus
+}
+#endif
