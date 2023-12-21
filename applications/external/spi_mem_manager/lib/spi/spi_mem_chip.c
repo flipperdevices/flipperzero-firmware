@@ -39,6 +39,7 @@ const SPIMemChipVendorName spi_mem_chip_vendor_names[] = {
     {"Genitop", SPIMemChipVendorGenitop},
     {"Paragon", SPIMemChipVendorParagon},
     {"XTX", SPIMemChipVendorXTX},
+    {"XMC", SPIMemChipVendorXMC},
     {"Unknown", SPIMemChipVendorUnknown}};
 
 static const char* spi_mem_chip_search_vendor_name(SPIMemChipVendor vendor_enum) {
