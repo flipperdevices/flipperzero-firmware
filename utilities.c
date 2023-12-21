@@ -17,8 +17,32 @@ char getKeyAtPosition(short x, short y) {
 short calculateStringWidth(const char* str, short length) {
     short width = 0;
     for (short i = 0; i < length; i++) {
-        width += (str[i] == '*' || str[i] == '<' || str[i] == '=' || str[i] == 'R') ? 3 : 4;
-        width += 1; // space between characters
+        switch (str[i]) {
+            case '*':width += 4;break;
+            case '0':width += 4;break;
+            case '1':width += 3;break;
+            case '2':
+            case '3':
+            case '4':width += 4;break;
+            case '5':width += 4;break;
+            case '6':width += 4;break;
+            case '7':width += 4;break;
+            case '8':width += 4;break;
+            case '9':width += 4;break;
+            case 'A':
+            case 'B':
+            case 'C':
+            case 'D':
+            case 'E':
+            case 'F':
+            case '<':width += 3;break;
+            case '=':width += 4;break;
+            case 'R':width += 9;break;
+            default:
+                width += 3;
+                break;
+        }
+        width += 1;
     }
     return width;
 }
