@@ -13,32 +13,46 @@ const char* HEX_TO_BINARY_TABLE[16] = {
 };
 
 bool decToBin(const char* decString, char* binaryResult, size_t resultSize) {
-    char* end;
-    long num = strtol(decString, &end, 10);
+    if (decString == NULL || binaryResult == NULL || resultSize < 2) {
+        return false; // Invalid pointers or insufficient result size
+    }
 
-    if (*end != '\0' || num < 0) {
+    char* end;
+    unsigned long num = strtoul(decString, &end, 10); // positive numbers only
+
+    if (*end != '\0' || *decString == '\0') {
         return false; // Invalid decimal
     }
 
-    int index = 0;
-    char binary[65]; // Maximum 64 bits
-
-    do {
-        binary[index++] = '0' + (num & 1);
-        num >>= 1;
-    } while (num > 0 && index < 64);
-
-    binary[index] = '\0'; // Null-terminate
-
-    // Reverse the binary string
-    for (int i = 0; i < index / 2; i++) {
-        char temp = binary[i];
-        binary[i] = binary[index - 1 - i];
-        binary[index - 1 - i] = temp;
+    // Calculate the number of bits required for the binary representation
+    size_t bitsNeeded = 0;
+    unsigned long tempNum = num;
+    while (tempNum > 0) {
+        bitsNeeded++;
+        tempNum >>= 1;
     }
 
-    strncpy(binaryResult, binary, resultSize - 1);
-    binaryResult[resultSize - 1] = '\0';
+    // If the number is zero
+    if (num == 0) {
+        if (resultSize < 2) {
+            return false; // Check buffer size
+        }
+        strcpy(binaryResult, "0");
+        return true;
+    }
+
+    // Ensure the buffer is large enough to store the binary representation
+    if (bitsNeeded >= resultSize) {
+        return false; // Not enough space in result buffer
+    }
+
+    binaryResult[bitsNeeded] = '\0'; // Null-terminate the result
+
+    // Fill the binary string from the end
+    for (int i = bitsNeeded - 1; i >= 0; i--) {
+        binaryResult[i] = (num & 1) + '0'; // Get the least significant bit
+        num >>= 1;
+    }
 
     return true;
 }
