@@ -527,7 +527,7 @@ void subghz_cli_command_decode_raw(Cli* cli, FuriString* args, void* context) {
             printf("SubGhz decode_raw: Load_keystore keeloq_mfcodes_user \033[0;32mOK\033[0m\r\n");
         } else {
             printf(
-                "SubGhz decode_raw: Load_keystore keeloq_mfcodes_user \033[0;31mERROR\033[0m\r\n");
+                "SubGhz decode_raw: Load_keystore keeloq_mfcodes_user \033[0;33mAbsent\033[0m\r\n");
         }
         subghz_environment_set_came_atomo_rainbow_table_file_name(
             environment, SUBGHZ_CAME_ATOMO_DIR_NAME);
@@ -629,7 +629,7 @@ void subghz_cli_command_tx_from_file(Cli* cli, FuriString* args, void* context) 
         printf("subghz tx_from_file: Load_keystore keeloq_mfcodes_user \033[0;32mOK\033[0m\r\n");
     } else {
         printf(
-            "subghz tx_from_file: Load_keystore keeloq_mfcodes_user \033[0;31mERROR\033[0m\r\n");
+            "subghz tx_from_file: Load_keystore keeloq_mfcodes_user \033[0;33mAbsent\033[0m\r\n");
     }
     subghz_environment_set_came_atomo_rainbow_table_file_name(
         environment, SUBGHZ_CAME_ATOMO_DIR_NAME);
