@@ -29,8 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM1219-1727-0.93.9-fbcd69e](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-12-19 17:27 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-12-19 17:27 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-12-20 20:39 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-12-20 20:39 EST`
 - OFW: [Add AC's Carrier 42QG5A580SC and AUX YKR-H/006E #3284 (By gusdleon)](https://github.com/flipperdevices/flipperzero-firmware/pull/3284)
 - OFW: [added new TV Philips OLED 934/12 #3293 (By MarcelSchm)](https://github.com/flipperdevices/flipperzero-firmware/pull/3293)
 - For BT/USB Remote: [PTT: fixed 'raise hand' for zoom on mac #33 (By hryamzik)](https://github.com/xMasterX/all-the-plugins/pull/33)
@@ -142,6 +142,7 @@ bettse)](https://github.com/flipperdevices/flipperzero-good-faps/pull/90)
 - NFC: [Parser / KDF for mizip and mykey updated & addition of hi and microel (By zProAle)](https://github.com/zProAle/my_flipper_kdf)
 - Removed: [COGES NFC (For Coffee Machines) (By OFW + haisenteck)](https://github.com/haisenteck/flipperzero-Haisenteck/) (This functionality seems to be covered by KDF)
 - Added: [NFC Playlist v1.0 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
+- UL: [NFC: Added zolotaya korona Parser & Fixes for Kazan & Metromoney(By Leptoptilos)](https://github.com/DarkFlippers/unleashed-firmware/commit/9b156fbdca06956c450d5ebb79f676a62dfde4b0)
 
 <a name="release">
 
