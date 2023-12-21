@@ -39,9 +39,8 @@ cd flipperzero-firmware/
 
 # clone this repository (Calculator)
 # move all files to `applications_user` directory
+cd applications_user/
 git clone https://github.com/armixz/Flipper-Zero-Programmer-Calculator.git
-cd Flipper-Zero-Programmer-Calculator/
-cp * ~/path/to/firmware/applications_user/programmer_calculator/.
 
 # build and launch the app
 cd ~/path/to/root-directory eg. ~/Xtreme-Firmware
