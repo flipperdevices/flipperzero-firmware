@@ -30,6 +30,23 @@ void infrared_encoder_pioneer_free(void* encoder_ptr) {
     infrared_common_encoder_free(encoder_ptr);
 }
 
+InfraredStatus infrared_encoder_pioneer_encode_repeat(
+    InfraredCommonEncoder* encoder,
+    uint32_t* duration,
+    bool* level) {
+    furi_assert(encoder);
+
+    *duration = INFRARED_PIONEER_SILENCE;
+    *level = false;
+
+    encoder->timings_sum = 0;
+    encoder->timings_encoded = 1;
+    encoder->bits_encoded = 0;
+    encoder->state = InfraredCommonEncoderStatePreamble;
+
+    return InfraredStatusOk;
+}
+
 InfraredStatus infrared_encoder_pioneer_encode(void* encoder_ptr, uint32_t* duration, bool* level) {
     InfraredCommonEncoder* encoder = encoder_ptr;
 
@@ -37,7 +54,7 @@ InfraredStatus infrared_encoder_pioneer_encode(void* encoder_ptr, uint32_t* dura
     if((status == InfraredStatusOk) && (encoder->bits_encoded == encoder->bits_to_encode)) {
         furi_assert(!*level);
         status = InfraredStatusDone;
-        encoder->state = InfraredCommonEncoderStateSilence;
+        encoder->state = InfraredCommonEncoderStateEncodeRepeat;
     }
     return status;
 }

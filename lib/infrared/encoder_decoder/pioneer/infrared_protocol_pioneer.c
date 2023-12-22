@@ -21,7 +21,7 @@ const InfraredCommonProtocolSpec infrared_protocol_pioneer = {
     .encode = infrared_common_encode_pdwm,
     .interpret = infrared_decoder_pioneer_interpret,
     .decode_repeat = NULL,
-    .encode_repeat = NULL,
+    .encode_repeat = infrared_encoder_pioneer_encode_repeat,
 };
 
 static const InfraredProtocolVariant infrared_protocol_variant_pioneer = {

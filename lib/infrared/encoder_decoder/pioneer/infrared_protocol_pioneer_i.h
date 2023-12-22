@@ -19,3 +19,7 @@
 extern const InfraredCommonProtocolSpec infrared_protocol_pioneer;
 
 bool infrared_decoder_pioneer_interpret(InfraredCommonDecoder* decoder);
+InfraredStatus infrared_encoder_pioneer_encode_repeat(
+    InfraredCommonEncoder* encoder,
+    uint32_t* duration,
+    bool* level);
