@@ -177,11 +177,14 @@ static const struct {
     const char* name;
 } na_actions[] = {
     {0x13, "AppleTV AutoFill"},
+    {0x24, "Apple Vision Pro"},
+    {0x05, "Apple Watch"},
     {0x27, "AppleTV Connecting..."},
     {0x20, "Join This AppleTV?"},
     {0x19, "AppleTV Audio Sync"},
     {0x1E, "AppleTV Color Balance"},
     {0x09, "Setup New iPhone"},
+    {0x2F, "Sign in to other device"},
     {0x02, "Transfer Phone Number"},
     {0x0B, "HomePod Setup"},
     {0x01, "Setup New AppleTV"},
