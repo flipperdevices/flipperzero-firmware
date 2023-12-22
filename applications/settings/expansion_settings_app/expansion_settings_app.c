@@ -1,9 +1,9 @@
 #include "expansion_settings_app.h"
 
 static const char* const expansion_uart_text[] = {
-    "None",
     "USART",
     "LPUART",
+    "None",
 };
 
 static void expansion_settings_app_uart_changed(VariableItem* item) {
@@ -12,11 +12,10 @@ static void expansion_settings_app_uart_changed(VariableItem* item) {
     variable_item_set_current_value_text(item, expansion_uart_text[index]);
     app->settings.uart_index = index;
 
-    if(index == 0) {
-        expansion_disable(app->expansion);
+    if(index < FuriHalSerialIdMax) {
+        expansion_enable(app->expansion, index);
     } else {
-        const FuriHalSerialId serial_id = index - 1;
-        expansion_enable(app->expansion, serial_id);
+        expansion_disable(app->expansion);
     }
 }
 

@@ -378,8 +378,8 @@ void expansion_on_system_start(void* arg) {
     ExpansionSettings settings = {};
     if(!expansion_settings_load(&settings)) {
         expansion_settings_save(&settings);
-    } else if(settings.uart_index != 0) {
-        expansion_enable(instance, settings.uart_index - 1);
+    } else if(settings.uart_index < FuriHalSerialIdMax) {
+        expansion_enable(instance, settings.uart_index);
     }
 }
 
