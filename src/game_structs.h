@@ -6,7 +6,8 @@
 
 enum ThreadsMessageType {
     SAVE_AND_EXIT, // Request to exit the program, save the state and quit the thread
-    RESET_STATE // Reset the persisted state and return to the main view
+    RESET_STATE, // Reset the persisted state and return to the main view
+    PROCESS_CANDY // User requested to give food
 };
 
 /* Request from main thread to be processed by secondary thread */
@@ -31,6 +32,9 @@ struct PersistentGameState {
     // Feature XP
     uint32_t xp;
     uint32_t last_recorded_xp_update; // Timestamp converted from FuriHalRtcDateTime
+    // Feature HU
+    uint32_t hu;
+    uint32_t last_recorded_hu_update; // Same as above
     // Feature HP
     uint32_t hp;
     uint32_t last_recorded_hp_update; // Same as above
@@ -47,6 +51,8 @@ struct GameState {
 struct GameEvents {
     uint32_t xp; // How many new XP to assign
     uint32_t xp_timestamp; // New timestamp to use in the GameState
+    int32_t hu; // How many HU to add or remove
+    uint32_t hu_timestamp; // Timestamp to use in the GameState
     int32_t hp; // How many HP to add or remove
     uint32_t hp_timestamp; // Timestamp to use in the GameState
 };

@@ -26,3 +26,7 @@ void go_back_to_main_scene(struct ApplicationContext *context) {
 void send_tick_to_scene(struct ApplicationContext *context) {
     scene_manager_handle_tick_event(context->scene_manager);
 }
+
+void go_to_candy_animation(struct ApplicationContext *context) {
+    scene_manager_next_scene(context->scene_manager, scene_candy);
+}

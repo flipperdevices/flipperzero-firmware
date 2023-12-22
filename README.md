@@ -8,7 +8,6 @@ This application is still under initial development
 
 # TODO
 
-* Add eat feature
 * Add animations for stage up
 * Add sound
 * Add vibration

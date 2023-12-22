@@ -97,7 +97,8 @@ bool scene_main_on_event(void *ctx, SceneManagerEvent event) {
             } else if (index == info_button) {
                 scene_manager_next_scene(context->scene_manager, scene_status);
             } else if (index == candy_button) {
-                // TODO
+                struct ThreadsMessage threads_message = {.type = PROCESS_CANDY};
+                furi_message_queue_put(context->threads_message_queue, &threads_message, FuriWaitForever);
             }
             return true; // Let's tell we handled the event
         default:

@@ -64,6 +64,9 @@ static void init_gui(struct ApplicationContext *context) {
     view_dispatcher_add_view(context->view_dispatcher,
                              scene_status,
                              popup_get_view(context->popup_module));
+    view_dispatcher_add_view(context->view_dispatcher,
+                             scene_candy,
+                             popup_get_view(context->popup_module));
 
     // Init GUI and attach the view_dispatcher to it
     context->gui = furi_record_open(RECORD_GUI);
@@ -74,6 +77,7 @@ static void init_gui(struct ApplicationContext *context) {
 
 static void free_gui(struct ApplicationContext *context) {
     /* Free the view_dispatcher */
+    view_dispatcher_remove_view(context->view_dispatcher, scene_candy);
     view_dispatcher_remove_view(context->view_dispatcher, scene_status);
     view_dispatcher_remove_view(context->view_dispatcher, scene_about);
     view_dispatcher_remove_view(context->view_dispatcher, scene_reset);

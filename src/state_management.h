@@ -13,5 +13,7 @@ void generate_new_random_events(struct GameState *, struct GameEvents *);
 bool process_events(struct GameState *, struct GameEvents);
 /* Get a string that can be used to show the game state */
 void get_state_str(const struct GameState *, char *, size_t);
+/* Restore some HU with a candy (user event) */
+void give_candy(struct GameState *, struct GameEvents *);
 
 #endif

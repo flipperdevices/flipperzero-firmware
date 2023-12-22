@@ -5,7 +5,7 @@
 
 #include "game_structs.h"
 
-/* Every feature has to implement 3 methods:
+/* Every feature has to implement 4 methods:
  *
  * void init_<FEATURE>(struct GameState *game_state, uint32_t current_timestamp)
  *   Initializes the feature variables inside the @game_state.
@@ -34,9 +34,28 @@ bool apply_xp(struct GameState *, struct GameEvents);
 int get_text_xp(const struct GameState *, char *, size_t);
 
 // Hunger
+void init_hu(struct GameState *, uint32_t);
+void check_hu(const struct GameState *, uint32_t, struct GameEvents *);
+bool apply_hu(struct GameState *, struct GameEvents);
+int get_text_hu(const struct GameState *, char *, size_t);
+
+// Health (depends on HU)
 void init_hp(struct GameState *, uint32_t);
 void check_hp(const struct GameState *, uint32_t, struct GameEvents *);
 bool apply_hp(struct GameState *, struct GameEvents);
 int get_text_hp(const struct GameState *, char *, size_t);
+
+/* correct_state
+ * It is use to verify that the updates
+ * done by the individual features doesn't
+ * corrupt the other features. */
+void correct_state(struct GameState *);
+
+/* Special actions */
+
+/* generate_hu is used to restore hunger.
+ * Takes in input the @game_state, the @current_timestamp and
+ * the @game_events struct where to put the hu that are restored. */
+void generate_hu(struct GameState *, uint32_t, struct GameEvents *);
 
 #endif

@@ -4,23 +4,6 @@
 #include "constants.h"
 #include "random_generator.h"
 
-/* correct_state_* functions
- * They are used to fix the feature state after
- * a state change caused by another feature */
-
-static void correct_state_xp(struct GameState *game_state, uint32_t current_timestamp) {
-    if (game_state->persistent.stage == DEAD) {
-        game_state->persistent.xp = 0;
-        game_state->persistent.last_recorded_xp_update = current_timestamp;
-    }
-}
-
-static void correct_state_hp(struct GameState *game_state, uint32_t current_timestamp) {
-    if (game_state->persistent.stage == DEAD) {
-        game_state->persistent.hp = 0;
-        game_state->persistent.last_recorded_hp_update = current_timestamp;
-    }
-}
 /* EXPERIENCE */
 
 void init_xp(struct GameState *game_state, uint32_t current_timestamp) {
@@ -55,6 +38,11 @@ void check_xp(const struct GameState *game_state, uint32_t current_timestamp, st
 bool apply_xp(struct GameState *game_state, struct GameEvents game_events) {
     bool state_updated = false;
 
+    if (game_events.xp_timestamp == 0) {
+        // XP events not generated
+        return false;
+    }
+
     while(game_events.xp > 0 && game_state->persistent.stage != DEAD) {
         state_updated = true;
         uint32_t max_xp_this_stage = MAX_XP_PER_STAGE[game_state->persistent.stage];
@@ -78,9 +66,6 @@ bool apply_xp(struct GameState *game_state, struct GameEvents game_events) {
         }
     }
     game_state->persistent.last_recorded_xp_update = game_events.xp_timestamp;
-    if (state_updated) {
-        correct_state_hp(game_state, game_events.xp_timestamp);
-    }
     return state_updated;
 }
 
@@ -89,8 +74,81 @@ int get_text_xp(const struct GameState *game_state, char *str, size_t size) {
                     game_state->persistent.xp,
                     MAX_XP_PER_STAGE[game_state->persistent.stage]);
 }
-
 /* HUNGER */
+
+void init_hu(struct GameState *game_state, uint32_t current_timestamp) {
+    game_state->persistent.hu = MAX_HU;
+    game_state->persistent.last_recorded_hu_update = current_timestamp;
+}
+
+void check_hu(const struct GameState *game_state, uint32_t current_timestamp, struct GameEvents *game_events) {
+    uint32_t last_timestamp = game_state->persistent.last_recorded_hu_update;
+    uint32_t nb_events = (current_timestamp - last_timestamp) / LOSE_HU_FREQUENCY;
+
+    FURI_LOG_D(LOG_TAG, "check_hu(): current_timestamp=%lu; last_timestamp=%lu; nb_events=%lu",
+        current_timestamp,
+        last_timestamp,
+        nb_events);
+
+    // If some events are extracted, the timestamp will be updated
+    // even though there are no HP to add.
+    game_events->hu_timestamp = (nb_events) ? current_timestamp : last_timestamp;
+
+    while(nb_events-- > 0) {
+        if (toss_a_coin(LOSE_HU_PROBABILITY)) {
+            game_events->hu--;
+        }
+    }
+
+    if (game_events->hu) {
+        FURI_LOG_I(LOG_TAG, "Lost %ld HU!", -(game_events->hu));
+    }
+}
+
+bool apply_hu(struct GameState *game_state, struct GameEvents game_events) {
+    int32_t hu = game_events.hu;
+
+    if (game_events.hu_timestamp == 0) {
+        // HU events not generated
+        return false;
+    }
+
+    if (hu < 0) {
+        uint32_t lost_hu = (uint32_t)-hu;
+        // Lost some HU
+        if (game_state->persistent.hu > lost_hu) {
+            // There are still HU left
+            game_state->persistent.hu -= lost_hu;
+        } else {
+            // Started to starve
+            game_state->persistent.hu = 0;
+            FURI_LOG_I(LOG_TAG, "The pet is hungry!");
+        }
+    } else if (hu > 0) {
+        // Ate some food
+        if (game_state->persistent.hu + hu > MAX_HU) {
+            // Gained more than max HU
+            game_state->persistent.hu = MAX_HU;
+        } else {
+            game_state->persistent.hu += hu;
+        }
+    }
+
+    game_state->persistent.last_recorded_hu_update = game_events.hu_timestamp;
+    if (hu != 0) {
+        FURI_LOG_D(LOG_TAG, "apply_hu(): new total is %lu HU", game_state->persistent.hu);
+        return true;
+    }
+    return false;
+}
+
+int get_text_hu(const struct GameState *game_state, char *str, size_t size) {
+    return snprintf(str, size, "HU: %lu/%d",
+                    game_state->persistent.hu,
+                    MAX_HU);
+}
+
+/* HEALTH */
 
 void init_hp(struct GameState *game_state, uint32_t current_timestamp) {
     game_state->persistent.hp = MAX_HP;
@@ -99,7 +157,7 @@ void init_hp(struct GameState *game_state, uint32_t current_timestamp) {
 
 void check_hp(const struct GameState *game_state, uint32_t current_timestamp, struct GameEvents *game_events) {
     uint32_t last_timestamp = game_state->persistent.last_recorded_hp_update;
-    uint32_t nb_events = (current_timestamp - last_timestamp) / LOSE_HP_FREQUENCY;
+    uint32_t nb_events = (current_timestamp - last_timestamp) / CHECK_HP_FREQUENCY;
 
     FURI_LOG_D(LOG_TAG, "check_hp(): current_timestamp=%lu; last_timestamp=%lu; nb_events=%lu",
         current_timestamp,
@@ -111,7 +169,13 @@ void check_hp(const struct GameState *game_state, uint32_t current_timestamp, st
     game_events->hp_timestamp = (nb_events) ? current_timestamp : last_timestamp;
 
     while(nb_events-- > 0) {
-        if (toss_a_coin(NEW_HP_PROBABILITY)) {
+        // If the pet is hungry or if he got sick
+        if (!game_state->persistent.hu || toss_a_coin(LOSE_HP_PROBABILITY)) {
+            if (!game_state->persistent.hu) {
+                FURI_LOG_I(LOG_TAG, "The pet is starving!");
+            } else {
+                FURI_LOG_I(LOG_TAG, "The pet got sick!");
+            }
             game_events->hp--;
         }
     }
@@ -124,6 +188,11 @@ void check_hp(const struct GameState *game_state, uint32_t current_timestamp, st
 bool apply_hp(struct GameState *game_state, struct GameEvents game_events) {
     int32_t hp = game_events.hp;
 
+    if (game_events.hp_timestamp == 0) {
+        // HP events not generated
+        return false;
+    }
+
     if (hp < 0) {
         uint32_t lost_hp = (uint32_t)-hp;
         // Lost some HP
@@ -131,10 +200,10 @@ bool apply_hp(struct GameState *game_state, struct GameEvents game_events) {
             // There are still HP left
             game_state->persistent.hp -= lost_hp;
         } else {
-            // Dead by starvation
+            // Dead
             game_state->persistent.hp = 0;
             game_state->persistent.stage = DEAD;
-            FURI_LOG_I(LOG_TAG, "The pet is dead by starvation!");
+            FURI_LOG_I(LOG_TAG, "The pet is dead!");
         }
     } else if (hp > 0) {
         // Gained some HP
@@ -149,7 +218,6 @@ bool apply_hp(struct GameState *game_state, struct GameEvents game_events) {
     game_state->persistent.last_recorded_hp_update = game_events.hp_timestamp;
     if (hp != 0) {
         FURI_LOG_D(LOG_TAG, "apply_hp(): new total is %lu HP", game_state->persistent.hp);
-        correct_state_xp(game_state, game_events.hp_timestamp);
         return true;
     }
     return false;
@@ -159,4 +227,21 @@ int get_text_hp(const struct GameState *game_state, char *str, size_t size) {
     return snprintf(str, size, "HP: %lu/%d",
                     game_state->persistent.hp,
                     MAX_HP);
+}
+
+/* Other functions */
+
+void correct_state(struct GameState *game_state) {
+    if (game_state->persistent.stage == DEAD) {
+        game_state->persistent.xp = 0;
+        game_state->persistent.hu = 0;
+        game_state->persistent.hp = 0;
+    }
+}
+
+void generate_hu(struct GameState *game_state, uint32_t current_timestamp, struct GameEvents *game_events) {
+    if (game_state->persistent.stage != DEAD && game_state->persistent.hu < MAX_HU) {
+        game_events->hu = random_uniform(MIN_CANDY_HU_RESTORE, MAX_CANDY_HU_RESTORE);
+        game_events->hu_timestamp = current_timestamp;
+    }
 }

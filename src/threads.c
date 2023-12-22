@@ -55,6 +55,15 @@ int32_t secondary_thread(void *ctx)
                     context->game_state->next_animation_index = 0;
                     go_back_to_main_scene(context);
                     break;
+                case PROCESS_CANDY:
+                    FURI_LOG_T(LOG_TAG, "Received candy request");
+                    struct GameEvents events = { 0 };
+                    give_candy(context->game_state, &events);
+                    if (process_events(context->game_state, events)) {
+                        context->game_state->next_animation_index = 0;
+                        go_to_candy_animation(context);
+                    }
+                    break;
                 default:
                     furi_crash("Unexpected game event type");
             }
