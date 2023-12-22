@@ -60,6 +60,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [SPI Mem Manager v1.3 (By drunkbatya)-OFW](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/spi_mem_manager) [Added XM25QH64C and XM25QH128A support for spi mem manger app. #94 (By 5unr153)](https://github.com/flipperdevices/flipperzero-good-faps/pull/94)
 - [Updated infrared assets #677 (By amec0e)](https://github.com/DarkFlippers/unleashed-firmware/pull/677)
 - OFW: [Gui: fix string width calculation #3305 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3305)
+- OFW: [Rollback #3305 and #3297 fix various rendering issues #3307 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3307)
+- Updated: [Pokemon Trading v1.5 (By EstebanFuentealba & kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
 
 <a name="release">
 
