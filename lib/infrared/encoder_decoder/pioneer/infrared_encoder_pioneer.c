@@ -10,7 +10,7 @@ void infrared_encoder_pioneer_reset(void* encoder_ptr, const InfraredMessage* me
 
     uint8_t* data = encoder->data;
 
-    if(message->protocol == InfraredProtocolPIONEER) {
+    if(message->protocol == InfraredProtocolPioneer) {
         data[0] = message->address & 0xFF;
         data[1] = ~(message->address & 0xFF);
         data[2] = message->command & 0xFF;

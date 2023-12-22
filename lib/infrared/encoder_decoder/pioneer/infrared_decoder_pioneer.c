@@ -26,7 +26,7 @@ bool infrared_decoder_pioneer_interpret(InfraredCommonDecoder* decoder) {
         if(command_checksum != real_command_checksum) {
             return false;
         }
-        protocol = InfraredProtocolPIONEER;
+        protocol = InfraredProtocolPioneer;
     } else {
         return false;
     }

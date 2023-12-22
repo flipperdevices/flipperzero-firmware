@@ -34,7 +34,7 @@ static const InfraredProtocolVariant infrared_protocol_variant_pioneer = {
 };
 
 const InfraredProtocolVariant* infrared_protocol_pioneer_get_variant(InfraredProtocol protocol) {
-    if(protocol == InfraredProtocolPIONEER)
+    if(protocol == InfraredProtocolPioneer)
         return &infrared_protocol_variant_pioneer;
     else
         return NULL;
