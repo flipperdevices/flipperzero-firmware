@@ -18,7 +18,7 @@
 
 #define TAG "ExpansionTest"
 
-#define EXPANSION_INACTIVE_TIMEOUT_MS (250U)
+#define EXPANSION_PROTOCOL_TIMEOUT_MS (250U)
 
 #define TEST_DIR_PATH EXT_PATH(TAG)
 #define TEST_FILE_NAME "test.txt"
@@ -109,7 +109,7 @@ static size_t expansion_test_app_receive_callback(uint8_t* data, size_t data_siz
         if(received_size == data_size) break;
 
         const uint32_t flags = furi_thread_flags_wait(
-            EXPANSION_TEST_APP_ALL_FLAGS, FuriFlagWaitAny, EXPANSION_INACTIVE_TIMEOUT_MS);
+            EXPANSION_TEST_APP_ALL_FLAGS, FuriFlagWaitAny, EXPANSION_PROTOCOL_TIMEOUT_MS);
 
         // Exit on any error
         if(flags & FuriFlagError) break;
@@ -168,7 +168,7 @@ static bool expansion_test_app_send_data_request(
     ExpansionTestApp* instance,
     const uint8_t* data,
     size_t data_size) {
-    furi_assert(data_size <= EXPANSION_MAX_DATA_SIZE);
+    furi_assert(data_size <= EXPANSION_PROTOCOL_MAX_DATA_SIZE);
 
     ExpansionFrame frame = {
         .header.type = ExpansionFrameTypeData,
@@ -188,7 +188,7 @@ static bool expansion_test_app_rpc_encode_callback(
     size_t size_sent = 0;
 
     while(size_sent < data_size) {
-        const size_t current_size = MIN(data_size - size_sent, EXPANSION_MAX_DATA_SIZE);
+        const size_t current_size = MIN(data_size - size_sent, EXPANSION_PROTOCOL_MAX_DATA_SIZE);
         if(!expansion_test_app_send_data_request(instance, data + size_sent, current_size)) break;
         if(!expansion_frame_decode(&instance->frame, expansion_test_app_receive_callback, instance))
             break;
@@ -361,7 +361,7 @@ static bool expansion_test_app_idle(ExpansionTestApp* instance, uint32_t num_cyc
         if(!expansion_frame_decode(&instance->frame, expansion_test_app_receive_callback, instance))
             break;
         if(instance->frame.header.type != ExpansionFrameTypeHeartbeat) break;
-        furi_delay_ms(EXPANSION_INACTIVE_TIMEOUT_MS - 50);
+        furi_delay_ms(EXPANSION_PROTOCOL_TIMEOUT_MS - 50);
     }
 
     return num_cycles_done == num_cycles;

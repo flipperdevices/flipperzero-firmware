@@ -19,7 +19,17 @@ extern "C" {
 /**
  * @brief Maximum data size per frame, in bytes.
  */
-#define EXPANSION_MAX_DATA_SIZE (64U)
+#define EXPANSION_PROTOCOL_MAX_DATA_SIZE (64U)
+
+/**
+ * @brief Maximum allowed inactivity period, in milliseconds.
+ */
+#define EXPANSION_PROTOCOL_TIMEOUT_MS (250U)
+
+/**
+ * @brief Dead time after changing connection baud rate.
+ */
+#define EXPANSION_PROTOCOL_BAUD_CHANGE_DT_MS (25UL)
 
 /**
  * @brief Enumeration of supported frame types.
@@ -91,10 +101,10 @@ typedef struct {
  * @brief Data frame contents.
  */
 typedef struct {
-    /** Size of the data. Must be less than EXPANSION_MAX_DATA_SIZE. */
+    /** Size of the data. Must be less than EXPANSION_PROTOCOL_MAX_DATA_SIZE. */
     uint8_t size;
     /** Data bytes. Valid only up to ExpansionFrameData::size bytes. */
-    uint8_t bytes[EXPANSION_MAX_DATA_SIZE];
+    uint8_t bytes[EXPANSION_PROTOCOL_MAX_DATA_SIZE];
 } ExpansionFrameData;
 
 /**

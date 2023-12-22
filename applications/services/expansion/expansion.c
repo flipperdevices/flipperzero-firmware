@@ -13,7 +13,6 @@
 
 #define TAG "ExpansionSrv"
 
-#define EXPANSION_INACTIVE_TIMEOUT_MS (250U)
 #define EXPANSION_BUFFER_SIZE (sizeof(ExpansionFrame))
 
 typedef enum {
@@ -79,7 +78,7 @@ static size_t expansion_receive_callback(uint8_t* data, size_t data_size, void* 
         if(received_size == data_size) break;
 
         const uint32_t flags = furi_thread_flags_wait(
-            EXPANSION_ALL_FLAGS, FuriFlagWaitAny, furi_ms_to_ticks(EXPANSION_INACTIVE_TIMEOUT_MS));
+            EXPANSION_ALL_FLAGS, FuriFlagWaitAny, furi_ms_to_ticks(EXPANSION_PROTOCOL_TIMEOUT_MS));
 
         if(flags & FuriFlagError) {
             if(flags == FuriFlagErrorTimeout) {
@@ -130,7 +129,7 @@ static bool expansion_send_status_response(Expansion* instance, ExpansionFrameEr
 
 static bool
     expansion_send_data_response(Expansion* instance, const uint8_t* data, size_t data_size) {
-    furi_assert(data_size <= EXPANSION_MAX_DATA_SIZE);
+    furi_assert(data_size <= EXPANSION_PROTOCOL_MAX_DATA_SIZE);
 
     ExpansionFrame frame = {
         .header.type = ExpansionFrameTypeData,
@@ -147,14 +146,15 @@ static void expansion_rpc_send_callback(void* context, uint8_t* data, size_t dat
 
     for(size_t sent_data_size = 0; sent_data_size < data_size;) {
         if(furi_semaphore_acquire(
-               instance->tx_semaphore, furi_ms_to_ticks(EXPANSION_INACTIVE_TIMEOUT_MS)) !=
+               instance->tx_semaphore, furi_ms_to_ticks(EXPANSION_PROTOCOL_TIMEOUT_MS)) !=
            FuriStatusOk) {
             // TODO: this should not set ExitReason to User
             furi_thread_flags_set(furi_thread_get_id(instance->worker_thread), ExpansionFlagStop);
             break;
         }
 
-        const size_t current_data_size = MIN(data_size - sent_data_size, EXPANSION_MAX_DATA_SIZE);
+        const size_t current_data_size =
+            MIN(data_size - sent_data_size, EXPANSION_PROTOCOL_MAX_DATA_SIZE);
         if(!expansion_send_data_response(instance, data + sent_data_size, current_data_size))
             break;
         sent_data_size += current_data_size;
@@ -247,7 +247,7 @@ static bool expansion_handle_session_state_rpc_active(Expansion* instance) {
                 instance->rpc_session,
                 instance->rx_frame.content.data.bytes,
                 instance->rx_frame.content.data.size,
-                EXPANSION_INACTIVE_TIMEOUT_MS);
+                EXPANSION_PROTOCOL_TIMEOUT_MS);
             if(size_consumed != instance->rx_frame.content.data.size) break;
 
         } else if(instance->rx_frame.header.type == ExpansionFrameTypeControl) {
@@ -294,8 +294,6 @@ static void expansion_worker_pending_callback(void* context, uint32_t arg) {
     Expansion* instance = context;
     furi_thread_join(instance->worker_thread);
 
-    FURI_LOG_D(TAG, "Service stopped");
-
     // Do not re-enable detection interrup on user-requested exit
     if(instance->exit_reason != ExpansionSessionExitReasonUser) {
         furi_mutex_acquire(instance->state_mutex, FuriWaitForever);
@@ -310,21 +308,19 @@ static int32_t expansion_worker(void* context) {
     furi_assert(context);
     Expansion* instance = context;
 
-    FURI_LOG_D(TAG, "Service started");
-
     furi_hal_power_insomnia_enter();
-
     furi_hal_serial_control_set_expansion_callback(instance->serial_id, NULL, NULL);
 
     instance->serial_handle = furi_hal_serial_control_acquire(instance->serial_id);
     furi_check(instance->serial_handle);
 
+    FURI_LOG_D(TAG, "Service started");
+
     instance->rx_buf = furi_stream_buffer_alloc(EXPANSION_BUFFER_SIZE, 1);
     instance->session_state = ExpansionSessionStateHandShake;
     instance->exit_reason = ExpansionSessionExitReasonUnknown;
 
-    // TODO: Skip garbage input caused by RX pin perturbations
-    furi_delay_ms(5);
+    // TODO: wait for the rx pin to stabilise
 
     furi_hal_serial_init(instance->serial_handle, EXPANSION_DEFAULT_BAUD_RATE);
     furi_hal_serial_set_rx_callback(
@@ -338,15 +334,13 @@ static int32_t expansion_worker(void* context) {
         expansion_rpc_session_close(instance);
     }
 
+    FURI_LOG_D(TAG, "Service stopped");
+
     furi_hal_serial_control_release(instance->serial_handle);
     furi_stream_buffer_free(instance->rx_buf);
 
     furi_hal_power_insomnia_exit();
-
-    furi_timer_pending_callback(
-        expansion_worker_pending_callback,
-        instance,
-        furi_ms_to_ticks(EXPANSION_INACTIVE_TIMEOUT_MS));
+    furi_timer_pending_callback(expansion_worker_pending_callback, instance, 0);
 
     return 0;
 }
