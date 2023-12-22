@@ -53,7 +53,7 @@ fbtenv_restore_env()
         unset REQUESTS_CA_BUNDLE;
     fi
 
-    if [ "$SYS_TYPE" = "Linux" ]; then
+    if [ "$SYS_TYPE" = "linux" ]; then
         if [ -n "$SAVED_TERMINFO_DIRS" ]; then
             export TERMINFO_DIRS="$SAVED_TERMINFO_DIRS";
         else
@@ -321,7 +321,7 @@ fbtenv_main()
     export PYTHONPATH=;
     export PYTHONHOME=;
 
-    if [ "$SYS_TYPE" = "Linux" ]; then
+    if [ "$SYS_TYPE" = "linux" ]; then
         export SAVED_TERMINFO_DIRS="${TERMINFO_DIRS:-""}";
         export TERMINFO_DIRS="$TOOLCHAIN_ARCH_DIR/share/terminfo";
     fi
