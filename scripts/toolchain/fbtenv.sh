@@ -4,7 +4,7 @@
 
 # public variables
 DEFAULT_SCRIPT_PATH="$(pwd -P)";
-FBT_TOOLCHAIN_VERSION="${FBT_TOOLCHAIN_VERSION:-"26"}";
+FBT_TOOLCHAIN_VERSION="${FBT_TOOLCHAIN_VERSION:-"27"}";
 
 if [ -z ${FBT_TOOLCHAIN_PATH+x} ] ; then
     FBT_TOOLCHAIN_PATH_WAS_SET=0;
@@ -131,25 +131,17 @@ fbtenv_check_env_vars()
 
 fbtenv_get_kernel_type()
 {
-    SYS_TYPE="$(uname -s)";
+    SYS_TYPE="$(uname -s | tr '[:upper:]' '[:lower:]')";
     ARCH_TYPE="$(uname -m)";
-    if [ "$ARCH_TYPE" != "x86_64" ] && [ "$SYS_TYPE" != "Darwin" ]; then
-        echo "We only provide toolchain for x86_64 CPUs, sorry..";
-        return 1;
-    fi
-    if [ "$SYS_TYPE" = "Darwin" ]; then
-        TOOLCHAIN_ARCH_DIR="$FBT_TOOLCHAIN_PATH/toolchain/$ARCH_TYPE-darwin";
-        TOOLCHAIN_URL="https://update.flipperzero.one/builds/toolchain/gcc-arm-none-eabi-12.3-$ARCH_TYPE-darwin-flipper-$FBT_TOOLCHAIN_VERSION.tar.gz";
-    elif [ "$SYS_TYPE" = "Linux" ]; then
-        TOOLCHAIN_ARCH_DIR="$FBT_TOOLCHAIN_PATH/toolchain/x86_64-linux";
-        TOOLCHAIN_URL="https://update.flipperzero.one/builds/toolchain/gcc-arm-none-eabi-12.3-x86_64-linux-flipper-$FBT_TOOLCHAIN_VERSION.tar.gz";
-    elif echo "$SYS_TYPE" | grep -q "MINGW"; then
+    if echo "$SYS_TYPE" | grep -q "MINGW"; then
         echo "In MinGW shell, use \"[u]fbt.cmd\" instead of \"[u]fbt\"";
         return 1;
-    else
+    elif [ $SYS_TYPE != "linux" ] && [ $SYS_TYPE != "darwin" ]; then
         echo "Your system configuration is not supported. Sorry.. Please report us your configuration.";
         return 1;
     fi
+    TOOLCHAIN_ARCH_DIR="$FBT_TOOLCHAIN_PATH/toolchain/$ARCH_TYPE-$SYS_TYPE";
+    TOOLCHAIN_URL="https://update.flipperzero.one/builds/toolchain/gcc-arm-none-eabi-12.3-$ARCH_TYPE-$SYS_TYPE-flipper-$FBT_TOOLCHAIN_VERSION.tar.gz";
     return 0;
 }
 
