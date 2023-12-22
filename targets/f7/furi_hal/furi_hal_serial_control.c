@@ -1,7 +1,6 @@
 #include "furi_hal_serial_control.h"
 #include "furi_hal_serial_types_i.h"
 #include "furi_hal_serial.h"
-#include "furi_hal_resources.h"
 
 #include <furi.h>
 #include <toolbox/api_lock.h>

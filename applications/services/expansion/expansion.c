@@ -164,8 +164,7 @@ static void expansion_rpc_send_callback(void* context, uint8_t* data, size_t dat
 
 static bool expansion_rpc_session_open(Expansion* instance) {
     Rpc* rpc = furi_record_open(RECORD_RPC);
-    // TODO: Add new RPC owner
-    instance->rpc_session = rpc_session_open(rpc, RpcOwnerUnknown);
+    instance->rpc_session = rpc_session_open(rpc, RpcOwnerUart);
 
     if(instance->rpc_session) {
         instance->tx_semaphore = furi_semaphore_alloc(1, 1);
