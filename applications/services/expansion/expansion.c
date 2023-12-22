@@ -38,6 +38,7 @@ typedef enum {
 typedef enum {
     ExpansionFlagStop = 1 << 0,
     ExpansionFlagData = 1 << 1,
+    ExpansionFlagError = 1 << 2,
 } ExpansionFlag;
 
 #define EXPANSION_ALL_FLAGS (ExpansionFlagData | ExpansionFlagStop)
@@ -94,6 +95,10 @@ static size_t expansion_receive_callback(uint8_t* data, size_t data_size, void* 
             // Exiting due to explicit request
             instance->exit_reason = ExpansionSessionExitReasonUser;
             break;
+        } else if(flags & ExpansionFlagError) {
+            // Exiting due to RPC error
+            instance->exit_reason = ExpansionSessionExitReasonError;
+            break;
         } else if(flags & ExpansionFlagData) {
             // Go to buffer reading
             continue;
@@ -149,8 +154,7 @@ static void expansion_rpc_send_callback(void* context, uint8_t* data, size_t dat
         if(furi_semaphore_acquire(
                instance->tx_semaphore, furi_ms_to_ticks(EXPANSION_PROTOCOL_TIMEOUT_MS)) !=
            FuriStatusOk) {
-            // TODO: this should not set ExitReason to User
-            furi_thread_flags_set(furi_thread_get_id(instance->worker_thread), ExpansionFlagStop);
+            furi_thread_flags_set(furi_thread_get_id(instance->worker_thread), ExpansionFlagError);
             break;
         }
 
