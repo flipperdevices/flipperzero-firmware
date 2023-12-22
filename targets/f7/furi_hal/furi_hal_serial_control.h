@@ -41,8 +41,6 @@ void furi_hal_serial_control_release(FuriHalSerialHandle* handle);
  */
 void furi_hal_serial_control_set_logging_config(FuriHalSerialId serial_id, uint32_t baud_rate);
 
-// TODO: Work in progress APIs
-
 /**
  * @brief Expansion module detection callback type.
  *
