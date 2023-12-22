@@ -1448,7 +1448,9 @@ Function,+,furi_hal_serial_control_suspend,void,
 Function,+,furi_hal_serial_deinit,void,FuriHalSerialHandle*
 Function,+,furi_hal_serial_disable_direction,void,"FuriHalSerialHandle*, FuriHalSerialDirection"
 Function,+,furi_hal_serial_enable_direction,void,"FuriHalSerialHandle*, FuriHalSerialDirection"
+Function,+,furi_hal_serial_get_gpio_pin,const GpioPin*,"FuriHalSerialHandle*, FuriHalSerialDirection"
 Function,+,furi_hal_serial_init,void,"FuriHalSerialHandle*, uint32_t"
+Function,+,furi_hal_serial_is_baud_rate_supported,_Bool,"FuriHalSerialHandle*, uint32_t"
 Function,+,furi_hal_serial_resume,void,FuriHalSerialHandle*
 Function,+,furi_hal_serial_set_br,void,"FuriHalSerialHandle*, uint32_t"
 Function,+,furi_hal_serial_set_rx_callback,void,"FuriHalSerialHandle*, FuriHalSerialRxCallback, void*"

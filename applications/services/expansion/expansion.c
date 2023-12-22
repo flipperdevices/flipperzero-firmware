@@ -14,6 +14,7 @@
 #define TAG "ExpansionSrv"
 
 #define EXPANSION_BUFFER_SIZE (sizeof(ExpansionFrame))
+#define EXPANSION_RX_STABILITY_CONFIDENCE (1000UL)
 
 typedef enum {
     ExpansionStateDisabled,
@@ -163,6 +164,7 @@ static void expansion_rpc_send_callback(void* context, uint8_t* data, size_t dat
 
 static bool expansion_rpc_session_open(Expansion* instance) {
     Rpc* rpc = furi_record_open(RECORD_RPC);
+    // TODO: Add new RPC owner
     instance->rpc_session = rpc_session_open(rpc, RpcOwnerUnknown);
 
     if(instance->rpc_session) {
@@ -183,11 +185,6 @@ static void expansion_rpc_session_close(Expansion* instance) {
     furi_record_close(RECORD_RPC);
 }
 
-static inline bool expansion_is_supported_baud_rate(uint32_t baud_rate) {
-    // TODO: Should this be in furi_hal_serial?
-    return baud_rate >= 9600UL && baud_rate <= 921600UL;
-}
-
 static bool expansion_handle_session_state_handshake(Expansion* instance) {
     bool success = false;
 
@@ -197,7 +194,7 @@ static bool expansion_handle_session_state_handshake(Expansion* instance) {
 
         FURI_LOG_D(TAG, "Proposed baud rate: %lu", baud_rate);
 
-        if(expansion_is_supported_baud_rate(baud_rate)) {
+        if(furi_hal_serial_is_baud_rate_supported(instance->serial_handle, baud_rate)) {
             instance->session_state = ExpansionSessionStateConnected;
             // Send response on previous baud rate
             if(!expansion_send_status_response(instance, ExpansionFrameErrorNone)) break;
@@ -304,6 +301,16 @@ static void expansion_worker_pending_callback(void* context, uint32_t arg) {
     }
 }
 
+static inline void expansion_wait_for_stable_rx(Expansion* instance, uint32_t target_confidence) {
+    const GpioPin* rx_gpio =
+        furi_hal_serial_get_gpio_pin(instance->serial_handle, FuriHalSerialDirectionRx);
+
+    for(int32_t confidence = 0; confidence > (int32_t)target_confidence;) {
+        confidence += furi_hal_gpio_read(rx_gpio) ? 1 : -1;
+        furi_delay_us(1);
+    }
+}
+
 static int32_t expansion_worker(void* context) {
     furi_assert(context);
     Expansion* instance = context;
@@ -320,9 +327,10 @@ static int32_t expansion_worker(void* context) {
     instance->session_state = ExpansionSessionStateHandShake;
     instance->exit_reason = ExpansionSessionExitReasonUnknown;
 
-    // TODO: wait for the rx pin to stabilise
+    expansion_wait_for_stable_rx(instance, EXPANSION_RX_STABILITY_CONFIDENCE);
 
     furi_hal_serial_init(instance->serial_handle, EXPANSION_DEFAULT_BAUD_RATE);
+
     furi_hal_serial_set_rx_callback(
         instance->serial_handle, expansion_serial_rx_callback, instance);
 

@@ -157,6 +157,11 @@ void furi_hal_serial_init(FuriHalSerialHandle* handle, uint32_t baud) {
     }
 }
 
+bool furi_hal_serial_is_baud_rate_supported(FuriHalSerialHandle* handle, uint32_t baud) {
+    furi_check(handle);
+    return baud >= 9600UL && baud <= 4000000UL;
+}
+
 void furi_hal_serial_set_br(FuriHalSerialHandle* handle, uint32_t baud) {
     furi_check(handle);
     if(handle->id == FuriHalSerialIdUsart) {
@@ -360,4 +365,13 @@ void furi_hal_serial_disable_direction(
     const GpioPin* gpio = furi_hal_serial_config[handle->id].gpio[direction];
 
     furi_hal_gpio_init(gpio, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
+}
+
+const GpioPin*
+    furi_hal_serial_get_gpio_pin(FuriHalSerialHandle* handle, FuriHalSerialDirection direction) {
+    furi_check(handle);
+    furi_check(handle->id < FuriHalSerialIdMax);
+    furi_check(direction < FuriHalSerialDirectionMax);
+
+    return furi_hal_serial_config[handle->id].gpio[direction];
 }

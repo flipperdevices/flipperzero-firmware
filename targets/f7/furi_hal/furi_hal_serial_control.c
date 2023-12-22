@@ -175,9 +175,7 @@ static bool furi_hal_serial_control_handler_expansion_cb(void* input, void* outp
 
     FuriHalSerialControlMessageExpCallback* message_input = input;
     FuriHalSerialHandle* handle = &furi_hal_serial_control->handles[message_input->id];
-    // TODO: Move gpio selecton to furi_hal_serial
-    const GpioPin* gpio = message_input->id == FuriHalSerialIdUsart ? &gpio_usart_rx :
-                                                                      &gpio_ext_pc0;
+    const GpioPin* gpio = furi_hal_serial_get_gpio_pin(handle, FuriHalSerialDirectionRx);
 
     if(message_input->callback) {
         furi_check(furi_hal_serial_control->expansion_cb == NULL);
@@ -326,10 +324,12 @@ void furi_hal_serial_control_release(FuriHalSerialHandle* handle) {
 
 void furi_hal_serial_control_set_logging_config(FuriHalSerialId serial_id, uint32_t baud_rate) {
     furi_check(serial_id <= FuriHalSerialIdMax);
-    furi_check(baud_rate >= 9600 && baud_rate <= 4000000);
 
     // Very special case of updater, where RTC initialized before kernel start
     if(!furi_hal_serial_control) return;
+
+    furi_check(furi_hal_serial_is_baud_rate_supported(
+        &furi_hal_serial_control->handles[serial_id], baud_rate));
 
     FuriHalSerialControlMessageInputLogging message_input = {
         .id = serial_id,
@@ -348,6 +348,7 @@ void furi_hal_serial_control_set_expansion_callback(
     FuriHalSerialControlExpansionCallback callback,
     void* context) {
     furi_check(serial_id <= FuriHalSerialIdMax);
+    furi_check(furi_hal_serial_control);
 
     FuriHalSerialControlMessageExpCallback message_input = {
         .id = serial_id,
