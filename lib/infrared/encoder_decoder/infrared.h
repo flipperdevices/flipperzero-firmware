@@ -35,6 +35,7 @@ typedef enum {
     InfraredProtocolKaseikyo,
     InfraredProtocolRCA,
     InfraredProtocolMAX,
+    InfraredProtocolPIONEER
 } InfraredProtocol;
 
 typedef struct {
