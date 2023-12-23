@@ -29,8 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM1220-2112-0.93.9-1169adb](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-12-22 11:35 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-12-22 11:35 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-12-22 23:20 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-12-22 23:20 EST`
 - OFW: [Add AC's Carrier 42QG5A580SC and AUX YKR-H/006E #3284 (By gusdleon)](https://github.com/flipperdevices/flipperzero-firmware/pull/3284)
 - OFW: [added new TV Philips OLED 934/12 #3293 (By MarcelSchm)](https://github.com/flipperdevices/flipperzero-firmware/pull/3293)
 - For BT/USB Remote: [PTT: fixed 'raise hand' for zoom on mac #33 (By hryamzik)](https://github.com/xMasterX/all-the-plugins/pull/33)
@@ -149,6 +149,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Added: [NFC Playlist v1.0 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
 - UL: [NFC: Added zolotaya korona Parser & Fixes for Kazan & Metromoney(By Leptoptilos)](https://github.com/DarkFlippers/unleashed-firmware/commit/9b156fbdca06956c450d5ebb79f676a62dfde4b0)
 - Updated: [PicoPass (iClass) v1.11 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass) [Rework. Part 1 #68 (By gornekich)](https://github.com/flipperdevices/flipperzero-good-faps/pull/68) [Hopefully fix name buffer size issues (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/9058c0c6a9980f84f6436673f9d3fbbc82cb3f81) [Save partial #85 (By bettse)](https://github.com/flipperdevices/flipperzero-good-faps/pull/85) [More info view (raw bytes) #86 (By bettse)](https://github.com/flipperdevices/flipperzero-good-faps/pull/86) [detect config card #87 (By bettse)](https://github.com/flipperdevices/flipperzero-good-faps/pull/87) [add additional keys to elite dict #89 (By kitsunehunter)](https://github.com/flipperdevices/flipperzero-good-faps/pull/89) [config SE problem #90 (By bettse)](https://github.com/flipperdevices/flipperzero-good-faps/pull/90) [handle NR-MAC auth for legacy cards #95(By bettse)](https://github.com/flipperdevices/flipperzero-good-faps/pull/95)
+- OFW: [NFC: HID MFC Plugin #3312 (By bettse)](https://github.com/flipperdevices/flipperzero-firmware/pull/3312)
 
 <a name="release">
 
