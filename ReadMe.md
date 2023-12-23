@@ -61,6 +61,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [Gui: fix string width calculation #3305 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3305)
 - OFW: [Rollback #3305 and #3297 fix various rendering issues #3307 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3307)
 - Updated: [Pokemon Trading v1.5 (By EstebanFuentealba & kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
+- Updated: [BLE Spam v4.4 (By Willy-JL & ECTO-1A & Spooks4576 with research from xMasterX; OFW API thanks to noproto)](https://github.com/noproto/apple_ble_spam_ofw) [Added new devices #1015 (By Mr-Proxy-source)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/1015)
 
 ## IN THIS BRANCH:
 
