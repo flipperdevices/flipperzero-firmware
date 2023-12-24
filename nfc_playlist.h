@@ -8,7 +8,7 @@
 #include <gui/modules/popup.h>
 #include <gui/modules/variable_item_list.h>
 #include <notification/notification_messages.h>
-#include <lib/worker/nfc_playlist_worker.h>
+#include <nfc_playlist_worker.h>
 
 typedef enum {
    NfcPlaylistView_Menu,
