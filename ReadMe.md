@@ -4,7 +4,7 @@
 &nbsp;<a href='https://shop.rogue-master.net/' target='_blank'><img src='https://rogue-master.net/img/Merch.png' alt='RM Merch'' title='RM Merch'></a>
 &nbsp;<a href='https://github.com/RogueMaster/awesome-flipperzero-withModules' target='_blank'><img src='https://rogue-master.net/img/Resources.png' alt='More Research / Assets' title='More Research / Assets'></a></h1>
 
-# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1215-1347-0.93.9-073ec96.tgz&channel=RM1215-1347-0.93.9-073ec96&version=0.93.9) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1215-1347-0.93.9-073ec96-NoAnim.tgz&channel=RM1215-1347-0.93.9-073ec96-NoAnim&version=0.93.9)
+# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1223-2011-0.93.9-f05e1e3.tgz&channel=RM1223-2011-0.93.9-f05e1e3&version=0.93.9) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1223-2011-0.93.9-f05e1e3-NoAnim.tgz&channel=RM1223-2011-0.93.9-f05e1e3-NoAnim&version=0.93.9)
 
 ## Thank you so much to our RM Pro/SUPER Patreon supporters! Because of people like you, we are able to offer the best and most up-to-date Flipper Zero Firmware!
 
@@ -31,38 +31,6 @@ This software is for experimental purposes only and is not meant for any illegal
 
 - Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-12-23 19:52 EST`
 - Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-12-23 19:52 EST`
-- OFW: [Add AC's Carrier 42QG5A580SC and AUX YKR-H/006E #3284 (By gusdleon)](https://github.com/flipperdevices/flipperzero-firmware/pull/3284)
-- OFW: [added new TV Philips OLED 934/12 #3293 (By MarcelSchm)](https://github.com/flipperdevices/flipperzero-firmware/pull/3293)
-- For BT/USB Remote: [PTT: fixed 'raise hand' for zoom on mac #33 (By hryamzik)](https://github.com/xMasterX/all-the-plugins/pull/33)
-- For Wifi Marauder: [Add samsung and all spam #43 (By justcallmekoko)](https://github.com/0xchocolate/flipperzero-wifi-marauder/pull/43)
-- Updated: [Bad KB (Modified PR#738 from pengu1ndev - Original from Willy-JL) #739 (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/739)
-- Updated: [WiFi (Marauder) v6.6 (By 0xchocolate & tcpassos)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion)
-- Updated: [Video Player v0.2 (By LTVA1)](https://github.com/LTVA1/flipper-zero-video-player)
-- Updated: [WS2812B LED Tester v1.8 (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/gpio/ws2812b_tester)
-- Removed: [MALVEKE Pokemon Trading v1.4 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external/malveke_pokemon_trading) `Req: Malveke` (Uses Different GPIO Than Standard Pokemon Trader App)
-- Updated: [Pokemon Trading v1.5 (By EstebanFuentealba & kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
-- Updated: [MALVEKE GB Live Camera v1.1 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external/malveke_gb_live_camera) `Req: Malveke`
-- NFC: [MFC Keys Updates (By Willy-JL) & Dupe Removal (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/69bb24a7bfe22c20a2d8886f840f677c554d69ad)
-- Updated: [FlipBoard Blinky v2.1 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
-- Updated: [FlipBoard Keyboard v2.0 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
-- Updated: [FlipBoard Signal v3.1 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
-- OFW: [Added UTF-8 support to Flipper Zero canvas API #3297 (By bolknote)](https://github.com/flipperdevices/flipperzero-firmware/pull/3297)
-- Updated: [Hangman v1.5 (By Evgeny Stepanischev & Eva Stepanischeva)](https://github.com/bolknote/Flipper-Zero-Hangman-Game)
-- Updated: [Sub-GHz Bruteforcer v3.9.1 (By Ganapati/xMasterX/derskythe)](https://github.com/derskythe/flipperzero-subbrute/tree/master)
-- Updated: [ESP32CAM Marauder v0.6.6 (By 0xchocolate & eried)](https://github.com/eried/flipperzero-mayhem)
-- Updated: Motion Mouse to be named: [Air Mouse 2 v1.0 (By nminaylov)](https://github.com/flipperdevices/flipperzero-good-faps/tree/nm/motion_mouse_app) `Req: ICM42688` They decided to take the same name as Air Mouse.
-- SubGHz: [Repeater: Use actual Time it takes to TX a Key as TX Length (By LeeroysHub)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/4bb9e085d88f477ce252f52df12050412220aa47)
-- Added: [Programmer Calculator v0.7 (By armixz)](https://github.com/armixz/Flipper-Zero-Programmer-Calculator)
-- UL: [SubGHz: better history element removal (By Willy-JL)](https://github.com/DarkFlippers/unleashed-firmware/commit/8fa21c49b2ee49aadd28d713f586880469e3bff1)
-- UL: [SubGHz: testing dynamic limit based on freeheap + RPC (By Willy-JL)](https://github.com/DarkFlippers/unleashed-firmware/commit/77f458fb6ea27057962f3767bd54a5bc5253276e)
-- UL: [SubGHz: faac rcxt add manually (not tested) (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/eaae5da51914a5ac5132d3540dda81c8a79c158d)
-- UL: [IR: change percent on number #672 (By krolchonok)](https://github.com/DarkFlippers/unleashed-firmware/pull/672)
-- Updated: [SPI Mem Manager v1.3 (By drunkbatya)-OFW](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/spi_mem_manager) [Added XM25QH64C and XM25QH128A support for spi mem manger app. #94 (By 5unr153)](https://github.com/flipperdevices/flipperzero-good-faps/pull/94)
-- [Updated infrared assets #677 (By amec0e)](https://github.com/DarkFlippers/unleashed-firmware/pull/677)
-- OFW: [Gui: fix string width calculation #3305 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3305)
-- OFW: [Rollback #3305 and #3297 fix various rendering issues #3307 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3307)
-- Updated: [Pokemon Trading v1.5 (By EstebanFuentealba & kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
-- Updated: [BLE Spam v4.4 (By Willy-JL & ECTO-1A & Spooks4576 with research from xMasterX; OFW API thanks to noproto)](https://github.com/noproto/apple_ble_spam_ofw) [Added new devices #1015 (By Mr-Proxy-source)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/1015)
 
 <a name="release">
 
@@ -542,4 +510,4 @@ $ ./fbt dolphin_ext
 - [Desktop Favorite Binds To Allow Opening Custom Game Menu. Whomever can complete this gets 3 months of subscriber builds. Patrons can DM me to add their monthly towards this bounty.](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/756)
 - `Bluetooth Audio` APP to allow flipper to pair to external speaker or headphones for wav/mp3 playback ($200 USD in ETH or BTC) (Don't think this is possible)
 
-# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1215-1347-0.93.9-073ec96.tgz&channel=RM1215-1347-0.93.9-073ec96&version=0.93.9) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1215-1347-0.93.9-073ec96-NoAnim.tgz&channel=RM1215-1347-0.93.9-073ec96-NoAnim&version=0.93.9)
+# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1223-2011-0.93.9-f05e1e3.tgz&channel=RM1223-2011-0.93.9-f05e1e3&version=0.93.9) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1223-2011-0.93.9-f05e1e3-NoAnim.tgz&channel=RM1223-2011-0.93.9-f05e1e3-NoAnim&version=0.93.9)
