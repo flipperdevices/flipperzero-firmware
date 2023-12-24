@@ -156,7 +156,7 @@ class Main(App):
             say = input("Anything to say? ").strip().lower()
             if say != "void":
                 return 2
-            say = input("Why, Mr. Anderson? ").strip().lower()
+            say = input("Why, Mr. Anderson?! Why?! WHY DO YOU PERSIST?! ").strip().lower()
             if say != "because":
                 return 3
 
