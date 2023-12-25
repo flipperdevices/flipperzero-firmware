@@ -1,8 +1,0 @@
-{
-    "C_Cpp.errorSquiggles": "disabled",
-    "files.associations": {
-        "dolphin_state.h": "c",
-        "gui.h": "c",
-        "furi.h": "c"
-    }
-}
