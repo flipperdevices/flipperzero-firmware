@@ -2,11 +2,14 @@
 
 # Matagotchi
 Tamagotchi like game for Flipper Zero
-![Home](images/home_screen.png) ![About](images/about_screen.png)
+
+![Home](images/home_screen.png)
+![About](images/about_screen.png)
 
 ## Supported features
 ### Life stages
 The pet grows from an egg to an adult and then dies of old age.
+
 The stages are ![Egg](assets/egg_00_60x60.png) -> ![Baby](assets/baby_00_60x60.png) -> ![Child](assets/child_00_60x60.png) -> ![Teen](assets/teen_00_60x60.png) -> ![Adult](assets/adult_00_60x60.png) -> ![Dead](assets/dead_00_60x60.png)
 
 What? Who said that a cat can't come from an egg? I must have missed some biology lessons.
@@ -25,12 +28,14 @@ state from the settings.
 
 ### Experience
 ![Stats](images/stats_screen.png)
+
 The pet periodically gains experience (XP). Once he reaches
 the maximum experience for the current life stage,
 he passes to the next stage.
 
 ### Hunger
 ![Candy](images/candy_screen.png)
+
 You have to feed the pet or he will starve.
 You can give him candies.
 
