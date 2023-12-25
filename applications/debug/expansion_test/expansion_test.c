@@ -293,7 +293,6 @@ static bool expansion_test_app_rpc_mkdir(ExpansionTestApp* instance) {
     return success;
 }
 
-// TODO: Implement multi-chunk RPC messages?
 static bool expansion_test_app_rpc_write(ExpansionTestApp* instance) {
     bool success = false;
 
