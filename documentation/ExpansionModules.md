@@ -3,11 +3,12 @@
 ## Terms and definitions
 
 - Expansion module: A third-party hardware unit meant for use with Flipper Zero by connecting it to its GPIO header.
-- Expansion module protocol: A serial-based, byte-oriented, synchronous, full-duplex communication protocol described in this document.
-- Host: Hardware unit tasked with serving requests. Used interchangeably with Flipper, Flipper Zero, Server etc. throughout this document.
+- Expansion module protocol: A serial-based, byte-oriented, synchronous communication protocol described in this document.
+- Host: Hardware unit tasked with serving requests. Used interchangeably with Flipper, Server, Host etc. throughout this document.
 - Device: Used interchangeably with Expansion module, Module, Client, etc.
 - RPC: Remote Procedure Call, a protobuf-based communication protocol widely used by Flipper Zero companion applications.
 - Timeout interval: Period of inactivity to be treated as a loss of connection, also denoted as Tto. Equals to 250 ms.
+- Baud rate switch dead time: Period of time after baud rate change during which no communication is allowed, also denoted Tdt. Equals to 25 ms.
 
 ## Features
 
@@ -27,19 +28,19 @@ Depending on the UART selected for communication, the following pins area availa
 
 ## Frame structure
 
-Each frame consists of a header (1 byte), contents (size depends of frame type) and CRC field (TBD bytes):
+Each frame consists of a header (1 byte), contents (size depends of frame type) and checksum (1 byte) fields:
 
-| Header (1 byte) | Contents (0 or more bytes) | CRC (? bytes) |
-|-----------------|----------------------------|---------------|
-| Frame type      | Frame payload              | CRC checksum  |
+| Header (1 byte) | Contents (0 or more bytes) | Checksum (1 byte) |
+|-----------------|----------------------------|-------------------|
+| Frame type      | Frame payload              | XOR checksum      |
 
 ### Heartbeat frame
 
 HEARTBEAT frames are used to maintain an idle connection. In the event of not receiving any frames within Tto, either side must cease all communications and be ready to initiate the connection again.
 
-| Header (1 byte) | CRC (? bytes) |
-|-----------------|---------------|
-| 0x01            | CRC checksum  |
+| Header (1 byte) | Checksum (1 byte) |
+|-----------------|-------------------|
+| 0x01            | XOR checksum      |
 
 Note that the contents field is not present (0 bytes length).
 
@@ -47,9 +48,9 @@ Note that the contents field is not present (0 bytes length).
 
 STATUS frames are used to report the status of a transaction. Every received frame MUST be confirmed by a matching STATUS response.
 
-| Header (1 byte) | Contents (1 byte) | CRC (? bytes) |
-|-----------------|-------------------|---------------|
-| 0x02            | Error code        | CRC checksum  |
+| Header (1 byte) | Contents (1 byte) | Checksum (1 byte) |
+|-----------------|-------------------|-------------------|
+| 0x02            | Error code        | XOR checksum      |
 
 The `Error code` field SHALL have one of the following values:
 
@@ -63,9 +64,9 @@ The `Error code` field SHALL have one of the following values:
 
 BAUD RATE frames are used to negotiate communication speed. The initial connection SHALL always happen at 9600 baud. The first message sent by the module MUST be a BAUD RATE frame, even if a different speed is not required.
 
-| Header (1 byte) | Contents (4 bytes) | CRC (? bytes) |
-|-----------------|--------------------|---------------|
-| 0x03            | Baud rate          | CRC checksum  |
+| Header (1 byte) | Contents (4 bytes) | Checksum (1 byte) |
+|-----------------|--------------------|-------------------|
+| 0x03            | Baud rate          | XOR checksum      |
 
 If the requested baud rate is supported by the host, it SHALL respond with a STATUS frame with an OK error code, otherwise the error code SHALL be 0x02 (Baud rate not supported). Until the negotiation succeeds, the speed SHALL remain at 9600 baud. The module MAY send additional BAUD RATE frames with alternative speeds in case the initial request was refused. No other frames are allowed until the speed negotiation succeeds.
 
@@ -73,9 +74,9 @@ If the requested baud rate is supported by the host, it SHALL respond with a STA
 
 CONTROL frames are used to control various aspects of the communication. As of now, the sole purpose of CONTROL frames is to start and stop the RPC session.
 
-| Header (1 byte) | Contents (1 byte) | CRC (? bytes) |
-|-----------------|-------------------|---------------|
-| 0x04            | Command           | CRC checksum  |
+| Header (1 byte) | Contents (1 byte) | Checksum (1 byte) |
+|-----------------|-------------------|-------------------|
+| 0x04            | Command           | XOR checksum      |
 
 The `Command` field SHALL have one of the followind values:
 
@@ -88,9 +89,9 @@ The `Command` field SHALL have one of the followind values:
 
 DATA frames are used to transmit arbitrary data in either direction. Each DATA frame can hold up to 64 bytes. If an RPC session is curretly open, all received bytes are forwarded to it.
 
-| Header (1 byte) | Contents (1 to 65 byte(s)) | CRC (? bytes) |
-|-----------------|----------------------------|---------------|
-| 0x05            | Data                       | CRC checksum  |
+| Header (1 byte) | Contents (1 to 65 byte(s)) | Checksum (1 byte) |
+|-----------------|----------------------------|-------------------|
+| 0x05            | Data                       | XOR checksum      |
 
 The `Data` field SHALL have the following structure:
 
@@ -112,6 +113,10 @@ Pull down RX                -->
                             <--       Heartbeat
 Baud Rate                   -->
                             <--       Status [OK | Error]
+                             |
+(Module changes baud rate    |        (Flipper changes 
+ and waits for Tdt)          |         baud rate)
+                             |
 Control [Start RPC]         -->
                             <--       Status [OK | Error]
 -----------------------------+--------------------------- (1)
