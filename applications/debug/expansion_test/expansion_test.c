@@ -18,8 +18,6 @@
 
 #define TAG "ExpansionTest"
 
-#define EXPANSION_PROTOCOL_TIMEOUT_MS (250U)
-
 #define TEST_DIR_PATH EXT_PATH(TAG)
 #define TEST_FILE_NAME "test.txt"
 #define TEST_FILE_PATH EXT_PATH(TAG "/" TEST_FILE_NAME)
