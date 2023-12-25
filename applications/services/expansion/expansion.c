@@ -14,7 +14,6 @@
 #define TAG "ExpansionSrv"
 
 #define EXPANSION_BUFFER_SIZE (sizeof(ExpansionFrame))
-#define EXPANSION_RX_STABILITY_CONFIDENCE (1000UL)
 
 typedef enum {
     ExpansionStateDisabled,
@@ -304,16 +303,6 @@ static void expansion_worker_pending_callback(void* context, uint32_t arg) {
     }
 }
 
-static inline void expansion_wait_for_stable_rx(Expansion* instance, uint32_t target_confidence) {
-    const GpioPin* rx_gpio =
-        furi_hal_serial_get_gpio_pin(instance->serial_handle, FuriHalSerialDirectionRx);
-
-    for(int32_t confidence = 0; confidence > (int32_t)target_confidence;) {
-        confidence += furi_hal_gpio_read(rx_gpio) ? 1 : -1;
-        furi_delay_us(1);
-    }
-}
-
 static int32_t expansion_worker(void* context) {
     furi_assert(context);
     Expansion* instance = context;
@@ -329,8 +318,6 @@ static int32_t expansion_worker(void* context) {
     instance->rx_buf = furi_stream_buffer_alloc(EXPANSION_BUFFER_SIZE, 1);
     instance->session_state = ExpansionSessionStateHandShake;
     instance->exit_reason = ExpansionSessionExitReasonUnknown;
-
-    expansion_wait_for_stable_rx(instance, EXPANSION_RX_STABILITY_CONFIDENCE);
 
     furi_hal_serial_init(instance->serial_handle, EXPANSION_DEFAULT_BAUD_RATE);
 
