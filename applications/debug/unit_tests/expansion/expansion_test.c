@@ -85,27 +85,6 @@ static size_t test_expansion_send_callback(const uint8_t* data, size_t data_size
     return size_sent;
 }
 
-MU_TEST(test_expansion_encode_frame) {
-    const ExpansionFrame frame_in = {
-        .header.type = ExpansionFrameTypeData,
-        .content.data.size = 8,
-        .content.data.bytes = {0xde, 0xad, 0xbe, 0xef, 0xfe, 0xed, 0xca, 0xfe},
-    };
-
-    ExpansionFrame frame_out;
-
-    TestExpansionSendStream stream = {
-        .data_out = &frame_out,
-        .size_available = sizeof(frame_out),
-        .size_sent = 0,
-    };
-
-    mu_assert(
-        expansion_frame_encode(&frame_in, test_expansion_send_callback, &stream), "encode failed");
-    mu_assert_int_eq(expansion_frame_get_encoded_size(&frame_in), stream.size_sent);
-    mu_assert_mem_eq(&frame_in, &frame_out, stream.size_sent);
-}
-
 typedef struct {
     const void* data_in;
     size_t size_available;
@@ -124,32 +103,52 @@ static size_t test_expansion_receive_callback(uint8_t* data, size_t data_size, v
     return size_received;
 }
 
-MU_TEST(test_expansion_decode_frame) {
+MU_TEST(test_expansion_encode_decode_frame) {
     const ExpansionFrame frame_in = {
         .header.type = ExpansionFrameTypeData,
         .content.data.size = 8,
         .content.data.bytes = {0xde, 0xad, 0xbe, 0xef, 0xfe, 0xed, 0xca, 0xfe},
     };
 
+    uint8_t encoded_data[sizeof(ExpansionFrame) + sizeof(ExpansionFrameChecksum)];
+    memset(encoded_data, 0, sizeof(encoded_data));
+
+    TestExpansionSendStream send_stream = {
+        .data_out = &encoded_data,
+        .size_available = sizeof(encoded_data),
+        .size_sent = 0,
+    };
+
+    const size_t encoded_size = expansion_frame_get_encoded_size(&frame_in);
+
+    mu_assert_int_eq(
+        expansion_protocol_encode(&frame_in, test_expansion_send_callback, &send_stream),
+        ExpansionProtocolStatusOk);
+    mu_assert_int_eq(encoded_size + sizeof(ExpansionFrameChecksum), send_stream.size_sent);
+    mu_assert_int_eq(
+        expansion_protocol_get_checksum((const uint8_t*)&frame_in, encoded_size),
+        encoded_data[encoded_size]);
+    mu_assert_mem_eq(&frame_in, &encoded_data, encoded_size);
+
     TestExpansionReceiveStream stream = {
-        .data_in = &frame_in,
-        .size_available = expansion_frame_get_encoded_size(&frame_in),
+        .data_in = encoded_data,
+        .size_available = send_stream.size_sent,
         .size_received = 0,
     };
 
     ExpansionFrame frame_out;
-    mu_assert(
-        expansion_frame_decode(&frame_out, test_expansion_receive_callback, &stream),
-        "decode failed");
-    mu_assert_int_eq(expansion_frame_get_encoded_size(&frame_in), stream.size_received);
-    mu_assert_mem_eq(&frame_in, &frame_out, stream.size_received);
+
+    mu_assert_int_eq(
+        expansion_protocol_decode(&frame_out, test_expansion_receive_callback, &stream),
+        ExpansionProtocolStatusOk);
+    mu_assert_int_eq(encoded_size + sizeof(ExpansionFrameChecksum), stream.size_received);
+    mu_assert_mem_eq(&frame_in, &frame_out, encoded_size);
 }
 
 MU_TEST_SUITE(test_expansion_suite) {
     MU_RUN_TEST(test_expansion_encoded_size);
     MU_RUN_TEST(test_expansion_remaining_size);
-    MU_RUN_TEST(test_expansion_encode_frame);
-    MU_RUN_TEST(test_expansion_decode_frame);
+    MU_RUN_TEST(test_expansion_encode_decode_frame);
 }
 
 int run_minunit_test_expansion() {

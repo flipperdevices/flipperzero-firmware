@@ -13,7 +13,7 @@
 
 #define TAG "ExpansionSrv"
 
-#define EXPANSION_BUFFER_SIZE (sizeof(ExpansionFrame))
+#define EXPANSION_BUFFER_SIZE (sizeof(ExpansionFrame) + sizeof(ExpansionFrameChecksum))
 
 typedef enum {
     ExpansionStateDisabled,
@@ -120,7 +120,8 @@ static bool expansion_send_heartbeat(Expansion* instance) {
         .content.heartbeat = {},
     };
 
-    return expansion_frame_encode(&frame, expansion_send_callback, instance);
+    return expansion_protocol_encode(&frame, expansion_send_callback, instance) ==
+           ExpansionProtocolStatusOk;
 }
 
 static bool expansion_send_status_response(Expansion* instance, ExpansionFrameError error) {
@@ -129,7 +130,8 @@ static bool expansion_send_status_response(Expansion* instance, ExpansionFrameEr
         .content.status.error = error,
     };
 
-    return expansion_frame_encode(&frame, expansion_send_callback, instance);
+    return expansion_protocol_encode(&frame, expansion_send_callback, instance) ==
+           ExpansionProtocolStatusOk;
 }
 
 static bool
@@ -142,7 +144,8 @@ static bool
     };
 
     memcpy(frame.content.data.bytes, data, data_size);
-    return expansion_frame_encode(&frame, expansion_send_callback, instance);
+    return expansion_protocol_encode(&frame, expansion_send_callback, instance) ==
+           ExpansionProtocolStatusOk;
 }
 
 // Called in Rpc session thread context
@@ -280,8 +283,9 @@ static inline void expansion_state_machine(Expansion* instance) {
     };
 
     while(true) {
-        if(!expansion_frame_decode(&instance->rx_frame, expansion_receive_callback, instance))
-            break;
+        const ExpansionProtocolStatus status =
+            expansion_protocol_decode(&instance->rx_frame, expansion_receive_callback, instance);
+        if(status != ExpansionProtocolStatusOk) break;
         if(!expansion_session_state_handlers[instance->session_state](instance)) break;
     }
 }

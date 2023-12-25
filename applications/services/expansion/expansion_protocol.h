@@ -124,6 +124,11 @@ typedef struct {
 #pragma pack(pop)
 
 /**
+ * @brief Expansion checksum type.
+ */
+typedef uint8_t ExpansionFrameChecksum;
+
+/**
  * @brief Receive function type declaration.
  *
  * @see expansion_frame_decode().
@@ -217,16 +222,44 @@ static size_t
 }
 
 /**
+ * @brief Enumeration of protocol parser statuses.
+ */
+typedef enum {
+    ExpansionProtocolStatusOk, /**< No error has occurred. */
+    ExpansionProtocolStatusErrorFormat, /**< Invalid frame type. */
+    ExpansionProtocolStatusErrorChecksum, /**< Checksum mismatch. */
+    ExpansionProtocolStatusErrorCommunication, /**< Input/output error. */
+} ExpansionProtocolStatus;
+
+/**
+ * @brief Get the checksum byte corresponding to the frame
+ *
+ * Lightweight XOR checksum algorithm for basic error detection.
+ *
+ * @param[in] data pointer to a byte buffer containing the data.
+ * @param[in] data_size size of the data buffer.
+ * @returns checksum byte of the frame.
+ */
+static ExpansionFrameChecksum
+    expansion_protocol_get_checksum(const uint8_t* data, size_t data_size) {
+    ExpansionFrameChecksum checksum = 0;
+    for(size_t i = 0; i < data_size; ++i) {
+        checksum ^= data[i];
+    }
+    return checksum;
+}
+
+/**
  * @brief Receive and decode a frame.
  *
- * Will repeatedly call the receive callback function until enough data is gathered.
+ * Will repeatedly call the receive callback function until enough data is received.
  *
  * @param[out] frame pointer to the frame to contain decoded data.
  * @param[in] receive pointer to the function used to receive data.
  * @param[in,out] context pointer to a user-defined context object. Will be passed to the receive callback function.
- * @returns true if a frame was successfully received and decoded, false otherwise.
+ * @returns ExpansionProtocolStatusOk on success, any other error code on failure.
  */
-static bool expansion_frame_decode(
+static ExpansionProtocolStatus expansion_protocol_decode(
     ExpansionFrame* frame,
     ExpansionFrameReceiveCallback receive,
     void* context) {
@@ -235,16 +268,33 @@ static bool expansion_frame_decode(
 
     while(true) {
         remaining_size = expansion_frame_get_remaining_size(frame, total_size);
-        if(remaining_size == 0 || remaining_size == SIZE_MAX) break;
+
+        if(remaining_size == SIZE_MAX) {
+            return ExpansionProtocolStatusErrorFormat;
+        } else if(remaining_size == 0) {
+            break;
+        }
 
         const size_t received_size =
             receive((uint8_t*)frame + total_size, remaining_size, context);
-        if(received_size == 0) break;
+
+        if(received_size == 0) {
+            return ExpansionProtocolStatusErrorCommunication;
+        }
 
         total_size += received_size;
     }
 
-    return remaining_size == 0;
+    ExpansionFrameChecksum checksum;
+    const size_t received_size = receive(&checksum, sizeof(checksum), context);
+
+    if(received_size != sizeof(checksum)) {
+        return ExpansionProtocolStatusErrorCommunication;
+    } else if(checksum != expansion_protocol_get_checksum((const uint8_t*)frame, total_size)) {
+        return ExpansionProtocolStatusErrorChecksum;
+    } else {
+        return ExpansionProtocolStatusOk;
+    }
 }
 
 /**
@@ -253,18 +303,25 @@ static bool expansion_frame_decode(
  * @param[in] frame pointer to the frame to be encoded and sent.
  * @param[in] send pointer to the function used to send data.
  * @param[in,out] context pointer to a user-defined context object. Will be passed to the send callback function.
- * @returns true if a frame was successfully encoded and sent, false otherwise.
+ * @returns ExpansionProtocolStatusOk on success, any other error code on failure.
  */
-static bool expansion_frame_encode(
+static ExpansionProtocolStatus expansion_protocol_encode(
     const ExpansionFrame* frame,
     ExpansionFrameSendCallback send,
     void* context) {
     const size_t encoded_size = expansion_frame_get_encoded_size(frame);
+    if(encoded_size == 0) {
+        return ExpansionProtocolStatusErrorFormat;
+    }
 
-    if(encoded_size != 0) {
-        return send((const uint8_t*)frame, encoded_size, context) == encoded_size;
+    const ExpansionFrameChecksum checksum =
+        expansion_protocol_get_checksum((const uint8_t*)frame, encoded_size);
+
+    if((send((const uint8_t*)frame, encoded_size, context) != encoded_size) ||
+       (send(&checksum, sizeof(checksum), context) != sizeof(checksum))) {
+        return ExpansionProtocolStatusErrorCommunication;
     } else {
-        return false;
+        return ExpansionProtocolStatusOk;
     }
 }
 

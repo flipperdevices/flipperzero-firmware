@@ -25,6 +25,8 @@
 #define HOST_SERIAL_ID (FuriHalSerialIdLpuart)
 #define MODULE_SERIAL_ID (FuriHalSerialIdUsart)
 
+#define RECEIVE_BUFFER_SIZE (sizeof(ExpansionFrame) + sizeof(ExpansionFrameChecksum))
+
 typedef enum {
     ExpansionTestAppFlagData = 1U << 0,
     ExpansionTestAppFlagExit = 1U << 1,
@@ -50,7 +52,7 @@ static void expansion_test_app_serial_rx_callback(uint8_t data, void* context) {
 
 static ExpansionTestApp* expansion_test_app_alloc() {
     ExpansionTestApp* instance = malloc(sizeof(ExpansionTestApp));
-    instance->buf = furi_stream_buffer_alloc(sizeof(ExpansionFrame), 1);
+    instance->buf = furi_stream_buffer_alloc(RECEIVE_BUFFER_SIZE, 1);
     return instance;
 }
 
@@ -122,7 +124,8 @@ static size_t
 }
 
 static bool expansion_test_app_receive_frame(ExpansionTestApp* instance, ExpansionFrame* frame) {
-    return expansion_frame_decode(frame, expansion_test_app_receive_callback, instance);
+    return expansion_protocol_decode(frame, expansion_test_app_receive_callback, instance) ==
+           ExpansionProtocolStatusOk;
 }
 
 static bool
@@ -131,7 +134,8 @@ static bool
         .header.type = ExpansionFrameTypeStatus,
         .content.status.error = error,
     };
-    return expansion_frame_encode(&frame, expansion_test_app_send_callback, instance);
+    return expansion_protocol_encode(&frame, expansion_test_app_send_callback, instance) ==
+           ExpansionProtocolStatusOk;
 }
 
 static bool expansion_test_app_send_heartbeat(ExpansionTestApp* instance) {
@@ -139,7 +143,8 @@ static bool expansion_test_app_send_heartbeat(ExpansionTestApp* instance) {
         .header.type = ExpansionFrameTypeHeartbeat,
         .content.heartbeat = {},
     };
-    return expansion_frame_encode(&frame, expansion_test_app_send_callback, instance);
+    return expansion_protocol_encode(&frame, expansion_test_app_send_callback, instance) ==
+           ExpansionProtocolStatusOk;
 }
 
 static bool
@@ -148,7 +153,8 @@ static bool
         .header.type = ExpansionFrameTypeBaudRate,
         .content.baud_rate.baud = baud_rate,
     };
-    return expansion_frame_encode(&frame, expansion_test_app_send_callback, instance);
+    return expansion_protocol_encode(&frame, expansion_test_app_send_callback, instance) ==
+           ExpansionProtocolStatusOk;
 }
 
 static bool expansion_test_app_send_control_request(
@@ -158,7 +164,8 @@ static bool expansion_test_app_send_control_request(
         .header.type = ExpansionFrameTypeControl,
         .content.control.command = command,
     };
-    return expansion_frame_encode(&frame, expansion_test_app_send_callback, instance);
+    return expansion_protocol_encode(&frame, expansion_test_app_send_callback, instance) ==
+           ExpansionProtocolStatusOk;
 }
 
 static bool expansion_test_app_send_data_request(
@@ -173,7 +180,8 @@ static bool expansion_test_app_send_data_request(
     };
 
     memcpy(frame.content.data.bytes, data, data_size);
-    return expansion_frame_encode(&frame, expansion_test_app_send_callback, instance);
+    return expansion_protocol_encode(&frame, expansion_test_app_send_callback, instance) ==
+           ExpansionProtocolStatusOk;
 }
 
 static bool expansion_test_app_rpc_encode_callback(
