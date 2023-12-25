@@ -1,7 +1,7 @@
 #include "nfc_playlist.h"
 #include "scences/emulation.h"
 
-bool cancel = false;
+NfcPlaylistEmulationState EmulationState = NfcPlaylistEmulationState_Stopped;
 
 void nfc_playlist_emulation_scene_on_enter(void* context) {
     NfcPlaylist* nfc_playlist = context;
@@ -10,13 +10,12 @@ void nfc_playlist_emulation_scene_on_enter(void* context) {
 }
 
 bool nfc_playlist_emulation_scene_on_event(void* context, SceneManagerEvent event) {
-    NfcPlaylist* nfc_playlist = context;
-    UNUSED(nfc_playlist);
+    UNUSED(context);
     FURI_LOG_RAW_I("nfc_playlist_emulation_scene_on_event: %ld", event.event);
     switch (event.event) {
         case 0:
-            if (nfc_playlist_worker_is_emulating(nfc_playlist->nfc_playlist_worker) && cancel != true) {
-                cancel = true;
+            if (EmulationState == NfcPlaylistEmulationState_Emulating) {
+                EmulationState = NfcPlaylistEmulationState_Canceled;
                 return true;
             }
         default:
@@ -28,7 +27,7 @@ bool nfc_playlist_emulation_scene_on_event(void* context, SceneManagerEvent even
 
 void nfc_playlist_emulation_scene_on_exit(void* context) {
     NfcPlaylist* nfc_playlist = context;
-    cancel = false;
+    EmulationState = NfcPlaylistEmulationState_Stopped;
     nfc_playlist_emulation_stop(nfc_playlist);
     nfc_playlist_emulation_free(nfc_playlist);
     popup_reset(nfc_playlist->popup);
@@ -73,10 +72,10 @@ int32_t nfc_playlist_emulation_task(void* context) {
 
     // Read file
     if(file_stream_open(stream, APP_DATA_PATH("playlist.txt"), FSAM_READ, FSOM_OPEN_EXISTING)) {
-
+        EmulationState = NfcPlaylistEmulationState_Emulating;
         int file_position = 0;
         // read the file line by line and print the text
-        while(stream_read_line(stream, line) && cancel == false) {
+        while(stream_read_line(stream, line) && EmulationState == NfcPlaylistEmulationState_Emulating) {
             if (options_emulate_delay[nfc_playlist->emulate_delay] > 0) {
                 if (file_position > 0) {
                     popup_set_header(nfc_playlist->popup, "Delaying", 64, 10, AlignCenter, AlignTop);
@@ -88,10 +87,14 @@ int32_t nfc_playlist_emulation_task(void* context) {
                         popup_set_text(nfc_playlist->popup, display_text, 64, 50, AlignCenter, AlignTop);
                         furi_delay_ms(500);
                         time_counter_delay_ms -= 500;
-                    } while(time_counter_delay_ms > 0 && cancel == false);
+                    } while(time_counter_delay_ms > 0 && EmulationState == NfcPlaylistEmulationState_Emulating);
                 } else {
                     file_position++;
                 }
+            }
+
+            if (EmulationState != NfcPlaylistEmulationState_Emulating) {
+                break;
             }
 
             char* file_path = (char*)furi_string_get_cstr(line);
@@ -109,27 +112,27 @@ int32_t nfc_playlist_emulation_task(void* context) {
                 snprintf(popup_header_text, 80, "%s\n%s", "ERROR not found:", file_name);
                 popup_set_header(nfc_playlist->popup, popup_header_text, 64, 10, AlignCenter, AlignTop);
                 start_error_blink(nfc_playlist);
-                do {
+                while(time_counter_ms > 0 && EmulationState == NfcPlaylistEmulationState_Emulating) {
                     char popup_text[10];
                     snprintf(popup_text, 10, "%ds", (time_counter_ms/1000));
                     popup_set_text(nfc_playlist->popup, popup_text, 64, 50, AlignCenter, AlignTop);
                     furi_delay_ms(500);
                     time_counter_ms -= 500;
-                } while(time_counter_ms > 0);
+                }
             } 
 
-            else if (strstr(file_ext, "nfc") == NULL) {
+            else if (strcasestr(file_ext, "nfc") == NULL) {
                 char popup_header_text[80];
                 snprintf(popup_header_text, 80, "%s\n%s", "ERROR invalid file:", file_name);
                 popup_set_header(nfc_playlist->popup, popup_header_text, 64, 10, AlignCenter, AlignTop);
                 start_error_blink(nfc_playlist);
-                do {
+                while(time_counter_ms > 0 && EmulationState == NfcPlaylistEmulationState_Emulating) {
                     char popup_text[10];
                     snprintf(popup_text, 10, "%ds", (time_counter_ms/1000));
                     popup_set_text(nfc_playlist->popup, popup_text, 64, 50, AlignCenter, AlignTop);
                     furi_delay_ms(500);
                     time_counter_ms -= 500;
-                } while(time_counter_ms > 0);
+                }
             }
             
             else {
@@ -139,16 +142,17 @@ int32_t nfc_playlist_emulation_task(void* context) {
                 nfc_playlist_worker_set_nfc_data(nfc_playlist->nfc_playlist_worker, file_path);
                 nfc_playlist_worker_start(nfc_playlist->nfc_playlist_worker);
                 start_normal_blink(nfc_playlist);
-                do {
+                while(nfc_playlist_worker_is_emulating(nfc_playlist->nfc_playlist_worker) && time_counter_ms > 0 && EmulationState == NfcPlaylistEmulationState_Emulating) {
                     char popup_text[10];
                     snprintf(popup_text, 10, "%ds", (time_counter_ms/1000));
                     popup_set_text(nfc_playlist->popup, popup_text, 64, 50, AlignCenter, AlignTop);
                     furi_delay_ms(500);
                     time_counter_ms -= 500;
-                } while(nfc_playlist_worker_is_emulating(nfc_playlist->nfc_playlist_worker) && time_counter_ms > 0 && cancel == false);
+                }
                 nfc_playlist_worker_stop(nfc_playlist->nfc_playlist_worker);
             }
         }
+        EmulationState = NfcPlaylistEmulationState_Stopped;
         popup_reset(nfc_playlist->popup);
         popup_set_header(nfc_playlist->popup, "Emulation finished", 64, 10, AlignCenter, AlignTop);
         popup_set_text(nfc_playlist->popup, "Press back", 64, 50, AlignCenter, AlignTop);
