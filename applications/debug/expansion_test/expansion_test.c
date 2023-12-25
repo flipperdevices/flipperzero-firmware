@@ -72,11 +72,6 @@ static void expansion_test_app_start(ExpansionTestApp* instance) {
 
     furi_hal_serial_set_rx_callback(
         instance->handle, expansion_test_app_serial_rx_callback, instance);
-
-    // Send pulses to emulate module insertion
-    const uint8_t init = 0xAA;
-    furi_hal_serial_tx(instance->handle, &init, sizeof(init));
-    furi_hal_serial_tx_wait_complete(instance->handle);
 }
 
 static void expansion_test_app_stop(ExpansionTestApp* instance) {
@@ -126,6 +121,10 @@ static size_t
     furi_hal_serial_tx_wait_complete(instance->handle);
 
     return data_size;
+}
+
+static bool expansion_test_app_receive_frame(ExpansionTestApp* instance, ExpansionFrame* frame) {
+    return expansion_frame_decode(frame, expansion_test_app_receive_callback, instance);
 }
 
 static bool
@@ -190,8 +189,7 @@ static bool expansion_test_app_rpc_encode_callback(
     while(size_sent < data_size) {
         const size_t current_size = MIN(data_size - size_sent, EXPANSION_PROTOCOL_MAX_DATA_SIZE);
         if(!expansion_test_app_send_data_request(instance, data + size_sent, current_size)) break;
-        if(!expansion_frame_decode(&instance->frame, expansion_test_app_receive_callback, instance))
-            break;
+        if(!expansion_test_app_receive_frame(instance, &instance->frame)) break;
         if(!expansion_test_app_is_success_response(&instance->frame)) break;
         size_sent += current_size;
     }
@@ -217,8 +215,7 @@ static bool expansion_test_app_receive_rpc_request(ExpansionTestApp* instance, P
     bool success = false;
 
     do {
-        if(!expansion_frame_decode(&instance->frame, expansion_test_app_receive_callback, instance))
-            break;
+        if(!expansion_test_app_receive_frame(instance, &instance->frame)) break;
         if(!expansion_test_app_send_status_response(instance, ExpansionFrameErrorNone)) break;
         if(instance->frame.header.type != ExpansionFrameTypeData) break;
         pb_istream_t stream = pb_istream_from_buffer(
@@ -230,12 +227,19 @@ static bool expansion_test_app_receive_rpc_request(ExpansionTestApp* instance, P
     return success;
 }
 
+static bool expansion_test_app_send_presence(ExpansionTestApp* instance) {
+    // Send pulses to emulate module insertion
+    const uint8_t init = 0xAA;
+    furi_hal_serial_tx(instance->handle, &init, sizeof(init));
+    furi_hal_serial_tx_wait_complete(instance->handle);
+    return true;
+}
+
 static bool expansion_test_app_wait_ready(ExpansionTestApp* instance) {
     bool success = false;
 
     do {
-        if(!expansion_frame_decode(&instance->frame, expansion_test_app_receive_callback, instance))
-            break;
+        if(!expansion_test_app_receive_frame(instance, &instance->frame)) break;
         if(instance->frame.header.type != ExpansionFrameTypeHeartbeat) break;
         success = true;
     } while(false);
@@ -248,10 +252,10 @@ static bool expansion_test_app_handshake(ExpansionTestApp* instance) {
 
     do {
         if(!expansion_test_app_send_baud_rate_request(instance, 230400)) break;
-        if(!expansion_frame_decode(&instance->frame, expansion_test_app_receive_callback, instance))
-            break;
+        if(!expansion_test_app_receive_frame(instance, &instance->frame)) break;
         if(!expansion_test_app_is_success_response(&instance->frame)) break;
         furi_hal_serial_set_br(instance->handle, 230400);
+        furi_delay_ms(EXPANSION_PROTOCOL_BAUD_CHANGE_DT_MS);
         success = true;
     } while(false);
 
@@ -264,8 +268,7 @@ static bool expansion_test_app_start_rpc(ExpansionTestApp* instance) {
     do {
         if(!expansion_test_app_send_control_request(instance, ExpansionFrameControlCommandStartRpc))
             break;
-        if(!expansion_frame_decode(&instance->frame, expansion_test_app_receive_callback, instance))
-            break;
+        if(!expansion_test_app_receive_frame(instance, &instance->frame)) break;
         if(!expansion_test_app_is_success_response(&instance->frame)) break;
         success = true;
     } while(false);
@@ -358,8 +361,7 @@ static bool expansion_test_app_idle(ExpansionTestApp* instance, uint32_t num_cyc
     uint32_t num_cycles_done;
     for(num_cycles_done = 0; num_cycles_done < num_cycles; ++num_cycles_done) {
         if(!expansion_test_app_send_heartbeat(instance)) break;
-        if(!expansion_frame_decode(&instance->frame, expansion_test_app_receive_callback, instance))
-            break;
+        if(!expansion_test_app_receive_frame(instance, &instance->frame)) break;
         if(instance->frame.header.type != ExpansionFrameTypeHeartbeat) break;
         furi_delay_ms(EXPANSION_PROTOCOL_TIMEOUT_MS - 50);
     }
@@ -373,8 +375,7 @@ static bool expansion_test_app_stop_rpc(ExpansionTestApp* instance) {
     do {
         if(!expansion_test_app_send_control_request(instance, ExpansionFrameControlCommandStopRpc))
             break;
-        if(!expansion_frame_decode(&instance->frame, expansion_test_app_receive_callback, instance))
-            break;
+        if(!expansion_test_app_receive_frame(instance, &instance->frame)) break;
         if(!expansion_test_app_is_success_response(&instance->frame)) break;
         success = true;
     } while(false);
@@ -391,6 +392,7 @@ int32_t expansion_test_app(void* p) {
     bool success = false;
 
     do {
+        if(!expansion_test_app_send_presence(instance)) break;
         if(!expansion_test_app_wait_ready(instance)) break;
         if(!expansion_test_app_handshake(instance)) break;
         if(!expansion_test_app_start_rpc(instance)) break;
