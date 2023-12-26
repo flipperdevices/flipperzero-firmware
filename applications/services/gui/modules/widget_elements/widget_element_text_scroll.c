@@ -18,6 +18,7 @@ typedef struct {
     uint8_t y;
     uint8_t width;
     uint8_t height;
+    uint8_t bar_offset;
     FuriString* text;
     uint8_t scroll_pos_total;
     uint8_t scroll_pos_current;
@@ -158,7 +159,7 @@ static void widget_element_text_scroll_draw(Canvas* canvas, WidgetElement* eleme
         if(model->scroll_pos_total > 1) {
             elements_scrollbar_pos(
                 canvas,
-                model->x + model->width + WIDGET_ELEMENT_TEXT_SCROLL_BAR_OFFSET,
+                model->x + model->width + model->bar_offset,
                 model->y,
                 model->height,
                 model->scroll_pos_current,
@@ -220,6 +221,7 @@ WidgetElement* widget_element_text_scroll_create(
     uint8_t y,
     uint8_t width,
     uint8_t height,
+    uint8_t bar_offest,
     const char* text) {
     furi_assert(text);
 
@@ -227,7 +229,8 @@ WidgetElement* widget_element_text_scroll_create(
     WidgetElementTextScrollModel* model = malloc(sizeof(WidgetElementTextScrollModel));
     model->x = x;
     model->y = y;
-    model->width = width - WIDGET_ELEMENT_TEXT_SCROLL_BAR_OFFSET;
+    model->bar_offset = bar_offest;
+    model->width = width - model->bar_offset;
     model->height = height;
     model->scroll_pos_current = 0;
     model->scroll_pos_total = 1;
