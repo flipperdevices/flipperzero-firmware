@@ -297,7 +297,7 @@ static void expansion_worker_pending_callback(void* context, uint32_t arg) {
     Expansion* instance = context;
     furi_thread_join(instance->worker_thread);
 
-    // Do not re-enable detection interrup on user-requested exit
+    // Do not re-enable detection interrupt on user-requested exit
     if(instance->exit_reason != ExpansionSessionExitReasonUser) {
         furi_mutex_acquire(instance->state_mutex, FuriWaitForever);
         instance->state = ExpansionStateEnabled;
