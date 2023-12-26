@@ -23,7 +23,7 @@ This repository contains a calculator application designed to run on Flipper Zer
 To get started with this calculator program, clone the repository and compile the source files.
 
 ```bash
-# clone `RogueMaster Firmware` or `Xtreme-Firmware` or `flipperzero-firmware` repository:
+# clone `RogueMaster Firmware` repository:
 git clone --recursive https://github.com/RogueMaster/flipperzero-firmware-wPlugins.git
 cd flipperzero-firmware-wPlugins/
 --or--
