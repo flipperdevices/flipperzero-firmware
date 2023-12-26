@@ -35,6 +35,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - Added: [Smack My Dolphin Up! (By siberianbot)](https://github.com/siberianbot/smack-my-dolphin-up)
 - OFW: [About: cn,tw,mx certification information #3318 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3318)
 - Updated: [Programmer Calculator v0.8 (By armixz)](https://github.com/armixz/Flipper-Zero-Programmer-Calculator)
+- UL: SubGHz: Temp fix for subghz keyboard lock display issue (furi_timer is not working properly) (By xMasterX)
+- UL: SubGHz: Added new option to delete old signals on full memory (By xMasterX)
 
 <a name="release">
 

@@ -22,6 +22,7 @@
 #define SUBGHZ_LAST_SETTING_FIELD_REPEATER "Repeater"
 #define SUBGHZ_LAST_SETTING_FIELD_LISTEN_AFTER_TX "ListenAfterTX"
 #define SUBGHZ_LAST_SETTING_FIELD_SOUND "Sound"
+#define SUBGHZ_LAST_SETTING_FIELD_DELETE_OLD "DelOldSignals"
 
 SubGhzLastSettings* subghz_last_settings_alloc(void) {
     SubGhzLastSettings* instance = malloc(sizeof(SubGhzLastSettings));
@@ -50,6 +51,7 @@ void subghz_last_settings_load(SubGhzLastSettings* instance, size_t preset_count
     bool temp_enable_listen_after_tx = false;
     bool temp_enable_sound = false;
     uint32_t temp_RepeaterState = false;
+    bool temp_delete_old_sig = false;
     uint32_t temp_ignore_filter = 0;
     uint32_t temp_filter = 0;
     float temp_rssi = 0;
@@ -121,7 +123,8 @@ void subghz_last_settings_load(SubGhzLastSettings* instance, size_t preset_count
             1);
         flipper_format_read_bool(
             fff_data_file, SUBGHZ_LAST_SETTING_FIELD_SOUND, (bool*)&temp_enable_sound, 1);
-
+        flipper_format_read_bool(
+            fff_data_file, SUBGHZ_LAST_SETTING_FIELD_DELETE_OLD, (bool*)&temp_delete_old_sig, 1);
     } else {
         FURI_LOG_E(TAG, "Error open file %s", SUBGHZ_LAST_SETTINGS_PATH);
     }
@@ -174,6 +177,8 @@ void subghz_last_settings_load(SubGhzLastSettings* instance, size_t preset_count
         instance->external_module_power_5v_disable = temp_external_module_power_5v_disable;
 
         instance->timestamp_file_names = temp_timestamp_file_names;
+
+        instance->delete_old_signals = temp_delete_old_sig;
 
         // External power amp CC1101
         instance->external_module_power_amp = temp_external_module_power_amp;
@@ -305,6 +310,10 @@ bool subghz_last_settings_save(SubGhzLastSettings* instance) {
         }
         if(!flipper_format_insert_or_update_bool(
                file, SUBGHZ_LAST_SETTING_FIELD_SOUND, &instance->enable_sound, 1)) {
+            break;
+        }
+        if(!flipper_format_insert_or_update_bool(
+               file, SUBGHZ_LAST_SETTING_FIELD_DELETE_OLD, &instance->delete_old_signals, 1)) {
             break;
         }
         saved = true;
