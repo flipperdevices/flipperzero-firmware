@@ -1,5 +1,6 @@
 #pragma once
 #include <furi.h>
+#include <furi_hal.h>
 #include <string.h>
 #include <gui/gui.h>
 #include <gui/view_dispatcher.h>
@@ -7,6 +8,7 @@
 #include <gui/modules/popup.h>
 #include <gui/modules/variable_item_list.h>
 #include <notification/notification_messages.h>
+#include <nfc_playlist_worker.h>
 
 typedef enum {
    NfcPlaylistView_Menu,
@@ -25,6 +27,8 @@ typedef struct {
    VariableItemList* variable_item_list;
    Popup* popup;
    NotificationApp* notification;
+   FuriThread* thread;
+   NfcPlaylistWorker* nfc_playlist_worker;
    uint8_t emulate_timeout;
    uint8_t emulate_delay;
    bool emulate_led_indicator;
