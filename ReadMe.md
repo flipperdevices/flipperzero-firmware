@@ -34,6 +34,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW PR: NFC: [Update mf_classic_dict.nfc #3314 (By ry4000)](https://github.com/flipperdevices/flipperzero-firmware/pull/3314) - For Bandai Namco Passport / Sega Aime Card (Already part of key dictionairy lines 1918-1952.)
 - Added: [Smack My Dolphin Up! (By siberianbot)](https://github.com/siberianbot/smack-my-dolphin-up)
 - OFW: [About: cn,tw,mx certification information #3318 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3318)
+- Updated: [Programmer Calculator v0.8 (By armixz)](https://github.com/armixz/Flipper-Zero-Programmer-Calculator)
 
 ## IN THIS BRANCH:
 
@@ -530,7 +531,7 @@ $ ./fbt dolphin_ext
 - [Pokemon Trading v1.5 (By EstebanFuentealba & kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
 - [Pomodoro Timer v1.2 (By sbrin)](https://github.com/sbrin/flipperzero_pomodoro)
 - [Pomodoro 2 v1.3 (By Th3Un1q3)](https://github.com/Th3Un1q3/flipp_pomodoro)
-- [Programmer Calculator v0.7 (By armixz)](https://github.com/armixz/Flipper-Zero-Programmer-Calculator)
+- [Programmer Calculator v0.8 (By armixz)](https://github.com/armixz/Flipper-Zero-Programmer-Calculator)
 - [Protocol Visualizer v1.1 (By antirez)](https://github.com/antirez/protoview)
 - [UHF RFID WIP v1.1 (By frux-c)](https://github.com/frux-c/uhf_rfid) `Req: M100 or QM100`
 - [QR Code v2.0 (By bmatcuk)](https://github.com/bmatcuk/flipperzero-qrcode)
