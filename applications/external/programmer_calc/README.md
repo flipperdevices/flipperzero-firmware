@@ -27,9 +27,6 @@ To get started with this calculator program, clone the repository and compile th
 git clone --recursive https://github.com/RogueMaster/flipperzero-firmware-wPlugins.git
 cd flipperzero-firmware-wPlugins/
 --or--
-git clone --recursive --jobs 8 https://github.com/Flipper-XFW/Xtreme-Firmware.git
-cd Xtreme-Firmware/
---or--
 git clone https://github.com/flipperdevices/flipperzero-firmware.git
 cd flipperzero-firmware/
 
