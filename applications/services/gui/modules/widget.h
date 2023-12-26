@@ -127,6 +127,30 @@ void widget_add_text_scroll_element(
     uint8_t height,
     const char* text);
 
+/** Add Text Scroll Element with custom bar symbol offset 
+ *
+ * @param      widget           Widget instance
+ * @param      x                x coordinate
+ * @param      y                y coordinate
+ * @param      width            width to fit text
+ * @param      height           height to fit text
+ * @param      bar_offset       offset from text to bar symbol, effects on the actual element workspace width
+ * @param[in]  text             Formatted text. Default format: align left, Secondary font.
+ *                              The following formats are available:
+ *                               "\e#Bold text" - sets bold font before until next '\n' symbol
+ *                               "\e*Monospaced text\e*" - sets monospaced font before until next '\n' symbol
+ *                               "\ecCenter-aligned text" - sets center horizontal align until the next '\n' symbol
+ *                               "\erRight-aligned text" - sets right horizontal align until the next '\n' symbol
+ */
+void widget_add_text_scroll_with_offset_element(
+    Widget* widget,
+    uint8_t x,
+    uint8_t y,
+    uint8_t width,
+    uint8_t height,
+    uint8_t bar_offset,
+    const char* text);
+
 /** Add Button Element
  *
  * @param      widget       Widget instance

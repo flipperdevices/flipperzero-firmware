@@ -2,8 +2,6 @@
 #include <gui/elements.h>
 #include <m-array.h>
 
-#define WIDGET_ELEMENT_TEXT_SCROLL_BAR_OFFSET (4)
-
 typedef struct {
     Font font;
     Align horizontal;
