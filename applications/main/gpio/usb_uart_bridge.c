@@ -86,14 +86,14 @@ static void usb_uart_on_irq_rx_dma_cb(
 
     if(ev & (FuriHalSerialRxEventRx | FuriHalSerialRxEventEnd)) {
         uint8_t data[FURI_HAL_SERIAL_DMA_BUFFER_SIZE] = {0};
-        do {
+        while(size) {
             size_t ret = furi_hal_serial_dma_rx(
                 handle,
                 data,
                 (size > FURI_HAL_SERIAL_DMA_BUFFER_SIZE) ? FURI_HAL_SERIAL_DMA_BUFFER_SIZE : size);
             furi_stream_buffer_send(usb_uart->rx_stream, data, ret, 0);
             size -= ret;
-        } while(size);
+        };
         furi_thread_flags_set(furi_thread_get_id(usb_uart->thread), WorkerEvtRxDone);
     }
 }

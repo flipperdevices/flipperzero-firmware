@@ -12,7 +12,7 @@
 
 #include <furi.h>
 
-#define USART1_SET_OVERSAMPLING LL_USART_OVERSAMPLING_16
+#define FURI_HAL_USART_OVERSAMPLING LL_USART_OVERSAMPLING_16
 
 typedef struct {
     uint8_t* buffer_rx_ptr;
@@ -35,34 +35,30 @@ static void furi_hal_serial_rx_configure(
 
 static void furi_hal_serial_usart_irq_callback() {
     FuriHalSerialRxEvent event = 0;
-    if(!(USART1->ISR & (USART_ISR_ORE | USART_ISR_NE | USART_ISR_FE | USART_ISR_PE))) {
-        //if no errors
-        if(USART1->ISR & USART_ISR_RXNE_RXFNE) {
-            event |= FuriHalSerialRxEventRx;
-        }
-
-        if(USART1->ISR & USART_ISR_IDLE) {
-            USART1->ICR |= USART_ICR_IDLECF;
-            event |= FuriHalSerialRxEventEnd;
-        }
-    } else {
-        //if errors
-        if(USART1->ISR & USART_ISR_ORE) {
-            USART1->ICR |= USART_ICR_ORECF;
-            event |= FuriHalSerialRxEventOverrunError;
-        }
-        if(USART1->ISR & USART_ISR_NE) {
-            USART1->ICR |= USART_ICR_NECF;
-            event |= FuriHalSerialRxEventNoiseLineError;
-        }
-        if(USART1->ISR & USART_ISR_FE) {
-            USART1->ICR |= USART_ICR_FECF;
-            event |= FuriHalSerialRxEventFrameError;
-        }
-        if(USART1->ISR & USART_ISR_PE) {
-            USART1->ICR |= USART_ICR_PECF;
-            event |= FuriHalSerialRxEventFrameError;
-        }
+    //if no errors
+    if(USART1->ISR & USART_ISR_RXNE_RXFNE) {
+        event |= FuriHalSerialRxEventRx;
+    }
+    if(USART1->ISR & USART_ISR_IDLE) {
+        USART1->ICR = USART_ICR_IDLECF;
+        event |= FuriHalSerialRxEventEnd;
+    }
+    //if errors
+    if(USART1->ISR & USART_ISR_ORE) {
+        USART1->ICR = USART_ICR_ORECF;
+        event |= FuriHalSerialRxEventOverrunError;
+    }
+    if(USART1->ISR & USART_ISR_NE) {
+        USART1->ICR = USART_ICR_NECF;
+        event |= FuriHalSerialRxEventNoiseError;
+    }
+    if(USART1->ISR & USART_ISR_FE) {
+        USART1->ICR = USART_ICR_FECF;
+        event |= FuriHalSerialRxEventFrameError;
+    }
+    if(USART1->ISR & USART_ISR_PE) {
+        USART1->ICR = USART_ICR_PECF;
+        event |= FuriHalSerialRxEventFrameError;
     }
 
     if(furi_hal_serial[FuriHalSerialIdUsart].buffer_rx_ptr == NULL) {
@@ -203,7 +199,7 @@ static void furi_hal_serial_uasrt_init(FuriHalSerialHandle* handle, uint32_t bau
     USART_InitStruct.Parity = LL_USART_PARITY_NONE;
     USART_InitStruct.TransferDirection = LL_USART_DIRECTION_TX_RX;
     USART_InitStruct.HardwareFlowControl = LL_USART_HWCONTROL_NONE;
-    USART_InitStruct.OverSampling = USART1_SET_OVERSAMPLING;
+    USART_InitStruct.OverSampling = FURI_HAL_USART_OVERSAMPLING;
     LL_USART_Init(USART1, &USART_InitStruct);
     LL_USART_EnableFIFO(USART1);
     LL_USART_ConfigAsyncMode(USART1);
@@ -220,34 +216,30 @@ static void furi_hal_serial_uasrt_init(FuriHalSerialHandle* handle, uint32_t bau
 
 static void furi_hal_serial_lpuart_irq_callback() {
     FuriHalSerialRxEvent event = 0;
-    if(!(LPUART1->ISR & (USART_ISR_ORE | USART_ISR_NE | USART_ISR_FE | USART_ISR_PE))) {
-        //if no errors
-        if(LPUART1->ISR & USART_ISR_RXNE_RXFNE) {
-            event |= FuriHalSerialRxEventRx;
-        }
-
-        if(LPUART1->ISR & USART_ISR_IDLE) {
-            LPUART1->ICR |= USART_ICR_IDLECF;
-            event |= FuriHalSerialRxEventEnd;
-        }
-    } else {
-        //if errors
-        if(LPUART1->ISR & USART_ISR_ORE) {
-            LPUART1->ICR |= USART_ICR_ORECF;
-            event |= FuriHalSerialRxEventOverrunError;
-        }
-        if(LPUART1->ISR & USART_ISR_NE) {
-            LPUART1->ICR |= USART_ICR_NECF;
-            event |= FuriHalSerialRxEventNoiseLineError;
-        }
-        if(LPUART1->ISR & USART_ISR_FE) {
-            LPUART1->ICR |= USART_ICR_FECF;
-            event |= FuriHalSerialRxEventFrameError;
-        }
-        if(LPUART1->ISR & USART_ISR_PE) {
-            LPUART1->ICR |= USART_ICR_PECF;
-            event |= FuriHalSerialRxEventFrameError;
-        }
+    //if no errors
+    if(LPUART1->ISR & USART_ISR_RXNE_RXFNE) {
+        event |= FuriHalSerialRxEventRx;
+    }
+    if(LPUART1->ISR & USART_ISR_IDLE) {
+        LPUART1->ICR = USART_ICR_IDLECF;
+        event |= FuriHalSerialRxEventEnd;
+    }
+    //if errors
+    if(LPUART1->ISR & USART_ISR_ORE) {
+        LPUART1->ICR = USART_ICR_ORECF;
+        event |= FuriHalSerialRxEventOverrunError;
+    }
+    if(LPUART1->ISR & USART_ISR_NE) {
+        LPUART1->ICR = USART_ICR_NECF;
+        event |= FuriHalSerialRxEventNoiseError;
+    }
+    if(LPUART1->ISR & USART_ISR_FE) {
+        LPUART1->ICR = USART_ICR_FECF;
+        event |= FuriHalSerialRxEventFrameError;
+    }
+    if(LPUART1->ISR & USART_ISR_PE) {
+        LPUART1->ICR = USART_ICR_PECF;
+        event |= FuriHalSerialRxEventFrameError;
     }
 
     if(furi_hal_serial[FuriHalSerialIdLpuart].buffer_rx_ptr == NULL) {
@@ -265,26 +257,6 @@ static void furi_hal_serial_lpuart_irq_callback() {
                 furi_hal_serial_dma_bytes_available(FuriHalSerialIdLpuart),
                 furi_hal_serial[FuriHalSerialIdLpuart].context);
         }
-    }
-
-    if(LL_LPUART_IsActiveFlag_RXNE_RXFNE(LPUART1)) {
-        if(furi_hal_serial[FuriHalSerialIdLpuart].rx_byte_callback) {
-            furi_hal_serial[FuriHalSerialIdLpuart].rx_byte_callback(
-                furi_hal_serial[FuriHalSerialIdLpuart].handle,
-                FuriHalSerialRxEventRx,
-                furi_hal_serial[FuriHalSerialIdLpuart].context);
-        }
-    } else if(LL_LPUART_IsActiveFlag_IDLE(LPUART1)) {
-        LL_LPUART_ClearFlag_IDLE(LPUART1);
-        if(furi_hal_serial[FuriHalSerialIdLpuart].rx_dma_callback) {
-            furi_hal_serial[FuriHalSerialIdLpuart].rx_dma_callback(
-                furi_hal_serial[FuriHalSerialIdLpuart].handle,
-                FuriHalSerialRxEventEnd,
-                furi_hal_serial_dma_bytes_available(FuriHalSerialIdLpuart),
-                furi_hal_serial[FuriHalSerialIdLpuart].context);
-        }
-    } else if(LL_LPUART_IsActiveFlag_ORE(LPUART1)) {
-        LL_LPUART_ClearFlag_ORE(LPUART1);
     }
 }
 
@@ -435,7 +407,7 @@ static uint32_t furi_hal_serial_get_prescaler(FuriHalSerialHandle* handle, uint3
     uint32_t divisor = (uartclk / baud);
     uint32_t prescaler = 0;
     if(handle->id == FuriHalSerialIdUsart) {
-        if(USART1_SET_OVERSAMPLING == LL_USART_OVERSAMPLING_16) {
+        if(FURI_HAL_USART_OVERSAMPLING == LL_USART_OVERSAMPLING_16) {
             divisor = (divisor / 16) >> 12;
         } else {
             divisor = (divisor / 8) >> 12;
@@ -508,7 +480,7 @@ void furi_hal_serial_set_br(FuriHalSerialHandle* handle, uint32_t baud) {
             LL_USART_Disable(USART1);
             uint32_t uartclk = LL_RCC_GetUSARTClockFreq(LL_RCC_USART1_CLKSOURCE);
             LL_USART_SetPrescaler(USART1, prescaler);
-            LL_USART_SetBaudRate(USART1, uartclk, prescaler, USART1_SET_OVERSAMPLING, baud);
+            LL_USART_SetBaudRate(USART1, uartclk, prescaler, FURI_HAL_USART_OVERSAMPLING, baud);
             LL_USART_Enable(USART1);
         }
     } else if(handle->id == FuriHalSerialIdLpuart) {
@@ -630,7 +602,7 @@ static void furi_hal_serial_event_init(FuriHalSerialHandle* handle, FuriHalSeria
         }
 
         if(event & (FuriHalSerialRxEventOverrunError | FuriHalSerialRxEventFrameError |
-                    FuriHalSerialRxEventNoiseLineError)) {
+                    FuriHalSerialRxEventNoiseError)) {
             if(handle->id == FuriHalSerialIdUsart) {
                 LL_USART_EnableIT_ERROR(USART1);
             } else if(handle->id == FuriHalSerialIdLpuart) {
@@ -730,7 +702,7 @@ static size_t furi_hal_serial_dma_bytes_available(FuriHalSerialId ch) {
     } else if(ch == FuriHalSerialIdLpuart) {
         index_dma = LL_DMA_GetDataLength(DMA1, LL_DMA_CHANNEL_7);
     } else {
-        return 0;
+        furi_crash("Invalid programming");
     }
 
     furi_hal_serial[ch].buffer_rx_index_write = FURI_HAL_SERIAL_DMA_BUFFER_SIZE - index_dma;

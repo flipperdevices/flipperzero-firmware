@@ -106,33 +106,32 @@ static void
     UartEchoApp* app = context;
     volatile FuriHalSerialRxEvent event_copy = event;
     UNUSED(event_copy);
+
+    WorkerEventFlags flag = 0;
+
     if(event & FuriHalSerialRxEventRx) {
         uint8_t data = furi_hal_serial_rx(handle);
         furi_stream_buffer_send(app->rx_stream, &data, 1, 0);
-        furi_thread_flags_set(furi_thread_get_id(app->worker_thread), WorkerEventRx);
+        flag |= WorkerEventRx;
     }
 
     if(event & FuriHalSerialRxEventEnd) {
         //idle line detected, packet transmission may have ended
-        furi_thread_flags_set(furi_thread_get_id(app->worker_thread), WorkerEventRxEnd);
+        flag |= WorkerEventRxEnd;
     }
 
-    if(event & (FuriHalSerialRxEventFrameError | FuriHalSerialRxEventNoiseLineError |
-                FuriHalSerialRxEventOverrunError)) {
-        //error detected
-        WorkerEventFlags flag = 0;
-        if(event & FuriHalSerialRxEventFrameError) {
-            flag |= WorkerEventRxFE;
-        }
-        if(event & FuriHalSerialRxEventNoiseLineError) {
-            flag |= WorkerEventRxNE;
-        }
-        if(event & FuriHalSerialRxEventOverrunError) {
-            flag |= WorkerEventRxORE;
-        }
-
-        furi_thread_flags_set(furi_thread_get_id(app->worker_thread), flag);
+    //error detected
+    if(event & FuriHalSerialRxEventFrameError) {
+        flag |= WorkerEventRxFE;
     }
+    if(event & FuriHalSerialRxEventNoiseError) {
+        flag |= WorkerEventRxNE;
+    }
+    if(event & FuriHalSerialRxEventOverrunError) {
+        flag |= WorkerEventRxORE;
+    }
+
+    furi_thread_flags_set(furi_thread_get_id(app->worker_thread), flag);
 }
 
 static void uart_echo_push_to_list(UartDumpModel* model, const char data) {
@@ -279,7 +278,7 @@ static UartEchoApp* uart_echo_app_alloc(uint32_t baudrate) {
         app->serial_handle,
         uart_echo_on_irq_cb,
         app,
-        (FuriHalSerialRxEventFrameError | FuriHalSerialRxEventNoiseLineError |
+        (FuriHalSerialRxEventFrameError | FuriHalSerialRxEventNoiseError |
          FuriHalSerialRxEventEnd | FuriHalSerialRxEventOverrunError));
 
     return app;
