@@ -174,6 +174,22 @@ static void subghz_scene_add_to_history_callback(
                 FURI_LOG_I(TAG, "Key Received, Transmitting now.");
             }
         } else {
+            if(subghz->last_settings->delete_old_signals) {
+                if(subghz_history_get_last_index(subghz->history) >= 54) {
+                    subghz->state_notifications = SubGhzNotificationStateRx;
+
+                    subghz_view_receiver_disable_draw_callback(subghz->subghz_receiver);
+
+                    subghz_history_delete_item(subghz->history, 0);
+                    subghz_view_receiver_delete_item(subghz->subghz_receiver, 0);
+                    subghz_view_receiver_enable_draw_callback(subghz->subghz_receiver);
+
+                    subghz_scene_receiver_update_statusbar(subghz);
+                    subghz->idx_menu_chosen =
+                        subghz_view_receiver_get_idx_menu(subghz->subghz_receiver);
+                    idx--;
+                }
+            }
             if(subghz_history_add_to_history(history, decoder_base, &preset)) {
                 furi_string_reset(item_name);
                 furi_string_reset(item_time);
@@ -200,7 +216,7 @@ static void subghz_scene_add_to_history_callback(
         furi_string_free(item_time);
 
     } else {
-        FURI_LOG_I(TAG, "%s protocol ignored", decoder_base->protocol->name);
+        FURI_LOG_D(TAG, "%s protocol ignored", decoder_base->protocol->name);
     }
 }
 
