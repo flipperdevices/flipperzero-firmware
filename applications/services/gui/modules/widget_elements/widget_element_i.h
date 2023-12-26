@@ -79,11 +79,13 @@ WidgetElement* widget_element_frame_create(
     uint8_t height,
     uint8_t radius);
 
+/** Create text scroll element */
 WidgetElement* widget_element_text_scroll_create(
     uint8_t x,
     uint8_t y,
     uint8_t width,
     uint8_t height,
+    uint8_t bar_offset,
     const char* text);
 
 #ifdef __cplusplus
