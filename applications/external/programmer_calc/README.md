@@ -27,9 +27,6 @@ To get started with this calculator program, clone the repository and compile th
 git clone --recursive https://github.com/RogueMaster/flipperzero-firmware-wPlugins.git
 cd flipperzero-firmware-wPlugins/
 --or--
-git clone --recursive --jobs 8 https://github.com/Flipper-XFW/Xtreme-Firmware.git
-cd Xtreme-Firmware/
---or--
 git clone https://github.com/flipperdevices/flipperzero-firmware.git
 cd flipperzero-firmware/
 
@@ -43,7 +40,7 @@ cd applications_user/
 git clone https://github.com/armixz/Flipper-Zero-Programmer-Calculator.git
 
 # build and launch the app
-cd ~/path/to/root-directory eg. ~/Xtreme-Firmware
+cd ~/path/to/root-directory eg. ~/flipperzero-firmware-wPlugins
 ./fbt launch APPSRC=programmercalc
 ```
 
@@ -74,5 +71,5 @@ Distributed under the GPL-3.0 License. See `LICENSE` for more information.
 
 ## Acknowledgements 🎉
 
-- Huge thanks to [Flipper-XFW](https://github.com/Flipper-XFW/Xtreme-Apps/tree/dev/calculator) - [@n-o-T-I-n-s-a-n-e](https://github.com/n-o-T-I-n-s-a-n-e) for being the inspiration and idea behind starting this project.
+- Huge thanks to [@n-o-T-I-n-s-a-n-e](https://github.com/n-o-T-I-n-s-a-n-e) for being the inspiration and idea behind starting this project.
 - This project uses libraries and tools from the Flipper Universal Registry Implementation (FURI), including Furi, Furi HAL, and GUI.
