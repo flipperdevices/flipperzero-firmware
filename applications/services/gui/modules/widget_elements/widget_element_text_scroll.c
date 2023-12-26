@@ -48,7 +48,8 @@ static bool
     return processed;
 }
 
-void widget_element_text_scroll_add_line(WidgetElement* element, TextScrollLineArray* line) {
+static void
+    widget_element_text_scroll_add_line(WidgetElement* element, TextScrollLineArray* line) {
     WidgetElementTextScrollModel* model = element->model;
     TextScrollLineArray new_line;
     new_line.font = line->font;
