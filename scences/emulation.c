@@ -119,7 +119,7 @@ int32_t nfc_playlist_emulation_task(void* context) {
                     furi_delay_ms(500);
                     time_counter_ms -= 500;
                 }
-            } 
+            }
 
             else if (strcasestr(file_ext, "nfc") == NULL) {
                 char popup_header_text[80];
@@ -134,7 +134,7 @@ int32_t nfc_playlist_emulation_task(void* context) {
                     time_counter_ms -= 500;
                 }
             }
-            
+
             else {
                 char popup_header_text[80];
                 snprintf(popup_header_text, 80, "%s\n%s", "Emulating:", file_name);
@@ -165,6 +165,6 @@ int32_t nfc_playlist_emulation_task(void* context) {
     furi_string_free(line);
     file_stream_close(stream);
     stream_free(stream);
-    // Close storage    
+    // Close storage
     return 0;
 }
