@@ -1,1 +1,0 @@
-fbt fap_nfc_playlist && fbt launch APPSRC=applications_user/nfc_playlist
