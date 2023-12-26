@@ -48,6 +48,8 @@ static NfcPlaylist* nfc_playlist_alloc() {
     nfc_playlist->popup = popup_alloc();
     nfc_playlist->emulate_timeout = default_emulate_timeout;
     nfc_playlist->emulate_delay = default_emulate_delay;
+    nfc_playlist->emulate_led_indicator = default_emulate_led_indicator;
+    nfc_playlist->notification = furi_record_open(RECORD_NOTIFICATION);
 
     view_dispatcher_set_event_callback_context(nfc_playlist->view_dispatcher, nfc_playlist);
     view_dispatcher_set_custom_event_callback(
@@ -74,6 +76,7 @@ static void nfc_playlist_free(NfcPlaylist* nfc_playlist) {
     view_dispatcher_free(nfc_playlist->view_dispatcher);
     variable_item_list_free(nfc_playlist->variable_item_list);
     popup_free(nfc_playlist->popup);
+    furi_record_close(RECORD_NOTIFICATION);
     free(nfc_playlist);
 }
 

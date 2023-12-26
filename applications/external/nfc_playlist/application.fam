@@ -9,6 +9,9 @@ App(
         Lib(
             name="worker",
         ),
+        Lib(
+            name="led",
+        ),
     ],
     fap_icon="playlist_10px.png",
     fap_author="acegoal07",
