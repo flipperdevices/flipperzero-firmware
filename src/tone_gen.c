@@ -6,21 +6,21 @@
 #include "app_context.h"
 #include "tone_gen.h"
 
-#include "menus/main_menu.h"
+#include "scenes/starting_scene.h"
 
 /** collection of all scene on_enter handlers - in the same order as their enum */
 void (*const scene_on_enter_handlers[])(void*) = {
-    scene_on_enter_main_menu,
+    scene_on_enter_starting_scene,
 };
 
 /** collection of all scene on event handlers - in the same order as their enum */
 bool (*const scene_on_event_handlers[])(void*, SceneManagerEvent) = {
-    scene_on_event_main_menu,
+    scene_on_event_starting_scene,
 };
 
 /** collection of all scene on exit handlers - in the same order as their enum */
 void (*const scene_on_exit_handlers[])(void*) = {
-    scene_on_exit_main_menu,
+    scene_on_exit_starting_scene,
 };
 
 const SceneManagerHandlers scene_event_handlers = {

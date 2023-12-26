@@ -1,7 +1,7 @@
 #include <gui/modules/menu.h>
 #include <gui/modules/popup.h>
 
-#include "main_menu.h"
+#include "starting_scene.h"
 #include "../app_context.h"
 #include "../tone_gen.h"
 #include "../utils/linked_list.h"
@@ -13,8 +13,8 @@ typedef enum {
 } ToneGenAppMenuSelection;
 
 /** main menu callback - sends a custom event to the scene manager based on the menu selection */
-void menu_callback_main_menu(void* context, uint32_t index) {
-    FURI_LOG_I(TAG, "menu_callback_main_menu");
+void menu_callback_starting_scene(void* context, uint32_t index) {
+    FURI_LOG_I(TAG, "menu_callback_starting_scene");
     UNUSED(context);
     // struct AppContext_t* app = context;
     switch(index) {
@@ -30,8 +30,8 @@ void menu_callback_main_menu(void* context, uint32_t index) {
 }
 
 /** resets the menu, gives it content, callbacks and selection enums */
-void scene_on_enter_main_menu(void* context) {
-    FURI_LOG_I(TAG, "scene_on_enter_main_menu");
+void scene_on_enter_starting_scene(void* context) {
+    FURI_LOG_I(TAG, "scene_on_enter_starting_scene");
     struct AppContext_t* app = (struct AppContext_t*)context;
     // Setup our menu
     FURI_LOG_D(TAG, "Adding view menu");
@@ -55,21 +55,21 @@ void scene_on_enter_main_menu(void* context) {
         "Play Tone",
         NULL,
         ToneGenAppMenuSelection_Play,
-        menu_callback_main_menu,
+        menu_callback_starting_scene,
         app);
     menu_add_item(
         menuView->viewData,
         "Adjust Tone",
         NULL,
         ToneGenAppMenuSelection_Adjust,
-        menu_callback_main_menu,
+        menu_callback_starting_scene,
         app);
     view_dispatcher_switch_to_view(app->view_dispatcher, ToneGenAppView_Menu);
 }
 
 /** main menu event handler - switches scene based on the event */
-bool scene_on_event_main_menu(void* context, SceneManagerEvent event) {
-    FURI_LOG_I(TAG, "scene_on_event_main_menu");
+bool scene_on_event_starting_scene(void* context, SceneManagerEvent event) {
+    FURI_LOG_I(TAG, "scene_on_event_starting_scene");
     UNUSED(context);
     // struct AppContext_t* app = context;
     bool consumed = false;
@@ -93,8 +93,8 @@ bool scene_on_event_main_menu(void* context, SceneManagerEvent event) {
     return consumed;
 }
 
-void scene_on_exit_main_menu(void* context) {
-    FURI_LOG_I(TAG, "scene_on_exit_main_menu");
+void scene_on_exit_starting_scene(void* context) {
+    FURI_LOG_I(TAG, "scene_on_exit_starting_scene");
     struct AppContext_t* app = context;
     freeAppContextViews(&app);
 }
