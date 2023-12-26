@@ -172,7 +172,7 @@ static bool washcity_parse(const NfcDevice* device, FuriString* parsed_data) {
             "\e#WashCity\nCard number: %s\nBalance: %lu.%02u EUR",
             card_number,
             balance_eur,
-            balancecentsi);
+            balance_cents);
         parsed = true;
     } while(false);
 
