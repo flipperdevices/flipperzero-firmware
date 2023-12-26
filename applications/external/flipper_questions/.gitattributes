@@ -1,2 +1,0 @@
-assets/ filter=lfs diff=lfs merge=lfs -text
-question_lists/ filter=lfs diff=lfs merge=lfs -text

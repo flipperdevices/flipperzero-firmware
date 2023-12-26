@@ -1,0 +1,13 @@
+App(
+    appid="smack_my_dolphin_up",
+    name="Smack My Dolphin Up!",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="smack_my_dolphin_up_app",
+    stack_size=2 * 1024,
+    fap_category="Settings",
+    fap_icon="smack_my_dolphin_up.png",
+    fap_author="siberianbot",
+    fap_description="For those whom won't bother yourself with dolphin emotional state",
+    fap_version="1.0",
+    fap_weburl="https://github.com/siberianbot/smack-my-dolphin-up",
+)
