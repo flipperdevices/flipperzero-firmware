@@ -25,8 +25,8 @@ static void nfc_scene_info_on_enter_mf_classic(NfcApp* instance) {
         temp_str, "\e#%s\n", nfc_device_get_name(device, NfcDeviceNameTypeFull));
     nfc_render_mf_classic_info(data, NfcProtocolFormatTypeFull, temp_str);
 
-    widget_add_text_scroll_element(
-        instance->widget, 0, 0, 128, 52, furi_string_get_cstr(temp_str));
+    widget_add_text_scroll_with_offset_element(
+        instance->widget, 0, 0, 128, 52, 2, furi_string_get_cstr(temp_str));
 
     furi_string_free(temp_str);
 }
@@ -128,8 +128,8 @@ static void nfc_scene_read_success_on_enter_mf_classic(NfcApp* instance) {
         temp_str, "\e#%s\n", nfc_device_get_name(device, NfcDeviceNameTypeFull));
     nfc_render_mf_classic_info(data, NfcProtocolFormatTypeShort, temp_str);
 
-    widget_add_text_scroll_element(
-        instance->widget, 0, 0, 128, 52, furi_string_get_cstr(temp_str));
+    widget_add_text_scroll_with_offset_element(
+        instance->widget, 0, 0, 128, 52, 2, furi_string_get_cstr(temp_str));
 
     furi_string_free(temp_str);
 }
