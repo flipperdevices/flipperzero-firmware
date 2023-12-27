@@ -20,7 +20,7 @@ typedef struct {
     size_t buffer_rx_index_read;
     bool enabled;
     FuriHalSerialHandle* handle;
-    FuriHalSerialRxCallback rx_byte_callback;
+    FuriHalSerialAsyncRxCallback rx_byte_callback;
     FuriHalSerialDmaRxCallback rx_dma_callback;
     void* context;
 } FuriHalSerial;
@@ -31,7 +31,7 @@ static size_t furi_hal_serial_dma_bytes_available(FuriHalSerialId ch);
 
 static void furi_hal_serial_async_rx_configure(
     FuriHalSerialHandle* handle,
-    FuriHalSerialRxCallback callback,
+    FuriHalSerialAsyncRxCallback callback,
     void* context);
 
 static void furi_hal_serial_usart_irq_callback() {
@@ -620,7 +620,7 @@ static void furi_hal_serial_event_deinit(FuriHalSerialHandle* handle) {
 
 static void furi_hal_serial_async_rx_configure(
     FuriHalSerialHandle* handle,
-    FuriHalSerialRxCallback callback,
+    FuriHalSerialAsyncRxCallback callback,
     void* context) {
     if(handle->id == FuriHalSerialIdUsart) {
         if(callback == NULL) {
@@ -659,7 +659,7 @@ static void furi_hal_serial_async_rx_configure(
 
 void furi_hal_serial_async_rx_start(
     FuriHalSerialHandle* handle,
-    FuriHalSerialRxCallback callback,
+    FuriHalSerialAsyncRxCallback callback,
     void* context,
     bool report_errors) {
     furi_check(handle);

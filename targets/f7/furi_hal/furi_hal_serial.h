@@ -94,7 +94,7 @@ typedef enum {
  * @param      event    FuriHalSerialRxEvent
  * @param      context  Callback context provided earlier
  */
-typedef void (*FuriHalSerialRxCallback)(
+typedef void (*FuriHalSerialAsyncRxCallback)(
     FuriHalSerialHandle* handle,
     FuriHalSerialRxEvent event,
     void* context);
@@ -111,7 +111,7 @@ typedef void (*FuriHalSerialRxCallback)(
  */
 void furi_hal_serial_async_rx_start(
     FuriHalSerialHandle* handle,
-    FuriHalSerialRxCallback callback,
+    FuriHalSerialAsyncRxCallback callback,
     void* context,
     bool report_errors);
 
@@ -124,7 +124,7 @@ void furi_hal_serial_async_rx_stop(FuriHalSerialHandle* handle);
 /** Get data Serial receive
  *
  * @warning    This function must be called only from the callback
- *             FuriHalSerialRxCallback
+ *             FuriHalSerialAsyncRxCallback
  *
  * @param      handle  Serial handle
  *
