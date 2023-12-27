@@ -33,6 +33,7 @@ static void mf_classic_listener_reset_state(MfClassicListener* instance) {
     instance->state = MfClassicListenerStateIdle;
     instance->cmd_in_progress = false;
     instance->current_cmd_handler_idx = 0;
+    instance->write_block = 0;
     instance->transfer_value = 0;
     instance->transfer_valid = false;
     instance->value_cmd = MfClassicValueCommandInvalid;
@@ -245,6 +246,7 @@ static MfClassicListenerCommand mf_classic_listener_write_block_first_part_handl
         uint8_t auth_sector_num = mf_classic_get_sector_by_block(auth_ctx->block_num);
         if(sector_num != auth_sector_num) break;
 
+        instance->write_block = block_num;
         instance->cmd_in_progress = true;
         instance->current_cmd_handler_idx++;
         command = MfClassicListenerCommandAck;
@@ -265,7 +267,7 @@ static MfClassicListenerCommand mf_classic_listener_write_block_second_part_hand
         size_t buff_size = bit_buffer_get_size_bytes(buff);
         if(buff_size != sizeof(MfClassicBlock)) break;
 
-        uint8_t block_num = auth_ctx->block_num;
+        uint8_t block_num = instance->write_block;
         MfClassicKeyType key_type = auth_ctx->key_type;
         MfClassicBlock block = instance->data->block[block_num];
 
