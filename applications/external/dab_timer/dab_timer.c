@@ -207,7 +207,9 @@ static void dab_timer_render_callback(Canvas* const canvas, void* ctx) {
         if(plugin_state->time_format == LocaleTimeFormat12h)
             canvas_draw_str_aligned(canvas, 117, 4, AlignCenter, AlignCenter, meridian_string);
         canvas_draw_str_aligned(canvas, 96, 20, AlignCenter, AlignTop, date_string); // DRAW DATE
-    } else if(plugin_state->faceType == FaceStyleOriginal || plugin_state->faceType == FaceStyleOriginalInverted) {
+    } else if(
+        plugin_state->faceType == FaceStyleOriginal ||
+        plugin_state->faceType == FaceStyleOriginalInverted) {
         canvas_set_font(canvas, FontSecondary);
         if(plugin_state->faceType == FaceStyleOriginalInverted) {
             canvas_draw_icon(canvas, 0, 0, &I_black);
@@ -275,7 +277,9 @@ static void dab_timer_render_callback(Canvas* const canvas, void* ctx) {
                     canvas, 64, 38, AlignCenter, AlignTop, date_string); // DRAW DATE
             canvas_set_font(canvas, FontSecondary);
         }
-    } else if(plugin_state->faceType == FaceStyleOriginalSmall || plugin_state->faceType == FaceStyleOriginalSmallInverted) {
+    } else if(
+        plugin_state->faceType == FaceStyleOriginalSmall ||
+        plugin_state->faceType == FaceStyleOriginalSmallInverted) {
         if(plugin_state->faceType == FaceStyleOriginalSmallInverted) {
             canvas_draw_icon(canvas, 0, 0, &I_black);
             if(timer_start_timestamp != 0) {
@@ -310,7 +314,9 @@ static void dab_timer_render_callback(Canvas* const canvas, void* ctx) {
             canvas_draw_str_aligned(
                 canvas, 64, 38, AlignCenter, AlignTop, date_string); // DRAW DATE
         canvas_set_font(canvas, FontSecondary);
-    } else if(plugin_state->faceType == FaceStyleCircle || plugin_state->faceType == FaceStyleCircleInverted) {
+    } else if(
+        plugin_state->faceType == FaceStyleCircle ||
+        plugin_state->faceType == FaceStyleCircleInverted) {
         if(plugin_state->faceType == FaceStyleCircleInverted) {
             canvas_draw_icon(canvas, 0, 0, &I_black);
             if(timer_start_timestamp != 0) {
@@ -406,7 +412,8 @@ static void dab_timer_render_callback(Canvas* const canvas, void* ctx) {
     if(plugin_state->faceType < FaceStylePwnInverted) {
         canvas_set_color(canvas, ColorWhite);
     }
-    if(plugin_state->faceType != FaceStyleCircle && plugin_state->faceType != FaceStyleBinary && plugin_state->faceType != FaceStyleCircleInverted &&
+    if(plugin_state->faceType != FaceStyleCircle && plugin_state->faceType != FaceStyleBinary &&
+       plugin_state->faceType != FaceStyleCircleInverted &&
        plugin_state->faceType != FaceStyleBinaryInverted) {
         if(!plugin_state->desktop_settings->is_dumbmode && !plugin_state->w_test) {
             if(timer_running) {
@@ -624,7 +631,7 @@ int32_t dab_timer_app(void* p) {
                         plugin_state->desktop_settings->is_dumbmode =
                             true; // MAKE SURE IT'S ON SO IT GETS TURNED OFF
                         dab_timer_dumbmode_changed(plugin_state->desktop_settings);
-                        if(plugin_state->songSelect == SoundAlertMario || 
+                        if(plugin_state->songSelect == SoundAlertMario ||
                            plugin_state->songSelect == SoundAlertGoGoPoRa ||
                            plugin_state->songSelect == SoundAlertByMin) {
                             notification_message(notification, &sequence_success);
