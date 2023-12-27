@@ -1,6 +1,4 @@
-#include "flipper.pb.h"
 #include "rpc_i.h"
-#include "gui.pb.h"
 #include <gui/gui_i.h>
 #include <assets_icons.h>
 

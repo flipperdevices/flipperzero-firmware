@@ -59,12 +59,20 @@ struct Expansion {
 static void expansion_detect_callback(void* context);
 
 // Called in UART IRQ context
-static void expansion_serial_rx_callback(uint8_t data, void* context) {
+static void expansion_serial_rx_callback(
+    FuriHalSerialHandle* handle,
+    FuriHalSerialRxEvent event,
+    void* context) {
+    furi_assert(handle);
     furi_assert(context);
+
     Expansion* instance = context;
 
-    furi_stream_buffer_send(instance->rx_buf, &data, sizeof(data), 0);
-    furi_thread_flags_set(furi_thread_get_id(instance->worker_thread), ExpansionFlagData);
+    if(event == FuriHalSerialRxEventData) {
+        const uint8_t data = furi_hal_serial_async_rx(handle);
+        furi_stream_buffer_send(instance->rx_buf, &data, sizeof(data), 0);
+        furi_thread_flags_set(furi_thread_get_id(instance->worker_thread), ExpansionFlagData);
+    }
 }
 
 static size_t expansion_receive_callback(uint8_t* data, size_t data_size, void* context) {
@@ -325,8 +333,8 @@ static int32_t expansion_worker(void* context) {
 
     furi_hal_serial_init(instance->serial_handle, EXPANSION_DEFAULT_BAUD_RATE);
 
-    furi_hal_serial_set_rx_callback(
-        instance->serial_handle, expansion_serial_rx_callback, instance);
+    furi_hal_serial_async_rx_start(
+        instance->serial_handle, expansion_serial_rx_callback, instance, false);
 
     if(expansion_send_heartbeat(instance)) {
         expansion_state_machine(instance);
