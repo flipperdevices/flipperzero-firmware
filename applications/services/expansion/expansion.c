@@ -374,7 +374,7 @@ static Expansion* expansion_alloc() {
     Expansion* instance = malloc(sizeof(Expansion));
 
     instance->state_mutex = furi_mutex_alloc(FuriMutexTypeNormal);
-    instance->worker_thread = furi_thread_alloc_ex(TAG, 1024, expansion_worker, instance);
+    instance->worker_thread = furi_thread_alloc_ex(TAG, 768, expansion_worker, instance);
 
     return instance;
 }
