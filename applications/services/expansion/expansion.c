@@ -114,6 +114,11 @@ static size_t expansion_receive_callback(uint8_t* data, size_t data_size, void* 
     return received_size;
 }
 
+static inline bool expansion_receive_frame(Expansion* instance, ExpansionFrame* frame) {
+    return expansion_protocol_decode(frame, expansion_receive_callback, instance) ==
+           ExpansionProtocolStatusOk;
+}
+
 static size_t expansion_send_callback(const uint8_t* data, size_t data_size, void* context) {
     Expansion* instance = context;
     furi_hal_serial_tx(instance->serial_handle, data, data_size);
@@ -121,24 +126,27 @@ static size_t expansion_send_callback(const uint8_t* data, size_t data_size, voi
     return data_size;
 }
 
+static inline bool expansion_send_frame(Expansion* instance, const ExpansionFrame* frame) {
+    return expansion_protocol_encode(frame, expansion_send_callback, instance) ==
+           ExpansionProtocolStatusOk;
+}
+
 static bool expansion_send_heartbeat(Expansion* instance) {
-    ExpansionFrame frame = {
+    const ExpansionFrame frame = {
         .header.type = ExpansionFrameTypeHeartbeat,
         .content.heartbeat = {},
     };
 
-    return expansion_protocol_encode(&frame, expansion_send_callback, instance) ==
-           ExpansionProtocolStatusOk;
+    return expansion_send_frame(instance, &frame);
 }
 
 static bool expansion_send_status_response(Expansion* instance, ExpansionFrameError error) {
-    ExpansionFrame frame = {
+    const ExpansionFrame frame = {
         .header.type = ExpansionFrameTypeStatus,
         .content.status.error = error,
     };
 
-    return expansion_protocol_encode(&frame, expansion_send_callback, instance) ==
-           ExpansionProtocolStatusOk;
+    return expansion_send_frame(instance, &frame);
 }
 
 static bool
@@ -151,8 +159,7 @@ static bool
     };
 
     memcpy(frame.content.data.bytes, data, data_size);
-    return expansion_protocol_encode(&frame, expansion_send_callback, instance) ==
-           ExpansionProtocolStatusOk;
+    return expansion_send_frame(instance, &frame);
 }
 
 // Called in Rpc session thread context
@@ -286,7 +293,7 @@ static bool
 static inline void expansion_state_machine(Expansion* instance) {
     typedef bool (*ExpansionSessionStateHandler)(Expansion*, const ExpansionFrame*);
 
-    static const ExpansionSessionStateHandler expansion_session_state_handlers[] = {
+    static const ExpansionSessionStateHandler expansion_handlers[] = {
         [ExpansionSessionStateHandShake] = expansion_handle_session_state_handshake,
         [ExpansionSessionStateConnected] = expansion_handle_session_state_connected,
         [ExpansionSessionStateRpcActive] = expansion_handle_session_state_rpc_active,
@@ -295,10 +302,8 @@ static inline void expansion_state_machine(Expansion* instance) {
     ExpansionFrame rx_frame;
 
     while(true) {
-        const ExpansionProtocolStatus status =
-            expansion_protocol_decode(&rx_frame, expansion_receive_callback, instance);
-        if(status != ExpansionProtocolStatusOk) break;
-        if(!expansion_session_state_handlers[instance->session_state](instance, &rx_frame)) break;
+        if(!expansion_receive_frame(instance, &rx_frame)) break;
+        if(!expansion_handlers[instance->session_state](instance, &rx_frame)) break;
     }
 }
 
