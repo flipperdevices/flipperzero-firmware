@@ -14,22 +14,24 @@ bool nfc_back_event_callback(void* context) {
     return scene_manager_handle_back_event(nfc->scene_manager);
 }
 
-static void nfc_app_rpc_command_callback(RpcAppSystemEvent rpc_event, void* context) {
+static void nfc_app_rpc_command_callback(const RpcAppSystemEvent* event, void* context) {
     furi_assert(context);
     NfcApp* nfc = (NfcApp*)context;
 
     furi_assert(nfc->rpc_ctx);
 
-    if(rpc_event == RpcAppEventSessionClose) {
+    if(event->type == RpcAppEventTypeSessionClose) {
         view_dispatcher_send_custom_event(nfc->view_dispatcher, NfcCustomEventRpcSessionClose);
         rpc_system_app_set_callback(nfc->rpc_ctx, NULL, NULL);
         nfc->rpc_ctx = NULL;
-    } else if(rpc_event == RpcAppEventAppExit) {
+    } else if(event->type == RpcAppEventTypeAppExit) {
         view_dispatcher_send_custom_event(nfc->view_dispatcher, NfcCustomEventRpcExit);
-    } else if(rpc_event == RpcAppEventLoadFile) {
-        view_dispatcher_send_custom_event(nfc->view_dispatcher, NfcCustomEventRpcLoad);
+    } else if(event->type == RpcAppEventTypeLoadFile) {
+        furi_assert(event->data.type == RpcAppSystemEventDataTypeString);
+        furi_string_set(nfc->file_path, event->data.string);
+        view_dispatcher_send_custom_event(nfc->view_dispatcher, NfcCustomEventRpcLoadFile);
     } else {
-        rpc_system_app_confirm(nfc->rpc_ctx, rpc_event, false);
+        rpc_system_app_confirm(nfc->rpc_ctx, false);
     }
 }
 
@@ -49,6 +51,7 @@ NfcApp* nfc_app_alloc() {
 
     instance->mf_ul_auth = mf_ultralight_auth_alloc();
     instance->mfc_key_cache = mf_classic_key_cache_alloc();
+    instance->nfc_supported_cards = nfc_supported_cards_alloc();
 
     // Nfc device
     instance->nfc_device = nfc_device_alloc();
@@ -108,7 +111,6 @@ NfcApp* nfc_app_alloc() {
         instance->view_dispatcher, NfcViewWidget, widget_get_view(instance->widget));
 
     // Dict attack
-
     instance->dict_attack = dict_attack_alloc();
     view_dispatcher_add_view(
         instance->view_dispatcher, NfcViewDictAttack, dict_attack_get_view(instance->dict_attack));
@@ -139,6 +141,7 @@ void nfc_app_free(NfcApp* instance) {
 
     mf_ultralight_auth_free(instance->mf_ul_auth);
     mf_classic_key_cache_free(instance->mfc_key_cache);
+    nfc_supported_cards_free(instance->nfc_supported_cards);
 
     // Nfc device
     nfc_device_free(instance->nfc_device);
@@ -337,8 +340,10 @@ bool nfc_load_file(NfcApp* instance, FuriString* path, bool show_dialog) {
     furi_assert(path);
     bool result = false;
 
+    nfc_supported_cards_load_cache(instance->nfc_supported_cards);
+
     FuriString* load_path = furi_string_alloc();
-    if(nfc_has_shadow_file_internal(instance, path)) {
+    if(nfc_has_shadow_file_internal(instance, path)) { //-V1051
         nfc_set_shadow_file_path(path, load_path);
     } else if(furi_string_end_with(path, NFC_APP_SHADOW_EXTENSION)) {
         size_t path_len = furi_string_size(path);
@@ -398,28 +403,28 @@ bool nfc_load_from_file_select(NfcApp* instance) {
     browser_options.base_path = NFC_APP_FOLDER;
     browser_options.hide_dot_files = true;
 
-    // Input events and views are managed by file_browser
-    bool result = dialog_file_browser_show(
-        instance->dialogs, instance->file_path, instance->file_path, &browser_options);
+    bool success = false;
+    do {
+        // Input events and views are managed by file_browser
+        if(!dialog_file_browser_show(
+               instance->dialogs, instance->file_path, instance->file_path, &browser_options))
+            break;
+        success = nfc_load_file(instance, instance->file_path, true);
+    } while(!success);
 
-    if(result) {
-        result = nfc_load_file(instance, instance->file_path, true);
-    }
-
-    return result;
+    return success;
 }
 
 void nfc_show_loading_popup(void* context, bool show) {
     NfcApp* nfc = context;
-    TaskHandle_t timer_task = xTaskGetHandle(configTIMER_SERVICE_TASK_NAME);
 
     if(show) {
         // Raise timer priority so that animations can play
-        vTaskPrioritySet(timer_task, configMAX_PRIORITIES - 1);
+        furi_timer_set_thread_priority(FuriTimerThreadPriorityElevated);
         view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewLoading);
     } else {
         // Restore default timer priority
-        vTaskPrioritySet(timer_task, configTIMER_TASK_PRIORITY);
+        furi_timer_set_thread_priority(FuriTimerThreadPriorityNormal);
     }
 }
 

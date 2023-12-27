@@ -21,7 +21,7 @@ static Iso14443_3bError iso14443_3b_poller_prepare_trx(Iso14443_3bPoller* instan
     furi_assert(instance);
 
     if(instance->state == Iso14443_3bPollerStateIdle) {
-        return iso14443_3b_poller_async_activate(instance, NULL);
+        return iso14443_3b_poller_activate(instance, NULL);
     }
 
     return Iso14443_3bErrorNone;
@@ -63,8 +63,7 @@ static Iso14443_3bError iso14443_3b_poller_frame_exchange(
     return ret;
 }
 
-Iso14443_3bError
-    iso14443_3b_poller_async_activate(Iso14443_3bPoller* instance, Iso14443_3bData* data) {
+Iso14443_3bError iso14443_3b_poller_activate(Iso14443_3bPoller* instance, Iso14443_3bData* data) {
     furi_assert(instance);
     furi_assert(instance->nfc);
 
@@ -118,12 +117,13 @@ Iso14443_3bError
         bit_buffer_reset(instance->rx_buffer);
 
         // Send ATTRIB
+        uint8_t cid = 0;
         bit_buffer_append_byte(instance->tx_buffer, 0x1d);
         bit_buffer_append_bytes(instance->tx_buffer, data->uid, ISO14443_3B_UID_SIZE);
         bit_buffer_append_byte(instance->tx_buffer, 0x00);
         bit_buffer_append_byte(instance->tx_buffer, ISO14443_3B_ATTRIB_FRAME_SIZE_256);
         bit_buffer_append_byte(instance->tx_buffer, 0x01);
-        bit_buffer_append_byte(instance->tx_buffer, 0x00);
+        bit_buffer_append_byte(instance->tx_buffer, cid);
 
         ret = iso14443_3b_poller_frame_exchange(
             instance, instance->tx_buffer, instance->rx_buffer, iso14443_3b_get_fwt_fc_max(data));
@@ -132,9 +132,17 @@ Iso14443_3bError
             break;
         }
 
-        if(bit_buffer_get_size_bytes(instance->rx_buffer) != 1 ||
-           bit_buffer_get_byte(instance->rx_buffer, 0) != 0) {
-            FURI_LOG_D(TAG, "Unexpected ATTRIB response");
+        if(bit_buffer_get_size_bytes(instance->rx_buffer) != 1) {
+            FURI_LOG_W(
+                TAG,
+                "Unexpected ATTRIB response length: %zu",
+                bit_buffer_get_size_bytes(instance->rx_buffer));
+        }
+
+        uint8_t cid_received = bit_buffer_get_byte(instance->rx_buffer, 0);
+        // 15 bit is RFU
+        if((cid_received & 0x7f) != cid) {
+            FURI_LOG_D(TAG, "Incorrect CID in ATTRIB response: %02X", cid_received);
             instance->state = Iso14443_3bPollerStateActivationFailed;
             ret = Iso14443_3bErrorCommunication;
             break;

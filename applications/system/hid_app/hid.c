@@ -14,7 +14,21 @@ enum HidDebugSubmenuIndex {
     HidSubmenuIndexMouse,
     HidSubmenuIndexMouseClicker,
     HidSubmenuIndexMouseJiggler,
+    HidSubmenuIndexRemovePairing,
 };
+
+static void bt_hid_remove_pairing(Bt* bt) {
+    bt_disconnect(bt);
+
+    // Wait 2nd core to update nvm storage
+    furi_delay_ms(200);
+
+    furi_hal_bt_stop_advertising();
+
+    bt_forget_bonded_devices(bt);
+
+    furi_hal_bt_start_advertising();
+}
 
 static void hid_submenu_callback(void* context, uint32_t index) {
     furi_assert(context);
@@ -45,6 +59,8 @@ static void hid_submenu_callback(void* context, uint32_t index) {
     } else if(index == HidSubmenuIndexMouseJiggler) {
         app->view_id = HidViewMouseJiggler;
         view_dispatcher_switch_to_view(app->view_dispatcher, HidViewMouseJiggler);
+    } else if(index == HidSubmenuIndexRemovePairing) {
+        bt_hid_remove_pairing(app->bt);
     }
 }
 
@@ -143,6 +159,14 @@ Hid* hid_alloc(HidTransport transport) {
         HidSubmenuIndexMouseJiggler,
         hid_submenu_callback,
         app);
+    if(transport == HidTransportBle) {
+        submenu_add_item(
+            app->device_type_submenu,
+            "Remove Pairing",
+            HidSubmenuIndexRemovePairing,
+            hid_submenu_callback,
+            app);
+    }
     view_set_previous_callback(submenu_get_view(app->device_type_submenu), hid_exit);
     view_dispatcher_add_view(
         app->view_dispatcher, HidViewSubmenu, submenu_get_view(app->device_type_submenu));
@@ -264,7 +288,7 @@ void hid_hal_keyboard_press(Hid* instance, uint16_t event) {
     } else if(instance->transport == HidTransportUsb) {
         furi_hal_hid_kb_press(event);
     } else {
-        furi_crash(NULL);
+        furi_crash();
     }
 }
 
@@ -275,7 +299,7 @@ void hid_hal_keyboard_release(Hid* instance, uint16_t event) {
     } else if(instance->transport == HidTransportUsb) {
         furi_hal_hid_kb_release(event);
     } else {
-        furi_crash(NULL);
+        furi_crash();
     }
 }
 
@@ -286,7 +310,7 @@ void hid_hal_keyboard_release_all(Hid* instance) {
     } else if(instance->transport == HidTransportUsb) {
         furi_hal_hid_kb_release_all();
     } else {
-        furi_crash(NULL);
+        furi_crash();
     }
 }
 
@@ -297,7 +321,7 @@ void hid_hal_consumer_key_press(Hid* instance, uint16_t event) {
     } else if(instance->transport == HidTransportUsb) {
         furi_hal_hid_consumer_key_press(event);
     } else {
-        furi_crash(NULL);
+        furi_crash();
     }
 }
 
@@ -308,7 +332,7 @@ void hid_hal_consumer_key_release(Hid* instance, uint16_t event) {
     } else if(instance->transport == HidTransportUsb) {
         furi_hal_hid_consumer_key_release(event);
     } else {
-        furi_crash(NULL);
+        furi_crash();
     }
 }
 
@@ -319,7 +343,7 @@ void hid_hal_consumer_key_release_all(Hid* instance) {
     } else if(instance->transport == HidTransportUsb) {
         furi_hal_hid_kb_release_all();
     } else {
-        furi_crash(NULL);
+        furi_crash();
     }
 }
 
@@ -330,7 +354,7 @@ void hid_hal_mouse_move(Hid* instance, int8_t dx, int8_t dy) {
     } else if(instance->transport == HidTransportUsb) {
         furi_hal_hid_mouse_move(dx, dy);
     } else {
-        furi_crash(NULL);
+        furi_crash();
     }
 }
 
@@ -341,7 +365,7 @@ void hid_hal_mouse_scroll(Hid* instance, int8_t delta) {
     } else if(instance->transport == HidTransportUsb) {
         furi_hal_hid_mouse_scroll(delta);
     } else {
-        furi_crash(NULL);
+        furi_crash();
     }
 }
 
@@ -352,7 +376,7 @@ void hid_hal_mouse_press(Hid* instance, uint16_t event) {
     } else if(instance->transport == HidTransportUsb) {
         furi_hal_hid_mouse_press(event);
     } else {
-        furi_crash(NULL);
+        furi_crash();
     }
 }
 
@@ -363,7 +387,7 @@ void hid_hal_mouse_release(Hid* instance, uint16_t event) {
     } else if(instance->transport == HidTransportUsb) {
         furi_hal_hid_mouse_release(event);
     } else {
-        furi_crash(NULL);
+        furi_crash();
     }
 }
 
@@ -375,7 +399,7 @@ void hid_hal_mouse_release_all(Hid* instance) {
         furi_hal_hid_mouse_release(HID_MOUSE_BTN_LEFT);
         furi_hal_hid_mouse_release(HID_MOUSE_BTN_RIGHT);
     } else {
-        furi_crash(NULL);
+        furi_crash();
     }
 }
 

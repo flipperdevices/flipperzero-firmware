@@ -25,33 +25,10 @@ forward_os_env = {
     "PATH": os.environ["PATH"],
 }
 
-# Proxying environment to child processes & scripts
-variables_to_forward = [
-    # CI/CD variables
-    "WORKFLOW_BRANCH_OR_TAG",
-    "DIST_SUFFIX",
-    # Python & other tools
-    "HOME",
-    "APPDATA",
-    "PYTHONHOME",
-    "PYTHONNOUSERSITE",
-    "TMP",
-    "TEMP",
-    # Colors for tools
-    "TERM",
-]
-
-if proxy_env := GetOption("proxy_env"):
-    variables_to_forward.extend(proxy_env.split(","))
-
-for env_value_name in variables_to_forward:
-    if environ_value := os.environ.get(env_value_name, None):
-        forward_os_env[env_value_name] = environ_value
 
 # Core environment init - loads SDK state, sets up paths, etc.
 core_env = Environment(
     variables=ufbt_variables,
-    ENV=forward_os_env,
     UFBT_STATE_DIR=ufbt_state_dir,
     UFBT_CURRENT_SDK_DIR=ufbt_current_sdk_dir,
     UFBT_SCRIPT_DIR=ufbt_script_dir,
@@ -69,6 +46,7 @@ core_env.Append(CPPDEFINES=GetOption("extra_defines"))
 from fbt.appmanifest import FlipperApplication, FlipperAppType
 from fbt.sdk.cache import SdkCache
 from fbt.util import (
+    FORWARDED_ENV_VARIABLES,
     path_as_posix,
     resolve_real_dir_node,
     single_quote,
@@ -76,8 +54,19 @@ from fbt.util import (
     wrap_tempfile,
 )
 
+variables_to_forward = list(FORWARDED_ENV_VARIABLES)
+
+if proxy_env := GetOption("proxy_env"):
+    variables_to_forward.extend(proxy_env.split(","))
+
+for env_value_name in variables_to_forward:
+    if environ_value := os.environ.get(env_value_name, None):
+        forward_os_env[env_value_name] = environ_value
+
+
 # Base environment with all tools loaded from SDK
 env = core_env.Clone(
+    ENV=forward_os_env,
     toolpath=[core_env["FBT_SCRIPT_DIR"].Dir("fbt_tools")],
     tools=[
         "fbt_tweaks",
@@ -325,24 +314,26 @@ else:
 
 appenv.PhonyTarget(
     "cli",
-    '${PYTHON3} "${FBT_SCRIPT_DIR}/serial_cli.py" -p ${FLIP_PORT}',
+    [["${PYTHON3}", "${FBT_SCRIPT_DIR}/serial_cli.py", "-p", "${FLIP_PORT}"]],
 )
 
 # Update WiFi devboard firmware
-dist_env.PhonyTarget("devboard_flash", "${PYTHON3} ${FBT_SCRIPT_DIR}/wifi_board.py")
+dist_env.PhonyTarget(
+    "devboard_flash", [["${PYTHON3}", "${FBT_SCRIPT_DIR}/wifi_board.py"]]
+)
 
 # Linter
 
 dist_env.PhonyTarget(
     "lint",
-    "${PYTHON3} ${FBT_SCRIPT_DIR}/lint.py check ${LINT_SOURCES}",
+    [["${PYTHON3}", "${FBT_SCRIPT_DIR}/lint.py", "check", "${LINT_SOURCES}"]],
     source=original_app_dir.File(".clang-format"),
     LINT_SOURCES=[original_app_dir],
 )
 
 dist_env.PhonyTarget(
     "format",
-    "${PYTHON3} ${FBT_SCRIPT_DIR}/lint.py format ${LINT_SOURCES}",
+    [["${PYTHON3}", "${FBT_SCRIPT_DIR}/lint.py", "format", "${LINT_SOURCES}"]],
     source=original_app_dir.File(".clang-format"),
     LINT_SOURCES=[original_app_dir],
 )
@@ -455,7 +446,17 @@ if dolphin_src_dir.exists():
     )
     dist_env.PhonyTarget(
         "dolphin_ext",
-        '${PYTHON3} ${FBT_SCRIPT_DIR}/storage.py -p ${FLIP_PORT} send "${SOURCE}" /ext/dolphin',
+        [
+            [
+                "${PYTHON3}",
+                "${FBT_SCRIPT_DIR}/storage.py",
+                "-p",
+                "${FLIP_PORT}",
+                "send",
+                "${SOURCE}",
+                "/ext/dolphin",
+            ]
+        ],
         source=ufbt_build_dir.Dir("dolphin"),
     )
 else:
@@ -465,9 +466,12 @@ else:
 
     dist_env.PhonyTarget("dolphin_ext", Action(missing_dolphin_folder, None))
 
+# print(env.Dump())
 dist_env.PhonyTarget(
     "env",
-    "@echo $( ${FBT_SCRIPT_DIR}/toolchain/fbtenv.sh $)",
+    '@echo "FBT_TOOLCHAIN_PATH='
+    + forward_os_env["FBT_TOOLCHAIN_PATH"]
+    + '" source $( "${FBT_SCRIPT_DIR.abspath}/toolchain/fbtenv.sh" $)',
 )
 
 dist_env.PostConfigureUfbtEnvionment()

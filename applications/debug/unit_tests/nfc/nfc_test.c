@@ -7,12 +7,12 @@
 #include <nfc/nfc_poller.h>
 #include <nfc/nfc_listener.h>
 #include <nfc/protocols/iso14443_3a/iso14443_3a.h>
-#include <nfc/protocols/iso14443_3a/iso14443_3a_poller_sync_api.h>
+#include <nfc/protocols/iso14443_3a/iso14443_3a_poller_sync.h>
 #include <nfc/protocols/mf_ultralight/mf_ultralight.h>
-#include <nfc/protocols/mf_ultralight/mf_ultralight_poller_sync_api.h>
-#include <nfc/protocols/mf_classic/mf_classic_poller_sync_api.h>
+#include <nfc/protocols/mf_ultralight/mf_ultralight_poller_sync.h>
+#include <nfc/protocols/mf_classic/mf_classic_poller_sync.h>
 
-#include <nfc/helpers/nfc_dict.h>
+#include <toolbox/keys_dict.h>
 #include <nfc/nfc.h>
 
 #include "../minunit.h"
@@ -34,7 +34,7 @@ static void nfc_test_alloc() {
 }
 
 static void nfc_test_free() {
-    furi_assert(nfc_test);
+    furi_check(nfc_test);
 
     furi_record_close(RECORD_STORAGE);
     free(nfc_test);
@@ -182,8 +182,8 @@ MU_TEST(iso14443_3a_reader) {
 
     Iso14443_3aData iso14443_3a_poller_data = {};
     mu_assert(
-        iso14443_3a_poller_read(poller, &iso14443_3a_poller_data) == Iso14443_3aErrorNone,
-        "iso14443_3a_poller_read() failed");
+        iso14443_3a_poller_sync_read(poller, &iso14443_3a_poller_data) == Iso14443_3aErrorNone,
+        "iso14443_3a_poller_sync_read() failed");
 
     nfc_listener_stop(iso3_listener);
     mu_assert(
@@ -203,15 +203,26 @@ static void mf_ultralight_reader_test(const char* path) {
     NfcDevice* nfc_device = nfc_device_alloc();
     mu_assert(nfc_device_load(nfc_device, path), "nfc_device_load() failed\r\n");
 
-    NfcListener* mfu_listener = nfc_listener_alloc(
-        listener,
-        NfcProtocolMfUltralight,
-        nfc_device_get_data(nfc_device, NfcProtocolMfUltralight));
+    MfUltralightData* data =
+        (MfUltralightData*)nfc_device_get_data(nfc_device, NfcProtocolMfUltralight);
+
+    uint32_t features = mf_ultralight_get_feature_support_set(data->type);
+    bool pwd_supported =
+        mf_ultralight_support_feature(features, MfUltralightFeatureSupportPasswordAuth);
+    uint8_t pwd_num = mf_ultralight_get_pwd_page_num(data->type);
+    const uint8_t zero_pwd[4] = {0, 0, 0, 0};
+
+    if(pwd_supported && !memcmp(data->page[pwd_num].data, zero_pwd, sizeof(zero_pwd))) {
+        data->pages_read -= 2;
+    }
+
+    NfcListener* mfu_listener = nfc_listener_alloc(listener, NfcProtocolMfUltralight, data);
+
     nfc_listener_start(mfu_listener, NULL, NULL);
 
     MfUltralightData* mfu_data = mf_ultralight_alloc();
-    MfUltralightError error = mf_ultralight_poller_read_card(poller, mfu_data);
-    mu_assert(error == MfUltralightErrorNone, "mf_ultralight_poller_read_card() failed");
+    MfUltralightError error = mf_ultralight_poller_sync_read_card(poller, mfu_data);
+    mu_assert(error == MfUltralightErrorNone, "mf_ultralight_poller_sync_read_card() failed");
 
     nfc_listener_stop(mfu_listener);
     nfc_listener_free(mfu_listener);
@@ -259,8 +270,8 @@ MU_TEST(ntag_213_locked_reader) {
     nfc_listener_start(mfu_listener, NULL, NULL);
 
     MfUltralightData* mfu_data = mf_ultralight_alloc();
-    MfUltralightError error = mf_ultralight_poller_read_card(poller, mfu_data);
-    mu_assert(error == MfUltralightErrorNone, "mf_ultralight_poller_read_card() failed");
+    MfUltralightError error = mf_ultralight_poller_sync_read_card(poller, mfu_data);
+    mu_assert(error == MfUltralightErrorNone, "mf_ultralight_poller_sync_read_card() failed");
 
     nfc_listener_stop(mfu_listener);
     nfc_listener_free(mfu_listener);
@@ -297,8 +308,8 @@ static void mf_ultralight_write() {
     MfUltralightData* mfu_data = mf_ultralight_alloc();
 
     // Initial read
-    MfUltralightError error = mf_ultralight_poller_read_card(poller, mfu_data);
-    mu_assert(error == MfUltralightErrorNone, "mf_ultralight_poller_read_card() failed");
+    MfUltralightError error = mf_ultralight_poller_sync_read_card(poller, mfu_data);
+    mu_assert(error == MfUltralightErrorNone, "mf_ultralight_poller_sync_read_card() failed");
 
     mu_assert(
         mf_ultralight_is_equal(mfu_data, nfc_device_get_data(nfc_device, NfcProtocolMfUltralight)),
@@ -310,13 +321,13 @@ static void mf_ultralight_write() {
         FURI_LOG_D(TAG, "Writing page %d", i);
         furi_hal_random_fill_buf(page.data, sizeof(MfUltralightPage));
         mfu_data->page[i] = page;
-        error = mf_ultralight_poller_write_page(poller, i, &page);
-        mu_assert(error == MfUltralightErrorNone, "mf_ultralight_poller_write_page() failed");
+        error = mf_ultralight_poller_sync_write_page(poller, i, &page);
+        mu_assert(error == MfUltralightErrorNone, "mf_ultralight_poller_sync_write_page() failed");
     }
 
     // Verification read
-    error = mf_ultralight_poller_read_card(poller, mfu_data);
-    mu_assert(error == MfUltralightErrorNone, "mf_ultralight_poller_read_card() failed");
+    error = mf_ultralight_poller_sync_read_card(poller, mfu_data);
+    mu_assert(error == MfUltralightErrorNone, "mf_ultralight_poller_sync_read_card() failed");
 
     nfc_listener_stop(mfu_listener);
     const MfUltralightData* mfu_listener_data =
@@ -344,7 +355,7 @@ static void mf_classic_reader() {
     MfClassicBlock block = {};
     MfClassicKey key = {.data = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff}};
 
-    mf_classic_poller_read_block(poller, 0, &key, MfClassicKeyTypeA, &block);
+    mf_classic_poller_sync_read_block(poller, 0, &key, MfClassicKeyTypeA, &block);
 
     nfc_listener_stop(mfc_listener);
     nfc_listener_free(mfc_listener);
@@ -372,8 +383,8 @@ static void mf_classic_write() {
     furi_hal_random_fill_buf(block_write.data, sizeof(MfClassicBlock));
     MfClassicKey key = {.data = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff}};
 
-    mf_classic_poller_write_block(poller, 1, &key, MfClassicKeyTypeA, &block_write);
-    mf_classic_poller_read_block(poller, 1, &key, MfClassicKeyTypeA, &block_read);
+    mf_classic_poller_sync_write_block(poller, 1, &key, MfClassicKeyTypeA, &block_write);
+    mf_classic_poller_sync_read_block(poller, 1, &key, MfClassicKeyTypeA, &block_read);
 
     nfc_listener_stop(mfc_listener);
     nfc_listener_free(mfc_listener);
@@ -402,16 +413,18 @@ static void mf_classic_value_block() {
     mf_classic_value_to_block(value, 1, &block_write);
 
     MfClassicError error = MfClassicErrorNone;
-    error = mf_classic_poller_write_block(poller, 1, &key, MfClassicKeyTypeA, &block_write);
+    error = mf_classic_poller_sync_write_block(poller, 1, &key, MfClassicKeyTypeA, &block_write);
     mu_assert(error == MfClassicErrorNone, "Write failed");
 
     int32_t data = 200;
     int32_t new_value = 0;
-    error = mf_classic_poller_change_value(poller, 1, &key, MfClassicKeyTypeA, data, &new_value);
+    error =
+        mf_classic_poller_sync_change_value(poller, 1, &key, MfClassicKeyTypeA, data, &new_value);
     mu_assert(error == MfClassicErrorNone, "Value increment failed");
     mu_assert(new_value == value + data, "Value not match");
 
-    error = mf_classic_poller_change_value(poller, 1, &key, MfClassicKeyTypeA, -data, &new_value);
+    error =
+        mf_classic_poller_sync_change_value(poller, 1, &key, MfClassicKeyTypeA, -data, &new_value);
     mu_assert(error == MfClassicErrorNone, "Value decrement failed");
     mu_assert(new_value == value, "Value not match");
 
@@ -430,36 +443,36 @@ MU_TEST(mf_classic_dict_test) {
             "Remove test dict failed");
     }
 
-    NfcDict* dict = nfc_dict_alloc(
-        NFC_APP_MF_CLASSIC_DICT_UNIT_TEST_PATH, NfcDictModeOpenAlways, sizeof(MfClassicKey));
-    mu_assert(dict != NULL, "nfc_dict_alloc() failed");
+    KeysDict* dict = keys_dict_alloc(
+        NFC_APP_MF_CLASSIC_DICT_UNIT_TEST_PATH, KeysDictModeOpenAlways, sizeof(MfClassicKey));
+    mu_assert(dict != NULL, "keys_dict_alloc() failed");
 
-    size_t dict_keys_total = nfc_dict_get_total_keys(dict);
-    mu_assert(dict_keys_total == 0, "nfc_dict_keys_total() failed");
+    size_t dict_keys_total = keys_dict_get_total_keys(dict);
+    mu_assert(dict_keys_total == 0, "keys_dict_keys_total() failed");
 
     const uint32_t test_key_num = 30;
     MfClassicKey* key_arr_ref = malloc(test_key_num * sizeof(MfClassicKey));
     for(size_t i = 0; i < test_key_num; i++) {
         furi_hal_random_fill_buf(key_arr_ref[i].data, sizeof(MfClassicKey));
         mu_assert(
-            nfc_dict_add_key(dict, key_arr_ref[i].data, sizeof(MfClassicKey)), "add key failed");
+            keys_dict_add_key(dict, key_arr_ref[i].data, sizeof(MfClassicKey)), "add key failed");
 
-        size_t dict_keys_total = nfc_dict_get_total_keys(dict);
-        mu_assert(dict_keys_total == (i + 1), "nfc_dict_keys_total() failed");
+        size_t dict_keys_total = keys_dict_get_total_keys(dict);
+        mu_assert(dict_keys_total == (i + 1), "keys_dict_keys_total() failed");
     }
 
-    nfc_dict_free(dict);
+    keys_dict_free(dict);
 
-    dict = nfc_dict_alloc(
-        NFC_APP_MF_CLASSIC_DICT_UNIT_TEST_PATH, NfcDictModeOpenAlways, sizeof(MfClassicKey));
-    mu_assert(dict != NULL, "nfc_dict_alloc() failed");
+    dict = keys_dict_alloc(
+        NFC_APP_MF_CLASSIC_DICT_UNIT_TEST_PATH, KeysDictModeOpenAlways, sizeof(MfClassicKey));
+    mu_assert(dict != NULL, "keys_dict_alloc() failed");
 
-    dict_keys_total = nfc_dict_get_total_keys(dict);
-    mu_assert(dict_keys_total == test_key_num, "nfc_dict_keys_total() failed");
+    dict_keys_total = keys_dict_get_total_keys(dict);
+    mu_assert(dict_keys_total == test_key_num, "keys_dict_keys_total() failed");
 
     MfClassicKey key_dut = {};
     size_t key_idx = 0;
-    while(nfc_dict_get_next_key(dict, key_dut.data, sizeof(MfClassicKey))) {
+    while(keys_dict_get_next_key(dict, key_dut.data, sizeof(MfClassicKey))) {
         mu_assert(
             memcmp(key_arr_ref[key_idx].data, key_dut.data, sizeof(MfClassicKey)) == 0,
             "Loaded key data mismatch");
@@ -471,19 +484,19 @@ MU_TEST(mf_classic_dict_test) {
     for(size_t i = 0; i < COUNT_OF(delete_keys_idx); i++) {
         MfClassicKey* key = &key_arr_ref[delete_keys_idx[i]];
         mu_assert(
-            nfc_dict_is_key_present(dict, key->data, sizeof(MfClassicKey)),
-            "nfc_dict_is_key_present() failed");
+            keys_dict_is_key_present(dict, key->data, sizeof(MfClassicKey)),
+            "keys_dict_is_key_present() failed");
         mu_assert(
-            nfc_dict_delete_key(dict, key->data, sizeof(MfClassicKey)),
-            "nfc_dict_delete_key() failed");
+            keys_dict_delete_key(dict, key->data, sizeof(MfClassicKey)),
+            "keys_dict_delete_key() failed");
     }
 
-    dict_keys_total = nfc_dict_get_total_keys(dict);
+    dict_keys_total = keys_dict_get_total_keys(dict);
     mu_assert(
         dict_keys_total == test_key_num - COUNT_OF(delete_keys_idx),
-        "nfc_dict_keys_total() failed");
+        "keys_dict_keys_total() failed");
 
-    nfc_dict_free(dict);
+    keys_dict_free(dict);
     free(key_arr_ref);
 
     mu_assert(
