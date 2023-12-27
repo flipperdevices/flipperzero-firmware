@@ -90,7 +90,7 @@ static size_t expansion_receive_callback(uint8_t* data, size_t data_size, void* 
             EXPANSION_ALL_FLAGS, FuriFlagWaitAny, furi_ms_to_ticks(EXPANSION_PROTOCOL_TIMEOUT_MS));
 
         if(flags & FuriFlagError) {
-            if(flags == FuriFlagErrorTimeout) {
+            if(flags == (unsigned)FuriFlagErrorTimeout) {
                 // Exiting due to timeout
                 instance->exit_reason = ExpansionSessionExitReasonTimeout;
             } else {
