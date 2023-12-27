@@ -41,16 +41,16 @@ struct UartDumpModel {
 typedef enum {
     WorkerEventReserved = (1 << 0), // Reserved for StreamBuffer internal event
     WorkerEventStop = (1 << 1),
-    WorkerEventRx = (1 << 2),
-    WorkerEventRxEnd = (1 << 3),
-    WorkerEventRxORE = (1 << 4),
-    WorkerEventRxFE = (1 << 5),
-    WorkerEventRxNE = (1 << 6),
+    WorkerEventRxData = (1 << 2),
+    WorkerEventRxIdle = (1 << 3),
+    WorkerEventRxOverrunError = (1 << 4),
+    WorkerEventRxFramingError = (1 << 5),
+    WorkerEventRxNoiseError = (1 << 6),
 } WorkerEventFlags;
 
-#define WORKER_EVENTS_MASK                                                                     \
-    (WorkerEventStop | WorkerEventRx | WorkerEventRxEnd | WorkerEventRxORE | WorkerEventRxFE | \
-     WorkerEventRxNE)
+#define WORKER_EVENTS_MASK                                                                 \
+    (WorkerEventStop | WorkerEventRxData | WorkerEventRxIdle | WorkerEventRxOverrunError | \
+     WorkerEventRxFramingError | WorkerEventRxNoiseError)
 
 const NotificationSequence sequence_notification = {
     &message_display_backlight_on,
@@ -112,23 +112,23 @@ static void
     if(event & FuriHalSerialRxEventData) {
         uint8_t data = furi_hal_serial_async_rx(handle);
         furi_stream_buffer_send(app->rx_stream, &data, 1, 0);
-        flag |= WorkerEventRx;
+        flag |= WorkerEventRxData;
     }
 
     if(event & FuriHalSerialRxEventIdle) {
         //idle line detected, packet transmission may have ended
-        flag |= WorkerEventRxEnd;
+        flag |= WorkerEventRxIdle;
     }
 
     //error detected
     if(event & FuriHalSerialRxEventFrameError) {
-        flag |= WorkerEventRxFE;
+        flag |= WorkerEventRxFramingError;
     }
     if(event & FuriHalSerialRxEventNoiseError) {
-        flag |= WorkerEventRxNE;
+        flag |= WorkerEventRxNoiseError;
     }
     if(event & FuriHalSerialRxEventOverrunError) {
-        flag |= WorkerEventRxORE;
+        flag |= WorkerEventRxOverrunError;
     }
 
     furi_thread_flags_set(furi_thread_get_id(app->worker_thread), flag);
@@ -186,7 +186,7 @@ static int32_t uart_echo_worker(void* context) {
         furi_check((events & FuriFlagError) == 0);
 
         if(events & WorkerEventStop) break;
-        if(events & WorkerEventRx) {
+        if(events & WorkerEventRxData) {
             size_t length = 0;
             do {
                 uint8_t data[64];
@@ -210,18 +210,19 @@ static int32_t uart_echo_worker(void* context) {
                 app->view, UartDumpModel * model, { UNUSED(model); }, true);
         }
 
-        if(events & WorkerEventRxEnd) {
+        if(events & WorkerEventRxIdle) {
             furi_hal_serial_tx(app->serial_handle, (uint8_t*)"\r\nDetect IDLE\r\n", 15);
         }
 
-        if(events & (WorkerEventRxORE | WorkerEventRxFE | WorkerEventRxNE)) {
-            if(events & WorkerEventRxORE) {
+        if(events &
+           (WorkerEventRxOverrunError | WorkerEventRxFramingError | WorkerEventRxNoiseError)) {
+            if(events & WorkerEventRxOverrunError) {
                 furi_hal_serial_tx(app->serial_handle, (uint8_t*)"\r\nDetect ORE\r\n", 14);
             }
-            if(events & WorkerEventRxFE) {
+            if(events & WorkerEventRxFramingError) {
                 furi_hal_serial_tx(app->serial_handle, (uint8_t*)"\r\nDetect FE\r\n", 13);
             }
-            if(events & WorkerEventRxNE) {
+            if(events & WorkerEventRxNoiseError) {
                 furi_hal_serial_tx(app->serial_handle, (uint8_t*)"\r\nDetect NE\r\n", 13);
             }
         }
