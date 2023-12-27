@@ -3,7 +3,7 @@
 #include "gui/canvas.h"
 #include "gui/modules/dialog_ex.h"
 #include "gui/view_dispatcher.h"
-#include <example_xtra_beacon_icons.h>
+#include <example_ble_beacon_icons.h>
 
 static void
     ble_beacon_app_scene_run_beacon_confirm_dialog_callback(DialogExResult result, void* context) {
