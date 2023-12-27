@@ -4,7 +4,7 @@
 #include <expansion/expansion_protocol.h>
 
 MU_TEST(test_expansion_encoded_size) {
-    ExpansionFrame frame;
+    ExpansionFrame frame = {};
 
     frame.header.type = ExpansionFrameTypeHeartbeat;
     mu_assert_int_eq(1, expansion_frame_get_encoded_size(&frame));
@@ -26,7 +26,7 @@ MU_TEST(test_expansion_encoded_size) {
 }
 
 MU_TEST(test_expansion_remaining_size) {
-    ExpansionFrame frame;
+    ExpansionFrame frame = {};
 
     mu_assert_int_eq(1, expansion_frame_get_remaining_size(&frame, 0));
 
