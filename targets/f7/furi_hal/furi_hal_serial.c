@@ -28,7 +28,8 @@ typedef struct {
 static FuriHalSerial furi_hal_serial[FuriHalSerialIdMax] = {0};
 
 static size_t furi_hal_serial_dma_bytes_available(FuriHalSerialId ch);
-static void furi_hal_serial_rx_configure(
+
+static void furi_hal_serial_async_rx_configure(
     FuriHalSerialHandle* handle,
     FuriHalSerialRxCallback callback,
     void* context);
@@ -37,11 +38,11 @@ static void furi_hal_serial_usart_irq_callback() {
     FuriHalSerialRxEvent event = 0;
     //if no errors
     if(USART1->ISR & USART_ISR_RXNE_RXFNE) {
-        event |= FuriHalSerialRxEventRx;
+        event |= FuriHalSerialRxEventData;
     }
     if(USART1->ISR & USART_ISR_IDLE) {
         USART1->ICR = USART_ICR_IDLECF;
-        event |= FuriHalSerialRxEventEnd;
+        event |= FuriHalSerialRxEventIdle;
     }
     //if errors
     if(USART1->ISR & USART_ISR_ORE) {
@@ -92,7 +93,7 @@ static void furi_hal_serial_usart_dma_rx_isr() {
             if(furi_hal_serial[FuriHalSerialIdUsart].rx_dma_callback) {
                 furi_hal_serial[FuriHalSerialIdUsart].rx_dma_callback(
                     furi_hal_serial[FuriHalSerialIdUsart].handle,
-                    FuriHalSerialRxEventRx,
+                    FuriHalSerialRxEventData,
                     furi_hal_serial_dma_bytes_available(FuriHalSerialIdUsart),
                     furi_hal_serial[FuriHalSerialIdUsart].context);
             }
@@ -106,7 +107,7 @@ static void furi_hal_serial_usart_dma_rx_isr() {
             if(furi_hal_serial[FuriHalSerialIdUsart].rx_dma_callback) {
                 furi_hal_serial[FuriHalSerialIdUsart].rx_dma_callback(
                     furi_hal_serial[FuriHalSerialIdUsart].handle,
-                    FuriHalSerialRxEventRx,
+                    FuriHalSerialRxEventData,
                     furi_hal_serial_dma_bytes_available(FuriHalSerialIdUsart),
                     furi_hal_serial[FuriHalSerialIdUsart].context);
             }
@@ -218,11 +219,11 @@ static void furi_hal_serial_lpuart_irq_callback() {
     FuriHalSerialRxEvent event = 0;
     //if no errors
     if(LPUART1->ISR & USART_ISR_RXNE_RXFNE) {
-        event |= FuriHalSerialRxEventRx;
+        event |= FuriHalSerialRxEventData;
     }
     if(LPUART1->ISR & USART_ISR_IDLE) {
         LPUART1->ICR = USART_ICR_IDLECF;
-        event |= FuriHalSerialRxEventEnd;
+        event |= FuriHalSerialRxEventIdle;
     }
     //if errors
     if(LPUART1->ISR & USART_ISR_ORE) {
@@ -273,7 +274,7 @@ static void furi_hal_serial_lpuart_dma_rx_isr() {
             if(furi_hal_serial[FuriHalSerialIdLpuart].rx_dma_callback) {
                 furi_hal_serial[FuriHalSerialIdLpuart].rx_dma_callback(
                     furi_hal_serial[FuriHalSerialIdLpuart].handle,
-                    FuriHalSerialRxEventRx,
+                    FuriHalSerialRxEventData,
                     furi_hal_serial_dma_bytes_available(FuriHalSerialIdLpuart),
                     furi_hal_serial[FuriHalSerialIdLpuart].context);
             }
@@ -287,7 +288,7 @@ static void furi_hal_serial_lpuart_dma_rx_isr() {
             if(furi_hal_serial[FuriHalSerialIdLpuart].rx_dma_callback) {
                 furi_hal_serial[FuriHalSerialIdLpuart].rx_dma_callback(
                     furi_hal_serial[FuriHalSerialIdLpuart].handle,
-                    FuriHalSerialRxEventRx,
+                    FuriHalSerialRxEventData,
                     furi_hal_serial_dma_bytes_available(FuriHalSerialIdLpuart),
                     furi_hal_serial[FuriHalSerialIdLpuart].context);
             }
@@ -499,7 +500,7 @@ void furi_hal_serial_set_br(FuriHalSerialHandle* handle, uint32_t baud) {
 
 void furi_hal_serial_deinit(FuriHalSerialHandle* handle) {
     furi_check(handle);
-    furi_hal_serial_rx_configure(handle, NULL, NULL);
+    furi_hal_serial_async_rx_configure(handle, NULL, NULL);
     if(handle->id == FuriHalSerialIdUsart) {
         if(furi_hal_bus_is_enabled(FuriHalBusUSART1)) {
             furi_hal_bus_disable(FuriHalBusUSART1);
@@ -591,23 +592,18 @@ void furi_hal_serial_tx_wait_complete(FuriHalSerialHandle* handle) {
     }
 }
 
-static void furi_hal_serial_event_init(FuriHalSerialHandle* handle, FuriHalSerialRxEvent event) {
-    if(event != FuriHalSerialRxEventOffError) {
-        if(event & FuriHalSerialRxEventEnd) {
-            if(handle->id == FuriHalSerialIdUsart) {
-                LL_USART_EnableIT_IDLE(USART1);
-            } else if(handle->id == FuriHalSerialIdLpuart) {
-                LL_LPUART_EnableIT_IDLE(LPUART1);
-            }
-        }
+static void furi_hal_serial_event_init(FuriHalSerialHandle* handle, bool report_errors) {
+    if(handle->id == FuriHalSerialIdUsart) {
+        LL_USART_EnableIT_IDLE(USART1);
+    } else if(handle->id == FuriHalSerialIdLpuart) {
+        LL_LPUART_EnableIT_IDLE(LPUART1);
+    }
 
-        if(event & (FuriHalSerialRxEventOverrunError | FuriHalSerialRxEventFrameError |
-                    FuriHalSerialRxEventNoiseError)) {
-            if(handle->id == FuriHalSerialIdUsart) {
-                LL_USART_EnableIT_ERROR(USART1);
-            } else if(handle->id == FuriHalSerialIdLpuart) {
-                LL_LPUART_EnableIT_ERROR(LPUART1);
-            }
+    if(report_errors) {
+        if(handle->id == FuriHalSerialIdUsart) {
+            LL_USART_EnableIT_ERROR(USART1);
+        } else if(handle->id == FuriHalSerialIdLpuart) {
+            LL_LPUART_EnableIT_ERROR(LPUART1);
         }
     }
 }
@@ -622,7 +618,7 @@ static void furi_hal_serial_event_deinit(FuriHalSerialHandle* handle) {
     }
 }
 
-static void furi_hal_serial_rx_configure(
+static void furi_hal_serial_async_rx_configure(
     FuriHalSerialHandle* handle,
     FuriHalSerialRxCallback callback,
     void* context) {
@@ -661,17 +657,17 @@ static void furi_hal_serial_rx_configure(
     furi_hal_serial[handle->id].context = context;
 }
 
-void furi_hal_serial_rx_start(
+void furi_hal_serial_async_rx_start(
     FuriHalSerialHandle* handle,
     FuriHalSerialRxCallback callback,
     void* context,
-    FuriHalSerialRxEvent event) {
+    bool report_errors) {
     furi_check(handle);
     furi_check(callback);
 
-    furi_hal_serial_event_init(handle, event);
+    furi_hal_serial_event_init(handle, report_errors);
 
-    furi_hal_serial_rx_configure(handle, callback, context);
+    furi_hal_serial_async_rx_configure(handle, callback, context);
 
     //assign different functions to different usarts
     furi_check(
@@ -679,13 +675,13 @@ void furi_hal_serial_rx_start(
         furi_hal_serial[FuriHalSerialIdLpuart].rx_byte_callback);
 }
 
-void furi_hal_serial_rx_stop(FuriHalSerialHandle* handle) {
+void furi_hal_serial_async_rx_stop(FuriHalSerialHandle* handle) {
     furi_check(handle);
     furi_hal_serial_event_deinit(handle);
-    furi_hal_serial_rx_configure(handle, NULL, NULL);
+    furi_hal_serial_async_rx_configure(handle, NULL, NULL);
 }
 
-uint8_t furi_hal_serial_rx(FuriHalSerialHandle* handle) {
+uint8_t furi_hal_serial_async_rx(FuriHalSerialHandle* handle) {
     furi_check(FURI_IS_IRQ_MODE());
     furi_assert(handle->id < FuriHalSerialIdMax);
 
@@ -781,11 +777,11 @@ void furi_hal_serial_dma_rx_start(
     FuriHalSerialHandle* handle,
     FuriHalSerialDmaRxCallback callback,
     void* context,
-    FuriHalSerialRxEvent event) {
+    bool report_errors) {
     furi_check(handle);
     furi_check(callback);
 
-    furi_hal_serial_event_init(handle, event);
+    furi_hal_serial_event_init(handle, report_errors);
     furi_hal_serial_dma_configure(handle, callback, context);
 
     //assign different functions to different usarts

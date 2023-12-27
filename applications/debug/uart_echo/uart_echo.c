@@ -109,13 +109,13 @@ static void
 
     WorkerEventFlags flag = 0;
 
-    if(event & FuriHalSerialRxEventRx) {
-        uint8_t data = furi_hal_serial_rx(handle);
+    if(event & FuriHalSerialRxEventData) {
+        uint8_t data = furi_hal_serial_async_rx(handle);
         furi_stream_buffer_send(app->rx_stream, &data, 1, 0);
         flag |= WorkerEventRx;
     }
 
-    if(event & FuriHalSerialRxEventEnd) {
+    if(event & FuriHalSerialRxEventIdle) {
         //idle line detected, packet transmission may have ended
         flag |= WorkerEventRxEnd;
     }
@@ -274,12 +274,7 @@ static UartEchoApp* uart_echo_app_alloc(uint32_t baudrate) {
     furi_check(app->serial_handle);
     furi_hal_serial_init(app->serial_handle, baudrate);
 
-    furi_hal_serial_rx_start(
-        app->serial_handle,
-        uart_echo_on_irq_cb,
-        app,
-        (FuriHalSerialRxEventFrameError | FuriHalSerialRxEventNoiseError |
-         FuriHalSerialRxEventEnd | FuriHalSerialRxEventOverrunError));
+    furi_hal_serial_async_rx_start(app->serial_handle, uart_echo_on_irq_cb, app, true);
 
     return app;
 }

@@ -84,7 +84,7 @@ static void usb_uart_on_irq_rx_dma_cb(
     void* context) {
     UsbUartBridge* usb_uart = (UsbUartBridge*)context;
 
-    if(ev & (FuriHalSerialRxEventRx | FuriHalSerialRxEventEnd)) {
+    if(ev & (FuriHalSerialRxEventData | FuriHalSerialRxEventIdle)) {
         uint8_t data[FURI_HAL_SERIAL_DMA_BUFFER_SIZE] = {0};
         while(size) {
             size_t ret = furi_hal_serial_dma_rx(
@@ -132,7 +132,7 @@ static void usb_uart_serial_init(UsbUartBridge* usb_uart, uint8_t uart_ch) {
 
     furi_hal_serial_init(usb_uart->serial_handle, 115200);
     furi_hal_serial_dma_rx_start(
-        usb_uart->serial_handle, usb_uart_on_irq_rx_dma_cb, usb_uart, FuriHalSerialRxEventOffError);
+        usb_uart->serial_handle, usb_uart_on_irq_rx_dma_cb, usb_uart, false);
 }
 
 static void usb_uart_serial_deinit(UsbUartBridge* usb_uart) {
