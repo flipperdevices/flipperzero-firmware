@@ -1,9 +1,10 @@
 ## **macOS compile guide**  by deafbed, 
-* Updated by **@eltonalvess**
+* Updated by **@eltonalvess**, and **@tonywald**
 
 ### Tested with M1 Macbook Air, macOS Monterey (12.4)
 ### :arrow_up: Update
  * Tested with M1 Macbook Pro, macOS Ventura (13.4, 22F66) [06-06-2023]
+ * Tested with M1 Macbook Air, macOS Sonoma (14.1.2) [12-27-2023]
 
 ## **FROM THE BEGINNING**
 
@@ -51,6 +52,8 @@ Next, we run the following command to download the remaining requirements:
 
 `brew bundle --verbose`
 
+> If you get the error `Homebrew Bundle failed! 1 Brewfile dependency failed to install.`, try running `brew install --cask gcc-arm-embedded`. You can verify that this fixes the error by running `brew bundle --verbose` again.
+ 
 ---
 
 ### Compile
