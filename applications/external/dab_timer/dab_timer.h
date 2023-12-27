@@ -41,6 +41,28 @@ typedef struct {
     InputEvent input;
 } PluginEvent;
 
+typedef enum {
+    FaceStylePwn,
+    FaceStyleOriginal,
+    FaceStyleOriginalSmall,
+    FaceStyleCircle,
+    FaceStyleBinary,
+    FaceStylePwnInverted,
+    FaceStyleOriginalInverted,
+    FaceStyleOriginalSmallInverted,
+    FaceStyleCircleInverted,
+    FaceStyleBinaryInverted,
+    FaceStyleCount,
+} FaceStyle;
+
+typedef enum {
+    SoundAlertOff,
+    SoundAlertByMin,
+    SoundAlertMario,
+    SoundAlertGoGoPoRa,
+    SoundAlertCount,
+} SoundAlert;
+
 typedef struct {
     FuriMutex* mutex;
     FuriMessageQueue* event_queue;
@@ -54,15 +76,15 @@ typedef struct {
     uint16_t timer_stopped_seconds;
     uint16_t timerSecs;
     uint8_t alert_time;
-    uint8_t songSelect;
     uint8_t codeSequence;
-    uint8_t faceType;
     uint8_t curEmotiveFace;
     bool timer_running;
     bool w_test;
+    FaceStyle faceType;
+    SoundAlert songSelect;
 } DabTimerState;
 
-const NotificationSequence clock_alert_silent = {
+const NotificationSequence dab_timer_alert_silent = {
     &message_vibro_on,
     &message_red_255,
     &message_green_255,
@@ -74,7 +96,7 @@ const NotificationSequence clock_alert_silent = {
     &message_display_backlight_on,
     NULL,
 };
-const NotificationSequence clock_alert_pr1 = {
+const NotificationSequence dab_timer_alert_pr1 = {
     &message_vibro_on,
     &message_red_255,
     &message_green_255,
@@ -96,7 +118,7 @@ const NotificationSequence clock_alert_pr1 = {
     &message_sound_off,
     NULL,
 };
-const NotificationSequence clock_alert_pr2 = {
+const NotificationSequence dab_timer_alert_pr2 = {
     &message_vibro_on,
     &message_note_fs5,
     &message_delay_100,
@@ -117,7 +139,7 @@ const NotificationSequence clock_alert_pr2 = {
     &message_sound_off,
     NULL,
 };
-const NotificationSequence clock_alert_pr3 = {
+const NotificationSequence dab_timer_alert_pr3 = {
     &message_display_backlight_off,
     &message_note_g5,
     &message_delay_100,
@@ -131,7 +153,7 @@ const NotificationSequence clock_alert_pr3 = {
     &message_delay_100,
     NULL,
 };
-const NotificationSequence clock_alert_mario1 = {
+const NotificationSequence dab_timer_alert_mario1 = {
     &message_vibro_on,
     &message_red_255,
     &message_green_255,
@@ -159,7 +181,7 @@ const NotificationSequence clock_alert_mario1 = {
     &message_sound_off,
     NULL,
 };
-const NotificationSequence clock_alert_mario2 = {
+const NotificationSequence dab_timer_alert_mario2 = {
     &message_vibro_on,
     &message_display_backlight_off,
     &message_delay_100,
@@ -179,7 +201,7 @@ const NotificationSequence clock_alert_mario2 = {
     &message_display_backlight_on,
     NULL,
 };
-const NotificationSequence clock_alert_mario3 = {
+const NotificationSequence dab_timer_alert_mario3 = {
     &message_display_backlight_off,
     &message_note_g5,
     &message_delay_100,
@@ -201,7 +223,7 @@ const NotificationSequence clock_alert_mario3 = {
     &message_sound_off,
     NULL,
 };
-const NotificationSequence clock_alert_perMin = {
+const NotificationSequence dab_timer_alert_perMin = {
     &message_note_g5,
     &message_delay_100,
     &message_delay_50,
@@ -214,7 +236,7 @@ const NotificationSequence clock_alert_perMin = {
     &message_sound_off,
     NULL,
 };
-const NotificationSequence clock_alert_startStop = {
+const NotificationSequence dab_timer_alert_startStop = {
     &message_red_255,
     &message_green_255,
     &message_blue_255,
