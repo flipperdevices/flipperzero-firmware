@@ -6,6 +6,9 @@
 
 #define GAP_MS_TO_SCAN_INTERVAL(x) (uint16_t)((x) / 0.625)
 
+// Also used as an indicator of whether the beacon had ever been configured
+#define GAP_MIN_ADV_INTERVAL_MS 20
+
 typedef struct {
     GapExtraBeaconConfig last_config;
     GapExtraBeaconState extra_beacon_state;
@@ -24,7 +27,7 @@ void gap_extra_beacon_init() {
             extra_beacon.extra_beacon_data, extra_beacon.extra_beacon_data_len);
         if(extra_beacon.extra_beacon_state == GapExtraBeaconStateStarted) {
             extra_beacon.extra_beacon_state = GapExtraBeaconStateStopped;
-            gap_extra_beacon_start(&extra_beacon.last_config);
+            gap_extra_beacon_set_config(&extra_beacon.last_config);
         }
 
     } else {
@@ -37,20 +40,37 @@ void gap_extra_beacon_init() {
     }
 }
 
-bool gap_extra_beacon_start(const GapExtraBeaconConfig* config) {
+bool gap_extra_beacon_set_config(const GapExtraBeaconConfig* config) {
     furi_check(extra_beacon.state_mutex);
     furi_check(config);
+
+    furi_check(config->min_adv_interval_ms <= config->max_adv_interval_ms);
+    furi_check(config->min_adv_interval_ms >= GAP_MIN_ADV_INTERVAL_MS);
 
     if(extra_beacon.extra_beacon_state != GapExtraBeaconStateStopped) {
         return false;
     }
 
+    furi_mutex_acquire(extra_beacon.state_mutex, FuriWaitForever);
     if(config != &extra_beacon.last_config) {
         memcpy(&extra_beacon.last_config, config, sizeof(GapExtraBeaconConfig));
+    }
+    furi_mutex_release(extra_beacon.state_mutex);
+
+    return true;
+}
+
+bool gap_extra_beacon_start() {
+    furi_check(extra_beacon.state_mutex);
+    furi_check(extra_beacon.last_config.min_adv_interval_ms >= GAP_MIN_ADV_INTERVAL_MS);
+
+    if(extra_beacon.extra_beacon_state != GapExtraBeaconStateStopped) {
+        return false;
     }
 
     FURI_LOG_I(TAG, "Starting");
     furi_mutex_acquire(extra_beacon.state_mutex, FuriWaitForever);
+    const GapExtraBeaconConfig* config = &extra_beacon.last_config;
     tBleStatus status = aci_gap_additional_beacon_start(
         GAP_MS_TO_SCAN_INTERVAL(config->min_adv_interval_ms),
         GAP_MS_TO_SCAN_INTERVAL(config->max_adv_interval_ms),
@@ -124,4 +144,14 @@ GapExtraBeaconState gap_extra_beacon_get_state() {
     furi_check(extra_beacon.state_mutex);
 
     return extra_beacon.extra_beacon_state;
+}
+
+const GapExtraBeaconConfig* gap_extra_beacon_get_config() {
+    furi_check(extra_beacon.state_mutex);
+
+    if(extra_beacon.last_config.min_adv_interval_ms < GAP_MIN_ADV_INTERVAL_MS) {
+        return NULL;
+    }
+
+    return &extra_beacon.last_config;
 }

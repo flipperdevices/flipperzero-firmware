@@ -414,8 +414,16 @@ uint8_t furi_hal_ble_extra_beacon_get_data(uint8_t* data) {
     return gap_extra_beacon_get_data(data);
 }
 
-bool furi_hal_ble_extra_beacon_start(const GapExtraBeaconConfig* config) {
-    return gap_extra_beacon_start(config);
+bool furi_hal_ble_extra_beacon_set_config(const GapExtraBeaconConfig* config) {
+    return gap_extra_beacon_set_config(config);
+}
+
+const GapExtraBeaconConfig* furi_hal_ble_extra_beacon_get_config() {
+    return gap_extra_beacon_get_config();
+}
+
+bool furi_hal_ble_extra_beacon_start() {
+    return gap_extra_beacon_start();
 }
 
 bool furi_hal_ble_extra_beacon_stop() {

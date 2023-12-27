@@ -236,7 +236,7 @@ bool furi_hal_ble_ensure_c2_mode(BleGlueC2Mode mode);
 
 /** Extra beacon API */
 
-/** Set extra beacon data
+/** Set extra beacon data. Can be called in any state
  *
  * @param[in]  data  data to set
  * @param[in]  len   data length. Must be <= EXTRA_BEACON_MAX_DATA_SIZE
@@ -247,9 +247,9 @@ bool furi_hal_ble_extra_beacon_set_data(const uint8_t* data, uint8_t len);
 
 /** Get last configured extra beacon data
  *
- * @param      data  data to write to. Must be at least EXTRA_BEACON_MAX_DATA_SIZE bytes long
+ * @param      data  data buffer to write to. Must be at least EXTRA_BEACON_MAX_DATA_SIZE bytes long
  *
- * @return     data length
+ * @return     valid data length
  */
 uint8_t furi_hal_ble_extra_beacon_get_data(uint8_t* data);
 
@@ -260,7 +260,15 @@ uint8_t furi_hal_ble_extra_beacon_get_data(uint8_t* data);
  *
  * @return     true on success
  */
-bool furi_hal_ble_extra_beacon_start(const GapExtraBeaconConfig* config);
+bool furi_hal_ble_extra_beacon_set_config(const GapExtraBeaconConfig* config);
+
+/** Start extra beacon. 
+ * Beacon must configured with furi_hal_ble_extra_beacon_set_config()
+ * and in stopped state before calling this function.
+ *
+ * @return     true on success
+ */
+bool furi_hal_ble_extra_beacon_start();
 
 /** Stop extra beacon
  *
@@ -273,6 +281,12 @@ bool furi_hal_ble_extra_beacon_stop();
  * @return     extra beacon state
  */
 bool furi_hal_ble_extra_beacon_is_active();
+
+/** Get last extra beacon config
+ *
+ * @return     extra beacon config. NULL if beacon had never been configured.
+ */
+const GapExtraBeaconConfig* furi_hal_ble_extra_beacon_get_config();
 
 #ifdef __cplusplus
 }

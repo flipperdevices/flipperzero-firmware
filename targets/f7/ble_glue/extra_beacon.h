@@ -64,9 +64,9 @@ typedef enum {
 typedef struct {
     uint16_t min_adv_interval_ms, max_adv_interval_ms;
     GapAdvChannelMap adv_channel_map;
-    uint8_t address[EXTRA_BEACON_MAC_ADDR_SIZE];
-    GapAddressType address_type;
     GapAdvPowerLevelInd adv_power_level;
+    GapAddressType address_type;
+    uint8_t address[EXTRA_BEACON_MAC_ADDR_SIZE];
 } GapExtraBeaconConfig;
 
 typedef enum {
@@ -77,16 +77,21 @@ typedef enum {
 
 void gap_extra_beacon_init();
 
+GapExtraBeaconState gap_extra_beacon_get_state();
+
+bool gap_extra_beacon_set_config(const GapExtraBeaconConfig* config);
+
+const GapExtraBeaconConfig* gap_extra_beacon_get_config();
+
 bool gap_extra_beacon_set_data(const uint8_t* data, uint8_t length);
 
-bool gap_extra_beacon_start(const GapExtraBeaconConfig* config);
+uint8_t gap_extra_beacon_get_data(uint8_t* data);
+
+bool gap_extra_beacon_start();
 
 bool gap_extra_beacon_stop();
 
-GapExtraBeaconState gap_extra_beacon_get_state();
-
 // Fill data with last configured extra beacon data and return its length
-uint8_t gap_extra_beacon_get_data(uint8_t* data);
 
 #ifdef __cplusplus
 }
