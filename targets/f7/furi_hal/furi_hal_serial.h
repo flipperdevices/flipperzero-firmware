@@ -77,28 +77,112 @@ void furi_hal_serial_tx(FuriHalSerialHandle* handle, const uint8_t* buffer, size
  */
 void furi_hal_serial_tx_wait_complete(FuriHalSerialHandle* handle);
 
+/** Serial RX events */
+typedef enum {
+    FuriHalSerialRxEventData = (1 << 0), /**< Data: new data available */
+    FuriHalSerialRxEventIdle = (1 << 1), /**< Idle: bus idle detected */
+    FuriHalSerialRxEventFrameError = (1 << 2), /**< Framing Error: incorrect frame detected */
+    FuriHalSerialRxEventNoiseError = (1 << 3), /**< Noise Error: noise on the line detected */
+    FuriHalSerialRxEventOverrunError = (1 << 4), /**< Overrun Error: no space for received data */
+} FuriHalSerialRxEvent;
+
 /** Receive callback
  *
  * @warning    Callback will be called in interrupt context, ensure thread
  *             safety on your side.
- *
- * @param      data     Received data
+ * @param      handle   Serial handle
+ * @param      event    FuriHalSerialRxEvent
  * @param      context  Callback context provided earlier
  */
-typedef void (*FuriHalSerialRxCallback)(uint8_t data, void* context);
+typedef void (*FuriHalSerialAsyncRxCallback)(
+    FuriHalSerialHandle* handle,
+    FuriHalSerialRxEvent event,
+    void* context);
 
-/** Sets Serial Receive callback
+/** Start and sets Serial Receive callback
  *
- * @warning Callback will be called in interrupt context, ensure thread safety on your side
+ * @warning    Callback will be called in interrupt context, ensure thread
+ *             safety on your side
+ *
+ * @param      handle         Serial handle
+ * @param      callback       callback pointer
+ * @param      context        callback context
+ * @param[in]  report_errors  report RX error
+ */
+void furi_hal_serial_async_rx_start(
+    FuriHalSerialHandle* handle,
+    FuriHalSerialAsyncRxCallback callback,
+    void* context,
+    bool report_errors);
+
+/** Stop Serial Receive
  *
  * @param      handle    Serial handle
- * @param      callback  callback pointer
- * @param      context   callback context
  */
-void furi_hal_serial_set_rx_callback(
+void furi_hal_serial_async_rx_stop(FuriHalSerialHandle* handle);
+
+/** Get data Serial receive
+ *
+ * @warning    This function must be called only from the callback
+ *             FuriHalSerialAsyncRxCallback
+ *
+ * @param      handle  Serial handle
+ *
+ * @return     data
+ */
+uint8_t furi_hal_serial_async_rx(FuriHalSerialHandle* handle);
+
+/* DMA based Serial API */
+
+#define FURI_HAL_SERIAL_DMA_BUFFER_SIZE (256u)
+
+/** Receive DMA callback
+ *
+ * @warning    DMA Callback will be called in interrupt context, ensure thread
+ *             safety on your side.
+ *
+ * @param      handle    Serial handle
+ * @param      event     FuriHalSerialDmaRxEvent
+ * @param      data_len  Received data
+ * @param      context   Callback context provided earlier
+ */
+typedef void (*FuriHalSerialDmaRxCallback)(
     FuriHalSerialHandle* handle,
-    FuriHalSerialRxCallback callback,
+    FuriHalSerialRxEvent event,
+    size_t data_len,
     void* context);
+
+/** Start and sets Serial event callback receive DMA
+ *
+ * @param      handle         Serial handle
+ * @param      callback       callback pointer
+ * @param      context        callback context
+ * @param[in]  report_errors  report RX error
+ */
+void furi_hal_serial_dma_rx_start(
+    FuriHalSerialHandle* handle,
+    FuriHalSerialDmaRxCallback callback,
+    void* context,
+    bool report_errors);
+
+/** Stop Serial receive DMA
+ *
+ * @param      handle  Serial handle
+ */
+void furi_hal_serial_dma_rx_stop(FuriHalSerialHandle* handle);
+
+/** Get data Serial receive DMA
+ *
+ * @warning    This function must be called only from the callback
+ *             FuriHalSerialDmaRxCallback
+ *
+ * @param      handle  Serial handle
+ * @param      data    pointer to data buffer
+ * @param      len     get data size (in bytes)
+ *
+ * @return     size actual data receive (in bytes)
+ */
+size_t furi_hal_serial_dma_rx(FuriHalSerialHandle* handle, uint8_t* data, size_t len);
 
 #ifdef __cplusplus
 }
