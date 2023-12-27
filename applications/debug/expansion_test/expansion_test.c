@@ -44,10 +44,19 @@ typedef struct {
     Storage* storage;
 } ExpansionTestApp;
 
-static void expansion_test_app_serial_rx_callback(uint8_t data, void* context) {
+static void expansion_test_app_serial_rx_callback(
+    FuriHalSerialHandle* handle,
+    FuriHalSerialRxEvent event,
+    void* context) {
+    furi_assert(handle);
+    furi_assert(context);
     ExpansionTestApp* app = context;
-    furi_stream_buffer_send(app->buf, &data, sizeof(data), 0);
-    furi_thread_flags_set(app->thread_id, ExpansionTestAppFlagData);
+
+    if(event == FuriHalSerialRxEventData) {
+        const uint8_t data = furi_hal_serial_async_rx(handle);
+        furi_stream_buffer_send(app->buf, &data, sizeof(data), 0);
+        furi_thread_flags_set(app->thread_id, ExpansionTestAppFlagData);
+    }
 }
 
 static ExpansionTestApp* expansion_test_app_alloc() {
@@ -70,8 +79,8 @@ static void expansion_test_app_start(ExpansionTestApp* instance) {
     // Start waiting for the initial pulse
     expansion_enable(instance->expansion, HOST_SERIAL_ID);
 
-    furi_hal_serial_set_rx_callback(
-        instance->handle, expansion_test_app_serial_rx_callback, instance);
+    furi_hal_serial_async_rx_start(
+        instance->handle, expansion_test_app_serial_rx_callback, instance, false);
 }
 
 static void expansion_test_app_stop(ExpansionTestApp* instance) {
