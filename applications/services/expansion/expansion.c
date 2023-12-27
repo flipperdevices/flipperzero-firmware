@@ -340,7 +340,7 @@ static int32_t expansion_worker(void* context) {
     instance->session_state = ExpansionSessionStateHandShake;
     instance->exit_reason = ExpansionSessionExitReasonUnknown;
 
-    furi_hal_serial_init(instance->serial_handle, EXPANSION_DEFAULT_BAUD_RATE);
+    furi_hal_serial_init(instance->serial_handle, EXPANSION_PROTOCOL_DEFAULT_BAUD_RATE);
 
     furi_hal_serial_async_rx_start(
         instance->serial_handle, expansion_serial_rx_callback, instance, false);

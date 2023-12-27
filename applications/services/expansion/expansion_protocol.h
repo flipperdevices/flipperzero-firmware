@@ -17,6 +17,11 @@ extern "C" {
 #endif
 
 /**
+ * @brief Default baud rate to start all communications at.
+ */
+#define EXPANSION_PROTOCOL_DEFAULT_BAUD_RATE (9600UL)
+
+/**
  * @brief Maximum data size per frame, in bytes.
  */
 #define EXPANSION_PROTOCOL_MAX_DATA_SIZE (64U)
@@ -29,7 +34,7 @@ extern "C" {
 /**
  * @brief Dead time after changing connection baud rate.
  */
-#define EXPANSION_PROTOCOL_BAUD_CHANGE_DT_MS (25UL)
+#define EXPANSION_PROTOCOL_BAUD_CHANGE_DT_MS (25U)
 
 /**
  * @brief Enumeration of supported frame types.
@@ -160,7 +165,7 @@ typedef size_t (*ExpansionFrameSendCallback)(const uint8_t* data, size_t data_si
  * @param[in] frame pointer to the frame to be evaluated.
  * @returns encoded frame size, in bytes.
  */
-static size_t expansion_frame_get_encoded_size(const ExpansionFrame* frame) {
+static inline size_t expansion_frame_get_encoded_size(const ExpansionFrame* frame) {
     switch(frame->header.type) {
     case ExpansionFrameTypeHeartbeat:
         return sizeof(frame->header);
@@ -187,7 +192,7 @@ static size_t expansion_frame_get_encoded_size(const ExpansionFrame* frame) {
  * @param[in] received_size number of bytes currently availabe for evaluation.
  * @returns number of bytes needed for a complete frame.
  */
-static size_t
+static inline size_t
     expansion_frame_get_remaining_size(const ExpansionFrame* frame, size_t received_size) {
     if(received_size < sizeof(ExpansionFrameHeader)) return sizeof(ExpansionFrameHeader);
 
@@ -240,7 +245,7 @@ typedef enum {
  * @param[in] data_size size of the data buffer.
  * @returns checksum byte of the frame.
  */
-static ExpansionFrameChecksum
+static inline ExpansionFrameChecksum
     expansion_protocol_get_checksum(const uint8_t* data, size_t data_size) {
     ExpansionFrameChecksum checksum = 0;
     for(size_t i = 0; i < data_size; ++i) {
@@ -259,7 +264,7 @@ static ExpansionFrameChecksum
  * @param[in,out] context pointer to a user-defined context object. Will be passed to the receive callback function.
  * @returns ExpansionProtocolStatusOk on success, any other error code on failure.
  */
-static ExpansionProtocolStatus expansion_protocol_decode(
+static inline ExpansionProtocolStatus expansion_protocol_decode(
     ExpansionFrame* frame,
     ExpansionFrameReceiveCallback receive,
     void* context) {
@@ -305,7 +310,7 @@ static ExpansionProtocolStatus expansion_protocol_decode(
  * @param[in,out] context pointer to a user-defined context object. Will be passed to the send callback function.
  * @returns ExpansionProtocolStatusOk on success, any other error code on failure.
  */
-static ExpansionProtocolStatus expansion_protocol_encode(
+static inline ExpansionProtocolStatus expansion_protocol_encode(
     const ExpansionFrame* frame,
     ExpansionFrameSendCallback send,
     void* context) {

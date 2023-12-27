@@ -8,8 +8,6 @@ extern "C" {
 
 #define RECORD_EXPANSION "expansion"
 
-#define EXPANSION_DEFAULT_BAUD_RATE (9600)
-
 typedef struct Expansion Expansion;
 
 void expansion_enable(Expansion* instance, FuriHalSerialId serial_id);
