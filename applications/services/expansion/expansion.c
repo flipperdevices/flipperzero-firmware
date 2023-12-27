@@ -46,7 +46,6 @@ struct Expansion {
     ExpansionState state;
     ExpansionSessionState session_state;
     ExpansionSessionExitReason exit_reason;
-    ExpansionFrame rx_frame;
     FuriStreamBuffer* rx_buf;
     FuriSemaphore* tx_semaphore;
     FuriMutex* state_mutex;
@@ -198,18 +197,19 @@ static void expansion_rpc_session_close(Expansion* instance) {
     furi_record_close(RECORD_RPC);
 }
 
-static bool expansion_handle_session_state_handshake(Expansion* instance) {
+static bool
+    expansion_handle_session_state_handshake(Expansion* instance, const ExpansionFrame* rx_frame) {
     bool success = false;
 
     do {
-        if(instance->rx_frame.header.type != ExpansionFrameTypeBaudRate) break;
-        const uint32_t baud_rate = instance->rx_frame.content.baud_rate.baud;
+        if(rx_frame->header.type != ExpansionFrameTypeBaudRate) break;
+        const uint32_t baud_rate = rx_frame->content.baud_rate.baud;
 
         FURI_LOG_D(TAG, "Proposed baud rate: %lu", baud_rate);
 
         if(furi_hal_serial_is_baud_rate_supported(instance->serial_handle, baud_rate)) {
             instance->session_state = ExpansionSessionStateConnected;
-            // Send response on previous baud rate
+            // Send response at previous baud rate
             if(!expansion_send_status_response(instance, ExpansionFrameErrorNone)) break;
             furi_hal_serial_set_br(instance->serial_handle, baud_rate);
 
@@ -223,18 +223,18 @@ static bool expansion_handle_session_state_handshake(Expansion* instance) {
     return success;
 }
 
-static bool expansion_handle_session_state_connected(Expansion* instance) {
+static bool
+    expansion_handle_session_state_connected(Expansion* instance, const ExpansionFrame* rx_frame) {
     bool success = false;
 
     do {
-        if(instance->rx_frame.header.type == ExpansionFrameTypeControl) {
-            if(instance->rx_frame.content.control.command != ExpansionFrameControlCommandStartRpc)
-                break;
+        if(rx_frame->header.type == ExpansionFrameTypeControl) {
+            if(rx_frame->content.control.command != ExpansionFrameControlCommandStartRpc) break;
             instance->session_state = ExpansionSessionStateRpcActive;
             if(!expansion_rpc_session_open(instance)) break;
             if(!expansion_send_status_response(instance, ExpansionFrameErrorNone)) break;
 
-        } else if(instance->rx_frame.header.type == ExpansionFrameTypeHeartbeat) {
+        } else if(rx_frame->header.type == ExpansionFrameTypeHeartbeat) {
             if(!expansion_send_heartbeat(instance)) break;
 
         } else {
@@ -246,32 +246,32 @@ static bool expansion_handle_session_state_connected(Expansion* instance) {
     return success;
 }
 
-static bool expansion_handle_session_state_rpc_active(Expansion* instance) {
+static bool
+    expansion_handle_session_state_rpc_active(Expansion* instance, const ExpansionFrame* rx_frame) {
     bool success = false;
 
     do {
-        if(instance->rx_frame.header.type == ExpansionFrameTypeData) {
+        if(rx_frame->header.type == ExpansionFrameTypeData) {
             if(!expansion_send_status_response(instance, ExpansionFrameErrorNone)) break;
 
             const size_t size_consumed = rpc_session_feed(
                 instance->rpc_session,
-                instance->rx_frame.content.data.bytes,
-                instance->rx_frame.content.data.size,
+                rx_frame->content.data.bytes,
+                rx_frame->content.data.size,
                 EXPANSION_PROTOCOL_TIMEOUT_MS);
-            if(size_consumed != instance->rx_frame.content.data.size) break;
+            if(size_consumed != rx_frame->content.data.size) break;
 
-        } else if(instance->rx_frame.header.type == ExpansionFrameTypeControl) {
-            if(instance->rx_frame.content.control.command != ExpansionFrameControlCommandStopRpc)
-                break;
+        } else if(rx_frame->header.type == ExpansionFrameTypeControl) {
+            if(rx_frame->content.control.command != ExpansionFrameControlCommandStopRpc) break;
             instance->session_state = ExpansionSessionStateConnected;
             expansion_rpc_session_close(instance);
             if(!expansion_send_status_response(instance, ExpansionFrameErrorNone)) break;
 
-        } else if(instance->rx_frame.header.type == ExpansionFrameTypeStatus) {
-            if(instance->rx_frame.content.status.error != ExpansionFrameErrorNone) break;
+        } else if(rx_frame->header.type == ExpansionFrameTypeStatus) {
+            if(rx_frame->content.status.error != ExpansionFrameErrorNone) break;
             furi_semaphore_release(instance->tx_semaphore);
 
-        } else if(instance->rx_frame.header.type == ExpansionFrameTypeHeartbeat) {
+        } else if(rx_frame->header.type == ExpansionFrameTypeHeartbeat) {
             if(!expansion_send_heartbeat(instance)) break;
 
         } else {
@@ -284,17 +284,21 @@ static bool expansion_handle_session_state_rpc_active(Expansion* instance) {
 }
 
 static inline void expansion_state_machine(Expansion* instance) {
-    static bool (*const expansion_session_state_handlers[])(Expansion*) = {
+    typedef bool (*ExpansionSessionStateHandler)(Expansion*, const ExpansionFrame*);
+
+    static const ExpansionSessionStateHandler expansion_session_state_handlers[] = {
         [ExpansionSessionStateHandShake] = expansion_handle_session_state_handshake,
         [ExpansionSessionStateConnected] = expansion_handle_session_state_connected,
         [ExpansionSessionStateRpcActive] = expansion_handle_session_state_rpc_active,
     };
 
+    ExpansionFrame rx_frame;
+
     while(true) {
         const ExpansionProtocolStatus status =
-            expansion_protocol_decode(&instance->rx_frame, expansion_receive_callback, instance);
+            expansion_protocol_decode(&rx_frame, expansion_receive_callback, instance);
         if(status != ExpansionProtocolStatusOk) break;
-        if(!expansion_session_state_handlers[instance->session_state](instance)) break;
+        if(!expansion_session_state_handlers[instance->session_state](instance, &rx_frame)) break;
     }
 }
 
