@@ -64,6 +64,18 @@ jobs:
               -C assets resources
           done
 
+      - name: 'Bundle self-update package'
+        if: ${{ !github.event.pull_request.head.repo.fork }}
+        run: |
+          set -e
+          for UPDATEBUNDLE in artifacts/*/
+          do
+            BUNDLE_NAME=`echo $UPDATEBUNDLE | cut -d'/' -f2`
+            echo Packaging ${BUNDLE_NAME}
+            tar czpf artifacts/flipper-z-${BUNDLE_NAME}.tgz -C artifacts ${BUNDLE_NAME}
+            rm -rf artifacts/${BUNDLE_NAME}
+          done
+
       - name: "Check for uncommitted changes"
         run: |
           git diff --exit-code
