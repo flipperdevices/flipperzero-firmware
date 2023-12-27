@@ -3,7 +3,7 @@
 #include "gui/scene_manager.h"
 
 enum SubmenuIndex {
-    SubmenuIndexBeaconToggle,
+    // SubmenuIndexBeaconToggle,
     SubmenuIndexSetMac,
     SubmenuIndexSetData,
 };
@@ -17,12 +17,12 @@ void ble_beacon_app_scene_menu_on_enter(void* context) {
     BleBeaconApp* ble_beacon = context;
     Submenu* submenu = ble_beacon->submenu;
 
-    submenu_add_item(
-        submenu,
-        ble_beacon->is_beacon_active ? "Stop Beacon" : "Start Beacon",
-        SubmenuIndexBeaconToggle,
-        ble_beacon_app_scene_menu_submenu_callback,
-        ble_beacon);
+    // submenu_add_item(
+    //     submenu,
+    //     ble_beacon->is_beacon_active ? "Stop Beacon" : "Start Beacon",
+    //     SubmenuIndexBeaconToggle,
+    //     ble_beacon_app_scene_menu_submenu_callback,
+    //     ble_beacon);
 
     submenu_add_item(
         submenu,
@@ -37,7 +37,7 @@ void ble_beacon_app_scene_menu_on_enter(void* context) {
         ble_beacon_app_scene_menu_submenu_callback,
         ble_beacon);
 
-    submenu_set_selected_item(submenu, SubmenuIndexBeaconToggle);
+    // submenu_set_selected_item(submenu, SubmenuIndexBeaconToggle);
     view_dispatcher_switch_to_view(ble_beacon->view_dispatcher, BleBeaconAppViewSubmenu);
 }
 
@@ -55,12 +55,13 @@ bool ble_beacon_app_scene_menu_on_event(void* context, SceneManagerEvent event) 
         } else if(submenu_index == SubmenuIndexSetData) {
             scene_manager_next_scene(scene_manager, BleBeaconAppSceneInputBeaconData);
             consumed = true;
-        } else if(submenu_index == SubmenuIndexBeaconToggle) {
-            ble_beacon->is_beacon_active = !ble_beacon->is_beacon_active;
-            ble_beacon_app_update_state(ble_beacon);
-            scene_manager_previous_scene(scene_manager);
-            consumed = true;
         }
+        // else if(submenu_index == SubmenuIndexBeaconToggle) {
+        //     ble_beacon->is_beacon_active = !ble_beacon->is_beacon_active;
+        //     ble_beacon_app_update_state(ble_beacon);
+        //     scene_manager_previous_scene(scene_manager);
+        //     consumed = true;
+        // }
     }
 
     return consumed;

@@ -8,7 +8,7 @@ static void ble_beacon_app_scene_add_type_byte_input_callback(void* context) {
 
 void ble_beacon_app_scene_input_mac_addr_on_enter(void* context) {
     BleBeaconApp* ble_beacon = context;
-    byte_input_set_header_text(ble_beacon->byte_input, "Enter MAC (reversed))");
+    byte_input_set_header_text(ble_beacon->byte_input, "Enter MAC (reversed)");
 
     byte_input_set_result_callback(
         ble_beacon->byte_input,

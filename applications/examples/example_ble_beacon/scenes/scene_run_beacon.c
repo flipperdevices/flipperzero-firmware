@@ -2,6 +2,7 @@
 #include "core/string.h"
 #include "gui/canvas.h"
 #include "gui/modules/dialog_ex.h"
+#include "gui/scene_manager.h"
 #include "gui/view_dispatcher.h"
 #include <example_ble_beacon_icons.h>
 
@@ -16,7 +17,7 @@ void ble_beacon_app_scene_run_beacon_on_enter(void* context) {
     BleBeaconApp* ble_beacon = context;
     DialogEx* dialog_ex = ble_beacon->dialog_ex;
 
-    dialog_ex_set_header(dialog_ex, "BLE Beacon Demo", 64, 9, AlignCenter, AlignCenter);
+    dialog_ex_set_header(dialog_ex, "BLE Beacon Demo", 64, 0, AlignCenter, AlignTop);
 
     FuriString* status = ble_beacon->status_string;
 
@@ -39,11 +40,13 @@ void ble_beacon_app_scene_run_beacon_on_enter(void* context) {
 
     furi_string_cat_printf(status, "\nData length: %d", ble_beacon->beacon_data_len);
 
-    dialog_ex_set_text(dialog_ex, furi_string_get_cstr(status), 82, 32, AlignCenter, AlignCenter);
+    dialog_ex_set_text(dialog_ex, furi_string_get_cstr(status), 0, 29, AlignLeft, AlignCenter);
 
-    dialog_ex_set_icon(dialog_ex, 0, 20, &I_lighthouse_35x44);
+    dialog_ex_set_icon(dialog_ex, 93, 20, &I_lighthouse_35x44);
 
-    dialog_ex_set_right_button_text(dialog_ex, "Configure");
+    dialog_ex_set_left_button_text(dialog_ex, "Config");
+
+    dialog_ex_set_center_button_text(dialog_ex, ble_beacon->is_beacon_active ? "Stop" : "Start");
 
     dialog_ex_set_result_callback(
         dialog_ex, ble_beacon_app_scene_run_beacon_confirm_dialog_callback);
@@ -57,10 +60,20 @@ bool ble_beacon_app_scene_run_beacon_on_event(void* context, SceneManagerEvent e
     SceneManager* scene_manager = ble_beacon->scene_manager;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == DialogExResultRight) {
+        if(event.event == DialogExResultLeft) {
             scene_manager_next_scene(scene_manager, BleBeaconAppSceneMenu);
             return true;
+        } else if(event.event == DialogExResultCenter) {
+            ble_beacon->is_beacon_active = !ble_beacon->is_beacon_active;
+            ble_beacon_app_update_state(ble_beacon);
+            // hacky way to refresh the scene
+            scene_manager_search_and_switch_to_another_scene(
+                scene_manager, BleBeaconAppSceneRunBeacon);
+            return true;
         }
+    } else if(event.type == SceneManagerEventTypeBack) {
+        // scene_manager_stop(scene_manager);
+        // return true;
     }
     return false;
 }
