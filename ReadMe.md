@@ -27,10 +27,10 @@ This software is for experimental purposes only and is not meant for any illegal
 
 <a name="latest">
 
-## Latest Updates - [PATREON: Latest Release RM1226-1142-0.93.9-e59f801](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
+## Latest Updates - [PATREON: Latest Release RM1227-1725-0.93.9-e4c18d2](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-12-27 01:10 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-12-27 01:10 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-12-27 17:25 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-12-27 17:25 EST`
 - OFW PR: NFC: [Update mf_classic_dict.nfc #3314 (By ry4000)](https://github.com/flipperdevices/flipperzero-firmware/pull/3314) - For Bandai Namco Passport / Sega Aime Card (Already part of key dictionairy lines 1918-1952.)
 - Added: [Smack My Dolphin Up! (By siberianbot)](https://github.com/siberianbot/smack-my-dolphin-up)
 - OFW: [About: cn,tw,mx certification information #3318 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3318)
