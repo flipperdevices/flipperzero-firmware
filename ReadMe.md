@@ -29,8 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM1227-1725-0.93.9-e4c18d2](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-12-27 17:25 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-12-27 17:25 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-12-27 18:08 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-12-27 18:08 EST`
 - OFW PR: NFC: [Update mf_classic_dict.nfc #3314 (By ry4000)](https://github.com/flipperdevices/flipperzero-firmware/pull/3314) - For Bandai Namco Passport / Sega Aime Card (Already part of key dictionairy lines 1918-1952.)
 - Added: [Smack My Dolphin Up! (By siberianbot)](https://github.com/siberianbot/smack-my-dolphin-up)
 - OFW: [About: cn,tw,mx certification information #3318 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3318)
@@ -38,6 +38,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: [SubGHz: Temp fix for subghz keyboard lock display issue (furi_timer is not working properly) (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/5c00a403f6477fc7f0b2c6f82689983bbc284410)
 - UL: [SubGHz: Added new option to delete old signals on full memory (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/b84f14386c9f2c111811b031a18a6914f71a3e74)
 - Updated: [Dab Timer v1.7 (By RogueMaster)](https://github.com/RogueMaster/flipperzero-dabtimer)
+- [MACOS_GUIDE.md - Sonoma Notes #1016 (By tonywald)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/1016)
 
 <a name="release">
 
