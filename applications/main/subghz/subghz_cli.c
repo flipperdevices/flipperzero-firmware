@@ -807,7 +807,7 @@ void subghz_cli_command_tx_from_file(Cli* cli, FuriString* args, void* context) 
         furi_hal_power_suppress_charge_enter();
 
         printf(
-            "Listening at \033[0;33m%s\033[0m. Frequency=%ld, Protocol=%s\r\n\r\nPress CTRL+C to stop\r\n\r\n",
+            "Listening at \033[0;33m%s\033[0m. Frequency=%lu, Protocol=%s\r\n\r\nPress CTRL+C to stop\r\n\r\n",
             furi_string_get_cstr(file_name),
             frequency,
             furi_string_get_cstr(temp_str));
