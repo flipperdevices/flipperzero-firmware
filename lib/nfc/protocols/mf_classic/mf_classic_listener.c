@@ -241,6 +241,7 @@ static MfClassicListenerCommand mf_classic_listener_write_block_first_part_handl
 
         uint8_t block_num = bit_buffer_get_byte(buff, 1);
         if(block_num >= instance->total_block_num) break;
+        if(block_num == 0) break;
 
         uint8_t sector_num = mf_classic_get_sector_by_block(block_num);
         uint8_t auth_sector_num = mf_classic_get_sector_by_block(auth_ctx->block_num);
@@ -611,6 +612,7 @@ NfcCommand mf_classic_listener_run(NfcGenericEvent event, void* context) {
 
             mf_classic_listener_send_short_frame(instance, nack);
             mf_classic_listener_reset_state(instance);
+            command = NfcCommandSleep;
         } else if(mfc_command == MfClassicListenerCommandSilent) {
             command = NfcCommandReset;
         } else if(mfc_command == MfClassicListenerCommandSleep) {
