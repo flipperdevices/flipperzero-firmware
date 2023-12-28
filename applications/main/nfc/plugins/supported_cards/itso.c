@@ -90,7 +90,7 @@ static bool itso_parse(const NfcDevice* device, FuriString* parsed_data) {
         uint64_t x2 = swap_uint64(itso_file->part2);
 
         char cardBuff[32];
-        char dateBuff[17];
+        char dateBuff[18];
 
         snprintf(cardBuff, sizeof(cardBuff), "%llx%llx", x1, x2);
         snprintf(dateBuff, sizeof(dateBuff), "%llx", x2);
