@@ -9,16 +9,19 @@
 static void (*const minesweeper_scene_on_enter_handlers[])(void*) = {
     minesweeper_scenes_startup_scene_on_enter,
     minesweeper_scenes_game_on_enter,
+    minesweeper_scenes_menu_on_enter,
 };
 
 static bool (*const minesweeper_scene_on_event_handlers[])(void*, SceneManagerEvent) = {
     minesweeper_scenes_startup_scene_on_event,
     minesweeper_scenes_game_on_event,
+    minesweeper_scenes_menu_on_event,
 };
 
 static void (*const minesweeper_scene_on_exit_handlers[])(void*) = {
     minesweeper_scenes_startup_scene_on_exit,
     minesweeper_scenes_game_on_exit,
+    minesweeper_scenes_menu_on_exit,
 };
 
 static const SceneManagerHandlers minesweeper_scene_manager_handlers = {
@@ -68,6 +71,9 @@ static App* app_alloc() {
     app->loading = loading_alloc();
     view_dispatcher_add_view(app->view_dispatcher, MineSweeperLoadingView, loading_get_view(app->loading));
 
+    app->menu = dialog_ex_alloc();
+    view_dispatcher_add_view(app->view_dispatcher, MineSweeperMenuView, dialog_ex_get_view(app->menu));
+
     return app;
 
 }
@@ -86,6 +92,7 @@ static void app_free(App* app) {
     popup_free(app->popup);
     empty_screen_free(app->empty_screen);
     loading_free(app->loading);
+    dialog_ex_free(app->menu);
 
     free(app->app_state);
     free(app);
