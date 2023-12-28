@@ -1,5 +1,5 @@
-#ifndef STARTUP_SCREEN_H
-#define STARTUP_SCREEN_H
+#ifndef MINESWEEPER_STARTUP_SCREEN_H
+#define MINESWEEPER_STARTUP_SCREEN_H
 
 #include <gui/scene_manager.h>
 
