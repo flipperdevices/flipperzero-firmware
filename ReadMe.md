@@ -42,6 +42,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [Add Samsung AC remotes DB93 and AR-EH04 #3301 (By braghetto)](https://github.com/flipperdevices/flipperzero-firmware/pull/3301)
 - OFW: [Scripts: fix incorrect handling of storage stress test count option #3321 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3321)
 - OFW: NFC: [Update mf_classic_dict.nfc #3314 (By ry4000)](https://github.com/flipperdevices/flipperzero-firmware/pull/3314) - For Bandai Namco Passport / Sega Aime Card (Already part of key dictionairy lines 1918-1952.) - ALREADY IN RM
+- Removed some bloat out of the NFC dictionary (By RogueMaster)
 
 ## IN THIS BRANCH:
 
