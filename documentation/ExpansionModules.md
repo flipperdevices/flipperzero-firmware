@@ -2,18 +2,19 @@
 
 ## Terms and definitions
 
-- Expansion module: A third-party hardware unit meant for use with Flipper Zero by connecting it to its GPIO header.
-- Expansion module protocol: A serial-based, byte-oriented, synchronous communication protocol described in this document.
+- Expansion Module: A third-party hardware unit meant for use with Flipper Zero by connecting it to its GPIO header.
+- Expansion Module Protocol: A serial-based, byte-oriented, synchronous communication protocol described in this document.
 - Host: Hardware unit tasked with serving requests. Used interchangeably with Flipper, Server, Host etc. throughout this document.
-- Device: Used interchangeably with Expansion module, Module, Client, etc.
+- Device: Used interchangeably with Expansion Module, Module, Client, etc.
 - RPC: Remote Procedure Call, a protobuf-based communication protocol widely used by Flipper Zero companion applications.
-- Timeout interval: Period of inactivity to be treated as a loss of connection, also denoted as Tto. Equals to 250 ms.
-- Baud rate switch dead time: Period of time after baud rate change during which no communication is allowed, also denoted Tdt. Equals to 25 ms.
+- Timeout Interval: Period of inactivity to be treated as a loss of connection, also denoted as Tto. Equals to 250 ms.
+- Baud Rate Switch Dead Time: Period of time after baud rate change during which no communication is allowed, also denoted Tdt. Equals to 25 ms.
 
 ## Features
 
 - Automatic expansion module detection
 - Baud rate negotiation
+- Basic error detection
 - Request-response communication flow
 - Integration with Flipper RPC protocol
 
@@ -151,4 +152,13 @@ Control [Stop RPC]          -->
     The host SHALL respond with a HEARTBEAT frame each time.
 ```
 
-(To be continued...)
+## Error detection
+
+Error detection is implemented via adding an extra checksum byte to every frame (see above).
+
+The checksum is calculated by bitwise XOR-ing every byte in the frame (excluding the checksum byte itself), with an initial value of 0.
+
+### Error recovery behaviour
+
+In the event of a detected error, the concerned side MUST cease all communications and reset to initial state. The other side will then experience
+a communication timeout and the connection will be re-established automatically.
