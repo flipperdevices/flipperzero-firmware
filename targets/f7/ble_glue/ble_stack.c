@@ -25,7 +25,6 @@ typedef struct {
 
 static BleApp* ble_app = NULL;
 
-// static int32_t ble_stack_hci_thread(void* context);
 static void ble_stack_hci_event_handler(void* pPayload);
 static void ble_stack_hci_status_not_handler(HCI_TL_CmdStatus_t status);
 

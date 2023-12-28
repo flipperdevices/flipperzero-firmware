@@ -9,8 +9,6 @@
 
 #include <gui/modules/widget.h>
 #include <gui/modules/submenu.h>
-// #include <gui/modules/text_box.h>
-// #include <gui/modules/text_input.h>
 #include <gui/modules/byte_input.h>
 #include <gui/modules/dialog_ex.h>
 

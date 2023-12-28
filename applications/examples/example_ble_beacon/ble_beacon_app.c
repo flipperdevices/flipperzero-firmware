@@ -1,11 +1,7 @@
 #include "ble_beacon_app.h"
 
-#include "core/core_defines.h"
-#include "core/string.h"
-#include "extra_beacon.h"
-#include "furi_hal_ble.h"
-#include "furi_hal_version.h"
-#include <core/log.h>
+#include <extra_beacon.h>
+#include <furi_hal_version.h>
 
 #include <string.h>
 

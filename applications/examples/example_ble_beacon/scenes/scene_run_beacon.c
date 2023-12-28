@@ -1,9 +1,4 @@
 #include "../ble_beacon_app.h"
-#include "core/string.h"
-#include "gui/canvas.h"
-#include "gui/modules/dialog_ex.h"
-#include "gui/scene_manager.h"
-#include "gui/view_dispatcher.h"
 #include <example_ble_beacon_icons.h>
 
 static void
