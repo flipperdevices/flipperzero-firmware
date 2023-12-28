@@ -26,6 +26,7 @@ typedef enum {
     MineSweeperPopupView,
     MineSweeperLoadingView,
     MineSweeperEmptyScreenView,
+    MineSweeperMenuView,
     MineSweeperPopupCount,  // Leave at end
 } MineSweeperView;
 
@@ -33,23 +34,9 @@ typedef enum {
 typedef enum {
     MineSweeperStartupScene,
     MineSweeperGameScene,
+    MineSweeperMenuScene,
     MineSweeperSceneCount,  // Leave at end
 } MineSweeperScene;
-
-typedef enum {
-    Tile0,
-    Tile1,
-    Tile2,
-    Tile3,
-    Tile4,
-    Tile5,
-    Tile6,
-    Tile7,
-    Tile8,
-    TileClear,
-    TileFlag,
-    TileMine,
-} Tile;
 
 typedef enum {
     MineSweeperGameKeyUpShortEvent,
@@ -65,12 +52,8 @@ typedef enum {
     MineSweeperGameKeyLeftLongEvent,
     MineSweeperGameKeyOkLongEvent,
     MineSweeperGameKeyBackLongEvent,
+    MineSweeperGameKeyEventSize
 } MineSweeperGameKeyEvent;
-
-typedef enum {
-    TileStatusEmpty,
-    TileStatusMine,
-} TileStatus;
 
 typedef struct CurPos {
     uint8_t x;
@@ -79,9 +62,6 @@ typedef struct CurPos {
 
 // App state
 typedef struct AppState {
-    TileStatus minefield[PLAY_HEIGHT][PLAY_WIDTH];
-    Tile playfield[PLAY_HEIGHT][PLAY_WIDTH];
-    //FuriTimer* timer;
     CurPos curPos;
     int fields_cleared;
     int flags_used;
@@ -97,6 +77,7 @@ typedef struct App {
     View* empty_screen_view;
     EmptyScreen* empty_screen;
     Loading* loading;
+    DialogEx* menu;
 } App;
 
 
