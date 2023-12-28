@@ -14,6 +14,7 @@
 #include "mjs_primitive.h"
 #include "mjs_string.h"
 #include "mjs_util.h"
+#include "mjs_array_buf.h"
 
 /*
  * If the file with the given filename was already loaded, returns the
@@ -156,4 +157,6 @@ void mjs_init_builtin(struct mjs* mjs, mjs_val_t obj) {
     */
     mjs_set(mjs, obj, "NaN", ~0, MJS_TAG_NAN);
     mjs_set(mjs, obj, "isNaN", ~0, mjs_mk_foreign_func(mjs, (mjs_func_ptr_t)mjs_op_isnan));
+
+    mjs_init_builtin_array_buf(mjs, obj);
 }

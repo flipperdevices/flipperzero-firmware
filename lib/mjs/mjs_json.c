@@ -30,6 +30,8 @@ static int should_skip_for_json(enum mjs_type type) {
     case MJS_TYPE_BOOLEAN:
     case MJS_TYPE_NUMBER:
     case MJS_TYPE_STRING:
+    case MJS_TYPE_ARRAY_BUF:
+    case MJS_TYPE_ARRAY_BUF_VIEW:
     case MJS_TYPE_OBJECT_GENERIC:
     case MJS_TYPE_OBJECT_ARRAY:
         ret = 0;
@@ -148,6 +150,8 @@ MJS_PRIVATE mjs_err_t to_json_or_debug(
     case MJS_TYPE_NUMBER:
     case MJS_TYPE_UNDEFINED:
     case MJS_TYPE_FOREIGN:
+    case MJS_TYPE_ARRAY_BUF:
+    case MJS_TYPE_ARRAY_BUF_VIEW:
         /* For those types, regular `mjs_to_string()` works */
         {
             /* refactor: mjs_to_string allocates memory every time */

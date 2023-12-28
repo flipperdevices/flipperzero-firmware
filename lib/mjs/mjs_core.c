@@ -60,6 +60,7 @@ void mjs_destroy(struct mjs* mjs) {
     mbuf_free(&mjs->scopes);
     mbuf_free(&mjs->loop_addresses);
     mbuf_free(&mjs->json_visited_stack);
+    mbuf_free(&mjs->array_buffers);
     free(mjs->error_msg);
     free(mjs->stack_trace);
     mjs_ffi_args_free_list(mjs);
@@ -84,6 +85,7 @@ struct mjs* mjs_create(void* context) {
     mbuf_init(&mjs->scopes, 0);
     mbuf_init(&mjs->loop_addresses, 0);
     mbuf_init(&mjs->json_visited_stack, 0);
+    mbuf_init(&mjs->array_buffers, 0);
 
     mjs->bcode_len = 0;
 
@@ -259,6 +261,10 @@ MJS_PRIVATE enum mjs_type mjs_get_type(mjs_val_t v) {
         return MJS_TYPE_BOOLEAN;
     case MJS_TAG_NULL >> 48:
         return MJS_TYPE_NULL;
+    case MJS_TAG_ARRAY_BUF >> 48:
+        return MJS_TYPE_ARRAY_BUF;
+    case MJS_TAG_ARRAY_BUF_VIEW >> 48:
+        return MJS_TYPE_ARRAY_BUF_VIEW;
     default:
         abort();
         return MJS_TYPE_UNDEFINED;

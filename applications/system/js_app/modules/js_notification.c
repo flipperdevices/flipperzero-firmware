@@ -79,9 +79,9 @@ static void* js_notification_create(struct mjs* mjs, mjs_val_t* object) {
     NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
     mjs_val_t notify_obj = mjs_mk_object(mjs);
     mjs_set(mjs, notify_obj, INST_PROP_NAME, ~0, mjs_mk_foreign(mjs, notification));
-    mjs_set(mjs, notify_obj, "success", ~0, MFS_MK_FN(js_notify_success));
-    mjs_set(mjs, notify_obj, "error", ~0, MFS_MK_FN(js_notify_error));
-    mjs_set(mjs, notify_obj, "blink", ~0, MFS_MK_FN(js_notify_blink));
+    mjs_set(mjs, notify_obj, "success", ~0, MJS_MK_FN(js_notify_success));
+    mjs_set(mjs, notify_obj, "error", ~0, MJS_MK_FN(js_notify_error));
+    mjs_set(mjs, notify_obj, "blink", ~0, MJS_MK_FN(js_notify_blink));
     *object = notify_obj;
 
     return notification;

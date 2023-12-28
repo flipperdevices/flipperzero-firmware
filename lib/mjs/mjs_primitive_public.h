@@ -18,6 +18,8 @@ extern "C" {
 /* JavaScript `undefined` value */
 #define MJS_UNDEFINED MJS_TAG_UNDEFINED
 
+#define MJS_MK_FN(fn) mjs_mk_foreign_func(mjs, (mjs_func_ptr_t)fn)
+
 /* Function pointer type used in `mjs_mk_foreign_func`. */
 typedef void (*mjs_func_ptr_t)(void);
 

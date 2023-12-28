@@ -370,13 +370,13 @@ static void* js_badusb_create(struct mjs* mjs, mjs_val_t* object) {
     JsBadusbInst* badusb = malloc(sizeof(JsBadusbInst));
     mjs_val_t badusb_obj = mjs_mk_object(mjs);
     mjs_set(mjs, badusb_obj, INST_PROP_NAME, ~0, mjs_mk_foreign(mjs, badusb));
-    mjs_set(mjs, badusb_obj, "setup", ~0, MFS_MK_FN(js_badusb_setup));
-    mjs_set(mjs, badusb_obj, "isConnected", ~0, MFS_MK_FN(js_badusb_is_connected));
-    mjs_set(mjs, badusb_obj, "press", ~0, MFS_MK_FN(js_badusb_press));
-    mjs_set(mjs, badusb_obj, "hold", ~0, MFS_MK_FN(js_badusb_hold));
-    mjs_set(mjs, badusb_obj, "release", ~0, MFS_MK_FN(js_badusb_release));
-    mjs_set(mjs, badusb_obj, "print", ~0, MFS_MK_FN(js_badusb_print));
-    mjs_set(mjs, badusb_obj, "println", ~0, MFS_MK_FN(js_badusb_println));
+    mjs_set(mjs, badusb_obj, "setup", ~0, MJS_MK_FN(js_badusb_setup));
+    mjs_set(mjs, badusb_obj, "isConnected", ~0, MJS_MK_FN(js_badusb_is_connected));
+    mjs_set(mjs, badusb_obj, "press", ~0, MJS_MK_FN(js_badusb_press));
+    mjs_set(mjs, badusb_obj, "hold", ~0, MJS_MK_FN(js_badusb_hold));
+    mjs_set(mjs, badusb_obj, "release", ~0, MJS_MK_FN(js_badusb_release));
+    mjs_set(mjs, badusb_obj, "print", ~0, MJS_MK_FN(js_badusb_print));
+    mjs_set(mjs, badusb_obj, "println", ~0, MJS_MK_FN(js_badusb_println));
     *object = badusb_obj;
     return badusb;
 }

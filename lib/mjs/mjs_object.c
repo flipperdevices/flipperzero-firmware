@@ -25,7 +25,7 @@ MJS_PRIVATE struct mjs_object* get_object_struct(mjs_val_t v) {
     if(mjs_is_null(v)) {
         ret = NULL;
     } else {
-        assert(mjs_is_object(v));
+        assert(mjs_is_object_based(v));
         ret = (struct mjs_object*)get_ptr(v);
     }
     return ret;
@@ -45,12 +45,17 @@ int mjs_is_object(mjs_val_t v) {
     return (v & MJS_TAG_MASK) == MJS_TAG_OBJECT || (v & MJS_TAG_MASK) == MJS_TAG_ARRAY;
 }
 
+int mjs_is_object_based(mjs_val_t v) {
+    return ((v & MJS_TAG_MASK) == MJS_TAG_OBJECT) || ((v & MJS_TAG_MASK) == MJS_TAG_ARRAY) ||
+           ((v & MJS_TAG_MASK) == MJS_TAG_ARRAY_BUF_VIEW);
+}
+
 MJS_PRIVATE struct mjs_property*
     mjs_get_own_property(struct mjs* mjs, mjs_val_t obj, const char* name, size_t len) {
     struct mjs_property* p;
     struct mjs_object* o;
 
-    if(!mjs_is_object(obj)) {
+    if(!mjs_is_object_based(obj)) {
         return NULL;
     }
 
@@ -177,7 +182,7 @@ MJS_PRIVATE mjs_err_t mjs_set_internal(
 
     if(p == NULL) {
         struct mjs_object* o;
-        if(!mjs_is_object(obj)) {
+        if(!mjs_is_object_based(obj)) {
             return MJS_REFERENCE_ERROR;
         }
 
@@ -216,7 +221,7 @@ MJS_PRIVATE void mjs_destroy_property(struct mjs_property** p) {
 int mjs_del(struct mjs* mjs, mjs_val_t obj, const char* name, size_t len) {
     struct mjs_property *prop, *prev;
 
-    if(!mjs_is_object(obj)) {
+    if(!mjs_is_object_based(obj)) {
         return -1;
     }
     if(len == (size_t)~0) {

@@ -17,6 +17,7 @@
 #include "mjs_string.h"
 #include "mjs_tok.h"
 #include "mjs_util.h"
+#include "mjs_array_buf.h"
 
 #if MJS_GENERATE_JSC && defined(CS_MMAP)
 #include <sys/mman.h>
@@ -316,6 +317,11 @@ static void exec_expr(struct mjs* mjs, int op) {
         mjs_val_t key = mjs_pop(mjs);
         if(mjs_is_object(obj)) {
             mjs_set_v(mjs, obj, key, val);
+        } else if(mjs_is_data_view(obj)) {
+            mjs_err_t err = mjs_dataview_set_prop(mjs, obj, key, val);
+            if(err != MJS_OK) {
+                mjs_prepend_errorf(mjs, err, "");
+            }
         } else if(mjs_is_foreign(obj)) {
             /*
          * We don't have setters, so in order to support properties which behave
@@ -502,6 +508,53 @@ static int getprop_builtin_foreign(
     return 1;
 }
 
+static int getprop_builtin_array_buf(
+    struct mjs* mjs,
+    mjs_val_t val,
+    const char* name,
+    size_t name_len,
+    mjs_val_t* res) {
+    if(strcmp(name, "byteLength") == 0) {
+        size_t len = 0;
+        mjs_array_buf_get_ptr(mjs, val, &len);
+        *res = mjs_mk_number(mjs, len);
+        return 1;
+    } else if(strcmp(name, "getPtr") == 0) {
+        void* ptr = mjs_array_buf_get_ptr(mjs, val, NULL);
+        *res = mjs_mk_foreign(mjs, ptr);
+        return 1;
+    } else if(strcmp(name, "slice") == 0) {
+        *res = mjs_mk_foreign_func(mjs, (mjs_func_ptr_t)mjs_array_buf_slice);
+        return 1;
+    }
+
+    (void)name_len;
+    return 0;
+}
+
+static int getprop_builtin_data_view(
+    struct mjs* mjs,
+    mjs_val_t val,
+    const char* name,
+    size_t name_len,
+    mjs_val_t* res) {
+    if(strcmp(name, "byteLength") == 0) {
+        size_t len = 0;
+        mjs_array_buf_get_ptr(mjs, mjs_dataview_get_buf(mjs, val), &len);
+        *res = mjs_mk_number(mjs, len);
+        return 1;
+    } else if(strcmp(name, "length") == 0) {
+        *res = mjs_dataview_get_len(mjs, val);
+        return 1;
+    } else if(strcmp(name, "buffer") == 0) {
+        *res = mjs_dataview_get_buf(mjs, val);
+        return 1;
+    }
+
+    (void)name_len;
+    return 0;
+}
+
 static void mjs_apply_(struct mjs* mjs) {
     mjs_val_t res = MJS_UNDEFINED, *args = NULL;
     mjs_val_t func = mjs->vals.this_obj, v = mjs_arg(mjs, 1);
@@ -534,6 +587,10 @@ static int getprop_builtin(struct mjs* mjs, mjs_val_t val, mjs_val_t name, mjs_v
             handled = getprop_builtin_array(mjs, val, s, n, res);
         } else if(mjs_is_foreign(val)) {
             handled = getprop_builtin_foreign(mjs, val, s, n, res);
+        } else if(mjs_is_array_buf(val)) {
+            handled = getprop_builtin_array_buf(mjs, val, s, n, res);
+        } else if(mjs_is_data_view(val)) {
+            handled = getprop_builtin_data_view(mjs, val, s, n, res);
         }
     }
 
@@ -688,6 +745,8 @@ MJS_PRIVATE mjs_err_t mjs_execute(struct mjs* mjs, size_t off, mjs_val_t* res) {
             if(!getprop_builtin(mjs, obj, key, &val)) {
                 if(mjs_is_object(obj)) {
                     val = mjs_get_v_proto(mjs, obj, key);
+                } else if((mjs_is_data_view(obj) && (mjs_is_number(key)))) {
+                    val = mjs_dataview_get_prop(mjs, obj, key);
                 } else {
                     mjs_prepend_errorf(mjs, MJS_TYPE_ERROR, "type error");
                 }

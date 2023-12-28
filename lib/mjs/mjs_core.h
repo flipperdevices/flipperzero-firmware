@@ -73,6 +73,7 @@ struct mjs {
     struct mbuf foreign_strings; /* Sequence of (varint len, char *data) */
     struct mbuf owned_values;
     struct mbuf json_visited_stack;
+    struct mbuf array_buffers;
     struct mjs_vals vals;
     char* error_msg;
     char* stack_trace;

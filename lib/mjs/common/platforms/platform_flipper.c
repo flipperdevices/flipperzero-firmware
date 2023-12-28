@@ -1,6 +1,7 @@
 #include <furi.h>
 #include <toolbox/stream/file_stream.h>
 #include "../cs_dbg.h"
+#include "../frozen/frozen.h"
 
 char* cs_read_file(const char* path, size_t* size) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
@@ -42,6 +43,13 @@ int json_vfprintf(const char* file_name, const char* fmt, va_list ap) {
 
 int json_prettify_file(const char* file_name) {
     UNUSED(file_name);
+    return 0;
+}
+
+int json_printer_file(struct json_out* out, const char* buf, size_t len) {
+    UNUSED(out);
+    UNUSED(buf);
+    UNUSED(len);
     return 0;
 }
 

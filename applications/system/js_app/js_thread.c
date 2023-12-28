@@ -235,18 +235,18 @@ static int32_t js_thread(void* arg) {
     struct mjs* mjs = mjs_create(worker);
     worker->modules = js_modules_create(mjs, worker->resolver);
     mjs_val_t global = mjs_get_global(mjs);
-    mjs_set(mjs, global, "print", ~0, MFS_MK_FN(js_print));
-    mjs_set(mjs, global, "delay", ~0, MFS_MK_FN(js_delay));
-    mjs_set(mjs, global, "to_string", ~0, MFS_MK_FN(js_global_to_string));
-    mjs_set(mjs, global, "to_hex_string", ~0, MFS_MK_FN(js_global_to_hex_string));
-    mjs_set(mjs, global, "ffi_address", ~0, MFS_MK_FN(js_ffi_address));
-    mjs_set(mjs, global, "require", ~0, MFS_MK_FN(js_require));
+    mjs_set(mjs, global, "print", ~0, MJS_MK_FN(js_print));
+    mjs_set(mjs, global, "delay", ~0, MJS_MK_FN(js_delay));
+    mjs_set(mjs, global, "to_string", ~0, MJS_MK_FN(js_global_to_string));
+    mjs_set(mjs, global, "to_hex_string", ~0, MJS_MK_FN(js_global_to_hex_string));
+    mjs_set(mjs, global, "ffi_address", ~0, MJS_MK_FN(js_ffi_address));
+    mjs_set(mjs, global, "require", ~0, MJS_MK_FN(js_require));
 
     mjs_val_t console_obj = mjs_mk_object(mjs);
-    mjs_set(mjs, console_obj, "log", ~0, MFS_MK_FN(js_console_log));
-    mjs_set(mjs, console_obj, "warn", ~0, MFS_MK_FN(js_console_warn));
-    mjs_set(mjs, console_obj, "error", ~0, MFS_MK_FN(js_console_error));
-    mjs_set(mjs, console_obj, "debug", ~0, MFS_MK_FN(js_console_debug));
+    mjs_set(mjs, console_obj, "log", ~0, MJS_MK_FN(js_console_log));
+    mjs_set(mjs, console_obj, "warn", ~0, MJS_MK_FN(js_console_warn));
+    mjs_set(mjs, console_obj, "error", ~0, MJS_MK_FN(js_console_error));
+    mjs_set(mjs, console_obj, "debug", ~0, MJS_MK_FN(js_console_debug));
     mjs_set(mjs, global, "console", ~0, console_obj);
 
     mjs_set_ffi_resolver(mjs, js_dlsym, worker->resolver);

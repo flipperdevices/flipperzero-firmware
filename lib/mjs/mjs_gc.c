@@ -283,7 +283,7 @@ static void gc_mark_object(struct mjs* mjs, mjs_val_t* v) {
     struct mjs_property* prop;
     struct mjs_property* next;
 
-    assert(mjs_is_object(*v));
+    assert(mjs_is_object_based(*v));
 
     obj_base = get_object_struct(*v);
 
@@ -367,7 +367,7 @@ static void gc_mark_string(struct mjs* mjs, mjs_val_t* v) {
 }
 
 MJS_PRIVATE void gc_mark(struct mjs* mjs, mjs_val_t* v) {
-    if(mjs_is_object(*v)) {
+    if(mjs_is_object_based(*v)) {
         gc_mark_object(mjs, v);
     }
     if(mjs_is_ffi_sig(*v)) {
@@ -514,7 +514,7 @@ void mjs_gc(struct mjs* mjs, int full) {
 }
 
 MJS_PRIVATE int gc_check_val(struct mjs* mjs, mjs_val_t v) {
-    if(mjs_is_object(v)) {
+    if(mjs_is_object_based(v)) {
         return gc_check_ptr(&mjs->object_arena, get_object_struct(v));
     }
     if(mjs_is_ffi_sig(v)) {

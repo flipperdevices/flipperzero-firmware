@@ -34,6 +34,12 @@ static void js_uart_setup(struct mjs* mjs) {
     JsUartInst* uart = mjs_get_ptr(mjs, obj_inst);
     furi_assert(uart);
 
+    if(uart->setup_done) {
+        mjs_prepend_errorf(mjs, MJS_INTERNAL_ERROR, "UART is already configured");
+        mjs_return(mjs, MJS_UNDEFINED);
+        return;
+    }
+
     bool args_correct = false;
     uint32_t baudrate = 0;
 
@@ -104,6 +110,14 @@ static void js_uart_write(struct mjs* mjs) {
             if(!args_correct) {
                 break;
             }
+        } else if(mjs_is_typed_array(arg)) {
+            mjs_val_t array_buf = arg;
+            if(mjs_is_data_view(arg)) {
+                array_buf = mjs_dataview_get_buf(mjs, arg);
+            }
+            size_t len = 0;
+            char* buf = mjs_array_buf_get_ptr(mjs, array_buf, &len);
+            furi_hal_uart_tx(FuriHalUartIdLPUART1, (uint8_t*)buf, len);
         } else {
             args_correct = false;
             break;
@@ -244,6 +258,55 @@ static void js_uart_readln(struct mjs* mjs) {
     }
     mjs_return(mjs, return_obj);
     furi_string_free(rx_buf);
+}
+
+static void js_uart_read_bytes(struct mjs* mjs) {
+    mjs_val_t obj_inst = mjs_get(mjs, mjs_get_this(mjs), INST_PROP_NAME, ~0);
+    JsUartInst* uart = mjs_get_ptr(mjs, obj_inst);
+    furi_assert(uart);
+    if(!uart->setup_done) {
+        mjs_prepend_errorf(mjs, MJS_INTERNAL_ERROR, "UART is not configured");
+        mjs_return(mjs, MJS_UNDEFINED);
+        return;
+    }
+
+    size_t read_len = 0;
+    uint32_t timeout = FuriWaitForever;
+
+    do {
+        size_t num_args = mjs_nargs(mjs);
+        if(num_args == 1) {
+            mjs_val_t arg = mjs_arg(mjs, 0);
+            if(!mjs_is_number(arg)) {
+                break;
+            }
+            read_len = mjs_get_int32(mjs, arg);
+        } else if(num_args == 2) {
+            mjs_val_t len_arg = mjs_arg(mjs, 0);
+            mjs_val_t timeout_arg = mjs_arg(mjs, 1);
+            if((!mjs_is_number(len_arg)) || (!mjs_is_number(timeout_arg))) {
+                break;
+            }
+            read_len = mjs_get_int32(mjs, len_arg);
+            timeout = mjs_get_int32(mjs, timeout_arg);
+        }
+    } while(0);
+
+    if(read_len == 0) {
+        mjs_prepend_errorf(mjs, MJS_BAD_ARGS_ERROR, "");
+        mjs_return(mjs, MJS_UNDEFINED);
+        return;
+    }
+
+    char* read_buf = malloc(read_len);
+    size_t bytes_read = js_uart_receive(uart, read_buf, read_len, timeout);
+
+    mjs_val_t return_obj = MJS_UNDEFINED;
+    if(bytes_read > 0) {
+        return_obj = mjs_mk_array_buf(mjs, read_buf, bytes_read);
+    }
+    mjs_return(mjs, return_obj);
+    free(read_buf);
 }
 
 static bool js_uart_expect_parse_string(struct mjs* mjs, mjs_val_t arg, PatternArray_t patterns) {
@@ -475,11 +538,12 @@ static void* js_uart_create(struct mjs* mjs, mjs_val_t* object) {
     js_uart->mjs = mjs;
     mjs_val_t uart_obj = mjs_mk_object(mjs);
     mjs_set(mjs, uart_obj, INST_PROP_NAME, ~0, mjs_mk_foreign(mjs, js_uart));
-    mjs_set(mjs, uart_obj, "setup", ~0, MFS_MK_FN(js_uart_setup));
-    mjs_set(mjs, uart_obj, "write", ~0, MFS_MK_FN(js_uart_write));
-    mjs_set(mjs, uart_obj, "read", ~0, MFS_MK_FN(js_uart_read));
-    mjs_set(mjs, uart_obj, "readln", ~0, MFS_MK_FN(js_uart_readln));
-    mjs_set(mjs, uart_obj, "expect", ~0, MFS_MK_FN(js_uart_expect));
+    mjs_set(mjs, uart_obj, "setup", ~0, MJS_MK_FN(js_uart_setup));
+    mjs_set(mjs, uart_obj, "write", ~0, MJS_MK_FN(js_uart_write));
+    mjs_set(mjs, uart_obj, "read", ~0, MJS_MK_FN(js_uart_read));
+    mjs_set(mjs, uart_obj, "readln", ~0, MJS_MK_FN(js_uart_readln));
+    mjs_set(mjs, uart_obj, "readBytes", ~0, MJS_MK_FN(js_uart_read_bytes));
+    mjs_set(mjs, uart_obj, "expect", ~0, MJS_MK_FN(js_uart_expect));
     *object = uart_obj;
 
     return js_uart;

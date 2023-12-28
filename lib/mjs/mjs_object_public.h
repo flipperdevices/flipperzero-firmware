@@ -19,6 +19,11 @@ extern "C" {
  */
 int mjs_is_object(mjs_val_t v);
 
+/*
+ * Returns true if the given value type is object-based (object, array, dataview).
+ */
+int mjs_is_object_based(mjs_val_t v);
+
 /* Make an empty object */
 mjs_val_t mjs_mk_object(struct mjs* mjs);
 

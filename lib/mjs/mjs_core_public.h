@@ -80,6 +80,9 @@ typedef uint64_t mjs_val_t;
 #define MJS_TAG_FUNCTION_FFI MAKE_TAG(1, 14)
 #define MJS_TAG_NULL MAKE_TAG(1, 15)
 
+#define MJS_TAG_ARRAY_BUF MAKE_TAG(0, 1) /* ArrayBuffer */
+#define MJS_TAG_ARRAY_BUF_VIEW MAKE_TAG(0, 2) /* DataView */
+
 #define MJS_TAG_MASK MAKE_TAG(1, 15)
 
 /* This if-0 is a dirty workaround to force etags to pick `struct mjs` */
@@ -100,6 +103,8 @@ enum mjs_type {
     MJS_TYPE_NUMBER,
     MJS_TYPE_STRING,
     MJS_TYPE_FOREIGN,
+    MJS_TYPE_ARRAY_BUF,
+    MJS_TYPE_ARRAY_BUF_VIEW,
 
     /* Different classes of Object type */
     MJS_TYPE_OBJECT_GENERIC,

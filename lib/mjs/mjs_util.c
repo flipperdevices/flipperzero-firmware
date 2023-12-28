@@ -14,6 +14,7 @@
 #include "mjs_string.h"
 #include "mjs_util.h"
 #include "mjs_tok.h"
+#include "mjs_array_buf.h"
 #include <furi.h>
 
 const char* mjs_typeof(mjs_val_t v) {
@@ -40,6 +41,10 @@ MJS_PRIVATE const char* mjs_stringify_type(enum mjs_type t) {
         return "null";
     case MJS_TYPE_UNDEFINED:
         return "undefined";
+    case MJS_TYPE_ARRAY_BUF:
+        return "array_buf";
+    case MJS_TYPE_ARRAY_BUF_VIEW:
+        return "data_view";
     default:
         return "???";
     }
@@ -532,6 +537,9 @@ mjs_err_t mjs_to_string(struct mjs* mjs, mjs_val_t* v, char** p, size_t* sizep, 
     } else if(mjs_is_foreign(*v)) {
         *p = "TODO_foreign";
         *sizep = 12;
+    } else if(mjs_is_typed_array(*v)) {
+        *p = "TODO_typed_array";
+        *sizep = 16;
     } else {
         ret = MJS_TYPE_ERROR;
         mjs_set_errorf(mjs, ret, "unknown type to convert to string");

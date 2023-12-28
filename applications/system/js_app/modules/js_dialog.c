@@ -130,8 +130,8 @@ static void js_dialog_custom(struct mjs* mjs) {
 
 static void* js_dialog_create(struct mjs* mjs, mjs_val_t* object) {
     mjs_val_t dialog_obj = mjs_mk_object(mjs);
-    mjs_set(mjs, dialog_obj, "message", ~0, MFS_MK_FN(js_dialog_message));
-    mjs_set(mjs, dialog_obj, "custom", ~0, MFS_MK_FN(js_dialog_custom));
+    mjs_set(mjs, dialog_obj, "message", ~0, MJS_MK_FN(js_dialog_message));
+    mjs_set(mjs, dialog_obj, "custom", ~0, MJS_MK_FN(js_dialog_custom));
     *object = dialog_obj;
 
     return (void*)1;
