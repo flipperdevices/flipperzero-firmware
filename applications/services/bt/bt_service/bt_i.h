@@ -62,6 +62,7 @@ struct Bt {
     BtSettings bt_settings;
     BtKeysStorage* keys_storage;
     BtStatus status;
+    bool beacon_active;
     FuriHalBleProfileBase* current_profile;
     FuriMessageQueue* message_queue;
     NotificationApp* notification;

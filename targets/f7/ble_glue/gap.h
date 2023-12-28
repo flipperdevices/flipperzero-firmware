@@ -23,6 +23,8 @@ typedef enum {
     GapEventTypePinCodeShow,
     GapEventTypePinCodeVerify,
     GapEventTypeUpdateMTU,
+    GapEventTypeBeaconStart,
+    GapEventTypeBeaconStop,
 } GapEventType;
 
 typedef union {
@@ -84,6 +86,8 @@ void gap_stop_advertising();
 GapState gap_get_state();
 
 void gap_thread_stop();
+
+void gap_emit_ble_beacon_status_event(bool active);
 
 #ifdef __cplusplus
 }

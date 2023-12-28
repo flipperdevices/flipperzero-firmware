@@ -13,8 +13,7 @@ static void
     view_dispatcher_send_custom_event(ble_beacon->view_dispatcher, result);
 }
 
-void ble_beacon_app_scene_run_beacon_on_enter(void* context) {
-    BleBeaconApp* ble_beacon = context;
+static void update_status_text(BleBeaconApp* ble_beacon) {
     DialogEx* dialog_ex = ble_beacon->dialog_ex;
 
     dialog_ex_set_header(dialog_ex, "BLE Beacon Demo", 64, 0, AlignCenter, AlignTop);
@@ -51,6 +50,12 @@ void ble_beacon_app_scene_run_beacon_on_enter(void* context) {
     dialog_ex_set_result_callback(
         dialog_ex, ble_beacon_app_scene_run_beacon_confirm_dialog_callback);
     dialog_ex_set_context(dialog_ex, ble_beacon);
+}
+
+void ble_beacon_app_scene_run_beacon_on_enter(void* context) {
+    BleBeaconApp* ble_beacon = context;
+
+    update_status_text(ble_beacon);
 
     view_dispatcher_switch_to_view(ble_beacon->view_dispatcher, BleBeaconAppViewDialog);
 }
@@ -66,14 +71,9 @@ bool ble_beacon_app_scene_run_beacon_on_event(void* context, SceneManagerEvent e
         } else if(event.event == DialogExResultCenter) {
             ble_beacon->is_beacon_active = !ble_beacon->is_beacon_active;
             ble_beacon_app_update_state(ble_beacon);
-            // hacky way to refresh the scene
-            scene_manager_search_and_switch_to_another_scene(
-                scene_manager, BleBeaconAppSceneRunBeacon);
+            update_status_text(ble_beacon);
             return true;
         }
-    } else if(event.type == SceneManagerEventTypeBack) {
-        // scene_manager_stop(scene_manager);
-        // return true;
     }
     return false;
 }

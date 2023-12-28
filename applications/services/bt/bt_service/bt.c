@@ -15,14 +15,21 @@
 #define BT_RPC_EVENT_DISCONNECTED (1UL << 1)
 #define BT_RPC_EVENT_ALL (BT_RPC_EVENT_BUFF_SENT | BT_RPC_EVENT_DISCONNECTED)
 
+#define ICON_SPACER 2
+
 static void bt_draw_statusbar_callback(Canvas* canvas, void* context) {
     furi_assert(context);
 
     Bt* bt = context;
+    uint8_t draw_offset = 0;
+    if(bt->beacon_active) {
+        canvas_draw_icon(canvas, 0, 0, &I_BLE_beacon_8x8);
+        draw_offset += icon_get_width(&I_BLE_beacon_8x8) + ICON_SPACER;
+    }
     if(bt->status == BtStatusAdvertising) {
-        canvas_draw_icon(canvas, 0, 0, &I_Bluetooth_Idle_5x8);
+        canvas_draw_icon(canvas, draw_offset, 0, &I_Bluetooth_Idle_5x8);
     } else if(bt->status == BtStatusConnected) {
-        canvas_draw_icon(canvas, 0, 0, &I_Bluetooth_Connected_16x8);
+        canvas_draw_icon(canvas, draw_offset, 0, &I_Bluetooth_Connected_16x8);
     }
 }
 
@@ -236,15 +243,14 @@ static bool bt_on_gap_event_callback(GapEvent event, void* context) {
     furi_assert(context);
     Bt* bt = context;
     bool ret = false;
+    bool do_update_status = false;
     bool current_profile_is_serial =
         furi_hal_ble_check_profile_type(bt->current_profile, ble_profile_serial);
 
     if(event.type == GapEventTypeConnected) {
         // Update status bar
         bt->status = BtStatusConnected;
-        BtMessage message = {.type = BtMessageTypeUpdateStatus};
-        furi_check(
-            furi_message_queue_put(bt->message_queue, &message, FuriWaitForever) == FuriStatusOk);
+        do_update_status = true;
         // Clear BT_RPC_EVENT_DISCONNECTED because it might be set from previous session
         furi_event_flag_clear(bt->rpc_event, BT_RPC_EVENT_DISCONNECTED);
 
@@ -268,6 +274,7 @@ static bool bt_on_gap_event_callback(GapEvent event, void* context) {
         // Update battery level
         PowerInfo info;
         power_get_info(bt->power, &info);
+        BtMessage message = {.type = BtMessageTypeUpdateStatus};
         message.type = BtMessageTypeUpdateBatteryLevel;
         message.data.battery_level = info.charge;
         furi_check(
@@ -286,15 +293,11 @@ static bool bt_on_gap_event_callback(GapEvent event, void* context) {
         ret = true;
     } else if(event.type == GapEventTypeStartAdvertising) {
         bt->status = BtStatusAdvertising;
-        BtMessage message = {.type = BtMessageTypeUpdateStatus};
-        furi_check(
-            furi_message_queue_put(bt->message_queue, &message, FuriWaitForever) == FuriStatusOk);
+        do_update_status = true;
         ret = true;
     } else if(event.type == GapEventTypeStopAdvertising) {
         bt->status = BtStatusOff;
-        BtMessage message = {.type = BtMessageTypeUpdateStatus};
-        furi_check(
-            furi_message_queue_put(bt->message_queue, &message, FuriWaitForever) == FuriStatusOk);
+        do_update_status = true;
         ret = true;
     } else if(event.type == GapEventTypePinCodeShow) {
         BtMessage message = {
@@ -307,6 +310,20 @@ static bool bt_on_gap_event_callback(GapEvent event, void* context) {
     } else if(event.type == GapEventTypeUpdateMTU) {
         bt->max_packet_size = event.data.max_packet_size;
         ret = true;
+    } else if(event.type == GapEventTypeBeaconStart) {
+        bt->beacon_active = true;
+        do_update_status = true;
+        ret = true;
+    } else if(event.type == GapEventTypeBeaconStop) {
+        bt->beacon_active = false;
+        do_update_status = true;
+        ret = true;
+    }
+
+    if(do_update_status) {
+        BtMessage message = {.type = BtMessageTypeUpdateStatus};
+        furi_check(
+            furi_message_queue_put(bt->message_queue, &message, FuriWaitForever) == FuriStatusOk);
     }
     return ret;
 }
@@ -323,11 +340,18 @@ static void bt_on_key_storage_change_callback(uint8_t* addr, uint16_t size, void
 }
 
 static void bt_statusbar_update(Bt* bt) {
+    uint8_t active_icon_width = 0;
+    if(bt->beacon_active) {
+        active_icon_width = icon_get_width(&I_BLE_beacon_8x8) + ICON_SPACER;
+    }
     if(bt->status == BtStatusAdvertising) {
-        view_port_set_width(bt->statusbar_view_port, icon_get_width(&I_Bluetooth_Idle_5x8));
-        view_port_enabled_set(bt->statusbar_view_port, true);
+        active_icon_width += icon_get_width(&I_Bluetooth_Idle_5x8);
     } else if(bt->status == BtStatusConnected) {
-        view_port_set_width(bt->statusbar_view_port, icon_get_width(&I_Bluetooth_Connected_16x8));
+        active_icon_width += icon_get_width(&I_Bluetooth_Connected_16x8);
+    }
+
+    if(active_icon_width > 0) {
+        view_port_set_width(bt->statusbar_view_port, active_icon_width);
         view_port_enabled_set(bt->statusbar_view_port, true);
     } else {
         view_port_enabled_set(bt->statusbar_view_port, false);

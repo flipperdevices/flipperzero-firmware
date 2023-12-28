@@ -575,3 +575,9 @@ static int32_t gap_app(void* context) {
 
     return 0;
 }
+
+void gap_emit_ble_beacon_status_event(bool active) {
+    GapEvent event = {.type = active ? GapEventTypeBeaconStart : GapEventTypeBeaconStop};
+    gap->on_event_cb(event, gap->context);
+    FURI_LOG_I(TAG, "Beacon status event: %d", active);
+}

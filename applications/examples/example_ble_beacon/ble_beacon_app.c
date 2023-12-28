@@ -49,6 +49,7 @@ static void ble_beacon_app_restore_beacon_state(BleBeaconApp* app) {
             local_config->address, furi_hal_version_get_ble_mac(), sizeof(local_config->address));
         // Modify MAC address to make it different from the one used by the main app
         local_config->address[0] ^= 0xFF;
+        local_config->address[3] ^= 0xFF;
 
         furi_check(furi_hal_ble_extra_beacon_set_config(local_config));
     }

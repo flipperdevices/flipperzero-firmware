@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,51.1,,
+Version,+,51.2,,
 Header,+,applications/drivers/subghz/cc1101_ext/cc1101_ext_interconnect.h,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
@@ -1744,6 +1744,7 @@ Function,-,gamma,double,double
 Function,-,gamma_r,double,"double, int*"
 Function,-,gammaf,float,float
 Function,-,gammaf_r,float,"float, int*"
+Function,-,gap_emit_ble_beacon_status_event,void,_Bool
 Function,-,gap_extra_beacon_get_config,const GapExtraBeaconConfig*,
 Function,-,gap_extra_beacon_get_data,uint8_t,uint8_t*
 Function,-,gap_extra_beacon_get_state,GapExtraBeaconState,

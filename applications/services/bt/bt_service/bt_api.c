@@ -5,14 +5,12 @@ FuriHalBleProfileBase* bt_profile_start(Bt* bt, const FuriHalBleProfileConfig* p
     furi_assert(bt);
 
     // Send message
-    // bool result = false;
     FuriHalBleProfileBase* profile_instance = NULL;
 
     BtMessage message = {
         .lock = api_lock_alloc_locked(),
         .type = BtMessageTypeSetProfile,
         .data.profile_config = profile_config,
-        // .result = &result,
         .profile_instance = &profile_instance,
     };
     furi_check(

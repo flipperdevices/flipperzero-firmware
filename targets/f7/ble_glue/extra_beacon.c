@@ -1,4 +1,6 @@
 #include "extra_beacon.h"
+#include "gap.h"
+
 #include <ble/ble.h>
 #include <furi.h>
 
@@ -83,6 +85,7 @@ bool gap_extra_beacon_start() {
         return false;
     }
     extra_beacon.extra_beacon_state = GapExtraBeaconStateStarted;
+    gap_emit_ble_beacon_status_event(true);
     furi_mutex_release(extra_beacon.state_mutex);
 
     return true;
@@ -103,6 +106,7 @@ bool gap_extra_beacon_stop() {
         return false;
     }
     extra_beacon.extra_beacon_state = GapExtraBeaconStateStopped;
+    gap_emit_ble_beacon_status_event(false);
     furi_mutex_release(extra_beacon.state_mutex);
 
     return true;
