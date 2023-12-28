@@ -3,7 +3,6 @@
 // Custom event enumeration
 typedef enum {
      MineSweeperStartEvent,
-     MineSweeperBackEvent,
 } MineSweeperStartupEvent;
 
 
@@ -19,7 +18,6 @@ void minesweeper_scenes_startup_scene_on_enter(void* context) {
 
     furi_assert(app);
 
-    // fake loading
     view_dispatcher_switch_to_view(app->view_dispatcher, MineSweeperLoadingView);
 
     popup_reset(app->popup);
@@ -30,13 +28,11 @@ void minesweeper_scenes_startup_scene_on_enter(void* context) {
 
     app->popup_view = popup_get_view(app->popup);
 
-    popup_set_header(app->popup, "MINE\n    Sweeper", 50, 25, AlignLeft, AlignCenter);
+    popup_set_header(app->popup, "MINE\n    Sweeper", 55, 25, AlignLeft, AlignCenter);
 
-    //popup_set_text(app->popup, "Sweeper", 70, 35, AlignLeft, AlignCenter);
+    popup_set_text(app->popup, "Quick press any button to start\nHold back to exit", 64, 55, AlignCenter, AlignCenter);
 
-    popup_set_icon(app->popup, 5, 32-18, &I_MineSweeperIcon_36x36);
-    
-    for (int i = 0; i < 10000; ++i) {}
+    popup_set_icon(app->popup, 10, 24-18, &I_MineSweeperIcon_36x36);
 
     view_dispatcher_switch_to_view(app->view_dispatcher, MineSweeperPopupView);
 }
