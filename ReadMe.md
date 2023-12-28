@@ -29,9 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM1227-1725-0.93.9-e4c18d2](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-12-27 23:30 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-12-27 23:30 EST`
-- OFW PR: NFC: [Update mf_classic_dict.nfc #3314 (By ry4000)](https://github.com/flipperdevices/flipperzero-firmware/pull/3314) - For Bandai Namco Passport / Sega Aime Card (Already part of key dictionairy lines 1918-1952.)
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-12-28 11:36 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-12-28 11:36 EST`
 - Added: [Smack My Dolphin Up! (By siberianbot)](https://github.com/siberianbot/smack-my-dolphin-up)
 - OFW: [About: cn,tw,mx certification information #3318 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3318)
 - Updated: [Programmer Calculator v0.8 (By armixz)](https://github.com/armixz/Flipper-Zero-Programmer-Calculator)
@@ -40,6 +39,9 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Dab Timer v1.7 (By RogueMaster)](https://github.com/RogueMaster/flipperzero-dabtimer)
 - [MACOS_GUIDE.md - Sonoma Notes #1016 (By tonywald)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/1016)
 - OFW: [SubGhz: add cmd CLI "subghz tx_from_file" #3302 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/3302)
+- OFW: [Add Samsung AC remotes DB93 and AR-EH04 #3301 (By braghetto)](https://github.com/flipperdevices/flipperzero-firmware/pull/3301)
+- OFW: [Scripts: fix incorrect handling of storage stress test count option #3321 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3321)
+- OFW: NFC: [Update mf_classic_dict.nfc #3314 (By ry4000)](https://github.com/flipperdevices/flipperzero-firmware/pull/3314) - For Bandai Namco Passport / Sega Aime Card (Already part of key dictionairy lines 1918-1952.) - ALREADY IN RM
 
 ## IN THIS BRANCH:
 
@@ -128,11 +130,11 @@ This software is for experimental purposes only and is not meant for any illegal
 - Added: [NFC Playlist v1.0 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
 - UL: [NFC: Added zolotaya korona Parser & Fixes for Kazan & Metromoney(By Leptoptilos)](https://github.com/DarkFlippers/unleashed-firmware/commit/9b156fbdca06956c450d5ebb79f676a62dfde4b0)
 - Updated: [PicoPass (iClass) v1.11 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass) [Rework. Part 1 #68 (By gornekich)](https://github.com/flipperdevices/flipperzero-good-faps/pull/68) [Hopefully fix name buffer size issues (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/9058c0c6a9980f84f6436673f9d3fbbc82cb3f81) [Save partial #85 (By bettse)](https://github.com/flipperdevices/flipperzero-good-faps/pull/85) [More info view (raw bytes) #86 (By bettse)](https://github.com/flipperdevices/flipperzero-good-faps/pull/86) [detect config card #87 (By bettse)](https://github.com/flipperdevices/flipperzero-good-faps/pull/87) [add additional keys to elite dict #89 (By kitsunehunter)](https://github.com/flipperdevices/flipperzero-good-faps/pull/89) [config SE problem #90 (By bettse)](https://github.com/flipperdevices/flipperzero-good-faps/pull/90) [handle NR-MAC auth for legacy cards #95(By bettse)](https://github.com/flipperdevices/flipperzero-good-faps/pull/95)
-- OFW: [NFC: HID MFC Plugin #3312 (By bettse)](https://github.com/flipperdevices/flipperzero-firmware/pull/3312)
 - OFW: [RPC: reverse input #3304 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3304)
 - Updated: [NFC Playlist v1.0 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
 - OFW PR: [PoC skylanders plugin #3315 (By bettse)](https://github.com/flipperdevices/flipperzero-firmware/pull/3315)
-- OFW PR: [Added NFC plugin; parser for WashCity cards. #3319 (By yaba)](https://github.com/flipperdevices/flipperzero-firmware/pull/3319)
+- OFW: [NFC: HID MFC Plugin #3312 (By bettse)](https://github.com/flipperdevices/flipperzero-firmware/pull/3312)
+- OFW: [Added NFC plugin; parser for WashCity cards. #3319 (By yaba)](https://github.com/flipperdevices/flipperzero-firmware/pull/3319)
 
 <a name="release">
 
