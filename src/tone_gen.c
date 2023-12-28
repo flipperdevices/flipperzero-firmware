@@ -7,20 +7,24 @@
 #include "tone_gen.h"
 
 #include "scenes/starting_scene.h"
+#include "scenes/settings_scene.h"
 
 /** collection of all scene on_enter handlers - in the same order as their enum */
 void (*const scene_on_enter_handlers[])(void*) = {
     scene_on_enter_starting_scene,
+    scene_on_enter_settings_scene,
 };
 
 /** collection of all scene on event handlers - in the same order as their enum */
 bool (*const scene_on_event_handlers[])(void*, SceneManagerEvent) = {
     scene_on_event_starting_scene,
+    scene_on_event_settings_scene,
 };
 
 /** collection of all scene on exit handlers - in the same order as their enum */
 void (*const scene_on_exit_handlers[])(void*) = {
     scene_on_exit_starting_scene,
+    scene_on_exit_settings_scene,
 };
 
 const SceneManagerHandlers scene_event_handlers = {
@@ -29,23 +33,49 @@ const SceneManagerHandlers scene_event_handlers = {
     .on_exit_handlers = scene_on_exit_handlers,
     .scene_num = ToneGenAppScene_count};
 
+int setupViews(struct AppContext_t** appContext) {
+    // Create views
+    struct View_t* sharedMenuView = malloc(sizeof(struct View_t));
+    sharedMenuView->viewData = menu_alloc();
+    sharedMenuView->viewId = ToneGenAppView_SharedMenu;
+    sharedMenuView->type = MENU;
+
+    // Add views to the app context for management later
+    AppContextStatus result = addViewToAppContext(appContext, sharedMenuView);
+    if(result != APP_CONTEXT_OK) {
+        FURI_LOG_E(TAG, "There was a problem adding the view %d!", sharedMenuView->viewId);
+        return -1;
+    }
+
+    // Add views to the view dispatcher for usage later
+    view_dispatcher_add_view(
+        (*appContext)->view_dispatcher,
+        sharedMenuView->viewId,
+        menu_get_view(sharedMenuView->viewData));
+    return 0;
+}
+
 int32_t tone_gen_app(void* p) {
     UNUSED(p);
 
     FURI_LOG_I(TAG, "Tone gen app starting...");
 
     struct AppContext_t* appContext;
-    AppContextStatus result = initializeAppContext(&appContext, &scene_event_handlers);
+    AppContextStatus result =
+        initializeAppContext(&appContext, ToneGenAppView_count, &scene_event_handlers);
 
     if(result == APP_CONTEXT_OK) {
-        // set the scene and launch the main loop
-        FURI_LOG_D(TAG, "Setting the scene");
-        Gui* gui = furi_record_open(RECORD_GUI);
-        view_dispatcher_attach_to_gui(
-            appContext->view_dispatcher, gui, ViewDispatcherTypeFullscreen);
-        scene_manager_next_scene(appContext->scene_manager, ToneGenAppScene_MainMenu);
-        FURI_LOG_D(TAG, "Starting the view dispatcher");
-        view_dispatcher_run(appContext->view_dispatcher);
+        result = setupViews(&appContext);
+        if(result == 0) {
+            // set the scene and launch the main loop
+            FURI_LOG_D(TAG, "Setting the scene");
+            Gui* gui = furi_record_open(RECORD_GUI);
+            view_dispatcher_attach_to_gui(
+                appContext->view_dispatcher, gui, ViewDispatcherTypeFullscreen);
+            scene_manager_next_scene(appContext->scene_manager, ToneGenAppScene_Starting);
+            FURI_LOG_D(TAG, "Starting the view dispatcher");
+            view_dispatcher_run(appContext->view_dispatcher);
+        }
 
         // free all memory
         FURI_LOG_D(TAG, "Ending the app");

@@ -16,15 +16,14 @@ typedef enum {
 void menu_callback_starting_scene(void* context, uint32_t index) {
     FURI_LOG_I(TAG, "menu_callback_starting_scene");
     UNUSED(context);
-    // struct AppContext_t* app = context;
+    struct AppContext_t* app = context;
     switch(index) {
     case ToneGenAppMenuSelection_Play:
         FURI_LOG_I(TAG, "selection one");
         // scene_manager_handle_custom_event(app->scene_manager, ToneGenAppEvent_StartPlayback);
         break;
     case ToneGenAppMenuSelection_Adjust:
-        FURI_LOG_I(TAG, "selection two");
-        // scene_manager_handle_custom_event(app->scene_manager, ToneGenAppEvent_AdjustTone);
+        scene_manager_handle_custom_event(app->scene_manager, ToneGenAppMenuSelection_Adjust);
         break;
     }
 }
@@ -33,17 +32,9 @@ void menu_callback_starting_scene(void* context, uint32_t index) {
 void scene_on_enter_starting_scene(void* context) {
     FURI_LOG_I(TAG, "scene_on_enter_starting_scene");
     struct AppContext_t* app = (struct AppContext_t*)context;
-    // Setup our menu
-    FURI_LOG_D(TAG, "Adding view menu");
-    struct View_t* menuView = malloc(sizeof(struct View_t));
-    menuView->viewData = menu_alloc();
-    menuView->viewId = ToneGenAppView_Menu;
-    menuView->type = MENU;
-    view_dispatcher_add_view(
-        app->view_dispatcher, ToneGenAppView_Menu, menu_get_view(menuView->viewData));
+    struct View_t* menuView = app->activeViews[ToneGenAppView_SharedMenu];
 
     // Set the currently active view
-    addNode(&app->activeViews, menuView);
     menu_reset(menuView->viewData);
 
     // NB. icons are specified as NULL below, because:
@@ -64,27 +55,27 @@ void scene_on_enter_starting_scene(void* context) {
         ToneGenAppMenuSelection_Adjust,
         menu_callback_starting_scene,
         app);
-    view_dispatcher_switch_to_view(app->view_dispatcher, ToneGenAppView_Menu);
+    view_dispatcher_switch_to_view(app->view_dispatcher, ToneGenAppView_SharedMenu);
 }
 
 /** main menu event handler - switches scene based on the event */
 bool scene_on_event_starting_scene(void* context, SceneManagerEvent event) {
     FURI_LOG_I(TAG, "scene_on_event_starting_scene");
     UNUSED(context);
-    // struct AppContext_t* app = context;
+    struct AppContext_t* app = context;
     bool consumed = false;
     switch(event.type) {
     case SceneManagerEventTypeCustom:
-        // switch(event.event) {
-        // case ToneGenAppEvent_StartPlayback:
-        //     scene_manager_next_scene(app->scene_manager, ToneGenAppScene_Playback);
-        //     consumed = true;
-        //     break;
-        // case ToneGenAppEvent_AdjustTone:
-        //     scene_manager_next_scene(app->scene_manager, ToneGenAppScene_AdjustTone);
-        //     consumed = true;
-        //     break;
-        // }
+        switch(event.event) {
+        case ToneGenAppMenuSelection_Play:
+            // scene_manager_next_scene(app->scene_manager, ToneGenAppScene_Playback);
+            // consumed = true;
+            break;
+        case ToneGenAppMenuSelection_Adjust:
+            scene_manager_next_scene(app->scene_manager, ToneGenAppScene_Settings);
+            consumed = true;
+            break;
+        }
         break;
     default: // eg. SceneManagerEventTypeBack, SceneManagerEventTypeTick
         consumed = false;
@@ -95,6 +86,5 @@ bool scene_on_event_starting_scene(void* context, SceneManagerEvent event) {
 
 void scene_on_exit_starting_scene(void* context) {
     FURI_LOG_I(TAG, "scene_on_exit_starting_scene");
-    struct AppContext_t* app = context;
-    freeAppContextViews(&app);
+    UNUSED(context);
 }

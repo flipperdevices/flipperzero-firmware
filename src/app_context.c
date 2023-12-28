@@ -20,6 +20,7 @@ bool viewDispatcherNavigationCallback(void* context) {
 
 AppContextStatus initializeAppContext(
     struct AppContext_t** context,
+    int viewsCount,
     const SceneManagerHandlers* sceneManagerHandlers) {
     FURI_LOG_I(TAG, "Allocating memory for app context");
 
@@ -48,31 +49,44 @@ AppContextStatus initializeAppContext(
         (*context)->view_dispatcher, viewDispatcherNavigationCallback);
     FURI_LOG_I(TAG, "Setting view dispatcher callbacks done");
 
+    (*context)->activeViews = malloc(sizeof(struct View_t) * viewsCount);
+    if((*context)->activeViews == NULL) {
+        return APP_CONTEXT_CANT_ALLOCATE;
+    }
+    (*context)->activeViewsCount = viewsCount;
+
+    return APP_CONTEXT_OK;
+}
+
+AppContextStatus addViewToAppContext(struct AppContext_t** context, struct View_t* view) {
+    if(view->viewId > (*context)->activeViewsCount || view->viewId < 0) {
+        return APP_CONTEXT_NOT_ENOUGH_VIEWS;
+    }
+    (*context)->activeViews[view->viewId] = view;
     return APP_CONTEXT_OK;
 }
 
 AppContextStatus freeAppContextViews(struct AppContext_t** context) {
     FURI_LOG_I(TAG, "Freeing views");
-    struct ListNode_t* root = (*context)->activeViews;
-    while(root) {
-        struct View_t* view = root->data;
-        view_dispatcher_remove_view((*context)->view_dispatcher, view->viewId);
+    for(int i = 0; i < (*context)->activeViewsCount; i++) {
+        struct View_t* view = (*context)->activeViews[i];
+        if(view != NULL) {
+            view_dispatcher_remove_view((*context)->view_dispatcher, view->viewId);
 
-        switch(view->type) {
-        case MENU:
-            menu_free(view->viewData);
-            break;
-        case POPUP:
-            popup_free(view->viewData);
-            break;
+            switch(view->type) {
+            case MENU:
+                menu_free(view->viewData);
+                break;
+            case POPUP:
+                popup_free(view->viewData);
+                break;
+            }
+            free(view);
         }
-        root = root->next;
     }
     FURI_LOG_I(TAG, "Removing all views from list");
-    LinkedListStatus result = removeAllNodes(&(*context)->activeViews);
-    if(result != LIST_OK) {
-        return APP_CONTEXT_UNKNOWN_ERROR;
-    }
+    free((*context)->activeViews);
+    (*context)->activeViewsCount = 0;
     return APP_CONTEXT_OK;
 }
 

@@ -8,9 +8,17 @@
 #include <music_worker/music_worker.h>
 
 // ids for all scenes used by the app
-typedef enum { ToneGenAppScene_MainMenu, ToneGenAppScene_count } ToneGenAppScene;
+typedef enum {
+    ToneGenAppScene_Starting,
+    ToneGenAppScene_Settings,
+    ToneGenAppScene_count
+} ToneGenAppScene;
 
 // ids for the 2 types of view used by the app
-typedef enum { ToneGenAppView_Menu, ToneGenAppView_Popup } ToneGenAppView;
+typedef enum {
+    ToneGenAppView_SharedMenu,
+    ToneGenAppView_Popup,
+    ToneGenAppView_count
+} ToneGenAppView;
 
 #endif
