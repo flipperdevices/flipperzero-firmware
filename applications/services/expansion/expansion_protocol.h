@@ -2,7 +2,10 @@
  * @file expansion_protocol.h
  * @brief Flipper Expansion Protocol parser reference implementation.
  *
- * This file is written with low-spec hardware in mind. It does not use
+ * This file is licensed separately under The Unlicense.
+ * See https://unlicense.org/ for more details.
+ *
+ * This parser is written with low-spec hardware in mind. It does not use
  * dynamic memory allocation or Flipper-specific libraries and can be
  * included directly into any module's firmware's sources.
  */

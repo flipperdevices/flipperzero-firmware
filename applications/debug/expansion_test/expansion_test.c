@@ -1,3 +1,25 @@
+/**
+ * @file expansion_test.c
+ * @brief Expansion module support testing application.
+ *
+ * Before running, connect pins using the following scheme:
+ * 13 -> 16 (USART TX to LPUART RX)
+ * 14 -> 15 (USART RX to LPUART TX)
+ *
+ * What this application does:
+ *
+ * - Enables module support and emulates the module on a single device
+ *   (hence the above connection),
+ * - Connects to the expansion module service, sets baud rate,
+ * - Starts the RPC session,
+ * - Creates a directory at `/ext/ExpansionTest` and writes a file
+ *   named `test.txt` under it,
+ * - Plays an audiovisual alert (sound and blinking display),
+ * - Waits 10 cycles of idle loop,
+ * - Stops the RPC session,
+ * - Waits another 10 cycles of idle loop,
+ * - Exits (plays a sound if any of the above steps failed).
+ */
 #include <furi.h>
 
 #include <furi_hal_resources.h>

@@ -1,6 +1,5 @@
 /**
  * @file expansion.h
- *
  * @brief Expansion module support library.
  */
 #pragma once
