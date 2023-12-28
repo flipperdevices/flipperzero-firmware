@@ -7,6 +7,7 @@
 #include <gui/modules/popup.h>
 #include <gui/modules/loading.h>
 #include <gui/modules/empty_screen.h>
+#include <gui/modules/dialog_ex.h>
 
 #include <string.h> // memset
 #include <unistd.h> // sleep
@@ -72,7 +73,6 @@ typedef struct App {
     AppState* app_state;
     SceneManager* scene_manager;
     ViewDispatcher* view_dispatcher;
-    View* popup_view;
     Popup* popup;
     View* empty_screen_view;
     EmptyScreen* empty_screen;
