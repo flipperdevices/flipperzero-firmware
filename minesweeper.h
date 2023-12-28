@@ -52,6 +52,22 @@ typedef enum {
 } Tile;
 
 typedef enum {
+    MineSweeperGameKeyUpShortEvent,
+    MineSweeperGameKeyDownShortEvent,
+    MineSweeperGameKeyRightShortEvent,
+    MineSweeperGameKeyLeftShortEvent,
+    MineSweeperGameKeyOkShortEvent,
+    MineSweeperGameKeyBackShortEvent,
+    
+    MineSweeperGameKeyUpLongEvent, 
+    MineSweeperGameKeyDownLongEvent,
+    MineSweeperGameKeyRightLongEvent,
+    MineSweeperGameKeyLeftLongEvent,
+    MineSweeperGameKeyOkLongEvent,
+    MineSweeperGameKeyBackLongEvent,
+} MineSweeperGameKeyEvent;
+
+typedef enum {
     TileStatusEmpty,
     TileStatusMine,
 } TileStatus;
