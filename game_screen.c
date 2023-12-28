@@ -1,22 +1,18 @@
 #include "minesweeper.h" 
 
-typedef enum {
-    MineSweeperGameExit,
-} MineSweeperGameEvent;
-
 static void reset_app_state(AppState* app_state) {
     memset(app_state, 0, sizeof(*app_state));
 }
 
 // Custom callbacks for view attached to EmptyScreen
-void minesweeper_empty_screen_view_draw_callback(Canvas* canvas, void* context) {
+static void minesweeper_empty_screen_view_draw_callback(Canvas* canvas, void* context) {
     furi_assert(canvas);
     furi_assert(context);
     
     //App* app = (App*)context;
 }
 
-bool minesweeper_empty_screen_view_input_callback(InputEvent* event, void* context) {
+static bool minesweeper_empty_screen_view_input_callback(InputEvent* event, void* context) {
     furi_assert(context);
     furi_assert(event);
 
@@ -79,9 +75,7 @@ bool minesweeper_scenes_game_on_event(void* context, SceneManagerEvent event) {
                 default :
                     break;
             }
-
             break;
-
         default:
             break;
     }
