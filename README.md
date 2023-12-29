@@ -40,6 +40,8 @@ You have to feed the pet or he will starve.
 You can give him candies.
 
 ### Health
+![Pill](images/pill_screen.png)
+
 When the pet is hungry he starts losing health.
 You need to cure him with a pill.
 He can also get sick.
