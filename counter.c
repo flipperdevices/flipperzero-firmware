@@ -35,7 +35,7 @@ void state_free(Counter* c) {
 
 static void input_callback(InputEvent* input_event, void* ctx) {
     Counter* c = ctx;
-    if(input_event->type == InputTypeShort) {
+    if(input_event->type == InputTypeShort || input_event->type == InputTypeLong) {
         furi_message_queue_put(c->input_queue, input_event, 0);
     }
 }
@@ -89,25 +89,47 @@ Counter* state_init() {
 int32_t counterapp(void) {
     Counter* c = state_init();
 
-    while(1) {
-        InputEvent input;
+    InputEvent input;
+    for(bool processing = true; processing;) {
         while(furi_message_queue_get(c->input_queue, &input, FuriWaitForever) == FuriStatusOk) {
             furi_check(furi_mutex_acquire(c->mutex, FuriWaitForever) == FuriStatusOk);
 
-            if(input.key == InputKeyBack) {
-                furi_mutex_release(c->mutex);
-                state_free(c);
-                return 0;
-            } else if(input.key == InputKeyUp && c->count < MAX_COUNT) {
-                c->pressed = true;
-                c->boxtimer = BOXTIME;
-                c->count++;
-            } else if(input.key == InputKeyDown && c->count != 0) {
-                c->pressed = true;
-                c->boxtimer = BOXTIME;
-                c->count--;
+            if(input.type == InputTypeShort) {
+                switch(input.key) {
+                    case InputKeyBack:
+                        processing = false;
+                        break;
+                    case InputKeyUp:
+                    case InputKeyOk:
+                        if (c->count < MAX_COUNT) {
+                            c->pressed = true;
+                            c->boxtimer = BOXTIME;
+                            c->count++;
+                        }
+                        break;
+                    case InputKeyDown:
+                        if (c->count > 0) {
+                            c->pressed = true;
+                            c->boxtimer = BOXTIME;
+                            c->count--;
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            } else if(input.type == InputTypeLong) {
+                switch(input.key) {
+                    case InputKeyBack:
+                        c->count = 0;
+                        break;
+                    default:
+                        break;
+                }
             }
             furi_mutex_release(c->mutex);
+            if(!processing) {
+                break;
+            }
             view_port_update(c->view_port);
         }
     }
