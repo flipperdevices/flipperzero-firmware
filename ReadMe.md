@@ -137,6 +137,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW PR: [PoC skylanders plugin #3315 (By bettse)](https://github.com/flipperdevices/flipperzero-firmware/pull/3315)
 - OFW: [NFC: HID MFC Plugin #3312 (By bettse)](https://github.com/flipperdevices/flipperzero-firmware/pull/3312)
 - OFW: [Added NFC plugin; parser for WashCity cards. #3319 (By yaba)](https://github.com/flipperdevices/flipperzero-firmware/pull/3319)
+- OFW: [MFC emulation fixes #3324 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3324)
 
 <a name="release">
 
