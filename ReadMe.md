@@ -27,11 +27,10 @@ This software is for experimental purposes only and is not meant for any illegal
 
 <a name="latest">
 
-## Latest Updates - [PATREON: Latest Release RM1227-1725-0.93.9-e4c18d2](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
+## Latest Updates - [PATREON: Latest Release RM1229-0118-0.93.9-93605f3](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-12-28 11:36 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-12-28 11:36 EST`
-- OFW PR: NFC: [Update mf_classic_dict.nfc #3314 (By ry4000)](https://github.com/flipperdevices/flipperzero-firmware/pull/3314) - For Bandai Namco Passport / Sega Aime Card (Already part of key dictionairy lines 1918-1952.)
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-12-29 01:18 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-12-29 01:18 EST`
 - Added: [Smack My Dolphin Up! (By siberianbot)](https://github.com/siberianbot/smack-my-dolphin-up)
 - OFW: [About: cn,tw,mx certification information #3318 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3318)
 - Updated: [Programmer Calculator v0.8 (By armixz)](https://github.com/armixz/Flipper-Zero-Programmer-Calculator)
@@ -39,7 +38,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: [SubGHz: Added new option to delete old signals on full memory (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/b84f14386c9f2c111811b031a18a6914f71a3e74)
 - Updated: [Dab Timer v1.7 (By RogueMaster)](https://github.com/RogueMaster/flipperzero-dabtimer)
 - [MACOS_GUIDE.md - Sonoma Notes #1016 (By tonywald)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/1016)
-- OFW PR: [SubGhz: add cmd CLI "subghz tx_from_file" #3302 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/3302)
+- OFW PR: [SubGhz: add cmd CLI 'subghz tx_from_file' #3302 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/3302)
 - OFW: [Add Samsung AC remotes DB93 and AR-EH04 #3301 (By braghetto)](https://github.com/flipperdevices/flipperzero-firmware/pull/3301)
 - OFW: [Scripts: fix incorrect handling of storage stress test count option #3321 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3321)
 - OFW: NFC: [Update mf_classic_dict.nfc #3314 (By ry4000)](https://github.com/flipperdevices/flipperzero-firmware/pull/3314) - For Bandai Namco Passport / Sega Aime Card (Already part of key dictionairy lines 1918-1952.) - ALREADY IN RM
