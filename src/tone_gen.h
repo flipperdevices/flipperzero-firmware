@@ -10,6 +10,7 @@
 // ids for all scenes used by the app
 typedef enum {
     ToneGenAppScene_Starting,
+    ToneGenAppScene_Playback,
     ToneGenAppScene_Settings,
     ToneGenAppScene_count
 } ToneGenAppScene;
@@ -17,8 +18,18 @@ typedef enum {
 // ids for the 2 types of view used by the app
 typedef enum {
     ToneGenAppView_SharedMenu,
+    ToneGenAppView_PlaybackView,
     ToneGenAppView_Popup,
     ToneGenAppView_count
 } ToneGenAppView;
+
+typedef enum { SQUARE, SINE } ToneWaveType;
+
+struct ToneData_t {
+    int animationOffset;
+    int amplitude;
+    int period;
+    ToneWaveType waveType;
+};
 
 #endif

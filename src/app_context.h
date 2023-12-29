@@ -9,6 +9,7 @@
 
 typedef enum {
     MENU,
+    VIEW,
     POPUP,
 } ViewType;
 
@@ -31,6 +32,7 @@ struct AppContext_t {
     ViewDispatcher* view_dispatcher;
     struct View_t** activeViews;
     int activeViewsCount;
+    void* additionalData;
 };
 
 /// @brief Creates an app context with the desired scene handlers.

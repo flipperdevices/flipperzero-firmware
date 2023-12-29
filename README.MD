@@ -11,6 +11,7 @@ This project depends on [uFBT](https://github.com/flipperdevices/flipperzero-ufb
 The application is structured such that each scene can be self contained, with the sharing of data between scenes done via the app context. All of the scenes can be found with their corresponding source and header files in the `src/scenes` directory. The scenes do as follows:
 
 - **Starting Scene**: The scene where the application starts. This has the main menu options that users see when they start the app.
+- **Playback Scene**: The scene where the sound is played. Animates a waveform with the *approximate* shape of the sound being played.
 - **Settings Scene**: The scene where users can configure the tone's properties.
 
 Note as well that the app context file is generic, and designed in such as way that it should not need to be updated for things specific to the application. This allows for an easier time to allow scenes to self manage, insteaed of having somewhere else that centrally manages everything.

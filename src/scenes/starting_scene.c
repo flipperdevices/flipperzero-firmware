@@ -19,8 +19,7 @@ void menu_callback_starting_scene(void* context, uint32_t index) {
     struct AppContext_t* app = context;
     switch(index) {
     case ToneGenAppMenuSelection_Play:
-        FURI_LOG_I(TAG, "selection one");
-        // scene_manager_handle_custom_event(app->scene_manager, ToneGenAppEvent_StartPlayback);
+        scene_manager_handle_custom_event(app->scene_manager, ToneGenAppMenuSelection_Play);
         break;
     case ToneGenAppMenuSelection_Adjust:
         scene_manager_handle_custom_event(app->scene_manager, ToneGenAppMenuSelection_Adjust);
@@ -68,8 +67,8 @@ bool scene_on_event_starting_scene(void* context, SceneManagerEvent event) {
     case SceneManagerEventTypeCustom:
         switch(event.event) {
         case ToneGenAppMenuSelection_Play:
-            // scene_manager_next_scene(app->scene_manager, ToneGenAppScene_Playback);
-            // consumed = true;
+            scene_manager_next_scene(app->scene_manager, ToneGenAppScene_Playback);
+            consumed = true;
             break;
         case ToneGenAppMenuSelection_Adjust:
             scene_manager_next_scene(app->scene_manager, ToneGenAppScene_Settings);

@@ -60,6 +60,7 @@ AppContextStatus initializeAppContext(
 
 AppContextStatus addViewToAppContext(struct AppContext_t** context, struct View_t* view) {
     if(view->viewId > (*context)->activeViewsCount || view->viewId < 0) {
+        FURI_LOG_I(TAG, "Not enough views!");
         return APP_CONTEXT_NOT_ENOUGH_VIEWS;
     }
     (*context)->activeViews[view->viewId] = view;
@@ -76,6 +77,9 @@ AppContextStatus freeAppContextViews(struct AppContext_t** context) {
             switch(view->type) {
             case MENU:
                 menu_free(view->viewData);
+                break;
+            case VIEW:
+                view_free(view->viewData);
                 break;
             case POPUP:
                 popup_free(view->viewData);
