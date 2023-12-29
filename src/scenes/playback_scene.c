@@ -2,16 +2,11 @@
 #include "../app_context.h"
 #include "../tone_gen.h"
 
-#define SINE_WAVE(x, toneModelData)                                                    \
-    (toneDataModel->amplitude *                                                        \
-         sin((x + toneDataModel->animationOffset) * 50 * toneDataModel->period) * 20 + \
-     (64 / 2))
+#define SINE_WAVE(x, toneModelData) \
+    (sin((x + toneDataModel->animationOffset) * 50) * 20 + (64 / 2))
 
-#define SQUARE_WAVE(x, toneModelData)                                                            \
-    (toneDataModel->amplitude *                                                                  \
-         (sin((x + toneDataModel->animationOffset) * 50 * toneDataModel->period) > 0 ? 1 : -1) * \
-         20 +                                                                                    \
-     (64 / 2))
+#define SQUARE_WAVE(x, toneModelData) \
+    ((sin((x + toneDataModel->animationOffset) * 50) > 0 ? 1 : -1) * 20 + (64 / 2))
 
 // Renders the waveform
 static void playback_view_draw_callback(Canvas* canvas, void* model) {
@@ -59,9 +54,8 @@ void scene_on_enter_playback_scene(void* context) {
 
     FURI_LOG_I(TAG, "setting view model");
     struct ToneData_t* toneDataModel = (struct ToneData_t*)view_get_model(playbackView->viewData);
-    toneDataModel->amplitude = ((struct ToneData_t*)app->additionalData)->amplitude;
-    toneDataModel->period = ((struct ToneData_t*)app->additionalData)->period;
     toneDataModel->waveType = ((struct ToneData_t*)app->additionalData)->waveType;
+    toneDataModel->frequency = ((struct ToneData_t*)app->additionalData)->frequency;
 
     // Set the currently active view
     FURI_LOG_I(TAG, "setting active view");

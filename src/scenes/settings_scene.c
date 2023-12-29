@@ -1,36 +1,41 @@
-#include <gui/modules/submenu.h>
-#include <gui/modules/popup.h>
+#include <gui/modules/variable_item_list.h>
 
 #include "settings_scene.h"
 #include "../app_context.h"
 #include "../tone_gen.h"
 #include "../utils/linked_list.h"
 
-/** indices for menu items */
-typedef enum {
-    SettingsMenuOptions_WaveType,
-    SettingsMenuOptions_Amplitude,
-    SettingsMenuOptions_Period,
-} SettingsMenuOptions;
-
-/** main menu callback - sends a custom event to the scene manager based on the menu selection */
+// Not actively used in this instance.
 void menu_callback_settings_scene(void* context, uint32_t index) {
     UNUSED(context);
-    // struct AppContext_t* app = context;
-    switch(index) {
-    case SettingsMenuOptions_WaveType:
-        FURI_LOG_I(TAG, "selection one");
-        // scene_manager_handle_custom_event(app->scene_manager, ToneGenAppEvent_StartPlayback);
-        break;
-    case SettingsMenuOptions_Amplitude:
-        FURI_LOG_I(TAG, "selection two");
-        // scene_manager_handle_custom_event(app->scene_manager, ToneGenAppEvent_AdjustTone);
-        break;
-    case SettingsMenuOptions_Period:
-        FURI_LOG_I(TAG, "selection three");
-        // scene_manager_handle_custom_event(app->scene_manager, ToneGenAppEvent_AdjustTone);
-        break;
-    }
+    UNUSED(index);
+}
+
+static uint8_t wave_option_values[] = {SINE, SQUARE};
+static char* wave_option_names[] = {"Sine", "Square"};
+static void wave_type_option_change(VariableItem* item) {
+    struct AppContext_t* app = variable_item_get_context(item);
+    uint8_t index = variable_item_get_current_value_index(item);
+    variable_item_set_current_value_text(item, wave_option_names[index]);
+    ((struct ToneData_t*)app->additionalData)->waveType = index;
+}
+
+// Since the max number of options for variable item lists is
+// the size of an 8-bit integer, we need to limit the max
+// number of steps. In this case, we limit it to 241 total
+// steps available, incrementing in steps of 10.
+#define MIN_FREQ 100
+#define MAX_FREQ 2500
+#define FREQ_STEPS 10
+#define INDEX_TO_FREQ(index) (uint16_t)((index * FREQ_STEPS) + MIN_FREQ)
+#define FREQ_TO_INDEX(freq) (uint8_t)((freq - MIN_FREQ) / FREQ_STEPS)
+char* frequencyStr;
+static void frequency_option_change(VariableItem* item) {
+    struct AppContext_t* app = variable_item_get_context(item);
+    uint8_t index = variable_item_get_current_value_index(item);
+    ((struct ToneData_t*)app->additionalData)->frequency = INDEX_TO_FREQ(index);
+    snprintf(frequencyStr, 8, "%dhz", ((struct ToneData_t*)app->additionalData)->frequency);
+    variable_item_set_current_value_text(item, frequencyStr);
 }
 
 /** resets the menu, gives it content, callbacks and selection enums */
@@ -40,62 +45,49 @@ void scene_on_enter_settings_scene(void* context) {
 
     // Setup our menu
     FURI_LOG_D(TAG, "Adding view menu");
-    struct View_t* menuView = app->activeViews[ToneGenAppView_Submenu];
+    struct View_t* variableItemListView = app->activeViews[ToneGenAppView_VariableItemList];
 
     // Set the currently active view
-    submenu_reset(menuView->viewData);
+    variable_item_list_reset(variableItemListView->viewData);
 
-    submenu_set_header(menuView->viewData, "Tone Settings");
-
-    FURI_LOG_D(TAG, "Adding menu options for settings");
-    submenu_add_item(
-        menuView->viewData,
+    FURI_LOG_D(TAG, "Adding options for settings");
+    VariableItem* item = variable_item_list_add(
+        variableItemListView->viewData,
         "Wave Type",
-        SettingsMenuOptions_WaveType,
-        menu_callback_settings_scene,
+        COUNT_OF(wave_option_values),
+        wave_type_option_change,
         app);
-    submenu_add_item(
-        menuView->viewData,
-        "Amplitude",
-        SettingsMenuOptions_Amplitude,
-        menu_callback_settings_scene,
+    variable_item_set_current_value_index(
+        item, ((struct ToneData_t*)app->additionalData)->waveType);
+    variable_item_set_current_value_text(
+        item, wave_option_names[((struct ToneData_t*)app->additionalData)->waveType]);
+
+    item = variable_item_list_add(
+        variableItemListView->viewData,
+        "Frequency",
+        FREQ_TO_INDEX(MAX_FREQ) + 1,
+        frequency_option_change,
         app);
-    submenu_add_item(
-        menuView->viewData,
-        "Period",
-        SettingsMenuOptions_Period,
-        menu_callback_settings_scene,
-        app);
-    view_dispatcher_switch_to_view(app->view_dispatcher, ToneGenAppView_Submenu);
+    variable_item_set_current_value_index(
+        item, FREQ_TO_INDEX(((struct ToneData_t*)app->additionalData)->frequency));
+
+    frequencyStr = calloc(8, sizeof(char));
+    snprintf(frequencyStr, 8, "%dhz", ((struct ToneData_t*)app->additionalData)->frequency);
+    variable_item_set_current_value_text(item, frequencyStr);
+
+    view_dispatcher_switch_to_view(app->view_dispatcher, ToneGenAppView_VariableItemList);
 }
 
-/** main menu event handler - switches scene based on the event */
+// Not actively used in this instance.
 bool scene_on_event_settings_scene(void* context, SceneManagerEvent event) {
     FURI_LOG_I(TAG, "scene_on_event_settings_scene");
     UNUSED(context);
-    // struct AppContext_t* app = context;
-    bool consumed = false;
-    switch(event.type) {
-    case SceneManagerEventTypeCustom:
-        // switch(event.event) {
-        // case ToneGenAppEvent_StartPlayback:
-        //     scene_manager_next_scene(app->scene_manager, ToneGenAppScene_Playback);
-        //     consumed = true;
-        //     break;
-        // case ToneGenAppEvent_AdjustTone:
-        //     scene_manager_next_scene(app->scene_manager, ToneGenAppScene_AdjustTone);
-        //     consumed = true;
-        //     break;
-        // }
-        break;
-    default: // eg. SceneManagerEventTypeBack, SceneManagerEventTypeTick
-        consumed = false;
-        break;
-    }
-    return consumed;
+    UNUSED(event);
+    return false;
 }
 
 void scene_on_exit_settings_scene(void* context) {
     FURI_LOG_I(TAG, "scene_on_exit_settings_scene");
     UNUSED(context);
+    free(frequencyStr);
 }

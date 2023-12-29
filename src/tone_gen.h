@@ -25,13 +25,12 @@ typedef enum {
     ToneGenAppView_count
 } ToneGenAppView;
 
-typedef enum { SQUARE, SINE } ToneWaveType;
+typedef enum { SINE, SQUARE } ToneWaveType;
 
 struct ToneData_t {
     int animationOffset;
-    int amplitude;
-    int period;
     ToneWaveType waveType;
+    uint16_t frequency;
 };
 
 #endif

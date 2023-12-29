@@ -114,8 +114,7 @@ int32_t tone_gen_app(void* p) {
     if(result == APP_CONTEXT_OK) {
         appContext->additionalData = malloc(sizeof(struct ToneData_t));
         ((struct ToneData_t*)appContext->additionalData)->animationOffset = 0;
-        ((struct ToneData_t*)appContext->additionalData)->amplitude = 1;
-        ((struct ToneData_t*)appContext->additionalData)->period = 1;
+        ((struct ToneData_t*)appContext->additionalData)->frequency = 440;
         ((struct ToneData_t*)appContext->additionalData)->waveType = SINE;
 
         result = setupViews(&appContext);
