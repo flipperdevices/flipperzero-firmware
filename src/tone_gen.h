@@ -18,6 +18,7 @@ typedef enum {
 // ids for the 2 types of view used by the app
 typedef enum {
     ToneGenAppView_SharedMenu,
+    ToneGenAppView_Submenu,
     ToneGenAppView_PlaybackView,
     ToneGenAppView_Popup,
     ToneGenAppView_count

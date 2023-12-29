@@ -1,4 +1,5 @@
 #include <gui/modules/menu.h>
+#include <gui/modules/submenu.h>
 #include <gui/modules/popup.h>
 
 #include "tone_gen.h"
@@ -77,6 +78,9 @@ AppContextStatus freeAppContextViews(struct AppContext_t** context) {
             switch(view->type) {
             case MENU:
                 menu_free(view->viewData);
+                break;
+            case SUBMENU:
+                submenu_free(view->viewData);
                 break;
             case VIEW:
                 view_free(view->viewData);

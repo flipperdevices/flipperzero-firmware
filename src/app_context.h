@@ -9,6 +9,7 @@
 
 typedef enum {
     MENU,
+    SUBMENU,
     VIEW,
     POPUP,
 } ViewType;

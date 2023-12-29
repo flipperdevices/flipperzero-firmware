@@ -1,4 +1,4 @@
-#include <gui/modules/menu.h>
+#include <gui/modules/submenu.h>
 #include <gui/modules/popup.h>
 
 #include "settings_scene.h"
@@ -40,34 +40,33 @@ void scene_on_enter_settings_scene(void* context) {
 
     // Setup our menu
     FURI_LOG_D(TAG, "Adding view menu");
-    struct View_t* menuView = app->activeViews[ToneGenAppView_SharedMenu];
+    struct View_t* menuView = app->activeViews[ToneGenAppView_Submenu];
 
     // Set the currently active view
-    menu_reset(menuView->viewData);
+    submenu_reset(menuView->viewData);
+
+    submenu_set_header(menuView->viewData, "Tone Settings");
 
     FURI_LOG_D(TAG, "Adding menu options for settings");
-    menu_add_item(
+    submenu_add_item(
         menuView->viewData,
         "Wave Type",
-        NULL,
         SettingsMenuOptions_WaveType,
         menu_callback_settings_scene,
         app);
-    menu_add_item(
+    submenu_add_item(
         menuView->viewData,
         "Amplitude",
-        NULL,
         SettingsMenuOptions_Amplitude,
         menu_callback_settings_scene,
         app);
-    menu_add_item(
+    submenu_add_item(
         menuView->viewData,
         "Period",
-        NULL,
         SettingsMenuOptions_Period,
         menu_callback_settings_scene,
         app);
-    view_dispatcher_switch_to_view(app->view_dispatcher, ToneGenAppView_SharedMenu);
+    view_dispatcher_switch_to_view(app->view_dispatcher, ToneGenAppView_Submenu);
 }
 
 /** main menu event handler - switches scene based on the event */
