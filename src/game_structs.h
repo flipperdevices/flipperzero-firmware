@@ -7,7 +7,8 @@
 enum ThreadsMessageType {
     SAVE_AND_EXIT, // Request to exit the program, save the state and quit the thread
     RESET_STATE, // Reset the persisted state and return to the main view
-    PROCESS_CANDY // User requested to give food
+    PROCESS_CANDY, // User requested to give food
+    PROCESS_PILL // User requested to give a pill
 };
 
 /* Request from main thread to be processed by secondary thread */

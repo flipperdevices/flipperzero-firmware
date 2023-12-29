@@ -96,7 +96,7 @@ void check_hu(const struct GameState *game_state, uint32_t current_timestamp, st
 
     while(nb_events-- > 0) {
         if (toss_a_coin(LOSE_HU_PROBABILITY)) {
-            game_events->hu--;
+            game_events->hu -= random_uniform(LOSE_HU_MIN, LOSE_HU_MAX);
         }
     }
 
@@ -172,11 +172,11 @@ void check_hp(const struct GameState *game_state, uint32_t current_timestamp, st
         // If the pet is hungry or if he got sick
         if (!game_state->persistent.hu || toss_a_coin(LOSE_HP_PROBABILITY)) {
             if (!game_state->persistent.hu) {
-                FURI_LOG_I(LOG_TAG, "The pet is starving!");
+                FURI_LOG_I(LOG_TAG, "The pet is losing HP for starvation!");
             } else {
-                FURI_LOG_I(LOG_TAG, "The pet got sick!");
+                FURI_LOG_I(LOG_TAG, "The pet is losing HP for an illness!");
             }
-            game_events->hp--;
+            game_events->hp -= random_uniform(LOSE_HP_MIN, LOSE_HP_MAX);
         }
     }
 
@@ -243,5 +243,12 @@ void generate_hu(struct GameState *game_state, uint32_t current_timestamp, struc
     if (game_state->persistent.stage != DEAD && game_state->persistent.hu < MAX_HU) {
         game_events->hu = random_uniform(MIN_CANDY_HU_RESTORE, MAX_CANDY_HU_RESTORE);
         game_events->hu_timestamp = current_timestamp;
+    }
+}
+
+void generate_hp(struct GameState *game_state, uint32_t current_timestamp, struct GameEvents *game_events) {
+    if (game_state->persistent.stage != DEAD && game_state->persistent.hp < MAX_HP) {
+        game_events->hp = random_uniform(MIN_PILL_HP_RESTORE, MAX_PILL_HP_RESTORE);
+        game_events->hp_timestamp = current_timestamp;
     }
 }

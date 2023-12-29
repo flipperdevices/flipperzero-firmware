@@ -43,7 +43,8 @@ int32_t secondary_thread(void *ctx)
         // Block until a message is received
         FuriStatus status = furi_message_queue_get(context->threads_message_queue, &message, BACKGROUND_ACTIVITY_TICKS);
         if(status == FuriStatusOk) {
-          // Received something
+            // Received something
+            struct GameEvents events = { 0 };
             switch(message.type) {
                 case SAVE_AND_EXIT:
                     FURI_LOG_T(LOG_TAG, "Received termination message");
@@ -57,11 +58,18 @@ int32_t secondary_thread(void *ctx)
                     break;
                 case PROCESS_CANDY:
                     FURI_LOG_T(LOG_TAG, "Received candy request");
-                    struct GameEvents events = { 0 };
                     give_candy(context->game_state, &events);
                     if (process_events(context->game_state, events)) {
                         context->game_state->next_animation_index = 0;
                         go_to_candy_animation(context);
+                    }
+                    break;
+                case PROCESS_PILL:
+                    FURI_LOG_T(LOG_TAG, "Received pill request");
+                    give_pill(context->game_state, &events);
+                    if (process_events(context->game_state, events)) {
+                        context->game_state->next_animation_index = 0;
+                        go_to_pill_animation(context);
                     }
                     break;
                 default:

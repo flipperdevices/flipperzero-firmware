@@ -9,7 +9,7 @@
 
 /* How many ticks a popup animation should stay
  * on the screen */
-#define ANIMATION_TICKS_DURATION 2U
+#define ANIMATION_TICKS_DURATION 1U
 
 /* Strings */
 #define LOG_TAG "Matagotchi"
@@ -49,11 +49,17 @@ static const uint32_t MAX_XP_PER_STAGE[] = {1,    // EGG
 #define MAX_HU 100
 #define LOSE_HU_FREQUENCY 600 // Lose one HU every 600 seconds
 #define LOSE_HU_PROBABILITY 80 // 80% of probability of losing an HU
-#define MIN_CANDY_HU_RESTORE 1 // Restore a random number between MIN and MAX
-#define MAX_CANDY_HU_RESTORE 5
+#define LOSE_HU_MIN 1 // Lose a random number between MIN and MAX when the probability is hit
+#define LOSE_HU_MAX 5
+#define MIN_CANDY_HU_RESTORE 5 // Restore a random number between MIN and MAX
+#define MAX_CANDY_HU_RESTORE 10
 /* Health */
 #define MAX_HP 100
 #define CHECK_HP_FREQUENCY 300 // Check every 300 seconds
-#define LOSE_HP_PROBABILITY 0 // 0% of probability of losing an HP (getting sick)
+#define LOSE_HP_PROBABILITY 10 // 10% of probability of losing an HP (getting sick)
+#define LOSE_HP_MIN 1 // Lose a random number between MIN and MAX when the probability is hit
+#define LOSE_HP_MAX 5
+#define MIN_PILL_HP_RESTORE 10 // Restore a random number between MIN and MAX
+#define MAX_PILL_HP_RESTORE 50
 
 #endif

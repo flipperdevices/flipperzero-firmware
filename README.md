@@ -40,8 +40,9 @@ You have to feed the pet or he will starve.
 You can give him candies.
 
 ### Health
-When the pet is hungry he starts loosing health.
-You need to cure him (feature not yet implemented).
+When the pet is hungry he starts losing health.
+You need to cure him with a pill.
+He can also get sick.
 
 # Disclamer
 This application is still under initial development
@@ -51,5 +52,4 @@ This application is still under initial development
 * Add animations for stage up
 * Add sound
 * Add vibration
-* Add sickness feature
 * Add happyness feature

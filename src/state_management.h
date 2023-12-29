@@ -15,5 +15,7 @@ bool process_events(struct GameState *, struct GameEvents);
 void get_state_str(const struct GameState *, char *, size_t);
 /* Restore some HU with a candy (user event) */
 void give_candy(struct GameState *, struct GameEvents *);
+/* Restore some HP with a pill (user event) */
+void give_pill(struct GameState *, struct GameEvents *);
 
 #endif

@@ -35,7 +35,7 @@ candy restores a variable number of HU. Once the
 pet is full, he won't accept candies anymore.
 
 When the HU indicator goes to 0, the pet will start
-loosing health (see below).
+losing health (see below).
 
 ### Health
 The Health (HP) indicator represents the health of the
@@ -46,7 +46,7 @@ The pet can lose HP in two ways: for starvation, when the
 HU indicator is 0, or a cause of an illness.
 
 The health is checked periodically. It will for sure lose
-1HP at every check if the HU indicator is 0, while it's
-random whether 1XP is lost for an illness.
+some HPs at every check if the HU indicator is 0. It's
+random whether some HPs are lost for an illness.
 
-You can restore the health by giving the pet a medicine.
+You can restore the health by giving the pet a pill.

@@ -12,7 +12,8 @@
 enum ButtonIndex {
     settings_button,
     info_button,
-    candy_button
+    candy_button,
+    pill_button
 };
 
 static void main_button_pressed_callback(void *ctx, uint32_t index) {
@@ -58,6 +59,14 @@ static void scene_main_refresh_view(ButtonPanel *button_panel, struct Applicatio
                           &I_candy_icon_hover_20x20, // Icon when cursor over it
                           main_button_pressed_callback,
                           context);
+    button_panel_add_item(button_panel,
+                          pill_button, // Index
+                          1, 1, // Location in the matrix declared above (x, y)
+                          102, 38, // Coordinates where to draw the icon (x, y)
+                          &I_pill_icon_20x20, // Icon
+                          &I_pill_icon_hover_20x20, // Icon when cursor over it
+                          main_button_pressed_callback,
+                          context);
 
     button_panel_set_selection(button_panel, x, y);
 }
@@ -98,6 +107,9 @@ bool scene_main_on_event(void *ctx, SceneManagerEvent event) {
                 scene_manager_next_scene(context->scene_manager, scene_status);
             } else if (index == candy_button) {
                 struct ThreadsMessage threads_message = {.type = PROCESS_CANDY};
+                furi_message_queue_put(context->threads_message_queue, &threads_message, FuriWaitForever);
+            } else if (index == pill_button) {
+                struct ThreadsMessage threads_message = {.type = PROCESS_PILL};
                 furi_message_queue_put(context->threads_message_queue, &threads_message, FuriWaitForever);
             }
             return true; // Let's tell we handled the event

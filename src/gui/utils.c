@@ -30,3 +30,7 @@ void send_tick_to_scene(struct ApplicationContext *context) {
 void go_to_candy_animation(struct ApplicationContext *context) {
     scene_manager_next_scene(context->scene_manager, scene_candy);
 }
+
+void go_to_pill_animation(struct ApplicationContext *context) {
+    scene_manager_next_scene(context->scene_manager, scene_pill);
+}

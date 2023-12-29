@@ -58,4 +58,9 @@ void correct_state(struct GameState *);
  * the @game_events struct where to put the hu that are restored. */
 void generate_hu(struct GameState *, uint32_t, struct GameEvents *);
 
+/* generate_hp is used to restore health.
+ * Takes in input the @game_state, the @current_timestamp and
+ * the @game_events struct where to put the hp that are restored. */
+void generate_hp(struct GameState *, uint32_t, struct GameEvents *);
+
 #endif

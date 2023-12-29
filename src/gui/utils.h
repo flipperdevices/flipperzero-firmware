@@ -21,4 +21,8 @@ void send_tick_to_scene(struct ApplicationContext *);
  * scene */
 void go_to_candy_animation(struct ApplicationContext *);
 
+/* Show the heal animation and then go back to the previous
+ * scene */
+void go_to_pill_animation(struct ApplicationContext *);
+
 #endif
