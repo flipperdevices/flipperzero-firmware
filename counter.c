@@ -3,6 +3,8 @@
 #include <input/input.h>
 #include <stdlib.h>
 #include <counter_icons.h>
+#include <notification/notification.h>
+#include <notification/notification_messages.h>
 
 #define MAX_COUNT 99999
 #define NUM_WIDTH 12
@@ -12,16 +14,19 @@
 #define MIDDLE_Y 32 - BOXHEIGHT / 2
 #define OFFSET_X 8
 #define OFFSET_Y 9
+#define VIBRO_TIME_MS 20
 
 typedef struct {
     FuriMessageQueue* input_queue;
     ViewPort* view_port;
     Gui* gui;
     FuriMutex** mutex;
+    NotificationApp* notifications;
 
     int count;
     bool pressed;
     int boxtimer;
+    bool vibro;
 } Counter;
 
 void state_free(Counter* c) {
@@ -78,8 +83,10 @@ Counter* state_init() {
     c->view_port = view_port_alloc();
     c->gui = furi_record_open(RECORD_GUI);
     c->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
+    c->notifications = furi_record_open(RECORD_NOTIFICATION);
     c->count = 0;
     c->boxtimer = 0;
+    c->vibro = false;
     view_port_input_callback_set(c->view_port, input_callback, c);
     view_port_draw_callback_set(c->view_port, render_callback, c);
     gui_add_view_port(c->gui, c->view_port, GuiLayerFullscreen);
@@ -105,6 +112,11 @@ int32_t counterapp(void) {
                             c->pressed = true;
                             c->boxtimer = BOXTIME;
                             c->count++;
+                            if (c->vibro) {
+                                notification_message(c->notifications, &sequence_set_vibro_on);
+                                furi_delay_ms(VIBRO_TIME_MS);
+                                notification_message(c->notifications, &sequence_reset_vibro);
+                            }
                         }
                         break;
                     case InputKeyDown:
@@ -121,6 +133,9 @@ int32_t counterapp(void) {
                 switch(input.key) {
                     case InputKeyBack:
                         c->count = 0;
+                        break;
+                    case InputKeyOk:
+                        c->vibro = !c->vibro;
                         break;
                     default:
                         break;
