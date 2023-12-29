@@ -5,7 +5,8 @@ enum SubmenuIndex {
     SubmenuIndexAuthenticate,
     SubmenuIndexSetStandartConfig,
     SubmenuIndexGetConfig,
-    SubmenuIndexGetRevision
+    SubmenuIndexGetRevision,
+    SubmenuIndexSetShadowMode,
 };
 
 void nfc_magic_scene_gen4_actions_menu_submenu_callback(void* context, uint32_t index) {
@@ -36,6 +37,13 @@ void nfc_magic_scene_gen4_actions_menu_on_enter(void* context) {
         SubmenuIndexSetStandartConfig,
         nfc_magic_scene_gen4_actions_menu_submenu_callback,
         instance);
+    submenu_add_item(
+        submenu,
+        "Set Shadow Mode",
+        SubmenuIndexSetShadowMode,
+        nfc_magic_scene_gen4_actions_menu_submenu_callback,
+        instance);
+
     if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
         submenu_add_item(
             submenu,
@@ -67,6 +75,9 @@ bool nfc_magic_scene_gen4_actions_menu_on_event(void* context, SceneManagerEvent
             consumed = true;
         } else if(event.event == SubmenuIndexGetRevision) {
             scene_manager_next_scene(instance->scene_manager, NfcMagicSceneGen4Revision);
+            consumed = true;
+        } else if(event.event == SubmenuIndexSetShadowMode) {
+            scene_manager_next_scene(instance->scene_manager, NfcMagicSceneGen4SelectShdMode);
             consumed = true;
         }
         scene_manager_set_scene_state(

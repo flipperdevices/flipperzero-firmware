@@ -3,6 +3,7 @@
 #include "gen4_poller.h"
 #include <nfc/nfc_poller.h>
 #include <nfc/protocols/iso14443_3a/iso14443_3a_poller.h>
+#include <stdint.h>
 
 #define TAG "Gen4Poller"
 
@@ -53,6 +54,7 @@ typedef enum {
     Gen4PollerStateSetDefaultConfig,
     Gen4PollerStateGetCurrentConfig,
     Gen4PollerStateGetRevision,
+    Gen4PollerStateSetShadowMode,
 
     Gen4PollerStateSuccess,
     Gen4PollerStateFail,
@@ -77,6 +79,8 @@ struct Gen4Poller {
     uint32_t new_password;
 
     uint8_t config[GEN4_POLLER_CONFIG_SIZE_MAX];
+
+    uint8_t shadow_mode;
 
     Gen4PollerEvent gen4_event;
     Gen4PollerEventData gen4_event_data;
@@ -106,6 +110,8 @@ Gen4PollerError
 
 Gen4PollerError
     gen4_poller_get_config(Gen4Poller* instance, uint32_t password, uint8_t* config_result);
+
+Gen4PollerError gen4_poller_set_shadow_mode(Gen4Poller* instance, uint32_t password, uint8_t mode);
 
 #ifdef __cplusplus
 }
