@@ -4,11 +4,13 @@
 #include <stdlib.h>
 #include <counter_icons.h>
 
-#define MAX_COUNT 99
+#define MAX_COUNT 99999
+#define NUM_WIDTH 12
 #define BOXTIME 2
-#define BOXWIDTH 30
-#define MIDDLE_X 64 - BOXWIDTH / 2
-#define MIDDLE_Y 32 - BOXWIDTH / 2
+#define MIN_BOXWIDTH 30
+#define BOXHEIGHT 30
+#define MIDDLE_Y 32 - BOXHEIGHT / 2
+#define OFFSET_X 8
 #define OFFSET_Y 9
 
 typedef struct {
@@ -47,19 +49,25 @@ static void render_callback(Canvas* canvas, void* ctx) {
     canvas_draw_str_aligned(canvas, 64, 10, AlignCenter, AlignCenter, "Counter :)");
     canvas_set_font(canvas, FontBigNumbers);
 
-    char scount[5];
+    char scount[8];
+    snprintf(scount, sizeof(scount), "%d", c->count);
+    size_t cntr_len = strlen(scount);
+    size_t boxwidth = cntr_len * NUM_WIDTH + OFFSET_X;
+    if (boxwidth < MIN_BOXWIDTH) {
+        boxwidth = MIN_BOXWIDTH;
+    }
+    size_t middle_x = 64 - boxwidth / 2;
     if(c->pressed == true || c->boxtimer > 0) {
-        canvas_draw_rframe(canvas, MIDDLE_X, MIDDLE_Y + OFFSET_Y, BOXWIDTH, BOXWIDTH, 5);
+        canvas_draw_rframe(canvas, middle_x, MIDDLE_Y + OFFSET_Y, boxwidth, BOXHEIGHT, 5);
         canvas_draw_rframe(
-            canvas, MIDDLE_X - 1, MIDDLE_Y + OFFSET_Y - 1, BOXWIDTH + 2, BOXWIDTH + 2, 5);
+            canvas, middle_x - 1, MIDDLE_Y + OFFSET_Y - 1, boxwidth + 2, BOXHEIGHT + 2, 5);
         canvas_draw_rframe(
-            canvas, MIDDLE_X - 2, MIDDLE_Y + OFFSET_Y - 2, BOXWIDTH + 4, BOXWIDTH + 4, 5);
+            canvas, middle_x - 2, MIDDLE_Y + OFFSET_Y - 2, boxwidth + 4, BOXHEIGHT + 4, 5);
         c->pressed = false;
         c->boxtimer--;
     } else {
-        canvas_draw_rframe(canvas, MIDDLE_X, MIDDLE_Y + OFFSET_Y, BOXWIDTH, BOXWIDTH, 5);
+        canvas_draw_rframe(canvas, middle_x, MIDDLE_Y + OFFSET_Y, boxwidth, BOXHEIGHT, 5);
     }
-    snprintf(scount, sizeof(scount), "%d", c->count);
     canvas_draw_str_aligned(canvas, 64, 32 + OFFSET_Y, AlignCenter, AlignCenter, scount);
     furi_mutex_release(c->mutex);
 }
