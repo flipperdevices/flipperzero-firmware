@@ -11,6 +11,7 @@ typedef enum {
     MENU,
     SUBMENU,
     VIEW,
+    VARIABLE_ITEM_LIST,
     POPUP,
 } ViewType;
 

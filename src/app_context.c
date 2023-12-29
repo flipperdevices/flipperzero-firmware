@@ -1,6 +1,7 @@
 #include <gui/modules/menu.h>
-#include <gui/modules/submenu.h>
 #include <gui/modules/popup.h>
+#include <gui/modules/submenu.h>
+#include <gui/modules/variable_item_list.h>
 
 #include "tone_gen.h"
 #include "app_context.h"
@@ -65,6 +66,29 @@ AppContextStatus addViewToAppContext(struct AppContext_t** context, struct View_
         return APP_CONTEXT_NOT_ENOUGH_VIEWS;
     }
     (*context)->activeViews[view->viewId] = view;
+    switch(view->type) {
+    case MENU:
+        view_dispatcher_add_view(
+            (*context)->view_dispatcher, view->viewId, menu_get_view(view->viewData));
+        break;
+    case SUBMENU:
+        view_dispatcher_add_view(
+            (*context)->view_dispatcher, view->viewId, submenu_get_view(view->viewData));
+        break;
+    case VIEW:
+        view_dispatcher_add_view((*context)->view_dispatcher, view->viewId, view->viewData);
+        break;
+    case VARIABLE_ITEM_LIST:
+        view_dispatcher_add_view(
+            (*context)->view_dispatcher,
+            view->viewId,
+            variable_item_list_get_view(view->viewData));
+        break;
+    case POPUP:
+        view_dispatcher_add_view(
+            (*context)->view_dispatcher, view->viewId, popup_get_view(view->viewData));
+        break;
+    }
     return APP_CONTEXT_OK;
 }
 
@@ -84,6 +108,9 @@ AppContextStatus freeAppContextViews(struct AppContext_t** context) {
                 break;
             case VIEW:
                 view_free(view->viewData);
+                break;
+            case VARIABLE_ITEM_LIST:
+                variable_item_list_free(view->viewData);
                 break;
             case POPUP:
                 popup_free(view->viewData);

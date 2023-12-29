@@ -19,6 +19,7 @@ typedef enum {
 typedef enum {
     ToneGenAppView_SharedMenu,
     ToneGenAppView_Submenu,
+    ToneGenAppView_VariableItemList,
     ToneGenAppView_PlaybackView,
     ToneGenAppView_Popup,
     ToneGenAppView_count
