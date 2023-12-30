@@ -11,10 +11,6 @@ This is a simple Flipper Zero application to send left-clicks as a USB HID devic
 
 ![Screenshot](screenshot.png)
 
-## Use-case
-
-- Great for auto-clicking in games like [Idle Wizard](https://store.steampowered.com/app/992070/Idle_Wizard/) 😁
-
 ## Installation
 
 Download the [latest release](https://github.com/pbek/usb_hid_autofire/releases/latest)

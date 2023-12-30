@@ -88,19 +88,19 @@ int32_t usb_hid_autofire_app(void* p) {
                 }
 
                 switch(event.input.key) {
-                    case InputKeyOk:
-                        btn_left_autofire = !btn_left_autofire;
-                        break;
-                    case InputKeyLeft:
-                        if(autofire_delay > 0) {
-                            autofire_delay -= 10;
-                        }
-                        break;
-                    case InputKeyRight:
-                        autofire_delay += 10;
-                        break;
-                    default:
-                        break;
+                case InputKeyOk:
+                    btn_left_autofire = !btn_left_autofire;
+                    break;
+                case InputKeyLeft:
+                    if(autofire_delay > 0) {
+                        autofire_delay -= 10;
+                    }
+                    break;
+                case InputKeyRight:
+                    autofire_delay += 10;
+                    break;
+                default:
+                    break;
                 }
             }
         }
