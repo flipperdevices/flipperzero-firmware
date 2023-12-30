@@ -21,6 +21,8 @@ jobs:
         include:
           - name: dev channel
             sdk-channel: dev
+          - name: release-candidate channel
+            sdk-channel: release-candidate
           - name: release channel
             sdk-channel: release
           # You can add unofficial channels here. See ufbt action docs for more info.
