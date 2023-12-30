@@ -16,6 +16,7 @@
 #include <gui/modules/loading.h>
 #include <gui/modules/text_input.h>
 #include <gui/modules/byte_input.h>
+#include <gui/modules/text_box.h>
 #include <gui/modules/widget.h>
 
 #include <input/input.h>
@@ -31,7 +32,7 @@
 #include <assets_icons.h>
 
 #include <nfc/nfc.h>
-#include <nfc/helpers/nfc_dict.h>
+#include <toolbox/keys_dict.h>
 #include "protocol/picopass_poller.h"
 #include "protocol/picopass_listener.h"
 
@@ -90,7 +91,7 @@ struct Picopass {
     Nfc* nfc;
     PicopassPoller* poller;
     PicopassListener* listener;
-    NfcDict* dict;
+    KeysDict* dict;
 
     char text_store[PICOPASS_TEXT_STORE_SIZE];
     FuriString* text_box_store;
@@ -102,6 +103,7 @@ struct Picopass {
     Loading* loading;
     TextInput* text_input;
     ByteInput* byte_input;
+    TextBox* text_box;
     Widget* widget;
     DictAttack* dict_attack;
     Loclass* loclass;
@@ -117,6 +119,7 @@ typedef enum {
     PicopassViewLoading,
     PicopassViewTextInput,
     PicopassViewByteInput,
+    PicopassViewTextBox,
     PicopassViewWidget,
     PicopassViewDictAttack,
     PicopassViewLoclass,
