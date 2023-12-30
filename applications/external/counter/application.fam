@@ -8,6 +8,8 @@ App(
     fap_icon_assets="icons",
     fap_author="Krulknul",
     fap_weburl="https://github.com/Krulknul/dolphin-counter",
-    fap_version=(1, 2),
+    fap_version=(1, 3),
     fap_description="Simple counter",
+    #  [Improved (By plasticuproject)](https://github.com/plasticuproject/dolphin-better-counter)
+    #  [Improve counter with extending range and adding vibro feedback #2 (By vzhestkov)](https://github.com/Krulknul/dolphin-counter/pull/2)
 )
