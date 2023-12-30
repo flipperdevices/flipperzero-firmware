@@ -6,6 +6,7 @@
   - [FlipKeyboard](./flipkeyboard/README.md)
   - [FlipBlinky](./flipblinky/README.md)
   - [FlipSignal](./flipsignal/README.md)
+  - [Simon Tutorial](./simon-tutorial/README.md)
 - [Installing Apps](#installing-apps)
   - [Using flipc.org (Chrome, Edge, Opera)](#using-flipcorg-chrome-edge-opera)
   - [Using flipc.org (Other browsers)](#using-flipcorg-other-browsers)
@@ -30,6 +31,7 @@ You can order your FlipBoard from [https://tindie.com/stores/MakeItHackin](https
 - [FlipKeyboard](./flipkeyboard/README.md)
 - [FlipBlinky](./flipblinky/README.md)
 - [FlipSignal](./flipsignal/README.md)
+- [Simon Tutorial](./simon-tutorial/README.md)
 
 ## Installing Apps
 
