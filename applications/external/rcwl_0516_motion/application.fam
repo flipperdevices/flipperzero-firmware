@@ -1,9 +1,0 @@
-App(
-    appid="rcwl_0516_motion_sensor",
-    name="[RCWL-516] Motion Sensor",
-    apptype=FlipperAppType.EXTERNAL,
-    entry_point="rcwl_0516",
-    stack_size=1 * 1024,
-    fap_icon="motion_detection_icon_10x10px.png",
-    fap_category="GPIO/Sensors",
-)
