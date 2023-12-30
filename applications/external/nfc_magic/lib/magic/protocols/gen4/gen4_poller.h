@@ -38,9 +38,10 @@ typedef enum {
     Gen4PollerModeWrite,
     Gen4PollerModeSetPassword,
 
-    Gen4PollerModeSetDefaultCFG,
-    Gen4PollerModeGetCFG,
+    Gen4PollerModeSetDefaultCfg,
+    Gen4PollerModeGetCfg,
     Gen4PollerModeGetRevision,
+    Gen4PollerModeSetShadowMode,
 } Gen4PollerMode;
 
 typedef struct {

@@ -1,5 +1,7 @@
+#include "core/check.h"
 #include "core/log.h"
 #include "gen4_poller_i.h"
+#include "protocols/gen4/gen4_poller.h"
 #include <nfc/protocols/iso14443_3a/iso14443_3a.h>
 #include <nfc/protocols/iso14443_3a/iso14443_3a_poller.h>
 #include <nfc/helpers/nfc_util.h>
@@ -171,12 +173,14 @@ NfcCommand gen4_poller_request_mode_handler(Gen4Poller* instance) {
         instance->state = Gen4PollerStateRequestWriteData;
     } else if(instance->gen4_event_data.request_mode.mode == Gen4PollerModeSetPassword) {
         instance->state = Gen4PollerStateChangePassword;
-    } else if(instance->gen4_event_data.request_mode.mode == Gen4PollerModeSetDefaultCFG) {
+    } else if(instance->gen4_event_data.request_mode.mode == Gen4PollerModeSetDefaultCfg) {
         instance->state = Gen4PollerStateSetDefaultConfig;
-    } else if(instance->gen4_event_data.request_mode.mode == Gen4PollerModeGetCFG) {
+    } else if(instance->gen4_event_data.request_mode.mode == Gen4PollerModeGetCfg) {
         instance->state = Gen4PollerStateGetCurrentConfig;
     } else if(instance->gen4_event_data.request_mode.mode == Gen4PollerModeGetRevision) {
         instance->state = Gen4PollerStateGetRevision;
+    } else if(instance->gen4_event_data.request_mode.mode == Gen4PollerModeSetShadowMode) {
+        instance->state = Gen4PollerStateSetShadowMode;
     } else {
         instance->state = Gen4PollerStateFail;
     }
@@ -534,6 +538,25 @@ NfcCommand gen4_poller_get_revision_handler(Gen4Poller* instance) {
     return command;
 }
 
+NfcCommand gen4_poller_set_shadow_mode_handler(Gen4Poller* instance) {
+    NfcCommand command = NfcCommandContinue;
+
+    do {
+        Gen4PollerError error =
+            gen4_poller_set_shadow_mode(instance, instance->password, instance->shadow_mode);
+
+        if(error != Gen4PollerErrorNone) {
+            FURI_LOG_E(TAG, "Failed to set shadow mode: %d", error);
+            instance->state = Gen4PollerStateFail;
+            break;
+        }
+
+        instance->state = Gen4PollerStateSuccess;
+    } while(false);
+
+    return command;
+}
+
 NfcCommand gen4_poller_success_handler(Gen4Poller* instance) {
     NfcCommand command = NfcCommandContinue;
 
@@ -568,6 +591,7 @@ static const Gen4PollerStateHandler gen4_poller_state_handlers[Gen4PollerStateNu
     [Gen4PollerStateSetDefaultConfig] = gen4_poller_set_default_cfg_handler,
     [Gen4PollerStateGetCurrentConfig] = gen4_poller_get_current_cfg_handler,
     [Gen4PollerStateGetRevision] = gen4_poller_get_revision_handler,
+    [Gen4PollerStateSetShadowMode] = gen4_poller_set_shadow_mode_handler,
     [Gen4PollerStateSuccess] = gen4_poller_success_handler,
     [Gen4PollerStateFail] = gen4_poller_fail_handler,
 

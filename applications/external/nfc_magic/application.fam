@@ -12,6 +12,13 @@ App(
         ),
     ],
     fap_icon_assets="assets",
-    fap_version="1.4",
+    fap_version="1.5",
     fap_description="Application for writing to NFC tags with modifiable sector 0",
+    #  [NFC Magic Gen4 Support #2238 (By nullableVoidPtr)](https://github.com/flipperdevices/flipperzero-firmware/pull/2238)
+    #  [rework #67 (By gornekich)](https://github.com/flipperdevices/flipperzero-good-faps/pull/67)
+    #  [fix gen4 detection #71 (By gornekich)](https://github.com/flipperdevices/flipperzero-good-faps/pull/71)
+    #  [Specify in error scene that only Gen1 magic and Gen4 UMCs are supported #75 (By kitsunehunter)](https://github.com/flipperdevices/flipperzero-good-faps/pull/75)
+    #  [UI / Scenes (By xMasterX) & Poller functions, minor UI fixes (By Leptopt1los)](https://github.com/xMasterX/all-the-plugins/commit/d70f146f15a6bab2272d4ebfe37001d7d5f0f556)
+    #  [New options for gen4 cards #82 (By Leptopt1los)](https://github.com/flipperdevices/flipperzero-good-faps/pull/82)
+    #  [Gen4 shadow mode management support #98 (By Leptopt1los)](https://github.com/flipperdevices/flipperzero-good-faps/pull/98)
 )
