@@ -11,7 +11,6 @@
 #define RGB_G(V) ((V >> 16) & 0xFF)
 #define RGB_B(V) (V & 0xFF)
 
-
 void led_init();
 void led_deinit();
 int8_t led_update();

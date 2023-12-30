@@ -14,7 +14,7 @@ void rgb_led_submenu_callback(void* context, uint32_t index) {
     if(index == RgbLedSubmenuIndexDefault) {
         app->view_id = RgbLedViewDefault;
         view_dispatcher_switch_to_view(app->view_dispatcher, RgbLedViewDefault);
-    } 
+    }
 }
 
 void rgb_led_dialog_callback(DialogExResult result, void* context) {
@@ -58,7 +58,8 @@ RgbLed* rgb_led_app_alloc() {
     submenu_add_item(
         app->submenu, "Default", RgbLedSubmenuIndexDefault, rgb_led_submenu_callback, app);
     view_set_previous_callback(submenu_get_view(app->submenu), rgb_led_exit);
-    view_dispatcher_add_view(app->view_dispatcher, RgbLedViewSubmenu, submenu_get_view(app->submenu));
+    view_dispatcher_add_view(
+        app->view_dispatcher, RgbLedViewSubmenu, submenu_get_view(app->submenu));
 
     // Dialog view
     app->dialog = dialog_ex_alloc();

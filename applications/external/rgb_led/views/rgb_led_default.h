@@ -3,7 +3,6 @@
 #include <gui/view.h>
 #include "../led_ll.h"
 
-
 void rgb_led_init(void);
 
 typedef struct RgbLedDefault RgbLedDefault;
