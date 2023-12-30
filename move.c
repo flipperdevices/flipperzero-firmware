@@ -42,7 +42,6 @@ void find_movable_left(PlayGround* mv, uint8_t* current_movable) {
     const uint8_t sx = (*current_movable != MOVABLE_NOT_FOUND) ? coord_x(*current_movable) :
                                                                  SIZE_X / 2;
     const uint8_t sy = (*current_movable != MOVABLE_NOT_FOUND) ? coord_y(*current_movable) : 0;
-    uint8_t py = sy;
     uint8_t px = sx;
 
     // to the left, same line
@@ -54,47 +53,13 @@ void find_movable_left(PlayGround* mv, uint8_t* current_movable) {
         }
     }
 
-    // down, to the left
-    while(py < SIZE_Y - 1) {
-        py++;
-        px = sx - 1;
-
-        while(px > 0) {
-            if((*mv)[py][px] != MOVABLE_NOT) {
-                *current_movable = coord_from(px, py);
+    uint8_t x, y;
+    for(y = sy - 1; y > 0; y--) {
+        for(x = SIZE_X - 1; x > 0; x--) {
+            if((*mv)[y][x] != MOVABLE_NOT) {
+                *current_movable = coord_from(x, y);
                 return;
             }
-            px--;
-        }
-    }
-
-    // back climbing up, on left
-    py = sy;
-    while(py > 0) {
-        py--;
-        px = sx;
-
-        while(px > 0) {
-            if((*mv)[py][px] != MOVABLE_NOT) {
-                *current_movable = coord_from(px, py);
-                return;
-            }
-            px--;
-        }
-    }
-
-    // back climbing up, on right
-    py = sy;
-    while(py > 0) {
-        py--;
-        px = sx + 1;
-
-        while(px < SIZE_X - 1) {
-            if((*mv)[py][px] != MOVABLE_NOT) {
-                *current_movable = coord_from(px, py);
-                return;
-            }
-            px++;
         }
     }
 
@@ -120,30 +85,13 @@ void find_movable_right(PlayGround* mv, uint8_t* current_movable) {
         }
     }
 
-    while(py < SIZE_Y - 1) {
-        py++;
-        px = sx;
-
-        while(px < SIZE_X - 1) {
-            if((*mv)[py][px] != MOVABLE_NOT) {
-                *current_movable = coord_from(px, py);
+    uint8_t x, y;
+    for(y = py + 1; y < SIZE_Y; y++) {
+        for(x = 0; x < SIZE_X; x++) {
+            if((*mv)[y][x] != MOVABLE_NOT) {
+                *current_movable = coord_from(x, y);
                 return;
             }
-            px++;
-        }
-    }
-
-    py = sy;
-    while(py < SIZE_Y - 1) {
-        py++;
-        px = sx - 1;
-
-        while(px > 0) {
-            if((*mv)[py][px] != MOVABLE_NOT) {
-                *current_movable = coord_from(px, py);
-                return;
-            }
-            px--;
         }
     }
 
