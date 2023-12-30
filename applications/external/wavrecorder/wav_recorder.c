@@ -2,7 +2,7 @@
 #include <furi_hal.h>
 #include <gui/gui.h>
 #include <input/input.h>
-#include <wav_recorder_icons.h>
+// #include <wav_recorder_icons.h>
 #include "furi_hal_adc.h"
 
 #define TAG "WavRecorder"
