@@ -15,7 +15,7 @@ NfcCommand nfc_mafic_scene_gen4_set_cfg_poller_callback(Gen4PollerEvent event, v
         view_dispatcher_send_custom_event(
             instance->view_dispatcher, NfcMagicCustomEventCardDetected);
     } else if(event.type == Gen4PollerEventTypeRequestMode) {
-        event.data->request_mode.mode = Gen4PollerModeSetDefaultCFG;
+        event.data->request_mode.mode = Gen4PollerModeSetDefaultCfg;
     } else if(event.type == Gen4PollerEventTypeSuccess) {
         view_dispatcher_send_custom_event(
             instance->view_dispatcher, NfcMagicCustomEventWorkerSuccess);

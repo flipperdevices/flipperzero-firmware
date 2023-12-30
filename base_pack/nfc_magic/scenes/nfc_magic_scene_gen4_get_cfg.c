@@ -15,7 +15,7 @@ NfcCommand nfc_mafic_scene_gen4_get_cfg_poller_callback(Gen4PollerEvent event, v
         view_dispatcher_send_custom_event(
             instance->view_dispatcher, NfcMagicCustomEventCardDetected);
     } else if(event.type == Gen4PollerEventTypeRequestMode) {
-        event.data->request_mode.mode = Gen4PollerModeGetCFG;
+        event.data->request_mode.mode = Gen4PollerModeGetCfg;
     } else if(event.type == Gen4PollerEventTypeSuccess) {
         // Copy config from event to main instance to display it on success scene
         memcpy(
