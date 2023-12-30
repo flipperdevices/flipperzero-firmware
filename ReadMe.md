@@ -49,6 +49,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [FlipBoard Keyboard v2.0 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
 - Updated: [FlipBoard Signal v3.1 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
 - Updated: [Counter v1.3 (By Krulknul)](https://github.com/Krulknul/dolphin-counter)
+- Added: [FlipBoard Simon v1.0 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
 
 ## IN THIS BRANCH:
 
@@ -474,6 +475,7 @@ $ ./fbt dolphin_ext
 - [FlipBoard Blinky v2.1 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
 - [FlipBoard Keyboard v2.0 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
 - [FlipBoard Signal v3.1 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
+- [FlipBoard Simon v1.0 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
 - [FlipBIP Crypto Wallet v1.14 (By xtruan)](https://github.com/xtruan/FlipBIP)
 - [Flizzer Tracker v0.4 (By LTVA1)](https://github.com/LTVA1/flizzer_tracker)
 - [FM Radio v1.1 (By coolshrimp)](https://github.com/coolshrimp/flipperzero-firmware-wPlugins/tree/420/applications/external/fm_radio)

@@ -1,17 +1,24 @@
 # FlipKeyboard
 
 - [Overview](#overview)
-- [Configuration](#configuration)
 - [Running the app](#running-the-app)
+- [Configuration](#configuration)
+- [Using the app](#using-the-app)
 - [Tutorials](#tutorials)
   - [Video tutorials](#video-tutorials)
   - [Written tutorials](#written-tutorials)
 
 ## Overview
 
-<img src="./gallery/01-key-main-menu.png" width="200px">
+<img src="./gallery/banner.png">
 
 The FlipKeyboard application turns your Flipper Zero into a musical, light-up keyboard, that connects via USB to a computer. It uses the FlipBoard to provide the keys and the LEDs. The application is written in C and uses the flipboard common code for the majority of the functionality.
+
+## Running the app
+
+<img src="./gallery/01-key-main-menu.png" width="200px">
+
+Make sure your FlipBoard is connected to your Flipper Zero.  On your Flipper Zero, press the `Ok` button.  Scroll down to `Apps` and click the `Ok` button.  Select the `GPIO` folder.  Select the `FlipBoard Keyboard` application. You should see the FlipBoard LEDs do their start-up sequence.
 
 ## Configuration
 
@@ -41,11 +48,9 @@ You can pick the key from an on-screen keyboard. Press "ok" to while a "Keystrok
 
 NOTE: For this demo, not all keys are on the on-screen keyboard; you may need to use "left" and "right" buttons on the "Keystroke" option to access some keys.
 
-## Running the app
+## Using the app
 
-<img src="./gallery/banner.png">
-
-Make sure your FlipBoard is connected to your Flipper Zero.  Choose the "Flipboard Keyboard" option to launch the app.  You should see the FlipBoard LEDs do their start-up sequence.  Press the buttons to see the LEDs change color & hear the tones get played.  If your computer is connected to your Flipper Zero, you should see keystrokes and Messages get entered on the computer.
+Choose the `Flipboard Keyboard` option to enable the FlipBoard.  Press the buttons to see the LEDs change color & hear the tones get played. If your computer is connected to your Flipper Zero, you should see keystrokes and Messages get entered on the computer.
 
 ## Tutorials
 
