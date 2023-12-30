@@ -20,16 +20,18 @@ Right now the current structure of the application is heavily inspired from [lee
 
 The following is the application structure with a breakdown of each folder.
 ## Application Structure
--  **[F0_Minesweeper_Fap](https://github.com/squee72564/F0_Minesweeper_Fap)**
-	- [github/workflows](https://github.com/squee72564/F0_Minesweeper_Fap/tree/main/.github/workflows)
+-  **[F0_Minesweeper_Fap/](https://github.com/squee72564/F0_Minesweeper_Fap)**
+	- [github/workflows/](https://github.com/squee72564/F0_Minesweeper_Fap/tree/main/.github/workflows)
 		- Github workflows folder
-	- [dist](https://github.com/squee72564/F0_Minesweeper_Fap/tree/main/dist)
+	- [dist/](https://github.com/squee72564/F0_Minesweeper_Fap/tree/main/dist)
 		-  Contains .fap file for game when compiled
-	- [images](https://github.com/squee72564/F0_Minesweeper_Fap/tree/main/images)
+	- [images/](https://github.com/squee72564/F0_Minesweeper_Fap/tree/main/images)
 		-  Contains all custom image assets used for game
-	- [scenes](https://github.com/squee72564/F0_Minesweeper_Fap/tree/main/scenes)
+	- [scenes/](https://github.com/squee72564/F0_Minesweeper_Fap/tree/main/scenes)
 		- Contains `minesweeper_scene.c`, `minesweeper_scene.h`, and `minesweeper_scene_config.h` files to automate creation of scene FP arrays and Scene enumeration types. View the `.README` in this folder for more information on adding new scenes.
 		-  Contains the enter/event/exit functions for each scene used in a .c file
-	- [views](https://github.com/squee72564/F0_Minesweeper_Fap/tree/main/views)
+	- [views/](https://github.com/squee72564/F0_Minesweeper_Fap/tree/main/views)
 		-  Contains the .c and .h files for any custom views used.
 		- Right now there is the StartScreen custom view built for the game. 
+	- minesweeper.c / minesweeper.h
+		- Main Mine Sweeper App .c and .h file
