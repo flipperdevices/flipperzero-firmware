@@ -1,0 +1,12 @@
+App(
+    appid="nightstand",
+    name="Nightstand",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="clock_app",
+    requires=["gui"],
+    icon="A_Clock_14",
+    stack_size=2 * 1024,
+	fap_category="Misc",
+    order=81,
+)
+
