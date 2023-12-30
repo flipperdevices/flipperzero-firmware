@@ -9,7 +9,7 @@ void map_movability(PlayGround* pg, PlayGround* mv) {
             tile = (*pg)[y][x];
             if(is_block(tile)) {
                 if(x > 0 && ((*pg)[y][x - 1] == EMPTY_TILE)) movable += MOVABLE_LEFT;
-                if((x < (SIZE_X - 1)) && ((*pg)[y][x + 1] == EMPTY_TILE)) movable += MOVABLE_RIGTH;
+                if((x < (SIZE_X - 1)) && ((*pg)[y][x + 1] == EMPTY_TILE)) movable += MOVABLE_RIGHT;
             }
             (*mv)[y][x] = movable;
         }
