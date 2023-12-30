@@ -1,0 +1,29 @@
+{
+    "cortex-debug.enableTelemetry": false,
+    "cortex-debug.variableUseNaturalFormat": false,
+    "cortex-debug.showRTOS": true,
+    "cortex-debug.armToolchainPath": "/Users/lewiswestbury/.ufbt/toolchain/x86_64-darwin/bin",
+    "cortex-debug.openocdPath": "/Users/lewiswestbury/.ufbt/toolchain/x86_64-darwin/openocd/bin/openocd",
+    "cortex-debug.gdbPath": "/Users/lewiswestbury/.ufbt/toolchain/x86_64-darwin/bin/arm-none-eabi-gdb-py",
+    "editor.formatOnSave": true,
+    "files.associations": {
+        "*.scons": "python",
+        "SConscript": "python",
+        "SConstruct": "python",
+        "*.fam": "python",
+        "infrared_worker.h": "c",
+        "infrared_transmit.h": "c",
+<<<<<<< HEAD
+        "tag_ir.h": "c"
+=======
+        "tag_ir.h": "c",
+        "furi_hal_resources.h": "c",
+        "furi_hal.h": "c"
+>>>>>>> tag_use_queue
+    },
+    "cortex-debug.registerUseNaturalFormat": false,
+    "python.analysis.typeCheckingMode": "off",
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.black-formatter"
+    }
+}

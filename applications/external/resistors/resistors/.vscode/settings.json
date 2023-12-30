@@ -1,0 +1,32 @@
+{
+    "cortex-debug.enableTelemetry": false,
+    "cortex-debug.variableUseNaturalFormat": false,
+    "cortex-debug.showRTOS": true,
+    "cortex-debug.armToolchainPath": "/Users/lewiswestbury/.ufbt/toolchain/x86_64-darwin/bin",
+    "cortex-debug.openocdPath": "/Users/lewiswestbury/.ufbt/toolchain/x86_64-darwin/openocd/bin/openocd",
+    "cortex-debug.gdbPath": "/Users/lewiswestbury/.ufbt/toolchain/x86_64-darwin/bin/arm-none-eabi-gdb-py",
+    "editor.formatOnSave": true,
+    "files.associations": {
+        "*.scons": "python",
+        "SConscript": "python",
+        "SConstruct": "python",
+        "*.fam": "python",
+        "flipper.h": "c",
+        "widget_element.h": "c"
+    },
+    "cortex-debug.registerUseNaturalFormat": false,
+    "python.analysis.typeCheckingMode": "off",
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.black-formatter"
+    },
+    "cSpell.words": [
+        "Fullscreen",
+        "FURI",
+        "uncalculated"
+    ],
+    "workbench.colorCustomizations": {
+        "activityBar.background": "#202175",
+        "titleBar.activeBackground": "#2C2EA4",
+        "titleBar.activeForeground": "#FCFCFE"
+    }
+}

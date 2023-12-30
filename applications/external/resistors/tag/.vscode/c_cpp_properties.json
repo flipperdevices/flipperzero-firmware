@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "name": "main",
+            "compilerPath": "/Users/lewiswestbury/.ufbt/toolchain/x86_64-darwin/bin/arm-none-eabi-gcc",
+            "intelliSenseMode": "gcc-arm",
+            "compileCommands": "${workspaceFolder}/.vscode/compile_commands.json",
+            "configurationProvider": "ms-vscode.cpptools",
+            "cStandard": "gnu17",
+            "cppStandard": "c++17"
+        },
+    ],
+    "version": 4
+}
