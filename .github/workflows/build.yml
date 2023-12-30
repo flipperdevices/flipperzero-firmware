@@ -22,7 +22,7 @@ jobs:
           - name: dev channel
             sdk-channel: dev
           - name: release-candidate channel
-            sdk-channel: release-candidate
+            sdk-channel: rc
           - name: release channel
             sdk-channel: release
           # You can add unofficial channels here. See ufbt action docs for more info.
