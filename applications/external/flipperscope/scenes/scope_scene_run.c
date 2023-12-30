@@ -25,7 +25,7 @@
 #include "stm32wbxx_ll_gpio.h"
 
 #include "../scope_app_i.h"
-#include "flipperscope_icons.h"
+#include "scope_icons.h"
 
 #define DIGITAL_SCALE_12BITS ((uint32_t)0xFFF)
 #define VAR_CONVERTED_DATA_INIT_VALUE (DIGITAL_SCALE_12BITS + 1)
