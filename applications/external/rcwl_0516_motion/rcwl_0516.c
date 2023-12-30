@@ -9,28 +9,25 @@
 #include <notification/notification_messages.h>
 
 static void rcwl_0516_draw_callback(Canvas* canvas, void* ctx) {
-    
     furi_assert(ctx);
     Rcwl_0516* app = ctx;
 
     canvas_clear(canvas);
     canvas_set_font(canvas, FontPrimary);
     elements_multiline_text_aligned(canvas, 60, 17, AlignCenter, AlignTop, "Motion Status");
-    
+
     canvas_set_font(canvas, FontSecondary);
 
-    if(app->input_value){
+    if(app->input_value) {
         furi_hal_light_set(LightRed, 255);
         furi_hal_light_set(LightBlue, 0);
         furi_hal_light_set(LightGreen, 0);
 
-        elements_multiline_text_aligned(
-            canvas, 60, 32, AlignCenter, AlignTop,"Motion Detection");
+        elements_multiline_text_aligned(canvas, 60, 32, AlignCenter, AlignTop, "Motion Detection");
         notification_message(app->notifications, &sequence_display_backlight_on);
 
-    }else {
-        elements_multiline_text_aligned(
-        canvas, 60, 32, AlignCenter, AlignTop,"No Motion");
+    } else {
+        elements_multiline_text_aligned(canvas, 60, 32, AlignCenter, AlignTop, "No Motion");
         notification_message(app->notifications, &sequence_display_backlight_off);
         furi_hal_light_set(LightBlue, 255);
         furi_hal_light_set(LightRed, 0);
@@ -90,12 +87,11 @@ int32_t rcwl_0516(void* p) {
 
     while(1) {
         app->input_value = furi_hal_gpio_read(app->input_pin);
-        
+
         if(furi_message_queue_get(app->event_queue, &event, 100) == FuriStatusOk) {
             if(event.key == InputKeyBack) {
                 if(event.type == InputTypePress) break;
-
-            } 
+            }
         }
     }
 

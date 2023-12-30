@@ -17,7 +17,6 @@ struct Rcwl_0516 {
     bool output_value;
 
     NotificationApp* notifications;
-
 };
 
 typedef struct Rcwl_0516 Rcwl_0516;
