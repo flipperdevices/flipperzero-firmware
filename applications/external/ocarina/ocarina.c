@@ -40,7 +40,6 @@ void input_callback(InputEvent* input, void* ctx) {
 Ocarina* ocarina_alloc() {
     Ocarina* instance = malloc(sizeof(Ocarina));
 
-
     instance->model_mutex = furi_mutex_alloc(FuriMutexTypeNormal);
 
     instance->event_queue = furi_message_queue_alloc(8, sizeof(InputEvent));
@@ -63,8 +62,11 @@ void ocarina_free(Ocarina* instance) {
     furi_message_queue_free(instance->event_queue);
 
     furi_mutex_free(instance->model_mutex);
-    
-    furi_hal_speaker_stop();
+
+    if(furi_hal_speaker_is_mine()) {
+        furi_hal_speaker_stop();
+        furi_hal_speaker_release();
+    }
 
     free(instance);
 }
@@ -86,29 +88,43 @@ int32_t ocarina_app(void* p) {
             if(event.type == InputTypePress) {
                 switch(event.key) {
                 case InputKeyUp:
-	            furi_hal_speaker_start(NOTE_UP, volume);
+                    if(furi_hal_speaker_is_mine() || furi_hal_speaker_acquire(1000)) {
+                        furi_hal_speaker_start(NOTE_UP, volume);
+                    }
                     break;
                 case InputKeyDown:
-	            furi_hal_speaker_start(NOTE_DOWN, volume);
+                    if(furi_hal_speaker_is_mine() || furi_hal_speaker_acquire(1000)) {
+                        furi_hal_speaker_start(NOTE_DOWN, volume);
+                    }
                     break;
                 case InputKeyLeft:
-                    furi_hal_speaker_start(NOTE_LEFT, volume);
+                    if(furi_hal_speaker_is_mine() || furi_hal_speaker_acquire(1000)) {
+                        furi_hal_speaker_start(NOTE_LEFT, volume);
+                    }
                     break;
                 case InputKeyRight:
-                    furi_hal_speaker_start(NOTE_RIGHT, volume);
+                    if(furi_hal_speaker_is_mine() || furi_hal_speaker_acquire(1000)) {
+                        furi_hal_speaker_start(NOTE_RIGHT, volume);
+                    }
                     break;
                 case InputKeyOk:
-	            furi_hal_speaker_start(NOTE_OK, volume);
+                    if(furi_hal_speaker_is_mine() || furi_hal_speaker_acquire(1000)) {
+                        furi_hal_speaker_start(NOTE_OK, volume);
+                    }
                     break;
                 case InputKeyBack:
                     processing = false;
                     break;
+                default:
+                    break;
                 }
-            } else if (event.type == InputTypeRelease) {
-                furi_hal_speaker_stop();
+            } else if(event.type == InputTypeRelease) {
+                if(furi_hal_speaker_is_mine()) {
+                    furi_hal_speaker_stop();
+                    furi_hal_speaker_release();
+                }
             }
         }
-
 
         furi_mutex_release(ocarina->model_mutex);
         view_port_update(ocarina->view_port); // signals our draw callback
