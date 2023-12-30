@@ -135,7 +135,7 @@ void pocsag_pager_scene_receiver_on_enter(void* context) {
 
     if(app->txrx->txrx_state == PCSGTxRxStateRx) {
         pcsg_rx_end(app);
-    };
+    }
     if((app->txrx->txrx_state == PCSGTxRxStateIDLE) ||
        (app->txrx->txrx_state == PCSGTxRxStateSleep)) {
         // Start RX

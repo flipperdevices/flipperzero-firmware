@@ -136,7 +136,7 @@ void pcsg_hopper_update(POCSAGPagerApp* app) {
 
     if(app->txrx->txrx_state == PCSGTxRxStateRx) {
         pcsg_rx_end(app);
-    };
+    }
     if(app->txrx->txrx_state == PCSGTxRxStateIDLE) {
         subghz_receiver_reset(app->txrx->receiver);
         app->txrx->preset->frequency =
