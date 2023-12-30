@@ -207,8 +207,6 @@ static void airmon_run(AirmonContext* ctx) {
                     }
                 }
             }
-        } else {
-            FURI_LOG_D(TAG, "FuriMessageQueue: event timeout");
         }
 
         power_get_info(ctx->power, &ctx->power_info);
