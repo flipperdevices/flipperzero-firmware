@@ -46,7 +46,7 @@ static const GPIO GPIOList[] = {
     {14, "14 (RX)", &RX_14},
     {15, "15 (C1)", &gpio_ext_pc1},
     {16, "16 (C0)", &gpio_ext_pc0},
-    {17, "17 (1W)", &ibutton_gpio}};
+    {17, "17 (1W)", &gpio_ibutton}};
 
 //Список интерфейсов, которые прикреплены к GPIO (определяется индексом)
 //NULL - порт свободен, указатель на интерфейс - порт занят этим интерфейсом
@@ -79,7 +79,8 @@ const Interface SPI = {
 static const SensorType* sensorTypes[] = {&DHT11,  &DHT12_SW,  &DHT20,      &DHT21,    &DHT22,
                                           &Dallas, &AM2320_SW, &AM2320_I2C, &HTU21x,   &AHT10,
                                           &SHT30,  &GXHT30,    &LM75,       &HDC1080,  &BMP180,
-                                          &BMP280, &BME280,    &BME680,     &MAX31855, &MAX6675};
+                                          &BMP280, &BME280,    &BME680,     &MAX31855, &MAX6675,
+                                          &SCD30,  &SCD40};
 
 const SensorType* unitemp_sensors_getTypeFromInt(uint8_t index) {
     if(index > SENSOR_TYPES_COUNT) return NULL;
@@ -627,11 +628,16 @@ UnitempStatus unitemp_sensor_updateData(Sensor* sensor) {
         UNITEMP_DEBUG("Sensor %s update status %d", sensor->name, sensor->status);
     }
 
-    if(app->settings.temp_unit == UT_TEMP_FAHRENHEIT && sensor->status == UT_SENSORSTATUS_OK) {
-        uintemp_celsiumToFarengate(sensor);
-    }
-
     if(sensor->status == UT_SENSORSTATUS_OK) {
+        if(app->settings.heat_index &&
+           ((sensor->type->datatype & (UT_TEMPERATURE | UT_HUMIDITY)) ==
+            (UT_TEMPERATURE | UT_HUMIDITY))) {
+            unitemp_calculate_heat_index(sensor);
+        }
+        if(app->settings.temp_unit == UT_TEMP_FAHRENHEIT) {
+            uintemp_celsiumToFarengate(sensor);
+        }
+
         sensor->temp += sensor->temp_offset / 10.f;
         if(app->settings.pressure_unit == UT_PRESSURE_MM_HG) {
             unitemp_pascalToMmHg(sensor);

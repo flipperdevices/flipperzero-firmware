@@ -8,8 +8,6 @@
 ![image](https://user-images.githubusercontent.com/10090793/215605424-54b1c08c-e41b-4fb4-b966-dd959507200b.png)
 
 ## Installation
-Download and install from application catalog https://lab.flipper.net/apps/unitemp or mobile application  
-...or install the application manually:
 1) Download [latest version](https://cloud.quenon.ru/index.php/s/h98rT9UnaOL4wxR/download?path=%2F&files=unitemp-latest.fap)
 2) Copy `unitemp-latest.fap` to `SD card/apps/GPIO` with qFlipper or mobile application
 3) Open application on your Flipper: `Applications->GPIO->Temp sensors reader`  
