@@ -29,8 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM1229-0118-0.93.9-93605f3](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-12-29 12:42 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-12-29 12:42 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-12-29 20:50 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-12-29 20:50 EST`
 - Added: [Smack My Dolphin Up! (By siberianbot)](https://github.com/siberianbot/smack-my-dolphin-up)
 - OFW: [About: cn,tw,mx certification information #3318 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3318)
 - Updated: [Programmer Calculator v0.8 (By armixz)](https://github.com/armixz/Flipper-Zero-Programmer-Calculator)
@@ -44,6 +44,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: NFC: [Update mf_classic_dict.nfc #3314 (By ry4000)](https://github.com/flipperdevices/flipperzero-firmware/pull/3314) - For Bandai Namco Passport / Sega Aime Card (Already part of key dictionairy lines 1918-1952.) - ALREADY IN RM
 - Updated: [u-blox GPS v0.3 (By liamhays)](https://github.com/liamhays/ublox)
 - Removed some bloat out of the NFC dictionary (By RogueMaster)
+- UL: [subghz revert previous "fix" and do proper fix (By Willy-JL & xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/b48103196fcab783d236c82b4b6be6cd88d887c2)]
 
 <a name="release">
 

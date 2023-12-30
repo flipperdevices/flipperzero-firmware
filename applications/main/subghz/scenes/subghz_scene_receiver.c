@@ -246,7 +246,6 @@ void subghz_scene_receiver_on_enter(void* context) {
         subghz->idx_menu_chosen = 0;
     }
 
-    subghz_view_receiver_set_lock(subghz->subghz_receiver, subghz_is_locked(subghz));
     subghz_view_receiver_set_mode(subghz->subghz_receiver, SubGhzViewReceiverModeLive);
 
     // Load history to receiver
@@ -310,6 +309,8 @@ void subghz_scene_receiver_on_enter(void* context) {
     }
 
     subghz_scene_receiver_update_statusbar(subghz);
+
+    subghz_view_receiver_set_lock(subghz->subghz_receiver, subghz_is_locked(subghz));
 
     view_dispatcher_switch_to_view(subghz->view_dispatcher, SubGhzViewIdReceiver);
 }
