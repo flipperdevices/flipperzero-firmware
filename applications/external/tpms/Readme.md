@@ -23,4 +23,4 @@ Pressing OK displays temperature and pressure.
 
 Feel free to contribute via PR or report issue
 
-Code based on [weather station app](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/weather_station)
+Code based on [weather station app](https://github.com/flipperdevices/flipperzero-firmware/tree/dev/applications/external/weather_station)
