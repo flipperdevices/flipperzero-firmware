@@ -45,6 +45,9 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [u-blox GPS v0.3 (By liamhays)](https://github.com/liamhays/ublox)
 - Removed some bloat out of the NFC dictionary (By RogueMaster)
 - UL: [subghz revert previous "fix" and do proper fix (By Willy-JL & xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/b48103196fcab783d236c82b4b6be6cd88d887c2)]
+- Updated: [FlipBoard Blinky v2.1 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
+- Updated: [FlipBoard Keyboard v2.0 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
+- Updated: [FlipBoard Signal v3.1 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
 
 <a name="release">
 
