@@ -35,3 +35,5 @@ The following is the application structure with a breakdown of each folder.
 		- Right now there is the StartScreen custom view built for the game. 
 	- minesweeper.c / minesweeper.h
 		- Main Mine Sweeper App .c and .h file
+	- application.fam
+		- [Build system manifest file](https://github.com/flipperdevices/flipperzero-firmware/blob/dev/documentation/AppManifests.md#application-definition) for the application
