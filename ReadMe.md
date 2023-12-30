@@ -50,6 +50,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [FlipBoard Signal v3.1 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
 - Updated: [Counter v1.3 (By Krulknul)](https://github.com/Krulknul/dolphin-counter)
 - Added: [FlipBoard Simon v1.0 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
+- Updated: [WAV Player v1.1 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/tree/zlo/wav-player) [WavPlayer: Skip LIST metadata, better logging (By Willy-JL)]
 
 <a name="release">
 
