@@ -508,20 +508,28 @@ static void action_model_load_fields(ActionModel* model, FlipperFormat* flipper_
 
     if(flipper_format_read_uint32(flipper_format, "ColorUp", &data32, 1)) {
         model->color_up = data32;
+    } else {
+        action_model_load_has_id(model->action_id, flipper_format);
     }
 
     if(flipper_format_read_uint32(flipper_format, "ColorDown", &data32, 1)) {
         model->color_down = data32;
+    } else {
+        action_model_load_has_id(model->action_id, flipper_format);
     }
 
     if(flipper_format_read_float(flipper_format, "Frequency", &dataf, 1)) {
         model->frequency = dataf;
+    } else {
+        action_model_load_has_id(model->action_id, flipper_format);
     }
 
     if(flipper_format_read_string(flipper_format, "Message", message)) {
         if(furi_string_size(message)) {
             action_model_set_message(model, furi_string_get_cstr(message), 0);
         }
+    } else {
+        action_model_load_has_id(model->action_id, flipper_format);
     }
 
     if(flipper_format_read_string(flipper_format, "Message2", message)) {
