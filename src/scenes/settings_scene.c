@@ -92,7 +92,7 @@ void scene_on_enter_settings_scene(void* context) {
     variable_item_set_current_value_index(
         item, (uint8_t)(((struct ToneData_t*)app->additionalData)->volume * 10.0f));
 
-    volumeStr = calloc(8, sizeof(char));
+    volumeStr = calloc(5, sizeof(char));
     snprintf(
         volumeStr,
         5,
