@@ -52,6 +52,9 @@ bool nfc_magic_scene_magic_info_on_event(void* context, SceneManagerEvent event)
                 consumed = true;
             }
         }
+    } else if(event.type == SceneManagerEventTypeBack) {
+        consumed = scene_manager_search_and_switch_to_previous_scene(
+            instance->scene_manager, NfcMagicSceneStart);
     }
     return consumed;
 }

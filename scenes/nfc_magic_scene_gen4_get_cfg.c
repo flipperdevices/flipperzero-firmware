@@ -39,7 +39,7 @@ static void nfc_magic_scene_gen4_get_cfg_setup_view(NfcMagicApp* instance) {
     Popup* popup = instance->popup;
     popup_reset(popup);
     uint32_t state =
-        scene_manager_get_scene_state(instance->scene_manager, NfcMagicSceneGen4GetCFG);
+        scene_manager_get_scene_state(instance->scene_manager, NfcMagicSceneGen4GetCfg);
 
     if(state == NfcMagicSceneGen4GetCFGStateCardSearch) {
         popup_set_icon(instance->popup, 0, 8, &I_NFC_manual_60x50);
@@ -57,7 +57,7 @@ void nfc_magic_scene_gen4_get_cfg_on_enter(void* context) {
     NfcMagicApp* instance = context;
 
     scene_manager_set_scene_state(
-        instance->scene_manager, NfcMagicSceneGen4GetCFG, NfcMagicSceneGen4GetCFGStateCardSearch);
+        instance->scene_manager, NfcMagicSceneGen4GetCfg, NfcMagicSceneGen4GetCFGStateCardSearch);
     nfc_magic_scene_gen4_get_cfg_setup_view(instance);
 
     nfc_magic_app_blink_start(instance);
@@ -76,19 +76,19 @@ bool nfc_magic_scene_gen4_get_cfg_on_event(void* context, SceneManagerEvent even
         if(event.event == NfcMagicCustomEventCardDetected) {
             scene_manager_set_scene_state(
                 instance->scene_manager,
-                NfcMagicSceneGen4GetCFG,
+                NfcMagicSceneGen4GetCfg,
                 NfcMagicSceneGen4GetCFGStateCardFound);
             nfc_magic_scene_gen4_get_cfg_setup_view(instance);
             consumed = true;
         } else if(event.event == NfcMagicCustomEventCardLost) {
             scene_manager_set_scene_state(
                 instance->scene_manager,
-                NfcMagicSceneGen4GetCFG,
+                NfcMagicSceneGen4GetCfg,
                 NfcMagicSceneGen4GetCFGStateCardSearch);
             nfc_magic_scene_gen4_get_cfg_setup_view(instance);
             consumed = true;
         } else if(event.event == NfcMagicCustomEventWorkerSuccess) {
-            scene_manager_next_scene(instance->scene_manager, NfcMagicSceneGen4ShowCFG);
+            scene_manager_next_scene(instance->scene_manager, NfcMagicSceneGen4ShowCfg);
             consumed = true;
         } else if(event.event == NfcMagicCustomEventWorkerFail) {
             scene_manager_next_scene(instance->scene_manager, NfcMagicSceneGen4Fail);
@@ -105,7 +105,7 @@ void nfc_magic_scene_gen4_get_cfg_on_exit(void* context) {
     gen4_poller_stop(instance->gen4_poller);
     gen4_poller_free(instance->gen4_poller);
     scene_manager_set_scene_state(
-        instance->scene_manager, NfcMagicSceneGen4GetCFG, NfcMagicSceneGen4GetCFGStateCardSearch);
+        instance->scene_manager, NfcMagicSceneGen4GetCfg, NfcMagicSceneGen4GetCFGStateCardSearch);
     // Clear view
     popup_reset(instance->popup);
 
