@@ -24,9 +24,6 @@ static void subghz_remote_make_app_folder(SubGhzRemoteApp* app) {
 
     Storage* storage = furi_record_open(RECORD_STORAGE);
 
-    // Migrate old users data
-    storage_common_migrate(storage, EXT_PATH("unirf"), SUBREM_APP_FOLDER);
-
     if(!storage_simply_mkdir(storage, SUBREM_APP_FOLDER)) {
         // FURI_LOG_E(TAG, "Could not create folder %s", SUBREM_APP_FOLDER);
         dialog_message_show_storage_error(app->dialogs, "Cannot create\napp folder");
@@ -175,9 +172,7 @@ int32_t subghz_remote_app(void* arg) {
     subghz_remote_make_app_folder(subghz_remote_app);
 
     bool map_loaded = false;
-#ifdef FW_ORIGIN_Official
-    const bool fw_ofw = strcmp(version_get_firmware_origin(version_get()), "Official") == 0;
-#endif
+
     if((arg != NULL) && (strlen(arg) != 0)) {
         furi_string_set(subghz_remote_app->file_path, (const char*)arg);
         SubRemLoadMapState load_state = subrem_map_file_load(
@@ -196,19 +191,8 @@ int32_t subghz_remote_app(void* arg) {
     } else {
         furi_string_set(subghz_remote_app->file_path, SUBREM_APP_FOLDER);
         scene_manager_next_scene(subghz_remote_app->scene_manager, SubRemSceneStart);
-#ifdef FW_ORIGIN_Official
-        if(fw_ofw) {
-            scene_manager_next_scene(subghz_remote_app->scene_manager, SubRemSceneOpenMapFile);
-        }
-    }
-
-    if(!fw_ofw) {
-        scene_manager_next_scene(subghz_remote_app->scene_manager, SubRemSceneFwWarning);
-    }
-#else
         scene_manager_next_scene(subghz_remote_app->scene_manager, SubRemSceneOpenMapFile);
     }
-#endif
 
     view_dispatcher_run(subghz_remote_app->view_dispatcher);
 

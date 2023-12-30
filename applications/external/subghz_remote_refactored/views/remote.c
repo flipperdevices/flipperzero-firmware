@@ -216,21 +216,32 @@ bool subrem_view_remote_input(InputEvent* event, void* context) {
     furi_assert(context);
     SubRemViewRemote* subrem_view_remote = context;
 
-    if(event->key == InputKeyBack && event->type == InputTypeLong) {
-        subrem_view_remote->callback(SubRemCustomEventViewRemoteBack, subrem_view_remote->context);
-        return true;
-    } else if(event->key == InputKeyBack && event->type == InputTypeShort) {
+    /* Want to stop sending if we are sending, exit the app if we are not! */
+    if(event->key == InputKeyBack && event->type == InputTypePress) {
+        bool is_stopping = false;
+
         with_view_model(
             subrem_view_remote->view,
             SubRemViewRemoteModel * model,
-            { model->pressed_btn = 0; },
+            {
+                if(model->state == SubRemViewRemoteStateSending) {
+                    is_stopping = true;
+                    model->pressed_btn = 0;
+                }
+            },
             true);
-        subrem_view_remote->callback(
-            SubRemCustomEventViewRemoteForcedStop, subrem_view_remote->context);
-        return true;
-    } else if(event->key == InputKeyBack) {
+
+        //Cant send this inside that with_model, locks the model and the app will hang and not unload!
+        if(is_stopping)
+            subrem_view_remote->callback(
+                SubRemCustomEventViewRemoteForcedStop, subrem_view_remote->context);
+        else
+            subrem_view_remote->callback(
+                SubRemCustomEventViewRemoteBack, subrem_view_remote->context);
+
         return true;
     }
+
     // BACK button processing end
 
     if(event->key == InputKeyUp && event->type == InputTypePress) {

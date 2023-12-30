@@ -149,9 +149,7 @@ SubRemLoadSubState subrem_sub_preset_load(
         if(protocol->flag & SubGhzProtocolFlag_Send) {
             if((protocol->type == SubGhzProtocolTypeStatic) ||
                (protocol->type == SubGhzProtocolTypeDynamic) ||
-#ifndef FW_ORIGIN_Official
                (protocol->type == SubGhzProtocolTypeBinRAW) ||
-#endif
                (protocol->type == SubGhzProtocolTypeRAW)) {
                 sub_preset->type = protocol->type;
             } else {

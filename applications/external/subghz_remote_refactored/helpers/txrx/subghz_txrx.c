@@ -4,9 +4,7 @@
 #include <applications/drivers/subghz/cc1101_ext/cc1101_ext_interconnect.h>
 #include <lib/subghz/devices/cc1101_int/cc1101_int_interconnect.h>
 
-#ifndef FW_ORIGIN_Official
 #include <lib/subghz/blocks/custom_btn.h>
-#endif
 
 #define TAG "SubGhz"
 
@@ -28,7 +26,7 @@ static void subghz_txrx_radio_device_power_off(SubGhzTxRx* instance) {
 SubGhzTxRx* subghz_txrx_alloc() {
     SubGhzTxRx* instance = malloc(sizeof(SubGhzTxRx));
     instance->setting = subghz_setting_alloc();
-    subghz_setting_load(instance->setting, EXT_PATH("subghz/assets/setting_user"));
+    subghz_setting_load(instance->setting, EXT_PATH("subghz/assets/setting_user.txt"));
 
     instance->preset = malloc(sizeof(SubGhzRadioPreset));
     instance->preset->name = furi_string_alloc();
@@ -659,14 +657,12 @@ bool subghz_txrx_get_debug_pin_state(SubGhzTxRx* instance) {
     return instance->debug_pin_state;
 }
 
-#ifndef FW_ORIGIN_Official
 void subghz_txrx_reset_dynamic_and_custom_btns(SubGhzTxRx* instance) {
     furi_assert(instance);
     subghz_environment_reset_keeloq(instance->environment);
 
     subghz_custom_btns_reset();
 }
-#endif
 
 SubGhzReceiver* subghz_txrx_get_receiver(SubGhzTxRx* instance) {
     furi_assert(instance);
