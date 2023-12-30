@@ -27,10 +27,10 @@ This software is for experimental purposes only and is not meant for any illegal
 
 <a name="latest">
 
-## Latest Updates - [PATREON: Latest Release RM1229-0118-0.93.9-93605f3](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
+## Latest Updates - [PATREON: Latest Release RM1230-0114-0.93.9-a0e0dd4](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-12-29 20:50 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-12-29 20:50 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-12-30 01:14 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-12-30 01:14 EST`
 - Added: [Smack My Dolphin Up! (By siberianbot)](https://github.com/siberianbot/smack-my-dolphin-up)
 - OFW: [About: cn,tw,mx certification information #3318 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3318)
 - Updated: [Programmer Calculator v0.8 (By armixz)](https://github.com/armixz/Flipper-Zero-Programmer-Calculator)
@@ -48,6 +48,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [FlipBoard Blinky v2.1 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
 - Updated: [FlipBoard Keyboard v2.0 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
 - Updated: [FlipBoard Signal v3.1 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
+- Updated: [Counter v1.3 (By Krulknul)](https://github.com/Krulknul/dolphin-counter)
 
 ## IN THIS BRANCH:
 
@@ -439,7 +440,7 @@ $ ./fbt dolphin_ext
 - [Control 7-segment display with Flipper Zero (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/gpio)
 - [Cookie Clicker v1.0 (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/hid/hid_cookie)
 - [Count Down Timer v1.2 (By 0w0mewo)](https://github.com/0w0mewo/fpz_cntdown_timer)
-- [Counter v1.2 (By Krulknul)](https://github.com/Krulknul/dolphin-counter) [Improved (By plasticuproject)](https://github.com/plasticuproject/dolphin-better-counter)
+- [Counter v1.3 (By Krulknul)](https://github.com/Krulknul/dolphin-counter)
 - [Cross Remote v1.0 (By leedave)](https://github.com/leedave/flipper-zero-cross-remote)
 - [Dab Timer v1.7 (By RogueMaster)](https://github.com/RogueMaster/flipperzero-dabtimer)
 - [DAP Link v1.1 (By DrZlo13)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/1897)
