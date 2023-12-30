@@ -13,5 +13,5 @@ App(
     fap_author="Gerald McAlister",
     fap_weburl="https://github.com/GEMISIS/tone_gen",
     fap_icon_assets="images",  # Image assets to compile for this application
-    sources=["src/*.c", "src/scenes/*.c", "src/utils/*.c"],
+    sources=["src/*.c", "src/scenes/*.c", "src/system/*.c", "src/utils/*.c"],
 )

@@ -5,7 +5,6 @@
 #define TAG "tone-gen"
 
 #include <furi.h>
-#include <music_worker/music_worker.h>
 
 // ids for all scenes used by the app
 typedef enum {
@@ -31,6 +30,7 @@ struct ToneData_t {
     int animationOffset;
     ToneWaveType waveType;
     uint16_t frequency;
+    float volume;
 };
 
 #endif

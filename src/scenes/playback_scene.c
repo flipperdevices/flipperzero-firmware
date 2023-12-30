@@ -1,6 +1,9 @@
+#include <furi_hal.h>
+
 #include "playback_scene.h"
 #include "../app_context.h"
 #include "../tone_gen.h"
+#include "../system/audio_helper.h"
 
 #define SINE_WAVE(x, toneModelData) \
     (sin((x + toneDataModel->animationOffset) * 50) * 20 + (64 / 2))
@@ -56,10 +59,16 @@ void scene_on_enter_playback_scene(void* context) {
     struct ToneData_t* toneDataModel = (struct ToneData_t*)view_get_model(playbackView->viewData);
     toneDataModel->waveType = ((struct ToneData_t*)app->additionalData)->waveType;
     toneDataModel->frequency = ((struct ToneData_t*)app->additionalData)->frequency;
+    toneDataModel->volume = ((struct ToneData_t*)app->additionalData)->volume;
 
     // Set the currently active view
     FURI_LOG_I(TAG, "setting active view");
     view_dispatcher_switch_to_view(app->view_dispatcher, ToneGenAppView_PlaybackView);
+
+    if(initializeSpeaker()) {
+        FURI_LOG_I(TAG, "Starting sound");
+        startSound(toneDataModel);
+    }
 }
 
 // Not actively used in this instance.
@@ -74,4 +83,6 @@ bool scene_on_event_playback_scene(void* context, SceneManagerEvent event) {
 void scene_on_exit_playback_scene(void* context) {
     FURI_LOG_I(TAG, "scene_on_exit_playback_scene");
     UNUSED(context);
+    stopSound();
+    deinitializeSpeaker();
 }

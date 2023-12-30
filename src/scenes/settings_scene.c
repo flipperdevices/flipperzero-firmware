@@ -38,6 +38,15 @@ static void frequency_option_change(VariableItem* item) {
     variable_item_set_current_value_text(item, frequencyStr);
 }
 
+char* volumeStr;
+static void volume_option_change(VariableItem* item) {
+    struct AppContext_t* app = variable_item_get_context(item);
+    uint8_t index = variable_item_get_current_value_index(item);
+    ((struct ToneData_t*)app->additionalData)->volume = ((float)(index)) / 10.0f;
+    snprintf(volumeStr, 5, "%d", (index * 10));
+    variable_item_set_current_value_text(item, volumeStr);
+}
+
 /** resets the menu, gives it content, callbacks and selection enums */
 void scene_on_enter_settings_scene(void* context) {
     FURI_LOG_I(TAG, "scene_on_enter_settings_scene");
@@ -51,6 +60,7 @@ void scene_on_enter_settings_scene(void* context) {
     variable_item_list_reset(variableItemListView->viewData);
 
     FURI_LOG_D(TAG, "Adding options for settings");
+    // Wave type setting
     VariableItem* item = variable_item_list_add(
         variableItemListView->viewData,
         "Wave Type",
@@ -62,6 +72,7 @@ void scene_on_enter_settings_scene(void* context) {
     variable_item_set_current_value_text(
         item, wave_option_names[((struct ToneData_t*)app->additionalData)->waveType]);
 
+    // Frequency setting
     item = variable_item_list_add(
         variableItemListView->viewData,
         "Frequency",
@@ -74,6 +85,20 @@ void scene_on_enter_settings_scene(void* context) {
     frequencyStr = calloc(8, sizeof(char));
     snprintf(frequencyStr, 8, "%dhz", ((struct ToneData_t*)app->additionalData)->frequency);
     variable_item_set_current_value_text(item, frequencyStr);
+
+    // Volume setting
+    item = variable_item_list_add(
+        variableItemListView->viewData, "Volume", 11, volume_option_change, app);
+    variable_item_set_current_value_index(
+        item, (uint8_t)(((struct ToneData_t*)app->additionalData)->volume * 10.0f));
+
+    volumeStr = calloc(8, sizeof(char));
+    snprintf(
+        volumeStr,
+        5,
+        "%d",
+        ((uint8_t)(((struct ToneData_t*)app->additionalData)->volume * 100.0f)));
+    variable_item_set_current_value_text(item, volumeStr);
 
     view_dispatcher_switch_to_view(app->view_dispatcher, ToneGenAppView_VariableItemList);
 }
@@ -90,4 +115,5 @@ void scene_on_exit_settings_scene(void* context) {
     FURI_LOG_I(TAG, "scene_on_exit_settings_scene");
     UNUSED(context);
     free(frequencyStr);
+    free(volumeStr);
 }
