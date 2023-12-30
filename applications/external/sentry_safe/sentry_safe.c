@@ -150,8 +150,8 @@ int32_t sentry_safe_app(void* p) {
             }
         }
 
-        view_port_update(view_port);
         furi_mutex_release(sentry_state->mutex);
+        view_port_update(view_port);
     }
 
     // Reset GPIO pins to default state
