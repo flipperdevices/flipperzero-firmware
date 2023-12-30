@@ -1,0 +1,240 @@
+name: "Build with Firmware"
+run-name: "Build ${{ inputs.DEPLOY_TARGET }} triggered by ${{ github.EVENT_NAME }} (@${{ github.ACTOR }})"
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Enter version to build or left empty for the NEXT version"
+        required: false
+        type: string
+#  push:
+#    paths:
+#      - .github/workflows/build-with-firmware.yml
+
+permissions:
+  contents: write
+  packages: write
+
+#concurrency:
+#  group: firmware-build-${{ vars.FIRMWARE_VERSION }}-${{ vars.RELEASE_VERSION }}
+#  cancel-in-progress: false
+
+jobs:
+  build-and-upload:
+    runs-on: ubuntu-latest
+    env:
+      REPO_SELF: ${{ vars.REPO_SELF }}
+      APP_PATH: "applications_user/subbrute"
+      RELATIVE_PATH: "applications/external/subbrute"
+      PREV_TAG: ""
+      APP_NAME: ""
+      ZIP_NAME: ""
+      ZIP_TAG: ""
+      TGZ_NAME: ""
+      TGZ_TAG: ""
+      SHA: ""
+      FW_VERSION: ""
+      RELEASE_VERSION: ""
+    strategy:
+      fail-fast: false
+      matrix:
+        firmware: [unlshd, official]
+        include:
+          - firmware: unlshd
+            url: ${{ vars.REPO_UNLEASHED }}
+            version: ${{ vars.FIRMWARE_VERSION }}
+            src-included: 0
+          - firmware: official
+            url: ${{ vars.REPO_OFFICIAL }}
+            version: official
+            src-included: 0
+    steps:
+      - name: Copy Firmware Files
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ matrix.url }}
+          clean: true
+          submodules: true
+          ref: dev
+
+      - name: Copy Repo Files
+        if: ${{ matrix.src-included == 0 }}
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ vars.REPO_SELF }}
+          clean: true
+          submodules: true
+          path: ${{ env.APP_PATH }}
+
+      #    - name: Restore FBT
+      #      id: cache-restore
+      #      if: ${{ success() }}
+      #      uses: actions/cache/restore@v3
+      #      with:
+      #        path: |
+      #          build/**
+      #          debug/**
+      #        # An explicit key for restoring and saving the cache
+      #        key: 'fbt=${{ env.FIRMWARE_VERSION }}'
+      #
+      - name: Remove other apps
+        shell: pwsh
+        # rm to remove problem FAP which includes non-existent files
+        run: |
+          Remove-Item -Force -Recurse ./applications/debug -ErrorAction SilentlyContinue
+          Remove-Item -Force -Recurse ./applications/examples -ErrorAction SilentlyContinue
+          Remove-Item -Force -Recurse ${{ env.RELATIVE_PATH }} -ErrorAction SilentlyContinue
+
+      - name: Get SHA of our application and release version
+        shell: pwsh
+        env:
+          GITHUB_TOKEN: ${{ secrets.FLIPPER_TOKEN }}
+          INPUT_VERSION: ${{ inputs.version }}
+        run: |
+          Write-Output "::notice title=${{ matrix.firmware }} Input Version Number::v${{ inputs.version }}"
+          $fwInfo = ((gh release view --json tagName,url -R ${{ matrix.url }}) | ConvertFrom-Json)
+          cd '${{ env.APP_PATH }}'
+          $sha = (git rev-parse --verify HEAD)
+          
+          $releaseVersion = ''
+          $latestTag = ((gh release view --json tagName,url -R ${{ vars.REPO_SELF }}) | ConvertFrom-Json ).tagName
+
+          if ( [string]::IsNullOrWhitespace($env:INPUT_VERSION) ) {            
+            Write-Output "::notice title=${{ matrix.firmware }} Latest tag::$latestTag"
+            
+            $lastIndex = $latestTag.LastIndexOf('.')
+            
+            $minorValue = $latestTag.Substring($latestTag.LastIndexOf('.') + 1)
+            $minorValue = [Convert]::ToInt32($minorValue) + 1
+            $newTag = $latestTag.Substring(0, $lastIndex)
+            
+            $releaseVersion = ('{0}.{1}' -f $newTag, $minorValue)
+          } else {
+            $releaseVersion = "$env:INPUT_VERSION"
+          }
+          
+          if ( $releaseVersion.StartsWith('v') ) {
+            $releaseVersion = $releaseVersion.Substring(1)
+          }
+          
+          Write-Output "::notice title=${{ matrix.firmware }} PREV_TAG::$latestTag"
+          Write-Output "::notice title=${{ matrix.firmware }} RELEASE_VERSION::$releaseVersion"
+          Write-Output "::notice title=${{ matrix.firmware }} SHA::$sha"
+          Write-Output ('::notice title=${{ matrix.firmware }} FW_VERSION::{0}' -f $fwInfo.tagName)
+          
+          Write-Output ('RELEASE_VERSION={0}' -f $releaseVersion) >> $env:GITHUB_ENV
+          Write-Output ('SHA={0}' -f $sha) >> $env:GITHUB_ENV
+          Write-Output ('FW_VERSION={0}' -f $fwInfo.tagName) >> $env:GITHUB_ENV
+          Write-Output ('PREV_TAG={0}' -f $latestTag) >> $env:GITHUB_ENV
+
+      - name: Build Firmware
+        shell: bash
+        if: ${{ success() }}
+        env:
+          FBT_NO_SYNC: 0
+          DIST_SUFFIX: ${{ matrix.version }}
+          WORKFLOW_BRANCH_OR_TAG: release-cfw
+        run: |
+          ./fbt COMPACT=1 DEBUG=0 FBT_NO_SYNC=0
+
+      - name: Build FAPs
+        shell: bash
+        if: ${{ success() }}
+        env:
+          FBT_NO_SYNC: 0
+          DIST_SUFFIX: ${{ matrix.version }}
+          WORKFLOW_BRANCH_OR_TAG: release-cfw
+          # rm to remove problem FAP which includes non-existent files
+        run: |
+          ./fbt COMPACT=1 DEBUG=0 FBT_NO_SYNC=0 fap_dist
+
+      #    - name: Save FBT
+      #      id: cache-save
+      #      if: ${{ success() }}
+      #      uses: actions/cache/save@v3
+      #      with:
+      #        path: |
+      #          build/**
+      #          debug/**
+      #        # An explicit key for restoring and saving the cache
+      #        key: ${{ steps.cache-restore.outputs.cache-primary-key }}
+
+      - name: Create assets
+        if: ${{ success() }}
+        shell: pwsh
+        env:
+          APP_NAME: "subghz_bruteforcer_${{ env.RELEASE_VERSION }}"
+        run: |
+          function Format-Bytes {
+            param(
+                  [int]$number
+              )
+              $sizes = 'KB', 'MB', 'GB', 'TB', 'PB'
+              for ($x = 0; $x -lt $sizes.count; $x++) {
+                  if ($number -lt [int64]"1$($sizes[$x])") {
+                      if ($x -eq 0) {
+                          return "$number B"
+                      }
+                      else {
+                          $formattedNumber = $number / [int64]"1$($sizes[$x-1])"
+                          $formattedNumber = "{0:N2}" -f $formattedNumber
+                          return "$formattedNumber $($sizes[$x-1])"
+                      }
+                  }
+              }
+          }
+          $appName = $env:APP_NAME
+          if ( '${{ matrix.firmware }}' -eq 'unlshd' ) {
+            $appName = ('{0}_${{ env.FW_VERSION }}' -f $appName)
+          } else {
+            $appName = ('{0}_${{ matrix.firmware}}-${{ env.FW_VERSION }}' -f $appName)
+          }
+          $zipName = ('{0}.zip' -f $appName)
+          $tgzName = ('{0}.tgz' -f $appName)
+          $fapName = 'subghz_bruteforcer.fap'
+          $dstFap = "./$fapName"
+          $appDir = "dist/f7-C/apps/Sub-GHz"
+
+          if (!(Test-Path -Path "$appDir/$fapName" -PathType Leaf)) {
+              Write-Error '::error title=Files not found::Cannot find files in location'
+              exit 1
+          }
+
+          $size = (Get-Item -Path "$appDir/$fapName" | Get-ItemPropertyValue -Name Length)
+          Write-Output ('Filesize: {0}' -f (Format-Bytes $size))
+          Copy-Item -Force -Verbose -Path "$appDir/$fapName" -Destination $dstFap
+
+          zip -r -qq $zipName $dstFap
+          tar zcf $tgzName $dstFap
+
+          if ( !(Test-Path -Path $zipName -PathType Leaf) -or !(Test-Path -Path $tgzName -PathType Leaf) ) {
+              Write-Error '::error title=Files not found::Cannot find files in location'
+              exit 1
+          }
+
+          $zipSize = Format-Bytes (Get-Item -Path $zipName).Length
+          $tgzSize = Format-Bytes (Get-Item -Path $tgzName ).Length
+
+          Write-Output ('ZIP_NAME={0}' -f $zipName) >> $env:GITHUB_ENV
+          Write-Output ('TGZ_NAME={0}' -f $tgzName ) >> $env:GITHUB_ENV
+          Write-Output ('ZIP_TAG={0} ({1})' -f $zipName, $zipSize) >> $env:GITHUB_ENV
+          Write-Output ('TGZ_TAG={0} ({1})' -f $tgzName , $tgzSize) >> $env:GITHUB_ENV
+
+      - name: Upload assets
+        if: ${{ success() && env.ZIP_NAME != '' }}
+        shell: pwsh
+        env:
+          GITHUB_TOKEN: ${{ secrets.FLIPPER_TOKEN }}
+        run: |
+          $mime = "Accept: application/vnd.github+json"
+          $api = "X-GitHub-Api-Version: 2022-11-28"
+          $json = (gh api -H $mime -H $api /repos/${{ github.REPOSITORY }}/releases) | ConvertFrom-Json
+          $tagExists = ($json.GetEnumerator() | Where-Object { $_.tag_name -eq 'v${{ env.RELEASE_VERSION }}' }) -ne $null
+          if ( $tagExists -eq $false ) {
+            gh api --method POST -H $mime -H $api /repos/${{ github.REPOSITORY }}/releases -f tag_name='v${{ env.RELEASE_VERSION }}' -f target_commitish='${{ env.SHA }}' -f name='v${{ env.RELEASE_VERSION }}' -F draft=false -F prerelease=false -F generate_release_notes=true
+          }          
+          gh release upload 'v${{ env.RELEASE_VERSION }}' '${{ env.ZIP_NAME }}#${{ env.ZIP_TAG }}' '${{ env.TGZ_NAME }}#${{ env.TGZ_TAG }}' --clobber -R ${{ env.REPO_SELF }}
+          gh release edit 'v${{ env.RELEASE_VERSION }}' --draft=false -R ${{ env.REPO_SELF }}
+
+#EOF
