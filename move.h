@@ -28,6 +28,7 @@ inline uint8_t coord_y(uint8_t coord) {
 void map_movability(PlayGround* pg, PlayGround* mv);
 
 uint8_t find_movable(PlayGround* mv);
+uint8_t find_movable_rev(PlayGround* mv);
 
 void find_movable_left(PlayGround* mv, uint8_t* current_movable);
 void find_movable_right(PlayGround* mv, uint8_t* current_movable);

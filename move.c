@@ -27,11 +27,25 @@ uint8_t find_movable(PlayGround* mv) {
     return MOVABLE_NOT_FOUND;
 }
 
+uint8_t find_movable_rev(PlayGround* mv) {
+    uint8_t x, y;
+    for(y = SIZE_Y - 1; y > 0; y--) {
+        for(x = SIZE_X - 1; x > 0; x--) {
+            if((*mv)[y][x] != MOVABLE_NOT) return coord_from(x, y);
+        }
+    }
+
+    return MOVABLE_NOT_FOUND;
+}
+
 void find_movable_left(PlayGround* mv, uint8_t* current_movable) {
-    uint8_t sx = (*current_movable != MOVABLE_NOT_FOUND) ? coord_x(*current_movable) : SIZE_X / 2;
-    uint8_t sy = (*current_movable != MOVABLE_NOT_FOUND) ? coord_y(*current_movable) : 0;
+    const uint8_t sx = (*current_movable != MOVABLE_NOT_FOUND) ? coord_x(*current_movable) :
+                                                                 SIZE_X / 2;
+    const uint8_t sy = (*current_movable != MOVABLE_NOT_FOUND) ? coord_y(*current_movable) : 0;
+    uint8_t py = sy;
     uint8_t px = sx;
 
+    // to the left, same line
     while(px > 0) {
         px--;
         if((*mv)[sy][px] != MOVABLE_NOT) {
@@ -40,35 +54,64 @@ void find_movable_left(PlayGround* mv, uint8_t* current_movable) {
         }
     }
 
-    while(sy > 0) {
-        sy--;
-        px = sx;
+    // down, to the left
+    while(py < SIZE_Y - 1) {
+        py++;
+        px = sx - 1;
 
         while(px > 0) {
-            if((*mv)[sy][px] != MOVABLE_NOT) {
-                *current_movable = coord_from(px, sy);
+            if((*mv)[py][px] != MOVABLE_NOT) {
+                *current_movable = coord_from(px, py);
                 return;
             }
             px--;
         }
+    }
 
+    // back climbing up, on left
+    py = sy;
+    while(py > 0) {
+        py--;
+        px = sx;
+
+        while(px > 0) {
+            if((*mv)[py][px] != MOVABLE_NOT) {
+                *current_movable = coord_from(px, py);
+                return;
+            }
+            px--;
+        }
+    }
+
+    // back climbing up, on right
+    py = sy;
+    while(py > 0) {
+        py--;
         px = sx + 1;
 
         while(px < SIZE_X - 1) {
-            if((*mv)[sy][px] != MOVABLE_NOT) {
-                *current_movable = coord_from(px, sy);
+            if((*mv)[py][px] != MOVABLE_NOT) {
+                *current_movable = coord_from(px, py);
                 return;
             }
             px++;
         }
     }
+
+    uint8_t last = find_movable_rev(mv);
+    if(last != MOVABLE_NOT_FOUND) {
+        *current_movable = last;
+    }
 }
 
 void find_movable_right(PlayGround* mv, uint8_t* current_movable) {
-    uint8_t sx = (*current_movable != MOVABLE_NOT_FOUND) ? coord_x(*current_movable) : SIZE_X / 2;
-    uint8_t sy = (*current_movable != MOVABLE_NOT_FOUND) ? coord_y(*current_movable) : 0;
+    const uint8_t sx = (*current_movable != MOVABLE_NOT_FOUND) ? coord_x(*current_movable) :
+                                                                 SIZE_X / 2;
+    const uint8_t sy = (*current_movable != MOVABLE_NOT_FOUND) ? coord_y(*current_movable) : 0;
     uint8_t px = sx;
+    uint8_t py = sy;
 
+    // search right
     while(px < SIZE_X - 1) {
         px++;
         if((*mv)[sy][px] != MOVABLE_NOT) {
@@ -77,27 +120,36 @@ void find_movable_right(PlayGround* mv, uint8_t* current_movable) {
         }
     }
 
-    while(sy < SIZE_Y - 1) {
-        sy++;
+    while(py < SIZE_Y - 1) {
+        py++;
         px = sx;
 
         while(px < SIZE_X - 1) {
-            if((*mv)[sy][px] != MOVABLE_NOT) {
-                *current_movable = coord_from(px, sy);
+            if((*mv)[py][px] != MOVABLE_NOT) {
+                *current_movable = coord_from(px, py);
                 return;
             }
             px++;
         }
+    }
 
+    py = sy;
+    while(py < SIZE_Y - 1) {
+        py++;
         px = sx - 1;
 
         while(px > 0) {
-            if((*mv)[sy][px] != MOVABLE_NOT) {
-                *current_movable = coord_from(px, sy);
+            if((*mv)[py][px] != MOVABLE_NOT) {
+                *current_movable = coord_from(px, py);
                 return;
             }
             px--;
         }
+    }
+
+    uint8_t first = find_movable(mv);
+    if(first != MOVABLE_NOT_FOUND) {
+        *current_movable = first;
     }
 }
 
