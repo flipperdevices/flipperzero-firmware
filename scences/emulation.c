@@ -11,7 +11,6 @@ void nfc_playlist_emulation_scene_on_enter(void* context) {
 
 bool nfc_playlist_emulation_scene_on_event(void* context, SceneManagerEvent event) {
     UNUSED(context);
-    FURI_LOG_RAW_I("nfc_playlist_emulation_scene_on_event: %ld", event.event);
     switch (event.event) {
         case 0:
             if (EmulationState == NfcPlaylistEmulationState_Emulating) {
@@ -152,11 +151,11 @@ int32_t nfc_playlist_emulation_task(void* context) {
                 nfc_playlist_worker_stop(nfc_playlist->nfc_playlist_worker);
             }
         }
-        EmulationState = NfcPlaylistEmulationState_Stopped;
         popup_reset(nfc_playlist->popup);
-        popup_set_header(nfc_playlist->popup, "Emulation finished", 64, 10, AlignCenter, AlignTop);
+        popup_set_header(nfc_playlist->popup, EmulationState == NfcPlaylistEmulationState_Canceled ? "Emulation stopped" : "Emulation finished", 64, 10, AlignCenter, AlignTop);
         popup_set_text(nfc_playlist->popup, "Press back", 64, 50, AlignCenter, AlignTop);
         stop_blink(nfc_playlist);
+        EmulationState = NfcPlaylistEmulationState_Stopped;
     } else {
         popup_set_header(nfc_playlist->popup, "Error:", 64, 10, AlignCenter, AlignTop);
         popup_set_text(nfc_playlist->popup, "Failed to open file\n/ext/apps_data/nfc_playlist/playlist.txt", 64, 25, AlignCenter, AlignTop);
