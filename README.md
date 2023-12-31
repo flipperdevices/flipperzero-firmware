@@ -1,6 +1,8 @@
 # Minesweeper Implementation for the Flipper Zero.
 Hello!
 
+![Mine Sweeper Start Animation](https://github.com/squee72564/F0_Minesweeper_Fap/blob/main/images/github_images/StartScreenAnimationGif.gif)
+
 This is my first flipper zero application and this repo will be a learning process in general.
 
 If you have any tips for structuring the application and best practices for managing the views/scenes
