@@ -7,11 +7,6 @@ typedef enum {
     MineSweeperSceneStartScreenContinueEvent,
 } MineSweeperSceneStartScreenEvent;
 
-//void minesweeper_scene_start_screen_timer_callback(void* context) {
-//    furi_assert(context);
-//    UNUSED(context);
-//}
-
 bool minesweeper_scene_start_screen_input_callback(InputEvent* event, void* context) {
     furi_assert(event);
     furi_assert(context);
@@ -19,11 +14,15 @@ bool minesweeper_scene_start_screen_input_callback(InputEvent* event, void* cont
     App* app = context;
     bool consumed = false;
 
-    // right now we continue if back is not pressed
+    // Right now we continue if back is not pressed
     if (event->key == InputKeyBack) {
-        consumed = scene_manager_handle_custom_event(app->scene_manager, MineSweeperSceneStartScreenExitEvent); 
+        consumed = scene_manager_handle_custom_event(
+                        app->scene_manager,
+                        MineSweeperSceneStartScreenExitEvent); 
     } else {
-        consumed = scene_manager_handle_custom_event(app->scene_manager, MineSweeperSceneStartScreenContinueEvent); 
+        consumed = scene_manager_handle_custom_event(
+                        app->scene_manager,
+                        MineSweeperSceneStartScreenContinueEvent); 
     }
 
     return consumed;
@@ -46,15 +45,16 @@ void minesweeper_scene_start_screen_on_enter(void* context) {
 
     // Set callbacks
     //start_screen_set_timer_callback(app->start_screen, minesweeper_scene_start_screen_timer_callback);
+    
     start_screen_set_input_callback(
             app->start_screen,
             minesweeper_scene_start_screen_input_callback);
+
     start_screen_set_secondary_draw_callback(
             app->start_screen,
             minesweeper_scene_start_screen_secondary_draw_callback);
     
-    const Icon* start_screen_icon = &A_StartScreen_128x64;
-    start_screen_set_icon_animation(app->start_screen, 0, 0, start_screen_icon);
+    start_screen_set_icon_animation(app->start_screen, 0, 0, &A_StartScreen_128x64);
 
     view_dispatcher_switch_to_view(app->view_dispatcher, MineSweeperStartScreenView);
 }
@@ -67,11 +67,10 @@ bool minesweeper_scene_start_screen_on_event(void* context, SceneManagerEvent ev
 
     if (event.type == SceneManagerEventTypeCustom) {
         if (event.event == MineSweeperSceneStartScreenContinueEvent) {
-            scene_manager_set_scene_state(app->scene_manager, MineSweeperSceneStartScreen, MineSweeperSceneMenu);
             scene_manager_next_scene(app->scene_manager, MineSweeperSceneMenu); 
             consumed = true;
         } else if (event.event == MineSweeperSceneStartScreenExitEvent) {
-            //exit app
+            // Exit app
             scene_manager_stop(app->scene_manager);
             view_dispatcher_stop(app->view_dispatcher);
             consumed = true;
