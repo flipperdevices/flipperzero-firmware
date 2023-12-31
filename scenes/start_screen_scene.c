@@ -38,6 +38,8 @@ void minesweeper_scene_start_screen_on_enter(void* context) {
     
     furi_assert(app->start_screen);
 
+    start_screen_set_context(app->start_screen, app);
+
     // Set callbacks
     //start_screen_set_timer_callback(app->start_screen, minesweeper_scene_start_screen_timer_callback);
     start_screen_set_input_callback(
@@ -47,9 +49,9 @@ void minesweeper_scene_start_screen_on_enter(void* context) {
             app->start_screen,
             minesweeper_scene_start_screen_secondary_draw_callback);
     
-    start_screen_set_context(app->start_screen, app);
 
-    start_screen_set_icon_animation(app->start_screen, 0, 0);
+    // Right now Icon is hardcoded, need to implmement generic version;
+    //start_screen_set_icon_animation(app->start_screen, 0, 0);
 
     view_dispatcher_switch_to_view(app->view_dispatcher, MineSweeperStartScreenView);
 }
@@ -60,12 +62,13 @@ bool minesweeper_scene_start_screen_on_event(void* context, SceneManagerEvent ev
     App* app = context;
     bool consumed = false;
 
-    if (event.type == SceneManagerEventTypeBack) {
-        //exit app
-        scene_manager_stop(app->scene_manager);
-        view_dispatcher_stop(app->view_dispatcher);
-        consumed = true;
-    } else if (event.type == SceneManagerEventTypeCustom && event.event == MineSweeperSceneStartScreenContinueEvent) {
+    //if (event.type == SceneManagerEventTypeBack) {
+    //    //exit app
+    //    scene_manager_stop(app->scene_manager);
+    //    view_dispatcher_stop(app->view_dispatcher);
+    //    consumed = true;
+    //}
+    if (event.type == SceneManagerEventTypeCustom && event.event == MineSweeperSceneStartScreenContinueEvent) {
         scene_manager_next_scene(app->scene_manager, MineSweeperSceneMenu); 
         consumed = true;
     }
