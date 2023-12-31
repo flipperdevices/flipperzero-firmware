@@ -46,6 +46,12 @@ bool minesweeper_scene_menu_on_event(void* context, SceneManagerEvent event) {
             }
 
         } else if (event.event == DialogExResultRight) {
+
+            if (!scene_manager_previous_scene(app->scene_manager)) {
+                scene_manager_stop(app->scene_manager);
+                view_dispatcher_stop(app->view_dispatcher);
+            }
+
            scene_manager_search_and_switch_to_another_scene(app->scene_manager, MineSweeperSceneStartScreen); 
         }
         consumed = true;
