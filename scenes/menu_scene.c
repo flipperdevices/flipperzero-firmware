@@ -26,13 +26,13 @@ static const char* farewellPrompts[] = {
 static void minesweeper_menu_scene_dialog_callback(DialogExResult result, void* context) {
     furi_assert(context);
 
-    App* app = context;
+    MineSweeperApp* app = context;
     view_dispatcher_send_custom_event(app->view_dispatcher, result);
 }
 
 void minesweeper_scene_menu_on_enter(void* context) {
     furi_assert(context);
-    App* app = (App*)context;
+    MineSweeperApp* app = (MineSweeperApp*)context;
 
     view_dispatcher_switch_to_view(app->view_dispatcher, MineSweeperLoadingView);
     
@@ -58,7 +58,7 @@ void minesweeper_scene_menu_on_enter(void* context) {
 bool minesweeper_scene_menu_on_event(void* context, SceneManagerEvent event) {
     furi_assert(context);
 
-    App* app = context; 
+    MineSweeperApp* app = context; 
     bool consumed = false;
     
     if (event.type == SceneManagerEventTypeCustom) {
@@ -91,7 +91,7 @@ bool minesweeper_scene_menu_on_event(void* context, SceneManagerEvent event) {
 
 void minesweeper_scene_menu_on_exit(void* context) {
     furi_assert(context);
-    App* app = (App*)context;
+    MineSweeperApp* app = (MineSweeperApp*)context;
 
     dialog_ex_reset(app->menu);
 }

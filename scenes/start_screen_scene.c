@@ -11,7 +11,7 @@ bool minesweeper_scene_start_screen_input_callback(InputEvent* event, void* cont
     furi_assert(event);
     furi_assert(context);
 
-    App* app = context;
+    MineSweeperApp* app = context;
     bool consumed = false;
 
     // Right now we continue if back is not pressed
@@ -37,7 +37,7 @@ void minesweeper_scene_start_screen_secondary_draw_callback(Canvas* canvas, void
 
 void minesweeper_scene_start_screen_on_enter(void* context) {
     furi_assert(context);
-    App* app = context;
+    MineSweeperApp* app = context;
     
     furi_assert(app->start_screen);
 
@@ -62,7 +62,7 @@ void minesweeper_scene_start_screen_on_enter(void* context) {
 bool minesweeper_scene_start_screen_on_event(void* context, SceneManagerEvent event) {
     furi_assert(context);
 
-    App* app = context;
+    MineSweeperApp* app = context;
     bool consumed = false;
 
     if (event.type == SceneManagerEventTypeCustom) {
@@ -83,6 +83,6 @@ bool minesweeper_scene_start_screen_on_event(void* context, SceneManagerEvent ev
 void minesweeper_scene_start_screen_on_exit(void* context) {
     furi_assert(context);
 
-    App* app = context;
+    MineSweeperApp* app = context;
     start_screen_reset(app->start_screen);
 }

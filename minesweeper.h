@@ -26,8 +26,8 @@
 
 #define TAG "MineSweeper"
 
-// App
-typedef struct App {
+// MineSweeperApp
+typedef struct MineSweeperApp {
     Gui* gui;
     NotificationApp* notification;
     SceneManager* scene_manager;
@@ -38,7 +38,7 @@ typedef struct App {
     uint32_t haptic;
     uint32_t speaker;
     uint32_t led;
-} App;
+} MineSweeperApp;
 
 // View Id Enumeration
 typedef enum {

@@ -2,24 +2,24 @@
 
 static bool minesweeper_custom_event_callback(void* context, uint32_t custom_event) {
     furi_assert(context);
-    App* app = (App*)context;
+    MineSweeperApp* app = (MineSweeperApp*)context;
     return scene_manager_handle_custom_event(app->scene_manager, custom_event);
 }
 
 static bool minesweeper_navigation_event_callback(void* context) {
     furi_assert(context);
-    App* app = (App*)context;
+    MineSweeperApp* app = (MineSweeperApp*)context;
     return scene_manager_handle_back_event(app->scene_manager);
 }
 
 static void minesweeper_tick_event_callback(void* context) {
     furi_assert(context);
-    App* app = (App*)context;
+    MineSweeperApp* app = (MineSweeperApp*)context;
     return scene_manager_handle_tick_event(app->scene_manager);
 }
 
-static App* app_alloc() { 
-    App* app = (App*)malloc(sizeof(App));
+static MineSweeperApp* app_alloc() { 
+    MineSweeperApp* app = (MineSweeperApp*)malloc(sizeof(MineSweeperApp));
     
     // Get Gui and NotificationApp
     app->gui = furi_record_open(RECORD_GUI);
@@ -59,7 +59,7 @@ static App* app_alloc() {
 
 }
 
-static void app_free(App* app) {
+static void app_free(MineSweeperApp* app) {
     furi_assert(app);
     
     // Remove each view from View Dispatcher
@@ -89,7 +89,7 @@ static void app_free(App* app) {
 int32_t minesweeper_app(void* p) {
     UNUSED(p);
 
-    App* app = app_alloc();
+    MineSweeperApp* app = app_alloc();
 
     view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
 
