@@ -26,7 +26,6 @@ void minesweeper_scene_menu_on_enter(void* context) {
     dialog_ex_set_result_callback(app->menu, minesweeper_menu_scene_dialog_callback);
 
     view_dispatcher_switch_to_view(app->view_dispatcher, MineSweeperMenuView);
-
 }
 
 bool minesweeper_scene_menu_on_event(void* context, SceneManagerEvent event) {
@@ -41,9 +40,11 @@ bool minesweeper_scene_menu_on_event(void* context, SceneManagerEvent event) {
             case DialogExResultLeft :
                 if (!scene_manager_search_and_switch_to_previous_scene(
                     app->scene_manager, MineSweeperSceneStartScreen)) {
+
                     scene_manager_stop(app->scene_manager);
                     view_dispatcher_stop(app->view_dispatcher);
                 }
+
                 consumed = true;
                 break;
 
@@ -66,5 +67,4 @@ void minesweeper_scene_menu_on_exit(void* context) {
     App* app = (App*)context;
 
     dialog_ex_reset(app->menu);
-
 }
