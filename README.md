@@ -1,4 +1,7 @@
 [![FAP: Build for multiple SDK sources](https://github.com/pionaiki/fz-tarot/actions/workflows/build.yml/badge.svg)](https://github.com/pionaiki/fz-tarot/actions/workflows/build.yml)
+[![FAP Release](https://flipc.org/pionaiki/fz-tarot/badge)](https://flipc.org/pionaiki/fz-tarot)
+[![FAP Candidate](https://flipc.org/pionaiki/fz-tarot/badge?channel=rc)](https://flipc.org/pionaiki/fz-tarot?channel=rc)
+[![FAP dev](https://flipc.org/pionaiki/fz-tarot/badge?channel=dev)](https://flipc.org/pionaiki/fz-tarot?channel=dev)
 
 ![Banner](.flipcorg/banner.png)
 
