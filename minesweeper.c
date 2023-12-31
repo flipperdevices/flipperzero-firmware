@@ -94,7 +94,7 @@ int32_t minesweeper_app(void* p) {
     view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
 
     // This will be the initial scene on app startup
-    scene_manager_next_scene(app->scene_manager, MineSweeperSceneMenu);
+    scene_manager_next_scene(app->scene_manager, MineSweeperSceneStartScreen);
 
     furi_hal_power_suppress_charge_enter();
     
