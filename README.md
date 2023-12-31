@@ -1,5 +1,7 @@
 [![FAP: Build for multiple SDK sources](https://github.com/pionaiki/fz-tarot/actions/workflows/build.yml/badge.svg)](https://github.com/pionaiki/fz-tarot/actions/workflows/build.yml)
 
+![Banner](.flipcorg/banner.png)
+
 # fz-tarot
 Tarot spread for Flipper Zero. This app can give you a linear spread of the major arcana cards (minor arcana is planned to be added).
 
