@@ -91,12 +91,12 @@ void start_screen_view_draw_callback(Canvas* canvas, void* _model) {
 }
 
 bool start_screen_view_input_callback(InputEvent* event, void* context) {
-    StartScreen* app = context;
+    StartScreen* start_screen = context;
     bool consumed = false;
 
-    // If custom input callback is set use, otherwise default
-    if (app->input_callback) {
-        app->input_callback(event, context); 
+    // If custom input callback is set pass event to it, otherwise return false 
+    if (start_screen->input_callback) {
+        start_screen->input_callback(event, start_screen->context); 
         consumed = true;
     }
 
