@@ -2,6 +2,7 @@
 #include "../views/start_screen.h"
 
 typedef enum {
+    MineSweeperSceneStartScreenExitEvent,
     MineSweeperSceneStartScreenContinueEvent,
 } MineSweeperSceneStartScreenEvent;
 
@@ -18,8 +19,10 @@ bool minesweeper_scene_start_screen_input_callback(InputEvent* event, void* cont
     bool consumed = false;
 
     // right now we continue if back is not pressed
-    if (event->key != InputKeyBack) {
-       return scene_manager_handle_custom_event(app->scene_manager, MineSweeperSceneStartScreenContinueEvent); 
+    if (event->key == InputKeyBack) {
+        consumed = scene_manager_handle_custom_event(app->scene_manager, MineSweeperSceneStartScreenExitEvent); 
+    } else {
+        consumed = scene_manager_handle_custom_event(app->scene_manager, MineSweeperSceneStartScreenContinueEvent); 
     }
 
     return consumed;
@@ -62,15 +65,17 @@ bool minesweeper_scene_start_screen_on_event(void* context, SceneManagerEvent ev
     App* app = context;
     bool consumed = false;
 
-    //if (event.type == SceneManagerEventTypeBack) {
-    //    //exit app
-    //    scene_manager_stop(app->scene_manager);
-    //    view_dispatcher_stop(app->view_dispatcher);
-    //    consumed = true;
-    //}
-    if (event.type == SceneManagerEventTypeCustom && event.event == MineSweeperSceneStartScreenContinueEvent) {
-        scene_manager_next_scene(app->scene_manager, MineSweeperSceneMenu); 
-        consumed = true;
+    if (event.type == SceneManagerEventTypeCustom) {
+        if (event.event == MineSweeperSceneStartScreenContinueEvent) {
+            scene_manager_set_scene_state(app->scene_manager, MineSweeperSceneStartScreen, MineSweeperSceneMenu);
+            scene_manager_next_scene(app->scene_manager, MineSweeperSceneMenu); 
+            consumed = true;
+        } else if (event.event == MineSweeperSceneStartScreenExitEvent) {
+            //exit app
+            scene_manager_stop(app->scene_manager);
+            view_dispatcher_stop(app->view_dispatcher);
+            consumed = true;
+        }
     }
 
     return consumed;
