@@ -102,9 +102,6 @@ int32_t minesweeper_app(void* p) {
 
     furi_hal_power_suppress_charge_exit();
 
-    view_dispatcher_stop(app->view_dispatcher);
-    scene_manager_stop(app->scene_manager);
-
     app_free(app);
 
     return 0;
