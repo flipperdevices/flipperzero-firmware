@@ -50,7 +50,7 @@ void start_screen_view_exit(void* context) {
     StartScreen* start_screen = context;
 
     with_view_model(
-            start_screen->view, StartScreenModel * model, {icon_animation_start(model->icon.animation);}, false);
+            start_screen->view, StartScreenModel * model, {icon_animation_stop(model->icon.animation);}, false);
 }
 
 void start_screen_view_draw_callback(Canvas* canvas, void* _model) {
@@ -63,9 +63,9 @@ void start_screen_view_draw_callback(Canvas* canvas, void* _model) {
 
     canvas_set_color(canvas, ColorWhite);
     canvas_draw_box(canvas, 0, 0, canvas_width(canvas), canvas_height(canvas));
+    canvas_set_color(canvas, ColorBlack);
 
     if (model->icon.animation != NULL) {
-        //canvas_draw_icon(canvas, model->icon.x, model->icon.y, &A_StartScreen_128x64); 
         canvas_draw_icon_animation(canvas, model->icon.x, model->icon.y, model->icon.animation);
     }
 
@@ -109,10 +109,12 @@ bool start_screen_view_input_callback(InputEvent* event, void* context) {
     StartScreen* start_screen = context;
     bool consumed = false;
 
-    // If custom input callback is set pass event to it, otherwise return false 
-    if (start_screen->input_callback) {
+    // If custom input callback is defined pass event to it 
+    if (start_screen->input_callback != NULL) {
         start_screen->input_callback(event, start_screen->context); 
         consumed = true;
+    } else {
+        // You can add default functionality here
     }
 
     return consumed;
@@ -122,11 +124,13 @@ void start_screen_timer_callback(void* context) {
     furi_assert(context);
     StartScreen* start_screen = context;
 
-    if (start_screen->timer_callback) {
+    if (start_screen->timer_callback != NULL) {
         start_screen->timer_callback(context);
     }
 }
 
+
+// this can probably be moved in with the start function for the icon animation if we want a timer
 
 //static void start_screen_start_timer(void* context) {
 //    furi_assert(context);
@@ -157,14 +161,7 @@ StartScreen* start_screen_alloc() {
 
     view_set_context(start_screen->view, start_screen);
     view_allocate_model(start_screen->view, ViewModelTypeLocking, sizeof(StartScreenModel));
-    view_set_draw_callback(start_screen->view, start_screen_view_draw_callback);
-    view_set_input_callback(start_screen->view, start_screen_view_input_callback);
 
-    // Right now these enter/exit callbacks are being used to start/stop animations
-    // We can also set/stop a timer in here
-    view_set_enter_callback(start_screen->view, start_screen_view_enter);
-    view_set_enter_callback(start_screen->view, start_screen_view_exit);
-    
     with_view_model(
         start_screen->view,
         StartScreenModel * model,
@@ -190,7 +187,7 @@ StartScreen* start_screen_alloc() {
             model->text3.horizontal = AlignLeft;
             model->text3.vertical = AlignBottom;
 
-            model->icon.x = 10;
+            model->icon.x = 0;
             model->icon.y = 0;
             model->icon.animation = icon_animation_alloc(&A_StartScreen_128x64);
 
@@ -198,12 +195,30 @@ StartScreen* start_screen_alloc() {
         },
         true);
 
+    view_set_draw_callback(start_screen->view, start_screen_view_draw_callback);
+    view_set_input_callback(start_screen->view, start_screen_view_input_callback);
+    
+    // Right now these enter/exit callbacks are being used to start/stop animations
+    // We can also set/stop a timer in here
+    view_set_enter_callback(start_screen->view, start_screen_view_enter);
+    view_set_exit_callback(start_screen->view, start_screen_view_exit);
+    
     return start_screen;
 }
 
 void start_screen_free(StartScreen* instance) {
     furi_assert(instance);
     furi_timer_free(instance->timer);
+
+    with_view_model(
+        instance->view,
+        StartScreenModel * model,
+        {
+            if (model->icon.animation != NULL)
+                icon_animation_free(model->icon.animation);
+        },
+        false);
+
     view_free(instance->view);
     free(instance);
 }
@@ -216,8 +231,8 @@ void start_screen_reset(StartScreen* instance) {
         StartScreenModel * model,
         {
             memset(&model->text1, 0, sizeof(model->text1));
-            memset(&model->text1, 0, sizeof(model->text2));
-            memset(&model->text1, 0, sizeof(model->text3));
+            memset(&model->text2, 0, sizeof(model->text2));
+            memset(&model->text3, 0, sizeof(model->text3));
         },
         false);
     instance->timer_callback = NULL;
