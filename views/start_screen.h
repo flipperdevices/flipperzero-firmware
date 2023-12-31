@@ -149,14 +149,14 @@ void start_screen_set_text3(
         Font font,
         const char* text);
 
-/** Set Icon Element
+/** Set Icon Animation Element
  *
  * @param      instance StartScreen instance
  * @param      x       top left x coordinate
  * @param      y       top left y coordinate
  * @param      icon    Icon instance
  */
-void start_screen_set_icon_element(StartScreen* instance, uint8_t x, uint8_t y, const Icon* icon);
+void start_screen_set_icon_animation(StartScreen* instance, uint8_t x, uint8_t y);
 
 #ifdef __cplusplus
 }
