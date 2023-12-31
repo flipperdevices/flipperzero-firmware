@@ -9,6 +9,6 @@ App(
     fap_icon="tarot.png",  # 10x10 1-bit PNG
     fap_description="Tarot card reader",
     fap_author="pionaiki & tihyltew",
-    fap_weburl="https://github.com/pionaiki/flipper-tarot",
+    fap_weburl="https://github.com/pionaiki/fz-tarot",
     fap_icon_assets="images",  # Image assets to compile for this application
 )
