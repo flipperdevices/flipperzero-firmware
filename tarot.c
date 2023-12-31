@@ -114,7 +114,8 @@ void tarot_app_scene_on_enter_about(void* context) {
     popup_reset(app->popup);
     popup_set_context(app->popup, app);
     popup_set_header(app->popup, "About", 64, 1, AlignCenter, AlignTop);
-    popup_set_text(app->popup, "\nCode: pionaiki\nArt: tihyltew\n\ngithub.com/pionaiki/fz-tarot", 64, 10, AlignCenter, AlignTop);
+    popup_set_icon(app->popup, 16, 64-13, &I_github_icon);
+    popup_set_text(app->popup, "\n\nCode: pionaiki\nArt: tihyltew\n\n       /pionaiki/fz-tarot", 64, 0, AlignCenter, AlignTop);
     view_dispatcher_switch_to_view(app->view_dispatcher, AppView_Popup);
 }
 
@@ -139,7 +140,7 @@ const int card_x = 23;
 const int card_y = 32;
 const int card_number = 22;
 
-int card_selected = 1; // Cursor position 0-2
+int card_selected = 0;
 
 struct Card {
     const char name[20];
@@ -147,28 +148,28 @@ struct Card {
 };
 
 const struct Card card[] = {
-    {"The Fool",            &I_major_placeholder},
-    {"The Magician",        &I_major_placeholder},
-    {"The High Priestess",  &I_major_placeholder},
-    {"The Empress",         &I_major_placeholder},
-    {"The Emperor",         &I_major_placeholder},
-    {"The Hierophant",      &I_major_placeholder},
-    {"The Lovers",          &I_major_placeholder},
-    {"The Chariot",         &I_major_placeholder},
-    {"Strength",            &I_major_placeholder},
-    {"The Hermit",          &I_major_placeholder},
-    {"Wheel of Fortune",    &I_major_placeholder},
-    {"Justice",             &I_major_placeholder},
-    {"The Hanged Man",      &I_major_placeholder},
-    {"Death",               &I_major_placeholder},
-    {"Temperance",          &I_major_placeholder},
-    {"The Devil",           &I_major_placeholder},
-    {"The Tower",           &I_major_placeholder},
-    {"The Star",            &I_major_placeholder},
-    {"The Moon",            &I_major_placeholder},
-    {"The Sun",             &I_major_placeholder},
-    {"Judgement",           &I_major_placeholder},
-    {"The World",           &I_major_placeholder}
+    {"The Fool",            &I_major_0},
+    {"The Magician",        &I_major_1},
+    {"The High Priestess",  &I_major_2},
+    {"The Empress",         &I_major_3},
+    {"The Emperor",         &I_major_4},
+    {"The Hierophant",      &I_major_5},
+    {"The Lovers",          &I_major_6},
+    {"The Chariot",         &I_major_7},
+    {"Strength",            &I_major_8},
+    {"The Hermit",          &I_major_9},
+    {"Wheel of Fortune",    &I_major_10},
+    {"Justice",             &I_major_11},
+    {"The Hanged Man",      &I_major_12},
+    {"Death",               &I_major_13},
+    {"Temperance",          &I_major_14},
+    {"The Devil",           &I_major_15},
+    {"The Tower",           &I_major_16},
+    {"The Star",            &I_major_17},
+    {"The Moon",            &I_major_18},
+    {"The Sun",             &I_major_19},
+    {"Judgement",           &I_major_20},
+    {"The World",           &I_major_21}
 };
 
 static uint16_t unbiased_rand (uint16_t max) {
@@ -180,34 +181,92 @@ static uint16_t unbiased_rand (uint16_t max) {
     return x % max;
 }
 
-void tarot_app_scene_on_enter_game(void* context) {
-    FURI_LOG_T(TAG, "tarot_app_scene_on_enter_game");
+struct Spread {
+    int card[3];
+    bool selected[3];
+    bool rotation[3]; // 0 - up, 1 - down
+};
+
+struct Spread spread;
+
+void draw_tarot(void* context) {
     App* app = context;
     widget_reset(app->widget);
 
-    int one = unbiased_rand(card_number);
-    int two = unbiased_rand(card_number);
-    while (two == one) {
-        two = unbiased_rand(card_number);
-    };
-    int three = unbiased_rand(card_number);
-    while (three == one || three == two) {
-        three = unbiased_rand(card_number);
+    // Set the cursor to the selected card
+    spread.selected[0] = 0;
+    spread.selected[1] = 0;
+    spread.selected[2] = 0;
+    spread.selected[card_selected] = 1;
+
+    // Draw cards
+    widget_add_icon_element(app->widget, (128-card_x)/2 - 32, 10 - 2*spread.selected[0], card[spread.card[0]].icon);
+    widget_add_icon_element(app->widget, (128-card_x)/2, 10 - 2*spread.selected[1], card[spread.card[1]].icon);
+    widget_add_icon_element(app->widget, (128-card_x)/2 + 32, 10 - 2*spread.selected[2], card[spread.card[2]].icon);
+
+    // Draw cursor
+    widget_add_icon_element(app->widget, (128-card_x)/2 - 34 + card_x/2 + card_selected*32, 41, &I_cursor);
+
+    // Draw card name
+    widget_add_string_element(app->widget, 64, 60, AlignCenter, AlignBottom, FontPrimary, card[spread.card[card_selected]].name);
+}
+
+static bool widget_input_callback(InputEvent* input_event, void* context) {
+    App* app = context;
+    bool consumed = false;
+    if(input_event->type == InputTypeShort) {
+        switch(input_event->key) {
+        case InputKeyRight:
+            card_selected++;
+            if (card_selected > 2) {
+                card_selected = 0;
+            }
+            consumed = true;
+            break;
+        case InputKeyLeft:
+            card_selected--;
+            if (card_selected < 0) {
+                card_selected = 2;
+            }
+            consumed = true;
+            break;
+        case InputKeyUp:
+            // UP
+            consumed = true;
+            break;
+        case InputKeyDown:
+            // DOWN
+            consumed = true;
+            break;
+        default:
+            consumed = false;
+            break;
+        }
     }
+    if(consumed) draw_tarot(app);
+    return consumed;
+}
 
-    struct Card random_card[] = {
-        card[one],
-        card[two],
-        card[three]
+void tarot_app_scene_on_enter_game(void* context) {
+    FURI_LOG_T(TAG, "tarot_app_scene_on_enter_game");
+    App* app = context;
+
+    // Set random spread
+    spread.card[0] = unbiased_rand(card_number);
+    spread.card[1] = unbiased_rand(card_number);
+    while (spread.card[1] == spread.card[0]) {
+        spread.card[1] = unbiased_rand(card_number);
     };
+    spread.card[2] = unbiased_rand(card_number);
+    while (spread.card[2] == spread.card[0] || spread.card[2] == spread.card[1]) {
+        spread.card[2] = unbiased_rand(card_number);
+    }
     
-    widget_add_icon_element(app->widget, (128-card_x)/2 - 32, 10, random_card[0].icon);
-    widget_add_icon_element(app->widget, (128-card_x)/2, 10, random_card[1].icon);
-    widget_add_icon_element(app->widget, (128-card_x)/2 + 32, 10, random_card[2].icon);
+    draw_tarot(app);
 
-    widget_add_icon_element(app->widget, (128-card_x)/2 - 34 + card_x/2 + card_selected*32, 40, &I_cursor);
+    view_set_context(widget_get_view(app->widget), app);
 
-    widget_add_string_element(app->widget, 64, 60, AlignCenter, AlignBottom, FontPrimary, random_card[card_selected].name);
+    view_set_input_callback(widget_get_view(app->widget), widget_input_callback);
 
     view_dispatcher_switch_to_view(app->view_dispatcher, AppView_Widget);
 }

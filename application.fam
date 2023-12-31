@@ -5,9 +5,8 @@ App(
     entry_point="tarot_app",
     stack_size=2 * 1024,
     fap_category="Games",
-    # Optional values
-    # fap_version=(1, 0),  # (major, minor)
-    # fap_icon="tarot.png",  # 10x10 1-bit PNG
+    fap_version=(1, 0),  # (major, minor)
+    fap_icon="tarot.png",  # 10x10 1-bit PNG
     fap_description="Tarot card reader",
     fap_author="pionaiki",
     fap_weburl="https://github.com/pionaiki/flipper-tarot",
