@@ -4,7 +4,7 @@
 &nbsp;<a href='https://shop.rogue-master.net/' target='_blank'><img src='https://rogue-master.net/img/Merch.png' alt='RM Merch'' title='RM Merch'></a>
 &nbsp;<a href='https://github.com/RogueMaster/awesome-flipperzero-withModules' target='_blank'><img src='https://rogue-master.net/img/Resources.png' alt='More Research / Assets' title='More Research / Assets'></a></h1>
 
-# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1223-2011-0.93.9-f05e1e3.tgz&channel=RM1223-2011-0.93.9-f05e1e3&version=0.93.9) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1223-2011-0.93.9-f05e1e3-NoAnim.tgz&channel=RM1223-2011-0.93.9-f05e1e3-NoAnim&version=0.93.9)
+# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1231-0258-0.93.9-0b284ab.tgz&channel=RM1231-0258-0.93.9-0b284ab&version=0.93.9) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1231-0258-0.93.9-0b284ab-NoAnim.tgz&channel=RM1231-0258-0.93.9-0b284ab-NoAnim&version=0.93.9)
 
 ## Thank you so much to our RM Pro/SUPER Patreon supporters! Because of people like you, we are able to offer the best and most up-to-date Flipper Zero Firmware!
 
@@ -27,29 +27,10 @@ This software is for experimental purposes only and is not meant for any illegal
 
 <a name="latest">
 
-## Latest Updates - [PATREON: Latest Release RM1230-0114-0.93.9-a0e0dd4](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
+## Latest Updates - [PATREON: Latest Release RM1231-0235-0.93.9-0eb2e5f](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-12-30 01:14 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-12-30 01:14 EST`
-- Added: [Smack My Dolphin Up! (By siberianbot)](https://github.com/siberianbot/smack-my-dolphin-up)
-- OFW: [About: cn,tw,mx certification information #3318 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3318)
-- Updated: [Programmer Calculator v0.8 (By armixz)](https://github.com/armixz/Flipper-Zero-Programmer-Calculator)
-- UL: [SubGHz: Temp fix for subghz keyboard lock display issue (furi_timer is not working properly) (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/5c00a403f6477fc7f0b2c6f82689983bbc284410)
-- UL: [SubGHz: Added new option to delete old signals on full memory (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/b84f14386c9f2c111811b031a18a6914f71a3e74)
-- Updated: [Dab Timer v1.7 (By RogueMaster)](https://github.com/RogueMaster/flipperzero-dabtimer)
-- [MACOS_GUIDE.md - Sonoma Notes #1016 (By tonywald)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/1016)
-- OFW PR: [SubGhz: add cmd CLI 'subghz tx_from_file' #3302 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/3302)
-- OFW: [Add Samsung AC remotes DB93 and AR-EH04 #3301 (By braghetto)](https://github.com/flipperdevices/flipperzero-firmware/pull/3301)
-- OFW: [Scripts: fix incorrect handling of storage stress test count option #3321 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3321)
-- OFW: NFC: [Update mf_classic_dict.nfc #3314 (By ry4000)](https://github.com/flipperdevices/flipperzero-firmware/pull/3314) - For Bandai Namco Passport / Sega Aime Card (Already part of key dictionairy lines 1918-1952.) - ALREADY IN RM
-- Updated: [u-blox GPS v0.3 (By liamhays)](https://github.com/liamhays/ublox)
-- Removed some bloat out of the NFC dictionary (By RogueMaster)
-- UL: [subghz revert previous "fix" and do proper fix (By Willy-JL & xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/b48103196fcab783d236c82b4b6be6cd88d887c2)]
-- Updated: [FlipBoard Blinky v2.1 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
-- Updated: [FlipBoard Keyboard v2.0 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
-- Updated: [FlipBoard Signal v3.1 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
-- Updated: [Counter v1.3 (By Krulknul)](https://github.com/Krulknul/dolphin-counter)
-- Added: [FlipBoard Simon v1.0 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-12-31 02:35 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-12-31 02:35 EST`
 
 ## IN THIS BRANCH:
 
@@ -629,4 +610,4 @@ $ ./fbt dolphin_ext
 - [Desktop Favorite Binds To Allow Opening Custom Game Menu. Whomever can complete this gets 3 months of subscriber builds. Patrons can DM me to add their monthly towards this bounty.](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/756)
 - `Bluetooth Audio` APP to allow flipper to pair to external speaker or headphones for wav/mp3 playback ($200 USD in ETH or BTC) (Don't think this is possible)
 
-# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1223-2011-0.93.9-f05e1e3.tgz&channel=RM1223-2011-0.93.9-f05e1e3&version=0.93.9) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1223-2011-0.93.9-f05e1e3-NoAnim.tgz&channel=RM1223-2011-0.93.9-f05e1e3-NoAnim&version=0.93.9)
+# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1231-0258-0.93.9-0b284ab.tgz&channel=RM1231-0258-0.93.9-0b284ab&version=0.93.9) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1231-0258-0.93.9-0b284ab-NoAnim.tgz&channel=RM1231-0258-0.93.9-0b284ab-NoAnim&version=0.93.9)

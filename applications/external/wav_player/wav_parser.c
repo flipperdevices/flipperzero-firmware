@@ -33,24 +33,44 @@ bool wav_parser_parse(WavParser* parser, Stream* stream, WavPlayerApp* app) {
     stream_read(stream, (uint8_t*)&parser->header, sizeof(WavHeaderChunk));
     stream_read(stream, (uint8_t*)&parser->format, sizeof(WavFormatChunk));
     stream_read(stream, (uint8_t*)&parser->data, sizeof(WavDataChunk));
+    char segment_name[5];
 
-    if(memcmp(parser->header.riff, "RIFF", 4) != 0 ||
-       memcmp(parser->header.wave, "WAVE", 4) != 0) {
-        FURI_LOG_E(TAG, "WAV: wrong header");
+    if(memcmp(parser->header.riff, "RIFF", 4) != 0) {
+        strlcpy(segment_name, (char*)&parser->header.riff, sizeof(segment_name));
+        FURI_LOG_E(TAG, "WAV: wrong RIFF header: '%s'", segment_name);
+        return false;
+    }
+
+    if(memcmp(parser->header.wave, "WAVE", 4) != 0) {
+        strlcpy(segment_name, (char*)&parser->header.wave, sizeof(segment_name));
+        FURI_LOG_E(TAG, "WAV: wrong WAVE header: '%s'", segment_name);
         return false;
     }
 
     if(memcmp(parser->format.fmt, "fmt ", 4) != 0) {
-        FURI_LOG_E(TAG, "WAV: wrong format");
+        strlcpy(segment_name, (char*)&parser->format.fmt, sizeof(segment_name));
+        FURI_LOG_E(TAG, "WAV: wrong fmt segment: '%s'", segment_name);
         return false;
     }
 
-    if(parser->format.tag != FormatTagPCM || memcmp(parser->data.data, "data", 4) != 0) {
+    if(parser->format.tag != FormatTagPCM) {
         FURI_LOG_E(
             TAG,
-            "WAV: non-PCM format %u, next '%lu'",
+            "WAV: non-PCM format: %u (%s)",
             parser->format.tag,
-            (uint32_t)parser->data.data);
+            format_text(parser->format.tag));
+        return false;
+    }
+
+    if(memcmp(parser->data.data, "LIST", 4) == 0) {
+        FURI_LOG_D(TAG, "WAV: skipping LIST segment");
+        stream_seek(stream, parser->data.size, StreamOffsetFromCurrent);
+        stream_read(stream, (uint8_t*)&parser->data, sizeof(WavDataChunk));
+    }
+
+    if(memcmp(parser->data.data, "data", 4) != 0) {
+        strlcpy(segment_name, (char*)&parser->data.data, sizeof(segment_name));
+        FURI_LOG_E(TAG, "WAV: wrong data segment: '%s'", segment_name);
         return false;
     }
 
