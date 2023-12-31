@@ -4,7 +4,6 @@
 #include <input/input.h>
 
 #include <furi.h>
-#include "minesweeper_icons.h"
 
 struct StartScreen {
     View* view;
@@ -42,7 +41,13 @@ void start_screen_view_enter(void* context) {
     StartScreen* start_screen = context;
 
     with_view_model(
-            start_screen->view, StartScreenModel * model, {icon_animation_start(model->icon.animation);}, true);
+        start_screen->view,
+        StartScreenModel * model,
+        {
+            if (model->icon.animation != NULL)
+                icon_animation_start(model->icon.animation);
+        },
+        true);
 }
 
 void start_screen_view_exit(void* context) {
@@ -50,7 +55,13 @@ void start_screen_view_exit(void* context) {
     StartScreen* start_screen = context;
 
     with_view_model(
-            start_screen->view, StartScreenModel * model, {icon_animation_stop(model->icon.animation);}, false);
+        start_screen->view,
+        StartScreenModel * model,
+        {
+            if (model->icon.animation != NULL)
+                icon_animation_stop(model->icon.animation);
+        },
+        true);
 }
 
 void start_screen_view_draw_callback(Canvas* canvas, void* _model) {
@@ -58,7 +69,6 @@ void start_screen_view_draw_callback(Canvas* canvas, void* _model) {
     furi_assert(_model);
     StartScreenModel* model = _model;
 
-    // Prepare canvas
     canvas_clear(canvas);
 
     canvas_set_color(canvas, ColorWhite);
@@ -89,7 +99,6 @@ void start_screen_view_draw_callback(Canvas* canvas, void* _model) {
             model->text2.horizontal,
             model->text2.vertical,
             model->text2.text);
-
     }
 
     if (model->text3.text != NULL) {
@@ -101,8 +110,8 @@ void start_screen_view_draw_callback(Canvas* canvas, void* _model) {
             model->text3.horizontal,
             model->text3.vertical,
             model->text3.text);
-
     }
+
 }
 
 bool start_screen_view_input_callback(InputEvent* event, void* context) {
@@ -189,9 +198,7 @@ StartScreen* start_screen_alloc() {
 
             model->icon.x = 0;
             model->icon.y = 0;
-            model->icon.animation = icon_animation_alloc(&A_StartScreen_128x64);
-
-            view_tie_icon_animation(start_screen->view, model->icon.animation);
+            model->icon.animation = NULL;
         },
         true);
 
@@ -216,6 +223,8 @@ void start_screen_free(StartScreen* instance) {
         {
             if (model->icon.animation != NULL)
                 icon_animation_free(model->icon.animation);
+
+            model->icon.animation = NULL;
         },
         false);
 
@@ -339,11 +348,11 @@ void start_screen_set_text3(
         true);
 }
 
-// Icon is hard coded right now, need to change
 void start_screen_set_icon_animation(
     StartScreen* instance,
     uint8_t x,
-    uint8_t y) {
+    uint8_t y,
+    const Icon* animation) {
 
     furi_assert(instance);
     with_view_model(
@@ -352,7 +361,7 @@ void start_screen_set_icon_animation(
         {
             model->icon.x = x;
             model->icon.y = y;
-            model->icon.animation = icon_animation_alloc(&A_StartScreen_128x64);
+            model->icon.animation = icon_animation_alloc(animation);
             view_tie_icon_animation(instance->view, model->icon.animation);
         },
         true);

@@ -1,5 +1,6 @@
 #include "../minesweeper.h"
 #include "../views/start_screen.h"
+#include "minesweeper_icons.h"
 
 typedef enum {
     MineSweeperSceneStartScreenExitEvent,
@@ -52,9 +53,8 @@ void minesweeper_scene_start_screen_on_enter(void* context) {
             app->start_screen,
             minesweeper_scene_start_screen_secondary_draw_callback);
     
-
-    // Right now Icon is hardcoded, need to implmement generic version;
-    //start_screen_set_icon_animation(app->start_screen, 0, 0);
+    const Icon* start_screen_icon = &A_StartScreen_128x64;
+    start_screen_set_icon_animation(app->start_screen, 0, 0, start_screen_icon);
 
     view_dispatcher_switch_to_view(app->view_dispatcher, MineSweeperStartScreenView);
 }

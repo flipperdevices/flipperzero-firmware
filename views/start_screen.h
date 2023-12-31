@@ -154,9 +154,9 @@ void start_screen_set_text3(
  * @param      instance StartScreen instance
  * @param      x       top left x coordinate
  * @param      y       top left y coordinate
- * @param      icon    Icon instance
+ * @param      animation    IconAnimation instance
  */
-void start_screen_set_icon_animation(StartScreen* instance, uint8_t x, uint8_t y);
+void start_screen_set_icon_animation(StartScreen* instance, uint8_t x, uint8_t y, const Icon* animation);
 
 #ifdef __cplusplus
 }
