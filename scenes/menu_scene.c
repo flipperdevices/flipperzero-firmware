@@ -1,5 +1,28 @@
 #include "../minesweeper.h"
 
+static const char* farewellPrompts[] = {
+    "Leaving so\n   soon?",
+    "Will you\n   stay?",
+    "Don't swim\n   away.",
+    "Feeling\n   farewell?",
+    "Sad to part\n   ways.",
+    "Ocean of\n   goodbyes.",
+    "Dolphin tears,\n   why?",
+    "Lonely without\n   you.",
+    "End of our\n   wave?",
+    "Will you\n   return?",
+    "Drowning in\n   goodbye.",
+    "Farewell\n   ripples.",
+    "Flipper's\n   frown.",
+    "Sea of\n   solitude.",
+    "Parting\n   currents.",
+    "Goodbye, old\n   friend.",
+    "Will tide\n  bring back?",
+    "Echoes of\n  departure.",
+    "Dolphin's last\n   dance.",
+    "Ocean misses\n   you."
+};
+
 static void minesweeper_menu_scene_dialog_callback(DialogExResult result, void* context) {
     furi_assert(context);
 
@@ -15,9 +38,13 @@ void minesweeper_scene_menu_on_enter(void* context) {
     
     dialog_ex_set_context(app->menu, app);
 
-    dialog_ex_set_header(app->menu, "Leave to start menu?", 64, 5, AlignCenter, AlignTop);
+    dialog_ex_set_header(app->menu, "Leave Minesweeper?", 64, 4, AlignCenter, AlignTop);
 
-    dialog_ex_set_icon(app->menu, 21, 13, &I_Cry_dolph_55x52);
+    uint32_t prompt_index = furi_hal_random_get() % sizeof(farewellPrompts) / sizeof(char*);
+
+    dialog_ex_set_text(app->menu, farewellPrompts[prompt_index], 65, 20, AlignLeft, AlignTop);
+
+    dialog_ex_set_icon(app->menu, 11, 13, &I_Cry_dolph_55x52);
 
     dialog_ex_set_left_button_text(app->menu, "Back");
 
