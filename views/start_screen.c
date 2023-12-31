@@ -26,7 +26,7 @@ typedef struct {
 } TextElement;
 
 typedef struct {
-    IconAnimation* icon;
+    IconAnimation* animation;
     uint8_t x, y;
 } IconElement;
 
@@ -36,6 +36,22 @@ typedef struct {
     TextElement text3;
     IconElement icon;
 } StartScreenModel;
+
+void start_screen_view_enter(void* context) {
+    furi_assert(context);
+    StartScreen* start_screen = context;
+
+    with_view_model(
+            start_screen->view, StartScreenModel * model, {icon_animation_start(model->icon.animation);}, true);
+}
+
+void start_screen_view_exit(void* context) {
+    furi_assert(context);
+    StartScreen* start_screen = context;
+
+    with_view_model(
+            start_screen->view, StartScreenModel * model, {icon_animation_start(model->icon.animation);}, false);
+}
 
 void start_screen_view_draw_callback(Canvas* canvas, void* _model) {
     furi_assert(canvas);
@@ -47,11 +63,10 @@ void start_screen_view_draw_callback(Canvas* canvas, void* _model) {
 
     canvas_set_color(canvas, ColorWhite);
     canvas_draw_box(canvas, 0, 0, canvas_width(canvas), canvas_height(canvas));
-    canvas_set_color(canvas, ColorBlack);
 
-    if (model->icon.icon != NULL) {
-        canvas_draw_icon(canvas, model->icon.x, model->icon.y, &A_StartScreen_128x64);      // HERE YOU CAN SET THE CUSTOM ANIMATION ASSET IN IMAGES
-        canvas_draw_icon_animation(canvas, model->icon.x, model->icon.y, model->icon.icon);
+    if (model->icon.animation != NULL) {
+        //canvas_draw_icon(canvas, model->icon.x, model->icon.y, &A_StartScreen_128x64); 
+        canvas_draw_icon_animation(canvas, model->icon.x, model->icon.y, model->icon.animation);
     }
 
     if (model->text1.text != NULL) {
@@ -136,7 +151,7 @@ StartScreen* start_screen_alloc() {
     start_screen->timer = furi_timer_alloc(start_screen_timer_callback, FuriTimerTypeOnce, start_screen);
     furi_assert(start_screen->timer);
 
-    // This is if we want to enable timeout functionality for the start screen like the popup module
+    // This is if we want to enable timer functionality 
     start_screen->timer_period_in_ms = 1000;
     start_screen->timer_enabled = false;
 
@@ -144,8 +159,11 @@ StartScreen* start_screen_alloc() {
     view_allocate_model(start_screen->view, ViewModelTypeLocking, sizeof(StartScreenModel));
     view_set_draw_callback(start_screen->view, start_screen_view_draw_callback);
     view_set_input_callback(start_screen->view, start_screen_view_input_callback);
-    // We can optionally set the enter and exit callback of the view to work with the timer
-    // See popup.c in gui/modules/ of the firmware
+
+    // Right now these enter/exit callbacks are being used to start/stop animations
+    // We can also set/stop a timer in here
+    view_set_enter_callback(start_screen->view, start_screen_view_enter);
+    view_set_enter_callback(start_screen->view, start_screen_view_exit);
     
     with_view_model(
         start_screen->view,
@@ -172,9 +190,11 @@ StartScreen* start_screen_alloc() {
             model->text3.horizontal = AlignLeft;
             model->text3.vertical = AlignBottom;
 
-            model->icon.x = 0;
+            model->icon.x = 10;
             model->icon.y = 0;
-            model->icon.icon = NULL;
+            model->icon.animation = icon_animation_alloc(&A_StartScreen_128x64);
+
+            view_tie_icon_animation(start_screen->view, model->icon.animation);
         },
         true);
 
@@ -304,6 +324,7 @@ void start_screen_set_text3(
         true);
 }
 
+// Icon is hard coded right now, need to change
 void start_screen_set_icon_animation(
     StartScreen* instance,
     uint8_t x,
@@ -316,8 +337,8 @@ void start_screen_set_icon_animation(
         {
             model->icon.x = x;
             model->icon.y = y;
-            model->icon.icon = icon_animation_alloc(&A_StartScreen_128x64);
-            view_tie_icon_animation(instance->view, model->icon.icon);
+            model->icon.animation = icon_animation_alloc(&A_StartScreen_128x64);
+            view_tie_icon_animation(instance->view, model->icon.animation);
         },
         true);
 }
