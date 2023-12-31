@@ -21,10 +21,6 @@ static void minesweeper_tick_event_callback(void* context) {
 static App* app_alloc() { 
     App* app = (App*)malloc(sizeof(App));
     
-    if (!app) {
-        return NULL;
-    }
-
     // Get Gui and NotificationApp
     app->gui = furi_record_open(RECORD_GUI);
     app->notification = furi_record_open(RECORD_NOTIFICATION);
@@ -45,8 +41,8 @@ static App* app_alloc() {
     view_dispatcher_set_tick_event_callback(app->view_dispatcher, minesweeper_tick_event_callback, 500);
 
     // Alloc views and add to view dispatcher
-    app->start_screen = start_screen_alloc(); // !! RETURNS NULL UNIMPLEMENTED ATM
-    //view_dispatcher_add_view(app->view_dispatcher, MineSweeperStartScreenView, start_screen_get_view(app->start_screen));
+    app->start_screen = start_screen_alloc();
+    view_dispatcher_add_view(app->view_dispatcher, MineSweeperStartScreenView, start_screen_get_view(app->start_screen));
 
     app->loading = loading_alloc();
     view_dispatcher_add_view(app->view_dispatcher, MineSweeperLoadingView, loading_get_view(app->loading));
@@ -79,6 +75,12 @@ static void app_free(App* app) {
     loading_free(app->loading);
     dialog_ex_free(app->menu);
 
+    furi_record_close(RECORD_GUI);
+    furi_record_close(RECORD_NOTIFICATION);
+
+    app->gui = NULL;
+    app->notification = NULL;
+
     // Free app structure
     free(app);
 
@@ -88,20 +90,20 @@ int32_t minesweeper_app(void* p) {
     UNUSED(p);
 
     App* app = app_alloc();
-    if (!app) {
-        return 1;
-    }
 
     view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
 
     // This will be the initial scene on app startup
-    scene_manager_next_scene(app->scene_manager, MineSweeperSceneStartScreen);
+    scene_manager_next_scene(app->scene_manager, MineSweeperSceneMenu);
 
     furi_hal_power_suppress_charge_enter();
     
     view_dispatcher_run(app->view_dispatcher);
 
     furi_hal_power_suppress_charge_exit();
+
+    view_dispatcher_stop(app->view_dispatcher);
+    scene_manager_stop(app->scene_manager);
 
     app_free(app);
 
