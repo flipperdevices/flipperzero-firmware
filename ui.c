@@ -4,6 +4,56 @@
 #include "fonts.h"
 #include "game_vexed_icons.h"
 
+//-----------------------------------------------------------------------------
+
+const Icon* tile_to_icon(uint8_t tile, bool gameOver) {
+    switch(tile) {
+    case 1:
+        return &I_a;
+    case 2:
+        return &I_b;
+    case 3:
+        return &I_c;
+    case 4:
+        return &I_alt_d;
+    case 5:
+        return &I_e;
+    case 6:
+        return &I_f;
+    case 7:
+        return &I_g;
+    case 8:
+        return &I_h;
+    case 9:
+    default:
+        return gameOver ? &I_w_black : &I_w;
+    };
+}
+
+//-----------------------------------------------------------------------------
+
+void gray_canvas(Canvas* const canvas) {
+    canvas_set_color(canvas, ColorWhite);
+    for(int x = 0; x < 128; x += 2) {
+        for(int y = 0; y < 64; y++) {
+            canvas_draw_dot(canvas, x + (y % 2 == 1 ? 0 : 1), y);
+        }
+    }
+}
+
+//-----------------------------------------------------------------------------
+
+void mask_canvas(Canvas* const canvas, uint8_t sx, uint8_t sy, uint8_t w, uint8_t h) {
+    canvas_set_color(canvas, ColorWhite);
+    for(uint8_t x = sx; x < sx + w; x += 2) {
+        for(uint8_t y = sy; y < sy + h; y++) {
+            canvas_draw_dot(canvas, x + (y % 2 == 1 ? 0 : 1), y);
+        }
+    }
+}
+
+//-----------------------------------------------------------------------------
+
 void elements_button_right_back(Canvas* canvas, const char* str) {
     const uint8_t button_height = 12;
     const uint8_t vertical_offset = 3;
@@ -29,6 +79,8 @@ void elements_button_right_back(Canvas* canvas, const char* str) {
         canvas, x - horizontal_offset - icon->width, y - icon_v_offset, &I_back_btn_10x8);
     canvas_invert_color(canvas);
 }
+
+//-----------------------------------------------------------------------------
 
 size_t
     elements_get_max_chars_to_fit(Canvas* canvas, Align horizontal, const char* text, uint8_t x) {
@@ -75,6 +127,8 @@ size_t
     furi_string_free(str);
     return result;
 }
+
+//-----------------------------------------------------------------------------
 
 void elements_multiline_text_aligned_limited(
     Canvas* canvas,
@@ -135,11 +189,15 @@ void elements_multiline_text_aligned_limited(
     }
 }
 
+//-----------------------------------------------------------------------------
+
 void hint_pill_single(Canvas* canvas, const char* str) {
     canvas_draw_rframe(canvas, 82, 53, 46, 11, 3);
     canvas_set_custom_u8g2_font(canvas, u8g2_font_micro_tr);
     canvas_draw_str_aligned(canvas, 104, 56, AlignCenter, AlignTop, str);
 }
+
+//-----------------------------------------------------------------------------
 
 void hint_pill_double(Canvas* canvas, const char* str1, const char* str2, const Icon* icon) {
     canvas_set_color(canvas, ColorBlack);
@@ -149,4 +207,121 @@ void hint_pill_double(Canvas* canvas, const char* str1, const char* str2, const 
     canvas_set_custom_u8g2_font(canvas, u8g2_font_micro_tr);
     canvas_draw_str_aligned(canvas, 110, 51, AlignCenter, AlignTop, str1);
     canvas_draw_str_aligned(canvas, 110, 57, AlignCenter, AlignTop, str2);
+}
+
+//-----------------------------------------------------------------------------
+
+void menu_pill(
+    Canvas* canvas,
+    int no,
+    int count,
+    bool selected,
+    bool masked,
+    const char* label,
+    const Icon* icon) {
+    UNUSED(count);
+
+    uint8_t height = 12;
+    uint8_t y_offset = 4;
+    uint8_t menu_pad_v = 4;
+    uint8_t menu_pad_h = 8;
+    uint8_t menu_total_w = 114;
+
+    uint8_t menu_off_x = (128 - menu_total_w) / 2;
+    uint8_t col = no % 2;
+    uint8_t row = no / 2;
+
+    uint8_t width = (menu_total_w - menu_pad_h) / 2;
+
+    uint8_t x = (col * (width + menu_pad_h)) + menu_off_x;
+    uint8_t origin_x = x + (width / 2);
+
+    uint8_t y = y_offset + row * (height + menu_pad_v);
+
+    canvas_set_color(canvas, selected ? ColorWhite : ColorBlack);
+    canvas_draw_rbox(canvas, x + 1, y + 1, width, height, 2);
+    canvas_set_color(canvas, selected ? ColorBlack : ColorWhite);
+    canvas_draw_rbox(canvas, x, y, width, height, 2);
+    canvas_set_color(canvas, ColorBlack);
+    canvas_draw_rframe(canvas, x, y, width, height, 2);
+    canvas_set_color(canvas, selected ? ColorWhite : ColorBlack);
+    canvas_set_font(canvas, FontSecondary);
+    canvas_draw_str_aligned(
+        canvas, origin_x + 6, y + (height / 2), AlignCenter, AlignCenter, label);
+
+    canvas_draw_icon(canvas, x + 3, y + 2, icon);
+
+    if(masked) {
+        mask_canvas(canvas, x, y, width + 1, height + 1);
+    }
+}
+
+//-----------------------------------------------------------------------------
+
+#define HIST_BRICK_W 13
+#define HIST_BRICK_H 18
+
+#define HIST_SPC_X 6
+#define HIST_SPC_Y 6
+#define HIST_PAD_X 8
+#define HIST_PAD_Y 8
+
+//-----------------------------------------------------------------------------
+
+void panel_histogram_elem(Canvas* canvas, uint8_t x, uint8_t y, uint8_t brick, uint8_t count) {
+    int bufSize = 8;
+    char buf[bufSize];
+
+    canvas_set_color(canvas, ColorBlack);
+
+    canvas_draw_icon(canvas, x + 2, y, tile_to_icon(brick, false));
+    canvas_set_font(canvas, FontPrimary);
+    memset(buf, 0, bufSize);
+    snprintf(buf, sizeof(buf), "%u", count);
+    canvas_draw_str_aligned(
+        canvas, x + (HIST_BRICK_W / 2), y + HIST_BRICK_H, AlignCenter, AlignBottom, buf);
+}
+
+//-----------------------------------------------------------------------------
+
+void panel_histogram(Canvas* canvas, const char* bricks, const uint8_t* values) {
+    const uint8_t len = strlen(bricks);
+
+    if(len == 0) {
+        return;
+    }
+
+    const uint8_t rows = (len > 4) ? 2 : 1;
+    const uint8_t breakpoint = (len > 4) ? (len - (len / 2)) : len;
+    const uint8_t widths[2] = {breakpoint, len - breakpoint};
+    const uint8_t columns = MAX(widths[0], widths[1]);
+
+    const uint8_t w = (columns * HIST_BRICK_W) + ((columns - 1) * HIST_SPC_X) + (2 * HIST_PAD_X);
+    const uint8_t h = (rows * HIST_BRICK_H) + ((rows - 1) * HIST_SPC_Y) + (2 * HIST_PAD_Y);
+
+    const uint8_t x = (128 - w) / 2;
+    const uint8_t y = (64 - h) / 2;
+
+    canvas_set_color(canvas, ColorBlack);
+    canvas_draw_rbox(canvas, x + 2, y + 2, w, h, 4);
+    canvas_set_color(canvas, ColorWhite);
+    canvas_draw_rbox(canvas, x, y, w, h, 4);
+    canvas_set_color(canvas, ColorBlack);
+    canvas_draw_rframe(canvas, x, y, w, h, 4);
+
+    uint8_t i, row = 0, col = 0;
+    uint8_t posx = x + HIST_PAD_X;
+    uint8_t posy = y + HIST_PAD_Y;
+
+    for(i = 0; i < len; i++) {
+        panel_histogram_elem(canvas, posx, posy, (uint8_t)(bricks[i]), values[i]);
+        col++;
+        posx += (HIST_BRICK_W + HIST_SPC_X);
+        if((rows > 1) && (i == breakpoint - 1)) {
+            row++;
+            col = 0;
+            posx = (x + HIST_PAD_X) + (widths[0] - widths[1]) * ((HIST_BRICK_W + HIST_SPC_X) / 2);
+            posy += (HIST_BRICK_H + HIST_SPC_Y);
+        }
+    }
 }

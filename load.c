@@ -13,6 +13,7 @@ LevelData* alloc_level_data() {
     ld->solution = furi_string_alloc();
     ld->board = furi_string_alloc();
     ld->title = furi_string_alloc();
+    ld->gamePar = 0;
     return ld;
 }
 
@@ -20,8 +21,25 @@ void free_level_data(LevelData* ld) {
     furi_string_free(ld->solution);
     furi_string_free(ld->board);
     furi_string_free(ld->title);
-
     free(ld);
+}
+
+LevelSet* alloc_level_set() {
+    LevelSet* ls = malloc(sizeof(LevelSet));
+    ls->title = furi_string_alloc();
+    ls->author = furi_string_alloc();
+    ls->description = furi_string_alloc();
+    ls->file = furi_string_alloc();
+    ls->maxLevel = 0;
+    return ls;
+}
+
+void free_level_set(LevelSet* ls) {
+    furi_string_free(ls->title);
+    furi_string_free(ls->author);
+    furi_string_free(ls->description);
+    furi_string_free(ls->file);
+    free(ls);
 }
 
 int load_level_row(uint8_t* pb, const char* psz, const char* pszMax) {
@@ -170,9 +188,11 @@ bool load_level(Storage* storage, const char* path, int level, LevelData* levelD
                 furi_string_right(levelData->solution, level_board_sep + 1);
                 furi_string_trim(levelData->solution, "\n\r\t");
 
+                levelData->gamePar = strlen(furi_string_get_cstr(levelData->solution)) / 2;
+
                 FURI_LOG_I(TAG, "LEVEL TITLE \"%s\"", furi_string_get_cstr(levelData->title));
-                FURI_LOG_I(TAG, "LEVEL BOARD \"%s\"", furi_string_get_cstr(levelData->board));
-                FURI_LOG_I(
+                FURI_LOG_D(TAG, "LEVEL BOARD \"%s\"", furi_string_get_cstr(levelData->board));
+                FURI_LOG_D(
                     TAG, "LEVEL SOLUTION \"%s\"", furi_string_get_cstr(levelData->solution));
 
                 break;
@@ -189,4 +209,11 @@ bool load_level(Storage* storage, const char* path, int level, LevelData* levelD
     } else {
         return false;
     }
+}
+
+bool load_level_set(Storage* storage, const char* path, LevelSet* levelSet) {
+    UNUSED(storage);
+    UNUSED(path);
+    levelSet->maxLevel = 20;
+    return true;
 }

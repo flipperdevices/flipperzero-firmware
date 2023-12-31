@@ -1,19 +1,8 @@
 #pragma once
 
-#include "common.h"
-
-#define MOVABLE_NOT 0
-#define MOVABLE_LEFT 1
-#define MOVABLE_RIGHT 2
-#define MOVABLE_BOTH 3
-
-#define MOVABLE_NOT_FOUND 128
+#include "game.h"
 
 typedef uint8_t MovabilityTab[SIZE_Y][SIZE_X];
-
-inline bool is_block(uint8_t tile) {
-    return (tile > 0) && (tile != WALL_TILE);
-}
 
 inline uint8_t coord_from(uint8_t x, uint8_t y) {
     return (y * SIZE_X) + x;

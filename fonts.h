@@ -1,7 +1,6 @@
 #pragma once
 
-#include "common.h"
-#include <gui/gui.h>
+#include <furi.h>
 
 extern const uint8_t u8g2_font_squeezed_r6_tr[708];
 extern const uint8_t u8g2_font_wedge_tr[792];
