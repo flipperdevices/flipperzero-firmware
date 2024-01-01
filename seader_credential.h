@@ -36,6 +36,7 @@ typedef struct {
     uint64_t credential;
     size_t bit_length;
     uint8_t sio[128];
+    uint8_t sio_len;
     uint8_t diversifier[8];
     uint8_t diversifier_len;
     SeaderCredentialType type;

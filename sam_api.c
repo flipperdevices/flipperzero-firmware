@@ -321,7 +321,7 @@ bool seader_unpack_pacs(Seader* seader, uint8_t* buf, size_t size) {
 
             memset(display, 0, sizeof(display));
             if(seader_credential->sio[0] == 0x30) {
-                for(uint8_t i = 0; i < sizeof(seader_credential->sio); i++) {
+                for(uint8_t i = 0; i < seader_credential->sio_len; i++) {
                     snprintf(
                         display + (i * 2), sizeof(display), "%02x", seader_credential->sio[i]);
                 }
@@ -478,22 +478,25 @@ void seader_capture_sio(BitBuffer* tx_buffer, BitBuffer* rx_buffer, SeaderCreden
     if(credential->type == SeaderCredentialTypePicopass) {
         if(memcmp(buffer, read4Block6, len) == 0 && rxBuffer[0] == 0x30) {
             memcpy(credential->sio, rxBuffer, 32);
+            credential->sio_len += 32;
         } else if(memcmp(buffer, read4Block10, len) == 0 && rxBuffer[0] == 0x30) {
             memcpy(credential->sio, rxBuffer, 32);
+            credential->sio_len += 32;
         } else if(memcmp(buffer, read4Block9, len) == 0) {
             memcpy(credential->sio + 32, rxBuffer + 8, 24);
+            credential->sio_len += 24;
         } else if(memcmp(buffer, read4Block13, len) == 0) {
             memcpy(credential->sio + 32, rxBuffer + 8, 24);
+            credential->sio_len += 24;
         }
     } else if(credential->type == SeaderCredentialType14A) {
         // Desfire EV1 passes SIO in the clear
         uint8_t desfire_read[] = {
             0x90, 0xbd, 0x00, 0x00, 0x07, 0x0f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
         if(memcmp(buffer, desfire_read, len) == 0 && rxBuffer[0] == 0x30) {
-            memcpy(
-                credential->sio,
-                rxBuffer,
-                bit_buffer_get_size_bytes(rx_buffer) - 2); // -2 for the APDU response bytes
+            credential->sio_len =
+                bit_buffer_get_size_bytes(rx_buffer) - 2; // -2 for the APDU response bytes
+            memcpy(credential->sio, rxBuffer, credential->sio_len);
         }
     }
 }
