@@ -67,7 +67,7 @@ bool minesweeper_scene_start_screen_on_event(void* context, SceneManagerEvent ev
 
     if (event.type == SceneManagerEventTypeCustom) {
         if (event.event == MineSweeperSceneStartScreenContinueEvent) {
-            scene_manager_next_scene(app->scene_manager, MineSweeperSceneMenu); 
+            scene_manager_next_scene(app->scene_manager, MineSweeperSceneGameScreen); 
             consumed = true;
         } else if (event.event == MineSweeperSceneStartScreenExitEvent) {
             // Exit app
