@@ -19,6 +19,7 @@
 #include "scenes/minesweeper_scene.h"
 
 #include "views/start_screen.h"
+#include "views/minesweeper_game_screen.h"
 
 //#include <assets_icons.h>
 #include "minesweeper_icons.h"
@@ -34,6 +35,7 @@ typedef struct MineSweeperApp {
     ViewDispatcher* view_dispatcher;
     StartScreen* start_screen;
     Loading* loading;
+    MineSweeperGameScreen* game_screen;
     DialogEx* menu;
     uint32_t haptic;
     uint32_t speaker;
@@ -44,6 +46,7 @@ typedef struct MineSweeperApp {
 typedef enum {
     MineSweeperStartScreenView,
     MineSweeperLoadingView,
+    MineSweeperGameScreenView,
     MineSweeperMenuView,
     MineSweeperViewCount,
 } MineSweeperView;
