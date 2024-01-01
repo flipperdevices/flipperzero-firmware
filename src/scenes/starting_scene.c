@@ -6,6 +6,9 @@
 #include "../tone_gen.h"
 #include "../utils/linked_list.h"
 
+// Icons to include
+#include "tone_gen_icons.h"
+
 /** indices for menu items */
 typedef enum {
     ToneGenAppMenuSelection_Play,
@@ -43,14 +46,14 @@ void scene_on_enter_starting_scene(void* context) {
     menu_add_item(
         menuView->viewData,
         "Play Tone",
-        NULL,
+        &A_play_button,
         ToneGenAppMenuSelection_Play,
         menu_callback_starting_scene,
         app);
     menu_add_item(
         menuView->viewData,
         "Adjust Tone",
-        NULL,
+        &A_settings_button,
         ToneGenAppMenuSelection_Adjust,
         menu_callback_starting_scene,
         app);
