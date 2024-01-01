@@ -5,6 +5,7 @@ enum SubmenuIndex {
     SubmenuIndexWrite,
     SubmenuIndexChangePassword,
     SubmenuIndexSetShadowMode,
+    SubmenuIndexSetDirectWriteBlock0Mode,
     SubmenuIndexGetRevision,
     SubmenuIndexGetConfig,
     SubmenuIndexWipe,
@@ -32,6 +33,12 @@ void nfc_magic_scene_gen4_menu_on_enter(void* context) {
         submenu,
         "Set Shadow Mode",
         SubmenuIndexSetShadowMode,
+        nfc_magic_scene_gen4_menu_submenu_callback,
+        instance);
+    submenu_add_item(
+        submenu,
+        "Set Direct Write To Block 0 Mode",
+        SubmenuIndexSetDirectWriteBlock0Mode,
         nfc_magic_scene_gen4_menu_submenu_callback,
         instance);
     submenu_add_item(
@@ -78,6 +85,10 @@ bool nfc_magic_scene_gen4_menu_on_event(void* context, SceneManagerEvent event) 
             consumed = true;
         } else if(event.event == SubmenuIndexSetShadowMode) {
             scene_manager_next_scene(instance->scene_manager, NfcMagicSceneGen4SelectShdMode);
+            consumed = true;
+        } else if(event.event == SubmenuIndexSetDirectWriteBlock0Mode) {
+            scene_manager_next_scene(
+                instance->scene_manager, NfcMagicSceneGen4SelectDirectWriteBlock0Mode);
             consumed = true;
         }
 
