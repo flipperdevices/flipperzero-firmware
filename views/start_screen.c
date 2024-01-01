@@ -120,8 +120,7 @@ bool start_screen_view_input_callback(InputEvent* event, void* context) {
 
     // If custom input callback is defined pass event to it 
     if (start_screen->input_callback != NULL) {
-        start_screen->input_callback(event, start_screen->context); 
-        consumed = true;
+        consumed = start_screen->input_callback(event, start_screen->context); 
     } else {
         // You can add default functionality here
     }
@@ -160,6 +159,8 @@ StartScreen* start_screen_alloc() {
     StartScreen* start_screen = (StartScreen*)malloc(sizeof(StartScreen));
     
     start_screen->view = view_alloc();
+
+    start_screen->input_callback = NULL;
 
     start_screen->timer = furi_timer_alloc(start_screen_timer_callback, FuriTimerTypeOnce, start_screen);
     furi_assert(start_screen->timer);
