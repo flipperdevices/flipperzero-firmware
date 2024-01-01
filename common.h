@@ -8,10 +8,14 @@
 #define SIZE_Y 8
 #define TILE_SIZE 8
 
+#define SIZE_X_BG 16
+#define SIZE_Y_BG 8
+
 #define WALL_TILE 9
 #define EMPTY_TILE 0
 
 #define MENU_PAUSED_COUNT 6
+#define MAIN_MENU_COUNT 3
 
 // -- move -----------------
 
@@ -25,6 +29,8 @@
 // -------------------------
 
 typedef uint8_t PlayGround[SIZE_Y][SIZE_X];
+typedef uint8_t BackGround[SIZE_Y_BG][SIZE_X_BG];
+
 
 typedef struct {
     uint8_t ofBrick[WALL_TILE];

@@ -29,4 +29,6 @@ void menu_pill(
     const char* label,
     const Icon* icon);
 
+void main_menu_pill(Canvas* canvas, uint8_t y, uint8_t w, bool selected, const char* label);
+
 void panel_histogram(Canvas* canvas, const char* bricks, const uint8_t* values);

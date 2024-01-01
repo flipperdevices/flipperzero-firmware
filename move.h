@@ -22,10 +22,6 @@ inline uint8_t movable_dir(MovabilityTab* mv, uint8_t current_movable) {
                MOVABLE_NOT;
 }
 
-inline void clear_board(PlayGround* ani) {
-    memset(ani, '\0', sizeof(uint8_t) * SIZE_X * SIZE_Y);
-}
-
 void map_movability(PlayGround* pg, MovabilityTab* mv);
 
 uint8_t find_movable(MovabilityTab* mv);

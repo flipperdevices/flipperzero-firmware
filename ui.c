@@ -258,6 +258,27 @@ void menu_pill(
 
 //-----------------------------------------------------------------------------
 
+void main_menu_pill(Canvas* canvas, uint8_t y, uint8_t w, bool selected, const char* label) {
+    uint8_t height = 12;
+
+    uint8_t x = (128 - w) / 2;
+    uint8_t origin_x = x + (w / 2);
+
+    canvas_set_color(canvas, selected ? ColorWhite : ColorBlack);
+    canvas_draw_rbox(canvas, x + 1, y + 1, w, height, 2);
+    canvas_set_color(canvas, selected ? ColorBlack : ColorWhite);
+    canvas_draw_rbox(canvas, x, y, w, height, 2);
+    canvas_set_color(canvas, ColorBlack);
+    canvas_draw_rframe(canvas, x, y, w, height, 2);
+    canvas_set_color(canvas, selected ? ColorWhite : ColorBlack);
+    canvas_draw_str_aligned(
+        canvas, origin_x, y + (height / 2), AlignCenter, AlignCenter, label);
+
+    //canvas_draw_icon(canvas, x + 3, y + 2, icon);
+}
+
+//-----------------------------------------------------------------------------
+
 #define HIST_BRICK_W 13
 #define HIST_BRICK_H 18
 

@@ -7,6 +7,8 @@
 #include "load.h"
 #include "stats.h"
 
+//-----------------------------------------------------------------------------
+
 typedef struct {
     uint8_t u;
     uint8_t l;
@@ -20,6 +22,7 @@ typedef struct {
 
 typedef enum {
     MAIN_MENU,
+    INTRO,
     SELECT_BRICK,
     SELECT_DIRECTION,
     MOVE_SIDES,
@@ -30,6 +33,12 @@ typedef enum {
     GAME_OVER,
     LEVEL_FINISHED,
 } State;
+
+typedef enum {
+    NEW_GAME,
+    CONTINUE,
+    CUSTOM,
+} GameMode;
 
 typedef enum {
     NOT_GAME_OVER = 0,
@@ -71,12 +80,45 @@ typedef struct {
     uint8_t current_movable;
     uint8_t next_movable;
     uint8_t menu_paused_pos;
+    uint8_t main_menu_pos;
+    GameMode main_menu_mode;
+    bool hasContinue;
 
     // game state
     GameOver gameOverReason;
     MoveInfo move;
 
+    BackGround bg;
+
 } Game;
+
+//-----------------------------------------------------------------------------
 
 Game* alloc_game_state(int* error);
 void free_game_state(Game* game);
+
+//-----------------------------------------------------------------------------
+
+GameOver is_game_over(PlayGround* mv, Stats* stats);
+bool is_level_finished(Stats* stats);
+Neighbors find_neighbors(PlayGround* pg, uint8_t x, uint8_t y);
+
+//-----------------------------------------------------------------------------
+
+void initial_load_game(Game* game);
+void start_game_at_level(Game* game, uint8_t levelNo);
+void refresh_level(Game* g);
+
+//-----------------------------------------------------------------------------
+
+void click_selected(Game* game);
+
+void start_gravity(Game* g);
+void stop_gravity(Game* g);
+void start_explosion(Game* g);
+void stop_explosion(Game* g);
+void start_move(Game* g, uint8_t direction);
+void stop_move(Game* g);
+
+void movement_stoped(Game* g);
+bool undo(Game* g);
