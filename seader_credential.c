@@ -72,6 +72,7 @@ static bool seader_credential_load(SeaderCredential* cred, FuriString* path, boo
         // Optional SIO/Diversifier
         flipper_format_read_hex(file, "SIO", cred->sio, sizeof(cred->sio));
         flipper_format_read_hex(file, "Diversifier", cred->diversifier, sizeof(cred->diversifier));
+        cred->diversifier_len = sizeof(cred->diversifier); // No way to know real length;
 
         parsed = true;
     } while(false);
@@ -364,7 +365,7 @@ bool seader_credential_save_agnostic(SeaderCredential* cred, const char* name) {
         if(cred->sio[0] == 0x30) {
             if(!flipper_format_write_hex(file, "SIO", cred->sio, sizeof(cred->sio))) break;
             if(!flipper_format_write_hex(
-                   file, "Diversifier", cred->diversifier, sizeof(cred->diversifier)))
+                   file, "Diversifier", cred->diversifier, cred->diversifier_len))
                 break;
         }
 
@@ -643,6 +644,7 @@ void seader_credential_clear(SeaderCredential* cred) {
     cred->type = SeaderCredentialTypeNone;
     memset(cred->sio, 0, sizeof(cred->sio));
     memset(cred->diversifier, 0, sizeof(cred->diversifier));
+    cred->diversifier_len = 0;
     furi_string_reset(cred->load_path);
 }
 

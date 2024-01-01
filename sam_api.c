@@ -774,6 +774,7 @@ NfcCommand seader_worker_card_detect(
         OCTET_STRING_fromBuf(
             &cardDetails->protocol, (const char*)protocol_bytes, sizeof(protocol_bytes));
         memcpy(credential->diversifier, uid, uid_len);
+        credential->diversifier_len = uid_len;
     } else {
         protocol_bytes[1] = FrameProtocol_nfc;
         OCTET_STRING_fromBuf(
@@ -783,6 +784,7 @@ NfcCommand seader_worker_card_detect(
         cardDetails->atqa = &atqa_string;
         if(seader_mf_df_check_card_type(atqa[0], atqa[1], sak)) {
             memcpy(credential->diversifier, uid, uid_len);
+            credential->diversifier_len = uid_len;
         }
     }
 

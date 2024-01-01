@@ -37,6 +37,7 @@ typedef struct {
     size_t bit_length;
     uint8_t sio[128];
     uint8_t diversifier[8];
+    uint8_t diversifier_len;
     SeaderCredentialType type;
     SeaderCredentialSaveFormat save_format;
     char name[SEADER_CRED_NAME_MAX_LEN + 1];
