@@ -1,5 +1,6 @@
 #include "minesweeper_game_screen.h"
 #include "minesweeper_icons.h"
+
 #include <gui/elements.h>
 #include <gui/icon_animation.h>
 #include <input/input.h>
@@ -48,6 +49,7 @@ typedef enum {
 struct MineSweeperGameScreen {
     View* view;
     void* context;
+    GameScreenInputCallback input_callback;
 };
 
 typedef struct {
@@ -108,18 +110,30 @@ void mine_sweeper_game_screen_view_draw_callback(Canvas* canvas, void* _model) {
     canvas_clear(canvas);
 
     canvas_set_color(canvas, ColorBlack);
-    //canvas_set_color(canvas, ColorWhite);
 
     for (uint8_t i = 0; i < MINESWEEPER_BOARD_TILE_COUNT; i++) {
 
         MineSweeperTile tile = model->board[i];
 
         if (tile.icon_element.icon != NULL) {
-            canvas_draw_icon(
-                canvas,
-                tile.icon_element.x,
-                tile.icon_element.y,
-                tile.icon_element.icon);
+            if ( model->curr_pos.x * MINESWEEPER_BOARD_WIDTH + model->curr_pos.y == i) {
+                inverted_canvas_white_to_black(
+                    canvas,
+                    {
+                        canvas_draw_icon(
+                            canvas,
+                            tile.icon_element.y,
+                            tile.icon_element.x,
+                            tile.icon_element.icon);
+                    });
+
+            } else {
+                canvas_draw_icon(
+                    canvas,
+                    tile.icon_element.y,
+                    tile.icon_element.x,
+                    tile.icon_element.icon);
+            }
         }
     }
 
@@ -128,11 +142,69 @@ void mine_sweeper_game_screen_view_draw_callback(Canvas* canvas, void* _model) {
 bool mine_sweeper_game_screen_view_input_callback(InputEvent* event, void* context) {
     furi_assert(context);
 
-    //MineSweeperGameScreen* mine_sweeper_game_screen = context;
+    MineSweeperGameScreen* instance = context;
     bool consumed = false;
+    
+    // In this input callback we can change the view model according to the event
+    // then pass it to the custom input callback defined in the scene manager
+    if (event->type == InputTypePress) {
+        switch (event->key) {
 
-    UNUSED(context);
-    UNUSED(event);
+            case InputKeyUp :
+                with_view_model(
+                    instance->view,
+                    MineSweeperGameScreenModel * model,
+                    {
+                        model->curr_pos.x = (model->curr_pos.x-1 < 0) ? 0 : model->curr_pos.x-1;
+                    },
+                    true);
+                consumed = true;
+                break;
+
+            case InputKeyDown :
+                with_view_model(
+                    instance->view,
+                    MineSweeperGameScreenModel * model,
+                    {
+                        model->curr_pos.x = (model->curr_pos.x+1 >= MINESWEEPER_BOARD_HEIGHT) ? MINESWEEPER_BOARD_HEIGHT-1 : model->curr_pos.x+1;
+                    },
+                    true);
+                consumed = true;
+                break;
+
+            case InputKeyRight :
+                with_view_model(
+                    instance->view,
+                    MineSweeperGameScreenModel * model,
+                    {
+                        model->curr_pos.y = (model->curr_pos.y+1 >= MINESWEEPER_BOARD_WIDTH) ? MINESWEEPER_BOARD_WIDTH-1 : model->curr_pos.y+1;
+                    },
+                    true);
+                consumed = true;
+                break;
+
+            case InputKeyLeft :
+                with_view_model(
+                    instance->view,
+                    MineSweeperGameScreenModel * model,
+                    {
+                        model->curr_pos.y = (model->curr_pos.y-1 < 0) ? 0 : model->curr_pos.y-1;
+                    },
+                    true);
+                consumed = true;
+                break;
+
+            case InputKeyOk :
+                break;
+
+            default:
+                break;
+        }
+    }
+
+    if (!consumed && instance->input_callback != NULL) {
+        consumed = instance->input_callback(event, instance->context);
+    }
 
     return consumed;
 }
@@ -140,36 +212,61 @@ bool mine_sweeper_game_screen_view_input_callback(InputEvent* event, void* conte
 static void setup_board(MineSweeperGameScreen* instance) {
     furi_assert(instance);
 
-    // Randomly generate a tile type for each board tile
-    uint8_t mines_generated = 0;
-
     MineSweeperGameScreenTileType tiles[MINESWEEPER_BOARD_TILE_COUNT];
+    memset(&tiles, 0, sizeof(tiles));
 
-    for (uint8_t i = 0; i < MINESWEEPER_BOARD_TILE_COUNT; i++) {
-        MineSweeperGameScreenTileType tile_type = MineSweeperGameScreenTileNone;
+    for (uint8_t i = 0; i < MINESWEEPER_STARTING_MINES; i++) {
+        uint8_t rand_pos;
 
         do {
-            tile_type = (furi_hal_random_get() % (MineSweeperGameScreenTileTypeCount-1)) + 1;
-        } while (mines_generated == MINESWEEPER_STARTING_MINES && tile_type == MineSweeperGameScreenTileMine);
-        
-        if (tile_type == MineSweeperGameScreenTileMine) {
-            mines_generated++;
-        }
-
-        tiles[i] = tile_type;
-    }
-
-    // If not all mines are added randomly add them to board positions
-    while (mines_generated < MINESWEEPER_STARTING_MINES) {
-        uint8_t rand_pos = furi_hal_random_get() % MINESWEEPER_BOARD_TILE_COUNT;
-        
-        if (tiles[rand_pos] == MineSweeperGameScreenTileMine)
-            continue;
+            rand_pos = furi_hal_random_get() % MINESWEEPER_BOARD_TILE_COUNT;
+        } while (tiles[rand_pos] == MineSweeperGameScreenTileMine);
 
         tiles[rand_pos] = MineSweeperGameScreenTileMine;
-        mines_generated++;
+    }
+
+    // All mines are set so we look at each tile for surrounding mines
+    for (uint8_t i = 0; i < MINESWEEPER_BOARD_TILE_COUNT; i++) {
+        MineSweeperGameScreenTileType tile_type = tiles[i];
+
+        if (tile_type == MineSweeperGameScreenTileMine) {
+            continue;
+        }
+
+        uint8_t x = i / MINESWEEPER_BOARD_WIDTH;
+        uint8_t y = i % MINESWEEPER_BOARD_WIDTH;
+
+        uint8_t offsets[8][2] = {
+            {-1,1},
+            {0,1},
+            {1,1},
+            {1,0},
+            {1,-1},
+            {0,-1},
+            {-1,-1},
+            {-1,0},
+        };
+
+        uint8_t mine_count = 0;
+
+        for (uint8_t j = 0; j < 8; j++) {
+            int8_t dx = x + offsets[j][0];
+            int8_t dy = y + offsets[j][1];
+
+            if (dx < 0 || dy < 0 || dx >= MINESWEEPER_BOARD_HEIGHT || dy >= MINESWEEPER_BOARD_WIDTH) {
+                continue;
+            }
+
+            uint8_t pos = dx * MINESWEEPER_BOARD_WIDTH + dy;
+            if (tiles[pos] == MineSweeperGameScreenTileMine) {
+                mine_count++;
+            }
+        }
+
+        tiles[i] = (MineSweeperGameScreenTileType) ((mine_count % (MineSweeperGameScreenTileTypeCount-1)) + 1);
 
     }
+
 
     // Save tiles to view model
     // Because of way tile enum and Icon* array is set up we can
@@ -210,6 +307,9 @@ MineSweeperGameScreen* mine_sweeper_game_screen_alloc() {
     view_set_enter_callback(mine_sweeper_game_screen->view, mine_sweeper_game_screen_view_enter);
     view_set_exit_callback(mine_sweeper_game_screen->view, mine_sweeper_game_screen_view_exit);
 
+    mine_sweeper_game_screen->input_callback = NULL;
+
+    setup_board(mine_sweeper_game_screen);
     
     return mine_sweeper_game_screen;
 }
@@ -235,6 +335,8 @@ void mine_sweeper_game_screen_free(MineSweeperGameScreen* instance) {
 // This should not be called in the on_exit in the game scene unless the state is saved.
 void mine_sweeper_game_screen_reset(MineSweeperGameScreen* instance) {
     furi_assert(instance);
+    
+    instance->input_callback = NULL;
 
     setup_board(instance);
 
@@ -243,6 +345,11 @@ void mine_sweeper_game_screen_reset(MineSweeperGameScreen* instance) {
 View* mine_sweeper_game_screen_get_view(MineSweeperGameScreen* instance) {
     furi_assert(instance);
     return instance->view;
+}
+
+void mine_sweeper_game_screen_set_input_callback(MineSweeperGameScreen* instance, GameScreenInputCallback callback) {
+    furi_assert(instance);
+    instance->input_callback = callback;
 }
 
 void mine_sweeper_game_screen_set_context(MineSweeperGameScreen* instance, void* context) {
