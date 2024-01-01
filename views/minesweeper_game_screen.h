@@ -8,10 +8,23 @@
 
 #include <gui/view.h>
 
-#define MINESWEEPER_BOARD_HEIGHT 8
-#define MINESWEEPER_BOARD_WIDTH 16
-#define MINESWEEPER_BOARD_TILE_COUNT (MINESWEEPER_BOARD_HEIGHT * MINESWEEPER_BOARD_WIDTH)
-#define MINESWEEPER_STARTING_MINES 20
+// MAX TILES ALLOWED
+#define MINESWEEPER_BOARD_MAX_TILES  (1<<10)
+
+// These defines represent how many tiles
+// can be visually representen on the screen 
+#define MINESWEEPER_SCREEN_TILE_HEIGHT 8
+#define MINESWEEPER_SCREEN_TILE_WIDTH 16
+
+// These defines currently represent the actual
+// width and hight in tiles for the board.
+// This should be replaced with uint8_t members in the 
+// view model that can be changed by the user
+#define MINESWEEPER_BOARD_TILE_HEIGHT 8 
+#define MINESWEEPER_BOARD_TILE_WIDTH 128 
+
+#define MINESWEEPER_BOARD_TILE_COUNT (MINESWEEPER_BOARD_TILE_HEIGHT * MINESWEEPER_BOARD_TILE_WIDTH)
+#define MINESWEEPER_STARTING_MINES (MINESWEEPER_BOARD_TILE_COUNT * .20f)
 
 #ifdef __cplusplus
 extern "C" {
@@ -76,7 +89,7 @@ void mine_sweeper_game_screen_set_context(MineSweeperGameScreen* instance, void*
  * @param       x       row in board grid
  * @param       y       column in board grid
  */
-bool mine_sweeper_is_tile_mine(MineSweeperGameScreen* instance, uint8_t x, uint8_t y);
+bool mine_sweeper_is_tile_mine(MineSweeperGameScreen* instance, uint16_t x, uint16_t y);
 
 
 #define inverted_canvas_white_to_black(canvas, code)      \
