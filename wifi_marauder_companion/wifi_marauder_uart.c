@@ -2,11 +2,9 @@
 #include "wifi_marauder_uart.h"
 
 #include <xtreme/xtreme.h>
-#define XTREME_UART_CH \
-    (xtreme_settings.uart_esp_channel == UARTDefault ? FuriHalUartIdUSART1 : FuriHalUartIdLPUART1)
-bool xtreme_uart = false;
 
-#define UART_CH (FuriHalUartIdUSART1)
+#define UART_CH \
+    (xtreme_settings.uart_esp_channel == UARTDefault ? FuriHalUartIdUSART1 : FuriHalUartIdLPUART1)
 #define BAUDRATE (115200)
 
 struct WifiMarauderUart {
@@ -133,13 +131,8 @@ static int32_t uart_worker(void* context) {
     return 0;
 }
 
-// Will switch appropriately based on whether usart_init or xtreme_uart_init was called
 void wifi_marauder_uart_tx(uint8_t* data, size_t len) {
-    if(xtreme_uart) {
-        furi_hal_uart_tx(XTREME_UART_CH, data, len);
-    } else {
-        furi_hal_uart_tx(UART_CH, data, len);
-    }
+    furi_hal_uart_tx(UART_CH, data, len);
 }
 
 WifiMarauderUart*
@@ -167,13 +160,7 @@ WifiMarauderUart*
     return uart;
 }
 
-WifiMarauderUart* wifi_marauder_xtreme_uart_init(WifiMarauderApp* app) {
-    xtreme_uart = true;
-    return wifi_marauder_uart_init(app, XTREME_UART_CH, "WifiMarauderUartRxThread");
-}
-
 WifiMarauderUart* wifi_marauder_usart_init(WifiMarauderApp* app) {
-    xtreme_uart = false;
     return wifi_marauder_uart_init(app, UART_CH, "WifiMarauderUartRxThread");
 }
 

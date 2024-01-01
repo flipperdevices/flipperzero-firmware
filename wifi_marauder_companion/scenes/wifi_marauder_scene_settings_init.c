@@ -63,10 +63,6 @@ bool wifi_marauder_scene_settings_init_on_event(void* context, SceneManagerEvent
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        if(app->which_prompt == PROMPT_PCAPS) {
-            wifi_marauder_uart_free(app->uart);
-        }
-
         // get which button press: "Yes" or "No"
         if(event.event == GuiButtonTypeRight) {
             // Yes
@@ -86,12 +82,6 @@ bool wifi_marauder_scene_settings_init_on_event(void* context, SceneManagerEvent
 
         // save setting to file, load next widget or scene
         if(app->which_prompt == PROMPT_PCAPS) {
-            if(app->ok_to_save_pcaps) {
-                app->uart = wifi_marauder_usart_init(app);
-            } else {
-                app->uart = wifi_marauder_xtreme_uart_init(app);
-            }
-
             if(storage_file_open(
                    app->save_pcap_setting_file,
                    SAVE_PCAP_SETTING_FILEPATH,
