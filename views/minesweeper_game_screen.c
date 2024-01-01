@@ -53,11 +53,11 @@ struct MineSweeperGameScreen {
 };
 
 typedef struct {
-    uint8_t x, y;
+    uint16_t x_abs, y_abs;
 } CurrentPosition;
 
 typedef struct {
-    uint8_t x, y;
+    uint16_t x_abs, y_abs;
     const Icon* icon;
 } IconElement;
 
@@ -69,9 +69,10 @@ typedef struct {
 
 typedef struct {
     MineSweeperTile board[ MINESWEEPER_BOARD_TILE_COUNT ];
-    uint8_t mines_left;
-    uint8_t flags_left;
+    uint16_t mines_left;
+    uint16_t flags_left;
     CurrentPosition curr_pos;
+    uint8_t right_boundary, bottom_boundary;
 } MineSweeperGameScreenModel;
 
 void mine_sweeper_game_screen_view_enter(void* context) {
@@ -110,30 +111,49 @@ void mine_sweeper_game_screen_view_draw_callback(Canvas* canvas, void* _model) {
     canvas_clear(canvas);
 
     canvas_set_color(canvas, ColorBlack);
+    
 
-    for (uint8_t i = 0; i < MINESWEEPER_BOARD_TILE_COUNT; i++) {
 
-        MineSweeperTile tile = model->board[i];
+    /** We can use the boundary uint8_t in the model to transform the relative x/y coordinates
+     * to the absolute x/y positions on the whole board grid.
+     *
+     * The relative coordinates start at zero and go to the screen height and width for x and y
+     * repsectively.
+     *
+     *  Once we have the correct absolute x/y coord we can use that to access the correct position for the
+     *  tille in the 1D buffer within the model.
+     *
+     * We draw the icons with the relative x and y values while the tile within the model has its absolute x/y
+     */
 
-        if (tile.icon_element.icon != NULL) {
-            if ( model->curr_pos.x * MINESWEEPER_BOARD_WIDTH + model->curr_pos.y == i) {
+    for (uint8_t x_rel = 0; x_rel < MINESWEEPER_SCREEN_TILE_HEIGHT; x_rel++) {
+        uint16_t x_abs = (model->bottom_boundary - MINESWEEPER_SCREEN_TILE_HEIGHT) + x_rel;
+        
+        for (uint8_t y_rel = 0; y_rel < MINESWEEPER_SCREEN_TILE_WIDTH; y_rel++) {
+            uint16_t y_abs = (model->right_boundary - MINESWEEPER_SCREEN_TILE_WIDTH) + y_rel;
+
+            uint16_t board_buffer_pos = x_abs * MINESWEEPER_BOARD_TILE_WIDTH + y_abs;
+            MineSweeperTile tile = model->board[board_buffer_pos];
+
+            if (model->curr_pos.x_abs * MINESWEEPER_BOARD_TILE_WIDTH + model->curr_pos.y_abs == board_buffer_pos) {
                 inverted_canvas_white_to_black(
                     canvas,
                     {
                         canvas_draw_icon(
                             canvas,
-                            tile.icon_element.y,
-                            tile.icon_element.x,
+                            y_rel * icon_get_width(tile.icon_element.icon),
+                            x_rel * icon_get_height(tile.icon_element.icon),
                             tile.icon_element.icon);
                     });
 
             } else {
                 canvas_draw_icon(
                     canvas,
-                    tile.icon_element.y,
-                    tile.icon_element.x,
+                    y_rel * icon_get_width(tile.icon_element.icon),
+                    x_rel * icon_get_height(tile.icon_element.icon),
                     tile.icon_element.icon);
             }
+
         }
     }
 
@@ -147,7 +167,14 @@ bool mine_sweeper_game_screen_view_input_callback(InputEvent* event, void* conte
     
     // In this input callback we can change the view model according to the event
     // then pass it to the custom input callback defined in the scene manager
-    if (event->type == InputTypePress) {
+    if ((event->type == InputTypePress) && (event->key == InputKeyOk)) {
+
+        // register that something good or bad happened
+        // Do we still pass this to the input callback in the scene manager?
+
+        consumed = true;
+
+    } else if ((event->type == InputTypePress) || (event->type == InputTypeRepeat)) {
         switch (event->key) {
 
             case InputKeyUp :
@@ -155,7 +182,13 @@ bool mine_sweeper_game_screen_view_input_callback(InputEvent* event, void* conte
                     instance->view,
                     MineSweeperGameScreenModel * model,
                     {
-                        model->curr_pos.x = (model->curr_pos.x-1 < 0) ? 0 : model->curr_pos.x-1;
+                        model->curr_pos.x_abs = (model->curr_pos.x_abs-1 < 0) ? 0 : model->curr_pos.x_abs-1;
+
+                        bool is_outside_boundary = model->curr_pos.x_abs < (model->bottom_boundary - MINESWEEPER_SCREEN_TILE_HEIGHT);
+                        
+                        if (is_outside_boundary /**&& model->bottom_boundary-1 >= MINESWEEPER_SCREEN_TILE_HEIGHT*/) {
+                            model->bottom_boundary--;
+                        }
                     },
                     true);
                 consumed = true;
@@ -166,18 +199,14 @@ bool mine_sweeper_game_screen_view_input_callback(InputEvent* event, void* conte
                     instance->view,
                     MineSweeperGameScreenModel * model,
                     {
-                        model->curr_pos.x = (model->curr_pos.x+1 >= MINESWEEPER_BOARD_HEIGHT) ? MINESWEEPER_BOARD_HEIGHT-1 : model->curr_pos.x+1;
-                    },
-                    true);
-                consumed = true;
-                break;
+                        model->curr_pos.x_abs = (model->curr_pos.x_abs+1 >= MINESWEEPER_BOARD_TILE_HEIGHT) ?
+                            MINESWEEPER_BOARD_TILE_HEIGHT-1 : model->curr_pos.x_abs+1;
 
-            case InputKeyRight :
-                with_view_model(
-                    instance->view,
-                    MineSweeperGameScreenModel * model,
-                    {
-                        model->curr_pos.y = (model->curr_pos.y+1 >= MINESWEEPER_BOARD_WIDTH) ? MINESWEEPER_BOARD_WIDTH-1 : model->curr_pos.y+1;
+                        bool is_outside_boundary = model->curr_pos.x_abs >= model->bottom_boundary;
+
+                        if (is_outside_boundary /**&& model->bottom_boundary+1 <= MINESWEEPER_BOARD_TILE_HEIGHT*/) {
+                            model->bottom_boundary++;
+                        }
                     },
                     true);
                 consumed = true;
@@ -188,7 +217,31 @@ bool mine_sweeper_game_screen_view_input_callback(InputEvent* event, void* conte
                     instance->view,
                     MineSweeperGameScreenModel * model,
                     {
-                        model->curr_pos.y = (model->curr_pos.y-1 < 0) ? 0 : model->curr_pos.y-1;
+                        model->curr_pos.y_abs = (model->curr_pos.y_abs-1 < 0) ? 0 : model->curr_pos.y_abs-1;
+
+                        bool is_outside_boundary = model->curr_pos.y_abs < (model->right_boundary - MINESWEEPER_SCREEN_TILE_WIDTH);
+                        
+                        if (is_outside_boundary /**&& model->right_boundary-1 >= MINESWEEPER_SCREEN_TILE_WIDTH*/) {
+                            model->right_boundary--;
+                        }
+                    },
+                    true);
+                consumed = true;
+                break;
+
+            case InputKeyRight :
+                with_view_model(
+                    instance->view,
+                    MineSweeperGameScreenModel * model,
+                    {
+                        model->curr_pos.y_abs = (model->curr_pos.y_abs+1 >= MINESWEEPER_BOARD_TILE_WIDTH) ?
+                            MINESWEEPER_BOARD_TILE_WIDTH-1 : model->curr_pos.y_abs+1;
+
+                        bool is_outside_boundary = model->curr_pos.y_abs >= model->right_boundary;
+
+                        if (is_outside_boundary /**&& model->right_boundary+1 <= MINESWEEPER_BOARD_TILE_WIDTH*/) {
+                            model->right_boundary++;
+                        }
                     },
                     true);
                 consumed = true;
@@ -212,11 +265,13 @@ bool mine_sweeper_game_screen_view_input_callback(InputEvent* event, void* conte
 static void setup_board(MineSweeperGameScreen* instance) {
     furi_assert(instance);
 
+    // We can use a temporary buffer to set the tile types initially
+    // and manipulate then save to actual model
     MineSweeperGameScreenTileType tiles[MINESWEEPER_BOARD_TILE_COUNT];
     memset(&tiles, 0, sizeof(tiles));
 
-    for (uint8_t i = 0; i < MINESWEEPER_STARTING_MINES; i++) {
-        uint8_t rand_pos;
+    for (uint16_t i = 0; i < MINESWEEPER_STARTING_MINES; i++) {
+        uint16_t rand_pos;
 
         do {
             rand_pos = furi_hal_random_get() % MINESWEEPER_BOARD_TILE_COUNT;
@@ -226,15 +281,15 @@ static void setup_board(MineSweeperGameScreen* instance) {
     }
 
     // All mines are set so we look at each tile for surrounding mines
-    for (uint8_t i = 0; i < MINESWEEPER_BOARD_TILE_COUNT; i++) {
+    for (uint16_t i = 0; i < MINESWEEPER_BOARD_TILE_COUNT; i++) {
         MineSweeperGameScreenTileType tile_type = tiles[i];
 
         if (tile_type == MineSweeperGameScreenTileMine) {
             continue;
         }
 
-        uint8_t x = i / MINESWEEPER_BOARD_WIDTH;
-        uint8_t y = i % MINESWEEPER_BOARD_WIDTH;
+        uint16_t x = i / MINESWEEPER_BOARD_TILE_WIDTH;
+        uint16_t y = i % MINESWEEPER_BOARD_TILE_WIDTH;
 
         uint8_t offsets[8][2] = {
             {-1,1},
@@ -247,17 +302,17 @@ static void setup_board(MineSweeperGameScreen* instance) {
             {-1,0},
         };
 
-        uint8_t mine_count = 0;
+        uint16_t mine_count = 0;
 
         for (uint8_t j = 0; j < 8; j++) {
-            int8_t dx = x + offsets[j][0];
-            int8_t dy = y + offsets[j][1];
+            int16_t dx = x + (uint16_t)offsets[j][0];
+            int16_t dy = y + (uint16_t)offsets[j][1];
 
-            if (dx < 0 || dy < 0 || dx >= MINESWEEPER_BOARD_HEIGHT || dy >= MINESWEEPER_BOARD_WIDTH) {
+            if (dx < 0 || dy < 0 || dx >= MINESWEEPER_BOARD_TILE_HEIGHT || dy >= MINESWEEPER_BOARD_TILE_WIDTH) {
                 continue;
             }
 
-            uint8_t pos = dx * MINESWEEPER_BOARD_WIDTH + dy;
+            uint16_t pos = dx * MINESWEEPER_BOARD_TILE_WIDTH + dy;
             if (tiles[pos] == MineSweeperGameScreenTileMine) {
                 mine_count++;
             }
@@ -275,17 +330,20 @@ static void setup_board(MineSweeperGameScreen* instance) {
         instance->view,
         MineSweeperGameScreenModel * model,
         {
-            for (uint8_t i = 0; i < MINESWEEPER_BOARD_TILE_COUNT; i++) {
+            for (uint16_t i = 0; i < MINESWEEPER_BOARD_TILE_COUNT; i++) {
                 model->board[i].tile_type = tiles[i];
                 model->board[i].tile_state = MineSweeperGameScreenTileStateUncleared;
                 model->board[i].icon_element.icon = tile_icons[ tiles[i] ];
-                model->board[i].icon_element.x = (i/MINESWEEPER_BOARD_WIDTH) * icon_get_height(tile_icons[ tiles[i] ]);
-                model->board[i].icon_element.y = (i%MINESWEEPER_BOARD_WIDTH) * icon_get_width(tile_icons[ tiles[i] ]);
-                model->mines_left = MINESWEEPER_STARTING_MINES;
-                model->flags_left = MINESWEEPER_STARTING_MINES;
-                model->curr_pos.x = 0;
-                model->curr_pos.y = 0;
+                model->board[i].icon_element.x_abs = (i/MINESWEEPER_BOARD_TILE_WIDTH);
+                model->board[i].icon_element.y_abs = (i%MINESWEEPER_BOARD_TILE_WIDTH);
             }
+
+            model->mines_left = MINESWEEPER_STARTING_MINES;
+            model->flags_left = MINESWEEPER_STARTING_MINES;
+            model->curr_pos.x_abs = 0;
+            model->curr_pos.y_abs = 0;
+            model->right_boundary = MINESWEEPER_SCREEN_TILE_WIDTH;
+            model->bottom_boundary = MINESWEEPER_SCREEN_TILE_HEIGHT;
          
         },
         true);
@@ -332,7 +390,7 @@ void mine_sweeper_game_screen_free(MineSweeperGameScreen* instance) {
 }
 
 // This function should be called whenever you want to reset the game state
-// This should not be called in the on_exit in the game scene unless the state is saved.
+// This should NOT be called in the on_exit in the game scene
 void mine_sweeper_game_screen_reset(MineSweeperGameScreen* instance) {
     furi_assert(instance);
     
@@ -357,7 +415,7 @@ void mine_sweeper_game_screen_set_context(MineSweeperGameScreen* instance, void*
     instance->context = context;
 }
 
-bool mine_sweeper_is_tile_mine(MineSweeperGameScreen* instance, uint8_t x, uint8_t y) {
+bool mine_sweeper_is_tile_mine(MineSweeperGameScreen* instance, uint16_t x, uint16_t y) {
     furi_assert(instance);
     bool is_mine = false;
     
@@ -365,7 +423,7 @@ bool mine_sweeper_is_tile_mine(MineSweeperGameScreen* instance, uint8_t x, uint8
         instance->view,
         MineSweeperGameScreenModel * model,
         {
-            uint8_t pos = x * MINESWEEPER_BOARD_WIDTH + y;
+            uint16_t pos = x * MINESWEEPER_BOARD_TILE_WIDTH + y;
             if (model->board[pos].tile_type == MineSweeperGameScreenTileMine) {
                 is_mine = true;
             }
