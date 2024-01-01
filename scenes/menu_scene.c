@@ -66,7 +66,7 @@ bool minesweeper_scene_menu_on_event(void* context, SceneManagerEvent event) {
 
             case DialogExResultLeft :
                 if (!scene_manager_search_and_switch_to_previous_scene(
-                    app->scene_manager, MineSweeperSceneStartScreen)) {
+                    app->scene_manager, MineSweeperSceneGameScreen)) {
 
                     scene_manager_stop(app->scene_manager);
                     view_dispatcher_stop(app->view_dispatcher);
