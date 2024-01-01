@@ -7,7 +7,7 @@ App(
     entry_point="tone_gen_app",
     stack_size=2 * 1024,
     fap_category="Tools",
-    fap_version="0.1",
+    fap_version="1.0",
     fap_icon="tone_gen.png",  # 10x10 1-bit PNG
     fap_description="A simple app to generate sound tones.",
     fap_author="Gerald McAlister",
