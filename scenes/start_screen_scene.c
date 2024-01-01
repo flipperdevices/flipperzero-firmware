@@ -1,5 +1,6 @@
 #include "../minesweeper.h"
 #include "../views/start_screen.h"
+#include "../views/minesweeper_game_screen.h"
 #include "minesweeper_icons.h"
 
 typedef enum {
@@ -85,4 +86,5 @@ void minesweeper_scene_start_screen_on_exit(void* context) {
 
     MineSweeperApp* app = context;
     start_screen_reset(app->start_screen);
+    mine_sweeper_game_screen_reset(app->game_screen);
 }

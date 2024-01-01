@@ -49,7 +49,7 @@ bool minesweeper_scene_game_screen_on_event(void* context, SceneManagerEvent eve
 
 void minesweeper_scene_game_screen_on_exit(void* context) {
     furi_assert(context);
-
     MineSweeperApp* app = context;
-    mine_sweeper_game_screen_reset(app->game_screen);
+
+    UNUSED(app);
 }
