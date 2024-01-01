@@ -2,6 +2,7 @@ set(STM32_SUPPORTED_FAMILIES_LONG_NAME
     STM32C0
     STM32F0 STM32F1 STM32F2 STM32F3 STM32F4 STM32F7
     STM32G0 STM32G4
+    STM32H5
     STM32H7_M4 STM32H7_M7
     STM32L0 STM32L1 STM32L4 STM32L5
     STM32U5
@@ -390,6 +391,7 @@ include(stm32/f4)
 include(stm32/f7)
 include(stm32/g0)
 include(stm32/g4)
+include(stm32/h5)
 include(stm32/h7)
 include(stm32/l0)
 include(stm32/l1)
