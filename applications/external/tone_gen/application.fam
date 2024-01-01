@@ -1,0 +1,15 @@
+App(
+    appid="tone_gen",
+    name="Tone Generator",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="tone_gen_app",
+    stack_size=2 * 1024,
+    fap_category="Tools",
+    fap_icon="tone_gen.png",
+    fap_icon_assets="images",
+    sources=["src/*.c", "src/scenes/*.c", "src/system/*.c", "src/utils/*.c"],
+    fap_author="Gerald McAlister",
+    fap_weburl="https://github.com/GEMISIS/tone_gen",
+    fap_version="1.0",
+    fap_description="A simple app to generate sound tones.",
+)
