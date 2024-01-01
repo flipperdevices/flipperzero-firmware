@@ -20,12 +20,6 @@ extern "C" {
 /** MineSweeperGameScreen anonymous structure */
 typedef struct MineSweeperGameScreen MineSweeperGameScreen;
 
-/** MineSweeperGameScreen callback types
- * @warning     comes from GUI thread
- */
-typedef void (*MineSweeperGameScreenTimerCallback)(void* context);
-typedef bool (*MineSweeperGameScreenInputCallback)(InputEvent* event, void* context);
-
 /** Allocate and initalize
  *
  * This view is used as the game screen of an application.
@@ -53,15 +47,6 @@ void mine_sweeper_game_screen_reset(MineSweeperGameScreen* instance);
  * @return      view instance that can be used for embedding
  */
 View* mine_sweeper_game_screen_get_view(MineSweeperGameScreen* instance);
-
-/** Set MineSweeperGameScreen input callback 
- *
- * @param       instance MineSweeperGameScreen instance
- * @param       callback MineSweeperGameScreenInputCallback callback
- */
-void mine_sweeper_game_screen_set_input_callback(
-        MineSweeperGameScreen* instance,
-        MineSweeperGameScreenInputCallback callback);
 
 /** Set MineSweeperGameScreen context 
  *
