@@ -8,7 +8,7 @@
 
 #include <gui/view.h>
 
-#define MINESWEEPER_BOARD_HEIGHT 7
+#define MINESWEEPER_BOARD_HEIGHT 8
 #define MINESWEEPER_BOARD_WIDTH 16
 #define MINESWEEPER_BOARD_TILE_COUNT (MINESWEEPER_BOARD_HEIGHT * MINESWEEPER_BOARD_WIDTH)
 #define MINESWEEPER_STARTING_MINES 20
@@ -19,6 +19,11 @@ extern "C" {
 
 /** MineSweeperGameScreen anonymous structure */
 typedef struct MineSweeperGameScreen MineSweeperGameScreen;
+
+/** StartScreen callback types
+ * @warning     comes from GUI thread
+ */
+typedef bool (*GameScreenInputCallback)(InputEvent* event, void* context);
 
 /** Allocate and initalize
  *
@@ -48,6 +53,15 @@ void mine_sweeper_game_screen_reset(MineSweeperGameScreen* instance);
  */
 View* mine_sweeper_game_screen_get_view(MineSweeperGameScreen* instance);
 
+/** Set MineSweeperGameScreen input callback 
+ *
+ * @param       instance MineSweeperGameScreen instance
+ * @param       callback MineSweeperGameScreenInputCallback callback
+ */
+void mine_sweeper_game_screen_set_input_callback(
+        MineSweeperGameScreen* instance,
+        GameScreenInputCallback callback);
+
 /** Set MineSweeperGameScreen context 
  *
  * @param       instance MineSweeperGameScreen instance
@@ -63,6 +77,14 @@ void mine_sweeper_game_screen_set_context(MineSweeperGameScreen* instance, void*
  * @param       y       column in board grid
  */
 bool mine_sweeper_is_tile_mine(MineSweeperGameScreen* instance, uint8_t x, uint8_t y);
+
+
+#define inverted_canvas_white_to_black(canvas, code)      \
+    {                                           \
+        canvas_set_color(canvas, ColorWhite);   \
+        {code};                                 \
+        canvas_set_color(canvas, ColorBlack);   \
+    }                           
 
 #ifdef __cplusplus
 }
