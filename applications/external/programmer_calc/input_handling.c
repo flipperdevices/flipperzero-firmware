@@ -22,43 +22,43 @@ void handle_short_press(Calculator* calculator_state, ViewPort* view_port, Input
     switch(event->key) {
     case InputKeyUp:
         if(calculator_state->position.y > 0) {
-            if(calculator_state->position.y == 2) {
+            if(calculator_state->position.y == 1) {
                 calculator_state->position.x = 0;
             }
             calculator_state->position.y--;
-            if(calculator_state->position.y == 1) { // If cursor moves to row 2, skip it
-                calculator_state->position.y--;
-            }
+            // if(calculator_state->position.y == 1) { // If cursor moves to row 2, skip it
+            //     calculator_state->position.y--;
+            // }
         }
         break;
     case InputKeyDown:
-        if(calculator_state->position.y < 6 - 1) {
-            if(calculator_state->position.y == 6 - 2 &&
+        if(calculator_state->position.y < 5 - 1) {
+            if(calculator_state->position.y == 5 - 2 &&
                (calculator_state->position.x == 3 || calculator_state->position.x == 4)) {
-                calculator_state->position.y = 6 - 1;
+                calculator_state->position.y = 5 - 1;
                 calculator_state->position.x = 3;
             } else {
                 calculator_state->position.y++;
             }
-            if(calculator_state->position.y == 1) { // If cursor moves to row 2, skip it
-                calculator_state->position.y++;
-            }
+            // if(calculator_state->position.y == 1) { // If cursor moves to row 2, skip it
+            //     calculator_state->position.y++;
+            // }
         }
         break;
     case InputKeyLeft:
-        if(calculator_state->position.y > 1 && calculator_state->position.x > 0) {
+        if(calculator_state->position.y > 0 && calculator_state->position.x > 0) {
             calculator_state->position.x--;
         }
         break;
     case InputKeyRight:
-        if(calculator_state->position.y < 2) {
+        if(calculator_state->position.y < 1) {
             // Cursor stays in the same column
-        } else if(calculator_state->position.y == 6 - 1) {
+        } else if(calculator_state->position.y == 5 - 1) {
             if(calculator_state->position.x < 3) {
                 calculator_state->position.x++;
             }
         } else {
-            if(calculator_state->position.x < 6 - 1) {
+            if(calculator_state->position.x < 5 - 1) {
                 calculator_state->position.x++;
             }
         }
