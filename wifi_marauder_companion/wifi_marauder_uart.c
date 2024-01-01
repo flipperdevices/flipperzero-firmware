@@ -13,9 +13,9 @@ struct WifiMarauderUart {
     FuriThread* rx_thread;
     FuriStreamBuffer* rx_stream;
     FuriStreamBuffer* pcap_stream;
-    uint8_t pcap_test_buf[12];
-    uint8_t pcap_test_idx;
     bool pcap;
+    uint8_t mark_test_buf[11];
+    uint8_t mark_test_idx;
     uint8_t rx_buf[RX_BUF_SIZE + 1];
     void (*handle_rx_data_cb)(uint8_t* buf, size_t len, void* context);
     void (*handle_rx_pcap_cb)(uint8_t* buf, size_t len, void* context);
@@ -47,50 +47,50 @@ void wifi_marauder_uart_on_irq_cb(UartIrqEvent ev, uint8_t data, void* context) 
     WifiMarauderUart* uart = (WifiMarauderUart*)context;
 
     if(ev == UartIrqEventRXNE) {
-        if(uart->pcap_test_idx != 0) {
-            // We are trying to match a pcap delimiter
-            const char* pcap_begin = "%PCAP_BEGIN%";
-            const char* pcap_close = "%PCAP_CLOSE%";
-            if(data == pcap_begin[uart->pcap_test_idx] ||
-               data == pcap_close[uart->pcap_test_idx]) {
-                // Received char matches next char in a pcap delimiter, append to buffer
-                uart->pcap_test_buf[uart->pcap_test_idx++] = data;
-                if(uart->pcap_test_idx == sizeof(uart->pcap_test_buf)) {
-                    // Buffer reached max length, parse what delimiter this is and discard buffer
+        const char* mark_begin = "[BUF/BEGIN]";
+        const char* mark_close = "[BUF/CLOSE]";
+        if(uart->mark_test_idx != 0) {
+            // We are trying to match a marker
+            if(data == mark_begin[uart->mark_test_idx] ||
+               data == mark_close[uart->mark_test_idx]) {
+                // Received char matches next char in a marker, append to test buffer
+                uart->mark_test_buf[uart->mark_test_idx++] = data;
+                if(uart->mark_test_idx == sizeof(uart->mark_test_buf)) {
+                    // Test buffer reached max length, parse what marker this is and discard buffer
                     if(!memcmp(
-                           uart->pcap_test_buf, (void*)pcap_begin, sizeof(uart->pcap_test_buf))) {
+                           uart->mark_test_buf, (void*)mark_begin, sizeof(uart->mark_test_buf))) {
                         uart->pcap = true;
                     } else if(!memcmp(
-                                  uart->pcap_test_buf,
-                                  (void*)pcap_close,
-                                  sizeof(uart->pcap_test_buf))) {
+                                  uart->mark_test_buf,
+                                  (void*)mark_close,
+                                  sizeof(uart->mark_test_buf))) {
                         uart->pcap = false;
                     }
-                    uart->pcap_test_idx = 0;
+                    uart->mark_test_idx = 0;
                 }
                 // Don't pass to stream
                 return;
             } else {
-                // Received char doesn't match any expected next char, send old buffer
+                // Received char doesn't match any expected next char, send current test buffer
                 if(uart->pcap) {
                     furi_stream_buffer_send(
-                        uart->pcap_stream, uart->pcap_test_buf, uart->pcap_test_idx, 0);
+                        uart->pcap_stream, uart->mark_test_buf, uart->mark_test_idx, 0);
                     furi_thread_flags_set(furi_thread_get_id(uart->rx_thread), WorkerEvtPcapDone);
                 } else {
                     furi_stream_buffer_send(
-                        uart->rx_stream, uart->pcap_test_buf, uart->pcap_test_idx, 0);
+                        uart->rx_stream, uart->mark_test_buf, uart->mark_test_idx, 0);
                     furi_thread_flags_set(furi_thread_get_id(uart->rx_thread), WorkerEvtRxDone);
                 }
-                // Reset buffer and try parsing this char from scratch
-                uart->pcap_test_idx = 0;
+                // Reset test buffer and try parsing this char from scratch
+                uart->mark_test_idx = 0;
             }
         }
         // If we reach here the buffer is empty
-        if(data == '%') {
-            // Received delimiter start, append to buffer
-            uart->pcap_test_buf[uart->pcap_test_idx++] = data;
+        if(data == mark_begin[0]) {
+            // Received marker start, append to test buffer
+            uart->mark_test_buf[uart->mark_test_idx++] = data;
         } else {
-            // Not a delimiter start and we aren't matching a delimiter, this is just data
+            // Not a marker start and we aren't matching a marker, this is just data
             if(uart->pcap) {
                 furi_stream_buffer_send(uart->pcap_stream, &data, 1, 0);
                 furi_thread_flags_set(furi_thread_get_id(uart->rx_thread), WorkerEvtPcapDone);

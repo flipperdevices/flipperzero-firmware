@@ -51,7 +51,7 @@ void wifi_marauder_console_output_handle_rx_data_cb(uint8_t* buf, size_t len, vo
     view_dispatcher_send_custom_event(app->view_dispatcher, WifiMarauderEventRefreshConsoleOutput);
 }
 
-void wifi_marauder_console_output_handle_rx_pcap_cb(uint8_t* buf, size_t len, void* context) {
+void wifi_marauder_console_output_handle_rx_packets_cb(uint8_t* buf, size_t len, void* context) {
     furi_assert(context);
     WifiMarauderApp* app = context;
 
@@ -106,7 +106,7 @@ void wifi_marauder_scene_console_output_on_enter(void* context) {
         wifi_marauder_console_output_handle_rx_data_cb); // setup callback for general log rx thread
     wifi_marauder_uart_set_handle_rx_pcap_cb(
         app->uart,
-        wifi_marauder_console_output_handle_rx_pcap_cb); // setup callback for general log rx thread
+        wifi_marauder_console_output_handle_rx_packets_cb); // setup callback for packets rx thread
 
     // Get ready to send command
     if((app->is_command && app->selected_tx_string) || app->script) {
@@ -158,7 +158,11 @@ void wifi_marauder_scene_console_output_on_enter(void* context) {
         if(app->selected_tx_string) {
             wifi_marauder_uart_tx(
                 (uint8_t*)(app->selected_tx_string), strlen(app->selected_tx_string));
-            wifi_marauder_uart_tx((uint8_t*)("\n"), 1);
+            if(app->is_writing_pcap) {
+                wifi_marauder_uart_tx((uint8_t*)(" -serial\n"), strlen(" -serial\n"));
+            } else {
+                wifi_marauder_uart_tx((uint8_t*)("\n"), 1);
+            }
             if(send_html && the_html) {
                 wifi_marauder_uart_tx(the_html, html_size);
                 wifi_marauder_uart_tx((uint8_t*)("\n"), 1);
