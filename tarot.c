@@ -169,7 +169,29 @@ const struct Card card[] = {
     {"The Moon",            &I_major_18},
     {"The Sun",             &I_major_19},
     {"Judgement",           &I_major_20},
-    {"The World",           &I_major_21}
+    {"The World",           &I_major_21},
+    {"The Fool",            &I_major_0_},
+    {"The Magician",        &I_major_1_},
+    {"The High Priestess",  &I_major_2_},
+    {"The Empress",         &I_major_3_},
+    {"The Emperor",         &I_major_4_},
+    {"The Hierophant",      &I_major_5_},
+    {"The Lovers",          &I_major_6_},
+    {"The Chariot",         &I_major_7_},
+    {"Strength",            &I_major_8_},
+    {"The Hermit",          &I_major_9_},
+    {"Wheel of Fortune",    &I_major_10_},
+    {"Justice",             &I_major_11_},
+    {"The Hanged Man",      &I_major_12_},
+    {"Death",               &I_major_13_},
+    {"Temperance",          &I_major_14_},
+    {"The Devil",           &I_major_15_},
+    {"The Tower",           &I_major_16_},
+    {"The Star",            &I_major_17_},
+    {"The Moon",            &I_major_18_},
+    {"The Sun",             &I_major_19_},
+    {"Judgement",           &I_major_20_},
+    {"The World",           &I_major_21_}
 };
 
 static uint16_t unbiased_rand (uint16_t max) {
@@ -184,7 +206,6 @@ static uint16_t unbiased_rand (uint16_t max) {
 struct Spread {
     int card[3];
     bool selected[3];
-    bool rotation[3]; // 0 - up, 1 - down
 };
 
 struct Spread spread;
@@ -232,11 +253,11 @@ static bool widget_input_callback(InputEvent* input_event, void* context) {
             break;
         case InputKeyUp:
             // UP
-            consumed = true;
+            //consumed = true;
             break;
         case InputKeyDown:
             // DOWN
-            consumed = true;
+            //consumed = true;
             break;
         default:
             consumed = false;
@@ -260,6 +281,13 @@ void tarot_app_scene_on_enter_game(void* context) {
     spread.card[2] = unbiased_rand(card_number);
     while (spread.card[2] == spread.card[0] || spread.card[2] == spread.card[1]) {
         spread.card[2] = unbiased_rand(card_number);
+    }
+
+    // Upside down card option
+    if (0/*settings.upside_down*/) {
+        spread.card[0] += card_number*unbiased_rand(2);
+        spread.card[1] += card_number*unbiased_rand(2);
+        spread.card[2] += card_number*unbiased_rand(2);
     }
     
     draw_tarot(app);
