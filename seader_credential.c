@@ -418,6 +418,7 @@ bool seader_credential_save_picopass(SeaderCredential* cred, const char* name) {
             furi_string_printf(temp_str, "Block %d", i);
             switch(i) {
             case CSN_INDEX:
+                // TODO: Is there any practical difference here?  If so, document.
                 if(withSIO) {
                     if(!flipper_format_write_hex(
                            file,

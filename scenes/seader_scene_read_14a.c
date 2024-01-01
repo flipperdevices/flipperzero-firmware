@@ -17,6 +17,7 @@ void seader_scene_read_14a_on_enter(void* context) {
 
     seader->worker->stage = SeaderPollerEventTypeCardDetect;
     seader_credential_clear(seader->credential);
+    seader->credential->type = SeaderCredentialType14A;
     nfc_poller_start(seader->poller, seader_worker_poller_callback_iso14443_4a, seader);
 
     seader_blink_start(seader);
