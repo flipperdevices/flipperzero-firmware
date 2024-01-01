@@ -2,6 +2,7 @@
 
  - Get revision, get config moved into main Gen4 menu
  - New function: Set Gen4 card shadow mode
+ - New function: Set Gen4 card direct write to block 0 mode
  - Fixed: back button did not allow to exit from some scenes while the card is next to the Flipper HF RFID antenna
 
 ## 1.4 

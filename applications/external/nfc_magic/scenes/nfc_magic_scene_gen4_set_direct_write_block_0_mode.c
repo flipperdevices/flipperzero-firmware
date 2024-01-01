@@ -2,12 +2,13 @@
 #include "applications_user/nfc_magic/lib/magic/protocols/gen4/gen4_poller_i.h"
 
 enum {
-    NfcMagicSceneGen4SetShadowModeStateCardSearch,
-    NfcMagicSceneGen4SetShadowModeStateCardFound,
+    NfcMagicSceneGen4SetDirectWriteBlock0ModeStateCardSearch,
+    NfcMagicSceneGen4SetDirectWriteBlock0ModeStateCardFound,
 };
 
-NfcCommand
-    nfc_magic_scene_gen4_set_shd_mode_poller_callback(Gen4PollerEvent event, void* context) {
+NfcCommand nfc_magic_scene_gen4_set_direct_write_block_0_mode_poller_callback(
+    Gen4PollerEvent event,
+    void* context) {
     NfcMagicApp* instance = context;
     furi_assert(event.data);
 
@@ -16,7 +17,7 @@ NfcCommand
         view_dispatcher_send_custom_event(
             instance->view_dispatcher, NfcMagicCustomEventCardDetected);
     } else if(event.type == Gen4PollerEventTypeRequestMode) {
-        event.data->request_mode.mode = Gen4PollerModeSetShadowMode;
+        event.data->request_mode.mode = Gen4PollerModeSetDirectWriteBlock0Mode;
     } else if(event.type == Gen4PollerEventTypeSuccess) {
         view_dispatcher_send_custom_event(
             instance->view_dispatcher, NfcMagicCustomEventWorkerSuccess);
@@ -30,13 +31,13 @@ NfcCommand
     return command;
 }
 
-static void nfc_magic_scene_gen4_set_shd_mode_setup_view(NfcMagicApp* instance) {
+static void nfc_magic_scene_gen4_set_direct_write_block_0_mode_setup_view(NfcMagicApp* instance) {
     Popup* popup = instance->popup;
     popup_reset(popup);
-    uint32_t state =
-        scene_manager_get_scene_state(instance->scene_manager, NfcMagicSceneGen4SetShdMode);
+    uint32_t state = scene_manager_get_scene_state(
+        instance->scene_manager, NfcMagicSceneGen4SetDirectWriteBlock0Mode);
 
-    if(state == NfcMagicSceneGen4SetShadowModeStateCardSearch) {
+    if(state == NfcMagicSceneGen4SetDirectWriteBlock0ModeStateCardSearch) {
         popup_set_icon(instance->popup, 0, 8, &I_NFC_manual_60x50);
         popup_set_text(
             instance->popup, "Apply the\ncard\nto the back", 128, 32, AlignRight, AlignCenter);
@@ -48,29 +49,33 @@ static void nfc_magic_scene_gen4_set_shd_mode_setup_view(NfcMagicApp* instance) 
     view_dispatcher_switch_to_view(instance->view_dispatcher, NfcMagicAppViewPopup);
 }
 
-void nfc_magic_scene_gen4_set_shd_mode_on_enter(void* context) {
+void nfc_magic_scene_gen4_set_direct_write_block_0_mode_on_enter(void* context) {
     NfcMagicApp* instance = context;
 
-    uint8_t shadow_mode =
-        scene_manager_get_scene_state(instance->scene_manager, NfcMagicSceneGen4SetShdMode);
+    uint8_t direct_write_block_0_mode = scene_manager_get_scene_state(
+        instance->scene_manager, NfcMagicSceneGen4SetDirectWriteBlock0Mode);
 
     scene_manager_set_scene_state(
         instance->scene_manager,
-        NfcMagicSceneGen4SetShdMode,
-        NfcMagicSceneGen4SetShadowModeStateCardSearch);
-    nfc_magic_scene_gen4_set_shd_mode_setup_view(instance);
+        NfcMagicSceneGen4SetDirectWriteBlock0Mode,
+        NfcMagicSceneGen4SetDirectWriteBlock0ModeStateCardSearch);
+    nfc_magic_scene_gen4_set_direct_write_block_0_mode_setup_view(instance);
 
     nfc_magic_app_blink_start(instance);
 
     instance->gen4_poller = gen4_poller_alloc(instance->nfc);
     gen4_poller_set_password(instance->gen4_poller, instance->gen4_password);
-    instance->gen4_poller->shadow_mode = shadow_mode;
+    instance->gen4_poller->direct_write_block_0_mode = direct_write_block_0_mode;
 
     gen4_poller_start(
-        instance->gen4_poller, nfc_magic_scene_gen4_set_shd_mode_poller_callback, instance);
+        instance->gen4_poller,
+        nfc_magic_scene_gen4_set_direct_write_block_0_mode_poller_callback,
+        instance);
 }
 
-bool nfc_magic_scene_gen4_set_shd_mode_on_event(void* context, SceneManagerEvent event) {
+bool nfc_magic_scene_gen4_set_direct_write_block_0_mode_on_event(
+    void* context,
+    SceneManagerEvent event) {
     NfcMagicApp* instance = context;
     bool consumed = false;
 
@@ -78,16 +83,16 @@ bool nfc_magic_scene_gen4_set_shd_mode_on_event(void* context, SceneManagerEvent
         if(event.event == NfcMagicCustomEventCardDetected) {
             scene_manager_set_scene_state(
                 instance->scene_manager,
-                NfcMagicSceneGen4SetShdMode,
-                NfcMagicSceneGen4SetShadowModeStateCardFound);
-            nfc_magic_scene_gen4_set_shd_mode_setup_view(instance);
+                NfcMagicSceneGen4SetDirectWriteBlock0Mode,
+                NfcMagicSceneGen4SetDirectWriteBlock0ModeStateCardFound);
+            nfc_magic_scene_gen4_set_direct_write_block_0_mode_setup_view(instance);
             consumed = true;
         } else if(event.event == NfcMagicCustomEventCardLost) {
             scene_manager_set_scene_state(
                 instance->scene_manager,
-                NfcMagicSceneGen4SetShdMode,
-                NfcMagicSceneGen4SetShadowModeStateCardSearch);
-            nfc_magic_scene_gen4_set_shd_mode_setup_view(instance);
+                NfcMagicSceneGen4SetDirectWriteBlock0Mode,
+                NfcMagicSceneGen4SetDirectWriteBlock0ModeStateCardSearch);
+            nfc_magic_scene_gen4_set_direct_write_block_0_mode_setup_view(instance);
             consumed = true;
         } else if(event.event == NfcMagicCustomEventWorkerSuccess) {
             scene_manager_next_scene(instance->scene_manager, NfcMagicSceneSuccess);
@@ -101,15 +106,15 @@ bool nfc_magic_scene_gen4_set_shd_mode_on_event(void* context, SceneManagerEvent
     return consumed;
 }
 
-void nfc_magic_scene_gen4_set_shd_mode_on_exit(void* context) {
+void nfc_magic_scene_gen4_set_direct_write_block_0_mode_on_exit(void* context) {
     NfcMagicApp* instance = context;
 
     gen4_poller_stop(instance->gen4_poller);
     gen4_poller_free(instance->gen4_poller);
     scene_manager_set_scene_state(
         instance->scene_manager,
-        NfcMagicSceneGen4SetShdMode,
-        NfcMagicSceneGen4SetShadowModeStateCardSearch);
+        NfcMagicSceneGen4SetDirectWriteBlock0Mode,
+        NfcMagicSceneGen4SetDirectWriteBlock0ModeStateCardSearch);
     // Clear view
     popup_reset(instance->popup);
 
