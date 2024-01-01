@@ -1,3 +1,5 @@
+[!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/ginkage)
+
 # Flipper Air Mouse
 
 [![FlipC.org](https://flipc.org/ginkage/FlippAirMouse/badge)](https://flipc.org/ginkage/FlippAirMouse)
