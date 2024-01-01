@@ -15,6 +15,7 @@ void seader_scene_read_picopass_on_enter(void* context) {
 
     seader->worker->stage = SeaderPollerEventTypeCardDetect;
     seader_credential_clear(seader->credential);
+    seader->credential->type = SeaderCredentialTypePicopass;
     seader->picopass_poller = picopass_poller_alloc(seader->nfc);
     picopass_poller_start(seader->picopass_poller, seader_worker_poller_callback_picopass, seader);
 

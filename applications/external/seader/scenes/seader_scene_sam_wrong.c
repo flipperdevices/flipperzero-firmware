@@ -21,7 +21,7 @@ void seader_scene_sam_wrong_on_enter(void* context) {
         seader_scene_sam_wrong_submenu_callback,
         seader);
     submenu_add_item(
-        submenu, "Load", SubmenuIndexSaved, seader_scene_sam_wrong_submenu_callback, seader);
+        submenu, "Saved", SubmenuIndexSaved, seader_scene_sam_wrong_submenu_callback, seader);
 
     submenu_set_selected_item(
         submenu, scene_manager_get_scene_state(seader->scene_manager, SeaderSceneSamPresent));

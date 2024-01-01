@@ -242,6 +242,8 @@ void seader_worker_poller_conversation(Seader* seader, SeaderPollerContainer* sp
                 // no-op
             } else {
                 FURI_LOG_I(TAG, "Response false");
+                view_dispatcher_send_custom_event(
+                    seader->view_dispatcher, SeaderCustomEventWorkerExit);
                 seader_worker->stage = SeaderPollerEventTypeComplete;
             }
         }

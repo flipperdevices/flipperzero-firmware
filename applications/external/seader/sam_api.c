@@ -321,7 +321,7 @@ bool seader_unpack_pacs(Seader* seader, uint8_t* buf, size_t size) {
 
             memset(display, 0, sizeof(display));
             if(seader_credential->sio[0] == 0x30) {
-                for(uint8_t i = 0; i < sizeof(seader_credential->sio); i++) {
+                for(uint8_t i = 0; i < seader_credential->sio_len; i++) {
                     snprintf(
                         display + (i * 2), sizeof(display), "%02x", seader_credential->sio[i]);
                 }
@@ -475,14 +475,29 @@ void seader_capture_sio(BitBuffer* tx_buffer, BitBuffer* rx_buffer, SeaderCreden
     size_t len = bit_buffer_get_size_bytes(tx_buffer);
     const uint8_t* rxBuffer = bit_buffer_get_data(rx_buffer);
 
-    if(memcmp(buffer, read4Block6, len) == 0 && rxBuffer[0] == 0x30) {
-        memcpy(credential->sio, rxBuffer, 32);
-    } else if(memcmp(buffer, read4Block10, len) == 0 && rxBuffer[0] == 0x30) {
-        memcpy(credential->sio, rxBuffer, 32);
-    } else if(memcmp(buffer, read4Block9, len) == 0) {
-        memcpy(credential->sio + 32, rxBuffer + 8, 24);
-    } else if(memcmp(buffer, read4Block13, len) == 0) {
-        memcpy(credential->sio + 32, rxBuffer + 8, 24);
+    if(credential->type == SeaderCredentialTypePicopass) {
+        if(memcmp(buffer, read4Block6, len) == 0 && rxBuffer[0] == 0x30) {
+            memcpy(credential->sio, rxBuffer, 32);
+            credential->sio_len += 32;
+        } else if(memcmp(buffer, read4Block10, len) == 0 && rxBuffer[0] == 0x30) {
+            memcpy(credential->sio, rxBuffer, 32);
+            credential->sio_len += 32;
+        } else if(memcmp(buffer, read4Block9, len) == 0) {
+            memcpy(credential->sio + 32, rxBuffer + 8, 24);
+            credential->sio_len += 24;
+        } else if(memcmp(buffer, read4Block13, len) == 0) {
+            memcpy(credential->sio + 32, rxBuffer + 8, 24);
+            credential->sio_len += 24;
+        }
+    } else if(credential->type == SeaderCredentialType14A) {
+        // Desfire EV1 passes SIO in the clear
+        uint8_t desfire_read[] = {
+            0x90, 0xbd, 0x00, 0x00, 0x07, 0x0f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+        if(memcmp(buffer, desfire_read, len) == 0 && rxBuffer[0] == 0x30) {
+            credential->sio_len =
+                bit_buffer_get_size_bytes(rx_buffer) - 2; // -2 for the APDU response bytes
+            memcpy(credential->sio, rxBuffer, credential->sio_len);
+        }
     }
 }
 
@@ -564,6 +579,7 @@ void seader_iso14443a_transmit(
             break;
         }
 
+        seader_capture_sio(tx_buffer, rx_buffer, seader->credential);
         seader_send_nfc_rx(
             seader_uart,
             (uint8_t*)bit_buffer_get_data(rx_buffer),
@@ -714,11 +730,19 @@ bool seader_process_success_response_i(
 
         processed = seader_worker_state_machine(seader, payload, online, spc);
     } else {
-        FURI_LOG_D(TAG, "Failed to decode APDU payload");
+        memset(display, 0, sizeof(display));
+        for(uint8_t i = 0; i < len; i++) {
+            snprintf(display + (i * 2), sizeof(display), "%02x", apdu[i]);
+        }
+        FURI_LOG_D(TAG, "Failed to decode APDU payload: [%s]", display);
     }
 
     ASN_STRUCT_FREE(asn_DEF_Payload, payload);
     return processed;
+}
+
+bool seader_mf_df_check_card_type(uint8_t ATQA0, uint8_t ATQA1, uint8_t SAK) {
+    return ATQA0 == 0x44 && ATQA1 == 0x03 && SAK == 0x20;
 }
 
 NfcCommand seader_worker_card_detect(
@@ -737,6 +761,8 @@ NfcCommand seader_worker_card_detect(
 
     SeaderWorker* seader_worker = seader->worker;
     SeaderUartBridge* seader_uart = seader_worker->uart;
+    SeaderCredential* credential = seader->credential;
+
     CardDetails_t* cardDetails = 0;
     cardDetails = calloc(1, sizeof *cardDetails);
     assert(cardDetails);
@@ -750,6 +776,8 @@ NfcCommand seader_worker_card_detect(
         protocol_bytes[1] = FrameProtocol_iclass;
         OCTET_STRING_fromBuf(
             &cardDetails->protocol, (const char*)protocol_bytes, sizeof(protocol_bytes));
+        memcpy(credential->diversifier, uid, uid_len);
+        credential->diversifier_len = uid_len;
     } else {
         protocol_bytes[1] = FrameProtocol_nfc;
         OCTET_STRING_fromBuf(
@@ -757,6 +785,10 @@ NfcCommand seader_worker_card_detect(
 
         cardDetails->sak = &sak_string;
         cardDetails->atqa = &atqa_string;
+        if(seader_mf_df_check_card_type(atqa[0], atqa[1], sak)) {
+            memcpy(credential->diversifier, uid, uid_len);
+            credential->diversifier_len = uid_len;
+        }
     }
 
     seader_send_card_detected(seader_uart, cardDetails);
