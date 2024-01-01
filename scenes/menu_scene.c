@@ -36,21 +36,21 @@ void minesweeper_scene_menu_on_enter(void* context) {
 
     view_dispatcher_switch_to_view(app->view_dispatcher, MineSweeperLoadingView);
     
-    dialog_ex_set_context(app->menu, app);
+    dialog_ex_set_context(app->menu_screen, app);
 
-    dialog_ex_set_header(app->menu, "Leave Minesweeper?", 64, 4, AlignCenter, AlignTop);
+    dialog_ex_set_header(app->menu_screen, "Leave Minesweeper?", 64, 4, AlignCenter, AlignTop);
 
     uint32_t prompt_index = furi_hal_random_get() % sizeof(farewellPrompts) / sizeof(char*);
 
-    dialog_ex_set_text(app->menu, farewellPrompts[prompt_index], 65, 20, AlignLeft, AlignTop);
+    dialog_ex_set_text(app->menu_screen, farewellPrompts[prompt_index], 65, 20, AlignLeft, AlignTop);
 
-    dialog_ex_set_icon(app->menu, 11, 13, &I_Cry_dolph_55x52);
+    dialog_ex_set_icon(app->menu_screen, 11, 13, &I_Cry_dolph_55x52);
 
-    dialog_ex_set_left_button_text(app->menu, "Back");
+    dialog_ex_set_left_button_text(app->menu_screen, "Back");
 
-    dialog_ex_set_right_button_text(app->menu, "Exit");
+    dialog_ex_set_right_button_text(app->menu_screen, "Exit");
 
-    dialog_ex_set_result_callback(app->menu, minesweeper_menu_scene_dialog_callback);
+    dialog_ex_set_result_callback(app->menu_screen, minesweeper_menu_scene_dialog_callback);
 
     view_dispatcher_switch_to_view(app->view_dispatcher, MineSweeperMenuView);
 }
@@ -93,5 +93,5 @@ void minesweeper_scene_menu_on_exit(void* context) {
     furi_assert(context);
     MineSweeperApp* app = (MineSweeperApp*)context;
 
-    dialog_ex_reset(app->menu);
+    dialog_ex_reset(app->menu_screen);
 }
