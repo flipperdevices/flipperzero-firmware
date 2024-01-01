@@ -68,7 +68,7 @@ typedef struct {
 } MineSweeperTile;
 
 typedef struct {
-    MineSweeperTile board[ MINESWEEPER_BOARD_TILE_COUNT ];
+    MineSweeperTile board[ MINESWEEPER_BOARD_MAX_TILES ];
     uint16_t mines_left;
     uint16_t flags_left;
     CurrentPosition curr_pos;
@@ -115,15 +115,17 @@ void mine_sweeper_game_screen_view_draw_callback(Canvas* canvas, void* _model) {
 
 
     /** We can use the boundary uint8_t in the model to transform the relative x/y coordinates
-     * to the absolute x/y positions on the whole board grid.
+     *  to the absolute x/y positions on the board grid as well as the position in the board buffer.
      *
-     * The relative coordinates start at zero and go to the screen height and width for x and y
-     * repsectively.
+     *  The relative coordinates start at zero and go to MINESWEEPER_SCREEN_TILE_HEIGHT-1 and
+     *  MINESWEEPER_SCREEN_TILE_HEIGHT-1 for x and y repsectively.
      *
-     *  Once we have the correct absolute x/y coord we can use that to access the correct position for the
-     *  tille in the 1D buffer within the model.
+     *  Once we have the absolute x/y coord we can use that to access the correct position for the
+     *  tile in the board buffer within the model.
      *
-     * We draw the icons with the relative x and y values while the tile within the model has its absolute x/y
+     *  We draw the tile located at the absolute position in the grid onto the screen at the position of the
+     *  relative x and y.
+     *  We also invert the color if it is the current position selected by the user
      */
 
     for (uint8_t x_rel = 0; x_rel < MINESWEEPER_SCREEN_TILE_HEIGHT; x_rel++) {
@@ -132,10 +134,10 @@ void mine_sweeper_game_screen_view_draw_callback(Canvas* canvas, void* _model) {
         for (uint8_t y_rel = 0; y_rel < MINESWEEPER_SCREEN_TILE_WIDTH; y_rel++) {
             uint16_t y_abs = (model->right_boundary - MINESWEEPER_SCREEN_TILE_WIDTH) + y_rel;
 
-            uint16_t board_buffer_pos = x_abs * MINESWEEPER_BOARD_TILE_WIDTH + y_abs;
-            MineSweeperTile tile = model->board[board_buffer_pos];
+            uint16_t board_buffer_pos_abs = x_abs * MINESWEEPER_BOARD_TILE_WIDTH + y_abs;
+            MineSweeperTile tile = model->board[board_buffer_pos_abs];
 
-            if (model->curr_pos.x_abs * MINESWEEPER_BOARD_TILE_WIDTH + model->curr_pos.y_abs == board_buffer_pos) {
+            if (model->curr_pos.x_abs * MINESWEEPER_BOARD_TILE_WIDTH + model->curr_pos.y_abs == board_buffer_pos_abs) {
                 inverted_canvas_white_to_black(
                     canvas,
                     {
