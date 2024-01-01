@@ -47,6 +47,9 @@ static MineSweeperApp* app_alloc() {
     app->loading = loading_alloc();
     view_dispatcher_add_view(app->view_dispatcher, MineSweeperLoadingView, loading_get_view(app->loading));
 
+    app->game_screen = mine_sweeper_game_screen_alloc();
+    view_dispatcher_add_view(app->view_dispatcher, MineSweeperGameScreenView, mine_sweeper_game_screen_get_view(app->game_screen));
+
     app->menu = dialog_ex_alloc();
     view_dispatcher_add_view(app->view_dispatcher, MineSweeperMenuView, dialog_ex_get_view(app->menu));
 
@@ -73,6 +76,8 @@ static void app_free(MineSweeperApp* app) {
 
     // Free views
     loading_free(app->loading);
+    start_screen_free(app->start_screen);
+    mine_sweeper_game_screen_free(app->game_screen);  
     dialog_ex_free(app->menu);
 
     furi_record_close(RECORD_GUI);
