@@ -63,7 +63,7 @@ void scene_on_enter_settings_scene(void* context) {
     // Wave type setting
     VariableItem* item = variable_item_list_add(
         variableItemListView->viewData,
-        "Wave Type",
+        "Wave Display",
         COUNT_OF(wave_option_values),
         wave_type_option_change,
         app);
