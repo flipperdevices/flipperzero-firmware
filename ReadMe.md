@@ -27,10 +27,10 @@ This software is for experimental purposes only and is not meant for any illegal
 
 <a name="latest">
 
-## Latest Updates - [PATREON: Latest Release RM1231-0235-0.93.9-0eb2e5f](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
+## Latest Updates - [PATREON: Latest Release RM0101-0245-0.93.9-116e51f](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-12-31 02:35 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-12-31 02:35 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-01-01 02:45 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-01-01 02:45 EST`
 - Added: [Tarot v0.1 (By pionaiki & tihyltew)](https://github.com/pionaiki/fz-tarot)
 - Added: [Tone Generator v1.0 (By GEMISIS)](https://github.com/GEMISIS/tone_gen)
 
