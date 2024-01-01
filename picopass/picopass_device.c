@@ -54,13 +54,13 @@ static bool picopass_device_save_file_seader(
             seader_file_header,
             seader_file_version,
             furi_string_get_cstr(file_path));
+        storage_simply_mkdir(dev->storage, EXT_PATH("apps_data/seader"));
         if(!flipper_format_file_open_always(file, furi_string_get_cstr(file_path))) break;
         if(!flipper_format_write_header_cstr(file, seader_file_header, seader_file_version)) break;
         if(!flipper_format_write_uint32(file, "Bits", (uint32_t*)&pacs->bitLength, 1)) break;
         if(!flipper_format_write_hex(file, "Credential", pacs->credential, PICOPASS_BLOCK_LEN))
             break;
 
-        FURI_LOG_D(TAG, "Pre-sio");
         // Seader only captures 64 byte SIO so I'm going to leave it at that
         uint8_t sio[64];
 
@@ -76,7 +76,6 @@ static bool picopass_device_save_file_seader(
             }
             if(!flipper_format_write_hex(file, "SIO", sio, sizeof(sio))) break;
         }
-        FURI_LOG_D(TAG, "post sio");
         if(!flipper_format_write_hex(
                file, "Diversifier", AA1[PICOPASS_CSN_BLOCK_INDEX].data, PICOPASS_BLOCK_LEN))
             break;
