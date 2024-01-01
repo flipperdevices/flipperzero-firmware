@@ -15,6 +15,7 @@
 #include <gui/scene_manager.h>
 #include <gui/modules/loading.h>
 #include <gui/modules/dialog_ex.h>
+#include <gui/modules/variable_item_list.h>
 
 #include "scenes/minesweeper_scene.h"
 
@@ -36,7 +37,8 @@ typedef struct MineSweeperApp {
     StartScreen* start_screen;
     Loading* loading;
     MineSweeperGameScreen* game_screen;
-    DialogEx* menu;
+    DialogEx* menu_screen;
+    VariableItemList* settings_screen;
     uint32_t haptic;
     uint32_t speaker;
     uint32_t led;
