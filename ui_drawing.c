@@ -206,6 +206,7 @@ void calculator_draw_callback(Canvas* canvas, void* ctx) {
         modeStr = " waiting ...";
         break;
     }
+    
     canvas_draw_str(canvas, 15, 72, modeStr);
     short cursorX = 2;
     short cursorY = 61; // Starting Y position
