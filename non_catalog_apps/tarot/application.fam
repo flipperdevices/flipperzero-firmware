@@ -1,0 +1,14 @@
+App(
+    appid="tarot",  # Must be unique
+    name="Tarot",  # Displayed in menus
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="tarot_app",
+    stack_size=2 * 1024,
+    fap_category="Games",
+    fap_version=(0, 1),  # (major, minor)
+    fap_icon="tarot.png",  # 10x10 1-bit PNG
+    fap_description="Tarot card reader",
+    fap_author="pionaiki & tihyltew",
+    fap_weburl="https://github.com/pionaiki/fz-tarot",
+    fap_icon_assets="images",  # Image assets to compile for this application
+)

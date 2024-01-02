@@ -151,6 +151,7 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 | Sokoban | ![Games Badge] | [by Racso](https://github.com/Racso/fzero-apps/tree/main) |  | [![Author Badge]](https://lab.flipper.net/apps/racso_sokoban) |
 | Игра «Виселица» («Балда») | ![Games Badge] | [by bolknote](https://github.com/bolknote/Flipper-Zero-Hangman-Game) |  | ![None Badge] |
 | City Bloxx | ![Games Badge] | [by Milk-Cool](https://github.com/Milk-Cool/fz-citybloxx) |  | ![None Badge] |
+| Tarot spread | ![Games Badge] | [by pionaiki](https://github.com/pionaiki/fz-tarot) |  | ![None Badge] |
 | Air Mouse | ![GPIO Badge] | [by ginkage](https://github.com/ginkage/FlippAirMouse/) |  | [![Author Badge]](https://lab.flipper.net/apps/air_mouse) |
 | Plantower PMSx003 sensor reader | ![GPIO Badge] | [by 3cky](https://github.com/3cky/flipperzero-airmon) |  | [![UFW Badge]](https://lab.flipper.net/apps/airmon) |
 | Bar code scanner emulator via COM port | ![GPIO Badge] | [by polarikus](https://github.com/polarikus/flipper-zero_bc_scanner_emulator) |  | ![None Badge] |
@@ -243,6 +244,7 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 | Resistance calculator | ![Tools Badge] | [by instantiator](https://github.com/instantiator/flipper-zero-experimental-apps) |  | [![UFW Badge]](https://lab.flipper.net/apps/resistors) |
 | Simple calendar app | ![Tools Badge] | [by Adiras](https://github.com/Adiras/flipperzero-calendar) |  | ![None Badge] |
 | Programmer Calculator | ![Tools Badge] | [by armixz](https://github.com/armixz/Flipper-Zero-Programmer-Calculator) |  | ![None Badge] |
+| Tone Generator | ![Tools Badge] | [by GEMISIS](https://github.com/GEMISIS/tone_gen/) |  | ![None Badge] |
 | USB HID Autofire | ![USB Badge] | [by pbek](https://github.com/pbek/usb_hid_autofire) |  | ![None Badge] |
 | USB Consumer Control | ![USB Badge] | [by WithSecureLabs](https://github.com/WithSecureLabs/usb-consumer-control/tree/main) |  | ![None Badge] |
 

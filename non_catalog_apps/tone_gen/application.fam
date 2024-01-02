@@ -1,0 +1,17 @@
+# For details & more options, see documentation/AppManifests.md in firmware repo
+
+App(
+    appid="tone_gen",  # Must be unique
+    name="Tone Generator",  # Displayed in menus
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="tone_gen_app",
+    stack_size=2 * 1024,
+    fap_category="Tools",
+    fap_version="1.0",
+    fap_icon="tone_gen.png",  # 10x10 1-bit PNG
+    fap_description="A simple app to generate sound tones.",
+    fap_author="Gerald McAlister",
+    fap_weburl="https://github.com/GEMISIS/tone_gen",
+    fap_icon_assets="images",  # Image assets to compile for this application
+    sources=["src/*.c", "src/scenes/*.c", "src/system/*.c", "src/utils/*.c"],
+)
