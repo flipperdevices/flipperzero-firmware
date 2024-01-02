@@ -13,10 +13,9 @@
 
 // These defines represent how many tiles
 // can be visually representen on the screen 
+// due to icon sizes
 #define MINESWEEPER_SCREEN_TILE_HEIGHT 7
 #define MINESWEEPER_SCREEN_TILE_WIDTH 16
-
-#define MINESWEEPER_STARTING_MINES (44)
 
 #ifdef __cplusplus
 extern "C" {
@@ -36,7 +35,7 @@ typedef bool (*GameScreenInputCallback)(InputEvent* event, void* context);
  *
  * @return      MineSweeperGameScreen view instance 
  */
-MineSweeperGameScreen* mine_sweeper_game_screen_alloc(uint8_t width, uint8_t height);
+MineSweeperGameScreen* mine_sweeper_game_screen_alloc(uint8_t width, uint8_t height, uint8_t difficulty);
 
 /** Deinitialize and free Start Screen view
  *
@@ -48,7 +47,7 @@ void mine_sweeper_game_screen_free(MineSweeperGameScreen* instance);
  *
  * @param       instance MineSweeperGameScreen instance
  */
-void mine_sweeper_game_screen_reset(MineSweeperGameScreen* instance, uint8_t width, uint8_t height);
+void mine_sweeper_game_screen_reset(MineSweeperGameScreen* instance, uint8_t width, uint8_t height, uint8_t difficulty);
 
 /** Get MineSweeperGameScreen view
  *
