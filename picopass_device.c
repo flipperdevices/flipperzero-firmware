@@ -167,6 +167,11 @@ static bool picopass_device_save_file(
     FuriString* temp_str;
     temp_str = furi_string_alloc();
 
+    if(dev->format == PicopassDeviceSaveFormatPartial) {
+        // Clear key that may have been set when doing key tests for legacy
+        memset(AA1[PICOPASS_SECURE_KD_BLOCK_INDEX].data, 0, PICOPASS_BLOCK_LEN);
+    }
+
     do {
         if(use_load_path && !furi_string_empty(dev->load_path)) {
             // Get directory name
@@ -178,7 +183,8 @@ static bool picopass_device_save_file(
             furi_string_printf(temp_str, "%s/%s%s", folder, dev_name, extension);
         }
 
-        if(dev->format == PicopassDeviceSaveFormatHF) {
+        if(dev->format == PicopassDeviceSaveFormatHF ||
+           dev->format == PicopassDeviceSaveFormatPartial) {
             // Open file
             if(!flipper_format_file_open_always(file, furi_string_get_cstr(temp_str))) break;
 
@@ -229,6 +235,9 @@ bool picopass_device_save(PicopassDevice* dev, const char* dev_name) {
     } else if(dev->format == PicopassDeviceSaveFormatSeader) {
         return picopass_device_save_file(
             dev, dev_name, EXT_PATH("apps_data/seader"), ".credential", true);
+    } else if(dev->format == PicopassDeviceSaveFormatPartial) {
+        return picopass_device_save_file(
+            dev, dev_name, STORAGE_APP_DATA_PATH_PREFIX, PICOPASS_APP_EXTENSION, true);
     }
 
     return false;
