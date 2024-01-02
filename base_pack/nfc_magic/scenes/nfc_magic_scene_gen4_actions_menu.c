@@ -1,11 +1,8 @@
 #include "../nfc_magic_app_i.h"
-#include "furi_hal_rtc.h"
 
 enum SubmenuIndex {
     SubmenuIndexAuthenticate,
     SubmenuIndexSetStandartConfig,
-    SubmenuIndexGetConfig,
-    SubmenuIndexGetRevision
 };
 
 void nfc_magic_scene_gen4_actions_menu_submenu_callback(void* context, uint32_t index) {
@@ -26,24 +23,10 @@ void nfc_magic_scene_gen4_actions_menu_on_enter(void* context) {
         instance);
     submenu_add_item(
         submenu,
-        "Get Revision",
-        SubmenuIndexGetRevision,
-        nfc_magic_scene_gen4_actions_menu_submenu_callback,
-        instance);
-    submenu_add_item(
-        submenu,
         "Set Standart Config",
         SubmenuIndexSetStandartConfig,
         nfc_magic_scene_gen4_actions_menu_submenu_callback,
         instance);
-    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
-        submenu_add_item(
-            submenu,
-            "Get Config",
-            SubmenuIndexGetConfig,
-            nfc_magic_scene_gen4_actions_menu_submenu_callback,
-            instance);
-    }
 
     submenu_set_selected_item(
         submenu,
@@ -60,15 +43,10 @@ bool nfc_magic_scene_gen4_actions_menu_on_event(void* context, SceneManagerEvent
             scene_manager_next_scene(instance->scene_manager, NfcMagicSceneKeyInput);
             consumed = true;
         } else if(event.event == SubmenuIndexSetStandartConfig) {
-            scene_manager_next_scene(instance->scene_manager, NfcMagicSceneGen4SetCFG);
-            consumed = true;
-        } else if(event.event == SubmenuIndexGetConfig) {
-            scene_manager_next_scene(instance->scene_manager, NfcMagicSceneGen4GetCFG);
-            consumed = true;
-        } else if(event.event == SubmenuIndexGetRevision) {
-            scene_manager_next_scene(instance->scene_manager, NfcMagicSceneGen4Revision);
+            scene_manager_next_scene(instance->scene_manager, NfcMagicSceneGen4SetCfg);
             consumed = true;
         }
+
         scene_manager_set_scene_state(
             instance->scene_manager, NfcMagicSceneGen4ActionsMenu, event.event);
     } else if(event.type == SceneManagerEventTypeBack) {

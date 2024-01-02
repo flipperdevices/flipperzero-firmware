@@ -10,7 +10,7 @@ App(
     ],
     stack_size=4 * 1024,
     fap_description="Application for writing to NFC tags with modifiable sector 0",
-    fap_version="1.4",
+    fap_version="1.5",
     fap_icon="assets/Nfc_10px.png",
     fap_category="NFC",
     fap_private_libs=[

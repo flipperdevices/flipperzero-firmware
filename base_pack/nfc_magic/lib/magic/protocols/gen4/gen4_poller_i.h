@@ -36,11 +36,22 @@ typedef enum {
     Gen4PollerShadowModePreWrite = 0x00,
     // written data can be read once before restored to original
     Gen4PollerShadowModeRestore = 0x01,
-    // written data is discarded
-    Gen4PollerShadowModeIgnore = 0x02,
+    // shadow mode disabled
+    Gen4PollerShadowModeDisabled = 0x02,
     // apparently for UL?
-    Gen4PollerShadowModeHighSpeedIgnore = 0x03
+    Gen4PollerShadowModeHighSpeedDisabled = 0x03,
+    // work with new UMC. With old UMC is untested
+    Gen4PollerShadowModeSplit = 0x04,
 } Gen4PollerShadowMode;
+
+typedef enum {
+    // gen2 card behavour
+    Gen4PollerDirectWriteBlock0ModeEnabled = 0x00,
+    // common card behavour
+    Gen4PollerDirectWriteBlock0ModeDisabled = 0x01,
+    // default mode. same behavour as Gen4PollerDirectWriteBlock0ModeActivate
+    Gen4PollerDirectWriteBlock0ModeDefault = 0x02,
+} Gen4PollerDirectWriteBlock0Mode;
 
 typedef enum {
     Gen4PollerStateIdle,
@@ -53,6 +64,8 @@ typedef enum {
     Gen4PollerStateSetDefaultConfig,
     Gen4PollerStateGetCurrentConfig,
     Gen4PollerStateGetRevision,
+    Gen4PollerStateSetShadowMode,
+    Gen4PollerStateSetDirectWriteBlock0,
 
     Gen4PollerStateSuccess,
     Gen4PollerStateFail,
@@ -77,6 +90,9 @@ struct Gen4Poller {
     uint32_t new_password;
 
     uint8_t config[GEN4_POLLER_CONFIG_SIZE_MAX];
+
+    Gen4PollerShadowMode shadow_mode;
+    Gen4PollerDirectWriteBlock0Mode direct_write_block_0_mode;
 
     Gen4PollerEvent gen4_event;
     Gen4PollerEventData gen4_event_data;
@@ -106,6 +122,14 @@ Gen4PollerError
 
 Gen4PollerError
     gen4_poller_get_config(Gen4Poller* instance, uint32_t password, uint8_t* config_result);
+
+Gen4PollerError
+    gen4_poller_set_shadow_mode(Gen4Poller* instance, uint32_t password, Gen4PollerShadowMode mode);
+
+Gen4PollerError gen4_poller_set_direct_write_block_0_mode(
+    Gen4Poller* instance,
+    uint32_t password,
+    Gen4PollerDirectWriteBlock0Mode mode);
 
 #ifdef __cplusplus
 }
