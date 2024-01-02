@@ -25,7 +25,7 @@ static MineSweeperApp* app_alloc() {
     NotificationApp* notification_app = furi_record_open(RECORD_NOTIFICATION);
 
     // Turn backlight on when app starts
-    notification_message(notification_appd, &sequence_display_backlight_on);
+    notification_message(notification_app, &sequence_display_backlight_on);
 
     furi_record_close(RECORD_NOTIFICATION);
 
@@ -83,8 +83,13 @@ static MineSweeperApp* app_alloc() {
     app->confirmation_screen = dialog_ex_alloc();
     view_dispatcher_add_view(app->view_dispatcher, MineSweeperConfirmationView, dialog_ex_get_view(app->confirmation_screen));
 
-    return app;
+    Gui* gui = furi_record_open(RECORD_GUI);
 
+    view_dispatcher_attach_to_gui(app->view_dispatcher, gui, ViewDispatcherTypeFullscreen);
+    
+    furi_record_close(RECORD_GUI);
+
+    return app;
 }
 
 static void app_free(MineSweeperApp* app) {
@@ -111,9 +116,6 @@ static void app_free(MineSweeperApp* app) {
     furi_string_free(app->settings_info.width_str);
     furi_string_free(app->settings_info.height_str);
 
-    app->gui = NULL;
-    app->notification = NULL;
-
     // Free app structure
     free(app);
 
@@ -123,8 +125,6 @@ int32_t minesweeper_app(void* p) {
     UNUSED(p);
 
     MineSweeperApp* app = app_alloc();
-
-    view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
 
     // This will be the initial scene on app startup
     scene_manager_next_scene(app->scene_manager, MineSweeperSceneStartScreen);
