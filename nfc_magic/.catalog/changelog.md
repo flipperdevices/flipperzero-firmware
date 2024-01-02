@@ -1,5 +1,9 @@
 ## 1.4 
 
+ - Fix incorrect max sector configuration
+
+## 1.4 
+
  - Auth with password option moved into new submenu "Gen4 actions"
  - New function: Get gen4 card revision
  - New function: Get gen4 card config (shows only when debug ON)
