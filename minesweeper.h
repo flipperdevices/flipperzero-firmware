@@ -38,9 +38,6 @@ typedef struct {
 
 // MineSweeperApp
 typedef struct MineSweeperApp {
-    NotificationApp* notification;
-
-    Gui* gui;
     SceneManager* scene_manager;
     ViewDispatcher* view_dispatcher;
 
