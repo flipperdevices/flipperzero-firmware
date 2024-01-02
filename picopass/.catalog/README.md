@@ -35,6 +35,8 @@ There are some situations when the offline loclass may not find a key, such as:
 
 Due to the nature of how secure picopass works, it is possible to emulate some public fields from a card and capture the reader's response, which can be used to authenticate.  Two of the pieces involved in this are the NR and MAC.
 
+These instructions are intended to be performed all at the same time.  If you use the card with the reader between Card Part 1 and Card Part 2, then Card Part 2 will fail.
+
 ## Card Part 1
 
 1. Place card against Flipper Zero

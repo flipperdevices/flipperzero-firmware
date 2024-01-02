@@ -106,7 +106,7 @@ bool picopass_scene_card_menu_on_event(void* context, SceneManagerEvent event) {
             scene_manager_set_scene_state(
                 picopass->scene_manager, PicopassSceneCardMenu, SubmenuIndexSave);
             scene_manager_next_scene(picopass->scene_manager, PicopassSceneSaveName);
-            picopass->dev->format = PicopassDeviceSaveFormatHF;
+            picopass->dev->format = PicopassDeviceSaveFormatPartial;
             consumed = true;
         } else if(event.event == SubmenuIndexSaveAsSeader) {
             scene_manager_set_scene_state(

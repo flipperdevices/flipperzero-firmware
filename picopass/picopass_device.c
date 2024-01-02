@@ -54,13 +54,13 @@ static bool picopass_device_save_file_seader(
             seader_file_header,
             seader_file_version,
             furi_string_get_cstr(file_path));
+        storage_simply_mkdir(dev->storage, EXT_PATH("apps_data/seader"));
         if(!flipper_format_file_open_always(file, furi_string_get_cstr(file_path))) break;
         if(!flipper_format_write_header_cstr(file, seader_file_header, seader_file_version)) break;
         if(!flipper_format_write_uint32(file, "Bits", (uint32_t*)&pacs->bitLength, 1)) break;
         if(!flipper_format_write_hex(file, "Credential", pacs->credential, PICOPASS_BLOCK_LEN))
             break;
 
-        FURI_LOG_D(TAG, "Pre-sio");
         // Seader only captures 64 byte SIO so I'm going to leave it at that
         uint8_t sio[64];
 
@@ -76,7 +76,6 @@ static bool picopass_device_save_file_seader(
             }
             if(!flipper_format_write_hex(file, "SIO", sio, sizeof(sio))) break;
         }
-        FURI_LOG_D(TAG, "post sio");
         if(!flipper_format_write_hex(
                file, "Diversifier", AA1[PICOPASS_CSN_BLOCK_INDEX].data, PICOPASS_BLOCK_LEN))
             break;
@@ -167,6 +166,11 @@ static bool picopass_device_save_file(
     FuriString* temp_str;
     temp_str = furi_string_alloc();
 
+    if(dev->format == PicopassDeviceSaveFormatPartial) {
+        // Clear key that may have been set when doing key tests for legacy
+        memset(AA1[PICOPASS_SECURE_KD_BLOCK_INDEX].data, 0, PICOPASS_BLOCK_LEN);
+    }
+
     do {
         if(use_load_path && !furi_string_empty(dev->load_path)) {
             // Get directory name
@@ -178,7 +182,8 @@ static bool picopass_device_save_file(
             furi_string_printf(temp_str, "%s/%s%s", folder, dev_name, extension);
         }
 
-        if(dev->format == PicopassDeviceSaveFormatHF) {
+        if(dev->format == PicopassDeviceSaveFormatHF ||
+           dev->format == PicopassDeviceSaveFormatPartial) {
             // Open file
             if(!flipper_format_file_open_always(file, furi_string_get_cstr(temp_str))) break;
 
@@ -229,6 +234,9 @@ bool picopass_device_save(PicopassDevice* dev, const char* dev_name) {
     } else if(dev->format == PicopassDeviceSaveFormatSeader) {
         return picopass_device_save_file(
             dev, dev_name, EXT_PATH("apps_data/seader"), ".credential", true);
+    } else if(dev->format == PicopassDeviceSaveFormatPartial) {
+        return picopass_device_save_file(
+            dev, dev_name, STORAGE_APP_DATA_PATH_PREFIX, PICOPASS_APP_EXTENSION, true);
     }
 
     return false;
