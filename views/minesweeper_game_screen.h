@@ -33,34 +33,41 @@ typedef bool (*GameScreenInputCallback)(InputEvent* event, void* context);
  *
  * This view is used as the game screen of an application.
  *
- * @return      MineSweeperGameScreen view instance 
+ * @param       width       uint8_t width for board
+ * @param       height      uint8_t height for board
+ * @param       difficulty  uint8_t difficulty for board
+ *
+ * @return      MineSweeperGameScreen* instance 
  */
 MineSweeperGameScreen* mine_sweeper_game_screen_alloc(uint8_t width, uint8_t height, uint8_t difficulty);
 
 /** Deinitialize and free Start Screen view
  *
- * @param       instsance MineSweeperGameScreen instance
+ * @param       instsance   MineSweeperGameScreen instance
  */
 void mine_sweeper_game_screen_free(MineSweeperGameScreen* instance);
 
 /** Reset MineSweeperGameScreen
  *
- * @param       instance MineSweeperGameScreen instance
+ * @param       instance    MineSweeperGameScreen* instance
+ * @param       width       uint8_t width for board
+ * @param       height      uint8_t height for board
+ * @param       difficulty  uint8_t difficulty for board
  */
 void mine_sweeper_game_screen_reset(MineSweeperGameScreen* instance, uint8_t width, uint8_t height, uint8_t difficulty);
 
 /** Get MineSweeperGameScreen view
  *
- * @param       instance MineSweeperGameScreen instance
+ * @param       instance    MineSweeperGameScreen instance
  *
- * @return      view instance that can be used for embedding
+ * @return      View* instance that can be used for embedding
  */
 View* mine_sweeper_game_screen_get_view(MineSweeperGameScreen* instance);
 
 /** Set MineSweeperGameScreen input callback 
  *
- * @param       instance MineSweeperGameScreen instance
- * @param       callback MineSweeperGameScreenInputCallback callback
+ * @param       instance    MineSweeperGameScreen* instance
+ * @param       callback    MineSweeperGameScreenInputCallback callback
  */
 void mine_sweeper_game_screen_set_input_callback(
         MineSweeperGameScreen* instance,
@@ -68,16 +75,16 @@ void mine_sweeper_game_screen_set_input_callback(
 
 /** Set MineSweeperGameScreen context 
  *
- * @param       instance MineSweeperGameScreen instance
- * @param       context context pointer, will be passed to callback 
+ * @param       instance    MineSweeperGameScreen* instance
+ * @param       context     void* context for MineSweeperGameScreen instance 
  */
 void mine_sweeper_game_screen_set_context(MineSweeperGameScreen* instance, void* context);
 
 /** Return true/false if tile is a mine 
  *
- * @param       instance MineSweeperGameScreen instance
- * @param       x       row in board grid
- * @param       y       column in board grid
+ * @param       instance    MineSweeperGameScreen* instance
+ * @param       x           uint8_t row in board grid
+ * @param       y           uint8_t column in board grid
  */
 bool mine_sweeper_is_tile_mine(MineSweeperGameScreen* instance, uint16_t x, uint16_t y);
 
