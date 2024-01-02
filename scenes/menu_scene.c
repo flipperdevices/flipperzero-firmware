@@ -30,7 +30,7 @@ static void minesweeper_menu_scene_dialog_callback(DialogExResult result, void* 
     view_dispatcher_send_custom_event(app->view_dispatcher, result);
 }
 
-void minesweeper_scene_menu_on_enter(void* context) {
+void minesweeper_scene_menu_screen_on_enter(void* context) {
     furi_assert(context);
     MineSweeperApp* app = (MineSweeperApp*)context;
 
@@ -38,15 +38,17 @@ void minesweeper_scene_menu_on_enter(void* context) {
     
     dialog_ex_set_context(app->menu_screen, app);
 
-    dialog_ex_set_header(app->menu_screen, "Leave Minesweeper?", 64, 4, AlignCenter, AlignTop);
+    dialog_ex_set_header(app->menu_screen, "Exit Game?", (128*3)/4, 4, AlignCenter, AlignTop);
 
     uint32_t prompt_index = furi_hal_random_get() % sizeof(farewellPrompts) / sizeof(char*);
 
     dialog_ex_set_text(app->menu_screen, farewellPrompts[prompt_index], 65, 20, AlignLeft, AlignTop);
 
-    dialog_ex_set_icon(app->menu_screen, 11, 13, &I_Cry_dolph_55x52);
+    dialog_ex_set_icon(app->menu_screen, 11, 0, &I_Cry_dolph_55x52);
 
     dialog_ex_set_left_button_text(app->menu_screen, "Back");
+
+    dialog_ex_set_center_button_text(app->menu_screen, "Settings");
 
     dialog_ex_set_right_button_text(app->menu_screen, "Exit");
 
@@ -55,7 +57,7 @@ void minesweeper_scene_menu_on_enter(void* context) {
     view_dispatcher_switch_to_view(app->view_dispatcher, MineSweeperMenuView);
 }
 
-bool minesweeper_scene_menu_on_event(void* context, SceneManagerEvent event) {
+bool minesweeper_scene_menu_screen_on_event(void* context, SceneManagerEvent event) {
     furi_assert(context);
 
     MineSweeperApp* app = context; 
@@ -66,7 +68,7 @@ bool minesweeper_scene_menu_on_event(void* context, SceneManagerEvent event) {
 
             case DialogExResultLeft :
                 if (!scene_manager_search_and_switch_to_previous_scene(
-                    app->scene_manager, MineSweeperSceneGameScreen)) {
+                        app->scene_manager, MineSweeperSceneGameScreen)) {
 
                     scene_manager_stop(app->scene_manager);
                     view_dispatcher_stop(app->view_dispatcher);
@@ -81,6 +83,10 @@ bool minesweeper_scene_menu_on_event(void* context, SceneManagerEvent event) {
                 consumed = true;
                 break;
 
+            case DialogExResultCenter :
+                scene_manager_next_scene(app->scene_manager, MineSweeperSceneSettingsScreen);
+                break;
+
             default :
                 break;
         }
@@ -89,7 +95,7 @@ bool minesweeper_scene_menu_on_event(void* context, SceneManagerEvent event) {
     return consumed;
 }
 
-void minesweeper_scene_menu_on_exit(void* context) {
+void minesweeper_scene_menu_screen_on_exit(void* context) {
     furi_assert(context);
     MineSweeperApp* app = (MineSweeperApp*)context;
 
