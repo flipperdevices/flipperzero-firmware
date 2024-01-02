@@ -568,12 +568,14 @@ void seader_iso14443a_transmit(
     furi_assert(iso14443_4a_poller);
     SeaderWorker* seader_worker = seader->worker;
     SeaderUartBridge* seader_uart = seader_worker->uart;
+    SeaderCredential* credential = seader->credential;
 
     BitBuffer* tx_buffer = bit_buffer_alloc(len);
     BitBuffer* rx_buffer = bit_buffer_alloc(SEADER_POLLER_MAX_BUFFER_SIZE);
 
     do {
-        if(memcmp(buffer, ev2_request, len) == 0) {
+        if(credential->isDesfire && memcmp(buffer, ev2_request, len) == 0) {
+            FURI_LOG_I(TAG, "Intercept Desfire EV2 response and return File Not Found");
             bit_buffer_append_bytes(rx_buffer, FILE_NOT_FOUND, sizeof(FILE_NOT_FOUND));
 
         } else {
@@ -588,7 +590,7 @@ void seader_iso14443a_transmit(
             }
         }
 
-        seader_capture_sio(tx_buffer, rx_buffer, seader->credential);
+        seader_capture_sio(tx_buffer, rx_buffer, credential);
         seader_send_nfc_rx(
             seader_uart,
             (uint8_t*)bit_buffer_get_data(rx_buffer),
@@ -787,6 +789,7 @@ NfcCommand seader_worker_card_detect(
             &cardDetails->protocol, (const char*)protocol_bytes, sizeof(protocol_bytes));
         memcpy(credential->diversifier, uid, uid_len);
         credential->diversifier_len = uid_len;
+        credential->isDesfire = false;
     } else {
         protocol_bytes[1] = FrameProtocol_nfc;
         OCTET_STRING_fromBuf(
@@ -794,7 +797,8 @@ NfcCommand seader_worker_card_detect(
 
         cardDetails->sak = &sak_string;
         cardDetails->atqa = &atqa_string;
-        if(seader_mf_df_check_card_type(atqa[0], atqa[1], sak)) {
+        credential->isDesfire = seader_mf_df_check_card_type(atqa[0], atqa[1], sak);
+        if(credential->isDesfire) {
             memcpy(credential->diversifier, uid, uid_len);
             credential->diversifier_len = uid_len;
         }
