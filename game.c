@@ -21,13 +21,13 @@ Game* alloc_game_state(int* error) {
     game->currentLevel = 0; //4   16  21??? 22  32
     game->gameMoves = 0;
 
-    game->undo_movable = MOVABLE_NOT_FOUND;
-    game->current_movable = MOVABLE_NOT_FOUND;
-    game->next_movable = MOVABLE_NOT_FOUND;
-    game->menu_paused_pos = 0;
+    game->undoMovable = MOVABLE_NOT_FOUND;
+    game->currentMovable = MOVABLE_NOT_FOUND;
+    game->nextMovable = MOVABLE_NOT_FOUND;
+    game->menuPausedPos = 0;
 
-    game->main_menu_btn = MODE_BTN;
-    game->main_menu_mode = NEW_GAME;
+    game->mainMenuBtn = MODE_BTN;
+    game->mainMenuMode = NEW_GAME;
     game->mainMenuInfo = false;
     game->hasContinue = false;
     game->selectedSet = furi_string_alloc_set(assetLevels[0]);
@@ -48,7 +48,7 @@ Game* alloc_game_state(int* error) {
 //-----------------------------------------------------------------------------
 
 void free_game_state(Game* game) {
-    view_port_free(game->view_port);
+    view_port_free(game->viewPort);
     furi_mutex_free(game->mutex);
     free_level_data(game->levelData);
     free_level_set(game->levelSet);
@@ -135,11 +135,11 @@ void initial_load_game(Game* game) {
     if(game->hasContinue) {
         furi_string_set(game->selectedSet, game->continueSet);
         game->selectedLevel = game->continueLevel + 1;
-        game->main_menu_mode = CONTINUE;
+        game->mainMenuMode = CONTINUE;
     } else {
         furi_string_set(game->selectedSet, assetLevels[0]);
         game->selectedLevel = 0;
-        game->main_menu_mode = NEW_GAME;
+        game->mainMenuMode = NEW_GAME;
     }
 
     load_level_set(storage, game->selectedSet, game->levelSet);
@@ -171,8 +171,8 @@ void start_game_at_level(Game* game, uint8_t levelNo) {
         game->currentLevel = levelNo;
         refresh_level(game);
     } else {
-        game->main_menu_btn = LEVELSET_BTN;
-        game->main_menu_mode = CUSTOM;
+        game->mainMenuBtn = LEVELSET_BTN;
+        game->mainMenuMode = CUSTOM;
 
         game->setPos = (game->setPos < game->setCount - 1) ? game->setPos + 1 : 0;
         furi_string_set(game->selectedSet, assetLevels[game->setPos]);
@@ -186,9 +186,9 @@ void start_game_at_level(Game* game, uint8_t levelNo) {
 //-----------------------------------------------------------------------------
 
 void refresh_level(Game* g) {
-    clear_board(&g->board_curr);
-    clear_board(&g->board_undo);
-    clear_board(&g->board_ani);
+    clear_board(&g->board);
+    clear_board(&g->boardUndo);
+    clear_board(&g->toAnimate);
 
     furi_string_set(g->selectedSet, g->levelSet->id);
     furi_string_set(g->continueSet, g->levelSet->id);
@@ -198,15 +198,15 @@ void refresh_level(Game* g) {
     // Open storage
     Storage* storage = furi_record_open(RECORD_STORAGE);
     if(load_level(storage, g->levelSet->id, g->currentLevel, g->levelData)) {
-        parse_level_notation(furi_string_get_cstr(g->levelData->board), &g->board_curr);
+        parse_level_notation(furi_string_get_cstr(g->levelData->board), &g->board);
     }
     // Close storage
     furi_record_close(RECORD_STORAGE);
 
-    map_movability(&g->board_curr, &g->movables);
-    update_board_stats(&g->board_curr, g->stats);
-    g->current_movable = find_movable(&g->movables);
-    g->undo_movable = MOVABLE_NOT_FOUND;
+    map_movability(&g->board, &g->movables);
+    update_board_stats(&g->board, g->stats);
+    g->currentMovable = find_movable(&g->movables);
+    g->undoMovable = MOVABLE_NOT_FOUND;
     g->gameMoves = 0;
     g->state = SELECT_BRICK;
 }
@@ -235,7 +235,7 @@ void forget_continue(Game* game) {
 //-----------------------------------------------------------------------------
 
 void click_selected(Game* game) {
-    const uint8_t dir = movable_dir(&game->movables, game->current_movable);
+    const uint8_t dir = movable_dir(&game->movables, game->currentMovable);
     switch(dir) {
     case MOVABLE_LEFT:
     case MOVABLE_RIGHT:
@@ -255,14 +255,14 @@ void start_gravity(Game* g) {
     uint8_t x, y;
     bool change = false;
 
-    clear_board(&g->board_ani);
+    clear_board(&g->toAnimate);
 
     // go through it bottom to top so as all the blocks tumble down on top of each other
     for(y = (SIZE_Y - 2); y > 0; y--) {
         for(x = (SIZE_X - 1); x > 0; x--) {
-            if((is_block(g->board_curr[y][x])) && (g->board_curr[y + 1][x] == EMPTY_TILE)) {
+            if((is_block(g->board[y][x])) && (g->board[y + 1][x] == EMPTY_TILE)) {
                 change = true;
-                g->board_ani[y][x] = 1;
+                g->toAnimate[y][x] = 1;
             }
         }
     }
@@ -283,9 +283,9 @@ void stop_gravity(Game* g) {
     uint8_t x, y;
     for(y = 0; y < SIZE_Y - 1; y++) {
         for(x = 0; x < SIZE_X; x++) {
-            if(g->board_ani[y][x] == 1) {
-                g->board_curr[y + 1][x] = g->board_curr[y][x];
-                g->board_curr[y][x] = EMPTY_TILE;
+            if(g->toAnimate[y][x] == 1) {
+                g->board[y + 1][x] = g->board[y][x];
+                g->board[y][x] = EMPTY_TILE;
             }
         }
     }
@@ -299,18 +299,18 @@ void start_explosion(Game* g) {
     uint8_t x, y;
     bool change = false;
 
-    clear_board(&g->board_ani);
+    clear_board(&g->toAnimate);
 
     // go through it bottom to top so as all the blocks tumble down on top of each other
     for(y = 0; y < SIZE_Y; y++) {
         for(x = 0; x < SIZE_X; x++) {
-            if(is_block(g->board_curr[y][x])) {
-                if(((y > 0) && (g->board_curr[y][x] == g->board_curr[y - 1][x])) ||
-                   ((x > 0) && (g->board_curr[y][x] == g->board_curr[y][x - 1])) ||
-                   ((y < SIZE_Y - 1) && (g->board_curr[y][x] == g->board_curr[y + 1][x])) ||
-                   ((x < SIZE_X - 1) && (g->board_curr[y][x] == g->board_curr[y][x + 1]))) {
+            if(is_block(g->board[y][x])) {
+                if(((y > 0) && (g->board[y][x] == g->board[y - 1][x])) ||
+                   ((x > 0) && (g->board[y][x] == g->board[y][x - 1])) ||
+                   ((y < SIZE_Y - 1) && (g->board[y][x] == g->board[y + 1][x])) ||
+                   ((x < SIZE_X - 1) && (g->board[y][x] == g->board[y][x + 1]))) {
                     change = true;
-                    g->board_ani[y][x] = 1;
+                    g->toAnimate[y][x] = 1;
                 }
             }
         }
@@ -332,8 +332,8 @@ void stop_explosion(Game* g) {
     uint8_t x, y;
     for(y = 0; y < SIZE_Y - 1; y++) {
         for(x = 0; x < SIZE_X; x++) {
-            if(g->board_ani[y][x] == 1) {
-                g->board_curr[y][x] = EMPTY_TILE;
+            if(g->toAnimate[y][x] == 1) {
+                g->board[y][x] = EMPTY_TILE;
             }
         }
     }
@@ -344,14 +344,14 @@ void stop_explosion(Game* g) {
 //-----------------------------------------------------------------------------
 
 void start_move(Game* g, uint8_t direction) {
-    g->undo_movable = g->current_movable;
-    copy_level(g->board_undo, g->board_curr);
+    g->undoMovable = g->currentMovable;
+    copy_level(g->boardUndo, g->board);
     g->gameMoves++;
     g->move.dir = direction;
-    g->move.x = coord_x(g->current_movable);
-    g->move.y = coord_y(g->current_movable);
+    g->move.x = coord_x(g->currentMovable);
+    g->move.y = coord_y(g->currentMovable);
     g->move.frameNo = 0;
-    g->next_movable = coord_from((g->move.x + ((direction == MOVABLE_LEFT) ? -1 : 1)), g->move.y);
+    g->nextMovable = coord_from((g->move.x + ((direction == MOVABLE_LEFT) ? -1 : 1)), g->move.y);
     g->state = MOVE_SIDES;
 }
 
@@ -359,10 +359,10 @@ void start_move(Game* g, uint8_t direction) {
 
 void stop_move(Game* g) {
     uint8_t deltaX = ((g->move.dir & MOVABLE_LEFT) != 0) ? -1 : 1;
-    uint8_t tile = g->board_curr[g->move.y][g->move.x];
+    uint8_t tile = g->board[g->move.y][g->move.x];
 
-    g->board_curr[g->move.y][g->move.x] = EMPTY_TILE;
-    g->board_curr[g->move.y][cap_x(g->move.x + deltaX)] = tile;
+    g->board[g->move.y][g->move.x] = EMPTY_TILE;
+    g->board[g->move.y][cap_x(g->move.x + deltaX)] = tile;
 
     start_gravity(g);
 }
@@ -370,18 +370,18 @@ void stop_move(Game* g) {
 //-----------------------------------------------------------------------------
 
 void movement_stoped(Game* g) {
-    map_movability(&g->board_curr, &g->movables);
-    update_board_stats(&g->board_curr, g->stats);
-    g->current_movable = g->next_movable;
-    g->next_movable = MOVABLE_NOT_FOUND;
-    if(!is_block(g->board_curr[coord_y(g->current_movable)][coord_x(g->current_movable)])) {
-        find_movable_down(&g->movables, &g->current_movable);
+    map_movability(&g->board, &g->movables);
+    update_board_stats(&g->board, g->stats);
+    g->currentMovable = g->nextMovable;
+    g->nextMovable = MOVABLE_NOT_FOUND;
+    if(!is_block(g->board[coord_y(g->currentMovable)][coord_x(g->currentMovable)])) {
+        find_movable_down(&g->movables, &g->currentMovable);
     }
-    if(!is_block(g->board_curr[coord_y(g->current_movable)][coord_x(g->current_movable)])) {
-        find_movable_right(&g->movables, &g->current_movable);
+    if(!is_block(g->board[coord_y(g->currentMovable)][coord_x(g->currentMovable)])) {
+        find_movable_right(&g->movables, &g->currentMovable);
     }
-    if(!is_block(g->board_curr[coord_y(g->current_movable)][coord_x(g->current_movable)])) {
-        g->current_movable = MOVABLE_NOT_FOUND;
+    if(!is_block(g->board[coord_y(g->currentMovable)][coord_x(g->currentMovable)])) {
+        g->currentMovable = MOVABLE_NOT_FOUND;
     }
 
     g->gameOverReason = is_game_over(&g->movables, g->stats);
@@ -399,12 +399,12 @@ void movement_stoped(Game* g) {
 //-----------------------------------------------------------------------------
 
 bool undo(Game* g) {
-    if(g->undo_movable != MOVABLE_NOT_FOUND) {
-        g->current_movable = g->undo_movable;
-        g->undo_movable = MOVABLE_NOT_FOUND;
-        copy_level(g->board_curr, g->board_undo);
-        map_movability(&g->board_curr, &g->movables);
-        update_board_stats(&g->board_curr, g->stats);
+    if(g->undoMovable != MOVABLE_NOT_FOUND) {
+        g->currentMovable = g->undoMovable;
+        g->undoMovable = MOVABLE_NOT_FOUND;
+        copy_level(g->board, g->boardUndo);
+        map_movability(&g->board, &g->movables);
+        update_board_stats(&g->board, g->stats);
         g->gameMoves--;
         g->state = SELECT_BRICK;
         return true;

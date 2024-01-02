@@ -61,7 +61,7 @@ typedef struct {
 } MoveInfo;
 
 typedef struct {
-    ViewPort* view_port;
+    ViewPort* viewPort;
     FuriMutex* mutex;
     State state;
 
@@ -73,29 +73,29 @@ typedef struct {
     unsigned int gameMoves;
 
     // board
-    PlayGround board_curr;
-    PlayGround board_undo;
-    PlayGround board_ani;
+    PlayGround board;
+    PlayGround boardUndo;
+    PlayGround toAnimate;
     PlayGround movables;
 
     // board stats
     Stats* stats;
 
     // selections
-    uint8_t undo_movable;
-    uint8_t current_movable;
-    uint8_t next_movable;
-    uint8_t menu_paused_pos;
+    uint8_t undoMovable;
+    uint8_t currentMovable;
+    uint8_t nextMovable;
 
-    MenuButtons main_menu_btn;
-    GameMode main_menu_mode;
+    // menus
+    uint8_t menuPausedPos;
+    MenuButtons mainMenuBtn;
+    GameMode mainMenuMode;
     bool mainMenuInfo;
     bool hasContinue;
     FuriString* selectedSet;
     uint8_t selectedLevel;
     FuriString* continueSet;
     uint8_t continueLevel;
-
     uint8_t setPos;
     uint8_t setCount;
 

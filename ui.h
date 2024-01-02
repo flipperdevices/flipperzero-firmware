@@ -4,7 +4,7 @@
 #include <u8g2/u8g2.h>
 #include <toolbox/compress.h>
 
-//--- workaround to not use private API
+//--- workaround to access private API
 
 #define GUI_DISPLAY_WIDTH 128
 #define GUI_DISPLAY_HEIGHT 64

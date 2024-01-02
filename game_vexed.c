@@ -22,7 +22,7 @@
 void game_tick(void* ctx) {
     furi_assert(ctx);
     const Game* game = ctx;
-    view_port_update(game->view_port);
+    view_port_update(game->viewPort);
 }
 
 static void app_input_callback(InputEvent* input_event, void* ctx) {
@@ -56,13 +56,13 @@ int32_t game_vexed_app(void* p) {
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(InputEvent));
 
     // Configure view port
-    game->view_port = view_port_alloc();
-    view_port_draw_callback_set(game->view_port, app_draw_callback, game);
-    view_port_input_callback_set(game->view_port, app_input_callback, event_queue);
+    game->viewPort = view_port_alloc();
+    view_port_draw_callback_set(game->viewPort, app_draw_callback, game);
+    view_port_input_callback_set(game->viewPort, app_input_callback, event_queue);
 
     // Register view port in GUI
     Gui* gui = furi_record_open(RECORD_GUI);
-    gui_add_view_port(gui, game->view_port, GuiLayerFullscreen);
+    gui_add_view_port(gui, game->viewPort, GuiLayerFullscreen);
 
     // Create a timer. When non-paused, it trigers UI refresh
     FuriTimer* timer = furi_timer_alloc(game_tick, FuriTimerTypePeriodic, game);
@@ -96,15 +96,15 @@ int32_t game_vexed_app(void* p) {
             }
 
             if(shouldBePaused) {
-                view_port_update(game->view_port);
+                view_port_update(game->viewPort);
             }
             furi_mutex_release(game->mutex);
         }
     }
 
     furi_timer_free(timer);
-    view_port_enabled_set(game->view_port, false);
-    gui_remove_view_port(gui, game->view_port);
+    view_port_enabled_set(game->viewPort, false);
+    gui_remove_view_port(gui, game->viewPort);
     furi_message_queue_free(event_queue);
     free_game_state(game);
     furi_record_close(RECORD_GUI);

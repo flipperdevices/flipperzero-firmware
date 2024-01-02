@@ -8,22 +8,22 @@ void events_for_selection(InputEvent* event, Game* game) {
     if((event->type == InputTypePress) || (event->type == InputTypeRepeat)) {
         switch(event->key) {
         case InputKeyLeft:
-            find_movable_left(&game->movables, &game->current_movable);
+            find_movable_left(&game->movables, &game->currentMovable);
             break;
         case InputKeyRight:
-            find_movable_right(&game->movables, &game->current_movable);
+            find_movable_right(&game->movables, &game->currentMovable);
             break;
         case InputKeyUp:
-            find_movable_up(&game->movables, &game->current_movable);
+            find_movable_up(&game->movables, &game->currentMovable);
             break;
         case InputKeyDown:
-            find_movable_down(&game->movables, &game->current_movable);
+            find_movable_down(&game->movables, &game->currentMovable);
             break;
         case InputKeyOk:
             click_selected(game);
             break;
         case InputKeyBack:
-            game->menu_paused_pos = (game->undo_movable == MOVABLE_NOT_FOUND) ? 4 : 0;
+            game->menuPausedPos = (game->undoMovable == MOVABLE_NOT_FOUND) ? 4 : 0;
             game->state = PAUSED;
             break;
         default:
@@ -61,37 +61,37 @@ void events_for_paused(InputEvent* event, Game* game) {
     if((event->type == InputTypePress) || (event->type == InputTypeRepeat)) {
         switch(event->key) {
         case InputKeyLeft:
-            game->menu_paused_pos =
-                (game->menu_paused_pos + MENU_PAUSED_COUNT - 1) % MENU_PAUSED_COUNT;
-            if((game->menu_paused_pos == 0) && (game->undo_movable == MOVABLE_NOT_FOUND)) {
-                game->menu_paused_pos =
-                    (game->menu_paused_pos + MENU_PAUSED_COUNT - 1) % MENU_PAUSED_COUNT;
+            game->menuPausedPos =
+                (game->menuPausedPos + MENU_PAUSED_COUNT - 1) % MENU_PAUSED_COUNT;
+            if((game->menuPausedPos == 0) && (game->undoMovable == MOVABLE_NOT_FOUND)) {
+                game->menuPausedPos =
+                    (game->menuPausedPos + MENU_PAUSED_COUNT - 1) % MENU_PAUSED_COUNT;
             }
             break;
         case InputKeyRight:
-            game->menu_paused_pos = (game->menu_paused_pos + 1) % MENU_PAUSED_COUNT;
-            if((game->menu_paused_pos == 0) && (game->undo_movable == MOVABLE_NOT_FOUND)) {
-                game->menu_paused_pos = (game->menu_paused_pos + 1) % MENU_PAUSED_COUNT;
+            game->menuPausedPos = (game->menuPausedPos + 1) % MENU_PAUSED_COUNT;
+            if((game->menuPausedPos == 0) && (game->undoMovable == MOVABLE_NOT_FOUND)) {
+                game->menuPausedPos = (game->menuPausedPos + 1) % MENU_PAUSED_COUNT;
             }
             break;
 
         case InputKeyUp:
-            game->menu_paused_pos =
-                (game->menu_paused_pos + MENU_PAUSED_COUNT - 2) % MENU_PAUSED_COUNT;
-            if((game->menu_paused_pos == 0) && (game->undo_movable == MOVABLE_NOT_FOUND)) {
-                game->menu_paused_pos =
-                    (game->menu_paused_pos + MENU_PAUSED_COUNT - 2) % MENU_PAUSED_COUNT;
+            game->menuPausedPos =
+                (game->menuPausedPos + MENU_PAUSED_COUNT - 2) % MENU_PAUSED_COUNT;
+            if((game->menuPausedPos == 0) && (game->undoMovable == MOVABLE_NOT_FOUND)) {
+                game->menuPausedPos =
+                    (game->menuPausedPos + MENU_PAUSED_COUNT - 2) % MENU_PAUSED_COUNT;
             }
             break;
 
         case InputKeyDown:
-            game->menu_paused_pos = (game->menu_paused_pos + 2) % MENU_PAUSED_COUNT;
-            if((game->menu_paused_pos == 0) && (game->undo_movable == MOVABLE_NOT_FOUND)) {
-                game->menu_paused_pos = (game->menu_paused_pos + 2) % MENU_PAUSED_COUNT;
+            game->menuPausedPos = (game->menuPausedPos + 2) % MENU_PAUSED_COUNT;
+            if((game->menuPausedPos == 0) && (game->undoMovable == MOVABLE_NOT_FOUND)) {
+                game->menuPausedPos = (game->menuPausedPos + 2) % MENU_PAUSED_COUNT;
             }
             break;
         case InputKeyOk:
-            switch(game->menu_paused_pos) {
+            switch(game->menuPausedPos) {
             case 0: // undo
                 undo(game);
                 break;
@@ -99,8 +99,8 @@ void events_for_paused(InputEvent* event, Game* game) {
                 refresh_level(game);
                 break;
             case 2: // menu
-                game->main_menu_mode = CUSTOM;
-                game->main_menu_btn = MODE_BTN;
+                game->mainMenuMode = CUSTOM;
+                game->mainMenuBtn = MODE_BTN;
                 game->state = MAIN_MENU;
                 break;
             case 3: // skip
@@ -132,7 +132,7 @@ void events_for_game_over(InputEvent* event, Game* game) {
             undo(game);
             break;
         case InputKeyOk:
-            game->main_menu_mode = NEW_GAME;
+            game->mainMenuMode = NEW_GAME;
             game->state = MAIN_MENU;
             break;
         case InputKeyLeft:
@@ -157,7 +157,7 @@ void events_for_level_finished(InputEvent* event, Game* game) {
         case InputKeyUp:
         case InputKeyDown:
         case InputKeyBack:
-            game->main_menu_mode = CONTINUE;
+            game->mainMenuMode = CONTINUE;
             game->state = MAIN_MENU;
             break;
         case InputKeyOk:
@@ -194,7 +194,7 @@ void events_for_main_menu(InputEvent* event, Game* game) {
     if((event->type == InputTypePress) || (event->type == InputTypeRepeat)) {
         switch(event->key) {
         case InputKeyOk:
-            switch(game->main_menu_mode) {
+            switch(game->mainMenuMode) {
             case NEW_GAME:
                 forget_continue(game);
                 FuriString* setName = furi_string_alloc_set(assetLevels[0]);
@@ -203,7 +203,7 @@ void events_for_main_menu(InputEvent* event, Game* game) {
                 start_game_at_level(game, 0);
                 break;
             case CUSTOM:
-                switch(game->main_menu_btn) {
+                switch(game->mainMenuBtn) {
                 case LEVELSET_BTN:
                 case LEVELNO_BTN:
                     if(game->mainMenuInfo) {
@@ -230,7 +230,7 @@ void events_for_main_menu(InputEvent* event, Game* game) {
             break;
         case InputKeyLeft:
             if(game->mainMenuInfo) return;
-            switch(game->main_menu_btn) {
+            switch(game->mainMenuBtn) {
             case LEVELSET_BTN:
                 game->setPos = (game->setPos > 0) ? game->setPos - 1 : game->setCount - 1;
                 furi_string_set(game->selectedSet, assetLevels[game->setPos]);
@@ -243,19 +243,19 @@ void events_for_main_menu(InputEvent* event, Game* game) {
                 break;
             case MODE_BTN:
             default:
-                if(game->main_menu_mode == CUSTOM) {
-                    game->main_menu_mode = game->hasContinue ? CONTINUE : NEW_GAME;
-                } else if(game->main_menu_mode == CONTINUE) {
-                    game->main_menu_mode = NEW_GAME;
+                if(game->mainMenuMode == CUSTOM) {
+                    game->mainMenuMode = game->hasContinue ? CONTINUE : NEW_GAME;
+                } else if(game->mainMenuMode == CONTINUE) {
+                    game->mainMenuMode = NEW_GAME;
                 } else {
-                    game->main_menu_mode = CUSTOM;
+                    game->mainMenuMode = CUSTOM;
                 }
                 break;
             }
             break;
         case InputKeyRight:
             if(game->mainMenuInfo) return;
-            switch(game->main_menu_btn) {
+            switch(game->mainMenuBtn) {
             case LEVELSET_BTN:
                 game->setPos = (game->setPos < game->setCount - 1) ? game->setPos + 1 : 0;
                 furi_string_set(game->selectedSet, assetLevels[game->setPos]);
@@ -270,27 +270,25 @@ void events_for_main_menu(InputEvent* event, Game* game) {
             case MODE_BTN:
             default:
 
-                if(game->main_menu_mode == NEW_GAME) {
-                    game->main_menu_mode = game->hasContinue ? CONTINUE : CUSTOM;
-                } else if(game->main_menu_mode == CONTINUE) {
-                    game->main_menu_mode = CUSTOM;
+                if(game->mainMenuMode == NEW_GAME) {
+                    game->mainMenuMode = game->hasContinue ? CONTINUE : CUSTOM;
+                } else if(game->mainMenuMode == CONTINUE) {
+                    game->mainMenuMode = CUSTOM;
                 } else {
-                    game->main_menu_mode = NEW_GAME;
+                    game->mainMenuMode = NEW_GAME;
                 }
             }
             break;
         case InputKeyUp:
             if(game->mainMenuInfo) return;
-            if(game->main_menu_mode == CUSTOM) {
-                game->main_menu_btn =
-                    (game->main_menu_btn - 1 + MAIN_MENU_COUNT) % MAIN_MENU_COUNT;
+            if(game->mainMenuMode == CUSTOM) {
+                game->mainMenuBtn = (game->mainMenuBtn - 1 + MAIN_MENU_COUNT) % MAIN_MENU_COUNT;
             }
             break;
         case InputKeyDown:
             if(game->mainMenuInfo) return;
-            if(game->main_menu_mode == CUSTOM) {
-                game->main_menu_btn =
-                    (game->main_menu_btn + 1 + MAIN_MENU_COUNT) % MAIN_MENU_COUNT;
+            if(game->mainMenuMode == CUSTOM) {
+                game->mainMenuBtn = (game->mainMenuBtn + 1 + MAIN_MENU_COUNT) % MAIN_MENU_COUNT;
             }
             break;
         case InputKeyBack:

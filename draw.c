@@ -227,7 +227,7 @@ void draw_main_menu_custom(Canvas* canvas, Game* game) {
         canvas,
         35,
         90,
-        game->main_menu_btn == LEVELSET_BTN,
+        game->mainMenuBtn == LEVELSET_BTN,
         game->setPos > 0,
         game->setPos < game->setCount - 1,
         furi_string_get_cstr(game->selectedSet));
@@ -240,7 +240,7 @@ void draw_main_menu_custom(Canvas* canvas, Game* game) {
         canvas,
         50,
         75,
-        game->main_menu_btn == LEVELNO_BTN,
+        game->mainMenuBtn == LEVELNO_BTN,
         game->selectedLevel > 0,
         game->selectedLevel < game->levelSet->maxLevel - 1,
         buf);
@@ -262,12 +262,12 @@ void draw_main_menu(Canvas* canvas, Game* game) {
         canvas,
         20,
         90,
-        game->main_menu_btn == MODE_BTN,
-        game->main_menu_mode != NEW_GAME,
-        game->main_menu_mode != CUSTOM,
-        game_mode_label(game->main_menu_mode));
+        game->mainMenuBtn == MODE_BTN,
+        game->mainMenuMode != NEW_GAME,
+        game->mainMenuMode != CUSTOM,
+        game_mode_label(game->mainMenuMode));
 
-    switch(game->main_menu_mode) {
+    switch(game->mainMenuMode) {
     case CONTINUE:
         draw_main_menu_continue(canvas, game);
         break;
@@ -283,9 +283,9 @@ void draw_main_menu(Canvas* canvas, Game* game) {
     if(game->mainMenuInfo) {
         gray_canvas(canvas);
 
-        if(game->main_menu_btn == LEVELSET_BTN) {
+        if(game->mainMenuBtn == LEVELSET_BTN) {
             draw_set_info(canvas, game);
-        } else if(game->main_menu_btn == LEVELNO_BTN) {
+        } else if(game->mainMenuBtn == LEVELNO_BTN) {
             draw_level_info(canvas, game);
         }
 
@@ -308,7 +308,7 @@ void draw_playground(Canvas* canvas, Game* game) {
 
     for(y = 0; y < SIZE_Y; y++) {
         for(x = 0; x < SIZE_X; x++) {
-            tile = game->board_curr[y][x];
+            tile = game->board[y][x];
 
             sx = x * TILE_SIZE;
             sy = y * TILE_SIZE;
@@ -319,14 +319,14 @@ void draw_playground(Canvas* canvas, Game* game) {
                 if((game->state == MOVE_SIDES) && (x == game->move.x) && (y == game->move.y))
                     continue;
                 if(((game->state == MOVE_GRAVITY) || (game->state == EXPLODE)) &&
-                   (game->board_ani[y][x] == 1))
+                   (game->toAnimate[y][x] == 1))
                     continue;
 
                 canvas_set_color(canvas, ColorBlack);
                 canvas_draw_icon(canvas, sx, sy, tile_to_icon(tile, game->state == GAME_OVER));
             }
             if(tile == WALL_TILE) {
-                tiles = find_neighbors(&game->board_curr, x, y);
+                tiles = find_neighbors(&game->board, x, y);
 
                 /*
                 whiteB =
@@ -426,10 +426,10 @@ void draw_playground(Canvas* canvas, Game* game) {
 
 void draw_movable(Canvas* canvas, Game* game, uint32_t frameNo) {
     bool oddFrame = (frameNo % 20 < 10);
-    if(game->current_movable != MOVABLE_NOT_FOUND) {
+    if(game->currentMovable != MOVABLE_NOT_FOUND) {
         canvas_set_color(canvas, ColorBlack);
-        uint8_t x = coord_x(game->current_movable);
-        uint8_t y = coord_y(game->current_movable);
+        uint8_t x = coord_x(game->currentMovable);
+        uint8_t y = coord_y(game->currentMovable);
         uint8_t how_movable = game->movables[y][x];
 
         if((how_movable & MOVABLE_LEFT) != 0) {
@@ -456,10 +456,10 @@ void draw_movable(Canvas* canvas, Game* game, uint32_t frameNo) {
 
 void draw_direction(Canvas* canvas, Game* game, uint32_t frameNo) {
     bool oddFrame = (frameNo % 20 < 10);
-    if(game->current_movable != MOVABLE_NOT_FOUND) {
+    if(game->currentMovable != MOVABLE_NOT_FOUND) {
         canvas_set_color(canvas, ColorBlack);
-        uint8_t x = coord_x(game->current_movable);
-        uint8_t y = coord_y(game->current_movable);
+        uint8_t x = coord_x(game->currentMovable);
+        uint8_t y = coord_y(game->currentMovable);
 
         if(oddFrame) {
             canvas_draw_icon(canvas, (x - 1) * TILE_SIZE, y * TILE_SIZE, &I_mov_l);
@@ -472,7 +472,7 @@ void draw_ani_sides(Canvas* canvas, Game* game) {
     uint8_t tile, sx, sy, deltaX;
 
     if(game->state == MOVE_SIDES) {
-        tile = game->board_curr[game->move.y][game->move.x];
+        tile = game->board[game->move.y][game->move.x];
         deltaX = ((game->move.dir & MOVABLE_LEFT) != 0) ? -1 : 1;
 
         sx = (game->move.x * TILE_SIZE) + (deltaX * game->move.frameNo);
@@ -495,12 +495,12 @@ void draw_ani_gravity(Canvas* canvas, Game* game) {
     if(game->state == MOVE_GRAVITY) {
         for(y = 0; y < SIZE_Y; y++) {
             for(x = 0; x < SIZE_X; x++) {
-                tile = game->board_curr[y][x];
+                tile = game->board[y][x];
 
                 sx = x * TILE_SIZE;
                 sy = y * TILE_SIZE;
 
-                if((tile > 0) && (game->board_ani[y][x] == 1)) {
+                if((tile > 0) && (game->toAnimate[y][x] == 1)) {
                     canvas_set_color(canvas, ColorBlack);
                     canvas_draw_icon(
                         canvas,
@@ -529,9 +529,9 @@ void draw_ani_explode(Canvas* canvas, Game* game) {
     if(game->state == EXPLODE) {
         for(y = 0; y < SIZE_Y; y++) {
             for(x = 0; x < SIZE_X; x++) {
-                tile = game->board_curr[y][x];
+                tile = game->board[y][x];
 
-                if((tile > 0) && (game->board_ani[y][x] == 1)) {
+                if((tile > 0) && (game->toAnimate[y][x] == 1)) {
                     sx = x * TILE_SIZE;
                     sy = y * TILE_SIZE;
                     cx = sx + 4;
@@ -602,20 +602,17 @@ void draw_paused(Canvas* canvas, Game* game) {
         canvas,
         0,
         MENU_PAUSED_COUNT,
-        ((game->menu_paused_pos == 0) && (game->undo_movable != MOVABLE_NOT_FOUND)),
-        game->undo_movable == MOVABLE_NOT_FOUND,
+        ((game->menuPausedPos == 0) && (game->undoMovable != MOVABLE_NOT_FOUND)),
+        game->undoMovable == MOVABLE_NOT_FOUND,
         "Undo",
         &I_ico_undo);
     menu_pill(
-        canvas, 1, MENU_PAUSED_COUNT, game->menu_paused_pos == 1, false, "Restart", &I_ico_restart);
+        canvas, 1, MENU_PAUSED_COUNT, game->menuPausedPos == 1, false, "Restart", &I_ico_restart);
+    menu_pill(canvas, 2, MENU_PAUSED_COUNT, game->menuPausedPos == 2, false, "Menu", &I_ico_home);
+    menu_pill(canvas, 3, MENU_PAUSED_COUNT, game->menuPausedPos == 3, false, "Skip", &I_ico_skip);
+    menu_pill(canvas, 4, MENU_PAUSED_COUNT, game->menuPausedPos == 4, false, "Count", &I_ico_hist);
     menu_pill(
-        canvas, 2, MENU_PAUSED_COUNT, game->menu_paused_pos == 2, false, "Menu", &I_ico_home);
-    menu_pill(
-        canvas, 3, MENU_PAUSED_COUNT, game->menu_paused_pos == 3, false, "Skip", &I_ico_skip);
-    menu_pill(
-        canvas, 4, MENU_PAUSED_COUNT, game->menu_paused_pos == 4, false, "Count", &I_ico_hist);
-    menu_pill(
-        canvas, 5, MENU_PAUSED_COUNT, game->menu_paused_pos == 5, false, "Solve", &I_ico_check);
+        canvas, 5, MENU_PAUSED_COUNT, game->menuPausedPos == 5, false, "Solve", &I_ico_check);
 
     canvas_set_color(canvas, ColorBlack);
     canvas_set_font(canvas, FontSecondary);
@@ -629,8 +626,8 @@ void draw_histogram(Canvas* canvas, Stats* stats) {
 
 void draw_playfield_hint(Canvas* canvas, Game* game) {
     if(game->state == SELECT_BRICK) {
-        if((game->current_movable != MOVABLE_NOT_FOUND) &&
-           (movable_dir(&game->movables, game->current_movable) == MOVABLE_BOTH)) {
+        if((game->currentMovable != MOVABLE_NOT_FOUND) &&
+           (movable_dir(&game->movables, game->currentMovable) == MOVABLE_BOTH)) {
             hint_pill_double(canvas, "Select", "Choose", &I_hint_2);
         } else {
             hint_pill_double(canvas, "Select", "Move", &I_hint_1);
