@@ -53,7 +53,7 @@ static void minesweeper_scene_settings_screen_set_width(VariableItem* item) {
 
     char source[5];
     uint8_t index = 0;
-    uint8_t curr_board_height = 8;
+    uint8_t curr_board_height = 7;
     bool is_over_max_tiles = false;
 
     furi_assert(item);
@@ -82,7 +82,7 @@ static void minesweeper_scene_settings_screen_set_width(VariableItem* item) {
 
         variable_item_set_current_value_index(
                 app->t_settings_info.height_item,
-                app->t_settings_info.board_height-8);
+                app->t_settings_info.board_height-7);
 
         variable_item_set_current_value_text(app->t_settings_info.height_item, furi_string_get_cstr(app->t_settings_info.height_str));
     }
@@ -110,7 +110,7 @@ static void minesweeper_scene_settings_screen_set_height(VariableItem* item) {
     app->t_settings_info.height_item = item;
 
     index = variable_item_get_current_value_index(app->t_settings_info.height_item);
-    app->t_settings_info.board_height = index+8;
+    app->t_settings_info.board_height = index+7;
 
     curr_board_width = app->t_settings_info.board_width;
 
@@ -135,7 +135,7 @@ static void minesweeper_scene_settings_screen_set_height(VariableItem* item) {
         variable_item_set_current_value_text(app->t_settings_info.width_item, furi_string_get_cstr(app->t_settings_info.width_str));
     }
 
-    snprintf(source, 5, "%" PRIu8, index+8);
+    snprintf(source, 5, "%" PRIu8, index+7);
     source[4] = '\0';
 
     furi_string_set_strn(app->t_settings_info.height_str, source, 5);
@@ -205,7 +205,7 @@ void minesweeper_scene_settings_screen_on_enter(void* context) {
     item = variable_item_list_add(
            va,
            "Board Height",
-           65-8,
+           65-7,
            minesweeper_scene_settings_screen_set_height,
            app);
 
@@ -213,7 +213,7 @@ void minesweeper_scene_settings_screen_on_enter(void* context) {
 
     variable_item_set_current_value_index(
             item,
-            app->t_settings_info.board_height-8);
+            app->t_settings_info.board_height-7);
 
     snprintf(source, 5, "%" PRIu8, app->t_settings_info.board_height);
     source[4] = '\0';
