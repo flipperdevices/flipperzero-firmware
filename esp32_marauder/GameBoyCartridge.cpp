@@ -471,6 +471,16 @@ void GameBoyCartridge::headerROM_GB(bool printInfo = true)
         transferJSON["message"] = "";
         transferJSON["checksum"] = checksumStr;
         transferJSON["title"] = this->gameTitle;
+
+        // Game Boy Camera (USA, Europe):		"GAMEBOYCAMERA"
+        // Game Boy Camera Gold (USA):			"GAMEBOYCAMERA G"
+        // Pocket Camera (Japan) (Rev A):		"POCKETCAMERA"
+        // Pocket Camera (J) (V1.1) [S] (1):	"POCKETCAMERA"
+
+        transferJSON["isCamera"] = strcmp(gameTitle, "GAMEBOYCAMERA") == 0 ||
+            strcmp(gameTitle, "GAMEBOYCAMERA G") == 0 ||
+            strcmp(gameTitle, "POCKETCAMERA") == 0;
+            
         transferJSON["ramBanks"] = this->sramBanks;
         transferJSON["ramEndAddress"] = this->ramEndAddress;
         transferJSON["romBanks"] = this->romBanks;
