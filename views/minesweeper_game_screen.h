@@ -13,18 +13,10 @@
 
 // These defines represent how many tiles
 // can be visually representen on the screen 
-#define MINESWEEPER_SCREEN_TILE_HEIGHT 8
+#define MINESWEEPER_SCREEN_TILE_HEIGHT 7
 #define MINESWEEPER_SCREEN_TILE_WIDTH 16
 
-// These defines currently represent the actual
-// width and hight in tiles for the board.
-// This should be replaced with uint8_t members in the 
-// view model that can be changed by the user
-#define MINESWEEPER_BOARD_TILE_HEIGHT 8 
-#define MINESWEEPER_BOARD_TILE_WIDTH 128 
-
-#define MINESWEEPER_BOARD_TILE_COUNT (MINESWEEPER_BOARD_TILE_HEIGHT * MINESWEEPER_BOARD_TILE_WIDTH)
-#define MINESWEEPER_STARTING_MINES (MINESWEEPER_BOARD_TILE_COUNT * .20f)
+#define MINESWEEPER_STARTING_MINES (44)
 
 #ifdef __cplusplus
 extern "C" {
@@ -56,7 +48,7 @@ void mine_sweeper_game_screen_free(MineSweeperGameScreen* instance);
  *
  * @param       instance MineSweeperGameScreen instance
  */
-void mine_sweeper_game_screen_reset(MineSweeperGameScreen* instance);
+void mine_sweeper_game_screen_reset(MineSweeperGameScreen* instance, uint8_t width, uint8_t height);
 
 /** Get MineSweeperGameScreen view
  *
@@ -81,11 +73,6 @@ void mine_sweeper_game_screen_set_input_callback(
  * @param       context context pointer, will be passed to callback 
  */
 void mine_sweeper_game_screen_set_context(MineSweeperGameScreen* instance, void* context);
-
-/**
- * ADD LATER
- */
-void mine_sweeper_game_screen_set_board_dimensions(MineSweeperGameScreen* instance, uint8_t width, uint8_t height);
 
 /** Return true/false if tile is a mine 
  *
