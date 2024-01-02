@@ -25,20 +25,28 @@
 //#include <assets_icons.h>
 #include "minesweeper_icons.h"
 
-
 #define TAG "MineSweeper"
+
+typedef struct {
+    uint8_t board_width, board_height, difficulty;
+    bool has_been_changed;
+} MineSweeperAppSettings;
 
 // MineSweeperApp
 typedef struct MineSweeperApp {
-    Gui* gui;
     NotificationApp* notification;
+
+    Gui* gui;
     SceneManager* scene_manager;
     ViewDispatcher* view_dispatcher;
+
     StartScreen* start_screen;
     Loading* loading;
     MineSweeperGameScreen* game_screen;
     DialogEx* menu_screen;
     VariableItemList* settings_screen;
+
+    MineSweeperAppSettings settings_info;
     uint32_t haptic;
     uint32_t speaker;
     uint32_t led;
@@ -50,6 +58,7 @@ typedef enum {
     MineSweeperLoadingView,
     MineSweeperGameScreenView,
     MineSweeperMenuView,
+    MineSweeperSettingsView,
     MineSweeperViewCount,
 } MineSweeperView;
 
