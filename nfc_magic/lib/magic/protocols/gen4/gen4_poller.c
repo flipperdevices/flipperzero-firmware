@@ -274,7 +274,7 @@ static NfcCommand gen4_poller_write_mf_classic(Gen4Poller* instance) {
             instance->config[25] = iso3_data->atqa[1];
             instance->config[26] = iso3_data->sak;
             instance->config[27] = 0x00;
-            instance->config[28] = instance->total_blocks;
+            instance->config[28] = instance->total_blocks - 1;
             instance->config[29] = 0x01;
 
             Gen4PollerError error = gen4_poller_set_config(
@@ -353,7 +353,7 @@ static NfcCommand gen4_poller_write_mf_ultralight(Gen4Poller* instance) {
             instance->config[25] = iso3_data->atqa[1];
             instance->config[26] = iso3_data->sak;
             instance->config[27] = 0x00;
-            instance->config[28] = instance->total_blocks;
+            instance->config[28] = instance->total_blocks - 1;
             instance->config[29] = 0x01;
 
             Gen4PollerError error = gen4_poller_set_config(
