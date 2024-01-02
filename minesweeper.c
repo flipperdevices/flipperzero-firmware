@@ -57,8 +57,10 @@ static MineSweeperApp* app_alloc() {
     view_dispatcher_add_view(app->view_dispatcher, MineSweeperSettingsView, variable_item_list_get_view(app->settings_screen));
 
     // Set setting info to default
-    app->settings_info.board_width = 16;
-    app->settings_info.board_height = 8;
+    app->settings_info.width_str = furi_string_alloc();
+    app->settings_info.height_str = furi_string_alloc();
+    app->settings_info.board_width = 32;
+    app->settings_info.board_height = 32;
     app->settings_info.difficulty = 0;
 
     // Set hardware related values to default
@@ -91,6 +93,9 @@ static void app_free(MineSweeperApp* app) {
 
     furi_record_close(RECORD_GUI);
     furi_record_close(RECORD_NOTIFICATION);
+
+    furi_string_free(app->settings_info.width_str);
+    furi_string_free(app->settings_info.height_str);
 
     app->gui = NULL;
     app->notification = NULL;
