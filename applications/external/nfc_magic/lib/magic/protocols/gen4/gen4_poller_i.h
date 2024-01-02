@@ -3,7 +3,6 @@
 #include "gen4_poller.h"
 #include <nfc/nfc_poller.h>
 #include <nfc/protocols/iso14443_3a/iso14443_3a_poller.h>
-#include <stdint.h>
 
 #define TAG "Gen4Poller"
 
@@ -47,9 +46,9 @@ typedef enum {
 
 typedef enum {
     // gen2 card behavour
-    Gen4PollerDirectWriteBlock0ModeActivated = 0x00,
+    Gen4PollerDirectWriteBlock0ModeEnabled = 0x00,
     // common card behavour
-    Gen4PollerDirectWriteBlock0ModeDeactivated = 0x01,
+    Gen4PollerDirectWriteBlock0ModeDisabled = 0x01,
     // default mode. same behavour as Gen4PollerDirectWriteBlock0ModeActivate
     Gen4PollerDirectWriteBlock0ModeDefault = 0x02,
 } Gen4PollerDirectWriteBlock0Mode;

@@ -1,10 +1,9 @@
 #include "gen4_poller_i.h"
 
 #include "bit_buffer.h"
-#include "core/log.h"
+#include "protocols/gen4/gen4_poller.h"
 #include <nfc/protocols/iso14443_3a/iso14443_3a_poller.h>
 #include <nfc/helpers/nfc_util.h>
-#include <stdint.h>
 
 #define GEN4_CMD_PREFIX (0xCF)
 
@@ -18,9 +17,11 @@
 #define GEN4_CMD_FUSE_CFG (0xF1)
 #define GEN4_CMD_SET_PWD (0xFE)
 
-#define CONFIG_SIZE (32)
+#define GEM4_RESPONSE_SUCCESS (0x02)
+
+#define CONFIG_SIZE_MAX (32)
+#define CONFIG_SIZE_MIN (30)
 #define REVISION_SIZE (5)
-#define SHD_MODE_RESPONSE_SIZE (2)
 
 static Gen4PollerError gen4_poller_process_error(Iso14443_3aError error) {
     Gen4PollerError ret = Gen4PollerErrorNone;
@@ -57,14 +58,14 @@ Gen4PollerError gen4_poller_set_shadow_mode(
             break;
         }
 
-        size_t rx_bytes = bit_buffer_get_size_bytes(instance->rx_buffer);
-        if(rx_bytes != SHD_MODE_RESPONSE_SIZE) {
+        uint16_t response = bit_buffer_get_size_bytes(instance->rx_buffer);
+
+        FURI_LOG_D(TAG, "Card response: 0x%02X, Shadow mode set: 0x%02X", response, mode);
+
+        if(response != GEM4_RESPONSE_SUCCESS) {
             ret = Gen4PollerErrorProtocol;
             break;
         }
-        uint16_t response = bit_buffer_get_size_bytes(instance->rx_buffer);
-
-        FURI_LOG_D(TAG, "Card response: %X, Shadow mode set: %u", response, mode);
 
     } while(false);
 
@@ -93,15 +94,15 @@ Gen4PollerError gen4_poller_set_direct_write_block_0_mode(
             ret = gen4_poller_process_error(error);
             break;
         }
-
-        // size_t rx_bytes = bit_buffer_get_size_bytes(instance->rx_buffer);
-        // if(rx_bytes != SHD_MODE_RESPONSE_SIZE) {
-        //     ret = Gen4PollerErrorProtocol;
-        //     break;
-        // }
         uint16_t response = bit_buffer_get_size_bytes(instance->rx_buffer);
 
-        FURI_LOG_D(TAG, "Card response: %X, Direct write to block 0 mode set: %u", response, mode);
+        FURI_LOG_D(
+            TAG, "Card response: 0x%02X, Direct write to block 0 mode set: 0x%02X", response, mode);
+
+        if(response != GEM4_RESPONSE_SUCCESS) {
+            ret = Gen4PollerErrorProtocol;
+            break;
+        }
 
     } while(false);
 
@@ -130,11 +131,11 @@ Gen4PollerError
 
         size_t rx_bytes = bit_buffer_get_size_bytes(instance->rx_buffer);
 
-        if(rx_bytes != CONFIG_SIZE) {
+        if(rx_bytes != CONFIG_SIZE_MAX || rx_bytes != CONFIG_SIZE_MIN) {
             ret = Gen4PollerErrorProtocol;
             break;
         }
-        bit_buffer_write_bytes(instance->rx_buffer, config_result, CONFIG_SIZE);
+        bit_buffer_write_bytes(instance->rx_buffer, config_result, CONFIG_SIZE_MAX);
     } while(false);
 
     return ret;
@@ -197,8 +198,11 @@ Gen4PollerError gen4_poller_set_config(
             break;
         }
 
-        size_t rx_bytes = bit_buffer_get_size_bytes(instance->rx_buffer);
-        if(rx_bytes != 2) {
+        uint16_t response = bit_buffer_get_size_bytes(instance->rx_buffer);
+
+        FURI_LOG_D(TAG, "Card response to set default config command: 0x%02X", response);
+
+        if(response != GEM4_RESPONSE_SUCCESS) {
             ret = Gen4PollerErrorProtocol;
             break;
         }
@@ -265,8 +269,16 @@ Gen4PollerError
             break;
         }
 
-        size_t rx_bytes = bit_buffer_get_size_bytes(instance->rx_buffer);
-        if(rx_bytes != 2) {
+        uint16_t response = bit_buffer_get_size_bytes(instance->rx_buffer);
+
+        FURI_LOG_D(
+            TAG,
+            "Trying to change password from 0x%08lX to 0x%08lX. Card response: 0x%02X",
+            pwd_current,
+            pwd_new,
+            response);
+
+        if(response != GEM4_RESPONSE_SUCCESS) {
             ret = Gen4PollerErrorProtocol;
             break;
         }

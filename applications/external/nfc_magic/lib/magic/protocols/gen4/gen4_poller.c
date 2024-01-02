@@ -1,13 +1,9 @@
-#include "core/check.h"
-#include "core/log.h"
 #include "gen4_poller_i.h"
 #include "protocols/gen4/gen4_poller.h"
 #include <nfc/protocols/iso14443_3a/iso14443_3a.h>
 #include <nfc/protocols/iso14443_3a/iso14443_3a_poller.h>
 #include <nfc/helpers/nfc_util.h>
 #include <nfc/nfc_poller.h>
-
-#include <furi/furi.h>
 
 #define GEN4_POLLER_THREAD_FLAG_DETECTED (1U << 0)
 
@@ -281,7 +277,7 @@ static NfcCommand gen4_poller_write_mf_classic(Gen4Poller* instance) {
             instance->config[26] = iso3_data->sak;
             instance->config[27] = 0x00;
             instance->config[28] = instance->total_blocks - 1;
-            instance->config[29] = Gen4PollerDirectWriteBlock0ModeDeactivated;
+            instance->config[29] = Gen4PollerDirectWriteBlock0ModeDisabled;
 
             Gen4PollerError error = gen4_poller_set_config(
                 instance, instance->password, instance->config, sizeof(instance->config), false);
@@ -360,7 +356,7 @@ static NfcCommand gen4_poller_write_mf_ultralight(Gen4Poller* instance) {
             instance->config[26] = iso3_data->sak;
             instance->config[27] = 0x00;
             instance->config[28] = instance->total_blocks - 1;
-            instance->config[29] = Gen4PollerDirectWriteBlock0ModeDeactivated;
+            instance->config[29] = Gen4PollerDirectWriteBlock0ModeDisabled;
 
             Gen4PollerError error = gen4_poller_set_config(
                 instance, instance->password, instance->config, sizeof(instance->config), false);
