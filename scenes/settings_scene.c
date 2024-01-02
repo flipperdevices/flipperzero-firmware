@@ -249,13 +249,15 @@ bool minesweeper_scene_settings_screen_on_event(void* context, SceneManagerEvent
 
     } else if (event.type == SceneManagerEventTypeBack) {
 
-        if (!scene_manager_search_and_switch_to_previous_scene(
-                app->scene_manager, MineSweeperSceneMenuScreen)) {
+        scene_manager_next_scene(app->scene_manager, MineSweeperSceneConfirmationScreen);
 
-            scene_manager_stop(app->scene_manager);
-            view_dispatcher_stop(app->view_dispatcher);
+        //if (!scene_manager_search_and_switch_to_previous_scene(
+        //        app->scene_manager, MineSweeperSceneMenuScreen)) {
 
-        }
+        //    scene_manager_stop(app->scene_manager);
+        //    view_dispatcher_stop(app->view_dispatcher);
+
+        //}
 
         consumed = true;
     }
