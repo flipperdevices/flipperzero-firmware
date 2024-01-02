@@ -1,0 +1,2 @@
+# Flipper-Zero-Crypto-Dictionary
+ 
