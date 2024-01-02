@@ -203,14 +203,17 @@ void ublox_worker_read_nav_messages(void* context) {
 	    FURI_LOG_I(TAG, "sent callback");
 	    // if logging, add point
             if(ublox->log_state == UbloxLogStateLogging) {
-                if(!kml_add_path_point(
-                       &(ublox->kmlfile),
-                       // ublox returns values as floats * 1e7 in int form
-                       (double)(ublox->nav_pvt.lat) / (double)1e7,
-                       (double)(ublox->nav_pvt.lon) / (double)1e7,
-                       ublox->nav_pvt.hMSL / 1e3)) { // convert altitude to meters
-                    FURI_LOG_E(TAG, "failed to write line to file");
-                }
+		// only add points if there's a fix (even if it's only dead reckoning)
+		if (ublox->nav_pvt.fixType != 0) {
+		    if(!kml_add_path_point(
+					   &(ublox->kmlfile),
+					   // ublox returns values as floats * 1e7 in int form
+					   (double)(ublox->nav_pvt.lat) / (double)1e7,
+					   (double)(ublox->nav_pvt.lon) / (double)1e7,
+					   ublox->nav_pvt.hMSL / 1e3)) { // convert altitude to meters
+			FURI_LOG_E(TAG, "failed to write line to file");
+		    }
+		}
             }
         } else {
 	    // bad data

@@ -95,6 +95,9 @@ display will also stop logging. If the GPS disconnects or becomes
 unreachable, logging will stop and all data will be saved. The log
 file is flushed every 16 writes in case a disk problem arises.
 
+Data points are only added to the KML file if the GPS has a fix,
+including a dead reckoning fix.
+
 ## Time synchronization
 ![u-blox app time synchronization display](screenshots/sync_time.png)
 
