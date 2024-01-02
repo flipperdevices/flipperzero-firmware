@@ -36,6 +36,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Marauder Assets for ESP Flasher (By justcallmekoko)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/61bb973015b3cb8093ed367a3acdc67d99697183)
 - Updated: [ESP Flasher Dependancy: stm32-cmake (By ObKo)](https://github.com/ObKo/stm32-cmake)
 - Updated: [Programmer Calculator v0.8 (By armixz)](https://github.com/armixz/Flipper-Zero-Programmer-Calculator)
+- Updated: [Tarot v0.1 (By pionaiki & tihyltew)](https://github.com/pionaiki/fz-tarot)
 
 <a name="release">
 
