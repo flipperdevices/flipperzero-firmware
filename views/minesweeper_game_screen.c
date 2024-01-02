@@ -72,7 +72,8 @@ typedef struct {
     uint16_t mines_left;
     uint16_t flags_left;
     CurrentPosition curr_pos;
-    uint8_t right_boundary, bottom_boundary, board_width, board_height;
+    uint8_t right_boundary, bottom_boundary,
+            board_width, board_height, board_difficulty;
 } MineSweeperGameScreenModel;
 
 void mine_sweeper_game_screen_view_enter(void* context) {
@@ -264,11 +265,19 @@ bool mine_sweeper_game_screen_view_input_callback(InputEvent* event, void* conte
     return consumed;
 }
 
+static const float difficulty_multiplier[5] = {
+    0.20f,
+    0.25f,
+    0.29f,
+    0.33f,
+    0.40f,
+};
+
 static void setup_board(MineSweeperGameScreen* instance) {
     furi_assert(instance);
 
     uint16_t board_tile_count = 0;
-    uint8_t board_width = 0, board_height = 0;
+    uint8_t board_width = 0, board_height = 0, board_difficulty = 0;
 
     with_view_model(
         instance->view,
@@ -277,17 +286,19 @@ static void setup_board(MineSweeperGameScreen* instance) {
             board_width = model->board_width;
             board_height = model->board_height;
             board_tile_count =  (model->board_width*model->board_height);
+            board_difficulty = model->board_difficulty;
         },
         false);
+
+    uint16_t num_mines = board_tile_count * difficulty_multiplier[ board_difficulty ];
 
     /** We can use a temporary buffer to set the tile types initially
      * and manipulate then save to actual model
      */
-
     MineSweeperGameScreenTileType tiles[MINESWEEPER_BOARD_MAX_TILES];
     memset(&tiles, 0, sizeof(tiles));
 
-    for (uint16_t i = 0; i < MINESWEEPER_STARTING_MINES; i++) {
+    for (uint16_t i = 0; i < num_mines; i++) {
         uint16_t rand_pos;
 
         do {
@@ -354,8 +365,8 @@ static void setup_board(MineSweeperGameScreen* instance) {
                 model->board[i].icon_element.y_abs = (i%model->board_width);
             }
 
-            model->mines_left = MINESWEEPER_STARTING_MINES;
-            model->flags_left = MINESWEEPER_STARTING_MINES;
+            model->mines_left = num_mines;
+            model->flags_left = num_mines;
             model->curr_pos.x_abs = 0;
             model->curr_pos.y_abs = 0;
             model->right_boundary = MINESWEEPER_SCREEN_TILE_WIDTH;
@@ -365,7 +376,12 @@ static void setup_board(MineSweeperGameScreen* instance) {
         true);
 }
 
-static void mine_sweeper_game_screen_set_board_dimensions(MineSweeperGameScreen* instance, uint8_t width, uint8_t height) {
+static void mine_sweeper_game_screen_set_board_information(
+        MineSweeperGameScreen* instance,
+        uint8_t width,
+        uint8_t height,
+        uint8_t difficulty) {
+
     furi_assert(instance);
     
     with_view_model(
@@ -374,11 +390,12 @@ static void mine_sweeper_game_screen_set_board_dimensions(MineSweeperGameScreen*
         {
             model->board_width = width;
             model->board_height = height;
+            model->board_difficulty = difficulty;
         },
         true);
 }
 
-MineSweeperGameScreen* mine_sweeper_game_screen_alloc(uint8_t width, uint8_t height) {
+MineSweeperGameScreen* mine_sweeper_game_screen_alloc(uint8_t width, uint8_t height, uint8_t difficulty) {
     MineSweeperGameScreen* mine_sweeper_game_screen = (MineSweeperGameScreen*)malloc(sizeof(MineSweeperGameScreen));
     
     mine_sweeper_game_screen->view = view_alloc();
@@ -396,7 +413,7 @@ MineSweeperGameScreen* mine_sweeper_game_screen_alloc(uint8_t width, uint8_t hei
     mine_sweeper_game_screen->input_callback = NULL;
     
     // We need to initize board width and height before setup
-    mine_sweeper_game_screen_set_board_dimensions(mine_sweeper_game_screen, width, height);
+    mine_sweeper_game_screen_set_board_information(mine_sweeper_game_screen, width, height, difficulty);
 
     setup_board(mine_sweeper_game_screen);
     
@@ -422,12 +439,12 @@ void mine_sweeper_game_screen_free(MineSweeperGameScreen* instance) {
 
 // This function should be called whenever you want to reset the game state
 // This should NOT be called in the on_exit in the game scene
-void mine_sweeper_game_screen_reset(MineSweeperGameScreen* instance, uint8_t width, uint8_t height) {
+void mine_sweeper_game_screen_reset(MineSweeperGameScreen* instance, uint8_t width, uint8_t height, uint8_t difficulty) {
     furi_assert(instance);
     
     instance->input_callback = NULL;
     
-    mine_sweeper_game_screen_set_board_dimensions(instance, width, height);
+    mine_sweeper_game_screen_set_board_information(instance, width, height, difficulty);
     
     setup_board(instance);
 
