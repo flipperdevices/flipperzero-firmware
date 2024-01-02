@@ -4,7 +4,8 @@
 #include <furi.h>
 #include <stdbool.h>
 
-#define MAX_TEXT_LENGTH 30
+#define MAX_TEXT_LENGTH_INPUT 19
+#define MAX_TEXT_LENGTH_RESULT 37
 
 typedef enum {
     ModeNone,
@@ -25,14 +26,17 @@ typedef struct {
 typedef struct {
     FuriMutex* mutex;
     selectedPosition position;
-    char text[MAX_TEXT_LENGTH];
-    char originalInput[MAX_TEXT_LENGTH];
-    char binaryResult[MAX_TEXT_LENGTH];
-    char hexResult[MAX_TEXT_LENGTH];
-    char decResult[MAX_TEXT_LENGTH];
-    char charResult[MAX_TEXT_LENGTH];
+    char text[MAX_TEXT_LENGTH_INPUT];
+    char originalInput[MAX_TEXT_LENGTH_INPUT];
+    char decToBinResult[MAX_TEXT_LENGTH_RESULT];
+    char decToHexResult[MAX_TEXT_LENGTH_RESULT];
+    char decToCharResult[MAX_TEXT_LENGTH_RESULT];
+    char hexToBinResult[MAX_TEXT_LENGTH_RESULT];
+    char hexToDecResult[MAX_TEXT_LENGTH_RESULT];
+    char binToDecResult[MAX_TEXT_LENGTH_RESULT];
+    char binToHexResult[MAX_TEXT_LENGTH_RESULT];
     short textLength;
-    char log[MAX_TEXT_LENGTH];
+    char log[MAX_TEXT_LENGTH_RESULT];
     bool newInputStarted;
     CalculatorMode mode;
 } Calculator;

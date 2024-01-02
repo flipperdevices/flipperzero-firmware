@@ -84,7 +84,7 @@ void handle_long_press(Calculator* calculator_state, ViewPort* view_port, InputE
     switch(event->key) {
     case InputKeyOk:
         if(calculator_state->position.x == 0 && calculator_state->position.y == 4) {
-            if(calculator_state->textLength < MAX_TEXT_LENGTH) {
+            if(calculator_state->textLength < MAX_TEXT_LENGTH_INPUT) {
                 calculator_state->text[calculator_state->textLength++] = ')';
                 calculator_state->text[calculator_state->textLength] = '\0';
             }
@@ -101,7 +101,7 @@ void handle_key_press(Calculator* calculator_state, char key) {
     switch(key) {
     case '=':
         // Logic for '=' key
-        strncpy(calculator_state->originalInput, calculator_state->text, MAX_TEXT_LENGTH);
+        strncpy(calculator_state->originalInput, calculator_state->text, MAX_TEXT_LENGTH_INPUT);
         calculate(calculator_state);
         // calculator_state->text[0] = '\0';
         calculator_state->textLength = 0;
@@ -110,10 +110,13 @@ void handle_key_press(Calculator* calculator_state, char key) {
         // Logic for 'R' key, typically 'Clear'
         calculator_state->text[0] = '\0';
         calculator_state->textLength = 0;
-        calculator_state->binaryResult[0] = '\0'; // Clear binary result
-        calculator_state->decResult[0] = '\0'; // Clear binary result
-        calculator_state->charResult[0] = '\0'; // Clear binary result
-        calculator_state->hexResult[0] = '\0'; // Clear hex result
+        calculator_state->decToBinResult[0] = '\0';
+        calculator_state->decToHexResult[0] = '\0';
+        calculator_state->decToCharResult[0] = '\0';
+        calculator_state->hexToBinResult[0] = '\0';
+        calculator_state->hexToDecResult[0] = '\0';
+        calculator_state->binToDecResult[0] = '\0';
+        calculator_state->binToHexResult[0] = '\0';
         calculator_state->newInputStarted = false;
         break;
     case '<':
@@ -132,7 +135,7 @@ void handle_key_press(Calculator* calculator_state, char key) {
             calculator_state->newInputStarted = false;
         }
         // Add the new character to the text, respecting the maximum text length
-        if(calculator_state->textLength < MAX_TEXT_LENGTH - 1) {
+        if(calculator_state->textLength < MAX_TEXT_LENGTH_INPUT - 1) {
             calculator_state->text[calculator_state->textLength++] = key;
             calculator_state->text[calculator_state->textLength] = '\0';
         }

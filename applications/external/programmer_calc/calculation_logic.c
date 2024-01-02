@@ -23,21 +23,21 @@ static const char* HEX_TO_BINARY_TABLE[16] = {
     "1110",
     "1111"};
 
-bool decToBin(const char* decString, char* binaryResult, size_t resultSize) {
-    if(decString == NULL || binaryResult == NULL || resultSize < 2) {
-        return false; // Invalid pointers or insufficient result size
+bool decToBin(const char* decString, char* decToBinResult, size_t resultSize) {
+    if(decString == NULL || decToBinResult == NULL || resultSize < 2) {
+        return false; // INVALID pointers or insufficient result size
     }
 
     char* end;
-    unsigned long num = strtoul(decString, &end, 10);
+    unsigned long long num = strtoull(decString, &end, 10);
 
     if(*end != '\0' || *decString == '\0') {
-        return false; // Invalid decimal
+        return false; // INVALID decimal
     }
 
     // Calculate the number of bits
     size_t bitsNeeded = 0;
-    unsigned long tempNum = num;
+    unsigned long long tempNum = num;
     while(tempNum > 0) {
         bitsNeeded++;
         tempNum >>= 1;
@@ -48,7 +48,7 @@ bool decToBin(const char* decString, char* binaryResult, size_t resultSize) {
         if(resultSize < 2) {
             return false; // buffer
         }
-        strcpy(binaryResult, "0");
+        strcpy(decToBinResult, "0");
         return true;
     }
 
@@ -57,24 +57,24 @@ bool decToBin(const char* decString, char* binaryResult, size_t resultSize) {
         return false;
     }
 
-    binaryResult[bitsNeeded] = '\0'; // Null-terminate the result
+    decToBinResult[bitsNeeded] = '\0'; // Null-terminate the result
 
     // fill the binary string from the end
     for(int i = bitsNeeded - 1; i >= 0; i--) {
-        binaryResult[i] = (num & 1) + '0'; // the least significant bit
+        decToBinResult[i] = (num & 1) + '0'; // the least significant bit
         num >>= 1;
     }
 
     return true;
 }
 
-bool decToHex(const char* decString, char* hexResult, size_t resultSize) {
-    if(decString == NULL || hexResult == NULL || resultSize == 0) {
+bool decToHex(const char* decString, char* decToHexResult, size_t resultSize) {
+    if(decString == NULL || decToHexResult == NULL || resultSize == 0) {
         return false;
     }
 
     char* end;
-    unsigned long num = strtoul(decString, &end, 10);
+    unsigned long long num = strtoull(decString, &end, 10);
 
     if(*end != '\0' || *decString == '\0') {
         return false;
@@ -82,7 +82,7 @@ bool decToHex(const char* decString, char* hexResult, size_t resultSize) {
 
     // buffer size
     size_t requiredSize = 1;
-    unsigned long tempNum = num;
+    unsigned long long tempNum = num;
 
     while(tempNum >= 16) {
         requiredSize++;
@@ -93,32 +93,32 @@ bool decToHex(const char* decString, char* hexResult, size_t resultSize) {
         return false;
     }
 
-    hexResult[requiredSize] = '\0';
+    decToHexResult[requiredSize] = '\0';
 
     // convert to hexadecimal in reverse order
     do {
         int remainder = num % 16;
-        hexResult[--requiredSize] = (remainder < 10) ? ('0' + remainder) :
-                                                       ('A' + (remainder - 10));
+        decToHexResult[--requiredSize] = (remainder < 10) ? ('0' + remainder) :
+                                                            ('A' + (remainder - 10));
         num /= 16;
     } while(num > 0);
 
     return true;
 }
 
-bool decToChar(const char* decString, char* outChar) {
-    if(decString == NULL || outChar == NULL || *decString == '\0') {
+bool decToChar(const char* decString, char* decToCharResult) {
+    if(decString == NULL || decToCharResult == NULL || *decString == '\0') {
         return false;
     }
 
     char* end;
-    unsigned long num = strtoul(decString, &end, 10);
+    unsigned long long num = strtoull(decString, &end, 10);
 
     if(*end != '\0' || num > 255) {
         return false;
     }
 
-    *outChar = (char)num;
+    *decToCharResult = (char)num;
     return true;
 }
 
@@ -141,8 +141,8 @@ bool hexDigitToBinary(char hexDigit, char* binary) {
     }
 }
 
-bool hexToBin(const char* hexString, char* binaryResult, size_t resultSize) {
-    if(hexString == NULL || binaryResult == NULL || resultSize == 0) {
+bool hexToBin(const char* hexString, char* hexToBinResult, size_t resultSize) {
+    if(hexString == NULL || hexToBinResult == NULL || resultSize == 0) {
         return false;
     }
 
@@ -166,22 +166,22 @@ bool hexToBin(const char* hexString, char* binaryResult, size_t resultSize) {
         if(resultSize < 4) {
             return false;
         }
-        memcpy(binaryResult, hexToBinary, 4);
-        binaryResult += 4;
+        memcpy(hexToBinResult, hexToBinary, 4);
+        hexToBinResult += 4;
         hexString++;
         resultSize -= 4;
     }
 
-    *binaryResult = '\0';
+    *hexToBinResult = '\0';
     return true;
 }
 
-bool hexToDec(const char* hexString, int* outNum) {
-    if(hexString == NULL || outNum == NULL) {
+bool hexToDec(const char* hexString, int* hexToDecResult) {
+    if(hexString == NULL || hexToDecResult == NULL) {
         return false;
     }
 
-    *outNum = 0;
+    *hexToDecResult = 0;
     while(*hexString) {
         char digit = *hexString;
         int value;
@@ -196,31 +196,32 @@ bool hexToDec(const char* hexString, int* outNum) {
             return false;
         }
 
-        if(*outNum > INT_MAX / 16 || (*outNum == INT_MAX / 16 && value > INT_MAX % 16)) {
+        if(*hexToDecResult > INT_MAX / 16 ||
+           (*hexToDecResult == INT_MAX / 16 && value > INT_MAX % 16)) {
             return false; // check overflow
         }
 
-        *outNum = *outNum * 16 + value;
+        *hexToDecResult = *hexToDecResult * 16 + value;
         hexString++;
     }
 
     return true;
 }
 
-bool binToDec(const char* binaryString, int* decResult) {
-    if(binaryString == NULL || decResult == NULL) {
+bool binToDec(const char* binaryString, int* binToDecResult) {
+    if(binaryString == NULL || binToDecResult == NULL) {
         return false;
     }
 
-    *decResult = 0;
+    *binToDecResult = 0;
     for(const char* p = binaryString; *p; ++p) {
         if(*p != '0' && *p != '1') {
             return false;
         }
-        if(*decResult > INT_MAX / 2) {
+        if(*binToDecResult > INT_MAX / 2) {
             return false; // check overflow
         }
-        *decResult = (*decResult << 1) | (*p - '0');
+        *binToDecResult = (*binToDecResult << 1) | (*p - '0');
     }
 
     return true;
@@ -235,8 +236,8 @@ char binaryToHexDigit(const char* bin) {
     return (value < 10) ? ('0' + value) : ('A' + (value - 10));
 }
 
-bool binToHex(const char* binaryString, char* hexResult, size_t resultSize) {
-    if(binaryString == NULL || hexResult == NULL || resultSize == 0) {
+bool binToHex(const char* binaryString, char* binToHexResult, size_t resultSize) {
+    if(binaryString == NULL || binToHexResult == NULL || resultSize == 0) {
         return false;
     }
 
@@ -244,7 +245,7 @@ bool binToHex(const char* binaryString, char* hexResult, size_t resultSize) {
 
     for(size_t i = 0; i < binLength; ++i) {
         if(binaryString[i] != '0' && binaryString[i] != '1') {
-            snprintf(hexResult, resultSize, "Invalid Binary");
+            snprintf(binToHexResult, resultSize, "INVALID Binary");
             return false;
         }
     }
@@ -269,12 +270,12 @@ bool binToHex(const char* binaryString, char* hexResult, size_t resultSize) {
         }
 
         if(tempIndex == 4) {
-            hexResult[hexIndex++] = binaryToHexDigit(tempBin);
+            binToHexResult[hexIndex++] = binaryToHexDigit(tempBin);
             tempIndex = 0;
         }
     }
 
-    hexResult[hexIndex] = '\0';
+    binToHexResult[hexIndex] = '\0';
     return true;
 }
 
@@ -290,76 +291,90 @@ void calculate(Calculator* calculator_state) {
     case ModeDecToBin:
         if(!decToBin(
                calculator_state->text,
-               calculator_state->binaryResult,
-               sizeof(calculator_state->binaryResult))) {
+               calculator_state->decToBinResult,
+               sizeof(calculator_state->decToBinResult))) {
             snprintf(
-                calculator_state->binaryResult,
-                sizeof(calculator_state->binaryResult),
-                "Invalid Dec");
+                calculator_state->decToBinResult,
+                sizeof(calculator_state->decToBinResult),
+                "INVALID D");
         }
         break;
 
     case ModeDecToHex:
         if(!decToHex(
                calculator_state->text,
-               calculator_state->hexResult,
-               sizeof(calculator_state->hexResult))) {
+               calculator_state->decToHexResult,
+               sizeof(calculator_state->decToHexResult))) {
             snprintf(
-                calculator_state->hexResult, sizeof(calculator_state->hexResult), "Invalid Dec");
+                calculator_state->decToHexResult,
+                sizeof(calculator_state->decToHexResult),
+                "INVALID D");
         }
         break;
 
     case ModeDecToChar:
         if(decToChar(calculator_state->text, &result)) {
-            calculator_state->charResult[0] = result;
-            calculator_state->charResult[1] = '\0';
+            calculator_state->decToCharResult[0] = result;
+            calculator_state->decToCharResult[1] = '\0';
         } else {
             snprintf(
-                calculator_state->charResult, sizeof(calculator_state->charResult), "Invalid Dec");
+                calculator_state->decToCharResult,
+                sizeof(calculator_state->decToCharResult),
+                "INVALID D");
         }
         break;
 
     case ModeHexToBin:
         if(!hexToBin(
                calculator_state->text,
-               calculator_state->binaryResult,
-               sizeof(calculator_state->binaryResult))) {
+               calculator_state->hexToBinResult,
+               sizeof(calculator_state->hexToBinResult))) {
             snprintf(
-                calculator_state->binaryResult,
-                sizeof(calculator_state->binaryResult),
-                "Invalid Hex");
+                calculator_state->hexToBinResult,
+                sizeof(calculator_state->hexToBinResult),
+                "INVALID H");
         }
         break;
 
     case ModeHexToDec:
         if(hexToDec(calculator_state->text, &num)) {
-            snprintf(calculator_state->decResult, sizeof(calculator_state->decResult), "%d", num);
+            snprintf(
+                calculator_state->hexToDecResult,
+                sizeof(calculator_state->hexToDecResult),
+                "%d",
+                num);
         } else {
             snprintf(
-                calculator_state->decResult, sizeof(calculator_state->decResult), "Invalid Hex");
+                calculator_state->hexToDecResult,
+                sizeof(calculator_state->hexToDecResult),
+                "INVALID H");
         }
         break;
 
     case ModeBinToDec:
         if(binToDec(calculator_state->text, &num)) {
-            snprintf(calculator_state->decResult, sizeof(calculator_state->decResult), "%d", num);
+            snprintf(
+                calculator_state->binToDecResult,
+                sizeof(calculator_state->binToDecResult),
+                "%d",
+                num);
         } else {
             snprintf(
-                calculator_state->decResult,
-                sizeof(calculator_state->decResult),
-                "Invalid Binary");
+                calculator_state->binToDecResult,
+                sizeof(calculator_state->binToDecResult),
+                "INVALID B");
         }
         break;
 
     case ModeBinToHex:
         if(!binToHex(
                calculator_state->text,
-               calculator_state->hexResult,
-               sizeof(calculator_state->hexResult))) {
+               calculator_state->binToHexResult,
+               sizeof(calculator_state->binToHexResult))) {
             snprintf(
-                calculator_state->hexResult,
-                sizeof(calculator_state->hexResult),
-                "Invalid Binary");
+                calculator_state->binToHexResult,
+                sizeof(calculator_state->binToHexResult),
+                "INVALID B");
         }
         break;
 

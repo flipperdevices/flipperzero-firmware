@@ -15,8 +15,8 @@ void drawElement(Canvas* canvas, const char* str, int x, int y, int width, int h
 void generate_calculator_layout(Canvas* canvas) {
     // display
     canvas_draw_frame(canvas, 0, 0, 64, 62); // display frame
-    canvas_draw_frame(canvas, 2, 2, 60, 31); // output  frame
-    canvas_draw_frame(canvas, 2, 34, 60, 26); // input   frame
+    canvas_draw_frame(canvas, 2, 2, 60, 38); // output  frame
+    canvas_draw_frame(canvas, 2, 41, 60, 19); // input   frame
 
     // Horizonal and Vertical lines
     // drawElement(canvas, NULL, 0, 48, 64, 2, 0);  // H line 1
@@ -35,29 +35,29 @@ void generate_calculator_layout(Canvas* canvas) {
     drawElement(canvas, NULL, 62, 61, 2, 65, 0); // V line 6
 
     // MODE key and display
-    // row 1 and 2
-    drawElement(canvas, "", 4, 72, 0, 0, FontSecondary);
+    // row 1
+    drawElement(canvas, "M", 4, 72, 0, 0, FontSecondary);
 
     // Keys
-    // row 3
+    // row 2
     drawElement(canvas, "7", 5, 85, 0, 0, FontSecondary);
     drawElement(canvas, "8", 17, 85, 0, 0, FontSecondary);
     drawElement(canvas, "9", 29, 85, 0, 0, FontSecondary);
     drawElement(canvas, "A", 42, 85, 0, 0, FontSecondary);
     drawElement(canvas, "B", 54, 85, 0, 0, FontSecondary);
-    // row 4
+    // row 3
     drawElement(canvas, "4", 5, 98, 0, 0, FontSecondary);
     drawElement(canvas, "5", 17, 98, 0, 0, FontSecondary);
     drawElement(canvas, "6", 29, 98, 0, 0, FontSecondary);
     drawElement(canvas, "C", 42, 98, 0, 0, FontSecondary);
     drawElement(canvas, "D", 54, 98, 0, 0, FontSecondary);
-    // row 5
+    // row 4
     drawElement(canvas, "1", 6, 111, 0, 0, FontSecondary);
     drawElement(canvas, "2", 17, 111, 0, 0, FontSecondary);
     drawElement(canvas, "3", 29, 111, 0, 0, FontSecondary);
     drawElement(canvas, "E", 42, 111, 0, 0, FontSecondary);
     drawElement(canvas, "F", 54, 111, 0, 0, FontSecondary);
-    // row 6
+    // row 5
     drawElement(canvas, "<", 6, 124, 0, 0, FontSecondary);
     drawElement(canvas, "0", 17, 124, 0, 0, FontSecondary);
     drawElement(canvas, "=", 29, 124, 0, 0, FontSecondary);
@@ -70,14 +70,41 @@ void draw_highlighted_cell(Canvas* canvas, short x, short y, short width, short 
     canvas_draw_box(canvas, x, y, width, height);
 }
 
-void displayResult(Canvas* canvas, char* result, int x, int y) {
-    const int maxLength = 24; // Maximum length for splitting into lines
-    const int lineLength = 12; // Length of each line
+void displayInput(Canvas* canvas, const char* input, int x, int y) {
+    const int maxLength = 18; // Maximum length for splitting into lines
+    const int lineLength = 9; // Length of each line
+    const int lineSpacing = 8; // Reduced line spacing
+
+    int length = strlen(input);
+
+    if(length > lineLength) {
+        char line1[lineLength + 1];
+        strncpy(line1, input, lineLength);
+        line1[lineLength] = '\0';
+
+        const char* line2 = input + lineLength;
+
+        canvas_draw_str(canvas, x, y, line1);
+        if(length > maxLength) {
+            char trimmedLine2[maxLength - lineLength + 1];
+            strncpy(trimmedLine2, line2, maxLength - lineLength);
+            trimmedLine2[maxLength - lineLength] = '\0';
+            canvas_draw_str(canvas, x, y + lineSpacing, trimmedLine2);
+        } else {
+            canvas_draw_str(canvas, x, y + lineSpacing, line2); // lineSpacing used here
+        }
+    } else {
+        canvas_draw_str(canvas, x, y, input); // Single line if lineLength characters or less
+    }
+}
+
+void displayResult(Canvas* canvas, const char* result, int x, int y) {
+    const int lineLength = 9; // Length of each line
     const int lineSpacing = 9; // Reduced line spacing
 
     int length = strlen(result);
 
-    if(length > maxLength) {
+    if(length > 3 * lineLength) { // More than 3 lines
         char line1[lineLength + 1];
         strncpy(line1, result, lineLength);
         line1[lineLength] = '\0';
@@ -86,12 +113,31 @@ void displayResult(Canvas* canvas, char* result, int x, int y) {
         strncpy(line2, result + lineLength, lineLength);
         line2[lineLength] = '\0';
 
-        const char* line3 = result + (2 * lineLength);
+        char line3[lineLength + 1];
+        strncpy(line3, result + 2 * lineLength, lineLength);
+        line3[lineLength] = '\0';
+
+        const char* line4 = result + 3 * lineLength; // Remainder of the text
 
         canvas_draw_str(canvas, x, y, line1);
         canvas_draw_str(canvas, x, y + lineSpacing, line2);
-        canvas_draw_str(canvas, x, y + (2 * lineSpacing), line3);
-    } else if(length > lineLength) {
+        canvas_draw_str(canvas, x, y + 2 * lineSpacing, line3);
+        canvas_draw_str(canvas, x, y + 3 * lineSpacing, line4);
+    } else if(length > 2 * lineLength) { // More than 2 lines
+        char line1[lineLength + 1];
+        strncpy(line1, result, lineLength);
+        line1[lineLength] = '\0';
+
+        char line2[lineLength + 1];
+        strncpy(line2, result + lineLength, lineLength);
+        line2[lineLength] = '\0';
+
+        const char* line3 = result + 2 * lineLength;
+
+        canvas_draw_str(canvas, x, y, line1);
+        canvas_draw_str(canvas, x, y + lineSpacing, line2);
+        canvas_draw_str(canvas, x, y + 2 * lineSpacing, line3);
+    } else if(length > lineLength) { // More than 1 line
         char line1[lineLength + 1];
         strncpy(line1, result, lineLength);
         line1[lineLength] = '\0';
@@ -116,56 +162,56 @@ void calculator_draw_callback(Canvas* canvas, void* ctx) {
     // Draw the static UI layout
     generate_calculator_layout(canvas);
 
-    char resultLabel[2 * MAX_TEXT_LENGTH]; // Buffer to hold the result label
-    char modeNumber[3]; // Buffer to hold the mode number
+    char resultLabel[2 * MAX_TEXT_LENGTH_RESULT]; // Buffer to hold the result label
+    // char modeNumber[3]; // Buffer to hold the mode number
 
     // Check which mode is selected and prepare the label accordingly
     switch(calculator_state->mode) {
     case ModeDecToBin:
-        snprintf(resultLabel, sizeof(resultLabel), "> %s", calculator_state->binaryResult);
-        strcpy(modeNumber, "1");
+        snprintf(resultLabel, sizeof(resultLabel), "%s", calculator_state->decToBinResult);
+        // strcpy(modeNumber, "M");
         break;
     case ModeDecToHex:
-        snprintf(resultLabel, sizeof(resultLabel), "> %s", calculator_state->hexResult);
-        strcpy(modeNumber, "2");
+        snprintf(resultLabel, sizeof(resultLabel), "%s", calculator_state->decToHexResult);
+        // strcpy(modeNumber, "M");
         break;
     case ModeDecToChar:
-        snprintf(resultLabel, sizeof(resultLabel), "> %s", calculator_state->charResult);
-        strcpy(modeNumber, "3");
+        snprintf(resultLabel, sizeof(resultLabel), "%s", calculator_state->decToCharResult);
+        // strcpy(modeNumber, "M");
         break;
     case ModeHexToBin:
-        snprintf(resultLabel, sizeof(resultLabel), "> %s", calculator_state->binaryResult);
-        strcpy(modeNumber, "4");
+        snprintf(resultLabel, sizeof(resultLabel), "%s", calculator_state->hexToBinResult);
+        // strcpy(modeNumber, "M");
         break;
     case ModeHexToDec:
-        snprintf(resultLabel, sizeof(resultLabel), "> %s", calculator_state->decResult);
-        strcpy(modeNumber, "5");
+        snprintf(resultLabel, sizeof(resultLabel), "%s", calculator_state->hexToDecResult);
+        // strcpy(modeNumber, "M");
         break;
     case ModeBinToDec:
-        snprintf(resultLabel, sizeof(resultLabel), "> %s", calculator_state->decResult);
-        strcpy(modeNumber, "6");
+        snprintf(resultLabel, sizeof(resultLabel), "%s", calculator_state->binToDecResult);
+        // strcpy(modeNumber, "M");
         break;
     case ModeBinToHex:
-        snprintf(resultLabel, sizeof(resultLabel), "> %s", calculator_state->hexResult);
-        strcpy(modeNumber, "7");
+        snprintf(resultLabel, sizeof(resultLabel), "%s", calculator_state->binToHexResult);
+        // strcpy(modeNumber, "M");
         break;
     default:
         // If no mode is selected, you can display a default message or leave it empty
-        strncpy(resultLabel, "Click [M]ODE_________   <PCalc v0.8>", sizeof(resultLabel));
-        strcpy(modeNumber, "M");
+        strncpy(resultLabel, "         -> [M]ODE_________<P Calc v0.9>", sizeof(resultLabel));
+        // strcpy(modeNumber, "M");
         break;
     }
 
     // Display the result, splitting into two lines if necessary
-    displayResult(canvas, resultLabel, 5, 12);
+    displayResult(canvas, resultLabel, 4, 11);
 
     // Draw new input with ">" label or mode selection prompt
-    char inputLabel[MAX_TEXT_LENGTH + 1]; // Adjusted size for "> "
-    snprintf(inputLabel, sizeof(inputLabel), ">%s", calculator_state->text);
-    canvas_draw_str(canvas, 5, 44, inputLabel);
+    char inputLabel[MAX_TEXT_LENGTH_INPUT + 2]; // Adjusted size for "> "
+    snprintf(inputLabel, sizeof(inputLabel), "%s", calculator_state->text);
+    displayInput(canvas, inputLabel, 4, 50);
 
     // Replace "M" with the current mode number
-    canvas_draw_str(canvas, 5, 72, modeNumber); // Position where "M" was originally drawn
+    // canvas_draw_str(canvas, 5, 72, modeNumber); // Position where "M" was originally drawn
 
     // Define the cell dimensions for each row and column
     const short cellDimensions[5][5][2] = {
@@ -205,7 +251,7 @@ void calculator_draw_callback(Canvas* canvas, void* ctx) {
         break;
     }
 
-    canvas_draw_str(canvas, 15, 72, modeStr);
+    canvas_draw_str(canvas, 16, 71, modeStr);
     short cursorX = 2;
     short cursorY = 61; // Starting Y position
 

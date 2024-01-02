@@ -3,8 +3,8 @@
 
 #include "calculator_state.h"
 
-bool decToBin(const char* decString, char* binaryResult, size_t resultSize);
-bool decToHex(const char* decString, char* hexResult, size_t resultSize);
+bool decToBin(const char* decString, char* decToBinResult, size_t resultSize);
+bool decToHex(const char* decString, char* decToHexResult, size_t resultSize);
 bool decToChar(const char* decString, char* outChar);
 bool hexToBin(const char* hexString, char* binaryResult, size_t resultSize);
 bool hexToDec(const char* hexString, int* outNum);
