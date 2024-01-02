@@ -187,10 +187,9 @@ NfcCommand picopass_poller_check_security(PicopassPoller* instance) {
 
     if(instance->data->pacs.se_enabled) {
         FURI_LOG_D(TAG, "SE enabled");
-        instance->state = PicopassPollerStateNrMacAuth;
-    } else {
-        instance->state = PicopassPollerStateAuth;
     }
+    // Always try the NR-MAC auth in case we have the file.
+    instance->state = PicopassPollerStateNrMacAuth;
     return command;
 }
 
@@ -221,8 +220,13 @@ NfcCommand picopass_poller_nr_mac_auth(PicopassPoller* instance) {
     FURI_LOG_D(TAG, "Looking for %s", furi_string_get_cstr(temp_str));
     uint8_t nr_mac[PICOPASS_BLOCK_LEN];
 
-    // Presume failure unless all steps are successful and the state is made "read block"
-    instance->state = PicopassPollerStateFail;
+    // Set next state so breaking do/while will jump to it. If successful, do/while will set to ReadBlock
+    if(instance->data->pacs.se_enabled) {
+        instance->state = PicopassPollerStateFail;
+    } else {
+        // For non-SE, run through normal key check
+        instance->state = PicopassPollerStateAuth;
+    }
     do {
         //check for file
         if(!flipper_format_file_open_existing(file, furi_string_get_cstr(temp_str))) break;
