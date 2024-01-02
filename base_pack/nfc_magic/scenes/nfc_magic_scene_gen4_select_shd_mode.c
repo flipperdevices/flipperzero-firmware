@@ -1,13 +1,6 @@
 #include "../nfc_magic_app_i.h"
+#include "protocols/gen4/gen4_poller_i.h"
 
-/* SHADOW MODES DESCRIPTION:
-    00: pre-write, shadow data can be written
-    01: restore mode
-        WARNING: new UMC (06a0) cards return garbage data when using 01
-    02: disabled
-    03: disabled, high speed R/W mode for Ultralight?
-    04: split mode, work with new UMC. With old UMC is untested.
-*/
 enum SubmenuIndex {
     SubmenuIndexPreWriteMode,
     SubmenuIndexRestoreMode,
@@ -70,29 +63,33 @@ bool nfc_magic_scene_gen4_select_shd_mode_on_event(void* context, SceneManagerEv
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SubmenuIndexPreWriteMode) {
             scene_manager_set_scene_state(
-                instance->scene_manager, NfcMagicSceneGen4SetShdMode, SubmenuIndexPreWriteMode);
+                instance->scene_manager,
+                NfcMagicSceneGen4SetShdMode,
+                Gen4PollerShadowModePreWrite);
             scene_manager_next_scene(instance->scene_manager, NfcMagicSceneGen4SetShdMode);
             consumed = true;
         } else if(event.event == SubmenuIndexRestoreMode) {
             scene_manager_set_scene_state(
-                instance->scene_manager, NfcMagicSceneGen4SetShdMode, SubmenuIndexRestoreMode);
+                instance->scene_manager, NfcMagicSceneGen4SetShdMode, Gen4PollerShadowModeRestore);
             scene_manager_next_scene(instance->scene_manager, NfcMagicSceneGen4SetShdMode);
             consumed = true;
         } else if(event.event == SubmenuIndexDisable) {
             scene_manager_set_scene_state(
-                instance->scene_manager, NfcMagicSceneGen4SetShdMode, SubmenuIndexDisable);
+                instance->scene_manager,
+                NfcMagicSceneGen4SetShdMode,
+                Gen4PollerShadowModeDisabled);
             scene_manager_next_scene(instance->scene_manager, NfcMagicSceneGen4SetShdMode);
             consumed = true;
         } else if(event.event == SubmenuIndexDisableHighSpeed) {
             scene_manager_set_scene_state(
                 instance->scene_manager,
                 NfcMagicSceneGen4SetShdMode,
-                SubmenuIndexDisableHighSpeed);
+                Gen4PollerShadowModeHighSpeedDisabled);
             scene_manager_next_scene(instance->scene_manager, NfcMagicSceneGen4SetShdMode);
             consumed = true;
         } else if(event.event == SubmenuIndexSplitMode) {
             scene_manager_set_scene_state(
-                instance->scene_manager, NfcMagicSceneGen4SetShdMode, SubmenuIndexSplitMode);
+                instance->scene_manager, NfcMagicSceneGen4SetShdMode, Gen4PollerShadowModeSplit);
             scene_manager_next_scene(instance->scene_manager, NfcMagicSceneGen4SetShdMode);
             consumed = true;
         }

@@ -42,6 +42,7 @@ typedef enum {
     Gen4PollerModeGetCfg,
     Gen4PollerModeGetRevision,
     Gen4PollerModeSetShadowMode,
+    Gen4PollerModeSetDirectWriteBlock0Mode
 } Gen4PollerMode;
 
 typedef struct {

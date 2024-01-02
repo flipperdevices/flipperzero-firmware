@@ -1,5 +1,4 @@
 #include "../nfc_magic_app_i.h"
-#include "gui/scene_manager.h"
 
 #define CONFIG_SIZE (32)
 
