@@ -19,7 +19,6 @@ Calculator* initialize_calculator_state() {
     return state;
 }
 
-
 ViewPort* initialize_view_port(Calculator* calculator_state, FuriMessageQueue* event_queue) {
     ViewPort* view_port = view_port_alloc();
     view_port_draw_callback_set(view_port, calculator_draw_callback, calculator_state);
@@ -28,15 +27,17 @@ ViewPort* initialize_view_port(Calculator* calculator_state, FuriMessageQueue* e
     return view_port;
 }
 
-
 Gui* initialize_gui(ViewPort* view_port) {
     Gui* gui = furi_record_open(RECORD_GUI);
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
     return gui;
 }
 
-
-void cleanup_resources(Calculator* calculator_state, ViewPort* view_port, Gui* gui, FuriMessageQueue* event_queue) {
+void cleanup_resources(
+    Calculator* calculator_state, 
+    ViewPort* view_port, 
+    Gui* gui, 
+    FuriMessageQueue* event_queue) {
     gui_remove_view_port(gui, view_port);
     view_port_free(view_port);
     furi_mutex_free(calculator_state->mutex);
