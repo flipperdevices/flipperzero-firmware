@@ -244,7 +244,7 @@ void GameboyLiveCamera::readPicture(bool is_thumbnail)
 
                 int color = ((data >> x_) & 1) | (((data2 >> x_) << 1) & 2);
                 // Check if the color is 2 or 3
-                if (color == 2 || color == 3) 
+                if (color != 2 && color != 3) 
                 {
                     c |= 1 << j; // (Black color)
                 }
