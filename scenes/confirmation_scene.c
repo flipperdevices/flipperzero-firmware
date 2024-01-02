@@ -22,7 +22,9 @@ void minesweeper_scene_confirmation_screen_on_enter(void* context) {
 
     dialog_ex_set_left_button_text(app->confirmation_screen, "Back");
 
-    dialog_ex_set_right_button_text(app->confirmation_screen, "Save and Reset");
+    dialog_ex_set_center_button_text(app->confirmation_screen, "Cancel");
+
+    dialog_ex_set_right_button_text(app->confirmation_screen, "Save");
 
     dialog_ex_set_result_callback(app->confirmation_screen, confirmation_scene_dialog_callback);
 
@@ -55,6 +57,9 @@ bool minesweeper_scene_confirmation_screen_on_event(void* context, SceneManagerE
                 app->settings_info.board_width  = app->t_settings_info.board_width;
                 app->settings_info.board_height = app->t_settings_info.board_height;
                 app->settings_info.difficulty   = app->t_settings_info.difficulty;
+
+                // This is used to let the settings view know it can save the main settings_info
+                // to the temp one on the next on enter
                 app->is_settings_changed = false;
 
                 // Reset the game board
@@ -69,6 +74,13 @@ bool minesweeper_scene_confirmation_screen_on_event(void* context, SceneManagerE
                 break;
 
             case DialogExResultCenter :
+                // Do not commit changes to actual buffer on cancel
+
+                app->is_settings_changed = false;
+
+                // we want to just switch back to the game screen without resetting 
+                scene_manager_search_and_switch_to_another_scene(app->scene_manager, MineSweeperSceneGameScreen); 
+
                 break;
 
             default :
