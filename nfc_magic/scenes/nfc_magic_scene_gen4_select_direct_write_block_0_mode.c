@@ -3,8 +3,8 @@
 #include "protocols/gen4/gen4_poller_i.h"
 
 enum SubmenuIndex {
-    SubmenuIndexActivate,
-    SubmenuIndexDeactivate,
+    SubmenuIndexEnable,
+    SubmenuIndexDisable,
     SubmenuIndexDefault,
 };
 
@@ -22,14 +22,14 @@ void nfc_magic_scene_gen4_select_direct_write_block_0_mode_on_enter(void* contex
     Submenu* submenu = instance->submenu;
     submenu_add_item(
         submenu,
-        "Activate",
-        SubmenuIndexActivate,
+        "Enable",
+        SubmenuIndexEnable,
         nfc_magic_scene_gen4_select_direct_write_block_0_mode_submenu_callback,
         instance);
     submenu_add_item(
         submenu,
-        "Deactivate",
-        SubmenuIndexDeactivate,
+        "Disable",
+        SubmenuIndexDisable,
         nfc_magic_scene_gen4_select_direct_write_block_0_mode_submenu_callback,
         instance);
     if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
@@ -54,19 +54,19 @@ bool nfc_magic_scene_gen4_select_direct_write_block_0_mode_on_event(
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == SubmenuIndexActivate) {
+        if(event.event == SubmenuIndexEnable) {
             scene_manager_set_scene_state(
                 instance->scene_manager,
                 NfcMagicSceneGen4SetDirectWriteBlock0Mode,
-                Gen4PollerDirectWriteBlock0ModeActivated);
+                Gen4PollerDirectWriteBlock0ModeEnabled);
             scene_manager_next_scene(
                 instance->scene_manager, NfcMagicSceneGen4SetDirectWriteBlock0Mode);
             consumed = true;
-        } else if(event.event == SubmenuIndexDeactivate) {
+        } else if(event.event == SubmenuIndexDisable) {
             scene_manager_set_scene_state(
                 instance->scene_manager,
                 NfcMagicSceneGen4SetDirectWriteBlock0Mode,
-                Gen4PollerDirectWriteBlock0ModeDeactivated);
+                Gen4PollerDirectWriteBlock0ModeDisabled);
             scene_manager_next_scene(
                 instance->scene_manager, NfcMagicSceneGen4SetDirectWriteBlock0Mode);
             consumed = true;

@@ -37,7 +37,7 @@ void nfc_magic_scene_gen4_menu_on_enter(void* context) {
         instance);
     submenu_add_item(
         submenu,
-        "Set Direct Write To Block 0 Mode",
+        "Set Gen2 Mode",
         SubmenuIndexSetDirectWriteBlock0Mode,
         nfc_magic_scene_gen4_menu_submenu_callback,
         instance);
