@@ -48,13 +48,19 @@ static MineSweeperApp* app_alloc() {
     view_dispatcher_add_view(app->view_dispatcher, MineSweeperLoadingView, loading_get_view(app->loading));
 
     app->game_screen = mine_sweeper_game_screen_alloc();
-    view_dispatcher_add_view(app->view_dispatcher, MineSweeperGameScreenView, mine_sweeper_game_screen_get_view(app->game_screen));
+    view_dispatcher_add_view(
+        app->view_dispatcher,
+        MineSweeperGameScreenView,
+        mine_sweeper_game_screen_get_view(app->game_screen));
 
     app->menu_screen = dialog_ex_alloc();
     view_dispatcher_add_view(app->view_dispatcher, MineSweeperMenuView, dialog_ex_get_view(app->menu_screen));
 
     app->settings_screen = variable_item_list_alloc();
     view_dispatcher_add_view(app->view_dispatcher, MineSweeperSettingsView, variable_item_list_get_view(app->settings_screen));
+
+    app->confirmation_screen = dialog_ex_alloc();
+    view_dispatcher_add_view(app->view_dispatcher, MineSweeperConfirmationView, dialog_ex_get_view(app->confirmation_screen));
 
     // Set setting info to default
     app->settings_info.width_str = furi_string_alloc();
@@ -90,6 +96,7 @@ static void app_free(MineSweeperApp* app) {
     mine_sweeper_game_screen_free(app->game_screen);  
     dialog_ex_free(app->menu_screen);
     variable_item_list_free(app->settings_screen);
+    dialog_ex_free(app->confirmation_screen);
 
     furi_record_close(RECORD_GUI);
     furi_record_close(RECORD_NOTIFICATION);

@@ -50,6 +50,7 @@ typedef struct MineSweeperApp {
     MineSweeperGameScreen* game_screen;
     DialogEx* menu_screen;
     VariableItemList* settings_screen;
+    DialogEx* confirmation_screen;
 
     MineSweeperAppSettings settings_info;
     uint32_t haptic;
@@ -64,6 +65,7 @@ typedef enum {
     MineSweeperGameScreenView,
     MineSweeperMenuView,
     MineSweeperSettingsView,
+    MineSweeperConfirmationView,
     MineSweeperViewCount,
 } MineSweeperView;
 
