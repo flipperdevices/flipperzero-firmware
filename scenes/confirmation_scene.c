@@ -57,6 +57,11 @@ bool minesweeper_scene_confirmation_screen_on_event(void* context, SceneManagerE
                 app->settings_info.difficulty   = app->t_settings_info.difficulty;
                 app->is_settings_changed = false;
 
+                mine_sweeper_game_screen_set_board_dimensions(
+                    app->game_screen,
+                    app->settings_info.board_width,
+                    app->settings_info.board_width);
+
                 // Reset the game board
                 mine_sweeper_game_screen_reset(app->game_screen);
 

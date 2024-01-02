@@ -72,7 +72,7 @@ typedef struct {
     uint16_t mines_left;
     uint16_t flags_left;
     CurrentPosition curr_pos;
-    uint8_t right_boundary, bottom_boundary;
+    uint8_t right_boundary, bottom_boundary, board_width, board_height;
 } MineSweeperGameScreenModel;
 
 void mine_sweeper_game_screen_view_enter(void* context) {
@@ -352,7 +352,7 @@ static void setup_board(MineSweeperGameScreen* instance) {
     
 }
 
-MineSweeperGameScreen* mine_sweeper_game_screen_alloc() {
+MineSweeperGameScreen* mine_sweeper_game_screen_alloc(uint8_t width, uint8_t height) {
     MineSweeperGameScreen* mine_sweeper_game_screen = (MineSweeperGameScreen*)malloc(sizeof(MineSweeperGameScreen));
     
     mine_sweeper_game_screen->view = view_alloc();
@@ -368,6 +368,9 @@ MineSweeperGameScreen* mine_sweeper_game_screen_alloc() {
     view_set_exit_callback(mine_sweeper_game_screen->view, mine_sweeper_game_screen_view_exit);
 
     mine_sweeper_game_screen->input_callback = NULL;
+    
+    // We need to initize board width and height before setup
+    mine_sweeper_game_screen_set_board_dimensions(mine_sweeper_game_screen, width, height);
 
     setup_board(mine_sweeper_game_screen);
     
@@ -415,6 +418,19 @@ void mine_sweeper_game_screen_set_input_callback(MineSweeperGameScreen* instance
 void mine_sweeper_game_screen_set_context(MineSweeperGameScreen* instance, void* context) {
     furi_assert(instance);
     instance->context = context;
+}
+
+void mine_sweeper_game_screen_set_board_dimensions(MineSweeperGameScreen* instance, uint8_t width, uint8_t height) {
+    furi_assert(instance);
+    
+    with_view_model(
+        instance->view,
+        MineSweeperGameScreenModel * model,
+        {
+            model->board_width = width;
+            model->board_height = height;
+        },
+        false);
 }
 
 bool mine_sweeper_is_tile_mine(MineSweeperGameScreen* instance, uint16_t x, uint16_t y) {

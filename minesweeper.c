@@ -40,6 +40,20 @@ static MineSweeperApp* app_alloc() {
     view_dispatcher_set_navigation_event_callback(app->view_dispatcher, minesweeper_navigation_event_callback);
     view_dispatcher_set_tick_event_callback(app->view_dispatcher, minesweeper_tick_event_callback, 500);
 
+    // Set setting info to default
+    app->settings_info.width_str = furi_string_alloc();
+    app->settings_info.height_str = furi_string_alloc();
+    app->settings_info.board_width = 32;
+    app->settings_info.board_height = 32;
+    app->settings_info.difficulty = 0;
+    memset(&app->t_settings_info, 0, sizeof(app->t_settings_info));
+    app->is_settings_changed = false;
+
+    // Set hardware related values to default
+    app->haptic = 1;
+    app->speaker = 1;
+    app->led = 1;
+
     // Alloc views and add to view dispatcher
     app->start_screen = start_screen_alloc();
     view_dispatcher_add_view(app->view_dispatcher, MineSweeperStartScreenView, start_screen_get_view(app->start_screen));
@@ -47,7 +61,7 @@ static MineSweeperApp* app_alloc() {
     app->loading = loading_alloc();
     view_dispatcher_add_view(app->view_dispatcher, MineSweeperLoadingView, loading_get_view(app->loading));
 
-    app->game_screen = mine_sweeper_game_screen_alloc();
+    app->game_screen = mine_sweeper_game_screen_alloc(app->settings_info.board_width, app->settings_info.board_height);
     view_dispatcher_add_view(
         app->view_dispatcher,
         MineSweeperGameScreenView,
@@ -62,19 +76,7 @@ static MineSweeperApp* app_alloc() {
     app->confirmation_screen = dialog_ex_alloc();
     view_dispatcher_add_view(app->view_dispatcher, MineSweeperConfirmationView, dialog_ex_get_view(app->confirmation_screen));
 
-    // Set setting info to default
-    app->settings_info.width_str = furi_string_alloc();
-    app->settings_info.height_str = furi_string_alloc();
-    app->settings_info.board_width = 32;
-    app->settings_info.board_height = 32;
-    app->settings_info.difficulty = 0;
-    memset(&app->t_settings_info, 0, sizeof(app->t_settings_info));
-    app->is_settings_changed = false;
 
-    // Set hardware related values to default
-    app->haptic = 1;
-    app->speaker = 1;
-    app->led = 1;
 
     return app;
 
