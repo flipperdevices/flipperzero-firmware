@@ -44,7 +44,7 @@ typedef bool (*GameScreenInputCallback)(InputEvent* event, void* context);
  *
  * @return      MineSweeperGameScreen view instance 
  */
-MineSweeperGameScreen* mine_sweeper_game_screen_alloc();
+MineSweeperGameScreen* mine_sweeper_game_screen_alloc(uint8_t width, uint8_t height);
 
 /** Deinitialize and free Start Screen view
  *
@@ -82,6 +82,10 @@ void mine_sweeper_game_screen_set_input_callback(
  */
 void mine_sweeper_game_screen_set_context(MineSweeperGameScreen* instance, void* context);
 
+/**
+ * ADD LATER
+ */
+void mine_sweeper_game_screen_set_board_dimensions(MineSweeperGameScreen* instance, uint8_t width, uint8_t height);
 
 /** Return true/false if tile is a mine 
  *
