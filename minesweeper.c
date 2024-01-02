@@ -43,8 +43,8 @@ static MineSweeperApp* app_alloc() {
     // Set setting info to default
     app->settings_info.width_str = furi_string_alloc();
     app->settings_info.height_str = furi_string_alloc();
-    app->settings_info.board_width = 32;
-    app->settings_info.board_height = 32;
+    app->settings_info.board_width = 16;
+    app->settings_info.board_height = 7;
     app->settings_info.difficulty = 0;
     memset(&app->t_settings_info, 0, sizeof(app->t_settings_info));
     app->is_settings_changed = false;
@@ -61,7 +61,11 @@ static MineSweeperApp* app_alloc() {
     app->loading = loading_alloc();
     view_dispatcher_add_view(app->view_dispatcher, MineSweeperLoadingView, loading_get_view(app->loading));
 
-    app->game_screen = mine_sweeper_game_screen_alloc(app->settings_info.board_width, app->settings_info.board_height);
+    app->game_screen = mine_sweeper_game_screen_alloc(
+            app->settings_info.board_width,
+            app->settings_info.board_height,
+            app->settings_info.difficulty);
+
     view_dispatcher_add_view(
         app->view_dispatcher,
         MineSweeperGameScreenView,
@@ -75,8 +79,6 @@ static MineSweeperApp* app_alloc() {
 
     app->confirmation_screen = dialog_ex_alloc();
     view_dispatcher_add_view(app->view_dispatcher, MineSweeperConfirmationView, dialog_ex_get_view(app->confirmation_screen));
-
-
 
     return app;
 
