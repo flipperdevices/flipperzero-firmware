@@ -34,7 +34,6 @@ typedef struct {
     VariableItem* difficulty_item;
     VariableItem* width_item;
     VariableItem* height_item;
-    bool has_been_changed;
 } MineSweeperAppSettings;
 
 // MineSweeperApp
@@ -53,6 +52,8 @@ typedef struct MineSweeperApp {
     DialogEx* confirmation_screen;
 
     MineSweeperAppSettings settings_info;
+    MineSweeperAppSettings t_settings_info;
+    bool is_settings_changed;
     uint32_t haptic;
     uint32_t speaker;
     uint32_t led;

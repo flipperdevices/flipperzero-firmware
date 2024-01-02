@@ -68,6 +68,8 @@ static MineSweeperApp* app_alloc() {
     app->settings_info.board_width = 32;
     app->settings_info.board_height = 32;
     app->settings_info.difficulty = 0;
+    memset(&app->t_settings_info, 0, sizeof(app->t_settings_info));
+    app->is_settings_changed = false;
 
     // Set hardware related values to default
     app->haptic = 1;
