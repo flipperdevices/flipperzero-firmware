@@ -21,12 +21,13 @@ static void minesweeper_tick_event_callback(void* context) {
 static MineSweeperApp* app_alloc() { 
     MineSweeperApp* app = (MineSweeperApp*)malloc(sizeof(MineSweeperApp));
     
-    // Get Gui and NotificationApp
-    app->gui = furi_record_open(RECORD_GUI);
-    app->notification = furi_record_open(RECORD_NOTIFICATION);
+    // NotificationApp Service
+    NotificationApp* notification_app = furi_record_open(RECORD_NOTIFICATION);
 
-    // Turn backlight on
-    notification_message(app->notification, &sequence_display_backlight_on);
+    // Turn backlight on when app starts
+    notification_message(notification_appd, &sequence_display_backlight_on);
+
+    furi_record_close(RECORD_NOTIFICATION);
 
     // Alloc Scene Manager and set handlers for on_enter, on_event, on_exit 
     app->scene_manager = scene_manager_alloc(&minesweeper_scene_handlers, app);
@@ -40,6 +41,8 @@ static MineSweeperApp* app_alloc() {
     view_dispatcher_set_navigation_event_callback(app->view_dispatcher, minesweeper_navigation_event_callback);
     view_dispatcher_set_tick_event_callback(app->view_dispatcher, minesweeper_tick_event_callback, 500);
 
+    // Read settings from storage
+    
     // Set setting info to default
     app->settings_info.width_str = furi_string_alloc();
     app->settings_info.height_str = furi_string_alloc();
@@ -104,8 +107,6 @@ static void app_free(MineSweeperApp* app) {
     variable_item_list_free(app->settings_screen);
     dialog_ex_free(app->confirmation_screen);
 
-    furi_record_close(RECORD_GUI);
-    furi_record_close(RECORD_NOTIFICATION);
 
     furi_string_free(app->settings_info.width_str);
     furi_string_free(app->settings_info.height_str);
