@@ -29,6 +29,11 @@
 
 typedef struct {
     uint8_t board_width, board_height, difficulty;
+    FuriString* width_str;
+    FuriString* height_str;
+    VariableItem* difficulty_item;
+    VariableItem* width_item;
+    VariableItem* height_item;
     bool has_been_changed;
 } MineSweeperAppSettings;
 
