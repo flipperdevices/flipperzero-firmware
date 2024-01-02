@@ -40,7 +40,7 @@ bool minesweeper_scene_game_screen_on_event(void* context, SceneManagerEvent eve
     bool consumed = false;
 
     if (event.type == SceneManagerEventTypeBack) {
-        scene_manager_next_scene(app->scene_manager, MineSweeperSceneMenu);
+        scene_manager_next_scene(app->scene_manager, MineSweeperSceneMenuScreen);
         consumed = true;
     }
 
