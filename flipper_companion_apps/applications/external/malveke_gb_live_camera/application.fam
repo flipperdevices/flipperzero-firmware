@@ -7,7 +7,7 @@ App(
     requires=["gui"],
     stack_size=8*1024,
     order=1,
-    fap_version=[1,1],
+    fap_version=[1,2],
     fap_libs=["assets"],
 	fap_icon="icons/icon.png",
     fap_icon_assets="icons",
