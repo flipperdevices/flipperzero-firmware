@@ -8,17 +8,6 @@ static void gb_live_camera_view_draw_callback(Canvas* canvas, void* _model) {
     canvas_set_color(canvas, ColorBlack);
     canvas_draw_frame(canvas, 0, 0, FRAME_WIDTH, FRAME_HEIGTH);
 
-    for(size_t p = 0; p < FRAME_BUFFER_LENGTH; ++p) {
-        uint8_t x = p % ROW_BUFFER_LENGTH; // 0 .. 15
-        uint8_t y = p / ROW_BUFFER_LENGTH; // 0 .. 63
-
-        for(uint8_t i = 0; i < 8; ++i) {
-            if((model->pixels[p] & (1 << (7 - i))) != 0) {
-                canvas_draw_dot(canvas, (x * 8) + i, y);
-            }
-        }
-    }
-
     if(!model->initialized) {
         canvas_set_font(canvas, FontPrimary);
         canvas_draw_str(canvas, 8, 28, "GAME BOY");
@@ -30,6 +19,17 @@ static void gb_live_camera_view_draw_callback(Canvas* canvas, void* _model) {
         canvas_set_font(canvas, FontSecondary);
         canvas_draw_str(canvas, 9, 47, "Insert Cartridge");
         elements_button_center(canvas, "Ok");
+    } else {
+        for(size_t p = 0; p < FRAME_BUFFER_LENGTH; ++p) {
+            uint8_t x = p % ROW_BUFFER_LENGTH; // 0 .. 15
+            uint8_t y = p / ROW_BUFFER_LENGTH; // 0 .. 63
+
+            for(uint8_t i = 0; i < 8; ++i) {
+                if((model->pixels[p] & (1 << (7 - i))) == 0) {
+                    canvas_draw_dot(canvas, (x * 8) + i, y);
+                }
+            }
+        }
     }
 }
 
