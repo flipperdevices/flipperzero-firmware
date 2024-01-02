@@ -53,6 +53,14 @@ static MineSweeperApp* app_alloc() {
     app->menu_screen = dialog_ex_alloc();
     view_dispatcher_add_view(app->view_dispatcher, MineSweeperMenuView, dialog_ex_get_view(app->menu_screen));
 
+    app->settings_screen = variable_item_list_alloc();
+    view_dispatcher_add_view(app->view_dispatcher, MineSweeperSettingsView, variable_item_list_get_view(app->settings_screen));
+
+    // Set setting info to default
+    app->settings_info.board_width = 16;
+    app->settings_info.board_height = 8;
+    app->settings_info.difficulty = 0;
+
     // Set hardware related values to default
     app->haptic = 1;
     app->speaker = 1;
@@ -79,6 +87,7 @@ static void app_free(MineSweeperApp* app) {
     start_screen_free(app->start_screen);
     mine_sweeper_game_screen_free(app->game_screen);  
     dialog_ex_free(app->menu_screen);
+    variable_item_list_free(app->settings_screen);
 
     furi_record_close(RECORD_GUI);
     furi_record_close(RECORD_NOTIFICATION);
