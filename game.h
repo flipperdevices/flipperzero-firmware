@@ -29,6 +29,7 @@ typedef enum {
 typedef enum {
     MAIN_MENU,
     INTRO,
+    ABOUT,
     SELECT_BRICK,
     SELECT_DIRECTION,
     MOVE_SIDES,
@@ -71,6 +72,8 @@ typedef struct {
     // score
     uint8_t currentLevel;
     unsigned int gameMoves;
+    int16_t score;
+    char parLabel[PAR_LABEL_SIZE];
 
     // board
     PlayGround board;
@@ -126,6 +129,7 @@ void start_game_at_level(Game* game, uint8_t levelNo);
 void refresh_level(Game* g);
 void level_finished(Game* g);
 void forget_continue(Game* g);
+void score_for_level(Game* g, uint8_t levelNo, char* buf, size_t max);
 
 //-----------------------------------------------------------------------------
 

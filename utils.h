@@ -13,7 +13,7 @@ inline uint8_t cap_y(uint8_t coord) {
 }
 
 inline bool is_state_pause(State gameState) {
-    return ((gameState < SELECT_BRICK) || (gameState >= PAUSED));
+    return ((gameState < ABOUT) || (gameState >= PAUSED));
 }
 
 inline void copy_level(PlayGround target, PlayGround source) {

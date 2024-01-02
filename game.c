@@ -20,6 +20,7 @@ Game* alloc_game_state(int* error) {
 
     game->currentLevel = 0; //4   16  21??? 22  32
     game->gameMoves = 0;
+    game->score = 0;
 
     game->undoMovable = MOVABLE_NOT_FOUND;
     game->currentMovable = MOVABLE_NOT_FOUND;
@@ -41,6 +42,8 @@ Game* alloc_game_state(int* error) {
     game->gameOverReason = NOT_GAME_OVER;
 
     game->move.frameNo = 0;
+
+    memset(game->parLabel, 0, PAR_LABEL_SIZE);
 
     return game;
 }
@@ -127,6 +130,20 @@ void index_set(Game* game) {
 
 //-----------------------------------------------------------------------------
 
+void recalc_score(Game* g) {
+    g->score = 0;
+    for(uint8_t i = 0; i < g->levelSet->maxLevel; i++) {
+        if(g->levelSet->scores[i].moves > 0) {
+            g->score += g->levelSet->scores[i].moves - g->levelSet->pars[i];
+        }
+        if(g->levelSet->scores[i].spoiled) {
+            g->score += 5;
+        }
+    }
+}
+
+//-----------------------------------------------------------------------------
+
 void initial_load_game(Game* game) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
 
@@ -145,6 +162,7 @@ void initial_load_game(Game* game) {
     load_level_set(storage, game->selectedSet, game->levelSet);
     furi_record_close(RECORD_STORAGE);
     index_set(game);
+    recalc_score(game);
 
     if(game->selectedLevel > game->levelSet->maxLevel - 1) {
         game->selectedLevel = game->levelSet->maxLevel - 1;
@@ -162,6 +180,7 @@ void load_gameset_if_needed(Game* game, FuriString* expectedSet) {
         furi_record_close(RECORD_STORAGE);
     }
     index_set(game);
+    recalc_score(game);
 }
 
 //-----------------------------------------------------------------------------
@@ -180,6 +199,21 @@ void start_game_at_level(Game* game, uint8_t levelNo) {
         game->selectedLevel = 0;
 
         game->state = MAIN_MENU;
+    }
+}
+
+//-----------------------------------------------------------------------------
+
+void score_for_level(Game* g, uint8_t levelNo, char* buf, size_t max) {
+    if(g->levelSet->scores[levelNo].moves == 0) {
+        snprintf(buf, max, "???");
+    } else {
+        if(g->levelSet->scores[levelNo].moves == g->levelSet->pars[levelNo]) {
+            snprintf(buf, max, "par");
+        } else {
+            snprintf(
+                buf, max, "%+d", g->levelSet->scores[levelNo].moves - g->levelSet->pars[levelNo]);
+        }
     }
 }
 
@@ -209,6 +243,9 @@ void refresh_level(Game* g) {
     g->undoMovable = MOVABLE_NOT_FOUND;
     g->gameMoves = 0;
     g->state = SELECT_BRICK;
+
+    memset(g->parLabel, 0, PAR_LABEL_SIZE);
+    score_for_level(g, g->selectedLevel, g->parLabel, PAR_LABEL_SIZE);
 }
 
 //-----------------------------------------------------------------------------
@@ -218,7 +255,16 @@ void level_finished(Game* g) {
     furi_string_set(g->selectedSet, g->levelSet->id);
     furi_string_set(g->continueSet, g->levelSet->id);
     g->continueLevel = g->currentLevel;
+
+    uint16_t moves = (uint16_t)g->gameMoves;
+    if((moves < g->levelSet->scores[g->currentLevel].moves) ||
+       (g->levelSet->scores[g->currentLevel].moves == 0)) {
+        g->levelSet->scores[g->currentLevel].moves = moves;
+    }
+
     save_last_level(g->levelSet->id, g->currentLevel);
+    save_set_scores(g->levelSet->id, g->levelSet->scores);
+    recalc_score(g);
 }
 
 //-----------------------------------------------------------------------------
@@ -229,7 +275,8 @@ void forget_continue(Game* game) {
     furi_string_set(game->continueSet, assetLevels[0]);
     game->selectedLevel = 0;
     game->continueLevel = 0;
-    delete_progress();
+    delete_progress(game->levelSet->scores);
+    recalc_score(game);
 }
 
 //-----------------------------------------------------------------------------

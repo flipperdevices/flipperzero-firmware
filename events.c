@@ -132,7 +132,8 @@ void events_for_game_over(InputEvent* event, Game* game) {
             undo(game);
             break;
         case InputKeyOk:
-            game->mainMenuMode = NEW_GAME;
+            game->mainMenuMode = (game->hasContinue) ? CONTINUE : NEW_GAME;
+            game->mainMenuBtn = MODE_BTN;
             game->state = MAIN_MENU;
             break;
         case InputKeyLeft:
@@ -158,6 +159,7 @@ void events_for_level_finished(InputEvent* event, Game* game) {
         case InputKeyDown:
         case InputKeyBack:
             game->mainMenuMode = CONTINUE;
+            game->mainMenuBtn = MODE_BTN;
             game->state = MAIN_MENU;
             break;
         case InputKeyOk:
@@ -294,6 +296,8 @@ void events_for_main_menu(InputEvent* event, Game* game) {
         case InputKeyBack:
             if(game->mainMenuInfo) {
                 game->mainMenuInfo = false;
+            } else {
+                game->state = ABOUT;
             }
         default:
             break;
@@ -321,10 +325,34 @@ void events_for_intro(InputEvent* event, Game* game) {
 
 //-----------------------------------------------------------------------------
 
+void events_for_about(InputEvent* event, Game* game) {
+    if((event->type == InputTypePress) || (event->type == InputTypeRepeat)) {
+        switch(event->key) {
+        case InputKeyOk:
+            // handled on root level - exit
+            // see: game_vexed.c
+            break;
+        case InputKeyLeft:
+        case InputKeyRight:
+        case InputKeyUp:
+        case InputKeyDown:
+        case InputKeyBack:
+            game->state = MAIN_MENU;
+        default:
+            break;
+        }
+    }
+}
+
+//-----------------------------------------------------------------------------
+
 void events_for_game(InputEvent* event, Game* game) {
     switch(game->state) {
     case MAIN_MENU:
         events_for_main_menu(event, game);
+        break;
+    case ABOUT:
+        events_for_about(event, game);
         break;
     case INTRO:
         events_for_intro(event, game);

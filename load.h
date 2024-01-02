@@ -4,7 +4,14 @@
 #include "common.h"
 
 #define ASSETS_LEVELS_COUNT 9
+#define MAX_LEVELS_PER_SET 100
+
 extern char* assetLevels[];
+
+typedef struct {
+    uint16_t moves;
+    bool spoiled;
+} LevelScore;
 
 typedef struct {
     FuriString* id;
@@ -13,6 +20,8 @@ typedef struct {
     FuriString* description;
     FuriString* url;
     uint8_t maxLevel;
+    LevelScore scores[MAX_LEVELS_PER_SET];
+    uint8_t pars[MAX_LEVELS_PER_SET];
 } LevelSet;
 
 typedef struct {
@@ -30,7 +39,9 @@ void free_level_data(LevelData* ld);
 bool load_level_set(Storage* storage, FuriString* levelSetId, LevelSet* levelSet);
 bool load_last_level(FuriString* lastLevelSetId, uint8_t* levelNo);
 bool save_last_level(FuriString* lastLevelSetId, uint8_t levelNo);
-void delete_progress();
+bool load_set_scores(Storage* storage, FuriString* levelSetId, LevelScore* scores);
+bool save_set_scores(FuriString* levelSetId, LevelScore* scores);
+void delete_progress(LevelScore* scores);
 
 int load_level_row(uint8_t* pb, const char* psz, const char* pszMax);
 bool parse_level_notation(const char* pszLevel, PlayGround* level);

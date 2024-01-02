@@ -36,6 +36,7 @@ void my_canvas_frame_set(
 void gray_canvas(Canvas* const canvas);
 void mask_canvas(Canvas* const canvas, uint8_t sx, uint8_t sy, uint8_t w, uint8_t h);
 void canvas_draw_hline_dotted(Canvas* const canvas, uint8_t x, uint8_t y, uint8_t w);
+void canvas_draw_vline_dotted(Canvas* const canvas, uint8_t x, uint8_t y, uint8_t h);
 
 void elements_button_right_back(Canvas* canvas, const char* str);
 void elements_multiline_text_aligned_limited(
@@ -69,3 +70,11 @@ void main_menu_pill(
     const char* label);
 
 void panel_histogram(Canvas* canvas, const char* bricks, const uint8_t* values);
+
+uint8_t dialog_frame(
+    Canvas* canvas,
+    uint8_t w,
+    uint8_t h,
+    bool bigHeader,
+    bool safeFrame,
+    const char* label);

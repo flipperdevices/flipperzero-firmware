@@ -82,6 +82,25 @@ bool level_set_id_to_path(Storage* storage, FuriString* levelSetId, size_t maxSi
     return false;
 }
 
+bool level_set_id_to_score_path(
+    Storage* storage,
+    FuriString* levelSetId,
+    size_t maxSize,
+    char* path) {
+    memset(path, 0, maxSize);
+
+    snprintf(
+        path,
+        maxSize - 1,
+        "/ext/apps_data/game_vexed/scores/%s.sco",
+        furi_string_get_cstr(levelSetId));
+    if(storage_common_exists(storage, path)) {
+        return true;
+    }
+
+    return false;
+}
+
 int load_level_row(uint8_t* pb, const char* psz, const char* pszMax) {
     int cBlocks = 0;
     for(; psz < pszMax; psz++) {
@@ -258,20 +277,102 @@ bool load_level(Storage* storage, FuriString* levelSetId, int level, LevelData* 
     }
 }
 
+// https://stackoverflow.com/a/53966346
+void btox(char* xp, const char* bb, int n) {
+    const char xx[] = "0123456789ABCDEF";
+    while(--n >= 0) xp[n] = xx[(bb[n >> 1] >> ((1 - (n & 1)) << 2)) & 0xF];
+}
+
+void debug_dump_hex(const char* label, const char* data, int n) {
+    char hexstr[n + 1];
+    btox(hexstr, data, n);
+    hexstr[n] = 0; /* Terminate! */
+    FURI_LOG_D(TAG, "%s = %s", label, hexstr);
+}
+
+bool load_set_scores(Storage* storage, FuriString* levelSetId, LevelScore* scores) {
+    bool loaded = false;
+    const size_t scoreSize = sizeof(LevelScore) * MAX_LEVELS_PER_SET;
+    const size_t bufSize = 512;
+    char filePath[bufSize];
+    memset(scores, 0, scoreSize);
+
+    if(!level_set_id_to_score_path(storage, levelSetId, bufSize, filePath)) {
+        FURI_LOG_E(TAG, "SCORES FOR LEVEL NOT FOUND! \"%s\"", filePath);
+        return false;
+    }
+
+    Stream* stream = file_stream_alloc(storage);
+    if(file_stream_open(stream, filePath, FSAM_READ, FSOM_OPEN_EXISTING)) {
+        size_t actualyRead = stream_read(stream, (uint8_t*)scores, scoreSize);
+
+        if(scoreSize != actualyRead) {
+            FURI_LOG_E(TAG, "Error while reading scores!");
+        } else {
+            debug_dump_hex("Scores", (char*)scores, scoreSize << 1);
+            loaded = true;
+        }
+
+        file_stream_close(stream);
+        stream_free(stream);
+    }
+
+    return loaded;
+}
+
+bool save_set_scores(FuriString* levelSetId, LevelScore* scores) {
+    bool saved = false;
+    const size_t scoreSize = sizeof(LevelScore) * MAX_LEVELS_PER_SET;
+    const size_t bufSize = 512;
+    char filePath[bufSize];
+
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+
+    //debug_dump_hex("Scores to write", (char*)scores, scoreSize << 1);
+
+    if(!level_set_id_to_score_path(storage, levelSetId, bufSize, filePath)) {
+        FURI_LOG_D(TAG, "Writing new scores \"%s\"", filePath);
+    } else {
+        FURI_LOG_D(TAG, "Overwriting scores \"%s\"", filePath);
+    }
+
+    Stream* stream = file_stream_alloc(storage);
+    if(file_stream_open(stream, filePath, FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
+        size_t actualyWrote = stream_write(stream, (uint8_t*)scores, scoreSize);
+
+        if(scoreSize != actualyWrote) {
+            FURI_LOG_E(TAG, "Error while writing scores!");
+        } else {
+            saved = true;
+        }
+
+        file_stream_close(stream);
+        stream_free(stream);
+    }
+
+    furi_record_close(RECORD_STORAGE);
+
+    return saved;
+}
+
 bool load_level_set(Storage* storage, FuriString* levelSetId, LevelSet* levelSet) {
     Stream* stream = file_stream_alloc(storage);
     FuriString* line = furi_string_alloc();
     FuriString* value;
     bool loaded = false;
     uint8_t levelCount = 0;
-    size_t sep, level_no_sep;
+    size_t sep, level_no_sep, level_name_sep, level_board_sep;
 
-    size_t bufSize = 512;
+    memset(levelSet->pars, 0, sizeof(uint8_t) * MAX_LEVELS_PER_SET);
+
+    const size_t bufSize = 512;
     char filePath[bufSize];
 
     if(!level_set_id_to_path(storage, levelSetId, bufSize, filePath)) {
         FURI_LOG_E(TAG, "LEVEL NOT FOUND! \"%s\"", filePath);
     }
+
+    load_set_scores(storage, levelSetId, levelSet->scores);
 
     furi_string_set(levelSet->id, levelSetId);
     furi_string_set(levelSet->title, levelSetId);
@@ -316,15 +417,30 @@ bool load_level_set(Storage* storage, FuriString* levelSetId, LevelSet* levelSet
             }
 
             level_no_sep = furi_string_search_char(line, ';', 0);
+            if(level_no_sep == FURI_STRING_FAILURE) continue;
+            level_name_sep = furi_string_search_char(line, ';', level_no_sep + 1);
+            if(level_name_sep == FURI_STRING_FAILURE) continue;
+            level_board_sep = furi_string_search_char(line, ';', level_name_sep + 1);
+            if(level_board_sep == FURI_STRING_FAILURE) continue;
+
             value = furi_string_alloc_set(line);
             furi_string_left(value, level_no_sep);
             const char* value_raw = furi_string_get_cstr(value);
             int levelNo = atoi(value_raw);
-            if(levelNo < 256) {
+            furi_string_free(value);
+
+            if(levelNo < MAX_LEVELS_PER_SET) {
+                value = furi_string_alloc_set(line);
+                furi_string_right(value, level_board_sep + 1);
+                furi_string_trim(value, "\n\r\t");
+                levelSet->pars[levelCount] = (furi_string_size(value) / 2) % 256;
+                furi_string_free(value);
+
                 levelCount++;
             }
-            furi_string_free(value);
         }
+
+        debug_dump_hex("Pars", (char*)levelSet->pars, sizeof(levelSet->pars) << 1);
 
         furi_string_free(line);
         file_stream_close(stream);
@@ -454,10 +570,11 @@ bool save_last_level(FuriString* lastLevelSetId, uint8_t levelNo) {
     return true;
 }
 
-void delete_progress() {
+void delete_progress(LevelScore* scores) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
     if(storage_common_exists(storage, MY_APP_DATA_PATH("scores/game.txt"))) {
-        storage_common_remove(storage, MY_APP_DATA_PATH("scores/game.txt"));
+        storage_simply_remove_recursive(storage, MY_APP_DATA_PATH("scores"));
     }
     furi_record_close(RECORD_STORAGE);
+    memset(scores, 0, sizeof(LevelScore) * MAX_LEVELS_PER_SET);
 }

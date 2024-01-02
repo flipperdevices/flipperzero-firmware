@@ -77,6 +77,14 @@ void canvas_draw_hline_dotted(Canvas* const canvas, uint8_t x, uint8_t y, uint8_
 
 //-----------------------------------------------------------------------------
 
+void canvas_draw_vline_dotted(Canvas* const canvas, uint8_t x, uint8_t y, uint8_t h) {
+    for(uint8_t i = y; i < y + h; i += 2) {
+        canvas_draw_dot(canvas, x, i);
+    }
+}
+
+//-----------------------------------------------------------------------------
+
 void elements_button_right_back(Canvas* canvas, const char* str) {
     const uint8_t button_height = 12;
     const uint8_t vertical_offset = 3;
@@ -392,4 +400,43 @@ void panel_histogram(Canvas* canvas, const char* bricks, const uint8_t* values) 
             posy += (HIST_BRICK_H + HIST_SPC_Y);
         }
     }
+}
+
+//-----------------------------------------------------------------------------
+
+uint8_t dialog_frame(
+    Canvas* canvas,
+    uint8_t w,
+    uint8_t h,
+    bool bigHeader,
+    bool safeFrame,
+    const char* label) {
+    const uint8_t x = (GUI_DISPLAY_WIDTH - w) / 2;
+    const uint8_t y = (53 - h) / 2;
+
+    canvas_set_color(canvas, ColorWhite);
+    if(safeFrame) canvas_draw_rbox(canvas, x - 3, y - 2, w + 7, h + 5, 3);
+
+    canvas_set_color(canvas, ColorBlack);
+    canvas_draw_rbox(canvas, x + 1, y + 1, w, h, 3);
+    canvas_set_color(canvas, ColorWhite);
+    canvas_draw_rbox(canvas, x, y, w, h, 3);
+    canvas_set_color(canvas, ColorBlack);
+    canvas_draw_rframe(canvas, x, y, w, h, 3);
+
+    canvas_set_color(canvas, ColorBlack);
+    canvas_draw_rbox(canvas, x, y, w, 11 + (bigHeader ? 1 : 0), 3);
+    canvas_draw_box(canvas, x, y + 3, w, (11 - 3) + (bigHeader ? 1 : 0));
+
+    canvas_set_color(canvas, ColorWhite);
+
+    if(bigHeader) {
+        canvas_set_font(canvas, FontPrimary);
+    } else {
+        canvas_set_custom_u8g2_font(canvas, app_u8g2_font_squeezed_r7_tr);
+    }
+
+    canvas_draw_str_aligned(canvas, GUI_DISPLAY_WIDTH / 2, y + 2, AlignCenter, AlignTop, label);
+
+    return y + 12;
 }

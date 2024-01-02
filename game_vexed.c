@@ -76,7 +76,8 @@ int32_t game_vexed_app(void* p) {
         if(event_status == FuriStatusOk) {
             furi_mutex_acquire(game->mutex, FuriWaitForever);
 
-            if((event.type == InputTypeLong) && (event.key == InputKeyBack)) {
+            if(((event.type == InputTypeLong) && (event.key == InputKeyBack)) ||
+               ((game->state == ABOUT) && (event.key == InputKeyOk))) {
                 running = false;
             } else {
                 events_for_game(&event, game);
