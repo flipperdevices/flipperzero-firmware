@@ -29,14 +29,15 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0101-0245-0.93.9-116e51f](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-01-01 18:45 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-01-01 18:45 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-01-02 01:12 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-01-02 01:12 EST`
 - Added: [Tarot v0.1 (By pionaiki & tihyltew)](https://github.com/pionaiki/fz-tarot)
 - Added: [Tone Generator v1.0 (By GEMISIS)](https://github.com/GEMISIS/tone_gen)
 - Updated: [Marauder Assets for ESP Flasher (By justcallmekoko)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/61bb973015b3cb8093ed367a3acdc67d99697183)
 - Updated: [ESP Flasher Dependancy: stm32-cmake (By ObKo)](https://github.com/ObKo/stm32-cmake)
 - Updated: [Programmer Calculator v0.8 (By armixz)](https://github.com/armixz/Flipper-Zero-Programmer-Calculator)
 - Updated: [Tarot v0.1 (By pionaiki & tihyltew)](https://github.com/pionaiki/fz-tarot)
+- Updated: [MALVEKE GB Live Camera v1.2 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external/malveke_gb_live_camera) `Req: Malveke`
 
 ## IN THIS BRANCH:
 
@@ -495,7 +496,7 @@ $ ./fbt dolphin_ext
 - [MALVEKE GAME BOY Cartridge (GB/GBC) v1.0 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external/malveke_gb_cartridge) `Req: Malveke`
 - [MALVEKE GAME BOY Emulator v1.0 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external/malveke_gb_emulator) `Req: Malveke`
 - [MALVEKE GAME BOY Link-Camera v1.0 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external/malveke_gb_link_camera) `Req: Malveke`
-- [MALVEKE GB Live Camera v1.1 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external/malveke_gb_live_camera) `Req: Malveke`
+- [MALVEKE GB Live Camera v1.2 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external/malveke_gb_live_camera) `Req: Malveke`
 - [MALVEKE PIN Test v1.0 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external/malveke_pin_test) `Req: Malveke`
 - [MAX31855 (By skotopes)](https://github.com/skotopes/flipperzero_max31855)
 - [Metronome v1.1 (By panki27)](https://github.com/panki27/Metronome)
