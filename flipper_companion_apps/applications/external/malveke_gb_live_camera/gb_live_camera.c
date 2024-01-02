@@ -1,16 +1,14 @@
 #include "gb_live_camera.h"
 #include <malveke_gb_live_camera_icons.h>
 
-
-
 static void gb_live_camera_view_draw_callback(Canvas* canvas, void* _model) {
     UartDumpModel* model = _model;
 
     // Prepare canvas
     canvas_set_color(canvas, ColorBlack);
     canvas_draw_frame(canvas, 0, 0, FRAME_WIDTH, FRAME_HEIGTH);
-    
-    if (!model->initialized){
+
+    if(!model->initialized) {
         canvas_set_font(canvas, FontPrimary);
         canvas_draw_str(canvas, 8, 28, "GAME BOY");
         canvas_draw_icon(canvas, 76, 8, &I_gbcam_48x49);
@@ -20,7 +18,7 @@ static void gb_live_camera_view_draw_callback(Canvas* canvas, void* _model) {
         canvas_draw_str(canvas, 8, 38, "CAMERA...");
         canvas_set_font(canvas, FontSecondary);
         canvas_draw_str(canvas, 9, 47, "Insert Cartridge");
-        elements_button_center(canvas, "Ok"); 
+        elements_button_center(canvas, "Ok");
     } else {
         for(size_t p = 0; p < FRAME_BUFFER_LENGTH; ++p) {
             uint8_t x = p % ROW_BUFFER_LENGTH; // 0 .. 15
@@ -65,7 +63,7 @@ static void save_image(void* context) {
     // if(storage_common_stat(storage, IMAGE_FILE_DIRECTORY_PATH, NULL) == FSE_NOT_EXIST) {
     //     storage_simply_mkdir(storage, IMAGE_FILE_DIRECTORY_PATH);
     // }
-     //  Create MALVEKE dir
+    //  Create MALVEKE dir
     if(storage_common_stat(storage, MALVEKE_APP_FOLDER, NULL) == FSE_NOT_EXIST) {
         storage_simply_mkdir(storage, MALVEKE_APP_FOLDER);
     }
@@ -79,22 +77,26 @@ static void save_image(void* context) {
     get_timefilename(file_name);
 
     // this functions open a file, using write access and creates new file if not exist.
-    bool result = storage_file_open(file, furi_string_get_cstr(file_name), FSAM_WRITE, FSOM_OPEN_ALWAYS);
+    bool result =
+        storage_file_open(file, furi_string_get_cstr(file_name), FSAM_WRITE, FSOM_OPEN_ALWAYS);
     //bool result = storage_file_open(file, EXT_PATH("DCIM/test.bmp"), FSAM_WRITE, FSOM_OPEN_ALWAYS);
     furi_string_free(file_name);
 
-    if (result){
+    if(result) {
         storage_file_write(file, bitmap_header, BITMAP_HEADER_LENGTH);
-        with_view_model(app->view, UartDumpModel * model, {
-            int8_t row_buffer[ROW_BUFFER_LENGTH];
-            for (size_t i = 64; i > 0; --i) {
-                for (size_t j = 0; j < ROW_BUFFER_LENGTH; ++j){
-                    row_buffer[j] = model->pixels[((i-1)*ROW_BUFFER_LENGTH) + j];
+        with_view_model(
+            app->view,
+            UartDumpModel * model,
+            {
+                int8_t row_buffer[ROW_BUFFER_LENGTH];
+                for(size_t i = 64; i > 0; --i) {
+                    for(size_t j = 0; j < ROW_BUFFER_LENGTH; ++j) {
+                        row_buffer[j] = model->pixels[((i - 1) * ROW_BUFFER_LENGTH) + j];
+                    }
+                    storage_file_write(file, row_buffer, ROW_BUFFER_LENGTH);
                 }
-                storage_file_write(file, row_buffer, ROW_BUFFER_LENGTH);
-            }
-            
-        }, false);
+            },
+            false);
     }
 
     // Closing the "file descriptor"
@@ -108,38 +110,47 @@ static void save_image(void* context) {
 
 static bool gb_live_camera_view_input_callback(InputEvent* event, void* context) {
     UartEchoApp* instance = context;
-    if (event->type == InputTypePress){
-        if (event->key == InputKeyUp){
+    if(event->type == InputTypePress) {
+        if(event->key == InputKeyUp) {
             const char gblivecamera_command_enable_dithering[] = "gblivecamera -D\n";
-            furi_hal_uart_tx(FuriHalUartIdUSART1, (uint8_t*)gblivecamera_command_enable_dithering, strlen(gblivecamera_command_enable_dithering));
-        }
-        else if (event->key == InputKeyDown){
+            furi_hal_uart_tx(
+                FuriHalUartIdUSART1,
+                (uint8_t*)gblivecamera_command_enable_dithering,
+                strlen(gblivecamera_command_enable_dithering));
+        } else if(event->key == InputKeyDown) {
             const char gblivecamera_command_disable_dithering[] = "gblivecamera -d\n";
-            furi_hal_uart_tx(FuriHalUartIdUSART1, (uint8_t*)gblivecamera_command_disable_dithering, strlen(gblivecamera_command_disable_dithering));
-        }
-        else if (event->key == InputKeyRight){
+            furi_hal_uart_tx(
+                FuriHalUartIdUSART1,
+                (uint8_t*)gblivecamera_command_disable_dithering,
+                strlen(gblivecamera_command_disable_dithering));
+        } else if(event->key == InputKeyRight) {
             const char gblivecamera_command_increase_exposure[] = "gblivecamera -E\n";
-            furi_hal_uart_tx(FuriHalUartIdUSART1, (uint8_t*)gblivecamera_command_increase_exposure, strlen(gblivecamera_command_increase_exposure));
-        }
-        else if (event->key == InputKeyLeft){
+            furi_hal_uart_tx(
+                FuriHalUartIdUSART1,
+                (uint8_t*)gblivecamera_command_increase_exposure,
+                strlen(gblivecamera_command_increase_exposure));
+        } else if(event->key == InputKeyLeft) {
             const char gblivecamera_command_decrease_exposure[] = "gblivecamera -e\n";
-            furi_hal_uart_tx(FuriHalUartIdUSART1, (uint8_t*)gblivecamera_command_decrease_exposure, strlen(gblivecamera_command_decrease_exposure));
-        }
-        else if (event->key == InputKeyOk){
+            furi_hal_uart_tx(
+                FuriHalUartIdUSART1,
+                (uint8_t*)gblivecamera_command_decrease_exposure,
+                strlen(gblivecamera_command_decrease_exposure));
+        } else if(event->key == InputKeyOk) {
             with_view_model(
-                    instance->view,
-                    UartDumpModel * model,
-                    {
-                        if (!model->initialized){
-                            const char gblivecamera_command[] = "gblivecamera\n\n";
-                            furi_hal_uart_tx(FuriHalUartIdUSART1, (uint8_t*)gblivecamera_command, strlen(gblivecamera_command));
-                        } else {
-                            save_image(context);
-                        }
-                    },
-                    true);
-            
-            
+                instance->view,
+                UartDumpModel * model,
+                {
+                    if(!model->initialized) {
+                        const char gblivecamera_command[] = "gblivecamera\n\n";
+                        furi_hal_uart_tx(
+                            FuriHalUartIdUSART1,
+                            (uint8_t*)gblivecamera_command,
+                            strlen(gblivecamera_command));
+                    } else {
+                        save_image(context);
+                    }
+                },
+                true);
         }
     }
     return false;
@@ -163,36 +174,39 @@ static void gb_live_camera_on_irq_cb(UartIrqEvent ev, uint8_t data, void* contex
 }
 
 static void process_ringbuffer(UartDumpModel* model, uint8_t byte) {
-
     //// 1. Phase: filling the ringbuffer
-    if (model->ringbuffer_index == 0 && byte != 'Y'){ // First char has to be 'Y' in the buffer.
+    if(model->ringbuffer_index == 0 && byte != 'Y') { // First char has to be 'Y' in the buffer.
         return;
     }
-    
-    if (model->ringbuffer_index == 1 && byte != ':'){ // Second char has to be ':' in the buffer or reset.
+
+    if(model->ringbuffer_index == 1 &&
+       byte != ':') { // Second char has to be ':' in the buffer or reset.
         model->ringbuffer_index = 0;
         process_ringbuffer(model, byte);
         return;
     }
 
-    model->row_ringbuffer[model->ringbuffer_index] = byte; // Assign current byte to the ringbuffer;
+    model->row_ringbuffer[model->ringbuffer_index] =
+        byte; // Assign current byte to the ringbuffer;
     ++model->ringbuffer_index; // Increment the ringbuffer index
 
-    if (model->ringbuffer_index < RING_BUFFER_LENGTH){ // Let's wait 'till the buffer fills.
+    if(model->ringbuffer_index < RING_BUFFER_LENGTH) { // Let's wait 'till the buffer fills.
         return;
     }
 
     //// 2. Phase: flushing the ringbuffer to the framebuffer
     model->ringbuffer_index = 0; // Let's reset the ringbuffer
     model->initialized = true; // We've successfully established the connection
-    size_t row_start_index = model->row_ringbuffer[2] * ROW_BUFFER_LENGTH; // Third char will determine the row number
+    size_t row_start_index =
+        model->row_ringbuffer[2] * ROW_BUFFER_LENGTH; // Third char will determine the row number
 
-    if (row_start_index > LAST_ROW_INDEX){ // Failsafe
+    if(row_start_index > LAST_ROW_INDEX) { // Failsafe
         row_start_index = 0;
     }
 
-    for (size_t i = 0; i < ROW_BUFFER_LENGTH; ++i) {
-        model->pixels[row_start_index + i] = model->row_ringbuffer[i+3]; // Writing the remaining 16 bytes into the frame buffer
+    for(size_t i = 0; i < ROW_BUFFER_LENGTH; ++i) {
+        model->pixels[row_start_index + i] =
+            model->row_ringbuffer[i + 3]; // Writing the remaining 16 bytes into the frame buffer
     }
 }
 
@@ -216,7 +230,8 @@ static int32_t gb_live_camera_worker(void* context) {
                 if(length > 0) {
                     with_view_model(
                         app->view,
-                        UartDumpModel * model, {
+                        UartDumpModel * model,
+                        {
                             for(size_t i = 0; i < length; i++) {
                                 process_ringbuffer(model, data[i]);
                             }
@@ -226,7 +241,8 @@ static int32_t gb_live_camera_worker(void* context) {
             } while(length > 0);
 
             notification_message(app->notification, &sequence_notification);
-            with_view_model(app->view, UartDumpModel * model, { UNUSED(model); }, true);
+            with_view_model(
+                app->view, UartDumpModel * model, { UNUSED(model); }, true);
         }
     }
 
@@ -282,7 +298,7 @@ static UartEchoApp* gb_live_camera_app_alloc() {
     furi_hal_uart_set_irq_cb(FuriHalUartIdLPUART1, gb_live_camera_on_irq_cb, app);
     // furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, gb_live_camera_on_irq_cb, app);
     furi_hal_power_enable_otg();
-    furi_delay_ms(1); 
+    furi_delay_ms(1);
     return app;
 }
 
@@ -321,7 +337,7 @@ int32_t gb_live_camera_app(void* p) {
     UartEchoApp* app = gb_live_camera_app_alloc();
     view_dispatcher_run(app->view_dispatcher);
     gb_live_camera_app_free(app);
-    
+
     furi_hal_power_disable_otg();
 
     return 0;
