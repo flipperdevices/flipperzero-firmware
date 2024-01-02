@@ -14,30 +14,29 @@ void drawElement(Canvas* canvas, const char* str, int x, int y, int width, int h
 
 void generate_calculator_layout(Canvas* canvas) {
     // display
-    canvas_draw_frame(canvas, 0, 0, 64, 49); // display frame
+    canvas_draw_frame(canvas, 0, 0, 64, 62); // display frame
     canvas_draw_frame(canvas, 2, 2, 60, 31); // output  frame
-    canvas_draw_frame(canvas, 2, 34, 60, 13); // input   frame
+    canvas_draw_frame(canvas, 2, 34, 60, 26); // input   frame
 
     // Horizonal and Vertical lines
-    drawElement(canvas, NULL, 0, 48, 64, 2, 0); // H line 1
-    drawElement(canvas, NULL, 0, 61, 64, 1, 0); // H line 2
+    // drawElement(canvas, NULL, 0, 48, 64, 2, 0);  // H line 1
+    drawElement(canvas, NULL, 0, 61, 64, 2, 0); // H line 2
     drawElement(canvas, NULL, 0, 73, 64, 2, 0); // H line 3
     drawElement(canvas, NULL, 0, 87, 64, 1, 0); // H line 4
     drawElement(canvas, NULL, 0, 100, 64, 1, 0); // H line 5
     drawElement(canvas, NULL, 0, 113, 64, 1, 0); // H line 6
     drawElement(canvas, NULL, 0, 126, 64, 2, 0); // H line 7
 
-    drawElement(canvas, NULL, 0, 50, 2, 80, 0); // V line 1
-    drawElement(canvas, NULL, 13, 73, 1, 55, 0); // V line 2
+    drawElement(canvas, NULL, 0, 61, 2, 65, 0); // V line 1
+    drawElement(canvas, NULL, 13, 61, 1, 65, 0); // V line 2
     drawElement(canvas, NULL, 25, 73, 1, 55, 0); // V line 3
     drawElement(canvas, NULL, 37, 73, 2, 55, 0); // V line 4
     drawElement(canvas, NULL, 50, 73, 1, 41, 0); // V line 5
-    drawElement(canvas, NULL, 62, 48, 2, 81, 0); // V line 6
+    drawElement(canvas, NULL, 62, 61, 2, 65, 0); // V line 6
 
     // MODE key and display
     // row 1 and 2
-    drawElement(canvas, "MODE", 19, 59, 0, 0, FontSecondary);
-    drawElement(canvas, "", 5, 38, 0, 0, FontSecondary);
+    drawElement(canvas, "", 4, 72, 0, 0, FontSecondary);
 
     // Keys
     // row 3
@@ -72,34 +71,37 @@ void draw_highlighted_cell(Canvas* canvas, short x, short y, short width, short 
 }
 
 void displayResult(Canvas* canvas, char* result, int x, int y) {
+    const int maxLength = 24; // Maximum length for splitting into lines
+    const int lineLength = 12; // Length of each line
+    const int lineSpacing = 9; // Reduced line spacing
+
     int length = strlen(result);
-    int lineSpacing = 9; // Reduced line spacing
 
-    if(length > 22) {
-        char line1[12];
-        strncpy(line1, result, 11);
-        line1[11] = '\0';
+    if(length > maxLength) {
+        char line1[lineLength + 1];
+        strncpy(line1, result, lineLength);
+        line1[lineLength] = '\0';
 
-        char line2[12];
-        strncpy(line2, result + 11, 11);
-        line2[11] = '\0';
+        char line2[lineLength + 1];
+        strncpy(line2, result + lineLength, lineLength);
+        line2[lineLength] = '\0';
 
-        const char* line3 = result + 22;
+        const char* line3 = result + (2 * lineLength);
 
         canvas_draw_str(canvas, x, y, line1);
         canvas_draw_str(canvas, x, y + lineSpacing, line2);
-        canvas_draw_str(canvas, x, y + 2 * lineSpacing, line3);
-    } else if(length > 11) {
-        char line1[12];
-        strncpy(line1, result, 11);
-        line1[11] = '\0';
+        canvas_draw_str(canvas, x, y + (2 * lineSpacing), line3);
+    } else if(length > lineLength) {
+        char line1[lineLength + 1];
+        strncpy(line1, result, lineLength);
+        line1[lineLength] = '\0';
 
-        const char* line2 = result + 11;
+        const char* line2 = result + lineLength;
 
         canvas_draw_str(canvas, x, y, line1);
         canvas_draw_str(canvas, x, y + lineSpacing, line2);
     } else {
-        canvas_draw_str(canvas, x, y, result); // Single line if 11 characters or less
+        canvas_draw_str(canvas, x, y, result); // Single line if lineLength characters or less
     }
 }
 
@@ -115,76 +117,97 @@ void calculator_draw_callback(Canvas* canvas, void* ctx) {
     generate_calculator_layout(canvas);
 
     char resultLabel[2 * MAX_TEXT_LENGTH]; // Buffer to hold the result label
+    char modeNumber[3]; // Buffer to hold the mode number
 
     // Check which mode is selected and prepare the label accordingly
-    if(calculator_state->mode == ModeHexToDec) {
-        snprintf(resultLabel, sizeof(resultLabel), "Dec: %s", calculator_state->decResult);
-    } else if(calculator_state->mode == ModeDecToBin) {
-        snprintf(resultLabel, sizeof(resultLabel), "Bin: %s", calculator_state->binaryResult);
-    } else if(calculator_state->mode == ModeDecToChar) {
-        snprintf(resultLabel, sizeof(resultLabel), "Charachter %s", calculator_state->charResult);
-    } else if(calculator_state->mode == ModeHexToBin) {
-        snprintf(resultLabel, sizeof(resultLabel), "Bin: %s", calculator_state->binaryResult);
-    } else if(calculator_state->mode == ModeDecToHex) {
-        snprintf(resultLabel, sizeof(resultLabel), "Hex: %s", calculator_state->hexResult);
-    } else if(calculator_state->mode == ModeBinToDec) {
-        snprintf(resultLabel, sizeof(resultLabel), "Dec: %s", calculator_state->decResult);
-    } else if(calculator_state->mode == ModeBinToHex) {
-        snprintf(resultLabel, sizeof(resultLabel), "Hex: %s", calculator_state->hexResult);
-    } else {
+    switch(calculator_state->mode) {
+    case ModeDecToBin:
+        snprintf(resultLabel, sizeof(resultLabel), "> %s", calculator_state->binaryResult);
+        strcpy(modeNumber, "1");
+        break;
+    case ModeDecToHex:
+        snprintf(resultLabel, sizeof(resultLabel), "> %s", calculator_state->hexResult);
+        strcpy(modeNumber, "2");
+        break;
+    case ModeDecToChar:
+        snprintf(resultLabel, sizeof(resultLabel), "> %s", calculator_state->charResult);
+        strcpy(modeNumber, "3");
+        break;
+    case ModeHexToBin:
+        snprintf(resultLabel, sizeof(resultLabel), "> %s", calculator_state->binaryResult);
+        strcpy(modeNumber, "4");
+        break;
+    case ModeHexToDec:
+        snprintf(resultLabel, sizeof(resultLabel), "> %s", calculator_state->decResult);
+        strcpy(modeNumber, "5");
+        break;
+    case ModeBinToDec:
+        snprintf(resultLabel, sizeof(resultLabel), "> %s", calculator_state->decResult);
+        strcpy(modeNumber, "6");
+        break;
+    case ModeBinToHex:
+        snprintf(resultLabel, sizeof(resultLabel), "> %s", calculator_state->hexResult);
+        strcpy(modeNumber, "7");
+        break;
+    default:
         // If no mode is selected, you can display a default message or leave it empty
-        strncpy(resultLabel, "Click MODE Programmer Calc v0.8", sizeof(resultLabel));
+        strncpy(resultLabel, "Click [M]ODE_________   <PCalc v0.8>", sizeof(resultLabel));
+        strcpy(modeNumber, "M");
+        break;
     }
 
     // Display the result, splitting into two lines if necessary
     displayResult(canvas, resultLabel, 5, 12);
 
     // Draw new input with ">" label or mode selection prompt
-    char inputLabel[MAX_TEXT_LENGTH + 3]; // Adjusted size for "> "
-
-    snprintf(inputLabel, sizeof(inputLabel), "$> %s", calculator_state->text);
+    char inputLabel[MAX_TEXT_LENGTH + 1]; // Adjusted size for "> "
+    snprintf(inputLabel, sizeof(inputLabel), ">%s", calculator_state->text);
     canvas_draw_str(canvas, 5, 44, inputLabel);
+
+    // Replace "M" with the current mode number
+    canvas_draw_str(canvas, 5, 72, modeNumber); // Position where "M" was originally drawn
+
     // Define the cell dimensions for each row and column
-    const short cellDimensions[6][5][2] = {
+    const short cellDimensions[5][5][2] = {
         // {Width, Height} for each cell
         {{12, 13}, {0, 0}, {0, 0}, {0, 0}, {0, 0}}, // Row 1 (One column)
-        {{9, 13}, {0, 0}, {0, 0}, {0, 0}, {0, 0}}, // Row 2 (One column)
+        {{12, 13}, {12, 13}, {12, 13}, {12, 13}, {12, 13}}, // Row 2
         {{12, 13}, {12, 13}, {12, 13}, {12, 13}, {12, 13}}, // Row 3
         {{12, 13}, {12, 13}, {12, 13}, {12, 13}, {12, 13}}, // Row 4
-        {{12, 13}, {12, 13}, {12, 13}, {12, 13}, {12, 13}}, // Row 5
-        {{12, 13}, {12, 13}, {12, 13}, {24, 13}, {0, 0}}, // Row 6, with different width for column 4
+        {{12, 13}, {12, 13}, {12, 13}, {24, 13}, {0, 0}}, // Row 5, with different width for column 4
     };
 
     const char* modeStr = "";
     switch(calculator_state->mode) {
     case ModeDecToBin:
-        modeStr = " 1: Dec >> Bin";
+        modeStr = "Dec > Bin";
         break;
     case ModeDecToHex:
-        modeStr = "2: Dec >> Hex";
+        modeStr = "Dec > Hex";
         break;
     case ModeDecToChar:
-        modeStr = "3: Dec >> Char";
+        modeStr = "Dec > Char";
         break;
     case ModeHexToBin:
-        modeStr = "4: Hex >> Bin";
+        modeStr = "Hex > Bin";
         break;
     case ModeHexToDec:
-        modeStr = "5: Hex >> Dec";
+        modeStr = "Hex > Dec";
         break;
     case ModeBinToDec:
-        modeStr = "6: Bin >> Dec";
+        modeStr = "Bin > Dec";
         break;
     case ModeBinToHex:
-        modeStr = "7: Bin >> Hex";
+        modeStr = "Bin > Hex";
         break;
     default:
-        modeStr = "      waiting ...";
+        modeStr = " waiting ...";
         break;
     }
-    canvas_draw_str(canvas, 4, 71, modeStr);
+
+    canvas_draw_str(canvas, 15, 72, modeStr);
     short cursorX = 2;
-    short cursorY = 48; // Starting Y position
+    short cursorY = 61; // Starting Y position
 
     for(int i = 0; i < calculator_state->position.y; i++) {
         cursorY += cellDimensions[i][0][1]; // Add the height of each previous row

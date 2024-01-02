@@ -107,16 +107,14 @@ bool esp_flasher_scene_quick_on_event(void* context, SceneManagerEvent event) {
             boot = APP_DATA_PATH("assets/marauder/WifidevS2/esp32_marauder.ino.bootloader.bin");
             part = APP_DATA_PATH("assets/marauder/esp32_marauder.ino.partitions.bin");
             app0 = APP_DATA_PATH("assets/marauder/boot_app0.bin");
-            firm = APP_DATA_PATH(
-                "assets/marauder/WifidevS2/esp32_marauder_v0_13_6_20231214_flipper.bin");
+            firm = APP_DATA_PATH("assets/marauder/WifidevS2/marauder_v0_13_6_flipper.bin");
             enter_bootloader = true;
             break;
         case QuickDevproWroomMarauder:
             boot = APP_DATA_PATH("assets/marauder/DevproWroom/esp32_marauder.ino.bootloader.bin");
             part = APP_DATA_PATH("assets/marauder/esp32_marauder.ino.partitions.bin");
             app0 = APP_DATA_PATH("assets/marauder/boot_app0.bin");
-            firm = APP_DATA_PATH(
-                "assets/marauder/DevproWroom/esp32_marauder_v0_13_6_20231214_marauder_dev_board_pro.bin");
+            firm = APP_DATA_PATH("assets/marauder/DevproWroom/marauder_v0_13_6_devboardpro.bin");
             break;
         default:
             flash = false;
