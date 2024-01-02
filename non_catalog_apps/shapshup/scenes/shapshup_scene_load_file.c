@@ -1,4 +1,5 @@
 #include "../shapshup_i.h"
+#include <shapshup_icons.h>
 
 #define TAG "ShapShupSceneLoadFile"
 
