@@ -34,11 +34,26 @@ const Icon* tile_to_icon(uint8_t tile, bool gameOver) {
 
 void gray_canvas(Canvas* const canvas) {
     canvas_set_color(canvas, ColorWhite);
-    for(int x = 0; x < 128; x += 2) {
-        for(int y = 0; y < 64; y++) {
+    for(int x = 0; x < GUI_DISPLAY_WIDTH; x += 2) {
+        for(int y = 0; y < GUI_DISPLAY_HEIGHT; y++) {
             canvas_draw_dot(canvas, x + (y % 2 == 1 ? 0 : 1), y);
         }
     }
+}
+
+//-----------------------------------------------------------------------------
+
+void my_canvas_frame_set(
+    Canvas* canvas,
+    uint8_t offset_x,
+    uint8_t offset_y,
+    uint8_t width,
+    uint8_t height) {
+    furi_assert(canvas);
+    canvas->offset_x = offset_x;
+    canvas->offset_y = offset_y;
+    canvas->width = width;
+    canvas->height = height;
 }
 
 //-----------------------------------------------------------------------------
@@ -49,6 +64,14 @@ void mask_canvas(Canvas* const canvas, uint8_t sx, uint8_t sy, uint8_t w, uint8_
         for(uint8_t y = sy; y < sy + h; y++) {
             canvas_draw_dot(canvas, x + (y % 2 == 1 ? 0 : 1), y);
         }
+    }
+}
+
+//-----------------------------------------------------------------------------
+
+void canvas_draw_hline_dotted(Canvas* const canvas, uint8_t x, uint8_t y, uint8_t w) {
+    for(uint8_t i = x; i < x + w; i += 2) {
+        canvas_draw_dot(canvas, i, y);
     }
 }
 
@@ -193,7 +216,7 @@ void elements_multiline_text_aligned_limited(
 
 void hint_pill_single(Canvas* canvas, const char* str) {
     canvas_draw_rframe(canvas, 82, 53, 46, 11, 3);
-    canvas_set_custom_u8g2_font(canvas, u8g2_font_micro_tr);
+    canvas_set_custom_u8g2_font(canvas, app_u8g2_font_micro_tr);
     canvas_draw_str_aligned(canvas, 104, 56, AlignCenter, AlignTop, str);
 }
 
@@ -204,7 +227,7 @@ void hint_pill_double(Canvas* canvas, const char* str1, const char* str2, const 
     canvas_draw_rbox(canvas, 82, 49, 46, 15, 3);
     canvas_set_color(canvas, ColorWhite);
     canvas_draw_icon(canvas, 86, 51, icon);
-    canvas_set_custom_u8g2_font(canvas, u8g2_font_micro_tr);
+    canvas_set_custom_u8g2_font(canvas, app_u8g2_font_micro_tr);
     canvas_draw_str_aligned(canvas, 110, 51, AlignCenter, AlignTop, str1);
     canvas_draw_str_aligned(canvas, 110, 57, AlignCenter, AlignTop, str2);
 }
@@ -227,7 +250,7 @@ void menu_pill(
     uint8_t menu_pad_h = 8;
     uint8_t menu_total_w = 114;
 
-    uint8_t menu_off_x = (128 - menu_total_w) / 2;
+    uint8_t menu_off_x = (GUI_DISPLAY_WIDTH - menu_total_w) / 2;
     uint8_t col = no % 2;
     uint8_t row = no / 2;
 
@@ -258,23 +281,47 @@ void menu_pill(
 
 //-----------------------------------------------------------------------------
 
-void main_menu_pill(Canvas* canvas, uint8_t y, uint8_t w, bool selected, const char* label) {
+void main_menu_indi(Canvas* canvas, uint8_t x, uint8_t y, uint8_t xicon, const Icon* icon) {
+    const uint8_t height = 12;
+    const uint8_t width = 13;
+
+    canvas_set_color(canvas, ColorBlack);
+    canvas_draw_rbox(canvas, x + 1, y + 1, width, height, 2);
+    canvas_set_color(canvas, ColorWhite);
+    canvas_draw_rbox(canvas, x, y, width, height, 2);
+    canvas_set_color(canvas, ColorBlack);
+    canvas_draw_rframe(canvas, x, y, width, height, 2);
+
+    canvas_draw_icon(canvas, x + 4 + xicon, y + 2, icon);
+}
+
+//-----------------------------------------------------------------------------
+
+void main_menu_pill(
+    Canvas* canvas,
+    uint8_t y,
+    uint8_t w,
+    bool selected,
+    bool leftIni,
+    bool rightIndi,
+    const char* label) {
     uint8_t height = 12;
 
-    uint8_t x = (128 - w) / 2;
+    uint8_t x = (GUI_DISPLAY_WIDTH - w) / 2;
     uint8_t origin_x = x + (w / 2);
 
-    canvas_set_color(canvas, selected ? ColorWhite : ColorBlack);
+    canvas_set_color(canvas, ColorBlack);
     canvas_draw_rbox(canvas, x + 1, y + 1, w, height, 2);
     canvas_set_color(canvas, selected ? ColorBlack : ColorWhite);
     canvas_draw_rbox(canvas, x, y, w, height, 2);
     canvas_set_color(canvas, ColorBlack);
     canvas_draw_rframe(canvas, x, y, w, height, 2);
     canvas_set_color(canvas, selected ? ColorWhite : ColorBlack);
-    canvas_draw_str_aligned(
-        canvas, origin_x, y + (height / 2), AlignCenter, AlignCenter, label);
+    canvas_draw_str_aligned(canvas, origin_x, y + (height / 2), AlignCenter, AlignCenter, label);
 
-    //canvas_draw_icon(canvas, x + 3, y + 2, icon);
+    canvas_set_color(canvas, ColorBlack);
+    if(leftIni) canvas_draw_icon(canvas, x - 8, y + 3, &I_ButtonLeft_4x7);
+    if(rightIndi) canvas_draw_icon(canvas, x + w + 5, y + 3, &I_ButtonRight_4x7);
 }
 
 //-----------------------------------------------------------------------------
@@ -320,8 +367,8 @@ void panel_histogram(Canvas* canvas, const char* bricks, const uint8_t* values) 
     const uint8_t w = (columns * HIST_BRICK_W) + ((columns - 1) * HIST_SPC_X) + (2 * HIST_PAD_X);
     const uint8_t h = (rows * HIST_BRICK_H) + ((rows - 1) * HIST_SPC_Y) + (2 * HIST_PAD_Y);
 
-    const uint8_t x = (128 - w) / 2;
-    const uint8_t y = (64 - h) / 2;
+    const uint8_t x = (GUI_DISPLAY_WIDTH - w) / 2;
+    const uint8_t y = (GUI_DISPLAY_HEIGHT - h) / 2;
 
     canvas_set_color(canvas, ColorBlack);
     canvas_draw_rbox(canvas, x + 2, y + 2, w, h, 4);

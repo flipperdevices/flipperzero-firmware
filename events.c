@@ -8,23 +8,15 @@ void events_for_selection(InputEvent* event, Game* game) {
     if((event->type == InputTypePress) || (event->type == InputTypeRepeat)) {
         switch(event->key) {
         case InputKeyLeft:
-            //current_level--;
-            //refresh_level();
             find_movable_left(&game->movables, &game->current_movable);
             break;
         case InputKeyRight:
-            //current_level++;
-            //refresh_level();
             find_movable_right(&game->movables, &game->current_movable);
             break;
         case InputKeyUp:
-            //image_position.y -= 2;
-            //whiteB = !whiteB;
             find_movable_up(&game->movables, &game->current_movable);
             break;
         case InputKeyDown:
-            //image_position.y += 2;
-            //whiteB = !whiteB;
             find_movable_down(&game->movables, &game->current_movable);
             break;
         case InputKeyOk:
@@ -33,17 +25,6 @@ void events_for_selection(InputEvent* event, Game* game) {
         case InputKeyBack:
             game->menu_paused_pos = (game->undo_movable == MOVABLE_NOT_FOUND) ? 4 : 0;
             game->state = PAUSED;
-            break;
-        default:
-            break;
-        }
-    }
-
-    if(event->type == InputTypeLong) {
-        switch(event->key) {
-        case InputKeyOk:
-            game->current_level++;
-            refresh_level(game);
             break;
         default:
             break;
@@ -118,11 +99,12 @@ void events_for_paused(InputEvent* event, Game* game) {
                 refresh_level(game);
                 break;
             case 2: // menu
+                game->main_menu_mode = CUSTOM;
+                game->main_menu_btn = MODE_BTN;
                 game->state = MAIN_MENU;
                 break;
             case 3: // skip
-                game->current_level++;
-                refresh_level(game);
+                start_game_at_level(game, game->currentLevel + 1);
                 break;
             case 4: // count
                 game->state = HISTOGRAM;
@@ -150,6 +132,7 @@ void events_for_game_over(InputEvent* event, Game* game) {
             undo(game);
             break;
         case InputKeyOk:
+            game->main_menu_mode = NEW_GAME;
             game->state = MAIN_MENU;
             break;
         case InputKeyLeft:
@@ -174,11 +157,11 @@ void events_for_level_finished(InputEvent* event, Game* game) {
         case InputKeyUp:
         case InputKeyDown:
         case InputKeyBack:
+            game->main_menu_mode = CONTINUE;
             game->state = MAIN_MENU;
             break;
         case InputKeyOk:
-            game->current_level++;
-            refresh_level(game);
+            start_game_at_level(game, game->currentLevel + 1);
             break;
         default:
             break;
@@ -213,19 +196,53 @@ void events_for_main_menu(InputEvent* event, Game* game) {
         case InputKeyOk:
             switch(game->main_menu_mode) {
             case NEW_GAME:
+                forget_continue(game);
+                FuriString* setName = furi_string_alloc_set(assetLevels[0]);
+                load_gameset_if_needed(game, setName);
+                furi_string_free(setName);
                 start_game_at_level(game, 0);
                 break;
             case CUSTOM:
-                start_game_at_level(game, game->current_level);
+                switch(game->main_menu_btn) {
+                case LEVELSET_BTN:
+                case LEVELNO_BTN:
+                    if(game->mainMenuInfo) {
+                        game->mainMenuInfo = false;
+                        load_gameset_if_needed(game, game->selectedSet);
+                        start_game_at_level(game, game->selectedLevel);
+                    } else {
+                        game->mainMenuInfo = true;
+                    }
+                    break;
+                default:
+                case MODE_BTN:
+                    load_gameset_if_needed(game, game->selectedSet);
+                    start_game_at_level(game, game->selectedLevel);
+                    break;
+                }
                 break;
             case CONTINUE:
             default:
-                start_game_at_level(game, game->current_level);
+                load_gameset_if_needed(game, game->continueSet);
+                start_game_at_level(game, game->continueLevel + 1);
                 break;
             }
             break;
         case InputKeyLeft:
-            if(game->main_menu_pos == 0) {
+            if(game->mainMenuInfo) return;
+            switch(game->main_menu_btn) {
+            case LEVELSET_BTN:
+                game->setPos = (game->setPos > 0) ? game->setPos - 1 : game->setCount - 1;
+                furi_string_set(game->selectedSet, assetLevels[game->setPos]);
+                load_gameset_if_needed(game, game->selectedSet);
+                game->selectedLevel = 0;
+                break;
+            case LEVELNO_BTN:
+                game->selectedLevel = (game->selectedLevel > 0) ? game->selectedLevel - 1 :
+                                                                  game->levelSet->maxLevel - 1;
+                break;
+            case MODE_BTN:
+            default:
                 if(game->main_menu_mode == CUSTOM) {
                     game->main_menu_mode = game->hasContinue ? CONTINUE : NEW_GAME;
                 } else if(game->main_menu_mode == CONTINUE) {
@@ -233,10 +250,26 @@ void events_for_main_menu(InputEvent* event, Game* game) {
                 } else {
                     game->main_menu_mode = CUSTOM;
                 }
+                break;
             }
             break;
         case InputKeyRight:
-            if(game->main_menu_pos == 0) {
+            if(game->mainMenuInfo) return;
+            switch(game->main_menu_btn) {
+            case LEVELSET_BTN:
+                game->setPos = (game->setPos < game->setCount - 1) ? game->setPos + 1 : 0;
+                furi_string_set(game->selectedSet, assetLevels[game->setPos]);
+                load_gameset_if_needed(game, game->selectedSet);
+                game->selectedLevel = 0;
+                break;
+            case LEVELNO_BTN:
+                game->selectedLevel = (game->selectedLevel < (game->levelSet->maxLevel - 1)) ?
+                                          game->selectedLevel + 1 :
+                                          0;
+                break;
+            case MODE_BTN:
+            default:
+
                 if(game->main_menu_mode == NEW_GAME) {
                     game->main_menu_mode = game->hasContinue ? CONTINUE : CUSTOM;
                 } else if(game->main_menu_mode == CONTINUE) {
@@ -247,18 +280,23 @@ void events_for_main_menu(InputEvent* event, Game* game) {
             }
             break;
         case InputKeyUp:
+            if(game->mainMenuInfo) return;
             if(game->main_menu_mode == CUSTOM) {
-                game->main_menu_pos =
-                    (game->main_menu_pos - 1 + MAIN_MENU_COUNT) % MAIN_MENU_COUNT;
+                game->main_menu_btn =
+                    (game->main_menu_btn - 1 + MAIN_MENU_COUNT) % MAIN_MENU_COUNT;
             }
             break;
         case InputKeyDown:
+            if(game->mainMenuInfo) return;
             if(game->main_menu_mode == CUSTOM) {
-                game->main_menu_pos =
-                    (game->main_menu_pos + 1 + MAIN_MENU_COUNT) % MAIN_MENU_COUNT;
+                game->main_menu_btn =
+                    (game->main_menu_btn + 1 + MAIN_MENU_COUNT) % MAIN_MENU_COUNT;
             }
             break;
         case InputKeyBack:
+            if(game->mainMenuInfo) {
+                game->mainMenuInfo = false;
+            }
         default:
             break;
         }

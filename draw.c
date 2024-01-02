@@ -95,7 +95,7 @@ void draw_intro(Canvas* canvas, Game* game, uint32_t frameNo) {
 
     if(game->move.frameNo > 7) {
         canvas_set_color(canvas, ColorXOR);
-        canvas_draw_box(canvas, 0, 0, 128, 64);
+        canvas_draw_box(canvas, 0, 0, GUI_DISPLAY_WIDTH, GUI_DISPLAY_HEIGHT);
         canvas_draw_icon(canvas, 0, 0, &I_logo_vexed_big);
     }
 
@@ -109,56 +109,190 @@ void draw_intro(Canvas* canvas, Game* game, uint32_t frameNo) {
     }
 }
 
-void draw_main_menu(Canvas* canvas, Game* game) {
+void draw_set_info(Canvas* canvas, Game* game) {
+    const uint8_t y = 2;
+    const uint8_t w = 118;
+    const uint8_t h = 46;
+    const uint8_t x = (GUI_DISPLAY_WIDTH - w) / 2;
+
+    canvas_set_color(canvas, ColorBlack);
+    canvas_draw_rbox(canvas, x + 1, y + 1, w, h, 3);
+    canvas_set_color(canvas, ColorWhite);
+    canvas_draw_rbox(canvas, x, y, w, h, 3);
+    canvas_set_color(canvas, ColorBlack);
+    canvas_draw_rframe(canvas, x, y, w, h, 3);
+
+    canvas_set_color(canvas, ColorBlack);
+    canvas_draw_rbox(canvas, x, y, w, 11, 3);
+    canvas_draw_box(canvas, x, y + 3, w, 11 - 3);
+
+    canvas_set_color(canvas, ColorWhite);
+    canvas_set_custom_u8g2_font(canvas, app_u8g2_font_squeezed_r7_tr);
+    canvas_draw_str_aligned(
+        canvas,
+        GUI_DISPLAY_WIDTH / 2,
+        y + 2,
+        AlignCenter,
+        AlignTop,
+        furi_string_get_cstr(game->levelSet->title));
+
+    canvas_set_custom_u8g2_font(canvas, app_u8g2_font_squeezed_r6_tr);
+    canvas_set_color(canvas, ColorBlack);
+    canvas_draw_str_aligned(
+        canvas,
+        GUI_DISPLAY_WIDTH / 2,
+        y + 12,
+        AlignCenter,
+        AlignTop,
+        furi_string_get_cstr(game->levelSet->author));
+
+    canvas_draw_str_aligned(
+        canvas,
+        GUI_DISPLAY_WIDTH / 2,
+        y + 20,
+        AlignCenter,
+        AlignTop,
+        furi_string_get_cstr(game->levelSet->url));
+
+    canvas_draw_hline_dotted(canvas, x, y + 28, w);
+
+    my_canvas_frame_set(canvas, x + 3, y + 28, w - 6, h - 29 - 1);
+    elements_multiline_text_aligned_limited(
+        canvas,
+        canvas->width / 2,
+        canvas->height / 2,
+        2,
+        AlignCenter,
+        AlignCenter,
+        furi_string_get_cstr(game->levelSet->description));
+    my_canvas_frame_set(canvas, 0, 0, GUI_DISPLAY_WIDTH, GUI_DISPLAY_HEIGHT);
+}
+
+void draw_level_info(Canvas* canvas, Game* game) {
+    // TODO: instead, last record for level
+    draw_set_info(canvas, game);
+}
+
+void draw_main_menu_new_game(Canvas* canvas, Game* game) {
+    canvas_set_color(canvas, ColorBlack);
+    canvas_set_font(canvas, FontSecondary);
+    elements_button_center(canvas, "Start");
+    if(game->hasContinue) {
+        canvas_set_custom_u8g2_font(canvas, app_u8g2_font_squeezed_r7_tr);
+        elements_button_right(canvas, "Continue");
+        canvas_draw_str_aligned(
+            canvas,
+            GUI_DISPLAY_CENTER_X,
+            37,
+            AlignCenter,
+            AlignTop,
+            "!!! Forgets all progress and scores !!!");
+    }
+}
+
+void draw_main_menu_continue(Canvas* canvas, Game* game) {
+    int bufSize = 80;
+    char buf[bufSize];
+    bool hasNext = (game->continueLevel + 1) < game->levelSet->maxLevel;
+
+    canvas_set_color(canvas, ColorBlack);
+    canvas_set_font(canvas, FontSecondary);
+    elements_button_left(canvas, "New");
+    elements_button_center(canvas, "Start");
+    canvas_set_custom_u8g2_font(canvas, app_u8g2_font_squeezed_r7_tr);
+    elements_button_right(canvas, "Custom");
+
+    memset(buf, 0, bufSize);
+    if(hasNext) {
+        snprintf(
+            buf,
+            sizeof(buf),
+            "%s #%d",
+            furi_string_get_cstr(game->continueSet),
+            game->continueLevel + 2);
+    } else {
+        snprintf(buf, sizeof(buf), "%s finished!", furi_string_get_cstr(game->continueSet));
+    }
+
+    canvas_draw_str_aligned(canvas, GUI_DISPLAY_CENTER_X, 37, AlignCenter, AlignTop, buf);
+}
+
+void draw_main_menu_custom(Canvas* canvas, Game* game) {
     int bufSize = 80;
     char buf[bufSize];
 
     canvas_set_color(canvas, ColorBlack);
+    canvas_set_custom_u8g2_font(canvas, app_u8g2_font_squeezed_r7_tr);
+    main_menu_pill(
+        canvas,
+        35,
+        90,
+        game->main_menu_btn == LEVELSET_BTN,
+        game->setPos > 0,
+        game->setPos < game->setCount - 1,
+        furi_string_get_cstr(game->selectedSet));
 
-    canvas_draw_line(canvas, 0, 6, 128, 6);
-    canvas_draw_line(canvas, 0, 9, 128, 9);
+    canvas_set_font(canvas, FontSecondary);
+    memset(buf, 0, bufSize);
+    snprintf(
+        buf, sizeof(buf), "Level: %u of %u", game->selectedLevel + 1, game->levelSet->maxLevel);
+    main_menu_pill(
+        canvas,
+        50,
+        75,
+        game->main_menu_btn == LEVELNO_BTN,
+        game->selectedLevel > 0,
+        game->selectedLevel < game->levelSet->maxLevel - 1,
+        buf);
+}
+
+void draw_main_menu(Canvas* canvas, Game* game) {
+    canvas_set_color(canvas, ColorBlack);
+
+    canvas_draw_line(canvas, 0, 6, GUI_DISPLAY_WIDTH, 6);
+    canvas_draw_line(canvas, 0, 9, GUI_DISPLAY_WIDTH, 9);
 
     canvas_set_color(canvas, ColorBlack);
-    canvas_draw_rbox(canvas, 64 - 16 - 6, 1, 32 + 12, 14, 3);
+    canvas_draw_rbox(canvas, GUI_DISPLAY_CENTER_X - 16 - 6, 1, 32 + 12, 14, 3);
     canvas_set_color(canvas, ColorWhite);
-    canvas_draw_icon(canvas, 64 - 16, 2, &I_logo_vexed_mini);
+    canvas_draw_icon(canvas, GUI_DISPLAY_CENTER_X - 16, 2, &I_logo_vexed_mini);
 
     canvas_set_font(canvas, FontSecondary);
     main_menu_pill(
-        canvas, 20, 90, game->main_menu_pos == 0, game_mode_label(game->main_menu_mode));
+        canvas,
+        20,
+        90,
+        game->main_menu_btn == MODE_BTN,
+        game->main_menu_mode != NEW_GAME,
+        game->main_menu_mode != CUSTOM,
+        game_mode_label(game->main_menu_mode));
 
-    if(game->main_menu_mode == CUSTOM) {
-        canvas_set_custom_u8g2_font(canvas, u8g2_font_squeezed_r7_tr);
-        main_menu_pill(
-            canvas, 35, 90, game->main_menu_pos == 1, furi_string_get_cstr(game->levelSet->title));
+    switch(game->main_menu_mode) {
+    case CONTINUE:
+        draw_main_menu_continue(canvas, game);
+        break;
+    case CUSTOM:
+        draw_main_menu_custom(canvas, game);
+        break;
+    case NEW_GAME:
+    default:
+        draw_main_menu_new_game(canvas, game);
+        break;
+    }
 
-        canvas_set_font(canvas, FontSecondary);
-        memset(buf, 0, bufSize);
-        snprintf(buf, sizeof(buf), "Level: %u", game->current_level + 1);
-        main_menu_pill(canvas, 50, 60, game->main_menu_pos == 2, buf);
-    } else {
+    if(game->mainMenuInfo) {
+        gray_canvas(canvas);
+
+        if(game->main_menu_btn == LEVELSET_BTN) {
+            draw_set_info(canvas, game);
+        } else if(game->main_menu_btn == LEVELNO_BTN) {
+            draw_level_info(canvas, game);
+        }
+
         canvas_set_color(canvas, ColorBlack);
         canvas_set_font(canvas, FontSecondary);
-
-        if(game->main_menu_mode == NEW_GAME) {
-            elements_button_center(canvas, "Start");
-            if(game->hasContinue) {
-                canvas_set_custom_u8g2_font(canvas, u8g2_font_squeezed_r7_tr);
-                elements_button_right(canvas, "Continue");
-            } else {
-                canvas_set_custom_u8g2_font(canvas, u8g2_font_squeezed_r7_tr);
-                elements_button_right(canvas, "Custom");
-            }
-        }
-
-        if(game->hasContinue) {
-            if(game->main_menu_mode == CONTINUE) {
-                elements_button_left(canvas, "New");
-                elements_button_center(canvas, "Start");
-                canvas_set_custom_u8g2_font(canvas, u8g2_font_squeezed_r6_tr);
-                elements_button_right(canvas, "Custom");
-            }
-        }
+        elements_button_center(canvas, "Start");
+        elements_button_right_back(canvas, "Back");
     }
 }
 
@@ -439,23 +573,23 @@ void draw_scores(Canvas* canvas, Game* game) {
 
     canvas_draw_rbox(canvas, 82, 1, 46, 17, 2);
 
-    canvas_set_custom_u8g2_font(canvas, u8g2_font_squeezed_r6_tr);
+    canvas_set_custom_u8g2_font(canvas, app_u8g2_font_squeezed_r6_tr);
     canvas_set_color(canvas, ColorWhite);
     elements_multiline_text_aligned_limited(
         canvas, 105, 9, 2, AlignCenter, AlignCenter, furi_string_get_cstr(game->levelData->title));
 
     canvas_set_color(canvas, ColorBlack);
     //canvas_set_font(canvas, FontPrimary);
-    canvas_set_custom_u8g2_font(canvas, u8g2_font_wedge_tr);
+    canvas_set_custom_u8g2_font(canvas, app_u8g2_font_wedge_tr);
     canvas_draw_str_aligned(canvas, 104, 20, AlignCenter, AlignTop, "Level");
-    canvas_set_custom_u8g2_font(canvas, u8g2_font_tom_thumb_4x6_mn);
+    canvas_set_custom_u8g2_font(canvas, app_u8g2_font_tom_thumb_4x6_mn);
     memset(buf, 0, bufSize);
-    snprintf(buf, sizeof(buf), "%u/%u", game->current_level + 1, game->levelSet->maxLevel);
+    snprintf(buf, sizeof(buf), "%u/%u", game->currentLevel + 1, game->levelSet->maxLevel);
     canvas_draw_str_aligned(canvas, 104, 27, AlignCenter, AlignTop, buf);
 
-    canvas_set_custom_u8g2_font(canvas, u8g2_font_wedge_tr);
+    canvas_set_custom_u8g2_font(canvas, app_u8g2_font_wedge_tr);
     canvas_draw_str_aligned(canvas, 104, 34, AlignCenter, AlignTop, "Moves");
-    canvas_set_custom_u8g2_font(canvas, u8g2_font_tom_thumb_4x6_mn);
+    canvas_set_custom_u8g2_font(canvas, app_u8g2_font_tom_thumb_4x6_mn);
     memset(buf, 0, bufSize);
     snprintf(buf, sizeof(buf), "%u/%u", game->gameMoves, game->levelData->gamePar);
     canvas_draw_str_aligned(canvas, 104, 41, AlignCenter, AlignTop, buf);
@@ -531,17 +665,16 @@ void draw_game_over(Canvas* canvas, GameOver gameOverReason) {
     canvas_draw_rframe(canvas, 14, 8, 100, 38, 4);
 
     canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str_aligned(canvas, 64, 11, AlignCenter, AlignTop, "Game Over");
+    canvas_draw_str_aligned(canvas, GUI_DISPLAY_CENTER_X, 11, AlignCenter, AlignTop, "Game Over");
 
     canvas_set_font(canvas, FontSecondary);
     if(gameOverReason == CANNOT_MOVE) {
-        canvas_draw_str_aligned(canvas, 64, 30, AlignCenter, AlignTop, "Cannot move");
+        canvas_draw_str_aligned(
+            canvas, GUI_DISPLAY_CENTER_X, 30, AlignCenter, AlignTop, "Cannot move");
     } else if(gameOverReason == BRICKS_LEFT) {
-        canvas_draw_str_aligned(canvas, 64, 30, AlignCenter, AlignTop, "Unpaired bricks left");
+        canvas_draw_str_aligned(
+            canvas, GUI_DISPLAY_CENTER_X, 30, AlignCenter, AlignTop, "Unpaired bricks left");
     }
-
-    //elements_button_center(canvas, "Menu");
-    //elements_button_right_back(canvas, "Undo");
 
     elements_button_left(canvas, "Retry");
     elements_button_center(canvas, "Menu");
@@ -551,6 +684,8 @@ void draw_game_over(Canvas* canvas, GameOver gameOverReason) {
 void draw_level_finished(Canvas* canvas, Game* game) {
     int bufSize = 80;
     char buf[bufSize];
+
+    bool hasNext = game->currentLevel < game->levelSet->maxLevel - 1;
 
     gray_canvas(canvas);
 
@@ -562,17 +697,28 @@ void draw_level_finished(Canvas* canvas, Game* game) {
     canvas_draw_rframe(canvas, 14, 6, 100, 40, 4);
 
     canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str_aligned(canvas, 64, 9, AlignCenter, AlignTop, "Level finished !");
+    canvas_draw_str_aligned(
+        canvas,
+        GUI_DISPLAY_CENTER_X,
+        9,
+        AlignCenter,
+        AlignTop,
+        hasNext ? "Level finished!" : "Pack finished!");
 
     canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str_aligned(canvas, 64, 24, AlignCenter, AlignTop, "Moves / Par");
+    canvas_draw_str_aligned(
+        canvas, GUI_DISPLAY_CENTER_X, 24, AlignCenter, AlignTop, "Moves / Par");
     memset(buf, 0, bufSize);
     snprintf(buf, sizeof(buf), "%u / %u", game->gameMoves, game->levelData->gamePar);
     canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str_aligned(canvas, 64, 42, AlignCenter, AlignBottom, buf);
+    canvas_draw_str_aligned(canvas, GUI_DISPLAY_CENTER_X, 42, AlignCenter, AlignBottom, buf);
 
     canvas_set_font(canvas, FontSecondary);
     //elements_button_left(canvas, "Replay");
-    elements_button_center(canvas, "Next");
-    elements_button_right_back(canvas, "Menu");
+    if(hasNext) {
+        elements_button_center(canvas, "Next");
+        elements_button_right_back(canvas, "Menu");
+    } else {
+        elements_button_center(canvas, "Menu");
+    }
 }

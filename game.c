@@ -8,7 +8,7 @@ Game* alloc_game_state(int* error) {
 
     game->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
     if(!game->mutex) {
-        FURI_LOG_E("Vexed", "cannot create mutex\r\n");
+        FURI_LOG_E(TAG, "cannot create mutex\r\n");
         free(game);
         *error = 255;
         return NULL;
@@ -18,16 +18,24 @@ Game* alloc_game_state(int* error) {
     game->levelSet = alloc_level_set();
     game->stats = alloc_stats();
 
-    game->current_level = 0; //4   16  21??? 22  32
+    game->currentLevel = 0; //4   16  21??? 22  32
     game->gameMoves = 0;
 
     game->undo_movable = MOVABLE_NOT_FOUND;
     game->current_movable = MOVABLE_NOT_FOUND;
     game->next_movable = MOVABLE_NOT_FOUND;
     game->menu_paused_pos = 0;
-    game->main_menu_pos = 0;
+
+    game->main_menu_btn = MODE_BTN;
     game->main_menu_mode = NEW_GAME;
+    game->mainMenuInfo = false;
     game->hasContinue = false;
+    game->selectedSet = furi_string_alloc_set(assetLevels[0]);
+    game->selectedLevel = 0;
+    game->continueSet = furi_string_alloc_set(assetLevels[0]);
+    game->continueLevel = 0;
+    game->setPos = 0;
+    game->setCount = 1;
 
     game->state = INTRO;
     game->gameOverReason = NOT_GAME_OVER;
@@ -45,6 +53,8 @@ void free_game_state(Game* game) {
     free_level_data(game->levelData);
     free_level_set(game->levelSet);
     free_stats(game->stats);
+    furi_string_free(game->selectedSet);
+    furi_string_free(game->continueSet);
     free(game);
 }
 
@@ -103,20 +113,74 @@ Neighbors find_neighbors(PlayGround* pg, uint8_t x, uint8_t y) {
 
 //-----------------------------------------------------------------------------
 
+void index_set(Game* game) {
+    const char* findSetId = furi_string_get_cstr(game->levelSet->id);
+    game->setCount = ASSETS_LEVELS_COUNT;
+    game->setPos = 0;
+    for(uint8_t i = 0; i < ASSETS_LEVELS_COUNT; i++) {
+        if(strcmp(findSetId, assetLevels[i]) == 0) {
+            game->setPos = i;
+            return;
+        }
+    }
+}
+
+//-----------------------------------------------------------------------------
+
 void initial_load_game(Game* game) {
-    furi_string_set(game->levelSet->file, APP_ASSETS_PATH("levels/01 Classic Levels.vxl"));
-    furi_string_set(game->levelSet->title, "01 Classic Levels");
     Storage* storage = furi_record_open(RECORD_STORAGE);
-    load_level_set(storage, furi_string_get_cstr(game->levelSet->file), game->levelSet);
+
+    game->hasContinue = load_last_level(game->continueSet, &game->continueLevel);
+
+    if(game->hasContinue) {
+        furi_string_set(game->selectedSet, game->continueSet);
+        game->selectedLevel = game->continueLevel + 1;
+        game->main_menu_mode = CONTINUE;
+    } else {
+        furi_string_set(game->selectedSet, assetLevels[0]);
+        game->selectedLevel = 0;
+        game->main_menu_mode = NEW_GAME;
+    }
+
+    load_level_set(storage, game->selectedSet, game->levelSet);
     furi_record_close(RECORD_STORAGE);
+    index_set(game);
+
+    if(game->selectedLevel > game->levelSet->maxLevel - 1) {
+        game->selectedLevel = game->levelSet->maxLevel - 1;
+    }
+
     randomize_bg(&game->bg);
 }
 
 //-----------------------------------------------------------------------------
 
+void load_gameset_if_needed(Game* game, FuriString* expectedSet) {
+    if(furi_string_cmp(expectedSet, game->levelSet->id) != 0) {
+        Storage* storage = furi_record_open(RECORD_STORAGE);
+        load_level_set(storage, expectedSet, game->levelSet);
+        furi_record_close(RECORD_STORAGE);
+    }
+    index_set(game);
+}
+
+//-----------------------------------------------------------------------------
+
 void start_game_at_level(Game* game, uint8_t levelNo) {
-    game->current_level = levelNo;
-    refresh_level(game);
+    if(levelNo < game->levelSet->maxLevel) {
+        game->currentLevel = levelNo;
+        refresh_level(game);
+    } else {
+        game->main_menu_btn = LEVELSET_BTN;
+        game->main_menu_mode = CUSTOM;
+
+        game->setPos = (game->setPos < game->setCount - 1) ? game->setPos + 1 : 0;
+        furi_string_set(game->selectedSet, assetLevels[game->setPos]);
+        load_gameset_if_needed(game, game->selectedSet);
+        game->selectedLevel = 0;
+
+        game->state = MAIN_MENU;
+    }
 }
 
 //-----------------------------------------------------------------------------
@@ -126,10 +190,14 @@ void refresh_level(Game* g) {
     clear_board(&g->board_undo);
     clear_board(&g->board_ani);
 
+    furi_string_set(g->selectedSet, g->levelSet->id);
+    furi_string_set(g->continueSet, g->levelSet->id);
+
+    g->selectedLevel = g->currentLevel;
+
     // Open storage
     Storage* storage = furi_record_open(RECORD_STORAGE);
-    if(load_level(
-           storage, furi_string_get_cstr(g->levelSet->file), g->current_level, g->levelData)) {
+    if(load_level(storage, g->levelSet->id, g->currentLevel, g->levelData)) {
         parse_level_notation(furi_string_get_cstr(g->levelData->board), &g->board_curr);
     }
     // Close storage
@@ -141,6 +209,27 @@ void refresh_level(Game* g) {
     g->undo_movable = MOVABLE_NOT_FOUND;
     g->gameMoves = 0;
     g->state = SELECT_BRICK;
+}
+
+//-----------------------------------------------------------------------------
+
+void level_finished(Game* g) {
+    g->hasContinue = true;
+    furi_string_set(g->selectedSet, g->levelSet->id);
+    furi_string_set(g->continueSet, g->levelSet->id);
+    g->continueLevel = g->currentLevel;
+    save_last_level(g->levelSet->id, g->currentLevel);
+}
+
+//-----------------------------------------------------------------------------
+
+void forget_continue(Game* game) {
+    game->hasContinue = false;
+    furi_string_set(game->selectedSet, assetLevels[0]);
+    furi_string_set(game->continueSet, assetLevels[0]);
+    game->selectedLevel = 0;
+    game->continueLevel = 0;
+    delete_progress();
 }
 
 //-----------------------------------------------------------------------------
@@ -301,6 +390,7 @@ void movement_stoped(Game* g) {
         g->state = GAME_OVER;
     } else if(is_level_finished(g->stats)) {
         g->state = LEVEL_FINISHED;
+        level_finished(g);
     } else {
         g->state = SELECT_BRICK;
     }

@@ -21,6 +21,12 @@ typedef struct {
 } Neighbors;
 
 typedef enum {
+    MODE_BTN = 0,
+    LEVELSET_BTN = 1,
+    LEVELNO_BTN = 2,
+} MenuButtons;
+
+typedef enum {
     MAIN_MENU,
     INTRO,
     SELECT_BRICK,
@@ -63,7 +69,7 @@ typedef struct {
     LevelData* levelData;
 
     // score
-    uint8_t current_level;
+    uint8_t currentLevel;
     unsigned int gameMoves;
 
     // board
@@ -80,9 +86,18 @@ typedef struct {
     uint8_t current_movable;
     uint8_t next_movable;
     uint8_t menu_paused_pos;
-    uint8_t main_menu_pos;
+
+    MenuButtons main_menu_btn;
     GameMode main_menu_mode;
+    bool mainMenuInfo;
     bool hasContinue;
+    FuriString* selectedSet;
+    uint8_t selectedLevel;
+    FuriString* continueSet;
+    uint8_t continueLevel;
+
+    uint8_t setPos;
+    uint8_t setCount;
 
     // game state
     GameOver gameOverReason;
@@ -106,8 +121,11 @@ Neighbors find_neighbors(PlayGround* pg, uint8_t x, uint8_t y);
 //-----------------------------------------------------------------------------
 
 void initial_load_game(Game* game);
+void load_gameset_if_needed(Game* game, FuriString* expectedSet);
 void start_game_at_level(Game* game, uint8_t levelNo);
 void refresh_level(Game* g);
+void level_finished(Game* g);
+void forget_continue(Game* g);
 
 //-----------------------------------------------------------------------------
 

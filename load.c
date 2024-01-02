@@ -8,6 +8,24 @@
 #include <toolbox/stream/stream.h>
 #include <toolbox/stream/file_stream.h>
 
+// i overwrite it because this: https://github.com/flipperdevices/flipperzero-firmware/blob/a7b60bf2a610e1a364d26a925f3713c08d16d49c/applications/services/storage/storage_processing.c#L530
+// gets me gui thread instead of app thread
+
+#define MY_APP_DATA_PATH(path)  \
+    "/ext/apps_data/game_vexed" \
+    "/" path
+
+char* assetLevels[] = {
+    "01 Classic Levels",
+    "02 Classic Levels 2",
+    "03 Childrens Pack",
+    "04 Confusion Pack",
+    "05 Impossible Pack",
+    "06 Panic Pack",
+    "07 Twister Levels",
+    "08 Variety Pack",
+    "09 Variety II Pack"};
+
 LevelData* alloc_level_data() {
     LevelData* ld = malloc(sizeof(LevelData));
     ld->solution = furi_string_alloc();
@@ -26,20 +44,42 @@ void free_level_data(LevelData* ld) {
 
 LevelSet* alloc_level_set() {
     LevelSet* ls = malloc(sizeof(LevelSet));
+    ls->id = furi_string_alloc();
     ls->title = furi_string_alloc();
     ls->author = furi_string_alloc();
     ls->description = furi_string_alloc();
-    ls->file = furi_string_alloc();
+    ls->url = furi_string_alloc();
     ls->maxLevel = 0;
     return ls;
 }
 
 void free_level_set(LevelSet* ls) {
+    furi_string_free(ls->id);
     furi_string_free(ls->title);
     furi_string_free(ls->author);
     furi_string_free(ls->description);
-    furi_string_free(ls->file);
+    furi_string_free(ls->url);
     free(ls);
+}
+
+bool level_set_id_to_path(Storage* storage, FuriString* levelSetId, size_t maxSize, char* path) {
+    memset(path, 0, maxSize);
+
+    snprintf(path, maxSize - 1, "/assets/levels/%s.vxl", furi_string_get_cstr(levelSetId));
+    if(storage_common_exists(storage, path)) {
+        return true;
+    }
+
+    snprintf(
+        path,
+        maxSize - 1,
+        "/ext/apps_data/game_vexed/extra_levels/%s.vxl",
+        furi_string_get_cstr(levelSetId));
+    if(storage_common_exists(storage, path)) {
+        return true;
+    }
+
+    return false;
 }
 
 int load_level_row(uint8_t* pb, const char* psz, const char* pszMax) {
@@ -146,13 +186,20 @@ bool parse_level_notation(const char* pszLevel, PlayGround* level) {
     return true;
 }
 
-bool load_level(Storage* storage, const char* path, int level, LevelData* levelData) {
+bool load_level(Storage* storage, FuriString* levelSetId, int level, LevelData* levelData) {
     Stream* stream = file_stream_alloc(storage);
     FuriString* line = furi_string_alloc();
     FuriString* value;
     bool loaded = false;
 
-    if(file_stream_open(stream, path, FSAM_READ, FSOM_OPEN_EXISTING)) {
+    size_t bufSize = 512;
+    char filePath[bufSize];
+
+    if(!level_set_id_to_path(storage, levelSetId, bufSize, filePath)) {
+        FURI_LOG_E(TAG, "LEVEL NOT FOUND! \"%s\"", filePath);
+    }
+
+    if(file_stream_open(stream, filePath, FSAM_READ, FSOM_OPEN_EXISTING)) {
         while(stream_read_line(stream, line)) {
             if(furi_string_start_with(line, "#")) continue;
             size_t level_no_sep = furi_string_search_char(line, ';', 0);
@@ -211,9 +258,206 @@ bool load_level(Storage* storage, const char* path, int level, LevelData* levelD
     }
 }
 
-bool load_level_set(Storage* storage, const char* path, LevelSet* levelSet) {
-    UNUSED(storage);
-    UNUSED(path);
-    levelSet->maxLevel = 20;
+bool load_level_set(Storage* storage, FuriString* levelSetId, LevelSet* levelSet) {
+    Stream* stream = file_stream_alloc(storage);
+    FuriString* line = furi_string_alloc();
+    FuriString* value;
+    bool loaded = false;
+    uint8_t levelCount = 0;
+    size_t sep, level_no_sep;
+
+    size_t bufSize = 512;
+    char filePath[bufSize];
+
+    if(!level_set_id_to_path(storage, levelSetId, bufSize, filePath)) {
+        FURI_LOG_E(TAG, "LEVEL NOT FOUND! \"%s\"", filePath);
+    }
+
+    furi_string_set(levelSet->id, levelSetId);
+    furi_string_set(levelSet->title, levelSetId);
+
+    if(file_stream_open(stream, filePath, FSAM_READ, FSOM_OPEN_EXISTING)) {
+        while(stream_read_line(stream, line)) {
+            if(furi_string_start_with(line, "#")) {
+                //size_t url_sep = furi_string_search(line, "URL:", 1);
+                //size_t descr_sep = furi_string_search(line, "Description:", 1);
+
+                sep = furi_string_search(line, "Author:", 1);
+                if(sep != FURI_STRING_FAILURE) {
+                    value = furi_string_alloc_set(line);
+                    furi_string_right(value, sep + 7);
+                    furi_string_trim(value, " \t\n\r");
+                    FURI_LOG_D(TAG, "AUTHOR \"%s\"", furi_string_get_cstr(value));
+                    furi_string_set(levelSet->author, value);
+                    furi_string_free(value);
+                }
+
+                sep = furi_string_search(line, "URL:", 1);
+                if(sep != FURI_STRING_FAILURE) {
+                    value = furi_string_alloc_set(line);
+                    furi_string_right(value, sep + 4);
+                    furi_string_trim(value, " \t\n\r");
+                    FURI_LOG_D(TAG, "URL \"%s\"", furi_string_get_cstr(value));
+                    furi_string_set(levelSet->url, value);
+                    furi_string_free(value);
+                }
+
+                sep = furi_string_search(line, "Description:", 1);
+                if(sep != FURI_STRING_FAILURE) {
+                    value = furi_string_alloc_set(line);
+                    furi_string_right(value, sep + 12);
+                    furi_string_trim(value, " \t\n\r");
+                    FURI_LOG_D(TAG, "DESCR \"%s\"", furi_string_get_cstr(value));
+                    furi_string_set(levelSet->description, value);
+                    furi_string_free(value);
+                }
+
+                continue;
+            }
+
+            level_no_sep = furi_string_search_char(line, ';', 0);
+            value = furi_string_alloc_set(line);
+            furi_string_left(value, level_no_sep);
+            const char* value_raw = furi_string_get_cstr(value);
+            int levelNo = atoi(value_raw);
+            if(levelNo < 256) {
+                levelCount++;
+            }
+            furi_string_free(value);
+        }
+
+        furi_string_free(line);
+        file_stream_close(stream);
+        stream_free(stream);
+
+        levelSet->maxLevel = levelCount;
+
+        return loaded;
+    } else {
+        return false;
+    }
+}
+
+void load_all(File* f, FuriString* target) {
+    size_t bufSize = 256;
+    size_t bytesRead;
+    char buf[bufSize];
+
+    do {
+        memset(buf, 0, sizeof(buf));
+        bytesRead = storage_file_read(f, buf, bufSize - 1);
+        FURI_LOG_D(TAG, "Bufer read: %s", buf);
+        if(bytesRead > 0) {
+            furi_string_cat_str(target, buf);
+            FURI_LOG_D(TAG, "Furi: %s", furi_string_get_cstr(target));
+        }
+    } while(bytesRead > 0);
+}
+
+bool load_last_level(FuriString* lastLevelSetId, uint8_t* levelNo) {
+    FuriString* fbuf = furi_string_alloc();
+    size_t pos;
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    File* file = storage_file_alloc(storage);
+    bool loaded = false;
+
+    if(!storage_common_exists(storage, MY_APP_DATA_PATH("scores/game.txt"))) {
+        FURI_LOG_I(TAG, "No scores file (yet)");
+        return false;
+    }
+
+    if(!storage_file_open(
+           file, MY_APP_DATA_PATH("scores/game.txt"), FSAM_READ, FSOM_OPEN_EXISTING)) {
+        FURI_LOG_E(TAG, "Failed to open file");
+        return false;
+    }
+
+    load_all(file, fbuf);
+    FURI_LOG_T(TAG, "Loaded scores: %s", furi_string_get_cstr(fbuf));
+
+    if(furi_string_size(fbuf) > 0) {
+        pos = furi_string_search_char(fbuf, '\n', 0);
+        if(pos == FURI_STRING_FAILURE) {
+            FURI_LOG_E(TAG, "ERROR - no file ID in scores file");
+        } else {
+            furi_string_set_n(lastLevelSetId, fbuf, 0, pos);
+            furi_string_trim(lastLevelSetId);
+            furi_string_right(fbuf, pos + 1);
+
+            FURI_LOG_T(
+                TAG,
+                "AFTER LEVEL LOAD: [%s] [%s]",
+                furi_string_get_cstr(lastLevelSetId),
+                furi_string_get_cstr(fbuf));
+
+            pos = furi_string_search_char(fbuf, '\n', 0);
+            if(pos == FURI_STRING_FAILURE) {
+                FURI_LOG_E(TAG, "ERROR - no level NO in scores file");
+            } else {
+                furi_string_left(fbuf, pos);
+                int levelRead = atoi(furi_string_get_cstr(fbuf));
+                *levelNo = (uint8_t)(levelRead % 256);
+                loaded = true;
+            }
+        }
+    }
+
+    storage_file_close(file);
+    storage_file_free(file);
+    furi_record_close(RECORD_STORAGE);
+    furi_string_free(fbuf);
+    return loaded;
+}
+
+bool save_last_level(FuriString* lastLevelSetId, uint8_t levelNo) {
+    const int bufSize = 256;
+    char buf[bufSize];
+    memset(buf, 0, bufSize);
+    snprintf(buf, sizeof(buf), "%s\n%u\n", furi_string_get_cstr(lastLevelSetId), levelNo);
+
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    File* file = storage_file_alloc(storage);
+
+    if(!storage_common_exists(storage, "/ext/apps_data")) {
+        if(storage_common_mkdir(storage, "/ext/apps_data/") != FSE_OK) {
+            FURI_LOG_E(TAG, "Cannot created /ext/apps_data/ dir");
+            return false;
+        }
+    }
+
+    if(!storage_common_exists(storage, "/ext/apps_data/game_vexed")) {
+        if(storage_common_mkdir(storage, "/ext/apps_data/game_vexed") != FSE_OK) {
+            FURI_LOG_E(TAG, "Cannot created /ext/apps_data/game_vexed dir");
+            return false;
+        }
+    }
+
+    if(!storage_common_exists(storage, MY_APP_DATA_PATH("scores"))) {
+        if(storage_common_mkdir(storage, MY_APP_DATA_PATH("scores")) != FSE_OK) {
+            FURI_LOG_E(TAG, "Cannot created scored data dir");
+            return false;
+        }
+    }
+
+    if(!storage_file_open(
+           file, MY_APP_DATA_PATH("scores/game.txt"), FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
+        FURI_LOG_E(TAG, "Failed to open file");
+        return false;
+    }
+    if(!storage_file_write(file, buf, strlen(buf))) {
+        FURI_LOG_E(TAG, "Failed to write to file");
+        return false;
+    }
+    storage_file_close(file);
+    storage_file_free(file);
+    furi_record_close(RECORD_STORAGE);
     return true;
+}
+
+void delete_progress() {
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    if(storage_common_exists(storage, MY_APP_DATA_PATH("scores/game.txt"))) {
+        storage_common_remove(storage, MY_APP_DATA_PATH("scores/game.txt"));
+    }
+    furi_record_close(RECORD_STORAGE);
 }

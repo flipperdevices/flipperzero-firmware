@@ -4,6 +4,8 @@
 
 void draw_app(Canvas* canvas, Game* game);
 void draw_intro(Canvas* canvas, Game* game, uint32_t frameNo);
+void draw_set_info(Canvas* canvas, Game* game);
+void draw_level_info(Canvas* canvas, Game* game);
 void draw_main_menu(Canvas* canvas, Game* game);
 void draw_playground(Canvas* canvas, Game* game);
 void draw_movable(Canvas* canvas, Game* game, uint32_t frameNo);
