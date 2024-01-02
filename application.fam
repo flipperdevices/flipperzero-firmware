@@ -11,6 +11,6 @@ App(
     fap_category="Tools",
     fap_author="@armixz",
     fap_weburl="https://github.com/armixz/Flipper-Zero-Programmer-Calculator",
-    fap_version="0.8",
+    fap_version="0.9",
     fap_description="Calculator, for Programmers!",
 )
