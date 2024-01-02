@@ -203,8 +203,55 @@ void draw_set_info(Canvas* canvas, Game* game) {
 }
 
 void draw_level_info(Canvas* canvas, Game* game) {
-    // TODO: instead, last record for level
-    draw_set_info(canvas, game);
+    int bufSize = 80;
+    char buf[bufSize];
+
+    memset(buf, 0, bufSize);
+    snprintf(
+        buf,
+        sizeof(buf),
+        "%s #%u",
+        furi_string_get_cstr(game->levelSet->title),
+        game->selectedLevel + 1);
+
+    const uint8_t x = (GUI_DISPLAY_WIDTH - 100) / 2;
+    const uint8_t y = dialog_frame(canvas, 100, 40, false, false, buf);
+
+    canvas_set_color(canvas, ColorBlack);
+    canvas_draw_vline_dotted(canvas, GUI_DISPLAY_CENTER_X, y, 30);
+
+    canvas_set_font(canvas, FontSecondary);
+    canvas_set_custom_u8g2_font(canvas, app_u8g2_font_squeezed_r7_tr);
+    canvas_draw_str_aligned(canvas, x + 25, y + 4, AlignCenter, AlignTop, "Moves/Par");
+    memset(buf, 0, bufSize);
+    if(game->levelSet->scores[game->selectedLevel].moves == 0) {
+        snprintf(
+            buf,
+            sizeof(buf),
+            "??? / %u",
+
+            game->levelSet->pars[game->selectedLevel]);
+    } else {
+        snprintf(
+            buf,
+            sizeof(buf),
+            "%u / %u",
+            game->levelSet->scores[game->selectedLevel].moves,
+            game->levelSet->pars[game->selectedLevel]);
+    }
+    canvas_set_font(canvas, FontPrimary);
+    canvas_draw_str_aligned(canvas, x + 25, y + 22, AlignCenter, AlignBottom, buf);
+
+    canvas_set_custom_u8g2_font(canvas, app_u8g2_font_squeezed_r7_tr);
+    canvas_draw_str_aligned(canvas, x + 75, y + 4, AlignCenter, AlignTop, "Score");
+    memset(buf, 0, bufSize);
+    if(game->score == 0) {
+        snprintf(buf, sizeof(buf), "on par");
+    } else {
+        snprintf(buf, sizeof(buf), "%+d", game->score);
+    }
+    canvas_set_font(canvas, FontPrimary);
+    canvas_draw_str_aligned(canvas, x + 75, y + 22, AlignCenter, AlignBottom, buf);
 }
 
 void draw_main_menu_new_game(Canvas* canvas, Game* game) {
@@ -227,7 +274,16 @@ void draw_main_menu_new_game(Canvas* canvas, Game* game) {
 void draw_main_menu_continue(Canvas* canvas, Game* game) {
     int bufSize = 80;
     char buf[bufSize];
+    int scorebufSize = 10;
+    char scorebufSet[scorebufSize];
     bool hasNext = (game->continueLevel + 1) < game->levelSet->maxLevel;
+    memset(scorebufSet, 0, scorebufSize);
+
+    if(game->score == 0) {
+        snprintf(scorebufSet, sizeof(scorebufSet), "par");
+    } else {
+        snprintf(scorebufSet, sizeof(scorebufSet), "%+d", game->score);
+    }
 
     canvas_set_color(canvas, ColorBlack);
     canvas_set_font(canvas, FontSecondary);
@@ -241,8 +297,9 @@ void draw_main_menu_continue(Canvas* canvas, Game* game) {
         snprintf(
             buf,
             sizeof(buf),
-            "%s #%d",
+            "%s (%s), #%d",
             furi_string_get_cstr(game->continueSet),
+            scorebufSet,
             game->continueLevel + 2);
     } else {
         snprintf(buf, sizeof(buf), "%s finished!", furi_string_get_cstr(game->continueSet));
