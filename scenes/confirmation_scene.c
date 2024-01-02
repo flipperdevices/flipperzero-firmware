@@ -52,6 +52,10 @@ bool minesweeper_scene_confirmation_screen_on_event(void* context, SceneManagerE
                 view_dispatcher_switch_to_view(app->view_dispatcher, MineSweeperLoadingView);
 
                 // Commit changes to actual buffer for settings data
+                app->settings_info.board_width  = app->t_settings_info.board_width;
+                app->settings_info.board_height = app->t_settings_info.board_height;
+                app->settings_info.difficulty   = app->t_settings_info.difficulty;
+                app->is_settings_changed = false;
 
                 // Reset the game board
                 mine_sweeper_game_screen_reset(app->game_screen);
