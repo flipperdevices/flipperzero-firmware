@@ -20,7 +20,7 @@ int r1 = 0, r2 = 0;
 void draw_app(Canvas* canvas, Game* game) {
     canvas_clear(canvas);
 
-    if(game->state == MAIN_MENU) {
+    if((game->state == MAIN_MENU) || (game->state == RESET_PROMPT)) {
         draw_main_menu(canvas, game);
     }
 
@@ -32,12 +32,19 @@ void draw_app(Canvas* canvas, Game* game) {
         draw_intro(canvas, game, frameNo);
     }
 
+    if(game->state == RESET_PROMPT) {
+        draw_reset_prompt(canvas, game);
+    }
+
     if(game->state >= SELECT_BRICK) {
         draw_playground(canvas, game);
 
         switch(game->state) {
         case SELECT_BRICK:
             draw_movable(canvas, game, frameNo);
+            break;
+        case SOLUTION_SELECT:
+            draw_direction_solution(canvas, game, frameNo);
             break;
         case SELECT_DIRECTION:
             draw_direction(canvas, game, frameNo);
@@ -64,6 +71,9 @@ void draw_app(Canvas* canvas, Game* game) {
             break;
         case HISTOGRAM:
             draw_histogram(canvas, game->stats);
+            break;
+        case SOLUTION_PROMPT:
+            draw_solution_prompt(canvas, game);
             break;
         case GAME_OVER:
             draw_game_over(canvas, game->gameOverReason);
@@ -402,7 +412,7 @@ void draw_playground(Canvas* canvas, Game* game) {
     Neighbors tiles;
     uint8_t tile, x, y, sx, sy, ex, ey;
 
-    bool whiteB = (game->state == LEVEL_FINISHED);
+    bool whiteB = (game->state == LEVEL_FINISHED) || (game->solutionMode);
 
     //canvas_set_color(canvas, ColorWhite);
     ///canvas_draw_box(
@@ -570,6 +580,41 @@ void draw_direction(Canvas* canvas, Game* game, uint32_t frameNo) {
     }
 }
 
+void draw_direction_solution(Canvas* canvas, Game* game, uint32_t frameNo) {
+    bool oddFrame = (frameNo % 20 < 10);
+    if(game->currentMovable != MOVABLE_NOT_FOUND) {
+        canvas_set_color(canvas, ColorBlack);
+        uint8_t x = coord_x(game->currentMovable);
+        uint8_t y = coord_y(game->currentMovable);
+        uint8_t how_movable = game->movables[y][x];
+
+        if((how_movable & MOVABLE_LEFT) != 0) {
+            canvas_draw_icon(
+                canvas, (x - 1) * TILE_SIZE + (oddFrame ? 0 : 1), y * TILE_SIZE, &I_arr_l);
+        }
+
+        if((how_movable & MOVABLE_RIGHT) != 0) {
+            canvas_draw_icon(
+                canvas, (x + 1) * TILE_SIZE + (oddFrame ? 1 : 0), y * TILE_SIZE, &I_mov_r);
+        }
+
+        canvas_draw_frame(
+            canvas, x * TILE_SIZE - 1, y * TILE_SIZE - 1, TILE_SIZE + 3, TILE_SIZE + 3);
+
+        if(oddFrame) {
+            canvas_draw_frame(
+                canvas, x * TILE_SIZE - 2, y * TILE_SIZE - 2, TILE_SIZE + 5, TILE_SIZE + 5);
+        } else {
+            canvas_draw_frame(canvas, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE + 1, TILE_SIZE + 1);
+        }
+    }
+
+    game->move.frameNo--;
+    if(game->move.frameNo == 0) {
+        solution_move(game);
+    }
+}
+
 void draw_ani_sides(Canvas* canvas, Game* game) {
     uint8_t tile, sx, sy, deltaX;
 
@@ -674,7 +719,6 @@ void draw_scores(Canvas* canvas, Game* game, uint32_t frameNo) {
     bool showScore = (frameNo % 200) < 100;
 
     canvas_set_color(canvas, ColorBlack);
-
     canvas_draw_rbox(canvas, 82, 1, 46, 17, 2);
 
     canvas_set_custom_u8g2_font(canvas, app_u8g2_font_squeezed_r6_tr);
@@ -682,36 +726,47 @@ void draw_scores(Canvas* canvas, Game* game, uint32_t frameNo) {
     elements_multiline_text_aligned_limited(
         canvas, 105, 9, 2, AlignCenter, AlignCenter, furi_string_get_cstr(game->levelData->title));
 
-    canvas_set_color(canvas, ColorBlack);
-    //canvas_set_font(canvas, FontPrimary);
-    canvas_set_custom_u8g2_font(canvas, app_u8g2_font_wedge_tr);
-    canvas_draw_str_aligned(canvas, 104, 20, AlignCenter, AlignTop, showScore ? "Score" : "Level");
-    canvas_set_custom_u8g2_font(canvas, app_u8g2_font_tom_thumb_4x6_mr);
-    memset(buf, 0, bufSize);
-    if(showScore) {
-        if(game->score == 0) {
-            snprintf(buf, sizeof(buf), "on par");
+    if(game->solutionMode) {
+        canvas_set_color(canvas, ColorBlack);
+        canvas_set_custom_u8g2_font(canvas, app_u8g2_font_wedge_tr);
+        canvas_draw_str_aligned(canvas, 104, 27, AlignCenter, AlignTop, "Solution");
+        canvas_set_custom_u8g2_font(canvas, app_u8g2_font_tom_thumb_4x6_mr);
+        memset(buf, 0, bufSize);
+        snprintf(buf, sizeof(buf), "%d of %d", game->solutionStep + 1, game->solutionTotal);
+        canvas_draw_str_aligned(canvas, 104, 34, AlignCenter, AlignTop, buf);
+    } else {
+        canvas_set_color(canvas, ColorBlack);
+        canvas_set_custom_u8g2_font(canvas, app_u8g2_font_wedge_tr);
+        canvas_draw_str_aligned(
+            canvas, 104, 20, AlignCenter, AlignTop, showScore ? "Score" : "Level");
+        canvas_set_custom_u8g2_font(canvas, app_u8g2_font_tom_thumb_4x6_mr);
+        memset(buf, 0, bufSize);
+        if(showScore) {
+            if(game->score == 0) {
+                snprintf(buf, sizeof(buf), "on par");
+            } else {
+                snprintf(buf, sizeof(buf), "%+d", game->score);
+            }
         } else {
-            snprintf(buf, sizeof(buf), "%+d", game->score);
+            snprintf(buf, sizeof(buf), "%u/%u", game->currentLevel + 1, game->levelSet->maxLevel);
         }
-    } else {
-        snprintf(buf, sizeof(buf), "%u/%u", game->currentLevel + 1, game->levelSet->maxLevel);
+
+        canvas_draw_str_aligned(canvas, 104, 27, AlignCenter, AlignTop, buf);
+
+        canvas_set_custom_u8g2_font(canvas, app_u8g2_font_wedge_tr);
+        canvas_draw_str_aligned(
+            canvas, 104, 34, AlignCenter, AlignTop, showScore ? "Best" : "Moves");
+        canvas_set_custom_u8g2_font(canvas, app_u8g2_font_tom_thumb_4x6_mr);
+        memset(buf, 0, bufSize);
+
+        if(showScore) {
+            snprintf(buf, sizeof(buf), "%s", game->parLabel);
+        } else {
+            snprintf(buf, sizeof(buf), "%u/%u", game->gameMoves, game->levelData->gamePar);
+        }
+
+        canvas_draw_str_aligned(canvas, 104, 41, AlignCenter, AlignTop, buf);
     }
-
-    canvas_draw_str_aligned(canvas, 104, 27, AlignCenter, AlignTop, buf);
-
-    canvas_set_custom_u8g2_font(canvas, app_u8g2_font_wedge_tr);
-    canvas_draw_str_aligned(canvas, 104, 34, AlignCenter, AlignTop, showScore ? "Best" : "Moves");
-    canvas_set_custom_u8g2_font(canvas, app_u8g2_font_tom_thumb_4x6_mr);
-    memset(buf, 0, bufSize);
-
-    if(showScore) {
-        snprintf(buf, sizeof(buf), "%s", game->parLabel);
-    } else {
-        snprintf(buf, sizeof(buf), "%u/%u", game->gameMoves, game->levelData->gamePar);
-    }
-
-    canvas_draw_str_aligned(canvas, 104, 41, AlignCenter, AlignTop, buf);
 }
 
 void draw_paused(Canvas* canvas, Game* game) {
@@ -757,16 +812,20 @@ void draw_playfield_hint(Canvas* canvas, Game* game) {
         hint_pill_double(canvas, "Move", "Cancel", &I_hint_3);
     }
 
-    if(game->state == MOVE_SIDES) {
-        hint_pill_single(canvas, "moving..");
-    }
+    if(game->state == SOLUTION_SELECT || game->solutionMode) {
+        hint_pill_double(canvas, "ANY", "CANCEL", &I_hint_4);
+    } else {
+        if(game->state == MOVE_SIDES) {
+            hint_pill_single(canvas, "moving..");
+        }
 
-    if(game->state == MOVE_GRAVITY) {
-        hint_pill_single(canvas, "falling..");
-    }
+        if(game->state == MOVE_GRAVITY) {
+            hint_pill_single(canvas, "falling..");
+        }
 
-    if(game->state == EXPLODE) {
-        hint_pill_single(canvas, "BOOM!");
+        if(game->state == EXPLODE) {
+            hint_pill_single(canvas, "BOOM!");
+        }
     }
 }
 
@@ -832,4 +891,51 @@ void draw_level_finished(Canvas* canvas, Game* game) {
     } else {
         elements_button_center(canvas, "Menu");
     }
+}
+
+void draw_solution_prompt(Canvas* canvas, Game* game) {
+    gray_canvas(canvas);
+
+    const uint8_t y = dialog_frame(canvas, 100, 40, true, false, "Show solution?");
+    const bool penalty = solution_will_have_penalty(game);
+
+    canvas_set_color(canvas, ColorBlack);
+    canvas_set_custom_u8g2_font(canvas, app_u8g2_font_squeezed_r7_tr);
+
+    if(penalty) {
+        canvas_draw_str_aligned(
+            canvas, GUI_DISPLAY_CENTER_X, y + 4, AlignCenter, AlignTop, "It has one-time penalty");
+        canvas_draw_str_aligned(
+            canvas, GUI_DISPLAY_CENTER_X, y + 15, AlignCenter, AlignTop, "of additional 5 point");
+    } else {
+        canvas_draw_str_aligned(
+            canvas, GUI_DISPLAY_CENTER_X, y + 4, AlignCenter, AlignTop, "Show solution?");
+    }
+
+    elements_button_center(canvas, "Show");
+    elements_button_right_back(canvas, "Resign");
+}
+
+void draw_reset_prompt(Canvas* canvas, Game* game) {
+    UNUSED(game);
+
+    gray_canvas(canvas);
+
+    const uint8_t y = dialog_frame(canvas, 110, 45, true, false, "Reset game?");
+
+    canvas_set_color(canvas, ColorBlack);
+    canvas_set_custom_u8g2_font(canvas, app_u8g2_font_squeezed_r7_tr);
+
+    canvas_draw_str_aligned(
+        canvas, GUI_DISPLAY_CENTER_X, y + 2, AlignCenter, AlignTop, "Starting new game will reset");
+    canvas_draw_str_aligned(
+        canvas, GUI_DISPLAY_CENTER_X, y + 10, AlignCenter, AlignTop, "all progress and scores!");
+
+    canvas_draw_str_aligned(
+        canvas, GUI_DISPLAY_CENTER_X, y + 21, AlignCenter, AlignTop, "Are you sure?");
+
+    canvas_set_font(canvas, FontSecondary);
+    elements_button_center(canvas, "Confirm");
+    canvas_set_custom_u8g2_font(canvas, app_u8g2_font_squeezed_r7_tr);
+    elements_button_right_back(canvas, "Back");
 }

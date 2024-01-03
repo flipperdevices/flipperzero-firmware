@@ -29,14 +29,17 @@ typedef enum {
 typedef enum {
     MAIN_MENU,
     INTRO,
+    RESET_PROMPT,
     ABOUT,
     SELECT_BRICK,
     SELECT_DIRECTION,
+    SOLUTION_SELECT,
     MOVE_SIDES,
     MOVE_GRAVITY,
     EXPLODE,
     PAUSED,
     HISTOGRAM,
+    SOLUTION_PROMPT,
     GAME_OVER,
     LEVEL_FINISHED,
 } State;
@@ -81,6 +84,13 @@ typedef struct {
     PlayGround toAnimate;
     PlayGround movables;
 
+    // solution
+    PlayGround boardBackup;
+    uint8_t currentMovableBackup;
+    bool solutionMode;
+    uint8_t solutionStep;
+    uint8_t solutionTotal;
+
     // board stats
     Stats* stats;
 
@@ -117,6 +127,7 @@ void free_game_state(Game* game);
 
 //-----------------------------------------------------------------------------
 
+void new_game(Game* game);
 GameOver is_game_over(PlayGround* mv, Stats* stats);
 bool is_level_finished(Stats* stats);
 Neighbors find_neighbors(PlayGround* pg, uint8_t x, uint8_t y);
@@ -144,3 +155,16 @@ void stop_move(Game* g);
 
 void movement_stoped(Game* g);
 bool undo(Game* g);
+
+//-----------------------------------------------------------------------------
+
+inline bool solution_will_have_penalty(Game* g) {
+    return (g->levelSet->scores[g->currentLevel].moves == 0) &&
+           (!g->levelSet->scores[g->currentLevel].spoiled);
+}
+
+void start_solution(Game* g);
+void end_solution(Game* g);
+void solution_select(Game* g);
+void solution_move(Game* g);
+void solution_next(Game* g);

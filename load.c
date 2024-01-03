@@ -328,26 +328,28 @@ bool save_set_scores(FuriString* levelSetId, LevelScore* scores) {
 
     Storage* storage = furi_record_open(RECORD_STORAGE);
 
-    //debug_dump_hex("Scores to write", (char*)scores, scoreSize << 1);
+    if(ensure_paths(storage)) {
+        //debug_dump_hex("Scores to write", (char*)scores, scoreSize << 1);
 
-    if(!level_set_id_to_score_path(storage, levelSetId, bufSize, filePath)) {
-        FURI_LOG_D(TAG, "Writing new scores \"%s\"", filePath);
-    } else {
-        FURI_LOG_D(TAG, "Overwriting scores \"%s\"", filePath);
-    }
-
-    Stream* stream = file_stream_alloc(storage);
-    if(file_stream_open(stream, filePath, FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
-        size_t actualyWrote = stream_write(stream, (uint8_t*)scores, scoreSize);
-
-        if(scoreSize != actualyWrote) {
-            FURI_LOG_E(TAG, "Error while writing scores!");
+        if(!level_set_id_to_score_path(storage, levelSetId, bufSize, filePath)) {
+            FURI_LOG_D(TAG, "Writing new scores \"%s\"", filePath);
         } else {
-            saved = true;
+            FURI_LOG_D(TAG, "Overwriting scores \"%s\"", filePath);
         }
 
-        file_stream_close(stream);
-        stream_free(stream);
+        Stream* stream = file_stream_alloc(storage);
+        if(file_stream_open(stream, filePath, FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
+            size_t actualyWrote = stream_write(stream, (uint8_t*)scores, scoreSize);
+
+            if(scoreSize != actualyWrote) {
+                FURI_LOG_E(TAG, "Error while writing scores!");
+            } else {
+                saved = true;
+            }
+
+            file_stream_close(stream);
+            stream_free(stream);
+        }
     }
 
     furi_record_close(RECORD_STORAGE);
@@ -525,15 +527,7 @@ bool load_last_level(FuriString* lastLevelSetId, uint8_t* levelNo) {
     return loaded;
 }
 
-bool save_last_level(FuriString* lastLevelSetId, uint8_t levelNo) {
-    const int bufSize = 256;
-    char buf[bufSize];
-    memset(buf, 0, bufSize);
-    snprintf(buf, sizeof(buf), "%s\n%u\n", furi_string_get_cstr(lastLevelSetId), levelNo);
-
-    Storage* storage = furi_record_open(RECORD_STORAGE);
-    File* file = storage_file_alloc(storage);
-
+bool ensure_paths(Storage* storage) {
     if(!storage_common_exists(storage, "/ext/apps_data")) {
         if(storage_common_mkdir(storage, "/ext/apps_data/") != FSE_OK) {
             FURI_LOG_E(TAG, "Cannot created /ext/apps_data/ dir");
@@ -555,17 +549,38 @@ bool save_last_level(FuriString* lastLevelSetId, uint8_t levelNo) {
         }
     }
 
-    if(!storage_file_open(
-           file, MY_APP_DATA_PATH("scores/game.txt"), FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
-        FURI_LOG_E(TAG, "Failed to open file");
-        return false;
+    if(!storage_common_exists(storage, MY_APP_DATA_PATH("extra_levels"))) {
+        if(storage_common_mkdir(storage, MY_APP_DATA_PATH("extra_levels")) != FSE_OK) {
+            FURI_LOG_E(TAG, "Cannot create dir for extra_levels");
+            return false;
+        }
     }
-    if(!storage_file_write(file, buf, strlen(buf))) {
-        FURI_LOG_E(TAG, "Failed to write to file");
-        return false;
+
+    return true;
+}
+
+bool save_last_level(FuriString* lastLevelSetId, uint8_t levelNo) {
+    const int bufSize = 256;
+    char buf[bufSize];
+    memset(buf, 0, bufSize);
+    snprintf(buf, sizeof(buf), "%s\n%u\n", furi_string_get_cstr(lastLevelSetId), levelNo);
+
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    if(ensure_paths(storage)) {
+        File* file = storage_file_alloc(storage);
+
+        if(!storage_file_open(
+               file, MY_APP_DATA_PATH("scores/game.txt"), FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
+            FURI_LOG_E(TAG, "Failed to open file");
+            return false;
+        }
+        if(!storage_file_write(file, buf, strlen(buf))) {
+            FURI_LOG_E(TAG, "Failed to write to file");
+            return false;
+        }
+        storage_file_close(file);
+        storage_file_free(file);
     }
-    storage_file_close(file);
-    storage_file_free(file);
     furi_record_close(RECORD_STORAGE);
     return true;
 }

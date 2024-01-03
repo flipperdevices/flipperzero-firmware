@@ -1,11 +1,16 @@
 #include "events.h"
 
 #include "move.h"
+#include "game.h"
 
 //-----------------------------------------------------------------------------
 
 void events_for_selection(InputEvent* event, Game* game) {
     if((event->type == InputTypePress) || (event->type == InputTypeRepeat)) {
+        if(game->solutionMode) {
+            end_solution(game);
+            return;
+        }
         switch(event->key) {
         case InputKeyLeft:
             find_movable_left(&game->movables, &game->currentMovable);
@@ -110,6 +115,12 @@ void events_for_paused(InputEvent* event, Game* game) {
                 game->state = HISTOGRAM;
                 break;
             case 5: // solve
+                if(solution_will_have_penalty(game)) {
+                    game->state = SOLUTION_PROMPT;
+                } else {
+                    start_solution(game);
+                }
+                break;
             default:
                 break;
             }
@@ -198,11 +209,11 @@ void events_for_main_menu(InputEvent* event, Game* game) {
         case InputKeyOk:
             switch(game->mainMenuMode) {
             case NEW_GAME:
-                forget_continue(game);
-                FuriString* setName = furi_string_alloc_set(assetLevels[0]);
-                load_gameset_if_needed(game, setName);
-                furi_string_free(setName);
-                start_game_at_level(game, 0);
+                if(game->hasContinue) {
+                    game->state = RESET_PROMPT;
+                } else {
+                    new_game(game);
+                }
                 break;
             case CUSTOM:
                 switch(game->mainMenuBtn) {
@@ -346,6 +357,65 @@ void events_for_about(InputEvent* event, Game* game) {
 
 //-----------------------------------------------------------------------------
 
+void events_for_solution_prompt(InputEvent* event, Game* game) {
+    if((event->type == InputTypePress) || (event->type == InputTypeRepeat)) {
+        switch(event->key) {
+        case InputKeyOk:
+            start_solution(game);
+            break;
+        case InputKeyLeft:
+        case InputKeyRight:
+        case InputKeyUp:
+        case InputKeyDown:
+        case InputKeyBack:
+            game->state = SELECT_BRICK;
+        default:
+            break;
+        }
+    }
+}
+
+//-----------------------------------------------------------------------------
+
+void events_for_solution_select(InputEvent* event, Game* game) {
+    if((event->type == InputTypePress) || (event->type == InputTypeRepeat)) {
+        switch(event->key) {
+        case InputKeyUp:
+        case InputKeyDown:
+            break;
+        case InputKeyOk:
+        case InputKeyLeft:
+        case InputKeyRight:
+        case InputKeyBack:
+            end_solution(game);
+        default:
+            break;
+        }
+    }
+}
+
+//-----------------------------------------------------------------------------
+
+void events_for_reset(InputEvent* event, Game* game) {
+    if((event->type == InputTypePress) || (event->type == InputTypeRepeat)) {
+        switch(event->key) {
+        case InputKeyOk:
+            new_game(game);
+            break;
+        case InputKeyLeft:
+        case InputKeyRight:
+        case InputKeyUp:
+        case InputKeyDown:
+        case InputKeyBack:
+            game->state = MAIN_MENU;
+        default:
+            break;
+        }
+    }
+}
+
+//-----------------------------------------------------------------------------
+
 void events_for_game(InputEvent* event, Game* game) {
     switch(game->state) {
     case MAIN_MENU:
@@ -353,6 +423,9 @@ void events_for_game(InputEvent* event, Game* game) {
         break;
     case ABOUT:
         events_for_about(event, game);
+        break;
+    case RESET_PROMPT:
+        events_for_reset(event, game);
         break;
     case INTRO:
         events_for_intro(event, game);
@@ -369,12 +442,24 @@ void events_for_game(InputEvent* event, Game* game) {
     case HISTOGRAM:
         events_for_histogram(event, game);
         break;
+    case SOLUTION_PROMPT:
+        events_for_solution_prompt(event, game);
+        break;
+    case SOLUTION_SELECT:
+        events_for_solution_select(event, game);
+        break;
     case GAME_OVER:
         events_for_game_over(event, game);
         break;
     case LEVEL_FINISHED:
         events_for_level_finished(event, game);
         break;
+    case MOVE_SIDES:
+    case MOVE_GRAVITY:
+    case EXPLODE:
+        if(game->solutionMode) {
+            events_for_solution_select(event, game);
+        }
     default:
         break;
     }

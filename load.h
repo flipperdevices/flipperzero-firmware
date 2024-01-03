@@ -36,6 +36,8 @@ void free_level_set(LevelSet* ls);
 LevelData* alloc_level_data();
 void free_level_data(LevelData* ld);
 
+bool ensure_paths(Storage* storage);
+
 bool load_level_set(Storage* storage, FuriString* levelSetId, LevelSet* levelSet);
 bool load_last_level(FuriString* lastLevelSetId, uint8_t* levelNo);
 bool save_last_level(FuriString* lastLevelSetId, uint8_t levelNo);

@@ -22,6 +22,11 @@ Game* alloc_game_state(int* error) {
     game->gameMoves = 0;
     game->score = 0;
 
+    game->currentMovableBackup = MOVABLE_NOT_FOUND;
+    game->solutionMode = false;
+    game->solutionStep = 0;
+    game->solutionTotal = 0;
+
     game->undoMovable = MOVABLE_NOT_FOUND;
     game->currentMovable = MOVABLE_NOT_FOUND;
     game->nextMovable = MOVABLE_NOT_FOUND;
@@ -169,6 +174,16 @@ void initial_load_game(Game* game) {
     }
 
     randomize_bg(&game->bg);
+}
+
+//-----------------------------------------------------------------------------
+
+void new_game(Game* game) {
+    forget_continue(game);
+    FuriString* setName = furi_string_alloc_set(assetLevels[0]);
+    load_gameset_if_needed(game, setName);
+    furi_string_free(setName);
+    start_game_at_level(game, 0);
 }
 
 //-----------------------------------------------------------------------------
@@ -391,14 +406,19 @@ void stop_explosion(Game* g) {
 //-----------------------------------------------------------------------------
 
 void start_move(Game* g, uint8_t direction) {
-    g->undoMovable = g->currentMovable;
-    copy_level(g->boardUndo, g->board);
-    g->gameMoves++;
+    if(!g->solutionMode) {
+        g->undoMovable = g->currentMovable;
+        copy_level(g->boardUndo, g->board);
+        g->gameMoves++;
+    }
     g->move.dir = direction;
     g->move.x = coord_x(g->currentMovable);
     g->move.y = coord_y(g->currentMovable);
     g->move.frameNo = 0;
-    g->nextMovable = coord_from((g->move.x + ((direction == MOVABLE_LEFT) ? -1 : 1)), g->move.y);
+    if(!g->solutionMode) {
+        g->nextMovable =
+            coord_from((g->move.x + ((direction == MOVABLE_LEFT) ? -1 : 1)), g->move.y);
+    }
     g->state = MOVE_SIDES;
 }
 
@@ -417,29 +437,33 @@ void stop_move(Game* g) {
 //-----------------------------------------------------------------------------
 
 void movement_stoped(Game* g) {
-    map_movability(&g->board, &g->movables);
-    update_board_stats(&g->board, g->stats);
-    g->currentMovable = g->nextMovable;
-    g->nextMovable = MOVABLE_NOT_FOUND;
-    if(!is_block(g->board[coord_y(g->currentMovable)][coord_x(g->currentMovable)])) {
-        find_movable_down(&g->movables, &g->currentMovable);
-    }
-    if(!is_block(g->board[coord_y(g->currentMovable)][coord_x(g->currentMovable)])) {
-        find_movable_right(&g->movables, &g->currentMovable);
-    }
-    if(!is_block(g->board[coord_y(g->currentMovable)][coord_x(g->currentMovable)])) {
-        g->currentMovable = MOVABLE_NOT_FOUND;
-    }
-
-    g->gameOverReason = is_game_over(&g->movables, g->stats);
-
-    if(g->gameOverReason > NOT_GAME_OVER) {
-        g->state = GAME_OVER;
-    } else if(is_level_finished(g->stats)) {
-        g->state = LEVEL_FINISHED;
-        level_finished(g);
+    if(g->solutionMode) {
+        solution_next(g);
     } else {
-        g->state = SELECT_BRICK;
+        map_movability(&g->board, &g->movables);
+        update_board_stats(&g->board, g->stats);
+        g->currentMovable = g->nextMovable;
+        g->nextMovable = MOVABLE_NOT_FOUND;
+        if(!is_block(g->board[coord_y(g->currentMovable)][coord_x(g->currentMovable)])) {
+            find_movable_down(&g->movables, &g->currentMovable);
+        }
+        if(!is_block(g->board[coord_y(g->currentMovable)][coord_x(g->currentMovable)])) {
+            find_movable_right(&g->movables, &g->currentMovable);
+        }
+        if(!is_block(g->board[coord_y(g->currentMovable)][coord_x(g->currentMovable)])) {
+            g->currentMovable = MOVABLE_NOT_FOUND;
+        }
+
+        g->gameOverReason = is_game_over(&g->movables, g->stats);
+
+        if(g->gameOverReason > NOT_GAME_OVER) {
+            g->state = GAME_OVER;
+        } else if(is_level_finished(g->stats)) {
+            g->state = LEVEL_FINISHED;
+            level_finished(g);
+        } else {
+            g->state = SELECT_BRICK;
+        }
     }
 }
 
@@ -458,5 +482,83 @@ bool undo(Game* g) {
     } else {
         g->state = SELECT_BRICK;
         return false;
+    }
+}
+
+uint8_t
+    movable_from_solution(Game* g, const char* solutionStr, uint8_t step, PlayGround* movables) {
+    const char solX = solutionStr[step * 2];
+    const char solY = solutionStr[step * 2 + 1];
+
+    int x, y;
+    uint8_t dir;
+
+    x = solX - 'a';
+    if(solX <= 'Z') {
+        dir = MOVABLE_LEFT;
+        x = solX - 'A';
+    }
+    y = solY - 'a';
+    if(solY <= 'Z') {
+        dir = MOVABLE_RIGHT;
+        y = solY - 'A';
+    }
+
+    if(x < 0 || x >= SIZE_X || y < 0 || y >= SIZE_Y) {
+        end_solution(g);
+        return 0;
+    }
+
+    clear_board(movables);
+    (*movables)[y][x] = dir;
+
+    return coord_from(x, y);
+}
+
+//-----------------------------------------------------------------------------
+
+void start_solution(Game* g) {
+    copy_level(g->boardBackup, g->board);
+    g->currentMovableBackup = g->currentMovable;
+    g->solutionStep = 0;
+    g->solutionTotal = furi_string_size(g->levelData->solution) / 2;
+    g->solutionMode = true;
+    if(solution_will_have_penalty(g)) {
+        g->levelSet->scores[g->currentLevel].spoiled = true;
+        save_set_scores(g->levelSet->id, g->levelSet->scores);
+        recalc_score(g);
+    }
+    solution_select(g);
+}
+
+//-----------------------------------------------------------------------------
+
+void end_solution(Game* g) {
+    g->state = SELECT_BRICK;
+    g->currentMovable = g->currentMovableBackup;
+    copy_level(g->board, g->boardBackup);
+    clear_board(&g->toAnimate);
+    map_movability(&g->board, &g->movables);
+    update_board_stats(&g->board, g->stats);
+    g->solutionMode = false;
+}
+
+void solution_select(Game* g) {
+    g->currentMovable = movable_from_solution(
+        g, furi_string_get_cstr(g->levelData->solution), g->solutionStep, &g->movables);
+    g->move.frameNo = 35;
+    g->state = SOLUTION_SELECT;
+}
+void solution_move(Game* g) {
+    const uint8_t dir = movable_dir(&g->movables, g->currentMovable);
+    start_move(g, dir);
+}
+
+void solution_next(Game* g) {
+    if(g->solutionStep < g->solutionTotal - 1) {
+        g->solutionStep++;
+        solution_select(g);
+    } else {
+        end_solution(g);
     }
 }
