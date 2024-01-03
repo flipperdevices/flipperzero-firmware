@@ -41,16 +41,35 @@ static MineSweeperApp* app_alloc() {
     view_dispatcher_set_navigation_event_callback(app->view_dispatcher, minesweeper_navigation_event_callback);
     view_dispatcher_set_tick_event_callback(app->view_dispatcher, minesweeper_tick_event_callback, 500);
 
-    // Read settings from storage
-    
     // Set setting info to default
     app->settings_info.width_str = furi_string_alloc();
     app->settings_info.height_str = furi_string_alloc();
-    app->settings_info.board_width = 16;
-    app->settings_info.board_height = 7;
-    app->settings_info.difficulty = 0;
     memset(&app->t_settings_info, 0, sizeof(app->t_settings_info));
     app->is_settings_changed = false;
+
+    // Read settings from storage
+    // The save data has a consistent format
+    // 'of xxx,xxx,xxx\n' so read first 11 bytes
+    
+    char save_data[32];
+
+    uint8_t bytes_read = 0;
+    //bytes_read = mine_sweeper_storage_file_read(save_data, 11);
+    save_data[11] = '\0';
+
+    if (bytes_read == 11) {
+        sscanf(
+            save_data,
+            "%" SCNu8 ",%" SCNu8 ",%" SCNu8,
+            &app->settings_info.board_width,
+            &app->settings_info.board_height,
+            &app->settings_info.difficulty);
+    } else {
+
+        app->settings_info.board_width = 16;
+        app->settings_info.board_height = 7;
+        app->settings_info.difficulty = 0;
+    }
 
     // Set hardware related values to default
     app->haptic = 1;
