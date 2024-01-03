@@ -1,9 +1,11 @@
 /* Reduced variant of the Flipper Zero SubGhz Class */
 
 #include "subghz_i.h"
+#include "../../helpers/meal_pager_custom_event.h"
+#include "../../helpers/meal_pager_led.h"
 //#include "../meal_pager_storage.h"
 
-static SubGhz* subghz_alloc() {
+SubGhz* subghz_alloc() {
     SubGhz* subghz = malloc(sizeof(SubGhz));
     
     subghz->file_path = furi_string_alloc();
@@ -13,7 +15,7 @@ static SubGhz* subghz_alloc() {
     return subghz;
 }
 
-static void subghz_free(SubGhz* subghz) {
+void subghz_free(SubGhz* subghz) {
     //TxRx
     subghz_txrx_free(subghz->txrx);
 
@@ -24,11 +26,23 @@ static void subghz_free(SubGhz* subghz) {
     free(subghz);
 }
 
-void subghz_send(void* context) {
-    UNUSED(context);
-    SubGhz* subghz = subghz_alloc();
 
-    subghz_load_protocol_from_file(subghz);
+void subghz_scene_transmit_callback_end_tx(void* context) {
+    furi_assert(context);
+    //UNUSED(context);
+    FURI_LOG_D(TAG, "callback end");
+    Meal_Pager* app = context;
+    view_dispatcher_send_custom_event(
+        app->view_dispatcher, Meal_PagerCustomEventViewTransmitterSendStop);
+}
+
+void subghz_send(void* context) {
+    //UNUSED(context);
+    Meal_Pager* app = context;
+    //SubGhz* subghz = subghz_alloc();
+
+    FURI_LOG_D(TAG, "loading protocol from file");
+    subghz_load_protocol_from_file(app->subghz);
 
     /*Storage* storage = furi_record_open(RECORD_STORAGE);
     FlipperFormat* ff = flipper_format_file_alloc(storage);
@@ -41,7 +55,14 @@ void subghz_send(void* context) {
     }*/
 
     //subghz_txrx_tx_start(subghz->txrx, ff);
-    subghz_txrx_tx_start(subghz->txrx, subghz_txrx_get_fff_data(subghz->txrx)); //Seems like it must be done this way
+    
+    FURI_LOG_D(TAG, "Starting Transmission");
+    subghz_txrx_tx_start(app->subghz->txrx, subghz_txrx_get_fff_data(app->subghz->txrx)); //Seems like it must be done this way
+
+    FURI_LOG_D(TAG, "setting sugbhz raw file encoder worker callback");
+    subghz_txrx_set_raw_file_encoder_worker_callback_end(
+                        app->subghz->txrx, subghz_scene_transmit_callback_end_tx, app);
+    app->state_notifications = SubGhzNotificationStateTx;
 
     /*flipper_format_rewind(ff);
     flipper_format_file_close(ff);
@@ -50,5 +71,7 @@ void subghz_send(void* context) {
     furi_record_close(RECORD_STORAGE);*/
 
 
-    subghz_free(subghz);
+    //subghz_free(subghz);
+    FURI_LOG_D(TAG, "Finished Transmitting");
+    //meal_pager_blink_stop(app);
 }

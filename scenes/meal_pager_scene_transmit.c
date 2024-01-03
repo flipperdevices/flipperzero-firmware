@@ -4,6 +4,7 @@
 #include "../views/meal_pager_transmit.h"
 #include "../helpers/meal_pager_led.h"
 #include "../helpers/subghz/subghz.h"
+#include <dolphin/dolphin.h>
 
 void meal_pager_transmit_callback(Meal_PagerCustomEvent event, void* context) {
     furi_assert(context);
@@ -30,12 +31,15 @@ void meal_pager_scene_transmit_on_enter(void* context) {
         return;
     }
     FURI_LOG_D(TAG, "Generated tmp.sub");
-    meal_pager_blink_start_subghz(app);
+    //meal_pager_blink_start_subghz(app);
     FURI_LOG_D(TAG, "Start Transmitting");
     subghz_send(app);
-    FURI_LOG_D(TAG, "Finished Transmitting");
-    meal_pager_blink_stop(app);
+    
+    dolphin_deed(DolphinDeedSubGhzSend);
+    //FURI_LOG_D(TAG, "Finished Transmitting");
+    //meal_pager_blink_stop(app);
 }
+
 
 bool meal_pager_scene_transmit_on_event(void* context, SceneManagerEvent event) {
     Meal_Pager* app = context;
@@ -61,7 +65,19 @@ bool meal_pager_scene_transmit_on_event(void* context, SceneManagerEvent event) 
                     }
                 consumed = true;
                 break;
+            case Meal_PagerCustomEventViewTransmitterSendStop:
+                app->state_notifications = SubGhzNotificationStateIDLE;
+                subghz_txrx_stop(app->subghz->txrx);
+                meal_pager_blink_stop(app);
+                scene_manager_next_scene(app->scene_manager, Meal_PagerSceneMenu);
+                FURI_LOG_D(TAG, "Stop Event");
+                break;
         }
+    } else if(event.type == SceneManagerEventTypeTick) {
+        if(app->state_notifications == SubGhzNotificationStateTx) {
+            notification_message(app->notification, &sequence_blink_magenta_10);
+        }
+        return true;
     }
     
     return consumed;

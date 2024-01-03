@@ -19,6 +19,10 @@ typedef enum {
     Meal_PagerCustomEventScene2Right,
     Meal_PagerCustomEventScene2Ok,
     Meal_PagerCustomEventScene2Back,
+    Meal_PagerCustomEventViewTransmitterBack,
+    Meal_PagerCustomEventViewTransmitterSendStart,
+    Meal_PagerCustomEventViewTransmitterSendStop,
+    Meal_PagerCustomEventViewTransmitterError,
 } Meal_PagerCustomEvent;
 
 enum Meal_PagerCustomEventType {

@@ -191,7 +191,7 @@ bool meal_pager_retekess_t119_generate_all(void* context) {
     bool success = meal_pager_save_subghz_buffer_file_start(app, ff, storage);
 
     if (!success) {
-        FURI_LOG_D(TAG, "failed to save buffer");
+        FURI_LOG_D(TAG, "failed to save to buffer");
         meal_pager_save_subghz_buffer_stop(app, ff);
         furi_record_close(RECORD_STORAGE);
         return success;

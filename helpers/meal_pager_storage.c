@@ -11,6 +11,7 @@ static void meal_pager_close_storage() {
 
 static void meal_pager_close_config_file(FlipperFormat* file) {
     if (file == NULL) return;
+    flipper_format_rewind(file);
     flipper_format_file_close(file);
     flipper_format_free(file);
 }
