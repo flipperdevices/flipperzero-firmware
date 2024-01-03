@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,51.2,,
+Version,+,52.0,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
 Header,+,applications/services/cli/cli_vcp.h,,
@@ -621,14 +621,14 @@ Function,-,ble_system_fus_get_status,BleGlueCommandResult,
 Function,-,ble_system_fus_stack_delete,BleGlueCommandResult,
 Function,-,ble_system_fus_stack_install,BleGlueCommandResult,"uint32_t, uint32_t"
 Function,-,ble_system_fus_wait_operation,BleGlueCommandResult,
-Function,+,ble_system_get_c2_info,const BleGlueC2Info*,
+Function,+,ble_system_get_c2_info,const BleSystemC2Info*,
 Function,-,ble_system_get_c2_status,BleSystemStatus,
 Function,-,ble_system_get_hardfault_info,const BleGlueHardfaultInfo*,
 Function,+,ble_system_init,void,
 Function,+,ble_system_is_alive,_Bool,
 Function,+,ble_system_is_radio_stack_ready,_Bool,
 Function,+,ble_system_reinit_c2,_Bool,
-Function,+,ble_system_set_key_storage_changed_callback,void,"BleGlueKeyStorageChangedCallback, void*"
+Function,+,ble_system_set_key_storage_changed_callback,void,"BleSystemKeyStorageChangedCallback, void*"
 Function,+,ble_system_start,_Bool,
 Function,+,ble_system_stop,void,
 Function,+,ble_system_wait_for_c2_start,_Bool,int32_t
@@ -1059,7 +1059,7 @@ Function,+,furi_hal_ble_lock_core2,void,
 Function,+,furi_hal_ble_nvm_sram_sem_acquire,void,
 Function,+,furi_hal_ble_nvm_sram_sem_release,void,
 Function,+,furi_hal_ble_reinit,void,
-Function,+,furi_hal_ble_set_key_storage_change_callback,void,"BleGlueKeyStorageChangedCallback, void*"
+Function,+,furi_hal_ble_set_key_storage_change_callback,void,"BleSystemKeyStorageChangedCallback, void*"
 Function,+,furi_hal_ble_start_advertising,void,
 Function,+,furi_hal_ble_start_app,FuriHalBleProfileBase*,"const FuriHalBleProfileConfig*, GapEventCallback, void*"
 Function,+,furi_hal_ble_start_packet_rx,void,"uint8_t, uint8_t"
