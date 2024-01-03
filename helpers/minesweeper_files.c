@@ -51,3 +51,29 @@ bool mine_sweeper_storage_file_write(const char* format, ...) {
 
     return true;
 }
+
+uint8_t mine_sweeper_storage_file_read(char* buff, size_t to_read) {
+    furi_assert(buff);
+    
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+
+    File* file = storage_file_alloc(storage);
+
+    if(!storage_file_open(file, APP_DATA_PATH("minesweeper_game_data.txt"), FSAM_READ, FSOM_OPEN_EXISTING)) {
+        
+        storage_file_close(file);
+        storage_file_free(file);
+        furi_record_close(RECORD_STORAGE);
+
+        return 0;
+    }
+
+    size_t bytes_read = storage_file_read(file, buff, to_read);
+
+    storage_file_close(file);
+    storage_file_free(file);
+    furi_record_close(RECORD_STORAGE);
+
+    return (to_read == bytes_read) ? bytes_read : 0;
+}
+
