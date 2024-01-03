@@ -18,6 +18,8 @@
 #include "views/meal_pager_startscreen.h"
 #include "views/meal_pager_transmit.h"
 #include "helpers/meal_pager_storage.h"
+#include "helpers/subghz/subghz_types.h"
+#include "helpers/subghz/subghz.h"
 
 #define TAG "Meal_Pager"
 
@@ -25,12 +27,15 @@
 #define SUBGHZ_APP_FOLDER ANY_PATH("subghz")
 
 typedef struct Meal_PagerTransmit Meal_PagerTransmit;
+typedef struct SubGhz SubGhz;
 
 typedef struct {
     Gui* gui;
     NotificationApp* notification;
+    SubGhzNotificationState state_notifications;
     ViewDispatcher* view_dispatcher;
     Submenu* submenu;
+    SubGhz* subghz;
     SceneManager* scene_manager;
     VariableItemList* variable_item_list;
     Meal_PagerStartscreen* meal_pager_startscreen;

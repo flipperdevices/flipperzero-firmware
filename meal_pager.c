@@ -58,6 +58,8 @@ Meal_Pager* meal_pager_app_alloc() {
     app->dialogs = furi_record_open(RECORD_DIALOGS);
     app->file_path = furi_string_alloc();
 
+    app->subghz = subghz_alloc();
+
     // Load configs
     meal_pager_read_settings(app);
 
@@ -96,6 +98,8 @@ void meal_pager_app_free(Meal_Pager* app) {
     // Close File Browser
     furi_record_close(RECORD_DIALOGS);
     furi_string_free(app->file_path);
+
+    subghz_free(app->subghz);
 
     //Remove whatever is left
     free(app);

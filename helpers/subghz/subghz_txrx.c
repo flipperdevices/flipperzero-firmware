@@ -556,7 +556,7 @@ SubGhzProtocolDecoderBase* subghz_txrx_get_decoder(SubGhzTxRx* instance) {
     subghz_receiver_set_rx_callback(instance->receiver, callback, context);
 }*/
 
-/*void subghz_txrx_set_raw_file_encoder_worker_callback_end(
+void subghz_txrx_set_raw_file_encoder_worker_callback_end(
     SubGhzTxRx* instance,
     SubGhzProtocolEncoderRAWCallbackEnd callback,
     void* context) {
@@ -564,7 +564,7 @@ SubGhzProtocolDecoderBase* subghz_txrx_get_decoder(SubGhzTxRx* instance) {
         (SubGhzProtocolEncoderRAW*)subghz_transmitter_get_protocol_instance(instance->transmitter),
         callback,
         context);
-}*/
+}
 
 bool subghz_txrx_radio_device_is_external_connected(SubGhzTxRx* instance, const char* name) {
     furi_assert(instance);

@@ -285,10 +285,10 @@ SubGhzSetting* subghz_txrx_get_setting(SubGhzTxRx* instance);
  * @param callback Callback for Raw decoder, end of data transfer 
  * @param context Context for callback
  */
-/*void subghz_txrx_set_raw_file_encoder_worker_callback_end(
+void subghz_txrx_set_raw_file_encoder_worker_callback_end(
     SubGhzTxRx* instance,
     SubGhzProtocolEncoderRAWCallbackEnd callback,
-    void* context);*/
+    void* context);
 
 /* Checking if an external radio device is connected
 * 
