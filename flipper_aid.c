@@ -66,11 +66,11 @@ int32_t flipper_aid_app(void* p){
             break;
         }else if (event.input.type == InputTypeShort && event.input.key == InputKeyOk){
             if (furi_hal_speaker_acquire(1000)){
-                uint32_t freq = round(furi_kernel_get_tick_frequency()*0.45);
+                uint32_t freq = round(furi_kernel_get_tick_frequency()*0.5);
                 furi_timer_start(timer, freq);
                 while(1){
                     furi_check(furi_message_queue_get(event_queue, &event, FuriWaitForever) == FuriStatusOk);
-                    if (event.type == CPREventTypeInput && event.input.type == InputTypeShort && event.input.key == InputKeyBack){
+                    if (event.type == CPREventTypeInput && event.input.type == InputTypeShort && (event.input.key == InputKeyBack || event.input.key == InputKeyOk)){
                         break;
                     }else if (event.type == CPREventTypeTick){
                         furi_hal_speaker_start(440.0f, 1.0f);
