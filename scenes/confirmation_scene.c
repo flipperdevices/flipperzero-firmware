@@ -1,6 +1,4 @@
 #include "../minesweeper.h"
-#include "../views/minesweeper_game_screen.h"
-#include "../helpers/minesweeper_files.h"
 
 static void confirmation_scene_dialog_callback(DialogExResult result, void* context) {
     furi_assert(context);
@@ -58,13 +56,8 @@ bool minesweeper_scene_confirmation_screen_on_event(void* context, SceneManagerE
                 app->settings_info.board_width  = app->t_settings_info.board_width;
                 app->settings_info.board_height = app->t_settings_info.board_height;
                 app->settings_info.difficulty   = app->t_settings_info.difficulty;
-                
-                // Commit changes to save file for next app startup
-                mine_sweeper_storage_file_write(
-                    "%03" PRIu8 ",%03" PRIu8 ",%03" PRIu8,
-                    app->settings_info.board_width,
-                    app->settings_info.board_height,
-                    app->settings_info.difficulty);
+
+                mine_sweeper_save_settings(app);
 
                 // This is used to let the settings view know it can save the main settings_info
                 // to the temp one on the next on enter
