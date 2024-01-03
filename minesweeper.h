@@ -2,7 +2,7 @@
 #define MINESWEEPER_H
 
 #include <string.h> // memset
-#include <stdlib.h>
+#include <inttypes.h> // PRIu8 & SCNu8
 
 #include <furi.h>
 #include <furi_hal.h>
@@ -18,11 +18,9 @@
 #include <gui/modules/variable_item_list.h>
 
 #include "scenes/minesweeper_scene.h"
-
 #include "views/start_screen.h"
 #include "views/minesweeper_game_screen.h"
-
-//#include <assets_icons.h>
+#include "helpers/minesweeper_files.h"
 #include "minesweeper_icons.h"
 
 #define TAG "MineSweeper"
