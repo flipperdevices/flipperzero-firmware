@@ -142,6 +142,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [NFC Playlist v1.0 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
 - UL: [Added plugin to read WashCity card balance #683 (By yaba)](https://github.com/DarkFlippers/unleashed-firmware/pull/683)
 - UL: [NFC: Add manually MF Classic with custom UID #690 (By Leptopt1los)](https://github.com/DarkFlippers/unleashed-firmware/pull/690)
+- OFW: [Desktop: fix rpc unlock on pin input screen #3334 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3334)
 
 <a name="release">
 
