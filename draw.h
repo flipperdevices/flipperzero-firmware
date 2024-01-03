@@ -23,3 +23,4 @@ void draw_playfield_hint(Canvas* canvas, Game* game);
 void draw_game_over(Canvas* canvas, GameOver gameOverReason);
 void draw_level_finished(Canvas* canvas, Game* game);
 void draw_solution_prompt(Canvas* canvas, Game* game);
+void draw_invalid_prompt(Canvas* canvas, Game* game);

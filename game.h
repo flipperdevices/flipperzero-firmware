@@ -30,6 +30,7 @@ typedef enum {
     MAIN_MENU,
     INTRO,
     RESET_PROMPT,
+    INVALID_PROMPT,
     ABOUT,
     SELECT_BRICK,
     SELECT_DIRECTION,
@@ -116,6 +117,10 @@ typedef struct {
     GameOver gameOverReason;
     MoveInfo move;
 
+    // extra levels
+    LevelList levelList;
+
+    FuriString* errorMsg;
     BackGround bg;
 
 } Game;
@@ -134,6 +139,9 @@ Neighbors find_neighbors(PlayGround* pg, uint8_t x, uint8_t y);
 
 //-----------------------------------------------------------------------------
 
+const char* level_on_pos(Game* game, int pos);
+int level_count(Game* game);
+void handle_ivalid_set(Game* game, Storage* storage, FuriString* setId, FuriString* errorMsg);
 void initial_load_game(Game* game);
 void load_gameset_if_needed(Game* game, FuriString* expectedSet);
 void start_game_at_level(Game* game, uint8_t levelNo);

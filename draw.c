@@ -36,6 +36,10 @@ void draw_app(Canvas* canvas, Game* game) {
         draw_reset_prompt(canvas, game);
     }
 
+    if(game->state == INVALID_PROMPT) {
+        draw_invalid_prompt(canvas, game);
+    }
+
     if(game->state >= SELECT_BRICK) {
         draw_playground(canvas, game);
 
@@ -88,6 +92,8 @@ void draw_app(Canvas* canvas, Game* game) {
 
     frameNo++;
 }
+
+//-----------------------------------------------------------------------------
 
 void draw_intro(Canvas* canvas, Game* game, uint32_t frameNo) {
     if(frameNo % 2 == 1) {
@@ -212,6 +218,8 @@ void draw_set_info(Canvas* canvas, Game* game) {
     my_canvas_frame_set(canvas, 0, 0, GUI_DISPLAY_WIDTH, GUI_DISPLAY_HEIGHT);
 }
 
+//-----------------------------------------------------------------------------
+
 void draw_level_info(Canvas* canvas, Game* game) {
     int bufSize = 80;
     char buf[bufSize];
@@ -264,6 +272,8 @@ void draw_level_info(Canvas* canvas, Game* game) {
     canvas_draw_str_aligned(canvas, x + 75, y + 22, AlignCenter, AlignBottom, buf);
 }
 
+//-----------------------------------------------------------------------------
+
 void draw_main_menu_new_game(Canvas* canvas, Game* game) {
     canvas_set_color(canvas, ColorBlack);
     canvas_set_font(canvas, FontSecondary);
@@ -280,6 +290,8 @@ void draw_main_menu_new_game(Canvas* canvas, Game* game) {
             "!!! Forgets all progress and scores !!!");
     }
 }
+
+//-----------------------------------------------------------------------------
 
 void draw_main_menu_continue(Canvas* canvas, Game* game) {
     int bufSize = 80;
@@ -317,6 +329,8 @@ void draw_main_menu_continue(Canvas* canvas, Game* game) {
 
     canvas_draw_str_aligned(canvas, GUI_DISPLAY_CENTER_X, 37, AlignCenter, AlignTop, buf);
 }
+
+//-----------------------------------------------------------------------------
 
 void draw_main_menu_custom(Canvas* canvas, Game* game) {
     int bufSize = 80;
@@ -357,6 +371,8 @@ void draw_main_menu_custom(Canvas* canvas, Game* game) {
         game->selectedLevel < game->levelSet->maxLevel - 1,
         buf);
 }
+
+//-----------------------------------------------------------------------------
 
 void draw_main_menu(Canvas* canvas, Game* game) {
     canvas_set_color(canvas, ColorBlack);
@@ -408,15 +424,13 @@ void draw_main_menu(Canvas* canvas, Game* game) {
     }
 }
 
+//-----------------------------------------------------------------------------
+
 void draw_playground(Canvas* canvas, Game* game) {
     Neighbors tiles;
     uint8_t tile, x, y, sx, sy, ex, ey;
 
     bool whiteB = (game->state == LEVEL_FINISHED) || (game->solutionMode);
-
-    //canvas_set_color(canvas, ColorWhite);
-    ///canvas_draw_box(
-    // canvas, start_x * TILE_SIZE, start_y * TILE_SIZE, draw_w * TILE_SIZE, draw_h * TILE_SIZE);
 
     for(y = 0; y < SIZE_Y; y++) {
         for(x = 0; x < SIZE_X; x++) {
@@ -439,12 +453,6 @@ void draw_playground(Canvas* canvas, Game* game) {
             }
             if(tile == WALL_TILE) {
                 tiles = find_neighbors(&game->board, x, y);
-
-                /*
-                whiteB =
-
-                    !(((tiles.u != WALL_TILE) && (tiles.d != WALL_TILE) &&
-                       (tiles.l != WALL_TILE) && (tiles.r != WALL_TILE)));*/
 
                 // UP
                 if(tiles.u != WALL_TILE) {
@@ -536,6 +544,8 @@ void draw_playground(Canvas* canvas, Game* game) {
     }
 }
 
+//-----------------------------------------------------------------------------
+
 void draw_movable(Canvas* canvas, Game* game, uint32_t frameNo) {
     bool oddFrame = (frameNo % 20 < 10);
     if(game->currentMovable != MOVABLE_NOT_FOUND) {
@@ -566,6 +576,8 @@ void draw_movable(Canvas* canvas, Game* game, uint32_t frameNo) {
     }
 }
 
+//-----------------------------------------------------------------------------
+
 void draw_direction(Canvas* canvas, Game* game, uint32_t frameNo) {
     bool oddFrame = (frameNo % 20 < 10);
     if(game->currentMovable != MOVABLE_NOT_FOUND) {
@@ -579,6 +591,8 @@ void draw_direction(Canvas* canvas, Game* game, uint32_t frameNo) {
         }
     }
 }
+
+//-----------------------------------------------------------------------------
 
 void draw_direction_solution(Canvas* canvas, Game* game, uint32_t frameNo) {
     bool oddFrame = (frameNo % 20 < 10);
@@ -615,6 +629,8 @@ void draw_direction_solution(Canvas* canvas, Game* game, uint32_t frameNo) {
     }
 }
 
+//-----------------------------------------------------------------------------
+
 void draw_ani_sides(Canvas* canvas, Game* game) {
     uint8_t tile, sx, sy, deltaX;
 
@@ -635,6 +651,8 @@ void draw_ani_sides(Canvas* canvas, Game* game) {
         }
     }
 }
+
+//-----------------------------------------------------------------------------
 
 void draw_ani_gravity(Canvas* canvas, Game* game) {
     uint8_t tile, x, y, sx, sy;
@@ -669,6 +687,8 @@ void draw_ani_gravity(Canvas* canvas, Game* game) {
         }
     }
 }
+
+//-----------------------------------------------------------------------------
 
 void draw_ani_explode(Canvas* canvas, Game* game) {
     uint8_t tile, x, y, sx, sy, cx, cy, s, o;
@@ -711,6 +731,8 @@ void draw_ani_explode(Canvas* canvas, Game* game) {
         }
     }
 }
+
+//-----------------------------------------------------------------------------
 
 void draw_scores(Canvas* canvas, Game* game, uint32_t frameNo) {
     int bufSize = 80;
@@ -769,6 +791,8 @@ void draw_scores(Canvas* canvas, Game* game, uint32_t frameNo) {
     }
 }
 
+//-----------------------------------------------------------------------------
+
 void draw_paused(Canvas* canvas, Game* game) {
     gray_canvas(canvas);
 
@@ -792,6 +816,8 @@ void draw_paused(Canvas* canvas, Game* game) {
     canvas_set_font(canvas, FontSecondary);
     elements_button_right_back(canvas, "Back to game");
 }
+
+//-----------------------------------------------------------------------------
 
 void draw_histogram(Canvas* canvas, Stats* stats) {
     gray_canvas(canvas);
@@ -829,6 +855,8 @@ void draw_playfield_hint(Canvas* canvas, Game* game) {
     }
 }
 
+//-----------------------------------------------------------------------------
+
 void draw_game_over(Canvas* canvas, GameOver gameOverReason) {
     gray_canvas(canvas);
 
@@ -848,6 +876,8 @@ void draw_game_over(Canvas* canvas, GameOver gameOverReason) {
     elements_button_center(canvas, "Menu");
     elements_button_right_back(canvas, "Undo");
 }
+
+//-----------------------------------------------------------------------------
 
 void draw_level_finished(Canvas* canvas, Game* game) {
     int bufSize = 80;
@@ -893,6 +923,8 @@ void draw_level_finished(Canvas* canvas, Game* game) {
     }
 }
 
+//-----------------------------------------------------------------------------
+
 void draw_solution_prompt(Canvas* canvas, Game* game) {
     gray_canvas(canvas);
 
@@ -916,6 +948,8 @@ void draw_solution_prompt(Canvas* canvas, Game* game) {
     elements_button_right_back(canvas, "Resign");
 }
 
+//-----------------------------------------------------------------------------
+
 void draw_reset_prompt(Canvas* canvas, Game* game) {
     UNUSED(game);
 
@@ -938,4 +972,33 @@ void draw_reset_prompt(Canvas* canvas, Game* game) {
     elements_button_center(canvas, "Confirm");
     canvas_set_custom_u8g2_font(canvas, app_u8g2_font_squeezed_r7_tr);
     elements_button_right_back(canvas, "Back");
+}
+
+//-----------------------------------------------------------------------------
+
+void draw_invalid_prompt(Canvas* canvas, Game* game) {
+    UNUSED(game);
+
+    gray_canvas(canvas);
+
+    const uint8_t y = dialog_frame(canvas, 110, 45, true, false, "Invalid level");
+
+    canvas_set_color(canvas, ColorBlack);
+    canvas_set_custom_u8g2_font(canvas, app_u8g2_font_squeezed_r7_tr);
+
+    canvas_draw_str_aligned(
+        canvas, GUI_DISPLAY_CENTER_X, y + 2, AlignCenter, AlignTop, "Cannot load/parse level!");
+    canvas_draw_str_aligned(
+        canvas,
+        GUI_DISPLAY_CENTER_X,
+        y + 10,
+        AlignCenter,
+        AlignTop,
+        furi_string_get_cstr(game->errorMsg));
+
+    canvas_draw_str_aligned(
+        canvas, GUI_DISPLAY_CENTER_X, y + 21, AlignCenter, AlignTop, "Repair or remove file!");
+
+    canvas_set_font(canvas, FontSecondary);
+    elements_button_center(canvas, "Understood");
 }

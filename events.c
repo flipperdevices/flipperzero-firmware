@@ -246,7 +246,7 @@ void events_for_main_menu(InputEvent* event, Game* game) {
             switch(game->mainMenuBtn) {
             case LEVELSET_BTN:
                 game->setPos = (game->setPos > 0) ? game->setPos - 1 : game->setCount - 1;
-                furi_string_set(game->selectedSet, assetLevels[game->setPos]);
+                furi_string_set(game->selectedSet, level_on_pos(game, game->setPos));
                 load_gameset_if_needed(game, game->selectedSet);
                 game->selectedLevel = 0;
                 break;
@@ -271,7 +271,7 @@ void events_for_main_menu(InputEvent* event, Game* game) {
             switch(game->mainMenuBtn) {
             case LEVELSET_BTN:
                 game->setPos = (game->setPos < game->setCount - 1) ? game->setPos + 1 : 0;
-                furi_string_set(game->selectedSet, assetLevels[game->setPos]);
+                furi_string_set(game->selectedSet, level_on_pos(game, game->setPos));
                 load_gameset_if_needed(game, game->selectedSet);
                 game->selectedLevel = 0;
                 break;
@@ -416,6 +416,24 @@ void events_for_reset(InputEvent* event, Game* game) {
 
 //-----------------------------------------------------------------------------
 
+void events_for_invalid(InputEvent* event, Game* game) {
+    if((event->type == InputTypePress) || (event->type == InputTypeRepeat)) {
+        switch(event->key) {
+        case InputKeyOk:
+        case InputKeyLeft:
+        case InputKeyRight:
+        case InputKeyUp:
+        case InputKeyDown:
+        case InputKeyBack:
+            game->state = MAIN_MENU;
+        default:
+            break;
+        }
+    }
+}
+
+//-----------------------------------------------------------------------------
+
 void events_for_game(InputEvent* event, Game* game) {
     switch(game->state) {
     case MAIN_MENU:
@@ -426,6 +444,9 @@ void events_for_game(InputEvent* event, Game* game) {
         break;
     case RESET_PROMPT:
         events_for_reset(event, game);
+        break;
+    case INVALID_PROMPT:
+        events_for_invalid(event, game);
         break;
     case INTRO:
         events_for_intro(event, game);

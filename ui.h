@@ -4,7 +4,8 @@
 #include <u8g2/u8g2.h>
 #include <toolbox/compress.h>
 
-//--- workaround to access private API
+//-----------------------------------------------------------------------------
+// workaround to access private API
 
 #define GUI_DISPLAY_WIDTH 128
 #define GUI_DISPLAY_HEIGHT 64
@@ -23,16 +24,17 @@ struct Canvas {
     CompressIcon* compress_icon;
 };
 
-//---
-
-const Icon* tile_to_icon(uint8_t tile, bool gameOver);
-
 void my_canvas_frame_set(
     Canvas* canvas,
     uint8_t offset_x,
     uint8_t offset_y,
     uint8_t width,
     uint8_t height);
+
+//-----------------------------------------------------------------------------
+
+const Icon* tile_to_icon(uint8_t tile, bool gameOver);
+
 void gray_canvas(Canvas* const canvas);
 void mask_canvas(Canvas* const canvas, uint8_t sx, uint8_t sy, uint8_t w, uint8_t h);
 void canvas_draw_hline_dotted(Canvas* const canvas, uint8_t x, uint8_t y, uint8_t w);

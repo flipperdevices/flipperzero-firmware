@@ -16,6 +16,8 @@ void map_movability(PlayGround* pg, PlayGround* mv) {
     }
 }
 
+//-----------------------------------------------------------------------------
+
 uint8_t find_movable(PlayGround* mv) {
     uint8_t x, y;
     for(y = 0; y < SIZE_Y; y++) {
@@ -27,6 +29,8 @@ uint8_t find_movable(PlayGround* mv) {
     return MOVABLE_NOT_FOUND;
 }
 
+//-----------------------------------------------------------------------------
+
 uint8_t find_movable_rev(PlayGround* mv) {
     uint8_t x, y;
     for(y = SIZE_Y - 1; y > 0; y--) {
@@ -37,6 +41,8 @@ uint8_t find_movable_rev(PlayGround* mv) {
 
     return MOVABLE_NOT_FOUND;
 }
+
+//-----------------------------------------------------------------------------
 
 void find_movable_left(PlayGround* mv, uint8_t* currentMovable) {
     const uint8_t sx = (*currentMovable != MOVABLE_NOT_FOUND) ? coord_x(*currentMovable) :
@@ -69,6 +75,8 @@ void find_movable_left(PlayGround* mv, uint8_t* currentMovable) {
     }
 }
 
+//-----------------------------------------------------------------------------
+
 void find_movable_right(PlayGround* mv, uint8_t* currentMovable) {
     const uint8_t sx = (*currentMovable != MOVABLE_NOT_FOUND) ? coord_x(*currentMovable) :
                                                                 SIZE_X / 2;
@@ -100,6 +108,8 @@ void find_movable_right(PlayGround* mv, uint8_t* currentMovable) {
         *currentMovable = first;
     }
 }
+
+//-----------------------------------------------------------------------------
 
 void find_movable_down(PlayGround* mv, uint8_t* currentMovable) {
     uint8_t sx = (*currentMovable != MOVABLE_NOT_FOUND) ? coord_x(*currentMovable) : SIZE_X / 2;
@@ -134,6 +144,8 @@ void find_movable_down(PlayGround* mv, uint8_t* currentMovable) {
         }
     }
 }
+
+//-----------------------------------------------------------------------------
 
 void find_movable_up(PlayGround* mv, uint8_t* currentMovable) {
     uint8_t sx = (*currentMovable != MOVABLE_NOT_FOUND) ? coord_x(*currentMovable) : SIZE_X / 2;

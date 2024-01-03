@@ -18,7 +18,7 @@ Game* alloc_game_state(int* error) {
     game->levelSet = alloc_level_set();
     game->stats = alloc_stats();
 
-    game->currentLevel = 0; //4   16  21??? 22  32
+    game->currentLevel = 0;
     game->gameMoves = 0;
     game->score = 0;
 
@@ -49,8 +49,27 @@ Game* alloc_game_state(int* error) {
     game->move.frameNo = 0;
 
     memset(game->parLabel, 0, PAR_LABEL_SIZE);
+    game->errorMsg = furi_string_alloc();
 
     return game;
+}
+
+//-----------------------------------------------------------------------------
+
+void load_game_board(Game* g) {
+    bool levelLoadable = false;
+    // Open storage
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    if(load_level(storage, g->levelSet->id, g->currentLevel, g->levelData, g->errorMsg)) {
+        levelLoadable = parse_level_notation(furi_string_get_cstr(g->levelData->board), &g->board);
+    }
+    // Close storage
+
+    if(!levelLoadable) {
+        handle_ivalid_set(g, storage, g->levelSet->id, g->errorMsg);
+    }
+
+    furi_record_close(RECORD_STORAGE);
 }
 
 //-----------------------------------------------------------------------------
@@ -63,6 +82,8 @@ void free_game_state(Game* game) {
     free_stats(game->stats);
     furi_string_free(game->selectedSet);
     furi_string_free(game->continueSet);
+    furi_string_free(game->errorMsg);
+    free_level_list(&game->levelList);
     free(game);
 }
 
@@ -123,12 +144,21 @@ Neighbors find_neighbors(PlayGround* pg, uint8_t x, uint8_t y) {
 
 void index_set(Game* game) {
     const char* findSetId = furi_string_get_cstr(game->levelSet->id);
-    game->setCount = ASSETS_LEVELS_COUNT;
+    game->setCount = level_count(game);
     game->setPos = 0;
     for(uint8_t i = 0; i < ASSETS_LEVELS_COUNT; i++) {
         if(strcmp(findSetId, assetLevels[i]) == 0) {
             game->setPos = i;
             return;
+        }
+    }
+
+    if(game->levelList.ids != NULL) {
+        for(uint8_t j = 0; j < game->levelList.count; j++) {
+            if(strcmp(findSetId, furi_string_get_cstr(game->levelList.ids[j])) == 0) {
+                game->setPos = ASSETS_LEVELS_COUNT + j;
+                return;
+            }
         }
     }
 }
@@ -149,8 +179,25 @@ void recalc_score(Game* g) {
 
 //-----------------------------------------------------------------------------
 
+void handle_ivalid_set(Game* game, Storage* storage, FuriString* setId, FuriString* errorMsg) {
+    mark_set_invalid(storage, setId, errorMsg);
+    list_extra_levels(storage, &game->levelList);
+    furi_string_set(game->errorMsg, "Invalid level: ");
+    furi_string_cat(game->errorMsg, setId);
+    furi_string_set(game->selectedSet, assetLevels[0]);
+    game->mainMenuMode = CUSTOM;
+    game->selectedLevel = 0;
+    game->mainMenuBtn = LEVELSET_BTN;
+    load_level_set(storage, game->selectedSet, game->levelSet, game->errorMsg);
+    game->state = INVALID_PROMPT;
+}
+
+//-----------------------------------------------------------------------------
+
 void initial_load_game(Game* game) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
+
+    list_extra_levels(storage, &game->levelList);
 
     game->hasContinue = load_last_level(game->continueSet, &game->continueLevel);
 
@@ -164,7 +211,9 @@ void initial_load_game(Game* game) {
         game->mainMenuMode = NEW_GAME;
     }
 
-    load_level_set(storage, game->selectedSet, game->levelSet);
+    if(!load_level_set(storage, game->selectedSet, game->levelSet, game->errorMsg)) {
+        handle_ivalid_set(game, storage, game->selectedSet, game->errorMsg);
+    }
     furi_record_close(RECORD_STORAGE);
     index_set(game);
     recalc_score(game);
@@ -191,11 +240,41 @@ void new_game(Game* game) {
 void load_gameset_if_needed(Game* game, FuriString* expectedSet) {
     if(furi_string_cmp(expectedSet, game->levelSet->id) != 0) {
         Storage* storage = furi_record_open(RECORD_STORAGE);
-        load_level_set(storage, expectedSet, game->levelSet);
+        if(!load_level_set(storage, expectedSet, game->levelSet, game->errorMsg)) {
+            handle_ivalid_set(game, storage, game->selectedSet, game->errorMsg);
+        }
         furi_record_close(RECORD_STORAGE);
     }
     index_set(game);
     recalc_score(game);
+}
+
+//-----------------------------------------------------------------------------
+
+const char* level_on_pos(Game* game, int pos) {
+    if(pos < ASSETS_LEVELS_COUNT) {
+        return assetLevels[pos];
+    } else {
+        int adjPos = pos - ASSETS_LEVELS_COUNT;
+        FURI_LOG_D(TAG, "Level for exra %d, %d", pos, adjPos);
+        if((game->levelList.ids != NULL) && (adjPos < game->levelList.count)) {
+            if(game->levelList.ids[adjPos] != NULL) {
+                return furi_string_get_cstr(game->levelList.ids[adjPos]);
+            } else {
+                return assetLevels[ASSETS_LEVELS_COUNT - 1];
+            }
+        } else {
+            return assetLevels[ASSETS_LEVELS_COUNT - 1];
+        }
+    }
+
+    return assetLevels[0];
+}
+
+//-----------------------------------------------------------------------------
+
+int level_count(Game* game) {
+    return ASSETS_LEVELS_COUNT + ((game->levelList.ids != NULL) ? game->levelList.count : 0);
 }
 
 //-----------------------------------------------------------------------------
@@ -209,7 +288,7 @@ void start_game_at_level(Game* game, uint8_t levelNo) {
         game->mainMenuMode = CUSTOM;
 
         game->setPos = (game->setPos < game->setCount - 1) ? game->setPos + 1 : 0;
-        furi_string_set(game->selectedSet, assetLevels[game->setPos]);
+        furi_string_set(game->selectedSet, level_on_pos(game, game->setPos));
         load_gameset_if_needed(game, game->selectedSet);
         game->selectedLevel = 0;
 
@@ -243,14 +322,7 @@ void refresh_level(Game* g) {
     furi_string_set(g->continueSet, g->levelSet->id);
 
     g->selectedLevel = g->currentLevel;
-
-    // Open storage
-    Storage* storage = furi_record_open(RECORD_STORAGE);
-    if(load_level(storage, g->levelSet->id, g->currentLevel, g->levelData)) {
-        parse_level_notation(furi_string_get_cstr(g->levelData->board), &g->board);
-    }
-    // Close storage
-    furi_record_close(RECORD_STORAGE);
+    load_game_board(g);
 
     map_movability(&g->board, &g->movables);
     update_board_stats(&g->board, g->stats);
@@ -485,6 +557,8 @@ bool undo(Game* g) {
     }
 }
 
+//-----------------------------------------------------------------------------
+
 uint8_t
     movable_from_solution(Game* g, const char* solutionStr, uint8_t step, PlayGround* movables) {
     const char solX = solutionStr[step * 2];
@@ -519,6 +593,10 @@ uint8_t
 
 void start_solution(Game* g) {
     copy_level(g->boardBackup, g->board);
+
+    clear_board(&g->board);
+    load_game_board(g);
+
     g->currentMovableBackup = g->currentMovable;
     g->solutionStep = 0;
     g->solutionTotal = furi_string_size(g->levelData->solution) / 2;
@@ -543,16 +621,23 @@ void end_solution(Game* g) {
     g->solutionMode = false;
 }
 
+//-----------------------------------------------------------------------------
+
 void solution_select(Game* g) {
     g->currentMovable = movable_from_solution(
         g, furi_string_get_cstr(g->levelData->solution), g->solutionStep, &g->movables);
     g->move.frameNo = 35;
     g->state = SOLUTION_SELECT;
 }
+
+//-----------------------------------------------------------------------------
+
 void solution_move(Game* g) {
     const uint8_t dir = movable_dir(&g->movables, g->currentMovable);
     start_move(g, dir);
 }
+
+//-----------------------------------------------------------------------------
 
 void solution_next(Game* g) {
     if(g->solutionStep < g->solutionTotal - 1) {

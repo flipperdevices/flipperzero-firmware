@@ -8,8 +8,8 @@
 #define SIZE_Y 8
 #define TILE_SIZE 8
 
-#define SIZE_X_BG 17
-#define SIZE_Y_BG 9
+#define SIZE_X_BG 17 // 128/8 +1
+#define SIZE_Y_BG 9 // 64/8  +1
 
 #define WALL_TILE 9
 #define EMPTY_TILE 0
