@@ -43,20 +43,20 @@ typedef struct {
     uint8_t FusMemorySizeSram2B; /*< Multiple of 1K */
     uint8_t FusMemorySizeSram2A; /*< Multiple of 1K */
     uint8_t FusMemorySizeFlash; /*< Multiple of 4K */
-} BleGlueC2Info;
+} BleSystemC2Info;
 
 typedef enum {
     // Stage 1: core2 startup and FUS
-    BleGlueStatusStartup,
-    BleGlueStatusBroken,
-    BleGlueStatusC2Started,
+    BleSystemStatusStartup,
+    BleSystemStatusBroken,
+    BleSystemStatusC2Started,
     // Stage 2: radio stack
-    BleGlueStatusRadioStackRunning,
-    BleGlueStatusRadioStackMissing
-} BleGlueStatus;
+    BleSystemStatusRadioStackRunning,
+    BleSystemStatusRadioStackMissing
+} BleSystemStatus;
 
 typedef void (
-    *BleGlueKeyStorageChangedCallback)(uint8_t* change_addr_start, uint16_t size, void* context);
+    *BleSystemKeyStorageChangedCallback)(uint8_t* change_addr_start, uint16_t size, void* context);
 
 /** Initialize start core2 and initialize transport */
 void ble_system_init();
@@ -81,9 +81,9 @@ bool ble_system_is_alive();
  */
 bool ble_system_wait_for_c2_start(int32_t timeout_ms);
 
-BleGlueStatus ble_system_get_c2_status();
+BleSystemStatus ble_system_get_c2_status();
 
-const BleGlueC2Info* ble_system_get_c2_info();
+const BleSystemC2Info* ble_system_get_c2_info();
 
 /** Is core2 radio stack present and ready
  *
@@ -97,7 +97,7 @@ bool ble_system_is_radio_stack_ready();
  * @param      context   The context for callback
  */
 void ble_system_set_key_storage_changed_callback(
-    BleGlueKeyStorageChangedCallback callback,
+    BleSystemKeyStorageChangedCallback callback,
     void* context);
 
 bool ble_system_reinit_c2();

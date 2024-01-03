@@ -67,7 +67,7 @@ void furi_hal_ble_unlock_core2() {
     furi_check(furi_mutex_release(furi_hal_ble.core2_mtx) == FuriStatusOk);
 }
 
-static bool furi_hal_ble_radio_stack_is_supported(const BleGlueC2Info* info) {
+static bool furi_hal_ble_radio_stack_is_supported(const BleSystemC2Info* info) {
     bool supported = false;
     if(info->StackType == INFO_STACK_TYPE_BLE_LIGHT) {
         if(info->VersionMajor >= FURI_HAL_BLE_STACK_VERSION_MAJOR &&
@@ -109,7 +109,7 @@ bool furi_hal_ble_start_radio_stack() {
         }
 
         // Check whether we support radio stack
-        const BleGlueC2Info* c2_info = ble_system_get_c2_info();
+        const BleSystemC2Info* c2_info = ble_system_get_c2_info();
         if(!furi_hal_ble_radio_stack_is_supported(c2_info)) {
             FURI_LOG_E(TAG, "Unsupported radio stack");
             // Don't stop SHCI for crypto enclave support
@@ -275,7 +275,7 @@ void furi_hal_ble_get_key_storage_buff(uint8_t** key_buff_addr, uint16_t* key_bu
 }
 
 void furi_hal_ble_set_key_storage_change_callback(
-    BleGlueKeyStorageChangedCallback callback,
+    BleSystemKeyStorageChangedCallback callback,
     void* context) {
     furi_assert(callback);
     ble_system_set_key_storage_changed_callback(callback, context);

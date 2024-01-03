@@ -126,7 +126,7 @@ static void bt_battery_level_changed_callback(const void* _event, void* context)
     case PowerEventTypeFullyCharged:
     case PowerEventTypeStopCharging:
         message.type = BtMessageTypeUpdatePowerState;
-        message.data.power_state = is_charging;
+        message.data.power_state_charging = is_charging;
         furi_check(
             furi_message_queue_put(bt->message_queue, &message, FuriWaitForever) == FuriStatusOk);
         break;
@@ -475,7 +475,7 @@ int32_t bt_srv(void* p) {
             // Update battery level
             furi_hal_ble_update_battery_level(message.data.battery_level);
         } else if(message.type == BtMessageTypeUpdatePowerState) {
-            furi_hal_ble_update_power_state(message.data.power_state);
+            furi_hal_ble_update_power_state(message.data.power_state_charging);
         } else if(message.type == BtMessageTypePinCodeShow) {
             // Display PIN code
             bt_pin_code_show(bt, message.data.pin_code);

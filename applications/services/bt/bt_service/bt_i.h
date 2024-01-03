@@ -42,7 +42,7 @@ typedef struct {
 typedef union {
     uint32_t pin_code;
     uint8_t battery_level;
-    bool power_state;
+    bool power_state_charging;
     const FuriHalBleProfileConfig* profile_config;
     BtKeyStorageUpdateData key_storage_data;
 } BtMessageData;

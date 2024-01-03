@@ -171,7 +171,7 @@ bool furi_hal_ble_clear_white_list();
  * @param       context     pointer to context
  */
 void furi_hal_ble_set_key_storage_change_callback(
-    BleGlueKeyStorageChangedCallback callback,
+    BleSystemKeyStorageChangedCallback callback,
     void* context);
 
 /** Start ble tone tx at given channel and power

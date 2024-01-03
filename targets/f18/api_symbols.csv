@@ -622,7 +622,7 @@ Function,-,ble_system_fus_stack_delete,BleGlueCommandResult,
 Function,-,ble_system_fus_stack_install,BleGlueCommandResult,"uint32_t, uint32_t"
 Function,-,ble_system_fus_wait_operation,BleGlueCommandResult,
 Function,+,ble_system_get_c2_info,const BleGlueC2Info*,
-Function,-,ble_system_get_c2_status,BleGlueStatus,
+Function,-,ble_system_get_c2_status,BleSystemStatus,
 Function,-,ble_system_get_hardfault_info,const BleGlueHardfaultInfo*,
 Function,+,ble_system_init,void,
 Function,+,ble_system_is_alive,_Bool,

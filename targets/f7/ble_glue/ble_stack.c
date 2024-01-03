@@ -115,9 +115,7 @@ void ble_stack_get_key_storage_buff(uint8_t** addr, uint16_t* size) {
 
 void ble_stack_deinit() {
     furi_check(ble_app);
-    // if(!ble_app) {
-    //     return;
-    // }
+
     furi_mutex_free(ble_app->hci_mtx);
     furi_semaphore_free(ble_app->hci_sem);
     free(ble_app);

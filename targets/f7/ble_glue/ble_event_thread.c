@@ -48,7 +48,6 @@ void shci_notify_asynch_evt(void* pdata) {
         return;
     }
 
-    // FURI_LOG_W(TAG, "shci_notify_asynch_evt");
     FuriThreadId thread_id = furi_thread_get_id(event_thread);
     furi_assert(thread_id);
     furi_thread_flags_set(thread_id, BLE_EVENT_THREAD_FLAG_SHCI_EVENT);
@@ -56,15 +55,19 @@ void shci_notify_asynch_evt(void* pdata) {
 
 void hci_notify_asynch_evt(void* pdata) {
     UNUSED(pdata);
-    furi_check(event_thread);
-    // FURI_LOG_W(TAG, "hci_notify_asynch_evt");
+    if(!event_thread) {
+        return;
+    }
+
     FuriThreadId thread_id = furi_thread_get_id(event_thread);
     furi_assert(thread_id);
     furi_thread_flags_set(thread_id, BLE_EVENT_THREAD_FLAG_HCI_EVENT);
 }
 
 void ble_event_thread_stop() {
-    if(!event_thread) return;
+    if(!event_thread) {
+        return;
+    }
 
     FuriThreadId thread_id = furi_thread_get_id(event_thread);
     furi_assert(thread_id);

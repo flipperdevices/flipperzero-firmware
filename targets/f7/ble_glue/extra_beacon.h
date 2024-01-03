@@ -89,9 +89,8 @@ const GapExtraBeaconConfig* gap_extra_beacon_get_config();
 
 bool gap_extra_beacon_set_data(const uint8_t* data, uint8_t length);
 
+// Fill "data" with last configured extra beacon data and return its length
 uint8_t gap_extra_beacon_get_data(uint8_t* data);
-
-// Fill data with last configured extra beacon data and return its length
 
 #ifdef __cplusplus
 }
