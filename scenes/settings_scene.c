@@ -181,7 +181,7 @@ void minesweeper_scene_settings_screen_on_enter(void* context) {
     item = variable_item_list_add(
            va,
            "Board Width",
-           129-16,
+           147-16,
            minesweeper_scene_settings_screen_set_width,
            app);
 
