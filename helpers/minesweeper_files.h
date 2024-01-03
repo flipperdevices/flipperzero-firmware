@@ -18,6 +18,15 @@ extern "C" {
 bool mine_sweeper_storage_file_write(const char* format, ...)
     _ATTRIBUTE((__format__(__printf__, 1, 2)));
 
+/** Read data from a file 
+ *
+ * @param   buff        void* buffer to save data to
+ * @param   to_read     size_t to_read size of data to read into buffer
+ *
+ * @return  size_t bytes read
+ */
+uint8_t mine_sweeper_storage_file_read(char* buff, size_t to_read);
+
 #ifdef __cplusplus
 }
 #endif
