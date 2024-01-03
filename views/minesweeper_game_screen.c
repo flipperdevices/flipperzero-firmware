@@ -8,7 +8,7 @@
 #include <furi.h>
 #include <furi_hal.h>
 
-static const Icon* tile_icons[] = {
+static const Icon* tile_icons[13] = {
     &I_tile_empty_8x8,
     &I_tile_0_8x8,
     &I_tile_1_8x8,
@@ -53,7 +53,7 @@ struct MineSweeperGameScreen {
 };
 
 typedef struct {
-    uint16_t x_abs, y_abs;
+    int16_t x_abs, y_abs;
 } CurrentPosition;
 
 typedef struct {
@@ -296,30 +296,27 @@ static void setup_board(MineSweeperGameScreen* instance) {
      * and manipulate then save to actual model
      */
     MineSweeperGameScreenTileType tiles[MINESWEEPER_BOARD_MAX_TILES];
-    memset(&tiles, 0, sizeof(tiles));
+    memset(&tiles, MineSweeperGameScreenTileNone, sizeof(tiles));
 
     for (uint16_t i = 0; i < num_mines; i++) {
         uint16_t rand_pos;
 
         do {
-            rand_pos = furi_hal_random_get() % (board_tile_count);
+            rand_pos = furi_hal_random_get() % board_tile_count;
         } while (tiles[rand_pos] == MineSweeperGameScreenTileMine);
 
         tiles[rand_pos] = MineSweeperGameScreenTileMine;
     }
 
     /** All mines are set so we look at each tile for surrounding mines */
-    for (uint16_t i = 0; i < (board_tile_count); i++) {
+    for (uint16_t i = 0; i < board_tile_count; i++) {
         MineSweeperGameScreenTileType tile_type = tiles[i];
 
         if (tile_type == MineSweeperGameScreenTileMine) {
             continue;
         }
 
-        uint16_t x = i / board_width;
-        uint16_t y = i % board_width;
-
-        uint8_t offsets[8][2] = {
+        int8_t offsets[8][2] = {
             {-1,1},
             {0,1},
             {1,1},
@@ -332,9 +329,12 @@ static void setup_board(MineSweeperGameScreen* instance) {
 
         uint16_t mine_count = 0;
 
+        uint16_t x = i / board_width;
+        uint16_t y = i % board_width;
+
         for (uint8_t j = 0; j < 8; j++) {
-            int16_t dx = x + (uint16_t)offsets[j][0];
-            int16_t dy = y + (uint16_t)offsets[j][1];
+            int16_t dx = x + (int16_t)offsets[j][0];
+            int16_t dy = y + (int16_t)offsets[j][1];
 
             if (dx < 0 || dy < 0 || dx >= board_height || dy >= board_width) {
                 continue;
@@ -344,9 +344,10 @@ static void setup_board(MineSweeperGameScreen* instance) {
             if (tiles[pos] == MineSweeperGameScreenTileMine) {
                 mine_count++;
             }
+
         }
 
-        tiles[i] = (MineSweeperGameScreenTileType) ((mine_count % (MineSweeperGameScreenTileTypeCount-1)) + 1);
+        tiles[i] = (MineSweeperGameScreenTileType) mine_count+1;
 
     }
 
@@ -357,7 +358,7 @@ static void setup_board(MineSweeperGameScreen* instance) {
         instance->view,
         MineSweeperGameScreenModel * model,
         {
-            for (uint16_t i = 0; i < (model->board_width*model->board_height); i++) {
+            for (uint16_t i = 0; i < board_tile_count; i++) {
                 model->board[i].tile_type = tiles[i];
                 model->board[i].tile_state = MineSweeperGameScreenTileStateUncleared;
                 model->board[i].icon_element.icon = tile_icons[ tiles[i] ];
