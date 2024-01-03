@@ -2,7 +2,7 @@
 
 enum SubmenuIndex {
     SubmenuIndexAuthenticate,
-    SubmenuIndexSetStandartConfig,
+    SubmenuIndexSetDefaultConfig,
 };
 
 void nfc_magic_scene_gen4_actions_menu_submenu_callback(void* context, uint32_t index) {
@@ -23,8 +23,8 @@ void nfc_magic_scene_gen4_actions_menu_on_enter(void* context) {
         instance);
     submenu_add_item(
         submenu,
-        "Set Standart Config",
-        SubmenuIndexSetStandartConfig,
+        "Set Default Config",
+        SubmenuIndexSetDefaultConfig,
         nfc_magic_scene_gen4_actions_menu_submenu_callback,
         instance);
 
@@ -42,8 +42,8 @@ bool nfc_magic_scene_gen4_actions_menu_on_event(void* context, SceneManagerEvent
         if(event.event == SubmenuIndexAuthenticate) {
             scene_manager_next_scene(instance->scene_manager, NfcMagicSceneKeyInput);
             consumed = true;
-        } else if(event.event == SubmenuIndexSetStandartConfig) {
-            scene_manager_next_scene(instance->scene_manager, NfcMagicSceneGen4SetCfg);
+        } else if(event.event == SubmenuIndexSetDefaultConfig) {
+            scene_manager_next_scene(instance->scene_manager, NfcMagicSceneGen4SetDefaultCfg);
             consumed = true;
         }
 
