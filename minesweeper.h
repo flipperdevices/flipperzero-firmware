@@ -20,7 +20,7 @@
 #include "scenes/minesweeper_scene.h"
 #include "views/start_screen.h"
 #include "views/minesweeper_game_screen.h"
-#include "helpers/minesweeper_files.h"
+#include "helpers/mine_sweeper_storage.h"
 #include "minesweeper_icons.h"
 
 #define TAG "MineSweeper"

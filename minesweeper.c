@@ -1,4 +1,5 @@
 #include "minesweeper.h"
+//#include <args.h>
 
 static bool minesweeper_custom_event_callback(void* context, uint32_t custom_event) {
     furi_assert(context);
@@ -47,38 +48,24 @@ static MineSweeperApp* app_alloc() {
     memset(&app->t_settings_info, 0, sizeof(app->t_settings_info));
     app->is_settings_changed = false;
 
-    // Read settings from storage
-    // The save data has a consistent format
-    // 'of xxx,xxx,xxx\n' so read first 11 bytes
-    
-    char save_data[32];
-
-    uint8_t bytes_read = 0;
-    //bytes_read = mine_sweeper_storage_file_read(save_data, 11);
-    save_data[11] = '\0';
-
-    if (bytes_read == 11) {
-        sscanf(
-            save_data,
-            "%" SCNu8 ",%" SCNu8 ",%" SCNu8,
-            &app->settings_info.board_width,
-            &app->settings_info.board_height,
-            &app->settings_info.difficulty);
-    } else {
-
+    // If we cannot read the save file set to default values
+    if (!(mine_sweeper_read_settings(app))) {
         app->settings_info.board_width = 16;
         app->settings_info.board_height = 7;
         app->settings_info.difficulty = 0;
-    }
+        app->haptic = 1;
+        app->speaker = 1;
+        app->led = 1;
 
-    // Set hardware related values to default
-    app->haptic = 1;
-    app->speaker = 1;
-    app->led = 1;
+        mine_sweeper_save_settings(app);
+    }
 
     // Alloc views and add to view dispatcher
     app->start_screen = start_screen_alloc();
-    view_dispatcher_add_view(app->view_dispatcher, MineSweeperStartScreenView, start_screen_get_view(app->start_screen));
+    view_dispatcher_add_view(
+            app->view_dispatcher,
+            MineSweeperStartScreenView,
+            start_screen_get_view(app->start_screen));
 
     app->loading = loading_alloc();
     view_dispatcher_add_view(app->view_dispatcher, MineSweeperLoadingView, loading_get_view(app->loading));
