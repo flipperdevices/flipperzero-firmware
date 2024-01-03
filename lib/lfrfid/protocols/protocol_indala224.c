@@ -26,12 +26,12 @@ typedef struct {
 } ProtocolIndala224Encoder;
 
 typedef struct {
-    uint8_t encoded_data[INDALA26_ENCODED_DATA_SIZE];
-    uint8_t negative_encoded_data[INDALA26_ENCODED_DATA_SIZE];
-    uint8_t corrupted_encoded_data[INDALA26_ENCODED_DATA_SIZE];
-    uint8_t corrupted_negative_encoded_data[INDALA26_ENCODED_DATA_SIZE];
+    uint8_t encoded_data[INDALA224_ENCODED_DATA_SIZE];
+    uint8_t negative_encoded_data[INDALA224_ENCODED_DATA_SIZE];
+    uint8_t corrupted_encoded_data[INDALA224_ENCODED_DATA_SIZE];
+    uint8_t corrupted_negative_encoded_data[INDALA224_ENCODED_DATA_SIZE];
 
-    uint8_t data[INDALA26_DECODED_DATA_SIZE];
+    uint8_t data[INDALA224_DECODED_DATA_SIZE];
     ProtocolIndala224Encoder encoder;
 } ProtocolIndala224;
 
@@ -219,19 +219,19 @@ void protocol_indala224_render_data_internal(
         furi_string_printf(
             result,
             "UID: %u%u...",
-            uid1,
-            uid2);
+            ( unsigned int ) uid1,
+            ( unsigned int ) uid2);
     } else {
         furi_string_printf(
             result,
             "UID: %u%u%u%u%u%u%u",
-            uid1,
-            uid2,
-            uid3,
-            uid4,
-            uid5,
-            uid6,
-            uid7);
+            ( unsigned int ) uid1,
+            ( unsigned int ) uid2,
+            ( unsigned int ) uid3,
+            ( unsigned int ) uid4,
+            ( unsigned int ) uid5,
+            ( unsigned int ) uid6,
+            ( unsigned int ) uid7);
     }
 }
 void protocol_indala224_render_data(ProtocolIndala224* protocol, FuriString* result) {
