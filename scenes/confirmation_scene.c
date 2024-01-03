@@ -61,7 +61,7 @@ bool minesweeper_scene_confirmation_screen_on_event(void* context, SceneManagerE
                 
                 // Commit changes to save file for next app startup
                 mine_sweeper_storage_file_write(
-                    "%d,%d,%d",
+                    "%03" PRIu8 ",%03" PRIu8 ",%03" PRIu8,
                     app->settings_info.board_width,
                     app->settings_info.board_height,
                     app->settings_info.difficulty);
