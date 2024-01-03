@@ -15,4 +15,4 @@ void customConcat(char* dest, const char* src);
 
 //void meal_pager_retekess_t119_generate_station(void* context, uint32_t station);
 
-void meal_pager_retekess_t119_generate_all(void* context);
+bool meal_pager_retekess_t119_generate_all(void* context);

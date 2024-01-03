@@ -308,7 +308,7 @@ SubGhzTxRxStartTxState subghz_txrx_tx_start(SubGhzTxRx* instance, FlipperFormat*
         }
         if(ret != SubGhzTxRxStartTxStateOk) {
             FURI_LOG_D(TAG, "state not ok");
-            //subghz_transmitter_free(instance->transmitter); // Crashes here
+            subghz_transmitter_free(instance->transmitter); // Crashes here
             if(instance->txrx_state != SubGhzTxRxStateIDLE) {
                 subghz_txrx_idle(instance);
             }

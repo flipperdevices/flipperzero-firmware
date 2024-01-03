@@ -180,15 +180,23 @@ static void meal_pager_retekess_t119_generate_station(void* context, uint32_t st
     }
 }
 
-void meal_pager_retekess_t119_generate_all(void* context) {
+bool meal_pager_retekess_t119_generate_all(void* context) {
     Meal_Pager* app = context;
 
     app->current_pager = 1;
     app->current_station = app->first_station;
 
     Storage* storage = furi_record_open(RECORD_STORAGE);
-    FlipperFormat* ff = meal_pager_save_subghz_buffer_file_start(app, storage);
+    FlipperFormat* ff = flipper_format_file_alloc(storage);
+    bool success = meal_pager_save_subghz_buffer_file_start(app, ff, storage);
 
+    if (!success) {
+        FURI_LOG_D(TAG, "failed to save buffer");
+        meal_pager_save_subghz_buffer_stop(app, ff);
+        furi_record_close(RECORD_STORAGE);
+        return success;
+    }
+    
     for (u_int32_t i = app->current_station;i <= app->last_station; i++) {
         meal_pager_retekess_t119_generate_station(app, i, ff);
         //furi_thread_flags_wait(0, FuriFlagWaitAny, 100);
@@ -199,5 +207,6 @@ void meal_pager_retekess_t119_generate_all(void* context) {
 
     meal_pager_save_subghz_buffer_stop(app, ff);
     furi_record_close(RECORD_STORAGE);
+    return success;
 }
 

@@ -15,19 +15,21 @@ static void meal_pager_close_config_file(FlipperFormat* file) {
     flipper_format_free(file);
 }
 
-FlipperFormat* meal_pager_save_subghz_buffer_file_start(void* context, Storage* storage) {
+bool meal_pager_save_subghz_buffer_file_start(void* context, FlipperFormat* ff, Storage* storage) {
     // SubGhz TXRX can only be loaded with files, makes sense as to save RAM
     Meal_Pager* app = context;
     UNUSED(app);
+    bool success = false;
     FURI_LOG_D(TAG, "Creating Temp File");
     //Storage* storage = furi_record_open(RECORD_STORAGE);
-    FlipperFormat* ff = flipper_format_file_alloc(storage);
+    //FlipperFormat* ff = flipper_format_file_alloc(storage);
 
     // Overwrite wont work, so delete first
     if(storage_file_exists(storage, MEAL_PAGER_TMP_FILE)) {
         bool stored = storage_simply_remove(storage, MEAL_PAGER_TMP_FILE);
         if (!stored) {
             FURI_LOG_D(TAG, "Cannot remove file, seems to be open");
+            return success;
         }
     }
 
@@ -49,16 +51,16 @@ FlipperFormat* meal_pager_save_subghz_buffer_file_start(void* context, Storage* 
         //totp_close_config_file(fff_file);
         FURI_LOG_D(TAG, "Error creating new file %s", MEAL_PAGER_TMP_FILE);
         meal_pager_close_storage();
-        return ff;
+        return success;
     }
     
-    bool success = flipper_format_write_header_cstr(ff, MEAL_PAGER_SUBGHZ_FILE_TYPE, MEAL_PAGER_SUBGHZ_FILE_VERSION) &&
+    success = flipper_format_write_header_cstr(ff, MEAL_PAGER_SUBGHZ_FILE_TYPE, MEAL_PAGER_SUBGHZ_FILE_VERSION) &&
                    flipper_format_write_string_cstr(ff, "Frequency", MEAL_PAGER_SUBGHZ_FILE_FREQUENCY) &&
                    flipper_format_write_string_cstr(ff, "Preset", MEAL_PAGER_SUBGHZ_FILE_PRESET) &&
                    flipper_format_write_string_cstr(ff, "Protocol", MEAL_PAGER_SUBGHZ_FILE_Protocol);
-    UNUSED(success);            
-
-    return ff;
+    //UNUSED(success);            
+    return success;
+    //return ff;
 }
 
 void meal_pager_save_subghz_buffer_stop(void* context, FlipperFormat* ff) {
