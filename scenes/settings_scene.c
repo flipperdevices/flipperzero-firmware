@@ -1,4 +1,3 @@
-#include <inttypes.h>
 #include "../minesweeper.h"
 #include "../views/minesweeper_game_screen.h"
 
