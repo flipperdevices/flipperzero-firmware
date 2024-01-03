@@ -23,7 +23,12 @@ void meal_pager_scene_transmit_on_enter(void* context) {
     meal_pager_transmit_model_set_pager(app->meal_pager_transmit, app->current_pager);
     meal_pager_transmit_set_callback(app->meal_pager_transmit, meal_pager_transmit_callback, app);
     view_dispatcher_switch_to_view(app->view_dispatcher, Meal_PagerViewIdTransmit);
-    meal_pager_retekess_t119_generate_all(app);
+    bool generated = meal_pager_retekess_t119_generate_all(app);
+    if (!generated) {
+        FURI_LOG_D(TAG, "Could not generate temp file");
+        meal_pager_blink_stop(app);
+        return;
+    }
     FURI_LOG_D(TAG, "Generated tmp.sub");
     meal_pager_blink_start_subghz(app);
     FURI_LOG_D(TAG, "Start Transmitting");
