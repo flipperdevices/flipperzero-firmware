@@ -3,18 +3,18 @@
 
 static void (*const nfc_playlist_scene_on_enter_handlers[])(void*) = {
     nfc_playlist_main_menu_scene_on_enter,
-    nfc_playlist_emulation_scene_on_enter,
-};
+    nfc_playlist_settings_scene_on_enter,
+    nfc_playlist_emulation_scene_on_enter};
 
 static bool (*const nfc_playlist_scene_on_event_handlers[])(void*, SceneManagerEvent) = {
     nfc_playlist_main_menu_scene_on_event,
-    nfc_playlist_emulation_scene_on_event,
-};
+    nfc_playlist_settings_scene_on_event,
+    nfc_playlist_emulation_scene_on_event};
 
 static void (*const nfc_playlist_scene_on_exit_handlers[])(void*) = {
     nfc_playlist_main_menu_scene_on_exit,
-    nfc_playlist_emulation_scene_on_exit,
-};
+    nfc_playlist_settings_scene_on_exit,
+    nfc_playlist_emulation_scene_on_exit};
 
 static const SceneManagerHandlers nfc_playlist_scene_manager_handlers = {
     .on_enter_handlers = nfc_playlist_scene_on_enter_handlers,
@@ -45,6 +45,7 @@ static NfcPlaylist* nfc_playlist_alloc() {
     view_dispatcher_enable_queue(nfc_playlist->view_dispatcher);
 
     nfc_playlist->variable_item_list = variable_item_list_alloc();
+    nfc_playlist->submenu = submenu_alloc();
     nfc_playlist->popup = popup_alloc();
     nfc_playlist->emulate_timeout = default_emulate_timeout;
     nfc_playlist->emulate_delay = default_emulate_delay;
@@ -60,6 +61,11 @@ static NfcPlaylist* nfc_playlist_alloc() {
     view_dispatcher_add_view(
         nfc_playlist->view_dispatcher,
         NfcPlaylistView_Menu,
+        submenu_get_view(nfc_playlist->submenu));
+
+    view_dispatcher_add_view(
+        nfc_playlist->view_dispatcher,
+        NfcPlaylistView_Settings,
         variable_item_list_get_view(nfc_playlist->variable_item_list));
 
     view_dispatcher_add_view(
@@ -72,9 +78,11 @@ static void nfc_playlist_free(NfcPlaylist* nfc_playlist) {
     furi_assert(nfc_playlist);
     scene_manager_free(nfc_playlist->scene_manager);
     view_dispatcher_remove_view(nfc_playlist->view_dispatcher, NfcPlaylistView_Menu);
+    view_dispatcher_remove_view(nfc_playlist->view_dispatcher, NfcPlaylistView_Settings);
     view_dispatcher_remove_view(nfc_playlist->view_dispatcher, NfcPlaylistView_Popup);
     view_dispatcher_free(nfc_playlist->view_dispatcher);
     variable_item_list_free(nfc_playlist->variable_item_list);
+    submenu_free(nfc_playlist->submenu);
     popup_free(nfc_playlist->popup);
     furi_record_close(RECORD_NOTIFICATION);
     free(nfc_playlist);

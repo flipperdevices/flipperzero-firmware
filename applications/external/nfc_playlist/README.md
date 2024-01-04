@@ -10,3 +10,4 @@ To set the playlist you need to create a file in ext/apps_data/nfc_playlist call
 
 ## Ideas
 - [ ] Add the ability to change playlist
+- [ ] Make it so changed settings are saved (maybe make it so settings can be specified for each playlist changing the settings based on the playlist selected)
