@@ -56,7 +56,7 @@
 - Use **GAME BOY CAMERA** like Camera
 - Extra modules
     - Slot for `NRF24`/`CC1101`.
-    - Slot for `GPS NEO-6M` Module (wardrive)
+    - Slot for `GPS NEO-XM` Module (wardrive)
 - Includes Marauder ESP32 (v0.13.0).
 
 
