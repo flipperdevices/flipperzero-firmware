@@ -121,34 +121,52 @@ If you are using a browser that does not support the Web Serial API, you will ne
 
 This is the recommended configuration if you are going to be editing the existing applications or writing your own.  You will get code completion and be able to step into the firmware code, finding out how a specific function works.
 
-Prerequisites:
+**Prerequisites:**
+
+Most of the prerequisites links have a default "Download" button on the landing page (look for a button that says `Download` or has a download icon).  For each of the installers, after you accept the license agreement, you can just click "Next" through the rest of the install process.
+
 - [Install Python](https://www.python.org/downloads/)
 - [Install GIT tools](https://git-scm.com/downloads)
 - [Install VSCode](https://code.visualstudio.com/download)
 
 Configure VSCode:
 - Step 1: Make sure you have installed the above prerequisites.
-- Step 2: Create a folder called `repos` in your home directory.  You can use any folder you want, but this tutorial assumes you are using `/repos` folder.  
+- Step 2: Create a folder called `repos` in your home directory.  You can use any folder you want, but this tutorial assumes you are using `/repos` folder.  If you are using Windows, you can use `C:\repos` or `C:\Users\yourname\repos` or any other folder you want.
 - Step 3: Open VSCode.
 - Step 4: Clone the Flipboard repository.
   - Step 4a: `View`/`Command Palette`/`Git: Clone`
   - Step 4b: Enter the URL of the flipboard repository `https://github.com/jamisonderek/flipboard.git` then click **Clone from URL** and choose your `/repos` folder as the target.  This will create a folder called `flipboard` in your `repos` folder.
   - Step 4c: When prompted if you would like to open the repository, choose `Open`.
   - Step 4d: When prompted if you trust the authors, choose `Yes` (or choose `No` if you prefer.)
-- Step 5: **Recursively clone** the firmware repository. 
+- Step 5: **Recursively clone** the firmware repository.   Be sure you choose `Git: Clone (Recursive)` from the `Command Palette` menu.  This is different than the `Git: Clone` command you ran in the previous step!
   - Step 5a: `View`/`Command Palette`/`Git: Clone (Recursive)`
   - Step 5b: Enter the URL of the firmware you would like to run on your Flipper and choose your `/repos` folder as the target.
     - Official: `https://github.com/flipperdevices/flipperzero-firmware.git`
     - Unleashed: `https://github.com/DarkFlippers/unleashed-firmware.git`
     - RogueMaster: `https://github.com/RogueMaster/flipperzero-firmware-wPlugins.git`
     - Xtreme: `https://github.com/Flipper-XFW/Xtreme-Firmware.git`
+  - NOTE: THIS IS RECURSIVELY CLONING THE REPOSITORY.  This may take a few minutes to complete, depending on the speed of your internet connection.
   - Step 5c: When prompted if you would like to open the repository, choose `Open`.
   - Step 5d: When prompted if you trust the authors, choose `Yes` (so you will be able to build the code later.)
-- Step 6: Install VSCode tools
-  - Step 6a: Right click on `fbt` and choose `Open in Integrated Terminal`.
-  - Step 6b: Type `./fbt vscode_dist` and press enter.
-  - Step 6c: When prompted if you would like to install the recommended extensions, choose `Install`.
-  - Step 6d: Be sure the extensions `CMAKE` and `CMAKE TOOLS` are disabled for the workspace, otherwise Ctrl+Shift+B may not show the build options!
+  - You may get a warning about "13 submodules".  This is normal, you can safely ignore this warning.
+- Step 6: Open GIT tools
+  - Step 6a: Open the GIT CMD window (or any new command window should be fine.)
+  - Step 6b: Type `git` and press enter.
+  - Step 6c: If you get a message that says `git is not recognized as an internal or external command`, then you need to add the git tools to your path.
+- Step 7: Install VSCode tools
+  - Step 7a: Close VSCode and reopen it.
+  - Step 7b: In VSCode, make sure the Explorer window is open (`View`/`Explorer`).
+  - Step 7c: Right click on `fbt` and choose `Open in Integrated Terminal`.  A new command terminal should appear at the bottom right of the screen.
+  - Step 7d: Type `./fbt vscode_dist` in the Integrated Terminal and press enter.
+  - Step 7e: If prompted if you would like to install the recommended extensions, choose `Install`.
+  - Step 7f: Close VSCode and reopen it.
+  - Step 7g: If prompted if you would like to install the recommended extensions, choose `Install`.
+  - Step 7h: Be sure the extensions `CMAKE` and `CMAKE TOOLS` are disabled for the workspace, otherwise Ctrl+Shift+B may not show the build options (and instead show things about `cmake`)!
+    - Step 7h1: Click on the `Extensions` icon on the left side of the screen.
+    - Step 7h2: Type `cmake` in the search box.
+    - Step 7h3: Click on the `CMAKE` extension.
+    - Step 7h4: If it has an `Install` button you are done.
+    - Step 7h5: If it has a `Disable` button, click on the `Disable` button.
 - Step 7: Build and deploy
   - Step 7a: Connect your Flipper to the computer.
   - Step 7b: Press `Ctrl+Shift+B` to bring up the build options.
@@ -162,6 +180,7 @@ Configure VSCode:
 
 Build and deploy the application:
   - Step 1: Connect your Flipper to the computer.
+  - Step 2: In VSCode, make sure the Explorer window is open (`View`/`Explorer`).
   - Step 2: Open the file `./applications_user/flipblinky/app.c` (or whichever application you want to build)
   - Step 3: Press `Ctrl+Shift+B` to bring up the build options.
   - Step 4: Choose `[Debug] Launch App on Flipper`.
