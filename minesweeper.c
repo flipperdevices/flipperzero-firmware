@@ -50,6 +50,7 @@ static MineSweeperApp* app_alloc() {
 
     // If we cannot read the save file set to default values
     if (!(mine_sweeper_read_settings(app))) {
+        FURI_LOG_D(TAG, "Cannot read save file, loading defaults");
         app->settings_info.board_width = 16;
         app->settings_info.board_height = 7;
         app->settings_info.difficulty = 0;
@@ -58,6 +59,8 @@ static MineSweeperApp* app_alloc() {
         app->led = 1;
 
         mine_sweeper_save_settings(app);
+    } else {
+        FURI_LOG_D(TAG, "Save file loaded sucessfully");
     }
 
     // Alloc views and add to view dispatcher
@@ -103,6 +106,8 @@ static void app_free(MineSweeperApp* app) {
     
     // Remove each view from View Dispatcher
     for (MineSweeperView minesweeper_view = (MineSweeperView)0; minesweeper_view < MineSweeperViewCount; minesweeper_view++) {
+
+        FURI_LOG_D(TAG, "Removing view from View Dispatcher : %d", minesweeper_view);
         view_dispatcher_remove_view(app->view_dispatcher, minesweeper_view);
     }
 
@@ -131,17 +136,17 @@ int32_t minesweeper_app(void* p) {
     UNUSED(p);
 
     MineSweeperApp* app = app_alloc();
+    FURI_LOG_D(TAG, "Mine Sweeper app allocated with size : %d", sizeof(app));
 
     // This will be the initial scene on app startup
     scene_manager_next_scene(app->scene_manager, MineSweeperSceneStartScreen);
+    FURI_LOG_D(TAG, "Scene Manager initial scene set : %d", MineSweeperSceneStartScreen);
 
-    furi_hal_power_suppress_charge_enter();
-    
+    FURI_LOG_D(TAG, "Starting View Dispatcher");
     view_dispatcher_run(app->view_dispatcher);
 
-    furi_hal_power_suppress_charge_exit();
-
     app_free(app);
+    FURI_LOG_D(TAG, "Mine Sweeper app freed");
 
     return 0;
 }
