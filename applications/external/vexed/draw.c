@@ -5,7 +5,7 @@
 #include <gui/elements.h>
 #include <gui/icon_i.h>
 #include "fonts.h"
-#include "game_vexed_icons.h"
+#include "vexed_icons.h"
 #include "ui.h"
 #include "move.h"
 #include "utils.h"

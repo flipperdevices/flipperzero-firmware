@@ -207,5 +207,3 @@ void find_movable_up(PlayGround* mv, uint8_t* currentMovable) {
         }
     }
 }
-
-

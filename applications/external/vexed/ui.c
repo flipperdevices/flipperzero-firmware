@@ -2,7 +2,8 @@
 
 #include <gui/icon_i.h>
 #include "fonts.h"
-#include "game_vexed_icons.h"
+#include "vexed_icons.h"
+#include "math.h"
 
 //-----------------------------------------------------------------------------
 
