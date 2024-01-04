@@ -1,7 +1,7 @@
 #pragma once
 
 #include <gui/gui.h>
-#include <u8g2/u8g2.h>
+#include <u8g2.h>
 #include <toolbox/compress.h>
 
 //-----------------------------------------------------------------------------
