@@ -1,7 +1,8 @@
 #pragma once
 
 #include <gui/gui.h>
-#include <u8g2.h>
+#include <gui/canvas_i.h>
+//#include <u8g2_glue.h>
 #include <toolbox/compress.h>
 
 //-----------------------------------------------------------------------------
@@ -12,6 +13,7 @@
 
 #define GUI_DISPLAY_CENTER_X 64
 
+/*
 typedef struct u8g2_struct u8g2_t;
 
 struct Canvas {
@@ -23,6 +25,7 @@ struct Canvas {
     uint8_t height;
     CompressIcon* compress_icon;
 };
+*/
 
 void my_canvas_frame_set(
     Canvas* canvas,
