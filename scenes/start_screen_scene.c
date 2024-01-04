@@ -1,7 +1,4 @@
 #include "../minesweeper.h"
-#include "../views/start_screen.h"
-#include "../views/minesweeper_game_screen.h"
-#include "minesweeper_icons.h"
 
 typedef enum {
     MineSweeperSceneStartScreenExitEvent,
@@ -68,6 +65,7 @@ bool minesweeper_scene_start_screen_on_event(void* context, SceneManagerEvent ev
 
     if (event.type == SceneManagerEventTypeCustom) {
         if (event.event == MineSweeperSceneStartScreenContinueEvent) {
+            mine_sweeper_game_screen_reset_clock(app->game_screen);
             scene_manager_next_scene(app->scene_manager, MineSweeperSceneGameScreen); 
             consumed = true;
         } else if (event.event == MineSweeperSceneStartScreenExitEvent) {
