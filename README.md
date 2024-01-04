@@ -12,11 +12,11 @@ Goal of the game is to clear levels from bricks. Level is seen as cross section,
 
 ![Simple level playthrough](docs/img/playtru.gif)
 
-## Selecting bricks
+### Selecting bricks
 
 To select brick you want to move, use arrow buttons. &#9664; Left and Right &#9654; arrows move sideways and cycle through all bricks, &#9660; Down and &#9650; Up pointing buttons moves selection vertically to the nearest block downwards or upwards.
 
-## Moving bricks
+### Moving bricks
 
 If selected brick can be moved **only in one direction** you can move it immediately when it is selected, clicking &#9673; Center button. 
 
@@ -28,7 +28,7 @@ If selected brick can be moved **both directions** you need to **choose it first
 
 ![Two way selection](docs/img/direction.gif)
 
-## Gravity and Explosions
+### Gravity and Explosions
 
 When block is moved to hang in the air - it will fall down, stopped if there is wall or another block. If after movement two or more blocks of the same kind are touching - they will explode and leave empty space - that may trigger further to fall and explode.
 
