@@ -4,6 +4,7 @@
 #include "../views/meal_pager_transmit.h"
 #include "../helpers/meal_pager_led.h"
 #include "../helpers/subghz/subghz.h"
+#include "../views/meal_pager_transmit.h"
 #include <dolphin/dolphin.h>
 
 void meal_pager_transmit_callback(Meal_PagerCustomEvent event, void* context) {
@@ -34,6 +35,7 @@ void meal_pager_scene_transmit_on_enter(void* context) {
     //meal_pager_blink_start_subghz(app);
     FURI_LOG_D(TAG, "Start Transmitting");
     if (!app->stop_transmit) {
+        meal_pager_transmit_model_set_sending(app->meal_pager_transmit, 1);
         subghz_send(app);
     }
     dolphin_deed(DolphinDeedSubGhzSend);
@@ -69,6 +71,7 @@ bool meal_pager_scene_transmit_on_event(void* context, SceneManagerEvent event) 
                 app->state_notifications = SubGhzNotificationStateIDLE;
                 subghz_txrx_stop(app->subghz->txrx);
                 meal_pager_blink_stop(app);
+                meal_pager_transmit_model_set_sending(app->meal_pager_transmit, 0);
                 scene_manager_next_scene(app->scene_manager, Meal_PagerSceneMenu);
                 FURI_LOG_D(TAG, "Stop Event");
                 break;

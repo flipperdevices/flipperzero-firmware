@@ -23,6 +23,7 @@ typedef struct {
     uint32_t pager_type;
     uint32_t station;
     uint32_t pager;
+    uint32_t sending;
 } Meal_PagerTransmitModel;
 
 void meal_pager_transmit_set_callback(
@@ -36,7 +37,6 @@ void meal_pager_transmit_set_callback(
 }
 
 void meal_pager_transmit_draw(Canvas* canvas, Meal_PagerTransmitModel* model) {
-    UNUSED(model);
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
     canvas_set_font(canvas, FontPrimary);
@@ -48,9 +48,13 @@ void meal_pager_transmit_draw(Canvas* canvas, Meal_PagerTransmitModel* model) {
     snprintf(pagerText, 20, "Pager: %lu", model->pager);
     canvas_draw_str_aligned(canvas, 0, 10, AlignLeft, AlignTop, pager_type_text_long[model->pager_type]); 
     canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str_aligned(canvas, 0, 22, AlignLeft, AlignTop, "Generating Data");
-    canvas_draw_str_aligned(canvas, 0, 32, AlignLeft, AlignTop, stationText); 
-    canvas_draw_str_aligned(canvas, 0, 42, AlignLeft, AlignTop, pagerText); 
+    if (model->sending == 0) {
+        canvas_draw_str_aligned(canvas, 0, 22, AlignLeft, AlignTop, "Generating Data");
+        canvas_draw_str_aligned(canvas, 0, 32, AlignLeft, AlignTop, stationText); 
+        canvas_draw_str_aligned(canvas, 0, 42, AlignLeft, AlignTop, pagerText); 
+    } else {
+        canvas_draw_str_aligned(canvas, 0, 22, AlignLeft, AlignTop, "Sending Data");
+    }
 }
 
 static void meal_pager_transmit_model_init(Meal_PagerTransmitModel* const model) {
@@ -58,6 +62,7 @@ static void meal_pager_transmit_model_init(Meal_PagerTransmitModel* const model)
     model->pager_type = 0;
     model->station = 0;
     model->pager = 0;
+    model->sending = 0;
 }
 
 void meal_pager_transmit_model_set_type(Meal_PagerTransmit* instance, uint32_t type) {
@@ -71,6 +76,20 @@ void meal_pager_transmit_model_set_station(Meal_PagerTransmit* instance, uint32_
     furi_assert(instance);
     Meal_PagerTransmitModel* model = view_get_model(instance->view);
     model->station = station;
+    view_commit_model(instance->view, false);
+    with_view_model(
+        instance->view,
+        Meal_PagerTransmitModel* model,
+        {
+            UNUSED(model);
+        },
+        true);
+}
+
+void meal_pager_transmit_model_set_sending(Meal_PagerTransmit* instance, uint32_t value) {
+    furi_assert(instance);
+    Meal_PagerTransmitModel* model = view_get_model(instance->view);
+    model->sending = value;
     view_commit_model(instance->view, false);
     with_view_model(
         instance->view,
