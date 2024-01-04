@@ -74,6 +74,8 @@ typedef struct {
     CurrentPosition curr_pos;
     uint8_t right_boundary, bottom_boundary,
             board_width, board_height, board_difficulty;
+    uint32_t start_tick;
+    FuriString* info_str;
 } MineSweeperGameScreenModel;
 
 void mine_sweeper_game_screen_view_enter(void* context) {
@@ -180,22 +182,67 @@ void mine_sweeper_game_screen_view_draw_callback(Canvas* canvas, void* _model) {
         canvas_draw_line(canvas, 0,0,127,0);
     }
 
-    // Draw cursor pos and time
-    FuriString* pos_data = furi_string_alloc_printf(
-                                "X:%03hhd  Y:%03hhd",
-                                model->curr_pos.x_abs,
-                                model->curr_pos.y_abs);
+    // Draw X Position Text 
+    furi_string_printf(
+            model->info_str,
+            "X:%03hhd",
+            model->curr_pos.x_abs);
 
-    FuriString* flags_data = furi_string_alloc_printf("F:%03hd", model->mines_left);
-    
-    canvas_draw_str_aligned(canvas, 0,64-7, AlignLeft, AlignTop, furi_string_get_cstr(pos_data));
+    canvas_draw_str_aligned(
+            canvas,
+            0,
+            64-7,
+            AlignLeft,
+            AlignTop,
+            furi_string_get_cstr(model->info_str));
 
-    canvas_draw_str_aligned(canvas,
-            110 - canvas_string_width(canvas, furi_string_get_cstr(flags_data)),
+    // Draw Y Position Text 
+    furi_string_printf(
+            model->info_str,
+            "Y:%03hhd",
+            model->curr_pos.y_abs);
+
+    canvas_draw_str_aligned(
+            canvas,
+            33,
+            64-7,
+            AlignLeft,
+            AlignTop,
+            furi_string_get_cstr(model->info_str));
+
+    // Draw flag text
+    furi_string_printf(
+            model->info_str,
+            "F:%03hd",
+            model->flags_left);
+
+    canvas_draw_str_aligned(
+            canvas,
+            66,
             64 - 7,
             AlignLeft,
             AlignTop,
-            furi_string_get_cstr(flags_data));
+            furi_string_get_cstr(model->info_str));
+
+    // Draw time text
+    uint32_t ticks_elapsed = furi_get_tick() - model->start_tick;
+    uint32_t sec = ticks_elapsed / furi_kernel_get_tick_frequency();
+    uint32_t minutes = sec / 60;
+    sec = sec % 60;
+
+    furi_string_printf(
+             model->info_str,
+             "%02ld:%02ld",
+             minutes,
+             sec);
+
+    canvas_draw_str_aligned(
+            canvas,
+            126 - canvas_string_width(canvas, furi_string_get_cstr(model->info_str)),
+            64 - 7,
+            AlignLeft,
+            AlignTop,
+            furi_string_get_cstr(model->info_str));
 }
 
 bool mine_sweeper_game_screen_view_input_callback(InputEvent* event, void* context) {
@@ -442,6 +489,7 @@ static void mine_sweeper_game_screen_set_board_information(
             model->board_width = width;
             model->board_height = height;
             model->board_difficulty = difficulty;
+            model->start_tick = furi_get_tick();
         },
         true);
 }
@@ -461,8 +509,18 @@ MineSweeperGameScreen* mine_sweeper_game_screen_alloc(uint8_t width, uint8_t hei
     view_set_enter_callback(mine_sweeper_game_screen->view, mine_sweeper_game_screen_view_enter);
     view_set_exit_callback(mine_sweeper_game_screen->view, mine_sweeper_game_screen_view_exit);
 
+    // Secondary Input callback can be called by scene
     mine_sweeper_game_screen->input_callback = NULL;
-    
+
+    // Allocate strings in model
+    with_view_model(
+        mine_sweeper_game_screen->view,
+        MineSweeperGameScreenModel * model,
+        {
+            model->info_str = furi_string_alloc();
+        },
+        true);
+
     // We need to initize board width and height before setup
     mine_sweeper_game_screen_set_board_information(mine_sweeper_game_screen, width, height, difficulty);
 
@@ -475,12 +533,12 @@ MineSweeperGameScreen* mine_sweeper_game_screen_alloc(uint8_t width, uint8_t hei
 void mine_sweeper_game_screen_free(MineSweeperGameScreen* instance) {
     furi_assert(instance);
 
+    // Dealloc strings in model
     with_view_model(
         instance->view,
         MineSweeperGameScreenModel * model,
         {
-            // Free any dynamically allocated members in the model
-            UNUSED(model);
+            furi_string_free(model->info_str);
         },
         false);
 
