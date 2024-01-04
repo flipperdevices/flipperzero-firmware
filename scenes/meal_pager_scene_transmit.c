@@ -1,6 +1,7 @@
 #include "../meal_pager_i.h"
 #include "../helpers/meal_pager_custom_event.h"
 #include "../helpers/retekess/meal_pager_retekess_t119.h"
+#include "../helpers/retekess/meal_pager_retekess_td157.h"
 #include "../views/meal_pager_transmit.h"
 #include "../helpers/meal_pager_led.h"
 #include "../helpers/subghz/subghz.h"
@@ -25,22 +26,30 @@ void meal_pager_scene_transmit_on_enter(void* context) {
     meal_pager_transmit_model_set_pager(app->meal_pager_transmit, app->current_pager);
     meal_pager_transmit_set_callback(app->meal_pager_transmit, meal_pager_transmit_callback, app);
     view_dispatcher_switch_to_view(app->view_dispatcher, Meal_PagerViewIdTransmit);
-    bool generated = meal_pager_retekess_t119_generate_all(app);
+    bool generated = false;
+    switch (app->pager_type) {
+        case Meal_PagerPagerTypeT119:
+            generated = meal_pager_retekess_t119_generate_all(app);
+            break;
+        case Meal_PagerPagerTypeTD157:
+            generated = meal_pager_retekess_td157_generate_all(app);
+            break;
+        default:
+            generated = false;
+            break;
+    }
     if (!generated) {
         FURI_LOG_D(TAG, "Could not generate temp file");
         meal_pager_blink_stop(app);
         return;
     }
     FURI_LOG_D(TAG, "Generated tmp.sub");
-    //meal_pager_blink_start_subghz(app);
     FURI_LOG_D(TAG, "Start Transmitting");
     if (!app->stop_transmit) {
         meal_pager_transmit_model_set_sending(app->meal_pager_transmit, 1);
         subghz_send(app);
     }
     dolphin_deed(DolphinDeedSubGhzSend);
-    //FURI_LOG_D(TAG, "Finished Transmitting");
-    //meal_pager_blink_stop(app);
 }
 
 
