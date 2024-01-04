@@ -30,7 +30,7 @@ Means that SubGhz Signals are being sent
 ## Can this Brute-Force Attacks
 This is a Proof-of-Concept. In Theory it could, but I wouldn't recommend trying it. Its annoying for people targeted and it could get you into trouble. Seriously, don't be that person, nobody will like your for it. 
 Appart from that, most pagers support 8191 Stations. Triggering ~30 Pagers per station would easily take a long time. That when only sending each trigger once. It is recommended is to repeat the signal approx 10x (currently not possible, but possible that stations don't react to a single call), so that would already take all day. 
-Chances are also, that your Flipper Zero will crash in that time.
+Also your Flipper Zero will crash in that time, as the generated signals use RAM which is limited in the device. There may be ways to work around this, but I think its better to have such a limitation.
 
 ## Does this even work
 I don't know. It's based on intel collected from other people. The Flipper sends data, I checked that with a second flipper. But if the data actually triggers something is not sure. 
