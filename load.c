@@ -733,7 +733,11 @@ void delete_progress(LevelScore* scores) {
 
 void init_level_list(LevelList* ls, int capacity) {
     ls->count = capacity;
-    ls->ids = malloc(sizeof(FuriString*) * capacity);
+    if(capacity > 0) {
+        ls->ids = malloc(sizeof(FuriString*) * capacity);
+    } else {
+        ls->ids = NULL;
+    }
 }
 
 //-----------------------------------------------------------------------------
@@ -744,6 +748,7 @@ void free_level_list(LevelList* ls) {
             furi_string_free(ls->ids[i]);
         }
         free(ls->ids);
+        ls->ids = NULL;
     }
 }
 
@@ -773,37 +778,42 @@ void list_extra_levels(Storage* storage, LevelList* levelList) {
                 furi_string_free(levelId);
             }
         } while(fileFound);
-        init_level_list(levelList, levelCount);
 
-        storage_dir_close(file);
-        storage_file_free(file);
-        file = storage_file_alloc(storage);
-        storage_dir_open(file, MY_APP_DATA_PATH("extra_levels"));
+        if(levelCount > 0) {
+            init_level_list(levelList, levelCount);
 
-        do {
-            memset(buf, 0, bufSize);
-            fileFound = storage_dir_read(file, &fileinfo, buf, bufSize);
-            if(fileFound) {
-                levelId = furi_string_alloc_set(buf);
-                if(furi_string_end_with_str(levelId, ".vxl")) {
-                    furi_string_left(levelId, furi_string_size(levelId) - 4);
-                    memset(buf2, 0, bufSize);
-                    level_set_id_to_error_path(levelId, bufSize, buf2);
-                    if(!storage_common_exists(storage, buf2)) {
-                        FURI_LOG_D(TAG, "EXTRA LEVEL FILE \"%s\"", furi_string_get_cstr(levelId));
-                        levelList->ids[levelNo] = furi_string_alloc_set(levelId);
-                        levelNo++;
-                    } else {
-                        FURI_LOG_W(
-                            TAG,
-                            "CANNOT LOAD LEVEL \"%s\" - error file exists at %s",
-                            furi_string_get_cstr(levelId),
-                            buf2);
+            storage_dir_close(file);
+            storage_file_free(file);
+
+            file = storage_file_alloc(storage);
+            storage_dir_open(file, MY_APP_DATA_PATH("extra_levels"));
+
+            do {
+                memset(buf, 0, bufSize);
+                fileFound = storage_dir_read(file, &fileinfo, buf, bufSize);
+                if(fileFound) {
+                    levelId = furi_string_alloc_set(buf);
+                    if(furi_string_end_with_str(levelId, ".vxl")) {
+                        furi_string_left(levelId, furi_string_size(levelId) - 4);
+                        memset(buf2, 0, bufSize);
+                        level_set_id_to_error_path(levelId, bufSize, buf2);
+                        if(!storage_common_exists(storage, buf2)) {
+                            FURI_LOG_D(
+                                TAG, "EXTRA LEVEL FILE \"%s\"", furi_string_get_cstr(levelId));
+                            levelList->ids[levelNo] = furi_string_alloc_set(levelId);
+                            levelNo++;
+                        } else {
+                            FURI_LOG_W(
+                                TAG,
+                                "CANNOT LOAD LEVEL \"%s\" - error file exists at %s",
+                                furi_string_get_cstr(levelId),
+                                buf2);
+                        }
                     }
+                    furi_string_free(levelId);
                 }
-                furi_string_free(levelId);
-            }
-        } while(fileFound);
+            } while(fileFound);
+        }
     }
 
     storage_dir_close(file);
