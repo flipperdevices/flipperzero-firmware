@@ -38,6 +38,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Tarot v0.1 (By pionaiki & tihyltew)](https://github.com/pionaiki/fz-tarot)
 - Updated: [MALVEKE GB Live Camera v1.2 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external/malveke_gb_live_camera) `Req: Malveke`
 - Updated: [Programmer Calculator v0.9 (By armixz)](https://github.com/armixz/Flipper-Zero-Programmer-Calculator)
+- Added: [Flipper Aid v1.0 (By spaghety)](https://github.com/spaghety/flipper-aid)
 
 <a name="release">
 
@@ -372,6 +373,7 @@ $ ./fbt dolphin_ext
 - [FlipBoard Signal v3.1 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
 - [FlipBoard Simon v1.0 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
 - [FlipBIP Crypto Wallet v1.14 (By xtruan)](https://github.com/xtruan/FlipBIP)
+- [Flipper Aid v1.0 (By spaghety)](https://github.com/spaghety/flipper-aid)
 - [Flizzer Tracker v0.4 (By LTVA1)](https://github.com/LTVA1/flizzer_tracker)
 - [FM Radio v1.1 (By coolshrimp)](https://github.com/coolshrimp/flipperzero-firmware-wPlugins/tree/420/applications/external/fm_radio)
 - [Genie Recorder v2.5 (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/subghz/apps/genie-recorder)
