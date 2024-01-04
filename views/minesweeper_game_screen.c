@@ -328,12 +328,24 @@ static void setup_board(MineSweeperGameScreen* instance) {
     MineSweeperGameScreenTileType tiles[MINESWEEPER_BOARD_MAX_TILES];
     memset(&tiles, MineSweeperGameScreenTileNone, sizeof(tiles));
 
+    // Place tiles everywhere randomly except the corners to help the solver
     for (uint16_t i = 0; i < num_mines; i++) {
+
         uint16_t rand_pos;
+        uint16_t x;
+        uint16_t y;
 
         do {
+
             rand_pos = furi_hal_random_get() % board_tile_count;
-        } while (tiles[rand_pos] == MineSweeperGameScreenTileMine);
+            x = rand_pos / board_width;
+            y = rand_pos % board_width;
+
+        } while (tiles[rand_pos] == MineSweeperGameScreenTileMine ||
+                            (rand_pos == 0)                       ||
+                            (x==0 && y==board_width-1)            ||
+                            (x==board_height-1 && y==0)           || 
+                            (rand_pos == board_tile_count-1));
 
         tiles[rand_pos] = MineSweeperGameScreenTileMine;
     }
