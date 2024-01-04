@@ -1,3 +1,5 @@
+![Vexed splash screen logo](img/2.png)
+
 # Vexed for Flipper Zero
 
 Vexed is puzzle game, where your goal is to clear level from bricks in smallest possible count of moves. Easy to learn, **hard to master**
@@ -41,4 +43,11 @@ See more about level format and extra levels in [custom VXL format documentation
 ## Acknowledgments and License
 
 This project was possible thanks to many authors, creators and contributors - see them all in dedicated [AUTHORS page](AUTHORS.md).
-To respect original Vexed licensing, this game is released under [GPL 2 license](LICENSE.md)
+
+To respect original Vexed licensing, this game is released under [GPL 2 license]
+(LICENSE.md)
+
+All changes are tracked in [Changelog](CHANGELOG.md).
+
+
+
