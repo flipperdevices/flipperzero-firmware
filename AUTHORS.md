@@ -6,7 +6,7 @@
 
 ## Orginal Palm.OS Vexed Authors
 
-This software uses code (parts level parsing routines) and game logic from orginal Palm.OS Vexed game:
+This software uses code (parts level parsing routines) and game logic from original Palm.OS Vexed game:
 
 - (c) 1999 James McCombe (Vexed 1.3)
 - (c) 2001 Mark Ingebretson (Vexed 1.4a)

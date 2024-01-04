@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial release of the game
 - Base gameplay extended for Flipper Zero: smart bricks selection and navigation
-- 9 level packs from orginal Palm-OS Vexed 2.2 game by James A. McCombe, Steve Haynal and Vexed Development Team
+- 9 level packs from original Palm-OS Vexed 2.2 game by James A. McCombe, Steve Haynal and Vexed Development Team
 - Support for built-in and user-provided levels
 - Golf-style par based scoring
 - One step back undo
