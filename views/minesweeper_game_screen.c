@@ -262,83 +262,66 @@ bool mine_sweeper_game_screen_view_input_callback(InputEvent* event, void* conte
 
     } else if ((event->type == InputTypePress) || (event->type == InputTypeRepeat)) {
 
-        switch (event->key) {
+        with_view_model(
+            instance->view,
+            MineSweeperGameScreenModel * model,
+            {
+                bool is_outside_boundary;
+                switch (event->key) {
 
-            case InputKeyUp :
-                with_view_model(
-                    instance->view,
-                    MineSweeperGameScreenModel * model,
-                    {
+                    case InputKeyUp :
                         model->curr_pos.x_abs = (model->curr_pos.x_abs-1 < 0) ? 0 : model->curr_pos.x_abs-1;
 
-                        bool is_outside_boundary = model->curr_pos.x_abs <
+                        is_outside_boundary = model->curr_pos.x_abs <
                             (model->bottom_boundary - MINESWEEPER_SCREEN_TILE_HEIGHT);
                         
                         if (is_outside_boundary) {
                             model->bottom_boundary--;
                         }
-                    },
-                    true);
-                consumed = true;
-                break;
+                        consumed= true;
+                        break;
 
-            case InputKeyDown :
-                with_view_model(
-                    instance->view,
-                    MineSweeperGameScreenModel * model,
-                    {
+                    case InputKeyDown :
                         model->curr_pos.x_abs = (model->curr_pos.x_abs+1 >= model->board_height) ?
                             model->board_height-1 : model->curr_pos.x_abs+1;
 
-                        bool is_outside_boundary = model->curr_pos.x_abs >= model->bottom_boundary;
+                        is_outside_boundary = model->curr_pos.x_abs >= model->bottom_boundary;
 
                         if (is_outside_boundary) {
                             model->bottom_boundary++;
                         }
-                    },
-                    true);
-                consumed = true;
-                break;
+                        consumed = true;
+                        break;
 
-            case InputKeyLeft :
-                with_view_model(
-                    instance->view,
-                    MineSweeperGameScreenModel * model,
-                    {
+                    case InputKeyLeft :
                         model->curr_pos.y_abs = (model->curr_pos.y_abs-1 < 0) ? 0 : model->curr_pos.y_abs-1;
 
-                        bool is_outside_boundary = model->curr_pos.y_abs <
+                        is_outside_boundary = model->curr_pos.y_abs <
                             (model->right_boundary - MINESWEEPER_SCREEN_TILE_WIDTH);
                         
                         if (is_outside_boundary) {
                             model->right_boundary--;
                         }
-                    },
-                    true);
-                consumed = true;
-                break;
+                        consumed = true;
+                        break;
 
-            case InputKeyRight :
-                with_view_model(
-                    instance->view,
-                    MineSweeperGameScreenModel * model,
-                    {
+                    case InputKeyRight :
                         model->curr_pos.y_abs = (model->curr_pos.y_abs+1 >= model->board_width) ?
                             model->board_width-1 : model->curr_pos.y_abs+1;
 
-                        bool is_outside_boundary = model->curr_pos.y_abs >= model->right_boundary;
+                        is_outside_boundary = model->curr_pos.y_abs >= model->right_boundary;
 
                         if (is_outside_boundary) {
                             model->right_boundary++;
                         }
-                    },
-                    true);
-                consumed = true;
-                break;
+                        consumed = true;
+                        break;
 
-            default:
-                break;
-        }
+                    default:
+                        break;
+                }
+            },
+            true);
 
     }
 
