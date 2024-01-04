@@ -7,16 +7,19 @@
 #include <gui/scene_manager.h>
 #include <gui/modules/popup.h>
 #include <gui/modules/variable_item_list.h>
+#include <gui/modules/submenu.h>
 #include <notification/notification_messages.h>
 #include <nfc_playlist_worker.h>
 
 typedef enum {
    NfcPlaylistView_Menu,
+   NfcPlaylistView_Settings,
    NfcPlaylistView_Popup
 } NfcPlayScenesView;
 
 typedef enum {
    NfcPlaylistScene_MainMenu,
+   NfcPlaylistScene_Settings,
    NfcPlaylistScene_EmulatingPopup,
    NfcPlaylistScene_count
 } NfcPlaylistScene;
@@ -25,6 +28,7 @@ typedef struct {
    SceneManager* scene_manager;
    ViewDispatcher* view_dispatcher;
    VariableItemList* variable_item_list;
+   Submenu* submenu;
    Popup* popup;
    NotificationApp* notification;
    FuriThread* thread;
