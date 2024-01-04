@@ -48,7 +48,7 @@ void calculateSumHex(const uint8_t *uid, size_t uidSize, uint8_t sumHex[]) {
   for (size_t i = 0; i < sizeof(xorKey); i++) {
     sumHex[i] = sumTwoDigits ^ xorKey[i];
   }
-}17
+}
 
 void generateKeyA(const uint8_t *uid, uint8_t uidSize, uint8_t keyA[]) {
   uint8_t sumHex[6];
@@ -58,7 +58,7 @@ void generateKeyA(const uint8_t *uid, uint8_t uidSize, uint8_t keyA[]) {
   if (firstCharacter == 0x2 || firstCharacter == 0x3 || firstCharacter == 0xA || firstCharacter == 0xB) {
     // XOR WITH 0x40
     for (size_t i = 0; i < sizeof(sumHex); i++) {
-      keyA[i] = 0x40 ^ sumHex[i];17
+      keyA[i] = 0x40 ^ sumHex[i];
     }
   } else if (firstCharacter == 0x6 || firstCharacter == 0x7 || firstCharacter == 0xE || firstCharacter == 0xF) {
     // XOR WITH 0xC0
@@ -93,7 +93,7 @@ static bool microel_read(Nfc* nfc, NfcDevice* device) {
         size_t uid_len;
         const uint8_t* uid = mf_classic_get_uid(data, &uid_len);
         FURI_LOG_D(TAG, "UID identified: %02X%02X%02X%02X", uid[0], uid[1], uid[2], uid[3]);
-        if(uid_len != UID_LENGTH) bre17ak;
+        if(uid_len != UID_LENGTH) break;
 
         uint8_t keyA[KEY_LENGTH];
         uint8_t keyB[KEY_LENGTH];
