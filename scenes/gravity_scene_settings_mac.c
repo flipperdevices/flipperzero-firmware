@@ -1,4 +1,4 @@
-#include "../uart_terminal_app_i.h"
+#include "../gravity_app_i.h"
 
 #define setMacCmdLen 26
 
@@ -17,8 +17,8 @@ void bytes_to_string(uint8_t* bytes, uint16_t bytesCount, char* strBytes) {
     p_out[-1] = 0;
 }
 
-void uart_terminal_scene_settings_mac_input_callback(void* context) {
-    UART_TerminalApp* app = context;
+void gravity_scene_settings_mac_input_callback(void* context) {
+    GravityApp* app = context;
 
     /* Convert app->mac_bytes[] to a string */
     char strMac[3 * NUM_MAC_BYTES] = "";
@@ -39,12 +39,12 @@ void uart_terminal_scene_settings_mac_input_callback(void* context) {
     app->show_stopscan_tip = false;
 
     /* Initialise the serial console */
-    uart_terminal_uart_tx((uint8_t*)("\n"), 1);
+    gravity_uart_tx((uint8_t*)("\n"), 1);
 
-    view_dispatcher_send_custom_event(app->view_dispatcher, UART_TerminalEventStartConsole);
+    view_dispatcher_send_custom_event(app->view_dispatcher, GravityEventStartConsole);
 }
 
-void uart_terminal_scene_settings_mac_changed_callback(void* context) {
+void gravity_scene_settings_mac_changed_callback(void* context) {
     // Do nothing?
     /* Github issue 19 - Warnings being treated as errors. Context is unused
        It shouldn't generate a warning but it does for the issue reporter.
@@ -55,8 +55,8 @@ void uart_terminal_scene_settings_mac_changed_callback(void* context) {
     }
 }
 
-void uart_terminal_scene_settings_mac_on_enter(void* context) {
-    UART_TerminalApp* app = context;
+void gravity_scene_settings_mac_on_enter(void* context) {
+    GravityApp* app = context;
 
     ByteInput* mac_input = app->settings_mac_bytes;
 
@@ -64,7 +64,7 @@ void uart_terminal_scene_settings_mac_on_enter(void* context) {
     byte_input_set_header_text(mac_input, "Enter MAC");
     byte_input_set_result_callback(
         mac_input,
-        uart_terminal_scene_settings_mac_input_callback,
+        gravity_scene_settings_mac_input_callback,
         NULL,
         app,
         app->mac_bytes,
@@ -73,20 +73,20 @@ void uart_terminal_scene_settings_mac_on_enter(void* context) {
     view_dispatcher_switch_to_view(app->view_dispatcher, Gravity_AppViewSettingsMac);
 }
 
-bool uart_terminal_scene_settings_mac_on_event(void* context, SceneManagerEvent event) {
-    UART_TerminalApp* app = context;
+bool gravity_scene_settings_mac_on_event(void* context, SceneManagerEvent event) {
+    GravityApp* app = context;
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == UART_TerminalEventStartConsole) {
-            scene_manager_next_scene(app->scene_manager, UART_TerminalAppViewConsoleOutput);
+        if(event.event == GravityEventStartConsole) {
+            scene_manager_next_scene(app->scene_manager, Gravity_AppViewConsoleOutput);
             consumed = true;
         }
     }
     return consumed;
 }
 
-void uart_terminal_scene_settings_mac_on_exit(void* context) {
+void gravity_scene_settings_mac_on_exit(void* context) {
     // Do nothing?
     /* Same story as on_changed */
     if(context != NULL) {

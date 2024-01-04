@@ -1,11 +1,11 @@
-#include "uart_terminal_app_i.h"
-#include "uart_terminal_uart.h"
+#include "gravity_app_i.h"
+#include "gravity_uart.h"
 
 //#define UART_CH (FuriHalUartIdUSART1)
 //#define BAUDRATE (115200)
 
-struct UART_TerminalUart {
-    UART_TerminalApp* app;
+struct GravityUart {
+    GravityApp* app;
     FuriThread* rx_thread;
     FuriStreamBuffer* rx_stream;
     uint8_t rx_buf[RX_BUF_SIZE + 1];
@@ -17,8 +17,8 @@ typedef enum {
     WorkerEvtRxDone = (1 << 1),
 } WorkerEvtFlags;
 
-void uart_terminal_uart_set_handle_rx_data_cb(
-    UART_TerminalUart* uart,
+void gravity_uart_set_handle_rx_data_cb(
+    GravityUart* uart,
     void (*handle_rx_data_cb)(uint8_t* buf, size_t len, void* context)) {
     furi_assert(uart);
     uart->handle_rx_data_cb = handle_rx_data_cb;
@@ -26,8 +26,8 @@ void uart_terminal_uart_set_handle_rx_data_cb(
 
 #define WORKER_ALL_RX_EVENTS (WorkerEvtStop | WorkerEvtRxDone)
 
-void uart_terminal_uart_on_irq_cb(UartIrqEvent ev, uint8_t data, void* context) {
-    UART_TerminalUart* uart = (UART_TerminalUart*)context;
+void gravity_uart_on_irq_cb(UartIrqEvent ev, uint8_t data, void* context) {
+    GravityUart* uart = (GravityUart*)context;
 
     if(ev == UartIrqEventRXNE) {
         furi_stream_buffer_send(uart->rx_stream, &data, 1, 0);
@@ -36,7 +36,7 @@ void uart_terminal_uart_on_irq_cb(UartIrqEvent ev, uint8_t data, void* context) 
 }
 
 static int32_t uart_worker(void* context) {
-    UART_TerminalUart* uart = (void*)context;
+    GravityUart* uart = (void*)context;
 
     while(1) {
         uint32_t events =
@@ -56,17 +56,17 @@ static int32_t uart_worker(void* context) {
     return 0;
 }
 
-void uart_terminal_uart_tx(uint8_t* data, size_t len) {
+void gravity_uart_tx(uint8_t* data, size_t len) {
     furi_hal_uart_tx(UART_CH, data, len);
 }
 
-UART_TerminalUart* uart_terminal_uart_init(UART_TerminalApp* app) {
-    UART_TerminalUart* uart = malloc(sizeof(UART_TerminalUart));
+GravityUart* gravity_uart_init(GravityApp* app) {
+    GravityUart* uart = malloc(sizeof(GravityUart));
     uart->app = app;
     // Init all rx stream and thread early to avoid crashes
     uart->rx_stream = furi_stream_buffer_alloc(RX_BUF_SIZE, 1);
     uart->rx_thread = furi_thread_alloc();
-    furi_thread_set_name(uart->rx_thread, "UART_TerminalUartRxThread");
+    furi_thread_set_name(uart->rx_thread, "GravityUartRxThread");
     furi_thread_set_stack_size(uart->rx_thread, 1024);
     furi_thread_set_context(uart->rx_thread, uart);
     furi_thread_set_callback(uart->rx_thread, uart_worker);
@@ -78,12 +78,12 @@ UART_TerminalUart* uart_terminal_uart_init(UART_TerminalApp* app) {
         app->BAUDRATE = 115200;
     }
     furi_hal_uart_set_br(UART_CH, app->BAUDRATE);
-    furi_hal_uart_set_irq_cb(UART_CH, uart_terminal_uart_on_irq_cb, uart);
+    furi_hal_uart_set_irq_cb(UART_CH, gravity_uart_on_irq_cb, uart);
 
     return uart;
 }
 
-void uart_terminal_uart_free(UART_TerminalUart* uart) {
+void gravity_uart_free(GravityUart* uart) {
     furi_assert(uart);
 
     furi_thread_flags_set(furi_thread_get_id(uart->rx_thread), WorkerEvtStop);
