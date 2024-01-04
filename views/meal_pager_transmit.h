@@ -12,6 +12,7 @@ void meal_pager_transmit_set_callback(
     Meal_PagerTransmitCallback callback,
     void* context);
 
+void meal_pager_transmit_model_set_sending(Meal_PagerTransmit* instance, uint32_t value);
 void meal_pager_transmit_model_set_type(Meal_PagerTransmit* instance, uint32_t type);
 void meal_pager_transmit_model_set_station(Meal_PagerTransmit* instance, uint32_t station);
 void meal_pager_transmit_model_set_pager(Meal_PagerTransmit* instance, uint32_t pager);
