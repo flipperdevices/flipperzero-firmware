@@ -43,7 +43,7 @@ SubGhzTxRx* subghz_txrx_alloc() {
     subghz_txrx_speaker_set_state(instance, SubGhzSpeakerStateDisable);
 
     instance->worker = subghz_worker_alloc();
-    instance->fff_data = flipper_format_string_alloc(); 
+    instance->fff_data = flipper_format_string_alloc();
 
     instance->environment = subghz_environment_alloc();
     instance->is_database_loaded =
@@ -241,7 +241,7 @@ SubGhzTxRxStartTxState subghz_txrx_tx_start(SubGhzTxRx* instance, FlipperFormat*
     SubGhzTxRxStartTxState ret = SubGhzTxRxStartTxStateErrorParserOthers;
     FuriString* temp_str = furi_string_alloc();
     uint32_t repeat = 200;
-    
+
     FURI_LOG_D(TAG, "starting loop in subghz_txrx_tx_start");
     do {
         FURI_LOG_D(TAG, "looping");
@@ -259,7 +259,7 @@ SubGhzTxRxStartTxState subghz_txrx_tx_start(SubGhzTxRx* instance, FlipperFormat*
         }
         //FURI_LOG_D(TAG, "File loaded");
         ret = SubGhzTxRxStartTxStateOk;
-        
+
         SubGhzRadioPreset* preset = instance->preset;
         instance->transmitter =
             subghz_transmitter_alloc_init(instance->environment, furi_string_get_cstr(temp_str));
@@ -268,14 +268,14 @@ SubGhzTxRxStartTxState subghz_txrx_tx_start(SubGhzTxRx* instance, FlipperFormat*
             FURI_LOG_D(TAG, "transmitter found");
             if(subghz_transmitter_deserialize(instance->transmitter, flipper_format) ==
                SubGhzProtocolStatusOk) {
-            //if (false) {
+                //if (false) {
                 FURI_LOG_D(TAG, "deserialization");
                 if(strcmp(furi_string_get_cstr(preset->name), "") != 0) {
                     FURI_LOG_D(TAG, "got preset name");
                     subghz_txrx_begin(
                         instance,
                         subghz_setting_get_preset_data_by_name(
-                            instance->setting, furi_string_get_cstr(preset->name))); 
+                            instance->setting, furi_string_get_cstr(preset->name)));
                     FURI_LOG_D(TAG, "loaded preset by name");
                     if(preset->frequency) {
                         if(!subghz_txrx_tx(instance, preset->frequency)) {
@@ -286,13 +286,13 @@ SubGhzTxRxStartTxState subghz_txrx_tx_start(SubGhzTxRx* instance, FlipperFormat*
                     } else {
                         ret = SubGhzTxRxStartTxStateErrorParserOthers;
                     }
-        
+
                 } else {
                     FURI_LOG_E(
                         TAG, "Unknown name preset \" %s \"", furi_string_get_cstr(preset->name));
                     ret = SubGhzTxRxStartTxStateErrorParserOthers;
                 }
-                
+
                 if(ret == SubGhzTxRxStartTxStateOk) {
                     //Start TX
                     FURI_LOG_D(TAG, "starting Async TX");

@@ -12,7 +12,6 @@ struct Meal_PagerStartscreen {
     void* context;
 };
 
-
 typedef struct {
     int some_value;
 } Meal_PagerStartscreenModel;
@@ -32,10 +31,10 @@ void meal_pager_startscreen_draw(Canvas* canvas, Meal_PagerStartscreenModel* mod
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
     canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str_aligned(canvas, 64, 10, AlignCenter, AlignTop, "Restaurant Pager"); 
+    canvas_draw_str_aligned(canvas, 64, 10, AlignCenter, AlignTop, "Restaurant Pager");
     canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str_aligned(canvas, 64, 22, AlignCenter, AlignTop, "Trigger Tool"); 
-    elements_button_center(canvas, "Start"); 
+    canvas_draw_str_aligned(canvas, 64, 22, AlignCenter, AlignTop, "Trigger Tool");
+    elements_button_center(canvas, "Start");
 }
 
 static void meal_pager_startscreen_model_init(Meal_PagerStartscreenModel* const model) {
@@ -43,36 +42,36 @@ static void meal_pager_startscreen_model_init(Meal_PagerStartscreenModel* const 
 }
 
 bool meal_pager_startscreen_input(InputEvent* event, void* context) {
-    furi_assert(context); 
+    furi_assert(context);
     Meal_PagerStartscreen* instance = context;
-    if (event->type == InputTypeRelease) {
+    if(event->type == InputTypeRelease) {
         switch(event->key) {
-            case InputKeyBack:
-                with_view_model(
-                    instance->view,
-                    Meal_PagerStartscreenModel * model,
-                    {
-                        UNUSED(model);
-                        instance->callback(Meal_PagerCustomEventStartscreenBack, instance->context);
-                    },
-                    true);
-                break;
-            case InputKeyLeft:
-            case InputKeyRight:
-            case InputKeyUp:
-            case InputKeyDown:
-            case InputKeyOk:
-                with_view_model(
-                    instance->view,
-                    Meal_PagerStartscreenModel* model,
-                    {
-                        UNUSED(model);
-                        instance->callback(Meal_PagerCustomEventStartscreenOk, instance->context);
-                    },
-                    true);
-                break;
-            case InputKeyMAX:
-                break;
+        case InputKeyBack:
+            with_view_model(
+                instance->view,
+                Meal_PagerStartscreenModel * model,
+                {
+                    UNUSED(model);
+                    instance->callback(Meal_PagerCustomEventStartscreenBack, instance->context);
+                },
+                true);
+            break;
+        case InputKeyLeft:
+        case InputKeyRight:
+        case InputKeyUp:
+        case InputKeyDown:
+        case InputKeyOk:
+            with_view_model(
+                instance->view,
+                Meal_PagerStartscreenModel * model,
+                {
+                    UNUSED(model);
+                    instance->callback(Meal_PagerCustomEventStartscreenOk, instance->context);
+                },
+                true);
+            break;
+        case InputKeyMAX:
+            break;
         }
     }
     return true;
@@ -88,11 +87,8 @@ void meal_pager_startscreen_enter(void* context) {
     with_view_model(
         instance->view,
         Meal_PagerStartscreenModel * model,
-        {
-            meal_pager_startscreen_model_init(model);
-        },
-        true
-    );
+        { meal_pager_startscreen_model_init(model); },
+        true);
 }
 
 Meal_PagerStartscreen* meal_pager_startscreen_alloc() {
@@ -108,12 +104,9 @@ Meal_PagerStartscreen* meal_pager_startscreen_alloc() {
     with_view_model(
         instance->view,
         Meal_PagerStartscreenModel * model,
-        {
-            meal_pager_startscreen_model_init(model);
-        },
-        true
-    );
-    
+        { meal_pager_startscreen_model_init(model); },
+        true);
+
     return instance;
 }
 
@@ -121,12 +114,7 @@ void meal_pager_startscreen_free(Meal_PagerStartscreen* instance) {
     furi_assert(instance);
 
     with_view_model(
-        instance->view,
-        Meal_PagerStartscreenModel * model,
-        {
-            UNUSED(model);
-        },
-        true);
+        instance->view, Meal_PagerStartscreenModel * model, { UNUSED(model); }, true);
     view_free(instance->view);
     free(instance);
 }
@@ -135,4 +123,3 @@ View* meal_pager_startscreen_get_view(Meal_PagerStartscreen* instance) {
     furi_assert(instance);
     return instance->view;
 }
-

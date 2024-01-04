@@ -1,8 +1,6 @@
 
 #include "meal_pager_retekess_td157.h"
 
-
-
 static char* genRawDataTD157(int zero, int one, const char* bits) {
     int bitsLen = strlen(bits);
     int lineLen = 256; // Adjust the line length as needed
@@ -15,11 +13,11 @@ static char* genRawDataTD157(int zero, int one, const char* bits) {
     customConcat(res, "-6000");
 
     // Append bits and create the line
-    for (int i = 0; i < bitsLen; i++) {
+    for(int i = 0; i < bitsLen; i++) {
         char c = bits[i];
         int t = (c == '0') ? zero : one;
 
-        if (i % 2 == 0) {
+        if(i % 2 == 0) {
             snprintf(line, lineLen, " %d", t);
         } else {
             snprintf(line, lineLen, " -%d", t);
@@ -31,13 +29,17 @@ static char* genRawDataTD157(int zero, int one, const char* bits) {
 
     // Append the closing part to the line
     customConcat(res, " 200 -6000");
-    
+
     free(line); // Free memory allocated for the line
 
     return res;
 }
 
-static void meal_pager_retekess_td157_generate_pager(void* context, char* stationId, uint32_t pager, FlipperFormat* ff) {
+static void meal_pager_retekess_td157_generate_pager(
+    void* context,
+    char* stationId,
+    uint32_t pager,
+    FlipperFormat* ff) {
     Meal_Pager* app = context;
     char pagerId[11];
     char* fullId = (char*)malloc(25 * sizeof(char));
@@ -58,18 +60,24 @@ static void meal_pager_retekess_td157_generate_pager(void* context, char* statio
     free(rawSignal);
 }
 
-static void meal_pager_retekess_td157_generate_station(void* context, uint32_t station, FlipperFormat* ff) {
+static void
+    meal_pager_retekess_td157_generate_station(void* context, uint32_t station, FlipperFormat* ff) {
     Meal_Pager* app = context;
-    FURI_LOG_D(TAG, "Generating TD157 Data for Station %lu. Pagers From %lu to %lu", station, app->first_pager, app->last_pager);
+    FURI_LOG_D(
+        TAG,
+        "Generating TD157 Data for Station %lu. Pagers From %lu to %lu",
+        station,
+        app->first_pager,
+        app->last_pager);
     app->current_station = station;
     app->current_pager = app->first_pager;
     char stationId[14];
     uint32ToBinaray(station, stationId, 10);
     //reverse(stationId);
     meal_pager_transmit_model_set_station(app->meal_pager_transmit, app->current_station);
-    for (u_int32_t i = app->current_pager;i <= app->last_pager; i++) {
+    for(u_int32_t i = app->current_pager; i <= app->last_pager; i++) {
         meal_pager_retekess_td157_generate_pager(app, stationId, i, ff);
-        if (app->stop_transmit) {
+        if(app->stop_transmit) {
             break;
         }
     }
@@ -85,16 +93,16 @@ bool meal_pager_retekess_td157_generate_all(void* context) {
     FlipperFormat* ff = flipper_format_file_alloc(storage);
     bool success = meal_pager_save_subghz_buffer_file_start(app, ff, storage);
 
-    if (!success) {
+    if(!success) {
         FURI_LOG_D(TAG, "failed to save to buffer");
         meal_pager_save_subghz_buffer_stop(app, ff);
         furi_record_close(RECORD_STORAGE);
         return success;
     }
-    
-    for (u_int32_t i = app->current_station;i <= app->last_station; i++) {
+
+    for(u_int32_t i = app->current_station; i <= app->last_station; i++) {
         meal_pager_retekess_td157_generate_station(app, i, ff);
-        if (app->stop_transmit) {
+        if(app->stop_transmit) {
             break;
         }
     }
@@ -103,4 +111,3 @@ bool meal_pager_retekess_td157_generate_all(void* context) {
     furi_record_close(RECORD_STORAGE);
     return success;
 }
-

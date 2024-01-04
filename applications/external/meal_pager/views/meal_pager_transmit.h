@@ -17,7 +17,6 @@ void meal_pager_transmit_model_set_type(Meal_PagerTransmit* instance, uint32_t t
 void meal_pager_transmit_model_set_station(Meal_PagerTransmit* instance, uint32_t station);
 void meal_pager_transmit_model_set_pager(Meal_PagerTransmit* instance, uint32_t pager);
 
-
 View* meal_pager_transmit_get_view(Meal_PagerTransmit* meal_pager_static);
 
 Meal_PagerTransmit* meal_pager_transmit_alloc();
