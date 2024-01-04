@@ -56,7 +56,17 @@ void mine_sweeper_game_screen_free(MineSweeperGameScreen* instance);
  * @param       height      uint8_t height for board
  * @param       difficulty  uint8_t difficulty for board
  */
-void mine_sweeper_game_screen_reset(MineSweeperGameScreen* instance, uint8_t width, uint8_t height, uint8_t difficulty);
+void mine_sweeper_game_screen_reset(
+        MineSweeperGameScreen* instance,
+        uint8_t width,
+        uint8_t height,
+        uint8_t difficulty);
+
+/** Reset MineSweeperGameScreen clock 
+ *
+ * @param       instance    MineSweeperGameScreen* instance
+ */
+void mine_sweeper_game_screen_reset_clock(MineSweeperGameScreen* instance);
 
 /** Get MineSweeperGameScreen view
  *
@@ -81,6 +91,7 @@ void mine_sweeper_game_screen_set_input_callback(
  * @param       context     void* context for MineSweeperGameScreen instance 
  */
 void mine_sweeper_game_screen_set_context(MineSweeperGameScreen* instance, void* context);
+
 
 /** Return true/false if tile is a mine 
  *
