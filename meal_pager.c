@@ -47,7 +47,7 @@ Meal_Pager* meal_pager_app_alloc() {
     app->first_station = 0;
     app->first_station_char = "0";
     app->last_station = 255;
-    app->last_station_char = "255";
+    app->last_station_char = "10";
     app->first_pager = 0;
     app->first_pager_char = "0";
     app->last_pager = 31;
