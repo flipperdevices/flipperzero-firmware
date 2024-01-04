@@ -48,8 +48,9 @@ void meal_pager_transmit_draw(Canvas* canvas, Meal_PagerTransmitModel* model) {
     snprintf(pagerText, 20, "Pager: %lu", model->pager);
     canvas_draw_str_aligned(canvas, 0, 10, AlignLeft, AlignTop, pager_type_text_long[model->pager_type]); 
     canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str_aligned(canvas, 0, 22, AlignLeft, AlignTop, stationText); 
-    canvas_draw_str_aligned(canvas, 0, 32, AlignLeft, AlignTop, pagerText); 
+    canvas_draw_str_aligned(canvas, 0, 22, AlignLeft, AlignTop, "Generating Data");
+    canvas_draw_str_aligned(canvas, 0, 32, AlignLeft, AlignTop, stationText); 
+    canvas_draw_str_aligned(canvas, 0, 42, AlignLeft, AlignTop, pagerText); 
 }
 
 static void meal_pager_transmit_model_init(Meal_PagerTransmitModel* const model) {

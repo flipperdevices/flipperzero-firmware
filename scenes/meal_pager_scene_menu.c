@@ -44,7 +44,17 @@ bool meal_pager_scene_menu_on_event(void* context, SceneManagerEvent event) {
                 app->scene_manager, Meal_PagerSceneMenu, SubmenuIndexSettings);
             scene_manager_next_scene(app->scene_manager, Meal_PagerSceneSettings);
             return true;
+        } else if (event.event == Meal_PagerCustomEventViewTransmitterSendStop) {
+            app->state_notifications = SubGhzNotificationStateIDLE;
+            subghz_txrx_stop(app->subghz->txrx);
+            FURI_LOG_D(TAG, "Stop Event from Menu");
+            return true;
         }
+    } else if(event.type == SceneManagerEventTypeTick) {
+        if(app->state_notifications == SubGhzNotificationStateTx) {
+            notification_message(app->notification, &sequence_blink_magenta_10);
+        }
+        return true;
     }
     return false;
 }
