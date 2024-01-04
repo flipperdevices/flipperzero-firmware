@@ -113,8 +113,6 @@ void mine_sweeper_game_screen_view_draw_callback(Canvas* canvas, void* _model) {
 
     canvas_set_color(canvas, ColorBlack);
     
-
-
     /** We can use the boundary uint8_t in the model to transform the relative x/y coordinates
      *  to the absolute x/y positions on the board grid as well as the position in the board buffer.
      *
@@ -184,12 +182,20 @@ void mine_sweeper_game_screen_view_draw_callback(Canvas* canvas, void* _model) {
 
     // Draw cursor pos and time
     FuriString* pos_data = furi_string_alloc_printf(
-                                "X: %03hhd Y: %03hhd",
+                                "X:%03hhd  Y:%03hhd",
                                 model->curr_pos.x_abs,
                                 model->curr_pos.y_abs);
-    
-    canvas_draw_str_aligned(canvas, 0,64-8, AlignLeft, AlignTop, furi_string_get_cstr(pos_data));
 
+    FuriString* flags_data = furi_string_alloc_printf("F:%03hd", model->mines_left);
+    
+    canvas_draw_str_aligned(canvas, 0,64-7, AlignLeft, AlignTop, furi_string_get_cstr(pos_data));
+
+    canvas_draw_str_aligned(canvas,
+            110 - canvas_string_width(canvas, furi_string_get_cstr(flags_data)),
+            64 - 7,
+            AlignLeft,
+            AlignTop,
+            furi_string_get_cstr(flags_data));
 }
 
 bool mine_sweeper_game_screen_view_input_callback(InputEvent* event, void* context) {
@@ -208,6 +214,7 @@ bool mine_sweeper_game_screen_view_input_callback(InputEvent* event, void* conte
         consumed = true;
 
     } else if ((event->type == InputTypePress) || (event->type == InputTypeRepeat)) {
+
         switch (event->key) {
 
             case InputKeyUp :
@@ -217,9 +224,10 @@ bool mine_sweeper_game_screen_view_input_callback(InputEvent* event, void* conte
                     {
                         model->curr_pos.x_abs = (model->curr_pos.x_abs-1 < 0) ? 0 : model->curr_pos.x_abs-1;
 
-                        bool is_outside_boundary = model->curr_pos.x_abs < (model->bottom_boundary - MINESWEEPER_SCREEN_TILE_HEIGHT);
+                        bool is_outside_boundary = model->curr_pos.x_abs <
+                            (model->bottom_boundary - MINESWEEPER_SCREEN_TILE_HEIGHT);
                         
-                        if (is_outside_boundary /**&& model->bottom_boundary-1 >= MINESWEEPER_SCREEN_TILE_HEIGHT*/) {
+                        if (is_outside_boundary) {
                             model->bottom_boundary--;
                         }
                     },
@@ -237,7 +245,7 @@ bool mine_sweeper_game_screen_view_input_callback(InputEvent* event, void* conte
 
                         bool is_outside_boundary = model->curr_pos.x_abs >= model->bottom_boundary;
 
-                        if (is_outside_boundary /**&& model->bottom_boundary+1 <= model->board_height*/) {
+                        if (is_outside_boundary) {
                             model->bottom_boundary++;
                         }
                     },
@@ -252,9 +260,10 @@ bool mine_sweeper_game_screen_view_input_callback(InputEvent* event, void* conte
                     {
                         model->curr_pos.y_abs = (model->curr_pos.y_abs-1 < 0) ? 0 : model->curr_pos.y_abs-1;
 
-                        bool is_outside_boundary = model->curr_pos.y_abs < (model->right_boundary - MINESWEEPER_SCREEN_TILE_WIDTH);
+                        bool is_outside_boundary = model->curr_pos.y_abs <
+                            (model->right_boundary - MINESWEEPER_SCREEN_TILE_WIDTH);
                         
-                        if (is_outside_boundary /**&& model->right_boundary-1 >= MINESWEEPER_SCREEN_TILE_WIDTH*/) {
+                        if (is_outside_boundary) {
                             model->right_boundary--;
                         }
                     },
@@ -272,7 +281,7 @@ bool mine_sweeper_game_screen_view_input_callback(InputEvent* event, void* conte
 
                         bool is_outside_boundary = model->curr_pos.y_abs >= model->right_boundary;
 
-                        if (is_outside_boundary /**&& model->right_boundary+1 <= model->board_width*/) {
+                        if (is_outside_boundary) {
                             model->right_boundary++;
                         }
                     },
@@ -280,12 +289,10 @@ bool mine_sweeper_game_screen_view_input_callback(InputEvent* event, void* conte
                 consumed = true;
                 break;
 
-            case InputKeyOk :
-                break;
-
             default:
                 break;
         }
+
     }
 
     if (!consumed && instance->input_callback != NULL) {
@@ -321,6 +328,7 @@ static void setup_board(MineSweeperGameScreen* instance) {
         false);
 
     uint16_t num_mines = board_tile_count * difficulty_multiplier[ board_difficulty ];
+    FURI_LOG_D(MS_DEBUG_TAG, "Placing %hd mines", num_mines);
 
     /** We can use a temporary buffer to set the tile types initially
      * and manipulate then save to actual model
@@ -458,6 +466,7 @@ MineSweeperGameScreen* mine_sweeper_game_screen_alloc(uint8_t width, uint8_t hei
     // We need to initize board width and height before setup
     mine_sweeper_game_screen_set_board_information(mine_sweeper_game_screen, width, height, difficulty);
 
+    FURI_LOG_D(MS_DEBUG_TAG, "Setting up board with w:%03hhd h:%03hhd d:%02hhd", width, height, difficulty);
     setup_board(mine_sweeper_game_screen);
     
     return mine_sweeper_game_screen;
@@ -487,8 +496,10 @@ void mine_sweeper_game_screen_reset(MineSweeperGameScreen* instance, uint8_t wid
     
     instance->input_callback = NULL;
     
+    // We need to initize board width and height before setup
     mine_sweeper_game_screen_set_board_information(instance, width, height, difficulty);
     
+    FURI_LOG_D(MS_DEBUG_TAG, "Setting up board with w:%03hhd h:%03hhd d:%02hhd", width, height, difficulty);
     setup_board(instance);
 
 }
