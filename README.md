@@ -18,7 +18,7 @@ To select brick you want to move, use arrow buttons. &#9664; Left and Right &#96
 
 If selected brick can be moved **only in one direction** you can move it imediately when it is selected, clicking &#9673; Center button. 
 
-While selected such block will be bordered by pulsating rectangle with &#x2190; arrow &#x2192; showing possible movement direction:
+While selected such block will be bordered by pulsating &#9633; square frame with &#x2190; arrow &#x2192; showing possible movement direction:
 
 ![One way selection](docs/img/selection.gif)
 
@@ -34,20 +34,9 @@ When block is moved to hang in the air - it will fall down, stopped if there is 
 
 ## More levels
 
-This game supports loading custom levels. 
+This game supports loading custom levels provided by user.
 
-Put them into: `[SDCARD]/apps_data/game_vexed/extra_levels` - you may upload them with [qFlipper](https://flipperzero.one/update)
-
-Levels should be in custom VXL format (CSV alike, derived from Vexed *.ini) - more info here soon. 
-
-Be warned that:
-* app have very **simple** parser, some bugs in format will be noticed and app will refuse to load level and create file with error info - but other wont, and app will not work properly, crash itself or Flipper - test and check folowing
-* althou it seems like plaintext - treat it as binary! - DO NOT add extra spaces, newlines or comments, stick to the format
-* do not use special characters in file name
-* start file name from two digits (to order file on list)
-* file name is level set name displayed in UI - keep it short!
-* keep max. 100 levels per set
-* make sure levels are numbered from 0 and there are no "holes" in level numbering
+See more about level format and extra levels in [custom VXL format documentation](docs/level_format.md)
 
 ## Acknowledgments and License
 
