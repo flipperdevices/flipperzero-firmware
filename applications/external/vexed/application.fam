@@ -1,0 +1,16 @@
+App(
+    appid="vexed",
+    name="Vexed",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="game_vexed_app",
+    stack_size=5 * 1024,
+    fap_category="Games",
+    fap_icon="game_vexed.png",
+    fap_icon_assets="images",
+    fap_file_assets="assets",
+    fap_author="dlvoy",
+    #  fap_author="Dominik Dzienia",
+    fap_weburl="https://github.com/dlvoy/flipper-zero-vexed",
+    fap_version="1.0.1",
+    fap_description="Vexed - classic Palm.OS puzzle game",
+)

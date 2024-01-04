@@ -1,0 +1,13 @@
+App(
+    appid="flipper_aid",
+    name="Flipper Aid",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="flipper_aid_app",
+    stack_size=1 * 1024,
+    fap_category="Tools",
+    fap_icon="aid_icon.png",
+    fap_author="spaghety",
+    fap_weburl="https://github.com/spaghety/flipper-aid",
+    fap_version=(1, 0),
+    fap_description="Flipper application for emergency response with pulse timer and CPR timer",
+)

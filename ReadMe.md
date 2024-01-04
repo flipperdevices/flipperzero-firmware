@@ -38,6 +38,9 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Tarot v0.1 (By pionaiki & tihyltew)](https://github.com/pionaiki/fz-tarot)
 - Updated: [MALVEKE GB Live Camera v1.2 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external/malveke_gb_live_camera) `Req: Malveke`
 - Updated: [Programmer Calculator v0.9 (By armixz)](https://github.com/armixz/Flipper-Zero-Programmer-Calculator)
+- Added: [Flipper Aid v1.0 (By spaghety)](https://github.com/spaghety/flipper-aid)
+- Added: [Restaurant Pager Trigger v0.1 (By leedave)](https://github.com/leedave/flipper-zero-meal-pager)
+- Added: [Vexed v1.0.1 (By dlvoy)](https://github.com/dlvoy/flipper-zero-vexed)
 
 ## IN THIS BRANCH:
 
@@ -386,6 +389,7 @@ $ ./fbt dolphin_ext
 - [Tic-Tac-Toe Multi v1.1 (By RouNNdeL)](https://github.com/RouNNdeL/flipper-tictactoe-multi)
 - [Tic Tac Toe v1.1 (By gotnull)](https://github.com/gotnull/flipperzero-firmware-wPlugins)
 - [Ultimate Tic-Tac-Toe v1.1 (By Racso)](https://github.com/Racso/fzero-apps)
+- [Vexed v1.0.1 (By dlvoy)](https://github.com/dlvoy/flipper-zero-vexed)
 - [Video Poker v1.2 (By PixlEmly)](https://github.com/PixlEmly/flipperzero-firmware-testing/blob/420/applications/VideoPoker/poker.c)
 - [Yatzee v1.1 (By emfleak)](https://github.com/emfleak/flipperzero-yatzee)
 - [Zero v1.4 (By Racso)](https://github.com/Racso/fzero-apps)
@@ -466,6 +470,7 @@ $ ./fbt dolphin_ext
 - [FlipBoard Signal v3.1 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
 - [FlipBoard Simon v1.0 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
 - [FlipBIP Crypto Wallet v1.14 (By xtruan)](https://github.com/xtruan/FlipBIP)
+- [Flipper Aid v1.0 (By spaghety)](https://github.com/spaghety/flipper-aid)
 - [Flizzer Tracker v0.4 (By LTVA1)](https://github.com/LTVA1/flizzer_tracker)
 - [FM Radio v1.1 (By coolshrimp)](https://github.com/coolshrimp/flipperzero-firmware-wPlugins/tree/420/applications/external/fm_radio)
 - [Genie Recorder v2.5 (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/subghz/apps/genie-recorder)
@@ -550,6 +555,7 @@ $ ./fbt dolphin_ext
 - [RCWL-516 Motion Sensor (By ahmedafe1)](https://github.com/ahmedafe1/rcwl_0516-Flipperzero)
 - [Remote Maker (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/487)
 - [Resistance Calculator v1.2 (By instantiator)](https://github.com/instantiator/flipper-zero-experimental-apps)
+- [Restaurant Pager Trigger v0.1 (By leedave)](https://github.com/leedave/flipper-zero-meal-pager)
 - [RFID Beacon (By nmrr)](https://github.com/nmrr/flipperzero-rfidbeacon)
 - [RFID Detector v1.2 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/2795)
 - [RFID Fuzzer v1.3 (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/507) [(Original By Ganapati)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/245)
