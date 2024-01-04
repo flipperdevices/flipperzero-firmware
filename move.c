@@ -1,4 +1,31 @@
 #include "move.h"
+#include "utils.h"
+
+uint8_t coord_from(uint8_t x, uint8_t y) {
+    return (y * SIZE_X) + x;
+}
+
+//-----------------------------------------------------------------------------
+
+uint8_t coord_x(uint8_t coord) {
+    return coord % SIZE_X;
+}
+
+//-----------------------------------------------------------------------------
+
+uint8_t coord_y(uint8_t coord) {
+    return coord / SIZE_X;
+}
+
+//-----------------------------------------------------------------------------
+
+uint8_t movable_dir(MovabilityTab* mv, uint8_t currentMovable) {
+    return (currentMovable != MOVABLE_NOT_FOUND) ?
+               (*mv)[coord_y(currentMovable)][coord_x(currentMovable)] :
+               MOVABLE_NOT;
+}
+
+//-----------------------------------------------------------------------------
 
 void map_movability(PlayGround* pg, PlayGround* mv) {
     uint8_t tile, x, y, movable;
@@ -180,3 +207,5 @@ void find_movable_up(PlayGround* mv, uint8_t* currentMovable) {
         }
     }
 }
+
+

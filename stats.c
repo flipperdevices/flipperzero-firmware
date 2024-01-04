@@ -1,4 +1,5 @@
 #include "stats.h"
+#include "utils.h"
 
 Stats* alloc_stats() {
     Stats* stats = malloc(sizeof(Stats));

@@ -166,13 +166,9 @@ bool undo(Game* g);
 
 //-----------------------------------------------------------------------------
 
-inline bool solution_will_have_penalty(Game* g) {
-    return (g->levelSet->scores[g->currentLevel].moves == 0) &&
-           (!g->levelSet->scores[g->currentLevel].spoiled);
-}
-
 void start_solution(Game* g);
 void end_solution(Game* g);
 void solution_select(Game* g);
 void solution_move(Game* g);
 void solution_next(Game* g);
+bool solution_will_have_penalty(Game* g);

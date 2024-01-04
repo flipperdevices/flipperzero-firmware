@@ -6,23 +6,10 @@ typedef uint8_t MovabilityTab[SIZE_Y][SIZE_X];
 
 //-----------------------------------------------------------------------------
 
-inline uint8_t coord_from(uint8_t x, uint8_t y) {
-    return (y * SIZE_X) + x;
-}
-
-inline uint8_t coord_x(uint8_t coord) {
-    return coord % SIZE_X;
-}
-
-inline uint8_t coord_y(uint8_t coord) {
-    return coord / SIZE_X;
-}
-
-inline uint8_t movable_dir(MovabilityTab* mv, uint8_t currentMovable) {
-    return (currentMovable != MOVABLE_NOT_FOUND) ?
-               (*mv)[coord_y(currentMovable)][coord_x(currentMovable)] :
-               MOVABLE_NOT;
-}
+uint8_t coord_from(uint8_t x, uint8_t y);
+uint8_t coord_x(uint8_t coord);
+uint8_t coord_y(uint8_t coord);
+uint8_t movable_dir(MovabilityTab* mv, uint8_t currentMovable);
 
 //-----------------------------------------------------------------------------
 

@@ -38,7 +38,3 @@ typedef struct {
     FuriString* bricksNonZero;
     uint8_t statsNonZero[WALL_TILE + 1];
 } Stats;
-
-inline bool is_block(uint8_t tile) {
-    return (tile > 0) && (tile != WALL_TILE);
-}

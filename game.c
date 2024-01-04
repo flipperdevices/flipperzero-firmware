@@ -647,3 +647,10 @@ void solution_next(Game* g) {
         end_solution(g);
     }
 }
+
+//-----------------------------------------------------------------------------
+
+bool solution_will_have_penalty(Game* g) {
+    return (g->levelSet->scores[g->currentLevel].moves == 0) &&
+           (!g->levelSet->scores[g->currentLevel].spoiled);
+}
