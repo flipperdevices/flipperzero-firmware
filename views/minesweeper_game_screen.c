@@ -489,7 +489,6 @@ static void mine_sweeper_game_screen_set_board_information(
             model->board_width = width;
             model->board_height = height;
             model->board_difficulty = difficulty;
-            model->start_tick = furi_get_tick();
         },
         true);
 }
@@ -520,6 +519,10 @@ MineSweeperGameScreen* mine_sweeper_game_screen_alloc(uint8_t width, uint8_t hei
             model->info_str = furi_string_alloc();
         },
         true);
+
+    // Reset the clock - This will set the start time at the allocation of the game screen
+    // but this is a public api as well and can be called in a scene for more accurate start times
+    mine_sweeper_game_screen_reset_clock(mine_sweeper_game_screen);
 
     // We need to initize board width and height before setup
     mine_sweeper_game_screen_set_board_information(mine_sweeper_game_screen, width, height, difficulty);
@@ -556,10 +559,24 @@ void mine_sweeper_game_screen_reset(MineSweeperGameScreen* instance, uint8_t wid
     
     // We need to initize board width and height before setup
     mine_sweeper_game_screen_set_board_information(instance, width, height, difficulty);
-    
+
+    mine_sweeper_game_screen_reset_clock(instance);
+
     FURI_LOG_D(MS_DEBUG_TAG, "Setting up board with w:%03hhd h:%03hhd d:%02hhd", width, height, difficulty);
     setup_board(instance);
 
+}
+
+void mine_sweeper_game_screen_reset_clock(MineSweeperGameScreen* instance) {
+    furi_assert(instance);
+
+    with_view_model(
+            instance->view,
+            MineSweeperGameScreenModel * model,
+            {
+                model->start_tick = furi_get_tick();
+            },
+            true);
 }
 
 View* mine_sweeper_game_screen_get_view(MineSweeperGameScreen* instance) {
