@@ -9,4 +9,6 @@ App(
     fap_icon="game_vexed.png",
     fap_icon_assets="images",
     fap_file_assets="assets",
+    fap_author="Dominik Dzienia",
+    fap_version="1.0.0",
 )
