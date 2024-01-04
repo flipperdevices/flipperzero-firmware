@@ -87,6 +87,11 @@ Each line contains following characters:
 * `character` - `a` to `h` representing each type of block
 * `~` tilde character - representing empty space
 
+| `1`..`10` | `~` | a | b | c | d | e | f | g | h |
+|:---------:|:---:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+| ![wall](../images/w.png) | ![space](img/space_docs.png) | ![block a](../images/a.png) |  ![block b](../images/b.png) | ![block c](../images/c.png) | ![block d](../images/d.png) | ![block e](../images/e.png) | ![block fa](../images/f.png) | ![block g](../images/g.png) | ![block a](../images/h.png) |
+
+
 _In our example, for first level:_
 ```
 10/10/10/6a~2/7~2/5fb~2/3e~efab1/10
