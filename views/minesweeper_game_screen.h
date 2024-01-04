@@ -17,6 +17,8 @@
 #define MINESWEEPER_SCREEN_TILE_HEIGHT 7
 #define MINESWEEPER_SCREEN_TILE_WIDTH 16
 
+#define MS_DEBUG_TAG  "Mine Sweeper Module/View"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
