@@ -19,7 +19,7 @@ void meal_pager_scene_menu_submenu_callback(void* context, uint32_t index) {
 void meal_pager_scene_menu_on_enter(void* context) {
     Meal_Pager* app = context;
 
-    submenu_add_item(app->submenu, "Scene 1 (empty)", SubmenuIndexTransmit, meal_pager_scene_menu_submenu_callback, app);
+    submenu_add_item(app->submenu, "Send Data", SubmenuIndexTransmit, meal_pager_scene_menu_submenu_callback, app);
     submenu_add_item(app->submenu, "Settings", SubmenuIndexSettings, meal_pager_scene_menu_submenu_callback, app);
 
     submenu_set_selected_item(app->submenu, scene_manager_get_scene_state(app->scene_manager, Meal_PagerSceneMenu));
@@ -58,7 +58,6 @@ bool meal_pager_scene_menu_on_event(void* context, SceneManagerEvent event) {
             subghz_txrx_stop(app->subghz->txrx);
             meal_pager_blink_stop(app);
             meal_pager_transmit_model_set_sending(app->meal_pager_transmit, 0);
-            //notification_message(app->notification, &sequence_blink_magenta_10);
         }
         return true;
     }

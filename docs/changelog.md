@@ -1,3 +1,11 @@
+## v0.7
+
+- Added support for TD157
+- Some log & comment cleaning
+- Moved common code to new location
+- Removed testing assets
+- Fixed bad menu label (from "scene1" to "send data")
+
 ## v0.6
 
 - Display when data is being generated and when it is being sent
