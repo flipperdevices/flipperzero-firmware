@@ -160,6 +160,36 @@ void mine_sweeper_game_screen_view_draw_callback(Canvas* canvas, void* _model) {
         }
     }
 
+    // If any borders are at the limits of the game board we draw a border line
+    
+    // Right border 
+    if (model->right_boundary == model->board_width) {
+        canvas_draw_line(canvas, 127,0,127,63-8);
+    }
+
+    // Left border
+    if ((model->right_boundary - MINESWEEPER_SCREEN_TILE_WIDTH) == 0) {
+        canvas_draw_line(canvas, 0,0,0,63-8);
+    }
+
+    // Bottom border
+    if (model->bottom_boundary == model->board_height) {
+        canvas_draw_line(canvas, 0,63-8,127,63-8);
+    }
+
+    // Top border
+    if ((model->bottom_boundary - MINESWEEPER_SCREEN_TILE_HEIGHT) == 0) {
+        canvas_draw_line(canvas, 0,0,127,0);
+    }
+
+    // Draw cursor pos and time
+    FuriString* pos_data = furi_string_alloc_printf(
+                                "X: %03hhd Y: %03hhd",
+                                model->curr_pos.x_abs,
+                                model->curr_pos.y_abs);
+    
+    canvas_draw_str_aligned(canvas, 0,64-8, AlignLeft, AlignTop, furi_string_get_cstr(pos_data));
+
 }
 
 bool mine_sweeper_game_screen_view_input_callback(InputEvent* event, void* context) {
