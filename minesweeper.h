@@ -23,7 +23,7 @@
 #include "helpers/mine_sweeper_storage.h"
 #include "minesweeper_icons.h"
 
-#define TAG "MineSweeper"
+#define TAG "Mine Sweeper Application"
 
 typedef struct {
     uint8_t board_width, board_height, difficulty;
