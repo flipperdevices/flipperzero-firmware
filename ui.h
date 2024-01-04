@@ -1,40 +1,26 @@
 #pragma once
 
 #include <gui/gui.h>
-#include <gui/canvas_i.h>
-//#include <u8g2_glue.h>
 #include <toolbox/compress.h>
-
-//-----------------------------------------------------------------------------
-// workaround to access private API
 
 #define GUI_DISPLAY_WIDTH 128
 #define GUI_DISPLAY_HEIGHT 64
 
 #define GUI_DISPLAY_CENTER_X 64
 
-/*
-typedef struct u8g2_struct u8g2_t;
-
-struct Canvas {
-    u8g2_t fb;
-    CanvasOrientation orientation;
+typedef struct {
     uint8_t offset_x;
     uint8_t offset_y;
     uint8_t width;
     uint8_t height;
-    CompressIcon* compress_icon;
-};
-*/
+} BoundingBox;
 
-void my_canvas_frame_set(
-    Canvas* canvas,
+void set_bounding_box(
+    BoundingBox* box,
     uint8_t offset_x,
     uint8_t offset_y,
     uint8_t width,
     uint8_t height);
-
-//-----------------------------------------------------------------------------
 
 const Icon* tile_to_icon(uint8_t tile, bool gameOver);
 
@@ -46,6 +32,7 @@ void canvas_draw_vline_dotted(Canvas* const canvas, uint8_t x, uint8_t y, uint8_
 void elements_button_right_back(Canvas* canvas, const char* str);
 void elements_multiline_text_aligned_limited(
     Canvas* canvas,
+    BoundingBox* box,
     uint8_t x,
     uint8_t y,
     uint8_t h,

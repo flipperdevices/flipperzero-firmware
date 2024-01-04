@@ -179,6 +179,7 @@ void draw_about(Canvas* canvas, Game* game, uint32_t frameNo) {
 }
 
 void draw_set_info(Canvas* canvas, Game* game) {
+    BoundingBox box;
     const uint8_t w = 118;
     const uint8_t h = 46;
     const uint8_t x = (GUI_DISPLAY_WIDTH - w) / 2;
@@ -206,16 +207,16 @@ void draw_set_info(Canvas* canvas, Game* game) {
 
     canvas_draw_hline_dotted(canvas, x, y + 16, w);
 
-    my_canvas_frame_set(canvas, x + 3, y + 16, w - 6, 16);
+    set_bounding_box(&box, x + 3, y + 16, w - 6, 16);
     elements_multiline_text_aligned_limited(
         canvas,
-        canvas->width / 2,
-        canvas->height / 2,
+        &box,
+        box.width / 2,
+        box.height / 2,
         2,
         AlignCenter,
         AlignCenter,
         furi_string_get_cstr(game->levelSet->description));
-    my_canvas_frame_set(canvas, 0, 0, GUI_DISPLAY_WIDTH, GUI_DISPLAY_HEIGHT);
 }
 
 //-----------------------------------------------------------------------------
@@ -735,6 +736,7 @@ void draw_ani_explode(Canvas* canvas, Game* game) {
 //-----------------------------------------------------------------------------
 
 void draw_scores(Canvas* canvas, Game* game, uint32_t frameNo) {
+    BoundingBox box;
     int bufSize = 80;
     char buf[bufSize];
 
@@ -745,8 +747,16 @@ void draw_scores(Canvas* canvas, Game* game, uint32_t frameNo) {
 
     canvas_set_custom_u8g2_font(canvas, app_u8g2_font_squeezed_r6_tr);
     canvas_set_color(canvas, ColorWhite);
+    set_bounding_box(&box, 82, 1, 46, 17);
     elements_multiline_text_aligned_limited(
-        canvas, 105, 9, 2, AlignCenter, AlignCenter, furi_string_get_cstr(game->levelData->title));
+        canvas,
+        &box,
+        box.width / 2,
+        box.height / 2,
+        2,
+        AlignCenter,
+        AlignCenter,
+        furi_string_get_cstr(game->levelData->title));
 
     if(game->solutionMode) {
         canvas_set_color(canvas, ColorBlack);

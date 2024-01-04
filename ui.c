@@ -43,17 +43,17 @@ void gray_canvas(Canvas* const canvas) {
 
 //-----------------------------------------------------------------------------
 
-void my_canvas_frame_set(
-    Canvas* canvas,
+void set_bounding_box(
+    BoundingBox* box,
     uint8_t offset_x,
     uint8_t offset_y,
     uint8_t width,
     uint8_t height) {
-    furi_assert(canvas);
-    canvas->offset_x = offset_x;
-    canvas->offset_y = offset_y;
-    canvas->width = width;
-    canvas->height = height;
+    furi_assert(box);
+    box->offset_x = offset_x;
+    box->offset_y = offset_y;
+    box->width = width;
+    box->height = height;
 }
 
 //-----------------------------------------------------------------------------
@@ -113,8 +113,12 @@ void elements_button_right_back(Canvas* canvas, const char* str) {
 
 //-----------------------------------------------------------------------------
 
-size_t
-    elements_get_max_chars_to_fit(Canvas* canvas, Align horizontal, const char* text, uint8_t x) {
+size_t elements_get_max_chars_to_fit(
+    Canvas* canvas,
+    BoundingBox* box,
+    Align horizontal,
+    const char* text,
+    uint8_t x) {
     const char* end = strchr(text, '\n');
     if(end == NULL) {
         end = text + strlen(text);
@@ -128,13 +132,13 @@ size_t
     uint16_t len_px = canvas_string_width(canvas, furi_string_get_cstr(str));
     uint8_t px_left = 0;
     if(horizontal == AlignCenter) {
-        if(x > (canvas_width(canvas) / 2)) {
-            px_left = (canvas_width(canvas) - x) * 2;
+        if(x > (box->width / 2)) {
+            px_left = (box->width - x) * 2;
         } else {
             px_left = x * 2;
         }
     } else if(horizontal == AlignLeft) {
-        px_left = canvas_width(canvas) - x;
+        px_left = box->width - x;
     } else if(horizontal == AlignRight) {
         px_left = x;
     } else {
@@ -163,6 +167,7 @@ size_t
 
 void elements_multiline_text_aligned_limited(
     Canvas* canvas,
+    BoundingBox* box,
     uint8_t x,
     uint8_t y,
     uint8_t h,
@@ -170,6 +175,7 @@ void elements_multiline_text_aligned_limited(
     Align vertical,
     const char* text) {
     furi_assert(canvas);
+    furi_assert(box);
     furi_assert(text);
 
     uint8_t lines_count = 0;
@@ -179,7 +185,7 @@ void elements_multiline_text_aligned_limited(
 
     /* go through text line by line and count lines */
     for(const char* start = text; start[0];) {
-        size_t chars_fit = elements_get_max_chars_to_fit(canvas, horizontal, start, x);
+        size_t chars_fit = elements_get_max_chars_to_fit(canvas, box, horizontal, start, x);
         ++lines_count;
         start += chars_fit;
         start += start[0] == '\n' ? 1 : 0;
@@ -196,7 +202,7 @@ void elements_multiline_text_aligned_limited(
 
     /* go through text line by line and print them */
     for(const char* start = text; start[0];) {
-        size_t chars_fit = elements_get_max_chars_to_fit(canvas, horizontal, start, x);
+        size_t chars_fit = elements_get_max_chars_to_fit(canvas, box, horizontal, start, x);
         lineNo++;
         if((start[chars_fit] == '\n') || (start[chars_fit] == 0)) {
             line = furi_string_alloc_printf("%.*s", chars_fit, start);
@@ -205,7 +211,13 @@ void elements_multiline_text_aligned_limited(
         } else {
             line = furi_string_alloc_printf("%.*s\n", chars_fit, start);
         }
-        canvas_draw_str_aligned(canvas, x, y, horizontal, vertical, furi_string_get_cstr(line));
+        canvas_draw_str_aligned(
+            canvas,
+            x + box->offset_x,
+            y + box->offset_y,
+            horizontal,
+            vertical,
+            furi_string_get_cstr(line));
         furi_string_free(line);
         y += font_height;
         if(y > canvas_height(canvas)) {
