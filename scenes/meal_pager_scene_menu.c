@@ -1,4 +1,5 @@
 #include "../meal_pager_i.h"
+#include "../helpers/meal_pager_led.h"
 
 enum SubmenuIndex {
     SubmenuIndexTransmit = 10,
@@ -52,7 +53,10 @@ bool meal_pager_scene_menu_on_event(void* context, SceneManagerEvent event) {
         }
     } else if(event.type == SceneManagerEventTypeTick) {
         if(app->state_notifications == SubGhzNotificationStateTx) {
-            notification_message(app->notification, &sequence_blink_magenta_10);
+            app->state_notifications = SubGhzNotificationStateIDLE;
+            subghz_txrx_stop(app->subghz->txrx);
+            meal_pager_blink_stop(app);
+            //notification_message(app->notification, &sequence_blink_magenta_10);
         }
         return true;
     }
