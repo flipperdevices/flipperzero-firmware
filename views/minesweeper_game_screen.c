@@ -330,7 +330,7 @@ static inline void bfs_tile_clear(MineSweeperGameScreenModel* model) {
         Point curr_pos = pointobj_get_point(pos);
         uint16_t curr_pos_1d = curr_pos.x * model->board_width + curr_pos.y;
         
-        // If in visited continue
+        // If in visited set continue
         if (point_set_cget(set, pos) != NULL) {
             continue;
         } 
@@ -356,6 +356,7 @@ static inline void bfs_tile_clear(MineSweeperGameScreenModel* model) {
             continue;
         }
 
+        // Search all neighbors and add valid to dequeue
         for (uint8_t i = 0; i < 8; i++) {
             int16_t dx = curr_pos.x + (int16_t)offsets[i][0];
             int16_t dy = curr_pos.y + (int16_t)offsets[i][1];
