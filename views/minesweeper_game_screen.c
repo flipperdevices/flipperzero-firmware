@@ -962,7 +962,7 @@ bool mine_sweeper_game_screen_view_input_callback(InputEvent* event, void* conte
                         UNUSED(board_height);
                         UNUSED(curr_pos_1d);
 
-                    // Flag or Unflag if enough time has passed
+                    // Flag or Unflag tile and check win condition 
                     } else if (!model->has_edited_flag && (state == MineSweeperGameScreenTileStateUncleared || state == MineSweeperGameScreenTileStateFlagged)) { 
                         FURI_LOG_D(MS_DEBUG_TAG, "Event Type: InputTypeLong && InputKeyOk");
 
@@ -972,7 +972,7 @@ bool mine_sweeper_game_screen_view_input_callback(InputEvent* event, void* conte
                             model->flags_left++;
                             model->has_edited_flag = true;
                         
-                        } else {
+                        } else if (model->flags_left > 0) {
                             if (model->board[curr_pos_1d].tile_type == MineSweeperGameScreenTileMine) model->mines_left--;
                             model->board[curr_pos_1d].tile_state = MineSweeperGameScreenTileStateFlagged;
                             model->flags_left--;
