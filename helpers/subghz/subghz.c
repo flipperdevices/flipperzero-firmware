@@ -7,7 +7,7 @@
 
 SubGhz* subghz_alloc() {
     SubGhz* subghz = malloc(sizeof(SubGhz));
-    
+
     subghz->file_path = furi_string_alloc();
 
     subghz->txrx = subghz_txrx_alloc();
@@ -25,7 +25,6 @@ void subghz_free(SubGhz* subghz) {
     // The rest
     free(subghz);
 }
-
 
 void subghz_scene_transmit_callback_end_tx(void* context) {
     furi_assert(context);
@@ -55,13 +54,15 @@ void subghz_send(void* context) {
     }*/
 
     //subghz_txrx_tx_start(subghz->txrx, ff);
-    
+
     FURI_LOG_D(TAG, "Starting Transmission");
-    subghz_txrx_tx_start(app->subghz->txrx, subghz_txrx_get_fff_data(app->subghz->txrx)); //Seems like it must be done this way
+    subghz_txrx_tx_start(
+        app->subghz->txrx,
+        subghz_txrx_get_fff_data(app->subghz->txrx)); //Seems like it must be done this way
 
     FURI_LOG_D(TAG, "setting sugbhz raw file encoder worker callback");
     subghz_txrx_set_raw_file_encoder_worker_callback_end(
-                        app->subghz->txrx, subghz_scene_transmit_callback_end_tx, app);
+        app->subghz->txrx, subghz_scene_transmit_callback_end_tx, app);
     app->state_notifications = SubGhzNotificationStateTx;
 
     /*flipper_format_rewind(ff);
@@ -69,7 +70,6 @@ void subghz_send(void* context) {
     flipper_format_free(ff);
 
     furi_record_close(RECORD_STORAGE);*/
-
 
     //subghz_free(subghz);
     FURI_LOG_D(TAG, "Finished Transmitting");

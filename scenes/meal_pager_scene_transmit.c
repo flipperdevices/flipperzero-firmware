@@ -27,63 +27,62 @@ void meal_pager_scene_transmit_on_enter(void* context) {
     meal_pager_transmit_set_callback(app->meal_pager_transmit, meal_pager_transmit_callback, app);
     view_dispatcher_switch_to_view(app->view_dispatcher, Meal_PagerViewIdTransmit);
     bool generated = false;
-    switch (app->pager_type) {
-        case Meal_PagerPagerTypeT119:
-            generated = meal_pager_retekess_t119_generate_all(app);
-            break;
-        case Meal_PagerPagerTypeTD157:
-            generated = meal_pager_retekess_td157_generate_all(app);
-            break;
-        default:
-            generated = false;
-            break;
+    switch(app->pager_type) {
+    case Meal_PagerPagerTypeT119:
+        generated = meal_pager_retekess_t119_generate_all(app);
+        break;
+    case Meal_PagerPagerTypeTD157:
+        generated = meal_pager_retekess_td157_generate_all(app);
+        break;
+    default:
+        generated = false;
+        break;
     }
-    if (!generated) {
+    if(!generated) {
         FURI_LOG_D(TAG, "Could not generate temp file");
         meal_pager_blink_stop(app);
         return;
     }
     FURI_LOG_D(TAG, "Generated tmp.sub");
     FURI_LOG_D(TAG, "Start Transmitting");
-    if (!app->stop_transmit) {
+    if(!app->stop_transmit) {
         meal_pager_transmit_model_set_sending(app->meal_pager_transmit, 1);
         subghz_send(app);
     }
     dolphin_deed(DolphinDeedSubGhzSend);
 }
 
-
 bool meal_pager_scene_transmit_on_event(void* context, SceneManagerEvent event) {
     Meal_Pager* app = context;
     bool consumed = false;
-    
+
     if(event.type == SceneManagerEventTypeCustom) {
         switch(event.event) {
-            case Meal_PagerCustomEventTransmitLeft:
-            case Meal_PagerCustomEventTransmitRight:
-                break;
-            case Meal_PagerCustomEventTransmitUp:
-            case Meal_PagerCustomEventTransmitDown:
-                break;
-            case Meal_PagerCustomEventTransmitBack:
-                app->stop_transmit = true;
-                app->state_notifications = SubGhzNotificationStateIDLE;
-                meal_pager_blink_stop(app);
-                if(!scene_manager_search_and_switch_to_previous_scene(
-                    app->scene_manager, Meal_PagerSceneMenu)) {
-                        scene_manager_stop(app->scene_manager);
-                        view_dispatcher_stop(app->view_dispatcher);
-                    }
-                consumed = true;
-                break;
-            case Meal_PagerCustomEventViewTransmitterSendStop:
-                app->state_notifications = SubGhzNotificationStateIDLE;
-                subghz_txrx_stop(app->subghz->txrx);
-                meal_pager_blink_stop(app);
-                meal_pager_transmit_model_set_sending(app->meal_pager_transmit, 0);
-                scene_manager_next_scene(app->scene_manager, Meal_PagerSceneMenu);
-                FURI_LOG_D(TAG, "Stop Event");
-                break;
+        case Meal_PagerCustomEventTransmitLeft:
+        case Meal_PagerCustomEventTransmitRight:
+            break;
+        case Meal_PagerCustomEventTransmitUp:
+        case Meal_PagerCustomEventTransmitDown:
+            break;
+        case Meal_PagerCustomEventTransmitBack:
+            app->stop_transmit = true;
+            app->state_notifications = SubGhzNotificationStateIDLE;
+            meal_pager_blink_stop(app);
+            if(!scene_manager_search_and_switch_to_previous_scene(
+                   app->scene_manager, Meal_PagerSceneMenu)) {
+                scene_manager_stop(app->scene_manager);
+                view_dispatcher_stop(app->view_dispatcher);
+            }
+            consumed = true;
+            break;
+        case Meal_PagerCustomEventViewTransmitterSendStop:
+            app->state_notifications = SubGhzNotificationStateIDLE;
+            subghz_txrx_stop(app->subghz->txrx);
+            meal_pager_blink_stop(app);
+            meal_pager_transmit_model_set_sending(app->meal_pager_transmit, 0);
+            scene_manager_next_scene(app->scene_manager, Meal_PagerSceneMenu);
+            FURI_LOG_D(TAG, "Stop Event");
+            break;
         }
     } else if(event.type == SceneManagerEventTypeTick) {
         if(app->state_notifications == SubGhzNotificationStateTx) {
@@ -91,7 +90,7 @@ bool meal_pager_scene_transmit_on_event(void* context, SceneManagerEvent event) 
         }
         return true;
     }
-    
+
     return consumed;
 }
 

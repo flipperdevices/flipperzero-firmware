@@ -5,7 +5,6 @@
 #include <gui/gui.h>
 #include <input/input.h>
 #include <stdlib.h>
-#include <assets_icons.h>
 #include <dialogs/dialogs.h>
 #include <notification/notification_messages.h>
 #include <gui/view_dispatcher.h>
@@ -42,7 +41,7 @@ typedef struct {
     Meal_PagerTransmit* meal_pager_transmit;
     DialogsApp* dialogs; // File Browser
     FuriString* file_path; // File Browser
-    uint32_t haptic; 
+    uint32_t haptic;
     uint32_t speaker;
     uint32_t led;
     uint32_t save_settings;
@@ -73,8 +72,6 @@ typedef enum {
     Meal_PagerPagerTypeTD165,
     Meal_PagerPagerTypeTD174,
 } Meal_PagerPagerType;
-
-
 
 typedef enum {
     Meal_PagerHapticOff,

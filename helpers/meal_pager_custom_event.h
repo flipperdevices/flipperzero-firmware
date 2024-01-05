@@ -45,7 +45,8 @@ static inline uint32_t meal_pager_custom_menu_event_pack(uint16_t type, int16_t 
     Meal_PagerCustomEventMenu event = {.content = {.type = type, .value = value}};
     return event.packed_value;
 }
-static inline void meal_pager_custom_menu_event_unpack(uint32_t packed_value, uint16_t* type, int16_t* value) {
+static inline void
+    meal_pager_custom_menu_event_unpack(uint32_t packed_value, uint16_t* type, int16_t* value) {
     Meal_PagerCustomEventMenu event = {.packed_value = packed_value};
     if(type) *type = event.content.type;
     if(value) *value = event.content.value;
