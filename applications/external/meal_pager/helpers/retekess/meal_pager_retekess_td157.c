@@ -55,7 +55,9 @@ static void meal_pager_retekess_td157_generate_pager(
     customConcat(fullId, actionId);
     char* manchester = encManchester(fullId, 0);
     char* rawSignal = genRawDataTD157(200, 600, manchester);
-    flipper_format_write_string_cstr(ff, "RAW_Data", rawSignal);
+    for(u_int32_t i = 1; app->repeats >= i; i++) {
+        flipper_format_write_string_cstr(ff, "RAW_Data", rawSignal);
+    }
     free(manchester);
     free(rawSignal);
 }
