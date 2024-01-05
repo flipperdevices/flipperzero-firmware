@@ -14,7 +14,7 @@ void stopSendingData();
 FuriMessageQueue* initializeReceivingData();
 void stopReceivingData();
 
-FuriHalUsbInterface *getUsbHidBulk();
+FuriHalUsbInterface* getUsbHidBulk();
 
 void sendViaEP(uint8_t* data, int interfaceNumber);
 void receiveFromEP(uint8_t* outBuf, int interfaceNumber);

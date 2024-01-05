@@ -11,13 +11,13 @@ typedef struct {
     FuriLogPuts puts;
     FuriLogTimestamp timestamp;
     FuriMutex* mutex;
-    File *logFile;
-    Storage *storage;
+    File* logFile;
+    Storage* storage;
 } FuriLogParams;
 
 static FuriLogParams furi_log;
 
-void writeToLog(const char *msg) {
+void writeToLog(const char* msg) {
     furi_hal_console_puts(msg);
 
     // Storage *s = furi_record_open(RECORD_STORAGE);
@@ -29,8 +29,6 @@ void writeToLog(const char *msg) {
     // furi_record_close(RECORD_STORAGE);
 }
 
-
-
 void file_log_init() {
     // Set default logging parameters
     furi_log.log_level = FURI_LOG_LEVEL_DEFAULT;
@@ -38,10 +36,9 @@ void file_log_init() {
     furi_log.timestamp = furi_get_tick;
     furi_log.mutex = furi_mutex_alloc(FuriMutexTypeNormal);
     furi_log.storage = furi_record_open(RECORD_STORAGE);
-    furi_log.logFile = storage_file_alloc(furi_log.storage);    
+    furi_log.logFile = storage_file_alloc(furi_log.storage);
     storage_file_open(furi_log.logFile, "/any/log.txt", FSAM_READ_WRITE, FSOM_OPEN_APPEND);
 }
-
 
 void file_log_deinit() {
     storage_file_close(furi_log.logFile);
@@ -78,12 +75,7 @@ void file_log_print_format(FuriLogLevel level, const char* tag, const char* form
         }
 
         // Timestamp
-        furi_string_printf(
-            string,
-            "%lu [%s][%s] ",
-            furi_log.timestamp(),
-            log_letter,
-            tag);
+        furi_string_printf(string, "%lu [%s][%s] ", furi_log.timestamp(), log_letter, tag);
         furi_log.puts(furi_string_get_cstr(string));
         furi_string_reset(string);
 
@@ -100,7 +92,6 @@ void file_log_print_format(FuriLogLevel level, const char* tag, const char* form
         furi_mutex_release(furi_log.mutex);
     }
 }
-
 
 void file_log_set_timestamp(FuriLogTimestamp timestamp) {
     furi_assert(timestamp);

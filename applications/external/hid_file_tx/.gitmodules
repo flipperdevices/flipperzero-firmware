@@ -1,3 +1,0 @@
-[submodule "minimal-client/lib/hidapi"]
-	path = minimal-client/lib/hidapi
-	url = https://github.com/libusb/hidapi
