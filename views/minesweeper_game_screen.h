@@ -8,6 +8,8 @@
 
 #include <gui/view.h>
 
+#include "minesweeper_game_screen_i.h"
+
 // MAX TILES ALLOWED
 #define MINESWEEPER_BOARD_MAX_TILES  (1<<10)
 
