@@ -260,6 +260,53 @@ bool mine_sweeper_game_screen_view_input_callback(InputEvent* event, void* conte
 
         consumed = true;
 
+    } else if (((event->type == InputTypeLong) || (event->type == InputTypeRepeat)) && event->key == InputKeyBack) {
+        
+        // Cursor to next closest mine if current position is uncovered
+        // Note that it is not the actual closest in terms of manhattan distance on the 2d grid
+        // but is closest within the 1d buffer of board tiles. This means it will jump to a covered position
+        // on the same row instead of a closer tile on a different row
+        //
+        // We probably just want to change this to a BFS search for the next uncovered tile using m-lib's dequeue
+        with_view_model(
+            instance->view,
+            MineSweeperGameScreenModel * model,
+            {
+                uint16_t curr_pos_1d = model->curr_pos.x_abs * model->board_width + model->curr_pos.y_abs;
+                if (model->board[curr_pos_1d].tile_type != MineSweeperGameScreenTileMine) { // NEED TO CHANGE TO UNCOVERED AFTER TESTING
+
+                    uint16_t total_tiles = model->board_width * model->board_height;
+                    uint16_t shortest_distance = 0; 
+
+                    // First search right and get 'closest' mine
+                    for (uint16_t i = curr_pos_1d + 1; i < total_tiles; i++) {
+                        if (model->board[i].tile_type == MineSweeperGameScreenTileMine) {
+                            shortest_distance = i - curr_pos_1d;
+                            model->curr_pos.x_abs = i / model->board_width;
+                            model->curr_pos.y_abs = i % model->board_width; 
+                            break;
+                        }
+                    }
+
+                    // Search left and resave if shorter
+                    for (int16_t i = curr_pos_1d - 1; i >= 0; i--) {
+
+                        uint16_t d = curr_pos_1d - i; 
+                        if (d >= shortest_distance) break;
+
+                        if (model->board[i].tile_type == MineSweeperGameScreenTileMine && (d < shortest_distance)) {
+                            model->curr_pos.x_abs = i / model->board_width;
+                            model->curr_pos.y_abs = i % model->board_width; 
+                            break;
+                        }
+                    }
+                }
+            },
+            false);
+
+
+        consumed = true;
+
     } else if ((event->type == InputTypePress) || (event->type == InputTypeRepeat)) {
 
         with_view_model(
