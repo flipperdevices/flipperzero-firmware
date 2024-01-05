@@ -34,7 +34,7 @@ void seader_scene_sam_present_on_update(void* context) {
         seader_scene_sam_present_submenu_callback,
         seader);
     submenu_add_item(
-        submenu, "Load", SubmenuIndexSaved, seader_scene_sam_present_submenu_callback, seader);
+        submenu, "Saved", SubmenuIndexSaved, seader_scene_sam_present_submenu_callback, seader);
 
     if(seader_worker->sam_version[0] != 0 && seader_worker->sam_version[1] != 0) {
         FuriString* fw_str = furi_string_alloc();

@@ -71,7 +71,9 @@ static bool seader_credential_load(SeaderCredential* cred, FuriString* path, boo
 
         // Optional SIO/Diversifier
         flipper_format_read_hex(file, "SIO", cred->sio, sizeof(cred->sio));
+        cred->sio_len = sizeof(cred->sio); // No way to know real length;
         flipper_format_read_hex(file, "Diversifier", cred->diversifier, sizeof(cred->diversifier));
+        cred->diversifier_len = sizeof(cred->diversifier); // No way to know real length;
 
         parsed = true;
     } while(false);
@@ -362,9 +364,10 @@ bool seader_credential_save_agnostic(SeaderCredential* cred, const char* name) {
                file, "Credential", (uint8_t*)&swapped, sizeof(cred->credential)))
             break;
         if(cred->sio[0] == 0x30) {
+            // TODO: update to writing sio_len bytes, when that value has been seen to work well
             if(!flipper_format_write_hex(file, "SIO", cred->sio, sizeof(cred->sio))) break;
             if(!flipper_format_write_hex(
-                   file, "Diversifier", cred->diversifier, sizeof(cred->diversifier)))
+                   file, "Diversifier", cred->diversifier, cred->diversifier_len))
                 break;
         }
 
@@ -418,6 +421,7 @@ bool seader_credential_save_picopass(SeaderCredential* cred, const char* name) {
             furi_string_printf(temp_str, "Block %d", i);
             switch(i) {
             case CSN_INDEX:
+                // TODO: Is there any practical difference here?  If so, document.
                 if(withSIO) {
                     if(!flipper_format_write_hex(
                            file,
@@ -641,7 +645,9 @@ void seader_credential_clear(SeaderCredential* cred) {
     cred->bit_length = 0;
     cred->type = SeaderCredentialTypeNone;
     memset(cred->sio, 0, sizeof(cred->sio));
+    cred->sio_len = 0;
     memset(cred->diversifier, 0, sizeof(cred->diversifier));
+    cred->diversifier_len = 0;
     furi_string_reset(cred->load_path);
 }
 
