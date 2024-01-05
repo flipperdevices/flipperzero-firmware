@@ -1,3 +1,4 @@
+docker pull rustdesk/rustdesk-server-s6
 # Flipper Build Tool
 
 FBT is the entry point for firmware-related commands and utilities.
