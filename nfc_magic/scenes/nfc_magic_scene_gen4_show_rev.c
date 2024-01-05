@@ -24,7 +24,7 @@ void nfc_magic_scene_gen4_show_rev_on_enter(void* context) {
         furi_string_cat_printf(temp_revision, "%02X ", instance->gen4_revision_display[i]);
     }
 
-    widget_add_icon_element(widget, 73, 17, &I_DolphinCommon_56x48);
+    widget_add_icon_element(widget, 84, 22, &I_WarningDolphinFlip_45x42);
     widget_add_string_element(widget, 3, 4, AlignLeft, AlignTop, FontPrimary, "Gen4 Revision");
     widget_add_string_multiline_element(
         widget, 3, 17, AlignLeft, AlignTop, FontSecondary, furi_string_get_cstr(temp_revision));

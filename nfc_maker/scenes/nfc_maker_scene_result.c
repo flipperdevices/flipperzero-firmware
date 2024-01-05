@@ -361,10 +361,10 @@ void nfc_maker_scene_result_on_enter(void* context) {
     furi_record_close(RECORD_STORAGE);
 
     if(success) {
-        popup_set_icon(popup, 32, 5, &I_DolphinNice_96x59);
+        popup_set_icon(popup, 36, 5, &I_DolphinDone_80x58);
         popup_set_header(popup, "Saved!", 13, 22, AlignLeft, AlignBottom);
     } else {
-        popup_set_icon(popup, 32, 5, &I_DolphinNice_96x59);
+        popup_set_icon(popup, 36, 5, &I_DolphinDone_80x58);
         popup_set_header(popup, "Saved!", 13, 22, AlignLeft, AlignBottom);
     }
     popup_set_timeout(popup, 1500);

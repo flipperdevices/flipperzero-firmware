@@ -203,7 +203,7 @@ static void render_callback(Canvas* canvas, void* context) {
 
         elements_button_left(canvas, "Back");
 
-        canvas_draw_icon(canvas, 71, 15, &I_DolphinCommon_56x48);
+        canvas_draw_icon(canvas, 82, 20, &I_WarningDolphinFlip_45x42);
         break;
     case NO_APS:
         canvas_draw_str(canvas, 80, 30, "No AP's");
