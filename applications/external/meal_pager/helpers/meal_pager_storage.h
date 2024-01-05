@@ -6,7 +6,7 @@
 #include <flipper_format/flipper_format_i.h>
 #include "../meal_pager_i.h"
 
-#define MEAL_PAGER_SETTINGS_FILE_VERSION 1
+#define MEAL_PAGER_SETTINGS_FILE_VERSION 2
 #define CONFIG_FILE_DIRECTORY_PATH EXT_PATH("apps_data/meal_pager")
 #define MEAL_PAGER_SETTINGS_SAVE_PATH CONFIG_FILE_DIRECTORY_PATH "/meal_pager.conf"
 #define MEAL_PAGER_SETTINGS_SAVE_PATH_TMP MEAL_PAGER_SETTINGS_SAVE_PATH ".tmp"
@@ -16,6 +16,7 @@
 #define MEAL_PAGER_SETTINGS_KEY_LAST_STATION "Last Station"
 #define MEAL_PAGER_SETTINGS_KEY_FIRST_PAGER "First Pager"
 #define MEAL_PAGER_SETTINGS_KEY_LAST_PAGER "Last Pager"
+#define MEAL_PAGER_SETTINGS_KEY_REPEATS "Repeats"
 #define MEAL_PAGER_SETTINGS_KEY_HAPTIC "Haptic"
 #define MEAL_PAGER_SETTINGS_KEY_LED "Led"
 #define MEAL_PAGER_SETTINGS_KEY_SPEAKER "Speaker"
