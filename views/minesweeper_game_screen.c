@@ -325,16 +325,51 @@ static inline void bfs_tile_clear(MineSweeperGameScreenModel* model) {
 
     point_deq_push_back(deq, pos);
     
-    point_deq_pop_front(&pos, deq);
-    Point check = pointobj_get_point(pos);
+    while (point_deq_size(deq) > 0) {
+        point_deq_pop_front(&pos, deq);
+        Point curr_pos = pointobj_get_point(pos);
+        uint16_t curr_pos_1d = curr_pos.x * model->board_width + curr_pos.y;
+        
+        // If in visited continue
+        if (point_set_cget(set, pos) != NULL) {
+            continue;
+        } 
+        
+        model->board[curr_pos_1d].tile_state = MineSweeperGameScreenTileStateCleared;
 
-    FURI_LOG_D(MS_DEBUG_TAG, "We should floodfill!!");
-    FURI_LOG_D(MS_DEBUG_TAG, "We pushed and popped the start pos from the queue: (%hd,%hd) -> (%hd,%hd)", start_pos.x, start_pos.y, check.x, check.y );
-    FURI_LOG_D(MS_DEBUG_TAG, "The assertion will be : %d", check.x == start_pos.x && check.y == start_pos.y );
-    FURI_LOG_D(MS_DEBUG_TAG, "The size of deq is : %d", point_deq_size(deq) );
-    furi_assert(check.x == start_pos.x && check.y == start_pos.y);
-    furi_assert(point_deq_size(deq) == 0);
-    
+        point_set_push(set, pos);
+
+        // Process neighbors four ways
+        int8_t offsets[8][2] = {
+            {-1,1},
+            {0,1},
+            {1,1},
+            {1,0},
+            {1,-1},
+            {0,-1},
+            {-1,-1},
+            {-1,0},
+        };
+
+        // If the current tile is not a zero tile we uncover but do not continue
+        if (model->board[curr_pos_1d].tile_type != MineSweeperGameScreenTileZero) {
+            continue;
+        }
+
+        for (uint8_t i = 0; i < 8; i++) {
+            int16_t dx = curr_pos.x + (int16_t)offsets[i][0];
+            int16_t dy = curr_pos.y + (int16_t)offsets[i][1];
+
+            if (dx < 0 || dy < 0 || dx >= model->board_height || dy >= model->board_width) {
+                continue;
+            }
+
+            Point neighbor = (Point) {.x = dx, .y = dy};
+            pointobj_set_point(pos, neighbor);
+            point_deq_push_back(deq, pos);
+        }
+    }
+
     point_set_clear(set);
     point_deq_clear(deq);
 }
