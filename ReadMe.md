@@ -42,6 +42,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Added: [Restaurant Pager Trigger v0.1 (By leedave)](https://github.com/leedave/flipper-zero-meal-pager)
 - Added: [Vexed v1.0.1 (By dlvoy)](https://github.com/dlvoy/flipper-zero-vexed)
 - Updated: [Restaurant Pager Trigger v0.8 (By leedave)](https://github.com/leedave/flipper-zero-meal-pager)
+- UL: [subghz use long press to exit transmitter (By xMasterX)]()
 
 <a name="release">
 
