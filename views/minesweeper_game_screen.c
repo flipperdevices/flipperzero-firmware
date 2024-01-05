@@ -77,7 +77,7 @@ typedef struct {
     uint32_t start_tick;
     FuriString* info_str;
     bool is_making_first_move;
-    bool has_edited_flag;
+    bool is_holding_down_button;
 } MineSweeperGameScreenModel;
 
 static const float difficulty_multiplier[5] = {
@@ -238,8 +238,94 @@ static void setup_board(MineSweeperGameScreen* instance) {
         true);
 }
 
-// Four way DFS 'Flood fill' to clear adjacent non-mine tiles
-// We can use m*lib for a set and dequeue for DFS
+static inline Point bfs_to_closest_tile(MineSweeperGameScreenModel* model) {
+    // Init both the set and dequeue
+    point_deq_t deq;
+    point_set_t set;
+
+    point_deq_init(deq);
+    point_set_init(set);
+
+    // Return the value in this point
+    Point result;
+
+    // Point_t pos will be used to keep track of the current point
+    Point_t pos;
+    pointobj_init(pos);
+
+    // Starting position is current pos
+    Point start_pos = (Point){.x = model->curr_pos.x_abs, .y = model->curr_pos.y_abs};
+    pointobj_set_point(pos, start_pos);
+
+    point_deq_push_back(deq, pos);
+
+    uint32_t start_tick = furi_get_tick();
+
+    uint16_t i = 0;
+    
+    while (point_deq_size(deq) > 0) {
+        point_deq_pop_front(&pos, deq);
+        Point curr_pos = pointobj_get_point(pos);
+        uint16_t curr_pos_1d = curr_pos.x * model->board_width + curr_pos.y;
+
+        // If the current tile is uncovered and not start_pos go to that position
+        if (model->board[curr_pos_1d].tile_state == MineSweeperGameScreenTileStateUncleared &&
+                !(start_pos.x ==  curr_pos.x && start_pos.y == curr_pos.y)) {
+
+            result = curr_pos;
+            break;
+        }
+        
+        // If in visited set continue
+        if (point_set_cget(set, pos) != NULL) {
+            continue;
+        } 
+        
+        // Add point to visited set
+        point_set_push(set, pos);
+
+
+        // Process all surrounding neighbors and add valid to dequeue
+        int8_t offsets[8][2] = {
+            {-1,1},
+            {0,1},
+            {1,1},
+            {1,0},
+            {1,-1},
+            {0,-1},
+            {-1,-1},
+            {-1,0},
+        };
+
+        for (uint8_t i = 0; i < 8; i++) {
+            int16_t dx = curr_pos.x + (int16_t)offsets[i][0];
+            int16_t dy = curr_pos.y + (int16_t)offsets[i][1];
+
+            if (dx < 0 || dy < 0 || dx >= model->board_height || dy >= model->board_width) {
+                continue;
+            }
+
+            Point neighbor = (Point) {.x = dx, .y = dy};
+            pointobj_set_point(pos, neighbor);
+            point_deq_push_back(deq, pos);
+        }
+
+        i++;
+    }
+
+    uint32_t ticks_elapsed = furi_get_tick() - start_tick;
+    double sec = (double)ticks_elapsed / (double)furi_kernel_get_tick_frequency();
+    double milliseconds = 1000.0L * sec;
+    FURI_LOG_D(MS_DEBUG_TAG, "BFS: %.2f MS in %d iterations.", milliseconds, i);
+
+    point_set_clear(set);
+    point_deq_clear(deq);
+
+    return result;
+}
+
+// Four way BFS 'Flood fill' to clear adjacent non-mine tiles
+// We can use m*lib for a set and dequeue for BFS
 static inline void bfs_tile_clear(MineSweeperGameScreenModel* model) {
     //
     // Init both the set and dequeue
@@ -906,7 +992,7 @@ static bool mine_sweeper_game_screen_view_play_input_callback(InputEvent* event,
                 instance->view,
                 MineSweeperGameScreenModel * model,
                 {
-                    model->has_edited_flag = false;
+                    model->is_holding_down_button = false;
                 },
                 true);
             
@@ -927,39 +1013,60 @@ static bool mine_sweeper_game_screen_view_play_input_callback(InputEvent* event,
 
                         FURI_LOG_D(MS_DEBUG_TAG, "Event Type: (InputTypeLong || InputTypeRepeat) && InputKeyBack");
 
-                        uint16_t curr_x;
-                        uint16_t curr_y;
-                        uint16_t board_width;
-                        uint16_t board_height;
-                        uint16_t curr_pos_1d;
 
-                        curr_x = model->curr_pos.x_abs;
-                        curr_y = model->curr_pos.y_abs;
-                        board_width = model->board_width;
-                        board_height = model->board_height;
-                        curr_pos_1d = curr_x * board_width + curr_y;
+                        // BFS to closest uncovered position
+                        Point res = bfs_to_closest_tile(model);
 
-                        // DFS to closest uncovered position
-                        UNUSED(model);
-                        UNUSED(board_width);
-                        UNUSED(board_height);
-                        UNUSED(curr_pos_1d);
+                        // Save cursor to new closest tile position
+                        // If the cursor moves outisde of the model boundaries we need to
+                        // move the boundary appropriately
+                        
+                        model->curr_pos.x_abs = res.x;
+                        model->curr_pos.y_abs = res.y;
+
+                        FURI_LOG_D(MS_DEBUG_TAG, "After DFS pos: (%hd,%hd)", res.x, res.y);
+
+                        bool is_outside_top_boundary = model->curr_pos.x_abs <
+                            (model->bottom_boundary - MINESWEEPER_SCREEN_TILE_HEIGHT);
+
+                        bool is_outside_bottom_boundary = model->curr_pos.x_abs >=
+                            model->bottom_boundary;
+
+                        bool is_outside_left_boundary = model->curr_pos.y_abs <
+                            (model->right_boundary - MINESWEEPER_SCREEN_TILE_WIDTH);
+
+                        bool is_outside_right_boundary = model->curr_pos.y_abs >=
+                            model->right_boundary;
+
+                        if (is_outside_top_boundary) {
+                            model->bottom_boundary = model->curr_pos.x_abs + MINESWEEPER_SCREEN_TILE_HEIGHT;
+                        } else if (is_outside_bottom_boundary) {
+                            model->bottom_boundary = model->curr_pos.x_abs+1;
+                        }
+
+                        if (is_outside_right_boundary) {
+                            model->right_boundary = model->curr_pos.y_abs+1;
+                        } else if (is_outside_left_boundary) {
+                            model->right_boundary = model->curr_pos.y_abs + MINESWEEPER_SCREEN_TILE_WIDTH;
+                        }
+                        
+                        model->is_holding_down_button = true;
 
                     // Flag or Unflag tile and check win condition 
-                    } else if (!model->has_edited_flag && (state == MineSweeperGameScreenTileStateUncleared || state == MineSweeperGameScreenTileStateFlagged)) { 
+                    } else if (!model->is_holding_down_button && (state == MineSweeperGameScreenTileStateUncleared || state == MineSweeperGameScreenTileStateFlagged)) { 
                         FURI_LOG_D(MS_DEBUG_TAG, "Event Type: InputTypeLong && InputKeyOk");
 
                         if (state == MineSweeperGameScreenTileStateFlagged) {
                             if (model->board[curr_pos_1d].tile_type == MineSweeperGameScreenTileMine) model->mines_left++;
                             model->board[curr_pos_1d].tile_state = MineSweeperGameScreenTileStateUncleared;
                             model->flags_left++;
-                            model->has_edited_flag = true;
+                            model->is_holding_down_button = true;
                         
                         } else if (model->flags_left > 0) {
                             if (model->board[curr_pos_1d].tile_type == MineSweeperGameScreenTileMine) model->mines_left--;
                             model->board[curr_pos_1d].tile_state = MineSweeperGameScreenTileStateFlagged;
                             model->flags_left--;
-                            model->has_edited_flag = true;
+                            model->is_holding_down_button = true;
                         }
 
                         // WIN CONDITION
