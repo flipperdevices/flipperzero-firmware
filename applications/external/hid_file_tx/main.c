@@ -17,6 +17,7 @@
 #include "filelogger.h"
 #include "constants.h"
 #include "hidtransfer_icons.h"
+#include <assets_icons.h>
 
 #define HEX_VIEWER_APP_PATH_FOLDER "/any"
 #define HEX_VIEWER_APP_EXTENSION "*"
@@ -395,10 +396,13 @@ bool eventCallback() {
 }
 
 void openMenu(void* bla) {
+    UNUSED(bla);
     view_dispatcher_switch_to_view(app->view_dispatcher, VIEW_DISPATCHER_MENU);
 }
 
 bool inputCallback(InputEvent* event, void* context) {
+    UNUSED(context);
+    UNUSED(event);
     FURI_LOG_D(TAG, "Back button pressend on sending view");
     return true;
 }

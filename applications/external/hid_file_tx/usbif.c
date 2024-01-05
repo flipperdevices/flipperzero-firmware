@@ -575,6 +575,7 @@ void stopReceivingData() {
 }
 
 void sendBulkData(uint8_t* data, uint8_t len) {
+    UNUSED(len);
     ThreadMessage msg = {.dataPointer = data};
     logQueueStats();
     furi_check(furi_message_queue_put(dataQueue, &msg, FuriWaitForever) == FuriStatusOk);
