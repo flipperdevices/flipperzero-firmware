@@ -1,14 +1,18 @@
 #ifndef MINESWEEPERGAMESCREEN_I_H
 #define MINESWEEPERGAMESCREEN_I_H
 
-#include <stdlib.h>
-#include <stdbool.h>
 #include "m-rbtree.h"
 #include "m-deque.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+		
+/** We can use this Point struct for the 2d position for the minesweeper game.
+  * We define the necessary functions needed for this user defined type
+  * so that we can make use of M*LIB's Red Black Tree and Double Ended
+  * Queue for DFS and other algorithms for our MineSweeper game
+  */
 
 typedef struct {
     uint8_t x,y;
@@ -73,46 +77,46 @@ static inline int pointobj_cmp(const Point_t a, const Point_t b) {
             CMP(pointobj_cmp)               \
         )
 
+// Use this to get rid of -Wunused-parameter errors for this macro only
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
 // Example Macro defining the RBTREE for Point that will be used as an ordered set
-//      RBTREE_DEF(point_set, Point_t, POINT_OPLIST)
+RBTREE_DEF(point_set, Point_t, POINT_OPLIST)
 
-//
+#pragma GCC diagnostic pop
+
 // Example Macro defining the DEQ for Point that will be used as a double ended queue
-//      DEQUE_DEF (point_deq, Point_t, POINT_OPLIST)
+DEQUE_DEF (point_deq, Point_t, POINT_OPLIST)
 
+// Helper to convert the Point_t type to Point
+static inline Point pointobj_get_point(const Point_t z) {
+    return z->p;
+}
 
-//// Printing deq to debug
-//static inline void print_deq_to_debug(point_deq_t* deq) {
-//
-//    point_deq_it_t it;
-//
-//    for(point_deq_it(it, *deq); !point_deq_end_p(it); point_deq_next(it)) {
-//        Point ref = pointobj_get_point(*point_deq_ref(it));
-//		
-//		
-//        // ADD FURI LOG TO DEBUG INSTEAD OF PRINTF
-//		printf("(%hd,%hd), ", ref.x, ref.y);
-//    }
-//}
-//
-//// Printing ordered set to debug
-//static inline void print_ordered_set_to_debug(point_set_t* tree) {
-//
-//    point_set_it_t it;
-//
-//    for(point_set_it(it, *tree); !point_set_end_p(it); point_set_next(it)) {
-//        Point ref = pointobj_get_point(*point_set_ref(it));
-//		
-//		
-//        // ADD FURI LOG TO DEBUG INSTEAD OF PRINTF
-//		printf("(%hd,%hd), ", ref.x, ref.y);
-//    }
-//}
-//
-//// Helper to convert the Point_t type to Point
-//static inline Point pointobj_get_point(const Point_t z) {
-//    return z->p;
-//}
+// Printing deq to debug
+static inline void print_deq_to_debug(point_deq_t* deq) {
+
+    point_deq_it_t it;
+
+    for(point_deq_it(it, *deq); !point_deq_end_p(it); point_deq_next(it)) {
+        Point ref = pointobj_get_point(*point_deq_ref(it));
+		
+        FURI_LOG_D("DEQ DEBUG:", "(%hd,%hd), ", ref.x, ref.y);
+    }
+}
+
+// Printing ordered set to debug
+static inline void print_ordered_set_to_debug(point_set_t* tree) {
+
+    point_set_it_t it;
+
+    for(point_set_it(it, *tree); !point_set_end_p(it); point_set_next(it)) {
+        Point ref = pointobj_get_point(*point_set_ref(it));
+		
+        FURI_LOG_D("SET DEBUG:", "(%hd,%hd), ", ref.x, ref.y);
+    }
+}
 
 #ifdef __cplusplus
 }
