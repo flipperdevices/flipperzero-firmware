@@ -126,6 +126,8 @@ void meal_pager_save_settings(void* context) {
     flipper_format_write_uint32(
         fff_file, MEAL_PAGER_SETTINGS_KEY_FIRST_PAGER, &app->first_pager, 1);
     flipper_format_write_uint32(fff_file, MEAL_PAGER_SETTINGS_KEY_LAST_PAGER, &app->last_pager, 1);
+    flipper_format_write_uint32(fff_file, MEAL_PAGER_SETTINGS_KEY_LAST_PAGER, &app->last_pager, 1);
+    flipper_format_write_uint32(fff_file, MEAL_PAGER_SETTINGS_KEY_REPEATS, &app->repeats, 1);
     flipper_format_write_uint32(fff_file, MEAL_PAGER_SETTINGS_KEY_HAPTIC, &app->haptic, 1);
     flipper_format_write_uint32(fff_file, MEAL_PAGER_SETTINGS_KEY_SPEAKER, &app->speaker, 1);
     flipper_format_write_uint32(fff_file, MEAL_PAGER_SETTINGS_KEY_LED, &app->led, 1);
@@ -185,6 +187,7 @@ void meal_pager_read_settings(void* context) {
     flipper_format_read_uint32(
         fff_file, MEAL_PAGER_SETTINGS_KEY_FIRST_PAGER, &app->first_pager, 1);
     flipper_format_read_uint32(fff_file, MEAL_PAGER_SETTINGS_KEY_LAST_PAGER, &app->last_pager, 1);
+    flipper_format_read_uint32(fff_file, MEAL_PAGER_SETTINGS_KEY_REPEATS, &app->repeats, 1);
     flipper_format_read_uint32(fff_file, MEAL_PAGER_SETTINGS_KEY_HAPTIC, &app->haptic, 1);
     flipper_format_read_uint32(fff_file, MEAL_PAGER_SETTINGS_KEY_SPEAKER, &app->speaker, 1);
     flipper_format_read_uint32(fff_file, MEAL_PAGER_SETTINGS_KEY_LED, &app->led, 1);

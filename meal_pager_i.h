@@ -57,6 +57,8 @@ typedef struct {
     uint32_t current_station;
     uint32_t current_pager;
     bool stop_transmit;
+    uint32_t repeats;
+    char* repeats_char;
 } Meal_Pager;
 
 typedef enum {

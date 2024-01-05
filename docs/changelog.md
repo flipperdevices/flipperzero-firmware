@@ -1,3 +1,9 @@
+## v0.8
+- Added Repeats feature 
+- Repeats configuration in settings
+- Usage of repeats in T119
+- Usage of repeats in TD157
+
 ## v0.7
 
 - Added support for TD157
