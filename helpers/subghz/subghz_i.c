@@ -48,7 +48,7 @@ void subghz_set_default_preset(SubGhz* subghz) {
 bool subghz_key_load(SubGhz* subghz, const char* file_path) { //, bool show_dialog) {
     furi_assert(subghz);
     furi_assert(file_path);
-    
+
     Storage* storage = furi_record_open(RECORD_STORAGE);
     FlipperFormat* fff_data_file = flipper_format_file_alloc(storage);
     Stream* fff_data_stream =
@@ -57,7 +57,7 @@ bool subghz_key_load(SubGhz* subghz, const char* file_path) { //, bool show_dial
     SubGhzLoadKeyState load_key_state = SubGhzLoadKeyStateParseErr;
     FuriString* temp_str = furi_string_alloc();
     uint32_t temp_data32;
-    
+
     do {
         stream_clean(fff_data_stream);
         if(!flipper_format_file_open_existing(fff_data_file, file_path)) {
@@ -206,8 +206,8 @@ bool subghz_load_protocol_from_file(SubGhz* subghz) {
         subghz->dialogs, subghz->file_path, subghz->file_path, &browser_options);
 
     if(res) {*/
-        //res = subghz_key_load(subghz, furi_string_get_cstr(subghz->file_path), true);
-       res = subghz_key_load(subghz, MEAL_PAGER_TMP_FILE); //, true);
+    //res = subghz_key_load(subghz, furi_string_get_cstr(subghz->file_path), true);
+    res = subghz_key_load(subghz, MEAL_PAGER_TMP_FILE); //, true);
     //}
 
     //furi_string_free(file_path);

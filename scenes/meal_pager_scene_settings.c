@@ -176,22 +176,14 @@ void meal_pager_scene_settings_on_enter(void* context) {
 
     // First Pager
     item = variable_item_list_add(
-        app->variable_item_list,
-        "First Pager",
-        99,
-        meal_pager_scene_settings_set_first_pager,
-        app);
+        app->variable_item_list, "First Pager", 99, meal_pager_scene_settings_set_first_pager, app);
     variable_item_set_current_value_index(item, app->first_pager);
     snprintf(app->first_pager_char, 20, "%lu", app->first_pager);
     variable_item_set_current_value_text(item, app->first_pager_char);
 
     // Last Pager
     item = variable_item_list_add(
-        app->variable_item_list,
-        "Last Pager",
-        99,
-        meal_pager_scene_settings_set_last_pager,
-        app);
+        app->variable_item_list, "Last Pager", 99, meal_pager_scene_settings_set_last_pager, app);
     variable_item_set_current_value_index(item, app->last_pager);
     snprintf(app->last_pager_char, 20, "%lu", app->last_pager);
     variable_item_set_current_value_text(item, app->last_pager_char);
@@ -200,33 +192,21 @@ void meal_pager_scene_settings_on_enter(void* context) {
 
     // Vibro on/off
     item = variable_item_list_add(
-        app->variable_item_list,
-        "Vibro/Haptic:",
-        2,
-        meal_pager_scene_settings_set_haptic,
-        app);
+        app->variable_item_list, "Vibro/Haptic:", 2, meal_pager_scene_settings_set_haptic, app);
     value_index = value_index_uint32(app->haptic, haptic_value, 2);
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, haptic_text[value_index]);
 
     // Sound on/off
     item = variable_item_list_add(
-        app->variable_item_list,
-        "Sound:",
-        2,
-        meal_pager_scene_settings_set_speaker,
-        app);
+        app->variable_item_list, "Sound:", 2, meal_pager_scene_settings_set_speaker, app);
     value_index = value_index_uint32(app->speaker, speaker_value, 2);
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, speaker_text[value_index]);
 
     // LED Effects on/off
     item = variable_item_list_add(
-        app->variable_item_list,
-        "LED FX:",
-        2,
-        meal_pager_scene_settings_set_led,
-        app);
+        app->variable_item_list, "LED FX:", 2, meal_pager_scene_settings_set_led, app);
     value_index = value_index_uint32(app->led, led_value, 2);
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, led_text[value_index]);
@@ -241,7 +221,7 @@ void meal_pager_scene_settings_on_enter(void* context) {
     value_index = value_index_uint32(app->save_settings, settings_value, 2);
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, settings_text[value_index]);
-    
+
     view_dispatcher_switch_to_view(app->view_dispatcher, Meal_PagerViewIdSettings);
 }
 
@@ -250,7 +230,6 @@ bool meal_pager_scene_settings_on_event(void* context, SceneManagerEvent event) 
     UNUSED(app);
     bool consumed = false;
     if(event.type == SceneManagerEventTypeCustom) {
-        
     }
     return consumed;
 }

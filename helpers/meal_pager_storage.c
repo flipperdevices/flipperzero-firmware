@@ -1,6 +1,5 @@
 #include "meal_pager_storage.h"
 
-
 static Storage* meal_pager_open_storage() {
     return furi_record_open(RECORD_STORAGE);
 }
@@ -10,7 +9,7 @@ static void meal_pager_close_storage() {
 }
 
 static void meal_pager_close_config_file(FlipperFormat* file) {
-    if (file == NULL) return;
+    if(file == NULL) return;
     flipper_format_rewind(file);
     flipper_format_file_close(file);
     flipper_format_free(file);
@@ -28,7 +27,7 @@ bool meal_pager_save_subghz_buffer_file_start(void* context, FlipperFormat* ff, 
     // Overwrite wont work, so delete first
     if(storage_file_exists(storage, MEAL_PAGER_TMP_FILE)) {
         bool stored = storage_simply_remove(storage, MEAL_PAGER_TMP_FILE);
-        if (!stored) {
+        if(!stored) {
             FURI_LOG_D(TAG, "Cannot remove file, seems to be open");
             return success;
         }
@@ -36,12 +35,11 @@ bool meal_pager_save_subghz_buffer_file_start(void* context, FlipperFormat* ff, 
 
     // Open File, create if not exists
     if(!storage_common_stat(storage, MEAL_PAGER_TMP_FILE, NULL) == FSE_OK) {
-        FURI_LOG_D(TAG, "Config file %s is not found. Will create new.", MEAL_PAGER_SETTINGS_SAVE_PATH);
+        FURI_LOG_D(
+            TAG, "Config file %s is not found. Will create new.", MEAL_PAGER_SETTINGS_SAVE_PATH);
         if(storage_common_stat(storage, CONFIG_FILE_DIRECTORY_PATH, NULL) == FSE_NOT_EXIST) {
             FURI_LOG_D(
-                TAG,
-                "Directory %s doesn't exist. Will create new.",
-                CONFIG_FILE_DIRECTORY_PATH);
+                TAG, "Directory %s doesn't exist. Will create new.", CONFIG_FILE_DIRECTORY_PATH);
             if(!storage_simply_mkdir(storage, CONFIG_FILE_DIRECTORY_PATH)) {
                 FURI_LOG_D(TAG, "Error creating directory %s", CONFIG_FILE_DIRECTORY_PATH);
             }
@@ -54,12 +52,14 @@ bool meal_pager_save_subghz_buffer_file_start(void* context, FlipperFormat* ff, 
         meal_pager_close_storage();
         return success;
     }
-    
-    success = flipper_format_write_header_cstr(ff, MEAL_PAGER_SUBGHZ_FILE_TYPE, MEAL_PAGER_SUBGHZ_FILE_VERSION) &&
-                   flipper_format_write_string_cstr(ff, "Frequency", MEAL_PAGER_SUBGHZ_FILE_FREQUENCY) &&
-                   flipper_format_write_string_cstr(ff, "Preset", MEAL_PAGER_SUBGHZ_FILE_PRESET) &&
-                   flipper_format_write_string_cstr(ff, "Protocol", MEAL_PAGER_SUBGHZ_FILE_Protocol);
-    //UNUSED(success);            
+
+    success =
+        flipper_format_write_header_cstr(
+            ff, MEAL_PAGER_SUBGHZ_FILE_TYPE, MEAL_PAGER_SUBGHZ_FILE_VERSION) &&
+        flipper_format_write_string_cstr(ff, "Frequency", MEAL_PAGER_SUBGHZ_FILE_FREQUENCY) &&
+        flipper_format_write_string_cstr(ff, "Preset", MEAL_PAGER_SUBGHZ_FILE_PRESET) &&
+        flipper_format_write_string_cstr(ff, "Protocol", MEAL_PAGER_SUBGHZ_FILE_Protocol);
+    //UNUSED(success);
     return success;
     //return ff;
 }
@@ -81,7 +81,7 @@ void meal_pager_save_subghz_buffer_stop(void* context, FlipperFormat* ff) {
 
 void meal_pager_save_settings(void* context) {
     Meal_Pager* app = context;
-    if (app->save_settings == 0) {
+    if(app->save_settings == 0) {
         FURI_LOG_D(TAG, "Skipping Save because Disabled");
         return;
     }
@@ -89,7 +89,7 @@ void meal_pager_save_settings(void* context) {
     FURI_LOG_D(TAG, "Saving Settings to File");
     Storage* storage = meal_pager_open_storage();
     FlipperFormat* fff_file = flipper_format_file_alloc(storage);
-    
+
     // Overwrite wont work, so delete first
     if(storage_file_exists(storage, MEAL_PAGER_SETTINGS_SAVE_PATH)) {
         storage_simply_remove(storage, MEAL_PAGER_SETTINGS_SAVE_PATH);
@@ -97,12 +97,11 @@ void meal_pager_save_settings(void* context) {
 
     // Open File, create if not exists
     if(!storage_common_stat(storage, MEAL_PAGER_SETTINGS_SAVE_PATH, NULL) == FSE_OK) {
-        FURI_LOG_D(TAG, "Config file %s is not found. Will create new.", MEAL_PAGER_SETTINGS_SAVE_PATH);
+        FURI_LOG_D(
+            TAG, "Config file %s is not found. Will create new.", MEAL_PAGER_SETTINGS_SAVE_PATH);
         if(storage_common_stat(storage, CONFIG_FILE_DIRECTORY_PATH, NULL) == FSE_NOT_EXIST) {
             FURI_LOG_D(
-                TAG,
-                "Directory %s doesn't exist. Will create new.",
-                CONFIG_FILE_DIRECTORY_PATH);
+                TAG, "Directory %s doesn't exist. Will create new.", CONFIG_FILE_DIRECTORY_PATH);
             if(!storage_simply_mkdir(storage, CONFIG_FILE_DIRECTORY_PATH)) {
                 FURI_LOG_E(TAG, "Error creating directory %s", CONFIG_FILE_DIRECTORY_PATH);
             }
@@ -115,29 +114,24 @@ void meal_pager_save_settings(void* context) {
         meal_pager_close_storage();
         return;
     }
-    
+
     // Store Settings
     flipper_format_write_header_cstr(
         fff_file, MEAL_PAGER_SETTINGS_HEADER, MEAL_PAGER_SETTINGS_FILE_VERSION);
-    flipper_format_write_uint32(
-        fff_file, MEAL_PAGER_SETTINGS_KEY_PAGER_TYPE, &app->pager_type, 1);
+    flipper_format_write_uint32(fff_file, MEAL_PAGER_SETTINGS_KEY_PAGER_TYPE, &app->pager_type, 1);
     flipper_format_write_uint32(
         fff_file, MEAL_PAGER_SETTINGS_KEY_FIRST_STATION, &app->first_station, 1);
     flipper_format_write_uint32(
         fff_file, MEAL_PAGER_SETTINGS_KEY_LAST_STATION, &app->last_station, 1);
     flipper_format_write_uint32(
         fff_file, MEAL_PAGER_SETTINGS_KEY_FIRST_PAGER, &app->first_pager, 1);
-    flipper_format_write_uint32(
-        fff_file, MEAL_PAGER_SETTINGS_KEY_LAST_PAGER, &app->last_pager, 1);
-    flipper_format_write_uint32(
-        fff_file, MEAL_PAGER_SETTINGS_KEY_HAPTIC, &app->haptic, 1);
-    flipper_format_write_uint32(
-        fff_file, MEAL_PAGER_SETTINGS_KEY_SPEAKER, &app->speaker, 1);
-    flipper_format_write_uint32(
-        fff_file, MEAL_PAGER_SETTINGS_KEY_LED, &app->led, 1);
+    flipper_format_write_uint32(fff_file, MEAL_PAGER_SETTINGS_KEY_LAST_PAGER, &app->last_pager, 1);
+    flipper_format_write_uint32(fff_file, MEAL_PAGER_SETTINGS_KEY_HAPTIC, &app->haptic, 1);
+    flipper_format_write_uint32(fff_file, MEAL_PAGER_SETTINGS_KEY_SPEAKER, &app->speaker, 1);
+    flipper_format_write_uint32(fff_file, MEAL_PAGER_SETTINGS_KEY_LED, &app->led, 1);
     flipper_format_write_uint32(
         fff_file, MEAL_PAGER_SETTINGS_KEY_SAVE_SETTINGS, &app->save_settings, 1);
-    
+
     if(!flipper_format_rewind(fff_file)) {
         meal_pager_close_config_file(fff_file);
         FURI_LOG_E(TAG, "Rewind error");
@@ -162,7 +156,7 @@ void meal_pager_read_settings(void* context) {
     uint32_t file_version;
     FuriString* temp_str = furi_string_alloc();
 
-    if (!flipper_format_file_open_existing(fff_file, MEAL_PAGER_SETTINGS_SAVE_PATH)) {
+    if(!flipper_format_file_open_existing(fff_file, MEAL_PAGER_SETTINGS_SAVE_PATH)) {
         FURI_LOG_E(TAG, "Cannot open file %s", MEAL_PAGER_SETTINGS_SAVE_PATH);
         meal_pager_close_config_file(fff_file);
         meal_pager_close_storage();
@@ -184,14 +178,18 @@ void meal_pager_read_settings(void* context) {
     }
 
     flipper_format_read_uint32(fff_file, MEAL_PAGER_SETTINGS_KEY_PAGER_TYPE, &app->pager_type, 1);
-    flipper_format_read_uint32(fff_file, MEAL_PAGER_SETTINGS_KEY_FIRST_STATION, &app->first_station, 1);
-    flipper_format_read_uint32(fff_file, MEAL_PAGER_SETTINGS_KEY_LAST_STATION, &app->last_station, 1);
-    flipper_format_read_uint32(fff_file, MEAL_PAGER_SETTINGS_KEY_FIRST_PAGER, &app->first_pager, 1);
+    flipper_format_read_uint32(
+        fff_file, MEAL_PAGER_SETTINGS_KEY_FIRST_STATION, &app->first_station, 1);
+    flipper_format_read_uint32(
+        fff_file, MEAL_PAGER_SETTINGS_KEY_LAST_STATION, &app->last_station, 1);
+    flipper_format_read_uint32(
+        fff_file, MEAL_PAGER_SETTINGS_KEY_FIRST_PAGER, &app->first_pager, 1);
     flipper_format_read_uint32(fff_file, MEAL_PAGER_SETTINGS_KEY_LAST_PAGER, &app->last_pager, 1);
     flipper_format_read_uint32(fff_file, MEAL_PAGER_SETTINGS_KEY_HAPTIC, &app->haptic, 1);
     flipper_format_read_uint32(fff_file, MEAL_PAGER_SETTINGS_KEY_SPEAKER, &app->speaker, 1);
     flipper_format_read_uint32(fff_file, MEAL_PAGER_SETTINGS_KEY_LED, &app->led, 1);
-    flipper_format_read_uint32(fff_file, MEAL_PAGER_SETTINGS_KEY_SAVE_SETTINGS, &app->save_settings, 1);
+    flipper_format_read_uint32(
+        fff_file, MEAL_PAGER_SETTINGS_KEY_SAVE_SETTINGS, &app->save_settings, 1);
 
     flipper_format_rewind(fff_file);
 

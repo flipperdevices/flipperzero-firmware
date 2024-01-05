@@ -18,7 +18,6 @@ struct Meal_PagerTransmit {
     void* context;
 };
 
-
 typedef struct {
     uint32_t pager_type;
     uint32_t station;
@@ -46,12 +45,13 @@ void meal_pager_transmit_draw(Canvas* canvas, Meal_PagerTransmitModel* model) {
     char pagerText[20] = "";
     snprintf(stationText, 20, "Station: %lu", model->station);
     snprintf(pagerText, 20, "Pager: %lu", model->pager);
-    canvas_draw_str_aligned(canvas, 0, 10, AlignLeft, AlignTop, pager_type_text_long[model->pager_type]); 
+    canvas_draw_str_aligned(
+        canvas, 0, 10, AlignLeft, AlignTop, pager_type_text_long[model->pager_type]);
     canvas_set_font(canvas, FontSecondary);
-    if (model->sending == 0) {
+    if(model->sending == 0) {
         canvas_draw_str_aligned(canvas, 0, 22, AlignLeft, AlignTop, "Generating Data");
-        canvas_draw_str_aligned(canvas, 0, 32, AlignLeft, AlignTop, stationText); 
-        canvas_draw_str_aligned(canvas, 0, 42, AlignLeft, AlignTop, pagerText); 
+        canvas_draw_str_aligned(canvas, 0, 32, AlignLeft, AlignTop, stationText);
+        canvas_draw_str_aligned(canvas, 0, 42, AlignLeft, AlignTop, pagerText);
     } else {
         canvas_draw_str_aligned(canvas, 0, 22, AlignLeft, AlignTop, "Sending Data");
     }
@@ -78,12 +78,7 @@ void meal_pager_transmit_model_set_station(Meal_PagerTransmit* instance, uint32_
     model->station = station;
     view_commit_model(instance->view, false);
     with_view_model(
-        instance->view,
-        Meal_PagerTransmitModel* model,
-        {
-            UNUSED(model);
-        },
-        true);
+        instance->view, Meal_PagerTransmitModel * model, { UNUSED(model); }, true);
 }
 
 void meal_pager_transmit_model_set_sending(Meal_PagerTransmit* instance, uint32_t value) {
@@ -92,12 +87,7 @@ void meal_pager_transmit_model_set_sending(Meal_PagerTransmit* instance, uint32_
     model->sending = value;
     view_commit_model(instance->view, false);
     with_view_model(
-        instance->view,
-        Meal_PagerTransmitModel* model,
-        {
-            UNUSED(model);
-        },
-        true);
+        instance->view, Meal_PagerTransmitModel * model, { UNUSED(model); }, true);
 }
 
 void meal_pager_transmit_model_set_pager(Meal_PagerTransmit* instance, uint32_t pager) {
@@ -106,44 +96,34 @@ void meal_pager_transmit_model_set_pager(Meal_PagerTransmit* instance, uint32_t 
     model->pager = pager;
     view_commit_model(instance->view, false);
     with_view_model(
-        instance->view,
-        Meal_PagerTransmitModel* model,
-        {
-            UNUSED(model);
-        },
-        true);
+        instance->view, Meal_PagerTransmitModel * model, { UNUSED(model); }, true);
 }
 
 bool meal_pager_transmit_input(InputEvent* event, void* context) {
-    furi_assert(context); 
+    furi_assert(context);
     Meal_PagerTransmit* instance = context;
-    if (event->type == InputTypeRelease) {
+    if(event->type == InputTypeRelease) {
         switch(event->key) {
-            case InputKeyBack:
-                with_view_model(
-                    instance->view,
-                    Meal_PagerTransmitModel * model,
-                    {
-                        UNUSED(model);
-                        instance->callback(Meal_PagerCustomEventTransmitBack, instance->context);
-                    },
-                    true);
-                break;
-            case InputKeyLeft:
-            case InputKeyRight:
-            case InputKeyUp:
-            case InputKeyDown:
-            case InputKeyOk:
-                with_view_model(
-                    instance->view,
-                    Meal_PagerTransmitModel* model,
-                    {
-                        UNUSED(model);
-                    },
-                    true);
-                break;
-            case InputKeyMAX:
-                break;
+        case InputKeyBack:
+            with_view_model(
+                instance->view,
+                Meal_PagerTransmitModel * model,
+                {
+                    UNUSED(model);
+                    instance->callback(Meal_PagerCustomEventTransmitBack, instance->context);
+                },
+                true);
+            break;
+        case InputKeyLeft:
+        case InputKeyRight:
+        case InputKeyUp:
+        case InputKeyDown:
+        case InputKeyOk:
+            with_view_model(
+                instance->view, Meal_PagerTransmitModel * model, { UNUSED(model); }, true);
+            break;
+        case InputKeyMAX:
+            break;
         }
     }
     return true;
@@ -159,13 +139,7 @@ void meal_pager_transmit_enter(void* context) {
     furi_assert(context);
     Meal_PagerTransmit* instance = (Meal_PagerTransmit*)context;
     with_view_model(
-        instance->view,
-        Meal_PagerTransmitModel * model,
-        {
-            UNUSED(model);
-        },
-        true
-    );
+        instance->view, Meal_PagerTransmitModel * model, { UNUSED(model); }, true);
 }
 
 Meal_PagerTransmit* meal_pager_transmit_alloc(void* context) {
@@ -187,9 +161,8 @@ Meal_PagerTransmit* meal_pager_transmit_alloc(void* context) {
             meal_pager_transmit_model_init(model);
             //meal_pager_transmit_model_set_type(instance, 0);
         },
-        true
-    );
-    
+        true);
+
     return instance;
 }
 
@@ -198,12 +171,7 @@ void meal_pager_transmit_free(Meal_PagerTransmit* instance) {
     furi_assert(instance);
 
     with_view_model(
-        instance->view,
-        Meal_PagerTransmitModel * model,
-        {
-            UNUSED(model);
-        },
-        true);
+        instance->view, Meal_PagerTransmitModel * model, { UNUSED(model); }, true);
     view_free(instance->view);
     free(instance);
 }
@@ -212,4 +180,3 @@ View* meal_pager_transmit_get_view(Meal_PagerTransmit* instance) {
     furi_assert(instance);
     return instance->view;
 }
-
