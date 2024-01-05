@@ -1,0 +1,63 @@
+# Author: Vexed Development Team
+# URL: http://vexed.sourceforge.net
+# Description: Difficult. Many of these levels have twists that add challenge.
+0;Tornado;10/4~~f3/4~2g2/1~e1~1~e2/1~2~1~3/1~2~~~3/1~~~e~~gf1/10;GbFbHgGgeFfFgGCdbGfGeGcGgGfGdGhGgGeGHdHdgG
+1;Helm Wind;10/1~b2b~1g1/1~3g~~a1/1~4~~2/1~g~2~~2/1~1~~~~~2/1~~~~a1~2/10;CbfBGfbGcGcEFgdFeFfFgFIcHfGfFfdGfCIc
+2;Solar Wind;10/10/10/6~b2/1b~c~~~3/2c2~~3/1~h~c~~h2/10;dECgeGcGfGdGeEHdbEcGdGeGbGcGdGeGfG
+3;Puelche;10/10/10/1e~c~5/1f~1~5/2~1~c4/1~~~~e~ef1/10;dDFfFgEgDgCgHgGgFgEgbDbEcGdGeGfGgG
+4;Thermal;10/5~a3/1g~~~~4/4~~4/4~~4/1e2~~1e2/1a~~g~~g2/10;bCcCEgHgGgdCGbbGcGdGbGcGdGeGfG
+5;Chinook;10/1c~2h4/1h~1~b~3/2~1~1~3/2~1~1~3/2~~~~h3/2~1b~c3/10;fCFcEfDfbBcFdFeGGfFfGfEfbCeG
+6;Storm;10/10/10/5~g3/4h~4/1a~eg~e~~1/2~3h~a1/10;eFIggFfFeFhFgFfFdFeFfFHfGfFfEfDfbFcFdFeFfFgFgGGdFfEfDf
+7;Breath;10/10/10/10/4ca~3/1e~3~~2/1baec~~b~1/10;eGfGfEeEfEgFdGcGeGdGfGHfeGhGgGbFcGdGeGfGbGcGdGeGfGgG
+8;Eurus;10/8e1/7~a1/2h~3~2/3~2~~2/2~~g~~h2/1ge1a~~3/10;IcHeHfGfeFfFgFIcHeGfFfEfDfHfGfFfEfDfcDdFeFeG
+9;Samiel;10/1b~7/2~7/1d~7/2~7/2~~2~~a1/1ea~~de~b1/10;bDcFdGcGdGeGgGIfHfbGcGdGeGfGbBcGdGeGfGgG
+10;Gale;10/10/1a~3~g2/2~3~3/2~3~3/2~d1~~3/1h~g~h~ad1/10;bGDfdGfGHcGfcGdGeGbCcFdGeGfGcGdGeGfGgG
+11;Gust;10/10/10/10/1be~~2~g1/1g2~2~2/1a~~~e~ba1/10;cEdEbEcEdEeGfGbGcGdGeGfGgGIebGcGdGeGfG
+12;Calm;10/10/10/2e7/2f~6/3~1~f~a1/1ha~~~h~e1/10;cEGfdGcGdGeGgGIfHfbGcGdGeGfGcEdGeGfGgG
+13;Candelia;10/10/10/7f2/6~e~1/2h~~~~1e1/1gf~g~~~h1/10;hEEgcFdFeGfGgGdGcGeGdGfGHeGfbGcGdGeG
+14;Updraft;10/1b8/1ga~~g~3/5bg~2/7~2/7~a1/7~g1/10;fCcCdCeCfCgDIfbCcCdCeCfCgDbCcCdCeC
+15;Auster;10/3c6/3e~~e3/5~4/5~4/5~~~g1/1bg~~~~bc1/10;dCeCGcIfHfcGdGeGbGcGdGeGfGdCeCfGgG
+16;Haboob;10/3~c5/3~3f~1/2f~4~1/1dc~2b~~1/3~~2~~1/2b~~~d~~1/10;EbcEcEbEcEdFeGhCdGeGfGgGgEcGdGeGfG
+17;Tropical Cyclone;10/3g~3f1/4~2~g1/4~2~2/4~2~2/4~2~2/1bfe~e~~b1/10;dGdBIceGfGIccGdGeGfGbGcGdGeGfGgG
+18;Downdraft;10/10/10/10/1a~3g3/1g~3a~e1/1e~h~~h~2/10;dGeGbEcGdGeGbFcGdGeGIfbGcGdGeGfG
+19;Cyclone;10/10/7~g1/7~2/2e~~f1~2/2g~~2~2/1fb~~~e~b1/10;cEdGeGcFdGFecGEfDfIceGfGdGeGfGgG
+20;Wuther;10/10/4g~4/1a~a1~4/2~b~~~~c1/1~~2~1~a1/1c2~~gb2/10;dEGgeEeCfEgEIeHeFgfGdEeGeEGeFefGEeDebDcECfdEIfFgHgeE
+21;Tebbad;10/10/10/10/1ba~3h2/3~~~~bg1/1g~~~~hab1/10;HfGfHfFgEgcEdFeGfGbEDgIgHgGgFgcEbGcGdGeGfGgG
+22;Lake Breeze;10/10/1c~7/1d~7/2~7/2~~~1~cg1/1dgdb~~b2/10;eGfGbCcFdFeGfGdGcGeGdGfGeGgGIfHfHgGgFgEgbD
+23;Capful Of Wind;10/2f7/1~a~6/1~1~1~a~e1/1b~~~~1~2/1f~~3~2/2~~be~~b1/10;EgDgFgEgcCCcDfbEIddGeGfGIgHgGgFgcEGdFeEe
+24;Notus;10/4~a4/4~5/4~5/4~2a2/2g~~~~gh1/2e~~~hea1/10;HfGfHfGfIfHfcFHgfFdGcGdGeGGgFgEgIgHgGgFb
+25;Blustery;10/10/10/1g~4~d1/1a~c3~c1/2~a~2~a1/2~d~g~~2/10;DfDfbDcEdFIddGeGfGbEIfHgGgFgcEIfcGdGeGfG
+26;Zephyr;10/10/7~e1/7~g1/2g3~~2/2f~2~3/2ge~d~df1/10;fGIcHedGeGIdcGdGeGcFfGdGgGeGHecGdGeGfGgG
+27;Breeze;10/4e~4/1~b1f~4/1~3~4/1~2f~4/1~~h1~4/1~~f~e~bh1/10;eBeCfGdGeEDgCgCcbFcGdGeGfGbGcGdGeGfGgG
+28;Hurricane;10/4~g1~e1/1a~e~2~2/1c~4~2/2~4~2/1a~4~2/1e~~c~~~g1/10;bCbFbDcGIbHgGgFgEgDcFbEcDccGdGeGfGgG
+29;Wind Chill;10/2c~6/3~6/2c~6/3h~~4/3fe~~~c1/4hf~~e1/10;dEeFcBdEcDFfdEfGgGIfHfeEdFeFfGeGfGgG
+30;Levanter;10/7~d1/2c4~2/2d4~2/2a~~~1~2/3~b~c~2/1b~~ad1~~1/10;gFIbHfbGcGcEcEdEeEcEdEeFeFdFfFgFdG
+31;Boreas;10/1e~1~be3/2~~~2h~1/2~~4~1/2~~4~1/2~~3~~1/1~b~geh~g1/10;FbEchCIfGbFbEgDgbBCgFgEcbGcGdGeGfGgG
+32;Roaring Forties;10/4h~4/5~4/5~1e2/1a2~~~a2/1h~~~1~f2/1ef~~h~3/10;eBbFcFFeHfcGdGeGHebGcGdGeGHfbGcGdGeG
+33;Squall;10/7~h1/6~~f1/4~~~3/3~e~4/3~2b~f1/1~c~bhec2/10;IbHceEGdFdCgEgEeDgdGFeEedGeGcGdGeGbGcGdGeGfGIcHcGdFeEeIfdGeGfG
+34;Twister;10/4b~4/5~4/5~4/1c~a~~4/2~gch~hg1/1~~a2~1b1/10;dEeEDfEfDfFfEfFfCgDfEfbEHfIfHfGfFfEfcFdFbGeBfFgFhFeFfF
+35;Typhoon;10/10/7a2/6~b2/1bf~~~~f2/3~~ad3/1d~~2fb2/10;FfGfbGcGEfcEFfdEeEHeeFdFHgfFHdGebEGfFfDgCgEfcEdFbGeFHe
+36;Friagem;10/4~a4/2~gc5/2~7/1~~~b~4/1~~~1~~bd1/1cd~~g~1a1/10;DcEcDcCeFbEcDcFgEgEecEdECgHfIfHfGgeEfFdGgFhFbGcGdGeG
+37;Simoom;10/8a1/1h~2e~~e1/2~3~~2/2~3~3/1b~~~~~~f1/1f~~ah1~b1/10;fCIcgFIfHfHdGfgFbCbFEgcFFgdFeFfFgFIcHdGfFfEfcGbGcGdG
+38;Dust Devil;10/10/10/2~g6/1c~3h~e1/1g~~~~f~c1/1e~~~~1hf1/10;DdbEcFIfgEhEdGcGeGGfHfdGFfGfIfHfIfbFGfeFcGfFgFbGcGdG
+39;Half A Gale;10/10/10/1c~g~~4/2~2~f~2/2d~~fa~~1/2a~d1c~g1/10;gEgFfFhFgFDdbDcDcGcFdFeFfFgGIfHfGfFfEfcGdDeDfFgFgG
+40;Sea Breeze;10/1~f7/1~2~df~2/1h~1~2~h1/2~1~1~~2/2~1~~~~d1/2h~cd~c2/10;IfcGfGeGdGFceFfFfGbDeGcGfGdGgGgCIdeGHeCbbDcGdGeGfG
+41;Williwaw;10/10/3~e5/3e1af~2/3c~2~2/4~~1b~1/2fb~~~ac1/10;EchFHgGgFgdEeFIggDhFfGfDgDeGfGdGeGfGgGcGdGeGfGgG
+42;Trade Winds;10/1d4d~2/1b~3g~2/2~4~2/2~4~2/1f~~3f2/1g~eb~~e2/10;DgbCcFcGdGeGfGbFcGdGeGfGgBbCcGdGeGfGgCbGcGdGeGfG
+43;Aquilo;10/10/7~b1/6f~2/4~b1~2/2e~~1~a~1/1~acfe~c~1/10;cFdFCgDgEgIcFehFHfeGgDHfdGeGcGdGeGfGbGcGdGeGfGgG
+44;Keen Blast;10/10/2d~6/1g1~6/1cf~6/1h1~~~~~~1/1cfhg~~1d1/10;cEeGdGbEbGcGbGfGeGdGcGcCcEdFeFdFfFdGgFhFbGcGdGeG
+45;Mariah;10/2a~6/3~6/1~e~6/1~1~h~4/1~~f1~~~2/1~~ecfcha1/10;eEfFgFcDcBDdCdbGDfEgcFCgDgdGcGdGeGbGcGdGeGfGgG
+46;Bise;10/3~d2~h1/3~3~2/3~~2~2/3e~2~2/2~b~~~d2/1eah~~~ab1/10;EbdDHfeGHgGgFgdFeFfGgGDfeGdGcGfGeGgGIbHfdGeGfG
+47;Stiff Breeze;10/3b~5/1b~1~5/1d~~~5/1e~g~~4/2g2~1~d1/1~eg~~e~2/10;bCdEdBEddGCgeGcGgGfGdGeEHgGgFgEgbEbEIfcGdGeGfG
+48;CAT;10/2~b6/2~4~h1/2~2~~~c1/2~2~1~2/1e~f~f~~2/1c~b~1~eh1/10;HgfFIggFIcIdHdHfDfbFDbcFGfFfdFcFeFfFcGGdFfbGcG
+49;Polar Night Jets;10/1b~7/2~7/2~7/2~2~h1g1/1g~~~~1~a1/2ch~ab~c1/10;GeFfbBFgEgcFdFeGIfdGeGfGcGdGeGfGgGbFcGdGeGfGgG
+50;Fresh Breeze;10/10/6~~f1/1a~3~h2/2~h~~~eg1/2~a~~~1e1/4~fg3/10;IcHcFgdEGgeFdFfFHeeFGeHeIeHefEgEhEFfGfeGbDcFdF
+51;Horse Latitudes;10/3~~d4/1h~~2d~2/2~~3~2/3a~2~2/1~f1f~1~2/1chca~~~2/10;dEeFbCcDCfdGdEcGfGeGbGcGdGbGcGdGeGFbEbgCdEeGfG
+52;Second Wind;10/1c~7/2~7/2~4~c1/2~1g~h~2/1a~~a~g~b1/1b~h1~1~2/10;gFIfIdHeGeGfeEHffEgEEfDfFfEfbBGfFfEfcFbFdFeFbG
+53;Foehn;10/4h~~b2/5~~3/5~~3/5~~d2/1~a~~~~eb1/1e1~h~~ad1/10;HbHeeGGfFfHfGfIfHfeBEgcFdFFfEfDfCfeGfGdGeGfGgG
+54;Anticyclone;10/10/10/10/1b3~f3/1f~1~~c~d1/1h~~d~bhc1/10;IfeGGeFfGfFfHfGfbFGgeFcGHgfFgFbFcGdGbGcGdGeG
+55;Simoon;10/10/10/6~e2/2~~e1~3/2fhb~~3/1dhd1~fb~1/10;EeDeGgeFdFcFhGfFeFdFfFeFcFdFeFGfgGFfHdEfDfbG
+56;Elephanta;10/6~a2/6~3/6~3/2c~2~3/1ha~2~d2/1fd~~~chf1/10;cEdGeGHbcFdGeGHfcGdGeGbFcGdGeGfGbGcGdGeGfGgG
+57;Hadley Cell;10/10/1c1g6/1g~b~5/2~1~5/1d~1~~~a2/1a~~~d1bc1/10;HfGfFfdDeFfFgFbDbFDdbDcDCfdDeFfFgFbGcGbGcGdG
+58;Favonius;10/1f~~3c2/3~2~a2/3~2~hf1/3~1~~3/3~~~~~e1/1e~~ha1~c1/10;bBbGcGcBdFeFfFHcGeHdGegFIfHfGfdGHdgFhFIdHdgF
+59;Willy-willy;10/10/5~~h2/5~1g~1/4~~2~1/2b~~ghf~1/2fa~ba1~1/10;HcGcFeFfEfGfFfFgdFcFGgeFdFHffFdGhDgFhFcGdGeG

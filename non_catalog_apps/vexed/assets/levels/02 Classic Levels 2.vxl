@@ -1,0 +1,62 @@
+# Author: Steve Haynal
+# URL: softerhardware.com/vexed.html
+# Description: This is the challenging follow-on to the Vexed Classic levels.
+0;Albuquerque;10/1~~~~~~~~1/1~hf~~~e~1/1~eab~~fh1/1~3~~3/1~1c~~~~2/1~~b~a~c~1/10;eDFfdDeDdDeDHddGeGfGcDdDeDHdcDdDeDIdHd
+1;Fort Wayne;10/1~~2~2~1/1~~d~~~~c1/1~~1~~~~2/1~d1~~~~~1/1ha~~~c~f1/1bf~b~1ha1/10;IcdCCeEfcFIfHfeGGfFfdFeFfFgFhFbFcFbFdFcFeFcGfFgFbGcGdG
+2;Salt Lake City;10/1~~a~1~~2/1~~f~~~~~1/1g~1~~c~~1/1eb~~hd~d1/1cae~ebdh1/1efafdg1f1/10;dFdBcFcGbFGeFeIeIfgEGfFfHfGfdCHfGfeFcGfFgFhFcGdGbGcGdGeG
+3;Metairie;10/1h~2ad1~1/2~~2fd~1/1c~~~~2~1/2~~~~~~~1/1~c~ab~~b1/2a~hf~~2/10;CfEgFfEfDffGgGeGfGdGeGcGdGhCIeHfGfFfEfgChCIfHfGfFfIfgGfGeGgChCbFcFdFeFfFgFbBcFdFeFfFfBgChCIeHebDcFdFeFfGeGfGgGdGeGfGIfHfHgGgFgEg
+4;Las Vegas;10/2~1~~~~~1/1~~2~e~~1/1~e~~2~~1/1~a~~~~cf1/1~1bhf~h2/1~a2h1cb1/10;CeHfIggFIeHeHfeFgCdFHfGfeFfFgFcEdFeF
+5;Hampton;10/1h2~2d~1/1e~~~1~g~1/2~~~~~1e1/1~~a~~fgb1/1~~1~~dfa1/2~h~f1bf1/10;GeHcHcHfIfIeHeGeGfHfIfdGFfdEeEeFfFgFEgDgbCbCCfbFcGdG
+6;Ontario;10/1~~~~~~~~1/1~h~~~b~a1/1~a~1fa~2/1~1~~ch~2/1a~~~2e~1/1ef~~gbcg1/10;CdIcgDFgFeFeEeGdFeEgDgEgeGhFdGeGfGcDGeFecGdGeGfGgGbGcGdGeGfGgG
+7;Worcester;10/2~1~g~~~1/1~d~a1~e~1/1~c~2~f~1/1~a~1~~1~1/1~d~e~~~~1/3fcg~~~1/10;fBCcEcHceFcFdFHddGeG
+8;Amarillo;10/1~~~~d~~~1/1h~~~1~~~1/1b~~g~1~~1/2~~1~1~~1/1~~1~~be~1/2ghe~2d1/10;EdDebCfBgChEGfHfGfFfbDcGdG
+9;Irvine;10/1~~~~~d~~1/2~~~~1~~1/1d~~~~~~2/2~~~~~~~1/1h~~f~~~~1/1f~~d~dh~1/10;eGbGcGGbbDcGdGbGcGdGeGfG
+10;Hollywood;10/1~~~gh~~~1/1g~~hg~~g1/1fe~2~ef1/1ba~2~ba1/1cd~~~~dc1/1gh1ge1hg1/10;cDdFHdGfcEdFeFcFdFeFfFbDIdHecFdFeFbEcFbFIeHeGfHfIfdFeFGfHffBgEEbfCGfGfdFcFdFEcDf
+11;Indianapolis;10/1~~2~~~2/1~c~1~~~b1/1~1~~~~~2/1~~1~1h~2/1~~~h~d1~1/1~~c1~bd~1/10;GgCcbGeFfFIcHe
+12;Fort Worth;10/1dc1~~~~~1/1agde~~h~1/2e2~f1~1/2g~~~2~1/1~1~~~2~1/1~caf~ha~1/10;GdHcGdcEbBcEeCdEcEcEdGbCEgDgHgGgFgcE
+13;El Monte;10/1~~~1cd~e1/1f~~~1g~2/2~~~g1~~1/1~~~~1~~~1/1~~c~~~~~1/1~fd~e~~~1/10;bCIbfGgBdGeGfGgCFdeGfGfBgCdGeGfG
+14;Philadelphia;10/1~d~d~~1~1/1h1~f1~~~1/1a~~1~~~~1/2~~~g~~~1/1eh~~a~~~1/2aga1f~e1/10;FfFfbDcFcBEcdGdFeFfFbDbFcFEcdFeFcGfFgG
+15;Boston;10/1gf~~~~~~1/3b~~~3/1~2~~~a~1/1~1~~~g1~1/1~~~~ab~d1/1~~~dbf~2/10;HdGddCeFcBdCeFbBcBdCeFIfeGfG
+16;Orange;10/1~g~~2~f1/1~1~~~d~e1/1~1~~~1~2/1~~~~~~ha1/1~~~~~fg2/1e~chfdac1/10;HeGeFfGcFgIeHfIgIcIcHeGecBdFeGdGeGfGbGcGdGeGfG
+17;Charlotte;10/3~f1~h2/2~hg~~1~1/1~~3~~2/1~~2~~~2/1~~b~~~~2/1b~2f~g~1/10;DfeCfCeCfCHbdCeCfC
+18;Chesapeake;10/2~bhf2~1/1bc1a1~~~1/1cg~e~~~~1/3~1~c~~1/1ca~cge~d1/2bhbfcdb1/10;cDIfgEeDfEEdfFeFdFEdcGFbeDFfeGbFcGdBbDcDdGIgHgeD
+19;Waco;10/1b~~a~h1~1/2~e1cb~~1/1~~1~h1~~1/1~~~~1~~c1/1a~d~~bef1/1f~h~~had1/10;bFDfCfDccFdFGfbBcFdFgCHeGfgCFdFdEeHfGfHfIeHfdGeGcGHgGgeBFdIfbGcGdGeGfGIgHgGgFgEgDg
+20;Greensboro;10/1~~gf~f~d1/1g~1e~1~f1/1aedf~~~g1/1gbhb~fa2/1ahf1~dec1/1efeb~cdb1/10;IbHdGdeBeDGfeGHfGfIcHeIdHeGeeDfDdDeDfDgDdBeDcDdDeDbDcDdDCeDeGbHfGfIffGIgHgFgDfDgEebFbGEe
+21;Citrus Heights;10/1~~b1~~ed1/1~f1~~~h2/1~1~~~~1~1/1bf~~~gac1/1ch~hfcge1/1d1f1ca3/10;cEDbCbEfFfGfCcbEcEHbHcGfGfFfcFIbHcIeHeGfFfGfHfbFcFEfDfCfFfEfIfHf
+22;Albany;10/1h~1h~c~a1/1g~1a~1~b1/2~~h~~~d1/1~~~1e~~2/1ec~hgbd2/1ab~ehabg1/10;EdbBcEIdgFfFcFbFcFdFgGeCGbFgIdHfGfFgEgIdEdDgGgFgEgDgCgIgHgGgFgEgbC
+23;Minneapolis;10/2~eb1~~d1/1~~fa~~~f1/1~a2~~~a1/1~e1~~hfe1/1~f~~~eb2/1ah1afad~1/10;IcCdDbeCFfeCGeIeHeIeHeIefGHfcFdFFfGfEfDfdCeC
+24;Rochester;10/2~caf2e1/1~~4~f1/1cb~~~~~c1/3f~g~~h1/1h~a~a~~2/2bdgefdh1/10;DfFfcDdEeEfEgFIdbDcDdEeEfEDbcDdEeEfEEbDbCdFbEbDbcDbDcDFfIcHeGfIdHedGeGfGcGdGeGfGbFcGdGeGfGIe
+25;New Haven;10/1a~~g1~~~1/2~ge~~a~1/1~~h1~d1~1/2~e~~2b1/1~~1~1~ed1/1hd~gbfdf1/10;HfIfgGDdCfCggGfGeGEceCdCDdcGFeGdFeEgDgGgFgEgDgCgbBDeCfHcGdFeEgHgGgFgEgDgEcDebGIgcGHgdGGg
+26;San Jose;10/1~~b~~~~2/1~~1~~~~~1/1a~1~~~~~1/2e~~b~~~1/1~gh~1~~g1/1a1c~hc~e1/10;dFdBFedGeGbDcEcFCfdFIfeGfGdGeGfGgG
+27;Newport News;10/1e~~~f~fb1/1dh~~1~cg1/1ag~~c~ed1/2e~gacf2/2fdcgfgf1/1hde1fbdg1/10;cDFdHcfBfFHfIdIdcEbDcDdDdFbCeFgFfFcEcFdFeFIdcFdFeFGfHfFffGEfbDbG
+28;Flint;10/1~e~3~~1/1~1~~~~b~1/1~1~~~~1e1/1~f~~~~cf1/1ag~~c~g2/3b~gea~1/10;HecBdFcFdFHfeFHcIeIeHeGedGeGcFHfdGeGbFcFdGeGfG
+29;Winston-Salem;10/1~~bde~c2/1~~c1ch3/1hd2ba1~1/1acb~1b~~1/1e1f~gh~f1/1ahecbagb1/10;HbgEgEfDHffFfGgGDbEbDbCcbCdFcEdEcEDccEeFfGgGbDcEdGbEcEbGbGeGcGfGdGgGeGfD
+30;Scottsdale;10/1~~~c~f1~1/1~~~1~1~f1/1~~~~~~~a1/1h~~~c~~2/1g~~~d~g~1/2~dh1~a~1/10;eBFfEfbEcGGbIdfFHfGfIdbFFfcG
+31;Santa Clarita;10/1~~1~c~e~1/1~~~~d~c~1/1~h~1ac3/1~d~~b1~e1/1~cf~2~a1/1dbhfce~2/10;fBdFcDcFdGFccFdGFeEfbGEcIfGgFgFeEgeGfGHcGdIfHgGgFe
+32;Pittsburgh;10/1f~~1h~~~1/1c~~~1~~~1/2~~~~~~e1/2~bg~~~a1/1~efd~~~2/1hc1g~abd1/10;eEbBCfbFbCdFcFGgeFfFfGfBeGGfIedFFfEfDffGgGIeeGfG
+33;Paradise;10/1~cd~f1hc1/1~1c~1~ch1/1~~h~d~gc1/1b~c~f~ch1/1dabga~ea1/1f1eachfd1/10;HdDdFdcEbEdEcEfEeEEfFfFfdFeFcBIdHedFGeIeHeGedGeGfGcFbFcFdFFbEfDfCfeGfGgGdGeGfGgG
+34;Shreveport;10/1~~~f1c~~1/1~~~c~1g~1/1~~~h~~d~1/1~~~1~~1~1/1~~~~gbh~1/1~~fhd1bh1/10;EbEdhFgFhCfFgFHdGfgBeDHdGf
+35;Salinas;10/1~a~~g~~~1/1~e~e1~~~1/1~h~2~~b1/1c1ea~~~f1/1bcfcd~cg1/1cghdb~hc1/10;fGCdEccDdEGgHgbDdFcFbFeFdFcFFfdFgGIfHfIfHfeFeGCgDgHgGgFgcDbGcGdGeGIgfB
+36;Elizabeth;10/3~~1~~~1/1~~~~~~~~1/1~~~~~~e2/1~~1a~~1~1/1~~~f~~~~1/1defdhah2/10;EfeFfFfGcGeGdGfGHdGfbGcGdGeG
+37;Toledo;10/1~~g~1~3/1~~d~~~~2/1~~1~~~~2/1~~~~~e1~1/1~chd~1h~1/1hgebhbc~1/10;dCDcCfdFeFeGGedGbFcGdGeGfGbGcGdGeGfG
+38;Omaha;10/1c~b~c~c~1/2~1~1g1~1/2b~~~b~~1/1gh~~~ac~1/1bd~da1de1/2bdehcbc1/10;DbfBGeeFcFEgcFbFdFhEFgGgHgIfGeDgEgFgbBcFdFdGeGfGGebFcFdGcGdGeGfG
+39;Irving;10/1h~b~1~c~1/1a~1fg~1~1/1b~~gc~1~1/1d~ad1d~~1/1gehfbe~~1/1cadbac~c1/10;hBbCDbbDbDcEEeEeFfcFdFGfFfbFFgFccFcGbGcGGgFdbGcGdGeG
+40;Yonkers;10/1~~~a~a~~1/1~a~1~1~~1/1~1~~~~~~1/1~~~d~~~~1/1~~gc~~~~1/1~~fgcf~d1/10;eFeBeFdFfFgFcCFgGgGbdFdG
+41;Fullerton;10/1~~~~~a~b1/1c~~g~1~d1/1g~~1~ea2/2~~h~f1~1/1hd~1~1~~1/1ec~~~~fb1/10;gBbCcEGefGEcbDcFEebFcFIcHdGdcGdGGebGcGdGIcHdGefGgG
+42;Tulsa;10/1~~b~~~~~1/1~~1~~c~2/1d~~~~h~~1/2~h~d1~~1/1~~a~1~~~1/1~abec~~e1/10;DfDbgCfGGdFdeGfGgGbDFecG
+43;Milwaukee;10/1~1~~~1c~1/1~~d~~~1~1/1~~ah~~~~1/2~1f~~~~1/1cd~a~~~b1/3ghgfb2/10;DcIfDdcFEfdGdGeGhBbFcFIfdGeGfG
+44;Little Rock;10/1~~g1~~3/1~~1~~~~c1/1~~~~~~1g1/1~~~~~haf1/1~~b~~4/1~ac~fhgb1/10;GeFgIcHceGGeFfHeGedGFfEfIeHeGeIeHeEgDgDbcFdGHgGecGdGeGfGgG
+45;Aurora;10/1c~1~~1~~1/2~1~~~~~1/1~~~~~~~~1/1~dbgc~~~1/1~cdfgh~h1/1gfbgac~a1/10;CfbBEecGfEgEIffGgGbGcGdG
+46;Sioux Falls;10/2~~f~1~~1/1c~~b~~e~1/1g~~1~~a~1/1df~~d~cb1/2d~~c~3/1ac~ge~cd1/10;HcHeEbcEbEbDbEcGfGgGHebGcGdGeGeCIeHe
+47;Durham;10/1~~1~1~a2/1~~~~f~df1/1~~~~b~gd1/1~h~bahb2/1h1dagcgc1/1bhcecefd1/10;FdCeHcHcGcFcFeGeFeEeDeGeFeEeEfFfGfeGeGfGHdIcdFeGHecEdGIfHfeGIdHgbGcGdGeG
+48;Mobile;10/1~~~~~~~2/1~d~~~~hb1/1~1~~~~3/2~~~~~~~1/1~~~a~eah1/1~c~c~dbe1/10;cGHcgEhEIcHcgEhFgFEgcCdFeGdGeGfGgG
+49;San Antonio;10/1e~~f~1~~1/1acfe~h~b1/1dgdg~g~d1/1hafc~h~a1/1d1ba~a~h1/2cgf~1ha1/10;gCeBGfdDbBcBGeeFcDbCcDbEDdGfeFdFfFgFeFcDfFgFcEdG
+50;Madison;10/1~g~~1~~2/1~1~~a~~~1/1~1~~1~~h1/1~~~d~1~a1/1~fhce~~e1/1adfdcga2/10;IeIefFgFFcEeDeEeeFCbCeDedFcFGgeFfFbEcEbGcGdG
+51;Sunnyvale;10/1~h~c~2~1/1~f~d~~c~1/1~he1~~g~1/1a1da~~f~1/1b~bfb~h~1/1c~fbgdef1/10;hEbFDffFHeGeCbcCDfDfGfcGbFcFdFdGeCcGdGeGfGbFHgGgFgcDbGcGdGHgeC
+52;Memphis;10/1~~1~~~~e1/1gb~~~~~2/1ef~~d~~~1/3~1e~~f1/1~~~~1~cd1/1b1~~ecdg1/10;HffEIbHffEgFcDcDDfCfbDcDdFeGIfdGeGfGbDcDdGeGfGgG
+53;Salem;10/2~~~~~~~1/1~a~1~~~~1/1~f~~g~~~1/1~1~~1~~~1/1f~~~b~~~1/1ag~~e~eb1/10;CdCdfGFdcGfGgG
+54;Phoenix;10/1~~2~~b2/1~~~fc~h~1/1~~g2~d2/2~hge~1~1/1gfbhd~c~1/1dg1ef~d~1/10;DefFfCfGHccEdFeFGfdFcFbFHcHdGedFFfGfEfDfeCgGeGfC
+55;Oxnard;10/1~~e~ba~h1/1h~d~2~2/1b~b~~1~b1/1hea1~~~2/1bf1dh~~d1/1chfhbcdh1/10;IfFbDcDdbCcDdDGbFbEccEbECfbFfFIgIbgGIdHfeDDecGbGcGdGeGfG
+56;Jackson;10/1f~~~~g~2/1g~~~~a~~1/2~1ch1~~1/1~~fa1~bc1/1fhdbd~ed1/2egaf~af1/10;fFeFfFHeIeHeGfFfHfGfFfgCgGfGFdeFdFeFfFgFIgdFeFfFcFdFeFbCGcFdEfEgGgFgEgDgbC
+57;Baltimore;10/2~~~~1~h1/1~~~~~f~d1/1~~~~~b~2/1c~~~~1~~1/1h~h~cedf1/2fg~bge2/10;IcgFGdFedFbFcFIfIcHfGfdFbFcFdFdGeGcGdGHgGd
+58;Grand Rapids;10/1~1~~bh~~1/1~~~b2~~1/2~~1g~~~1/1~~~~ac~~1/1a~~~2~~1/1gch~1h~h1/10;FbgGGbFbEcFebFcFFeGeFeEfbGcG
