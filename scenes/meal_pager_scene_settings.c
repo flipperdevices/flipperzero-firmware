@@ -101,6 +101,15 @@ static void meal_pager_scene_settings_set_last_pager(VariableItem* item) {
     app->last_pager = index;
 }
 
+static void meal_pager_scene_settings_set_repeats(VariableItem* item) {
+    Meal_Pager* app = variable_item_get_context(item);
+    uint32_t index = variable_item_get_current_value_index(item);
+
+    snprintf(app->repeats_char, 20, "%lu", index);
+    variable_item_set_current_value_text(item, app->repeats_char);
+    app->repeats = index;
+}
+
 static void meal_pager_scene_settings_set_haptic(VariableItem* item) {
     Meal_Pager* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
@@ -189,6 +198,11 @@ void meal_pager_scene_settings_on_enter(void* context) {
     variable_item_set_current_value_text(item, app->last_pager_char);
 
     // Repeat Attacks
+    item = variable_item_list_add(
+        app->variable_item_list, "Signal Repeat", 11, meal_pager_scene_settings_set_repeats, app);
+    variable_item_set_current_value_index(item, app->repeats);
+    snprintf(app->repeats_char, 20, "%lu", app->repeats);
+    variable_item_set_current_value_text(item, app->repeats_char);
 
     // Vibro on/off
     item = variable_item_list_add(

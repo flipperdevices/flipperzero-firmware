@@ -67,7 +67,10 @@ static void meal_pager_retekess_t119_generate_pager(
     //FURI_LOG_D(TAG, "Manchester: %s", manchester);
     char* rawSignal = genRawDataT119(200, 600, manchester);
     //FURI_LOG_D(TAG, "RAW_Data: %s", rawSignal);
-    flipper_format_write_string_cstr(ff, "RAW_Data", rawSignal);
+    for(u_int32_t i = 1; app->repeats >= i; i++) {
+        flipper_format_write_string_cstr(ff, "RAW_Data", rawSignal);
+    }
+    //flipper_format_write_string_cstr(ff, "RAW_Data", rawSignal);
     free(manchester);
     free(rawSignal);
 }
