@@ -1,0 +1,25 @@
+{
+    "files.associations": {
+        "docker-compose*.yml": "dockercompose",
+        "Dockerfile*": "dockerfile",
+        "cstdlib": "c",
+        "atomic": "c",
+        "*.tcc": "c",
+        "chrono": "c",
+        "codecvt": "c",
+        "cstddef": "c",
+        "cwchar": "c",
+        "string": "c",
+        "string_view": "c",
+        "fstream": "c",
+        "iomanip": "c",
+        "iosfwd": "c",
+        "istream": "c",
+        "limits": "c",
+        "ostream": "c",
+        "streambuf": "c",
+        "type_traits": "c",
+        "types.h": "c",
+        "time.h": "c"
+    }
+}
