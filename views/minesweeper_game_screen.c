@@ -782,11 +782,18 @@ static inline void bfs_tile_clear(MineSweeperGameScreenModel* model) {
             continue;
         } 
         
+        // Set tile to cleared
         model->board[curr_pos_1d].tile_state = MineSweeperGameScreenTileStateCleared;
 
+        // Add point to visited set
         point_set_push(set, pos);
 
-        // Process neighbors four ways
+        // If the current tile is not a zero tile we do not continue
+        if (model->board[curr_pos_1d].tile_type != MineSweeperGameScreenTileZero) {
+            continue;
+        }
+
+        // Process all surrounding neighbors and add valid to dequeue
         int8_t offsets[8][2] = {
             {-1,1},
             {0,1},
@@ -798,12 +805,6 @@ static inline void bfs_tile_clear(MineSweeperGameScreenModel* model) {
             {-1,0},
         };
 
-        // If the current tile is not a zero tile we uncover but do not continue
-        if (model->board[curr_pos_1d].tile_type != MineSweeperGameScreenTileZero) {
-            continue;
-        }
-
-        // Search all neighbors and add valid to dequeue
         for (uint8_t i = 0; i < 8; i++) {
             int16_t dx = curr_pos.x + (int16_t)offsets[i][0];
             int16_t dy = curr_pos.y + (int16_t)offsets[i][1];
@@ -819,9 +820,9 @@ static inline void bfs_tile_clear(MineSweeperGameScreenModel* model) {
     }
 
     uint32_t ticks_elapsed = furi_get_tick() - start_tick;
-    float sec = (float)ticks_elapsed / (float)furi_kernel_get_tick_frequency();
-    double milliseconds = 1000 * sec;
-    FURI_LOG_D(MS_DEBUG_TAG, "FLOOD FILL TOOK: %f MS", milliseconds);
+    double sec = (double)ticks_elapsed / (double)furi_kernel_get_tick_frequency();
+    double milliseconds = 1000.0L * sec;
+    FURI_LOG_D(MS_DEBUG_TAG, "FLOOD FILL TOOK: %.2f MS", milliseconds);
 
     point_set_clear(set);
     point_deq_clear(deq);
