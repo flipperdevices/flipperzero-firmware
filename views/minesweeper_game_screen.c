@@ -80,6 +80,21 @@ typedef struct {
     bool has_edited_flag;
 } MineSweeperGameScreenModel;
 
+static const float difficulty_multiplier[5] = {
+    0.14f,
+    0.16f,
+    0.18f,
+    0.22f,
+    0.25f,
+};
+
+void mine_sweeper_game_screen_view_lose_draw_callback(Canvas* canvas, void* _model);
+void mine_sweeper_game_screen_view_win_draw_callback(Canvas* canvas, void* _model);
+void mine_sweeper_game_screen_view_draw_callback(Canvas* canvas, void* _model);
+bool mine_sweeper_game_screen_view_end_input_callback(InputEvent* event, void* context);
+bool mine_sweeper_game_screen_view_input_callback(InputEvent* event, void* context);
+
+
 void mine_sweeper_game_screen_view_enter(void* context) {
     furi_assert(context);
     UNUSED(context);
@@ -106,6 +121,436 @@ void mine_sweeper_game_screen_view_exit(void* context) {
     //    {
     //    },
     //    true);
+}
+
+static void setup_board(MineSweeperGameScreen* instance) {
+    furi_assert(instance);
+
+    uint16_t board_tile_count = 0;
+    uint8_t board_width = 0, board_height = 0, board_difficulty = 0;
+
+    with_view_model(
+        instance->view,
+        MineSweeperGameScreenModel * model,
+        {
+            board_width = model->board_width;
+            board_height = model->board_height;
+            board_tile_count =  (model->board_width*model->board_height);
+            board_difficulty = model->board_difficulty;
+        },
+        false);
+
+    uint16_t num_mines = board_tile_count * difficulty_multiplier[ board_difficulty ];
+    FURI_LOG_D(MS_DEBUG_TAG, "Placing %hd mines", num_mines);
+
+    /** We can use a temporary buffer to set the tile types initially
+     * and manipulate then save to actual model
+     */
+    MineSweeperGameScreenTileType tiles[MINESWEEPER_BOARD_MAX_TILES];
+    memset(&tiles, MineSweeperGameScreenTileNone, sizeof(tiles));
+
+    // Place tiles everywhere randomly except the corners to help the solver
+    for (uint16_t i = 0; i < num_mines; i++) {
+
+        uint16_t rand_pos;
+        uint16_t x;
+        uint16_t y;
+
+        do {
+
+            rand_pos = furi_hal_random_get() % board_tile_count;
+            x = rand_pos / board_width;
+            y = rand_pos % board_width;
+
+        } while (tiles[rand_pos] == MineSweeperGameScreenTileMine ||
+                            (rand_pos == 0)                       ||
+                            (x==0 && y==board_width-1)            ||
+                            (x==board_height-1 && y==0)           || 
+                            (rand_pos == board_tile_count-1));
+
+        tiles[rand_pos] = MineSweeperGameScreenTileMine;
+    }
+
+    /** All mines are set so we look at each tile for surrounding mines */
+    for (uint16_t i = 0; i < board_tile_count; i++) {
+        MineSweeperGameScreenTileType tile_type = tiles[i];
+
+        if (tile_type == MineSweeperGameScreenTileMine) {
+            continue;
+        }
+
+        int8_t offsets[8][2] = {
+            {-1,1},
+            {0,1},
+            {1,1},
+            {1,0},
+            {1,-1},
+            {0,-1},
+            {-1,-1},
+            {-1,0},
+        };
+
+        uint16_t mine_count = 0;
+
+        uint16_t x = i / board_width;
+        uint16_t y = i % board_width;
+
+        for (uint8_t j = 0; j < 8; j++) {
+            int16_t dx = x + (int16_t)offsets[j][0];
+            int16_t dy = y + (int16_t)offsets[j][1];
+
+            if (dx < 0 || dy < 0 || dx >= board_height || dy >= board_width) {
+                continue;
+            }
+
+            uint16_t pos = dx * board_width + dy;
+            if (tiles[pos] == MineSweeperGameScreenTileMine) {
+                mine_count++;
+            }
+
+        }
+
+        tiles[i] = (MineSweeperGameScreenTileType) mine_count+1;
+
+    }
+
+    // Save tiles to view model
+    // Because of way tile enum and Icon* array is set up we can
+    // index tile_icons with the enum type to get the correct Icon*
+    with_view_model(
+        instance->view,
+        MineSweeperGameScreenModel * model,
+        {
+            for (uint16_t i = 0; i < board_tile_count; i++) {
+                model->board[i].tile_type = tiles[i];
+                model->board[i].tile_state = MineSweeperGameScreenTileStateUncleared;
+                model->board[i].icon_element.icon = tile_icons[ tiles[i] ];
+                model->board[i].icon_element.x_abs = (i/model->board_width);
+                model->board[i].icon_element.y_abs = (i%model->board_width);
+            }
+
+            model->mines_left = num_mines;
+            model->flags_left = num_mines;
+            model->curr_pos.x_abs = 0;
+            model->curr_pos.y_abs = 0;
+            model->right_boundary = MINESWEEPER_SCREEN_TILE_WIDTH;
+            model->bottom_boundary = MINESWEEPER_SCREEN_TILE_HEIGHT;
+            model->is_making_first_move = true;         
+        },
+        true);
+}
+
+void mine_sweeper_game_screen_view_win_draw_callback(Canvas* canvas, void* _model) {
+    furi_assert(canvas);
+    furi_assert(_model);
+    MineSweeperGameScreenModel* model = _model;
+
+    canvas_clear(canvas);
+
+    canvas_set_color(canvas, ColorBlack);
+    
+    /** We can use the boundary uint8_t in the model to transform the relative x/y coordinates
+     *  to the absolute x/y positions on the board grid as well as the position in the board buffer.
+     *
+     *  The relative coordinates start at zero and go to MINESWEEPER_SCREEN_TILE_HEIGHT-1 and
+     *  MINESWEEPER_SCREEN_TILE_HEIGHT-1 for x and y repsectively.
+     *
+     *  Once we have the absolute x/y coord we can use that to access the correct position for the
+     *  tile in the board buffer within the model.
+     *
+     *  We draw the tile located at the absolute position in the grid onto the screen at the position of the
+     *  relative x and y.
+     *  We also invert the color if it is the current position selected by the user
+     */
+
+    uint16_t cursor_pos_1d = model->curr_pos.x_abs * model->board_width + model->curr_pos.y_abs;
+    
+    for (uint8_t x_rel = 0; x_rel < MINESWEEPER_SCREEN_TILE_HEIGHT; x_rel++) {
+        uint16_t x_abs = (model->bottom_boundary - MINESWEEPER_SCREEN_TILE_HEIGHT) + x_rel;
+        
+        for (uint8_t y_rel = 0; y_rel < MINESWEEPER_SCREEN_TILE_WIDTH; y_rel++) {
+            uint16_t y_abs = (model->right_boundary - MINESWEEPER_SCREEN_TILE_WIDTH) + y_rel;
+
+            uint16_t curr_render_tile_pos_1d = x_abs * model->board_width + y_abs;
+            MineSweeperTile tile = model->board[curr_render_tile_pos_1d];
+
+            switch (tile.tile_state) {
+
+                case MineSweeperGameScreenTileStateFlagged :
+                    if (cursor_pos_1d == curr_render_tile_pos_1d) {
+
+                        inverted_canvas_white_to_black(
+                            canvas,
+                            {
+                                canvas_draw_icon(
+                                    canvas,
+                                    y_rel * icon_get_width(tile.icon_element.icon),
+                                    x_rel * icon_get_height(tile.icon_element.icon),
+                                    tile_icons[11]);
+                            });
+
+                    } else {
+                        canvas_draw_icon(
+                            canvas,
+                            y_rel * icon_get_width(tile.icon_element.icon),
+                            x_rel * icon_get_height(tile.icon_element.icon),
+                            tile_icons[11]);
+                    }
+
+                    break;
+                default :
+                    if (cursor_pos_1d == curr_render_tile_pos_1d) {
+
+                        inverted_canvas_white_to_black(
+                            canvas,
+                            {
+                                canvas_draw_icon(
+                                    canvas,
+                                    y_rel * icon_get_width(tile.icon_element.icon),
+                                    x_rel * icon_get_height(tile.icon_element.icon),
+                                    tile.icon_element.icon);
+                            });
+
+                    } else {
+                        canvas_draw_icon(
+                            canvas,
+                            y_rel * icon_get_width(tile.icon_element.icon),
+                            x_rel * icon_get_height(tile.icon_element.icon),
+                            tile.icon_element.icon);
+                    }
+
+
+                    break;
+            }
+
+        }
+    }
+
+    // If any borders are at the limits of the game board we draw a border line
+    
+    // Right border 
+    if (model->right_boundary == model->board_width) {
+        canvas_draw_line(canvas, 127,0,127,63-8);
+    }
+
+    // Left border
+    if ((model->right_boundary - MINESWEEPER_SCREEN_TILE_WIDTH) == 0) {
+        canvas_draw_line(canvas, 0,0,0,63-8);
+    }
+
+    // Bottom border
+    if (model->bottom_boundary == model->board_height) {
+        canvas_draw_line(canvas, 0,63-8,127,63-8);
+    }
+
+    // Top border
+    if ((model->bottom_boundary - MINESWEEPER_SCREEN_TILE_HEIGHT) == 0) {
+        canvas_draw_line(canvas, 0,0,127,0);
+    }
+
+    // Draw X Position Text 
+    furi_string_printf(
+            model->info_str,
+            "X:%03hhd",
+            model->curr_pos.x_abs);
+
+    canvas_draw_str_aligned(
+            canvas,
+            0,
+            64-7,
+            AlignLeft,
+            AlignTop,
+            furi_string_get_cstr(model->info_str));
+
+    // Draw Y Position Text 
+    furi_string_printf(
+            model->info_str,
+            "Y:%03hhd",
+            model->curr_pos.y_abs);
+
+    canvas_draw_str_aligned(
+            canvas,
+            33,
+            64-7,
+            AlignLeft,
+            AlignTop,
+            furi_string_get_cstr(model->info_str));
+
+    // Draw flag text
+    furi_string_printf(
+            model->info_str,
+            "F:%03hd",
+            model->flags_left);
+
+    canvas_draw_str_aligned(
+            canvas,
+            66,
+            64 - 7,
+            AlignLeft,
+            AlignTop,
+            furi_string_get_cstr(model->info_str));
+
+    // Draw time text
+    uint32_t ticks_elapsed = furi_get_tick() - model->start_tick;
+    uint32_t sec = ticks_elapsed / furi_kernel_get_tick_frequency();
+    uint32_t minutes = sec / 60;
+    sec = sec % 60;
+
+    furi_string_printf(
+             model->info_str,
+             "%02ld:%02ld",
+             minutes,
+             sec);
+
+    canvas_draw_str_aligned(
+            canvas,
+            126 - canvas_string_width(canvas, furi_string_get_cstr(model->info_str)),
+            64 - 7,
+            AlignLeft,
+            AlignTop,
+            furi_string_get_cstr(model->info_str));
+}
+
+void mine_sweeper_game_screen_view_lose_draw_callback(Canvas* canvas, void* _model) {
+    furi_assert(canvas);
+    furi_assert(_model);
+    MineSweeperGameScreenModel* model = _model;
+
+    canvas_clear(canvas);
+
+    canvas_set_color(canvas, ColorBlack);
+    
+    /** We can use the boundary uint8_t in the model to transform the relative x/y coordinates
+     *  to the absolute x/y positions on the board grid as well as the position in the board buffer.
+     *
+     *  The relative coordinates start at zero and go to MINESWEEPER_SCREEN_TILE_HEIGHT-1 and
+     *  MINESWEEPER_SCREEN_TILE_HEIGHT-1 for x and y repsectively.
+     *
+     *  Once we have the absolute x/y coord we can use that to access the correct position for the
+     *  tile in the board buffer within the model.
+     *
+     *  We draw the tile located at the absolute position in the grid onto the screen at the position of the
+     *  relative x and y.
+     *  We also invert the color if it is the current position selected by the user
+     */
+
+    uint16_t cursor_pos_1d = model->curr_pos.x_abs * model->board_width + model->curr_pos.y_abs;
+    
+    for (uint8_t x_rel = 0; x_rel < MINESWEEPER_SCREEN_TILE_HEIGHT; x_rel++) {
+        uint16_t x_abs = (model->bottom_boundary - MINESWEEPER_SCREEN_TILE_HEIGHT) + x_rel;
+        
+        for (uint8_t y_rel = 0; y_rel < MINESWEEPER_SCREEN_TILE_WIDTH; y_rel++) {
+            uint16_t y_abs = (model->right_boundary - MINESWEEPER_SCREEN_TILE_WIDTH) + y_rel;
+
+            uint16_t curr_render_tile_pos_1d = x_abs * model->board_width + y_abs;
+            MineSweeperTile tile = model->board[curr_render_tile_pos_1d];
+
+            if (cursor_pos_1d == curr_render_tile_pos_1d) {
+
+                inverted_canvas_white_to_black(
+                    canvas,
+                    {
+                        canvas_draw_icon(
+                            canvas,
+                            y_rel * icon_get_width(tile.icon_element.icon),
+                            x_rel * icon_get_height(tile.icon_element.icon),
+                            tile.icon_element.icon);
+                    });
+
+            } else {
+                canvas_draw_icon(
+                    canvas,
+                    y_rel * icon_get_width(tile.icon_element.icon),
+                    x_rel * icon_get_height(tile.icon_element.icon),
+                    tile.icon_element.icon);
+            }
+
+        }
+    }
+
+    // If any borders are at the limits of the game board we draw a border line
+    
+    // Right border 
+    if (model->right_boundary == model->board_width) {
+        canvas_draw_line(canvas, 127,0,127,63-8);
+    }
+
+    // Left border
+    if ((model->right_boundary - MINESWEEPER_SCREEN_TILE_WIDTH) == 0) {
+        canvas_draw_line(canvas, 0,0,0,63-8);
+    }
+
+    // Bottom border
+    if (model->bottom_boundary == model->board_height) {
+        canvas_draw_line(canvas, 0,63-8,127,63-8);
+    }
+
+    // Top border
+    if ((model->bottom_boundary - MINESWEEPER_SCREEN_TILE_HEIGHT) == 0) {
+        canvas_draw_line(canvas, 0,0,127,0);
+    }
+
+    // Draw X Position Text 
+    furi_string_printf(
+            model->info_str,
+            "X:%03hhd",
+            model->curr_pos.x_abs);
+
+    canvas_draw_str_aligned(
+            canvas,
+            0,
+            64-7,
+            AlignLeft,
+            AlignTop,
+            furi_string_get_cstr(model->info_str));
+
+    // Draw Y Position Text 
+    furi_string_printf(
+            model->info_str,
+            "Y:%03hhd",
+            model->curr_pos.y_abs);
+
+    canvas_draw_str_aligned(
+            canvas,
+            33,
+            64-7,
+            AlignLeft,
+            AlignTop,
+            furi_string_get_cstr(model->info_str));
+
+    // Draw flag text
+    furi_string_printf(
+            model->info_str,
+            "F:%03hd",
+            model->flags_left);
+
+    canvas_draw_str_aligned(
+            canvas,
+            66,
+            64 - 7,
+            AlignLeft,
+            AlignTop,
+            furi_string_get_cstr(model->info_str));
+
+    // Draw time text
+    uint32_t ticks_elapsed = furi_get_tick() - model->start_tick;
+    uint32_t sec = ticks_elapsed / furi_kernel_get_tick_frequency();
+    uint32_t minutes = sec / 60;
+    sec = sec % 60;
+
+    furi_string_printf(
+             model->info_str,
+             "%02ld:%02ld",
+             minutes,
+             sec);
+
+    canvas_draw_str_aligned(
+            canvas,
+            126 - canvas_string_width(canvas, furi_string_get_cstr(model->info_str)),
+            64 - 7,
+            AlignLeft,
+            AlignTop,
+            furi_string_get_cstr(model->info_str));
 }
 
 void mine_sweeper_game_screen_view_draw_callback(Canvas* canvas, void* _model) {
@@ -324,6 +769,8 @@ static inline void bfs_tile_clear(MineSweeperGameScreenModel* model) {
     pointobj_set_point(pos, start_pos);
 
     point_deq_push_back(deq, pos);
+
+    uint32_t start_tick = furi_get_tick();
     
     while (point_deq_size(deq) > 0) {
         point_deq_pop_front(&pos, deq);
@@ -371,14 +818,56 @@ static inline void bfs_tile_clear(MineSweeperGameScreenModel* model) {
         }
     }
 
+    uint32_t ticks_elapsed = furi_get_tick() - start_tick;
+    float sec = (float)ticks_elapsed / (float)furi_kernel_get_tick_frequency();
+    double milliseconds = 1000 * sec;
+    FURI_LOG_D(MS_DEBUG_TAG, "FLOOD FILL TOOK: %f MS", milliseconds);
+
     point_set_clear(set);
     point_deq_clear(deq);
+}
+
+bool mine_sweeper_game_screen_view_end_input_callback(InputEvent* event, void* context) {
+    furi_assert(context);
+    furi_assert(event);
+
+    MineSweeperGameScreen* instance = context;
+    bool consumed = false;
+
+    if (event->type == InputTypePress) {
+        mine_sweeper_game_screen_reset_clock(instance);
+
+        with_view_model(
+            instance->view,
+            MineSweeperGameScreenModel * model,
+            {
+                FURI_LOG_D(
+                        MS_DEBUG_TAG,
+                        "Setting up board with w:%03hhd h:%03hhd",
+                        model->board_width,
+                        model->board_height);
+
+                        view_set_draw_callback(
+                                instance->view,
+                                mine_sweeper_game_screen_view_draw_callback);
+                        view_set_input_callback(
+                                instance->view,
+                                mine_sweeper_game_screen_view_input_callback);
+            },
+            false);
+
+        setup_board(instance);
+        consumed = true; 
+    }
+
+    return consumed;
 }
 
 // Not sure if the custom callback will actually be used at this point, and it may be a better
 // idea to remove it so it is simple for the user to use this module in their own apps
 bool mine_sweeper_game_screen_view_input_callback(InputEvent* event, void* context) {
     furi_assert(context);
+    furi_assert(event);
 
     MineSweeperGameScreen* instance = context;
     bool consumed = false;
@@ -398,7 +887,13 @@ bool mine_sweeper_game_screen_view_input_callback(InputEvent* event, void* conte
 
                     if (state == MineSweeperGameScreenTileStateUncleared && type == MineSweeperGameScreenTileMine) {
                         // TODO: LOSE HERE
+                        // 1. Clear single tile with mine
+                        // 2. Change draw and input callbacks
+
                         model->board[curr_pos_1d].tile_state = MineSweeperGameScreenTileStateCleared;
+                        view_set_draw_callback(instance->view, mine_sweeper_game_screen_view_lose_draw_callback);
+                        view_set_input_callback(instance->view, mine_sweeper_game_screen_view_end_input_callback);
+
                     } else if (state == MineSweeperGameScreenTileStateUncleared) {
                         model->board[curr_pos_1d].tile_state = MineSweeperGameScreenTileStateCleared;
                         
@@ -445,7 +940,6 @@ bool mine_sweeper_game_screen_view_input_callback(InputEvent* event, void* conte
                     
                     MineSweeperGameScreenTileState state = model->board[curr_pos_1d].tile_state;
 
-                    // TODO: DFS FOR CLOSEST MINE
                     if (state == MineSweeperGameScreenTileStateCleared) {
 
                         FURI_LOG_D(MS_DEBUG_TAG, "Event Type: (InputTypeLong || InputTypeRepeat) && InputKeyBack");
@@ -473,19 +967,22 @@ bool mine_sweeper_game_screen_view_input_callback(InputEvent* event, void* conte
                         FURI_LOG_D(MS_DEBUG_TAG, "Event Type: InputTypeLong && InputKeyOk");
 
                         if (state == MineSweeperGameScreenTileStateFlagged) {
+                            if (model->board[curr_pos_1d].tile_type == MineSweeperGameScreenTileMine) model->mines_left++;
                             model->board[curr_pos_1d].tile_state = MineSweeperGameScreenTileStateUncleared;
                             model->flags_left++;
                             model->has_edited_flag = true;
                         
                         } else {
+                            if (model->board[curr_pos_1d].tile_type == MineSweeperGameScreenTileMine) model->mines_left--;
                             model->board[curr_pos_1d].tile_state = MineSweeperGameScreenTileStateFlagged;
                             model->flags_left--;
                             model->has_edited_flag = true;
                         }
 
                         // TODO: CHECK WIN CONDITION
-                        if (model->flags_left == 0) {
-                            // Check Win Condition
+                        if (model->flags_left == 0 && model->mines_left == 0) {
+                            view_set_draw_callback(instance->view, mine_sweeper_game_screen_view_win_draw_callback);
+                            view_set_input_callback(instance->view, mine_sweeper_game_screen_view_end_input_callback);
                         }
 
                     }
@@ -581,130 +1078,6 @@ bool mine_sweeper_game_screen_view_input_callback(InputEvent* event, void* conte
     return consumed;
 }
 
-static const float difficulty_multiplier[5] = {
-    0.20f,
-    0.25f,
-    0.29f,
-    0.33f,
-    0.40f,
-};
-
-static void setup_board(MineSweeperGameScreen* instance) {
-    furi_assert(instance);
-
-    uint16_t board_tile_count = 0;
-    uint8_t board_width = 0, board_height = 0, board_difficulty = 0;
-
-    with_view_model(
-        instance->view,
-        MineSweeperGameScreenModel * model,
-        {
-            board_width = model->board_width;
-            board_height = model->board_height;
-            board_tile_count =  (model->board_width*model->board_height);
-            board_difficulty = model->board_difficulty;
-        },
-        false);
-
-    uint16_t num_mines = board_tile_count * difficulty_multiplier[ board_difficulty ];
-    FURI_LOG_D(MS_DEBUG_TAG, "Placing %hd mines", num_mines);
-
-    /** We can use a temporary buffer to set the tile types initially
-     * and manipulate then save to actual model
-     */
-    MineSweeperGameScreenTileType tiles[MINESWEEPER_BOARD_MAX_TILES];
-    memset(&tiles, MineSweeperGameScreenTileNone, sizeof(tiles));
-
-    // Place tiles everywhere randomly except the corners to help the solver
-    for (uint16_t i = 0; i < num_mines; i++) {
-
-        uint16_t rand_pos;
-        uint16_t x;
-        uint16_t y;
-
-        do {
-
-            rand_pos = furi_hal_random_get() % board_tile_count;
-            x = rand_pos / board_width;
-            y = rand_pos % board_width;
-
-        } while (tiles[rand_pos] == MineSweeperGameScreenTileMine ||
-                            (rand_pos == 0)                       ||
-                            (x==0 && y==board_width-1)            ||
-                            (x==board_height-1 && y==0)           || 
-                            (rand_pos == board_tile_count-1));
-
-        tiles[rand_pos] = MineSweeperGameScreenTileMine;
-    }
-
-    /** All mines are set so we look at each tile for surrounding mines */
-    for (uint16_t i = 0; i < board_tile_count; i++) {
-        MineSweeperGameScreenTileType tile_type = tiles[i];
-
-        if (tile_type == MineSweeperGameScreenTileMine) {
-            continue;
-        }
-
-        int8_t offsets[8][2] = {
-            {-1,1},
-            {0,1},
-            {1,1},
-            {1,0},
-            {1,-1},
-            {0,-1},
-            {-1,-1},
-            {-1,0},
-        };
-
-        uint16_t mine_count = 0;
-
-        uint16_t x = i / board_width;
-        uint16_t y = i % board_width;
-
-        for (uint8_t j = 0; j < 8; j++) {
-            int16_t dx = x + (int16_t)offsets[j][0];
-            int16_t dy = y + (int16_t)offsets[j][1];
-
-            if (dx < 0 || dy < 0 || dx >= board_height || dy >= board_width) {
-                continue;
-            }
-
-            uint16_t pos = dx * board_width + dy;
-            if (tiles[pos] == MineSweeperGameScreenTileMine) {
-                mine_count++;
-            }
-
-        }
-
-        tiles[i] = (MineSweeperGameScreenTileType) mine_count+1;
-
-    }
-
-    // Save tiles to view model
-    // Because of way tile enum and Icon* array is set up we can
-    // index tile_icons with the enum type to get the correct Icon*
-    with_view_model(
-        instance->view,
-        MineSweeperGameScreenModel * model,
-        {
-            for (uint16_t i = 0; i < board_tile_count; i++) {
-                model->board[i].tile_type = tiles[i];
-                model->board[i].tile_state = MineSweeperGameScreenTileStateUncleared;
-                model->board[i].icon_element.icon = tile_icons[ tiles[i] ];
-                model->board[i].icon_element.x_abs = (i/model->board_width);
-                model->board[i].icon_element.y_abs = (i%model->board_width);
-            }
-
-            model->mines_left = num_mines;
-            model->flags_left = num_mines;
-            model->curr_pos.x_abs = 0;
-            model->curr_pos.y_abs = 0;
-            model->right_boundary = MINESWEEPER_SCREEN_TILE_WIDTH;
-            model->bottom_boundary = MINESWEEPER_SCREEN_TILE_HEIGHT;
-            model->is_making_first_move = true;         
-        },
-        true);
-}
 
 static void mine_sweeper_game_screen_set_board_information(
         MineSweeperGameScreen* instance,
