@@ -51,16 +51,20 @@ NfcCommand picopass_read_card_worker_callback(PicopassPollerEvent event, void* c
         memcpy(event.data->req_key.key, key, PICOPASS_KEY_LEN);
         event.data->req_key.is_elite_key = (scene_state == PicopassSceneReadCardDictElite);
         event.data->req_key.is_key_provided = is_key_provided;
-    } else if(event.type == PicopassPollerEventTypeSuccess) {
+    } else if(
+        event.type == PicopassPollerEventTypeSuccess ||
+        event.type == PicopassPollerEventTypeAuthFail) {
         const PicopassDeviceData* data = picopass_poller_get_data(picopass->poller);
         memcpy(&picopass->dev->dev_data, data, sizeof(PicopassDeviceData));
         view_dispatcher_send_custom_event(
             picopass->view_dispatcher, PicopassCustomEventPollerSuccess);
     } else if(event.type == PicopassPollerEventTypeFail) {
-        const PicopassDeviceData* data = picopass_poller_get_data(picopass->poller);
-        memcpy(&picopass->dev->dev_data, data, sizeof(PicopassDeviceData));
-        view_dispatcher_send_custom_event(
-            picopass->view_dispatcher, PicopassCustomEventPollerSuccess);
+        // the poller will retry, but provide some feedback to the user
+        uint32_t ticks = furi_get_tick();
+        if(picopass->last_error_notify_ticks + furi_ms_to_ticks(500) < ticks) {
+            picopass->last_error_notify_ticks = ticks;
+            notification_message(picopass->notifications, &sequence_error);
+        }
     }
 
     return command;
@@ -69,6 +73,8 @@ NfcCommand picopass_read_card_worker_callback(PicopassPollerEvent event, void* c
 void picopass_scene_read_card_on_enter(void* context) {
     Picopass* picopass = context;
     dolphin_deed(DolphinDeedNfcRead);
+
+    picopass->last_error_notify_ticks = 0;
 
     // Setup view
     Popup* popup = picopass->popup;

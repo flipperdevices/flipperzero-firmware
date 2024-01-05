@@ -29,6 +29,7 @@ typedef enum {
     PicopassPollerStateParseWiegand,
     PicopassPollerStateSuccess,
     PicopassPollerStateFail,
+    PicopassPollerStateAuthFail,
 
     PicopassPollerStateNum,
 } PicopassPollerState;

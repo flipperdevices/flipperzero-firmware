@@ -246,7 +246,7 @@ NfcCommand picopass_poller_nr_mac_auth(PicopassPoller* instance) {
 
     // Set next state so breaking do/while will jump to it. If successful, do/while will set to ReadBlock
     if(instance->data->pacs.se_enabled) {
-        instance->state = PicopassPollerStateFail;
+        instance->state = PicopassPollerStateAuthFail;
     } else {
         // For non-SE, run through normal key check
         instance->state = PicopassPollerStateAuth;
@@ -343,7 +343,7 @@ NfcCommand picopass_poller_auth_handler(PicopassPoller* instance) {
         if(command != NfcCommandContinue) break;
 
         if(!instance->event_data.req_key.is_key_provided) {
-            instance->state = PicopassPollerStateFail;
+            instance->state = PicopassPollerStateAuthFail;
             break;
         }
 
@@ -615,6 +615,17 @@ NfcCommand picopass_poller_fail_handler(PicopassPoller* instance) {
     return command;
 }
 
+NfcCommand picopass_poller_auth_fail_handler(PicopassPoller* instance) {
+    NfcCommand command = NfcCommandReset;
+
+    instance->event.type = PicopassPollerEventTypeAuthFail;
+    command = instance->callback(instance->event, instance->context);
+    picopass_poller_reset(instance);
+    instance->state = PicopassPollerStateDetect;
+
+    return command;
+}
+
 static const PicopassPollerStateHandler picopass_poller_state_handler[PicopassPollerStateNum] = {
     [PicopassPollerStateRequestMode] = picopass_poller_request_mode_handler,
     [PicopassPollerStateDetect] = picopass_poller_detect_handler,
@@ -630,6 +641,7 @@ static const PicopassPollerStateHandler picopass_poller_state_handler[PicopassPo
     [PicopassPollerStateParseWiegand] = picopass_poller_parse_wiegand_handler,
     [PicopassPollerStateSuccess] = picopass_poller_success_handler,
     [PicopassPollerStateFail] = picopass_poller_fail_handler,
+    [PicopassPollerStateAuthFail] = picopass_poller_auth_fail_handler,
 };
 
 static NfcCommand picopass_poller_callback(NfcEvent event, void* context) {
