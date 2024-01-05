@@ -94,18 +94,6 @@ static const float difficulty_multiplier[5] = {
  * Non public function declarations
  ***************************************************************/
 
-// Currently not using enter/exit callback
-void mine_sweeper_game_screen_view_enter(void* context);
-void mine_sweeper_game_screen_view_exit(void* context);
-
-// Different input/draw callbacks for play/win/lose state
-void mine_sweeper_game_screen_view_lose_draw_callback(Canvas* canvas, void* _model);
-void mine_sweeper_game_screen_view_win_draw_callback(Canvas* canvas, void* _model);
-void mine_sweeper_game_screen_view_play_draw_callback(Canvas* canvas, void* _model);
-
-bool mine_sweeper_game_screen_view_end_input_callback(InputEvent* event, void* context);
-bool mine_sweeper_game_screen_view_play_input_callback(InputEvent* event, void* context);
-
 // Static helper functions
 static void setup_board(MineSweeperGameScreen* instance);
 static inline void bfs_tile_clear(MineSweeperGameScreenModel* model);
@@ -114,6 +102,19 @@ static void mine_sweeper_game_screen_set_board_information(
         uint8_t width,
         uint8_t height,
         uint8_t difficulty);
+
+// Currently not using enter/exit callback
+static void mine_sweeper_game_screen_view_enter(void* context);
+static void mine_sweeper_game_screen_view_exit(void* context);
+
+// Different input/draw callbacks for play/win/lose state
+static void mine_sweeper_game_screen_view_lose_draw_callback(Canvas* canvas, void* _model);
+static void mine_sweeper_game_screen_view_win_draw_callback(Canvas* canvas, void* _model);
+static void mine_sweeper_game_screen_view_play_draw_callback(Canvas* canvas, void* _model);
+
+static bool mine_sweeper_game_screen_view_end_input_callback(InputEvent* event, void* context);
+static bool mine_sweeper_game_screen_view_play_input_callback(InputEvent* event, void* context);
+
 
 
 /**************************************************************
@@ -335,17 +336,17 @@ static void mine_sweeper_game_screen_set_board_information(
         true);
 }
 
-void mine_sweeper_game_screen_view_enter(void* context) {
+static void mine_sweeper_game_screen_view_enter(void* context) {
     furi_assert(context);
     UNUSED(context);
 }
 
-void mine_sweeper_game_screen_view_exit(void* context) {
+static void mine_sweeper_game_screen_view_exit(void* context) {
     furi_assert(context);
     UNUSED(context);
 }
 
-void mine_sweeper_game_screen_view_win_draw_callback(Canvas* canvas, void* _model) {
+static void mine_sweeper_game_screen_view_win_draw_callback(Canvas* canvas, void* _model) {
     furi_assert(canvas);
     furi_assert(_model);
     MineSweeperGameScreenModel* model = _model;
@@ -502,7 +503,7 @@ void mine_sweeper_game_screen_view_win_draw_callback(Canvas* canvas, void* _mode
             furi_string_get_cstr(model->info_str));
 }
 
-void mine_sweeper_game_screen_view_lose_draw_callback(Canvas* canvas, void* _model) {
+static void mine_sweeper_game_screen_view_lose_draw_callback(Canvas* canvas, void* _model) {
     furi_assert(canvas);
     furi_assert(_model);
     MineSweeperGameScreenModel* model = _model;
@@ -630,7 +631,7 @@ void mine_sweeper_game_screen_view_lose_draw_callback(Canvas* canvas, void* _mod
             furi_string_get_cstr(model->info_str));
 }
 
-void mine_sweeper_game_screen_view_play_draw_callback(Canvas* canvas, void* _model) {
+static void mine_sweeper_game_screen_view_play_draw_callback(Canvas* canvas, void* _model) {
     furi_assert(canvas);
     furi_assert(_model);
     MineSweeperGameScreenModel* model = _model;
@@ -812,7 +813,7 @@ void mine_sweeper_game_screen_view_play_draw_callback(Canvas* canvas, void* _mod
             furi_string_get_cstr(model->info_str));
 }
 
-bool mine_sweeper_game_screen_view_end_input_callback(InputEvent* event, void* context) {
+static bool mine_sweeper_game_screen_view_end_input_callback(InputEvent* event, void* context) {
     furi_assert(context);
     furi_assert(event);
 
@@ -850,7 +851,7 @@ bool mine_sweeper_game_screen_view_end_input_callback(InputEvent* event, void* c
 
 // Not sure if the custom callback will actually be used at this point, and it may be a better
 // idea to remove it so it is simple for the user to use this module in their own apps
-bool mine_sweeper_game_screen_view_play_input_callback(InputEvent* event, void* context) {
+static bool mine_sweeper_game_screen_view_play_input_callback(InputEvent* event, void* context) {
     furi_assert(context);
     furi_assert(event);
 
@@ -1060,7 +1061,6 @@ bool mine_sweeper_game_screen_view_play_input_callback(InputEvent* event, void* 
     return consumed;
 }
 
-
 MineSweeperGameScreen* mine_sweeper_game_screen_alloc(uint8_t width, uint8_t height, uint8_t difficulty) {
     MineSweeperGameScreen* mine_sweeper_game_screen = (MineSweeperGameScreen*)malloc(sizeof(MineSweeperGameScreen));
 
@@ -1137,6 +1137,9 @@ void mine_sweeper_game_screen_reset(MineSweeperGameScreen* instance, uint8_t wid
 
 }
 
+// This function should be called when you want to reset the game clock
+// Already called in reset and alloc function for game, but can be called from
+// other scenes that need it like a start scene that plays after alloc
 void mine_sweeper_game_screen_reset_clock(MineSweeperGameScreen* instance) {
     furi_assert(instance);
 
@@ -1154,30 +1157,7 @@ View* mine_sweeper_game_screen_get_view(MineSweeperGameScreen* instance) {
     return instance->view;
 }
 
-void mine_sweeper_game_screen_set_input_callback(MineSweeperGameScreen* instance, GameScreenInputCallback callback) {
-    furi_assert(instance);
-    instance->input_callback = callback;
-}
-
 void mine_sweeper_game_screen_set_context(MineSweeperGameScreen* instance, void* context) {
     furi_assert(instance);
     instance->context = context;
-}
-
-bool mine_sweeper_is_tile_mine(MineSweeperGameScreen* instance, uint16_t x, uint16_t y) {
-    furi_assert(instance);
-    bool is_mine = false;
-    
-    with_view_model(
-        instance->view,
-        MineSweeperGameScreenModel * model,
-        {
-            uint16_t pos = x * model->board_width + y;
-            if (model->board[pos].tile_type == MineSweeperGameScreenTileMine) {
-                is_mine = true;
-            }
-        },
-        false);
-
-    return is_mine;
 }

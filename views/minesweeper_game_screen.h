@@ -78,31 +78,12 @@ void mine_sweeper_game_screen_reset_clock(MineSweeperGameScreen* instance);
  */
 View* mine_sweeper_game_screen_get_view(MineSweeperGameScreen* instance);
 
-/** Set MineSweeperGameScreen input callback 
- *
- * @param       instance    MineSweeperGameScreen* instance
- * @param       callback    MineSweeperGameScreenInputCallback callback
- */
-void mine_sweeper_game_screen_set_input_callback(
-        MineSweeperGameScreen* instance,
-        GameScreenInputCallback callback);
-
 /** Set MineSweeperGameScreen context 
  *
  * @param       instance    MineSweeperGameScreen* instance
  * @param       context     void* context for MineSweeperGameScreen instance 
  */
 void mine_sweeper_game_screen_set_context(MineSweeperGameScreen* instance, void* context);
-
-
-/** Return true/false if tile is a mine 
- *
- * @param       instance    MineSweeperGameScreen* instance
- * @param       x           uint8_t row in board grid
- * @param       y           uint8_t column in board grid
- */
-bool mine_sweeper_is_tile_mine(MineSweeperGameScreen* instance, uint16_t x, uint16_t y);
-
 
 #define inverted_canvas_white_to_black(canvas, code)      \
     {                                           \
