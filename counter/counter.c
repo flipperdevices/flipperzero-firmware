@@ -58,7 +58,7 @@ static void render_callback(Canvas* canvas, void* ctx) {
     snprintf(scount, sizeof(scount), "%d", c->count);
     size_t cntr_len = strlen(scount);
     size_t boxwidth = cntr_len * NUM_WIDTH + OFFSET_X;
-    if (boxwidth < MIN_BOXWIDTH) {
+    if(boxwidth < MIN_BOXWIDTH) {
         boxwidth = MIN_BOXWIDTH;
     }
     size_t middle_x = 64 - boxwidth / 2;
@@ -103,42 +103,42 @@ int32_t counterapp(void) {
 
             if(input.type == InputTypeShort) {
                 switch(input.key) {
-                    case InputKeyBack:
-                        processing = false;
-                        break;
-                    case InputKeyUp:
-                    case InputKeyOk:
-                        if (c->count < MAX_COUNT) {
-                            c->pressed = true;
-                            c->boxtimer = BOXTIME;
-                            c->count++;
-                            if (c->vibro) {
-                                notification_message(c->notifications, &sequence_set_vibro_on);
-                                furi_delay_ms(VIBRO_TIME_MS);
-                                notification_message(c->notifications, &sequence_reset_vibro);
-                            }
+                case InputKeyBack:
+                    processing = false;
+                    break;
+                case InputKeyUp:
+                case InputKeyOk:
+                    if(c->count < MAX_COUNT) {
+                        c->pressed = true;
+                        c->boxtimer = BOXTIME;
+                        c->count++;
+                        if(c->vibro) {
+                            notification_message(c->notifications, &sequence_set_vibro_on);
+                            furi_delay_ms(VIBRO_TIME_MS);
+                            notification_message(c->notifications, &sequence_reset_vibro);
                         }
-                        break;
-                    case InputKeyDown:
-                        if (c->count > 0) {
-                            c->pressed = true;
-                            c->boxtimer = BOXTIME;
-                            c->count--;
-                        }
-                        break;
-                    default:
-                        break;
+                    }
+                    break;
+                case InputKeyDown:
+                    if(c->count > 0) {
+                        c->pressed = true;
+                        c->boxtimer = BOXTIME;
+                        c->count--;
+                    }
+                    break;
+                default:
+                    break;
                 }
             } else if(input.type == InputTypeLong) {
                 switch(input.key) {
-                    case InputKeyBack:
-                        c->count = 0;
-                        break;
-                    case InputKeyOk:
-                        c->vibro = !c->vibro;
-                        break;
-                    default:
-                        break;
+                case InputKeyBack:
+                    c->count = 0;
+                    break;
+                case InputKeyOk:
+                    c->vibro = !c->vibro;
+                    break;
+                default:
+                    break;
                 }
             }
             furi_mutex_release(c->mutex);
