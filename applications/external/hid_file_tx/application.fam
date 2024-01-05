@@ -1,0 +1,15 @@
+App(
+    appid="hidtransfer",
+    name="HID File Transfer",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="hidtransfer_app",
+    stack_size=6 * 1024,
+    fap_icon="icons/hid_10px.png",
+    fap_icon_assets="icons",
+    fap_libs=["assets"],
+    fap_category="USB",
+    fap_author="Kavakuo",
+    fap_weburl="https://github.com/Kavakuo/HID-File-Transfer",
+    fap_version=(1, 0),
+    fap_description="This is an application for the Flipper Zero that allows to exchange files using the HID protocol with around 260kB/s. This approach is especially useful when access to mass storage devices is blocked on a PC. Transferring files with this application requires the Windows/Linux client to run an executable that communicates with the Flipper Zero for data exchange. Therefore, multiple stages are required to be able to exchange data.",
+)
