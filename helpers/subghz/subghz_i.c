@@ -1,6 +1,5 @@
 #include "subghz_i.h"
 
-//#include "assets_icons.h"
 #include "subghz/types.h"
 #include <math.h>
 #include <furi.h>
@@ -10,7 +9,6 @@
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
 #include <flipper_format/flipper_format.h>
-//#include "views/receiver.h"
 
 #include <flipper_format/flipper_format_i.h>
 #include <lib/toolbox/stream/stream.h>
