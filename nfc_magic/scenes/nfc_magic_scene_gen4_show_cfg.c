@@ -33,7 +33,11 @@ void nfc_magic_scene_gen4_show_cfg_on_enter(void* context) {
     widget_add_text_scroll_element(widget, 3, 17, 124, 50, furi_string_get_cstr(temp_config));
 
     widget_add_button_element(
-        widget, GuiButtonTypeLeft, "Exit", nfc_magic_scene_gen4_show_cfg_widget_callback, instance);
+        widget,
+        GuiButtonTypeLeft,
+        "Retry",
+        nfc_magic_scene_gen4_show_cfg_widget_callback,
+        instance);
 
     furi_string_free(temp_config);
     view_dispatcher_switch_to_view(instance->view_dispatcher, NfcMagicAppViewWidget);
@@ -45,9 +49,11 @@ bool nfc_magic_scene_gen4_show_cfg_on_event(void* context, SceneManagerEvent eve
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == GuiButtonTypeLeft) {
-            consumed = scene_manager_search_and_switch_to_previous_scene(
-                instance->scene_manager, NfcMagicSceneGen4ActionsMenu);
+            consumed = scene_manager_previous_scene(instance->scene_manager);
         }
+    } else if(event.type == SceneManagerEventTypeBack) {
+        consumed = scene_manager_search_and_switch_to_previous_scene(
+            instance->scene_manager, NfcMagicSceneGen4Menu);
     }
     return consumed;
 }
