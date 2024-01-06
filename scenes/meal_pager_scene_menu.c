@@ -4,7 +4,7 @@
 
 enum SubmenuIndex {
     SubmenuIndexTransmit = 10,
-    SubmenuIndexScene2,
+    SubmenuIndexSetStation,
     SubmenuIndexScene3,
     SubmenuIndexScene4,
     SubmenuIndexScene5,
@@ -25,6 +25,12 @@ void meal_pager_scene_menu_on_enter(void* context) {
         SubmenuIndexTransmit,
         meal_pager_scene_menu_submenu_callback,
         app);
+    submenu_add_item(
+        app->submenu,
+        "Set Stations",
+        SubmenuIndexSetStation,
+        meal_pager_scene_menu_submenu_callback,
+        app);    
     submenu_add_item(
         app->submenu,
         "Settings",
@@ -61,6 +67,11 @@ bool meal_pager_scene_menu_on_event(void* context, SceneManagerEvent event) {
             app->state_notifications = SubGhzNotificationStateIDLE;
             subghz_txrx_stop(app->subghz->txrx);
             FURI_LOG_D(TAG, "Stop Event from Menu");
+            return true;
+        } else if(event.event == SubmenuIndexSetStation) {
+            scene_manager_set_scene_state(
+                app->scene_manager, Meal_PagerSceneSetStation, SubmenuIndexSetStation);
+            scene_manager_next_scene(app->scene_manager, Meal_PagerSceneSetStation);
             return true;
         }
     } else if(event.type == SceneManagerEventTypeTick) {
