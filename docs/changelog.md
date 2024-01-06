@@ -1,3 +1,6 @@
+## v0.9
+- Added support for TD165
+
 ## v0.8
 - Added Repeats feature 
 - Repeats configuration in settings
