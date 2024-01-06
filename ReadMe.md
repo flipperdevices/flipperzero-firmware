@@ -48,6 +48,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: [SubGHz: Add Kia Encoder #691 (By letvinov28)](https://github.com/DarkFlippers/unleashed-firmware/pull/691)
 - OFW: [UI refactor #3323 (By RebornedBrain)](https://github.com/flipperdevices/flipperzero-firmware/pull/3323)
 - OFW: [Desktop: fix rpc unlock on pin input screen #3334 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3334)
+- UL: [NFC: Parser CLeanup (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/e55116ea3fe0f79fd5ec219fad7d4127b50eb68a)
 
 ## IN THIS BRANCH:
 
