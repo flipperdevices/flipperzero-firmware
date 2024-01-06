@@ -51,15 +51,6 @@ void start_screen_reset(StartScreen* instance);
  */
 View* start_screen_get_view(StartScreen* instance);
 
-/** Set StartScreen timer callback 
- *
- * @param       instance StartScreen instance
- * @param       callback StartScreenTimerCallback callback
- */
-void start_screen_set_timer_callback(
-        StartScreen* instance,
-        StartScreenTimerCallback callback);
-
 /** Set StartScreen input callback 
  *
  * @param       instance StartScreen instance

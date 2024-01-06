@@ -8,13 +8,8 @@
 struct StartScreen {
     View* view;
     void* context;
-    StartScreenTimerCallback timer_callback;
     StartScreenInputCallback input_callback;
     StartScreenDrawCallback secondary_draw_callback;
-
-    FuriTimer* timer;
-    uint32_t timer_period_in_ms;
-    bool timer_enabled;
 };
 
 typedef struct {
@@ -128,46 +123,12 @@ bool start_screen_view_input_callback(InputEvent* event, void* context) {
     return consumed;
 }
 
-void start_screen_timer_callback(void* context) {
-    furi_assert(context);
-    StartScreen* start_screen = context;
-
-    if (start_screen->timer_callback != NULL) {
-        start_screen->timer_callback(context);
-    }
-}
-
-
-// this can probably be moved in with the start function for the icon animation if we want a timer
-
-//static void start_screen_start_timer(void* context) {
-//    furi_assert(context);
-//    StartScreen* start_screen = context; 
-//
-//    if (start_screen->timer_enabled) {
-//        uint32_t timer_period = 
-//            start_screen->timer_period_in_ms / (1000.0f / furi_kernel_get_tick_frequency());
-//        if (timer_period == 0) timer_period = 1;
-//
-//        if (furi_timer_start(start_screen->timer, timer_period) != FuriStatusOk) {
-//            furi_crash();
-//        }
-//    }
-//}
-
 StartScreen* start_screen_alloc() {
     StartScreen* start_screen = (StartScreen*)malloc(sizeof(StartScreen));
     
     start_screen->view = view_alloc();
 
     start_screen->input_callback = NULL;
-
-    start_screen->timer = furi_timer_alloc(start_screen_timer_callback, FuriTimerTypeOnce, start_screen);
-    furi_assert(start_screen->timer);
-
-    // This is if we want to enable timer functionality 
-    start_screen->timer_period_in_ms = 1000;
-    start_screen->timer_enabled = false;
 
     view_set_context(start_screen->view, start_screen);
     view_allocate_model(start_screen->view, ViewModelTypeLocking, sizeof(StartScreenModel));
@@ -207,7 +168,6 @@ StartScreen* start_screen_alloc() {
     view_set_input_callback(start_screen->view, start_screen_view_input_callback);
     
     // Right now these enter/exit callbacks are being used to start/stop animations
-    // We can also set/stop a timer in here
     view_set_enter_callback(start_screen->view, start_screen_view_enter);
     view_set_exit_callback(start_screen->view, start_screen_view_exit);
     
@@ -216,7 +176,6 @@ StartScreen* start_screen_alloc() {
 
 void start_screen_free(StartScreen* instance) {
     furi_assert(instance);
-    furi_timer_free(instance->timer);
 
     with_view_model(
         instance->view,
@@ -245,21 +204,13 @@ void start_screen_reset(StartScreen* instance) {
             memset(&model->text3, 0, sizeof(model->text3));
         },
         false);
-    instance->timer_callback = NULL;
     instance->input_callback = NULL;
     instance->secondary_draw_callback = NULL;
-    instance->timer_enabled = false;
-    instance->timer_period_in_ms = 0;
 }
 
 View* start_screen_get_view(StartScreen* instance) {
     furi_assert(instance);
     return instance->view;
-}
-
-void start_screen_set_timer_callback(StartScreen* instance, StartScreenTimerCallback callback) {
-    furi_assert(instance);
-    instance->timer_callback = callback;
 }
 
 void start_screen_set_input_callback(StartScreen* instance, StartScreenInputCallback callback) {
