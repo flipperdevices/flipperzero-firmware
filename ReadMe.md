@@ -140,6 +140,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - Update: [NFC Seader v2.2 (By bettse)](https://github.com/bettse/seader)
 - Updated: [NFC Magic v1.5 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966) [rework #67 (By gornekich)](https://github.com/flipperdevices/flipperzero-good-faps/pull/67) [fix gen4 detection #71 (By gornekich)](https://github.com/flipperdevices/flipperzero-good-faps/pull/71) [Specify in error scene that only Gen1 magic and Gen4 UMCs are supported #75 (By kitsunehunter)](https://github.com/flipperdevices/flipperzero-good-faps/pull/75) [UI / Scenes (By xMasterX) & Poller functions, minor UI fixes (By Leptopt1los)](https://github.com/xMasterX/all-the-plugins/commit/d70f146f15a6bab2272d4ebfe37001d7d5f0f556) [New options for gen4 cards #82 (By Leptopt1los)](https://github.com/flipperdevices/flipperzero-good-faps/pull/82)  [Fix support of 4K fobs #102 (By Leptopt1los)](https://github.com/flipperdevices/flipperzero-good-faps/pull/102) [Gen4 shadow mode management support #98 (By Leptopt1los) With Fixes By RogueMaster](https://github.com/flipperdevices/flipperzero-good-faps/pull/98)
 - Updated: [NFC Playlist v1.0 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
+- UL: [Added plugin to read WashCity card balance #683 (By yaba)](https://github.com/DarkFlippers/unleashed-firmware/pull/683)
+- UL: [NFC: Add manually MF Classic with custom UID #690 (By Leptopt1los)](https://github.com/DarkFlippers/unleashed-firmware/pull/690)
 
 <a name="release">
 
