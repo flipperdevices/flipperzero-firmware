@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "callbacks.h": "c",
+        "topics.h": "c"
+    }
+}
