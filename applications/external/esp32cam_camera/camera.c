@@ -27,7 +27,7 @@ static void camera_view_draw_callback(Canvas* canvas, void* _model) {
           furi_hal_uart_tx(FuriHalUartIdUSART1, data, sizeof(data));
         }*/
 
-        canvas_draw_icon(canvas, 74, 16, &I_DolphinCommon_56x48);
+        canvas_draw_icon(canvas, 85, 21, &I_WarningDolphinFlip_45x42);
         canvas_set_font(canvas, FontSecondary);
         canvas_draw_str(canvas, 8, 12, "Waiting ESP32-CAM...");
         canvas_draw_str(canvas, 20, 24, "VCC - 3V3/5V");

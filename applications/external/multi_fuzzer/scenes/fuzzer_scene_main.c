@@ -75,7 +75,6 @@ void fuzzer_scene_main_on_enter(void* context) {
 
     // Setup view
     Popup* popup = app->popup;
-    // popup_set_icon(popup, 72, 17, &I_DolphinCommon_56x48);
     popup_set_timeout(popup, 2500);
     popup_set_context(popup, app);
     popup_set_callback(popup, fuzzer_scene_main_error_popup_callback);

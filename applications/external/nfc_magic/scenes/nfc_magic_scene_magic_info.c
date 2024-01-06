@@ -18,7 +18,7 @@ void nfc_magic_scene_magic_info_on_enter(void* context) {
 
     notification_message(nfc_magic->notifications, &sequence_success);
 
-    widget_add_icon_element(widget, 73, 17, &I_DolphinCommon_56x48);
+    widget_add_icon_element(widget, 84, 22, &I_WarningDolphinFlip_45x42);
     widget_add_string_element(
         widget, 3, 4, AlignLeft, AlignTop, FontPrimary, "Magic card detected");
     widget_add_string_element(widget, 3, 17, AlignLeft, AlignTop, FontSecondary, card_type);

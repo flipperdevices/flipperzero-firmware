@@ -88,7 +88,7 @@ static void view_draw_callback(Canvas* canvas, void* _model) {
 
     // if (!model->initialized){
     //     canvas_clear(canvas);
-    //     canvas_draw_icon(canvas, 74, 16, &I_DolphinCommon_56x48);
+    //     canvas_draw_icon(canvas, 85, 21, &I_WarningDolphinFlip_45x42);
     //     canvas_set_font(canvas, FontSecondary);
     //     canvas_draw_str(canvas, 8, 12, "Waiting MALVEKE Board...");
     //     // canvas_draw_str(canvas, 20, 24, "VCC - 3V3/5V");

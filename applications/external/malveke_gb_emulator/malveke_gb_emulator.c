@@ -1,5 +1,4 @@
 #include "malveke_gb_emulator.h"
-#include <malveke_gb_emulator_icons.h>
 
 static void malveke_gb_emulator_view_draw_callback(Canvas* canvas, void* _model) {
     UartDumpModel* model = _model;

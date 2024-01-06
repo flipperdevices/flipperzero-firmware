@@ -11,7 +11,7 @@ void nfc_scene_passport_pace_todo_on_enter(void* context) {
 
     // Setup view
     Popup* popup = nfc->popup;
-    popup_set_icon(popup, 64, 16, &I_DolphinCommon_56x48);
+    popup_set_icon(popup, 75, 21, &I_WarningDolphinFlip_45x42);
     popup_set_header(popup, "PACE not yet implemented", 4, 4, AlignLeft, AlignTop);
     popup_set_timeout(popup, 2000);
     popup_set_context(popup, nfc);

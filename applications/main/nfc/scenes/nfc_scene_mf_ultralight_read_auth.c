@@ -45,7 +45,7 @@ void nfc_scene_mf_ultralight_read_auth_set_state(Nfc* nfc, NfcSceneMfUlReadState
                 22,
                 AlignLeft,
                 AlignTop);
-            popup_set_icon(nfc->popup, 73, 20, &I_DolphinCommon_56x48);
+            popup_set_icon(nfc->popup, 84, 25, &I_WarningDolphinFlip_45x42);
             nfc_blink_stop(nfc);
             notification_message(nfc->notifications, &sequence_error);
             notification_message(nfc->notifications, &sequence_set_red_255);

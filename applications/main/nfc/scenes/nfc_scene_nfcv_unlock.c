@@ -93,7 +93,7 @@ void nfc_scene_nfcv_unlock_set_state(Nfc* nfc, NfcSceneNfcVUnlockState state) {
             popup_reset(popup);
             popup_set_header(popup, "Wrong Type Of Card!", 64, 3, AlignCenter, AlignTop);
             popup_set_text(popup, nfcv_data->error, 4, 22, AlignLeft, AlignTop);
-            popup_set_icon(popup, 73, 20, &I_DolphinCommon_56x48);
+            popup_set_icon(popup, 84, 25, &I_WarningDolphinFlip_45x42);
         }
         scene_manager_set_scene_state(nfc->scene_manager, NfcSceneNfcVUnlock, state);
     }
