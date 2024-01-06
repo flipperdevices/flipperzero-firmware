@@ -41,9 +41,6 @@ void minesweeper_scene_start_screen_on_enter(void* context) {
 
     start_screen_set_context(app->start_screen, app);
 
-    // Set callbacks
-    //start_screen_set_timer_callback(app->start_screen, minesweeper_scene_start_screen_timer_callback);
-    
     start_screen_set_input_callback(
             app->start_screen,
             minesweeper_scene_start_screen_input_callback);
