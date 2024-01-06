@@ -452,54 +452,17 @@ static void mine_sweeper_game_screen_view_win_draw_callback(Canvas* canvas, void
             uint16_t curr_rendering_tile_pos_1d = x_abs * model->board_width + y_abs;
             MineSweeperTile tile = model->board[curr_rendering_tile_pos_1d];
 
-            switch (tile.tile_state) {
-
-                case MineSweeperGameScreenTileStateFlagged :
-                    if (cursor_pos_1d == curr_rendering_tile_pos_1d) {
-
-                        inverted_canvas_white_to_black(
-                            canvas,
-                            {
-                                canvas_draw_icon(
-                                    canvas,
-                                    y_rel * icon_get_width(tile.icon_element.icon),
-                                    x_rel * icon_get_height(tile.icon_element.icon),
-                                    tile_icons[11]);
-                            });
-
-                    } else {
-                        canvas_draw_icon(
-                            canvas,
-                            y_rel * icon_get_width(tile.icon_element.icon),
-                            x_rel * icon_get_height(tile.icon_element.icon),
-                            tile_icons[11]);
-                    }
-
-                    break;
-                default :
-                    if (cursor_pos_1d == curr_rendering_tile_pos_1d) {
-
-                        inverted_canvas_white_to_black(
-                            canvas,
-                            {
-                                canvas_draw_icon(
-                                    canvas,
-                                    y_rel * icon_get_width(tile.icon_element.icon),
-                                    x_rel * icon_get_height(tile.icon_element.icon),
-                                    tile.icon_element.icon);
-                            });
-
-                    } else {
-                        canvas_draw_icon(
-                            canvas,
-                            y_rel * icon_get_width(tile.icon_element.icon),
-                            x_rel * icon_get_height(tile.icon_element.icon),
-                            tile.icon_element.icon);
-                    }
-
-
-                    break;
+            if (cursor_pos_1d == curr_rendering_tile_pos_1d) {
+                canvas_set_color(canvas, ColorWhite);
+            } else {
+                canvas_set_color(canvas, ColorBlack);
             }
+
+            canvas_draw_icon(
+                canvas,
+                y_rel * icon_get_width(tile.icon_element.icon),
+                x_rel * icon_get_height(tile.icon_element.icon),
+                tile.icon_element.icon);
 
         }
     }
@@ -526,44 +489,16 @@ static void mine_sweeper_game_screen_view_win_draw_callback(Canvas* canvas, void
         canvas_draw_line(canvas, 0,0,127,0);
     }
 
-    // Draw X Position Text 
+
+    // Draw win text
     furi_string_printf(
             model->info_str,
-            "X:%03hhd",
-            model->curr_pos.x_abs);
+            "YOU WIN!");
 
     canvas_draw_str_aligned(
             canvas,
             0,
             64-7,
-            AlignLeft,
-            AlignTop,
-            furi_string_get_cstr(model->info_str));
-
-    // Draw Y Position Text 
-    furi_string_printf(
-            model->info_str,
-            "Y:%03hhd",
-            model->curr_pos.y_abs);
-
-    canvas_draw_str_aligned(
-            canvas,
-            33,
-            64-7,
-            AlignLeft,
-            AlignTop,
-            furi_string_get_cstr(model->info_str));
-
-    // Draw flag text
-    furi_string_printf(
-            model->info_str,
-            "F:%03hd",
-            model->flags_left);
-
-    canvas_draw_str_aligned(
-            canvas,
-            66,
-            64 - 7,
             AlignLeft,
             AlignTop,
             furi_string_get_cstr(model->info_str));
@@ -610,24 +545,16 @@ static void mine_sweeper_game_screen_view_lose_draw_callback(Canvas* canvas, voi
             MineSweeperTile tile = model->board[curr_rendering_tile_pos_1d];
 
             if (cursor_pos_1d == curr_rendering_tile_pos_1d) {
-
-                inverted_canvas_white_to_black(
-                    canvas,
-                    {
-                        canvas_draw_icon(
-                            canvas,
-                            y_rel * icon_get_width(tile.icon_element.icon),
-                            x_rel * icon_get_height(tile.icon_element.icon),
-                            tile.icon_element.icon);
-                    });
-
+                canvas_set_color(canvas, ColorWhite);
             } else {
-                canvas_draw_icon(
-                    canvas,
-                    y_rel * icon_get_width(tile.icon_element.icon),
-                    x_rel * icon_get_height(tile.icon_element.icon),
-                    tile.icon_element.icon);
+                canvas_set_color(canvas, ColorBlack);
             }
+
+            canvas_draw_icon(
+                canvas,
+                y_rel * icon_get_width(tile.icon_element.icon),
+                x_rel * icon_get_height(tile.icon_element.icon),
+                tile.icon_element.icon);
 
         }
     }
@@ -654,44 +581,15 @@ static void mine_sweeper_game_screen_view_lose_draw_callback(Canvas* canvas, voi
         canvas_draw_line(canvas, 0,0,127,0);
     }
 
-    // Draw X Position Text 
+    // Draw lose text
     furi_string_printf(
             model->info_str,
-            "X:%03hhd",
-            model->curr_pos.x_abs);
+            "YOU LOSE!");
 
     canvas_draw_str_aligned(
             canvas,
             0,
             64-7,
-            AlignLeft,
-            AlignTop,
-            furi_string_get_cstr(model->info_str));
-
-    // Draw Y Position Text 
-    furi_string_printf(
-            model->info_str,
-            "Y:%03hhd",
-            model->curr_pos.y_abs);
-
-    canvas_draw_str_aligned(
-            canvas,
-            33,
-            64-7,
-            AlignLeft,
-            AlignTop,
-            furi_string_get_cstr(model->info_str));
-
-    // Draw flag text
-    furi_string_printf(
-            model->info_str,
-            "F:%03hd",
-            model->flags_left);
-
-    canvas_draw_str_aligned(
-            canvas,
-            66,
-            64 - 7,
             AlignLeft,
             AlignTop,
             furi_string_get_cstr(model->info_str));
@@ -724,7 +622,6 @@ static void mine_sweeper_game_screen_view_play_draw_callback(Canvas* canvas, voi
 
     canvas_clear(canvas);
 
-    canvas_set_color(canvas, ColorBlack);
     
     uint16_t cursor_pos_1d = model->curr_pos.x_abs * model->board_width + model->curr_pos.y_abs;
     
@@ -737,75 +634,36 @@ static void mine_sweeper_game_screen_view_play_draw_callback(Canvas* canvas, voi
             uint16_t curr_rendering_tile_pos_1d = x_abs * model->board_width + y_abs;
             MineSweeperTile tile = model->board[curr_rendering_tile_pos_1d];
 
+            if (cursor_pos_1d == curr_rendering_tile_pos_1d) {
+                canvas_set_color(canvas, ColorWhite);
+            } else {
+                canvas_set_color(canvas, ColorBlack);
+            }
+
             switch (tile.tile_state) {
 
                 case MineSweeperGameScreenTileStateFlagged :
-                    if (cursor_pos_1d == curr_rendering_tile_pos_1d) {
-
-                        inverted_canvas_white_to_black(
-                            canvas,
-                            {
-                                canvas_draw_icon(
-                                    canvas,
-                                    y_rel * icon_get_width(tile.icon_element.icon),
-                                    x_rel * icon_get_height(tile.icon_element.icon),
-                                    tile_icons[11]);
-                            });
-
-                    } else {
-                        canvas_draw_icon(
-                            canvas,
-                            y_rel * icon_get_width(tile.icon_element.icon),
-                            x_rel * icon_get_height(tile.icon_element.icon),
-                            tile_icons[11]);
-                    }
+                    canvas_draw_icon(
+                        canvas,
+                        y_rel * icon_get_width(tile.icon_element.icon),
+                        x_rel * icon_get_height(tile.icon_element.icon),
+                        tile_icons[11]);
 
                     break;
                 case MineSweeperGameScreenTileStateUncleared :
-                    if (cursor_pos_1d == curr_rendering_tile_pos_1d) {
-
-                        inverted_canvas_white_to_black(
-                            canvas,
-                            {
-                                canvas_draw_icon(
-                                    canvas,
-                                    y_rel * icon_get_width(tile.icon_element.icon),
-                                    x_rel * icon_get_height(tile.icon_element.icon),
-                                    tile_icons[12]);
-                            });
-
-                    } else {
-                        canvas_draw_icon(
-                            canvas,
-                            y_rel * icon_get_width(tile.icon_element.icon),
-                            x_rel * icon_get_height(tile.icon_element.icon),
-                            tile_icons[12]);
-                    }
-
+                    canvas_draw_icon(
+                        canvas,
+                        y_rel * icon_get_width(tile.icon_element.icon),
+                        x_rel * icon_get_height(tile.icon_element.icon),
+                        tile_icons[12]);
 
                     break;
                 case MineSweeperGameScreenTileStateCleared :
-                    if (cursor_pos_1d == curr_rendering_tile_pos_1d) {
-
-                        inverted_canvas_white_to_black(
-                            canvas,
-                            {
-                                canvas_draw_icon(
-                                    canvas,
-                                    y_rel * icon_get_width(tile.icon_element.icon),
-                                    x_rel * icon_get_height(tile.icon_element.icon),
-                                    tile.icon_element.icon);
-                            });
-
-                    } else {
-                        canvas_draw_icon(
-                            canvas,
-                            y_rel * icon_get_width(tile.icon_element.icon),
-                            x_rel * icon_get_height(tile.icon_element.icon),
-                            tile.icon_element.icon);
-                    }
-
-
+                    canvas_draw_icon(
+                        canvas,
+                        y_rel * icon_get_width(tile.icon_element.icon),
+                        x_rel * icon_get_height(tile.icon_element.icon),
+                        tile.icon_element.icon);
                     break;
                 default:
                     break;
@@ -907,36 +765,94 @@ static bool mine_sweeper_game_screen_view_end_input_callback(InputEvent* event, 
     bool consumed = false;
 
     if (event->type == InputTypePress) {
-        mine_sweeper_game_screen_reset_clock(instance);
 
         with_view_model(
             instance->view,
             MineSweeperGameScreenModel * model,
             {
-                FURI_LOG_D(
-                        MS_DEBUG_TAG,
-                        "Setting up board with w:%03hhd h:%03hhd",
-                        model->board_width,
-                        model->board_height);
+                bool is_outside_boundary;
+                switch (event->key) {
 
+                    case InputKeyUp :
+                        FURI_LOG_D(MS_DEBUG_TAG, "Event Type: (InputTypePress || InputTypeRepeat) && InputKeyUp");
+                        model->curr_pos.x_abs = (model->curr_pos.x_abs-1 < 0) ? 0 : model->curr_pos.x_abs-1;
+
+                        is_outside_boundary = model->curr_pos.x_abs <
+                            (model->bottom_boundary - MINESWEEPER_SCREEN_TILE_HEIGHT);
+                        
+                        if (is_outside_boundary) {
+                            model->bottom_boundary--;
+                        }
+
+                        consumed = true;
+                        break;
+
+                    case InputKeyDown :
+                        FURI_LOG_D(MS_DEBUG_TAG, "Event Type: (InputTypePress || InputTypeRepeat) && Inputdown");
+                        model->curr_pos.x_abs = (model->curr_pos.x_abs+1 >= model->board_height) ?
+                            model->board_height-1 : model->curr_pos.x_abs+1;
+
+                        is_outside_boundary = model->curr_pos.x_abs >= model->bottom_boundary;
+
+                        if (is_outside_boundary) {
+                            model->bottom_boundary++;
+                        }
+
+                        consumed = true;
+                        break;
+
+                    case InputKeyLeft :
+                        FURI_LOG_D(MS_DEBUG_TAG, "Event Type: (InputTypePress || InputTypeRepeat) && InputKeyLeft");
+                        model->curr_pos.y_abs = (model->curr_pos.y_abs-1 < 0) ? 0 : model->curr_pos.y_abs-1;
+
+                        is_outside_boundary = model->curr_pos.y_abs <
+                            (model->right_boundary - MINESWEEPER_SCREEN_TILE_WIDTH);
+                        
+                        if (is_outside_boundary) {
+                            model->right_boundary--;
+                        }
+
+                        consumed = true;
+                        break;
+
+                    case InputKeyRight :
+                        FURI_LOG_D(MS_DEBUG_TAG, "Event Type: (InputTypePress || InputTypeRepeat) && InputKeyRight");
+                        model->curr_pos.y_abs = (model->curr_pos.y_abs+1 >= model->board_width) ?
+                            model->board_width-1 : model->curr_pos.y_abs+1;
+
+                        is_outside_boundary = model->curr_pos.y_abs >= model->right_boundary;
+
+                        if (is_outside_boundary) {
+                            model->right_boundary++;
+                        }
+
+                        consumed = true;
+                        break;
+
+                    default: // Anything other than movement around the screen should restart game
+                        
+                        mine_sweeper_game_screen_reset_clock(instance);
                         view_set_draw_callback(
                                 instance->view,
                                 mine_sweeper_game_screen_view_play_draw_callback);
                         view_set_input_callback(
                                 instance->view,
                                 mine_sweeper_game_screen_view_play_input_callback);
+
+                        setup_board(instance);
+                        consumed = true;
+                        break;
+                }
+
             },
             false);
 
-        setup_board(instance);
         consumed = true; 
     }
 
     return consumed;
 }
 
-// Not sure if the custom callback will actually be used at this point, and it may be a better
-// idea to remove it so it is simple for the user to use this module in their own apps
 static bool mine_sweeper_game_screen_view_play_input_callback(InputEvent* event, void* context) {
     furi_assert(context);
     furi_assert(event);
@@ -944,7 +860,9 @@ static bool mine_sweeper_game_screen_view_play_input_callback(InputEvent* event,
     MineSweeperGameScreen* instance = context;
     bool consumed = false;
 
-    if (!consumed && (event->key == InputKeyOk)) { // Attempt to Clear Space
+    // Checking button types
+
+    if (event->key == InputKeyOk) { // Attempt to Clear Space !! THIS CAN BE A LOSE CONDITION
 
         if (event->type == InputTypePress) { 
             FURI_LOG_D(MS_DEBUG_TAG, "Event Type: InputTypePress && InputKeyOk");
@@ -1161,8 +1079,10 @@ static bool mine_sweeper_game_screen_view_play_input_callback(InputEvent* event,
     if (!consumed && instance->input_callback != NULL) {
         FURI_LOG_D(MS_DEBUG_TAG, "Event type: %d, Key: %d, not consumed, sending to custom callback.", event->type, event->key);
         consumed = instance->input_callback(event, instance->context);
-    } else {
+    } else if (!consumed) {
         FURI_LOG_D(MS_DEBUG_TAG, "Event type: %d, Key: %d, not consumed and custom callback NULL.", event->type, event->key);
+    } else {
+        FURI_LOG_D(MS_DEBUG_TAG, "Event type: %d, Key: %d, consumed.", event->type, event->key);
     }
 
     return consumed;
