@@ -224,7 +224,7 @@ void nfc_text_store_clear(NfcApp* nfc) {
 }
 
 void nfc_blink_read_start(NfcApp* nfc) {
-    notification_message(nfc->notifications, &sequence_blink_start_cyan);
+    notification_message(nfc->notifications, &sequence_blink_start_yellow);
 }
 
 void nfc_blink_emulate_start(NfcApp* nfc) {
@@ -232,7 +232,7 @@ void nfc_blink_emulate_start(NfcApp* nfc) {
 }
 
 void nfc_blink_detect_start(NfcApp* nfc) {
-    notification_message(nfc->notifications, &sequence_blink_start_yellow);
+    notification_message(nfc->notifications, &sequence_blink_start_cyan);
 }
 
 void nfc_blink_stop(NfcApp* nfc) {
