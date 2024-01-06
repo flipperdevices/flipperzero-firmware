@@ -110,7 +110,7 @@ static void show_hello() {
     dialog_message_set_text(message, message_text, 0, 17, AlignLeft, AlignTop);
     dialog_message_set_buttons(message, NULL, "Tap", NULL);
 
-    dialog_message_set_icon(message, &I_DolphinCommon_56x48, 72, 17);
+    dialog_message_set_icon(message, &I_WarningDolphinFlip_45x42, 83, 22);
 
     dialog_message_show(dialogs, message);
 

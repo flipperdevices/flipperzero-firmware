@@ -13,7 +13,7 @@ void nfc_magic_scene_gen4_fail_on_enter(void* context) {
 
     notification_message(instance->notifications, &sequence_error);
 
-    widget_add_icon_element(widget, 72, 17, &I_DolphinCommon_56x48);
+    widget_add_icon_element(widget, 83, 22, &I_WarningDolphinFlip_45x42);
     widget_add_string_element(
         widget, 7, 4, AlignLeft, AlignTop, FontPrimary, "Something gone wrong!");
     widget_add_string_multiline_element(
