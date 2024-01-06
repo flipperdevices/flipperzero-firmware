@@ -101,6 +101,7 @@ bool desktop_scene_locked_on_event(void* context, SceneManagerEvent event) {
             break;
         }
         case DesktopLockedEventUnlocked:
+        case DesktopGlobalApiUnlock:
             desktop_unlock(desktop);
             consumed = true;
             break;
