@@ -1,0 +1,15 @@
+App(
+    appid="wardriver",
+    name="Wardriver GPS",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="wardriver_app",
+    stack_size=2048,
+    fap_icon="lookingglass.png",
+    fap_category="GPIO/ESP32",
+    fap_icon_assets="icons",
+    fap_icon_assets_symbol="wardriver",
+    fap_author="Sil333033",
+    fap_weburl="https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/d4f7c1406dfdfa2768983e8723f5f2f6639aeefe",
+    fap_version="1.0",
+    fap_description="Sniff WiFi access points with GPS location coordinates",
+)

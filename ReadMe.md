@@ -48,6 +48,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: [SubGHz: Add Kia Encoder #691 (By letvinov28)](https://github.com/DarkFlippers/unleashed-firmware/pull/691)
 - OFW: [UI refactor #3323 (By RebornedBrain)](https://github.com/flipperdevices/flipperzero-firmware/pull/3323)
 - OFW: [Desktop: fix rpc unlock on pin input screen #3334 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3334)
+- Added: [Wardriver GPS v1.0 (By Sil333033)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/d4f7c1406dfdfa2768983e8723f5f2f6639aeefe)
 
 <a name="release">
 
@@ -514,6 +515,7 @@ $ ./fbt dolphin_ext
 - [USB Midi (By DrZlo13)](https://github.com/DrZlo13/flipper-zero-usb-midi) [Instructions by ESurge](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/applications/plugins/usb_midi/ReadMe.md)
 - [VB Migration Assistant v1.2 (By GMMan)](https://github.com/GMMan/flipperzero-vb-migrate)
 - [Video Player v0.2 (By LTVA1)](https://github.com/LTVA1/flipper-zero-video-player)
+- [Wardriver GPS v1.0 (By Sil333033)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/d4f7c1406dfdfa2768983e8723f5f2f6639aeefe)
 - [WAV Player v1.1 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/tree/zlo/wav-player) Updated by Atmanos & RogueMaster To Work.  [Updated by xMasterX](https://github.com/DarkFlippers/unleashed-firmware/commit/76d3f84a5eb069b749e3ad20df6fdbbc785eb253)
 - [WAV Recorder (By scrolltex)](https://github.com/scrolltex/flipper-wav-recorder)
 - [WHC SWIO Flasher v1.0 (By sukvojte)](https://github.com/sukvojte/wch_swio_flasher)
