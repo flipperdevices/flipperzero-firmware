@@ -3,25 +3,6 @@
 
 #include <input/input.h>
 
-typedef enum {
-    MineSweeperGameScreenContinueEvent,
-} MineSweeperGameScreenEvent;
-
-bool mineweeper_scene_game_screen_input_callback(InputEvent* event, void* context) {
-    furi_assert(event);
-    furi_assert(context);
-    
-    MineSweeperApp* app = context;
-
-    bool consumed = false;
-
-    if (event->type == InputTypePress) {
-        consumed = scene_manager_handle_custom_event(app->scene_manager, MineSweeperGameScreenContinueEvent);
-    }
-
-    return consumed;
-}
-
 void minesweeper_scene_game_screen_on_enter(void* context) {
     furi_assert(context);
     MineSweeperApp* app = context;
@@ -39,6 +20,8 @@ bool minesweeper_scene_game_screen_on_event(void* context, SceneManagerEvent eve
     MineSweeperApp* app = context;
     bool consumed = false;
 
+    // No custom scene events from mine sweeper view
+    // Just check for back button to route to next screen
     if (event.type == SceneManagerEventTypeBack) {
         scene_manager_next_scene(app->scene_manager, MineSweeperSceneMenuScreen);
         consumed = true;
@@ -50,6 +33,8 @@ bool minesweeper_scene_game_screen_on_event(void* context, SceneManagerEvent eve
 void minesweeper_scene_game_screen_on_exit(void* context) {
     furi_assert(context);
     MineSweeperApp* app = context;
-
+    
+    // Do not call reset function for mine sweeper module
+    //unless you want to reset the state of the board
     UNUSED(app);
 }
