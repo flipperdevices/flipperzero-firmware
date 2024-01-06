@@ -10,7 +10,7 @@ const SubGhzProtocol* weather_station_protocol_registry_items[] = {
     &ws_protocol_acurite_592txr, &ws_protocol_ambient_weather,
     &ws_protocol_auriol_th,      &ws_protocol_oregon_v1,
     &ws_protocol_tx_8300,        &ws_protocol_wendox_w6726,
-    &ws_protocol_auriol_ahfl,
+    &ws_protocol_auriol_ahfl,    &ws_protocol_kedsum_th,
 };
 
 const SubGhzProtocolRegistry weather_station_protocol_registry = {

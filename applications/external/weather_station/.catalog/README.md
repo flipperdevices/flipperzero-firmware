@@ -11,7 +11,7 @@ GT-WT02
 GT-WT03
 Acurite 592TXR
 Acurite-606TX
-Acurite-606TXC
+Acurite-609TXC
 Acurite-986
 LaCrosse_TX
 TX141THBv2
@@ -23,3 +23,4 @@ Avriol HG06061
 TX8300
 Wendox W6276
 Auriol AHFL
+Kedsum-TH/Conrad-S3318P

@@ -50,6 +50,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - [UI Refactor for many apps (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/91fd1bb298dfe20f3c76b3489032933eab791a31)
 - Added: [Wardriver GPS v1.0 (By Sil333033)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/d4f7c1406dfdfa2768983e8723f5f2f6639aeefe)
 - Updated: [Restaurant Pager Trigger v1.0 (By leedave)](https://github.com/leedave/flipper-zero-meal-pager)
+- Updated: [Weather Station v1.3 (By Skorpionm)-OFW](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/weather_station) [WS: add protocol Kedsum-TH/Conrad-S3318P #104](https://github.com/flipperdevices/flipperzero-good-faps/pull/104)
 
 <a name="release">
 
@@ -520,7 +521,7 @@ $ ./fbt dolphin_ext
 - [WAV Player v1.1 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/tree/zlo/wav-player) Updated by Atmanos & RogueMaster To Work.  [Updated by xMasterX](https://github.com/DarkFlippers/unleashed-firmware/commit/76d3f84a5eb069b749e3ad20df6fdbbc785eb253)
 - [WAV Recorder (By scrolltex)](https://github.com/scrolltex/flipper-wav-recorder)
 - [WHC SWIO Flasher v1.0 (By sukvojte)](https://github.com/sukvojte/wch_swio_flasher)
-- [Weather Station (By Skorpionm)-OFW](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/weather_station)
+- [Weather Station v1.3 (By Skorpionm)-OFW](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/weather_station)
 - [Wiegand Reader v1.3 (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/gpio)
 - [WiFi (Deauther) V2 (By Timmotools)](https://github.com/Timmotools/flipperzero_esp8266_deautherv2) `Req: ESP8266`
 - [WiFi (Marauder) v6.6 (By 0xchocolate & tcpassos)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) `Req: ESP32 WITH MARAUDER FLASHED` [ESP32 MARAUDER Firmware](https://github.com/tcpassos/ESP32Marauder)
