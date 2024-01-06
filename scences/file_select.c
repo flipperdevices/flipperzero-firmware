@@ -11,7 +11,7 @@ void nfc_playlist_file_select_scene_on_enter(void* context) {
    file_browser_configure(
       nfc_playlist->file_browser,
       ".txt",
-      "/ext/apps_data/nfc_playlist/",
+      furi_string_get_cstr(nfc_playlist->base_file_path),
       true,
       true,
       &I_sub1_10px,
