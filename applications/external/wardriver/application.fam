@@ -9,7 +9,7 @@ App(
     fap_icon_assets="icons",
     fap_icon_assets_symbol="wardriver",
     fap_author="Sil333033",
-    fap_weburl="https://github.com/Flipper-XFW/Xtreme-Apps/tree/dev/wardriver",
+    fap_weburl="https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/d4f7c1406dfdfa2768983e8723f5f2f6639aeefe",
     fap_version="1.0",
     fap_description="Sniff WiFi access points with GPS location coordinates",
 )
