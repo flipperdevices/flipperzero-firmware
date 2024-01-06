@@ -10,7 +10,7 @@ static char* genRawDataTd174(int zero, int one, const char* bits) {
     char* res = (char*)malloc(lineLen * sizeof(char));
     res[0] = '\0'; // Null-terminate the result string
 
-    customConcat(res, "-6000");
+    customConcat(res, "-6000 300 -900"); // Always starts with 01
 
     // Append bits and create the line
     for(int i = 0; i < bitsLen; i++) {
@@ -58,22 +58,11 @@ static void meal_pager_retekess_td174_generate_pager(
     customConcat(fullId, stationId);
     customConcat(fullId, actionId);
     customConcat(fullId, pagerId);
-    //FURI_LOG_D(TAG, "Result %s", fullId);
-    //FURI_LOG_D(TAG, "Station & Pager: %s", stationPagerId);
-    //FURI_LOG_D(TAG, "Station & Pager: %s", stationPagerId);
-    
-    //FURI_LOG_D(TAG, "CustomConcat: %s", fullId);
-    //FURI_LOG_D(TAG, "Station & Pager & Action: %s", fullId);
     char* manchester = encManchester(fullId, 0);
-    char* manchesterFull = "01";
-    customConcat(manchesterFull, manchester);
-    //FURI_LOG_D(TAG, "Manchester: %s", manchester);
-    char* rawSignal = genRawDataTd174(300, 900, manchesterFull);
-    //FURI_LOG_D(TAG, "RAW_Data: %s", rawSignal);
+    char* rawSignal = genRawDataTd174(300, 900, manchester);
     for(u_int32_t i = 1; app->repeats >= i; i++) {
         flipper_format_write_string_cstr(ff, "RAW_Data", rawSignal);
     }
-    //flipper_format_write_string_cstr(ff, "RAW_Data", rawSignal);
     free(manchester);
     free(rawSignal);
 }
@@ -95,7 +84,6 @@ static void
     meal_pager_transmit_model_set_station(app->meal_pager_transmit, app->current_station);
     for(u_int32_t i = app->current_pager; i <= app->last_pager; i++) {
         meal_pager_retekess_td174_generate_pager(app, stationId, i, ff);
-        //furi_thread_flags_wait(0, FuriFlagWaitAny, 1);
         if(app->stop_transmit) {
             break;
         }

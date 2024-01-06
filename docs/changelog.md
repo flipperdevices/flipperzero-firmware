@@ -1,3 +1,6 @@
+## v1.0
+- Added support for TD174
+
 ## v0.9
 - Added support for TD165
 

@@ -8,7 +8,7 @@ This app triggers restaurant pagers in a brute force manner, useful to test if d
 - Retekess T119
 - Retekess TD157
 - Retekess TD165
-- Retekess TD174 (coming soon)
+- Retekess TD174
 
 ### Features
 - Select range of stations (needs improving for full range)
