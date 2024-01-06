@@ -70,7 +70,7 @@ void* subghz_protocol_encoder_kia_alloc(SubGhzEnvironment* environment) {
     instance->encoder.upload = malloc(instance->encoder.size_upload * sizeof(LevelDuration));
     instance->encoder.repeat = 1;
     instance->encoder.is_running = false;
-    
+
     return instance;
 }
 
@@ -134,11 +134,14 @@ static bool subghz_protocol_encoder_kia_get_upload(SubGhzProtocolEncoderKIA* ins
     if(subghz_custom_btn_get_original() == 0) {
         subghz_custom_btn_set_original(instance->generic.btn);
     }
-    
+
     size_t index = 0;
     size_t size_upload = (instance->generic.data_count_bit * 2 + 32) * 2 + 540;
     if(size_upload > instance->encoder.size_upload) {
-        FURI_LOG_E(TAG, "Size upload exceeds allocated encoder buffer. %i", instance->generic.data_count_bit);
+        FURI_LOG_E(
+            TAG,
+            "Size upload exceeds allocated encoder buffer. %i",
+            instance->generic.data_count_bit);
         return false;
     } else {
         instance->encoder.size_upload = size_upload;
@@ -153,56 +156,60 @@ static bool subghz_protocol_encoder_kia_get_upload(SubGhzProtocolEncoderKIA* ins
     } else if(instance->generic.cnt >= 0xFFFF) {
         instance->generic.cnt = 0;
     }
-    
-    uint8_t btn = subghz_custom_btn_get() == SUBGHZ_CUSTOM_BTN_OK 
-        ? subghz_custom_btn_get_original()
-        : subghz_custom_btn_get();
 
-    uint64_t reversed = 0, value = ((uint64_t)(0x0F)           << 56) |
-            ((uint64_t)(instance->generic.cnt    & 0xFFFF)     << 40) |
-            ((uint64_t)(instance->generic.serial & 0x0FFFFFFF) << 12) |
-            ((uint64_t)(btn                      & 0x0F)       << 8);
+    uint8_t btn = subghz_custom_btn_get() == SUBGHZ_CUSTOM_BTN_OK ?
+                      subghz_custom_btn_get_original() :
+                      subghz_custom_btn_get();
+
+    uint64_t reversed = 0, value = ((uint64_t)(0x0F) << 56) |
+                                   ((uint64_t)(instance->generic.cnt & 0xFFFF) << 40) |
+                                   ((uint64_t)(instance->generic.serial & 0x0FFFFFFF) << 12) |
+                                   ((uint64_t)(btn & 0x0F) << 8);
     for(uint8_t i = 0; i < sizeof(uint64_t); ++i) {
         reversed = (reversed << 8) | ((value >> (i * 8)) & 0xFF);
     }
 
-    instance->generic.data = value | (uint64_t)subghz_protocol_blocks_crc8((uint8_t*)&reversed, 7, 0x7F, 0x0F);
+    instance->generic.data =
+        value | (uint64_t)subghz_protocol_blocks_crc8((uint8_t*)&reversed, 7, 0x7F, 0x0F);
 
     //Send header
     for(uint16_t i = 270; i > 0; i--) {
-        instance->encoder.upload[index++] = level_duration_make(true,  (uint32_t)subghz_protocol_kia_const.te_short);
-        instance->encoder.upload[index++] = level_duration_make(false, (uint32_t)subghz_protocol_kia_const.te_short);
+        instance->encoder.upload[index++] =
+            level_duration_make(true, (uint32_t)subghz_protocol_kia_const.te_short);
+        instance->encoder.upload[index++] =
+            level_duration_make(false, (uint32_t)subghz_protocol_kia_const.te_short);
     }
 
     for(uint8_t h = 2; h > 0; h--) {
         for(uint8_t i = 15; i > 0; i--) {
-            instance->encoder.upload[index++] = level_duration_make(true,  (uint32_t)subghz_protocol_kia_const.te_short);
-            instance->encoder.upload[index++] = level_duration_make(false, (uint32_t)subghz_protocol_kia_const.te_short);
+            instance->encoder.upload[index++] =
+                level_duration_make(true, (uint32_t)subghz_protocol_kia_const.te_short);
+            instance->encoder.upload[index++] =
+                level_duration_make(false, (uint32_t)subghz_protocol_kia_const.te_short);
         }
 
         for(uint8_t i = instance->generic.data_count_bit; i > 0; i--) {
             if(bit_read(instance->generic.data, i - 1)) {
                 //send bit 1
                 instance->encoder.upload[index++] =
-                    level_duration_make(true,  (uint32_t)subghz_protocol_kia_const.te_long);
+                    level_duration_make(true, (uint32_t)subghz_protocol_kia_const.te_long);
                 instance->encoder.upload[index++] =
                     level_duration_make(false, (uint32_t)subghz_protocol_kia_const.te_long);
             } else {
                 //send bit 0
                 instance->encoder.upload[index++] =
-                    level_duration_make(true,  (uint32_t)subghz_protocol_kia_const.te_short);
+                    level_duration_make(true, (uint32_t)subghz_protocol_kia_const.te_short);
                 instance->encoder.upload[index++] =
                     level_duration_make(false, (uint32_t)subghz_protocol_kia_const.te_short);
             }
         }
 
         instance->encoder.upload[index++] =
-            level_duration_make(true,  (uint32_t)subghz_protocol_kia_const.te_long * 3);
+            level_duration_make(true, (uint32_t)subghz_protocol_kia_const.te_long * 3);
         instance->encoder.upload[index++] =
             level_duration_make(false, (uint32_t)subghz_protocol_kia_const.te_long * 3);
-
     }
-    
+
     return true;
 }
 
@@ -247,7 +254,7 @@ SubGhzProtocolStatus
         }
 
         instance->encoder.is_running = true;
-    } while (false);
+    } while(false);
 
     return ret;
 }
@@ -256,7 +263,8 @@ const SubGhzProtocol subghz_protocol_kia = {
     .name = SUBGHZ_PROTOCOL_KIA_NAME,
     .type = SubGhzProtocolTypeDynamic,
     .flag = SubGhzProtocolFlag_433 | SubGhzProtocolFlag_FM | SubGhzProtocolFlag_Decodable |
-            SubGhzProtocolFlag_Load | SubGhzProtocolFlag_Save | SubGhzProtocolFlag_Send | SubGhzProtocolFlag_AutoAlarms,
+            SubGhzProtocolFlag_Load | SubGhzProtocolFlag_Save | SubGhzProtocolFlag_Send |
+            SubGhzProtocolFlag_AutoAlarms,
 
     .decoder = &subghz_protocol_kia_decoder,
     .encoder = &subghz_protocol_kia_encoder,
@@ -403,7 +411,7 @@ static void subghz_protocol_kia_check_remote_controller(SubGhzBlockGeneric* inst
     if(subghz_custom_btn_get_original() == 0) {
         subghz_custom_btn_set_original(instance->btn);
     }
-    
+
     subghz_custom_btn_set_max(4);
 }
 
