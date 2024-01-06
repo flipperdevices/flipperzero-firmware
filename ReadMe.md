@@ -41,7 +41,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - Added: [Flipper Aid v1.0 (By spaghety)](https://github.com/spaghety/flipper-aid)
 - Added: [Restaurant Pager Trigger v0.1 (By leedave)](https://github.com/leedave/flipper-zero-meal-pager)
 - Added: [Vexed v1.0.1 (By dlvoy)](https://github.com/dlvoy/flipper-zero-vexed)
-- Updated: [Restaurant Pager Trigger v0.8 (By leedave)](https://github.com/leedave/flipper-zero-meal-pager)
 - UL: [subghz use long press to exit transmitter (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/1a88b731d5f95f445a687768e3db880e6ba5a8f9)
 - Added: [T5577 Multiwriter v0.1 (By Leptopt1los)](https://github.com/Leptopt1los/t5577_multiwriter)
 - Added: [HID File Transfer v1.0 (By Kavakuo)](https://github.com/Kavakuo/HID-File-Transfer)
@@ -50,6 +49,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [Desktop: fix rpc unlock on pin input screen #3334 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3334)
 - [UI Refactor for many apps (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/91fd1bb298dfe20f3c76b3489032933eab791a31)
 - Added: [Wardriver GPS v1.0 (By Sil333033)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/d4f7c1406dfdfa2768983e8723f5f2f6639aeefe)
+- Updated: [Restaurant Pager Trigger v1.0 (By leedave)](https://github.com/leedave/flipper-zero-meal-pager)
 
 <a name="release">
 
@@ -475,7 +475,7 @@ $ ./fbt dolphin_ext
 - [RCWL-516 Motion Sensor (By ahmedafe1)](https://github.com/ahmedafe1/rcwl_0516-Flipperzero)
 - [Remote Maker (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/487)
 - [Resistance Calculator v1.2 (By instantiator)](https://github.com/instantiator/flipper-zero-experimental-apps)
-- [Restaurant Pager Trigger v0.8 (By leedave)](https://github.com/leedave/flipper-zero-meal-pager)
+- [Restaurant Pager Trigger v1.0 (By leedave)](https://github.com/leedave/flipper-zero-meal-pager)
 - [RFID Beacon (By nmrr)](https://github.com/nmrr/flipperzero-rfidbeacon)
 - [RFID Detector v1.1 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/2795)
 - [RFID Fuzzer v1.3 (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/507) [(Original By Ganapati)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/245)
