@@ -1,7 +1,7 @@
 
-#include "meal_pager_retekess_t119.h"
+#include "meal_pager_retekess_td174.h"
 
-static char* genRawDataT119(int zero, int one, const char* bits) {
+static char* genRawDataTd174(int zero, int one, const char* bits) {
     int bitsLen = strlen(bits);
     int lineLen = 256; // Adjust the line length as needed
     char* line = (char*)malloc(lineLen * sizeof(char));
@@ -10,7 +10,7 @@ static char* genRawDataT119(int zero, int one, const char* bits) {
     char* res = (char*)malloc(lineLen * sizeof(char));
     res[0] = '\0'; // Null-terminate the result string
 
-    customConcat(res, "-6000");
+    customConcat(res, "-6000 300 -900"); // Always starts with 01
 
     // Append bits and create the line
     for(int i = 0; i < bitsLen; i++) {
@@ -28,14 +28,14 @@ static char* genRawDataT119(int zero, int one, const char* bits) {
     }
 
     // Append the closing part to the line
-    customConcat(res, " 200 -6000");
+    customConcat(res, " 300 -6000");
 
     free(line); // Free memory allocated for the line
 
     return res;
 }
 
-static void meal_pager_retekess_t119_generate_pager(
+static void meal_pager_retekess_td174_generate_pager(
     void* context,
     char* stationId,
     uint32_t pager,
@@ -45,42 +45,34 @@ static void meal_pager_retekess_t119_generate_pager(
     char* fullId = (char*)malloc(25 * sizeof(char));
     uint32_t action = 0; // 0 = ring, 1 = mute
     char actionId[2];
-    //FURI_LOG_D(TAG, "Generating T119 Data for Pager %lu", pager);
+    //FURI_LOG_D(TAG, "Generating TD174 Data for Pager %lu", pager);
     app->current_pager = pager;
     meal_pager_transmit_model_set_pager(app->meal_pager_transmit, app->current_pager);
-    uint32ToBinaray(pager, pagerId, 10);
-    uint32ToBinaray(action, actionId, 1);
+    uint32ToBinaray(pager, pagerId, 8);
+    uint32ToBinaray(action, actionId, 2);
     reverse(pagerId);
     reverse(actionId);
     //FURI_LOG_D(TAG, "Station Bin: %s", stationId);
     //FURI_LOG_D(TAG, "Pager Bin: %s", pagerId);
     //FURI_LOG_D(TAG, "Action Bin: %s", actionId);
     customConcat(fullId, stationId);
-    customConcat(fullId, pagerId);
-    //FURI_LOG_D(TAG, "Result %s", fullId);
-    //FURI_LOG_D(TAG, "Station & Pager: %s", stationPagerId);
-    //FURI_LOG_D(TAG, "Station & Pager: %s", stationPagerId);
     customConcat(fullId, actionId);
-    //FURI_LOG_D(TAG, "CustomConcat: %s", fullId);
-    //FURI_LOG_D(TAG, "Station & Pager & Action: %s", fullId);
+    customConcat(fullId, pagerId);
     char* manchester = encManchester(fullId, 0);
-    //FURI_LOG_D(TAG, "Manchester: %s", manchester);
-    char* rawSignal = genRawDataT119(200, 600, manchester);
-    //FURI_LOG_D(TAG, "RAW_Data: %s", rawSignal);
+    char* rawSignal = genRawDataTd174(300, 900, manchester);
     for(u_int32_t i = 1; app->repeats >= i; i++) {
         flipper_format_write_string_cstr(ff, "RAW_Data", rawSignal);
     }
-    //flipper_format_write_string_cstr(ff, "RAW_Data", rawSignal);
     free(manchester);
     free(rawSignal);
 }
 
 static void
-    meal_pager_retekess_t119_generate_station(void* context, uint32_t station, FlipperFormat* ff) {
+    meal_pager_retekess_td174_generate_station(void* context, uint32_t station, FlipperFormat* ff) {
     Meal_Pager* app = context;
     FURI_LOG_D(
         TAG,
-        "Generating T119 Data for Station %lu. Pagers From %lu to %lu",
+        "Generating TD174 Data for Station %lu. Pagers From %lu to %lu",
         station,
         app->first_pager,
         app->last_pager);
@@ -91,15 +83,14 @@ static void
     reverse(stationId);
     meal_pager_transmit_model_set_station(app->meal_pager_transmit, app->current_station);
     for(u_int32_t i = app->current_pager; i <= app->last_pager; i++) {
-        meal_pager_retekess_t119_generate_pager(app, stationId, i, ff);
-        //furi_thread_flags_wait(0, FuriFlagWaitAny, 1);
+        meal_pager_retekess_td174_generate_pager(app, stationId, i, ff);
         if(app->stop_transmit) {
             break;
         }
     }
 }
 
-bool meal_pager_retekess_t119_generate_all(void* context) {
+bool meal_pager_retekess_td174_generate_all(void* context) {
     Meal_Pager* app = context;
 
     app->current_pager = 1;
@@ -107,7 +98,7 @@ bool meal_pager_retekess_t119_generate_all(void* context) {
 
     Storage* storage = furi_record_open(RECORD_STORAGE);
     FlipperFormat* ff = flipper_format_file_alloc(storage);
-    bool success = meal_pager_save_subghz_buffer_file_start(app, ff, storage, MEAL_PAGER_SUBGHZ_FILE_FREQUENCY);
+    bool success = meal_pager_save_subghz_buffer_file_start(app, ff, storage, MEAL_PAGER_SUBGHZ_FILE_ALT_FREQUENCY);
 
     if(!success) {
         FURI_LOG_D(TAG, "failed to save to buffer");
@@ -117,7 +108,7 @@ bool meal_pager_retekess_t119_generate_all(void* context) {
     }
 
     for(u_int32_t i = app->current_station; i <= app->last_station; i++) {
-        meal_pager_retekess_t119_generate_station(app, i, ff);
+        meal_pager_retekess_td174_generate_station(app, i, ff);
         //furi_thread_flags_wait(0, FuriFlagWaitAny, 100);
         if(app->stop_transmit) {
             break;

@@ -3,6 +3,7 @@
 #include "../helpers/retekess/meal_pager_retekess_t119.h"
 #include "../helpers/retekess/meal_pager_retekess_td157.h"
 #include "../helpers/retekess/meal_pager_retekess_td165.h"
+#include "../helpers/retekess/meal_pager_retekess_td174.h"
 #include "../views/meal_pager_transmit.h"
 #include "../helpers/meal_pager_led.h"
 #include "../helpers/subghz/subghz.h"
@@ -37,6 +38,9 @@ void meal_pager_scene_transmit_on_enter(void* context) {
         break;
     case Meal_PagerPagerTypeTD165:
         generated = meal_pager_retekess_td165_generate_all(app);
+        break;
+    case Meal_PagerPagerTypeTD174:
+        generated = meal_pager_retekess_td174_generate_all(app);
         break;
     default:
         generated = false;
