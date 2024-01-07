@@ -1,7 +1,7 @@
 # Simon for FlipBoard
 
 ## Introduction
-This guide will lead you through the process of building your own Simon memory game using the FlipBoard. The game involves pressing the buttons on the FlipBoard in the correct order. The game begins with a sequence of one button press. If the player replicates the sequence correctly, another button press is added to the sequence. The game continues until the player makes a mistake in the sequence or completes the song.
+The FlipBoard is a device that lets you create your own Simon memory game. Simon is a game where you have to remember and repeat a sequence of button presses. Each button has a different color and sound. The game starts by showing you one button press. You have to press the same button. Then the game adds another button press to the sequence. You have to press both buttons in the same order. The game keeps adding more button presses until you make a mistake or finish the song. This guide will show you how to build and play the game using the FlipBoard.
 
 This guide is written with extensive details. You should be able to successfully create the game _without_ needing to read any of the **VSCODE**, **C LANGUAGE**, **FLIPPER CODE**, **FLIPBOARD CODE**, or **SIMON CODE** sections. Feel free to bypass any topics that don't apply to you. 
 
@@ -27,124 +27,21 @@ Click on any step to see all of the detailed instructions for that step.
 Each step (up to step 7) of this tutorial has a corresponding directory in the [completed directory](./completed/README.md). If you have read and understood the first seven steps, feel free to copy the files from the `step-07` directory into your own project and continue from there. You will want to redo **step 1e**, edit the `fap_author` and `fap_weburl` entries.
 
 - [Step 1. Create a new `flipsimon` project](#step-1-create-a-new-flipsimon-project)
-  - Step 1a. Create a `flipsimon` folder for the project
-  - Step 1b. Copy `flipblinky.png` and rename to `flipsimon.png`
-  - Step 1c. Edit the `flipsimon.png` image
-  - Step 1d. Copy the `application.fam` from the `flipblinky` tutorial
-  - Step 1e. Edit the `application.fam` file
-  - Step 1f. Create a new `app.c` file
-  - Step 1g. Add `simon_app` entry point to `app.c`
-  - Step 1h. Run the application
-
 - [Step 2. Setup basic FlipBoard project](#step-2-setup-basic-flipboard-project)
-  - Step 2a. Copy the `common` folder from the `flipblinky` tutorial
-  - Step 2b. Copy the `app_config.h` file from the `flipblinky` tutorial
-  - Step 2c. Edit the `app_config.h` file
-  - Step 2d. Replace the contents of the `app.c` file
-  - Step 2e. Run the application
-
 - [Step 3. Create the startup sequence](#step-3-create-the-startup-sequence)
-  - Step 3a. Add more include statements to `app.c`
-  - Step 3b. Register the custom event callback.
-  - Step 3c. Create the custom event handler. 
-  - Step 3d. Create the `loaded_app_menu` function. 
-  - Step 3e. Run the application
-
 - [Step 4. Draw message (Press OK to play)](#step-4-draw-message-press-ok-to-play)
-  - Step 4a. Add more include statements to `app.c`
-  - Step 4b. Replace the `get_primary_view` function
-  - Step 4c. Add a new `simon_view_draw` function
-  - Step 4d. Run the application
-
 - [Step 5. Add game state to the model](#step-5-add-game-state-to-the-model)
-  - Step 5a. Add a `SimonGameState` enumeration
-  - Step 5b. Add a `SimonGame` structure
-  - Step 5c. Set the custom data in your `simon_app`
-  - Step 5d. Replace the `simon_view_draw` code
-  - Step 5e. Run the application
-
 - [Step 6. Allow user to start new game](#step-6-allow-user-to-start-new-game)
-  - Step 6a. Create a `SimonCustomEventId` enumeration
-  - Step 6b. Edit the `get_primary_view` function
-  - Step 6c. Create a `simon_view_input` function
-  - Step 6d. Add `SimonGameStateNewGame` to enum `SimonGameState`
-  - Step 6e. Update the custom event handler for `SimonCustomEventIdNewGame`
-  - Step 6f. Update draw callback to handle `SimonGameStateNewGame`
-  - Step 6g. Run the application
-
 - [Step 7. Handle the `Back` button](#step-7-handle-the-back-button)
-  - Step 7a. Update `get_primary_view` function
-  - Step 7b. Create a `simon_enter_callback` function
-  - Step 7c. Run the application
-
 - [Step 8. Turn the FlipBoard lights on (dim)](#step-8-turn-the-flipboard-lights-on-dim)
-  - Step 8a. Turn the LEDs on when entering the primary view
-  - Step 8b. Run the application
-
 - [Step 9. Generate a song](#step-9-generate-a-song)
-  - Step 9a. Add constant for max song length
-  - Step 9b. Add song properties to the `SimonGame` struct
-  - Step 9c. Create a function that returns a random button id.
-  - Step 9d. Create a function that generates a random song.
-  - Step 9e. Replace the `custom_event_handler` `SimonCustomEventIdNewGame` code
-  - Step 9f. Run the application
-
 - [Step 10. Teach the notes to the user](#step-10-teach-the-notes-to-the-user)
-  - Step 10a. Add a new custom event for teaching notes
-  - Step 10b. Add a #define for the note teach time
-  - Step 10c. Update `custom_event_handler` for new game to also send a teach notes   -nt
-  - Step 10d. Update `SimonGameState` enum to have a teaching state
-  - Step 10e. Update the `SimonGame` struct for notes
-  - Step 10f. Update the `generate_song` function to reset the note numbers
-  - Step 10g. Create a function that plays a note
-  - Step 10h. Create a function that teaches the current portion of the song
-  - Step 10i. Update the `custom_event_handler` for `SimonCustomEventIdTeachNotes`
-  - Step 10j. Update the `simon_view_draw` function to handle   -monGameStateTeaching`
-  - Step 10k. Run the application
-
 - [Step 11. Allow player turn to repeat the notes](#step-11-allow-player-turn-to-repeat-the-notes)
-  - Step 11a. Add custom event for player turn
-  - Step 11b. Update `simon_teach_notes` to send player turn custom event
-  - Step 11c. Update the `SimonGameState` enum to have a player turn state
-  - Step 11d. Update the `custom_event_handler` for `SimonCustomEventIdPlayerTurn`
-  - Step 11e. Update the `simon_view_draw function` to handle   -monGameStateListening`
-  - Step 11f. Update the `simon_enter_callback` function to start a button monitor
-  - Step 11g. Create a `flipboard_debounced_switch` function
-  - Step 11h. Update the `get_primary_view` to set an exit callback
-  - Step 11i. Create a `simon_exit_callback` function
-  - Step 11j. Run the application
-
 - [Step 12. Check if the user pressed the correct button](#step-12-check-if-the-user-pressed-the-correct-button)
-  - Step 12a. Add wrong note event to `SimonCustomEventId` enum
-  - Step 12b. Add played sequence event to `SimonCustomEventId` enum
-  - Step 12c. Update `flipboard_debounced_switch` to check if the user pressed the   -rect button
-  - Step 12d. Create a `simon_handle_guess` function
-  - Step 12e. Update the `custom_event_handler` for `SimonCustomEventIdWrongNote`
-  - Step 12f. Update the `custom_event_handler` for   -monCustomEventIdPlayedSequence`
-  - Step 12g. Run the application
-
 - [Step 13. Tell the user if they won or lost](#step-13-tell-the-user-if-they-won-or-lost)
-  - Step 13a. Update the `simon_enter_callback` to reset the song length
-  - Step 13b. Update the `simon_view_draw` function
-  - Step 13c. Run the application
-
 - [Step 14. Create special ending for a lost game](#step-14-create-special-ending-for-a-lost-game)
-  - Step 14a. Replace the `custom_event_handler` `SimonCustomEventIdWrongNote` code
-  - Step 14b. Create a `lost_game` function
-  - Step 14c. Run the application
-
 - [Step 15. Create special ending for a won game](#step-15-create-special-ending-for-a-won-game)
-  - Step 15a. Replace the `custom_event_handler` `SimonCustomEventIdPlayedSequence`   -e
-  - Step 15b. Create a `won_game` function
-  - Step 15c. Run the application
-
 - [Step 16. Change the speed of the song (and add more notes)](#step-16-change-the-speed-of-the-song-and-add-more-notes)
-  - Step 16a. Change the length of the song to 12 notes
-  - Step 16b. Create an array of delays (in milliseconds)
-  - Step 16c. Change `simon_play_note` to take a delay parameter
-  - Step 16d. Update the `simon_teach_notes` function to use the delays array
-  - Step 16e. Run the application
-
 - [Congratulations!](#congratulations)
 
 ## Step 1. Create a new `flipsimon` project
@@ -155,6 +52,7 @@ The `flipsimon` project serves as the primary project for the Simon game. Initia
 - Right click on `applications_users` folder.
 - Choose `New Folder...`
 - Type `flipsimon` and press `Enter`.
+- You should see "> flipsimon" in the Explorer pane.  If you see lines lines to flipsimon instead of an arrow, delete flipsimon and try again, verifying you picked `New Folder...`.
 
 ### Step 1b. Copy `flipblinky.png` and rename to `flipsimon.png`
 The `flipsimon.png` will be the icon that shows in the App menu on the Flipper Zero.
@@ -172,6 +70,8 @@ We will use the `Luna Paint - Image Editor` extension to edit the image.
 - On the left side of Visual Studio Code, click on Explorer.
 - Open the `flipsimon.png` file.
 - Edit the image (creating a black and white 10x10 pixel PNG image).
+- NOTE: You can use left click to set a pixel and right click to clear a pixel.
+- NOTE: You can use CTRL+scroll wheel to zoom out, which may be helpful.
 - Save the image
 
 ### Step 1d. Copy the `application.fam` from the `flipblinky` tutorial
@@ -183,20 +83,21 @@ We will use the `Luna Paint - Image Editor` extension to edit the image.
 The `application.fam` file is a JSON formatted text file that contains the information about the application.
 - Set the `appid` to `flipboard_simon`.  This is the unique identifier for the application.  It must be unique across all applications. Lowercase letters, numbers and underscores are allowed. 
 - Set the `name` to `FlipBoard Simon`.  This is the name that will show in the App menu on the Flipper Zero.
-- Set the `entry_point` to `simon_app`. This is the name of the function that will be called when the application is started.
+- Set the `entry_point` to `flipboard_simon_app`. This is the name of the function that will be called when the application is started.
 - Set the `fap_version` to `(1, 0)`.  This is the version of the FAP (Flipper Application Protocol).  You should increase this number whenever you release new features.
 - Set the `fap_icon` to `flipsimon.png`.
 - Set the `fap_category` to `Games`.
 - Remove the `fap_icons_assets` entry if it exists.  This is the folder where PNG files will get converted into Icon and IconAnimation assets.  We will not be using this feature in this tutorial.
 - Edit the `fap_description` to `Simon memory game for the FlipBoard`.  You can enter any description you would like.
 - You can also add `fap_author` and `fap_weburl` entries it you want, as described in the [AppManifest.md file](https://github.com/flipperdevices/flipperzero-firmware/blob/dev/documentation/AppManifests.md)
+- Save the `application.fam` file.
 
 ### Step 1f. Create a new `app.c` file
 - Right click on the `flipsimon` folder and choose `New File`.
 - Type `app.c` and press `Enter`.
 
 ### Step 1g. Add `simon_app` entry point to `app.c`
-Add the following code to the `app.c` file:
+Add the following code to the `app.c` file, then save the file:
 
 ```c
 #include <furi.h>
@@ -207,7 +108,7 @@ Add the following code to the `app.c` file:
  * @param p Unused parameter.
  * @return int32_t Returns a 0 for success.
  */
-int32_t simon_app(void* p) {
+int32_t flipboard_simon_app(void* p) {
     UNUSED(p);
 
     return 0;
@@ -220,7 +121,7 @@ int32_t simon_app(void* p) {
 - **C LANGUAGE**: The compiler treats everything between `/*` and `*/` as a comment, ignoring it during compilation. Similarly, `//` initiates a single-line comment, causing the compiler to ignore everything following it on the same line. Note: While compilers disregard comments, AI assistants like GitHub Copilot use them to better understand the code's purpose. You can enhance documentation by using additional markup such as `@brief`, `@details`, `@param`, and `@return`.
 
 - **FLIPPER CODE**: `int32_t` represents a 32-bit signed integer, which can hold both positive and negative values. In contrast, unsigned integers such as `uint32_t` can only hold positive values (and zero). The range of a 32-bit signed integer is from -2,147,483,648 to 2,147,483,647.
-- **C LANGUAGE**: `simon_app` is the function's name. Parentheses `()` follow the function name and are used to pass parameters to the function. Curly braces `{}` define the function's scope, which is the area where the function's code resides. The function's name corresponds to the `entry_point` in the `application.fam` file, which is the function the Flipper Zero will execute when the application starts.
+- **C LANGUAGE**: `flipboard_simon_app` is the function's name. Parentheses `()` follow the function name and are used to pass parameters to the function. Curly braces `{}` define the function's scope, which is the area where the function's code resides. The function's name corresponds to the `entry_point` in the `application.fam` file, which is the function the Flipper Zero will execute when the application starts.
 - **C LANGUAGE**: `void* p` represents the function's parameter list. `void*` is the parameter's type, indicating a pointer to an unspecified type. `p` is the parameter's name, serving as a local variable accessible only within the function's scope.
 
 - **FLIPPER CODE**: The `p` is not used in this function, so it is marked as `UNUSED`.  The `UNUSED` macro is defined in `furi.h` and is used to prevent compiler warnings about unused variables.
@@ -235,6 +136,8 @@ int32_t simon_app(void* p) {
 - Make sure Flipper Zero is plugged into the computer.
 - Press Control+Shift+B
 - Choose `[Debug] Launch app on Flipper`
+
+If you get an error message displayed in red, read it out loud and hopefully there will be a clue as to the issue.  If you can't figure it out, ask for help in the [Discord server](https://discord.com/invite/NsjCvqwPAd).
 
 NOTE: The application doesn't actually do anything, so it will run and then immediately exit.
 
@@ -286,7 +189,7 @@ static View* get_primary_view(void* context) {
  * @param p Unused parameter.
  * @return int32_t Returns a 0 for success.
  */
-int32_t simon_app(void* p) {
+int32_t flipboard_simon_app(void* p) {
     UNUSED(p);
 
     ActionModelFields fields = ActionModelFieldColorDown | ActionModelFieldFrequency;

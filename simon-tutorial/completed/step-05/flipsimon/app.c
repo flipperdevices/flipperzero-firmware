@@ -129,7 +129,7 @@ static bool custom_event_handler(void* context, uint32_t event) {
  * @param p Unused parameter.
  * @return int32_t Returns a 0 for success.
  */
-int32_t simon_app(void* p) {
+int32_t flipboard_simon_app(void* p) {
     UNUSED(p);
 
     ActionModelFields fields = ActionModelFieldColorDown | ActionModelFieldFrequency;
