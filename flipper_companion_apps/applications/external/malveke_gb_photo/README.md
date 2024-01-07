@@ -110,6 +110,7 @@ These instructions assume that you are starting at the Flipper Zero desktop. Oth
 
 ## TODO
 - [ ] Refactor Code
+- [ ] Reading images directly from the cartridge (without opening a .SAV file).
 - [ ] For BMP, avoid using memory to generate images; write directly to files.
 - [ ] Exhibit and view images through a Web Server interface.
 - [ ] Add frames to images.
