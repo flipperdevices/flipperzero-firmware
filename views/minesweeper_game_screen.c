@@ -81,11 +81,11 @@ typedef struct {
 } MineSweeperGameScreenModel;
 
 static const float difficulty_multiplier[5] = {
-    0.05f,
-    0.16f,
-    0.18f,
-    0.22f,
-    0.25f,
+    0.15f,
+    0.17f,
+    0.19f,
+    0.23f,
+    0.27f,
 };
 
 /****************************************************************
@@ -414,6 +414,13 @@ static void mine_sweeper_game_screen_set_board_information(
         uint8_t difficulty) {
 
     furi_assert(instance);
+
+    // These are the min/max values that can actually be set
+    if (width  > 146) {width = 146};
+    if (width  < 16 ) {width = 16};
+    if (height > 64 ) {height = 64};
+    if (height < 7  ) {height = 7};
+    if (difficulty > 4 ) {difficulty = 4};
     
     with_view_model(
         instance->view,
