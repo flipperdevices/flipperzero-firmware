@@ -2,6 +2,10 @@
 #include <../../nfc_playlist.h>
 #include <notification/notification_messages.h>
 
-void start_normal_blink(NfcPlaylist* nfc_playlist);
-void start_error_blink(NfcPlaylist* nfc_playlist);
+typedef enum NfcPlaylistLedState {
+   NfcPlaylistLedState_Normal,
+   NfcPlaylistLedState_Error
+} NfcPlaylistLedState;
+
+void start_blink(NfcPlaylist* nfc_playlist, int state);
 void stop_blink(NfcPlaylist* nfc_playlist);

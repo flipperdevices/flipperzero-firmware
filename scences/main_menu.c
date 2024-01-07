@@ -68,29 +68,24 @@ void nfc_playlist_main_menu_scene_on_enter(void* context) {
 bool nfc_playlist_main_menu_scene_on_event(void* context, SceneManagerEvent event) {
     NfcPlaylist* nfc_playlist = context;
     bool consumed = false;
-    switch(event.type) {
-        case SceneManagerEventTypeCustom:
-            switch(event.event) {
-                case NfcPlaylistEvent_ShowEmulatingPopup:
-                    scene_manager_next_scene(nfc_playlist->scene_manager, NfcPlaylistScene_EmulatingPopup);
-                    consumed = true;
-                    break;
-                case NfcPlaylistEvent_ShowFileSelect:
-                    scene_manager_next_scene(nfc_playlist->scene_manager, NfcPlaylistScene_FileSelect);
-                    consumed = true;
-                    break;
-                case NfcPlaylistEvent_ShowSettings:
-                    scene_manager_next_scene(nfc_playlist->scene_manager, NfcPlaylistScene_Settings);
-                    consumed = true;
-                    break;
-                default:
-                    break;
-            }
-            break;
-        default:
-            consumed = false;
-            break;
-   }
+    if (event.type == SceneManagerEventTypeCustom) {
+        switch(event.event) {
+            case NfcPlaylistEvent_ShowEmulatingPopup:
+                scene_manager_next_scene(nfc_playlist->scene_manager, NfcPlaylistScene_EmulatingPopup);
+                consumed = true;
+                break;
+            case NfcPlaylistEvent_ShowFileSelect:
+                scene_manager_next_scene(nfc_playlist->scene_manager, NfcPlaylistScene_FileSelect);
+                consumed = true;
+                break;
+            case NfcPlaylistEvent_ShowSettings:
+                scene_manager_next_scene(nfc_playlist->scene_manager, NfcPlaylistScene_Settings);
+                consumed = true;
+                break;
+            default:
+                break;
+        }
+    }
    return consumed;
 }
 

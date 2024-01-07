@@ -45,10 +45,8 @@ static NfcPlaylist* nfc_playlist_alloc() {
     NfcPlaylist* nfc_playlist = malloc(sizeof(NfcPlaylist));
     furi_assert(nfc_playlist);
     nfc_playlist->scene_manager = scene_manager_alloc(&nfc_playlist_scene_manager_handlers, nfc_playlist);
-
     nfc_playlist->view_dispatcher = view_dispatcher_alloc();
     view_dispatcher_enable_queue(nfc_playlist->view_dispatcher);
-
     nfc_playlist->variable_item_list = variable_item_list_alloc();
     nfc_playlist->submenu = submenu_alloc();
     nfc_playlist->base_file_path = furi_string_alloc_set_str("/ext/apps_data/nfc_playlist/");
@@ -60,16 +58,13 @@ static NfcPlaylist* nfc_playlist_alloc() {
     nfc_playlist->emulate_delay = default_emulate_delay;
     nfc_playlist->emulate_led_indicator = default_emulate_led_indicator;
     nfc_playlist->notification = furi_record_open(RECORD_NOTIFICATION);
-
     view_dispatcher_set_event_callback_context(nfc_playlist->view_dispatcher, nfc_playlist);
     view_dispatcher_set_custom_event_callback(nfc_playlist->view_dispatcher, nfc_playlist_custom_callback);
     view_dispatcher_set_navigation_event_callback(nfc_playlist->view_dispatcher, nfc_playlist_back_event_callback);
-
     view_dispatcher_add_view(nfc_playlist->view_dispatcher, NfcPlaylistView_Menu, submenu_get_view(nfc_playlist->submenu));
     view_dispatcher_add_view(nfc_playlist->view_dispatcher, NfcPlaylistView_Settings, variable_item_list_get_view(nfc_playlist->variable_item_list));
     view_dispatcher_add_view(nfc_playlist->view_dispatcher, NfcPlaylistView_Popup, popup_get_view(nfc_playlist->popup));
     view_dispatcher_add_view(nfc_playlist->view_dispatcher, NfcPlaylistView_FileSelect, file_browser_get_view(nfc_playlist->file_browser));
-
     return nfc_playlist;
 }
 

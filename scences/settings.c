@@ -8,35 +8,31 @@ typedef enum {
     NfcPlaylistSettings_Reset
 } NfcPlaylistMenuSelection;
 
-static void nfc_playlist_settings_menu_callback(void* context, uint32_t index) {
+void nfc_playlist_settings_menu_callback(void* context, uint32_t index) {
     NfcPlaylist* nfc_playlist = context;
-    switch(index) {
-        case NfcPlaylistSettings_Reset:
-            nfc_playlist->emulate_timeout = default_emulate_timeout;
-            VariableItem* emulation_timeout_settings = variable_item_list_get(nfc_playlist->variable_item_list, NfcPlaylistSettings_Timeout);
-            variable_item_set_current_value_index(emulation_timeout_settings, nfc_playlist->emulate_timeout);
-            char emulation_timeout_settings_text[3];
-            snprintf(emulation_timeout_settings_text, 3, "%ds", options_emulate_timeout[nfc_playlist->emulate_timeout]);
-            variable_item_set_current_value_text(emulation_timeout_settings, (char*)emulation_timeout_settings_text);
+    if (index == NfcPlaylistSettings_Reset) {
+        nfc_playlist->emulate_timeout = default_emulate_timeout;
+        VariableItem* emulation_timeout_settings = variable_item_list_get(nfc_playlist->variable_item_list, NfcPlaylistSettings_Timeout);
+        variable_item_set_current_value_index(emulation_timeout_settings, nfc_playlist->emulate_timeout);
+        char emulation_timeout_settings_text[3];
+        snprintf(emulation_timeout_settings_text, 3, "%ds", options_emulate_timeout[nfc_playlist->emulate_timeout]);
+        variable_item_set_current_value_text(emulation_timeout_settings, (char*)emulation_timeout_settings_text);
 
-            nfc_playlist->emulate_delay = default_emulate_delay;
-            VariableItem* emulation_delay_settings = variable_item_list_get(nfc_playlist->variable_item_list, NfcPlaylistSettings_Delay);
-            variable_item_set_current_value_index(emulation_delay_settings, nfc_playlist->emulate_delay);
-            char emulation_delay_settings_text[3];
-            snprintf(emulation_delay_settings_text, 3, "%ds", options_emulate_delay[nfc_playlist->emulate_delay]);
-            variable_item_set_current_value_text(emulation_delay_settings, (char*)emulation_delay_settings_text);
+        nfc_playlist->emulate_delay = default_emulate_delay;
+        VariableItem* emulation_delay_settings = variable_item_list_get(nfc_playlist->variable_item_list, NfcPlaylistSettings_Delay);
+        variable_item_set_current_value_index(emulation_delay_settings, nfc_playlist->emulate_delay);
+        char emulation_delay_settings_text[3];
+        snprintf(emulation_delay_settings_text, 3, "%ds", options_emulate_delay[nfc_playlist->emulate_delay]);
+        variable_item_set_current_value_text(emulation_delay_settings, (char*)emulation_delay_settings_text);
 
-            nfc_playlist->emulate_led_indicator = default_emulate_led_indicator;
-            VariableItem* emulation_led_indicator_settings = variable_item_list_get(nfc_playlist->variable_item_list, NfcPlaylistSettings_LedIndicator);
-            variable_item_set_current_value_index(emulation_led_indicator_settings, nfc_playlist->emulate_led_indicator);
-            variable_item_set_current_value_text(emulation_led_indicator_settings, nfc_playlist->emulate_led_indicator ? "ON" : "OFF");
-            break;
-        default:
-            break;
-   }
+        nfc_playlist->emulate_led_indicator = default_emulate_led_indicator;
+        VariableItem* emulation_led_indicator_settings = variable_item_list_get(nfc_playlist->variable_item_list, NfcPlaylistSettings_LedIndicator);
+        variable_item_set_current_value_index(emulation_led_indicator_settings, nfc_playlist->emulate_led_indicator);
+        variable_item_set_current_value_text(emulation_led_indicator_settings, nfc_playlist->emulate_led_indicator ? "ON" : "OFF");
+    }
 }
 
-static void nfc_playlist_settings_options_change_callback(VariableItem* item) {
+void nfc_playlist_settings_options_change_callback(VariableItem* item) {
     NfcPlaylist* nfc_playlist = variable_item_get_context(item);
 
     uint8_t current_option = variable_item_list_get_selected_item_index(nfc_playlist->variable_item_list);
