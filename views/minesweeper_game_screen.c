@@ -864,31 +864,12 @@ static bool mine_sweeper_game_screen_view_play_input_callback(InputEvent* event,
 
     MineSweeperGameScreen* instance = context;
     bool consumed = false;
-    bool is_holding_down_button = false;
-
-    with_view_model(
-        instance->view,
-        MineSweeperGameScreenModel * model,
-        {is_holding_down_button = model->is_holding_down_button;},
-        true);
-
 
     // Checking button types
 
-
     if (event->key == InputKeyOk) { // Attempt to Clear Space !! THIS CAN BE A LOSE CONDITION
         
-        bool is_lose_condition_triggered = false;
-
-
-        if (event->type == InputTypeRelease) {
-            with_view_model(
-                instance->view,
-                MineSweeperGameScreenModel * model,
-                {model->is_holding_down_button = false;},
-                true);
-
-        } else if (event->type == InputTypePress) { 
+         if (event->type == InputTypePress) { 
 
             FURI_LOG_D(MS_DEBUG_TAG, "Event Type: InputTypePress && InputKeyOk");
 
@@ -902,7 +883,8 @@ static bool mine_sweeper_game_screen_view_play_input_callback(InputEvent* event,
 
                     // LOSE CONDITION OR TILE CLEAR
                     if (state == MineSweeperGameScreenTileStateUncleared && type == MineSweeperGameScreenTileMine) {
-                        is_lose_condition_triggered = true;
+                        view_set_draw_callback(instance->view, mine_sweeper_game_screen_view_lose_draw_callback);
+                        view_set_input_callback(instance->view, mine_sweeper_game_screen_view_end_input_callback);
                         model->board[curr_pos_1d].tile_state = MineSweeperGameScreenTileStateCleared;
 
                     } else if (state == MineSweeperGameScreenTileStateUncleared) {
@@ -914,116 +896,6 @@ static bool mine_sweeper_game_screen_view_play_input_callback(InputEvent* event,
                 },
                 true);
 
-        } else if (!is_holding_down_button && (event->type == InputTypeLong || event->type == InputTypeRepeat)) {
-            FURI_LOG_D(MS_DEBUG_TAG, "Event Type: InputTypePress && InputKeyOk");
-
-            uint8_t board_width;
-            uint8_t board_height;
-            uint8_t curr_x;
-            uint8_t curr_y;
-            uint16_t curr_pos_1d;
-            MineSweeperGameScreenTileType tile_type;
-            MineSweeperGameScreenTileState tile_state;
-
-            with_view_model(
-                instance->view,
-                MineSweeperGameScreenModel * model,
-                {
-                    board_width = model->board_width;
-                    board_height = model->board_height;
-                    curr_x = model->curr_pos.x_abs;
-                    curr_y = model->curr_pos.y_abs;
-                    curr_pos_1d = curr_x * board_width + curr_y;
-                    tile_type = model->board[curr_pos_1d].tile_type;
-                    tile_state = model->board[curr_pos_1d].tile_state;
-                },
-                true);
-
-            int8_t offsets[8][2] = {
-                {-1,1},
-                {0,1},
-                {1,1},
-                {1,0},
-                {1,-1},
-                {0,-1},
-                {-1,-1},
-                {-1,0},
-            };
-
-            // If the tile is an uncoverd tile and not a zero tile check surrounding flags to see if we can auto open
-            if (tile_state == MineSweeperGameScreenTileStateUncleared && tile_type != MineSweeperGameScreenTileZero) {
-                uint8_t num_surrounding_flags = 0;
-
-
-                for (uint8_t j = 0; j < 8; j++) {
-                    int16_t dx = curr_x + (int16_t)offsets[j][0];
-                    int16_t dy = curr_y + (int16_t)offsets[j][1];
-
-                    if (dx < 0 || dy < 0 || dx >= board_height || dy >= board_width) {
-                        continue;
-                    }
-
-                    uint16_t _1d_pos = dx * board_width + dy;
-
-                    with_view_model(
-                        instance->view,
-                        MineSweeperGameScreenModel * model,
-                        {
-                            if (model->board[_1d_pos].tile_state == MineSweeperGameScreenTileStateFlagged) {
-                                num_surrounding_flags++;
-                            }
-
-                        },
-                        false);
-                }
-
-                // If the number of flags is correct open all surrounding non flagged spots
-                if (num_surrounding_flags == tile_type-1) {
-                    for (uint8_t j = 0; j < 8; j++) {
-                        int16_t dx = curr_x + (int16_t)offsets[j][0];
-                        int16_t dy = curr_y + (int16_t)offsets[j][1];
-
-                        if (dx < 0 || dy < 0 || dx >= board_height || dy >= board_width) {
-                            continue;
-                        }
-
-                        uint16_t _1d_pos = dx * board_width + dy;
-
-                        with_view_model(
-                            instance->view,
-                            MineSweeperGameScreenModel * model,
-                            {
-                                //POTENTIAL LOSE CONDITION OR TILE CLEAR 
-                                if (model->board[_1d_pos].tile_state != MineSweeperGameScreenTileStateFlagged) {
-
-                                    model->board[_1d_pos].tile_state = MineSweeperGameScreenTileStateCleared;
-
-                                    if (model->board[_1d_pos].tile_type == MineSweeperGameScreenTileMine) {
-                                        is_lose_condition_triggered = true;
-                                    }
-                                        
-                                }
-
-                            },
-                            false);
-                    }
-
-                }
-
-
-            }
-                
-                with_view_model(
-                    instance->view,
-                    MineSweeperGameScreenModel * model,
-                    {model->is_holding_down_button = true;},
-                    true);
-            
-        }
-
-        if (is_lose_condition_triggered) {
-            view_set_draw_callback(instance->view, mine_sweeper_game_screen_view_lose_draw_callback);
-            view_set_input_callback(instance->view, mine_sweeper_game_screen_view_end_input_callback);
         }
 
         consumed = true;
