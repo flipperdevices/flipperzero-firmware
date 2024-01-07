@@ -96,6 +96,7 @@ static const float difficulty_multiplier[5] = {
 
 // Static helper functions
 static void setup_board(MineSweeperGameScreen* instance);
+static Point bfs_to_closest_tile(MineSweeperGameScreenModel* model) {
 static inline void bfs_tile_clear(MineSweeperGameScreenModel* model);
 static void mine_sweeper_game_screen_set_board_information(
         MineSweeperGameScreen* instance,
@@ -264,10 +265,6 @@ static inline Point bfs_to_closest_tile(MineSweeperGameScreenModel* model) {
 
     point_deq_push_back(deq, pos);
 
-    uint32_t start_tick = furi_get_tick();
-
-    uint16_t i = 0;
-    
     while (point_deq_size(deq) > 0) {
         point_deq_pop_front(&pos, deq);
         Point curr_pos = pointobj_get_point(pos);
@@ -314,13 +311,7 @@ static inline Point bfs_to_closest_tile(MineSweeperGameScreenModel* model) {
             pointobj_set_point(pos, neighbor);
             point_deq_push_back(deq, pos);
         }
-
-        i++;
     }
-
-    uint32_t ticks_elapsed = furi_get_tick() - start_tick;
-    double sec = (double)ticks_elapsed / (double)furi_kernel_get_tick_frequency();
-    double milliseconds = 1000.0L * sec;
 
     point_set_clear(set);
     point_deq_clear(deq);
@@ -349,8 +340,6 @@ static inline void bfs_tile_clear(MineSweeperGameScreenModel* model) {
 
     point_deq_push_back(deq, pos);
 
-    uint32_t start_tick = furi_get_tick();
-    
     while (point_deq_size(deq) > 0) {
         point_deq_pop_front(&pos, deq);
         Point curr_pos = pointobj_get_point(pos);
@@ -397,10 +386,6 @@ static inline void bfs_tile_clear(MineSweeperGameScreenModel* model) {
             point_deq_push_back(deq, pos);
         }
     }
-
-    uint32_t ticks_elapsed = furi_get_tick() - start_tick;
-    double sec = (double)ticks_elapsed / (double)furi_kernel_get_tick_frequency();
-    double milliseconds = 1000.0L * sec;
 
     point_set_clear(set);
     point_deq_clear(deq);
