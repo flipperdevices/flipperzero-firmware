@@ -29,8 +29,9 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0107-1432-0.93.9-de4f61d](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-01-07 14:37 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-01-07 14:37 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-01-07 17:23 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-01-07 17:23 EST`
+- [Fixed many memory leaks (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/5fed20065ce527a643999eab213c24a186c5722c) with thanks to [Fixed memory leak #13 (By squee72564)](https://github.com/leedave/flipper-zero-fap-boilerplate/pull/13)
 
 ## IN THIS BRANCH:
 
@@ -130,7 +131,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - [NFC: Skip system dict bug fixed (By Leptopt1los)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/7de861bb4ccec9c016ef996db4753a550835fc90)
 - [NFC: Set ATQA scene bit numbering changed (By Leptopt1los)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/4e068ba59316201bfaeea29eb708def7905b113f)
 - Updated: [NFC Playlist v1.1 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
-- [NFC parsers false read() positive return fixed (By Leptopt1los)](https://github.com/DarkFlippers/unleashed-firmware/commit/46364444643fd8d29223284b872ff0220203547c)
+- [NFC parsers false read() positive return fixed (By Leptopt1los)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/db0c7e4fad5c214c36aa8753d27befe49676a985)
 
 <a name="release">
 

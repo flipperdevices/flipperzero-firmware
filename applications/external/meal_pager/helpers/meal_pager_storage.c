@@ -180,6 +180,8 @@ void meal_pager_read_settings(void* context) {
         return;
     }
 
+    furi_string_free(temp_str);
+
     flipper_format_read_uint32(fff_file, MEAL_PAGER_SETTINGS_KEY_PAGER_TYPE, &app->pager_type, 1);
     flipper_format_read_uint32(
         fff_file, MEAL_PAGER_SETTINGS_KEY_FIRST_STATION, &app->first_station, 1);
