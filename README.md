@@ -61,15 +61,15 @@
 
 
 ## Flipper faps (WIP)
-- [[MALVEKE] GAME BOY Cartridge  (GB/GBC)](./flipper_companion_apps/applications/external/malveke_gb_cartridge/README.md)
-- [[MALVEKE] GAME BOY ADVANCE Cartridge](./flipper_companion_apps/applications/external/malveke_gba_cartridge/README.md)
-- [[MALVEKE] GAME BOY Photo](./flipper_companion_apps/applications/external/malveke_gb_photo/README.md)
-- [[MALVEKE] GAME BOY Live Camera](./flipper_companion_apps/applications/external/malveke_gb_live_camera/README.md)
-- [MALVEKE] GAME BOY Camera Link Cable Transfer (Review)
-- [MALVEKE] GAME BOY Printer Link Cable Transfer
-- [MALVEKE] GAME BOY Logo Generator
-- [[MALVEKE] Pokemon Trading](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Pokemon-Trading?tab=readme-ov-file#instructions-for-use)
-- [[MALVEKE] GAME BOY Emulator (POC)](./flipper_companion_apps/applications/external/malveke_gb_emulator/README.md)
+- [GAME BOY Cartridge  (GB/GBC) MALVEKE](./flipper_companion_apps/applications/external/malveke_gb_cartridge/README.md)
+- [GAME BOY ADVANCE Cartridge MALVEKE](./flipper_companion_apps/applications/external/malveke_gba_cartridge/README.md)
+- [GAME BOY Photo MALVEKE](./flipper_companion_apps/applications/external/malveke_gb_photo/README.md)
+- [GAME BOY Live Camera MALVEKE](./flipper_companion_apps/applications/external/malveke_gb_live_camera/README.md)
+- GAME BOY Camera Link Cable Transfer MALVEKE (Review)
+- GAME BOY Printer Link Cable Transfer MALVEKE
+- GAME BOY Logo Generator MALVEKE
+- [Pokemon Trading MALVEKE](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Pokemon-Trading?tab=readme-ov-file#instructions-for-use)
+- [GAME BOY Emulator MALVEKE(POC)](./flipper_companion_apps/applications/external/malveke_gb_emulator/README.md)
 
 ## Contributors
 [![Contributors](https://contrib.rocks/image?repo=EstebanFuentealba/MALVEKE-Flipper-Zero)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/graphs/contributors)
