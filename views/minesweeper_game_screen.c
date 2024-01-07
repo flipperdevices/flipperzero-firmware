@@ -416,11 +416,11 @@ static void mine_sweeper_game_screen_set_board_information(
     furi_assert(instance);
 
     // These are the min/max values that can actually be set
-    if (width  > 146) {width = 146};
-    if (width  < 16 ) {width = 16};
-    if (height > 64 ) {height = 64};
-    if (height < 7  ) {height = 7};
-    if (difficulty > 4 ) {difficulty = 4};
+    if (width  > 146) {width = 146;}
+    if (width  < 16 ) {width = 16;}
+    if (height > 64 ) {height = 64;}
+    if (height < 7  ) {height = 7;}
+    if (difficulty > 4 ) {difficulty = 4;}
     
     with_view_model(
         instance->view,
