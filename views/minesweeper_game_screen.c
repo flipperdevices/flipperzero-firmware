@@ -153,14 +153,14 @@ static void setup_board(MineSweeperGameScreen* instance) {
         uint16_t rand_pos;
         uint16_t x;
         uint16_t y;
-
+        bool is_invalid_position;
         do {
 
             rand_pos = furi_hal_random_get() % board_tile_count;
             x = rand_pos / board_width;
             y = rand_pos % board_width;
 
-            bool is_invalid_position = ((rand_pos == 0)                 ||
+            is_invalid_position = ((rand_pos == 0)                 ||
                                          (x==0 && y==1)                 ||
                                          (x==1 && y==0)                 ||
                                          rand_pos == board_tile_count-1 ||
@@ -769,7 +769,7 @@ static bool mine_sweeper_game_screen_view_end_input_callback(InputEvent* event, 
     MineSweeperGameScreen* instance = context;
     bool consumed = false;
 
-    if (event->type == InputTypePress) {
+    if (event->type == InputTypePress || event->type == InputTypeRepeat) {
 
         with_view_model(
             instance->view,
