@@ -29,7 +29,7 @@ typedef struct {
 } PluginEvent;
 
 typedef enum {
-    TileType0, // this HAS to be in order, for hint assignment to be ez pz
+    TileType0, // this HAS to be here in order, for hint assignment to be ez pz
     TileType1,
     TileType2,
     TileType3,
@@ -40,25 +40,32 @@ typedef enum {
     TileType8,
     TileTypeUncleared,
     TileTypeFlag,
+    TileTypeUdFlag,
     TileTypeMine
 } TileType;
 
 typedef enum { FieldEmpty, FieldMine } Field;
 
 typedef struct {
-    FuriMutex* mutex;
-    DialogsApp* dialogs;
-    NotificationApp* notifications;
     Field minefield[PLAYFIELD_WIDTH][PLAYFIELD_HEIGHT];
     TileType playfield[PLAYFIELD_WIDTH][PLAYFIELD_HEIGHT];
+    FuriTimer* timer;
     int cursor_x;
     int cursor_y;
     int mines_left;
     int fields_cleared;
     int flags_set;
     bool game_started;
+    bool game_over;
     uint32_t game_started_tick;
 } Minesweeper;
+
+static void timer_callback(void* ctx) {
+    UNUSED(ctx);
+    NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
+    notification_message(notification, &sequence_reset_vibro);
+    furi_record_close(RECORD_NOTIFICATION);
+}
 
 static void input_callback(InputEvent* input_event, FuriMessageQueue* event_queue) {
     furi_assert(event_queue);
@@ -68,16 +75,20 @@ static void input_callback(InputEvent* input_event, FuriMessageQueue* event_queu
 }
 
 static void render_callback(Canvas* const canvas, void* ctx) {
-    furi_assert(ctx);
     const Minesweeper* minesweeper_state = ctx;
-    furi_mutex_acquire(minesweeper_state->mutex, FuriWaitForever);
-
+    if(minesweeper_state == NULL) {
+        return;
+    }
     FuriString* mineStr;
     FuriString* timeStr;
     mineStr = furi_string_alloc();
     timeStr = furi_string_alloc();
 
-    furi_string_printf(mineStr, "Mines: %d", MINECOUNT - minesweeper_state->flags_set);
+    if(minesweeper_state->game_over) {
+        furi_string_printf(mineStr, "GAME OVER. * to cont.");
+    } else {
+        furi_string_printf(mineStr, "Mines: %d", MINECOUNT - minesweeper_state->flags_set);
+    }
     canvas_set_font(canvas, FontSecondary);
     canvas_draw_str_aligned(canvas, 0, 0, AlignLeft, AlignTop, furi_string_get_cstr(mineStr));
 
@@ -130,6 +141,9 @@ static void render_callback(Canvas* const canvas, void* ctx) {
             case TileTypeFlag:
                 tile_to_draw = tile_flag_bits;
                 break;
+            case TileTypeUdFlag:
+                tile_to_draw = tile_udflag_bits;
+                break;
             case TileTypeUncleared:
                 tile_to_draw = tile_uncleared_bits;
                 break;
@@ -156,7 +170,6 @@ static void render_callback(Canvas* const canvas, void* ctx) {
 
     furi_string_free(mineStr);
     furi_string_free(timeStr);
-    furi_mutex_release(minesweeper_state->mutex);
 }
 
 static void setup_playfield(Minesweeper* minesweeper_state) {
@@ -201,25 +214,30 @@ static void place_flag(Minesweeper* minesweeper_state) {
 
 static bool game_lost(Minesweeper* minesweeper_state) {
     // returns true if the player wants to restart, otherwise false
-    DialogMessage* message = dialog_message_alloc();
+    DialogsApp* dialogs = furi_record_open(RECORD_DIALOGS);
 
-    dialog_message_set_header(message, "Game Over", 64, 3, AlignCenter, AlignTop);
-    dialog_message_set_text(message, "You hit a mine!", 64, 32, AlignCenter, AlignCenter);
+    DialogMessage* message = dialog_message_alloc();
+    const char* header_text = "Game Over";
+    const char* message_text = "You hit a mine!";
+
+    dialog_message_set_header(message, header_text, 64, 3, AlignCenter, AlignTop);
+    dialog_message_set_text(message, message_text, 64, 32, AlignCenter, AlignCenter);
     dialog_message_set_buttons(message, NULL, "Play again", NULL);
 
-    // Set cursor to initial position
-    minesweeper_state->cursor_x = 0;
-    minesweeper_state->cursor_y = 0;
+    dialog_message_set_icon(message, NULL, 0, 10);
 
-    notification_message(minesweeper_state->notifications, &sequence_single_vibro);
+    minesweeper_state->game_over = false; // reset the game state
 
-    DialogMessageButton choice = dialog_message_show(minesweeper_state->dialogs, message);
+    DialogMessageButton choice = dialog_message_show(dialogs, message);
     dialog_message_free(message);
+    furi_record_close(RECORD_DIALOGS);
 
     return choice == DialogMessageButtonCenter;
 }
 
 static bool game_won(Minesweeper* minesweeper_state) {
+    DialogsApp* dialogs = furi_record_open(RECORD_DIALOGS);
+
     FuriString* tempStr;
     tempStr = furi_string_alloc();
 
@@ -237,20 +255,27 @@ static bool game_won(Minesweeper* minesweeper_state) {
     dialog_message_set_text(
         message, furi_string_get_cstr(tempStr), 64, 32, AlignCenter, AlignCenter);
     dialog_message_set_buttons(message, NULL, "Play again", NULL);
+    dialog_message_set_icon(message, NULL, 72, 17);
 
     // Call dolphin deed when we win the game
     dolphin_deed(DolphinDeedPluginGameWin);
 
-    DialogMessageButton choice = dialog_message_show(minesweeper_state->dialogs, message);
+    DialogMessageButton choice = dialog_message_show(dialogs, message);
     dialog_message_free(message);
     furi_string_free(tempStr);
+    furi_record_close(RECORD_DIALOGS);
     return choice == DialogMessageButtonCenter;
 }
 
 // returns false if the move loses the game - otherwise true
 static bool play_move(Minesweeper* minesweeper_state, int cursor_x, int cursor_y) {
     if(minesweeper_state->playfield[cursor_x][cursor_y] == TileTypeFlag) {
-        // we're on a flagged field, do nothing
+        // if the game is over and the flagged feild wasn't a mine, let the player know with an
+        // upside down flag
+        if(minesweeper_state->game_over &&
+           minesweeper_state->minefield[cursor_x][cursor_y] != FieldMine) {
+            minesweeper_state->playfield[cursor_x][cursor_y] = TileTypeUdFlag;
+        }
         return true;
     }
     if(minesweeper_state->minefield[cursor_x][cursor_y] == FieldMine) {
@@ -280,7 +305,7 @@ static bool play_move(Minesweeper* minesweeper_state, int cursor_x, int cursor_y
         }
         int mines = minesweeper_state->playfield[cursor_x][cursor_y]; // ¯\_(ツ)_/¯
         if(flags == mines) {
-            // auto uncover all non-flags around (to win faster ;)
+            // auto uncover all non-flags around (to win faster;) )
             for(int auto_y = cursor_y - 1; auto_y <= cursor_y + 1; auto_y++) {
                 for(int auto_x = cursor_x - 1; auto_x <= cursor_x + 1; auto_x++) {
                     if(auto_x == cursor_x && auto_y == cursor_y) {
@@ -333,7 +358,7 @@ static bool play_move(Minesweeper* minesweeper_state, int cursor_x, int cursor_y
                 if(auto_x >= 0 && auto_x < PLAYFIELD_WIDTH && auto_y >= 0 &&
                    auto_y < PLAYFIELD_HEIGHT) {
                     if(minesweeper_state->playfield[auto_x][auto_y] == TileTypeUncleared) {
-                        play_move(minesweeper_state, auto_x, auto_y);
+                        (void)play_move(minesweeper_state, auto_x, auto_y);
                     }
                 }
             }
@@ -345,6 +370,7 @@ static bool play_move(Minesweeper* minesweeper_state, int cursor_x, int cursor_y
 static void minesweeper_state_init(Minesweeper* const minesweeper_state) {
     minesweeper_state->cursor_x = minesweeper_state->cursor_y = 0;
     minesweeper_state->game_started = false;
+    minesweeper_state->game_over = false;
     for(int y = 0; y < PLAYFIELD_HEIGHT; y++) {
         for(int x = 0; x < PLAYFIELD_WIDTH; x++) {
             minesweeper_state->playfield[x][y] = TileTypeUncleared;
@@ -354,42 +380,36 @@ static void minesweeper_state_init(Minesweeper* const minesweeper_state) {
 
 int32_t minesweeper_app(void* p) {
     UNUSED(p);
+    DialogsApp* dialogs = furi_record_open(RECORD_DIALOGS);
+
+    DialogMessage* message = dialog_message_alloc();
+    const char* header_text = "Minesweeper";
+    const char* message_text = "Hold OK pressed to toggle flags.\ngithub.com/panki27";
+
+    dialog_message_set_header(message, header_text, 64, 3, AlignCenter, AlignTop);
+    dialog_message_set_text(message, message_text, 64, 32, AlignCenter, AlignCenter);
+    dialog_message_set_buttons(message, NULL, "Play", NULL);
+
+    dialog_message_set_icon(message, NULL, 0, 10);
+
+    dialog_message_show(dialogs, message);
+    dialog_message_free(message);
+    furi_record_close(RECORD_DIALOGS);
+
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(PluginEvent));
 
-    Minesweeper* minesweeper_state = malloc(sizeof(Minesweeper));
+    Minesweeper* minesweeper_state = (Minesweeper*)malloc(sizeof(Minesweeper));
     // setup
     minesweeper_state_init(minesweeper_state);
 
-    minesweeper_state->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
-    if(!minesweeper_state->mutex) {
-        FURI_LOG_E("Minesweeper", "cannot create mutex\r\n");
-        free(minesweeper_state);
-        return 255;
-    }
     // BEGIN IMPLEMENTATION
-
-    minesweeper_state->dialogs = furi_record_open(RECORD_DIALOGS);
-    minesweeper_state->notifications = furi_record_open(RECORD_NOTIFICATION);
-
-    DialogMessage* message = dialog_message_alloc();
-
-    dialog_message_set_header(message, "Minesweeper", 64, 3, AlignCenter, AlignTop);
-    dialog_message_set_text(
-        message,
-        "Hold OK pressed to toggle flags.\ngithub.com/panki27",
-        64,
-        32,
-        AlignCenter,
-        AlignCenter);
-    dialog_message_set_buttons(message, NULL, "Play", NULL);
-
-    dialog_message_show(minesweeper_state->dialogs, message);
-    dialog_message_free(message);
 
     // Set system callbacks
     ViewPort* view_port = view_port_alloc();
     view_port_draw_callback_set(view_port, render_callback, minesweeper_state);
     view_port_input_callback_set(view_port, input_callback, event_queue);
+    minesweeper_state->timer =
+        furi_timer_alloc(timer_callback, FuriTimerTypeOnce, minesweeper_state);
 
     // Open GUI and register view_port
     Gui* gui = furi_record_open(RECORD_GUI);
@@ -404,53 +424,65 @@ int32_t minesweeper_app(void* p) {
                 if(event.input.type == InputTypeShort) {
                     switch(event.input.key) {
                     case InputKeyUp:
-                        furi_mutex_acquire(minesweeper_state->mutex, FuriWaitForever);
                         minesweeper_state->cursor_y--;
                         if(minesweeper_state->cursor_y < 0) {
                             minesweeper_state->cursor_y = PLAYFIELD_HEIGHT - 1;
                         }
-                        furi_mutex_release(minesweeper_state->mutex);
                         break;
                     case InputKeyDown:
-                        furi_mutex_acquire(minesweeper_state->mutex, FuriWaitForever);
                         minesweeper_state->cursor_y++;
                         if(minesweeper_state->cursor_y >= PLAYFIELD_HEIGHT) {
                             minesweeper_state->cursor_y = 0;
                         }
-                        furi_mutex_release(minesweeper_state->mutex);
                         break;
                     case InputKeyRight:
-                        furi_mutex_acquire(minesweeper_state->mutex, FuriWaitForever);
                         minesweeper_state->cursor_x++;
                         if(minesweeper_state->cursor_x >= PLAYFIELD_WIDTH) {
                             minesweeper_state->cursor_x = 0;
                         }
-                        furi_mutex_release(minesweeper_state->mutex);
                         break;
                     case InputKeyLeft:
-                        furi_mutex_acquire(minesweeper_state->mutex, FuriWaitForever);
                         minesweeper_state->cursor_x--;
                         if(minesweeper_state->cursor_x < 0) {
                             minesweeper_state->cursor_x = PLAYFIELD_WIDTH - 1;
                         }
-                        furi_mutex_release(minesweeper_state->mutex);
                         break;
                     case InputKeyOk:
                         if(!minesweeper_state->game_started) {
                             setup_playfield(minesweeper_state);
                             minesweeper_state->game_started = true;
                         }
-                        if(!play_move(
-                               minesweeper_state,
-                               minesweeper_state->cursor_x,
-                               minesweeper_state->cursor_y)) {
-                            // ooops. looks like we hit a mine!
+                        if(minesweeper_state->game_over) {
+                            // if the game is over and the player presses okay, bring them to the
+                            // game over menu. This allows a player to see all the mine locations
+                            // before being taken away from the playfield.
                             if(game_lost(minesweeper_state)) {
                                 // player wants to restart.
                                 setup_playfield(minesweeper_state);
                             } else {
                                 // player wants to exit :(
                                 processing = false;
+                            }
+                        } else if(!play_move(
+                                      minesweeper_state,
+                                      minesweeper_state->cursor_x,
+                                      minesweeper_state->cursor_y)) {
+                            // ooops. looks like we hit a mine!
+
+                            // give the player some feedback
+                            NotificationApp* notifications = furi_record_open(RECORD_NOTIFICATION);
+                            notification_message(notifications, &sequence_set_vibro_on);
+                            furi_record_close(RECORD_NOTIFICATION);
+                            furi_timer_start(
+                                minesweeper_state->timer,
+                                (uint32_t)furi_kernel_get_tick_frequency() * 0.2);
+
+                            minesweeper_state->game_over = true;
+                            // Call play move for every space to reveal all the mines
+                            for(int mx = 0; mx < PLAYFIELD_WIDTH; ++mx) {
+                                for(int my = 0; my < PLAYFIELD_HEIGHT; ++my) {
+                                    play_move(minesweeper_state, mx, my);
+                                }
                             }
                         } else {
                             // check win condition.
@@ -483,9 +515,7 @@ int32_t minesweeper_app(void* p) {
                         break;
                     case InputKeyOk:
                         FURI_LOG_D("Minesweeper", "Toggling flag");
-                        furi_mutex_acquire(minesweeper_state->mutex, FuriWaitForever);
                         place_flag(minesweeper_state);
-                        furi_mutex_release(minesweeper_state->mutex);
                         break;
                     case InputKeyBack:
                         processing = false;
@@ -501,11 +531,9 @@ int32_t minesweeper_app(void* p) {
     view_port_enabled_set(view_port, false);
     gui_remove_view_port(gui, view_port);
     furi_record_close(RECORD_GUI);
-    furi_record_close(RECORD_DIALOGS);
-    furi_record_close(RECORD_NOTIFICATION);
     view_port_free(view_port);
     furi_message_queue_free(event_queue);
-    furi_mutex_free(minesweeper_state->mutex);
+    furi_timer_free(minesweeper_state->timer);
     free(minesweeper_state);
 
     return 0;
