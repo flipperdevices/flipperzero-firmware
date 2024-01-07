@@ -117,6 +117,10 @@ These instructions assume that you are starting at the Flipper Zero desktop. Oth
 - [ ] Export to other file formats.
 - [ ] Extract Game Faces.
 
+## Acknowledgements
+- [**@raphnet**](https://github.com/raphnet/gbcam2png/) command-line tool for extracting Game Boy Camera photos from a save ram (.sav) file and writing them in the PNG format.
+- [**@HerrZatacke**](https://github.com/HerrZatacke/gb-printer-web/) Several ideas drawn from your Gameboy Printer Web.
+
 <p align='center'>
 <br />
 <br />
