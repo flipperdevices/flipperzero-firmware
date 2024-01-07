@@ -467,6 +467,7 @@ static void mine_sweeper_game_screen_view_win_draw_callback(Canvas* canvas, void
         }
     }
 
+    canvas_set_color(canvas, ColorBlack);
     // If any borders are at the limits of the game board we draw a border line
     
     // Right border 
@@ -531,8 +532,6 @@ static void mine_sweeper_game_screen_view_lose_draw_callback(Canvas* canvas, voi
 
     canvas_clear(canvas);
 
-    canvas_set_color(canvas, ColorBlack);
-    
     uint16_t cursor_pos_1d = model->curr_pos.x_abs * model->board_width + model->curr_pos.y_abs;
     
     for (uint8_t x_rel = 0; x_rel < MINESWEEPER_SCREEN_TILE_HEIGHT; x_rel++) {
@@ -559,6 +558,7 @@ static void mine_sweeper_game_screen_view_lose_draw_callback(Canvas* canvas, voi
         }
     }
 
+    canvas_set_color(canvas, ColorBlack);
     // If any borders are at the limits of the game board we draw a border line
     
     // Right border 
@@ -672,6 +672,7 @@ static void mine_sweeper_game_screen_view_play_draw_callback(Canvas* canvas, voi
         }
     }
 
+    canvas_set_color(canvas, ColorBlack);
     // If any borders are at the limits of the game board we draw a border line
     
     // Right border 
