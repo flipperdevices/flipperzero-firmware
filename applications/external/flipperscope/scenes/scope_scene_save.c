@@ -65,6 +65,7 @@ bool scope_scene_save_on_event(void* context, SceneManagerEvent event) {
                    file, app->data, sizeof(uint16_t) * ADC_CONVERTED_DATA_BUFFER_SIZE)) {
                 // Todo: Display error
             }
+            furi_string_free(temp_str);
             storage_file_close(file);
             storage_file_free(file);
             furi_record_close(RECORD_STORAGE);

@@ -103,6 +103,8 @@ void boilerplate_read_settings(void* context) {
         return;
     }
 
+    furi_string_free(temp_str);
+
     flipper_format_read_uint32(fff_file, BOILERPLATE_SETTINGS_KEY_HAPTIC, &app->haptic, 1);
     flipper_format_read_uint32(fff_file, BOILERPLATE_SETTINGS_KEY_SPEAKER, &app->speaker, 1);
     flipper_format_read_uint32(fff_file, BOILERPLATE_SETTINGS_KEY_LED, &app->led, 1);
