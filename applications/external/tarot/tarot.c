@@ -13,12 +13,7 @@
 #include <tarot_icons.h>
 
 /* ids for all scenes used by the app */
-typedef enum {
-    AppScene_MainMenu,
-    AppScene_About,
-    AppScene_Game,
-    AppScene_count
-} AppScene;
+typedef enum { AppScene_MainMenu, AppScene_About, AppScene_Game, AppScene_count } AppScene;
 
 /* ids for the 2 types of view used by the app */
 typedef enum { AppView_Submenu, AppView_Popup, AppView_Widget } AppView;
@@ -61,17 +56,9 @@ void tarot_app_scene_on_enter_main_menu(void* context) {
     submenu_reset(app->submenu);
 
     submenu_add_item(
-        app->submenu,
-        "Run",
-        AppMenuSelection_Run,
-        tarot_app_menu_callback_main_menu,
-        app);
+        app->submenu, "Run", AppMenuSelection_Run, tarot_app_menu_callback_main_menu, app);
     submenu_add_item(
-        app->submenu,
-        "About",
-        AppMenuSelection_About,
-        tarot_app_menu_callback_main_menu,
-        app);
+        app->submenu, "About", AppMenuSelection_About, tarot_app_menu_callback_main_menu, app);
     view_dispatcher_switch_to_view(app->view_dispatcher, AppView_Submenu);
 }
 
@@ -114,8 +101,14 @@ void tarot_app_scene_on_enter_about(void* context) {
     popup_reset(app->popup);
     popup_set_context(app->popup, app);
     popup_set_header(app->popup, "About", 64, 1, AlignCenter, AlignTop);
-    popup_set_icon(app->popup, 16, 64-13, &I_github_icon);
-    popup_set_text(app->popup, "\n\nCode: pionaiki\nArt: tihyltew\n\n       /pionaiki/fz-tarot", 64, 0, AlignCenter, AlignTop);
+    popup_set_icon(app->popup, 16, 64 - 13, &I_github_icon);
+    popup_set_text(
+        app->popup,
+        "\n\nCode: pionaiki\nArt: tihyltew\n\n       /pionaiki/fz-tarot",
+        64,
+        0,
+        AlignCenter,
+        AlignTop);
     view_dispatcher_switch_to_view(app->view_dispatcher, AppView_Popup);
 }
 
@@ -148,58 +141,57 @@ struct Card {
 };
 
 const struct Card card[] = {
-    {"The Fool",            &I_major_0},
-    {"The Magician",        &I_major_1},
-    {"The High Priestess",  &I_major_2},
-    {"The Empress",         &I_major_3},
-    {"The Emperor",         &I_major_4},
-    {"The Hierophant",      &I_major_5},
-    {"The Lovers",          &I_major_6},
-    {"The Chariot",         &I_major_7},
-    {"Strength",            &I_major_8},
-    {"The Hermit",          &I_major_9},
-    {"Wheel of Fortune",    &I_major_10},
-    {"Justice",             &I_major_11},
-    {"The Hanged Man",      &I_major_12},
-    {"Death",               &I_major_13},
-    {"Temperance",          &I_major_14},
-    {"The Devil",           &I_major_15},
-    {"The Tower",           &I_major_16},
-    {"The Star",            &I_major_17},
-    {"The Moon",            &I_major_18},
-    {"The Sun",             &I_major_19},
-    {"Judgement",           &I_major_20},
-    {"The World",           &I_major_21},
-    {"The Fool",            &I_major_0_},
-    {"The Magician",        &I_major_1_},
-    {"The High Priestess",  &I_major_2_},
-    {"The Empress",         &I_major_3_},
-    {"The Emperor",         &I_major_4_},
-    {"The Hierophant",      &I_major_5_},
-    {"The Lovers",          &I_major_6_},
-    {"The Chariot",         &I_major_7_},
-    {"Strength",            &I_major_8_},
-    {"The Hermit",          &I_major_9_},
-    {"Wheel of Fortune",    &I_major_10_},
-    {"Justice",             &I_major_11_},
-    {"The Hanged Man",      &I_major_12_},
-    {"Death",               &I_major_13_},
-    {"Temperance",          &I_major_14_},
-    {"The Devil",           &I_major_15_},
-    {"The Tower",           &I_major_16_},
-    {"The Star",            &I_major_17_},
-    {"The Moon",            &I_major_18_},
-    {"The Sun",             &I_major_19_},
-    {"Judgement",           &I_major_20_},
-    {"The World",           &I_major_21_}
-};
+    {"The Fool", &I_major_0},
+    {"The Magician", &I_major_1},
+    {"The High Priestess", &I_major_2},
+    {"The Empress", &I_major_3},
+    {"The Emperor", &I_major_4},
+    {"The Hierophant", &I_major_5},
+    {"The Lovers", &I_major_6},
+    {"The Chariot", &I_major_7},
+    {"Strength", &I_major_8},
+    {"The Hermit", &I_major_9},
+    {"Wheel of Fortune", &I_major_10},
+    {"Justice", &I_major_11},
+    {"The Hanged Man", &I_major_12},
+    {"Death", &I_major_13},
+    {"Temperance", &I_major_14},
+    {"The Devil", &I_major_15},
+    {"The Tower", &I_major_16},
+    {"The Star", &I_major_17},
+    {"The Moon", &I_major_18},
+    {"The Sun", &I_major_19},
+    {"Judgement", &I_major_20},
+    {"The World", &I_major_21},
+    {"The Fool", &I_major_0_},
+    {"The Magician", &I_major_1_},
+    {"The High Priestess", &I_major_2_},
+    {"The Empress", &I_major_3_},
+    {"The Emperor", &I_major_4_},
+    {"The Hierophant", &I_major_5_},
+    {"The Lovers", &I_major_6_},
+    {"The Chariot", &I_major_7_},
+    {"Strength", &I_major_8_},
+    {"The Hermit", &I_major_9_},
+    {"Wheel of Fortune", &I_major_10_},
+    {"Justice", &I_major_11_},
+    {"The Hanged Man", &I_major_12_},
+    {"Death", &I_major_13_},
+    {"Temperance", &I_major_14_},
+    {"The Devil", &I_major_15_},
+    {"The Tower", &I_major_16_},
+    {"The Star", &I_major_17_},
+    {"The Moon", &I_major_18_},
+    {"The Sun", &I_major_19_},
+    {"Judgement", &I_major_20_},
+    {"The World", &I_major_21_}};
 
-static uint16_t unbiased_rand (uint16_t max) {
+static uint16_t unbiased_rand(uint16_t max) {
     uint16_t remainder = RAND_MAX % max;
     uint16_t x;
     do {
         x = rand();
-    } while (x >= RAND_MAX - remainder);
+    } while(x >= RAND_MAX - remainder);
     return x % max;
 }
 
@@ -221,15 +213,32 @@ void draw_tarot(void* context) {
     spread.selected[card_selected] = 1;
 
     // Draw cards
-    widget_add_icon_element(app->widget, (128-card_x)/2 - 32, 10 - 2*spread.selected[0], card[spread.card[0]].icon);
-    widget_add_icon_element(app->widget, (128-card_x)/2, 10 - 2*spread.selected[1], card[spread.card[1]].icon);
-    widget_add_icon_element(app->widget, (128-card_x)/2 + 32, 10 - 2*spread.selected[2], card[spread.card[2]].icon);
+    widget_add_icon_element(
+        app->widget,
+        (128 - card_x) / 2 - 32,
+        10 - 2 * spread.selected[0],
+        card[spread.card[0]].icon);
+    widget_add_icon_element(
+        app->widget, (128 - card_x) / 2, 10 - 2 * spread.selected[1], card[spread.card[1]].icon);
+    widget_add_icon_element(
+        app->widget,
+        (128 - card_x) / 2 + 32,
+        10 - 2 * spread.selected[2],
+        card[spread.card[2]].icon);
 
     // Draw cursor
-    widget_add_icon_element(app->widget, (128-card_x)/2 - 34 + card_x/2 + card_selected*32, 41, &I_cursor);
+    widget_add_icon_element(
+        app->widget, (128 - card_x) / 2 - 34 + card_x / 2 + card_selected * 32, 41, &I_cursor);
 
     // Draw card name
-    widget_add_string_element(app->widget, 64, 60, AlignCenter, AlignBottom, FontPrimary, card[spread.card[card_selected]].name);
+    widget_add_string_element(
+        app->widget,
+        64,
+        60,
+        AlignCenter,
+        AlignBottom,
+        FontPrimary,
+        card[spread.card[card_selected]].name);
 }
 
 static bool widget_input_callback(InputEvent* input_event, void* context) {
@@ -239,14 +248,14 @@ static bool widget_input_callback(InputEvent* input_event, void* context) {
         switch(input_event->key) {
         case InputKeyRight:
             card_selected++;
-            if (card_selected > 2) {
+            if(card_selected > 2) {
                 card_selected = 0;
             }
             consumed = true;
             break;
         case InputKeyLeft:
             card_selected--;
-            if (card_selected < 0) {
+            if(card_selected < 0) {
                 card_selected = 2;
             }
             consumed = true;
@@ -275,21 +284,21 @@ void tarot_app_scene_on_enter_game(void* context) {
     // Set random spread
     spread.card[0] = unbiased_rand(card_number);
     spread.card[1] = unbiased_rand(card_number);
-    while (spread.card[1] == spread.card[0]) {
+    while(spread.card[1] == spread.card[0]) {
         spread.card[1] = unbiased_rand(card_number);
     };
     spread.card[2] = unbiased_rand(card_number);
-    while (spread.card[2] == spread.card[0] || spread.card[2] == spread.card[1]) {
+    while(spread.card[2] == spread.card[0] || spread.card[2] == spread.card[1]) {
         spread.card[2] = unbiased_rand(card_number);
     }
 
     // Upside down card option
-    if (0/*settings.upside_down*/) {
-        spread.card[0] += card_number*unbiased_rand(2);
-        spread.card[1] += card_number*unbiased_rand(2);
-        spread.card[2] += card_number*unbiased_rand(2);
+    if(0 /*settings.upside_down*/) {
+        spread.card[0] += card_number * unbiased_rand(2);
+        spread.card[1] += card_number * unbiased_rand(2);
+        spread.card[2] += card_number * unbiased_rand(2);
     }
-    
+
     draw_tarot(app);
 
     view_set_context(widget_get_view(app->widget), app);
@@ -383,7 +392,8 @@ void tarot_app_view_dispatcher_init(App* app) {
 
     // add views to the dispatcher, indexed by their enum value
     FURI_LOG_D(TAG, "tarot_app_view_dispatcher_init adding view menu");
-    view_dispatcher_add_view(app->view_dispatcher, AppView_Submenu, submenu_get_view(app->submenu));
+    view_dispatcher_add_view(
+        app->view_dispatcher, AppView_Submenu, submenu_get_view(app->submenu));
 
     FURI_LOG_D(TAG, "tarot_app_view_dispatcher_init adding view popup");
     view_dispatcher_add_view(app->view_dispatcher, AppView_Popup, popup_get_view(app->popup));
