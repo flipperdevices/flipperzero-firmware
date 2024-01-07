@@ -96,7 +96,7 @@ static const float difficulty_multiplier[5] = {
 
 // Static helper functions
 static void setup_board(MineSweeperGameScreen* instance);
-static Point bfs_to_closest_tile(MineSweeperGameScreenModel* model) {
+static Point bfs_to_closest_tile(MineSweeperGameScreenModel* model);
 static inline void bfs_tile_clear(MineSweeperGameScreenModel* model);
 static void mine_sweeper_game_screen_set_board_information(
         MineSweeperGameScreen* instance,
@@ -244,7 +244,7 @@ static void setup_board(MineSweeperGameScreen* instance) {
     );
 }
 
-static inline Point bfs_to_closest_tile(MineSweeperGameScreenModel* model) {
+static Point bfs_to_closest_tile(MineSweeperGameScreenModel* model) {
     // Init both the set and dequeue
     point_deq_t deq;
     point_set_t set;
