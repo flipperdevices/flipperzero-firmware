@@ -136,7 +136,8 @@ static void setup_board(MineSweeperGameScreen* instance) {
             board_tile_count =  (model->board_width*model->board_height);
             board_difficulty = model->board_difficulty;
         },
-        false);
+        false
+    );
 
     uint16_t num_mines = board_tile_count * difficulty_multiplier[ board_difficulty ];
     FURI_LOG_D(MS_DEBUG_TAG, "Placing %hd mines", num_mines);
@@ -239,7 +240,8 @@ static void setup_board(MineSweeperGameScreen* instance) {
             model->bottom_boundary = MINESWEEPER_SCREEN_TILE_HEIGHT;
             model->is_making_first_move = true;         
         },
-        true);
+        true
+    );
 }
 
 static inline Point bfs_to_closest_tile(MineSweeperGameScreenModel* model) {
@@ -430,7 +432,8 @@ static void mine_sweeper_game_screen_set_board_information(
             model->board_height = height;
             model->board_difficulty = difficulty;
         },
-        true);
+        true
+    );
 }
 
 static void mine_sweeper_game_screen_view_enter(void* context) {
@@ -857,7 +860,8 @@ static bool mine_sweeper_game_screen_view_end_input_callback(InputEvent* event, 
                 }
 
             },
-            false);
+            false
+        );
 
         consumed = true; 
     }
@@ -901,7 +905,8 @@ static bool mine_sweeper_game_screen_view_play_input_callback(InputEvent* event,
                     }
 
                 },
-                true);
+                true
+            );
 
         }
 
@@ -921,7 +926,8 @@ static bool mine_sweeper_game_screen_view_play_input_callback(InputEvent* event,
                 {
                     model->is_holding_down_button = false;
                 },
-                true);
+                true
+            );
             
             consumed = true;
 
@@ -1004,7 +1010,8 @@ static bool mine_sweeper_game_screen_view_play_input_callback(InputEvent* event,
 
                     }
                 },
-                false);
+                false
+            );
 
             consumed = true;
 
@@ -1081,7 +1088,8 @@ static bool mine_sweeper_game_screen_view_play_input_callback(InputEvent* event,
                         break;
                 }
             },
-            true);
+            true
+        );
     }
     
 
@@ -1124,7 +1132,8 @@ MineSweeperGameScreen* mine_sweeper_game_screen_alloc(uint8_t width, uint8_t hei
         {
             model->info_str = furi_string_alloc();
         },
-        true);
+        true
+    );
 
     // Reset the clock - This will set the start time at the allocation of the game screen
     // but this is a public api as well and can be called in a scene for more accurate start times
@@ -1149,7 +1158,8 @@ void mine_sweeper_game_screen_free(MineSweeperGameScreen* instance) {
         {
             furi_string_free(model->info_str);
         },
-        false);
+        false
+    );
 
     // Free view and any dynamically allocated members in main struct
     view_free(instance->view);
@@ -1180,12 +1190,13 @@ void mine_sweeper_game_screen_reset_clock(MineSweeperGameScreen* instance) {
     furi_assert(instance);
 
     with_view_model(
-            instance->view,
-            MineSweeperGameScreenModel * model,
-            {
-                model->start_tick = furi_get_tick();
-            },
-            true);
+        instance->view,
+        MineSweeperGameScreenModel * model,
+        {
+            model->start_tick = furi_get_tick();
+        },
+        true
+    );
 }
 
 View* mine_sweeper_game_screen_get_view(MineSweeperGameScreen* instance) {
