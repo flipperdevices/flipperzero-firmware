@@ -93,7 +93,7 @@ bool meal_pager_scene_transmit_on_event(void* context, SceneManagerEvent event) 
             break;
         }
     } else if(event.type == SceneManagerEventTypeTick) {
-        if(app->state_notifications == SubGhzNotificationStateTx) {
+        if(app->state_notifications == SubGhzNotificationStateTx && app->led == 1) {
             notification_message(app->notification, &sequence_blink_magenta_10);
         }
         return true;

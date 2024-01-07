@@ -2,14 +2,18 @@
 
 void meal_pager_blink_start_subghz(Meal_Pager* app) {
     furi_assert(app);
-    notification_message(app->notification, &sequence_blink_stop);
-    notification_message(app->notification, &sequence_blink_start_magenta);
+    if(app->led == 1) {
+        notification_message(app->notification, &sequence_blink_stop);
+        notification_message(app->notification, &sequence_blink_start_magenta);
+    }
 }
 
 void meal_pager_blink_start_compile(Meal_Pager* app) {
     furi_assert(app);
-    notification_message(app->notification, &sequence_blink_stop);
-    notification_message(app->notification, &sequence_blink_start_yellow);
+    if(app->led == 1) {
+        notification_message(app->notification, &sequence_blink_stop);
+        notification_message(app->notification, &sequence_blink_start_yellow);
+    }
 }
 
 void meal_pager_blink_stop(Meal_Pager* app) {

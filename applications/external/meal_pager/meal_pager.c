@@ -58,12 +58,19 @@ Meal_Pager* meal_pager_app_alloc() {
     app->stop_transmit = false;
     app->repeats = 1;
     app->repeats_char = "1";
+    app->max_station = 8191;
+    app->max_pager = 999;
+
+    snprintf(app->text_store[0], 32, "%lu", app->first_station);
 
     // Used for File Browser
     app->dialogs = furi_record_open(RECORD_DIALOGS);
     app->file_path = furi_string_alloc();
 
     app->subghz = subghz_alloc();
+
+    // Custom made int keyboard
+    app->int_input = int_input_alloc();
 
     // Load configs
     meal_pager_read_settings(app);
@@ -87,7 +94,16 @@ Meal_Pager* meal_pager_app_alloc() {
         Meal_PagerViewIdSettings,
         variable_item_list_get_view(app->variable_item_list));
 
+    app->int_input = int_input_alloc();
+    view_dispatcher_add_view(
+        app->view_dispatcher, Meal_PagerViewIdIntInput, int_input_get_view(app->int_input));
+
     //End Scene Additions
+
+    snprintf(app->text_store[0], 20, "%lu", app->first_station);
+    snprintf(app->text_store[1], 20, "%lu", app->last_station);
+    snprintf(app->text_store[2], 20, "%lu", app->first_pager);
+    snprintf(app->text_store[3], 20, "%lu", app->last_pager);
 
     return app;
 }
@@ -102,7 +118,9 @@ void meal_pager_app_free(Meal_Pager* app) {
     view_dispatcher_remove_view(app->view_dispatcher, Meal_PagerViewIdMenu);
     view_dispatcher_remove_view(app->view_dispatcher, Meal_PagerViewIdTransmit);
     view_dispatcher_remove_view(app->view_dispatcher, Meal_PagerViewIdSettings);
+    view_dispatcher_remove_view(app->view_dispatcher, Meal_PagerViewIdIntInput);
     submenu_free(app->submenu);
+    int_input_free(app->int_input);
 
     view_dispatcher_free(app->view_dispatcher);
     furi_record_close(RECORD_GUI);
