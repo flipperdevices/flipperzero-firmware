@@ -61,6 +61,9 @@ Meal_Pager* meal_pager_app_alloc() {
     app->max_station = 8191;
     app->max_pager = 999;
 
+    snprintf(app->text_buffer, 32, "%lu", app->first_station);
+    //app->text_buffer = text_buffer;
+
     // Used for File Browser
     app->dialogs = furi_record_open(RECORD_DIALOGS);
     app->file_path = furi_string_alloc();

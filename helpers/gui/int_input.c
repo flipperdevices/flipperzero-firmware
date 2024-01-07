@@ -21,7 +21,7 @@ typedef struct {
     size_t text_buffer_size;
     bool clear_default_text;
     
-    IntInputCallback input_callback;
+    IntInputCallback callback;
     //IntChangedCallback changed_callback;
     void* callback_context;
 
@@ -263,13 +263,14 @@ UNUSED(text_length);
         if (model->clear_default_text) {
             text_length = 0;
         }
-        if(text_length < (model->text_buffer_size - 1)) {
+        //if(text_length < (model->text_buffer_size - 1)) {
             //model->text_buffer[text_length] = selected;
             //model->text_buffer[text_length + 1] = 0;
-            //FURI_LOG_D("INT_INPUT", model->text_buffer);
-            FURI_LOG_D("INT_INPUT", "%u", text_length);
-            FURI_LOG_D("INT_INPUT", "%u", model->text_buffer_size);
-        }
+            FURI_LOG_D("INT_INPUT", model->text_buffer);
+            //FURI_LOG_D("INT_INPUT", "%u", text_length);
+            //FURI_LOG_D("INT_INPUT", "%u", model->text_buffer_size);
+            FURI_LOG_D("INT_INPUT", "%d", selected);
+        //}
     }
     model->clear_default_text = false;
 }
@@ -402,6 +403,7 @@ static bool int_input_view_input_callback(InputEvent* event, void* context) {
             int_input_handle_ok(model);
             break;
         default:
+            consumed = false;
             break;
         }
     }
@@ -412,14 +414,25 @@ static bool int_input_view_input_callback(InputEvent* event, void* context) {
     return consumed;
 }
 
-/** Reset all input-related data in model
- *
- * @param      model  The model
- */
-static void int_input_reset_model_input_data(IntInputModel* model) {
-    model->selected_row = 0;
-    model->selected_column = 0;
+void int_input_reset(IntInput* int_input) {
+    FURI_LOG_D("INT_INPUT", "Resetting Model");
+    furi_assert(int_input);
+    with_view_model(
+        int_input->view,
+        IntInputModel * model,
+        {
+            model->header = "";
+            model->selected_row = 0;
+            model->selected_column = 0;
+            model->clear_default_text = false;
+            model->text_buffer = "";
+            model->text_buffer_size = 0;
+            model->callback = NULL;
+            model->callback_context = NULL;
+        },
+        true);
 }
+
 
 IntInput* int_input_alloc() {
     IntInput* int_input = malloc(sizeof(IntInput));
@@ -429,17 +442,7 @@ IntInput* int_input_alloc() {
     view_set_draw_callback(int_input->view, int_input_view_draw_callback);
     view_set_input_callback(int_input->view, int_input_view_input_callback);
 
-    with_view_model(
-        int_input->view,
-        IntInputModel * model,
-        {
-            model->header = "";
-            model->input_callback = NULL;
-           // model->changed_callback = NULL;
-            model->callback_context = NULL;
-            int_input_reset_model_input_data(model);
-        },
-        true);
+    int_input_reset(int_input);
 
     return int_input;
 }
@@ -457,19 +460,16 @@ View* int_input_get_view(IntInput* int_input) {
 
 void int_input_set_result_callback(
     IntInput* int_input,
-    IntInputCallback input_callback,
-    //IntChangedCallback changed_callback,
+    IntInputCallback callback,
     void* callback_context,
     char* text_buffer,
     size_t text_buffer_size,
     bool clear_default_text) {
-    //UNUSED(changed_callback);
     with_view_model(
         int_input->view,
         IntInputModel * model,
         {
-            int_input_reset_model_input_data(model);
-            model->input_callback = input_callback;
+            model->callback = callback;
             model->callback_context = callback_context;
             model->text_buffer = text_buffer;
             model->text_buffer_size = text_buffer_size;
