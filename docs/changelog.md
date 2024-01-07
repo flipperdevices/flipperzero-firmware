@@ -1,3 +1,6 @@
+## 1.3
+- Patched Memory Leak in storage
+
 ## v1.2
 - Updated compatibility to 0.95.0-rc
 
