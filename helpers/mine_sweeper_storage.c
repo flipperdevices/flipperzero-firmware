@@ -42,7 +42,6 @@ void mine_sweeper_save_settings(void* context) {
 
     if(!flipper_format_file_open_new(fff_file, MINESWEEPER_SETTINGS_SAVE_PATH)) {
         FURI_LOG_E(TAG, "Error creating new file %s", MINESWEEPER_SETTINGS_SAVE_PATH);
-        mine_sweeper_close_config_file(fff_file);
         mine_sweeper_close_storage();
         return;
     }
