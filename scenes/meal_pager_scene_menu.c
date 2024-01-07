@@ -4,7 +4,10 @@
 
 enum SubmenuIndex {
     SubmenuIndexTransmit = 10,
-    SubmenuIndexScene2,
+    SubmenuIndexSetFirstStation,
+    SubmenuIndexSetLastStation,
+    SubmenuIndexSetFirstPager,
+    SubmenuIndexSetLastPager,
     SubmenuIndexScene3,
     SubmenuIndexScene4,
     SubmenuIndexScene5,
@@ -23,6 +26,30 @@ void meal_pager_scene_menu_on_enter(void* context) {
         app->submenu,
         "Send Data",
         SubmenuIndexTransmit,
+        meal_pager_scene_menu_submenu_callback,
+        app);
+    submenu_add_item(
+        app->submenu,
+        "Set First Station",
+        SubmenuIndexSetFirstStation,
+        meal_pager_scene_menu_submenu_callback,
+        app);
+    submenu_add_item(
+        app->submenu,
+        "Set Last Station",
+        SubmenuIndexSetLastStation,
+        meal_pager_scene_menu_submenu_callback,
+        app);
+    submenu_add_item(
+        app->submenu,
+        "Set First Pager",
+        SubmenuIndexSetFirstPager,
+        meal_pager_scene_menu_submenu_callback,
+        app);
+    submenu_add_item(
+        app->submenu,
+        "Set Last Pager",
+        SubmenuIndexSetLastPager,
         meal_pager_scene_menu_submenu_callback,
         app);
     submenu_add_item(
@@ -61,6 +88,26 @@ bool meal_pager_scene_menu_on_event(void* context, SceneManagerEvent event) {
             app->state_notifications = SubGhzNotificationStateIDLE;
             subghz_txrx_stop(app->subghz->txrx);
             FURI_LOG_D(TAG, "Stop Event from Menu");
+            return true;
+        } else if(event.event == SubmenuIndexSetFirstStation) {
+            scene_manager_set_scene_state(
+                app->scene_manager, Meal_PagerSceneSetFirstStation, SubmenuIndexSetFirstStation);
+            scene_manager_next_scene(app->scene_manager, Meal_PagerSceneSetFirstStation);
+            return true;
+        } else if(event.event == SubmenuIndexSetLastStation) {
+            scene_manager_set_scene_state(
+                app->scene_manager, Meal_PagerSceneSetLastStation, SubmenuIndexSetLastStation);
+            scene_manager_next_scene(app->scene_manager, Meal_PagerSceneSetLastStation);
+            return true;
+        } else if(event.event == SubmenuIndexSetFirstPager) {
+            scene_manager_set_scene_state(
+                app->scene_manager, Meal_PagerSceneSetFirstPager, SubmenuIndexSetFirstPager);
+            scene_manager_next_scene(app->scene_manager, Meal_PagerSceneSetFirstPager);
+            return true;
+        } else if(event.event == SubmenuIndexSetLastPager) {
+            scene_manager_set_scene_state(
+                app->scene_manager, Meal_PagerSceneSetLastPager, SubmenuIndexSetLastPager);
+            scene_manager_next_scene(app->scene_manager, Meal_PagerSceneSetLastPager);
             return true;
         }
     } else if(event.type == SceneManagerEventTypeTick) {

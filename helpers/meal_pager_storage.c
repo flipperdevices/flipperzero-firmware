@@ -15,7 +15,11 @@ static void meal_pager_close_config_file(FlipperFormat* file) {
     flipper_format_free(file);
 }
 
-bool meal_pager_save_subghz_buffer_file_start(void* context, FlipperFormat* ff, Storage* storage, char* frequency) {
+bool meal_pager_save_subghz_buffer_file_start(
+    void* context,
+    FlipperFormat* ff,
+    Storage* storage,
+    char* frequency) {
     // SubGhz TXRX can only be loaded with files, makes sense as to save RAM
     Meal_Pager* app = context;
     UNUSED(app);
@@ -53,12 +57,11 @@ bool meal_pager_save_subghz_buffer_file_start(void* context, FlipperFormat* ff, 
         return success;
     }
 
-    success =
-        flipper_format_write_header_cstr(
-            ff, MEAL_PAGER_SUBGHZ_FILE_TYPE, MEAL_PAGER_SUBGHZ_FILE_VERSION) &&
-        flipper_format_write_string_cstr(ff, "Frequency", frequency) &&
-        flipper_format_write_string_cstr(ff, "Preset", MEAL_PAGER_SUBGHZ_FILE_PRESET) &&
-        flipper_format_write_string_cstr(ff, "Protocol", MEAL_PAGER_SUBGHZ_FILE_Protocol);
+    success = flipper_format_write_header_cstr(
+                  ff, MEAL_PAGER_SUBGHZ_FILE_TYPE, MEAL_PAGER_SUBGHZ_FILE_VERSION) &&
+              flipper_format_write_string_cstr(ff, "Frequency", frequency) &&
+              flipper_format_write_string_cstr(ff, "Preset", MEAL_PAGER_SUBGHZ_FILE_PRESET) &&
+              flipper_format_write_string_cstr(ff, "Protocol", MEAL_PAGER_SUBGHZ_FILE_Protocol);
     return success;
 }
 
@@ -178,6 +181,7 @@ void meal_pager_read_settings(void* context) {
     }
 
     flipper_format_read_uint32(fff_file, MEAL_PAGER_SETTINGS_KEY_PAGER_TYPE, &app->pager_type, 1);
+    meal_pager_set_max_values(app);
     flipper_format_read_uint32(
         fff_file, MEAL_PAGER_SETTINGS_KEY_FIRST_STATION, &app->first_station, 1);
     flipper_format_read_uint32(
@@ -194,6 +198,27 @@ void meal_pager_read_settings(void* context) {
 
     flipper_format_rewind(fff_file);
 
+    furi_string_free(temp_str);
+
     meal_pager_close_config_file(fff_file);
     meal_pager_close_storage();
+}
+
+void meal_pager_set_max_values(void* context) {
+    Meal_Pager* app = context;
+    switch(app->pager_type) {
+    case Meal_PagerPagerTypeT119:
+    case Meal_PagerPagerTypeTD165:
+        app->max_station = 8191;
+        app->max_pager = 999;
+        break;
+    case Meal_PagerPagerTypeTD174:
+        app->max_station = 8191;
+        app->max_pager = 10;
+        break;
+    case Meal_PagerPagerTypeTD157:
+        app->max_station = 1023;
+        app->max_pager = 999;
+        break;
+    }
 }

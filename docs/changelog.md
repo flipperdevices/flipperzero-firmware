@@ -1,3 +1,16 @@
+## v1.1
+- Created a new UI Input View as FW does not supply one for numbers
+- New UI to Set First Station
+- New UI to Set Last Station
+- New UI to Set First Page
+- New UI to Set Last Pager
+- Removed Vibro/Sound settings as not used
+
+Known issues
+- After setting last station, the settings view is weird. Some kindo of memory bug. But data remains correct. 
+- Extensive use can cause crashes, must be some memory leak left
+
+
 ## v1.0
 - Added support for TD174
 

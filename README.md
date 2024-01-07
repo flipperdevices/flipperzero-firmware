@@ -11,8 +11,9 @@ This app triggers restaurant pagers in a brute force manner, useful to test if d
 - Retekess TD174
 
 ### Features
-- Select range of stations (needs improving for full range)
-- Select range of pagers (needs improving for full range)
+- Send a Range of Signals
+- Select range of stations
+- Select range of pagers
 
 ## How to install on Flipper Zero
 - If you do not have one, download a firmware onto your PC via git<br>
