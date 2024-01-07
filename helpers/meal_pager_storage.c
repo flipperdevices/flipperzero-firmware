@@ -198,6 +198,8 @@ void meal_pager_read_settings(void* context) {
 
     flipper_format_rewind(fff_file);
 
+    furi_string_free(temp_str);
+
     meal_pager_close_config_file(fff_file);
     meal_pager_close_storage();
 }
