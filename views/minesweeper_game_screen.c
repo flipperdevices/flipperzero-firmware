@@ -147,7 +147,7 @@ static void setup_board(MineSweeperGameScreen* instance) {
     MineSweeperGameScreenTileType tiles[MINESWEEPER_BOARD_MAX_TILES];
     memset(&tiles, MineSweeperGameScreenTileNone, sizeof(tiles));
 
-    // Place tiles everywhere randomly except the corners to help the solver
+    // Randomly place tiles except in the corners to help guarantee solvability
     for (uint16_t i = 0; i < num_mines; i++) {
 
         uint16_t rand_pos;
@@ -160,11 +160,15 @@ static void setup_board(MineSweeperGameScreen* instance) {
             x = rand_pos / board_width;
             y = rand_pos % board_width;
 
-        } while (tiles[rand_pos] == MineSweeperGameScreenTileMine ||
-                            (rand_pos == 0)                       ||
-                            (x==0 && y==board_width-1)            ||
-                            (x==board_height-1 && y==0)           || 
-                            (rand_pos == board_tile_count-1));
+            bool is_invalid_position = ((rand_pos == 0)                 ||
+                                         (x==0 && y==1)                 ||
+                                         (x==1 && y==0)                 ||
+                                         rand_pos == board_tile_count-1 ||
+                                         (x==0 && y==board_width-1)     ||
+                                         (x==board_height-1 && y==0));
+
+
+        } while (tiles[rand_pos] == MineSweeperGameScreenTileMine || is_invalid_position);
 
         tiles[rand_pos] = MineSweeperGameScreenTileMine;
     }
