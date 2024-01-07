@@ -104,8 +104,6 @@ void xremote_read_settings(void* context) {
         return;
     }
 
-    furi_string_free(temp_str);
-
     flipper_format_read_uint32(fff_file, XREMOTE_SETTINGS_KEY_HAPTIC, &app->haptic, 1);
     flipper_format_read_uint32(fff_file, XREMOTE_SETTINGS_KEY_SPEAKER, &app->speaker, 1);
     flipper_format_read_uint32(fff_file, XREMOTE_SETTINGS_KEY_LED, &app->led, 1);
@@ -114,6 +112,8 @@ void xremote_read_settings(void* context) {
     flipper_format_read_uint32(fff_file, XREMOTE_SETTINGS_KEY_IR_TIMING, &app->ir_timing, 1);
 
     flipper_format_rewind(fff_file);
+
+    furi_string_free(temp_str);
 
     xremote_close_config_file(fff_file);
     xremote_close_storage();
