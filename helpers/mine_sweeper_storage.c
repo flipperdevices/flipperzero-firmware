@@ -18,7 +18,6 @@ static void mine_sweeper_close_config_file(FlipperFormat* file) {
 void mine_sweeper_save_settings(void* context) {
     MineSweeperApp* app = context;
 
-    FURI_LOG_D(TAG, "Saving Settings");
     Storage* storage = mine_sweeper_open_storage();
     FlipperFormat* fff_file = flipper_format_file_alloc(storage);
     
@@ -29,9 +28,9 @@ void mine_sweeper_save_settings(void* context) {
 
     // Open File, create if not exists
     if(!storage_common_stat(storage, MINESWEEPER_SETTINGS_SAVE_PATH, NULL) == FSE_OK) {
-        FURI_LOG_D(TAG, "Config file %s is not found. Will create new.", MINESWEEPER_SETTINGS_SAVE_PATH);
+        FURI_LOG_I(TAG, "Config file %s is not found. Will create new.", MINESWEEPER_SETTINGS_SAVE_PATH);
         if(storage_common_stat(storage, CONFIG_FILE_DIRECTORY_PATH, NULL) == FSE_NOT_EXIST) {
-            FURI_LOG_D(
+            FURI_LOG_I(
                 TAG,
                 "Directory %s doesn't exist. Will create new.",
                 CONFIG_FILE_DIRECTORY_PATH);
