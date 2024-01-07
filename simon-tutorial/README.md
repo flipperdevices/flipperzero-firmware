@@ -137,7 +137,7 @@ int32_t flipboard_simon_app(void* p) {
 - Press Control+Shift+B
 - Choose `[Debug] Launch app on Flipper`
 
-If you get an error message displayed in red, read it out loud and hopefully there will be a clue as to the issue.  If you can't figure it out, ask for help in the [Discord server](https://discord.com/invite/NsjCvqwPAd).
+If you get an error message displayed in red, read it out loud and hopefully there will be a clue as to the issue.  If you can't figure it out, ask for help in the [Discord server](https://discord.com/invite/NsjCvqwPAd).  If it just says `***FBT Errors***` check to see if the text a few lines above has the message `“sections requires a defined symbol root specified by -e or -u”`.  If so, you need to confirm that the entry_point value in `application.fam` file matches the name of the method in `app.c` (the casing must be identical).
 
 NOTE: The application doesn't actually do anything, so it will run and then immediately exit.
 
