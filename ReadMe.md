@@ -27,10 +27,10 @@ This software is for experimental purposes only and is not meant for any illegal
 
 <a name="latest">
 
-## Latest Updates - [PATREON: Latest Release RM0105-1750-0.93.9-a9982b0](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
+## Latest Updates - [PATREON: Latest Release RM0106-2347-0.93.9-e789a49](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-01-06 22:37 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-01-06 22:37 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-01-06 23:47 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-01-06 23:47 EST`
 - Added: [Tarot v0.1 (By pionaiki & tihyltew)](https://github.com/pionaiki/fz-tarot)
 - Added: [Tone Generator v1.0 (By GEMISIS)](https://github.com/GEMISIS/tone_gen)
 - Updated: [Marauder Assets for ESP Flasher (By justcallmekoko)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/61bb973015b3cb8093ed367a3acdc67d99697183)
@@ -44,7 +44,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: [subghz use long press to exit transmitter (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/1a88b731d5f95f445a687768e3db880e6ba5a8f9)
 - Added: [T5577 Multiwriter v0.1 (By Leptopt1los)](https://github.com/Leptopt1los/t5577_multiwriter)
 - Added: [HID File Transfer v1.0 (By Kavakuo)](https://github.com/Kavakuo/HID-File-Transfer)
-- UL: [SubGHz: Add Kia Encoder #691 (By letvinov28)](https://github.com/DarkFlippers/unleashed-firmware/pull/691)
+- [SubGHz: Add Kia Encoder #691 (By letvinov28)](https://github.com/DarkFlippers/unleashed-firmware/pull/691)
 - OFW: [UI refactor #3323 (By RebornedBrain)](https://github.com/flipperdevices/flipperzero-firmware/pull/3323)
 - OFW: [Desktop: fix rpc unlock on pin input screen #3334 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3334)
 - [UI Refactor for many apps (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/91fd1bb298dfe20f3c76b3489032933eab791a31)
