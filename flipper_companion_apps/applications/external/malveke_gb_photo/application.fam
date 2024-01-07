@@ -1,0 +1,21 @@
+App(
+    appid="malveke_gb_photo",
+    name="[GB] GAME BOY PHOTO",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="boilerplate_app",
+    cdefines=["APP_GB_PHOTO"],
+    requires=[
+        "gui",
+        "storage",
+    ],
+    stack_size=2 * 1024,
+    order=10,
+    fap_version=[1,0],
+    fap_libs=["assets"],
+    fap_icon="icons/icon_10px.png",
+    fap_icon_assets="icons",
+    fap_category="GPIO",
+    fap_description="Game Boy Camera save RAM photo to BMP from the Flipper Zero.",
+	fap_author="Esteban Fuentealba",
+	fap_weburl="https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/"
+)
