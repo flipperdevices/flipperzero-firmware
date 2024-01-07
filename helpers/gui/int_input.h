@@ -54,7 +54,6 @@ View* int_input_get_view(IntInput* int_input);
 void int_input_set_result_callback(
     IntInput* int_input,
     IntInputCallback input_callback,
-    //IntChangedCallback changed_callback,
     void* callback_context,
     char* text_buffer,
     size_t text_buffer_size,

@@ -64,6 +64,7 @@ typedef struct {
     char* text_buffer;
     uint32_t max_station;
     uint32_t max_pager;
+    char text_store[6][129];
 } Meal_Pager;
 
 typedef enum {

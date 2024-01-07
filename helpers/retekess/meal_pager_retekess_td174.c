@@ -98,7 +98,8 @@ bool meal_pager_retekess_td174_generate_all(void* context) {
 
     Storage* storage = furi_record_open(RECORD_STORAGE);
     FlipperFormat* ff = flipper_format_file_alloc(storage);
-    bool success = meal_pager_save_subghz_buffer_file_start(app, ff, storage, MEAL_PAGER_SUBGHZ_FILE_ALT_FREQUENCY);
+    bool success = meal_pager_save_subghz_buffer_file_start(
+        app, ff, storage, MEAL_PAGER_SUBGHZ_FILE_ALT_FREQUENCY);
 
     if(!success) {
         FURI_LOG_D(TAG, "failed to save to buffer");
