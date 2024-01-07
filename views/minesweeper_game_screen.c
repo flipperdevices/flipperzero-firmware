@@ -124,6 +124,12 @@ static bool mine_sweeper_game_screen_view_play_input_callback(InputEvent* event,
 static void setup_board(MineSweeperGameScreen* instance) {
     furi_assert(instance);
 
+    static double time = 0.0;
+    static uint32_t iter = 0;
+    iter++;
+
+    uint32_t start_tick = furi_get_tick();
+
     uint16_t board_tile_count = 0;
     uint8_t board_width = 0, board_height = 0, board_difficulty = 0;
 
@@ -242,9 +248,25 @@ static void setup_board(MineSweeperGameScreen* instance) {
         },
         true
     );
+
+    uint32_t ticks_elapsed = furi_get_tick() - start_tick;
+    double sec = (double)ticks_elapsed / (double)furi_kernel_get_tick_frequency();
+    double milliseconds = 1000.0L * sec;
+    time += milliseconds;
+    
+    FURI_LOG_D(MS_DEBUG_TAG, "Setup board time: %.03f", time/iter);
 }
 
 static inline Point bfs_to_closest_tile(MineSweeperGameScreenModel* model) {
+    furi_assert(model);
+
+    static double bfs_time = 0.0L;
+    static double time = 0.0L;
+    static uint32_t iter = 0;
+    iter++;
+
+    uint32_t start_tick = furi_get_tick();
+
     // Init both the set and dequeue
     point_deq_t deq;
     point_set_t set;
@@ -265,7 +287,7 @@ static inline Point bfs_to_closest_tile(MineSweeperGameScreenModel* model) {
 
     point_deq_push_back(deq, pos);
 
-    uint32_t start_tick = furi_get_tick();
+    uint32_t bfs_start_tick = furi_get_tick();
 
     uint16_t i = 0;
     
@@ -319,13 +341,25 @@ static inline Point bfs_to_closest_tile(MineSweeperGameScreenModel* model) {
         i++;
     }
 
-    uint32_t ticks_elapsed = furi_get_tick() - start_tick;
-    double sec = (double)ticks_elapsed / (double)furi_kernel_get_tick_frequency();
-    double milliseconds = 1000.0L * sec;
-    FURI_LOG_D(MS_DEBUG_TAG, "BFS: %.2f MS in %d iterations.", milliseconds, i);
+    uint32_t bfs_end_tick = furi_get_tick();
 
     point_set_clear(set);
     point_deq_clear(deq);
+
+    uint32_t ticks_elapsed = furi_get_tick() - start_tick;
+    uint32_t bfs_ticks_elapsed = bfs_end_tick - bfs_start_tick;
+    double sec = (double)ticks_elapsed / (double)furi_kernel_get_tick_frequency();
+    double bfs_sec = (double)bfs_ticks_elapsed / (double)furi_kernel_get_tick_frequency();
+    double milliseconds = 1000.0L * sec;
+    double bfs_milliseconds = 1000.0L * bfs_sec;
+    time += milliseconds;
+    bfs_time += bfs_milliseconds;
+
+    FURI_LOG_D(MS_DEBUG_TAG, "BFS specific time: %.03f, in %d iter", bfs_milliseconds, i);
+    FURI_LOG_D(MS_DEBUG_TAG, "BFS Clear function time: %.03f", milliseconds);
+
+    FURI_LOG_D(MS_DEBUG_TAG, "BFS specific time: %.03f, in %d iter", bfs_time/iter, i);
+    FURI_LOG_D(MS_DEBUG_TAG, "BFS Jump function time: %.03f", time/iter);
 
     return result;
 }
@@ -333,7 +367,15 @@ static inline Point bfs_to_closest_tile(MineSweeperGameScreenModel* model) {
 // Four way BFS 'Flood fill' to clear adjacent non-mine tiles
 // We can use m*lib for a set and dequeue for BFS
 static inline void bfs_tile_clear(MineSweeperGameScreenModel* model) {
-    //
+    furi_assert(model);
+
+    static double bfs_time = 0.0L;
+    static double time = 0.0L;
+    static uint32_t iter = 0;
+    iter++;
+
+    uint32_t start_tick = furi_get_tick();
+    
     // Init both the set and dequeue
     point_deq_t deq;
     point_set_t set;
@@ -351,8 +393,10 @@ static inline void bfs_tile_clear(MineSweeperGameScreenModel* model) {
 
     point_deq_push_back(deq, pos);
 
-    uint32_t start_tick = furi_get_tick();
-    
+    uint32_t bfs_start_tick = furi_get_tick();
+
+    uint16_t i = 0;
+
     while (point_deq_size(deq) > 0) {
         point_deq_pop_front(&pos, deq);
         Point curr_pos = pointobj_get_point(pos);
@@ -398,15 +442,28 @@ static inline void bfs_tile_clear(MineSweeperGameScreenModel* model) {
             pointobj_set_point(pos, neighbor);
             point_deq_push_back(deq, pos);
         }
+        i++;
     }
 
-    uint32_t ticks_elapsed = furi_get_tick() - start_tick;
-    double sec = (double)ticks_elapsed / (double)furi_kernel_get_tick_frequency();
-    double milliseconds = 1000.0L * sec;
-    FURI_LOG_D(MS_DEBUG_TAG, "FLOOD FILL TOOK: %.2f MS", milliseconds);
+    uint32_t bfs_end_tick = furi_get_tick();
 
     point_set_clear(set);
     point_deq_clear(deq);
+
+    uint32_t ticks_elapsed = furi_get_tick() - start_tick;
+    uint32_t bfs_ticks_elapsed = bfs_end_tick - bfs_start_tick;
+    double sec = (double)ticks_elapsed / (double)furi_kernel_get_tick_frequency();
+    double bfs_sec = (double)bfs_ticks_elapsed / (double)furi_kernel_get_tick_frequency();
+    double milliseconds = 1000.0L * sec;
+    double bfs_milliseconds = 1000.0L * bfs_sec;
+    time += milliseconds;
+    bfs_time += bfs_milliseconds;
+
+    FURI_LOG_D(MS_DEBUG_TAG, "BFS specific time: %.03f, in %d iter", bfs_milliseconds, i);
+    FURI_LOG_D(MS_DEBUG_TAG, "BFS Clear function time: %.03f", milliseconds);
+
+    FURI_LOG_D(MS_DEBUG_TAG, "BFS specific time avg: %.03f, in %d iter", bfs_time/iter, i);
+    FURI_LOG_D(MS_DEBUG_TAG, "BFS Clear function time avg: %.03f", time/iter);
 }
 
 static void mine_sweeper_game_screen_set_board_information(
@@ -632,6 +689,13 @@ static void mine_sweeper_game_screen_view_lose_draw_callback(Canvas* canvas, voi
 static void mine_sweeper_game_screen_view_play_draw_callback(Canvas* canvas, void* _model) {
     furi_assert(canvas);
     furi_assert(_model);
+
+    static double time = 0.0L;
+    static uint32_t iter = 0;
+    iter++;
+    
+    uint32_t start_tick = furi_get_tick();
+
     MineSweeperGameScreenModel* model = _model;
 
     canvas_clear(canvas);
@@ -770,6 +834,15 @@ static void mine_sweeper_game_screen_view_play_draw_callback(Canvas* canvas, voi
             AlignLeft,
             AlignTop,
             furi_string_get_cstr(model->info_str));
+
+    uint32_t ticks_elapsed2 = furi_get_tick() - start_tick;
+    double sec2 = (double) ticks_elapsed2 / (double) furi_kernel_get_tick_frequency();
+    double milliseconds = sec2 * 1000;
+    time += milliseconds;
+
+    if (iter % 50 == 0)
+        FURI_LOG_D(MS_DEBUG_TAG, "Draw callback avg time: %.03f", time/iter);
+
 }
 
 static bool mine_sweeper_game_screen_view_end_input_callback(InputEvent* event, void* context) {
@@ -789,7 +862,6 @@ static bool mine_sweeper_game_screen_view_end_input_callback(InputEvent* event, 
                 switch (event->key) {
 
                     case InputKeyUp :
-                        FURI_LOG_D(MS_DEBUG_TAG, "Event Type: (InputTypePress || InputTypeRepeat) && InputKeyUp");
                         model->curr_pos.x_abs = (model->curr_pos.x_abs-1 < 0) ? 0 : model->curr_pos.x_abs-1;
 
                         is_outside_boundary = model->curr_pos.x_abs <
@@ -803,7 +875,6 @@ static bool mine_sweeper_game_screen_view_end_input_callback(InputEvent* event, 
                         break;
 
                     case InputKeyDown :
-                        FURI_LOG_D(MS_DEBUG_TAG, "Event Type: (InputTypePress || InputTypeRepeat) && Inputdown");
                         model->curr_pos.x_abs = (model->curr_pos.x_abs+1 >= model->board_height) ?
                             model->board_height-1 : model->curr_pos.x_abs+1;
 
@@ -817,7 +888,6 @@ static bool mine_sweeper_game_screen_view_end_input_callback(InputEvent* event, 
                         break;
 
                     case InputKeyLeft :
-                        FURI_LOG_D(MS_DEBUG_TAG, "Event Type: (InputTypePress || InputTypeRepeat) && InputKeyLeft");
                         model->curr_pos.y_abs = (model->curr_pos.y_abs-1 < 0) ? 0 : model->curr_pos.y_abs-1;
 
                         is_outside_boundary = model->curr_pos.y_abs <
@@ -831,7 +901,6 @@ static bool mine_sweeper_game_screen_view_end_input_callback(InputEvent* event, 
                         break;
 
                     case InputKeyRight :
-                        FURI_LOG_D(MS_DEBUG_TAG, "Event Type: (InputTypePress || InputTypeRepeat) && InputKeyRight");
                         model->curr_pos.y_abs = (model->curr_pos.y_abs+1 >= model->board_width) ?
                             model->board_width-1 : model->curr_pos.y_abs+1;
 
@@ -873,6 +942,13 @@ static bool mine_sweeper_game_screen_view_play_input_callback(InputEvent* event,
     furi_assert(context);
     furi_assert(event);
 
+    static double time = 0.0L;
+    static uint32_t iter = 0;
+    iter++;
+    
+    uint32_t start_tick = furi_get_tick();
+
+
     MineSweeperGameScreen* instance = context;
     bool consumed = false;
 
@@ -881,8 +957,6 @@ static bool mine_sweeper_game_screen_view_play_input_callback(InputEvent* event,
     if (event->key == InputKeyOk) { // Attempt to Clear Space !! THIS CAN BE A LOSE CONDITION
         
          if (event->type == InputTypePress) { 
-
-            FURI_LOG_D(MS_DEBUG_TAG, "Event Type: InputTypePress && InputKeyOk");
 
             with_view_model(
                 instance->view,
@@ -944,7 +1018,6 @@ static bool mine_sweeper_game_screen_view_play_input_callback(InputEvent* event,
 
                     if (state == MineSweeperGameScreenTileStateCleared) {
 
-                        FURI_LOG_D(MS_DEBUG_TAG, "Event Type: (InputTypeLong || InputTypeRepeat) && InputKeyBack");
 
 
                         // BFS to closest uncovered position
@@ -957,7 +1030,6 @@ static bool mine_sweeper_game_screen_view_play_input_callback(InputEvent* event,
                         model->curr_pos.x_abs = res.x;
                         model->curr_pos.y_abs = res.y;
 
-                        FURI_LOG_D(MS_DEBUG_TAG, "After DFS pos: (%hd,%hd)", res.x, res.y);
 
                         bool is_outside_top_boundary = model->curr_pos.x_abs <
                             (model->bottom_boundary - MINESWEEPER_SCREEN_TILE_HEIGHT);
@@ -987,7 +1059,6 @@ static bool mine_sweeper_game_screen_view_play_input_callback(InputEvent* event,
 
                     // Flag or Unflag tile and check win condition 
                     } else if (!model->is_holding_down_button && (state == MineSweeperGameScreenTileStateUncleared || state == MineSweeperGameScreenTileStateFlagged)) { 
-                        FURI_LOG_D(MS_DEBUG_TAG, "Event Type: InputTypeLong && InputKeyOk");
 
                         if (state == MineSweeperGameScreenTileStateFlagged) {
                             if (model->board[curr_pos_1d].tile_type == MineSweeperGameScreenTileMine) model->mines_left++;
@@ -1028,7 +1099,6 @@ static bool mine_sweeper_game_screen_view_play_input_callback(InputEvent* event,
                 switch (event->key) {
 
                     case InputKeyUp :
-                        FURI_LOG_D(MS_DEBUG_TAG, "Event Type: (InputTypePress || InputTypeRepeat) && InputKeyUp");
                         model->curr_pos.x_abs = (model->curr_pos.x_abs-1 < 0) ? 0 : model->curr_pos.x_abs-1;
 
                         is_outside_boundary = model->curr_pos.x_abs <
@@ -1042,7 +1112,6 @@ static bool mine_sweeper_game_screen_view_play_input_callback(InputEvent* event,
                         break;
 
                     case InputKeyDown :
-                        FURI_LOG_D(MS_DEBUG_TAG, "Event Type: (InputTypePress || InputTypeRepeat) && Inputdown");
                         model->curr_pos.x_abs = (model->curr_pos.x_abs+1 >= model->board_height) ?
                             model->board_height-1 : model->curr_pos.x_abs+1;
 
@@ -1056,7 +1125,6 @@ static bool mine_sweeper_game_screen_view_play_input_callback(InputEvent* event,
                         break;
 
                     case InputKeyLeft :
-                        FURI_LOG_D(MS_DEBUG_TAG, "Event Type: (InputTypePress || InputTypeRepeat) && InputKeyLeft");
                         model->curr_pos.y_abs = (model->curr_pos.y_abs-1 < 0) ? 0 : model->curr_pos.y_abs-1;
 
                         is_outside_boundary = model->curr_pos.y_abs <
@@ -1070,7 +1138,6 @@ static bool mine_sweeper_game_screen_view_play_input_callback(InputEvent* event,
                         break;
 
                     case InputKeyRight :
-                        FURI_LOG_D(MS_DEBUG_TAG, "Event Type: (InputTypePress || InputTypeRepeat) && InputKeyRight");
                         model->curr_pos.y_abs = (model->curr_pos.y_abs+1 >= model->board_width) ?
                             model->board_width-1 : model->curr_pos.y_abs+1;
 
@@ -1084,7 +1151,6 @@ static bool mine_sweeper_game_screen_view_play_input_callback(InputEvent* event,
                         break;
 
                     default:
-                        FURI_LOG_D(MS_DEBUG_TAG, "Event Type: (InputTypePress || InputTypeRepeat) && DEFAULT CASE");
                         break;
                 }
             },
@@ -1094,13 +1160,16 @@ static bool mine_sweeper_game_screen_view_play_input_callback(InputEvent* event,
     
 
     if (!consumed && instance->input_callback != NULL) {
-        FURI_LOG_D(MS_DEBUG_TAG, "Event type: %d, Key: %d, not consumed, sending to custom callback.", event->type, event->key);
         consumed = instance->input_callback(event, instance->context);
-    } else if (!consumed) {
-        FURI_LOG_D(MS_DEBUG_TAG, "Event type: %d, Key: %d, not consumed and custom callback NULL.", event->type, event->key);
-    } else {
-        FURI_LOG_D(MS_DEBUG_TAG, "Event type: %d, Key: %d, consumed.", event->type, event->key);
     }
+
+    uint32_t ticks_elapsed = furi_get_tick() - start_tick;
+    double sec = (double) ticks_elapsed / (double) furi_kernel_get_tick_frequency();
+    double milliseconds = sec * 1000;
+    time += milliseconds;
+
+    if (iter%3==0)
+        FURI_LOG_D(MS_DEBUG_TAG, "Input callback avg time: %.03f", time/iter);
 
     return consumed;
 }
