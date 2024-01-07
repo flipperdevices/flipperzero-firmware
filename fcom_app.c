@@ -1,8 +1,6 @@
 #include "flipper.h"
 #include "app_state.h"
 
-const char* TAG = "FCOM";
-
 int32_t fcom_app(void* p) {
     UNUSED(p);
     FURI_LOG_I(TAG, "fcom app launched");
@@ -11,7 +9,7 @@ int32_t fcom_app(void* p) {
 
     Gui* gui = furi_record_open(RECORD_GUI);
     view_dispatcher_attach_to_gui(app->view_dispatcher, gui, ViewDispatcherTypeFullscreen);
-    scene_manager_next_scene(app->scene_manager, FcomMainMenuScene);
+    scene_manager_next_scene(app->scene_manager, FcomSubmenuView);
     view_dispatcher_run(app->view_dispatcher);
 
     app_free(app);

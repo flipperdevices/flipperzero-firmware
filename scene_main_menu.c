@@ -5,14 +5,37 @@
 
 /* main menu scene */
 
+/* 
+Setup our scene widgets and create callback hooks 
+*/
+void fcom_menu_callback(void* context, uint32_t index);
+void fcom_main_menu_scene_on_enter(void* context) {
+    App* app = context;
+    submenu_reset(app->submenu);
+    submenu_set_header(app->submenu, "Sensors");
+    submenu_add_item(
+        app->submenu, "HC-SR04", MainMenuSelectionHCSR04, fcom_menu_callback, app);
+    /*
+    submenu_add_item(
+        app->submenu, "4-bar resistor", ResistorsMainMenuSelectionR4, resistors_menu_callback, app);
+    submenu_add_item(
+        app->submenu, "5-bar resistor", ResistorsMainMenuSelectionR5, resistors_menu_callback, app);
+    submenu_add_item(
+        app->submenu, "6-bar resistor", ResistorsMainMenuSelectionR6, resistors_menu_callback, app);
+    */
+    view_dispatcher_switch_to_view(app->view_dispatcher, FcomSubmenuView);
+}
+
+
 /** main menu callback - sends custom events to the scene manager based on the selection */
-void resistors_menu_callback(void* context, uint32_t index) {
+void fcom_menu_callback(void* context, uint32_t index) {
     App* app = context;
     switch(index) {
-    case ResistorsMainMenuSelectionR3:
+    case MainMenuSelectionHCSR04:
         scene_manager_handle_custom_event(
-            app->scene_manager, ResistorsMainMenuSceneSelectionEventR3);
+            app->scene_manager, MainMenuSceneSelectionEventHCSR04);
         break;
+    /*
     case ResistorsMainMenuSelectionR4:
         scene_manager_handle_custom_event(
             app->scene_manager, ResistorsMainMenuSceneSelectionEventR4);
@@ -25,38 +48,23 @@ void resistors_menu_callback(void* context, uint32_t index) {
         scene_manager_handle_custom_event(
             app->scene_manager, ResistorsMainMenuSceneSelectionEventR6);
         break;
+    */
     }
-}
-
-/** main menu scene - resets the submenu, and gives it content, callbacks and selection enums */
-void fcom_main_menu_scene_on_enter(void* context) {
-    App* app = context;
-    submenu_reset(app->submenu);
-    submenu_set_header(app->submenu, "Resistors");
-    submenu_add_item(
-        app->submenu, "3-bar resistor", ResistorsMainMenuSelectionR3, resistors_menu_callback, app);
-    submenu_add_item(
-        app->submenu, "4-bar resistor", ResistorsMainMenuSelectionR4, resistors_menu_callback, app);
-    submenu_add_item(
-        app->submenu, "5-bar resistor", ResistorsMainMenuSelectionR5, resistors_menu_callback, app);
-    submenu_add_item(
-        app->submenu, "6-bar resistor", ResistorsMainMenuSelectionR6, resistors_menu_callback, app);
-    view_dispatcher_switch_to_view(app->view_dispatcher, FcomSubmenuView);
 }
 
 /** main menu event handler - switches scene based on the event */
 bool fcom_main_menu_scene_on_event(void* context, SceneManagerEvent event) {
-    context = context;
+    App* app = context;
     bool consumed = false;
     switch(event.type) {
     case SceneManagerEventTypeCustom:
-        /*
         switch(event.event) {
-        case ResistorsMainMenuSceneSelectionEventR3:
-            app_init_resistor(app, R3);
-            scene_manager_next_scene(app->scene_manager, ResistorsEditScene);
+        case MainMenuSceneSelectionEventHCSR04:
+            // Reset state: app_init_resistor(app, R3);
+            scene_manager_next_scene(app->scene_manager, FcomHCSR04Scene);
             consumed = true;
             break;
+        /*
         case ResistorsMainMenuSceneSelectionEventR4:
             app_init_resistor(app, R4);
             scene_manager_next_scene(app->scene_manager, ResistorsEditScene);
@@ -72,7 +80,8 @@ bool fcom_main_menu_scene_on_event(void* context, SceneManagerEvent event) {
             scene_manager_next_scene(app->scene_manager, ResistorsEditScene);
             consumed = true;
             break;
-        }*/
+        */
+        }
         break;
     default: // eg. SceneManagerEventTypeBack, SceneManagerEventTypeTick
         consumed = false;

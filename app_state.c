@@ -7,14 +7,21 @@ App* app_alloc() {
     view_dispatcher_enable_queue(app->view_dispatcher);
     view_dispatcher_set_event_callback_context(app->view_dispatcher, app);
     view_dispatcher_set_custom_event_callback(app->view_dispatcher, fcom_custom_callback);
+    
+    // Wire back button to scene manager
     view_dispatcher_set_navigation_event_callback(
         app->view_dispatcher, fcom_back_event_callback);
 
+    //Allocate our submenu and add the view
     app->submenu = submenu_alloc();
-    app->widget = widget_alloc();
-
     view_dispatcher_add_view(
         app->view_dispatcher, FcomSubmenuView, submenu_get_view(app->submenu));
+
+    //Allocate our dialog and add the view
+    app->dialog = dialog_ex_alloc();
+    app->widget = widget_alloc();
+    view_dispatcher_add_view(
+        app->view_dispatcher, FcomHCSR04View, dialog_ex_get_view(app->dialog));
 
     return app;
 }
@@ -34,12 +41,16 @@ void app_free(App* app) {
     free(app->state);
 
     view_dispatcher_remove_view(app->view_dispatcher, FcomSubmenuView);
+    submenu_free(app->submenu);
+
+    view_dispatcher_remove_view(app->view_dispatcher, FcomHCSR04View);
+    widget_free(app->widget);
+
+    dialog_ex_free(app->dialog);
 
     scene_manager_free(app->scene_manager);
     view_dispatcher_free(app->view_dispatcher);
 
-    submenu_free(app->submenu);
-    widget_free(app->widget);
 
     free(app);
 }

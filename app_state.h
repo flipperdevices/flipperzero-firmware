@@ -5,15 +5,17 @@
 #include "scenes.h"
 
 typedef struct AppState {
-    uint8_t edit_selection;
+    char value[22];
 } AppState;
 
 typedef struct App {
     SceneManager* scene_manager;
     ViewDispatcher* view_dispatcher;
     Submenu* submenu;
+    DialogEx* dialog;
     Widget* widget;
     AppState* state;
+    FuriThread* read_thread;
 } App;
 
 App* app_alloc();

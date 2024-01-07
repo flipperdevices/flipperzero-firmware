@@ -3,12 +3,13 @@
 
 #include "flipper.h"
 #include "scene_main_menu.h"
+#include "scene_hcsr04.h"
 
 /** The current scene */
-typedef enum { FcomMainMenuScene, FcomSceneCount } FcomScene;
+typedef enum { FcomMainMenuScene, FcomHCSR04Scene, FcomSceneCount } FcomScene;
 
 /** The current view */
-typedef enum { FcomSubmenuView } FcomView;
+typedef enum { FcomSubmenuView, FcomHCSR04View } FcomView;
 
 extern void (*const fcom_scene_on_enter_handlers[])(void*);
 extern bool (*const fcom_scene_on_event_handlers[])(void*, SceneManagerEvent);
