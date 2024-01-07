@@ -109,6 +109,8 @@ void color_guess_read_settings(void* context) {
 
     flipper_format_rewind(fff_file);
 
+    furi_string_free(temp_str);
+
     color_guess_close_config_file(fff_file);
     color_guess_close_storage();
 }
