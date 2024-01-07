@@ -29,8 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0105-1750-0.93.9-a9982b0](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-01-06 01:30 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-01-06 01:30 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-01-06 22:37 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-01-06 22:37 EST`
 - Added: [Tarot v0.1 (By pionaiki & tihyltew)](https://github.com/pionaiki/fz-tarot)
 - Added: [Tone Generator v1.0 (By GEMISIS)](https://github.com/GEMISIS/tone_gen)
 - Updated: [Marauder Assets for ESP Flasher (By justcallmekoko)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/61bb973015b3cb8093ed367a3acdc67d99697183)
@@ -51,6 +51,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Added: [Wardriver GPS v1.0 (By Sil333033)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/d4f7c1406dfdfa2768983e8723f5f2f6639aeefe)
 - Updated: [Restaurant Pager Trigger v1.0 (By leedave)](https://github.com/leedave/flipper-zero-meal-pager)
 - Updated: [Weather Station v1.3 (By Skorpionm)-OFW](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/weather_station) [WS: add protocol Kedsum-TH/Conrad-S3318P #104](https://github.com/flipperdevices/flipperzero-good-faps/pull/104)
+- Updated: [FlipBoard Simon v1.0 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
 
 <a name="release">
 
