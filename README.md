@@ -3,8 +3,6 @@
 # Minesweeper Implementation for the Flipper Zero.
 Hello!
 
-![Mine Sweeper Start Animation Gif](https://github.com/squee72564/F0_Minesweeper_Fap/blob/main/images/github_images/StartScreenAnimationGif.gif)
-
 ![Mine Sweeper Example Gameplay Gif](https://github.com/squee72564/F0_Minesweeper_Fap/blob/main/images/github_images/MineSweeperGameplay.gif)
 
 ## Installation
