@@ -160,7 +160,7 @@ static void setup_board(MineSweeperGameScreen* instance) {
             x = rand_pos / board_width;
             y = rand_pos % board_width;
 
-            is_invalid_position = ((rand_pos == 0)                 ||
+            is_invalid_position = ((rand_pos == 0)                      ||
                                          (x==0 && y==1)                 ||
                                          (x==1 && y==0)                 ||
                                          rand_pos == board_tile_count-1 ||
