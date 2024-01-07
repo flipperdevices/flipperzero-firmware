@@ -1,4 +1,4 @@
-# 🐬 Flipper Zero - Pokemon Trading in Game Boy
+# GAME BOY Pokemon Trading MALVEKE
 
 <p align="center">
 <a target="_blank" href="https://www.reddit.com/r/flipperzero/comments/121ncot/flipper_zero_game_boy_pokemon_trading/">

@@ -1,5 +1,8 @@
 # Changelog - Patch Notes
 
+## Version 1.6
+- **Change Name:** All the application names for GAME BOY/MALVEKE were standardized for better readability on the screen.
+
 ## Version 1.5
 - **Add Features:** Incorporate flipper-gblink library; Add support for MALVEKE board as well as custom pin selection; If MALVEKE board is detected, default to that pinout, otherwise use the original documented pinout.
 - **BUG:** The current MALVEKE pinout and interrupt use breaks the OK button after entering the trade screen.

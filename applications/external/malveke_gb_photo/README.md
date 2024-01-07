@@ -1,4 +1,4 @@
-# [MALVEKE] ***GAME BOY*** PHOTO
+# ***GAME BOY*** PHOTO MALVEKE
 
 <div align="center">
 
@@ -38,7 +38,7 @@ These instructions assume that you are starting at the Flipper Zero desktop. Oth
         <br />
     </p>
 
-- For the next step, you'll need a `.SAV` file extracted from the GAME BOY Camera's RAM. If you don't have one, you can use the [**[MALVEKE] GAME BOY Cartridge (GB/GBC)**](/flipper_companion_apps/applications/external/malveke_gb_cartridge/README.md#instructions-for-use) app to save the RAM.
+- For the next step, you'll need a `.SAV` file extracted from the GAME BOY Camera's RAM. If you don't have one, you can use the [**GAME BOY Cartridge (GB/GBC) MALVEKE**](/flipper_companion_apps/applications/external/malveke_gb_cartridge/README.md#instructions-for-use) app to save the RAM.
 
     <p align='center'>
         <br />
@@ -110,6 +110,7 @@ These instructions assume that you are starting at the Flipper Zero desktop. Oth
 
 ## TODO
 - [ ] Refactor Code
+- [ ] Reading images directly from the cartridge (without opening a .SAV file).
 - [ ] For BMP, avoid using memory to generate images; write directly to files.
 - [ ] Exhibit and view images through a Web Server interface.
 - [ ] Add frames to images.

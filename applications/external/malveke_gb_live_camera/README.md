@@ -1,4 +1,4 @@
-# [MALVEKE] ***GAME BOY*** Live Camera 
+# ***GAME BOY*** Live Camera MALVEKE
 
 <figure>
     <img src="./docs/images/proto.png" />
@@ -55,7 +55,7 @@ These instructions assume that you are starting at the Flipper Zero desktop. Oth
 - Press the `OK` button on the Flipper to open the main menu.
 - Choose `Applications` from the menu.
 - Choose `GPIO` from the submenu.
-- Choose `[MALVEKE] GB Live Camera`
+- Choose `GAME BOY Live Camera MALVEKE`
 - The Flipper Zero will show the loading screen of the application. 
 
     <p align='center'>

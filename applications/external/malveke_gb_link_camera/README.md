@@ -1,4 +1,4 @@
-# [MALVEKE] ***GAME BOY*** Link Camera
+# ***GAME BOY*** Link Camera MALVEKE
 
 ## Introduction
 
@@ -24,7 +24,7 @@ These instructions assume that you are starting at the Flipper Zero desktop. Oth
 - Press the `OK` button on the Flipper to open the main menu.
 - Choose `Applications` from the menu.
 - Choose `GPIO` from the submenu.
-- Choose `[MALVEKE] GAME BOY Link-Camera`
+- Choose `GAME BOY Link-Camera MALVEKE`
 - The Flipper Zero will show the loading screen of the application. 
 
     <p align='center'>

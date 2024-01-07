@@ -1,6 +1,6 @@
 App(
     appid="malveke_gb_live_camera",
-    name="GB Live Camera",
+    name="GAME BOY Live Camera",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="gb_live_camera_app",
     stack_size=8 * 1024,
@@ -9,6 +9,6 @@ App(
     fap_category="GPIO/MALVEKE",
     fap_author="Esteban Fuentealba",
     fap_weburl="https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/",
-    fap_version=(1, 2),
+    fap_version=(1, 3),
     fap_description="Insert a GAME BOY Camera cartridge, you can use it as a camera and take snapshots from the Flipper Zero.",
 )
