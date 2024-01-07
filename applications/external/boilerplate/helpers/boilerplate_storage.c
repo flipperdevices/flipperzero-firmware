@@ -96,8 +96,6 @@ void boilerplate_read_settings(void* context) {
         return;
     }
 
-    furi_string_free(temp_str);
-
     if(file_version < BOILERPLATE_SETTINGS_FILE_VERSION) {
         FURI_LOG_I(TAG, "old config version, will be removed.");
         boilerplate_close_config_file(fff_file);
