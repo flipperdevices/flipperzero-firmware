@@ -19,9 +19,7 @@
 #include "views/boilerplate_scene_1.h"
 #include "views/boilerplate_scene_2.h"
 
-
 #include <string.h>
-
 
 #define TAG "GBPHOTO"
 
@@ -31,8 +29,6 @@
 #define MALVEKE_APP_FOLDER EXT_PATH(MALVEKE_APP_FOLDER_USER)
 #define MALVEKE_APP_FOLDER_RAMS MALVEKE_APP_FOLDER "/rams"
 #define MALVEKE_APP_FOLDER_PHOTOS MALVEKE_APP_FOLDER "/photos"
-
-
 
 typedef struct {
     Gui* gui;
@@ -56,7 +52,6 @@ typedef struct {
     bool show_instructions;
     uint8_t tile_data[16];
     uint8_t scratchpad1[0x11FC]; // 0000 - 11fb
-
 
     unsigned long palette_color_hex_a;
     unsigned long palette_color_hex_b;

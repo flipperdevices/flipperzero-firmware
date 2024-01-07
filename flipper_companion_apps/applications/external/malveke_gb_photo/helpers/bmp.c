@@ -1,11 +1,10 @@
 #include "bmp.h"
-void bmp_init(void *buf, long width, long height)
-{
+void bmp_init(void* buf, long width, long height) {
     long pad;
     unsigned long size;
     unsigned long uw = width;
     unsigned long uh = -height;
-    unsigned char *p = (unsigned char *)buf;
+    unsigned char* p = (unsigned char*)buf;
 
 #ifdef BMP_COMPAT
     uh = height;
@@ -97,22 +96,15 @@ void bmp_init(void *buf, long width, long height)
     *p++ = 0x00;
     *p = 0x00;
 }
-void bmp_set(void *buf, long x, long y, unsigned long color)
-{
-    unsigned char *p;
-    unsigned char *hdr = (unsigned char *)buf;
-    unsigned long width =
-        (unsigned long)hdr[18] << 0 |
-        (unsigned long)hdr[19] << 8 |
-        (unsigned long)hdr[20] << 16 |
-        (unsigned long)hdr[21] << 24;
+void bmp_set(void* buf, long x, long y, unsigned long color) {
+    unsigned char* p;
+    unsigned char* hdr = (unsigned char*)buf;
+    unsigned long width = (unsigned long)hdr[18] << 0 | (unsigned long)hdr[19] << 8 |
+                          (unsigned long)hdr[20] << 16 | (unsigned long)hdr[21] << 24;
     long pad = (width * -3UL) & 3;
 #ifdef BMP_COMPAT
-    unsigned long height =
-        (unsigned long)hdr[22] << 0 |
-        (unsigned long)hdr[23] << 8 |
-        (unsigned long)hdr[24] << 16 |
-        (unsigned long)hdr[25] << 24;
+    unsigned long height = (unsigned long)hdr[22] << 0 | (unsigned long)hdr[23] << 8 |
+                           (unsigned long)hdr[24] << 16 | (unsigned long)hdr[25] << 24;
     y = height - y - 1;
 #endif
     p = hdr + 14 + 40 + y * (width * 3 + pad) + x * 3;
@@ -120,8 +112,7 @@ void bmp_set(void *buf, long x, long y, unsigned long color)
     p[1] = color >> 8;
     p[2] = color >> 16;
 }
-unsigned long bmp_encode(unsigned long color_hex)
-{
+unsigned long bmp_encode(unsigned long color_hex) {
     unsigned char r = (color_hex >> 16) & 0xFF;
     unsigned char g = (color_hex >> 8) & 0xFF;
     unsigned char b = color_hex & 0xFF;

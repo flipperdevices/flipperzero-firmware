@@ -1,6 +1,6 @@
 App(
     appid="malveke_gb_photo",
-    name="[GB] GAME BOY PHOTO",
+    name="GAME BOY PHOTO MALVEKE",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="boilerplate_app",
     cdefines=["APP_GB_PHOTO"],

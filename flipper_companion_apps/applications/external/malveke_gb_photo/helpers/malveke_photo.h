@@ -5,6 +5,6 @@
 
 #include "../malveke_gb_photo.h"
 
-void get_timefilename(FuriString *name, int index);
+void get_timefilename(FuriString* name, int index);
 
 #endif /* MALVEKE_PHOTO_H */

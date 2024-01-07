@@ -25,10 +25,9 @@ Boilerplate* boilerplate_app_alloc() {
     app->gui = furi_record_open(RECORD_GUI);
     app->notification = furi_record_open(RECORD_NOTIFICATION);
     app->storage = furi_record_open(RECORD_STORAGE);
-    
+
     //Turn backlight on, believe me this makes testing your app easier
     notification_message(app->notification, &sequence_display_backlight_on);
-
 
     //Scene additions
     app->view_dispatcher = view_dispatcher_alloc();
@@ -36,11 +35,13 @@ Boilerplate* boilerplate_app_alloc() {
 
     app->scene_manager = scene_manager_alloc(&boilerplate_scene_handlers, app);
     view_dispatcher_set_event_callback_context(app->view_dispatcher, app);
-    view_dispatcher_set_navigation_event_callback(app->view_dispatcher, boilerplate_navigation_event_callback);
-    view_dispatcher_set_tick_event_callback(app->view_dispatcher, boilerplate_tick_event_callback, 100);
-    view_dispatcher_set_custom_event_callback(app->view_dispatcher, boilerplate_custom_event_callback);
+    view_dispatcher_set_navigation_event_callback(
+        app->view_dispatcher, boilerplate_navigation_event_callback);
+    view_dispatcher_set_tick_event_callback(
+        app->view_dispatcher, boilerplate_tick_event_callback, 100);
+    view_dispatcher_set_custom_event_callback(
+        app->view_dispatcher, boilerplate_custom_event_callback);
     app->submenu = submenu_alloc();
-
 
     app->palette = BoilerplatePaletteBlackAndWhite;
     app->info = BoilerplateInfoOn;
@@ -48,7 +49,6 @@ Boilerplate* boilerplate_app_alloc() {
     app->palette_color_hex_b = 0xAAAAAA;
     app->palette_color_hex_c = 0x555555;
     app->palette_color_hex_d = 0x000000;
-    
 
     app->file_path = furi_string_alloc();
     app->camera_ram_sav = storage_file_alloc(app->storage);
@@ -57,23 +57,33 @@ Boilerplate* boilerplate_app_alloc() {
     app->pos_y = 0;
     app->show_instructions = true;
 
-   
-
     // Used for File Browser
     app->dialogs = furi_record_open(RECORD_DIALOGS);
     app->file_path = furi_string_alloc();
 
-
-    view_dispatcher_add_view(app->view_dispatcher, BoilerplateViewIdMenu, submenu_get_view(app->submenu));
+    view_dispatcher_add_view(
+        app->view_dispatcher, BoilerplateViewIdMenu, submenu_get_view(app->submenu));
     app->boilerplate_startscreen = boilerplate_startscreen_alloc();
-    view_dispatcher_add_view(app->view_dispatcher, BoilerplateViewIdStartscreen, boilerplate_startscreen_get_view(app->boilerplate_startscreen));
+    view_dispatcher_add_view(
+        app->view_dispatcher,
+        BoilerplateViewIdStartscreen,
+        boilerplate_startscreen_get_view(app->boilerplate_startscreen));
     app->boilerplate_scene_1 = boilerplate_scene_1_alloc();
-    view_dispatcher_add_view(app->view_dispatcher, BoilerplateViewIdScene1, boilerplate_scene_1_get_view(app->boilerplate_scene_1));
+    view_dispatcher_add_view(
+        app->view_dispatcher,
+        BoilerplateViewIdScene1,
+        boilerplate_scene_1_get_view(app->boilerplate_scene_1));
     app->boilerplate_scene_2 = boilerplate_scene_2_alloc();
-    view_dispatcher_add_view(app->view_dispatcher, BoilerplateViewIdScene2, boilerplate_scene_2_get_view(app->boilerplate_scene_2));
-    
+    view_dispatcher_add_view(
+        app->view_dispatcher,
+        BoilerplateViewIdScene2,
+        boilerplate_scene_2_get_view(app->boilerplate_scene_2));
+
     app->variable_item_list = variable_item_list_alloc();
-    view_dispatcher_add_view(app->view_dispatcher, BoilerplateViewIdSettings, variable_item_list_get_view(app->variable_item_list));
+    view_dispatcher_add_view(
+        app->view_dispatcher,
+        BoilerplateViewIdSettings,
+        variable_item_list_get_view(app->variable_item_list));
 
     //End Scene Additions
 
@@ -82,7 +92,7 @@ Boilerplate* boilerplate_app_alloc() {
 
 void boilerplate_app_free(Boilerplate* app) {
     furi_assert(app);
-    
+
     // Scene manager
     scene_manager_free(app->scene_manager);
 
@@ -100,12 +110,9 @@ void boilerplate_app_free(Boilerplate* app) {
         storage_file_free(app->camera_ram_sav);
     }
 
-
     furi_record_close(RECORD_GUI);
     furi_record_close(RECORD_STORAGE);
 
-
-    
     app->gui = NULL;
     app->notification = NULL;
     app->storage = NULL;
@@ -121,10 +128,11 @@ void boilerplate_app_free(Boilerplate* app) {
 int32_t boilerplate_app(void* p) {
     UNUSED(p);
     Boilerplate* app = boilerplate_app_alloc();
-    
+
     view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
-    
-    scene_manager_next_scene(app->scene_manager, BoilerplateSceneStartscreen); //Start with start screen
+
+    scene_manager_next_scene(
+        app->scene_manager, BoilerplateSceneStartscreen); //Start with start screen
 
     furi_hal_power_suppress_charge_enter();
 
@@ -135,6 +143,3 @@ int32_t boilerplate_app(void* p) {
 
     return 0;
 }
-
-
-

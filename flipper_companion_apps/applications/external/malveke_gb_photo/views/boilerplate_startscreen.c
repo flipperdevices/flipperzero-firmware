@@ -6,31 +6,27 @@
 
 extern const uint8_t u8g2_font_5x7_mf[1911]; // Declare as extern
 
-struct BoilerplateStartscreen
-{
-    View *view;
+struct BoilerplateStartscreen {
+    View* view;
     BoilerplateStartscreenCallback callback;
-    void *context;
+    void* context;
 };
 
-typedef struct
-{
+typedef struct {
     int some_value;
 } BoilerplateStartscreenModel;
 
 void boilerplate_startscreen_set_callback(
-    BoilerplateStartscreen *instance,
+    BoilerplateStartscreen* instance,
     BoilerplateStartscreenCallback callback,
-    void *context)
-{
+    void* context) {
     furi_assert(instance);
     furi_assert(callback);
     instance->callback = callback;
     instance->context = context;
 }
 
-void boilerplate_startscreen_draw(Canvas *canvas, BoilerplateStartscreenModel *model)
-{
+void boilerplate_startscreen_draw(Canvas* canvas, BoilerplateStartscreenModel* model) {
     UNUSED(model);
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
@@ -43,19 +39,15 @@ void boilerplate_startscreen_draw(Canvas *canvas, BoilerplateStartscreenModel *m
     elements_button_center(canvas, "Start");
 }
 
-static void boilerplate_startscreen_model_init(BoilerplateStartscreenModel *const model)
-{
+static void boilerplate_startscreen_model_init(BoilerplateStartscreenModel* const model) {
     model->some_value = 1;
 }
 
-bool boilerplate_startscreen_input(InputEvent *event, void *context)
-{
+bool boilerplate_startscreen_input(InputEvent* event, void* context) {
     furi_assert(context);
-    BoilerplateStartscreen *instance = context;
-    if (event->type == InputTypeRelease)
-    {
-        switch (event->key)
-        {
+    BoilerplateStartscreen* instance = context;
+    if(event->type == InputTypeRelease) {
+        switch(event->key) {
         case InputKeyBack:
             with_view_model(
                 instance->view,
@@ -80,27 +72,22 @@ bool boilerplate_startscreen_input(InputEvent *event, void *context)
     return true;
 }
 
-void boilerplate_startscreen_exit(void *context)
-{
+void boilerplate_startscreen_exit(void* context) {
     furi_assert(context);
 }
 
-void boilerplate_startscreen_enter(void *context)
-{
+void boilerplate_startscreen_enter(void* context) {
     furi_assert(context);
-    BoilerplateStartscreen *instance = (BoilerplateStartscreen *)context;
+    BoilerplateStartscreen* instance = (BoilerplateStartscreen*)context;
     with_view_model(
         instance->view,
         BoilerplateStartscreenModel * model,
-        {
-            boilerplate_startscreen_model_init(model);
-        },
+        { boilerplate_startscreen_model_init(model); },
         true);
 }
 
-BoilerplateStartscreen *boilerplate_startscreen_alloc()
-{
-    BoilerplateStartscreen *instance = malloc(sizeof(BoilerplateStartscreen));
+BoilerplateStartscreen* boilerplate_startscreen_alloc() {
+    BoilerplateStartscreen* instance = malloc(sizeof(BoilerplateStartscreen));
     instance->view = view_alloc();
     view_allocate_model(instance->view, ViewModelTypeLocking, sizeof(BoilerplateStartscreenModel));
     view_set_context(instance->view, instance); // furi_assert crashes in events without this
@@ -109,30 +96,21 @@ BoilerplateStartscreen *boilerplate_startscreen_alloc()
     with_view_model(
         instance->view,
         BoilerplateStartscreenModel * model,
-        {
-            boilerplate_startscreen_model_init(model);
-        },
+        { boilerplate_startscreen_model_init(model); },
         true);
 
     return instance;
 }
 
-void boilerplate_startscreen_free(BoilerplateStartscreen *instance)
-{
+void boilerplate_startscreen_free(BoilerplateStartscreen* instance) {
     furi_assert(instance);
     with_view_model(
-        instance->view,
-        BoilerplateStartscreenModel * model,
-        {
-            UNUSED(model);
-        },
-        true);
+        instance->view, BoilerplateStartscreenModel * model, { UNUSED(model); }, true);
     view_free(instance->view);
     free(instance);
 }
 
-View *boilerplate_startscreen_get_view(BoilerplateStartscreen *instance)
-{
+View* boilerplate_startscreen_get_view(BoilerplateStartscreen* instance) {
     furi_assert(instance);
     return instance->view;
 }

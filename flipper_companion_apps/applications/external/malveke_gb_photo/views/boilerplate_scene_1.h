@@ -8,8 +8,8 @@
 #include "../helpers/bmp.h"
 #include "../helpers/malveke_photo.h"
 
-#define WIDTH   128L
-#define HEIGHT  112L
+#define WIDTH 128L
+#define HEIGHT 112L
 
 #define FRAME_WIDTH 128
 #define FRAME_HEIGTH 64
