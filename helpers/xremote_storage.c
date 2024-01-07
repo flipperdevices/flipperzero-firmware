@@ -113,6 +113,8 @@ void xremote_read_settings(void* context) {
 
     flipper_format_rewind(fff_file);
 
+    furi_string_free(temp_str);
+
     xremote_close_config_file(fff_file);
     xremote_close_storage();
 }
