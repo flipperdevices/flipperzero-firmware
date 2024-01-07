@@ -1,4 +1,4 @@
-# [MALVEKE] ***GAME BOY*** Cartridge (GB/GBC)
+# ***GAME BOY*** Cartridge (GB/GBC) MALVEKE
 
 <figure>
     <img src="./docs/images/proto.jpg" />
@@ -39,7 +39,7 @@ These instructions assume that you are starting at the Flipper Zero desktop. Oth
 - Press the `OK` button on the Flipper to open the main menu.
 - Choose `Applications` from the menu.
 - Choose `GPIO` from the submenu.
-- Choose `[MALVEKE] GAME BOY Cartridge (GB/GBC)`
+- Choose `GAME BOY Cartridge (GB/GBC) MALVEKE`
 
     <p align='center'>
         <br />

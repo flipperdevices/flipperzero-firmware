@@ -1,6 +1,6 @@
 App(
     appid="malveke_gb_emulator",
-    name="[MALVEKE] Emulator",
+    name="GAME BOY Emulator MALVEKE",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="malveke_gb_emulator_app",
     cdefines=["APP_EMULATOR"],
