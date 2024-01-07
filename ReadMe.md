@@ -29,8 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0106-2347-0.93.9-e789a49](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-01-06 23:47 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-01-06 23:47 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-01-07 03:41 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-01-07 03:41 EST`
 - Added: [Tarot v0.1 (By pionaiki & tihyltew)](https://github.com/pionaiki/fz-tarot)
 - Added: [Tone Generator v1.0 (By GEMISIS)](https://github.com/GEMISIS/tone_gen)
 - Updated: [Marauder Assets for ESP Flasher (By justcallmekoko)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/61bb973015b3cb8093ed367a3acdc67d99697183)
@@ -54,6 +54,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [FlipBoard Simon v1.0 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
 - Added: [MALVEKE GB Photo v1.0 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external/malveke_gb_photo) `Req: Malveke`
 - Added: [YuriCable Pro Max v0.1 (By arag0re)](https://github.com/arag0re/fz-yuricable-pro-max)
+- Updated: [Flipper Aid v1.0 (By spaghety)](https://github.com/spaghety/flipper-aid)
 
 <a name="release">
 

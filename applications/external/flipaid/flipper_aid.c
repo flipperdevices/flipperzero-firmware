@@ -4,6 +4,9 @@
 #include <input/input.h>
 #include <notification/notification_messages.h>
 
+//CPR pause/play variable
+short cprProgress = 0;
+
 /**
  * Enumeration establishes difference between ticks and input events in CPR
 */
@@ -36,7 +39,20 @@ void flipper_aid_draw_callback(Canvas* canvas, void* ctx) {
     canvas_set_font(canvas, FontSecondary);
     canvas_draw_str(canvas, 2, 22, "Press OK to start CPR");
     canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str(canvas, 2, 34, "Release return to exit the app");
+    canvas_draw_str(canvas, 2, 34, "Press return to exit the app");
+    //pause button
+    if(cprProgress == 0) {
+        canvas_draw_line(canvas, 60, 45, 60, 57);
+        canvas_draw_line(canvas, 61, 46, 61, 56);
+        canvas_draw_line(canvas, 62, 47, 62, 55);
+        canvas_draw_line(canvas, 63, 48, 63, 54);
+        canvas_draw_line(canvas, 64, 49, 64, 53);
+        canvas_draw_line(canvas, 65, 50, 65, 52);
+        canvas_draw_dot(canvas, 66, 51);
+    } else {
+        canvas_draw_box(canvas, 60, 45, 3, 12);
+        canvas_draw_box(canvas, 66, 45, 3, 12);
+    }
 }
 
 void flipper_aid_input_callback(InputEvent* input_event, void* ctx) {
@@ -68,12 +84,14 @@ int32_t flipper_aid_app(void* p) {
             if(furi_hal_speaker_acquire(1000)) {
                 uint32_t freq = round(furi_kernel_get_tick_frequency() * 0.5);
                 furi_timer_start(timer, freq);
+                cprProgress = 1; //start CPR
                 while(1) {
                     furi_check(
                         furi_message_queue_get(event_queue, &event, FuriWaitForever) ==
                         FuriStatusOk);
                     if(event.type == CPREventTypeInput && event.input.type == InputTypeShort &&
                        (event.input.key == InputKeyBack || event.input.key == InputKeyOk)) {
+                        cprProgress = 0; //pause CPR
                         break;
                     } else if(event.type == CPREventTypeTick) {
                         furi_hal_speaker_start(440.0f, 1.0f);
