@@ -17,6 +17,8 @@
 
 #include "../helpers/camera_suite_custom_event.h"
 
+#include <camera_suite_icons.h>
+
 #define BITMAP_HEADER_LENGTH 62
 #define FRAME_BIT_DEPTH 1
 #define FRAME_BUFFER_LENGTH 1024
@@ -33,7 +35,6 @@ static const unsigned char bitmap_header[BITMAP_HEADER_LENGTH] = {
     0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0x00};
 
-extern const Icon I_DolphinCommon_56x48;
 typedef enum {
     WorkerEventReserved = (1 << 0), // Reserved for StreamBuffer internal event
     WorkerEventStop = (1 << 1),
