@@ -1,12 +1,10 @@
+
 # Minesweeper Implementation for the Flipper Zero.
 Hello!
 
 ![Mine Sweeper Start Animation](https://github.com/squee72564/F0_Minesweeper_Fap/blob/main/images/github_images/StartScreenAnimationGif.gif)
 
 This is my first flipper zero application and this repo will be a learning process in general.
-
-If you have any tips for structuring the application and best practices for managing the views/scenes
-I am always welcome to feedback!
 
 Right now the current structure of the application is heavily inspired from [leedave's](https://github.com/leedave/flipper-zero-fap-boilerplate) boilerplate repo.
 
@@ -19,9 +17,23 @@ Right now the current structure of the application is heavily inspired from [lee
 	`ufbt launch` to compile and launch the app on your Flipper Zero
 4. Profit
 
+## How To Play
+- Up/Down/Left/Right Buttons to move around (can be held to continuously move)
+- Center OK Button to attempt opening up a tile
+- Hold Back Button on a covered tile to toggle marking it with a flag
+- Hold Back Button on a uncovered tile to jump to one of the closest covered tiles (this can help find last covered tiles on a larger board)
+- Press Back Button to access the settings menu where you can do the following:
+	- Change board width
+	- Change board height
+	- Change difficulty (still experimenting with values for this)
 
-The following is the application structure with a breakdown of each folder.
+#### NOTICE:
+The way I set the board up leaves the corners as safe starting positions with the top left tile 0,0 always having an unambiguous next move. I opted for this instead of opening up the board on the first tile the user selects.
+
+This is done to help the solver and simplify the game start. 
+
 ## Application Structure
+The following is the application structure with a breakdown of each folder:
 -  **[F0_Minesweeper_Fap/](https://github.com/squee72564/F0_Minesweeper_Fap)**
 	- [github/workflows/](https://github.com/squee72564/F0_Minesweeper_Fap/tree/main/.github/workflows)
 		- Github workflows folder
@@ -39,3 +51,9 @@ The following is the application structure with a breakdown of each folder.
 		- Main Mine Sweeper App .c and .h file
 	- application.fam
 		- [Build system manifest file](https://github.com/flipperdevices/flipperzero-firmware/blob/dev/documentation/AppManifests.md#application-definition) for the application
+
+## TODO
+- Implement mine sweeper solver for board generation
+	- Using a solver to check the generated board can ensure that it can be solved without any guesses. I think this would be more fair to the player and would ensure more interesting boards where you are not just guessing.
+	- The one downside is that this will introduce much more overhead for the board setup as the game will need to continuously generate and attempt to solve maps until it gets a valid one.
+	- I may have it attempt to generate and solve maps for a set time period, and if it cannot do so it will use the next random map, solve it even if it needs to guess perfectly multiple times, and then inform the user that a unambiguous map could not be generated in the set amount of time and that it will take N guesses to solve.
