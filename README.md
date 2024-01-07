@@ -1,12 +1,11 @@
 
+
 # Minesweeper Implementation for the Flipper Zero.
 Hello!
 
-![Mine Sweeper Start Animation](https://github.com/squee72564/F0_Minesweeper_Fap/blob/main/images/github_images/StartScreenAnimationGif.gif)
+![Mine Sweeper Start Animation Gif](https://github.com/squee72564/F0_Minesweeper_Fap/blob/main/images/github_images/StartScreenAnimationGif.gif)
 
-This is my first flipper zero application and this repo will be a learning process in general.
-
-Right now the current structure of the application is heavily inspired from [leedave's](https://github.com/leedave/flipper-zero-fap-boilerplate) boilerplate repo.
+![Mine Sweeper Example Gameplay Gif](https://github.com/squee72564/F0_Minesweeper_Fap/blob/main/images/github_images/MineSweeperGameplay.gif)
 
 ## Installation
 1. Clone this repo to your computer ie:
@@ -51,6 +50,10 @@ The following is the application structure with a breakdown of each folder:
 		- Main Mine Sweeper App .c and .h file
 	- application.fam
 		- [Build system manifest file](https://github.com/flipperdevices/flipperzero-firmware/blob/dev/documentation/AppManifests.md#application-definition) for the application
+
+
+Right now the current structure of the application is heavily inspired from [leedave's](https://github.com/leedave/flipper-zero-fap-boilerplate) boilerplate repo.
+
 
 ## TODO
 - Implement mine sweeper solver for board generation
