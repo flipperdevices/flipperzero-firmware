@@ -68,7 +68,7 @@
 - GAME BOY Camera Link Cable Transfer MALVEKE (Review)
 - GAME BOY Printer Link Cable Transfer MALVEKE
 - GAME BOY Logo Generator MALVEKE
-- [Pokemon Trading MALVEKE](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Pokemon-Trading?tab=readme-ov-file#instructions-for-use)
+- [GAME BOY Pokemon Trading MALVEKE](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Pokemon-Trading?tab=readme-ov-file#instructions-for-use)
 - [GAME BOY Emulator MALVEKE(POC)](./flipper_companion_apps/applications/external/malveke_gb_emulator/README.md)
 
 ## Contributors
