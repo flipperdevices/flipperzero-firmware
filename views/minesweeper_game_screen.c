@@ -96,6 +96,7 @@ static const float difficulty_multiplier[5] = {
 
 // Static helper functions
 static void setup_board(MineSweeperGameScreen* instance);
+static Point bfs_to_closest_tile(MineSweeperGameScreenModel* model);
 static inline void bfs_tile_clear(MineSweeperGameScreenModel* model);
 static void mine_sweeper_game_screen_set_board_information(
         MineSweeperGameScreen* instance,
@@ -146,7 +147,6 @@ static void setup_board(MineSweeperGameScreen* instance) {
     );
 
     uint16_t num_mines = board_tile_count * difficulty_multiplier[ board_difficulty ];
-    FURI_LOG_D(MS_DEBUG_TAG, "Placing %hd mines", num_mines);
 
     /** We can use a temporary buffer to set the tile types initially
      * and manipulate then save to actual model
@@ -337,8 +337,6 @@ static inline Point bfs_to_closest_tile(MineSweeperGameScreenModel* model) {
             pointobj_set_point(pos, neighbor);
             point_deq_push_back(deq, pos);
         }
-
-        i++;
     }
 
     uint32_t bfs_end_tick = furi_get_tick();
@@ -1018,8 +1016,6 @@ static bool mine_sweeper_game_screen_view_play_input_callback(InputEvent* event,
 
                     if (state == MineSweeperGameScreenTileStateCleared) {
 
-
-
                         // BFS to closest uncovered position
                         Point res = bfs_to_closest_tile(model);
 
@@ -1029,7 +1025,6 @@ static bool mine_sweeper_game_screen_view_play_input_callback(InputEvent* event,
                         
                         model->curr_pos.x_abs = res.x;
                         model->curr_pos.y_abs = res.y;
-
 
                         bool is_outside_top_boundary = model->curr_pos.x_abs <
                             (model->bottom_boundary - MINESWEEPER_SCREEN_TILE_HEIGHT);
@@ -1211,7 +1206,6 @@ MineSweeperGameScreen* mine_sweeper_game_screen_alloc(uint8_t width, uint8_t hei
     // We need to initize board width and height before setup
     mine_sweeper_game_screen_set_board_information(mine_sweeper_game_screen, width, height, difficulty);
 
-    FURI_LOG_D(MS_DEBUG_TAG, "Setting up board with w:%03hhd h:%03hhd d:%02hhd", width, height, difficulty);
     setup_board(mine_sweeper_game_screen);
     
     return mine_sweeper_game_screen;
@@ -1247,7 +1241,6 @@ void mine_sweeper_game_screen_reset(MineSweeperGameScreen* instance, uint8_t wid
 
     mine_sweeper_game_screen_reset_clock(instance);
 
-    FURI_LOG_D(MS_DEBUG_TAG, "Setting up board with w:%03hhd h:%03hhd d:%02hhd", width, height, difficulty);
     setup_board(instance);
 
 }

@@ -18,7 +18,6 @@ static void mine_sweeper_close_config_file(FlipperFormat* file) {
 void mine_sweeper_save_settings(void* context) {
     MineSweeperApp* app = context;
 
-    FURI_LOG_D(TAG, "Saving Settings");
     Storage* storage = mine_sweeper_open_storage();
     FlipperFormat* fff_file = flipper_format_file_alloc(storage);
     
@@ -29,9 +28,9 @@ void mine_sweeper_save_settings(void* context) {
 
     // Open File, create if not exists
     if(!storage_common_stat(storage, MINESWEEPER_SETTINGS_SAVE_PATH, NULL) == FSE_OK) {
-        FURI_LOG_D(TAG, "Config file %s is not found. Will create new.", MINESWEEPER_SETTINGS_SAVE_PATH);
+        FURI_LOG_I(TAG, "Config file %s is not found. Will create new.", MINESWEEPER_SETTINGS_SAVE_PATH);
         if(storage_common_stat(storage, CONFIG_FILE_DIRECTORY_PATH, NULL) == FSE_NOT_EXIST) {
-            FURI_LOG_D(
+            FURI_LOG_I(
                 TAG,
                 "Directory %s doesn't exist. Will create new.",
                 CONFIG_FILE_DIRECTORY_PATH);
@@ -42,7 +41,6 @@ void mine_sweeper_save_settings(void* context) {
     }
 
     if(!flipper_format_file_open_new(fff_file, MINESWEEPER_SETTINGS_SAVE_PATH)) {
-        //totp_close_config_file(fff_file);
         FURI_LOG_E(TAG, "Error creating new file %s", MINESWEEPER_SETTINGS_SAVE_PATH);
         mine_sweeper_close_storage();
         return;
@@ -68,8 +66,8 @@ void mine_sweeper_save_settings(void* context) {
         fff_file, MINESWEEPER_SETTINGS_KEY_DIFFICULTY, &d, 1);
     
     if(!flipper_format_rewind(fff_file)) {
-        mine_sweeper_close_config_file(fff_file);
         FURI_LOG_E(TAG, "Rewind error");
+        mine_sweeper_close_config_file(fff_file);
         mine_sweeper_close_storage();
         return;
     }
@@ -81,6 +79,7 @@ void mine_sweeper_save_settings(void* context) {
 
 bool mine_sweeper_read_settings(void* context) {
     MineSweeperApp* app = context;
+
     Storage* storage = mine_sweeper_open_storage();
     FlipperFormat* fff_file = flipper_format_file_alloc(storage);
 
@@ -89,6 +88,7 @@ bool mine_sweeper_read_settings(void* context) {
         mine_sweeper_close_storage();
         return false;
     }
+
     uint32_t file_version;
     FuriString* temp_str = furi_string_alloc();
 
@@ -105,6 +105,8 @@ bool mine_sweeper_read_settings(void* context) {
         mine_sweeper_close_storage();
         return false;
     }
+
+    furi_string_free(temp_str);
 
     if(file_version < MINESWEEPER_SETTINGS_FILE_VERSION) {
         FURI_LOG_I(TAG, "old config version, will be removed.");
