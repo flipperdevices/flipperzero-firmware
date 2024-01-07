@@ -39,6 +39,7 @@ This code is open-source and may be used for whatever you want to do with it.
 - [Roguemaster](https://github.com/RogueMaster/flipperzero-firmware-wPlugins) for distributing the boilerplate 
 - [Flipc](flipc.org) for distributing the boilerplate
 - [Nikita Vostokov](https://github.com/wosk) for code contributions
+- [Alexander Rodriguez](https://github.com/squee72564) for code contributions
 
 ## Some cool projects I found using this 
 (love seeing it being used. Let me know if you want yours added)<br>

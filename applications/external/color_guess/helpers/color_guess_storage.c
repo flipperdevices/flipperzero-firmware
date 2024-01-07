@@ -102,14 +102,14 @@ void color_guess_read_settings(void* context) {
         return;
     }
 
-    furi_string_free(temp_str);
-
     flipper_format_read_uint32(fff_file, COLOR_GUESS_SETTINGS_KEY_HAPTIC, &app->haptic, 1);
     flipper_format_read_uint32(fff_file, COLOR_GUESS_SETTINGS_KEY_LED, &app->led, 1);
     flipper_format_read_uint32(
         fff_file, COLOR_GUESS_SETTINGS_KEY_SAVE_SETTINGS, &app->save_settings, 1);
 
     flipper_format_rewind(fff_file);
+
+    furi_string_free(temp_str);
 
     color_guess_close_config_file(fff_file);
     color_guess_close_storage();
