@@ -42,20 +42,23 @@ View* int_input_get_view(IntInput* int_input);
 
 /** Set byte input result callback
  *
- * @param      int_input        byte input instance
- * @param      input_callback    input callback fn
- * @param      changed_callback  changed callback fn
- * @param      callback_context  callback context
- * @param      bytes             buffer to use
- * @param      bytes_count       buffer length
+ * @param      int_input          byte input instance
+ * @param      input_callback     input callback fn
+ * @param      changed_callback   changed callback fn
+ * @param      callback_context   callback context
+ * @param      text_buffer        buffer to use
+ * @param      text_buffer_size   buffer length
+ * @param      clear_default_text clear previous entry
  */
+
 void int_input_set_result_callback(
     IntInput* int_input,
     IntInputCallback input_callback,
-    IntChangedCallback changed_callback,
+    //IntChangedCallback changed_callback,
     void* callback_context,
-    uint8_t* bytes,
-    uint8_t bytes_count);
+    char* text_buffer,
+    size_t text_buffer_size,
+    bool clear_default_text);
 
 /** Set byte input header text
  *

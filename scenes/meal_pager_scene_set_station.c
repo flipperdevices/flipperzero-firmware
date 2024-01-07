@@ -1,5 +1,6 @@
 #include "../meal_pager_i.h"
 #include "../helpers/meal_pager_custom_event.h"
+#include "../helpers/meal_pager_storage.h"
 #include "../helpers/retekess/meal_pager_retekess_t119.h"
 #include "../helpers/retekess/meal_pager_retekess_td157.h"
 #include "../helpers/retekess/meal_pager_retekess_td165.h"
@@ -18,27 +19,31 @@ void meal_pager_set_station_callback(Meal_PagerCustomEvent event, void* context)
     UNUSED(event);
 }
 
-/*static void meal_pager_int_input_callback(void* context) {
+static void meal_pager_int_input_callback(void* context) {
     furi_assert(context);
     Meal_Pager* app = context;
     view_dispatcher_send_custom_event(app->view_dispatcher, Meal_PagerCustomerEventIntInput);
-}*/
+}
 
 void meal_pager_scene_set_station_on_enter(void* context) {
     furi_assert(context);
     Meal_Pager* app = context;
     IntInput* int_input = app->int_input;
     uint8_t enter_name_length = 4;
-
-    int_input_set_header_text(int_input, "Set first Station (0 - 8191)");
-
-    /*int_input_set_result_callback(
+    meal_pager_set_max_values(app);
+    char *str = "Set first Station (0 - 9999)";
+    const char *constStr = str;
+    snprintf(str, 36, "Set first Station (0 - %lu)", app->max_station);
+    
+    int_input_set_header_text(int_input, constStr);
+    
+    int_input_set_result_callback(
         int_input,
         meal_pager_int_input_callback,
         context,
         app->text_buffer,
-        &enter_name_length,
-        false);*/
+        enter_name_length,
+        false);
         
     UNUSED(app);
     UNUSED(enter_name_length);

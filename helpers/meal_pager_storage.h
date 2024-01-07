@@ -35,3 +35,4 @@ void meal_pager_save_subghz_buffer_stop(void* context, FlipperFormat* ff);
 
 void meal_pager_save_settings(void* context);
 void meal_pager_read_settings(void* context);
+void meal_pager_set_max_values(void* context);

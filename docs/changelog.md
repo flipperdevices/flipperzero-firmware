@@ -1,3 +1,6 @@
+## v1.1
+- New UI to Set Stations
+
 ## v1.0
 - Added support for TD174
 
