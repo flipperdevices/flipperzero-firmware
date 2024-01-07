@@ -8,7 +8,7 @@ App(
     fap_icon_assets="icons",
     fap_category="GPIO/MALVEKE",
     fap_author="Esteban Fuentealba",
-    fap_version=(1, 0),
+    fap_version=(1, 1),
     fap_weburl="https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero",
     fap_description="Read info from GAME BOY ADVANCE Cartridges. Backing up and restoring your saves (RAM) (WIP). Backing up and restoring your games (ROM) (WIP).",
 )

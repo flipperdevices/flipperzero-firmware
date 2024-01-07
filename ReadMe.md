@@ -55,6 +55,10 @@ This software is for experimental purposes only and is not meant for any illegal
 - Added: [MALVEKE GB Photo v1.0 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external/malveke_gb_photo) `Req: Malveke`
 - Added: [YuriCable Pro Max v0.1 (By arag0re)](https://github.com/arag0re/fz-yuricable-pro-max)
 - Updated: [Flipper Aid v1.0 (By spaghety)](https://github.com/spaghety/flipper-aid)
+- Updated: [MALVEKE GAME BOY ADVANCE Cartridge v1.1 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external/malveke_gba_cartridge) `Req: Malveke`
+- Updated: [MALVEKE GAME BOY Link-Camera v1.1 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external/malveke_gb_link_camera) `Req: Malveke`
+- Updated: [MALVEKE GAME BOY Cartridge (GB/GBC) v1.1 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external/malveke_gb_cartridge) `Req: Malveke`
+- Updated: [MALVEKE GAME BOY Live Camera v1.3 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external/malveke_gb_live_camera) `Req: Malveke`
 
 <a name="release">
 
@@ -419,11 +423,11 @@ $ ./fbt dolphin_ext
 - [Logic Analyzer (By g3gg0)](https://github.com/g3gg0/flipper-logic_analyzer)
 - [LORA Terminal (By aafksab)](https://github.com/aafksab/LORA-Term)
 - [MagSpoof (By zacharyweiss)](https://github.com/zacharyweiss/magspoof_flipper) [(Updates By hummusec)](https://github.com/hummusec/magspoof_flipper)
-- [MALVEKE GAME BOY ADVANCE Cartridge v1.0 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external/malveke_gba_cartridge) `Req: Malveke`
-- [MALVEKE GAME BOY Cartridge (GB/GBC) v1.0 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external/malveke_gb_cartridge) `Req: Malveke`
+- [MALVEKE GAME BOY ADVANCE Cartridge v1.1 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external/malveke_gba_cartridge) `Req: Malveke`
+- [MALVEKE GAME BOY Cartridge (GB/GBC) v1.1 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external/malveke_gb_cartridge) `Req: Malveke`
 - [MALVEKE GAME BOY Emulator v1.0 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external/malveke_gb_emulator) `Req: Malveke`
-- [MALVEKE GAME BOY Link-Camera v1.0 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external/malveke_gb_link_camera) `Req: Malveke`
-- [MALVEKE GB Live Camera v1.2 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external/malveke_gb_live_camera) `Req: Malveke`
+- [MALVEKE GAME BOY Link-Camera v1.1 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external/malveke_gb_link_camera) `Req: Malveke`
+- [MALVEKE GAME BOY Live Camera v1.3 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external/malveke_gb_live_camera) `Req: Malveke`
 - [MALVEKE GB Photo v1.0 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external/malveke_gb_photo) `Req: Malveke`
 - [MALVEKE PIN Test v1.0 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external/malveke_pin_test) `Req: Malveke`
 - [MAX31855 (By skotopes)](https://github.com/skotopes/flipperzero_max31855)
