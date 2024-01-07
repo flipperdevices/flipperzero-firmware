@@ -5,7 +5,7 @@ App(
     sources=[
         "*.c",
     ],
-    entry_point="simon_app",
+    entry_point="flipboard_simon_app",
     stack_size=4 * 1024,
     fap_icon="flipsimon.png",
     fap_category="GPIO/FlipBoard",

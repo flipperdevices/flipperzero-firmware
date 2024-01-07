@@ -20,5 +20,6 @@
 #include "tx_8300.h"
 #include "wendox_w6726.h"
 #include "auriol_ahfl.h"
+#include "kedsum_th.h"
 
 extern const SubGhzProtocolRegistry weather_station_protocol_registry;

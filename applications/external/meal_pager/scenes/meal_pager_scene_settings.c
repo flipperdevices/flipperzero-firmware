@@ -151,12 +151,7 @@ void meal_pager_scene_settings_on_enter(void* context) {
 
     // Pager Type
     item = variable_item_list_add(
-        app->variable_item_list,
-        "Pager Type:",
-        //4,
-        2,
-        meal_pager_scene_settings_set_pager_type,
-        app);
+        app->variable_item_list, "Pager Type:", 4, meal_pager_scene_settings_set_pager_type, app);
     value_index = value_index_uint32(app->pager_type, pager_type_value, 4);
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, pager_type_text[value_index]);
