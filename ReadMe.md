@@ -146,12 +146,12 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [PicoPass (iClass) v1.11 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass) [Rework. Part 1 #68 (By gornekich)](https://github.com/flipperdevices/flipperzero-good-faps/pull/68) [Hopefully fix name buffer size issues (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/9058c0c6a9980f84f6436673f9d3fbbc82cb3f81) [Save partial #85 (By bettse)](https://github.com/flipperdevices/flipperzero-good-faps/pull/85) [More info view (raw bytes) #86 (By bettse)](https://github.com/flipperdevices/flipperzero-good-faps/pull/86) [detect config card #87 (By bettse)](https://github.com/flipperdevices/flipperzero-good-faps/pull/87) [add additional keys to elite dict #89 (By kitsunehunter)](https://github.com/flipperdevices/flipperzero-good-faps/pull/89) [config SE problem #90 (By bettse)](https://github.com/flipperdevices/flipperzero-good-faps/pull/90) [handle NR-MAC auth for legacy cards #95(By bettse)](https://github.com/flipperdevices/flipperzero-good-faps/pull/95) [Create seader directory if needed #101](https://github.com/flipperdevices/flipperzero-good-faps/pull/101)
 - Update: [NFC Seader v2.2 (By bettse)](https://github.com/bettse/seader)
 - Updated: [NFC Magic v1.5 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966) [rework #67 (By gornekich)](https://github.com/flipperdevices/flipperzero-good-faps/pull/67) [fix gen4 detection #71 (By gornekich)](https://github.com/flipperdevices/flipperzero-good-faps/pull/71) [Specify in error scene that only Gen1 magic and Gen4 UMCs are supported #75 (By kitsunehunter)](https://github.com/flipperdevices/flipperzero-good-faps/pull/75) [UI / Scenes (By xMasterX) & Poller functions, minor UI fixes (By Leptopt1los)](https://github.com/xMasterX/all-the-plugins/commit/d70f146f15a6bab2272d4ebfe37001d7d5f0f556) [New options for gen4 cards #82 (By Leptopt1los)](https://github.com/flipperdevices/flipperzero-good-faps/pull/82)  [Fix support of 4K fobs #102 (By Leptopt1los)](https://github.com/flipperdevices/flipperzero-good-faps/pull/102) [Gen4 shadow mode management support #98 (By Leptopt1los) With Fixes By RogueMaster](https://github.com/flipperdevices/flipperzero-good-faps/pull/98)
-- Updated: [NFC Playlist v1.0 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
 - [Added plugin to read WashCity card balance #683 (By yaba)](https://github.com/DarkFlippers/unleashed-firmware/pull/683)
 - [NFC: Add manually MF Classic with custom UID #690 (By Leptopt1los)](https://github.com/DarkFlippers/unleashed-firmware/pull/690)
 - UL: [NFC: Parser CLeanup (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/e55116ea3fe0f79fd5ec219fad7d4127b50eb68a)
 - [NFC: Skip system dict bug fixed (By Leptopt1los)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/7de861bb4ccec9c016ef996db4753a550835fc90)
 - [NFC: Set ATQA scene bit numbering changed (By Leptopt1los)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/4e068ba59316201bfaeea29eb708def7905b113f)
+- Updated: [NFC Playlist v1.1 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
 
 <a name="release">
 
@@ -544,7 +544,7 @@ $ ./fbt dolphin_ext
 - [NFC Magic v1.5 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966)
 - [NFC Maker NTAG203 (by Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/343cb39d08f60b75b537e1a31100707935cf6e9d)
 - [NFC Maker NTAG215 (by Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/343cb39d08f60b75b537e1a31100707935cf6e9d)
-- [NFC Playlist v1.0 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
+- [NFC Playlist v1.1 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
 - [NFC Seader v2.2 (By bettse)](https://github.com/bettse/seader)
 - [Nightstand Clock v1.1 (By nymda)](https://github.com/nymda/FlipperNightStand)
 - [Notes for FZ WIP (By AdrianN001)](https://github.com/AdrianN001/Flipper-Zero-Note-Application)

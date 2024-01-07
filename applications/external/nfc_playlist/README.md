@@ -9,5 +9,5 @@ When you start the app there is a start button when pressed starts the playlist
 To set the playlist you need to create a file in ext/apps_data/nfc_playlist called playlist.txt you can find an example of the file in the repository
 
 ## Ideas
-- [ ] Add the ability to change playlist
+- [x] Add the ability to change playlist
 - [ ] Make it so changed settings are saved (maybe make it so settings can be specified for each playlist changing the settings based on the playlist selected)

@@ -8,7 +8,7 @@ typedef enum {
     NfcPlaylistSettings_Reset
 } NfcPlaylistMenuSelection;
 
-static void nfc_playlist_menu_callback(void* context, uint32_t index) {
+static void nfc_playlist_settings_menu_callback(void* context, uint32_t index) {
     NfcPlaylist* nfc_playlist = context;
     switch(index) {
     case NfcPlaylistSettings_Reset:
@@ -136,7 +136,7 @@ void nfc_playlist_settings_scene_on_enter(void* context) {
     variable_item_list_add(nfc_playlist->variable_item_list, "Reset settings", 0, NULL, NULL);
 
     variable_item_list_set_enter_callback(
-        nfc_playlist->variable_item_list, nfc_playlist_menu_callback, nfc_playlist);
+        nfc_playlist->variable_item_list, nfc_playlist_settings_menu_callback, nfc_playlist);
     view_dispatcher_switch_to_view(nfc_playlist->view_dispatcher, NfcPlaylistView_Settings);
 }
 
