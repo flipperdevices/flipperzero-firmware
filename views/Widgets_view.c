@@ -18,8 +18,6 @@
 #include "UnitempViews.h"
 #include "unitemp_icons.h"
 
-extern const Icon I_DolphinCommon_56x48;
-
 void unitemp_widgets_alloc(void) {
     app->widget = widget_alloc();
     view_dispatcher_add_view(
