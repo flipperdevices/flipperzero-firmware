@@ -118,6 +118,18 @@ static uint8_t tile_flag_bits[] = {
     0x81,
     0xFF,
 };
+#define tile_udflag_width 8
+#define tile_udflag_height 8
+static uint8_t tile_udflag_bits[] = {
+    0xFF,
+    0x81,
+    0xB9,
+    0x91,
+    0x91,
+    0x9d,
+    0x81,
+    0xFF,
+};
 #define tile_mine_width 8
 #define tile_mine_height 8
 static uint8_t tile_mine_bits[] = {
