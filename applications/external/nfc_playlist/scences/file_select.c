@@ -26,8 +26,7 @@ void nfc_playlist_file_select_scene_on_enter(void* context) {
 bool nfc_playlist_file_select_scene_on_event(void* context, SceneManagerEvent event) {
     UNUSED(event);
     UNUSED(context);
-    bool consumed = false;
-    return consumed;
+    return false;
 }
 
 void nfc_playlist_file_select_scene_on_exit(void* context) {

@@ -71,8 +71,7 @@ void nfc_playlist_main_menu_scene_on_enter(void* context) {
 bool nfc_playlist_main_menu_scene_on_event(void* context, SceneManagerEvent event) {
     NfcPlaylist* nfc_playlist = context;
     bool consumed = false;
-    switch(event.type) {
-    case SceneManagerEventTypeCustom:
+    if(event.type == SceneManagerEventTypeCustom) {
         switch(event.event) {
         case NfcPlaylistEvent_ShowEmulatingPopup:
             scene_manager_next_scene(nfc_playlist->scene_manager, NfcPlaylistScene_EmulatingPopup);
@@ -89,10 +88,6 @@ bool nfc_playlist_main_menu_scene_on_event(void* context, SceneManagerEvent even
         default:
             break;
         }
-        break;
-    default:
-        consumed = false;
-        break;
     }
     return consumed;
 }

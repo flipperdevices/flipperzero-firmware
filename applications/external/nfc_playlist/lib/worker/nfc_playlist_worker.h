@@ -7,7 +7,7 @@
 
 typedef enum NfcPlaylistWorkerState {
    NfcPlaylistWorkerState_Emulating,
-   NfcPlaylistWorkerState_Stopped,
+   NfcPlaylistWorkerState_Stopped
 } NfcPlaylistWorkerState;
 
 typedef struct NfcPlaylistWorker {

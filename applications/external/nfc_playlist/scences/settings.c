@@ -8,10 +8,9 @@ typedef enum {
     NfcPlaylistSettings_Reset
 } NfcPlaylistMenuSelection;
 
-static void nfc_playlist_settings_menu_callback(void* context, uint32_t index) {
+void nfc_playlist_settings_menu_callback(void* context, uint32_t index) {
     NfcPlaylist* nfc_playlist = context;
-    switch(index) {
-    case NfcPlaylistSettings_Reset:
+    if(index == NfcPlaylistSettings_Reset) {
         nfc_playlist->emulate_timeout = default_emulate_timeout;
         VariableItem* emulation_timeout_settings =
             variable_item_list_get(nfc_playlist->variable_item_list, NfcPlaylistSettings_Timeout);
@@ -47,13 +46,10 @@ static void nfc_playlist_settings_menu_callback(void* context, uint32_t index) {
             emulation_led_indicator_settings, nfc_playlist->emulate_led_indicator);
         variable_item_set_current_value_text(
             emulation_led_indicator_settings, nfc_playlist->emulate_led_indicator ? "ON" : "OFF");
-        break;
-    default:
-        break;
     }
 }
 
-static void nfc_playlist_settings_options_change_callback(VariableItem* item) {
+void nfc_playlist_settings_options_change_callback(VariableItem* item) {
     NfcPlaylist* nfc_playlist = variable_item_get_context(item);
 
     uint8_t current_option =
