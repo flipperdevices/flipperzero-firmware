@@ -136,6 +136,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - [NFC: Set ATQA scene bit numbering changed (By Leptopt1los)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/4e068ba59316201bfaeea29eb708def7905b113f)
 - Updated: [NFC Playlist v1.1 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
 - [NFC parsers false read() positive return fixed (By Leptopt1los)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/db0c7e4fad5c214c36aa8753d27befe49676a985) [Also Applied to other MFC Parsers (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/3608d5bc5f31f65f39f4debfc8b9799d76fc804e)
+- OFW PR: [NFC: Parser San Francisco Bay Area "Clipper" transit card. #3344 (By ke6jjj)](https://github.com/flipperdevices/flipperzero-firmware/pull/3344)
 
 <a name="release">
 
@@ -275,6 +276,7 @@ $ ./fbt dolphin_ext
 - NFC: [Parser for Mizip (From zProAle)](https://github.com/noproto/flipper_kdf/pull/3)
 - NFC: [Parser for Philips Sonicare toothbrush heads (By Sil333033, Research By Cyrill Künzi)](https://kuenzi.dev/toothbrush/)
 - NFC: [Parsers for Saflok and Mykey (From noproto)](https://github.com/noproto/flipper_kdf)
+- NFC: [Parser San Francisco Bay Area "Clipper" transit card. #3344 (By ke6jjj)](https://github.com/flipperdevices/flipperzero-firmware/pull/3344)
 - Plugins: 2048, Arkanoid, Snake, and Tetris show score. Thanks to [whoamins](https://github.com/flipperdevices/flipperzero-firmware/commit/7feda832ede1ba8468eff2ca055fef3ddbdc16ac) and [DevMilanIan](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/188) With position changes by RogueMaster. Also all + Tic Tac Toe updated by [Unleashed/Eng1n33r](https://github.com/DarkFlippers/unleashed-firmware) for stability.
 - Plugins: Icon for Clock [Thanks to Redlink](https://github.com/redlink2/flipperzero-firmware/tree/menuChanges)
 - Plugins: [PicoPass Emulation (By nvx)](https://github.com/nvx/flipperzero-firmware/tree/picopass_emulation)
