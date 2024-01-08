@@ -52,15 +52,18 @@ typedef struct SpotifyRemoteApp {
     TextBox* text_box;
     Loading* loading;
     UartHelper* uart_helper;
+    FuriString* message;
 } SpotifyRemoteApp;
+
+typedef enum {
+    SPOTIFY_REMOTE_ON_RECEIVE_EVENT,
+} SpotifyRemoteCustomEvent;
 
 // handles data received from UART
 static void uart_process_line(FuriString* line, void* context) {
-    UNUSED(line);
-    UNUSED(context);
-    // SpotifyRemoteApp* app = context;
-    // const char* str = furi_string_get_cstr(line);
-    // button_panel_add_label(app->button_panel, 2, 2, FontPrimary, str);
+    SpotifyRemoteApp* app = context;
+    furi_string_set(app->message, line);
+    scene_manager_handle_custom_event(app->scene_manager, SPOTIFY_REMOTE_ON_RECEIVE_EVENT);
 }
 
 // called when selection is made in button panel
@@ -182,33 +185,72 @@ bool spotify_remote_button_panel_scene_on_event(void* context, SceneManagerEvent
 }
 
 void spotify_remote_button_panel_scene_on_exit(void* context) {
-    UNUSED(context);
+    SpotifyRemoteApp* app = context;
+    button_panel_reset(app->button_panel);
 }
 
 // text box callbacks
 void spotify_remote_text_box_scene_on_enter(void* context) {
-    UNUSED(context);
+    SpotifyRemoteApp* app = context;
+    text_box_reset(app->text_box);
+    text_box_set_text(app->text_box, furi_string_get_cstr(app->message));
+    text_box_set_font(app->text_box, TextBoxFontText);
+    view_dispatcher_switch_to_view(app->view_dispatcher, SPOTIFY_REMOTE_TEXT_BOX_VIEW);
 }
 
 bool spotify_remote_text_box_scene_on_event(void* context, SceneManagerEvent event) {
-    UNUSED(context);
-    UNUSED(event);
-    return false;
+    SpotifyRemoteApp* app = context;
+    bool consumed = false;
+
+    switch(event.type) {
+    case SceneManagerEventTypeCustom:
+        switch(event.event) {
+        case SPOTIFY_REMOTE_ON_RECEIVE_EVENT:
+            if(furi_string_get_cstr(app->message)[0] == 'O' &&
+               furi_string_get_cstr(app->message)[1] == 'K') {
+                scene_manager_next_scene(app->scene_manager, SPOTIFY_REMOTE_BUTTON_PANEL_SCENE);
+                consumed = true;
+            }
+            break;
+        }
+    default:
+        break;
+    }
+
+    return consumed;
 }
 
 void spotify_remote_text_box_scene_on_exit(void* context) {
-    UNUSED(context);
+    SpotifyRemoteApp* app = context;
+    text_box_reset(app->text_box);
 }
 
 // loading callbacks
 void spotify_remote_loading_scene_on_enter(void* context) {
-    UNUSED(context);
+    SpotifyRemoteApp* app = context;
+    view_dispatcher_switch_to_view(app->view_dispatcher, SPOTIFY_REMOTE_LOADING_VIEW);
 }
 
 bool spotify_remote_loading_scene_on_event(void* context, SceneManagerEvent event) {
-    UNUSED(context);
-    UNUSED(event);
-    return false;
+    SpotifyRemoteApp* app = context;
+    bool consumed = false;
+
+    switch(event.type) {
+    case SceneManagerEventTypeCustom:
+        switch(event.event) {
+        case SPOTIFY_REMOTE_ON_RECEIVE_EVENT:
+            if(furi_string_get_cstr(app->message)[0] == 'I' &&
+               furi_string_get_cstr(app->message)[1] == 'P') {
+                scene_manager_next_scene(app->scene_manager, SPOTIFY_REMOTE_TEXT_BOX_SCENE);
+                consumed = true;
+            }
+            break;
+        }
+    default:
+        break;
+    }
+
+    return consumed;
 }
 
 void spotify_remote_loading_scene_on_exit(void* context) {
@@ -299,6 +341,8 @@ static SpotifyRemoteApp* spotify_remote_app_alloc() {
     uart_helper_set_delimiter(app->uart_helper, LINE_DELIMITER, INCLUDE_LINE_DELIMITER);
     uart_helper_set_callback(app->uart_helper, uart_process_line, app);
 
+    app->message = furi_string_alloc();
+
     return app;
 }
 
@@ -325,7 +369,7 @@ int32_t spotify_remote_app(void* p) {
     UNUSED(p);
 
     SpotifyRemoteApp* app = spotify_remote_app_alloc();
-    scene_manager_next_scene(app->scene_manager, SPOTIFY_REMOTE_BUTTON_PANEL_SCENE);
+    scene_manager_next_scene(app->scene_manager, SPOTIFY_REMOTE_LOADING_SCENE);
     view_dispatcher_run(app->view_dispatcher);
 
     spotify_remote_app_free(app);
