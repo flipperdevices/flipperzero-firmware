@@ -2,20 +2,28 @@
 
 ### What
 This app allows you to fake Mifare UIDs.  
-It emulates only the UID of the card, it does not emulate the full card, but it seems to be enough...
+It can emulate either UIDs or full cards from your Flipper's storage.
 
-Currently it does support this kinds of card:
+Currently it supports this kinds of card:
 - Classic 1k
 - Classic 4k
 - Ultralight
 
 ### Install
-To compile you must be familiar with the Flipperzero firmware.
+#### FBT
+
 1. Checkout the Flipperzero firmware
-2. go to `applications/plugins/`
+2. Go to `applications/plugins/`
 3. `git clone` this repo inside directory
-4. return to main firmware directory with `cd ../..`
-5. run `fbt fap_mifare_fuzzer` to compile
+4. Return to main firmware directory with `cd ../..`
+5. Run `fbt fap_mifare_fuzzer` to compile
+
+#### uFBT (no firmware required)
+
+1. [Install uFBT](https://pypi.org/project/ufbt/)
+2. Open your app's directory in Terminal
+3. Deploy the app to your Flipper with `ufbt launch`
+
 
 ### License
 
