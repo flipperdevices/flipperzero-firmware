@@ -231,6 +231,7 @@ SubGhzSignal* subghz_signal_load_file(char* file_path) {
     } else {
         FURI_LOG_E(TAG, "Error opening file %s", file_path);
     }
+
     flipper_format_free(fff_data_file);
 
     if(parsed && file_type == Raw) {
