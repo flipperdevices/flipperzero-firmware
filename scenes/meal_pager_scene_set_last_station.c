@@ -17,7 +17,7 @@ void meal_pager_scene_set_last_station_on_enter(void* context) {
     meal_pager_set_max_values(app);
     char* str = "Set Last Station (0 - 9999)";
     const char* constStr = str;
-    snprintf(str, 36, "Set Last Station (%lu - %lu)", app->last_station, app->max_station);
+    snprintf(str, 36, "Set Last Station (%lu - %lu)", app->first_station, app->max_station);
 
     int_input_set_header_text(int_input, constStr);
 
@@ -41,6 +41,14 @@ bool meal_pager_scene_set_last_station_on_event(void* context, SceneManagerEvent
         return true;
     } else if(event.type == SceneManagerEventTypeCustom) {
         app->last_station = atoi(app->text_store[1]);
+        if(app->last_station > app->max_station) {
+            app->last_station = app->max_station;
+            snprintf(app->text_store[1], 5, "%lu", app->last_station);
+        }
+        if(app->last_station < app->first_station) {
+            app->last_station = app->first_station;
+            snprintf(app->text_store[1], 5, "%lu", app->last_station);
+        }
         app->last_station_char = app->text_store[1];
         scene_manager_previous_scene(app->scene_manager);
         return true;

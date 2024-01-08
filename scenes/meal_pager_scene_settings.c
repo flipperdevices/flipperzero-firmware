@@ -233,4 +233,5 @@ void meal_pager_scene_settings_on_exit(void* context) {
     Meal_Pager* app = context;
     variable_item_list_set_selected_item(app->variable_item_list, 0);
     variable_item_list_reset(app->variable_item_list);
+    meal_pager_set_max_values(app);
 }
