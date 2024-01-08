@@ -76,6 +76,8 @@ static bool skylanders_read(Nfc* nfc, NfcDevice* device) {
 }
 
 static uint8_t fill_name(const uint16_t id, FuriString* name) {
+    // USED RESEARCH FROM https://github.com/silicontrip/SkyReader/blob/master/toynames.cpp#L15C1-L163C1
+    // AND https://github.com/bettse/Solarbreeze/blob/master/Solarbreeze/ThePoster.swift#L438C1-L681C1
     switch(id) {
     case 0x0000:
         furi_string_cat_printf(name, "Whirlwind");
@@ -253,6 +255,39 @@ static uint8_t fill_name(const uint16_t id, FuriString* name) {
         break;
     case 0x00D1:
         furi_string_cat_printf(name, "Scorpion Striker Catapult");
+        break;
+    case 0x00D2:
+        furi_string_cat_printf(name, "Trap - Magic");
+        break;
+    case 0x00D3:
+        furi_string_cat_printf(name, "Trap - Water");
+        break;
+    case 0x00D4:
+        furi_string_cat_printf(name, "Trap - Air");
+        break;
+    case 0x00D5:
+        furi_string_cat_printf(name, "Trap - Undead");
+        break;
+    case 0x00D6:
+        furi_string_cat_printf(name, "Trap - Tech");
+        break;
+    case 0x00D7:
+        furi_string_cat_printf(name, "Trap - Fire");
+        break;
+    case 0x00D8:
+        furi_string_cat_printf(name, "Trap - Earth");
+        break;
+    case 0x00D9:
+        furi_string_cat_printf(name, "Trap - Life");
+        break;
+    case 0x00DA:
+        furi_string_cat_printf(name, "Trap - Light");
+        break;
+    case 0x00DB:
+        furi_string_cat_printf(name, "Trap - Dark");
+        break;
+    case 0x00DC:
+        furi_string_cat_printf(name, "Trap - Kaos");
         break;
     case 0x00E6:
         furi_string_cat_printf(name, "Hand Of Fate");
@@ -464,14 +499,107 @@ static uint8_t fill_name(const uint16_t id, FuriString* name) {
     case 0x021F:
         furi_string_cat_printf(name, "Eye Small");
         break;
+    case 0x0259:
+        furi_string_cat_printf(name, "King Pen");
+        break;
+    case 0x0265:
+        furi_string_cat_printf(name, "Golden Queen");
+        break;
+    case 0x02AD:
+        furi_string_cat_printf(name, "Fire Acorn");
+        break;
+    case 0x03E8:
+        furi_string_cat_printf(name, "(Boom) Jet");
+        break;
+    case 0x03E9:
+        furi_string_cat_printf(name, "(Free) Ranger");
+        break;
+    case 0x03EA:
+        furi_string_cat_printf(name, "(Rubble) Rouser");
+        break;
+    case 0x03EB:
+        furi_string_cat_printf(name, "(Doom) Stone");
+        break;
     case 0x03EC:
         furi_string_cat_printf(name, "Blast Zone");
+        break;
+    case 0x03ED:
+        furi_string_cat_printf(name, "(Fire) Kraken");
+        break;
+    case 0x03EE:
+        furi_string_cat_printf(name, "(Stink) Bomb");
+        break;
+    case 0x03EF:
+        furi_string_cat_printf(name, "(Grilla) Drilla");
+        break;
+    case 0x03F0:
+        furi_string_cat_printf(name, "(Hoot) Loop");
+        break;
+    case 0x03F1:
+        furi_string_cat_printf(name, "(Trap) Shadow");
+        break;
+    case 0x03F2:
+        furi_string_cat_printf(name, "(Magna) Charge");
+        break;
+    case 0x03F3:
+        furi_string_cat_printf(name, "(Spy) Rise");
+        break;
+    case 0x03F4:
+        furi_string_cat_printf(name, "(Night) Shift");
+        break;
+    case 0x03F5:
+        furi_string_cat_printf(name, "(Rattle) Shake");
+        break;
+    case 0x03F6:
+        furi_string_cat_printf(name, "(Freeze) Blade");
         break;
     case 0x03F7:
         furi_string_cat_printf(name, "Wash Buckler");
         break;
+    case 0x07D0:
+        furi_string_cat_printf(name, "Boom (Jet)");
+        break;
+    case 0x07D1:
+        furi_string_cat_printf(name, "Free (Ranger)");
+        break;
+    case 0x07D2:
+        furi_string_cat_printf(name, "Rubble (Rouser)");
+        break;
+    case 0x07D3:
+        furi_string_cat_printf(name, "Doom (Stone)");
+        break;
     case 0x07D4:
         furi_string_cat_printf(name, "Blast Zone (Head)");
+        break;
+    case 0x07D5:
+        furi_string_cat_printf(name, "Fire (Kraken)");
+        break;
+    case 0x07D6:
+        furi_string_cat_printf(name, "Stink (Bomb)");
+        break;
+    case 0x07D7:
+        furi_string_cat_printf(name, "Grilla (Drilla)");
+        break;
+    case 0x07D8:
+        furi_string_cat_printf(name, "Hoot (Loop)");
+        break;
+    case 0x07D9:
+        furi_string_cat_printf(name, "Trap (Shadow)");
+        break;
+    case 0x07DA:
+        furi_string_cat_printf(name, "Magna (Charge)");
+        break;
+    case 0x07DB:
+        furi_string_cat_printf(name, "Spy (Rise)");
+        break;
+    case 0x07DC:
+        furi_string_cat_printf(name, "Night (Shift)");
+        break;
+    case 0x07DD:
+        furi_string_cat_printf(name, "Rattle (Shake)");
+        break;
+    case 0x07DE:
+        furi_string_cat_printf(name, "Freeze (Blade)");
         break;
     case 0x07DF:
         furi_string_cat_printf(name, "Wash Buckler (Head)");
@@ -523,6 +651,165 @@ static uint8_t fill_name(const uint16_t id, FuriString* name) {
         break;
     case 0x0BC7:
         furi_string_cat_printf(name, "Punk Shock");
+        break;
+    case 0x0C80:
+        furi_string_cat_printf(name, "Battle Hammer");
+        break;
+    case 0x0C81:
+        furi_string_cat_printf(name, "Sky Diamond");
+        break;
+    case 0x0C82:
+        furi_string_cat_printf(name, "Platinum Sheep");
+        break;
+    case 0x0C83:
+        furi_string_cat_printf(name, "Groove Machine");
+        break;
+    case 0x0C84:
+        furi_string_cat_printf(name, "UFO Hat");
+        break;
+    case 0x0C94:
+        furi_string_cat_printf(name, "Jet Stream");
+        break;
+    case 0x0C95:
+        furi_string_cat_printf(name, "Tomb Buggy");
+        break;
+    case 0x0C96:
+        furi_string_cat_printf(name, "Reef Ripper");
+        break;
+    case 0x0C97:
+        furi_string_cat_printf(name, "Burn Cycle");
+        break;
+    case 0x0C98:
+        furi_string_cat_printf(name, "Hot Streak");
+        break;
+    case 0x0C99:
+        furi_string_cat_printf(name, "Shark Tank");
+        break;
+    case 0x0C9A:
+        furi_string_cat_printf(name, "Thump Truck");
+        break;
+    case 0x0C9B:
+        furi_string_cat_printf(name, "Crypt Crusher");
+        break;
+    case 0x0C9C:
+        furi_string_cat_printf(name, "Stealth Stinger");
+        break;
+    case 0x0C9F:
+        furi_string_cat_printf(name, "Dive Bomber");
+        break;
+    case 0x0CA0:
+        furi_string_cat_printf(name, "Sky Slicer");
+        break;
+    case 0x0CA1:
+        furi_string_cat_printf(name, "Clown Cruiser");
+        break;
+    case 0x0CA2:
+        furi_string_cat_printf(name, "Gold Rusher");
+        break;
+    case 0x0CA3:
+        furi_string_cat_printf(name, "Shield Striker");
+        break;
+    case 0x0CA4:
+        furi_string_cat_printf(name, "Sun Runner");
+        break;
+    case 0x0CA5:
+        furi_string_cat_printf(name, "Sea Shadow");
+        break;
+    case 0x0CA6:
+        furi_string_cat_printf(name, "Splatter Splasher");
+        break;
+    case 0x0CA7:
+        furi_string_cat_printf(name, "Soda Skimmer");
+        break;
+    case 0x0CA8:
+        furi_string_cat_printf(name, "Barrel Blaster");
+        break;
+    case 0x0CA9:
+        furi_string_cat_printf(name, "Buzz Wing");
+        break;
+    case 0x0CE4:
+        furi_string_cat_printf(name, "Sheep Wreck Island");
+        break;
+    case 0x0CE5:
+        furi_string_cat_printf(name, "Tower of Time");
+        break;
+    case 0x0CE6:
+        furi_string_cat_printf(name, "Fiery Forge");
+        break;
+    case 0x0CE7:
+        furi_string_cat_printf(name, "Arkeyan Crossbow");
+        break;
+    case 0x0D48:
+        furi_string_cat_printf(name, "Fiesta");
+        break;
+    case 0x0D49:
+        furi_string_cat_printf(name, "High Volt");
+        break;
+    case 0x0D4A:
+        furi_string_cat_printf(name, "Splat");
+        break;
+    case 0x0D4E:
+        furi_string_cat_printf(name, "Stormblade");
+        break;
+    case 0x0D53:
+        furi_string_cat_printf(name, "Smash It");
+        break;
+    case 0x0D54:
+        furi_string_cat_printf(name, "Spitfire");
+        break;
+    case 0x0D55:
+        furi_string_cat_printf(name, "Hurricane Jet-Vac");
+        break;
+    case 0x0D56:
+        furi_string_cat_printf(name, "Double Dare Trigger Happy");
+        break;
+    case 0x0D57:
+        furi_string_cat_printf(name, "Super Shot Stealth Elf");
+        break;
+    case 0x0D58:
+        furi_string_cat_printf(name, "Shark Shooter Terrafin");
+        break;
+    case 0x0D59:
+        furi_string_cat_printf(name, "Bone Bash Roller Brawl");
+        break;
+    case 0x0D5C:
+        furi_string_cat_printf(name, "Big Bubble Pop Fizz");
+        break;
+    case 0x0D5D:
+        furi_string_cat_printf(name, "Lava Lance Eruptor");
+        break;
+    case 0x0D5E:
+        furi_string_cat_printf(name, "Deep Dive Gill Grunt");
+        break;
+    case 0x0D5F:
+        furi_string_cat_printf(name, "Turbo Charge Donkey Kong");
+        break;
+    case 0x0D60:
+        furi_string_cat_printf(name, "Hammer Slam Bowser");
+        break;
+    case 0x0D61:
+        furi_string_cat_printf(name, "Dive-Clops");
+        break;
+    case 0x0D62:
+        furi_string_cat_printf(name, "Astroblast");
+        break;
+    case 0x0D63:
+        furi_string_cat_printf(name, "Nightfall");
+        break;
+    case 0x0D64:
+        furi_string_cat_printf(name, "Thrillipede");
+        break;
+    case 0x0DAC:
+        furi_string_cat_printf(name, "Sky Trophy");
+        break;
+    case 0x0DAD:
+        furi_string_cat_printf(name, "Land Trophy");
+        break;
+    case 0x0DAE:
+        furi_string_cat_printf(name, "Sea Trophy");
+        break;
+    case 0x0DAF:
+        furi_string_cat_printf(name, "Kaos Trophy");
         break;
     default:
         furi_string_cat_printf(name, "Unknown");
