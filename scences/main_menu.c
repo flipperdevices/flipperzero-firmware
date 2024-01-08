@@ -32,7 +32,6 @@ void nfc_playlist_main_menu_menu_callback(void* context, uint32_t index) {
 
 void nfc_playlist_main_menu_scene_on_enter(void* context) {
     NfcPlaylist* nfc_playlist = context;
-
     if (!nfc_playlist->file_selected) {
         nfc_playlist->file_selected = true;
         scene_manager_next_scene(nfc_playlist->scene_manager, NfcPlaylistScene_FileSelect);

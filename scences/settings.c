@@ -64,6 +64,7 @@ void nfc_playlist_settings_options_change_callback(VariableItem* item) {
 
 void nfc_playlist_settings_scene_on_enter(void* context) {
     NfcPlaylist* nfc_playlist = context;
+
     variable_item_list_set_header(nfc_playlist->variable_item_list, "Settings");
 
     VariableItem* emulation_timeout_settings = variable_item_list_add(
@@ -100,6 +101,7 @@ void nfc_playlist_settings_scene_on_enter(void* context) {
     variable_item_list_add(nfc_playlist->variable_item_list, "Reset settings", 0, NULL, NULL);
 
     variable_item_list_set_enter_callback(nfc_playlist->variable_item_list, nfc_playlist_settings_menu_callback, nfc_playlist);
+
     view_dispatcher_switch_to_view(nfc_playlist->view_dispatcher, NfcPlaylistView_Settings);
 }
 
