@@ -977,12 +977,13 @@ static bool mine_sweeper_game_screen_view_play_input_callback(InputEvent* event,
                     }
 
                 // LOSE CONDITION OR CLEAR SURROUNDING
-                } else if (!model->is_holding_down_button && event->type == InputTypeRepeat) {
+                } else if (!model->is_holding_down_button && event->type == InputTypeLong) {
                     // Try to clear surrounding tiles if correct number is flagged.
                     is_lose_condition_triggered = try_clear_surrounding_tiles(model);
                     model->is_holding_down_button = true;
 
-                }
+                } 
+
             },
             true
         );
