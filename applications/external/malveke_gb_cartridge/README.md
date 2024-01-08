@@ -36,6 +36,7 @@ https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/assets/442927/a1d06e1f
 
 These instructions assume that you are starting at the Flipper Zero desktop. Otherwise, press the Back button until you are at the desktop.
 
+- Disconnect the Flipper Zero from the USB port if you are currently using it.
 - Press the `OK` button on the Flipper to open the main menu.
 - Choose `Applications` from the menu.
 - Choose `GPIO` from the submenu.

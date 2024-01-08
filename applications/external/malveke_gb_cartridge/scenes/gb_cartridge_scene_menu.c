@@ -7,7 +7,7 @@ enum SubmenuIndex {
     SubmenuIndexScene1,
     SubmenuIndexScene2,
     SubmenuIndexScene3,
-    SubmenuIndexScene4,
+    // SubmenuIndexScene4,
     SubmenuIndexScene5,
     SubmenuIndexSettings,
 };
@@ -104,10 +104,10 @@ bool gb_cartridge_scene_menu_on_event(void* context, SceneManagerEvent event) {
             scene_manager_set_scene_state(
                 app->scene_manager, GBCartridgeSceneMenu, SubmenuIndexScene3);
             scene_manager_next_scene(app->scene_manager, GBCartridgeSceneScene_3);
-        } else if(event.event == SubmenuIndexScene4) {
-            scene_manager_set_scene_state(
-                app->scene_manager, GBCartridgeSceneMenu, SubmenuIndexScene4);
-            scene_manager_next_scene(app->scene_manager, GBCartridgeSceneScene_4);
+            // } else if(event.event == SubmenuIndexScene4) {
+            //     scene_manager_set_scene_state(
+            //         app->scene_manager, GBCartridgeSceneMenu, SubmenuIndexScene4);
+            //     scene_manager_next_scene(app->scene_manager, GBCartridgeSceneScene_4);
         } else if(event.event == SubmenuIndexScene5) {
             scene_manager_set_scene_state(
                 app->scene_manager, GBCartridgeSceneMenu, SubmenuIndexScene5);
