@@ -17,6 +17,8 @@
 #define SHAPSHUP_CHART_LOWEST_POINT 40
 #define SHAPSHUP_CHART_HIGHEST_POINT 20
 #define SCREEN_WIDTH 128
+#define SHAPSHUP_ALERT_DEFAULT_TTL 150
+#define SHAPSHUP_SCALE_MIN_VALUE 0.1
 
 /**
  * @brief ShapShupShapeItem
@@ -32,8 +34,16 @@ typedef struct {
     uint8_t height;
 } ShapShupShapeItem;
 
+/**
+ * @brief Construct a new array def object
+ * 
+ */
 ARRAY_DEF(ShapShupShapeItemArray, ShapShupShapeItem, M_POD_OPLIST)
 
+/**
+ * @brief init array
+ * 
+ */
 #define M_OPL_ShapShupShapeItemArray_t() ARRAY_OPLIST(ShapShupShapeItemArray, M_POD_OPLIST)
 
 /**
@@ -96,8 +106,28 @@ typedef struct {
     char alert_text[SHAPSHUP_TEXT_STORE_SIZE];
 } ShapShupMainViewModel;
 
+/**
+ * @brief shapshup_main_view_show_alert
+ * 
+ * @param instance ShapShupMainView*
+ * @param text to show
+ * @param ttl TTL value
+ */
 void shapshup_main_view_show_alert(ShapShupMainView* instance, const char* text, uint32_t ttl);
+
+/**
+ * @brief shapshup_main_view_reset_alert
+ * 
+ * @param instance ShapShupMainView*
+ */
 void shapshup_main_view_reset_alert(ShapShupMainView* instance);
+
+/**
+ * @brief shapshup_main_view_draw_alert_if_needed
+ * 
+ * @param canvas 
+ * @param model 
+ */
 void shapshup_main_view_draw_alert_if_needed(Canvas* canvas, ShapShupMainViewModel* model);
 
 /**
@@ -129,10 +159,18 @@ uint64_t calc_offset_per_page(uint64_t total, uint64_t min_len, float scale);
 /**
  * @brief format_number
  * 
- * @param n 
- * @param out 
+ * @param n numbver
+ * @param out output value
  */
 void format_number(uint64_t n, char* out);
+
+/**
+ * @brief format frequency to show
+ * 
+ * @param frequency frequency
+ * @param output_buffer output value
+ */
+void format_frequency(uint32_t frequency, char* output_buffer);
 
 /**
  * @brief shapshup_main_view_input
