@@ -20,7 +20,7 @@
           Except for 'Get' menu options, which may still be "Get" if
           the sync on startup failed. Default values are #define'd
  */
-bool writeSettingsToFile(UART_TerminalApp* app, File* file) {
+bool writeSettingsToFile(GravityApp* app, File* file) {
     int bufLen = 0;
     char fBuffer[FILEBUFFER_SIZE] = "";
     char strBuffer[32] = "";
@@ -154,7 +154,7 @@ void close_file(File* file) {
 
 /* So much goddamn repeated code! The APP_DATA_PATH macro, as far as I can figure, can't be
    called with a variable, even a const char[] :( */
-bool save_settings(UART_TerminalApp* app) {
+bool save_settings(GravityApp* app) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
     File* file = storage_file_alloc(storage);
     if(!storage_file_open(file, APP_DATA_PATH(FILENAME_SETTINGS), FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
@@ -185,7 +185,7 @@ bool save_settings(UART_TerminalApp* app) {
     return true;
 }
 
-bool load_settings(UART_TerminalApp* app) {
+bool load_settings(GravityApp* app) {
     uint16_t bufferSize = 1024;
     char buffer[bufferSize];
     uint16_t bytesRead;
@@ -216,7 +216,7 @@ bool load_settings(UART_TerminalApp* app) {
     }
 }
 
-bool writeDataToFile(UART_TerminalApp* app, File* file) {
+bool writeDataToFile(GravityApp* app, File* file) {
     int bufLen = 0;
     uint8_t dataBuffer[DATABUFFER_SIZE];
 
@@ -226,7 +226,7 @@ bool writeDataToFile(UART_TerminalApp* app, File* file) {
     return true;
 }
 
-bool save_data(UART_TerminalApp* app) {
+bool save_data(GravityApp* app) {
     // (void)(app);
     // Storage* storage = furi_record_open(RECORD_STORAGE);
     // File* file = storage_file_alloc(storage);
@@ -261,7 +261,7 @@ bool save_data(UART_TerminalApp* app) {
     }
 }
 
-bool load_data(UART_TerminalApp* app) {
+bool load_data(GravityApp* app) {
     // uint16_t bufferSize = 1024;
     // char buffer[bufferSize];
     // uint16_t bytesRead;

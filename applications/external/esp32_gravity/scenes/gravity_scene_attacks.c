@@ -1,7 +1,7 @@
-#include "../uart_terminal_app_i.h"
+#include "../gravity_app_i.h"
 #include <dolphin/dolphin.h>
 
-UART_TerminalItem attacks[NUM_ATTACK_ITEMS] = {
+GravityItem attacks[NUM_ATTACK_ITEMS] = {
     {"Mana", {""}, 1, {""}, NO_ARGS, FOCUS_CONSOLE_END, NO_TIP, true},
     {"selectedAP DOS",
      {"Status", "On", "Off"},
@@ -36,11 +36,11 @@ UART_TerminalItem attacks[NUM_ATTACK_ITEMS] = {
      NO_TIP,
      false}};
 
-static void displaySubmenu(UART_TerminalApp* app, UART_TerminalItem* item) {
+static void displaySubmenu(GravityApp* app, GravityItem* item) {
     int newScene = -1;
     if(!strcmp(item->item_string, "Mana")) {
         // Mana menu
-        newScene = UART_TerminalSceneAttacksMana;
+        newScene = GravitySceneAttacksMana;
     }
     if(newScene < 0) {
         return;
@@ -49,10 +49,10 @@ static void displaySubmenu(UART_TerminalApp* app, UART_TerminalItem* item) {
 }
 
 /* Callback when an option is selected */
-static void uart_terminal_scene_attacks_var_list_enter_callback(void* context, uint32_t index) {
+static void gravity_scene_attacks_var_list_enter_callback(void* context, uint32_t index) {
     furi_assert(context);
-    UART_TerminalApp* app = context;
-    UART_TerminalItem* item = NULL;
+    GravityApp* app = context;
+    GravityItem* item = NULL;
     const int selected_option_index = app->selected_menu_options[GRAVITY_MENU_ATTACKS][index];
     furi_assert(index < NUM_ATTACK_ITEMS);
     app->selected_menu_items[GRAVITY_MENU_ATTACKS] = index;
@@ -83,30 +83,28 @@ static void uart_terminal_scene_attacks_var_list_enter_callback(void* context, u
              (item->needs_keyboard == TOGGLE_ARGS &&
               (app->selected_tx_string[cmdLen - 1] == ' ')));
         /* Initialise the serial console */
-        uart_terminal_uart_tx((uint8_t*)("\n"), 1);
+        gravity_uart_tx((uint8_t*)("\n"), 1);
 
         if(needs_keyboard) {
-            view_dispatcher_send_custom_event(
-                app->view_dispatcher, UART_TerminalEventStartKeyboard);
+            view_dispatcher_send_custom_event(app->view_dispatcher, GravityEventStartKeyboard);
         } else {
-            view_dispatcher_send_custom_event(
-                app->view_dispatcher, UART_TerminalEventStartConsole);
+            view_dispatcher_send_custom_event(app->view_dispatcher, GravityEventStartConsole);
         }
     }
 }
 
 /* Callback when a selected option is changed (I Think) */
-static void uart_terminal_scene_attacks_var_list_change_callback(VariableItem* item) {
+static void gravity_scene_attacks_var_list_change_callback(VariableItem* item) {
     furi_assert(item);
 
-    UART_TerminalApp* app = variable_item_get_context(item);
+    GravityApp* app = variable_item_get_context(item);
     furi_assert(app);
 
     if(app->selected_menu_items[GRAVITY_MENU_ATTACKS] >= NUM_ATTACK_ITEMS) {
         app->selected_menu_items[GRAVITY_MENU_ATTACKS] = 0;
     }
 
-    const UART_TerminalItem* menu_item = &attacks[app->selected_menu_items[GRAVITY_MENU_ATTACKS]];
+    const GravityItem* menu_item = &attacks[app->selected_menu_items[GRAVITY_MENU_ATTACKS]];
     uint8_t item_index = variable_item_get_current_value_index(item);
     furi_assert(item_index < menu_item->num_options_menu);
     variable_item_set_current_value_text(item, menu_item->options_menu[item_index]);
@@ -115,13 +113,13 @@ static void uart_terminal_scene_attacks_var_list_change_callback(VariableItem* i
 }
 
 /* Callback on entering the scene (initialisation) */
-void uart_terminal_scene_attacks_on_enter(void* context) {
-    UART_TerminalApp* app = context;
+void gravity_scene_attacks_on_enter(void* context) {
+    GravityApp* app = context;
     VariableItemList* var_item_list = app->attacks_menu_list;
     VariableItem* item;
 
     variable_item_list_set_enter_callback(
-        var_item_list, uart_terminal_scene_attacks_var_list_enter_callback, app);
+        var_item_list, gravity_scene_attacks_var_list_enter_callback, app);
 
     app->currentMenu = GRAVITY_MENU_ATTACKS;
     for(int i = 0; i < NUM_ATTACK_ITEMS; ++i) {
@@ -129,7 +127,7 @@ void uart_terminal_scene_attacks_on_enter(void* context) {
             var_item_list,
             attacks[i].item_string,
             attacks[i].num_options_menu,
-            uart_terminal_scene_attacks_var_list_change_callback,
+            gravity_scene_attacks_var_list_change_callback,
             app);
         variable_item_set_current_value_index(
             item, app->selected_menu_options[GRAVITY_MENU_ATTACKS][i]);
@@ -143,17 +141,17 @@ void uart_terminal_scene_attacks_on_enter(void* context) {
 }
 
 /* Event handler callback - Handle scene change and tick events */
-bool uart_terminal_scene_attacks_on_event(void* context, SceneManagerEvent event) {
+bool gravity_scene_attacks_on_event(void* context, SceneManagerEvent event) {
     UNUSED(context);
-    UART_TerminalApp* app = context;
+    GravityApp* app = context;
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
         int nextScene = 0;
-        if(event.event == UART_TerminalEventStartKeyboard) {
-            nextScene = UART_TerminalAppViewTextInput;
-        } else if(event.event == UART_TerminalEventStartConsole) {
-            nextScene = UART_TerminalAppViewConsoleOutput;
+        if(event.event == GravityEventStartKeyboard) {
+            nextScene = Gravity_AppViewTextInput;
+        } else if(event.event == GravityEventStartConsole) {
+            nextScene = Gravity_AppViewConsoleOutput;
         }
         scene_manager_next_scene(app->scene_manager, nextScene);
         consumed = true;
@@ -166,7 +164,7 @@ bool uart_terminal_scene_attacks_on_event(void* context, SceneManagerEvent event
 }
 
 /* Clean up on exit */
-void uart_terminal_scene_attacks_on_exit(void* context) {
-    UART_TerminalApp* app = context;
+void gravity_scene_attacks_on_exit(void* context) {
+    GravityApp* app = context;
     variable_item_list_reset(app->attacks_menu_list);
 }
