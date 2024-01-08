@@ -12,6 +12,6 @@ App(
     fap_category="Games",
     fap_icon_assets="icons",
     fap_description="Elektronika IM-02 - Nu, Pogodi!",
-    fap_version="1.2",
-    fap_author="sionyx",
+    fap_version="1.3",
+    fap_author="@sionyx",
 )
