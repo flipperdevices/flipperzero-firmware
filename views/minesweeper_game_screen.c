@@ -98,7 +98,7 @@ static const float difficulty_multiplier[5] = {
 static void setup_board(MineSweeperGameScreen* instance);
 static bool check_board_with_solver(MineSweeperTile* board, uint8_t board_width, uint8_t board_height, uint16_t total_mines);
 static Point bfs_to_closest_tile(MineSweeperGameScreenModel* model);
-static void bfs_tile_clear(MineSweeperTile* board, uint8_t board_width, uint8_t board_height, uint16_t x, uint16_t y);
+static inline void bfs_tile_clear(MineSweeperTile* board, uint8_t board_width, uint8_t board_height, uint16_t x, uint16_t y);
 static void mine_sweeper_game_screen_set_board_information(
         MineSweeperGameScreen* instance,
         uint8_t width,
@@ -258,10 +258,12 @@ static bool check_board_with_solver(MineSweeperTile* board, uint8_t board_width,
 
     // Init both the set and dequeue
     point_deq_t deq;
-    point_set_t set;
+    point_set_t visited;
+    
+    FURI_LOG_D(MS_DEBUG_TAG, "IN SOLVER. DEQ : %d, SET: %d", sizeof(deq), sizeof(visited));
 
     point_deq_init(deq);
-    point_set_init(set);
+    point_set_init(visited);
 
     bool is_solvable = false;
 
@@ -276,7 +278,7 @@ static bool check_board_with_solver(MineSweeperTile* board, uint8_t board_width,
     point_deq_push_back(deq, pos);
 
     // Initially set 0,0 to open as it is safe
-    bfs_tile_clear(board, board_width, board_height, 0, 0); // THIS IS CAUSING US TO CRASH
+    //bfs_tile_clear(&board[0], board_width, board_height, 0, 0); // THIS IS CAUSING US TO CRASH
 //
 //    // While we have valid edges to check
 //    while (point_deq_size(deq) > 0) {
@@ -335,7 +337,7 @@ static bool check_board_with_solver(MineSweeperTile* board, uint8_t board_width,
 //        }
 //    }
 
-    point_set_clear(set);
+    point_set_clear(visited);
     point_deq_clear(deq);
 
     UNUSED(is_solvable);
@@ -421,9 +423,9 @@ static inline Point bfs_to_closest_tile(MineSweeperGameScreenModel* model) {
     return result;
 }
 
-// Four way BFS 'Flood fill' to clear adjacent non-mine tiles
+// Eight way BFS 'Flood fill' to clear adjacent non-mine tiles
 // We can use m*lib for a set and dequeue for BFS
-static void bfs_tile_clear(MineSweeperTile* board, uint8_t board_width, uint8_t board_height, uint16_t x, uint16_t y) {
+static inline void bfs_tile_clear(MineSweeperTile* board, uint8_t board_width, uint8_t board_height, uint16_t x, uint16_t y) {
     FURI_LOG_D(MS_DEBUG_TAG, "IN TILE CLEAR FUNCTION");
     furi_assert(board);
     
@@ -464,6 +466,7 @@ static void bfs_tile_clear(MineSweeperTile* board, uint8_t board_width, uint8_t 
         point_set_push(set, pos);
 
         // If the current tile is not a zero tile we do not continue
+        // If the solver is using the function we also check if we push the this tile on deq
         if (board[curr_pos_1d].tile_type != MineSweeperGameScreenTileZero) {
             continue;
         }
@@ -1098,7 +1101,7 @@ static bool mine_sweeper_game_screen_view_play_input_callback(InputEvent* event,
                     }
 
                 // LOSE CONDITION OR CLEAR SURROUNDING
-                } else if (!model->is_holding_down_button && event->type == InputTypeRepeat) {
+                } else if (!model->is_holding_down_button && event->type == InputTypeLong) {
                     
                     // Try to clear surrounding tiles if correct number is flagged.
                     is_lose_condition_triggered = try_clear_surrounding_tiles(model);
