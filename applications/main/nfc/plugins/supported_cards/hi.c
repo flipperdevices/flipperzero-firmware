@@ -3,7 +3,6 @@
 #include <nfc/nfc_device.h>
 #include <nfc/helpers/nfc_util.h>
 #include <nfc/protocols/mf_classic/mf_classic_poller_sync.h>
-#include <stdint.h>
 
 #define TAG "HI!"
 #define KEY_LENGTH 6
@@ -159,7 +158,7 @@ static bool hi_read(Nfc* nfc, NfcDevice* device) {
 
         nfc_device_set_data(device, NfcProtocolMfClassic, data);
 
-        is_read = true;
+        is_read = mf_classic_is_card_read(data);
     } while(false);
 
     mf_classic_free(data);
