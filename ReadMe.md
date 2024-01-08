@@ -34,9 +34,9 @@ This software is for experimental purposes only and is not meant for any illegal
 - [Fixed many memory leaks (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/5fed20065ce527a643999eab213c24a186c5722c) with thanks to [Fixed memory leak #13 (By squee72564)](https://github.com/leedave/flipper-zero-fap-boilerplate/pull/13)
 - Updated: [Color Guess v1.3 (By leedave)](https://github.com/leedave/Leeds-Flipper-Zero-Applications)
 - Updated: [Cross Remote v1.1 (By leedave)](https://github.com/leedave/flipper-zero-cross-remote)
-- Updated: [Restaurant Pager Trigger v1.1 (By leedave)](https://github.com/leedave/flipper-zero-meal-pager)
 - Updated: [MALVEKE GAME BOY Cartridge (GB/GBC) v1.1 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external/malveke_gb_cartridge) `Req: Malveke`
 - OFW PR: [LFRFID: Indala 224 (resolves #2386) #3337 (By Aidan-McNay)](https://github.com/flipperdevices/flipperzero-firmware/pull/3337)
+- Updated: [Restaurant Pager Trigger v1.2 (By leedave)](https://github.com/leedave/flipper-zero-meal-pager)
 
 <a name="release">
 
@@ -464,7 +464,7 @@ $ ./fbt dolphin_ext
 - [RCWL-516 Motion Sensor (By ahmedafe1)](https://github.com/ahmedafe1/rcwl_0516-Flipperzero)
 - [Remote Maker (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/487)
 - [Resistance Calculator v1.2 (By instantiator)](https://github.com/instantiator/flipper-zero-experimental-apps)
-- [Restaurant Pager Trigger v1.1 (By leedave)](https://github.com/leedave/flipper-zero-meal-pager)
+- [Restaurant Pager Trigger v1.2 (By leedave)](https://github.com/leedave/flipper-zero-meal-pager)
 - [RFID Beacon (By nmrr)](https://github.com/nmrr/flipperzero-rfidbeacon)
 - [RFID Detector v1.1 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/2795)
 - [RFID Fuzzer v1.3 (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/507) [(Original By Ganapati)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/245)
