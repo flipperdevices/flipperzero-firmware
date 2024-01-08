@@ -56,6 +56,9 @@ void mine_sweeper_save_settings(void* context) {
     flipper_format_write_uint32(
         fff_file, MINESWEEPER_SETTINGS_KEY_LED, &app->led, 1);
 
+    flipper_format_write_bool(
+        fff_file, MINESWEEPER_SETTINGS_KEY_ENSURE_SOLVABLE, &app->ensure_map_solvable, 1);
+
     uint32_t w = app->settings_info.board_width, h = app->settings_info.board_height, d = app->settings_info.difficulty;
 
     flipper_format_write_uint32(
@@ -120,9 +123,18 @@ bool mine_sweeper_read_settings(void* context) {
     flipper_format_read_uint32(fff_file, MINESWEEPER_SETTINGS_KEY_HEIGHT, &h, 1);
     flipper_format_read_uint32(fff_file, MINESWEEPER_SETTINGS_KEY_DIFFICULTY, &d, 1);
 
+    if (w > 146) {w = 146;}
+    if (w < 16 ) {w = 16;}
+    if (h > 64 ) {h = 64;}
+    if (h < 7  ) {h = 7;}
+    if (d > 4 ) {d = 4;}
+
     app->settings_info.board_width = (uint8_t) w;
     app->settings_info.board_height = (uint8_t) h;
     app->settings_info.difficulty = (uint8_t) d;
+
+    flipper_format_read_bool(
+        fff_file, MINESWEEPER_SETTINGS_KEY_ENSURE_SOLVABLE, &app->ensure_map_solvable, 1);
 
     flipper_format_read_uint32(fff_file, MINESWEEPER_SETTINGS_KEY_HAPTIC, &app->haptic, 1);
     flipper_format_read_uint32(fff_file, MINESWEEPER_SETTINGS_KEY_SPEAKER, &app->speaker, 1);
