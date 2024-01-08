@@ -42,6 +42,7 @@ typedef struct {
     FuriString* file_path;
     char file_name[256];
     FlipperApplication* app;
+    const ElfApiInterface* api_interface;
 } NfcSupportedCardsLoadContext;
 
 struct NfcSupportedCards {
@@ -72,12 +73,14 @@ void nfc_supported_cards_free(NfcSupportedCards* instance) {
     free(instance);
 }
 
-static NfcSupportedCardsLoadContext* nfc_supported_cards_load_context_alloc() {
+static NfcSupportedCardsLoadContext*
+    nfc_supported_cards_load_context_alloc(ElfApiInterface* api_interface) {
     NfcSupportedCardsLoadContext* instance = malloc(sizeof(NfcSupportedCardsLoadContext));
 
     instance->storage = furi_record_open(RECORD_STORAGE);
     instance->directory = storage_file_alloc(instance->storage);
     instance->file_path = furi_string_alloc();
+    instance->api_interface = api_interface ? api_interface : firmware_api_interface;
 
     if(!storage_dir_open(instance->directory, NFC_SUPPORTED_CARDS_PLUGINS_PATH)) {
         FURI_LOG_D(TAG, "Failed to open directory: %s", NFC_SUPPORTED_CARDS_PLUGINS_PATH);
@@ -159,7 +162,7 @@ void nfc_supported_cards_load_cache(NfcSupportedCards* instance) {
            (instance->load_state == NfcSupportedCardsLoadStateFail))
             break;
 
-        instance->load_context = nfc_supported_cards_load_context_alloc();
+        instance->load_context = nfc_supported_cards_load_context_alloc(NULL);
 
         while(true) {
             const NfcSupportedCardsPlugin* plugin =
@@ -206,7 +209,7 @@ bool nfc_supported_cards_read(NfcSupportedCards* instance, NfcDevice* device, Nf
     do {
         if(instance->load_state != NfcSupportedCardsLoadStateSuccess) break;
 
-        instance->load_context = nfc_supported_cards_load_context_alloc();
+        instance->load_context = nfc_supported_cards_load_context_alloc(NULL);
 
         NfcSupportedCardsPluginCache_it_t iter;
         for(NfcSupportedCardsPluginCache_it(iter, instance->plugins_cache_arr);
@@ -252,7 +255,7 @@ bool nfc_supported_cards_parse(
     do {
         if(instance->load_state != NfcSupportedCardsLoadStateSuccess) break;
 
-        instance->load_context = nfc_supported_cards_load_context_alloc();
+        instance->load_context = nfc_supported_cards_load_context_alloc(NULL);
 
         NfcSupportedCardsPluginCache_it_t iter;
         for(NfcSupportedCardsPluginCache_it(iter, instance->plugins_cache_arr);
