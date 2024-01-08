@@ -1,16 +1,16 @@
-#include "../uart_terminal_app_i.h"
+#include "../gravity_app_i.h"
 
 #define MIN_VERSION_STRLEN 43
 
 uint32_t launchTime;
 
-void uart_terminal_console_output_handle_rx_data_cb(uint8_t* buf, size_t len, void* context) {
+void gravity_console_output_handle_rx_data_cb(uint8_t* buf, size_t len, void* context) {
     furi_assert(context);
-    UART_TerminalApp* app = context;
+    GravityApp* app = context;
 
     // If text box store gets too big, then truncate it
     app->text_box_store_strlen += len;
-    if(app->text_box_store_strlen >= UART_TERMINAL_TEXT_BOX_STORE_SIZE - 1) {
+    if(app->text_box_store_strlen >= GRAVITY_TEXT_BOX_STORE_SIZE - 1) {
         furi_string_right(app->text_box_store, app->text_box_store_strlen / 2);
         app->text_box_store_strlen = furi_string_size(app->text_box_store) + len;
     }
@@ -36,12 +36,11 @@ void uart_terminal_console_output_handle_rx_data_cb(uint8_t* buf, size_t len, vo
         text_box_set_focus(app->text_box, TextBoxFocusEnd);
     }
 
-    view_dispatcher_send_custom_event(
-        app->view_dispatcher, UART_TerminalEventRefreshConsoleOutput);
+    view_dispatcher_send_custom_event(app->view_dispatcher, GravityEventRefreshConsoleOutput);
 }
 
-void uart_terminal_scene_console_output_on_enter(void* context) {
-    UART_TerminalApp* app = context;
+void gravity_scene_console_output_on_enter(void* context) {
+    GravityApp* app = context;
 
     launchTime = furi_get_tick();
 
@@ -98,12 +97,12 @@ void uart_terminal_scene_console_output_on_enter(void* context) {
     // Set starting text - for "View Log", this will just be what was already in the text box store
     text_box_set_text(app->text_box, furi_string_get_cstr(app->text_box_store));
 
-    scene_manager_set_scene_state(app->scene_manager, UART_TerminalSceneConsoleOutput, 0);
-    view_dispatcher_switch_to_view(app->view_dispatcher, UART_TerminalAppViewConsoleOutput);
+    scene_manager_set_scene_state(app->scene_manager, GravitySceneConsoleOutput, 0);
+    view_dispatcher_switch_to_view(app->view_dispatcher, Gravity_AppViewConsoleOutput);
 
     // Register callback to receive data
-    uart_terminal_uart_set_handle_rx_data_cb(
-        app->uart, uart_terminal_console_output_handle_rx_data_cb); // setup callback for rx thread
+    gravity_uart_set_handle_rx_data_cb(
+        app->uart, gravity_console_output_handle_rx_data_cb); // setup callback for rx thread
 
     // Send command with CR+LF or newline '\n'
     /* GRAVITY: Ignore the "cls" command */
@@ -115,9 +114,8 @@ void uart_terminal_scene_console_output_on_enter(void* context) {
             // itoa(strlen(app->selected_tx_string), foo, 10);
             // furi_string_cat_str(app->text_box_store, foo);
             // app->text_box_store_strlen += strlen(foo);
-            uart_terminal_uart_tx(
-                (uint8_t*)(app->selected_tx_string), strlen(app->selected_tx_string));
-            uart_terminal_uart_tx((uint8_t*)("\r\n"), 2);
+            gravity_uart_tx((uint8_t*)(app->selected_tx_string), strlen(app->selected_tx_string));
+            gravity_uart_tx((uint8_t*)("\r\n"), 2);
         } else {
             // furi_string_cat_str(app->text_box_store, app->selected_tx_string);
             // app->text_box_store_strlen += strlen(app->selected_tx_string);
@@ -125,9 +123,8 @@ void uart_terminal_scene_console_output_on_enter(void* context) {
             // itoa(strlen(app->selected_tx_string), foo, 10);
             // furi_string_cat_str(app->text_box_store, foo);
             // app->text_box_store_strlen += strlen(foo);
-            uart_terminal_uart_tx(
-                (uint8_t*)(app->selected_tx_string), strlen(app->selected_tx_string));
-            uart_terminal_uart_tx((uint8_t*)("\n"), 1);
+            gravity_uart_tx((uint8_t*)(app->selected_tx_string), strlen(app->selected_tx_string));
+            gravity_uart_tx((uint8_t*)("\n"), 1);
         }
     }
     if(app->free_command && app->selected_tx_string != NULL) {
@@ -137,8 +134,8 @@ void uart_terminal_scene_console_output_on_enter(void* context) {
     }
 }
 
-bool uart_terminal_scene_console_output_on_event(void* context, SceneManagerEvent event) {
-    UART_TerminalApp* app = context;
+bool gravity_scene_console_output_on_event(void* context, SceneManagerEvent event) {
+    GravityApp* app = context;
 
     bool consumed = false;
 
@@ -152,14 +149,14 @@ bool uart_terminal_scene_console_output_on_event(void* context, SceneManagerEven
     return consumed;
 }
 
-void uart_terminal_scene_console_output_on_exit(void* context) {
-    UART_TerminalApp* app = context;
+void gravity_scene_console_output_on_exit(void* context) {
+    GravityApp* app = context;
 
     // Unregister rx callback
-    uart_terminal_uart_set_handle_rx_data_cb(app->uart, NULL);
+    gravity_uart_set_handle_rx_data_cb(app->uart, NULL);
 
     /* Instruct ESP32 to halt any UIs that may be drawing */
     if(app->selected_tx_string != NULL && !strcmp(app->selected_tx_string, "stalk on")) {
-        uart_terminal_uart_tx((uint8_t*)"stalk off\n", strlen("stalk off\n"));
+        gravity_uart_tx((uint8_t*)"stalk off\n", strlen("stalk off\n"));
     }
 }

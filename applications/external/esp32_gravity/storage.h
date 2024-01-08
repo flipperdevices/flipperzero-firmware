@@ -2,12 +2,12 @@
 #define STORAGE_H
 
 /* Module to save and load settings to and from Flipper's internal storage */
-#include "uart_terminal_app_i.h"
+#include "gravity_app_i.h"
 #include <storage/storage.h>
 
-bool save_settings(UART_TerminalApp* app);
-bool load_settings(UART_TerminalApp* app);
-bool save_data(UART_TerminalApp* app);
-bool load_data(UART_TerminalApp* app);
+bool save_settings(GravityApp* app);
+bool load_settings(GravityApp* app);
+bool save_data(GravityApp* app);
+bool load_data(GravityApp* app);
 
 #endif

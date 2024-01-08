@@ -42,7 +42,7 @@ bool syncNextToken(uint8_t** syncString, GravitySyncItem* tokenItem, char* token
     ALL OTHERS: set
    Where appropriate, replace "GET" menuItem options with the current value.
 */
-bool syncProcessResponse(UART_TerminalApp* app) {
+bool syncProcessResponse(GravityApp* app) {
     uint8_t* nextToken = app->syncBuffer;
     int tokenInt;
     GravitySyncItem tokenItem = 0;
@@ -288,9 +288,9 @@ bool syncProcessResponse(UART_TerminalApp* app) {
 }
 
 /* Handle synchronisation response from Flipper */
-void uart_terminal_sync_rx_data_cb(uint8_t* buf, size_t len, void* context) {
+void gravity_sync_rx_data_cb(uint8_t* buf, size_t len, void* context) {
     furi_assert(context);
-    UART_TerminalApp* app = context;
+    GravityApp* app = context;
 
     /* Append buf and len to log file */
     Storage* storage = furi_record_open(RECORD_STORAGE);
@@ -353,7 +353,7 @@ void uart_terminal_sync_rx_data_cb(uint8_t* buf, size_t len, void* context) {
         if(zIdx < app->syncBufLen) {
             memset(app->syncBuffer, '\0', SYNC_BUFFER_SIZE);
             app->syncBufLen = 0;
-            uart_terminal_uart_tx((uint8_t*)"sync\n", 5);
+            gravity_uart_tx((uint8_t*)"sync\n", 5);
         } else {
             app->syncComplete = true;
             /* Process sync elements */
@@ -363,7 +363,7 @@ void uart_terminal_sync_rx_data_cb(uint8_t* buf, size_t len, void* context) {
             memset(app->syncBuffer, '\0', SYNC_BUFFER_SIZE);
             app->syncBufLen = 0;
             /* De-register the sync callback */
-            uart_terminal_uart_set_handle_rx_data_cb(app->uart, NULL);
+            gravity_uart_set_handle_rx_data_cb(app->uart, NULL);
         }
     }
 
@@ -397,23 +397,23 @@ void syncCleanup() {
     }
 }
 
-void do_sync(UART_TerminalApp* app) {
+void do_sync(GravityApp* app) {
     //    if (!app->syncComplete) {
     /* Initialise sync buffer */
     memset(app->syncBuffer, '\0', SYNC_BUFFER_SIZE);
     app->syncBufLen = 0;
     /* Init */
-    uart_terminal_uart_set_handle_rx_data_cb(app->uart, NULL);
-    uart_terminal_uart_tx((uint8_t*)"\n", 1);
+    gravity_uart_set_handle_rx_data_cb(app->uart, NULL);
+    gravity_uart_tx((uint8_t*)"\n", 1);
 
     /* Register callback to receive data */
-    uart_terminal_uart_set_handle_rx_data_cb(app->uart, uart_terminal_sync_rx_data_cb);
+    gravity_uart_set_handle_rx_data_cb(app->uart, gravity_sync_rx_data_cb);
     /* Execute Sync */
-    uart_terminal_uart_tx((uint8_t*)"sync\n", 5);
+    gravity_uart_tx((uint8_t*)"sync\n", 5);
 
     // perhaps start a timer here of 1 or 2 seconds. If syncBuffer contains "Unrecognized" then sync again
 
     //char purgeString[] = "(0:2)(1:8)(2:32)(3:20)(4:1)(5:40:91:51:BB:AC:7D)(6:5)(7:1)(8:0.000000)(9:0)(10:0)(11:11)(12:-95)(13:90)\n";
-    //uart_terminal_sync_rx_data_cb((uint8_t *)purgeString, strlen(purgeString), app);
+    //gravity_sync_rx_data_cb((uint8_t *)purgeString, strlen(purgeString), app);
     //    }
 }
