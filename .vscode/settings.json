@@ -1,6 +1,12 @@
 {
     "files.associations": {
         "callbacks.h": "c",
-        "topics.h": "c"
+        "topics.h": "c",
+        "stdlib.h": "c",
+        "app.h": "c",
+        "scenes.h": "c",
+        "resource.h": "c",
+        "constants.h": "c",
+        "dynamic_buffer.h": "c"
     }
 }

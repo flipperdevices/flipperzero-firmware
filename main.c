@@ -16,7 +16,7 @@ int32_t c_book_app(void* p) {
     App* app = app_alloc();
     Gui* gui = furi_record_open(RECORD_GUI);
     view_dispatcher_attach_to_gui(app->view_dispatcher, gui, ViewDispatcherTypeFullscreen);
-    scene_manager_next_scene(app->scene_manager, BookMainMenuScene);
+    scene_manager_next_scene(app->scene_manager, MainMenuScene);
     view_dispatcher_run(app->view_dispatcher);
     app_free(app);
     return 0;
