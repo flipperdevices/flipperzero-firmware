@@ -402,7 +402,7 @@ static inline void bfs_tile_clear(MineSweeperGameScreenModel* model, uint16_t x,
         uint16_t curr_pos_1d = curr_pos.x * model->board_width + curr_pos.y;
         
         // If in visited set continue
-        if (point_set_cget(set, pos) != NULL) {
+        if (point_set_cget(set, pos) != NULL || model->board[curr_pos_1d].tile_state == MineSweeperGameScreenTileStateCleared) {
             continue;
         } 
         
@@ -660,8 +660,8 @@ static bool try_clear_surrounding_tiles(MineSweeperGameScreenModel* model) {
             }
 
             uint16_t pos = dx * board_width + dy;
-            if (model->board[pos].tile_state != MineSweeperGameScreenTileStateFlagged) {
-                model->board[pos].tile_state = MineSweeperGameScreenTileStateCleared;
+            if (model->board[pos].tile_state != MineSweeperGameScreenTileStateFlagged &&
+                model->board[pos].tile_state != MineSweeperGameScreenTileStateCleared) {
                 bfs_tile_clear(model, dx, dy);
             }
 
@@ -1061,8 +1061,6 @@ static bool mine_sweeper_game_screen_view_play_input_callback(InputEvent* event,
                         model->board[curr_pos_1d].tile_state = MineSweeperGameScreenTileStateCleared;
 
                     } else if (state == MineSweeperGameScreenTileStateUncleared) {
-                        model->board[curr_pos_1d].tile_state = MineSweeperGameScreenTileStateCleared;
-                        
                         bfs_tile_clear(model, (uint16_t)model->curr_pos.x_abs, (uint16_t)model->curr_pos.y_abs);
                     }
 
