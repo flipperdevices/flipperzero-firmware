@@ -1,5 +1,6 @@
 #include "../meal_pager_i.h"
 #include "../helpers/meal_pager_led.h"
+#include "../helpers/meal_pager_storage.h"
 #include "../views/meal_pager_transmit.h"
 
 enum SubmenuIndex {
@@ -21,6 +22,8 @@ void meal_pager_scene_menu_submenu_callback(void* context, uint32_t index) {
 
 void meal_pager_scene_menu_on_enter(void* context) {
     Meal_Pager* app = context;
+
+    meal_pager_set_max_values(app);
 
     submenu_add_item(
         app->submenu,

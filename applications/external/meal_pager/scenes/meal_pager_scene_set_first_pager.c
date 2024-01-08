@@ -41,6 +41,10 @@ bool meal_pager_scene_set_first_pager_on_event(void* context, SceneManagerEvent 
         return true;
     } else if(event.type == SceneManagerEventTypeCustom) {
         app->first_pager = atoi(app->text_store[2]);
+        if(app->first_pager > app->max_pager) {
+            app->first_pager = app->max_pager;
+            snprintf(app->text_store[2], 4, "%lu", app->first_pager);
+        }
         app->first_pager_char = app->text_store[2];
         scene_manager_previous_scene(app->scene_manager);
         return true;
