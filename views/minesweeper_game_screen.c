@@ -681,7 +681,7 @@ static bool try_clear_surrounding_tiles(MineSweeperGameScreenModel* model) {
     }
 
     // We clear surrounding tile
-    if (num_surrounding_flagged == tile.tile_type-1) {
+    if (num_surrounding_flagged >= tile.tile_type-1) {
         if (was_mine_found) is_lose_condition_triggered = true;
 
 
