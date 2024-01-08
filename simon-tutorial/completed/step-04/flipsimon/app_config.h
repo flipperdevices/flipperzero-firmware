@@ -1,4 +1,4 @@
-#define TAG "FlipBoard Simon"
+#define TAG "FlipBoardSimon"
 #define FLIPBOARD_APP_NAME "simon"
 #define FLIPBOARD_PRIMARY_ITEM_NAME "Play Simon"
 

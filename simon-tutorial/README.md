@@ -96,7 +96,7 @@ The `application.fam` file is a JSON formatted text file that contains the infor
 - Right click on the `flipsimon` folder and choose `New File`.
 - Type `app.c` and press `Enter`.
 
-### Step 1g. Add `simon_app` entry point to `app.c`
+### Step 1g. Add `fliboard_simon_app` entry point to `app.c`
 Add the following code to the `app.c` file, then save the file:
 
 ```c
@@ -131,13 +131,14 @@ int32_t flipboard_simon_app(void* p) {
 ### Step 1h. Run the application
 <img src="step-01.png" width="50%"/>
 
+- Make sure you save app.c & any other files you edited.
 - Make sure qFlipper is not running & no CLI is running.
 - Make sure no applications are running on the Flipper Zero.
 - Make sure Flipper Zero is plugged into the computer.
 - Press Control+Shift+B
 - Choose `[Debug] Launch app on Flipper`
 
-If you get an error message displayed in red, read it out loud and hopefully there will be a clue as to the issue.  If you can't figure it out, ask for help in the [Discord server](https://discord.com/invite/NsjCvqwPAd).  If it just says `***FBT Errors***` check to see if the text a few lines above has the message `“sections requires a defined symbol root specified by -e or -u”`.  If so, you need to confirm that the entry_point value in `application.fam` file matches the name of the method in `app.c` (the casing must be identical).
+If you get an error message displayed in red, read it out loud and hopefully there will be a clue as to the issue.  If you can't figure it out, ask for help in the [Discord server](https://discord.com/invite/NsjCvqwPAd).  If it just says `***FBT Errors***` check to see if the text a few lines above has the message `“sections requires a defined symbol root specified by -e or -u”`.  If so, you need to confirm that the entry_point value in `application.fam` file matches the name of the method in `app.c` (the casing must be identical).  If you still can't figure out the error, you may want to compare your code with the code in the completed files.
 
 NOTE: The application doesn't actually do anything, so it will run and then immediately exit.
 
@@ -157,11 +158,12 @@ The fundamental FlipBoard project will include a menu, a Configuration screen, a
 - Right click on the `flipsimon` folder and choose `Paste`.
 
 ### Step 2c. Edit the `app_config.h` file
-- Change the `TAG` to `"FlipBoard Simon"`.  This TAG is used for logging messages.
+- Change the `TAG` to `"FlipBoardSimon"`.  This TAG is used for logging messages.
 - Change the `FLIPBOARD_APP_NAME` to `"simon"`.  The FLIPBOARD_APP_NAME is used for saving the application settings.
 - Change the `FLIPBOARD_PRIMARY_ITEM_NAME` to `"Play Simon"`.  This is the name that will show in the the applications menu.
 - Delete the line `#define FIRMWARE_SUPPORTS_SUBGHZ 1`.  This is not needed for this application, since we do not use the SUBGHZ radio.
 - Change the `ABOUT_TEXT`.  This is the text that will display in the About dialog. Each line must end with a '\' character to continue to the next line.  The last line must not have a '\' character. Put the text in quotes.  A `\n` will create a new line.
+- Save the file.
 
 ### Step 2d. Replace the contents of the `app.c` file
 Replace the contents of the `app.c` file with the following code:
@@ -258,7 +260,8 @@ int32_t flipboard_simon_app(void* p) {
 <img src="step-02-2.png" width="50%"/>
 <img src="step-02-3.png" width="50%"/>
 
-- Follow the same steps as [above](#step-1h-run-the-application). 
+- Make sure you save app.c & any other files you edited.
+- Follow the same steps to run the application as you did in step 1 [above](#step-1h-run-the-application). 
 
 The application should run and show the main application:
 - The `Config` should show configuration for `Action 1`, `Action 2`, `Action 4` and `Action 8`.  Each action should show a setting for the `Press color` and the `Music note`.
@@ -290,7 +293,7 @@ At the top of the app.c file, change the include statements to the following:
 - **FLIPBOARD CODE**: The `#include "./common/leds.h"` statement will include the FlipBoard LEDs Implementation.
 
 ### Step 3b. Register the custom event callback.
-Add the following code in the `simon_app` after the `flipboard_alloc` statement and before the `view_dispatcher_run` statement:
+Add the following code in the `flipboard_simon_app` function, just before the `view_dispatcher_run` statement:
 ```c
     view_dispatcher_set_event_callback_context(flipboard_get_view_dispatcher(app), app);
     view_dispatcher_set_custom_event_callback(
@@ -306,7 +309,7 @@ Add the following code in the `simon_app` after the `flipboard_alloc` statement 
 ### Step 3c. Create the custom event handler. 
 The `custom_event_handler` will get invoked every time the ViewDispatcher receives a custom event. For now, we will check for the `CustomEventAppMenuEnter` event and call `loaded_app_menu` each time that event is received.
 
-Add the following code above the `simon_app` function:
+Add the following code above the `flipboard_simon_app` function:
 ```c
 /**
  * @brief Handles the custom events.
@@ -419,6 +422,7 @@ static void loaded_app_menu(FlipboardModel* model) {
 - **SIMON CODE**: Following the `if` statement, we switch off all the lights by setting them to Black. We then invoke `flipboard_leds_update` to reflect this change on the LEDs.
 
 ### Step 3e. Run the application
+- Make sure you save app.c.
 - Follow the same steps as [above](#step-1h-run-the-application). 
 
 The application should run.  When it starts the LEDs should light following the pattern we defined.
@@ -502,6 +506,7 @@ static void simon_view_draw(Canvas* canvas, void* model) {
 ### Step 4d. Run the application
 <img src="step-04.png" width="50%"/>
 
+- Make sure you save app.c.
 - Follow the same steps as [above](#step-1h-run-the-application). 
 
 The application should run.  When you select "Play Simon" from the main menu, you should see a screen that shows "PRESS OK TO PLAY".  We haven't implemented playing yet.  The back button isn't handled yet; so you will need to reboot the Flipper (press and hold `Back`+`Left` buttons.)
@@ -540,8 +545,8 @@ struct SimonGame {
 - **C LANGUAGE**: `typedef struct StructName StructName;` indicates that `StructName` is a structure type. A structure is a collection of variables (also called properties) under a single name. You can now declare a variable of type `StructName`, like `StructName my_struct_value;` or a pointer to a `StructName` such as `StructName* my_struct_pointer;`
 - **SIMON CODE**: `typedef struct SimonGame SimonGame;` declares that `SimonGame` is a structure type. Currently, it has one property, which is the game state.
 
-### Step 5c. Set the custom data in your `simon_app`
-In your `simon_app` function, add the following code just above the `view_dispatcher_run` function call:
+### Step 5c. Set the custom data in your `flipboard_simon_app`
+In your `flipboard_simon_app` function, add the following code just above the `view_dispatcher_run` function call:
 
 ```c
     FlipboardModel* model = flipboard_get_model(app);
@@ -587,6 +592,7 @@ static void simon_view_draw(Canvas* canvas, void* model) {
 - **C LANGUAGE**: Remember, `==` is used for comparison, while `=` is used for assignment. If you mistakenly use `=`, it would assign the value of `SimonGameStateGameOver` to the `state` property of `game` and then evaluate `SimonGameStateGameOver` as a boolean (true if non-zero).
 
 ### Step 5e. Run the application
+- Make sure you save app.c.
 - Follow the same steps as [above](#step-1h-run-the-application). 
 
 The application should run and behave the same a the previous step (since the newly added game state is always GameOver).
@@ -672,24 +678,10 @@ Within the `SimonGameState` enumeration, append the following code after the `Si
 - **SIMON CODE**: We've defined two states: `SimonGameStateGameOver`, which indicates that we can initiate a new game, and `SimonGameStateNewGame`, which signifies that a new game has begun. We will introduce additional states in the future.
 
 ### Step 6e. Update the custom event handler for `SimonCustomEventIdNewGame`
-In the `custom_event_handler` function, append an `else` clause following the existing `if` clause. Additionally, incorporate another invocation of `flipboard_model_update_gui(model);` prior to the `return` statement.
+In the `custom_event_handler` function, add the following code after the `}` associated with the `if` statement.
 
-Before the change:
 ```c
-    flipboard_model_update_gui(model);
-
-    if(event == CustomEventAppMenuEnter) {
-        loaded_app_menu(model);
-    }
-```
-
-After the change:
-```c
-    flipboard_model_update_gui(model);
-
-    if(event == CustomEventAppMenuEnter) {
-        loaded_app_menu(model);
-    } else if(event == SimonCustomEventIdNewGame) {
+    else if(event == SimonCustomEventIdNewGame) {
         SimonGame* game = flipboard_model_get_custom_data(model);
         game->state = SimonGameStateNewGame;
     }
@@ -697,6 +689,7 @@ After the change:
     flipboard_model_update_gui(model);
 ```
 
+- **VSCODE**: When you save the file, it may automatically format the code.
 - **C LANGUAGE**: The `else` statement is executed only when the preceding `if (expr)` evaluates to false. You can follow the `else` keyword with `{}` to execute multiple instructions. In our case, we've placed another `if` statement after `else` to check a second condition. After the second closing bracket, you could add another `else` to execute code when neither of the two conditions are true. This `else` could be followed by either `{}` or another `if`. You can repeat this process for all your conditions. An alternative approach is to use `switch` and `case` statements, which we won't be using in this tutorial.
 
 - **SIMON CODE**: If the custom event is `SimonCustomEventIdNewGame`, we transition the game state to `SimonGameStateNewGame`.
@@ -704,20 +697,10 @@ After the change:
 - **SIMON CODE**: Redrawing the screen without any changes could cause a minor flicker. To avoid this, you could monitor whether your state has been updated and only invoke `flipboard_model_update_gui` when the game state changes. Alternatively, you could relocate the initial `flipboard_model_update_gui` call to the `CustomEventAppMenuEnter` if block, right before the `loaded_app_menu` call.
 
 ### Step 6f. Update draw callback to handle `SimonGameStateNewGame`
-In the `simon_view_draw` function, incorporate an `else if` clause. This will display "CREATING NEW GAME" when the game state is `SimonGameStateNewGame`.
+In the `simon_view_draw` function, add the following after the `}` associated with the `if` statement.
 
-Before the change:
 ```c
-    if(game->state == SimonGameStateGameOver) {
-        canvas_draw_str_aligned(canvas, 64, 12, AlignCenter, AlignCenter, "PRESS OK TO PLAY");
-    }
-```
-
-After the change:
-```c
-    if(game->state == SimonGameStateGameOver) {
-        canvas_draw_str_aligned(canvas, 64, 12, AlignCenter, AlignCenter, "PRESS OK TO PLAY");
-    } else if(game->state == SimonGameStateNewGame) {
+    else if(game->state == SimonGameStateNewGame) {
         canvas_draw_str_aligned(canvas, 64, 12, AlignCenter, AlignCenter, "CREATING NEW GAME");
     }
 ```
@@ -725,6 +708,7 @@ After the change:
 ### Step 6g. Run the application
 <img src="step-06.png" width="50%"/>
 
+- Make sure you save app.c.
 - Follow the same steps as [above](#step-1h-run-the-application). 
 
 Notice that now when you go to "Play Simon" it says "PRESS OK TO PLAY" like before.  When you click the `Ok` button on the Flipper Zero, the message switches to "CREATING NEW GAME". The back button isn't handled yet.
@@ -765,6 +749,7 @@ static void simon_enter_callback(void* context) {
 - **SIMON CODE**: Each time the user navigates to the "Play Simon" view, we reset the game state to 'game over'.
 
 ### Step 7c. Run the application
+- Make sure you save app.c.
 - Follow the same steps as [above](#step-1h-run-the-application). 
 
 You should be able go to "Play Simon", it says "PRESS OK TO PLAY".  When you click the `Ok` button on the Flipper Zero, the message switches to "CREATING NEW GAME". Pressing `Back` should take you back to the main menu.  Going back into "Play Simon" should show the "PRESS OK TO PLAY" message.
@@ -797,6 +782,7 @@ At the bottom of the `simon_enter_callback` function, after the line `game->stat
 - **FLIPBOARD CODE**: The function `flipboard_model_set_colors(model, NULL, 0x0);` configures the LEDs with no associated Action Model and no buttons pressed, causing the FlipBoard LEDs to illuminate in their default state when no buttons are active.
 
 ### Step 8b. Run the application
+- Make sure you save app.c.
 - Follow the same steps as [above](#step-1h-run-the-application). 
 
 This time go into `Config` and set the colors for Action 1, 2, 4 and 8.  Then when you go into `Play Simon` you should see the buttons with a dim versions of those colors.
@@ -901,6 +887,7 @@ After updating:
 
 
 ### Step 9f. Run the application
+- Make sure you save app.c.
 - Follow the same steps as [above](#step-1h-run-the-application). 
 
 Run the application, then load https://lab.flipper.net/cli and type the command `log debug` to see the logs from the Flipper.  Press the `OK` button to create a new game and you should see the song notes get logged.  If you press `Back` button and then go back to "Play Simon" and press `OK` button you should see a different random song get generated.
@@ -1082,6 +1069,7 @@ After updating:
 ```
 
 ### Step 10k. Run the application
+- Make sure you save app.c.
 - Follow the same steps as [above](#step-1h-run-the-application).
 
 Run the application. Choose the "Play Simon" option.  When you press the `OK` button, the Flipper Zero will generate a random song and then teach you the first note.  We don't have any code for the user to repeat the note yet, so the song will only play the first note.
@@ -1266,6 +1254,7 @@ static void simon_exit_callback(void* context) {
 - **FLIPBOARD CODE**: The function `flipboard_model_set_button_monitor` assigns a callback that is triggered when a button is pressed or released. By passing NULL for both the callback function and the context object, we effectively disable the button monitor that was initiated in the `simon_enter_callback` function.
 
 ### Step 11j. Run the application
+- Make sure you save app.c.
 - Follow the same steps as [above](#step-1h-run-the-application).
 
 Run the application. Choose the "Play Simon" option.  It should create a random song, play the first note, and then allow you to press buttons when it is your turn.  We have not yet implemented the code to check if you pressed the correct button.
@@ -1374,6 +1363,7 @@ Add the following code to the `custom_event_handler` function after the `SimonCu
 - **SIMON CODE**: If the `successful_note_number` does not match the `song_length`, we transition the game state to `SimonGameStateTeaching` to teach the user the next note. We reset the `note_number` to 0 to start teaching from the first note. We  delay `SIMON_TEACH_DELAY_MS` milliseconds, before we trigger the `SimonCustomEventIdTeachNotes` event.
 
 ### Step 12g. Run the application
+- Make sure you save app.c.
 - Follow the same steps as [above](#step-1h-run-the-application).
 
 Run the application. Choose the "Play Simon" option.  It should create a random song, play the first note, and then allow you to press buttons when it is your turn. You can continue playing until you either win or lose.  We don't tell the user if they won or lost yet.
@@ -1409,6 +1399,7 @@ Replace the first `if` statement in the `simon_view_draw` function with the foll
 - **SIMON CODE**: If `game->song_length` does not equal `note_number`, the user has made a mistake, and the message "LOST. OK TO PLAY" is displayed.
 
 ### Step 13c. Run the application
+- Make sure you save app.c.
 - Follow the same steps as [above](#step-1h-run-the-application).
 
 Run the application. Choose the "Play Simon" option.  You should now have different messages for when you are just starting, or when you win or lose.
@@ -1470,6 +1461,7 @@ static void lost_game(FlipboardModel* model) {
 - **SIMON CODE**: We play the corrected note 3 times.  We also turn on the vibration motor for 200 milliseconds and then turn it off for 100 milliseconds.
 
 ### Step 14c. Run the application
+- Make sure you save app.c.
 - Follow the same steps as [above](#step-1h-run-the-application).
 
 Run the application. Choose the "Play Simon" option.  You should now have different messages for when you are just starting, or when you win or lose.  When you lose, the Flipper Zero will play the correct note 3 times and vibrate.
@@ -1539,6 +1531,7 @@ static void won_game(FlipboardModel* model) {
 - **SIMON CODE**: We turn the speaker off & LEDs off, delay a bit, and repeat a couple of times.
 
 ### Step 15c. Run the application
+- Make sure you save app.c.
 - Follow the same steps as [above](#step-1h-run-the-application).
 
 Run the application. Choose the "Play Simon" option.  You should now have different messages for when you are just starting, or when you win or lose.  When you win, the Flipper Zero will play a special tone and flash all the LEDs.
@@ -1620,6 +1613,7 @@ static void simon_teach_notes(Flipboard* flipboard) {
 - **SIMON CODE**: We set the `speed_index` to the `successful_note_number`.  If the `speed_index` is greater than or equal to the number of elements in the `delays` array, then we set the `speed_index` to the last element in the `delays` array.
 
 ### Step 16e. Run the application
+- Make sure you save app.c.
 - Follow the same steps as [above](#step-1h-run-the-application).
 
 Run the application. Choose the "Play Simon" option.  You should now have a longer song that plays faster and faster!
