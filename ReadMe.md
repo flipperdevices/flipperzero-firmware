@@ -137,10 +137,10 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: [NFC: Parser CLeanup (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/e55116ea3fe0f79fd5ec219fad7d4127b50eb68a)
 - [NFC: Skip system dict bug fixed (By Leptopt1los)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/7de861bb4ccec9c016ef996db4753a550835fc90)
 - [NFC: Set ATQA scene bit numbering changed (By Leptopt1los)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/4e068ba59316201bfaeea29eb708def7905b113f)
-- Updated: [NFC Playlist v1.1 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
 - [NFC parsers false read() positive return fixed (By Leptopt1los)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/db0c7e4fad5c214c36aa8753d27befe49676a985) [Also Applied to other MFC Parsers (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/3608d5bc5f31f65f39f4debfc8b9799d76fc804e)
 - OFW PR: NFC: [Parser for San Francisco Bay Area "Clipper" transit card. #3344 (By ke6jjj)](https://github.com/flipperdevices/flipperzero-firmware/pull/3344)
 - OFW PR: NFC: [Parser for ITSO (UK) #3325 (By gsp8181)](https://github.com/flipperdevices/flipperzero-firmware/pull/3325)
+- Updated: [NFC Playlist v1.1 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
 
 <a name="release">
 
