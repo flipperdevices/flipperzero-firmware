@@ -1,9 +1,9 @@
 #pragma once
 
-#include "uart_terminal_app.h"
-#include "scenes/uart_terminal_scene.h"
-#include "uart_terminal_custom_event.h"
-#include "uart_terminal_uart.h"
+#include "gravity_app.h"
+#include "scenes/gravity_scene.h"
+#include "gravity_custom_event.h"
+#include "gravity_uart.h"
 
 #include <gui/gui.h>
 #include <gui/view_dispatcher.h>
@@ -33,8 +33,8 @@
 #define MAX_MENU_STR_LEN (12)
 #define NUM_MAC_BYTES (6)
 
-#define UART_TERMINAL_TEXT_BOX_STORE_SIZE (4096)
-#define UART_TERMINAL_TEXT_INPUT_STORE_SIZE (512)
+#define GRAVITY_TEXT_BOX_STORE_SIZE (4096)
+#define GRAVITY_TEXT_INPUT_STORE_SIZE (512)
 #define UART_CH (FuriHalUartIdUSART1)
 
 #define STRINGS_GET "Get"
@@ -111,14 +111,14 @@ enum PurgeMenuItems {
 char *strToken(char *cmdLine, char sep, int tokenNum);
 bool mac_string_to_bytes(char *strMac, uint8_t *bMac);
 bool mac_bytes_to_string(uint8_t *bMac, char *strMac);
-bool syncProcessResponse(UART_TerminalApp *app);
+bool syncProcessResponse(GravityApp *app);
 
-struct UART_TerminalApp {
+struct GravityApp {
     Gui* gui;
     ViewDispatcher* view_dispatcher;
     SceneManager* scene_manager;
 
-    char text_input_store[UART_TERMINAL_TEXT_INPUT_STORE_SIZE + 1];
+    char text_input_store[GRAVITY_TEXT_INPUT_STORE_SIZE + 1];
     FuriString* text_box_store;
     size_t text_box_store_strlen;
     TextBox* text_box;
@@ -130,7 +130,7 @@ struct UART_TerminalApp {
     VariableItemList *help_info_menu_list, *attacks_mana_menu_list, *purge_menu_list;
     ByteInput *settings_mac_bytes;
 
-    UART_TerminalUart* uart;
+    GravityUart* uart;
     int selected_menu_items[GRAVITY_MENU_COUNT];
     int selected_menu_options[GRAVITY_MENU_COUNT][MAX_MENU_ITEMS];
     char* selected_tx_string;
@@ -159,8 +159,8 @@ struct UART_TerminalApp {
 };
 
 typedef enum {
-    UART_TerminalAppViewConsoleOutput,
-    UART_TerminalAppViewTextInput,
+    Gravity_AppViewConsoleOutput,
+    Gravity_AppViewTextInput,
     Gravity_AppViewMainMenu,
     Gravity_AppViewTargetsMenu,
     Gravity_AppViewPacketsMenu,
@@ -173,7 +173,7 @@ typedef enum {
     Gravity_AppViewHelpMenu,
     Gravity_AppViewHelpInfoMenu,
     Gravity_AppViewPurgeMenu,
-} UART_TerminalAppView;
+} Gravity_AppView;
 
 // For each command, define whether additional arguments are needed
 // (enabling text input to fill them out), and whether the console
@@ -195,7 +195,7 @@ typedef struct {
     FocusConsole focus_console;
     bool show_stopscan_tip;
     bool isSubMenu;
-} UART_TerminalItem;
+} GravityItem;
 
-extern UART_TerminalItem purgeMenu[]; /* Provided by uart_terminal_scene_purge.c */
-extern UART_TerminalItem settings[];  /* Used by sync.c */
+extern GravityItem purgeMenu[]; /* Provided by gravity_scene_purge.c */
+extern GravityItem settings[];  /* Used by sync.c */

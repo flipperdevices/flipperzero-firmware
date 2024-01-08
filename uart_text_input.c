@@ -1,7 +1,7 @@
 #include "uart_text_input.h"
 #include <gui/elements.h>
-#include "uart_terminal_icons.h"
-#include "uart_terminal_app_i.h"
+#include "gravity_icons.h"
+#include "gravity_app_i.h"
 #include <furi.h>
 
 struct UART_TextInput {

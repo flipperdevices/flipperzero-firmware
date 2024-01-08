@@ -1,0 +1,899 @@
+In callback with args:
+
+
+In callback with args:
+
+
+
+In callback with args:
+U
+
+In callback with args:
+nrecognized command
+> sync
+
+
+In callback with args:
+
+
+In callback with args:
+[0;32mI (703) cpu_start: Multicore app[0mets Jun  8 2016 00:22:57
+
+rst:0x1 (POWERON_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+configsip: 0, SPIWP:0xee
+clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+mode:DIO, clock div:2
+load:0x3fff0030,len:5820
+ho 0 tail 12 room 4
+load:0x40078000,len:151
+
+In callback with args:
+
+
+In callback with args:
+[0;32mI (703) cpu_start: Multicore app[0m
+[0;32mI (703) cpu_start: Pro cpu up.[0m
+[0;32mI (703) cpu_start: Starting app cpu, entry point is 0x4008136c[0m
+[0;32mI (0) cpu_start: App cpu up.[0m
+[0;32mI (721) cpu_start: Pro cpu start user code[0m
+[0;32mI (721) cpu_start: cpu freq: 160000000 Hz[0m
+[
+
+In callback with args:
+0;32mI (721) cpu_start: Application information:[0m
+[0;32mI (726) cpu_start: Project name:     esp-wireless-tools[0m
+[0;32mI (731) c
+
+In callback with args:
+pu_start: App version:      v0.5.0-55-gffe2330-dirty[0m
+[0;32mI (738) cpu_start: Compile time:     Nov 11 2023 20:36:32[0m
+[0;32mI (744) cpu_start: ELF file SHA256:  64c39313bdc751e2...[0m
+[0;32mI (750) cpu_start: ESP-IDF:          v5.1.1-dirty[0m
+[0;32mI 
+
+In callback with args:
+(755) cpu_start: Min chip rev:     v0.0[0m
+[0;32mI (760) cpu_start: Max chip rev:     v3.99 [0m
+[0;32mI (765) cpu_start: Chip rev:         v1.0[0m
+[0;32mI (770
+
+In callback with args:
+) heap_init: Initializing. RAM available for dynamic allocation:[0m
+[0;32mI (777) heap_init: At 3FFAFF10 len 000000F0 (0 KiB): DRAM[0m
+[0;32mI (783) heap_init: At 3FFB6388 len 00001C78 (7 KiB)
+
+In callback with args:
+: DRAM[0m
+[0;32mI (789) heap_init: At 3FFB9A20 len 00004108 (16 KiB): DRAM[0m
+[0;32mI (795) heap_init: At 3FFC9CD0 len 00016330 (88 KiB): DRAM[0m
+[0;32mI (801) heap_init: At 3FFE0440 len 00003AE0 (14 KiB): D/IRA
+
+In callback with args:
+M[0m
+[0;32mI (808) heap_init: At 3FFE4350 len 0001BCB0 (111 KiB): D/IRAM[0m
+[0;32mI (814) heap_init: At 4009D128 len 00002ED8 (11 KiB): IRAM[0m
+[0;32mI (822) spi_flash: detected chip: gener
+
+In callback with args:
+ic[0m
+[0;32mI (825) spi_flash: flash io: dio[0m
+[0;32mI (830) coexist: coex firmware version: 80b0d89[0m
+[0;32mI (835) app_start: Starting scheduler on CPU0[0m
+[0;32mI (839) app_start: Starting scheduler on C
+
+In callback with args:
+PU1[0m
+[0;32mI (839) main_task: Started on CPU0[0m
+[0;32mI (849) main_task: Calling app_main()[0m
+
+
+In callback with args:
+
+
+In callback with args:
+[0;32mI (899) wifi_init: rx ba win: 6[0m
+[0;32mI (899) wifi_init: tcpip mbox: 32[0m
+[0;32mI (899) wifi_init: udp mbox: 6[0m
+[0;32mI (899) wifi_init: tcp mbox: 6[0m
+[0;32mI (909) wifi_init: tcp tx win: 5744[0
+
+In callback with args:
+m
+[0;32mI (909) wifi_init: tcp rx win: 5744[0m
+[0;32mI (919) wifi_init: tcp mss: 1440[0m
+[0;32mI (919) wifi_init: WiFi IRAM OP enabled[0m
+[0;32mI (929) wifi
+
+In callback with args:
+_init: WiFi RX IRAM OP enabled[0m
+[0;32mI (929) phy_init: phy_version 4670,719f9f6,Feb 18 2021,17:07:07[0m
+
+
+In callback with args:
+S
+
+In callback with args:
+tarted Gravity v1.0.0
+
+[5n
+
+In callback with args:
+
+
+In callback with args:
+
+Type 'help' to get the list of commands.
+Use UP/DOWN arrows to navigate through command history.
+Press TAB when typing command name to auto-complete.
+
+Your terminal application does not support
+
+In callback with args:
+e
+
+In callback with args:
+ts Jun  8 2016 00:22:57
+
+rst:0x1 (POWERON_RESET),boot:0x13 (SPIets Jun  8 2016 00:22:57
+
+rst:0x1 (POWERON_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+configsip: 0, SPIWP:0xee
+clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+mode:DIO, clock div:2
+load:0x3fff0030,len:5820
+ho 0 tail 12 room 4
+
+
+In callback with args:
+
+
+In callback with args:
+[0;32mI (703) cpu_start: Multicore app[0m
+[0;32mI (703) cpu_start: Pro cpu up.[0m
+[0;32mI (703) cpu_start: Starting app cpu, entry point is 0x4008136c[0m
+[0;32mI (0) cpu_start: App cpu up.[0m
+
+
+In callback with args:
+[0;32mI (721) cpu_start: Pro cpu start user code[0m
+[0;32mI (721) cpu_start: cpu freq: 160000000 Hz[0m
+[0;32mI (721) cpu_start: Application information:[0m
+[0;32mI (726) cpu_start: Projec
+
+In callback with args:
+t name:     esp-wireless-tools[0m
+[0;32mI (732) cpu_start: App version:      v0.5.0-55-gffe2330-dirty[0m
+[0;32mI (738) cpu_start: Compile time:     Nov 11 2023 20:36:32[0m
+[0;32mI (744) 
+
+In callback with args:
+cpu_start: ELF file SHA256:  64c39313bdc751e2...[0m
+[0;32mI (750) cpu_start: ESP-IDF:          v5.1.1-dirty[0m
+[0;32mI (755) cpu_start: Min chip rev:     v0.0
+
+In callback with args:
+[0m
+[0;32mI (760) cpu_start: Max chip rev:     v3.99 [0m
+[0;32mI (765) cpu_start: Chip rev:         v1.0[0m
+[0;32mI (770) heap_init: Initializing. RAM available for dynamic allocation:[0m
+[0;32mI (777) heap_init: At 3FFAFF10 len 000000F0 (
+
+In callback with args:
+0 KiB): DRAM[0m
+[0;32mI (783) heap_init: At 3FFB6388 len 00001C78 (7 KiB): DRAM[0m
+[0;32mI (789) heap_init: At 3FFB9A20 len 00004108 (16 KiB): DRAM[0m
+[0;32mI 
+
+In callback with args:
+(795) heap_init: At 3FFC9CD0 len 00016330 (88 KiB): DRAM[0m
+[0;32mI (801) heap_init: At 3FFE0440 len 00003AE0 (14 KiB): D/IRAM[0m
+[0;32mI (808) heap_init: At 3FFE4350 len 0001BCB0 (111 KiB): D/IRAM[0m
+[0;32mI (814) heap_init: At 4009D128 len 000
+
+In callback with args:
+02ED8 (11 KiB): IRAM[0m
+[0;32mI (822) spi_flash: detected chip: generic[0m
+[0;32mI (825) spi_flash: flash io: dio[0m
+[0;32mI (830) coexist: coex firmware versio
+
+In callback with args:
+n: 80b0d89[0m
+[0;32mI (835) app_start: Starting scheduler on CPU0[0m
+[0;32mI (840) app_start: Starting scheduler on CPU1[0m
+[0;32mI (840) main_task: Started on CPU0[0m
+[0;32mI (850) main_task: Calling app_main()[0m
+
+
+In callback with args:
+
+
+In callback with args:
+[0;32mI (900) wifi_init: rx ba win: 6[0m
+[0;32mI (900) wifi_init: tcpip mbox: 32[0m
+[0;32mI (900) wifi_init: udp mbox: 6[0m
+[0;32mI (900) wifi_init: tcp mbox: 6[0m
+[0;32mI (910) wifi_init: tcp tx win: 5744[0m
+[0;32mI (910) wifi_init: tcp rx win: 5744[0m
+[0;32mI (920) wifi_init: tcp mss: 1
+
+In callback with args:
+440[0m
+[0;32mI (920) wifi_init: WiFi IRAM OP enabled[0m
+[0;32mI (930) wifi_init: WiFi RX IRAM OP enabled[0m
+[0;32mI (930) phy_init: phy_version 4670,719f9f6,Feb 18 2021,17:07:07[0m
+
+
+In callback with args:
+S
+
+In callback with args:
+tarted Gravity v1.0.0
+
+[5n
+
+In callback with args:
+
+
+In callback with args:
+
+Type 'help' to get the list of commands.
+Use UP/DOWN arrows to navigate through command history.
+Press TAB when typing command name to auto-complete.
+
+Y
+
+In callback with args:
+
+
+In callback with args:
+
+
+
+In callback with args:
+U
+
+In callback with args:
+nrecognized command
+> sync
+
+
+In callback with args:
+
+
+In callback with args:
+
+
+
+In callback with args:
+>
+
+In callback with args:
+ sync
+
+
+In callback with args:
+(
+
+In callback with args:
+0:2)(1:8)(2:32)(3:20)(4:1)(5:40:91:51:BB:AC:7D)(6:5)(7:1)(8:0.000000)(9:0)(10:0)(11:16)(12:-70)(13:180)
+> 
+
+In callback with args:
+
+
+In callback with args:
+[0;32mI (703) cpu_start: Multicore app[0m
+[0;32mI (703) cpu_start: Pro cpu up.[0m
+[0;32mI (703) cpu_start: Starting app cpu, entry point is 0x4008136c[0m
+[0;32mI (0) cpu_start: App cpu up.[0m
+[0;32mI (721) cpu_start: Pro cpu start user code[0m
+[0;32mI (721) cpu_start: c
+
+In callback with args:
+pu freq: 160000000 Hz[0m
+[0;32mI (721) cpu_start: Application information:[0m
+[0;32mI (726) cpu_start: Project name:     esp-wireless-tools[0m
+[0;32mI (732) c
+
+In callback with args:
+pu_start: App version:      v0.5.0-55-gffe2330-dirty[0m
+[0;32mI (738) cpu_start: Compile time:     Nov 11 2023 20:36:32[0m
+[0;32mI (744) cpu_start: ELF file SHA256:  64c39313bdc751e2...[0m
+[0;32mI (750) cpu_start: ESP-IDF:          v5.1.1-di
+
+In callback with args:
+rty[0m
+[0;32mI (755) cpu_start: Min chip rev:     v0.0[0m
+[0;32mI (760) cpu_start: Max chip rev:     v3.99 [0m
+[0;32mI (765) cpu_start: Chip rev:         v1.
+
+In callback with args:
+0[0m
+[0;32mI (770) heap_init: Initializing. RAM available for dynamic allocation:[0m
+[0;32mI (777) heap_init: At 3FFAFF10 len 000000F0 (0 KiB): DRAM[0m
+[0;32mI (783) heap_init: At 3FFB6388 len 00001C78 (7 KiB): DRAM[0m
+[0;32mI (789) h
+
+In callback with args:
+eap_init: At 3FFB9A20 len 00004108 (16 KiB): DRAM[0m
+[0;32mI (795) heap_init: At 3FFC9CD0 len 00016330 (88 KiB): DRAM[0m
+[0;32mI (801) heap_init: At 3FFE0440 len 
+
+In callback with args:
+00003AE0 (14 KiB): D/IRAM[0m
+[0;32mI (808) heap_init: At 3FFE4350 len 0001BCB0 (111 KiB): D/IRAM[0m
+[0;32mI (814) heap_init: At 4009D128 len 00002ED8 (11 KiB): IRAM[0m
+[0;32mI (822) s
+
+In callback with args:
+pi_flash: detected chip: generic[0m
+[0;32mI (825) spi_flash: flash io: dio[0m
+[0;32mI (830) coexist: coex firmware version: 80b0d89[0m
+[0;32mI (835) app_start: Starting scheduler on CPU0[0m
+[0;32mI (840) app_s
+
+In callback with args:
+tart: Starting scheduler on CPU1[0m
+[0;32mI (840) main_task: Started on CPU0[0m
+[0;32mI (850) main_task: Calling app_main()[0m
+
+
+In callback with args:
+
+
+In callback with args:
+[0;32mI (900) wifi_init: rx ba win: 6[0m
+[0;32mI (900) wifi_init: tcpip mbox: 32[0m
+[0;32mI (900) wifi_init: udp mbox: 6[0m
+[0;32mI (900) wifi_init: tcp mbox: 6[0m
+[0;32mI (910) wifi_init: tcp tx win: 5744[
+
+In callback with args:
+0m
+[0;32mI (910) wifi_init: tcp rx win: 5744[0m
+[0;32mI (920) wifi_init: tcp mss: 1440[0m
+[0;32mI (920) wifi_init: WiFi IRAM OP enabled[0m
+[0;32mI (930) wifi_init: Wi
+
+In callback with args:
+Fi RX IRAM OP enabled[0m
+[0;32mI (930) phy_init: phy_version 4670,719f9f6,Feb 18 2021,17:07:07[0m
+
+
+In callback with args:
+S
+
+In callback with args:
+tarted Gravity v1.0.0
+
+[5n
+
+In callback with args:
+
+
+In callback with args:
+
+Type 'help' to get the list of commands.
+Use UP/DOWN arrows to navigate through command history.
+Press TAB when typing command name to auto-complete.
+
+Your terminal application does not support escape sequences
+
+In callback with args:
+
+
+In callback with args:
+
+
+
+In callback with args:
+U
+
+In callback with args:
+nrecognized command
+> sync
+
+
+In callback with args:
+
+
+In callback with args:
+
+
+
+In callback with args:
+>
+
+In callback with args:
+ sync
+
+
+In callback with args:
+(
+
+In callback with args:
+0:2)(1:8)(2:32)(3:20)(4:1)(5:40:91:51:BB:AC:7D)(6:5)(7:1)(8:0.000000)(9:0)(10:0)(11:16)(12:-70)(13:180)
+> 
+
+In callback with args:
+e
+
+In callback with args:
+ts Jun  8 2016 00:22:57
+
+rst:0x1 (POWERON_RESET),boot:0x13 (SPIets Jun  8 2016 00:22:57
+
+rst:0x1 (POWERON_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+configsip: 0, SPIWP:0xee
+clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+mode:DIO, clock div:2
+load:0x3fff0030,len:5820
+ho 0 tail 12 room 4
+l
+
+In callback with args:
+
+
+In callback with args:
+[0;32mI (703) cpu_start: Multicore app[0m
+[0;32mI (703) cpu_start: Pro cpu up.[0m
+[0;32mI (703) cpu_start: Starting app cpu, entry point is 0x4008136c[0m
+[0;32mI (0) cpu_start: App cpu up.[0m
+
+
+In callback with args:
+[0;32mI (721) cpu_start: Pro cpu start user code[0m
+[0;32mI (721) cpu_start: cpu freq: 160000000 Hz[0m
+[0;32mI (721) cpu_start: Application information:[0m
+[0;32mI (726) cpu_start: Project nam
+
+In callback with args:
+e:     esp-wireless-tools[0m
+[0;32mI (732) cpu_start: App version:      v0.5.0-55-gffe2330-dirty[0m
+[0;32mI (738) cpu_start: Compile time:     Nov 11 2023 20:36:32[0m
+[0;32mI (744) cpu_star
+
+In callback with args:
+t: ELF file SHA256:  64c39313bdc751e2...[0m
+[0;32mI (750) cpu_start: ESP-IDF:          v5.1.1-dirty[0m
+[0;32mI (755) cpu_start: Min chip rev:     v0.0[0m
+[0;3
+
+In callback with args:
+2mI (760) cpu_start: Max chip rev:     v3.99 [0m
+[0;32mI (765) cpu_start: Chip rev:         v1.0[0m
+[0;32mI (770) heap_init: Initializing. RAM available for dynamic allocation:[0m
+[0;32mI (777) heap_init: At 3FFAFF10 len 000000F0 (0 KiB): DRAM[0
+
+In callback with args:
+m
+[0;32mI (783) heap_init: At 3FFB6388 len 00001C78 (7 KiB): DRAM[0m
+[0;32mI (789) heap_init: At 3FFB9A20 len 00004108 (16 KiB): DRAM[0m
+[0;32mI (795) heap_init: At 3FFC9CD0 len 00016330 (88 KiB): DRAM[0m
+[0
+
+In callback with args:
+;32mI (801) heap_init: At 3FFE0440 len 00003AE0 (14 KiB): D/IRAM[0m
+[0;32mI (808) heap_init: At 3FFE4350 len 0001BCB0 (111 KiB): D/IRAM[0m
+[0;32mI (814) heap_init: At 4009D128 len 00002ED8 (11 KiB): IRAM[0m
+[0;32mI (822) spi_flash: detec
+
+In callback with args:
+ted chip: generic[0m
+[0;32mI (825) spi_flash: flash io: dio[0m
+[0;32mI (830) coexist: coex firmware version: 80b0d89[0m
+[0;32mI (835) app_start: Starting schedu
+
+In callback with args:
+ler on CPU0[0m
+[0;32mI (840) app_start: Starting scheduler on CPU1[0m
+[0;32mI (840) main_task: Started on CPU0[0m
+[0;32mI (850) main_task: Calling app_main()[0m
+
+
+In callback with args:
+
+
+In callback with args:
+[0;32mI (900) wifi_init: rx ba win: 6[0m
+[0;32mI (900) wifi_init: tcpip mbox: 32[0m
+[0;32mI (900) wifi_init: udp mbox: 6[0m
+[0;32mI (900) wifi_init: tcp mbox: 6[0m
+[0;32mI (910) wifi_init: tcp tx win: 574
+
+In callback with args:
+4[0m
+[0;32mI (910) wifi_init: tcp rx win: 5744[0m
+[0;32mI (920) wifi_init: tcp mss: 1440[0m
+[0;32mI (920) wifi_init: WiFi IRAM OP enabled[0m
+[0;32mI (930) wifi_init: WiFi RX IRAM OP enabled[0m
+[0;32mI (93
+
+In callback with args:
+0) phy_init: phy_version 4670,719f9f6,Feb 18 2021,17:07:07[0m
+
+
+In callback with args:
+S
+
+In callback with args:
+tarted Gravity v1.0.0
+
+[5n
+
+In callback with args:
+
+
+In callback with args:
+
+Brown 
+
+In callback with args:
+e
+
+In callback with args:
+ts Jun  8 2016 00:22:57
+
+rst:0x1 (POWERON_RESET),boot:0x13 (SP	ets Jun  8 2016 00:22:57
+
+rst:0x1 (POWERON_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+configsip: 0, SPIWP:0xee
+clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+mode:DIO, clock div:2
+load:0x3fff0030,len:5820
+ho 0 tail 12 room 4
+l
+
+In callback with args:
+
+
+In callback with args:
+[0;32mI (703) cpu_start: Multicore app[0m
+[0;32mI (703) cpu_start: Pro cpu up.[0m
+[0;32mI (703) cpu_start: Starting app cpu, entry point is 0x4008136c[0m
+[0;32mI (0) cpu_start: App cpu up.[0m
+
+
+In callback with args:
+[0;32mI (721) cpu_start: Pro cpu start user code[0m
+[0;32mI (721) cpu_start: cpu freq: 160000000 Hz[0m
+[0;32mI (721) cpu_start: Application information:[0m
+[0;32mI (726) cpu_start: Project name:     es
+
+In callback with args:
+p-wireless-tools[0m
+[0;32mI (732) cpu_start: App version:      v0.5.0-55-gffe2330-dirty[0m
+[0;32mI (738) cpu_start: Compile time:     Nov 11 2023 20:36:32[0m
+[0;32mI (744) cpu_start: ELF fi
+
+In callback with args:
+le SHA256:  64c39313bdc751e2...[0m
+[0;32mI (750) cpu_start: ESP-IDF:          v5.1.1-dirty[0m
+[0;32mI (755) cpu_start: Min chip rev:     v0.0[0m
+[0;32mI (760) cpu_start: Max chip rev:     v3.99 [0m
+[0;32mI (765) cpu_start: Chip rev:         v1.0[0m
+[0
+
+In callback with args:
+;32mI (770) heap_init: Initializing. RAM available for dynamic allocation:[0m
+[0;32mI (777) heap_init: At 3FFAFF10 len 000000F0 (0 KiB): DRAM[0m
+[0;32mI (783) heap_init: At 3FFB6388 len 00001C78 (7 KiB): DRAM[0m
+[0;32mI (789) heap_init: At 3FFB9A20 len 00004108 (16 KiB): DRAM[0m
+[0;32mI (795) heap_in
+
+In callback with args:
+it: At 3FFC9CD0 len 00016330 (88 KiB): DRAM[0m
+[0;32mI (801) heap_init: At 3FFE0440 len 00003AE0 (14 KiB): D/IRAM[0m
+[0;32mI (808) heap_init: At 3FFE4350 len 0001BCB0 (111 KiB): D/IRAM[0m
+[0;32mI (814) heap_init: At
+
+In callback with args:
+ 4009D128 len 00002ED8 (11 KiB): IRAM[0m
+[0;32mI (822) spi_flash: detected chip: generic[0m
+[0;32mI (825) spi_flash: flash io: dio[0m
+[0;32mI (830) coexist: coex firmware version: 80b0d89[
+
+In callback with args:
+0m
+[0;32mI (835) app_start: Starting scheduler on CPU0[0m
+[0;32mI (840) app_start: Starting scheduler on CPU1[0m
+[0;32mI (840) main_task: Started on CPU0[0m
+[0;32mI (850) main_task: Calling app_main()[0m
+
+
+In callback with args:
+
+
+In callback with args:
+[0;32mI (900) wifi_init: rx ba win: 6[0m
+[0;32mI (900) wifi_init: tcpip mbox: 32[0m
+[0;32mI (900) wifi_init: udp mbox: 6[0m
+[0;32mI (900) wifi_init: tcp mbox: 6[0m
+[0;32mI (91
+
+In callback with args:
+0) wifi_init: tcp tx win: 5744[0m
+[0;32mI (910) wifi_init: tcp rx win: 5744[0m
+[0;32mI (920) wifi_init: tcp mss: 1440[0m
+[0;32mI (920) wifi_init: WiFi IRAM OP enabled[0m
+[0;32mI (930) wifi_init: WiFi RX IRAM OP enabled[0m
+[0;32mI
+
+In callback with args:
+ (930) phy_init: phy_version 4670,719f9f6,Feb 18 2021,17:07:07[0m
+
+
+In callback with args:
+S
+
+In callback with args:
+tarted Gravity v1.0.0
+
+[5n
+
+In callback with args:
+
+
+In callback with args:
+
+Brown 
+
+In callback with args:
+e
+
+In callback with args:
+ts Jun  8 2016 00:22:57
+
+rst:0x1 (POWERON_RESET),boot:0x13 (SPets Jun  8 2016 00:22:57
+
+rst:0x1 (POWERON_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+configsip: 0, SPIWP:0xee
+clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+mode:DIO, clock div:2
+load:0x3fff0030,len:5820
+ho 0 tail 12 room 4
+lo
+
+In callback with args:
+
+
+In callback with args:
+[0;32mI (703) cpu_start: Multicore app[0m
+[0;32mI (703) cpu_start: Pro cpu up.[0m
+[0;32mI (703) cpu_start: Starting app cpu, entry point is 0x4008136c[0m
+[0;32mI (0) cpu_start: App cpu up.[0m
+[0;32mI (721) cpu_start: Pro cpu start user 
+
+In callback with args:
+code[0m
+[0;32mI (721) cpu_start: cpu freq: 160000000 Hz[0m
+[0;32mI (721) cpu_start: Application information:[0m
+[0;32mI (726) cpu_start: Project name:     e
+
+In callback with args:
+sp-wireless-tools[0m
+[0;32mI (732) cpu_start: App version:      v0.5.0-55-gffe2330-dirty[0m
+[0;32mI (738) cpu_start: Compile time:     Nov 11 2023 20:36:32[0m
+[0;32mI (744) cpu_start: ELF f
+
+In callback with args:
+ile SHA256:  64c39313bdc751e2...[0m
+[0;32mI (750) cpu_start: ESP-IDF:          v5.1.1-dirty[0m
+[0;32mI (755) cpu_start: Min chip rev:     v0.0[0m
+[0;32mI (760) cpu_start: Max chip rev:     v3.99 [0m
+[0;32
+
+In callback with args:
+mI (765) cpu_start: Chip rev:         v1.0[0m
+[0;32mI (770) heap_init: Initializing. RAM available for dynamic allocation:[0m
+[0;32mI (777) heap_init: At 3FFAFF10 len 000000F0 (0 KiB): DRAM[0m
+[0;32mI (783) heap_init: At 3FFB6388 len 00001C78 (7 KiB): DRAM[0m
+[0;32mI (7
+
+In callback with args:
+89) heap_init: At 3FFB9A20 len 00004108 (16 KiB): DRAM[0m
+[0;32mI (795) heap_init: At 3FFC9CD0 len 00016330 (88 KiB): DRAM[0m
+[0;32mI (801) heap_init: At 3FFE0440 len 00003AE0 (14 KiB): D/IRAM[0m
+[0;32mI (808) heap
+
+In callback with args:
+_init: At 3FFE4350 len 0001BCB0 (111 KiB): D/IRAM[0m
+[0;32mI (814) heap_init: At 4009D128 len 00002ED8 (11 KiB): IRAM[0m
+[0;32mI (822) spi_flash: detected chip: generic[0m
+[0;32mI (825) spi_flash: flash io: dio[0m
+[0;32mI (830) coexist: coex firmware version: 80b0d89[0m
+[0;32mI
+
+In callback with args:
+ (835) app_start: Starting scheduler on CPU0[0m
+[0;32mI (840) app_start: Starting scheduler on CPU1[0m
+[0;32mI (840) main_task: Started on CPU0[0m
+[0;32mI (850) main_task: Calling app_main()[0m
+
+
+In callback with args:
+
+
+In callback with args:
+[0;32mI (900) wifi_init: rx ba win: 6[0m
+[0;32mI (900) wifi_init: tcpip mbox: 32[0m
+[0;32mI (900) wifi_init: udp mbox: 6[0m
+[0;32mI (900) wifi_init: tcp mbox: 6[0m
+[0;32mI (910) wifi_init: tcp tx win: 5744[0m
+[0;32mI (910) 
+
+In callback with args:
+wifi_init: tcp rx win: 5744[0m
+[0;32mI (920) wifi_init: tcp mss: 1440[0m
+[0;32mI (920) wifi_init: WiFi IRAM OP enabled[0m
+[0;32mI (930) wifi_init: WiFi RX IRAM OP enabled[0m
+[0;32mI (930)
+
+In callback with args:
+ phy_init: phy_version 4670,719f9f6,Feb 18 2021,17:07:07[0m
+
+
+In callback with args:
+S
+
+In callback with args:
+tarted Gravity v1.0.0
+
+[5n
+
+In callback with args:
+
+
+In callback with args:
+
+Type 'help' to get the list of commands.
+Use UP/DOWN arrows to navigate through command history.
+Press TAB when typing command name to auto-complete.
+
+Your terminal application doe
+
+In callback with args:
+e
+
+In callback with args:
+ts Jun  8 2016 00:22:57
+
+rst:0x1 (POWERON_RESET),boot:0x13 (SPI_
+
+In callback with args:
+
+
+In callback with args:
+[0;32mI (703) cpu_start: Multicore app[0m
+[0;32mI (703) cpu_start: Pro cpu up.[0m
+[0;32mI (703) cpu_start: Starting app cpu, entry point is 0x4008136c[0m
+[0;32mI (0) cpu_start: App cpu up.[0m
+[0;32mI (721) cpu_start: Pro cpu start user code[0m
+[0;32mI (721) cpu_start: cpu freq:
+
+In callback with args:
+ 160000000 Hz[0m
+[0;32mI (721) cpu_start: Application information:[0m
+[0;32mI (726) cpu_start: Project name:     esp-wireless-tools[0m
+[0;32mI (732) cpu_start: 
+
+In callback with args:
+App version:      v0.5.0-55-gffe2330-dirty[0m
+[0;32mI (738) cpu_start: Compile time:     Nov 11 2023 20:36:32[0m
+[0;32mI (744) cpu_start: ELF file SHA256:  64c39313bdc751e2...[0m
+[0;32mI (750) cpu_start: ESP-IDF:          v5.1.1-dirty[0m
+[0;32mI (755) cpu_start: Min chip rev:     v0.0[0m
+[0;32mI (760) 
+
+In callback with args:
+cpu_start: Max chip rev:     v3.99 [0m
+[0;32mI (765) cpu_start: Chip rev:         v1.0[0m
+[0;32mI (770) heap_init: Initializing. RAM available for dynamic alloc
+
+In callback with args:
+ation:[0m
+[0;32mI (777) heap_init: At 3FFAFF10 len 000000F0 (0 KiB): DRAM[0m
+[0;32mI (783) heap_init: At 3FFB6388 len 00001C78 (7 KiB): DRAM[0m
+[0;32mI (789) heap_init: At 3FFB9A20 len 00004108 (16 KiB): DRAM[0m
+[0;32mI (795) heap_init: At 3
+
+In callback with args:
+FFC9CD0 len 00016330 (88 KiB): DRAM[0m
+[0;32mI (801) heap_init: At 3FFE0440 len 00003AE0 (14 KiB): D/IRAM[0m
+[0;32mI (808) heap_init: At 3FFE4350 len 0001BCB0 (1
+
+In callback with args:
+11 KiB): D/IRAM[0m
+[0;32mI (814) heap_init: At 4009D128 len 00002ED8 (11 KiB): IRAM[0m
+[0;32mI (822) spi_flash: detected chip: generic[0m
+[0;32mI (825) spi_flash: flash io: dio[0m
+[0;32mI (830) coexist: coex firmware version: 80b0d89[0m
+
+
+In callback with args:
+[0;32mI (835) app_start: Starting scheduler on CPU0[0m
+[0;32mI (840) app_start: Starting scheduler on CPU1[0m
+[0;32mI (840) main_task: Started on CPU0[0m
+[0;3
+
+In callback with args:
+2mI (850) main_task: Calling app_main()[0m
+
+
+In callback with args:
+
+
+In callback with args:
+[0;32mI (900) wifi_init: rx ba win: 6[0m
+[0;32mI (900) wifi_init: tcpip mbox: 32[0m
+[0;32mI (900) wifi_init: udp mbox: 6[0m
+[0;32mI (900) wifi_init: tcp mbox: 6[0m
+[0;32mI (910) wifi_init: tcp tx win: 5744[0m
+[0;32mI (910) wifi_init: t
+
+In callback with args:
+cp rx win: 5744[0m
+[0;32mI (920) wifi_init: tcp mss: 1440[0m
+[0;32mI (920) wifi_init: WiFi IRAM OP enabled[0m
+[0;32mI (930) wifi_init: WiFi RX IRAM OP enabled
+
+In callback with args:
+[0m
+[0;32mI (930) phy_init: phy_version 4670,719f9f6,Feb 18 2021,17:07:07[0m
+
+
+In callback with args:
+S
+
+In callback with args:
+tarted Gravity v1.0.0
+
+[5n
+
+In callback with args:
+
+
+In callback with args:
+
+Type 'help' to get the list of commands.
+Use UP/DOWN arrows to navigate through command history.
+Press TAB when typing command name to auto-complete.
+
+Your terminal application does not support escape sequences.
+
+In callback with args:
+
+
+In callback with args:
+
+
+
+In callback with args:
+U
+
+In callback with args:
+nrecognized command
+> sync
+
+
+In callback with args:
+
+
+In callback with args:
+
+
+
+In callback with args:
+>
+
+In callback with args:
+ sync
+
+
+In callback with args:
+(
+
+In callback with args:
+0:2)(1:8)(2:32)(3:20)(4:1)(5:40:91:51:BB:AC:7D)(6:5)(7:1)(8:0.000000)(9:0)(10:0)(11:16)(12:-70)(13:180)
+> 
+

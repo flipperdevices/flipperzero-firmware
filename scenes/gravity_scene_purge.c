@@ -1,4 +1,4 @@
-#include "../uart_terminal_app_i.h"
+#include "../gravity_app_i.h"
 #include <dolphin/dolphin.h>
 
 /*
@@ -10,7 +10,7 @@
     Purge unnamed?
 */
 
-UART_TerminalItem purgeMenu[NUM_PURGE_ITEMS] = {
+GravityItem purgeMenu[NUM_PURGE_ITEMS] = {
   {"Purge By Age?", {"On", "Off"}, 2, {"on", "off"}, NO_ARGS, FOCUS_CONSOLE_END, NO_TIP, false},
   {"Purge Age",
   {"5 sec", "10 sec", "20 sec", "30 sec", "60 sec", "90 sec", "120 sec", "3 min", "5 min", "10 min", "30 min", "1 hour"},
@@ -53,10 +53,10 @@ int indexOf(char *val, const char **array, int arrayLen) {
 }
 
 /* Callback when an option is selected */
-static void uart_terminal_scene_purge_var_list_enter_callback(void* context, uint32_t index) {
+static void gravity_scene_purge_var_list_enter_callback(void* context, uint32_t index) {
     furi_assert(context);
-    UART_TerminalApp* app = context;
-    UART_TerminalItem *item = NULL;
+    GravityApp* app = context;
+    GravityItem *item = NULL;
     int selected_option_index = app->selected_menu_options[GRAVITY_MENU_PURGE][index];
     furi_assert(index < NUM_PURGE_ITEMS);
     app->selected_menu_items[GRAVITY_MENU_PURGE] = index;
@@ -87,7 +87,7 @@ static void uart_terminal_scene_purge_var_list_enter_callback(void* context, uin
     /* At this point we're ready to save or run the configured purge strategy */
     /* Expected command values: save, ap, sta, bt, ble */
     /* Initialise the serial console */
-    uart_terminal_uart_tx((uint8_t*)("\n"), 1);
+    gravity_uart_tx((uint8_t*)("\n"), 1);
     int strat = 0;
     if (bAge) {
         strat += GRAVITY_PURGE_AGE;
@@ -118,7 +118,7 @@ static void uart_terminal_scene_purge_var_list_enter_callback(void* context, uin
             strcpy(saveCmd, "set BLE_PURGE_MIN_AGE ");
             strcat(saveCmd, strAge);
             strcat(saveCmd, "\n");
-            uart_terminal_uart_tx((uint8_t *)saveCmd, strlen(saveCmd));
+            gravity_uart_tx((uint8_t *)saveCmd, strlen(saveCmd));
             // YAGNI: Delay
         }
         if (bRSSI) {
@@ -126,7 +126,7 @@ static void uart_terminal_scene_purge_var_list_enter_callback(void* context, uin
             strcpy(saveCmd, "set BLE_PURGE_MAX_RSSI ");
             strcat(saveCmd, strRSSI);
             strcat(saveCmd, "\n");
-            uart_terminal_uart_tx((uint8_t *)saveCmd, strlen(saveCmd));
+            gravity_uart_tx((uint8_t *)saveCmd, strlen(saveCmd));
             // YAGNI: Delay
         }
         char strStrat[3];
@@ -202,24 +202,24 @@ static void uart_terminal_scene_purge_var_list_enter_callback(void* context, uin
                             (app->selected_tx_string[cmdLen-1] == ' ')));
 
     if(needs_keyboard) {
-        view_dispatcher_send_custom_event(app->view_dispatcher, UART_TerminalEventStartKeyboard);
+        view_dispatcher_send_custom_event(app->view_dispatcher, GravityEventStartKeyboard);
     } else {
-        view_dispatcher_send_custom_event(app->view_dispatcher, UART_TerminalEventStartConsole);
+        view_dispatcher_send_custom_event(app->view_dispatcher, GravityEventStartConsole);
     }
 }
 
 /* Callback when a selected option is changed (I Think) */
-static void uart_terminal_scene_purge_var_list_change_callback(VariableItem* item) {
+static void gravity_scene_purge_var_list_change_callback(VariableItem* item) {
     furi_assert(item);
 
-    UART_TerminalApp* app = variable_item_get_context(item);
+    GravityApp* app = variable_item_get_context(item);
     furi_assert(app);
 
     if (app->selected_menu_items[GRAVITY_MENU_PURGE] >= NUM_PURGE_ITEMS) {
         app->selected_menu_items[GRAVITY_MENU_PURGE] = 0;
     }
 
-    const UART_TerminalItem* menu_item = &purgeMenu[app->selected_menu_items[GRAVITY_MENU_PURGE]];
+    const GravityItem* menu_item = &purgeMenu[app->selected_menu_items[GRAVITY_MENU_PURGE]];
     uint8_t item_index = variable_item_get_current_value_index(item);
     furi_assert(item_index < menu_item->num_options_menu);
     variable_item_set_current_value_text(item, menu_item->options_menu[item_index]);
@@ -227,8 +227,8 @@ static void uart_terminal_scene_purge_var_list_change_callback(VariableItem* ite
 }
 
 /* Callback on entering the scene (initialisation) */
-void uart_terminal_scene_purge_on_enter(void* context) {
-    UART_TerminalApp* app = context;
+void gravity_scene_purge_on_enter(void* context) {
+    GravityApp* app = context;
     VariableItemList* var_item_list = app->purge_menu_list;
     VariableItem *item;
 
@@ -236,7 +236,7 @@ void uart_terminal_scene_purge_on_enter(void* context) {
     app->free_command = false;
 
     variable_item_list_set_enter_callback(
-        var_item_list, uart_terminal_scene_purge_var_list_enter_callback, app);
+        var_item_list, gravity_scene_purge_var_list_enter_callback, app);
 
     /* Need to create the menu before we can set values for selected_options_index[] */
     app->currentMenu = GRAVITY_MENU_PURGE;
@@ -245,7 +245,7 @@ void uart_terminal_scene_purge_on_enter(void* context) {
             var_item_list,
             purgeMenu[i].item_string,
             purgeMenu[i].num_options_menu,
-            uart_terminal_scene_purge_var_list_change_callback,
+            gravity_scene_purge_var_list_change_callback,
             app);
         purgeMenuItemViews[i] = item;
         variable_item_set_current_value_index(item, app->selected_menu_options[GRAVITY_MENU_PURGE][i]);
@@ -258,17 +258,17 @@ void uart_terminal_scene_purge_on_enter(void* context) {
 }
 
 /* Event handler callback - Handle scene change and tick events */
-bool uart_terminal_scene_purge_on_event(void* context, SceneManagerEvent event) {
+bool gravity_scene_purge_on_event(void* context, SceneManagerEvent event) {
     UNUSED(context);
-    UART_TerminalApp* app = context;
+    GravityApp* app = context;
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
         int nextScene = 0;
-        if (event.event == UART_TerminalEventStartKeyboard) {
-            nextScene = UART_TerminalAppViewTextInput;
-        } else if (event.event == UART_TerminalEventStartConsole) {
-            nextScene = UART_TerminalAppViewConsoleOutput;
+        if (event.event == GravityEventStartKeyboard) {
+            nextScene = Gravity_AppViewTextInput;
+        } else if (event.event == GravityEventStartConsole) {
+            nextScene = Gravity_AppViewConsoleOutput;
         }
         scene_manager_next_scene(app->scene_manager, nextScene);
         consumed = true;
@@ -280,7 +280,7 @@ bool uart_terminal_scene_purge_on_event(void* context, SceneManagerEvent event) 
 }
 
 /* Clean up on exit */
-void uart_terminal_scene_purge_on_exit(void* context) {
-    UART_TerminalApp* app = context;
+void gravity_scene_purge_on_exit(void* context) {
+    GravityApp* app = context;
     variable_item_list_reset(app->purge_menu_list);
 }
