@@ -38,6 +38,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW PR: [LFRFID: Indala 224 (resolves #2386) #3337 (By Aidan-McNay)](https://github.com/flipperdevices/flipperzero-firmware/pull/3337)
 - Updated: [Restaurant Pager Trigger v1.2 (By leedave)](https://github.com/leedave/flipper-zero-meal-pager)
 - Updated: [Nu Pogodi! (Ну, погоди!) v1.3 (By sionyx)](https://github.com/sionyx/flipper_nupogodi)
+- Updated: [Authenticator/TOTP v5.10.0 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
 
 <a name="release">
 
@@ -308,7 +309,7 @@ $ ./fbt dolphin_ext
 - [Analog Clock v1.1 (By scrolltex)](https://github.com/scrolltex/flipper_analog_clock)
 - [APRS Cln Hello World (By NSV47)](https://github.com/NSV47/APRS_hello_world_clean)
 - [Atomic Dice Roller v1.1 (By nmrr)](https://github.com/nmrr/flipperzero-atomicdiceroller)
-- [Authenticator/TOTP v5.9.1 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
+- [Authenticator/TOTP v5.10.0 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
 - [AVR Flasher (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/2475)
 - [AZERTY Mouse Jacker (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/mousejacker) `Req: NRF24` (Uses AZERTY keyboard - Source Unknown)
 - [Bad KB (Modified PR#738 from pengu1ndev - Original from Willy-JL) #739 (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/739)
