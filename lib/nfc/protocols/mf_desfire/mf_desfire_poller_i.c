@@ -301,24 +301,32 @@ MfDesfireError mf_desfire_poller_read_file_data(
     size_t size,
     MfDesfireFileData* data) {
     furi_assert(instance);
-
-    bit_buffer_reset(instance->input_buffer);
-    bit_buffer_append_byte(instance->input_buffer, MF_DESFIRE_CMD_READ_DATA);
-    bit_buffer_append_byte(instance->input_buffer, id);
-    bit_buffer_append_bytes(instance->input_buffer, (const uint8_t*)&offset, 3);
-    bit_buffer_append_bytes(instance->input_buffer, (const uint8_t*)&size, 3);
-
+    size_t cur_offset, read_size, num_read;
     MfDesfireError error;
 
-    do {
+    simple_array_init(data->data, size);
+    uint8_t* data_buf = (uint8_t*)simple_array_get_data(data->data);
+
+    for(cur_offset = offset; cur_offset < size; cur_offset += num_read) {
+        read_size = size - cur_offset;
+
+        bit_buffer_reset(instance->input_buffer);
+        bit_buffer_append_byte(instance->input_buffer, MF_DESFIRE_CMD_READ_DATA);
+        bit_buffer_append_byte(instance->input_buffer, id);
+        bit_buffer_append_bytes(
+            instance->input_buffer, (const uint8_t*)&cur_offset, 3); // This is not endian safe.
+        bit_buffer_append_bytes(
+            instance->input_buffer, (const uint8_t*)&read_size, 3); // This is not endian safe.
+
         error = mf_desfire_send_chunks(instance, instance->input_buffer, instance->result_buffer);
 
         if(error != MfDesfireErrorNone) break;
 
-        if(!mf_desfire_file_data_parse(data, instance->result_buffer)) {
-            error = MfDesfireErrorProtocol;
-        }
-    } while(false);
+        num_read = bit_buffer_get_size_bytes(instance->result_buffer);
+        if(num_read == 0 || num_read > read_size) return MfDesfireErrorProtocol;
+
+        bit_buffer_write_bytes(instance->result_buffer, &data_buf[cur_offset], num_read);
+    }
 
     return error;
 }
