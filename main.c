@@ -1,4 +1,3 @@
-// main.c
 #include <furi.h>
 #include "app/app.h"
 #include "scenes/scenes.h"
