@@ -126,12 +126,6 @@ static bool mine_sweeper_game_screen_view_play_input_callback(InputEvent* event,
 static void setup_board(MineSweeperGameScreen* instance) {
     furi_assert(instance);
 
-    static double time = 0.0;
-    static uint32_t iter = 0;
-    iter++;
-
-    uint32_t start_tick = furi_get_tick();
-
     uint16_t board_tile_count = 0;
     uint8_t board_width = 0, board_height = 0, board_difficulty = 0;
 
@@ -250,23 +244,10 @@ static void setup_board(MineSweeperGameScreen* instance) {
         true
     );
 
-    uint32_t ticks_elapsed = furi_get_tick() - start_tick;
-    double sec = (double)ticks_elapsed / (double)furi_kernel_get_tick_frequency();
-    double milliseconds = 1000.0L * sec;
-    time += milliseconds;
-    
-    FURI_LOG_D(MS_DEBUG_TAG, "Setup board time: %.03f", time/iter);
 }
 
 static inline Point bfs_to_closest_tile(MineSweeperGameScreenModel* model) {
     furi_assert(model);
-
-    static double bfs_time = 0.0L;
-    static double time = 0.0L;
-    static uint32_t iter = 0;
-    iter++;
-
-    uint32_t start_tick = furi_get_tick();
 
     // Init both the set and dequeue
     point_deq_t deq;
@@ -288,10 +269,6 @@ static inline Point bfs_to_closest_tile(MineSweeperGameScreenModel* model) {
 
     point_deq_push_back(deq, pos);
 
-    uint32_t bfs_start_tick = furi_get_tick();
-
-    uint16_t i = 0;
-    
     while (point_deq_size(deq) > 0) {
         point_deq_pop_front(&pos, deq);
         Point curr_pos = pointobj_get_point(pos);
@@ -340,25 +317,8 @@ static inline Point bfs_to_closest_tile(MineSweeperGameScreenModel* model) {
         }
     }
 
-    uint32_t bfs_end_tick = furi_get_tick();
-
     point_set_clear(set);
     point_deq_clear(deq);
-
-    uint32_t ticks_elapsed = furi_get_tick() - start_tick;
-    uint32_t bfs_ticks_elapsed = bfs_end_tick - bfs_start_tick;
-    double sec = (double)ticks_elapsed / (double)furi_kernel_get_tick_frequency();
-    double bfs_sec = (double)bfs_ticks_elapsed / (double)furi_kernel_get_tick_frequency();
-    double milliseconds = 1000.0L * sec;
-    double bfs_milliseconds = 1000.0L * bfs_sec;
-    time += milliseconds;
-    bfs_time += bfs_milliseconds;
-
-    FURI_LOG_D(MS_DEBUG_TAG, "BFS specific time: %.03f, in %d iter", bfs_milliseconds, i);
-    FURI_LOG_D(MS_DEBUG_TAG, "BFS Clear function time: %.03f", milliseconds);
-
-    FURI_LOG_D(MS_DEBUG_TAG, "BFS specific time: %.03f, in %d iter", bfs_time/iter, i);
-    FURI_LOG_D(MS_DEBUG_TAG, "BFS Jump function time: %.03f", time/iter);
 
     return result;
 }
@@ -367,13 +327,6 @@ static inline Point bfs_to_closest_tile(MineSweeperGameScreenModel* model) {
 // We can use m*lib for a set and dequeue for BFS
 static inline void bfs_tile_clear(MineSweeperGameScreenModel* model, uint16_t x, uint16_t y) {
     furi_assert(model);
-
-    static double bfs_time = 0.0L;
-    static double time = 0.0L;
-    static uint32_t iter = 0;
-    iter++;
-
-    uint32_t start_tick = furi_get_tick();
     
     // Init both the set and dequeue
     point_deq_t deq;
@@ -391,10 +344,6 @@ static inline void bfs_tile_clear(MineSweeperGameScreenModel* model, uint16_t x,
     pointobj_set_point(pos, start_pos);
 
     point_deq_push_back(deq, pos);
-
-    uint32_t bfs_start_tick = furi_get_tick();
-
-    uint16_t i = 0;
 
     while (point_deq_size(deq) > 0) {
         point_deq_pop_front(&pos, deq);
@@ -441,28 +390,11 @@ static inline void bfs_tile_clear(MineSweeperGameScreenModel* model, uint16_t x,
             pointobj_set_point(pos, neighbor);
             point_deq_push_back(deq, pos);
         }
-        i++;
     }
-
-    uint32_t bfs_end_tick = furi_get_tick();
 
     point_set_clear(set);
     point_deq_clear(deq);
 
-    uint32_t ticks_elapsed = furi_get_tick() - start_tick;
-    uint32_t bfs_ticks_elapsed = bfs_end_tick - bfs_start_tick;
-    double sec = (double)ticks_elapsed / (double)furi_kernel_get_tick_frequency();
-    double bfs_sec = (double)bfs_ticks_elapsed / (double)furi_kernel_get_tick_frequency();
-    double milliseconds = 1000.0L * sec;
-    double bfs_milliseconds = 1000.0L * bfs_sec;
-    time += milliseconds;
-    bfs_time += bfs_milliseconds;
-
-    FURI_LOG_D(MS_DEBUG_TAG, "BFS specific time: %.03f, in %d iter", bfs_milliseconds, i);
-    FURI_LOG_D(MS_DEBUG_TAG, "BFS Clear function time: %.03f", milliseconds);
-
-    FURI_LOG_D(MS_DEBUG_TAG, "BFS specific time avg: %.03f, in %d iter", bfs_time/iter, i);
-    FURI_LOG_D(MS_DEBUG_TAG, "BFS Clear function time avg: %.03f", time/iter);
 }
 
 static void mine_sweeper_game_screen_set_board_information(
@@ -767,12 +699,6 @@ static void mine_sweeper_game_screen_view_play_draw_callback(Canvas* canvas, voi
     furi_assert(canvas);
     furi_assert(_model);
 
-    static double time = 0.0L;
-    static uint32_t iter = 0;
-    iter++;
-    
-    uint32_t start_tick = furi_get_tick();
-
     MineSweeperGameScreenModel* model = _model;
 
     canvas_clear(canvas);
@@ -912,14 +838,6 @@ static void mine_sweeper_game_screen_view_play_draw_callback(Canvas* canvas, voi
             AlignTop,
             furi_string_get_cstr(model->info_str));
 
-    uint32_t ticks_elapsed2 = furi_get_tick() - start_tick;
-    double sec2 = (double) ticks_elapsed2 / (double) furi_kernel_get_tick_frequency();
-    double milliseconds = sec2 * 1000;
-    time += milliseconds;
-
-    if (iter % 50 == 0)
-        FURI_LOG_D(MS_DEBUG_TAG, "Draw callback avg time: %.03f", time/iter);
-
 }
 
 static bool mine_sweeper_game_screen_view_end_input_callback(InputEvent* event, void* context) {
@@ -1024,13 +942,6 @@ static bool mine_sweeper_game_screen_view_end_input_callback(InputEvent* event, 
 static bool mine_sweeper_game_screen_view_play_input_callback(InputEvent* event, void* context) {
     furi_assert(context);
     furi_assert(event);
-
-    static double time = 0.0L;
-    static uint32_t iter = 0;
-    iter++;
-    
-    uint32_t start_tick = furi_get_tick();
-
 
     MineSweeperGameScreen* instance = context;
     bool consumed = false;
@@ -1257,14 +1168,6 @@ static bool mine_sweeper_game_screen_view_play_input_callback(InputEvent* event,
     if (!consumed && instance->input_callback != NULL) {
         consumed = instance->input_callback(event, instance->context);
     }
-
-    uint32_t ticks_elapsed = furi_get_tick() - start_tick;
-    double sec = (double) ticks_elapsed / (double) furi_kernel_get_tick_frequency();
-    double milliseconds = sec * 1000;
-    time += milliseconds;
-
-    if (iter%3==0)
-        FURI_LOG_D(MS_DEBUG_TAG, "Input callback avg time: %.03f", time/iter);
 
     return consumed;
 }
