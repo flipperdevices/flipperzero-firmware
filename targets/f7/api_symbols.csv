@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,50.1,,
+Version,+,53.1,,
 Header,+,applications/drivers/subghz/cc1101_ext/cc1101_ext_interconnect.h,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
@@ -111,6 +111,7 @@ Header,+,lib/music_worker/music_worker.h,,
 Header,+,lib/nanopb/pb.h,,
 Header,+,lib/nanopb/pb_decode.h,,
 Header,+,lib/nanopb/pb_encode.h,,
+Header,+,lib/nfc/helpers/gallagher_util.h,,
 Header,+,lib/nfc/helpers/iso13239_crc.h,,
 Header,+,lib/nfc/helpers/iso14443_crc.h,,
 Header,+,lib/nfc/helpers/nfc_data_generator.h,,
@@ -1697,6 +1698,7 @@ Function,+,furi_timer_start,FuriStatus,"FuriTimer*, uint32_t"
 Function,+,furi_timer_stop,FuriStatus,FuriTimer*
 Function,-,fwrite,size_t,"const void*, size_t, size_t, FILE*"
 Function,-,fwrite_unlocked,size_t,"const void*, size_t, size_t, FILE*"
+Function,+,gallagher_deobfuscate_and_parse_credential,void,"GallagherCredential*, const uint8_t*"
 Function,-,gamma,double,double
 Function,-,gamma_r,double,"double, int*"
 Function,-,gammaf,float,float
