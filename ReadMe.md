@@ -24,6 +24,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - [:fire: PATREON ANIMATION BUILDS AVAILABLE](https://www.patreon.com/RogueMaster/membership): [ALL](https://www.patreon.com/posts/animation-all-v4-77935728) (For Preview Only), ANIMSWITCHER, 420, 420+18, Anime Only, Anime+420, Anime+420+18, BMO, CHERRY 18+, DBZ, Dolphin, HACKZ, ManifestSwitcher, MARIO, MARVEL, No Anim, ONE PIECE, P0KEMON, RM 18PLUS, RM SELECT, RM SELECT + 18PLUS, RM MINIMAL (default on GitHub), SAO, SCIENCE, SJUMP, SQUATCH, VIRUS, WATCHDOGS AND STOCK with all assets updated to look like stock. ANIMSWITCHER, Anime and RM Select builds are very large and can slow down F0.
 - [VIDEO PREVIEW FOR ALL ANIMATIONS](https://www.patreon.com/posts/august-2023-all-87925007)
 - [Supporters also get SD Card Assets zip file with extra NFC Assets such as Infrared remotes, NFC files, SubGHz files and 86 RM Pro Trained Level 50 Sm@sh Amiib0 (By RogueMaster)](https://www.patreon.com/RogueMaster/membership)
+- OFW PR: [LFRFID: Indala 224 (resolves #2386) #3337 (By Aidan-McNay)](https://github.com/flipperdevices/flipperzero-firmware/pull/3337)
 
 <a name="latest">
 
@@ -179,6 +180,7 @@ $ ./fbt dolphin_ext
 - Plugins: [PicoPass Emulation (By nvx)](https://github.com/nvx/flipperzero-firmware/tree/picopass_emulation)
 - [RFID: 3 new T5577 extra actions: Set/clear custom pw; write block; wipe #678 (By plgcoder)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/678)
 - RFID: [Hitag #2658 (By blackvault88)](https://github.com/flipperdevices/flipperzero-firmware/pull/2658)
+- RFID: [Indala 224 (resolves #2386) #3337 (By Aidan-McNay)](https://github.com/flipperdevices/flipperzero-firmware/pull/3337)
 - Settings: OFW PR [Automatic shutdown on idle #1647 (By SHxKenzuto)](https://github.com/flipperdevices/flipperzero-firmware/pull/1647)
 - Settings: Auto-Lock Options Added: 10s+15s+90s [(By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/applications/desktop/desktop_settings/scenes/desktop_settings_scene_start.c)
 - Settings: Battery Meter on Desktop [Thanks to McAzzaMan](https://github.com/McAzzaMan/flipperzero-firmware/tree/BatteryPercentageView)
