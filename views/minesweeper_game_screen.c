@@ -572,7 +572,8 @@ static bool try_clear_surrounding_tiles(MineSweeperGameScreenModel* model) {
         uint16_t pos = dx * board_width + dy;
         if (model->board[pos].tile_state == MineSweeperGameScreenTileStateFlagged) {
             num_surrounding_flagged++;
-        } else if (!was_mine_found && model->board[pos].tile_type == MineSweeperGameScreenTileMine) {
+        } else if (!was_mine_found && model->board[pos].tile_type == MineSweeperGameScreenTileMine
+                && model->board[pos].tile_state != MineSweeperGameScreenTileStateFlagged) {
             was_mine_found = true;
         }
 
