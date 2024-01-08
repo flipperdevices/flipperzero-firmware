@@ -7,7 +7,7 @@ App(
     fap_icon="icons/meal_pager_10px.png",
     fap_icon_assets="icons",
     fap_category="Sub-Ghz",
-    fap_version="1.1",
+    fap_version="1.2",
     fap_libs=["assets"],
     fap_author="leedave",
     fap_weburl="https://github.com/leedave/flipper-zero-meal-pager",

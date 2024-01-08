@@ -221,4 +221,28 @@ void meal_pager_set_max_values(void* context) {
         app->max_pager = 999;
         break;
     }
+    if(app->first_station > app->max_station) {
+        app->first_station = app->max_station;
+        snprintf(app->text_store[0], 5, "%lu", app->first_station);
+    }
+    if(app->last_station > app->max_station) {
+        app->last_station = app->max_station;
+        snprintf(app->text_store[1], 5, "%lu", app->last_station);
+    }
+    if(app->last_station < app->first_station) {
+        app->last_station = app->first_station;
+        snprintf(app->text_store[1], 5, "%lu", app->last_station);
+    }
+    if(app->first_pager > app->max_pager) {
+        app->first_pager = app->max_pager;
+        snprintf(app->text_store[2], 4, "%lu", app->first_pager);
+    }
+    if(app->last_pager > app->max_pager) {
+        app->last_pager = app->max_pager;
+        snprintf(app->text_store[3], 4, "%lu", app->last_pager);
+    }
+    if(app->last_pager < app->first_pager) {
+        app->last_pager = app->first_pager;
+        snprintf(app->text_store[3], 4, "%lu", app->last_pager);
+    }
 }

@@ -1,3 +1,7 @@
+## v1.2
+- Fixed Memory bug in Last Station UI
+- Added auto-correction when entries in First/Last station/pager are out of range
+
 ## v1.1
 - Created a new UI Input View as FW does not supply one for numbers
 - New UI to Set First Station
