@@ -1,5 +1,8 @@
 #pragma once
 
+#include <stdint.h>
+#include <stddef.h>
+
 /**
  * @brief ShapshupCustomEvent
 *  ShapShupCustomEventTypeReserved = 100,
