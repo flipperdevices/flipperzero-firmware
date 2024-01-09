@@ -166,7 +166,7 @@ The fundamental FlipBoard project will include a menu, a Configuration screen, a
 - Save the file.
 
 ### Step 2d. Replace the contents of the `app.c` file
-Replace the contents of the `app.c` file with the following code:
+**Replace** the entire contents of the `app.c` file with the following code:
 
 ```c
 #include <furi.h>
@@ -272,7 +272,7 @@ The application should run and show the main application:
 The startup sequence will be the sequence of blinking lights on the FlipBoard when the application starts.
 
 ### Step 3a. Add more include statements to `app.c`
-At the top of the app.c file, change the include statements to the following:
+At the top of the app.c file, **replace** the include statements with the following:
 ```c
 #include <furi.h>
 #include <gui/view.h>
@@ -293,7 +293,7 @@ At the top of the app.c file, change the include statements to the following:
 - **FLIPBOARD CODE**: The `#include "./common/leds.h"` statement will include the FlipBoard LEDs Implementation.
 
 ### Step 3b. Register the custom event callback.
-Add the following code in the `flipboard_simon_app` function, just before the `view_dispatcher_run` statement:
+**Add** the following code in the `flipboard_simon_app` function, just before the `view_dispatcher_run` statement:
 ```c
     view_dispatcher_set_event_callback_context(flipboard_get_view_dispatcher(app), app);
     view_dispatcher_set_custom_event_callback(
@@ -307,9 +307,10 @@ Add the following code in the `flipboard_simon_app` function, just before the `v
 - **C LANGUAGE**: The type definition is `typedef bool (*ViewDispatcherCustomEventCallback)(void* context, uint32_t event);`.  This means that the return type should be a `bool`.  The first parameter is a `void*` and the second parameter is a `uint32_t`.  You can name the function anything, we have picked a name of `custom_event_handler`.  This means we would declare the function as: `bool custom_event_handler(void* context, uint32_t event)`.
 
 ### Step 3c. Create the custom event handler. 
-The `custom_event_handler` will get invoked every time the ViewDispatcher receives a custom event. For now, we will check for the `CustomEventAppMenuEnter` event and call `loaded_app_menu` each time that event is received.
+**Add** the following code above the `flipboard_simon_app` function:
 
-Add the following code above the `flipboard_simon_app` function:
+NOTE: `Functions` are left aligned, so whenever you looking for function, look at code that starts in column 1.  If it's indented, it is _not_ the function.  Typically our functions start with the word `static` but `flipboard_simon_app` is an exception to this rule since it is the entry point for our application.  In our case, the line we are looking for is `int32_t flipboard_simon_app(void* p) {`.  When the directions say to add code above the function, if the function has a comment above it, you should add the code above the comment.  Comments are usually in green and start with `/**` and end with `*/`.  When the directions say to add code below the function, the code should be added below the function's closing `}` (which will be in column 1).
+
 ```c
 /**
  * @brief Handles the custom events.
@@ -333,6 +334,8 @@ static bool custom_event_handler(void* context, uint32_t event) {
 }
 ```
 
+- **SIMON CODE**: The `custom_event_handler` will get invoked every time the ViewDispatcher receives a custom event. For now, we will check for the `CustomEventAppMenuEnter` event and call `loaded_app_menu` each time that event is received.
+
 - **FLIPPER CODE**: Our `custom_event_handler` takes two parameters.  The first parameter is a `void*` and the second parameter is a `uint32_t`.  The first parameter is the context that we set in the `view_dispatcher_set_event_callback_context` function.  The second parameter is the event id that was sent to the ViewDispatcher.
 
 - **C LANGUAGE**: The `void*` is a pointer to an unknown type.  We will need to cast it to the correct type, so we can use it.  In this case, we know that the context is a `Flipboard*` so we cast it to a `Flipboard*`.
@@ -347,9 +350,7 @@ static bool custom_event_handler(void* context, uint32_t event) {
 - **FLIPPER CODE**: `return true;` is the return statement for the function.  A return code of `true` from this function means that the function handled the custom event.  In this tutorial we will always return `true`, even if we didn't actually handle the event.
 
 ### Step 3d. Create the `loaded_app_menu` function. 
-The function `loaded_app_menu` is triggered by the custom event handler each time the main application menu appears. If it's the menu's initial display, the startup sequence will play before the lights are switched off. For subsequent displays of the menu, only the lights will be turned off.
-
-Add the following code above the `custom_event_handler` function:
+**Add** the following code above the `custom_event_handler` function:
 ```c
 /**
  * @brief Invoked whenever the main application menu is loaded.
@@ -400,6 +401,7 @@ static void loaded_app_menu(FlipboardModel* model) {
 }
 ```
 
+- **SIMON CODE**: The function `loaded_app_menu` is triggered by the custom event handler each time the main application menu appears. If it's the menu's initial display, the startup sequence will play before the lights are switched off. For subsequent displays of the menu, only the lights will be turned off.
 - **C LANGUAGE**: The `void` return type for the function means that the function does not return any value.  You can use `return;` inside a conditional block to exit the function early.  You are not required to end the function with a `return;` statement when the function is void.
 - **C LANGUAGE**: The `loaded_app_menu` takes a single parameter, a pointer to a FlipboardModel object.  We could have made it take a `void*` and had the user cast it into a `FlipboardModel*`, but it is better to take an explicit type, so the caller knows what they need to pass.  Many of the `furi_` functions take `void*` since the Flipper Developers don't know what context the application will require.
 
@@ -431,7 +433,7 @@ The application should run.  When it starts the LEDs should light following the 
 We will be using the Flipper Zero screen to inform the user of the current state of the game.  In this initial step, we will just tell them "Press OK to play."
 
 ### Step 4a. Add more include statements to `app.c`
-Add another include statement to the top section of app.c.  Typically these are sorted, so this would be added after the line `#include "./common/flipboard_model.h"`:
+**Add** another include statement to the top section of `app.c`.  Typically these are sorted, so this would be added after the line `#include "./common/flipboard_model.h"`:
 
 ```c
 #include "./common/flipboard_model_ref.h"
@@ -440,7 +442,7 @@ Add another include statement to the top section of app.c.  Typically these are 
 - **FLIPBOARD CODE**: The header file `./common/flipboard_model_ref.h` provides a mechanism to reference an existing `FlipboardModel*` object. This is particularly useful when your model is automatically created for you.
 
 ### Step 4b. Replace the `get_primary_view` function
-Replace the existing `get_primary_view` function with the following code:
+**Replace** the existing `get_primary_view` function and comment with the following code:
 
 ```c
 /**
@@ -478,7 +480,7 @@ static View* get_primary_view(void* context) {
 - **SIMON CODE**: We use `ref->model = model;` so that the `model` property is set to the model. There are multiple approaches you can take to allow multiple views to share a single model, but this is the approach this tutorial is using.
 
 ### Step 4c. Add a new `simon_view_draw` function
-Add the following `simon_view_draw` function above the `get_primary_view` function:
+**Add** the following code above the `get_primary_view` function:
 
 ```c
 /**
@@ -515,7 +517,7 @@ The application should run.  When you select "Play Simon" from the main menu, yo
 The game model encapsulates all the details pertinent to the current game. At this stage, we will only store the state, specifically, whether the game is over. As we progress, we will introduce additional states and properties.
 
 ### Step 5a. Add a `SimonGameState` enumeration
-Add the following lines after all of the `#include` statements:
+**Add** the following code after all of the `#include` statements:
 
 ```c
 typedef enum SimonGameState SimonGameState;
@@ -546,7 +548,7 @@ struct SimonGame {
 - **SIMON CODE**: `typedef struct SimonGame SimonGame;` declares that `SimonGame` is a structure type. Currently, it has one property, which is the game state.
 
 ### Step 5c. Set the custom data in your `flipboard_simon_app`
-In your `flipboard_simon_app` function, add the following code just above the `view_dispatcher_run` function call:
+**Add** the following code in the `flipboard_simon_app` function, just above the `view_dispatcher_run` line:
 
 ```c
     FlipboardModel* model = flipboard_get_model(app);
@@ -562,7 +564,7 @@ In your `flipboard_simon_app` function, add the following code just above the `v
 - **FLIPBOARD CODE**: `flipboard_model_set_custom_data` assigns custom data to the model. This data can be retrieved later using `flipboard_model_get_custom_data`.
 
 ### Step 5d. Replace the `simon_view_draw` code
-Replace the `simon_view_draw` function with the code below.  This new version retrieves the current game data and displays the message only when the game state is `SimonGameStateGameOver`.
+**Replace** the existing `simon_view_draw` function and comment with the following code:
 
 ```c
 /**
@@ -581,7 +583,7 @@ static void simon_view_draw(Canvas* canvas, void* model) {
     }
 }
 ```
-
+- **SIMON CODE**: This new version retrieves the current game data and displays the message only when the game state is `SimonGameStateGameOver`.
 - **FLIPPER CODE**: The second parameter of your draw callback function is a `void* model`. This represents **the model** associated with your `View*` object, which is distinct from the `void* context` provided by most functions (where you can set the context object). You _should_ use the data in your model for rendering, without altering any program state. It's assumed that all necessary rendering data is part of the model. If you need to alter the model, you should do so in a separate function, such as an input callback function.
 
 - **SIMON CODE**: We use `flipboard_model_get_custom_data` to get the additional game data that we associated with the model.
@@ -601,7 +603,7 @@ The application should run and behave the same a the previous step (since the ne
 We will introduce a new custom event to initiate a new game. This event will be triggered when the user presses the `Ok` button while the current game state is 'game over'. Upon processing this custom event, we will transition the game state to 'new game'. Additionally, we will modify the draw callback to display a message that varies based on the game state.
 
 ### Step 6a. Create a `SimonCustomEventId` enumeration
-Insert the following code before the `typedef struct SimonGame SimonGame;` line:
+**Add** the following code above the `typedef struct SimonGame SimonGame;` line:
 
 ```c
 typedef enum SimonCustomEventId SimonCustomEventId;
@@ -614,8 +616,7 @@ enum SimonCustomEventId {
 - **SIMON CODE**: `SimonCustomEventIdNewGame` will be the custom event id that we use when we want to start a new game.  Our custom game events start at id 0x4000.  We could define some max value in `./common/custom_event.h` and use that +1 as a starting point instead.
 
 ### Step 6b. Edit the `get_primary_view` function
-Right after the line `View* view = view_alloc();` in the `get_primary_view` function, incorporate the subsequent two lines:
-
+**Add** the following code in the `get_primary_view` function, just below the `View* view = view_alloc();` line:
 ```c
     view_set_context(view, context);
     view_set_input_callback(view, simon_view_input);
@@ -628,7 +629,7 @@ Right after the line `View* view = view_alloc();` in the `get_primary_view` func
 - **VSCODE**: To explore the function signature for `simon_view_input` in more detail, use the "Go To Definition" feature. 
 
 ### Step 6c. Create a `simon_view_input` function
-Add the `simon_view_input` function before the `get_primary_view` function in your code.
+**Add** the following code above the `get_primary_view` function:
 
 ```c
 /* @brief Handles the input events.
@@ -668,7 +669,9 @@ static bool simon_view_input(InputEvent* event, void* context) {
 - **FLIPPER CODE**: The input callback function should return `true` if it has successfully processed the event, otherwise it should return `false`.
 
 ### Step 6d. Add `SimonGameStateNewGame` to enum `SimonGameState`
-Within the `SimonGameState` enumeration, append the following code after the `SimonGameStateGameOver,` line:
+**Add** the following code in the `SimonGameState` enumeration, just below the `SimonGameStateGameOver,` line:
+
+NOTE: Enumerations are left aligned, so whenever you looking for enumeration, look at code that starts in column 1.  If it's indented, it is _not_ the enumeration.  Enumerations start with the keyword `enum`.  In our case, the line we are looking for is `enum SimonGameState {`.  Typically you will add values to the end of the enumeration, on the line right before the `}`.
 
 ```c
     /// @brief Populating a new game
@@ -678,7 +681,9 @@ Within the `SimonGameState` enumeration, append the following code after the `Si
 - **SIMON CODE**: We've defined two states: `SimonGameStateGameOver`, which indicates that we can initiate a new game, and `SimonGameStateNewGame`, which signifies that a new game has begun. We will introduce additional states in the future.
 
 ### Step 6e. Update the custom event handler for `SimonCustomEventIdNewGame`
-In the `custom_event_handler` function, add the following code after the `}` associated with the `if` statement.
+**Add** the following code in the `custom_event_handler` function, just below the `}` associated with the `if` statement:
+
+NOTE: An `if` statement has an expression in `()` and then has a `{` that defines all the statements to run when expression is true.  The `}` ends the set of statements that run when the `if` statement is true.  You add `else` and `else if` statements after the `}` associated with the `if` statement.
 
 ```c
     else if(event == SimonCustomEventIdNewGame) {
@@ -697,7 +702,7 @@ In the `custom_event_handler` function, add the following code after the `}` ass
 - **SIMON CODE**: Redrawing the screen without any changes could cause a minor flicker. To avoid this, you could monitor whether your state has been updated and only invoke `flipboard_model_update_gui` when the game state changes. Alternatively, you could relocate the initial `flipboard_model_update_gui` call to the `CustomEventAppMenuEnter` if block, right before the `loaded_app_menu` call.
 
 ### Step 6f. Update draw callback to handle `SimonGameStateNewGame`
-In the `simon_view_draw` function, add the following after the `}` associated with the `if` statement.
+**Add** the following code in the `simon_view_draw` function, just below the `}` associated with the `if` statement:
 
 ```c
     else if(game->state == SimonGameStateNewGame) {
@@ -717,8 +722,7 @@ Notice that now when you go to "Play Simon" it says "PRESS OK TO PLAY" like befo
 Next, we'll manage the back button functionality. Upon pressing the back button, the user will be redirected to the main application menu. Moreover, we'll reset the game state to 'game over' each time the user re-enters the "Play Simon" view.
 
 ### Step 7a. Update `get_primary_view` function
-Incorporate the subsequent code in the `get_primary_view` function, right after the `view_set_draw_callback` function invocation:
-
+**Add** the following code in the `get_primary_view` function, just below the `view_set_draw_callback` line:
 ```c
     view_set_previous_callback(view, flipboard_navigation_show_app_menu);
     view_set_enter_callback(view, simon_enter_callback);
@@ -731,8 +735,7 @@ Incorporate the subsequent code in the `get_primary_view` function, right after 
 - **FLIPPER CODE**: The `view_set_enter_callback` function sets a callback to be invoked when the user navigates to the given view. The `simon_enter_callback` function, which we will define in the next step, will be used for this purpose.
 
 ### Step 7b. Create a `simon_enter_callback` function
-Add the following `simon_enter_callback` function above the `get_primary_view` function:
-
+**Add** the following code above the `get_primary_view` function:
 ```c
 /**
  * @brief This method is invoked when entering the "Play Simon" view.
@@ -757,8 +760,7 @@ You should be able go to "Play Simon", it says "PRESS OK TO PLAY".  When you cli
 ## Step 8. Turn the FlipBoard lights on (dim)
 
 ### Step 8a. Turn the LEDs on when entering the primary view
-At the bottom of the `simon_enter_callback` function, after the line `game->state = SimonGameStateGameOver;` add the following code:
-
+**Add** the following code in the `simon_enter_callback` function, just below the `game->state = SimonGameStateGameOver;` line:
 ```c
     // Set color up to be a lighter version of color down.
     for(int i = 0; i < 4; i++) {
@@ -790,8 +792,7 @@ This time go into `Config` and set the colors for Action 1, 2, 4 and 8.  Then wh
 ## Step 9. Generate a song
 
 ### Step 9a. Add constant for max song length
-After all of the `#include` statements, add the following definition of MAX_SONG_LENGTH:
-
+**Add** the following code after all of the `#include` statements:
 ```c
 #define MAX_SONG_LENGTH 5
 ```
@@ -799,9 +800,10 @@ After all of the `#include` statements, add the following definition of MAX_SONG
 - **C LANGUAGE**: The `#define` directive replaces all occurrences of `MAX_SONG_LENGTH` with the value `5` in the code. This is a preprocessor directive, which means the replacement takes place prior to the code compilation.
 
 ### Step 9b. Add song properties to the `SimonGame` struct
-Add a `song_length` property (uint8_t) and `notes` array of uint8_t with length MAX_SONG_LENGTH to the existing `SimonGame`` struct.
+**Replace** the existing `SimonGame` structure with the following code:
 
-The new struct code should look like the following:
+NOTE: Structures are left aligned, so look at code that starts in column 1.  If it's indented, it is _not_ the structure.  Structures start with the keyword `struct`.  In our case, the line we are looking for is `struct SimonGame {`.  Typically the order of items in the structure don't matter (unless the structure is saved to a file.)
+
 ```c
 struct SimonGame {
     /// @brief The total number of notes in the song
@@ -819,8 +821,7 @@ struct SimonGame {
 - **C LANGUAGE**: The declaration `uint8_t notes[5]` creates an array that can store 5 values of type `uint8_t`. The array indices start at `notes[0]` and end at `notes[4]`.
 
 ### Step 9c. Create a function that returns a random button id.
-We need a function that returns a random button id (1, 2, 4 or 8) for use in our song. Add the following function above the `simon_view_draw` function.
-
+**Add** the following code above the `simon_view_draw` function:
 ```c
 /**
  * @brief Returns a random button id (1, 2, 4 or 8).
@@ -832,13 +833,16 @@ static uint8_t random_button_id() {
 }
 ```
 
+- **SIMON CODE**: We create a function that returns a random button id (1, 2, 4 or 8) for use in our song.
 - **FLIPPER CODE**: The `rand()` function generates a random 4-byte integer.
 - **C LANGUAGE**: The `&` operator performs a bitwise AND operation. A bit is set only if it's set in both operands.
 - **SIMON CODE**: The expression `rand() & 0x3` generates a random number and combines it with 3 (00000011b), resulting in a random value between 0 and 3. This is similar to `rand() % 4`, which divides the random number by 4 and takes the remainder.
 - **SIMON CODE**: Shifting 1 by the random number results in 1, 2, 4, or 8.
 
 ### Step 9d. Create a function that generates a random song.
-Add the following `generate_song` function below the `random_button_id` function:
+**Add** the following code below the `random_button_id` function:
+
+NOTE: Remember when the directions say to add code below the function, the code should be added below the function's closing `}` (which will be in column 1).
 
 ```c
 /**
@@ -866,9 +870,7 @@ void generate_song(FlipboardModel* model) {
 - **FLIPPER CODE**: `FURI_LOG_D` is used to log debug messages. The TAG is defined in `app_config.h` and represents the application's name in the log. The string uses printf format specifiers (`%d` is replaced with the integer parameters). You can view the log at https://lab.flipper.net/cli using Chrome or Edge. Remember to close the browser before deploying any updated code to the Flipper Zero.
 
 ### Step 9e. Replace the `custom_event_handler` `SimonCustomEventIdNewGame` code
-Replace the new game event handler code in `custom_event_handler` to call `generate_song` instead of setting the game state.
-
-Before updating:
+**Modify** the following code in the `custom_event_handler` function:
 ```c
     } else if(event == SimonCustomEventIdNewGame) {
         SimonGame* game = flipboard_model_get_custom_data(model);
@@ -876,7 +878,7 @@ Before updating:
     }
 ```
 
-After updating:
+**Replacing** with this code:
 ```c
     } else if(event == SimonCustomEventIdNewGame) {
         generate_song(model);
@@ -895,7 +897,7 @@ Run the application, then load https://lab.flipper.net/cli and type the command 
 ## Step 10. Teach the notes to the user
 
 ### Step 10a. Add a new custom event for teaching notes
-Add the following enum value to `SimonCustomEventId` after the `SimonCustomEventIdNewGame` entry:
+**Add** the following code in the `SimonCustomEventId` enumeration, just below the `SimonCustomEventIdNewGame,` line:
 
 ```c
     /// @brief Teach the user the notes.
@@ -903,7 +905,7 @@ Add the following enum value to `SimonCustomEventId` after the `SimonCustomEvent
 ```
 
 ### Step 10b. Add a #define for the note teach time
-Add the following #define after the `#define MAX_SONG_LENGTH 5` line:
+**Add** the following code after the `#define MAX_SONG_LENGTH 5` line:
 
 ```c
 #define SIMON_TEACH_DELAY_MS 1000
@@ -912,16 +914,14 @@ Add the following #define after the `#define MAX_SONG_LENGTH 5` line:
 - **SIMON CODE**: `SIMON_TEACH_DELAY_MS` is the amount of time to delay before sending the `SimonCustomEventIdTeachNotes` event.  The value is in milliseconds.
 
 ### Step 10c. Update `custom_event_handler` for new game to also send a teach notes event
-Update the new game event handler code in `custom_event_handler` to send the new custom event after the song is generated and after a delay.
-
-Before updating:
+**Modify** the following code in the `custom_event_handler` function:
 ```c
     } else if(event == SimonCustomEventIdNewGame) {
         generate_song(model);
     }
 ```
 
-After updating:
+**Replacing** with this code:
 ```c
     } else if(event == SimonCustomEventIdNewGame) {
         generate_song(model);
@@ -930,8 +930,10 @@ After updating:
     }
 ```
 
+- **SIMON CODE**: We send the new custom event after the song is generated and waiting for the SIM_TEAM_DELAY_MS milliseconds.
+
 ### Step 10d. Update `SimonGameState` enum to have a teaching state
-Add the following enum value to `SimonGameState` after the `SimonGameStateNewGame` entry:
+**Add** the following code in the `SimonGameState` enumeration, just below the `SimonGameStateNewGame,` line:
 
 ```c
     /// @brief Teaching the user the notes.
@@ -939,7 +941,7 @@ Add the following enum value to `SimonGameState` after the `SimonGameStateNewGam
 ```
 
 ### Step 10e. Update the `SimonGame` struct for notes
-Add the following properties to the `SimonGame` struct:
+**Add** the following code in the `SimonGame` struct:
 
 ```c
     /// @brief The highest note number that user has successfully repeated.
@@ -950,7 +952,7 @@ Add the following properties to the `SimonGame` struct:
 ```
 
 ### Step 10f. Update the `generate_song` function to reset the note numbers
-Add the following code to the `generate_song` function right after assigning the `game->state` to `SimonGameStateNewGame`:
+**Add** the following code in the `generate_song` function, just below the `game->state = SimonGameStateNewGame` line:
 
 ```c
     game->successful_note_number = 0;
@@ -958,7 +960,7 @@ Add the following code to the `generate_song` function right after assigning the
 ```
 
 ### Step 10g. Create a function that plays a note
-The `simon_play_note` function will play a note and light the button.  Add the following function above the `random_button_id` function:
+**Add** the following code above the `random_button_id` function:
 
 ```c
 /**
@@ -983,13 +985,14 @@ static void simon_play_note(FlipboardModel* model, int note) {
 }
 ```
 
+- **SIMON CODE**: The `simon_play_note` function will play a note and light the button.
 - **FLIPPER CODE**: `furi_assert` is used to check that the note is 1, 2, 4, or 8. If it's not, the program will crash. This is useful for debugging, but you can remove it if you prefer.
 - **FLIPBOARD CODE**: `flipboard_model_play_tone` plays a tone on the Flipper Zero. The first parameter is the model, the second is the action model. The action model is used to determine the tone.
 - **FLIPBOARD CODE**: `flipboard_model_set_colors` sets the LEDs on the FlipBoard. The first parameter is the model, the second is the action model, and the third is the action ID. The action ID is used to determine the buttons that were pressed.
 - **SIMON CODE**: We delay 500 milliseconds between pressing and releasing the button. This is a total of 1 second per note. You can adjust this value to change the speed of the note.
 
 ### Step 10h. Create a function that teaches the current portion of the song
-The `simon_teach_notes` function will teach the current portion of the song.  Add the following function below the `simon_play_note` function:
+**Add** the following code below the `simon_play_note` function:
 
 ```c
 /**
@@ -1010,12 +1013,12 @@ static void simon_teach_notes(Flipboard* flipboard) {
 }
 ```
 
-- **SIMON CODE**: The `simon_teach_notes` function is responsible for setting the game's state to `SimonGameStateTeaching`. 
+- **SIMON CODE**: The `simon_teach_notes` function will teach the current portion of the song. The `simon_teach_notes` function is responsible for setting the game's state to `SimonGameStateTeaching`. 
 - **SIMON CODE**: This function also plays the current note and increments the `note_number`. 
 - **SIMON CODE**: If the `note_number` is less than or equal to the `successful_note_number`, the function sends the `SimonCustomEventIdTeachNotes` event.  This means we will play all of the notes that the user has successfully repeated plus one more note.  In an upcoming step, we will implement functionality to handle this event.
 
 ### Step 10i. Update the `custom_event_handler` for `SimonCustomEventIdTeachNotes`
-Add the following code to the `custom_event_handler` function after the `SimonCustomEventIdNewGame` entry:
+**Add** the following code in the `custom_event_handler` function, just below the `}` associated with the last `else if` statement:
 
 ```c
     else if(event == SimonCustomEventIdTeachNotes) {
@@ -1023,47 +1026,10 @@ Add the following code to the `custom_event_handler` function after the `SimonCu
     }
 ```
 
-Before updating:
-```c
-    else if(event == SimonCustomEventIdNewGame) {
-        generate_song(model);
-        furi_delay_ms(SIMON_TEACH_DELAY_MS);
-        flipboard_send_custom_event(flipboard, SimonCustomEventIdTeachNotes);
-    }
-```
-
-After updating:
-```c
-    else if(event == SimonCustomEventIdNewGame) {
-        generate_song(model);
-        furi_delay_ms(SIMON_TEACH_DELAY_MS);
-        flipboard_send_custom_event(flipboard, SimonCustomEventIdTeachNotes);
-    } else if(event == SimonCustomEventIdTeachNotes) {
-        simon_teach_notes(flipboard);
-    }
-```
-
 ### Step 10j. Update the `simon_view_draw` function to handle `SimonGameStateTeaching`
-Add the following code to the `simon_view_draw` function after the `SimonGameStateNewGame` entry:
-
+**Add** the following code in the `simon_view_draw` function, just below the `}` associated with the last `else if` statement:
 ```c
     else if(game->state == SimonGameStateTeaching) {
-        canvas_draw_str_aligned(canvas, 64, 12, AlignCenter, AlignCenter, "TEACHING NOTES");
-    }
-```
-
-Before updating:
-```c
-    } else if(game->state == SimonGameStateNewGame) {
-        canvas_draw_str_aligned(canvas, 64, 12, AlignCenter, AlignCenter, "CREATING NEW GAME");
-    }
-```
-
-After updating:
-```c
-    } else if(game->state == SimonGameStateNewGame) {
-        canvas_draw_str_aligned(canvas, 64, 12, AlignCenter, AlignCenter, "CREATING NEW GAME");
-    } else if(game->state == SimonGameStateTeaching) {
         canvas_draw_str_aligned(canvas, 64, 12, AlignCenter, AlignCenter, "TEACHING NOTES");
     }
 ```
