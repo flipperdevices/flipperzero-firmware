@@ -1043,7 +1043,7 @@ Run the application. Choose the "Play Simon" option.  When you press the `OK` bu
 ## Step 11. Allow player turn to repeat the notes
 
 ### Step 11a. Add custom event for player turn
-Add the following enum value to `SimonCustomEventId` after the `SimonCustomEventIdTeachNotes` entry:
+**Add** the following code in the `SimonCustomEventId` enumeration, just below the `SimonCustomEventIdTeachNotes,` line:
 
 ```c
     /// @brief Player should repeat the notes.
@@ -1051,32 +1051,17 @@ Add the following enum value to `SimonCustomEventId` after the `SimonCustomEvent
 ```
 
 ### Step 11b. Update `simon_teach_notes` to send player turn custom event
-Modify the `simon_teach_notes` function to send the `SimonCustomEventIdPlayerTurn` event when the `note_number` is greater than the `successful_note_number`.  After the if statement, add the following code:
-
+**Add** the following code in the `simon_teach_notes` function, just below the `}` associated with the `if` statement:
 ```c
     else {
         flipboard_send_custom_event(flipboard, SimonCustomEventIdPlayerTurn);
     }
 ```
 
-Before updating:
-```c
-    if(game->note_number <= game->successful_note_number) {
-        flipboard_send_custom_event(flipboard, SimonCustomEventIdTeachNotes);
-    }
-```
-
-After updating:
-```c
-    if(game->note_number <= game->successful_note_number) {
-        flipboard_send_custom_event(flipboard, SimonCustomEventIdTeachNotes);
-    } else {
-        flipboard_send_custom_event(flipboard, SimonCustomEventIdPlayerTurn);
-    }
-```
+- **SIMON CODE**: This will send the `SimonCustomEventIdPlayerTurn` event when the `note_number` is greater than the `successful_note_number`.
 
 ### Step 11c. Update the `SimonGameState` enum to have a player turn state
-Add the following enum value to `SimonGameState` after the `SimonGameStateTeaching` entry:
+**Add** the following code in the `SimonGameState` enumeration, just below the `SimonGameStateTeaching,` line:
 
 ```c
     /// @brief User is trying to play the notes.
@@ -1084,28 +1069,10 @@ Add the following enum value to `SimonGameState` after the `SimonGameStateTeachi
 ```
 
 ### Step 11d. Update the `custom_event_handler` for `SimonCustomEventIdPlayerTurn`
-Add the following code to the `custom_event_handler` function after the `SimonCustomEventIdTeachNotes` entry:
+**Add** the following code in the `custom_event_handler` function, just below the `}` associated with the last `else if` statement:
 
 ```c
     else if(event == SimonCustomEventIdPlayerTurn) {
-        SimonGame* game = flipboard_model_get_custom_data(model);
-        game->state = SimonGameStateListening;
-        game->note_number = 0;
-    }
-```
-
-Before updating:
-```c
-    } else if(event == SimonCustomEventIdTeachNotes) {
-        simon_teach_notes(flipboard);
-    }
-```
-
-After updating:
-```c
-    } else if(event == SimonCustomEventIdTeachNotes) {
-        simon_teach_notes(flipboard);
-    } else if(event == SimonCustomEventIdPlayerTurn) {
         SimonGame* game = flipboard_model_get_custom_data(model);
         game->state = SimonGameStateListening;
         game->note_number = 0;
@@ -1116,32 +1083,19 @@ After updating:
 - **SIMON CODE**: We set the `note_number` to 0 so that the user starts with the first note.
 
 ### Step 11e. Update the `simon_view_draw function` to handle `SimonGameStateListening`
-Add the following code to the `simon_view_draw` function after the `SimonGameStateTeaching` entry:
-
+**Add** the following code in the `simon_view_draw` function, just below the `}` associated with the last `else if` statement:
 ```c
     else if(game->state == SimonGameStateListening) {
         canvas_draw_str_aligned(canvas, 64, 12, AlignCenter, AlignCenter, "YOUR TURN");
     }
 ```
 
-Before updating:
-```c
-    } else if(game->state == SimonGameStateTeaching) {
-        canvas_draw_str_aligned(canvas, 64, 12, AlignCenter, AlignCenter, "TEACHING NOTES");
-    }
-```
-
-After updating:
-```c
-    } else if(game->state == SimonGameStateTeaching) {
-        canvas_draw_str_aligned(canvas, 64, 12, AlignCenter, AlignCenter, "TEACHING NOTES");
-    } else if(game->state == SimonGameStateListening) {
-        canvas_draw_str_aligned(canvas, 64, 12, AlignCenter, AlignCenter, "YOUR TURN");
-    }
-```
+- **SIMON CODE**: This will display "YOUR TURN" when the game state is `SimonGameStateListening`.
 
 ### Step 11f. Update the `simon_enter_callback` function to start a button monitor
-Add the following code to the bottom of the `simon_enter_callback` function:
+**Add** the following code in the `simon_enter_callback` function, just before the end of the function:
+
+NOTE: The end of the function is the `}` that is in column 1.
 
 ```c
     flipboard_model_set_button_monitor(model, flipboard_debounced_switch, flipboard);
@@ -1150,8 +1104,7 @@ Add the following code to the bottom of the `simon_enter_callback` function:
 - **FLIPBOARD CODE**: The function `flipboard_model_set_button_monitor` assigns a callback that is triggered when a button is pressed or released. We will define this callback, `flipboard_debounced_switch`, in the subsequent step. The `flipboard` object is passed as the context object.
 
 ### Step 11g. Create a `flipboard_debounced_switch` function
-Add the following `flipboard_debounced_switch` function above the `simon_enter_callback` function:
-
+**Add** the following code above the `simon_enter_callback` function:
 ```c
 /**
  * @brief This method handles FlipBoard button input.
@@ -1202,9 +1155,7 @@ Add the following code to the `get_primary_view` function after the `view_set_en
 - **FLIPPER CODE**: The function `view_set_exit_callback` assigns a callback that is triggered when the user navigates away from the given view. The `simon_exit_callback` function, which we will define in the next step, will be used for this purpose.
 
 ### Step 11i. Create a `simon_exit_callback` function
-
-Add the following `simon_exit_callback` function above the `get_primary_view` function:
-
+**Add** the following code above the `get_primary_view` function:
 ```c
 /**
  * @brief This method is invoked when exiting the "Play Simon" view.
@@ -1228,15 +1179,14 @@ Run the application. Choose the "Play Simon" option.  It should create a random 
 ## Step 12. Check if the user pressed the correct button
 
 ### Step 12a. Add wrong note event to `SimonCustomEventId` enum
-Add the following enum value to `SimonCustomEventId` after the `SimonCustomEventIdPlayerTurn` entry:
-
+**Add** the following code in the `SimonCustomEventId` enumeration, just below the `SimonCustomEventIdPlayerTurn,` line:
 ```c
     /// @brief Player pressed the wrong note!
     SimonCustomEventIdWrongNote,
 ```
 
 ### Step 12b. Add played sequence event to `SimonCustomEventId` enum
-Add the following enum value to `SimonCustomEventId` after the `SimonCustomEventIdWrongNote` entry:
+**Add** the following code in the `SimonCustomEventId` enumeration, just below the `SimonCustomEventIdWrongNote,` line:
 
 ```c
     /// @brief Player played the sequence.
@@ -1244,28 +1194,16 @@ Add the following enum value to `SimonCustomEventId` after the `SimonCustomEvent
 ``` 
 
 ### Step 12c. Update `flipboard_debounced_switch` to check if the user pressed the correct button
-Add the following code to the `flipboard_debounced_switch` function after the `FURI_LOG_D(TAG, "Old button was is %d"...)` statement:
+**Add** the following code in the `flipboard_debounced_switch` function, just below the `FURI_LOG_D(TAG, "Old button was is %d", action_model_get_action_id(action_model));` line:
 
 ```c
     simon_handle_guess(flipboard, action_model_get_action_id(action_model));
 ```
 
-The complete `if` statement should look like the following:
-```c
-    if(new_button == 0) {
-        furi_assert(old_button);
-        uint8_t reduced_old_button = flipboard_model_reduce(model, old_button, false);
-        action_model = flipboard_model_get_action_model(model, reduced_old_button);
-        furi_assert(action_model);
-        FURI_LOG_D(TAG, "Old button was is %d", action_model_get_action_id(action_model));
-        simon_handle_guess(flipboard, action_model_get_action_id(action_model));
-    }
-```
-
 - **SIMON CODE**: We invoke the `simon_handle_guess` function, passing in the `flipboard` object and the id of the button pressed by the user. This function will be defined in the following step.
 
 ### Step 12d. Create a `simon_handle_guess` function
-Add the following `simon_handle_guess` function above the `flipboard_debounced_switch` function:
+**Add** the following code above the `flipboard_debounced_switch` function:
 
 ```c
 /**
@@ -1295,8 +1233,7 @@ static void simon_handle_guess(Flipboard* flipboard, uint8_t played_note) {
 - **SIMON CODE**: If the `played_note` matches the `expected_note`, we increment the `note_number` and verify if the user has played all the notes. If they have, we trigger the `SimonCustomEventIdPlayedSequence` event.
 
 ### Step 12e. Update the `custom_event_handler` for `SimonCustomEventIdWrongNote`
-Add the following code to the `custom_event_handler` function after the `SimonCustomEventIdPlayerTurn` entry:
-
+**Add** the following code in the `custom_event_handler` function, just below the `}` associated with the last `else if` statement:
 ```c
     else if(event == SimonCustomEventIdWrongNote) {
         SimonGame* game = flipboard_model_get_custom_data(model);
@@ -1307,8 +1244,7 @@ Add the following code to the `custom_event_handler` function after the `SimonCu
 - **SIMON CODE**: We transition the game state to `SimonGameStateGameOver` to indicate the end of the current game, allowing the user to start a new one.
 
 ### Step 12f. Update the `custom_event_handler` for `SimonCustomEventIdPlayedSequence`
-Add the following code to the `custom_event_handler` function after the `SimonCustomEventIdWrongNote` entry:
-
+**Add** the following code in the `custom_event_handler` function, just below the `}` associated with the last `else if` statement:
 ```c
     else if(event == SimonCustomEventIdPlayedSequence) {
         SimonGame* game = flipboard_model_get_custom_data(model);
@@ -1337,8 +1273,7 @@ Run the application. Choose the "Play Simon" option.  It should create a random 
 ## Step 13. Tell the user if they won or lost
 
 ### Step 13a. Update the `simon_enter_callback` to reset the song length
-Add the following code to the `simon_enter_callback` function below the setting of `game->state`:
-
+**Add** the following code in the `simon_enter_callback` function, just below the `game->state = SimonGameStateGameOver;` line:
 ```c
     game->song_length = 0;
 ```
@@ -1346,8 +1281,14 @@ Add the following code to the `simon_enter_callback` function below the setting 
 - **SIMON CODE**: A `song_length` of 0 indicates we haven't generated a song.
 
 ### Step 13b. Update the `simon_view_draw` function
-Replace the first `if` statement in the `simon_view_draw` function with the following code:
+**Modify** the following code in the `simon_view_draw` function:
+```c
+    if(game->state == SimonGameStateGameOver) {
+        canvas_draw_str_aligned(canvas, 64, 12, AlignCenter, AlignCenter, "PRESS OK TO PLAY");
+    }
+```    
 
+**Replacing** with this code:
 ```c
     if(game->state == SimonGameStateGameOver) {
         if(game->song_length == 0) {
@@ -1373,9 +1314,7 @@ Run the application. Choose the "Play Simon" option.  You should now have differ
 ## Step 14. Create special ending for a lost game
 
 ### Step 14a. Replace the `custom_event_handler` `SimonCustomEventIdWrongNote` code
-Replace the wrong note event handler code in `custom_event_handler` to call `lost_game` instead of setting the game state.
-
-Before updating:
+**Modify** the following code in the `custom_event_handler` function:
 ```c
     } else if(event == SimonCustomEventIdWrongNote) {
         SimonGame* game = flipboard_model_get_custom_data(model);
@@ -1383,7 +1322,7 @@ Before updating:
     }
 ```
 
-After updating:
+**Replacing** with this code:
 ```c
     } else if(event == SimonCustomEventIdWrongNote) {
         lost_game(model);
@@ -1393,7 +1332,7 @@ After updating:
 - **SIMON CODE**: We call the `lost_game` function to handle the special ending for a lost game.  We will define this function next.
 
 ### Step 14b. Create a `lost_game` function
-Add the following `lost_game` function above the `custom_event_handler` function:
+**Add** the following code above the `custom_event_handler` function:
 
 ```c
 /**
@@ -1435,16 +1374,14 @@ Run the application. Choose the "Play Simon" option.  You should now have differ
 ## Step 15. Create special ending for a won game
 
 ### Step 15a. Replace the `custom_event_handler` `SimonCustomEventIdPlayedSequence` code
-Replace the played sequence event handler code in `custom_event_handler` to call `won_game` instead of setting the game state to game over.
-
-Before updating:
+**Modify** the following code in the `custom_event_handler` function:
 ```c
         if(game->successful_note_number == game->song_length) {
             game->state = SimonGameStateGameOver;
         }
 ```
 
-After updating:
+**Replacing** with this code:
 ```c
         if(game->successful_note_number == game->song_length) {
             won_game(model);
@@ -1454,7 +1391,7 @@ After updating:
 - **SIMON CODE**: We call the `won_game` function to handle the special ending for a won game.  We will define this function next.
 
 ### Step 15b. Create a `won_game` function
-Add the following `won_game` function above the `custom_event_handler` function:
+**Add** the following code above the `custom_event_handler` function:
 
 ```c
 /**
@@ -1505,8 +1442,7 @@ Run the application. Choose the "Play Simon" option.  You should now have differ
 ## Step 16. Change the speed of the song (and add more notes)
 
 ### Step 16a. Change the length of the song to 12 notes
-Find the `#define MAX_SONG_LENGTH` and update the value to be 12:
-
+**Update** the `#define MAX_SONG_LENGTH` with a new value of 12:
 ```c
 #define MAX_SONG_LENGTH 12
 ```
@@ -1514,15 +1450,14 @@ Find the `#define MAX_SONG_LENGTH` and update the value to be 12:
 - **SIMON CODE**: We are going to increase the length of the song to 12 notes.  This will make the game a little more challenging.
 
 ### Step 16b. Create an array of delays (in milliseconds)
-Add the following array of delays after the `#define` statements:
+**Add** the following code after all of the `#define` statements:
 
 ```c
 uint16_t delays[] = {500, 500, 400, 300, 250, 200, 150, 100, 80};
 ```
 
 ### Step 16c. Change `simon_play_note` to take a delay parameter
-Change the `simon_play_note` function to take a delay parameter and use it instead of the hardcoded 500 milliseconds.  The function should look like the following:
-
+**Replace** the existing `simon_play_note` function and comment with the following code:
 ```c
 /**
  * @brief Plays a note and lights the button.
@@ -1547,8 +1482,10 @@ static void simon_play_note(FlipboardModel* model, int note, int delay_ms) {
 }
 ```
 
+- **SIMON CODE**: Our function now takes a delay parameter.  We use this delay parameter instead of the hardcoded 500 milliseconds.
+
 ### Step 16d. Update the `simon_teach_notes` function to use the delays array
-Update the `simon_teach_notes` function to use the delays array.  The function should look like the following:
+**Replace** the existing `simon_teach_notes` function and comment with the following code:
 
 ```c
 /**
