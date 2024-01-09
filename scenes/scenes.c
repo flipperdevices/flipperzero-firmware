@@ -174,7 +174,7 @@ void topic_scene_on_enter(void* context) {
 
         if(wrapped_text) {
             widget_add_text_scroll_element(
-                app->widget, 0, 0, WIDGET_WIDTH, WIDGET_HEIGHT, wrapped_text);
+                app->widget, 2, 1, WIDGET_WIDTH, WIDGET_HEIGHT, wrapped_text);
             free(wrapped_text);
         }
     } else {
