@@ -1223,15 +1223,19 @@ static bool mine_sweeper_game_screen_view_end_input_callback(InputEvent* event, 
                                 instance->view,
                                 mine_sweeper_game_screen_view_play_input_callback);
 
+                        // Here we are going to generate a valid map for the player 
                         bool is_valid_board = false;
 
+                        size_t memsz = sizeof(MineSweeperTile) * MINESWEEPER_BOARD_MAX_TILES;
                         MineSweeperTile* p = &board_t[0];
-                        
+                        FURI_LOG_D(MS_DEBUG_TAG, "Setting Up board_t at : %p", p);
+
+                        uint16_t iter = 0;
+                        uint32_t start_tick = furi_get_tick();
+
                         do {
-                            FURI_LOG_D(MS_DEBUG_TAG, "Setting Up board_t at : %p", p);
                             setup_board(instance);
 
-                            size_t memsz = sizeof(MineSweeperTile) * MINESWEEPER_BOARD_MAX_TILES;
                             memset(board_t, 0, memsz);
                             memcpy(board_t, model->board, sizeof(MineSweeperTile) * (model->board_width * model->board_height));
 
@@ -1244,9 +1248,20 @@ static bool mine_sweeper_game_screen_view_end_input_callback(InputEvent* event, 
 
                             is_valid_board = check_board_with_verifier(board_t, model->board_width, model->board_height, model->mines_left);
                         
+                            iter++;
 
                         } while (true && !is_valid_board);  //Change first variable in boolean expression to enable random startup
-                                                           //
+
+                        uint32_t ticks_elapsed = furi_get_tick() - start_tick;
+                        double sec = (double)ticks_elapsed / (double)furi_kernel_get_tick_frequency();
+
+                        FURI_LOG_D(
+                            MS_DEBUG_TAG,
+                            "Took %f s to setup board with %d iterations (%f s on avg)",
+                            sec,
+                            iter,
+                            sec / (double)iter);
+    
                         consumed = true;
                         break;
                     }
@@ -1519,9 +1534,7 @@ MineSweeperGameScreen* mine_sweeper_game_screen_alloc(uint8_t width, uint8_t hei
     view_set_enter_callback(mine_sweeper_game_screen->view, mine_sweeper_game_screen_view_enter);
     view_set_exit_callback(mine_sweeper_game_screen->view, mine_sweeper_game_screen_view_exit);
 
-    // Secondary Input callback can be used to simplify input/draw callback
-    // for play/loss/win into one main callback funtion that calls the appropriate
-    // secondary callback
+    // Not being used
     mine_sweeper_game_screen->input_callback = NULL;
 
     // Allocate strings in model
@@ -1629,6 +1642,10 @@ void mine_sweeper_game_screen_reset(MineSweeperGameScreen* instance, uint8_t wid
 
     size_t memsz = sizeof(MineSweeperTile) * MINESWEEPER_BOARD_MAX_TILES;
     MineSweeperTile* p = &board_t[0];
+    FURI_LOG_D(MS_DEBUG_TAG, "Setting Up board_t at : %p", p);
+
+    uint16_t iter = 0;
+    uint32_t start_tick = furi_get_tick();
 
     do {
         FURI_LOG_D(MS_DEBUG_TAG, "Setting Up board_t at : %p", p);
@@ -1656,8 +1673,20 @@ void mine_sweeper_game_screen_reset(MineSweeperGameScreen* instance, uint8_t wid
         );
     
         is_valid_board = check_board_with_verifier(board_t, board_width, board_height, num_mines);
+
+        iter++;
         
     } while (true && !is_valid_board);  //Change first variable in boolean expression to enable random startup
+
+    uint32_t ticks_elapsed = furi_get_tick() - start_tick;
+    double sec = (double)ticks_elapsed / (double)furi_kernel_get_tick_frequency();
+
+	FURI_LOG_D(
+        MS_DEBUG_TAG,
+        "Took %f s to setup board with %d iterations (%f s on avg)",
+        sec,
+        iter,
+        sec / (double)iter);
 
 }
 
