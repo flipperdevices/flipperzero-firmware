@@ -4,7 +4,7 @@
 #include "../callbacks/callbacks.h"
 
 App* app_alloc() {
-    App* app = calloc(1, sizeof(App));
+    App* app = malloc(1 * sizeof(App));
     app->file_stream = file_stream_alloc(furi_record_open(RECORD_STORAGE));
     if(!app->file_stream) {
         free(app);
