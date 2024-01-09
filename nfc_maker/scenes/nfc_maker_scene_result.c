@@ -25,8 +25,8 @@ void nfc_maker_scene_result_on_enter(void* context) {
     do {
         if(!flipper_format_file_open_new(file, furi_string_get_cstr(path))) break;
 
-        if(!flipper_format_write_header_cstr(file, "Flipper NFC device", 3)) break;
-        if(!flipper_format_write_string_cstr(file, "Device type", "NTAG215")) break;
+        if(!flipper_format_write_header_cstr(file, "Flipper NFC device", 4)) break;
+        if(!flipper_format_write_string_cstr(file, "Device type", "NTAG/Ultralight")) break;
 
         // Serial number
         size_t i = 0;
@@ -40,6 +40,8 @@ void nfc_maker_scene_result_on_enter(void* context) {
         if(!flipper_format_write_hex(file, "UID", uid, sizeof(uid))) break;
         if(!flipper_format_write_string_cstr(file, "ATQA", "00 44")) break;
         if(!flipper_format_write_string_cstr(file, "SAK", "00")) break;
+        if(!flipper_format_write_string_cstr(file, "Data format version", "2")) break;
+        if(!flipper_format_write_string_cstr(file, "NTAG/Ultralight type", "NTAG215")) break;
         // TODO: Maybe randomize?
         if(!flipper_format_write_string_cstr(
                file,
@@ -56,6 +58,7 @@ void nfc_maker_scene_result_on_enter(void* context) {
         if(!flipper_format_write_string_cstr(file, "Counter 2", "0")) break;
         if(!flipper_format_write_string_cstr(file, "Tearing 2", "00")) break;
         if(!flipper_format_write_uint32(file, "Pages total", &pages, 1)) break;
+        if(!flipper_format_write_uint32(file, "Pages read", &pages, 1)) break;
 
         // Static data
         buf[i++] = 0x48; // Internal
@@ -350,6 +353,8 @@ void nfc_maker_scene_result_on_enter(void* context) {
             }
         }
         if(!ok) break;
+
+        if(!flipper_format_write_string_cstr(file, "Failed authentication attempts", "0")) break;
 
         success = true;
 
