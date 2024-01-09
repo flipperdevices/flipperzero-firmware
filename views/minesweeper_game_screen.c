@@ -749,8 +749,6 @@ static inline Point bfs_to_closest_tile(MineSweeperGameScreenModel* model) {
                 continue;
             }
                 
-            if (point_set_cget(set, pos) != NULL) continue; 
-
             Point neighbor = (Point) {.x = dx, .y = dy};
             pointobj_set_point(pos, neighbor);
             point_deq_push_back(deq, pos);
