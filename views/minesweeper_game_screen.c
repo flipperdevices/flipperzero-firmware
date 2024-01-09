@@ -81,12 +81,10 @@ typedef struct {
 } MineSweeperGameScreenModel;
 
 // Multipliers for ratio of mines to tiles
-static const float difficulty_multiplier[5] = {
+static const float difficulty_multiplier[3] = {
     0.15f,
     0.17f,
     0.19f,
-    0.20f,
-    0.21f,
 };
 
 // Offsets array used consistently when checking surrounding tiles

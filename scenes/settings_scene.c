@@ -5,8 +5,6 @@ typedef enum {
     MineSweeperSettingsScreenDifficultyTypeEasy,
     MineSweeperSettingsScreenDifficultyTypeMedium,
     MineSweeperSettingsScreenDifficultyTypeHard,
-    MineSweeperSettingsScreenDifficultyTypeVeryHard,
-    MineSweeperSettingsScreenDifficultyTypeImpossible,
     MineSweeperSettingsScreenDifficultyTypeNum,
 } MineSweeperSettingsScreenDifficultyType;
 
@@ -27,8 +25,6 @@ static char* settings_screen_difficulty_text[MineSweeperSettingsScreenDifficulty
     "Child",
     "Boy",
     "Man",
-    "God",
-    "???",
 };
 
 static void minesweeper_scene_settings_screen_set_difficulty(VariableItem* item) {
