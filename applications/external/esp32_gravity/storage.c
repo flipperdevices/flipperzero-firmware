@@ -157,20 +157,27 @@ void close_file(File* file) {
 bool save_settings(GravityApp* app) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
     File* file = storage_file_alloc(storage);
+    bool retVal = true;
     if(!storage_file_open(file, APP_DATA_PATH(FILENAME_SETTINGS), FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
         FURI_LOG_E(TAG, "Failed to open %s for writing", FILENAME_SETTINGS);
         storage_file_free(file);
         furi_record_close(RECORD_STORAGE);
-        return false;
+        retVal = false;
     }
-    if(!storage_file_truncate(file)) {
+    if(retVal && !storage_file_truncate(file)) {
         FURI_LOG_E(TAG, "Unable to truncate settings file for writing");
         close_file(file);
-        return false;
+        retVal = false;
     }
-    if(!writeSettingsToFile(app, file)) {
+    if(retVal && !writeSettingsToFile(app, file)) {
         FURI_LOG_E(TAG, "Failed to write settings");
         close_file(file);
+        retVal = false;
+    }
+    if(!retVal) {
+        popup_set_header(app->popup, "Save Failed", 64, 10, AlignCenter, AlignTop);
+        popup_set_text(app->popup, "Save Settings Failed", 10, 40, AlignLeft, AlignTop);
+        view_dispatcher_switch_to_view(app->view_dispatcher, Gravity_AppViewPopup);
         return false;
     }
     /* Keeping this comment block as an example of writing arbitrary text to a file
@@ -182,6 +189,9 @@ bool save_settings(GravityApp* app) {
     /* Flush write cache */
     storage_file_sync(file);
     close_file(file);
+    popup_set_header(app->popup, "Save Succeeded", 64, 10, AlignCenter, AlignTop);
+    popup_set_text(app->popup, "Saved Settings", 10, 40, AlignLeft, AlignTop);
+    view_dispatcher_switch_to_view(app->view_dispatcher, Gravity_AppViewPopup);
     return true;
 }
 
@@ -196,6 +206,9 @@ bool load_settings(GravityApp* app) {
         FURI_LOG_E(TAG, "Failed to open %s for reading", FILENAME_SETTINGS);
         storage_file_free(file);
         furi_record_close(RECORD_STORAGE);
+        popup_set_header(app->popup, "Load Failed", 64, 10, AlignCenter, AlignTop);
+        popup_set_text(app->popup, "Failed to load settings", 10, 40, AlignLeft, AlignTop);
+        view_dispatcher_switch_to_view(app->view_dispatcher, Gravity_AppViewPopup);
         return false;
     }
 
@@ -205,9 +218,12 @@ bool load_settings(GravityApp* app) {
     memset(app->syncBuffer, '\0', SYNC_BUFFER_SIZE);
     app->syncBufLen = bytesRead;
     strncpy((char*)app->syncBuffer, buffer, SYNC_BUFFER_SIZE);
-    syncProcessResponse(app);
+    syncProcessResponse(app, true);
 
     close_file(file);
+    popup_set_header(app->popup, "Load Successful", 64, 10, AlignCenter, AlignTop);
+    popup_set_text(app->popup, "Settings Loaded", 10, 40, AlignLeft, AlignTop);
+    view_dispatcher_switch_to_view(app->view_dispatcher, Gravity_AppViewPopup);
     /* Another nod to the person with the insane compiler */
     if(app->is_command) {
         return true;
