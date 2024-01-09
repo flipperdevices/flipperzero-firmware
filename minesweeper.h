@@ -25,6 +25,7 @@
 
 #define TAG "Mine Sweeper Application"
 
+// This is a helper struct for the settings view/scene
 typedef struct {
     uint8_t board_width, board_height, difficulty;
     FuriString* width_str;
@@ -34,7 +35,7 @@ typedef struct {
     VariableItem* height_item;
 } MineSweeperAppSettings;
 
-// MineSweeperApp
+// Main MineSweeperApp
 typedef struct MineSweeperApp {
     SceneManager* scene_manager;
     ViewDispatcher* view_dispatcher;
@@ -48,7 +49,10 @@ typedef struct MineSweeperApp {
 
     MineSweeperAppSettings settings_info;
     MineSweeperAppSettings t_settings_info;
+
     bool is_settings_changed;
+    bool ensure_map_solvable;
+
     uint32_t haptic;
     uint32_t speaker;
     uint32_t led;
