@@ -1,5 +1,5 @@
 #include "minesweeper_game_screen.h"
-#include "minesweeper_icons.h"
+#include "f0_minesweeper_aer72564_icons.h"
 
 #include <gui/elements.h>
 #include <gui/icon_animation.h>
