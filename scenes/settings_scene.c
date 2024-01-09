@@ -19,12 +19,18 @@ typedef enum {
     MineSweeperSettingsScreenEventDifficultyChange,
     MineSweeperSettingsScreenEventWidthChange,
     MineSweeperSettingsScreenEventHeightChange,
+    MineSweeperSettingsScreenEventSolvableChange,
 } MineSweeperSettingsScreenEvent;
 
-static char* settings_screen_difficulty_text[MineSweeperSettingsScreenDifficultyTypeNum] = {
+static const char* settings_screen_difficulty_text[MineSweeperSettingsScreenDifficultyTypeNum] = {
     "Child",
     "Boy",
     "Man",
+};
+
+static const char* settings_screen_verifier_text[2] = {
+    "False",
+    "True",
 };
 
 static void minesweeper_scene_settings_screen_set_difficulty(VariableItem* item) {
@@ -141,6 +147,25 @@ static void minesweeper_scene_settings_screen_set_height(VariableItem* item) {
     view_dispatcher_send_custom_event(app->view_dispatcher, MineSweeperSettingsScreenEventWidthChange);
 }
 
+static void minesweeper_scene_settings_screen_set_solvable(VariableItem* item) {
+    furi_assert(item);
+
+    MineSweeperApp* app = variable_item_get_context(item);
+
+    uint8_t index = variable_item_get_current_value_index(app->t_settings_info.solvable_item);
+
+    FURI_LOG_D(TAG, "CALLBACK HAS INDEX %d", index);
+    
+    app->t_settings_info.ensure_solvable_board = (index == 1) ? true : false;
+
+    FURI_LOG_D(TAG, "BOOL SET TO %d", app->t_settings_info.ensure_solvable_board);
+
+    variable_item_set_current_value_text(item, settings_screen_verifier_text[index]);
+
+    view_dispatcher_send_custom_event(app->view_dispatcher, MineSweeperSettingsScreenEventSolvableChange);
+    
+}
+
 void minesweeper_scene_settings_screen_on_enter(void* context) {
     furi_assert(context);
 
@@ -151,6 +176,7 @@ void minesweeper_scene_settings_screen_on_enter(void* context) {
 
     // If we are accessing the scene and have not changed the settings
     if (!app->is_settings_changed) {
+        FURI_LOG_D(TAG, "Setting temp settings to app settings");
         // Set temp setting buffer to current state
         app->t_settings_info = app->settings_info;
     }
@@ -218,6 +244,28 @@ void minesweeper_scene_settings_screen_on_enter(void* context) {
             item,
             furi_string_get_cstr(app->t_settings_info.height_str));
 
+    // Set solvable item
+    item = variable_item_list_add(
+            va,
+            "Ensure Solvable",
+            2,
+            minesweeper_scene_settings_screen_set_solvable,
+            app);
+
+    app->t_settings_info.solvable_item = item;
+
+    uint8_t idx = (app->t_settings_info.ensure_solvable_board) ? 1 : 0;
+
+    FURI_LOG_D(TAG, "STARTING IDX FOR BOOL %d, FROM BOOL t_settings_info %d", idx, app->t_settings_info.ensure_solvable_board);
+
+    variable_item_set_current_value_index(
+            item,
+            idx);
+
+    variable_item_set_current_value_text(
+            item,
+            settings_screen_verifier_text[idx]);
+
     view_dispatcher_switch_to_view(app->view_dispatcher, MineSweeperSettingsView);
 }
 
@@ -229,9 +277,10 @@ bool minesweeper_scene_settings_screen_on_event(void* context, SceneManagerEvent
     
     if (event.type == SceneManagerEventTypeCustom) {
 
-        app->is_settings_changed = (app->settings_info.board_width != app->t_settings_info.board_width ||
+        app->is_settings_changed = (app->settings_info.board_width != app->t_settings_info.board_width  ||
                                    app->settings_info.board_height != app->t_settings_info.board_height ||
-                                   app->settings_info.difficulty != app->t_settings_info.difficulty);
+                                   app->settings_info.difficulty != app->t_settings_info.difficulty     ||
+                                   app->settings_info.ensure_solvable_board != app->t_settings_info.ensure_solvable_board);
 
         switch (event.event) {
 
