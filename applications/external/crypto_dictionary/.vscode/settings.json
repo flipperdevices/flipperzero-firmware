@@ -1,9 +1,0 @@
-{
-    "files.associations": {
-        "crypto_details.h": "c",
-        "stddef.h": "c",
-        "crypto_dict_app.h": "c",
-        "stdlib.h": "c",
-        "app.h": "c"
-    }
-}

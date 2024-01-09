@@ -42,6 +42,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [i2c Tools v1.2 (By NaejEL)](https://github.com/NaejEL/flipperzero-i2ctools)
 - Updated: [Restaurant Pager Trigger v1.2 (By leedave)](https://github.com/leedave/flipper-zero-meal-pager)
 - Updated: [YuriCable Pro Max v0.1 (By arag0re)](https://github.com/arag0re/fz-yuricable-pro-max)
+- Added: [Crypto Dictionary v0.1 (By armixz)](https://github.com/armixz/Flipper-Zero-Crypto-Dictionary)
 
 <a name="release">
 
@@ -345,6 +346,7 @@ $ ./fbt dolphin_ext
 - [Count Down Timer v1.2 (By 0w0mewo)](https://github.com/0w0mewo/fpz_cntdown_timer)
 - [Counter v1.3 (By Krulknul)](https://github.com/Krulknul/dolphin-counter)
 - [Cross Remote v1.1 (By leedave)](https://github.com/leedave/flipper-zero-cross-remote)
+- [Crypto Dictionary v0.1 (By armixz)](https://github.com/armixz/Flipper-Zero-Crypto-Dictionary)
 - [Dab Timer v1.7 (By RogueMaster)](https://github.com/RogueMaster/flipperzero-dabtimer)
 - [DAP Link v1.1 (By DrZlo13)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/1897)
 - [DCF77 Transmitter v1.1 (By arha)](https://github.com/arha/flipper-dcf77)
