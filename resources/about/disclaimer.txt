@@ -1,0 +1,14 @@
++-----Disclaimer------+
+Cryptography Dictionary is a
+comprehensive reference tool
+that provides detailed info on
+various algorithms.
+while I endeavor to keep the
+content up to date I make no
+representation or warranties
+of any kind, express or implied
+about the completeness,
+accuracy, or availability with
+respect to the application or
+the information contained on
+the app <for any purpose>.
