@@ -1,6 +1,6 @@
 #include "i2csaver.h"
 
-bool Bi2c_save_file(const char* content) {
+bool i2c_save_file(const char* content) {
     bool to_return = false;
     // We need a storage struct (gain accesso to the filesystem API )
     Storage* storage = furi_record_open(RECORD_STORAGE);
