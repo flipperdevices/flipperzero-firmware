@@ -109,16 +109,38 @@ static MineSweeperTile board_t[MINESWEEPER_BOARD_MAX_TILES];
  ***************************************************************/
 
 // Static helper functions
+
 static void setup_board(MineSweeperGameScreen* instance);
-static bool check_board_with_solver(MineSweeperTile* board, const uint8_t board_width, const uint8_t board_height, uint16_t total_mines);
+
+static bool check_board_with_verifier(
+        MineSweeperTile* board,
+        const uint8_t board_width,
+        const uint8_t board_height,
+        uint16_t total_mines);
+
 static Point bfs_to_closest_tile(MineSweeperGameScreenModel* model);
-static inline void bfs_tile_clear_solver(MineSweeperTile* board, const uint8_t board_width, const uint8_t board_height, const uint16_t x, const uint16_t y, point_deq_t* edges, point_set_t* visited);
-static void bfs_tile_clear(MineSweeperTile* board, const uint8_t board_width, const uint8_t board_height, const uint16_t x, const uint16_t y);
+
+static inline void bfs_tile_clear_verifier(
+        MineSweeperTile* board,
+        const uint8_t board_width,
+        const uint8_t board_height,
+        const uint16_t x,
+        const uint16_t y,
+        point_deq_t* edges,
+        point_set_t* visited);
+
+static void bfs_tile_clear(MineSweeperTile* board,
+        const uint8_t board_width,
+        const uint8_t board_height,
+        const uint16_t x,
+        const uint16_t y);
+
 static void mine_sweeper_game_screen_set_board_information(
         MineSweeperGameScreen* instance,
         const uint8_t width,
         const uint8_t height,
         const uint8_t difficulty);
+
 static bool try_clear_surrounding_tiles(MineSweeperGameScreenModel* model);
 
 // Currently not using enter/exit callback
@@ -139,6 +161,10 @@ static bool mine_sweeper_game_screen_view_play_input_callback(InputEvent* event,
  * Function definitions
  *************************************************************/
 
+/**
+ * This function is called on alloc, reset, and win/lose condition.
+ * It sets up a random board to be checked by the verifier
+ */
 static void setup_board(MineSweeperGameScreen* instance) {
     furi_assert(instance);
 
@@ -251,9 +277,10 @@ static void setup_board(MineSweeperGameScreen* instance) {
 
 }
 
-// The solver will always start at 0,0 and will return true if it could
-// solve the board unambiguously else false if it needs to guess
-static bool check_board_with_solver(MineSweeperTile* board, const uint8_t board_width, const uint8_t board_height, uint16_t total_mines) {
+/**
+ *  This function serves as the 
+ */
+static bool check_board_with_verifier(MineSweeperTile* board, const uint8_t board_width, const uint8_t board_height, uint16_t total_mines) {
     furi_assert(board);
 
     // Double ended queue used to track edges.
@@ -280,7 +307,7 @@ static bool check_board_with_solver(MineSweeperTile* board, const uint8_t board_
 
     // Initially bfs clear from 0,0 as it is safe. We should push all 'edges' found
     // into the deq and this will be where we start off from
-    bfs_tile_clear_solver(board, board_width, board_height, 0, 0, &deq, &visited);
+    bfs_tile_clear_verifier(board, board_width, board_height, 0, 0, &deq, &visited);
                                                              
     uint16_t i = 0, j = 0;
     //
@@ -344,7 +371,7 @@ static bool check_board_with_solver(MineSweeperTile* board, const uint8_t board_
 
                     uint16_t pos = dx * board_width + dy;
                     if (board[pos].tile_state == MineSweeperGameScreenTileStateUncleared) {
-                        bfs_tile_clear_solver(board, board_width, board_height, dx, dy, &deq, &visited);
+                        bfs_tile_clear_verifier(board, board_width, board_height, dx, dy, &deq, &visited);
                     }
 
                 }
@@ -419,7 +446,7 @@ static bool check_board_with_solver(MineSweeperTile* board, const uint8_t board_
 
     FURI_LOG_D(
         MS_DEBUG_TAG,
-        "Leaving solver with deq size : %d, total edges checked : %d, total cycles %d, is_solvable : %d",
+        "Leaving verifier with deq size : %d, total edges checked : %d, total cycles %d, is_solvable : %d",
         point_deq_size(deq), j, i, is_solvable);
 
     point_set_clear(visited);
@@ -500,7 +527,7 @@ static inline Point bfs_to_closest_tile(MineSweeperGameScreenModel* model) {
 
 // Eight way BFS 'Flood fill' to clear adjacent non-mine tiles
 // We can use m*lib for a set and dequeue for BFS
-static inline void bfs_tile_clear_solver(
+static inline void bfs_tile_clear_verifier(
         MineSweeperTile* board,
         const uint8_t board_width,
         const uint8_t board_height,
@@ -559,10 +586,10 @@ static inline void bfs_tile_clear_solver(
 
         // If the current tile is not a zero tile this means we hit an edge of the open space
         // We do not further process this space for the bfs tile clear, but we need further checking
-        // if the solver is using the function
+        // if the verifier is using the function
         if (board[curr_pos_1d].tile_type != MineSweeperGameScreenTileZero) {
 
-            // If the solver is using this function edges and visited will be non NULL
+            // If the verifier is using this function edges and visited will be non NULL
             // We can push this edge into edges if it is not in visited, as it is a new edge
             if (edges != NULL && visited != NULL && point_set_cget(*visited, pos) == NULL) {
                 //FURI_LOG_D(MS_DEBUG_TAG, "\t\t\t\tPoint at position (%hd, %hd) was found with bfs_clear and will be pushed on the set and deq", curr_pos.x, curr_pos.y);
@@ -1210,7 +1237,8 @@ static bool mine_sweeper_game_screen_view_end_input_callback(InputEvent* event, 
                                 model->board_width,
                                 model->board_height);
 
-                            is_valid_board = check_board_with_solver(board_t, model->board_width, model->board_height, model->mines_left);
+                            is_valid_board = check_board_with_verifier(board_t, model->board_width, model->board_height, model->mines_left);
+                        
 
                         } while (true && !is_valid_board);  //Change first variable in boolean expression to enable random startup
                                                            //
@@ -1537,12 +1565,12 @@ MineSweeperGameScreen* mine_sweeper_game_screen_alloc(uint8_t width, uint8_t hei
                 memset(board_t, 0, memsz);
                 memcpy(board_t, model->board, sizeof(MineSweeperTile) * (board_width * board_height));
 				
-				FURI_LOG_D(MS_DEBUG_TAG, "(mines, width, height) (%hd, %hhd, %hhd) at board %p to solver", num_mines, board_width, board_height, p);
+				FURI_LOG_D(MS_DEBUG_TAG, "(mines, width, height) (%hd, %hhd, %hhd) at board %p to verifier", num_mines, board_width, board_height, p);
             },
             true
         );
     
-        is_valid_board = check_board_with_solver(board_t, board_width, board_height, num_mines);
+        is_valid_board = check_board_with_verifier(board_t, board_width, board_height, num_mines);
 
         iter++; 
 
@@ -1622,7 +1650,7 @@ void mine_sweeper_game_screen_reset(MineSweeperGameScreen* instance, uint8_t wid
             true
         );
     
-        is_valid_board = check_board_with_solver(board_t, board_width, board_height, num_mines);
+        is_valid_board = check_board_with_verifier(board_t, board_width, board_height, num_mines);
         
     } while (true && !is_valid_board);  //Change first variable in boolean expression to enable random startup
 
