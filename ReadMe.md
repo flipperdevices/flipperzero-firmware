@@ -29,8 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0109-1155-0.93.9-9236c42](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-01-09 11:55 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-01-09 11:55 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-01-09 16:55 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-01-09 16:55 EST`
 - [Fixed many memory leaks (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/5fed20065ce527a643999eab213c24a186c5722c) with thanks to [Fixed memory leak #13 (By squee72564)](https://github.com/leedave/flipper-zero-fap-boilerplate/pull/13)
 - Updated: [Color Guess v1.3 (By leedave)](https://github.com/leedave/Leeds-Flipper-Zero-Applications)
 - Updated: [Cross Remote v1.1 (By leedave)](https://github.com/leedave/flipper-zero-cross-remote)
@@ -41,6 +41,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [ESP32 Gravity v1.0.1 (By chris-bc)](https://github.com/chris-bc/Flipper-Gravity) `Req: ESP32`
 - Updated: [i2c Tools v1.2 (By NaejEL)](https://github.com/NaejEL/flipperzero-i2ctools)
 - Updated: [Restaurant Pager Trigger v1.2 (By leedave)](https://github.com/leedave/flipper-zero-meal-pager)
+- Updated: [YuriCable Pro Max v0.1 (By arag0re)](https://github.com/arag0re/fz-yuricable-pro-max)
 
 <a name="release">
 
