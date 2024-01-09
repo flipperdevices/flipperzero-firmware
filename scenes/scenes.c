@@ -182,7 +182,7 @@ void topic_scene_on_enter(void* context) {
         dynamic_buffer_init(&dynamic_content, 30);
         strcpy(dynamic_content.data, "Failed to open asset file.");
         widget_add_text_scroll_element(
-            app->widget, 0, 0, WIDGET_WIDTH, WIDGET_HEIGHT, dynamic_content.data);
+            app->widget, 2, 1, WIDGET_WIDTH, WIDGET_HEIGHT, dynamic_content.data);
     }
 
     view_dispatcher_switch_to_view(app->view_dispatcher, WidgetView);

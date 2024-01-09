@@ -1,0 +1,21 @@
++-----Block Ciphers----+
+ | 64-bit block (8 byte)           |
++-----Key  Length-----+
+ | 32 bits - 448 bits                   |
+ | 128-bits Considered              |
++------MODES-------+
+ | ECB - CBC - CFB - OFB     |
+ | Triple ECB - Triple CBC       |
+ | (see Modes(1))                         |
++----- OVERVIEW -----+
+ | blowfish is currently one of |
+ | the fastest Block ciphers.    |
+ | It is quite bit faster than       |
+ | DES and much faster than  |
+ | IDEA Or RC2                              |
+ |-------------------|
+ | Blowfish consist of a key      |
+ | setup phase and the actual |
+ | Encryption or decryption    |
+ | phase.                                           |
++------------------ +

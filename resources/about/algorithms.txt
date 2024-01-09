@@ -8,10 +8,10 @@ DH
 +------Certificate-----+
 X.509, X.509v3
 +----Hash Functions----+
-HMAC
-+--Authentication-Codes-+
 MD2, MD4, MD5, MDC2
 RIPEMD, SHA
++--Authentication-Codes-+
+HMAC
 +---Auxiliary  Functions--+
 ERR, Threads, RAND
 +----Data-Encoding----+
