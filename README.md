@@ -1,9 +1,15 @@
 
 
+
 # Minesweeper Implementation for the Flipper Zero.
 Hello!
 
 ![Mine Sweeper Example Gameplay Gif](https://github.com/squee72564/F0_Minesweeper_Fap/blob/main/images/github_images/MineSweeperGameplay.gif)
+## Added features unique to this implementation:
+-	Enable board verifier for board generation to ensure unambiguous boards!
+-	Set board width and height
+-	Set difficulty
+-	A number of different button presses as shortcuts for game actions (see How To Play) 
 
 ## Installation
 1. Clone this repo to your computer ie:
@@ -15,19 +21,23 @@ Hello!
 4. Profit
 
 ## How To Play
-- Up/Down/Left/Right Buttons to move around (can be held to continuously move)
+- Up/Down/Left/Right Buttons to move around
+	- These buttons can be held down to keep moving in a direction
 - Center OK Button to attempt opening up a tile
-- Hold Back Button on a covered tile to toggle marking it with a flag
-- Hold Back Button on a uncovered tile to jump to one of the closest covered tiles (this can help find last covered tiles on a larger board)
+	- Press OK on a tile to open it up
+	- Hold OK on a cleared space with a number to clear all surrounding tiles (correct number of flags must be set around it)
+- Hold Back Button on a tile to toggle marking it with a flag
+- Hold Back Button on a cleared space to jump to one of the closest tiles (this can help find last tiles on a larger board)
 - Press Back Button to access the settings menu where you can do the following:
 	- Change board width
 	- Change board height
-	- Change difficulty (still experimenting with values for this)
+	- Change difficulty
+	- Ensure Solvable (**Important!**)- This option will enable the board verifier for board generation and can significantly increase wait times for generating a board. Currently this may lock up the view port on the loading animation, but it should eventually resolve and return to the game.
 
-#### NOTICE:
-The way I set the board up leaves the corners as safe starting positions with the top left tile 0,0 always having an unambiguous next move. I opted for this instead of opening up the board on the first tile the user selects.
+#### IMPORTANT NOTICE:
+The way I set the board up leaves the corners as safe starting positions!
 
-This is done to help the solver and simplify the game start. 
+In addition to this, with the "Ensure Solvable" option set to true, the board will always be solvable from 0,0! Without Ensure Solvable enabled in the settings the mine placement for the board generation is randomized and there is no guarantee that the game with be solvable without any guesses.
 
 ## Application Structure
 The following is the application structure with a breakdown of each folder:
@@ -54,7 +64,6 @@ Right now the current structure of the application is heavily inspired from [lee
 
 
 ## TODO
-- Implement mine sweeper solver for board generation
-	- Using a solver to check the generated board can ensure that it can be solved without any guesses. I think this would be more fair to the player and would ensure more interesting boards where you are not just guessing.
-	- The one downside is that this will introduce much more overhead for the board setup as the game will need to continuously generate and attempt to solve maps until it gets a valid one.
-	- I may have it attempt to generate and solve maps for a set time period, and if it cannot do so it will use the next random map, solve it even if it needs to guess perfectly multiple times, and then inform the user that a unambiguous map could not be generated in the set amount of time and that it will take N guesses to solve.
+- Multi-threading for board verifier for faster solvable board generation
+- Maybe trying to further optimize the board verification algorithm if possible
+	- I could try adding all of the corners to the starting positions for the verifier and see if this works better; although it is more simple for the user to just start from tile 0,0 and go from there.
