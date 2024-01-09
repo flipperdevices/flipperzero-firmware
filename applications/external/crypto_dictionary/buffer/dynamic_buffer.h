@@ -9,7 +9,6 @@ typedef struct {
     size_t capacity;
 } DynamicBuffer;
 
-
 void dynamic_buffer_init(DynamicBuffer* buffer, size_t initial_capacity);
 bool dynamic_buffer_grow(DynamicBuffer* buffer, size_t min_capacity);
 bool dynamic_buffer_append(DynamicBuffer* buffer, const char* src, size_t src_size);
