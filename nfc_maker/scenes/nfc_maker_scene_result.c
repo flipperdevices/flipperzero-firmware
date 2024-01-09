@@ -70,7 +70,7 @@ void nfc_maker_scene_result_on_enter(void* context) {
         buf[i++] = 0x3E; // ...
         buf[i++] = 0x00; // ...
 
-        buf[i++] = 0x03; // Container flags
+        buf[i++] = 0x03; // NDEF TLV block
 
         // NDEF Docs: https://developer.nordicsemi.com/nRF_Connect_SDK/doc/latest/nrf/protocols/nfc/index.html#nfc-data-exchange-format-ndef
         uint8_t tnf = 0x00;
@@ -284,9 +284,9 @@ void nfc_maker_scene_result_on_enter(void* context) {
 
         size_t record_len = header_len + payload_len;
         if(record_len < 0xFF) {
-            buf[i++] = record_len; // Record length
+            buf[i++] = record_len; // TLV length
         } else {
-            buf[i++] = 0xFF; // Record length
+            buf[i++] = 0xFF; // TLV length
             buf[i++] = record_len >> 8; // ...
             buf[i++] = record_len & 0xFF; // ...
         }
