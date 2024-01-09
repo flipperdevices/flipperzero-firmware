@@ -8,7 +8,7 @@ App(
     cdefines=["APP_MINESWEEPER"],
     requires=[
         "gui",
-        #"storage",                     # Require if we do any r/w to storage
+        "storage",                     # Require if we do any r/w to storage
     ],
     stack_size=2 * 1024,
 
