@@ -53,8 +53,7 @@ static MineSweeperApp* app_alloc() {
         FURI_LOG_I(TAG, "Cannot read save file, loading defaults");
         app->settings_info.board_width = 16;
         app->settings_info.board_height = 7;
-        app->settings_info.difficulty = 2;
-        app->ensure_map_solvable = true;
+        app->settings_info.difficulty = 0;
         app->haptic = 1;
         app->speaker = 1;
         app->led = 1;
@@ -78,7 +77,7 @@ static MineSweeperApp* app_alloc() {
             app->settings_info.board_width,
             app->settings_info.board_height,
             app->settings_info.difficulty,
-            app->ensure_map_solvable);
+            false);
 
     view_dispatcher_add_view(
         app->view_dispatcher,
