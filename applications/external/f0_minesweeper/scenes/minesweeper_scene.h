@@ -7,7 +7,7 @@
 #define ADD_SCENE(prefix, name, id) MineSweeperScene##id,
 typedef enum {
 #include "minesweeper_scene_config.h"
-        MineSweeperSceneNum
+    MineSweeperSceneNum
 } MineSweeperScene;
 #undef ADD_SCENE
 
