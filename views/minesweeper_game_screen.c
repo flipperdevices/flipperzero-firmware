@@ -305,8 +305,6 @@ static bool check_board_with_verifier(MineSweeperTile* board, const uint8_t boar
     // into the deq and this will be where we start off from
     bfs_tile_clear_verifier(board, board_width, board_height, 0, 0, &deq, &visited);
                                                              
-    uint16_t i = 0, j = 0;
-    
     //While we have valid edges to check and have not solved the board
     while (!is_solvable && point_deq_size(deq) > 0) {
 
@@ -354,9 +352,6 @@ static bool check_board_with_verifier(MineSweeperTile* board, const uint8_t boar
                 
                 // If the tile has the same number of surrounding flags as its type we bfs clear the uncleared surrounding tiles
                 // pushing new unvisited edges on deq
-                //FURI_LOG_D(MS_DEBUG_TAG, "(%d)\tPoint at position (%hd, %hd) has correct # flags around it (%d); bfs tile clear surrounding and pop",tile_num, i, curr_pos.x, curr_pos.y);
-
-                //size_t deqsz_start = point_deq_size(deq);
 
                 for (uint8_t j = 0; j < 8; j++) {
                     int16_t dx = curr_pos.x + (int16_t)offsets[j][0];
@@ -372,9 +367,6 @@ static bool check_board_with_verifier(MineSweeperTile* board, const uint8_t boar
                     }
 
                 }
-                //size_t deqsz_end = point_deq_size(deq);
-
-                //FURI_LOG_D(MS_DEBUG_TAG, "\t\t\tStarting deq size : %d,\tEnding deq size : %d", deqsz_start, deqsz_end);
 
                 is_stuck = false;
 
@@ -382,7 +374,6 @@ static bool check_board_with_verifier(MineSweeperTile* board, const uint8_t boar
 
                 // If the number of surrounding tiles is the tile num it is unambiguous so we place a flag on those tiles,
                 // decrement the mine count appropriately and check win condition, and then mark stuck as false
-                //FURI_LOG_D(MS_DEBUG_TAG, "(%d)\tPoint at position (%hd, %hd) is solvable; marking surrounding tiles as flags, pop, and checking win condition", i, curr_pos.x, curr_pos.y);
 
                 for (uint8_t j = 0; j < 8; j++) {
                     int16_t dx = curr_pos.x + (int16_t)offsets[j][0];
@@ -401,55 +392,28 @@ static bool check_board_with_verifier(MineSweeperTile* board, const uint8_t boar
                 total_mines -= (num_surrounding_tiles - num_flagged_tiles);
 
                 if (total_mines == 0) is_solvable = true;
-                //FURI_LOG_D(MS_DEBUG_TAG, "(%d)\t\tTotal mines left: %hd",i, total_mines);
-
                  
                 is_stuck = false;
 
             } else if (num_surrounding_tiles != 0) {
 
-                //FURI_LOG_D(MS_DEBUG_TAG, "(%d)\tPoint at position (%hd, %hd) is ambiguous; Pushing back on deq", i, curr_pos.x, curr_pos.y);
                 // If we have tiles around this position but the number of flagged tiles != tile num
                 // and the surrounding tiles != tile num this means the tile is ambiguous. We can push
                 // it back on the deq to be reprocessed with any other new edges
                 
                 point_deq_push_back(deq, pos);
 
-            } else {
-
-                //FURI_LOG_D(MS_DEBUG_TAG, "(%d)\tPoint at position (%hd, %hd) is no longer an edge.", i, curr_pos.x, curr_pos.y);
-                // else if no condition is met this tile is not surrounded by uncleared tiles and is therefore not an edge anymore
-                // so leave popped off the deq
-
             }
-            
-            curr_iter++;
-            j+=curr_iter;
         }
-        i++;
-        //FURI_LOG_D(MS_DEBUG_TAG, "==================== CYCLE %d COMPLETED WITH %d ITER ====================", i, curr_iter);
-
+        
         // If we are stuck we break as it is an ambiguous map generation
         if (is_stuck) {
-            //FURI_LOG_D(MS_DEBUG_TAG, "(%d)\t !!! BREAKING FROM AMBIGOUS MAP AFTER %d TOTAL ITER", i ,j);
             break;
         }
     }
 
-    //FURI_LOG_D(MS_DEBUG_TAG, "==================== DEQ AFTER SOLVE ====================");
-    //print_deq_to_debug(&deq);
-
-    //FURI_LOG_D(MS_DEBUG_TAG, "==================== SET AFTER SOLVE ====================");
-    //print_ordered_set_to_debug(&visited);
-
-    FURI_LOG_D(
-        MS_DEBUG_TAG,
-        "Leaving verifier with deq size : %d, total edges checked : %d, total cycles %d, is_solvable : %d",
-        point_deq_size(deq), j, i, is_solvable);
-
     point_set_clear(visited);
     point_deq_clear(deq);
-
 
     return is_solvable;
 
@@ -472,8 +436,6 @@ static inline void bfs_tile_clear_verifier(
     furi_assert(board);
     furi_assert(edges);
     furi_assert(visited);
-    
-    //FURI_LOG_D(MS_DEBUG_TAG, "\t\t\t--- Started bfs_clear at (%hd, %hd)", x, y);
     
     // Init both the set and dequeue
     point_deq_t deq;
@@ -500,12 +462,10 @@ static inline void bfs_tile_clear_verifier(
         
         // If in visited set
         if (point_set_cget(set, pos) != NULL || point_set_cget(*visited, pos) != NULL) {
-            //FURI_LOG_D(MS_DEBUG_TAG, "\t\t\t\tPoint at position (%hd, %hd) is already in the visited set; continue", curr_pos.x, curr_pos.y);
         } 
         
         // If it is cleared continue
         if (board[curr_pos_1d].tile_state == MineSweeperGameScreenTileStateCleared) {
-            //FURI_LOG_D(MS_DEBUG_TAG, "\t\t\t\tPoint at position (%hd, %hd) is already cleared; continue", curr_pos.x, curr_pos.y);
             continue;
         }
         
@@ -521,7 +481,6 @@ static inline void bfs_tile_clear_verifier(
             // We can push this edge into edges if it is not in visited, as it is a new edge
             // and also add to the visited set
             if (point_set_cget(*visited, pos) == NULL) {
-                //FURI_LOG_D(MS_DEBUG_TAG, "\t\t\t\tPoint at position (%hd, %hd) was found with bfs_clear and will be pushed on the set and deq", curr_pos.x, curr_pos.y);
                 point_deq_push_back(*edges, pos);
                 point_set_push(*visited, pos);
             }
@@ -544,15 +503,12 @@ static inline void bfs_tile_clear_verifier(
 
             if (point_set_cget(set, pos) != NULL || point_set_cget(*visited, pos) != NULL) continue;
 
-            //FURI_LOG_D(MS_DEBUG_TAG, "\t\t\t\tPoint at position (%hd, %hd) is a valid neighbor and will be pushed on the deq", dx, dy);
             point_deq_push_back(deq, pos);
         }
     }
 
     point_set_clear(set);
     point_deq_clear(deq);
-
-    //FURI_LOG_D(MS_DEBUG_TAG, "\t\t\t--- Ended bfs_clear at (%hd, %hd)", x, y);
 }
 
 /**
@@ -1225,11 +1181,6 @@ static bool mine_sweeper_game_screen_view_end_input_callback(InputEvent* event, 
                         bool is_valid_board = false;
 
                         size_t memsz = sizeof(MineSweeperTile) * MINESWEEPER_BOARD_MAX_TILES;
-                        MineSweeperTile* p = &board_t[0];
-                        FURI_LOG_D(MS_DEBUG_TAG, "Setting Up board_t at : %p", p);
-
-                        uint16_t iter = 0;
-                        uint32_t start_tick = furi_get_tick();
 
                         do {
                             setup_board(instance);
@@ -1237,29 +1188,12 @@ static bool mine_sweeper_game_screen_view_end_input_callback(InputEvent* event, 
                             memset(board_t, 0, memsz);
                             memcpy(board_t, model->board, sizeof(MineSweeperTile) * (model->board_width * model->board_height));
 
-                            FURI_LOG_D(
-                                MS_DEBUG_TAG,
-                                "(mines, width, height) (%hd, %hhd, %hhd)",
-                                model->mines_left,
-                                model->board_width,
-                                model->board_height);
-
                             is_valid_board = check_board_with_verifier(board_t, model->board_width, model->board_height, model->mines_left);
                         
                             iter++;
 
-                        } while (true && !is_valid_board);  //Change first variable in boolean expression to enable random startup
+                        } while (true & !is_valid_board);  //Change first variable in boolean expression to enable random startup
 
-                        uint32_t ticks_elapsed = furi_get_tick() - start_tick;
-                        double sec = (double)ticks_elapsed / (double)furi_kernel_get_tick_frequency();
-
-                        FURI_LOG_D(
-                            MS_DEBUG_TAG,
-                            "Took %f s to setup board with %d iterations (%f s on avg)",
-                            sec,
-                            iter,
-                            sec / (double)iter);
-    
                         consumed = true;
                         break;
                     }
@@ -1555,13 +1489,8 @@ MineSweeperGameScreen* mine_sweeper_game_screen_alloc(uint8_t width, uint8_t hei
 
     // Here we are going to generate a valid map for the player 
     bool is_valid_board = false;
-
     size_t memsz = sizeof(MineSweeperTile) * MINESWEEPER_BOARD_MAX_TILES;
-    MineSweeperTile* p = &board_t[0];
-    FURI_LOG_D(MS_DEBUG_TAG, "Setting Up board_t at : %p", p);
 
-    uint16_t iter = 0;
-    uint32_t start_tick = furi_get_tick();
     do {
         setup_board(mine_sweeper_game_screen);
 
@@ -1580,28 +1509,14 @@ MineSweeperGameScreen* mine_sweeper_game_screen_alloc(uint8_t width, uint8_t hei
 
                 memset(board_t, 0, memsz);
                 memcpy(board_t, model->board, sizeof(MineSweeperTile) * (board_width * board_height));
-				
-				FURI_LOG_D(MS_DEBUG_TAG, "(mines, width, height) (%hd, %hhd, %hhd) at board %p to verifier", num_mines, board_width, board_height, p);
             },
             true
         );
     
         is_valid_board = check_board_with_verifier(board_t, board_width, board_height, num_mines);
 
-        iter++; 
-
     } while (!is_valid_board);  //Change first variable in boolean expression to enable random startup
 
-    uint32_t ticks_elapsed = furi_get_tick() - start_tick;
-    double sec = (double)ticks_elapsed / (double)furi_kernel_get_tick_frequency();
-
-	FURI_LOG_D(
-        MS_DEBUG_TAG,
-        "Took %f s to setup board with %d iterations (%f s on avg)",
-        sec,
-        iter,
-        sec / (double)iter);
-    
     return mine_sweeper_game_screen;
 }
 
@@ -1637,16 +1552,9 @@ void mine_sweeper_game_screen_reset(MineSweeperGameScreen* instance, uint8_t wid
 
     // Here we are going to generate a valid map for the player 
     bool is_valid_board = false;
-
     size_t memsz = sizeof(MineSweeperTile) * MINESWEEPER_BOARD_MAX_TILES;
-    MineSweeperTile* p = &board_t[0];
-    FURI_LOG_D(MS_DEBUG_TAG, "Setting Up board_t at : %p", p);
-
-    uint16_t iter = 0;
-    uint32_t start_tick = furi_get_tick();
 
     do {
-        FURI_LOG_D(MS_DEBUG_TAG, "Setting Up board_t at : %p", p);
         setup_board(instance);
 
         uint16_t num_mines = 1;
@@ -1664,27 +1572,13 @@ void mine_sweeper_game_screen_reset(MineSweeperGameScreen* instance, uint8_t wid
 
                 memset(board_t, 0, memsz);
                 memcpy(board_t, model->board, sizeof(MineSweeperTile) * (board_width * board_height));
-				
-				FURI_LOG_D(MS_DEBUG_TAG, "(mines, width, height) (%hd, %hhd, %hhd)", num_mines, board_width, board_height);
             },
             true
         );
     
         is_valid_board = check_board_with_verifier(board_t, board_width, board_height, num_mines);
 
-        iter++;
-        
     } while (true && !is_valid_board);  //Change first variable in boolean expression to enable random startup
-
-    uint32_t ticks_elapsed = furi_get_tick() - start_tick;
-    double sec = (double)ticks_elapsed / (double)furi_kernel_get_tick_frequency();
-
-	FURI_LOG_D(
-        MS_DEBUG_TAG,
-        "Took %f s to setup board with %d iterations (%f s on avg)",
-        sec,
-        iter,
-        sec / (double)iter);
 
 }
 
