@@ -870,7 +870,7 @@ void generate_song(FlipboardModel* model) {
 - **FLIPPER CODE**: `FURI_LOG_D` is used to log debug messages. The TAG is defined in `app_config.h` and represents the application's name in the log. The string uses printf format specifiers (`%d` is replaced with the integer parameters). You can view the log at https://lab.flipper.net/cli using Chrome or Edge. Remember to close the browser before deploying any updated code to the Flipper Zero.
 
 ### Step 9e. Replace the `custom_event_handler` `SimonCustomEventIdNewGame` code
-**Modify** the following code in the `custom_event_handler` function:
+**Replace** the following code in the `custom_event_handler` function:
 ```c
     } else if(event == SimonCustomEventIdNewGame) {
         SimonGame* game = flipboard_model_get_custom_data(model);
@@ -878,7 +878,7 @@ void generate_song(FlipboardModel* model) {
     }
 ```
 
-**Replacing** with this code:
+**With** this code:
 ```c
     } else if(event == SimonCustomEventIdNewGame) {
         generate_song(model);
@@ -914,14 +914,14 @@ Run the application, then load https://lab.flipper.net/cli and type the command 
 - **SIMON CODE**: `SIMON_TEACH_DELAY_MS` is the amount of time to delay before sending the `SimonCustomEventIdTeachNotes` event.  The value is in milliseconds.
 
 ### Step 10c. Update `custom_event_handler` for new game to also send a teach notes event
-**Modify** the following code in the `custom_event_handler` function:
+**Replace** the following code in the `custom_event_handler` function:
 ```c
     } else if(event == SimonCustomEventIdNewGame) {
         generate_song(model);
     }
 ```
 
-**Replacing** with this code:
+**With** this code:
 ```c
     } else if(event == SimonCustomEventIdNewGame) {
         generate_song(model);
@@ -1146,7 +1146,7 @@ void flipboard_debounced_switch(void* context, uint8_t old_button, uint8_t new_b
 - **SIMON CODE**: We verify if the game state is `SimonGameStateListening` and return if it's not, thereby ignoring the button press.
 
 ### Step 11h. Update the `get_primary_view` to set an exit callback
-Add the following code to the `get_primary_view` function after the `view_set_enter_callback` function call:
+Add the following code to the `get_primary_view` function after the `view_set_enter_callback(view, simon_enter_callback);` line:
 
 ```c
     view_set_exit_callback(view, simon_exit_callback);
@@ -1281,14 +1281,14 @@ Run the application. Choose the "Play Simon" option.  It should create a random 
 - **SIMON CODE**: A `song_length` of 0 indicates we haven't generated a song.
 
 ### Step 13b. Update the `simon_view_draw` function
-**Modify** the following code in the `simon_view_draw` function:
+**Replace** the following code in the `simon_view_draw` function:
 ```c
     if(game->state == SimonGameStateGameOver) {
         canvas_draw_str_aligned(canvas, 64, 12, AlignCenter, AlignCenter, "PRESS OK TO PLAY");
     }
 ```    
 
-**Replacing** with this code:
+**With** this code:
 ```c
     if(game->state == SimonGameStateGameOver) {
         if(game->song_length == 0) {
@@ -1314,7 +1314,7 @@ Run the application. Choose the "Play Simon" option.  You should now have differ
 ## Step 14. Create special ending for a lost game
 
 ### Step 14a. Replace the `custom_event_handler` `SimonCustomEventIdWrongNote` code
-**Modify** the following code in the `custom_event_handler` function:
+**Replace** the following code in the `custom_event_handler` function:
 ```c
     } else if(event == SimonCustomEventIdWrongNote) {
         SimonGame* game = flipboard_model_get_custom_data(model);
@@ -1322,7 +1322,7 @@ Run the application. Choose the "Play Simon" option.  You should now have differ
     }
 ```
 
-**Replacing** with this code:
+**With** this code:
 ```c
     } else if(event == SimonCustomEventIdWrongNote) {
         lost_game(model);
@@ -1374,14 +1374,14 @@ Run the application. Choose the "Play Simon" option.  You should now have differ
 ## Step 15. Create special ending for a won game
 
 ### Step 15a. Replace the `custom_event_handler` `SimonCustomEventIdPlayedSequence` code
-**Modify** the following code in the `custom_event_handler` function:
+**Replace** the following code in the `custom_event_handler` function:
 ```c
         if(game->successful_note_number == game->song_length) {
             game->state = SimonGameStateGameOver;
         }
 ```
 
-**Replacing** with this code:
+**With** this code:
 ```c
         if(game->successful_note_number == game->song_length) {
             won_game(model);
