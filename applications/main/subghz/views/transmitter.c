@@ -16,6 +16,8 @@ typedef struct {
     FuriString* key_str;
     bool show_button;
     SubGhzRadioDeviceType device_type;
+    IconAnimation* icon_int_ant;
+    IconAnimation* icon_ext_ant;
 } SubGhzViewTransmitterModel;
 
 void subghz_view_transmitter_set_callback(
@@ -102,9 +104,11 @@ void subghz_view_transmitter_draw(Canvas* canvas, SubGhzViewTransmitterModel* mo
     canvas_draw_str(canvas, 113, 7, furi_string_get_cstr(model->preset_str));
     if(model->show_button) {
         if(model->device_type == SubGhzRadioDeviceTypeInternal) {
-            canvas_draw_icon(canvas, 108, 39, &I_Internal_antenna_20x12);
+            //canvas_draw_icon(canvas, 109, 39, &I_Internal_ant_1_9x11);
+            canvas_draw_icon_animation(canvas, 109, 39, model->icon_int_ant);
         } else {
-            canvas_draw_icon(canvas, 108, 39, &I_External_antenna_20x12);
+            //canvas_draw_icon(canvas, 109, 39, &I_External_ant_1_9x11);
+            canvas_draw_icon_animation(canvas, 109, 39, model->icon_ext_ant);
         }
         subghz_view_transmitter_button_right(canvas, "Send");
     }
@@ -140,10 +144,26 @@ bool subghz_view_transmitter_input(InputEvent* event, void* context) {
         true);
 
     if(can_be_sent && event->key == InputKeyOk && event->type == InputTypePress) {
+        with_view_model(
+            subghz_transmitter->view,
+            SubGhzViewTransmitterModel * model,
+            {
+                icon_animation_start(model->icon_int_ant);
+                icon_animation_start(model->icon_ext_ant);
+            },
+            false);
         subghz_transmitter->callback(
             SubGhzCustomEventViewTransmitterSendStart, subghz_transmitter->context);
         return true;
     } else if(can_be_sent && event->key == InputKeyOk && event->type == InputTypeRelease) {
+        with_view_model(
+            subghz_transmitter->view,
+            SubGhzViewTransmitterModel * model,
+            {
+                icon_animation_stop(model->icon_int_ant);
+                icon_animation_stop(model->icon_ext_ant);
+            },
+            false);
         subghz_transmitter->callback(
             SubGhzCustomEventViewTransmitterSendStop, subghz_transmitter->context);
         return true;
@@ -154,10 +174,22 @@ bool subghz_view_transmitter_input(InputEvent* event, void* context) {
 
 void subghz_view_transmitter_enter(void* context) {
     furi_assert(context);
+    //SubGhzViewTransmitter* subghz_transmitter = context;
+    // with_view_model(
+    //     subghz_transmitter->view,
+    //     SubGhzViewTransmitterModel * model,
+    //     { icon_animation_start(model->icon); },
+    //     true);
 }
 
 void subghz_view_transmitter_exit(void* context) {
     furi_assert(context);
+    // SubGhzViewTransmitter* subghz_transmitter = context;
+    // with_view_model(
+    //     subghz_transmitter->view,
+    //     SubGhzViewTransmitterModel * model,
+    //     { icon_animation_start(model->icon); },
+    //     true);
 }
 
 SubGhzViewTransmitter* subghz_view_transmitter_alloc() {
@@ -181,6 +213,10 @@ SubGhzViewTransmitter* subghz_view_transmitter_alloc() {
             model->frequency_str = furi_string_alloc();
             model->preset_str = furi_string_alloc();
             model->key_str = furi_string_alloc();
+            model->icon_int_ant = icon_animation_alloc(&A_SubGhz_Internal_ant);
+            view_tie_icon_animation(subghz_transmitter->view, model->icon_int_ant);
+            model->icon_ext_ant = icon_animation_alloc(&A_SubGhz_External_ant);
+            view_tie_icon_animation(subghz_transmitter->view, model->icon_ext_ant);
         },
         true);
     return subghz_transmitter;
@@ -196,6 +232,8 @@ void subghz_view_transmitter_free(SubGhzViewTransmitter* subghz_transmitter) {
             furi_string_free(model->frequency_str);
             furi_string_free(model->preset_str);
             furi_string_free(model->key_str);
+            icon_animation_free(model->icon_int_ant);
+            icon_animation_free(model->icon_ext_ant);
         },
         true);
     view_free(subghz_transmitter->view);
