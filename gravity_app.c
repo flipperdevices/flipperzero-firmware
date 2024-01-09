@@ -105,6 +105,10 @@ GravityApp* gravity_app_alloc() {
     app->settings_mac_bytes = byte_input_alloc();
     view_dispatcher_add_view(app->view_dispatcher, Gravity_AppViewSettingsMac,
             byte_input_get_view(app->settings_mac_bytes));
+    /* Generic popup that can be reused */
+    app->popup = popup_alloc();
+    view_dispatcher_add_view(app->view_dispatcher, Gravity_AppViewPopup,
+            popup_get_view(app->popup));
 
     for (int j = 0; j < GRAVITY_MENU_COUNT; ++j) {
         for(int i = 0; i < MAX_MENU_ITEMS; ++i) {
@@ -163,6 +167,7 @@ void gravity_app_free(GravityApp* app) {
     furi_string_free(app->text_box_store);
     uart_text_input_free(app->text_input);
     byte_input_free(app->settings_mac_bytes);
+    popup_free(app->popup);
 
     // View dispatcher
     view_dispatcher_free(app->view_dispatcher);
