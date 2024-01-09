@@ -111,7 +111,7 @@ enum PurgeMenuItems {
 char *strToken(char *cmdLine, char sep, int tokenNum);
 bool mac_string_to_bytes(char *strMac, uint8_t *bMac);
 bool mac_bytes_to_string(uint8_t *bMac, char *strMac);
-bool syncProcessResponse(GravityApp *app);
+bool syncProcessResponse(GravityApp *app, bool syncFromFile);
 
 struct GravityApp {
     Gui* gui;

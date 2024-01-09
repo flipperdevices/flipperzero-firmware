@@ -205,7 +205,7 @@ bool load_settings(GravityApp* app) {
     memset(app->syncBuffer, '\0', SYNC_BUFFER_SIZE);
     app->syncBufLen = bytesRead;
     strncpy((char*)app->syncBuffer, buffer, SYNC_BUFFER_SIZE);
-    syncProcessResponse(app);
+    syncProcessResponse(app, true);
 
     close_file(file);
     /* Another nod to the person with the insane compiler */

@@ -41,12 +41,13 @@ bool syncNextToken(uint8_t **syncString, GravitySyncItem *tokenItem, char *token
     ALL OTHERS: set
    Where appropriate, replace "GET" menuItem options with the current value.
 */
-bool syncProcessResponse(GravityApp *app) {
+bool syncProcessResponse(GravityApp *app, bool syncFromFile) {
     uint8_t *nextToken = app->syncBuffer;
     int tokenInt;
     GravitySyncItem tokenItem = 0;
     char tokenValue[18] = "";
     char *newGet = NULL;
+    char command[128] = ""; // TODO: Analysis of commands, reduce array size to that required
 
     /* Skip over any extraneous data */
     while (nextToken[0] != '(' && nextToken[0] != '\0') {
@@ -62,12 +63,15 @@ bool syncProcessResponse(GravityApp *app) {
                 switch (status) {
                     case HOP_STATUS_ON:
                         newStatus = OPTIONS_HOP_ON;
+                        strcpy(command, "hop on");
                         break;
                     case HOP_STATUS_OFF:
                         newStatus = OPTIONS_HOP_OFF;
+                        strcpy(command, "hop off");
                         break;
                     case HOP_STATUS_DEFAULT:
                         newStatus = OPTIONS_HOP_DEFAULT;
+                        strcpy(command, "hop default");
                         break;
                 }
                 app->selected_menu_options[GRAVITY_MENU_SETTINGS][SETTINGS_MENU_HOP_STATUS] = newStatus;
@@ -84,6 +88,8 @@ bool syncProcessResponse(GravityApp *app) {
                     break;
                 }
                 strcpy(newGet, tokenValue);
+                strcpy(command, "set ssid_len_min ");
+                strcat(command, tokenValue);
                 settings[SETTINGS_MENU_SSID_MIN].options_menu[OPTIONS_SSID_MIN_GET] = newGet;
                 break;
             case GRAVITY_SYNC_SSID_MAX:
@@ -97,6 +103,8 @@ bool syncProcessResponse(GravityApp *app) {
                     break;
                 }
                 strcpy(newGet, tokenValue);
+                strcpy(command, "set ssid_len_max ");
+                strcat(command, tokenValue);
                 settings[SETTINGS_MENU_SSID_MAX].options_menu[OPTIONS_SSID_MAX_GET] = newGet;
                 break;
             case GRAVITY_SYNC_SSID_COUNT:
@@ -110,16 +118,22 @@ bool syncProcessResponse(GravityApp *app) {
                     break;
                 }
                 strcpy(newGet, tokenValue);
+                strcpy(command, "set ssid_len_max ");
+                strcat(command, tokenValue);
                 settings[SETTINGS_MENU_SSID_DEFAULT].options_menu[OPTIONS_SSID_DEFAULT_GET] = newGet;
                 break;
             case GRAVITY_SYNC_CHANNEL:
                 // set channel
                 app->channel = strtol(tokenValue, NULL, 10);
                 app->selected_menu_options[GRAVITY_MENU_SETTINGS][SETTINGS_MENU_CHANNEL] = app->channel;
+                strcpy(command, "set channel ");
+                strcat(command, tokenValue);
                 break;
             case GRAVITY_SYNC_MAC: ;
                 // set MAC
                 mac_string_to_bytes(tokenValue, app->mac_bytes);
+                strcpy(command, "set mac ");
+                strcat(command, tokenValue);
                 break;
             case GRAVITY_SYNC_ATTACK_MILLIS:
                 /* If 'get' label has already been replaced by sync, free that memory */
@@ -132,17 +146,22 @@ bool syncProcessResponse(GravityApp *app) {
                     break;
                 }
                 strcpy(newGet, tokenValue);
+                strcpy(command, "set mac ");
+                strcat(command, tokenValue);
                 settings[SETTINGS_MENU_ATTACK_MILLIS].options_menu[OPTIONS_ATTACK_MILLIS_GET] = newGet;
                 break;
             case GRAVITY_SYNC_MAC_RAND:
                 // set value
                 tokenInt = strtol(tokenValue, NULL, 10);
+                strcpy(command, "set mac_rand ");
                 if ((bool)tokenInt) {
                     app->selected_menu_options[GRAVITY_MENU_SETTINGS][SETTINGS_MENU_MAC_RAND] = OPTIONS_MAC_RAND_ON;
                     app->mac_rand = true;
+                    strcat(command, "on");
                 } else {
                     app->selected_menu_options[GRAVITY_MENU_SETTINGS][SETTINGS_MENU_MAC_RAND] = OPTIONS_MAC_RAND_OFF;
                     app->mac_rand = false;
+                    strcat(command, "off");
                 }
                 break;
             case GRAVITY_SYNC_PKT_EXPIRY:
@@ -156,6 +175,8 @@ bool syncProcessResponse(GravityApp *app) {
                     break;
                 }
                 strcpy(newGet, tokenValue);
+                strcpy(command, "set pkt_expiry ");
+                strcat(command, tokenValue);
                 settings[SETTINGS_MENU_PKT_EXPIRY].options_menu[OPTIONS_PKT_EXPIRY_GET] = newGet;
                 break;
             case GRAVITY_SYNC_HOP_MODE:
@@ -165,9 +186,11 @@ bool syncProcessResponse(GravityApp *app) {
                 switch (tokenInt) {
                     case HOP_MODE_SEQUENTIAL:
                         currentHopMode = OPTIONS_HOP_MODE_SEQUENTIAL;
+                        strcpy(command, "hop sequential");
                         break;
                     case HOP_MODE_RANDOM:
                         currentHopMode = OPTIONS_HOP_MODE_RANDOM;
+                        strcpy(command, "hop random");
                         break;
                     default:
                         // TODO: Error
@@ -179,12 +202,15 @@ bool syncProcessResponse(GravityApp *app) {
             case GRAVITY_SYNC_DICT_DISABLED:
                 // set
                 tokenInt = strtol(tokenValue, NULL, 10);
+                strcpy(command, "set scramble_words ");
                 bool scrambled = (bool)tokenInt;
                 int newVal;
                 if (scrambled) {
                     newVal = OPTIONS_DICT_CHARS;
+                    strcat(command, "on");
                 } else {
                     newVal = OPTIONS_DICT_WORDS;
+                    strcat(command, "off");
                 }
                 app->dict_disabled = scrambled;
                 app->selected_menu_options[GRAVITY_MENU_SETTINGS][SETTINGS_MENU_DICT_DISABLE] = newVal;
@@ -213,6 +239,8 @@ bool syncProcessResponse(GravityApp *app) {
                 } else {
                     app->selected_menu_options[GRAVITY_MENU_PURGE][PURGE_MENU_UNNAMED_ON] = OPTIONS_PURGE_OFF;
                 }
+                strcpy(command, "set ble_purge_strat ");
+                strcat(command, tokenValue);
                 break;
             case GRAVITY_SYNC_PURGE_RSSI_MAX:
                 /* This can be set to any value but Flipper offers discrete values. Find the nearest
@@ -232,6 +260,8 @@ bool syncProcessResponse(GravityApp *app) {
                     --rssiIdx;
                 }
                 app->selected_menu_options[GRAVITY_MENU_PURGE][PURGE_MENU_RSSI] = rssiIdx;
+                strcpy(command, "set ble_purge_max_rssi ");
+                strcat(command, tokenValue);
                 break;
             case GRAVITY_SYNC_PURGE_AGE_MIN:
                 /* This can be set to any value but Flipper offers discrete values. Find the nearest
@@ -248,11 +278,15 @@ bool syncProcessResponse(GravityApp *app) {
                     ageIdx = 0;
                 }
                 app->selected_menu_options[GRAVITY_MENU_PURGE][PURGE_MENU_AGE] = ageIdx;
+                strcpy(command, "set ble_purge_min_age ");
+                strcat(command, tokenValue);
                 break;
             default:
                 // display modal error
+                return false;
                 break;
         }
+        gravity_uart_tx((uint8_t *)command, strlen(command));
     }
     return true;
 }
@@ -325,7 +359,7 @@ void gravity_sync_rx_data_cb(uint8_t* buf, size_t len, void* context) {
         } else {
              app->syncComplete = true;
              /* Process sync elements */
-             if (!syncProcessResponse(app)) {
+             if (!syncProcessResponse(app, false)) {
                  // TODO: Display modal dialogue reporting failure
              }
              memset(app->syncBuffer, '\0', SYNC_BUFFER_SIZE);
