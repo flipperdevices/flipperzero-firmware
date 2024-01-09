@@ -1,8 +1,6 @@
 # FlipperZero_NFC_Playlist:
 The idea behind this app is to allow for you to test multiple copies of NFC's at once as a bulk test
 
-At the moment this project is very basic and just reads the cards from the txt file and emulates the NFC's but this is very early days of development and i wanted to make a basic version of my idea first
-
 ## How it works (As of the moment will change):
 When starting the app you are greeted by a select file option where you choose the playlist you wanna run.
 
