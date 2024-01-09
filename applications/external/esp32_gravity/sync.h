@@ -8,7 +8,7 @@
 #include "gravity_app_i.h"
 
 bool syncNextToken(uint8_t** syncString, GravitySyncItem* tokenItem, char* tokenValue);
-bool syncProcessResponse(GravityApp* app);
+bool syncProcessResponse(GravityApp* app, bool syncFromFile);
 void gravity_sync_rx_data_cb(uint8_t* buf, size_t len, void* context);
 void syncCleanup();
 void do_sync(GravityApp* app);

@@ -11,6 +11,7 @@
 #include <gui/modules/text_box.h>
 #include <gui/modules/variable_item_list.h>
 #include <gui/modules/byte_input.h>
+#include <gui/modules/popup.h>
 #include "uart_text_input.h"
 #include "sync.h"
 #include "storage.h"
@@ -109,7 +110,7 @@ enum PurgeMenuItems {
 char* strToken(char* cmdLine, char sep, int tokenNum);
 bool mac_string_to_bytes(char* strMac, uint8_t* bMac);
 bool mac_bytes_to_string(uint8_t* bMac, char* strMac);
-bool syncProcessResponse(GravityApp* app);
+bool syncProcessResponse(GravityApp* app, bool syncFromFile);
 
 struct GravityApp {
     Gui* gui;
@@ -127,6 +128,7 @@ struct GravityApp {
     VariableItemList *packets_deauth_menu_list, *packets_fuzz_menu_list;
     VariableItemList *help_info_menu_list, *attacks_mana_menu_list, *purge_menu_list;
     ByteInput* settings_mac_bytes;
+    Popup* popup;
 
     GravityUart* uart;
     int selected_menu_items[GRAVITY_MENU_COUNT];
@@ -171,6 +173,7 @@ typedef enum {
     Gravity_AppViewHelpMenu,
     Gravity_AppViewHelpInfoMenu,
     Gravity_AppViewPurgeMenu,
+    Gravity_AppViewPopup,
 } Gravity_AppView;
 
 // For each command, define whether additional arguments are needed
