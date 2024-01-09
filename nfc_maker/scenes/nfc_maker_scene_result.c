@@ -364,8 +364,8 @@ void nfc_maker_scene_result_on_enter(void* context) {
         popup_set_icon(popup, 36, 5, &I_DolphinDone_80x58);
         popup_set_header(popup, "Saved!", 13, 22, AlignLeft, AlignBottom);
     } else {
-        popup_set_icon(popup, 36, 5, &I_DolphinDone_80x58);
-        popup_set_header(popup, "Saved!", 13, 22, AlignLeft, AlignBottom);
+        popup_set_icon(popup, 69, 15, &I_WarningDolphinFlip_45x42);
+        popup_set_header(popup, "Error!", 13, 22, AlignLeft, AlignBottom);
     }
     popup_set_timeout(popup, 1500);
     popup_set_context(popup, app);
