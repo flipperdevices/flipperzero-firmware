@@ -37,6 +37,7 @@ typedef enum {
     SDQSlaveErrorResetInProgress,
     SDQSlaveErrorPresenceConflict,
     SDQSlaveErrorInvalidCommand,
+    SDQSlaveErrorBitReadTiming,
     SDQSlaveErrorTimeout,
 } SDQSlaveError;
 
@@ -44,7 +45,7 @@ typedef struct SDQDevice SDQDevice;
 typedef struct SDQSlave SDQSlave;
 
 typedef bool (*SDQSlaveResetCallback)(bool is_short, void* context);
-typedef bool (*SDQSlaveCommandCallback)(uint8_t command, void* context);
+typedef bool (*SDQSlaveCommandCallback)(uint8_t* command, void* context);
 typedef void (*SDQSlaveResultCallback)(void* context);
 
 struct SDQSlave* sdq_slave_alloc(const GpioPin* gpio_pin);
@@ -57,8 +58,8 @@ void sdq_slave_set_reset_callback(SDQSlave* bus, SDQSlaveResetCallback callback,
 void sdq_slave_set_command_callback(SDQSlave* bus, SDQSlaveCommandCallback callback, void* context);
 void sdq_slave_set_result_callback(SDQSlave* bus, SDQSlaveResultCallback result_cb, void* context);
 
-bool sdq_slave_send(SDQSlave* bus, const uint8_t* data, size_t data_size);
-bool sdq_slave_receive(SDQSlave* bus, uint8_t* data, size_t data_size);
+bool sdq_slave_send(SDQSlave* bus, const uint8_t data[], size_t data_size);
+bool sdq_slave_receive(SDQSlave* bus, uint8_t data[], size_t data_size);
 
 #ifdef __cplusplus
 }
