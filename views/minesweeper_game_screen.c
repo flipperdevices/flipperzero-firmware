@@ -76,6 +76,7 @@ typedef struct {
     uint16_t flags_left;
     uint32_t start_tick;
     FuriString* info_str;
+    bool ensure_solvable_board;
     bool is_making_first_move;
     bool is_holding_down_button;
 } MineSweeperGameScreenModel;
@@ -135,7 +136,8 @@ static void mine_sweeper_game_screen_set_board_information(
         MineSweeperGameScreen* instance,
         const uint8_t width,
         const uint8_t height,
-        const uint8_t difficulty);
+        const uint8_t difficulty,
+        bool is_solvable);
 
 static bool try_clear_surrounding_tiles(MineSweeperGameScreenModel* model);
 
@@ -280,7 +282,12 @@ static void setup_board(MineSweeperGameScreen* instance) {
  *
  *  Returns true if it is unambiguously solvable.
  */
-static bool check_board_with_verifier(MineSweeperTile* board, const uint8_t board_width, const uint8_t board_height, uint16_t total_mines) {
+static bool check_board_with_verifier(
+        MineSweeperTile* board,
+        const uint8_t board_width,
+        const uint8_t board_height,
+        uint16_t total_mines) {
+
     furi_assert(board);
 
     // Double ended queue used to track edges.
@@ -307,8 +314,6 @@ static bool check_board_with_verifier(MineSweeperTile* board, const uint8_t boar
                                                              
     //While we have valid edges to check and have not solved the board
     while (!is_solvable && point_deq_size(deq) > 0) {
-
-        uint16_t curr_iter = 0;
 
         bool is_stuck = true; // This variable will track if any flag was placed for any edge to see if we are stuck
                               
@@ -594,7 +599,8 @@ static void mine_sweeper_game_screen_set_board_information(
         MineSweeperGameScreen* instance,
         uint8_t width,
         uint8_t height,
-        uint8_t difficulty) {
+        uint8_t difficulty,
+        bool is_solvable) {
 
     furi_assert(instance);
 
@@ -612,6 +618,7 @@ static void mine_sweeper_game_screen_set_board_information(
             model->board_width = width;
             model->board_height = height;
             model->board_difficulty = difficulty;
+            model->ensure_solvable_board = is_solvable;
         },
         true
     );
@@ -1188,11 +1195,14 @@ static bool mine_sweeper_game_screen_view_end_input_callback(InputEvent* event, 
                             memset(board_t, 0, memsz);
                             memcpy(board_t, model->board, sizeof(MineSweeperTile) * (model->board_width * model->board_height));
 
-                            is_valid_board = check_board_with_verifier(board_t, model->board_width, model->board_height, model->mines_left);
+                            is_valid_board = check_board_with_verifier(
+                                                            board_t,
+                                                            model->board_width,
+                                                            model->board_height,
+                                                            model->mines_left);
                         
-                            iter++;
 
-                        } while (true & !is_valid_board);  //Change first variable in boolean expression to enable random startup
+                        } while (model->ensure_solvable_board && !is_valid_board);
 
                         consumed = true;
                         break;
@@ -1451,7 +1461,7 @@ static bool mine_sweeper_game_screen_view_play_input_callback(InputEvent* event,
     return consumed;
 }
 
-MineSweeperGameScreen* mine_sweeper_game_screen_alloc(uint8_t width, uint8_t height, uint8_t difficulty) {
+MineSweeperGameScreen* mine_sweeper_game_screen_alloc(uint8_t width, uint8_t height, uint8_t difficulty, bool ensure_solvable) {
     MineSweeperGameScreen* mine_sweeper_game_screen = (MineSweeperGameScreen*)malloc(sizeof(MineSweeperGameScreen));
 
     mine_sweeper_game_screen->view = view_alloc();
@@ -1485,7 +1495,7 @@ MineSweeperGameScreen* mine_sweeper_game_screen_alloc(uint8_t width, uint8_t hei
     mine_sweeper_game_screen_reset_clock(mine_sweeper_game_screen);
 
     // We need to initize board width and height before setup
-    mine_sweeper_game_screen_set_board_information(mine_sweeper_game_screen, width, height, difficulty);
+    mine_sweeper_game_screen_set_board_information(mine_sweeper_game_screen, width, height, difficulty, ensure_solvable);
 
     // Here we are going to generate a valid map for the player 
     bool is_valid_board = false;
@@ -1515,7 +1525,7 @@ MineSweeperGameScreen* mine_sweeper_game_screen_alloc(uint8_t width, uint8_t hei
     
         is_valid_board = check_board_with_verifier(board_t, board_width, board_height, num_mines);
 
-    } while (!is_valid_board);  //Change first variable in boolean expression to enable random startup
+    } while (ensure_solvable && !is_valid_board);
 
     return mine_sweeper_game_screen;
 }
@@ -1540,13 +1550,13 @@ void mine_sweeper_game_screen_free(MineSweeperGameScreen* instance) {
 
 // This function should be called whenever you want to reset the game state
 // This should NOT be called in the on_exit in the game scene
-void mine_sweeper_game_screen_reset(MineSweeperGameScreen* instance, uint8_t width, uint8_t height, uint8_t difficulty) {
+void mine_sweeper_game_screen_reset(MineSweeperGameScreen* instance, uint8_t width, uint8_t height, uint8_t difficulty, bool ensure_solvable) {
     furi_assert(instance);
     
     instance->input_callback = NULL;
     
     // We need to initize board width and height before setup
-    mine_sweeper_game_screen_set_board_information(instance, width, height, difficulty);
+    mine_sweeper_game_screen_set_board_information(instance, width, height, difficulty, ensure_solvable);
 
     mine_sweeper_game_screen_reset_clock(instance);
 
@@ -1578,7 +1588,7 @@ void mine_sweeper_game_screen_reset(MineSweeperGameScreen* instance, uint8_t wid
     
         is_valid_board = check_board_with_verifier(board_t, board_width, board_height, num_mines);
 
-    } while (true && !is_valid_board);  //Change first variable in boolean expression to enable random startup
+    } while (ensure_solvable && !is_valid_board);
 
 }
 

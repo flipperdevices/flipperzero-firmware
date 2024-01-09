@@ -56,6 +56,7 @@ bool minesweeper_scene_confirmation_screen_on_event(void* context, SceneManagerE
                 app->settings_info.board_width  = app->t_settings_info.board_width;
                 app->settings_info.board_height = app->t_settings_info.board_height;
                 app->settings_info.difficulty   = app->t_settings_info.difficulty;
+                app->settings_info.ensure_solvable_board = app->t_settings_info.ensure_solvable_board;
 
                 mine_sweeper_save_settings(app);
 
@@ -68,7 +69,8 @@ bool minesweeper_scene_confirmation_screen_on_event(void* context, SceneManagerE
                         app->game_screen,
                         app->settings_info.board_width,
                         app->settings_info.board_height,
-                        app->settings_info.difficulty);
+                        app->settings_info.difficulty,
+                        app->settings_info.ensure_solvable_board);
 
                 // Go to reset game view
                 scene_manager_search_and_switch_to_another_scene(app->scene_manager, MineSweeperSceneGameScreen); 

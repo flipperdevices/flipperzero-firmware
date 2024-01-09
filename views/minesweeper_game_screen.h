@@ -43,7 +43,7 @@ typedef bool (*GameScreenInputCallback)(InputEvent* event, void* context);
  *
  * @return      MineSweeperGameScreen* instance 
  */
-MineSweeperGameScreen* mine_sweeper_game_screen_alloc(uint8_t width, uint8_t height, uint8_t difficulty);
+MineSweeperGameScreen* mine_sweeper_game_screen_alloc(uint8_t width, uint8_t height, uint8_t difficulty, bool ensure_solvable);
 
 /** Deinitialize and free Start Screen view
  *
@@ -62,7 +62,8 @@ void mine_sweeper_game_screen_reset(
         MineSweeperGameScreen* instance,
         uint8_t width,
         uint8_t height,
-        uint8_t difficulty);
+        uint8_t difficulty,
+        bool ensure_solvable);
 
 /** Reset MineSweeperGameScreen clock 
  *

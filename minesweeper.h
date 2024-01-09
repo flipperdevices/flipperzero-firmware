@@ -28,11 +28,13 @@
 // This is a helper struct for the settings view/scene
 typedef struct {
     uint8_t board_width, board_height, difficulty;
+    bool ensure_solvable_board;
     FuriString* width_str;
     FuriString* height_str;
     VariableItem* difficulty_item;
     VariableItem* width_item;
     VariableItem* height_item;
+    VariableItem* solvable_item;
 } MineSweeperAppSettings;
 
 // Main MineSweeperApp
