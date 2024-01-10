@@ -1,1 +1,0 @@
-APPLICATION_NAME="flipper_hello_app"
