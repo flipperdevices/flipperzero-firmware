@@ -6,10 +6,10 @@
 
 #define TAG "BleExtraBeacon"
 
-#define GAP_MS_TO_SCAN_INTERVAL(x) (uint16_t)((x) / 0.625)
+#define GAP_MS_TO_SCAN_INTERVAL(x) ((uint16_t)((x) / 0.625))
 
 // Also used as an indicator of whether the beacon had ever been configured
-#define GAP_MIN_ADV_INTERVAL_MS 20
+#define GAP_MIN_ADV_INTERVAL_MS (20)
 
 typedef struct {
     GapExtraBeaconConfig last_config;
