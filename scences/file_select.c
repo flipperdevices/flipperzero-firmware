@@ -15,7 +15,7 @@ void nfc_playlist_file_select_scene_on_enter(void* context) {
       true,
       true,
       &I_sub1_10px,
-      false);
+      true);
    view_dispatcher_switch_to_view(nfc_playlist->view_dispatcher, NfcPlaylistView_FileSelect);
    file_browser_set_callback(nfc_playlist->file_browser, nfc_playlist_file_select_menu_callback, nfc_playlist);
    file_browser_start(nfc_playlist->file_browser, nfc_playlist->base_file_path);
