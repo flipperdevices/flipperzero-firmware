@@ -693,7 +693,6 @@ static bool try_clear_surrounding_tiles(MineSweeperGameScreenModel* model) {
                 model->board[pos].tile_state != MineSweeperGameScreenTileStateCleared) {
                 uint16_t tiles_cleared = bfs_tile_clear(model->board, model->board_width, model->board_height, dx, dy);
                 model->tiles_left -= tiles_cleared;
-                FURI_LOG_D(MS_DEBUG_TAG, "Tiles cleared: %d,\tTiles Left: %d", tiles_cleared, model->tiles_left);
             }
 
         }
@@ -1275,7 +1274,6 @@ static bool mine_sweeper_game_screen_view_play_input_callback(InputEvent* event,
                                                     (uint16_t)model->curr_pos.y_abs);
 
                         model->tiles_left -= tiles_cleared;
-                        FURI_LOG_D(MS_DEBUG_TAG, "Tiles cleared: %d,\tTiles Left: %d", tiles_cleared, model->tiles_left);
 
                         // Check win condition
                         if (model->mines_left == 0 && model->flags_left == 0 && model->tiles_left == 0) {
