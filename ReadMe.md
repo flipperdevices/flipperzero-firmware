@@ -29,8 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0110-0215-0.93.9-aeef6a7](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-01-10 02:15 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-01-10 02:15 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-01-10 11:15 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-01-10 11:15 EST`
 - [Fixed many memory leaks (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/5fed20065ce527a643999eab213c24a186c5722c) with thanks to [Fixed memory leak #13 (By squee72564)](https://github.com/leedave/flipper-zero-fap-boilerplate/pull/13)
 - Updated: [Color Guess v1.3 (By leedave)](https://github.com/leedave/Leeds-Flipper-Zero-Applications)
 - Updated: [Cross Remote v1.1 (By leedave)](https://github.com/leedave/flipper-zero-cross-remote)
@@ -47,6 +47,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Added: [Gas Sensor v0.1 (By iancohee)](https://github.com/iancohee/gas_sensor_fap) `Req: BME680 / SGP30`
 - Added: [Crossy Road v1.0 (By Mikael098)](https://github.com/Mikael098/CrossyRoad-FlipperZero-)
 - Updated: [F0 Minesweeper v0.1 (By squee72564)](https://github.com/squee72564/F0_Minesweeper_Fap)
+- OFW: [ufbt: fixed generated project paths on Windows #3339 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/3339)
 
 ## IN THIS BRANCH:
 
@@ -151,6 +152,9 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Mifare Fuzzer v1.3 (By spheeere98)](https://github.com/spheeere98/mifare_fuzzer) [Card emulation for Mifare Fuzzer #38 (By Kondenko)](https://github.com/xMasterX/all-the-plugins/pull/38)
 - Updated: [ShapShup v1.1 (By derskythe)](https://github.com/derskythe/flipperzero-shapshup)
 - Updated: [PicoPass (iClass) v1.12 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass) [Rework. Part 1 #68 (By gornekich)](https://github.com/flipperdevices/flipperzero-good-faps/pull/68) [Hopefully fix name buffer size issues (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/9058c0c6a9980f84f6436673f9d3fbbc82cb3f81) [Save partial #85 (By bettse)](https://github.com/flipperdevices/flipperzero-good-faps/pull/85) [More info view (raw bytes) #86 (By bettse)](https://github.com/flipperdevices/flipperzero-good-faps/pull/86) [detect config card #87 (By bettse)](https://github.com/flipperdevices/flipperzero-good-faps/pull/87) [add additional keys to elite dict #89 (By kitsunehunter)](https://github.com/flipperdevices/flipperzero-good-faps/pull/89) [config SE problem #90 (By bettse)](https://github.com/flipperdevices/flipperzero-good-faps/pull/90) [handle NR-MAC auth for legacy cards #95(By bettse)](https://github.com/flipperdevices/flipperzero-good-faps/pull/95) [Create seader directory if needed #101](https://github.com/flipperdevices/flipperzero-good-faps/pull/101) [Add support for non-secure cards #106 (By nvx)](https://github.com/flipperdevices/flipperzero-good-faps/pull/106)
+- OFW: [Fix MyKey production date parsing #3332 (By augustozanellato)](https://github.com/flipperdevices/flipperzero-firmware/pull/3332)
+- OFW: [NFC: parsers minor cleanup #3329 (By Leptopt1los)](https://github.com/flipperdevices/flipperzero-firmware/pull/3329)
+- OFW: [Ntag success write freeze when not saved card #3354 (By RebornedBrain)](https://github.com/flipperdevices/flipperzero-firmware/pull/3354)
 
 <a name="release">
 
