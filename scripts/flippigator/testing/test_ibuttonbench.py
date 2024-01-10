@@ -59,7 +59,14 @@ class TestIbuttonBench(BaseCase):
                 "Save",
                 "Emulate",
             ]
-            assert nav_reader.get_menu_list(ref = nav_reader.get_ref_from_list(menu_ref, nav_reader.font_haxrcorp_4089, invert = 1)) == menu_ref, "Key actions menu is wrong"
+            assert (
+                nav_reader.get_menu_list(
+                    ref=nav_reader.get_ref_from_list(
+                        menu_ref, nav_reader.font_haxrcorp_4089, invert=1
+                    )
+                )
+                == menu_ref
+            ), "Key actions menu is wrong"
         relay.reset()
 
     def test_metakom(self, nav_reader, nav_key, relay):
@@ -110,7 +117,14 @@ class TestIbuttonBench(BaseCase):
                 "Save",
                 "Emulate",
             ]
-            assert nav_reader.get_menu_list(ref = nav_reader.get_ref_from_list(menu_ref, nav_reader.font_haxrcorp_4089, invert = 1)) == menu_ref, "Key actions menu is wrong"
+            assert (
+                nav_reader.get_menu_list(
+                    ref=nav_reader.get_ref_from_list(
+                        menu_ref, nav_reader.font_haxrcorp_4089, invert=1
+                    )
+                )
+                == menu_ref
+            ), "Key actions menu is wrong"
         relay.reset()
 
     def test_ds1992(self, nav_reader, nav_key, relay):
@@ -164,7 +178,14 @@ class TestIbuttonBench(BaseCase):
                 "Write Blank",
                 "Write Copy",
             ]
-            assert nav_reader.get_menu_list(ref = nav_reader.get_ref_from_list(menu_ref, nav_reader.font_haxrcorp_4089, invert = 1)) == menu_ref, "Key actions menu is wrong"
+            assert (
+                nav_reader.get_menu_list(
+                    ref=nav_reader.get_ref_from_list(
+                        menu_ref, nav_reader.font_haxrcorp_4089, invert=1
+                    )
+                )
+                == menu_ref
+            ), "Key actions menu is wrong"
         relay.reset()
 
     def test_ds1996(self, nav_reader, nav_key, relay):
@@ -217,7 +238,14 @@ class TestIbuttonBench(BaseCase):
                 "View Data",
                 "Write Copy",
             ]
-            assert nav_reader.get_menu_list(ref = nav_reader.get_ref_from_list(menu_ref, nav_reader.font_haxrcorp_4089, invert = 1)) == menu_ref, "Key actions menu is wrong"
+            assert (
+                nav_reader.get_menu_list(
+                    ref=nav_reader.get_ref_from_list(
+                        menu_ref, nav_reader.font_haxrcorp_4089, invert=1
+                    )
+                )
+                == menu_ref
+            ), "Key actions menu is wrong"
         relay.reset()
 
     def test_ds1971(self, nav_reader, nav_key, relay):
@@ -270,5 +298,12 @@ class TestIbuttonBench(BaseCase):
                 "View Data",
                 "Write Copy",
             ]
-            assert nav_reader.get_menu_list(ref = nav_reader.get_ref_from_list(menu_ref, nav_reader.font_haxrcorp_4089, invert = 1)) == menu_ref, "Key actions menu is wrong"
+            assert (
+                nav_reader.get_menu_list(
+                    ref=nav_reader.get_ref_from_list(
+                        menu_ref, nav_reader.font_haxrcorp_4089, invert=1
+                    )
+                )
+                == menu_ref
+            ), "Key actions menu is wrong"
         relay.reset()

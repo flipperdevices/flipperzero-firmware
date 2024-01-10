@@ -46,9 +46,15 @@ class TestNfcBench(BaseCase):
         while "SkipOk" in state:
             state = nav.get_current_state()
             nav.press_ok()
-        state = nav.get_current_state(ref = nav.get_ref_from_string("Mifare Classic 1K", nav.font_helvB08, 0))
+        state = nav.get_current_state(
+            ref=nav.get_ref_from_string("Mifare Classic 1K", nav.font_helvB08, 0)
+        )
         assert len(state) > 0, "Result of reading reference card is fail"
-        state = nav.get_current_state(ref = nav.get_ref_from_string("UID: 04 4D 67 32 13 5C 80", nav.font_haxrcorp_4089, 0))
+        state = nav.get_current_state(
+            ref=nav.get_ref_from_string(
+                "UID: 04 4D 67 32 13 5C 80", nav.font_haxrcorp_4089, 0
+            )
+        )
         assert len(state) > 0, "Result of reading reference card is fail"
         nav.press_right()
         menu_ref = [
@@ -57,12 +63,23 @@ class TestNfcBench(BaseCase):
             "Detect Reader",
             "Info",
         ]
-        assert nav.get_menu_list(ref = nav.get_ref_from_list(menu_ref, nav.font_haxrcorp_4089, invert = 1)) == menu_ref, "NFC card menu is wrong"
+        assert (
+            nav.get_menu_list(
+                ref=nav.get_ref_from_list(menu_ref, nav.font_haxrcorp_4089, invert=1)
+            )
+            == menu_ref
+        ), "NFC card menu is wrong"
         nav.go_to("Emulate")
         nav.press_ok()
-        state = nav.get_current_state(ref = nav.get_ref_from_string("Emulating", nav.font_helvB08, 0))
+        state = nav.get_current_state(
+            ref=nav.get_ref_from_string("Emulating", nav.font_helvB08, 0)
+        )
         assert len(state) > 0, "Emulation failed"
-        state = nav.get_current_state(ref = nav.get_ref_from_string("Mifare Classic 1K", nav.font_haxrcorp_4089, 0, no_space = 1))
+        state = nav.get_current_state(
+            ref=nav.get_ref_from_string(
+                "Mifare Classic 1K", nav.font_haxrcorp_4089, 0, no_space=1
+            )
+        )
         assert len(state) > 0, "Emulation failed"
 
         nav.press_back()
@@ -79,7 +96,6 @@ class TestNfcBench(BaseCase):
         while "Saved!" in state:
             state = nav.get_current_state()
         nav.go_to_main_screen()
-
 
     def test_read_nfc_a_card(self, nav, gator, reader_nfc):
         with allure.step("Delete previous card, if possible"):
@@ -114,9 +130,13 @@ class TestNfcBench(BaseCase):
         while "SkipOk" in state:
             state = nav.get_current_state()
             nav.press_ok()
-        state = nav.get_current_state(ref = nav.get_ref_from_string("Mifare Classic 1K", nav.font_helvB08, 0))
+        state = nav.get_current_state(
+            ref=nav.get_ref_from_string("Mifare Classic 1K", nav.font_helvB08, 0)
+        )
         assert len(state) > 0, "Result of reading reference card is fail"
-        state = nav.get_current_state(ref = nav.get_ref_from_string("UID: 00 00 00 00", nav.font_haxrcorp_4089, 0))
+        state = nav.get_current_state(
+            ref=nav.get_ref_from_string("UID: 00 00 00 00", nav.font_haxrcorp_4089, 0)
+        )
         assert len(state) > 0, "Result of reading reference card is fail"
         nav.press_right()
         menu_ref = [
@@ -125,12 +145,23 @@ class TestNfcBench(BaseCase):
             "Detect Reader",
             "Info",
         ]
-        assert nav.get_menu_list(ref = nav.get_ref_from_list(menu_ref, nav.font_haxrcorp_4089, invert = 1)) == menu_ref, "NFC card menu is wrong"
+        assert (
+            nav.get_menu_list(
+                ref=nav.get_ref_from_list(menu_ref, nav.font_haxrcorp_4089, invert=1)
+            )
+            == menu_ref
+        ), "NFC card menu is wrong"
         nav.go_to("Emulate")
         nav.press_ok()
-        state = nav.get_current_state(ref = nav.get_ref_from_string("Emulating", nav.font_helvB08, 0))
+        state = nav.get_current_state(
+            ref=nav.get_ref_from_string("Emulating", nav.font_helvB08, 0)
+        )
         assert len(state) > 0, "Emulation failed"
-        state = nav.get_current_state(ref = nav.get_ref_from_string("Mifare Classic 1K", nav.font_haxrcorp_4089, 0, no_space = 1))
+        state = nav.get_current_state(
+            ref=nav.get_ref_from_string(
+                "Mifare Classic 1K", nav.font_haxrcorp_4089, 0, no_space=1
+            )
+        )
         assert len(state) > 0, "Emulation failed"
 
         nav.press_back()
@@ -147,7 +178,6 @@ class TestNfcBench(BaseCase):
         while "Saved!" in state:
             state = nav.get_current_state()
         nav.go_to_main_screen()
-
 
     def test_read_mifare_classic_4k_card(self, nav, gator, reader_nfc):
         with allure.step("Delete previous card, if possible"):
@@ -182,9 +212,13 @@ class TestNfcBench(BaseCase):
         while "SkipOk" in state:
             state = nav.get_current_state()
             nav.press_ok()
-        state = nav.get_current_state(ref = nav.get_ref_from_string("Mifare Classic 4K", nav.font_helvB08, 0))
+        state = nav.get_current_state(
+            ref=nav.get_ref_from_string("Mifare Classic 4K", nav.font_helvB08, 0)
+        )
         assert len(state) > 0, "Result of reading reference card is fail"
-        state = nav.get_current_state(ref = nav.get_ref_from_string("UID: 7A D6 7C 9D", nav.font_haxrcorp_4089, 0))
+        state = nav.get_current_state(
+            ref=nav.get_ref_from_string("UID: 7A D6 7C 9D", nav.font_haxrcorp_4089, 0)
+        )
         assert len(state) > 0, "Result of reading reference card is fail"
         nav.press_right()
         menu_ref = [
@@ -192,12 +226,23 @@ class TestNfcBench(BaseCase):
             "Emulate",
             "Info",
         ]
-        assert nav.get_menu_list(ref = nav.get_ref_from_list(menu_ref, nav.font_haxrcorp_4089, invert = 1)) == menu_ref, "NFC card menu is wrong"
+        assert (
+            nav.get_menu_list(
+                ref=nav.get_ref_from_list(menu_ref, nav.font_haxrcorp_4089, invert=1)
+            )
+            == menu_ref
+        ), "NFC card menu is wrong"
         nav.go_to("Emulate")
         nav.press_ok()
-        state = nav.get_current_state(ref = nav.get_ref_from_string("Emulating", nav.font_helvB08, 0))
+        state = nav.get_current_state(
+            ref=nav.get_ref_from_string("Emulating", nav.font_helvB08, 0)
+        )
         assert len(state) > 0, "Emulation failed"
-        state = nav.get_current_state(ref = nav.get_ref_from_string("Mifare Classic 4K", nav.font_haxrcorp_4089, 0, no_space = 1))
+        state = nav.get_current_state(
+            ref=nav.get_ref_from_string(
+                "Mifare Classic 4K", nav.font_haxrcorp_4089, 0, no_space=1
+            )
+        )
         assert len(state) > 0, "Emulation failed"
 
         nav.press_back()
@@ -214,7 +259,6 @@ class TestNfcBench(BaseCase):
         while "Saved!" in state:
             state = nav.get_current_state()
         nav.go_to_main_screen()
-
 
     def test_read_troika_card(self, nav, gator, reader_nfc):
         with allure.step("Delete previous card, if possible"):
@@ -240,11 +284,17 @@ class TestNfcBench(BaseCase):
             while "ReadingCardNFC" in state:
                 nav.logger.debug("ReadingCardNFC")
                 state = nav.get_current_state()
-        state = nav.get_current_state(ref = nav.get_ref_from_string("Troika", nav.font_helvB08, 0))
+        state = nav.get_current_state(
+            ref=nav.get_ref_from_string("Troika", nav.font_helvB08, 0)
+        )
         assert len(state) > 0, "Result of reading reference card is fail"
-        state = nav.get_current_state(ref = nav.get_ref_from_string("Num: 41202868", nav.font_haxrcorp_4089, 0))
+        state = nav.get_current_state(
+            ref=nav.get_ref_from_string("Num: 41202868", nav.font_haxrcorp_4089, 0)
+        )
         assert len(state) > 0, "Result of reading reference card is fail"
-        state = nav.get_current_state(ref = nav.get_ref_from_string("Balance: 1 RUR", nav.font_haxrcorp_4089, 0))
+        state = nav.get_current_state(
+            ref=nav.get_ref_from_string("Balance: 1 RUR", nav.font_haxrcorp_4089, 0)
+        )
         assert len(state) > 0, "Result of reading reference card is fail"
         nav.press_right()
         menu_ref = [
@@ -252,13 +302,24 @@ class TestNfcBench(BaseCase):
             "Emulate",
             "Info",
         ]
-        assert nav.get_menu_list(ref = nav.get_ref_from_list(menu_ref, nav.font_haxrcorp_4089, invert = 1)) == menu_ref, "NFC card menu is wrong"
+        assert (
+            nav.get_menu_list(
+                ref=nav.get_ref_from_list(menu_ref, nav.font_haxrcorp_4089, invert=1)
+            )
+            == menu_ref
+        ), "NFC card menu is wrong"
 
         nav.go_to("Emulate")
         nav.press_ok()
-        state = nav.get_current_state(ref = nav.get_ref_from_string("Emulating", nav.font_helvB08, 0))
+        state = nav.get_current_state(
+            ref=nav.get_ref_from_string("Emulating", nav.font_helvB08, 0)
+        )
         assert len(state) > 0, "Emulation failed"
-        state = nav.get_current_state(ref = nav.get_ref_from_string("Mifare Classic 1K", nav.font_haxrcorp_4089, 0, no_space = 1))
+        state = nav.get_current_state(
+            ref=nav.get_ref_from_string(
+                "Mifare Classic 1K", nav.font_haxrcorp_4089, 0, no_space=1
+            )
+        )
         assert len(state) > 0, "Emulation failed"
         nav.press_back()
 
@@ -294,9 +355,15 @@ class TestNfcBench(BaseCase):
             while "ReadingCardNFC" in state:
                 nav.logger.debug("ReadingCardNFC")
                 state = nav.get_current_state()
-        state = nav.get_current_state(ref = nav.get_ref_from_string("NTAG215", nav.font_helvB08, 0))
+        state = nav.get_current_state(
+            ref=nav.get_ref_from_string("NTAG215", nav.font_helvB08, 0)
+        )
         assert len(state) > 0, "Result of reading reference card is fail"
-        state = nav.get_current_state(ref = nav.get_ref_from_string("UID: 04 77 42 39 BA 07 CO", nav.font_haxrcorp_4089, 0))
+        state = nav.get_current_state(
+            ref=nav.get_ref_from_string(
+                "UID: 04 77 42 39 BA 07 CO", nav.font_haxrcorp_4089, 0
+            )
+        )
         assert len(state) > 0, "Result of reading reference card is fail"
         nav.press_right()
         menu_ref = [
@@ -305,13 +372,22 @@ class TestNfcBench(BaseCase):
             "Unlock",
             "Info",
         ]
-        assert nav.get_menu_list(ref = nav.get_ref_from_list(menu_ref, nav.font_haxrcorp_4089, invert = 1)) == menu_ref, "NFC card menu is wrong"
+        assert (
+            nav.get_menu_list(
+                ref=nav.get_ref_from_list(menu_ref, nav.font_haxrcorp_4089, invert=1)
+            )
+            == menu_ref
+        ), "NFC card menu is wrong"
 
         nav.go_to("Emulate")
         nav.press_ok()
-        state = nav.get_current_state(ref = nav.get_ref_from_string("Emulating", nav.font_helvB08, 0))
+        state = nav.get_current_state(
+            ref=nav.get_ref_from_string("Emulating", nav.font_helvB08, 0)
+        )
         assert len(state) > 0, "Emulation failed"
-        state = nav.get_current_state(ref = nav.get_ref_from_string("NTAG215", nav.font_haxrcorp_4089, 0))
+        state = nav.get_current_state(
+            ref=nav.get_ref_from_string("NTAG215", nav.font_haxrcorp_4089, 0)
+        )
         assert len(state) > 0, "Emulation failed"
         nav.press_back()
 
@@ -347,9 +423,15 @@ class TestNfcBench(BaseCase):
             while "ReadingCardNFC" in state:
                 nav.logger.debug("ReadingCardNFC")
                 state = nav.get_current_state()
-        state = nav.get_current_state(ref = nav.get_ref_from_string("Mifare Ultralight", nav.font_helvB08, 0))
+        state = nav.get_current_state(
+            ref=nav.get_ref_from_string("Mifare Ultralight", nav.font_helvB08, 0)
+        )
         assert len(state) > 0, "Result of reading reference card is fail"
-        state = nav.get_current_state(ref = nav.get_ref_from_string("UID: 04 40 BD BA 5C 48 80", nav.font_haxrcorp_4089, 0))
+        state = nav.get_current_state(
+            ref=nav.get_ref_from_string(
+                "UID: 04 40 BD BA 5C 48 80", nav.font_haxrcorp_4089, 0
+            )
+        )
         assert len(state) > 0, "Result of reading reference card is fail"
         nav.press_right()
         menu_ref = [
@@ -357,14 +439,25 @@ class TestNfcBench(BaseCase):
             "Emulate",
             "Info",
         ]
-        assert nav.get_menu_list(ref = nav.get_ref_from_list(menu_ref, nav.font_haxrcorp_4089, invert = 1)) == menu_ref, "NFC card menu is wrong"
+        assert (
+            nav.get_menu_list(
+                ref=nav.get_ref_from_list(menu_ref, nav.font_haxrcorp_4089, invert=1)
+            )
+            == menu_ref
+        ), "NFC card menu is wrong"
 
         nav.go_to("Emulate")
         nav.press_ok()
-        
-        state = nav.get_current_state(ref = nav.get_ref_from_string("Emulating", nav.font_helvB08, 0))
+
+        state = nav.get_current_state(
+            ref=nav.get_ref_from_string("Emulating", nav.font_helvB08, 0)
+        )
         assert len(state) > 0, "Emulation failed"
-        state = nav.get_current_state(ref = nav.get_ref_from_string("Mifare Ultralight", nav.font_haxrcorp_4089, 0, no_space = 1))
+        state = nav.get_current_state(
+            ref=nav.get_ref_from_string(
+                "Mifare Ultralight", nav.font_haxrcorp_4089, 0, no_space=1
+            )
+        )
         assert len(state) > 0, "Emulation failed"
         nav.press_back()
 
@@ -376,7 +469,6 @@ class TestNfcBench(BaseCase):
         while "Saved!" in state:
             state = nav.get_current_state()
         nav.go_to_main_screen()
-
 
     def test_read_mifare_desfire_card(self, nav, gator, reader_nfc):
         with allure.step("Delete previous card, if possible"):
@@ -401,9 +493,15 @@ class TestNfcBench(BaseCase):
             while "ReadingCardNFC" in state:
                 nav.logger.debug("ReadingCardNFC")
                 state = nav.get_current_state()
-        state = nav.get_current_state(ref = nav.get_ref_from_string("Mifare DESFire", nav.font_helvB08, 0))
+        state = nav.get_current_state(
+            ref=nav.get_ref_from_string("Mifare DESFire", nav.font_helvB08, 0)
+        )
         assert len(state) > 0, "Result of reading reference card is fail"
-        state = nav.get_current_state(ref = nav.get_ref_from_string("UID: 04 48 6A 32 33 58 80", nav.font_haxrcorp_4089, 0))
+        state = nav.get_current_state(
+            ref=nav.get_ref_from_string(
+                "UID: 04 48 6A 32 33 58 80", nav.font_haxrcorp_4089, 0
+            )
+        )
         assert len(state) > 0, "Result of reading reference card is fail"
         nav.press_right()
         menu_ref = [
@@ -411,11 +509,20 @@ class TestNfcBench(BaseCase):
             "Emulate UID",
             "Info",
         ]
-        assert nav.get_menu_list(ref = nav.get_ref_from_list(menu_ref, nav.font_haxrcorp_4089, invert = 1)) == menu_ref, "NFC card menu is wrong"
+        assert (
+            nav.get_menu_list(
+                ref=nav.get_ref_from_list(menu_ref, nav.font_haxrcorp_4089, invert=1)
+            )
+            == menu_ref
+        ), "NFC card menu is wrong"
 
         nav.go_to("Emulate UID")
         nav.press_ok()
-        state = nav.get_current_state(ref = nav.get_ref_from_string("Emulating UID", nav.font_helvB08, 0, no_space = 1))
+        state = nav.get_current_state(
+            ref=nav.get_ref_from_string(
+                "Emulating UID", nav.font_helvB08, 0, no_space=1
+            )
+        )
         assert len(state) > 0, "Emulation failed"
         nav.press_back()
 
@@ -427,7 +534,6 @@ class TestNfcBench(BaseCase):
         while "Saved!" in state:
             state = nav.get_current_state()
         nav.go_to_main_screen()
-
 
     def test_read_bank_card(self, nav, gator):
         with allure.step("Delete previous card, if possible"):
@@ -451,7 +557,9 @@ class TestNfcBench(BaseCase):
             while "ReadingCardNFC" in state:
                 nav.logger.debug("ReadingCardNFC")
                 state = nav.get_current_state()
-            state = nav.get_current_state(ref = nav.get_ref_from_string("Multi-protocol card", nav.font_helvB08, 0))
+            state = nav.get_current_state(
+                ref=nav.get_ref_from_string("Multi-protocol card", nav.font_helvB08, 0)
+            )
             assert len(state) > 0, "Reading failed"
             with allure.step("Read as ISO14443-4A"):
                 nav.go_to("Read as ISO14443-4A")
@@ -468,9 +576,17 @@ class TestNfcBench(BaseCase):
                     nav.logger.debug("ReadingCardNFC")
                     state = nav.get_current_state()
 
-                state = nav.get_current_state(ref = nav.get_ref_from_string("ISO14443-4A (Unknown)", nav.font_helvB08, 0, no_space = 1))
+                state = nav.get_current_state(
+                    ref=nav.get_ref_from_string(
+                        "ISO14443-4A (Unknown)", nav.font_helvB08, 0, no_space=1
+                    )
+                )
                 assert len(state) > 0, "Result of reading reference card is fail"
-                state = nav.get_current_state(ref = nav.get_ref_from_string("UID: 8E C5 C8 AF", nav.font_haxrcorp_4089, 0))
+                state = nav.get_current_state(
+                    ref=nav.get_ref_from_string(
+                        "UID: 8E C5 C8 AF", nav.font_haxrcorp_4089, 0
+                    )
+                )
                 assert len(state) > 0, "Result of reading reference card is fail"
                 nav.press_right()
                 menu_ref = [
@@ -478,11 +594,22 @@ class TestNfcBench(BaseCase):
                     "Emulate UID",
                     "Info",
                 ]
-                assert nav.get_menu_list(ref = nav.get_ref_from_list(menu_ref, nav.font_haxrcorp_4089, invert = 1)) == menu_ref, "NFC card menu is wrong"
+                assert (
+                    nav.get_menu_list(
+                        ref=nav.get_ref_from_list(
+                            menu_ref, nav.font_haxrcorp_4089, invert=1
+                        )
+                    )
+                    == menu_ref
+                ), "NFC card menu is wrong"
 
                 nav.go_to("Emulate UID")
                 nav.press_ok()
-                state = nav.get_current_state(ref = nav.get_ref_from_string("Emulating UID", nav.font_helvB08, 0, no_space = 1))
+                state = nav.get_current_state(
+                    ref=nav.get_ref_from_string(
+                        "Emulating UID", nav.font_helvB08, 0, no_space=1
+                    )
+                )
                 assert len(state) > 0, "Emulation failed"
                 nav.press_back()
 
@@ -504,7 +631,9 @@ class TestNfcBench(BaseCase):
             while "ReadingCardNFC" in state:
                 nav.logger.debug("ReadingCardNFC")
                 state = nav.get_current_state()
-            state = nav.get_current_state(ref = nav.get_ref_from_string("Multi-protocol card", nav.font_helvB08, 0))
+            state = nav.get_current_state(
+                ref=nav.get_ref_from_string("Multi-protocol card", nav.font_helvB08, 0)
+            )
             assert len(state) > 0, "Reading failed"
             with allure.step("Read as NTAG/Ultralight"):
                 nav.go_to("Read as NTAG/Ultralight")
@@ -521,11 +650,23 @@ class TestNfcBench(BaseCase):
                     nav.logger.debug("ReadingCardNFC")
                     state = nav.get_current_state()
 
-                state = nav.get_current_state(ref = nav.get_ref_from_string("Mifare Ultralight", nav.font_helvB08, 0, no_space = 1))
+                state = nav.get_current_state(
+                    ref=nav.get_ref_from_string(
+                        "Mifare Ultralight", nav.font_helvB08, 0, no_space=1
+                    )
+                )
                 assert len(state) > 0, "Result of reading reference card is fail"
-                state = nav.get_current_state(ref = nav.get_ref_from_string("UID: 8E C5 C8 AF", nav.font_haxrcorp_4089, 0))
+                state = nav.get_current_state(
+                    ref=nav.get_ref_from_string(
+                        "UID: 8E C5 C8 AF", nav.font_haxrcorp_4089, 0
+                    )
+                )
                 assert len(state) > 0, "Result of reading reference card is fail"
-                state = nav.get_current_state(ref = nav.get_ref_from_string("Password-protected pages!", nav.font_haxrcorp_4089, 0))
+                state = nav.get_current_state(
+                    ref=nav.get_ref_from_string(
+                        "Password-protected pages!", nav.font_haxrcorp_4089, 0
+                    )
+                )
                 assert len(state) > 0, "Result of reading reference card is fail"
                 nav.press_right()
                 menu_ref = [
@@ -534,13 +675,28 @@ class TestNfcBench(BaseCase):
                     "Unlock",
                     "Info",
                 ]
-                assert nav.get_menu_list(ref = nav.get_ref_from_list(menu_ref, nav.font_haxrcorp_4089, invert = 1)) == menu_ref, "NFC card menu is wrong"
+                assert (
+                    nav.get_menu_list(
+                        ref=nav.get_ref_from_list(
+                            menu_ref, nav.font_haxrcorp_4089, invert=1
+                        )
+                    )
+                    == menu_ref
+                ), "NFC card menu is wrong"
 
                 nav.go_to("Emulate")
                 nav.press_ok()
-                state = nav.get_current_state(ref = nav.get_ref_from_string("Emulating", nav.font_helvB08, 0, no_space = 1))
+                state = nav.get_current_state(
+                    ref=nav.get_ref_from_string(
+                        "Emulating", nav.font_helvB08, 0, no_space=1
+                    )
+                )
                 assert len(state) > 0, "Emulation failed"
-                state = nav.get_current_state(ref = nav.get_ref_from_string("Mifare Ultralight", nav.font_haxrcorp_4089, 0, no_space = 1))
+                state = nav.get_current_state(
+                    ref=nav.get_ref_from_string(
+                        "Mifare Ultralight", nav.font_haxrcorp_4089, 0, no_space=1
+                    )
+                )
                 assert len(state) > 0, "Emulation failed"
                 nav.press_back()
 
@@ -562,7 +718,9 @@ class TestNfcBench(BaseCase):
             while "ReadingCardNFC" in state:
                 nav.logger.debug("ReadingCardNFC")
                 state = nav.get_current_state()
-            state = nav.get_current_state(ref = nav.get_ref_from_string("Multi-protocol card", nav.font_helvB08, 0))
+            state = nav.get_current_state(
+                ref=nav.get_ref_from_string("Multi-protocol card", nav.font_helvB08, 0)
+            )
             assert len(state) > 0, "Reading failed"
             with allure.step("Read as Mifare Classic"):
                 nav.go_to("Read as Mifare Classic")
@@ -590,9 +748,17 @@ class TestNfcBench(BaseCase):
                 while "SkipOk" in state:
                     state = nav.get_current_state()
                     nav.press_ok()
-                state = nav.get_current_state(ref = nav.get_ref_from_string("Mifare Classic 1K", nav.font_helvB08, 0))
+                state = nav.get_current_state(
+                    ref=nav.get_ref_from_string(
+                        "Mifare Classic 1K", nav.font_helvB08, 0
+                    )
+                )
                 assert len(state) > 0, "Result of reading reference card is fail"
-                state = nav.get_current_state(ref = nav.get_ref_from_string("UID: 8E C5 C8 AF", nav.font_haxrcorp_4089, 0))
+                state = nav.get_current_state(
+                    ref=nav.get_ref_from_string(
+                        "UID: 8E C5 C8 AF", nav.font_haxrcorp_4089, 0
+                    )
+                )
                 assert len(state) > 0, "Result of reading reference card is fail"
                 nav.press_right()
                 menu_ref = [
@@ -600,12 +766,25 @@ class TestNfcBench(BaseCase):
                     "Emulate",
                     "Info",
                 ]
-                assert nav.get_menu_list(ref = nav.get_ref_from_list(menu_ref, nav.font_haxrcorp_4089, invert = 1)) == menu_ref, "NFC card menu is wrong"
+                assert (
+                    nav.get_menu_list(
+                        ref=nav.get_ref_from_list(
+                            menu_ref, nav.font_haxrcorp_4089, invert=1
+                        )
+                    )
+                    == menu_ref
+                ), "NFC card menu is wrong"
                 nav.go_to("Emulate")
                 nav.press_ok()
-                state = nav.get_current_state(ref = nav.get_ref_from_string("Emulating", nav.font_helvB08, 0))
+                state = nav.get_current_state(
+                    ref=nav.get_ref_from_string("Emulating", nav.font_helvB08, 0)
+                )
                 assert len(state) > 0, "Emulation failed"
-                state = nav.get_current_state(ref = nav.get_ref_from_string("Mifare Classic 1K", nav.font_haxrcorp_4089, 0, no_space = 1))
+                state = nav.get_current_state(
+                    ref=nav.get_ref_from_string(
+                        "Mifare Classic 1K", nav.font_haxrcorp_4089, 0, no_space=1
+                    )
+                )
                 assert len(state) > 0, "Emulation failed"
 
                 nav.press_back()
@@ -622,7 +801,6 @@ class TestNfcBench(BaseCase):
                 while "Saved!" in state:
                     state = nav.get_current_state()
         nav.go_to_main_screen()
-
 
     def test_read_all_in_one_card(self, nav, gator, reader_nfc):
         with allure.step("Delete previous card, if possible"):
@@ -647,11 +825,17 @@ class TestNfcBench(BaseCase):
             while "ReadingCardNFC" in state:
                 nav.logger.debug("ReadingCardNFC")
                 state = nav.get_current_state()
-        state = nav.get_current_state(ref = nav.get_ref_from_string("All-In-One", nav.font_helvB08, 0))
+        state = nav.get_current_state(
+            ref=nav.get_ref_from_string("All-In-One", nav.font_helvB08, 0)
+        )
         assert len(state) > 0, "Result of reading reference card is fail"
-        state = nav.get_current_state(ref = nav.get_ref_from_string("Number: 2105793721", nav.font_haxrcorp_4089, 0))
+        state = nav.get_current_state(
+            ref=nav.get_ref_from_string("Number: 2105793721", nav.font_haxrcorp_4089, 0)
+        )
         assert len(state) > 0, "Result of reading reference card is fail"
-        state = nav.get_current_state(ref = nav.get_ref_from_string("Rides left: 0", nav.font_haxrcorp_4089, 0))
+        state = nav.get_current_state(
+            ref=nav.get_ref_from_string("Rides left: 0", nav.font_haxrcorp_4089, 0)
+        )
         assert len(state) > 0, "Result of reading reference card is fail"
         nav.press_right()
         menu_ref = [
@@ -659,13 +843,24 @@ class TestNfcBench(BaseCase):
             "Emulate",
             "Info",
         ]
-        assert nav.get_menu_list(ref = nav.get_ref_from_list(menu_ref, nav.font_haxrcorp_4089, invert = 1)) == menu_ref, "NFC card menu is wrong"
+        assert (
+            nav.get_menu_list(
+                ref=nav.get_ref_from_list(menu_ref, nav.font_haxrcorp_4089, invert=1)
+            )
+            == menu_ref
+        ), "NFC card menu is wrong"
 
         nav.go_to("Emulate")
         nav.press_ok()
-        state = nav.get_current_state(ref = nav.get_ref_from_string("Emulating", nav.font_helvB08, 0))
+        state = nav.get_current_state(
+            ref=nav.get_ref_from_string("Emulating", nav.font_helvB08, 0)
+        )
         assert len(state) > 0, "Emulation failed"
-        state = nav.get_current_state(ref = nav.get_ref_from_string("Mifare Ultralight", nav.font_haxrcorp_4089, 0, no_space = 1))
+        state = nav.get_current_state(
+            ref=nav.get_ref_from_string(
+                "Mifare Ultralight", nav.font_haxrcorp_4089, 0, no_space=1
+            )
+        )
         assert len(state) > 0, "Emulation failed"
         nav.press_back()
 

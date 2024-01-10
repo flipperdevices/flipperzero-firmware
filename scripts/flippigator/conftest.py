@@ -297,7 +297,7 @@ def relay_serial(request):
 
 @pytest.fixture(scope="session")
 def nav(flipper_serial, request):
-    if (request.config.getoption("--update_flippers")):
+    if request.config.getoption("--update_flippers"):
         port = request.config.getoption("--port")
         if port:
             pass
@@ -308,17 +308,25 @@ def nav(flipper_serial, request):
 
         os.system("ufbt dotenv_create")
         os.system("ufbt update --channel=dev")
-        os.system("ufbt flash_usb FLIP_PORT="+port)
+        os.system("ufbt flash_usb FLIP_PORT=" + port)
         time.sleep(2)
 
         start_time = time.time()
-        while (time.time() - start_time < 120):
+        while time.time() - start_time < 120:
             try:
                 flipper_serial = serial.Serial(port, timeout=1)
             except serial.serialutil.SerialException:
                 time.sleep(1)
-                print("Waiting for flipper boot after update "+ str(int(time.time() - start_time)) + "s")
-                logging.debug("Waiting for flipper boot after update "+ str(int(time.time() - start_time)) + "s")
+                print(
+                    "Waiting for flipper boot after update "
+                    + str(int(time.time() - start_time))
+                    + "s"
+                )
+                logging.debug(
+                    "Waiting for flipper boot after update "
+                    + str(int(time.time() - start_time))
+                    + "s"
+                )
                 if time.time() - start_time > 120:
                     logging.error("can not open serial port")
                     sys.exit(0)
@@ -394,7 +402,7 @@ def px(request):
 
 @pytest.fixture(scope="session")
 def nav_reader(flipper_reader_serial, request):
-    if (request.config.getoption("--update_flippers")):
+    if request.config.getoption("--update_flippers"):
         port = request.config.getoption("--flipper_r_port")
         if port:
             pass
@@ -405,17 +413,25 @@ def nav_reader(flipper_reader_serial, request):
 
         os.system("ufbt dotenv_create")
         os.system("ufbt update --channel=dev")
-        os.system("ufbt flash_usb FLIP_PORT="+port)
+        os.system("ufbt flash_usb FLIP_PORT=" + port)
         time.sleep(2)
 
         start_time = time.time()
-        while (time.time() - start_time < 120):
+        while time.time() - start_time < 120:
             try:
                 flipper_serial = serial.Serial(port, timeout=1)
             except serial.serialutil.SerialException:
                 time.sleep(1)
-                print("Waiting for flipper boot after update "+ str(int(time.time() - start_time)) + "s")
-                logging.debug("Waiting for flipper boot after update "+ str(int(time.time() - start_time)) + "s")
+                print(
+                    "Waiting for flipper boot after update "
+                    + str(int(time.time() - start_time))
+                    + "s"
+                )
+                logging.debug(
+                    "Waiting for flipper boot after update "
+                    + str(int(time.time() - start_time))
+                    + "s"
+                )
                 if time.time() - start_time > 120:
                     logging.error("can not open 'reader' serial port")
                     sys.exit(0)
@@ -484,7 +500,7 @@ def nav_reader(flipper_reader_serial, request):
 
 @pytest.fixture(scope="session")
 def nav_key(flipper_key_serial, request):
-    if (request.config.getoption("--update_flippers")):
+    if request.config.getoption("--update_flippers"):
         port = request.config.getoption("--flipper_k_port")
         if port:
             pass
@@ -495,17 +511,25 @@ def nav_key(flipper_key_serial, request):
 
         os.system("ufbt dotenv_create")
         os.system("ufbt update --channel=dev")
-        os.system("ufbt flash_usb FLIP_PORT="+port)
+        os.system("ufbt flash_usb FLIP_PORT=" + port)
         time.sleep(2)
 
         start_time = time.time()
-        while (time.time() - start_time < 120):
+        while time.time() - start_time < 120:
             try:
                 flipper_serial = serial.Serial(port, timeout=1)
             except serial.serialutil.SerialException:
                 time.sleep(1)
-                print("Waiting for flipper boot after update "+ str(int(time.time() - start_time)) + "s")
-                logging.debug("Waiting for flipper boot after update "+ str(int(time.time() - start_time)) + "s")
+                print(
+                    "Waiting for flipper boot after update "
+                    + str(int(time.time() - start_time))
+                    + "s"
+                )
+                logging.debug(
+                    "Waiting for flipper boot after update "
+                    + str(int(time.time() - start_time))
+                    + "s"
+                )
                 if time.time() - start_time > 120:
                     logging.error("can not open 'key' serial port")
                     sys.exit(0)

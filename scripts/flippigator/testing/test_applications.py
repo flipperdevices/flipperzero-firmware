@@ -23,13 +23,13 @@ class TestApplications(BaseCase):
             "NFC",
             "RFID",
             "Sub-GHz",
-#            "Tools",
+            #            "Tools",
             "USB",
             "iButton",
         ]
-        ref = nav.get_ref_from_list(menu_ref, nav.font_haxrcorp_4089, invert = 1)
+        ref = nav.get_ref_from_list(menu_ref, nav.font_haxrcorp_4089, invert=1)
         ref["FileBrowserLevelUp"] = nav.imRef["FileBrowserLevelUp"]
-        menu = nav.get_menu_list(ref = ref)
+        menu = nav.get_menu_list(ref=ref)
         for i in menu:
             if i in menu_ref:
                 menu_ref.remove(i)
@@ -41,6 +41,7 @@ class TestApplications(BaseCase):
         print(menu_ref)
         assert len(menu_ref) == 0, "Applications menu list is wrong"
         nav.go_to_main_screen()
+
 
 '''
     @pytest.mark.smoke

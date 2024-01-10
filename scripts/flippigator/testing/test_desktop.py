@@ -40,5 +40,10 @@ class TestMain(BaseCase):
             "Apps",
         ]
 
-        assert nav.get_menu_list(ref = nav.get_ref_from_list(ref_list, nav.font_helvB08, invert = 0)) == ref_list
-        #assert nav.get_menu_list() == ref_list
+        assert (
+            nav.get_menu_list(
+                ref=nav.get_ref_from_list(ref_list, nav.font_helvB08, invert=0)
+            )
+            == ref_list
+        )
+        # assert nav.get_menu_list() == ref_list

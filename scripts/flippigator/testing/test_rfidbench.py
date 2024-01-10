@@ -32,9 +32,15 @@ class TestRfidBench(BaseCase):
                 state = nav.get_current_state()
                 if time.time() - start_time > 10:
                     break
-        state = nav.get_current_state(ref = nav.get_ref_from_string("Indala26[Motorola]", nav.font_helvB08, 0, no_space = 1))
+        state = nav.get_current_state(
+            ref=nav.get_ref_from_string(
+                "Indala26[Motorola]", nav.font_helvB08, 0, no_space=1
+            )
+        )
         assert len(state) > 0, "Result of reading reference card is fail"
-        state = nav.get_current_state(ref = nav.get_ref_from_string("C8 33 65 B0", nav.font_haxrcorp_4089, 0))
+        state = nav.get_current_state(
+            ref=nav.get_ref_from_string("C8 33 65 B0", nav.font_haxrcorp_4089, 0)
+        )
         assert len(state) > 0, "Result of reading reference card is fail"
         nav.press_right()
         menu_ref = [
@@ -42,12 +48,21 @@ class TestRfidBench(BaseCase):
             "Emulate",
             "Write",
         ]
-        assert nav.get_menu_list(ref = nav.get_ref_from_list(menu_ref, nav.font_haxrcorp_4089, invert = 1)) == menu_ref, "RFID card menu is wrong"
+        assert (
+            nav.get_menu_list(
+                ref=nav.get_ref_from_list(menu_ref, nav.font_haxrcorp_4089, invert=1)
+            )
+            == menu_ref
+        ), "RFID card menu is wrong"
         nav.go_to("Emulate")
         nav.press_ok()
-        state = nav.get_current_state(ref = nav.get_ref_from_string("Emulating", nav.font_helvB08, 0))
+        state = nav.get_current_state(
+            ref=nav.get_ref_from_string("Emulating", nav.font_helvB08, 0)
+        )
         assert len(state) > 0, "Emulation failed"
-        state = nav.get_current_state(ref = nav.get_ref_from_string("Indala26", nav.font_haxrcorp_4089, 0))
+        state = nav.get_current_state(
+            ref=nav.get_ref_from_string("Indala26", nav.font_haxrcorp_4089, 0)
+        )
         assert len(state) > 0, "Emulation failed"
         nav.press_back()
 
@@ -104,12 +119,21 @@ class TestRfidBench(BaseCase):
             "Emulate",
             "Write",
         ]
-        assert nav.get_menu_list(ref = nav.get_ref_from_list(menu_ref, nav.font_haxrcorp_4089, invert = 1)) == menu_ref, "RFID card menu is wrong"
+        assert (
+            nav.get_menu_list(
+                ref=nav.get_ref_from_list(menu_ref, nav.font_haxrcorp_4089, invert=1)
+            )
+            == menu_ref
+        ), "RFID card menu is wrong"
         nav.go_to("Emulate")
         nav.press_ok()
-        state = nav.get_current_state(ref = nav.get_ref_from_string("Emulating", nav.font_helvB08, 0))
+        state = nav.get_current_state(
+            ref=nav.get_ref_from_string("Emulating", nav.font_helvB08, 0)
+        )
         assert len(state) > 0, "Emulation failed"
-        state = nav.get_current_state(ref = nav.get_ref_from_string("EM4100", nav.font_haxrcorp_4089, 0))
+        state = nav.get_current_state(
+            ref=nav.get_ref_from_string("EM4100", nav.font_haxrcorp_4089, 0)
+        )
         assert len(state) > 0, "Emulation failed"
         nav.press_back()
 
@@ -166,12 +190,21 @@ class TestRfidBench(BaseCase):
             "Emulate",
             "Write",
         ]
-        assert nav.get_menu_list(ref = nav.get_ref_from_list(menu_ref, nav.font_haxrcorp_4089, invert = 1)) == menu_ref, "RFID card menu is wrong"
+        assert (
+            nav.get_menu_list(
+                ref=nav.get_ref_from_list(menu_ref, nav.font_haxrcorp_4089, invert=1)
+            )
+            == menu_ref
+        ), "RFID card menu is wrong"
         nav.go_to("Emulate")
         nav.press_ok()
-        state = nav.get_current_state(ref = nav.get_ref_from_string("Emulating", nav.font_helvB08, 0))
+        state = nav.get_current_state(
+            ref=nav.get_ref_from_string("Emulating", nav.font_helvB08, 0)
+        )
         assert len(state) > 0, "Emulation failed"
-        state = nav.get_current_state(ref = nav.get_ref_from_string("H10301", nav.font_haxrcorp_4089, 0))
+        state = nav.get_current_state(
+            ref=nav.get_ref_from_string("H10301", nav.font_haxrcorp_4089, 0)
+        )
         assert len(state) > 0, "Emulation failed"
         nav.press_back()
 

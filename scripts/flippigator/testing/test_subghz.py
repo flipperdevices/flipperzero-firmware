@@ -23,7 +23,12 @@ class TestSubGhz(BaseCase):
             "Radio Settings",
         ]
 
-        assert nav.get_menu_list(ref = nav.get_ref_from_list(menu_ref, nav.font_haxrcorp_4089, invert = 1)) == menu_ref, "Some of Sub-GHz menu items are missing"
+        assert (
+            nav.get_menu_list(
+                ref=nav.get_ref_from_list(menu_ref, nav.font_haxrcorp_4089, invert=1)
+            )
+            == menu_ref
+        ), "Some of Sub-GHz menu items are missing"
 
         nav.go_to_main_screen()
 

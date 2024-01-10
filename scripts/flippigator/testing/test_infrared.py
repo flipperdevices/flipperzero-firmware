@@ -19,7 +19,12 @@ class TestInfrared(BaseCase):
             "Saved Remotes",
             "Debug",
         ]
-        assert nav.get_menu_list(ref = nav.get_ref_from_list(menu_ref, nav.font_haxrcorp_4089, invert = 1)) == menu_ref
+        assert (
+            nav.get_menu_list(
+                ref=nav.get_ref_from_list(menu_ref, nav.font_haxrcorp_4089, invert=1)
+            )
+            == menu_ref
+        )
         nav.go_to_main_screen()
 
     def test_read(self, nav):

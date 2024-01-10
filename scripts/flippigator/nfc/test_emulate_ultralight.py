@@ -26,9 +26,11 @@ class TestEmulateUltralight:
             assert 0, "File not found"
 
     class TestMFU11:
-
         data = [
-            ("hf 14a raw -sc 4B0000000000000000000000000000000000000000", "05 [ 53 06 ]"),
+            (
+                "hf 14a raw -sc 4B0000000000000000000000000000000000000000",
+                "05 [ 53 06 ]",
+            ),
         ]
 
         @pytest.mark.parametrize("command, expected_result", data)
@@ -107,9 +109,11 @@ class TestEmulateUltralight:
             assert expected_result in result
 
     class TestMFU21:
-
         data = [
-            ("hf 14a raw -sc 4B0000000000000000000000000000000000000000", "05 [ 53 06 ]"),
+            (
+                "hf 14a raw -sc 4B0000000000000000000000000000000000000000",
+                "05 [ 53 06 ]",
+            ),
         ]
 
         @pytest.mark.parametrize("command, expected_result", data)
@@ -186,4 +190,3 @@ class TestEmulateUltralight:
             result = px_result[0]
 
             assert expected_result in result
-

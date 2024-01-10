@@ -16,7 +16,7 @@ from flippigator.modules.rfid import AppRfid
 from flippigator.modules.settings import AppSettings
 from flippigator.modules.subghz import AppSubGhz
 from flippigator.modules.u2f import AppU2f
-from PIL import Image, ImageFont, ImageDraw
+from PIL import Image, ImageDraw, ImageFont
 
 # APPLY_TEMPLATE_THRESHOLD = 0.99
 SCREEN_H = 128
@@ -62,7 +62,9 @@ class Navigator:
         self.settings = AppSettings(self)
 
         self.font_helvB08 = ImageFont.load("./flippigator/fonts/helvB08.pil")
-        self.font_haxrcorp_4089 = ImageFont.truetype("./flippigator/fonts/haxrcorp_4089.ttf", 16)
+        self.font_haxrcorp_4089 = ImageFont.truetype(
+            "./flippigator/fonts/haxrcorp_4089.ttf", 16
+        )
         self.font_profont11 = ImageFont.load("./flippigator/fonts/profont11.pil")
         self.font_profont22 = ImageFont.load("./flippigator/fonts/profont22.pil")
 
@@ -139,14 +141,14 @@ class Navigator:
         cv.imshow(self._window_name, display_image)
         key = cv.waitKey(1)
 
-    def get_img_from_string(self, phrase, font, invert = 0, no_space = 0):
+    def get_img_from_string(self, phrase, font, invert=0, no_space=0):
         self.logger.debug("Generated template for '" + phrase + "'")
         if no_space == 0:
-            result = Image.new("L", font.getsize(phrase+"  "), 255)
+            result = Image.new("L", font.getsize(phrase + "  "), 255)
         else:
             result = Image.new("L", font.getsize(phrase), 255)
         dctx = ImageDraw.Draw(result)
-        dctx.text((0, 0), phrase+"  ", font=font)
+        dctx.text((0, 0), phrase + "  ", font=font)
         result = numpy.array(result)
         if font == self.font_helvB08:
             result = result[3:, :]
@@ -156,20 +158,22 @@ class Navigator:
             result = cv.bitwise_not(result)
         display_image = cv.resize(
             result,
-            (0, 0), 
-            fx=self._scale, 
+            (0, 0),
+            fx=self._scale,
             fy=self._scale,
             interpolation=cv.INTER_NEAREST,
-        ) 
-        #cv.imshow(str(phrase) + " " + str(font), display_image)
+        )
+        # cv.imshow(str(phrase) + " " + str(font), display_image)
         return result
 
-    def get_ref_from_string(self, phrase, font, invert = 0, no_space = 0):
+    def get_ref_from_string(self, phrase, font, invert=0, no_space=0):
         ref_dict = dict()
-        ref_dict.update({"phrase": self.get_img_from_string(phrase, font, invert, no_space)})
+        ref_dict.update(
+            {"phrase": self.get_img_from_string(phrase, font, invert, no_space)}
+        )
         return ref_dict
 
-    def get_ref_from_list(self, ref_list, font, invert = 0):
+    def get_ref_from_list(self, ref_list, font, invert=0):
         ref_dict = dict()
         for i in ref_list:
             ref_dict.update({i: self.get_img_from_string(i, font, invert)})
@@ -177,14 +181,22 @@ class Navigator:
 
     def get_ref_all_fonts(self, phrase):
         ref_dict = dict()
-        ref_dict.update({"gen0": self.get_img_from_string(phrase, self.font_helvB08, 0)})
-        #ref_dict.update({1: self.get_img_from_string(phrase, self.font_helvB08, 1)})
-        #ref_dict.update({2: self.get_img_from_string(phrase, self.font_haxrcorp_4089, 0)})
-        ref_dict.update({"gen1": self.get_img_from_string(phrase, self.font_haxrcorp_4089, 1)})
-        #ref_dict.update({4: self.get_img_from_string(phrase, self.font_profont22, 0)})
-        ref_dict.update({"gen2": self.get_img_from_string(phrase, self.font_profont22, 1)})
-        #ref_dict.update({6: self.get_img_from_string(phrase, self.font_profont11, 0)})
-        ref_dict.update({"gen3": self.get_img_from_string(phrase, self.font_profont11, 1)})
+        ref_dict.update(
+            {"gen0": self.get_img_from_string(phrase, self.font_helvB08, 0)}
+        )
+        # ref_dict.update({1: self.get_img_from_string(phrase, self.font_helvB08, 1)})
+        # ref_dict.update({2: self.get_img_from_string(phrase, self.font_haxrcorp_4089, 0)})
+        ref_dict.update(
+            {"gen1": self.get_img_from_string(phrase, self.font_haxrcorp_4089, 1)}
+        )
+        # ref_dict.update({4: self.get_img_from_string(phrase, self.font_profont22, 0)})
+        ref_dict.update(
+            {"gen2": self.get_img_from_string(phrase, self.font_profont22, 1)}
+        )
+        # ref_dict.update({6: self.get_img_from_string(phrase, self.font_profont11, 0)})
+        ref_dict.update(
+            {"gen3": self.get_img_from_string(phrase, self.font_profont11, 1)}
+        )
         return ref_dict
 
     def recog_ref(self, ref=None, area=(0, 64, 0, 128)):
@@ -314,7 +326,7 @@ class Navigator:
         self.proto.rpc_gui_send_input(f"{duration} {button}")
         self.logger.debug("Press " + button)
 
-    def get_menu_list(self, ref = None):
+    def get_menu_list(self, ref=None):
         if ref == None:
             ref = self.imRef
         time.sleep(0.2)
@@ -354,16 +366,22 @@ class Navigator:
 
         return menus
 
-    def go_to(self, target, area=(0, 64, 0, 128), direction: Optional[str] = "down", timeout = 20):
+    def go_to(
+        self,
+        target,
+        area=(0, 64, 0, 128),
+        direction: Optional[str] = "down",
+        timeout=20,
+    ):
         if not (target in self.imRef.keys()):
             self.logger.info("Going to " + target)
             self.logger.info("No ref for target, generating from text" + target)
             ref = self.get_ref_all_fonts(target)
-            state = self.get_current_state(area=area, timeout = 0.1, ref = ref)
+            state = self.get_current_state(area=area, timeout=0.1, ref=ref)
 
             start_time = time.time()
             while start_time + timeout > time.time():
-                state = self.get_current_state(area=area, timeout = 0.1, ref = ref)
+                state = self.get_current_state(area=area, timeout=0.1, ref=ref)
                 if len(state) != 0:
                     return 0
                 if direction == "down":
@@ -372,12 +390,12 @@ class Navigator:
                     self.press_up()
             return -1
         else:
-            state = self.get_current_state(area=area, timeout = 0.3)
+            state = self.get_current_state(area=area, timeout=0.3)
             self.logger.info("Going to " + target)
 
             start_time = time.time()
             while start_time + timeout > time.time():
-                state = self.get_current_state(area=area, timeout = 0.5)
+                state = self.get_current_state(area=area, timeout=0.5)
                 if target in state:
                     return 0
                 if direction == "down":
@@ -395,9 +413,9 @@ class Navigator:
         self.press_back()
         self.press_back()
         time.sleep(0.1)  # try to fix freeze while emilating Mfc1K
-        state = self.get_current_state(timeout = 0.1)
+        state = self.get_current_state(timeout=0.1)
         while not ("SDcardIcon" in state):
-            state = self.get_current_state(timeout = 0.1)
+            state = self.get_current_state(timeout=0.1)
             if "ExitLeft" in state:
                 self.press_left()
             else:
@@ -432,7 +450,7 @@ class Navigator:
         files = list()
         start_time = time.time()
 
-        result = self.go_to(filename, area=(15, 64, 0, 128), timeout = 15)
+        result = self.go_to(filename, area=(15, 64, 0, 128), timeout=15)
         if result == -1:
             self.logger.warning("File not found!")
             return -1
@@ -470,7 +488,7 @@ class Navigator:
         files = list()
         start_time = time.time()
 
-        result = self.go_to(filename, area=(15, 64, 0, 128), timeout = 15)
+        result = self.go_to(filename, area=(15, 64, 0, 128), timeout=15)
         if result == -1:
             self.logger.warning("File not found! (timeout)")
             return -1

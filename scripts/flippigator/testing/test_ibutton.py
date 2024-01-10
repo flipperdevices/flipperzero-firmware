@@ -18,7 +18,12 @@ class TestIbutton(BaseCase):
             "Saved",
             "Add Manually",
         ]
-        assert nav.get_menu_list(ref = nav.get_ref_from_list(menu_ref, nav.font_haxrcorp_4089, invert = 1)) == menu_ref, "iButton menu list is wrong"
+        assert (
+            nav.get_menu_list(
+                ref=nav.get_ref_from_list(menu_ref, nav.font_haxrcorp_4089, invert=1)
+            )
+            == menu_ref
+        ), "iButton menu list is wrong"
 
     def test_read(self, nav):
         nav.ibutton.go_into()

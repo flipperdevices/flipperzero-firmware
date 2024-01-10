@@ -23,5 +23,10 @@ class TestSettings(BaseCase):
             "System",
             "About",
         ]
-        assert nav.get_menu_list(ref = nav.get_ref_from_list(menu_ref, nav.font_haxrcorp_4089, invert = 1)) == menu_ref, "Settings menu list is wrong"
+        assert (
+            nav.get_menu_list(
+                ref=nav.get_ref_from_list(menu_ref, nav.font_haxrcorp_4089, invert=1)
+            )
+            == menu_ref
+        ), "Settings menu list is wrong"
         nav.go_to_main_screen()

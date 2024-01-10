@@ -26,7 +26,12 @@ class TestNfc(BaseCase):
             "Add Manually",
             "Debug",
         ]
-        assert nav.get_menu_list(ref = nav.get_ref_from_list(menu_ref, nav.font_haxrcorp_4089, invert = 1)) == menu_ref, "NFC menu list differs from reference"
+        assert (
+            nav.get_menu_list(
+                ref=nav.get_ref_from_list(menu_ref, nav.font_haxrcorp_4089, invert=1)
+            )
+            == menu_ref
+        ), "NFC menu list differs from reference"
 
     @pytest.mark.smoke
     def test_read(self, nav):
@@ -125,7 +130,14 @@ class TestNfc(BaseCase):
                 "Mifare Classic Keys",
                 "Unlock NTAG/Ultralight",
             ]
-            assert nav.get_menu_list(ref = nav.get_ref_from_list(menu_ref, nav.font_haxrcorp_4089, invert = 1)) == menu_ref, "NFC Extra Actions list is wrong"
+            assert (
+                nav.get_menu_list(
+                    ref=nav.get_ref_from_list(
+                        menu_ref, nav.font_haxrcorp_4089, invert=1
+                    )
+                )
+                == menu_ref
+            ), "NFC Extra Actions list is wrong"
 
         with allure.step("Mifare Classic Keys"):
             nav.go_to("Mifare Classic Keys")
@@ -144,7 +156,14 @@ class TestNfc(BaseCase):
                 "Auth As Xiaomi Air Purifier",
                 "Enter Password Manually",
             ]
-            assert nav.get_menu_list(ref = nav.get_ref_from_list(menu_ref, nav.font_haxrcorp_4089, invert = 1)) == menu_ref, "NFC Extra Actions list is wrong"
+            assert (
+                nav.get_menu_list(
+                    ref=nav.get_ref_from_list(
+                        menu_ref, nav.font_haxrcorp_4089, invert=1
+                    )
+                )
+                == menu_ref
+            ), "NFC Extra Actions list is wrong"
             nav.press_back()
 
     def test_add_manually(self, nav):
@@ -173,7 +192,12 @@ class TestNfc(BaseCase):
             "Mifare Classic 4k 4byte UI...",
             "Mifare Classic 4k 7byte UI...",
         ]
-        assert nav.get_menu_list(ref = nav.get_ref_from_list(menu_ref, nav.font_haxrcorp_4089, invert = 1)) == menu_ref, "NFC Add manually option list is wrong"
+        assert (
+            nav.get_menu_list(
+                ref=nav.get_ref_from_list(menu_ref, nav.font_haxrcorp_4089, invert=1)
+            )
+            == menu_ref
+        ), "NFC Add manually option list is wrong"
 
     @pytest.mark.smoke
     def test_add_manually_smoke(self, nav):
@@ -202,14 +226,21 @@ class TestNfc(BaseCase):
             "Mifare Classic 4k 4byte UI...",
             "Mifare Classic 4k 7byte UI...",
         ]
-        assert nav.get_menu_list(ref = nav.get_ref_from_list(menu_ref, nav.font_haxrcorp_4089, invert = 1)) == menu_ref, "NFC Add manually option list is wrong"
-
+        assert (
+            nav.get_menu_list(
+                ref=nav.get_ref_from_list(menu_ref, nav.font_haxrcorp_4089, invert=1)
+            )
+            == menu_ref
+        ), "NFC Add manually option list is wrong"
 
     def test_debug(self, nav):
         nav.nfc.go_into()
         nav.go_to("Debug")
         nav.press_ok()
-        menu_ref = [
-            "Field"
-        ]
-        assert nav.get_menu_list(ref = nav.get_ref_from_list(menu_ref, nav.font_haxrcorp_4089, invert = 1)) == menu_ref, "NFC Debug options list is wrong"
+        menu_ref = ["Field"]
+        assert (
+            nav.get_menu_list(
+                ref=nav.get_ref_from_list(menu_ref, nav.font_haxrcorp_4089, invert=1)
+            )
+            == menu_ref
+        ), "NFC Debug options list is wrong"
