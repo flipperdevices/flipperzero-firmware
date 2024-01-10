@@ -6,6 +6,9 @@ void subghz_scene_delete_callback(GuiButtonType result, InputType type, void* co
     SubGhz* subghz = context;
     if((result == GuiButtonTypeRight) && (type == InputTypeShort)) {
         view_dispatcher_send_custom_event(subghz->view_dispatcher, SubGhzCustomEventSceneDelete);
+    } else if((result == GuiButtonTypeLeft) && (type == InputTypeShort)) {
+        view_dispatcher_send_custom_event(
+            subghz->view_dispatcher, SubGhzCustomEventSceneDeleteBack);
     }
 }
 
@@ -52,6 +55,8 @@ void subghz_scene_delete_on_enter(void* context) {
 
     widget_add_button_element(
         subghz->widget, GuiButtonTypeRight, "Delete", subghz_scene_delete_callback, subghz);
+    widget_add_button_element(
+        subghz->widget, GuiButtonTypeLeft, "Cancel", subghz_scene_delete_callback, subghz);
 
     view_dispatcher_switch_to_view(subghz->view_dispatcher, SubGhzViewIdWidget);
 }
@@ -68,6 +73,8 @@ bool subghz_scene_delete_on_event(void* context, SceneManagerEvent event) {
                     subghz->scene_manager, SubGhzSceneStart);
             }
             return true;
+        } else if(event.event == SubGhzCustomEventSceneDeleteBack) {
+            return scene_manager_previous_scene(subghz->scene_manager);
         }
     }
     return false;

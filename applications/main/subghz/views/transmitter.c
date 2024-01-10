@@ -104,11 +104,9 @@ void subghz_view_transmitter_draw(Canvas* canvas, SubGhzViewTransmitterModel* mo
     canvas_draw_str(canvas, 113, 7, furi_string_get_cstr(model->preset_str));
     if(model->show_button) {
         if(model->device_type == SubGhzRadioDeviceTypeInternal) {
-            //canvas_draw_icon(canvas, 109, 39, &I_Internal_ant_1_9x11);
-            canvas_draw_icon_animation(canvas, 109, 39, model->icon_int_ant);
+            canvas_draw_icon_animation(canvas, 109, 40, model->icon_int_ant);
         } else {
-            //canvas_draw_icon(canvas, 109, 39, &I_External_ant_1_9x11);
-            canvas_draw_icon_animation(canvas, 109, 39, model->icon_ext_ant);
+            canvas_draw_icon_animation(canvas, 109, 40, model->icon_ext_ant);
         }
         subghz_view_transmitter_button_right(canvas, "Send");
     }
@@ -174,22 +172,10 @@ bool subghz_view_transmitter_input(InputEvent* event, void* context) {
 
 void subghz_view_transmitter_enter(void* context) {
     furi_assert(context);
-    //SubGhzViewTransmitter* subghz_transmitter = context;
-    // with_view_model(
-    //     subghz_transmitter->view,
-    //     SubGhzViewTransmitterModel * model,
-    //     { icon_animation_start(model->icon); },
-    //     true);
 }
 
 void subghz_view_transmitter_exit(void* context) {
     furi_assert(context);
-    // SubGhzViewTransmitter* subghz_transmitter = context;
-    // with_view_model(
-    //     subghz_transmitter->view,
-    //     SubGhzViewTransmitterModel * model,
-    //     { icon_animation_start(model->icon); },
-    //     true);
 }
 
 SubGhzViewTransmitter* subghz_view_transmitter_alloc() {
