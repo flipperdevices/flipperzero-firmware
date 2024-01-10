@@ -25,11 +25,13 @@ static SVCCTL_EvtAckStatus_t ble_service_event_dispatcher_dispatch_event(void* e
         GapSvcEventHandlerList_next(it)) {
         const GapSvcEventHandler* item = GapSvcEventHandlerList_cref(it);
         ack_status = item->callback(event, item->context);
-        // Since we're replacing individual event handlers with a single event dispatcher, we need
-        // to replicate its behavior of acking events. See AN5289, 7.6.10
+        /* Since we're replacing individual event handlers with a single event 
+         * dispatcher, we need to replicate its behavior of acking events. 
+         * See AN5289, 7.6.10 
+         */
         switch(ack_status) {
         case SVCCTL_EvtNotAck:
-            continue; // Keep going
+            continue; /* Keep going */
         case SVCCTL_EvtAckFlowEnable:
             return SVCCTL_EvtAckFlowEnable;
         case SVCCTL_EvtAckFlowDisable:

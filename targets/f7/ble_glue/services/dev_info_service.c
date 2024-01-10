@@ -138,13 +138,13 @@ BleServiceDevInfo* ble_svc_dev_info_start() {
 
 void ble_svc_dev_info_stop(BleServiceDevInfo* dev_info_svc) {
     furi_assert(dev_info_svc);
-    // Delete service characteristics
+    /* Delete service characteristics */
     for(size_t i = 0; i < DevInfoSvcGattCharacteristicCount; i++) {
         ble_gatt_characteristic_delete(
             dev_info_svc->service_handle, &dev_info_svc->characteristics[i]);
     }
 
-    // Delete service
+    /* Delete service */
     ble_gatt_service_delete(dev_info_svc->service_handle);
 
     free(dev_info_svc);

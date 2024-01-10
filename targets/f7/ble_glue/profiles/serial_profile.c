@@ -76,38 +76,34 @@ void ble_profile_serial_set_event_callback(
     uint16_t buff_size,
     FuriHalBtSerialCallback callback,
     void* context) {
-    furi_check(profile);
-    furi_check(profile->config == ble_profile_serial);
+    furi_check(profile && (profile->config == ble_profile_serial));
 
     BleProfileSerial* serial_profile = (BleProfileSerial*)profile;
     ble_svc_serial_set_callbacks(serial_profile->serial_svc, buff_size, callback, context);
 }
 
 void ble_profile_serial_notify_buffer_is_empty(FuriHalBleProfileBase* profile) {
-    furi_check(profile);
-    furi_check(profile->config == ble_profile_serial);
+    furi_check(profile && (profile->config == ble_profile_serial));
 
     BleProfileSerial* serial_profile = (BleProfileSerial*)profile;
     ble_svc_serial_notify_buffer_is_empty(serial_profile->serial_svc);
 }
 
 void ble_profile_serial_set_rpc_active(FuriHalBleProfileBase* profile, bool active) {
-    furi_check(profile);
-    furi_check(profile->config == ble_profile_serial);
+    furi_check(profile && (profile->config == ble_profile_serial));
 
     BleProfileSerial* serial_profile = (BleProfileSerial*)profile;
-
     ble_svc_serial_set_rpc_active(serial_profile->serial_svc, active);
 }
 
 bool ble_profile_serial_tx(FuriHalBleProfileBase* profile, uint8_t* data, uint16_t size) {
-    furi_check(profile);
-    furi_check(profile->config == ble_profile_serial);
+    furi_check(profile && (profile->config == ble_profile_serial));
 
     BleProfileSerial* serial_profile = (BleProfileSerial*)profile;
 
-    if(size > ble_profile_serial_PACKET_SIZE_MAX) {
+    if(size > BLE_PROFILE_SERIAL_PACKET_SIZE_MAX) {
         return false;
     }
+
     return ble_svc_serial_update_tx(serial_profile->serial_svc, data, size);
 }

@@ -23,19 +23,20 @@ static int32_t ble_event_thread(void* context) {
     UNUSED(context);
     uint32_t flags = 0;
 
-    while(true) {
+    while((flags & BLE_EVENT_THREAD_FLAG_KILL_THREAD) == 0) {
         flags =
             furi_thread_flags_wait(BLE_EVENT_THREAD_FLAG_ALL, FuriFlagWaitAny, FuriWaitForever);
         if(flags & BLE_EVENT_THREAD_FLAG_SHCI_EVENT) {
-            // FURI_LOG_W(TAG, "shci_user_evt_proc");
+#ifdef FURI_BLE_EXTRA_LOG
+            FURI_LOG_W(TAG, "shci_user_evt_proc");
+#endif
             shci_user_evt_proc();
         }
         if(flags & BLE_EVENT_THREAD_FLAG_HCI_EVENT) {
-            // FURI_LOG_W(TAG, "hci_user_evt_proc");
+#ifdef FURI_BLE_EXTRA_LOG
+            FURI_LOG_W(TAG, "hci_user_evt_proc");
+#endif
             hci_user_evt_proc();
-        }
-        if(flags & BLE_EVENT_THREAD_FLAG_KILL_THREAD) {
-            break;
         }
     }
 
@@ -45,6 +46,9 @@ static int32_t ble_event_thread(void* context) {
 void shci_notify_asynch_evt(void* pdata) {
     UNUSED(pdata);
     if(!event_thread) {
+#ifdef FURI_BLE_EXTRA_LOG
+        FURI_LOG_E(TAG, "shci: event_thread is NULL");
+#endif
         return;
     }
 
@@ -56,6 +60,9 @@ void shci_notify_asynch_evt(void* pdata) {
 void hci_notify_asynch_evt(void* pdata) {
     UNUSED(pdata);
     if(!event_thread) {
+#ifdef FURI_BLE_EXTRA_LOG
+        FURI_LOG_E(TAG, "hci: event_thread is NULL");
+#endif
         return;
     }
 
@@ -66,6 +73,9 @@ void hci_notify_asynch_evt(void* pdata) {
 
 void ble_event_thread_stop() {
     if(!event_thread) {
+#ifdef FURI_BLE_EXTRA_LOG
+        FURI_LOG_E(TAG, "thread_stop: event_thread is NULL");
+#endif
         return;
     }
 

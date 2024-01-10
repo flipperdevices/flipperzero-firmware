@@ -12,19 +12,19 @@
 #define TAG "BtBatterySvc"
 
 enum {
-    // Common states
+    /* Common states */
     BatterySvcPowerStateUnknown = 0b00,
     BatterySvcPowerStateUnsupported = 0b01,
-    // Level states
+    /* Level states */
     BatterySvcPowerStateGoodLevel = 0b10,
     BatterySvcPowerStateCriticallyLowLevel = 0b11,
-    // Charging states
+    /* Charging states */
     BatterySvcPowerStateNotCharging = 0b10,
     BatterySvcPowerStateCharging = 0b11,
-    // Discharging states
+    /* Discharging states */
     BatterySvcPowerStateNotDischarging = 0b10,
     BatterySvcPowerStateDischarging = 0b11,
-    // Battery states
+    /* Battery states */
     BatterySvcPowerStateBatteryNotPresent = 0b10,
     BatterySvcPowerStateBatteryPresent = 0b11,
 };
@@ -78,6 +78,8 @@ struct BleServiceBattery {
 
 LIST_DEF(BatterySvcInstanceList, BleServiceBattery*, M_POD_OPLIST);
 
+/* We need to keep track of all battery service instances so that we can update 
+ * them when the battery state changes. */
 static BatterySvcInstanceList_t instances;
 static bool instances_initialized = false;
 
@@ -108,7 +110,6 @@ BleServiceBattery* ble_svc_battery_start(bool auto_update) {
         BatterySvcInstanceList_push_back(instances, battery_svc);
     }
 
-    // ble_svc_battery_update_power_state();
     return battery_svc;
 }
 
@@ -128,14 +129,14 @@ void ble_svc_battery_stop(BleServiceBattery* battery_svc) {
     for(size_t i = 0; i < BatterySvcGattCharacteristicCount; i++) {
         ble_gatt_characteristic_delete(battery_svc->svc_handle, &battery_svc->chars[i]);
     }
-    // Delete Battery service
+    /* Delete Battery service */
     ble_gatt_service_delete(battery_svc->svc_handle);
     free(battery_svc);
 }
 
 bool ble_svc_battery_update_level(BleServiceBattery* battery_svc, uint8_t battery_charge) {
     furi_check(battery_svc);
-    // Update battery level characteristic
+    /* Update battery level characteristic */
     return ble_gatt_characteristic_update(
         battery_svc->svc_handle,
         &battery_svc->chars[BatterySvcGattCharacteristicBatteryLevel],
@@ -145,7 +146,7 @@ bool ble_svc_battery_update_level(BleServiceBattery* battery_svc, uint8_t batter
 bool ble_svc_battery_update_power_state(BleServiceBattery* battery_svc, bool charging) {
     furi_check(battery_svc);
 
-    // Update power state characteristic
+    /* Update power state characteristic */
     BattrySvcPowerState power_state = {
         .level = BatterySvcPowerStateUnsupported,
         .present = BatterySvcPowerStateBatteryPresent,
@@ -166,6 +167,9 @@ bool ble_svc_battery_update_power_state(BleServiceBattery* battery_svc, bool cha
 
 void ble_svc_battery_state_update(uint8_t* battery_level, bool* charging) {
     if(!instances_initialized) {
+#ifdef FURI_BLE_EXTRA_LOG
+        FURI_LOG_W(TAG, "Battery service not initialized");
+#endif
         return;
     }
 

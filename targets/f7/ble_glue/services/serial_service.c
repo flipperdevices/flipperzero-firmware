@@ -154,25 +154,21 @@ static void
 
 BleServiceSerial* ble_svc_serial_start() {
     BleServiceSerial* serial_svc = malloc(sizeof(BleServiceSerial));
-    // Register event handler
+
     serial_svc->event_handler =
         ble_service_event_dispatcher_register_handler(ble_svc_serial_event_handler, serial_svc);
 
-    // Add service
     if(!ble_gatt_service_add(
            UUID_TYPE_128, &service_uuid, PRIMARY_SERVICE, 12, &serial_svc->svc_handle)) {
         free(serial_svc);
         return NULL;
     }
-
-    // Add characteristics
     for(uint8_t i = 0; i < SerialSvcGattCharacteristicCount; i++) {
         ble_gatt_characteristic_init(
             serial_svc->svc_handle, &ble_svc_serial_chars[i], &serial_svc->chars[i]);
     }
 
     ble_svc_serial_update_rpc_char(serial_svc, SerialServiceRpcStatusNotActive);
-    // Allocate buffer size mutex
     serial_svc->buff_size_mtx = furi_mutex_alloc(FuriMutexTypeNormal);
 
     return serial_svc;
@@ -217,15 +213,12 @@ void ble_svc_serial_notify_buffer_is_empty(BleServiceSerial* serial_svc) {
 void ble_svc_serial_stop(BleServiceSerial* serial_svc) {
     furi_check(serial_svc);
 
-    // Unregister event handler
     ble_service_event_dispatcher_unregister_handler(serial_svc->event_handler);
 
     for(uint8_t i = 0; i < SerialSvcGattCharacteristicCount; i++) {
         ble_gatt_characteristic_delete(serial_svc->svc_handle, &serial_svc->chars[i]);
     }
-    // Delete service
     ble_gatt_service_delete(serial_svc->svc_handle);
-    // Delete buffer size mutex
     furi_mutex_free(serial_svc->buff_size_mtx);
     free(serial_svc);
 }

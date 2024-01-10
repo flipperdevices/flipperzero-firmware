@@ -8,7 +8,8 @@ extern "C" {
 #endif
 
 /*
- * Additinal non-connetable beacon API
+ * Additinal non-connetable beacon API.
+ * Not to be used directly, but through furi_hal_ble_extra_beacon_* APIs.
  */
 
 #define EXTRA_BEACON_MAX_DATA_SIZE (31)

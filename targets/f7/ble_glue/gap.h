@@ -8,7 +8,7 @@
 #define GAP_MAC_ADDR_SIZE (6)
 
 /*
- * GAP helpers - background thread that handles BLE GAP events and advertising
+ * GAP helpers - background thread that handles BLE GAP events and advertising.
  */
 
 #ifdef __cplusplus

@@ -234,7 +234,9 @@ uint32_t furi_hal_ble_get_transmitted_packets();
  */
 bool furi_hal_ble_ensure_c2_mode(BleGlueC2Mode mode);
 
-/** Extra beacon API */
+/**
+ * Extra BLE beacon API 
+ */
 
 /** Set extra beacon data. Can be called in any state
  *
@@ -253,10 +255,9 @@ bool furi_hal_ble_extra_beacon_set_data(const uint8_t* data, uint8_t len);
  */
 uint8_t furi_hal_ble_extra_beacon_get_data(uint8_t* data);
 
-/** Start extra beacon
- * Beacon must be stopped before calling this function
+/** Configure extra beacon.
  *
- * @param[in]  config  extra beacon config
+ * @param[in]  config  extra beacon config: interval, power, address, etc.
  *
  * @return     true on success
  */
@@ -276,13 +277,13 @@ bool furi_hal_ble_extra_beacon_start();
  */
 bool furi_hal_ble_extra_beacon_stop();
 
-/** Check if extra beacon is active
+/** Check if extra beacon is active.
  *
  * @return     extra beacon state
  */
 bool furi_hal_ble_extra_beacon_is_active();
 
-/** Get last extra beacon config
+/** Get last configured extra beacon config
  *
  * @return     extra beacon config. NULL if beacon had never been configured.
  */
