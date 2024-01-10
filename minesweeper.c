@@ -93,6 +93,9 @@ static MineSweeperApp* app_alloc() {
     app->confirmation_screen = dialog_ex_alloc();
     view_dispatcher_add_view(app->view_dispatcher, MineSweeperConfirmationView, dialog_ex_get_view(app->confirmation_screen));
 
+    app->info_screen = text_box_alloc();
+    view_dispatcher_add_view(app->view_dispatcher, MineSweeperInfoView, text_box_get_view(app->info_screen));
+
     Gui* gui = furi_record_open(RECORD_GUI);
 
     view_dispatcher_attach_to_gui(app->view_dispatcher, gui, ViewDispatcherTypeFullscreen);
@@ -122,6 +125,7 @@ static void app_free(MineSweeperApp* app) {
     dialog_ex_free(app->menu_screen);
     variable_item_list_free(app->settings_screen);
     dialog_ex_free(app->confirmation_screen);
+    text_box_free(app->info_screen);
 
 
     furi_string_free(app->settings_info.width_str);

@@ -16,6 +16,7 @@
 #include <gui/modules/loading.h>
 #include <gui/modules/dialog_ex.h>
 #include <gui/modules/variable_item_list.h>
+#include <gui/modules/text_box.h>
 
 #include "scenes/minesweeper_scene.h"
 #include "views/start_screen.h"
@@ -48,6 +49,7 @@ typedef struct MineSweeperApp {
     DialogEx* menu_screen;
     VariableItemList* settings_screen;
     DialogEx* confirmation_screen;
+    TextBox* info_screen;
 
     MineSweeperAppSettings settings_info;
     MineSweeperAppSettings t_settings_info;
@@ -68,6 +70,7 @@ typedef enum {
     MineSweeperMenuView,
     MineSweeperSettingsView,
     MineSweeperConfirmationView,
+    MineSweeperInfoView,
     MineSweeperViewCount,
 } MineSweeperView;
 
