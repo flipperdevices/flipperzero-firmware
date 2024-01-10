@@ -13,14 +13,13 @@ os.system("color")
 class TestInfrared(BaseCase):
     def test_infrared_menu(self, nav):
         nav.infrared.go_into()
-        menu = nav.get_menu_list()
         menu_ref = [
             "Universal Remotes",
             "Learn New Remote",
             "Saved Remotes",
             "Debug",
         ]
-        assert menu == menu_ref, "Infrared menu list is wrong"
+        assert nav.get_menu_list(ref = nav.get_ref_from_list(menu_ref, nav.font_haxrcorp_4089, invert = 1)) == menu_ref
         nav.go_to_main_screen()
 
     def test_read(self, nav):

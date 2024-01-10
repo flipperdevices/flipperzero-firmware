@@ -55,12 +55,11 @@ class TestIbuttonBench(BaseCase):
 
         with allure.step("Cheking key menu"):
             nav_reader.press_right()
-            menu = nav_reader.get_menu_list()
             menu_ref = [
                 "Save",
                 "Emulate",
             ]
-            assert menu == menu_ref, "Key actions menu is wrong"
+            assert nav_reader.get_menu_list(ref = nav_reader.get_ref_from_list(menu_ref, nav_reader.font_haxrcorp_4089, invert = 1)) == menu_ref, "Key actions menu is wrong"
         relay.reset()
 
     def test_metakom(self, nav_reader, nav_key, relay):
@@ -107,12 +106,11 @@ class TestIbuttonBench(BaseCase):
             ), "Reading emulated key failed"
         with allure.step("Cheking key menu"):
             nav_reader.press_right()
-            menu = nav_reader.get_menu_list()
             menu_ref = [
                 "Save",
                 "Emulate",
             ]
-            assert menu == menu_ref, "Key actions menu is wrong"
+            assert nav_reader.get_menu_list(ref = nav_reader.get_ref_from_list(menu_ref, nav_reader.font_haxrcorp_4089, invert = 1)) == menu_ref, "Key actions menu is wrong"
         relay.reset()
 
     def test_ds1992(self, nav_reader, nav_key, relay):
@@ -159,7 +157,6 @@ class TestIbuttonBench(BaseCase):
             ), "Reading emulated key failed"
         with allure.step("Cheking key menu"):
             nav_reader.press_right()
-            menu = nav_reader.get_menu_list()
             menu_ref = [
                 "Save",
                 "Emulate",
@@ -167,7 +164,7 @@ class TestIbuttonBench(BaseCase):
                 "Write Blank",
                 "Write Copy",
             ]
-            assert menu == menu_ref, "Key actions menu is wrong"
+            assert nav_reader.get_menu_list(ref = nav_reader.get_ref_from_list(menu_ref, nav_reader.font_haxrcorp_4089, invert = 1)) == menu_ref, "Key actions menu is wrong"
         relay.reset()
 
     def test_ds1996(self, nav_reader, nav_key, relay):
@@ -214,14 +211,13 @@ class TestIbuttonBench(BaseCase):
             ), "Reading emulated key failed"
         with allure.step("Cheking key menu"):
             nav_reader.press_right()
-            menu = nav_reader.get_menu_list()
             menu_ref = [
                 "Save",
                 "Emulate",
                 "View Data",
                 "Write Copy",
             ]
-            assert menu == menu_ref, "Key actions menu is wrong"
+            assert nav_reader.get_menu_list(ref = nav_reader.get_ref_from_list(menu_ref, nav_reader.font_haxrcorp_4089, invert = 1)) == menu_ref, "Key actions menu is wrong"
         relay.reset()
 
     def test_ds1971(self, nav_reader, nav_key, relay):
@@ -268,12 +264,11 @@ class TestIbuttonBench(BaseCase):
             ), "Reading emulated key failed"
         with allure.step("Cheking key menu"):
             nav_reader.press_right()
-            menu = nav_reader.get_menu_list()
             menu_ref = [
                 "Save",
                 "Emulate",
                 "View Data",
                 "Write Copy",
             ]
-            assert menu == menu_ref, "Key actions menu is wrong"
+            assert nav_reader.get_menu_list(ref = nav_reader.get_ref_from_list(menu_ref, nav_reader.font_haxrcorp_4089, invert = 1)) == menu_ref, "Key actions menu is wrong"
         relay.reset()

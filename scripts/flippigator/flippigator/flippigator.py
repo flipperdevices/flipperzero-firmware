@@ -16,6 +16,7 @@ from flippigator.modules.rfid import AppRfid
 from flippigator.modules.settings import AppSettings
 from flippigator.modules.subghz import AppSubGhz
 from flippigator.modules.u2f import AppU2f
+from PIL import Image, ImageFont, ImageDraw
 
 # APPLY_TEMPLATE_THRESHOLD = 0.99
 SCREEN_H = 128
@@ -59,6 +60,11 @@ class Navigator:
         self.u2f = AppU2f(self)
         self.applications = AppApplications(self)
         self.settings = AppSettings(self)
+
+        self.font_helvB08 = ImageFont.load("./flippigator/fonts/helvB08.pil")
+        self.font_haxrcorp_4089 = ImageFont.truetype("./flippigator/fonts/haxrcorp_4089.ttf", 16)
+        self.font_profont11 = ImageFont.load("./flippigator/fonts/profont11.pil")
+        self.font_profont22 = ImageFont.load("./flippigator/fonts/profont22.pil")
 
         for filename in os.listdir(path):
             f = cv.imread(path + str(filename), 0)
@@ -133,16 +139,62 @@ class Navigator:
         cv.imshow(self._window_name, display_image)
         key = cv.waitKey(1)
 
+    def get_img_from_string(self, phrase, font, invert = 0, no_space = 0):
+        self.logger.debug("Generated template for '" + phrase + "'")
+        if no_space == 0:
+            result = Image.new("L", font.getsize(phrase+"  "), 255)
+        else:
+            result = Image.new("L", font.getsize(phrase), 255)
+        dctx = ImageDraw.Draw(result)
+        dctx.text((0, 0), phrase+"  ", font=font)
+        result = numpy.array(result)
+        if font == self.font_helvB08:
+            result = result[3:, :]
+        else:
+            result = result[2:, :]
+        if invert:
+            result = cv.bitwise_not(result)
+        display_image = cv.resize(
+            result,
+            (0, 0), 
+            fx=self._scale, 
+            fy=self._scale,
+            interpolation=cv.INTER_NEAREST,
+        ) 
+        #cv.imshow(str(phrase) + " " + str(font), display_image)
+        return result
+
+    def get_ref_from_string(self, phrase, font, invert = 0, no_space = 0):
+        ref_dict = dict()
+        ref_dict.update({"phrase": self.get_img_from_string(phrase, font, invert, no_space)})
+        return ref_dict
+
+    def get_ref_from_list(self, ref_list, font, invert = 0):
+        ref_dict = dict()
+        for i in ref_list:
+            ref_dict.update({i: self.get_img_from_string(i, font, invert)})
+        return ref_dict
+
+    def get_ref_all_fonts(self, phrase):
+        ref_dict = dict()
+        ref_dict.update({"gen0": self.get_img_from_string(phrase, self.font_helvB08, 0)})
+        #ref_dict.update({1: self.get_img_from_string(phrase, self.font_helvB08, 1)})
+        #ref_dict.update({2: self.get_img_from_string(phrase, self.font_haxrcorp_4089, 0)})
+        ref_dict.update({"gen1": self.get_img_from_string(phrase, self.font_haxrcorp_4089, 1)})
+        #ref_dict.update({4: self.get_img_from_string(phrase, self.font_profont22, 0)})
+        ref_dict.update({"gen2": self.get_img_from_string(phrase, self.font_profont22, 1)})
+        #ref_dict.update({6: self.get_img_from_string(phrase, self.font_profont11, 0)})
+        ref_dict.update({"gen3": self.get_img_from_string(phrase, self.font_profont11, 1)})
+        return ref_dict
+
     def recog_ref(self, ref=None, area=(0, 64, 0, 128)):
         if ref is None:
-            ref = []
+            ref = self.imRef
         # self.updateScreen()
         temp_pic_list = list()
         screen_image = self.get_raw_screen()[area[0] : area[1], area[2] : area[3]]
-        if len(ref) == 0:
-            ref = list(self.imRef.keys())
-        for im in ref:
-            template = cv.cvtColor(self.imRef.get(im), 0)
+        for im in ref.keys():
+            template = cv.cvtColor(ref.get(im), 0)
             if (template.shape[0] <= screen_image.shape[0]) and (
                 (template.shape[1] <= screen_image.shape[1])
             ):
@@ -198,9 +250,9 @@ class Navigator:
 
         return found_ic
 
-    def get_current_state(self, timeout: float = 5, ref=None, area=(0, 64, 0, 128)):
+    def get_current_state(self, timeout: float = 2, ref=None, area=(0, 64, 0, 128)):
         if ref is None:
-            ref = []
+            ref = self.imRef
         self.update_screen()
         state = self.recog_ref(ref, area)
         start_time = time.time()
@@ -217,7 +269,7 @@ class Navigator:
     def wait_for_state(self, state, timeout=5) -> int:
         start_time = time.time()
         while start_time + timeout > time.time():
-            cur_state = self.get_current_state()
+            cur_state = self.get_current_state(timeout=0.1)
             if state in cur_state:
                 return 0
         return -1
@@ -262,14 +314,16 @@ class Navigator:
         self.proto.rpc_gui_send_input(f"{duration} {button}")
         self.logger.debug("Press " + button)
 
-    def get_menu_list(self):
+    def get_menu_list(self, ref = None):
+        if ref == None:
+            ref = self.imRef
         time.sleep(0.2)
         self.logger.info("Scanning menu list")
         menus = list()
-        self.get_current_state(timeout=1)
+        self.get_current_state(timeout=0.2, ref=ref)
 
         while True:
-            cur = self.get_current_state(timeout=1)
+            cur = self.get_current_state(timeout=0.2, ref=ref)
             if not (cur == []):
                 if cur[0] in menus:
                     break
@@ -300,16 +354,37 @@ class Navigator:
 
         return menus
 
-    def go_to(self, target, area=(0, 64, 0, 128), direction: Optional[str] = "down"):
-        state = self.get_current_state(area=area)
-        self.logger.info("Going to " + target)
+    def go_to(self, target, area=(0, 64, 0, 128), direction: Optional[str] = "down", timeout = 20):
+        if not (target in self.imRef.keys()):
+            self.logger.info("Going to " + target)
+            self.logger.info("No ref for target, generating from text" + target)
+            ref = self.get_ref_all_fonts(target)
+            state = self.get_current_state(area=area, timeout = 0.1, ref = ref)
 
-        while not (target in state):
-            if direction == "down":
-                self.press_down()
-            elif direction == "up":
-                self.press_up()
-            state = self.get_current_state(area=area)
+            start_time = time.time()
+            while start_time + timeout > time.time():
+                state = self.get_current_state(area=area, timeout = 0.1, ref = ref)
+                if len(state) != 0:
+                    return 0
+                if direction == "down":
+                    self.press_down()
+                elif direction == "up":
+                    self.press_up()
+            return -1
+        else:
+            state = self.get_current_state(area=area, timeout = 0.3)
+            self.logger.info("Going to " + target)
+
+            start_time = time.time()
+            while start_time + timeout > time.time():
+                state = self.get_current_state(area=area, timeout = 0.5)
+                if target in state:
+                    return 0
+                if direction == "down":
+                    self.press_down()
+                elif direction == "up":
+                    self.press_up()
+            return -1
 
     def open(self, target, area=(0, 64, 0, 128), direction: Optional[str] = "down"):
         self.go_to(target, area, direction)
@@ -320,15 +395,15 @@ class Navigator:
         self.press_back()
         self.press_back()
         time.sleep(0.1)  # try to fix freeze while emilating Mfc1K
-        state = self.get_current_state()
+        state = self.get_current_state(timeout = 0.1)
         while not ("SDcardIcon" in state):
-            state = self.get_current_state()
+            state = self.get_current_state(timeout = 0.1)
             if "ExitLeft" in state:
                 self.press_left()
             else:
                 self.press_back()
 
-        time.sleep(1)  # wait for some time, because of missing key pressing
+        time.sleep(1.5)  # wait for some time, because of missing key pressing
 
     def open_file(self, module, filename):
         self.logger.info("Opening file '" + filename + "' in module '" + module + "'")
@@ -357,20 +432,11 @@ class Navigator:
         files = list()
         start_time = time.time()
 
-        while start_time + 10 > time.time():
-            state = self.get_current_state(timeout=0.5, area=(15, 64, 0, 128))
-
-            if not (state == []):
-                if state[0] in files:
-                    self.logger.warning("File not found!")
-                    return -1
-                if state[0] == "browser_" + filename:
-                    break
-                files.append(state[0])
-            self.press_down()
-        if start_time + 10 <= time.time():
-            self.logger.warning("File not found! (timeout)")
+        result = self.go_to(filename, area=(15, 64, 0, 128), timeout = 15)
+        if result == -1:
+            self.logger.warning("File not found!")
             return -1
+
         self.press_ok()
         self.go_to("browser_Run in app", area=(15, 64, 0, 128))
         self.press_ok()
@@ -404,18 +470,8 @@ class Navigator:
         files = list()
         start_time = time.time()
 
-        while start_time + 10 > time.time():
-            state = self.get_current_state(timeout=0.5, area=(15, 64, 0, 128))
-
-            if not (state == []):
-                if state[0] in files:
-                    self.logger.warning("File not found!")
-                    return -1
-                if state[0] == "browser_" + filename:
-                    break
-                files.append(state[0])
-            self.press_down()
-        if start_time + 10 <= time.time():
+        result = self.go_to(filename, area=(15, 64, 0, 128), timeout = 15)
+        if result == -1:
             self.logger.warning("File not found! (timeout)")
             return -1
 
