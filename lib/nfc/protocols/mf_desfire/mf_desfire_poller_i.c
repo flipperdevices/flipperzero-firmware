@@ -59,7 +59,8 @@ MfDesfireError mf_desfire_send_chunks(
                 break;
             }
 
-            const size_t rx_size = bit_buffer_get_size_bytes(instance->rx_buffer);
+            // Compute size of retrieved data, not counting the "next" flag byte.
+            const size_t rx_size = bit_buffer_get_size_bytes(instance->rx_buffer) - sizeof(uint8_t);
             const size_t rx_capacity_remaining =
                 bit_buffer_get_capacity_bytes(rx_buffer) - bit_buffer_get_size_bytes(rx_buffer);
 
