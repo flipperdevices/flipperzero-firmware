@@ -10,7 +10,7 @@
  * @author Ian S. Cohee
  */
 #include "bme680.h"
-#include "BME68x-Sensor-API-4.4.8/bme68x.h"
+#include "BME68x_Sensor_API_448/bme68x.h"
 #include "../gas_sensor_i.h"
 
 #include <furi_hal_power.h>

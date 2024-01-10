@@ -14,7 +14,7 @@
 #include <furi.h>
 #include <furi_hal_i2c.h>
 
-#include "BME68x-Sensor-API-4.4.8/bme68x.h"
+#include "BME68x_Sensor_API_448/bme68x.h"
 
 /**
  * @brief Typedefs of BME68x-Sensor-API definitions
