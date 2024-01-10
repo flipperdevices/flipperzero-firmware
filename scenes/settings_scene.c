@@ -155,11 +155,7 @@ static void minesweeper_scene_settings_screen_set_solvable(VariableItem* item) {
 
     uint8_t index = variable_item_get_current_value_index(app->t_settings_info.solvable_item);
 
-    FURI_LOG_D(TAG, "CALLBACK HAS INDEX %d", index);
-    
     app->t_settings_info.ensure_solvable_board = (index == 1) ? true : false;
-
-    FURI_LOG_D(TAG, "BOOL SET TO %d", app->t_settings_info.ensure_solvable_board);
 
     variable_item_set_current_value_text(item, settings_screen_verifier_text[index]);
 
@@ -185,7 +181,6 @@ void minesweeper_scene_settings_screen_on_enter(void* context) {
 
     // If we are accessing the scene and have not changed the settings
     if (!app->is_settings_changed) {
-        FURI_LOG_D(TAG, "Setting temp settings to app settings");
         // Set temp setting buffer to current state
         app->t_settings_info = app->settings_info;
     }
