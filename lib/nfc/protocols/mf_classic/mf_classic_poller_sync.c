@@ -1,6 +1,7 @@
 #include "mf_classic_poller_sync.h"
 #include "mf_classic_poller_i.h"
 
+#include "protocols/mf_classic/mf_classic.h"
 #include <nfc/nfc_poller.h>
 
 #include <furi.h>
@@ -484,6 +485,7 @@ MfClassicError
 
         mf_classic_get_read_sectors_and_keys(mfc_data, &sectors_read, &keys_found);
         if((sectors_read > 0) || (keys_found > 0)) {
+            if(!mf_classic_is_card_read(mfc_data)) error = MfClassicErrorPartialRead;
             mf_classic_copy(data, mfc_data);
         } else {
             error = MfClassicErrorNotPresent;
