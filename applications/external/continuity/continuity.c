@@ -6,7 +6,7 @@
 #include <gui/gui.h>
 #include <input/input.h>
 
-extern const GpioPin gpio_ext_pc0;
+// extern const GpioPin gpio_ext_pc0;
 
 // These should be an app context, I know.
 bool pinState = false; // yeah globals ftw!
