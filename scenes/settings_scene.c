@@ -20,6 +20,7 @@ typedef enum {
     MineSweeperSettingsScreenEventWidthChange,
     MineSweeperSettingsScreenEventHeightChange,
     MineSweeperSettingsScreenEventSolvableChange,
+    MineSweeperSettingsScreenEventInfoChange,
 } MineSweeperSettingsScreenEvent;
 
 static const char* settings_screen_difficulty_text[MineSweeperSettingsScreenDifficultyTypeNum] = {
@@ -166,6 +167,14 @@ static void minesweeper_scene_settings_screen_set_solvable(VariableItem* item) {
     
 }
 
+static void minesweeper_scene_settings_screen_set_info(VariableItem* item) {
+    furi_assert(item);
+
+    MineSweeperApp* app = variable_item_get_context(item);
+
+    view_dispatcher_send_custom_event(app->view_dispatcher, MineSweeperSettingsScreenEventInfoChange);
+}
+
 void minesweeper_scene_settings_screen_on_enter(void* context) {
     furi_assert(context);
 
@@ -203,7 +212,7 @@ void minesweeper_scene_settings_screen_on_enter(void* context) {
     item = variable_item_list_add(
            va,
            "Board Width",
-           147-16,
+           33-16,
            minesweeper_scene_settings_screen_set_width,
            app);
 
@@ -226,7 +235,7 @@ void minesweeper_scene_settings_screen_on_enter(void* context) {
     item = variable_item_list_add(
            va,
            "Board Height",
-           65-7,
+           33-7,
            minesweeper_scene_settings_screen_set_height,
            app);
 
@@ -256,8 +265,6 @@ void minesweeper_scene_settings_screen_on_enter(void* context) {
 
     uint8_t idx = (app->t_settings_info.ensure_solvable_board) ? 1 : 0;
 
-    FURI_LOG_D(TAG, "STARTING IDX FOR BOOL %d, FROM BOOL t_settings_info %d", idx, app->t_settings_info.ensure_solvable_board);
-
     variable_item_set_current_value_index(
             item,
             idx);
@@ -265,6 +272,22 @@ void minesweeper_scene_settings_screen_on_enter(void* context) {
     variable_item_set_current_value_text(
             item,
             settings_screen_verifier_text[idx]);
+    
+    // Set info item
+    item = variable_item_list_add(
+            va,
+            "Right For Info",
+            2,
+            minesweeper_scene_settings_screen_set_info,
+            app);
+
+    variable_item_set_current_value_index(
+            item,
+            0);
+
+    variable_item_set_current_value_text(
+            item,
+            "-------");
 
     view_dispatcher_switch_to_view(app->view_dispatcher, MineSweeperSettingsView);
 }
@@ -294,6 +317,15 @@ bool minesweeper_scene_settings_screen_on_event(void* context, SceneManagerEvent
             
             case MineSweeperSettingsScreenEventHeightChange :
 
+                break;
+
+            case MineSweeperSettingsScreenEventSolvableChange :
+
+                break;
+
+            case MineSweeperSettingsScreenEventInfoChange :
+
+                scene_manager_next_scene(app->scene_manager, MineSweeperSceneInfoScreen);
                 break;
 
             default :
