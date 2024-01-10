@@ -1,0 +1,14 @@
+App(
+    appid="crossy_road",
+    name="Crossy Road",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="crossy_road",
+    stack_size=1 * 1024,
+    fap_icon="crossy_road_10x.png",
+    fap_icon_assets="images",
+    fap_category="Games",
+    fap_author="Mikael098", #  Mikael Fortier 
+    fap_weburl="https://github.com/Mikael098/CrossyRoad-FlipperZero-",
+    fap_version="1.0",
+    fap_description="Frogger clone WIP.",
+)

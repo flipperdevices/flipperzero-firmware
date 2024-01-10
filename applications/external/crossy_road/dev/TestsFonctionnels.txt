@@ -1,0 +1,41 @@
+//Test fonctionnels
+
+<-----------------Test du déplacement du joueur----------------->
+1: Le joueur peut se déplacer vers la droite lorsqu'il apui sur la flèche de droite du flipper zero
+2: Le joueur peut se déplacer vers la gauche lorsqu'il apui sur la flèche de gauche du flipper zero
+3: Le joueur peut se déplacer vers le haut lorsqu'il apui sur la flèche du haut du flipper zero
+4: Le joueur peut se déplacer vers le bas lorsqu'il apui sur la flèche du bas du flipper zero
+5: Le joueur peut quitter la partie lorsqu'il apui sur la flèche de retour du flipper zero
+6: Lorsque le joueur veut se déplacer en dehors de la carte sur l'axe des x, il se fait téléporter à la limite de la map
+7: Lorsque le joueur veut se déplacer en dehors de la carte sur l'axe des y, il se fait téléporter à l'extrimité de la carte sur l'axe des y
+
+<-----------------Test des obstacles----------------->
+8: Les obstacles réapparaissent dans le haut de l'écran une fois qu'ils sortent de l'écran
+9: Lorsque le joueur entre en collision avec un obstacle, il se fait téléporter à la ligne de départ
+10: Lorsque le joueur entre en collision avec un obstacle, les points se remis à zéro
+11: Lorsque le joueur entre en collision avec un obstacle, les obstacles sont repositioner à leur position de départ
+12: Lorsque le joueur entre en collision avec un obstacle, la vitesse des obstacles sont remise à ceux de défaut
+13: Lorsque le joueur entre en collision avec un obstacle, le menu de fin de partie apparaît
+14: La vitesse maximal des obstacles est définie à 3
+
+<-----------------Test de la ligne d'arrivée----------------->
+15: Lorsque le joueur entre en collision avec la ligne d'arrivée, le nombre de points s'incrémente de un
+16: Lorsque le joueur entre en collision avec la ligne d'arrivée, le joueur se fait téléporter à la ligne de départ
+17: Lorsque le joueur entre en collision avec la ligne d'arrivée, la vitesses des obstacles s'incrémente de 0.5 
+18: Lorsque le joueur entre en collision avec la ligne d'arrivée, la difficultée du jeu augmente
+
+<-----------------Test des menus----------------->
+19: Lorsque le joueur appui sur le bouton du centre, il peut sortir de menu d'accueil du jeux pour jouer au jeux
+20: Lorsque le joueur appui sur le bouton du centre, il peut sortir de menu de fin de partie du jeux pour jouer au jeux
+21: Lorsque le menu de fin de partie apparaît, le pointage du joueur est inscrit
+22: Le texte des menus sont correctement centré au centre
+
+<-----------------Test autres----------------->
+23: L'application peut être disponible dans divers firmware
+24: Il est possible de compléter le jeu
+25: Il est possible de modifer le jeu et de le mettre en ligne la nouvelle version sans problème
+26: Le nom de l'application est différent que celui de base
+27: L'application est situé dans de dossier "applications_user" 
+28: La fermeture de l'application se fait correctement lors de l'appui de la touche de retour
+29: L'ouverture de l'application se fait correctement
+30: Le rafraîchissement de l'application se fait correctement

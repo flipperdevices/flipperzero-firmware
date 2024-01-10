@@ -1,0 +1,14 @@
+App(
+    appid="gas_sensor",
+    name="Gas Sensor",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="gas_sensor_app",
+    stack_size=2 * 1024,
+    fap_category="GPIO",
+    fap_icon="gas_sensor.png",
+    fap_icon_assets="images",
+    fap_author="iancohee",
+    fap_weburl="https://github.com/iancohee/gas_sensor_fap",
+    fap_version="0.1",
+    fap_description="Simple application that reads BME680 and SGP30 data.",
+)
