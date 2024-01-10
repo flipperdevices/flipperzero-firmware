@@ -307,9 +307,10 @@ MfDesfireError mf_desfire_poller_read_file_data(
 
     simple_array_init(data->data, size);
     uint8_t* data_buf = (uint8_t*)simple_array_get_data(data->data);
+    const size_t max_read_size = bit_buffer_get_capacity_bytes(instance->result_buffer);
 
     for(cur_offset = offset; cur_offset < size; cur_offset += num_read) {
-        read_size = size - cur_offset;
+        read_size = MIN(max_read_size, size - cur_offset);
 
         bit_buffer_reset(instance->input_buffer);
         bit_buffer_append_byte(instance->input_buffer, MF_DESFIRE_CMD_READ_DATA);
@@ -324,7 +325,10 @@ MfDesfireError mf_desfire_poller_read_file_data(
         if(error != MfDesfireErrorNone) break;
 
         num_read = bit_buffer_get_size_bytes(instance->result_buffer);
-        if(num_read == 0 || num_read > read_size) return MfDesfireErrorProtocol;
+        if(num_read == 0) break;
+
+        if(num_read > read_size)
+            num_read = read_size; // Prevent buffer overflow by sender.
 
         bit_buffer_write_bytes(instance->result_buffer, &data_buf[cur_offset], num_read);
     }
