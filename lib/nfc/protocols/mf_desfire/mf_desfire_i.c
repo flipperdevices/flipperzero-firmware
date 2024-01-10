@@ -490,7 +490,10 @@ bool mf_desfire_application_load(MfDesfireApplication* data, const char* prefix,
         if(i != key_version_count) break;
 
         uint32_t file_count;
-        if(!mf_desfire_file_count_load(&file_count, prefix, ff)) break;
+        if(!mf_desfire_file_count_load(&file_count, prefix, ff)) {
+            success = true;
+            break;
+        }
 
         simple_array_init(data->file_ids, file_count);
         if(!mf_desfire_file_ids_load(simple_array_get_data(data->file_ids), file_count, prefix, ff))
