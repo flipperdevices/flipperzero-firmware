@@ -147,7 +147,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - [NFC: Set ATQA scene bit numbering changed (By Leptopt1los)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/4e068ba59316201bfaeea29eb708def7905b113f)
 - [NFC parsers false read() positive return fixed (By Leptopt1los)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/db0c7e4fad5c214c36aa8753d27befe49676a985) [Also Applied to other MFC Parsers (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/3608d5bc5f31f65f39f4debfc8b9799d76fc804e)
 - OFW PR: NFC: [Parser for ITSO (UK) #3325 (By gsp8181)](https://github.com/flipperdevices/flipperzero-firmware/pull/3325)
-- Updated: [NFC Playlist v1.1 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
 - Updated: [Mifare Fuzzer v1.3 (By spheeere98)](https://github.com/spheeere98/mifare_fuzzer) [Card emulation for Mifare Fuzzer #38 (By Kondenko)](https://github.com/xMasterX/all-the-plugins/pull/38)
 - Updated: [ShapShup v1.1 (By derskythe)](https://github.com/derskythe/flipperzero-shapshup)
 - Updated: [PicoPass (iClass) v1.12 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass) [Rework. Part 1 #68 (By gornekich)](https://github.com/flipperdevices/flipperzero-good-faps/pull/68) [Hopefully fix name buffer size issues (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/9058c0c6a9980f84f6436673f9d3fbbc82cb3f81) [Save partial #85 (By bettse)](https://github.com/flipperdevices/flipperzero-good-faps/pull/85) [More info view (raw bytes) #86 (By bettse)](https://github.com/flipperdevices/flipperzero-good-faps/pull/86) [detect config card #87 (By bettse)](https://github.com/flipperdevices/flipperzero-good-faps/pull/87) [add additional keys to elite dict #89 (By kitsunehunter)](https://github.com/flipperdevices/flipperzero-good-faps/pull/89) [config SE problem #90 (By bettse)](https://github.com/flipperdevices/flipperzero-good-faps/pull/90) [handle NR-MAC auth for legacy cards #95(By bettse)](https://github.com/flipperdevices/flipperzero-good-faps/pull/95) [Create seader directory if needed #101](https://github.com/flipperdevices/flipperzero-good-faps/pull/101) [Add support for non-secure cards #106 (By nvx)](https://github.com/flipperdevices/flipperzero-good-faps/pull/106)
@@ -155,6 +154,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [NFC: parsers minor cleanup #3329 (By Leptopt1los)](https://github.com/flipperdevices/flipperzero-firmware/pull/3329)
 - OFW: [Ntag success write freeze when not saved card #3354 (By RebornedBrain)](https://github.com/flipperdevices/flipperzero-firmware/pull/3354)
 - OFW PR: NFC: [Parser for San Francisco Bay Area "Clipper" transit card. #3344 (By ke6jjj)](https://github.com/flipperdevices/flipperzero-firmware/pull/3344)
+- Updated: [NFC Playlist v1.1 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
 
 <a name="release">
 
