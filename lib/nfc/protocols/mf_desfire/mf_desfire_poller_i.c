@@ -60,7 +60,8 @@ MfDesfireError mf_desfire_send_chunks(
             }
 
             // Compute size of retrieved data, not counting the "next" flag byte.
-            const size_t rx_size = bit_buffer_get_size_bytes(instance->rx_buffer) - sizeof(uint8_t);
+            const size_t rx_size =
+                bit_buffer_get_size_bytes(instance->rx_buffer) - sizeof(uint8_t);
             const size_t rx_capacity_remaining =
                 bit_buffer_get_capacity_bytes(rx_buffer) - bit_buffer_get_size_bytes(rx_buffer);
 
@@ -327,8 +328,7 @@ MfDesfireError mf_desfire_poller_read_file_data(
         num_read = bit_buffer_get_size_bytes(instance->result_buffer);
         if(num_read == 0) break;
 
-        if(num_read > read_size)
-            num_read = read_size; // Prevent buffer overflow by sender.
+        if(num_read > read_size) num_read = read_size; // Prevent buffer overflow by sender.
 
         bit_buffer_write_bytes(instance->result_buffer, &data_buf[cur_offset], num_read);
     }
