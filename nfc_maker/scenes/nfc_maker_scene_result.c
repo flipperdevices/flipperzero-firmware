@@ -128,7 +128,7 @@ void nfc_maker_scene_result_on_enter(void* context) {
         }
         case NfcMakerSceneHttps: {
             tnf = 0x01; // NFC Forum well-known type [NFC RTD]
-            type = "\x55";
+            type = "U";
 
             data_len = strnlen(app->big_buf, BIG_INPUT_LEN);
             payload_len = data_len + 1;
@@ -141,7 +141,7 @@ void nfc_maker_scene_result_on_enter(void* context) {
         }
         case NfcMakerSceneMail: {
             tnf = 0x01; // NFC Forum well-known type [NFC RTD]
-            type = "\x55";
+            type = "U";
 
             data_len = strnlen(app->mail_buf, MAIL_INPUT_LEN);
             payload_len = data_len + 1;
@@ -154,7 +154,7 @@ void nfc_maker_scene_result_on_enter(void* context) {
         }
         case NfcMakerScenePhone: {
             tnf = 0x01; // NFC Forum well-known type [NFC RTD]
-            type = "\x55";
+            type = "U";
 
             data_len = strnlen(app->phone_buf, PHONE_INPUT_LEN);
             payload_len = data_len + 1;
@@ -167,22 +167,22 @@ void nfc_maker_scene_result_on_enter(void* context) {
         }
         case NfcMakerSceneText: {
             tnf = 0x01; // NFC Forum well-known type [NFC RTD]
-            type = "\x54";
+            type = "T";
 
             data_len = strnlen(app->big_buf, BIG_INPUT_LEN);
             payload_len = data_len + 3;
             payload = malloc(payload_len);
 
             payload[j++] = 0x02;
-            payload[j++] = 0x65; // e
-            payload[j++] = 0x6E; // n
+            payload[j++] = 'e';
+            payload[j++] = 'n';
             memcpy(&payload[j], app->big_buf, data_len);
             j += data_len;
             break;
         }
         case NfcMakerSceneUrl: {
             tnf = 0x01; // NFC Forum well-known type [NFC RTD]
-            type = "\x55";
+            type = "U";
 
             data_len = strnlen(app->big_buf, BIG_INPUT_LEN);
             payload_len = data_len + 1;
@@ -292,7 +292,7 @@ void nfc_maker_scene_result_on_enter(void* context) {
         }
         buf[i++] = flags; // Flags and TNF
         buf[i++] = type_len; // Type length
-        if(flags & 1 << 4) { // SR (Short Record)
+        if(flags & (1 << 4)) { // SR (Short Record)
             buf[i++] = payload_len; // Payload length
         } else {
             buf[i++] = 0x00; // Payload length
