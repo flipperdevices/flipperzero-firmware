@@ -1,7 +1,6 @@
 #include "mf_classic_poller_sync.h"
 #include "mf_classic_poller_i.h"
 
-#include "protocols/mf_classic/mf_classic.h"
 #include <nfc/nfc_poller.h>
 
 #include <furi.h>
