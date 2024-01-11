@@ -64,7 +64,8 @@ int32_t nfc_playlist_emulation_task(void* context) {
     view_dispatcher_switch_to_view(nfc_playlist->view_dispatcher, NfcPlaylistView_Popup);
 
     if(file_stream_open(
-           stream, furi_string_get_cstr(nfc_playlist->file_path), FSAM_READ, FSOM_OPEN_EXISTING)) {
+           stream, furi_string_get_cstr(nfc_playlist->file_path), FSAM_READ, FSOM_OPEN_EXISTING) &&
+       nfc_playlist->file_selected) {
         EmulationState = NfcPlaylistEmulationState_Emulating;
         int file_position = 0;
         while(stream_read_line(stream, line) &&
@@ -124,7 +125,9 @@ int32_t nfc_playlist_emulation_task(void* context) {
                     furi_delay_ms(50);
                     time_counter_ms -= 50;
                 }
-            } else if(strcasestr(file_ext, "nfc") == NULL) {
+            }
+
+            else if(strcasestr(file_ext, "nfc") == NULL) {
                 char popup_header_text[(21 + strlen(file_name))];
                 snprintf(
                     popup_header_text,
@@ -143,7 +146,9 @@ int32_t nfc_playlist_emulation_task(void* context) {
                     furi_delay_ms(50);
                     time_counter_ms -= 50;
                 }
-            } else {
+            }
+
+            else {
                 char popup_header_text[(12 + strlen(file_name))];
                 snprintf(
                     popup_header_text, (12 + strlen(file_name)), "%s\n%s", "Emulating:", file_name);
@@ -176,7 +181,15 @@ int32_t nfc_playlist_emulation_task(void* context) {
         popup_set_text(nfc_playlist->popup, "Press back", 64, 50, AlignCenter, AlignTop);
         stop_blink(nfc_playlist);
         EmulationState = NfcPlaylistEmulationState_Stopped;
-    } else {
+    }
+
+    else if(!nfc_playlist->file_selected) {
+        popup_set_header(
+            nfc_playlist->popup, "No playlist selected", 64, 10, AlignCenter, AlignTop);
+        popup_set_text(nfc_playlist->popup, "Press back", 64, 50, AlignCenter, AlignTop);
+    }
+
+    else {
         popup_set_header(
             nfc_playlist->popup, "Failed to open playlist", 64, 10, AlignCenter, AlignTop);
         popup_set_text(nfc_playlist->popup, "Press back", 64, 50, AlignCenter, AlignTop);

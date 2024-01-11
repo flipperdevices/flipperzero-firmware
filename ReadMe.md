@@ -158,9 +158,9 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [NFC: parsers minor cleanup #3329 (By Leptopt1los)](https://github.com/flipperdevices/flipperzero-firmware/pull/3329)
 - OFW: [Ntag success write freeze when not saved card #3354 (By RebornedBrain)](https://github.com/flipperdevices/flipperzero-firmware/pull/3354)
 - OFW PR: NFC: [Parser for San Francisco Bay Area "Clipper" transit card. #3344 (By ke6jjj)](https://github.com/flipperdevices/flipperzero-firmware/pull/3344)
-- Updated: [NFC Playlist v1.1 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
 - Updated: [NFC Maker NTAG215 (by Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/343cb39d08f60b75b537e1a31100707935cf6e9d)
 - NFC: [Parser for NDEF (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/ca82f485248e2355a8ee2c31bec3ecbf22de2b38)
+- Updated: [NFC Playlist v1.1 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
 
 <a name="release">
 
