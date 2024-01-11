@@ -64,5 +64,4 @@ The 3.3 uF to 10 uF will respond to slow freq changes while the 0.1 uF will resp
 
 ## Disclaimer
 Used images and some text from this repo: https://raw.githubusercontent.com/RogueMaster/flipperzero-firmware-wPlugins/420/documentation/NRF24.md
-Used some code from this repo: https://github.com/Flipper-XFW/Xtreme-Firmware
 Thanks for them for their work!
