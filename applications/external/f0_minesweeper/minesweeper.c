@@ -23,12 +23,10 @@ static MineSweeperApp* app_alloc() {
     MineSweeperApp* app = (MineSweeperApp*)malloc(sizeof(MineSweeperApp));
 
     // NotificationApp Service
-    NotificationApp* notification_app = furi_record_open(RECORD_NOTIFICATION);
+    app->notification = furi_record_open(RECORD_NOTIFICATION);
 
     // Turn backlight on when app starts
-    notification_message(notification_app, &sequence_display_backlight_on);
-
-    furi_record_close(RECORD_NOTIFICATION);
+    notification_message(app->notification, &sequence_display_backlight_on);
 
     // Alloc Scene Manager and set handlers for on_enter, on_event, on_exit
     app->scene_manager = scene_manager_alloc(&minesweeper_scene_handlers, app);
@@ -142,6 +140,8 @@ static void app_free(MineSweeperApp* app) {
 
     furi_string_free(app->settings_info.width_str);
     furi_string_free(app->settings_info.height_str);
+
+    furi_record_close(RECORD_NOTIFICATION);
 
     // Free app structure
     free(app);

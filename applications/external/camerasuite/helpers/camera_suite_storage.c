@@ -105,8 +105,6 @@ void camera_suite_read_settings(void* context) {
         return;
     }
 
-    furi_string_free(temp_str);
-
     // Read settings
     flipper_format_read_uint32(
         fff_file, BOILERPLATE_SETTINGS_KEY_ORIENTATION, &app->orientation, 1);
