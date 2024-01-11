@@ -7,7 +7,7 @@
 
 Initial Full release for the game.
 
-### Added
+## Added
 - Mine sweeper game with settings menu to choose variable board dimensions from 16x7 to 32x32.
 	- Ability to set difficulty, width, and height for the game board in settings.
 	- Ability to enable solvable boards only
