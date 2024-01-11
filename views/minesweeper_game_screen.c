@@ -570,7 +570,7 @@ static inline uint16_t bfs_tile_clear(
             continue;
         } 
         
-        // If it not uncleared continue
+        // If it is not uncleared continue
         if (board[curr_pos_1d].tile_state != MineSweeperGameScreenTileStateUncleared) {
             continue;
         }
