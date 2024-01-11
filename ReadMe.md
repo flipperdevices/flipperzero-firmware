@@ -47,9 +47,9 @@ This software is for experimental purposes only and is not meant for any illegal
 - Added: [Gas Sensor v0.1 (By iancohee)](https://github.com/iancohee/gas_sensor_fap) `Req: BME680 / SGP30`
 - Added: [Crossy Road v1.0 (By Mikael098)](https://github.com/Mikael098/CrossyRoad-FlipperZero-)
 - OFW: [ufbt: fixed generated project paths on Windows #3339 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/3339)
-- Updated: [F0 Minesweeper v1.0 (By squee72564)](https://github.com/squee72564/F0_Minesweeper_Fap)
 - Added: [The C Prog. Language v0.2 (By armixz)](https://github.com/armixz/Flipper-Zero-The-C-Programming-Language)
-- Updated: [ESP32 Camera Suite v1.4 (By CodyTolene)](https://github.com/CodyTolene/Flipper-Zero-Camera-Suite)
+- Updated: [ESP32 Camera Suite v1.5 (By CodyTolene)](https://github.com/CodyTolene/Flipper-Zero-Camera-Suite)
+- Updated: [Minesweeper Redux v1.0 (By squee72564)](https://github.com/squee72564/F0_Minesweeper_Fap)
 
 ## IN THIS BRANCH:
 
@@ -377,7 +377,6 @@ $ ./fbt dolphin_ext
 - [Doom v1.1 (By p4nic4ttack)](https://github.com/p4nic4ttack/doom-flipper-zero/) (ported and fixed by xMasterX & Svarich & hedger)
 - [DVD Bounce (By schaene)](https://github.com/schaene/Flipper-DVD-Bounce)
 - [Etch-A-Sketch (By SimplyMinimal)](https://github.com/SimplyMinimal/FlipperZero-Etch-A-Sketch)
-- [F0 Minesweeper v1.0 (By squee72564)](https://github.com/squee72564/F0_Minesweeper_Fap)
 - [Five Nights at Flipper's (By sillygir1)](https://github.com/sillygir1/flipperzero-fnaf)
 - [Flappy Bird v1.1 (By DroomOne)](https://github.com/DroomOne/flipperzero-firmware/tree/dev/applications/flappy_bird) [Flappy: Border hitboxes, bigger Pilars (By TQMatvey)](https://github.com/DarkFlippers/unleashed-firmware/pull/114) [Increase pilars line width to improve visibility (By ahumeniy)](https://github.com/DarkFlippers/unleashed-firmware/pull/140)
 - [Game of Life v1.1 (Updated to work by tgxn) (By itsyourbedtime)](https://github.com/tgxn/flipperzero-firmware/blob/dev/applications/game_of_life/game_of_life.c)
@@ -387,6 +386,7 @@ $ ./fbt dolphin_ext
 - [JetPack v1.1 (by timstrasser)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/1164e4d214efa38847e08c6387bf53578bc0d366)
 - [Mandelbrot Set v1.1 (By Possibly-Matt)](https://github.com/Possibly-Matt/flipperzero-firmware-wPlugins)
 - [Minesweeper v1.2 (By panki27)](https://github.com/panki27/minesweeper)
+- [Minesweeper Redux v1.0 (By squee72564)](https://github.com/squee72564/F0_Minesweeper_Fap)
 - [Monty Hall v1.1 (By DevMilanIan)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/203)
 - [Multi Counter (By JadePossible)](https://github.com/JadePossible/Flipper-Multi-Counter)
 - [Nu Pogodi! (Ну, погоди!) v1.3 (By sionyx)](https://github.com/sionyx/flipper_nupogodi)
@@ -480,7 +480,7 @@ $ ./fbt dolphin_ext
 - [DTMF Dolphin v1.2 (By litui)](https://github.com/litui/dtmf_dolphin)
 - [EM4100 Key Generator v1.1 (By Milk-Cool)](https://github.com/Milk-Cool/fz-em4100-generator)
 - [Enhanced Sub-Ghz Chat v1.2 (By twisted-pear)](https://github.com/twisted-pear/esubghz_chat)
-- [ESP32 Camera Suite v1.4 (By CodyTolene)](https://github.com/CodyTolene/Flipper-Zero-Camera-Suite)
+- [ESP32 Camera Suite v1.5 (By CodyTolene)](https://github.com/CodyTolene/Flipper-Zero-Camera-Suite)
 - [ESP Flasher v1.4 (By 0xchocolate)](https://github.com/0xchocolate/flipperzero-esp-flasher)
 - [ESP WiFi Scanner v1.1 (By SequoiaSan)](https://github.com/SequoiaSan/FlipperZero-WiFi-Scanner_Module-ESP8266) `Req: ESP8266 or ESP32`
 - [ESP32 Gravity v1.0.1 (By chris-bc)](https://github.com/chris-bc/Flipper-Gravity) `Req: ESP32`

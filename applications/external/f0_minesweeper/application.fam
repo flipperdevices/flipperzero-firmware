@@ -1,8 +1,8 @@
 App(
-    appid="f0_minesweeper",
-    name="F0 Minesweeper",
+    appid="minesweeper_redux",
+    name="Minesweeper Redux",
     apptype=FlipperAppType.EXTERNAL,
-    entry_point="f0_minesweeper_app",
+    entry_point="minesweeper_redux_app",
     stack_size=2 * 1024,
     fap_icon_assets="assets",
     fap_icon="assets/minesweeper.png",
