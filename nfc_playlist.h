@@ -3,6 +3,7 @@
 #include <furi_hal.h>
 #include <string.h>
 #include <gui/gui.h>
+#include <assets_icons.h>
 #include <gui/view_dispatcher.h>
 #include <gui/scene_manager.h>
 #include <gui/modules/popup.h>
@@ -11,7 +12,6 @@
 #include <gui/modules/file_browser.h>
 #include <notification/notification_messages.h>
 #include <nfc_playlist_worker.h>
-#include <assets_icons.h>
 
 typedef enum {
    NfcPlaylistView_Menu,
