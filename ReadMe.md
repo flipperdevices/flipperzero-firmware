@@ -50,6 +50,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Added: [The C Prog. Language v0.2 (By armixz)](https://github.com/armixz/Flipper-Zero-The-C-Programming-Language)
 - Updated: [ESP32 Camera Suite v1.5 (By CodyTolene)](https://github.com/CodyTolene/Flipper-Zero-Camera-Suite)
 - Updated: [Minesweeper Redux v1.0 (By squee72564)](https://github.com/squee72564/F0_Minesweeper_Fap)
+- OFW: [FuriHal: fix start duration furi_hal_subghz_async_tx #3230 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/3230)
 - Updated: [Hangman v1.5 (By Evgeny Stepanischev & Eva Stepanischeva)](https://github.com/bolknote/Flipper-Zero-Hangman-Game)
 - Updated: [Crypto Dictionary v0.1 (By armixz)](https://github.com/armixz/Flipper-Zero-Crypto-Dictionary)
 
