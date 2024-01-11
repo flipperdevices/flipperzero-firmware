@@ -1,7 +1,7 @@
 # For details & more options, see documentation/AppManifests.md in firmware repo
 
 App(
-    appid="f0_minesweeper_aer72564",    # Must be unique
+    appid="minesweeper_redux",    # Must be unique
     name="Mine Sweeper",                # Displayed in menus
     apptype=FlipperAppType.EXTERNAL,
     entry_point="minesweeper_app",
