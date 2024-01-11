@@ -104,6 +104,9 @@ void brainfuck_free(BFApp* brainfuck) {
     // Scene Manager
     scene_manager_free(brainfuck->scene_manager);
 
+    // Free file path
+    furi_string_free(brainfuck->BF_file_path);
+
     // GUI
     furi_record_close(RECORD_GUI);
     brainfuck->gui = NULL;
