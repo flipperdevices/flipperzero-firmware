@@ -2,9 +2,7 @@
 
 
 # Minesweeper Implementation for the Flipper Zero.
-Hello!
 
-![Mine Sweeper Example Gameplay Gif](https://github.com/squee72564/F0_Minesweeper_Fap/blob/main/img/github_images/MineSweeperGameplay.gif)
 ## Added features unique to this implementation:
 -	Enable board verifier for board generation to ensure unambiguous boards!
 -	Set board width and height
