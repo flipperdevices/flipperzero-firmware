@@ -26,8 +26,8 @@ void nfc_maker_scene_result_on_enter(void* context) {
     do {
         if(!flipper_format_file_open_new(file, furi_string_get_cstr(path))) break;
 
-        if(!flipper_format_write_header_cstr(file, "Flipper NFC device", 3)) break;
-        if(!flipper_format_write_string_cstr(file, "Device type", "NTAG215")) break;
+        if(!flipper_format_write_header_cstr(file, "Flipper NFC device", 4)) break;
+        if(!flipper_format_write_string_cstr(file, "Device type", "NTAG/Ultralight")) break;
 
         // Serial number
         size_t i = 0;
@@ -41,6 +41,8 @@ void nfc_maker_scene_result_on_enter(void* context) {
         if(!flipper_format_write_hex(file, "UID", uid, sizeof(uid))) break;
         if(!flipper_format_write_string_cstr(file, "ATQA", "00 44")) break;
         if(!flipper_format_write_string_cstr(file, "SAK", "00")) break;
+        if(!flipper_format_write_string_cstr(file, "Data format version", "2")) break;
+        if(!flipper_format_write_string_cstr(file, "NTAG/Ultralight type", "NTAG215")) break;
         // TODO: Maybe randomize?
         if(!flipper_format_write_string_cstr(
                file,
@@ -57,6 +59,7 @@ void nfc_maker_scene_result_on_enter(void* context) {
         if(!flipper_format_write_string_cstr(file, "Counter 2", "0")) break;
         if(!flipper_format_write_string_cstr(file, "Tearing 2", "00")) break;
         if(!flipper_format_write_uint32(file, "Pages total", &pages, 1)) break;
+        if(!flipper_format_write_uint32(file, "Pages read", &pages, 1)) break;
 
         // Static data
         buf[i++] = 0x48; // Internal
@@ -68,7 +71,7 @@ void nfc_maker_scene_result_on_enter(void* context) {
         buf[i++] = 0x3E; // ...
         buf[i++] = 0x00; // ...
 
-        buf[i++] = 0x03; // Container flags
+        buf[i++] = 0x03; // NDEF TLV block
 
         // NDEF Docs: https://developer.nordicsemi.com/nRF_Connect_SDK/doc/latest/nrf/protocols/nfc/index.html#nfc-data-exchange-format-ndef
         uint8_t tnf = 0x00;
@@ -126,7 +129,7 @@ void nfc_maker_scene_result_on_enter(void* context) {
         }
         case NfcMakerSceneHttps: {
             tnf = 0x01; // NFC Forum well-known type [NFC RTD]
-            type = "\x55";
+            type = "U";
 
             data_len = newstrnlen(app->big_buf, BIG_INPUT_LEN);
             payload_len = data_len + 1;
@@ -139,7 +142,7 @@ void nfc_maker_scene_result_on_enter(void* context) {
         }
         case NfcMakerSceneMail: {
             tnf = 0x01; // NFC Forum well-known type [NFC RTD]
-            type = "\x55";
+            type = "U";
 
             data_len = newstrnlen(app->mail_buf, MAIL_INPUT_LEN);
             payload_len = data_len + 1;
@@ -152,7 +155,7 @@ void nfc_maker_scene_result_on_enter(void* context) {
         }
         case NfcMakerScenePhone: {
             tnf = 0x01; // NFC Forum well-known type [NFC RTD]
-            type = "\x55";
+            type = "U";
 
             data_len = newstrnlen(app->phone_buf, PHONE_INPUT_LEN);
             payload_len = data_len + 1;
@@ -165,22 +168,22 @@ void nfc_maker_scene_result_on_enter(void* context) {
         }
         case NfcMakerSceneText: {
             tnf = 0x01; // NFC Forum well-known type [NFC RTD]
-            type = "\x54";
+            type = "T";
 
             data_len = newstrnlen(app->big_buf, BIG_INPUT_LEN);
             payload_len = data_len + 3;
             payload = malloc(payload_len);
 
             payload[j++] = 0x02;
-            payload[j++] = 0x65; // e
-            payload[j++] = 0x6E; // n
+            payload[j++] = 'e';
+            payload[j++] = 'n';
             memcpy(&payload[j], app->big_buf, data_len);
             j += data_len;
             break;
         }
         case NfcMakerSceneUrl: {
             tnf = 0x01; // NFC Forum well-known type [NFC RTD]
-            type = "\x55";
+            type = "U";
 
             data_len = newstrnlen(app->big_buf, BIG_INPUT_LEN);
             payload_len = data_len + 1;
@@ -282,15 +285,15 @@ void nfc_maker_scene_result_on_enter(void* context) {
 
         size_t record_len = header_len + payload_len;
         if(record_len < 0xFF) {
-            buf[i++] = record_len; // Record length
+            buf[i++] = record_len; // TLV length
         } else {
-            buf[i++] = 0xFF; // Record length
+            buf[i++] = 0xFF; // TLV length
             buf[i++] = record_len >> 8; // ...
             buf[i++] = record_len & 0xFF; // ...
         }
         buf[i++] = flags; // Flags and TNF
         buf[i++] = type_len; // Type length
-        if(flags & 1 << 4) { // SR (Short Record)
+        if(flags & (1 << 4)) { // SR (Short Record)
             buf[i++] = payload_len; // Payload length
         } else {
             buf[i++] = 0x00; // Payload length
@@ -352,6 +355,8 @@ void nfc_maker_scene_result_on_enter(void* context) {
         }
         if(!ok) break;
 
+        if(!flipper_format_write_string_cstr(file, "Failed authentication attempts", "0")) break;
+
         success = true;
 
     } while(false);
@@ -362,11 +367,11 @@ void nfc_maker_scene_result_on_enter(void* context) {
     furi_record_close(RECORD_STORAGE);
 
     if(success) {
-        popup_set_icon(popup, 32, 5, &I_DolphinNice_96x59);
+        popup_set_icon(popup, 36, 5, &I_DolphinDone_80x58);
         popup_set_header(popup, "Saved!", 13, 22, AlignLeft, AlignBottom);
     } else {
-        popup_set_icon(popup, 32, 5, &I_DolphinNice_96x59);
-        popup_set_header(popup, "Saved!", 13, 22, AlignLeft, AlignBottom);
+        popup_set_icon(popup, 69, 15, &I_WarningDolphinFlip_45x42);
+        popup_set_header(popup, "Error!", 13, 22, AlignLeft, AlignBottom);
     }
     popup_set_timeout(popup, 1500);
     popup_set_context(popup, app);
