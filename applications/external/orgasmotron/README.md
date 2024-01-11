@@ -30,10 +30,9 @@ The application will be compiled and copied onto your device.
 - Updates for FW 0.79 by Roguemaster
 
 ## Licensing
-The source this was developed from is the Orgasmotron application delivered in RougeMaster Firmware as well as the Flipper-Xtreme Firmware
+The source this was developed from is the Orgasmotron application delivered in RougeMaster Firmware
 All my changes are considered open-source and can be used for whatever purpose. <br>
-[https://github.com/RogueMaster/flipperzero-firmware-wPlugins]<br>
-[https://github.com/ClaraCrazy/Flipper-Xtreme]
+[https://github.com/RogueMaster/flipperzero-firmware-wPlugins]
 
 ## My Source
 [https://github.com/leedave/Leeds-Flipper-Zero-Applications]
