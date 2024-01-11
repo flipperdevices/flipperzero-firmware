@@ -34,7 +34,7 @@ Hello!
 	- Change difficulty
 	- Ensure Solvable (**Important!**)- This option will enable the board verifier for board generation and can significantly increase wait times for generating a board. Currently this may lock up the view port on the loading animation, but it should eventually resolve and return to the game.
 
-#### IMPORTANT NOTICE:
+## IMPORTANT NOTICE:
 The way I set the board up leaves the corners as safe starting positions!
 
 In addition to this, with the "Ensure Solvable" option set to true, the board will always be solvable from 0,0! Without Ensure Solvable enabled in the settings the mine placement for the board generation is randomized and there is no guarantee that the game with be solvable without any guesses.
