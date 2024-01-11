@@ -13,7 +13,7 @@ App(
             name="led",
         ),
     ],
-    fap_icon="playlist_10px.png",
+    fap_icon="icons/playlist_10px.png",
     fap_icon_assets="icons",
     fap_author="acegoal07",
     fap_weburl="https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main",
