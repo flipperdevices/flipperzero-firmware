@@ -1,6 +1,3 @@
-
-
-
 # Minesweeper Implementation for the Flipper Zero.
 
 ## Added features unique to this implementation:
@@ -11,14 +8,14 @@
 
 
 ## How To Play
-- Up/Down/Left/Right Buttons to move around
+1. Up/Down/Left/Right Buttons to move around
 	- These buttons can be held down to keep moving in a direction
-- Center OK Button to attempt opening up a tile
+2. Center OK Button to attempt opening up a tile
 	- Press OK on a tile to open it up
 	- Hold OK on a cleared space with a number to clear all surrounding tiles (correct number of flags must be set around it)
-- Hold Back Button on a tile to toggle marking it with a flag
-- Hold Back Button on a cleared space to jump to one of the closest tiles (this can help find last tiles on a larger board)
-- Press Back Button to access the settings menu where you can do the following:
+3. Hold Back Button on a tile to toggle marking it with a flag
+4. Hold Back Button on a cleared space to jump to one of the closest tiles (this can help find last tiles on a larger board)
+5. Press Back Button to access the settings menu where you can do the following:
 	- Change board width
 	- Change board height
 	- Change difficulty
