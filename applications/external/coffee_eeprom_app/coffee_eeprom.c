@@ -95,6 +95,7 @@ void load_file_dump() {
                file, furi_string_get_cstr(file_path), FSAM_READ, FSOM_OPEN_EXISTING)) {
             FURI_LOG_E(TAG, "Failed to open file");
         }
+        furi_string_free(file_path);
         uint8_t buffer[256] = {0};
 
         uint16_t read = 0;
@@ -122,6 +123,7 @@ void load_file_dump() {
             }
             FURI_LOG_E(TAG, "%s", furi_string_get_cstr(dump));
             FURI_LOG_E(TAG, "END READ DUMP");
+            furi_string_free(dump);
             write_dump(buffer, (size_t)read);
             break;
         }

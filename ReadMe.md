@@ -53,6 +53,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [FuriHal: fix start duration furi_hal_subghz_async_tx #3230 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/3230)
 - Updated: [Hangman v1.5 (By Evgeny Stepanischev & Eva Stepanischeva)](https://github.com/bolknote/Flipper-Zero-Hangman-Game)
 - Updated: [Crypto Dictionary v0.1 (By armixz)](https://github.com/armixz/Flipper-Zero-Crypto-Dictionary)
+- UL: [9 Applications Updated to remove possible Memory Leakks (By xMasterX)]()
 
 <a name="release">
 
