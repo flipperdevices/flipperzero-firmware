@@ -163,6 +163,7 @@ void meal_pager_read_settings(void* context) {
         FURI_LOG_E(TAG, "Cannot open file %s", MEAL_PAGER_SETTINGS_SAVE_PATH);
         meal_pager_close_config_file(fff_file);
         meal_pager_close_storage();
+        furi_string_free(temp_str);
         return;
     }
 
@@ -170,6 +171,7 @@ void meal_pager_read_settings(void* context) {
         FURI_LOG_E(TAG, "Missing Header Data");
         meal_pager_close_config_file(fff_file);
         meal_pager_close_storage();
+        furi_string_free(temp_str);
         return;
     }
 
@@ -177,6 +179,7 @@ void meal_pager_read_settings(void* context) {
         FURI_LOG_I(TAG, "old config version, will be removed.");
         meal_pager_close_config_file(fff_file);
         meal_pager_close_storage();
+        furi_string_free(temp_str);
         return;
     }
 
@@ -199,7 +202,7 @@ void meal_pager_read_settings(void* context) {
     flipper_format_rewind(fff_file);
 
     furi_string_free(temp_str);
-
+    
     meal_pager_close_config_file(fff_file);
     meal_pager_close_storage();
 }
