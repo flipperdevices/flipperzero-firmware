@@ -29,7 +29,8 @@
 #include "scenes/ibutton_scene.h"
 
 #define IBUTTON_APP_FOLDER ANY_PATH("ibutton")
-#define IBUTTON_APP_EXTENSION ".ibtn"
+#define IBUTTON_APP_FILENAME_PREFIX "iBtn"
+#define IBUTTON_APP_FILENAME_EXTENSION ".ibtn"
 
 #define IBUTTON_KEY_NAME_SIZE 22
 
@@ -89,7 +90,7 @@ typedef enum {
 } iButtonNotificationMessage;
 
 bool ibutton_select_and_load_key(iButton* ibutton);
-bool ibutton_load_key(iButton* ibutton);
+bool ibutton_load_key(iButton* ibutton, bool show_error);
 bool ibutton_save_key(iButton* ibutton);
 bool ibutton_delete_key(iButton* ibutton);
 void ibutton_reset_key(iButton* ibutton);

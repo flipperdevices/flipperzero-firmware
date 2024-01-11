@@ -33,6 +33,8 @@ class FlipperAppType(Enum):
 @dataclass
 class FlipperApplication:
     APP_ID_REGEX: ClassVar[re.Pattern] = re.compile(r"^[a-z0-9_]+$")
+    PRIVATE_FIELD_PREFIX: ClassVar[str] = "_"
+    APP_MANIFEST_DEFAULT_NAME: ClassVar[str] = "application.fam"
 
     @dataclass
     class ExternallyBuiltFile:
@@ -48,8 +50,6 @@ class FlipperApplication:
         cdefines: List[str] = field(default_factory=list)
         cincludes: List[str] = field(default_factory=list)
 
-    PRIVATE_FIELD_PREFIX = "_"
-
     appid: str
     apptype: FlipperAppType
     name: Optional[str] = ""
@@ -64,6 +64,7 @@ class FlipperApplication:
     order: int = 0
     sdk_headers: List[str] = field(default_factory=list)
     targets: List[str] = field(default_factory=lambda: ["all"])
+    resources: Optional[str] = None
 
     # .fap-specific
     sources: List[str] = field(default_factory=lambda: ["*.c*"])
@@ -79,11 +80,19 @@ class FlipperApplication:
     fap_extbuild: List[ExternallyBuiltFile] = field(default_factory=list)
     fap_private_libs: List[Library] = field(default_factory=list)
     fap_file_assets: Optional[str] = None
+    fal_embedded: bool = False
     # Internally used by fbt
     _appmanager: Optional["AppManager"] = None
     _appdir: Optional[object] = None
     _apppath: Optional[str] = None
     _plugins: List["FlipperApplication"] = field(default_factory=list)
+    _assets_dirs: List[object] = field(default_factory=list)
+    _section_fapmeta: Optional[object] = None
+    _section_fapfileassets: Optional[object] = None
+
+    @property
+    def embeds_plugins(self):
+        return any(plugin.fal_embedded for plugin in self._plugins)
 
     def supports_hardware_target(self, target: str):
         return target in self.targets or "all" in self.targets
@@ -91,6 +100,10 @@ class FlipperApplication:
     @property
     def is_default_deployable(self):
         return self.apptype != FlipperAppType.DEBUG and self.fap_category != "Examples"
+
+    @property
+    def do_strict_import_checks(self):
+        return self.apptype != FlipperAppType.PLUGIN
 
     def __post_init__(self):
         if self.apptype == FlipperAppType.PLUGIN:
@@ -104,8 +117,10 @@ class FlipperApplication:
                 self.fap_version = tuple(int(v) for v in self.fap_version.split("."))
             except ValueError:
                 raise FlipperManifestException(
-                    f"Invalid version string '{self.fap_version}'. Must be in the form 'major.minor'"
+                    f"Invalid version '{self.fap_version}'. Must be in the form 'major.minor'"
                 )
+            if len(self.fap_version) < 2:
+                raise ValueError("Not enough version components")
 
 
 class AppManager:
@@ -137,11 +152,25 @@ class AppManager:
                 raise FlipperManifestException(
                     f"Plugin {kw.get('appid')} must have 'requires' in manifest"
                 )
-        # Harmless - cdefines for external apps are meaningless
-        # if apptype == FlipperAppType.EXTERNAL and kw.get("cdefines"):
-        #     raise FlipperManifestException(
-        #         f"External app {kw.get('appid')} must not have 'cdefines' in manifest"
-        #     )
+        else:
+            if kw.get("fal_embedded"):
+                raise FlipperManifestException(
+                    f"App {kw.get('appid')} cannot have fal_embedded set"
+                )
+
+        if apptype in AppBuildset.dist_app_types:
+            # For distributing .fap's resources, there's "fap_file_assets"
+            for app_property in ("resources",):
+                if kw.get(app_property):
+                    raise FlipperManifestException(
+                        f"App {kw.get('appid')} of type {apptype} cannot have '{app_property}' in manifest"
+                    )
+        else:
+            for app_property in ("fap_extbuild", "fap_private_libs", "fap_icon_assets"):
+                if kw.get(app_property):
+                    raise FlipperManifestException(
+                        f"App {kw.get('appid')} of type {apptype} must not have '{app_property}' in manifest"
+                    )
 
     def load_manifest(self, app_manifest_path: str, app_dir_node: object):
         if not os.path.exists(app_manifest_path):
@@ -193,8 +222,19 @@ class AppManager:
             raise FlipperManifestException(f"Duplicate app declaration: {app.appid}")
         self.known_apps[app.appid] = app
 
-    def filter_apps(self, applist: List[str], hw_target: str):
-        return AppBuildset(self, applist, hw_target)
+    def filter_apps(
+        self,
+        *,
+        applist: List[str],
+        ext_applist: List[str],
+        hw_target: str,
+    ):
+        return AppBuildset(
+            self,
+            hw_target=hw_target,
+            appnames=applist,
+            extra_ext_appnames=ext_applist,
+        )
 
 
 class AppBuilderException(Exception):
@@ -211,6 +251,21 @@ class AppBuildset:
         FlipperAppType.SETTINGS,
         FlipperAppType.STARTUP,
     )
+    EXTERNAL_APP_TYPES_MAP = {
+        # AppType -> bool: true if always deploy, false if obey app set
+        FlipperAppType.EXTERNAL: True,
+        FlipperAppType.PLUGIN: True,
+        FlipperAppType.DEBUG: True,
+        FlipperAppType.MENUEXTERNAL: False,
+    }
+
+    @classmethod
+    @property
+    def dist_app_types(cls):
+        """Applications that are installed on SD card"""
+        return list(
+            entry[0] for entry in cls.EXTERNAL_APP_TYPES_MAP.items() if entry[1]
+        )
 
     @staticmethod
     def print_writer(message):
@@ -219,24 +274,33 @@ class AppBuildset:
     def __init__(
         self,
         appmgr: AppManager,
-        appnames: List[str],
         hw_target: str,
+        appnames: List[str],
+        *,
+        extra_ext_appnames: List[str],
         message_writer: Callable | None = None,
     ):
         self.appmgr = appmgr
         self.appnames = set(appnames)
+        self.incompatible_extapps, self.extapps = [], []
+        self._extra_ext_appnames = extra_ext_appnames
         self._orig_appnames = appnames
         self.hw_target = hw_target
         self._writer = message_writer if message_writer else self.print_writer
         self._process_deps()
+        self._process_ext_apps()
         self._check_conflicts()
         self._check_unsatisfied()  # unneeded?
         self._check_target_match()
         self._group_plugins()
-        self.apps = sorted(
+        self._apps = sorted(
             list(map(self.appmgr.get, self.appnames)),
             key=lambda app: app.appid,
         )
+
+    @property
+    def apps(self):
+        return list(self._apps)
 
     def _is_missing_dep(self, dep_name: str):
         return dep_name not in self.appnames
@@ -270,6 +334,27 @@ class AppBuildset:
             if len(provided) == 0:
                 break
             self.appnames.update(provided)
+
+    def _process_ext_apps(self):
+        extapps = [
+            app
+            for (apptype, global_lookup) in self.EXTERNAL_APP_TYPES_MAP.items()
+            for app in self.get_apps_of_type(apptype, global_lookup)
+        ]
+        extapps.extend(map(self.appmgr.get, self._extra_ext_appnames))
+
+        for app in extapps:
+            (
+                self.extapps
+                if app.supports_hardware_target(self.hw_target)
+                else self.incompatible_extapps
+            ).append(app)
+
+    def get_ext_apps(self):
+        return self.extapps
+
+    def get_incompatible_ext_apps(self):
+        return self.incompatible_extapps
 
     def _check_conflicts(self):
         conflicts = []
@@ -325,13 +410,13 @@ class AppBuildset:
 
     def get_apps_cdefs(self):
         cdefs = set()
-        for app in self.apps:
+        for app in self._apps:
             cdefs.update(app.cdefines)
         return sorted(list(cdefs))
 
     def get_sdk_headers(self):
         sdk_headers = []
-        for app in self.apps:
+        for app in self._apps:
             sdk_headers.extend(
                 [
                     src._appdir.File(header)
@@ -342,17 +427,21 @@ class AppBuildset:
         return sdk_headers
 
     def get_apps_of_type(self, apptype: FlipperAppType, all_known: bool = False):
+        """Looks up apps of given type in current app set. If all_known is true,
+        ignores app set and checks all loaded apps' manifests."""
         return sorted(
             filter(
                 lambda app: app.apptype == apptype,
-                self.appmgr.known_apps.values() if all_known else self.apps,
+                self.appmgr.known_apps.values()
+                if all_known
+                else map(self.appmgr.get, self.appnames),
             ),
             key=lambda app: app.order,
         )
 
     def get_builtin_apps(self):
         return list(
-            filter(lambda app: app.apptype in self.BUILTIN_APP_TYPES, self.apps)
+            filter(lambda app: app.apptype in self.BUILTIN_APP_TYPES, self._apps)
         )
 
     def get_builtin_app_folders(self):
@@ -363,96 +452,3 @@ class AppBuildset:
                 for source_type in app.sources
             )
         )
-
-
-class ApplicationsCGenerator:
-    APP_TYPE_MAP = {
-        FlipperAppType.SERVICE: ("FlipperInternalApplication", "FLIPPER_SERVICES"),
-        FlipperAppType.SYSTEM: ("FlipperInternalApplication", "FLIPPER_SYSTEM_APPS"),
-        FlipperAppType.APP: ("FlipperInternalApplication", "FLIPPER_APPS"),
-        FlipperAppType.DEBUG: ("FlipperInternalApplication", "FLIPPER_DEBUG_APPS"),
-        FlipperAppType.SETTINGS: (
-            "FlipperInternalApplication",
-            "FLIPPER_SETTINGS_APPS",
-        ),
-        FlipperAppType.STARTUP: (
-            "FlipperInternalOnStartHook",
-            "FLIPPER_ON_SYSTEM_START",
-        ),
-    }
-
-    APP_EXTERNAL_TYPE = (
-        "FlipperExternalApplication",
-        "FLIPPER_EXTERNAL_APPS",
-    )
-
-    def __init__(self, buildset: AppBuildset, autorun_app: str = ""):
-        self.buildset = buildset
-        self.autorun = autorun_app
-
-    def get_app_ep_forward(self, app: FlipperApplication):
-        if app.apptype == FlipperAppType.STARTUP:
-            return f"extern void {app.entry_point}();"
-        return f"extern int32_t {app.entry_point}(void* p);"
-
-    def get_app_descr(self, app: FlipperApplication):
-        if app.apptype == FlipperAppType.STARTUP:
-            return app.entry_point
-        return f"""
-    {{.app = {app.entry_point},
-     .name = "{app.name}",
-     .appid = "{app.appid}", 
-     .stack_size = {app.stack_size},
-     .icon = {f"&{app.icon}" if app.icon else "NULL"},
-     .flags = {'|'.join(f"FlipperInternalApplicationFlag{flag}" for flag in app.flags)} }}"""
-
-    def get_external_app_descr(self, app: FlipperApplication):
-        app_path = "/ext/apps"
-        if app.fap_category:
-            app_path += f"/{app.fap_category}"
-        app_path += f"/{app.appid}.fap"
-        return f"""
-    {{
-     .name = "{app.name}",
-     .icon = {f"&{app.icon}" if app.icon else "NULL"},
-     .path = "{app_path}" }}"""
-
-    def generate(self):
-        contents = [
-            '#include "applications.h"',
-            "#include <assets_icons.h>",
-            f'const char* FLIPPER_AUTORUN_APP_NAME = "{self.autorun}";',
-        ]
-        for apptype in self.APP_TYPE_MAP:
-            contents.extend(
-                map(self.get_app_ep_forward, self.buildset.get_apps_of_type(apptype))
-            )
-            entry_type, entry_block = self.APP_TYPE_MAP[apptype]
-            contents.append(f"const {entry_type} {entry_block}[] = {{")
-            contents.append(
-                ",\n".join(
-                    map(self.get_app_descr, self.buildset.get_apps_of_type(apptype))
-                )
-            )
-            contents.append("};")
-            contents.append(
-                f"const size_t {entry_block}_COUNT = COUNT_OF({entry_block});"
-            )
-
-        archive_app = self.buildset.get_apps_of_type(FlipperAppType.ARCHIVE)
-        if archive_app:
-            contents.extend(
-                [
-                    self.get_app_ep_forward(archive_app[0]),
-                    f"const FlipperInternalApplication FLIPPER_ARCHIVE = {self.get_app_descr(archive_app[0])};",
-                ]
-            )
-
-        entry_type, entry_block = self.APP_EXTERNAL_TYPE
-        external_apps = self.buildset.get_apps_of_type(FlipperAppType.MENUEXTERNAL)
-        contents.append(f"const {entry_type} {entry_block}[] = {{")
-        contents.append(",\n".join(map(self.get_external_app_descr, external_apps)))
-        contents.append("};")
-        contents.append(f"const size_t {entry_block}_COUNT = COUNT_OF({entry_block});")
-
-        return "\n".join(contents)

@@ -53,7 +53,7 @@ static int32_t ducky_fnc_string(BadUsbScript* bad_usb, const char* line, int32_t
         furi_string_cat(bad_usb->string_print, "\n");
     }
 
-    if(bad_usb->stringdelay == 0) { // stringdelay not set - run command immidiately
+    if(bad_usb->stringdelay == 0) { // stringdelay not set - run command immediately
         bool state = ducky_string(bad_usb, furi_string_get_cstr(bad_usb->string_print));
         if(!state) {
             return ducky_error(bad_usb, "Invalid string %s", line);
@@ -171,7 +171,7 @@ static const DuckyCmd ducky_commands[] = {
     {"WAIT_FOR_BUTTON_PRESS", ducky_fnc_waitforbutton, -1},
 };
 
-#define TAG "BadUSB"
+#define TAG "BadUsb"
 #define WORKER_TAG TAG "Worker"
 
 int32_t ducky_execute_cmd(BadUsbScript* bad_usb, const char* line) {

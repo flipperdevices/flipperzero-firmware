@@ -5,7 +5,7 @@
 #include <furi_hal_random.h>
 #include <flipper_format/flipper_format.h>
 
-#define TAG "U2F"
+#define TAG "U2f"
 
 #define U2F_DATA_FOLDER EXT_PATH("u2f/")
 #define U2F_CERT_FILE U2F_DATA_FOLDER "assets/cert.der"
@@ -37,7 +37,7 @@ typedef struct {
     uint32_t counter;
     uint8_t random_salt[24];
     uint32_t control;
-} __attribute__((packed)) U2fCounterData;
+} FURI_PACKED U2fCounterData;
 
 bool u2f_data_check(bool cert_only) {
     bool state = false;

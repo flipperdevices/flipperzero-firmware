@@ -10,7 +10,7 @@
 #include <lib/subghz/devices/devices.h>
 #include <lib/subghz/devices/cc1101_configs.h>
 
-#define TAG "SubGhz TEST"
+#define TAG "SubGhzTest"
 #define KEYSTORE_DIR_NAME EXT_PATH("subghz/assets/keeloq_mfcodes")
 #define CAME_ATOMO_DIR_NAME EXT_PATH("subghz/assets/came_atomo")
 #define NICE_FLOR_S_DIR_NAME EXT_PATH("subghz/assets/nice_flor_s")
@@ -98,9 +98,9 @@ static bool subghz_decoder_test(const char* path, const char* name_decoder) {
         }
         subghz_file_encoder_worker_free(file_worker_encoder_handler);
     }
-    FURI_LOG_T(TAG, "\r\n Decoder count parse \033[0;33m%d\033[0m ", subghz_test_decoder_count);
+    FURI_LOG_T(TAG, "Decoder count parse %d", subghz_test_decoder_count);
     if(furi_get_tick() - test_start > TEST_TIMEOUT) {
-        printf("\033[0;31mTest decoder %s ERROR TimeOut\033[0m\r\n", name_decoder);
+        printf("Test decoder %s ERROR TimeOut\r\n", name_decoder);
         return false;
     } else {
         return subghz_test_decoder_count ? true : false;
@@ -137,9 +137,9 @@ static bool subghz_decode_random_test(const char* path) {
         }
         subghz_file_encoder_worker_free(file_worker_encoder_handler);
     }
-    FURI_LOG_D(TAG, "\r\n Decoder count parse \033[0;33m%d\033[0m ", subghz_test_decoder_count);
+    FURI_LOG_D(TAG, "Decoder count parse %d", subghz_test_decoder_count);
     if(furi_get_tick() - test_start > TEST_TIMEOUT * 10) {
-        printf("\033[0;31mRandom test ERROR TimeOut\033[0m\r\n");
+        printf("Random test ERROR TimeOut\r\n");
         return false;
     } else if(subghz_test_decoder_count == TEST_RANDOM_COUNT_PARSE) {
         return true;
@@ -200,10 +200,9 @@ static bool subghz_encoder_test(const char* path) {
         subghz_transmitter_free(transmitter);
     }
     flipper_format_free(fff_data_file);
-    FURI_LOG_T(TAG, "\r\n Decoder count parse \033[0;33m%d\033[0m ", subghz_test_decoder_count);
+    FURI_LOG_T(TAG, "Decoder count parse %d", subghz_test_decoder_count);
     if(furi_get_tick() - test_start > TEST_TIMEOUT) {
-        printf(
-            "\033[0;31mTest encoder %s ERROR TimeOut\033[0m\r\n", furi_string_get_cstr(temp_str));
+        printf("Test encoder %s ERROR TimeOut\r\n", furi_string_get_cstr(temp_str));
         subghz_test_decoder_count = 0;
     }
     furi_string_free(temp_str);
@@ -232,17 +231,17 @@ typedef struct {
     size_t pos;
 } SubGhzHalAsyncTxTest;
 
-#define SUBGHZ_HAL_TEST_DURATION 1
+#define SUBGHZ_HAL_TEST_DURATION 3
 
 static LevelDuration subghz_hal_async_tx_test_yield(void* context) {
     SubGhzHalAsyncTxTest* test = context;
     bool is_odd = test->pos % 2;
 
     if(test->type == SubGhzHalAsyncTxTestTypeNormal) {
-        if(test->pos < API_HAL_SUBGHZ_ASYNC_TX_BUFFER_FULL * 8) {
+        if(test->pos < FURI_HAL_SUBGHZ_ASYNC_TX_BUFFER_FULL * 8) {
             test->pos++;
             return level_duration_make(is_odd, SUBGHZ_HAL_TEST_DURATION);
-        } else if(test->pos == API_HAL_SUBGHZ_ASYNC_TX_BUFFER_FULL * 8) {
+        } else if(test->pos == FURI_HAL_SUBGHZ_ASYNC_TX_BUFFER_FULL * 8) {
             test->pos++;
             return level_duration_reset();
         } else {
@@ -252,36 +251,36 @@ static LevelDuration subghz_hal_async_tx_test_yield(void* context) {
         if(test->pos == 0) {
             test->pos++;
             return level_duration_make(!is_odd, SUBGHZ_HAL_TEST_DURATION);
-        } else if(test->pos < API_HAL_SUBGHZ_ASYNC_TX_BUFFER_FULL * 8) {
+        } else if(test->pos < FURI_HAL_SUBGHZ_ASYNC_TX_BUFFER_FULL * 8) {
             test->pos++;
             return level_duration_make(is_odd, SUBGHZ_HAL_TEST_DURATION);
-        } else if(test->pos == API_HAL_SUBGHZ_ASYNC_TX_BUFFER_FULL * 8) {
+        } else if(test->pos == FURI_HAL_SUBGHZ_ASYNC_TX_BUFFER_FULL * 8) {
             test->pos++;
             return level_duration_reset();
         } else {
             furi_crash("Yield after reset");
         }
     } else if(test->type == SubGhzHalAsyncTxTestTypeInvalidMid) {
-        if(test->pos == API_HAL_SUBGHZ_ASYNC_TX_BUFFER_HALF / 2) {
+        if(test->pos == FURI_HAL_SUBGHZ_ASYNC_TX_BUFFER_HALF / 2) {
             test->pos++;
             return level_duration_make(!is_odd, SUBGHZ_HAL_TEST_DURATION);
-        } else if(test->pos < API_HAL_SUBGHZ_ASYNC_TX_BUFFER_FULL * 8) {
+        } else if(test->pos < FURI_HAL_SUBGHZ_ASYNC_TX_BUFFER_FULL * 8) {
             test->pos++;
             return level_duration_make(is_odd, SUBGHZ_HAL_TEST_DURATION);
-        } else if(test->pos == API_HAL_SUBGHZ_ASYNC_TX_BUFFER_FULL * 8) {
+        } else if(test->pos == FURI_HAL_SUBGHZ_ASYNC_TX_BUFFER_FULL * 8) {
             test->pos++;
             return level_duration_reset();
         } else {
             furi_crash("Yield after reset");
         }
     } else if(test->type == SubGhzHalAsyncTxTestTypeInvalidEnd) {
-        if(test->pos == API_HAL_SUBGHZ_ASYNC_TX_BUFFER_FULL - 1) {
+        if(test->pos == FURI_HAL_SUBGHZ_ASYNC_TX_BUFFER_FULL - 1) {
             test->pos++;
             return level_duration_make(!is_odd, SUBGHZ_HAL_TEST_DURATION);
-        } else if(test->pos < API_HAL_SUBGHZ_ASYNC_TX_BUFFER_FULL * 8) {
+        } else if(test->pos < FURI_HAL_SUBGHZ_ASYNC_TX_BUFFER_FULL * 8) {
             test->pos++;
             return level_duration_make(is_odd, SUBGHZ_HAL_TEST_DURATION);
-        } else if(test->pos == API_HAL_SUBGHZ_ASYNC_TX_BUFFER_FULL * 8) {
+        } else if(test->pos == FURI_HAL_SUBGHZ_ASYNC_TX_BUFFER_FULL * 8) {
             test->pos++;
             return level_duration_reset();
         } else {
@@ -295,20 +294,20 @@ static LevelDuration subghz_hal_async_tx_test_yield(void* context) {
             furi_crash("Yield after reset");
         }
     } else if(test->type == SubGhzHalAsyncTxTestTypeResetMid) {
-        if(test->pos < API_HAL_SUBGHZ_ASYNC_TX_BUFFER_HALF / 2) {
+        if(test->pos < FURI_HAL_SUBGHZ_ASYNC_TX_BUFFER_HALF / 2) {
             test->pos++;
             return level_duration_make(is_odd, SUBGHZ_HAL_TEST_DURATION);
-        } else if(test->pos == API_HAL_SUBGHZ_ASYNC_TX_BUFFER_HALF / 2) {
+        } else if(test->pos == FURI_HAL_SUBGHZ_ASYNC_TX_BUFFER_HALF / 2) {
             test->pos++;
             return level_duration_reset();
         } else {
             furi_crash("Yield after reset");
         }
     } else if(test->type == SubGhzHalAsyncTxTestTypeResetEnd) {
-        if(test->pos < API_HAL_SUBGHZ_ASYNC_TX_BUFFER_FULL - 1) {
+        if(test->pos < FURI_HAL_SUBGHZ_ASYNC_TX_BUFFER_FULL) {
             test->pos++;
             return level_duration_make(is_odd, SUBGHZ_HAL_TEST_DURATION);
-        } else if(test->pos == API_HAL_SUBGHZ_ASYNC_TX_BUFFER_FULL - 1) {
+        } else if(test->pos == FURI_HAL_SUBGHZ_ASYNC_TX_BUFFER_FULL) {
             test->pos++;
             return level_duration_reset();
         } else {
@@ -327,6 +326,7 @@ bool subghz_hal_async_tx_test_run(SubGhzHalAsyncTxTestType type) {
     furi_hal_subghz_set_frequency_and_path(433920000);
 
     if(!furi_hal_subghz_start_async_tx(subghz_hal_async_tx_test_yield, &test)) {
+        mu_warn("SubGHZ transmission is prohibited");
         return false;
     }
 
@@ -334,6 +334,8 @@ bool subghz_hal_async_tx_test_run(SubGhzHalAsyncTxTestType type) {
 
     while(!furi_hal_subghz_is_async_tx_complete()) {
         if(furi_hal_cortex_timer_is_expired(timer)) {
+            furi_hal_subghz_stop_async_tx();
+            furi_hal_subghz_sleep();
             return false;
         }
         furi_delay_ms(10);
@@ -655,6 +657,13 @@ MU_TEST(subghz_decoder_kinggates_stylo4k_test) {
         "Test decoder " SUBGHZ_PROTOCOL_KINGGATES_STYLO_4K_NAME " error\r\n");
 }
 
+MU_TEST(subghz_decoder_mastercode_test) {
+    mu_assert(
+        subghz_decoder_test(
+            EXT_PATH("unit_tests/subghz/mastercode_raw.sub"), SUBGHZ_PROTOCOL_MASTERCODE_NAME),
+        "Test decoder " SUBGHZ_PROTOCOL_MASTERCODE_NAME " error\r\n");
+}
+
 //test encoders
 MU_TEST(subghz_encoder_princeton_test) {
     mu_assert(
@@ -806,6 +815,12 @@ MU_TEST(subghz_encoder_dooya_test) {
         "Test encoder " SUBGHZ_PROTOCOL_DOOYA_NAME " error\r\n");
 }
 
+MU_TEST(subghz_encoder_mastercode_test) {
+    mu_assert(
+        subghz_encoder_test(EXT_PATH("unit_tests/subghz/mastercode.sub")),
+        "Test encoder " SUBGHZ_PROTOCOL_MASTERCODE_NAME " error\r\n");
+}
+
 MU_TEST(subghz_random_test) {
     mu_assert(subghz_decode_random_test(TEST_RANDOM_DIR_NAME), "Random test error\r\n");
 }
@@ -856,6 +871,7 @@ MU_TEST_SUITE(subghz) {
     MU_RUN_TEST(subghz_decoder_alutech_at_4n_test);
     MU_RUN_TEST(subghz_decoder_nice_one_test);
     MU_RUN_TEST(subghz_decoder_kinggates_stylo4k_test);
+    MU_RUN_TEST(subghz_decoder_mastercode_test);
 
     MU_RUN_TEST(subghz_encoder_princeton_test);
     MU_RUN_TEST(subghz_encoder_came_test);
@@ -882,6 +898,7 @@ MU_TEST_SUITE(subghz) {
     MU_RUN_TEST(subghz_encoder_smc5326_test);
     MU_RUN_TEST(subghz_encoder_holtek_ht12x_test);
     MU_RUN_TEST(subghz_encoder_dooya_test);
+    MU_RUN_TEST(subghz_encoder_mastercode_test);
 
     MU_RUN_TEST(subghz_random_test);
     subghz_test_deinit();

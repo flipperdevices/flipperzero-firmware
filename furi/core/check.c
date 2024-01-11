@@ -55,8 +55,6 @@ PLACE_IN_SECTION("MB_MEM2") uint32_t __furi_check_registers[13] = {0};
                  : "memory");
 
 extern size_t xPortGetTotalHeapSize(void);
-extern size_t xPortGetFreeHeapSize(void);
-extern size_t xPortGetMinimumEverFreeHeapSize(void);
 
 static void __furi_put_uint32_as_text(uint32_t data) {
     char tmp_str[] = "-2147483648";
@@ -128,7 +126,7 @@ static void __furi_print_name(bool isr) {
     }
 }
 
-FURI_NORETURN void __furi_crash() {
+FURI_NORETURN void __furi_crash_implementation() {
     __disable_irq();
     GET_MESSAGE_AND_STORE_REGISTERS();
 
@@ -153,18 +151,18 @@ FURI_NORETURN void __furi_crash() {
     __furi_print_heap_info();
     __furi_print_bt_stack_info();
 
-#ifndef FURI_DEBUG
     // Check if debug enabled by DAP
     // https://developer.arm.com/documentation/ddi0403/d/Debug-Architecture/ARMv7-M-Debug/Debug-register-support-in-the-SCS/Debug-Halting-Control-and-Status-Register--DHCSR?lang=en
     bool debug = CoreDebug->DHCSR & CoreDebug_DHCSR_C_DEBUGEN_Msk;
+#ifdef FURI_NDEBUG
     if(debug) {
 #endif
         furi_hal_console_puts("\r\nSystem halted. Connect debugger for more info\r\n");
         furi_hal_console_puts("\033[0m\r\n");
         furi_hal_debug_enable();
 
-        RESTORE_REGISTERS_AND_HALT_MCU(true);
-#ifndef FURI_DEBUG
+        RESTORE_REGISTERS_AND_HALT_MCU(debug);
+#ifdef FURI_NDEBUG
     } else {
         uint32_t ptr = (uint32_t)__furi_check_message;
         if(ptr < FLASH_BASE || ptr > (FLASH_BASE + FLASH_SIZE)) {
@@ -179,7 +177,7 @@ FURI_NORETURN void __furi_crash() {
     __builtin_unreachable();
 }
 
-FURI_NORETURN void __furi_halt() {
+FURI_NORETURN void __furi_halt_implementation() {
     __disable_irq();
     GET_MESSAGE_AND_STORE_REGISTERS();
 

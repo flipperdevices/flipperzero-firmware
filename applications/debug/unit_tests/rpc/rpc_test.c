@@ -1,24 +1,30 @@
-#include "flipper.pb.h"
 #include <core/check.h>
 #include <core/record.h>
-#include "pb_decode.h"
-#include <rpc/rpc.h>
-#include "rpc/rpc_i.h"
-#include "storage.pb.h"
-#include "storage/filesystem_api_defines.h"
-#include "storage/storage.h"
 #include <furi.h>
-#include "../minunit.h"
 #include <stdint.h>
-#include <pb.h>
-#include <pb_encode.h>
-#include <m-list.h>
+
+#include <FreeRTOS.h>
+#include <semphr.h>
+
+#include <rpc/rpc.h>
+#include <rpc/rpc_i.h>
+#include <cli/cli.h>
+#include <storage/storage.h>
+#include <loader/loader.h>
+#include <storage/filesystem_api_defines.h>
+
 #include <lib/toolbox/md5_calc.h>
 #include <lib/toolbox/path.h>
-#include <cli/cli.h>
-#include <loader/loader.h>
+
+#include <m-list.h>
+#include "../minunit.h"
+
 #include <protobuf_version.h>
-#include <semphr.h>
+#include <pb.h>
+#include <pb_encode.h>
+#include <pb_decode.h>
+#include <storage.pb.h>
+#include <flipper.pb.h>
 
 LIST_DEF(MsgList, PB_Main, M_POD_OPLIST)
 #define M_OPL_MsgList_t() LIST_OPLIST(MsgList)
@@ -36,7 +42,7 @@ typedef struct {
     FuriStreamBuffer* output_stream;
     SemaphoreHandle_t close_session_semaphore;
     SemaphoreHandle_t terminate_semaphore;
-    TickType_t timeout;
+    uint32_t timeout;
 } RpcSessionContext;
 
 static RpcSessionContext rpc_session[TEST_RPC_SESSIONS];
@@ -67,7 +73,6 @@ static RpcSessionContext rpc_session[TEST_RPC_SESSIONS];
     } while(0)
 
 static void output_bytes_callback(void* ctx, uint8_t* got_bytes, size_t got_size);
-static void clean_directory(Storage* fs_api, const char* clean_dir);
 static void
     test_rpc_add_empty_to_list(MsgList_t msg_list, PB_CommandStatus status, uint32_t command_id);
 static void test_rpc_encode_and_feed(MsgList_t msg_list, uint8_t session);
@@ -149,11 +154,41 @@ static void test_rpc_teardown_second_session(void) {
     rpc_session[1].session = NULL;
 }
 
+static void test_rpc_storage_clean_directory(Storage* fs_api, const char* clean_dir) {
+    furi_check(fs_api);
+    furi_check(clean_dir);
+    storage_simply_remove_recursive(fs_api, clean_dir);
+    FS_Error error = storage_common_mkdir(fs_api, clean_dir);
+    furi_check(error == FSE_OK);
+}
+
+static void test_rpc_storage_create_file(Storage* fs_api, const char* path, size_t size) {
+    File* file = storage_file_alloc(fs_api);
+
+    bool success = false;
+    do {
+        if(!storage_file_open(file, path, FSAM_WRITE, FSOM_CREATE_ALWAYS)) break;
+        if(!storage_file_seek(file, size, true)) break;
+        success = true;
+    } while(false);
+
+    storage_file_close(file);
+    storage_file_free(file);
+
+    furi_check(success);
+}
+
 static void test_rpc_storage_setup(void) {
     test_rpc_setup();
 
     Storage* fs_api = furi_record_open(RECORD_STORAGE);
-    clean_directory(fs_api, TEST_DIR_NAME);
+    test_rpc_storage_clean_directory(fs_api, TEST_DIR_NAME);
+    test_rpc_storage_create_file(fs_api, TEST_DIR_NAME "/file100", 100);
+    test_rpc_storage_create_file(fs_api, TEST_DIR_NAME "/file250", 250);
+    test_rpc_storage_create_file(fs_api, TEST_DIR_NAME "/file500", 200);
+    test_rpc_storage_create_file(fs_api, TEST_DIR_NAME "/file1000", 1000);
+    test_rpc_storage_create_file(fs_api, TEST_DIR_NAME "/file2500", 2500);
+    test_rpc_storage_create_file(fs_api, TEST_DIR_NAME "/file5000", 5000);
     furi_record_close(RECORD_STORAGE);
 }
 
@@ -161,7 +196,7 @@ static void test_rpc_storage_teardown(void) {
     test_rpc_teardown();
 
     Storage* fs_api = furi_record_open(RECORD_STORAGE);
-    clean_directory(fs_api, TEST_DIR_NAME);
+    test_rpc_storage_clean_directory(fs_api, TEST_DIR_NAME);
     furi_record_close(RECORD_STORAGE);
 }
 
@@ -177,36 +212,6 @@ static void test_rpc_session_terminated_callback(void* context) {
     RpcSessionContext* callbacks_context = context;
 
     xSemaphoreGive(callbacks_context->terminate_semaphore);
-}
-
-static void clean_directory(Storage* fs_api, const char* clean_dir) {
-    furi_check(fs_api);
-    furi_check(clean_dir);
-
-    File* dir = storage_file_alloc(fs_api);
-    if(storage_dir_open(dir, clean_dir)) {
-        FileInfo fileinfo;
-        char* name = malloc(MAX_NAME_LENGTH + 1);
-        while(storage_dir_read(dir, &fileinfo, name, MAX_NAME_LENGTH)) {
-            size_t size = strlen(clean_dir) + strlen(name) + 1 + 1;
-            char* fullname = malloc(size);
-            snprintf(fullname, size, "%s/%s", clean_dir, name);
-            if(file_info_is_dir(&fileinfo)) {
-                clean_directory(fs_api, fullname);
-            }
-            FS_Error error = storage_common_remove(fs_api, fullname);
-            furi_check(error == FSE_OK);
-            free(fullname);
-        }
-        free(name);
-    } else {
-        FS_Error error = storage_common_mkdir(fs_api, clean_dir);
-        (void)error;
-        furi_check(error == FSE_OK);
-    }
-
-    storage_dir_close(dir);
-    storage_file_free(dir);
 }
 
 static void test_rpc_print_message_list(MsgList_t msg_list) {
@@ -282,34 +287,46 @@ static void test_rpc_add_ping_to_list(MsgList_t msg_list, bool request, uint32_t
     response->which_content = (request == PING_REQUEST) ? PB_Main_system_ping_request_tag :
                                                           PB_Main_system_ping_response_tag;
 }
+static void test_rpc_fill_basic_message(PB_Main* message, uint16_t tag, uint32_t command_id) {
+    message->command_id = command_id;
+    message->command_status = PB_CommandStatus_OK;
+    message->cb_content.funcs.encode = NULL;
+    message->which_content = tag;
+    message->has_next = false;
+}
+
+static void test_rpc_create_storage_list_request(
+    PB_Main* message,
+    const char* path,
+    bool include_md5,
+    uint32_t command_id,
+    uint32_t filter_max_size) {
+    furi_check(message);
+    furi_check(path);
+    test_rpc_fill_basic_message(message, PB_Main_storage_list_request_tag, command_id);
+    message->content.storage_list_request.path = strdup(path);
+    message->content.storage_list_request.include_md5 = include_md5;
+    message->content.storage_list_request.filter_max_size = filter_max_size;
+}
 
 static void test_rpc_create_simple_message(
     PB_Main* message,
     uint16_t tag,
     const char* str,
-    uint32_t command_id,
-    bool flag) {
+    uint32_t command_id) {
     furi_check(message);
 
     char* str_copy = NULL;
     if(str) {
         str_copy = strdup(str);
     }
-    message->command_id = command_id;
-    message->command_status = PB_CommandStatus_OK;
-    message->cb_content.funcs.encode = NULL;
-    message->which_content = tag;
-    message->has_next = false;
+    test_rpc_fill_basic_message(message, tag, command_id);
     switch(tag) {
     case PB_Main_storage_info_request_tag:
         message->content.storage_info_request.path = str_copy;
         break;
     case PB_Main_storage_stat_request_tag:
         message->content.storage_stat_request.path = str_copy;
-        break;
-    case PB_Main_storage_list_request_tag:
-        message->content.storage_list_request.path = str_copy;
-        message->content.storage_list_request.include_md5 = flag;
         break;
     case PB_Main_storage_mkdir_request_tag:
         message->content.storage_mkdir_request.path = str_copy;
@@ -533,7 +550,7 @@ static bool test_rpc_pb_stream_read(pb_istream_t* istream, pb_byte_t* buf, size_
     RpcSessionContext* session_context = istream->state;
     size_t bytes_received = 0;
 
-    TickType_t now = xTaskGetTickCount();
+    uint32_t now = furi_get_tick();
     int32_t time_left = session_context->timeout - now;
     time_left = MAX(time_left, 0);
     bytes_received =
@@ -573,11 +590,29 @@ static void
     message->content.storage_list_response.file[2].name = str;
 }
 
+static bool test_rpc_system_storage_list_filter(
+    const FileInfo* fileinfo,
+    const char* name,
+    size_t filter_max_size) {
+    bool result = false;
+
+    do {
+        if(!path_contains_only_ascii(name)) break;
+        if(filter_max_size) {
+            if(fileinfo->size > filter_max_size) break;
+        }
+        result = true;
+    } while(false);
+
+    return result;
+}
+
 static void test_rpc_storage_list_create_expected_list(
     MsgList_t msg_list,
     const char* path,
     uint32_t command_id,
-    bool append_md5) {
+    bool append_md5,
+    size_t filter_max_size) {
     Storage* fs_api = furi_record_open(RECORD_STORAGE);
     File* dir = storage_file_alloc(fs_api);
 
@@ -615,7 +650,7 @@ static void test_rpc_storage_list_create_expected_list(
                 i = 0;
             }
 
-            if(path_contains_only_ascii(name)) {
+            if(test_rpc_system_storage_list_filter(&fileinfo, name, filter_max_size)) {
                 list->file[i].type = file_info_is_dir(&fileinfo) ? PB_Storage_File_FileType_DIR :
                                                                    PB_Storage_File_FileType_FILE;
                 list->file[i].size = fileinfo.size;
@@ -659,7 +694,7 @@ static void test_rpc_decode_and_compare(MsgList_t expected_msg_list, uint8_t ses
     furi_check(!MsgList_empty_p(expected_msg_list));
     furi_check(session < TEST_RPC_SESSIONS);
 
-    rpc_session[session].timeout = xTaskGetTickCount() + MAX_RECEIVE_OUTPUT_TIMEOUT;
+    rpc_session[session].timeout = furi_get_tick() + MAX_RECEIVE_OUTPUT_TIMEOUT;
     pb_istream_t istream = {
         .callback = test_rpc_pb_stream_read,
         .state = &rpc_session[session],
@@ -683,7 +718,7 @@ static void test_rpc_decode_and_compare(MsgList_t expected_msg_list, uint8_t ses
             pb_release(&PB_Main_msg, &result);
         }
 
-    rpc_session[session].timeout = xTaskGetTickCount() + 50;
+    rpc_session[session].timeout = furi_get_tick() + 50;
     if(pb_decode_ex(&istream, &PB_Main_msg, &result, PB_DECODE_DELIMITED)) {
         mu_fail("decoded more than expected");
     }
@@ -698,17 +733,21 @@ static void test_rpc_free_msg_list(MsgList_t msg_list) {
     MsgList_clear(msg_list);
 }
 
-static void test_rpc_storage_list_run(const char* path, uint32_t command_id, bool md5) {
+static void test_rpc_storage_list_run(
+    const char* path,
+    uint32_t command_id,
+    bool md5,
+    size_t filter_max_size) {
     PB_Main request;
     MsgList_t expected_msg_list;
     MsgList_init(expected_msg_list);
 
-    test_rpc_create_simple_message(
-        &request, PB_Main_storage_list_request_tag, path, command_id, md5);
+    test_rpc_create_storage_list_request(&request, path, md5, command_id, filter_max_size);
     if(!strcmp(path, "/")) {
         test_rpc_storage_list_create_expected_list_root(expected_msg_list, command_id);
     } else {
-        test_rpc_storage_list_create_expected_list(expected_msg_list, path, command_id, md5);
+        test_rpc_storage_list_create_expected_list(
+            expected_msg_list, path, command_id, md5, filter_max_size);
     }
     test_rpc_encode_and_feed_one(&request, 0);
     test_rpc_decode_and_compare(expected_msg_list, 0);
@@ -718,25 +757,32 @@ static void test_rpc_storage_list_run(const char* path, uint32_t command_id, boo
 }
 
 MU_TEST(test_storage_list) {
-    test_rpc_storage_list_run("/", ++command_id, false);
-    test_rpc_storage_list_run(EXT_PATH("nfc"), ++command_id, false);
-    test_rpc_storage_list_run(STORAGE_INT_PATH_PREFIX, ++command_id, false);
-    test_rpc_storage_list_run(STORAGE_EXT_PATH_PREFIX, ++command_id, false);
-    test_rpc_storage_list_run(EXT_PATH("infrared"), ++command_id, false);
-    test_rpc_storage_list_run(EXT_PATH("ibutton"), ++command_id, false);
-    test_rpc_storage_list_run(EXT_PATH("lfrfid"), ++command_id, false);
-    test_rpc_storage_list_run("error_path", ++command_id, false);
+    test_rpc_storage_list_run("/", ++command_id, false, 0);
+    test_rpc_storage_list_run(EXT_PATH("nfc"), ++command_id, false, 0);
+    test_rpc_storage_list_run(STORAGE_INT_PATH_PREFIX, ++command_id, false, 0);
+    test_rpc_storage_list_run(STORAGE_EXT_PATH_PREFIX, ++command_id, false, 0);
+    test_rpc_storage_list_run(EXT_PATH("infrared"), ++command_id, false, 0);
+    test_rpc_storage_list_run(EXT_PATH("ibutton"), ++command_id, false, 0);
+    test_rpc_storage_list_run(EXT_PATH("lfrfid"), ++command_id, false, 0);
+    test_rpc_storage_list_run("error_path", ++command_id, false, 0);
 }
 
 MU_TEST(test_storage_list_md5) {
-    test_rpc_storage_list_run("/", ++command_id, true);
-    test_rpc_storage_list_run(EXT_PATH("nfc"), ++command_id, true);
-    test_rpc_storage_list_run(STORAGE_INT_PATH_PREFIX, ++command_id, true);
-    test_rpc_storage_list_run(STORAGE_EXT_PATH_PREFIX, ++command_id, true);
-    test_rpc_storage_list_run(EXT_PATH("infrared"), ++command_id, true);
-    test_rpc_storage_list_run(EXT_PATH("ibutton"), ++command_id, true);
-    test_rpc_storage_list_run(EXT_PATH("lfrfid"), ++command_id, true);
-    test_rpc_storage_list_run("error_path", ++command_id, true);
+    test_rpc_storage_list_run("/", ++command_id, true, 0);
+    test_rpc_storage_list_run(EXT_PATH("nfc"), ++command_id, true, 0);
+    test_rpc_storage_list_run(STORAGE_INT_PATH_PREFIX, ++command_id, true, 0);
+    test_rpc_storage_list_run(STORAGE_EXT_PATH_PREFIX, ++command_id, true, 0);
+    test_rpc_storage_list_run(EXT_PATH("infrared"), ++command_id, true, 0);
+    test_rpc_storage_list_run(EXT_PATH("ibutton"), ++command_id, true, 0);
+    test_rpc_storage_list_run(EXT_PATH("lfrfid"), ++command_id, true, 0);
+    test_rpc_storage_list_run("error_path", ++command_id, true, 0);
+}
+
+MU_TEST(test_storage_list_size) {
+    test_rpc_storage_list_run(TEST_DIR_NAME, ++command_id, false, 0);
+    test_rpc_storage_list_run(TEST_DIR_NAME, ++command_id, false, 1);
+    test_rpc_storage_list_run(TEST_DIR_NAME, ++command_id, false, 1000);
+    test_rpc_storage_list_run(TEST_DIR_NAME, ++command_id, false, 2500);
 }
 
 static void
@@ -804,8 +850,7 @@ static void test_storage_read_run(const char* path, uint32_t command_id) {
     MsgList_init(expected_msg_list);
 
     test_rpc_add_read_to_list_by_reading_real_file(expected_msg_list, path, command_id);
-    test_rpc_create_simple_message(
-        &request, PB_Main_storage_read_request_tag, path, command_id, false);
+    test_rpc_create_simple_message(&request, PB_Main_storage_read_request_tag, path, command_id);
     test_rpc_encode_and_feed_one(&request, 0);
     test_rpc_decode_and_compare(expected_msg_list, 0);
 
@@ -859,8 +904,7 @@ static void test_rpc_storage_info_run(const char* path, uint32_t command_id) {
     MsgList_t expected_msg_list;
     MsgList_init(expected_msg_list);
 
-    test_rpc_create_simple_message(
-        &request, PB_Main_storage_info_request_tag, path, command_id, false);
+    test_rpc_create_simple_message(&request, PB_Main_storage_info_request_tag, path, command_id);
 
     PB_Main* response = MsgList_push_new(expected_msg_list);
     response->command_id = command_id;
@@ -892,8 +936,7 @@ static void test_rpc_storage_stat_run(const char* path, uint32_t command_id) {
     MsgList_t expected_msg_list;
     MsgList_init(expected_msg_list);
 
-    test_rpc_create_simple_message(
-        &request, PB_Main_storage_stat_request_tag, path, command_id, false);
+    test_rpc_create_simple_message(&request, PB_Main_storage_stat_request_tag, path, command_id);
 
     Storage* fs_api = furi_record_open(RECORD_STORAGE);
     FileInfo fileinfo;
@@ -1005,11 +1048,7 @@ static void test_storage_write_read_run(
     test_rpc_add_empty_to_list(expected_msg_list, PB_CommandStatus_OK, *command_id);
 
     test_rpc_create_simple_message(
-        MsgList_push_raw(input_msg_list),
-        PB_Main_storage_read_request_tag,
-        path,
-        ++*command_id,
-        false);
+        MsgList_push_raw(input_msg_list), PB_Main_storage_read_request_tag, path, ++*command_id);
     test_rpc_add_read_or_write_to_list(
         expected_msg_list,
         READ_RESPONSE,
@@ -1082,8 +1121,7 @@ MU_TEST(test_storage_interrupt_continuous_same_system) {
         MsgList_push_new(input_msg_list),
         PB_Main_storage_mkdir_request_tag,
         TEST_DIR "dir1",
-        command_id + 1,
-        false);
+        command_id + 1);
     test_rpc_add_read_or_write_to_list(
         input_msg_list,
         WRITE_REQUEST,
@@ -1163,8 +1201,7 @@ static void test_storage_delete_run(
     MsgList_t expected_msg_list;
     MsgList_init(expected_msg_list);
 
-    test_rpc_create_simple_message(
-        &request, PB_Main_storage_delete_request_tag, path, command_id, false);
+    test_rpc_create_simple_message(&request, PB_Main_storage_delete_request_tag, path, command_id);
     request.content.storage_delete_request.recursive = recursive;
     test_rpc_add_empty_to_list(expected_msg_list, status, command_id);
 
@@ -1245,8 +1282,7 @@ static void test_storage_mkdir_run(const char* path, size_t command_id, PB_Comma
     MsgList_t expected_msg_list;
     MsgList_init(expected_msg_list);
 
-    test_rpc_create_simple_message(
-        &request, PB_Main_storage_mkdir_request_tag, path, command_id, false);
+    test_rpc_create_simple_message(&request, PB_Main_storage_mkdir_request_tag, path, command_id);
     test_rpc_add_empty_to_list(expected_msg_list, status, command_id);
 
     test_rpc_encode_and_feed_one(&request, 0);
@@ -1297,12 +1333,11 @@ static void test_storage_md5sum_run(
     MsgList_t expected_msg_list;
     MsgList_init(expected_msg_list);
 
-    test_rpc_create_simple_message(
-        &request, PB_Main_storage_md5sum_request_tag, path, command_id, false);
+    test_rpc_create_simple_message(&request, PB_Main_storage_md5sum_request_tag, path, command_id);
     if(status == PB_CommandStatus_OK) {
         PB_Main* response = MsgList_push_new(expected_msg_list);
         test_rpc_create_simple_message(
-            response, PB_Main_storage_md5sum_response_tag, md5sum, command_id, false);
+            response, PB_Main_storage_md5sum_response_tag, md5sum, command_id);
         response->command_status = status;
     } else {
         test_rpc_add_empty_to_list(expected_msg_list, status, command_id);
@@ -1461,6 +1496,7 @@ MU_TEST_SUITE(test_rpc_storage) {
     MU_RUN_TEST(test_storage_stat);
     MU_RUN_TEST(test_storage_list);
     MU_RUN_TEST(test_storage_list_md5);
+    MU_RUN_TEST(test_storage_list_size);
     MU_RUN_TEST(test_storage_read);
     MU_RUN_TEST(test_storage_write_read);
     MU_RUN_TEST(test_storage_write);
@@ -1759,8 +1795,7 @@ MU_TEST(test_rpc_multisession_storage) {
         MsgList_push_raw(input_0),
         PB_Main_storage_read_request_tag,
         TEST_DIR "file0.txt",
-        ++command_id,
-        false);
+        ++command_id);
     test_rpc_add_read_or_write_to_list(
         expected_0, READ_RESPONSE, TEST_DIR "file0.txt", pattern, sizeof(pattern), 1, command_id);
 
@@ -1768,8 +1803,7 @@ MU_TEST(test_rpc_multisession_storage) {
         MsgList_push_raw(input_1),
         PB_Main_storage_read_request_tag,
         TEST_DIR "file1.txt",
-        ++command_id,
-        false);
+        ++command_id);
     test_rpc_add_read_or_write_to_list(
         expected_1, READ_RESPONSE, TEST_DIR "file1.txt", pattern, sizeof(pattern), 1, command_id);
 

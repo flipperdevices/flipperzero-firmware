@@ -28,7 +28,7 @@
 
 #define SUBGHZ_REGION_FILENAME "/int/.region_data"
 
-#define TAG "SubGhz CLI"
+#define TAG "SubGhzCli"
 
 static void subghz_cli_radio_device_power_on() {
     uint8_t attempts = 5;
@@ -565,7 +565,7 @@ void subghz_cli_command_decode_raw(Cli* cli, FuriString* args, void* context) {
             }
         }
 
-        printf("\r\nPackets received \033[0;32m%u\033[0m\r\n", instance->packet_count);
+        printf("\r\nPackets received \033[0;32m%zu\033[0m\r\n", instance->packet_count);
 
         // Cleanup
         subghz_receiver_free(receiver);
@@ -946,7 +946,7 @@ static void subghz_cli_command(Cli* cli, FuriString* args, void* context) {
 static bool
     subghz_on_system_start_istream_read(pb_istream_t* istream, pb_byte_t* buf, size_t count) {
     File* file = istream->state;
-    uint16_t ret = storage_file_read(file, buf, count);
+    size_t ret = storage_file_read(file, buf, count);
     return (count == ret);
 }
 

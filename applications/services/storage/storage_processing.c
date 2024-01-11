@@ -98,6 +98,12 @@ static FS_Error storage_get_data(Storage* app, FuriString* path, StorageData** s
     }
 }
 
+static void storage_path_trim_trailing_slashes(FuriString* path) {
+    while(furi_string_end_with(path, "/")) {
+        furi_string_left(path, furi_string_size(path) - 1);
+    }
+}
+
 /******************* File Functions *******************/
 
 bool storage_process_file_open(
@@ -357,6 +363,8 @@ static FS_Error storage_process_common_remove(Storage* app, FuriString* path) {
     FS_Error ret = storage_get_data(app, path, &storage);
 
     do {
+        if(ret != FSE_OK) break;
+
         if(storage_path_already_open(path, storage)) {
             ret = FSE_ALREADY_OPEN;
             break;
@@ -398,6 +406,31 @@ static FS_Error storage_process_common_fs_info(
     return ret;
 }
 
+static bool
+    storage_process_common_equivalent_path(Storage* app, FuriString* path1, FuriString* path2) {
+    bool ret = false;
+
+    do {
+        const StorageType storage_type1 = storage_get_type_by_path(path1);
+        const StorageType storage_type2 = storage_get_type_by_path(path2);
+
+        // Paths on different storages are of course not equal
+        if(storage_type1 != storage_type2) break;
+
+        StorageData* storage;
+        const FS_Error status = storage_get_data(app, path1, &storage);
+
+        if(status != FSE_OK) break;
+
+        FS_CALL(
+            storage,
+            common.equivalent_path(furi_string_get_cstr(path1), furi_string_get_cstr(path2)));
+
+    } while(false);
+
+    return ret;
+}
+
 /****************** Raw SD API ******************/
 // TODO FL-3521: think about implementing a custom storage API to split that kind of api linkage
 #include "storages/storage_ext.h"
@@ -418,12 +451,38 @@ static FS_Error storage_process_sd_format(Storage* app) {
 static FS_Error storage_process_sd_unmount(Storage* app) {
     FS_Error ret = FSE_OK;
 
-    if(storage_data_status(&app->storage[ST_EXT]) == StorageStatusNotReady) {
-        ret = FSE_NOT_READY;
-    } else {
-        sd_unmount_card(&app->storage[ST_EXT]);
-        storage_data_timestamp(&app->storage[ST_EXT]);
-    }
+    do {
+        StorageData* storage = &app->storage[ST_EXT];
+        if(storage_data_status(storage) == StorageStatusNotReady) {
+            ret = FSE_NOT_READY;
+            break;
+        }
+
+        if(storage_open_files_count(storage)) {
+            ret = FSE_DENIED;
+            break;
+        }
+
+        sd_unmount_card(storage);
+        storage_data_timestamp(storage);
+    } while(false);
+
+    return ret;
+}
+
+static FS_Error storage_process_sd_mount(Storage* app) {
+    FS_Error ret = FSE_OK;
+
+    do {
+        StorageData* storage = &app->storage[ST_EXT];
+        if(storage_data_status(storage) != StorageStatusNotReady) {
+            ret = FSE_NOT_READY;
+            break;
+        }
+
+        ret = sd_mount_card(storage, true);
+        storage_data_timestamp(storage);
+    } while(false);
 
     return ret;
 }
@@ -623,12 +682,32 @@ void storage_process_message_internal(Storage* app, StorageMessage* message) {
             app, message->data->cresolvepath.path, message->data->cresolvepath.thread_id, true);
         break;
 
+    case StorageCommandCommonEquivalentPath: {
+        FuriString* path1 = furi_string_alloc_set(message->data->cequivpath.path1);
+        FuriString* path2 = furi_string_alloc_set(message->data->cequivpath.path2);
+        storage_path_trim_trailing_slashes(path1);
+        storage_path_trim_trailing_slashes(path2);
+        storage_process_alias(app, path1, message->data->cequivpath.thread_id, false);
+        storage_process_alias(app, path2, message->data->cequivpath.thread_id, false);
+        if(message->data->cequivpath.truncate) {
+            furi_string_left(path2, furi_string_size(path1));
+        }
+        message->return_data->bool_value =
+            storage_process_common_equivalent_path(app, path1, path2);
+        furi_string_free(path1);
+        furi_string_free(path2);
+        break;
+    }
+
     // SD operations
     case StorageCommandSDFormat:
         message->return_data->error_value = storage_process_sd_format(app);
         break;
     case StorageCommandSDUnmount:
         message->return_data->error_value = storage_process_sd_unmount(app);
+        break;
+    case StorageCommandSDMount:
+        message->return_data->error_value = storage_process_sd_mount(app);
         break;
     case StorageCommandSDInfo:
         message->return_data->error_value =

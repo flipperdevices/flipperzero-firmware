@@ -32,7 +32,7 @@ Only two parameters are mandatory: **appid** and **apptype**. Others are optiona
 - **name**: name displayed in menus.
 - **entry_point**: C function to be used as the application's entry point. Note that C++ function names are mangled, so you need to wrap them in `extern "C"` to use them as entry points.
 - **flags**: internal flags for system apps. Do not use.
-- **cdefines**: C preprocessor definitions to declare globally for other apps when the current application is included in the active build configuration.
+- **cdefines**: C preprocessor definitions to declare globally for other apps when the current application is included in the active build configuration. **For external applications**: specified definitions are used when building the application itself.
 - **requires**: list of application IDs to include in the build configuration when the current application is referenced in the list of applications to build.
 - **conflicts**: list of application IDs with which the current application conflicts. If any of them is found in the constructed application list, `fbt` will abort the firmware build process.
 - **provides**: functionally identical to **_requires_** field.
@@ -41,12 +41,13 @@ Only two parameters are mandatory: **appid** and **apptype**. Others are optiona
 - **order**: order of an application within its group when sorting entries in it. The lower the order is, the closer to the start of the list the item is placed. _Used for ordering startup hooks and menu entries._
 - **sdk_headers**: list of C header files from this app's code to include in API definitions for external applications.
 - **targets**: list of strings and target names with which this application is compatible. If not specified, the application is built for all targets. The default value is `["all"]`.
+- **resources**: name of a folder within the application's source folder to be used for packacking SD card resources for this application. They will only be used if application is included in build configuration. The default value is `""`, meaning no resources are packaged.
 
 #### Parameters for external applications
 
 The following parameters are used only for [FAPs](./AppsOnSDCard.md):
 
-- **sources**: list of strings, file name masks used for gathering sources within the app folder. The default value of `["*.c*"]` includes C and C++ source files. Applications cannot use the `"lib"` folder for their own source code, as it is reserved for **fap_private_libs**.
+- **sources**: list of strings, file name masks used for gathering sources within the app folder. The default value of `["*.c*"]` includes C and C++ source files. Applications cannot use the `"lib"` folder for their own source code, as it is reserved for **fap_private_libs**. Paths starting with `"!"` are excluded from the list of sources. They can also include wildcard characters and directory names. For example, a value of `["*.c*", "!plugins"]` will include all C and C++ source files in the app folder except those in the `plugins` (and `lib`) folders. Paths with no wildcards (`*, ?`) are treated as full literal paths for both inclusion and exclusion.
 - **fap_version**: string, application version. The default value is "0.1". You can also use a tuple of 2 numbers in the form of (x,y) to specify the version. It is also possible to add more dot-separated parts to the version, like patch number, but only major and minor version numbers are stored in the built .fap.
 - **fap_icon**: name of a `.png` file, 1-bit color depth, 10x10px, to be embedded within `.fap` file.
 - **fap_libs**: list of extra libraries to link the application against. Provides access to extra functions that are not exported as a part of main firmware at the expense of increased `.fap` file size and RAM consumption.
@@ -56,6 +57,7 @@ The following parameters are used only for [FAPs](./AppsOnSDCard.md):
 - **fap_weburl**: string, may be empty. Application's homepage.
 - **fap_icon_assets**: string. If present, it defines a folder name to be used for gathering image assets for this application. These images will be preprocessed and built alongside the application. See [FAP assets](./AppsOnSDCard.md#fap-assets) for details.
 - **fap_extbuild**: provides support for parts of application sources to be built by external tools. Contains a list of `ExtFile(path="file name", command="shell command")` definitions. `fbt` will run the specified command for each file in the list.
+- **fal_embedded**: boolean, default `False`. Applies only to PLUGIN type. If `True`, the plugin will be embedded into host application's .fap file as a resource and extracted to `apps_assets/APPID` folder on its start. This allows plugins to be distributed as a part of the host application.
 
 Note that commands are executed at the firmware root folder, and all intermediate files must be placed in an application's temporary build folder. For that, you can use pattern expansion by `fbt`: `${FAP_WORK_DIR}` will be replaced with the path to the application's temporary build folder, and `${FAP_SRC_DIR}` will be replaced with the path to the application's source folder. You can also use other variables defined internally by `fbt`.
 
@@ -75,12 +77,12 @@ Example for building an app from Rust sources:
   Library sources must be placed in a subfolder of the `lib` folder within the application's source folder.
   Each library is defined as a call to the `Lib()` function, accepting the following parameters:
 
-    - **name**: name of the library's folder. Required.
-    - **fap_include_paths**: list of the library's relative paths to add to the parent fap's include path list. The default value is `["."]`, meaning the library's source root.
-    - **sources**: list of filename masks to be used for gathering include files for this library. Paths are relative to the library's source root. The default value is `["*.c*"]`.
-    - **cflags**: list of additional compiler flags to be used for building this library. The default value is `[]`.
-    - **cdefines**: list of additional preprocessor definitions to be used for building this library. The default value is `[]`.
-    - **cincludes**: list of additional include paths to be used for building this library. Paths are relative to the application's root. This can be used for providing external search paths for this library's code — for configuration headers. The default value is `[]`.
+  - **name**: name of the library's folder. Required.
+  - **fap_include_paths**: list of the library's relative paths to add to the parent fap's include path list. The default value is `["."]`, meaning the library's source root.
+  - **sources**: list of filename masks to be used for gathering include files for this library. Paths are relative to the library's source root. The default value is `["*.c*"]`.
+  - **cflags**: list of additional compiler flags to be used for building this library. The default value is `[]`.
+  - **cdefines**: list of additional preprocessor definitions to be used for building this library. The default value is `[]`.
+  - **cincludes**: list of additional include paths to be used for building this library. Paths are relative to the application's root. This can be used for providing external search paths for this library's code — for configuration headers. The default value is `[]`.
 
 Example for building an app with a private library:
 

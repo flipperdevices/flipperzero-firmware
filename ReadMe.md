@@ -37,6 +37,10 @@ Finally, open a [Pull Request](https://github.com/flipperdevices/flipperzero-fir
 
 Flipper Zero Firmware is written in C, with some bits and pieces written in C++ and armv7m assembly languages. An intermediate level of C knowledge is recommended for comfortable programming. C, C++, and armv7m assembly languages are supported for Flipper applications.
 
+# Firmware RoadMap
+
+[Firmware RoadMap Miro Board](https://miro.com/app/board/uXjVO_3D6xU=/)
+
 ## Requirements
 
 Supported development platforms:
@@ -93,7 +97,7 @@ Make sure your Flipper is on, and your firmware is functioning. Connect your Fli
 - [Flipper File Formats](/documentation/file_formats) - everything about how Flipper stores your data and how you can work with it
 - [Universal Remotes](/documentation/UniversalRemotes.md) - contributing your infrared remote to the universal remote database
 - [Firmware Roadmap](/documentation/RoadMap.md)
-- And much more in the [Developer Documentation](https://flipperdevices.github.io/flipperzero-firmware/)
+- And much more in the [Developer Documentation](https://developer.flipper.net/flipperzero/doxygen)
 
 # Project structure
 

@@ -14,7 +14,7 @@ To build your application as a FAP, create a folder with your app's source code 
 
 - To build your application, run `./fbt fap_{APPID}`, where APPID is your application's ID in its manifest.
 - To build your app and upload it over USB to run on Flipper, use `./fbt launch APPSRC=applications_user/path/to/app`. This command is configured in the default [VS Code profile](../.vscode/ReadMe.md) as a "Launch App on Flipper" build action (Ctrl+Shift+B menu).
-- To build an app without uploading it to Flipper, use `./fbt build APPSRC=applications_user/path/to/app`. This command is also availabe in VSCode configuration as "Build App".
+- To build an app without uploading it to Flipper, use `./fbt build APPSRC=applications_user/path/to/app`. This command is also available in VSCode configuration as "Build App".
 - To build all FAPs, run `./fbt faps` or `./fbt fap_dist`.
 
 ## FAP assets
@@ -61,7 +61,7 @@ The App Loader allocates memory for the application and copies it to RAM, proces
 
 ## API versioning
 
-Not all parts of firmware are available for external applications. A subset of available functions and variables is defined in the "api_symbols.csv" file, which is a part of the firmware target definition in the `firmware/targets/` directory.
+Not all parts of firmware are available for external applications. A subset of available functions and variables is defined in the "api_symbols.csv" file, which is a part of the firmware target definition in the `targets/` directory.
 
 `fbt` uses semantic versioning for the API. The major version is incremented when there are breaking changes in the API. The minor version is incremented when new features are added.
 

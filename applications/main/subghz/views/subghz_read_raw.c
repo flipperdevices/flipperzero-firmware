@@ -9,7 +9,7 @@
 
 #include <assets_icons.h>
 #define SUBGHZ_READ_RAW_RSSI_HISTORY_SIZE 100
-#define TAG "SubGhzReadRAW"
+#define TAG "SubGhzReadRaw"
 
 struct SubGhzReadRAW {
     View* view;
@@ -329,7 +329,7 @@ void subghz_read_raw_draw(Canvas* canvas, SubGhzReadRAWModel* model) {
     case SubGhzReadRAWStatusLoadKeyTX:
     case SubGhzReadRAWStatusLoadKeyTXRepeat:
         graphics_mode = 0;
-        elements_button_center(canvas, "Send");
+        elements_button_center(canvas, "Hold to repeat");
         break;
 
     case SubGhzReadRAWStatusStart:
