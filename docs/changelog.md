@@ -4,7 +4,7 @@
 - Add settings options to toggle hardware feedback
 - Maybe take a look at the board verifier algo and try to make faster/multi-thread or anything to allow better maps
 
-## Version 1.0.1 - 1/11/2024
+## Version 1.1.0 - 1/11/2024
 
 Added haptic / led functionality
 
