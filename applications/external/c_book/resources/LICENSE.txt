@@ -1,0 +1,9 @@
+The C Programming Language (Second Ed.) 
+by Brian W. Kernighan
+and Dennis M. Ritchie.
+
+* All rights reserved.
+
+This LICENSE file and the permissions and restrictions contained herein apply only to the use of this text file and any associated materials provided. It does not grant any rights to the content of "The C Programming Language" book itself, including but not limited to the text, code samples, or any other material contained therein.
+
+For permissions beyond the scope of this license, please contact the publisher or the copyright holder(s).
