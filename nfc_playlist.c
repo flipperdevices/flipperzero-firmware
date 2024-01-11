@@ -94,7 +94,6 @@ int32_t nfc_playlist_main(void* p) {
 
    Gui* gui = furi_record_open(RECORD_GUI);
    view_dispatcher_attach_to_gui(nfc_playlist->view_dispatcher, gui, ViewDispatcherTypeFullscreen);
-   
    scene_manager_next_scene(nfc_playlist->scene_manager, NfcPlaylistScene_MainMenu);
    view_dispatcher_run(nfc_playlist->view_dispatcher);
 
