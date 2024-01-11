@@ -41,7 +41,7 @@ typedef struct {
     uint8_t keyboard_rows;
     uint8_t word_letters_gap;
     uint16_t letters[HANGMAN_MAX_ALP_SIZE];
-    char *message_ok, *message_won, *message_loose;
+    char *message_ok, *message_won, *message_lose;
 } HangmanLangConfig;
 
 typedef struct {
