@@ -52,6 +52,7 @@ static NfcPlaylist* nfc_playlist_alloc() {
     nfc_playlist->base_file_path = furi_string_alloc_set_str("/ext/apps_data/nfc_playlist/");
     nfc_playlist->file_path = nfc_playlist->base_file_path;
     nfc_playlist->file_selected = false;
+    nfc_playlist->file_selected_check = false;
     nfc_playlist->file_browser = file_browser_alloc(nfc_playlist->file_path);
     nfc_playlist->popup = popup_alloc();
     nfc_playlist->emulate_timeout = default_emulate_timeout;
@@ -93,6 +94,7 @@ int32_t nfc_playlist_main(void* p) {
 
    Gui* gui = furi_record_open(RECORD_GUI);
    view_dispatcher_attach_to_gui(nfc_playlist->view_dispatcher, gui, ViewDispatcherTypeFullscreen);
+   
    scene_manager_next_scene(nfc_playlist->scene_manager, NfcPlaylistScene_MainMenu);
    view_dispatcher_run(nfc_playlist->view_dispatcher);
 
