@@ -3,6 +3,7 @@
 
 void nfc_playlist_file_select_menu_callback(void* context) {
    NfcPlaylist* nfc_playlist = context;
+   nfc_playlist->file_selected_check = true;
    scene_manager_previous_scene(nfc_playlist->scene_manager);
 }
 
