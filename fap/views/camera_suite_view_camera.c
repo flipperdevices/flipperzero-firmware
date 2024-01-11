@@ -61,13 +61,20 @@ static void camera_suite_view_camera_draw(Canvas* canvas, void* model) {
 
     // Draw the guide if the camera is not initialized.
     if(!uartDumpModel->is_initialized) {
-        canvas_draw_icon(canvas, 74, 16, &I_DolphinCommon_56x48);
         canvas_set_font(canvas, FontSecondary);
-        canvas_draw_str(canvas, 8, 12, "Connect the ESP32-CAM");
-        canvas_draw_str(canvas, 20, 24, "VCC - 3V3");
-        canvas_draw_str(canvas, 20, 34, "GND - GND");
-        canvas_draw_str(canvas, 20, 44, "U0R - TX");
-        canvas_draw_str(canvas, 20, 54, "U0T - RX");
+        canvas_draw_str(canvas, 10, 25, "VCC - 3V3");
+        canvas_set_font(canvas, FontSecondary);
+        canvas_draw_str(canvas, 73, 25, "GND - GND");
+        canvas_set_font(canvas, FontSecondary);
+        canvas_draw_str(canvas, 10, 11, "Connect the ESP32-CAM:");
+        canvas_set_font(canvas, FontSecondary);
+        canvas_draw_str(canvas, 10, 36, "U0R - TX");
+        canvas_set_font(canvas, FontSecondary);
+        canvas_draw_str(canvas, 73, 36, "U0T - RX");
+        canvas_set_font(canvas, FontSecondary);
+        canvas_draw_str(canvas, 10, 49, "github.com/CodyTolene/");
+        canvas_set_font(canvas, FontSecondary);
+        canvas_draw_str(canvas, 4, 60, "Flipper-Zero-Camera-Suite");
     }
 }
 
@@ -332,6 +339,7 @@ static bool camera_suite_view_camera_input(InputEvent* event, void* context) {
         }
         }
     }
+
     return false;
 }
 
