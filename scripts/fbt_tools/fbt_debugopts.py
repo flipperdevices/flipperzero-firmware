@@ -18,7 +18,7 @@ def GetDevices(env):
 def generate(env, **kw):
     env.AddMethod(GetDevices)
     env.SetDefault(
-        FBT_DEBUG_DIR="${FBT_SCRIPT_DIR}/debug",
+        FBT_DEBUG_DIR="${FBT_SCRIPT_DIR.get_subst_proxy().posix}/debug",
     )
 
     if (adapter_serial := env.subst("$SWD_TRANSPORT_SERIAL")) != "auto":
@@ -36,11 +36,11 @@ def generate(env, **kw):
 
     env.SetDefault(
         OPENOCD_GDB_PIPE=[
-            "|openocd -c 'gdb_port pipe; log_output ${FBT_DEBUG_DIR}/openocd.log' ${[SINGLEQUOTEFUNC(OPENOCD_OPTS)]}"
+            "|openocd -c 'gdb_port pipe; log_output ${FBT_DEBUG_DIR.get_subst_proxy().posix}/openocd.log' ${[SINGLEQUOTEFUNC(OPENOCD_OPTS)]}"
         ],
         GDBOPTS_BASE=[
             "-ex",
-            "source ${FBT_DEBUG_DIR}/gdbinit",
+            "source ${FBT_DEBUG_DIR.get_subst_proxy().posix}/gdbinit",
             "-ex",
             "target extended-remote ${GDBREMOTE}",
         ],
@@ -57,15 +57,15 @@ def generate(env, **kw):
         ],
         GDBPYOPTS=[
             "-ex",
-            "source ${FBT_DEBUG_DIR}/FreeRTOS/FreeRTOS.py",
+            "source ${FBT_DEBUG_DIR.get_subst_proxy().posix}/FreeRTOS/FreeRTOS.py",
             "-ex",
-            "source ${FBT_DEBUG_DIR}/flipperapps.py",
+            "source ${FBT_DEBUG_DIR.get_subst_proxy().posix}/flipperapps.py",
             "-ex",
-            "source ${FBT_DEBUG_DIR}/flipperversion.py",
+            "source ${FBT_DEBUG_DIR.get_subst_proxy().posix}/flipperversion.py",
             "-ex",
             "fap-set-debug-elf-root ${FBT_FAP_DEBUG_ELF_ROOT}",
             "-ex",
-            "source ${FBT_DEBUG_DIR}/PyCortexMDebug/PyCortexMDebug.py",
+            "source ${FBT_DEBUG_DIR.get_subst_proxy().posix}/PyCortexMDebug/PyCortexMDebug.py",
             "-ex",
             "svd_load ${SVD_FILE}",
             "-ex",
@@ -73,7 +73,7 @@ def generate(env, **kw):
             "-ex",
             "fw-version",
         ],
-        JFLASHPROJECT="${FBT_DEBUG_DIR}/fw.jflash",
+        JFLASHPROJECT="${FBT_DEBUG_DIR.get_subst_proxy().posix}/fw.jflash",
     )
 
 

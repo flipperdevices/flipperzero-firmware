@@ -83,7 +83,7 @@ def generate(env, **kw):
         FW_ELF=sdk_current_sdk_dir_node.File(sdk_components["firmware.elf"]),
         FW_BIN=sdk_current_sdk_dir_node.File(sdk_components["full.bin"]),
         UPDATE_BUNDLE_DIR=sdk_current_sdk_dir_node.Dir(sdk_components["update.dir"]),
-        SVD_FILE="${FBT_DEBUG_DIR}/STM32WB55_CM4.svd",
+        SVD_FILE="${FBT_DEBUG_DIR.get_subst_proxy().posix}/STM32WB55_CM4.svd",
         # Build variables
         ROOT_DIR=env.Dir("#"),
         FIRMWARE_BUILD_CFG="firmware",

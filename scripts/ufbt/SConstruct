@@ -128,7 +128,7 @@ dist_env = env.Clone(
         "-c",
         "transport select hla_swd",
         "-f",
-        "${FBT_DEBUG_DIR}/stm32wbx.cfg",
+        "${FBT_DEBUG_DIR.get_subst_proxy().posix}/stm32wbx.cfg",
         "-c",
         "stm32wbx.cpu configure -rtos auto",
     ],
@@ -176,9 +176,9 @@ dist_env.PhonyTarget(
 # Debug alien elf
 debug_other_opts = [
     "-ex",
-    "source ${FBT_DEBUG_DIR}/PyCortexMDebug/PyCortexMDebug.py",
+    "source ${FBT_DEBUG_DIR.get_subst_proxy().posix}/PyCortexMDebug/PyCortexMDebug.py",
     "-ex",
-    "source ${FBT_DEBUG_DIR}/flipperversion.py",
+    "source ${FBT_DEBUG_DIR.get_subst_proxy().posix}/flipperversion.py",
     "-ex",
     "fw-version",
 ]
