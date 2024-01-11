@@ -45,7 +45,6 @@ typedef enum {
     SubGhzDeviceCC1101ExtStateIdle, /**< Idle, energy save mode */
     SubGhzDeviceCC1101ExtStateAsyncRx, /**< Async RX started */
     SubGhzDeviceCC1101ExtStateAsyncTx, /**< Async TX started, DMA and timer is on */
-    SubGhzDeviceCC1101ExtStateAsyncTxLast, /**< Async TX continue, DMA completed and timer got last value to go */
     SubGhzDeviceCC1101ExtStateAsyncTxEnd, /**< Async TX complete, cleanup needed */
 } SubGhzDeviceCC1101ExtState;
 
@@ -272,8 +271,8 @@ void subghz_device_cc1101_ext_dump_state() {
 
 void subghz_device_cc1101_ext_load_custom_preset(const uint8_t* preset_data) {
     //load config
+    subghz_device_cc1101_ext_reset();
     furi_hal_spi_acquire(subghz_device_cc1101_ext->spi_bus_handle);
-    cc1101_reset(subghz_device_cc1101_ext->spi_bus_handle);
     uint32_t i = 0;
     uint8_t pa[8] = {0};
     while(preset_data[i]) {
@@ -302,8 +301,8 @@ void subghz_device_cc1101_ext_load_custom_preset(const uint8_t* preset_data) {
 }
 
 void subghz_device_cc1101_ext_load_registers(const uint8_t* data) {
+    subghz_device_cc1101_ext_reset();
     furi_hal_spi_acquire(subghz_device_cc1101_ext->spi_bus_handle);
-    cc1101_reset(subghz_device_cc1101_ext->spi_bus_handle);
     uint32_t i = 0;
     while(data[i]) {
         cc1101_write_reg(subghz_device_cc1101_ext->spi_bus_handle, data[i], data[i + 1]);
@@ -384,6 +383,7 @@ void subghz_device_cc1101_ext_reset() {
     furi_hal_gpio_init(subghz_device_cc1101_ext->g0_pin, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
     cc1101_switch_to_idle(subghz_device_cc1101_ext->spi_bus_handle);
     cc1101_reset(subghz_device_cc1101_ext->spi_bus_handle);
+    // Warning: push pull cc1101 clock output on GD0
     cc1101_write_reg(
         subghz_device_cc1101_ext->spi_bus_handle, CC1101_IOCFG0, CC1101IocfgHighImpedance);
     furi_hal_spi_release(subghz_device_cc1101_ext->spi_bus_handle);
@@ -822,14 +822,17 @@ bool subghz_device_cc1101_ext_is_async_tx_complete() {
 void subghz_device_cc1101_ext_stop_async_tx() {
     furi_assert(
         subghz_device_cc1101_ext->state == SubGhzDeviceCC1101ExtStateAsyncTx ||
-        subghz_device_cc1101_ext->state == SubGhzDeviceCC1101ExtStateAsyncTxLast ||
         subghz_device_cc1101_ext->state == SubGhzDeviceCC1101ExtStateAsyncTxEnd);
+
+    // Deinitialize GPIO
+    furi_hal_gpio_write(subghz_device_cc1101_ext->g0_pin, false);
+    furi_hal_gpio_init(
+        subghz_device_cc1101_ext->g0_pin, GpioModeAnalog, GpioPullDown, GpioSpeedLow);
 
     // Shutdown radio
     subghz_device_cc1101_ext_idle();
 
     // Deinitialize Timer
-    FURI_CRITICAL_ENTER();
     furi_hal_bus_disable(FuriHalBusTIM17);
     furi_hal_interrupt_set_isr(FuriHalInterruptIdTim1TrgComTim17, NULL, NULL);
 
@@ -838,16 +841,10 @@ void subghz_device_cc1101_ext_stop_async_tx() {
     LL_DMA_DisableChannel(SUBGHZ_DEVICE_CC1101_EXT_DMA_CH4_DEF);
     furi_hal_interrupt_set_isr(SUBGHZ_DEVICE_CC1101_EXT_DMA_CH3_IRQ, NULL, NULL);
 
-    // Deinitialize GPIO
-    furi_hal_gpio_write(subghz_device_cc1101_ext->g0_pin, false);
-    furi_hal_gpio_init(subghz_device_cc1101_ext->g0_pin, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
-
     // Stop debug
     if(subghz_device_cc1101_ext_stop_debug()) {
         LL_DMA_DisableChannel(SUBGHZ_DEVICE_CC1101_EXT_DMA_CH5_DEF);
     }
-
-    FURI_CRITICAL_EXIT();
 
     free(subghz_device_cc1101_ext->async_tx.buffer);
 

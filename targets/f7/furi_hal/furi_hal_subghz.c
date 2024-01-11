@@ -161,8 +161,8 @@ void furi_hal_subghz_dump_state() {
 
 void furi_hal_subghz_load_custom_preset(const uint8_t* preset_data) {
     //load config
+    furi_hal_subghz_reset();
     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
-    cc1101_reset(&furi_hal_spi_bus_handle_subghz);
     uint32_t i = 0;
     uint8_t pa[8] = {0};
     while(preset_data[i]) {
@@ -190,8 +190,8 @@ void furi_hal_subghz_load_custom_preset(const uint8_t* preset_data) {
 }
 
 void furi_hal_subghz_load_registers(const uint8_t* data) {
+    furi_hal_subghz_reset();
     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
-    cc1101_reset(&furi_hal_spi_bus_handle_subghz);
     uint32_t i = 0;
     while(data[i]) {
         cc1101_write_reg(&furi_hal_spi_bus_handle_subghz, data[i], data[i + 1]);
@@ -269,6 +269,7 @@ void furi_hal_subghz_reset() {
     furi_hal_gpio_init(&gpio_cc1101_g0, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
     cc1101_switch_to_idle(&furi_hal_spi_bus_handle_subghz);
     cc1101_reset(&furi_hal_spi_bus_handle_subghz);
+    // Warning: push pull cc1101 clock output on GD0
     cc1101_write_reg(&furi_hal_spi_bus_handle_subghz, CC1101_IOCFG0, CC1101IocfgHighImpedance);
     furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
 }
@@ -673,7 +674,7 @@ static void furi_hal_subghz_async_tx_timer_isr() {
                 furi_hal_subghz.state = SubGhzStateAsyncTxEnd;
                 LL_DMA_DisableChannel(SUBGHZ_DMA_CH1_DEF);
                 //forcibly pulls the pin to the ground so that there is no carrier
-                furi_hal_gpio_init(&gpio_cc1101_g0, GpioModeInput, GpioPullDown, GpioSpeedLow);
+                furi_hal_gpio_init(&gpio_cc1101_g0, GpioModeAnalog, GpioPullDown, GpioSpeedLow);
                 LL_TIM_DisableCounter(TIM2);
             }
         }
@@ -794,6 +795,10 @@ void furi_hal_subghz_stop_async_tx() {
         furi_hal_subghz.state == SubGhzStateAsyncTx ||
         furi_hal_subghz.state == SubGhzStateAsyncTxEnd);
 
+    // Deinitialize GPIO
+    // Keep in mind that cc1101 will try to pull it up in idle.
+    furi_hal_gpio_init(&gpio_cc1101_g0, GpioModeAnalog, GpioPullDown, GpioSpeedLow);
+
     // Shutdown radio
     furi_hal_subghz_idle();
 #ifdef FURI_HAL_SUBGHZ_TX_GPIO
@@ -801,7 +806,6 @@ void furi_hal_subghz_stop_async_tx() {
 #endif
 
     // Deinitialize Timer
-    FURI_CRITICAL_ENTER();
     furi_hal_bus_disable(FuriHalBusTIM2);
     furi_hal_interrupt_set_isr(FuriHalInterruptIdTIM2, NULL, NULL);
 
@@ -810,15 +814,10 @@ void furi_hal_subghz_stop_async_tx() {
 
     furi_hal_interrupt_set_isr(SUBGHZ_DMA_CH1_IRQ, NULL, NULL);
 
-    // Deinitialize GPIO
-    furi_hal_gpio_init(&gpio_cc1101_g0, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
-
     // Stop debug
     if(furi_hal_subghz_stop_debug()) {
         LL_DMA_DisableChannel(SUBGHZ_DMA_CH2_DEF);
     }
-
-    FURI_CRITICAL_EXIT();
 
     free(furi_hal_subghz_async_tx.buffer);
 
