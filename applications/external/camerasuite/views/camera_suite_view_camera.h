@@ -14,7 +14,6 @@
 #include <notification/notification_messages.h>
 #include <storage/filesystem_api_defines.h>
 #include <storage/storage.h>
-#include <camerasuite_icons.h>
 
 #include "../helpers/camera_suite_custom_event.h"
 
