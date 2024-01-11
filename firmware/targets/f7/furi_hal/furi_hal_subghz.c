@@ -841,6 +841,11 @@ bool furi_hal_subghz_start_async_tx(FuriHalSubGhzAsyncTxCallback callback, void*
     // Start debug
     if(furi_hal_subghz_start_debug()) {
         const GpioPin* gpio = furi_hal_subghz.async_mirror_pin;
+        // //Preparing bit mask
+        // //Debug pin is may be only PORTB! (PB0, PB1, .., PB15)
+        // furi_hal_subghz_debug_gpio_buff[0] = 0;
+        // furi_hal_subghz_debug_gpio_buff[1] = 0;
+
         furi_hal_subghz_debug_gpio_buff[0] = gpio->pin;
         furi_hal_subghz_debug_gpio_buff[1] = (uint32_t)gpio->pin << GPIO_NUMBER;
 
