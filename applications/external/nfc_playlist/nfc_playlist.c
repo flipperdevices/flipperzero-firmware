@@ -50,6 +50,7 @@ static NfcPlaylist* nfc_playlist_alloc() {
     nfc_playlist->base_file_path = furi_string_alloc_set_str("/ext/apps_data/nfc_playlist/");
     nfc_playlist->file_path = nfc_playlist->base_file_path;
     nfc_playlist->file_selected = false;
+    nfc_playlist->file_selected_check = false;
     nfc_playlist->file_browser = file_browser_alloc(nfc_playlist->file_path);
     nfc_playlist->popup = popup_alloc();
     nfc_playlist->emulate_timeout = default_emulate_timeout;

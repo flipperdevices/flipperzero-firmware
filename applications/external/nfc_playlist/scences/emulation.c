@@ -65,7 +65,7 @@ int32_t nfc_playlist_emulation_task(void* context) {
 
     if(file_stream_open(
            stream, furi_string_get_cstr(nfc_playlist->file_path), FSAM_READ, FSOM_OPEN_EXISTING) &&
-       nfc_playlist->file_selected) {
+       nfc_playlist->file_selected_check) {
         EmulationState = NfcPlaylistEmulationState_Emulating;
         int file_position = 0;
         while(stream_read_line(stream, line) &&
@@ -183,7 +183,7 @@ int32_t nfc_playlist_emulation_task(void* context) {
         EmulationState = NfcPlaylistEmulationState_Stopped;
     }
 
-    else if(!nfc_playlist->file_selected) {
+    else if(!nfc_playlist->file_selected_check) {
         popup_set_header(
             nfc_playlist->popup, "No playlist selected", 64, 10, AlignCenter, AlignTop);
         popup_set_text(nfc_playlist->popup, "Press back", 64, 50, AlignCenter, AlignTop);
