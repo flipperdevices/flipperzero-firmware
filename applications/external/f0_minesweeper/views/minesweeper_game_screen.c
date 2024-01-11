@@ -101,7 +101,6 @@ static const int8_t offsets[8][2] = {
 };
 
 static MineSweeperTile board_t[MINESWEEPER_BOARD_MAX_TILES];
-static MineSweeperTile board_t2[2][MINESWEEPER_BOARD_MAX_TILES];
 
 /****************************************************************
  * Function declarations
@@ -671,8 +670,8 @@ static bool try_clear_surrounding_tiles(MineSweeperGameScreenModel* model) {
             }
 
             uint16_t pos = dx * board_width + dy;
-            if(model->board[pos].tile_state != MineSweeperGameScreenTileStateFlagged &&
-               model->board[pos].tile_state != MineSweeperGameScreenTileStateCleared) {
+            if(model->board[pos].tile_state == MineSweeperGameScreenTileStateUncleared) {
+                // Decrement tiles left by the amount cleared
                 uint16_t tiles_cleared =
                     bfs_tile_clear(model->board, model->board_width, model->board_height, dx, dy);
                 model->tiles_left -= tiles_cleared;
@@ -1427,7 +1426,6 @@ MineSweeperGameScreen* mine_sweeper_game_screen_alloc(
     uint8_t height,
     uint8_t difficulty,
     bool ensure_solvable) {
-    UNUSED(board_t2);
     MineSweeperGameScreen* mine_sweeper_game_screen =
         (MineSweeperGameScreen*)malloc(sizeof(MineSweeperGameScreen));
 
