@@ -158,7 +158,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW PR: NFC: [Parser for San Francisco Bay Area "Clipper" transit card. #3344 (By ke6jjj)](https://github.com/flipperdevices/flipperzero-firmware/pull/3344)
 - Updated: [NFC Playlist v1.1 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
 - Updated: [NFC Maker NTAG215 (by Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/343cb39d08f60b75b537e1a31100707935cf6e9d)
-- NFC: [Parser for NDEF (By Willy-JL)]()
+- NFC: [Parser for NDEF (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/ca82f485248e2355a8ee2c31bec3ecbf22de2b38)
 
 <a name="release">
 
@@ -297,6 +297,7 @@ $ ./fbt dolphin_ext
 - NFC: [Parser / KDF for mizip and mykey updated & addition of hi and microel (By zProAle)](https://github.com/zProAle/my_flipper_kdf)
 - NFC: [Parser for ITSO (UK) #3325 (By gsp8181)](https://github.com/flipperdevices/flipperzero-firmware/pull/3325)
 - NFC: [Parser for Mizip (From zProAle)](https://github.com/noproto/flipper_kdf/pull/3)
+- NFC: [Parser for NDEF (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/ca82f485248e2355a8ee2c31bec3ecbf22de2b38)
 - NFC: [Parser for Philips Sonicare toothbrush heads (By Sil333033, Research By Cyrill Künzi)](https://kuenzi.dev/toothbrush/)
 - NFC: [Parser for Saflok and Mykey (From noproto)](https://github.com/noproto/flipper_kdf)
 - NFC: [Parser for San Francisco Bay Area "Clipper" transit card. #3344 (By ke6jjj)](https://github.com/flipperdevices/flipperzero-firmware/pull/3344)
