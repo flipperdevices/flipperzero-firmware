@@ -1,7 +1,24 @@
 
 # Changelog
 ## TODO:
-- Implement LED and haptic feedback
+- Implement speaker functionality to play sounds
+- Add settings options to toggle hardware feedback
+- Maybe take a look at the board verifier algo and try to make faster/multi-thread or anything to allow better maps
+
+## Version 1.0.1 - 1/11/2024
+
+Added haptic / led functionality
+
+## Added
+- Haptic feedback on all button presses.
+    - Out of bounds movement
+    - Ok to clear tiles
+    - Holding back for flags
+    - Different haptic feedback on win/loss
+- LED changes on win loss
+    - Initially LED is just reset
+    - Set to red on loss
+    - Set to blue on win
 
 ## Version 1.0.0 - 1/10/2024
 
