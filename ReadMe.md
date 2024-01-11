@@ -46,7 +46,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Added: [F0 Minesweeper v0.1 (By squee72564)](https://github.com/squee72564/F0_Minesweeper_Fap)
 - Added: [Gas Sensor v0.1 (By iancohee)](https://github.com/iancohee/gas_sensor_fap) `Req: BME680 / SGP30`
 - Added: [Crossy Road v1.0 (By Mikael098)](https://github.com/Mikael098/CrossyRoad-FlipperZero-)
-- Updated: [F0 Minesweeper v0.1 (By squee72564)](https://github.com/squee72564/F0_Minesweeper_Fap)
+- Updated: [F0 Minesweeper v1.0 (By squee72564)](https://github.com/squee72564/F0_Minesweeper_Fap)
 - OFW: [ufbt: fixed generated project paths on Windows #3339 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/3339)
 
 ## IN THIS BRANCH:
@@ -372,7 +372,7 @@ $ ./fbt dolphin_ext
 - [Doom v1.1 (By p4nic4ttack)](https://github.com/p4nic4ttack/doom-flipper-zero/) (ported and fixed by xMasterX & Svarich & hedger)
 - [DVD Bounce (By schaene)](https://github.com/schaene/Flipper-DVD-Bounce)
 - [Etch-A-Sketch (By SimplyMinimal)](https://github.com/SimplyMinimal/FlipperZero-Etch-A-Sketch)
-- [F0 Minesweeper v0.1 (By squee72564)](https://github.com/squee72564/F0_Minesweeper_Fap)
+- [F0 Minesweeper v1.0 (By squee72564)](https://github.com/squee72564/F0_Minesweeper_Fap)
 - [Five Nights at Flipper's (By sillygir1)](https://github.com/sillygir1/flipperzero-fnaf)
 - [Flappy Bird v1.1 (By DroomOne)](https://github.com/DroomOne/flipperzero-firmware/tree/dev/applications/flappy_bird) [Flappy: Border hitboxes, bigger Pilars (By TQMatvey)](https://github.com/DarkFlippers/unleashed-firmware/pull/114) [Increase pilars line width to improve visibility (By ahumeniy)](https://github.com/DarkFlippers/unleashed-firmware/pull/140)
 - [Game of Life v1.1 (Updated to work by tgxn) (By itsyourbedtime)](https://github.com/tgxn/flipperzero-firmware/blob/dev/applications/game_of_life/game_of_life.c)
