@@ -62,7 +62,7 @@ int32_t nfc_playlist_emulation_task(void* context) {
     popup_set_context(nfc_playlist->popup, nfc_playlist);
     view_dispatcher_switch_to_view(nfc_playlist->view_dispatcher, NfcPlaylistView_Popup);
 
-    if(file_stream_open(stream, furi_string_get_cstr(nfc_playlist->file_path), FSAM_READ, FSOM_OPEN_EXISTING)) {
+    if(file_stream_open(stream, furi_string_get_cstr(nfc_playlist->file_path), FSAM_READ, FSOM_OPEN_EXISTING) && nfc_playlist->file_selected) {
         EmulationState = NfcPlaylistEmulationState_Emulating;
         int file_position = 0;
         while(stream_read_line(stream, line) && EmulationState == NfcPlaylistEmulationState_Emulating) {
@@ -144,7 +144,14 @@ int32_t nfc_playlist_emulation_task(void* context) {
         popup_set_text(nfc_playlist->popup, "Press back", 64, 50, AlignCenter, AlignTop);
         stop_blink(nfc_playlist);
         EmulationState = NfcPlaylistEmulationState_Stopped;
-    } else {
+    } 
+    
+    else if (!nfc_playlist->file_selected) {
+        popup_set_header(nfc_playlist->popup, "No playlist selected", 64, 10, AlignCenter, AlignTop);
+        popup_set_text(nfc_playlist->popup, "Press back", 64, 50, AlignCenter, AlignTop);
+    } 
+    
+    else {
         popup_set_header(nfc_playlist->popup, "Failed to open playlist", 64, 10, AlignCenter, AlignTop);
         popup_set_text(nfc_playlist->popup, "Press back", 64, 50, AlignCenter, AlignTop);
     }
