@@ -147,7 +147,7 @@ static void app_free(MineSweeperApp* app) {
     free(app);
 }
 
-int32_t f0_minesweeper_app(void* p) {
+int32_t minesweeper_redux_app(void* p) {
     UNUSED(p);
 
     MineSweeperApp* app = app_alloc();
