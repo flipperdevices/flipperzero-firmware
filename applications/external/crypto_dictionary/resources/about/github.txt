@@ -1,3 +1,4 @@
-+-------GitHub-------+
-URL: bit.ly/4aPyqhx
-Version: 0.1
++------ GitHub -------+
+ | Crypto_dict version: 0.1       |
+ | url: bit.ly/4aPyqhx                |
++------------------ +

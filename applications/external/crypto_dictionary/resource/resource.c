@@ -1,14 +1,20 @@
 #include "resource.h"
 
 Topic symmetric_cipher[] = {
-    {"* Modes", NULL, APP_ASSETS_PATH("symmetric_cipher/modes.txt")},
     {"1-Blowfish", NULL, APP_ASSETS_PATH("symmetric_cipher/blowfish.txt")},
-    {"2-CAST", NULL, APP_ASSETS_PATH("development.txt")},
-    // {"3-DES", NULL, APP_ASSETS_PATH("development.txt")},
-    // {"4-IDEA", NULL, APP_ASSETS_PATH("development.txt")},
-    // {"5-RC2", NULL, APP_ASSETS_PATH("development.txt")},
-    // {"6-RC4", NULL, APP_ASSETS_PATH("development.txt")},
-    // {"7-RC5", NULL, APP_ASSETS_PATH("development.txt")},
+    {"2-Camellia", NULL, APP_ASSETS_PATH("symmetric_cipher/camellia.txt")},
+    {"3-CAST-128", NULL, APP_ASSETS_PATH("symmetric_cipher/cast128.txt")},
+    {"4-CAST-256", NULL, APP_ASSETS_PATH("symmetric_cipher/cast256.txt")},
+    {"5-DES", NULL, APP_ASSETS_PATH("symmetric_cipher/des.txt")},
+    {"6-IDEA", NULL, APP_ASSETS_PATH("symmetric_cipher/idea.txt")},
+    {"7-RC2", NULL, APP_ASSETS_PATH("symmetric_cipher/rc2.txt")},
+    {"8-RC4", NULL, APP_ASSETS_PATH("symmetric_cipher/rc4.txt")},
+    {"9-RC5", NULL, APP_ASSETS_PATH("symmetric_cipher/rc5.txt")},
+    {"10-RC6", NULL, APP_ASSETS_PATH("symmetric_cipher/rc6.txt")},
+    {"11-Serpent", NULL, APP_ASSETS_PATH("symmetric_cipher/serpent.txt")},
+    {"12-SM4", NULL, APP_ASSETS_PATH("symmetric_cipher/sm4.txt")},
+    {"13-Twofish", NULL, APP_ASSETS_PATH("symmetric_cipher/twofish.txt")},
+    {"14-Triple DES", NULL, APP_ASSETS_PATH("symmetric_cipher/des3.txt")},
 };
 
 // Topic public_key[] = {
@@ -68,9 +74,8 @@ Topic symmetric_cipher[] = {
 // };
 
 Topic about[] = {
-    {"1-Algorithms", NULL, APP_ASSETS_PATH("about/algorithms.txt")},
-    {"2-Disclaimer", NULL, APP_ASSETS_PATH("about/disclaimer.txt")},
-    {"3-GitHub", NULL, APP_ASSETS_PATH("about/github.txt")},
+    // {"Algorithms", NULL, APP_ASSETS_PATH("about/algorithms.txt")},
+    {"GitHub", NULL, APP_ASSETS_PATH("about/github.txt")},
 };
 
 Chapter chapters[] = {
