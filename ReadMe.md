@@ -50,6 +50,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Added: [The C Prog. Language v0.2 (By armixz)](https://github.com/armixz/Flipper-Zero-The-C-Programming-Language)
 - Updated: [ESP32 Camera Suite v1.5 (By CodyTolene)](https://github.com/CodyTolene/Flipper-Zero-Camera-Suite)
 - Updated: [Minesweeper Redux v1.0 (By squee72564)](https://github.com/squee72564/F0_Minesweeper_Fap)
+- Updated: [Crypto Dictionary v0.1 (By armixz)](https://github.com/armixz/Flipper-Zero-Crypto-Dictionary)
 
 <a name="release">
 

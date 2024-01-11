@@ -1,0 +1,6 @@
++------ camellia ------+
+ | block size: 128-bit                  |
+ | key: 128,192, and 256          |
+ | structure: Feistel network |
+ | rounds: 18 or 24                       |
++------------------ +
