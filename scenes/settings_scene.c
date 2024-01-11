@@ -24,9 +24,9 @@ typedef enum {
 } MineSweeperSettingsScreenEvent;
 
 static const char* settings_screen_difficulty_text[MineSweeperSettingsScreenDifficultyTypeNum] = {
-    "Child",
-    "Boy",
-    "Man",
+    "Easy",
+    "Medium",
+    "Hard",
 };
 
 static const char* settings_screen_verifier_text[2] = {
