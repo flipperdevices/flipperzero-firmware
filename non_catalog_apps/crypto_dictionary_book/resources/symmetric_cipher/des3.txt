@@ -1,0 +1,6 @@
++------ DES3--------+
+ | block size: 64-bit (8 byte) |
+ | key size bits: 112 or 168         |
+ | structure: Feistel network |
+ | rounds: 48 DES                        |
++------------------ +

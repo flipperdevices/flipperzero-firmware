@@ -1,0 +1,6 @@
++-------  RC4  -------+
+ | block size: 2064                      |
+ | key size bits: 40-2048        |
+ | structure: pentium                 |
+ | rounds: One                                |
++------------------ +

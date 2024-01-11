@@ -1,0 +1,6 @@
++------- DES--------+
+ | block size: 64-bit (8 byte) |
+ | key size bits: 56                       |
+ | structure: Feistel network |
+ | rounds: sixteen                         |
++------------------ +

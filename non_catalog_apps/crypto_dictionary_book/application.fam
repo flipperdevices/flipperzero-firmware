@@ -1,0 +1,16 @@
+App(
+    appid="crypto_dict",
+    name="Crypto Dictionary",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="crypto_dict_app",
+    requires=["gui", "storage"],
+    stack_size=10 * 1024,
+    fap_icon="icons/crypto_dict_icon.png",
+    fap_category="Media",
+    fap_icon_assets="icons",
+    fap_file_assets="resources",
+    fap_author="@armixz",
+    fap_weburl="https://github.com/armixz/Flipper-Zero-Crypto-Dictionary",
+    fap_version="0.1",
+    fap_description="Cryptography Dictionary (Flipper Zero Edition)",
+)

@@ -1,0 +1,6 @@
++-------  SM4 -------+
+ | block size: 128 bits                  |
+ | key size bits: 128-bit             |
+ | structure: Feistel network |
+ | rounds: 32                                  |
++------------------ +

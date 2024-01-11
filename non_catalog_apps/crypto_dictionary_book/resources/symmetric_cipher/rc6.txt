@@ -1,0 +1,6 @@
++-------  RC6  -------+
+ | block size: 128 bits                  |
+ | key size bits: 128,192,256  |
+ | structure: Feistel network |
+ | rounds: 20                                  |
++------------------ +

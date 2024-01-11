@@ -1,0 +1,10 @@
++-----development---- +
+ | I'm excited to let you             |
+ | know that this part of App  |
+ | is under development.           |
+ | I appreciate your patience. |
++------------------ +
++------ GitHub -------+
+ | Crypto_dict version: 0.1       |
+ | url: bit.ly/4aPyqhx                |
++------------------ +

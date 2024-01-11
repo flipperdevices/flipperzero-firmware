@@ -1,0 +1,16 @@
+App(
+    appid="c_book",
+    name="The C Prog. Language",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="c_book_app",
+    requires=["gui"],
+    stack_size=10 * 1024,
+    fap_icon="icons/c_book_icon.png",
+    fap_category="Media",
+    fap_icon_assets="icons",
+    fap_file_assets="resources",
+    fap_author="@armixz",
+    fap_weburl="https://github.com/armixz/Flipper-Zero-The-C-Programming-Language",
+    fap_version="0.2",
+    fap_description="The C Programming Language, Flipper Zero Edition (by Brian W. Kernighan, Dennis M. Ritchie)",
+)

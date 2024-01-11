@@ -1,0 +1,6 @@
++-------  RC2  -------+
+ | block size: 64-bit (8 byte) |
+ | key size bits: 1 - 128               |
+ | structure: Feistel network |
+ | rounds:16mixing-2mashing|
++------------------ +

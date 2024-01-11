@@ -1,0 +1,26 @@
++------  BlowFish -----+
+ | block size: 64-bit (8 byte) |
+ | key size bits: 32 - 448         |
+ | structure: Feistel network |
+ | rounds: sixteen                         |
++------------------ +
++------Structure -----+
+ |> XOR the L with Kx                |
+ |> use XORed data As F input|
+ |> XOR the F Output with R   |
+ |> Swap L <-> R                          |
++------------------ +
+ | * Kx = P-Array-entry X     |
+ | * L = left half of the data     |
+ | * R = right half of the data  |
++------------------ +
+ |        L     plain (64 bits)  R       |
+ |   /            First round        \   |
+ |   |<- XOR<-Kr                        |   |
+ |   |---> Ffunc--->XOR->|   |
+ |   \  repeat fiften rounds/   |
+ |   /      Undo last swap      \   |
+ |   /   Output whitening    \   |
+ |   |<-XOR,K18   K17,XOR->|   |
+ |   \ Ciphertext (64 bits)/   |
++------------------ +

@@ -216,6 +216,8 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 | USB Midi | ![Media Badge] | [by DrZlo13](https://github.com/DrZlo13/flipper-zero-usb-midi) |  | ![None Badge] |
 | Video Player | ![Media Badge] | [by LTVA1](https://github.com/LTVA1/flipper-zero-video-player) | <- Follow link to download examples and learn how to convert videos | ![None Badge] |
 | Music Tracker | ![Media Badge] | [by DrZlo13](https://github.com/DrZlo13/flipper-zero-music-tracker) |  | [![UFW Badge]](https://lab.flipper.net/apps/zero_tracker) |
+| The C Programming Language | ![Media Badge] | [by armixz](https://github.com/armixz/Flipper-Zero-The-C-Programming-Language) |  | ![None Badge] |
+| Cryptography Dictionary | ![Media Badge] | [by armixz](https://github.com/armixz/Flipper-Zero-Crypto-Dictionary) |  | ![None Badge] |
 | Mifare Fuzzer | ![NFC Badge] | [by spheeere98](https://github.com/spheeere98/mifare_fuzzer) | Fixed crash on exit. / Update!: Ported to new NFC API [by @Sil333033](https://github.com/Flipper-XFW/Xtreme-Firmware/commit/ac5744328a28b73fb5022ce7baaa4332a824a739) | [![UFW Badge]](https://lab.flipper.net/apps/mifare_fuzzer) |
 | Seader | ![NFC Badge] | [by bettse](https://github.com/bettse/seader/tree/main) | `Interface with a SAM from the Flipper Zero over UART` | [![Author Badge]](https://lab.flipper.net/apps/seader) |
 | VB Lab Migration Assistant | ![NFC Badge] | [by GMMan (cyanic)](https://github.com/GMMan/flipperzero-vb-migrate) |  | [![Author Badge]](https://lab.flipper.net/apps/vb_migrate) |

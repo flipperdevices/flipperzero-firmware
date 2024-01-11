@@ -1,0 +1,6 @@
++------CAST 256-----+
+ | block size: 128-bit                  |
+ | key:128,160,192,224,256 |
+ | structure: Feistel network |
+ | rounds: 48                                  |
++------------------ +

@@ -1,0 +1,6 @@
++-------  RC5  -------+
+ | block size: 32, 64 Or 128     |
+ | key size bits: 0 - 2040         |
+ | structure: Feistel network |
+ | rounds: 1 to 255                       |
++------------------ +
