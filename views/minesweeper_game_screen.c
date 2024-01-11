@@ -562,8 +562,8 @@ static inline uint16_t bfs_tile_clear(
             continue;
         } 
         
-        // If it is cleared continue
-        if (board[curr_pos_1d].tile_state == MineSweeperGameScreenTileStateCleared) {
+        // If it is not uncleared continue
+        if (board[curr_pos_1d].tile_state != MineSweeperGameScreenTileStateUncleared) {
             continue;
         }
         
