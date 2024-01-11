@@ -78,7 +78,7 @@ typedef struct {
     uint32_t start_tick;
     FuriString* info_str;
     bool ensure_solvable_board;
-    bool is_making_first_move;
+    bool is_win_triggered;
     bool is_holding_down_button;
 } MineSweeperGameScreenModel;
 
@@ -273,7 +273,7 @@ static void setup_board(MineSweeperGameScreen* instance) {
             model->curr_pos.y_abs = 0;
             model->right_boundary = MINESWEEPER_SCREEN_TILE_WIDTH;
             model->bottom_boundary = MINESWEEPER_SCREEN_TILE_HEIGHT;
-            model->is_making_first_move = true;         
+            model->is_win_triggered = false;         
         },
         true
     );
@@ -1184,7 +1184,8 @@ static bool mine_sweeper_game_screen_view_end_input_callback(InputEvent* event, 
                         break;
 
                     default: // Anything other than movement around the screen should restart game
-                        
+                        mine_sweeper_led_reset(instance->context);
+
                         mine_sweeper_game_screen_reset_clock(instance);
                         view_set_draw_callback(
                                 instance->view,
@@ -1235,9 +1236,21 @@ static bool mine_sweeper_game_screen_view_play_input_callback(InputEvent* event,
     MineSweeperGameScreen* instance = context;
     bool consumed = false;
 
+
     // Checking button types
 
-    if (event->key == InputKeyOk) { // Attempt to Clear Space !! THIS CAN BE A LOSE CONDITION
+    if (event->type == InputTypeRelease) {
+        with_view_model(
+            instance->view,
+            MineSweeperGameScreenModel * model,
+            {
+                model->is_holding_down_button = false;
+                consumed = true;
+            },
+            true);
+    }
+
+    if (!consumed && event->key == InputKeyOk) { // Attempt to Clear Space !! THIS CAN BE A LOSE CONDITION
 
         bool is_lose_condition_triggered = false;
         bool is_win_condition_triggered = false;
@@ -1246,12 +1259,11 @@ static bool mine_sweeper_game_screen_view_play_input_callback(InputEvent* event,
             instance->view,
             MineSweeperGameScreenModel * model,
             {
-                if (event->type == InputTypeRelease) {
 
-                    model->is_holding_down_button = false;
-
-                } else if (!model->is_holding_down_button && event->type == InputTypePress) { 
-
+                if (!model->is_holding_down_button && event->type == InputTypePress) { 
+                    
+                    mine_sweeper_play_happy_bump(instance->context);
+                    
                     uint16_t curr_pos_1d = model->curr_pos.x_abs * model->board_width + model->curr_pos.y_abs;
 
                     MineSweeperGameScreenTileState state = model->board[curr_pos_1d].tile_state;
@@ -1264,6 +1276,7 @@ static bool mine_sweeper_game_screen_view_play_input_callback(InputEvent* event,
                         model->board[curr_pos_1d].tile_state = MineSweeperGameScreenTileStateCleared;
 
                     } else if (state == MineSweeperGameScreenTileStateUncleared) {
+                        mine_sweeper_play_happy_bump(instance->context);
 
                         uint16_t tiles_cleared = bfs_tile_clear(
                                                     model->board,
@@ -1282,6 +1295,7 @@ static bool mine_sweeper_game_screen_view_play_input_callback(InputEvent* event,
 
                 // LOSE/WIN CONDITION OR CLEAR SURROUNDING
                 } else if (!model->is_holding_down_button && event->type == InputTypeLong) {
+                    mine_sweeper_play_happy_bump(instance->context);
                     
                     // Try to clear surrounding tiles if correct number is flagged.
                     is_lose_condition_triggered = try_clear_surrounding_tiles(model);
@@ -1300,13 +1314,17 @@ static bool mine_sweeper_game_screen_view_play_input_callback(InputEvent* event,
         
         // Check  if win or lose condition was triggered on OK press
         if (is_lose_condition_triggered) {
+            mine_sweeper_led_set_rgb(instance->context, 255, 0, 000);
+            mine_sweeper_play_end_bump(instance->context);
             view_set_draw_callback(instance->view, mine_sweeper_game_screen_view_lose_draw_callback);
             view_set_input_callback(instance->view, mine_sweeper_game_screen_view_end_input_callback);
         } else if (is_win_condition_triggered) {
+            mine_sweeper_led_set_rgb(instance->context, 0, 0, 255);
+            mine_sweeper_play_long_bump(instance->context);
             view_set_draw_callback(instance->view, mine_sweeper_game_screen_view_win_draw_callback);
             view_set_input_callback(instance->view, mine_sweeper_game_screen_view_end_input_callback);
         }
-        
+
 
         consumed = true;
 
@@ -1317,19 +1335,7 @@ static bool mine_sweeper_game_screen_view_play_input_callback(InputEvent* event,
                                                    // the next closest covered tile on when on a uncovered
                                                    // tile
 
-        if (event->type == InputTypeRelease) {
-            with_view_model(
-                instance->view,
-                MineSweeperGameScreenModel * model,
-                {
-                    model->is_holding_down_button = false;
-                },
-                true
-            );
-            
-            consumed = true;
-
-        } else if (event->type == InputTypeLong || event->type == InputTypeRepeat) {    // Only process longer back keys;
+        if (event->type == InputTypeLong || event->type == InputTypeRepeat) {    // Only process longer back keys;
                                                                                         // short presses should take
                                                                                         // us to the menu
             with_view_model(
@@ -1376,10 +1382,14 @@ static bool mine_sweeper_game_screen_view_play_input_callback(InputEvent* event,
                             model->right_boundary = model->curr_pos.y_abs + MINESWEEPER_SCREEN_TILE_WIDTH;
                         }
                         
+                        mine_sweeper_play_happy_bump(instance->context);
                         model->is_holding_down_button = true;
 
                     // Flag or Unflag tile and check win condition 
-                    } else if (!model->is_holding_down_button && (state == MineSweeperGameScreenTileStateUncleared || state == MineSweeperGameScreenTileStateFlagged)) { 
+                    } else if (!model->is_holding_down_button &&
+                        (state == MineSweeperGameScreenTileStateUncleared || state == MineSweeperGameScreenTileStateFlagged)) { 
+
+                        mine_sweeper_play_happy_bump(instance->context);
 
                         if (state == MineSweeperGameScreenTileStateFlagged) {
                             if (model->board[curr_pos_1d].tile_type == MineSweeperGameScreenTileMine) model->mines_left++;
@@ -1397,6 +1407,9 @@ static bool mine_sweeper_game_screen_view_play_input_callback(InputEvent* event,
                         // WIN CONDITION
                         // This can be a win condition where the non-mine tiles are cleared and they place the last flag
                         if (model->flags_left == 0 && model->mines_left == 0 && model->tiles_left == 0) {
+                            mine_sweeper_play_long_bump(instance->context);
+                            mine_sweeper_led_set_rgb(instance->context, 0, 0, 255);
+
                             view_set_draw_callback(instance->view, mine_sweeper_game_screen_view_win_draw_callback);
                             view_set_input_callback(instance->view, mine_sweeper_game_screen_view_end_input_callback);
                         }
@@ -1421,6 +1434,7 @@ static bool mine_sweeper_game_screen_view_play_input_callback(InputEvent* event,
                 switch (event->key) {
 
                     case InputKeyUp :
+                        if (model->curr_pos.x_abs-1 < 0) {mine_sweeper_play_oob_bump(instance->context);}
                         model->curr_pos.x_abs = (model->curr_pos.x_abs-1 < 0) ? 0 : model->curr_pos.x_abs-1;
 
                         is_outside_boundary = model->curr_pos.x_abs <
@@ -1434,6 +1448,7 @@ static bool mine_sweeper_game_screen_view_play_input_callback(InputEvent* event,
                         break;
 
                     case InputKeyDown :
+                        if (model->curr_pos.x_abs+1 >= model->board_height) {mine_sweeper_play_oob_bump(instance->context);}
                         model->curr_pos.x_abs = (model->curr_pos.x_abs+1 >= model->board_height) ?
                             model->board_height-1 : model->curr_pos.x_abs+1;
 
@@ -1447,6 +1462,7 @@ static bool mine_sweeper_game_screen_view_play_input_callback(InputEvent* event,
                         break;
 
                     case InputKeyLeft :
+                        if (model->curr_pos.y_abs-1 < 0) {mine_sweeper_play_oob_bump(instance->context);}
                         model->curr_pos.y_abs = (model->curr_pos.y_abs-1 < 0) ? 0 : model->curr_pos.y_abs-1;
 
                         is_outside_boundary = model->curr_pos.y_abs <
@@ -1460,6 +1476,7 @@ static bool mine_sweeper_game_screen_view_play_input_callback(InputEvent* event,
                         break;
 
                     case InputKeyRight :
+                        if (model->curr_pos.y_abs+1 >= model->board_width) {mine_sweeper_play_oob_bump(instance->context);}
                         model->curr_pos.y_abs = (model->curr_pos.y_abs+1 >= model->board_width) ?
                             model->board_width-1 : model->curr_pos.y_abs+1;
 
@@ -1582,6 +1599,9 @@ void mine_sweeper_game_screen_reset(MineSweeperGameScreen* instance, uint8_t wid
     furi_assert(instance);
     
     instance->input_callback = NULL;
+    
+    // Reset led
+    mine_sweeper_led_reset(instance->context);
     
     // We need to initize board width and height before setup
     mine_sweeper_game_screen_set_board_information(instance, width, height, difficulty, ensure_solvable);
