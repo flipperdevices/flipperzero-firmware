@@ -92,8 +92,10 @@ void color_guess_read_settings(void* context) {
         FURI_LOG_E(TAG, "Missing Header Data");
         color_guess_close_config_file(fff_file);
         color_guess_close_storage();
+        furi_string_free(temp_str);
         return;
     }
+    furi_string_free(temp_str);
 
     if(file_version < COLOR_GUESS_SETTINGS_FILE_VERSION) {
         FURI_LOG_I(TAG, "old config version, will be removed.");

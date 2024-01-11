@@ -53,6 +53,7 @@ void dump(uint8_t* out){
 		}
 		FURI_LOG_E("COFFEE_eeprom", furi_string_get_cstr(dump_str));
 		FURI_LOG_E("COFFEE_eeprom", "End dump");
+		furi_string_free(dump_str);
 	}else{
         FURI_LOG_D("COFFEE", "DUMP: EEPROM not ready %x (8-bit)", EEPROM_I2C_ADDR);
     }

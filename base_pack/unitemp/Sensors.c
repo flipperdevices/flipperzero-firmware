@@ -292,6 +292,8 @@ bool unitemp_sensors_load(void) {
     //Открытие потока к файлу с датчиками
     if(!file_stream_open(
            app->file_stream, furi_string_get_cstr(filepath), FSAM_READ_WRITE, FSOM_OPEN_EXISTING)) {
+        // Free file path string if we got an error
+        furi_string_free(filepath);
         if(file_stream_get_error(app->file_stream) == FSE_NOT_EXIST) {
             FURI_LOG_W(APP_NAME, "Missing sensors file");
             //Закрытие потока и освобождение памяти
@@ -309,6 +311,8 @@ bool unitemp_sensors_load(void) {
             return false;
         }
     }
+    // Free file path string if we successfully opened the file
+    furi_string_free(filepath);
 
     //Вычисление размера файла
     uint16_t file_size = stream_size(app->file_stream);
@@ -402,6 +406,8 @@ bool unitemp_sensors_save(void) {
     //Открытие потока
     if(!file_stream_open(
            app->file_stream, furi_string_get_cstr(filepath), FSAM_READ_WRITE, FSOM_CREATE_ALWAYS)) {
+        // Free file path string if we got an error
+        furi_string_free(filepath);
         FURI_LOG_E(
             APP_NAME,
             "An error occurred while saving the sensors file: %d",
@@ -411,6 +417,8 @@ bool unitemp_sensors_save(void) {
         stream_free(app->file_stream);
         return false;
     }
+    // Free file path string if we successfully opened the file
+    furi_string_free(filepath);
 
     //Сохранение датчиков
     for(uint8_t i = 0; i < unitemp_sensors_getActiveCount(); i++) {
