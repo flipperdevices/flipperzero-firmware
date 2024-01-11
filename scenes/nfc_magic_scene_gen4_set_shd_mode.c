@@ -1,5 +1,5 @@
 #include "../nfc_magic_app_i.h"
-#include "applications_user/nfc_magic/lib/magic/protocols/gen4/gen4_poller_i.h"
+#include "../lib/magic/protocols/gen4/gen4_poller_i.h"
 
 enum {
     NfcMagicSceneGen4SetShadowModeStateCardSearch,
