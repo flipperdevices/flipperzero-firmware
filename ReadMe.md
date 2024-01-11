@@ -49,7 +49,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [ufbt: fixed generated project paths on Windows #3339 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/3339)
 - Updated: [F0 Minesweeper v1.0 (By squee72564)](https://github.com/squee72564/F0_Minesweeper_Fap)
 - Added: [The C Prog. Language v0.2 (By armixz)](https://github.com/armixz/Flipper-Zero-The-C-Programming-Language)
-- Updated: [ESP32 Camera Suite v1.4 (By CodyTolene)](https://github.com/CodyTolene/Flipper-Zero-Camera-Suite)
+- Updated: [ESP32 Camera Suite v1.5 (By CodyTolene)](https://github.com/CodyTolene/Flipper-Zero-Camera-Suite)
 
 <a name="release">
 
@@ -368,7 +368,7 @@ $ ./fbt dolphin_ext
 - [DTMF Dolphin v1.2 (By litui)](https://github.com/litui/dtmf_dolphin)
 - [EM4100 Key Generator v1.1 (By Milk-Cool)](https://github.com/Milk-Cool/fz-em4100-generator)
 - [Enhanced Sub-Ghz Chat v1.1 (By twisted-pear)](https://github.com/twisted-pear/esubghz_chat)
-- [ESP32 Camera Suite v1.4 (By CodyTolene)](https://github.com/CodyTolene/Flipper-Zero-Camera-Suite)
+- [ESP32 Camera Suite v1.5 (By CodyTolene)](https://github.com/CodyTolene/Flipper-Zero-Camera-Suite)
 - [ESP32 Evil Portal v0.2 (By bigbrodude6119)](https://github.com/bigbrodude6119/flipper-zero-evil-portal) [Changes By leedave]( https://github.com/leedave/flipper-zero-evil-portal/tree/leedave/ap_rename/flipper/flipper-evil-portal)
 - [ESP Flasher v1.4 (By 0xchocolate)](https://github.com/0xchocolate/flipperzero-esp-flasher)
 - [ESP WiFi Scanner v1.1 (By SequoiaSan)](https://github.com/SequoiaSan/FlipperZero-WiFi-Scanner_Module-ESP8266) `Req: ESP8266 or ESP32`
