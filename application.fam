@@ -7,7 +7,7 @@ App(
     requires=["gui", "cli", "dialogs", "storage", "input", "notification", "bt"],
     stack_size=2 * 1024,
     order=20,
-    fap_version="5.91",
+    fap_version="5.100",
     fap_author="Alexander Kopachov (@akopachov)",
     fap_description="Software-based TOTP/HOTP authenticator for Flipper Zero device",
     fap_weburl="https://github.com/akopachov/flipper-zero_authenticator",
@@ -163,4 +163,12 @@ App(
     entry_point="totp_cli_notification_plugin_ep",
     requires=["totp"],
     sources=["cli/plugins/notification/notification.c", "cli/cli_shared_methods.c"],
+)
+
+App(
+    appid="totp_cli_export_plugin",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="totp_cli_export_plugin_ep",
+    requires=["totp"],
+    sources=["cli/plugins/export/export.c", "cli/cli_shared_methods.c"],
 )
