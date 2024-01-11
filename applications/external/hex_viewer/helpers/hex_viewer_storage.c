@@ -93,8 +93,10 @@ void hex_viewer_read_settings(void* context) {
         FURI_LOG_E(TAG, "Missing Header Data");
         hex_viewer_close_config_file(fff_file);
         hex_viewer_close_storage();
+        furi_string_free(temp_str);
         return;
     }
+    furi_string_free(temp_str);
 
     if(file_version < HEX_VIEWER_SETTINGS_FILE_VERSION) {
         FURI_LOG_I(TAG, "old config version, will be removed.");

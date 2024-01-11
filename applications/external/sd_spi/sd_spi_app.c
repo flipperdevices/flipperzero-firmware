@@ -403,6 +403,7 @@ void app_scene_on_enter_status(void* context) {
 
     text_box_set_text(app->tb_status, furi_string_get_cstr(fs_status));
     text_box_set_focus(app->tb_status, TextBoxFocusEnd);
+    furi_string_free(fs_status);
     view_dispatcher_switch_to_view(app->view_dispatcher, AppView_Status);
 }
 bool app_scene_on_event_status(void* context, SceneManagerEvent event) {
