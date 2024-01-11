@@ -1,14 +1,23 @@
+# For details & more options, see documentation/AppManifests.md in firmware repo
+
 App(
-    appid="minesweeper",
-    name="Minesweeper",
+    appid="minesweeper_redux",  # Must be unique
+    name="Mine Sweeper",  # Displayed in menus
     apptype=FlipperAppType.EXTERNAL,
     entry_point="minesweeper_app",
-    requires=["gui"],
-    stack_size=8 * 1024,
+    cdefines=["APP_MINESWEEPER"],
+    requires=[
+        "gui",
+        "storage",  # Require if we do any r/w to storage
+    ],
+    stack_size=2 * 1024,
+    fap_libs=["assets"],  # Not sure if needed
+    fap_icon_assets="assets",  # Image assets to compile for this application
+    fap_icon="assets/minesweeper.png",  # 10x10 1-bit PNG
     fap_category="Games",
-    fap_icon="minesweeper_icon.png",
-    order=35,
-    fap_author="@panki27 & @xMasterX",
-    fap_version="1.1",
-    fap_description="Minesweeper Game",
+    # Optional values
+    fap_version="1.0",
+    fap_description="Flipper Zero Minesweeper Implementation",
+    fap_author="Alexander Rodriguez",
+    fap_weburl="https://github.com/squee72564/F0_Minesweeper_Fap",
 )
