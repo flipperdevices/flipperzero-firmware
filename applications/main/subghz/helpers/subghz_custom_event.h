@@ -71,5 +71,6 @@ typedef enum {
     SubGhzCustomEventViewTransmitterBack,
     SubGhzCustomEventViewTransmitterSendStart,
     SubGhzCustomEventViewTransmitterSendStop,
+    SubGhzCustomEventViewTransmitterSendSave,
     SubGhzCustomEventViewTransmitterError,
 } SubGhzCustomEvent;
