@@ -29,6 +29,7 @@ typedef enum {
     PicopassPollerStateParseWiegand,
     PicopassPollerStateSuccess,
     PicopassPollerStateFail,
+    PicopassPollerStateAuthFail,
 
     PicopassPollerStateNum,
 } PicopassPollerState;
@@ -45,6 +46,7 @@ struct PicopassPoller {
     uint8_t div_key[8];
     uint8_t current_block;
     uint8_t app_limit;
+    bool secured;
 
     PicopassDeviceData* data;
 
