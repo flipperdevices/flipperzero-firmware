@@ -157,7 +157,8 @@ void topic_scene_on_enter(void* context) {
     if(file_stream_open(app->file_stream, file_path, FSAM_READ, FSOM_OPEN_EXISTING)) {
         FuriString* line = furi_string_alloc();
         while(stream_read_line(app->file_stream, line)) {
-            dynamic_buffer_append(&dynamic_content, furi_string_get_cstr(line), furi_string_size(line));
+            dynamic_buffer_append(
+                &dynamic_content, furi_string_get_cstr(line), furi_string_size(line));
             dynamic_buffer_append(&dynamic_content, "\r\n", 1);
         }
         dynamic_buffer_append(&dynamic_content, "\0", 1);

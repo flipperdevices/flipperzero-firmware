@@ -24,7 +24,6 @@ typedef struct App {
     Stream* file_stream;
 } App;
 
-
 App* app_alloc();
 void app_free(App* app);
 

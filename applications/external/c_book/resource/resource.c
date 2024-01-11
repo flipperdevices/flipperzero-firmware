@@ -2,8 +2,9 @@
 
 Topic preface[] = {
     {"Preface", NULL, APP_ASSETS_PATH("preface/preface.txt")},
-    {"Preface to the first edition", NULL, APP_ASSETS_PATH("preface/preface_to_the_first_edition.txt")}
-};
+    {"Preface to the first edition",
+     NULL,
+     APP_ASSETS_PATH("preface/preface_to_the_first_edition.txt")}};
 
 Topic chapter1[] = {
     {"1.0 A Tutorial Introduction", NULL, APP_ASSETS_PATH("chapter1/0-chapter1.txt")},
