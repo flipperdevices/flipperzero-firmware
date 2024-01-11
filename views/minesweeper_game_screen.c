@@ -102,7 +102,6 @@ static const int8_t offsets[8][2] = {
 };
 
 static MineSweeperTile board_t[MINESWEEPER_BOARD_MAX_TILES];
-static MineSweeperTile board_t2[2][MINESWEEPER_BOARD_MAX_TILES];
 
 /****************************************************************
  * Function declarations
@@ -1491,7 +1490,6 @@ static bool mine_sweeper_game_screen_view_play_input_callback(InputEvent* event,
 }
 
 MineSweeperGameScreen* mine_sweeper_game_screen_alloc(uint8_t width, uint8_t height, uint8_t difficulty, bool ensure_solvable) {
-    UNUSED(board_t2);
     MineSweeperGameScreen* mine_sweeper_game_screen = (MineSweeperGameScreen*)malloc(sizeof(MineSweeperGameScreen));
     
     mine_sweeper_game_screen->view = view_alloc();
