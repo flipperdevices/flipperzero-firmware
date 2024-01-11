@@ -19,6 +19,7 @@
 #include "helpers/meal_pager_storage.h"
 #include "helpers/subghz/subghz_types.h"
 #include "helpers/subghz/subghz.h"
+#include "helpers/gui/int_input.h"
 
 #define TAG "Meal_Pager"
 
@@ -59,6 +60,11 @@ typedef struct {
     bool stop_transmit;
     uint32_t repeats;
     char* repeats_char;
+    IntInput* int_input;
+    char* text_buffer;
+    uint32_t max_station;
+    uint32_t max_pager;
+    char text_store[6][36];
 } Meal_Pager;
 
 typedef enum {
@@ -66,6 +72,7 @@ typedef enum {
     Meal_PagerViewIdMenu,
     Meal_PagerViewIdTransmit,
     Meal_PagerViewIdSettings,
+    Meal_PagerViewIdIntInput,
 } Meal_PagerViewId;
 
 typedef enum {

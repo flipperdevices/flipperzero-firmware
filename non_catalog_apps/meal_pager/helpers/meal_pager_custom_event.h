@@ -23,6 +23,8 @@ typedef enum {
     Meal_PagerCustomEventViewTransmitterSendStart,
     Meal_PagerCustomEventViewTransmitterSendStop,
     Meal_PagerCustomEventViewTransmitterError,
+    Meal_PagerCustomerEventIntInput,
+    Meal_PagerCustomEventViewIntInputOk,
 } Meal_PagerCustomEvent;
 
 enum Meal_PagerCustomEventType {
