@@ -74,6 +74,7 @@ void dump(uint8_t* out) {
     } else {
         FURI_LOG_D("COFFEE", "DUMP: EEPROM not ready %x (8-bit)", EEPROM_I2C_ADDR);
     }
+    furi_string_free(dump_str);
     furi_hal_i2c_release(&furi_hal_i2c_handle_external);
 }
 
