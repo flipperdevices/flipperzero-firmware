@@ -1336,13 +1336,11 @@ static bool mine_sweeper_game_screen_view_play_input_callback(InputEvent* event,
         with_view_model(
             instance->view,
             MineSweeperGameScreenModel * model,
-            {
+            {   
+                uint16_t curr_pos_1d = model->curr_pos.x_abs * model->board_width + model->curr_pos.y_abs;
 
                 if (!model->is_holding_down_button && event->type == InputTypePress) { 
                     
-                    
-                    uint16_t curr_pos_1d = model->curr_pos.x_abs * model->board_width + model->curr_pos.y_abs;
-
                     MineSweeperGameScreenTileState state = model->board[curr_pos_1d].tile_state;
                     MineSweeperGameScreenTileType type = model->board[curr_pos_1d].tile_type;
 
@@ -1386,7 +1384,8 @@ static bool mine_sweeper_game_screen_view_play_input_callback(InputEvent* event,
 
                     // We need to check if it is ok to play this or else we conflict
                     // with the lose effect and crash
-                    if (!is_win_condition_triggered && !is_lose_condition_triggered) {
+                    if (!is_win_condition_triggered && !is_lose_condition_triggered &&
+                        model->board[curr_pos_1d].tile_type != MineSweeperGameScreenTileZero) {
                         mine_sweeper_long_ok_effect(instance);
                     }
 
