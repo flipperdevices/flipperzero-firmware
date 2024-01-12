@@ -79,7 +79,7 @@ To run this application on FlipperZero, you will need:
 1. Power on your FlipperZero device.
 2. Connect the uhf module to the flipper via gpio.
 3. Navigate to the UHF RFID app on FlipperZero's menu.
-4. Currently Reading the EPC tag is the only usable option
+4. Currently Read for EPC, TID, USER Banks are supported, as well as saving and Writing EPC, USER Banks
    ... will further update this page as it development goes
 
 ## Contributions
