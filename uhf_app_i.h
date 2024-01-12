@@ -68,6 +68,9 @@ struct UHFApp {
     Loading* loading;
     TextInput* text_input;
     Widget* widget;
+    // view setting
+    bool device_verified;
+    bool view_device_info;
 };
 
 typedef enum {
