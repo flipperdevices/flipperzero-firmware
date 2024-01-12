@@ -49,6 +49,28 @@ static void subghz_cli_radio_device_power_off() {
     if(furi_hal_power_is_otg_enabled()) furi_hal_power_disable_otg();
 }
 
+static SubGhzEnvironment* subghz_cli_environment_init(void) {
+    SubGhzEnvironment* environment = subghz_environment_alloc();
+    if(subghz_environment_load_keystore(environment, SUBGHZ_KEYSTORE_DIR_NAME)) {
+        printf("Load_keystore keeloq_mfcodes \033[0;32mOK\033[0m\r\n");
+    } else {
+        printf("Load_keystore keeloq_mfcodes \033[0;31mERROR\033[0m\r\n");
+    }
+    if(subghz_environment_load_keystore(environment, SUBGHZ_KEYSTORE_DIR_USER_NAME)) {
+        printf("Load_keystore keeloq_mfcodes_user \033[0;32mOK\033[0m\r\n");
+    } else {
+        printf("Load_keystore keeloq_mfcodes_user \033[0;33mAbsent\033[0m\r\n");
+    }
+    subghz_environment_set_came_atomo_rainbow_table_file_name(
+        environment, SUBGHZ_CAME_ATOMO_DIR_NAME);
+    subghz_environment_set_alutech_at_4n_rainbow_table_file_name(
+        environment, SUBGHZ_ALUTECH_AT_4N_DIR_NAME);
+    subghz_environment_set_nice_flor_s_rainbow_table_file_name(
+        environment, SUBGHZ_NICE_FLOR_S_DIR_NAME);
+    subghz_environment_set_protocol_registry(environment, (void*)&subghz_protocol_registry);
+    return environment;
+}
+
 void subghz_cli_command_tx_carrier(Cli* cli, FuriString* args, void* context) {
     UNUSED(context);
     uint32_t frequency = 433920000;
@@ -324,16 +346,7 @@ void subghz_cli_command_rx(Cli* cli, FuriString* args, void* context) {
         furi_stream_buffer_alloc(sizeof(LevelDuration) * 1024, sizeof(LevelDuration));
     furi_check(instance->stream);
 
-    SubGhzEnvironment* environment = subghz_environment_alloc();
-    subghz_environment_load_keystore(environment, SUBGHZ_KEYSTORE_DIR_NAME);
-    subghz_environment_load_keystore(environment, SUBGHZ_KEYSTORE_DIR_USER_NAME);
-    subghz_environment_set_came_atomo_rainbow_table_file_name(
-        environment, SUBGHZ_CAME_ATOMO_DIR_NAME);
-    subghz_environment_set_alutech_at_4n_rainbow_table_file_name(
-        environment, SUBGHZ_ALUTECH_AT_4N_DIR_NAME);
-    subghz_environment_set_nice_flor_s_rainbow_table_file_name(
-        environment, SUBGHZ_NICE_FLOR_S_DIR_NAME);
-    subghz_environment_set_protocol_registry(environment, (void*)&subghz_protocol_registry);
+    SubGhzEnvironment* environment = subghz_cli_environment_init();
 
     SubGhzReceiver* receiver = subghz_receiver_alloc_init(environment);
     subghz_receiver_set_filter(receiver, SubGhzProtocolFlag_Decodable);
@@ -517,25 +530,7 @@ void subghz_cli_command_decode_raw(Cli* cli, FuriString* args, void* context) {
         // Allocate context
         SubGhzCliCommandRx* instance = malloc(sizeof(SubGhzCliCommandRx));
 
-        SubGhzEnvironment* environment = subghz_environment_alloc();
-        if(subghz_environment_load_keystore(environment, SUBGHZ_KEYSTORE_DIR_NAME)) {
-            printf("SubGhz decode_raw: Load_keystore keeloq_mfcodes \033[0;32mOK\033[0m\r\n");
-        } else {
-            printf("SubGhz decode_raw: Load_keystore keeloq_mfcodes \033[0;31mERROR\033[0m\r\n");
-        }
-        if(subghz_environment_load_keystore(environment, SUBGHZ_KEYSTORE_DIR_USER_NAME)) {
-            printf("SubGhz decode_raw: Load_keystore keeloq_mfcodes_user \033[0;32mOK\033[0m\r\n");
-        } else {
-            printf(
-                "SubGhz decode_raw: Load_keystore keeloq_mfcodes_user \033[0;33mAbsent\033[0m\r\n");
-        }
-        subghz_environment_set_came_atomo_rainbow_table_file_name(
-            environment, SUBGHZ_CAME_ATOMO_DIR_NAME);
-        subghz_environment_set_alutech_at_4n_rainbow_table_file_name(
-            environment, SUBGHZ_ALUTECH_AT_4N_DIR_NAME);
-        subghz_environment_set_nice_flor_s_rainbow_table_file_name(
-            environment, SUBGHZ_NICE_FLOR_S_DIR_NAME);
-        subghz_environment_set_protocol_registry(environment, (void*)&subghz_protocol_registry);
+        SubGhzEnvironment* environment = subghz_cli_environment_init();
 
         SubGhzReceiver* receiver = subghz_receiver_alloc_init(environment);
         subghz_receiver_set_filter(receiver, SubGhzProtocolFlag_Decodable);
@@ -619,25 +614,8 @@ void subghz_cli_command_tx_from_file(Cli* cli, FuriString* args, void* context) 
     SubGhzTransmitter* transmitter = NULL;
 
     subghz_devices_init();
-    SubGhzEnvironment* environment = subghz_environment_alloc();
-    if(subghz_environment_load_keystore(environment, SUBGHZ_KEYSTORE_DIR_NAME)) {
-        printf("subghz tx_from_file: Load_keystore keeloq_mfcodes \033[0;32mOK\033[0m\r\n");
-    } else {
-        printf("subghz tx_from_file: Load_keystore keeloq_mfcodes \033[0;31mERROR\033[0m\r\n");
-    }
-    if(subghz_environment_load_keystore(environment, SUBGHZ_KEYSTORE_DIR_USER_NAME)) {
-        printf("subghz tx_from_file: Load_keystore keeloq_mfcodes_user \033[0;32mOK\033[0m\r\n");
-    } else {
-        printf(
-            "subghz tx_from_file: Load_keystore keeloq_mfcodes_user \033[0;33mAbsent\033[0m\r\n");
-    }
-    subghz_environment_set_came_atomo_rainbow_table_file_name(
-        environment, SUBGHZ_CAME_ATOMO_DIR_NAME);
-    subghz_environment_set_alutech_at_4n_rainbow_table_file_name(
-        environment, SUBGHZ_ALUTECH_AT_4N_DIR_NAME);
-    subghz_environment_set_nice_flor_s_rainbow_table_file_name(
-        environment, SUBGHZ_NICE_FLOR_S_DIR_NAME);
-    subghz_environment_set_protocol_registry(environment, (void*)&subghz_protocol_registry);
+
+    SubGhzEnvironment* environment = subghz_cli_environment_init();
 
     do {
         if(furi_string_size(args)) {
