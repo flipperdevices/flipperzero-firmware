@@ -53,7 +53,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Hangman v1.5 (By Evgeny Stepanischev & Eva Stepanischeva)](https://github.com/bolknote/Flipper-Zero-Hangman-Game)
 - Updated: [Crypto Dictionary v0.1 (By armixz)](https://github.com/armixz/Flipper-Zero-Crypto-Dictionary)
 - UL: [9 Applications Updated to remove possible Memory Leakks (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/f6abe6612b31faeb3c19071b5aab8e5b28dafd8c)
-- Updated: [Minesweeper Redux v1.0 (By squee72564)](https://github.com/squee72564/F0_Minesweeper_Fap)
+- Updated: [Minesweeper Redux v1.1 (By squee72564)](https://github.com/squee72564/F0_Minesweeper_Fap)
 
 ## IN THIS BRANCH:
 

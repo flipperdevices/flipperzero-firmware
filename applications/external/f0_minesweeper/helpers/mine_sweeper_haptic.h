@@ -5,10 +5,12 @@
 
 void mine_sweeper_play_happy_bump(void* context);
 
+void mine_sweeper_play_long_ok_bump(void* context);
+
 void mine_sweeper_play_oob_bump(void* context);
 
-void mine_sweeper_play_end_bump(void* context);
+void mine_sweeper_play_lose_bump(void* context);
 
-void mine_sweeper_play_long_bump(void* context);
+void mine_sweeper_play_win_bump(void* context);
 
 #endif
