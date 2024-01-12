@@ -59,22 +59,100 @@ static void camera_suite_view_camera_draw(Canvas* canvas, void* model) {
         }
     }
 
-    // Draw the guide if the camera is not initialized.
+    // Draw the pinout guide if the camera is not initialized.
     if(!uartDumpModel->is_initialized) {
+        // Clear the screen.
+        canvas_clear(canvas);
+
+        // Draw the ESP32-CAM module.
         canvas_set_font(canvas, FontSecondary);
-        canvas_draw_str(canvas, 10, 25, "VCC - 3V3");
+        canvas_draw_str(canvas, 47, 50, "ESP32");
         canvas_set_font(canvas, FontSecondary);
-        canvas_draw_str(canvas, 73, 25, "GND - GND");
+        canvas_draw_str(canvas, 52, 58, "CAM");
+        canvas_draw_dot(canvas, 84, 3);
+        canvas_draw_box(canvas, 50, 35, 23, 7);
+        canvas_draw_circle(canvas, 42, 12, 1);
+        canvas_draw_circle(canvas, 42, 16, 1);
+        canvas_draw_circle(canvas, 42, 20, 1);
+        canvas_draw_circle(canvas, 42, 24, 1);
+        canvas_draw_circle(canvas, 42, 28, 1);
+        canvas_draw_circle(canvas, 42, 32, 1);
+        canvas_draw_circle(canvas, 42, 36, 1);
+        canvas_draw_circle(canvas, 42, 8, 1);
+        canvas_draw_circle(canvas, 59, 15, 1);
+        canvas_draw_circle(canvas, 61, 17, 5);
+        canvas_draw_circle(canvas, 61, 17, 9);
+        canvas_draw_circle(canvas, 80, 12, 1);
+        canvas_draw_circle(canvas, 80, 16, 1);
+        canvas_draw_circle(canvas, 80, 20, 1);
+        canvas_draw_circle(canvas, 80, 24, 1);
+        canvas_draw_circle(canvas, 80, 28, 1);
+        canvas_draw_circle(canvas, 80, 32, 1);
+        canvas_draw_circle(canvas, 80, 36, 1);
+        canvas_draw_circle(canvas, 80, 42, 1);
+        canvas_draw_circle(canvas, 80, 8, 1);
+        canvas_draw_line(canvas, 38, 4, 38, 58);
+        canvas_draw_line(canvas, 39, 3, 83, 3);
+        canvas_draw_line(canvas, 40, 2, 84, 2);
+        canvas_draw_line(canvas, 48, 4, 74, 4);
+        canvas_draw_line(canvas, 48, 5, 48, 26);
+        canvas_draw_line(canvas, 55, 27, 49, 27);
+        canvas_draw_line(canvas, 56, 25, 56, 36);
+        canvas_draw_line(canvas, 64, 21, 63, 21);
+        canvas_draw_line(canvas, 65, 15, 65, 17);
+        canvas_draw_line(canvas, 66, 15, 64, 18);
+        canvas_draw_line(canvas, 66, 16, 64, 19);
+        canvas_draw_line(canvas, 66, 18, 60, 21);
+        canvas_draw_line(canvas, 66, 19, 61, 21);
+        canvas_draw_line(canvas, 66, 25, 66, 36);
+        canvas_draw_line(canvas, 73, 27, 67, 27);
+        canvas_draw_line(canvas, 74, 5, 74, 26);
+        canvas_draw_line(canvas, 75, 4, 75, 25);
+        canvas_draw_line(canvas, 83, 59, 39, 59);
+        canvas_draw_line(canvas, 84, 4, 84, 58);
+        canvas_draw_line(canvas, 85, 2, 85, 57);
+        canvas_draw_frame(canvas, 78, 40, 5, 5);
+
+        // Draw the pinout lines.
+        canvas_draw_line(canvas, 39, 8, 21, 8);
+        canvas_draw_line(canvas, 87, 24, 83, 24);
+        canvas_draw_line(canvas, 87, 32, 83, 32);
+        canvas_draw_line(canvas, 88, 23, 88, 13);
+        canvas_draw_line(canvas, 88, 33, 88, 43);
+        canvas_draw_line(canvas, 89, 12, 126, 12);
+        canvas_draw_line(canvas, 126, 28, 83, 28);
+        canvas_draw_line(canvas, 126, 44, 89, 44);
+
+        // Draw the pinout labels.
         canvas_set_font(canvas, FontSecondary);
-        canvas_draw_str(canvas, 10, 11, "Connect the ESP32-CAM:");
+        canvas_draw_str(canvas, 91, 11, "VCC-3V");
         canvas_set_font(canvas, FontSecondary);
-        canvas_draw_str(canvas, 10, 36, "U0R - TX");
+        canvas_draw_str(canvas, 91, 27, "U0R-TX");
         canvas_set_font(canvas, FontSecondary);
-        canvas_draw_str(canvas, 73, 36, "U0T - RX");
+        canvas_draw_str(canvas, 91, 43, "U0T-RX");
         canvas_set_font(canvas, FontSecondary);
-        canvas_draw_str(canvas, 10, 49, "github.com/CodyTolene/");
+        canvas_draw_str(canvas, 2, 12, "GND");
         canvas_set_font(canvas, FontSecondary);
-        canvas_draw_str(canvas, 4, 60, "Flipper-Zero-Camera-Suite");
+        canvas_draw_str(canvas, 12, 21, "-GND");
+
+        // Draw the "Please Connect Module!" text.
+        canvas_set_font(canvas, FontSecondary);
+        canvas_draw_str(canvas, 2, 40, "Please");
+        canvas_set_font(canvas, FontSecondary);
+        canvas_draw_str(canvas, 2, 49, "Connect");
+        canvas_set_font(canvas, FontSecondary);
+        canvas_draw_str(canvas, 2, 58, "Module!");
+
+        // Draw the "Back" text and button logo.
+        canvas_set_font(canvas, FontSecondary);
+        canvas_draw_str(canvas, 92, 57, "Back");
+        canvas_draw_line(canvas, 116, 49, 116, 53);
+        canvas_draw_line(canvas, 115, 50, 115, 52);
+        canvas_draw_dot(canvas, 114, 51);
+        canvas_draw_line(canvas, 117, 51, 121, 51);
+        canvas_draw_line(canvas, 122, 52, 123, 53);
+        canvas_draw_line(canvas, 123, 54, 122, 55);
+        canvas_draw_line(canvas, 121, 56, 117, 56);
     }
 }
 
