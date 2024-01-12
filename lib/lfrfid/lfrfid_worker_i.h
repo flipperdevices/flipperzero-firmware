@@ -23,6 +23,7 @@ typedef enum {
     LFRFIDWorkerIdle,
     LFRFIDWorkerRead,
     LFRFIDWorkerWrite,
+    LFRFIDWorkerWriteWithPass,
     LFRFIDWorkerEmulate,
     LFRFIDWorkerReadRaw,
     LFRFIDWorkerEmulateRaw,
