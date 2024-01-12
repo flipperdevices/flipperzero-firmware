@@ -120,9 +120,9 @@ bool mine_sweeper_read_settings(void* context) {
     flipper_format_read_uint32(fff_file, MINESWEEPER_SETTINGS_KEY_DIFFICULTY, &d, 1);
     flipper_format_read_uint32(fff_file, MINESWEEPER_SETTINGS_KEY_FEEDBACK, &f, 1);
 
-    if (w > 146) {w = 146;}
+    if (w > 32) {w = 32;}
     if (w < 16 ) {w = 16;}
-    if (h > 64 ) {h = 64;}
+    if (h > 32 ) {h = 32;}
     if (h < 7  ) {h = 7;}
     if (d > 2 ) {d = 2;}
     if (f > 1) {f = 1;}
