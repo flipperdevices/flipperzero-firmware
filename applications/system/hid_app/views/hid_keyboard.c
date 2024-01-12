@@ -286,6 +286,14 @@ static void hid_keyboard_get_select_key(HidKeyboardModel* model, HidKeyboardPoin
                                 0); // Skip zero width keys, pretend they are one key
 }
 
+static void hid_keyboard_modifier_set(Hid* hid, uint16_t keycode, bool is_pressed) {
+    if(is_pressed) {
+        hid_hal_keyboard_press(hid, keycode);
+    } else {
+        hid_hal_keyboard_release(hid, keycode);
+    }
+}
+
 static void hid_keyboard_process(HidKeyboard* hid_keyboard, InputEvent* event) {
     with_view_model(
         hid_keyboard->view,
@@ -300,35 +308,25 @@ static void hid_keyboard_process(HidKeyboard* hid_keyboard, InputEvent* event) {
                     // Toggle the modifier key when clicked, and click the key
                     if(model->last_key_code == HID_KEYBOARD_L_SHIFT) {
                         model->shift = !model->shift;
-                        if(model->shift)
-                            model->modifier_code |= KEY_MOD_LEFT_SHIFT;
-                        else
-                            model->modifier_code &= ~KEY_MOD_LEFT_SHIFT;
+                        hid_keyboard_modifier_set(
+                            hid_keyboard->hid, KEY_MOD_LEFT_SHIFT, model->shift);
                     } else if(model->last_key_code == HID_KEYBOARD_L_ALT) {
                         model->alt = !model->alt;
-                        if(model->alt)
-                            model->modifier_code |= KEY_MOD_LEFT_ALT;
-                        else
-                            model->modifier_code &= ~KEY_MOD_LEFT_ALT;
+                        hid_keyboard_modifier_set(hid_keyboard->hid, KEY_MOD_LEFT_ALT, model->alt);
                     } else if(model->last_key_code == HID_KEYBOARD_L_CTRL) {
                         model->ctrl = !model->ctrl;
-                        if(model->ctrl)
-                            model->modifier_code |= KEY_MOD_LEFT_CTRL;
-                        else
-                            model->modifier_code &= ~KEY_MOD_LEFT_CTRL;
+                        hid_keyboard_modifier_set(
+                            hid_keyboard->hid, KEY_MOD_LEFT_CTRL, model->ctrl);
                     } else if(model->last_key_code == HID_KEYBOARD_L_GUI) {
                         model->gui = !model->gui;
-                        if(model->gui)
-                            model->modifier_code |= KEY_MOD_LEFT_GUI;
-                        else
-                            model->modifier_code &= ~KEY_MOD_LEFT_GUI;
+                        hid_keyboard_modifier_set(hid_keyboard->hid, KEY_MOD_LEFT_GUI, model->gui);
+                    } else {
+                        hid_hal_keyboard_press(hid_keyboard->hid, model->last_key_code);
                     }
-                    hid_hal_keyboard_press(
-                        hid_keyboard->hid, model->modifier_code | model->last_key_code);
+
                 } else if(event->type == InputTypeRelease) {
                     // Release happens after short and long presses
-                    hid_hal_keyboard_release(
-                        hid_keyboard->hid, model->modifier_code | model->last_key_code);
+                    hid_hal_keyboard_release(hid_keyboard->hid, model->last_key_code);
                     model->ok_pressed = false;
                 }
             } else if(event->key == InputKeyBack) {
@@ -364,6 +362,16 @@ static bool hid_keyboard_input_callback(InputEvent* event, void* context) {
 
     if(event->type == InputTypeLong && event->key == InputKeyBack) {
         hid_hal_keyboard_release_all(hid_keyboard->hid);
+        with_view_model(
+            hid_keyboard->view,
+            HidKeyboardModel * model,
+            {
+                model->shift = false;
+                model->alt = false;
+                model->ctrl = false;
+                model->gui = false;
+            },
+            true);
     } else {
         hid_keyboard_process(hid_keyboard, event);
         consumed = true;
