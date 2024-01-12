@@ -13,6 +13,9 @@
 #define T5577_OPCODE_PAGE_1 0b11
 #define T5577_OPCODE_RESET 0b00
 
+#define T5577_BLOCKS_IN_PAGE_0 8
+#define T5577_BLOCKS_IN_PAGE_1 4
+
 static void t5577_start() {
     furi_hal_rfid_tim_read_start(125000, 0.5);
 
@@ -52,6 +55,7 @@ static void t5577_write_reset() {
 }
 
 static void t5577_write_block_pass(
+    uint8_t page,
     uint8_t block,
     bool lock_bit,
     uint32_t data,
@@ -62,8 +66,15 @@ static void t5577_write_block_pass(
     // start gap
     t5577_write_gap(T5577_TIMING_START_GAP);
 
-    // opcode for page 0
-    t5577_write_opcode(T5577_OPCODE_PAGE_0);
+    // opcode for page
+    t5577_write_opcode((page == 1) ? T5577_OPCODE_PAGE_1 : T5577_OPCODE_PAGE_0);
+
+    // password
+    if(with_pass) {
+        for(uint8_t i = 0; i < 32; i++) {
+            t5577_write_bit((password >> (31 - i)) & 1);
+        }
+    }
 
     // password
     if(with_pass) {
@@ -92,7 +103,7 @@ static void t5577_write_block_pass(
 }
 
 static void t5577_write_block_simple(uint8_t block, bool lock_bit, uint32_t data) {
-    t5577_write_block_pass(block, lock_bit, data, false, 0);
+    t5577_write_block_pass(0, block, lock_bit, data, false, 0);
 }
 
 void t5577_write(LFRFIDT5577* data) {
@@ -110,7 +121,7 @@ void t5577_write_with_pass(LFRFIDT5577* data, uint32_t password) {
     t5577_start();
     FURI_CRITICAL_ENTER();
     for(size_t i = 0; i < data->blocks_to_write; i++) {
-        t5577_write_block_pass(i, false, data->block[i], true, password);
+        t5577_write_block_pass(0, i, false, data->block[i], true, password);
     }
     t5577_write_reset();
     FURI_CRITICAL_EXIT();
@@ -177,6 +188,25 @@ void t5577_write_page_block_pass_with_start_and_stop(
     t5577_start();
     FURI_CRITICAL_ENTER();
     t5577_write_page_block_pass(page, block, lock_bit, data, with_pass, password /*, testmode*/);
+    t5577_write_reset();
+    FURI_CRITICAL_EXIT();
+    t5577_stop();
+}
+
+void t5577_write_with_mask(LFRFIDT5577* data, uint8_t page, uint32_t password) {
+    t5577_start();
+    FURI_CRITICAL_ENTER();
+
+    uint8_t mask = data->mask;
+
+    size_t pages_total = (page == 0) ? T5577_BLOCKS_IN_PAGE_0 : T5577_BLOCKS_IN_PAGE_1;
+
+    for(size_t i = 0; i < pages_total; i++) {
+        bool need_to_write = mask & 1;
+        mask >>= 1;
+        if(!need_to_write) continue;
+        t5577_write_block_pass(page, i, false, data->block[i], true, password);
+    }
     t5577_write_reset();
     FURI_CRITICAL_EXIT();
     t5577_stop();
