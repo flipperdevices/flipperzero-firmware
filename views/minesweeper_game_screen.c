@@ -200,7 +200,7 @@ static void setup_board(MineSweeperGameScreen* instance) {
      * and manipulate then save to actual model
      */
     MineSweeperGameScreenTileType tiles[MINESWEEPER_BOARD_MAX_TILES];
-    memset(&tiles, MineSweeperGameScreenTileNone, sizeof(tiles));
+    memset(&tiles, MineSweeperGameScreenTileZero, sizeof(tiles));
 
     // Randomly place tiles except in the corners to help guarantee solvability
     for (uint16_t i = 0; i < num_mines; i++) {
