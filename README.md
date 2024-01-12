@@ -241,7 +241,17 @@ A huge thanks to the following people and projects for making this possible:
 4. Request PR [here][pull-request-link], introduce work via your branch.
 5. Wait for review and merge.
 
-Thank you!
+When developing the firmware, be sure to download the dependencies by running the `firmware-flash.bat` batch script at the root of this directory. This will download the ESP32-CAM firmware dependencies to the directories defined in the `arduino-cli.yaml` file post-run. Add these dependencies and their directories to your "Include path" in your IDE of choice. I prefer Visual Studio Code, there's a guide on how to get started with that workflow here:
+
+https://github.com/CodyTolene/Flipper-Zero-Development-Toolkit
+
+Example include path:
+
+```markdown
+C:/Users/<username>/AppData/Local/Temp/arduino-cli/\*\*
+```
+
+Thank you for any and all contributions to this project, I'm looking forward to seeing what you come up with! If you have any questions, please let me know by opening an issue [here][issues-link].
 
 <p align="right">[ <a href="#index">Back to top</a> ]</p>
 
