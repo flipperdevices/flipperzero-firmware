@@ -105,6 +105,7 @@ void camera_suite_app_free(CameraSuite* app) {
     view_dispatcher_remove_view(app->view_dispatcher, CameraSuiteViewIdMenu);
     view_dispatcher_remove_view(app->view_dispatcher, CameraSuiteViewIdCamera);
     view_dispatcher_remove_view(app->view_dispatcher, CameraSuiteViewIdGuide);
+    view_dispatcher_remove_view(app->view_dispatcher, CameraSuiteViewIdAppSettings);
     view_dispatcher_remove_view(app->view_dispatcher, CameraSuiteViewIdCamSettings);
     submenu_free(app->submenu);
 
