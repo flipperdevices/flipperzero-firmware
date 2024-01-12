@@ -107,7 +107,7 @@ void t5577_write(LFRFIDT5577Data* data) {
     t5577_stop();
 }
 
-void t5577_write_with_mask(LFRFIDT5577Data* data) {
+void t5577_multiwriter_write_with_mask(LFRFIDT5577Data* data) {
     t5577_start();
     FURI_CRITICAL_ENTER();
 
