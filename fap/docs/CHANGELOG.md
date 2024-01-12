@@ -1,4 +1,4 @@
-## Roadmap
+# Roadmap
 
 - Store images to onboard ESP32-CAM SD card (partially completed, #24).
 - Camera preview GUI overlay (#21).
