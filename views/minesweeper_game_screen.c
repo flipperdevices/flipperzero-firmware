@@ -143,8 +143,7 @@ static void mine_sweeper_game_screen_view_enter(void* context);
 static void mine_sweeper_game_screen_view_exit(void* context);
 
 // Different input/draw callbacks for play/win/lose state
-static void mine_sweeper_game_screen_view_win_draw_callback(Canvas* canvas, void* _model);
-static void mine_sweeper_game_screen_view_lose_draw_callback(Canvas* canvas, void* _model);
+static void mine_sweeper_game_screen_view_end_draw_callback(Canvas* canvas, void* _model);
 static void mine_sweeper_game_screen_view_play_draw_callback(Canvas* canvas, void* _model);
 
 // These consolidate the function calls for led/haptic/sound for specific events
@@ -1090,100 +1089,7 @@ static void mine_sweeper_game_screen_view_exit(void* context) {
     UNUSED(context);
 }
 
-static void mine_sweeper_game_screen_view_win_draw_callback(Canvas* canvas, void* _model) {
-    furi_assert(canvas);
-    furi_assert(_model);
-    MineSweeperGameScreenModel* model = _model;
-
-    canvas_clear(canvas);
-
-    canvas_set_color(canvas, ColorBlack);
-    
-    uint16_t cursor_pos_1d = model->curr_pos.x_abs * model->board_width + model->curr_pos.y_abs;
-    
-    for (uint8_t x_rel = 0; x_rel < MINESWEEPER_SCREEN_TILE_HEIGHT; x_rel++) {
-        uint16_t x_abs = (model->bottom_boundary - MINESWEEPER_SCREEN_TILE_HEIGHT) + x_rel;
-        
-        for (uint8_t y_rel = 0; y_rel < MINESWEEPER_SCREEN_TILE_WIDTH; y_rel++) {
-            uint16_t y_abs = (model->right_boundary - MINESWEEPER_SCREEN_TILE_WIDTH) + y_rel;
-
-            uint16_t curr_rendering_tile_pos_1d = x_abs * model->board_width + y_abs;
-            MineSweeperTile tile = model->board[curr_rendering_tile_pos_1d];
-
-            if (cursor_pos_1d == curr_rendering_tile_pos_1d) {
-                canvas_set_color(canvas, ColorWhite);
-            } else {
-                canvas_set_color(canvas, ColorBlack);
-            }
-
-            canvas_draw_icon(
-                canvas,
-                y_rel * icon_get_width(tile.icon_element.icon),
-                x_rel * icon_get_height(tile.icon_element.icon),
-                tile.icon_element.icon);
-
-        }
-    }
-
-    canvas_set_color(canvas, ColorBlack);
-    // If any borders are at the limits of the game board we draw a border line
-    
-    // Right border 
-    if (model->right_boundary == model->board_width) {
-        canvas_draw_line(canvas, 127,0,127,63-8);
-    }
-
-    // Left border
-    if ((model->right_boundary - MINESWEEPER_SCREEN_TILE_WIDTH) == 0) {
-        canvas_draw_line(canvas, 0,0,0,63-8);
-    }
-
-    // Bottom border
-    if (model->bottom_boundary == model->board_height) {
-        canvas_draw_line(canvas, 0,63-8,127,63-8);
-    }
-
-    // Top border
-    if ((model->bottom_boundary - MINESWEEPER_SCREEN_TILE_HEIGHT) == 0) {
-        canvas_draw_line(canvas, 0,0,127,0);
-    }
-
-
-    // Draw win text
-    furi_string_printf(
-            model->info_str,
-            "YOU WIN!");
-
-    canvas_draw_str_aligned(
-            canvas,
-            0,
-            64-7,
-            AlignLeft,
-            AlignTop,
-            furi_string_get_cstr(model->info_str));
-
-    // Draw time text
-    uint32_t ticks_elapsed = furi_get_tick() - model->start_tick;
-    uint32_t sec = ticks_elapsed / furi_kernel_get_tick_frequency();
-    uint32_t minutes = sec / 60;
-    sec = sec % 60;
-
-    furi_string_printf(
-             model->info_str,
-             "%02ld:%02ld",
-             minutes,
-             sec);
-
-    canvas_draw_str_aligned(
-            canvas,
-            126 - canvas_string_width(canvas, furi_string_get_cstr(model->info_str)),
-            64 - 7,
-            AlignLeft,
-            AlignTop,
-            furi_string_get_cstr(model->info_str));
-}
-
-static void mine_sweeper_game_screen_view_lose_draw_callback(Canvas* canvas, void* _model) {
+static void mine_sweeper_game_screen_view_end_draw_callback(Canvas* canvas, void* _model) {
     furi_assert(canvas);
     furi_assert(_model);
     MineSweeperGameScreenModel* model = _model;
@@ -1238,11 +1144,20 @@ static void mine_sweeper_game_screen_view_lose_draw_callback(Canvas* canvas, voi
     if ((model->bottom_boundary - MINESWEEPER_SCREEN_TILE_HEIGHT) == 0) {
         canvas_draw_line(canvas, 0,0,127,0);
     }
+    
+    
+    const char* end_status_str = "";
 
-    // Draw lose text
+    if (model->has_lost_game) {
+        end_status_str = "YOU LOSE!  PRESS OK.\0";
+    } else {
+        end_status_str = "YOU WIN!   PRESS OK.\0";
+    }
+    
+    // Draw win/lose text
     furi_string_printf(
             model->info_str,
-            "YOU LOSE!");
+            "%s", end_status_str);
 
     canvas_draw_str_aligned(
             canvas,
@@ -1541,14 +1456,14 @@ static bool mine_sweeper_game_screen_view_play_input_callback(InputEvent* event,
                     model->has_lost_game = true;
                     mine_sweeper_lose_effect(instance);
 
-                    view_set_draw_callback(instance->view, mine_sweeper_game_screen_view_lose_draw_callback);
+                    view_set_draw_callback(instance->view, mine_sweeper_game_screen_view_end_draw_callback);
                     view_set_input_callback(instance->view, mine_sweeper_game_screen_view_end_input_callback);
 
                 } else if (is_win_condition_triggered) {
 
                     mine_sweeper_win_effect(instance);
 
-                    view_set_draw_callback(instance->view, mine_sweeper_game_screen_view_win_draw_callback);
+                    view_set_draw_callback(instance->view, mine_sweeper_game_screen_view_end_draw_callback);
                     view_set_input_callback(instance->view, mine_sweeper_game_screen_view_end_input_callback);
 
                 }
@@ -1587,7 +1502,7 @@ static bool mine_sweeper_game_screen_view_play_input_callback(InputEvent* event,
 
                         if (is_win_condition_triggered) {
 
-                            view_set_draw_callback(instance->view, mine_sweeper_game_screen_view_win_draw_callback);
+                            view_set_draw_callback(instance->view, mine_sweeper_game_screen_view_end_draw_callback);
                             view_set_input_callback(instance->view, mine_sweeper_game_screen_view_end_input_callback);
 
                         }
