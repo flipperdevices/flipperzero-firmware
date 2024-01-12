@@ -28,8 +28,7 @@ void camera_suite_view_start_draw(Canvas* canvas, CameraSuiteViewStartModel* mod
     UNUSED(model);
     canvas_clear(canvas);
 
-    // Draw Camera Suite logo. Hand drawn with the help
-    // of "https://lopaka.app/", check them out!
+    // Draw Camera Suite logo.
     canvas_draw_circle(canvas, 82, 28, 1);
     canvas_draw_circle(canvas, 85, 29, 11);
     canvas_draw_circle(canvas, 85, 29, 6);
