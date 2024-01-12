@@ -9,6 +9,8 @@
 - Add new splash/start screen.
 - Add new module not connected notification + pinout guide in-app.
 - Update README with a new "Special Thanks" section.
+- Update README "Contributions" section regarding firmware development.
+- Separate settings into two views: app and cam settings.
 - Pending...
 
 ## v1.5
@@ -23,9 +25,6 @@
 - Improve Firmware flashing utility code.
 - Improve GitHub actions code.
 - Look to mitigate issue "Mirrored Image" #27.
-
-## v1.3.1 (patch)
-
 - Addressed new linting issue with "ufbt" tools.
 
 ## v1.3
