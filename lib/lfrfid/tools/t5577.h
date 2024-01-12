@@ -45,6 +45,8 @@ typedef struct {
     uint8_t mask;
 } LFRFIDT5577;
 
+const uint32_t* t5577_get_default_passwords(uint8_t* len);
+
 /**
  * @brief Write T5577 tag data to tag
  * 

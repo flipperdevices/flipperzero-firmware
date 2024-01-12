@@ -2087,6 +2087,7 @@ Function,+,lfrfid_worker_start_thread,void,LFRFIDWorker*
 Function,+,lfrfid_worker_stop,void,LFRFIDWorker*
 Function,+,lfrfid_worker_stop_thread,void,LFRFIDWorker*
 Function,+,lfrfid_worker_write_start,void,"LFRFIDWorker*, LFRFIDProtocol, LFRFIDWorkerWriteCallback, void*"
+Function,+,lfrfid_worker_write_with_pass_start,void,"LFRFIDWorker*, LFRFIDProtocol, LFRFIDWorkerWriteCallback, void*"
 Function,-,lgamma,double,double
 Function,-,lgamma_r,double,"double, int*"
 Function,-,lgammaf,float,float
@@ -3264,6 +3265,7 @@ Function,+,submenu_set_header,void,"Submenu*, const char*"
 Function,+,submenu_set_orientation,void,"Submenu*, ViewOrientation"
 Function,+,submenu_set_selected_item,void,"Submenu*, uint32_t"
 Function,-,system,int,const char*
+Function,+,t5577_get_default_passwords,const uint32_t*,uint8_t*
 Function,+,t5577_write,void,LFRFIDT5577*
 Function,+,t5577_write_page_block_pass,void,"uint8_t, uint8_t, _Bool, uint32_t, _Bool, uint32_t"
 Function,+,t5577_write_page_block_pass_with_start_and_stop,void,"uint8_t, uint8_t, _Bool, uint32_t, _Bool, uint32_t"
