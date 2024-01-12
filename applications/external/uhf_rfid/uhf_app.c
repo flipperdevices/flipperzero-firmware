@@ -182,7 +182,6 @@ void uhf_blink_stop(UHFApp* uhf_app) {
 
 void uhf_show_loading_popup(void* ctx, bool show) {
     UHFApp* uhf_app = ctx;
-
     if(show) {
         // Raise timer priority so that animations can play
         furi_timer_set_thread_priority(FuriTimerThreadPriorityElevated);
@@ -202,7 +201,7 @@ int32_t uhf_app_main(void* ctx) {
     // init pin a2
     // furi_hal_gpio_init_simple(&gpio_ext_pa7, GpioModeOutputPushPull);
     furi_hal_uart_set_br(FuriHalUartIdUSART1, DEFAULT_BAUDRATE);
-    scene_manager_next_scene(uhf_app->scene_manager, UHFSceneVerify);
+    scene_manager_next_scene(uhf_app->scene_manager, UHFSceneModuleInfo);
     view_dispatcher_run(uhf_app->view_dispatcher);
 
     // disable 5v pin
