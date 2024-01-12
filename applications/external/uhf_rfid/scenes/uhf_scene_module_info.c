@@ -1,17 +1,16 @@
 #include "../uhf_app_i.h"
 
-bool verify_success = false;
 FuriString* temp_str;
 
-void uhf_scene_verify_callback_event(UHFWorkerEvent event, void* ctx) {
+void uhf_scene_module_info_callback_event(UHFWorkerEvent event, void* ctx) {
     UNUSED(ctx);
     UHFApp* uhf_app = ctx;
-    if(event == UHFWorkerEventSuccess) verify_success = true;
+    if(event == UHFWorkerEventSuccess) uhf_app->device_verified = true;
 
     view_dispatcher_send_custom_event(uhf_app->view_dispatcher, UHFCustomEventVerifyDone);
 }
 
-void uhf_scene_verify_widget_callback(GuiButtonType result, InputType type, void* ctx) {
+void uhf_scene_module_info_widget_callback(GuiButtonType result, InputType type, void* ctx) {
     furi_assert(ctx);
     UHFApp* uhf_app = ctx;
 
@@ -20,25 +19,26 @@ void uhf_scene_verify_widget_callback(GuiButtonType result, InputType type, void
     }
 }
 
-void uhf_scene_verify_on_enter(void* ctx) {
+void uhf_scene_module_info_on_enter(void* ctx) {
     UHFApp* uhf_app = ctx;
+    uhf_app->device_verified = false; // reset device verified
     uhf_worker_start(
-        uhf_app->worker, UHFWorkerStateVerify, uhf_scene_verify_callback_event, uhf_app);
+        uhf_app->worker, UHFWorkerStateVerify, uhf_scene_module_info_callback_event, uhf_app);
     temp_str = furi_string_alloc();
     view_dispatcher_switch_to_view(uhf_app->view_dispatcher, UHFViewWidget);
 }
 
-bool uhf_scene_verify_on_event(void* ctx, SceneManagerEvent event) {
+bool uhf_scene_module_info_on_event(void* ctx, SceneManagerEvent event) {
     UHFApp* uhf_app = ctx;
     bool consumed = false;
     if(event.event == SceneManagerEventTypeBack) {
         uhf_app->worker->state = UHFWorkerStateStop;
     } else if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == GuiButtonTypeRight) {
-            scene_manager_next_scene(uhf_app->scene_manager, UHFSceneStart);
-            consumed = true;
+            scene_manager_search_and_switch_to_another_scene(
+                uhf_app->scene_manager, UHFSceneStart);
         } else if(event.event == GuiButtonTypeLeft) {
-            if(!verify_success) {
+            if(!uhf_app->device_verified) {
                 widget_reset(uhf_app->widget);
                 furi_string_reset(temp_str);
                 uhf_worker_stop(uhf_app->worker);
@@ -49,11 +49,11 @@ bool uhf_scene_verify_on_event(void* ctx, SceneManagerEvent event) {
                 uhf_worker_start(
                     uhf_app->worker,
                     UHFWorkerStateVerify,
-                    uhf_scene_verify_callback_event,
+                    uhf_scene_module_info_callback_event,
                     uhf_app);
             }
         } else if(event.event == UHFCustomEventVerifyDone) {
-            if(verify_success) {
+            if(uhf_app->device_verified) {
                 widget_reset(uhf_app->widget);
                 furi_string_reset(temp_str);
                 M100Module* module = uhf_app->worker->module;
@@ -99,7 +99,7 @@ bool uhf_scene_verify_on_event(void* ctx, SceneManagerEvent event) {
                     uhf_app->widget,
                     GuiButtonTypeRight,
                     "Continue",
-                    uhf_scene_verify_widget_callback,
+                    uhf_scene_module_info_widget_callback,
                     uhf_app);
             } else {
                 widget_add_string_element(
@@ -122,13 +122,13 @@ bool uhf_scene_verify_on_event(void* ctx, SceneManagerEvent event) {
                     uhf_app->widget,
                     GuiButtonTypeLeft,
                     "Retry",
-                    uhf_scene_verify_widget_callback,
+                    uhf_scene_module_info_widget_callback,
                     uhf_app);
                 widget_add_button_element(
                     uhf_app->widget,
                     GuiButtonTypeRight,
                     "Skip",
-                    uhf_scene_verify_widget_callback,
+                    uhf_scene_module_info_widget_callback,
                     uhf_app);
             }
         }
@@ -136,7 +136,7 @@ bool uhf_scene_verify_on_event(void* ctx, SceneManagerEvent event) {
     return consumed;
 }
 
-void uhf_scene_verify_on_exit(void* ctx) {
+void uhf_scene_module_info_on_exit(void* ctx) {
     UHFApp* uhf_app = ctx;
     // Clear string
     furi_string_free(temp_str);
