@@ -183,16 +183,19 @@ bool mf_desfire_file_settings_parse(MfDesfireFileSettings* data, const BitBuffer
         if(data_size < min_data_size) break;
 
         MfDesfireFileSettingsLayout layout;
-        bit_buffer_write_bytes(buf, &layout, sizeof(MfDesfireFileSettingsLayout));
+        const uint8_t* get_file_settings_resp = bit_buffer_get_data(buf);
+        memcpy(&layout, get_file_settings_resp, sizeof(MfDesfireFileSettingsLayout));
+        // bit_buffer_write_bytes(buf, &layout, sizeof(MfDesfireFileSettingsLayout));
 
         data->type = layout.header.type;
         data->comm = layout.header.comm;
         data->access_rights = layout.header.access_rights;
 
         if(data->type == MfDesfireFileTypeStandard || data->type == MfDesfireFileTypeBackup) {
-            if(data_size != min_data_size) break;
+            // if(data_size != min_data_size) break;
 
             data->data.size = layout.data.size;
+            FURI_LOG_I("Desfire", "File size: %ld", data->data.size);
 
         } else if(data->type == MfDesfireFileTypeValue) {
             if(data_size !=
