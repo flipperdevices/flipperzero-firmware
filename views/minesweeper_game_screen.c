@@ -1351,7 +1351,9 @@ static bool mine_sweeper_game_screen_view_end_input_callback(InputEvent* event, 
                 model->is_holding_down_button = false;
                 consumed = true;
 
-            } else if (!model->is_holding_down_button && event->key == InputKeyOk && event->type == InputTypeRelease) { 
+            }
+
+            if (!model->is_holding_down_button && event->key == InputKeyOk && event->type == InputTypeRelease) { 
                 // After release when user presses and releases ok we want to restart the next time this function is pressed
 
                 model->is_restart_triggered = true;
