@@ -54,6 +54,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Crypto Dictionary v0.1 (By armixz)](https://github.com/armixz/Flipper-Zero-Crypto-Dictionary)
 - UL: [9 Applications Updated to remove possible Memory Leakks (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/f6abe6612b31faeb3c19071b5aab8e5b28dafd8c)
 - Updated: [Minesweeper Redux v1.1 (By squee72564)](https://github.com/squee72564/F0_Minesweeper_Fap)
+- OFW: [assets: checking limits on image size; ufbt: cdb target #3359 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/3359)
+- Updated: [Mouse Jacker v1.1 (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/mousejacker) [numlock support in mousejackers (By xMasterX)](https://github.com/xMasterX/all-the-plugins/commit/36b21873f22acbe61e7f2d5088e7e7f5e77c1a89)
 
 ## IN THIS BRANCH:
 
@@ -164,7 +166,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [NFC Playlist v1.1 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
 - Updated: [NFC Magic v1.5 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966) [rework #67 (By gornekich)](https://github.com/flipperdevices/flipperzero-good-faps/pull/67) [fix gen4 detection #71 (By gornekich)](https://github.com/flipperdevices/flipperzero-good-faps/pull/71) [Specify in error scene that only Gen1 magic and Gen4 UMCs are supported #75 (By kitsunehunter)](https://github.com/flipperdevices/flipperzero-good-faps/pull/75) [UI / Scenes (By xMasterX) & Poller functions, minor UI fixes (By Leptopt1los)](https://github.com/xMasterX/all-the-plugins/commit/d70f146f15a6bab2272d4ebfe37001d7d5f0f556) [New options for gen4 cards #82 (By Leptopt1los)](https://github.com/flipperdevices/flipperzero-good-faps/pull/82)  [Fix support of 4K fobs #102 (By Leptopt1los)](https://github.com/flipperdevices/flipperzero-good-faps/pull/102) [Gen4 shadow mode management support #98 (By Leptopt1los) With Fixes By RogueMaster](https://github.com/flipperdevices/flipperzero-good-faps/pull/98)
 - OFW: [NFC: system dict skip when user dict is skipped fix #3356 (By Leptopt1los)](https://github.com/flipperdevices/flipperzero-firmware/pull/3356)
-- OFW: [assets: checking limits on image size; ufbt: cdb target #3359 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/3359)
 
 <a name="release">
 
