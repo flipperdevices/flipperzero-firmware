@@ -1,4 +1,5 @@
 
+
 # Changelog
 ## TODO:
 - Add settings options to toggle hardware feedback
@@ -7,6 +8,8 @@
 ## Version 1.1.0 - 1/11/2024
 
 Added haptic / led functionality
+
+Code Reformats
 
 ## Added
 - Haptic feedback on all button presses.
