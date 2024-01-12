@@ -657,7 +657,7 @@ static bool try_clear_surrounding_tiles(MineSweeperGameScreenModel* model) {
 
     MineSweeperTile tile = model->board[curr_pos_1d];
 
-    // Return true if tile is zero tile or not cleared
+    // Return false if tile is zero tile or not cleared
     if (tile.tile_state != MineSweeperGameScreenTileStateCleared || tile.tile_type == MineSweeperGameScreenTileZero) {
         return false;
     }
