@@ -45,7 +45,8 @@ typedef enum {
     CameraSuiteViewIdMenu,
     CameraSuiteViewIdCamera,
     CameraSuiteViewIdGuide,
-    CameraSuiteViewIdSettings,
+    CameraSuiteViewIdAppSettings,
+    CameraSuiteViewIdCamSettings,
 } CameraSuiteViewId;
 
 typedef enum {
