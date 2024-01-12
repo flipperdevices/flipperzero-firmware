@@ -4,6 +4,13 @@
 - Camera preview GUI overlay (#21).
 - Full screen 90 degree and 270 degree fill (#6).
 
+## v1.6
+
+- Add new splash/start screen.
+- Add new module not connected notification + pinout guide in-app.
+- Update README with a new "Special Thanks" section.
+- Pending...
+
 ## v1.5
 
 - Remove usage of image no longer found in the Flipper Zero firmware build.
