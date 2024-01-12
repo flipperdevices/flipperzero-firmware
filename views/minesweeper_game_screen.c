@@ -1,12 +1,4 @@
 #include "minesweeper_game_screen.h"
-#include "minesweeper_redux_icons.h"
-
-#include <gui/elements.h>
-#include <gui/icon_animation.h>
-#include <input/input.h>
-
-#include <furi.h>
-#include <furi_hal.h>
 
 static const Icon* tile_icons[13] = {
     &I_tile_empty_8x8,

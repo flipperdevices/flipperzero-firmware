@@ -8,6 +8,13 @@
 
 #include <gui/view.h>
 
+#include <gui/elements.h>
+#include <gui/icon_animation.h>
+#include <input/input.h>
+#include <furi.h>
+#include <furi_hal.h>
+
+#include "minesweeper_redux_icons.h"
 #include "minesweeper_game_screen_i.h"
 #include "../helpers/mine_sweeper_haptic.h"
 #include "../helpers/mine_sweeper_led.h"
