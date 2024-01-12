@@ -64,11 +64,7 @@ NfcCommand picopass_poller_select_handler(PicopassPoller* instance) {
             break;
         }
 
-        if(instance->mode == PicopassPollerModeRead) {
-            instance->state = PicopassPollerStatePreAuth;
-        } else {
-            instance->state = PicopassPollerStateAuth;
-        }
+        instance->state = PicopassPollerStatePreAuth;
     } while(false);
 
     return command;
@@ -138,7 +134,7 @@ NfcCommand picopass_poller_pre_auth_handler(PicopassPoller* instance) {
             instance->data->AA1[PICOPASS_SECURE_EPURSE_BLOCK_INDEX].data[6],
             instance->data->AA1[PICOPASS_SECURE_EPURSE_BLOCK_INDEX].data[7]);
 
-        error = picopass_poller_read_block(instance, 5, &block);
+        error = picopass_poller_read_block(instance, PICOPASS_SECURE_AIA_BLOCK_INDEX, &block);
         if(error != PicopassErrorNone) {
             instance->state = PicopassPollerStateFail;
             break;
@@ -168,6 +164,28 @@ NfcCommand picopass_poller_pre_auth_handler(PicopassPoller* instance) {
 NfcCommand picopass_poller_check_security(PicopassPoller* instance) {
     NfcCommand command = NfcCommandContinue;
 
+    instance->secured = true;
+
+    uint8_t crypt =
+        (instance->data->AA1[PICOPASS_CONFIG_BLOCK_INDEX].data[7] & PICOPASS_FUSE_CRYPT10);
+    switch(crypt) {
+    case 0:
+        FURI_LOG_D(TAG, "Secured page - Authentication disabled");
+        // Well this is awkward... We can try anyway though I guess...
+        break;
+    case PICOPASS_FUSE_CRYPT0:
+        FURI_LOG_D(TAG, "Non-secured page, skipping auth");
+        instance->secured = false;
+        picopass_poller_prepare_read(instance);
+        instance->state = PicopassPollerStateReadBlock;
+        return command;
+    case PICOPASS_FUSE_CRYPT0 | PICOPASS_FUSE_CRYPT1:
+        FURI_LOG_D(TAG, "Secured page - keys modifiable");
+        break;
+    case PICOPASS_FUSE_CRYPT1:
+        FURI_LOG_D(TAG, "Secured page - keys locked");
+    }
+
     // Thank you proxmark!
     PicopassBlock temp_block = {};
     memset(temp_block.data, 0xff, sizeof(PicopassBlock));
@@ -188,8 +206,14 @@ NfcCommand picopass_poller_check_security(PicopassPoller* instance) {
     if(instance->data->pacs.se_enabled) {
         FURI_LOG_D(TAG, "SE enabled");
     }
-    // Always try the NR-MAC auth in case we have the file.
-    instance->state = PicopassPollerStateNrMacAuth;
+
+    if(instance->mode == PicopassPollerModeRead) {
+        // Always try the NR-MAC auth in case we have the file.
+        instance->state = PicopassPollerStateNrMacAuth;
+    } else {
+        // NR-MAC auth doesn't allow for writing, so don't try
+        instance->state = PicopassPollerStateAuth;
+    }
     return command;
 }
 
@@ -222,7 +246,7 @@ NfcCommand picopass_poller_nr_mac_auth(PicopassPoller* instance) {
 
     // Set next state so breaking do/while will jump to it. If successful, do/while will set to ReadBlock
     if(instance->data->pacs.se_enabled) {
-        instance->state = PicopassPollerStateFail;
+        instance->state = PicopassPollerStateAuthFail;
     } else {
         // For non-SE, run through normal key check
         instance->state = PicopassPollerStateAuth;
@@ -319,7 +343,7 @@ NfcCommand picopass_poller_auth_handler(PicopassPoller* instance) {
         if(command != NfcCommandContinue) break;
 
         if(!instance->event_data.req_key.is_key_provided) {
-            instance->state = PicopassPollerStateFail;
+            instance->state = PicopassPollerStateAuthFail;
             break;
         }
 
@@ -397,11 +421,15 @@ NfcCommand picopass_poller_read_block_handler(PicopassPoller* instance) {
 
     do {
         if(instance->current_block == instance->app_limit) {
-            instance->state = PicopassPollerStateParseCredential;
+            if(instance->secured) {
+                instance->state = PicopassPollerStateParseCredential;
+            } else {
+                instance->state = PicopassPollerStateSuccess;
+            }
             break;
         }
 
-        if(instance->current_block == PICOPASS_SECURE_KD_BLOCK_INDEX) {
+        if(instance->secured && instance->current_block == PICOPASS_SECURE_KD_BLOCK_INDEX) {
             // Skip over Kd block which is populated earlier (READ of Kd returns all FF's)
             instance->current_block++;
         }
@@ -587,6 +615,17 @@ NfcCommand picopass_poller_fail_handler(PicopassPoller* instance) {
     return command;
 }
 
+NfcCommand picopass_poller_auth_fail_handler(PicopassPoller* instance) {
+    NfcCommand command = NfcCommandReset;
+
+    instance->event.type = PicopassPollerEventTypeAuthFail;
+    command = instance->callback(instance->event, instance->context);
+    picopass_poller_reset(instance);
+    instance->state = PicopassPollerStateDetect;
+
+    return command;
+}
+
 static const PicopassPollerStateHandler picopass_poller_state_handler[PicopassPollerStateNum] = {
     [PicopassPollerStateRequestMode] = picopass_poller_request_mode_handler,
     [PicopassPollerStateDetect] = picopass_poller_detect_handler,
@@ -602,6 +641,7 @@ static const PicopassPollerStateHandler picopass_poller_state_handler[PicopassPo
     [PicopassPollerStateParseWiegand] = picopass_poller_parse_wiegand_handler,
     [PicopassPollerStateSuccess] = picopass_poller_success_handler,
     [PicopassPollerStateFail] = picopass_poller_fail_handler,
+    [PicopassPollerStateAuthFail] = picopass_poller_auth_fail_handler,
 };
 
 static NfcCommand picopass_poller_callback(NfcEvent event, void* context) {

@@ -31,7 +31,9 @@ NfcCommand picopass_scene_write_poller_callback(PicopassPollerEvent event, void*
     } else if(event.type == PicopassPollerEventTypeSuccess) {
         view_dispatcher_send_custom_event(
             picopass->view_dispatcher, PicopassCustomEventPollerSuccess);
-    } else if(event.type == PicopassPollerEventTypeFail) {
+    } else if(
+        event.type == PicopassPollerEventTypeFail ||
+        event.type == PicopassPollerEventTypeAuthFail) {
         view_dispatcher_send_custom_event(
             picopass->view_dispatcher, PicopassCustomEventPollerFail);
     }

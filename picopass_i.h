@@ -90,6 +90,7 @@ struct Picopass {
     PicopassPoller* poller;
     PicopassListener* listener;
     KeysDict* dict;
+    uint32_t last_error_notify_ticks;
 
     char text_store[PICOPASS_TEXT_STORE_SIZE];
     FuriString* text_box_store;
