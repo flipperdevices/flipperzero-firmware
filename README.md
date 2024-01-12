@@ -169,10 +169,10 @@ This fap app is available on your phones Flipper Zero application catalog! Simpl
 4. Move "camera_suite.fap" into `~\apps\gpio\` on your Flipper Zero MicroSD:
 
    ```markdown
-   . # The Flipper Zero MicroSD root.
-   ├── apps # The Flipper Zero Applications folder.
-   | ├── gpio # The Flipper Zero GPIO folder.
-   | | ├── camera_suite.fap # The Camera Suite application.
+   .                            # The Flipper Zero MicroSD root.
+   ├── apps                     # The Flipper Zero Applications folder.
+   |   ├── gpio                 # The Flipper Zero GPIO folder.
+   |   |   ├── camera_suite.fap # The Camera Suite application.
    ```
 
 5. Reinsert your MicroSD into your Flipper Zero if you took it out.
@@ -248,7 +248,7 @@ https://github.com/CodyTolene/Flipper-Zero-Development-Toolkit
 Example include path:
 
 ```markdown
-C:/Users/<username>/AppData/Local/Temp/arduino-cli/\*\*
+C:/Users/<username>/AppData/Local/Temp/arduino-cli/**
 ```
 
 Thank you for any and all contributions to this project, I'm looking forward to seeing what you come up with! If you have any questions, please let me know by opening an issue [here][issues-link].
