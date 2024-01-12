@@ -23,7 +23,7 @@
 - [Firmware Installation](#firmware-installation)
 - [Software Installation](#software-installation)
 - [Software Guide](#software-guide)
-- [Attributions](#attributions)
+- [Special Thanks](#special-thanks)
 - [Contributions](#contributions)
 - [Changelog](fap/docs/CHANGELOG.md)
 
@@ -60,8 +60,6 @@ This section is dedicated to all the fans that have made videos of this project!
 [![Flipper Zero ESP32 CAM Camera Module - TAKEAPART](https://img.youtube.com/vi/cEl5UnWH_Ok/0.jpg)](https://www.youtube.com/watch?v=cEl5UnWH_Ok)
 
 </details>
-
-
 
 <p align="right">[ <a href="#index">Back to top</a> ]</p>
 
@@ -123,7 +121,7 @@ That's it, let me know if you have any issues!
    ```markdown
    https://dl.espressif.com/dl/package_esp32_index.json
    ```
-   
+
 6. In the Arduino IDE, go to `Tools > Board > Boards Manager`.
 7. Search for `esp32` and install `esp32` by `Espressif Systems`.
 8. Plug in your Flipper Zero via USB. Make sure qFlipper or something else isn't connected to it already after doing so.
@@ -171,10 +169,10 @@ This fap app is available on your phones Flipper Zero application catalog! Simpl
 4. Move "camera_suite.fap" into `~\apps\gpio\` on your Flipper Zero MicroSD:
 
    ```markdown
-   .                            # The Flipper Zero MicroSD root.
-   ├── apps                     # The Flipper Zero Applications folder.
-   |   ├── gpio                 # The Flipper Zero GPIO folder.
-   |   |   ├── camera_suite.fap # The Camera Suite application.
+   . # The Flipper Zero MicroSD root.
+   ├── apps # The Flipper Zero Applications folder.
+   | ├── gpio # The Flipper Zero GPIO folder.
+   | | ├── camera_suite.fap # The Camera Suite application.
    ```
 
 5. Reinsert your MicroSD into your Flipper Zero if you took it out.
@@ -224,13 +222,14 @@ This fap app is available on your phones Flipper Zero application catalog! Simpl
 
 <p align="right">[ <a href="#index">Back to top</a> ]</p>
 
-## Attributions <a name="attributions"></a>
+## Special Thanks <a name="special-thanks"></a>
 
-This project is based on/forked from the [Flipper Zero Camera Application][flipperzero-camera]
-by [Z4urce][github-profile-z4urce] combined with the [Flipper Zero Boilerplate Application][flipper-zero-fap-boilerplate]
-by [Dave Lee][github-profile-leedave].
+A huge thanks to the following people and projects for making this possible:
 
-The firmware provided here also works with Z4urce's [Flipper Zero Camera Application][flipperzero-camera] so if you have their application installed it too should work fine.
+- This project is based on & forked from the [Flipper Zero Camera Application][flipperzero-camera] by [Z4urce][github-profile-z4urce]. Thanks Z4rce for the inspiration and the great work!
+- I based this projects application structure on the [Flipper Zero Boilerplate Application][flipper-zero-fap-boilerplate] by [leedave][github-profile-leedave]. Thanks leedave for the great boilerplate application that helped me learn how to structure a Flipper Zero application properly!
+- The project images were drawn using the a application called "[lopaka][lopaka]" by [sbrin][github-profile-sbrin]. Thanks sbrin for your help in creating the images for this project!
+- The Flipper Zero community for all your support and feedback!
 
 <p align="right">[ <a href="#index">Back to top</a> ]</p>
 
@@ -267,6 +266,8 @@ Cody
 [flipperzero-camera]: https://github.com/Z4urce/flipperzero-camera
 [github-actions-link]: https://github.com/CodyTolene/Flipper-Zero-Camera-Suite/actions?query=workflow%3A%22Build+%2B+upload.%22
 [github-profile-leedave]: https://github.com/leedave
+[github-profile-sbrin]: https://github.com/sbrin
 [github-profile-z4urce]: https://github.com/Z4urce
 [issues-link]: https://github.com/CodyTolene/Flipper-Zero-Camera-Suite/issues
+[lopaka]: https://github.com/sbrin/lopaka
 [pull-request-link]: https://github.com/CodyTolene/Flipper-Zero-Camera-Suite/pulls
