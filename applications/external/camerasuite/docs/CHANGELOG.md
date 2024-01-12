@@ -4,7 +4,7 @@
 - Camera preview GUI overlay (#21).
 - Full screen 90 degree and 270 degree fill (#6).
 
-## v1.4.1 (patch)
+## v1.5
 
 - Remove usage of image no longer found in the Flipper Zero firmware build.
 
