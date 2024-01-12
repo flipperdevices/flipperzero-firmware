@@ -9,6 +9,9 @@
 #include <gui/view.h>
 
 #include "minesweeper_game_screen_i.h"
+#include "../helpers/mine_sweeper_haptic.h"
+#include "../helpers/mine_sweeper_led.h"
+#include "../helpers/mine_sweeper_speaker.h"
 
 // MAX TILES ALLOWED
 #define MINESWEEPER_BOARD_MAX_TILES  (1<<10)
