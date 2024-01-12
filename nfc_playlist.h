@@ -38,13 +38,13 @@ typedef struct {
    NotificationApp* notification;
    FuriThread* thread;
    NfcPlaylistWorker* nfc_playlist_worker;
+   FuriString* base_file_path;
+   bool file_selected;
+   bool file_selected_check;
    uint8_t emulate_timeout;
    uint8_t emulate_delay;
    bool emulate_led_indicator;
-   FuriString* base_file_path;
    FuriString* file_path;
-   bool file_selected;
-   bool file_selected_check;
 } NfcPlaylist;
 
 static const int options_emulate_timeout[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
