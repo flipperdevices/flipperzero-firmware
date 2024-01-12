@@ -2,8 +2,13 @@
 
 # Changelog
 ## TODO:
-- Add settings options to toggle hardware feedback
 - Maybe take a look at the board verifier algo and try to make faster/multi-thread or anything to allow better maps
+
+## Version 1.1.1 - 1/12/2024
+
+Added ability to toggle sound and haptic feedback.
+
+Minor reformats and fixes.
 
 ## Version 1.1.0 - 1/11/2024
 
