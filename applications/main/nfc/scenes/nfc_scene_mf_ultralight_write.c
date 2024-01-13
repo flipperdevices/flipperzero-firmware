@@ -20,7 +20,19 @@ NfcCommand nfc_scene_mf_ultralight_write_worker_callback(NfcGenericEvent event, 
         mfu_event->data->poller_mode = MfUltralightPollerModeWrite;
         view_dispatcher_send_custom_event(instance->view_dispatcher, NfcCustomEventCardDetected);
     } else if(mfu_event->type == MfUltralightPollerEventTypeAuthRequest) {
-        mfu_event->data->auth_context.skip_auth = true;
+        const MfUltralightData* mfu_ref_data =
+            nfc_device_get_data(instance->nfc_device, NfcProtocolMfUltralight);
+        MfUltralightConfigPages* config = NULL;
+        mf_ultralight_get_config_page(mfu_ref_data, &config);
+        if(config->auth0 <= mfu_ref_data->pages_total - 1) {
+            uint8_t pwd_page_idx = mf_ultralight_get_pwd_page_num(mfu_ref_data->type);
+            memcpy(
+                mfu_event->data->auth_context.password.data,
+                mfu_ref_data->page[pwd_page_idx].data,
+                sizeof(MfUltralightAuthPassword));
+        } else {
+            mfu_event->data->auth_context.skip_auth = true;
+        }
     } else if(mfu_event->type == MfUltralightPollerEventTypeRequestWriteData) {
         mfu_event->data->write_data =
             nfc_device_get_data(instance->nfc_device, NfcProtocolMfUltralight);
@@ -31,6 +43,8 @@ NfcCommand nfc_scene_mf_ultralight_write_worker_callback(NfcGenericEvent event, 
         view_dispatcher_send_custom_event(instance->view_dispatcher, NfcCustomEventPollerFailure);
         command = NfcCommandStop;
     } else if(mfu_event->type == MfUltralightPollerEventTypeWriteFail) {
+        FURI_LOG_D("MfUltralightWrite", "Write failed with %d", mfu_event->data->error);
+        view_dispatcher_send_custom_event(instance->view_dispatcher, NfcCustomEventPollerFailure);
         command = NfcCommandStop;
     } else if(mfu_event->type == MfUltralightPollerEventTypeWriteSuccess) {
         view_dispatcher_send_custom_event(instance->view_dispatcher, NfcCustomEventPollerSuccess);
