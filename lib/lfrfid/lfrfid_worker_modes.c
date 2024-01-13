@@ -703,7 +703,7 @@ static void lfrfid_worker_mode_write_with_pass_process(LFRFIDWorker* worker) {
             t5577_write_with_mask(&request->t5577, 0, 0);
 
             ProtocolId read_result = PROTOCOL_NO;
-            LFRFIDWorkerReadState state = lfrfid_worker_read_internal(
+            LFRFIDWorkerReadState state = lfrfid_worker_read_ttf(
                 worker,
                 protocol_dict_get_features(worker->protocols, protocol),
                 LFRFID_WORKER_WRITE_VERIFY_TIME_MS,
