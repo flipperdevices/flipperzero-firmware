@@ -21,5 +21,6 @@
 #include "wendox_w6726.h"
 #include "auriol_ahfl.h"
 #include "kedsum_th.h"
+#include "emos_e601x.h"
 
 extern const SubGhzProtocolRegistry weather_station_protocol_registry;
