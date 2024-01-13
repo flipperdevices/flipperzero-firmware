@@ -52,7 +52,7 @@ void t5577_multiwriter_scene_write_third_key_on_enter(void* context) {
     add_em41xx_data(&data_to_write, key, 5);
     set_em41xx_config(&data_to_write, 3);
 
-    t5577_write_with_mask(&data_to_write);
+    t5577_write_with_maskis(&data_to_write);
 
     t5577_multiwriter_write_third_key_callback(LFRFIDWorkerWriteOK, context);
 }

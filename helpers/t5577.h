@@ -51,7 +51,7 @@ typedef struct {
  * @param data 
  */
 
-void t5577_write_with_mask(LFRFIDT5577Data* data);
+void t5577_write_with_maskis(LFRFIDT5577Data* data);
 
 #ifdef __cplusplus
 }
