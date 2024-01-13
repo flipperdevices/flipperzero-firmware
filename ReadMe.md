@@ -29,8 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0112-1638-0.93.9-60e5acf](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-01-12 16:38 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-01-12 16:38 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-01-12 22:10 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-01-12 22:10 EST`
 - [Fixed many memory leaks (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/5fed20065ce527a643999eab213c24a186c5722c) with thanks to [Fixed memory leak #13 (By squee72564)](https://github.com/leedave/flipper-zero-fap-boilerplate/pull/13)
 - Updated: [Color Guess v1.3 (By leedave)](https://github.com/leedave/Leeds-Flipper-Zero-Applications)
 - Updated: [Cross Remote v1.1 (By leedave)](https://github.com/leedave/flipper-zero-cross-remote)
@@ -57,7 +57,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [assets: checking limits on image size; ufbt: cdb target #3359 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/3359)
 - Updated: [Mouse Jacker v1.1 (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/mousejacker) [numlock support in mousejackers (By xMasterX)](https://github.com/xMasterX/all-the-plugins/commit/36b21873f22acbe61e7f2d5088e7e7f5e77c1a89)
 - Updated: [UHF RFID WIP v1.1 (By frux-c)](https://github.com/frux-c/uhf_rfid) `Req: M100 or QM100`
-- OFW PR: [T5577 lib: write with mask function added #3362 (By Leptopt1los)](https://github.com/flipperdevices/flipperzero-firmware/pull/3362) Code also added for inegration into RFID app (By xMasterX or Leptopt1los)
+- OFW PR: [T5577 lib: write with mask function added #3362 (By Leptopt1los)](https://github.com/flipperdevices/flipperzero-firmware/pull/3362) [Code also added for inegration into RFID app (By xMasterX or Leptopt1los)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/e89d395bc97f1ec336045e9cf527dd940c5c3132)
 
 <a name="release">
 
