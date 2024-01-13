@@ -107,7 +107,7 @@ void t5577_write(LFRFIDT5577Data* data) {
     t5577_stop();
 }
 
-void t5577_write_with_mask(LFRFIDT5577Data* data) {
+void t5577_write_with_maskis(LFRFIDT5577Data* data) {
     t5577_start();
     FURI_CRITICAL_ENTER();
 
@@ -131,7 +131,7 @@ void t5577_write_with_mask(LFRFIDT5577Data* data) {
     t5577_stop();
 }
 
-void t5577_write_with_pass(LFRFIDT5577Data* data, uint32_t password) {
+void t5577_write_with_passis(LFRFIDT5577Data* data, uint32_t password) {
     t5577_start();
     FURI_CRITICAL_ENTER();
     for(size_t i = 0; i < data->blocks_to_write; i++) {
