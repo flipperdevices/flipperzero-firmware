@@ -33,17 +33,22 @@ Adding options like settings the access password, baud rate, rf power, channel, 
 
 ## Features
 
-- [x] Read Single UHF RFID tag.
-- [x] View saved UHF RFID tag.
-- [x] Write Single UHF RFID tag.
-- [ ] Change Module setting parameters. **(In Progress)**
-  - [x] Set Baudrates 
+- [x] Read Single UHF RFID tag
+  - [x] EPC Bank
+  - [x] TID Bank
+  - [x] USER Bank
+- [x] View saved UHF RFID tags
+- [x] Write Single UHF RFID tag
+  - [x] EPC Bank
+  - [ ] TID Bank (Not Supported if locked)
+  - [x] USER Bank
+- [ ] Change Module setting parameters **(In Progress)**
+  - [x] Set Baudrates
+  - [x] Set RF Power
+  - [x] Set Region
   - [ ] Set/Reset Access Password
   - [ ] Set Kill Password
   - [ ] Kill Tag
-  - [x] Set RF Power
-  - [x] Set Region
-
 - [ ] Edit/Create new data to write.
 - Extras
   - [ ] Read multiple tags at once
@@ -74,7 +79,7 @@ To run this application on FlipperZero, you will need:
 1. Power on your FlipperZero device.
 2. Connect the uhf module to the flipper via gpio.
 3. Navigate to the UHF RFID app on FlipperZero's menu.
-4. Currently Reading the EPC tag is the only usable option
+4. Currently Read for EPC, TID, USER Banks are supported, as well as saving and Writing EPC, USER Banks
    ... will further update this page as it development goes
 
 ## Contributions
