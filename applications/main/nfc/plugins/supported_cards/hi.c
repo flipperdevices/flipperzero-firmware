@@ -167,12 +167,49 @@ static bool hi_read(Nfc* nfc, NfcDevice* device) {
     return is_read;
 }
 
+static bool hi_parse(const NfcDevice* device, FuriString* parsed_data) {
+    furi_assert(device);
+    furi_assert(parsed_data);
+
+    const MfClassicData* data = nfc_device_get_data(device, NfcProtocolMfClassic);
+
+    bool parsed = false;
+
+    do {
+        // Verify card type
+        HiCardConfig cfg = {};
+        if(!hi_get_card_config(&cfg, data->type)) break;
+
+        // Verify key
+        MfClassicSectorTrailer* sec_tr =
+            mf_classic_get_sector_trailer_by_sector(data, cfg.verify_sector);
+        uint64_t key = nfc_util_bytes2num(sec_tr->key_b.data, 6);
+        if(key != cfg.keys[cfg.verify_sector].b) return false;
+
+        //Get UID
+        uint8_t uid[UID_LENGTH];
+        memcpy(uid, data->iso14443_3a_data->uid, UID_LENGTH);
+
+        //parse data
+        furi_string_cat_printf(parsed_data, "\e#HI! Card\n");
+        furi_string_cat_printf(parsed_data, "UID:");
+        for(size_t i = 0; i < UID_LENGTH; i++) {
+            furi_string_cat_printf(parsed_data, " %02X", uid[i]);
+        }
+        furi_string_cat_printf(parsed_data, "\n");
+
+        parsed = true;
+    } while(false);
+
+    return parsed;
+}
+
 /* Actual implementation of app<>plugin interface */
 static const NfcSupportedCardsPlugin hi_plugin = {
     .protocol = NfcProtocolMfClassic,
     .verify = hi_verify,
     .read = hi_read,
-    .parse = NULL,
+    .parse = hi_parse,
 };
 
 /* Plugin descriptor to comply with basic plugin specification */
