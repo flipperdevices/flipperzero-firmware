@@ -33,10 +33,11 @@ typedef enum {
 
 typedef struct {
     M100ModuleInfo* info;
-    uint32_t baudrate;
     WorkingRegion region;
+    uint32_t baudrate;
     uint16_t region_frequency;
     uint16_t transmitting_power;
+    uint16_t max_transmitting_power;
     bool freq_hopping;
     Buffer* buf;
 } M100Module;
