@@ -10,10 +10,6 @@ const manifest = {
     {
       chipFamily: "ESP32-S2",
       parts: [
-        // { path: "esp32_marauder.ino.bootloader.bin", offset: 4096 },
-        // { path: "esp32_marauder.ino.partitions.bin", offset: 32768 },
-        // { path: "boot_app0.bin", offset: 57344 },
-        // { path: "MALVEKE.ino.bin", offset: 65536 },
         { "path": "esp32_marauder.ino.bootloader.bin", "offset": 0x1000 },  
         { "path": "esp32_marauder.ino.partitions.bin", "offset": 0x8000 },
         { "path": "boot_app0.bin", "offset": 0xE000 },  //  otadata
