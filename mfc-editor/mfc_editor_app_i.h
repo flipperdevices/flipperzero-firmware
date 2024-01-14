@@ -8,10 +8,12 @@
 #include <gui/scene_manager.h>
 #include <gui/view_dispatcher.h>
 
+#include <gui/modules/popup.h>
 #include <gui/modules/submenu.h>
 
 #include <nfc/nfc.h>
 #include <nfc/nfc_device.h>
+#include <nfc/protocols/mf_classic/mf_classic.h>
 
 #include <storage/storage.h>
 
@@ -25,6 +27,13 @@
 #define NFC_APP_EXTENSION ".nfc"
 #define NFC_APP_SHADOW_EXTENSION ".shd"
 
+enum MfcEditorCustomEvent {
+    // Reserve first 100 events for button types and indexes, starting from 0
+    MfcEditorCustomEventReserved = 100,
+
+    MfcEditorCustomEventViewExit,
+};
+
 struct MfcEditorApp {
     ViewDispatcher* view_dispatcher;
     SceneManager* scene_manager;
@@ -34,6 +43,7 @@ struct MfcEditorApp {
     DialogsApp* dialogs;
 
     Submenu* submenu;
+    Popup* popup;
 
     NfcDevice* nfc_device;
 
@@ -42,6 +52,7 @@ struct MfcEditorApp {
 
 typedef enum {
     MfcEditorAppViewSubmenu,
+    MfcEditorAppViewPopup,
 } MfcEditorAppView;
 
 bool mfc_editor_prompt_load_file(MfcEditorApp* instance);

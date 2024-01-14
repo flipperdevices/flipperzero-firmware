@@ -47,6 +47,10 @@ MfcEditorApp* mfc_editor_app_alloc() {
     view_dispatcher_add_view(
         instance->view_dispatcher, MfcEditorAppViewSubmenu, submenu_get_view(instance->submenu));
 
+    instance->popup = popup_alloc();
+    view_dispatcher_add_view(
+        instance->view_dispatcher, MfcEditorAppViewPopup, popup_get_view(instance->popup));
+
     return instance;
 }
 
@@ -55,6 +59,9 @@ void mfc_editor_app_free(MfcEditorApp* instance) {
 
     view_dispatcher_remove_view(instance->view_dispatcher, MfcEditorAppViewSubmenu);
     submenu_free(instance->submenu);
+
+    view_dispatcher_remove_view(instance->view_dispatcher, MfcEditorAppViewPopup);
+    popup_free(instance->popup);
 
     view_dispatcher_free(instance->view_dispatcher);
     scene_manager_free(instance->scene_manager);
