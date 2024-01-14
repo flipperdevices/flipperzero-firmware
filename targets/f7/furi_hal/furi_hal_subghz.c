@@ -17,6 +17,9 @@
 
 #define TAG "FuriHalSubGhz"
 
+#define FURI_HAL_SUBGHZ_TX_GPIO gpio_ext_pc3
+#define FURI_HAL_SUBGHZ_ASYNC_MIRROR_GPIO gpio_ext_pb2
+
 static uint32_t furi_hal_subghz_debug_gpio_buff[2] = {0};
 
 /* DMA Channels definition */
@@ -277,12 +280,22 @@ void furi_hal_subghz_reset() {
 void furi_hal_subghz_idle() {
     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
     cc1101_switch_to_idle(&furi_hal_spi_bus_handle_subghz);
+    //waiting for the chip to switch to IDLE mode
+    while(true) {
+        CC1101Status status = cc1101_get_status(&furi_hal_spi_bus_handle_subghz);
+        if(status.STATE == CC1101StateIDLE) break;
+    }
     furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
 }
 
 void furi_hal_subghz_rx() {
     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
     cc1101_switch_to_rx(&furi_hal_spi_bus_handle_subghz);
+    //waiting for the chip to switch to Rx mode
+    while(true) {
+        CC1101Status status = cc1101_get_status(&furi_hal_spi_bus_handle_subghz);
+        if(status.STATE == CC1101StateRX) break;
+    }
     furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
 }
 
@@ -290,6 +303,11 @@ bool furi_hal_subghz_tx() {
     if(furi_hal_subghz.regulation != SubGhzRegulationTxRx) return false;
     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
     cc1101_switch_to_tx(&furi_hal_spi_bus_handle_subghz);
+    //waiting for the chip to switch to Tx mode
+    while(true) {
+        CC1101Status status = cc1101_get_status(&furi_hal_spi_bus_handle_subghz);
+        if(status.STATE == CC1101StateTX) break;
+    }
     furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
     return true;
 }
@@ -674,7 +692,7 @@ static void furi_hal_subghz_async_tx_timer_isr() {
                 furi_hal_subghz.state = SubGhzStateAsyncTxEnd;
                 LL_DMA_DisableChannel(SUBGHZ_DMA_CH1_DEF);
                 //forcibly pulls the pin to the ground so that there is no carrier
-                furi_hal_gpio_init(&gpio_cc1101_g0, GpioModeAnalog, GpioPullDown, GpioSpeedLow);
+                furi_hal_gpio_write(&gpio_cc1101_g0, false);
                 LL_TIM_DisableCounter(TIM2);
             }
         }
@@ -749,6 +767,11 @@ bool furi_hal_subghz_start_async_tx(FuriHalSubGhzAsyncTxCallback callback, void*
     furi_hal_subghz_async_tx_refill(
         furi_hal_subghz_async_tx.buffer, FURI_HAL_SUBGHZ_ASYNC_TX_BUFFER_FULL);
 
+    for(uint32_t i=0; i<FURI_HAL_SUBGHZ_ASYNC_TX_BUFFER_FULL; i++ ){
+        FURI_LOG_RAW_I ("%ld ", furi_hal_subghz_async_tx.buffer[i]);
+    }
+    FURI_LOG_RAW_I ("\r\n ");
+
     LL_TIM_EnableDMAReq_UPDATE(TIM2);
     LL_TIM_CC_EnableChannel(TIM2, LL_TIM_CHANNEL_CH2);
 
@@ -795,12 +818,11 @@ void furi_hal_subghz_stop_async_tx() {
         furi_hal_subghz.state == SubGhzStateAsyncTx ||
         furi_hal_subghz.state == SubGhzStateAsyncTxEnd);
 
-    // Deinitialize GPIO
-    // Keep in mind that cc1101 will try to pull it up in idle.
-    furi_hal_gpio_init(&gpio_cc1101_g0, GpioModeAnalog, GpioPullDown, GpioSpeedLow);
-
     // Shutdown radio
     furi_hal_subghz_idle();
+
+    // Deinitialize GPIO
+    furi_hal_gpio_init(&gpio_cc1101_g0, GpioModeAnalog, GpioPullDown, GpioSpeedLow);
 #ifdef FURI_HAL_SUBGHZ_TX_GPIO
     furi_hal_gpio_write(&FURI_HAL_SUBGHZ_TX_GPIO, false);
 #endif

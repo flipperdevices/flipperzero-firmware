@@ -392,12 +392,22 @@ void subghz_device_cc1101_ext_reset() {
 void subghz_device_cc1101_ext_idle() {
     furi_hal_spi_acquire(subghz_device_cc1101_ext->spi_bus_handle);
     cc1101_switch_to_idle(subghz_device_cc1101_ext->spi_bus_handle);
+    //waiting for the chip to switch to IDLE mode
+    while(true) {
+        CC1101Status status = cc1101_get_status(subghz_device_cc1101_ext->spi_bus_handle);
+        if(status.STATE == CC1101StateIDLE) break;
+    }
     furi_hal_spi_release(subghz_device_cc1101_ext->spi_bus_handle);
 }
 
 void subghz_device_cc1101_ext_rx() {
     furi_hal_spi_acquire(subghz_device_cc1101_ext->spi_bus_handle);
     cc1101_switch_to_rx(subghz_device_cc1101_ext->spi_bus_handle);
+    //waiting for the chip to switch to Rx mode
+    while(true) {
+        CC1101Status status = cc1101_get_status(subghz_device_cc1101_ext->spi_bus_handle);
+        if(status.STATE == CC1101StateRX) break;
+    }
     furi_hal_spi_release(subghz_device_cc1101_ext->spi_bus_handle);
 }
 
@@ -405,6 +415,11 @@ bool subghz_device_cc1101_ext_tx() {
     if(subghz_device_cc1101_ext->regulation != SubGhzDeviceCC1101ExtRegulationTxRx) return false;
     furi_hal_spi_acquire(subghz_device_cc1101_ext->spi_bus_handle);
     cc1101_switch_to_tx(subghz_device_cc1101_ext->spi_bus_handle);
+    //waiting for the chip to switch to Tx mode
+    while(true) {
+        CC1101Status status = cc1101_get_status(subghz_device_cc1101_ext->spi_bus_handle);
+        if(status.STATE == CC1101StateTx) break;
+    }
     furi_hal_spi_release(subghz_device_cc1101_ext->spi_bus_handle);
     return true;
 }
@@ -824,13 +839,13 @@ void subghz_device_cc1101_ext_stop_async_tx() {
         subghz_device_cc1101_ext->state == SubGhzDeviceCC1101ExtStateAsyncTx ||
         subghz_device_cc1101_ext->state == SubGhzDeviceCC1101ExtStateAsyncTxEnd);
 
-    // Deinitialize GPIO
+    // Shutdown radio
+    subghz_device_cc1101_ext_idle();
+    
+     // Deinitialize GPIO
     furi_hal_gpio_write(subghz_device_cc1101_ext->g0_pin, false);
     furi_hal_gpio_init(
         subghz_device_cc1101_ext->g0_pin, GpioModeAnalog, GpioPullDown, GpioSpeedLow);
-
-    // Shutdown radio
-    subghz_device_cc1101_ext_idle();
 
     // Deinitialize Timer
     furi_hal_bus_disable(FuriHalBusTIM17);

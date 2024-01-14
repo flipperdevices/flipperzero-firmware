@@ -790,6 +790,8 @@ void subghz_cli_command_tx_from_file(Cli* cli, FuriString* args, void* context) 
             frequency,
             furi_string_get_cstr(temp_str));
         do {
+            //delay in downloading files and other preparatory processes
+            furi_delay_ms(200);
             if(subghz_devices_start_async_tx(device, subghz_transmitter_yield, transmitter)) {
                 while(
                     !(subghz_devices_is_async_complete_tx(device) ||
@@ -842,12 +844,12 @@ static void subghz_cli_command_print_usage() {
     printf("\trx_raw <frequency:in Hz>\t - Receive RAW\r\n");
     printf("\tdecode_raw <file_name: path_RAW_file>\t - Testing\r\n");
     printf(
-        "\ttx_from_file <file_name: path_file> <repeat: count> <device: 0 - CC1101_INT, 1 - CC1101_EXT>\t - Transfer from file\r\n");
+        "\ttx_from_file <file_name: path_file> <repeat: count> <device: 0 - CC1101_INT, 1 - CC1101_EXT>\t - Transmitting from file\r\n");
 
     if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
         printf("\r\n");
         printf("  debug cmd:\r\n");
-        printf("\ttx_carrier <frequency:in Hz>\t - Transmit carrier\r\n");
+        printf("\ttx_carrier <frequency:in Hz>\t - Transmitting carrier\r\n");
         printf("\trx_carrier <frequency:in Hz>\t - Receive carrier\r\n");
         printf(
             "\tencrypt_keeloq <path_decrypted_file> <path_encrypted_file> <IV:16 bytes in hex>\t - Encrypt keeloq manufacture keys\r\n");
