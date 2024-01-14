@@ -33,6 +33,7 @@
 #include "bett.h"
 #include "doitrand.h"
 #include "phoenix_v2.h"
+#include "honeywell.h"
 #include "honeywell_wdb.h"
 #include "magellan.h"
 #include "intertechno_v3.h"
@@ -46,5 +47,4 @@
 #include "bin_raw.h"
 #include "x10.h"
 #include "genie.h"
-#include "honeywell.h"
 #include "mastercode.h"
