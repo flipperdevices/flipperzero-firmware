@@ -14,8 +14,4 @@ void setup();
 
 void loop();
 
-void streamToSerial();
-
-void streamToWiFi();
-
 #endif
