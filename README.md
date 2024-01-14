@@ -216,9 +216,9 @@ This fap app is available on your phones Flipper Zero application catalog! Simpl
 
 | Setting | Description |
 | :------ | :---------- |
-| **Haptic FX** | Toggle haptic feedback on/off. |
-| **Sound FX** | Toggle sound effects on/off. |
-| **LED FX** | Toggle LED effects on/off. |
+| **Haptic Effects** | Toggle haptic feedback on/off. |
+| **Sound Effects** | Toggle sound effects on/off. |
+| **LED Effects** | Toggle LED effects on/off. |
 
 <p align="right">[ <a href="#index">Back to top</a> ]</p>
 
