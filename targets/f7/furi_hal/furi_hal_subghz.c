@@ -17,9 +17,6 @@
 
 #define TAG "FuriHalSubGhz"
 
-#define FURI_HAL_SUBGHZ_TX_GPIO gpio_ext_pc3
-#define FURI_HAL_SUBGHZ_ASYNC_MIRROR_GPIO gpio_ext_pb2
-
 static uint32_t furi_hal_subghz_debug_gpio_buff[2] = {0};
 
 /* DMA Channels definition */
@@ -766,11 +763,6 @@ bool furi_hal_subghz_start_async_tx(FuriHalSubGhzAsyncTxCallback callback, void*
     furi_hal_subghz_async_tx_middleware_idle(&furi_hal_subghz_async_tx.middleware);
     furi_hal_subghz_async_tx_refill(
         furi_hal_subghz_async_tx.buffer, FURI_HAL_SUBGHZ_ASYNC_TX_BUFFER_FULL);
-
-    for(uint32_t i=0; i<FURI_HAL_SUBGHZ_ASYNC_TX_BUFFER_FULL; i++ ){
-        FURI_LOG_RAW_I ("%ld ", furi_hal_subghz_async_tx.buffer[i]);
-    }
-    FURI_LOG_RAW_I ("\r\n ");
 
     LL_TIM_EnableDMAReq_UPDATE(TIM2);
     LL_TIM_CC_EnableChannel(TIM2, LL_TIM_CHANNEL_CH2);

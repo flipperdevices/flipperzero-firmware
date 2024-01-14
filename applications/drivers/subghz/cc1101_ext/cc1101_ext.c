@@ -418,7 +418,7 @@ bool subghz_device_cc1101_ext_tx() {
     //waiting for the chip to switch to Tx mode
     while(true) {
         CC1101Status status = cc1101_get_status(subghz_device_cc1101_ext->spi_bus_handle);
-        if(status.STATE == CC1101StateTx) break;
+        if(status.STATE == CC1101StateTX) break;
     }
     furi_hal_spi_release(subghz_device_cc1101_ext->spi_bus_handle);
     return true;
@@ -841,8 +841,8 @@ void subghz_device_cc1101_ext_stop_async_tx() {
 
     // Shutdown radio
     subghz_device_cc1101_ext_idle();
-    
-     // Deinitialize GPIO
+
+    // Deinitialize GPIO
     furi_hal_gpio_write(subghz_device_cc1101_ext->g0_pin, false);
     furi_hal_gpio_init(
         subghz_device_cc1101_ext->g0_pin, GpioModeAnalog, GpioPullDown, GpioSpeedLow);
