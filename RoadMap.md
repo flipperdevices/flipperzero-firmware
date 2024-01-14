@@ -1,4 +1,4 @@
-# RoadMap for RM BUILD
+# RoadMap for RogueMaster (RM) BUILD
 ### This is more of a project wish list...
 - It is open to whoever wants to build and PR. You get all the credit if you can create it! :D
 - I likely won't have time to cover all these items.
