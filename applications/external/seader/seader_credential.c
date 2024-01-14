@@ -384,7 +384,7 @@ bool seader_credential_save_agnostic(SeaderCredential* cred, const char* name) {
 
 bool seader_credential_save_picopass(SeaderCredential* cred, const char* name) {
     uint8_t zero[PICOPASS_BLOCK_LEN] = {0};
-    uint8_t csn[PICOPASS_BLOCK_LEN] = {0x7a, 0xf5, 0x31, 0x13, 0xfe, 0xff, 0x12, 0xe0};
+    uint8_t fake_csn[PICOPASS_BLOCK_LEN] = {0x7a, 0xf5, 0x31, 0x13, 0xfe, 0xff, 0x12, 0xe0};
     uint8_t cfg[PICOPASS_BLOCK_LEN] = {0x12, 0xff, 0xff, 0xff, 0x7f, 0x1f, 0xff, 0x3c};
     uint8_t epurse[PICOPASS_BLOCK_LEN] = {0xff, 0xff, 0xff, 0xff, 0xe3, 0xff, 0xff, 0xff};
     uint8_t debit_key[PICOPASS_BLOCK_LEN] = {0xe3, 0xf3, 0x07, 0x84, 0x4a, 0x0b, 0x62, 0x04};
@@ -421,18 +421,18 @@ bool seader_credential_save_picopass(SeaderCredential* cred, const char* name) {
             furi_string_printf(temp_str, "Block %d", i);
             switch(i) {
             case CSN_INDEX:
-                // TODO: Is there any practical difference here?  If so, document.
-                if(withSIO) {
+                if(memcmp(cred->diversifier, zero, PICOPASS_BLOCK_LEN) == 0) {
+                    // when doing a downgrade from a non-picopass, we need to use a fake csn
+                    if(!flipper_format_write_hex(
+                           file, furi_string_get_cstr(temp_str), fake_csn, sizeof(fake_csn))) {
+                        block_saved = false;
+                    }
+                } else {
                     if(!flipper_format_write_hex(
                            file,
                            furi_string_get_cstr(temp_str),
                            cred->diversifier,
                            PICOPASS_BLOCK_LEN)) {
-                        block_saved = false;
-                    }
-                } else {
-                    if(!flipper_format_write_hex(
-                           file, furi_string_get_cstr(temp_str), csn, sizeof(csn))) {
                         block_saved = false;
                     }
                 }

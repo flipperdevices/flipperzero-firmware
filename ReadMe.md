@@ -150,7 +150,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [NFC: HID MFC Plugin #3312 (By bettse)](https://github.com/flipperdevices/flipperzero-firmware/pull/3312)
 - OFW: [Added NFC plugin; parser for WashCity cards. #3319 (By yaba)](https://github.com/flipperdevices/flipperzero-firmware/pull/3319)
 - OFW: [MFC emulation fixes #3324 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3324)
-- Update: [NFC Seader v2.2 (By bettse)](https://github.com/bettse/seader)
 - [Added plugin to read WashCity card balance #683 (By yaba)](https://github.com/DarkFlippers/unleashed-firmware/pull/683)
 - [NFC: Add manually MF Classic with custom UID #690 (By Leptopt1los)](https://github.com/DarkFlippers/unleashed-firmware/pull/690)
 - UL: [NFC: Parser CLeanup (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/e55116ea3fe0f79fd5ec219fad7d4127b50eb68a)
@@ -173,6 +172,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - NFC: [Parser for EMV (By Leptopt1los)](https://github.com/Leptopt1los/unleashed-firmware/compare/c85e130...Leptopt1los:unleashed-firmware:d337222)
 - UL: [Revert 'NFC: Skip system dict bug fixed' (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/781794f69978302b3978cc6b212904cad9104bbc)
 - UL: NFC: [Parser for Zolotaya Korona Online parser added (By Leptopt1los)](https://github.com/DarkFlippers/unleashed-firmware/commit/9aae348cae2619c4b32373431c9bf802e234ee6a)
+- Update: [NFC Seader v2.3 (By bettse)](https://github.com/bettse/seader)
 
 <a name="release">
 
@@ -576,7 +576,7 @@ $ ./fbt dolphin_ext
 - [NFC Maker NTAG203 (by Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/343cb39d08f60b75b537e1a31100707935cf6e9d)
 - [NFC Maker NTAG215 (by Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/343cb39d08f60b75b537e1a31100707935cf6e9d)
 - [NFC Playlist v1.1 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
-- [NFC Seader v2.2 (By bettse)](https://github.com/bettse/seader)
+- [NFC Seader v2.3 (By bettse)](https://github.com/bettse/seader)
 - [Nightstand Clock v1.1 (By nymda)](https://github.com/nymda/FlipperNightStand)
 - [Notes for FZ WIP (By AdrianN001)](https://github.com/AdrianN001/Flipper-Zero-Note-Application)
 - [NRF Sniff v1.1 (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/nrfsniff) ([Pin Out](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/tree/420/applications/nrfsniff) from nocomp/Frog/UberGuidoZ) `Req: NRF24`
