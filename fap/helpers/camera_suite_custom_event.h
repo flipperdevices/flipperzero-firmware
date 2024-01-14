@@ -15,6 +15,13 @@ typedef enum {
     CameraSuiteCustomEventSceneCameraRight,
     CameraSuiteCustomEventSceneCameraOk,
     CameraSuiteCustomEventSceneCameraBack,
+    // Scene events: WiFi Camera
+    CameraSuiteCustomEventSceneWiFiCameraUp,
+    CameraSuiteCustomEventSceneWiFiCameraDown,
+    CameraSuiteCustomEventSceneWiFiCameraLeft,
+    CameraSuiteCustomEventSceneWiFiCameraRight,
+    CameraSuiteCustomEventSceneWiFiCameraOk,
+    CameraSuiteCustomEventSceneWiFiCameraBack,
     // Scene events: Guide
     CameraSuiteCustomEventSceneGuideUp,
     CameraSuiteCustomEventSceneGuideDown,

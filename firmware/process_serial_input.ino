@@ -43,6 +43,7 @@ void process_serial_input() {
             camera_model.isStreamToSerialEnabled = false;
             break;
         case 'S': // Start serial stream.
+            camera_model.isStreamToWiFiEnabled = false;
             set_camera_config_defaults(CAMERA_FUNCTION_SERIAL);
             set_camera_model_defaults(CAMERA_FUNCTION_SERIAL);
             set_camera_defaults(CAMERA_FUNCTION_SERIAL);
@@ -52,6 +53,7 @@ void process_serial_input() {
             camera_model.isStreamToWiFiEnabled = false;
             break;
         case 'W': // Start wifi stream.
+            camera_model.isStreamToSerialEnabled = false;
             set_camera_config_defaults(CAMERA_FUNCTION_WIFI);
             set_camera_model_defaults(CAMERA_FUNCTION_WIFI);
             set_camera_defaults(CAMERA_FUNCTION_WIFI);

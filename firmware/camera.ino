@@ -19,6 +19,12 @@ void set_camera_defaults(CameraFunction camera_function) {
     cam->set_sharpness(cam, 0);   // Set initial sharpness.
     cam->set_vflip(cam, true);    // Set initial vertical flip.
     cam->set_hmirror(cam, false); // Set initial horizontal mirror.
+
+    if(camera_function == CAMERA_FUNCTION_SERIAL) {
+        // TODO
+    } else if(camera_function == CAMERA_FUNCTION_WIFI) {
+        // TODO
+    }
 }
 
 void turn_flash_off() {

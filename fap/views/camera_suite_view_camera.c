@@ -598,7 +598,7 @@ CameraSuiteViewCamera* camera_suite_view_camera_alloc() {
     instance->worker_thread = thread;
     furi_thread_start(instance->worker_thread);
 
-    // Enable uart listener
+    // Disable console.
     furi_hal_console_disable();
 
     // 115200 is the default baud rate for the ESP32-CAM.
