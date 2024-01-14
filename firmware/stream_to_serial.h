@@ -1,5 +1,5 @@
-#ifndef PROCESS_IMAGE_H
-#define PROCESS_IMAGE_H
+#ifndef STREAM_TO_SERIAL_H
+#define STREAM_TO_SERIAL_H
 
 #include <FS.h>
 #include <esp_camera.h>
@@ -8,6 +8,6 @@
 #include "dither_image.h"
 
 /** Process and send grayscale images back to the Flipper Zero. */
-void process_image_to_serial(camera_fb_t* frame_buffer);
+void stream_to_serial();
 
 #endif

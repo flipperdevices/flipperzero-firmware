@@ -1,6 +1,8 @@
-#include "process_image_to_serial.h"
+#include "stream_to_serial.h"
 
-void process_image_to_serial(camera_fb_t* frame_buffer) {
+void stream_to_serial() {
+    camera_fb_t* frame_buffer = esp_camera_fb_get();
+
     // If dithering is not disabled, perform dithering on the image. Dithering
     // is the process of approximating the look of a high-resolution grayscale
     // image in a lower resolution by binary values (black & white), thereby
@@ -51,4 +53,7 @@ void process_image_to_serial(camera_fb_t* frame_buffer) {
         // next iteration.
         Serial.flush();
     }
+    
+    // Return the frame buffer back to the camera driver.
+    esp_camera_fb_return(frame_buffer);
 }

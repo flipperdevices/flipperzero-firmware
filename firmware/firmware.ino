@@ -22,14 +22,16 @@ void loop() {
     process_serial_input();
     
     if (camera_model.isStreamToSerialEnabled) {
-        // Stream the camera output to serial.
-        streamToSerial();
+        // Process the camera image and output to serial.
+        stream_to_serial();
+        delay(50);
         return;
     }
     
     if (camera_model.isStreamToWiFiEnabled) {
         // Stream the camera output to WiFi.
         streamToWiFi();
+        delay(50);
         return;
     }
 
@@ -37,21 +39,6 @@ void loop() {
     if (camera_model.isFlashEnabled) {
         turn_flash_off();
     }
-}
-
-void streamToSerial() {
-    camera_fb_t* frame_buffer = esp_camera_fb_get();
-    if (frame_buffer) {
-        // Process the image and output to serial.
-        process_image_to_serial(frame_buffer);
-        // Return the frame buffer back to the camera driver.
-        esp_camera_fb_return(frame_buffer);
-        delay(50);
-    }
-}
-
-void streamToWiFi() {
-    // @todo - Implement.
-    turn_flash_on();
+    
     delay(50);
 }

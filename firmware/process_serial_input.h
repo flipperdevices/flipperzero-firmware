@@ -1,5 +1,5 @@
-#ifndef PROCESS_SERIAL_COMMANDS_H
-#define PROCESS_SERIAL_COMMANDS_H
+#ifndef PROCESS_SERIAL_INPUT_H
+#define PROCESS_SERIAL_INPUT_H
 
 #include <esp_camera.h>
 

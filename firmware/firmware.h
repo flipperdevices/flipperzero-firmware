@@ -6,7 +6,8 @@
 #include "camera.h"
 #include "camera_config.h"
 #include "camera_model.h"
-#include "process_image_to_serial.h"
+#include "stream_to_serial.h"
+#include "stream_to_wifi.h"
 #include "process_serial_input.h"
 
 void setup();

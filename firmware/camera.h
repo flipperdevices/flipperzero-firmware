@@ -1,5 +1,5 @@
-#ifndef INITIALIZE_CAMERA_H
-#define INITIALIZE_CAMERA_H
+#ifndef CAMERA_H
+#define CAMERA_H
 
 #include <FS.h>
 #include <esp_camera.h>
