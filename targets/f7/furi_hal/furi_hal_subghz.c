@@ -705,7 +705,7 @@ bool furi_hal_subghz_start_async_tx(FuriHalSubGhzAsyncTxCallback callback, void*
         LL_DMA_PRIORITY_VERYHIGH; // Ensure that ARR is updated before anyone else try to check it
     LL_DMA_Init(SUBGHZ_DMA_CH1_DEF, &dma_config);
     // Ensure that async tx state transition always preempts other ISRs
-    furi_hal_interrupt_set_isr_ex(SUBGHZ_DMA_CH1_IRQ, 4, furi_hal_subghz_async_tx_dma_isr, NULL);
+    furi_hal_interrupt_set_isr(SUBGHZ_DMA_CH1_IRQ, furi_hal_subghz_async_tx_dma_isr, NULL);
     LL_DMA_EnableIT_TC(SUBGHZ_DMA_CH1_DEF);
     LL_DMA_EnableIT_HT(SUBGHZ_DMA_CH1_DEF);
     LL_DMA_EnableChannel(SUBGHZ_DMA_CH1_DEF);
