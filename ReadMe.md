@@ -59,6 +59,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW PR: [T5577 lib: write with mask function added #3362 (By Leptopt1los)](https://github.com/flipperdevices/flipperzero-firmware/pull/3362) [Code also added for inegration into RFID app (By xMasterX or Leptopt1los)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/e89d395bc97f1ec336045e9cf527dd940c5c3132)
 - Updated: [Mouse Jacker v1.1 (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/mousejacker) [numlock support in mousejackers (By xMasterX)](https://github.com/xMasterX/all-the-plugins/commit/36b21873f22acbe61e7f2d5088e7e7f5e77c1a89)
 - [WS: add protocol EMOS E601x #107 (By linusnielsen)](https://github.com/flipperdevices/flipperzero-good-faps/pull/107)
+- UL: [SubGHz: Update Honeywell (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/8c9d9af6a0d16fd98cb11ec6e159a5e0c0c030b6)
 
 ## IN THIS BRANCH:
 
@@ -171,6 +172,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [NFC: system dict skip when user dict is skipped fix #3356 (By Leptopt1los)](https://github.com/flipperdevices/flipperzero-firmware/pull/3356)
 - NFC: [Parser for EMV (By Leptopt1los)](https://github.com/Leptopt1los/unleashed-firmware/compare/c85e130...Leptopt1los:unleashed-firmware:d337222)
 - UL: [Revert 'NFC: Skip system dict bug fixed' (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/781794f69978302b3978cc6b212904cad9104bbc)
+- UL: NFC: [Parser for Zolotaya Korona Online parser added (By Leptopt1los)](https://github.com/DarkFlippers/unleashed-firmware/commit/9aae348cae2619c4b32373431c9bf802e234ee6a)
 
 <a name="release">
 
@@ -314,6 +316,7 @@ $ ./fbt dolphin_ext
 - NFC: [Parser for Philips Sonicare toothbrush heads (By Sil333033, Research By Cyrill Künzi)](https://kuenzi.dev/toothbrush/)
 - NFC: [Parser for Saflok and Mykey (From noproto)](https://github.com/noproto/flipper_kdf)
 - NFC: [Parser for San Francisco Bay Area "Clipper" transit card. #3344 (By ke6jjj)](https://github.com/flipperdevices/flipperzero-firmware/pull/3344)
+- NFC: [Parser for Zolotaya Korona Online parser added (By Leptopt1los)](https://github.com/DarkFlippers/unleashed-firmware/commit/9aae348cae2619c4b32373431c9bf802e234ee6a)
 - Plugins: 2048, Arkanoid, Snake, and Tetris show score. Thanks to [whoamins](https://github.com/flipperdevices/flipperzero-firmware/commit/7feda832ede1ba8468eff2ca055fef3ddbdc16ac) and [DevMilanIan](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/188) With position changes by RogueMaster. Also all + Tic Tac Toe updated by [Unleashed/Eng1n33r](https://github.com/DarkFlippers/unleashed-firmware) for stability.
 - Plugins: Icon for Clock [Thanks to Redlink](https://github.com/redlink2/flipperzero-firmware/tree/menuChanges)
 - Plugins: [PicoPass Emulation (By nvx)](https://github.com/nvx/flipperzero-firmware/tree/picopass_emulation)
