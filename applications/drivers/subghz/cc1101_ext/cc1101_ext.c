@@ -742,7 +742,7 @@ bool subghz_device_cc1101_ext_start_async_tx(SubGhzDeviceCC1101ExtCallback callb
         SUBGHZ_DEVICE_CC1101_EXT_DMA_CH3_DEF,
         LL_DMA_DIRECTION_MEMORY_TO_PERIPH | LL_DMA_MODE_CIRCULAR | LL_DMA_PERIPH_NOINCREMENT |
             LL_DMA_MEMORY_INCREMENT | LL_DMA_PDATAALIGN_WORD | LL_DMA_MDATAALIGN_WORD |
-            LL_DMA_MODE_NORMAL);
+            LL_DMA_PRIORITY_VERYHIGH);
     LL_DMA_SetDataLength(
         SUBGHZ_DEVICE_CC1101_EXT_DMA_CH3_DEF, SUBGHZ_DEVICE_CC1101_EXT_ASYNC_TX_BUFFER_FULL);
     LL_DMA_SetPeriphRequest(SUBGHZ_DEVICE_CC1101_EXT_DMA_CH3_DEF, LL_DMAMUX_REQ_TIM17_UP);
@@ -751,8 +751,8 @@ bool subghz_device_cc1101_ext_start_async_tx(SubGhzDeviceCC1101ExtCallback callb
     LL_DMA_EnableIT_HT(SUBGHZ_DEVICE_CC1101_EXT_DMA_CH3_DEF);
     LL_DMA_EnableChannel(SUBGHZ_DEVICE_CC1101_EXT_DMA_CH3_DEF);
 
-    furi_hal_interrupt_set_isr(
-        SUBGHZ_DEVICE_CC1101_EXT_DMA_CH3_IRQ, subghz_device_cc1101_ext_async_tx_dma_isr, NULL);
+    furi_hal_interrupt_set_isr_ex(
+        SUBGHZ_DEVICE_CC1101_EXT_DMA_CH3_IRQ, 4, subghz_device_cc1101_ext_async_tx_dma_isr, NULL);
 
     furi_hal_bus_enable(FuriHalBusTIM17);
 

@@ -678,6 +678,8 @@ static void furi_hal_subghz_async_tx_timer_isr() {
                 LL_DMA_DisableChannel(SUBGHZ_DMA_CH1_DEF);
                 //forcibly pulls the pin to the ground so that there is no carrier
                 furi_hal_gpio_write(&gpio_cc1101_g0, false);
+                furi_hal_gpio_init(
+                    &gpio_cc1101_g0, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
                 LL_TIM_DisableCounter(TIM2);
             } else {
                 furi_crash("Wat?");
@@ -720,9 +722,11 @@ bool furi_hal_subghz_start_async_tx(FuriHalSubGhzAsyncTxCallback callback, void*
     dma_config.MemoryOrM2MDstDataSize = LL_DMA_MDATAALIGN_WORD;
     dma_config.NbData = FURI_HAL_SUBGHZ_ASYNC_TX_BUFFER_FULL;
     dma_config.PeriphRequest = LL_DMAMUX_REQ_TIM2_UP;
-    dma_config.Priority = LL_DMA_MODE_NORMAL;
+    dma_config.Priority =
+        LL_DMA_PRIORITY_VERYHIGH; // Ensure that ARR is updated before anyone else try to check it
     LL_DMA_Init(SUBGHZ_DMA_CH1_DEF, &dma_config);
-    furi_hal_interrupt_set_isr(SUBGHZ_DMA_CH1_IRQ, furi_hal_subghz_async_tx_dma_isr, NULL);
+    // Ensure that async tx state transition always preempts other ISRs
+    furi_hal_interrupt_set_isr_ex(SUBGHZ_DMA_CH1_IRQ, 4, furi_hal_subghz_async_tx_dma_isr, NULL);
     LL_DMA_EnableIT_TC(SUBGHZ_DMA_CH1_DEF);
     LL_DMA_EnableIT_HT(SUBGHZ_DMA_CH1_DEF);
     LL_DMA_EnableChannel(SUBGHZ_DMA_CH1_DEF);
@@ -782,7 +786,7 @@ bool furi_hal_subghz_start_async_tx(FuriHalSubGhzAsyncTxCallback callback, void*
         dma_config.MemoryOrM2MDstDataSize = LL_DMA_MDATAALIGN_WORD;
         dma_config.NbData = 2;
         dma_config.PeriphRequest = LL_DMAMUX_REQ_TIM2_UP;
-        dma_config.Priority = LL_DMA_PRIORITY_VERYHIGH;
+        dma_config.Priority = LL_DMA_PRIORITY_HIGH; // Ensure that it's updated after ARR
         LL_DMA_Init(SUBGHZ_DMA_CH2_DEF, &dma_config);
         LL_DMA_SetDataLength(SUBGHZ_DMA_CH2_DEF, 2);
         LL_DMA_EnableChannel(SUBGHZ_DMA_CH2_DEF);
