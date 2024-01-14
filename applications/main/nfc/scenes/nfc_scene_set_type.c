@@ -54,7 +54,7 @@ bool nfc_scene_set_type_on_event(void* context, SceneManagerEvent event) {
             scene_manager_next_scene(instance->scene_manager, NfcSceneSetSak);
             consumed = true;
         } else {
-            int uid_len = nfc_data_generator_get_uid_len(event.event);
+            size_t uid_len = nfc_data_generator_get_uid_len(event.event);
             nfc_scene_set_type_init_edit_data(instance->iso14443_3a_edit_data, uid_len);
             nfc_device_set_data(
                 instance->nfc_device, NfcProtocolIso14443_3a, instance->iso14443_3a_edit_data);
