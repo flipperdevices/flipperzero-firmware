@@ -4,13 +4,17 @@ void setup() {
     // Begin serial communication.
     Serial.begin(230400);
 
-    // Set initial camera configurations for serial output.
+    // Set initial camera configs for serial streaming.
     set_camera_config_defaults(CAMERA_FUNCTION_SERIAL);
+
+    // Set initial camera model for serial streaming.
     set_camera_model_defaults(CAMERA_FUNCTION_SERIAL);
-    set_camera_defaults(CAMERA_FUNCTION_SERIAL);
 
     // Initialize the camera.
     initialize_camera();
+
+    // Set initial camera settings for serial streaming.
+    set_camera_defaults(CAMERA_FUNCTION_SERIAL);
 }
 
 // Main loop of the program.
@@ -48,4 +52,6 @@ void streamToSerial() {
 
 void streamToWiFi() {
     // @todo - Implement.
+    turn_flash_on();
+    delay(50);
 }
