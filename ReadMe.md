@@ -60,7 +60,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Mouse Jacker v1.1 (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/mousejacker) [numlock support in mousejackers (By xMasterX)](https://github.com/xMasterX/all-the-plugins/commit/36b21873f22acbe61e7f2d5088e7e7f5e77c1a89)
 - [WS: add protocol EMOS E601x #107 (By linusnielsen)](https://github.com/flipperdevices/flipperzero-good-faps/pull/107)
 - UL: [SubGHz: Update Honeywell (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/8c9d9af6a0d16fd98cb11ec6e159a5e0c0c030b6)
-- [Faster Power Off Timeout (Thanks casimirextreme)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/issues/1020)
+- [Reworded MissingImports error message (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/13d97ab03741c2159c1d0114573a2c54426d6a8f)
 
 ## IN THIS BRANCH:
 
@@ -174,6 +174,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: [Revert 'NFC: Skip system dict bug fixed' (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/781794f69978302b3978cc6b212904cad9104bbc)
 - UL: NFC: [Parser for Zolotaya Korona Online parser added (By Leptopt1los)](https://github.com/DarkFlippers/unleashed-firmware/commit/9aae348cae2619c4b32373431c9bf802e234ee6a)
 - Update: [NFC Seader v2.3 (By bettse)](https://github.com/bettse/seader)
+- [Faster Power Off Timeout (Thanks casimirextreme)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/issues/1020)
+- Added: [Tetris Modern v1.3 (By Alloy-Lou)](https://github.com/Alloy-Lou/all-the-plugins/tree/dev/base_pack/tetris_modern_game)
 
 <a name="release">
 
@@ -434,6 +436,7 @@ $ ./fbt dolphin_ext
 - [Tanks v1.4 (By Alexgr13)](https://github.com/alexgr13/flipperzero-firmware/tree/fork/dev/applications/tanks-game)
 - [Tarot v0.1 (By pionaiki & tihyltew)](https://github.com/pionaiki/fz-tarot)
 - [Tetris v1.3 (By jeffplang)](https://github.com/jeffplang/flipperzero-firmware/tree/tetris_game/applications/tetris_game)
+- [Tetris Modern v1.3 (By Alloy-Lou)](https://github.com/Alloy-Lou/all-the-plugins/tree/dev/base_pack/tetris_modern_game)
 - [Tic-Tac-Toe Multi v1.1 (By RouNNdeL)](https://github.com/RouNNdeL/flipper-tictactoe-multi)
 - [Tic Tac Toe v1.1 (By gotnull)](https://github.com/gotnull/flipperzero-firmware-wPlugins)
 - [Ultimate Tic-Tac-Toe v1.1 (By Racso)](https://github.com/Racso/fzero-apps)
