@@ -1,6 +1,7 @@
 ADD_SCENE(camera_suite, start, Start)
 ADD_SCENE(camera_suite, menu, Menu)
 ADD_SCENE(camera_suite, camera, Camera)
+ADD_SCENE(camera_suite, wifi_camera, WiFiCamera)
 ADD_SCENE(camera_suite, guide, Guide)
 ADD_SCENE(camera_suite, app_settings, AppSettings)
 ADD_SCENE(camera_suite, cam_settings, CamSettings)
