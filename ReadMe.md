@@ -60,6 +60,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW PR: [T5577 lib: write with mask function added #3362 (By Leptopt1los)](https://github.com/flipperdevices/flipperzero-firmware/pull/3362) [Code also added for inegration into RFID app (By xMasterX or Leptopt1los)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/e89d395bc97f1ec336045e9cf527dd940c5c3132)
 - [WS: add protocol EMOS E601x #107 (By linusnielsen)](https://github.com/flipperdevices/flipperzero-good-faps/pull/107)
 - UL: [SubGHz: Update Honeywell (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/8c9d9af6a0d16fd98cb11ec6e159a5e0c0c030b6)
+- [Reworded MissingImports error message (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/13d97ab03741c2159c1d0114573a2c54426d6a8f)
 
 <a name="release">
 
