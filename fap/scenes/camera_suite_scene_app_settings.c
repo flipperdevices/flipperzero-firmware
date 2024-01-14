@@ -63,23 +63,31 @@ void camera_suite_scene_app_settings_on_enter(void* context) {
     VariableItem* item;
     uint8_t value_index;
 
-    // Haptic FX ON/OFF
+    // Haptic Effects ON/OFF
     item = variable_item_list_add(
-        app->variable_item_list, "Haptic FX:", 2, camera_suite_scene_app_settings_set_haptic, app);
+        app->variable_item_list,
+        "Haptic Effects:",
+        2,
+        camera_suite_scene_app_settings_set_haptic,
+        app);
     value_index = value_index_uint32(app->haptic, haptic_value, 2);
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, haptic_text[value_index]);
 
-    // Sound FX ON/OFF
+    // Sound Effects ON/OFF
     item = variable_item_list_add(
-        app->variable_item_list, "Sound FX:", 2, camera_suite_scene_app_settings_set_speaker, app);
+        app->variable_item_list,
+        "Sound Effects:",
+        2,
+        camera_suite_scene_app_settings_set_speaker,
+        app);
     value_index = value_index_uint32(app->speaker, speaker_value, 2);
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, speaker_text[value_index]);
 
-    // LED FX ON/OFF
+    // LED Effects ON/OFF
     item = variable_item_list_add(
-        app->variable_item_list, "LED FX:", 2, camera_suite_scene_app_settings_set_led, app);
+        app->variable_item_list, "LED Effects:", 2, camera_suite_scene_app_settings_set_led, app);
     value_index = value_index_uint32(app->led, led_value, 2);
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, led_text[value_index]);
