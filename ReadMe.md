@@ -60,6 +60,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Mouse Jacker v1.1 (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/mousejacker) [numlock support in mousejackers (By xMasterX)](https://github.com/xMasterX/all-the-plugins/commit/36b21873f22acbe61e7f2d5088e7e7f5e77c1a89)
 - [WS: add protocol EMOS E601x #107 (By linusnielsen)](https://github.com/flipperdevices/flipperzero-good-faps/pull/107)
 - UL: [SubGHz: Update Honeywell (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/8c9d9af6a0d16fd98cb11ec6e159a5e0c0c030b6)
+- [Faster Power Off Timeout (Thanks casimirextreme)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/issues/1020)
 
 ## IN THIS BRANCH:
 
