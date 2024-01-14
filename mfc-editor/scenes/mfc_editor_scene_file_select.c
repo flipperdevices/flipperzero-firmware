@@ -5,9 +5,8 @@ void mfc_editor_scene_file_select_on_enter(void* context) {
 
     if(mfc_editor_prompt_load_file(instance)) {
         if(nfc_device_get_protocol(instance->nfc_device) == NfcProtocolMfClassic) {
-            FURI_LOG_I(
-                TAG, "Valid MFC file selected at '%s'", furi_string_get_cstr(instance->file_path));
-            scene_manager_previous_scene(instance->scene_manager);
+            scene_manager_set_scene_state(instance->scene_manager, MfcEditorSceneSectorSelect, 0);
+            scene_manager_next_scene(instance->scene_manager, MfcEditorSceneSectorSelect);
         } else {
             scene_manager_next_scene(instance->scene_manager, MfcEditorSceneInvalidFile);
         }

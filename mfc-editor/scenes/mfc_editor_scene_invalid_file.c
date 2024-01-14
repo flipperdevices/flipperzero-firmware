@@ -10,7 +10,8 @@ void mfc_editor_scene_invalid_file_on_enter(void* context) {
 
     Popup* popup = instance->popup;
     popup_set_header(popup, "Invalid file", 63, 10, AlignCenter, AlignTop);
-    popup_set_text(popup, "Only MIFARE Classic files\nare supported", 63, 40, AlignCenter, AlignCenter);
+    popup_set_text(
+        popup, "Only MIFARE Classic files\nare supported", 63, 40, AlignCenter, AlignCenter);
     popup_set_context(popup, instance);
     popup_set_callback(popup, mfc_editor_scene_invalid_file_popup_callback);
 
