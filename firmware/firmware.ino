@@ -30,7 +30,7 @@ void loop() {
     
     if (camera_model.isStreamToWiFiEnabled) {
         // Stream the camera output to WiFi.
-        streamToWiFi();
+        stream_to_wifi();
         delay(50);
         return;
     }
