@@ -4,30 +4,48 @@ void setup() {
     // Begin serial communication.
     Serial.begin(230400);
 
-    // Set the camera configuration defaults.
-    set_camera_config_defaults();
-
-    // Set the camera model defaults values.
-    set_camera_model_defaults();
+    // Set initial camera configurations for serial output.
+    set_camera_config_defaults(CAMERA_FUNCTION_SERIAL);
+    set_camera_model_defaults(CAMERA_FUNCTION_SERIAL);
+    set_camera_defaults(CAMERA_FUNCTION_SERIAL);
 
     // Initialize the camera.
     initialize_camera();
-
-    // Set the camera to the default settings.
-    set_camera_defaults();
 }
 
 // Main loop of the program.
 void loop() {
-    process_serial_commands();
-
-    if (camera_model.isStreamEnabled) {
-        camera_fb_t* frame_buffer = esp_camera_fb_get();
-        if (frame_buffer) {
-            process_image(frame_buffer);
-            // Return the frame buffer back to the camera driver.
-            esp_camera_fb_return(frame_buffer);
-            delay(50);
-        }
+    process_serial_input();
+    
+    if (camera_model.isStreamToSerialEnabled) {
+        // Stream the camera output to serial.
+        streamToSerial();
+        return;
     }
+    
+    if (camera_model.isStreamToWiFiEnabled) {
+        // Stream the camera output to WiFi.
+        streamToWiFi();
+        return;
+    }
+
+    // No camera function is enabled, turn the flash off if on.
+    if (camera_model.isFlashEnabled) {
+        turn_flash_off();
+    }
+}
+
+void streamToSerial() {
+    camera_fb_t* frame_buffer = esp_camera_fb_get();
+    if (frame_buffer) {
+        // Process the image and output to serial.
+        process_image_to_serial(frame_buffer);
+        // Return the frame buffer back to the camera driver.
+        esp_camera_fb_return(frame_buffer);
+        delay(50);
+    }
+}
+
+void streamToWiFi() {
+    // @todo - Implement.
 }

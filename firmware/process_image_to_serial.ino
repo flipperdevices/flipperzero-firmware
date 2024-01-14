@@ -1,6 +1,6 @@
-#include "process_image.h"
+#include "process_image_to_serial.h"
 
-void process_image(camera_fb_t* frame_buffer) {
+void process_image_to_serial(camera_fb_t* frame_buffer) {
     // If dithering is not disabled, perform dithering on the image. Dithering
     // is the process of approximating the look of a high-resolution grayscale
     // image in a lower resolution by binary values (black & white), thereby

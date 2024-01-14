@@ -169,10 +169,10 @@ This fap app is available on your phones Flipper Zero application catalog! Simpl
 4. Move "camera_suite.fap" into `~\apps\gpio\` on your Flipper Zero MicroSD:
 
    ```markdown
-   .                            # The Flipper Zero MicroSD root.
-   ├── apps                     # The Flipper Zero Applications folder.
-   |   ├── gpio                 # The Flipper Zero GPIO folder.
-   |   |   ├── camera_suite.fap # The Camera Suite application.
+   . # The Flipper Zero MicroSD root.
+   ├── apps # The Flipper Zero Applications folder.
+   | ├── gpio # The Flipper Zero GPIO folder.
+   | | ├── camera_suite.fap # The Camera Suite application.
    ```
 
 5. Reinsert your MicroSD into your Flipper Zero if you took it out.
@@ -226,7 +226,7 @@ This fap app is available on your phones Flipper Zero application catalog! Simpl
 
 A huge thanks to the following people and projects for making this possible:
 
-- This project is based on & forked from the [Flipper Zero Camera Application][flipperzero-camera] by [Z4urce][github-profile-z4urce]. Thanks Z4rce for the inspiration and the great work!
+- This project is based on & forked from the [Flipper Zero Camera Application][flipperzero-camera] by [Z4urce][github-profile-z4urce]. Thanks Z4urce for the inspiration and the great work!
 - I based this projects application structure on the [Flipper Zero Boilerplate Application][flipper-zero-fap-boilerplate] by [leedave][github-profile-leedave]. Thanks leedave for the great boilerplate application that helped me learn how to structure a Flipper Zero application properly!
 - The project images were drawn using the a application called "[lopaka][lopaka]" by [sbrin][github-profile-sbrin]. Thanks sbrin for your help in creating the images for this project!
 - The Flipper Zero community for all your support and feedback!
@@ -248,7 +248,7 @@ https://github.com/CodyTolene/Flipper-Zero-Development-Toolkit
 Example include path:
 
 ```markdown
-C:/Users/<username>/AppData/Local/Temp/arduino-cli/**
+C:/Users/<username>/AppData/Local/Temp/arduino-cli/\*\*
 ```
 
 Thank you for any and all contributions to this project, I'm looking forward to seeing what you come up with! If you have any questions, please let me know by opening an issue [here][issues-link].

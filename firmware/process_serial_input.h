@@ -8,6 +8,6 @@
 #include "pins.h"
 
 /** Handle the serial input commands coming from the Flipper Zero. */
-void process_serial_commands();
+void process_serial_input();
 
 #endif

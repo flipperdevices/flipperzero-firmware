@@ -11,7 +11,7 @@
 void initialize_camera();
 
 /** Reset the camera to the default settings. */
-void set_camera_defaults();
+void set_camera_defaults(CameraFunction camera_function);
 
 /** Turn the flash off. */
 void turn_flash_off();

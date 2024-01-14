@@ -9,7 +9,7 @@ void initialize_camera() {
     }
 }
 
-void set_camera_defaults() {
+void set_camera_defaults(CameraFunction camera_function) {
     // Get the camera sensor reference.
     sensor_t* cam = esp_camera_sensor_get();
 

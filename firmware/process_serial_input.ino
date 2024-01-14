@@ -1,6 +1,6 @@
-#include "process_serial_commands.h"
+#include "process_serial_input.h"
 
-void process_serial_commands() {
+void process_serial_input() {
     if (Serial.available() > 0) {
         char input = Serial.read();
         sensor_t* cam = esp_camera_sensor_get();
@@ -39,17 +39,23 @@ void process_serial_commands() {
         case 'P':
             // save_picture_to_sd_card(); // @todo
             break;
-        case 's': // Stop stream.
-            turn_flash_off();
-            set_camera_model_defaults();
-            set_camera_defaults();
-            camera_model.isStreamEnabled = false;
+        case 's': // Stop serial stream.
+            camera_model.isStreamToSerialEnabled = false;
             break;
-        case 'S': // Start stream.
-            turn_flash_off();
-            set_camera_model_defaults();
-            set_camera_defaults();
-            camera_model.isStreamEnabled = true;
+        case 'S': // Start serial stream.
+            set_camera_config_defaults(CAMERA_FUNCTION_SERIAL);
+            set_camera_model_defaults(CAMERA_FUNCTION_SERIAL);
+            set_camera_defaults(CAMERA_FUNCTION_SERIAL);
+            camera_model.isStreamToSerialEnabled = true;
+            break;
+        case 'w': // Stop wifi stream.
+            camera_model.isStreamToWiFiEnabled = false;
+            break;
+        case 'W': // Start wifi stream.
+            set_camera_config_defaults(CAMERA_FUNCTION_WIFI);
+            set_camera_model_defaults(CAMERA_FUNCTION_WIFI);
+            set_camera_defaults(CAMERA_FUNCTION_WIFI);
+            camera_model.isStreamToWiFiEnabled = true;
             break;
         case '0':
             camera_model.ditherAlgorithm = FLOYD_STEINBERG;
