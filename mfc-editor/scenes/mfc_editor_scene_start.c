@@ -27,9 +27,9 @@ bool mfc_editor_scene_start_on_event(void* context, SceneManagerEvent event) {
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SubmenuIndexOpen) {
-            FURI_LOG_I(TAG, "Open item clicked");
             scene_manager_set_scene_state(
                 instance->scene_manager, MfcEditorSceneStart, SubmenuIndexOpen);
+            scene_manager_next_scene(instance->scene_manager, MfcEditorSceneFileSelect);
             consumed = true;
         }
     }
