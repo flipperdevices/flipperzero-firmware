@@ -393,10 +393,8 @@ void subghz_device_cc1101_ext_idle() {
     furi_hal_spi_acquire(subghz_device_cc1101_ext->spi_bus_handle);
     cc1101_switch_to_idle(subghz_device_cc1101_ext->spi_bus_handle);
     //waiting for the chip to switch to IDLE mode
-    while(true) {
-        CC1101Status status = cc1101_get_status(subghz_device_cc1101_ext->spi_bus_handle);
-        if(status.STATE == CC1101StateIDLE) break;
-    }
+    furi_check(cc1101_wait_status_state(
+        subghz_device_cc1101_ext->spi_bus_handle, CC1101StateIDLE, 10000));
     furi_hal_spi_release(subghz_device_cc1101_ext->spi_bus_handle);
 }
 
@@ -404,10 +402,8 @@ void subghz_device_cc1101_ext_rx() {
     furi_hal_spi_acquire(subghz_device_cc1101_ext->spi_bus_handle);
     cc1101_switch_to_rx(subghz_device_cc1101_ext->spi_bus_handle);
     //waiting for the chip to switch to Rx mode
-    while(true) {
-        CC1101Status status = cc1101_get_status(subghz_device_cc1101_ext->spi_bus_handle);
-        if(status.STATE == CC1101StateRX) break;
-    }
+    furi_check(
+        cc1101_wait_status_state(subghz_device_cc1101_ext->spi_bus_handle, CC1101StateRX, 10000));
     furi_hal_spi_release(subghz_device_cc1101_ext->spi_bus_handle);
 }
 
@@ -416,10 +412,8 @@ bool subghz_device_cc1101_ext_tx() {
     furi_hal_spi_acquire(subghz_device_cc1101_ext->spi_bus_handle);
     cc1101_switch_to_tx(subghz_device_cc1101_ext->spi_bus_handle);
     //waiting for the chip to switch to Tx mode
-    while(true) {
-        CC1101Status status = cc1101_get_status(subghz_device_cc1101_ext->spi_bus_handle);
-        if(status.STATE == CC1101StateTX) break;
-    }
+    furi_check(
+        cc1101_wait_status_state(subghz_device_cc1101_ext->spi_bus_handle, CC1101StateTX, 10000));
     furi_hal_spi_release(subghz_device_cc1101_ext->spi_bus_handle);
     return true;
 }

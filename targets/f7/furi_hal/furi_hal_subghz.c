@@ -278,10 +278,7 @@ void furi_hal_subghz_idle() {
     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
     cc1101_switch_to_idle(&furi_hal_spi_bus_handle_subghz);
     //waiting for the chip to switch to IDLE mode
-    while(true) {
-        CC1101Status status = cc1101_get_status(&furi_hal_spi_bus_handle_subghz);
-        if(status.STATE == CC1101StateIDLE) break;
-    }
+    furi_check(cc1101_wait_status_state(&furi_hal_spi_bus_handle_subghz, CC1101StateIDLE, 10000));
     furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
 }
 
@@ -289,10 +286,7 @@ void furi_hal_subghz_rx() {
     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
     cc1101_switch_to_rx(&furi_hal_spi_bus_handle_subghz);
     //waiting for the chip to switch to Rx mode
-    while(true) {
-        CC1101Status status = cc1101_get_status(&furi_hal_spi_bus_handle_subghz);
-        if(status.STATE == CC1101StateRX) break;
-    }
+    furi_check(cc1101_wait_status_state(&furi_hal_spi_bus_handle_subghz, CC1101StateRX, 10000));
     furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
 }
 
@@ -301,10 +295,7 @@ bool furi_hal_subghz_tx() {
     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
     cc1101_switch_to_tx(&furi_hal_spi_bus_handle_subghz);
     //waiting for the chip to switch to Tx mode
-    while(true) {
-        CC1101Status status = cc1101_get_status(&furi_hal_spi_bus_handle_subghz);
-        if(status.STATE == CC1101StateTX) break;
-    }
+    furi_check(cc1101_wait_status_state(&furi_hal_spi_bus_handle_subghz, CC1101StateTX, 10000));
     furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
     return true;
 }
@@ -367,10 +358,7 @@ uint32_t furi_hal_subghz_set_frequency(uint32_t value) {
     uint32_t real_frequency = cc1101_set_frequency(&furi_hal_spi_bus_handle_subghz, value);
     cc1101_calibrate(&furi_hal_spi_bus_handle_subghz);
 
-    while(true) {
-        CC1101Status status = cc1101_get_status(&furi_hal_spi_bus_handle_subghz);
-        if(status.STATE == CC1101StateIDLE) break;
-    }
+    furi_check(cc1101_wait_status_state(&furi_hal_spi_bus_handle_subghz, CC1101StateIDLE, 10000));
 
     furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
     return real_frequency;
@@ -691,6 +679,8 @@ static void furi_hal_subghz_async_tx_timer_isr() {
                 //forcibly pulls the pin to the ground so that there is no carrier
                 furi_hal_gpio_write(&gpio_cc1101_g0, false);
                 LL_TIM_DisableCounter(TIM2);
+            } else {
+                furi_crash("Wat?");
             }
         }
     }
