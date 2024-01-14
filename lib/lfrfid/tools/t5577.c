@@ -121,7 +121,7 @@ void t5577_write_with_pass(LFRFIDT5577* data, uint32_t password) {
     t5577_stop();
 }
 
-void t5577_write_with_mask(LFRFIDT5577* data, uint8_t page, uint32_t password) {
+void t5577_write_with_mask(LFRFIDT5577* data, uint8_t page, bool with_pass, uint32_t password) {
     t5577_start();
     FURI_CRITICAL_ENTER();
 
@@ -133,7 +133,7 @@ void t5577_write_with_mask(LFRFIDT5577* data, uint8_t page, uint32_t password) {
         bool need_to_write = mask & 1;
         mask >>= 1;
         if(!need_to_write) continue;
-        t5577_write_block_pass(page, i, false, data->block[i], true, password);
+        t5577_write_block_pass(page, i, false, data->block[i], with_pass, password);
     }
     t5577_write_reset();
     FURI_CRITICAL_EXIT();
