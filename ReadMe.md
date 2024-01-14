@@ -60,6 +60,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW PR: [T5577 lib: write with mask function added #3362 (By Leptopt1los)](https://github.com/flipperdevices/flipperzero-firmware/pull/3362) [Code also added for inegration into RFID app (By xMasterX or Leptopt1los)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/e89d395bc97f1ec336045e9cf527dd940c5c3132)
 - [WS: add protocol EMOS E601x #107 (By linusnielsen)](https://github.com/flipperdevices/flipperzero-good-faps/pull/107)
 - UL: [SubGHz: Update Honeywell (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/8c9d9af6a0d16fd98cb11ec6e159a5e0c0c030b6)
+- [Reworded MissingImports error message (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/13d97ab03741c2159c1d0114573a2c54426d6a8f)
+- Added: [Tetris Modern v1.3 (By Alloy-Lou)](https://github.com/Alloy-Lou/all-the-plugins/tree/dev/base_pack/tetris_modern_game)
 
 <a name="release">
 
@@ -315,6 +317,7 @@ $ ./fbt dolphin_ext
 - [Tanks v1.4 (By Alexgr13)](https://github.com/alexgr13/flipperzero-firmware/tree/fork/dev/applications/tanks-game)
 - [Tarot v0.1 (By pionaiki & tihyltew)](https://github.com/pionaiki/fz-tarot)
 - [Tetris v1.3 (By jeffplang)](https://github.com/jeffplang/flipperzero-firmware/tree/tetris_game/applications/tetris_game)
+- [Tetris Modern v1.3 (By Alloy-Lou)](https://github.com/Alloy-Lou/all-the-plugins/tree/dev/base_pack/tetris_modern_game)
 - [Tic-Tac-Toe Multi v1.1 (By RouNNdeL)](https://github.com/RouNNdeL/flipper-tictactoe-multi)
 - [Tic Tac Toe v1.1 (By gotnull)](https://github.com/gotnull/flipperzero-firmware-wPlugins)
 - [Ultimate Tic-Tac-Toe v1.1 (By Racso)](https://github.com/Racso/fzero-apps)
