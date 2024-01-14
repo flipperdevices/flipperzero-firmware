@@ -20,5 +20,6 @@ jobs:
       - name: Lint sources
         uses: flipperdevices/flipperzero-ufbt-action@v0.1.3
         with:
+          app-dir: ./fap
           skip-setup: true
           task: lint
