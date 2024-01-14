@@ -25,6 +25,7 @@
 - [Software Guide](#software-guide)
 - [Special Thanks](#special-thanks)
 - [Contributions](#contributions)
+- [Licensing](#licensing)
 - [Changelog](fap/docs/CHANGELOG.md)
 
 ## Introduction <a name="intro"></a>
@@ -255,7 +256,17 @@ Thank you for any and all contributions to this project, I'm looking forward to 
 
 <p align="right">[ <a href="#index">Back to top</a> ]</p>
 
-Donations are welcome and appreciated!
+## Licensing <a name="licensing"></a>
+
+This project is licensed under the BSD 3-Clause license. See the [LICENSE](LICENSE) file for details. Certain files in this project are based on code from Espressif Systems (Shanghai) PTE LTD and are licensed under the Apache License, Version 2.0. See the [APACHE_2_LICENSE](LICENSE.Apache-2.0) file for the pertaining license text.
+
+`SPDX-License-Identifier: BSD 3-Clause, Apache-2.0`
+
+<p align="right">[ <a href="#index">Back to top</a> ]</p>
+
+## Wrapping Up <a name="licensing"></a>
+
+Thanks to all the people and projects that made this possible! I hope you enjoy this project as much as I enjoyed working on it. If you have any questions, please let me know by opening an issue [here][issues-link].
 
 | Type                                                           | Info                                                                               |
 | :------------------------------------------------------------- | :--------------------------------------------------------------------------------- |
@@ -263,9 +274,9 @@ Donations are welcome and appreciated!
 | <img width="48" src=".github/simple-icons/buymeacoffee.svg" /> | https://www.buymeacoffee.com/codytolene                                            |
 | <img width="48" src=".github/images/bitcoin-btc-logo.svg" />   | [bc1qfx3lvspkj0q077u3gnrnxqkqwyvcku2nml86wmudy7yf2u8edmqq0a5vnt][btc-address-link] |
 
-Fin. Thanks for looking and happy programming friend!
+Fin. Happy programming friend!
 
-Cody
+Cody Tolene
 
 <!-- LINKS -->
 

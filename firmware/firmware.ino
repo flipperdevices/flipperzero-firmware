@@ -24,19 +24,11 @@ void loop() {
     if (camera_model.isStreamToSerialEnabled) {
         // Process the camera image and output to serial.
         stream_to_serial();
-        delay(50);
-        return;
-    }
-    
-    if (camera_model.isStreamToWiFiEnabled) {
+    } else if (camera_model.isStreamToWiFiEnabled) {
         // Stream the camera output to WiFi.
         stream_to_wifi();
-        delay(50);
-        return;
-    }
-
-    // No camera function is enabled, turn the flash off if on.
-    if (camera_model.isFlashEnabled) {
+    } else if (camera_model.isFlashEnabled) {
+        // Not currently streaming, turn the flash off if it's enabled.
         turn_flash_off();
     }
     
