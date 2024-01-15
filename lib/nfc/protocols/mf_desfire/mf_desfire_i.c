@@ -179,8 +179,11 @@ bool mf_desfire_file_settings_parse(MfDesfireFileSettings* data, const BitBuffer
         const size_t data_size = bit_buffer_get_size_bytes(buf);
         const size_t min_data_size =
             sizeof(MfDesfireFileSettingsHeader) + sizeof(MfDesfireFileSettingsData);
+        const size_t max_data_size =
+            sizeof(MfDesfireFileSettingsHeader) + sizeof(MfDesfireFileSettingsValue);
 
-        if(data_size < min_data_size) {
+        if(data_size < min_data_size) break;
+        if(data_size < max_data_size) {
             MfDesfireFileSettingsLayout layout;
             bit_buffer_write_bytes(buf, &layout, sizeof(MfDesfireFileSettingsLayout));
 
