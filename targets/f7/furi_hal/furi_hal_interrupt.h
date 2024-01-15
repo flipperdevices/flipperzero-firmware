@@ -67,7 +67,7 @@ typedef enum {
 
     /* Special group, read docs first(ALL OF THEM: especially FreeRTOS configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY) */
     FuriHalInterruptPriorityKamiSama =
-        3, /**< Forget about thread safety, you are god now, no one can prevent you from fucking up OS critical section, you are not allowed to use any OS primitives, but who can stop you? Use this priority only for direct hardware interaction with LL HAL. */
+        3, /**< Forget about thread safety, you are god now. No one can prevent you from messing with OS critical section. You are not allowed to use any OS primitives, but who can stop you? Use this priority only for direct hardware interaction with LL HAL. */
 } FuriHalInterruptPriority;
 
 /** Initialize interrupt subsystem */
