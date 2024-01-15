@@ -9,13 +9,14 @@
 #include <stdint.h>
 #include <lib/nfc/protocols/mf_classic/mf_classic.h>
 
+#define GALLAGHER_CREDENTIAL_SECTOR 15
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 extern const uint8_t GALLAGHER_DECODE_TABLE[256];
 extern const uint8_t GALLAGHER_CARDAX_ASCII[MF_CLASSIC_BLOCK_SIZE];
-extern const uint8_t GALLAGHER_CREDENTIAL_SECTOR;
 
 typedef struct GallagherCredential {
     uint8_t region;

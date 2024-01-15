@@ -10,5 +10,4 @@ static constexpr auto nfc_app_api_table = sort(create_array_t<sym_entry>(
         nfc_app_api_gallagher_deobfuscate_and_parse_credential,
         void,
         (GallagherCredential * credential, const uint8_t* cardholder_data_obfuscated)),
-    API_VARIABLE(NFC_APP_API_GALLAGHER_CREDENTIAL_SECTOR, const uint8_t),
     API_VARIABLE(NFC_APP_API_GALLAGHER_CARDAX_ASCII, const uint8_t*)));

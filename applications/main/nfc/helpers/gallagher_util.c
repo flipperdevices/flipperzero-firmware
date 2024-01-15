@@ -6,6 +6,8 @@
 
 #include "gallagher_util.h"
 
+#define GALLAGHER_CREDENTIAL_SECTOR 15
+
 /* The Gallagher obfuscation algorithm is a 256-byte substitution table. The below array is generated from
  * https://github.com/megabug/gallagher-research/blob/master/formats/cardholder/substitution-table.bin.
 */
@@ -33,7 +35,6 @@ const uint8_t GALLAGHER_DECODE_TABLE[256] = {
 // "www.cardax.com  " (note two padding spaces)
 const uint8_t GALLAGHER_CARDAX_ASCII[MF_CLASSIC_BLOCK_SIZE] =
     {'w', 'w', 'w', '.', 'c', 'a', 'r', 'd', 'a', 'x', '.', 'c', 'o', 'm', ' ', ' '};
-const uint8_t GALLAGHER_CREDENTIAL_SECTOR = 15;
 
 /* Precondition: cardholder_data_obfuscated points to at least 8 safe-to-read bytes of memory.
 */

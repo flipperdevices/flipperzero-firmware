@@ -6,6 +6,7 @@
 
 #include "nfc_supported_card_plugin.h"
 #include "../../nfc_app_api.h"
+#include "../../helpers/gallagher_util.h"
 
 #include <flipper_application/flipper_application.h>
 #include <nfc/protocols/mf_classic/mf_classic.h>
@@ -25,7 +26,7 @@ static bool gallagher_parse(const NfcDevice* device, FuriString* parsed_data) {
     // It's possible for a single tag to contain multiple credentials,
     // but this is currently unimplementecd.
     const uint8_t credential_sector_start_block_number =
-        mf_classic_get_first_block_num_of_sector(NFC_APP_API_GALLAGHER_CREDENTIAL_SECTOR);
+        mf_classic_get_first_block_num_of_sector(GALLAGHER_CREDENTIAL_SECTOR);
 
     // Test 1: The first 8 bytes and the second 8 bytes should be bitwise inverses.
     const uint8_t* credential_block_start_ptr =
