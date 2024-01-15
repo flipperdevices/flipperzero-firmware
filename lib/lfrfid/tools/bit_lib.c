@@ -365,3 +365,70 @@ uint16_t bit_lib_crc16(
 
     return crc;
 }
+
+void bit_lib_num_to_bytes_be(uint64_t src, uint8_t len, uint8_t* dest) {
+    furi_assert(dest);
+    furi_assert(len <= 8);
+
+    while(len--) {
+        dest[len] = (uint8_t)src;
+        src >>= 8;
+    }
+}
+
+void bit_lib_num_to_bytes_le(uint64_t src, uint8_t len, uint8_t* dest) {
+    furi_assert(dest);
+    furi_assert(len <= 8);
+
+    for(int i = 0; i < len; i++) {
+        dest[i] = (uint8_t)(src >> (8 * i));
+    }
+}
+
+uint64_t bit_lib_bytes_to_num_be(const uint8_t* src, uint8_t len) {
+    furi_assert(src);
+    furi_assert(len <= 8);
+
+    uint64_t res = 0;
+    while(len--) {
+        res = (res << 8) | (*src);
+        src++;
+    }
+    return res;
+}
+
+uint64_t bit_lib_bytes_to_num_le(const uint8_t* src, uint8_t len) {
+    furi_assert(src);
+    furi_assert(len <= 8);
+
+    uint64_t res = 0;
+    uint8_t shift = 0;
+    while(len--) {
+        res |= ((uint64_t)*src) << (8 * shift++);
+        src++;
+    }
+    return res;
+}
+
+uint64_t bit_lib_bytes_to_num_bcd(const uint8_t* src, uint8_t len, bool* is_bcd) {
+    furi_assert(src);
+    furi_assert(len <= 9);
+
+    uint64_t res = 0;
+    uint8_t nibble_1, nibble_2;
+    *is_bcd = true;
+
+    for(uint8_t i = 0; i < len; i++) {
+        nibble_1 = src[i] / 16;
+        nibble_2 = src[i] % 16;
+        if((nibble_1 > 9) || (nibble_2 > 9)) *is_bcd = false;
+
+        res *= 10;
+        res += nibble_1;
+
+        res *= 10;
+        res += nibble_2;
+    }
+
+    return res;
+}
