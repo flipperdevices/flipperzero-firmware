@@ -9,7 +9,8 @@ static void hid_scene_exit_confirm_dialog_callback(DialogExResult result, void* 
     } else if(result == DialogExResultRight) {
         scene_manager_previous_scene(app->scene_manager);
     } else if(result == DialogExResultCenter) {
-        scene_manager_previous_scene(app->scene_manager);
+        scene_manager_search_and_switch_to_previous_scene(app->scene_manager, HidSceneMain);
+        view_dispatcher_switch_to_view(app->view_dispatcher, HidViewSubmenu);
     }
 }
 
