@@ -700,7 +700,7 @@ static void lfrfid_worker_mode_write_with_pass_process(LFRFIDWorker* worker) {
             request->t5577.block[0] |= 0b10000;
             request->t5577.block[7] = pass;
 
-            t5577_write_with_mask(&request->t5577, 0, 0);
+            t5577_write_with_mask(&request->t5577, 0, 1, 0);
 
             ProtocolId read_result = PROTOCOL_NO;
             LFRFIDWorkerReadState state = lfrfid_worker_read_ttf(

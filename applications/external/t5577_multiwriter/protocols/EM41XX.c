@@ -1,7 +1,6 @@
 #include "EM41XX.h"
 #include "core/check.h"
 #include "core/log.h"
-#include <stdint.h>
 
 #define EM41XX_LINES (10)
 #define EM41XX_COLUMNS (4)
@@ -60,7 +59,7 @@ uint64_t em41xx_encode(uint64_t data) {
     return result;
 }
 
-bool add_em41xx_data(LFRFIDT5577Data* data, uint64_t key, uint8_t from_index) {
+bool add_em41xx_data(LFRFIDT5577* data, uint64_t key, uint8_t from_index) {
     if(from_index + EM41XX_BLOCKS > (T5577_MAX_BLOCKS - 1)) return false;
 
     uint64_t blocks_data = em41xx_encode(key);
@@ -87,7 +86,7 @@ uint32_t get_config(uint8_t keys_count) {
     return result;
 }
 
-bool set_em41xx_config(LFRFIDT5577Data* data, uint8_t keys_count) {
+bool set_em41xx_config(LFRFIDT5577* data, uint8_t keys_count) {
     if(keys_count > 3) return false;
 
     data->block[0] = get_config(keys_count);
