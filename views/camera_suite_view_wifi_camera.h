@@ -1,5 +1,7 @@
 #pragma once
 
+#include <gui/modules/text_box.h>
+
 #include <furi.h>
 #include <furi_hal.h>
 #include <furi_hal_console.h>
@@ -17,17 +19,22 @@
 
 #include "../helpers/camera_suite_custom_event.h"
 
+typedef void (*CameraSuiteViewWiFiCameraCallback)(CameraSuiteCustomEvent event, void* context);
+
 typedef struct CameraSuiteViewWiFiCamera {
     CameraSuiteViewCameraCallback callback;
+    FuriStreamBuffer* wifi_rx_stream;
+    FuriThread* wifi_worker_thread;
     View* view;
     void* context;
 } CameraSuiteViewWiFiCamera;
 
 typedef struct {
-    int some_value;
+    FuriString* log;
+    size_t log_strlen;
 } CameraSuiteViewWiFiCameraModel;
 
-typedef void (*CameraSuiteViewWiFiCameraCallback)(CameraSuiteCustomEvent event, void* context);
+#define WIFI_WORKER_EVENTS_MASK (WorkerEventStop | WorkerEventRx)
 
 CameraSuiteViewWiFiCamera* camera_suite_view_wifi_camera_alloc();
 

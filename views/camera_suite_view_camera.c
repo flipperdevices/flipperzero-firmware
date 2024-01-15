@@ -469,10 +469,10 @@ static void camera_on_irq_cb(UartIrqEvent uartIrqEvent, uint8_t data, void* cont
     CameraSuiteViewCamera* instance = context;
 
     // If `uartIrqEvent` is `UartIrqEventRXNE`, send the data to the
-    // `rx_stream` and set the `WorkerEventRx` flag.
+    // `camera_rx_stream` and set the `WorkerEventRx` flag.
     if(uartIrqEvent == UartIrqEventRXNE) {
-        furi_stream_buffer_send(instance->rx_stream, &data, 1, 0);
-        furi_thread_flags_set(furi_thread_get_id(instance->worker_thread), WorkerEventRx);
+        furi_stream_buffer_send(instance->camera_rx_stream, &data, 1, 0);
+        furi_thread_flags_set(furi_thread_get_id(instance->camera_worker_thread), WorkerEventRx);
     }
 }
 
@@ -524,7 +524,7 @@ static void process_ringbuffer(UartDumpModel* model, uint8_t const byte) {
     }
 }
 
-static int32_t camera_worker(void* context) {
+static int32_t camera_suite_camera_worker(void* context) {
     furi_assert(context);
 
     CameraSuiteViewCamera* instance = context;
@@ -532,7 +532,7 @@ static int32_t camera_worker(void* context) {
     while(1) {
         // Wait for any event on the worker thread.
         uint32_t events =
-            furi_thread_flags_wait(WORKER_EVENTS_MASK, FuriFlagWaitAny, FuriWaitForever);
+            furi_thread_flags_wait(CAMERA_WORKER_EVENTS_MASK, FuriFlagWaitAny, FuriWaitForever);
 
         // Check if an error occurred.
         furi_check((events & FuriFlagError) == 0);
@@ -545,12 +545,12 @@ static int32_t camera_worker(void* context) {
             // Read all available data from the stream buffer.
             do {
                 // Read up to 64 bytes from the stream buffer.
-                size_t intended_data_size = 64;
+                size_t buffer_size = 64;
                 // Allocate a buffer for the data.
-                uint8_t data[intended_data_size];
+                uint8_t data[buffer_size];
                 // Read the data from the stream buffer.
                 length =
-                    furi_stream_buffer_receive(instance->rx_stream, data, intended_data_size, 0);
+                    furi_stream_buffer_receive(instance->camera_rx_stream, data, buffer_size, 0);
                 if(length > 0) {
                     with_view_model(
                         instance->view,
@@ -581,7 +581,7 @@ CameraSuiteViewCamera* camera_suite_view_camera_alloc() {
     instance->view = view_alloc();
 
     // Allocate a stream buffer
-    instance->rx_stream = furi_stream_buffer_alloc(2048, 1);
+    instance->camera_rx_stream = furi_stream_buffer_alloc(2048, 1);
 
     // Allocate model
     view_allocate_model(instance->view, ViewModelTypeLocking, sizeof(UartDumpModel));
@@ -602,9 +602,10 @@ CameraSuiteViewCamera* camera_suite_view_camera_alloc() {
     view_set_exit_callback(instance->view, camera_suite_view_camera_exit);
 
     // Allocate a thread for this camera to run on.
-    FuriThread* thread = furi_thread_alloc_ex("UsbUartWorker", 2048, camera_worker, instance);
-    instance->worker_thread = thread;
-    furi_thread_start(instance->worker_thread);
+    FuriThread* thread = furi_thread_alloc_ex(
+        "Camera_Suite_Camera_Rx_Thread", 2048, camera_suite_camera_worker, instance);
+    instance->camera_worker_thread = thread;
+    furi_thread_start(instance->camera_worker_thread);
 
     // Disable console.
     furi_hal_console_disable();
@@ -625,10 +626,10 @@ void camera_suite_view_camera_free(CameraSuiteViewCamera* instance) {
     furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, NULL, NULL);
 
     // Free the worker thread.
-    furi_thread_free(instance->worker_thread);
+    furi_thread_free(instance->camera_worker_thread);
 
     // Free the allocated stream buffer.
-    furi_stream_buffer_free(instance->rx_stream);
+    furi_stream_buffer_free(instance->camera_rx_stream);
 
     // Re-enable the console.
     // furi_hal_console_enable();
