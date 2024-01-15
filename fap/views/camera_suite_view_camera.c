@@ -530,25 +530,33 @@ static int32_t camera_worker(void* context) {
     CameraSuiteViewCamera* instance = context;
 
     while(1) {
+        // Wait for any event on the worker thread.
         uint32_t events =
             furi_thread_flags_wait(WORKER_EVENTS_MASK, FuriFlagWaitAny, FuriWaitForever);
+
+        // Check if an error occurred.
         furi_check((events & FuriFlagError) == 0);
 
+        // Check if the thread should stop.
         if(events & WorkerEventStop) {
             break;
         } else if(events & WorkerEventRx) {
             size_t length = 0;
+            // Read all available data from the stream buffer.
             do {
+                // Read up to 64 bytes from the stream buffer.
                 size_t intended_data_size = 64;
+                // Allocate a buffer for the data.
                 uint8_t data[intended_data_size];
+                // Read the data from the stream buffer.
                 length =
                     furi_stream_buffer_receive(instance->rx_stream, data, intended_data_size, 0);
-
                 if(length > 0) {
                     with_view_model(
                         instance->view,
                         UartDumpModel * model,
                         {
+                            // Process the data.
                             for(size_t i = 0; i < length; i++) {
                                 process_ringbuffer(model, data[i]);
                             }

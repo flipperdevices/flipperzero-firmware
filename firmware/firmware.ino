@@ -20,7 +20,7 @@ void setup() {
 // Main loop of the program.
 void loop() {
   process_serial_input();
-    
+  
   if (camera_model.isStreamToSerialEnabled) {
     // Process the camera image and output to serial.
     stream_to_serial();
@@ -31,6 +31,6 @@ void loop() {
     // Not currently streaming, turn the flash off if it's enabled.
     turn_flash_off();
   }
-    
+  
   delay(50);
 }

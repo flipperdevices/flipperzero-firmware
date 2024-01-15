@@ -6,6 +6,8 @@
 #include "camera.h"
 #include "camera_model.h"
 #include "pins.h"
+#include "stream_to_serial.h"
+#include "stream_to_wifi.h"
 
 /** Handle the serial input commands coming from the Flipper Zero. */
 void process_serial_input();

@@ -57,3 +57,15 @@ void stream_to_serial() {
   // Return the frame buffer back to the camera driver.
   esp_camera_fb_return(frame_buffer);
 }
+
+void start_serial_stream() {
+  camera_model.isStreamToWiFiEnabled = false;
+  set_camera_config_defaults(CAMERA_FUNCTION_SERIAL);
+  set_camera_model_defaults(CAMERA_FUNCTION_SERIAL);
+  set_camera_defaults(CAMERA_FUNCTION_SERIAL);
+  camera_model.isStreamToSerialEnabled = true;
+}
+
+void stop_serial_stream() {
+  camera_model.isStreamToSerialEnabled = false;
+}

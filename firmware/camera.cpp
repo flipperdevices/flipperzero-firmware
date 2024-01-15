@@ -65,6 +65,18 @@ void lower_brightness() {
   cam->set_brightness(cam, cam->status.brightness - 1);
 }
 
+void set_dithering(bool is_dithering_enabled) {
+  camera_model.isDitheringEnabled = is_dithering_enabled;
+}
+
+void set_dithering_algorithm(DitheringAlgorithm dithering_algorithm) {
+  camera_model.ditherAlgorithm = dithering_algorithm;
+}
+
+void set_inverted(bool is_inverted_enabled) {
+  camera_model.isInvertEnabled = is_inverted_enabled;
+}
+
 void set_hmirror(bool is_hmirror_enabled) {
   sensor_t *cam = esp_camera_sensor_get();
   cam->set_hmirror(cam, is_hmirror_enabled);

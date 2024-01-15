@@ -19,10 +19,10 @@ void process_serial_input() {
       add_contrast();
       break;
     case 'd':
-      camera_model.isDitheringEnabled = false;
+      set_dithering(false);
       break;
     case 'D':
-      camera_model.isDitheringEnabled = true;
+      set_dithering(true);
       break;
     case 'f':
       turn_flash_off();
@@ -31,44 +31,37 @@ void process_serial_input() {
       turn_flash_on();
       break;
     case 'i':
-      camera_model.isInvertEnabled = false;
+      set_inverted(false);
       break;
     case 'I':
-      camera_model.isInvertEnabled = true;
+      set_inverted(true);
       break;
     case 'P':
-      // save_picture_to_sd_card(); // @todo
+      // @todo
+      // save_picture_to_sd_card(); 
       break;
-    case 's': // Stop serial stream.
-      camera_model.isStreamToSerialEnabled = false;
+    case 's':
+      stop_serial_stream();
       break;
-    case 'S': // Start serial stream.
-      camera_model.isStreamToWiFiEnabled = false;
-      set_camera_config_defaults(CAMERA_FUNCTION_SERIAL);
-      set_camera_model_defaults(CAMERA_FUNCTION_SERIAL);
-      set_camera_defaults(CAMERA_FUNCTION_SERIAL);
-      camera_model.isStreamToSerialEnabled = true;
+    case 'S':
+      start_serial_stream();
       break;
-    case 'w': // Stop wifi stream.
-      camera_model.isStreamToWiFiEnabled = false;
+    case 'w':
+      stop_wifi_stream();
       break;
-    case 'W': // Start wifi stream.
-      camera_model.isStreamToSerialEnabled = false;
-      set_camera_config_defaults(CAMERA_FUNCTION_WIFI);
-      set_camera_model_defaults(CAMERA_FUNCTION_WIFI);
-      set_camera_defaults(CAMERA_FUNCTION_WIFI);
-      camera_model.isStreamToWiFiEnabled = true;
+    case 'W':
+      start_wifi_stream();
       break;
     case '0':
-      camera_model.ditherAlgorithm = FLOYD_STEINBERG;
+      set_dithering_algorithm(FLOYD_STEINBERG);
       break;
     case '1':
-      camera_model.ditherAlgorithm = JARVIS_JUDICE_NINKE;
+      set_dithering_algorithm(JARVIS_JUDICE_NINKE);
       break;
     case '2':
-      camera_model.ditherAlgorithm = STUCKI;
+      set_dithering_algorithm(STUCKI);
       break;
-    default: // Do nothing.
+    default:
       break;
     }
   }

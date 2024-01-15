@@ -2,6 +2,7 @@
 #define STREAM_TO_WIFI_H
 
 #include <FS.h>
+#include <WiFi.h>
 #include <esp_camera.h>
 
 #include "camera.h"
@@ -10,5 +11,11 @@
 
 /** Start the WiFi camera stream. */
 void stream_to_wifi();
+
+/** Start the WiFi camera stream. */
+void start_wifi_stream();
+
+/** Stop the WiFi camera stream. */
+void stop_wifi_stream();
 
 #endif
