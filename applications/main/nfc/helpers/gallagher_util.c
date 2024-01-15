@@ -40,7 +40,6 @@ const uint8_t GALLAGHER_CREDENTIAL_SECTOR = 15;
 void gallagher_deobfuscate_and_parse_credential(
     GallagherCredential* credential,
     const uint8_t* cardholder_data_obfuscated) {
-    furi_assert(false);
     uint8_t cardholder_data_deobfuscated[8];
     for(int i = 0; i < 8; i++) {
         cardholder_data_deobfuscated[i] = GALLAGHER_DECODE_TABLE[cardholder_data_obfuscated[i]];
