@@ -176,6 +176,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - Update: [NFC Seader v2.3 (By bettse)](https://github.com/bettse/seader)
 - [Faster Power Off Timeout (Thanks casimirextreme)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/issues/1020)
 - Added: [Tetris Modern v1.3 (By Alloy-Lou)](https://github.com/Alloy-Lou/all-the-plugins/tree/dev/base_pack/tetris_modern_game)
+- OFW: [NFC UI refactor #3361 (By RebornedBrain)](https://github.com/flipperdevices/flipperzero-firmware/pull/3361)
+- OFW: [Furi_hal_rtc: new function #3294 (By Leptopt1los)](https://github.com/flipperdevices/flipperzero-firmware/pull/3294)
 
 <a name="release">
 
