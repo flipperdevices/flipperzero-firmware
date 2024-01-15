@@ -40,7 +40,9 @@ static void furi_hal_serial_async_rx_configure(
     FuriHalSerialAsyncRxCallback callback,
     void* context);
 
-static void furi_hal_serial_usart_irq_callback(void) {
+static void furi_hal_serial_usart_irq_callback(void* context) {
+    UNUSED(context);
+
     FuriHalSerialRxEvent event = 0;
     // Notification flags
     if(USART1->ISR & USART_ISR_RXNE_RXFNE) {
@@ -86,7 +88,8 @@ static void furi_hal_serial_usart_irq_callback(void) {
     }
 }
 
-static void furi_hal_serial_usart_dma_rx_isr(void) {
+static void furi_hal_serial_usart_dma_rx_isr(void* context) {
+    UNUSED(context);
 #if FURI_HAL_SERIAL_USART_DMA_CHANNEL == LL_DMA_CHANNEL_6
     if(LL_DMA_IsActiveFlag_HT6(FURI_HAL_SERIAL_USART_DMA_INSTANCE)) {
         LL_DMA_ClearFlag_HT6(FURI_HAL_SERIAL_USART_DMA_INSTANCE);
@@ -238,7 +241,9 @@ static void furi_hal_serial_usart_init(FuriHalSerialHandle* handle, uint32_t bau
     furi_hal_serial[handle->id].enabled = true;
 }
 
-static void furi_hal_serial_lpuart_irq_callback(void) {
+static void furi_hal_serial_lpuart_irq_callback(void* context) {
+    UNUSED(context);
+
     FuriHalSerialRxEvent event = 0;
     // Notification flags
     if(LPUART1->ISR & USART_ISR_RXNE_RXFNE) {
@@ -284,7 +289,8 @@ static void furi_hal_serial_lpuart_irq_callback(void) {
     }
 }
 
-static void furi_hal_serial_lpuart_dma_rx_isr(void) {
+static void furi_hal_serial_lpuart_dma_rx_isr(void* context) {
+    UNUSED(context);
 #if FURI_HAL_SERIAL_LPUART_DMA_CHANNEL == LL_DMA_CHANNEL_7
     if(LL_DMA_IsActiveFlag_HT7(FURI_HAL_SERIAL_LPUART_DMA_INSTANCE)) {
         LL_DMA_ClearFlag_HT7(FURI_HAL_SERIAL_LPUART_DMA_INSTANCE);
