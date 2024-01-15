@@ -279,7 +279,7 @@ void signal_reader_start(SignalReader* instance, SignalReaderCallback callback, 
     // Start DMA irq, higher priority than normal
     furi_hal_interrupt_set_isr_ex(
         SIGNAL_READER_DMA_GPIO_IRQ,
-        FuriHalInterruptPriorityVeryHigh,
+        FuriHalInterruptPriorityHighest,
         furi_hal_sw_digital_pin_dma_rx_isr,
         instance);
 
