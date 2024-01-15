@@ -201,6 +201,7 @@ Here are some nice ideas to improve this app:
 * 2024-01-15
   * Global schema has been updated
   * Gallery has beed upadated
+  * Rebuild of the app with the last toolchain
 
 * 2023-08-06
   * Code optimization (shift operation on CPS array has been removed)
