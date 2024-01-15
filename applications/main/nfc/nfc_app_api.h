@@ -5,7 +5,7 @@
  * It is also exposed to plugins to allow them to use the application's API.
  */
 #include <stdint.h>
-#include <nfc/helpers/gallagher_util.h>
+#include "helpers/gallagher_util.h"
 
 #ifdef __cplusplus
 extern "C" {

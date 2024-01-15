@@ -1,7 +1,5 @@
 #include "nfc_app_api.h"
 
-#include <nfc/helpers/gallagher_util.h>
-
 /* Actual implementation of app's API and its private state */
 
 void nfc_app_api_gallagher_deobfuscate_and_parse_credential(

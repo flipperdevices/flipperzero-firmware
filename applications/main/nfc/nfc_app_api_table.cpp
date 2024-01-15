@@ -8,9 +8,9 @@
  */
 #include "nfc_app_api_table_i.h"
 
-static_assert(!has_hash_collisions(app_api_table), "Detected API method hash collision!");
+static_assert(!has_hash_collisions(nfc_app_api_table), "Detected API method hash collision!");
 
-constexpr HashtableApiInterface applicaton_hashtable_api_interface{
+constexpr HashtableApiInterface nfc_application_hashtable_api_interface{
     {
         .api_version_major = 0,
         .api_version_minor = 0,
@@ -18,10 +18,10 @@ constexpr HashtableApiInterface applicaton_hashtable_api_interface{
         .resolver_callback = &elf_resolve_from_hashtable,
     },
     /* pointers to application's API table boundaries */
-    .table_cbegin = app_api_table.cbegin(),
-    .table_cend = app_api_table.cend(),
+    .table_cbegin = nfc_app_api_table.cbegin(),
+    .table_cend = nfc_app_api_table.cend(),
 };
 
 /* Casting to generic resolver to use in Composite API resolver */
-extern "C" const ElfApiInterface* const application_api_interface =
-    &applicaton_hashtable_api_interface;
+extern "C" const ElfApiInterface* const nfc_application_api_interface =
+    &nfc_application_hashtable_api_interface;

@@ -9,7 +9,7 @@ App(
     order=30,
     resources="resources",
     sources=[
-        "*.c",
+        "*.c*",
         "!plugins",
         "!nfc_cli.c",
     ],

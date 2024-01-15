@@ -1,9 +1,11 @@
 #include "nfc_supported_cards.h"
+#include "nfc_app_api_interface.h"
 
 #include "../plugins/supported_cards/nfc_supported_card_plugin.h"
 
 #include <flipper_application/flipper_application.h>
 #include <flipper_application/plugins/plugin_manager.h>
+#include <flipper_application/plugins/composite_resolver.h>
 #include <loader/firmware_api/firmware_api.h>
 
 #include <furi.h>
@@ -74,7 +76,7 @@ void nfc_supported_cards_free(NfcSupportedCards* instance) {
 }
 
 static NfcSupportedCardsLoadContext*
-    nfc_supported_cards_load_context_alloc(ElfApiInterface* api_interface) {
+    nfc_supported_cards_load_context_alloc(const ElfApiInterface* api_interface) {
     NfcSupportedCardsLoadContext* instance = malloc(sizeof(NfcSupportedCardsLoadContext));
 
     instance->storage = furi_record_open(RECORD_STORAGE);
@@ -111,7 +113,7 @@ static const NfcSupportedCardsPlugin*
     const NfcSupportedCardsPlugin* plugin = NULL;
     do {
         if(instance->app) flipper_application_free(instance->app);
-        instance->app = flipper_application_alloc(instance->storage, firmware_api_interface);
+        instance->app = flipper_application_alloc(instance->storage, instance->api_interface);
         if(flipper_application_preload(instance->app, furi_string_get_cstr(path)) !=
            FlipperApplicationPreloadStatusSuccess)
             break;
@@ -162,7 +164,11 @@ void nfc_supported_cards_load_cache(NfcSupportedCards* instance) {
            (instance->load_state == NfcSupportedCardsLoadStateFail))
             break;
 
-        instance->load_context = nfc_supported_cards_load_context_alloc(NULL);
+        CompositeApiResolver* resolver = composite_api_resolver_alloc();
+        composite_api_resolver_add(resolver, firmware_api_interface);
+        composite_api_resolver_add(resolver, nfc_application_api_interface);
+        instance->load_context =
+            nfc_supported_cards_load_context_alloc(composite_api_resolver_get(resolver));
 
         while(true) {
             const NfcSupportedCardsPlugin* plugin =
@@ -209,7 +215,11 @@ bool nfc_supported_cards_read(NfcSupportedCards* instance, NfcDevice* device, Nf
     do {
         if(instance->load_state != NfcSupportedCardsLoadStateSuccess) break;
 
-        instance->load_context = nfc_supported_cards_load_context_alloc(NULL);
+        CompositeApiResolver* resolver = composite_api_resolver_alloc();
+        composite_api_resolver_add(resolver, firmware_api_interface);
+        composite_api_resolver_add(resolver, nfc_application_api_interface);
+        instance->load_context =
+            nfc_supported_cards_load_context_alloc(composite_api_resolver_get(resolver));
 
         NfcSupportedCardsPluginCache_it_t iter;
         for(NfcSupportedCardsPluginCache_it(iter, instance->plugins_cache_arr);
@@ -255,7 +265,11 @@ bool nfc_supported_cards_parse(
     do {
         if(instance->load_state != NfcSupportedCardsLoadStateSuccess) break;
 
-        instance->load_context = nfc_supported_cards_load_context_alloc(NULL);
+        CompositeApiResolver* resolver = composite_api_resolver_alloc();
+        composite_api_resolver_add(resolver, firmware_api_interface);
+        composite_api_resolver_add(resolver, nfc_application_api_interface);
+        instance->load_context =
+            nfc_supported_cards_load_context_alloc(composite_api_resolver_get(resolver));
 
         NfcSupportedCardsPluginCache_it_t iter;
         for(NfcSupportedCardsPluginCache_it(iter, instance->plugins_cache_arr);

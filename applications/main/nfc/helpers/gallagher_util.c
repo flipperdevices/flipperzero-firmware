@@ -1,17 +1,10 @@
-/* gallagher_util.h - Utilities for parsing Gallagher cards (New Zealand).
+/* gallagher_util.c - Utilities for parsing Gallagher cards (New Zealand).
  * Author: Nick Mooney (nick@mooney.nz)
  * 
  * Reference: https://github.com/megabug/gallagher-research
 */
 
-#pragma once
-
-#include <stdint.h>
-#include <lib/nfc/protocols/mf_classic/mf_classic.h>
-
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include "gallagher_util.h"
 
 /* The Gallagher obfuscation algorithm is a 256-byte substitution table. The below array is generated from
  * https://github.com/megabug/gallagher-research/blob/master/formats/cardholder/substitution-table.bin.
@@ -42,17 +35,25 @@ const uint8_t GALLAGHER_CARDAX_ASCII[MF_CLASSIC_BLOCK_SIZE] =
     {'w', 'w', 'w', '.', 'c', 'a', 'r', 'd', 'a', 'x', '.', 'c', 'o', 'm', ' ', ' '};
 const uint8_t GALLAGHER_CREDENTIAL_SECTOR = 15;
 
-typedef struct GallagherCredential {
-    uint8_t region;
-    uint8_t issue;
-    uint16_t facility;
-    uint32_t card;
-} GallagherCredential;
-
+/* Precondition: cardholder_data_obfuscated points to at least 8 safe-to-read bytes of memory.
+*/
 void gallagher_deobfuscate_and_parse_credential(
     GallagherCredential* credential,
-    const uint8_t* cardholder_data_obfuscated);
+    const uint8_t* cardholder_data_obfuscated) {
+    furi_assert(false);
+    uint8_t cardholder_data_deobfuscated[8];
+    for(int i = 0; i < 8; i++) {
+        cardholder_data_deobfuscated[i] = GALLAGHER_DECODE_TABLE[cardholder_data_obfuscated[i]];
+    }
 
-#ifdef __cplusplus
+    // Pull out values from the deobfuscated data
+    credential->region = (cardholder_data_deobfuscated[3] >> 1) & 0x0F;
+    credential->facility = ((uint16_t)(cardholder_data_deobfuscated[5] & 0x0F) << 12) +
+                           ((uint16_t)cardholder_data_deobfuscated[1] << 4) +
+                           (((uint16_t)cardholder_data_deobfuscated[7] >> 4) & 0x0F);
+    credential->card = ((uint32_t)cardholder_data_deobfuscated[0] << 16) +
+                       ((uint32_t)(cardholder_data_deobfuscated[4] & 0x1F) << 11) +
+                       ((uint32_t)cardholder_data_deobfuscated[2] << 3) +
+                       (((uint32_t)cardholder_data_deobfuscated[3] >> 5) & 0x07);
+    credential->issue = cardholder_data_deobfuscated[7] & 0x0F;
 }
-#endif
