@@ -4,3 +4,4 @@
 #include "loading_scene.h"
 #include "ip_scene.h"
 #include "button_panel_scene.h"
+#include "about_scene.h"

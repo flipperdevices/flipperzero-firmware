@@ -115,7 +115,6 @@ void spotify_remote_button_panel_scene_on_enter(void* context) {
 bool spotify_remote_button_panel_scene_on_event(void* context, SceneManagerEvent event) {
     UNUSED(context);
     UNUSED(event);
-
     return false;
 }
 

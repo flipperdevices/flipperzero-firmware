@@ -10,7 +10,6 @@
 #include <gui/modules/text_box.h>
 #include <gui/modules/button_panel.h>
 #include <gui/modules/text_input.h>
-#include <gui/modules/widget.h>
 
 // Derek Jamison's uart helper
 #include "uart_helper.h"
@@ -36,9 +35,9 @@ typedef enum {
     SPOTIFY_REMOTE_LOADING_SCENE,
     SPOTIFY_REMOTE_IP_SCENE,
     SPOTIFY_REMOTE_BUTTON_PANEL_SCENE,
+    SPOTIFY_REMOTE_ABOUT_SCENE,
     SPOTIFY_REMOTE_WIFI_SSID_SCENE,
     SPOTIFY_REMOTE_WIFI_PASSWORD_SCENE,
-    SPOTIFY_REMOTE_ABOUT_SCENE,
     SPOTIFY_REMOTE_SCENE_COUNT,
 } SpotifyRemoteScene;
 
@@ -51,14 +50,13 @@ typedef struct SpotifyRemoteApp {
     Gui* gui;
     SceneManager* scene_manager;
     ViewDispatcher* view_dispatcher;
-    Submenu* main_menu;
+    Submenu* submenu;
     Loading* loading;
-    TextBox* ip;
+    TextBox* text_box;
     ButtonPanel* button_panel;
     UartHelper* uart_helper;
     FuriString* message_recieved;
     FuriString* wifi_ssid;
     FuriString* wifi_password;
     bool is_remote_launched;
-
 } SpotifyRemoteApp;

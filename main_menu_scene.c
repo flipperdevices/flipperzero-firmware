@@ -6,6 +6,8 @@ void spotify_remote_main_menu_callback(void* context, uint32_t index) {
     switch(index) {
     case SPOTIFY_REMOTE_MAIN_MENU_SCENE_LAUNCH:
         app->is_remote_launched = true;
+        uart_helper_send(app->uart_helper, "7\n", 2);
+        uart_helper_send(app->uart_helper, "7\n", 2);
         scene_manager_handle_custom_event(
             app->scene_manager, SPOTIFY_REMOTE_MAIN_MENU_SCENE_LAUNCH_EVENT);
         break;
@@ -25,23 +27,23 @@ void spotify_remote_main_menu_callback(void* context, uint32_t index) {
 // main menu scene manager callbacks
 void spotify_remote_main_menu_scene_on_enter(void* context) {
     SpotifyRemoteApp* app = context;
-    submenu_reset(app->main_menu);
-    submenu_set_header(app->main_menu, "Spotify Remote");
+    submenu_reset(app->submenu);
+    submenu_set_header(app->submenu, "Spotify Remote");
 
     submenu_add_item(
-        app->main_menu,
+        app->submenu,
         "Launch Remote",
         SPOTIFY_REMOTE_MAIN_MENU_SCENE_LAUNCH,
         spotify_remote_main_menu_callback,
         app);
     submenu_add_item(
-        app->main_menu,
+        app->submenu,
         "Config",
         SPOTIFY_REMOTE_MAIN_MENU_SCENE_CONFIG,
         spotify_remote_main_menu_callback,
         app);
     submenu_add_item(
-        app->main_menu,
+        app->submenu,
         "About",
         SPOTIFY_REMOTE_MAIN_MENU_SCENE_ABOUT,
         spotify_remote_main_menu_callback,
@@ -80,5 +82,5 @@ bool spotify_remote_main_menu_scene_on_event(void* context, SceneManagerEvent ev
 
 void spotify_remote_main_menu_scene_on_exit(void* context) {
     SpotifyRemoteApp* app = context;
-    submenu_reset(app->main_menu);
+    submenu_reset(app->submenu);
 }
