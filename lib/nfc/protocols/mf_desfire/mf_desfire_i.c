@@ -481,16 +481,19 @@ bool mf_desfire_application_load(MfDesfireApplication* data, const char* prefix,
     do {
         if(!mf_desfire_key_settings_load(&data->key_settings, prefix, ff)) break;
 
-        const uint32_t key_version_count = data->key_settings.max_keys;
-        simple_array_init(data->key_versions, key_version_count);
-
         uint32_t i;
-        for(i = 0; i < key_version_count; ++i) {
-            if(!mf_desfire_key_version_load(simple_array_get(data->key_versions, i), prefix, i, ff))
-                break;
-        }
+        const uint32_t key_version_count = data->key_settings.max_keys;
+        if(key_version_count) {
+            simple_array_init(data->key_versions, key_version_count);
 
-        if(i != key_version_count) break;
+            for(i = 0; i < key_version_count; ++i) {
+                if(!mf_desfire_key_version_load(
+                       simple_array_get(data->key_versions, i), prefix, i, ff))
+                    break;
+            }
+
+            if(i != key_version_count) break;
+        }
 
         uint32_t file_count;
         if(!mf_desfire_file_count_load(&file_count, prefix, ff)) {
