@@ -61,6 +61,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - [WS: add protocol EMOS E601x #107 (By linusnielsen)](https://github.com/flipperdevices/flipperzero-good-faps/pull/107)
 - UL: [SubGHz: Update Honeywell (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/8c9d9af6a0d16fd98cb11ec6e159a5e0c0c030b6)
 - [Reworded MissingImports error message (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/13d97ab03741c2159c1d0114573a2c54426d6a8f)
+- OFW: [Furi_hal_rtc: new function #3294 (By Leptopt1los)](https://github.com/flipperdevices/flipperzero-firmware/pull/3294)
 
 ## IN THIS BRANCH:
 
@@ -177,7 +178,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - [Faster Power Off Timeout (Thanks casimirextreme)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/issues/1020)
 - Added: [Tetris Modern v1.3 (By Alloy-Lou)](https://github.com/Alloy-Lou/all-the-plugins/tree/dev/base_pack/tetris_modern_game)
 - OFW: [NFC UI refactor #3361 (By RebornedBrain)](https://github.com/flipperdevices/flipperzero-firmware/pull/3361)
-- OFW: [Furi_hal_rtc: new function #3294 (By Leptopt1los)](https://github.com/flipperdevices/flipperzero-firmware/pull/3294)
 
 <a name="release">
 
