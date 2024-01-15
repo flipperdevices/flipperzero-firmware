@@ -5,7 +5,7 @@
 */
 
 #include "nfc_supported_card_plugin.h"
-#include "../../helpers/gallagher_util.h"
+#include "../../nfc_app_api.h"
 
 #include <flipper_application/flipper_application.h>
 #include <nfc/protocols/mf_classic/mf_classic.h>
@@ -25,7 +25,7 @@ static bool gallagher_parse(const NfcDevice* device, FuriString* parsed_data) {
     // It's possible for a single tag to contain multiple credentials,
     // but this is currently unimplementecd.
     const uint8_t credential_sector_start_block_number =
-        mf_classic_get_first_block_num_of_sector(GALLAGHER_CREDENTIAL_SECTOR);
+        mf_classic_get_first_block_num_of_sector(NFC_APP_API_GALLAGHER_CREDENTIAL_SECTOR);
 
     // Test 1: The first 8 bytes and the second 8 bytes should be bitwise inverses.
     const uint8_t* credential_block_start_ptr =
@@ -41,13 +41,15 @@ static bool gallagher_parse(const NfcDevice* device, FuriString* parsed_data) {
     // Test 2: The contents of the second block should be equal to the GALLAGHER_CARDAX_ASCII constant.
     const uint8_t* cardax_block_start_ptr =
         &data->block[credential_sector_start_block_number + 1].data[0];
-    if(memcmp(cardax_block_start_ptr, &GALLAGHER_CARDAX_ASCII, MF_CLASSIC_BLOCK_SIZE) != 0) {
+    if(memcmp(cardax_block_start_ptr, NFC_APP_API_GALLAGHER_CARDAX_ASCII, MF_CLASSIC_BLOCK_SIZE) !=
+       0) {
         return false;
     }
 
     // Deobfuscate the credential data
     GallagherCredential credential;
-    gallagher_deobfuscate_and_parse_credential(&credential, credential_block_start_ptr);
+    nfc_app_api_gallagher_deobfuscate_and_parse_credential(
+        &credential, credential_block_start_ptr);
 
     char display_region = 'A';
     // Per https://github.com/megabug/gallagher-research/blob/master/formats/cardholder/cardholder.md,
