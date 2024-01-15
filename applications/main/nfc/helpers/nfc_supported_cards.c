@@ -102,6 +102,7 @@ static void nfc_supported_cards_load_context_free(NfcSupportedCardsLoadContext* 
     storage_file_free(instance->directory);
 
     furi_record_close(RECORD_STORAGE);
+    // TODO: We likely have to free the composite resolver here, too
     free(instance);
 }
 
