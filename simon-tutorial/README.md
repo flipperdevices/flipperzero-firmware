@@ -24,7 +24,11 @@ Ensure your build environment is correctly set up by following the steps outline
 ## Steps
 Click on any step to see all of the detailed instructions for that step.
 
-Each step (up to step 7) of this tutorial has a corresponding directory in the [completed directory](./completed/README.md). If you have read and understood the first seven steps, feel free to copy the files from the `step-07` directory into your own project and continue from there. You will want to redo **step 1e**, edit the `fap_author` and `fap_weburl` entries.
+For the most fun, it is recommended that you at least do steps 8-16 yourself; so that you build your very own game!  Also, be sure to read the first 7 steps, and pay attention to the notes on `step 3c` & `step 6d` since you may need the information later.  You should edit the `application.fam` file's `fap_author` and `fap_weburl` entries to have **your** name and url (this was from `step 1e`).
+
+Each step of this tutorial has a corresponding directory in the [completed directory](./completed/README.md).  If you are trying to learn coding on the Flipper Zero, you may want to do all the steps yourself.  If you are just trying to get a working game, you can copy the files from the completed directory into your project.  If you are stuck, you can look at the completed files to see what you are missing (typically the `app.c` file).
+
+NOTE: If you are getting strange behavior where the step doesn't seem to be doing anything, you might want to try changing your `app_id` in `application.fam` as your firmware may pre-install some version of this application.
 
 - [Step 1. Create a new `flipsimon` project](#step-1-create-a-new-flipsimon-project)
 - [Step 2. Setup basic FlipBoard project](#step-2-setup-basic-flipboard-project)
