@@ -163,6 +163,10 @@ I maintain another application that uses the **geiger board** to roll dice by us
 
 <img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/user/IMG-1552.jpg" width=50% height=50%>
 
+[hackster.io] - https://www.hackster.io/news/erwin-ried-s-flippenheimer-gives-the-flipper-zero-pocket-multi-tool-radiation-monitoring-powers-a6fd3460f858
+
+<img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/user/image_36GFUa60bI.jpg" width=50% height=50%>
+
 [Seanclark2409 [YouTube]](https://www.youtube.com/@seanclark2409) (click on the picture to see the video): 
 
 [![Watch the video](https://img.youtube.com/vi/JQB2jvY1oZ0/maxresdefault.jpg)](https://youtu.be/JQB2jvY1oZ0)
@@ -175,6 +179,10 @@ I maintain another application that uses the **geiger board** to roll dice by us
 
 [![Watch the video](https://img.youtube.com/vi/-I57_S_AXYY/maxresdefault.jpg)](https://youtu.be/-I57_S_AXYY)
 
+[Erwin Ried [YouTube]](https://www.youtube.com/@eried) (click on the picture to see the video):
+
+[![Watch the video](https://img.youtube.com/vi/lVqxNnsxskg/maxresdefault.jpg)](https://www.youtube.com/watch?v=lVqxNnsxskg)
+
 ## What's next ?
 
 Here are some nice ideas to improve this app:
@@ -185,6 +193,10 @@ Here are some nice ideas to improve this app:
 * Buzz when it gets dangerous like a dosimeter
 
 ## Changelog
+
+* 2024-01-15
+  * Global schema has been updated
+  * Gallery has beed upadated
 
 * 2023-08-06
   * Code optimization (shift operation on CPS array has been removed)
