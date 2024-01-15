@@ -817,8 +817,7 @@ void subghz_device_cc1101_ext_stop_async_tx() {
 
     // Deinitialize GPIO
     furi_hal_gpio_write(subghz_device_cc1101_ext->g0_pin, false);
-    furi_hal_gpio_init(
-        subghz_device_cc1101_ext->g0_pin, GpioModeAnalog, GpioPullDown, GpioSpeedLow);
+    furi_hal_gpio_init(subghz_device_cc1101_ext->g0_pin, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
 
     // Deinitialize Timer
     furi_hal_bus_disable(FuriHalBusTIM17);

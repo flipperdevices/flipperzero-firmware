@@ -687,7 +687,7 @@ bool furi_hal_subghz_start_async_tx(FuriHalSubGhzAsyncTxCallback callback, void*
 
     // Connect CC1101_GD0 to TIM2 as output
     furi_hal_gpio_init_ex(
-        &gpio_cc1101_g0, GpioModeAltFunctionPushPull, GpioPullDown, GpioSpeedLow, GpioAltFn1TIM2);
+        &gpio_cc1101_g0, GpioModeAltFunctionPushPull, GpioPullNo, GpioSpeedLow, GpioAltFn1TIM2);
 
     // Configure DMA
     LL_DMA_InitTypeDef dma_config = {0};
@@ -704,7 +704,6 @@ bool furi_hal_subghz_start_async_tx(FuriHalSubGhzAsyncTxCallback callback, void*
     dma_config.Priority =
         LL_DMA_PRIORITY_VERYHIGH; // Ensure that ARR is updated before anyone else try to check it
     LL_DMA_Init(SUBGHZ_DMA_CH1_DEF, &dma_config);
-    // Ensure that async tx state transition always preempts other ISRs
     furi_hal_interrupt_set_isr(SUBGHZ_DMA_CH1_IRQ, furi_hal_subghz_async_tx_dma_isr, NULL);
     LL_DMA_EnableIT_TC(SUBGHZ_DMA_CH1_DEF);
     LL_DMA_EnableIT_HT(SUBGHZ_DMA_CH1_DEF);
@@ -783,7 +782,7 @@ void furi_hal_subghz_stop_async_tx() {
     furi_hal_subghz_idle();
 
     // Deinitialize GPIO
-    furi_hal_gpio_init(&gpio_cc1101_g0, GpioModeAnalog, GpioPullDown, GpioSpeedLow);
+    furi_hal_gpio_init(&gpio_cc1101_g0, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
 #ifdef FURI_HAL_SUBGHZ_TX_GPIO
     furi_hal_gpio_write(&FURI_HAL_SUBGHZ_TX_GPIO, false);
 #endif
