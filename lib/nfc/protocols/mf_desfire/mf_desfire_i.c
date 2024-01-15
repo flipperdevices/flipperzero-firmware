@@ -180,46 +180,49 @@ bool mf_desfire_file_settings_parse(MfDesfireFileSettings* data, const BitBuffer
         const size_t min_data_size =
             sizeof(MfDesfireFileSettingsHeader) + sizeof(MfDesfireFileSettingsData);
 
-        if(data_size < min_data_size) break;
+        if(data_size < min_data_size) {
+            MfDesfireFileSettingsLayout layout;
+            bit_buffer_write_bytes(buf, &layout, sizeof(MfDesfireFileSettingsLayout));
 
-        MfDesfireFileSettingsLayout layout;
-        const uint8_t* get_file_settings_resp = bit_buffer_get_data(buf);
-        memcpy(&layout, get_file_settings_resp, sizeof(MfDesfireFileSettingsLayout));
-        // bit_buffer_write_bytes(buf, &layout, sizeof(MfDesfireFileSettingsLayout));
+            data->type = layout.header.type;
+            data->comm = layout.header.comm;
+            data->access_rights = layout.header.access_rights;
 
-        data->type = layout.header.type;
-        data->comm = layout.header.comm;
-        data->access_rights = layout.header.access_rights;
+            if(data->type == MfDesfireFileTypeStandard || data->type == MfDesfireFileTypeBackup) {
+                if(data_size != min_data_size) break;
 
-        if(data->type == MfDesfireFileTypeStandard || data->type == MfDesfireFileTypeBackup) {
-            // if(data_size != min_data_size) break;
+                data->data.size = layout.data.size;
+            } else if(data->type == MfDesfireFileTypeValue) {
+                if(data_size !=
+                   sizeof(MfDesfireFileSettingsHeader) + sizeof(MfDesfireFileSettingsValue))
+                    break;
 
-            data->data.size = layout.data.size;
-            FURI_LOG_I("Desfire", "File size: %ld", data->data.size);
+                data->value.lo_limit = layout.value.lo_limit;
+                data->value.hi_limit = layout.value.hi_limit;
+                data->value.limited_credit_value = layout.value.limited_credit_value;
+                data->value.limited_credit_enabled = layout.value.limited_credit_enabled;
 
-        } else if(data->type == MfDesfireFileTypeValue) {
-            if(data_size !=
-               sizeof(MfDesfireFileSettingsHeader) + sizeof(MfDesfireFileSettingsValue))
+            } else if(
+                data->type == MfDesfireFileTypeLinearRecord ||
+                data->type == MfDesfireFileTypeCyclicRecord) {
+                if(data_size !=
+                   sizeof(MfDesfireFileSettingsHeader) + sizeof(MfDesfireFileSettingsRecord))
+                    break;
+
+                data->record.size = layout.record.size;
+                data->record.max = layout.record.max;
+                data->record.cur = layout.record.cur;
+
+            } else {
                 break;
-
-            data->value.lo_limit = layout.value.lo_limit;
-            data->value.hi_limit = layout.value.hi_limit;
-            data->value.limited_credit_value = layout.value.limited_credit_value;
-            data->value.limited_credit_enabled = layout.value.limited_credit_enabled;
-
-        } else if(
-            data->type == MfDesfireFileTypeLinearRecord ||
-            data->type == MfDesfireFileTypeCyclicRecord) {
-            if(data_size !=
-               sizeof(MfDesfireFileSettingsHeader) + sizeof(MfDesfireFileSettingsRecord))
-                break;
-
-            data->record.size = layout.record.size;
-            data->record.max = layout.record.max;
-            data->record.cur = layout.record.cur;
-
+            }
         } else {
-            break;
+            // TODO FL-3750: process HID Desfire command response here
+            // Set default fields for now
+            data->type = 0;
+            data->comm = 0;
+            data->access_rights = 0;
+            data->data.size = 0;
         }
 
         parsed = true;
