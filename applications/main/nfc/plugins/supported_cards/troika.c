@@ -5,6 +5,7 @@
 #include <nfc/nfc_device.h>
 #include <nfc/helpers/nfc_util.h>
 #include <nfc/protocols/mf_classic/mf_classic_poller_sync.h>
+#include "furi_hal_rtc.h"
 
 #define TAG "Troika"
 
@@ -100,7 +101,12 @@ static TroikaLayout troika_get_layout(const MfClassicData* data, uint8_t start_b
         result = TroikaLayoutE;
         break;
     default:
-        return TroikaLayoutUnknown;
+        // If debug is enabled - pass the actual layout value for the debug text
+        if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
+            return layout;
+        } else {
+            return TroikaLayoutUnknown;
+        }
     }
 
     return result;
@@ -122,7 +128,12 @@ static TroikaSubLayout troika_get_sub_layout(const MfClassicData* data, uint8_t 
         result = TroikaSublayout5;
         break;
     default:
-        return TroikaSublayoutUnknown;
+        // If debug is enabled - pass the actual sublayout value for the debug text
+        if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
+            return sub_layout;
+        } else {
+            return TroikaSublayoutUnknown;
+        }
     }
 
     return result;
@@ -288,14 +299,28 @@ static bool troika_parse(const NfcDevice* device, FuriString* parsed_data) {
         TroikaLayout layout = troika_get_layout(data, start_block_num);
         TroikaSubLayout sub_layout = troika_get_sub_layout(data, start_block_num);
 
-        if(layout == TroikaLayoutUnknown || sub_layout == TroikaSublayoutUnknown) break;
+        if(!furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
+            // If debug is enabled - proceed even if layout or sublayout is unknown, that will make collecting data easier
+            if(layout == TroikaLayoutUnknown || sub_layout == TroikaSublayoutUnknown) break;
+        }
 
         uint16_t balance = troika_get_balance(data, start_block_num, layout, sub_layout);
 
         uint32_t number = troika_get_number(data, start_block_num, layout, sub_layout);
 
-        furi_string_printf(parsed_data, "\e#Troika\nNum: %lu\nBalance: %u RUR", number, balance);
-
+        if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
+            furi_string_printf(
+                parsed_data,
+                "\e#Troika\nNum: %lu\nBalance: %u RUR\nLayout: %02x\nSublayout: %02x\nData Block: %u",
+                number,
+                balance,
+                layout,
+                sub_layout,
+                start_block_num);
+        } else {
+            furi_string_printf(
+                parsed_data, "\e#Troika\nNum: %lu\nBalance: %u RUR", number, balance);
+        }
         parsed = true;
     } while(false);
 
