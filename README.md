@@ -40,7 +40,7 @@ Black wire is usually used for the ground (sleeve on the schematic). You can use
 
 Global schema:
 
-<p align="center"><img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/schema.jpg" width=75% height=75%></p>
+<p align="center"><img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/schema.jpg" width=100% height=100%></p>
 
 **Note:** Polarity of the geiger tube may be different on your board
 
