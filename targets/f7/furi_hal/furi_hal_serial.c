@@ -12,7 +12,13 @@
 
 #include <furi.h>
 
-#define FURI_HAL_USART_OVERSAMPLING LL_USART_OVERSAMPLING_16
+#define FURI_HAL_SERIAL_USART_OVERSAMPLING LL_USART_OVERSAMPLING_16
+
+#define FURI_HAL_SERIAL_USART_DMA_INSTANCE (DMA1)
+#define FURI_HAL_SERIAL_USART_DMA_CHANNEL (LL_DMA_CHANNEL_6)
+
+#define FURI_HAL_SERIAL_LPUART_DMA_INSTANCE (DMA1)
+#define FURI_HAL_SERIAL_LPUART_DMA_CHANNEL (LL_DMA_CHANNEL_7)
 
 typedef struct {
     uint8_t* buffer_rx_ptr;
@@ -34,9 +40,9 @@ static void furi_hal_serial_async_rx_configure(
     FuriHalSerialAsyncRxCallback callback,
     void* context);
 
-static void furi_hal_serial_usart_irq_callback() {
+static void furi_hal_serial_usart_irq_callback(void) {
     FuriHalSerialRxEvent event = 0;
-    //if no errors
+    // Notification flags
     if(USART1->ISR & USART_ISR_RXNE_RXFNE) {
         event |= FuriHalSerialRxEventData;
     }
@@ -44,7 +50,7 @@ static void furi_hal_serial_usart_irq_callback() {
         USART1->ICR = USART_ICR_IDLECF;
         event |= FuriHalSerialRxEventIdle;
     }
-    //if errors
+    // Error flags
     if(USART1->ISR & USART_ISR_ORE) {
         USART1->ICR = USART_ICR_ORECF;
         event |= FuriHalSerialRxEventOverrunError;
@@ -80,12 +86,14 @@ static void furi_hal_serial_usart_irq_callback() {
     }
 }
 
-static void furi_hal_serial_usart_dma_rx_isr() {
-#if LL_DMA_CHANNEL_6 == LL_DMA_CHANNEL_6
-    if(LL_DMA_IsActiveFlag_HT6(DMA1)) {
-        LL_DMA_ClearFlag_HT6(DMA1);
+static void furi_hal_serial_usart_dma_rx_isr(void) {
+#if FURI_HAL_SERIAL_USART_DMA_CHANNEL == LL_DMA_CHANNEL_6
+    if(LL_DMA_IsActiveFlag_HT6(FURI_HAL_SERIAL_USART_DMA_INSTANCE)) {
+        LL_DMA_ClearFlag_HT6(FURI_HAL_SERIAL_USART_DMA_INSTANCE);
         furi_hal_serial[FuriHalSerialIdUsart].buffer_rx_index_write =
-            FURI_HAL_SERIAL_DMA_BUFFER_SIZE - LL_DMA_GetDataLength(DMA1, LL_DMA_CHANNEL_6);
+            FURI_HAL_SERIAL_DMA_BUFFER_SIZE -
+            LL_DMA_GetDataLength(
+                FURI_HAL_SERIAL_USART_DMA_INSTANCE, FURI_HAL_SERIAL_USART_DMA_CHANNEL);
         if((furi_hal_serial[FuriHalSerialIdUsart].buffer_rx_index_read >
             furi_hal_serial[FuriHalSerialIdUsart].buffer_rx_index_write) ||
            (furi_hal_serial[FuriHalSerialIdUsart].buffer_rx_index_read <
@@ -99,8 +107,8 @@ static void furi_hal_serial_usart_dma_rx_isr() {
             }
         }
 
-    } else if(LL_DMA_IsActiveFlag_TC6(DMA1)) {
-        LL_DMA_ClearFlag_TC6(DMA1);
+    } else if(LL_DMA_IsActiveFlag_TC6(FURI_HAL_SERIAL_USART_DMA_INSTANCE)) {
+        LL_DMA_ClearFlag_TC6(FURI_HAL_SERIAL_USART_DMA_INSTANCE);
 
         if(furi_hal_serial[FuriHalSerialIdUsart].buffer_rx_index_read <
            FURI_HAL_SERIAL_DMA_BUFFER_SIZE * 3 / 4) {
@@ -125,32 +133,46 @@ static void furi_hal_serial_usart_init_dma_rx(void) {
     furi_hal_serial[FuriHalSerialIdUsart].buffer_rx_index_read = 0;
     furi_hal_serial[FuriHalSerialIdUsart].buffer_rx_ptr = malloc(FURI_HAL_SERIAL_DMA_BUFFER_SIZE);
     LL_DMA_SetMemoryAddress(
-        DMA1, LL_DMA_CHANNEL_6, (uint32_t)furi_hal_serial[FuriHalSerialIdUsart].buffer_rx_ptr);
-    LL_DMA_SetPeriphAddress(DMA1, LL_DMA_CHANNEL_6, (uint32_t) & (USART1->RDR));
+        FURI_HAL_SERIAL_USART_DMA_INSTANCE,
+        FURI_HAL_SERIAL_USART_DMA_CHANNEL,
+        (uint32_t)furi_hal_serial[FuriHalSerialIdUsart].buffer_rx_ptr);
+    LL_DMA_SetPeriphAddress(
+        FURI_HAL_SERIAL_USART_DMA_INSTANCE,
+        FURI_HAL_SERIAL_USART_DMA_CHANNEL,
+        (uint32_t) & (USART1->RDR));
 
     LL_DMA_ConfigTransfer(
-        DMA1,
-        LL_DMA_CHANNEL_6,
+        FURI_HAL_SERIAL_USART_DMA_INSTANCE,
+        FURI_HAL_SERIAL_USART_DMA_CHANNEL,
         LL_DMA_DIRECTION_PERIPH_TO_MEMORY | LL_DMA_MODE_CIRCULAR | LL_DMA_PERIPH_NOINCREMENT |
             LL_DMA_MEMORY_INCREMENT | LL_DMA_PDATAALIGN_BYTE | LL_DMA_MDATAALIGN_BYTE |
             LL_DMA_PRIORITY_HIGH);
-    LL_DMA_SetDataLength(DMA1, LL_DMA_CHANNEL_6, FURI_HAL_SERIAL_DMA_BUFFER_SIZE);
-    LL_DMA_SetPeriphRequest(DMA1, LL_DMA_CHANNEL_6, LL_DMAMUX_REQ_USART1_RX);
+    LL_DMA_SetDataLength(
+        FURI_HAL_SERIAL_USART_DMA_INSTANCE,
+        FURI_HAL_SERIAL_USART_DMA_CHANNEL,
+        FURI_HAL_SERIAL_DMA_BUFFER_SIZE);
+    LL_DMA_SetPeriphRequest(
+        FURI_HAL_SERIAL_USART_DMA_INSTANCE,
+        FURI_HAL_SERIAL_USART_DMA_CHANNEL,
+        LL_DMAMUX_REQ_USART1_RX);
 
     furi_hal_interrupt_set_isr(FuriHalInterruptIdDma1Ch6, furi_hal_serial_usart_dma_rx_isr, NULL);
 
-#if LL_DMA_CHANNEL_6 == LL_DMA_CHANNEL_6
-    if(LL_DMA_IsActiveFlag_HT6(DMA1)) LL_DMA_ClearFlag_HT6(DMA1);
-    if(LL_DMA_IsActiveFlag_TC6(DMA1)) LL_DMA_ClearFlag_TC6(DMA1);
-    if(LL_DMA_IsActiveFlag_TE6(DMA1)) LL_DMA_ClearFlag_TE6(DMA1);
+#if FURI_HAL_SERIAL_USART_DMA_CHANNEL == LL_DMA_CHANNEL_6
+    if(LL_DMA_IsActiveFlag_HT6(FURI_HAL_SERIAL_USART_DMA_INSTANCE))
+        LL_DMA_ClearFlag_HT6(FURI_HAL_SERIAL_USART_DMA_INSTANCE);
+    if(LL_DMA_IsActiveFlag_TC6(FURI_HAL_SERIAL_USART_DMA_INSTANCE))
+        LL_DMA_ClearFlag_TC6(FURI_HAL_SERIAL_USART_DMA_INSTANCE);
+    if(LL_DMA_IsActiveFlag_TE6(FURI_HAL_SERIAL_USART_DMA_INSTANCE))
+        LL_DMA_ClearFlag_TE6(FURI_HAL_SERIAL_USART_DMA_INSTANCE);
 #else
 #error Update this code. Would you kindly?
 #endif
 
-    LL_DMA_EnableIT_TC(DMA1, LL_DMA_CHANNEL_6);
-    LL_DMA_EnableIT_HT(DMA1, LL_DMA_CHANNEL_6);
+    LL_DMA_EnableIT_TC(FURI_HAL_SERIAL_USART_DMA_INSTANCE, FURI_HAL_SERIAL_USART_DMA_CHANNEL);
+    LL_DMA_EnableIT_HT(FURI_HAL_SERIAL_USART_DMA_INSTANCE, FURI_HAL_SERIAL_USART_DMA_CHANNEL);
 
-    LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_6);
+    LL_DMA_EnableChannel(FURI_HAL_SERIAL_USART_DMA_INSTANCE, FURI_HAL_SERIAL_USART_DMA_CHANNEL);
     LL_USART_EnableDMAReq_RX(USART1);
 
     LL_USART_EnableIT_IDLE(USART1);
@@ -158,24 +180,25 @@ static void furi_hal_serial_usart_init_dma_rx(void) {
 
 static void furi_hal_serial_usart_deinit_dma_rx(void) {
     if(furi_hal_serial[FuriHalSerialIdUsart].buffer_rx_ptr != NULL) {
-        LL_DMA_DisableChannel(DMA1, LL_DMA_CHANNEL_6);
+        LL_DMA_DisableChannel(
+            FURI_HAL_SERIAL_USART_DMA_INSTANCE, FURI_HAL_SERIAL_USART_DMA_CHANNEL);
         LL_USART_DisableDMAReq_RX(USART1);
 
         LL_USART_DisableIT_IDLE(USART1);
-        LL_DMA_DisableIT_TC(DMA1, LL_DMA_CHANNEL_6);
-        LL_DMA_DisableIT_HT(DMA1, LL_DMA_CHANNEL_6);
+        LL_DMA_DisableIT_TC(FURI_HAL_SERIAL_USART_DMA_INSTANCE, FURI_HAL_SERIAL_USART_DMA_CHANNEL);
+        LL_DMA_DisableIT_HT(FURI_HAL_SERIAL_USART_DMA_INSTANCE, FURI_HAL_SERIAL_USART_DMA_CHANNEL);
 
-        LL_DMA_ClearFlag_TC7(DMA1);
-        LL_DMA_ClearFlag_HT7(DMA1);
+        LL_DMA_ClearFlag_TC6(FURI_HAL_SERIAL_USART_DMA_INSTANCE);
+        LL_DMA_ClearFlag_HT6(FURI_HAL_SERIAL_USART_DMA_INSTANCE);
 
-        LL_DMA_DeInit(DMA1, LL_DMA_CHANNEL_6);
+        LL_DMA_DeInit(FURI_HAL_SERIAL_USART_DMA_INSTANCE, FURI_HAL_SERIAL_USART_DMA_CHANNEL);
         furi_hal_interrupt_set_isr(FuriHalInterruptIdDma1Ch6, NULL, NULL);
         free(furi_hal_serial[FuriHalSerialIdUsart].buffer_rx_ptr);
         furi_hal_serial[FuriHalSerialIdUsart].buffer_rx_ptr = NULL;
     }
 }
 
-static void furi_hal_serial_uasrt_init(FuriHalSerialHandle* handle, uint32_t baud) {
+static void furi_hal_serial_usart_init(FuriHalSerialHandle* handle, uint32_t baud) {
     furi_hal_bus_enable(FuriHalBusUSART1);
     LL_RCC_SetUSARTClockSource(LL_RCC_USART1_CLKSOURCE_PCLK2);
 
@@ -200,7 +223,7 @@ static void furi_hal_serial_uasrt_init(FuriHalSerialHandle* handle, uint32_t bau
     USART_InitStruct.Parity = LL_USART_PARITY_NONE;
     USART_InitStruct.TransferDirection = LL_USART_DIRECTION_TX_RX;
     USART_InitStruct.HardwareFlowControl = LL_USART_HWCONTROL_NONE;
-    USART_InitStruct.OverSampling = FURI_HAL_USART_OVERSAMPLING;
+    USART_InitStruct.OverSampling = FURI_HAL_SERIAL_USART_OVERSAMPLING;
     LL_USART_Init(USART1, &USART_InitStruct);
     LL_USART_EnableFIFO(USART1);
     LL_USART_ConfigAsyncMode(USART1);
@@ -215,9 +238,9 @@ static void furi_hal_serial_uasrt_init(FuriHalSerialHandle* handle, uint32_t bau
     furi_hal_serial[handle->id].enabled = true;
 }
 
-static void furi_hal_serial_lpuart_irq_callback() {
+static void furi_hal_serial_lpuart_irq_callback(void) {
     FuriHalSerialRxEvent event = 0;
-    //if no errors
+    // Notification flags
     if(LPUART1->ISR & USART_ISR_RXNE_RXFNE) {
         event |= FuriHalSerialRxEventData;
     }
@@ -225,7 +248,7 @@ static void furi_hal_serial_lpuart_irq_callback() {
         LPUART1->ICR = USART_ICR_IDLECF;
         event |= FuriHalSerialRxEventIdle;
     }
-    //if errors
+    // Error flags
     if(LPUART1->ISR & USART_ISR_ORE) {
         LPUART1->ICR = USART_ICR_ORECF;
         event |= FuriHalSerialRxEventOverrunError;
@@ -261,12 +284,14 @@ static void furi_hal_serial_lpuart_irq_callback() {
     }
 }
 
-static void furi_hal_serial_lpuart_dma_rx_isr() {
-#if LL_DMA_CHANNEL_7 == LL_DMA_CHANNEL_7
-    if(LL_DMA_IsActiveFlag_HT7(DMA1)) {
-        LL_DMA_ClearFlag_HT7(DMA1);
+static void furi_hal_serial_lpuart_dma_rx_isr(void) {
+#if FURI_HAL_SERIAL_LPUART_DMA_CHANNEL == LL_DMA_CHANNEL_7
+    if(LL_DMA_IsActiveFlag_HT7(FURI_HAL_SERIAL_LPUART_DMA_INSTANCE)) {
+        LL_DMA_ClearFlag_HT7(FURI_HAL_SERIAL_LPUART_DMA_INSTANCE);
         furi_hal_serial[FuriHalSerialIdLpuart].buffer_rx_index_write =
-            FURI_HAL_SERIAL_DMA_BUFFER_SIZE - LL_DMA_GetDataLength(DMA1, LL_DMA_CHANNEL_7);
+            FURI_HAL_SERIAL_DMA_BUFFER_SIZE -
+            LL_DMA_GetDataLength(
+                FURI_HAL_SERIAL_LPUART_DMA_INSTANCE, FURI_HAL_SERIAL_LPUART_DMA_CHANNEL);
         if((furi_hal_serial[FuriHalSerialIdLpuart].buffer_rx_index_read >
             furi_hal_serial[FuriHalSerialIdLpuart].buffer_rx_index_write) ||
            (furi_hal_serial[FuriHalSerialIdLpuart].buffer_rx_index_read <
@@ -280,8 +305,8 @@ static void furi_hal_serial_lpuart_dma_rx_isr() {
             }
         }
 
-    } else if(LL_DMA_IsActiveFlag_TC7(DMA1)) {
-        LL_DMA_ClearFlag_TC7(DMA1);
+    } else if(LL_DMA_IsActiveFlag_TC7(FURI_HAL_SERIAL_LPUART_DMA_INSTANCE)) {
+        LL_DMA_ClearFlag_TC7(FURI_HAL_SERIAL_LPUART_DMA_INSTANCE);
 
         if(furi_hal_serial[FuriHalSerialIdLpuart].buffer_rx_index_read <
            FURI_HAL_SERIAL_DMA_BUFFER_SIZE * 3 / 4) {
@@ -306,32 +331,46 @@ static void furi_hal_serial_lpuart_init_dma_rx(void) {
     furi_hal_serial[FuriHalSerialIdLpuart].buffer_rx_index_read = 0;
     furi_hal_serial[FuriHalSerialIdLpuart].buffer_rx_ptr = malloc(FURI_HAL_SERIAL_DMA_BUFFER_SIZE);
     LL_DMA_SetMemoryAddress(
-        DMA1, LL_DMA_CHANNEL_7, (uint32_t)furi_hal_serial[FuriHalSerialIdLpuart].buffer_rx_ptr);
-    LL_DMA_SetPeriphAddress(DMA1, LL_DMA_CHANNEL_7, (uint32_t) & (LPUART1->RDR));
+        FURI_HAL_SERIAL_LPUART_DMA_INSTANCE,
+        FURI_HAL_SERIAL_LPUART_DMA_CHANNEL,
+        (uint32_t)furi_hal_serial[FuriHalSerialIdLpuart].buffer_rx_ptr);
+    LL_DMA_SetPeriphAddress(
+        FURI_HAL_SERIAL_LPUART_DMA_INSTANCE,
+        FURI_HAL_SERIAL_LPUART_DMA_CHANNEL,
+        (uint32_t) & (LPUART1->RDR));
 
     LL_DMA_ConfigTransfer(
-        DMA1,
-        LL_DMA_CHANNEL_7,
+        FURI_HAL_SERIAL_LPUART_DMA_INSTANCE,
+        FURI_HAL_SERIAL_LPUART_DMA_CHANNEL,
         LL_DMA_DIRECTION_PERIPH_TO_MEMORY | LL_DMA_MODE_CIRCULAR | LL_DMA_PERIPH_NOINCREMENT |
             LL_DMA_MEMORY_INCREMENT | LL_DMA_PDATAALIGN_BYTE | LL_DMA_MDATAALIGN_BYTE |
             LL_DMA_PRIORITY_HIGH);
-    LL_DMA_SetDataLength(DMA1, LL_DMA_CHANNEL_7, FURI_HAL_SERIAL_DMA_BUFFER_SIZE);
-    LL_DMA_SetPeriphRequest(DMA1, LL_DMA_CHANNEL_7, LL_DMAMUX_REQ_LPUART1_RX);
+    LL_DMA_SetDataLength(
+        FURI_HAL_SERIAL_LPUART_DMA_INSTANCE,
+        FURI_HAL_SERIAL_LPUART_DMA_CHANNEL,
+        FURI_HAL_SERIAL_DMA_BUFFER_SIZE);
+    LL_DMA_SetPeriphRequest(
+        FURI_HAL_SERIAL_LPUART_DMA_INSTANCE,
+        FURI_HAL_SERIAL_LPUART_DMA_CHANNEL,
+        LL_DMAMUX_REQ_LPUART1_RX);
 
     furi_hal_interrupt_set_isr(FuriHalInterruptIdDma1Ch7, furi_hal_serial_lpuart_dma_rx_isr, NULL);
 
-#if LL_DMA_CHANNEL_7 == LL_DMA_CHANNEL_7
-    if(LL_DMA_IsActiveFlag_HT7(DMA1)) LL_DMA_ClearFlag_HT7(DMA1);
-    if(LL_DMA_IsActiveFlag_TC7(DMA1)) LL_DMA_ClearFlag_TC7(DMA1);
-    if(LL_DMA_IsActiveFlag_TE7(DMA1)) LL_DMA_ClearFlag_TE7(DMA1);
+#if FURI_HAL_SERIAL_LPUART_DMA_CHANNEL == LL_DMA_CHANNEL_7
+    if(LL_DMA_IsActiveFlag_HT7(FURI_HAL_SERIAL_LPUART_DMA_INSTANCE))
+        LL_DMA_ClearFlag_HT7(FURI_HAL_SERIAL_LPUART_DMA_INSTANCE);
+    if(LL_DMA_IsActiveFlag_TC7(FURI_HAL_SERIAL_LPUART_DMA_INSTANCE))
+        LL_DMA_ClearFlag_TC7(FURI_HAL_SERIAL_LPUART_DMA_INSTANCE);
+    if(LL_DMA_IsActiveFlag_TE7(FURI_HAL_SERIAL_LPUART_DMA_INSTANCE))
+        LL_DMA_ClearFlag_TE7(FURI_HAL_SERIAL_LPUART_DMA_INSTANCE);
 #else
 #error Update this code. Would you kindly?
 #endif
 
-    LL_DMA_EnableIT_TC(DMA1, LL_DMA_CHANNEL_7);
-    LL_DMA_EnableIT_HT(DMA1, LL_DMA_CHANNEL_7);
+    LL_DMA_EnableIT_TC(FURI_HAL_SERIAL_LPUART_DMA_INSTANCE, FURI_HAL_SERIAL_LPUART_DMA_CHANNEL);
+    LL_DMA_EnableIT_HT(FURI_HAL_SERIAL_LPUART_DMA_INSTANCE, FURI_HAL_SERIAL_LPUART_DMA_CHANNEL);
 
-    LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_7);
+    LL_DMA_EnableChannel(FURI_HAL_SERIAL_LPUART_DMA_INSTANCE, FURI_HAL_SERIAL_LPUART_DMA_CHANNEL);
     LL_USART_EnableDMAReq_RX(LPUART1);
 
     LL_USART_EnableIT_IDLE(LPUART1);
@@ -339,17 +378,20 @@ static void furi_hal_serial_lpuart_init_dma_rx(void) {
 
 static void furi_hal_serial_lpuart_deinit_dma_rx(void) {
     if(furi_hal_serial[FuriHalSerialIdLpuart].buffer_rx_ptr != NULL) {
-        LL_DMA_DisableChannel(DMA1, LL_DMA_CHANNEL_7);
+        LL_DMA_DisableChannel(
+            FURI_HAL_SERIAL_LPUART_DMA_INSTANCE, FURI_HAL_SERIAL_LPUART_DMA_CHANNEL);
         LL_USART_DisableDMAReq_RX(LPUART1);
 
         LL_USART_DisableIT_IDLE(LPUART1);
-        LL_DMA_DisableIT_TC(DMA1, LL_DMA_CHANNEL_7);
-        LL_DMA_DisableIT_HT(DMA1, LL_DMA_CHANNEL_7);
+        LL_DMA_DisableIT_TC(
+            FURI_HAL_SERIAL_LPUART_DMA_INSTANCE, FURI_HAL_SERIAL_LPUART_DMA_CHANNEL);
+        LL_DMA_DisableIT_HT(
+            FURI_HAL_SERIAL_LPUART_DMA_INSTANCE, FURI_HAL_SERIAL_LPUART_DMA_CHANNEL);
 
-        LL_DMA_ClearFlag_TC7(DMA1);
-        LL_DMA_ClearFlag_HT7(DMA1);
+        LL_DMA_ClearFlag_TC7(FURI_HAL_SERIAL_LPUART_DMA_INSTANCE);
+        LL_DMA_ClearFlag_HT7(FURI_HAL_SERIAL_LPUART_DMA_INSTANCE);
 
-        LL_DMA_DeInit(DMA1, LL_DMA_CHANNEL_7);
+        LL_DMA_DeInit(FURI_HAL_SERIAL_LPUART_DMA_INSTANCE, FURI_HAL_SERIAL_LPUART_DMA_CHANNEL);
         furi_hal_interrupt_set_isr(FuriHalInterruptIdDma1Ch7, NULL, NULL);
         free(furi_hal_serial[FuriHalSerialIdLpuart].buffer_rx_ptr);
         furi_hal_serial[FuriHalSerialIdLpuart].buffer_rx_ptr = NULL;
@@ -399,7 +441,7 @@ void furi_hal_serial_init(FuriHalSerialHandle* handle, uint32_t baud) {
     if(handle->id == FuriHalSerialIdLpuart) {
         furi_hal_serial_lpuart_init(handle, baud);
     } else if(handle->id == FuriHalSerialIdUsart) {
-        furi_hal_serial_uasrt_init(handle, baud);
+        furi_hal_serial_usart_init(handle, baud);
     }
 }
 
@@ -408,7 +450,7 @@ static uint32_t furi_hal_serial_get_prescaler(FuriHalSerialHandle* handle, uint3
     uint32_t divisor = (uartclk / baud);
     uint32_t prescaler = 0;
     if(handle->id == FuriHalSerialIdUsart) {
-        if(FURI_HAL_USART_OVERSAMPLING == LL_USART_OVERSAMPLING_16) {
+        if(FURI_HAL_SERIAL_USART_OVERSAMPLING == LL_USART_OVERSAMPLING_16) {
             divisor = (divisor / 16) >> 12;
         } else {
             divisor = (divisor / 8) >> 12;
@@ -481,7 +523,8 @@ void furi_hal_serial_set_br(FuriHalSerialHandle* handle, uint32_t baud) {
             LL_USART_Disable(USART1);
             uint32_t uartclk = LL_RCC_GetUSARTClockFreq(LL_RCC_USART1_CLKSOURCE);
             LL_USART_SetPrescaler(USART1, prescaler);
-            LL_USART_SetBaudRate(USART1, uartclk, prescaler, FURI_HAL_USART_OVERSAMPLING, baud);
+            LL_USART_SetBaudRate(
+                USART1, uartclk, prescaler, FURI_HAL_SERIAL_USART_OVERSAMPLING, baud);
             LL_USART_Enable(USART1);
         }
     } else if(handle->id == FuriHalSerialIdLpuart) {
@@ -511,7 +554,6 @@ void furi_hal_serial_deinit(FuriHalSerialHandle* handle) {
         furi_hal_serial_usart_deinit_dma_rx();
         furi_hal_gpio_init(&gpio_usart_tx, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
         furi_hal_gpio_init(&gpio_usart_rx, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
-        furi_hal_serial[handle->id].enabled = false;
     } else if(handle->id == FuriHalSerialIdLpuart) {
         if(furi_hal_bus_is_enabled(FuriHalBusLPUART1)) {
             furi_hal_bus_disable(FuriHalBusLPUART1);
@@ -522,8 +564,10 @@ void furi_hal_serial_deinit(FuriHalSerialHandle* handle) {
         furi_hal_serial_lpuart_deinit_dma_rx();
         furi_hal_gpio_init(&gpio_ext_pc0, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
         furi_hal_gpio_init(&gpio_ext_pc1, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
-        furi_hal_serial[handle->id].enabled = false;
+    } else {
+        furi_crash();
     }
+    furi_hal_serial[handle->id].enabled = false;
 }
 
 void furi_hal_serial_suspend(FuriHalSerialHandle* handle) {
@@ -623,32 +667,26 @@ static void furi_hal_serial_async_rx_configure(
     FuriHalSerialAsyncRxCallback callback,
     void* context) {
     if(handle->id == FuriHalSerialIdUsart) {
-        if(callback == NULL) {
-            furi_hal_interrupt_set_isr(FuriHalInterruptIdUart1, NULL, NULL);
-            //if init DMA -> deinit DMA
-            furi_hal_serial_usart_deinit_dma_rx();
-            //disable IRQ RX byte
-            LL_USART_DisableIT_RXNE_RXFNE(USART1);
-        } else {
-            //if init DMA -> deinit DMA
+        if(callback) {
             furi_hal_serial_usart_deinit_dma_rx();
             furi_hal_interrupt_set_isr(
                 FuriHalInterruptIdUart1, furi_hal_serial_usart_irq_callback, NULL);
             LL_USART_EnableIT_RXNE_RXFNE(USART1);
+        } else {
+            furi_hal_interrupt_set_isr(FuriHalInterruptIdUart1, NULL, NULL);
+            furi_hal_serial_usart_deinit_dma_rx();
+            LL_USART_DisableIT_RXNE_RXFNE(USART1);
         }
     } else if(handle->id == FuriHalSerialIdLpuart) {
-        if(callback == NULL) {
-            furi_hal_interrupt_set_isr(FuriHalInterruptIdLpUart1, NULL, NULL);
-            //if init DMA -> deinit DMA
-            furi_hal_serial_lpuart_deinit_dma_rx();
-            //disable IRQ RX byte
-            LL_LPUART_DisableIT_RXNE_RXFNE(LPUART1);
-        } else {
-            //if init DMA -> deinit DMA
+        if(callback) {
             furi_hal_serial_lpuart_deinit_dma_rx();
             furi_hal_interrupt_set_isr(
                 FuriHalInterruptIdLpUart1, furi_hal_serial_lpuart_irq_callback, NULL);
             LL_LPUART_EnableIT_RXNE_RXFNE(LPUART1);
+        } else {
+            furi_hal_interrupt_set_isr(FuriHalInterruptIdLpUart1, NULL, NULL);
+            furi_hal_serial_lpuart_deinit_dma_rx();
+            LL_LPUART_DisableIT_RXNE_RXFNE(LPUART1);
         }
     }
     furi_hal_serial[handle->id].rx_byte_callback = callback;
@@ -666,10 +704,9 @@ void furi_hal_serial_async_rx_start(
     furi_check(callback);
 
     furi_hal_serial_event_init(handle, report_errors);
-
     furi_hal_serial_async_rx_configure(handle, callback, context);
 
-    //assign different functions to different usarts
+    // Assign different functions to different UARTs
     furi_check(
         furi_hal_serial[FuriHalSerialIdUsart].rx_byte_callback !=
         furi_hal_serial[FuriHalSerialIdLpuart].rx_byte_callback);
@@ -692,16 +729,18 @@ uint8_t furi_hal_serial_async_rx(FuriHalSerialHandle* handle) {
 }
 
 static size_t furi_hal_serial_dma_bytes_available(FuriHalSerialId ch) {
-    size_t index_dma = 0;
+    size_t dma_remain = 0;
     if(ch == FuriHalSerialIdUsart) {
-        index_dma = LL_DMA_GetDataLength(DMA1, LL_DMA_CHANNEL_6);
+        dma_remain = LL_DMA_GetDataLength(
+            FURI_HAL_SERIAL_USART_DMA_INSTANCE, FURI_HAL_SERIAL_USART_DMA_CHANNEL);
     } else if(ch == FuriHalSerialIdLpuart) {
-        index_dma = LL_DMA_GetDataLength(DMA1, LL_DMA_CHANNEL_7);
+        dma_remain = LL_DMA_GetDataLength(
+            FURI_HAL_SERIAL_LPUART_DMA_INSTANCE, FURI_HAL_SERIAL_LPUART_DMA_CHANNEL);
     } else {
-        furi_crash("Invalid programming");
+        furi_crash();
     }
 
-    furi_hal_serial[ch].buffer_rx_index_write = FURI_HAL_SERIAL_DMA_BUFFER_SIZE - index_dma;
+    furi_hal_serial[ch].buffer_rx_index_write = FURI_HAL_SERIAL_DMA_BUFFER_SIZE - dma_remain;
     if(furi_hal_serial[ch].buffer_rx_index_write >= furi_hal_serial[ch].buffer_rx_index_read) {
         return furi_hal_serial[ch].buffer_rx_index_write -
                furi_hal_serial[ch].buffer_rx_index_read;
@@ -741,30 +780,26 @@ static void furi_hal_serial_dma_configure(
     FuriHalSerialDmaRxCallback callback,
     void* context) {
     furi_check(handle);
+
     if(handle->id == FuriHalSerialIdUsart) {
-        if(callback == NULL) {
-            furi_hal_interrupt_set_isr(FuriHalInterruptIdUart1, NULL, NULL);
-            //deinit DMA
-            furi_hal_serial_usart_init_dma_rx();
-            //disable IRQ RX byte
-            LL_USART_DisableIT_RXNE_RXFNE(USART1);
-        } else {
-            //deinit DMA
+        if(callback) {
             furi_hal_serial_usart_init_dma_rx();
             furi_hal_interrupt_set_isr(
                 FuriHalInterruptIdUart1, furi_hal_serial_usart_irq_callback, NULL);
+        } else {
+            LL_USART_DisableIT_RXNE_RXFNE(USART1);
+            furi_hal_interrupt_set_isr(FuriHalInterruptIdUart1, NULL, NULL);
+            furi_hal_serial_usart_deinit_dma_rx();
         }
     } else if(handle->id == FuriHalSerialIdLpuart) {
-        if(callback == NULL) {
-            furi_hal_interrupt_set_isr(FuriHalInterruptIdLpUart1, NULL, NULL);
-            //deinit DMA
-            furi_hal_serial_lpuart_deinit_dma_rx();
-            //disable IRQ RX byte
-            LL_LPUART_DisableIT_RXNE_RXFNE(LPUART1);
-        } else {
+        if(callback) {
             furi_hal_serial_lpuart_init_dma_rx();
             furi_hal_interrupt_set_isr(
                 FuriHalInterruptIdLpUart1, furi_hal_serial_lpuart_irq_callback, NULL);
+        } else {
+            LL_LPUART_DisableIT_RXNE_RXFNE(LPUART1);
+            furi_hal_interrupt_set_isr(FuriHalInterruptIdLpUart1, NULL, NULL);
+            furi_hal_serial_lpuart_deinit_dma_rx();
         }
     }
     furi_hal_serial[handle->id].rx_byte_callback = NULL;
@@ -784,7 +819,7 @@ void furi_hal_serial_dma_rx_start(
     furi_hal_serial_event_init(handle, report_errors);
     furi_hal_serial_dma_configure(handle, callback, context);
 
-    //assign different functions to different usarts
+    // Assign different functions to different UARTs
     furi_check(
         furi_hal_serial[FuriHalSerialIdUsart].rx_dma_callback !=
         furi_hal_serial[FuriHalSerialIdLpuart].rx_dma_callback);
