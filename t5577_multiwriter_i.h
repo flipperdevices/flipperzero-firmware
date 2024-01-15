@@ -18,8 +18,6 @@
 #include <gui/modules/byte_input.h>
 #include <gui/modules/widget.h>
 
-#include "views/t5577_multiwriter_view_read.h"
-
 #include <notification/notification_messages.h>
 #include <dialogs/dialogs.h>
 #include <storage/storage.h>
@@ -89,9 +87,6 @@ struct LfRfid {
     Popup* popup;
     TextInput* text_input;
     ByteInput* byte_input;
-
-    // Custom views
-    LfRfidReadView* read_view;
 };
 
 typedef enum {
@@ -101,7 +96,6 @@ typedef enum {
     LfRfidViewWidget,
     LfRfidViewTextInput,
     LfRfidViewByteInput,
-    LfRfidViewRead,
 } LfRfidView;
 
 bool t5577_multiwriter_load_key_from_file_select(LfRfid* app);

@@ -90,13 +90,6 @@ static LfRfid* t5577_multiwriter_alloc() {
         LfRfidViewByteInput,
         byte_input_get_view(t5577_multiwriter->byte_input));
 
-    // Read custom view
-    t5577_multiwriter->read_view = t5577_multiwriter_view_read_alloc();
-    view_dispatcher_add_view(
-        t5577_multiwriter->view_dispatcher,
-        LfRfidViewRead,
-        t5577_multiwriter_view_read_get_view(t5577_multiwriter->read_view));
-
     return t5577_multiwriter;
 } //-V773
 
@@ -135,10 +128,6 @@ static void t5577_multiwriter_free(LfRfid* t5577_multiwriter) {
     // ByteInput
     view_dispatcher_remove_view(t5577_multiwriter->view_dispatcher, LfRfidViewByteInput);
     byte_input_free(t5577_multiwriter->byte_input);
-
-    // Read custom view
-    view_dispatcher_remove_view(t5577_multiwriter->view_dispatcher, LfRfidViewRead);
-    t5577_multiwriter_view_read_free(t5577_multiwriter->read_view);
 
     // View Dispatcher
     view_dispatcher_free(t5577_multiwriter->view_dispatcher);
@@ -211,7 +200,7 @@ bool t5577_multiwriter_load_key_data(LfRfid* app, FuriString* path, bool show_di
     } while(0);
 
     if((!result) && (show_dialog)) {
-        dialog_message_show_storage_error(app->dialogs, "Cannot load\nkey file");
+        dialog_message_show_storage_error(app->dialogs, "Unsupported\nlfrfid protocol!");
     }
 
     return result;
