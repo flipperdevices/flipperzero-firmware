@@ -9,7 +9,7 @@ void stream_to_wifi() {
     WiFi.mode(WIFI_AP);
     WiFi.softAP(ssid, password);
     IPAddress IP = WiFi.softAPIP();
-    Serial.print("AP: ");
+    Serial.print("AP IP: ");
     Serial.println(IP);
     is_wifi_streaming = true;
   }
