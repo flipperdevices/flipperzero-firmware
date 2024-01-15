@@ -3,7 +3,15 @@
 void mfc_editor_scene_file_select_on_enter(void* context) {
     MfcEditorApp* instance = context;
 
-    if(mfc_editor_prompt_load_file(instance)) {
+    // File select scene should repeat itself if the file load failed
+    // or if the user quit the shadow file prompt, not the file selector
+    MfcEditorPromptResponse prompt_response = MfcEditorPromptResponseFailure;
+    while(prompt_response == MfcEditorPromptResponseFailure ||
+          prompt_response == MfcEditorPromptResponseExitedShadow) {
+        prompt_response = mfc_editor_prompt_load_file(instance);
+    }
+
+    if(prompt_response == MfcEditorPromptResponseSuccess) {
         if(nfc_device_get_protocol(instance->nfc_device) == NfcProtocolMfClassic) {
             scene_manager_set_scene_state(instance->scene_manager, MfcEditorSceneSectorSelect, 0);
             scene_manager_next_scene(instance->scene_manager, MfcEditorSceneSectorSelect);
@@ -11,7 +19,8 @@ void mfc_editor_scene_file_select_on_enter(void* context) {
             scene_manager_next_scene(instance->scene_manager, MfcEditorSceneInvalidFile);
         }
     } else {
-        scene_manager_previous_scene(instance->scene_manager);
+        scene_manager_search_and_switch_to_previous_scene(
+            instance->scene_manager, MfcEditorSceneStart);
     }
 }
 

@@ -24,8 +24,7 @@ bool mfc_editor_scene_invalid_file_on_event(void* context, SceneManagerEvent eve
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == MfcEditorCustomEventViewExit) {
-            consumed = scene_manager_search_and_switch_to_previous_scene(
-                instance->scene_manager, MfcEditorSceneStart);
+            consumed = scene_manager_previous_scene(instance->scene_manager);
         }
     }
 
