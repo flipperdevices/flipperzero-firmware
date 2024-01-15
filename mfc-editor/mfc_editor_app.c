@@ -137,7 +137,7 @@ static bool mfc_editor_file_has_shadow_file(MfcEditorApp* instance, FuriString* 
     return has_shadow_file;
 }
 
-bool mfc_editor_prompt_load_file(MfcEditorApp* instance) {
+MfcEditorPromptResponse mfc_editor_prompt_load_file(MfcEditorApp* instance) {
     furi_assert(instance);
 
     DialogsFileBrowserOptions browser_options;
@@ -145,19 +145,31 @@ bool mfc_editor_prompt_load_file(MfcEditorApp* instance) {
     browser_options.base_path = NFC_APP_FOLDER;
     browser_options.hide_dot_files = true;
 
-    bool result = dialog_file_browser_show(
-        instance->dialogs, instance->file_path, instance->file_path, &browser_options);
+    MfcEditorPromptResponse result = MfcEditorPromptResponseSuccess;
+    if(!dialog_file_browser_show(
+           instance->dialogs, instance->file_path, instance->file_path, &browser_options)) {
+        result = MfcEditorPromptResponseExitedFile;
+    } else {
+        if(mfc_editor_file_has_shadow_file(instance, instance->file_path)) {
+            DialogMessageButton message_button = mfc_editor_prompt_should_load_shadow(instance);
 
-    if(result) {
-        if(mfc_editor_file_has_shadow_file(instance, instance->file_path) &&
-           mfc_editor_prompt_should_load_shadow(instance) == DialogMessageButtonRight) {
-            FuriString* shadow_file_path = furi_string_alloc();
-            mfc_editor_get_shadow_file_path(instance->file_path, shadow_file_path);
-            furi_string_set(instance->file_path, shadow_file_path);
-            furi_string_free(shadow_file_path);
+            if(message_button == DialogMessageButtonRight) {
+                // User selected to use shadow file, so replace selected path with that path
+                FuriString* shadow_file_path = furi_string_alloc();
+                mfc_editor_get_shadow_file_path(instance->file_path, shadow_file_path);
+                furi_string_set(instance->file_path, shadow_file_path);
+                furi_string_free(shadow_file_path);
+            } else if(message_button == DialogMessageButtonBack) {
+                result = MfcEditorPromptResponseExitedShadow;
+            }
         }
 
-        result = mfc_editor_load_file(instance, instance->file_path, true);
+        // Don't load the file if user was prompted for shadow file use but went back
+        if(result == MfcEditorPromptResponseSuccess) {
+            if(!mfc_editor_load_file(instance, instance->file_path, true)) {
+                result = MfcEditorPromptResponseFailure;
+            }
+        }
     }
 
     return result;

@@ -55,6 +55,16 @@ typedef enum {
     MfcEditorAppViewPopup,
 } MfcEditorAppView;
 
-bool mfc_editor_prompt_load_file(MfcEditorApp* instance);
+typedef enum {
+    // Generic
+    MfcEditorPromptResponseSuccess,
+    MfcEditorPromptResponseFailure,
+
+    // Backed out of a prompt
+    MfcEditorPromptResponseExitedFile,
+    MfcEditorPromptResponseExitedShadow,
+} MfcEditorPromptResponse;
+
+MfcEditorPromptResponse mfc_editor_prompt_load_file(MfcEditorApp* instance);
 
 bool mfc_editor_load_file(MfcEditorApp* instance, FuriString* file_path, bool show_dialog);
