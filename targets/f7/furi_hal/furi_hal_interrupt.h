@@ -56,22 +56,22 @@ typedef enum {
 typedef enum {
     FuriHalInterruptPriorityLowest =
         -3, /**< Lowest priority level, you can use ISR-safe OS primitives */
-    FuriHalInterruptPriorityVeryLow =
-        -2, /**< Very Low priority level, you can use ISR-safe OS primitives */
+    FuriHalInterruptPriorityLower =
+        -2, /**< Lower priority level, you can use ISR-safe OS primitives */
     FuriHalInterruptPriorityLow =
-        -1, /**< Lower than normal priority level, you can use ISR-safe OS primitives */
+        -1, /**< Low priority level, you can use ISR-safe OS primitives */
     FuriHalInterruptPriorityNormal =
         0, /**< Normal(default) priority level, you can use ISR-safe OS primitives */
     FuriHalInterruptPriorityHigh =
-        1, /**< Higher than normal priority level, you can use ISR-safe OS primitives */
-    FuriHalInterruptPriorityVeryHigh =
-        2, /**< Very High priority level, you can use ISR-safe OS primitives */
+        1, /**< High priority level, you can use ISR-safe OS primitives */
+    FuriHalInterruptPriorityHigher =
+        2, /**< Higher priority level, you can use ISR-safe OS primitives */
     FuriHalInterruptPriorityHighest =
         3, /**< Highest priority level, you can use ISR-safe OS primitives */
 
     /* Special group, read docs first(ALL OF THEM: especially FreeRTOS configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY) */
     FuriHalInterruptPriorityKamiSama =
-        4, /**< Forget about thread safety, you are god now. No one can prevent you from messing with OS critical section. You are not allowed to use any OS primitives, but who can stop you? Use this priority only for direct hardware interaction with LL HAL. */
+        6, /**< Forget about thread safety, you are god now. No one can prevent you from messing with OS critical section. You are not allowed to use any OS primitives, but who can stop you? Use this priority only for direct hardware interaction with LL HAL. */
 } FuriHalInterruptPriority;
 
 /** Initialize interrupt subsystem */
