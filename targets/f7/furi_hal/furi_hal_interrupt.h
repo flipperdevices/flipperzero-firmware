@@ -73,8 +73,10 @@ typedef enum {
 /** Initialize interrupt subsystem */
 void furi_hal_interrupt_init();
 
-/** Set ISR and enable interrupt with default priority We don't clear interrupt
- * flags for you, do it by your self.
+/** Set ISR and enable interrupt with default priority
+ *
+ * @warning    Interrupt flags are not cleared automatically. You may want to
+ *             ensure that your peripheral status flags are cleared.
  *
  * @param      index    - interrupt ID
  * @param      isr      - your interrupt service routine or use NULL to clear
@@ -82,8 +84,10 @@ void furi_hal_interrupt_init();
  */
 void furi_hal_interrupt_set_isr(FuriHalInterruptId index, FuriHalInterruptISR isr, void* context);
 
-/** Set ISR and enable interrupt with custom priority We don't clear interrupt
- * flags for you, do it by your self.
+/** Set ISR and enable interrupt with custom priority
+ *
+ * @warning    Interrupt flags are not cleared automatically. You may want to
+ *             ensure that your peripheral status flags are cleared.
  *
  * @param      index     - interrupt ID
  * @param      priority  - One of FuriHalInterruptPriority
