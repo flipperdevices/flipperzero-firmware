@@ -3291,7 +3291,7 @@ Function,+,t5577_write,void,LFRFIDT5577*
 Function,+,t5577_write_page_block_pass,void,"uint8_t, uint8_t, _Bool, uint32_t, _Bool, uint32_t"
 Function,+,t5577_write_page_block_pass_with_start_and_stop,void,"uint8_t, uint8_t, _Bool, uint32_t, _Bool, uint32_t"
 Function,+,t5577_write_page_block_simple_with_start_and_stop,void,"uint8_t, uint8_t, _Bool, uint32_t"
-Function,+,t5577_write_with_mask,void,"LFRFIDT5577*, uint8_t, uint32_t"
+Function,+,t5577_write_with_mask,void,"LFRFIDT5577*, uint8_t, _Bool, uint32_t"
 Function,+,t5577_write_with_pass,void,"LFRFIDT5577*, uint32_t"
 Function,-,tan,double,double
 Function,-,tanf,float,float
