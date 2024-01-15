@@ -53,27 +53,46 @@ typedef enum {
     FuriHalInterruptIdMax,
 } FuriHalInterruptId;
 
+typedef enum {
+    FuriHalInterruptPriorityVeryLow =
+        -2, /**< Lowest priority level, you can use ISR-safe OS primitives */
+    FuriHalInterruptPriorityLow =
+        -1, /**< Lower than normal priority level, you can use ISR-safe OS primitives */
+    FuriHalInterruptPriorityNormal =
+        0, /**< Normal(default) priority level, you can use ISR-safe OS primitives */
+    FuriHalInterruptPriorityHigh =
+        1, /**< Higher than normal priority level, you can use ISR-safe OS primitives */
+    FuriHalInterruptPriorityVeryHigh =
+        2, /**< Highest priority level, you can use ISR-safe OS primitives */
+
+    /* Special group, read docs first(ALL OF THEM: especially FreeRTOS configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY) */
+    FuriHalInterruptPriorityKamiSama =
+        3, /**< Forget about thread safety, you are god now, no one can prevent you from fucking up OS critical section, you are not allowed to use any OS primitives, but who can stop you? Use this priority only for direct hardware interaction with LL HAL. */
+} FuriHalInterruptPriority;
+
 /** Initialize interrupt subsystem */
 void furi_hal_interrupt_init();
 
-/** Set ISR and enable interrupt with default priority
- * We don't clear interrupt flags for you, do it by your self.
- * @param index - interrupt ID
- * @param isr - your interrupt service routine or use NULL to clear
- * @param context - isr context
+/** Set ISR and enable interrupt with default priority We don't clear interrupt
+ * flags for you, do it by your self.
+ *
+ * @param      index    - interrupt ID
+ * @param      isr      - your interrupt service routine or use NULL to clear
+ * @param      context  - isr context
  */
 void furi_hal_interrupt_set_isr(FuriHalInterruptId index, FuriHalInterruptISR isr, void* context);
 
-/** Set ISR and enable interrupt with custom priority
- * We don't clear interrupt flags for you, do it by your self.
- * @param index - interrupt ID
- * @param priority - 0 to 15, 0 highest
- * @param isr - your interrupt service routine or use NULL to clear
- * @param context - isr context
+/** Set ISR and enable interrupt with custom priority We don't clear interrupt
+ * flags for you, do it by your self.
+ *
+ * @param      index     - interrupt ID
+ * @param      priority  - One of FuriHalInterruptPriority
+ * @param      isr       - your interrupt service routine or use NULL to clear
+ * @param      context   - isr context
  */
 void furi_hal_interrupt_set_isr_ex(
     FuriHalInterruptId index,
-    uint16_t priority,
+    FuriHalInterruptPriority priority,
     FuriHalInterruptISR isr,
     void* context);
 

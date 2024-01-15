@@ -11,7 +11,7 @@
 
 #define TAG "FuriHalInterrupt"
 
-#define FURI_HAL_INTERRUPT_DEFAULT_PRIORITY (configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY)
+#define FURI_HAL_INTERRUPT_DEFAULT_PRIORITY (configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY + 2)
 
 typedef struct {
     FuriHalInterruptISR isr;
@@ -120,16 +120,18 @@ void furi_hal_interrupt_init() {
 }
 
 void furi_hal_interrupt_set_isr(FuriHalInterruptId index, FuriHalInterruptISR isr, void* context) {
-    furi_hal_interrupt_set_isr_ex(index, FURI_HAL_INTERRUPT_DEFAULT_PRIORITY, isr, context);
+    furi_hal_interrupt_set_isr_ex(index, FuriHalInterruptPriorityNormal, isr, context);
 }
 
 void furi_hal_interrupt_set_isr_ex(
     FuriHalInterruptId index,
-    uint16_t priority,
+    FuriHalInterruptPriority priority,
     FuriHalInterruptISR isr,
     void* context) {
     furi_check(index < FuriHalInterruptIdMax);
-    furi_check(priority <= 15);
+    furi_check(priority >= -2 && priority <= 3);
+
+    uint16_t real_priority = FURI_HAL_INTERRUPT_DEFAULT_PRIORITY - priority;
 
     if(isr) {
         // Pre ISR set
@@ -147,7 +149,7 @@ void furi_hal_interrupt_set_isr_ex(
     if(isr) {
         // Post ISR set
         furi_hal_interrupt_clear_pending(index);
-        furi_hal_interrupt_enable(index, priority);
+        furi_hal_interrupt_enable(index, real_priority);
     } else {
         // Post ISR clear
     }
