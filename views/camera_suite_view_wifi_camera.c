@@ -49,7 +49,7 @@ static bool camera_suite_view_wifi_camera_input(InputEvent* event, void* context
                 {
                     UNUSED(model);
 
-                    // Stop camera stream.
+                    // Stop camera WiFi stream.
                     furi_hal_uart_tx(FuriHalUartIdUSART1, (uint8_t[]){'w'}, 1);
                     furi_delay_ms(50);
 
@@ -59,91 +59,11 @@ static bool camera_suite_view_wifi_camera_input(InputEvent* event, void* context
                 true);
             break;
         }
-        case InputKeyLeft: {
-            with_view_model(
-                instance->view,
-                CameraSuiteViewWiFiCameraModel * model,
-                {
-                    UNUSED(model);
-
-                    // Play sound.
-                    camera_suite_play_happy_bump(instance->context);
-                    camera_suite_play_input_sound(instance->context);
-                    camera_suite_led_set_rgb(instance->context, 0, 0, 255);
-
-                    instance->callback(CameraSuiteCustomEventSceneCameraLeft, instance->context);
-                },
-                true);
-            break;
-        }
-        case InputKeyRight: {
-            with_view_model(
-                instance->view,
-                CameraSuiteViewWiFiCameraModel * model,
-                {
-                    UNUSED(model);
-
-                    // Play sound.
-                    camera_suite_play_happy_bump(instance->context);
-                    camera_suite_play_input_sound(instance->context);
-                    camera_suite_led_set_rgb(instance->context, 0, 0, 255);
-
-                    instance->callback(CameraSuiteCustomEventSceneCameraRight, instance->context);
-                },
-                true);
-            break;
-        }
-        case InputKeyUp: {
-            with_view_model(
-                instance->view,
-                CameraSuiteViewWiFiCameraModel * model,
-                {
-                    UNUSED(model);
-
-                    // Play sound.
-                    camera_suite_play_happy_bump(instance->context);
-                    camera_suite_play_input_sound(instance->context);
-                    camera_suite_led_set_rgb(instance->context, 0, 0, 255);
-
-                    instance->callback(CameraSuiteCustomEventSceneCameraUp, instance->context);
-                },
-                true);
-            break;
-        }
-        case InputKeyDown: {
-            with_view_model(
-                instance->view,
-                CameraSuiteViewWiFiCameraModel * model,
-                {
-                    UNUSED(model);
-
-                    // Play sound.
-                    camera_suite_play_happy_bump(instance->context);
-                    camera_suite_play_input_sound(instance->context);
-                    camera_suite_led_set_rgb(instance->context, 0, 0, 255);
-
-                    instance->callback(CameraSuiteCustomEventSceneCameraDown, instance->context);
-                },
-                true);
-            break;
-        }
-        case InputKeyOk: {
-            with_view_model(
-                instance->view,
-                CameraSuiteViewWiFiCameraModel * model,
-                {
-                    UNUSED(model);
-
-                    // Play sound.
-                    camera_suite_play_long_bump(instance->context);
-                    camera_suite_play_input_sound(instance->context);
-                    camera_suite_led_set_rgb(instance->context, 0, 0, 255);
-
-                    instance->callback(CameraSuiteCustomEventSceneCameraOk, instance->context);
-                },
-                true);
-            break;
-        }
+        case InputKeyLeft:
+        case InputKeyRight:
+        case InputKeyUp:
+        case InputKeyDown:
+        case InputKeyOk:
         case InputKeyMAX:
         default: {
             break;
