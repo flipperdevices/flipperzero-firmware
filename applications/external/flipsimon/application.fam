@@ -1,5 +1,5 @@
 App(
-    appid="flipboard_simon",
+    appid="flipboard_simon_rm",
     name="FlipBoard Simon",
     apptype=FlipperAppType.EXTERNAL,
     sources=[
@@ -8,6 +8,7 @@ App(
     entry_point="flipboard_simon_app",
     stack_size=4 * 1024,
     fap_icon="flipsimon.png",
+    #  fap_icon_assets_symbol="flipboard_simon",
     fap_category="GPIO/FlipBoard",
     fap_author="codeallnight",
     fap_weburl="https://youtube.com/@MrDerekJamison",
