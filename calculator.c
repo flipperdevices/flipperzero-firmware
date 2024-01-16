@@ -20,4 +20,3 @@ int32_t calculator_app(void* p) {
     cleanup_resources(calculator_state, view_port, gui, event_queue);
     return 0;
 }
-
