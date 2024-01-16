@@ -254,7 +254,8 @@ bool xremote_pause_save(FlipperFormat* ff, int32_t time, const char* name) {
 bool xremote_sg_signal_save(SubGhzRemote* remote, FlipperFormat* ff, const char* name) {
     if(!flipper_format_write_comment_cstr(ff, "") ||
        !flipper_format_write_string_cstr(ff, "remote_type", "SG") ||
-       !flipper_format_write_string_cstr(ff, "name", name)) {
+       !flipper_format_write_string_cstr(ff, "name", name) ||
+       !flipper_format_write_string_cstr(ff, "filename", xremote_sg_remote_get_filename(remote))) {
         return false;
     }
     return xremote_sg_signal_save_data(remote, ff);

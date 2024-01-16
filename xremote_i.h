@@ -99,6 +99,7 @@ struct InfraredSignal {
 
 struct CrossRemoteItem {
     FuriString* name;
+    FuriString* filename;
     InfraredSignal* ir_signal;
     SubGhzRemote* sg_signal;
     int16_t type;

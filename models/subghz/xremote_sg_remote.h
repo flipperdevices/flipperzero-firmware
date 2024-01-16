@@ -9,6 +9,7 @@
 typedef struct SubGhzRemote SubGhzRemote;
 
 const char* xremote_sg_remote_get_name(SubGhzRemote* remote);
+const char* xremote_sg_remote_get_filename(SubGhzRemote* remote);
 
 SubGhzRemote* xremote_sg_remote_alloc();
 

@@ -24,6 +24,7 @@
 
 struct SubGhzRemote {
     FuriString* name;
+    FuriString* filename;
     FuriString* path;
     SubGhzTxRx* txrx;
     uint32_t frequency;
@@ -32,6 +33,10 @@ struct SubGhzRemote {
 
 const char* xremote_sg_remote_get_name(SubGhzRemote* remote) {
     return furi_string_get_cstr(remote->name);
+}
+
+const char* xremote_sg_remote_get_filename(SubGhzRemote* remote) {
+    return furi_string_get_cstr(remote->filename);
 }
 
 void subghz_preset_init(
@@ -56,6 +61,7 @@ const char* subghz_txrx_radio_device_get_name(SubGhzTxRx* instance) {
 SubGhzRemote* xremote_sg_remote_alloc() {
     SubGhzRemote* remote = malloc(sizeof(SubGhzRemote));
     remote->name = furi_string_alloc();
+    remote->filename = furi_string_alloc();
     remote->path = furi_string_alloc();
 
     // SubGhz Settings
@@ -86,6 +92,7 @@ SubGhzRemote* xremote_sg_remote_alloc() {
 void xremote_sg_remote_free(SubGhzRemote* remote) {
     furi_string_free(remote->path);
     furi_string_free(remote->name);
+    furi_string_free(remote->filename);
 
     // TXRX
     subghz_receiver_free(remote->txrx->receiver);
@@ -145,6 +152,7 @@ bool xremote_sg_remote_load(SubGhzRemote* remote, FuriString* path) {
         }
         //remote->name = fileName;
         furi_string_set_str(remote->name, fileName);
+        furi_string_set_str(remote->filename, fileName);
         uint32_t version;
         if(!flipper_format_read_header(ff, buf, &version)) break;
         if(!furi_string_equal(buf, "Flipper SubGhz RAW File") || (version != 1)) break;
@@ -180,6 +188,8 @@ bool xremote_sg_remote_load(SubGhzRemote* remote, FuriString* path) {
             FURI_LOG_E(TAG, "Missing Protocol");
             break;
         }
+
+
 
         /*if(!strcmp(furi_string_get_cstr(buf), "RAW")) {
             subghz_protocol_raw_gen_fff_data(
