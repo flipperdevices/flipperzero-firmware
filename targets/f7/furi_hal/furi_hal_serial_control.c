@@ -14,7 +14,7 @@ typedef enum {
     FuriHalSerialControlMessageTypeAcquire,
     FuriHalSerialControlMessageTypeRelease,
     FuriHalSerialControlMessageTypeLogging,
-    FuriHalSerialControlMessageTypeExpansionCb,
+    FuriHalSerialControlMessageTypeExpansionSetCallback,
     FuriHalSerialControlMessageTypeExpansionIrq,
 } FuriHalSerialControlMessageType;
 
@@ -169,7 +169,7 @@ static bool furi_hal_serial_control_handler_logging(void* input, void* output) {
     return true;
 }
 
-static bool furi_hal_serial_control_handler_expansion_cb(void* input, void* output) {
+static bool furi_hal_serial_control_handler_expansion_set_callback(void* input, void* output) {
     UNUSED(output);
 
     FuriHalSerialControlMessageExpCallback* message_input = input;
@@ -216,7 +216,8 @@ static const FuriHalSerialControlCommandHandler furi_hal_serial_control_handlers
     [FuriHalSerialControlMessageTypeAcquire] = furi_hal_serial_control_handler_acquire,
     [FuriHalSerialControlMessageTypeRelease] = furi_hal_serial_control_handler_release,
     [FuriHalSerialControlMessageTypeLogging] = furi_hal_serial_control_handler_logging,
-    [FuriHalSerialControlMessageTypeExpansionCb] = furi_hal_serial_control_handler_expansion_cb,
+    [FuriHalSerialControlMessageTypeExpansionSetCallback] =
+        furi_hal_serial_control_handler_expansion_set_callback,
     [FuriHalSerialControlMessageTypeExpansionIrq] = furi_hal_serial_control_handler_expansion_irq,
 };
 
@@ -356,7 +357,7 @@ void furi_hal_serial_control_set_expansion_callback(
         .context = context,
     };
     FuriHalSerialControlMessage message;
-    message.type = FuriHalSerialControlMessageTypeExpansionCb;
+    message.type = FuriHalSerialControlMessageTypeExpansionSetCallback;
     message.api_lock = api_lock_alloc_locked();
     message.input = &message_input;
     furi_message_queue_put(furi_hal_serial_control->queue, &message, FuriWaitForever);
