@@ -75,7 +75,7 @@ const HidKeyboardKey hid_keyboard_keyset[ROW_COUNT][COLUMN_COUNT] = {
         {.width = 1, .icon = NULL, .key = '8', .shift_key = '*', .value = HID_KEYBOARD_8},
         {.width = 1, .icon = NULL, .key = '9', .shift_key = '(', .value = HID_KEYBOARD_9},
         {.width = 1, .icon = NULL, .key = '0', .shift_key = ')', .value = HID_KEYBOARD_0},
-        {.width = 2, .icon = &I_Pin_arrow_left_9x7, .value = HID_KEYBOARD_DELETE},
+        {.width = 2, .icon = &I_Backspace_9x7, .value = HID_KEYBOARD_DELETE},
         {.width = 0, .value = HID_KEYBOARD_DELETE},
     },
     {
@@ -107,7 +107,7 @@ const HidKeyboardKey hid_keyboard_keyset[ROW_COUNT][COLUMN_COUNT] = {
         {.width = 1, .icon = NULL, .key = 'k', .shift_key = 'K', .value = HID_KEYBOARD_K},
         {.width = 1, .icon = NULL, .key = 'l', .shift_key = 'L', .value = HID_KEYBOARD_L},
         {.width = 1, .icon = NULL, .key = ';', .shift_key = ':', .value = HID_KEYBOARD_SEMICOLON},
-        {.width = 2, .icon = &I_Pin_arrow_right_9x7, .value = HID_KEYBOARD_RETURN},
+        {.width = 2, .icon = &I_Return_10x7, .value = HID_KEYBOARD_RETURN},
         {.width = 0, .value = HID_KEYBOARD_RETURN},
     },
     {
