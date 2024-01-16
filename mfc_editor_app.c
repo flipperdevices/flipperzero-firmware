@@ -81,15 +81,22 @@ void mfc_editor_app_free(MfcEditorApp* instance) {
     free(instance);
 }
 
-bool mfc_editor_load_file(MfcEditorApp* instance, FuriString* file_path, bool show_dialog) {
+MfcEditorPromptResponse mfc_editor_load_file(MfcEditorApp* instance, FuriString* file_path) {
     furi_assert(instance);
     furi_assert(file_path);
-    bool result = false;
 
-    result = nfc_device_load(instance->nfc_device, furi_string_get_cstr(file_path));
+    MfcEditorPromptResponse result = MfcEditorPromptResponseSuccess;
 
-    if(!result && show_dialog) {
+    if(!nfc_device_load(instance->nfc_device, furi_string_get_cstr(file_path))) {
+        result = MfcEditorPromptResponseFailure;
         dialog_message_show_storage_error(instance->dialogs, "Cannot load\nkey file");
+    } else {
+        if(nfc_device_get_protocol(instance->nfc_device) == NfcProtocolMfClassic) {
+            instance->mf_classic_data =
+                nfc_device_get_data(instance->nfc_device, NfcProtocolMfClassic);
+        } else {
+            result = MfcEditorPromptResponseNotMfClassic;
+        }
     }
 
     return result;
@@ -166,9 +173,7 @@ MfcEditorPromptResponse mfc_editor_prompt_load_file(MfcEditorApp* instance) {
 
         // Don't load the file if user was prompted for shadow file use but went back
         if(result == MfcEditorPromptResponseSuccess) {
-            if(!mfc_editor_load_file(instance, instance->file_path, true)) {
-                result = MfcEditorPromptResponseFailure;
-            }
+            result = mfc_editor_load_file(instance, instance->file_path);
         }
     }
 
