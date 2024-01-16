@@ -1152,7 +1152,7 @@ Function,-,furi_hal_init,void,
 Function,-,furi_hal_init_early,void,
 Function,-,furi_hal_interrupt_init,void,
 Function,+,furi_hal_interrupt_set_isr,void,"FuriHalInterruptId, FuriHalInterruptISR, void*"
-Function,+,furi_hal_interrupt_set_isr_ex,void,"FuriHalInterruptId, uint16_t, FuriHalInterruptISR, void*"
+Function,+,furi_hal_interrupt_set_isr_ex,void,"FuriHalInterruptId, FuriHalInterruptPriority, FuriHalInterruptISR, void*"
 Function,+,furi_hal_light_blink_set_color,void,Light
 Function,+,furi_hal_light_blink_start,void,"Light, uint8_t, uint16_t, uint16_t"
 Function,+,furi_hal_light_blink_stop,void,
@@ -1261,6 +1261,7 @@ Function,+,furi_hal_rtc_set_log_level,void,uint8_t
 Function,+,furi_hal_rtc_set_pin_fails,void,uint32_t
 Function,+,furi_hal_rtc_set_register,void,"FuriHalRtcRegister, uint32_t"
 Function,+,furi_hal_rtc_sync_shadow,void,
+Function,+,furi_hal_rtc_timestamp_to_datetime,void,"uint32_t, FuriHalRtcDateTime*"
 Function,+,furi_hal_rtc_validate_datetime,_Bool,FuriHalRtcDateTime*
 Function,+,furi_hal_sd_get_card_state,FuriStatus,
 Function,+,furi_hal_sd_info,FuriStatus,FuriHalSdInfo*
@@ -2818,6 +2819,7 @@ Variable,+,sequence_reset_red,const NotificationSequence,
 Variable,+,sequence_reset_rgb,const NotificationSequence,
 Variable,+,sequence_reset_sound,const NotificationSequence,
 Variable,+,sequence_reset_vibro,const NotificationSequence,
+Variable,+,sequence_semi_success,const NotificationSequence,
 Variable,+,sequence_set_blue_255,const NotificationSequence,
 Variable,+,sequence_set_green_255,const NotificationSequence,
 Variable,+,sequence_set_only_blue_255,const NotificationSequence,

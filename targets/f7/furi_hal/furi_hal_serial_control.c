@@ -323,6 +323,7 @@ void furi_hal_serial_control_release(FuriHalSerialHandle* handle) {
 
 void furi_hal_serial_control_set_logging_config(FuriHalSerialId serial_id, uint32_t baud_rate) {
     furi_check(serial_id <= FuriHalSerialIdMax);
+    furi_check(baud_rate >= 9600 && baud_rate <= 4000000);
 
     // Very special case of updater, where RTC initialized before kernel start
     if(!furi_hal_serial_control) return;
