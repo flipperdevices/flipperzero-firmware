@@ -68,6 +68,22 @@ static bool xremote_ir_signal_is_message_valid(InfraredMessage* message) {
     return true;
 }
 
+static bool xremote_remote_item_read_sg(CrossRemoteItem* item, FlipperFormat* ff) {
+    FuriString* buf;
+    bool success = false;
+    buf = furi_string_alloc();
+    item->type = XRemoteRemoteItemTypeSubGhz;
+    item->time = 0;
+
+    do {
+        if(!flipper_format_read_string(ff, "name", item->name)) break;
+        success = true;
+    } while(false);
+    furi_string_free(buf);
+
+    return success;
+}
+
 bool xremote_remote_item_read(CrossRemoteItem* item, FlipperFormat* ff) {
     FuriString* type = furi_string_alloc();
     bool success = false;
@@ -75,6 +91,8 @@ bool xremote_remote_item_read(CrossRemoteItem* item, FlipperFormat* ff) {
         if(!flipper_format_read_string(ff, "remote_type", type)) break;
         if(furi_string_equal(type, "IR")) {
             success = xremote_remote_item_read_ir(item, ff);
+        } else if(furi_string_equal(type, "SG")) {
+            success = xremote_remote_item_read_sg(item, ff);
         } else if(furi_string_equal(type, "PAUSE")) {
             success = xremote_remote_item_read_pause(item, ff);
         } else {
@@ -82,8 +100,11 @@ bool xremote_remote_item_read(CrossRemoteItem* item, FlipperFormat* ff) {
         }
         success = true;
     } while(false);
+    furi_string_free(type);
     return success;
 }
+
+
 
 bool xremote_remote_item_read_ir(CrossRemoteItem* item, FlipperFormat* ff) {
     FuriString* buf;

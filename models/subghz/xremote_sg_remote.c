@@ -181,7 +181,7 @@ bool xremote_sg_remote_load(SubGhzRemote* remote, FuriString* path) {
             break;
         }
 
-        if(!strcmp(furi_string_get_cstr(buf), "RAW")) {
+        /*if(!strcmp(furi_string_get_cstr(buf), "RAW")) {
             subghz_protocol_raw_gen_fff_data(
                 remote->txrx->fff_data,
                 furi_string_get_cstr(path),
@@ -190,11 +190,11 @@ bool xremote_sg_remote_load(SubGhzRemote* remote, FuriString* path) {
             stream_copy_full(
                 flipper_format_get_raw_stream(ff),
                 flipper_format_get_raw_stream(remote->txrx->fff_data));
-        }
+        }*/
 
         /*remote->txrx->decoder_result = subghz_receiver_search_decoder_base_by_name(
             remote->txrx->receiver, furi_string_get_cstr(buf));*/
-        if(remote->txrx->decoder_result) {
+        /*if(remote->txrx->decoder_result) {
             SubGhzProtocolStatus status = subghz_protocol_decoder_base_deserialize(
                 remote->txrx->decoder_result, remote->txrx->fff_data);
             if(status != SubGhzProtocolStatusOk) {
@@ -205,12 +205,13 @@ bool xremote_sg_remote_load(SubGhzRemote* remote, FuriString* path) {
         } else {
             FURI_LOG_E(TAG, "Protocol not found");
             break;
-        }
+        }*/
 
         success = true;
     } while(false);
 
     furi_string_free(buf);
+    flipper_format_buffered_file_close(ff);
     flipper_format_free(ff);
     furi_record_close(RECORD_STORAGE);
     return success;

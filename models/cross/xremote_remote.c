@@ -173,6 +173,7 @@ bool cross_remote_load(CrossRemote* remote, FuriString* path) {
     } while(false);
 
     furi_string_free(buf);
+    flipper_format_buffered_file_close(ff);
     flipper_format_free(ff);
     furi_record_close(RECORD_STORAGE);
     return success;
