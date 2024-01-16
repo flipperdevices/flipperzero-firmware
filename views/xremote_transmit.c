@@ -93,6 +93,8 @@ void xremote_transmit_draw_subghz(Canvas* canvas, XRemoteTransmitModel* model) {
 void xremote_transmit_draw(Canvas* canvas, XRemoteTransmitModel* model) {
     if(model->type == XRemoteRemoteItemTypeInfrared) {
         xremote_transmit_draw_ir(canvas, model);
+    } else if(model->type == XRemoteRemoteItemTypeSubGhz) {
+        xremote_transmit_draw_subghz(canvas, model);
     } else if(model->type == XRemoteRemoteItemTypePause) {
         xremote_transmit_draw_pause(canvas, model);
     }

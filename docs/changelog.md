@@ -1,5 +1,9 @@
+## v2.0
+
+- Fixed more memory leaks
+
 ## v1.1
-- Patched Memory Leak in storage
+- Patched memory leak in storage
 
 ## v1.0
 - Added option to change IR Signal Timing
