@@ -9,15 +9,20 @@ void mfc_editor_scene_sector_select_on_enter(void* context) {
     MfcEditorApp* instance = context;
 
     Submenu* submenu = instance->submenu;
-    submenu_set_header(submenu, "Select sector");
 
     uint8_t sectors_num = mf_classic_get_total_sectors_num(instance->mf_classic_data->type);
+
+    FuriString* label = furi_string_alloc();
     for(uint8_t i = 0; i < sectors_num; i++) {
-        char label[sizeof("Sector ") + 2];
-        snprintf(label, sizeof(label), "Sector %hhu", i);
+        furi_string_printf(label, "Sector %hhu", i);
         submenu_add_item(
-            submenu, label, i, mfc_editor_scene_sector_select_submenu_callback, instance);
+            submenu,
+            furi_string_get_cstr(label),
+            i,
+            mfc_editor_scene_sector_select_submenu_callback,
+            instance);
     }
+    furi_string_free(label);
 
     submenu_set_selected_item(
         submenu,

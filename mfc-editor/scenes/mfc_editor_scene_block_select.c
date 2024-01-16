@@ -25,19 +25,21 @@ void mfc_editor_scene_block_select_on_enter(void* context) {
 
     Submenu* submenu = instance->submenu;
 
-    char header[sizeof("Sector ") + 2];
-    snprintf(header, sizeof(header), "Sector %hhu", instance->current_sector);
-    submenu_set_header(submenu, header);
-
     uint8_t first_block = mf_classic_get_first_block_num_of_sector(instance->current_sector);
     uint8_t block_num = mf_classic_get_blocks_num_in_sector(instance->current_sector);
+
+    FuriString* label = furi_string_alloc();
     for(uint8_t i = 0; i < block_num; i++) {
         uint8_t block_index = first_block + i;
-        char label[sizeof("Block ") + 3];
-        snprintf(label, sizeof(label), "Block %hhu", block_index);
+        furi_string_printf(label, "Block %hhu", block_index);
         submenu_add_item(
-            submenu, label, block_index, mfc_editor_scene_block_select_submenu_callback, instance);
+            submenu,
+            furi_string_get_cstr(label),
+            block_index,
+            mfc_editor_scene_block_select_submenu_callback,
+            instance);
     }
+    furi_string_free(label);
 
     if(instance->current_sector == 0) {
         submenu_add_item(
