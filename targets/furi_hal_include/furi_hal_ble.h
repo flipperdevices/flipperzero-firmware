@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include "core/string.h"
 #include <furi.h>
 #include <stdbool.h>
 #include <gap.h>
@@ -17,7 +16,7 @@
 
 #define FURI_HAL_BLE_STACK_VERSION_MAJOR (1)
 #define FURI_HAL_BLE_STACK_VERSION_MINOR (12)
-#define FURI_HAL_BLE_C2_START_TIMEOUT 1000
+#define FURI_HAL_BLE_C2_START_TIMEOUT (1000)
 
 #ifdef __cplusplus
 extern "C" {

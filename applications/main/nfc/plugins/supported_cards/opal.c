@@ -28,7 +28,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "core/common_defines.h"
 #include "nfc_supported_card_plugin.h"
 
 #include <flipper_application/flipper_application.h>

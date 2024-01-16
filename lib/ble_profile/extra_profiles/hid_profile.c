@@ -1,6 +1,5 @@
 #include "hid_profile.h"
 
-#include "core/common_defines.h"
 #include <furi_hal_usb_hid.h>
 #include <services/dev_info_service.h>
 #include <services/battery_service.h>
@@ -408,7 +407,6 @@ static const FuriHalBleProfileConfig profile_callbacks = {
     .start = ble_profile_hid_start,
     .stop = ble_profile_hid_stop,
     .get_gap_config = ble_profile_hid_get_config,
-    // .process = NULL,
 };
 
 const FuriHalBleProfileConfig* ble_profile_hid = &profile_callbacks;

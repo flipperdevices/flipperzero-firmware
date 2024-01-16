@@ -20,8 +20,6 @@
 #include "scenes/scenes.h"
 #include <stdint.h>
 
-#define TEXT_STORE_SIZE 64U
-
 typedef struct {
     Gui* gui;
     SceneManager* scene_manager;
