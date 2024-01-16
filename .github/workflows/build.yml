@@ -75,5 +75,5 @@ jobs:
             ${{ steps.build-app-gb-cartridge.outputs.fap-artifacts }}
             ${{ steps.build-app-link-camera.outputs.fap-artifacts }}
             ${{ steps.build-app-live-camera.outputs.fap-artifacts }}
-            ${{ steps.build-build-app-gba-cartridge.outputs.fap-artifacts }}
+            ${{ steps.build-app-gba-cartridge.outputs.fap-artifacts }}
             ${{ steps.build-app-gb-photo.outputs.fap-artifacts }}
