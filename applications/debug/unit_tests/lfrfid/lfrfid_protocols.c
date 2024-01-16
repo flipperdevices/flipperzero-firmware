@@ -215,19 +215,17 @@ const int8_t indala26_test_timings[INDALA26_EMULATION_TIMINGS_COUNT] = {
 #define FDXB_TEST_EMULATION_TIMINGS_COUNT (206)
 
 const int8_t fdxb_test_timings[FDXB_TEST_EMULATION_TIMINGS_COUNT] = {
-    32, -16, 16, -16, 16, -16, 16, -16, 16, -16, 16, -16, 16, -16, 16, -16,
-    16, -16, 16, -16, 16, -32, 16, -16, 32, -16, 16, -16, 16, -16, 16, -32,
-    16, -16, 16, -16, 32, -32, 16, -16, 16, -16, 16, -16, 32, -16, 16, -16,
-    16, -16, 16, -32, 16, -16, 16, -16, 32, -16, 16, -16, 16, -16, 16, -32,
-    32, -32, 32, -32, 32, -32, 16, -16, 16, -16, 32, -16, 16, -32, 16, -16,
-    32, -16, 16, -32, 32, -16, 16, -32, 16, -16, 32, -16, 16, -32, 32, -16,
-    16, -32, 32, -32, 32, -32, 16, -16, 16, -16, 16, -16, 16, -16, 16, -16,
-    16, -16, 16, -16, 16, -16, 32, -16, 16, -16, 16, -16, 16, -16, 16, -16,
-    16, -16, 16, -16, 16, -32, 32, -32, 32, -32, 32, -32, 16, -16, 32, -32,
-    32, -16, 16, -16, 16, -32, 32, -32, 32, -32, 32, -32, 16, -16, 16, -16,
-    16, -16, 16, -16, 16, -16, 16, -16, 16, -16, 16, -16, 32, -16, 16, -16,
-    16, -16, 16, -16, 16, -16, 16, -16, 16, -16, 16, -16, 16, -32, 16, -16,
-    16, -16, 16, -16, 16, -16, 16, -16, 16, -16, 16, -16, 16, -16,
+    32,  -16, 16,  -16, 16,  -16, 16,  -16, 16,  -16, 16,  -16, 16,  -16, 16,  -16, 16,  -16, 16,
+    -16, 16,  -32, 16,  -16, 32,  -16, 16,  -16, 16,  -16, 16,  -32, 16,  -16, 16,  -16, 32,  -32,
+    16,  -16, 16,  -16, 16,  -16, 32,  -16, 16,  -16, 16,  -16, 16,  -32, 16,  -16, 16,  -16, 32,
+    -16, 16,  -16, 16,  -16, 16,  -32, 32,  -32, 32,  -32, 32,  -32, 16,  -16, 16,  -16, 32,  -16,
+    16,  -32, 16,  -16, 32,  -16, 16,  -32, 32,  -16, 16,  -32, 16,  -16, 32,  -16, 16,  -32, 32,
+    -16, 16,  -32, 32,  -32, 32,  -32, 16,  -16, 16,  -16, 16,  -16, 16,  -16, 16,  -16, 16,  -16,
+    16,  -16, 16,  -16, 32,  -16, 16,  -16, 16,  -16, 16,  -16, 16,  -16, 16,  -16, 16,  -16, 16,
+    -32, 32,  -32, 32,  -32, 32,  -32, 16,  -16, 32,  -32, 32,  -16, 16,  -16, 16,  -32, 32,  -32,
+    32,  -32, 32,  -32, 16,  -16, 16,  -16, 16,  -16, 16,  -16, 16,  -16, 16,  -16, 16,  -16, 16,
+    -16, 32,  -16, 16,  -16, 16,  -16, 16,  -16, 16,  -16, 16,  -16, 16,  -16, 16,  -16, 16,  -32,
+    16,  -16, 16,  -16, 16,  -16, 16,  -16, 16,  -16, 16,  -16, 16,  -16, 16,  -16,
 };
 
 MU_TEST(test_lfrfid_protocol_em_read_simple) {
@@ -468,8 +466,7 @@ MU_TEST(test_lfrfid_protocol_inadala26_emulate_simple) {
 
 MU_TEST(test_lfrfid_protocol_fdxb_emulate_simple) {
     ProtocolDict* dict = protocol_dict_alloc(lfrfid_protocols, LFRFIDProtocolMax);
-    mu_assert_int_eq(
-        FDXB_TEST_DATA_SIZE, protocol_dict_get_data_size(dict, LFRFIDProtocolFDXB));
+    mu_assert_int_eq(FDXB_TEST_DATA_SIZE, protocol_dict_get_data_size(dict, LFRFIDProtocolFDXB));
     mu_assert_string_eq("FDX-B", protocol_dict_get_name(dict, LFRFIDProtocolFDXB));
     mu_assert_string_eq("ISO", protocol_dict_get_manufacturer(dict, LFRFIDProtocolFDXB));
 
@@ -482,11 +479,9 @@ MU_TEST(test_lfrfid_protocol_fdxb_emulate_simple) {
         LevelDuration level_duration = protocol_dict_encoder_yield(dict, LFRFIDProtocolFDXB);
 
         if(level_duration_get_level(level_duration)) {
-            mu_assert_int_eq(
-                fdxb_test_timings[i], level_duration_get_duration(level_duration));
+            mu_assert_int_eq(fdxb_test_timings[i], level_duration_get_duration(level_duration));
         } else {
-            mu_assert_int_eq(
-                fdxb_test_timings[i], -level_duration_get_duration(level_duration));
+            mu_assert_int_eq(fdxb_test_timings[i], -level_duration_get_duration(level_duration));
         }
     }
 
@@ -495,8 +490,7 @@ MU_TEST(test_lfrfid_protocol_fdxb_emulate_simple) {
 
 MU_TEST(test_lfrfid_protocol_fdxb_read_simple) {
     ProtocolDict* dict = protocol_dict_alloc(lfrfid_protocols, LFRFIDProtocolMax);
-    mu_assert_int_eq(
-        FDXB_TEST_DATA_SIZE, protocol_dict_get_data_size(dict, LFRFIDProtocolFDXB));
+    mu_assert_int_eq(FDXB_TEST_DATA_SIZE, protocol_dict_get_data_size(dict, LFRFIDProtocolFDXB));
     mu_assert_string_eq("FDX-B", protocol_dict_get_name(dict, LFRFIDProtocolFDXB));
     mu_assert_string_eq("ISO", protocol_dict_get_manufacturer(dict, LFRFIDProtocolFDXB));
 
