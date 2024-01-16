@@ -18,9 +18,9 @@
 
 #define TAG "Core2"
 
-#define BLE_SYSTEM_HARDFAULT_CHECK_PERIOD_MS (5000)
+#define BLE_GLUE_HARDFAULT_CHECK_PERIOD_MS (5000)
 
-#define BLE_SYSTEM_HARDFAULT_INFO_MAGIC (0x1170FD0F)
+#define BLE_GLUE_HARDFAULT_INFO_MAGIC (0x1170FD0F)
 
 #define POOL_SIZE                      \
     (CFG_TLBLE_EVT_QUEUE_LENGTH * 4U * \
@@ -74,9 +74,9 @@ void ble_glue_init(void) {
     ble_glue->status = BleGlueStatusStartup;
     ble_glue->hardfault_check_timer =
         furi_timer_alloc(furi_hal_bt_hardfault_check, FuriTimerTypePeriodic, NULL);
-    furi_timer_start(ble_glue->hardfault_check_timer, BLE_SYSTEM_HARDFAULT_CHECK_PERIOD_MS);
+    furi_timer_start(ble_glue->hardfault_check_timer, BLE_GLUE_HARDFAULT_CHECK_PERIOD_MS);
 
-#ifdef BLE_SYSTEM_DEBUG
+#ifdef BLE_GLUE_DEBUG
     APPD_Init();
 #endif
 
@@ -331,7 +331,7 @@ static void ble_sys_status_not_callback(SHCI_TL_CmdStatus_t status) {
 static void ble_sys_user_event_callback(void* pPayload) {
     UNUSED(pPayload);
 
-#ifdef BLE_SYSTEM_DEBUG
+#ifdef BLE_GLUE_DEBUG
     APPD_EnableCPU2();
 #endif
 
@@ -429,7 +429,7 @@ BleGlueCommandResult ble_glue_fus_wait_operation(void) {
 const BleGlueHardfaultInfo* ble_glue_get_hardfault_info(void) {
     /* AN5289, 4.8.2 */
     const BleGlueHardfaultInfo* info = (BleGlueHardfaultInfo*)(SRAM2A_BASE);
-    if(info->magic != BLE_SYSTEM_HARDFAULT_INFO_MAGIC) {
+    if(info->magic != BLE_GLUE_HARDFAULT_INFO_MAGIC) {
         return NULL;
     }
     return info;

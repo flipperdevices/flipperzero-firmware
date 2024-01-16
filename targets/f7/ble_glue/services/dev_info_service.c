@@ -20,8 +20,8 @@ typedef enum {
     DevInfoSvcGattCharacteristicCount,
 } DevInfoSvcGattCharacteristicId;
 
-#define DEVICE_INFO_HARDWARE_REV_SIZE 4
-#define DEVICE_INFO_SOFTWARE_REV_SIZE 40
+#define DEVICE_INFO_HARDWARE_REV_SIZE (4)
+#define DEVICE_INFO_SOFTWARE_REV_SIZE (40)
 
 struct BleServiceDevInfo {
     uint16_t service_handle;
