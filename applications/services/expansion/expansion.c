@@ -316,7 +316,7 @@ static void expansion_worker_pending_callback(void* context, uint32_t arg) {
 
     // Do not re-enable detection interrupt on user-requested exit
     if(instance->exit_reason != ExpansionSessionExitReasonUser) {
-        furi_mutex_acquire(instance->state_mutex, FuriWaitForever);
+        furi_check(furi_mutex_acquire(instance->state_mutex, FuriWaitForever) == FuriStatusOk);
         instance->state = ExpansionStateEnabled;
         furi_hal_serial_control_set_expansion_callback(
             instance->serial_id, expansion_detect_callback, instance);
@@ -369,7 +369,7 @@ static void expansion_detect_callback(void* context) {
     furi_assert(context);
     Expansion* instance = context;
 
-    furi_mutex_acquire(instance->state_mutex, FuriWaitForever);
+    furi_check(furi_mutex_acquire(instance->state_mutex, FuriWaitForever) == FuriStatusOk);
 
     if(instance->state == ExpansionStateEnabled) {
         instance->state = ExpansionStateRunning;
@@ -407,7 +407,7 @@ void expansion_on_system_start(void* arg) {
 void expansion_enable(Expansion* instance, FuriHalSerialId serial_id) {
     expansion_disable(instance);
 
-    furi_mutex_acquire(instance->state_mutex, FuriWaitForever);
+    furi_check(furi_mutex_acquire(instance->state_mutex, FuriWaitForever) == FuriStatusOk);
 
     instance->serial_id = serial_id;
     instance->state = ExpansionStateEnabled;
@@ -421,7 +421,7 @@ void expansion_enable(Expansion* instance, FuriHalSerialId serial_id) {
 }
 
 void expansion_disable(Expansion* instance) {
-    furi_mutex_acquire(instance->state_mutex, FuriWaitForever);
+    furi_check(furi_mutex_acquire(instance->state_mutex, FuriWaitForever) == FuriStatusOk);
 
     if(instance->state == ExpansionStateRunning) {
         furi_thread_flags_set(furi_thread_get_id(instance->worker_thread), ExpansionFlagStop);
