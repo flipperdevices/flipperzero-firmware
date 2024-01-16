@@ -39,6 +39,15 @@ App(
 )
 
 App(
+    appid="mykey_parser",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="mykey_plugin_ep",
+    targets=["f7"],
+    requires=["nfc"],
+    sources=["plugins/supported_cards/mykey.c"],
+)
+
+App(
     appid="myki_parser",
     apptype=FlipperAppType.PLUGIN,
     entry_point="myki_plugin_ep",
@@ -54,6 +63,15 @@ App(
     targets=["f7"],
     requires=["nfc"],
     sources=["plugins/supported_cards/troika.c"],
+)
+
+App(
+    appid="washcity_parser",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="washcity_plugin_ep",
+    targets=["f7"],
+    requires=["nfc"],
+    sources=["plugins/supported_cards/washcity.c"],
 )
 
 App(
@@ -81,6 +99,24 @@ App(
     targets=["f7"],
     requires=["nfc"],
     sources=["plugins/supported_cards/aime.c"],
+)
+
+App(
+    appid="umarsh_parser",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="umarsh_plugin_ep",
+    targets=["f7"],
+    requires=["nfc"],
+    sources=["plugins/supported_cards/umarsh.c"],
+)
+
+App(
+    appid="hid_parser",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="hid_plugin_ep",
+    targets=["f7"],
+    requires=["nfc"],
+    sources=["plugins/supported_cards/hid.c"],
 )
 
 App(
