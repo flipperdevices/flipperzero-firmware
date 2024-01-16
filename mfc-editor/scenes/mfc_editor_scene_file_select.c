@@ -12,12 +12,10 @@ void mfc_editor_scene_file_select_on_enter(void* context) {
     }
 
     if(prompt_response == MfcEditorPromptResponseSuccess) {
-        if(nfc_device_get_protocol(instance->nfc_device) == NfcProtocolMfClassic) {
-            scene_manager_set_scene_state(instance->scene_manager, MfcEditorSceneSectorSelect, 0);
-            scene_manager_next_scene(instance->scene_manager, MfcEditorSceneSectorSelect);
-        } else {
-            scene_manager_next_scene(instance->scene_manager, MfcEditorSceneInvalidFile);
-        }
+        scene_manager_set_scene_state(instance->scene_manager, MfcEditorSceneSectorSelect, 0);
+        scene_manager_next_scene(instance->scene_manager, MfcEditorSceneSectorSelect);
+    } else if(prompt_response == MfcEditorPromptResponseNotMfClassic) {
+        scene_manager_next_scene(instance->scene_manager, MfcEditorSceneInvalidFile);
     } else {
         scene_manager_search_and_switch_to_previous_scene(
             instance->scene_manager, MfcEditorSceneStart);

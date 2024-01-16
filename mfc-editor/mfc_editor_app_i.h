@@ -46,8 +46,12 @@ struct MfcEditorApp {
     Popup* popup;
 
     NfcDevice* nfc_device;
+    const MfClassicData* mf_classic_data;
 
     FuriString* file_path;
+
+    uint8_t current_sector;
+    uint8_t current_block;
 };
 
 typedef enum {
@@ -60,6 +64,8 @@ typedef enum {
     MfcEditorPromptResponseSuccess,
     MfcEditorPromptResponseFailure,
 
+    MfcEditorPromptResponseNotMfClassic,
+
     // Backed out of a prompt
     MfcEditorPromptResponseExitedFile,
     MfcEditorPromptResponseExitedShadow,
@@ -67,4 +73,4 @@ typedef enum {
 
 MfcEditorPromptResponse mfc_editor_prompt_load_file(MfcEditorApp* instance);
 
-bool mfc_editor_load_file(MfcEditorApp* instance, FuriString* file_path, bool show_dialog);
+MfcEditorPromptResponse mfc_editor_load_file(MfcEditorApp* instance, FuriString* file_path);
