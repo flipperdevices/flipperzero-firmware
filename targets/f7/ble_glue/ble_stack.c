@@ -5,6 +5,7 @@
 #include <interface/patterns/ble_thread/tl/hci_tl.h>
 #include <interface/patterns/ble_thread/shci/shci.h>
 #include "gap.h"
+#include "furi_ble/event_dispatcher.h"
 
 #include <furi_hal.h>
 #include <furi.h>
@@ -140,12 +141,13 @@ void hci_cmd_resp_wait(uint32_t timeout) {
 ///////////////////////////////////////////////////////////////////////////////
 
 static void ble_stack_hci_event_handler(void* pPayload) {
-    SVCCTL_UserEvtFlowStatus_t svctl_return_status;
-    tHCI_UserEvtRxParam* pParam = (tHCI_UserEvtRxParam*)pPayload;
-
     furi_check(ble_app);
-    svctl_return_status = SVCCTL_UserEvtRx((void*)&(pParam->pckt->evtserial));
-    if(svctl_return_status != SVCCTL_UserEvtFlowDisable) {
+
+    tHCI_UserEvtRxParam* pParam = (tHCI_UserEvtRxParam*)pPayload;
+    BleEventFlowStatus event_flow_status =
+        ble_event_dispatcher_process_event((void*)&(pParam->pckt->evtserial));
+
+    if(event_flow_status != BleEventFlowDisable) {
         pParam->status = HCI_TL_UserEventFlow_Enable;
     } else {
         pParam->status = HCI_TL_UserEventFlow_Disable;

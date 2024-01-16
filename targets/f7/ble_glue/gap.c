@@ -86,7 +86,7 @@ static void gap_verify_connection_parameters(Gap* gap) {
     }
 }
 
-SVCCTL_UserEvtFlowStatus_t SVCCTL_App_Notification(void* pckt) {
+BleEventFlowStatus ble_event_app_notification(void* pckt) {
     hci_event_pckt* event_pckt;
     evt_le_meta_event* meta_evt;
     evt_blecore_aci* blue_evt;
@@ -272,7 +272,7 @@ SVCCTL_UserEvtFlowStatus_t SVCCTL_App_Notification(void* pckt) {
     if(gap) {
         furi_mutex_release(gap->state_mutex);
     }
-    return SVCCTL_UserEvtFlowEnable;
+    return BleEventFlowEnable;
 }
 
 static void set_advertisment_service_uid(uint8_t* uid, uint8_t uid_len) {
@@ -487,8 +487,7 @@ bool gap_init(GapConfig* config, GapEventCallback on_event_cb, void* context) {
     // Initialization of GATT & GAP layer
     gap->service.adv_name = config->adv_name;
     gap_init_svc(gap);
-    // Initialization of the BLE Services
-    SVCCTL_Init();
+    ble_event_dispatcher_init();
     // Initialization of the GAP state
     gap->state_mutex = furi_mutex_alloc(FuriMutexTypeNormal);
     gap->state = GapStateIdle;
@@ -511,9 +510,6 @@ bool gap_init(GapConfig* config, GapEventCallback on_event_cb, void* context) {
     // Set callback
     gap->on_event_cb = on_event_cb;
     gap->context = context;
-
-    // Register BLE event handler
-    ble_service_event_dispatcher_init();
 
     return true;
 }
@@ -544,7 +540,7 @@ void gap_thread_stop() {
         furi_message_queue_free(gap->command_queue);
         furi_timer_free(gap->advertise_timer);
 
-        ble_service_event_dispatcher_reset();
+        ble_event_dispatcher_reset();
         free(gap);
         gap = NULL;
     }

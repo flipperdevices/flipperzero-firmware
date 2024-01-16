@@ -72,9 +72,9 @@ struct BleServiceSerial {
     GapSvcEventHandler* event_handler;
 };
 
-static int32_t ble_svc_serial_event_handler(void* event, void* context) {
+static BleEventAckStatus ble_svc_serial_event_handler(void* event, void* context) {
     BleServiceSerial* serial_svc = (BleServiceSerial*)context;
-    SVCCTL_EvtAckStatus_t ret = SVCCTL_EvtNotAck;
+    BleEventAckStatus ret = BleEventNotAck;
     hci_event_pckt* event_pckt = (hci_event_pckt*)(((hci_uart_pckt*)event)->data);
     evt_blecore_aci* blecore_evt = (evt_blecore_aci*)event_pckt->data;
     aci_gatt_attribute_modified_event_rp0* attribute_modified;
@@ -84,7 +84,7 @@ static int32_t ble_svc_serial_event_handler(void* event, void* context) {
             if(attribute_modified->Attr_Handle ==
                serial_svc->chars[SerialSvcGattCharacteristicRx].handle + 2) {
                 // Descriptor handle
-                ret = SVCCTL_EvtAckFlowEnable;
+                ret = BleEventAckFlowEnable;
                 FURI_LOG_D(TAG, "RX descriptor event");
             } else if(
                 attribute_modified->Attr_Handle ==
@@ -113,7 +113,7 @@ static int32_t ble_svc_serial_event_handler(void* event, void* context) {
                     FURI_LOG_D(TAG, "Available buff size: %ld", buff_free_size);
                     furi_check(furi_mutex_release(serial_svc->buff_size_mtx) == FuriStatusOk);
                 }
-                ret = SVCCTL_EvtAckFlowEnable;
+                ret = BleEventAckFlowEnable;
             } else if(
                 attribute_modified->Attr_Handle ==
                 serial_svc->chars[SerialSvcGattCharacteristicStatus].handle + 1) {
@@ -135,7 +135,7 @@ static int32_t ble_svc_serial_event_handler(void* event, void* context) {
                 };
                 serial_svc->callback(event, serial_svc->context);
             }
-            ret = SVCCTL_EvtAckFlowEnable;
+            ret = BleEventAckFlowEnable;
         }
     }
     return ret;
@@ -156,7 +156,7 @@ BleServiceSerial* ble_svc_serial_start() {
     BleServiceSerial* serial_svc = malloc(sizeof(BleServiceSerial));
 
     serial_svc->event_handler =
-        ble_service_event_dispatcher_register_handler(ble_svc_serial_event_handler, serial_svc);
+        ble_event_dispatcher_register_svc_handler(ble_svc_serial_event_handler, serial_svc);
 
     if(!ble_gatt_service_add(
            UUID_TYPE_128, &service_uuid, PRIMARY_SERVICE, 12, &serial_svc->svc_handle)) {
@@ -213,7 +213,7 @@ void ble_svc_serial_notify_buffer_is_empty(BleServiceSerial* serial_svc) {
 void ble_svc_serial_stop(BleServiceSerial* serial_svc) {
     furi_check(serial_svc);
 
-    ble_service_event_dispatcher_unregister_handler(serial_svc->event_handler);
+    ble_event_dispatcher_unregister_svc_handler(serial_svc->event_handler);
 
     for(uint8_t i = 0; i < SerialSvcGattCharacteristicCount; i++) {
         ble_gatt_characteristic_delete(serial_svc->svc_handle, &serial_svc->chars[i]);

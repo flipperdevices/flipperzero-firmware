@@ -5,9 +5,9 @@
 
 #include <m-list.h>
 
-struct GapSvcEventHandler {
+struct GapEventHandler {
     void* context;
-    BleServiceEventHandlerCb callback;
+    BleSvcEventHandlerCb callback;
 };
 
 LIST_DEF(GapSvcEventHandlerList, GapSvcEventHandler, M_POD_OPLIST);
@@ -15,42 +15,48 @@ LIST_DEF(GapSvcEventHandlerList, GapSvcEventHandler, M_POD_OPLIST);
 static GapSvcEventHandlerList_t handlers;
 static bool initialized = false;
 
-static SVCCTL_EvtAckStatus_t ble_service_event_dispatcher_dispatch_event(void* event) {
-    furi_assert(initialized);
+BleEventFlowStatus ble_event_dispatcher_process_event(void* payload) {
+    furi_check(initialized);
 
     GapSvcEventHandlerList_it_t it;
-    SVCCTL_EvtAckStatus_t ack_status = SVCCTL_EvtNotAck;
+    BleEventAckStatus ack_status = BleEventNotAck;
 
     for(GapSvcEventHandlerList_it(it, handlers); !GapSvcEventHandlerList_end_p(it);
         GapSvcEventHandlerList_next(it)) {
         const GapSvcEventHandler* item = GapSvcEventHandlerList_cref(it);
-        ack_status = item->callback(event, item->context);
-        /* Since we're replacing individual event handlers with a single event 
-         * dispatcher, we need to replicate its behavior of acking events. 
-         * See AN5289, 7.6.10 
-         */
-        switch(ack_status) {
-        case SVCCTL_EvtNotAck:
-            continue; /* Keep going */
-        case SVCCTL_EvtAckFlowEnable:
-            return SVCCTL_EvtAckFlowEnable;
-        case SVCCTL_EvtAckFlowDisable:
-            return SVCCTL_EvtAckFlowDisable;
+        ack_status = item->callback(payload, item->context);
+        if(ack_status == BleEventNotAck) {
+            /* Keep going */
+            continue;
+        } else if((ack_status == BleEventAckFlowEnable) || (ack_status == BleEventAckFlowDisable)) {
+            break;
         }
     }
 
-    return ack_status;
+    /* Handlers for client-mode events are also to be implemented here. But not today. */
+
+    /* Now, decide on a flow control action based on results of all handlers */
+    switch(ack_status) {
+    case BleEventNotAck:
+        /* The event has NOT been managed yet. Pass to app for processing */
+        return ble_event_app_notification(payload);
+    case BleEventAckFlowEnable:
+        return BleEventFlowEnable;
+    case BleEventAckFlowDisable:
+        return BleEventFlowDisable;
+    default:
+        return BleEventFlowEnable;
+    }
 }
 
-void ble_service_event_dispatcher_init() {
+void ble_event_dispatcher_init() {
     furi_assert(!initialized);
 
     GapSvcEventHandlerList_init(handlers);
-    SVCCTL_RegisterSvcHandler(ble_service_event_dispatcher_dispatch_event);
     initialized = true;
 }
 
-void ble_service_event_dispatcher_reset() {
+void ble_event_dispatcher_reset() {
     furi_assert(initialized);
     furi_check(GapSvcEventHandlerList_size(handlers) == 0);
 
@@ -58,7 +64,7 @@ void ble_service_event_dispatcher_reset() {
 }
 
 GapSvcEventHandler*
-    ble_service_event_dispatcher_register_handler(BleServiceEventHandlerCb handler, void* context) {
+    ble_event_dispatcher_register_svc_handler(BleSvcEventHandlerCb handler, void* context) {
     furi_check(handler);
     furi_check(context);
     furi_check(initialized);
@@ -70,7 +76,7 @@ GapSvcEventHandler*
     return item;
 }
 
-void ble_service_event_dispatcher_unregister_handler(GapSvcEventHandler* handler) {
+void ble_event_dispatcher_unregister_svc_handler(GapSvcEventHandler* handler) {
     furi_check(handler);
 
     bool found = false;

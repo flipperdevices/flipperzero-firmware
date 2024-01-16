@@ -150,20 +150,20 @@ struct BleServiceHid {
     GapSvcEventHandler* event_handler;
 };
 
-static int32_t ble_svc_hid_event_handler(void* event, void* context) {
+static BleEventAckStatus ble_svc_hid_event_handler(void* event, void* context) {
     UNUSED(context);
 
-    SVCCTL_EvtAckStatus_t ret = SVCCTL_EvtNotAck;
+    BleEventAckStatus ret = BleEventNotAck;
     hci_event_pckt* event_pckt = (hci_event_pckt*)(((hci_uart_pckt*)event)->data);
     evt_blecore_aci* blecore_evt = (evt_blecore_aci*)event_pckt->data;
     // aci_gatt_attribute_modified_event_rp0* attribute_modified;
     if(event_pckt->evt == HCI_VENDOR_SPECIFIC_DEBUG_EVT_CODE) {
         if(blecore_evt->ecode == ACI_GATT_ATTRIBUTE_MODIFIED_VSEVT_CODE) {
             // Process modification events
-            ret = SVCCTL_EvtAckFlowEnable;
+            ret = BleEventAckFlowEnable;
         } else if(blecore_evt->ecode == ACI_GATT_SERVER_CONFIRMATION_VSEVT_CODE) {
             // Process notification confirmation
-            ret = SVCCTL_EvtAckFlowEnable;
+            ret = BleEventAckFlowEnable;
         }
     }
     return ret;
@@ -174,7 +174,7 @@ BleServiceHid* ble_svc_hid_start() {
 
     // Register event handler
     hid_svc->event_handler =
-        ble_service_event_dispatcher_register_handler(ble_svc_hid_event_handler, hid_svc);
+        ble_event_dispatcher_register_svc_handler(ble_svc_hid_event_handler, hid_svc);
     /**
      *  Add Human Interface Device Service
      */
@@ -288,7 +288,7 @@ bool ble_svc_hid_update_info(BleServiceHid* hid_svc, uint8_t* data) {
 
 void ble_svc_hid_stop(BleServiceHid* hid_svc) {
     furi_assert(hid_svc);
-    ble_service_event_dispatcher_unregister_handler(hid_svc->event_handler);
+    ble_event_dispatcher_unregister_svc_handler(hid_svc->event_handler);
     // Delete characteristics
     for(size_t i = 0; i < HidSvcGattCharacteristicCount; i++) {
         ble_gatt_characteristic_delete(hid_svc->svc_handle, &hid_svc->chars[i]);

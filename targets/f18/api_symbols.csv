@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,52.0,,
+Version,+,53.0,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
 Header,+,applications/services/cli/cli_vcp.h,,
@@ -573,6 +573,12 @@ Function,+,bit_buffer_starts_with_byte,_Bool,"const BitBuffer*, uint8_t"
 Function,+,bit_buffer_write_bytes,void,"const BitBuffer*, void*, size_t"
 Function,+,bit_buffer_write_bytes_mid,void,"const BitBuffer*, void*, size_t, size_t"
 Function,+,bit_buffer_write_bytes_with_parity,void,"const BitBuffer*, void*, size_t, size_t*"
+Function,-,ble_event_app_notification,BleEventFlowStatus,void*
+Function,-,ble_event_dispatcher_init,void,
+Function,-,ble_event_dispatcher_process_event,BleEventFlowStatus,void*
+Function,+,ble_event_dispatcher_register_svc_handler,GapSvcEventHandler*,"BleSvcEventHandlerCb, void*"
+Function,-,ble_event_dispatcher_reset,void,
+Function,+,ble_event_dispatcher_unregister_svc_handler,void,GapSvcEventHandler*
 Function,+,ble_gatt_characteristic_delete,void,"uint16_t, BleGattCharacteristicInstance*"
 Function,+,ble_gatt_characteristic_init,void,"uint16_t, const BleGattCharacteristicParams*, BleGattCharacteristicInstance*"
 Function,+,ble_gatt_characteristic_update,_Bool,"uint16_t, BleGattCharacteristicInstance*, const void*"
@@ -593,10 +599,6 @@ Function,+,ble_profile_serial_notify_buffer_is_empty,void,FuriHalBleProfileBase*
 Function,+,ble_profile_serial_set_event_callback,void,"FuriHalBleProfileBase*, uint16_t, FuriHalBtSerialCallback, void*"
 Function,+,ble_profile_serial_set_rpc_active,void,"FuriHalBleProfileBase*, _Bool"
 Function,+,ble_profile_serial_tx,_Bool,"FuriHalBleProfileBase*, uint8_t*, uint16_t"
-Function,-,ble_service_event_dispatcher_init,void,
-Function,+,ble_service_event_dispatcher_register_handler,GapSvcEventHandler*,"BleServiceEventHandlerCb, void*"
-Function,-,ble_service_event_dispatcher_reset,void,
-Function,+,ble_service_event_dispatcher_unregister_handler,void,GapSvcEventHandler*
 Function,-,ble_stack_deinit,void,
 Function,-,ble_stack_get_key_storage_buff,void,"uint8_t**, uint16_t*"
 Function,-,ble_stack_init,_Bool,

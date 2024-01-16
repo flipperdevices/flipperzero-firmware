@@ -7,28 +7,43 @@
 extern "C" {
 #endif
 
+typedef enum {
+    BleEventNotAck,
+    BleEventAckFlowEnable,
+    BleEventAckFlowDisable,
+} BleEventAckStatus;
+
+typedef enum {
+    BleEventFlowDisable,
+    BleEventFlowEnable,
+} BleEventFlowStatus;
+
 /* Using other types so not to leak all the BLE stack headers 
     (we don't have a wrapper for them yet)
- * Return type is SVCCTL_EvtAckStatus_t
  * Event data is hci_uart_pckt*
  * Context is user-defined 
  */
-typedef int32_t (*BleServiceEventHandlerCb)(void* event, void* context);
+typedef BleEventAckStatus (*BleSvcEventHandlerCb)(void* event, void* context);
 
-typedef struct GapSvcEventHandler GapSvcEventHandler;
+typedef struct GapEventHandler GapSvcEventHandler;
 
 /* To be called once at BLE system startup */
-void ble_service_event_dispatcher_init();
+void ble_event_dispatcher_init();
 
 /* To be called at stack reset - ensures that all handlers are unregistered */
-void ble_service_event_dispatcher_reset();
+void ble_event_dispatcher_reset();
+
+BleEventFlowStatus ble_event_dispatcher_process_event(void* payload);
+
+/* Final handler for event not ack'd by services - to be implemented by app */
+BleEventFlowStatus ble_event_app_notification(void* pckt);
 
 /* Add a handler to the list of handlers */
 FURI_WARN_UNUSED GapSvcEventHandler*
-    ble_service_event_dispatcher_register_handler(BleServiceEventHandlerCb handler, void* context);
+    ble_event_dispatcher_register_svc_handler(BleSvcEventHandlerCb handler, void* context);
 
 /* Remove a handler from the list of handlers */
-void ble_service_event_dispatcher_unregister_handler(GapSvcEventHandler* handler);
+void ble_event_dispatcher_unregister_svc_handler(GapSvcEventHandler* handler);
 
 #ifdef __cplusplus
 }

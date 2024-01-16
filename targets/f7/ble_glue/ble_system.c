@@ -37,7 +37,6 @@ static uint8_t ble_spare_event_buff[sizeof(TL_PacketHeader_t) + TL_EVT_HDR_SIZE 
 
 typedef struct {
     FuriMutex* shci_mtx;
-    FuriSemaphore* shci_sem;
     FuriTimer* hardfault_check_timer;
     BleSystemStatus status;
     BleSystemKeyStorageChangedCallback callback;
@@ -88,7 +87,6 @@ void ble_system_init() {
     TL_Init();
 
     ble_glue->shci_mtx = furi_mutex_alloc(FuriMutexTypeNormal);
-    ble_glue->shci_sem = furi_semaphore_alloc(1, 0);
 
     // FreeRTOS system task creation
     ble_event_thread_start();
@@ -250,7 +248,6 @@ void ble_system_stop() {
     ble_event_thread_stop();
     // Free resources
     furi_mutex_free(ble_glue->shci_mtx);
-    furi_semaphore_free(ble_glue->shci_sem);
     furi_timer_free(ble_glue->hardfault_check_timer);
 
     ble_system_clear_shared_memory();
