@@ -25,33 +25,10 @@ forward_os_env = {
     "PATH": os.environ["PATH"],
 }
 
-# Proxying environment to child processes & scripts
-variables_to_forward = [
-    # CI/CD variables
-    "WORKFLOW_BRANCH_OR_TAG",
-    "DIST_SUFFIX",
-    # Python & other tools
-    "HOME",
-    "APPDATA",
-    "PYTHONHOME",
-    "PYTHONNOUSERSITE",
-    "TMP",
-    "TEMP",
-    # Colors for tools
-    "TERM",
-]
-
-if proxy_env := GetOption("proxy_env"):
-    variables_to_forward.extend(proxy_env.split(","))
-
-for env_value_name in variables_to_forward:
-    if environ_value := os.environ.get(env_value_name, None):
-        forward_os_env[env_value_name] = environ_value
 
 # Core environment init - loads SDK state, sets up paths, etc.
 core_env = Environment(
     variables=ufbt_variables,
-    ENV=forward_os_env,
     UFBT_STATE_DIR=ufbt_state_dir,
     UFBT_CURRENT_SDK_DIR=ufbt_current_sdk_dir,
     UFBT_SCRIPT_DIR=ufbt_script_dir,
@@ -69,6 +46,7 @@ core_env.Append(CPPDEFINES=GetOption("extra_defines"))
 from fbt.appmanifest import FlipperApplication, FlipperAppType
 from fbt.sdk.cache import SdkCache
 from fbt.util import (
+    FORWARDED_ENV_VARIABLES,
     path_as_posix,
     resolve_real_dir_node,
     single_quote,
@@ -76,8 +54,19 @@ from fbt.util import (
     wrap_tempfile,
 )
 
+variables_to_forward = list(FORWARDED_ENV_VARIABLES)
+
+if proxy_env := GetOption("proxy_env"):
+    variables_to_forward.extend(proxy_env.split(","))
+
+for env_value_name in variables_to_forward:
+    if environ_value := os.environ.get(env_value_name, None):
+        forward_os_env[env_value_name] = environ_value
+
+
 # Base environment with all tools loaded from SDK
 env = core_env.Clone(
+    ENV=forward_os_env,
     toolpath=[core_env["FBT_SCRIPT_DIR"].Dir("fbt_tools")],
     tools=[
         "fbt_tweaks",
@@ -286,15 +275,16 @@ Default(install_and_check)
 
 # Compilation database
 
-fwcdb = appenv.CompilationDatabase(
+app_cdb = appenv.CompilationDatabase(
     original_app_dir.Dir(".vscode").File("compile_commands.json")
 )
 
-AlwaysBuild(fwcdb)
-Precious(fwcdb)
-NoClean(fwcdb)
+AlwaysBuild(app_cdb)
+Precious(app_cdb)
+NoClean(app_cdb)
 if len(apps_artifacts):
-    Default(fwcdb)
+    Default(app_cdb)
+Alias("cdb", app_cdb)
 
 
 # launch handler
@@ -376,7 +366,7 @@ for template_file in project_template_dir.Dir(".vscode").glob("*"):
                 "@UFBT_TOOLCHAIN_OPENOCD@": _path_as_posix(dist_env.WhereIs("openocd")),
                 "@UFBT_APP_DIR@": _path_as_posix(original_app_dir.abspath),
                 "@UFBT_ROOT_DIR@": _path_as_posix(Dir("#").abspath),
-                "@UFBT_DEBUG_DIR@": dist_env["FBT_DEBUG_DIR"],
+                "@UFBT_DEBUG_DIR@": _path_as_posix(dist_env["FBT_DEBUG_DIR"].abspath),
                 "@UFBT_DEBUG_ELF_DIR@": _path_as_posix(
                     dist_env["FBT_FAP_DEBUG_ELF_ROOT"].abspath
                 ),
@@ -392,7 +382,7 @@ for config_file in project_template_dir.glob(".*"):
 
 dist_env.Precious(vscode_dist)
 dist_env.NoClean(vscode_dist)
-dist_env.Alias("vscode_dist", vscode_dist)
+dist_env.Alias("vscode_dist", (vscode_dist, app_cdb))
 
 
 # Creating app from base template
@@ -477,9 +467,12 @@ else:
 
     dist_env.PhonyTarget("dolphin_ext", Action(missing_dolphin_folder, None))
 
+# print(env.Dump())
 dist_env.PhonyTarget(
     "env",
-    "@echo $( ${FBT_SCRIPT_DIR.abspath}/toolchain/fbtenv.sh $)",
+    '@echo "FBT_TOOLCHAIN_PATH='
+    + forward_os_env["FBT_TOOLCHAIN_PATH"]
+    + '" source $( "${FBT_SCRIPT_DIR.abspath}/toolchain/fbtenv.sh" $)',
 )
 
 dist_env.PostConfigureUfbtEnvionment()

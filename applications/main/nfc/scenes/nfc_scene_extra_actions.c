@@ -24,7 +24,7 @@ void nfc_scene_extra_actions_on_enter(void* context) {
         instance);
     submenu_add_item(
         submenu,
-        "Mifare Classic Keys",
+        "MIFARE Classic Keys",
         SubmenuIndexMfClassicKeys,
         nfc_scene_extra_actions_submenu_callback,
         instance);
@@ -45,11 +45,7 @@ bool nfc_scene_extra_actions_on_event(void* context, SceneManagerEvent event) {
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SubmenuIndexMfClassicKeys) {
-            if(nfc_dict_check_presence(NFC_APP_MF_CLASSIC_DICT_USER_PATH)) {
-                scene_manager_next_scene(instance->scene_manager, NfcSceneMfClassicKeys);
-            } else {
-                scene_manager_previous_scene(instance->scene_manager);
-            }
+            scene_manager_next_scene(instance->scene_manager, NfcSceneMfClassicKeys);
             consumed = true;
         } else if(event.event == SubmenuIndexMfUltralightUnlock) {
             mf_ultralight_auth_reset(instance->mf_ul_auth);

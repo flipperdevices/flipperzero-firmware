@@ -17,8 +17,9 @@ void nfc_scene_detect_on_enter(void* context) {
 
     // Setup view
     popup_reset(instance->popup);
+    popup_set_header(instance->popup, "Reading", 97, 15, AlignCenter, AlignTop);
     popup_set_text(
-        instance->popup, "Apply card to\nFlipper's back", 97, 24, AlignCenter, AlignTop);
+        instance->popup, "Apply card to\nFlipper's back", 97, 27, AlignCenter, AlignTop);
     popup_set_icon(instance->popup, 0, 8, &I_NFC_manual_60x50);
     view_dispatcher_switch_to_view(instance->view_dispatcher, NfcViewPopup);
 
@@ -37,6 +38,7 @@ bool nfc_scene_detect_on_event(void* context, SceneManagerEvent event) {
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == NfcCustomEventWorkerExit) {
             if(instance->protocols_detected_num > 1) {
+                notification_message(instance->notifications, &sequence_single_vibro);
                 scene_manager_next_scene(instance->scene_manager, NfcSceneSelectProtocol);
             } else {
                 scene_manager_next_scene(instance->scene_manager, NfcSceneRead);

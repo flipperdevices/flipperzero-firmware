@@ -8,7 +8,6 @@
 #include "nfc_protocol_support.h"
 
 #include "nfc/nfc_app_i.h"
-#include "nfc/helpers/nfc_supported_cards.h"
 
 #include "nfc_protocol_support_defs.h"
 #include "nfc_protocol_support_gui_common.h"
@@ -147,8 +146,7 @@ static void nfc_protocol_support_scene_more_info_on_exit(NfcApp* instance) {
 
 // SceneRead
 static void nfc_protocol_support_scene_read_on_enter(NfcApp* instance) {
-    popup_set_header(
-        instance->popup, "Reading card\nDon't move...", 85, 24, AlignCenter, AlignTop);
+    popup_set_header(instance->popup, "Don't move", 85, 27, AlignCenter, AlignTop);
     popup_set_icon(instance->popup, 12, 23, &A_Loading_24);
 
     view_dispatcher_switch_to_view(instance->view_dispatcher, NfcViewPopup);
@@ -157,11 +155,13 @@ static void nfc_protocol_support_scene_read_on_enter(NfcApp* instance) {
         instance->protocols_detected[instance->protocols_detected_selected_idx];
     instance->poller = nfc_poller_alloc(instance->nfc, protocol);
 
+    view_dispatcher_switch_to_view(instance->view_dispatcher, NfcViewPopup);
+    nfc_supported_cards_load_cache(instance->nfc_supported_cards);
+
     // Start poller with the appropriate callback
     nfc_protocol_support[protocol]->scene_read.on_enter(instance);
-    view_dispatcher_switch_to_view(instance->view_dispatcher, NfcViewPopup);
 
-    nfc_blink_detect_start(instance);
+    nfc_blink_read_start(instance);
 }
 
 static bool nfc_protocol_support_scene_read_on_event(NfcApp* instance, SceneManagerEvent event) {
@@ -178,7 +178,8 @@ static bool nfc_protocol_support_scene_read_on_event(NfcApp* instance, SceneMana
         } else if(event.event == NfcCustomEventPollerIncomplete) {
             nfc_poller_stop(instance->poller);
             nfc_poller_free(instance->poller);
-            bool card_read = nfc_supported_cards_read(instance->nfc_device, instance->nfc);
+            bool card_read = nfc_supported_cards_read(
+                instance->nfc_supported_cards, instance->nfc_device, instance->nfc);
             if(card_read) {
                 notification_message(instance->notifications, &sequence_success);
                 scene_manager_next_scene(instance->scene_manager, NfcSceneReadSuccess);
@@ -198,6 +199,10 @@ static bool nfc_protocol_support_scene_read_on_event(NfcApp* instance, SceneMana
                     instance->scene_manager, NfcSceneDetect);
             }
             consumed = true;
+        } else if(event.event == NfcCustomEventCardDetected) {
+            const NfcProtocol protocol =
+                instance->protocols_detected[instance->protocols_detected_selected_idx];
+            consumed = nfc_protocol_support[protocol]->scene_read.on_event(instance, event.event);
         }
     } else if(event.type == SceneManagerEventTypeBack) {
         nfc_poller_stop(instance->poller);
@@ -303,7 +308,7 @@ static void nfc_protocol_support_scene_read_success_on_enter(NfcApp* instance) {
     Widget* widget = instance->widget;
 
     FuriString* temp_str = furi_string_alloc();
-    if(nfc_supported_cards_parse(instance->nfc_device, temp_str)) {
+    if(nfc_supported_cards_parse(instance->nfc_supported_cards, instance->nfc_device, temp_str)) {
         widget_add_text_scroll_element(
             instance->widget, 0, 0, 128, 52, furi_string_get_cstr(temp_str));
     } else {
