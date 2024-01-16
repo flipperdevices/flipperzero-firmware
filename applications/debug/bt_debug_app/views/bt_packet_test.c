@@ -1,7 +1,7 @@
 #include "bt_packet_test.h"
 #include "bt_test.h"
 #include "bt_test_types.h"
-#include <furi_hal_ble.h>
+#include <furi_hal_bt.h>
 
 struct BtPacketTest {
     BtTest* bt_test;
@@ -30,20 +30,20 @@ static BtTestParamValue bt_param_data_rate[] = {
 static void bt_packet_test_start(BtPacketTest* bt_packet_test) {
     furi_assert(bt_packet_test);
     if(bt_packet_test->mode == BtTestModeRx) {
-        furi_hal_ble_start_packet_rx(bt_packet_test->channel, bt_packet_test->data_rate);
+        furi_hal_bt_start_packet_rx(bt_packet_test->channel, bt_packet_test->data_rate);
         furi_timer_start(bt_packet_test->timer, furi_kernel_get_tick_frequency() / 4);
     } else if(bt_packet_test->mode == BtTestModeTx) {
-        furi_hal_ble_start_packet_tx(bt_packet_test->channel, 1, bt_packet_test->data_rate);
+        furi_hal_bt_start_packet_tx(bt_packet_test->channel, 1, bt_packet_test->data_rate);
     }
 }
 
 static void bt_packet_test_stop(BtPacketTest* bt_packet_test) {
     furi_assert(bt_packet_test);
     if(bt_packet_test->mode == BtTestModeTx) {
-        furi_hal_ble_stop_packet_test();
-        bt_test_set_packets_tx(bt_packet_test->bt_test, furi_hal_ble_get_transmitted_packets());
+        furi_hal_bt_stop_packet_test();
+        bt_test_set_packets_tx(bt_packet_test->bt_test, furi_hal_bt_get_transmitted_packets());
     } else if(bt_packet_test->mode == BtTestModeRx) {
-        bt_test_set_packets_rx(bt_packet_test->bt_test, furi_hal_ble_stop_packet_test());
+        bt_test_set_packets_rx(bt_packet_test->bt_test, furi_hal_bt_stop_packet_test());
         furi_timer_stop(bt_packet_test->timer);
     }
 }
@@ -93,7 +93,7 @@ static void bt_test_packet_timer_callback(void* context) {
     furi_assert(context);
     BtPacketTest* bt_packet_test = context;
     if(bt_packet_test->mode == BtTestModeRx) {
-        bt_test_set_rssi(bt_packet_test->bt_test, furi_hal_ble_get_rssi());
+        bt_test_set_rssi(bt_packet_test->bt_test, furi_hal_bt_get_rssi());
     }
 }
 

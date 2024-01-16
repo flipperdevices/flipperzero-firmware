@@ -9,7 +9,7 @@ extern "C" {
 
 /*
  * Additinal non-connetable beacon API.
- * Not to be used directly, but through furi_hal_ble_extra_beacon_* APIs.
+ * Not to be used directly, but through furi_hal_bt_extra_beacon_* APIs.
  */
 
 #define EXTRA_BEACON_MAX_DATA_SIZE (31)

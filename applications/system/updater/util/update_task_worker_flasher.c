@@ -150,9 +150,9 @@ static bool update_task_write_stack(UpdateTask* update_task) {
         CHECK_RESULT(update_task_write_stack_data(update_task));
         update_task_set_progress(update_task, UpdateTaskStageRadioInstall, 10);
         CHECK_RESULT(
-            ble_system_fus_stack_install(manifest->radio_address, 0) != BleGlueCommandResultError);
+            ble_glue_fus_stack_install(manifest->radio_address, 0) != BleGlueCommandResultError);
         update_task_set_progress(update_task, UpdateTaskStageProgress, 80);
-        CHECK_RESULT(ble_system_fus_wait_operation() == BleGlueCommandResultOK);
+        CHECK_RESULT(ble_glue_fus_wait_operation() == BleGlueCommandResultOK);
         update_task_set_progress(update_task, UpdateTaskStageProgress, 100);
         /* ...system will restart here. */
         update_task_wait_for_restart(update_task);
@@ -164,9 +164,9 @@ static bool update_task_remove_stack(UpdateTask* update_task) {
     do {
         FURI_LOG_W(TAG, "Removing stack");
         update_task_set_progress(update_task, UpdateTaskStageRadioErase, 30);
-        CHECK_RESULT(ble_system_fus_stack_delete() != BleGlueCommandResultError);
+        CHECK_RESULT(ble_glue_fus_stack_delete() != BleGlueCommandResultError);
         update_task_set_progress(update_task, UpdateTaskStageProgress, 80);
-        CHECK_RESULT(ble_system_fus_wait_operation() == BleGlueCommandResultOK);
+        CHECK_RESULT(ble_glue_fus_wait_operation() == BleGlueCommandResultOK);
         update_task_set_progress(update_task, UpdateTaskStageProgress, 100);
         /* ...system will restart here. */
         update_task_wait_for_restart(update_task);
@@ -178,9 +178,9 @@ static bool update_task_manage_radiostack(UpdateTask* update_task) {
     update_task_set_progress(update_task, UpdateTaskStageRadioBusy, 10);
     bool success = false;
     do {
-        CHECK_RESULT(ble_system_wait_for_c2_start(FURI_HAL_BLE_C2_START_TIMEOUT));
+        CHECK_RESULT(ble_glue_wait_for_c2_start(FURI_HAL_BT_C2_START_TIMEOUT));
 
-        const BleSystemC2Info* c2_state = ble_system_get_c2_info();
+        const BleGlueC2Info* c2_state = ble_glue_get_c2_info();
 
         const UpdateManifestRadioVersion* radio_ver = &update_task->manifest->radio_version;
         bool stack_version_match = (c2_state->VersionMajor == radio_ver->version.major) &&
@@ -206,7 +206,7 @@ static bool update_task_manage_radiostack(UpdateTask* update_task) {
                 furi_hal_rtc_set_flag(FuriHalRtcFlagC2Update);
                 update_task_set_progress(update_task, UpdateTaskStageProgress, 20);
 
-                CHECK_RESULT(furi_hal_ble_ensure_c2_mode(BleGlueC2ModeFUS));
+                CHECK_RESULT(furi_hal_bt_ensure_c2_mode(BleGlueC2ModeFUS));
                 /* ...system will restart here. */
                 update_task_wait_for_restart(update_task);
             }
@@ -214,7 +214,7 @@ static bool update_task_manage_radiostack(UpdateTask* update_task) {
             /* OK, we're in FUS mode. */
             FURI_LOG_W(TAG, "Waiting for FUS to settle");
             update_task_set_progress(update_task, UpdateTaskStageProgress, 30);
-            CHECK_RESULT(ble_system_fus_wait_operation() == BleGlueCommandResultOK);
+            CHECK_RESULT(ble_glue_fus_wait_operation() == BleGlueCommandResultOK);
             if(stack_version_match) {
                 /* We can't check StackType with FUS, but partial version matches */
                 if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagC2Update)) {
@@ -229,7 +229,7 @@ static bool update_task_manage_radiostack(UpdateTask* update_task) {
                      * Let's start it up to check its version */
                     FURI_LOG_W(TAG, "Starting stack to check full version");
                     update_task_set_progress(update_task, UpdateTaskStageProgress, 50);
-                    CHECK_RESULT(furi_hal_ble_ensure_c2_mode(BleGlueC2ModeStack));
+                    CHECK_RESULT(furi_hal_bt_ensure_c2_mode(BleGlueC2ModeStack));
                     /* ...system will restart here. */
                     update_task_wait_for_restart(update_task);
                 }

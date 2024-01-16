@@ -1,7 +1,7 @@
 #include <furi_hal_info.h>
 #include <furi_hal_region.h>
 #include <furi_hal_version.h>
-#include <furi_hal_ble.h>
+#include <furi_hal_bt.h>
 #include <furi_hal_crypto.h>
 #include <furi_hal_rtc.h>
 
@@ -194,8 +194,8 @@ void furi_hal_info_get(PropertyValueCallback out, char sep, void* context) {
             version_get_git_origin(firmware_version));
     }
 
-    if(furi_hal_ble_is_alive()) {
-        const BleSystemC2Info* ble_c2_info = ble_system_get_c2_info();
+    if(furi_hal_bt_is_alive()) {
+        const BleGlueC2Info* ble_c2_info = ble_glue_get_c2_info();
         property_value_out(&property_context, NULL, 2, "radio", "alive", "true");
         property_value_out(
             &property_context,

@@ -43,64 +43,64 @@ typedef struct {
     uint8_t FusMemorySizeSram2B; /*< Multiple of 1K */
     uint8_t FusMemorySizeSram2A; /*< Multiple of 1K */
     uint8_t FusMemorySizeFlash; /*< Multiple of 4K */
-} BleSystemC2Info;
+} BleGlueC2Info;
 
 typedef enum {
     // Stage 1: core2 startup and FUS
-    BleSystemStatusStartup,
-    BleSystemStatusBroken,
-    BleSystemStatusC2Started,
+    BleGlueStatusStartup,
+    BleGlueStatusBroken,
+    BleGlueStatusC2Started,
     // Stage 2: radio stack
-    BleSystemStatusRadioStackRunning,
-    BleSystemStatusRadioStackMissing
-} BleSystemStatus;
+    BleGlueStatusRadioStackRunning,
+    BleGlueStatusRadioStackMissing
+} BleGlueStatus;
 
 typedef void (
-    *BleSystemKeyStorageChangedCallback)(uint8_t* change_addr_start, uint16_t size, void* context);
+    *BleGlueKeyStorageChangedCallback)(uint8_t* change_addr_start, uint16_t size, void* context);
 
 /** Initialize start core2 and initialize transport */
-void ble_system_init(void);
+void ble_glue_init(void);
 
 /** Start Core2 Radio stack
  *
  * @return     true on success
  */
-bool ble_system_start(void);
+bool ble_glue_start(void);
 
-void ble_system_stop(void);
+void ble_glue_stop(void);
 
 /** Is core2 alive and at least FUS is running
  * 
  * @return     true if core2 is alive
  */
-bool ble_system_is_alive(void);
+bool ble_glue_is_alive(void);
 
 /** Waits for C2 to reports its mode to callback
  *
  * @return     true if it reported before reaching timeout
  */
-bool ble_system_wait_for_c2_start(int32_t timeout_ms);
+bool ble_glue_wait_for_c2_start(int32_t timeout_ms);
 
-BleSystemStatus ble_system_get_c2_status(void);
+BleGlueStatus ble_glue_get_c2_status(void);
 
-const BleSystemC2Info* ble_system_get_c2_info(void);
+const BleGlueC2Info* ble_glue_get_c2_info(void);
 
 /** Is core2 radio stack present and ready
  *
  * @return     true if present and ready
  */
-bool ble_system_is_radio_stack_ready(void);
+bool ble_glue_is_radio_stack_ready(void);
 
 /** Set callback for NVM in RAM changes
  *
  * @param[in]  callback  The callback to call on NVM change
  * @param      context   The context for callback
  */
-void ble_system_set_key_storage_changed_callback(
-    BleSystemKeyStorageChangedCallback callback,
+void ble_glue_set_key_storage_changed_callback(
+    BleGlueKeyStorageChangedCallback callback,
     void* context);
 
-bool ble_system_reinit_c2();
+bool ble_glue_reinit_c2();
 
 typedef enum {
     BleGlueCommandResultUnknown,
@@ -114,15 +114,15 @@ typedef enum {
  *
  * @return      true on radio stack start command
  */
-BleGlueCommandResult ble_system_force_c2_mode(BleGlueC2Mode mode);
+BleGlueCommandResult ble_glue_force_c2_mode(BleGlueC2Mode mode);
 
-BleGlueCommandResult ble_system_fus_stack_delete(void);
+BleGlueCommandResult ble_glue_fus_stack_delete(void);
 
-BleGlueCommandResult ble_system_fus_stack_install(uint32_t src_addr, uint32_t dst_addr);
+BleGlueCommandResult ble_glue_fus_stack_install(uint32_t src_addr, uint32_t dst_addr);
 
-BleGlueCommandResult ble_system_fus_get_status(void);
+BleGlueCommandResult ble_glue_fus_get_status(void);
 
-BleGlueCommandResult ble_system_fus_wait_operation(void);
+BleGlueCommandResult ble_glue_fus_wait_operation(void);
 
 typedef struct {
     uint32_t magic;
@@ -135,7 +135,7 @@ typedef struct {
  *
  * @return     hardfault info. NULL if no hardfault
  */
-const BleGlueHardfaultInfo* ble_system_get_hardfault_info(void);
+const BleGlueHardfaultInfo* ble_glue_get_hardfault_info(void);
 
 #ifdef __cplusplus
 }

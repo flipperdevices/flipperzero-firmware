@@ -6,7 +6,7 @@
 #include <assets_icons.h>
 #include <furi_hal_version.h>
 #include <furi_hal_region.h>
-#include <furi_hal_ble.h>
+#include <furi_hal_bt.h>
 #include <furi_hal_info.h>
 
 typedef DialogMessageButton (*AboutDialogScreen)(DialogsApp* dialogs, DialogMessage* message);
@@ -161,9 +161,9 @@ static DialogMessageButton about_screen_fw_version(DialogsApp* dialogs, DialogMe
     FuriString* buffer;
     buffer = furi_string_alloc();
     const Version* ver = furi_hal_version_get_firmware_version();
-    const BleSystemC2Info* c2_ver = NULL;
+    const BleGlueC2Info* c2_ver = NULL;
 #ifdef SRV_BT
-    c2_ver = ble_system_get_c2_info();
+    c2_ver = ble_glue_get_c2_info();
 #endif
 
     if(!ver) { //-V1051

@@ -1,4 +1,4 @@
-#include "ble_stack.h"
+#include "ble_app.h"
 
 #include <core/check.h>
 #include <ble/ble.h>
@@ -12,8 +12,8 @@
 
 #define TAG "Bt"
 
-PLACE_IN_SECTION("MB_MEM1") ALIGN(4) static TL_CmdPacket_t ble_stack_cmd_buffer;
-PLACE_IN_SECTION("MB_MEM2") ALIGN(4) static uint32_t ble_stack_nvm[BLE_NVM_SRAM_SIZE];
+PLACE_IN_SECTION("MB_MEM1") ALIGN(4) static TL_CmdPacket_t ble_app_cmd_buffer;
+PLACE_IN_SECTION("MB_MEM2") ALIGN(4) static uint32_t ble_app_nvm[BLE_NVM_SRAM_SIZE];
 
 _Static_assert(
     sizeof(SHCI_C2_Ble_Init_Cmd_Packet_t) == 58,
@@ -26,18 +26,18 @@ typedef struct {
 
 static BleApp* ble_app = NULL;
 
-static void ble_stack_hci_event_handler(void* pPayload);
-static void ble_stack_hci_status_not_handler(HCI_TL_CmdStatus_t status);
+static void ble_app_hci_event_handler(void* pPayload);
+static void ble_app_hci_status_not_handler(HCI_TL_CmdStatus_t status);
 
 static const HCI_TL_HciInitConf_t hci_tl_config = {
-    .p_cmdbuffer = (uint8_t*)&ble_stack_cmd_buffer,
-    .StatusNotCallBack = ble_stack_hci_status_not_handler,
+    .p_cmdbuffer = (uint8_t*)&ble_app_cmd_buffer,
+    .StatusNotCallBack = ble_app_hci_status_not_handler,
 };
 
 static const SHCI_C2_CONFIG_Cmd_Param_t config_param = {
     .PayloadCmdSize = SHCI_C2_CONFIG_PAYLOAD_CMD_SIZE,
     .Config1 = SHCI_C2_CONFIG_CONFIG1_BIT0_BLE_NVM_DATA_TO_SRAM,
-    .BleNvmRamAddress = (uint32_t)ble_stack_nvm,
+    .BleNvmRamAddress = (uint32_t)ble_app_nvm,
     .EvtMask1 = SHCI_C2_CONFIG_EVTMASK1_BIT1_BLE_NVM_RAM_UPDATE_ENABLE,
 };
 
@@ -77,7 +77,7 @@ static const SHCI_C2_Ble_Init_Cmd_Packet_t ble_init_cmd_packet = {
                              SHCI_C2_BLE_INIT_OPTIONS_APPEARANCE_READONLY,
     }};
 
-bool ble_stack_init(void) {
+bool ble_app_init(void) {
     SHCI_CmdStatus_t status;
     ble_app = malloc(sizeof(BleApp));
     // Allocate semafore and mutex for ble command buffer access
@@ -85,7 +85,7 @@ bool ble_stack_init(void) {
     ble_app->hci_sem = furi_semaphore_alloc(1, 0);
 
     // Initialize Ble Transport Layer
-    hci_init(ble_stack_hci_event_handler, (void*)&hci_tl_config);
+    hci_init(ble_app_hci_event_handler, (void*)&hci_tl_config);
 
     do {
         // Configure NVM store for pairing data
@@ -109,19 +109,19 @@ bool ble_stack_init(void) {
     return status == SHCI_Success;
 }
 
-void ble_stack_get_key_storage_buff(uint8_t** addr, uint16_t* size) {
-    *addr = (uint8_t*)ble_stack_nvm;
-    *size = sizeof(ble_stack_nvm);
+void ble_app_get_key_storage_buff(uint8_t** addr, uint16_t* size) {
+    *addr = (uint8_t*)ble_app_nvm;
+    *size = sizeof(ble_app_nvm);
 }
 
-void ble_stack_deinit(void) {
+void ble_app_deinit(void) {
     furi_check(ble_app);
 
     furi_mutex_free(ble_app->hci_mtx);
     furi_semaphore_free(ble_app->hci_sem);
     free(ble_app);
     ble_app = NULL;
-    memset(&ble_stack_cmd_buffer, 0, sizeof(ble_stack_cmd_buffer));
+    memset(&ble_app_cmd_buffer, 0, sizeof(ble_app_cmd_buffer));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -140,7 +140,7 @@ void hci_cmd_resp_wait(uint32_t timeout) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static void ble_stack_hci_event_handler(void* pPayload) {
+static void ble_app_hci_event_handler(void* pPayload) {
     furi_check(ble_app);
 
     tHCI_UserEvtRxParam* pParam = (tHCI_UserEvtRxParam*)pPayload;
@@ -154,7 +154,7 @@ static void ble_stack_hci_event_handler(void* pPayload) {
     }
 }
 
-static void ble_stack_hci_status_not_handler(HCI_TL_CmdStatus_t status) {
+static void ble_app_hci_status_not_handler(HCI_TL_CmdStatus_t status) {
     if(status == HCI_TL_CmdBusy) {
         furi_hal_power_insomnia_enter();
         furi_mutex_acquire(ble_app->hci_mtx, FuriWaitForever);

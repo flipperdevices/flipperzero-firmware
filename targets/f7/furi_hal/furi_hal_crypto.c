@@ -1,6 +1,6 @@
 #include <furi_hal_crypto.h>
 #include <furi_hal_cortex.h>
-#include <furi_hal_ble.h>
+#include <furi_hal_bt.h>
 #include <furi_hal_random.h>
 #include <furi_hal_bus.h>
 
@@ -160,7 +160,7 @@ bool furi_hal_crypto_enclave_store_key(FuriHalCryptoKey* key, uint8_t* slot) {
 
     furi_check(furi_mutex_acquire(furi_hal_crypto_mutex, FuriWaitForever) == FuriStatusOk);
 
-    if(!furi_hal_ble_is_alive()) {
+    if(!furi_hal_bt_is_alive()) {
         return false;
     }
 
@@ -262,7 +262,7 @@ bool furi_hal_crypto_enclave_load_key(uint8_t slot, const uint8_t* iv) {
 
     furi_hal_bus_enable(FuriHalBusAES1);
 
-    if(!furi_hal_ble_is_alive()) {
+    if(!furi_hal_bt_is_alive()) {
         return false;
     }
 
@@ -279,7 +279,7 @@ bool furi_hal_crypto_enclave_load_key(uint8_t slot, const uint8_t* iv) {
 }
 
 bool furi_hal_crypto_enclave_unload_key(uint8_t slot) {
-    if(!furi_hal_ble_is_alive()) {
+    if(!furi_hal_bt_is_alive()) {
         return false;
     }
 

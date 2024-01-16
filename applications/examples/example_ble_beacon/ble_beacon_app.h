@@ -15,7 +15,7 @@
 #include <rpc/rpc_app.h>
 #include <notification/notification_messages.h>
 
-#include <furi_hal_ble.h>
+#include <furi_hal_bt.h>
 
 #include "scenes/scenes.h"
 #include <stdint.h>

@@ -1,5 +1,5 @@
 #include "bt_debug_app.h"
-#include <furi_hal_ble.h>
+#include <furi_hal_bt.h>
 
 #define TAG "BtDebugApp"
 
@@ -94,7 +94,7 @@ void bt_debug_app_free(BtDebugApp* app) {
 
 int32_t bt_debug_app(void* p) {
     UNUSED(p);
-    if(!furi_hal_ble_is_testing_supported()) {
+    if(!furi_hal_bt_is_testing_supported()) {
         FURI_LOG_E(TAG, "Incorrect radio stack: radio testing features are absent.");
         DialogsApp* dialogs = furi_record_open(RECORD_DIALOGS);
         dialog_message_show_storage_error(dialogs, "Incorrect\nRadioStack");
@@ -103,15 +103,15 @@ int32_t bt_debug_app(void* p) {
 
     BtDebugApp* app = bt_debug_app_alloc();
     // Was bt active?
-    const bool was_active = furi_hal_ble_is_active();
+    const bool was_active = furi_hal_bt_is_active();
     // Stop advertising
-    furi_hal_ble_stop_advertising();
+    furi_hal_bt_stop_advertising();
 
     view_dispatcher_run(app->view_dispatcher);
 
     // Restart advertising
     if(was_active) {
-        furi_hal_ble_start_advertising();
+        furi_hal_bt_start_advertising();
     }
     bt_debug_app_free(app);
     return 0;

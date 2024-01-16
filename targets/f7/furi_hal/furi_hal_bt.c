@@ -1,7 +1,7 @@
-#include "ble_system.h"
+#include "ble_glue.h"
 #include <core/check.h>
 #include <gap.h>
-#include <furi_hal_ble.h>
+#include <furi_hal_bt.h>
 #include <furi_ble/profile_interface.h>
 
 #include <ble/ble.h>
@@ -21,7 +21,7 @@
 
 #define TAG "FuriHalBt"
 
-#define furi_hal_ble_DEFAULT_MAC_ADDR \
+#define furi_hal_bt_DEFAULT_MAC_ADDR \
     { 0x6c, 0x7a, 0xd8, 0xac, 0x57, 0x72 }
 
 /* Time, in ms, to wait for mode transition before crashing */
@@ -32,12 +32,12 @@ typedef struct {
     FuriHalBtStack stack;
 } FuriHalBt;
 
-static FuriHalBt furi_hal_ble = {
+static FuriHalBt furi_hal_bt = {
     .core2_mtx = NULL,
     .stack = FuriHalBtStackUnknown,
 };
 
-void furi_hal_ble_init() {
+void furi_hal_bt_init() {
     FURI_LOG_I(TAG, "Start BT initialization");
     furi_hal_bus_enable(FuriHalBusHSEM);
     furi_hal_bus_enable(FuriHalBusIPCC);
@@ -45,105 +45,105 @@ void furi_hal_ble_init() {
     furi_hal_bus_enable(FuriHalBusPKA);
     furi_hal_bus_enable(FuriHalBusCRC);
 
-    if(!furi_hal_ble.core2_mtx) {
-        furi_hal_ble.core2_mtx = furi_mutex_alloc(FuriMutexTypeNormal);
-        furi_assert(furi_hal_ble.core2_mtx);
+    if(!furi_hal_bt.core2_mtx) {
+        furi_hal_bt.core2_mtx = furi_mutex_alloc(FuriMutexTypeNormal);
+        furi_assert(furi_hal_bt.core2_mtx);
     }
 
     // Explicitly tell that we are in charge of CLK48 domain
     furi_check(LL_HSEM_1StepLock(HSEM, CFG_HW_CLK48_CONFIG_SEMID) == 0);
 
     // Start Core2
-    ble_system_init();
+    ble_glue_init();
 }
 
-void furi_hal_ble_lock_core2() {
-    furi_assert(furi_hal_ble.core2_mtx);
-    furi_check(furi_mutex_acquire(furi_hal_ble.core2_mtx, FuriWaitForever) == FuriStatusOk);
+void furi_hal_bt_lock_core2() {
+    furi_assert(furi_hal_bt.core2_mtx);
+    furi_check(furi_mutex_acquire(furi_hal_bt.core2_mtx, FuriWaitForever) == FuriStatusOk);
 }
 
-void furi_hal_ble_unlock_core2() {
-    furi_assert(furi_hal_ble.core2_mtx);
-    furi_check(furi_mutex_release(furi_hal_ble.core2_mtx) == FuriStatusOk);
+void furi_hal_bt_unlock_core2() {
+    furi_assert(furi_hal_bt.core2_mtx);
+    furi_check(furi_mutex_release(furi_hal_bt.core2_mtx) == FuriStatusOk);
 }
 
-static bool furi_hal_ble_radio_stack_is_supported(const BleSystemC2Info* info) {
+static bool furi_hal_bt_radio_stack_is_supported(const BleGlueC2Info* info) {
     bool supported = false;
     if(info->StackType == INFO_STACK_TYPE_BLE_LIGHT) {
-        if(info->VersionMajor >= FURI_HAL_BLE_STACK_VERSION_MAJOR &&
-           info->VersionMinor >= FURI_HAL_BLE_STACK_VERSION_MINOR) {
-            furi_hal_ble.stack = FuriHalBtStackLight;
+        if(info->VersionMajor >= FURI_HAL_BT_STACK_VERSION_MAJOR &&
+           info->VersionMinor >= FURI_HAL_BT_STACK_VERSION_MINOR) {
+            furi_hal_bt.stack = FuriHalBtStackLight;
             supported = true;
         }
     } else if(info->StackType == INFO_STACK_TYPE_BLE_FULL) {
-        if(info->VersionMajor >= FURI_HAL_BLE_STACK_VERSION_MAJOR &&
-           info->VersionMinor >= FURI_HAL_BLE_STACK_VERSION_MINOR) {
-            furi_hal_ble.stack = FuriHalBtStackFull;
+        if(info->VersionMajor >= FURI_HAL_BT_STACK_VERSION_MAJOR &&
+           info->VersionMinor >= FURI_HAL_BT_STACK_VERSION_MINOR) {
+            furi_hal_bt.stack = FuriHalBtStackFull;
             supported = true;
         }
     } else {
-        furi_hal_ble.stack = FuriHalBtStackUnknown;
+        furi_hal_bt.stack = FuriHalBtStackUnknown;
     }
     return supported;
 }
 
-bool furi_hal_ble_start_radio_stack() {
+bool furi_hal_bt_start_radio_stack() {
     bool res = false;
-    furi_assert(furi_hal_ble.core2_mtx);
+    furi_assert(furi_hal_bt.core2_mtx);
 
-    furi_mutex_acquire(furi_hal_ble.core2_mtx, FuriWaitForever);
+    furi_mutex_acquire(furi_hal_bt.core2_mtx, FuriWaitForever);
 
     // Explicitly tell that we are in charge of CLK48 domain
     furi_check(LL_HSEM_1StepLock(HSEM, CFG_HW_CLK48_CONFIG_SEMID) == 0);
 
     do {
         // Wait until C2 is started or timeout
-        if(!ble_system_wait_for_c2_start(FURI_HAL_BLE_C2_START_TIMEOUT)) {
+        if(!ble_glue_wait_for_c2_start(FURI_HAL_BT_C2_START_TIMEOUT)) {
             FURI_LOG_E(TAG, "Core2 start failed");
             break;
         }
 
         // If C2 is running, start radio stack fw
-        if(!furi_hal_ble_ensure_c2_mode(BleGlueC2ModeStack)) {
+        if(!furi_hal_bt_ensure_c2_mode(BleGlueC2ModeStack)) {
             break;
         }
 
         // Check whether we support radio stack
-        const BleSystemC2Info* c2_info = ble_system_get_c2_info();
-        if(!furi_hal_ble_radio_stack_is_supported(c2_info)) {
+        const BleGlueC2Info* c2_info = ble_glue_get_c2_info();
+        if(!furi_hal_bt_radio_stack_is_supported(c2_info)) {
             FURI_LOG_E(TAG, "Unsupported radio stack");
             // Don't stop SHCI for crypto enclave support
             break;
         }
         // Starting radio stack
-        if(!ble_system_start()) {
+        if(!ble_glue_start()) {
             FURI_LOG_E(TAG, "Failed to start radio stack");
-            ble_stack_deinit();
-            ble_system_stop();
+            ble_app_deinit();
+            ble_glue_stop();
             break;
         }
         res = true;
     } while(false);
-    furi_mutex_release(furi_hal_ble.core2_mtx);
+    furi_mutex_release(furi_hal_bt.core2_mtx);
 
     gap_extra_beacon_init();
     return res;
 }
 
-FuriHalBtStack furi_hal_ble_get_radio_stack() {
-    return furi_hal_ble.stack;
+FuriHalBtStack furi_hal_bt_get_radio_stack() {
+    return furi_hal_bt.stack;
 }
 
-bool furi_hal_ble_is_gatt_gap_supported() {
-    if(furi_hal_ble.stack == FuriHalBtStackLight || furi_hal_ble.stack == FuriHalBtStackFull) {
+bool furi_hal_bt_is_gatt_gap_supported() {
+    if(furi_hal_bt.stack == FuriHalBtStackLight || furi_hal_bt.stack == FuriHalBtStackFull) {
         return true;
     } else {
         return false;
     }
 }
 
-bool furi_hal_ble_is_testing_supported() {
-    if(furi_hal_ble.stack == FuriHalBtStackFull) {
+bool furi_hal_bt_is_testing_supported() {
+    if(furi_hal_bt.stack == FuriHalBtStackFull) {
         return true;
     } else {
         return false;
@@ -153,7 +153,7 @@ bool furi_hal_ble_is_testing_supported() {
 static FuriHalBleProfileBase* current_profile = NULL;
 static GapConfig current_config = {0};
 
-bool furi_hal_ble_check_profile_type(
+bool furi_hal_bt_check_profile_type(
     FuriHalBleProfileBase* profile,
     const FuriHalBleProfileConfig* config) {
     if(!profile || !config) {
@@ -163,7 +163,7 @@ bool furi_hal_ble_check_profile_type(
     return profile->config == config;
 }
 
-FuriHalBleProfileBase* furi_hal_ble_start_app(
+FuriHalBleProfileBase* furi_hal_bt_start_app(
     const FuriHalBleProfileConfig* profile_config,
     GapEventCallback event_cb,
     void* context) {
@@ -172,11 +172,11 @@ FuriHalBleProfileBase* furi_hal_ble_start_app(
     furi_check(current_profile == NULL);
 
     do {
-        if(!ble_system_is_radio_stack_ready()) {
+        if(!ble_glue_is_radio_stack_ready()) {
             FURI_LOG_E(TAG, "Can't start BLE App - radio stack did not start");
             break;
         }
-        if(!furi_hal_ble_is_gatt_gap_supported()) {
+        if(!furi_hal_bt_is_gatt_gap_supported()) {
             FURI_LOG_E(TAG, "Can't start Ble App - unsupported radio stack");
             break;
         }
@@ -189,7 +189,7 @@ FuriHalBleProfileBase* furi_hal_ble_start_app(
             break;
         }
         // Start selected profile services
-        if(furi_hal_ble_is_gatt_gap_supported()) {
+        if(furi_hal_bt_is_gatt_gap_supported()) {
             current_profile = profile_config->start();
         }
     } while(false);
@@ -197,10 +197,10 @@ FuriHalBleProfileBase* furi_hal_ble_start_app(
     return current_profile;
 }
 
-void furi_hal_ble_reinit() {
+void furi_hal_bt_reinit() {
     furi_hal_power_insomnia_enter();
     FURI_LOG_I(TAG, "Disconnect and stop advertising");
-    furi_hal_ble_stop_advertising();
+    furi_hal_bt_stop_advertising();
 
     if(current_profile) {
         FURI_LOG_I(TAG, "Stop current profile services");
@@ -213,11 +213,11 @@ void furi_hal_ble_reinit() {
 
     FURI_LOG_I(TAG, "Stop BLE related RTOS threads");
     gap_thread_stop();
-    ble_stack_deinit();
+    ble_app_deinit();
 
     FURI_LOG_I(TAG, "Reset SHCI");
-    furi_check(ble_system_reinit_c2());
-    ble_system_stop();
+    furi_check(ble_glue_reinit_c2());
+    ble_glue_stop();
 
     // enterprise delay
     furi_delay_ms(100);
@@ -228,81 +228,81 @@ void furi_hal_ble_reinit() {
     furi_hal_bus_disable(FuriHalBusPKA);
     furi_hal_bus_disable(FuriHalBusCRC);
 
-    furi_hal_ble_init();
-    furi_hal_ble_start_radio_stack();
+    furi_hal_bt_init();
+    furi_hal_bt_start_radio_stack();
     furi_hal_power_insomnia_exit();
 }
 
-FuriHalBleProfileBase* furi_hal_ble_change_app(
+FuriHalBleProfileBase* furi_hal_bt_change_app(
     const FuriHalBleProfileConfig* profile_config,
     GapEventCallback event_cb,
     void* context) {
     furi_assert(event_cb);
 
-    furi_hal_ble_reinit();
-    return furi_hal_ble_start_app(profile_config, event_cb, context);
+    furi_hal_bt_reinit();
+    return furi_hal_bt_start_app(profile_config, event_cb, context);
 }
 
-bool furi_hal_ble_is_active() {
+bool furi_hal_bt_is_active() {
     return gap_get_state() > GapStateIdle;
 }
 
-void furi_hal_ble_start_advertising() {
+void furi_hal_bt_start_advertising() {
     if(gap_get_state() == GapStateIdle) {
         gap_start_advertising();
     }
 }
 
-void furi_hal_ble_stop_advertising() {
-    if(furi_hal_ble_is_active()) {
+void furi_hal_bt_stop_advertising() {
+    if(furi_hal_bt_is_active()) {
         gap_stop_advertising();
-        while(furi_hal_ble_is_active()) {
+        while(furi_hal_bt_is_active()) {
             furi_delay_tick(1);
         }
     }
 }
 
-void furi_hal_ble_update_battery_level(uint8_t battery_level) {
+void furi_hal_bt_update_battery_level(uint8_t battery_level) {
     ble_svc_battery_state_update(&battery_level, NULL);
 }
 
-void furi_hal_ble_update_power_state(bool charging) {
+void furi_hal_bt_update_power_state(bool charging) {
     ble_svc_battery_state_update(NULL, &charging);
 }
 
-void furi_hal_ble_get_key_storage_buff(uint8_t** key_buff_addr, uint16_t* key_buff_size) {
-    ble_stack_get_key_storage_buff(key_buff_addr, key_buff_size);
+void furi_hal_bt_get_key_storage_buff(uint8_t** key_buff_addr, uint16_t* key_buff_size) {
+    ble_app_get_key_storage_buff(key_buff_addr, key_buff_size);
 }
 
-void furi_hal_ble_set_key_storage_change_callback(
-    BleSystemKeyStorageChangedCallback callback,
+void furi_hal_bt_set_key_storage_change_callback(
+    BleGlueKeyStorageChangedCallback callback,
     void* context) {
     furi_assert(callback);
-    ble_system_set_key_storage_changed_callback(callback, context);
+    ble_glue_set_key_storage_changed_callback(callback, context);
 }
 
-void furi_hal_ble_nvm_sram_sem_acquire() {
+void furi_hal_bt_nvm_sram_sem_acquire() {
     while(LL_HSEM_1StepLock(HSEM, CFG_HW_BLE_NVM_SRAM_SEMID)) {
         furi_thread_yield();
     }
 }
 
-void furi_hal_ble_nvm_sram_sem_release() {
+void furi_hal_bt_nvm_sram_sem_release() {
     LL_HSEM_ReleaseLock(HSEM, CFG_HW_BLE_NVM_SRAM_SEMID, 0);
 }
 
-bool furi_hal_ble_clear_white_list() {
-    furi_hal_ble_nvm_sram_sem_acquire();
+bool furi_hal_bt_clear_white_list() {
+    furi_hal_bt_nvm_sram_sem_acquire();
     tBleStatus status = aci_gap_clear_security_db();
     if(status) {
         FURI_LOG_E(TAG, "Clear while list failed with status %d", status);
     }
-    furi_hal_ble_nvm_sram_sem_release();
+    furi_hal_bt_nvm_sram_sem_release();
     return status != BLE_STATUS_SUCCESS;
 }
 
-void furi_hal_ble_dump_state(FuriString* buffer) {
-    if(furi_hal_ble_is_alive()) {
+void furi_hal_bt_dump_state(FuriString* buffer) {
+    if(furi_hal_bt_is_alive()) {
         uint8_t HCI_Version;
         uint16_t HCI_Revision;
         uint8_t LMP_PAL_Version;
@@ -326,38 +326,38 @@ void furi_hal_ble_dump_state(FuriString* buffer) {
     }
 }
 
-bool furi_hal_ble_is_alive() {
-    return ble_system_is_alive();
+bool furi_hal_bt_is_alive() {
+    return ble_glue_is_alive();
 }
 
-void furi_hal_ble_start_tone_tx(uint8_t channel, uint8_t power) {
+void furi_hal_bt_start_tone_tx(uint8_t channel, uint8_t power) {
     aci_hal_set_tx_power_level(0, power);
     aci_hal_tone_start(channel, 0);
 }
 
-void furi_hal_ble_stop_tone_tx() {
+void furi_hal_bt_stop_tone_tx() {
     aci_hal_tone_stop();
 }
 
-void furi_hal_ble_start_packet_tx(uint8_t channel, uint8_t pattern, uint8_t datarate) {
+void furi_hal_bt_start_packet_tx(uint8_t channel, uint8_t pattern, uint8_t datarate) {
     hci_le_enhanced_transmitter_test(channel, 0x25, pattern, datarate);
 }
 
-void furi_hal_ble_start_packet_rx(uint8_t channel, uint8_t datarate) {
+void furi_hal_bt_start_packet_rx(uint8_t channel, uint8_t datarate) {
     hci_le_enhanced_receiver_test(channel, datarate, 0);
 }
 
-uint16_t furi_hal_ble_stop_packet_test() {
+uint16_t furi_hal_bt_stop_packet_test() {
     uint16_t num_of_packets = 0;
     hci_le_test_end(&num_of_packets);
     return num_of_packets;
 }
 
-void furi_hal_ble_start_rx(uint8_t channel) {
+void furi_hal_bt_start_rx(uint8_t channel) {
     aci_hal_rx_start(channel);
 }
 
-float furi_hal_ble_get_rssi() {
+float furi_hal_bt_get_rssi() {
     float val;
     uint8_t rssi_raw[3];
 
@@ -381,18 +381,18 @@ float furi_hal_ble_get_rssi() {
     return val;
 }
 
-uint32_t furi_hal_ble_get_transmitted_packets() {
+uint32_t furi_hal_bt_get_transmitted_packets() {
     uint32_t packets = 0;
     aci_hal_le_tx_test_packet_number(&packets);
     return packets;
 }
 
-void furi_hal_ble_stop_rx() {
+void furi_hal_bt_stop_rx() {
     aci_hal_rx_stop();
 }
 
-bool furi_hal_ble_ensure_c2_mode(BleGlueC2Mode mode) {
-    BleGlueCommandResult fw_start_res = ble_system_force_c2_mode(mode);
+bool furi_hal_bt_ensure_c2_mode(BleGlueC2Mode mode) {
+    BleGlueCommandResult fw_start_res = ble_glue_force_c2_mode(mode);
     if(fw_start_res == BleGlueCommandResultOK) {
         return true;
     } else if(fw_start_res == BleGlueCommandResultRestartPending) {
@@ -406,30 +406,30 @@ bool furi_hal_ble_ensure_c2_mode(BleGlueC2Mode mode) {
     return false;
 }
 
-bool furi_hal_ble_extra_beacon_set_data(const uint8_t* data, uint8_t len) {
+bool furi_hal_bt_extra_beacon_set_data(const uint8_t* data, uint8_t len) {
     return gap_extra_beacon_set_data(data, len);
 }
 
-uint8_t furi_hal_ble_extra_beacon_get_data(uint8_t* data) {
+uint8_t furi_hal_bt_extra_beacon_get_data(uint8_t* data) {
     return gap_extra_beacon_get_data(data);
 }
 
-bool furi_hal_ble_extra_beacon_set_config(const GapExtraBeaconConfig* config) {
+bool furi_hal_bt_extra_beacon_set_config(const GapExtraBeaconConfig* config) {
     return gap_extra_beacon_set_config(config);
 }
 
-const GapExtraBeaconConfig* furi_hal_ble_extra_beacon_get_config() {
+const GapExtraBeaconConfig* furi_hal_bt_extra_beacon_get_config() {
     return gap_extra_beacon_get_config();
 }
 
-bool furi_hal_ble_extra_beacon_start() {
+bool furi_hal_bt_extra_beacon_start() {
     return gap_extra_beacon_start();
 }
 
-bool furi_hal_ble_extra_beacon_stop() {
+bool furi_hal_bt_extra_beacon_stop() {
     return gap_extra_beacon_stop();
 }
 
-bool furi_hal_ble_extra_beacon_is_active() {
+bool furi_hal_bt_extra_beacon_is_active() {
     return gap_extra_beacon_get_state() == GapExtraBeaconStateStarted;
 }

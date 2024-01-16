@@ -37,7 +37,7 @@ Below is the list of peripherals that are enabled by the system. The user code m
 | GPIOD         | --                        |
 | GPIOE         | --                        |
 | GPIOH         | --                        |
-| PKA           | `furi_hal_ble.c`           |
+| PKA           | `furi_hal_bt.c`           |
 | AES2          | --                        |
 | HSEM          | --                        |
 | IPCC          | --                        |

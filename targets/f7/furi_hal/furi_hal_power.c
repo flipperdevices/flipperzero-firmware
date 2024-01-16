@@ -1,6 +1,6 @@
 #include <furi_hal_power.h>
 #include <furi_hal_clock.h>
-#include <furi_hal_ble.h>
+#include <furi_hal_bt.h>
 #include <furi_hal_vibro.h>
 #include <furi_hal_resources.h>
 #include <furi_hal_serial_control.h>
@@ -168,7 +168,7 @@ bool furi_hal_power_sleep_available() {
 }
 
 static inline bool furi_hal_power_deep_sleep_available() {
-    return furi_hal_ble_is_alive() && !furi_hal_rtc_is_flag_set(FuriHalRtcFlagLegacySleep) &&
+    return furi_hal_bt_is_alive() && !furi_hal_rtc_is_flag_set(FuriHalRtcFlagLegacySleep) &&
            !furi_hal_debug_is_gdb_session_active();
 }
 
@@ -299,7 +299,7 @@ bool furi_hal_power_is_charging_done() {
 void furi_hal_power_shutdown() {
     furi_hal_power_insomnia_enter();
 
-    furi_hal_ble_reinit();
+    furi_hal_bt_reinit();
 
     while(LL_HSEM_1StepLock(HSEM, CFG_HW_RCC_SEMID))
         ;

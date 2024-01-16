@@ -1,7 +1,7 @@
 #pragma once
 
 #include <furi.h>
-#include <furi_hal_ble.h>
+#include <furi_hal_bt.h>
 #include <furi_hal_usb.h>
 #include <furi_hal_usb_hid.h>
 

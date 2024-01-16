@@ -28,7 +28,7 @@ static void ble_beacon_app_tick_event_callback(void* context) {
 static void ble_beacon_app_restore_beacon_state(BleBeaconApp* app) {
     // Restore beacon data from service
     GapExtraBeaconConfig* local_config = &app->beacon_config;
-    const GapExtraBeaconConfig* config = furi_hal_ble_extra_beacon_get_config();
+    const GapExtraBeaconConfig* config = furi_hal_bt_extra_beacon_get_config();
     if(config) {
         // We have a config, copy it
         memcpy(local_config, config, sizeof(app->beacon_config));
@@ -47,14 +47,14 @@ static void ble_beacon_app_restore_beacon_state(BleBeaconApp* app) {
         local_config->address[0] ^= 0xFF;
         local_config->address[3] ^= 0xFF;
 
-        furi_check(furi_hal_ble_extra_beacon_set_config(local_config));
+        furi_check(furi_hal_bt_extra_beacon_set_config(local_config));
     }
 
     // Get beacon state
-    app->is_beacon_active = furi_hal_ble_extra_beacon_is_active();
+    app->is_beacon_active = furi_hal_bt_extra_beacon_is_active();
 
     // Restore last beacon data
-    app->beacon_data_len = furi_hal_ble_extra_beacon_get_data(app->beacon_data);
+    app->beacon_data_len = furi_hal_bt_extra_beacon_get_data(app->beacon_data);
 }
 
 static BleBeaconApp* ble_beacon_app_alloc() {
@@ -129,9 +129,9 @@ int32_t ble_beacon_app(void* args) {
 }
 
 void ble_beacon_app_update_state(BleBeaconApp* app) {
-    furi_hal_ble_extra_beacon_stop();
+    furi_hal_bt_extra_beacon_stop();
 
-    furi_check(furi_hal_ble_extra_beacon_set_config(&app->beacon_config));
+    furi_check(furi_hal_bt_extra_beacon_set_config(&app->beacon_config));
 
     app->beacon_data_len = 0;
     while((app->beacon_data[app->beacon_data_len] != 0) &&
@@ -141,9 +141,9 @@ void ble_beacon_app_update_state(BleBeaconApp* app) {
 
     FURI_LOG_I(TAG, "beacon_data_len: %d", app->beacon_data_len);
 
-    furi_check(furi_hal_ble_extra_beacon_set_data(app->beacon_data, app->beacon_data_len));
+    furi_check(furi_hal_bt_extra_beacon_set_data(app->beacon_data, app->beacon_data_len));
 
     if(app->is_beacon_active) {
-        furi_check(furi_hal_ble_extra_beacon_start());
+        furi_check(furi_hal_bt_extra_beacon_start());
     }
 }
