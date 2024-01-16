@@ -28,10 +28,10 @@ typedef BleEventAckStatus (*BleSvcEventHandlerCb)(void* event, void* context);
 typedef struct GapEventHandler GapSvcEventHandler;
 
 /* To be called once at BLE system startup */
-void ble_event_dispatcher_init();
+void ble_event_dispatcher_init(void);
 
 /* To be called at stack reset - ensures that all handlers are unregistered */
-void ble_event_dispatcher_reset();
+void ble_event_dispatcher_reset(void);
 
 BleEventFlowStatus ble_event_dispatcher_process_event(void* payload);
 

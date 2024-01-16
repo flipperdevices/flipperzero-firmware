@@ -419,7 +419,7 @@ static void gap_advertise_start(GapState new_state) {
     furi_timer_start(gap->advertise_timer, INITIAL_ADV_TIMEOUT);
 }
 
-static void gap_advertise_stop() {
+static void gap_advertise_stop(void) {
     FURI_LOG_I(TAG, "Stop");
     tBleStatus ret;
     if(gap->state > GapStateIdle) {
@@ -446,7 +446,7 @@ static void gap_advertise_stop() {
     gap->on_event_cb(event, gap->context);
 }
 
-void gap_start_advertising() {
+void gap_start_advertising(void) {
     furi_mutex_acquire(gap->state_mutex, FuriWaitForever);
     if(gap->state == GapStateIdle) {
         gap->state = GapStateStartingAdv;
@@ -458,7 +458,7 @@ void gap_start_advertising() {
     furi_mutex_release(gap->state_mutex);
 }
 
-void gap_stop_advertising() {
+void gap_stop_advertising(void) {
     furi_mutex_acquire(gap->state_mutex, FuriWaitForever);
     if(gap->state > GapStateIdle) {
         FURI_LOG_I(TAG, "Stop advertising");
@@ -514,7 +514,7 @@ bool gap_init(GapConfig* config, GapEventCallback on_event_cb, void* context) {
     return true;
 }
 
-GapState gap_get_state() {
+GapState gap_get_state(void) {
     GapState state;
     if(gap) {
         furi_mutex_acquire(gap->state_mutex, FuriWaitForever);
@@ -526,7 +526,7 @@ GapState gap_get_state() {
     return state;
 }
 
-void gap_thread_stop() {
+void gap_thread_stop(void) {
     if(gap) {
         furi_mutex_acquire(gap->state_mutex, FuriWaitForever);
         gap->enable_adv = false;

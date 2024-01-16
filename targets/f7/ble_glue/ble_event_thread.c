@@ -71,7 +71,7 @@ void hci_notify_asynch_evt(void* pdata) {
     furi_thread_flags_set(thread_id, BLE_EVENT_THREAD_FLAG_HCI_EVENT);
 }
 
-void ble_event_thread_stop() {
+void ble_event_thread_stop(void) {
     if(!event_thread) {
 #ifdef FURI_BLE_EXTRA_LOG
         FURI_LOG_E(TAG, "thread_stop: event_thread is NULL");
@@ -87,7 +87,7 @@ void ble_event_thread_stop() {
     event_thread = NULL;
 }
 
-void ble_event_thread_start() {
+void ble_event_thread_start(void) {
     furi_check(event_thread == NULL);
 
     event_thread = furi_thread_alloc_ex("BleEventWorker", 1024, ble_event_thread, NULL);

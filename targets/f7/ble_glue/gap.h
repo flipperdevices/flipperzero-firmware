@@ -79,13 +79,13 @@ typedef struct {
 
 bool gap_init(GapConfig* config, GapEventCallback on_event_cb, void* context);
 
-void gap_start_advertising();
+void gap_start_advertising(void);
 
-void gap_stop_advertising();
+void gap_stop_advertising(void);
 
-GapState gap_get_state();
+GapState gap_get_state(void);
 
-void gap_thread_stop();
+void gap_thread_stop(void);
 
 void gap_emit_ble_beacon_status_event(bool active);
 

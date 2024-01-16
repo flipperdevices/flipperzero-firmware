@@ -11,11 +11,11 @@
 extern "C" {
 #endif
 
-bool ble_stack_init();
+bool ble_stack_init(void);
 
 void ble_stack_get_key_storage_buff(uint8_t** addr, uint16_t* size);
 
-void ble_stack_deinit();
+void ble_stack_deinit(void);
 
 #ifdef __cplusplus
 }

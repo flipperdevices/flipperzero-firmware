@@ -49,14 +49,14 @@ BleEventFlowStatus ble_event_dispatcher_process_event(void* payload) {
     }
 }
 
-void ble_event_dispatcher_init() {
+void ble_event_dispatcher_init(void) {
     furi_assert(!initialized);
 
     GapSvcEventHandlerList_init(handlers);
     initialized = true;
 }
 
-void ble_event_dispatcher_reset() {
+void ble_event_dispatcher_reset(void) {
     furi_assert(initialized);
     furi_check(GapSvcEventHandlerList_size(handlers) == 0);
 

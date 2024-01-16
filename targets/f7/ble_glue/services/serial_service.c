@@ -152,7 +152,7 @@ static void
         serial_svc->svc_handle, &serial_svc->chars[SerialSvcGattCharacteristicStatus], &status);
 }
 
-BleServiceSerial* ble_svc_serial_start() {
+BleServiceSerial* ble_svc_serial_start(void) {
     BleServiceSerial* serial_svc = malloc(sizeof(BleServiceSerial));
 
     serial_svc->event_handler =

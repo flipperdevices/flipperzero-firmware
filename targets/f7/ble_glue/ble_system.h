@@ -59,21 +59,21 @@ typedef void (
     *BleSystemKeyStorageChangedCallback)(uint8_t* change_addr_start, uint16_t size, void* context);
 
 /** Initialize start core2 and initialize transport */
-void ble_system_init();
+void ble_system_init(void);
 
 /** Start Core2 Radio stack
  *
  * @return     true on success
  */
-bool ble_system_start();
+bool ble_system_start(void);
 
-void ble_system_stop();
+void ble_system_stop(void);
 
 /** Is core2 alive and at least FUS is running
  * 
  * @return     true if core2 is alive
  */
-bool ble_system_is_alive();
+bool ble_system_is_alive(void);
 
 /** Waits for C2 to reports its mode to callback
  *
@@ -81,15 +81,15 @@ bool ble_system_is_alive();
  */
 bool ble_system_wait_for_c2_start(int32_t timeout_ms);
 
-BleSystemStatus ble_system_get_c2_status();
+BleSystemStatus ble_system_get_c2_status(void);
 
-const BleSystemC2Info* ble_system_get_c2_info();
+const BleSystemC2Info* ble_system_get_c2_info(void);
 
 /** Is core2 radio stack present and ready
  *
  * @return     true if present and ready
  */
-bool ble_system_is_radio_stack_ready();
+bool ble_system_is_radio_stack_ready(void);
 
 /** Set callback for NVM in RAM changes
  *
@@ -116,13 +116,13 @@ typedef enum {
  */
 BleGlueCommandResult ble_system_force_c2_mode(BleGlueC2Mode mode);
 
-BleGlueCommandResult ble_system_fus_stack_delete();
+BleGlueCommandResult ble_system_fus_stack_delete(void);
 
 BleGlueCommandResult ble_system_fus_stack_install(uint32_t src_addr, uint32_t dst_addr);
 
-BleGlueCommandResult ble_system_fus_get_status();
+BleGlueCommandResult ble_system_fus_get_status(void);
 
-BleGlueCommandResult ble_system_fus_wait_operation();
+BleGlueCommandResult ble_system_fus_wait_operation(void);
 
 typedef struct {
     uint32_t magic;
@@ -135,7 +135,7 @@ typedef struct {
  *
  * @return     hardfault info. NULL if no hardfault
  */
-const BleGlueHardfaultInfo* ble_system_get_hardfault_info();
+const BleGlueHardfaultInfo* ble_system_get_hardfault_info(void);
 
 #ifdef __cplusplus
 }

@@ -69,7 +69,7 @@ static void furi_hal_ble_hardfault_check(void* context) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void ble_system_init() {
+void ble_system_init(void) {
     ble_glue = malloc(sizeof(BleGlue));
     ble_glue->status = BleSystemStatusStartup;
     ble_glue->hardfault_check_timer =
@@ -111,11 +111,11 @@ void ble_system_init() {
      */
 }
 
-const BleSystemC2Info* ble_system_get_c2_info() {
+const BleSystemC2Info* ble_system_get_c2_info(void) {
     return &ble_glue->c2_info;
 }
 
-BleSystemStatus ble_system_get_c2_status() {
+BleSystemStatus ble_system_get_c2_status(void) {
     return ble_glue->status;
 }
 
@@ -142,7 +142,7 @@ static const char* ble_system_get_reltype_str(const uint8_t reltype) {
     }
 }
 
-static void ble_system_update_c2_fw_info() {
+static void ble_system_update_c2_fw_info(void) {
     WirelessFwInfo_t wireless_info;
     SHCI_GetWirelessFwInfo(&wireless_info);
     BleSystemC2Info* local_info = &ble_glue->c2_info;
@@ -176,7 +176,7 @@ static void ble_system_update_c2_fw_info() {
     local_info->FusMemorySizeFlash = wireless_info.FusMemorySizeFlash;
 }
 
-static void ble_system_dump_stack_info() {
+static void ble_system_dump_stack_info(void) {
     const BleSystemC2Info* c2_info = &ble_glue->c2_info;
     FURI_LOG_I(
         TAG,
@@ -223,7 +223,7 @@ bool ble_system_wait_for_c2_start(int32_t timeout_ms) {
     return true;
 }
 
-bool ble_system_start() {
+bool ble_system_start(void) {
     furi_assert(ble_glue);
 
     if(ble_glue->status != BleSystemStatusC2Started) {
@@ -242,7 +242,7 @@ bool ble_system_start() {
     return true;
 }
 
-void ble_system_stop() {
+void ble_system_stop(void) {
     furi_assert(ble_glue);
 
     ble_event_thread_stop();
@@ -255,7 +255,7 @@ void ble_system_stop() {
     ble_glue = NULL;
 }
 
-bool ble_system_is_alive() {
+bool ble_system_is_alive(void) {
     if(!ble_glue) {
         return false;
     }
@@ -263,7 +263,7 @@ bool ble_system_is_alive() {
     return ble_glue->status >= BleSystemStatusC2Started;
 }
 
-bool ble_system_is_radio_stack_ready() {
+bool ble_system_is_radio_stack_ready(void) {
     if(!ble_glue) {
         return false;
     }
@@ -362,18 +362,18 @@ static void ble_sys_user_event_callback(void* pPayload) {
     }
 }
 
-static void ble_system_clear_shared_memory() {
+static void ble_system_clear_shared_memory(void) {
     memset(ble_event_pool, 0, sizeof(ble_event_pool));
     memset(&ble_system_cmd_buff, 0, sizeof(ble_system_cmd_buff));
     memset(ble_system_spare_event_buff, 0, sizeof(ble_system_spare_event_buff));
     memset(ble_spare_event_buff, 0, sizeof(ble_spare_event_buff));
 }
 
-bool ble_system_reinit_c2() {
+bool ble_system_reinit_c2(void) {
     return (SHCI_C2_Reinit() == SHCI_Success);
 }
 
-BleGlueCommandResult ble_system_fus_stack_delete() {
+BleGlueCommandResult ble_system_fus_stack_delete(void) {
     FURI_LOG_I(TAG, "Erasing stack");
     SHCI_CmdStatus_t erase_stat = SHCI_C2_FUS_FwDelete();
     FURI_LOG_I(TAG, "Cmd res = %x", erase_stat);
@@ -395,7 +395,7 @@ BleGlueCommandResult ble_system_fus_stack_install(uint32_t src_addr, uint32_t ds
     return BleGlueCommandResultError;
 }
 
-BleGlueCommandResult ble_system_fus_get_status() {
+BleGlueCommandResult ble_system_fus_get_status(void) {
     furi_check(ble_glue->c2_info.mode == BleGlueC2ModeFUS);
 
     SHCI_FUS_GetState_ErrorCode_t error_code = 0;
@@ -411,7 +411,7 @@ BleGlueCommandResult ble_system_fus_get_status() {
     return BleGlueCommandResultOK;
 }
 
-BleGlueCommandResult ble_system_fus_wait_operation() {
+BleGlueCommandResult ble_system_fus_wait_operation(void) {
     furi_check(ble_glue->c2_info.mode == BleGlueC2ModeFUS);
 
     while(true) {
@@ -426,7 +426,7 @@ BleGlueCommandResult ble_system_fus_wait_operation() {
     }
 }
 
-const BleGlueHardfaultInfo* ble_system_get_hardfault_info() {
+const BleGlueHardfaultInfo* ble_system_get_hardfault_info(void) {
     /* AN5289, 4.8.2 */
     const BleGlueHardfaultInfo* info = (BleGlueHardfaultInfo*)(SRAM2A_BASE);
     if(info->magic != BLE_SYSTEM_HARDFAULT_INFO_MAGIC) {

@@ -100,7 +100,7 @@ static const BleGattCharacteristicParams ble_svc_dev_info_chars[DevInfoSvcGattCh
          .gatt_evt_mask = GATT_DONT_NOTIFY_EVENTS,
          .is_variable = CHAR_VALUE_LEN_CONSTANT}};
 
-BleServiceDevInfo* ble_svc_dev_info_start() {
+BleServiceDevInfo* ble_svc_dev_info_start(void) {
     BleServiceDevInfo* dev_info_svc = malloc(sizeof(BleServiceDevInfo));
     snprintf(
         software_revision,

@@ -6,9 +6,9 @@ extern "C" {
 
 /* Controls for thread handling SHCI & HCI event queues. Used internally. */
 
-void ble_event_thread_start();
+void ble_event_thread_start(void);
 
-void ble_event_thread_stop();
+void ble_event_thread_stop(void);
 
 #ifdef __cplusplus
 }

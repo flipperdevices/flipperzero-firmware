@@ -16,7 +16,7 @@ typedef struct {
 } BleProfileSerial;
 _Static_assert(offsetof(BleProfileSerial, base) == 0, "Wrong layout");
 
-static FuriHalBleProfileBase* ble_profile_serial_start() {
+static FuriHalBleProfileBase* ble_profile_serial_start(void) {
     BleProfileSerial* profile = malloc(sizeof(BleProfileSerial));
 
     profile->base.config = ble_profile_serial;

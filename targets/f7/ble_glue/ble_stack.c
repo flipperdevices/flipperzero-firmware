@@ -77,7 +77,7 @@ static const SHCI_C2_Ble_Init_Cmd_Packet_t ble_init_cmd_packet = {
                              SHCI_C2_BLE_INIT_OPTIONS_APPEARANCE_READONLY,
     }};
 
-bool ble_stack_init() {
+bool ble_stack_init(void) {
     SHCI_CmdStatus_t status;
     ble_app = malloc(sizeof(BleApp));
     // Allocate semafore and mutex for ble command buffer access
@@ -114,7 +114,7 @@ void ble_stack_get_key_storage_buff(uint8_t** addr, uint16_t* size) {
     *size = sizeof(ble_stack_nvm);
 }
 
-void ble_stack_deinit() {
+void ble_stack_deinit(void) {
     furi_check(ble_app);
 
     furi_mutex_free(ble_app->hci_mtx);

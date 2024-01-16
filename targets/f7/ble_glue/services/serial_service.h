@@ -34,7 +34,7 @@ typedef uint16_t (*SerialServiceEventCallback)(SerialServiceEvent event, void* c
 
 typedef struct BleServiceSerial BleServiceSerial;
 
-BleServiceSerial* ble_svc_serial_start();
+BleServiceSerial* ble_svc_serial_start(void);
 
 void ble_svc_serial_stop(BleServiceSerial* service);
 
