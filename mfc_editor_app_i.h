@@ -8,6 +8,7 @@
 #include <gui/scene_manager.h>
 #include <gui/view_dispatcher.h>
 
+#include <gui/modules/dialog_ex.h>
 #include <gui/modules/popup.h>
 #include <gui/modules/submenu.h>
 
@@ -44,6 +45,7 @@ struct MfcEditorApp {
 
     Submenu* submenu;
     Popup* popup;
+    DialogEx* dialog_ex;
 
     NfcDevice* nfc_device;
     const MfClassicData* mf_classic_data;
@@ -52,11 +54,16 @@ struct MfcEditorApp {
 
     uint8_t current_sector;
     uint8_t current_block;
+
+    // DialogEx doesn't copy the strings given to it, so we need these
+    FuriString* data_view_header;
+    FuriString* data_view_text;
 };
 
 typedef enum {
     MfcEditorAppViewSubmenu,
     MfcEditorAppViewPopup,
+    MfcEditorAppViewDialogEx,
 } MfcEditorAppView;
 
 typedef enum {
@@ -70,6 +77,20 @@ typedef enum {
     MfcEditorPromptResponseExitedFile,
     MfcEditorPromptResponseExitedShadow,
 } MfcEditorPromptResponse;
+
+typedef enum {
+    MfcEditorBlockViewNormal,
+
+    // Special options - Sector 0 only
+    MfcEditorBlockViewUID,
+    MfcEditorBlockViewManufacturerBytes,
+
+    // Special options - All sectors
+    MfcEditorBlockViewKeyA,
+    MfcEditorBlockViewKeyB,
+    MfcEditorBlockViewAccessBits,
+    MfcEditorBlockViewUserByte,
+} MfcEditorBlockView;
 
 MfcEditorPromptResponse mfc_editor_prompt_load_file(MfcEditorApp* instance);
 

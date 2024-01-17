@@ -91,12 +91,30 @@ bool mfc_editor_scene_block_select_on_event(void* context, SceneManagerEvent eve
     MfcEditorApp* instance = context;
     bool consumed = false;
 
-    UNUSED(instance);
-
     if(event.type == SceneManagerEventTypeCustom) {
         scene_manager_set_scene_state(
             instance->scene_manager, MfcEditorSceneBlockSelect, event.event);
-        FURI_LOG_I(TAG, "Block select event %lu", event.event);
+
+        MfcEditorBlockView block_view;
+        if(event.event == SubmenuIndexUID) {
+            block_view = MfcEditorBlockViewUID;
+        } else if(event.event == SubmenuIndexManufacturerBytes) {
+            block_view = MfcEditorBlockViewManufacturerBytes;
+        } else if(event.event == SubmenuIndexKeyA) {
+            block_view = MfcEditorBlockViewKeyA;
+        } else if(event.event == SubmenuIndexKeyB) {
+            block_view = MfcEditorBlockViewKeyB;
+        } else if(event.event == SubmenuIndexAccessBits) {
+            block_view = MfcEditorBlockViewAccessBits;
+        } else if(event.event == SubmenuIndexUserByte) {
+            block_view = MfcEditorBlockViewUserByte;
+        } else {
+            block_view = MfcEditorBlockViewNormal;
+            instance->current_block = event.event;
+        }
+
+        scene_manager_set_scene_state(instance->scene_manager, MfcEditorSceneDataView, block_view);
+        scene_manager_next_scene(instance->scene_manager, MfcEditorSceneDataView);
         consumed = true;
     }
 

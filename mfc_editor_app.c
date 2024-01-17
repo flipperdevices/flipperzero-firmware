@@ -43,6 +43,9 @@ MfcEditorApp* mfc_editor_app_alloc() {
     instance->nfc_device = nfc_device_alloc();
     instance->file_path = furi_string_alloc_set(NFC_APP_FOLDER);
 
+    instance->data_view_header = furi_string_alloc();
+    instance->data_view_text = furi_string_alloc();
+
     instance->submenu = submenu_alloc();
     view_dispatcher_add_view(
         instance->view_dispatcher, MfcEditorAppViewSubmenu, submenu_get_view(instance->submenu));
@@ -50,6 +53,12 @@ MfcEditorApp* mfc_editor_app_alloc() {
     instance->popup = popup_alloc();
     view_dispatcher_add_view(
         instance->view_dispatcher, MfcEditorAppViewPopup, popup_get_view(instance->popup));
+
+    instance->dialog_ex = dialog_ex_alloc();
+    view_dispatcher_add_view(
+        instance->view_dispatcher,
+        MfcEditorAppViewDialogEx,
+        dialog_ex_get_view(instance->dialog_ex));
 
     return instance;
 }
@@ -62,6 +71,9 @@ void mfc_editor_app_free(MfcEditorApp* instance) {
 
     view_dispatcher_remove_view(instance->view_dispatcher, MfcEditorAppViewPopup);
     popup_free(instance->popup);
+
+    view_dispatcher_remove_view(instance->view_dispatcher, MfcEditorAppViewDialogEx);
+    dialog_ex_free(instance->dialog_ex);
 
     view_dispatcher_free(instance->view_dispatcher);
     scene_manager_free(instance->scene_manager);
@@ -77,6 +89,9 @@ void mfc_editor_app_free(MfcEditorApp* instance) {
 
     nfc_device_free(instance->nfc_device);
     furi_string_free(instance->file_path);
+
+    furi_string_free(instance->data_view_header);
+    furi_string_free(instance->data_view_text);
 
     free(instance);
 }
