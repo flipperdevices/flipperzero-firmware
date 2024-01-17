@@ -94,21 +94,63 @@ def pytest_addoption(parser):
     )
     parser.addoption(
         "--update-flippers",
-        action="store_true",
-        default=False,
-        help="use this flag for update all flippers",
+        action="store",
+        default=None,
+        help="use this parameter for update all flippers for exact update channel",
     )
 
 
 def pytest_configure(config):
     # here you can add setup before launching session!
-    pass
+    if config.getoption("--update-flippers"):
+        chan = config.getoption("--update-flippers")
+        update_firmware(config.getoption("--port"), chan)
+        if config.getoption("--bench-ibutton-ir"):
+            update_firmware(config.getoption("--flipper-r-port"), chan)
+            update_firmware(config.getoption("--flipper-k-port"), chan)
 
 
 def pytest_unconfigure(config):
     # here you can add teardown after session!
     pass
 
+
+def update_firmware(port, channel):
+    #check flipper on defined adress and it availability
+    try:
+        flipper_serial = serial.Serial(port, timeout=1)
+    except serial.serialutil.SerialException:
+        raise Exception('NoFlipper', 'There are no flipper on defined port, or it is unavailable')
+    flipper_serial.close()
+
+    #update flipper's firmware via ufbt
+    os.system("ufbt dotenv_create")
+    os.system("ufbt update --channel=" + channel)
+    os.system("ufbt flash_usb FLIP_PORT=" + port)
+    time.sleep(2)
+
+    start_time = time.time()
+    while time.time() - start_time < 120:
+        try:
+            flipper_serial = serial.Serial(port, timeout=1)
+        except serial.serialutil.SerialException:
+            time.sleep(1)
+            print(
+                "Waiting for flipper boot after update "
+                + str(int(time.time() - start_time))
+                + "s"
+            )
+            logging.debug(
+                "Waiting for flipper boot after update "
+                + str(int(time.time() - start_time))
+                + "s"
+            )
+            if time.time() - start_time > 120:
+                logging.error("can not open serial port")
+                raise Exception('FlipperDisapear', 'Can\'t connect to flipper after update')
+        else:
+            break
+    return 0
 
 def pytest_collection_modifyitems(config, items):
     if config.getoption("--debugger"):
@@ -297,49 +339,6 @@ def relay_serial(request):
 
 @pytest.fixture(scope="session")
 def nav(flipper_serial, request):
-    if request.config.getoption("--update-flippers"):
-        port = request.config.getoption("--port")
-        if port:
-            pass
-        elif is_windows():
-            port = "COM4"
-        else:
-            port = "/dev/ttyACM0"
-
-        os.system("ufbt dotenv_create")
-        os.system("ufbt update --channel=dev")
-        os.system("ufbt flash_usb FLIP_PORT=" + port)
-        time.sleep(2)
-
-        start_time = time.time()
-        while time.time() - start_time < 120:
-            try:
-                flipper_serial = serial.Serial(port, timeout=1)
-            except serial.serialutil.SerialException:
-                time.sleep(1)
-                print(
-                    "Waiting for flipper boot after update "
-                    + str(int(time.time() - start_time))
-                    + "s"
-                )
-                logging.debug(
-                    "Waiting for flipper boot after update "
-                    + str(int(time.time() - start_time))
-                    + "s"
-                )
-                if time.time() - start_time > 120:
-                    logging.error("can not open serial port")
-                    sys.exit(0)
-                    break
-            else:
-                break
-
-        flipper_serial.baudrate = 230400
-        flipper_serial.flushOutput()
-        flipper_serial.flushInput()
-        flipper_serial.timeout = 5
-        logging.debug("Flipper serial port opened on" + port)
-
     proto = FlipperProto(serial_port=flipper_serial, debug=True)
     proto.start_rpc_session()
     logging.debug("RPC session of main flipper started")
@@ -402,49 +401,6 @@ def px(request):
 
 @pytest.fixture(scope="session")
 def nav_reader(flipper_reader_serial, request):
-    if request.config.getoption("--update-flippers"):
-        port = request.config.getoption("--flipper-r-port")
-        if port:
-            pass
-        elif is_windows():
-            port = "COM7"
-        else:
-            port = "/dev/ttyACM2"
-
-        os.system("ufbt dotenv_create")
-        os.system("ufbt update --channel=dev")
-        os.system("ufbt flash_usb FLIP_PORT=" + port)
-        time.sleep(2)
-
-        start_time = time.time()
-        while time.time() - start_time < 120:
-            try:
-                flipper_serial = serial.Serial(port, timeout=1)
-            except serial.serialutil.SerialException:
-                time.sleep(1)
-                print(
-                    "Waiting for flipper boot after update "
-                    + str(int(time.time() - start_time))
-                    + "s"
-                )
-                logging.debug(
-                    "Waiting for flipper boot after update "
-                    + str(int(time.time() - start_time))
-                    + "s"
-                )
-                if time.time() - start_time > 120:
-                    logging.error("can not open 'reader' serial port")
-                    sys.exit(0)
-                    break
-            else:
-                break
-
-        flipper_serial.baudrate = 230400
-        flipper_serial.flushOutput()
-        flipper_serial.flushInput()
-        flipper_serial.timeout = 5
-        logging.debug("Flipper 'reader' serial port opened on" + port)
-
     proto = FlipperProto(serial_port=flipper_reader_serial, debug=True)
     proto.start_rpc_session()
     logging.debug("RPC session of flipper 'reader' started")
@@ -500,49 +456,6 @@ def nav_reader(flipper_reader_serial, request):
 
 @pytest.fixture(scope="session")
 def nav_key(flipper_key_serial, request):
-    if request.config.getoption("--update-flippers"):
-        port = request.config.getoption("--flipper-k-port")
-        if port:
-            pass
-        elif is_windows():
-            port = "COM8"
-        else:
-            port = "/dev/ttyACM3"
-
-        os.system("ufbt dotenv_create")
-        os.system("ufbt update --channel=dev")
-        os.system("ufbt flash_usb FLIP_PORT=" + port)
-        time.sleep(2)
-
-        start_time = time.time()
-        while time.time() - start_time < 120:
-            try:
-                flipper_serial = serial.Serial(port, timeout=1)
-            except serial.serialutil.SerialException:
-                time.sleep(1)
-                print(
-                    "Waiting for flipper boot after update "
-                    + str(int(time.time() - start_time))
-                    + "s"
-                )
-                logging.debug(
-                    "Waiting for flipper boot after update "
-                    + str(int(time.time() - start_time))
-                    + "s"
-                )
-                if time.time() - start_time > 120:
-                    logging.error("can not open 'key' serial port")
-                    sys.exit(0)
-                    break
-            else:
-                break
-
-        flipper_serial.baudrate = 230400
-        flipper_serial.flushOutput()
-        flipper_serial.flushInput()
-        flipper_serial.timeout = 5
-        logging.debug("Flipper 'key' serial port opened on" + port)
-
     proto = FlipperProto(serial_port=flipper_key_serial, debug=True)
     proto.start_rpc_session()
     logging.debug("RPC session of flipper 'key' started")
