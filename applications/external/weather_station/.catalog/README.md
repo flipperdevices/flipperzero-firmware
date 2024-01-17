@@ -24,3 +24,4 @@ TX8300
 Wendox W6276
 Auriol AHFL
 Kedsum-TH/Conrad-S3318P
+EMOS E601x

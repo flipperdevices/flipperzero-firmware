@@ -36,6 +36,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [FlipBoard Simon v1.1 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
 - OFW: [Bugfix: Strip last parity bit from decoded FDX-B data #3199 (By lagomorph)](https://github.com/flipperdevices/flipperzero-firmware/pull/3199)
 - OFW: [RFID CLI: better usage #3376 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/3376)
+- Updated: [Weather Station v1.4 (By Skorpionm)-OFW](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/weather_station) [WS: add protocol EMOS E601x #107 (By linusnielsen)](https://github.com/flipperdevices/flipperzero-good-faps/pull/107)
 
 ## IN THIS BRANCH:
 
@@ -633,7 +634,7 @@ $ ./fbt dolphin_ext
 - [WAV Player v1.1 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/tree/zlo/wav-player) Updated by Atmanos & RogueMaster To Work.  [Updated by xMasterX](https://github.com/DarkFlippers/unleashed-firmware/commit/76d3f84a5eb069b749e3ad20df6fdbbc785eb253)
 - [WAV Recorder (By scrolltex)](https://github.com/scrolltex/flipper-wav-recorder)
 - [WHC SWIO Flasher v1.0 (By sukvojte)](https://github.com/sukvojte/wch_swio_flasher)
-- [Weather Station v1.3 (By Skorpionm)-OFW](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/weather_station)
+- [Weather Station v1.4 (By Skorpionm)-OFW](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/weather_station)
 - [Wiegand Reader v1.3 (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/gpio)
 - [WiFi (Deauther) V2 (By Timmotools)](https://github.com/Timmotools/flipperzero_esp8266_deautherv2) `Req: ESP8266`
 - [WiFi (Marauder) v6.6 (By 0xchocolate & tcpassos)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) `Req: ESP32 WITH MARAUDER FLASHED` [ESP32 MARAUDER Firmware](https://github.com/tcpassos/ESP32Marauder)
