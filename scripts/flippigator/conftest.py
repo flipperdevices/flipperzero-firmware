@@ -33,29 +33,29 @@ def pytest_addoption(parser):
     You can add static name for usb devices by adding rules to /etc/udev/rules.d/99-usb-serial.rules
     SUBSYSTEM=="tty", ATTRS{idVendor}=="%your_device_VID%", ATTRS{idProduct}=="%your_device_PID%",
     ATTRS{serial}=="%your_device_serial%", SYMLINK+="name"
-    pytest -v --scale=8 --bench_nfc_rfid --bench_ibutton_ir --port=/dev/bench_flipper --reader_port=/dev/reader_arduino --flipper_r_port=/dev/ireader_flipper --flipper_k_port=/dev/ikey_flipper --relay_port=/dev/relay_arduino
+    pytest -v --scale=8 --bench-nfc-rfid --bench-ibutton-ir --port=/dev/bench_flipper --reader-port=/dev/reader_arduino --flipper-r-port=/dev/ireader_flipper --flipper-k-port=/dev/ikey_flipper --relay-port=/dev/relay_arduino
     """
     parser.addoption("--port", action="store", default=None, help="flipper serial port")
     parser.addoption(
-        "--bench_port", action="store", default=None, help="bench serial port"
+        "--bench-port", action="store", default=None, help="bench serial port"
     )
     parser.addoption(
-        "--reader_port", action="store", default=None, help="reader serial port"
+        "--reader-port", action="store", default=None, help="reader serial port"
     )
     parser.addoption(
-        "--relay_port",
+        "--relay-port",
         action="store",
         default=None,
         help="relay controller serial port",
     )
     parser.addoption(
-        "--flipper_r_port",
+        "--flipper-r-port",
         action="store",
         default=None,
         help="flipper ibutton reader and IR serial port",
     )
     parser.addoption(
-        "--flipper_k_port",
+        "--flipper-k-port",
         action="store",
         default=None,
         help="flipper ibutton key and IR serial port",
@@ -68,32 +68,32 @@ def pytest_addoption(parser):
     parser.addoption("--scale", action="store", default=8, help="scale factor")
     parser.addoption("--threshold", action="store", default=0.99, help="threshold")
     parser.addoption(
-        "--bench_nfc_rfid",
+        "--bench-nfc-rfid",
         action="store_true",
         default=False,
         help="use this flag for E2E rfid and nfc bench tests",
     )
     parser.addoption(
-        "--bench_ibutton_ir",
+        "--bench-ibutton-ir",
         action="store_true",
         default=False,
         help="use this flag for E2E ibutton and ir bench tests",
     )
     parser.addoption(
-        "--no_init",
+        "--no-init",
         action="store_true",
         default=False,
         help="use this flag for skip setup cycle",
     )
     parser.addoption(
-        "--px3_path",
+        "--px3-path",
         action="store",
         default="C:\\Users\\User\\Desktop\\proxmark3\\client\\proxmark3.exe",
         help="path to proxmark3 executable file",
         type=str,
     )
     parser.addoption(
-        "--update_flippers",
+        "--update-flippers",
         action="store_true",
         default=False,
         help="use this flag for update all flippers",
@@ -113,27 +113,27 @@ def pytest_unconfigure(config):
 def pytest_collection_modifyitems(config, items):
     if config.getoption("--debugger"):
         logging.basicConfig(level=logging.DEBUG)
-    if config.getoption("--bench_nfc_rfid"):
+    if config.getoption("--bench-nfc-rfid"):
         logging.info("NFC and RFID bench option selected")
     else:
         logging.info("NFC and RFID bench option unselected")
         skip_bench_nfc_rfid = pytest.mark.skip(
-            reason="need --bench_nfc_rfid option to run"
+            reason="need --bench-nfc-rfid option to run"
         )
 
         for item in items:
-            if "bench_nfc_rfid" in item.keywords:
+            if "bench-nfc-rfid" in item.keywords:
                 item.add_marker(skip_bench_nfc_rfid)
-    if config.getoption("--bench_ibutton_ir"):
+    if config.getoption("--bench-ibutton-ir"):
         logging.info("IButton and Infrared bench option selected")
     else:
         logging.info("IButton and Infrared bench option unselected")
         skip_bench_ibutton_ir = pytest.mark.skip(
-            reason="need --bench__ibutton_ir option to run"
+            reason="need --bench-ibutton-ir option to run"
         )
 
         for item in items:
-            if "bench_ibutton_ir" in item.keywords:
+            if "bench-ibutton-ir" in item.keywords:
                 item.add_marker(skip_bench_ibutton_ir)
 
 
@@ -183,7 +183,7 @@ def flipper_serial(request):
 @pytest.fixture(scope="session")
 def bench_serial(request):
     # taking port from config or returning OS based default
-    port = request.config.getoption("--bench_port")
+    port = request.config.getoption("--bench-port")
     if port:
         pass
     elif is_windows():
@@ -206,7 +206,7 @@ def bench_serial(request):
 @pytest.fixture(scope="session")
 def reader_serial(request):
     # taking port from config or returning OS based default
-    port = request.config.getoption("--reader_port")
+    port = request.config.getoption("--reader-port")
     if port:
         pass
     elif is_windows():
@@ -229,7 +229,7 @@ def reader_serial(request):
 @pytest.fixture(scope="session")
 def flipper_reader_serial(request):
     # taking port from config or returning OS based default
-    port = request.config.getoption("--flipper_r_port")
+    port = request.config.getoption("--flipper-r-port")
     if port:
         pass
     elif is_windows():
@@ -252,7 +252,7 @@ def flipper_reader_serial(request):
 @pytest.fixture(scope="session")
 def flipper_key_serial(request):
     # taking port from config or returning OS based default
-    port = request.config.getoption("--flipper_k_port")
+    port = request.config.getoption("--flipper-k-port")
     if port:
         pass
     elif is_windows():
@@ -275,7 +275,7 @@ def flipper_key_serial(request):
 @pytest.fixture(scope="session")
 def relay_serial(request):
     # taking port from config or returning OS based default
-    port = request.config.getoption("--relay_port")
+    port = request.config.getoption("--relay-port")
     if port:
         pass
     elif is_windows():
@@ -297,7 +297,7 @@ def relay_serial(request):
 
 @pytest.fixture(scope="session")
 def nav(flipper_serial, request):
-    if request.config.getoption("--update_flippers"):
+    if request.config.getoption("--update-flippers"):
         port = request.config.getoption("--port")
         if port:
             pass
@@ -361,7 +361,7 @@ def nav(flipper_serial, request):
     )
     nav.update_screen()
 
-    if not (request.config.getoption("--no_init")):
+    if not (request.config.getoption("--no-init")):
         # Enabling of bluetooth
         nav.go_to_main_screen()
         nav.press_ok()
@@ -396,14 +396,14 @@ def nav(flipper_serial, request):
 
 @pytest.fixture(scope="session")
 def px(request):
-    px = proxmark_wrapper(request.config.getoption("--px3_path"))
+    px = proxmark_wrapper(request.config.getoption("--px3-path"))
     return px
 
 
 @pytest.fixture(scope="session")
 def nav_reader(flipper_reader_serial, request):
-    if request.config.getoption("--update_flippers"):
-        port = request.config.getoption("--flipper_r_port")
+    if request.config.getoption("--update-flippers"):
+        port = request.config.getoption("--flipper-r-port")
         if port:
             pass
         elif is_windows():
@@ -465,7 +465,7 @@ def nav_reader(flipper_reader_serial, request):
         window_name="Reader flipper",
     )
     nav_reader.update_screen()
-    if not (request.config.getoption("--no_init")):
+    if not (request.config.getoption("--no-init")):
         # Enabling of bluetooth
         nav_reader.go_to_main_screen()
         nav_reader.press_ok()
@@ -500,8 +500,8 @@ def nav_reader(flipper_reader_serial, request):
 
 @pytest.fixture(scope="session")
 def nav_key(flipper_key_serial, request):
-    if request.config.getoption("--update_flippers"):
-        port = request.config.getoption("--flipper_k_port")
+    if request.config.getoption("--update-flippers"):
+        port = request.config.getoption("--flipper-k-port")
         if port:
             pass
         elif is_windows():
@@ -563,7 +563,7 @@ def nav_key(flipper_key_serial, request):
         window_name="Key flipper",
     )
     nav_key.update_screen()
-    if not (request.config.getoption("--no_init")):
+    if not (request.config.getoption("--no-init")):
         # Enabling of bluetooth
         nav_key.go_to_main_screen()
         nav_key.press_ok()
@@ -598,7 +598,7 @@ def nav_key(flipper_key_serial, request):
 
 @pytest.fixture(scope="session", autouse=False)
 def gator(bench_serial, request) -> Gator:
-    bench = request.config.getoption("--bench_nfc_rfid")
+    bench = request.config.getoption("--bench-nfc-rfid")
     if bench:
         logging.debug("Gator initialization")
 
@@ -611,7 +611,7 @@ def gator(bench_serial, request) -> Gator:
 
 @pytest.fixture(scope="session", autouse=False)
 def reader_nfc(reader_serial, gator, request) -> Reader:
-    bench = request.config.getoption("--bench_nfc_rfid")
+    bench = request.config.getoption("--bench-nfc-rfid")
     if bench:
         logging.debug("NFC reader initialization")
 
@@ -623,7 +623,7 @@ def reader_nfc(reader_serial, gator, request) -> Reader:
 
 @pytest.fixture(scope="session", autouse=False)
 def reader_em_hid(reader_serial, gator, request) -> Reader:
-    bench = request.config.getoption("--bench_nfc_rfid")
+    bench = request.config.getoption("--bench-nfc-rfid")
     if bench:
         logging.debug("Reader RFID EM and HID initialization")
 
@@ -635,7 +635,7 @@ def reader_em_hid(reader_serial, gator, request) -> Reader:
 
 @pytest.fixture(scope="session", autouse=False)
 def reader_indala(reader_serial, gator, request) -> Reader:
-    bench = request.config.getoption("--bench_nfc_rfid")
+    bench = request.config.getoption("--bench-nfc-rfid")
     if bench:
         logging.debug("Reader RFID Indala initialization")
 
@@ -647,7 +647,7 @@ def reader_indala(reader_serial, gator, request) -> Reader:
 
 @pytest.fixture(scope="session", autouse=False)
 def relay(relay_serial, gator, request) -> Relay:
-    bench = request.config.getoption("--bench_ibutton_ir")
+    bench = request.config.getoption("--bench-ibutton-ir")
     if bench:
         logging.debug("Relay module initialization")
 
