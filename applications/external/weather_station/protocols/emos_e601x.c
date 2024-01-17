@@ -135,7 +135,7 @@ static void ws_protocol_emose601x_extract_data(WSProtocolDecoderEmosE601x* insta
     instance->generic.id = (instance->upper_decode_data >> 24) & 0xff;
     instance->generic.battery_low = (instance->decoder.decode_data >> 10) & 1;
     instance->generic.btn = WS_NO_BTN;
-    uint16_t temp = (instance->decoder.decode_data >> 40) & 0xfff;
+    int16_t temp = (instance->decoder.decode_data >> 40) & 0xfff;
     /* Handle signed data */
     if(temp & 0x800) {
         temp |= 0xf000;
