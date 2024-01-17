@@ -152,8 +152,9 @@ This software is for experimental purposes only and is not meant for any illegal
 - [Faster Power Off Timeout (Thanks casimirextreme)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/issues/1020)
 - Added: [Tetris Modern v1.3 (By Alloy-Lou)](https://github.com/Alloy-Lou/all-the-plugins/tree/dev/base_pack/tetris_modern_game)
 - OFW: [NFC UI refactor #3361 (By RebornedBrain)](https://github.com/flipperdevices/flipperzero-firmware/pull/3361)
-- OFW PR: [NFC: Mf DESFire fixes #3367 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3367)
 - OFW PR: [NFC: Troika layout fixes #3365 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3365)
+- OFW: [NFC: Mf DESFire fixes #3367 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3367)
+- OFW: [NFC UI refactor #3369 (By RebornedBrain)](https://github.com/flipperdevices/flipperzero-firmware/pull/3369)
 
 <a name="release">
 
