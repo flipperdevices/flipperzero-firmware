@@ -63,8 +63,44 @@ void mfc_editor_scene_data_view_on_enter(void* context) {
         }
     } else if(block_view == MfcEditorBlockViewKeyA) {
         dialog_ex_set_header(dialog_ex, "Key A", 63, 3, AlignCenter, AlignTop);
+
+        if(mf_classic_is_key_found(mf_classic_data, instance->current_sector, MfClassicKeyTypeA)) {
+            MfClassicSectorTrailer* sector_trailer =
+                mf_classic_get_sector_trailer_by_sector(mf_classic_data, instance->current_sector);
+            MfClassicKey key_a = sector_trailer->key_a;
+            furi_string_printf(
+                instance->data_view_text,
+                "%02hhX %02hhX %02hhX %02hhX %02hhX %02hhX",
+                key_a.data[0],
+                key_a.data[1],
+                key_a.data[2],
+                key_a.data[3],
+                key_a.data[4],
+                key_a.data[5]);
+        } else {
+            furi_string_set(
+                instance->data_view_text, "Key A has not been found\nfor this sector.");
+        }
     } else if(block_view == MfcEditorBlockViewKeyB) {
         dialog_ex_set_header(dialog_ex, "Key B", 63, 3, AlignCenter, AlignTop);
+
+        if(mf_classic_is_key_found(mf_classic_data, instance->current_sector, MfClassicKeyTypeB)) {
+            MfClassicSectorTrailer* sector_trailer =
+                mf_classic_get_sector_trailer_by_sector(mf_classic_data, instance->current_sector);
+            MfClassicKey key_b = sector_trailer->key_b;
+            furi_string_printf(
+                instance->data_view_text,
+                "%02hhX %02hhX %02hhX %02hhX %02hhX %02hhX",
+                key_b.data[0],
+                key_b.data[1],
+                key_b.data[2],
+                key_b.data[3],
+                key_b.data[4],
+                key_b.data[5]);
+        } else {
+            furi_string_set(
+                instance->data_view_text, "Key B has not been found\nfor this sector.");
+        }
     } else if(block_view == MfcEditorBlockViewAccessBits) {
         dialog_ex_set_header(dialog_ex, "Access Bits", 63, 3, AlignCenter, AlignTop);
     } else if(block_view == MfcEditorBlockViewUserByte) {
