@@ -1,6 +1,6 @@
 #include <furi.h>
 #include "../minunit.h"
-#include <lfrfid/tools/bit_lib.h>
+#include <bit_lib/bit_lib.h>
 
 MU_TEST(test_bit_lib_increment_index) {
     uint32_t index = 0;
@@ -455,7 +455,7 @@ MU_TEST(test_bit_lib_num_to_bytes_be) {
     mu_assert_mem_eq(src, dest, sizeof(src[0]));
 
     bit_lib_num_to_bytes_be(0x0123456789ABCDEF, 4, dest);
-    mu_assert_mem_eq(src, dest, 4 * sizeof(src[0]));
+    mu_assert_mem_eq(src + 4, dest, 4 * sizeof(src[0]));
 
     bit_lib_num_to_bytes_be(0x0123456789ABCDEF, 8, dest);
     mu_assert_mem_eq(src, dest, 8 * sizeof(src[0]));
@@ -523,7 +523,7 @@ MU_TEST(test_bit_lib_bytes_to_num_bcd) {
     mu_assert_int_eq(true, is_bcd_res);
 
     res = bit_lib_bytes_to_num_bcd(src, 4, &is_bcd_res);
-    mu_assert_int_eq(01234567, res);
+    mu_assert_int_eq(1234567, res);
     mu_assert_int_eq(true, is_bcd_res);
 
     uint8_t digits[5] = {0x98, 0x76, 0x54, 0x32, 0x10};

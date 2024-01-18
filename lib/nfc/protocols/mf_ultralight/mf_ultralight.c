@@ -1,6 +1,6 @@
 #include "mf_ultralight.h"
 
-#include <lfrfid/tools/bit_lib.h>
+#include <bit_lib/bit_lib.h>
 #include <furi.h>
 
 #define MF_ULTRALIGHT_PROTOCOL_NAME "NTAG/Ultralight"

@@ -2,7 +2,7 @@
 
 #include <m-array.h>
 
-#include <lfrfid/tools/bit_lib.h>
+#include <bit_lib/bit_lib.h>
 #include <stream/stream.h>
 #include <stream/buffered_file_stream.h>
 
