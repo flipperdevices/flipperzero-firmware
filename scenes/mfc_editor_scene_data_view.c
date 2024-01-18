@@ -11,11 +11,12 @@ void mfc_editor_scene_data_view_on_enter(void* context) {
 
     const MfClassicData* mf_classic_data = instance->mf_classic_data;
     Iso14443_3aData* iso14443_3a_data = mf_classic_data->iso14443_3a_data;
+    
+    furi_string_reset(instance->data_view_text);
 
     if(block_view == MfcEditorBlockViewUID) {
         dialog_ex_set_header(dialog_ex, "UID", 63, 3, AlignCenter, AlignTop);
 
-        furi_string_set(instance->data_view_text, "");
         for(int i = 0; i < iso14443_3a_data->uid_len; i++) {
             furi_string_cat_printf(instance->data_view_text, "%02hhX ", iso14443_3a_data->uid[i]);
         }
@@ -41,7 +42,6 @@ void mfc_editor_scene_data_view_on_enter(void* context) {
         dialog_ex_set_header(dialog_ex, "Manufacturer Bytes", 63, 3, AlignCenter, AlignTop);
 
         if(mf_classic_is_block_read(mf_classic_data, 0)) {
-            furi_string_set(instance->data_view_text, "");
             // Skip BCC byte (not present on 7B UID cards)
             bool skip_byte = iso14443_3a_data->uid_len == 4;
             uint8_t byte_num = MF_CLASSIC_BLOCK_SIZE - iso14443_3a_data->uid_len - skip_byte;
@@ -50,9 +50,9 @@ void mfc_editor_scene_data_view_on_enter(void* context) {
                     instance->data_view_text, "%02hhX", mf_classic_data->block[0].data[i]);
                 // Go onto next line when halfway through
                 if(MF_CLASSIC_BLOCK_SIZE - i - 1 == byte_num / 2) {
-                    furi_string_cat(instance->data_view_text, "\n");
+                    furi_string_push_back(instance->data_view_text, '\n');
                 } else {
-                    furi_string_cat(instance->data_view_text, " ");
+                    furi_string_push_back(instance->data_view_text, ' ');
                 }
             }
             // Remove trailing space
