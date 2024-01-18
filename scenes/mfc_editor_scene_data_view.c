@@ -21,6 +21,22 @@ void mfc_editor_scene_data_view_on_enter(void* context) {
         }
         // Remove trailing space
         furi_string_trim(instance->data_view_text);
+    } else if(block_view == MfcEditorBlockViewBCC) {
+        dialog_ex_set_header(dialog_ex, "Block Check Character", 63, 3, AlignCenter, AlignTop);
+
+        uint8_t stored_bcc = mf_classic_data->block[0].data[4];
+        uint8_t calculated_bcc =
+            mfc_editor_calculate_uid_bcc(iso14443_3a_data->uid, iso14443_3a_data->uid_len);
+
+        furi_string_printf(
+            instance->data_view_text,
+            "Stored BCC: %02hhX\nActual BCC: %02hhX",
+            stored_bcc,
+            calculated_bcc);
+
+        if(stored_bcc != calculated_bcc) {
+            furi_string_cat(instance->data_view_text, "\n(Mismatch!)");
+        }
     } else if(block_view == MfcEditorBlockViewManufacturerBytes) {
         dialog_ex_set_header(dialog_ex, "Manufacturer Bytes", 63, 3, AlignCenter, AlignTop);
 

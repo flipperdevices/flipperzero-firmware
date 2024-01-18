@@ -6,6 +6,7 @@ enum SubmenuIndex {
 
     // Special options - Sector 0 only
     SubmenuIndexUID,
+    SubmenuIndexBCC,
     SubmenuIndexManufacturerBytes,
 
     // Special options - All sectors
@@ -48,6 +49,15 @@ void mfc_editor_scene_block_select_on_enter(void* context) {
             SubmenuIndexUID,
             mfc_editor_scene_block_select_submenu_callback,
             instance);
+        if(instance->mf_classic_data->iso14443_3a_data->uid_len == 4) {
+            // 7-byte UID cards don't store a BCC byte
+            submenu_add_item(
+                submenu,
+                "BCC",
+                SubmenuIndexBCC,
+                mfc_editor_scene_block_select_submenu_callback,
+                instance);
+        }
         submenu_add_item(
             submenu,
             "Manufacturer Bytes",
@@ -98,6 +108,8 @@ bool mfc_editor_scene_block_select_on_event(void* context, SceneManagerEvent eve
         MfcEditorBlockView block_view;
         if(event.event == SubmenuIndexUID) {
             block_view = MfcEditorBlockViewUID;
+        } else if(event.event == SubmenuIndexBCC) {
+            block_view = MfcEditorBlockViewBCC;
         } else if(event.event == SubmenuIndexManufacturerBytes) {
             block_view = MfcEditorBlockViewManufacturerBytes;
         } else if(event.event == SubmenuIndexKeyA) {

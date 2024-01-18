@@ -82,6 +82,7 @@ typedef enum {
 
     // Special options - Sector 0 only
     MfcEditorBlockViewUID,
+    MfcEditorBlockViewBCC,
     MfcEditorBlockViewManufacturerBytes,
 
     // Special options - All sectors
@@ -91,6 +92,12 @@ typedef enum {
     MfcEditorBlockViewUserByte,
 } MfcEditorBlockView;
 
+// Main loading methods
+
 MfcEditorPromptResponse mfc_editor_prompt_load_file(MfcEditorApp* instance);
 
 MfcEditorPromptResponse mfc_editor_load_file(MfcEditorApp* instance, FuriString* file_path);
+
+// Helper methods
+
+uint8_t mfc_editor_calculate_uid_bcc(uint8_t* uid, uint8_t uid_len);
