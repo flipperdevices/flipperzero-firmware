@@ -16,6 +16,7 @@ typedef struct App {
     Widget* widget;
     AppState* state;
     FuriThread* read_thread;
+    NotificationApp* notification;
 } App;
 
 App* app_alloc();

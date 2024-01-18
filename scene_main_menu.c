@@ -5,6 +5,13 @@
 
 /* main menu scene */
 
+/*
+Read -> reads a code sent by a digimon -> save UI
+Read After Send -> Select a code -> Sends the code and then reads the response -> save UI
+Send -> load UI -> send UI (either send after OK if first, or wait for code and then send if second)
+USB Serial -> Activate serial mode
+*/
+
 /* 
 Setup our scene widgets and create callback hooks 
 */
@@ -12,9 +19,9 @@ void fcom_menu_callback(void* context, uint32_t index);
 void fcom_main_menu_scene_on_enter(void* context) {
     App* app = context;
     submenu_reset(app->submenu);
-    submenu_set_header(app->submenu, "Sensors");
-    submenu_add_item(
-        app->submenu, "HC-SR04", MainMenuSelectionHCSR04, fcom_menu_callback, app);
+    submenu_set_header(app->submenu, "F-Com");
+    submenu_add_item(app->submenu, "Read", MainMenuSelectionHCSR04, fcom_menu_callback, app);
+    submenu_add_item(app->submenu, "Saved", MainMenuSelectionHCSR04, fcom_menu_callback, app);
     /*
     submenu_add_item(
         app->submenu, "4-bar resistor", ResistorsMainMenuSelectionR4, resistors_menu_callback, app);

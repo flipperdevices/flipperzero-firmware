@@ -2,6 +2,12 @@
 
 App* app_alloc() {
     App* app = malloc(sizeof(App));
+
+    app->notification = furi_record_open(RECORD_NOTIFICATION);
+    
+    //Turn backlight on, believe me this makes testing your app easier
+    notification_message(app->notification, &sequence_display_backlight_on);
+
     app->scene_manager = scene_manager_alloc(&fcom_scene_manager_handlers, app);
     app->view_dispatcher = view_dispatcher_alloc();
     view_dispatcher_enable_queue(app->view_dispatcher);
@@ -37,6 +43,8 @@ void app_quit(App* app) {
 
 void app_free(App* app) {
     furi_assert(app);
+
+    app->notification = NULL;
 
     free(app->state);
 
