@@ -26,10 +26,10 @@ void mfc_editor_scene_data_view_on_enter(void* context) {
 
         if(mf_classic_is_block_read(mf_classic_data, 0)) {
             furi_string_set(instance->data_view_text, "");
-            uint8_t byte_num = MF_CLASSIC_BLOCK_SIZE - iso14443_3a_data->uid_len - 1;
-            // +1 to ignore BCC byte
-            // TODO: should we do this for 4K?
-            for(int i = iso14443_3a_data->uid_len + 1; i < MF_CLASSIC_BLOCK_SIZE; i++) {
+            // Skip BCC byte (not present on 7B UID cards)
+            bool skip_byte = iso14443_3a_data->uid_len == 4;
+            uint8_t byte_num = MF_CLASSIC_BLOCK_SIZE - iso14443_3a_data->uid_len - skip_byte;
+            for(int i = iso14443_3a_data->uid_len + skip_byte; i < MF_CLASSIC_BLOCK_SIZE; i++) {
                 furi_string_cat_printf(
                     instance->data_view_text, "%02hhX", mf_classic_data->block[0].data[i]);
                 // Go onto next line when halfway through
