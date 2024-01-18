@@ -47,8 +47,7 @@ struct MfcEditorApp {
     Popup* popup;
     DialogEx* dialog_ex;
 
-    NfcDevice* nfc_device;
-    const MfClassicData* mf_classic_data;
+    MfClassicData* mf_classic_data;
 
     FuriString* file_path;
 

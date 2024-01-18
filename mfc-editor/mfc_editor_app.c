@@ -40,7 +40,7 @@ MfcEditorApp* mfc_editor_app_alloc() {
 
     instance->dialogs = furi_record_open(RECORD_DIALOGS);
 
-    instance->nfc_device = nfc_device_alloc();
+    instance->mf_classic_data = mf_classic_alloc();
     instance->file_path = furi_string_alloc_set(NFC_APP_FOLDER);
 
     instance->data_view_header = furi_string_alloc();
@@ -87,7 +87,7 @@ void mfc_editor_app_free(MfcEditorApp* instance) {
     furi_record_close(RECORD_DIALOGS);
     instance->dialogs = NULL;
 
-    nfc_device_free(instance->nfc_device);
+    mf_classic_free(instance->mf_classic_data);
     furi_string_free(instance->file_path);
 
     furi_string_free(instance->data_view_header);
@@ -102,17 +102,22 @@ MfcEditorPromptResponse mfc_editor_load_file(MfcEditorApp* instance, FuriString*
 
     MfcEditorPromptResponse result = MfcEditorPromptResponseSuccess;
 
-    if(!nfc_device_load(instance->nfc_device, furi_string_get_cstr(file_path))) {
+    NfcDevice* nfc_device = nfc_device_alloc();
+
+    if(!nfc_device_load(nfc_device, furi_string_get_cstr(file_path))) {
         result = MfcEditorPromptResponseFailure;
         dialog_message_show_storage_error(instance->dialogs, "Cannot load\nkey file");
     } else {
-        if(nfc_device_get_protocol(instance->nfc_device) == NfcProtocolMfClassic) {
-            instance->mf_classic_data =
-                nfc_device_get_data(instance->nfc_device, NfcProtocolMfClassic);
+        if(nfc_device_get_protocol(nfc_device) == NfcProtocolMfClassic) {
+            const MfClassicData* mf_classic_data =
+                nfc_device_get_data(nfc_device, NfcProtocolMfClassic);
+            mf_classic_copy(instance->mf_classic_data, mf_classic_data);
         } else {
             result = MfcEditorPromptResponseNotMfClassic;
         }
     }
+
+    nfc_device_free(nfc_device);
 
     return result;
 }
