@@ -447,6 +447,95 @@ MU_TEST(test_bit_lib_crc16) {
     mu_assert_int_eq(0x31C3, bit_lib_crc16(data, data_size, 0x1021, 0x0000, false, false, 0x0000));
 }
 
+MU_TEST(test_bit_lib_num_to_bytes_be) {
+    uint8_t src[8] = {0x01, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF};
+    uint8_t dest[8];
+
+    bit_lib_num_to_bytes_be(0x01, 1, dest);
+    mu_assert_mem_eq(src, dest, sizeof(src[0]));
+
+    bit_lib_num_to_bytes_be(0x0123456789ABCDEF, 4, dest);
+    mu_assert_mem_eq(src, dest, 4 * sizeof(src[0]));
+
+    bit_lib_num_to_bytes_be(0x0123456789ABCDEF, 8, dest);
+    mu_assert_mem_eq(src, dest, 8 * sizeof(src[0]));
+
+    bit_lib_num_to_bytes_be(bit_lib_bytes_to_num_be(src, 8), 8, dest);
+    mu_assert_mem_eq(src, dest, 8 * sizeof(src[0]));
+}
+
+MU_TEST(test_bit_lib_num_to_bytes_le) {
+    uint8_t dest[8];
+
+    uint8_t n2b_le_expected_1[] = {0x01};
+    bit_lib_num_to_bytes_le(0x01, 1, dest);
+    mu_assert_mem_eq(n2b_le_expected_1, dest, sizeof(n2b_le_expected_1[0]));
+
+    uint8_t n2b_le_expected_2[] = {0xEF, 0xCD, 0xAB, 0x89};
+    bit_lib_num_to_bytes_le(0x0123456789ABCDEF, 4, dest);
+    mu_assert_mem_eq(n2b_le_expected_2, dest, 4 * sizeof(n2b_le_expected_2[0]));
+
+    uint8_t n2b_le_expected_3[] = {0xEF, 0xCD, 0xAB, 0x89, 0x67, 0x45, 0x23, 0x01};
+    bit_lib_num_to_bytes_le(0x0123456789ABCDEF, 8, dest);
+    mu_assert_mem_eq(n2b_le_expected_3, dest, 8 * sizeof(n2b_le_expected_3[0]));
+
+    bit_lib_num_to_bytes_le(bit_lib_bytes_to_num_le(n2b_le_expected_3, 8), 8, dest);
+    mu_assert_mem_eq(n2b_le_expected_3, dest, 8 * sizeof(n2b_le_expected_3[0]));
+}
+
+MU_TEST(test_bit_lib_bytes_to_num_be) {
+    uint8_t src[8] = {0x01, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF};
+    uint64_t res;
+
+    res = bit_lib_bytes_to_num_be(src, 1);
+    mu_assert_int_eq(0x01, res);
+
+    res = bit_lib_bytes_to_num_be(src, 4);
+    mu_assert_int_eq(0x01234567, res);
+
+    res = bit_lib_bytes_to_num_be(src, 8);
+    uint64_t expected = 0x0123456789ABCDEF;
+    mu_assert_mem_eq(&expected, &res, sizeof(expected));
+}
+
+MU_TEST(test_bit_lib_bytes_to_num_le) {
+    uint8_t src[8] = {0x01, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF};
+    uint64_t res;
+
+    res = bit_lib_bytes_to_num_le(src, 1);
+    mu_assert_int_eq(0x01, res);
+
+    res = bit_lib_bytes_to_num_le(src, 4);
+    mu_assert_int_eq(0x67452301, res);
+
+    res = bit_lib_bytes_to_num_le(src, 8);
+    uint64_t expected = 0xEFCDAB8967452301;
+    mu_assert_mem_eq(&expected, &res, sizeof(expected));
+}
+
+MU_TEST(test_bit_lib_bytes_to_num_bcd) {
+    uint8_t src[8] = {0x01, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF};
+    uint64_t res;
+    bool is_bcd_res;
+
+    res = bit_lib_bytes_to_num_bcd(src, 1, &is_bcd_res);
+    mu_assert_int_eq(01, res);
+    mu_assert_int_eq(true, is_bcd_res);
+
+    res = bit_lib_bytes_to_num_bcd(src, 4, &is_bcd_res);
+    mu_assert_int_eq(01234567, res);
+    mu_assert_int_eq(true, is_bcd_res);
+
+    uint8_t digits[5] = {0x98, 0x76, 0x54, 0x32, 0x10};
+    uint64_t expected = 9876543210;
+    res = bit_lib_bytes_to_num_bcd(digits, 5, &is_bcd_res);
+    mu_assert_mem_eq(&expected, &res, sizeof(expected));
+    mu_assert_int_eq(true, is_bcd_res);
+
+    res = bit_lib_bytes_to_num_bcd(src, 8, &is_bcd_res);
+    mu_assert_int_eq(false, is_bcd_res);
+}
+
 MU_TEST_SUITE(test_bit_lib) {
     MU_RUN_TEST(test_bit_lib_increment_index);
     MU_RUN_TEST(test_bit_lib_is_set);
@@ -465,6 +554,11 @@ MU_TEST_SUITE(test_bit_lib) {
     MU_RUN_TEST(test_bit_lib_get_bit_count);
     MU_RUN_TEST(test_bit_lib_reverse_16_fast);
     MU_RUN_TEST(test_bit_lib_crc16);
+    MU_RUN_TEST(test_bit_lib_num_to_bytes_be);
+    MU_RUN_TEST(test_bit_lib_num_to_bytes_le);
+    MU_RUN_TEST(test_bit_lib_bytes_to_num_be);
+    MU_RUN_TEST(test_bit_lib_bytes_to_num_le);
+    MU_RUN_TEST(test_bit_lib_bytes_to_num_bcd);
 }
 
 int run_minunit_test_bit_lib() {

@@ -3,7 +3,7 @@
 #include <nfc/protocols/nfc_listener_base.h>
 
 #include <nfc/helpers/iso14443_crc.h>
-#include <nfc/helpers/nfc_util.h>
+#include <lfrfid/tools/bit_lib.h>
 
 #include <furi.h>
 #include <furi_hal_random.h>
@@ -88,7 +88,7 @@ static MfClassicListenerCommand mf_classic_listener_auth_first_part_handler(
             command = MfClassicListenerCommandProcessed;
         } else {
             uint8_t key_stream[4] = {};
-            nfc_util_num2bytes(nt_num ^ cuid, sizeof(uint32_t), key_stream);
+            bit_lib_num_to_bytes_be(nt_num ^ cuid, sizeof(uint32_t), key_stream);
             bit_buffer_copy_bytes(
                 instance->tx_plain_buffer, instance->auth_context.nt.data, sizeof(MfClassicNt));
             crypto1_encrypt(
@@ -161,7 +161,7 @@ static MfClassicListenerCommand
         }
 
         uint32_t at_num = prng_successor(nt_num, 96);
-        nfc_util_num2bytes(at_num, sizeof(uint32_t), instance->auth_context.at.data);
+        bit_lib_num_to_bytes_be(at_num, sizeof(uint32_t), instance->auth_context.at.data);
         bit_buffer_copy_bytes(
             instance->tx_plain_buffer, instance->auth_context.at.data, sizeof(MfClassicAr));
         crypto1_encrypt(

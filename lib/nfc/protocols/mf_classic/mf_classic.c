@@ -3,7 +3,7 @@
 #include <furi/furi.h>
 #include <toolbox/hex.h>
 
-#include <lib/nfc/helpers/nfc_util.h>
+#include <lib/lfrfid/tools/bit_lib.h>
 
 #define MF_CLASSIC_PROTOCOL_NAME "Mifare Classic"
 
@@ -475,7 +475,7 @@ void mf_classic_set_key_found(
     uint8_t key_arr[6] = {};
     MfClassicSectorTrailer* sec_trailer =
         mf_classic_get_sector_trailer_by_sector(data, sector_num);
-    nfc_util_num2bytes(key, 6, key_arr);
+    bit_lib_num_to_bytes_be(key, 6, key_arr);
     if(key_type == MfClassicKeyTypeA) {
         memcpy(sec_trailer->key_a.data, key_arr, sizeof(MfClassicKey));
         FURI_BIT_SET(data->key_a_mask, sector_num);

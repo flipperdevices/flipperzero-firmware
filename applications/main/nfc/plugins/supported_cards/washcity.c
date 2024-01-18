@@ -24,7 +24,7 @@
 #include <flipper_application/flipper_application.h>
 
 #include <nfc/nfc_device.h>
-#include <nfc/helpers/nfc_util.h>
+#include <lfrfid/tools/bit_lib.h>
 #include <nfc/protocols/mf_classic/mf_classic_poller_sync.h>
 
 #define TAG "WashCity"
@@ -63,7 +63,8 @@ static bool washcity_verify(Nfc* nfc) {
         FURI_LOG_D(TAG, "Verifying sector %u", ticket_sector_number);
 
         MfClassicKey key = {0};
-        nfc_util_num2bytes(washcity_1k_keys[ticket_sector_number].a, COUNT_OF(key.data), key.data);
+        bit_lib_num_to_bytes_be(
+            washcity_1k_keys[ticket_sector_number].a, COUNT_OF(key.data), key.data);
 
         MfClassicAuthContext auth_context;
         MfClassicError error = mf_classic_poller_sync_auth(
@@ -101,9 +102,11 @@ static bool washcity_read(Nfc* nfc, NfcDevice* device) {
             .key_b_mask = 0,
         };
         for(size_t i = 0; i < mf_classic_get_total_sectors_num(data->type); i++) {
-            nfc_util_num2bytes(washcity_1k_keys[i].a, sizeof(MfClassicKey), keys.key_a[i].data);
+            bit_lib_num_to_bytes_be(
+                washcity_1k_keys[i].a, sizeof(MfClassicKey), keys.key_a[i].data);
             FURI_BIT_SET(keys.key_a_mask, i);
-            nfc_util_num2bytes(washcity_1k_keys[i].b, sizeof(MfClassicKey), keys.key_b[i].data);
+            bit_lib_num_to_bytes_be(
+                washcity_1k_keys[i].b, sizeof(MfClassicKey), keys.key_b[i].data);
             FURI_BIT_SET(keys.key_b_mask, i);
         }
 
