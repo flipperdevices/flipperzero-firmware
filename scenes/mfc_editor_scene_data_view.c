@@ -11,7 +11,7 @@ void mfc_editor_scene_data_view_on_enter(void* context) {
 
     const MfClassicData* mf_classic_data = instance->mf_classic_data;
     Iso14443_3aData* iso14443_3a_data = mf_classic_data->iso14443_3a_data;
-    
+
     furi_string_reset(instance->data_view_text);
 
     if(block_view == MfcEditorBlockViewUID) {
@@ -29,14 +29,21 @@ void mfc_editor_scene_data_view_on_enter(void* context) {
         uint8_t calculated_bcc =
             mfc_editor_calculate_uid_bcc(iso14443_3a_data->uid, iso14443_3a_data->uid_len);
 
-        furi_string_printf(
-            instance->data_view_text,
-            "Stored BCC: %02hhX\nActual BCC: %02hhX",
-            stored_bcc,
-            calculated_bcc);
+        if(mf_classic_is_block_read(mf_classic_data, 0)) {
+            furi_string_printf(
+                instance->data_view_text,
+                "Stored BCC: %02hhX\nActual BCC: %02hhX",
+                stored_bcc,
+                calculated_bcc);
 
-        if(stored_bcc != calculated_bcc) {
-            furi_string_cat(instance->data_view_text, "\n(Mismatch!)");
+            if(stored_bcc != calculated_bcc) {
+                furi_string_cat(instance->data_view_text, "\n(Mismatch!)");
+            }
+        } else {
+            furi_string_printf(
+                instance->data_view_text,
+                "Actual BCC: %02hhX\nStored BCC is unavailable\nas Block 0 has not been read.",
+                calculated_bcc);
         }
     } else if(block_view == MfcEditorBlockViewManufacturerBytes) {
         dialog_ex_set_header(dialog_ex, "Manufacturer Bytes", 63, 3, AlignCenter, AlignTop);
