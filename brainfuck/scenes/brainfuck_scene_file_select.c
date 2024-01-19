@@ -21,6 +21,7 @@ void brainfuck_scene_file_select_on_enter(void* context) {
     } else {
         scene_manager_search_and_switch_to_previous_scene(app->scene_manager, brainfuckSceneStart);
     }
+    furi_string_free(path);
 }
 
 bool brainfuck_scene_file_select_on_event(void* context, SceneManagerEvent event) {
