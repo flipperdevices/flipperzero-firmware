@@ -3,16 +3,16 @@
 #include <gui/elements.h>
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
-#include <furi_hal_uart.h>
+#include <furi_hal_serial_control.h>
+#include <furi_hal_serial.h>
 #include <string.h>
 #include <stdio.h>
-
-#define FLIPPERZERO_SERIAL_BAUD 115200
 
 typedef enum ESerialCommand { ESerialCommand_Send } ESerialCommand;
 
 struct SendView {
     View* view;
+    FuriHalSerialHandle* serial_handle;
 };
 
 typedef struct {
@@ -26,7 +26,7 @@ static void Shake(void) {
     furi_record_close(RECORD_NOTIFICATION);
 }
 
-void send_serial_command_send(ESerialCommand command) {
+void send_serial_command_send(FuriHalSerialHandle* serial_handle, ESerialCommand command) {
     uint8_t data[1] = {0};
 
     char name[10] = "send";
@@ -40,7 +40,7 @@ void send_serial_command_send(ESerialCommand command) {
             return;
         };
 
-        furi_hal_uart_tx(FuriHalUartIdUSART1, data, 1);
+        furi_hal_serial_tx(serial_handle, data, 1);
     }
 }
 
@@ -72,7 +72,7 @@ static void send_view_process(SendView* send_view, InputEvent* event) {
                 } else if(event->key == InputKeyRight) {
                     model->right_pressed = true;
                     Shake();
-                    send_serial_command_send(ESerialCommand_Send);
+                    send_serial_command_send(send_view->serial_handle, ESerialCommand_Send);
                 } else if(event->key == InputKeyOk) {
                 } else if(event->key == InputKeyBack) {
                 }
@@ -107,14 +107,14 @@ static bool send_view_input_callback(InputEvent* event, void* context) {
     return consumed;
 }
 
-SendView* send_view_alloc() {
+SendView* send_view_alloc(FuriHalSerialHandle* serial_handle) {
     SendView* send_view = malloc(sizeof(SendView));
     send_view->view = view_alloc();
+    send_view->serial_handle = serial_handle;
     view_set_context(send_view->view, send_view);
     view_allocate_model(send_view->view, ViewModelTypeLocking, sizeof(SendViewModel));
     view_set_draw_callback(send_view->view, send_view_draw_callback);
     view_set_input_callback(send_view->view, send_view_input_callback);
-    furi_hal_uart_set_br(FuriHalUartIdUSART1, FLIPPERZERO_SERIAL_BAUD);
 
     return send_view;
 }

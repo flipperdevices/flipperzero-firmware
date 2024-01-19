@@ -12,6 +12,8 @@
 #include <gui/modules/text_input.h>
 #include <gui/modules/variable_item_list.h>
 
+#define UART_CH (FuriHalSerialIdUsart)
+
 #define NUM_MENU_ITEMS (11)
 
 #define WIFI_deauther_TEXT_BOX_STORE_SIZE (4096)

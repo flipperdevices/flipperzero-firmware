@@ -55,8 +55,8 @@ Settings* load_settings() {
     if(storage_common_stat(storage, CONFIG_FILE_PATH, NULL) != FSE_OK) {
         if(flipper_format_file_open_new(file, CONFIG_FILE_PATH)) {
             save_settings_file(file, settings);
+            flipper_format_file_close(file);
         }
-        flipper_format_file_close(file);
     } else {
         if(flipper_format_file_open_existing(file, CONFIG_FILE_PATH)) {
             uint32_t value;
@@ -78,8 +78,8 @@ Settings* load_settings() {
                     strcpy(settings->save_event, furi_string_get_cstr(text_event_value));
                 }
             }
+            flipper_format_file_close(file);
         }
-        flipper_format_file_close(file);
     }
 
     furi_string_free(text_ssid_value);
@@ -91,7 +91,10 @@ Settings* load_settings() {
     return settings;
 }
 
-void send_serial_command_config(ESerialCommand command, Settings* settings) {
+void send_serial_command_config(
+    FuriHalSerialHandle* serial_handle,
+    ESerialCommand command,
+    Settings* settings) {
     uint8_t data[1] = {0};
 
     char config_tmp[100];
@@ -126,7 +129,7 @@ void send_serial_command_config(ESerialCommand command, Settings* settings) {
             return;
         }
 
-        furi_hal_uart_tx(FuriHalUartIdUSART1, data, 1);
+        furi_hal_serial_tx(serial_handle, data, 1);
     }
 }
 
@@ -155,6 +158,10 @@ VirtualButtonApp* ifttt_virtual_button_app_alloc(uint32_t first_scene) {
     app->gui = furi_record_open(RECORD_GUI);
     app->power = furi_record_open(RECORD_POWER);
 
+    app->serial_handle = furi_hal_serial_control_acquire(FuriHalSerialIdUsart);
+    furi_check(app->serial_handle);
+    furi_hal_serial_init(app->serial_handle, FLIPPERZERO_SERIAL_BAUD);
+
     // View dispatcher
     app->view_dispatcher = view_dispatcher_alloc();
     app->scene_manager = scene_manager_alloc(&virtual_button_scene_handlers, app);
@@ -169,7 +176,7 @@ VirtualButtonApp* ifttt_virtual_button_app_alloc(uint32_t first_scene) {
     view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
 
     // Views
-    app->sen_view = send_view_alloc();
+    app->sen_view = send_view_alloc(app->serial_handle);
     view_dispatcher_add_view(
         app->view_dispatcher, VirtualButtonAppViewSendView, send_view_get_view(app->sen_view));
 
@@ -212,6 +219,9 @@ void ifttt_virtual_button_app_free(VirtualButtonApp* app) {
     furi_record_close(RECORD_POWER);
     furi_record_close(RECORD_GUI);
 
+    furi_hal_serial_deinit(app->serial_handle);
+    furi_hal_serial_control_release(app->serial_handle);
+
     free(app);
 }
 
@@ -228,7 +238,7 @@ int32_t ifttt_virtual_button_app(void* p) {
     uint32_t first_scene = VirtualButtonAppSceneStart;
     VirtualButtonApp* app = ifttt_virtual_button_app_alloc(first_scene);
     memcpy(&app->settings, load_settings(), sizeof(Settings));
-    send_serial_command_config(ESerialCommand_Config, &(app->settings));
+    send_serial_command_config(app->serial_handle, ESerialCommand_Config, &(app->settings));
 
     view_dispatcher_run(app->view_dispatcher);
     ifttt_virtual_button_app_free(app);

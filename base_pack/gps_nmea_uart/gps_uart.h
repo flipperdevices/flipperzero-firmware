@@ -3,6 +3,8 @@
 #include <furi_hal.h>
 #include <notification/notification_messages.h>
 
+#define UART_CH (FuriHalSerialIdUsart)
+
 #define RX_BUF_SIZE 1024
 
 static const int gps_baudrates[6] = {4800, 9600, 19200, 38400, 57600, 115200};
@@ -25,17 +27,27 @@ typedef struct {
 
 typedef enum { KNOTS, KPH, MPH, INVALID } SpeedUnit;
 
+typedef enum {
+    CHANGE_BAUDRATE,
+    CHANGE_BACKLIGHT,
+    CHANGE_DEEPSLEEP,
+    CHANGE_SPEEDUNIT,
+    NORMAL
+} ViewState;
+
 typedef struct {
     FuriMutex* mutex;
     FuriThread* thread;
     FuriStreamBuffer* rx_stream;
     uint8_t rx_buf[RX_BUF_SIZE];
+    FuriHalSerialHandle* serial_handle;
 
     NotificationApp* notifications;
     uint32_t baudrate;
-    bool changing_baudrate;
-    bool backlight_on;
+    bool backlight_enabled;
+    bool deep_sleep_enabled;
     SpeedUnit speed_units;
+    ViewState view_state;
 
     GpsStatus status;
 } GpsUart;

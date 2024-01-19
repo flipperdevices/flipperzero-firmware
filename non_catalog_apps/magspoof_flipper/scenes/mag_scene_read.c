@@ -7,9 +7,10 @@
 
 #define TAG "MagSceneRead"
 
-void uart_callback(UartIrqEvent event, uint8_t data, void* context) {
+void uart_callback(FuriHalSerialHandle* handle, FuriHalSerialRxEvent event, void* context) {
     Mag* mag = context;
-    if(event == UartIrqEventRXNE) {
+    if(event == FuriHalSerialRxEventData) {
+        uint8_t data = furi_hal_serial_async_rx(handle);
         furi_stream_buffer_send(mag->uart_rx_stream, &data, 1, 0);
         furi_thread_flags_set(furi_thread_get_id(mag->uart_rx_thread), WorkerEvtRxDone);
     }
@@ -93,10 +94,10 @@ void mag_scene_read_on_enter(void* context) {
     update_widgets(mag);
 
     // Initialize UART
-    // furi_hal_console_disable();
-    furi_hal_uart_deinit(FuriHalUartIdUSART1);
-    furi_hal_uart_init(FuriHalUartIdUSART1, 9600);
-    furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, uart_callback, mag);
+    mag->serial_handle = furi_hal_serial_control_acquire(FuriHalSerialIdUsart);
+    furi_check(mag->serial_handle);
+    furi_hal_serial_init(mag->serial_handle, 9600);
+    furi_hal_serial_async_rx_start(mag->serial_handle, uart_callback, mag, false);
     FURI_LOG_D(TAG, "UART initialized");
 
     mag->uart_rx_thread = furi_thread_alloc();
@@ -177,9 +178,8 @@ void mag_scene_read_on_exit(void* context) {
 
     furi_string_free(mag->uart_text_box_store);
 
-    furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, NULL, NULL);
-    furi_hal_uart_deinit(FuriHalUartIdUSART1);
-    // furi_hal_console_enable();
+    furi_hal_serial_deinit(mag->serial_handle);
+    furi_hal_serial_control_release(mag->serial_handle);
 
     notification_message(mag->notifications, &sequence_blink_stop);
 }
