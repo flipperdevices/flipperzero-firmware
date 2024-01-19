@@ -18,7 +18,7 @@ void mfc_editor_scene_data_view_on_enter(void* context) {
         dialog_ex_set_header(dialog_ex, "UID", 63, 3, AlignCenter, AlignTop);
 
         for(int i = 0; i < iso14443_3a_data->uid_len; i++) {
-            furi_string_cat_printf(instance->data_view_text, "%02hhX ", iso14443_3a_data->uid[i]);
+            furi_string_cat_printf(instance->data_view_text, "%02X ", iso14443_3a_data->uid[i]);
         }
         // Remove trailing space
         furi_string_trim(instance->data_view_text);
@@ -32,7 +32,7 @@ void mfc_editor_scene_data_view_on_enter(void* context) {
         if(mf_classic_is_block_read(mf_classic_data, 0)) {
             furi_string_printf(
                 instance->data_view_text,
-                "Stored BCC: %02hhX\nActual BCC: %02hhX",
+                "Stored BCC: %02X\nActual BCC: %02X",
                 stored_bcc,
                 calculated_bcc);
 
@@ -42,7 +42,7 @@ void mfc_editor_scene_data_view_on_enter(void* context) {
         } else {
             furi_string_printf(
                 instance->data_view_text,
-                "Actual BCC: %02hhX\nStored BCC is unavailable\nas Block 0 has not been read.",
+                "Actual BCC: %02X\nStored BCC is unavailable\nas Block 0 has not been read.",
                 calculated_bcc);
         }
     } else if(block_view == MfcEditorBlockViewManufacturerBytes) {
@@ -54,7 +54,7 @@ void mfc_editor_scene_data_view_on_enter(void* context) {
             uint8_t byte_num = MF_CLASSIC_BLOCK_SIZE - iso14443_3a_data->uid_len - skip_byte;
             for(int i = iso14443_3a_data->uid_len + skip_byte; i < MF_CLASSIC_BLOCK_SIZE; i++) {
                 furi_string_cat_printf(
-                    instance->data_view_text, "%02hhX", mf_classic_data->block[0].data[i]);
+                    instance->data_view_text, "%02X", mf_classic_data->block[0].data[i]);
                 // Go onto next line when halfway through
                 if(MF_CLASSIC_BLOCK_SIZE - i - 1 == byte_num / 2) {
                     furi_string_push_back(instance->data_view_text, '\n');
@@ -77,7 +77,7 @@ void mfc_editor_scene_data_view_on_enter(void* context) {
             MfClassicKey key_a = sector_trailer->key_a;
             furi_string_printf(
                 instance->data_view_text,
-                "%02hhX %02hhX %02hhX %02hhX %02hhX %02hhX",
+                "%02X %02X %02X %02X %02X %02X",
                 key_a.data[0],
                 key_a.data[1],
                 key_a.data[2],
@@ -97,7 +97,7 @@ void mfc_editor_scene_data_view_on_enter(void* context) {
             MfClassicKey key_b = sector_trailer->key_b;
             furi_string_printf(
                 instance->data_view_text,
-                "%02hhX %02hhX %02hhX %02hhX %02hhX %02hhX",
+                "%02X %02X %02X %02X %02X %02X",
                 key_b.data[0],
                 key_b.data[1],
                 key_b.data[2],
@@ -113,7 +113,7 @@ void mfc_editor_scene_data_view_on_enter(void* context) {
     } else if(block_view == MfcEditorBlockViewUserByte) {
         dialog_ex_set_header(dialog_ex, "User Byte", 63, 3, AlignCenter, AlignTop);
     } else {
-        furi_string_printf(instance->data_view_header, "Block %hhu Data", instance->current_block);
+        furi_string_printf(instance->data_view_header, "Block %u Data", instance->current_block);
         dialog_ex_set_header(
             dialog_ex,
             furi_string_get_cstr(instance->data_view_header),

@@ -14,7 +14,7 @@ void mfc_editor_scene_sector_select_on_enter(void* context) {
 
     FuriString* label = furi_string_alloc();
     for(uint8_t i = 0; i < sectors_num; i++) {
-        furi_string_printf(label, "Sector %hhu", i);
+        furi_string_printf(label, "Sector %u", i);
         submenu_add_item(
             submenu,
             furi_string_get_cstr(label),
