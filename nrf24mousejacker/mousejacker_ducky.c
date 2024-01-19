@@ -66,7 +66,8 @@ MJDuckyKey mj_ducky_keys[] = {{" ", 44, 0},         {"!", 30, 2},          {"\""
                               {"F4", 61, 0},        {"F6", 63, 0},         {"F8", 65, 0},
                               {"DOWNARROW", 81, 0}, {"DELETE", 42, 0},     {"RIGHT", 79, 0},
                               {"F3", 60, 0},        {"DOWN", 81, 0},       {"DEL", 76, 0},
-                              {"END", 77, 0},       {"INSERT", 73, 0},     {"F5", 62, 0},
+                              {"END", 77, 0},       {"INSERT", 73, 0},
+                              {"NUMLOCK", 83, 0},     {"F5", 62, 0},
                               {"LEFTARROW", 80, 0}, {"RIGHTARROW", 79, 0}, {"PAGEDOWN", 78, 0},
                               {"PAUSE", 72, 0},     {"SPACE", 44, 0},      {"UPARROW", 82, 0},
                               {"F11", 68, 0},       {"F7", 64, 0},         {"UP", 82, 0},
@@ -419,6 +420,10 @@ static bool mj_process_ducky_line(
         return true;
     } else if(strncmp(line_tmp, "TAB", strlen("TAB")) == 0) {
         if(!mj_get_ducky_key("TAB", 3, &dk)) return false;
+        send_hid_packet(handle, addr, addr_size, rate, dk.mod, dk.hid, plugin_state);
+        return true;
+    } else if(strncmp(line_tmp, "NUMLOCK", strlen("NUMLOCK")) == 0) {
+        if(!mj_get_ducky_key("NUMLOCK", 7, &dk)) return false;
         send_hid_packet(handle, addr, addr_size, rate, dk.mod, dk.hid, plugin_state);
         return true;
     }
