@@ -166,7 +166,7 @@ MU_TEST_SUITE(test_datetimelib_datetime_to_timestamp_suite) {
     MU_RUN_TEST(test_datetimelib_datetime_to_timestamp_max);
 }
 
-int run_minunit_test_datetime() {
+int run_minunit_test_datetimelib() {
     MU_RUN_SUITE(test_datetimelib_timestamp_to_datetime_suite);
     MU_RUN_SUITE(test_datetimelib_datetime_to_timestamp_suite);
     MU_RUN_SUITE(test_datetimelib_validate_datetime);
