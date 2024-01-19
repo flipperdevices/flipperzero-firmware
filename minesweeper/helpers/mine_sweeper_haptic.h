@@ -13,5 +13,4 @@ void mine_sweeper_play_lose_bump(void* context);
 
 void mine_sweeper_play_win_bump(void* context);
 
-
 #endif

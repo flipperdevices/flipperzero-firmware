@@ -14,15 +14,15 @@
 #include "../helpers/mine_sweeper_speaker.h"
 
 // MAX TILES ALLOWED
-#define MINESWEEPER_BOARD_MAX_TILES  (1<<10)
+#define MINESWEEPER_BOARD_MAX_TILES (1 << 10)
 
 // These defines represent how many tiles
-// can be visually representen on the screen 
+// can be visually representen on the screen
 // due to icon sizes
 #define MINESWEEPER_SCREEN_TILE_HEIGHT 7
 #define MINESWEEPER_SCREEN_TILE_WIDTH 16
 
-#define MS_DEBUG_TAG  "Mine Sweeper Module/View"
+#define MS_DEBUG_TAG "Mine Sweeper Module/View"
 
 #ifdef __cplusplus
 extern "C" {
@@ -46,7 +46,11 @@ typedef bool (*GameScreenInputCallback)(InputEvent* event, void* context);
  *
  * @return      MineSweeperGameScreen* instance 
  */
-MineSweeperGameScreen* mine_sweeper_game_screen_alloc(uint8_t width, uint8_t height, uint8_t difficulty, bool ensure_solvable);
+MineSweeperGameScreen* mine_sweeper_game_screen_alloc(
+    uint8_t width,
+    uint8_t height,
+    uint8_t difficulty,
+    bool ensure_solvable);
 
 /** Deinitialize and free Start Screen view
  *
@@ -62,11 +66,11 @@ void mine_sweeper_game_screen_free(MineSweeperGameScreen* instance);
  * @param       difficulty  uint8_t difficulty for board
  */
 void mine_sweeper_game_screen_reset(
-        MineSweeperGameScreen* instance,
-        uint8_t width,
-        uint8_t height,
-        uint8_t difficulty,
-        bool ensure_solvable);
+    MineSweeperGameScreen* instance,
+    uint8_t width,
+    uint8_t height,
+    uint8_t difficulty,
+    bool ensure_solvable);
 
 /** Reset MineSweeperGameScreen clock 
  *
@@ -89,12 +93,12 @@ View* mine_sweeper_game_screen_get_view(MineSweeperGameScreen* instance);
  */
 void mine_sweeper_game_screen_set_context(MineSweeperGameScreen* instance, void* context);
 
-#define inverted_canvas_white_to_black(canvas, code)      \
-    {                                           \
-        canvas_set_color(canvas, ColorWhite);   \
-        {code};                                 \
-        canvas_set_color(canvas, ColorBlack);   \
-    }                           
+#define inverted_canvas_white_to_black(canvas, code) \
+    {                                                \
+        canvas_set_color(canvas, ColorWhite);        \
+        {code};                                      \
+        canvas_set_color(canvas, ColorBlack);        \
+    }
 
 #ifdef __cplusplus
 }

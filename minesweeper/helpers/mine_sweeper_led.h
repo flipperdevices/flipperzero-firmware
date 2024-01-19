@@ -11,5 +11,4 @@ void mine_sweeper_led_blink_cyan(void* context);
 
 void mine_sweeper_led_reset(void* context);
 
-
 #endif
