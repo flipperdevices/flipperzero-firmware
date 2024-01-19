@@ -41,6 +41,13 @@ void wifi_marauder_uart_on_irq_cb(
     }
 }
 
+void workaround_on_irq_cb(FuriHalSerialHandle* handle, FuriHalSerialRxEvent event, void* context) {
+    // For some reason furi_hal_serial enforces different callbacks for usart/lpuart
+    // The callbacks receive context and handle pointers, user callbacks can handle it
+    // API really should not be doing this, if it gets fixed then revert this commit
+    wifi_marauder_uart_on_irq_cb(handle, event, context);
+}
+
 static int32_t uart_worker(void* context) {
     WifiMarauderUart* uart = (void*)context;
 
@@ -86,7 +93,11 @@ WifiMarauderUart* wifi_marauder_uart_init(
     }
     furi_check(uart->serial_handle);
     furi_hal_serial_init(uart->serial_handle, BAUDRATE);
-    furi_hal_serial_async_rx_start(uart->serial_handle, wifi_marauder_uart_on_irq_cb, uart, false);
+    furi_hal_serial_async_rx_start(
+        uart->serial_handle,
+        channel == FuriHalSerialIdUsart ? workaround_on_irq_cb : wifi_marauder_uart_on_irq_cb,
+        uart,
+        false);
 
     return uart;
 }
