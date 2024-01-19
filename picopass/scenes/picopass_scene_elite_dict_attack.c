@@ -87,12 +87,10 @@ NfcCommand picopass_elite_dict_attack_worker_callback(PicopassPollerEvent event,
                     picopass->view_dispatcher, PicopassCustomEventDictAttackUpdateView);
             }
         }
-    } else if(event.type == PicopassPollerEventTypeSuccess) {
-        const PicopassDeviceData* data = picopass_poller_get_data(picopass->poller);
-        memcpy(&picopass->dev->dev_data, data, sizeof(PicopassDeviceData));
-        view_dispatcher_send_custom_event(
-            picopass->view_dispatcher, PicopassCustomEventPollerSuccess);
-    } else if(event.type == PicopassPollerEventTypeFail) {
+    } else if(
+        event.type == PicopassPollerEventTypeSuccess ||
+        event.type == PicopassPollerEventTypeFail ||
+        event.type == PicopassPollerEventTypeAuthFail) {
         const PicopassDeviceData* data = picopass_poller_get_data(picopass->poller);
         memcpy(&picopass->dev->dev_data, data, sizeof(PicopassDeviceData));
         view_dispatcher_send_custom_event(
