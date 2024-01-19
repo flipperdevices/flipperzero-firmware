@@ -19,7 +19,6 @@
 #include "unitemp_icons.h"
 
 #include <assets_icons.h>
-// extern const Icon I_WarningDolphinFlip_45x42;
 
 void unitemp_widgets_alloc(void) {
     app->widget = widget_alloc();
