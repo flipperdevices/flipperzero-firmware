@@ -27,10 +27,10 @@ This software is for experimental purposes only and is not meant for any illegal
 
 <a name="latest">
 
-## Latest Updates - [PATREON: Latest Release RM0116-2026-0.93.9-475cae9](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
+## Latest Updates - [PATREON: Latest Release RM0118-2350-0.93.9-59e8e6e](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-01-16 20:26 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-01-16 20:26 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-01-18 23:50 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-01-18 23:50 EST`
 - Updated: [T5577 Multiwriter v0.2 (By Leptopt1los)](https://github.com/Leptopt1los/t5577_multiwriter)
 - Updated: OFW PR: [T5577 lib: write with mask function added #3362 (By Leptopt1los)](https://github.com/flipperdevices/flipperzero-firmware/pull/3362)
 - Updated: [FlipBoard Simon v1.1 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
@@ -40,6 +40,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [WS2812B LED Tester v1.9 (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/gpio/ws2812b_tester)
 - Updated: [YuriCable Pro Max v0.1 (By arag0re)](https://github.com/arag0re/fz-yuricable-pro-max)
 - Updated: [Dab Timer v1.8 (By RogueMaster)](https://github.com/RogueMaster/flipperzero-dabtimer) (Adds an alarm like alert)
+- To Be Merged OFW PRs: [3352](https://github.com/flipperdevices/flipperzero-firmware/pull/3352), [3302](https://github.com/flipperdevices/flipperzero-firmware/pull/3302), [3211](https://github.com/flipperdevices/flipperzero-firmware/pull/3211), [3366](https://github.com/flipperdevices/flipperzero-firmware/pull/3366) & [3250](https://github.com/flipperdevices/flipperzero-firmware/pull/3250)
 
 <a name="release">
 
