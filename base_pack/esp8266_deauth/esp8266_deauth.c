@@ -1,8 +1,8 @@
 #include <furi.h>
-#include <furi_hal_console.h>
 #include <furi_hal_gpio.h>
 #include <furi_hal_power.h>
-#include <furi_hal_uart.h>
+#include <furi_hal_serial_control.h>
+#include <furi_hal_serial.h>
 #include <gui/canvas_i.h>
 #include <gui/gui.h>
 #include <input/input.h>
@@ -12,6 +12,8 @@
 //#include <stdlib.h>
 
 #include "FlipperZeroWiFiDeauthModuleDefines.h"
+
+#define UART_CH (FuriHalSerialIdUsart)
 
 #define DEAUTH_APP_DEBUG 0
 
@@ -26,7 +28,6 @@
 #define DEAUTH_APP_LOG_E(format, ...)
 #endif // WIFI_APP_DEBUG
 
-#define DISABLE_CONSOLE !DEAUTH_APP_DEBUG
 #define ENABLE_MODULE_POWER 1
 #define ENABLE_MODULE_DETECTION 1
 
@@ -65,6 +66,7 @@ typedef struct SWiFiDeauthApp {
     FuriThread* m_worker_thread;
     //NotificationApp* m_notification;
     FuriStreamBuffer* m_rx_stream;
+    FuriHalSerialHandle* serial_handle;
     SGpioButtons m_GpioButtons;
 
     bool m_wifiDeauthModuleInitialized;
@@ -209,14 +211,16 @@ static void
     furi_message_queue_put(event_queue, &event, FuriWaitForever);
 }
 
-static void uart_on_irq_cb(UartIrqEvent ev, uint8_t data, void* context) {
+static void
+    uart_on_irq_cb(FuriHalSerialHandle* handle, FuriHalSerialRxEvent event, void* context) {
     furi_assert(context);
 
     SWiFiDeauthApp* app = context;
 
     DEAUTH_APP_LOG_I("uart_echo_on_irq_cb");
 
-    if(ev == UartIrqEventRXNE) {
+    if(event == FuriHalSerialRxEventData) {
+        uint8_t data = furi_hal_serial_async_rx(handle);
         DEAUTH_APP_LOG_I("ev == UartIrqEventRXNE");
         furi_stream_buffer_send(app->m_rx_stream, &data, 1, 0);
         furi_thread_flags_set(furi_thread_get_id(app->m_worker_thread), WorkerEventRx);
@@ -387,11 +391,10 @@ int32_t esp8266_deauth_app(void* p) {
     DEAUTH_APP_LOG_I("UART thread allocated");
 
     // Enable uart listener
-#if DISABLE_CONSOLE
-    furi_hal_console_disable();
-#endif
-    furi_hal_uart_set_br(FuriHalUartIdUSART1, FLIPPERZERO_SERIAL_BAUD);
-    furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, uart_on_irq_cb, app);
+    app->serial_handle = furi_hal_serial_control_acquire(FuriHalSerialIdUsart);
+    furi_check(app->serial_handle);
+    furi_hal_serial_init(app->serial_handle, FLIPPERZERO_SERIAL_BAUD);
+    furi_hal_serial_async_rx_start(app->serial_handle, uart_on_irq_cb, app, false);
     DEAUTH_APP_LOG_I("UART Listener created");
 
     SPluginEvent event;
@@ -505,9 +508,8 @@ int32_t esp8266_deauth_app(void* p) {
     furi_hal_gpio_init(&gpio_ext_pb3, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
     furi_hal_gpio_init(&gpio_ext_pa4, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
 
-#if DISABLE_CONSOLE
-    furi_hal_console_enable();
-#endif
+    furi_hal_serial_deinit(app->serial_handle);
+    furi_hal_serial_control_release(app->serial_handle);
 
     //*app->m_originalBufferLocation = app->m_originalBuffer;
 

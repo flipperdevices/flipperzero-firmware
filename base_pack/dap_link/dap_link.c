@@ -2,8 +2,8 @@
 #include <furi.h>
 #include <furi_hal_version.h>
 #include <furi_hal_gpio.h>
-#include <furi_hal_uart.h>
-#include <furi_hal_console.h>
+#include <furi_hal_serial_control.h>
+#include <furi_hal_serial.h>
 #include <furi_hal_resources.h>
 #include <furi_hal_power.h>
 #include <stm32wbxx_ll_usart.h>
@@ -275,14 +275,15 @@ typedef enum {
 typedef struct {
     FuriStreamBuffer* rx_stream;
     FuriThreadId thread_id;
-    FuriHalUartId uart_id;
+    FuriHalSerialHandle* serial_handle;
     struct usb_cdc_line_coding line_coding;
 } CDCProcess;
 
-static void cdc_uart_irq_cb(UartIrqEvent ev, uint8_t data, void* ctx) {
+static void cdc_uart_irq_cb(FuriHalSerialHandle* handle, FuriHalSerialRxEvent event, void* ctx) {
     CDCProcess* app = ctx;
 
-    if(ev == UartIrqEventRXNE) {
+    if(event == FuriHalSerialRxEventData) {
+        uint8_t data = furi_hal_serial_async_rx(handle);
         furi_stream_buffer_send(app->rx_stream, &data, 1, 0);
         furi_thread_flags_set(app->thread_id, CdcThreadEventUartRx);
     }
@@ -316,54 +317,52 @@ static void cdc_usb_config_callback(struct usb_cdc_line_coding* config, void* co
     furi_thread_flags_set(app->thread_id, CdcThreadEventCdcConfig);
 }
 
-static FuriHalUartId cdc_init_uart(
+static void cdc_init_uart(
+    CDCProcess* app,
     DapUartType type,
     DapUartTXRX swap,
     uint32_t baudrate,
-    void (*cb)(UartIrqEvent ev, uint8_t data, void* ctx),
+    void (*cb)(FuriHalSerialHandle* handle, FuriHalSerialRxEvent event, void* ctx),
     void* ctx) {
-    FuriHalUartId uart_id = FuriHalUartIdUSART1;
     if(baudrate == 0) baudrate = 115200;
 
     switch(type) {
     case DapUartTypeUSART1:
-        uart_id = FuriHalUartIdUSART1;
-        furi_hal_console_disable();
-        furi_hal_uart_deinit(uart_id);
+        app->serial_handle = furi_hal_serial_control_acquire(FuriHalSerialIdUsart);
+        furi_check(app->serial_handle);
         if(swap == DapUartTXRXSwap) {
             LL_USART_SetTXRXSwap(USART1, LL_USART_TXRX_SWAPPED);
         } else {
             LL_USART_SetTXRXSwap(USART1, LL_USART_TXRX_STANDARD);
         }
-        furi_hal_uart_init(uart_id, baudrate);
-        furi_hal_uart_set_irq_cb(uart_id, cb, ctx);
+        furi_hal_serial_init(app->serial_handle, baudrate);
+        furi_hal_serial_async_rx_start(app->serial_handle, cb, ctx, false);
         break;
     case DapUartTypeLPUART1:
-        uart_id = FuriHalUartIdLPUART1;
-        furi_hal_uart_deinit(uart_id);
+        app->serial_handle = furi_hal_serial_control_acquire(FuriHalSerialIdLpuart);
+        furi_check(app->serial_handle);
         if(swap == DapUartTXRXSwap) {
             LL_LPUART_SetTXRXSwap(LPUART1, LL_LPUART_TXRX_SWAPPED);
         } else {
             LL_LPUART_SetTXRXSwap(LPUART1, LL_LPUART_TXRX_STANDARD);
         }
-        furi_hal_uart_init(uart_id, baudrate);
-        furi_hal_uart_set_irq_cb(uart_id, cb, ctx);
+        furi_hal_serial_init(app->serial_handle, baudrate);
+        furi_hal_serial_async_rx_start(app->serial_handle, cb, ctx, false);
         break;
     }
-
-    return uart_id;
 }
 
-static void cdc_deinit_uart(DapUartType type) {
+static void cdc_deinit_uart(CDCProcess* app, DapUartType type) {
     switch(type) {
     case DapUartTypeUSART1:
-        furi_hal_uart_deinit(FuriHalUartIdUSART1);
+        furi_hal_serial_deinit(app->serial_handle);
         LL_USART_SetTXRXSwap(USART1, LL_USART_TXRX_STANDARD);
-        furi_hal_console_init();
+        furi_hal_serial_control_release(app->serial_handle);
         break;
     case DapUartTypeLPUART1:
-        furi_hal_uart_deinit(FuriHalUartIdLPUART1);
+        furi_hal_serial_deinit(app->serial_handle);
         LL_LPUART_SetTXRXSwap(LPUART1, LL_LPUART_TXRX_STANDARD);
+        furi_hal_serial_control_release(app->serial_handle);
         break;
     }
 }
@@ -385,8 +384,8 @@ static int32_t dap_cdc_process(void* p) {
     const uint8_t rx_buffer_size = 64;
     uint8_t* rx_buffer = malloc(rx_buffer_size);
 
-    app->uart_id = cdc_init_uart(
-        uart_pins_prev, uart_swap_prev, dap_state->cdc_baudrate, cdc_uart_irq_cb, app);
+    cdc_init_uart(
+        app, uart_pins_prev, uart_swap_prev, dap_state->cdc_baudrate, cdc_uart_irq_cb, app);
 
     dap_cdc_usb_set_context(app);
     dap_cdc_usb_set_rx_callback(cdc_usb_rx_callback);
@@ -405,7 +404,7 @@ static int32_t dap_cdc_process(void* p) {
                 if(dap_state->cdc_baudrate != app->line_coding.dwDTERate) {
                     dap_state->cdc_baudrate = app->line_coding.dwDTERate;
                     if(dap_state->cdc_baudrate > 0) {
-                        furi_hal_uart_set_br(app->uart_id, dap_state->cdc_baudrate);
+                        furi_hal_serial_set_br(app->serial_handle, dap_state->cdc_baudrate);
                     }
                 }
             }
@@ -424,7 +423,7 @@ static int32_t dap_cdc_process(void* p) {
             if(events & CdcThreadEventCdcRx) {
                 size_t len = dap_cdc_usb_rx(rx_buffer, rx_buffer_size);
                 if(len > 0) {
-                    furi_hal_uart_tx(app->uart_id, rx_buffer, len);
+                    furi_hal_serial_tx(app->serial_handle, rx_buffer, len);
                 }
                 dap_state->cdc_tx_counter += len;
             }
@@ -432,10 +431,11 @@ static int32_t dap_cdc_process(void* p) {
             if(events & CdcThreadEventApplyConfig) {
                 if(uart_pins_prev != dap_app->config.uart_pins ||
                    uart_swap_prev != dap_app->config.uart_swap) {
-                    cdc_deinit_uart(uart_pins_prev);
+                    cdc_deinit_uart(app, uart_pins_prev);
                     uart_pins_prev = dap_app->config.uart_pins;
                     uart_swap_prev = dap_app->config.uart_swap;
-                    app->uart_id = cdc_init_uart(
+                    cdc_init_uart(
+                        app,
                         uart_pins_prev,
                         uart_swap_prev,
                         dap_state->cdc_baudrate,
@@ -456,7 +456,7 @@ static int32_t dap_cdc_process(void* p) {
         }
     }
 
-    cdc_deinit_uart(uart_pins_prev);
+    cdc_deinit_uart(app, uart_pins_prev);
     free(rx_buffer);
     furi_stream_buffer_free(app->rx_stream);
     free(app);
