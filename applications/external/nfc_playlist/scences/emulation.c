@@ -107,10 +107,11 @@ int32_t nfc_playlist_emulation_task(void* context) {
             int time_counter_ms = (options_emulate_timeout[nfc_playlist->emulate_timeout] * 1000);
 
             if(storage_file_exists(storage, file_path) == false) {
-                char popup_header_text[(18 + strlen(file_name))];
+                int popup_header_text_size = strlen(file_name) + 18;
+                char popup_header_text[popup_header_text_size];
                 snprintf(
                     popup_header_text,
-                    (18 + strlen(file_name)),
+                    popup_header_text_size,
                     "%s\n%s",
                     "ERROR not found:",
                     file_name);
@@ -128,10 +129,11 @@ int32_t nfc_playlist_emulation_task(void* context) {
             }
 
             else if(strcasestr(file_ext, "nfc") == NULL) {
-                char popup_header_text[(21 + strlen(file_name))];
+                int popup_header_text_size = strlen(file_name) + 21;
+                char popup_header_text[popup_header_text_size];
                 snprintf(
                     popup_header_text,
-                    (21 + strlen(file_name)),
+                    popup_header_text_size,
                     "%s\n%s",
                     "ERROR invalid file:",
                     file_name);
@@ -149,9 +151,10 @@ int32_t nfc_playlist_emulation_task(void* context) {
             }
 
             else {
-                char popup_header_text[(12 + strlen(file_name))];
+                int popup_header_text_size = strlen(file_name) + 12;
+                char popup_header_text[popup_header_text_size];
                 snprintf(
-                    popup_header_text, (12 + strlen(file_name)), "%s\n%s", "Emulating:", file_name);
+                    popup_header_text, popup_header_text_size, "%s\n%s", "Emulating:", file_name);
                 popup_set_header(
                     nfc_playlist->popup, popup_header_text, 64, 10, AlignCenter, AlignTop);
                 nfc_playlist_worker_set_nfc_data(nfc_playlist->nfc_playlist_worker, file_path);
