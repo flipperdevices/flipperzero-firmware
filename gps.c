@@ -2,7 +2,6 @@
 #include "constants.h"
 
 #include <furi.h>
-#include <furi_hal_power.h>
 #include <gui/gui.h>
 #include <string.h>
 
@@ -21,7 +20,53 @@ static void render_callback(Canvas* const canvas, void* context) {
     GpsUart* gps_uart = context;
     furi_mutex_acquire(gps_uart->mutex, FuriWaitForever);
 
-    if(!gps_uart->changing_baudrate) {
+    char buffer[64];
+
+    switch(gps_uart->view_state) {
+    case CHANGE_BAUDRATE:
+        canvas_set_font(canvas, FontPrimary);
+        canvas_draw_str_aligned(canvas, 64, 32, AlignCenter, AlignBottom, "Baudrate set to:");
+        snprintf(buffer, 64, "%ld baud", gps_uart->baudrate);
+        canvas_draw_str_aligned(canvas, 64, 47, AlignCenter, AlignBottom, buffer);
+        break;
+    case CHANGE_BACKLIGHT:
+        canvas_set_font(canvas, FontPrimary);
+        canvas_draw_str_aligned(
+            canvas,
+            64,
+            32,
+            AlignCenter,
+            AlignBottom,
+            gps_uart->backlight_enabled ? "Backlight enabled" : "Backlight disabled");
+        break;
+    case CHANGE_DEEPSLEEP:
+        canvas_set_font(canvas, FontPrimary);
+        canvas_draw_str_aligned(
+            canvas,
+            64,
+            32,
+            AlignCenter,
+            AlignBottom,
+            gps_uart->deep_sleep_enabled ? "Deep sleep enabled" : "Deep sleep disabled");
+        break;
+    case CHANGE_SPEEDUNIT:
+        canvas_set_font(canvas, FontPrimary);
+        canvas_draw_str_aligned(canvas, 64, 32, AlignCenter, AlignBottom, "Speed unit set to:");
+        switch(gps_uart->speed_units) {
+        case KPH:
+            canvas_draw_str_aligned(canvas, 64, 47, AlignCenter, AlignBottom, "km/h");
+            break;
+        case MPH:
+            canvas_draw_str_aligned(canvas, 64, 47, AlignCenter, AlignBottom, "mi/h");
+            break;
+        case KNOTS:
+        default:
+            canvas_draw_str_aligned(canvas, 64, 47, AlignCenter, AlignBottom, "kn");
+            break;
+        }
+        break;
+    case NORMAL:
+    default:
         canvas_set_font(canvas, FontPrimary);
         canvas_draw_str_aligned(canvas, 32, 8, AlignCenter, AlignBottom, "Latitude");
         canvas_draw_str_aligned(canvas, 96, 8, AlignCenter, AlignBottom, "Longitude");
@@ -32,7 +77,6 @@ static void render_callback(Canvas* const canvas, void* context) {
         canvas_draw_str_aligned(canvas, 96, 52, AlignCenter, AlignBottom, "Last Fix");
 
         canvas_set_font(canvas, FontSecondary);
-        char buffer[64];
         snprintf(buffer, 64, "%f", (double)gps_uart->status.latitude);
         canvas_draw_str_aligned(canvas, 32, 18, AlignCenter, AlignBottom, buffer);
         snprintf(buffer, 64, "%f", (double)gps_uart->status.longitude);
@@ -42,10 +86,10 @@ static void render_callback(Canvas* const canvas, void* context) {
 
         switch(gps_uart->speed_units) {
         case KPH:
-            snprintf(buffer, 64, "%.2f km", (double)(gps_uart->status.speed * KNOTS_TO_KPH));
+            snprintf(buffer, 64, "%.2f km/h", (double)(gps_uart->status.speed * KNOTS_TO_KPH));
             break;
         case MPH:
-            snprintf(buffer, 64, "%.2f mi", (double)(gps_uart->status.speed * KNOTS_TO_MPH));
+            snprintf(buffer, 64, "%.2f mi/h", (double)(gps_uart->status.speed * KNOTS_TO_MPH));
             break;
         case KNOTS:
         default:
@@ -71,13 +115,7 @@ static void render_callback(Canvas* const canvas, void* context) {
             gps_uart->status.time_minutes,
             gps_uart->status.time_seconds);
         canvas_draw_str_aligned(canvas, 96, 62, AlignCenter, AlignBottom, buffer);
-    } else {
-        char buffer[64];
-        canvas_set_font(canvas, FontPrimary);
-        canvas_draw_str_aligned(canvas, 64, 32, AlignCenter, AlignBottom, "Baudrate set to:");
-
-        snprintf(buffer, 64, "%ld baud", gps_uart->baudrate);
-        canvas_draw_str_aligned(canvas, 64, 47, AlignCenter, AlignBottom, buffer);
+        break;
     }
 
     furi_mutex_release(gps_uart->mutex);
@@ -95,14 +133,6 @@ int32_t gps_app(void* p) {
 
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(PluginEvent));
 
-    uint8_t attempts = 0;
-    bool otg_was_enabled = furi_hal_power_is_otg_enabled();
-    while(!furi_hal_power_is_otg_enabled() && attempts++ < 5) {
-        furi_hal_power_enable_otg();
-        furi_delay_ms(10);
-    }
-    furi_delay_ms(200);
-
     GpsUart* gps_uart = gps_uart_enable();
 
     gps_uart->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
@@ -111,6 +141,14 @@ int32_t gps_app(void* p) {
         free(gps_uart);
         return 255;
     }
+
+    uint8_t attempts = 0;
+    bool otg_was_enabled = furi_hal_power_is_otg_enabled();
+    while(!furi_hal_power_is_otg_enabled() && attempts++ < 5) {
+        furi_hal_power_enable_otg();
+        furi_delay_ms(10);
+    }
+    furi_delay_ms(200);
 
     // set system callbacks
     ViewPort* view_port = view_port_alloc();
@@ -132,24 +170,27 @@ int32_t gps_app(void* p) {
             if(event.type == EventTypeKey) {
                 if(event.input.type == InputTypeShort) {
                     switch(event.input.key) {
-                    case InputKeyUp:
-                    case InputKeyDown:
-                    case InputKeyRight:
-                    case InputKeyLeft:
                     case InputKeyBack:
+                        processing = false;
                         break;
                     case InputKeyOk:
-                        if(!gps_uart->backlight_on) {
+                        if(!gps_uart->backlight_enabled) {
                             notification_message_block(
                                 gps_uart->notifications, &sequence_display_backlight_enforce_on);
-                            gps_uart->backlight_on = true;
+                            gps_uart->backlight_enabled = true;
                         } else {
                             notification_message_block(
                                 gps_uart->notifications, &sequence_display_backlight_enforce_auto);
                             notification_message(
                                 gps_uart->notifications, &sequence_display_backlight_off);
-                            gps_uart->backlight_on = false;
+                            gps_uart->backlight_enabled = false;
                         }
+
+                        gps_uart->view_state = CHANGE_BACKLIGHT;
+                        furi_mutex_release(gps_uart->mutex);
+                        view_port_update(view_port);
+                        furi_delay_ms(1000);
+                        gps_uart->view_state = NORMAL;
                         break;
                     default:
                         break;
@@ -167,15 +208,39 @@ int32_t gps_app(void* p) {
                         gps_uart->baudrate = gps_baudrates[current_gps_baudrate];
 
                         gps_uart_init_thread(gps_uart);
-                        gps_uart->changing_baudrate = true;
+                        gps_uart->view_state = CHANGE_BAUDRATE;
+
                         furi_mutex_release(gps_uart->mutex);
                         view_port_update(view_port);
+                        furi_delay_ms(1000);
+                        gps_uart->view_state = NORMAL;
                         break;
                     case InputKeyRight:
                         gps_uart->speed_units++;
                         if(gps_uart->speed_units == INVALID) {
                             gps_uart->speed_units = KNOTS;
                         }
+
+                        gps_uart->view_state = CHANGE_SPEEDUNIT;
+                        furi_mutex_release(gps_uart->mutex);
+                        view_port_update(view_port);
+                        furi_delay_ms(1000);
+                        gps_uart->view_state = NORMAL;
+                        break;
+                    case InputKeyDown:
+                        gps_uart->view_state = CHANGE_DEEPSLEEP;
+                        gps_uart->deep_sleep_enabled = !gps_uart->deep_sleep_enabled;
+
+                        // tested on Telit SE868-A and SL871L-S
+                        furi_hal_serial_tx(
+                            gps_uart->serial_handle,
+                            (uint8_t*)"$PMTK161,0*28\r\n",
+                            strlen("$PMTK161,0*28\r\n"));
+
+                        furi_mutex_release(gps_uart->mutex);
+                        view_port_update(view_port);
+                        furi_delay_ms(1000);
+                        gps_uart->view_state = NORMAL;
                         break;
                     case InputKeyBack:
                         processing = false;
@@ -186,12 +251,10 @@ int32_t gps_app(void* p) {
                 }
             }
         }
-        if(!gps_uart->changing_baudrate) {
+
+        if(gps_uart->view_state == NORMAL) {
             furi_mutex_release(gps_uart->mutex);
             view_port_update(view_port);
-        } else {
-            furi_delay_ms(1000);
-            gps_uart->changing_baudrate = false;
         }
     }
 

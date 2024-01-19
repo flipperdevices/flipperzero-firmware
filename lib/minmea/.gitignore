@@ -1,0 +1,10 @@
+build/
+cmake-build-*/
+*.o
+*~
+*.diff
+.*.swp
+minmea
+tests
+example
+*.exe
