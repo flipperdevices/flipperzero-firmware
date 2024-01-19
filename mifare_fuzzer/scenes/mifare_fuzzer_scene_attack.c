@@ -106,15 +106,16 @@ bool mifare_fuzzer_scene_attack_on_event(void* context, SceneManagerEvent event)
             mifare_fuzzer_emulator_set_attack(app->emulator_view, app->attack);
             // open dialog file
             DialogsFileBrowserOptions browser_options;
-            dialog_file_browser_set_basic_options(&browser_options, MIFARE_FUZZER_FILE_EXT, NULL);
+            dialog_file_browser_set_basic_options(
+                &browser_options, MIFARE_FUZZER_UID_FILE_EXT, NULL);
             browser_options.hide_ext = false;
             bool res = dialog_file_browser_show(
-                app->dialogs, app->file_path, app->app_folder, &browser_options);
+                app->dialogs, app->uid_file_path, app->app_folder, &browser_options);
             if(res) {
                 app->uids_stream = buffered_file_stream_alloc(app->storage);
                 res = buffered_file_stream_open(
                     app->uids_stream,
-                    furi_string_get_cstr(app->file_path),
+                    furi_string_get_cstr(app->uid_file_path),
                     FSAM_READ,
                     FSOM_OPEN_EXISTING);
                 if(res) {

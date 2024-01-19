@@ -4,6 +4,7 @@ App(
     apptype=FlipperAppType.EXTERNAL,
     entry_point="mifare_fuzzer_app",
     requires=[
+        "nfc",
         "storage",
         "gui",
     ],

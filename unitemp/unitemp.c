@@ -79,6 +79,8 @@ bool unitemp_saveSettings(void) {
     //Открытие потока
     if(!file_stream_open(
            app->file_stream, furi_string_get_cstr(filepath), FSAM_READ_WRITE, FSOM_CREATE_ALWAYS)) {
+        // Free file path string if we got an error
+        furi_string_free(filepath);
         FURI_LOG_E(
             APP_NAME,
             "An error occurred while saving the settings file: %d",
@@ -99,6 +101,8 @@ bool unitemp_saveSettings(void) {
     //Закрытие потока и освобождение памяти
     file_stream_close(app->file_stream);
     stream_free(app->file_stream);
+    // Free file path string if we successfully opened the file
+    furi_string_free(filepath);
 
     FURI_LOG_I(APP_NAME, "Settings have been successfully saved");
     return true;
@@ -124,6 +128,8 @@ bool unitemp_loadSettings(void) {
             //Закрытие потока и освобождение памяти
             file_stream_close(app->file_stream);
             stream_free(app->file_stream);
+            // Free file path string if we got an error
+            furi_string_free(filepath);
             //Сохранение стандартного конфига
             unitemp_saveSettings();
             return false;
@@ -135,9 +141,13 @@ bool unitemp_loadSettings(void) {
             //Закрытие потока и освобождение памяти
             file_stream_close(app->file_stream);
             stream_free(app->file_stream);
+            // Free file path string if we got an error
+            furi_string_free(filepath);
             return false;
         }
     }
+    // Free file path string if we successfully opened the file
+    furi_string_free(filepath);
 
     //Вычисление размера файла
     uint8_t file_size = stream_size(app->file_stream);

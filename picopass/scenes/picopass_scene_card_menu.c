@@ -24,8 +24,13 @@ void picopass_scene_card_menu_on_enter(void* context) {
 
     bool sio = 0x30 == AA1[PICOPASS_ICLASS_PACS_CFG_BLOCK_INDEX].data[0];
     bool no_key = picopass_is_memset(pacs->key, 0x00, PICOPASS_BLOCK_LEN);
+    bool secured = (AA1[PICOPASS_CONFIG_BLOCK_INDEX].data[7] & PICOPASS_FUSE_CRYPT10) !=
+                   PICOPASS_FUSE_CRYPT0;
 
-    if(no_key) {
+    if(!secured) {
+        submenu_add_item(
+            submenu, "Save", SubmenuIndexSave, picopass_scene_card_menu_submenu_callback, picopass);
+    } else if(no_key) {
         if(sio) {
             submenu_add_item(
                 submenu,

@@ -214,7 +214,7 @@ void loclass_opt_doReaderMAC(uint8_t* cc_nr_p, uint8_t* div_key_p, uint8_t mac[4
 
 void loclass_opt_doReaderMAC_2(
     LoclassState_t _init,
-    uint8_t* nr,
+    const uint8_t* nr,
     uint8_t mac[4],
     const uint8_t* div_key_p) {
     loclass_opt_suc(div_key_p, &_init, nr, 4, false);
@@ -268,7 +268,7 @@ LoclassState_t loclass_opt_doTagMAC_1(uint8_t* cc_p, const uint8_t* div_key_p) {
  */
 void loclass_opt_doTagMAC_2(
     LoclassState_t _init,
-    uint8_t* nr,
+    const uint8_t* nr,
     uint8_t mac[4],
     const uint8_t* div_key_p) {
     loclass_opt_suc(div_key_p, &_init, nr, 4, true);
@@ -286,7 +286,7 @@ void loclass_opt_doTagMAC_2(
  */
 void loclass_opt_doBothMAC_2(
     LoclassState_t _init,
-    uint8_t* nr,
+    const uint8_t* nr,
     uint8_t rmac[4],
     uint8_t tmac[4],
     const uint8_t* div_key_p) {

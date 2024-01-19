@@ -45,10 +45,25 @@ void picopass_scene_read_card_success_on_enter(void* context) {
         AA1[PICOPASS_ICLASS_PACS_CFG_BLOCK_INDEX].data, 0xFF, PICOPASS_BLOCK_LEN);
     bool SE = 0x30 == AA1[PICOPASS_ICLASS_PACS_CFG_BLOCK_INDEX].data[0];
     bool configCard = (AA1[PICOPASS_ICLASS_PACS_CFG_BLOCK_INDEX].data[7] >> 2 & 3) == 2;
+    bool secured = (AA1[PICOPASS_CONFIG_BLOCK_INDEX].data[7] & PICOPASS_FUSE_CRYPT10) !=
+                   PICOPASS_FUSE_CRYPT0;
+    bool hid_csn = picopass_device_hid_csn(picopass->dev);
 
-    if(no_key) {
+    if(!secured) {
+        furi_string_cat_printf(wiegand_str, "Non-Secured Chip");
+
+        if(!hid_csn) {
+            furi_string_cat_printf(credential_str, "Non-HID CSN");
+        }
+
+        widget_add_button_element(
+            widget,
+            GuiButtonTypeRight,
+            "More",
+            picopass_scene_read_card_success_widget_callback,
+            picopass);
+    } else if(no_key) {
         furi_string_cat_printf(wiegand_str, "Read Failed");
-        bool hid_csn = picopass_device_hid_csn(picopass->dev);
 
         if(pacs->se_enabled) {
             furi_string_cat_printf(credential_str, "SE enabled");
