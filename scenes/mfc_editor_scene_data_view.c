@@ -1,5 +1,10 @@
 #include "../mfc_editor_app_i.h"
 
+void mfc_editor_scene_data_view_dialog_ex_callback(DialogExResult result, void* context) {
+    MfcEditorApp* instance = context;
+    view_dispatcher_send_custom_event(instance->view_dispatcher, result);
+}
+
 void mfc_editor_scene_data_view_on_enter(void* context) {
     MfcEditorApp* instance = context;
 
@@ -145,7 +150,10 @@ void mfc_editor_scene_data_view_on_enter(void* context) {
         31,
         AlignCenter,
         AlignCenter);
+    dialog_ex_set_left_button_text(instance->dialog_ex, "Back");
 
+    dialog_ex_set_result_callback(
+        instance->dialog_ex, mfc_editor_scene_data_view_dialog_ex_callback);
     view_dispatcher_switch_to_view(instance->view_dispatcher, MfcEditorAppViewDialogEx);
 }
 
@@ -153,8 +161,12 @@ bool mfc_editor_scene_data_view_on_event(void* context, SceneManagerEvent event)
     MfcEditorApp* instance = context;
     bool consumed = false;
 
-    UNUSED(instance);
-    UNUSED(event);
+    if(event.type == SceneManagerEventTypeCustom) {
+        if(event.event == DialogExResultLeft) {
+            scene_manager_previous_scene(instance->scene_manager);
+            consumed = true;
+        }
+    }
 
     return consumed;
 }
