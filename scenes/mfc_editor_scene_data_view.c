@@ -112,6 +112,21 @@ void mfc_editor_scene_data_view_on_enter(void* context) {
         dialog_ex_set_header(dialog_ex, "Access Bits", 63, 3, AlignCenter, AlignTop);
     } else if(block_view == MfcEditorBlockViewUserByte) {
         dialog_ex_set_header(dialog_ex, "User Byte", 63, 3, AlignCenter, AlignTop);
+
+        uint8_t sector_trailer_num =
+            mf_classic_get_sector_trailer_num_by_sector(instance->current_sector);
+
+        if(mf_classic_is_block_read(mf_classic_data, sector_trailer_num)) {
+            furi_string_printf(
+                instance->data_view_text,
+                "Free byte between\nAccess Bits and Key B:\n%02X",
+                mf_classic_data->block[sector_trailer_num].data[9]);
+        } else {
+            furi_string_printf(
+                instance->data_view_text,
+                "Data unavailable.\nBlock %u has not been read.",
+                sector_trailer_num);
+        }
     } else {
         furi_string_printf(instance->data_view_header, "Block %u Data", instance->current_block);
         dialog_ex_set_header(
