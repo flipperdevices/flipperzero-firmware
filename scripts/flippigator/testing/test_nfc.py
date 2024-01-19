@@ -127,7 +127,7 @@ class TestNfc(BaseCase):
             nav.press_ok()
             menu_ref = [
                 "Read Specific Card Type",
-                "Mifare Classic Keys",
+                "MIFARE Classic Keys",
                 "Unlock NTAG/Ultralight",
             ]
             assert (
@@ -139,8 +139,8 @@ class TestNfc(BaseCase):
                 == menu_ref
             ), "NFC Extra Actions list is wrong"
 
-        with allure.step("Mifare Classic Keys"):
-            nav.go_to("Mifare Classic Keys")
+        with allure.step("MIFARE Classic Keys"):
+            nav.go_to("MIFARE Classic Keys")
             nav.press_ok()
             state = nav.get_current_state()
             assert (
@@ -173,11 +173,11 @@ class TestNfc(BaseCase):
         menu_ref = [
             "NFC-A 7-bytes UID",
             "NFC-A 4-bytes UID",
-            "Mifare Ultralight",
-            "Mifare Ultralight EV1 11",
-            "Mifare Ultralight EV1 H11",
-            "Mifare Ultralight EV1 21",
-            "Mifare Ultralight EV1 H21",
+            "MIFARE Ultralight",
+            "MIFARE Ultralight EV1 11",
+            "MIFARE Ultralight EV1 H11",
+            "MIFARE Ultralight EV1 21",
+            "MIFARE Ultralight EV1 H21",
             "NTAG203",
             "NTAG213",
             "NTAG215",
@@ -186,11 +186,11 @@ class TestNfc(BaseCase):
             "NTAG I2C 2k",
             "NTAG I2C Plus 1k",
             "NTAG I2C Plus 2k",
-            "Mifare Mini",
-            "Mifare Classic 1k 4byte UID",
-            "Mifare Classic 1k 7byte UID",
-            "Mifare Classic 4k 4byte UI...",
-            "Mifare Classic 4k 7byte UI...",
+            "MIFARE Mini",
+            "MIFARE Classic 1k 4byte ...",
+            "MIFARE Classic 1k 7byte ...",
+            "MIFARE Classic 4k 4byte ...",
+            "MIFARE Classic 4k 7byte ...",
         ]
         assert (
             nav.get_menu_list(
@@ -207,11 +207,11 @@ class TestNfc(BaseCase):
         menu_ref = [
             "NFC-A 7-bytes UID",
             "NFC-A 4-bytes UID",
-            "Mifare Ultralight",
-            "Mifare Ultralight EV1 11",
-            "Mifare Ultralight EV1 H11",
-            "Mifare Ultralight EV1 21",
-            "Mifare Ultralight EV1 H21",
+            "MIFARE Ultralight",
+            "MIFARE Ultralight EV1 11",
+            "MIFARE Ultralight EV1 H11",
+            "MIFARE Ultralight EV1 21",
+            "MIFARE Ultralight EV1 H21",
             "NTAG203",
             "NTAG213",
             "NTAG215",
@@ -220,11 +220,11 @@ class TestNfc(BaseCase):
             "NTAG I2C 2k",
             "NTAG I2C Plus 1k",
             "NTAG I2C Plus 2k",
-            "Mifare Mini",
-            "Mifare Classic 1k 4byte UID",
-            "Mifare Classic 1k 7byte UID",
-            "Mifare Classic 4k 4byte UI...",
-            "Mifare Classic 4k 7byte UI...",
+            "MIFARE Mini",
+            "MIFARE Classic 1k 4byte ...",
+            "MIFARE Classic 1k 7byte ...",
+            "MIFARE Classic 4k 4byte ...",
+            "MIFARE Classic 4k 7byte ...",
         ]
         assert (
             nav.get_menu_list(

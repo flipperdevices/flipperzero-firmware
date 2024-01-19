@@ -78,8 +78,8 @@ class TestRfidBench(BaseCase):
             if time.time() - start_time > 25:
                 break
         state = nav.get_current_state()
-        assert "status_Successfully writen" in state, "RFID Write fail"
-        while "status_Successfully writen" in state:
+        assert "status_Success" in state, "RFID Write fail"
+        while "status_Success" in state:
             state = nav.get_current_state()
 
         nav.go_to("Save")
@@ -149,8 +149,8 @@ class TestRfidBench(BaseCase):
             if time.time() - start_time > 25:
                 break
         state = nav.get_current_state()
-        assert "status_Successfully writen" in state, "RFID Write fail"
-        while "status_Successfully writen" in state:
+        assert "status_Success" in state, "RFID Write fail"
+        while "status_Success" in state:
             state = nav.get_current_state()
 
         nav.go_to("Save")
@@ -220,8 +220,8 @@ class TestRfidBench(BaseCase):
             if time.time() - start_time > 25:
                 break
         state = nav.get_current_state()
-        assert "status_Successfully writen" in state, "RFID Write fail"
-        while "status_Successfully writen" in state:
+        assert "status_Success" in state, "RFID Write fail"
+        while "status_Success" in state:
             state = nav.get_current_state()
 
         nav.go_to("Save")

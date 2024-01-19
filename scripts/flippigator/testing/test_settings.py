@@ -21,6 +21,7 @@ class TestSettings(BaseCase):
             "Desktop",
             "Passport",
             "System",
+            "Expansion Modules",
             "About",
         ]
         assert (

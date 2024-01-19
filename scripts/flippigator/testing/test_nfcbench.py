@@ -47,7 +47,7 @@ class TestNfcBench(BaseCase):
             state = nav.get_current_state()
             nav.press_ok()
         state = nav.get_current_state(
-            ref=nav.get_ref_from_string("Mifare Classic 1K", nav.font_helvB08, 0)
+            ref=nav.get_ref_from_string("MIFARE Classic 1K", nav.font_helvB08, 0)
         )
         assert len(state) > 0, "Result of reading reference card is fail"
         state = nav.get_current_state(
@@ -77,7 +77,7 @@ class TestNfcBench(BaseCase):
         assert len(state) > 0, "Emulation failed"
         state = nav.get_current_state(
             ref=nav.get_ref_from_string(
-                "Mifare Classic 1K", nav.font_haxrcorp_4089, 0, no_space=1
+                "MIFARE Classic 1K", nav.font_haxrcorp_4089, 0, no_space=1
             )
         )
         assert len(state) > 0, "Emulation failed"
@@ -95,6 +95,7 @@ class TestNfcBench(BaseCase):
         state = nav.get_current_state()
         while "Saved!" in state:
             state = nav.get_current_state()
+        gator.swim_to(-220.0, -10.0, 15000)
         nav.go_to_main_screen()
 
     def test_read_nfc_a_card(self, nav, gator, reader_nfc):
@@ -131,7 +132,7 @@ class TestNfcBench(BaseCase):
             state = nav.get_current_state()
             nav.press_ok()
         state = nav.get_current_state(
-            ref=nav.get_ref_from_string("Mifare Classic 1K", nav.font_helvB08, 0)
+            ref=nav.get_ref_from_string("MIFARE Classic 1K", nav.font_helvB08, 0)
         )
         assert len(state) > 0, "Result of reading reference card is fail"
         state = nav.get_current_state(
@@ -159,7 +160,7 @@ class TestNfcBench(BaseCase):
         assert len(state) > 0, "Emulation failed"
         state = nav.get_current_state(
             ref=nav.get_ref_from_string(
-                "Mifare Classic 1K", nav.font_haxrcorp_4089, 0, no_space=1
+                "MIFARE Classic 1K", nav.font_haxrcorp_4089, 0, no_space=1
             )
         )
         assert len(state) > 0, "Emulation failed"
@@ -177,6 +178,7 @@ class TestNfcBench(BaseCase):
         state = nav.get_current_state()
         while "Saved!" in state:
             state = nav.get_current_state()
+        gator.swim_to(-220.0, -90.0, 15000)
         nav.go_to_main_screen()
 
     def test_read_mifare_classic_4k_card(self, nav, gator, reader_nfc):
@@ -213,7 +215,7 @@ class TestNfcBench(BaseCase):
             state = nav.get_current_state()
             nav.press_ok()
         state = nav.get_current_state(
-            ref=nav.get_ref_from_string("Mifare Classic 4K", nav.font_helvB08, 0)
+            ref=nav.get_ref_from_string("MIFARE Classic 4K", nav.font_helvB08, 0)
         )
         assert len(state) > 0, "Result of reading reference card is fail"
         state = nav.get_current_state(
@@ -240,7 +242,7 @@ class TestNfcBench(BaseCase):
         assert len(state) > 0, "Emulation failed"
         state = nav.get_current_state(
             ref=nav.get_ref_from_string(
-                "Mifare Classic 4K", nav.font_haxrcorp_4089, 0, no_space=1
+                "MIFARE Classic 4K", nav.font_haxrcorp_4089, 0, no_space=1
             )
         )
         assert len(state) > 0, "Emulation failed"
@@ -258,6 +260,7 @@ class TestNfcBench(BaseCase):
         state = nav.get_current_state()
         while "Saved!" in state:
             state = nav.get_current_state()
+        gator.swim_to(-220.0, -170.0, 15000)
         nav.go_to_main_screen()
 
     def test_read_troika_card(self, nav, gator, reader_nfc):
@@ -317,7 +320,7 @@ class TestNfcBench(BaseCase):
         assert len(state) > 0, "Emulation failed"
         state = nav.get_current_state(
             ref=nav.get_ref_from_string(
-                "Mifare Classic 1K", nav.font_haxrcorp_4089, 0, no_space=1
+                "MIFARE Classic 1K", nav.font_haxrcorp_4089, 0, no_space=1
             )
         )
         assert len(state) > 0, "Emulation failed"
@@ -330,6 +333,7 @@ class TestNfcBench(BaseCase):
         state = nav.get_current_state()
         while "Saved!" in state:
             state = nav.get_current_state()
+        gator.swim_to(-220.0, -250.0, 15000)
         nav.go_to_main_screen()
 
     def test_read_ntag215_card(self, nav, gator, reader_nfc):
@@ -362,6 +366,12 @@ class TestNfcBench(BaseCase):
         state = nav.get_current_state(
             ref=nav.get_ref_from_string(
                 "UID: 04 77 42 39 BA 07 CO", nav.font_haxrcorp_4089, 0
+            )
+        )
+        assert len(state) > 0, "Result of reading reference card is fail"
+        state = nav.get_current_state(
+            ref=nav.get_ref_from_string(
+                "Pages Read: 133/135", nav.font_haxrcorp_4089, 0
             )
         )
         assert len(state) > 0, "Result of reading reference card is fail"
@@ -398,6 +408,7 @@ class TestNfcBench(BaseCase):
         state = nav.get_current_state()
         while "Saved!" in state:
             state = nav.get_current_state()
+        gator.swim_to(-220.0, -330.0, 15000)
         nav.go_to_main_screen()
 
     def test_read_mifare_ultralight_card(self, nav, gator, reader_nfc):
@@ -424,7 +435,7 @@ class TestNfcBench(BaseCase):
                 nav.logger.debug("ReadingCardNFC")
                 state = nav.get_current_state()
         state = nav.get_current_state(
-            ref=nav.get_ref_from_string("Mifare Ultralight", nav.font_helvB08, 0)
+            ref=nav.get_ref_from_string("MIFARE Ultralight", nav.font_helvB08, 0)
         )
         assert len(state) > 0, "Result of reading reference card is fail"
         state = nav.get_current_state(
@@ -455,7 +466,7 @@ class TestNfcBench(BaseCase):
         assert len(state) > 0, "Emulation failed"
         state = nav.get_current_state(
             ref=nav.get_ref_from_string(
-                "Mifare Ultralight", nav.font_haxrcorp_4089, 0, no_space=1
+                "MIFARE Ultralight", nav.font_haxrcorp_4089, 0, no_space=1
             )
         )
         assert len(state) > 0, "Emulation failed"
@@ -468,6 +479,7 @@ class TestNfcBench(BaseCase):
         state = nav.get_current_state()
         while "Saved!" in state:
             state = nav.get_current_state()
+        gator.swim_to(-220.0, -410.0, 15000)
         nav.go_to_main_screen()
 
     def test_read_mifare_desfire_card(self, nav, gator, reader_nfc):
@@ -494,7 +506,7 @@ class TestNfcBench(BaseCase):
                 nav.logger.debug("ReadingCardNFC")
                 state = nav.get_current_state()
         state = nav.get_current_state(
-            ref=nav.get_ref_from_string("Mifare DESFire", nav.font_helvB08, 0)
+            ref=nav.get_ref_from_string("MIFARE DESFire", nav.font_helvB08, 0)
         )
         assert len(state) > 0, "Result of reading reference card is fail"
         state = nav.get_current_state(
@@ -533,6 +545,7 @@ class TestNfcBench(BaseCase):
         state = nav.get_current_state()
         while "Saved!" in state:
             state = nav.get_current_state()
+        gator.swim_to(-220.0, -10.0, 15000)
         nav.go_to_main_screen()
 
     def test_read_bank_card(self, nav, gator):
@@ -652,7 +665,7 @@ class TestNfcBench(BaseCase):
 
                 state = nav.get_current_state(
                     ref=nav.get_ref_from_string(
-                        "Mifare Ultralight", nav.font_helvB08, 0, no_space=1
+                        "MIFARE Ultralight", nav.font_helvB08, 0, no_space=1
                     )
                 )
                 assert len(state) > 0, "Result of reading reference card is fail"
@@ -694,7 +707,7 @@ class TestNfcBench(BaseCase):
                 assert len(state) > 0, "Emulation failed"
                 state = nav.get_current_state(
                     ref=nav.get_ref_from_string(
-                        "Mifare Ultralight", nav.font_haxrcorp_4089, 0, no_space=1
+                        "MIFARE Ultralight", nav.font_haxrcorp_4089, 0, no_space=1
                     )
                 )
                 assert len(state) > 0, "Emulation failed"
@@ -722,8 +735,8 @@ class TestNfcBench(BaseCase):
                 ref=nav.get_ref_from_string("Multi-protocol card", nav.font_helvB08, 0)
             )
             assert len(state) > 0, "Reading failed"
-            with allure.step("Read as Mifare Classic"):
-                nav.go_to("Read as Mifare Classic")
+            with allure.step("Read as MIFARE Classic"):
+                nav.go_to("Read as MIFARE Classic")
                 nav.press_ok()
                 nav.update_screen()
                 state = nav.get_current_state()
@@ -750,7 +763,7 @@ class TestNfcBench(BaseCase):
                     nav.press_ok()
                 state = nav.get_current_state(
                     ref=nav.get_ref_from_string(
-                        "Mifare Classic 1K", nav.font_helvB08, 0
+                        "MIFARE Classic 1K", nav.font_helvB08, 0
                     )
                 )
                 assert len(state) > 0, "Result of reading reference card is fail"
@@ -782,7 +795,7 @@ class TestNfcBench(BaseCase):
                 assert len(state) > 0, "Emulation failed"
                 state = nav.get_current_state(
                     ref=nav.get_ref_from_string(
-                        "Mifare Classic 1K", nav.font_haxrcorp_4089, 0, no_space=1
+                        "MIFARE Classic 1K", nav.font_haxrcorp_4089, 0, no_space=1
                     )
                 )
                 assert len(state) > 0, "Emulation failed"
@@ -800,6 +813,7 @@ class TestNfcBench(BaseCase):
                 state = nav.get_current_state()
                 while "Saved!" in state:
                     state = nav.get_current_state()
+        gator.swim_to(-220.0, -90.0, 15000)
         nav.go_to_main_screen()
 
     def test_read_all_in_one_card(self, nav, gator, reader_nfc):
@@ -858,7 +872,7 @@ class TestNfcBench(BaseCase):
         assert len(state) > 0, "Emulation failed"
         state = nav.get_current_state(
             ref=nav.get_ref_from_string(
-                "Mifare Ultralight", nav.font_haxrcorp_4089, 0, no_space=1
+                "MIFARE Ultralight", nav.font_haxrcorp_4089, 0, no_space=1
             )
         )
         assert len(state) > 0, "Emulation failed"
@@ -871,6 +885,7 @@ class TestNfcBench(BaseCase):
         state = nav.get_current_state()
         while "Saved!" in state:
             state = nav.get_current_state()
+        gator.swim_to(-220.0, -170.0, 15000)
         nav.go_to_main_screen()
 
     def test_emulation_mifare_classic_1k_card(self, nav, gator, reader_nfc):
