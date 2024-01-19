@@ -3,7 +3,7 @@
 #include <usb_std.h>
 #include <usb_hid.h>
 #include <usb_cdc.h>
-#include <furi_hal_console.h>
+#include <core/log.h>
 
 #include "dap_v2_usb.h"
 
@@ -484,8 +484,8 @@ void furi_console_log_printf(const char* format, ...) {
     va_start(args, format);
     vsnprintf(buffer, sizeof(buffer), format, args);
     va_end(args);
-    furi_hal_console_puts(buffer);
-    furi_hal_console_puts("\r\n");
+    furi_log_puts(buffer);
+    furi_log_puts("\r\n");
     UNUSED(format);
 }
 #else
@@ -800,41 +800,41 @@ static usbd_respond hid_ep_config(usbd_device* dev, uint8_t cfg) {
 static void dump_request_type(uint8_t type) {
     switch(type & USB_REQ_DIRECTION) {
     case USB_REQ_HOSTTODEV:
-        furi_hal_console_puts("host to dev, ");
+        furi_log_puts("host to dev, ");
         break;
     case USB_REQ_DEVTOHOST:
-        furi_hal_console_puts("dev to host, ");
+        furi_log_puts("dev to host, ");
         break;
     }
 
     switch(type & USB_REQ_TYPE) {
     case USB_REQ_STANDARD:
-        furi_hal_console_puts("standard, ");
+        furi_log_puts("standard, ");
         break;
     case USB_REQ_CLASS:
-        furi_hal_console_puts("class, ");
+        furi_log_puts("class, ");
         break;
     case USB_REQ_VENDOR:
-        furi_hal_console_puts("vendor, ");
+        furi_log_puts("vendor, ");
         break;
     }
 
     switch(type & USB_REQ_RECIPIENT) {
     case USB_REQ_DEVICE:
-        furi_hal_console_puts("device");
+        furi_log_puts("device");
         break;
     case USB_REQ_INTERFACE:
-        furi_hal_console_puts("interface");
+        furi_log_puts("interface");
         break;
     case USB_REQ_ENDPOINT:
-        furi_hal_console_puts("endpoint");
+        furi_log_puts("endpoint");
         break;
     case USB_REQ_OTHER:
-        furi_hal_console_puts("other");
+        furi_log_puts("other");
         break;
     }
 
-    furi_hal_console_puts("\r\n");
+    furi_log_puts("\r\n");
 }
 #else
 #define dump_request_type(...)

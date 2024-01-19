@@ -83,7 +83,8 @@ Evil_PortalApp* evil_portal_app_alloc() {
 
 void evil_portal_app_free(Evil_PortalApp* app) {
     // Send reset event to dev board
-    evil_portal_uart_tx((uint8_t*)(RESET_CMD "\nstopscan\n"), strlen(RESET_CMD "\nstopscan\n"));
+    evil_portal_uart_tx(
+        app->uart, (uint8_t*)(RESET_CMD "\nstopscan\n"), strlen(RESET_CMD "\nstopscan\n"));
 
     furi_assert(app);
 

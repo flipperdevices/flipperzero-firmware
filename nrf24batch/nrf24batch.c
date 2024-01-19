@@ -1539,12 +1539,12 @@ int32_t nrf24batch_app(void* p) {
         FuriStatus event_status = furi_message_queue_get(event_queue, &event, 100);
         furi_mutex_acquire(APP->plugin_state->mutex, FuriWaitForever);
 
-        static FuriLogLevel FuriLogLevel = FuriLogLevelDefault;
-        if(furi_log_get_level() != FuriLogLevel) {
-            FuriLogLevel = furi_log_get_level();
-            if(FuriLogLevel == FuriLogLevelDebug)
-                furi_hal_uart_set_br(FuriHalUartIdUSART1, 1843200);
-        }
+        // static FuriLogLevel FuriLogLevel = FuriLogLevelDefault;
+        // if(furi_log_get_level() != FuriLogLevel) {
+        //     FuriLogLevel = furi_log_get_level();
+        //     if(FuriLogLevel == FuriLogLevelDebug)
+        //         furi_hal_uart_set_br(FuriHalUartIdUSART1, 1843200);
+        // }
         if(what_doing == 2 && rw_type == rwt_read_cmd && ReadRepeat &&
            furi_get_tick() - NRF_time > (uint32_t)(ReadCmdRepeatPeriod * 1000)) {
             ERR = 0;

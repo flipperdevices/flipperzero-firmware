@@ -2,8 +2,8 @@
 
 #include <furi.h>
 #include <furi_hal.h>
-#include <furi_hal_console.h>
-#include <furi_hal_uart.h>
+#include <furi_hal_serial_control.h>
+#include <furi_hal_serial.h>
 #include <gui/elements.h>
 #include <gui/gui.h>
 #include <gui/icon_i.h>
@@ -19,8 +19,7 @@
 
 #include <xtreme/xtreme.h>
 
-#define UART_CH \
-    (xtreme_settings.uart_esp_channel == UARTDefault ? FuriHalUartIdUSART1 : FuriHalUartIdLPUART1)
+#define UART_CH (xtreme_settings.uart_esp_channel)
 
 #define BITMAP_HEADER_LENGTH 62
 #define FRAME_BIT_DEPTH 1
@@ -52,6 +51,7 @@ typedef void (*CameraSuiteViewCameraCallback)(CameraSuiteCustomEvent event, void
 typedef struct CameraSuiteViewCamera {
     CameraSuiteViewCameraCallback callback;
     FuriStreamBuffer* rx_stream;
+    FuriHalSerialHandle* serial_handle;
     FuriThread* worker_thread;
     NotificationApp* notification;
     View* view;

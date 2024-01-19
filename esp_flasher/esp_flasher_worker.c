@@ -237,7 +237,7 @@ static int32_t esp_flasher_flash_bin(void* context) {
                 err_msg, sizeof(err_msg), "Cannot change transmission rate. Error: %u\n", err);
             loader_port_debug_print(err_msg);
         }
-        furi_hal_uart_set_br(UART_CH, FAST_BAUDRATE);
+        esp_flasher_uart_set_br(app->uart, FAST_BAUDRATE);
     }
 
     if(!err) {
@@ -256,7 +256,7 @@ static int32_t esp_flasher_flash_bin(void* context) {
 
         if(app->turbospeed) {
             loader_port_debug_print("Restoring transmission rate\n");
-            furi_hal_uart_set_br(UART_CH, BAUDRATE);
+            esp_flasher_uart_set_br(app->uart, FAST_BAUDRATE);
         }
 
         loader_port_debug_print(
@@ -365,7 +365,7 @@ esp_loader_error_t loader_port_read(uint8_t* data, uint16_t size, uint32_t timeo
 
 esp_loader_error_t loader_port_write(const uint8_t* data, uint16_t size, uint32_t timeout) {
     UNUSED(timeout);
-    esp_flasher_uart_tx((uint8_t*)data, size);
+    if(global_app) esp_flasher_uart_tx(global_app->uart, (uint8_t*)data, size);
     return ESP_LOADER_SUCCESS;
 }
 

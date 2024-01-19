@@ -232,8 +232,10 @@ int32_t gps_app(void* p) {
                         gps_uart->deep_sleep_enabled = !gps_uart->deep_sleep_enabled;
 
                         // tested on Telit SE868-A and SL871L-S
-                        furi_hal_uart_tx(
-                            UART_CH, (uint8_t*)"$PMTK161,0*28\r\n", strlen("$PMTK161,0*28\r\n"));
+                        furi_hal_serial_tx(
+                            gps_uart->serial_handle,
+                            (uint8_t*)"$PMTK161,0*28\r\n",
+                            strlen("$PMTK161,0*28\r\n"));
 
                         furi_mutex_release(gps_uart->mutex);
                         view_port_update(view_port);

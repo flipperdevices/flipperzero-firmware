@@ -64,8 +64,8 @@ void uart_terminal_scene_console_output_on_enter(void* context) {
     // Send command with newline '\n'
     /*if(!app->is_command && app->selected_tx_string)*/ {
         uart_terminal_uart_tx(
-            (uint8_t*)(app->selected_tx_string), strlen(app->selected_tx_string));
-        uart_terminal_uart_tx((uint8_t*)("\n"), 1);
+            app->uart, (uint8_t*)(app->selected_tx_string), strlen(app->selected_tx_string));
+        uart_terminal_uart_tx(app->uart, (uint8_t*)("\n"), 1);
     }
 }
 
@@ -92,6 +92,6 @@ void uart_terminal_scene_console_output_on_exit(void* context) {
 
     // Automatically logut when exiting view
     //if(app->is_command) {
-    //    uart_terminal_uart_tx((uint8_t*)("exit\n"), strlen("exit\n"));
+    //    uart_terminal_uart_tx(app->uart,(uint8_t*)("exit\n"), strlen("exit\n"));
     //}
 }

@@ -177,11 +177,6 @@ int32_t wifi_marauder_app(void* p) {
         furi_delay_ms(10);
     }
     furi_delay_ms(200);
-    for(int i = 0; i < 2; i++) {
-        furi_delay_ms(500);
-        furi_hal_uart_tx(FuriHalUartIdUSART1, (uint8_t[1]){'w'}, 1);
-    }
-    furi_delay_ms(1);
 
     WifiMarauderApp* wifi_marauder_app = wifi_marauder_app_alloc();
 
@@ -190,6 +185,11 @@ int32_t wifi_marauder_app(void* p) {
 
     wifi_marauder_app->uart = wifi_marauder_usart_init(wifi_marauder_app);
     wifi_marauder_app->lp_uart = wifi_marauder_lp_uart_init(wifi_marauder_app);
+    for(int i = 0; i < 2; i++) {
+        furi_delay_ms(500);
+        wifi_marauder_uart_tx(wifi_marauder_app->uart, (uint8_t[1]){'w'}, 1);
+    }
+    furi_delay_ms(1);
 
     view_dispatcher_run(wifi_marauder_app->view_dispatcher);
 

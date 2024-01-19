@@ -1,10 +1,8 @@
 #include "wardriver.h"
 
-#define UART_CH_ESP \
-    (xtreme_settings.uart_esp_channel == UARTDefault ? FuriHalUartIdUSART1 : FuriHalUartIdLPUART1)
+#define UART_CH_ESP (xtreme_settings.uart_esp_channel)
 
-#define UART_CH_GPS \
-    (xtreme_settings.uart_nmea_channel == UARTDefault ? FuriHalUartIdUSART1 : FuriHalUartIdLPUART1)
+#define UART_CH_GPS (xtreme_settings.uart_nmea_channel)
 
 #define WORKER_ALL_RX_EVENTS (WorkerEvtStop | WorkerEvtRxDone)
 

@@ -59,17 +59,17 @@ void send_request(int command, int a, int b, int c, int d, int e) {
     furi_delay_ms(3.4);
     furi_hal_gpio_write(&gpio_ext_pc1, true);
 
-    furi_hal_uart_init(FuriHalUartIdLPUART1, 4800);
-    //furi_hal_uart_set_br(FuriHalUartIdLPUART1, 4800);
-    //furi_hal_uart_set_irq_cb(FuriHalUartIdLPUART1, usb_uart_on_irq_cb, usb_uart);
+    FuriHalSerialHandle* serial_handle = furi_hal_serial_control_acquire(FuriHalSerialIdLpuart);
+    furi_check(serial_handle);
+    furi_hal_serial_init(serial_handle, 4800);
 
     uint8_t data[8] = {0x0, command, a, b, c, d, e, checksum};
-    furi_hal_uart_tx(FuriHalUartIdLPUART1, data, 8);
+    furi_hal_serial_tx(serial_handle, data, 8);
 
     furi_delay_ms(100);
 
-    furi_hal_uart_set_irq_cb(FuriHalUartIdLPUART1, NULL, NULL);
-    furi_hal_uart_deinit(FuriHalUartIdLPUART1);
+    furi_hal_serial_deinit(serial_handle);
+    furi_hal_serial_control_release(serial_handle);
 }
 
 void reset_code(int a, int b, int c, int d, int e) {
