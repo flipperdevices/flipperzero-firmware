@@ -158,7 +158,7 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 | Bar code scanner emulator via COM port | ![GPIO Badge] | [by polarikus](https://github.com/polarikus/flipper-zero_bc_scanner_emulator) |  | ![None Badge] |
 | ESP32->Flipper Camera | ![GPIO Badge] | [by Z4urce](https://github.com/Z4urce/flipperzero-camera) |  | ![None Badge] |
 | RC2014 ColecoVision | ![GPIO Badge] | [by ezod](https://github.com/ezod/flipperzero-rc2014-coleco) |  | ![None Badge] |
-| ESP Flasher | ![GPIO Badge] | [by 0xchocolate](https://github.com/0xchocolate/flipperzero-esp-flasher) |  | [![Author Badge]](https://lab.flipper.net/apps/esp_flasher) |
+| ESP Flasher | ![GPIO Badge] | [by 0xchocolate](https://github.com/0xchocolate/flipperzero-esp-flasher) | QuickFlash mode and other changes [by @Willy-JL](https://github.com/Flipper-XFW/Xtreme-Apps/tree/dev/esp_flasher) | [![Author Badge]](https://lab.flipper.net/apps/esp_flasher) |
 | ESP32-C6 Gravity terminal | ![GPIO Badge] | [by chris-bc](https://github.com/chris-bc/Flipper-Gravity) |  | ![None Badge] |
 | IFTTT Virtual Button for ESP8266 | ![GPIO Badge] | [by Ferrazzi](https://github.com/Ferrazzi/FlipperZero_IFTTT_Virtual_Button) | Fixes [by Willy-JL](https://github.com/Flipper-XFW/Xtreme-Firmware/commit/ae321fb5f4c616d3965546926b1b4b446eef8d86) | ![None Badge] |
 | Wifi Deauth v2 for ESP8266 | ![GPIO Badge] | [by Timmotools](https://github.com/Timmotools/flipperzero_esp8266_deautherv2) |  | ![None Badge] |
