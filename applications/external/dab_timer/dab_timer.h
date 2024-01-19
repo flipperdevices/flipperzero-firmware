@@ -60,6 +60,7 @@ typedef enum {
     SoundAlertByMin,
     SoundAlertMario,
     SoundAlertGoGoPoRa,
+    SoundAlertCont,
     SoundAlertCount,
 } SoundAlert;
 
@@ -73,9 +74,9 @@ typedef struct {
     // ViewDispatcher* view_dispatcher;
     uint32_t timer_start_timestamp;
     uint32_t lastexp_timestamp;
-    uint16_t timer_stopped_seconds;
-    uint16_t timerSecs;
-    uint8_t alert_time;
+    uint32_t timer_stopped_seconds;
+    uint32_t timerSecs;
+    uint32_t alert_time;
     uint8_t codeSequence;
     uint8_t curEmotiveFace;
     bool timer_running;
