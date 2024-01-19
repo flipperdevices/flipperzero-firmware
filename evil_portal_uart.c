@@ -6,8 +6,12 @@ struct Evil_PortalUart {
     Evil_PortalApp* app;
     FuriThread* rx_thread;
     FuriStreamBuffer* rx_stream;
+    bool pcap;
+    uint8_t mark_test_buf[11];
+    uint8_t mark_test_idx;
     uint8_t rx_buf[RX_BUF_SIZE + 1];
     void (*handle_rx_data_cb)(uint8_t* buf, size_t len, void* context);
+    FuriHalSerialHandle* serial_handle;
 };
 
 typedef enum {
@@ -24,12 +28,60 @@ void evil_portal_uart_set_handle_rx_data_cb(
 
 #define WORKER_ALL_RX_EVENTS (WorkerEvtStop | WorkerEvtRxDone)
 
-void evil_portal_uart_on_irq_cb(UartIrqEvent ev, uint8_t data, void* context) {
+void evil_portal_uart_on_irq_cb(
+    FuriHalSerialHandle* handle,
+    FuriHalSerialRxEvent event,
+    void* context) {
     Evil_PortalUart* uart = (Evil_PortalUart*)context;
 
-    if(ev == UartIrqEventRXNE) {
-        furi_stream_buffer_send(uart->rx_stream, &data, 1, 0);
-        furi_thread_flags_set(furi_thread_get_id(uart->rx_thread), WorkerEvtRxDone);
+    if(event == FuriHalSerialRxEventData) {
+        uint8_t data = furi_hal_serial_async_rx(handle);
+        const char* mark_begin = "[BUF/BEGIN]";
+        const char* mark_close = "[BUF/CLOSE]";
+        if(uart->mark_test_idx != 0) {
+            // We are trying to match a marker
+            if(data == mark_begin[uart->mark_test_idx] ||
+               data == mark_close[uart->mark_test_idx]) {
+                // Received char matches next char in a marker, append to test buffer
+                uart->mark_test_buf[uart->mark_test_idx++] = data;
+                if(uart->mark_test_idx == sizeof(uart->mark_test_buf)) {
+                    // Test buffer reached max length, parse what marker this is and discard buffer
+                    if(!memcmp(
+                           uart->mark_test_buf, (void*)mark_begin, sizeof(uart->mark_test_buf))) {
+                        uart->pcap = true;
+                    } else if(!memcmp(
+                                  uart->mark_test_buf,
+                                  (void*)mark_close,
+                                  sizeof(uart->mark_test_buf))) {
+                        uart->pcap = false;
+                    }
+                    uart->mark_test_idx = 0;
+                }
+                // Don't pass to stream
+                return;
+            } else {
+                // Received char doesn't match any expected next char, send current test buffer
+                if(!uart->pcap) {
+                    furi_stream_buffer_send(
+                        uart->rx_stream, uart->mark_test_buf, uart->mark_test_idx, 0);
+                    furi_thread_flags_set(furi_thread_get_id(uart->rx_thread), WorkerEvtRxDone);
+                }
+                // Reset test buffer and try parsing this char from scratch
+                uart->mark_test_idx = 0;
+            }
+        }
+        // If we reach here the buffer is empty
+        if(data == mark_begin[0]) {
+            // Received marker start, append to test buffer
+            uart->mark_test_buf[uart->mark_test_idx++] = data;
+        } else {
+            // Not a marker start and we aren't matching a marker, this is just data
+            if(!uart->pcap) {
+                // We want to ignore pcap data from marauder
+                furi_stream_buffer_send(uart->rx_stream, &data, 1, 0);
+                furi_thread_flags_set(furi_thread_get_id(uart->rx_thread), WorkerEvtRxDone);
+            }
+        }
     }
 }
 
@@ -75,14 +127,13 @@ static int32_t uart_worker(void* context) {
         }
     }
 
-    furi_hal_uart_set_irq_cb(UART_CH, NULL, NULL);
     furi_stream_buffer_free(uart->rx_stream);
 
     return 0;
 }
 
-void evil_portal_uart_tx(uint8_t* data, size_t len) {
-    furi_hal_uart_tx(UART_CH, data, len);
+void evil_portal_uart_tx(Evil_PortalUart* uart, uint8_t* data, size_t len) {
+    furi_hal_serial_tx(uart->serial_handle, data, len);
 }
 
 Evil_PortalUart* evil_portal_uart_init(Evil_PortalApp* app) {
@@ -98,19 +149,13 @@ Evil_PortalUart* evil_portal_uart_init(Evil_PortalApp* app) {
 
     furi_thread_start(uart->rx_thread);
 
-    if(UART_CH == FuriHalUartIdUSART1) {
-        furi_hal_console_disable();
-    } else if(UART_CH == FuriHalUartIdLPUART1) {
-        furi_hal_uart_init(UART_CH, app->BAUDRATE);
-    }
-
     if(app->BAUDRATE == 0) {
         app->BAUDRATE = 115200;
     }
-    furi_hal_uart_set_br(UART_CH, app->BAUDRATE);
-    furi_hal_uart_set_irq_cb(UART_CH, evil_portal_uart_on_irq_cb, uart);
-
-    //evil_portal_uart_tx((uint8_t*)("XFW#EVILPORTAL=1\n"), strlen("XFW#EVILPORTAL=1\n"));
+    uart->serial_handle = furi_hal_serial_control_acquire(UART_CH);
+    furi_check(uart->serial_handle);
+    furi_hal_serial_init(uart->serial_handle, app->BAUDRATE);
+    furi_hal_serial_async_rx_start(uart->serial_handle, evil_portal_uart_on_irq_cb, uart, false);
 
     return uart;
 }
@@ -122,11 +167,8 @@ void evil_portal_uart_free(Evil_PortalUart* uart) {
     furi_thread_join(uart->rx_thread);
     furi_thread_free(uart->rx_thread);
 
-    if(UART_CH == FuriHalUartIdLPUART1) {
-        furi_hal_uart_deinit(UART_CH);
-    } else {
-        furi_hal_console_enable();
-    }
+    furi_hal_serial_deinit(uart->serial_handle);
+    furi_hal_serial_control_release(uart->serial_handle);
 
     free(uart);
 }
