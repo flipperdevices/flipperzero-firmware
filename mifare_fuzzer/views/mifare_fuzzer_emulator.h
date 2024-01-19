@@ -4,6 +4,7 @@
 #include <furi_hal.h>
 #include <gui/view.h>
 #include <gui/elements.h>
+#include <lib/nfc/nfc_device.h>
 
 #include "lib/nfc/protocols/iso14443_3a/iso14443_3a.h"
 
@@ -49,7 +50,8 @@ View* mifare_fuzzer_emulator_get_view(MifareFuzzerEmulator* context);
 
 void mifare_fuzzer_emulator_set_card(
     MifareFuzzerEmulator* mifare_fuzzer_emulator,
-    MifareCard mifare_card);
+    MifareCard mifare_card,
+    FuriString* name);
 void mifare_fuzzer_emulator_set_attack(
     MifareFuzzerEmulator* mifare_fuzzer_emulator,
     MifareFuzzerAttack mifare_attack);
