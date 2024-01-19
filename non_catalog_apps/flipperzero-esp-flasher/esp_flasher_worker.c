@@ -230,29 +230,33 @@ static int32_t esp_flasher_flash_bin(void* context) {
     // higher BR
     if(!err && app->turbospeed) {
         loader_port_debug_print("Increasing speed for faster flash\n");
-        err = esp_loader_change_transmission_rate(921600);
-        if (err != ESP_LOADER_SUCCESS) {
+        err = esp_loader_change_transmission_rate(FAST_BAUDRATE);
+        if(err != ESP_LOADER_SUCCESS) {
             char err_msg[256];
             snprintf(
-                err_msg,
-                sizeof(err_msg),
-                "Cannot change transmission rate. Error: %u\n",
-                err);
+                err_msg, sizeof(err_msg), "Cannot change transmission rate. Error: %u\n", err);
             loader_port_debug_print(err_msg);
         }
-        furi_hal_uart_set_br(FuriHalUartIdUSART1, 921600);
+        esp_flasher_uart_set_br(app->uart, FAST_BAUDRATE);
     }
 
     if(!err) {
         loader_port_debug_print("Connected\n");
+        uint32_t start_time = furi_get_tick();
+
         if(!_switch_fw(app)) {
             _flash_all_files(app);
         }
         app->switch_fw = SwitchNotSet;
 
-        if (app->turbospeed) {
+        FuriString* flash_time =
+            furi_string_alloc_printf("Flash took: %lds\n", (furi_get_tick() - start_time) / 1000);
+        loader_port_debug_print(furi_string_get_cstr(flash_time));
+        furi_string_free(flash_time);
+
+        if(app->turbospeed) {
             loader_port_debug_print("Restoring transmission rate\n");
-            furi_hal_uart_set_br(FuriHalUartIdUSART1, 115200);
+            esp_flasher_uart_set_br(app->uart, BAUDRATE);
         }
 
         loader_port_debug_print(
@@ -272,6 +276,7 @@ static int32_t esp_flasher_flash_bin(void* context) {
 
     // done
     app->flash_worker_busy = false;
+    app->quickflash = false;
 
     // cleanup
     furi_stream_buffer_free(flash_rx_stream);
@@ -306,6 +311,9 @@ static int32_t esp_flasher_reset(void* context) {
     _setRTS(false);
     _initRTS();
 
+    furi_hal_gpio_init_simple(&gpio_swclk, GpioModeOutputPushPull);
+    furi_hal_gpio_write(&gpio_swclk, true);
+
     if(app->reset) {
         loader_port_debug_print("Resetting board\n");
         loader_port_reset_target();
@@ -318,6 +326,10 @@ static int32_t esp_flasher_reset(void* context) {
     app->flash_worker_busy = false;
     app->reset = false;
     app->boot = false;
+
+    if(app->quickflash) {
+        esp_flasher_flash_bin(app);
+    }
 
     return 0;
 }
@@ -353,7 +365,7 @@ esp_loader_error_t loader_port_read(uint8_t* data, uint16_t size, uint32_t timeo
 
 esp_loader_error_t loader_port_write(const uint8_t* data, uint16_t size, uint32_t timeout) {
     UNUSED(timeout);
-    esp_flasher_uart_tx((uint8_t*)data, size);
+    if(global_app) esp_flasher_uart_tx(global_app->uart, (uint8_t*)data, size);
     return ESP_LOADER_SUCCESS;
 }
 
@@ -364,6 +376,18 @@ void loader_port_reset_target(void) {
 }
 
 void loader_port_enter_bootloader(void) {
+    // Also support for the Multi-fucc and Xeon boards
+    furi_hal_gpio_write(&gpio_swclk, false);
+    if(furi_hal_power_is_otg_enabled()) {
+        furi_hal_power_disable_otg();
+    }
+    loader_port_delay_ms(100);
+    if(!furi_hal_power_is_otg_enabled()) {
+        furi_hal_power_enable_otg();
+    }
+    furi_hal_gpio_init_simple(&gpio_swclk, GpioModeAnalog);
+    loader_port_delay_ms(100);
+
     // adapted from custom usb-jtag-serial reset in esptool
     // (works on official wifi dev board)
     _setDTR(true);

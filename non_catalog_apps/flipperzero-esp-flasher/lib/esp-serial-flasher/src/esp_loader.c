@@ -85,7 +85,10 @@ static uint32_t timeout_per_mb(uint32_t size_bytes, uint32_t time_per_mb)
 
 esp_loader_error_t esp_loader_connect(esp_loader_connect_args_t *connect_args)
 {
-    loader_port_enter_bootloader();
+    // if bootloader mode ever give issues, uncomment this function
+    // it shouldnt be needed because we enter bootloader mode before this function is called
+    // this function breaks bootloader mode for the Multi-fucc and Xeon
+    //loader_port_enter_bootloader();
 
     RETURN_ON_ERROR(loader_initialize_conn(connect_args));
 

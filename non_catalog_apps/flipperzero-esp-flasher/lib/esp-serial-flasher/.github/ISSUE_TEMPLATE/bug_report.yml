@@ -1,0 +1,47 @@
+name: Bug report
+description: Report a problem with esp-serial-flasher operation
+labels: ['Type: Bug']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        * Please ensure you are using the latest version of `esp-serial-flasher`.
+        * Try using one of the examples from the `examples` directory and following the example documentation.
+        * If your board is a custom design, consider using our [free-of-charge schematic and PCB review service](https://www.espressif.com/en/contact-us/circuit-schematic-pcb-design-review).
+        * If still experiencing issues, please provide as many details as possible below about your hardware and software setup.
+  - type: input
+    id: port
+    attributes:
+      label: Port
+      description: Which port are you experiencing the issue with?
+      placeholder: ex. ESP, STM32
+    validations:
+      required: true
+  - type: input
+    id: target
+    attributes:
+      label: Target chip
+      description: Which chip are you trying to flash?
+      placeholder: ex. ESP8266, ESP32, ESP32-C3
+    validations:
+      required: true
+  - type: textarea
+    id: other-hw
+    attributes:
+      label: Hardware Configuration
+      description: What dev boards/custom PCB are you using, how are the chips connected, which baudrate are you trying to flash with?
+    validations:
+      required: true
+    id: output
+  - type: textarea
+    attributes:
+      label: Log output
+      description: Enable tracing with SERIAL_FLASHER_DEBUG_TRACE and provide the full log.
+      render: plain
+    validations:
+      required: true
+  - type: textarea
+    id: more-info
+    attributes:
+      label: More Information
+      description: Provide any additional information relevant to the issue.

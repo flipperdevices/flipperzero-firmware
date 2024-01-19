@@ -1,0 +1,139 @@
+stages:
+  - build
+  - test
+  - deploy
+
+workflow:
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS && $CI_PIPELINE_SOURCE == "push"
+      when: never
+    - if: "$CI_COMMIT_BRANCH"
+
+variables:
+  STM32_CUBE_H7_REPO: https://github.com/STMicroelectronics/STM32CubeH7
+  STM32_CUBE_H7_REPO_TAG: v1.11.1
+  ARM_TOOLCHAIN_URL: https://developer.arm.com/-/media/Files/downloads/gnu/13.2.rel1/binrel/arm-gnu-toolchain-13.2.rel1-x86_64-arm-none-eabi.tar.xz?rev=e434b9ea4afc4ed7998329566b764309&hash=CA590209F5774EE1C96E6450E14A3E26
+  QEMU_PATH: /opt/qemu/bin/qemu-system-xtensa
+  ZEPHYR_REPO: https://github.com/zephyrproject-rtos/zephyr.git
+  ZEPHYR_REPO_REV: v3.5.0
+  ZEPHYR_TOOLCHAIN: https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v0.16.3/toolchain_linux-x86_64_xtensa-espressif_esp32_zephyr-elf.tar.xz
+  ZEPHYR_SDK: https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v0.16.3/zephyr-sdk-0.16.3_linux-aarch64_minimal.tar.xz
+
+.build_idf_template:
+  stage: build
+  image: espressif/idf:latest
+  tags:
+    - build
+    - internet
+  variables:
+    PEDANTIC_FLAGS: "-Werror=all -Werror=extra"
+    EXTRA_CFLAGS: "${PEDANTIC_FLAGS}"
+    EXTRA_CXXFLAGS: "${PEDANTIC_FLAGS}"
+  script:
+    - cd $CI_PROJECT_DIR/examples/esp32_example
+    - idf.py build -DMD5_ENABLED=1
+    - idf.py build -DMD5_ENABLED=0
+    - cd $CI_PROJECT_DIR/examples/esp32_load_ram_example
+    - idf.py build
+    - cd $CI_PROJECT_DIR/examples/esp32_spi_load_ram_example
+    - idf.py build
+
+build_idf_v4.2:
+  extends: .build_idf_template
+  image: espressif/idf:release-v4.2
+
+build_idf_v4.3:
+  extends: .build_idf_template
+  image: espressif/idf:release-v4.3
+
+build_idf_v4.4:
+  extends: .build_idf_template
+  image: espressif/idf:release-v4.4
+
+build_idf_v5.0:
+  extends: .build_idf_template
+  image: espressif/idf:release-v5.0
+
+build_idf_v5.1:
+  extends: .build_idf_template
+  image: espressif/idf:release-v5.1
+
+build_idf_master:
+  extends: .build_idf_template
+  image: espressif/idf:latest
+
+build_stm32:
+  stage: build
+  # IDF is not necessary for STM32 build, but this image is already used in another job
+  # and it comes with a recent enough CMake version.
+  image: espressif/idf:latest
+  tags:
+    - build
+    - internet
+  script:
+    - cd $CI_PROJECT_DIR
+    - git submodule update --init
+    - git clone --depth=1 -b ${STM32_CUBE_H7_REPO_TAG} ${STM32_CUBE_H7_REPO}
+    - wget --no-verbose -O gcc-arm-none-eabi.tar.xz ${ARM_TOOLCHAIN_URL}
+    - tar xf gcc-arm-none-eabi.tar.xz
+    - mv arm-gnu-toolchain-* gcc-arm-none-eabi
+    - mkdir $CI_PROJECT_DIR/examples/stm32_example/build
+    - cd $CI_PROJECT_DIR/examples/stm32_example/build
+    - cmake -DSTM32_TOOLCHAIN_PATH=$CI_PROJECT_DIR/gcc-arm-none-eabi -DSTM32_CUBE_H7_PATH=$CI_PROJECT_DIR/STM32CubeH7 -G Ninja ..
+    - cmake --build .
+
+build_zephyr:
+  stage: build
+  image: espressif/idf:latest
+  tags:
+    - build
+    - internet
+  script:
+    - mkdir $CI_PROJECT_DIR/zephyrproject-rtos
+    - cd $CI_PROJECT_DIR/zephyrproject-rtos
+    - git clone --single-branch --depth=1 -b ${ZEPHYR_REPO_REV} ${ZEPHYR_REPO}
+    - mkdir $CI_PROJECT_DIR/zephyrproject-rtos/zephyr-sdk
+    - cd $CI_PROJECT_DIR/zephyrproject-rtos/zephyr-sdk
+    - wget --no-verbose -O zephyr_sdk.tar.xz ${ZEPHYR_SDK}
+    - tar xvf zephyr_sdk.tar.xz --strip-components=1
+    - wget --no-verbose -O esp32_toolchain.tar.xz ${ZEPHYR_TOOLCHAIN}
+    - tar xvf esp32_toolchain.tar.xz
+    - export ZEPHYR_SDK_INSTALL_DIR=$(pwd)
+    - export ZEPHYR_TOOLCHAIN_VARIANT="zephyr"
+    - cd $CI_PROJECT_DIR/zephyrproject-rtos/zephyr
+    - export ZEPHYR_BASE=$(pwd)
+    - pip install -r scripts/requirements.txt
+    - pip install wheel
+    - if [[ ! -d "$CI_PROJECT_DIR/zephyrproject-rtos/.west" ]]; then
+    - west init -l .
+    - fi
+    - unset IDF_PATH
+    - west zephyr-export
+    - west update hal_espressif
+    - west build -p -b esp32_devkitc_wroom $CI_PROJECT_DIR/examples/zephyr_example -DZEPHYR_EXTRA_MODULES=$CI_PROJECT_DIR
+
+run_tests:
+  stage: test
+  image: ${CI_DOCKER_REGISTRY}/qemu:esp-develop-20191124
+  tags:
+    - build
+    - internet
+  script:
+    - cd $CI_PROJECT_DIR/test
+    - export QEMU_PATH=/opt/qemu/bin/qemu-system-xtensa
+    - ./run_test.sh qemu
+    - ./run_test.sh host
+
+push_to_the_components_registry:
+  stage: deploy
+  image: python:3.10-alpine
+  tags:
+    - build
+    - internet
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master"'
+    - if: '$FORCE_PUSH_COMPONENT == "1"'
+  script:
+    - pip install idf-component-manager
+    - python -m idf_component_manager upload-component --allow-existing --name=esp-serial-flasher --namespace=espressif
