@@ -32,7 +32,7 @@ void mfc_editor_scene_block_select_on_enter(void* context) {
     FuriString* label = furi_string_alloc();
     for(uint8_t i = 0; i < block_num; i++) {
         uint8_t block_index = first_block + i;
-        furi_string_printf(label, "Block %hhu", block_index);
+        furi_string_printf(label, "Block %u", block_index);
         submenu_add_item(
             submenu,
             furi_string_get_cstr(label),
