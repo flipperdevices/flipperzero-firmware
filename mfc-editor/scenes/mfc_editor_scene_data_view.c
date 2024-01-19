@@ -133,7 +133,8 @@ void mfc_editor_scene_data_view_on_enter(void* context) {
                 sector_trailer_num);
         }
     } else {
-        furi_string_printf(instance->data_view_header, "Block %u Data", instance->current_block);
+        uint8_t current_block = instance->current_block;
+        furi_string_printf(instance->data_view_header, "Block %u Data", current_block);
         dialog_ex_set_header(
             dialog_ex,
             furi_string_get_cstr(instance->data_view_header),
@@ -141,6 +142,31 @@ void mfc_editor_scene_data_view_on_enter(void* context) {
             3,
             AlignCenter,
             AlignTop);
+
+        // Only display a block if it is fully read, and, if it is a sector trailer, both keys are found
+        if(mf_classic_is_block_read(mf_classic_data, current_block) &&
+           (!mf_classic_is_sector_trailer(current_block) ||
+            (mf_classic_is_key_found(
+                 mf_classic_data, instance->current_sector, MfClassicKeyTypeA) &&
+             mf_classic_is_key_found(
+                 mf_classic_data, instance->current_sector, MfClassicKeyTypeB)))) {
+            // Split block data across 2 even lines
+            const uint8_t* block_data = mf_classic_data->block[current_block].data;
+            for(int i = 0; i < MF_CLASSIC_BLOCK_SIZE / 2; i++) {
+                furi_string_cat_printf(instance->data_view_text, "%02X ", block_data[i]);
+            }
+            // Remove trailing space
+            furi_string_trim(instance->data_view_text);
+            furi_string_push_back(instance->data_view_text, '\n');
+            for(int i = MF_CLASSIC_BLOCK_SIZE / 2; i < MF_CLASSIC_BLOCK_SIZE; i++) {
+                furi_string_cat_printf(instance->data_view_text, "%02X ", block_data[i]);
+            }
+            // Remove trailing space
+            furi_string_trim(instance->data_view_text);
+        } else {
+            furi_string_set(
+                instance->data_view_text, "Data unavailable.\nBlock has not been fully read.");
+        }
     }
 
     dialog_ex_set_text(
