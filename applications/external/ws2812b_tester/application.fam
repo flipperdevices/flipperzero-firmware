@@ -8,6 +8,6 @@ App(
     fap_category="GPIO",
     fap_author="jamisonderek",
     fap_weburl="https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/gpio/ws2812b_tester",
-    fap_version=(1, 8),
+    fap_version=(1, 9),
     fap_description="WS2812B LED Tester App.  This is intended to test that WS2812B LEDs are functioning correctly.",
 )

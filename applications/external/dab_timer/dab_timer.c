@@ -143,11 +143,11 @@ static void dab_timer_render_callback(Canvas* const canvas, void* ctx) {
     }
     bool timer_running = plugin_state->timer_running;
     uint8_t songSelect = plugin_state->songSelect;
-    uint8_t alert_time = plugin_state->alert_time;
+    uint32_t alert_time = plugin_state->alert_time;
     uint32_t timer_start_timestamp = plugin_state->timer_start_timestamp;
-    uint16_t timer_stopped_seconds = plugin_state->timer_stopped_seconds;
+    uint32_t timer_stopped_seconds = plugin_state->timer_stopped_seconds;
     char alertTime[4];
-    snprintf(alertTime, sizeof(alertTime), "%d", alert_time);
+    snprintf(alertTime, sizeof(alertTime), "%ld", alert_time);
     furi_mutex_release(plugin_state->mutex);
     if(plugin_state->faceType == FaceStylePwn || plugin_state->faceType == FaceStylePwnInverted) {
         if(plugin_state->faceType == FaceStylePwnInverted) {
@@ -168,8 +168,8 @@ static void dab_timer_render_callback(Canvas* const canvas, void* ctx) {
             canvas_set_color(canvas, ColorBlack);
         }
         canvas_set_font(canvas, FontBigNumbers);
-        int32_t elapsed_secs = timer_running ? (curr_ts - timer_start_timestamp) :
-                                               timer_stopped_seconds;
+        uint32_t elapsed_secs = timer_running ? (curr_ts - timer_start_timestamp) :
+                                                timer_stopped_seconds;
         snprintf(timer_string, 20, "%.2ld:%.2ld", elapsed_secs / 60, elapsed_secs % 60);
         canvas_draw_str_aligned(canvas, 64, 8, AlignCenter, AlignCenter, time_string); // DRAW TIME
         if(plugin_state->w_test && timer_start_timestamp != 0) {
@@ -230,8 +230,8 @@ static void dab_timer_render_callback(Canvas* const canvas, void* ctx) {
         }
         canvas_set_font(canvas, FontBigNumbers);
         if(timer_start_timestamp != 0 && !plugin_state->w_test) {
-            int32_t elapsed_secs = timer_running ? (curr_ts - timer_start_timestamp) :
-                                                   timer_stopped_seconds;
+            uint32_t elapsed_secs = timer_running ? (curr_ts - timer_start_timestamp) :
+                                                    timer_stopped_seconds;
             snprintf(timer_string, 20, "%.2ld:%.2ld", elapsed_secs / 60, elapsed_secs % 60);
             canvas_draw_str_aligned(
                 canvas, 64, 8, AlignCenter, AlignCenter, time_string); // DRAW TIME
@@ -247,11 +247,11 @@ static void dab_timer_render_callback(Canvas* const canvas, void* ctx) {
         } else {
             if(plugin_state->w_test) canvas_set_font(canvas, FontBatteryPercent);
             if(plugin_state->w_test && timer_start_timestamp != 0) {
-                int32_t elapsed_secs = timer_running ? (curr_ts - timer_start_timestamp) :
-                                                       timer_stopped_seconds;
+                uint32_t elapsed_secs = timer_running ? (curr_ts - timer_start_timestamp) :
+                                                        timer_stopped_seconds;
                 snprintf(timer_string, 20, "%.2ld:%.2ld", elapsed_secs / 60, elapsed_secs % 60);
-                int32_t elapsed_secs_img = (elapsed_secs % 60) % 5;
-                int32_t elapsed_secs_img2 = (elapsed_secs % 60) % 4;
+                uint32_t elapsed_secs_img = (elapsed_secs % 60) % 5;
+                uint32_t elapsed_secs_img2 = (elapsed_secs % 60) % 4;
                 static const Icon* const count_anim[5] = {
                     &I_HappyFlipper_128x64, &I_G0ku, &I_g0ku_1, &I_g0ku_2, &I_g0ku_3};
                 static const Icon* const count_anim2[4] = {
@@ -330,8 +330,8 @@ static void dab_timer_render_callback(Canvas* const canvas, void* ctx) {
             }
             canvas_set_color(canvas, ColorBlack);
         }
-        uint8_t width = canvas_width(canvas);
-        uint8_t height = canvas_height(canvas);
+        int8_t width = canvas_width(canvas);
+        int8_t height = canvas_height(canvas);
         Vector2 clock_center = {
             .x = 28 + width / 2,
             .y = height / 2,
@@ -385,8 +385,8 @@ static void dab_timer_render_callback(Canvas* const canvas, void* ctx) {
         }
         canvas_set_font(canvas, FontBatteryPercent);
         if(timer_start_timestamp != 0) {
-            int32_t elapsed_secs = timer_running ? (curr_ts - timer_start_timestamp) :
-                                                   timer_stopped_seconds;
+            uint32_t elapsed_secs = timer_running ? (curr_ts - timer_start_timestamp) :
+                                                    timer_stopped_seconds;
             dab_timer_render_binary_face(canvas, elapsed_secs / 60, 5, timer_start_timestamp);
             dab_timer_render_binary_face(
                 canvas, elapsed_secs % 60, 5 + (9 * 1), timer_start_timestamp);
@@ -431,6 +431,8 @@ static void dab_timer_render_callback(Canvas* const canvas, void* ctx) {
                 elements_button_right(canvas, "S:Mario");
             } else if(songSelect == SoundAlertByMin) {
                 elements_button_right(canvas, "S:ByMin");
+            } else if(songSelect == SoundAlertCont) {
+                elements_button_right(canvas, "S:Cont");
             }
         }
         if(plugin_state->w_test && plugin_state->desktop_settings->is_dumbmode) {
@@ -534,11 +536,11 @@ int32_t dab_timer_app(void* p) {
                     case InputKeyDown:
                         if(plugin_state->codeSequence == 2 || plugin_state->codeSequence == 3) {
                             plugin_state->codeSequence++;
-                            if(plugin_state->timer_running)
+                            if(plugin_state->timer_running && plugin_state->alert_time >= 5)
                                 plugin_state->alert_time = plugin_state->alert_time - 5;
                         } else {
                             plugin_state->codeSequence = 0;
-                            if(plugin_state->timer_running)
+                            if(plugin_state->timer_running && plugin_state->alert_time >= 5)
                                 plugin_state->alert_time = plugin_state->alert_time - 5;
                         }
                         break;
@@ -587,6 +589,7 @@ int32_t dab_timer_app(void* p) {
                             if(!plugin_state->desktop_settings->is_dumbmode) {
                                 if(plugin_state->songSelect == SoundAlertMario ||
                                    plugin_state->songSelect == SoundAlertGoGoPoRa ||
+                                   plugin_state->songSelect == SoundAlertCont ||
                                    plugin_state->songSelect == SoundAlertByMin) {
                                     notification_message(notification, &dab_timer_alert_startStop);
                                 }
@@ -633,6 +636,7 @@ int32_t dab_timer_app(void* p) {
                         dab_timer_dumbmode_changed(plugin_state->desktop_settings);
                         if(plugin_state->songSelect == SoundAlertMario ||
                            plugin_state->songSelect == SoundAlertGoGoPoRa ||
+                           plugin_state->songSelect == SoundAlertCont ||
                            plugin_state->songSelect == SoundAlertByMin) {
                             notification_message(notification, &sequence_success);
                             notification_message(notification, &sequence_rainbow);
@@ -688,6 +692,10 @@ int32_t dab_timer_app(void* p) {
                             notification_message(notification, &dab_timer_alert_pr3);
                             notification_message(notification, &sequence_rainbow);
                             notification_message(notification, &sequence_rainbow);
+                        }
+                    } else if(plugin_state->songSelect == SoundAlertCont) {
+                        if(plugin_state->timerSecs >= plugin_state->alert_time) {
+                            notification_message(notification, &dab_timer_alert_mario1);
                         }
                     } else if(plugin_state->songSelect == SoundAlertMario) {
                         if(plugin_state->timerSecs == plugin_state->alert_time) {

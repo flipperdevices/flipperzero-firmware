@@ -6,7 +6,7 @@ App(
     stack_size=2 * 1024,
     fap_category="GPIO",
     fap_icon="lightning_10x.png",
-    fap_icon_assets="images",
+    fap_icon_assets="assets",
     fap_author="arag0re.eth && PooruTorie",
     fap_weburl="https://github.com/arag0re/fz-iphone-dcsd",
     fap_version="0.1",
