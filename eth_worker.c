@@ -5,7 +5,6 @@
 #include <furi_hal.h>
 #include "dhcp.h"
 #include "socket.h"
-#include "stm32wbxx_hal_gpio.h"
 #include <wizchip_conf.h>
 
 #define TAG "EthWorker"
@@ -226,8 +225,8 @@ void eth_run(EthWorker* worker, EthWorkerProcess process) {
 /************************** Ethernet Worker Thread *****************************/
 
 static uint8_t ip_assigned = 0;
-static GpioPin cspin = {.port = GPIOA, .pin = GPIO_PIN_4};
-static GpioPin resetpin = {.port = GPIOC, .pin = GPIO_PIN_3};
+static GpioPin cspin = {.port = GPIOA, .pin = LL_GPIO_PIN_4};
+static GpioPin resetpin = {.port = GPIOC, .pin = LL_GPIO_PIN_3};
 
 static void W5500_Select(void) {
     furi_hal_gpio_write(&cspin, false);
