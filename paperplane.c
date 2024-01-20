@@ -134,7 +134,6 @@ int32_t paperplane_app() {
         FURI_LOG_E("Paper Plane", "cannot create mutex\r\n");
         // game crash, all initialized items must be freed.
         furi_message_queue_free(event_queue);
-        furi_mutex_free(game_state->mutex);
         //furi_timer_free(game_state->timer); this causes a null pointer dereference
         free(game_state->paper);
         free(game_state->map);
