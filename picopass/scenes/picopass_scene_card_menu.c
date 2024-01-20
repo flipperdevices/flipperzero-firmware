@@ -23,52 +23,45 @@ void picopass_scene_card_menu_on_enter(void* context) {
     PicopassBlock* AA1 = picopass->dev->dev_data.AA1;
 
     bool sio = 0x30 == AA1[PICOPASS_ICLASS_PACS_CFG_BLOCK_INDEX].data[0];
-    bool no_key = picopass_is_memset(pacs->key, 0x00, PICOPASS_BLOCK_LEN);
     bool secured = (AA1[PICOPASS_CONFIG_BLOCK_INDEX].data[7] & PICOPASS_FUSE_CRYPT10) !=
                    PICOPASS_FUSE_CRYPT0;
+    bool zero_config = picopass_is_memset(
+        AA1[PICOPASS_ICLASS_PACS_CFG_BLOCK_INDEX].data, 0x00, PICOPASS_BLOCK_LEN);
+    bool no_credential = picopass_is_memset(pacs->credential, 0x00, sizeof(pacs->credential));
+    bool no_key =
+        picopass_is_memset(AA1[PICOPASS_SECURE_KD_BLOCK_INDEX].data, 0xFF, PICOPASS_BLOCK_LEN);
 
-    if(!secured) {
+    if(secured && zero_config) {
         submenu_add_item(
-            submenu, "Save", SubmenuIndexSave, picopass_scene_card_menu_submenu_callback, picopass);
-    } else if(no_key) {
-        if(sio) {
-            submenu_add_item(
-                submenu,
-                "Save",
-                SubmenuIndexSave,
-                picopass_scene_card_menu_submenu_callback,
-                picopass);
-            submenu_add_item(
-                submenu,
-                "Save in Seader fmt",
-                SubmenuIndexSaveAsSeader,
-                picopass_scene_card_menu_submenu_callback,
-                picopass);
-        } else {
-            submenu_add_item(
-                submenu,
-                "Save Partial",
-                SubmenuIndexSavePartial,
-                picopass_scene_card_menu_submenu_callback,
-                picopass);
-        }
+            submenu,
+            "Save Partial",
+            SubmenuIndexSavePartial,
+            picopass_scene_card_menu_submenu_callback,
+            picopass);
     } else {
         submenu_add_item(
             submenu, "Save", SubmenuIndexSave, picopass_scene_card_menu_submenu_callback, picopass);
+    }
+
+    if(secured && (sio || pacs->sio)) {
+        submenu_add_item(
+            submenu,
+            "Save in Seader fmt",
+            SubmenuIndexSaveAsSeader,
+            picopass_scene_card_menu_submenu_callback,
+            picopass);
+    }
+
+    if(secured && !no_credential) {
         submenu_add_item(
             submenu,
             "Save as LFRFID",
             SubmenuIndexSaveAsLF,
             picopass_scene_card_menu_submenu_callback,
             picopass);
-        if(pacs->sio) { // SR
-            submenu_add_item(
-                submenu,
-                "Save in Seader fmt",
-                SubmenuIndexSaveAsSeader,
-                picopass_scene_card_menu_submenu_callback,
-                picopass);
-        }
+    }
+
+    if(!zero_config && !no_key) {
         submenu_add_item(
             submenu,
             "Write",
@@ -81,12 +74,14 @@ void picopass_scene_card_menu_on_enter(void* context) {
             SubmenuIndexEmulate,
             picopass_scene_card_menu_submenu_callback,
             picopass);
-        submenu_add_item(
-            submenu,
-            "Change Key",
-            SubmenuIndexChangeKey,
-            picopass_scene_card_menu_submenu_callback,
-            picopass);
+        if(secured) {
+            submenu_add_item(
+                submenu,
+                "Change Key",
+                SubmenuIndexChangeKey,
+                picopass_scene_card_menu_submenu_callback,
+                picopass);
+        }
     }
 
     submenu_set_selected_item(
