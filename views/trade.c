@@ -86,6 +86,7 @@
 #include <gblink.h>
 
 #include "../pokemon_app.h"
+#include "../pokemon_data.h"
 #include "trade_patch_list.h"
 
 #define DELAY_MICROSECONDS 15
@@ -160,12 +161,11 @@ struct trade_ctx {
     uint8_t in_data;
     uint8_t out_data;
     uint8_t shift;
-    TradeBlock* trade_block;
-    TradeBlock* input_block;
-    const PokemonTable* pokemon_table;
+    PokemonData* input_pdata;
     struct patch_list* patch_list;
     void* gblink_handle;
     struct gblink_pins* gblink_pins;
+    PokemonData* pdata;
 };
 
 /* These are the needed variables for the draw callback */
@@ -173,7 +173,7 @@ struct trade_model {
     render_gameboy_state_t gameboy_status;
     bool ledon; // Controls the blue LED during trade
     uint8_t curr_pokemon;
-    const PokemonTable* pokemon_table;
+    const void* table;
 };
 
 /* A callback function that must be called outside of an interrupt context,
@@ -186,7 +186,7 @@ static void pokemon_plist_recreate_callback(void* context, uint32_t arg) {
     UNUSED(arg);
     struct trade_ctx* trade = context;
 
-    plist_create(&(trade->patch_list), trade->trade_block);
+    plist_create(&(trade->patch_list), trade->pdata);
 }
 
 /* Draws a whole screen image with Flipper mascot, Game Boy, etc. */
@@ -254,7 +254,7 @@ static void trade_draw_timer_callback(void* context) {
 static void trade_draw_callback(Canvas* canvas, void* view_model) {
     furi_assert(view_model);
     struct trade_model* model = view_model;
-    const Icon* icon = model->pokemon_table[model->curr_pokemon].icon;
+    const Icon* icon = table_icon_get(model->table, model->curr_pokemon);
 
     canvas_clear(canvas);
     switch(model->gameboy_status) {
@@ -397,14 +397,14 @@ static uint8_t getMenuResponse(struct trade_ctx* trade) {
 static uint8_t getTradeCentreResponse(struct trade_ctx* trade) {
     furi_assert(trade);
 
-    uint8_t* trade_block_flat = (uint8_t*)trade->trade_block;
-    uint8_t* input_block_flat = (uint8_t*)trade->input_block;
-    uint8_t* input_party_flat = (uint8_t*)trade->input_block->party;
+    uint8_t* trade_block_flat = (uint8_t*)trade->pdata->trade_block;
+    uint8_t* input_block_flat = (uint8_t*)trade->input_pdata->trade_block;
+    uint8_t* input_party_flat = (uint8_t*)trade->input_pdata->party;
     struct trade_model* model = NULL;
     uint8_t in = trade->in_data;
     uint8_t send = in;
     static bool patch_pt_2;
-    static int counter;
+    static size_t counter;
     static uint8_t in_pkmn_idx;
 
     /* TODO: Figure out how we should respond to a no_data_byte and/or how to
@@ -472,7 +472,7 @@ static uint8_t getTradeCentreResponse(struct trade_ctx* trade) {
         send = trade_block_flat[counter];
         counter++;
 
-        if(counter == sizeof(TradeBlock)) {
+        if(counter == trade->input_pdata->trade_block_sz) {
             trade->trade_centre_state = TRADE_PATCH_HEADER;
             counter = 0;
         }
@@ -595,21 +595,8 @@ static uint8_t getTradeCentreResponse(struct trade_ctx* trade) {
             model->gameboy_status = GAMEBOY_TRADING;
 
             /* Copy the traded-in Pokemon's main data to our struct */
-            trade->trade_block->party_members[0] = trade->input_block->party_members[in_pkmn_idx];
-            memcpy(
-                &(trade->trade_block->party[0]),
-                &(trade->input_block->party[in_pkmn_idx]),
-                sizeof(struct pokemon_structure));
-            memcpy(
-                &(trade->trade_block->nickname[0]),
-                &(trade->input_block->nickname[in_pkmn_idx]),
-                sizeof(struct name));
-            memcpy(
-                &(trade->trade_block->ot_name[0]),
-                &(trade->input_block->ot_name[in_pkmn_idx]),
-                sizeof(struct name));
-            model->curr_pokemon = pokemon_table_get_num_from_index(
-                trade->pokemon_table, trade->trade_block->party_members[0]);
+	    pokemon_stat_memcpy(trade->pdata, trade->input_pdata, in_pkmn_idx);
+            model->curr_pokemon = pokemon_stat_get(trade->pdata, STAT_NUM, NONE);
 
             /* Schedule a callback outside of ISR context to rebuild the patch
 	     * list with the new Pokemon that we just accepted.
@@ -671,16 +658,11 @@ void trade_enter_callback(void* context) {
         model->gameboy_status = GAMEBOY_READY;
     }
     trade->trade_centre_state = TRADE_RESET;
-    model->pokemon_table = trade->pokemon_table;
-    model->curr_pokemon = pokemon_table_get_num_from_index(
-        trade->pokemon_table, trade->trade_block->party_members[0]);
+    model->curr_pokemon = pokemon_stat_get(trade->pdata, STAT_NUM, NONE);
     model->ledon = false;
 
     view_commit_model(trade->view, true);
 
-    /* TODO: This should be moved further back to struct pokemon_fap for whole
-     * app flexibility since it would probably be written to by a different scene
-     */
     gblink_def.pins = trade->gblink_pins;
     gblink_def.callback = transferBit;
     gblink_def.cb_context = trade;
@@ -696,7 +678,7 @@ void trade_enter_callback(void* context) {
     furi_timer_start(trade->draw_timer, furi_ms_to_ticks(250));
 
     /* Create a trade patch list from the current trade block */
-    plist_create(&(trade->patch_list), trade->trade_block);
+    plist_create(&(trade->patch_list), trade->pdata);
 }
 
 void disconnect_pin(const GpioPin* pin) {
@@ -726,25 +708,25 @@ void trade_exit_callback(void* context) {
 }
 
 void* trade_alloc(
-    TradeBlock* trade_block,
-    const PokemonTable* table,
+    PokemonData* pdata,
     struct gblink_pins* gblink_pins,
     ViewDispatcher* view_dispatcher,
     uint32_t view_id) {
-    furi_assert(trade_block);
+    furi_assert(pdata);
 
     struct trade_ctx* trade = malloc(sizeof(struct trade_ctx));
 
     memset(trade, '\0', sizeof(struct trade_ctx));
     trade->view = view_alloc();
-    trade->trade_block = trade_block;
-    trade->input_block = malloc(sizeof(TradeBlock));
-    trade->pokemon_table = table;
+    trade->pdata = pdata;
+    trade->input_pdata = pokemon_data_alloc(pdata->gen);
     trade->patch_list = NULL;
     trade->gblink_pins = gblink_pins;
 
     view_set_context(trade->view, trade);
     view_allocate_model(trade->view, ViewModelTypeLockFree, sizeof(struct trade_model));
+    with_view_model(
+        trade->view, struct trade_model * model, { model->table = pdata->pokemon_table; }, false);
 
     view_set_draw_callback(trade->view, trade_draw_callback);
     view_set_enter_callback(trade->view, trade_enter_callback);
@@ -764,6 +746,6 @@ void trade_free(ViewDispatcher* view_dispatcher, uint32_t view_id, void* trade_c
 
     view_free_model(trade->view);
     view_free(trade->view);
-    free(trade->input_block);
+    pokemon_data_free(trade->input_pdata);
     free(trade);
 }
