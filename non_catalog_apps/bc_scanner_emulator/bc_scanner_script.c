@@ -17,6 +17,8 @@
 #define UART_BAUD 19200
 #define UART_PORT 0
 
+#define UART_CH (FuriHalSerialIdUsart)
+
 typedef enum {
     WorkerEvtToggle = (1 << 0),
     WorkerEvtEnd = (1 << 1),
@@ -31,6 +33,7 @@ struct BarCodeScript {
     uint8_t file_buf[FILE_BUFFER_LEN];
     uint8_t buf_len;
     bool is_file_end;
+    FuriHalSerialHandle* serial_handle;
 };
 
 static void scan_sound() {
@@ -45,23 +48,26 @@ static void scan_sound() {
     }
 }
 
-static void usb_uart_serial_init() {
+static void usb_uart_serial_init(BarCodeScript* bc_context) {
     furi_hal_usb_unlock();
     Cli* cli = furi_record_open(RECORD_CLI);
     cli_session_close(cli);
     furi_record_close(RECORD_CLI);
     furi_check(furi_hal_usb_set_config(&usb_cdc_single, NULL) == true);
-    furi_hal_console_disable();
-    furi_hal_uart_set_br(FuriHalUartIdUSART1, UART_BAUD);
+
+    bc_context->serial_handle = furi_hal_serial_control_acquire(UART_CH);
+    furi_check(bc_context->serial_handle);
+    furi_hal_serial_init(bc_context->serial_handle, UART_BAUD);
 }
 
-static void usb_uart_serial_deinit() {
+static void usb_uart_serial_deinit(BarCodeScript* bc_context) {
     furi_hal_usb_unlock();
     furi_check(furi_hal_usb_set_config(&usb_cdc_single, NULL) == true);
     Cli* cli = furi_record_open(RECORD_CLI);
     cli_session_open(cli, &cli_vcp);
     furi_record_close(RECORD_CLI);
-    furi_hal_console_enable();
+    furi_hal_serial_deinit(bc_context->serial_handle);
+    furi_hal_serial_control_release(bc_context->serial_handle);
 }
 
 static bool is_bc_end(const char chr) {
@@ -91,7 +97,7 @@ static int32_t bc_scanner_worker(void* context) {
     //uint8_t buff[5] = {'p', 'r', 'i', 'v', 'k'};
     //uint8_t state = 99;
 
-    usb_uart_serial_init();
+    usb_uart_serial_init(bc_script);
 
     while(1) {
         //state = furi_hal_cdc_get_ctrl_line_state(FuriHalUartIdUSART1);
@@ -162,7 +168,7 @@ static int32_t bc_scanner_worker(void* context) {
         }
     }
 
-    usb_uart_serial_deinit();
+    usb_uart_serial_deinit(bc_script);
     storage_file_close(script_file);
     storage_file_free(script_file);
     FURI_LOG_I(WORKER_TAG, "End");

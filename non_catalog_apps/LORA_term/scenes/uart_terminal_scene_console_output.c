@@ -120,7 +120,7 @@ void uart_terminal_scene_console_output_on_enter(void* context) {
         snprintf(buffer, 240, "%s\r\n", (app->selected_tx_string));
         FURI_LOG_E(appName, "Command: %s", buffer);
         FURI_LOG_I(appName, "Command: %s", buffer);
-        uart_terminal_uart_tx((unsigned char*)buffer, strlen(buffer));
+        uart_terminal_uart_tx(app->uart, (unsigned char*)buffer, strlen(buffer));
     }
 }
 

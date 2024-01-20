@@ -97,6 +97,7 @@ static void save_image(void* context) {
 }
 
 static bool camera_view_input_callback(InputEvent* event, void* context) {
+    UartEchoApp* app = context;
     if(event->type == InputTypePress) {
         uint8_t data[1];
         if(event->key == InputKeyUp) {
@@ -110,7 +111,7 @@ static bool camera_view_input_callback(InputEvent* event, void* context) {
         } else if(event->key == InputKeyOk) {
             save_image(context);
         }
-        furi_hal_uart_tx(FuriHalUartIdUSART1, data, 1);
+        furi_hal_serial_tx(app->serial_handle, data, 1);
     }
 
     return false;
@@ -121,11 +122,13 @@ static uint32_t camera_exit(void* context) {
     return VIEW_NONE;
 }
 
-static void camera_on_irq_cb(UartIrqEvent ev, uint8_t data, void* context) {
+static void
+    camera_on_irq_cb(FuriHalSerialHandle* handle, FuriHalSerialRxEvent event, void* context) {
     furi_assert(context);
     UartEchoApp* app = context;
 
-    if(ev == UartIrqEventRXNE) {
+    if(event == FuriHalSerialRxEventData) {
+        uint8_t data = furi_hal_serial_async_rx(handle);
         furi_stream_buffer_send(app->rx_stream, &data, 1, 0);
         furi_thread_flags_set(furi_thread_get_id(app->worker_thread), WorkerEventRx);
     }
@@ -247,9 +250,10 @@ static UartEchoApp* camera_app_alloc() {
     furi_thread_start(app->worker_thread);
 
     // Enable uart listener
-    furi_hal_console_disable();
-    furi_hal_uart_set_br(FuriHalUartIdUSART1, 230400);
-    furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, camera_on_irq_cb, app);
+    app->serial_handle = furi_hal_serial_control_acquire(FuriHalSerialIdUsart);
+    furi_check(app->serial_handle);
+    furi_hal_serial_init(app->serial_handle, 230400);
+    furi_hal_serial_async_rx_start(app->serial_handle, camera_on_irq_cb, app, false);
 
     return app;
 }
@@ -257,7 +261,8 @@ static UartEchoApp* camera_app_alloc() {
 static void camera_app_free(UartEchoApp* app) {
     furi_assert(app);
 
-    furi_hal_console_enable(); // this will also clear IRQ callback so thread is no longer referenced
+    furi_hal_serial_deinit(app->serial_handle);
+    furi_hal_serial_control_release(app->serial_handle);
 
     furi_thread_flags_set(furi_thread_get_id(app->worker_thread), WorkerEventStop);
     furi_thread_join(app->worker_thread);

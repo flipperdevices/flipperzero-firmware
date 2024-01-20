@@ -29,177 +29,272 @@ typedef struct {
 const UART_TerminalItem items[NUM_MENU_ITEMS] = {
     {"Console", {"View", "Clear"}, 2, {"", "cls"}, NO_ARGS, FOCUS_CONSOLE_END, NO_TIP},
     {"Beacon",
-    {"Status", "target-ssids", "APs", "RickRoll", "Random", "Infinite", "Off"},
-    7,
-    {"beacon", "beacon target-ssids", "beacon aps", "beacon rickroll", "beacon random ", "beacon infinite", "beacon off"},
-    TOGGLE_ARGS,
-    FOCUS_CONSOLE_END,
-    NO_TIP},
+     {"Status", "target-ssids", "APs", "RickRoll", "Random", "Infinite", "Off"},
+     7,
+     {"beacon",
+      "beacon target-ssids",
+      "beacon aps",
+      "beacon rickroll",
+      "beacon random ",
+      "beacon infinite",
+      "beacon off"},
+     TOGGLE_ARGS,
+     FOCUS_CONSOLE_END,
+     NO_TIP},
     {"Probe",
-    {"Status", "Any", "target-ssids", "APs", "Off"},
-    5,
-    {"probe", "probe any", "probe target-ssids", "probe aps", "probe off"},
-    NO_ARGS,
-    FOCUS_CONSOLE_END,
-    NO_TIP},
+     {"Status", "Any", "target-ssids", "APs", "Off"},
+     5,
+     {"probe", "probe any", "probe target-ssids", "probe aps", "probe off"},
+     NO_ARGS,
+     FOCUS_CONSOLE_END,
+     NO_TIP},
     {"Fuzz",
-    {"Status", "Off", "Overflow Beacon", "Overflow Request", "Overflow Response", "Malformed Beacon", "Malformed Request", "Malformed Response"},
-    8,
-    {"fuzz", "fuzz off", "fuzz beacon overflow", "fuzz req overflow", "fuzz resp overflow", "fuzz beacon malformed", "fuzz req malformed", "fuzz resp malformed"},
-    NO_ARGS,
-    FOCUS_CONSOLE_END,
-    NO_TIP},
+     {"Status",
+      "Off",
+      "Overflow Beacon",
+      "Overflow Request",
+      "Overflow Response",
+      "Malformed Beacon",
+      "Malformed Request",
+      "Malformed Response"},
+     8,
+     {"fuzz",
+      "fuzz off",
+      "fuzz beacon overflow",
+      "fuzz req overflow",
+      "fuzz resp overflow",
+      "fuzz beacon malformed",
+      "fuzz req malformed",
+      "fuzz resp malformed"},
+     NO_ARGS,
+     FOCUS_CONSOLE_END,
+     NO_TIP},
     {"Sniff",
-    {"Status", "On", "Off"},
-    3,
-    {"sniff", "sniff on", "sniff off"},
-    NO_ARGS,
-    FOCUS_CONSOLE_END,
-    NO_TIP},
+     {"Status", "On", "Off"},
+     3,
+     {"sniff", "sniff on", "sniff off"},
+     NO_ARGS,
+     FOCUS_CONSOLE_END,
+     NO_TIP},
     {"target-ssids",
-    {"Add", "Remove", "List"},
-    3,
-    {"target-ssids add ", "target-ssids remove ", "target-ssids"},
-    TOGGLE_ARGS,
-    FOCUS_CONSOLE_END,
-    NO_TIP},
+     {"Add", "Remove", "List"},
+     3,
+     {"target-ssids add ", "target-ssids remove ", "target-ssids"},
+     TOGGLE_ARGS,
+     FOCUS_CONSOLE_END,
+     NO_TIP},
     {"Scan",
-    {"Status", "<SSID>", "WiFi", "BT", "BLE", "BT Svcs", "Off"},
-    7,
-    {"scan", "scan ", "scan wifi", "scan bt", "scan ble", "scan bt services", "scan off"},
-    TOGGLE_ARGS,
-    FOCUS_CONSOLE_END,
-    NO_TIP},
+     {"Status", "<SSID>", "WiFi", "BT", "BLE", "BT Svcs", "Off"},
+     7,
+     {"scan", "scan ", "scan wifi", "scan bt", "scan ble", "scan bt services", "scan off"},
+     TOGGLE_ARGS,
+     FOCUS_CONSOLE_END,
+     NO_TIP},
     {"Hop",
-    {"Status", "On", "Off", "Sequential", "Random", "Default", "Set "},
-    7,
-    {"hop", "hop on", "hop off", "hop sequential", "hop random", "hop default", "hop "},
-    TOGGLE_ARGS,
-    FOCUS_CONSOLE_END,
-    NO_TIP},
+     {"Status", "On", "Off", "Sequential", "Random", "Default", "Set "},
+     7,
+     {"hop", "hop on", "hop off", "hop sequential", "hop random", "hop default", "hop "},
+     TOGGLE_ARGS,
+     FOCUS_CONSOLE_END,
+     NO_TIP},
     {"View",
-    {"STA", "AP", "BT", "BT SVCS", "BT+AP+STA", "STA+AP"},
-    6,
-    {"view sta", "view ap", "view bt", "view bt services", "view ap sta bt", "view sta ap"},
-    NO_ARGS,
-    FOCUS_CONSOLE_START,
-    NO_TIP},
+     {"STA", "AP", "BT", "BT SVCS", "BT+AP+STA", "STA+AP"},
+     6,
+     {"view sta", "view ap", "view bt", "view bt services", "view ap sta bt", "view sta ap"},
+     NO_ARGS,
+     FOCUS_CONSOLE_START,
+     NO_TIP},
     {"Select",
-    {"STA", "AP", "BT"},
-    3,
-    {"select sta ", "select ap ", "select bt "},
-    INPUT_ARGS,
-    FOCUS_CONSOLE_END,
-    NO_TIP},
+     {"STA", "AP", "BT"},
+     3,
+     {"select sta ", "select ap ", "select bt "},
+     INPUT_ARGS,
+     FOCUS_CONSOLE_END,
+     NO_TIP},
     {"Selected",
-    {"STA", "AP", "BT", "AP+STA+BT"},
-    4,
-    {"selected sta", "selected ap", "selected bt", "selected"},
-    NO_ARGS,
-    FOCUS_CONSOLE_START,
-    NO_TIP},
+     {"STA", "AP", "BT", "AP+STA+BT"},
+     4,
+     {"selected sta", "selected ap", "selected bt", "selected"},
+     NO_ARGS,
+     FOCUS_CONSOLE_START,
+     NO_TIP},
     {"Clear",
-    {"STA", "STA Sel.", "AP", "AP Sel.", "BT", "BT Sel.", "BT Svcs", "ALL"},
-    8,
-    {"clear sta", "clear sta selected", "clear ap", "clear ap selected", "clear bt", "clear bt selected", "clear bt services", "clear all"},
-    NO_ARGS,
-    FOCUS_CONSOLE_END,
-    NO_TIP},
+     {"STA", "STA Sel.", "AP", "AP Sel.", "BT", "BT Sel.", "BT Svcs", "ALL"},
+     8,
+     {"clear sta",
+      "clear sta selected",
+      "clear ap",
+      "clear ap selected",
+      "clear bt",
+      "clear bt selected",
+      "clear bt services",
+      "clear all"},
+     NO_ARGS,
+     FOCUS_CONSOLE_END,
+     NO_TIP},
     {"Purge",
-    {"AP", "STA", "BT", "BLE"},
-    4,
-    {"purge ap", "purge sta", "purge bt", "purge ble"},
-    NO_ARGS,
-    FOCUS_CONSOLE_END,
-    NO_TIP},
+     {"AP", "STA", "BT", "BLE"},
+     4,
+     {"purge ap", "purge sta", "purge bt", "purge ble"},
+     NO_ARGS,
+     FOCUS_CONSOLE_END,
+     NO_TIP},
     {"Get",
-    {"pkt expiry", "SSID rnd chars", "Attack millis", "SSID min len", "SSID max len", "default SSID count", "Channel", "MAC", "MAC Randomisation", "Purge Strategy", "Purge Min Age", "Purge Max RSSI"},
-    12,
-    {"get expiry", "get scramble_words", "get attack_millis", "get ssid_len_min", "get ssid_len_max", "get default_ssid_count", "get channel", "get mac", "get mac_rand", "get ble_purge_strat", "get ble_purge_min_age", "get ble_purge_max_rssi"},
-    NO_ARGS,
-    FOCUS_CONSOLE_END,
-    NO_TIP},
+     {"pkt expiry",
+      "SSID rnd chars",
+      "Attack millis",
+      "SSID min len",
+      "SSID max len",
+      "default SSID count",
+      "Channel",
+      "MAC",
+      "MAC Randomisation",
+      "Purge Strategy",
+      "Purge Min Age",
+      "Purge Max RSSI"},
+     12,
+     {"get expiry",
+      "get scramble_words",
+      "get attack_millis",
+      "get ssid_len_min",
+      "get ssid_len_max",
+      "get default_ssid_count",
+      "get channel",
+      "get mac",
+      "get mac_rand",
+      "get ble_purge_strat",
+      "get ble_purge_min_age",
+      "get ble_purge_max_rssi"},
+     NO_ARGS,
+     FOCUS_CONSOLE_END,
+     NO_TIP},
     {"Set",
-    {"pkt expiry", "SSID rnd chars", "Attack millis", "SSID min len", "SSID max len", "default SSID count", "Channel", "MAC", "MAC Randomisation", "Purge Strategy", "Purge Min Age", "Purge Max RSSI"},
-    12,
-    {"set expiry ", "set scramble_words ", "set attack_millis ", "set ssid_len_min ", "set ssid_len_max ", "set default_ssid_count ", "set channel ", "set mac ", "set mac_rand ", "set BLE_PURGE_STRAT ", "set BLE_PURGE_MIN_AGE ", "set BLE_PURGE_MAX_RSSI "},
-    INPUT_ARGS,
-    FOCUS_CONSOLE_END,
-    NO_TIP},
+     {"pkt expiry",
+      "SSID rnd chars",
+      "Attack millis",
+      "SSID min len",
+      "SSID max len",
+      "default SSID count",
+      "Channel",
+      "MAC",
+      "MAC Randomisation",
+      "Purge Strategy",
+      "Purge Min Age",
+      "Purge Max RSSI"},
+     12,
+     {"set expiry ",
+      "set scramble_words ",
+      "set attack_millis ",
+      "set ssid_len_min ",
+      "set ssid_len_max ",
+      "set default_ssid_count ",
+      "set channel ",
+      "set mac ",
+      "set mac_rand ",
+      "set BLE_PURGE_STRAT ",
+      "set BLE_PURGE_MIN_AGE ",
+      "set BLE_PURGE_MAX_RSSI "},
+     INPUT_ARGS,
+     FOCUS_CONSOLE_END,
+     NO_TIP},
     {"Deauth",
-    {"Status", "Set Delay", "Off", "Frame STA", "Device STA", "Spoof STA", "Frame APs", "Device APs", "Spoof APs", "Frame B'Cast", "Device B'Cast", "Spoof B'Cast"},
-    12,
-    {"deauth", "deauth ", "deauth off", "deauth frame sta", "deauth device sta", "deauth spoof sta", "deauth frame ap", "deauth device ap", "deauth spoof ap", "deauth frame broadcast", "deauth device broadcast", "deauth spoof broadcast"},
-    TOGGLE_ARGS,
-    FOCUS_CONSOLE_END,
-    NO_TIP},
+     {"Status",
+      "Set Delay",
+      "Off",
+      "Frame STA",
+      "Device STA",
+      "Spoof STA",
+      "Frame APs",
+      "Device APs",
+      "Spoof APs",
+      "Frame B'Cast",
+      "Device B'Cast",
+      "Spoof B'Cast"},
+     12,
+     {"deauth",
+      "deauth ",
+      "deauth off",
+      "deauth frame sta",
+      "deauth device sta",
+      "deauth spoof sta",
+      "deauth frame ap",
+      "deauth device ap",
+      "deauth spoof ap",
+      "deauth frame broadcast",
+      "deauth device broadcast",
+      "deauth spoof broadcast"},
+     TOGGLE_ARGS,
+     FOCUS_CONSOLE_END,
+     NO_TIP},
     {"Mana",
-    {"Status", "On", "Off", "Clear"},
-    4,
-    {"mana", "mana on", "mana off", "mana clear"},
-    NO_ARGS,
-    FOCUS_CONSOLE_END,
-    NO_TIP},
+     {"Status", "On", "Off", "Clear"},
+     4,
+     {"mana", "mana on", "mana off", "mana clear"},
+     NO_ARGS,
+     FOCUS_CONSOLE_END,
+     NO_TIP},
     {"Mana Verbose",
-    {"Status", "On", "Off"},
-    3,
-    {"mana verbose", "mana verbose on", "mana verbose off"},
-    NO_ARGS,
-    FOCUS_CONSOLE_END,
-    NO_TIP},
+     {"Status", "On", "Off"},
+     3,
+     {"mana verbose", "mana verbose on", "mana verbose off"},
+     NO_ARGS,
+     FOCUS_CONSOLE_END,
+     NO_TIP},
     {"Mana Loud",
-    {"Status", "On", "Off"},
-    3,
-    {"mana loud", "mana loud on", "mana loud off"},
-    NO_ARGS,
-    FOCUS_CONSOLE_END,
-    NO_TIP},
+     {"Status", "On", "Off"},
+     3,
+     {"mana loud", "mana loud on", "mana loud off"},
+     NO_ARGS,
+     FOCUS_CONSOLE_END,
+     NO_TIP},
     {"selectedAP DOS",
-    {"Status", "On", "Off"},
-    3,
-    {"ap-dos", "ap-dos on", "ap-dos off"},
-    NO_ARGS,
-    FOCUS_CONSOLE_END,
-    NO_TIP},
+     {"Status", "On", "Off"},
+     3,
+     {"ap-dos", "ap-dos on", "ap-dos off"},
+     NO_ARGS,
+     FOCUS_CONSOLE_END,
+     NO_TIP},
     {"AP Clone Attack",
-    {"Status", "Off", "OPN", "WEP", "WPA", "OPN+WEP", "OPN+WPA", "WEP+WPA", "OPN+WEP+WPA"},
-    9,
-    {"ap-clone", "ap-clone off", "ap-clone on open", "ap-clone on wep", "ap-clone on wpa", "ap-clone on open wep", "ap-clone on open wpa", "ap-clone on wep wpa", "ap-clone on open wep wpa"},
-    NO_ARGS,
-    FOCUS_CONSOLE_END,
-    NO_TIP},
-    {"Homing",
-    {"On", "Off"},
-    2,
-    {"stalk on", "stalk off"},
-    NO_ARGS,
-    FOCUS_CONSOLE_END,
-    NO_TIP},
+     {"Status", "Off", "OPN", "WEP", "WPA", "OPN+WEP", "OPN+WPA", "WEP+WPA", "OPN+WEP+WPA"},
+     9,
+     {"ap-clone",
+      "ap-clone off",
+      "ap-clone on open",
+      "ap-clone on wep",
+      "ap-clone on wpa",
+      "ap-clone on open wep",
+      "ap-clone on open wpa",
+      "ap-clone on wep wpa",
+      "ap-clone on open wep wpa"},
+     NO_ARGS,
+     FOCUS_CONSOLE_END,
+     NO_TIP},
+    {"Homing", {"On", "Off"}, 2, {"stalk on", "stalk off"}, NO_ARGS, FOCUS_CONSOLE_END, NO_TIP},
     {"Help",
-    {"Info <cmd>", "Get Started", "Commands", "About", "Help"},
-    5,
-    {"info ", "GET_STARTED", "commands", "gravity-version", "help"},
-    TOGGLE_ARGS,
-    FOCUS_CONSOLE_START,
-    NO_TIP},
+     {"Info <cmd>", "Get Started", "Commands", "About", "Help"},
+     5,
+     {"info ", "GET_STARTED", "commands", "gravity-version", "help"},
+     TOGGLE_ARGS,
+     FOCUS_CONSOLE_START,
+     NO_TIP},
 };
 
-
-char *strToken(char *cmdLine, char sep, int tokenNum) {
+char* strToken(char* cmdLine, char sep, int tokenNum) {
     int i;
     int tokenCount = 0;
-    for (i = 0; i < (int)strlen(cmdLine) && tokenCount != tokenNum; ++i) {
-        if (cmdLine[i] == sep) {
+    for(i = 0; i < (int)strlen(cmdLine) && tokenCount != tokenNum; ++i) {
+        if(cmdLine[i] == sep) {
             ++tokenCount;
         }
     }
-    if (cmdLine[i - 1] == sep || cmdLine[i - 1] == '\0') {
+    if(cmdLine[i - 1] == sep || cmdLine[i - 1] == '\0') {
         /* Found the end of the token, now find the beginning */
         int j;
-        for (j = (i - 2); j > 0 && cmdLine[j] != sep; --j) { }
+        for(j = (i - 2); j > 0 && cmdLine[j] != sep; --j) {
+        }
         /* Token runs from index j to (i - 2) */
-        char *retVal = malloc(sizeof(char) * (i - j));
-        if (retVal == NULL) {
+        char* retVal = malloc(sizeof(char) * (i - j));
+        if(retVal == NULL) {
             printf("GRAVITY: Failed to malloc token\n");
             return NULL;
         }
@@ -208,7 +303,7 @@ char *strToken(char *cmdLine, char sep, int tokenNum) {
         return retVal;
     } else {
         /* No token */
-        if (tokenNum == 1) {
+        if(tokenNum == 1) {
             return cmdLine;
         } else {
             return NULL;
@@ -224,7 +319,6 @@ static void uart_terminal_scene_start_var_list_enter_callback(void* context, uin
 
     furi_assert(index < NUM_MENU_ITEMS);
     const UART_TerminalItem* item = &items[index];
-
 
     const int selected_option_index = app->selected_option_index[index];
     dolphin_deed(DolphinDeedGpioUartBridge);
@@ -244,48 +338,48 @@ static void uart_terminal_scene_start_var_list_enter_callback(void* context, uin
     //char *cmd = strsep(&origCmd, " ");
     /* GRAVITY: strsep is disabled by Flipper's SDK. RYO */
 
-    char *cmd = strToken((char *)app->selected_tx_string, ' ', 1);
-    if (!strcmp(cmd, "beacon")) {
+    char* cmd = strToken((char*)app->selected_tx_string, ' ', 1);
+    if(!strcmp(cmd, "beacon")) {
         app->gravityCommand = GRAVITY_BEACON;
-    } else if (!strcmp(cmd, "target-ssids")) {
+    } else if(!strcmp(cmd, "target-ssids")) {
         app->gravityCommand = GRAVITY_TARGET_SSIDS;
-    } else if (!strcmp(cmd, "probe")) {
+    } else if(!strcmp(cmd, "probe")) {
         app->gravityCommand = GRAVITY_PROBE;
-    } else if (!strcmp(cmd, "fuzz")) {
+    } else if(!strcmp(cmd, "fuzz")) {
         app->gravityCommand = GRAVITY_FUZZ;
-    } else if (!strcmp(cmd, "sniff")) {
+    } else if(!strcmp(cmd, "sniff")) {
         app->gravityCommand = GRAVITY_SNIFF;
-    } else if (!strcmp(cmd, "deauth")) {
+    } else if(!strcmp(cmd, "deauth")) {
         app->gravityCommand = GRAVITY_DEAUTH;
-    } else if (!strcmp(cmd, "mana")) {
+    } else if(!strcmp(cmd, "mana")) {
         app->gravityCommand = GRAVITY_MANA;
-    } else if (!strcmp(cmd, "stalk")) {
+    } else if(!strcmp(cmd, "stalk")) {
         app->gravityCommand = GRAVITY_STALK;
-    } else if (!strcmp(cmd, "ap-dos")) {
+    } else if(!strcmp(cmd, "ap-dos")) {
         app->gravityCommand = GRAVITY_AP_DOS;
-    } else if (!strcmp(cmd, "ap-clone")) {
+    } else if(!strcmp(cmd, "ap-clone")) {
         app->gravityCommand = GRAVITY_AP_CLONE;
-    } else if (!strcmp(cmd, "scan")) {
+    } else if(!strcmp(cmd, "scan")) {
         app->gravityCommand = GRAVITY_SCAN;
-    } else if (!strcmp(cmd, "hop")) {
+    } else if(!strcmp(cmd, "hop")) {
         app->gravityCommand = GRAVITY_HOP;
-    } else if (!strcmp(cmd, "set")) {
+    } else if(!strcmp(cmd, "set")) {
         app->gravityCommand = GRAVITY_SET;
-    } else if (!strcmp(cmd, "get")) {
+    } else if(!strcmp(cmd, "get")) {
         app->gravityCommand = GRAVITY_GET;
-    } else if (!strcmp(cmd, "view")) {
+    } else if(!strcmp(cmd, "view")) {
         app->gravityCommand = GRAVITY_VIEW;
-    } else if (!strcmp(cmd, "select")) {
+    } else if(!strcmp(cmd, "select")) {
         app->gravityCommand = GRAVITY_SELECT;
-    } else if (!strcmp(cmd, "selected")) {
+    } else if(!strcmp(cmd, "selected")) {
         app->gravityCommand = GRAVITY_SELECTED;
-    } else if (!strcmp(cmd, "clear")) {
+    } else if(!strcmp(cmd, "clear")) {
         app->gravityCommand = GRAVITY_CLEAR;
-    } else if (!strcmp(cmd, "handshake")) {
+    } else if(!strcmp(cmd, "handshake")) {
         app->gravityCommand = GRAVITY_HANDSHAKE;
-    } else if (!strcmp(cmd, "commands")) {
+    } else if(!strcmp(cmd, "commands")) {
         app->gravityCommand = GRAVITY_COMMANDS;
-    } else if (!strcmp(cmd, "info")) {
+    } else if(!strcmp(cmd, "info")) {
         app->gravityCommand = GRAVITY_INFO;
     } else {
         app->gravityCommand = GRAVITY_NONE;
@@ -295,11 +389,11 @@ static void uart_terminal_scene_start_var_list_enter_callback(void* context, uin
 
     /* GRAVITY: For TOGGLE_ARGS display a keyboard if actual_command ends with ' ' */
     int cmdLen = strlen(app->selected_tx_string);
-    bool needs_keyboard = ((item->needs_keyboard == INPUT_ARGS) ||
-                            (item->needs_keyboard == TOGGLE_ARGS &&
-                                (app->selected_tx_string[cmdLen-1] == ' ')));
+    bool needs_keyboard =
+        ((item->needs_keyboard == INPUT_ARGS) ||
+         (item->needs_keyboard == TOGGLE_ARGS && (app->selected_tx_string[cmdLen - 1] == ' ')));
     /* Initialise the serial console */
-    uart_terminal_uart_tx((uint8_t*)("\n"), 1);
+    uart_terminal_uart_tx(app->uart, (uint8_t*)("\n"), 1);
 
     if(needs_keyboard) {
         view_dispatcher_send_custom_event(app->view_dispatcher, UART_TerminalEventStartKeyboard);

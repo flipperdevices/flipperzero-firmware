@@ -10,6 +10,7 @@ struct UART_TerminalUart {
     FuriStreamBuffer* rx_stream;
     uint8_t rx_buf[RX_BUF_SIZE + 1];
     void (*handle_rx_data_cb)(uint8_t* buf, size_t len, void* context);
+    FuriHalSerialHandle* serial_handle;
 };
 
 typedef enum {
@@ -25,11 +26,14 @@ void uart_terminal_uart_set_handle_rx_data_cb(
 }
 
 #define WORKER_ALL_RX_EVENTS (WorkerEvtStop | WorkerEvtRxDone)
-
-void uart_terminal_uart_on_irq_cb(UartIrqEvent ev, uint8_t data, void* context) {
+void uart_terminal_uart_on_irq_cb(
+    FuriHalSerialHandle* handle,
+    FuriHalSerialRxEvent event,
+    void* context) {
     UART_TerminalUart* uart = (UART_TerminalUart*)context;
 
-    if(ev == UartIrqEventRXNE) {
+    if(event == FuriHalSerialRxEventData) {
+        uint8_t data = furi_hal_serial_async_rx(handle);
         furi_stream_buffer_send(uart->rx_stream, &data, 1, 0);
         furi_thread_flags_set(furi_thread_get_id(uart->rx_thread), WorkerEvtRxDone);
     }
@@ -56,8 +60,8 @@ static int32_t uart_worker(void* context) {
     return 0;
 }
 
-void uart_terminal_uart_tx(uint8_t* data, size_t len) {
-    furi_hal_uart_tx(UART_CH, data, len);
+void uart_terminal_uart_tx(UART_TerminalUart* uart, uint8_t* data, size_t len) {
+    furi_hal_serial_tx(uart->serial_handle, data, len);
 }
 
 UART_TerminalUart* uart_terminal_uart_init(UART_TerminalApp* app) {
@@ -73,12 +77,13 @@ UART_TerminalUart* uart_terminal_uart_init(UART_TerminalApp* app) {
 
     furi_thread_start(uart->rx_thread);
 
-    furi_hal_console_disable();
     if(app->BAUDRATE == 0) {
         app->BAUDRATE = 115200;
     }
-    furi_hal_uart_set_br(UART_CH, app->BAUDRATE);
-    furi_hal_uart_set_irq_cb(UART_CH, uart_terminal_uart_on_irq_cb, uart);
+    uart->serial_handle = furi_hal_serial_control_acquire(UART_CH);
+    furi_check(uart->serial_handle);
+    furi_hal_serial_init(uart->serial_handle, app->BAUDRATE);
+    furi_hal_serial_async_rx_start(uart->serial_handle, uart_terminal_uart_on_irq_cb, uart, false);
 
     return uart;
 }
@@ -90,8 +95,8 @@ void uart_terminal_uart_free(UART_TerminalUart* uart) {
     furi_thread_join(uart->rx_thread);
     furi_thread_free(uart->rx_thread);
 
-    furi_hal_uart_set_irq_cb(UART_CH, NULL, NULL);
-    furi_hal_console_enable();
+    furi_hal_serial_deinit(uart->serial_handle);
+    furi_hal_serial_control_release(uart->serial_handle);
 
     free(uart);
 }

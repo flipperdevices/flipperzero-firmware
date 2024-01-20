@@ -3,8 +3,7 @@
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
 #include <gui/elements.h>
-#include <furi_hal_uart.h>
-#include <furi_hal_console.h>
+#include <furi_hal.h>
 #include <gui/view_dispatcher.h>
 #include <gui/modules/dialog_ex.h>
 
@@ -25,6 +24,7 @@ typedef struct {
     View* view;
     FuriThread* worker_thread;
     FuriStreamBuffer* rx_stream;
+    FuriHalSerialHandle* serial_handle;
 } FlipagotchiApp;
 
 typedef struct {
@@ -209,11 +209,13 @@ static uint32_t flipagotchi_exit(void* context) {
     return VIEW_NONE;
 }
 
-static void flipagotchi_on_irq_cb(UartIrqEvent ev, uint8_t data, void* context) {
+static void
+    flipagotchi_on_irq_cb(FuriHalSerialHandle* handle, FuriHalSerialRxEvent event, void* context) {
     furi_assert(context);
     FlipagotchiApp* app = context;
 
-    if(ev == UartIrqEventRXNE) {
+    if(event == FuriHalSerialRxEventData) {
+        uint8_t data = furi_hal_serial_async_rx(handle);
         furi_stream_buffer_send(app->rx_stream, &data, 1, 0);
         furi_thread_flags_set(furi_thread_get_id(app->worker_thread), WorkerEventRx);
     }
@@ -294,9 +296,10 @@ static FlipagotchiApp* flipagotchi_app_alloc() {
     view_dispatcher_switch_to_view(app->view_dispatcher, 0);
 
     // Enable uart listener
-    furi_hal_console_disable();
-    furi_hal_uart_set_br(PWNAGOTCHI_UART_CHANNEL, PWNAGOTCHI_UART_BAUD);
-    furi_hal_uart_set_irq_cb(PWNAGOTCHI_UART_CHANNEL, flipagotchi_on_irq_cb, app);
+    app->serial_handle = furi_hal_serial_control_acquire(PWNAGOTCHI_UART_CHANNEL);
+    furi_check(app->serial_handle);
+    furi_hal_serial_init(app->serial_handle, PWNAGOTCHI_UART_BAUD);
+    furi_hal_serial_async_rx_start(app->serial_handle, flipagotchi_on_irq_cb, app, false);
 
     app->worker_thread = furi_thread_alloc();
     furi_thread_set_name(app->worker_thread, "UsbUartWorker");
@@ -315,7 +318,8 @@ static void flipagotchi_app_free(FlipagotchiApp* app) {
     furi_thread_join(app->worker_thread);
     furi_thread_free(app->worker_thread);
 
-    furi_hal_console_enable();
+    furi_hal_serial_deinit(app->serial_handle);
+    furi_hal_serial_control_release(app->serial_handle);
 
     // Free views
     view_dispatcher_remove_view(app->view_dispatcher, 0);

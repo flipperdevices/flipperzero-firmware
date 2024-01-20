@@ -28,25 +28,30 @@ typedef enum {
 
 #define WORKER_ALL_RX_EVENTS (WorkerEvtStop | WorkerEvtRxDone)
 
-static void airmon_pms_uart_on_irq_cb(UartIrqEvent ev, uint8_t data, void* context) {
+static void airmon_pms_uart_on_irq_cb(
+    FuriHalSerialHandle* handle,
+    FuriHalSerialRxEvent event,
+    void* context) {
     AirmonPmsContext* pms_context = context;
 
-    if(ev == UartIrqEventRXNE) {
+    if(event == FuriHalSerialRxEventData) {
+        uint8_t data = furi_hal_serial_async_rx(handle);
         furi_stream_buffer_send(pms_context->rx_stream, &data, 1, 0);
         furi_thread_flags_set(furi_thread_get_id(pms_context->thread), WorkerEvtRxDone);
     }
 }
 
 static void airmon_pms_serial_init(AirmonPmsContext* pms_context) {
-    furi_hal_console_disable();
-    furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, airmon_pms_uart_on_irq_cb, pms_context);
-    furi_hal_uart_set_br(FuriHalUartIdUSART1, PMS_BAUDRATE);
+    pms_context->serial_handle = furi_hal_serial_control_acquire(UART_CH);
+    furi_check(pms_context->serial_handle);
+    furi_hal_serial_init(pms_context->serial_handle, PMS_BAUDRATE);
+    furi_hal_serial_async_rx_start(
+        pms_context->serial_handle, airmon_pms_uart_on_irq_cb, pms_context, false);
 }
 
 static void airmon_pms_serial_deinit(AirmonPmsContext* pms_context) {
-    UNUSED(pms_context);
-    furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, NULL, NULL);
-    furi_hal_console_enable();
+    furi_hal_serial_deinit(pms_context->serial_handle);
+    furi_hal_serial_control_release(pms_context->serial_handle);
 }
 
 bool airmon_pms_frame_valid(AirmonPmsContext* pms_context, size_t frame_len) {

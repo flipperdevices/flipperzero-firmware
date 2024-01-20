@@ -9,8 +9,6 @@
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
 #include <gui/elements.h>
-#include <furi_hal_uart.h>
-#include <furi_hal_console.h>
 #include <gui/view_dispatcher.h>
 #include <gui/modules/dialog_ex.h>
 
@@ -28,6 +26,7 @@ typedef struct {
     FuriThread* worker_thread;
     FuriStreamBuffer* rx_stream;
     File* file;
+    FuriHalSerialHandle* serial_handle;
 } WiFiMapApp;
 
 typedef struct {
@@ -123,11 +122,13 @@ static uint32_t uart_echo_exit(void* context) {
     return VIEW_NONE;
 }
 
-static void uart_echo_on_irq_cb(UartIrqEvent ev, uint8_t data, void* context) {
+static void
+    uart_echo_on_irq_cb(FuriHalSerialHandle* handle, FuriHalSerialRxEvent event, void* context) {
     furi_assert(context);
     WiFiMapApp* app = context;
 
-    if(ev == UartIrqEventRXNE) {
+    if(event == FuriHalSerialRxEventData) {
+        uint8_t data = furi_hal_serial_async_rx(handle);
         furi_stream_buffer_send(app->rx_stream, &data, 1, 0);
         furi_thread_flags_set(furi_thread_get_id(app->worker_thread), WorkerEventRx);
     }
@@ -192,7 +193,7 @@ static int32_t uart_echo_worker(void* context) {
                 uint8_t data[64];
                 length = furi_stream_buffer_receive(app->rx_stream, data, 64, 0);
                 if(length > 0) {
-                    furi_hal_uart_tx(FuriHalUartIdUSART1, data, length);
+                    furi_hal_serial_tx(app->serial_handle, data, length);
                     with_view_model(
                         app->view,
                         UartDumpModel * model,
@@ -256,9 +257,10 @@ static WiFiMapApp* uart_echo_app_alloc() {
     furi_thread_start(app->worker_thread);
 
     // Enable uart listener
-    furi_hal_console_disable();
-    furi_hal_uart_set_br(FuriHalUartIdUSART1, 115200);
-    furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, uart_echo_on_irq_cb, app);
+    app->serial_handle = furi_hal_serial_control_acquire(FuriHalSerialIdUsart);
+    furi_check(app->serial_handle);
+    furi_hal_serial_init(app->serial_handle, 115200);
+    furi_hal_serial_async_rx_start(app->serial_handle, uart_echo_on_irq_cb, app, false);
 
     return app;
 }
@@ -266,7 +268,8 @@ static WiFiMapApp* uart_echo_app_alloc() {
 static void uart_echo_app_free(WiFiMapApp* app) {
     furi_assert(app);
 
-    furi_hal_console_enable(); // this will also clear IRQ callback so thread is no longer referenced
+    furi_hal_serial_deinit(app->serial_handle);
+    furi_hal_serial_control_release(app->serial_handle);
 
     furi_thread_flags_set(furi_thread_get_id(app->worker_thread), WorkerEventStop);
     furi_thread_join(app->worker_thread);
