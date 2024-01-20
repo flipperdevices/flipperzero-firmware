@@ -162,7 +162,6 @@ struct trade_ctx {
     uint8_t shift;
     TradeBlock* trade_block;
     TradeBlock* input_block;
-    const PokemonTable* pokemon_table;
     struct patch_list* patch_list;
     void* gblink_handle;
     struct gblink_pins* gblink_pins;
@@ -173,7 +172,6 @@ struct trade_model {
     render_gameboy_state_t gameboy_status;
     bool ledon; // Controls the blue LED during trade
     uint8_t curr_pokemon;
-    const PokemonTable* pokemon_table;
 };
 
 /* A callback function that must be called outside of an interrupt context,
@@ -254,7 +252,7 @@ static void trade_draw_timer_callback(void* context) {
 static void trade_draw_callback(Canvas* canvas, void* view_model) {
     furi_assert(view_model);
     struct trade_model* model = view_model;
-    const Icon* icon = model->pokemon_table[model->curr_pokemon].icon;
+    const Icon* icon = table_icon_get(model->curr_pokemon);
 
     canvas_clear(canvas);
     switch(model->gameboy_status) {
@@ -670,7 +668,6 @@ void trade_enter_callback(void* context) {
         model->gameboy_status = GAMEBOY_READY;
     }
     trade->trade_centre_state = TRADE_RESET;
-    model->pokemon_table = trade->pokemon_table;
     model->curr_pokemon = pokemon_stat_get(trade->trade_block, STAT_NUM, NONE);
     model->ledon = false;
 
@@ -736,7 +733,6 @@ void* trade_alloc(
     trade->view = view_alloc();
     trade->trade_block = trade_block;
     trade->input_block = malloc(sizeof(TradeBlock));
-    trade->pokemon_table = pokemon_table;
     trade->patch_list = NULL;
     trade->gblink_pins = gblink_pins;
 
