@@ -59,19 +59,41 @@ static void render_callback(Canvas* const canvas, void* ctx) {
         return;
     }
 
-    char score_string[10];
-
+    // draw map (this should probably be it's own function)
     float background_position = game_state->paper->y;
     for(int i = background_position; i < background_position + 10; i++) {
+        /*
+            using a u_int32_t here so that bits 
+            that have been shifted out can still 
+            be read.
+        */
         u_int32_t currentRow = game_state->map[i];
         for(unsigned int j = 0; j < sizeof(uint16_t) * 8; j++) {
+            /*
+                0x8000 is 1 with 15 zeros
+                00000000000000001000000000000000 - 0x8000
+                00000000000000001111111001111111 - map data (currentRow)
+                using & will result in:
+                00000000000000001000000000000000
+                the above number will evaluate to true
+                
+                OR
+
+                00000000000000001000000000000000 - 0x8000
+                00000000000000000111111001111111 - map data (currentRow)
+                using & will result in:
+                00000000000000000000000000000000
+                the above number will result in false
+            */
             if(currentRow & 0x8000) {
                 const Icon* ground_to_draw = &I_Ground;
 
+                // if the bit to the left is 0, use the right facing ground sprite
                 if(!(currentRow & 0x4000)) {
                     ground_to_draw = &I_GroundRight;
                 }
 
+                // if the bit to the right is 0, use the left facing ground tile
                 if(!(currentRow & 0x10000)) {
                     ground_to_draw = &I_GroundLeft;
                 }
@@ -83,16 +105,20 @@ static void render_callback(Canvas* const canvas, void* ctx) {
                     ground_to_draw);
             }
 
+            // bit shift currentRow to the left, so the bit to the right will be drawn
             currentRow <<= 1;
         }
     }
 
+    // draw plane
     canvas_draw_icon(
         canvas, game_state->paper->x * SPRITE_SIZE, PAPER_START_Y, game_state->paper->icon);
+
     // Show score
+    char score_string[11]; // length is 11 b/c: Score: xxx\0
     canvas_draw_icon(canvas, 77, 2, &I_Score);
-    if(game_state->score == 0) canvas_set_font(canvas, FontSecondary);
-    snprintf(score_string, 12, "Score: %d", (int)game_state->paper->y);
+    snprintf(
+        score_string, 11, "Score: %d", (int)game_state->paper->y); // copy score into score_string
     canvas_draw_str_aligned(canvas, 80, 5, AlignLeft, AlignTop, score_string);
 
     furi_mutex_release(game_state->mutex);
@@ -106,12 +132,15 @@ int32_t paperplane_app() {
 
     if(!game_state->mutex) {
         FURI_LOG_E("Paper Plane", "cannot create mutex\r\n");
+        // game crash, all initialized items must be freed.
+        furi_message_queue_free(event_queue);
+        furi_mutex_free(game_state->mutex);
+        //furi_timer_free(game_state->timer); this causes a null pointer dereference
         free(game_state->paper);
         free(game_state->map);
         free(game_state);
         return 255;
     }
-    // BEGIN IMPLEMENTATION
 
     // Set system callbacks
     ViewPort* view_port = view_port_alloc();
@@ -135,10 +164,8 @@ int32_t paperplane_app() {
                    event.input.type == InputTypeRepeat) {
                     switch(event.input.key) {
                     case InputKeyUp:
-                        game_state->background_position++;
                         break;
                     case InputKeyDown:
-                        game_state->background_position--;
                         break;
                     case InputKeyLeft:
                         rotate_left(game_state->paper);

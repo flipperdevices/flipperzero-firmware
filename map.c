@@ -2,6 +2,13 @@
 #include "map.h"
 
 void init_map(uint16_t* map) {
+    /*
+        this is all the map data same as 
+        the map from https://ticalc.org/archives/files/fileinfo/341/34139.html
+        1: 8x8 tile exists on an 8x8 grid
+        0: no 8x8 tile
+    */
+
     map[0] = 0b1111111001111111;
     map[1] = 0b1111110000111111;
     map[2] = 0b1111000000001111;

@@ -12,11 +12,13 @@
 
 #define ROTATION_MULTIPLIER 2
 
-#define PLANE_UPDATE_MS_PER_FRAME 10
-
+/* 
+    x, and y are based on screen 
+    width and height / 8, map uses 
+    this grid system too.
+*/
 typedef struct Paper {
     const Icon* icon;
-    int frame_ms;
     float x, y;
     int rotation;
 } Paper;

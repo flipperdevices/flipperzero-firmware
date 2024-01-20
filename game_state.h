@@ -8,14 +8,11 @@
 #include "map.h"
 
 typedef struct GameState {
-    int frame_ms;
     Paper* paper;
     FuriTimer* timer;
     uint32_t last_tick;
     FuriMutex* mutex;
     uint16_t* map;
-    int background_position;
-    int score;
     int crash_flag;
 } GameState;
 
