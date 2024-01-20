@@ -23,6 +23,8 @@ This application has three submenu items:
 The "About" menu item contains information about the application.
 
 # Updates
+- Version 1.9
+  - Use logic LOW instead of HIGH as resting state.  Fixes first LED was "laggy" issue.
 - Version 1.8
   - Renamed app to fit on Flipper Zero main menu screen
   - Improved initialization to only happen when configuring the LEDs
