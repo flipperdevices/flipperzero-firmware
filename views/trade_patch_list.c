@@ -46,9 +46,9 @@ uint8_t plist_index_get(struct patch_list* plist, int offset) {
     return plist->index;
 }
 
-void plist_create(struct patch_list** pplist, TradeBlock* trade_block) {
-    furi_assert(trade_block);
-    uint8_t* trade_party_flat = (uint8_t*)trade_block->party;
+void plist_create(struct patch_list** pplist, PokemonData* pdata) {
+    furi_assert(pdata);
+    uint8_t* trade_party_flat = pdata->party;
     int i;
 
     /* If plist is non-NULL that means its already been created. Tear it down
