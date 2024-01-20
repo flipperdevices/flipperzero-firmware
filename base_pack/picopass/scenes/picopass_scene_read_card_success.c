@@ -39,7 +39,7 @@ void picopass_scene_read_card_success_on_enter(void* context) {
     }
 
     // We can't test the pacs->key in case it is intentionally all 0's and we can't test the key block since it is populated with the diversified key before each key test, so we approximate with the PACS config block being blank.
-    bool no_key = picopass_is_memset(
+    bool zero_config = picopass_is_memset(
         AA1[PICOPASS_ICLASS_PACS_CFG_BLOCK_INDEX].data, 0x00, PICOPASS_BLOCK_LEN);
     bool empty = picopass_is_memset(
         AA1[PICOPASS_ICLASS_PACS_CFG_BLOCK_INDEX].data, 0xFF, PICOPASS_BLOCK_LEN);
@@ -62,7 +62,7 @@ void picopass_scene_read_card_success_on_enter(void* context) {
             "More",
             picopass_scene_read_card_success_widget_callback,
             picopass);
-    } else if(no_key) {
+    } else if(zero_config) {
         furi_string_cat_printf(wiegand_str, "Read Failed");
 
         if(pacs->se_enabled) {
@@ -133,7 +133,12 @@ void picopass_scene_read_card_success_on_enter(void* context) {
             furi_string_cat_printf(credential_str, " +SIO");
         }
 
-        if(pacs->key) {
+        bool no_key =
+            picopass_is_memset(AA1[PICOPASS_SECURE_KD_BLOCK_INDEX].data, 0xFF, PICOPASS_BLOCK_LEN);
+
+        if(no_key) {
+            furi_string_cat_printf(key_str, "No Key: used NR-MAC");
+        } else if(pacs->key) {
             furi_string_cat_printf(key_str, "Key: ");
             uint8_t key[PICOPASS_BLOCK_LEN];
             memcpy(key, &pacs->key, PICOPASS_BLOCK_LEN);
