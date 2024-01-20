@@ -3,13 +3,31 @@
 
 #include "flipper.h"
 #include "scene_main_menu.h"
-#include "scene_hcsr04.h"
+#include "scene_add_code.h"
+#include "scene_read_code.h"
+#include "scene_save_code.h"
+#include "scene_select_code.h"
+#include "scene_send_code.h"
+#include "scene_serial.h"
 
 /** The current scene */
-typedef enum { FcomMainMenuScene, FcomHCSR04Scene, FcomSceneCount } FcomScene;
+typedef enum { FcomMainMenuScene, 
+               FcomReadCodeScene,
+               FcomCodeSelectScene,
+               FcomSendCodeScene,
+               FcomAddCodeScene,
+               FcomSerialScene,
+               FcomSaveCodeScene,
+               FcomSceneCount } FcomScene;
 
 /** The current view */
-typedef enum { FcomSubmenuView, FcomHCSR04View } FcomView;
+typedef enum { FcomMainMenuView,
+               FcomReadCodeView,
+               FcomSendCodeView,
+               FcomKeyboardView,
+               FcomSerialView,
+               FcomFileSelectView
+                } FcomView;
 
 extern void (*const fcom_scene_on_enter_handlers[])(void*);
 extern bool (*const fcom_scene_on_event_handlers[])(void*, SceneManagerEvent);

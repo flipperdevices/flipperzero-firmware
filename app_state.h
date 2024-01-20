@@ -5,7 +5,7 @@
 #include "scenes.h"
 
 typedef struct AppState {
-    char value[22];
+    bool usbSerialEnabled;
 } AppState;
 
 typedef struct App {

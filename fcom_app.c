@@ -9,7 +9,7 @@ int32_t fcom_app(void* p) {
 
     Gui* gui = furi_record_open(RECORD_GUI);
     view_dispatcher_attach_to_gui(app->view_dispatcher, gui, ViewDispatcherTypeFullscreen);
-    scene_manager_next_scene(app->scene_manager, FcomSubmenuView);
+    scene_manager_next_scene(app->scene_manager, FcomMainMenuScene);
     view_dispatcher_run(app->view_dispatcher);
 
     app_free(app);

@@ -6,10 +6,10 @@
 /* main menu scene */
 
 /*
-Read -> reads a code sent by a digimon -> save UI
-Read After Send -> Select a code -> Sends the code and then reads the response -> save UI
-Send -> load UI -> send UI (either send after OK if first, or wait for code and then send if second)
-USB Serial -> Activate serial mode
+Read -> Reads a code sent by a digimon (always waits) -> Save UI
+Saved -> Code Picker -> Send screen (Either in "Press OK to Send" or "Waiting for Remote") -> Save UI
+Add Manually -> Keyboard Entry -> Save UI
+USB Serial -> Text Box scene showing serial log
 */
 
 /* 
@@ -19,43 +19,35 @@ void fcom_menu_callback(void* context, uint32_t index);
 void fcom_main_menu_scene_on_enter(void* context) {
     App* app = context;
     submenu_reset(app->submenu);
-    submenu_set_header(app->submenu, "F-Com");
-    submenu_add_item(app->submenu, "Read", MainMenuSelectionHCSR04, fcom_menu_callback, app);
-    submenu_add_item(app->submenu, "Saved", MainMenuSelectionHCSR04, fcom_menu_callback, app);
-    /*
-    submenu_add_item(
-        app->submenu, "4-bar resistor", ResistorsMainMenuSelectionR4, resistors_menu_callback, app);
-    submenu_add_item(
-        app->submenu, "5-bar resistor", ResistorsMainMenuSelectionR5, resistors_menu_callback, app);
-    submenu_add_item(
-        app->submenu, "6-bar resistor", ResistorsMainMenuSelectionR6, resistors_menu_callback, app);
-    */
-    view_dispatcher_switch_to_view(app->view_dispatcher, FcomSubmenuView);
+    //submenu_set_header(app->submenu, "F-Com");
+    submenu_add_item(app->submenu, "Read", MainMenuSelectionRead, fcom_menu_callback, app);
+    submenu_add_item(app->submenu, "Saved", MainMenuSelectionSaved, fcom_menu_callback, app);
+    submenu_add_item(app->submenu, "Add Manually", MainMenuSelectionAdd, fcom_menu_callback, app);
+    submenu_add_item(app->submenu, "USB A-Com", MainMenuSelectionSerial, fcom_menu_callback, app);
+    //"5V on GPIO" to toggle on/off, which just sets up the bridge
+    view_dispatcher_switch_to_view(app->view_dispatcher, FcomMainMenuView);
 }
-
 
 /** main menu callback - sends custom events to the scene manager based on the selection */
 void fcom_menu_callback(void* context, uint32_t index) {
     App* app = context;
     switch(index) {
-    case MainMenuSelectionHCSR04:
+    case MainMenuSelectionRead:
         scene_manager_handle_custom_event(
-            app->scene_manager, MainMenuSceneSelectionEventHCSR04);
+            app->scene_manager, MainMenuSceneSelectionEventRead);
         break;
-    /*
-    case ResistorsMainMenuSelectionR4:
+    case MainMenuSelectionSaved:
         scene_manager_handle_custom_event(
-            app->scene_manager, ResistorsMainMenuSceneSelectionEventR4);
+            app->scene_manager, MainMenuSceneSelectionEventSaved);
         break;
-    case ResistorsMainMenuSelectionR5:
+    case MainMenuSelectionAdd:
         scene_manager_handle_custom_event(
-            app->scene_manager, ResistorsMainMenuSceneSelectionEventR5);
+            app->scene_manager, MainMenuSceneSelectionEventAdd);
         break;
-    case ResistorsMainMenuSelectionR6:
+    case MainMenuSelectionSerial:
         scene_manager_handle_custom_event(
-            app->scene_manager, ResistorsMainMenuSceneSelectionEventR6);
+            app->scene_manager, MainMenuSceneSelectionEventSerial);
         break;
-    */
     }
 }
 
@@ -66,28 +58,22 @@ bool fcom_main_menu_scene_on_event(void* context, SceneManagerEvent event) {
     switch(event.type) {
     case SceneManagerEventTypeCustom:
         switch(event.event) {
-        case MainMenuSceneSelectionEventHCSR04:
-            // Reset state: app_init_resistor(app, R3);
-            scene_manager_next_scene(app->scene_manager, FcomHCSR04Scene);
+        case MainMenuSceneSelectionEventRead:
+            scene_manager_next_scene(app->scene_manager, FcomReadCodeScene);
             consumed = true;
             break;
-        /*
-        case ResistorsMainMenuSceneSelectionEventR4:
-            app_init_resistor(app, R4);
-            scene_manager_next_scene(app->scene_manager, ResistorsEditScene);
+        case MainMenuSceneSelectionEventSaved:
+            scene_manager_next_scene(app->scene_manager, FcomCodeSelectScene);
             consumed = true;
             break;
-        case ResistorsMainMenuSceneSelectionEventR5:
-            app_init_resistor(app, R5);
-            scene_manager_next_scene(app->scene_manager, ResistorsEditScene);
+        case MainMenuSceneSelectionEventAdd:
+            scene_manager_next_scene(app->scene_manager, FcomAddCodeScene);
             consumed = true;
             break;
-        case ResistorsMainMenuSceneSelectionEventR6:
-            app_init_resistor(app, R6);
-            scene_manager_next_scene(app->scene_manager, ResistorsEditScene);
+        case MainMenuSceneSelectionEventSerial:
+            scene_manager_next_scene(app->scene_manager, FcomSerialScene);
             consumed = true;
             break;
-        */
         }
         break;
     default: // eg. SceneManagerEventTypeBack, SceneManagerEventTypeTick

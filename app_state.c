@@ -21,19 +21,31 @@ App* app_alloc() {
     //Allocate our submenu and add the view
     app->submenu = submenu_alloc();
     view_dispatcher_add_view(
-        app->view_dispatcher, FcomSubmenuView, submenu_get_view(app->submenu));
+        app->view_dispatcher, FcomMainMenuView, submenu_get_view(app->submenu));
 
-    //Allocate our dialog and add the view
-    app->dialog = dialog_ex_alloc();
-    app->widget = widget_alloc();
     view_dispatcher_add_view(
-        app->view_dispatcher, FcomHCSR04View, dialog_ex_get_view(app->dialog));
+        app->view_dispatcher, FcomReadCodeView, submenu_get_view(app->submenu));
+
+    view_dispatcher_add_view(
+        app->view_dispatcher, FcomSendCodeView, submenu_get_view(app->submenu));
+
+    view_dispatcher_add_view(
+        app->view_dispatcher, FcomKeyboardView, submenu_get_view(app->submenu));
+
+    view_dispatcher_add_view(
+        app->view_dispatcher, FcomSerialView, submenu_get_view(app->submenu));
+
+    view_dispatcher_add_view(
+        app->view_dispatcher, FcomFileSelectView, submenu_get_view(app->submenu));
 
     return app;
 }
 
 AppState* app_state_alloc() {
     AppState* state = malloc(sizeof(AppState));
+
+    // Allocate and start dcomm
+ 
     return state;
 }
 
@@ -44,14 +56,20 @@ void app_quit(App* app) {
 void app_free(App* app) {
     furi_assert(app);
 
+    // stop and deallocate usb serial if enabled
+    // Stop and deallocate dcomm
+
     app->notification = NULL;
 
     free(app->state);
 
-    view_dispatcher_remove_view(app->view_dispatcher, FcomSubmenuView);
+    view_dispatcher_remove_view(app->view_dispatcher, FcomMainMenuView);
+    view_dispatcher_remove_view(app->view_dispatcher, FcomReadCodeView);
+    view_dispatcher_remove_view(app->view_dispatcher, FcomSendCodeView);
+    view_dispatcher_remove_view(app->view_dispatcher, FcomKeyboardView);
+    view_dispatcher_remove_view(app->view_dispatcher, FcomSerialView);
+    view_dispatcher_remove_view(app->view_dispatcher, FcomFileSelectView);
     submenu_free(app->submenu);
-
-    view_dispatcher_remove_view(app->view_dispatcher, FcomHCSR04View);
     widget_free(app->widget);
 
     dialog_ex_free(app->dialog);
