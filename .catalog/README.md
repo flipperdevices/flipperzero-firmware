@@ -26,6 +26,7 @@ NOTE: If the screen says “Got std key” AND stays on 0/18, then loclass isn't
 ## Failure
 
 There are some situations when the offline loclass may not find a key, such as:
+ * non-iClass picopass (Circuit Laundry, etc)
  * iClass SE
  * Readers configured with Standard-2 keyset
  * Custom keyed readers using Standard KDF
