@@ -214,6 +214,7 @@ uint16_t pokemon_stat_ev_get(TradeBlock* trade, DataStat stat);
 void pokemon_stat_ev_set(TradeBlock* trade, DataStat stat, uint16_t val);
 uint8_t pokemon_stat_iv_get(TradeBlock* trade, DataStat stat);
 const char* table_stat_name_get(int num);
+const Icon *table_icon_get(int num);
 void pokemon_stat_iv_set(TradeBlock* trade, int val);
 void pokemon_exp_set(TradeBlock* trade, uint32_t exp);
 void pokemon_exp_calc(TradeBlock* trade);

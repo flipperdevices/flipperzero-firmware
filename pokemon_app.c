@@ -116,9 +116,8 @@ PokemonFap* pokemon_alloc() {
     scene_manager_next_scene(pokemon_fap->scene_manager, MainMenuScene);
 
     // Select Pokemon View
-    pokemon_fap->select_view = select_pokemon_alloc(pokemon_fap);
-    view_dispatcher_add_view(
-        pokemon_fap->view_dispatcher, AppViewSelectPokemon, pokemon_fap->select_view);
+    /* Allocates its own view and adds it to the main view_dispatcher */
+    pokemon_fap->select = select_pokemon_alloc(pokemon_fap, pokemon_fap->view_dispatcher, pokemon_fap->scene_manager, AppViewSelectPokemon);
 
     // Trade View
     /* Allocates its own view and adds it to the main view_dispatcher */
@@ -132,10 +131,8 @@ void free_app(PokemonFap* pokemon_fap) {
     furi_assert(pokemon_fap);
 
     // Free views
-    view_dispatcher_remove_view(pokemon_fap->view_dispatcher, AppViewSelectPokemon);
-    select_pokemon_free(pokemon_fap);
-
-    /* Also removes itself from the view_dispatcher */
+    /* These each remove themselves from the view_dispatcher */
+    select_pokemon_free(pokemon_fap->view_dispatcher, AppViewSelectPokemon, pokemon_fap->select);
     trade_free(pokemon_fap->view_dispatcher, AppViewTrade, pokemon_fap->trade);
 
     view_dispatcher_remove_view(pokemon_fap->view_dispatcher, AppViewMainMenu);

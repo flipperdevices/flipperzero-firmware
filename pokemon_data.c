@@ -232,6 +232,11 @@ uint8_t table_stat_base_get(TradeBlock* block, DataStat stat, DataStatSub num) {
     return 0;
 }
 
+const Icon *table_icon_get(int num)
+{
+	return pokemon_table[num].icon;
+}
+
 uint16_t pokemon_stat_get(TradeBlock* block, DataStat stat, DataStatSub which) {
     furi_assert(block);
     struct pokemon_structure* party = &block->party[0];

@@ -9,6 +9,13 @@ struct select_model {
     const PokemonTable* pokemon_table;
 };
 
+/* Anonymous struct */
+struct select_ctx {
+    View* view;
+    TradeBlock *trade_block;
+    SceneManager *scene_manager;
+};
+
 static void select_pokemon_render_callback(Canvas* canvas, void* model) {
     struct select_model* view_model = model;
     uint8_t curr_pokemon = view_model->curr_pokemon;
@@ -30,7 +37,7 @@ static void select_pokemon_render_callback(Canvas* canvas, void* model) {
 }
 
 static bool select_pokemon_input_callback(InputEvent* event, void* context) {
-    PokemonFap* pokemon_fap = (PokemonFap*)context;
+    struct select_ctx *select = (struct select_ctx*)context;
     bool consumed = false;
     uint8_t selected_pokemon;
 
@@ -40,7 +47,7 @@ static bool select_pokemon_input_callback(InputEvent* event, void* context) {
     if(event->type != InputTypePress) return consumed;
 
     with_view_model(
-        pokemon_fap->select_view,
+        select->view,
         struct select_model * model,
         { selected_pokemon = model->curr_pokemon; },
         false);
@@ -48,8 +55,8 @@ static bool select_pokemon_input_callback(InputEvent* event, void* context) {
     switch(event->key) {
     /* Advance to next view with the selected pokemon */
     case InputKeyOk:
-        pokemon_stat_set(pokemon_fap->trade_block, STAT_NUM, NONE, selected_pokemon);
-        scene_manager_previous_scene(pokemon_fap->scene_manager);
+        pokemon_stat_set(select->trade_block, STAT_NUM, NONE, selected_pokemon);
+        scene_manager_previous_scene(select->scene_manager);
         consumed = true;
         break;
 
@@ -99,7 +106,7 @@ static bool select_pokemon_input_callback(InputEvent* event, void* context) {
     }
 
     with_view_model(
-        pokemon_fap->select_view,
+        select->view,
         struct select_model * model,
         { model->curr_pokemon = selected_pokemon; },
         true);
@@ -108,34 +115,45 @@ static bool select_pokemon_input_callback(InputEvent* event, void* context) {
 }
 
 void select_pokemon_enter_callback(void* context) {
-    PokemonFap* pokemon_fap = (PokemonFap*)context;
+    struct select_ctx *select = (struct select_ctx*)context;
 
     with_view_model(
-        pokemon_fap->select_view,
+        select->view,
         struct select_model * model,
         {
-            model->curr_pokemon = pokemon_stat_get(pokemon_fap->trade_block, STAT_NUM, NONE);
+            model->curr_pokemon = pokemon_stat_get(select->trade_block, STAT_NUM, NONE);
             model->pokemon_table = pokemon_table;
         },
         true);
 }
 
-View* select_pokemon_alloc(PokemonFap* pokemon_fap) {
-    View* view;
+void* select_pokemon_alloc(TradeBlock* trade_block, ViewDispatcher* view_dispatcher, SceneManager* scene_manager, uint32_t viewid) {
+    furi_assert(trade_block);
 
-    view = view_alloc();
+    struct select_ctx *select = malloc(sizeof(struct select_ctx));
 
-    view_set_context(view, pokemon_fap);
-    view_allocate_model(view, ViewModelTypeLockFree, sizeof(struct select_model));
+    select->view = view_alloc();
+    select->trade_block = trade_block;
+    select->scene_manager = scene_manager;
 
-    view_set_draw_callback(view, select_pokemon_render_callback);
-    view_set_input_callback(view, select_pokemon_input_callback);
-    view_set_enter_callback(view, select_pokemon_enter_callback);
-    return view;
+    view_set_context(select->view, select);
+    view_allocate_model(select->view, ViewModelTypeLockFree, sizeof(struct select_model));
+
+    view_set_draw_callback(select->view, select_pokemon_render_callback);
+    view_set_input_callback(select->view, select_pokemon_input_callback);
+    view_set_enter_callback(select->view, select_pokemon_enter_callback);
+
+    view_dispatcher_add_view(view_dispatcher, viewid, select->view);
+
+    return select;
 }
 
-void select_pokemon_free(PokemonFap* pokemon_fap) {
-    furi_assert(pokemon_fap);
-    view_free_model(pokemon_fap->select_view);
-    view_free(pokemon_fap->select_view);
+void select_pokemon_free(ViewDispatcher* view_dispatcher, uint32_t viewid, void *select_ctx) {
+    struct select_ctx *select = (struct select_ctx*)select_ctx;
+
+    view_dispatcher_remove_view(view_dispatcher, viewid);
+
+    view_free_model(select->view);
+    view_free(select->view);
+    free(select);
 }

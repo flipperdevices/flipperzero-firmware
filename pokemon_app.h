@@ -19,8 +19,8 @@
 struct pokemon_fap {
     ViewDispatcher* view_dispatcher;
 
-    /* View ports for each of the application's steps */
-    View* select_view;
+    /* anonymous structs for each of the main views */
+    void* select;
     void* trade;
 
     /* Scene manager */
