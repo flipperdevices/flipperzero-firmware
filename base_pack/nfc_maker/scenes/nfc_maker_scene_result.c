@@ -102,7 +102,7 @@ void nfc_maker_scene_result_on_enter(void* context) {
 
             FuriString* vcard = furi_string_alloc_set("BEGIN:VCARD\r\nVERSION:3.0\r\n");
             furi_string_cat_printf(
-                vcard, "PRODID:-//Flipper Xtreme//%s//EN\r\n", version_get_version(NULL));
+                vcard, "PRODID:-//Flipper Zero//%s//EN\r\n", version_get_version(NULL));
             furi_string_cat_printf(vcard, "N:%s;%s;;;\r\n", app->small_buf2, app->small_buf1);
             furi_string_cat_printf(
                 vcard,
