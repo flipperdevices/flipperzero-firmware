@@ -57,8 +57,8 @@ void wifi_deauther_scene_console_output_on_enter(void* context) {
     // Send command with newline '\n'
     if(app->is_command && app->selected_tx_string) {
         wifi_deauther_uart_tx(
-            (uint8_t*)(app->selected_tx_string), strlen(app->selected_tx_string));
-        wifi_deauther_uart_tx((uint8_t*)("\n"), 1);
+            app->uart, (uint8_t*)(app->selected_tx_string), strlen(app->selected_tx_string));
+        wifi_deauther_uart_tx(app->uart, (uint8_t*)("\n"), 1);
     }
 }
 
@@ -85,6 +85,6 @@ void wifi_deauther_scene_console_output_on_exit(void* context) {
 
     // Automatically stop the scan when exiting view
     if(app->is_command) {
-        wifi_deauther_uart_tx((uint8_t*)("stopscan\n"), strlen("stopscan\n"));
+        wifi_deauther_uart_tx(app->uart, (uint8_t*)("stopscan\n"), strlen("stopscan\n"));
     }
 }
