@@ -168,8 +168,8 @@ void ethernet_view_process_draw(EthViewProcess* process, Canvas* canvas) {
         for(uint8_t i = 0; i < 6; ++i) {
             uint8_t x1 = 29 + i * 17;
             uint8_t x2 = x1 + 6;
-            draw_hex_digit(canvas, x1, 25, (mac[i] & 0x0F));
-            draw_hex_digit(canvas, x2, 25, (mac[i] & 0xF0) >> 4);
+            draw_hex_digit(canvas, x1, 25, (mac[i] & 0xF0) >> 4);
+            draw_hex_digit(canvas, x2, 25, (mac[i] & 0x0F));
             if(editing && (octet / 2 == i)) {
                 uint8_t x = octet & 1 ? x2 : x1;
                 canvas_draw_line(canvas, x, 26, x + 4, 26);
@@ -226,10 +226,13 @@ void ethernet_view_process_draw(EthViewProcess* process, Canvas* canvas) {
 }
 
 static void mac_change_hex_digit(uint8_t* mac, uint8_t octet, int8_t diff) {
-    uint8_t digit = (octet & 1) ? (mac[octet / 2] >> 4) : (mac[octet / 2]);
+    uint8_t digit = (octet & 1) ? (mac[octet / 2] & 0x0F) : (mac[octet / 2] >> 4);
     digit = (digit + diff) & 0xF;
-    mac[octet / 2] = (mac[octet / 2] & ((octet & 1) ? 0x0F : 0xF0)) |
-                     (digit << ((octet & 1) ? 4 : 0));
+    if(octet & 1) {
+        mac[octet / 2] = (mac[octet / 2] & 0xF0) | digit;
+    } else {
+        mac[octet / 2] = (digit << 4) | (mac[octet / 2] & 0x0F);
+    }
 }
 
 static void adress_change_dec_digit(uint8_t* ip, uint8_t digit, int8_t diff) {
@@ -254,11 +257,7 @@ void ethernet_view_process_keyevent(EthViewProcess* process, InputKey key) {
         uint8_t octet = ((EthViewDrawInit*)process->draw_struct)->current_octet;
         uint8_t* mac = ((EthViewDrawInit*)process->draw_struct)->mac;
         if(key == InputKeyLeft) {
-            if(octet > 0) {
-                octet -= 1;
-            } else {
-                process->editing = 0;
-            }
+            if(octet > 0) octet -= 1;
         } else if(key == InputKeyRight) {
             if(octet < 11) octet += 1;
         } else if(key == InputKeyUp) {

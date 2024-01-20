@@ -250,7 +250,7 @@ void ethernet_save_process_read(EthernetSaveConfig* config) {
     furi_record_close(RECORD_STORAGE);
 }
 
-EthernetSaveConfig* ehternet_save_process_malloc() {
+EthernetSaveConfig* ethernet_save_process_malloc() {
     EthernetSaveConfig* config = malloc(sizeof(EthernetSaveConfig));
 
     set_default_config(config);
@@ -259,7 +259,7 @@ EthernetSaveConfig* ehternet_save_process_malloc() {
 
     Storage* storage = furi_record_open(RECORD_STORAGE);
 
-    FURI_LOG_E(TAG, "ehternet_save_process_malloc");
+    FURI_LOG_E(TAG, "ethernet_save_process_malloc");
 
     File* file = storage_file_alloc(storage);
 
@@ -275,7 +275,7 @@ EthernetSaveConfig* ehternet_save_process_malloc() {
     return config;
 }
 
-void ehternet_save_process_print(EthernetSaveConfig* config, const char* str) {
+void ethernet_save_process_print(EthernetSaveConfig* config, const char* str) {
     furi_assert(config);
     FuriHalRtcDateTime datetime = {0};
     furi_hal_rtc_get_datetime(&datetime);
@@ -291,8 +291,8 @@ void ehternet_save_process_print(EthernetSaveConfig* config, const char* str) {
         str);
 }
 
-void ehternet_save_process_free(EthernetSaveConfig* config) {
-    FURI_LOG_E(TAG, "ehternet_save_process_free");
+void ethernet_save_process_free(EthernetSaveConfig* config) {
+    FURI_LOG_E(TAG, "ethernet_save_process_free");
     ethernet_save_process_write(config);
     storage_file_close(config->log_file);
     storage_file_free(config->log_file);
