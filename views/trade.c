@@ -608,8 +608,7 @@ static uint8_t getTradeCentreResponse(struct trade_ctx* trade) {
                 &(trade->trade_block->ot_name[0]),
                 &(trade->input_block->ot_name[in_pkmn_idx]),
                 sizeof(struct name));
-            model->curr_pokemon = pokemon_table_get_num_from_index(
-                trade->pokemon_table, trade->trade_block->party_members[0]);
+            model->curr_pokemon = pokemon_stat_get(trade->trade_block, STAT_NUM, NONE);
 
             /* Schedule a callback outside of ISR context to rebuild the patch
 	     * list with the new Pokemon that we just accepted.
@@ -672,8 +671,7 @@ void trade_enter_callback(void* context) {
     }
     trade->trade_centre_state = TRADE_RESET;
     model->pokemon_table = trade->pokemon_table;
-    model->curr_pokemon = pokemon_table_get_num_from_index(
-        trade->pokemon_table, trade->trade_block->party_members[0]);
+    model->curr_pokemon = pokemon_stat_get(trade->trade_block, STAT_NUM, NONE);
     model->ledon = false;
 
     view_commit_model(trade->view, true);
@@ -727,7 +725,6 @@ void trade_exit_callback(void* context) {
 
 void* trade_alloc(
     TradeBlock* trade_block,
-    const PokemonTable* table,
     struct gblink_pins* gblink_pins,
     ViewDispatcher* view_dispatcher,
     uint32_t view_id) {
@@ -739,7 +736,7 @@ void* trade_alloc(
     trade->view = view_alloc();
     trade->trade_block = trade_block;
     trade->input_block = malloc(sizeof(TradeBlock));
-    trade->pokemon_table = table;
+    trade->pokemon_table = pokemon_table;
     trade->patch_list = NULL;
     trade->gblink_pins = gblink_pins;
 

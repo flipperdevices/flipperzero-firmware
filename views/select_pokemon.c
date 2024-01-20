@@ -48,8 +48,7 @@ static bool select_pokemon_input_callback(InputEvent* event, void* context) {
     switch(event->key) {
     /* Advance to next view with the selected pokemon */
     case InputKeyOk:
-        pokemon_fap->curr_pokemon = selected_pokemon;
-        FURI_LOG_D(TAG, "[Select] Selected %s", pokemon_fap->pokemon_table[selected_pokemon].name);
+        pokemon_stat_set(pokemon_fap->trade_block, STAT_NUM, NONE, selected_pokemon);
         scene_manager_previous_scene(pokemon_fap->scene_manager);
         consumed = true;
         break;
@@ -115,8 +114,8 @@ void select_pokemon_enter_callback(void* context) {
         pokemon_fap->select_view,
         struct select_model * model,
         {
-            model->curr_pokemon = (uint8_t)pokemon_fap->curr_pokemon;
-            model->pokemon_table = pokemon_fap->pokemon_table;
+            model->curr_pokemon = pokemon_stat_get(pokemon_fap->trade_block, STAT_NUM, NONE);
+            model->pokemon_table = pokemon_table;
         },
         true);
 }

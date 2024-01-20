@@ -7,6 +7,8 @@
 
 typedef enum {
     MainMenuScene,
+    GenITradeScene, // Formerly main menu scene
+    GenIITradeScene,
     SelectPokemonScene,
     SelectNicknameScene,
     SelectLevelScene,
