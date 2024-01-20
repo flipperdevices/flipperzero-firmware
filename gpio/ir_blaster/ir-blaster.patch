@@ -1,0 +1,147 @@
+diff --git a/targets/f7/furi_hal/furi_hal_infrared.c b/targets/f7/furi_hal/furi_hal_infrared.c
+index 3b20b6bc3..723ce0bd6 100644
+--- a/targets/f7/furi_hal/furi_hal_infrared.c
++++ b/targets/f7/furi_hal/furi_hal_infrared.c
+@@ -2,6 +2,7 @@
+ #include <furi_hal_interrupt.h>
+ #include <furi_hal_resources.h>
+ #include <furi_hal_bus.h>
++#include <furi_hal_power.h>
+ 
+ #include <stm32wbxx_ll_tim.h>
+ #include <stm32wbxx_ll_dma.h>
+@@ -9,12 +10,6 @@
+ #include <furi.h>
+ #include <math.h>
+ 
+-// #define INFRARED_TX_DEBUG
+-
+-#if defined INFRARED_TX_DEBUG
+-#define gpio_infrared_tx gpio_ext_pa7
+-#endif
+-
+ #define INFRARED_TIM_TX_DMA_BUFFER_SIZE 200
+ #define INFRARED_POLARITY_SHIFT 1
+ 
+@@ -84,6 +79,8 @@ typedef enum {
+ static volatile InfraredState furi_hal_infrared_state = InfraredStateIdle;
+ static InfraredTimTx infrared_tim_tx;
+ static InfraredTimRx infrared_tim_rx;
++static bool is_infrared_external = false;
++static bool was_otg_requested = false;
+ 
+ static void furi_hal_infrared_tx_fill_buffer(uint8_t buf_num, uint8_t polarity_shift);
+ static void furi_hal_infrared_async_tx_free_resources(void);
+@@ -348,27 +345,29 @@ static void furi_hal_infrared_configure_tim_pwm_tx(uint32_t freq, float duty_cyc
+     LL_TIM_SetAutoReload(
+         INFRARED_DMA_TIMER,
+         __LL_TIM_CALC_ARR(SystemCoreClock, LL_TIM_GetPrescaler(INFRARED_DMA_TIMER), freq));
+-#if defined INFRARED_TX_DEBUG
+-    LL_TIM_OC_SetCompareCH1(
+-        INFRARED_DMA_TIMER, ((LL_TIM_GetAutoReload(INFRARED_DMA_TIMER) + 1) * (1 - duty_cycle)));
+-    LL_TIM_OC_EnablePreload(INFRARED_DMA_TIMER, LL_TIM_CHANNEL_CH1);
+-    /* LL_TIM_OCMODE_PWM2 set by DMA */
+-    LL_TIM_OC_SetMode(INFRARED_DMA_TIMER, LL_TIM_CHANNEL_CH1, LL_TIM_OCMODE_FORCED_INACTIVE);
+-    LL_TIM_OC_SetPolarity(INFRARED_DMA_TIMER, LL_TIM_CHANNEL_CH1N, LL_TIM_OCPOLARITY_HIGH);
+-    LL_TIM_OC_DisableFast(INFRARED_DMA_TIMER, LL_TIM_CHANNEL_CH1);
+-    LL_TIM_CC_EnableChannel(INFRARED_DMA_TIMER, LL_TIM_CHANNEL_CH1N);
+-    LL_TIM_DisableIT_CC1(INFRARED_DMA_TIMER);
+-#else
+-    LL_TIM_OC_SetCompareCH3(
+-        INFRARED_DMA_TIMER, ((LL_TIM_GetAutoReload(INFRARED_DMA_TIMER) + 1) * (1 - duty_cycle)));
+-    LL_TIM_OC_EnablePreload(INFRARED_DMA_TIMER, LL_TIM_CHANNEL_CH3);
+-    /* LL_TIM_OCMODE_PWM2 set by DMA */
+-    LL_TIM_OC_SetMode(INFRARED_DMA_TIMER, LL_TIM_CHANNEL_CH3, LL_TIM_OCMODE_FORCED_INACTIVE);
+-    LL_TIM_OC_SetPolarity(INFRARED_DMA_TIMER, LL_TIM_CHANNEL_CH3N, LL_TIM_OCPOLARITY_HIGH);
+-    LL_TIM_OC_DisableFast(INFRARED_DMA_TIMER, LL_TIM_CHANNEL_CH3);
+-    LL_TIM_CC_EnableChannel(INFRARED_DMA_TIMER, LL_TIM_CHANNEL_CH3N);
+-    LL_TIM_DisableIT_CC3(INFRARED_DMA_TIMER);
+-#endif
++    if(is_infrared_external) {
++        LL_TIM_OC_SetCompareCH1(
++            INFRARED_DMA_TIMER,
++            ((LL_TIM_GetAutoReload(INFRARED_DMA_TIMER) + 1) * (1 - duty_cycle)));
++        LL_TIM_OC_EnablePreload(INFRARED_DMA_TIMER, LL_TIM_CHANNEL_CH1);
++        /* LL_TIM_OCMODE_PWM2 set by DMA */
++        LL_TIM_OC_SetMode(INFRARED_DMA_TIMER, LL_TIM_CHANNEL_CH1, LL_TIM_OCMODE_FORCED_INACTIVE);
++        LL_TIM_OC_SetPolarity(INFRARED_DMA_TIMER, LL_TIM_CHANNEL_CH1N, LL_TIM_OCPOLARITY_HIGH);
++        LL_TIM_OC_DisableFast(INFRARED_DMA_TIMER, LL_TIM_CHANNEL_CH1);
++        LL_TIM_CC_EnableChannel(INFRARED_DMA_TIMER, LL_TIM_CHANNEL_CH1N);
++        LL_TIM_DisableIT_CC1(INFRARED_DMA_TIMER);
++    } else {
++        LL_TIM_OC_SetCompareCH3(
++            INFRARED_DMA_TIMER,
++            ((LL_TIM_GetAutoReload(INFRARED_DMA_TIMER) + 1) * (1 - duty_cycle)));
++        LL_TIM_OC_EnablePreload(INFRARED_DMA_TIMER, LL_TIM_CHANNEL_CH3);
++        /* LL_TIM_OCMODE_PWM2 set by DMA */
++        LL_TIM_OC_SetMode(INFRARED_DMA_TIMER, LL_TIM_CHANNEL_CH3, LL_TIM_OCMODE_FORCED_INACTIVE);
++        LL_TIM_OC_SetPolarity(INFRARED_DMA_TIMER, LL_TIM_CHANNEL_CH3N, LL_TIM_OCPOLARITY_HIGH);
++        LL_TIM_OC_DisableFast(INFRARED_DMA_TIMER, LL_TIM_CHANNEL_CH3);
++        LL_TIM_CC_EnableChannel(INFRARED_DMA_TIMER, LL_TIM_CHANNEL_CH3N);
++        LL_TIM_DisableIT_CC3(INFRARED_DMA_TIMER);
++    }
+     LL_TIM_DisableMasterSlaveMode(INFRARED_DMA_TIMER);
+     LL_TIM_EnableAllOutputs(INFRARED_DMA_TIMER);
+     LL_TIM_DisableIT_UPDATE(INFRARED_DMA_TIMER);
+@@ -377,11 +376,11 @@ static void furi_hal_infrared_configure_tim_pwm_tx(uint32_t freq, float duty_cyc
+ 
+ static void furi_hal_infrared_configure_tim_cmgr2_dma_tx(void) {
+     LL_DMA_InitTypeDef dma_config = {0};
+-#if defined INFRARED_TX_DEBUG
+-    dma_config.PeriphOrM2MSrcAddress = (uint32_t) & (INFRARED_DMA_TIMER->CCMR1);
+-#else
+-    dma_config.PeriphOrM2MSrcAddress = (uint32_t) & (INFRARED_DMA_TIMER->CCMR2);
+-#endif
++    if(is_infrared_external) {
++        dma_config.PeriphOrM2MSrcAddress = (uint32_t) & (INFRARED_DMA_TIMER->CCMR1);
++    } else {
++        dma_config.PeriphOrM2MSrcAddress = (uint32_t) & (INFRARED_DMA_TIMER->CCMR2);
++    }
+     dma_config.MemoryOrM2MDstAddress = (uint32_t)NULL;
+     dma_config.Direction = LL_DMA_DIRECTION_MEMORY_TO_PERIPH;
+     dma_config.Mode = LL_DMA_MODE_NORMAL;
+@@ -575,7 +574,11 @@ static void furi_hal_infrared_async_tx_free_resources(void) {
+         (furi_hal_infrared_state == InfraredStateIdle) ||
+         (furi_hal_infrared_state == InfraredStateAsyncTxStopped));
+ 
+-    furi_hal_gpio_init(&gpio_infrared_tx, GpioModeAnalog, GpioPullDown, GpioSpeedLow);
++    if(was_otg_requested) {
++        furi_hal_power_disable_otg();
++    }
++    const GpioPin* gpio_pin = (is_infrared_external) ? &gpio_ext_pa7 : &gpio_infrared_tx;
++    furi_hal_gpio_init(gpio_pin, GpioModeAnalog, GpioPullDown, GpioSpeedLow);
+     furi_hal_interrupt_set_isr(INFRARED_DMA_CH1_IRQ, NULL, NULL);
+     furi_hal_interrupt_set_isr(INFRARED_DMA_CH2_IRQ, NULL, NULL);
+ 
+@@ -636,10 +639,29 @@ void furi_hal_infrared_async_tx_start(uint32_t freq, float duty_cycle) {
+     furi_delay_us(5);
+     LL_TIM_GenerateEvent_UPDATE(INFRARED_DMA_TIMER); /* DMA -> TIMx_RCR */
+     furi_delay_us(5);
++
++    // Detect if a module (like IR Blaster) is connected to PA7.
++    furi_hal_gpio_init(&gpio_ext_pa7, GpioModeInput, GpioPullUp, GpioSpeedHigh);
++    furi_delay_ms(1);
++    is_infrared_external = !furi_hal_gpio_read(&gpio_ext_pa7);
++    furi_hal_gpio_init(&gpio_ext_pa7, GpioModeAnalog, GpioPullDown, GpioSpeedLow);
++
++    if(is_infrared_external) {
++        was_otg_requested = !furi_hal_power_is_otg_enabled();
++        if(was_otg_requested) {
++            furi_hal_power_enable_otg();
++            furi_delay_ms(100);
++        }
++    } else {
++        was_otg_requested = false;
++    }
++
++    const GpioPin* gpio_pin = (is_infrared_external) ? &gpio_ext_pa7 : &gpio_infrared_tx;
++
+     LL_GPIO_ResetOutputPin(
+-        gpio_infrared_tx.port, gpio_infrared_tx.pin); /* when disable it prevents false pulse */
++        gpio_pin->port, gpio_pin->pin); /* when disable it prevents false pulse */
+     furi_hal_gpio_init_ex(
+-        &gpio_infrared_tx, GpioModeAltFunctionPushPull, GpioPullUp, GpioSpeedHigh, GpioAltFn1TIM1);
++        gpio_pin, GpioModeAltFunctionPushPull, GpioPullUp, GpioSpeedHigh, GpioAltFn1TIM1);
+ 
+     FURI_CRITICAL_ENTER();
+     LL_TIM_GenerateEvent_UPDATE(INFRARED_DMA_TIMER); /* TIMx_RCR -> Repetition counter */
