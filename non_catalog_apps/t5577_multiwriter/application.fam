@@ -1,6 +1,6 @@
 App(
     appid="t5577_multiwriter",
-    name="T5577 Multiwriter",
+    name="T5577 multiwriter",
     apptype=FlipperAppType.EXTERNAL,
     targets=["f7"],
     entry_point="t5577_multiwriter_app",
@@ -8,7 +8,7 @@ App(
     stack_size=2 * 1024,
     order=20,
     fap_description="Application for writing several keys to one t5577",
-    fap_version="0.1",
+    fap_version="0.2",
     fap_icon="icon.png",
     fap_category="RFID",
 )

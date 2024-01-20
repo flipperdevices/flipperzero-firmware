@@ -1,6 +1,5 @@
 #include "../t5577_multiwriter_i.h"
 #include "../protocols/EM41XX.h"
-#include "../t5577_multiwriter/helpers/t5577.h"
 
 static void
     t5577_multiwriter_write_second_key_callback(LFRFIDWorkerWriteResult result, void* context) {
@@ -47,12 +46,12 @@ void t5577_multiwriter_scene_write_second_key_on_enter(void* context) {
     protocol_dict_get_data(app->dict, app->protocol_id, data, size);
 
     uint64_t key = bytes2num(data, size);
-    LFRFIDT5577Data data_to_write = {0};
+    LFRFIDT5577 data_to_write = {0};
 
     add_em41xx_data(&data_to_write, key, 3);
     set_em41xx_config(&data_to_write, 2);
 
-    t5577_write_with_maskis(&data_to_write);
+    t5577_write_with_mask(&data_to_write, 0, 0, 0);
 
     t5577_multiwriter_write_second_key_callback(LFRFIDWorkerWriteOK, context);
 }
