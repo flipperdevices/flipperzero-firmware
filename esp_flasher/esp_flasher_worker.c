@@ -256,7 +256,7 @@ static int32_t esp_flasher_flash_bin(void* context) {
 
         if(app->turbospeed) {
             loader_port_debug_print("Restoring transmission rate\n");
-            esp_flasher_uart_set_br(app->uart, FAST_BAUDRATE);
+            esp_flasher_uart_set_br(app->uart, BAUDRATE);
         }
 
         loader_port_debug_print(
