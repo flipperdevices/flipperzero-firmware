@@ -348,10 +348,9 @@ void pokemon_stat_set(TradeBlock* block, DataStat stat, DataStatSub which, uint1
         break;
     case STAT_IV:
         /* This is assumed to always be:
-			 * atk, def, spd, spc
-			 * each taking up 4 bits of 16.
-			 */
-        /* XXX: Does this need to be swapped? */
+	 * atk, def, spd, spc
+	 * each taking up 4 bits of 16.
+	 */
         party->iv = val;
         break;
     case STAT_MOVE:
@@ -2427,5 +2426,6 @@ const NamedList type_list[] = {
     {"Psychic", 0x18, GEN_I},
     {"Rock", 0x05, GEN_I},
     {"Water", 0x15, GEN_I},
+    /* Types are not transferred in gen ii */
     {},
 };

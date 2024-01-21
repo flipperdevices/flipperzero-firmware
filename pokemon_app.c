@@ -11,6 +11,7 @@
 /* Allocates a chunk of memory for the trade data block and sets up some
  * default values.
  */
+/* TODO: Probably move this to pokemon_data */
 static TradeBlock* trade_block_alloc(void) {
     TradeBlock* trade;
 
