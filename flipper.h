@@ -11,6 +11,8 @@
 #include <gui/modules/submenu.h>
 #include <gui/modules/text_input.h>
 #include <gui/modules/dialog_ex.h>
+#include <gui/modules/file_browser.h>
+#include <gui/modules/text_box.h>
 
 #include <notification/notification_messages.h>
 

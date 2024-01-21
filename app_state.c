@@ -20,23 +20,32 @@ App* app_alloc() {
 
     //Allocate our submenu and add the view
     app->submenu = submenu_alloc();
+    app->dialog = dialog_ex_alloc();
+    app->text_input = text_input_alloc();
+    app->file_path = furi_string_alloc();
+    app->file_browser = file_browser_alloc(app->file_path);
+    app->text_box = text_box_alloc();
+    app->text_box_store = furi_string_alloc();
+
+    file_browser_configure(app->file_browser, "*", NULL, true, false, &I_badusb_10px, true);
+
     view_dispatcher_add_view(
         app->view_dispatcher, FcomMainMenuView, submenu_get_view(app->submenu));
 
     view_dispatcher_add_view(
-        app->view_dispatcher, FcomReadCodeView, submenu_get_view(app->submenu));
+        app->view_dispatcher, FcomReadCodeView, dialog_ex_get_view(app->dialog));
 
     view_dispatcher_add_view(
-        app->view_dispatcher, FcomSendCodeView, submenu_get_view(app->submenu));
+        app->view_dispatcher, FcomSendCodeView, dialog_ex_get_view(app->dialog));
 
     view_dispatcher_add_view(
-        app->view_dispatcher, FcomKeyboardView, submenu_get_view(app->submenu));
+        app->view_dispatcher, FcomKeyboardView, text_input_get_view(app->text_input));
 
     view_dispatcher_add_view(
-        app->view_dispatcher, FcomSerialView, submenu_get_view(app->submenu));
+        app->view_dispatcher, FcomSerialView, text_box_get_view(app->text_box));
 
     view_dispatcher_add_view(
-        app->view_dispatcher, FcomFileSelectView, submenu_get_view(app->submenu));
+        app->view_dispatcher, FcomFileSelectView, file_browser_get_view(app->file_browser));
 
     return app;
 }
@@ -71,8 +80,11 @@ void app_free(App* app) {
     view_dispatcher_remove_view(app->view_dispatcher, FcomFileSelectView);
     submenu_free(app->submenu);
     widget_free(app->widget);
+    
 
     dialog_ex_free(app->dialog);
+    text_box_free(app->text_box);
+    furi_string_free(app->text_box_store);
 
     scene_manager_free(app->scene_manager);
     view_dispatcher_free(app->view_dispatcher);

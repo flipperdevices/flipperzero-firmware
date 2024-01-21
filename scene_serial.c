@@ -6,17 +6,23 @@
 
 
 void fcom_serial_scene_on_enter(void* context) {
-    FURI_LOG_I(TAG, "fcom_read_scene_on_enter");
+    FURI_LOG_I(TAG, "fcom_serial_scene_on_enter");
     App* app = context;
-    // initialize dcomm
-    // start dcomm thread in read mode
+    text_box_reset(app->text_box);
+    furi_string_reset(app->text_box_store);
 
+    furi_string_cat_printf(app->text_box_store, "Starting Serial");
+    furi_string_push_back(app->text_box_store, '\n');
+    furi_string_cat_printf(app->text_box_store, "....");
+    furi_string_push_back(app->text_box_store, '\n');
+
+    text_box_set_text(app->text_box, furi_string_get_cstr(app->text_box_store));
 
     view_dispatcher_switch_to_view(app->view_dispatcher, FcomSerialView);
 }
 
 bool fcom_serial_scene_on_event(void* context, SceneManagerEvent event) {
-    FURI_LOG_I(TAG, "fcom_read_scene_on_event");
+    FURI_LOG_I(TAG, "fcom_serial_scene_on_event");
     UNUSED(context);
     UNUSED(event);
 
@@ -31,7 +37,7 @@ bool fcom_serial_scene_on_event(void* context, SceneManagerEvent event) {
 }
 
 void fcom_serial_scene_on_exit(void* context) {
-    FURI_LOG_I(TAG, "fcom_read_scene_on_exit");
+    FURI_LOG_I(TAG, "fcom_serial_scene_on_exit");
     UNUSED(context);
     App* app = context;
     UNUSED(app);
