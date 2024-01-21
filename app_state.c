@@ -65,7 +65,7 @@ void app_quit(App* app) {
 void app_free(App* app) {
     furi_assert(app);
 
-    // stop and deallocate usb serial if enabled
+    // Stop and deallocate usb serial if enabled
     // Stop and deallocate dcomm
 
     app->notification = NULL;
@@ -78,17 +78,17 @@ void app_free(App* app) {
     view_dispatcher_remove_view(app->view_dispatcher, FcomKeyboardView);
     view_dispatcher_remove_view(app->view_dispatcher, FcomSerialView);
     view_dispatcher_remove_view(app->view_dispatcher, FcomFileSelectView);
-    submenu_free(app->submenu);
-    widget_free(app->widget);
-    
 
+    submenu_free(app->submenu);
     dialog_ex_free(app->dialog);
+    text_input_free(app->text_input);
+    furi_string_free(app->file_path);
+    file_browser_free(app->file_browser);
     text_box_free(app->text_box);
     furi_string_free(app->text_box_store);
 
     scene_manager_free(app->scene_manager);
     view_dispatcher_free(app->view_dispatcher);
-
 
     free(app);
 }

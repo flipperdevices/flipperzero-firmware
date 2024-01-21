@@ -19,7 +19,6 @@ typedef struct App {
     // Widgets for views
     Submenu* submenu;
     DialogEx* dialog;
-    Widget* widget;
     TextInput* text_input;
     FileBrowser* file_browser;
     FuriString* file_path;
