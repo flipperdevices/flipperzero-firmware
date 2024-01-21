@@ -78,6 +78,7 @@ typedef enum {
     STAT_TRAINER_NAME,
     STAT_SEL, // which EV/IV calc to use
     STAT_GEN,
+    STAT_EXP,
 } DataStat;
 
 typedef enum {
@@ -89,7 +90,11 @@ typedef enum {
     TYPE_0 = 0,
     TYPE_1,
 
-    NONE, // Just a filler value
+    EXP_0 = 0,
+    EXP_1,
+    EXP_2,
+
+    NONE = 0, // Just a filler value
 } DataStatSub;
 
 typedef enum {
@@ -207,19 +212,19 @@ extern const NamedList stats_list[];
 int named_list_pos_from_index_get(const NamedList* list, uint8_t index);
 const char* named_list_name_from_index_get(const NamedList* list, uint8_t index);
 int named_list_num_elements_get(const NamedList* list);
-uint8_t table_stat_base_get(TradeBlock* block, DataStat stat, DataStatSub num);
-uint16_t pokemon_stat_get(TradeBlock* trade, DataStat stat, DataStatSub num);
-void pokemon_stat_set(TradeBlock* trade, DataStat stat, DataStatSub which, uint16_t val);
-uint16_t pokemon_stat_ev_get(TradeBlock* trade, DataStat stat);
-void pokemon_stat_ev_set(TradeBlock* trade, DataStat stat, uint16_t val);
-uint8_t pokemon_stat_iv_get(TradeBlock* trade, DataStat stat);
+uint8_t table_stat_base_get(void* block, int gen, DataStat stat, DataStatSub num);
+uint16_t pokemon_stat_get(void* block, int gen, DataStat stat, DataStatSub num);
+void pokemon_stat_set(void* block, int gen, DataStat stat, DataStatSub which, uint16_t val);
+uint16_t pokemon_stat_ev_get(void* block, int gen, DataStat stat);
+void pokemon_stat_ev_set(void* block, int gen, DataStat stat, uint16_t val);
+uint8_t pokemon_stat_iv_get(void* block, int gen, DataStat stat);
 const char* table_stat_name_get(int num);
 const Icon *table_icon_get(int num);
-void pokemon_stat_iv_set(TradeBlock* trade, int val);
-void pokemon_exp_set(TradeBlock* trade, uint32_t exp);
-void pokemon_exp_calc(TradeBlock* trade);
-void pokemon_stat_calc(TradeBlock* trade, DataStat stat);
-void pokemon_default_nickname_set(char* dest, TradeBlock* block, size_t n);
-void pokemon_name_set(TradeBlock* block, DataStat stat, char* name);
-void pokemon_name_get(TradeBlock* block, DataStat stat, char* dest, size_t len);
+void pokemon_stat_iv_set(void* block, int gen, int val);
+void pokemon_exp_set(void* block, int gen, uint32_t exp);
+void pokemon_exp_calc(void* trade, int gen);
+void pokemon_stat_calc(void* block, int gen, DataStat stat);
+void pokemon_default_nickname_set(char* dest, void* block, int gen, size_t n);
+void pokemon_name_set(void* block, int gen, DataStat stat, char* name);
+void pokemon_name_get(void* block, int gen, DataStat stat, char* dest, size_t len);
 #endif /* POKEMON_DATA_H */

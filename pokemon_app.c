@@ -30,11 +30,11 @@ static TradeBlock* trade_block_alloc(void) {
     trade->party_cnt = 1;
 
     /* Trainer/OT name, not to exceed 7 characters! */
-    pokemon_name_set(trade, STAT_TRAINER_NAME, "Flipper");
-    pokemon_name_set(trade, STAT_OT_NAME, "Flipper");
+    pokemon_name_set(trade, GEN_I, STAT_TRAINER_NAME, "Flipper");
+    pokemon_name_set(trade, GEN_I, STAT_OT_NAME, "Flipper");
 
     /* OT trainer ID# */
-    pokemon_stat_set(trade, STAT_OT_ID, NONE, 42069);
+    pokemon_stat_set(trade, GEN_I, STAT_OT_ID, NONE, 42069);
 
     /* Notes:
      * Move pp isn't explicitly set up, should be fine
@@ -44,8 +44,8 @@ static TradeBlock* trade_block_alloc(void) {
 
     /* Set up initial pokemon and level */
     /* This causes all other stats to be recalculated */
-    pokemon_stat_set(trade, STAT_NUM, NONE, 0); // First Pokemon
-    pokemon_stat_set(trade, STAT_LEVEL, NONE, 2); // Minimum level of 2
+    pokemon_stat_set(trade, GEN_I, STAT_NUM, NONE, 0); // First Pokemon
+    pokemon_stat_set(trade, GEN_I, STAT_LEVEL, NONE, 2); // Minimum level of 2
 
     return trade;
 }
@@ -62,7 +62,7 @@ static bool detect_malveke(void) {
     bool rc;
 
     furi_hal_gpio_init(&gpio_usart_rx, GpioModeInput, GpioPullDown, GpioSpeedVeryHigh);
-    furi_hal_gpio_init(&gpio_swdio, GpioModeInput, GpioPullDown, GpioSpeedVeryHigh);
+    //furi_hal_gpio_init(&gpio_swdio, GpioModeInput, GpioPullDown, GpioSpeedVeryHigh);
     /* Delay a tick to let the IO pin changes settle */
     furi_delay_tick(1);
     rc = furi_hal_gpio_read(&gpio_usart_rx);
@@ -73,7 +73,7 @@ static bool detect_malveke(void) {
      */
     if(furi_hal_gpio_read(&gpio_swdio)) rc = 0;
     furi_hal_gpio_init_simple(&gpio_usart_rx, GpioModeAnalog);
-    furi_hal_gpio_init_simple(&gpio_swdio, GpioModeAnalog);
+    //furi_hal_gpio_init_simple(&gpio_swdio, GpioModeAnalog);
 
     return rc;
 }
@@ -118,7 +118,7 @@ PokemonFap* pokemon_alloc() {
 
     // Select Pokemon View
     /* Allocates its own view and adds it to the main view_dispatcher */
-    pokemon_fap->select = select_pokemon_alloc(pokemon_fap, pokemon_fap->view_dispatcher, pokemon_fap->scene_manager, AppViewSelectPokemon);
+    pokemon_fap->select = select_pokemon_alloc(pokemon_fap->trade_block, pokemon_fap->view_dispatcher, pokemon_fap->scene_manager, AppViewSelectPokemon);
 
     // Trade View
     /* Allocates its own view and adds it to the main view_dispatcher */

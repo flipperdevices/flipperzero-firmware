@@ -29,7 +29,7 @@ static void select_type_callback(VariableItem* item) {
     uint8_t pos = variable_item_get_current_value_index(item);
 
     variable_item_set_current_value_text(item, type_list[pos].name);
-    pokemon_stat_set(context->block, STAT_TYPE, context->type, type_list[pos].index);
+    pokemon_stat_set(context->block, GEN_I, STAT_TYPE, context->type, type_list[pos].index);
 }
 
 void select_type_scene_on_enter(void* context) {
@@ -47,7 +47,7 @@ void select_type_scene_on_enter(void* context) {
     /* NOTE: 2 is a magic number, but pretty obvious */
     for(i = 0; i < 2; i++) {
         type_cb[i].block = block;
-        type = pokemon_stat_get(block, STAT_TYPE, i);
+        type = pokemon_stat_get(block, GEN_I, STAT_TYPE, i);
         pos = named_list_pos_from_index_get(type_list, type);
 
         vitype[i] = variable_item_list_add(

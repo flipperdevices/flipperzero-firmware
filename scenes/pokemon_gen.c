@@ -51,7 +51,7 @@ void gen_scene_on_enter(void* context) {
     TradeBlock* block = pokemon_fap->trade_block;
     int pkmn_num;
 
-    pkmn_num = pokemon_stat_get(block, STAT_NUM, NONE);
+    pkmn_num = pokemon_stat_get(block, GEN_I, STAT_NUM, NONE);
 
     /* Clear the scene state of the Move scene since that is used to set the
      * highlighted menu item.
@@ -64,12 +64,12 @@ void gen_scene_on_enter(void* context) {
     submenu_add_item(
         pokemon_fap->submenu, buf, SelectPokemonScene, scene_change_from_main_cb, pokemon_fap);
 
-    pokemon_name_get(block, STAT_NICKNAME, name_buf, sizeof(name_buf));
+    pokemon_name_get(block, GEN_I, STAT_NICKNAME, name_buf, sizeof(name_buf));
     snprintf(buf, sizeof(buf), "Nickname:  %s", name_buf);
     submenu_add_item(
         pokemon_fap->submenu, buf, SelectNicknameScene, scene_change_from_main_cb, pokemon_fap);
 
-    snprintf(buf, sizeof(buf), "Level:           %d", pokemon_stat_get(block, STAT_LEVEL, NONE));
+    snprintf(buf, sizeof(buf), "Level:           %d", pokemon_stat_get(block, GEN_I, STAT_LEVEL, NONE));
     submenu_add_item(
         pokemon_fap->submenu, buf, SelectLevelScene, scene_change_from_main_cb, pokemon_fap);
 
@@ -89,16 +89,16 @@ void gen_scene_on_enter(void* context) {
 
     submenu_add_item(
         pokemon_fap->submenu,
-        named_list_name_from_index_get(stats_list, pokemon_stat_get(block, STAT_SEL, NONE)),
+        named_list_name_from_index_get(stats_list, pokemon_stat_get(block, GEN_I, STAT_SEL, NONE)),
         SelectStatsScene,
         scene_change_from_main_cb,
         pokemon_fap);
 
-    snprintf(buf, sizeof(buf), "OT ID#:          %05d", pokemon_stat_get(block, STAT_OT_ID, NONE));
+    snprintf(buf, sizeof(buf), "OT ID#:          %05d", pokemon_stat_get(block, GEN_I,  STAT_OT_ID, NONE));
     submenu_add_item(
         pokemon_fap->submenu, buf, SelectOTIDScene, scene_change_from_main_cb, pokemon_fap);
 
-    pokemon_name_get(block, STAT_OT_NAME, name_buf, sizeof(name_buf));
+    pokemon_name_get(block, GEN_I, STAT_OT_NAME, name_buf, sizeof(name_buf));
     snprintf(buf, sizeof(buf), "OT Name:      %s", name_buf);
     submenu_add_item(
         pokemon_fap->submenu, buf, SelectOTNameScene, scene_change_from_main_cb, pokemon_fap);

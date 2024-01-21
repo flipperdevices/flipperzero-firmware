@@ -11,14 +11,14 @@ static void select_move_selected_callback(void* context, uint32_t index) {
     uint32_t move = scene_manager_get_scene_state(pokemon_fap->scene_manager, SelectMoveScene);
 
     if(index == UINT32_MAX) {
-        pokemon_stat_set(block, STAT_MOVE, move, table_stat_base_get(block, STAT_MOVE, move));
+        pokemon_stat_set(block, GEN_I, STAT_MOVE, move, table_stat_base_get(block, GEN_I, STAT_MOVE, move));
     } else {
-        pokemon_stat_set(block, STAT_MOVE, move, index);
+        pokemon_stat_set(block, GEN_I, STAT_MOVE, move, index);
     }
     FURI_LOG_D(
         TAG,
         "[move] Set move %s to %d",
-        named_list_name_from_index_get(move_list, pokemon_stat_get(block, STAT_MOVE, move)),
+        named_list_name_from_index_get(move_list, pokemon_stat_get(block, GEN_I, STAT_MOVE, move)),
         (int)move);
 
     /* Move back to move menu */
@@ -58,7 +58,7 @@ void select_move_scene_on_enter(void* context) {
             sizeof(buf),
             "Move %d:         %s",
             i + 1,
-            named_list_name_from_index_get(move_list, pokemon_stat_get(block, STAT_MOVE, i)));
+            named_list_name_from_index_get(move_list, pokemon_stat_get(block, GEN_I, STAT_MOVE, i)));
         submenu_add_item(pokemon_fap->submenu, buf, i, select_move_number_callback, pokemon_fap);
     }
 
@@ -96,7 +96,7 @@ void select_move_index_scene_on_enter(void* context) {
         sizeof(buf),
         "Default [%s]",
         named_list_name_from_index_get(
-            move_list, pokemon_stat_get(pokemon_fap->trade_block, STAT_MOVE, move_num)));
+            move_list, pokemon_stat_get(pokemon_fap->trade_block, GEN_I, STAT_MOVE, move_num)));
     submenu_add_item(
         pokemon_fap->submenu, buf, UINT32_MAX, select_move_selected_callback, pokemon_fap);
 

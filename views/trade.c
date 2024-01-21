@@ -606,7 +606,7 @@ static uint8_t getTradeCentreResponse(struct trade_ctx* trade) {
                 &(trade->trade_block->ot_name[0]),
                 &(trade->input_block->ot_name[in_pkmn_idx]),
                 sizeof(struct name));
-            model->curr_pokemon = pokemon_stat_get(trade->trade_block, STAT_NUM, NONE);
+            model->curr_pokemon = pokemon_stat_get(trade->trade_block, GEN_I, STAT_NUM, NONE);
 
             /* Schedule a callback outside of ISR context to rebuild the patch
 	     * list with the new Pokemon that we just accepted.
@@ -668,7 +668,7 @@ void trade_enter_callback(void* context) {
         model->gameboy_status = GAMEBOY_READY;
     }
     trade->trade_centre_state = TRADE_RESET;
-    model->curr_pokemon = pokemon_stat_get(trade->trade_block, STAT_NUM, NONE);
+    model->curr_pokemon = pokemon_stat_get(trade->trade_block, GEN_I, STAT_NUM, NONE);
     model->ledon = false;
 
     view_commit_model(trade->view, true);
