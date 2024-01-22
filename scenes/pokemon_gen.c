@@ -1,4 +1,5 @@
 #include "../pokemon_app.h"
+#include "../pokemon_data.h"
 #include "../pokemon_char_encode.h"
 
 #include "pokemon_menu.h"
@@ -35,6 +36,7 @@ static void scene_change_from_main_cb(void* context, uint32_t index) {
 }
 
 /* XXX: Potentially trap Back when pressed here to prompt to prevent accidental leaving? */
+/* XXX: Free the trade and other pointers here */
 bool gen_back_event_callback(void* context) {
     furi_assert(context);
     PokemonFap* pokemon_fap = context;
@@ -44,6 +46,7 @@ bool gen_back_event_callback(void* context) {
 /* XXX: Probably put which gen we're using in the FAP */
 /* XXX: Should we allocate and free the trade block around here? */
 /* XXX: Does flipper have a monospace font available? */
+/* XXX: First entry here needs to have trade and other fap pointers set up */
 void gen_scene_on_enter(void* context) {
     char buf[32];
     char name_buf[11]; // All name buffers are 11 bytes at most, including term

@@ -23,10 +23,56 @@ const NamedList stats_list[] = {
     {},
 };
 
+/* Allocates a chunk of memory for the trade data block and sets up some
+ * default values.
+ */
+/* TODO: Probably move this to pokemon_data */
+void trade_block_alloc(PokemonFap *pokemon_fap) {
+    TradeBlock* trade;
+
+    /* XXX: This will change depending on generation */
+    trade = malloc(sizeof(TradeBlock));
+
+    /* Clear struct to be all TERM_ bytes as the various name strings need this */
+    memset(trade, TERM_, sizeof(TradeBlock));
+
+    /* The party_members element needs to be 0xff for unused */
+    memset(trade->party_members, 0xFF, sizeof(trade->party_members));
+
+    /* Zero the main party data, TERM_ in there can cause weirdness */
+    memset(trade->party, 0x00, sizeof(trade->party));
+
+    /* Set our Name, the pokemon's default OT name and ID */
+    trade->party_cnt = 1;
+
+    pokemon_fap->trade_block = trade;
+    pokemon_fap->party = trade->party[0];
+
+    /* Trainer/OT name, not to exceed 7 characters! */
+    pokemon_name_set(pokemon_fap, STAT_TRAINER_NAME, "Flipper");
+    pokemon_name_set(pokemon_fap, STAT_OT_NAME, "Flipper");
+
+    /* OT trainer ID# */
+    pokemon_stat_set(pokemon_fap, STAT_OT_ID, NONE, 42069);
+
+    /* Notes:
+     * Move pp isn't explicitly set up, should be fine
+     * Catch/held isn't explicitly set up, should be okay for only Gen I support now
+     * Status condition isn't explicity let up, would you ever want to?
+     */
+
+    /* Set up initial pokemon and level */
+    /* This causes all other stats to be recalculated */
+    pokemon_stat_set(pokemon_fap, STAT_NUM, NONE, 0); // First Pokemon
+    pokemon_stat_set(pokemon_fap, STAT_LEVEL, NONE, 2); // Minimum level of 2
+
+    return trade;
+}
+
 /*******************************************
  * function declarations
  ******************************************/
-void pokemon_stat_ev_calc(void* block, int gen, EvIv val);
+void pokemon_stat_ev_calc(PokemonFap* pokemon_fap, EvIv val);
 
 /* XXX: EV/IV don't depend on anything other than what they are set to
  * by the ev/iv selection. Therefore, there is no reason to calculate
@@ -46,37 +92,37 @@ void pokemon_stat_ev_calc(void* block, int gen, EvIv val);
  * type: depends on: index
  * nickname: depends on: index
  */
-void pokemon_recalculate(void* block, int gen, uint8_t recalc) {
-    furi_assert(block);
+void pokemon_recalculate(PokemonFap* pokemon_fap, uint8_t recalc) {
+    furi_assert(pokemon_fap);
     int i;
 
     if(recalc == RECALC_NONE) return;
 
     /* Ordered in order of priority for calculating other stats */
-    if(recalc & RECALC_NICKNAME) pokemon_default_nickname_set(NULL, block, gen, 0);
+    if(recalc & RECALC_NICKNAME) pokemon_default_nickname_set(NULL, pokemon_fap, 0);
 
     if(recalc & RECALC_MOVES) {
         for(i = MOVE_0; i <= MOVE_3; i++) {
-            pokemon_stat_set(block, gen, STAT_MOVE, i, table_stat_base_get(block, gen, STAT_BASE_MOVE, i));
+            pokemon_stat_set(pokemon_fap, STAT_MOVE, i, table_stat_base_get(pokemon_fap, STAT_BASE_MOVE, i));
         }
     }
 
     if(recalc & RECALC_TYPES) {
         for(i = TYPE_0; i <= TYPE_1; i++) {
-            pokemon_stat_set(block, gen, STAT_TYPE, i, table_stat_base_get(block, gen, STAT_BASE_TYPE, i));
+            pokemon_stat_set(pokemon_fap, STAT_TYPE, i, table_stat_base_get(pokemon_fap, STAT_BASE_TYPE, i));
         }
     }
 
-    if(recalc & RECALC_EXP) pokemon_exp_calc(block, gen);
+    if(recalc & RECALC_EXP) pokemon_exp_calc(pokemon_fap);
 
     if(recalc & RECALC_EVS) {
         /* XXX: 0 is magic value, needs to be saved somewhere first */
-        pokemon_stat_ev_calc(block, gen, 0);
+        pokemon_stat_ev_calc(pokemon_fap, 0);
     }
 
     if(recalc & RECALC_STATS) {
         for(i = STAT; i < STAT_END; i++) {
-            pokemon_stat_calc(block, gen, i);
+            pokemon_stat_calc(pokemon_fap, i);
         }
     }
 }
@@ -126,9 +172,8 @@ const char* table_stat_name_get(int num) {
 }
 
 /* This needs to convert to encoded characters */
-void pokemon_name_set(void* block, int gen, DataStat stat, char* name) {
-    furi_assert(block);
-    UNUSED(gen);
+void pokemon_name_set(PokemonFap* pokemon_fap, DataStat stat, char* name) {
+    furi_assert(pokemon_fap);
     size_t len;
     uint8_t* ptr = NULL;
 
@@ -160,9 +205,8 @@ void pokemon_name_set(void* block, int gen, DataStat stat, char* name) {
     pokemon_str_to_encoded_array(ptr, name, len);
 }
 
-void pokemon_name_get(void* block, int gen, DataStat stat, char* dest, size_t len) {
-    furi_assert(block);
-    UNUSED(gen);
+void pokemon_name_get(PokemonFap* pokemon_fap, DataStat stat, char* dest, size_t len) {
+    furi_assert(pokemon_fap);
     uint8_t* ptr = NULL;
 
     switch(stat) {
@@ -181,20 +225,20 @@ void pokemon_name_get(void* block, int gen, DataStat stat, char* dest, size_t le
 }
 
 /* If dest is not NULL, a copy of the default name is written to it as well */
-void pokemon_default_nickname_set(char* dest, void* block, int gen, size_t n) {
-    furi_assert(block);
+void pokemon_default_nickname_set(char* dest, PokemonFap* pokemon_fap, size_t n) {
+    furi_assert(pokemon_fap);
     unsigned int i;
     char buf[LEN_NAME_BUF];
 
     /* First, get the default name */
-    strncpy(buf, table_stat_name_get(pokemon_stat_get(block, gen, STAT_NUM, NONE)), sizeof(buf));
+    strncpy(buf, table_stat_name_get(pokemon_stat_get(pokemon_fap, STAT_NUM, NONE)), sizeof(buf));
 
     /* Next, walk through and toupper() each character */
     for(i = 0; i < sizeof(buf); i++) {
         buf[i] = toupper(buf[i]);
     }
 
-    pokemon_name_set(block, gen, STAT_NICKNAME, buf);
+    pokemon_name_set(pokemon_fap, STAT_NICKNAME, buf);
     FURI_LOG_D(TAG, "[data] Set default nickname");
 
     if(dest != NULL) {
@@ -205,9 +249,9 @@ void pokemon_default_nickname_set(char* dest, void* block, int gen, size_t n) {
 /* XXX: This could also just pass the pokemon number? */
 /* XXX: does no bounds checking of stat */
 /* XXX: does no bounds checking of num */
-uint8_t table_stat_base_get(void* block, int gen, DataStat stat, DataStatSub num) {
-    furi_assert(block);
-    int pkmnnum = pokemon_stat_get(block, gen, STAT_NUM, NONE);
+uint8_t table_stat_base_get(PokemonFap* pokemon_fap, DataStat stat, DataStatSub num) {
+    furi_assert(pokemon_fap);
+    int pkmnnum = pokemon_stat_get(pokemon_fap, STAT_NUM, NONE);
 
     switch(stat) {
     case STAT_BASE_ATK:
@@ -239,20 +283,11 @@ const Icon *table_icon_get(int num)
 	return pokemon_table[num].icon;
 }
 
-/* Get a pointer to the party struct inside the block */
-static void* pokemon_block_to_party(void* block, int gen) {
-    switch(gen) {
-    case GEN_I:
-        return (void*)(((TradeBlock*)block)->party);
-    default:
-        furi_crash("gen");
-    }
-}
-
-uint16_t pokemon_stat_get(void* block, int gen, DataStat stat, DataStatSub which) {
-    furi_assert(block);
-    furi_assert((gen == GEN_I));
-    void* party = pokemon_block_to_party(block, gen);
+uint16_t pokemon_stat_get(PokemonFap* pokemon_fap, DataStat stat, DataStatSub which) {
+    furi_assert(pokemon_fap);
+    void* party = pokemon_fap->party;
+    void* block = pokemon_fap->trade_block;
+    int gen = pokemon_fap->generation;
     uint16_t val = 0;
 
     switch(stat) {
@@ -322,9 +357,6 @@ uint16_t pokemon_stat_get(void* block, int gen, DataStat stat, DataStatSub which
     case STAT_SEL:
         if(gen == GEN_I) return ((TradeBlock*)block)->stat_sel;
 	break;
-    case STAT_GEN:
-        if(gen == GEN_I) return ((TradeBlock*)block)->gen;
-	break;
     default:
         furi_crash("STAT_GET: invalid stat");
         break;
@@ -333,9 +365,11 @@ uint16_t pokemon_stat_get(void* block, int gen, DataStat stat, DataStatSub which
     return __builtin_bswap16(val);
 }
 
-void pokemon_stat_set(void* block, int gen, DataStat stat, DataStatSub which, uint16_t val) {
-    furi_assert(block);
-    void* party = pokemon_block_to_party(block, gen);
+void pokemon_stat_set(PokemonFap* pokemon_fap, DataStat stat, DataStatSub which, uint16_t val) {
+    furi_assert(pokemon_fap);
+    void* party = pokemon_fap->party;
+    void *block = pokemon_fap->trade_block;
+    int gen = pokemon_fap->generation;
     uint8_t recalc = 0;
     uint16_t val_swap = __builtin_bswap16(val);
 
@@ -403,9 +437,6 @@ void pokemon_stat_set(void* block, int gen, DataStat stat, DataStatSub which, ui
     case STAT_SEL:
         if(gen == GEN_I) ((TradeBlock*)block)->stat_sel = val;
         break;
-    case STAT_GEN:
-        if(gen == GEN_I) ((TradeBlock*)block)->gen = val;
-        break;
     case STAT_EXP:
         if(gen == GEN_I) ((struct pokemon_structure*)party)->exp[which] = val;
 	break;
@@ -414,11 +445,11 @@ void pokemon_stat_set(void* block, int gen, DataStat stat, DataStatSub which, ui
         break;
     }
     FURI_LOG_D(TAG, "[data] stat %d set to %d", stat, __builtin_bswap16(val));
-    pokemon_recalculate(block, gen, recalc);
+    pokemon_recalculate(pokemon_fap, recalc);
 }
 
-uint16_t pokemon_stat_ev_get(void* block, int gen, DataStat stat) {
-    furi_assert(block);
+uint16_t pokemon_stat_ev_get(PokemonFap* pokemon_fap, DataStat stat) {
+    furi_assert(pokemon_fap);
     DataStat next;
 
     switch(stat) {
@@ -441,17 +472,17 @@ uint16_t pokemon_stat_ev_get(void* block, int gen, DataStat stat) {
         furi_crash("EV_GET: invalid stat");
         return 0;
     }
-    return pokemon_stat_get(block, gen, next, NONE);
+    return pokemon_stat_get(pokemon_fap, next, NONE);
 }
 
 /* XXX: val should be what is currently curr_stats, make it an enum I guess */
-void pokemon_stat_ev_calc(void* block, int gen, EvIv val) {
-    furi_assert(block);
+void pokemon_stat_ev_calc(PokemonFap* pokemon_fap, EvIv val) {
+    furi_assert(pokemon_fap);
     int level;
     uint16_t ev;
     DataStat i;
 
-    level = pokemon_stat_get(block, gen, STAT_LEVEL, 0);
+    level = pokemon_stat_get(pokemon_fap, STAT_LEVEL, 0);
 
     /* Generate STATEXP */
     switch(val) {
@@ -469,12 +500,12 @@ void pokemon_stat_ev_calc(void* block, int gen, EvIv val) {
     }
 
     for(i = STAT_EV; i < STAT_EV_END; i++) {
-        pokemon_stat_set(block, gen, i, NONE, ev);
+        pokemon_stat_set(pokemon_fap, i, NONE, ev);
     }
 }
 
-uint8_t pokemon_stat_iv_get(void* block, int gen, DataStat stat) {
-    furi_assert(block);
+uint8_t pokemon_stat_iv_get(PokemonFap* pokemon_fap, DataStat stat) {
+    furi_assert(pokemon_fap);
     DataStat next;
 
     switch(stat) {
@@ -497,12 +528,12 @@ uint8_t pokemon_stat_iv_get(void* block, int gen, DataStat stat) {
         furi_crash("IV_GET: invalid stat");
         return 0;
     }
-    return pokemon_stat_get(block, gen, next, NONE);
+    return pokemon_stat_get(pokemon_fap, next, NONE);
 }
 
 /* XXX: Uses random value dropped in to the main pokemon_fap strcut */
-void pokemon_stat_iv_calc(void* block, int gen, EvIv val) {
-    furi_assert(block);
+void pokemon_stat_iv_calc(PokemonFap* pokemon_fap, EvIv val) {
+    furi_assert(pokemon_fap);
     uint16_t iv;
 
     /* Set up IVs */
@@ -517,7 +548,7 @@ void pokemon_stat_iv_calc(void* block, int gen, EvIv val) {
         break;
     }
 
-    pokemon_stat_set(block, gen, STAT_IV, NONE, iv);
+    pokemon_stat_set(pokemon_fap, STAT_IV, NONE, iv);
 }
 
 /* XXX: Could offload these args and use the different *_get() functions in here instead */
@@ -542,27 +573,27 @@ static uint16_t stat_calc(uint8_t base, uint8_t iv, uint16_t ev, uint8_t level, 
         (output_array)[0] = (uint8_t)(((input) >> 16) & 0xFF); \
     } while(0)
 
-void pokemon_exp_set(void* block, int gen, uint32_t exp) {
-    furi_assert(block);
+void pokemon_exp_set(PokemonFap* pokemon_fap, uint32_t exp) {
+    furi_assert(pokemon_fap);
     uint8_t exp_tmp[3];
     int i;
 
     UINT32_TO_EXP(exp, exp_tmp);
 
     for (i = EXP_0; i <= EXP_2; i++) {
-        pokemon_stat_set(block, gen, STAT_EXP, i, exp_tmp[i]);
+        pokemon_stat_set(pokemon_fap, STAT_EXP, i, exp_tmp[i]);
     }
 
     FURI_LOG_D(TAG, "[data] Set pkmn exp %d", (int)exp);
 }
 
-void pokemon_exp_calc(void* block, int gen) {
-    furi_assert(block);
+void pokemon_exp_calc(PokemonFap* pokemon_fap) {
+    furi_assert(pokemon_fap);
     int level;
     uint32_t exp;
-    uint8_t growth = table_stat_base_get(block, gen, STAT_BASE_GROWTH, NONE);
+    uint8_t growth = table_stat_base_get(pokemon_fap, STAT_BASE_GROWTH, NONE);
 
-    level = (int)pokemon_stat_get(block, gen, STAT_LEVEL, NONE);
+    level = (int)pokemon_stat_get(pokemon_fap, STAT_LEVEL, NONE);
     /* Calculate exp */
     switch(growth) {
     case GROWTH_FAST:
@@ -586,26 +617,26 @@ void pokemon_exp_calc(void* block, int gen) {
         break;
     }
 
-    pokemon_exp_set(block, gen, exp);
+    pokemon_exp_set(pokemon_fap, exp);
 }
 
 /* Calculates stat from current level */
 /* XXX: Would it make sense instead to have a single function get the right bases and stats? */
-void pokemon_stat_calc(void* block, int gen, DataStat stat) {
-    furi_assert(block);
+void pokemon_stat_calc(PokemonFap* pokemon_fap, DataStat stat) {
+    furi_assert(pokemon_fap);
     uint8_t stat_iv;
     uint16_t stat_ev;
     uint16_t stat_tmp;
     uint8_t stat_base;
     uint8_t level;
 
-    level = pokemon_stat_get(block, gen, STAT_LEVEL, NONE);
-    stat_base = table_stat_base_get(block, gen, stat, NONE);
-    stat_ev = pokemon_stat_ev_get(block, gen, stat);
-    stat_iv = (uint8_t)pokemon_stat_iv_get(block, gen, stat);
+    level = pokemon_stat_get(pokemon_fap, STAT_LEVEL, NONE);
+    stat_base = table_stat_base_get(pokemon_fap, stat, NONE);
+    stat_ev = pokemon_stat_ev_get(pokemon_fap, stat);
+    stat_iv = (uint8_t)pokemon_stat_iv_get(pokemon_fap, stat);
     stat_tmp = stat_calc(stat_base, stat_iv, stat_ev, level, stat);
 
-    pokemon_stat_set(block, gen, stat, NONE, stat_tmp);
+    pokemon_stat_set(pokemon_fap, stat, NONE, stat_tmp);
 }
 
 const PokemonTable pokemon_table[] = {

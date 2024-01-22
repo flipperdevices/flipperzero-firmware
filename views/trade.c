@@ -86,6 +86,7 @@
 #include <gblink.h>
 
 #include "../pokemon_app.h"
+#include "../pokemon_data.h"
 #include "trade_patch_list.h"
 
 #define DELAY_MICROSECONDS 15
@@ -160,11 +161,11 @@ struct trade_ctx {
     uint8_t in_data;
     uint8_t out_data;
     uint8_t shift;
-    TradeBlock* trade_block;
     TradeBlock* input_block;
     struct patch_list* patch_list;
     void* gblink_handle;
     struct gblink_pins* gblink_pins;
+    PokemonFap* pokemon_fap;
 };
 
 /* These are the needed variables for the draw callback */
@@ -184,7 +185,7 @@ static void pokemon_plist_recreate_callback(void* context, uint32_t arg) {
     UNUSED(arg);
     struct trade_ctx* trade = context;
 
-    plist_create(&(trade->patch_list), trade->trade_block);
+    plist_create(&(trade->patch_list), (TradeBlock*)(trade->pokemon_fap->trade_block));
 }
 
 /* Draws a whole screen image with Flipper mascot, Game Boy, etc. */
@@ -395,7 +396,7 @@ static uint8_t getMenuResponse(struct trade_ctx* trade) {
 static uint8_t getTradeCentreResponse(struct trade_ctx* trade) {
     furi_assert(trade);
 
-    uint8_t* trade_block_flat = (uint8_t*)trade->trade_block;
+    uint8_t* trade_block_flat = (uint8_t*)trade->pokemon_fap->trade_block;
     uint8_t* input_block_flat = (uint8_t*)trade->input_block;
     uint8_t* input_party_flat = (uint8_t*)trade->input_block->party;
     struct trade_model* model = NULL;
@@ -606,7 +607,7 @@ static uint8_t getTradeCentreResponse(struct trade_ctx* trade) {
                 &(trade->trade_block->ot_name[0]),
                 &(trade->input_block->ot_name[in_pkmn_idx]),
                 sizeof(struct name));
-            model->curr_pokemon = pokemon_stat_get(trade->trade_block, GEN_I, STAT_NUM, NONE);
+            model->curr_pokemon = pokemon_stat_get(trade->pokemon_fap, STAT_NUM, NONE);
 
             /* Schedule a callback outside of ISR context to rebuild the patch
 	     * list with the new Pokemon that we just accepted.
@@ -668,7 +669,7 @@ void trade_enter_callback(void* context) {
         model->gameboy_status = GAMEBOY_READY;
     }
     trade->trade_centre_state = TRADE_RESET;
-    model->curr_pokemon = pokemon_stat_get(trade->trade_block, GEN_I, STAT_NUM, NONE);
+    model->curr_pokemon = pokemon_stat_get(trade->pokemon_fap, STAT_NUM, NONE);
     model->ledon = false;
 
     view_commit_model(trade->view, true);
@@ -691,7 +692,7 @@ void trade_enter_callback(void* context) {
     furi_timer_start(trade->draw_timer, furi_ms_to_ticks(250));
 
     /* Create a trade patch list from the current trade block */
-    plist_create(&(trade->patch_list), trade->trade_block);
+    plist_create(&(trade->patch_list), (TradeBlock*)(trade->pokemon_fap->trade_block));
 }
 
 void disconnect_pin(const GpioPin* pin) {
@@ -721,17 +722,17 @@ void trade_exit_callback(void* context) {
 }
 
 void* trade_alloc(
-    TradeBlock* trade_block,
+    PokemonFap* pokemon_fap,
     struct gblink_pins* gblink_pins,
     ViewDispatcher* view_dispatcher,
     uint32_t view_id) {
-    furi_assert(trade_block);
+    furi_assert(pokemon_fap);
 
     struct trade_ctx* trade = malloc(sizeof(struct trade_ctx));
 
     memset(trade, '\0', sizeof(struct trade_ctx));
     trade->view = view_alloc();
-    trade->trade_block = trade_block;
+    trade->pokemon_fap = pokemon_fap;
     trade->input_block = malloc(sizeof(TradeBlock));
     trade->patch_list = NULL;
     trade->gblink_pins = gblink_pins;

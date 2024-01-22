@@ -7,7 +7,7 @@
 #include "../pokemon_app.h"
 
 void* trade_alloc(
-    TradeBlock* trade_block,
+    PokemonFap* pokemon_fap,
     struct gblink_pins* gblink_pins,
     ViewDispatcher* view_dispatcher,
     uint32_t view_id);

@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "pokemon_app.h"
+
 #include <stdint.h>
 #include <furi.h>
 #include <math.h>
@@ -194,12 +196,6 @@ struct __attribute__((__packed__)) trade_data_block {
     /* OT name should not exceed 7 chars! */
     struct name ot_name[6];
     struct name nickname[6];
-
-    /* Extra variables needed to track tradeblock state appended here.
-     * These _should_ never be transmitted.
-     */
-    uint8_t gen;
-    uint8_t stat_sel;
 };
 
 typedef struct trade_data_block TradeBlock;
@@ -212,19 +208,19 @@ extern const NamedList stats_list[];
 int named_list_pos_from_index_get(const NamedList* list, uint8_t index);
 const char* named_list_name_from_index_get(const NamedList* list, uint8_t index);
 int named_list_num_elements_get(const NamedList* list);
-uint8_t table_stat_base_get(void* block, int gen, DataStat stat, DataStatSub num);
-uint16_t pokemon_stat_get(void* block, int gen, DataStat stat, DataStatSub num);
-void pokemon_stat_set(void* block, int gen, DataStat stat, DataStatSub which, uint16_t val);
-uint16_t pokemon_stat_ev_get(void* block, int gen, DataStat stat);
-void pokemon_stat_ev_set(void* block, int gen, DataStat stat, uint16_t val);
-uint8_t pokemon_stat_iv_get(void* block, int gen, DataStat stat);
+uint8_t table_stat_base_get(PokemonFap* pokemon_fap, DataStat stat, DataStatSub num);
+uint16_t pokemon_stat_get(PokemonFap* pokemon_fap, DataStat stat, DataStatSub num);
+void pokemon_stat_set(PokemonFap* pokemon_fap, DataStat stat, DataStatSub which, uint16_t val);
+uint16_t pokemon_stat_ev_get(PokemonFap* pokemon_fap, DataStat stat);
+void pokemon_stat_ev_set(PokemonFap* pokemon_fap, DataStat stat, uint16_t val);
+uint8_t pokemon_stat_iv_get(PokemonFap* pokemon_fap, DataStat stat);
 const char* table_stat_name_get(int num);
 const Icon *table_icon_get(int num);
-void pokemon_stat_iv_set(void* block, int gen, int val);
-void pokemon_exp_set(void* block, int gen, uint32_t exp);
-void pokemon_exp_calc(void* trade, int gen);
-void pokemon_stat_calc(void* block, int gen, DataStat stat);
-void pokemon_default_nickname_set(char* dest, void* block, int gen, size_t n);
-void pokemon_name_set(void* block, int gen, DataStat stat, char* name);
-void pokemon_name_get(void* block, int gen, DataStat stat, char* dest, size_t len);
+void pokemon_stat_iv_set(PokemonFap* pokemon_fap, int val);
+void pokemon_exp_set(PokemonFap* pokemon_fap, uint32_t exp);
+void pokemon_exp_calc(PokemonFap* pokemon_fap);
+void pokemon_stat_calc(PokemonFap* pokemon_fap, DataStat stat);
+void pokemon_default_nickname_set(char* dest, PokemonFap* pokemon_fap, size_t n);
+void pokemon_name_set(PokemonFap* pokemon_fap, DataStat stat, char* name);
+void pokemon_name_get(PokemonFap* pokemon_fap, DataStat stat, char* dest, size_t len);
 #endif /* POKEMON_DATA_H */

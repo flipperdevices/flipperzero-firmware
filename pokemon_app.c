@@ -8,47 +8,6 @@
 #include "pokemon_data.h"
 #include "pokemon_char_encode.h"
 
-/* Allocates a chunk of memory for the trade data block and sets up some
- * default values.
- */
-/* TODO: Probably move this to pokemon_data */
-static TradeBlock* trade_block_alloc(void) {
-    TradeBlock* trade;
-
-    trade = malloc(sizeof(TradeBlock));
-
-    /* Clear struct to be all TERM_ bytes as the various name strings need this */
-    memset(trade, TERM_, sizeof(TradeBlock));
-
-    /* The party_members element needs to be 0xff for unused */
-    memset(trade->party_members, 0xFF, sizeof(trade->party_members));
-
-    /* Zero the main party data, TERM_ in there can cause weirdness */
-    memset(trade->party, 0x00, sizeof(trade->party));
-
-    /* Set our Name, the pokemon's default OT name and ID */
-    trade->party_cnt = 1;
-
-    /* Trainer/OT name, not to exceed 7 characters! */
-    pokemon_name_set(trade, GEN_I, STAT_TRAINER_NAME, "Flipper");
-    pokemon_name_set(trade, GEN_I, STAT_OT_NAME, "Flipper");
-
-    /* OT trainer ID# */
-    pokemon_stat_set(trade, GEN_I, STAT_OT_ID, NONE, 42069);
-
-    /* Notes:
-     * Move pp isn't explicitly set up, should be fine
-     * Catch/held isn't explicitly set up, should be okay for only Gen I support now
-     * Status condition isn't explicity let up, would you ever want to?
-     */
-
-    /* Set up initial pokemon and level */
-    /* This causes all other stats to be recalculated */
-    pokemon_stat_set(trade, GEN_I, STAT_NUM, NONE, 0); // First Pokemon
-    pokemon_stat_set(trade, GEN_I, STAT_LEVEL, NONE, 2); // Minimum level of 2
-
-    return trade;
-}
 
 static void trade_block_free(TradeBlock* trade) {
     free(trade);
@@ -123,7 +82,7 @@ PokemonFap* pokemon_alloc() {
     // Trade View
     /* Allocates its own view and adds it to the main view_dispatcher */
     pokemon_fap->trade = trade_alloc(
-        pokemon_fap->trade_block, &pokemon_fap->pins, pokemon_fap->view_dispatcher, AppViewTrade);
+        pokemon_fap, &pokemon_fap->pins, pokemon_fap->view_dispatcher, AppViewTrade);
 
     return pokemon_fap;
 }

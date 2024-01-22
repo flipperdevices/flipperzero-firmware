@@ -12,31 +12,39 @@
 #include <gui/modules/variable_item_list.h>
 #include <gblink.h>
 
-#include "pokemon_data.h"
-
 #define TAG "Pokemon"
 
 struct pokemon_fap {
+    /* Various anonymous pointers for flipper UI/navigation */
     ViewDispatcher* view_dispatcher;
-
-    /* anonymous structs for each of the main views */
+    SceneManager* scene_manager;
     void* select;
     void* trade;
-
-    /* Scene manager */
-    SceneManager* scene_manager;
-
-    /* gui modules used in the application lifetime */
     Submenu* submenu;
     TextInput* text_input;
     VariableItemList* variable_item_list;
+
+    /* Runtime information that may be needed by any view or scene */
+    int generation;
 
     /* Struct for holding trade data */
     /* NOTE: There may be some runtime memory savings by adding more intelligence
      * to views/trade and slimming down this struct to only contain the single
      * pokemon data rather than the full 6 member party data.
      */
-    TradeBlock* trade_block;
+    /* This could be one of a number of different formats which is determined
+     * based on the generation variable.
+     */
+    void* trade_block;
+    void *party; // Pointer to the whole data struct for the first pokemon. This
+		 // shortcuts some calculations.
+    /* These are anonymous in case at some point in the future these change
+     * per generation.
+     */
+    void *move_list;
+    void *type_list;
+    void *stats_list;
+    int current_stat;
 
     /* Pin definition to actual Game Link Cable interface */
     struct gblink_pins pins;
