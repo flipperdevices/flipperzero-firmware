@@ -59,6 +59,11 @@ struct MfcEditorApp {
     FuriString* data_view_text;
 };
 
+typedef struct {
+    uint8_t bits : 3;
+    uint8_t check_bits : 3;
+} MfcEditorAccessBits;
+
 typedef enum {
     MfcEditorAppViewSubmenu,
     MfcEditorAppViewPopup,
@@ -101,3 +106,5 @@ MfcEditorPromptResponse mfc_editor_load_file(MfcEditorApp* instance, FuriString*
 // Helper methods
 
 uint8_t mfc_editor_calculate_uid_bcc(uint8_t* uid, uint8_t uid_len);
+
+MfcEditorAccessBits mfc_editor_get_block_access_bits(const MfClassicData* data, uint8_t block_num);

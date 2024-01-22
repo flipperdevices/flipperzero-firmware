@@ -1,20 +1,36 @@
 #include "../mfc_editor_app_i.h"
 
-void mfc_editor_scene_data_view_dialog_ex_callback(DialogExResult result, void* context) {
-    MfcEditorApp* instance = context;
-    view_dispatcher_send_custom_event(instance->view_dispatcher, result);
-}
+const char* access_data_block_labels[8] = {
+    // C3, C2, C1
+    "Key A: Read, Write, Inc, Dec\nKey B: Read, Write, Inc, Dec", // 000
+    "Key A: Read\nKey B: Read, Write", // 001
+    "Key A: Read\nKey B: Read", // 010
+    "Key A: Read, Dec\nKey B: Read, Write, Inc, Dec", // 011
+    "Key A: Read, Dec\nKey B: Read, Dec", // 100
+    "Key A: No Access\nKey B: Read", // 101
+    "Key A: No Access\nKey B: Read, Write", // 110
+    "Key A: No Access\nKey B: No Access", // 111
+};
 
-void mfc_editor_scene_data_view_on_enter(void* context) {
-    MfcEditorApp* instance = context;
+const char* access_sector_trailer_labels[8] = {
+    // C3, C2, C1
+    "Key A: KA-W, AB-R, KB-RW\nKey B: No Access", // 000
+    "Key A: AB-R\nKey B: KA+KB-W, AB-R", // 001
+    "Key A: AB+KB-R\nKey B: No Access", // 010
+    "Key A: AB-R\nKey B: AB-R", // 011
+    "Key A: KA-W, AB+KB-RW\nKey B: No Access", // 100
+    "Key A: AB-R\nKey B: AB-RW", // 101
+    "Key A: AB-R\nKey B: KA+KB-W, AB-RW", // 110
+    "Key A: AB-R\nKey B: AB-R", // 111
+};
 
+void mfc_editor_scene_data_view_update_display(MfcEditorApp* instance) {
     DialogEx* dialog_ex = instance->dialog_ex;
-    dialog_ex_set_context(instance->dialog_ex, instance);
 
     MfcEditorBlockView block_view =
         scene_manager_get_scene_state(instance->scene_manager, MfcEditorSceneDataView);
 
-    const MfClassicData* mf_classic_data = instance->mf_classic_data;
+    MfClassicData* mf_classic_data = instance->mf_classic_data;
     Iso14443_3aData* iso14443_3a_data = mf_classic_data->iso14443_3a_data;
 
     furi_string_reset(instance->data_view_text);
@@ -114,7 +130,54 @@ void mfc_editor_scene_data_view_on_enter(void* context) {
                 instance->data_view_text, "Key B has not been found\nfor this sector.");
         }
     } else if(block_view == MfcEditorBlockViewAccessBits) {
-        dialog_ex_set_header(dialog_ex, "Access Bits", 63, 3, AlignCenter, AlignTop);
+        uint8_t sector_trailer_num =
+            mf_classic_get_sector_trailer_num_by_sector(instance->current_sector);
+
+        if(mf_classic_is_block_read(mf_classic_data, sector_trailer_num)) {
+            furi_string_printf(
+                instance->data_view_header, "Access Bits (Block %u)", instance->current_block);
+            dialog_ex_set_header(
+                dialog_ex,
+                furi_string_get_cstr(instance->data_view_header),
+                63,
+                3,
+                AlignCenter,
+                AlignTop);
+
+            MfcEditorAccessBits access_bits =
+                mfc_editor_get_block_access_bits(mf_classic_data, instance->current_block);
+
+            furi_string_printf(
+                instance->data_view_text,
+                "C1: %i(%i), C2: %i(%i), C3: %i(%i)\n",
+                FURI_BIT(access_bits.bits, 0),
+                FURI_BIT(access_bits.check_bits, 0),
+                FURI_BIT(access_bits.bits, 1),
+                FURI_BIT(access_bits.check_bits, 1),
+                FURI_BIT(access_bits.bits, 2),
+                FURI_BIT(access_bits.check_bits, 2));
+
+            if(access_bits.bits != access_bits.check_bits) {
+                furi_string_cat(
+                    instance->data_view_text,
+                    "Access Bits are invalid.\nNo operations are allowed.");
+            } else if(instance->current_block == sector_trailer_num) {
+                furi_string_cat(
+                    instance->data_view_text, access_sector_trailer_labels[access_bits.bits]);
+            } else {
+                furi_string_cat(
+                    instance->data_view_text, access_data_block_labels[access_bits.bits]);
+            }
+
+            dialog_ex_set_center_button_text(dialog_ex, "Next");
+            dialog_ex_set_left_button_text(dialog_ex, "Prev");
+        } else {
+            dialog_ex_set_header(dialog_ex, "Access Bits", 63, 3, AlignCenter, AlignTop);
+            furi_string_printf(
+                instance->data_view_text,
+                "Access Bits unavailable.\nBlock %u has not been read.",
+                sector_trailer_num);
+        }
     } else if(block_view == MfcEditorBlockViewUserByte) {
         dialog_ex_set_header(dialog_ex, "User Byte", 63, 3, AlignCenter, AlignTop);
 
@@ -176,7 +239,19 @@ void mfc_editor_scene_data_view_on_enter(void* context) {
         31,
         AlignCenter,
         AlignCenter);
-    dialog_ex_set_left_button_text(instance->dialog_ex, "Back");
+}
+
+void mfc_editor_scene_data_view_dialog_ex_callback(DialogExResult result, void* context) {
+    MfcEditorApp* instance = context;
+    view_dispatcher_send_custom_event(instance->view_dispatcher, result);
+}
+
+void mfc_editor_scene_data_view_on_enter(void* context) {
+    MfcEditorApp* instance = context;
+
+    dialog_ex_set_context(instance->dialog_ex, instance);
+
+    mfc_editor_scene_data_view_update_display(instance);
 
     dialog_ex_set_result_callback(
         instance->dialog_ex, mfc_editor_scene_data_view_dialog_ex_callback);
@@ -188,9 +263,26 @@ bool mfc_editor_scene_data_view_on_event(void* context, SceneManagerEvent event)
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == DialogExResultLeft) {
-            scene_manager_previous_scene(instance->scene_manager);
-            consumed = true;
+        MfcEditorBlockView block_view =
+            scene_manager_get_scene_state(instance->scene_manager, MfcEditorSceneDataView);
+        if(block_view == MfcEditorBlockViewAccessBits) {
+            if(event.event == DialogExResultLeft) {
+                uint8_t new_sector = mf_classic_get_sector_by_block(--instance->current_block);
+                if(new_sector != instance->current_sector) {
+                    instance->current_block =
+                        mf_classic_get_sector_trailer_num_by_sector(instance->current_sector);
+                }
+                mfc_editor_scene_data_view_update_display(instance);
+                consumed = true;
+            } else if(event.event == DialogExResultCenter) {
+                uint8_t new_sector = mf_classic_get_sector_by_block(++instance->current_block);
+                if(new_sector != instance->current_sector) {
+                    instance->current_block =
+                        mf_classic_get_first_block_num_of_sector(instance->current_sector);
+                }
+                mfc_editor_scene_data_view_update_display(instance);
+                consumed = true;
+            }
         }
     }
 
