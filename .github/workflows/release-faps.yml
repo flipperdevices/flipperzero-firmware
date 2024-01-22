@@ -3,6 +3,7 @@ on: [push, pull_request]
 jobs:
   ufbt-build-action:
     runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
     name: 'ufbt: Build'
     steps:
       - name: Checkout
@@ -84,8 +85,9 @@ jobs:
       # release
       - name: Release
         uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/tags/')
         with:
+          generate_release_notes: true
+          prerelease: true
           files: |
             ${{ steps.build-app-esp32cam_camera.outputs.fap-artifacts }}
             ${{ steps.build-app-esp32cam_marauder_companion.outputs.fap-artifacts }}
