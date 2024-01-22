@@ -28,7 +28,7 @@ int gpio_blink_app(void* p) {
     // Initialize the LED pin as output.
     // GpioModeOutputPushPull means true = 3.3 volts, false = 0 volts.
     // GpioModeOutputOpenDrain means true = floating, false = 0 volts.
-    furi_hal_gpio_init_simple(pin_led, GpioModeOutputOpenDrain);
+    furi_hal_gpio_init_simple(pin_led, GpioModeOutputPushPull);
     do {
         furi_hal_gpio_write(pin_led, true);
         furi_delay_ms(500);

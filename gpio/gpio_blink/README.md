@@ -3,6 +3,11 @@ This is the classic "Hello World" of GPIO, where we blink an LED.  You will need
 
 Run the application and the LED should start blinking.  Hold the back button to exit.
 
+YouTube video that demonstrates blinking the LED:
+
+[![YouTube video that demonstrates blinking the LED](https://img.youtube.com/vi/27RtJAxY2RY/0.jpg)](https://youtu.be/27RtJAxY2RY)
+- [https://youtu.be/27RtJAxY2RY](https://youtu.be/27RtJAxY2RY)
+
 ## How it works
 - For list of pins see [/firmware/targets/f7/furi_hal/furi_hal_resources.c](https://github.com/flipperdevices/flipperzero-firmware/blob/dev/firmware/targets/f7/furi_hal/furi_hal_resources.c) in your firmware repo.
 
@@ -15,7 +20,7 @@ Run the application and the LED should start blinking.  Hold the back button to 
   - ``GpioModeOutputPushPull`` means true = 3.3 volts, false = 0 volts.
   - ``GpioModeOutputOpenDrain`` means true = floating, false = 0 volts.
   ```c
-  furi_hal_gpio_init_simple(pin_led, GpioModeOutputOpenDrain);
+  furi_hal_gpio_init_simple(pin_led, GpioModeOutputPushPull);
   ```
 
 - We turn the LED on (3.3 volts on the pin).
@@ -48,3 +53,5 @@ Run the application and the LED should start blinking.  Hold the back button to 
   furi_hal_gpio_init_simple(pin_led, GpioModeAnalog);
   ```
 
+## Other ideas
+- We could connect the long side of LED (anode) to +3.3volts and then the resistor to pin A7.  We could then use `GpioModeOutputOpenDrain` and then when the A7 pin is pulled to GND the LED would turn on; this is called "active low".
