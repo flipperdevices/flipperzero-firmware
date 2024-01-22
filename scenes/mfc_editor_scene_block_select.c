@@ -118,6 +118,8 @@ bool mfc_editor_scene_block_select_on_event(void* context, SceneManagerEvent eve
             block_view = MfcEditorBlockViewKeyB;
         } else if(event.event == SubmenuIndexAccessBits) {
             block_view = MfcEditorBlockViewAccessBits;
+            instance->current_block =
+                mf_classic_get_first_block_num_of_sector(instance->current_sector);
         } else if(event.event == SubmenuIndexUserByte) {
             block_view = MfcEditorBlockViewUserByte;
         } else {
