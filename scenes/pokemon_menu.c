@@ -1,4 +1,5 @@
 #include "../pokemon_app.h"
+#include "../pokemon_data.h"
 #include "../pokemon_char_encode.h"
 
 #include "pokemon_menu.h"
@@ -20,13 +21,13 @@ static void scene_change_from_main_cb(void* context, uint32_t index) {
     /* Set trade generation based on selected menu item */
     switch(index) {
     case GenITradeScene:
-        pokemon_stat_set(pokemon_fap->trade_block, GEN_I, STAT_GEN, NONE, GEN_I);
+        pokemon_stat_set(pokemon_fap, STAT_GEN, NONE, GEN_I);
         break;
     case GenIITradeScene:
-        pokemon_stat_set(pokemon_fap->trade_block, GEN_I, STAT_GEN, NONE, GEN_II);
+        pokemon_stat_set(pokemon_fap, STAT_GEN, NONE, GEN_II);
         break;
     default:
-        pokemon_stat_set(pokemon_fap->trade_block, GEN_I, STAT_GEN, NONE, 0);
+        pokemon_stat_set(pokemon_fap, STAT_GEN, NONE, 0);
         break;
     }
 

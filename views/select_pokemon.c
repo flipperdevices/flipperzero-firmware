@@ -3,6 +3,7 @@
 
 #include "../scenes/pokemon_menu.h"
 #include "../pokemon_app.h"
+#include "../pokemon_data.h"
 
 struct select_model {
     uint8_t curr_pokemon;
@@ -12,7 +13,7 @@ struct select_model {
 /* Anonymous struct */
 struct select_ctx {
     View* view;
-    TradeBlock *trade_block;
+    PokemonFap *pokemon_fap;
     SceneManager *scene_manager;
 };
 
@@ -55,7 +56,7 @@ static bool select_pokemon_input_callback(InputEvent* event, void* context) {
     switch(event->key) {
     /* Advance to next view with the selected pokemon */
     case InputKeyOk:
-        pokemon_stat_set(select->trade_block, GEN_I, STAT_NUM, NONE, selected_pokemon);
+        pokemon_stat_set(select->pokemon_fap, STAT_NUM, NONE, selected_pokemon);
         scene_manager_previous_scene(select->scene_manager);
         consumed = true;
         break;
@@ -121,19 +122,19 @@ void select_pokemon_enter_callback(void* context) {
         select->view,
         struct select_model * model,
         {
-            model->curr_pokemon = pokemon_stat_get(select->trade_block, GEN_I, STAT_NUM, NONE);
+            model->curr_pokemon = pokemon_stat_get(select->pokemon_fap, STAT_NUM, NONE);
             model->pokemon_table = pokemon_table;
         },
         true);
 }
 
-void* select_pokemon_alloc(TradeBlock* trade_block, ViewDispatcher* view_dispatcher, SceneManager* scene_manager, uint32_t viewid) {
-    furi_assert(trade_block);
+void* select_pokemon_alloc(PokemonFap* pokemon_fap, ViewDispatcher* view_dispatcher, SceneManager* scene_manager, uint32_t viewid) {
+    furi_assert(pokemon_fap);
 
     struct select_ctx *select = malloc(sizeof(struct select_ctx));
 
     select->view = view_alloc();
-    select->trade_block = trade_block;
+    select->pokemon_fap = pokemon_fap;
     select->scene_manager = scene_manager;
 
     view_set_context(select->view, select);

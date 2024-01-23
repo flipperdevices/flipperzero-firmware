@@ -5,6 +5,7 @@
 
 #include <gui/view.h>
 #include "../pokemon_app.h"
+#include "../pokemon_data.h"
 
 struct patch_list {
     uint8_t index;

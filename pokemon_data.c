@@ -27,11 +27,14 @@ const NamedList stats_list[] = {
  * default values.
  */
 /* TODO: Probably move this to pokemon_data */
-void trade_block_alloc(PokemonFap *pokemon_fap) {
+void *trade_block_alloc(PokemonFap *pokemon_fap) {
     TradeBlock* trade;
 
     /* XXX: This will change depending on generation */
     trade = malloc(sizeof(TradeBlock));
+
+    /* XXX: this needs to move to scene */
+    pokemon_fap->generation = GEN_I;
 
     /* Clear struct to be all TERM_ bytes as the various name strings need this */
     memset(trade, TERM_, sizeof(TradeBlock));
@@ -46,7 +49,7 @@ void trade_block_alloc(PokemonFap *pokemon_fap) {
     trade->party_cnt = 1;
 
     pokemon_fap->trade_block = trade;
-    pokemon_fap->party = trade->party[0];
+    pokemon_fap->party = trade->party;
 
     /* Trainer/OT name, not to exceed 7 characters! */
     pokemon_name_set(pokemon_fap, STAT_TRAINER_NAME, "Flipper");
@@ -179,17 +182,17 @@ void pokemon_name_set(PokemonFap* pokemon_fap, DataStat stat, char* name) {
 
     switch(stat) {
     case STAT_NICKNAME:
-        ptr = ((TradeBlock*)block)->nickname[0].str;
+        ptr = ((TradeBlock*)pokemon_fap->trade_block)->nickname[0].str;
         len = 10;
         FURI_LOG_D(TAG, "[data] nickname set to %s", name);
         break;
     case STAT_OT_NAME:
-        ptr = ((TradeBlock*)block)->ot_name[0].str;
+        ptr = ((TradeBlock*)pokemon_fap->trade_block)->ot_name[0].str;
         len = 7;
         FURI_LOG_D(TAG, "[data] OT name set to %s", name);
         break;
     case STAT_TRAINER_NAME:
-        ptr = ((TradeBlock*)block)->trainer_name.str;
+        ptr = ((TradeBlock*)pokemon_fap->trade_block)->trainer_name.str;
         len = 7;
         FURI_LOG_D(TAG, "[data] trainer name set to %s", name);
         break;
@@ -211,10 +214,10 @@ void pokemon_name_get(PokemonFap* pokemon_fap, DataStat stat, char* dest, size_t
 
     switch(stat) {
     case STAT_NICKNAME:
-        ptr = ((TradeBlock*)block)->nickname[0].str;
+        ptr = ((TradeBlock*)pokemon_fap->trade_block)->nickname[0].str;
         break;
     case STAT_OT_NAME:
-        ptr = ((TradeBlock*)block)->ot_name[0].str;
+        ptr = ((TradeBlock*)pokemon_fap->trade_block)->ot_name[0].str;
         break;
     default:
         furi_crash("name_get invalid");
@@ -357,6 +360,8 @@ uint16_t pokemon_stat_get(PokemonFap* pokemon_fap, DataStat stat, DataStatSub wh
     case STAT_SEL:
         if(gen == GEN_I) return ((TradeBlock*)block)->stat_sel;
 	break;
+    case STAT_GEN:
+	return GEN_I;
     default:
         furi_crash("STAT_GET: invalid stat");
         break;
@@ -439,6 +444,8 @@ void pokemon_stat_set(PokemonFap* pokemon_fap, DataStat stat, DataStatSub which,
         break;
     case STAT_EXP:
         if(gen == GEN_I) ((struct pokemon_structure*)party)->exp[which] = val;
+	break;
+    case STAT_GEN:
 	break;
     default:
         furi_crash("STAT_SET: invalid stat");

@@ -594,17 +594,17 @@ static uint8_t getTradeCentreResponse(struct trade_ctx* trade) {
             model->gameboy_status = GAMEBOY_TRADING;
 
             /* Copy the traded-in Pokemon's main data to our struct */
-            trade->trade_block->party_members[0] = trade->input_block->party_members[in_pkmn_idx];
+            ((TradeBlock*)trade->pokemon_fap->trade_block)->party_members[0] = trade->input_block->party_members[in_pkmn_idx];
             memcpy(
-                &(trade->trade_block->party[0]),
+                &(((TradeBlock*)trade->pokemon_fap->trade_block)->party[0]),
                 &(trade->input_block->party[in_pkmn_idx]),
                 sizeof(struct pokemon_structure));
             memcpy(
-                &(trade->trade_block->nickname[0]),
+                &(((TradeBlock*)trade->pokemon_fap->trade_block)->nickname[0]),
                 &(trade->input_block->nickname[in_pkmn_idx]),
                 sizeof(struct name));
             memcpy(
-                &(trade->trade_block->ot_name[0]),
+                &(((TradeBlock*)trade->pokemon_fap->trade_block)->ot_name[0]),
                 &(trade->input_block->ot_name[in_pkmn_idx]),
                 sizeof(struct name));
             model->curr_pokemon = pokemon_stat_get(trade->pokemon_fap, STAT_NUM, NONE);

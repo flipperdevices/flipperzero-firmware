@@ -1,12 +1,13 @@
 #include <gui/modules/submenu.h>
 
 #include "../pokemon_app.h"
+#include "../pokemon_data.h"
 #include "pokemon_menu.h"
 
 static void select_stats_selected_callback(void* context, uint32_t index) {
     PokemonFap* pokemon_fap = (PokemonFap*)context;
 
-    pokemon_stat_set(pokemon_fap->trade_block, GEN_I, STAT_SEL, NONE, index);
+    pokemon_stat_set(pokemon_fap, STAT_SEL, NONE, index);
 
     scene_manager_previous_scene(pokemon_fap->scene_manager);
 }

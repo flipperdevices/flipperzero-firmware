@@ -61,8 +61,4 @@ typedef enum {
     AppViewExitConfirm,
 } AppView;
 
-int pokemon_named_list_num_elements_get(const NamedList* list);
-
-void pokemon_trade_block_set_default_name(char* dest, PokemonFap* pokemon_fap, size_t n);
-
 #endif /* POKEMON_APP_H */

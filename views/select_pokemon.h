@@ -6,7 +6,7 @@
 #include <gui/view.h>
 #include "../pokemon_app.h"
 
-void* select_pokemon_alloc(TradeBlock* trade_block, ViewDispatcher* view_dispatcher, SceneManager* scene_manager, uint32_t viewid);
+void* select_pokemon_alloc(PokemonFap *pokemon_fap, ViewDispatcher* view_dispatcher, SceneManager* scene_manager, uint32_t viewid);
 
 void select_pokemon_free(ViewDispatcher* view_dispatcher, uint32_t viewid, void *select_ctx);
 

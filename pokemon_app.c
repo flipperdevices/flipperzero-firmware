@@ -1,11 +1,11 @@
 #include <furi_hal_light.h>
 #include <pokemon_icons.h>
 
+#include "pokemon_app.h"
+#include "pokemon_data.h"
 #include "scenes/pokemon_menu.h"
 #include "views/trade.h"
 #include "views/select_pokemon.h"
-#include "pokemon_app.h"
-#include "pokemon_data.h"
 #include "pokemon_char_encode.h"
 
 
@@ -58,7 +58,7 @@ PokemonFap* pokemon_alloc() {
         sizeof(struct gblink_pins));
 
     // Set up trade party struct
-    pokemon_fap->trade_block = trade_block_alloc();
+    pokemon_fap->trade_block = (void*)trade_block_alloc(pokemon_fap);
 
     /* Set up gui modules used. It would be nice if these could be allocated and
      * freed as needed, however, the scene manager still requires pointers that
@@ -77,7 +77,7 @@ PokemonFap* pokemon_alloc() {
 
     // Select Pokemon View
     /* Allocates its own view and adds it to the main view_dispatcher */
-    pokemon_fap->select = select_pokemon_alloc(pokemon_fap->trade_block, pokemon_fap->view_dispatcher, pokemon_fap->scene_manager, AppViewSelectPokemon);
+    pokemon_fap->select = (void*)select_pokemon_alloc(pokemon_fap, pokemon_fap->view_dispatcher, pokemon_fap->scene_manager, AppViewSelectPokemon);
 
     // Trade View
     /* Allocates its own view and adds it to the main view_dispatcher */

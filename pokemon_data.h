@@ -196,6 +196,8 @@ struct __attribute__((__packed__)) trade_data_block {
     /* OT name should not exceed 7 chars! */
     struct name ot_name[6];
     struct name nickname[6];
+
+    uint8_t stat_sel;
 };
 
 typedef struct trade_data_block TradeBlock;
@@ -205,6 +207,7 @@ extern const NamedList move_list[];
 extern const NamedList type_list[];
 extern const NamedList stats_list[];
 
+void *trade_block_alloc(PokemonFap *pokemon_fap);
 int named_list_pos_from_index_get(const NamedList* list, uint8_t index);
 const char* named_list_name_from_index_get(const NamedList* list, uint8_t index);
 int named_list_num_elements_get(const NamedList* list);
