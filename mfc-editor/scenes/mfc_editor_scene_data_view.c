@@ -1,31 +1,17 @@
 #include "../mfc_editor_app_i.h"
 
-const char* access_data_block_labels[8] = {
-    // C3, C2, C1
-    "Key A: Read, Write, Inc, Dec\nKey B: Read, Write, Inc, Dec", // 000
-    "Key A: Read\nKey B: Read, Write", // 001
-    "Key A: Read\nKey B: Read", // 010
-    "Key A: Read, Dec\nKey B: Read, Write, Inc, Dec", // 011
-    "Key A: Read, Dec\nKey B: Read, Dec", // 100
-    "Key A: No Access\nKey B: Read", // 101
-    "Key A: No Access\nKey B: Read, Write", // 110
-    "Key A: No Access\nKey B: No Access", // 111
-};
-
-const char* access_sector_trailer_labels[8] = {
-    // C3, C2, C1
-    "Key A: KA-W, AB-R, KB-RW\nKey B: No Access", // 000
-    "Key A: AB-R\nKey B: KA+KB-W, AB-R", // 001
-    "Key A: AB+KB-R\nKey B: No Access", // 010
-    "Key A: AB-R\nKey B: AB-R", // 011
-    "Key A: KA-W, AB+KB-RW\nKey B: No Access", // 100
-    "Key A: AB-R\nKey B: AB-RW", // 101
-    "Key A: AB-R\nKey B: KA+KB-W, AB-RW", // 110
-    "Key A: AB-R\nKey B: AB-R", // 111
-};
+void mfc_editor_scene_data_view_dialog_ex_callback(DialogExResult result, void* context) {
+    MfcEditorApp* instance = context;
+    view_dispatcher_send_custom_event(instance->view_dispatcher, result);
+}
 
 void mfc_editor_scene_data_view_update_display(MfcEditorApp* instance) {
     DialogEx* dialog_ex = instance->dialog_ex;
+
+    dialog_ex_reset(instance->dialog_ex);
+    dialog_ex_set_context(instance->dialog_ex, instance);
+    dialog_ex_set_result_callback(
+        instance->dialog_ex, mfc_editor_scene_data_view_dialog_ex_callback);
 
     MfcEditorBlockView block_view =
         scene_manager_get_scene_state(instance->scene_manager, MfcEditorSceneDataView);
@@ -43,6 +29,10 @@ void mfc_editor_scene_data_view_update_display(MfcEditorApp* instance) {
         }
         // Remove trailing space
         furi_string_trim(instance->data_view_text);
+
+        if(mf_classic_is_block_read(mf_classic_data, 0)) {
+            dialog_ex_set_right_button_text(dialog_ex, "Edit");
+        }
     } else if(block_view == MfcEditorBlockViewBCC) {
         dialog_ex_set_header(dialog_ex, "Block Check Character", 63, 3, AlignCenter, AlignTop);
 
@@ -59,6 +49,7 @@ void mfc_editor_scene_data_view_update_display(MfcEditorApp* instance) {
 
             if(stored_bcc != calculated_bcc) {
                 furi_string_cat(instance->data_view_text, "\n(Mismatch!)");
+                dialog_ex_set_center_button_text(dialog_ex, "Fix");
             }
         } else {
             furi_string_printf(
@@ -85,6 +76,8 @@ void mfc_editor_scene_data_view_update_display(MfcEditorApp* instance) {
             }
             // Remove trailing space
             furi_string_trim(instance->data_view_text);
+
+            dialog_ex_set_right_button_text(dialog_ex, "Edit");
         } else {
             furi_string_set(
                 instance->data_view_text, "Data unavailable.\nBlock 0 has not been read.");
@@ -105,6 +98,7 @@ void mfc_editor_scene_data_view_update_display(MfcEditorApp* instance) {
                 key_a.data[3],
                 key_a.data[4],
                 key_a.data[5]);
+            dialog_ex_set_right_button_text(dialog_ex, "Edit");
         } else {
             furi_string_set(
                 instance->data_view_text, "Key A has not been found\nfor this sector.");
@@ -125,6 +119,7 @@ void mfc_editor_scene_data_view_update_display(MfcEditorApp* instance) {
                 key_b.data[3],
                 key_b.data[4],
                 key_b.data[5]);
+            dialog_ex_set_right_button_text(dialog_ex, "Edit");
         } else {
             furi_string_set(
                 instance->data_view_text, "Key B has not been found\nfor this sector.");
@@ -171,6 +166,7 @@ void mfc_editor_scene_data_view_update_display(MfcEditorApp* instance) {
 
             dialog_ex_set_center_button_text(dialog_ex, "Next");
             dialog_ex_set_left_button_text(dialog_ex, "Prev");
+            dialog_ex_set_right_button_text(dialog_ex, "Edit");
         } else {
             dialog_ex_set_header(dialog_ex, "Access Bits", 63, 3, AlignCenter, AlignTop);
             furi_string_printf(
@@ -189,6 +185,7 @@ void mfc_editor_scene_data_view_update_display(MfcEditorApp* instance) {
                 instance->data_view_text,
                 "Free byte between\nAccess Bits and Key B:\n%02X",
                 mf_classic_data->block[sector_trailer_num].data[9]);
+            dialog_ex_set_right_button_text(dialog_ex, "Edit");
         } else {
             furi_string_printf(
                 instance->data_view_text,
@@ -226,6 +223,7 @@ void mfc_editor_scene_data_view_update_display(MfcEditorApp* instance) {
             }
             // Remove trailing space
             furi_string_trim(instance->data_view_text);
+            dialog_ex_set_right_button_text(dialog_ex, "Edit");
         } else {
             furi_string_set(
                 instance->data_view_text, "Data unavailable.\nBlock has not been fully read.");
@@ -241,20 +239,11 @@ void mfc_editor_scene_data_view_update_display(MfcEditorApp* instance) {
         AlignCenter);
 }
 
-void mfc_editor_scene_data_view_dialog_ex_callback(DialogExResult result, void* context) {
-    MfcEditorApp* instance = context;
-    view_dispatcher_send_custom_event(instance->view_dispatcher, result);
-}
-
 void mfc_editor_scene_data_view_on_enter(void* context) {
     MfcEditorApp* instance = context;
 
-    dialog_ex_set_context(instance->dialog_ex, instance);
-
     mfc_editor_scene_data_view_update_display(instance);
 
-    dialog_ex_set_result_callback(
-        instance->dialog_ex, mfc_editor_scene_data_view_dialog_ex_callback);
     view_dispatcher_switch_to_view(instance->view_dispatcher, MfcEditorAppViewDialogEx);
 }
 
@@ -265,7 +254,42 @@ bool mfc_editor_scene_data_view_on_event(void* context, SceneManagerEvent event)
     if(event.type == SceneManagerEventTypeCustom) {
         MfcEditorBlockView block_view =
             scene_manager_get_scene_state(instance->scene_manager, MfcEditorSceneDataView);
-        if(block_view == MfcEditorBlockViewAccessBits) {
+        if(block_view == MfcEditorBlockViewNormal) {
+            if(event.event == DialogExResultRight) {
+                // Block 0 and sector trailer blocks are risky edits
+                bool risky_block =
+                    instance->current_block == 0 ||
+                    instance->current_block ==
+                        mf_classic_get_sector_trailer_num_by_block(instance->current_block);
+                if(!risky_block || mfc_editor_warn_risky_operation(instance)) {
+                    scene_manager_set_scene_state(
+                        instance->scene_manager, MfcEditorSceneDataEdit, block_view);
+                    scene_manager_next_scene(instance->scene_manager, MfcEditorSceneDataEdit);
+                }
+                consumed = true;
+            }
+        } else if(
+            block_view == MfcEditorBlockViewUID ||
+            block_view == MfcEditorBlockViewManufacturerBytes ||
+            block_view == MfcEditorBlockViewKeyA || block_view == MfcEditorBlockViewKeyB) {
+            if(event.event == DialogExResultRight) {
+                if(mfc_editor_warn_risky_operation(instance)) {
+                    scene_manager_set_scene_state(
+                        instance->scene_manager, MfcEditorSceneDataEdit, block_view);
+                    scene_manager_next_scene(instance->scene_manager, MfcEditorSceneDataEdit);
+                }
+                consumed = true;
+            }
+        } else if(block_view == MfcEditorBlockViewBCC) {
+            if(event.event == DialogExResultCenter) {
+                // Fix BCC byte by setting it to calculated one
+                instance->mf_classic_data->block[0].data[4] = mfc_editor_calculate_uid_bcc(
+                    instance->mf_classic_data->iso14443_3a_data->uid,
+                    instance->mf_classic_data->iso14443_3a_data->uid_len);
+                mfc_editor_scene_data_view_update_display(instance);
+                consumed = true;
+            }
+        } else if(block_view == MfcEditorBlockViewAccessBits) {
             if(event.event == DialogExResultLeft) {
                 uint8_t new_sector = mf_classic_get_sector_by_block(--instance->current_block);
                 if(new_sector != instance->current_sector) {
@@ -282,7 +306,18 @@ bool mfc_editor_scene_data_view_on_event(void* context, SceneManagerEvent event)
                 }
                 mfc_editor_scene_data_view_update_display(instance);
                 consumed = true;
+            } else if(event.event == DialogExResultRight) {
+                if(mfc_editor_warn_risky_operation(instance)) {
+                    scene_manager_next_scene(
+                        instance->scene_manager, MfcEditorSceneDataEditAccessBits);
+                }
+                consumed = true;
             }
+        } else if(block_view == MfcEditorBlockViewUserByte) {
+            scene_manager_set_scene_state(
+                instance->scene_manager, MfcEditorSceneDataEdit, block_view);
+            scene_manager_next_scene(instance->scene_manager, MfcEditorSceneDataEdit);
+            consumed = true;
         }
     }
 

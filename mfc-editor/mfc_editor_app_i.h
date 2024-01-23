@@ -8,6 +8,7 @@
 #include <gui/scene_manager.h>
 #include <gui/view_dispatcher.h>
 
+#include <gui/modules/byte_input.h>
 #include <gui/modules/dialog_ex.h>
 #include <gui/modules/popup.h>
 #include <gui/modules/submenu.h>
@@ -33,7 +34,13 @@ enum MfcEditorCustomEvent {
     MfcEditorCustomEventReserved = 100,
 
     MfcEditorCustomEventViewExit,
+    MfcEditorCustomEventSave,
 };
+
+typedef struct {
+    uint8_t bits : 3;
+    uint8_t check_bits : 3;
+} MfcEditorAccessBits;
 
 struct MfcEditorApp {
     ViewDispatcher* view_dispatcher;
@@ -46,6 +53,7 @@ struct MfcEditorApp {
     Submenu* submenu;
     Popup* popup;
     DialogEx* dialog_ex;
+    ByteInput* byte_input;
 
     MfClassicData* mf_classic_data;
 
@@ -57,17 +65,16 @@ struct MfcEditorApp {
     // DialogEx doesn't copy the strings given to it, so we need these
     FuriString* data_view_header;
     FuriString* data_view_text;
-};
 
-typedef struct {
-    uint8_t bits : 3;
-    uint8_t check_bits : 3;
-} MfcEditorAccessBits;
+    uint8_t* edit_buffer;
+    MfcEditorAccessBits access_bits_edit;
+};
 
 typedef enum {
     MfcEditorAppViewSubmenu,
     MfcEditorAppViewPopup,
     MfcEditorAppViewDialogEx,
+    MfcEditorAppViewByteInput,
 } MfcEditorAppView;
 
 typedef enum {
@@ -103,8 +110,23 @@ MfcEditorPromptResponse mfc_editor_prompt_load_file(MfcEditorApp* instance);
 
 MfcEditorPromptResponse mfc_editor_load_file(MfcEditorApp* instance, FuriString* file_path);
 
+// Warning dialog
+
+bool mfc_editor_warn_risky_operation(MfcEditorApp* instance);
+
 // Helper methods
 
 uint8_t mfc_editor_calculate_uid_bcc(uint8_t* uid, uint8_t uid_len);
 
 MfcEditorAccessBits mfc_editor_get_block_access_bits(const MfClassicData* data, uint8_t block_num);
+
+void mfc_editor_set_block_access_bits(
+    MfClassicData* data,
+    uint8_t block_num,
+    const MfcEditorAccessBits* access_bits);
+
+// Strings
+
+extern const char* access_data_block_labels[8];
+
+extern const char* access_sector_trailer_labels[8];
