@@ -1,0 +1,54 @@
+diff --git a/targets/f7/furi_hal/furi_hal_infrared.c b/targets/f7/furi_hal/furi_hal_infrared.c
+index 9c0d84c55..b2592ee6d 100644
+--- a/targets/f7/furi_hal/furi_hal_infrared.c
++++ b/targets/f7/furi_hal/furi_hal_infrared.c
+@@ -2,6 +2,7 @@
+ #include <furi_hal_interrupt.h>
+ #include <furi_hal_resources.h>
+ #include <furi_hal_bus.h>
++#include <furi_hal_power.h>
+ 
+ #include <stm32wbxx_ll_tim.h>
+ #include <stm32wbxx_ll_dma.h>
+@@ -79,6 +80,7 @@ static volatile InfraredState furi_hal_infrared_state = InfraredStateIdle;
+ static InfraredTimTx infrared_tim_tx;
+ static InfraredTimRx infrared_tim_rx;
+ static bool infrared_external_output;
++static bool was_otg_requested = false;
+ 
+ static void furi_hal_infrared_tx_fill_buffer(uint8_t buf_num, uint8_t polarity_shift);
+ static void furi_hal_infrared_async_tx_free_resources(void);
+@@ -585,6 +587,9 @@ static void furi_hal_infrared_async_tx_free_resources(void) {
+     } else {
+         furi_hal_gpio_init(&gpio_infrared_tx, GpioModeAnalog, GpioPullDown, GpioSpeedLow);
+     }
++    if(was_otg_requested) {
++        furi_hal_power_disable_otg();
++    }
+     furi_hal_interrupt_set_isr(INFRARED_DMA_CH1_IRQ, NULL, NULL);
+     furi_hal_interrupt_set_isr(INFRARED_DMA_CH2_IRQ, NULL, NULL);
+ 
+@@ -645,6 +650,23 @@ void furi_hal_infrared_async_tx_start(uint32_t freq, float duty_cycle) {
+     furi_delay_us(5);
+     LL_TIM_GenerateEvent_UPDATE(INFRARED_DMA_TIMER); /* DMA -> TIMx_RCR */
+     furi_delay_us(5);
++
++    // Detect if a module (like IR Blaster) is connected to PA7.
++    furi_hal_gpio_init(&gpio_ext_pa7, GpioModeInput, GpioPullUp, GpioSpeedHigh);
++    furi_delay_ms(1);
++    infrared_external_output = !furi_hal_gpio_read(&gpio_ext_pa7);
++    furi_hal_gpio_init(&gpio_ext_pa7, GpioModeAnalog, GpioPullDown, GpioSpeedLow);
++
++    if(infrared_external_output) {
++        was_otg_requested = !furi_hal_power_is_otg_enabled();
++        if(was_otg_requested) {
++            furi_hal_power_enable_otg();
++            furi_delay_ms(100);
++        }
++    } else {
++        was_otg_requested = false;
++    }
++
+     if(infrared_external_output) {
+         LL_GPIO_ResetOutputPin(
+             gpio_ext_pa7.port, gpio_ext_pa7.pin); /* when disable it prevents false pulse */
