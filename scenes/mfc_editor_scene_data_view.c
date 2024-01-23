@@ -30,6 +30,20 @@ void mfc_editor_scene_data_view_update_display(MfcEditorApp* instance) {
         // Remove trailing space
         furi_string_trim(instance->data_view_text);
 
+        if(memcmp(
+               iso14443_3a_data->uid, mf_classic_data->block[0].data, iso14443_3a_data->uid_len)) {
+            // ISO-14443 UID does not match first bytes of block 0
+            furi_string_cat_printf(instance->data_view_text, "\nBlock 0 does not match UID!\n(");
+            for(int i = 0; i < iso14443_3a_data->uid_len; i++) {
+                furi_string_cat_printf(
+                    instance->data_view_text, "%02X ", mf_classic_data->block[0].data[i]);
+            }
+            // Remove trailing space
+            furi_string_trim(instance->data_view_text);
+            furi_string_push_back(instance->data_view_text, ')');
+            dialog_ex_set_center_button_text(dialog_ex, "Fix");
+        }
+
         if(mf_classic_is_block_read(mf_classic_data, 0)) {
             dialog_ex_set_right_button_text(dialog_ex, "Edit");
         }
@@ -268,8 +282,25 @@ bool mfc_editor_scene_data_view_on_event(void* context, SceneManagerEvent event)
                 }
                 consumed = true;
             }
+        } else if(block_view == MfcEditorBlockViewUID) {
+            if(event.event == DialogExResultRight) {
+                if(mfc_editor_warn_risky_operation(instance)) {
+                    scene_manager_set_scene_state(
+                        instance->scene_manager, MfcEditorSceneDataEdit, block_view);
+                    scene_manager_next_scene(instance->scene_manager, MfcEditorSceneDataEdit);
+                }
+                consumed = true;
+            } else if(event.event == DialogExResultCenter) {
+                if(mfc_editor_warn_risky_operation(instance)) {
+                    memcpy(
+                        instance->mf_classic_data->block[0].data,
+                        instance->mf_classic_data->iso14443_3a_data->uid,
+                        instance->mf_classic_data->iso14443_3a_data->uid_len);
+                    mfc_editor_scene_data_view_update_display(instance);
+                }
+                consumed = true;
+            }
         } else if(
-            block_view == MfcEditorBlockViewUID ||
             block_view == MfcEditorBlockViewManufacturerBytes ||
             block_view == MfcEditorBlockViewKeyA || block_view == MfcEditorBlockViewKeyB) {
             if(event.event == DialogExResultRight) {
