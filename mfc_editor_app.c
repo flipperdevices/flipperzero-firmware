@@ -1,5 +1,29 @@
 #include "mfc_editor_app_i.h"
 
+const char* access_data_block_labels[8] = {
+    // C3, C2, C1
+    "Key A: Read, Write, Inc, Dec\nKey B: Read, Write, Inc, Dec", // 000
+    "Key A: Read\nKey B: Read, Write", // 001
+    "Key A: Read\nKey B: Read", // 010
+    "Key A: Read, Dec\nKey B: Read, Write, Inc, Dec", // 011
+    "Key A: Read, Dec\nKey B: Read, Dec", // 100
+    "Key A: No Access\nKey B: Read", // 101
+    "Key A: No Access\nKey B: Read, Write", // 110
+    "Key A: No Access\nKey B: No Access", // 111
+};
+
+const char* access_sector_trailer_labels[8] = {
+    // C3, C2, C1
+    "Key A: KA-W, AB-R, KB-RW\nKey B: No Access", // 000
+    "Key A: AB-R\nKey B: KA+KB-W, AB-R", // 001
+    "Key A: AB+KB-R\nKey B: No Access", // 010
+    "Key A: AB-R\nKey B: AB-R", // 011
+    "Key A: KA-W, AB+KB-RW\nKey B: No Access", // 100
+    "Key A: AB-R\nKey B: AB-RW", // 101
+    "Key A: AB-R\nKey B: KA+KB-W, AB-RW", // 110
+    "Key A: AB-R\nKey B: AB-R", // 111
+};
+
 bool mfc_editor_app_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
     MfcEditorApp* instance = context;
@@ -60,6 +84,12 @@ MfcEditorApp* mfc_editor_app_alloc() {
         MfcEditorAppViewDialogEx,
         dialog_ex_get_view(instance->dialog_ex));
 
+    instance->byte_input = byte_input_alloc();
+    view_dispatcher_add_view(
+        instance->view_dispatcher,
+        MfcEditorAppViewByteInput,
+        byte_input_get_view(instance->byte_input));
+
     return instance;
 }
 
@@ -74,6 +104,9 @@ void mfc_editor_app_free(MfcEditorApp* instance) {
 
     view_dispatcher_remove_view(instance->view_dispatcher, MfcEditorAppViewDialogEx);
     dialog_ex_free(instance->dialog_ex);
+
+    view_dispatcher_remove_view(instance->view_dispatcher, MfcEditorAppViewByteInput);
+    byte_input_free(instance->byte_input);
 
     view_dispatcher_free(instance->view_dispatcher);
     scene_manager_free(instance->scene_manager);
@@ -124,12 +157,12 @@ MfcEditorPromptResponse mfc_editor_load_file(MfcEditorApp* instance, FuriString*
 
 static DialogMessageButton mfc_editor_prompt_should_load_shadow(MfcEditorApp* instance) {
     DialogMessage* message = dialog_message_alloc();
-    dialog_message_set_header(message, "File has modifications", 63, 0, AlignCenter, AlignTop);
+    dialog_message_set_header(message, "File has modifications", 63, 3, AlignCenter, AlignTop);
     dialog_message_set_text(
         message,
         "Would you like to load the\nmodified file (recommended)\nor the original file?",
         63,
-        30,
+        31,
         AlignCenter,
         AlignCenter);
     dialog_message_set_buttons(message, "Original", NULL, "Modified");
@@ -198,6 +231,25 @@ MfcEditorPromptResponse mfc_editor_prompt_load_file(MfcEditorApp* instance) {
     }
 
     return result;
+}
+
+bool mfc_editor_warn_risky_operation(MfcEditorApp* instance) {
+    DialogMessage* message = dialog_message_alloc();
+    dialog_message_set_header(message, "Risky operation", 63, 3, AlignCenter, AlignTop);
+    dialog_message_set_text(
+        message,
+        "Changing this data may\ninhibit writing to the card\nor could brick the card.",
+        63,
+        31,
+        AlignCenter,
+        AlignCenter);
+    dialog_message_set_buttons(message, "Back", "Continue", NULL);
+
+    DialogMessageButton message_button = dialog_message_show(instance->dialogs, message);
+
+    dialog_message_free(message);
+
+    return message_button == DialogMessageButtonCenter;
 }
 
 int32_t mfc_editor_app(void* p) {
