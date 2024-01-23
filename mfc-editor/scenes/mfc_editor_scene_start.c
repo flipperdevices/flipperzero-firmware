@@ -3,6 +3,7 @@
 enum SubmenuIndex {
     SubmenuIndexOpen,
     SubmenuIndexCreate,
+    SubmenuIndexDuplicate,
 };
 
 void mfc_editor_scene_start_submenu_callback(void* context, uint32_t index) {
@@ -23,6 +24,12 @@ void mfc_editor_scene_start_on_enter(void* context) {
         SubmenuIndexCreate,
         mfc_editor_scene_start_submenu_callback,
         instance);
+    submenu_add_item(
+        submenu,
+        "Duplicate Existing",
+        SubmenuIndexCreate,
+        mfc_editor_scene_start_submenu_callback,
+        instance);
 
     submenu_set_selected_item(
         submenu, scene_manager_get_scene_state(instance->scene_manager, MfcEditorSceneStart));
@@ -37,7 +44,7 @@ bool mfc_editor_scene_start_on_event(void* context, SceneManagerEvent event) {
         if(event.event == SubmenuIndexOpen) {
             scene_manager_next_scene(instance->scene_manager, MfcEditorSceneFileSelect);
             consumed = true;
-        } else if(event.event == SubmenuIndexCreate) {
+        } else {
             DialogMessage* message = dialog_message_alloc();
             dialog_message_set_header(
                 message, "Not implemented", 63, 30, AlignCenter, AlignCenter);
