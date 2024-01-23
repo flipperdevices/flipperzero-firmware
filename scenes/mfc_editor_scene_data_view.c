@@ -286,11 +286,13 @@ bool mfc_editor_scene_data_view_on_event(void* context, SceneManagerEvent event)
             }
         } else if(block_view == MfcEditorBlockViewBCC) {
             if(event.event == DialogExResultCenter) {
-                // Fix BCC byte by setting it to calculated one
-                instance->mf_classic_data->block[0].data[4] = mfc_editor_calculate_uid_bcc(
-                    instance->mf_classic_data->iso14443_3a_data->uid,
-                    instance->mf_classic_data->iso14443_3a_data->uid_len);
-                mfc_editor_scene_data_view_update_display(instance);
+                if(mfc_editor_warn_risky_operation(instance)) {
+                    // Fix BCC byte by setting it to calculated one
+                    instance->mf_classic_data->block[0].data[4] = mfc_editor_calculate_uid_bcc(
+                        instance->mf_classic_data->iso14443_3a_data->uid,
+                        instance->mf_classic_data->iso14443_3a_data->uid_len);
+                    mfc_editor_scene_data_view_update_display(instance);
+                }
                 consumed = true;
             }
         } else if(block_view == MfcEditorBlockViewAccessBits) {
