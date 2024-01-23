@@ -24,22 +24,17 @@ void mfc_editor_scene_data_view_update_display(MfcEditorApp* instance) {
     if(block_view == MfcEditorBlockViewUID) {
         dialog_ex_set_header(dialog_ex, "UID", 63, 3, AlignCenter, AlignTop);
 
-        for(int i = 0; i < iso14443_3a_data->uid_len; i++) {
-            furi_string_cat_printf(instance->data_view_text, "%02X ", iso14443_3a_data->uid[i]);
-        }
-        // Remove trailing space
-        furi_string_trim(instance->data_view_text);
+        mfc_editor_furi_string_render_bytes(
+            instance->data_view_text, iso14443_3a_data->uid, iso14443_3a_data->uid_len);
 
         if(memcmp(
                iso14443_3a_data->uid, mf_classic_data->block[0].data, iso14443_3a_data->uid_len)) {
             // ISO-14443 UID does not match first bytes of block 0
             furi_string_cat_printf(instance->data_view_text, "\nBlock 0 does not match UID!\n(");
-            for(int i = 0; i < iso14443_3a_data->uid_len; i++) {
-                furi_string_cat_printf(
-                    instance->data_view_text, "%02X ", mf_classic_data->block[0].data[i]);
-            }
-            // Remove trailing space
-            furi_string_trim(instance->data_view_text);
+            mfc_editor_furi_string_render_bytes(
+                instance->data_view_text,
+                mf_classic_data->block[0].data,
+                iso14443_3a_data->uid_len);
             furi_string_push_back(instance->data_view_text, ')');
             dialog_ex_set_center_button_text(dialog_ex, "Fix");
         }
@@ -77,19 +72,17 @@ void mfc_editor_scene_data_view_update_display(MfcEditorApp* instance) {
         if(mf_classic_is_block_read(mf_classic_data, 0)) {
             // Skip BCC byte (not present on 7B UID cards)
             bool skip_byte = iso14443_3a_data->uid_len == 4;
+            uint8_t start_index = iso14443_3a_data->uid_len + skip_byte;
             uint8_t byte_num = MF_CLASSIC_BLOCK_SIZE - iso14443_3a_data->uid_len - skip_byte;
-            for(int i = iso14443_3a_data->uid_len + skip_byte; i < MF_CLASSIC_BLOCK_SIZE; i++) {
-                furi_string_cat_printf(
-                    instance->data_view_text, "%02X", mf_classic_data->block[0].data[i]);
-                // Go onto next line when halfway through
-                if(MF_CLASSIC_BLOCK_SIZE - i - 1 == byte_num / 2) {
-                    furi_string_push_back(instance->data_view_text, '\n');
-                } else {
-                    furi_string_push_back(instance->data_view_text, ' ');
-                }
-            }
-            // Remove trailing space
-            furi_string_trim(instance->data_view_text);
+            uint8_t line_len = byte_num / 2;
+
+            mfc_editor_furi_string_render_bytes(
+                instance->data_view_text, mf_classic_data->block[0].data + start_index, line_len);
+            furi_string_push_back(instance->data_view_text, '\n');
+            mfc_editor_furi_string_render_bytes(
+                instance->data_view_text,
+                mf_classic_data->block[0].data + start_index + line_len,
+                byte_num - line_len);
 
             dialog_ex_set_right_button_text(dialog_ex, "Edit");
         } else {
@@ -102,16 +95,8 @@ void mfc_editor_scene_data_view_update_display(MfcEditorApp* instance) {
         if(mf_classic_is_key_found(mf_classic_data, instance->current_sector, MfClassicKeyTypeA)) {
             MfClassicSectorTrailer* sector_trailer =
                 mf_classic_get_sector_trailer_by_sector(mf_classic_data, instance->current_sector);
-            MfClassicKey key_a = sector_trailer->key_a;
-            furi_string_printf(
-                instance->data_view_text,
-                "%02X %02X %02X %02X %02X %02X",
-                key_a.data[0],
-                key_a.data[1],
-                key_a.data[2],
-                key_a.data[3],
-                key_a.data[4],
-                key_a.data[5]);
+            mfc_editor_furi_string_render_bytes(
+                instance->data_view_text, sector_trailer->key_a.data, MF_CLASSIC_KEY_SIZE);
             dialog_ex_set_right_button_text(dialog_ex, "Edit");
         } else {
             furi_string_set(
@@ -123,16 +108,8 @@ void mfc_editor_scene_data_view_update_display(MfcEditorApp* instance) {
         if(mf_classic_is_key_found(mf_classic_data, instance->current_sector, MfClassicKeyTypeB)) {
             MfClassicSectorTrailer* sector_trailer =
                 mf_classic_get_sector_trailer_by_sector(mf_classic_data, instance->current_sector);
-            MfClassicKey key_b = sector_trailer->key_b;
-            furi_string_printf(
-                instance->data_view_text,
-                "%02X %02X %02X %02X %02X %02X",
-                key_b.data[0],
-                key_b.data[1],
-                key_b.data[2],
-                key_b.data[3],
-                key_b.data[4],
-                key_b.data[5]);
+            mfc_editor_furi_string_render_bytes(
+                instance->data_view_text, sector_trailer->key_b.data, MF_CLASSIC_KEY_SIZE);
             dialog_ex_set_right_button_text(dialog_ex, "Edit");
         } else {
             furi_string_set(
@@ -226,17 +203,13 @@ void mfc_editor_scene_data_view_update_display(MfcEditorApp* instance) {
                  mf_classic_data, instance->current_sector, MfClassicKeyTypeB)))) {
             // Split block data across 2 even lines
             const uint8_t* block_data = mf_classic_data->block[current_block].data;
-            for(int i = 0; i < MF_CLASSIC_BLOCK_SIZE / 2; i++) {
-                furi_string_cat_printf(instance->data_view_text, "%02X ", block_data[i]);
-            }
-            // Remove trailing space
-            furi_string_trim(instance->data_view_text);
+            mfc_editor_furi_string_render_bytes(
+                instance->data_view_text, block_data, MF_CLASSIC_BLOCK_SIZE / 2);
             furi_string_push_back(instance->data_view_text, '\n');
-            for(int i = MF_CLASSIC_BLOCK_SIZE / 2; i < MF_CLASSIC_BLOCK_SIZE; i++) {
-                furi_string_cat_printf(instance->data_view_text, "%02X ", block_data[i]);
-            }
-            // Remove trailing space
-            furi_string_trim(instance->data_view_text);
+            mfc_editor_furi_string_render_bytes(
+                instance->data_view_text,
+                block_data + MF_CLASSIC_BLOCK_SIZE / 2,
+                MF_CLASSIC_BLOCK_SIZE / 2);
             dialog_ex_set_right_button_text(dialog_ex, "Edit");
         } else {
             furi_string_set(

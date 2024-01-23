@@ -125,6 +125,8 @@ void mfc_editor_set_block_access_bits(
     uint8_t block_num,
     const MfcEditorAccessBits* access_bits);
 
+void mfc_editor_furi_string_render_bytes(FuriString* string, const uint8_t* data, uint8_t length);
+
 // Strings
 
 extern const char* access_data_block_labels[8];
