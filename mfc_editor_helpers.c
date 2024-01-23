@@ -92,3 +92,11 @@ void mfc_editor_set_block_access_bits(
         FURI_BIT_SET(*access_byte_2, relative_block_num);
     }
 }
+
+void mfc_editor_furi_string_render_bytes(FuriString* string, const uint8_t* data, uint8_t length) {
+    for(uint8_t i = 0; i < length - 1; i++) {
+        furi_string_cat_printf(string, "%02X ", data[i]);
+    }
+    // Don't add a trailing space
+    furi_string_cat_printf(string, "%02X", data[length - 1]);
+}
