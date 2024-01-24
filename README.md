@@ -7,6 +7,7 @@ grid-template-rows: repeat(2, 1fr);
 gap: 2px;
 justify-items: center;
 align-items: center;
+width: 100vw;
 ">
   <img style="
     width: 280px;
