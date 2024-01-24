@@ -302,7 +302,7 @@ int32_t mfc_editor_app(void* p) {
 
     MfcEditorApp* instance = mfc_editor_app_alloc();
 
-    scene_manager_next_scene(instance->scene_manager, MfcEditorSceneStart);
+    scene_manager_next_scene(instance->scene_manager, MfcEditorSceneFileSelect);
 
     view_dispatcher_run(instance->view_dispatcher);
 
