@@ -21,6 +21,7 @@ typedef struct {
 
 typedef enum {
     TroikaLayoutUnknown = 0x0,
+    TroikaLayout2 = 0x2,
     TroikaLayoutE = 0xE,
 } TroikaLayout;
 
@@ -28,6 +29,7 @@ typedef enum {
     TroikaSublayoutUnknown = 0x0,
     TroikaSublayout3 = 0x3,
     TroikaSublayout5 = 0x5,
+    TroikaSublayout6 = 0x6,
 } TroikaSubLayout;
 
 static const MfClassicKeyPair troika_1k_keys[] = {
@@ -97,6 +99,9 @@ static TroikaLayout troika_get_layout(const MfClassicData* data, uint8_t start_b
 
     TroikaLayout result = TroikaLayoutUnknown;
     switch(layout) {
+    case 0x2:
+        result = TroikaLayout2;
+        break;
     case 0xE:
         result = TroikaLayoutE;
         break;
@@ -127,6 +132,9 @@ static TroikaSubLayout troika_get_sub_layout(const MfClassicData* data, uint8_t 
     case 5:
         result = TroikaSublayout5;
         break;
+    case 6:
+        result = TroikaSublayout6;
+        break;
     default:
         // If debug is enabled - pass the actual sublayout value for the debug text
         if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
@@ -137,6 +145,17 @@ static TroikaSubLayout troika_get_sub_layout(const MfClassicData* data, uint8_t 
     }
 
     return result;
+}
+
+static bool troika_has_balance(TroikaLayout layout, TroikaSubLayout sub_layout) {
+    UNUSED(sub_layout);
+    // Layout 0x2 has no balance
+
+    if(layout == TroikaLayout2) {
+        return false;
+    }
+
+    return true;
 }
 
 static uint16_t troika_get_balance(
@@ -180,7 +199,7 @@ static uint32_t troika_get_number(
     furi_assert(data);
     UNUSED(sub_layout);
 
-    if(layout == TroikaLayoutE) {
+    if(layout == TroikaLayoutE || layout == TroikaLayout2) {
         const uint8_t* temp_ptr = &data->block[start_block_num].data[2];
 
         uint32_t number = 0;
@@ -304,23 +323,27 @@ static bool troika_parse(const NfcDevice* device, FuriString* parsed_data) {
             if(layout == TroikaLayoutUnknown || sub_layout == TroikaSublayoutUnknown) break;
         }
 
-        uint16_t balance = troika_get_balance(data, start_block_num, layout, sub_layout);
-
         uint32_t number = troika_get_number(data, start_block_num, layout, sub_layout);
 
+        furi_string_printf(parsed_data, "\e#Troika\nNum: %lu", number);
+
+        if(troika_has_balance(layout, sub_layout) ||
+           furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
+            uint16_t balance = troika_get_balance(data, start_block_num, layout, sub_layout);
+            furi_string_cat_printf(parsed_data, "\nBalance: %u RUR", balance);
+        } else {
+            furi_string_cat_printf(parsed_data, "\nBalance: Not available");
+        }
+
         if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
-            furi_string_printf(
+            furi_string_cat_printf(
                 parsed_data,
-                "\e#Troika\nNum: %lu\nBalance: %u RUR\nLayout: %02x\nSublayout: %02x\nData Block: %u",
-                number,
-                balance,
+                "\nLayout: %02x\nSublayout: %02x\nData Block: %u",
                 layout,
                 sub_layout,
                 start_block_num);
-        } else {
-            furi_string_printf(
-                parsed_data, "\e#Troika\nNum: %lu\nBalance: %u RUR", number, balance);
         }
+
         parsed = true;
     } while(false);
 
