@@ -47,7 +47,8 @@ static void dict_attack_draw_callback(Canvas* canvas, void* model) {
                 "Reuse key check for sector: %d",
                 m->key_attack_current_sector);
         } else {
-            snprintf(draw_str, sizeof(draw_str), "Unlocking sector: %d", m->sector_current);
+            snprintf(
+                draw_str, sizeof(draw_str), "Unlocking Application Area %d", m->sector_current + 1);
         }
         canvas_draw_str_aligned(canvas, 0, 10, AlignLeft, AlignTop, draw_str);
         float dict_progress = m->dict_keys_total == 0 ?
@@ -71,7 +72,11 @@ static void dict_attack_draw_callback(Canvas* canvas, void* model) {
         snprintf(draw_str, sizeof(draw_str), "Keys found: %d/%d", m->keys_found, m->keys_total);
         canvas_draw_str_aligned(canvas, 0, 33, AlignLeft, AlignTop, draw_str);
         snprintf(
-            draw_str, sizeof(draw_str), "Sectors Read: %d/%d", m->sectors_read, m->sectors_total);
+            draw_str,
+            sizeof(draw_str),
+            "Application Area Read: %d/%d",
+            m->sectors_read,
+            m->sectors_total);
         canvas_draw_str_aligned(canvas, 0, 43, AlignLeft, AlignTop, draw_str);
     }
     elements_button_center(canvas, "Skip");
