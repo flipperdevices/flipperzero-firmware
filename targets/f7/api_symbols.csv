@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,52.0,,
+Version,+,52.1,,
 Header,+,applications/drivers/subghz/cc1101_ext/cc1101_ext_interconnect.h,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
@@ -644,6 +644,7 @@ Function,+,bit_lib_get_bit_count,uint8_t,uint32_t
 Function,+,bit_lib_get_bits,uint8_t,"const uint8_t*, size_t, uint8_t"
 Function,+,bit_lib_get_bits_16,uint16_t,"const uint8_t*, size_t, uint8_t"
 Function,+,bit_lib_get_bits_32,uint32_t,"const uint8_t*, size_t, uint8_t"
+Function,+,bit_lib_get_bits_64,uint64_t,"const uint8_t*, size_t, uint8_t"
 Function,+,bit_lib_num_to_bytes_be,void,"uint64_t, uint8_t, uint8_t*"
 Function,+,bit_lib_num_to_bytes_le,void,"uint64_t, uint8_t, uint8_t*"
 Function,+,bit_lib_print_bits,void,"const uint8_t*, size_t"

@@ -78,6 +78,37 @@ uint32_t bit_lib_get_bits_32(const uint8_t* data, size_t position, uint8_t lengt
     return value;
 }
 
+uint64_t bit_lib_get_bits_64(const uint8_t* data, size_t position, uint8_t length) {
+    uint64_t value = 0;
+    if(length <= 8) {
+        value = bit_lib_get_bits(data, position, length);
+    } else if(length <= 16) {
+        value = bit_lib_get_bits(data, position, 8) << (length - 8);
+        value |= bit_lib_get_bits(data, position + 8, length - 8);
+    } else if(length <= 24) {
+        value = bit_lib_get_bits(data, position, 8) << (length - 8);
+        value |= bit_lib_get_bits(data, position + 8, 8) << (length - 16);
+        value |= bit_lib_get_bits(data, position + 16, length - 16);
+    } else if(length <= 32) {
+        value = (uint64_t)bit_lib_get_bits(data, position, 8) << (length - 8);
+        value |= (uint64_t)bit_lib_get_bits(data, position + 8, 8) << (length - 16);
+        value |= (uint64_t)bit_lib_get_bits(data, position + 16, 8) << (length - 24);
+        value |= bit_lib_get_bits(data, position + 24, length - 24);
+    } else {
+        value = (uint64_t)bit_lib_get_bits(data, position, 8) << (length - 8);
+        value |= (uint64_t)bit_lib_get_bits(data, position + 8, 8) << (length - 16);
+        value |= (uint64_t)bit_lib_get_bits(data, position + 16, 8) << (length - 24);
+        value |= (uint64_t)bit_lib_get_bits(data, position + 24, 8) << (length - 32);
+        value |= (uint64_t)bit_lib_get_bits(data, position + 32, 8) << (length - 40);
+        value |= (uint64_t)bit_lib_get_bits(data, position + 40, 8) << (length - 48);
+        value |= (uint64_t)bit_lib_get_bits(data, position + 48, 8) << (length - 56);
+        value |= (uint64_t)bit_lib_get_bits(data, position + 56, 8) << (length - 64);
+        value |= bit_lib_get_bits(data, position + 64, length - 64);
+    }
+
+    return value;
+}
+
 bool bit_lib_test_parity_32(uint32_t bits, BitLibParity parity) {
 #if !defined __GNUC__
 #error Please, implement parity test for non-GCC compilers
@@ -431,111 +462,4 @@ uint64_t bit_lib_bytes_to_num_bcd(const uint8_t* src, uint8_t len, bool* is_bcd)
     }
 
     return res;
-}
-
-void bit_lib_push_bit(uint8_t* data, size_t data_size, bool bit) {
-    size_t last_index = data_size - 1;
-
-    for(size_t i = 0; i < last_index; ++i) {
-        data[i] = (data[i] << 1) | ((data[i + 1] >> 7) & 1);
-    }
-    data[last_index] = (data[last_index] << 1) | bit;
-}
-
-void bit_lib_set_bit(uint8_t* data, size_t position, bool bit) {
-    if(bit) {
-        data[position / 8] |= 1UL << (7 - (position % 8));
-    } else {
-        data[position / 8] &= ~(1UL << (7 - (position % 8)));
-    }
-}
-
-void bit_lib_set_bits(uint8_t* data, size_t position, uint8_t byte, uint8_t length) {
-    furi_check(length <= 8);
-    furi_check(length > 0);
-
-    for(uint8_t i = 0; i < length; ++i) {
-        uint8_t shift = (length - 1) - i;
-        bit_lib_set_bit(data, position + i, (byte >> shift) & 1); //-V610
-    }
-}
-
-bool bit_lib_get_bit(const uint8_t* data, size_t position) {
-    return (data[position / 8] >> (7 - (position % 8))) & 1;
-}
-
-uint8_t bit_lib_get_bits(const uint8_t* data, size_t position, uint8_t length) {
-    uint8_t shift = position % 8;
-    if(shift == 0) {
-        return data[position / 8] >> (8 - length);
-    } else {
-        // TODO fix read out of bounds
-        uint8_t value = (data[position / 8] << (shift));
-        value |= data[position / 8 + 1] >> (8 - shift);
-        value = value >> (8 - length);
-        return value;
-    }
-}
-
-uint16_t bit_lib_get_bits_16(const uint8_t* data, size_t position, uint8_t length) {
-    uint16_t value = 0;
-    if(length <= 8) {
-        value = bit_lib_get_bits(data, position, length);
-    } else {
-        value = bit_lib_get_bits(data, position, 8) << (length - 8);
-        value |= bit_lib_get_bits(data, position + 8, length - 8);
-    }
-    return value;
-}
-
-uint32_t bit_lib_get_bits_32(const uint8_t* data, size_t position, uint8_t length) {
-    uint32_t value = 0;
-    if(length <= 8) {
-        value = bit_lib_get_bits(data, position, length);
-    } else if(length <= 16) {
-        value = bit_lib_get_bits(data, position, 8) << (length - 8);
-        value |= bit_lib_get_bits(data, position + 8, length - 8);
-    } else if(length <= 24) {
-        value = bit_lib_get_bits(data, position, 8) << (length - 8);
-        value |= bit_lib_get_bits(data, position + 8, 8) << (length - 16);
-        value |= bit_lib_get_bits(data, position + 16, length - 16);
-    } else {
-        value = (uint32_t)bit_lib_get_bits(data, position, 8) << (length - 8);
-        value |= (uint32_t)bit_lib_get_bits(data, position + 8, 8) << (length - 16);
-        value |= (uint32_t)bit_lib_get_bits(data, position + 16, 8) << (length - 24);
-        value |= bit_lib_get_bits(data, position + 24, length - 24);
-    }
-
-    return value;
-}
-
-uint64_t bit_lib_get_bits_64(const uint8_t* data, size_t position, uint8_t length) {
-    uint64_t value = 0;
-    if(length <= 8) {
-        value = bit_lib_get_bits(data, position, length);
-    } else if(length <= 16) {
-        value = bit_lib_get_bits(data, position, 8) << (length - 8);
-        value |= bit_lib_get_bits(data, position + 8, length - 8);
-    } else if(length <= 24) {
-        value = bit_lib_get_bits(data, position, 8) << (length - 8);
-        value |= bit_lib_get_bits(data, position + 8, 8) << (length - 16);
-        value |= bit_lib_get_bits(data, position + 16, length - 16);
-    } else if(length <= 32) {
-        value = (uint64_t)bit_lib_get_bits(data, position, 8) << (length - 8);
-        value |= (uint64_t)bit_lib_get_bits(data, position + 8, 8) << (length - 16);
-        value |= (uint64_t)bit_lib_get_bits(data, position + 16, 8) << (length - 24);
-        value |= bit_lib_get_bits(data, position + 24, length - 24);
-    } else {
-        value = (uint64_t)bit_lib_get_bits(data, position, 8) << (length - 8);
-        value |= (uint64_t)bit_lib_get_bits(data, position + 8, 8) << (length - 16);
-        value |= (uint64_t)bit_lib_get_bits(data, position + 16, 8) << (length - 24);
-        value |= (uint64_t)bit_lib_get_bits(data, position + 24, 8) << (length - 32);
-        value |= (uint64_t)bit_lib_get_bits(data, position + 32, 8) << (length - 40);
-        value |= (uint64_t)bit_lib_get_bits(data, position + 40, 8) << (length - 48);
-        value |= (uint64_t)bit_lib_get_bits(data, position + 48, 8) << (length - 56);
-        value |= (uint64_t)bit_lib_get_bits(data, position + 56, 8) << (length - 64);
-        value |= bit_lib_get_bits(data, position + 64, length - 64);
-    }
-
-    return value;
 }
