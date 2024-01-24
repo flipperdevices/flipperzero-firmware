@@ -145,9 +145,29 @@ MfcEditorPromptResponse mfc_editor_load_file(MfcEditorApp* instance, FuriString*
             const MfClassicData* mf_classic_data =
                 nfc_device_get_data(nfc_device, NfcProtocolMfClassic);
             mf_classic_copy(instance->mf_classic_data, mf_classic_data);
+            instance->is_unsaved_changes = false;
         } else {
             result = MfcEditorPromptResponseNotMfClassic;
         }
+    }
+
+    nfc_device_free(nfc_device);
+
+    return result;
+}
+
+bool mfc_editor_save_file(MfcEditorApp* instance) {
+    furi_assert(instance);
+    furi_assert(instance->file_path);
+    furi_assert(instance->mf_classic_data);
+
+    NfcDevice* nfc_device = nfc_device_alloc();
+
+    nfc_device_set_data(nfc_device, NfcProtocolMfClassic, instance->mf_classic_data);
+
+    bool result = nfc_device_save(nfc_device, furi_string_get_cstr(instance->file_path));
+    if(!result) {
+        dialog_message_show_storage_error(instance->dialogs, "Cannot save\nkey file");
     }
 
     nfc_device_free(nfc_device);
@@ -250,6 +270,31 @@ bool mfc_editor_warn_risky_operation(MfcEditorApp* instance) {
     dialog_message_free(message);
 
     return message_button == DialogMessageButtonCenter;
+}
+
+MfcEditorSaveResponse mfc_editor_warn_unsaved_changes(MfcEditorApp* instance) {
+    DialogMessage* message = dialog_message_alloc();
+    dialog_message_set_header(message, "Unsaved changes", 63, 3, AlignCenter, AlignTop);
+    dialog_message_set_text(
+        message,
+        "Would you like to save?\nDiscarding your\nchanges is permanent.",
+        63,
+        31,
+        AlignCenter,
+        AlignCenter);
+    dialog_message_set_buttons(message, "Discrd", "Save", "Cancel");
+
+    DialogMessageButton message_button = dialog_message_show(instance->dialogs, message);
+
+    dialog_message_free(message);
+
+    if(message_button == DialogMessageButtonCenter) {
+        return MfcEditorSaveResponseSave;
+    } else if(message_button == DialogMessageButtonLeft) {
+        return MfcEditorSaveResponseDiscard;
+    } else {
+        return MfcEditorSaveResponseCancel;
+    }
 }
 
 int32_t mfc_editor_app(void* p) {

@@ -41,6 +41,20 @@ bool mfc_editor_scene_sector_select_on_event(void* context, SceneManagerEvent ev
         scene_manager_set_scene_state(instance->scene_manager, MfcEditorSceneBlockSelect, 0);
         scene_manager_next_scene(instance->scene_manager, MfcEditorSceneBlockSelect);
         consumed = true;
+    } else if(event.type == SceneManagerEventTypeBack) {
+        if(instance->is_unsaved_changes) {
+            MfcEditorSaveResponse response = mfc_editor_warn_unsaved_changes(instance);
+            if(response == MfcEditorSaveResponseSave) {
+                if(mfc_editor_save_file(instance)) {
+                    scene_manager_next_scene(instance->scene_manager, MfcEditorSceneSaveSuccess);
+                }
+                // Stop the scene manager from going back to previous scene
+                consumed = true;
+            } else if(response == MfcEditorSaveResponseCancel) {
+                // Stop the scene manager from going back to previous scene
+                consumed = true;
+            }
+        }
     }
 
     return consumed;
