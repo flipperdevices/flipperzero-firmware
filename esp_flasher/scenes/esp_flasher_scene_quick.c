@@ -35,7 +35,11 @@ void esp_flasher_scene_quick_on_enter(void* context) {
     case QuickS2:
         submenu_set_header(submenu, "Choose Board:");
         submenu_add_item(
-            submenu, "Flipper WiFi Board / Xeon", QuickBootS2, esp_flasher_scene_quick_submenu_callback, app);
+            submenu,
+            "Flipper WiFi Board / Xeon",
+            QuickBootS2,
+            esp_flasher_scene_quick_submenu_callback,
+            app);
         submenu_add_item(
             submenu, "Multi-Fucc", QuickBootWROOM, esp_flasher_scene_quick_submenu_callback, app);
         submenu_add_item(
