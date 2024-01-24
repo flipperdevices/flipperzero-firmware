@@ -62,7 +62,7 @@ App(
     entry_point="troika_plugin_ep",
     targets=["f7"],
     requires=["nfc"],
-    sources=["plugins/supported_cards/troika.c"],
+    sources=["plugins/supported_cards/troika.c", "helpers/mosgortrans_layouts_i.c"],
 )
 
 App(
