@@ -5,7 +5,6 @@
             "compilerPath": "${workspaceFolder}/toolchain/x86_64-windows/bin/arm-none-eabi-gcc.exe",
             "intelliSenseMode": "gcc-arm",
             "compileCommands": "${workspaceFolder}/build/latest/compile_commands.json",
-            "configurationProvider": "ms-vscode.cpptools",
             "cStandard": "gnu17",
             "cppStandard": "c++17"
         },
@@ -14,7 +13,6 @@
             "compilerPath": "${workspaceFolder}/toolchain/x86_64-linux/bin/arm-none-eabi-gcc",
             "intelliSenseMode": "gcc-arm",
             "compileCommands": "${workspaceFolder}/build/latest/compile_commands.json",
-            "configurationProvider": "ms-vscode.cpptools",
             "cStandard": "gnu17",
             "cppStandard": "c++17"
         },
@@ -23,7 +21,6 @@
             "compilerPath": "${workspaceFolder}/toolchain/x86_64-darwin/bin/arm-none-eabi-gcc",
             "intelliSenseMode": "gcc-arm",
             "compileCommands": "${workspaceFolder}/build/latest/compile_commands.json",
-            "configurationProvider": "ms-vscode.cpptools",
             "cStandard": "gnu17",
             "cppStandard": "c++17"
         }

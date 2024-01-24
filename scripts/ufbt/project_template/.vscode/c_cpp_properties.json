@@ -5,7 +5,6 @@
             "compilerPath": "@UFBT_TOOLCHAIN_GCC@",
             "intelliSenseMode": "gcc-arm",
             "compileCommands": "${workspaceFolder}/.vscode/compile_commands.json",
-            "configurationProvider": "ms-vscode.cpptools",
             "cStandard": "gnu17",
             "cppStandard": "c++17"
         }
