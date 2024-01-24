@@ -186,9 +186,10 @@ bool mfc_editor_scene_data_edit_on_event(void* context, SceneManagerEvent event)
                 mf_classic_get_sector_trailer_by_sector(mf_classic_data, instance->current_sector)
                     ->access_bits.data[3] = instance->edit_buffer[0];
             }
+            instance->is_unsaved_changes = true;
+            scene_manager_previous_scene(instance->scene_manager);
+            consumed = true;
         }
-        scene_manager_previous_scene(instance->scene_manager);
-        consumed = true;
     }
 
     return consumed;

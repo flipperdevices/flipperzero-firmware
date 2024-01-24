@@ -87,6 +87,7 @@ bool mfc_editor_scene_data_edit_access_bits_on_event(void* context, SceneManager
         } else if(event.event == DialogExResultCenter) {
             mfc_editor_set_block_access_bits(
                 instance->mf_classic_data, instance->current_block, &instance->access_bits_edit);
+            instance->is_unsaved_changes = true;
             scene_manager_previous_scene(instance->scene_manager);
             consumed = true;
         }

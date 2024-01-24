@@ -59,6 +59,8 @@ struct MfcEditorApp {
 
     FuriString* file_path;
 
+    bool is_unsaved_changes;
+
     uint8_t current_sector;
     uint8_t current_block;
 
@@ -90,6 +92,12 @@ typedef enum {
 } MfcEditorPromptResponse;
 
 typedef enum {
+    MfcEditorSaveResponseSave,
+    MfcEditorSaveResponseDiscard,
+    MfcEditorSaveResponseCancel,
+} MfcEditorSaveResponse;
+
+typedef enum {
     MfcEditorBlockViewNormal,
 
     // Special options - Sector 0 only
@@ -110,9 +118,13 @@ MfcEditorPromptResponse mfc_editor_prompt_load_file(MfcEditorApp* instance);
 
 MfcEditorPromptResponse mfc_editor_load_file(MfcEditorApp* instance, FuriString* file_path);
 
-// Warning dialog
+bool mfc_editor_save_file(MfcEditorApp* instance);
+
+// Warning dialogs
 
 bool mfc_editor_warn_risky_operation(MfcEditorApp* instance);
+
+MfcEditorSaveResponse mfc_editor_warn_unsaved_changes(MfcEditorApp* instance);
 
 // Helper methods
 

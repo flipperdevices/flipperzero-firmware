@@ -269,6 +269,7 @@ bool mfc_editor_scene_data_view_on_event(void* context, SceneManagerEvent event)
                         instance->mf_classic_data->block[0].data,
                         instance->mf_classic_data->iso14443_3a_data->uid,
                         instance->mf_classic_data->iso14443_3a_data->uid_len);
+                    instance->is_unsaved_changes = true;
                     mfc_editor_scene_data_view_update_display(instance);
                 }
                 consumed = true;
@@ -291,6 +292,7 @@ bool mfc_editor_scene_data_view_on_event(void* context, SceneManagerEvent event)
                     instance->mf_classic_data->block[0].data[4] = mfc_editor_calculate_uid_bcc(
                         instance->mf_classic_data->iso14443_3a_data->uid,
                         instance->mf_classic_data->iso14443_3a_data->uid_len);
+                    instance->is_unsaved_changes = true;
                     mfc_editor_scene_data_view_update_display(instance);
                 }
                 consumed = true;
