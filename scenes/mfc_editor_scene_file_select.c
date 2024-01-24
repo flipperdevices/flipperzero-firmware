@@ -17,8 +17,8 @@ void mfc_editor_scene_file_select_on_enter(void* context) {
     } else if(prompt_response == MfcEditorPromptResponseNotMfClassic) {
         scene_manager_next_scene(instance->scene_manager, MfcEditorSceneInvalidFile);
     } else {
-        scene_manager_search_and_switch_to_previous_scene(
-            instance->scene_manager, MfcEditorSceneStart);
+        // Exiting from file list stops the application
+        view_dispatcher_stop(instance->view_dispatcher);
     }
 }
 
