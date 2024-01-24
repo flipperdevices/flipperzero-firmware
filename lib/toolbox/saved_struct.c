@@ -13,7 +13,12 @@ typedef struct {
     uint32_t timestamp;
 } SavedStructHeader;
 
-bool saved_struct_save(const char* path, void* data, size_t size, uint8_t magic, uint8_t version) {
+bool saved_struct_save(
+    const char* path,
+    const void* data,
+    size_t size,
+    uint8_t magic,
+    uint8_t version) {
     furi_check(path);
     furi_check(data);
     furi_check(size);
@@ -35,7 +40,7 @@ bool saved_struct_save(const char* path, void* data, size_t size, uint8_t magic,
     if(result) {
         // Calculate checksum
         uint8_t checksum = 0;
-        uint8_t* source = data;
+        const uint8_t* source = data;
         for(size_t i = 0; i < size; i++) {
             checksum += source[i];
         }
@@ -162,8 +167,8 @@ bool saved_struct_get_metadata(
             *version = header.version;
         }
         if(payload_size) {
-        uint64_t file_size = storage_file_size(file);
-        *payload_size = file_size - sizeof(SavedStructHeader);
+            uint64_t file_size = storage_file_size(file);
+            *payload_size = file_size - sizeof(SavedStructHeader);
         }
 
         result = true;
