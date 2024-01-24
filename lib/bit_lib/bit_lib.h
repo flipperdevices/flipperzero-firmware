@@ -315,6 +315,13 @@ uint64_t bit_lib_bytes_to_num_le(const uint8_t* src, uint8_t len);
  */
 uint64_t bit_lib_bytes_to_num_bcd(const uint8_t* src, uint8_t len, bool* is_bcd);
 
+void bit_lib_set_bits(uint8_t* data, size_t position, uint8_t byte, uint8_t length);
+bool bit_lib_get_bit(const uint8_t* data, size_t position);
+uint8_t bit_lib_get_bits(const uint8_t* data, size_t position, uint8_t length);
+uint16_t bit_lib_get_bits_16(const uint8_t* data, size_t position, uint8_t length);
+uint32_t bit_lib_get_bits_32(const uint8_t* data, size_t position, uint8_t length);
+uint64_t bit_lib_get_bits_64(const uint8_t* data, size_t position, uint8_t length);
+
 #ifdef __cplusplus
 }
 #endif
