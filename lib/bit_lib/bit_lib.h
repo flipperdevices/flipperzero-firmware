@@ -90,6 +90,13 @@ uint16_t bit_lib_get_bits_16(const uint8_t* data, size_t position, uint8_t lengt
  */
 uint32_t bit_lib_get_bits_32(const uint8_t* data, size_t position, uint8_t length);
 
+/**
+ * @brief Get the bits of a data, as uint64_t.
+ * @param data The data to get the bits from.
+ * @param position The position of the first bit.
+ * @param length The length of the bits.
+ * @return The bits.
+ */
 uint64_t bit_lib_get_bits_64(const uint8_t* data, size_t position, uint8_t length);
 
 /**
