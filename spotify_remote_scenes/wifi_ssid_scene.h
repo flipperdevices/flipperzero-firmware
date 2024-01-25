@@ -1,7 +1,7 @@
 #pragma once
 
-#include "spotify_remote.h"
-#include "file_operations.h"
+#include "../spotify_remote.h"
+#include "../spotify_remote_utils/file_operations.h"
 
 void spotify_remote_wifi_ssid_callback(void* context);
 void spotify_remote_wifi_ssid_scene_on_enter(void* context);

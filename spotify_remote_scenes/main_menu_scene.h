@@ -1,6 +1,6 @@
 #pragma once
 
-#include "spotify_remote.h"
+#include "../spotify_remote.h"
 
 // menu index
 typedef enum {
