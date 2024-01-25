@@ -69,19 +69,6 @@ typedef enum {
     SubGhzLockOn,
 } SubGhzLock;
 
-typedef enum {
-    SubGhzViewIdMenu,
-    SubGhzViewIdReceiver,
-    SubGhzViewIdPopup,
-    SubGhzViewIdTextInput,
-    SubGhzViewIdWidget,
-    SubGhzViewIdTransmitter,
-    SubGhzViewIdVariableItemList,
-    SubGhzViewIdFrequencyAnalyzer,
-    SubGhzViewIdReadRAW,
-
-} SubGhzViewId;
-
 /** SubGhz load type file */
 typedef enum {
     SubGhzLoadTypeFileNoLoad,
