@@ -1,4 +1,4 @@
-# Flipper Zero FAP Boilerplate
+# Flipper Zero FAP FlipperTag
 
 ## What this is?
 Use this code as a foundation for developing Flipper Zero Applications, change the contents of this file when developing a new project
@@ -36,8 +36,8 @@ The application will be compiled and copied onto your device.
 This code is open-source and may be used for whatever you want to do with it. 
 
 ## Thank you notes
-- [Roguemaster](https://github.com/RogueMaster/flipperzero-firmware-wPlugins) for distributing the boilerplate 
-- [Flipc](flipc.org) for distributing the boilerplate
+- [Roguemaster](https://github.com/RogueMaster/flipperzero-firmware-wPlugins) for distributing the FlipperTag 
+- [Flipc](flipc.org) for distributing the FlipperTag
 - [Nikita Vostokov](https://github.com/wosk) for code contributions
 - [Alexander Rodriguez](https://github.com/squee72564) for code contributions
 
