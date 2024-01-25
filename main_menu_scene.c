@@ -64,7 +64,7 @@ bool spotify_remote_main_menu_scene_on_event(void* context, SceneManagerEvent ev
             consumed = true;
             break;
         case SPOTIFY_REMOTE_MAIN_MENU_SCENE_CONFIG_EVENT:
-            scene_manager_next_scene(app->scene_manager, SPOTIFY_REMOTE_WIFI_SSID_SCENE);
+            scene_manager_next_scene(app->scene_manager, SPOTIFY_REMOTE_CONFIG_SCENE);
             consumed = true;
             break;
         case SPOTIFY_REMOTE_MAIN_MENU_SCENE_ABOUT_EVENT:

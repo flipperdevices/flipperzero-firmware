@@ -17,6 +17,9 @@ static void (*const spotify_remote_scene_on_enter_handlers[])(void*) = {
     spotify_remote_ip_scene_on_enter,
     spotify_remote_button_panel_scene_on_enter,
     spotify_remote_about_scene_on_enter,
+    spotify_remote_config_scene_on_enter,
+    spotify_remote_wifi_ssid_scene_on_enter,
+    spotify_remote_wifi_password_scene_on_enter,
 };
 
 // array of on_event handlers
@@ -26,6 +29,9 @@ static bool (*const spotify_remote_scene_on_event_handlers[])(void*, SceneManage
     spotify_remote_ip_scene_on_event,
     spotify_remote_button_panel_scene_on_event,
     spotify_remote_about_scene_on_event,
+    spotify_remote_config_scene_on_event,
+    spotify_remote_wifi_ssid_scene_on_event,
+    spotify_remote_wifi_password_scene_on_event,
 };
 
 // array of on_exit handlers
@@ -35,6 +41,9 @@ static void (*const spotify_remote_scene_on_exit_handlers[])(void*) = {
     spotify_remote_ip_scene_on_exit,
     spotify_remote_button_panel_scene_on_exit,
     spotify_remote_about_scene_on_exit,
+    spotify_remote_config_scene_on_exit,
+    spotify_remote_wifi_ssid_scene_on_exit,
+    spotify_remote_wifi_password_scene_on_exit,
 };
 
 // create custom event callback
@@ -53,9 +62,13 @@ static bool spotify_remote_back_event_callback(void* context) {
     if(app->is_remote_launched) {
         // if in remote view, back button goes back to main menu
         app->is_remote_launched = false;
-        uart_helper_send(app->uart_helper, "8\n", 2);
+        uart_helper_send(app->uart_helper, "8\n", 2); //
         scene_manager_search_and_switch_to_another_scene(
             app->scene_manager, SPOTIFY_REMOTE_MAIN_MENU_SCENE);
+        return true;
+    } else if(app->is_wifi_config_launched) {
+        scene_manager_search_and_switch_to_another_scene(
+            app->scene_manager, SPOTIFY_REMOTE_CONFIG_SCENE);
         return true;
     } else {
         // delegate back event to scene manager
@@ -122,6 +135,11 @@ static SpotifyRemoteApp* spotify_remote_app_alloc() {
         app->view_dispatcher,
         SPOTIFY_REMOTE_BUTTON_PANEL_VIEW,
         button_panel_get_view(app->button_panel));
+    app->text_input = text_input_alloc();
+    view_dispatcher_add_view(
+        app->view_dispatcher,
+        SPOTIFY_REMOTE_TEXT_INPUT_VIEW,
+        text_input_get_view(app->text_input));
 
     // Initialize the UART helper.
     app->uart_helper = uart_helper_alloc();
@@ -131,7 +149,13 @@ static SpotifyRemoteApp* spotify_remote_app_alloc() {
 
     app->message_recieved = furi_string_alloc();
 
+    app->wifi_ssid_size = 32; // max ssid size
+    app->wifi_ssid = malloc(app->wifi_ssid_size);
+    app->wifi_password_size = 63; // max password size
+    app->wifi_password = malloc(app->wifi_password_size);
+
     app->is_remote_launched = false;
+    app->is_wifi_config_launched = false;
 
     return app;
 }
@@ -151,8 +175,11 @@ static void app_free(SpotifyRemoteApp* app) {
     loading_free(app->loading);
     button_panel_free(app->button_panel);
     text_box_free(app->text_box);
+    text_input_free(app->text_input);
     furi_string_free(app->message_recieved);
 
+    free(app->wifi_ssid);
+    free(app->wifi_password);
     free(app);
 }
 

@@ -10,6 +10,8 @@
 #include <gui/modules/text_box.h>
 #include <gui/modules/button_panel.h>
 #include <gui/modules/text_input.h>
+#include <storage/filesystem_api_defines.h>
+#include <storage/storage.h>
 
 // Derek Jamison's uart helper
 #include "uart_helper.h"
@@ -27,6 +29,7 @@ typedef enum {
     SPOTIFY_REMOTE_LOADING_VIEW,
     SPOTIFY_REMOTE_TEXT_BOX_VIEW,
     SPOTIFY_REMOTE_BUTTON_PANEL_VIEW,
+    SPOTIFY_REMOTE_TEXT_INPUT_VIEW,
 } SpotifyRemoteView;
 
 // enum for scenes
@@ -36,6 +39,7 @@ typedef enum {
     SPOTIFY_REMOTE_IP_SCENE,
     SPOTIFY_REMOTE_BUTTON_PANEL_SCENE,
     SPOTIFY_REMOTE_ABOUT_SCENE,
+    SPOTIFY_REMOTE_CONFIG_SCENE,
     SPOTIFY_REMOTE_WIFI_SSID_SCENE,
     SPOTIFY_REMOTE_WIFI_PASSWORD_SCENE,
     SPOTIFY_REMOTE_SCENE_COUNT,
@@ -44,6 +48,10 @@ typedef enum {
 typedef enum {
     SPOTIFY_REMOTE_ON_RECEIVE_EVENT = 100, // so it's not the same as main menu scene launch event
 } SpotifyRemoteCustomEvent;
+
+typedef enum {
+    SPOTIFY_REMOTE_TEXT_INPUT_SCENE_SAVE_EVENT,
+} SpotifyRemoteTextInputEvent;
 
 // create app object
 typedef struct SpotifyRemoteApp {
@@ -54,9 +62,13 @@ typedef struct SpotifyRemoteApp {
     Loading* loading;
     TextBox* text_box;
     ButtonPanel* button_panel;
+    TextInput* text_input;
     UartHelper* uart_helper;
     FuriString* message_recieved;
-    FuriString* wifi_ssid;
-    FuriString* wifi_password;
+    int wifi_ssid_size;
+    char* wifi_ssid;
+    int wifi_password_size;
+    char* wifi_password;
     bool is_remote_launched;
+    bool is_wifi_config_launched;
 } SpotifyRemoteApp;
