@@ -2,6 +2,8 @@
 
 #include <furi.h>
 
+#define TAG "MfDesfire"
+
 #define MF_DESFIRE_PROTOCOL_NAME "Mifare DESFire"
 
 const NfcDeviceBase nfc_device_mf_desfire = {
@@ -150,21 +152,32 @@ bool mf_desfire_save(const MfDesfireData* data, FlipperFormat* ff) {
     bool success = false;
 
     do {
+        FURI_LOG_I(TAG, "Saving iso-4 data");
         if(!iso14443_4a_save(data->iso14443_4a_data, ff)) break;
 
+        FURI_LOG_I(TAG, "Saving comment");
         if(!flipper_format_write_comment_cstr(ff, MF_DESFIRE_PROTOCOL_NAME " specific data"))
             break;
+        FURI_LOG_I(TAG, "Saving version");
         if(!mf_desfire_version_save(&data->version, ff)) break;
+        FURI_LOG_I(TAG, "Saving free memory");
         if(!mf_desfire_free_memory_save(&data->free_memory, ff)) break;
+        FURI_LOG_I(TAG, "Saving key settings");
         if(!mf_desfire_key_settings_save(
                &data->master_key_settings, MF_DESFIRE_FFF_PICC_PREFIX, ff))
             break;
 
+        if(data->master_key_versions == NULL) {
+            FURI_LOG_E(TAG, "master_key_settings is NULL");
+            break;
+        }
         const uint32_t master_key_version_count =
             simple_array_get_count(data->master_key_versions);
 
         uint32_t i;
+        FURI_LOG_I(TAG, "Saving key version");
         for(i = 0; i < master_key_version_count; ++i) {
+            FURI_LOG_I(TAG, "Saving key version %ld", i);
             if(!mf_desfire_key_version_save(
                    simple_array_cget(data->master_key_versions, i),
                    MF_DESFIRE_FFF_PICC_PREFIX,
@@ -175,16 +188,26 @@ bool mf_desfire_save(const MfDesfireData* data, FlipperFormat* ff) {
 
         if(i != master_key_version_count) break;
 
+        FURI_LOG_I(TAG, "Saving app count");
+        if(data->application_ids == NULL) {
+            FURI_LOG_E(TAG, "application_ids is NULL");
+            break;
+        }
         const uint32_t application_count = simple_array_get_count(data->application_ids);
         if(!mf_desfire_application_count_save(&application_count, ff)) break;
 
         if(application_count > 0) {
+            FURI_LOG_I(TAG, "Saving app ids");
             if(!mf_desfire_application_ids_save(
                    simple_array_cget_data(data->application_ids), application_count, ff))
                 break;
 
             for(i = 0; i < application_count; ++i) {
+                FURI_LOG_I(TAG, "Saving app %ld", i);
                 const MfDesfireApplicationId* app_id = simple_array_cget(data->application_ids, i);
+                if(app_id == NULL) {
+                    FURI_LOG_E(TAG, "APP ID %ld is NULL", i);
+                }
                 furi_string_printf(
                     prefix,
                     "%s %02x%02x%02x",
@@ -194,6 +217,10 @@ bool mf_desfire_save(const MfDesfireData* data, FlipperFormat* ff) {
                     app_id->data[2]);
 
                 const MfDesfireApplication* app = simple_array_cget(data->applications, i);
+                if(app == NULL) {
+                    FURI_LOG_E(TAG, "APP %ld is NULL", i);
+                    break;
+                }
                 if(!mf_desfire_application_save(app, furi_string_get_cstr(prefix), ff)) break;
             }
 

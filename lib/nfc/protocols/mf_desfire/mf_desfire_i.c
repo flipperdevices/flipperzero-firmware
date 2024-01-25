@@ -1,5 +1,7 @@
 #include "mf_desfire_i.h"
 
+#define TAG "MfDesfire"
+
 #define BITS_IN_BYTE (8U)
 
 #define MF_DESFIRE_FFF_VERSION_KEY \
@@ -537,11 +539,18 @@ bool mf_desfire_application_load(MfDesfireApplication* data, const char* prefix,
 }
 
 bool mf_desfire_version_save(const MfDesfireVersion* data, FlipperFormat* ff) {
+    if(data == NULL) {
+        FURI_LOG_E(TAG, "Version is NULL");
+    }
     return flipper_format_write_hex(
         ff, MF_DESFIRE_FFF_VERSION_KEY, (const uint8_t*)data, sizeof(MfDesfireVersion));
 }
 
 bool mf_desfire_free_memory_save(const MfDesfireFreeMemory* data, FlipperFormat* ff) {
+    if(data == NULL) {
+        FURI_LOG_E(TAG, "Free memory is NULL");
+    }
+
     return data->is_present ?
                flipper_format_write_uint32(ff, MF_DESFIRE_FFF_FREE_MEM_KEY, &data->bytes_free, 1) :
                true;
@@ -552,6 +561,9 @@ bool mf_desfire_key_settings_save(
     const char* prefix,
     FlipperFormat* ff) {
     bool success = false;
+    if(data == NULL) {
+        FURI_LOG_E(TAG, "Key setting is NULL");
+    }
 
     FuriString* key = furi_string_alloc();
 
@@ -598,6 +610,9 @@ bool mf_desfire_key_version_save(
     const char* prefix,
     uint32_t index,
     FlipperFormat* ff) {
+    if(data == NULL) {
+        FURI_LOG_E(TAG, "MfDesfireKeyVersion is NULL");
+    }
     FuriString* key = furi_string_alloc_printf(
         "%s %s %lu %s",
         prefix,
@@ -729,6 +744,10 @@ bool mf_desfire_application_save(
 
         uint32_t i;
         for(i = 0; i < key_version_count; ++i) {
+            if(data->key_versions == NULL) {
+                FURI_LOG_E(TAG, "key version %ld is NULL", i);
+                break;
+            }
             if(!mf_desfire_key_version_save(
                    simple_array_cget(data->key_versions, i), prefix, i, ff))
                 break;
@@ -736,20 +755,43 @@ bool mf_desfire_application_save(
 
         if(i != key_version_count) break;
 
+        if(data->file_ids == NULL) {
+            FURI_LOG_E(TAG, "File ids is NULL");
+            break;
+        }
         const uint32_t file_count = simple_array_get_count(data->file_ids);
         if(!mf_desfire_file_ids_save(simple_array_get_data(data->file_ids), file_count, prefix, ff))
             break;
 
         for(i = 0; i < file_count; ++i) {
             const MfDesfireFileId* file_id = simple_array_cget(data->file_ids, i);
+            if(file_id == NULL) {
+                FURI_LOG_E(TAG, "File id %ld is null", i);
+                break;
+            }
             furi_string_printf(
                 sub_prefix, "%s %s %u", prefix, MF_DESFIRE_FFF_FILE_SUB_PREFIX, *file_id);
 
+            if(data->file_settings == NULL) {
+                FURI_LOG_E(TAG, "data->file_settings %ld is null", i);
+                break;
+            }
             const MfDesfireFileSettings* file_settings = simple_array_cget(data->file_settings, i);
+            if(file_settings == NULL) {
+                FURI_LOG_E(TAG, "file_settings %ld is null", i);
+                break;
+            }
             if(!mf_desfire_file_settings_save(file_settings, furi_string_get_cstr(sub_prefix), ff))
                 break;
-
+            if(data->file_data == NULL) {
+                FURI_LOG_E(TAG, "data->file_data %ld is null", i);
+                break;
+            }
             const MfDesfireFileData* file_data = simple_array_cget(data->file_data, i);
+            if(file_data == NULL) {
+                FURI_LOG_E(TAG, "file_data %ld is null", i);
+                break;
+            }
             if(!mf_desfire_file_data_save(file_data, furi_string_get_cstr(sub_prefix), ff)) break;
         }
 
