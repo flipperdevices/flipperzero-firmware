@@ -1,5 +1,15 @@
 #include "app_state.h"
 
+/*
+TODO:
+- convert dmcomm loop into a furi thread
+- replace serial read/write with furi notification messages
+
+- create and start USB serial thread in serial bit
+- create thread to link USB serial to dmcomm
+
+*/
+
 App* app_alloc() {
     App* app = malloc(sizeof(App));
 
@@ -47,6 +57,15 @@ App* app_alloc() {
     view_dispatcher_add_view(
         app->view_dispatcher, FcomFileSelectView, file_browser_get_view(app->file_browser));
 
+    app->dmcomm_run = true;
+    app->dcomm_thread = furi_thread_alloc();
+    furi_thread_set_context(app->dcomm_thread, app);
+    furi_thread_set_priority(app->dcomm_thread, FuriThreadPriorityHigh);
+    furi_thread_set_stack_size(app->dcomm_thread, 8 * 1024);
+    furi_thread_set_name(app->dcomm_thread, "DMCOMMWorker");
+    furi_thread_set_callback(app->dcomm_thread, dmcomm_reader);
+    furi_thread_start(app->dcomm_thread);
+
     return app;
 }
 
@@ -67,6 +86,10 @@ void app_free(App* app) {
 
     // Stop and deallocate usb serial if enabled
     // Stop and deallocate dcomm
+
+    app->dmcomm_run = false;
+    furi_thread_join(app->dcomm_thread);
+    furi_thread_free(app->dcomm_thread);
 
     app->notification = NULL;
 

@@ -3,6 +3,7 @@
 
 #include "flipper.h"
 #include "scenes.h"
+#include "dmcomm_link.h"
 
 #define MAX_FILENAME_LEN 64
 
@@ -27,7 +28,8 @@ typedef struct App {
 
     // Interfaces to other things
     AppState* state;
-    FuriThread* read_thread;
+    bool dmcomm_run;
+    FuriThread* dcomm_thread;
     NotificationApp* notification;
 } App;
 
