@@ -27,8 +27,6 @@
 #include "views/lfrfid_view_read.h"
 #include "scenes/lfrfid_scene.h"
 
-#include "lfrfid_icons.h"
-
 #define LFRFID_TEXT_STORE_SIZE 40
 
 #define LFRFID_APP_FOLDER ANY_PATH("lfrfid")
@@ -115,8 +113,6 @@ struct LfRfid {
 
     uint8_t* old_key_data;
     uint8_t* new_key_data;
-
-    uint8_t password[4];
 
     RpcAppSystem* rpc_ctx;
     LfRfidRpcState rpc_state;

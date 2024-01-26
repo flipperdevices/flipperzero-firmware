@@ -1,4 +1,5 @@
 #include "../lfrfid_i.h"
+#include <lfrfid_icons.h>
 #include "tools/t5577.h"
 #define TAG "Clear T5577"
 

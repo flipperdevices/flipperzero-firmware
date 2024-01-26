@@ -1,5 +1,6 @@
 #include "../lfrfid_i.h"
 #include "gui/scene_manager.h"
+#include <lfrfid_icons.h>
 
 static void lfrfid_write_and_set_pass_callback(LFRFIDWorkerWriteResult result, void* context) {
     LfRfid* app = context;
