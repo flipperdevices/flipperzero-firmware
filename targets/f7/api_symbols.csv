@@ -2456,7 +2456,6 @@ Function,+,nfc_alloc,Nfc*,
 Function,+,nfc_config,void,"Nfc*, NfcMode, NfcTech"
 Function,+,nfc_data_generator_fill_data,void,"NfcDataGeneratorType, NfcDevice*"
 Function,+,nfc_data_generator_get_name,const char*,NfcDataGeneratorType
-Function,+,nfc_data_generator_get_uid_len,size_t,NfcDataGeneratorType
 Function,+,nfc_device_alloc,NfcDevice*,
 Function,+,nfc_device_clear,void,NfcDevice*
 Function,+,nfc_device_copy_data,void,"const NfcDevice*, NfcProtocol, NfcDeviceData*"

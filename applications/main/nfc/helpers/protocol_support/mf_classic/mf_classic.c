@@ -175,6 +175,9 @@ static bool nfc_scene_read_menu_on_event_mf_classic(NfcApp* instance, uint32_t e
         scene_manager_next_scene(instance->scene_manager, NfcSceneSaveConfirm);
         dolphin_deed(DolphinDeedNfcDetectReader);
         return true;
+    } else if(event == SubmenuIndexCommonEdit) {
+        scene_manager_next_scene(instance->scene_manager, NfcSceneSetUid);
+        return true;
     }
 
     return false;

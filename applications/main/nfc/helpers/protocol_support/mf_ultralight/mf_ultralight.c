@@ -210,6 +210,9 @@ static bool
     } else if(event == SubmenuIndexWrite) {
         scene_manager_next_scene(instance->scene_manager, NfcSceneMfUltralightWrite);
         return true;
+    } else if(event == SubmenuIndexCommonEdit) {
+        scene_manager_next_scene(instance->scene_manager, NfcSceneSetUid);
+        return true;
     }
     return false;
 }

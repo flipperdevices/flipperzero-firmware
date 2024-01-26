@@ -44,11 +44,9 @@ bool nfc_scene_set_uid_on_event(void* context, SceneManagerEvent event) {
                     scene_manager_next_scene(instance->scene_manager, NfcSceneSaveSuccess);
                     consumed = true;
                 }
-            } else if(!scene_manager_has_previous_scene(instance->scene_manager, NfcSceneSetAtqa)) {
-                uint32_t data_generator =
-                    scene_manager_get_scene_state(instance->scene_manager, NfcSceneGenerateInfo);
-                nfc_data_generator_fill_data(data_generator, instance->nfc_device);
-                scene_manager_next_scene(instance->scene_manager, NfcSceneGenerateInfo);
+            } else if(scene_manager_has_previous_scene(instance->scene_manager, NfcSceneReadMenu)) {
+                scene_manager_search_and_switch_to_previous_scene(
+                    instance->scene_manager, NfcSceneReadMenu);
                 consumed = true;
             } else {
                 scene_manager_next_scene(instance->scene_manager, NfcSceneSaveName);
