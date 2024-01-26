@@ -10,7 +10,7 @@ void (*const flippertag_on_enter_handlers[])(void*) = {
 // Generate scene on_event handlers array
 #define ADD_SCENE(prefix, name, id) prefix##_scene_##name##_on_event,
 bool (*const flippertag_on_event_handlers[])(void* context, SceneManagerEvent event) = {
-#include "FlipperTag_scene_config.h"
+#include "flippertag_scene_config.h"
 };
 #undef ADD_SCENE
 
