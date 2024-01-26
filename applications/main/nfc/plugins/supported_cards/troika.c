@@ -24,6 +24,7 @@ typedef struct {
 
 typedef enum {
     TroikaLayoutUnknown = 0x0,
+    TroikaLayout2 = 0x2,
     TroikaLayoutE = 0xE,
 } TroikaLayout;
 
@@ -31,6 +32,7 @@ typedef enum {
     TroikaSublayoutUnknown = 0x0,
     TroikaSublayout3 = 0x3,
     TroikaSublayout5 = 0x5,
+    TroikaSublayout6 = 0x6,
 } TroikaSubLayout;
 
 static const MfClassicKeyPair troika_1k_keys[] = {
@@ -1505,6 +1507,9 @@ static TroikaLayout troika_get_layout(const MfClassicData* data, uint8_t start_b
 
     TroikaLayout result = TroikaLayoutUnknown;
     switch(layout) {
+    case 0x2:
+        result = TroikaLayout2;
+        break;
     case 0xE:
         result = TroikaLayoutE;
         break;
@@ -1534,6 +1539,9 @@ static TroikaSubLayout troika_get_sub_layout(const MfClassicData* data, uint8_t 
         break;
     case 5:
         result = TroikaSublayout5;
+        break;
+    case 6:
+        result = TroikaSublayout6;
         break;
     default:
         // If debug is enabled - pass the actual sublayout value for the debug text
@@ -1588,7 +1596,7 @@ static uint32_t troika_get_number(
     furi_assert(data);
     UNUSED(sub_layout);
 
-    if(layout == TroikaLayoutE) {
+    if(layout == TroikaLayoutE || layout == TroikaLayout2) {
         const uint8_t* temp_ptr = &data->block[start_block_num].data[2];
 
         uint32_t number = 0;
