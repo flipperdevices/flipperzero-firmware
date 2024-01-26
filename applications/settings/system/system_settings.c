@@ -24,7 +24,6 @@ const uint32_t log_level_value[] = {
 };
 
 static void log_level_changed(VariableItem* item) {
-    // SystemSettings* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, log_level_text[index]);
     furi_hal_rtc_set_log_level(log_level_value[index]);
@@ -64,7 +63,6 @@ const uint32_t heap_trace_mode_value[] = {
 };
 
 static void heap_trace_mode_changed(VariableItem* item) {
-    // SystemSettings* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, heap_trace_mode_text[index]);
     furi_hal_rtc_set_heap_track_mode(heap_trace_mode_value[index]);
@@ -81,7 +79,6 @@ const uint32_t measurement_units_value[] = {
 };
 
 static void measurement_units_changed(VariableItem* item) {
-    // SystemSettings* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, measurement_units_text[index]);
     locale_set_measurement_unit(measurement_units_value[index]);
@@ -98,7 +95,6 @@ const uint32_t time_format_value[] = {
 };
 
 static void time_format_changed(VariableItem* item) {
-    // SystemSettings* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, time_format_text[index]);
     locale_set_time_format(time_format_value[index]);
@@ -117,7 +113,6 @@ const uint32_t date_format_value[] = {
 };
 
 static void date_format_changed(VariableItem* item) {
-    // SystemSettings* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, date_format_text[index]);
     locale_set_date_format(date_format_value[index]);
