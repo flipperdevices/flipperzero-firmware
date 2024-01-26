@@ -29,15 +29,15 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0118-2350-0.93.9-59e8e6e](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-01-25 20:20 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-01-25 20:20 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-01-25 20:28 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-01-25 20:28 EST`
 - Updated: [UHF RFID WIP v1.1 (By frux-c)](https://github.com/frux-c/uhf_rfid) `Req: M100 or QM100` (Updated Docs)
 - Updated: [Gas Sensor v0.1 (By iancohee)](https://github.com/iancohee/gas_sensor_fap) `Req: BME680 / SGP30` (Updated Docs)
 - Updated: [Restaurant Pager Trigger v1.2 (By leedave)](https://github.com/leedave/flipper-zero-meal-pager) (Minor Changes)
-- UL: Sub-GHz CLI Fixes (By xMasterX)
-- UL: T5577 write/clear with custom password option added (By Leptopt1los & xMasterX)
-- UL: Sub-GHz small ui fix for subghz hopper bug (By xMasterX)
-- UL: mac os music remote (By xMasterX)
+- UL: [Sub-GHz CLI Fixes (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/96691770d670d9dbcf1f462ce654baca144fc54d)
+- UL: [T5577 write/clear with custom password option added (By Leptopt1los & xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/c9a34cd31910e4d691de49386ee39c8f092a64e8)
+- UL: [Sub-GHz small ui fix for subghz hopper bug (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/85552434a6f876cb705d69ed383192fad24a5de0)
+- UL: [mac os music remote (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/a7051795d3e66c4740d42de75a939f7a3242a96d)
 - To Be Merged OFW PRs: [3352](https://github.com/flipperdevices/flipperzero-firmware/pull/3352), [3302](https://github.com/flipperdevices/flipperzero-firmware/pull/3302), [3211](https://github.com/flipperdevices/flipperzero-firmware/pull/3211), [3366](https://github.com/flipperdevices/flipperzero-firmware/pull/3366) & [3250](https://github.com/flipperdevices/flipperzero-firmware/pull/3250)
 
 <a name="release">
