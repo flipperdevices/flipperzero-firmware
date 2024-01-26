@@ -1,6 +1,6 @@
-#include "../FlipperTag.h"
-#include "../helpers/FlipperTag_custom_event.h"
-#include "../views/FlipperTag_startscreen.h"
+#include "../flippertag.h"
+#include "../helpers/flippertag_custom_event.h"
+#include "../views/flippertag_startscreen.h"
 
 void flippertag_scene_startscreen_callback(FlipperTagCustomEvent event, void* context) {
     furi_assert(context);
