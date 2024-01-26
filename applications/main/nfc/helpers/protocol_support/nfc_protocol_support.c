@@ -597,6 +597,7 @@ static void nfc_protocol_support_scene_emulate_on_enter(NfcApp* instance) {
                 temp_str,
                 "Unsaved\n%s",
                 nfc_device_get_name(instance->nfc_device, NfcDeviceNameTypeFull));
+            furi_string_replace_str(temp_str, "Mifare", "MIFARE");
         }
     }
 
