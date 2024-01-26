@@ -4,7 +4,7 @@
 #include <string.h>
 #include <storage/storage.h>
 #include <flipper_format/flipper_format_i.h>
-#include "../FlipperTag.h"
+#include "../flippertag.h"
 
 #define FLIPPERTAG_SETTINGS_FILE_VERSION 1
 #define CONFIG_FILE_DIRECTORY_PATH EXT_PATH("apps_data/flippertag")
