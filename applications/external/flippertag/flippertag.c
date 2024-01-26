@@ -59,47 +59,47 @@ void flippertag_recieved_infrared_signal_callback(void* context, InfraredWorkerS
     infrared_worker_get_raw_signal(signal, &timings, &size);
 
     switch(app->team) {
-        case FlipperTagSolo:
-            if(timings != SoloMessage) {
-                app->health -= 1;
+    case FlipperTagSolo:
+        if(timings != SoloMessage) {
+            app->health -= 1;
 
-                if(app->health > 0) {
-                    // flippertag_play_sound(app, 0);
-                    flippertag_led_set_rgb(app, 255, 0, 0);
-                    flippertag_play_long_bump(app);
-                    flippertag_led_reset(app);
-                } else {
-                    flippertag_led_set_rgb(app, 255, 0, 0);
-                }
+            if(app->health > 0) {
+                // flippertag_play_sound(app, 0);
+                flippertag_led_set_rgb(app, 255, 0, 0);
+                flippertag_play_long_bump(app);
+                flippertag_led_reset(app);
+            } else {
+                flippertag_led_set_rgb(app, 255, 0, 0);
             }
+        }
         break;
-        case FlipperTagTeam1:
-            if(timings == Team2Message) {
-                app->health -= 1;
+    case FlipperTagTeam1:
+        if(timings == Team2Message) {
+            app->health -= 1;
 
-                if(app->health > 0) {
-                    // flippertag_play_sound(app, 0);
-                    flippertag_led_set_rgb(app, 255, 0, 0);
-                    flippertag_play_long_bump(app);
-                    flippertag_led_reset(app);
-                } else {
-                    flippertag_led_set_rgb(app, 255, 0, 0);
-                }
+            if(app->health > 0) {
+                // flippertag_play_sound(app, 0);
+                flippertag_led_set_rgb(app, 255, 0, 0);
+                flippertag_play_long_bump(app);
+                flippertag_led_reset(app);
+            } else {
+                flippertag_led_set_rgb(app, 255, 0, 0);
             }
+        }
         break;
-        case FlipperTagTeam2:
-            if(timings == Team1Message) {
-                app->health -= 1;
+    case FlipperTagTeam2:
+        if(timings == Team1Message) {
+            app->health -= 1;
 
-                if(app->health > 0) {
-                    // flippertag_play_sound(app, 0);
-                    flippertag_led_set_rgb(app, 255, 0, 0);
-                    flippertag_play_long_bump(app);
-                    flippertag_led_reset(app);
-                } else {
-                    flippertag_led_set_rgb(app, 255, 0, 0);
-                }
+            if(app->health > 0) {
+                // flippertag_play_sound(app, 0);
+                flippertag_led_set_rgb(app, 255, 0, 0);
+                flippertag_play_long_bump(app);
+                flippertag_led_reset(app);
+            } else {
+                flippertag_led_set_rgb(app, 255, 0, 0);
             }
+        }
         break;
     }
 }
@@ -118,17 +118,14 @@ InfraredWorkerGetSignalResponse
     const FlipperTag* app = context;
 
     switch(app->team) {
-        case FlipperTagSolo:
-            infrared_worker_set_raw_signal(
-                instance, SoloMessage, 17, 38000, 0.33);
+    case FlipperTagSolo:
+        infrared_worker_set_raw_signal(instance, SoloMessage, 17, 38000, 0.33);
         break;
-        case FlipperTagTeam1:
-            infrared_worker_set_raw_signal(
-                instance, Team1Message, 17, 38000, 0.33);
+    case FlipperTagTeam1:
+        infrared_worker_set_raw_signal(instance, Team1Message, 17, 38000, 0.33);
         break;
-        case FlipperTagTeam2:
-            infrared_worker_set_raw_signal(
-                instance, Team2Message, 17, 38000, 0.33);
+    case FlipperTagTeam2:
+        infrared_worker_set_raw_signal(instance, Team2Message, 17, 38000, 0.33);
         break;
     }
 
@@ -202,7 +199,7 @@ FlipperTag* FlipperTag_app_alloc() {
     infrared_worker_rx_enable_signal_decoding(app->rx, false);
     infrared_worker_rx_enable_blink_on_receiving(app->rx, false);
     infrared_worker_rx_set_received_signal_callback(
-    app->rx, flippertag_recieved_infrared_signal_callback, app);
+        app->rx, flippertag_recieved_infrared_signal_callback, app);
 
     return app;
 }

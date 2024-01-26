@@ -48,8 +48,10 @@ void flippertag_scene_1_draw(Canvas* canvas, void* context) {
     canvas_draw_str_aligned(canvas, 0, 32, AlignLeft, AlignTop, furi_string_get_cstr(ammo_text));
 
     if(app->is_shielded) {
-        FuriString* shield_text = furi_string_alloc_printf("Shield Integrity: %ld", app->shield_status);
-        canvas_draw_str_aligned(canvas, 0, 42, AlignLeft, AlignTop, furi_string_get_cstr(shield_text));
+        FuriString* shield_text =
+            furi_string_alloc_printf("Shield Integrity: %ld", app->shield_status);
+        canvas_draw_str_aligned(
+            canvas, 0, 42, AlignLeft, AlignTop, furi_string_get_cstr(shield_text));
         furi_string_free(shield_text);
     }
 
@@ -97,11 +99,11 @@ bool flippertag_scene_1_input(InputEvent* event, void* context) {
         }
     } else if(event->type == InputTypePress) {
         switch(event->key) {
-            case InputKeyOk:
-                with_view_model(
-                    instance->view,
-                    FlipperTagScene1Model * model,
-                    {
+        case InputKeyOk:
+            with_view_model(
+                instance->view,
+                FlipperTagScene1Model * model,
+                {
                     UNUSED(model);
                     if(app->ammo > 0 && !(app->health <= 0 || app->is_shielded)) {
                         app->ammo -= 1;
