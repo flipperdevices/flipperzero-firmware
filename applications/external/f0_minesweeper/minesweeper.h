@@ -56,12 +56,10 @@ typedef struct MineSweeperApp {
     MineSweeperAppSettings settings_info;
     MineSweeperAppSettings t_settings_info;
 
-    bool is_settings_changed;
+    uint8_t is_settings_changed;
     bool ensure_map_solvable;
 
-    uint32_t haptic;
-    uint32_t speaker;
-    uint32_t led;
+    uint8_t feedback_enabled;
 } MineSweeperApp;
 
 // View Id Enumeration

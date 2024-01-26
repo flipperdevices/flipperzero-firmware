@@ -38,6 +38,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: [T5577 write/clear with custom password option added (By Leptopt1los & xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/c9a34cd31910e4d691de49386ee39c8f092a64e8)
 - UL: [Sub-GHz small ui fix for subghz hopper bug (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/85552434a6f876cb705d69ed383192fad24a5de0)
 - UL: [mac os music remote (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/a7051795d3e66c4740d42de75a939f7a3242a96d)
+- Updated:  [Minesweeper Redux v1.2 (By squee72564)](https://github.com/squee72564/F0_Minesweeper_Fap)
 - To Be Merged OFW PRs: [3352](https://github.com/flipperdevices/flipperzero-firmware/pull/3352), [3302](https://github.com/flipperdevices/flipperzero-firmware/pull/3302), [3211](https://github.com/flipperdevices/flipperzero-firmware/pull/3211), [3366](https://github.com/flipperdevices/flipperzero-firmware/pull/3366) & [3250](https://github.com/flipperdevices/flipperzero-firmware/pull/3250)
 
 ## IN THIS BRANCH:
@@ -390,7 +391,7 @@ $ ./fbt dolphin_ext
 - [JetPack v1.1 (by timstrasser)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/1164e4d214efa38847e08c6387bf53578bc0d366)
 - [Mandelbrot Set v1.1 (By Possibly-Matt)](https://github.com/Possibly-Matt/flipperzero-firmware-wPlugins)
 - [Minesweeper v1.2 (By panki27)](https://github.com/panki27/minesweeper)
-- [Minesweeper Redux v1.1 (By squee72564)](https://github.com/squee72564/F0_Minesweeper_Fap)
+- [Minesweeper Redux v1.2 (By squee72564)](https://github.com/squee72564/F0_Minesweeper_Fap)
 - [Monty Hall v1.1 (By DevMilanIan)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/203)
 - [Multi Counter (By JadePossible)](https://github.com/JadePossible/Flipper-Multi-Counter)
 - [Nu Pogodi! (Ну, погоди!) v1.3 (By sionyx)](https://github.com/sionyx/flipper_nupogodi)
