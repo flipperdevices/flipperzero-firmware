@@ -45,8 +45,18 @@ void mfc_editor_scene_data_edit_access_bits_on_enter(void* context) {
 
     dialog_ex_set_context(instance->dialog_ex, instance);
 
-    furi_string_printf(
-        instance->data_view_header, "Edit Block %u Access", instance->current_block);
+    if(instance->current_sector >= 32 && !mf_classic_is_sector_trailer(instance->current_block)) {
+        // 4K large sector - access bits affect range of blocks
+        furi_string_printf(
+            instance->data_view_header,
+            "Edit B. %u-%u Access",
+            instance->current_block / 5 * 5,
+            instance->current_block / 5 * 5 + 4);
+    } else {
+        furi_string_printf(
+            instance->data_view_header, "Edit Block %u Access", instance->current_block);
+    }
+
     dialog_ex_set_header(
         dialog_ex, furi_string_get_cstr(instance->data_view_header), 63, 3, AlignCenter, AlignTop);
 
