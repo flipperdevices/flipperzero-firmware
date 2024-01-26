@@ -41,6 +41,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated:  [Minesweeper Redux v1.2 (By squee72564)](https://github.com/squee72564/F0_Minesweeper_Fap)
 - Updated: [Air Mouse 2 v1.0 (By nminaylov)](https://github.com/flipperdevices/flipperzero-good-faps/tree/nm/motion_mouse_app) `Req: ICM42688`
 - Updated: [Weather Station v1.5 (By Skorpionm)-OFW](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/weather_station) [WS: Update the app version number #117](https://github.com/flipperdevices/flipperzero-good-faps/pull/117)
+- Added: [Flipper Tag v1.0 (By thejudge156)](https://github.com/thejudge156/flippertag)
+- Added: [Paper Plane v1.3 (By Larry-the-Pig)](https://github.com/Larry-the-Pig/flipper-plane)
 - To Be Merged OFW PRs: [3352](https://github.com/flipperdevices/flipperzero-firmware/pull/3352), [3302](https://github.com/flipperdevices/flipperzero-firmware/pull/3302), [3211](https://github.com/flipperdevices/flipperzero-firmware/pull/3211), [3366](https://github.com/flipperdevices/flipperzero-firmware/pull/3366) & [3250](https://github.com/flipperdevices/flipperzero-firmware/pull/3250)
 
 ## IN THIS BRANCH:
@@ -399,6 +401,7 @@ $ ./fbt dolphin_ext
 - [Monty Hall v1.1 (By DevMilanIan)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/203)
 - [Multi Counter (By JadePossible)](https://github.com/JadePossible/Flipper-Multi-Counter)
 - [Nu Pogodi! (Ну, погоди!) v1.3 (By sionyx)](https://github.com/sionyx/flipper_nupogodi)
+- [Paper Plane v1.3 (By Larry-the-Pig)](https://github.com/Larry-the-Pig/flipper-plane)
 - [Paint v1.1 (By n-o-T-I-n-s-a-n-e)](https://github.com/n-o-T-I-n-s-a-n-e)
 - [Pong v1.2 (By nmrr)](https://github.com/nmrr/flipperzero-pong) [(Patched By SimplyMinimal)](https://github.com/nmrr/flipperzero-pong/pull/2)
 - [Questions v1.0 (By nikilark)](https://github.com/nikilark/flipper_questions)
@@ -513,6 +516,7 @@ $ ./fbt dolphin_ext
 - [FlipBoard Simon v1.1 (By jamisonderek)](https://github.com/jamisonderek/flipboard)
 - [FlipBIP Crypto Wallet v1.14 (By xtruan)](https://github.com/xtruan/FlipBIP)
 - [Flipper Aid v1.0 (By spaghety)](https://github.com/spaghety/flipper-aid)
+- [Flipper Tag v1.0 (By thejudge156)](https://github.com/thejudge156/flippertag)
 - [Flizzer Tracker v0.4 (By LTVA1)](https://github.com/LTVA1/flizzer_tracker)
 - [FM Radio v1.1 (By coolshrimp)](https://github.com/coolshrimp/flipperzero-firmware-wPlugins/tree/420/applications/external/fm_radio)
 - [Gas Sensor v0.1 (By iancohee)](https://github.com/iancohee/gas_sensor_fap) `Req: BME680 / SGP30`
