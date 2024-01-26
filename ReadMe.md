@@ -39,6 +39,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: [Sub-GHz small ui fix for subghz hopper bug (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/85552434a6f876cb705d69ed383192fad24a5de0)
 - UL: [mac os music remote (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/a7051795d3e66c4740d42de75a939f7a3242a96d)
 - Updated:  [Minesweeper Redux v1.2 (By squee72564)](https://github.com/squee72564/F0_Minesweeper_Fap)
+- Updated: [Air Mouse 2 v1.0 (By nminaylov)](https://github.com/flipperdevices/flipperzero-good-faps/tree/nm/motion_mouse_app) `Req: ICM42688`
 - To Be Merged OFW PRs: [3352](https://github.com/flipperdevices/flipperzero-firmware/pull/3352), [3302](https://github.com/flipperdevices/flipperzero-firmware/pull/3302), [3211](https://github.com/flipperdevices/flipperzero-firmware/pull/3211), [3366](https://github.com/flipperdevices/flipperzero-firmware/pull/3366) & [3250](https://github.com/flipperdevices/flipperzero-firmware/pull/3250)
 
 <a name="release">
