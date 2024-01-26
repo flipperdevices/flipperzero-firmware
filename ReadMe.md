@@ -162,6 +162,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [NFC Playlist v1.1 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
 - OFW PR: [NFC: Display unread Mifare Classic bytes as question marks #3384 (By TollyH)](https://github.com/flipperdevices/flipperzero-firmware/pull/3384)
 - OFW PR: [NFC UI refactor #3382 (By RebornedBrain)](https://github.com/flipperdevices/flipperzero-firmware/pull/3382)
+- OFW PR: [NFC Parser Update For Troika #3390 (By assasinfil)](https://github.com/flipperdevices/flipperzero-firmware/pull/3390)
 
 <a name="release">
 
