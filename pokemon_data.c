@@ -13,15 +13,33 @@
 #define RECALC_TYPES 0x20
 #define RECALC_ALL 0xFF
 
-const NamedList stats_list[] = {
-    {"Random IV, Zero EV", RANDIV_ZEROEV, 0},
-    {"Random IV, Max EV / Level", RANDIV_LEVELEV, 0},
-    {"Random IV, Max EV", RANDIV_MAXEV, 0},
-    {"Max IV, Zero EV", MAXIV_ZEROEV, 0},
-    {"Max IV, Max EV / Level", MAXIV_LEVELEV, 0},
-    {"Max IV, Max EV", MAXIV_MAXEV, 0},
-    {},
+struct __attribute__((__packed__)) named_list {
+    const char* name;
+    const uint8_t index;
+    const uint8_t generation;
 };
+typedef struct named_list NamedList;
+
+struct __attribute__((__packed__)) pokemon_data_table {
+    const char* name;
+    const Icon* icon;
+    const uint8_t index;
+    const uint8_t base_hp;
+    const uint8_t base_atk;
+    const uint8_t base_def;
+    const uint8_t base_spd;
+    const uint8_t base_spc;
+    const uint8_t type[2];
+    const uint8_t move[4];
+    const uint8_t growth;
+};
+typedef struct pokemon_data_table PokemonTable;
+
+const NamedList move_list[];
+const NamedList type_list[];
+const NamedList stat_list[];
+const PokemonTable pokemon_table[];
+
 
 /* Allocates a chunk of memory for the trade data block and sets up some
  * default values.
@@ -48,8 +66,16 @@ void *trade_block_alloc(PokemonFap *pokemon_fap) {
     /* Set our Name, the pokemon's default OT name and ID */
     trade->party_cnt = 1;
 
+    /* Set up block and party pointers */
+    /* XXX: These should be removed */
     pokemon_fap->trade_block = trade;
     pokemon_fap->party = trade->party;
+
+    /* Set up lists */
+    pokemon_fap->move_list = move_list;
+    pokemon_fap->type_list = type_list;
+    pokemon_fap->stat_list = stat_list;
+    pokemon_fap->pokemon_table = pokemon_table;
 
     /* Trainer/OT name, not to exceed 7 characters! */
     pokemon_name_set(pokemon_fap, STAT_TRAINER_NAME, "Flipper");
@@ -106,13 +132,13 @@ void pokemon_recalculate(PokemonFap* pokemon_fap, uint8_t recalc) {
 
     if(recalc & RECALC_MOVES) {
         for(i = MOVE_0; i <= MOVE_3; i++) {
-            pokemon_stat_set(pokemon_fap, STAT_MOVE, i, table_stat_base_get(pokemon_fap, STAT_BASE_MOVE, i));
+            pokemon_stat_set(pokemon_fap, STAT_MOVE, i, table_stat_base_get(pokemon_fap->pokemon_table, pokemon_fap, STAT_BASE_MOVE, i));
         }
     }
 
     if(recalc & RECALC_TYPES) {
         for(i = TYPE_0; i <= TYPE_1; i++) {
-            pokemon_stat_set(pokemon_fap, STAT_TYPE, i, table_stat_base_get(pokemon_fap, STAT_BASE_TYPE, i));
+            pokemon_stat_set(pokemon_fap, STAT_TYPE, i, table_stat_base_get(pokemon_fap->pokemon_table, pokemon_fap, STAT_BASE_TYPE, i));
         }
     }
 
@@ -130,38 +156,20 @@ void pokemon_recalculate(PokemonFap* pokemon_fap, uint8_t recalc) {
     }
 }
 
-int named_list_num_elements_get(const NamedList* list) {
+int named_list_num_elements_get(const void* list) {
     int i;
 
     for(i = 0;; i++) {
-        if(list[i].name == NULL) return i;
+        if(((NamedList*)list)[i].name == NULL) return i;
     }
 }
 
-int named_list_pos_from_index_get(const NamedList* list, uint8_t index) {
+int named_list_pos_from_index_get(const void* list, uint8_t index) {
     int i;
 
     for(i = 0;; i++) {
-        if(list[i].name == NULL) break;
-        if(index == list[i].index) return i;
-    }
-
-    /* This will return the first entry in case index is not matched.
-     * Could be surprising at runtime.
-     */
-    return 0;
-}
-
-const char* named_list_name_from_index_get(const NamedList* list, uint8_t index) {
-    return list[named_list_pos_from_index_get(list, index)].name;
-}
-
-int table_pokemon_pos_get(uint8_t index) {
-    int i;
-
-    for(i = 0;; i++) {
-        if(pokemon_table[i].index == index) return i;
-        if(pokemon_table[i].name == NULL) break;
+        if(((NamedList*)list)[i].name == NULL) break;
+        if(index == ((NamedList*)list)[i].index) return i;
     }
 
     /* This will return the first entry in case index is not matched.
@@ -170,8 +178,34 @@ int table_pokemon_pos_get(uint8_t index) {
     return 0;
 }
 
-const char* table_stat_name_get(int num) {
-    return pokemon_table[num].name;
+int named_list_index_from_pos_get(const void* list, uint8_t pos) {
+	return ((NamedList*)list)[pos].index;
+}
+
+const char* named_list_name_from_index_get(const void* list, uint8_t index) {
+    return ((NamedList*)list)[named_list_pos_from_index_get(list, index)].name;
+}
+
+const char* named_list_name_from_pos_get(const void* list, uint8_t pos) {
+    return ((NamedList*)list)[pos].name;
+}
+
+int table_pokemon_pos_get(const void* table, uint8_t index) {
+    int i;
+
+    for(i = 0;; i++) {
+        if(((PokemonTable*)table)[i].index == index) return i;
+        if(((PokemonTable*)table)[i].name == NULL) break;
+    }
+
+    /* This will return the first entry in case index is not matched.
+     * Could be surprising at runtime.
+     */
+    return 0;
+}
+
+const char* table_stat_name_get(const void* table, int num) {
+    return ((PokemonTable*)table)[num].name;
 }
 
 /* This needs to convert to encoded characters */
@@ -234,7 +268,7 @@ void pokemon_default_nickname_set(char* dest, PokemonFap* pokemon_fap, size_t n)
     char buf[LEN_NAME_BUF];
 
     /* First, get the default name */
-    strncpy(buf, table_stat_name_get(pokemon_stat_get(pokemon_fap, STAT_NUM, NONE)), sizeof(buf));
+    strncpy(buf, table_stat_name_get(pokemon_fap->pokemon_table, pokemon_stat_get(pokemon_fap, STAT_NUM, NONE)), sizeof(buf));
 
     /* Next, walk through and toupper() each character */
     for(i = 0; i < sizeof(buf); i++) {
@@ -252,27 +286,28 @@ void pokemon_default_nickname_set(char* dest, PokemonFap* pokemon_fap, size_t n)
 /* XXX: This could also just pass the pokemon number? */
 /* XXX: does no bounds checking of stat */
 /* XXX: does no bounds checking of num */
-uint8_t table_stat_base_get(PokemonFap* pokemon_fap, DataStat stat, DataStatSub num) {
+uint8_t table_stat_base_get(const void* table, PokemonFap* pokemon_fap, DataStat stat, DataStatSub num) {
     furi_assert(pokemon_fap);
     int pkmnnum = pokemon_stat_get(pokemon_fap, STAT_NUM, NONE);
+    const PokemonTable *ptable = table;
 
     switch(stat) {
     case STAT_BASE_ATK:
-        return pokemon_table[pkmnnum].base_hp;
+        return ptable[pkmnnum].base_hp;
     case STAT_BASE_DEF:
-        return pokemon_table[pkmnnum].base_def;
+        return ptable[pkmnnum].base_def;
     case STAT_BASE_SPD:
-        return pokemon_table[pkmnnum].base_spd;
+        return ptable[pkmnnum].base_spd;
     case STAT_BASE_SPC:
-        return pokemon_table[pkmnnum].base_spc;
+        return ptable[pkmnnum].base_spc;
     case STAT_BASE_HP:
-        return pokemon_table[pkmnnum].base_hp;
+        return ptable[pkmnnum].base_hp;
     case STAT_BASE_TYPE:
-        return pokemon_table[pkmnnum].type[num];
+        return ptable[pkmnnum].type[num];
     case STAT_BASE_MOVE:
-        return pokemon_table[pkmnnum].move[num];
+        return ptable[pkmnnum].move[num];
     case STAT_BASE_GROWTH:
-        return pokemon_table[pkmnnum].growth;
+        return ptable[pkmnnum].growth;
     default:
         furi_crash("BASE_GET: invalid stat");
         break;
@@ -281,9 +316,9 @@ uint8_t table_stat_base_get(PokemonFap* pokemon_fap, DataStat stat, DataStatSub 
     return 0;
 }
 
-const Icon *table_icon_get(int num)
+const Icon *table_icon_get(const void* table, int num)
 {
-	return pokemon_table[num].icon;
+	return ((const PokemonTable*)table)[num].icon;
 }
 
 uint16_t pokemon_stat_get(PokemonFap* pokemon_fap, DataStat stat, DataStatSub which) {
@@ -347,7 +382,7 @@ uint16_t pokemon_stat_get(PokemonFap* pokemon_fap, DataStat stat, DataStatSub wh
 	break;
     case STAT_NUM:
         if(gen == GEN_I) val = ((struct pokemon_structure*)party)->index;
-        return table_pokemon_pos_get(val);
+        return table_pokemon_pos_get(pokemon_fap->pokemon_table, val);
     case STAT_MOVE:
         if(gen == GEN_I) return ((struct pokemon_structure*)party)->move[which];
 	break;
@@ -598,7 +633,7 @@ void pokemon_exp_calc(PokemonFap* pokemon_fap) {
     furi_assert(pokemon_fap);
     int level;
     uint32_t exp;
-    uint8_t growth = table_stat_base_get(pokemon_fap, STAT_BASE_GROWTH, NONE);
+    uint8_t growth = table_stat_base_get(pokemon_fap->pokemon_table, pokemon_fap, STAT_BASE_GROWTH, NONE);
 
     level = (int)pokemon_stat_get(pokemon_fap, STAT_LEVEL, NONE);
     /* Calculate exp */
@@ -638,7 +673,7 @@ void pokemon_stat_calc(PokemonFap* pokemon_fap, DataStat stat) {
     uint8_t level;
 
     level = pokemon_stat_get(pokemon_fap, STAT_LEVEL, NONE);
-    stat_base = table_stat_base_get(pokemon_fap, stat, NONE);
+    stat_base = table_stat_base_get(pokemon_fap->pokemon_table, pokemon_fap, stat, NONE);
     stat_ev = pokemon_stat_ev_get(pokemon_fap, stat);
     stat_iv = (uint8_t)pokemon_stat_iv_get(pokemon_fap, stat);
     stat_tmp = stat_calc(stat_base, stat_iv, stat_ev, level, stat);
@@ -2501,3 +2536,14 @@ const NamedList type_list[] = {
     /* Types are not transferred in gen ii */
     {},
 };
+
+const NamedList stat_list[] = {
+    {"Random IV, Zero EV", RANDIV_ZEROEV, 0},
+    {"Random IV, Max EV / Level", RANDIV_LEVELEV, 0},
+    {"Random IV, Max EV", RANDIV_MAXEV, 0},
+    {"Max IV, Zero EV", MAXIV_ZEROEV, 0},
+    {"Max IV, Max EV / Level", MAXIV_LEVELEV, 0},
+    {"Max IV, Max EV", MAXIV_MAXEV, 0},
+    {},
+};
+

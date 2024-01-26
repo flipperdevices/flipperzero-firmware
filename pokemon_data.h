@@ -108,29 +108,6 @@ typedef enum {
     MAXIV_MAXEV,
 } EvIv;
 
-struct __attribute__((__packed__)) pokemon_data_table {
-    const char* name;
-    const Icon* icon;
-    const uint8_t index;
-    const uint8_t base_hp;
-    const uint8_t base_atk;
-    const uint8_t base_def;
-    const uint8_t base_spd;
-    const uint8_t base_spc;
-    const uint8_t type[2];
-    const uint8_t move[4];
-    const uint8_t growth;
-};
-
-typedef struct pokemon_data_table PokemonTable;
-
-struct __attribute__((__packed__)) named_list {
-    const char* name;
-    const uint8_t index;
-    const uint8_t generation;
-};
-
-typedef struct named_list NamedList;
 
 /* The struct is laid out exactly as the data trasfer that gets sent for trade
  * information. It has to be packed in order to not have padding in the Flipper.
@@ -197,28 +174,29 @@ struct __attribute__((__packed__)) trade_data_block {
     struct name ot_name[6];
     struct name nickname[6];
 
+    /* This will never be transmitted, it is to track the current EV/IV setting */
     uint8_t stat_sel;
 };
 
 typedef struct trade_data_block TradeBlock;
 
-extern const PokemonTable pokemon_table[];
-extern const NamedList move_list[];
-extern const NamedList type_list[];
-extern const NamedList stats_list[];
-
 void *trade_block_alloc(PokemonFap *pokemon_fap);
-int named_list_pos_from_index_get(const NamedList* list, uint8_t index);
-const char* named_list_name_from_index_get(const NamedList* list, uint8_t index);
-int named_list_num_elements_get(const NamedList* list);
-uint8_t table_stat_base_get(PokemonFap* pokemon_fap, DataStat stat, DataStatSub num);
+
+int named_list_pos_from_index_get(const void* list, uint8_t index);
+int named_list_index_from_pos_get(const void* list, uint8_t pos);
+const char* named_list_name_from_index_get(const void* list, uint8_t index);
+const char* named_list_name_from_pos_get(const void* list, uint8_t pos);
+int named_list_num_elements_get(const void* list);
+
+uint8_t table_stat_base_get(const void* table, PokemonFap* pokemon_fap, DataStat stat, DataStatSub num);
+const char* table_stat_name_get(const void* table, int num);
+const Icon *table_icon_get(const void* table, int num);
+
 uint16_t pokemon_stat_get(PokemonFap* pokemon_fap, DataStat stat, DataStatSub num);
 void pokemon_stat_set(PokemonFap* pokemon_fap, DataStat stat, DataStatSub which, uint16_t val);
 uint16_t pokemon_stat_ev_get(PokemonFap* pokemon_fap, DataStat stat);
 void pokemon_stat_ev_set(PokemonFap* pokemon_fap, DataStat stat, uint16_t val);
 uint8_t pokemon_stat_iv_get(PokemonFap* pokemon_fap, DataStat stat);
-const char* table_stat_name_get(int num);
-const Icon *table_icon_get(int num);
 void pokemon_stat_iv_set(PokemonFap* pokemon_fap, int val);
 void pokemon_exp_set(PokemonFap* pokemon_fap, uint32_t exp);
 void pokemon_exp_calc(PokemonFap* pokemon_fap);

@@ -62,7 +62,7 @@ void gen_scene_on_enter(void* context) {
 
     submenu_reset(pokemon_fap->submenu);
 
-    snprintf(buf, sizeof(buf), "Pokemon:   %s", table_stat_name_get(pkmn_num));
+    snprintf(buf, sizeof(buf), "Pokemon:   %s", table_stat_name_get(pokemon_fap->pokemon_table, pkmn_num));
     submenu_add_item(
         pokemon_fap->submenu, buf, SelectPokemonScene, scene_change_from_main_cb, pokemon_fap);
 
@@ -91,12 +91,12 @@ void gen_scene_on_enter(void* context) {
 
     submenu_add_item(
         pokemon_fap->submenu,
-        named_list_name_from_index_get(stats_list, pokemon_stat_get(pokemon_fap, STAT_SEL, NONE)),
+        named_list_name_from_index_get(pokemon_fap->stat_list, pokemon_stat_get(pokemon_fap, STAT_SEL, NONE)),
         SelectStatsScene,
         scene_change_from_main_cb,
         pokemon_fap);
 
-    snprintf(buf, sizeof(buf), "OT ID#:          %05d", pokemon_stat_get(pokemon_fap,  STAT_OT_ID, NONE));
+    snprintf(buf, sizeof(buf), "OT ID#:          %05d", pokemon_stat_get(pokemon_fap, STAT_OT_ID, NONE));
     submenu_add_item(
         pokemon_fap->submenu, buf, SelectOTIDScene, scene_change_from_main_cb, pokemon_fap);
 

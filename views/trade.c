@@ -173,6 +173,7 @@ struct trade_model {
     render_gameboy_state_t gameboy_status;
     bool ledon; // Controls the blue LED during trade
     uint8_t curr_pokemon;
+    const void* table;
 };
 
 /* A callback function that must be called outside of an interrupt context,
@@ -253,7 +254,7 @@ static void trade_draw_timer_callback(void* context) {
 static void trade_draw_callback(Canvas* canvas, void* view_model) {
     furi_assert(view_model);
     struct trade_model* model = view_model;
-    const Icon* icon = table_icon_get(model->curr_pokemon);
+    const Icon* icon = table_icon_get(model->table, model->curr_pokemon);
 
     canvas_clear(canvas);
     switch(model->gameboy_status) {
@@ -739,6 +740,8 @@ void* trade_alloc(
 
     view_set_context(trade->view, trade);
     view_allocate_model(trade->view, ViewModelTypeLockFree, sizeof(struct trade_model));
+    with_view_model(
+        trade->view, struct trade_model * model, { model->table = pokemon_fap->pokemon_table; }, false);
 
     view_set_draw_callback(trade->view, trade_draw_callback);
     view_set_enter_callback(trade->view, trade_enter_callback);

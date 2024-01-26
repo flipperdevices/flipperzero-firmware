@@ -36,15 +36,15 @@ struct pokemon_fap {
      * based on the generation variable.
      */
     void* trade_block;
-    void *party; // Pointer to the whole data struct for the first pokemon. This
+    void* party; // Pointer to the whole data struct for the first pokemon. This
 		 // shortcuts some calculations.
     /* These are anonymous in case at some point in the future these change
      * per generation.
      */
-    void *move_list;
-    void *type_list;
-    void *stats_list;
-    int current_stat;
+    const void *move_list;
+    const void *type_list;
+    const void *stat_list;
+    const void *pokemon_table;
 
     /* Pin definition to actual Game Link Cable interface */
     struct gblink_pins pins;
