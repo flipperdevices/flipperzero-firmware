@@ -1,4 +1,5 @@
 #include "../lfrfid_i.h"
+#include <lfrfid_icons.h>
 #include <dolphin/dolphin.h>
 
 static const NotificationSequence sequence_blink_set_yellow = {

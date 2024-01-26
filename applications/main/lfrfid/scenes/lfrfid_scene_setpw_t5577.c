@@ -1,5 +1,6 @@
 #include "../lfrfid_i.h"
 #include "../helpers/lfrfid_dialog.h"
+#include <lfrfid_icons.h>
 
 #define LFRFID_T5577_BITRATE_RF_64 0x00140000
 #define LFRFID_T5577_MODULATION_MANCHESTER 0x00008000

@@ -1,4 +1,5 @@
 #include "../lfrfid_i.h"
+#include <lfrfid_icons.h>
 
 void lfrfid_scene_delete_success_on_enter(void* context) {
     LfRfid* app = context;

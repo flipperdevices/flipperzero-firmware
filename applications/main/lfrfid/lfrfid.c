@@ -1,4 +1,5 @@
 #include "lfrfid_i.h"
+#include <lfrfid_icons.h>
 #include <dolphin/dolphin.h>
 
 //TODO: use .txt file in resources for passwords.

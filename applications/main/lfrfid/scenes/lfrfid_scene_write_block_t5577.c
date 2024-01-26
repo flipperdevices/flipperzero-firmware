@@ -1,4 +1,5 @@
 #include "../lfrfid_i.h"
+#include <lfrfid_icons.h>
 
 static void lfrfid_write_block_t5577_password_and_config_to_EM(LfRfid* app) {
     Popup* popup = app->popup;
