@@ -1,6 +1,6 @@
 /**
  * @file int_input.h
- * GUI: Integer keyboard view module API
+ * GUI: Integer string keyboard view module API
  */
 
 #pragma once
