@@ -27,10 +27,10 @@ This software is for experimental purposes only and is not meant for any illegal
 
 <a name="latest">
 
-## Latest Updates - [PATREON: Latest Release RM0125-2349-0.93.9-eba1e22](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
+## Latest Updates - [PATREON: Latest Release RM0126-2108-0.93.9-2225e91](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-01-25 23:49 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-01-25 23:49 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-01-26 21:08 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-01-26 21:08 EST`
 - Updated: [UHF RFID WIP v1.1 (By frux-c)](https://github.com/frux-c/uhf_rfid) `Req: M100 or QM100` (Updated Docs)
 - Updated: [Gas Sensor v0.1 (By iancohee)](https://github.com/iancohee/gas_sensor_fap) `Req: BME680 / SGP30` (Updated Docs)
 - Updated: [Restaurant Pager Trigger v1.2 (By leedave)](https://github.com/leedave/flipper-zero-meal-pager) (Minor Changes)
