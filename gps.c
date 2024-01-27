@@ -2,6 +2,7 @@
 #include "constants.h"
 
 #include <furi.h>
+#include <furi_hal_power.h>
 #include <gui/gui.h>
 #include <string.h>
 
@@ -41,14 +42,14 @@ static void render_callback(Canvas* const canvas, void* context) {
 
         switch(gps_uart->speed_units) {
         case KPH:
-            snprintf(buffer, 64, "%.2f km", (double)(gps_uart->status.speed * KNOTS_TO_KPH));
+            snprintf(buffer, 64, "%.2f Km/h", (double)(gps_uart->status.speed * KNOTS_TO_KPH));
             break;
         case MPH:
-            snprintf(buffer, 64, "%.2f mi", (double)(gps_uart->status.speed * KNOTS_TO_MPH));
+            snprintf(buffer, 64, "%.2f Mi/h", (double)(gps_uart->status.speed * KNOTS_TO_MPH));
             break;
         case KNOTS:
         default:
-            snprintf(buffer, 64, "%.2f kn", (double)gps_uart->status.speed);
+            snprintf(buffer, 64, "%.2f Kn", (double)gps_uart->status.speed);
             break;
         }
 
@@ -93,6 +94,14 @@ int32_t gps_app(void* p) {
     UNUSED(p);
 
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(PluginEvent));
+
+    uint8_t attempts = 0;
+    bool otg_was_enabled = furi_hal_power_is_otg_enabled();
+    while(!furi_hal_power_is_otg_enabled() && attempts++ < 5) {
+        furi_hal_power_enable_otg();
+        furi_delay_ms(10);
+    }
+    furi_delay_ms(200);
 
     GpsUart* gps_uart = gps_uart_enable();
 
@@ -159,6 +168,8 @@ int32_t gps_app(void* p) {
 
                         gps_uart_init_thread(gps_uart);
                         gps_uart->changing_baudrate = true;
+                        furi_mutex_release(gps_uart->mutex);
+                        view_port_update(view_port);
                         break;
                     case InputKeyRight:
                         gps_uart->speed_units++;
@@ -175,11 +186,10 @@ int32_t gps_app(void* p) {
                 }
             }
         }
-
-        view_port_update(view_port);
-        furi_mutex_release(gps_uart->mutex);
-
-        if(gps_uart->changing_baudrate) {
+        if(!gps_uart->changing_baudrate) {
+            furi_mutex_release(gps_uart->mutex);
+            view_port_update(view_port);
+        } else {
             furi_delay_ms(1000);
             gps_uart->changing_baudrate = false;
         }
@@ -193,6 +203,10 @@ int32_t gps_app(void* p) {
     furi_message_queue_free(event_queue);
     furi_mutex_free(gps_uart->mutex);
     gps_uart_disable(gps_uart);
+
+    if(furi_hal_power_is_otg_enabled() && !otg_was_enabled) {
+        furi_hal_power_disable_otg();
+    }
 
     return 0;
 }
