@@ -9,6 +9,7 @@
 
 typedef struct AppState {
     bool usbSerialEnabled;
+    char current_code[MAX_FILENAME_LEN];
     char file_name_tmp[MAX_FILENAME_LEN];
 } AppState;
 
@@ -30,7 +31,12 @@ typedef struct App {
     AppState* state;
     bool dmcomm_run;
     FuriThread* dcomm_thread;
+
+    bool serial_run;
+    FuriThread* serial_thread;
+
     NotificationApp* notification;
+    Storage* storage;
 } App;
 
 App* app_alloc();

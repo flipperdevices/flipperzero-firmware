@@ -20,7 +20,8 @@ void fcom_send_code_scene_on_enter(void* context) {
     // initialize dcomm
     // start dcomm thread in read mode
 
-    dialog_ex_set_header(app->dialog, "Send Digimon Code", 64, 12, AlignCenter, AlignTop);
+    dialog_ex_set_header(app->dialog, "Send Digimon Code", 64, 2, AlignCenter, AlignTop);
+    dialog_ex_set_text(app->dialog, app->state->current_code, 78, 16, AlignLeft, AlignTop);
     dialog_ex_set_left_button_text(app->dialog, NULL);
     dialog_ex_set_right_button_text(app->dialog, NULL);
     dialog_ex_set_center_button_text(app->dialog, "Send");

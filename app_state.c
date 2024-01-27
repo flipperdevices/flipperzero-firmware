@@ -13,6 +13,7 @@ TODO:
 App* app_alloc() {
     App* app = malloc(sizeof(App));
 
+    app->storage = furi_record_open(RECORD_STORAGE);
     app->notification = furi_record_open(RECORD_NOTIFICATION);
     
     //Turn backlight on, believe me this makes testing your app easier
@@ -73,6 +74,9 @@ AppState* app_state_alloc() {
     AppState* state = malloc(sizeof(AppState));
 
     // Allocate and start dcomm
+    state->usbSerialEnabled = false;
+    state->current_code[0] = 0;
+    state->file_name_tmp[0] = 0;
  
     return state;
 }
@@ -91,7 +95,10 @@ void app_free(App* app) {
     furi_thread_join(app->dcomm_thread);
     furi_thread_free(app->dcomm_thread);
 
+    furi_record_close(RECORD_NOTIFICATION);
     app->notification = NULL;
+    furi_record_close(RECORD_STORAGE);
+    app->storage = NULL;
 
     free(app->state);
 
