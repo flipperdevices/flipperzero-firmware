@@ -41,11 +41,11 @@ bool xremote_scene_xr_list_edit_item_on_event(void* context, SceneManagerEvent e
         return true;
     } else if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SubmenuIndexDelete) {
-            cross_remote_delete(app->cross_remote);
+            xremote_cross_remote_delete(app->cross_remote);
         } else if(event.event == SubmenuIndexEdit) {
             strncpy(
                 app->text_store[0],
-                cross_remote_get_name(app->cross_remote),
+                xremote_cross_remote_get_name(app->cross_remote),
                 XREMOTE_MAX_REMOTE_NAME_LENGTH);
             scene_manager_next_scene(app->scene_manager, XRemoteSceneCreate);
             return 0;

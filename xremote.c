@@ -58,7 +58,7 @@ XRemote* xremote_app_alloc() {
 
     app->ir_remote_buffer = xremote_ir_remote_alloc();
     app->ir_worker = infrared_worker_alloc();
-    app->cross_remote = cross_remote_alloc();
+    app->cross_remote = xremote_cross_remote_alloc();
 
     app->sg_remote_buffer = xremote_sg_remote_alloc();
 
@@ -122,6 +122,8 @@ void xremote_app_free(XRemote* app) {
     scene_manager_free(app->scene_manager);
 
     infrared_worker_free(app->ir_worker);
+
+    xremote_cross_remote_free(app->cross_remote);
 
     // View Dispatcher
     view_dispatcher_remove_view(app->view_dispatcher, XRemoteViewIdMenu);

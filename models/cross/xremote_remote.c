@@ -9,7 +9,7 @@ struct CrossRemote {
     int transmitting;
 };
 
-static void cross_remote_clear_items(CrossRemote* remote) {
+static void xremote_cross_remote_clear_items(CrossRemote* remote) {
     CrossRemoteItemArray_it_t it;
     for(CrossRemoteItemArray_it(it, remote->items); !CrossRemoteItemArray_end_p(it);
         CrossRemoteItemArray_next(it)) {
@@ -18,7 +18,7 @@ static void cross_remote_clear_items(CrossRemote* remote) {
     CrossRemoteItemArray_reset(remote->items);
 }
 
-static void cross_remote_find_vacant_remote_name(FuriString* name, const char* path) {
+static void xremote_cross_remote_find_vacant_remote_name(FuriString* name, const char* path) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
 
     FuriString* base_path;
@@ -60,7 +60,7 @@ static void cross_remote_find_vacant_remote_name(FuriString* name, const char* p
     furi_record_close(RECORD_STORAGE);
 }
 
-CrossRemote* cross_remote_alloc() {
+CrossRemote* xremote_cross_remote_alloc() {
     CrossRemote* remote = malloc(sizeof(CrossRemote));
     CrossRemoteItemArray_init(remote->items);
     remote->name = furi_string_alloc();
@@ -69,27 +69,27 @@ CrossRemote* cross_remote_alloc() {
     return remote;
 }
 
-void cross_remote_set_transmitting(CrossRemote* remote, int status) {
+void xremote_cross_remote_set_transmitting(CrossRemote* remote, int status) {
     remote->transmitting = status;
 }
 
-int cross_remote_get_transmitting(CrossRemote* remote) {
+int xremote_cross_remote_get_transmitting(CrossRemote* remote) {
     return remote->transmitting;
 }
 
-void cross_remote_free(CrossRemote* remote) {
+void xremote_cross_remote_free(CrossRemote* remote) {
     furi_string_free(remote->name);
     furi_string_free(remote->path);
-    cross_remote_clear_items(remote);
+    xremote_cross_remote_clear_items(remote);
     CrossRemoteItemArray_clear(remote->items);
     free(remote);
 }
 
-const char* cross_remote_get_name(CrossRemote* remote) {
+const char* xremote_cross_remote_get_name(CrossRemote* remote) {
     return furi_string_get_cstr(remote->name);
 }
 
-bool cross_remote_add_ir_item(CrossRemote* remote, const char* name, InfraredSignal* signal) {
+bool xremote_cross_remote_add_ir_item(CrossRemote* remote, const char* name, InfraredSignal* signal) {
     CrossRemoteItem* item = xremote_remote_item_alloc();
     xremote_remote_item_set_type(item, XRemoteRemoteItemTypeInfrared);
     xremote_remote_item_set_name(item, name);
@@ -98,7 +98,7 @@ bool cross_remote_add_ir_item(CrossRemote* remote, const char* name, InfraredSig
     return true;
 }
 
-bool cross_remote_add_pause(CrossRemote* remote, int time) {
+bool xremote_cross_remote_add_pause(CrossRemote* remote, int time) {
     CrossRemoteItem* item = xremote_remote_item_alloc();
     xremote_remote_item_set_type(item, XRemoteRemoteItemTypePause);
     char name[9];
@@ -109,7 +109,7 @@ bool cross_remote_add_pause(CrossRemote* remote, int time) {
     return true;
 }
 
-bool cross_remote_add_subghz(CrossRemote* remote, SubGhzRemote* subghz) {
+bool xremote_cross_remote_add_subghz(CrossRemote* remote, SubGhzRemote* subghz) {
     UNUSED(subghz);
     CrossRemoteItem* item = xremote_remote_item_alloc();
     xremote_remote_item_set_type(item, XRemoteRemoteItemTypeSubGhz);
@@ -120,25 +120,33 @@ bool cross_remote_add_subghz(CrossRemote* remote, SubGhzRemote* subghz) {
     return true;
 }
 
-size_t cross_remote_get_item_count(CrossRemote* remote) {
+size_t xremote_cross_remote_get_item_count(CrossRemote* remote) {
     return CrossRemoteItemArray_size(remote->items);
 }
 
-CrossRemoteItem* cross_remote_get_item(CrossRemote* remote, size_t index) {
+CrossRemoteItem* xremote_cross_remote_get_item(CrossRemote* remote, size_t index) {
     furi_assert(index < CrossRemoteItemArray_size(remote->items));
     return *CrossRemoteItemArray_get(remote->items, index);
 }
 
-void cross_remote_remove_item(CrossRemote* remote, size_t index) {
+void xremote_cross_remote_remove_item(CrossRemote* remote, size_t index) {
     CrossRemoteItemArray_erase(remote->items, index);
 }
 
-void cross_remote_rename_item(CrossRemote* remote, size_t index, const char* name) {
-    CrossRemoteItem* item = cross_remote_get_item(remote, index);
+void xremote_cross_remote_rename_item(CrossRemote* remote, size_t index, const char* name) {
+    CrossRemoteItem* item = xremote_cross_remote_get_item(remote, index);
     xremote_remote_item_set_name(item, name);
 }
 
-bool cross_remote_load(CrossRemote* remote, FuriString* path) {
+static void xremote_cross_remote_set_name(CrossRemote* remote, const char* name) {
+    furi_string_set(remote->name, name);
+}
+
+static void xremote_cross_remote_set_path(CrossRemote* remote, const char* path) {
+    furi_string_set(remote->path, path);
+}
+
+bool xremote_cross_remote_load(CrossRemote* remote, FuriString* path) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
     FlipperFormat* ff = flipper_format_buffered_file_alloc(storage);
     FuriString* buf;
@@ -156,9 +164,9 @@ bool cross_remote_load(CrossRemote* remote, FuriString* path) {
 
         // Init Remote
         path_extract_filename(path, buf, true);
-        cross_remote_clear_items(remote);
-        cross_remote_set_name(remote, furi_string_get_cstr(buf));
-        cross_remote_set_path(remote, furi_string_get_cstr(path));
+        xremote_cross_remote_clear_items(remote);
+        xremote_cross_remote_set_name(remote, furi_string_get_cstr(buf));
+        xremote_cross_remote_set_path(remote, furi_string_get_cstr(path));
         // Load Items
         for(bool can_read = true; can_read;) {
             CrossRemoteItem* item = xremote_remote_item_alloc();
@@ -179,49 +187,7 @@ bool cross_remote_load(CrossRemote* remote, FuriString* path) {
     return success;
 }
 
-void cross_remote_set_name(CrossRemote* remote, const char* name) {
-    furi_string_set(remote->name, name);
-}
-
-void cross_remote_set_path(CrossRemote* remote, const char* path) {
-    furi_string_set(remote->path, path);
-}
-
-bool cross_remote_save_new(CrossRemote* remote, const char* name) {
-    FuriString *new_name, *new_path;
-    new_name = furi_string_alloc_set(name);
-    new_path = furi_string_alloc_set(XREMOTE_APP_FOLDER);
-
-    cross_remote_find_vacant_remote_name(new_name, furi_string_get_cstr(new_path));
-    furi_string_cat_printf(
-        new_path, "/%s%s", furi_string_get_cstr(new_name), XREMOTE_APP_EXTENSION);
-
-    cross_remote_set_name(remote, furi_string_get_cstr(new_name));
-    cross_remote_set_path(remote, furi_string_get_cstr(new_path));
-
-    furi_string_free(new_name);
-    furi_string_free(new_path);
-    return cross_remote_store(remote);
-}
-
-void cross_remote_reset(CrossRemote* remote) {
-    furi_string_reset(remote->name);
-    furi_string_reset(remote->path);
-    CrossRemoteItemArray_clear(remote->items);
-    remote->transmitting = 0;
-}
-
-bool cross_remote_delete(CrossRemote* remote) {
-    Storage* storage = furi_record_open(RECORD_STORAGE);
-    FS_Error status = storage_common_remove(storage, furi_string_get_cstr(remote->path));
-
-    cross_remote_reset(remote);
-
-    furi_record_close(RECORD_STORAGE);
-    return (status == FSE_OK || status == FSE_NOT_EXIST);
-}
-
-bool cross_remote_store(CrossRemote* remote) {
+static bool xremote_cross_remote_store(CrossRemote* remote) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
     FlipperFormat* ff = flipper_format_file_alloc(storage);
     const char* path = furi_string_get_cstr(remote->path);
@@ -261,3 +227,38 @@ bool cross_remote_store(CrossRemote* remote) {
     furi_record_close(RECORD_STORAGE);
     return success;
 }
+
+bool xremote_cross_remote_save_new(CrossRemote* remote, const char* name) {
+    FuriString *new_name, *new_path;
+    new_name = furi_string_alloc_set(name);
+    new_path = furi_string_alloc_set(XREMOTE_APP_FOLDER);
+
+    xremote_cross_remote_find_vacant_remote_name(new_name, furi_string_get_cstr(new_path));
+    furi_string_cat_printf(
+        new_path, "/%s%s", furi_string_get_cstr(new_name), XREMOTE_APP_EXTENSION);
+
+    xremote_cross_remote_set_name(remote, furi_string_get_cstr(new_name));
+    xremote_cross_remote_set_path(remote, furi_string_get_cstr(new_path));
+
+    furi_string_free(new_name);
+    furi_string_free(new_path);
+    return xremote_cross_remote_store(remote);
+}
+
+static void xremote_cross_remote_reset(CrossRemote* remote) {
+    furi_string_reset(remote->name);
+    furi_string_reset(remote->path);
+    CrossRemoteItemArray_clear(remote->items);
+    remote->transmitting = 0;
+}
+
+bool xremote_cross_remote_delete(CrossRemote* remote) {
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    FS_Error status = storage_common_remove(storage, furi_string_get_cstr(remote->path));
+
+    xremote_cross_remote_reset(remote);
+
+    furi_record_close(RECORD_STORAGE);
+    return (status == FSE_OK || status == FSE_NOT_EXIST);
+}
+

@@ -32,9 +32,9 @@ void xremote_scene_create_on_enter(void* context) {
     ButtonMenu* button_menu = app->button_menu_create;
     //SceneManager* scene_manager = app->scene_manager;
 
-    size_t item_count = cross_remote_get_item_count(app->cross_remote);
+    size_t item_count = xremote_cross_remote_get_item_count(app->cross_remote);
     for(size_t i = 0; i < item_count; ++i) {
-        CrossRemoteItem* item = cross_remote_get_item(app->cross_remote, i);
+        CrossRemoteItem* item = xremote_cross_remote_get_item(app->cross_remote, i);
         button_menu_add_item(
             button_menu,
             xremote_remote_item_get_name(item),
