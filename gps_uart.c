@@ -1,6 +1,6 @@
 #include <string.h>
 
-#include <minmea.h>
+#include "minmea.h"
 #include "gps_uart.h"
 
 typedef enum {
@@ -10,25 +10,30 @@ typedef enum {
 
 #define WORKER_ALL_RX_EVENTS (WorkerEvtStop | WorkerEvtRxDone)
 
-static void gps_uart_on_irq_cb(UartIrqEvent ev, uint8_t data, void* context) {
-    GpsUart* gps_uart = (GpsUart*)context;
-
-    if(ev == UartIrqEventRXNE) {
+static void gps_uart_on_irq_cb(FuriHalSerialHandle* handle, FuriHalSerialRxEvent ev, void* context) {
+	GpsUart* gps_uart = (GpsUart*)context;
+	
+	if(ev == FuriHalSerialRxEventData) {
+        uint8_t data = furi_hal_serial_async_rx(handle);
         furi_stream_buffer_send(gps_uart->rx_stream, &data, 1, 0);
         furi_thread_flags_set(furi_thread_get_id(gps_uart->thread), WorkerEvtRxDone);
     }
 }
 
-static void gps_uart_serial_init(GpsUart* gps_uart) {
-    furi_hal_console_disable();
-    furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, gps_uart_on_irq_cb, gps_uart);
-    furi_hal_uart_set_br(FuriHalUartIdUSART1, gps_uart->baudrate);
+void gps_uart_serial_init(GpsUart* gps_uart) {
+    furi_assert(!gps_uart->serial_handle);
+	
+    gps_uart->serial_handle = furi_hal_serial_control_acquire(UART_CH);
+	furi_assert(gps_uart->serial_handle);
+	furi_hal_serial_init(gps_uart->serial_handle, gps_uart->baudrate);
+    furi_hal_serial_async_rx_start(gps_uart->serial_handle, gps_uart_on_irq_cb, gps_uart, false);
 }
 
 static void gps_uart_serial_deinit(GpsUart* gps_uart) {
-    UNUSED(gps_uart);
-    furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, NULL, NULL);
-    furi_hal_console_enable();
+    furi_assert(gps_uart->serial_handle);
+    furi_hal_serial_deinit(gps_uart->serial_handle);
+    furi_hal_serial_control_release(gps_uart->serial_handle);
+    gps_uart->serial_handle = NULL;
 }
 
 static void gps_uart_parse_nmea(GpsUart* gps_uart, char* line) {
@@ -103,11 +108,7 @@ static int32_t gps_uart_worker(void* context) {
             do {
                 // receive serial bytes into rx_buf, starting at rx_offset from the start of the buffer
                 // the maximum we can receive is RX_BUF_SIZE - 1 - rx_offset
-                len = furi_stream_buffer_receive(
-                    gps_uart->rx_stream,
-                    gps_uart->rx_buf + rx_offset,
-                    RX_BUF_SIZE - 1 - rx_offset,
-                    0);
+                len = furi_stream_buffer_receive(gps_uart->rx_stream, gps_uart->rx_buf + rx_offset, RX_BUF_SIZE - 1 - rx_offset, 0);
                 if(len > 0) {
                     // increase rx_offset by the number of bytes received, and null-terminate rx_buf
                     rx_offset += len;
@@ -204,7 +205,7 @@ GpsUart* gps_uart_enable() {
     gps_uart->baudrate = gps_baudrates[current_gps_baudrate];
     gps_uart->changing_baudrate = false;
     gps_uart->backlight_on = false;
-    gps_uart->speed_units = KNOTS;
+    gps_uart->speed_units = KPH;
 
     gps_uart_init_thread(gps_uart);
 
