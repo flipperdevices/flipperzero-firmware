@@ -1,4 +1,4 @@
-name: "FAP: Build and lint"
+name: "Build and lint apps"
 on: [push, pull_request]
 jobs:
   ufbt-build-action:
@@ -16,7 +16,7 @@ jobs:
           ufbt-args: ""
           sdk-channel: release
       - name: Upload mfc-editor artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ github.event.repository.name }}-mfc-editor-${{ steps.build-app.outputs.suffix }}
           path: ${{ steps.build-app.outputs.fap-artifacts }}
