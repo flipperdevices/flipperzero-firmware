@@ -180,7 +180,7 @@ static DialogMessageButton mfc_editor_prompt_should_load_shadow(MfcEditorApp* in
     dialog_message_set_header(message, "File has modifications", 63, 3, AlignCenter, AlignTop);
     dialog_message_set_text(
         message,
-        "Would you like to load the\nmodified file (recommended)\nor the original file?",
+        "Would you like to edit the\nmodified file (recommended)\nor the original file?",
         63,
         31,
         AlignCenter,
