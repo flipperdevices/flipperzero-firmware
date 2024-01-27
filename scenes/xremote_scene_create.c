@@ -37,7 +37,7 @@ void xremote_scene_create_on_enter(void* context) {
         CrossRemoteItem* item = xremote_cross_remote_get_item(app->cross_remote, i);
         button_menu_add_item(
             button_menu,
-            xremote_remote_item_get_name(item),
+            xremote_cross_remote_item_get_name(item),
             i,
             xremote_create_callback,
             ButtonMenuItemTypeCommon,

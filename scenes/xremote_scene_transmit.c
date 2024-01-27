@@ -47,7 +47,7 @@ void xremote_scene_transmit_stop_ir_signal(XRemote* app) {
 }
 
 void xremote_scene_transmit_send_ir_signal(XRemote* app, CrossRemoteItem* item) {
-    InfraredSignal* signal = xremote_remote_item_get_ir_signal(item);
+    InfraredSignal* signal = xremote_cross_remote_item_get_ir_signal(item);
     dolphin_deed(DolphinDeedIrSend);
     xremote_scene_ir_notification_message(app, InfraredNotificationMessageBlinkStartSend);
     if(xremote_scene_ir_signal_is_raw(signal)) {
@@ -93,7 +93,7 @@ void xremote_scene_transmit_send_signal(void* context, CrossRemoteItem* item) {
         return;
     }
 
-    xremote_transmit_model_set_name(app->xremote_transmit, xremote_remote_item_get_name(item));
+    xremote_transmit_model_set_name(app->xremote_transmit, xremote_cross_remote_item_get_name(item));
     xremote_transmit_model_set_type(app->xremote_transmit, item->type);
     if(item->type == XRemoteRemoteItemTypeInfrared) {
         xremote_scene_transmit_send_ir_signal(app, item);

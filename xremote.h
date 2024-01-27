@@ -6,7 +6,7 @@
 #include "views/xremote_pause_set.h"
 #include "helpers/xremote_storage.h"
 #include "models/infrared/xremote_ir_remote.h"
-#include "models/cross/xremote_remote.h"
+#include "models/cross/xremote_cross_remote.h"
 #include "xremote_i.h"
 
 typedef struct {

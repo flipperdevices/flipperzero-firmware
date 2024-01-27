@@ -1,5 +1,5 @@
 #include "../xremote.h"
-#include "../models/cross/xremote_remote.h"
+#include "../models/cross/xremote_cross_remote.h"
 
 enum SubmenuIndexEdit {
     SubmenuIndexRename = 10,
