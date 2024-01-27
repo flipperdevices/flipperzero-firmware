@@ -27,10 +27,10 @@ This software is for experimental purposes only and is not meant for any illegal
 
 <a name="latest">
 
-## Latest Updates - [PATREON: Latest Release RM0125-2349-0.93.9-eba1e22](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
+## Latest Updates - [PATREON: Latest Release RM0126-2108-0.93.9-2225e91](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-01-25 23:49 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-01-25 23:49 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-01-26 21:08 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-01-26 21:08 EST`
 - Updated: [UHF RFID WIP v1.1 (By frux-c)](https://github.com/frux-c/uhf_rfid) `Req: M100 or QM100` (Updated Docs)
 - Updated: [Gas Sensor v0.1 (By iancohee)](https://github.com/iancohee/gas_sensor_fap) `Req: BME680 / SGP30` (Updated Docs)
 - Updated: [Restaurant Pager Trigger v1.2 (By leedave)](https://github.com/leedave/flipper-zero-meal-pager) (Minor Changes)
@@ -168,6 +168,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW PR: [NFC Rework more info scene for Ultralight cards #3391 (By RebornedBrain)](https://github.com/flipperdevices/flipperzero-firmware/pull/3391)
 - Updated: [PicoPass (iClass) v1.12 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass) [Rework. Part 1 #68 (By gornekich)](https://github.com/flipperdevices/flipperzero-good-faps/pull/68) [Hopefully fix name buffer size issues (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/9058c0c6a9980f84f6436673f9d3fbbc82cb3f81) [Save partial #85 (By bettse)](https://github.com/flipperdevices/flipperzero-good-faps/pull/85) [More info view (raw bytes) #86 (By bettse)](https://github.com/flipperdevices/flipperzero-good-faps/pull/86) [detect config card #87 (By bettse)](https://github.com/flipperdevices/flipperzero-good-faps/pull/87) [add additional keys to elite dict #89 (By kitsunehunter)](https://github.com/flipperdevices/flipperzero-good-faps/pull/89) [config SE problem #90 (By bettse)](https://github.com/flipperdevices/flipperzero-good-faps/pull/90) [handle NR-MAC auth for legacy cards #95(By bettse)](https://github.com/flipperdevices/flipperzero-good-faps/pull/95) [Create seader directory if needed #101](https://github.com/flipperdevices/flipperzero-good-faps/pull/101) [Add support for non-secure cards #106 (By nvx)](https://github.com/flipperdevices/flipperzero-good-faps/pull/106) [Picopass nr mac improvements #108 (By bettse)](https://github.com/flipperdevices/flipperzero-good-faps/pull/108) [Picopass read improvements #109 (By bettse)](https://github.com/flipperdevices/flipperzero-good-faps/pull/109)
 - Updated: [NFC Magic v1.5 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966) [rework #67 (By gornekich)](https://github.com/flipperdevices/flipperzero-good-faps/pull/67) [fix gen4 detection #71 (By gornekich)](https://github.com/flipperdevices/flipperzero-good-faps/pull/71) [Specify in error scene that only Gen1 magic and Gen4 UMCs are supported #75 (By kitsunehunter)](https://github.com/flipperdevices/flipperzero-good-faps/pull/75) [UI / Scenes (By xMasterX) & Poller functions, minor UI fixes (By Leptopt1los)](https://github.com/xMasterX/all-the-plugins/commit/d70f146f15a6bab2272d4ebfe37001d7d5f0f556) [New options for gen4 cards #82 (By Leptopt1los)](https://github.com/flipperdevices/flipperzero-good-faps/pull/82)  [Fix support of 4K fobs #102 (By Leptopt1los)](https://github.com/flipperdevices/flipperzero-good-faps/pull/102) [Gen4 shadow mode management support #98 (By Leptopt1los) With Fixes By RogueMaster](https://github.com/flipperdevices/flipperzero-good-faps/pull/98)
+- Added: [MFC Editor v1.0 (By TollyH)](https://github.com/TollyH/flipper-apps)
 
 <a name="release">
 
@@ -554,6 +555,7 @@ $ ./fbt dolphin_ext
 - [MALVEKE PIN Test v1.0 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external/malveke_pin_test) `Req: Malveke`
 - [MAX31855 (By skotopes)](https://github.com/skotopes/flipperzero_max31855)
 - [Metronome v1.1 (By panki27)](https://github.com/panki27/Metronome)
+- [MFC Editor v1.0 (By TollyH)](https://github.com/TollyH/flipper-apps)
 - [Mfkey32 v1.2 (By noproto)](https://github.com/noproto/FlipperMfkey)
 - [Mfkey32 With Nested v1.0 (By noproto)](https://github.com/noproto/FlipperMfkey)
 - [MH-Z19 CO2 Sensor (By meshchaninov)](https://github.com/meshchaninov/flipper-zero-mh-z19)
