@@ -9,7 +9,7 @@ App(
     fap_category="NFC",
     fap_icon_assets="assets",
     fap_author="TollyH",
-    fap_weburl="https://github.com/TollyH/flipper-apps",
+    fap_weburl="https://github.com/TollyH/flipper-apps/tree/main/mfc-editor",
     fap_version="1.0",
     fap_description="Application for viewing and editing MIFARE Classic .nfc files",
 )
