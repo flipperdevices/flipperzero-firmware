@@ -4,6 +4,7 @@
 #include <notification/notification_messages.h>
 
 #define RX_BUF_SIZE 1024
+#define UART_CH (FuriHalSerialIdUsart)
 
 static const int gps_baudrates[6] = {4800, 9600, 19200, 38400, 57600, 115200};
 static int current_gps_baudrate = 1;
@@ -36,6 +37,8 @@ typedef struct {
     bool changing_baudrate;
     bool backlight_on;
     SpeedUnit speed_units;
+	
+	FuriHalSerialHandle* serial_handle;
 
     GpsStatus status;
 } GpsUart;
