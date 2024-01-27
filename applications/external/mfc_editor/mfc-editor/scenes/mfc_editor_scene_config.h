@@ -1,0 +1,8 @@
+ADD_SCENE(mfc_editor, file_select, FileSelect)
+ADD_SCENE(mfc_editor, invalid_file, InvalidFile)
+ADD_SCENE(mfc_editor, sector_select, SectorSelect)
+ADD_SCENE(mfc_editor, block_select, BlockSelect)
+ADD_SCENE(mfc_editor, data_view, DataView)
+ADD_SCENE(mfc_editor, data_edit, DataEdit)
+ADD_SCENE(mfc_editor, data_edit_access_bits, DataEditAccessBits)
+ADD_SCENE(mfc_editor, save_success, SaveSuccess)
