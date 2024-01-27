@@ -68,7 +68,7 @@ extern "C" {
 #define PIMG_MORELEELLOO 22
 #define PIMG_NEUROMANCER 23
 #define PIMG_PIKASLEEPY 24
-#define PIMG_PIRATE 25
+#define PIMG_PIRATE 25 // Pirate Profile Pic (By cyberartemio)
 #define PIMG_RABBIT 26
 #define PIMG_SHINKAI 27
 #define PIMG_SKULL 28
