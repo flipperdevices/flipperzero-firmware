@@ -94,6 +94,30 @@ uint64_t bit_lib_get_bits_64(const uint8_t* data, size_t position, uint8_t lengt
         value |= (uint64_t)bit_lib_get_bits(data, position + 8, 8) << (length - 16);
         value |= (uint64_t)bit_lib_get_bits(data, position + 16, 8) << (length - 24);
         value |= bit_lib_get_bits(data, position + 24, length - 24);
+    } else if (length <= 40)
+    {
+        value = (uint64_t)bit_lib_get_bits(data, position, 8) << (length - 8);
+        value |= (uint64_t)bit_lib_get_bits(data, position + 8, 8) << (length - 16);
+        value |= (uint64_t)bit_lib_get_bits(data, position + 16, 8) << (length - 24);
+        value |= (uint64_t)bit_lib_get_bits(data, position + 24, 8) << (length - 32);
+        value |= bit_lib_get_bits(data, position + 32, length - 32);
+    } else if (length <= 48)
+    {
+        value = (uint64_t)bit_lib_get_bits(data, position, 8) << (length - 8);
+        value |= (uint64_t)bit_lib_get_bits(data, position + 8, 8) << (length - 16);
+        value |= (uint64_t)bit_lib_get_bits(data, position + 16, 8) << (length - 24);
+        value |= (uint64_t)bit_lib_get_bits(data, position + 24, 8) << (length - 32);
+        value |= (uint64_t)bit_lib_get_bits(data, position + 32, 8) << (length - 40);
+        value |= bit_lib_get_bits(data, position + 40, length - 40);
+    } else if (length <= 56)
+    {
+        value = (uint64_t)bit_lib_get_bits(data, position, 8) << (length - 8);
+        value |= (uint64_t)bit_lib_get_bits(data, position + 8, 8) << (length - 16);
+        value |= (uint64_t)bit_lib_get_bits(data, position + 16, 8) << (length - 24);
+        value |= (uint64_t)bit_lib_get_bits(data, position + 24, 8) << (length - 32);
+        value |= (uint64_t)bit_lib_get_bits(data, position + 32, 8) << (length - 40);
+        value |= (uint64_t)bit_lib_get_bits(data, position + 40, 8) << (length - 48);
+        value |= bit_lib_get_bits(data, position + 48, length - 48);
     } else {
         value = (uint64_t)bit_lib_get_bits(data, position, 8) << (length - 8);
         value |= (uint64_t)bit_lib_get_bits(data, position + 8, 8) << (length - 16);
@@ -102,8 +126,7 @@ uint64_t bit_lib_get_bits_64(const uint8_t* data, size_t position, uint8_t lengt
         value |= (uint64_t)bit_lib_get_bits(data, position + 32, 8) << (length - 40);
         value |= (uint64_t)bit_lib_get_bits(data, position + 40, 8) << (length - 48);
         value |= (uint64_t)bit_lib_get_bits(data, position + 48, 8) << (length - 56);
-        value |= (uint64_t)bit_lib_get_bits(data, position + 56, 8) << (length - 64);
-        value |= bit_lib_get_bits(data, position + 64, length - 64);
+        value |= bit_lib_get_bits(data, position + 56, length - 56);
     }
 
     return value;
