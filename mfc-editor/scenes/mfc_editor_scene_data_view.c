@@ -146,7 +146,7 @@ void mfc_editor_scene_data_view_update_display(MfcEditorApp* instance) {
             if(access_bits.bits != access_bits.check_bits) {
                 furi_string_cat(
                     instance->data_view_text,
-                    "Access Bits are invalid.\nNo operations are allowed.");
+                    "Access Bits are invalid.\nEntire sector inaccessible.");
             } else if(instance->current_block == sector_trailer_num) {
                 furi_string_cat(
                     instance->data_view_text, access_sector_trailer_labels[access_bits.bits]);
