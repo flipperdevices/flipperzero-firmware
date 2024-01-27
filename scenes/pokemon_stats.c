@@ -7,7 +7,7 @@
 static void select_stats_selected_callback(void* context, uint32_t index) {
     PokemonFap* pokemon_fap = (PokemonFap*)context;
 
-    pokemon_stat_set(pokemon_fap, STAT_SEL, NONE, index);
+    pokemon_stat_set(pokemon_fap->pdata, STAT_SEL, NONE, index);
 
     scene_manager_previous_scene(pokemon_fap->scene_manager);
 }
@@ -21,7 +21,7 @@ void select_stats_scene_on_enter(void* context) {
     for(i = 0; i < 6; i++) {
         submenu_add_item(
             pokemon_fap->submenu,
-            named_list_name_from_index_get(pokemon_fap->stat_list, i),
+            named_list_name_from_index_get(pokemon_fap->pdata->stat_list, i),
             i,
             select_stats_selected_callback,
             pokemon_fap);

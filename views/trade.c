@@ -186,7 +186,7 @@ static void pokemon_plist_recreate_callback(void* context, uint32_t arg) {
     UNUSED(arg);
     struct trade_ctx* trade = context;
 
-    plist_create(&(trade->patch_list), (TradeBlock*)(trade->pokemon_fap->trade_block));
+    plist_create(&(trade->patch_list), (TradeBlock*)(trade->pokemon_fap->pdata->trade_block));
 }
 
 /* Draws a whole screen image with Flipper mascot, Game Boy, etc. */
@@ -397,7 +397,7 @@ static uint8_t getMenuResponse(struct trade_ctx* trade) {
 static uint8_t getTradeCentreResponse(struct trade_ctx* trade) {
     furi_assert(trade);
 
-    uint8_t* trade_block_flat = (uint8_t*)trade->pokemon_fap->trade_block;
+    uint8_t* trade_block_flat = (uint8_t*)trade->pokemon_fap->pdata->trade_block;
     uint8_t* input_block_flat = (uint8_t*)trade->input_block;
     uint8_t* input_party_flat = (uint8_t*)trade->input_block->party;
     struct trade_model* model = NULL;
@@ -595,20 +595,20 @@ static uint8_t getTradeCentreResponse(struct trade_ctx* trade) {
             model->gameboy_status = GAMEBOY_TRADING;
 
             /* Copy the traded-in Pokemon's main data to our struct */
-            ((TradeBlock*)trade->pokemon_fap->trade_block)->party_members[0] = trade->input_block->party_members[in_pkmn_idx];
+            ((TradeBlock*)trade->pokemon_fap->pdata->trade_block)->party_members[0] = trade->input_block->party_members[in_pkmn_idx];
             memcpy(
-                &(((TradeBlock*)trade->pokemon_fap->trade_block)->party[0]),
+                &(((TradeBlock*)trade->pokemon_fap->pdata->trade_block)->party[0]),
                 &(trade->input_block->party[in_pkmn_idx]),
                 sizeof(struct pokemon_structure));
             memcpy(
-                &(((TradeBlock*)trade->pokemon_fap->trade_block)->nickname[0]),
+                &(((TradeBlock*)trade->pokemon_fap->pdata->trade_block)->nickname[0]),
                 &(trade->input_block->nickname[in_pkmn_idx]),
                 sizeof(struct name));
             memcpy(
-                &(((TradeBlock*)trade->pokemon_fap->trade_block)->ot_name[0]),
+                &(((TradeBlock*)trade->pokemon_fap->pdata->trade_block)->ot_name[0]),
                 &(trade->input_block->ot_name[in_pkmn_idx]),
                 sizeof(struct name));
-            model->curr_pokemon = pokemon_stat_get(trade->pokemon_fap, STAT_NUM, NONE);
+            model->curr_pokemon = pokemon_stat_get(trade->pokemon_fap->pdata, STAT_NUM, NONE);
 
             /* Schedule a callback outside of ISR context to rebuild the patch
 	     * list with the new Pokemon that we just accepted.
@@ -670,7 +670,7 @@ void trade_enter_callback(void* context) {
         model->gameboy_status = GAMEBOY_READY;
     }
     trade->trade_centre_state = TRADE_RESET;
-    model->curr_pokemon = pokemon_stat_get(trade->pokemon_fap, STAT_NUM, NONE);
+    model->curr_pokemon = pokemon_stat_get(trade->pokemon_fap->pdata, STAT_NUM, NONE);
     model->ledon = false;
 
     view_commit_model(trade->view, true);
@@ -693,7 +693,7 @@ void trade_enter_callback(void* context) {
     furi_timer_start(trade->draw_timer, furi_ms_to_ticks(250));
 
     /* Create a trade patch list from the current trade block */
-    plist_create(&(trade->patch_list), (TradeBlock*)(trade->pokemon_fap->trade_block));
+    plist_create(&(trade->patch_list), (TradeBlock*)(trade->pokemon_fap->pdata->trade_block));
 }
 
 void disconnect_pin(const GpioPin* pin) {
@@ -723,6 +723,7 @@ void trade_exit_callback(void* context) {
 }
 
 void* trade_alloc(
+    /* XXX: This should be PokemonData I think */
     PokemonFap* pokemon_fap,
     struct gblink_pins* gblink_pins,
     ViewDispatcher* view_dispatcher,
@@ -741,7 +742,7 @@ void* trade_alloc(
     view_set_context(trade->view, trade);
     view_allocate_model(trade->view, ViewModelTypeLockFree, sizeof(struct trade_model));
     with_view_model(
-        trade->view, struct trade_model * model, { model->table = pokemon_fap->pokemon_table; }, false);
+        trade->view, struct trade_model * model, { model->table = pokemon_fap->pdata->pokemon_table; }, false);
 
     view_set_draw_callback(trade->view, trade_draw_callback);
     view_set_enter_callback(trade->view, trade_enter_callback);

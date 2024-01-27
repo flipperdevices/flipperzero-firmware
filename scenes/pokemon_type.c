@@ -28,8 +28,8 @@ static void select_type_callback(VariableItem* item) {
     struct type_cb* context = variable_item_get_context(item);
     uint8_t pos = variable_item_get_current_value_index(item);
 
-    variable_item_set_current_value_text(item, named_list_name_from_pos_get(context->pokemon_fap->type_list, pos));
-    pokemon_stat_set(context->pokemon_fap, STAT_TYPE, context->type, named_list_index_from_pos_get(context->pokemon_fap->type_list, pos));
+    variable_item_set_current_value_text(item, named_list_name_from_pos_get(context->pokemon_fap->pdata->type_list, pos));
+    pokemon_stat_set(context->pokemon_fap->pdata, STAT_TYPE, context->type, named_list_index_from_pos_get(context->pokemon_fap->pdata->type_list, pos));
 }
 
 void select_type_scene_on_enter(void* context) {
@@ -37,7 +37,7 @@ void select_type_scene_on_enter(void* context) {
     VariableItem* vitype[2];
     char* strings[2] = {"Type 1:", "Type 2:"};
     int type;
-    int num_types = named_list_num_elements_get(pokemon_fap->type_list);
+    int num_types = named_list_num_elements_get(pokemon_fap->pdata->type_list);
     int pos;
     int i;
 
@@ -46,8 +46,8 @@ void select_type_scene_on_enter(void* context) {
     /* NOTE: 2 is a magic number, but pretty obvious */
     for(i = 0; i < 2; i++) {
         type_cb[i].pokemon_fap = pokemon_fap;
-        type = pokemon_stat_get(pokemon_fap, STAT_TYPE, i);
-        pos = named_list_pos_from_index_get(pokemon_fap->type_list, type);
+        type = pokemon_stat_get(pokemon_fap->pdata, STAT_TYPE, i);
+        pos = named_list_pos_from_index_get(pokemon_fap->pdata->type_list, type);
 
         vitype[i] = variable_item_list_add(
             pokemon_fap->variable_item_list,
@@ -57,7 +57,7 @@ void select_type_scene_on_enter(void* context) {
             &type_cb[i]);
 
         variable_item_set_current_value_index(vitype[i], pos);
-        variable_item_set_current_value_text(vitype[i], named_list_name_from_pos_get(pokemon_fap->type_list, pos));
+        variable_item_set_current_value_text(vitype[i], named_list_name_from_pos_get(pokemon_fap->pdata->type_list, pos));
     }
 
     view_dispatcher_add_view(

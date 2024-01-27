@@ -12,6 +12,8 @@
 #include <gui/modules/variable_item_list.h>
 #include <gblink.h>
 
+#include "pokemon_data.h"
+
 #define TAG "Pokemon"
 
 struct pokemon_fap {
@@ -24,27 +26,12 @@ struct pokemon_fap {
     TextInput* text_input;
     VariableItemList* variable_item_list;
 
-    /* Runtime information that may be needed by any view or scene */
-    int generation;
-
     /* Struct for holding trade data */
     /* NOTE: There may be some runtime memory savings by adding more intelligence
      * to views/trade and slimming down this struct to only contain the single
      * pokemon data rather than the full 6 member party data.
      */
-    /* This could be one of a number of different formats which is determined
-     * based on the generation variable.
-     */
-    void* trade_block;
-    void* party; // Pointer to the whole data struct for the first pokemon. This
-		 // shortcuts some calculations.
-    /* These are anonymous in case at some point in the future these change
-     * per generation.
-     */
-    const void *move_list;
-    const void *type_list;
-    const void *stat_list;
-    const void *pokemon_table;
+    PokemonData* pdata;
 
     /* Pin definition to actual Game Link Cable interface */
     struct gblink_pins pins;

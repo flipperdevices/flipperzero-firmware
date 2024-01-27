@@ -30,7 +30,7 @@ static bool select_name_input_validator(const char* text, FuriString* error, voi
     if(text[0] == '\0' && state == SelectNicknameScene) {
         /* Get the pokemon's name and populate our buffer with it */
         /* XXX: Nidoran M/F are still a problem with this. */
-        pokemon_default_nickname_set(name_buf, pokemon_fap, sizeof(name_buf));
+        pokemon_default_nickname_set(name_buf, pokemon_fap->pdata, sizeof(name_buf));
         return true;
     }
 
@@ -43,9 +43,9 @@ static bool select_name_input_validator(const char* text, FuriString* error, voi
     }
 
     if(state == SelectNicknameScene) {
-        pokemon_name_set(pokemon_fap, STAT_NICKNAME, (char*)text);
+        pokemon_name_set(pokemon_fap->pdata, STAT_NICKNAME, (char*)text);
     } else {
-        pokemon_name_set(pokemon_fap, STAT_OT_NAME, (char*)text);
+        pokemon_name_set(pokemon_fap->pdata, STAT_OT_NAME, (char*)text);
     }
 
     return true;
@@ -81,7 +81,7 @@ void select_name_scene_on_enter(void* context) {
         break;
     }
 
-    pokemon_name_get(pokemon_fap, stat, name_buf, len);
+    pokemon_name_get(pokemon_fap->pdata, stat, name_buf, len);
 
     text_input_reset(pokemon_fap->text_input);
     text_input_set_validator(pokemon_fap->text_input, select_name_input_validator, pokemon_fap);

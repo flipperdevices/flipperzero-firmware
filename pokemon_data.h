@@ -3,8 +3,6 @@
 
 #pragma once
 
-#include "pokemon_app.h"
-
 #include <stdint.h>
 #include <furi.h>
 #include <math.h>
@@ -173,35 +171,54 @@ struct __attribute__((__packed__)) trade_data_block {
     /* OT name should not exceed 7 chars! */
     struct name ot_name[6];
     struct name nickname[6];
-
-    /* This will never be transmitted, it is to track the current EV/IV setting */
-    uint8_t stat_sel;
 };
 
+typedef struct pokemon_data PokemonData;
 typedef struct trade_data_block TradeBlock;
+typedef struct named_list NamedList;
+typedef struct pokemon_data_table PokemonTable;
 
-void *trade_block_alloc(PokemonFap *pokemon_fap);
+/* Could make this anonymous? */
+struct pokemon_data {
+    const NamedList* move_list;
+    const NamedList* stat_list;
+    const NamedList* type_list;
+    const PokemonTable* pokemon_table;
+    /* Pointer to the live trade_block */
+    void* trade_block;
+    /* Shortcut pointer to the actual party data in the trade block */
+    void* party;
 
-int named_list_pos_from_index_get(const void* list, uint8_t index);
-int named_list_index_from_pos_get(const void* list, uint8_t pos);
-const char* named_list_name_from_index_get(const void* list, uint8_t index);
-const char* named_list_name_from_pos_get(const void* list, uint8_t pos);
-int named_list_num_elements_get(const void* list);
+    /* TODO: Porbably make this its own enum?*/
+    /* Current EV/IV stat selection */
+    uint8_t stat_sel;
 
-uint8_t table_stat_base_get(const void* table, PokemonFap* pokemon_fap, DataStat stat, DataStatSub num);
-const char* table_stat_name_get(const void* table, int num);
-const Icon *table_icon_get(const void* table, int num);
+    /* Current generation */
+    uint8_t gen;
+};
 
-uint16_t pokemon_stat_get(PokemonFap* pokemon_fap, DataStat stat, DataStatSub num);
-void pokemon_stat_set(PokemonFap* pokemon_fap, DataStat stat, DataStatSub which, uint16_t val);
-uint16_t pokemon_stat_ev_get(PokemonFap* pokemon_fap, DataStat stat);
-void pokemon_stat_ev_set(PokemonFap* pokemon_fap, DataStat stat, uint16_t val);
-uint8_t pokemon_stat_iv_get(PokemonFap* pokemon_fap, DataStat stat);
-void pokemon_stat_iv_set(PokemonFap* pokemon_fap, int val);
-void pokemon_exp_set(PokemonFap* pokemon_fap, uint32_t exp);
-void pokemon_exp_calc(PokemonFap* pokemon_fap);
-void pokemon_stat_calc(PokemonFap* pokemon_fap, DataStat stat);
-void pokemon_default_nickname_set(char* dest, PokemonFap* pokemon_fap, size_t n);
-void pokemon_name_set(PokemonFap* pokemon_fap, DataStat stat, char* name);
-void pokemon_name_get(PokemonFap* pokemon_fap, DataStat stat, char* dest, size_t len);
+PokemonData* trade_block_alloc(void);
+
+int named_list_pos_from_index_get(const NamedList* list, uint8_t index);
+int named_list_index_from_pos_get(const NamedList* list, uint8_t pos);
+const char* named_list_name_from_index_get(const NamedList* list, uint8_t index);
+const char* named_list_name_from_pos_get(const NamedList* list, uint8_t pos);
+int named_list_num_elements_get(const NamedList* list);
+
+uint8_t table_stat_base_get(const PokemonTable* table, PokemonData *pdata, DataStat stat, DataStatSub num);
+const char* table_stat_name_get(const PokemonTable* table, int num);
+const Icon *table_icon_get(const PokemonTable* table, int num);
+
+uint16_t pokemon_stat_get(PokemonData *pdata, DataStat stat, DataStatSub num);
+void pokemon_stat_set(PokemonData *pdata, DataStat stat, DataStatSub which, uint16_t val);
+uint16_t pokemon_stat_ev_get(PokemonData *pdata, DataStat stat);
+void pokemon_stat_ev_set(PokemonData *pdata, DataStat stat, uint16_t val);
+uint8_t pokemon_stat_iv_get(PokemonData *pdata, DataStat stat);
+void pokemon_stat_iv_set(PokemonData *pdata, int val);
+void pokemon_exp_set(PokemonData *pdata, uint32_t exp);
+void pokemon_exp_calc(PokemonData *pdata);
+void pokemon_stat_calc(PokemonData *pdata, DataStat stat);
+void pokemon_default_nickname_set(char* dest, PokemonData *pdata, size_t n);
+void pokemon_name_set(PokemonData *pdata, DataStat stat, char* name);
+void pokemon_name_get(PokemonData *pdata, DataStat stat, char* dest, size_t len);
 #endif /* POKEMON_DATA_H */

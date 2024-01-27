@@ -11,14 +11,14 @@ static void select_move_selected_callback(void* context, uint32_t index) {
     uint32_t move = scene_manager_get_scene_state(pokemon_fap->scene_manager, SelectMoveScene);
 
     if(index == UINT32_MAX) {
-        pokemon_stat_set(pokemon_fap, STAT_MOVE, move, table_stat_base_get(pokemon_fap->pokemon_table, pokemon_fap, STAT_MOVE, move));
+        pokemon_stat_set(pokemon_fap->pdata, STAT_MOVE, move, table_stat_base_get(pokemon_fap->pdata->pokemon_table, pokemon_fap->pdata, STAT_MOVE, move));
     } else {
-        pokemon_stat_set(pokemon_fap, STAT_MOVE, move, index);
+        pokemon_stat_set(pokemon_fap->pdata, STAT_MOVE, move, index);
     }
     FURI_LOG_D(
         TAG,
         "[move] Set move %s to %d",
-        named_list_name_from_index_get(pokemon_fap->move_list, pokemon_stat_get(pokemon_fap, STAT_MOVE, move)),
+        named_list_name_from_index_get(pokemon_fap->pdata->move_list, pokemon_stat_get(pokemon_fap->pdata, STAT_MOVE, move)),
         (int)move);
 
     /* Move back to move menu */
@@ -57,7 +57,7 @@ void select_move_scene_on_enter(void* context) {
             sizeof(buf),
             "Move %d:         %s",
             i + 1,
-            named_list_name_from_index_get(pokemon_fap->move_list, pokemon_stat_get(pokemon_fap, STAT_MOVE, i)));
+            named_list_name_from_index_get(pokemon_fap->pdata->move_list, pokemon_stat_get(pokemon_fap->pdata, STAT_MOVE, i)));
         submenu_add_item(pokemon_fap->submenu, buf, i, select_move_number_callback, pokemon_fap);
     }
 
@@ -85,7 +85,7 @@ void select_move_index_scene_on_enter(void* context) {
      */
     submenu_add_item(
         pokemon_fap->submenu,
-        named_list_name_from_index_get(pokemon_fap->move_list, 0),
+        named_list_name_from_index_get(pokemon_fap->pdata->move_list, 0),
         0,
         select_move_selected_callback,
         pokemon_fap);
@@ -96,14 +96,14 @@ void select_move_index_scene_on_enter(void* context) {
         sizeof(buf),
         "Default [%s]",
         named_list_name_from_index_get(
-            pokemon_fap->move_list, pokemon_stat_get(pokemon_fap, STAT_MOVE, move_num)));
+            pokemon_fap->pdata->move_list, pokemon_stat_get(pokemon_fap->pdata, STAT_MOVE, move_num)));
     submenu_add_item(
         pokemon_fap->submenu, buf, UINT32_MAX, select_move_selected_callback, pokemon_fap);
 
     /* Now, walk through the list and make a submenu item for each move's starting letter */
     /* XXX: fix this asap */
     for(i = 1;; i++) {
-        name = named_list_name_from_pos_get(pokemon_fap->move_list, i);
+        name = named_list_name_from_pos_get(pokemon_fap->pdata->move_list, i);
         if(name == NULL) break;
 	if(name[0] != letter[0]) {
             /* XXX: This will need some work when I get to adding generation ii stuff, not worrying about this now */
@@ -129,13 +129,13 @@ void select_move_set_scene_on_enter(void* context) {
     /* NOTE! Start with index of 1 in the move list since 0 should always be no move! */
     submenu_reset(pokemon_fap->submenu);
     for(i = 1;; i++) {
-        name = named_list_name_from_pos_get(pokemon_fap->move_list, i);
+        name = named_list_name_from_pos_get(pokemon_fap->pdata->move_list, i);
         if(name == NULL) break;
         if(name[0] == letter) {
             submenu_add_item(
                 pokemon_fap->submenu,
 		name,
-		named_list_index_from_pos_get(pokemon_fap->move_list, i),
+		named_list_index_from_pos_get(pokemon_fap->pdata->move_list, i),
                 select_move_selected_callback,
                 pokemon_fap);
         }

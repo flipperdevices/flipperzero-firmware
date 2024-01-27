@@ -58,7 +58,7 @@ PokemonFap* pokemon_alloc() {
         sizeof(struct gblink_pins));
 
     // Set up trade party struct
-    pokemon_fap->trade_block = (void*)trade_block_alloc(pokemon_fap);
+    pokemon_fap->pdata = trade_block_alloc();
 
     /* Set up gui modules used. It would be nice if these could be allocated and
      * freed as needed, however, the scene manager still requires pointers that
@@ -111,7 +111,7 @@ void free_app(PokemonFap* pokemon_fap) {
     furi_record_close(RECORD_GUI);
 
     // Free trade block
-    trade_block_free(pokemon_fap->trade_block);
+    trade_block_free(pokemon_fap->pdata->trade_block);
 
     // Free rest
     free(pokemon_fap);
