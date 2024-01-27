@@ -85,6 +85,7 @@ const char* const image_text[PROFILE_IMG_COUNT] = {
     "Moreleeloo",
     "Neuromancer",
     "Pikachu (Sleepy)",
+    "Pirate",
     "Rabbit",
     "Shinkai",
     "Skull",
@@ -104,9 +105,9 @@ const uint32_t image_value[PROFILE_IMG_COUNT] = {
     PIMG_FSOCIETY, PIMG_FSOCIETY2, PIMG_GOKUSET,     PIMG_GOKUKID,      PIMG_GOKUADULT,
     PIMG_GOKUSSJ,  PIMG_GOKUSSJ3,  PIMG_GUYFAWKES,   PIMG_LAIN,         PIMG_LEEROY,
     PIMG_MARIO,    PIMG_MARVIN,    PIMG_MORELEELLOO, PIMG_NEUROMANCER,  PIMG_PIKASLEEPY,
-    PIMG_RABBIT,   PIMG_SHINKAI,   PIMG_SKULL,       PIMG_SLIME,        PIMG_SONIC,
-    PIMG_SPIDER,   PIMG_TANKGIRL,  PIMG_TOTORO,      PIMG_WAIFU1,       PIMG_WAIFU2,
-    PIMG_WAIFU3,   PIMG_WRENCH};
+    PIMG_PIRATE,   PIMG_RABBIT,    PIMG_SHINKAI,     PIMG_SKULL,        PIMG_SLIME,
+    PIMG_SONIC,    PIMG_SPIDER,    PIMG_TANKGIRL,    PIMG_TOTORO,       PIMG_WAIFU1,
+    PIMG_WAIFU2,   PIMG_WAIFU3,    PIMG_WRENCH};
 
 const uint32_t name_value[PASSPORT_ON_OFF_COUNT] = {false, true};
 
