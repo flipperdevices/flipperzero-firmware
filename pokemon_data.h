@@ -178,7 +178,6 @@ typedef struct trade_data_block TradeBlock;
 typedef struct named_list NamedList;
 typedef struct pokemon_data_table PokemonTable;
 
-/* Could make this anonymous? */
 struct pokemon_data {
     const NamedList* move_list;
     const NamedList* stat_list;
@@ -189,7 +188,7 @@ struct pokemon_data {
     /* Shortcut pointer to the actual party data in the trade block */
     void* party;
 
-    /* TODO: Porbably make this its own enum?*/
+    /* TODO: Probably make this its own enum?*/
     /* Current EV/IV stat selection */
     uint8_t stat_sel;
 
@@ -199,16 +198,17 @@ struct pokemon_data {
 
 PokemonData* trade_block_alloc(void);
 
-int named_list_pos_from_index_get(const NamedList* list, uint8_t index);
-int named_list_index_from_pos_get(const NamedList* list, uint8_t pos);
-const char* named_list_name_from_index_get(const NamedList* list, uint8_t index);
-const char* named_list_name_from_pos_get(const NamedList* list, uint8_t pos);
-int named_list_num_elements_get(const NamedList* list);
+int namelist_pos_get(const NamedList* list, uint8_t index);
+int namelist_index_get(const NamedList* list, uint8_t pos);
+const char* namelist_name_get_index(const NamedList* list, uint8_t index);
+const char* namelist_name_get_pos(const NamedList* list, uint8_t pos);
+int namelist_cnt(const NamedList* list);
 
 uint8_t table_stat_base_get(const PokemonTable* table, PokemonData *pdata, DataStat stat, DataStatSub num);
 const char* table_stat_name_get(const PokemonTable* table, int num);
 const Icon *table_icon_get(const PokemonTable* table, int num);
 
+void pokemon_stat_memcpy(PokemonData* dst, void* traded, uint8_t which);
 uint16_t pokemon_stat_get(PokemonData *pdata, DataStat stat, DataStatSub num);
 void pokemon_stat_set(PokemonData *pdata, DataStat stat, DataStatSub which, uint16_t val);
 uint16_t pokemon_stat_ev_get(PokemonData *pdata, DataStat stat);

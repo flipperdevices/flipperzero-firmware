@@ -21,7 +21,7 @@ void select_stats_scene_on_enter(void* context) {
     for(i = 0; i < 6; i++) {
         submenu_add_item(
             pokemon_fap->submenu,
-            named_list_name_from_index_get(pokemon_fap->pdata->stat_list, i),
+            namelist_name_get_index(pokemon_fap->pdata->stat_list, i),
             i,
             select_stats_selected_callback,
             pokemon_fap);

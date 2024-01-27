@@ -151,7 +151,7 @@ void pokemon_recalculate(PokemonData* pdata, uint8_t recalc) {
     }
 }
 
-int named_list_num_elements_get(const NamedList* list) {
+int namelist_cnt(const NamedList* list) {
     int i;
 
     for(i = 0;; i++) {
@@ -159,7 +159,7 @@ int named_list_num_elements_get(const NamedList* list) {
     }
 }
 
-int named_list_pos_from_index_get(const NamedList* list, uint8_t index) {
+int namelist_pos_get(const NamedList* list, uint8_t index) {
     int i;
 
     for(i = 0;; i++) {
@@ -173,15 +173,15 @@ int named_list_pos_from_index_get(const NamedList* list, uint8_t index) {
     return 0;
 }
 
-int named_list_index_from_pos_get(const NamedList* list, uint8_t pos) {
+int namelist_index_get(const NamedList* list, uint8_t pos) {
 	return list[pos].index;
 }
 
-const char* named_list_name_from_index_get(const NamedList* list, uint8_t index) {
-    return list[named_list_pos_from_index_get(list, index)].name;
+const char* namelist_name_get_index(const NamedList* list, uint8_t index) {
+    return list[namelist_pos_get(list, index)].name;
 }
 
-const char* named_list_name_from_pos_get(const NamedList* list, uint8_t pos) {
+const char* namelist_name_get_pos(const NamedList* list, uint8_t pos) {
     return list[pos].name;
 }
 
@@ -456,7 +456,7 @@ void pokemon_stat_set(PokemonData* pdata, DataStat stat, DataStatSub which, uint
         recalc = (RECALC_STATS | RECALC_EXP | RECALC_EVS);
         break;
     case STAT_INDEX:
-        if(gen == GEN_I) ((struct pokemon_structure*)party)->index = val;
+        if(gen == GEN_I) ((struct pokemon_structure*)party)->index = val; // XXX: ALSO UPDATE PARTY_MEMBERS[0]!
         recalc = RECALC_ALL; // Always recalculate everything if we selected a different pokemon
         break;
     case STAT_NUM:
@@ -671,6 +671,24 @@ void pokemon_stat_calc(PokemonData* pdata, DataStat stat) {
     stat_tmp = stat_calc(stat_base, stat_iv, stat_ev, level, stat);
 
     pokemon_stat_set(pdata, stat, NONE, stat_tmp);
+}
+
+void pokemon_stat_memcpy(PokemonData* dst, void *traded, uint8_t which) {
+   /* Copy the traded-in Pokemon's main data to our struct */
+   /* XXX: Can use pokemon_stat_set */
+   ((TradeBlock*)dst->trade_block)->party_members[0] = ((TradeBlock*)traded)->party_members[which];
+   memcpy(
+       &(((TradeBlock*)dst->trade_block)->party[0]),
+       &(((TradeBlock*)traded)->party[which]),
+       sizeof(struct pokemon_structure));
+   memcpy(
+       &(((TradeBlock*)dst->trade_block)->nickname[0]),
+       &(((TradeBlock*)traded)->nickname[which]),
+       sizeof(struct name));
+   memcpy(
+       &(((TradeBlock*)dst->trade_block)->ot_name[0]),
+       &(((TradeBlock*)traded)->ot_name[which]),
+       sizeof(struct name));
 }
 
 const PokemonTable pokemon_table[] = {
