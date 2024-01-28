@@ -54,6 +54,7 @@ bool camera_suite_view_guide_input(InputEvent* event, void* context) {
                 CameraSuiteViewGuideModel * model,
                 {
                     UNUSED(model);
+                    // Go back to the main menu.
                     instance->callback(CameraSuiteCustomEventSceneGuideBack, instance->context);
                 },
                 true);
