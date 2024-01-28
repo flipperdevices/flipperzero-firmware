@@ -3,10 +3,15 @@ My YouTube channel [@MrDerekJamison](https://youtube.com/@MrDerekJamison) has a 
 
 ## Playlists
 There are a few different playlists:
-- [n00b](https://www.youtube.com/playlist?list=PLM1cyTMe-PYL8yUinRO8pKAf4DY6b4O6K) are videos about Flipper, Electronics, etc. that doesn't expect you to have any background knowledge.
-- [1337](https://www.youtube.com/playlist?list=PLM1cyTMe-PYKgVdttrysDB3b37hrfL8yK) are videos that try to understand the topic.  For example, instead of just playing back a signal, we might look at the data inside the signal.
-- [code](https://www.youtube.com/playlist?list=PLM1cyTMe-PYJaMQ6TWeK1mAWxORdjYJZ5) are videos for people looking to edit code in the Flipper or even write their own code.
 - [demo](https://www.youtube.com/playlist?list=PLM1cyTMe-PYLwMGndLPgQQh0RNxqaMUCF) are videos with demos of using the Flipper Zero.
+- [noob](https://www.youtube.com/playlist?list=PLM1cyTMe-PYL8yUinRO8pKAf4DY6b4O6K) are videos about Flipper, Electronics, etc. that doesn't expect you to have any background knowledge.
+- [flipboard](https://www.youtube.com/playlist?list=PLM1cyTMe-PYJ0c0ifVmyKnPA927OyJRaO) are videos about the FlipBoard macropad for the Flipper Zero.
+- [rolling-codes](https://www.youtube.com/playlist?list=PLM1cyTMe-PYJfnlDk3NjM85kU5VyCViNp) are videos about Sub-GHz rolling codes (remote control dynamic codes) the Flipper Zero.
+- [code](https://www.youtube.com/playlist?list=PLM1cyTMe-PYJaMQ6TWeK1mAWxORdjYJZ5) are videos for people looking to edit code in the Flipper or even write their own code.
+- [gpio](https://www.youtube.com/playlist?list=PLM1cyTMe-PYJCYA-yQ8OcC9jILsS004Tm) are videos about using the GPIO (General Purpose Input/Output) pins on the top of the the Flipper Zero.
+- [ux](https://www.youtube.com/playlist?list=PLM1cyTMe-PYJaMQ6TWeK1mAWxORdjYJZ5) are videos for people looking to write programs for the Flipper Zero focused on the screen and dpad of the Flipper.
+- [geek](https://www.youtube.com/playlist?list=PLM1cyTMe-PYKgVdttrysDB3b37hrfL8yK) are videos that try to understand the topic.  For example, instead of just playing back a signal, we might look at the data inside the signal.
+- [dolphin](https://www.youtube.com/playlist?list=PLM1cyTMe-PYLYry4Eq3msTxoBWv5Nmt3U) are videos about the Dolphin experimenter board for the Flipper Zero.
 
 
 
