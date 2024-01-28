@@ -25,13 +25,14 @@ typedef enum {
 
 typedef struct {
     DemoEventType type; // The reason for this event.
-    InputEvent input;   // This data is specific to keypress data.
+    InputEvent input; // This data is specific to keypress data.
     // You can add additional data that is helpful for your events.
 } DemoEvent;
 
 typedef struct {
     FuriString* buffer;
     // You can add additional state here.
+    int32_t counter;
 } DemoData;
 
 typedef struct {
@@ -56,17 +57,23 @@ static void basic_demo_render_callback(Canvas* canvas, void* ctx) {
     }
 
     DemoData* data = demo_context->data;
-    furi_string_printf(data->buffer, "Basic");
-    furi_string_cat_printf(data->buffer, " demo");
+    furi_string_printf(data->buffer, "Basic ViewPort demo");
 
     canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str_aligned(canvas, 45, 30, AlignLeft, AlignTop, furi_string_get_cstr(data->buffer));
+    canvas_draw_str_aligned(
+        canvas, 15, 25, AlignLeft, AlignTop, furi_string_get_cstr(data->buffer));
+
+    furi_string_printf(data->buffer, "OK pressed");
+    furi_string_cat_printf(data->buffer, " %ld times.", data->counter);
+    canvas_set_font(canvas, FontSecondary);
+    canvas_draw_str_aligned(
+        canvas, 15, 40, AlignLeft, AlignTop, furi_string_get_cstr(data->buffer));
 
     // Release the context, so other threads can update the data.
     furi_mutex_release(demo_context->mutex);
 }
 
-int32_t basic_demo_app(void* p) {
+int32_t basic_view_port_demo_app(void* p) {
     UNUSED(p);
 
     // Configure our initial data.
@@ -91,18 +98,23 @@ int32_t basic_demo_app(void* p) {
     DemoEvent event;
     bool processing = true;
     do {
-        if (furi_message_queue_get(demo_context->queue, &event, FuriWaitForever) == FuriStatusOk) {
+        if(furi_message_queue_get(demo_context->queue, &event, FuriWaitForever) == FuriStatusOk) {
             FURI_LOG_T(TAG, "Got event type: %d", event.type);
-            switch (event.type) {
-                case DemoEventTypeKey:
-                    // Short press of back button exits the program.
-                    if(event.input.type == InputTypeShort && event.input.key == InputKeyBack) {
-                        FURI_LOG_I(TAG, "Short-Back pressed. Exiting program.");
-                        processing = false;
+            switch(event.type) {
+            case DemoEventTypeKey:
+                // Short press of back button exits the program.
+                if(event.input.type == InputTypeShort && event.input.key == InputKeyBack) {
+                    FURI_LOG_I(TAG, "Short-Back pressed. Exiting program.");
+                    processing = false;
+                } else if(event.input.type == InputTypeShort && event.input.key == InputKeyOk) {
+                    FURI_LOG_I(TAG, "Short-OK pressed.");
+                    if(furi_mutex_acquire(demo_context->mutex, FuriWaitForever) == FuriStatusOk) {
+                        demo_context->data->counter++;
+                        furi_mutex_release(demo_context->mutex);
                     }
-                    break;
-                default:
-                    break;
+                }
+            default:
+                break;
             }
 
             // Send signal to update the screen (callback will get invoked at some point later.)
@@ -111,7 +123,7 @@ int32_t basic_demo_app(void* p) {
             // We had an issue getting message from the queue, so exit application.
             processing = false;
         }
-    } while (processing);
+    } while(processing);
 
     // Free resources
     view_port_enabled_set(view_port, false);
