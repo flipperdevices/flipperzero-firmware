@@ -100,7 +100,7 @@ NfcCommand picopass_poller_pre_auth_handler(PicopassPoller* instance) {
         memcpy(
             instance->data->card_data[PICOPASS_CONFIG_BLOCK_INDEX].data,
             block.data,
-            sizeof(PicopassBlock));
+            PICOPASS_BLOCK_LEN);
         FURI_LOG_D(
             TAG,
             "config %02x%02x%02x%02x%02x%02x%02x%02x",
@@ -121,7 +121,7 @@ NfcCommand picopass_poller_pre_auth_handler(PicopassPoller* instance) {
         memcpy(
             instance->data->card_data[PICOPASS_SECURE_EPURSE_BLOCK_INDEX].data,
             block.data,
-            sizeof(PicopassBlock));
+            PICOPASS_BLOCK_LEN);
         FURI_LOG_D(
             TAG,
             "epurse %02x%02x%02x%02x%02x%02x%02x%02x",
@@ -142,7 +142,7 @@ NfcCommand picopass_poller_pre_auth_handler(PicopassPoller* instance) {
         memcpy(
             instance->data->card_data[PICOPASS_SECURE_AIA_BLOCK_INDEX].data,
             block.data,
-            sizeof(PicopassBlock));
+            PICOPASS_BLOCK_LEN);
         FURI_LOG_D(
             TAG,
             "aia %02x%02x%02x%02x%02x%02x%02x%02x",
@@ -188,12 +188,12 @@ NfcCommand picopass_poller_check_security(PicopassPoller* instance) {
 
     // Thank you proxmark!
     PicopassBlock temp_block = {};
-    memset(temp_block.data, 0xff, sizeof(PicopassBlock));
+    memset(temp_block.data, 0xff, PICOPASS_BLOCK_LEN);
     instance->data->pacs.legacy =
         (memcmp(
              instance->data->card_data[PICOPASS_SECURE_AIA_BLOCK_INDEX].data,
              temp_block.data,
-             sizeof(PicopassBlock)) == 0);
+             PICOPASS_BLOCK_LEN) == 0);
 
     temp_block.data[3] = 0x00;
     temp_block.data[4] = 0x06;
@@ -201,7 +201,7 @@ NfcCommand picopass_poller_check_security(PicopassPoller* instance) {
         (memcmp(
              instance->data->card_data[PICOPASS_SECURE_AIA_BLOCK_INDEX].data,
              temp_block.data,
-             sizeof(PicopassBlock)) == 0);
+             PICOPASS_BLOCK_LEN) == 0);
 
     if(instance->data->pacs.se_enabled) {
         FURI_LOG_D(TAG, "SE enabled");
@@ -455,9 +455,7 @@ NfcCommand picopass_poller_read_block_handler(PicopassPoller* instance) {
             block.data[6],
             block.data[7]);
         memcpy(
-            instance->data->card_data[instance->current_block].data,
-            block.data,
-            sizeof(PicopassBlock));
+            instance->data->card_data[instance->current_block].data, block.data, PICOPASS_BLOCK_LEN);
         instance->current_block++;
     } while(false);
 

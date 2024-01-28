@@ -20,17 +20,14 @@ static PicopassError picopass_listener_process_error(NfcError error) {
 
 void picopass_listener_init_cipher_state_key(PicopassListener* instance, const uint8_t* key) {
     uint8_t cc[PICOPASS_BLOCK_LEN] = {};
-    memcpy(
-        cc,
-        instance->data->card_data[PICOPASS_SECURE_EPURSE_BLOCK_INDEX].data,
-        sizeof(PicopassBlock));
+    memcpy(cc, instance->data->card_data[PICOPASS_SECURE_EPURSE_BLOCK_INDEX].data, PICOPASS_BLOCK_LEN);
 
     instance->cipher_state = loclass_opt_doTagMAC_1(cc, key);
 }
 
 void picopass_listener_init_cipher_state(PicopassListener* instance) {
     uint8_t key[PICOPASS_BLOCK_LEN] = {};
-    memcpy(key, instance->data->card_data[instance->key_block_num].data, sizeof(PicopassBlock));
+    memcpy(key, instance->data->card_data[instance->key_block_num].data, PICOPASS_BLOCK_LEN);
 
     picopass_listener_init_cipher_state_key(instance, key);
 }
