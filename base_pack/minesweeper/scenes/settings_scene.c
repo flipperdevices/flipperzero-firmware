@@ -21,6 +21,7 @@ typedef enum {
     MineSweeperSettingsScreenEventHeightChange,
     MineSweeperSettingsScreenEventSolvableChange,
     MineSweeperSettingsScreenEventInfoChange,
+    MineSweeperSettingsScreenEventFeedbackChange,
 } MineSweeperSettingsScreenEvent;
 
 static const char* settings_screen_difficulty_text[MineSweeperSettingsScreenDifficultyTypeNum] = {
@@ -163,10 +164,30 @@ static void minesweeper_scene_settings_screen_set_solvable(VariableItem* item) {
     
 }
 
+static void minesweeper_scene_settings_screen_set_feedback(VariableItem* item) { 
+    furi_assert(item);
+
+    MineSweeperApp* app = variable_item_get_context(item);
+
+    uint8_t index = variable_item_get_current_value_index(item);
+    
+
+    app->feedback_enabled = index;
+
+    FURI_LOG_I(TAG, "FEEDBACK CALLBACK INDEX %d", app->feedback_enabled);
+    
+    variable_item_set_current_value_text(
+            item,
+            ((index) ? "Enabled" : "Disabled"));
+
+    view_dispatcher_send_custom_event(app->view_dispatcher, MineSweeperSettingsScreenEventFeedbackChange);
+}
+
 static void minesweeper_scene_settings_screen_set_info(VariableItem* item) {
     furi_assert(item);
 
     MineSweeperApp* app = variable_item_get_context(item);
+
 
     view_dispatcher_send_custom_event(app->view_dispatcher, MineSweeperSettingsScreenEventInfoChange);
 }
@@ -268,6 +289,22 @@ void minesweeper_scene_settings_screen_on_enter(void* context) {
             item,
             settings_screen_verifier_text[idx]);
     
+    // Set sound feedback item 
+    item = variable_item_list_add(
+            va,
+            "Feedback",
+            2,
+            minesweeper_scene_settings_screen_set_feedback,
+            app);
+
+    variable_item_set_current_value_index(
+            item,
+            app->feedback_enabled);
+
+    variable_item_set_current_value_text(
+            item,
+            ((app->feedback_enabled) ? "Enabled" : "Disabled"));
+    
     // Set info item
     item = variable_item_list_add(
             va,
@@ -323,6 +360,10 @@ bool minesweeper_scene_settings_screen_on_event(void* context, SceneManagerEvent
                 scene_manager_next_scene(app->scene_manager, MineSweeperSceneInfoScreen);
                 break;
 
+            case MineSweeperSettingsScreenEventFeedbackChange : 
+                // If only the feedback option is changed we can just save without restarting
+                mine_sweeper_save_settings(app);
+                break;
             default :
                 break;
         };
@@ -330,11 +371,12 @@ bool minesweeper_scene_settings_screen_on_event(void* context, SceneManagerEvent
 
     } else if (event.type == SceneManagerEventTypeBack) {
 
-        // If there are changes in the width, height, or difficulty go to confirmation scren
         if (app->is_settings_changed) { 
+            // If there are changes in the width, height, or difficulty go to confirmation screen for restart
 
             scene_manager_next_scene(app->scene_manager, MineSweeperSceneConfirmationScreen);
         } else {
+            // Otherwise just go back
 
             memset(&app->t_settings_info, 0, sizeof(app->t_settings_info));
 
