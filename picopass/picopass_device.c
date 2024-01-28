@@ -369,6 +369,7 @@ bool picopass_file_select(PicopassDevice* dev) {
 void picopass_device_data_clear(PicopassDeviceData* dev_data) {
     for(size_t i = 0; i < PICOPASS_MAX_APP_LIMIT; i++) {
         memset(dev_data->card_data[i].data, 0, sizeof(dev_data->card_data[i].data));
+        dev_data->card_data[i].valid = false;
     }
     dev_data->pacs.legacy = false;
     dev_data->pacs.se_enabled = false;
