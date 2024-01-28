@@ -88,6 +88,7 @@ PokemonData* pokemon_data_alloc(uint8_t gen) {
     /* This causes all other stats to be recalculated */
     pokemon_stat_set(pdata, STAT_NUM, NONE, 0); // First Pokemon
     pokemon_stat_set(pdata, STAT_LEVEL, NONE, 2); // Minimum level of 2
+    pokemon_stat_set(pdata, STAT_CONDITION, NONE, 0); // No status conditions
 
     return pdata;
 }
@@ -395,6 +396,9 @@ uint16_t pokemon_stat_get(PokemonData* pdata, DataStat stat, DataStatSub which) 
     case STAT_SEL:
         if(gen == GEN_I) return pdata->stat_sel;
 	break;
+    case STAT_CONDITION:
+        if (gen == GEN_I) return ((PokemonPartyGenI*)party)->status_condition = val;
+        break;
     case STAT_GEN:
 	return GEN_I;
     default:
@@ -470,19 +474,21 @@ void pokemon_stat_set(PokemonData* pdata, DataStat stat, DataStatSub which, uint
         recalc = RECALC_ALL; // Always recalculate everything if we selected a different pokemon
         break;
     case STAT_NUM:
-        if(gen == GEN_I) ((PokemonPartyGenI*)party)->index = pdata->pokemon_table[val].index;
-        recalc = RECALC_ALL; // Always recalculate everything if we selected a different pokemon
+        pokemon_stat_set(pdata, STAT_INDEX, NONE, pdata->pokemon_table[val].index);
         break;
     case STAT_OT_ID:
         if(gen == GEN_I) ((PokemonPartyGenI*)party)->ot_id = val_swap;
         break;
     case STAT_SEL:
         if(gen == GEN_I) pdata->stat_sel = val;
-	recalc = RECALC_EVIVS;
+	recalc = (RECALC_EVIVS | RECALC_STATS);
         break;
     case STAT_EXP:
         if(gen == GEN_I) ((PokemonPartyGenI*)party)->exp[which] = val;
 	break;
+    case STAT_CONDITION:
+        if (gen == GEN_I) ((PokemonPartyGenI*)party)->status_condition = val;
+        break;
     case STAT_GEN:
 	/* XXX: This needs to go away */
 	break;
@@ -527,7 +533,7 @@ static void pokemon_stat_ev_calc(PokemonData* pdata, EvIv val) {
     uint16_t ev;
     DataStat i;
 
-    level = pokemon_stat_get(pdata, STAT_LEVEL, 0);
+    level = pokemon_stat_get(pdata, STAT_LEVEL, NONE);
 
     /* Generate STATEXP */
     switch(val) {

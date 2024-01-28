@@ -72,6 +72,7 @@ typedef enum {
     STAT_LEVEL,
     STAT_INDEX,
     STAT_NUM,
+    STAT_CONDITION,
     STAT_NICKNAME,
     STAT_OT_NAME,
     STAT_OT_ID,
