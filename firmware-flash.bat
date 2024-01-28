@@ -4,9 +4,9 @@ setlocal EnableDelayedExpansion
 rem λ
 
 set CLI_FOUND_FOLLOW_UP=0
-set CLI_TEMP=%TEMP%\arduino-cli
+set CLI_TEMP=%TEMP%\camera-suite-assets
 set COMPILE_FLAG=firmware\.compile.flag
-set CONFIG_FILE=--config-file .\arduino-cli.yaml
+set ARDUINO_CLI_CONFIG_FILE=--config-file .\arduino-cli.yaml
 set DEFAULT_BOARD_FQBN=esp32:esp32:esp32cam
 set FIRMWARE_SRC=firmware\firmware.ino
 set SELECTED_BOARD=%DEFAULT_BOARD_FQBN%
@@ -28,6 +28,15 @@ echo - USB Channel = 1 (on newer firmware)
 echo - Baudrate = Host
 echo - UART Pins = 13,14
 echo - RTS/DTR Pins = None
+echo.
+echo Notes: 
+echo - You must have Git installed to use this script. If you do not have Git
+echo   installed, please install it from the following link:
+echo   https://git-scm.com/downloads
+echo - Temporary installation files will be installed to the following directory:
+echo   %CLI_TEMP%
+echo - Temp files will take up approximately 6GB of storage space.
+echo - You will have to option to delete the temp files after flashing.
 echo ------------------------------------------------------------------------------
 echo.
 pause
@@ -44,20 +53,20 @@ if not exist "arduino-cli.exe" (
     echo When the file is ready, press any key to check again.
     set /a CLI_FOUND_FOLLOW_UP+=1
     if %CLI_FOUND_FOLLOW_UP% geq 2 (
-        echo If you're still having issues, feel free to open a ticket at the following link:
+        echo If you are still having issues, feel free to open a ticket at the following link:
         echo https://github.com/CodyTolene/Flipper-Zero-Camera-Suite/issues
     )
     pause
     goto :checkCLI
 )
 if %CLI_FOUND_FOLLOW_UP% geq 1 (
-    echo File "arduino-cli.exe" found. Continuing...
+    echo File "arduino-cli.exe" found successfully. Continuing...
 )
 
 echo Checking configs...
-arduino-cli %CONFIG_FILE% config set directories.data %CLI_TEMP%\data
-arduino-cli %CONFIG_FILE% config set directories.downloads %CLI_TEMP%\downloads
-arduino-cli %CONFIG_FILE% config set directories.user %CLI_TEMP%\user %*
+arduino-cli %ARDUINO_CLI_CONFIG_FILE% config set directories.data %CLI_TEMP%\data
+arduino-cli %ARDUINO_CLI_CONFIG_FILE% config set directories.downloads %CLI_TEMP%\downloads
+arduino-cli %ARDUINO_CLI_CONFIG_FILE% config set directories.user %CLI_TEMP%\user %*
 
 echo Fetching assets...
 set DATA_FLAG=0
@@ -68,8 +77,18 @@ if not exist "%CLI_TEMP%\downloads" (
     set /a "DATA_FLAG+=1"
 )
 if %DATA_FLAG% gtr 0 (
-    arduino-cli %CONFIG_FILE% core update-index
-    arduino-cli %CONFIG_FILE% core install esp32:esp32
+    arduino-cli %ARDUINO_CLI_CONFIG_FILE% core update-index
+    arduino-cli %ARDUINO_CLI_CONFIG_FILE% core install esp32:esp32
+    echo Cloning ESPAsyncWebServer repository...
+    git clone https://github.com/me-no-dev/ESPAsyncWebServer.git "%CLI_TEMP%\ESPAsyncWebServer"
+    echo Cloning espressif Arduino ESP32 repository, a dependency of ESPAsyncWebServer...
+    git clone https://github.com/espressif/arduino-esp32.git "%CLI_TEMP%\arduino-esp32"
+    echo Cloning ESP8266 repository, a dependency of ESPAsyncWebServer...
+    git clone https://github.com/esp8266/Arduino.git "%CLI_TEMP%\ESP8266-Arduino"
+    echo Cloning AsyncTCP repository, a dependency of ESPAsyncWebServer...
+    git clone https://github.com/me-no-dev/AsyncTCP.git "%CLI_TEMP%\AsyncTCP"
+    echo Cloning ESPAsyncTCP repository, a dependency of ESPAsyncWebServer...
+    git clone https://github.com/me-no-dev/ESPAsyncTCP.git "%CLI_TEMP%\ESPAsyncTCP"
 ) else (
     echo Assets already installed. Skipping...
 )
@@ -113,7 +132,7 @@ set RETRY_COUNT=1
 :uploadLoop
 echo.
 echo Preparing firmware upload... Attempt number !RETRY_COUNT!...
-arduino-cli %CONFIG_FILE% upload -p %PORT_NUMBER% --fqbn !SELECTED_BOARD! %FIRMWARE_SRC%
+arduino-cli %ARDUINO_CLI_CONFIG_FILE% upload -p %PORT_NUMBER% --fqbn !SELECTED_BOARD! %FIRMWARE_SRC%
 if !ERRORLEVEL! EQU 0 (
     goto :uploadSuccess
 ) else (
@@ -128,7 +147,7 @@ if !ERRORLEVEL! EQU 0 (
             goto :uploadFirmware
         ) else (
             echo.
-            echo If you're still having issues, feel free to open a ticket at the following link:
+            echo If you are still having issues, feel free to open a ticket at the following link:
             echo https://github.com/CodyTolene/Flipper-Zero-Camera-Suite/issues
             echo.
             set /p DELETE_TEMP="Would you like to delete the temporary files? (Y/N): "
@@ -147,9 +166,9 @@ echo.
 echo Firmware upload was successful.
 echo Cleaning up...
 echo Restoring default configs...
-arduino-cli %CONFIG_FILE% config set directories.data C:\temp\arduino-cli\data
-arduino-cli %CONFIG_FILE% config set directories.downloads C:\temp\arduino-cli\staging
-arduino-cli %CONFIG_FILE% config set directories.user C:\temp\arduino-cli\user
+arduino-cli %ARDUINO_CLI_CONFIG_FILE% config set directories.data C:\temp\camera-suite-assets\data
+arduino-cli %ARDUINO_CLI_CONFIG_FILE% config set directories.downloads C:\temp\camera-suite-assets\staging
+arduino-cli %ARDUINO_CLI_CONFIG_FILE% config set directories.user C:\temp\camera-suite-assets\user
 set /p DELETE_TEMP="Would you like to delete the temporary files? (Y/N): "
 if /i "!DELETE_TEMP!"=="Y" (
     rmdir /s /q %CLI_TEMP%
@@ -174,7 +193,7 @@ if /i "%USE_DEFAULT_BOARD%"=="N" (
 echo.
 echo Compiling firmware, this will take a moment...
 echo.
-arduino-cli %CONFIG_FILE% compile --fqbn !SELECTED_BOARD! %FIRMWARE_SRC%
+arduino-cli %ARDUINO_CLI_CONFIG_FILE% compile --fqbn !SELECTED_BOARD! %FIRMWARE_SRC%
 if %ERRORLEVEL% EQU 0 (
     echo.
     echo Firmware compiled successfully.
@@ -188,9 +207,9 @@ if %ERRORLEVEL% EQU 0 (
     )
     echo Cleaning up...
     echo Restoring default configs...
-    arduino-cli %CONFIG_FILE% config set directories.data C:\temp\arduino-cli\data
-    arduino-cli %CONFIG_FILE% config set directories.downloads C:\temp\arduino-cli\staging
-    arduino-cli %CONFIG_FILE% config set directories.user C:\temp\arduino-cli\user
+    arduino-cli %ARDUINO_CLI_CONFIG_FILE% config set directories.data C:\temp\camera-suite-assets\data
+    arduino-cli %ARDUINO_CLI_CONFIG_FILE% config set directories.downloads C:\temp\camera-suite-assets\staging
+    arduino-cli %ARDUINO_CLI_CONFIG_FILE% config set directories.user C:\temp\camera-suite-assets\user
     set /p DELETE_TEMP="Would you like to delete the temporary files? (Y/N): "
     if /i "!DELETE_TEMP!"=="Y" (
         rmdir /s /q %CLI_TEMP%

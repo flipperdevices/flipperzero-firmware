@@ -123,6 +123,12 @@ That's it, let me know if you have any issues!
    https://dl.espressif.com/dl/package_esp32_index.json
    ```
 
+   or (a backup)
+
+   ```markdown
+   https://espressif.github.io/arduino-esp32/package_esp32_index.json
+   ```
+
 6. In the Arduino IDE, go to `Tools > Board > Boards Manager`.
 7. Search for `esp32` and install `esp32` by `Espressif Systems`.
 8. Plug in your Flipper Zero via USB. Make sure qFlipper or something else isn't connected to it already after doing so.
@@ -243,14 +249,14 @@ To contribute to this project, please follow the steps below:
 4. Request PR [here][pull-request-link], introduce work via your branch.
 5. Wait for review and merge.
 
-When developing the firmware, be sure to download the dependencies by running the `firmware-flash.bat` batch script at the root of this directory. This will download the ESP32-CAM firmware dependencies to the directories defined in the `arduino-cli.yaml` file post-run. Add these dependencies and their directories to your "Include path" in your IDE of choice. I prefer Visual Studio Code, there's a guide on how to get started with that workflow here:
+When developing the firmware, be sure to download the dependencies by running the `packages.bat` batch script at the root of this directory. This will download the ESP32-CAM firmware dependencies to your Windows TEMP folder. You can run the same script to remove the temporary files when you're done using them. Add these dependencies and their directories to your "Include path" in your IDE of choice. I prefer Visual Studio Code; there's a guide on how to get started with that workflow here:
 
 https://github.com/CodyTolene/Flipper-Zero-Development-Toolkit
 
 Example include path:
 
 ```markdown
-C:/Users/<username>/AppData/Local/Temp/arduino-cli/**
+C:/Users/<username>/AppData/Local/Temp/camera-suite-assets/**
 ```
 
 Thank you for any and all contributions to this project, I'm looking forward to seeing what you come up with! If you have any questions, please let me know by opening an issue [here][issues-link].

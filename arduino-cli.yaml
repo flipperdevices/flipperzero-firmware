@@ -7,9 +7,9 @@ build_cache:
 daemon:
     port: "50051"
 directories:
-    data: C:\temp\arduino-cli\data
-    downloads: C:\temp\arduino-cli\staging
-    user: C:\temp\arduino-cli\user
+    data: C:\temp\camera-suite-assets\data
+    downloads: C:\temp\camera-suite-assets\staging
+    user: C:\temp\camera-suite-assets\user
 library:
     enable_unsafe_install: false
 logging:
