@@ -2,7 +2,6 @@
 
 #include <furi.h>
 #include <furi_hal.h>
-#include <furi_hal_console.h>
 #include <furi_hal_uart.h>
 #include <gui/elements.h>
 #include <gui/gui.h>
@@ -39,15 +38,15 @@ typedef enum {
     WorkerEventRx = (1 << 2),
 } WorkerEventFlags;
 
-#define WORKER_EVENTS_MASK (WorkerEventStop | WorkerEventRx)
+#define CAMERA_WORKER_EVENTS_MASK (WorkerEventStop | WorkerEventRx)
 
 // Forward declaration
 typedef void (*CameraSuiteViewCameraCallback)(CameraSuiteCustomEvent event, void* context);
 
 typedef struct CameraSuiteViewCamera {
     CameraSuiteViewCameraCallback callback;
-    FuriStreamBuffer* rx_stream;
-    FuriThread* worker_thread;
+    FuriStreamBuffer* camera_rx_stream;
+    FuriThread* camera_worker_thread;
     NotificationApp* notification;
     View* view;
     void* context;

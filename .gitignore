@@ -5,6 +5,7 @@
 *.vscode
 *.zip
 .DS_Store
+.compile.flag
 .idea
 .submodules/*
 /venv
