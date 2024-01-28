@@ -93,7 +93,7 @@ void select_number_scene_on_enter(void* context) {
     text_input_reset(pokemon_fap->text_input);
     text_input_set_validator(pokemon_fap->text_input, select_number_input_validator, pokemon_fap);
     text_input_set_result_callback(
-        pokemon_fap->text_input, select_number_input_callback, pokemon_fap->pdata, number_buf, len, true);
+        pokemon_fap->text_input, select_number_input_callback, pokemon_fap, number_buf, len, true);
     text_input_set_header_text(pokemon_fap->text_input, header);
 
     view_dispatcher_add_view(

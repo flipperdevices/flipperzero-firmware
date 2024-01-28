@@ -13,25 +13,17 @@
 #include "pokemon_trade.h"
 #include "pokemon_pins.h"
 
-/* XXX: Make an alloc in here for this, no need for the main app to need
- * to care about it */
 static void scene_change_from_main_cb(void* context, uint32_t index) {
     PokemonFap* pokemon_fap = (PokemonFap*)context;
 
-    /* Set trade generation based on selected menu item */
-    switch(index) {
-    case GenITradeScene:
-        pokemon_stat_set(pokemon_fap->pdata, STAT_GEN, NONE, GEN_I);
-        break;
-    case GenIITradeScene:
-        pokemon_stat_set(pokemon_fap->pdata, STAT_GEN, NONE, GEN_II);
-        break;
-    default:
-        pokemon_stat_set(pokemon_fap->pdata, STAT_GEN, NONE, 0);
-        break;
-    }
-
-    /* XXX: Allocate trade block here based on generation selected */
+    /* Bit of a hack, encode the generation in the upper 16 bits of the Gen
+     * scene state. This gets cleared on first entry by the gen scene and
+     * shouldn't be an issue. It's the easiest way to communicat what generation
+     * to use without making another variable somewhere else.
+     * No matter the gen, we write it to GenI scene as any further Gen scene numbers
+     * are just used as markers
+     */
+    scene_manager_set_scene_state(pokemon_fap->scene_manager, GenITradeScene, index);
 
     /* Set scene state to the current index so we can have that element highlighted when
      * we return.

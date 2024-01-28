@@ -29,7 +29,7 @@ static bool select_name_input_validator(const char* text, FuriString* error, voi
     /* A blank field for the pokemon nickname means revert to default name */
     if(text[0] == '\0' && state == SelectNicknameScene) {
         /* Get the pokemon's name and populate our buffer with it */
-        /* XXX: Nidoran M/F are still a problem with this. */
+        /* TODO: Nidoran M/F are still a problem with this. */
         pokemon_default_nickname_set(name_buf, pokemon_fap->pdata, sizeof(name_buf));
         return true;
     }

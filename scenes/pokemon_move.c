@@ -101,12 +101,10 @@ void select_move_index_scene_on_enter(void* context) {
         pokemon_fap->submenu, buf, UINT32_MAX, select_move_selected_callback, pokemon_fap);
 
     /* Now, walk through the list and make a submenu item for each move's starting letter */
-    /* XXX: fix this asap */
     for(i = 1;; i++) {
         name = namelist_name_get_pos(pokemon_fap->pdata->move_list, i);
         if(name == NULL) break;
 	if(name[0] != letter[0]) {
-            /* XXX: This will need some work when I get to adding generation ii stuff, not worrying about this now */
             letter[0] = name[0];
             submenu_add_item(
                 pokemon_fap->submenu, letter, letter[0], select_move_index_callback, pokemon_fap);
@@ -131,7 +129,7 @@ void select_move_set_scene_on_enter(void* context) {
     for(i = 1;; i++) {
         name = namelist_name_get_pos(pokemon_fap->pdata->move_list, i);
         if(name == NULL) break;
-        if(name[0] == letter) {
+        if(name[0] == letter && (pokemon_fap->pdata->gen & namelist_gen_get_pos(pokemon_fap->pdata->move_list, i))) {
             submenu_add_item(
                 pokemon_fap->submenu,
 		name,

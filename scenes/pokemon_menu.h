@@ -26,4 +26,6 @@ typedef enum {
 
 extern const SceneManagerHandlers pokemon_scene_manager_handlers;
 
+bool main_menu_back_event_callback(void* context);
+
 #endif // POKEMON_MENU_H

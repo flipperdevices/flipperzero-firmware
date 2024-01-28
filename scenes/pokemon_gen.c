@@ -2,6 +2,9 @@
 #include "../pokemon_data.h"
 #include "../pokemon_char_encode.h"
 
+#include "../views/trade.h"
+#include "../views/select_pokemon.h"
+
 #include "pokemon_menu.h"
 #include "pokemon_stats.h"
 
@@ -28,6 +31,13 @@ static void scene_change_from_main_cb(void* context, uint32_t index) {
         break;
     }
 
+    /* Set the navigation handler back to the basic one in the main menu. We only
+     * want gen_back_event_callback from this menu as going back from the gen menu
+     * means we need to free pdata.
+     */
+    view_dispatcher_set_navigation_event_callback(
+        pokemon_fap->view_dispatcher, main_menu_back_event_callback);
+
     /* Set scene state to the current index so we can have that element highlighted when
      * we return.
      */
@@ -36,27 +46,68 @@ static void scene_change_from_main_cb(void* context, uint32_t index) {
 }
 
 /* XXX: Potentially trap Back when pressed here to prompt to prevent accidental leaving? */
-/* XXX: Free the trade and other pointers here */
 bool gen_back_event_callback(void* context) {
     furi_assert(context);
     PokemonFap* pokemon_fap = context;
+    
+    trade_block_free(pokemon_fap->pdata);
+    // Free views
+    /* These each remove themselves from the view_dispatcher */
+    select_pokemon_free(pokemon_fap->view_dispatcher, AppViewSelectPokemon, pokemon_fap->select);
+    trade_free(pokemon_fap->view_dispatcher, AppViewTrade, pokemon_fap->trade);
+
+    pokemon_fap->pdata = NULL;
+    pokemon_fap->select = NULL;
+    pokemon_fap->trade = NULL;
     return scene_manager_handle_back_event(pokemon_fap->scene_manager);
 }
 
-/* XXX: Probably put which gen we're using in the FAP */
-/* XXX: Should we allocate and free the trade block around here? */
 /* XXX: Does flipper have a monospace font available? */
-/* XXX: First entry here needs to have trade and other fap pointers set up */
 void gen_scene_on_enter(void* context) {
     char buf[32];
     char name_buf[11]; // All name buffers are 11 bytes at most, including term
     PokemonFap* pokemon_fap = (PokemonFap*)context;
     int pkmn_num;
+    uint32_t state;
+
+    // Set up trade party struct
+    if (!pokemon_fap->pdata) {
+        state = scene_manager_get_scene_state(pokemon_fap->scene_manager, GenITradeScene);
+        switch(state) {
+        case GenITradeScene:
+            state = GEN_I;
+            break;
+        case GenIITradeScene:
+            state = GEN_II;
+            break;
+        default:
+            state = 0;
+            break;
+        }
+        pokemon_fap->pdata = trade_block_alloc(state);
+
+	/* Clear the scene state as this is the first entry in to this scene
+	 * we definitely want to be completely reset.
+	 */
+	scene_manager_set_scene_state(pokemon_fap->scene_manager, GenITradeScene, 0);
+
+	/* Allocate select and trade views */
+        /* Allocates its own view and adds it to the main view_dispatcher */
+        pokemon_fap->select = select_pokemon_alloc(pokemon_fap, pokemon_fap->view_dispatcher, pokemon_fap->scene_manager, AppViewSelectPokemon);
+
+        // Trade View
+        /* Allocates its own view and adds it to the main view_dispatcher */
+        pokemon_fap->trade = trade_alloc(
+            pokemon_fap->pdata, &pokemon_fap->pins, pokemon_fap->view_dispatcher, AppViewTrade);
+    }
 
     pkmn_num = pokemon_stat_get(pokemon_fap->pdata, STAT_NUM, NONE);
 
     /* Clear the scene state of the Move scene since that is used to set the
      * highlighted menu item.
+     * This could be done in move, but move would need its own custom exit handler
+     * which is fine but would just waste a few more bytes compared to us handling
+     * it here.
      */
     scene_manager_set_scene_state(pokemon_fap->scene_manager, SelectMoveScene, 0);
 
@@ -114,6 +165,9 @@ void gen_scene_on_enter(void* context) {
     submenu_set_selected_item(
         pokemon_fap->submenu,
         scene_manager_get_scene_state(pokemon_fap->scene_manager, GenITradeScene));
+
+    view_dispatcher_set_navigation_event_callback(
+        pokemon_fap->view_dispatcher, gen_back_event_callback);
 
     view_dispatcher_switch_to_view(pokemon_fap->view_dispatcher, AppViewMainMenu);
 }

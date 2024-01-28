@@ -16,7 +16,7 @@
 struct __attribute__((__packed__)) named_list {
     const char* name;
     const uint8_t index;
-    const uint8_t generation;
+    const uint8_t gen;
 };
 
 struct __attribute__((__packed__)) pokemon_data_table {
@@ -42,15 +42,14 @@ const PokemonTable pokemon_table[];
 /* Allocates a chunk of memory for the trade data block and sets up some
  * default values.
  */
-/* TODO: Probably move this to pokemon_data */
-PokemonData* trade_block_alloc(void) {
+PokemonData* trade_block_alloc(uint8_t gen) {
     PokemonData* pdata;
 
     /* XXX: This will change depending on generation */
     pdata = malloc(sizeof(PokemonData));
+    pdata->trade_block = malloc(sizeof(TradeBlock));
 
-    /* XXX: this needs to move to scene */
-    pdata->gen = GEN_I;
+    pdata->gen = gen;
 
     /* Clear struct to be all TERM_ bytes as the various name strings need this */
     memset(pdata->trade_block, TERM_, sizeof(TradeBlock));
@@ -91,6 +90,11 @@ PokemonData* trade_block_alloc(void) {
     pokemon_stat_set(pdata, STAT_LEVEL, NONE, 2); // Minimum level of 2
 
     return pdata;
+}
+
+void trade_block_free(PokemonData* pdata) {
+    free(pdata->trade_block);
+    free(pdata);
 }
 
 /*******************************************
@@ -149,6 +153,10 @@ void pokemon_recalculate(PokemonData* pdata, uint8_t recalc) {
             pokemon_stat_calc(pdata, i);
         }
     }
+}
+
+uint8_t namelist_gen_get_pos(const NamedList* list, uint8_t pos) {
+    return list[pos].gen;
 }
 
 int namelist_cnt(const NamedList* list) {
@@ -213,17 +221,14 @@ void pokemon_name_set(PokemonData* pdata, DataStat stat, char* name) {
     case STAT_NICKNAME:
         ptr = ((TradeBlock*)pdata->trade_block)->nickname[0].str;
         len = 10;
-        FURI_LOG_D(TAG, "[data] nickname set to %s", name);
         break;
     case STAT_OT_NAME:
         ptr = ((TradeBlock*)pdata->trade_block)->ot_name[0].str;
         len = 7;
-        FURI_LOG_D(TAG, "[data] OT name set to %s", name);
         break;
     case STAT_TRAINER_NAME:
         ptr = ((TradeBlock*)pdata->trade_block)->trainer_name.str;
         len = 7;
-        FURI_LOG_D(TAG, "[data] trainer name set to %s", name);
         break;
     default:
         furi_crash("name");
@@ -235,6 +240,7 @@ void pokemon_name_set(PokemonData* pdata, DataStat stat, char* name) {
 
     /* Set the encoded name in the buffer */
     pokemon_str_to_encoded_array(ptr, name, len);
+    FURI_LOG_D(TAG, "[data] %d name set to %s", stat, name);
 }
 
 void pokemon_name_get(PokemonData* pdata, DataStat stat, char* dest, size_t len) {
@@ -456,7 +462,10 @@ void pokemon_stat_set(PokemonData* pdata, DataStat stat, DataStatSub which, uint
         recalc = (RECALC_STATS | RECALC_EXP | RECALC_EVS);
         break;
     case STAT_INDEX:
-        if(gen == GEN_I) ((struct pokemon_structure*)party)->index = val; // XXX: ALSO UPDATE PARTY_MEMBERS[0]!
+        if(gen == GEN_I) {
+            ((struct pokemon_structure*)party)->index = val;
+            ((TradeBlock*)pdata->trade_block)->party_members[0] = val;
+        }
         recalc = RECALC_ALL; // Always recalculate everything if we selected a different pokemon
         break;
     case STAT_NUM:
@@ -478,7 +487,7 @@ void pokemon_stat_set(PokemonData* pdata, DataStat stat, DataStatSub which, uint
         furi_crash("STAT_SET: invalid stat");
         break;
     }
-    FURI_LOG_D(TAG, "[data] stat %d set to %d", stat, __builtin_bswap16(val));
+    FURI_LOG_D(TAG, "[data] stat %d:%d set to %d", stat, which, val);
     pokemon_recalculate(pdata, recalc);
 }
 
@@ -667,7 +676,7 @@ void pokemon_stat_calc(PokemonData* pdata, DataStat stat) {
     level = pokemon_stat_get(pdata, STAT_LEVEL, NONE);
     stat_base = table_stat_base_get(pdata->pokemon_table, pdata, stat, NONE);
     stat_ev = pokemon_stat_ev_get(pdata, stat);
-    stat_iv = (uint8_t)pokemon_stat_iv_get(pdata, stat);
+    stat_iv = pokemon_stat_iv_get(pdata, stat);
     stat_tmp = stat_calc(stat_base, stat_iv, stat_ev, level, stat);
 
     pokemon_stat_set(pdata, stat, NONE, stat_tmp);
@@ -676,6 +685,9 @@ void pokemon_stat_calc(PokemonData* pdata, DataStat stat) {
 void pokemon_stat_memcpy(PokemonData* dst, void *traded, uint8_t which) {
    /* Copy the traded-in Pokemon's main data to our struct */
    /* XXX: Can use pokemon_stat_set */
+   /* XXX: TODO: While slower, want to implement this as a handful of functions to
+    * get from the traded struct and set the main struct.
+    */
    ((TradeBlock*)dst->trade_block)->party_members[0] = ((TradeBlock*)traded)->party_members[which];
    memcpy(
        &(((TradeBlock*)dst->trade_block)->party[0]),

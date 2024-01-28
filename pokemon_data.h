@@ -196,12 +196,14 @@ struct pokemon_data {
     uint8_t gen;
 };
 
-PokemonData* trade_block_alloc(void);
+PokemonData* trade_block_alloc(uint8_t gen);
+void trade_block_free(PokemonData* pdata);
 
 int namelist_pos_get(const NamedList* list, uint8_t index);
 int namelist_index_get(const NamedList* list, uint8_t pos);
 const char* namelist_name_get_index(const NamedList* list, uint8_t index);
 const char* namelist_name_get_pos(const NamedList* list, uint8_t pos);
+uint8_t namelist_gen_get_pos(const NamedList* list, uint8_t pos);
 int namelist_cnt(const NamedList* list);
 
 uint8_t table_stat_base_get(const PokemonTable* table, PokemonData *pdata, DataStat stat, DataStatSub num);

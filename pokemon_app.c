@@ -9,10 +9,6 @@
 #include "pokemon_char_encode.h"
 
 
-static void trade_block_free(TradeBlock* trade) {
-    free(trade);
-}
-
 /* The MALVEKE board has an esp32 which is set to TX on the flipper's default
  * UART pins. If this pin shows signs of something connected, assume a MALVEKE
  * board is being used.
@@ -57,9 +53,6 @@ PokemonFap* pokemon_alloc() {
         &common_pinouts[pokemon_fap->malveke_detected],
         sizeof(struct gblink_pins));
 
-    // Set up trade party struct
-    pokemon_fap->pdata = trade_block_alloc();
-
     /* Set up gui modules used. It would be nice if these could be allocated and
      * freed as needed, however, the scene manager still requires pointers that
      * get set up as a part of the scene. Therefore, individual scene's exit
@@ -75,25 +68,11 @@ PokemonFap* pokemon_alloc() {
         pokemon_fap->view_dispatcher, AppViewMainMenu, submenu_get_view(pokemon_fap->submenu));
     scene_manager_next_scene(pokemon_fap->scene_manager, MainMenuScene);
 
-    // Select Pokemon View
-    /* Allocates its own view and adds it to the main view_dispatcher */
-    pokemon_fap->select = (void*)select_pokemon_alloc(pokemon_fap, pokemon_fap->view_dispatcher, pokemon_fap->scene_manager, AppViewSelectPokemon);
-
-    // Trade View
-    /* Allocates its own view and adds it to the main view_dispatcher */
-    pokemon_fap->trade = trade_alloc(
-        pokemon_fap, &pokemon_fap->pins, pokemon_fap->view_dispatcher, AppViewTrade);
-
     return pokemon_fap;
 }
 
 void free_app(PokemonFap* pokemon_fap) {
     furi_assert(pokemon_fap);
-
-    // Free views
-    /* These each remove themselves from the view_dispatcher */
-    select_pokemon_free(pokemon_fap->view_dispatcher, AppViewSelectPokemon, pokemon_fap->select);
-    trade_free(pokemon_fap->view_dispatcher, AppViewTrade, pokemon_fap->trade);
 
     view_dispatcher_remove_view(pokemon_fap->view_dispatcher, AppViewMainMenu);
 
@@ -109,9 +88,6 @@ void free_app(PokemonFap* pokemon_fap) {
 
     // Close records
     furi_record_close(RECORD_GUI);
-
-    // Free trade block
-    trade_block_free(pokemon_fap->pdata->trade_block);
 
     // Free rest
     free(pokemon_fap);
