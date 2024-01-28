@@ -39,5 +39,6 @@ int32_t minimal_viewport_demo_app(void* p) {
     gui_remove_view_port(gui, view_port);
     view_port_free(view_port);
     furi_record_close(RECORD_GUI);
+    furi_message_queue_free(queue);
     return 0;
 }
