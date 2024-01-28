@@ -50,7 +50,7 @@ bool gen_back_event_callback(void* context) {
     furi_assert(context);
     PokemonFap* pokemon_fap = context;
     
-    trade_block_free(pokemon_fap->pdata);
+    pokemon_data_free(pokemon_fap->pdata);
     // Free views
     /* These each remove themselves from the view_dispatcher */
     select_pokemon_free(pokemon_fap->view_dispatcher, AppViewSelectPokemon, pokemon_fap->select);
@@ -84,7 +84,7 @@ void gen_scene_on_enter(void* context) {
             state = 0;
             break;
         }
-        pokemon_fap->pdata = trade_block_alloc(state);
+        pokemon_fap->pdata = pokemon_data_alloc(state);
 
 	/* Clear the scene state as this is the first entry in to this scene
 	 * we definitely want to be completely reset.

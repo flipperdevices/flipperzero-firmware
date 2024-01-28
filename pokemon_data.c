@@ -42,28 +42,28 @@ const PokemonTable pokemon_table[];
 /* Allocates a chunk of memory for the trade data block and sets up some
  * default values.
  */
-PokemonData* trade_block_alloc(uint8_t gen) {
+PokemonData* pokemon_data_alloc(uint8_t gen) {
     PokemonData* pdata;
 
     /* XXX: This will change depending on generation */
     pdata = malloc(sizeof(PokemonData));
-    pdata->trade_block = malloc(sizeof(TradeBlock));
+    pdata->trade_block = malloc(sizeof(TradeBlockGenI));
 
     pdata->gen = gen;
 
     /* Clear struct to be all TERM_ bytes as the various name strings need this */
-    memset(pdata->trade_block, TERM_, sizeof(TradeBlock));
+    memset(pdata->trade_block, TERM_, sizeof(TradeBlockGenI));
 
     /* The party_members element needs to be 0xff for unused */
-    memset(((TradeBlock*)pdata->trade_block)->party_members, 0xFF, sizeof(((TradeBlock*)pdata->trade_block)->party_members));
+    memset(((TradeBlockGenI*)pdata->trade_block)->party_members, 0xFF, sizeof(((TradeBlockGenI*)pdata->trade_block)->party_members));
 
-    pdata->party = ((TradeBlock*)pdata->trade_block)->party;
+    pdata->party = ((TradeBlockGenI*)pdata->trade_block)->party;
 
     /* Zero the main party data, TERM_ in there can cause weirdness */
     memset(pdata->party, 0x00, sizeof((*pdata->party)));
 
     /* Set our Name, the pokemon's default OT name and ID */
-    ((TradeBlock*)pdata->trade_block)->party_cnt = 1;
+    ((TradeBlockGenI*)pdata->trade_block)->party_cnt = 1;
 
     /* Set up lists */
     pdata->move_list = move_list;
@@ -92,7 +92,7 @@ PokemonData* trade_block_alloc(uint8_t gen) {
     return pdata;
 }
 
-void trade_block_free(PokemonData* pdata) {
+void pokemon_data_free(PokemonData* pdata) {
     free(pdata->trade_block);
     free(pdata);
 }
@@ -219,15 +219,15 @@ void pokemon_name_set(PokemonData* pdata, DataStat stat, char* name) {
 
     switch(stat) {
     case STAT_NICKNAME:
-        ptr = ((TradeBlock*)pdata->trade_block)->nickname[0].str;
+        ptr = ((TradeBlockGenI*)pdata->trade_block)->nickname[0].str;
         len = 10;
         break;
     case STAT_OT_NAME:
-        ptr = ((TradeBlock*)pdata->trade_block)->ot_name[0].str;
+        ptr = ((TradeBlockGenI*)pdata->trade_block)->ot_name[0].str;
         len = 7;
         break;
     case STAT_TRAINER_NAME:
-        ptr = ((TradeBlock*)pdata->trade_block)->trainer_name.str;
+        ptr = ((TradeBlockGenI*)pdata->trade_block)->trainer_name.str;
         len = 7;
         break;
     default:
@@ -249,10 +249,10 @@ void pokemon_name_get(PokemonData* pdata, DataStat stat, char* dest, size_t len)
 
     switch(stat) {
     case STAT_NICKNAME:
-        ptr = ((TradeBlock*)pdata->trade_block)->nickname[0].str;
+        ptr = ((TradeBlockGenI*)pdata->trade_block)->nickname[0].str;
         break;
     case STAT_OT_NAME:
-        ptr = ((TradeBlock*)pdata->trade_block)->ot_name[0].str;
+        ptr = ((TradeBlockGenI*)pdata->trade_block)->ot_name[0].str;
         break;
     default:
         furi_crash("name_get invalid");
@@ -329,67 +329,67 @@ uint16_t pokemon_stat_get(PokemonData* pdata, DataStat stat, DataStatSub which) 
 
     switch(stat) {
     case STAT_ATK:
-        if(gen == GEN_I) val = ((struct pokemon_structure*)party)->atk;
+        if(gen == GEN_I) val = ((PokemonPartyGenI*)party)->atk;
         break;
     case STAT_DEF:
-        if(gen == GEN_I) val = ((struct pokemon_structure*)party)->def;
+        if(gen == GEN_I) val = ((PokemonPartyGenI*)party)->def;
         break;
     case STAT_SPD:
-        if(gen == GEN_I) val = ((struct pokemon_structure*)party)->spd;
+        if(gen == GEN_I) val = ((PokemonPartyGenI*)party)->spd;
         break;
     case STAT_SPC:
-        if(gen == GEN_I) val = ((struct pokemon_structure*)party)->spc;
+        if(gen == GEN_I) val = ((PokemonPartyGenI*)party)->spc;
         break;
     case STAT_HP:
-        if(gen == GEN_I) val = ((struct pokemon_structure*)party)->hp;
+        if(gen == GEN_I) val = ((PokemonPartyGenI*)party)->hp;
         break;
     case STAT_ATK_EV:
-        if(gen == GEN_I) val = ((struct pokemon_structure*)party)->atk_ev;
+        if(gen == GEN_I) val = ((PokemonPartyGenI*)party)->atk_ev;
         break;
     case STAT_DEF_EV:
-        if(gen == GEN_I) val = ((struct pokemon_structure*)party)->def_ev;
+        if(gen == GEN_I) val = ((PokemonPartyGenI*)party)->def_ev;
         break;
     case STAT_SPD_EV:
-        if(gen == GEN_I) val = ((struct pokemon_structure*)party)->spd_ev;
+        if(gen == GEN_I) val = ((PokemonPartyGenI*)party)->spd_ev;
         break;
     case STAT_SPC_EV:
-        if(gen == GEN_I) val = ((struct pokemon_structure*)party)->spc_ev;
+        if(gen == GEN_I) val = ((PokemonPartyGenI*)party)->spc_ev;
         break;
     case STAT_HP_EV:
-        if(gen == GEN_I) val = ((struct pokemon_structure*)party)->hp_ev;
+        if(gen == GEN_I) val = ((PokemonPartyGenI*)party)->hp_ev;
         break;
     case STAT_ATK_IV:
-        if(gen == GEN_I) return (((struct pokemon_structure*)party)->iv >> 12) & 0x0F;
+        if(gen == GEN_I) return (((PokemonPartyGenI*)party)->iv >> 12) & 0x0F;
 	break;
     case STAT_DEF_IV:
-        if(gen == GEN_I) return (((struct pokemon_structure*)party)->iv >> 8) & 0x0F;
+        if(gen == GEN_I) return (((PokemonPartyGenI*)party)->iv >> 8) & 0x0F;
 	break;
     case STAT_SPD_IV:
-        if(gen == GEN_I) return (((struct pokemon_structure*)party)->iv >> 4) & 0x0F;
+        if(gen == GEN_I) return (((PokemonPartyGenI*)party)->iv >> 4) & 0x0F;
 	break;
     case STAT_SPC_IV:
-        if(gen == GEN_I) return ((struct pokemon_structure*)party)->iv & 0x0F;
+        if(gen == GEN_I) return ((PokemonPartyGenI*)party)->iv & 0x0F;
 	break;
     case STAT_HP_IV:
-        if(gen == GEN_I) return (((struct pokemon_structure*)party)->iv & 0xAA) >> 4;
+        if(gen == GEN_I) return (((PokemonPartyGenI*)party)->iv & 0xAA) >> 4;
 	break;
     case STAT_LEVEL:
-        if(gen == GEN_I) return ((struct pokemon_structure*)party)->level;
+        if(gen == GEN_I) return ((PokemonPartyGenI*)party)->level;
 	break;
     case STAT_INDEX:
-        if(gen == GEN_I) return ((struct pokemon_structure*)party)->index;
+        if(gen == GEN_I) return ((PokemonPartyGenI*)party)->index;
 	break;
     case STAT_NUM:
-        if(gen == GEN_I) val = ((struct pokemon_structure*)party)->index;
+        if(gen == GEN_I) val = ((PokemonPartyGenI*)party)->index;
         return table_pokemon_pos_get(pdata->pokemon_table, val);
     case STAT_MOVE:
-        if(gen == GEN_I) return ((struct pokemon_structure*)party)->move[which];
+        if(gen == GEN_I) return ((PokemonPartyGenI*)party)->move[which];
 	break;
     case STAT_TYPE:
-        if(gen == GEN_I) return ((struct pokemon_structure*)party)->type[which];
+        if(gen == GEN_I) return ((PokemonPartyGenI*)party)->type[which];
 	break;
     case STAT_OT_ID:
-        if(gen == GEN_I) val = ((struct pokemon_structure*)party)->ot_id;
+        if(gen == GEN_I) val = ((PokemonPartyGenI*)party)->ot_id;
         break;
     case STAT_SEL:
         if(gen == GEN_I) return pdata->stat_sel;
@@ -413,73 +413,73 @@ void pokemon_stat_set(PokemonData* pdata, DataStat stat, DataStatSub which, uint
 
     switch(stat) {
     case STAT_ATK:
-        if(gen == GEN_I) ((struct pokemon_structure*)party)->atk = val_swap;
+        if(gen == GEN_I) ((PokemonPartyGenI*)party)->atk = val_swap;
         break;
     case STAT_DEF:
-        if(gen == GEN_I) ((struct pokemon_structure*)party)->def = val_swap;
+        if(gen == GEN_I) ((PokemonPartyGenI*)party)->def = val_swap;
         break;
     case STAT_SPD:
-        if(gen == GEN_I) ((struct pokemon_structure*)party)->spd = val_swap;
+        if(gen == GEN_I) ((PokemonPartyGenI*)party)->spd = val_swap;
         break;
     case STAT_SPC:
-        if(gen == GEN_I) ((struct pokemon_structure*)party)->spc = val_swap;
+        if(gen == GEN_I) ((PokemonPartyGenI*)party)->spc = val_swap;
         break;
     case STAT_HP:
-        if(gen == GEN_I) ((struct pokemon_structure*)party)->hp = val_swap;
-        if(gen == GEN_I) ((struct pokemon_structure*)party)->max_hp = val_swap;
+        if(gen == GEN_I) ((PokemonPartyGenI*)party)->hp = val_swap;
+        if(gen == GEN_I) ((PokemonPartyGenI*)party)->max_hp = val_swap;
         break;
     case STAT_ATK_EV:
-        if(gen == GEN_I) ((struct pokemon_structure*)party)->atk_ev = val_swap;
+        if(gen == GEN_I) ((PokemonPartyGenI*)party)->atk_ev = val_swap;
         break;
     case STAT_DEF_EV:
-        if(gen == GEN_I) ((struct pokemon_structure*)party)->def_ev = val_swap;
+        if(gen == GEN_I) ((PokemonPartyGenI*)party)->def_ev = val_swap;
         break;
     case STAT_SPD_EV:
-        if(gen == GEN_I) ((struct pokemon_structure*)party)->spd_ev = val_swap;
+        if(gen == GEN_I) ((PokemonPartyGenI*)party)->spd_ev = val_swap;
         break;
     case STAT_SPC_EV:
-        if(gen == GEN_I) ((struct pokemon_structure*)party)->spc_ev = val_swap;
+        if(gen == GEN_I) ((PokemonPartyGenI*)party)->spc_ev = val_swap;
         break;
     case STAT_HP_EV:
-        if(gen == GEN_I) ((struct pokemon_structure*)party)->hp_ev = val_swap;
+        if(gen == GEN_I) ((PokemonPartyGenI*)party)->hp_ev = val_swap;
         break;
     case STAT_IV:
         /* This is assumed to always be:
 	 * atk, def, spd, spc
 	 * each taking up 4 bits of 16.
 	 */
-        if(gen == GEN_I) ((struct pokemon_structure*)party)->iv = val;
+        if(gen == GEN_I) ((PokemonPartyGenI*)party)->iv = val;
         break;
     case STAT_MOVE:
-        if(gen == GEN_I) ((struct pokemon_structure*)party)->move[which] = val;
+        if(gen == GEN_I) ((PokemonPartyGenI*)party)->move[which] = val;
         break;
     case STAT_TYPE:
-        if(gen == GEN_I) ((struct pokemon_structure*)party)->type[which] = val;
+        if(gen == GEN_I) ((PokemonPartyGenI*)party)->type[which] = val;
         break;
     case STAT_LEVEL:
-        if(gen == GEN_I) ((struct pokemon_structure*)party)->level = val;
-        if(gen == GEN_I) ((struct pokemon_structure*)party)->level_again = val;
+        if(gen == GEN_I) ((PokemonPartyGenI*)party)->level = val;
+        if(gen == GEN_I) ((PokemonPartyGenI*)party)->level_again = val;
         recalc = (RECALC_STATS | RECALC_EXP | RECALC_EVS);
         break;
     case STAT_INDEX:
         if(gen == GEN_I) {
-            ((struct pokemon_structure*)party)->index = val;
-            ((TradeBlock*)pdata->trade_block)->party_members[0] = val;
+            ((PokemonPartyGenI*)party)->index = val;
+            ((TradeBlockGenI*)pdata->trade_block)->party_members[0] = val;
         }
         recalc = RECALC_ALL; // Always recalculate everything if we selected a different pokemon
         break;
     case STAT_NUM:
-        if(gen == GEN_I) ((struct pokemon_structure*)party)->index = pdata->pokemon_table[val].index;
+        if(gen == GEN_I) ((PokemonPartyGenI*)party)->index = pdata->pokemon_table[val].index;
         recalc = RECALC_ALL; // Always recalculate everything if we selected a different pokemon
         break;
     case STAT_OT_ID:
-        if(gen == GEN_I) ((struct pokemon_structure*)party)->ot_id = val_swap;
+        if(gen == GEN_I) ((PokemonPartyGenI*)party)->ot_id = val_swap;
         break;
     case STAT_SEL:
         if(gen == GEN_I) pdata->stat_sel = val;
         break;
     case STAT_EXP:
-        if(gen == GEN_I) ((struct pokemon_structure*)party)->exp[which] = val;
+        if(gen == GEN_I) ((PokemonPartyGenI*)party)->exp[which] = val;
 	break;
     case STAT_GEN:
 	break;
@@ -688,18 +688,18 @@ void pokemon_stat_memcpy(PokemonData* dst, void *traded, uint8_t which) {
    /* XXX: TODO: While slower, want to implement this as a handful of functions to
     * get from the traded struct and set the main struct.
     */
-   ((TradeBlock*)dst->trade_block)->party_members[0] = ((TradeBlock*)traded)->party_members[which];
+   ((TradeBlockGenI*)dst->trade_block)->party_members[0] = ((TradeBlockGenI*)traded)->party_members[which];
    memcpy(
-       &(((TradeBlock*)dst->trade_block)->party[0]),
-       &(((TradeBlock*)traded)->party[which]),
-       sizeof(struct pokemon_structure));
+       &(((TradeBlockGenI*)dst->trade_block)->party[0]),
+       &(((TradeBlockGenI*)traded)->party[which]),
+       sizeof(PokemonPartyGenI));
    memcpy(
-       &(((TradeBlock*)dst->trade_block)->nickname[0]),
-       &(((TradeBlock*)traded)->nickname[which]),
+       &(((TradeBlockGenI*)dst->trade_block)->nickname[0]),
+       &(((TradeBlockGenI*)traded)->nickname[which]),
        sizeof(struct name));
    memcpy(
-       &(((TradeBlock*)dst->trade_block)->ot_name[0]),
-       &(((TradeBlock*)traded)->ot_name[which]),
+       &(((TradeBlockGenI*)dst->trade_block)->ot_name[0]),
+       &(((TradeBlockGenI*)traded)->ot_name[which]),
        sizeof(struct name));
 }
 

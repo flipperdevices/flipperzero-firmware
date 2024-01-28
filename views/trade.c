@@ -161,7 +161,7 @@ struct trade_ctx {
     uint8_t in_data;
     uint8_t out_data;
     uint8_t shift;
-    TradeBlock* input_block;
+    TradeBlockGenI* input_block;
     struct patch_list* patch_list;
     void* gblink_handle;
     struct gblink_pins* gblink_pins;
@@ -186,7 +186,7 @@ static void pokemon_plist_recreate_callback(void* context, uint32_t arg) {
     UNUSED(arg);
     struct trade_ctx* trade = context;
 
-    plist_create(&(trade->patch_list), (TradeBlock*)(trade->pdata->trade_block));
+    plist_create(&(trade->patch_list), (TradeBlockGenI*)(trade->pdata->trade_block));
 }
 
 /* Draws a whole screen image with Flipper mascot, Game Boy, etc. */
@@ -472,7 +472,7 @@ static uint8_t getTradeCentreResponse(struct trade_ctx* trade) {
         send = trade_block_flat[counter];
         counter++;
 
-        if(counter == sizeof(TradeBlock)) {
+        if(counter == sizeof(TradeBlockGenI)) {
             trade->trade_centre_state = TRADE_PATCH_HEADER;
             counter = 0;
         }
@@ -678,7 +678,7 @@ void trade_enter_callback(void* context) {
     furi_timer_start(trade->draw_timer, furi_ms_to_ticks(250));
 
     /* Create a trade patch list from the current trade block */
-    plist_create(&(trade->patch_list), (TradeBlock*)(trade->pdata->trade_block));
+    plist_create(&(trade->patch_list), (TradeBlockGenI*)(trade->pdata->trade_block));
 }
 
 void disconnect_pin(const GpioPin* pin) {
@@ -719,7 +719,7 @@ void* trade_alloc(
     memset(trade, '\0', sizeof(struct trade_ctx));
     trade->view = view_alloc();
     trade->pdata = pdata;
-    trade->input_block = malloc(sizeof(TradeBlock));
+    trade->input_block = malloc(sizeof(TradeBlockGenI));
     trade->patch_list = NULL;
     trade->gblink_pins = gblink_pins;
 

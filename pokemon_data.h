@@ -146,6 +146,7 @@ struct __attribute__((__packed__)) pokemon_structure {
     uint16_t spd; // Calculated from level
     uint16_t spc; // Calculated from level
 };
+typedef struct pokemon_structure PokemonPartyGenI;
 
 struct __attribute__((__packed__)) name {
     /* Reused a few times, but in Gen I, all name strings are 11 bytes in memory.
@@ -173,8 +174,7 @@ struct __attribute__((__packed__)) trade_data_block {
     struct name nickname[6];
 };
 
-typedef struct pokemon_data PokemonData;
-typedef struct trade_data_block TradeBlock;
+typedef struct trade_data_block TradeBlockGenI;
 typedef struct named_list NamedList;
 typedef struct pokemon_data_table PokemonTable;
 
@@ -195,9 +195,10 @@ struct pokemon_data {
     /* Current generation */
     uint8_t gen;
 };
+typedef struct pokemon_data PokemonData;
 
-PokemonData* trade_block_alloc(uint8_t gen);
-void trade_block_free(PokemonData* pdata);
+PokemonData* pokemon_data_alloc(uint8_t gen);
+void pokemon_data_free(PokemonData* pdata);
 
 int namelist_pos_get(const NamedList* list, uint8_t index);
 int namelist_index_get(const NamedList* list, uint8_t pos);
