@@ -22,7 +22,6 @@ static void mass_storage_app_tick_event_callback(void* context) {
 }
 
 void mass_storage_app_show_loading_popup(MassStorageApp* app, bool show) {
-
     if(show) {
         // Raise timer priority so that animations can play
         furi_timer_set_thread_priority(FuriTimerThreadPriorityElevated);
