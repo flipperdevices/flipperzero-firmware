@@ -3,41 +3,37 @@
 
 #include <stdint.h>
 
-/**
- * The dithering algorithms available.
- */
+/** The dithering algorithms available. */
 typedef enum {
     FLOYD_STEINBERG,
     JARVIS_JUDICE_NINKE,
     STUCKI,
 } DitheringAlgorithm;
 
+typedef enum {
+    CAMERA_FUNCTION_SERIAL,
+    CAMERA_FUNCTION_WIFI,
+} CameraFunction;
+
 typedef struct {
-    /**
-     * Flag to enable or disable dithering.
-     */
+    /** Flag to enable or disable dithering. */
     bool isDitheringEnabled;
-    /**
-     * Flag to represent the flash state when saving pictures to the Flipper.
-     */
+    /** Flag to represent the flash state when saving pictures to the Flipper Zero. */
     bool isFlashEnabled;
-    /**
-     * Flag to invert pixel colors.
-     */
+    /** Flag to invert pixel colors. */
     bool isInvertEnabled;
-    /**
-     * Flag to stop or start the stream.
-     */
-    bool isStreamEnabled;
-    /**
-     * Holds the currently selected dithering algorithm.
-     */
+    /** Flag to stop or start the stream to the Flipper Zero. */
+    bool isStreamToSerialEnabled;
+    /** Flag to stop or start the stream to WiFi. */
+    bool isStreamToWiFiEnabled;
+    /** Holds the currently selected dithering algorithm. */
     DitheringAlgorithm ditherAlgorithm;
 } CameraModel;
 
 /** The camera model. */
 extern CameraModel camera_model;
 
-void initialize_camera_model();
+/** Set the camera model to the default values depending on the camera use. */
+void set_camera_model_defaults(CameraFunction camera_function);
 
 #endif

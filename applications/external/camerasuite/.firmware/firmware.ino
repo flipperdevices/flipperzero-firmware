@@ -1,30 +1,36 @@
 #include "firmware.h"
 
 void setup() {
-    // Begin serial communication.
-    Serial.begin(230400); // 115200
+  // Begin serial communication.
+  Serial.begin(230400);
 
-    // Initialize the camera model.
-    initialize_camera_model();
+  // Set initial camera configs for serial streaming.
+  set_camera_config_defaults(CAMERA_FUNCTION_SERIAL);
 
-    // Initialize the camera configuration.
-    initialize_camera_config();
+  // Set initial camera model for serial streaming.
+  set_camera_model_defaults(CAMERA_FUNCTION_SERIAL);
 
-    // Initialize the camera.
-    initialize_camera();
+  // Initialize the camera.
+  initialize_camera();
+
+  // Set initial camera settings for serial streaming.
+  set_camera_defaults(CAMERA_FUNCTION_SERIAL);
 }
 
 // Main loop of the program.
 void loop() {
-    if (camera_model.isStreamEnabled) {
-        camera_fb_t* frame_buffer = esp_camera_fb_get();
-        if (frame_buffer) {
-            process_image(frame_buffer);
-            // Return the frame buffer back to the camera driver.
-            esp_camera_fb_return(frame_buffer);
-        }
-        delay(50);
-    }
-    handle_flash_state();
-    process_serial_commands();
+  process_serial_input();
+  
+  if (camera_model.isStreamToSerialEnabled) {
+    // Process the camera image and output to serial.
+    stream_to_serial();
+  } else if (camera_model.isStreamToWiFiEnabled) {
+    // Stream the camera output to WiFi.
+    stream_to_wifi();
+  } else if (camera_model.isFlashEnabled) {
+    // Not currently streaming, turn the flash off if it's enabled.
+    turn_flash_off();
+  }
+  
+  delay(50);
 }

@@ -23,8 +23,9 @@
 - [Firmware Installation](#firmware-installation)
 - [Software Installation](#software-installation)
 - [Software Guide](#software-guide)
-- [Attributions](#attributions)
+- [Special Thanks](#special-thanks)
 - [Contributions](#contributions)
+- [Licensing](#licensing)
 - [Changelog](fap/docs/CHANGELOG.md)
 
 ## Introduction <a name="intro"></a>
@@ -60,8 +61,6 @@ This section is dedicated to all the fans that have made videos of this project!
 [![Flipper Zero ESP32 CAM Camera Module - TAKEAPART](https://img.youtube.com/vi/cEl5UnWH_Ok/0.jpg)](https://www.youtube.com/watch?v=cEl5UnWH_Ok)
 
 </details>
-
-
 
 <p align="right">[ <a href="#index">Back to top</a> ]</p>
 
@@ -123,7 +122,7 @@ That's it, let me know if you have any issues!
    ```markdown
    https://dl.espressif.com/dl/package_esp32_index.json
    ```
-   
+
 6. In the Arduino IDE, go to `Tools > Board > Boards Manager`.
 7. Search for `esp32` and install `esp32` by `Espressif Systems`.
 8. Plug in your Flipper Zero via USB. Make sure qFlipper or something else isn't connected to it already after doing so.
@@ -171,10 +170,10 @@ This fap app is available on your phones Flipper Zero application catalog! Simpl
 4. Move "camera_suite.fap" into `~\apps\gpio\` on your Flipper Zero MicroSD:
 
    ```markdown
-   .                            # The Flipper Zero MicroSD root.
-   ├── apps                     # The Flipper Zero Applications folder.
-   |   ├── gpio                 # The Flipper Zero GPIO folder.
-   |   |   ├── camera_suite.fap # The Camera Suite application.
+   .                        # The Flipper Zero MicroSD root.
+   ├── apps                 # The Flipper Zero Applications folder.
+   | ├── gpio               # The Flipper Zero GPIO folder.
+   | | ├── camera_suite.fap # The Camera Suite application.
    ```
 
 5. Reinsert your MicroSD into your Flipper Zero if you took it out.
@@ -196,45 +195,47 @@ This fap app is available on your phones Flipper Zero application catalog! Simpl
 
 ### Flipper Zero button mappings
 
-🔼 = Contrast Up
+| Button | Action |
+| :----- | :----- |
+| 🔼     | Contrast Up |
+| 🔽     | Contrast Down |
+| ◀️     | Toggle invert |
+| ▶️     | Toggle dithering on/off |
+| ↩️     | Go back |
+| 🔵     | Take a picture and save to the "DCIM" folder at the root of your SD card. Image will be saved as a bitmap file with a timestamp as the filename ("YYYYMMDD-HHMMSS.bmp"). If flash is on in the settings (enabled by default) the ESP32-CAM onboard LED will light up when the camera is opened. |
 
-🔽 = Contrast Down
+### Camera Settings
 
-◀️ = Toggle invert.
+| Setting | Description |
+| :------ | :---------- |
+| **Orientation** | Rotate the camera image 90 degrees counter-clockwise starting at zero by default (0, 90, 180, 270). This is useful if you have your camera module mounted in a different orientation than the default. |
+| **Dithering Type** | Change between the Cycle Floyd–Steinberg, Jarvis-Judice-Ninke, and Stucki dithering types. |
+| **Flash** | Toggle the ESP32-CAM onboard LED on/off while using the camera. |
 
-▶️ = Toggle dithering on/off.
+### Application Settings
 
-↩️ = Go back.
-
-🔵 = Take a picture and save to the "DCIM" folder at the root of your SD card. Image will be saved as a bitmap file with a timestamp as the filename ("YYYYMMDD-HHMMSS.bmp"). If flash is on in the settings (enabled by default) the ESP32-CAM onboard LED will light up when the camera is opened.
-
-### Camera Suite settings
-
-**Orientation:** Rotate the camera image 90 degrees counter-clockwise starting at zero by default (0, 90, 180, 270). This is useful if you have your camera module mounted in a different orientation than the default.
-
-**Dithering Type:** Change between the Cycle Floyd–Steinberg, Jarvis-Judice-Ninke, and Stucki dithering types.
-
-**Flash:** Toggle the ESP32-CAM onboard LED on/off while using the camera.
-
-**Haptic FX:** Toggle haptic feedback on/off.
-
-**Sound FX:** Toggle sound effects on/off.
-
-**LED FX:** Toggle LED effects on/off.
+| Setting | Description |
+| :------ | :---------- |
+| **Haptic Effects** | Toggle haptic feedback on/off. |
+| **Sound Effects** | Toggle sound effects on/off. |
+| **LED Effects** | Toggle LED effects on/off. |
 
 <p align="right">[ <a href="#index">Back to top</a> ]</p>
 
-## Attributions <a name="attributions"></a>
+## Special Thanks <a name="special-thanks"></a>
 
-This project is based on/forked from the [Flipper Zero Camera Application][flipperzero-camera]
-by [Z4urce][github-profile-z4urce] combined with the [Flipper Zero Boilerplate Application][flipper-zero-fap-boilerplate]
-by [Dave Lee][github-profile-leedave].
+A huge thanks to the following people and projects for making this possible:
 
-The firmware provided here also works with Z4urce's [Flipper Zero Camera Application][flipperzero-camera] so if you have their application installed it too should work fine.
+- This project is based on & forked from the [Flipper Zero Camera Application][flipperzero-camera] by [Z4urce][github-profile-z4urce]. Thanks Z4urce for the inspiration and the great work!
+- I based this projects application structure on the [Flipper Zero Boilerplate Application][flipper-zero-fap-boilerplate] by [leedave][github-profile-leedave]. Thanks leedave for the great boilerplate application that helped me learn how to structure a Flipper Zero application properly!
+- The project images were drawn using the a application called "[lopaka][lopaka]" by [sbrin][github-profile-sbrin]. Thanks sbrin for your help in creating the images for this project!
+- The Flipper Zero community for all your support and feedback!
 
 <p align="right">[ <a href="#index">Back to top</a> ]</p>
 
 ## Contributions <a name="contributions"></a>
+
+To contribute to this project, please follow the steps below:
 
 1. Fork.
 2. Create a new branch: `<username>/[<issue-#>]-<feature-or-bug-fix-desc>`
@@ -242,11 +243,31 @@ The firmware provided here also works with Z4urce's [Flipper Zero Camera Applica
 4. Request PR [here][pull-request-link], introduce work via your branch.
 5. Wait for review and merge.
 
-Thank you!
+When developing the firmware, be sure to download the dependencies by running the `firmware-flash.bat` batch script at the root of this directory. This will download the ESP32-CAM firmware dependencies to the directories defined in the `arduino-cli.yaml` file post-run. Add these dependencies and their directories to your "Include path" in your IDE of choice. I prefer Visual Studio Code, there's a guide on how to get started with that workflow here:
+
+https://github.com/CodyTolene/Flipper-Zero-Development-Toolkit
+
+Example include path:
+
+```markdown
+C:/Users/<username>/AppData/Local/Temp/arduino-cli/**
+```
+
+Thank you for any and all contributions to this project, I'm looking forward to seeing what you come up with! If you have any questions, please let me know by opening an issue [here][issues-link].
 
 <p align="right">[ <a href="#index">Back to top</a> ]</p>
 
-Donations are welcome and appreciated!
+## Licensing <a name="licensing"></a>
+
+This project is licensed under the BSD 3-Clause license. See the [LICENSE](LICENSE) file for details. Certain files in this project are based on code from Espressif Systems (Shanghai) PTE LTD and are licensed under the Apache License, Version 2.0. See the [APACHE_2_LICENSE](LICENSE.Apache-2.0) file for the pertaining license text.
+
+`SPDX-License-Identifier: BSD 3-Clause, Apache-2.0`
+
+<p align="right">[ <a href="#index">Back to top</a> ]</p>
+
+## Wrapping Up <a name="licensing"></a>
+
+Thanks to all the people and projects that made this possible! I hope you enjoy this project as much as I enjoyed working on it. If you have any questions, please let me know by opening an issue [here][issues-link].
 
 | Type                                                           | Info                                                                               |
 | :------------------------------------------------------------- | :--------------------------------------------------------------------------------- |
@@ -254,9 +275,9 @@ Donations are welcome and appreciated!
 | <img width="48" src=".github/simple-icons/buymeacoffee.svg" /> | https://www.buymeacoffee.com/codytolene                                            |
 | <img width="48" src=".github/images/bitcoin-btc-logo.svg" />   | [bc1qfx3lvspkj0q077u3gnrnxqkqwyvcku2nml86wmudy7yf2u8edmqq0a5vnt][btc-address-link] |
 
-Fin. Thanks for looking and happy programming friend!
+Fin. Happy programming friend!
 
-Cody
+Cody Tolene
 
 <!-- LINKS -->
 
@@ -267,6 +288,8 @@ Cody
 [flipperzero-camera]: https://github.com/Z4urce/flipperzero-camera
 [github-actions-link]: https://github.com/CodyTolene/Flipper-Zero-Camera-Suite/actions?query=workflow%3A%22Build+%2B+upload.%22
 [github-profile-leedave]: https://github.com/leedave
+[github-profile-sbrin]: https://github.com/sbrin
 [github-profile-z4urce]: https://github.com/Z4urce
 [issues-link]: https://github.com/CodyTolene/Flipper-Zero-Camera-Suite/issues
+[lopaka]: https://github.com/sbrin/lopaka
 [pull-request-link]: https://github.com/CodyTolene/Flipper-Zero-Camera-Suite/pulls

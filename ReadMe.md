@@ -32,6 +32,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-01-27 13:53 EST`
 - Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-01-27 13:53 EST`
 - [Added Pirate Profile Pic (By cyberartemio)](https://github.com/cyberartemio/flipper-pirates-asset-pack/blob/main/Pirates/Icons/Passport/passport_okay_46x49.png)
+- Updated: [ESP32 Camera Suite v1.6 (By CodyTolene)](https://github.com/CodyTolene/Flipper-Zero-Camera-Suite)
 - To Be Merged OFW PRs: [3352](https://github.com/flipperdevices/flipperzero-firmware/pull/3352), [3302](https://github.com/flipperdevices/flipperzero-firmware/pull/3302), [3211](https://github.com/flipperdevices/flipperzero-firmware/pull/3211), [3366](https://github.com/flipperdevices/flipperzero-firmware/pull/3366) & [3250](https://github.com/flipperdevices/flipperzero-firmware/pull/3250)
 
 <a name="release">
@@ -352,7 +353,7 @@ $ ./fbt dolphin_ext
 - [DTMF Dolphin v1.2 (By litui)](https://github.com/litui/dtmf_dolphin)
 - [EM4100 Key Generator v1.1 (By Milk-Cool)](https://github.com/Milk-Cool/fz-em4100-generator)
 - [Enhanced Sub-Ghz Chat v1.1 (By twisted-pear)](https://github.com/twisted-pear/esubghz_chat)
-- [ESP32 Camera Suite v1.5 (By CodyTolene)](https://github.com/CodyTolene/Flipper-Zero-Camera-Suite)
+- [ESP32 Camera Suite v1.6 (By CodyTolene)](https://github.com/CodyTolene/Flipper-Zero-Camera-Suite)
 - [ESP32 Evil Portal v0.2 (By bigbrodude6119)](https://github.com/bigbrodude6119/flipper-zero-evil-portal) [Changes By leedave]( https://github.com/leedave/flipper-zero-evil-portal/tree/leedave/ap_rename/flipper/flipper-evil-portal)
 - [ESP Flasher v1.4 (By 0xchocolate)](https://github.com/0xchocolate/flipperzero-esp-flasher)
 - [ESP WiFi Scanner v1.1 (By SequoiaSan)](https://github.com/SequoiaSan/FlipperZero-WiFi-Scanner_Module-ESP8266) `Req: ESP8266 or ESP32`

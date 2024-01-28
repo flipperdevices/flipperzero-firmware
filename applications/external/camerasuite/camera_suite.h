@@ -16,6 +16,7 @@
 #include "views/camera_suite_view_guide.h"
 #include "views/camera_suite_view_start.h"
 #include "views/camera_suite_view_camera.h"
+#include "views/camera_suite_view_wifi_camera.h"
 #include "helpers/camera_suite_storage.h"
 
 #define TAG "Camera Suite"
@@ -29,6 +30,7 @@ typedef struct {
     VariableItemList* variable_item_list;
     CameraSuiteViewStart* camera_suite_view_start;
     CameraSuiteViewCamera* camera_suite_view_camera;
+    CameraSuiteViewWiFiCamera* camera_suite_view_wifi_camera;
     CameraSuiteViewGuide* camera_suite_view_guide;
     uint32_t orientation;
     uint32_t dither;
@@ -44,8 +46,10 @@ typedef enum {
     CameraSuiteViewIdStartscreen,
     CameraSuiteViewIdMenu,
     CameraSuiteViewIdCamera,
+    CameraSuiteViewIdWiFiCamera,
     CameraSuiteViewIdGuide,
-    CameraSuiteViewIdSettings,
+    CameraSuiteViewIdAppSettings,
+    CameraSuiteViewIdCamSettings,
 } CameraSuiteViewId;
 
 typedef enum {
