@@ -70,6 +70,20 @@ NfcCommand picopass_poller_select_handler(PicopassPoller* instance) {
     return command;
 }
 
+void picopass_poller_print_block(char* str, PicopassBlock block) {
+    FURI_LOG_D(
+        TAG,
+        str,
+        block.data[0],
+        block.data[1],
+        block.data[2],
+        block.data[3],
+        block.data[4],
+        block.data[5],
+        block.data[6],
+        block.data[7]);
+}
+
 NfcCommand picopass_poller_pre_auth_handler(PicopassPoller* instance) {
     NfcCommand command = NfcCommandContinue;
     PicopassError error = PicopassErrorNone;
@@ -80,17 +94,8 @@ NfcCommand picopass_poller_pre_auth_handler(PicopassPoller* instance) {
             instance->serial_num.data,
             sizeof(PicopassSerialNum));
         instance->data->card_data[PICOPASS_CSN_BLOCK_INDEX].valid = true;
-        FURI_LOG_D(
-            TAG,
-            "csn %02x%02x%02x%02x%02x%02x%02x%02x",
-            instance->data->card_data[PICOPASS_CSN_BLOCK_INDEX].data[0],
-            instance->data->card_data[PICOPASS_CSN_BLOCK_INDEX].data[1],
-            instance->data->card_data[PICOPASS_CSN_BLOCK_INDEX].data[2],
-            instance->data->card_data[PICOPASS_CSN_BLOCK_INDEX].data[3],
-            instance->data->card_data[PICOPASS_CSN_BLOCK_INDEX].data[4],
-            instance->data->card_data[PICOPASS_CSN_BLOCK_INDEX].data[5],
-            instance->data->card_data[PICOPASS_CSN_BLOCK_INDEX].data[6],
-            instance->data->card_data[PICOPASS_CSN_BLOCK_INDEX].data[7]);
+        picopass_poller_print_block(
+            "csn %02x%02x%02x%02x%02x%02x%02x%02x", instance->data->card_data[PICOPASS_CSN_BLOCK_INDEX]);
 
         PicopassBlock block = {};
         error = picopass_poller_read_block(instance, PICOPASS_CONFIG_BLOCK_INDEX, &block);
@@ -103,17 +108,9 @@ NfcCommand picopass_poller_pre_auth_handler(PicopassPoller* instance) {
             block.data,
             PICOPASS_BLOCK_LEN);
         instance->data->card_data[PICOPASS_CONFIG_BLOCK_INDEX].valid = true;
-        FURI_LOG_D(
-            TAG,
+        picopass_poller_print_block(
             "config %02x%02x%02x%02x%02x%02x%02x%02x",
-            instance->data->card_data[PICOPASS_CONFIG_BLOCK_INDEX].data[0],
-            instance->data->card_data[PICOPASS_CONFIG_BLOCK_INDEX].data[1],
-            instance->data->card_data[PICOPASS_CONFIG_BLOCK_INDEX].data[2],
-            instance->data->card_data[PICOPASS_CONFIG_BLOCK_INDEX].data[3],
-            instance->data->card_data[PICOPASS_CONFIG_BLOCK_INDEX].data[4],
-            instance->data->card_data[PICOPASS_CONFIG_BLOCK_INDEX].data[5],
-            instance->data->card_data[PICOPASS_CONFIG_BLOCK_INDEX].data[6],
-            instance->data->card_data[PICOPASS_CONFIG_BLOCK_INDEX].data[7]);
+            instance->data->card_data[PICOPASS_CONFIG_BLOCK_INDEX]);
 
         error = picopass_poller_read_block(instance, PICOPASS_SECURE_EPURSE_BLOCK_INDEX, &block);
         if(error != PicopassErrorNone) {
@@ -125,17 +122,9 @@ NfcCommand picopass_poller_pre_auth_handler(PicopassPoller* instance) {
             block.data,
             PICOPASS_BLOCK_LEN);
         instance->data->card_data[PICOPASS_SECURE_EPURSE_BLOCK_INDEX].valid = true;
-        FURI_LOG_D(
-            TAG,
+        picopass_poller_print_block(
             "epurse %02x%02x%02x%02x%02x%02x%02x%02x",
-            instance->data->card_data[PICOPASS_SECURE_EPURSE_BLOCK_INDEX].data[0],
-            instance->data->card_data[PICOPASS_SECURE_EPURSE_BLOCK_INDEX].data[1],
-            instance->data->card_data[PICOPASS_SECURE_EPURSE_BLOCK_INDEX].data[2],
-            instance->data->card_data[PICOPASS_SECURE_EPURSE_BLOCK_INDEX].data[3],
-            instance->data->card_data[PICOPASS_SECURE_EPURSE_BLOCK_INDEX].data[4],
-            instance->data->card_data[PICOPASS_SECURE_EPURSE_BLOCK_INDEX].data[5],
-            instance->data->card_data[PICOPASS_SECURE_EPURSE_BLOCK_INDEX].data[6],
-            instance->data->card_data[PICOPASS_SECURE_EPURSE_BLOCK_INDEX].data[7]);
+            instance->data->card_data[PICOPASS_SECURE_EPURSE_BLOCK_INDEX]);
 
         error = picopass_poller_read_block(instance, PICOPASS_SECURE_AIA_BLOCK_INDEX, &block);
         if(error != PicopassErrorNone) {
@@ -147,17 +136,9 @@ NfcCommand picopass_poller_pre_auth_handler(PicopassPoller* instance) {
             block.data,
             PICOPASS_BLOCK_LEN);
         instance->data->card_data[PICOPASS_SECURE_AIA_BLOCK_INDEX].valid = true;
-        FURI_LOG_D(
-            TAG,
+        picopass_poller_print_block(
             "aia %02x%02x%02x%02x%02x%02x%02x%02x",
-            instance->data->card_data[PICOPASS_SECURE_AIA_BLOCK_INDEX].data[0],
-            instance->data->card_data[PICOPASS_SECURE_AIA_BLOCK_INDEX].data[1],
-            instance->data->card_data[PICOPASS_SECURE_AIA_BLOCK_INDEX].data[2],
-            instance->data->card_data[PICOPASS_SECURE_AIA_BLOCK_INDEX].data[3],
-            instance->data->card_data[PICOPASS_SECURE_AIA_BLOCK_INDEX].data[4],
-            instance->data->card_data[PICOPASS_SECURE_AIA_BLOCK_INDEX].data[5],
-            instance->data->card_data[PICOPASS_SECURE_AIA_BLOCK_INDEX].data[6],
-            instance->data->card_data[PICOPASS_SECURE_AIA_BLOCK_INDEX].data[7]);
+            instance->data->card_data[PICOPASS_SECURE_AIA_BLOCK_INDEX]);
 
         instance->state = PicopassPollerStateCheckSecurity;
     } while(false);
