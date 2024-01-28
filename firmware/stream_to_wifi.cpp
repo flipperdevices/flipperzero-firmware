@@ -58,7 +58,7 @@ void start_server() {
 }
 
 void start_wifi_stream() {
-  turn_flash_on();
+  turn_flash_on(); // Physical test indicator that we're streaming.
   camera_model.isStreamToSerialEnabled = false;
   set_camera_config_defaults(CAMERA_FUNCTION_WIFI);
   set_camera_model_defaults(CAMERA_FUNCTION_WIFI);

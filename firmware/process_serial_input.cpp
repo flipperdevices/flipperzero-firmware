@@ -48,11 +48,11 @@ void process_serial_input() {
       break;
     case 'w':
       // @todo
-      stop_wifi_stream();
+      // stop_wifi_stream();
       break;
     case 'W':
       // @todo
-      start_wifi_stream();
+      // start_wifi_stream();
       break;
     case '0':
       set_dithering_algorithm(FLOYD_STEINBERG);
