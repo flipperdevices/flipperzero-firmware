@@ -22,19 +22,14 @@
 typedef void (*CameraSuiteViewWiFiCameraCallback)(CameraSuiteCustomEvent event, void* context);
 
 typedef struct CameraSuiteViewWiFiCamera {
-    CameraSuiteViewCameraCallback callback;
-    FuriStreamBuffer* wifi_rx_stream;
-    FuriThread* wifi_worker_thread;
     View* view;
+    CameraSuiteViewCameraCallback callback;
     void* context;
 } CameraSuiteViewWiFiCamera;
 
 typedef struct {
     FuriString* log;
-    size_t log_strlen;
 } CameraSuiteViewWiFiCameraModel;
-
-#define WIFI_WORKER_EVENTS_MASK (WorkerEventStop | WorkerEventRx)
 
 CameraSuiteViewWiFiCamera* camera_suite_view_wifi_camera_alloc();
 

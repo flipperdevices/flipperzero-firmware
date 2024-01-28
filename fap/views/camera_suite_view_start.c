@@ -4,16 +4,6 @@
 #include <input/input.h>
 #include <gui/elements.h>
 
-struct CameraSuiteViewStart {
-    View* view;
-    CameraSuiteViewStartCallback callback;
-    void* context;
-};
-
-typedef struct {
-    int some_value;
-} CameraSuiteViewStartModel;
-
 void camera_suite_view_start_set_callback(
     CameraSuiteViewStart* instance,
     CameraSuiteViewStartCallback callback,
@@ -169,12 +159,22 @@ void camera_suite_view_start_enter(void* context) {
 }
 
 CameraSuiteViewStart* camera_suite_view_start_alloc() {
+    // Allocate memory for the instance
     CameraSuiteViewStart* instance = malloc(sizeof(CameraSuiteViewStart));
+
+    // Allocate the view object
     instance->view = view_alloc();
+
+    // Allocate model
     view_allocate_model(instance->view, ViewModelTypeLocking, sizeof(CameraSuiteViewStartModel));
-    // furi_assert crashes in events without this
+
+    // Set context for the view (furi_assert crashes in events without this)
     view_set_context(instance->view, instance);
+
+    // Set draw callback
     view_set_draw_callback(instance->view, (ViewDrawCallback)camera_suite_view_start_draw);
+
+    // Set input callback
     view_set_input_callback(instance->view, camera_suite_view_start_input);
 
     with_view_model(
