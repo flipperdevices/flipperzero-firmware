@@ -32,6 +32,7 @@ struct SeaderUartBridge {
     FuriThread* tx_thread;
 
     FuriStreamBuffer* rx_stream;
+    FuriHalSerialHandle* serial_handle;
 
     FuriSemaphore* tx_sem;
 
@@ -40,7 +41,6 @@ struct SeaderUartBridge {
     uint8_t rx_buf[SEADER_UART_RX_BUF_SIZE];
     uint8_t tx_buf[SEADER_UART_RX_BUF_SIZE];
     size_t tx_len;
-    FuriHalSerialHandle* serial_handle;
 };
 
 typedef struct SeaderUartBridge SeaderUartBridge;
