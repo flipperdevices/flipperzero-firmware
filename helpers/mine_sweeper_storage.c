@@ -49,14 +49,11 @@ void mine_sweeper_save_settings(void* context) {
     // Store Settings
     flipper_format_write_header_cstr(
         fff_file, MINESWEEPER_SETTINGS_HEADER, MINESWEEPER_SETTINGS_FILE_VERSION);
-    flipper_format_write_uint32(
-        fff_file, MINESWEEPER_SETTINGS_KEY_HAPTIC, &app->haptic, 1);
-    flipper_format_write_uint32(
-        fff_file, MINESWEEPER_SETTINGS_KEY_SPEAKER, &app->speaker, 1);
-    flipper_format_write_uint32(
-        fff_file, MINESWEEPER_SETTINGS_KEY_LED, &app->led, 1);
 
-    uint32_t w = app->settings_info.board_width, h = app->settings_info.board_height, d = app->settings_info.difficulty;
+    uint32_t w = app->settings_info.board_width,
+             h = app->settings_info.board_height,
+             d = app->settings_info.difficulty,
+             f = app->feedback_enabled;
 
     flipper_format_write_uint32(
         fff_file, MINESWEEPER_SETTINGS_KEY_WIDTH, &w, 1);
@@ -64,6 +61,8 @@ void mine_sweeper_save_settings(void* context) {
         fff_file, MINESWEEPER_SETTINGS_KEY_HEIGHT, &h, 1);
     flipper_format_write_uint32(
         fff_file, MINESWEEPER_SETTINGS_KEY_DIFFICULTY, &d, 1);
+    flipper_format_write_uint32(
+        fff_file, MINESWEEPER_SETTINGS_KEY_FEEDBACK, &f, 1);
     
     if(!flipper_format_rewind(fff_file)) {
         FURI_LOG_E(TAG, "Rewind error");
@@ -115,24 +114,24 @@ bool mine_sweeper_read_settings(void* context) {
         return false;
     }
 
-    uint32_t w = 7, h = 16, d = 0;
+    uint32_t w = 7, h = 16, d = 0, f = 1;
     flipper_format_read_uint32(fff_file, MINESWEEPER_SETTINGS_KEY_WIDTH, &w, 1);
     flipper_format_read_uint32(fff_file, MINESWEEPER_SETTINGS_KEY_HEIGHT, &h, 1);
     flipper_format_read_uint32(fff_file, MINESWEEPER_SETTINGS_KEY_DIFFICULTY, &d, 1);
+    flipper_format_read_uint32(fff_file, MINESWEEPER_SETTINGS_KEY_FEEDBACK, &f, 1);
 
-    if (w > 146) {w = 146;}
+    if (w > 32) {w = 32;}
     if (w < 16 ) {w = 16;}
-    if (h > 64 ) {h = 64;}
+    if (h > 32 ) {h = 32;}
     if (h < 7  ) {h = 7;}
     if (d > 2 ) {d = 2;}
+    if (f > 1) {f = 1;}
 
     app->settings_info.board_width = (uint8_t) w;
     app->settings_info.board_height = (uint8_t) h;
     app->settings_info.difficulty = (uint8_t) d;
+    app->feedback_enabled = (uint8_t) f;
 
-    flipper_format_read_uint32(fff_file, MINESWEEPER_SETTINGS_KEY_HAPTIC, &app->haptic, 1);
-    flipper_format_read_uint32(fff_file, MINESWEEPER_SETTINGS_KEY_SPEAKER, &app->speaker, 1);
-    flipper_format_read_uint32(fff_file, MINESWEEPER_SETTINGS_KEY_LED, &app->led, 1);
 
     flipper_format_rewind(fff_file);
 

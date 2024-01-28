@@ -16,7 +16,7 @@ App(
     fap_icon="assets/minesweeper.png",  # 10x10 1-bit PNG
     fap_category="Games",
     # Optional values
-    fap_version="1.1",
+    fap_version="1.2",
     fap_description="Flipper Zero Minesweeper Implementation",
     fap_author="Alexander Rodriguez",
     fap_weburl="https://github.com/squee72564/F0_Minesweeper_Fap",

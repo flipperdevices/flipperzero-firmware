@@ -53,9 +53,7 @@ static MineSweeperApp* app_alloc() {
         app->settings_info.board_width = 16;
         app->settings_info.board_height = 7;
         app->settings_info.difficulty = 0;
-        app->haptic = 1;
-        app->speaker = 1;
-        app->led = 1;
+        app->feedback_enabled = 1;
 
         mine_sweeper_save_settings(app);
     } else {
