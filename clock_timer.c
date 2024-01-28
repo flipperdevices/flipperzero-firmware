@@ -27,7 +27,7 @@ static void clock_timer_isr(void* context) {
     LL_TIM_ClearFlag_UPDATE(FURI_HAL_CLOCK_TIMER);
 }
 
-void clock_timer_init(ClockTimerCallback callback, void* context, float period) {
+void clock_timer_start(ClockTimerCallback callback, void* context, float period) {
     clock_timer.callback = callback;
     clock_timer.context = context;
 
@@ -39,9 +39,7 @@ void clock_timer_init(ClockTimerCallback callback, void* context, float period) 
     LL_TIM_Init(FURI_HAL_CLOCK_TIMER, &TIM_InitStruct);
 
     furi_hal_interrupt_set_isr(FURI_HAL_CLOCK_TIMER_IRQ, clock_timer_isr, clock_timer.context);
-}
 
-void clock_timer_start(void) {
     LL_TIM_EnableIT_UPDATE(FURI_HAL_CLOCK_TIMER);
     LL_TIM_EnableCounter(FURI_HAL_CLOCK_TIMER);
 }
@@ -49,9 +47,7 @@ void clock_timer_start(void) {
 void clock_timer_stop(void) {
     LL_TIM_DisableIT_UPDATE(FURI_HAL_CLOCK_TIMER);
     LL_TIM_DisableCounter(FURI_HAL_CLOCK_TIMER);
-}
 
-void clock_timer_deinit(void) {
     furi_hal_bus_disable(FURI_HAL_CLOCK_TIMER_BUS);
     furi_hal_interrupt_set_isr(FURI_HAL_CLOCK_TIMER_IRQ, NULL, NULL);
 }

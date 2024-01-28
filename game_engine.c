@@ -94,8 +94,7 @@ void game_engine_run(GameEngine* engine) {
         furi_pubsub_subscribe(engine->input_pubsub, input_events_callback, &input_state);
 
     // start "game update" timer
-    clock_timer_init(clock_timer_callback, engine, engine->settings.fps);
-    clock_timer_start();
+    clock_timer_start(clock_timer_callback, engine, engine->settings.fps);
 
     // init fps counter
     uint32_t time_start = DWT->CYCCNT;
@@ -115,7 +114,6 @@ void game_engine_run(GameEngine* engine) {
             input_prev_state = input_current_state;
 
             canvas_reset(canvas);
-
             uint32_t time_end = DWT->CYCCNT;
             uint32_t time_delta = time_end - time_start;
             time_start = time_end;
@@ -128,6 +126,10 @@ void game_engine_run(GameEngine* engine) {
 
             if(input.pressed != 0) {
                 FURI_LOG_I("input", "pressed: %lu", input.pressed);
+
+                if(input.pressed & (1 << InputKeyBack)) {
+                    game_engine_stop(engine);
+                }
             }
 
             if(input.released != 0) {
@@ -141,10 +143,10 @@ void game_engine_run(GameEngine* engine) {
     }
 
     clock_timer_stop();
-    clock_timer_deinit();
 
     gui_direct_draw_release(engine->gui);
     furi_pubsub_unsubscribe(engine->input_pubsub, input_subscription);
+
     engine->running = false;
 }
 
