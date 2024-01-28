@@ -31,8 +31,6 @@ static inline bool xremote_sg_signal_save_data(SubGhzRemote* remote, FlipperForm
     UNUSED(remote);
     UNUSED(ff);
     return true;
-    /*return flipper_format_write_uint32(ff, "frequency", xremote_sg_remote_get_frequency(remote)) &&
-           flipper_format_write_string_cstr(ff, "preset", xremote_sg_remote_get_preset(remote));*/
 }
 
 static bool xremote_ir_signal_is_message_valid(InfraredMessage* message) {
@@ -190,7 +188,7 @@ bool xremote_cross_remote_item_read(CrossRemoteItem* item, FlipperFormat* ff) {
 void xremote_cross_remote_item_free(CrossRemoteItem* item) {
     furi_string_free(item->name);
     //Determine type before free
-    //xremote_ir_signal_free(item->ir_signal);
+    xremote_ir_signal_free(item->ir_signal);
     //xremote_sg_remote_free(item->sg_signal);
     free(item);
 }
