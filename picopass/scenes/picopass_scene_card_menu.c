@@ -20,16 +20,16 @@ void picopass_scene_card_menu_on_enter(void* context) {
     Picopass* picopass = context;
     Submenu* submenu = picopass->submenu;
     PicopassPacs* pacs = &picopass->dev->dev_data.pacs;
-    PicopassBlock* AA1 = picopass->dev->dev_data.AA1;
+    PicopassBlock* card_data = picopass->dev->dev_data.card_data;
 
-    bool sio = 0x30 == AA1[PICOPASS_ICLASS_PACS_CFG_BLOCK_INDEX].data[0];
-    bool secured = (AA1[PICOPASS_CONFIG_BLOCK_INDEX].data[7] & PICOPASS_FUSE_CRYPT10) !=
+    bool sio = 0x30 == card_data[PICOPASS_ICLASS_PACS_CFG_BLOCK_INDEX].data[0];
+    bool secured = (card_data[PICOPASS_CONFIG_BLOCK_INDEX].data[7] & PICOPASS_FUSE_CRYPT10) !=
                    PICOPASS_FUSE_CRYPT0;
     bool zero_config = picopass_is_memset(
-        AA1[PICOPASS_ICLASS_PACS_CFG_BLOCK_INDEX].data, 0x00, PICOPASS_BLOCK_LEN);
+        card_data[PICOPASS_ICLASS_PACS_CFG_BLOCK_INDEX].data, 0x00, PICOPASS_BLOCK_LEN);
     bool no_credential = picopass_is_memset(pacs->credential, 0x00, sizeof(pacs->credential));
     bool no_key =
-        picopass_is_memset(AA1[PICOPASS_SECURE_KD_BLOCK_INDEX].data, 0xFF, PICOPASS_BLOCK_LEN);
+        picopass_is_memset(card_data[PICOPASS_SECURE_KD_BLOCK_INDEX].data, 0xFF, PICOPASS_BLOCK_LEN);
 
     if(secured && zero_config) {
         submenu_add_item(

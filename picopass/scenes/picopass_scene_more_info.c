@@ -10,16 +10,16 @@ void picopass_scene_more_info_widget_callback(GuiButtonType result, InputType ty
 
 void picopass_scene_more_info_on_enter(void* context) {
     Picopass* picopass = context;
-    PicopassBlock* AA1 = picopass->dev->dev_data.AA1;
+    PicopassBlock* card_data = picopass->dev->dev_data.card_data;
 
     furi_string_reset(picopass->text_box_store);
 
-    size_t app_limit = MIN(AA1[PICOPASS_CONFIG_BLOCK_INDEX].data[0], PICOPASS_MAX_APP_LIMIT);
+    size_t app_limit = MIN(card_data[PICOPASS_CONFIG_BLOCK_INDEX].data[0], PICOPASS_MAX_APP_LIMIT);
     FuriString* str = picopass->text_box_store;
 
     for(size_t i = 0; i < app_limit; i++) {
         for(size_t j = 0; j < PICOPASS_BLOCK_LEN; j += 2) {
-            furi_string_cat_printf(str, "%02X%02X ", AA1[i].data[j], AA1[i].data[j + 1]);
+            furi_string_cat_printf(str, "%02X%02X ", card_data[i].data[j], card_data[i].data[j + 1]);
         }
     }
 
