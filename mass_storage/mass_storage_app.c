@@ -104,8 +104,6 @@ MassStorageApp* mass_storage_app_alloc(char* arg) {
 
     view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
 
-    scene_manager_set_scene_state(
-        app->scene_manager, MassStorageSceneStart, MassStorageSceneFileSelect);
     if(storage_file_exists(app->fs_api, furi_string_get_cstr(app->file_path))) {
         scene_manager_next_scene(app->scene_manager, MassStorageSceneWork);
     } else {
