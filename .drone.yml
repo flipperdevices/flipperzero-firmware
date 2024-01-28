@@ -137,4 +137,4 @@ trigger:
     - tag
 
 node:
-  typ: haupt
+  typ: dev1
