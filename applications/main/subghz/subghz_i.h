@@ -79,6 +79,9 @@ struct SubGhz {
     bool raw_send_only;
     bool raw_send_only_old;
 
+    bool save_datetime_set;
+    FuriHalRtcDateTime save_datetime;
+
     SubGhzLastSettings* last_settings;
 
     SubGhzProtocolFlag filter;
