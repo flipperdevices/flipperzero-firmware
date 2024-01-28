@@ -4,7 +4,6 @@
 
 #include <furi.h>
 #include <furi_hal.h>
-#include <furi_hal_console.h>
 #include <furi_hal_uart.h>
 #include <gui/elements.h>
 #include <gui/gui.h>
