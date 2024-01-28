@@ -29,8 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0126-2108-0.93.9-2225e91](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-01-28 16:53 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-01-28 16:53 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-01-28 17:40 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-01-28 17:40 EST`
 - [Added Pirate Profile Pic (By cyberartemio)](https://github.com/cyberartemio/flipper-pirates-asset-pack/blob/main/Pirates/Icons/Passport/passport_okay_46x49.png)
 - Updated: [ESP32 Camera Suite v1.6 (By CodyTolene)](https://github.com/CodyTolene/Flipper-Zero-Camera-Suite)
 - Updated: [USB Mass Storage v1.3 (By nminaylov)](https://github.com/flipperdevices/flipperzero-good-faps/tree/nm/usb_mass_storage_app/mass_storage) (Changes from xMasterX)
@@ -39,7 +39,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: [subghz keeloq fix emulation for multiple systems and extend support for 2 (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/ec9971614fe62221a938956e4fa82c82f46a6dd2)
 - UL: [Subghz save files with receive time (seconds added) (By xMasterX & Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/a8207c21dd56e2c838cc7346931d0fb9892a6b20)
 - UL: [subghz dea_mio fixes and programming mode support (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/cbe36a3ca49a38d350b06baf3deb3a8d2fcc4187)
-- [Improved IR Ext Module Detection & Power for Infrared & IR Remote (By Sil333033 & Willy-JL)]()
+- [Improved IR Ext Module Detection & Power for Infrared & IR Remote (By Sil333033 & Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/370f0c7159750d40d166adf565438324f0d57e08)
 - To Be Merged OFW PRs: [3352](https://github.com/flipperdevices/flipperzero-firmware/pull/3352), [3302](https://github.com/flipperdevices/flipperzero-firmware/pull/3302), [3211](https://github.com/flipperdevices/flipperzero-firmware/pull/3211), [3366](https://github.com/flipperdevices/flipperzero-firmware/pull/3366) & [3250](https://github.com/flipperdevices/flipperzero-firmware/pull/3250)
 
 <a name="release">
