@@ -52,7 +52,7 @@
 
 #define WORKER_ALL_RX_EVENTS                                                      \
     (WorkerEvtStop | WorkerEvtRxDone | WorkerEvtCfgChange | WorkerEvtLineCfgSet | \
-     WorkerEvtCtrlLineSet)
+     WorkerEvtCtrlLineSet | WorkerEvtSamTxComplete)
 #define WORKER_ALL_TX_EVENTS (WorkerEvtTxStop | WorkerEvtSamRx)
 
 #define SEADER_TEXT_STORE_SIZE 128
@@ -75,12 +75,12 @@ typedef enum {
 
     WorkerEvtTxStop = (1 << 2),
     WorkerEvtSamRx = (1 << 3),
+    WorkerEvtSamTxComplete = (1 << 4),
 
-    WorkerEvtCfgChange = (1 << 4),
+    WorkerEvtCfgChange = (1 << 5),
 
-    WorkerEvtLineCfgSet = (1 << 5),
-    WorkerEvtCtrlLineSet = (1 << 6),
-
+    WorkerEvtLineCfgSet = (1 << 6),
+    WorkerEvtCtrlLineSet = (1 << 7),
 } WorkerEvtFlags;
 
 struct Seader {
