@@ -5,7 +5,7 @@ App(
     entry_point="esp_flasher_app",
     cdefines=["SERIAL_FLASHER_INTERFACE_UART=1"],
     stack_size=4 * 1024,
-    fap_icon="update_10px.png",
+    fap_icon="assets/wifi_10px.png",
     fap_icon_assets="assets",
     fap_icon_assets_symbol="esp_flasher",
     fap_category="GPIO",
