@@ -31,17 +31,9 @@ void set_camera_config_defaults(CameraFunction camera_function) {
     camera_config.frame_size = FRAMESIZE_QQVGA;
   } else if (camera_function == CAMERA_FUNCTION_WIFI) {
     camera_config.pixel_format = PIXFORMAT_JPEG;
-
-    if (psramFound()) {
-      camera_config.jpeg_quality = 10;
-      camera_config.fb_count = 2;
-      camera_config.grab_mode = CAMERA_GRAB_LATEST;
-      camera_config.frame_size = FRAMESIZE_UXGA;
-    } else {
-      camera_config.jpeg_quality = 12;
-      camera_config.fb_count = 1;
-      camera_config.grab_mode = CAMERA_GRAB_WHEN_EMPTY;
-      camera_config.frame_size = FRAMESIZE_SVGA;
-    }
+    camera_config.jpeg_quality = 8;
+    camera_config.fb_count = 1;
+    camera_config.grab_mode = CAMERA_GRAB_WHEN_EMPTY;
+    camera_config.frame_size = FRAMESIZE_SVGA;
   }
 }

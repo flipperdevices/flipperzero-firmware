@@ -5,6 +5,10 @@
 *.vscode
 *.zip
 .DS_Store
+.arduino-cli
+.arduino-cli/*
+.arduino-cli/.compile.flag
+.compile.flag
 .idea
 .submodules/*
 /venv

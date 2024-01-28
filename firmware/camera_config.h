@@ -2,7 +2,6 @@
 #define CAMERA_CONFIG_H
 
 #include <esp_camera.h>
-#include <WiFi.h>
 
 #include "camera_model.h"
 #include "pins.h"
