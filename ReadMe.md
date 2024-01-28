@@ -39,6 +39,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: [subghz keeloq fix emulation for multiple systems and extend support for 2 (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/ec9971614fe62221a938956e4fa82c82f46a6dd2)
 - UL: [Subghz save files with receive time (seconds added) (By xMasterX & Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/a8207c21dd56e2c838cc7346931d0fb9892a6b20)
 - UL: [subghz dea_mio fixes and programming mode support (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/cbe36a3ca49a38d350b06baf3deb3a8d2fcc4187)
+- [Improved IR Ext Module Detection & Power for Infrared & IR Remote (By Sil333033 & Willy-JL)]()
 - To Be Merged OFW PRs: [3352](https://github.com/flipperdevices/flipperzero-firmware/pull/3352), [3302](https://github.com/flipperdevices/flipperzero-firmware/pull/3302), [3211](https://github.com/flipperdevices/flipperzero-firmware/pull/3211), [3366](https://github.com/flipperdevices/flipperzero-firmware/pull/3366) & [3250](https://github.com/flipperdevices/flipperzero-firmware/pull/3250)
 
 <a name="release">
@@ -533,7 +534,6 @@ $ ./fbt dolphin_ext
 ## Current Bounties $$ (Sorted By Difficulty - Easiest to Hardest)
 
 - Have a new app? Submit GitHub link to me on Discord for a special reward (if I add it to RM Firmware).
-- [IR Remote (5V/External GPIO Settings in App Like Infrared) ($25 USD in ETH or BTC)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/issues/641)
 - [Notepad FAP ($25 ETH or BTC BOUNTY)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/issues/694)
 - [Air Tag for FZ ($50 USD in ETH or BTC)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/issues/696)
 - [ID Card v2.0 - Update v1.0 (By alanretgue) to set and retrieve values from apps_data .txt file and allow for an optional notes field. Whomever can complete this gets 3 months of subscriber builds. Patrons can DM me to add their monthly towards this bounty.](https://github.com/alanretgue/Flipper_Zero-id_card)
