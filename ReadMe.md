@@ -33,7 +33,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-01-27 13:53 EST`
 - [Added Pirate Profile Pic (By cyberartemio)](https://github.com/cyberartemio/flipper-pirates-asset-pack/blob/main/Pirates/Icons/Passport/passport_okay_46x49.png)
 - Updated: [ESP32 Camera Suite v1.6 (By CodyTolene)](https://github.com/CodyTolene/Flipper-Zero-Camera-Suite)
-- Updated: [USB Mass Storage v1.3 (By nminaylov)](https://github.com/flipperdevices/flipperzero-good-faps/tree/nm/usb_mass_storage_app/mass_storage) [Based on OFW#1060 (By kevinwallace)](https://github.com/flipperdevices/flipperzero-firmware/pull/1060)
+- Updated: [USB Mass Storage v1.3 (By nminaylov)](https://github.com/flipperdevices/flipperzero-good-faps/tree/nm/usb_mass_storage_app/mass_storage) (Changes from xMasterX)
+- Updated: [ESP Flasher v1.4 (By 0xchocolate)](https://github.com/0xchocolate/flipperzero-esp-flasher) (Changes from xMasterX)
 - To Be Merged OFW PRs: [3352](https://github.com/flipperdevices/flipperzero-firmware/pull/3352), [3302](https://github.com/flipperdevices/flipperzero-firmware/pull/3302), [3211](https://github.com/flipperdevices/flipperzero-firmware/pull/3211), [3366](https://github.com/flipperdevices/flipperzero-firmware/pull/3366) & [3250](https://github.com/flipperdevices/flipperzero-firmware/pull/3250)
 
 <a name="release">

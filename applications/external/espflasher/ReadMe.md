@@ -2,7 +2,7 @@
 
 # ESP Flasher app for Flipper Zero
 
-Flipper Zero app to flash ESP chips from the device (no computer connection needed!). Uses espressif's [esp_serial_flasher](https://github.com/espressif/esp-serial-flasher) library. Requires an ESP chip connected to the flipper's UART pins (e.g. Wi-Fi devboard). For information on how to connect, see the ESP pinout/wiring details on UberGuidoZ's GPIO section: https://github.com/UberGuidoZ/Flipper/tree/main/GPIO
+Flipper Zero app to flash ESP chips from the device (no computer connection needed!). Uses espressif's [esp-serial-flasher](https://github.com/espressif/esp-serial-flasher) library. Requires an ESP chip connected to the flipper's UART pins (e.g. Wi-Fi devboard). For information on how to connect, see the ESP pinout/wiring details on UberGuidoZ's GPIO section: https://github.com/UberGuidoZ/Flipper/tree/main/GPIO
 
 <img src="https://github.com/0xchocolate/flipperzero-esp-flasher/blob/main/screenshots/esp-flasher-browse.png?raw=true" width=30% height=30% /> <img src="https://github.com/0xchocolate/flipperzero-esp-flasher/blob/main/screenshots/esp-flasher-flashing.png?raw=true" width=30% height=30% />
 

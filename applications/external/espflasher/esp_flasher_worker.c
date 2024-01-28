@@ -381,9 +381,13 @@ void loader_port_reset_target(void) {
 void loader_port_enter_bootloader(void) {
     // Also support for the Multi-fucc and Xeon boards
     furi_hal_gpio_write(&gpio_swclk, false);
-    furi_hal_power_disable_otg();
+    if(furi_hal_power_is_otg_enabled()) {
+        furi_hal_power_disable_otg();
+    }
     loader_port_delay_ms(100);
-    furi_hal_power_enable_otg();
+    if(!furi_hal_power_is_otg_enabled()) {
+        furi_hal_power_enable_otg();
+    }
     furi_hal_gpio_init_simple(&gpio_swclk, GpioModeAnalog);
     loader_port_delay_ms(100);
 
