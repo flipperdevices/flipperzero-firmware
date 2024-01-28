@@ -6,11 +6,13 @@ icon: "icons/camera_suite.png"
 id: "camera_suite"
 name: "[ESP32] Camera Suite"
 screenshots:
-  - "screenshots/start_screen.png"
-  - "screenshots/main_menu.png"
+  - "screenshots/camera.png"
   - "screenshots/camera_preview.png"
   - "screenshots/guide.png"
-  - "screenshots/settings.png"
+  - "screenshots/guide_connect.png"
+  - "screenshots/main_menu.png"
+  - "screenshots/settings_app.png"
+  - "screenshots/settings_camera.png"
 short_description: "A camera suite application for the Flipper Zero ESP32-CAM module."
 sourcecode:
   location:
