@@ -31,6 +31,7 @@
 #include "infrared_remote.h"
 #include "infrared_brute_force.h"
 #include "infrared_custom_event.h"
+#include "infrared_last_settings.h"
 
 #include "scenes/infrared_scene.h"
 #include "views/infrared_progress_view.h"
@@ -38,6 +39,7 @@
 #include "views/infrared_move_view.h"
 
 #include "rpc/rpc_app.h"
+#include <furi_hal_infrared.h>
 
 #define INFRARED_FILE_NAME_SIZE 100
 #define INFRARED_TEXT_STORE_NUM 2
@@ -109,10 +111,10 @@ struct InfraredApp {
 
     Submenu* submenu; /**< Standard view for displaying application menus. */
     TextInput* text_input; /**< Standard view for receiving user text input. */
-    VariableItemList* variable_item_list;
     DialogEx* dialog_ex; /**< Standard view for displaying dialogs. */
     ButtonMenu* button_menu; /**< Custom view for interacting with IR remotes. */
     Popup* popup; /**< Standard view for displaying messages. */
+    VariableItemList* variable_item_list;
 
     ViewStack* view_stack; /**< Standard view for displaying stacked interfaces. */
     InfraredDebugView* debug_view; /**< Custom view for displaying debug information. */
@@ -127,6 +129,7 @@ struct InfraredApp {
     /** Arbitrary text storage for various inputs. */
     char text_store[INFRARED_TEXT_STORE_NUM][INFRARED_TEXT_STORE_SIZE + 1];
     InfraredAppState app_state; /**< Application state. */
+    InfraredLastSettings* last_settings; /**< Last settings. */
 
     void* rpc_ctx; /**< Pointer to the RPC context object. */
 };
@@ -137,13 +140,13 @@ struct InfraredApp {
 typedef enum {
     InfraredViewSubmenu,
     InfraredViewTextInput,
-    InfraredViewVariableItemList,
     InfraredViewDialogEx,
     InfraredViewButtonMenu,
     InfraredViewPopup,
     InfraredViewStack,
     InfraredViewDebugView,
     InfraredViewMove,
+    InfraredViewVariableItemList,
 } InfraredView;
 
 /**

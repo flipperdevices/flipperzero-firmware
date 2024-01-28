@@ -149,6 +149,24 @@ void furi_hal_infrared_async_tx_set_signal_sent_isr_callback(
     FuriHalInfraredTxSignalSentISRCallback callback,
     void* context);
 
+/** Check if a module (like IR Blaster) is connected to PA7 
+ * 
+ * return true if a module is connected, false otherwise
+ */
+bool furi_hal_infrared_is_external_connected();
+
+/** Set auto detect
+ * 
+ * if enabled, external IR is used automatic if connected, otherwise internal IR is used
+*/
+void furi_hal_infrared_set_auto_detect(bool enable);
+
+/** Check if auto detect is enabled
+ * 
+ * @return true if enabled, false otherwise
+ */
+bool furi_hal_infrared_is_auto_detect_enabled();
+
 #ifdef __cplusplus
 }
 #endif

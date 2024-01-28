@@ -6,11 +6,13 @@
 #include <gui/gui.h>
 #include <input/input.h>
 #include <dialogs/dialogs.h>
+#include <ir_remote_icons.h>
+#include "infrared_last_settings.h"
+#include <furi_hal_infrared.h>
 
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
 
-#include "ir_remote_icons.h"
 #include "infrared_signal.h"
 #include "infrared_remote.h"
 #include "infrared_remote_button.h"
@@ -483,6 +485,26 @@ int32_t infrared_remote_app(void* p) {
     flipper_format_free(ff);
     furi_record_close(RECORD_STORAGE);
 
+    bool otg_was_enabled = furi_hal_power_is_otg_enabled();
+    InfraredLastSettings* last_settings = infrared_last_settings_alloc();
+    infrared_last_settings_load(last_settings);
+
+    furi_hal_infrared_set_auto_detect(last_settings->auto_detect);
+    if(!last_settings->auto_detect) {
+        furi_hal_infrared_set_debug_out(last_settings->ext_out);
+        if(last_settings->ext_5v) {
+            uint8_t attempts = 0;
+            while(!furi_hal_power_is_otg_enabled() && attempts++ < 5) {
+                furi_hal_power_enable_otg();
+                furi_delay_ms(10);
+            }
+        } else if(furi_hal_power_is_otg_enabled()) {
+            furi_hal_power_disable_otg();
+        }
+    } else if(furi_hal_power_is_otg_enabled()) {
+        furi_hal_power_disable_otg();
+    }
+
     bool running = true;
     NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
 
@@ -726,6 +748,19 @@ int32_t infrared_remote_app(void* p) {
             }
         }
     }
+
+    if(otg_was_enabled != furi_hal_power_is_otg_enabled()) {
+        if(otg_was_enabled) {
+            uint8_t attempts = 0;
+            while(!furi_hal_power_is_otg_enabled() && attempts++ < 5) {
+                furi_hal_power_enable_otg();
+                furi_delay_ms(10);
+            }
+        } else {
+            furi_hal_power_disable_otg();
+        }
+    }
+    infrared_last_settings_free(last_settings);
 
     // Free all things
     furi_string_free(app->up_button);

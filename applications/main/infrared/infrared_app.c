@@ -167,15 +167,15 @@ static InfraredApp* infrared_alloc() {
     view_dispatcher_add_view(
         view_dispatcher, InfraredViewTextInput, text_input_get_view(infrared->text_input));
 
+    infrared->dialog_ex = dialog_ex_alloc();
+    view_dispatcher_add_view(
+        view_dispatcher, InfraredViewDialogEx, dialog_ex_get_view(infrared->dialog_ex));
+
     infrared->variable_item_list = variable_item_list_alloc();
     view_dispatcher_add_view(
         infrared->view_dispatcher,
         InfraredViewVariableItemList,
         variable_item_list_get_view(infrared->variable_item_list));
-
-    infrared->dialog_ex = dialog_ex_alloc();
-    view_dispatcher_add_view(
-        view_dispatcher, InfraredViewDialogEx, dialog_ex_get_view(infrared->dialog_ex));
 
     infrared->button_menu = button_menu_alloc();
     view_dispatcher_add_view(
@@ -202,6 +202,25 @@ static InfraredApp* infrared_alloc() {
     infrared->loading = loading_alloc();
     infrared->progress = infrared_progress_view_alloc();
 
+    infrared->last_settings = infrared_last_settings_alloc();
+    infrared_last_settings_load(infrared->last_settings);
+
+    furi_hal_infrared_set_auto_detect(infrared->last_settings->auto_detect);
+    if(!infrared->last_settings->auto_detect) {
+        furi_hal_infrared_set_debug_out(infrared->last_settings->ext_out);
+        if(infrared->last_settings->ext_5v) {
+            uint8_t attempts = 0;
+            while(!furi_hal_power_is_otg_enabled() && attempts++ < 5) {
+                furi_hal_power_enable_otg();
+                furi_delay_ms(10);
+            }
+        } else if(furi_hal_power_is_otg_enabled()) {
+            furi_hal_power_disable_otg();
+        }
+    } else if(furi_hal_power_is_otg_enabled()) {
+        furi_hal_power_disable_otg();
+    }
+
     return infrared;
 }
 
@@ -222,11 +241,11 @@ static void infrared_free(InfraredApp* infrared) {
     view_dispatcher_remove_view(view_dispatcher, InfraredViewTextInput);
     text_input_free(infrared->text_input);
 
-    view_dispatcher_remove_view(infrared->view_dispatcher, InfraredViewVariableItemList);
-    variable_item_list_free(infrared->variable_item_list);
-
     view_dispatcher_remove_view(view_dispatcher, InfraredViewDialogEx);
     dialog_ex_free(infrared->dialog_ex);
+
+    view_dispatcher_remove_view(infrared->view_dispatcher, InfraredViewVariableItemList);
+    variable_item_list_free(infrared->variable_item_list);
 
     view_dispatcher_remove_view(view_dispatcher, InfraredViewButtonMenu);
     button_menu_free(infrared->button_menu);
@@ -267,10 +286,7 @@ static void infrared_free(InfraredApp* infrared) {
     furi_string_free(infrared->file_path);
     furi_string_free(infrared->button_name);
 
-    // Disable 5v power if was enabled for external module
-    if(furi_hal_power_is_otg_enabled()) {
-        furi_hal_power_disable_otg();
-    }
+    infrared_last_settings_free(infrared->last_settings);
 
     free(infrared);
 }
@@ -470,7 +486,8 @@ void infrared_popup_closed_callback(void* context) {
         infrared->view_dispatcher, InfraredCustomEventTypePopupClosed);
 }
 
-int32_t infrared_app(void* p) {
+int32_t infrared_app(char* p) {
+    bool otg_was_enabled = furi_hal_power_is_otg_enabled();
     InfraredApp* infrared = infrared_alloc();
 
     infrared_make_app_folder(infrared);
@@ -516,5 +533,16 @@ int32_t infrared_app(void* p) {
     view_dispatcher_run(infrared->view_dispatcher);
 
     infrared_free(infrared);
+    if(otg_was_enabled != furi_hal_power_is_otg_enabled()) {
+        if(otg_was_enabled) {
+            uint8_t attempts = 0;
+            while(!furi_hal_power_is_otg_enabled() && attempts++ < 5) {
+                furi_hal_power_enable_otg();
+                furi_delay_ms(10);
+            }
+        } else {
+            furi_hal_power_disable_otg();
+        }
+    }
     return 0;
 }
