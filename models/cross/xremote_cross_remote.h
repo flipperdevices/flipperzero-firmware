@@ -13,7 +13,7 @@ const char* xremote_cross_remote_get_name(CrossRemote* remote);
 void xremote_cross_remote_set_transmitting(CrossRemote* remote, int status);
 int xremote_cross_remote_get_transmitting(CrossRemote* remote);
 bool xremote_cross_remote_add_pause(CrossRemote* remote, int time);
-bool xremote_cross_remote_add_ir_item(CrossRemote* remote, const char* name, InfraredSignal* signal);
+bool xremote_cross_remote_add_ir_item(CrossRemote* remote, const char* name, InfraredSignal* signal, uint32_t timing);
 bool xremote_cross_remote_add_subghz(CrossRemote* remote, SubGhzRemote* subghz);
 void xremote_cross_remote_remove_item(CrossRemote* remote, size_t index);
 void xremote_cross_remote_rename_item(CrossRemote* remote, size_t index, const char* name);
