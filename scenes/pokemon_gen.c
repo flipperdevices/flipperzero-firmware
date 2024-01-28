@@ -45,21 +45,12 @@ static void scene_change_from_main_cb(void* context, uint32_t index) {
     scene_manager_next_scene(pokemon_fap->scene_manager, index);
 }
 
-/* XXX: Potentially trap Back when pressed here to prompt to prevent accidental leaving? */
 bool gen_back_event_callback(void* context) {
     furi_assert(context);
     PokemonFap* pokemon_fap = context;
     
-    pokemon_data_free(pokemon_fap->pdata);
-    // Free views
-    /* These each remove themselves from the view_dispatcher */
-    select_pokemon_free(pokemon_fap->view_dispatcher, AppViewSelectPokemon, pokemon_fap->select);
-    trade_free(pokemon_fap->view_dispatcher, AppViewTrade, pokemon_fap->trade);
-
-    pokemon_fap->pdata = NULL;
-    pokemon_fap->select = NULL;
-    pokemon_fap->trade = NULL;
-    return scene_manager_handle_back_event(pokemon_fap->scene_manager);
+    scene_manager_next_scene(pokemon_fap->scene_manager, ConfirmExitScene);
+    return true;
 }
 
 /* XXX: Does flipper have a monospace font available? */

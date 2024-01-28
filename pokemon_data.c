@@ -6,7 +6,7 @@
 
 #define RECALC_NONE 0x00
 #define RECALC_EXP 0x01
-#define RECALC_EVS 0x02
+#define RECALC_EVIVS 0x02
 #define RECALC_STATS 0x04
 #define RECALC_NICKNAME 0x08
 #define RECALC_MOVES 0x10
@@ -100,7 +100,8 @@ void pokemon_data_free(PokemonData* pdata) {
 /*******************************************
  * function declarations
  ******************************************/
-void pokemon_stat_ev_calc(PokemonData* pdata, EvIv val);
+static void pokemon_stat_ev_calc(PokemonData* pdata, EvIv val);
+static void pokemon_stat_iv_calc(PokemonData* pdata, EvIv val);
 
 /* XXX: EV/IV don't depend on anything other than what they are set to
  * by the ev/iv selection. Therefore, there is no reason to calculate
@@ -143,9 +144,9 @@ void pokemon_recalculate(PokemonData* pdata, uint8_t recalc) {
 
     if(recalc & RECALC_EXP) pokemon_exp_calc(pdata);
 
-    if(recalc & RECALC_EVS) {
-        /* XXX: 0 is magic value, needs to be saved somewhere first */
-        pokemon_stat_ev_calc(pdata, 0);
+    if(recalc & RECALC_EVIVS) {
+        pokemon_stat_ev_calc(pdata, pdata->stat_sel);
+        pokemon_stat_iv_calc(pdata, pdata->stat_sel);
     }
 
     if(recalc & RECALC_STATS) {
@@ -459,7 +460,7 @@ void pokemon_stat_set(PokemonData* pdata, DataStat stat, DataStatSub which, uint
     case STAT_LEVEL:
         if(gen == GEN_I) ((PokemonPartyGenI*)party)->level = val;
         if(gen == GEN_I) ((PokemonPartyGenI*)party)->level_again = val;
-        recalc = (RECALC_STATS | RECALC_EXP | RECALC_EVS);
+        recalc = (RECALC_STATS | RECALC_EXP | RECALC_EVIVS);
         break;
     case STAT_INDEX:
         if(gen == GEN_I) {
@@ -477,11 +478,13 @@ void pokemon_stat_set(PokemonData* pdata, DataStat stat, DataStatSub which, uint
         break;
     case STAT_SEL:
         if(gen == GEN_I) pdata->stat_sel = val;
+	recalc = RECALC_EVIVS;
         break;
     case STAT_EXP:
         if(gen == GEN_I) ((PokemonPartyGenI*)party)->exp[which] = val;
 	break;
     case STAT_GEN:
+	/* XXX: This needs to go away */
 	break;
     default:
         furi_crash("STAT_SET: invalid stat");
@@ -518,8 +521,7 @@ uint16_t pokemon_stat_ev_get(PokemonData* pdata, DataStat stat) {
     return pokemon_stat_get(pdata, next, NONE);
 }
 
-/* XXX: val should be what is currently curr_stats, make it an enum I guess */
-void pokemon_stat_ev_calc(PokemonData* pdata, EvIv val) {
+static void pokemon_stat_ev_calc(PokemonData* pdata, EvIv val) {
     furi_assert(pdata);
     int level;
     uint16_t ev;
@@ -574,8 +576,7 @@ uint8_t pokemon_stat_iv_get(PokemonData* pdata, DataStat stat) {
     return pokemon_stat_get(pdata, next, NONE);
 }
 
-/* XXX: Uses random value dropped in to the main pokemon_fap strcut */
-void pokemon_stat_iv_calc(PokemonData* pdata, EvIv val) {
+static void pokemon_stat_iv_calc(PokemonData* pdata, EvIv val) {
     furi_assert(pdata);
     uint16_t iv;
 

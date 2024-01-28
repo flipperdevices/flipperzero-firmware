@@ -57,10 +57,16 @@ PokemonFap* pokemon_alloc() {
      * freed as needed, however, the scene manager still requires pointers that
      * get set up as a part of the scene. Therefore, individual scene's exit
      * callbacks cannot free the buffer.
+     *
+     * In order to do this properly, I think each scene, or maybe common to all
+     * scenes, would end up needing to set a delayed callback of some kind. But
+     * I'm not sure how to guarantee this gets called in a reasonable amount of
+     * time.
      */
     pokemon_fap->text_input = text_input_alloc();
     pokemon_fap->submenu = submenu_alloc();
     pokemon_fap->variable_item_list = variable_item_list_alloc();
+    pokemon_fap->dialog_ex = dialog_ex_alloc();
 
     // Set up menu scene
     pokemon_fap->scene_manager = scene_manager_alloc(&pokemon_scene_manager_handlers, pokemon_fap);
@@ -85,6 +91,7 @@ void free_app(PokemonFap* pokemon_fap) {
     submenu_free(pokemon_fap->submenu);
     text_input_free(pokemon_fap->text_input);
     variable_item_list_free(pokemon_fap->variable_item_list);
+    dialog_ex_free(pokemon_fap->dialog_ex);
 
     // Close records
     furi_record_close(RECORD_GUI);

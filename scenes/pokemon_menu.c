@@ -12,6 +12,7 @@
 #include "pokemon_stats.h"
 #include "pokemon_trade.h"
 #include "pokemon_pins.h"
+#include "pokemon_exit_confirm.h"
 
 static void scene_change_from_main_cb(void* context, uint32_t index) {
     PokemonFap* pokemon_fap = (PokemonFap*)context;
@@ -100,6 +101,7 @@ void (*const pokemon_scene_on_enter_handlers[])(void*) = {
     select_name_scene_on_enter,
     trade_scene_on_enter,
     select_pins_scene_on_enter,
+    pokemon_exit_confirm_on_enter,
 };
 
 void (*const pokemon_scene_on_exit_handlers[])(void*) = {
@@ -117,6 +119,7 @@ void (*const pokemon_scene_on_exit_handlers[])(void*) = {
     generic_scene_on_exit,
     generic_scene_on_exit,
     null_scene_on_exit,
+    generic_scene_on_exit,
     generic_scene_on_exit,
 };
 
@@ -136,6 +139,7 @@ bool (*const pokemon_scene_on_event_handlers[])(void*, SceneManagerEvent) = {
     null_scene_on_event,
     null_scene_on_event,
     null_scene_on_event,
+    pokemon_exit_confirm_on_event,
 };
 
 const SceneManagerHandlers pokemon_scene_manager_handlers = {

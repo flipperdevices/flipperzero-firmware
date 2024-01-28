@@ -7,6 +7,7 @@
 #include <gui/view.h>
 #include <gui/view_dispatcher.h>
 #include <gui/icon.h>
+#include <gui/modules/dialog_ex.h>
 #include <gui/modules/submenu.h>
 #include <gui/modules/text_input.h>
 #include <gui/modules/variable_item_list.h>
@@ -25,6 +26,7 @@ struct pokemon_fap {
     Submenu* submenu;
     TextInput* text_input;
     VariableItemList* variable_item_list;
+    DialogEx* dialog_ex;
 
     /* Struct for holding trade data */
     /* NOTE: There may be some runtime memory savings by adding more intelligence
