@@ -2,6 +2,13 @@
 
   #define configs_h
 
+  // PCB versions
+  #define PCB_2_5 1
+  #define PCB_2_5_1 2
+
+  #define MALVEKE_VERSION PCB_2_5_1
+
+
   #define POLISH_POTATO
 
   //Indicates that it must redirect the stream with the captured packets to serial (1)

@@ -3,6 +3,7 @@
 
 #include <Arduino.h>
 #include <ArduinoJson.h>
+#include "config.h"
 // #include "SerialTransfer.h"
 // #include "MemoryFile.h"
 // #include <iostream>
@@ -25,22 +26,41 @@ SCL  V_SPI_WP   14
 SDA  V_SPI_HD   9
 */
 
-
+/*
+                        |       MALVEKE         |
+        |    GAME BOY   |   V2.5    |   V2.5.1  |   DESC
+________|_______________|___________|___________|_____________________
+PIN SO  |        2      |   IO5     |   IO13    |   (MISO) VSPI_MISO
+PIN CLK |        5      |   IO1     |   IO12    |   (SCK) VSPI_CLK
+PIN SI  |        3      |   IO2     |   IO11    |   (MOSI) VSPI_MOSI
+*/
 
 #ifndef WIFI_CONNECT_TIMEOUT
 #define WIFI_CONNECT_TIMEOUT 10000
 #endif
-#ifndef GB_MISO
-#define GB_MISO 5
-#endif
-#ifndef GB_MOSI
-#define GB_MOSI 2
-#endif
-#ifndef GB_SCLK
-#define GB_SCLK 1
-#endif
-#ifndef GB_SD
-#define GB_SD 7
+#if defined(MALVEKE_VERSION) && MALVEKE_VERSION == PCB_2_5_1
+    #ifndef GB_MISO
+    #define GB_MISO 13  
+    #endif
+    #ifndef GB_MOSI
+    #define GB_MOSI 11
+    #endif
+    #ifndef GB_SCLK
+    #define GB_SCLK 12
+    #endif
+#else
+    #ifndef GB_MISO
+    #define GB_MISO 5
+    #endif
+    #ifndef GB_MOSI
+    #define GB_MOSI 2
+    #endif
+    #ifndef GB_SCLK
+    #define GB_SCLK 1
+    #endif
+    #ifndef GB_SD
+    #define GB_SD 7
+    #endif
 #endif
 
 
