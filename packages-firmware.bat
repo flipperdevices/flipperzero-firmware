@@ -6,6 +6,8 @@ rem λ
 set CLI_TEMP=%TEMP%\arduino-cli
 set ARDUINO_CLI_CONFIG_FILE=--config-file %CD%\firmware\arduino-cli.yaml
 set CLI_FOUND_FOLLOW_UP=0
+set GITHUB_HOOKS_FOLDER=%CD%\.github\hooks
+set GIT_HOOKS_FOLDER=%CD%\.git\hooks
 
 chcp 65001 > nul
 echo ┏┓   ┓    ┏┳┓  ┓
@@ -113,10 +115,14 @@ if %DATA_FLAG% gtr 0 (
 )
 
 :wrapUp
+echo.
+echo Configuring Git hooks...
+copy /Y "%GITHUB_HOOKS_FOLDER%" "%GIT_HOOKS_FOLDER%"
+echo.
+echo Resetting arduino-cli config back to defaults...
 arduino-cli %ARDUINO_CLI_CONFIG_FILE% config set directories.data C:\temp\arduino-cli\data
 arduino-cli %ARDUINO_CLI_CONFIG_FILE% config set directories.downloads C:\temp\arduino-cli\staging
 arduino-cli %ARDUINO_CLI_CONFIG_FILE% config set directories.user C:\temp\arduino-cli\user
-
 echo.
 echo The ESP32-CAM development dependencies were installed successfully.
 echo.

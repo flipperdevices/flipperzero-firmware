@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# Run ufbt lint in the "fap" folder
+fap_folder="fap"
+
+# Change to the root directory of the repository
+cd "$(git rev-parse --show-toplevel)"
+
+# Run ufbt lint in the "fap" folder
+if ! (cd "$fap_folder" && ufbt lint); then
+    echo "Error: ufbt lint failed in the 'fap' folder. Please fix the issues before committing."
+    exit 1
+fi
+
+# If everything is okay, exit with a zero status
+exit 0
