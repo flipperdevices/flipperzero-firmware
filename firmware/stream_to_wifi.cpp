@@ -1,6 +1,6 @@
 #include "stream_to_wifi.h"
 
-char password[30] = "test123";
+// char password[30] = "test123";
 char ssid[30] = "ESP";
 
 bool is_wifi_streaming = false;
@@ -9,10 +9,10 @@ char index_html[MAX_HTML_SIZE] = "TEST";
 DNSServer dnsServer;
 AsyncWebServer server(80);
 
-class CaptiveRequestHandler : public AsyncWebHandler {
+class RequestHandler : public AsyncWebHandler {
 public:
-  CaptiveRequestHandler() {}
-  virtual ~CaptiveRequestHandler() {}
+  RequestHandler() {}
+  virtual ~RequestHandler() {}
 
   bool canHandle(AsyncWebServerRequest *request) { return true; }
 
@@ -27,7 +27,7 @@ void stream_to_wifi() {
 
     // Connect to WiFi AP
     WiFi.mode(WIFI_AP);
-    WiFi.softAP(ssid, password);
+    WiFi.softAP(ssid);
     WiFi.setSleep(false);
 
     // Start the web server
@@ -51,8 +51,14 @@ void start_server() {
     Serial.println("Client connected.");
   });
 
+  server.on("/get", HTTP_GET, [](AsyncWebServerRequest *request) {
+    request->send(
+        200, "text/html",
+        "<html><head><script>setTimeout(() => { window.location.href ='/' }, 100);</script></head><body></body></html>");
+  });
+
   dnsServer.start(53, "*", WiFi.softAPIP());
-  server.addHandler(new CaptiveRequestHandler()).setFilter(ON_AP_FILTER);
+  server.addHandler(new RequestHandler()).setFilter(ON_AP_FILTER);
   server.begin();
 }
 
