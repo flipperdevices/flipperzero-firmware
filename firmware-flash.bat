@@ -172,7 +172,7 @@ if /i "!DELETE_TEMP!"=="Y" (
     rmdir /s /q %CLI_TEMP%
 )
 echo.
-echo Fin. Happy programming friend.
+echo Fin - Happy programming friend.
 echo.
 pause
 exit /b

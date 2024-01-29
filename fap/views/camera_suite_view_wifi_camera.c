@@ -68,7 +68,7 @@ static bool camera_suite_view_wifi_camera_input(InputEvent* event, void* context
                     UNUSED(model);
 
                     // Stop camera WiFi stream.
-                    // furi_hal_uart_tx(FuriHalUartIdUSART1, (uint8_t[]){'w'}, 1);
+                    // furi_hal_uart_tx(furihaluartidusart1, (uint8_t[]){'w'}, 1);
                     // furi_delay_ms(50);
 
                     // Go back to the main menu.
