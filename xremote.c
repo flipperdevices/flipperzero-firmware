@@ -49,6 +49,7 @@ XRemote* xremote_app_alloc() {
     app->transmitting = 0;
     app->ir_timing = 1000;
     app->ir_timing_char = "1000";
+    app->stop_transmit = false;
 
     // Load configs
     xremote_read_settings(app);

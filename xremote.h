@@ -46,6 +46,7 @@ typedef struct {
     uint32_t ir_timing;
     char* ir_timing_char;
     bool transmitting;
+    bool stop_transmit;
     char text_store[XREMOTE_TEXT_STORE_NUM][XREMOTE_TEXT_STORE_SIZE + 1];
     SubGhz* subghz;
 } XRemote;

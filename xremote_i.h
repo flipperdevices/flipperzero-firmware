@@ -87,6 +87,7 @@ typedef enum {
     XRemoteTransmittingIdle,
     XRemoteTransmittingStart,
     XRemoteTransmittingStop,
+    XRemoteTransmittingStopSubghz,
 } XRemoteRemoteTransmissionStatus;
 
 struct InfraredSignal {

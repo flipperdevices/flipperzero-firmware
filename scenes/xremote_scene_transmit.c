@@ -80,15 +80,13 @@ void xremote_scene_transmit_send_pause(XRemote* app, CrossRemoteItem* item) {
 }
 
 void xremote_scene_transmit_send_subghz(XRemote* app, CrossRemoteItem* item) {
-    UNUSED(item);
     app->transmitting = true;
     xremote_scene_ir_notification_message(app, SubGhzNotificationMessageBlinkStartSend);
     // ADD SEND METHOD HERE
-    //FURI_LOG_D("SUBGZK", "path: %s", furi_string_get_cstr(item->filename));
     subghz_send(app, furi_string_get_cstr(item->filename)); //currently crashes, null pointer
-    furi_thread_flags_wait(0, FuriFlagWaitAny, 2000); //Remove later
-    app->transmitting = false;
-    xremote_scene_ir_notification_message(app, SubGhzNotificationMessageBlinkStop);
+    //furi_thread_flags_wait(0, FuriFlagWaitAny, 2000); //Remove later
+    //app->transmitting = false;
+    //xremote_scene_ir_notification_message(app, SubGhzNotificationMessageBlinkStop);
 }
 
 void xremote_scene_transmit_send_signal(void* context, CrossRemoteItem* item) {
@@ -104,13 +102,15 @@ void xremote_scene_transmit_send_signal(void* context, CrossRemoteItem* item) {
     xremote_transmit_model_set_type(app->xremote_transmit, item->type);
     if(item->type == XRemoteRemoteItemTypeInfrared) {
         xremote_scene_transmit_send_ir_signal(app, item);
+        xremote_cross_remote_set_transmitting(remote, XRemoteTransmittingStop);
     } else if(item->type == XRemoteRemoteItemTypePause) {
         xremote_scene_transmit_send_pause(app, item);
+        xremote_cross_remote_set_transmitting(remote, XRemoteTransmittingStop);
     } else if(item->type == XRemoteRemoteItemTypeSubGhz) {
         xremote_scene_transmit_send_subghz(app, item);
     }
 
-    xremote_cross_remote_set_transmitting(remote, XRemoteTransmittingStop);
+    //xremote_cross_remote_set_transmitting(remote, XRemoteTransmittingStop);
 }
 
 void xremote_scene_transmit_run_remote(void* context) {
@@ -125,7 +125,16 @@ void xremote_scene_transmit_run_remote(void* context) {
             CrossRemoteItem* item = xremote_cross_remote_get_item(remote, i);
             xremote_scene_transmit_send_signal(app, item);
             //furi_thread_flags_wait(0, FuriFlagWaitAny, 2000);
-            xremote_scene_ir_notification_message(app, InfraredNotificationMessageBlinkStartSend);
+            //furi_thread_flags_wait(0, FuriFlagWaitAny, 1000);
+            //xremote_scene_ir_notification_message(app, InfraredNotificationMessageBlinkStartSend);
+        } else if(xremote_cross_remote_get_transmitting(remote) == XRemoteTransmittingStopSubghz) {
+            i++;
+            app->state_notifications = SubGhzNotificationStateIDLE;
+            subghz_txrx_stop(app->subghz->txrx);
+            app->transmitting = false;
+            xremote_scene_ir_notification_message(app, SubGhzNotificationMessageBlinkStop);
+            xremote_cross_remote_set_transmitting(remote, XRemoteTransmittingIdle);
+            //furi_thread_flags_wait(0, FuriFlagWaitAny, 1000);
         } else if(xremote_cross_remote_get_transmitting(remote) == XRemoteTransmittingStop) {
             i++;
             xremote_cross_remote_set_transmitting(remote, XRemoteTransmittingIdle);
@@ -149,14 +158,38 @@ void xremote_scene_transmit_on_enter(void* context) {
 
 bool xremote_scene_transmit_on_event(void* context, SceneManagerEvent event) {
     XRemote* app = context;
-
-    UNUSED(app);
-    UNUSED(event);
     bool consumed = false;
+
+    if(event.type == SceneManagerEventTypeCustom) {
+        FURI_LOG_D(TAG, "Custom Event");
+        switch(event.event) {
+            case XRemoteCustomEventViewTransmitterSendStop:
+                FURI_LOG_D("SUBGHZ", "stop event");
+                //app->stop_transmit = true;
+                app->state_notifications = SubGhzNotificationStateIDLE;
+                subghz_txrx_stop(app->subghz->txrx);
+                app->transmitting = false;
+                xremote_scene_ir_notification_message(app, SubGhzNotificationMessageBlinkStop);
+                xremote_cross_remote_set_transmitting(app->cross_remote, XRemoteTransmittingStop);
+                break;
+            default: 
+                break;
+        }
+    } else if(event.type == SceneManagerEventTypeTick) {
+        FURI_LOG_D(TAG, "Tick Event");
+        if (app->state_notifications == SubGhzNotificationStateTx && app->led == 1) {
+            //blink for subghz
+        }
+    }
+
+    
     return consumed;
 }
 
 void xremote_scene_transmit_on_exit(void* context) {
     XRemote* app = context;
-    UNUSED(app);
+    app->transmitting = false;
+    subghz_txrx_stop(app->subghz->txrx);
+    app->state_notifications = SubGhzNotificationStateIDLE;
+    //xremote_cross_remote_set_transmitting(remote, XRemoteTransmittingIdle);
 }

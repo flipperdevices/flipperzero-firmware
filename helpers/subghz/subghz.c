@@ -28,33 +28,23 @@ void subghz_free(SubGhz* subghz) {
 
 void subghz_scene_transmit_callback_end_tx(void* context) {
     furi_assert(context);
-    //UNUSED(context);
     FURI_LOG_D(TAG, "callback end");
     XRemote* app = context;
     view_dispatcher_send_custom_event(
         app->view_dispatcher, XRemoteCustomEventViewTransmitterSendStop);
+
+
+    //app->state_notifications = SubGhzNotificationStateIDLE;
+    //subghz_txrx_stop(app->subghz->txrx);
+    //app->transmitting = false;
+    //xremote_scene_ir_notification_message(app, SubGhzNotificationMessageBlinkStop);
+    xremote_cross_remote_set_transmitting(app->cross_remote, XRemoteTransmittingStop);
 }
 
 void subghz_send(void* context, const char* path) {
-    //UNUSED(context);
     XRemote* app = context;
-    //SubGhz* subghz = subghz_alloc();
-
-    FURI_LOG_D(TAG, "loading protocol from file");
+    
     subghz_load_protocol_from_file(app->subghz, path);
-
-    /*Storage* storage = furi_record_open(RECORD_STORAGE);
-    FlipperFormat* ff = flipper_format_file_alloc(storage);
-
-    if(!flipper_format_file_open_existing(ff, MEAL_PAGER_TMP_FILE)) {
-        //totp_close_config_file(fff_file);
-        FURI_LOG_E(TAG, "Error reading Temp File %s", MEAL_PAGER_TMP_FILE);
-        furi_record_close(RECORD_STORAGE);
-        return;
-    }*/
-
-    //subghz_txrx_tx_start(subghz->txrx, ff);
-
     FURI_LOG_D(TAG, "Starting Transmission");
     subghz_txrx_tx_start(
         app->subghz->txrx,
@@ -65,13 +55,7 @@ void subghz_send(void* context, const char* path) {
         app->subghz->txrx, subghz_scene_transmit_callback_end_tx, app);
     app->state_notifications = SubGhzNotificationStateTx;
 
-    /*flipper_format_rewind(ff);
-    flipper_format_file_close(ff);
-    flipper_format_free(ff);
 
-    furi_record_close(RECORD_STORAGE);*/
 
-    //subghz_free(subghz);
     FURI_LOG_D(TAG, "Finished Transmitting");
-    //meal_pager_blink_stop(app);
 }

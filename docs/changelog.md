@@ -1,5 +1,6 @@
 ## v2.0
-
+- SubGhz Functionality added
+- Slight change in Storage format to enalbe individual IR timings later (feature request)
 - Fixed more memory leaks
 
 ## v1.1
