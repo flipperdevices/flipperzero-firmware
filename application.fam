@@ -1,0 +1,22 @@
+# For details & more options, see documentation/AppManifests.md in firmware repo
+
+App(
+    appid="pacman_app",  # Must be unique
+    name="PacMan",  # Displayed in menus
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="pacman_app",
+    stack_size=4 * 1024,
+    fap_category="Games",
+    requires=[
+        "gui",
+    ],
+    order=10,
+    # Optional values
+    # fap_version="0.1",
+    fap_icon="app.png",  # 10x10 1-bit PNG
+    # fap_description="A simple app",
+    # fap_author="J. Doe",
+    # fap_weburl="https://github.com/user/checkers",
+    fap_icon_assets="images",  # Image assets to compile for this application
+    fap_description="The classic PacMan game.",
+)
