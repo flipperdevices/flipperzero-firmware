@@ -129,9 +129,13 @@ MfDesfireError
     do {
         error = mf_desfire_send_chunks(instance, instance->input_buffer, instance->result_buffer);
 
-        if(error != MfDesfireErrorNone) break;
+        if(error != MfDesfireErrorNone) {
+            FURI_LOG_E(TAG, "Read Key settings failed: %d", error);
+            break;
+        }
 
         if(!mf_desfire_key_settings_parse(data, instance->result_buffer)) {
+            FURI_LOG_E(TAG, "Failed to parse read key settings cmd");
             error = MfDesfireErrorProtocol;
         }
     } while(false);

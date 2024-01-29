@@ -100,6 +100,12 @@ bool mf_desfire_key_settings_parse(MfDesfireKeySettings* data, const BitBuffer* 
         data->change_key_id = layout.change_key_id;
         data->max_keys = layout.max_keys;
         data->flags = layout.flags;
+    } else {
+        FURI_LOG_E(TAG, "Key setting incorrect length: %d", bit_buffer_get_size_bytes(buf));
+        for(size_t i = 0; i < bit_buffer_get_size_bytes(buf); i++) {
+            printf("%02X ", bit_buffer_get_byte(buf, i));
+        }
+        printf("\r\n");
     }
 
     return can_parse;
