@@ -220,13 +220,22 @@ static inline size_t
             content_size = sizeof(frame->content.data.size);
         } else {
             content_size = sizeof(frame->content.data.size) + frame->content.data.size;
+
+            if(content_size > sizeof(frame->content.data)) {
+                return SIZE_MAX;
+            }
         }
         break;
     default:
         return SIZE_MAX;
     }
 
-    return content_size > received_content_size ? content_size - received_content_size : 0;
+    size_t ret = 0;
+    if(content_size > received_content_size) {
+        ret = content_size - received_content_size;
+    }
+
+    return ret;
 }
 
 /**
