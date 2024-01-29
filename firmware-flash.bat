@@ -162,7 +162,7 @@ if !ERRORLEVEL! EQU 0 (
 echo.
 echo Firmware upload was successful.
 echo Cleaning up...
-echo Restoring default configs...
+echo Resetting arduino-cli config back to defaults...
 arduino-cli %ARDUINO_CLI_CONFIG_FILE% config set directories.data C:\temp\arduino-cli\data
 arduino-cli %ARDUINO_CLI_CONFIG_FILE% config set directories.downloads C:\temp\arduino-cli\staging
 arduino-cli %ARDUINO_CLI_CONFIG_FILE% config set directories.user C:\temp\arduino-cli\user
@@ -204,10 +204,11 @@ if %ERRORLEVEL% EQU 0 (
         goto :compileFirmware
     )
     echo Cleaning up...
-    echo Restoring default configs...
+    echo Resetting arduino-cli config back to defaults...
     arduino-cli %ARDUINO_CLI_CONFIG_FILE% config set directories.data C:\temp\arduino-cli\data
     arduino-cli %ARDUINO_CLI_CONFIG_FILE% config set directories.downloads C:\temp\arduino-cli\staging
     arduino-cli %ARDUINO_CLI_CONFIG_FILE% config set directories.user C:\temp\arduino-cli\user
+    arduino-cli %ARDUINO_CLI_CONFIG_FILE% config set library.enable_unsafe_install false
     set /p DELETE_TEMP="Would you like to delete the temporary files? (Y/N): "
     if /i "!DELETE_TEMP!"=="Y" (
         rmdir /s /q %CLI_TEMP%
