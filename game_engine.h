@@ -23,11 +23,12 @@ typedef struct {
 
 typedef struct GameEngine GameEngine;
 
+typedef struct RunningGameEngine RunningGameEngine;
+
 typedef void (*GameEngineCallback)(
-    GameEngine* engine,
+    RunningGameEngine* engine,
     Canvas* canvas,
     InputState input,
-    float delta_time,
     void* context);
 
 typedef struct {
@@ -42,24 +43,28 @@ GameEngineSettings game_engine_settings_init(void);
 
 /** Game Engine allocator
  * @param settings engine settings
- * @return GameEngine*  engine instance
+ * @return GameEngine*  GameEngine instance
  */
 GameEngine* game_engine_alloc(GameEngineSettings settings);
 
 /** Run the Game Engine. Blocks until game_engine_stop() is called.
- * @param engine engine instance
+ * @param engine GameEngine instance
  */
 void game_engine_run(GameEngine* engine);
 
-/** Stop the Game Engine. Will not block execution.
- * @param engine engine instance
- */
-void game_engine_stop(GameEngine* engine);
-
 /** Free the Game Engine
- * @param engine engine instance
+ * @param engine GameEngine instance
  */
 void game_engine_free(GameEngine* engine);
+
+/** Stop the running Game Engine. Will not block execution.
+ * @param engine RunningGameEngine instance
+ */
+void running_game_engine_stop(RunningGameEngine* engine);
+
+float running_game_engine_get_delta_time(RunningGameEngine* engine);
+
+float running_game_engine_get_delta_frames(RunningGameEngine* engine);
 
 #ifdef __cplusplus
 }

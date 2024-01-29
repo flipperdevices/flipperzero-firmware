@@ -20,7 +20,11 @@ struct GameEngine {
     FuriPubSub* input_pubsub;
     FuriThreadId thread_id;
     GameEngineSettings settings;
-    volatile bool running;
+};
+
+struct RunningGameEngine {
+    GameEngine* engine;
+    float fps;
 };
 
 typedef enum {
@@ -38,7 +42,6 @@ GameEngine* game_engine_alloc(GameEngineSettings settings) {
     engine->input_pubsub = furi_record_open(RECORD_INPUT_EVENTS);
     engine->thread_id = furi_thread_get_current_id();
     engine->settings = settings;
-    engine->running = false;
 
     return engine;
 }
@@ -96,7 +99,10 @@ static void input_events_callback(const void* value, void* context) {
 }
 
 void game_engine_run(GameEngine* engine) {
-    engine->running = true;
+    // create running engine
+    RunningGameEngine run = {
+        .engine = engine,
+    };
 
     // input state
     AtomicUint32 input_state = 0;
@@ -138,16 +144,16 @@ void game_engine_run(GameEngine* engine) {
             // clear screen
             canvas_reset(canvas);
 
-            // do the work
-            float fps = 1.0f / (time_delta / (float)SystemCoreClock);
-            float delta = engine->settings.fps / fps;
+            // calculate actual fps
+            run.fps = (float)SystemCoreClock / time_delta;
 
-            engine->settings.callback(engine, canvas, input, delta, engine->settings.context);
+            // do the work
+            engine->settings.callback(&run, canvas, input, engine->settings.context);
 
             // show fps if needed
             if(engine->settings.show_fps) {
                 canvas_set_color(canvas, ColorXOR);
-                canvas_printf(canvas, 0, 7, "%u", (uint32_t)roundf(fps));
+                canvas_printf(canvas, 0, 7, "%u", (uint32_t)roundf(run.fps));
             }
 
             // and output screen buffer
@@ -165,10 +171,16 @@ void game_engine_run(GameEngine* engine) {
     // release gui canvas and unsubscribe from input events
     gui_direct_draw_release(engine->gui);
     furi_pubsub_unsubscribe(engine->input_pubsub, input_subscription);
-
-    engine->running = false;
 }
 
-void game_engine_stop(GameEngine* engine) {
-    furi_thread_flags_set(engine->thread_id, GameThreadFlagStop);
+void running_game_engine_stop(RunningGameEngine* run) {
+    furi_thread_flags_set(run->engine->thread_id, GameThreadFlagStop);
+}
+
+float running_game_engine_get_delta_time(RunningGameEngine* engine) {
+    return 1.0f / engine->fps;
+}
+
+float running_game_engine_get_delta_frames(RunningGameEngine* engine) {
+    return engine->fps / engine->engine->settings.fps;
 }
