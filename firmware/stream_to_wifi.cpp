@@ -1,27 +1,34 @@
 #include "stream_to_wifi.h"
 
-// Constants
-const char *password = "test123";
-const char *ssid = "ESP";
+char password[30] = "test123";
+char ssid[30] = "ESP";
+
 bool is_wifi_streaming = false;
 char index_html[MAX_HTML_SIZE] = "TEST";
+
+DNSServer dnsServer;
 AsyncWebServer server(80);
 
-void stream_to_wifi() {
-  Serial.println("Starting");
+class CaptiveRequestHandler : public AsyncWebHandler {
+public:
+  CaptiveRequestHandler() {}
+  virtual ~CaptiveRequestHandler() {}
 
+  bool canHandle(AsyncWebServerRequest *request) { return true; }
+
+  void handleRequest(AsyncWebServerRequest *request) {
+    request->send_P(200, "text/html", index_html);
+  }
+};
+
+void stream_to_wifi() {
   if (!is_wifi_streaming) {
+    Serial.println("Starting WiFi stream...");
+
     // Connect to WiFi AP
     WiFi.mode(WIFI_AP);
     WiFi.softAP(ssid, password);
     WiFi.setSleep(false);
-
-    while (WiFi.status() != WL_CONNECTED) {
-      delay(500);
-      Serial.print(".");
-    }
-
-    Serial.println("WiFi connected");
 
     // Start the web server
     start_server();
@@ -33,46 +40,45 @@ void stream_to_wifi() {
     Serial.flush();
 
     is_wifi_streaming = true;
+  } else {
+    dnsServer.processNextRequest();
   }
 }
 
 void start_server() {
-  start_wifi_stream();
-
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
     request->send_P(200, "text/html", index_html);
+    Serial.println("Client connected.");
   });
 
-  // server.on("/stream", HTTP_GET, [](AsyncWebServerRequest *request){
-  //   camera_fb_t *fb = esp_camera_fb_get();  // Capture a frame
-  //   if (fb) {
-  //     request->send_P(200, "image/jpeg", (const char *)fb->buf, fb->len);
-  //     esp_camera_fb_return(fb);  // Release the frame buffer
-  //   } else {
-  //     request->send(500);  // Internal Server Error
-  //   }
-  // });
-
-  // Serve additional resources like images, stylesheets, etc. if needed.
-  // server.serveStatic("/img", SPIFFS, "/img");
-
+  dnsServer.start(53, "*", WiFi.softAPIP());
+  server.addHandler(new CaptiveRequestHandler()).setFilter(ON_AP_FILTER);
   server.begin();
 }
 
 void start_wifi_stream() {
-  turn_flash_on(); // Physical test indicator that we're streaming.
+  // Physical test indicator that we're streaming.
+  turn_flash_on(); 
+
   camera_model.isStreamToSerialEnabled = false;
+
   set_camera_config_defaults(CAMERA_FUNCTION_WIFI);
   set_camera_model_defaults(CAMERA_FUNCTION_WIFI);
   set_camera_defaults(CAMERA_FUNCTION_WIFI);
+
   // @todo - Dynamically set ssid and password via prompts.
+
   camera_model.isStreamToWiFiEnabled = true;
+
   turn_flash_off();
 }
 
 void stop_wifi_stream() {
   if (is_wifi_streaming) {
-    // WiFi.softAPdisconnect(true);
+    WiFi.setSleep(true);
+    server.end();
+    WiFi.softAPdisconnect(true);
+    WiFi.mode(WIFI_OFF);
     is_wifi_streaming = false;
     camera_model.isStreamToWiFiEnabled = false;
   }

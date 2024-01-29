@@ -82,8 +82,6 @@ if %DATA_FLAG% gtr 0 (
     arduino-cli %ARDUINO_CLI_CONFIG_FILE% core update-index
     arduino-cli %ARDUINO_CLI_CONFIG_FILE% core install esp32:esp32
     arduino-cli %ARDUINO_CLI_CONFIG_FILE% lib install --git-url https://github.com/me-no-dev/ESPAsyncWebServer.git
-    arduino-cli %ARDUINO_CLI_CONFIG_FILE% lib install --git-url https://github.com/espressif/arduino-esp32.git
-    arduino-cli %ARDUINO_CLI_CONFIG_FILE% lib install --git-url https://github.com/esp8266/Arduino.git
     arduino-cli %ARDUINO_CLI_CONFIG_FILE% lib install --git-url https://github.com/me-no-dev/AsyncTCP.git
     arduino-cli %ARDUINO_CLI_CONFIG_FILE% lib install --git-url https://github.com/me-no-dev/ESPAsyncTCP.git
 ) else (

@@ -4,6 +4,7 @@
 // #include <AsyncTCP.h>
 // #include <DNSServer.h>
 
+#include <DNSServer.h>
 #include <ESPAsyncWebServer.h>
 #include <FS.h>
 #include <WiFi.h>

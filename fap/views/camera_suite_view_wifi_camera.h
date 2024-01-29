@@ -18,16 +18,21 @@
 
 #include "../helpers/camera_suite_custom_event.h"
 
+#define WIFI_WORKER_EVENTS_MASK (WorkerEventStop | WorkerEventRx)
+
 typedef void (*CameraSuiteViewWiFiCameraCallback)(CameraSuiteCustomEvent event, void* context);
 
 typedef struct CameraSuiteViewWiFiCamera {
     View* view;
     CameraSuiteViewCameraCallback callback;
     void* context;
+    FuriStreamBuffer* wifi_rx_stream;
+    FuriThread* wifi_worker_thread;
 } CameraSuiteViewWiFiCamera;
 
 typedef struct {
     FuriString* log;
+    size_t log_strlen;
 } CameraSuiteViewWiFiCameraModel;
 
 CameraSuiteViewWiFiCamera* camera_suite_view_wifi_camera_alloc();
