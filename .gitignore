@@ -12,3 +12,6 @@
 __pycache__
 dist/*
 fap/dist/*
+firmware/.assets/
+firmware/.build
+firmware/build

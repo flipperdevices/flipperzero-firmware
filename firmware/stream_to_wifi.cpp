@@ -1,69 +1,70 @@
 #include "stream_to_wifi.h"
 
-#include <WiFi.h>
-#include <ESPAsyncWebServer.h>
-
-const char *ssid = "ESP";
-const char *password = "test123";
+// const char *ssid = "ESP";
+// const char *password = "test123";
 bool is_wifi_streaming = false;
 
-AsyncWebServer server(80);
+// AsyncWebServer server(80);
 
-#define MAX_HTML_SIZE 20000
+// #define MAX_HTML_SIZE 20000
 
-char index_html[MAX_HTML_SIZE] = "TEST";
+// char index_html[MAX_HTML_SIZE] = "TEST";
 
 void stream_to_wifi() {
-  if (!is_wifi_streaming) {
-    // Connect to WiFi AP
-    WiFi.mode(WIFI_AP);
-    WiFi.softAP(ssid, password);
-    WiFi.setSleep(false);
+  Serial.println("Starting");
 
-    while (WiFi.status() != WL_CONNECTED) {
-      delay(500);
-      Serial.print(".");
-    }
+  // if (!is_wifi_streaming) {
+  //   // Connect to WiFi AP
+  //   WiFi.mode(WIFI_AP);
+  //   WiFi.softAP(ssid, password);
+  //   WiFi.setSleep(false);
 
-    Serial.println("WiFi connected");
+  //   while (WiFi.status() != WL_CONNECTED) {
+  //     delay(500);
+  //     Serial.print(".");
+  //   }
 
-    // Start the web server
-    start_server();
+  //   Serial.println("WiFi connected");
 
-    Serial.print("Camera Ready! Use 'http://");
-    Serial.print(WiFi.softAPIP());
-    Serial.println("' to connect");
+  //   // Start the web server
+  //   start_server();
 
-    Serial.flush();
+  //   Serial.print("Camera Ready! Use 'http://");
+  //   Serial.print(WiFi.softAPIP());
+  //   Serial.println("' to connect");
 
-    is_wifi_streaming = true;
-  }
+  //   Serial.flush();
+
+  //   is_wifi_streaming = true;
+  // }
 }
 
 void start_server() {
-  server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
-    if (!camera_model.isStreamToWiFiEnabled) {
-      start_wifi_stream();
-    }
-    request->send_P(200, "text/html", index_html);
-  });
+  Serial.println("Starting server");
 
-  server.on("/stream", HTTP_GET, [](AsyncWebServerRequest *request){
-    if (!camera_model.isStreamToWiFiEnabled) {
-      start_wifi_stream();
-    }
+  // server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
+  //   if (!camera_model.isStreamToWiFiEnabled) {
+  //     start_wifi_stream();
+  //   }
+  //   request->send_P(200, "text/html", index_html);
+  // });
 
-    String boundary = "ESP32CAM";
-    String header = "--" + boundary + "\r\nContent-Type: image/jpeg\r\nContent-Length: ";
-    String jpeg = dither_image();
-    String response = header + jpeg.length() + "\r\n\r\n" + jpeg + "\r\n";
-    request->send(200, "multipart/x-mixed-replace; boundary=" + boundary, response);
-  });
+  // server.on("/stream", HTTP_GET, [](AsyncWebServerRequest *request){
+  //   if (!camera_model.isStreamToWiFiEnabled) {
+  //     start_wifi_stream();
+  //   }
 
-  // Serve additional resources like images, stylesheets, etc. if needed.
-  // server.serveStatic("/img", SPIFFS, "/img");
+  //   String boundary = "ESP32CAM";
+  //   String header = "--" + boundary + "\r\nContent-Type: image/jpeg\r\nContent-Length: ";
+  //   String jpeg = dither_image();
+  //   String response = header + jpeg.length() + "\r\n\r\n" + jpeg + "\r\n";
+  //   request->send(200, "multipart/x-mixed-replace; boundary=" + boundary, response);
+  // });
 
-  server.begin();
+  // // Serve additional resources like images, stylesheets, etc. if needed.
+  // // server.serveStatic("/img", SPIFFS, "/img");
+
+  // server.begin();
 }
 
 void start_wifi_stream() {
@@ -79,7 +80,7 @@ void start_wifi_stream() {
 
 void stop_wifi_stream() {
   if (is_wifi_streaming) {
-    WiFi.softAPdisconnect(true);
+    // WiFi.softAPdisconnect(true);
     is_wifi_streaming = false;
     camera_model.isStreamToWiFiEnabled = false;
   }

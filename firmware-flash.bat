@@ -4,11 +4,11 @@ setlocal EnableDelayedExpansion
 rem λ
 
 set CLI_FOUND_FOLLOW_UP=0
-set CLI_TEMP=%TEMP%\camera-suite-assets
-set COMPILE_FLAG=firmware\.compile.flag
-set ARDUINO_CLI_CONFIG_FILE=--config-file .\arduino-cli.yaml
+set CLI_TEMP=%TEMP%\arduino-cli
+set COMPILE_FLAG=%CLI_TEMP%\.compile.flag
+set ARDUINO_CLI_CONFIG_FILE=--config-file %CD%\firmware\arduino-cli.yaml
 set DEFAULT_BOARD_FQBN=esp32:esp32:esp32cam
-set FIRMWARE_SRC=firmware\firmware.ino
+set FIRMWARE_SRC=%CD%\firmware\firmware.ino
 set SELECTED_BOARD=%DEFAULT_BOARD_FQBN%
 
 chcp 65001 > nul
@@ -32,9 +32,13 @@ echo.
 echo Notes: 
 echo - You must have Git installed to use this script. If you do not have Git
 echo   installed, please install it from the following link:
+echo.
 echo   https://git-scm.com/downloads
+echo.
 echo - Temporary installation files will be installed to the following directory:
-echo   %CLI_TEMP%
+echo.
+echo   "%CLI_TEMP%"
+echo.
 echo - Temp files will take up approximately 6GB of storage space.
 echo - You will have to option to delete the temp files after flashing.
 echo ------------------------------------------------------------------------------
@@ -48,7 +52,7 @@ if not exist "arduino-cli.exe" (
     echo.
     echo The "arduino-cli.exe" file cannot be found. Please download it manually from the following link: 
     echo https://arduino.github.io/arduino-cli/latest/installation/#download
-    echo Extract the "arduino-cli.exe" file to the same directory as this script, root of the project.
+    echo Extract the "arduino-cli.exe" file to the same directory as this script.
     echo.
     echo When the file is ready, press any key to check again.
     set /a CLI_FOUND_FOLLOW_UP+=1
@@ -69,6 +73,7 @@ arduino-cli %ARDUINO_CLI_CONFIG_FILE% config set directories.downloads %CLI_TEMP
 arduino-cli %ARDUINO_CLI_CONFIG_FILE% config set directories.user %CLI_TEMP%\user %*
 
 echo Fetching assets...
+
 set DATA_FLAG=0
 if not exist "%CLI_TEMP%\data" (
     set /a "DATA_FLAG+=1"
@@ -80,15 +85,15 @@ if %DATA_FLAG% gtr 0 (
     arduino-cli %ARDUINO_CLI_CONFIG_FILE% core update-index
     arduino-cli %ARDUINO_CLI_CONFIG_FILE% core install esp32:esp32
     echo Cloning ESPAsyncWebServer repository...
-    git clone https://github.com/me-no-dev/ESPAsyncWebServer.git "%CLI_TEMP%\ESPAsyncWebServer"
+    git clone https://github.com/me-no-dev/ESPAsyncWebServer.git "%CLI_TEMP%\data\ESPAsyncWebServer"
     echo Cloning espressif Arduino ESP32 repository, a dependency of ESPAsyncWebServer...
-    git clone https://github.com/espressif/arduino-esp32.git "%CLI_TEMP%\arduino-esp32"
+    git clone https://github.com/espressif/arduino-esp32.git "%CLI_TEMP%\data\arduino-esp32"
     echo Cloning ESP8266 repository, a dependency of ESPAsyncWebServer...
-    git clone https://github.com/esp8266/Arduino.git "%CLI_TEMP%\ESP8266-Arduino"
+    git clone https://github.com/esp8266/Arduino.git "%CLI_TEMP%\data\ESP8266-Arduino"
     echo Cloning AsyncTCP repository, a dependency of ESPAsyncWebServer...
-    git clone https://github.com/me-no-dev/AsyncTCP.git "%CLI_TEMP%\AsyncTCP"
+    git clone https://github.com/me-no-dev/AsyncTCP.git "%CLI_TEMP%\data\AsyncTCP"
     echo Cloning ESPAsyncTCP repository, a dependency of ESPAsyncWebServer...
-    git clone https://github.com/me-no-dev/ESPAsyncTCP.git "%CLI_TEMP%\ESPAsyncTCP"
+    git clone https://github.com/me-no-dev/ESPAsyncTCP.git "%CLI_TEMP%\data\ESPAsyncTCP"
 ) else (
     echo Assets already installed. Skipping...
 )
@@ -166,9 +171,9 @@ echo.
 echo Firmware upload was successful.
 echo Cleaning up...
 echo Restoring default configs...
-arduino-cli %ARDUINO_CLI_CONFIG_FILE% config set directories.data C:\temp\camera-suite-assets\data
-arduino-cli %ARDUINO_CLI_CONFIG_FILE% config set directories.downloads C:\temp\camera-suite-assets\staging
-arduino-cli %ARDUINO_CLI_CONFIG_FILE% config set directories.user C:\temp\camera-suite-assets\user
+arduino-cli %ARDUINO_CLI_CONFIG_FILE% config set directories.data C:\temp\arduino-cli\data
+arduino-cli %ARDUINO_CLI_CONFIG_FILE% config set directories.downloads C:\temp\arduino-cli\staging
+arduino-cli %ARDUINO_CLI_CONFIG_FILE% config set directories.user C:\temp\arduino-cli\user
 set /p DELETE_TEMP="Would you like to delete the temporary files? (Y/N): "
 if /i "!DELETE_TEMP!"=="Y" (
     rmdir /s /q %CLI_TEMP%
@@ -207,9 +212,9 @@ if %ERRORLEVEL% EQU 0 (
     )
     echo Cleaning up...
     echo Restoring default configs...
-    arduino-cli %ARDUINO_CLI_CONFIG_FILE% config set directories.data C:\temp\camera-suite-assets\data
-    arduino-cli %ARDUINO_CLI_CONFIG_FILE% config set directories.downloads C:\temp\camera-suite-assets\staging
-    arduino-cli %ARDUINO_CLI_CONFIG_FILE% config set directories.user C:\temp\camera-suite-assets\user
+    arduino-cli %ARDUINO_CLI_CONFIG_FILE% config set directories.data C:\temp\arduino-cli\data
+    arduino-cli %ARDUINO_CLI_CONFIG_FILE% config set directories.downloads C:\temp\arduino-cli\staging
+    arduino-cli %ARDUINO_CLI_CONFIG_FILE% config set directories.user C:\temp\arduino-cli\user
     set /p DELETE_TEMP="Would you like to delete the temporary files? (Y/N): "
     if /i "!DELETE_TEMP!"=="Y" (
         rmdir /s /q %CLI_TEMP%
