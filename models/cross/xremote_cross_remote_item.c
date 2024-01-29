@@ -137,6 +137,7 @@ static bool xremote_cross_remote_item_read_ir(CrossRemoteItem* item, FlipperForm
 
     do {
         if(!flipper_format_read_string(ff, "name", item->name)) break;
+        if(!flipper_format_read_int32(ff, "time", &item->time, 1)) item->time = 1000;
         if(!flipper_format_read_string(ff, "type", buf)) break;
         if(furi_string_equal(buf, "raw")) {
             if(!xremote_cross_remote_item_read_ir_signal_raw(item, ff)) break;
@@ -229,11 +230,11 @@ uint32_t xremote_cross_remote_item_get_time(CrossRemoteItem* item) {
     return item->time;
 }
 
-bool xremote_cross_remote_item_ir_signal_save(InfraredSignal* signal, FlipperFormat* ff, const char* name, uint32_t time) {
+bool xremote_cross_remote_item_ir_signal_save(InfraredSignal* signal, FlipperFormat* ff, const char* name, int32_t time) {
     if(!flipper_format_write_comment_cstr(ff, "") ||
        !flipper_format_write_string_cstr(ff, "remote_type", "IR") ||
        !flipper_format_write_string_cstr(ff, "name", name) || 
-       !flipper_format_write_uint32(ff, "time", &time, 1)) {
+       !flipper_format_write_int32(ff, "time", &time, 1)) {
         return false;
     } else if(signal->is_raw) {
         return xremote_ir_signal_save_raw(&signal->payload.raw, ff);
