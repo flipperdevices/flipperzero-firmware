@@ -10,6 +10,8 @@ GameEngineSettings game_engine_settings_init() {
     GameEngineSettings settings;
     settings.fps = 60.0f;
     settings.show_fps = false;
+    settings.callback = NULL;
+    settings.context = NULL;
     return settings;
 }
 
@@ -29,6 +31,8 @@ typedef enum {
 #define GameThreadFlagMask (GameThreadFlagUpdate | GameThreadFlagStop)
 
 GameEngine* game_engine_alloc(GameEngineSettings settings) {
+    furi_check(settings.callback != NULL);
+
     GameEngine* engine = malloc(sizeof(GameEngine));
     engine->gui = furi_record_open(RECORD_GUI);
     engine->input_pubsub = furi_record_open(RECORD_INPUT_EVENTS);
@@ -62,22 +66,34 @@ static void clock_timer_callback(void* context) {
     furi_thread_flags_set(engine->thread_id, GameThreadFlagUpdate);
 }
 
+static const GameKey keys[] = {
+    [InputKeyUp] = GameKeyUp,
+    [InputKeyDown] = GameKeyDown,
+    [InputKeyRight] = GameKeyRight,
+    [InputKeyLeft] = GameKeyLeft,
+    [InputKeyOk] = GameKeyOk,
+    [InputKeyBack] = GameKeyBack,
+};
+
+static const size_t keys_count = sizeof(keys) / sizeof(keys[0]);
+
 static void input_events_callback(const void* value, void* context) {
     AtomicUint32* input_state = context;
-
     const InputEvent* event = value;
-    if(event->type == InputTypePress) {
-        *input_state |= (1 << event->key);
-    } else if(event->type == InputTypeRelease) {
-        *input_state &= ~(1 << event->key);
+
+    if(event->key < keys_count) {
+        switch(event->type) {
+        case InputTypePress:
+            *input_state |= (keys[event->key]);
+            break;
+        case InputTypeRelease:
+            *input_state &= ~(keys[event->key]);
+            break;
+        default:
+            break;
+        }
     }
 }
-
-typedef struct {
-    uint32_t current;
-    uint32_t pressed;
-    uint32_t released;
-} InputState;
 
 void game_engine_run(GameEngine* engine) {
     engine->running = true;
@@ -105,45 +121,48 @@ void game_engine_run(GameEngine* engine) {
         furi_check((flags & FuriFlagError) == 0);
 
         if(flags & GameThreadFlagUpdate) {
+            // update fps counter
+            uint32_t time_end = DWT->CYCCNT;
+            uint32_t time_delta = time_end - time_start;
+            time_start = time_end;
+
+            // update input state
             uint32_t input_current_state = input_state;
             InputState input = {
-                .current = input_current_state,
+                .held = input_current_state,
                 .pressed = input_current_state & ~input_prev_state,
                 .released = ~input_current_state & input_prev_state,
             };
             input_prev_state = input_current_state;
 
+            // clear screen
             canvas_reset(canvas);
-            uint32_t time_end = DWT->CYCCNT;
-            uint32_t time_delta = time_end - time_start;
-            time_start = time_end;
 
+            // do the work
+            float fps = 1.0f / (time_delta / (float)SystemCoreClock);
+            float delta = engine->settings.fps / fps;
+
+            engine->settings.callback(engine, canvas, input, delta, engine->settings.context);
+
+            // show fps if needed
             if(engine->settings.show_fps) {
-                float fps = 1.0f / (time_delta / (float)SystemCoreClock);
                 canvas_set_color(canvas, ColorXOR);
                 canvas_printf(canvas, 0, 7, "%u", (uint32_t)roundf(fps));
             }
 
-            if(input.pressed != 0) {
-                FURI_LOG_I("input", "pressed: %lu", input.pressed);
-
-                if(input.pressed & (1 << InputKeyBack)) {
-                    game_engine_stop(engine);
-                }
-            }
-
-            if(input.released != 0) {
-                FURI_LOG_I("input", "released: %lu", input.released);
-            }
-
+            // and output screen buffer
             canvas_commit(canvas);
-        } else if(flags & GameThreadFlagStop) {
+        }
+
+        if(flags & GameThreadFlagStop) {
             break;
         }
     }
 
+    // stop timer
     clock_timer_stop();
 
+    // release gui canvas and unsubscribe from input events
     gui_direct_draw_release(engine->gui);
     furi_pubsub_unsubscribe(engine->input_pubsub, input_subscription);
 
