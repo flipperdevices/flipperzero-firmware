@@ -4,7 +4,7 @@ App(
     apptype=FlipperAppType.EXTERNAL,
     entry_point="wifi_marauder_app",
     stack_size=4 * 1024,
-    resources="resources",
+    fap_file_assets="resources",
     fap_icon="wifi_10px.png",
     fap_category="GPIO/ESP32",
     fap_icon_assets="assets",

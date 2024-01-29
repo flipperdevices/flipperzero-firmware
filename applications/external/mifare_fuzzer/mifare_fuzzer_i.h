@@ -32,7 +32,7 @@
 
 #define TAG "MifareFuzzerApp"
 
-#define MIFARE_FUZZER_APP_FOLDER EXT_PATH("apps_data/mifare_fuzzer")
+#define MIFARE_FUZZER_APP_FOLDER APP_ASSETS_PATH("")
 #define MIFARE_FUZZER_UID_FILE_EXT ".txt"
 #define MIFARE_FUZZER_CARD_FILE_EXT ".nfc"
 

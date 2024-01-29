@@ -4,7 +4,7 @@ App(
     apptype=FlipperAppType.EXTERNAL,
     entry_point="evil_portal_app",
     stack_size=1 * 1024,
-    fap_file_assets="resources",
+    fap_file_assets=".resources",
     fap_icon="icons/evil_portal_10px.png",
     fap_category="GPIO/ESP32",
     fap_icon_assets="icons",

@@ -4,7 +4,7 @@ App(
     apptype=FlipperAppType.EXTERNAL,
     entry_point="tama_p1_app",
     stack_size=2 * 1024,
-    resources="resources",
+    fap_file_assets="resources",
     fap_icon="tamaIcon.png",
     fap_category="Games",
 )

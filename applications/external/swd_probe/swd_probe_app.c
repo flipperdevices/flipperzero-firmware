@@ -3,7 +3,7 @@
 #include "jep106.h"
 #include "adi.h"
 
-#define SWD_PATH EXT_PATH("apps_data/swd")
+#define SWD_PATH APP_ASSETS_PATH("")
 
 static void render_callback(Canvas* const canvas, void* cb_ctx);
 static bool swd_message_process(AppFSM* ctx);

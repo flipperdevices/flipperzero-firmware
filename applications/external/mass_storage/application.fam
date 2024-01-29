@@ -4,7 +4,7 @@ App(
     apptype=FlipperAppType.EXTERNAL,
     entry_point="mass_storage_app",
     stack_size=2 * 1024,
-    resources="resources",
+    fap_file_assets="resources",
     fap_icon="assets/mass_storage_10px.png",
     fap_icon_assets="assets",
     fap_category="USB",

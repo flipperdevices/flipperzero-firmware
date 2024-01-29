@@ -17,7 +17,7 @@
 #define KEYPAD_HEIGHT 4
 #define BUTTONS_COUNT 16
 #define ROM_START 0x200
-#define FILES_PATH "/ext/apps_data/.schip"
+#define FILES_PATH APP_ASSETS_PATH("")
 #define FILE_EXTENSION ".ch8"
 #define RPL_COUNT 8
 

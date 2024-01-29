@@ -4,7 +4,7 @@ App(
     apptype=FlipperAppType.EXTERNAL,
     entry_point="schip_main",
     stack_size=1 * 1024,
-    resources="resources",
+    fap_file_assets=".resources",
     fap_category="Games",
     fap_icon="icon.png",
     fap_icon_assets_symbol="schip",

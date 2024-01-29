@@ -4,7 +4,7 @@ App(
     apptype=FlipperAppType.EXTERNAL,
     entry_point="mifare_fuzzer_app",
     stack_size=4 * 1024,
-    resources="resources",
+    fap_file_assets="resources",
     fap_icon="images/mifare_fuzzer_10px.png",
     fap_category="NFC",
     fap_icon_assets="images",
