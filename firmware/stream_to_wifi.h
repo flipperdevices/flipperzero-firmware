@@ -4,13 +4,15 @@
 // #include <AsyncTCP.h>
 // #include <DNSServer.h>
 
-// #include <ESPAsyncWebServer.h>
-// #include <FS.h>
-// #include <WiFi.h>
-// #include <esp_camera.h>
+#include <ESPAsyncWebServer.h>
+#include <FS.h>
+#include <WiFi.h>
+#include <esp_camera.h>
 
 #include "camera.h"
 #include "camera_model.h"
+
+#define MAX_HTML_SIZE 20000
 
 /** Start the WiFi camera stream. */
 void stream_to_wifi();

@@ -243,14 +243,14 @@ To contribute to this project, please follow the steps below:
 4. Request PR [here][pull-request-link], introduce work via your branch.
 5. Wait for review and merge.
 
-When developing the firmware, be sure to download the dependencies by running the `packages-firmware.bat` batch script at the root of this directory. This will download the ESP32-CAM firmware dependencies (Arduino Build & Git Assets) to your Windows TEMP folder. You can run the same script over again later to remove the temporary files when you're done using them. Once installed, add these dependencies and their directories to your "Include path" in your IDE of choice. I prefer Visual Studio Code; there's a guide on how to get started with that workflow here:
+When developing the firmware, be sure to download the dependencies by running the `firmware-assets.bat` batch script at the root of this directory. This will download the ESP32-CAM firmware dependencies (Arduino Build & Git Assets) to your Windows TEMP folder. You can run the same script over again later to remove the temporary files when you're done using them. Once installed, add these dependencies and their directories to your "Include path" in your IDE of choice. I prefer Visual Studio Code; there's a guide on how to get started with that workflow here:
 
 https://github.com/CodyTolene/Flipper-Zero-Development-Toolkit
 
 Example include path:
 
 ```markdown
-C:/Users/<username>/AppData/Local/Temp/arduino-cli/**
+C:/Users/<username>/AppData/Local/Temp/arduino-cli/**/**
 ```
 
 Thank you for any and all contributions to this project, I'm looking forward to seeing what you come up with! If you have any questions, please let me know by opening an issue [here][issues-link].
