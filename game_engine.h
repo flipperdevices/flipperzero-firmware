@@ -25,7 +25,11 @@ typedef struct GameEngine GameEngine;
 
 typedef struct RunningGameEngine RunningGameEngine;
 
-typedef void (*GameEngineCallback)(
+typedef void (*GameEngineStartCallback)(GameEngine* engine, void* context);
+
+typedef void (*GameEngineStopCallback)(GameEngine* engine, void* context);
+
+typedef void (*GameEngineFrameCallback)(
     RunningGameEngine* engine,
     Canvas* canvas,
     InputState input,
@@ -34,7 +38,10 @@ typedef void (*GameEngineCallback)(
 typedef struct {
     float fps; // target fps
     bool show_fps; // show fps counter
-    GameEngineCallback callback; // game logic and rendering callback, called at target fps
+    bool always_backlight; // keep backlight on
+    GameEngineStartCallback start_callback; // called when engine starts
+    GameEngineFrameCallback frame_callback; // frame callback, called at target fps
+    GameEngineStopCallback stop_callback; // called when engine stops
     void* context; // user context passed to callback
 } GameEngineSettings;
 
@@ -57,13 +64,21 @@ void game_engine_run(GameEngine* engine);
  */
 void game_engine_free(GameEngine* engine);
 
-/** Stop the running Game Engine. Will not block execution.
+/** Stop the running Game Engine, will not block execution
  * @param engine RunningGameEngine instance
  */
 void running_game_engine_stop(RunningGameEngine* engine);
 
+/** Get delta time between current and previous frame
+ * @param engine RunningGameEngine instance
+ * @return float  delta time in seconds
+ */
 float running_game_engine_get_delta_time(RunningGameEngine* engine);
 
+/** Get delta frames between current and previous frame
+ * @param engine RunningGameEngine instance
+ * @return float  delta frames
+ */
 float running_game_engine_get_delta_frames(RunningGameEngine* engine);
 
 #ifdef __cplusplus

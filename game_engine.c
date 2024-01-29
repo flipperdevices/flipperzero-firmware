@@ -2,21 +2,26 @@
 #include <furi.h>
 #include <gui/gui.h>
 #include <input/input.h>
+#include <notification/notification_messages.h>
 #include "clock_timer.h"
 
 typedef _Atomic uint32_t AtomicUint32;
 
 GameEngineSettings game_engine_settings_init() {
     GameEngineSettings settings;
-    settings.fps = 60.0f;
+    settings.fps = 30.0f;
     settings.show_fps = false;
-    settings.callback = NULL;
+    settings.always_backlight = true;
+    settings.start_callback = NULL;
+    settings.frame_callback = NULL;
+    settings.stop_callback = NULL;
     settings.context = NULL;
     return settings;
 }
 
 struct GameEngine {
     Gui* gui;
+    NotificationApp* notifications;
     FuriPubSub* input_pubsub;
     FuriThreadId thread_id;
     GameEngineSettings settings;
@@ -35,10 +40,11 @@ typedef enum {
 #define GameThreadFlagMask (GameThreadFlagUpdate | GameThreadFlagStop)
 
 GameEngine* game_engine_alloc(GameEngineSettings settings) {
-    furi_check(settings.callback != NULL);
+    furi_check(settings.frame_callback != NULL);
 
     GameEngine* engine = malloc(sizeof(GameEngine));
     engine->gui = furi_record_open(RECORD_GUI);
+    engine->notifications = furi_record_open(RECORD_NOTIFICATION);
     engine->input_pubsub = furi_record_open(RECORD_INPUT_EVENTS);
     engine->thread_id = furi_thread_get_current_id();
     engine->settings = settings;
@@ -48,6 +54,7 @@ GameEngine* game_engine_alloc(GameEngineSettings settings) {
 
 void game_engine_free(GameEngine* engine) {
     furi_record_close(RECORD_GUI);
+    furi_record_close(RECORD_NOTIFICATION);
     furi_record_close(RECORD_INPUT_EVENTS);
     free(engine);
 }
@@ -99,14 +106,14 @@ static void input_events_callback(const void* value, void* context) {
 }
 
 void game_engine_run(GameEngine* engine) {
-    // create running engine
-    RunningGameEngine run = {
-        .engine = engine,
-    };
-
     // input state
     AtomicUint32 input_state = 0;
     uint32_t input_prev_state = 0;
+
+    // set backlight if needed
+    if(engine->settings.always_backlight) {
+        notification_message(engine->notifications, &sequence_display_backlight_enforce_on);
+    }
 
     // acquire gui canvas
     Canvas* canvas = gui_direct_draw_acquire(engine->gui);
@@ -115,11 +122,21 @@ void game_engine_run(GameEngine* engine) {
     FuriPubSubSubscription* input_subscription =
         furi_pubsub_subscribe(engine->input_pubsub, input_events_callback, &input_state);
 
+    // call start callback, if any
+    if(engine->settings.start_callback) {
+        engine->settings.start_callback(engine, engine->settings.context);
+    }
+
     // start "game update" timer
     clock_timer_start(clock_timer_callback, engine, engine->settings.fps);
 
     // init fps counter
     uint32_t time_start = DWT->CYCCNT;
+
+    // create running engine
+    RunningGameEngine run = {
+        .engine = engine,
+    };
 
     while(true) {
         uint32_t flags =
@@ -148,7 +165,7 @@ void game_engine_run(GameEngine* engine) {
             run.fps = (float)SystemCoreClock / time_delta;
 
             // do the work
-            engine->settings.callback(&run, canvas, input, engine->settings.context);
+            engine->settings.frame_callback(&run, canvas, input, engine->settings.context);
 
             // show fps if needed
             if(engine->settings.show_fps) {
@@ -168,9 +185,18 @@ void game_engine_run(GameEngine* engine) {
     // stop timer
     clock_timer_stop();
 
+    // call stop callback, if any
+    if(engine->settings.stop_callback) {
+        engine->settings.stop_callback(engine, engine->settings.context);
+    }
+
     // release gui canvas and unsubscribe from input events
     gui_direct_draw_release(engine->gui);
     furi_pubsub_unsubscribe(engine->input_pubsub, input_subscription);
+
+    if(engine->settings.always_backlight) {
+        notification_message(engine->notifications, &sequence_display_backlight_enforce_auto);
+    }
 }
 
 void running_game_engine_stop(RunningGameEngine* run) {
