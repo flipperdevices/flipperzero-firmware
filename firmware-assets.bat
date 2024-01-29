@@ -27,8 +27,8 @@ echo.
 echo Once installed you can add them to the "Include path" in your IDE of choice.
 echo.
 echo Notes:
-echo - Temporary installation files will take up approx. 3.5GB of storage space.
-echo - You can reinstall or delete the temporary files by re-running this script.
+echo - Development asset files will take up approx. 3.5GB of storage space.
+echo - You can reinstall or delete the asset files by re-running this script.
 echo ------------------------------------------------------------------------------
 echo.
 pause
@@ -84,7 +84,7 @@ if %DATA_FLAG% gtr 0 (
     arduino-cli %ARDUINO_CLI_CONFIG_FILE% lib install --git-url https://github.com/esp8266/Arduino.git
     arduino-cli %ARDUINO_CLI_CONFIG_FILE% lib install --git-url https://github.com/me-no-dev/AsyncTCP.git
     arduino-cli %ARDUINO_CLI_CONFIG_FILE% lib install --git-url https://github.com/me-no-dev/ESPAsyncTCP.git
-    goto :cleanup
+    goto :wrapUp
 ) else (
     set /p SHOULD_REINSTALL="Assets already installed. Reinstall? (Y/N): "
     if /i "!SHOULD_REINSTALL!"=="Y" (
@@ -98,7 +98,7 @@ if %DATA_FLAG% gtr 0 (
     )
 )
 
-:cleanup
+:wrapUp
 echo Configuring Git pre-commit hook...
 copy /Y "%GITHUB_HOOKS_FOLDER%" "%GIT_HOOKS_FOLDER%"
 echo Resetting arduino-cli config back to defaults...

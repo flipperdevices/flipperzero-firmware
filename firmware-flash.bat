@@ -31,7 +31,7 @@ echo - RTS/DTR Pins = None
 echo.
 echo Notes:
 echo - Temporary installation files will take up approx. 3.5GB of storage space.
-echo - You will have to option to delete the temporary files after flashing.
+echo - You will have the option to delete the temporary files on completion.
 echo ------------------------------------------------------------------------------
 echo.
 pause
