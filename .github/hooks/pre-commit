@@ -10,6 +10,8 @@ cd "$(git rev-parse --show-toplevel)"
 if ! (cd "$fap_folder" && ufbt lint); then
     echo "Error: ufbt lint failed in the 'fap' folder. Please fix the issues before committing."
     exit 1
+else
+    echo "ufbt lint passed in the 'fap' folder."
 fi
 
 # If everything is okay, exit with a zero status
