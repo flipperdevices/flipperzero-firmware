@@ -5,7 +5,7 @@ App(
     entry_point="dab_timer_app",
     stack_size=2 * 1024,
     icon="A_DabTimer_14",
-    resources="resources",
+    fap_file_assets="resources",
     fap_category="Main",
     fap_icon="dab_timer_icon_10px.png",
     fap_icon_assets="icons",

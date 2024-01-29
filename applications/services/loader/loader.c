@@ -221,9 +221,9 @@ static void loader_make_mainmenu_file(Storage* storage) {
 
 static void loader_make_gamesmenu_file(Storage* storage) {
     if(!storage_file_exists(storage, CFW_MENU_GAMESMODE_PATH) &&
-       storage_file_exists(storage, CFG_PATH("cfw_gamesmenu.default.txt"))) {
+       storage_file_exists(storage, EXT_PATH("apps_assets/dab_timer/cfw_gamesmenu.default.txt"))) {
         storage_common_copy(
-            storage, CFG_PATH("cfw_gamesmenu.default.txt"), CFW_MENU_GAMESMODE_PATH);
+            storage, EXT_PATH("apps_assets/dab_timer/cfw_gamesmenu.default.txt"), CFW_MENU_GAMESMODE_PATH);
     }
 }
 
