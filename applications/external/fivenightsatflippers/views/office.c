@@ -55,7 +55,7 @@ static void draw_doors(Canvas* canvas, Fnaf* fnaf) {
             canvas,
             fnaf->office->camera_x + 4,
             fnaf->office->left_door_y - 4,
-            &I_left_door_background_22x65);
+            &I_left_door_background_22x64);
         canvas_set_color(canvas, 1);
         canvas_draw_line(canvas, fnaf->office->camera_x + 24, 6, fnaf->office->camera_x + 25, 6);
         canvas_draw_icon(canvas, fnaf->office->camera_x + 4, 0, &I_left_door_top_22x14);
@@ -70,7 +70,7 @@ static void draw_doors(Canvas* canvas, Fnaf* fnaf) {
             canvas,
             fnaf->office->camera_x + 101,
             fnaf->office->right_door_y - 4,
-            &I_right_door_background_23x65);
+            &I_right_door_background_23x64);
         canvas_set_color(canvas, 1);
         canvas_draw_icon(canvas, fnaf->office->camera_x + 101, 0, &I_right_door_top_23x14);
         canvas_draw_icon(
