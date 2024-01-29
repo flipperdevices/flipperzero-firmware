@@ -64,6 +64,8 @@ XRemote* xremote_app_alloc() {
 
     app->loading = loading_alloc();
 
+    app->subghz = subghz_alloc();
+
     app->text_input = text_input_alloc();
     view_dispatcher_add_view(
         app->view_dispatcher, XRemoteViewIdTextInput, text_input_get_view(app->text_input));
@@ -124,6 +126,8 @@ void xremote_app_free(XRemote* app) {
     infrared_worker_free(app->ir_worker);
 
     xremote_cross_remote_free(app->cross_remote);
+
+    subghz_free(app->subghz);
 
     // View Dispatcher
     view_dispatcher_remove_view(app->view_dispatcher, XRemoteViewIdMenu);
