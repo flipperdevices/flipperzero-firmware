@@ -201,6 +201,7 @@ CameraSuiteViewWiFiCamera* camera_suite_view_wifi_camera_alloc() {
     instance->wifi_rx_stream = furi_stream_buffer_alloc(1024, 1);
 
     // Allocate a thread for this camera to run on.
+    // @NOTICE: THIS SEEMINGLY BREAKS THE CAMERA VIEW THREAD...
     FuriThread* thread = furi_thread_alloc_ex(
         "Camera_Suite_WiFi_Rx_Thread", 1024, camera_suite_wifi_camera_worker, instance);
     instance->wifi_worker_thread = thread;
