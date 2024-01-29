@@ -43,15 +43,18 @@ static void camera_suite_view_guide_model_init(CameraSuiteViewGuideModel* const 
     model->some_value = 1;
 }
 
-bool camera_suite_view_guide_input(InputEvent* event, void* context) {
-    furi_assert(context);
-    CameraSuiteViewGuide* instance = context;
+bool camera_suite_view_guide_input(InputEvent* event, void* grid_view_instance) {
+    furi_assert(grid_view_instance);
+
+    CameraSuiteViewGuide* instance = static_cast<CameraSuiteViewGuide*>(grid_view_instance);
+
     if(event->type == InputTypeRelease) {
         switch(event->key) {
         case InputKeyBack:
-            with_view_model(
+            with_view_model_cpp(
                 instance->view,
-                CameraSuiteViewGuideModel * model,
+                CameraSuiteViewGuideModel*,
+                model,
                 {
                     UNUSED(model);
                     // Go back to the main menu.
@@ -79,15 +82,16 @@ void camera_suite_view_guide_exit(void* context) {
 void camera_suite_view_guide_enter(void* context) {
     furi_assert(context);
     CameraSuiteViewGuide* instance = (CameraSuiteViewGuide*)context;
-    with_view_model(
+    with_view_model_cpp(
         instance->view,
-        CameraSuiteViewGuideModel * model,
+        CameraSuiteViewGuideModel*,
+        model,
         { camera_suite_view_guide_model_init(model); },
         true);
 }
 
 CameraSuiteViewGuide* camera_suite_view_guide_alloc() {
-    CameraSuiteViewGuide* instance = malloc(sizeof(CameraSuiteViewGuide));
+    CameraSuiteViewGuide* instance = (CameraSuiteViewGuide*)malloc(sizeof(CameraSuiteViewGuide));
     instance->view = view_alloc();
     view_allocate_model(instance->view, ViewModelTypeLocking, sizeof(CameraSuiteViewGuideModel));
     view_set_context(instance->view, instance); // furi_assert crashes in events without this
@@ -96,9 +100,10 @@ CameraSuiteViewGuide* camera_suite_view_guide_alloc() {
     view_set_enter_callback(instance->view, camera_suite_view_guide_enter);
     view_set_exit_callback(instance->view, camera_suite_view_guide_exit);
 
-    with_view_model(
+    with_view_model_cpp(
         instance->view,
-        CameraSuiteViewGuideModel * model,
+        CameraSuiteViewGuideModel*,
+        model,
         { camera_suite_view_guide_model_init(model); },
         true);
 
@@ -108,8 +113,8 @@ CameraSuiteViewGuide* camera_suite_view_guide_alloc() {
 void camera_suite_view_guide_free(CameraSuiteViewGuide* instance) {
     furi_assert(instance);
 
-    with_view_model(
-        instance->view, CameraSuiteViewGuideModel * model, { UNUSED(model); }, true);
+    with_view_model_cpp(
+        instance->view, CameraSuiteViewGuideModel*, model, { UNUSED(model); }, true);
     view_free(instance->view);
     free(instance);
 }

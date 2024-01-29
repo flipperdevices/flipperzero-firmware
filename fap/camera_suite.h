@@ -1,7 +1,6 @@
 #pragma once
 
 #include <furi.h>
-#include <furi_hal.h>
 #include <gui/gui.h>
 #include <gui/modules/button_menu.h>
 #include <gui/modules/submenu.h>
@@ -18,6 +17,8 @@
 #include "views/camera_suite_view_camera.h"
 #include "views/camera_suite_view_wifi_camera.h"
 #include "helpers/camera_suite_storage.h"
+
+#define WORKER_EVENTS_MASK (WorkerEventStop | WorkerEventRx)
 
 #define TAG "Camera Suite"
 
@@ -89,3 +90,10 @@ typedef enum {
     CameraSuiteLedOff,
     CameraSuiteLedOn,
 } CameraSuiteLedState;
+
+typedef enum {
+    // Reserved for StreamBuffer internal event
+    WorkerEventReserved = (1 << 0),
+    WorkerEventStop = (1 << 1),
+    WorkerEventRx = (1 << 2),
+} WorkerEventFlags;

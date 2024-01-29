@@ -14,12 +14,12 @@ enum SubmenuIndex {
 };
 
 void camera_suite_scene_menu_submenu_callback(void* context, uint32_t index) {
-    CameraSuite* app = context;
+    CameraSuite* app = static_cast<CameraSuite*>(context);
     view_dispatcher_send_custom_event(app->view_dispatcher, index);
 }
 
 void camera_suite_scene_menu_on_enter(void* context) {
-    CameraSuite* app = context;
+    CameraSuite* app = static_cast<CameraSuite*>(context);
 
     submenu_add_item(
         app->submenu,
@@ -63,7 +63,7 @@ void camera_suite_scene_menu_on_enter(void* context) {
 }
 
 bool camera_suite_scene_menu_on_event(void* context, SceneManagerEvent event) {
-    CameraSuite* app = context;
+    CameraSuite* app = static_cast<CameraSuite*>(context);
     UNUSED(app);
     if(event.type == SceneManagerEventTypeBack) {
         // Exit application.
@@ -102,6 +102,6 @@ bool camera_suite_scene_menu_on_event(void* context, SceneManagerEvent event) {
 }
 
 void camera_suite_scene_menu_on_exit(void* context) {
-    CameraSuite* app = context;
+    CameraSuite* app = static_cast<CameraSuite*>(context);
     submenu_reset(app->submenu);
 }

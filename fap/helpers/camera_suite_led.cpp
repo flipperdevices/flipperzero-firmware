@@ -1,8 +1,8 @@
-#include "camera_suite_led.h"
 #include "../camera_suite.h"
+#include "camera_suite_led.h"
 
 void camera_suite_led_set_rgb(void* context, int red, int green, int blue) {
-    CameraSuite* app = context;
+    CameraSuite* app = static_cast<CameraSuite*>(context);
     if(app->led != 1) {
         return;
     }
@@ -29,7 +29,7 @@ void camera_suite_led_set_rgb(void* context, int red, int green, int blue) {
 }
 
 void camera_suite_led_reset(void* context) {
-    CameraSuite* app = context;
+    CameraSuite* app = static_cast<CameraSuite*>(context);
     notification_message(app->notification, &sequence_reset_red);
     notification_message(app->notification, &sequence_reset_green);
     notification_message(app->notification, &sequence_reset_blue);

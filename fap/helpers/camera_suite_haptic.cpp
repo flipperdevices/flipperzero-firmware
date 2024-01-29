@@ -1,8 +1,8 @@
-#include "camera_suite_haptic.h"
 #include "../camera_suite.h"
+#include "camera_suite_haptic.h"
 
 void camera_suite_play_happy_bump(void* context) {
-    CameraSuite* app = context;
+    CameraSuite* app = static_cast<CameraSuite*>(context);
     if(app->haptic != 1) {
         return;
     }
@@ -12,7 +12,7 @@ void camera_suite_play_happy_bump(void* context) {
 }
 
 void camera_suite_play_bad_bump(void* context) {
-    CameraSuite* app = context;
+    CameraSuite* app = static_cast<CameraSuite*>(context);
     if(app->haptic != 1) {
         return;
     }
@@ -22,7 +22,7 @@ void camera_suite_play_bad_bump(void* context) {
 }
 
 void camera_suite_play_long_bump(void* context) {
-    CameraSuite* app = context;
+    CameraSuite* app = static_cast<CameraSuite*>(context);
     if(app->haptic != 1) {
         return;
     }

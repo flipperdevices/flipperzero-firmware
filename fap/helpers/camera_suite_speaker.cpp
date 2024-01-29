@@ -1,10 +1,10 @@
-#include "camera_suite_speaker.h"
 #include "../camera_suite.h"
+#include "camera_suite_speaker.h"
 
 #define NOTE_INPUT 587.33f
 
 void camera_suite_play_input_sound(void* context) {
-    CameraSuite* app = context;
+    CameraSuite* app = static_cast<CameraSuite*>(context);
     if(app->speaker != 1) {
         return;
     }
@@ -15,7 +15,7 @@ void camera_suite_play_input_sound(void* context) {
 }
 
 void camera_suite_stop_all_sound(void* context) {
-    CameraSuite* app = context;
+    CameraSuite* app = static_cast<CameraSuite*>(context);
     if(app->speaker != 1) {
         return;
     }

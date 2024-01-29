@@ -1,7 +1,7 @@
 #include "camera_suite_storage.h"
 
 static Storage* camera_suite_open_storage() {
-    return furi_record_open(RECORD_STORAGE);
+    return static_cast<Storage*>(furi_record_open(RECORD_STORAGE));
 }
 
 static void camera_suite_close_storage() {
@@ -15,7 +15,7 @@ static void camera_suite_close_config_file(FlipperFormat* file) {
 }
 
 void camera_suite_save_settings(void* context) {
-    CameraSuite* app = context;
+    CameraSuite* app = static_cast<CameraSuite*>(context);
 
     FURI_LOG_D(TAG, "Saving Settings");
     Storage* storage = camera_suite_open_storage();
@@ -70,7 +70,7 @@ void camera_suite_save_settings(void* context) {
 }
 
 void camera_suite_read_settings(void* context) {
-    CameraSuite* app = context;
+    CameraSuite* app = static_cast<CameraSuite*>(context);
     Storage* storage = camera_suite_open_storage();
     FlipperFormat* fff_file = flipper_format_file_alloc(storage);
 

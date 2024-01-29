@@ -1,24 +1,13 @@
 #pragma once
 
-#include <gui/modules/text_box.h>
-
-#include <furi.h>
 #include <furi_hal.h>
-#include <furi_hal_uart.h>
-#include <gui/elements.h>
-#include <gui/gui.h>
-#include <gui/icon_i.h>
-#include <gui/modules/dialog_ex.h>
-#include <gui/view.h>
-#include <gui/view_dispatcher.h>
-#include <notification/notification.h>
-#include <notification/notification_messages.h>
-#include <storage/filesystem_api_defines.h>
-#include <storage/storage.h>
+#include <furi_hal_serial.h>
+#include <furi_hal_serial_control.h>
 
+#include "../helpers/camera_suite_haptic.h"
+#include "../helpers/camera_suite_led.h"
+#include "../helpers/camera_suite_speaker.h"
 #include "../helpers/camera_suite_custom_event.h"
-
-#define WIFI_WORKER_EVENTS_MASK (WorkerEventStop | WorkerEventRx)
 
 typedef void (*CameraSuiteViewWiFiCameraCallback)(CameraSuiteCustomEvent event, void* context);
 
@@ -26,6 +15,7 @@ typedef struct CameraSuiteViewWiFiCamera {
     View* view;
     CameraSuiteViewCameraCallback callback;
     void* context;
+    FuriHalSerialHandle* wifi_serial_handle;
     FuriStreamBuffer* wifi_rx_stream;
     FuriThread* wifi_worker_thread;
 } CameraSuiteViewWiFiCamera;
@@ -35,13 +25,11 @@ typedef struct {
     size_t log_strlen;
 } CameraSuiteViewWiFiCameraModel;
 
+// Function Prototypes
 CameraSuiteViewWiFiCamera* camera_suite_view_wifi_camera_alloc();
-
-View* camera_suite_view_wifi_camera_get_view(CameraSuiteViewWiFiCamera* camera_suite_static);
-
-void camera_suite_view_wifi_camera_free(CameraSuiteViewWiFiCamera* camera_suite_static);
-
+void camera_suite_view_wifi_camera_free(CameraSuiteViewWiFiCamera* wifi_view_instance);
+View* camera_suite_view_wifi_camera_get_view(CameraSuiteViewWiFiCamera* wifi_view_instance);
 void camera_suite_view_wifi_camera_set_callback(
-    CameraSuiteViewWiFiCamera* camera_suite_view_wifi_camera,
+    CameraSuiteViewWiFiCamera* wifi_view_instance,
     CameraSuiteViewWiFiCameraCallback callback,
     void* context);

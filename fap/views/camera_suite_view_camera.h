@@ -1,19 +1,12 @@
 #pragma once
 
-#include <furi.h>
 #include <furi_hal.h>
-#include <furi_hal_uart.h>
-#include <gui/elements.h>
-#include <gui/gui.h>
-#include <gui/icon_i.h>
-#include <gui/modules/dialog_ex.h>
-#include <gui/view.h>
-#include <gui/view_dispatcher.h>
-#include <notification/notification.h>
-#include <notification/notification_messages.h>
-#include <storage/filesystem_api_defines.h>
-#include <storage/storage.h>
+#include <furi_hal_serial.h>
+#include <furi_hal_serial_control.h>
 
+#include "../helpers/camera_suite_haptic.h"
+#include "../helpers/camera_suite_led.h"
+#include "../helpers/camera_suite_speaker.h"
 #include "../helpers/camera_suite_custom_event.h"
 
 #define BITMAP_HEADER_LENGTH 62
@@ -26,19 +19,23 @@
 #define RING_BUFFER_LENGTH 19
 #define ROW_BUFFER_LENGTH 16
 
+#ifdef xtreme_settings
+/**
+ * Enable the following line for "Xtreme Firmware" & "Xtreme Apps" (Flipper-XFW).
+ * 
+ * @see https://github.com/Flipper-XFW/Xtreme-Firmware
+ * @see https://github.com/Flipper-XFW/Xtreme-Apps
+*/
+#define UART_CH (xtreme_settings.uart_esp_channel)
+#else
+#define UART_CH (FuriHalSerialIdUsart)
+#endif
+
 static const unsigned char bitmap_header[BITMAP_HEADER_LENGTH] = {
     0x42, 0x4D, 0x3E, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x3E, 0x00, 0x00, 0x00, 0x28, 0x00,
     0x00, 0x00, 0x80, 0x00, 0x00, 0x00, 0x40, 0x00, 0x00, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0x00};
-
-typedef enum {
-    WorkerEventReserved = (1 << 0), // Reserved for StreamBuffer internal event
-    WorkerEventStop = (1 << 1),
-    WorkerEventRx = (1 << 2),
-} WorkerEventFlags;
-
-#define CAMERA_WORKER_EVENTS_MASK (WorkerEventStop | WorkerEventRx)
 
 // Forward declaration
 typedef void (*CameraSuiteViewCameraCallback)(CameraSuiteCustomEvent event, void* context);
@@ -46,6 +43,7 @@ typedef void (*CameraSuiteViewCameraCallback)(CameraSuiteCustomEvent event, void
 typedef struct CameraSuiteViewCamera {
     CameraSuiteViewCameraCallback callback;
     FuriStreamBuffer* camera_rx_stream;
+    FuriHalSerialHandle* camera_serial_handle;
     FuriThread* camera_worker_thread;
     NotificationApp* notification;
     View* view;
@@ -66,9 +64,9 @@ typedef struct UartDumpModel {
 
 // Function Prototypes
 CameraSuiteViewCamera* camera_suite_view_camera_alloc();
-View* camera_suite_view_camera_get_view(CameraSuiteViewCamera* camera_suite_static);
-void camera_suite_view_camera_free(CameraSuiteViewCamera* camera_suite_static);
+View* camera_suite_view_camera_get_view(CameraSuiteViewCamera* camera_view_instance);
+void camera_suite_view_camera_free(CameraSuiteViewCamera* camera_view_instance);
 void camera_suite_view_camera_set_callback(
-    CameraSuiteViewCamera* camera_suite_view_camera,
+    CameraSuiteViewCamera* camera_view_instance,
     CameraSuiteViewCameraCallback callback,
     void* context);
