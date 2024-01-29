@@ -84,6 +84,7 @@ if %DATA_FLAG% gtr 0 (
     arduino-cli %ARDUINO_CLI_CONFIG_FILE% lib install --git-url https://github.com/esp8266/Arduino.git
     arduino-cli %ARDUINO_CLI_CONFIG_FILE% lib install --git-url https://github.com/me-no-dev/AsyncTCP.git
     arduino-cli %ARDUINO_CLI_CONFIG_FILE% lib install --git-url https://github.com/me-no-dev/ESPAsyncTCP.git
+    goto :cleanup
 ) else (
     set /p SHOULD_REINSTALL="Assets already installed. Reinstall? (Y/N): "
     if /i "!SHOULD_REINSTALL!"=="Y" (
@@ -97,6 +98,7 @@ if %DATA_FLAG% gtr 0 (
     )
 )
 
+:cleanup
 echo Configuring Git pre-commit hook...
 copy /Y "%GITHUB_HOOKS_FOLDER%" "%GIT_HOOKS_FOLDER%"
 echo Resetting arduino-cli config back to defaults...
@@ -104,6 +106,7 @@ arduino-cli %ARDUINO_CLI_CONFIG_FILE% config set directories.data C:\temp\arduin
 arduino-cli %ARDUINO_CLI_CONFIG_FILE% config set directories.downloads C:\temp\arduino-cli\staging
 arduino-cli %ARDUINO_CLI_CONFIG_FILE% config set directories.user C:\temp\arduino-cli\user
 arduino-cli %ARDUINO_CLI_CONFIG_FILE% config set library.enable_unsafe_install false
+
 echo.
 echo The ESP32-CAM development dependencies were installed successfully.
 echo.
