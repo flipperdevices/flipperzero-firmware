@@ -8,7 +8,6 @@ App(
     fap_icon_assets="icons",
     fap_category="Sub-GHz",
     fap_version="1.2",
-    fap_libs=["assets"],
     fap_author="leedave",
     fap_weburl="https://github.com/leedave/flipper-zero-meal-pager",
     fap_description="This app triggers restaurant pagers in a brute force manner, useful to test if devices are still functional.",
