@@ -38,7 +38,7 @@ void subghz_scene_transmit_callback_end_tx(void* context) {
     //subghz_txrx_stop(app->subghz->txrx);
     //app->transmitting = false;
     //xremote_scene_ir_notification_message(app, SubGhzNotificationMessageBlinkStop);
-    xremote_cross_remote_set_transmitting(app->cross_remote, XRemoteTransmittingStop);
+    xremote_cross_remote_set_transmitting(app->cross_remote, XRemoteTransmittingStopSubghz);
 }
 
 void subghz_send(void* context, const char* path) {
