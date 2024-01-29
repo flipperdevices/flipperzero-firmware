@@ -41,6 +41,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: [subghz dea_mio fixes and programming mode support (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/cbe36a3ca49a38d350b06baf3deb3a8d2fcc4187)
 - [Improved IR Ext Module Detection & Power for Infrared & IR Remote (By Sil333033 & Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/370f0c7159750d40d166adf565438324f0d57e08)
 - UL: [more contrast values for replacement displays (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/47a7c66527cbf4a976a5d6bfd111644c4fe01ac3)
+- Updated: [Five Nights at Flipper's v1.2 (By sillygir1)](https://github.com/sillygir1/flipperzero-fnaf)
 - To Be Merged OFW PRs: [3352](https://github.com/flipperdevices/flipperzero-firmware/pull/3352), [3302](https://github.com/flipperdevices/flipperzero-firmware/pull/3302), [3211](https://github.com/flipperdevices/flipperzero-firmware/pull/3211), [3366](https://github.com/flipperdevices/flipperzero-firmware/pull/3366) & [3250](https://github.com/flipperdevices/flipperzero-firmware/pull/3250)
 
 <a name="release">
@@ -256,7 +257,7 @@ $ ./fbt dolphin_ext
 - [Doom v1.1 (By p4nic4ttack)](https://github.com/p4nic4ttack/doom-flipper-zero/) (ported and fixed by xMasterX & Svarich & hedger)
 - [DVD Bounce (By schaene)](https://github.com/schaene/Flipper-DVD-Bounce)
 - [Etch-A-Sketch (By SimplyMinimal)](https://github.com/SimplyMinimal/FlipperZero-Etch-A-Sketch)
-- [Five Nights at Flipper's (By sillygir1)](https://github.com/sillygir1/flipperzero-fnaf)
+- [Five Nights at Flipper's v1.2 (By sillygir1)](https://github.com/sillygir1/flipperzero-fnaf)
 - [Flappy Bird v1.1 (By DroomOne)](https://github.com/DroomOne/flipperzero-firmware/tree/dev/applications/flappy_bird) [Flappy: Border hitboxes, bigger Pilars (By TQMatvey)](https://github.com/DarkFlippers/unleashed-firmware/pull/114) [Increase pilars line width to improve visibility (By ahumeniy)](https://github.com/DarkFlippers/unleashed-firmware/pull/140)
 - [Game of Life v1.1 (Updated to work by tgxn) (By itsyourbedtime)](https://github.com/tgxn/flipperzero-firmware/blob/dev/applications/game_of_life/game_of_life.c)
 - [Guess The Number v1.1 (By kWAYTV)](https://github.com/kWAYTV/guess-the-number-fz)

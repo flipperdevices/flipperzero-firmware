@@ -10,5 +10,5 @@ App(
     fap_icon_assets="images",
     fap_author="sillygir1",
     fap_weburl="https://github.com/sillygir1/flipperzero-fnaf",
-    fap_version="1.1",
+    fap_version="1.2",
 )
