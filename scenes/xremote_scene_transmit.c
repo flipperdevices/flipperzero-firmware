@@ -1,6 +1,7 @@
 #include "../xremote.h"
 #include "../views/xremote_transmit.h"
 #include "../models/infrared/xremote_ir_signal.h"
+#include "../helpers/subghz/subghz.h"
 
 static const NotificationSequence* xremote_notification_sequences[] = {
     &sequence_success,
@@ -83,6 +84,8 @@ void xremote_scene_transmit_send_subghz(XRemote* app, CrossRemoteItem* item) {
     app->transmitting = true;
     xremote_scene_ir_notification_message(app, SubGhzNotificationMessageBlinkStartSend);
     // ADD SEND METHOD HERE
+    //FURI_LOG_D("SUBGZK", "path: %s", furi_string_get_cstr(item->filename));
+    subghz_send(app, furi_string_get_cstr(item->filename)); //currently crashes, null pointer
     furi_thread_flags_wait(0, FuriFlagWaitAny, 2000); //Remove later
     app->transmitting = false;
     xremote_scene_ir_notification_message(app, SubGhzNotificationMessageBlinkStop);

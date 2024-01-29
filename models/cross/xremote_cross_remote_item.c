@@ -3,6 +3,7 @@
 CrossRemoteItem* xremote_cross_remote_item_alloc() {
     CrossRemoteItem* item = malloc(sizeof(CrossRemoteItem));
     item->name = furi_string_alloc();
+    item->filename = furi_string_alloc();
     item->time = 0;
     item->type = 0;
     item->ir_signal = xremote_ir_signal_alloc();
@@ -75,6 +76,7 @@ static bool xremote_cross_remote_item_read_sg(CrossRemoteItem* item, FlipperForm
 
     do {
         if(!flipper_format_read_string(ff, "name", item->name)) break;
+        if(!flipper_format_read_string(ff, "filename", item->filename)) break;
         success = true;
     } while(false);
     furi_string_free(buf);
@@ -188,6 +190,7 @@ bool xremote_cross_remote_item_read(CrossRemoteItem* item, FlipperFormat* ff) {
 
 void xremote_cross_remote_item_free(CrossRemoteItem* item) {
     furi_string_free(item->name);
+    furi_string_free(item->filename);
     //Determine type before free
     xremote_ir_signal_free(item->ir_signal);
     xremote_sg_remote_free(item->sg_signal);

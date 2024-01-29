@@ -47,13 +47,15 @@ bool xremote_sg_remote_load(SubGhzRemote* remote, FuriString* path) {
         if(!flipper_format_buffered_file_open_existing(ff, furi_string_get_cstr(path))) break;
         const char* fullPath = furi_string_get_cstr(path);
         char* fileName = strrchr(fullPath, '/') + 1;
+        furi_string_set_str(remote->filename, fullPath);
         char* dotPosition = strrchr(fileName, '.');
         if(dotPosition != NULL) { // check if there is a dot in the file name
             *dotPosition = '\0'; // set the dot position to NULL character to truncate the string
         }
         //remote->name = fileName;
         furi_string_set_str(remote->name, fileName);
-        furi_string_set_str(remote->filename, fileName);
+        //furi_string_set_str(remote->filename, fileName);
+        //free(fileName);
         uint32_t version;
         if(!flipper_format_read_header(ff, buf, &version)) break;
         if(!furi_string_equal(buf, "Flipper SubGhz RAW File") || (version != 1)) break;
