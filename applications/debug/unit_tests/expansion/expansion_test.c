@@ -28,43 +28,62 @@ MU_TEST(test_expansion_encoded_size) {
 MU_TEST(test_expansion_remaining_size) {
     ExpansionFrame frame = {};
 
-    mu_assert_int_eq(1, expansion_frame_get_remaining_size(&frame, 0));
+    size_t remaining_size;
+    mu_check(expansion_frame_get_remaining_size(&frame, 0, &remaining_size));
+    mu_assert_int_eq(1, remaining_size);
 
     frame.header.type = ExpansionFrameTypeHeartbeat;
-    mu_assert_int_eq(1, expansion_frame_get_remaining_size(&frame, 0));
-    mu_assert_int_eq(0, expansion_frame_get_remaining_size(&frame, 1));
-    mu_assert_int_eq(0, expansion_frame_get_remaining_size(&frame, 100));
+    mu_check(expansion_frame_get_remaining_size(&frame, 0, &remaining_size));
+    mu_assert_int_eq(1, remaining_size);
+    mu_check(expansion_frame_get_remaining_size(&frame, 1, &remaining_size));
+    mu_assert_int_eq(0, remaining_size);
+    mu_check(expansion_frame_get_remaining_size(&frame, 100, &remaining_size));
+    mu_assert_int_eq(0, remaining_size);
 
     frame.header.type = ExpansionFrameTypeStatus;
-    mu_assert_int_eq(1, expansion_frame_get_remaining_size(&frame, 0));
-    mu_assert_int_eq(1, expansion_frame_get_remaining_size(&frame, 1));
-    mu_assert_int_eq(0, expansion_frame_get_remaining_size(&frame, 2));
-    mu_assert_int_eq(0, expansion_frame_get_remaining_size(&frame, 100));
+    mu_check(expansion_frame_get_remaining_size(&frame, 0, &remaining_size));
+    mu_assert_int_eq(1, remaining_size);
+    mu_check(expansion_frame_get_remaining_size(&frame, 1, &remaining_size));
+    mu_assert_int_eq(1, remaining_size);
+    mu_check(expansion_frame_get_remaining_size(&frame, 2, &remaining_size));
+    mu_assert_int_eq(0, remaining_size);
+    mu_check(expansion_frame_get_remaining_size(&frame, 100, &remaining_size));
+    mu_assert_int_eq(0, remaining_size);
 
     frame.header.type = ExpansionFrameTypeBaudRate;
-    mu_assert_int_eq(1, expansion_frame_get_remaining_size(&frame, 0));
-    mu_assert_int_eq(4, expansion_frame_get_remaining_size(&frame, 1));
-    mu_assert_int_eq(0, expansion_frame_get_remaining_size(&frame, 5));
-    mu_assert_int_eq(0, expansion_frame_get_remaining_size(&frame, 100));
+    mu_check(expansion_frame_get_remaining_size(&frame, 0, &remaining_size));
+    mu_assert_int_eq(1, remaining_size);
+    mu_check(expansion_frame_get_remaining_size(&frame, 1, &remaining_size));
+    mu_assert_int_eq(4, remaining_size);
+    mu_check(expansion_frame_get_remaining_size(&frame, 5, &remaining_size));
+    mu_assert_int_eq(0, remaining_size);
+    mu_check(expansion_frame_get_remaining_size(&frame, 100, &remaining_size));
+    mu_assert_int_eq(0, remaining_size);
 
     frame.header.type = ExpansionFrameTypeControl;
-    mu_assert_int_eq(1, expansion_frame_get_remaining_size(&frame, 0));
-    mu_assert_int_eq(1, expansion_frame_get_remaining_size(&frame, 1));
-    mu_assert_int_eq(0, expansion_frame_get_remaining_size(&frame, 2));
-    mu_assert_int_eq(0, expansion_frame_get_remaining_size(&frame, 100));
+    mu_check(expansion_frame_get_remaining_size(&frame, 0, &remaining_size));
+    mu_assert_int_eq(1, remaining_size);
+    mu_check(expansion_frame_get_remaining_size(&frame, 1, &remaining_size));
+    mu_assert_int_eq(1, remaining_size);
+    mu_check(expansion_frame_get_remaining_size(&frame, 2, &remaining_size));
+    mu_assert_int_eq(0, remaining_size);
+    mu_check(expansion_frame_get_remaining_size(&frame, 100, &remaining_size));
+    mu_assert_int_eq(0, remaining_size);
 
     frame.header.type = ExpansionFrameTypeData;
     frame.content.data.size = EXPANSION_PROTOCOL_MAX_DATA_SIZE;
-    mu_assert_int_eq(1, expansion_frame_get_remaining_size(&frame, 0));
-    mu_assert_int_eq(1, expansion_frame_get_remaining_size(&frame, 1));
-    mu_assert_int_eq(
-        EXPANSION_PROTOCOL_MAX_DATA_SIZE, expansion_frame_get_remaining_size(&frame, 2));
+    mu_check(expansion_frame_get_remaining_size(&frame, 0, &remaining_size));
+    mu_assert_int_eq(1, remaining_size);
+    mu_check(expansion_frame_get_remaining_size(&frame, 1, &remaining_size));
+    mu_assert_int_eq(1, remaining_size);
+    mu_check(expansion_frame_get_remaining_size(&frame, 2, &remaining_size));
+    mu_assert_int_eq(EXPANSION_PROTOCOL_MAX_DATA_SIZE, remaining_size);
     for(size_t i = 0; i <= EXPANSION_PROTOCOL_MAX_DATA_SIZE; ++i) {
-        mu_assert_int_eq(
-            EXPANSION_PROTOCOL_MAX_DATA_SIZE - i,
-            expansion_frame_get_remaining_size(&frame, i + 2));
+        mu_check(expansion_frame_get_remaining_size(&frame, i + 2, &remaining_size));
+        mu_assert_int_eq(EXPANSION_PROTOCOL_MAX_DATA_SIZE - i, remaining_size);
     }
-    mu_assert_int_eq(0, expansion_frame_get_remaining_size(&frame, 100));
+    mu_check(expansion_frame_get_remaining_size(&frame, 100, &remaining_size));
+    mu_assert_int_eq(0, remaining_size);
 }
 
 typedef struct {
