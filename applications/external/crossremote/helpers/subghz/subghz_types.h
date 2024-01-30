@@ -35,6 +35,13 @@ typedef enum {
     SubGhzSpeakerStateEnable,
 } SubGhzSpeakerState;
 
+/** SubGhzRadioDeviceType */
+typedef enum {
+    SubGhzRadioDeviceTypeAuto,
+    SubGhzRadioDeviceTypeInternal,
+    SubGhzRadioDeviceTypeExternalCC1101,
+} SubGhzRadioDeviceType;
+
 /** SubGhzRxKeyState state */
 typedef enum {
     SubGhzRxKeyStateIDLE,
@@ -62,18 +69,9 @@ typedef enum {
     SubGhzLockOn,
 } SubGhzLock;
 
+/** SubGhz load type file */
 typedef enum {
-    SubGhzViewIdMenu,
-    SubGhzViewIdReceiver,
-    SubGhzViewIdPopup,
-    SubGhzViewIdTextInput,
-    SubGhzViewIdWidget,
-    SubGhzViewIdTransmitter,
-    SubGhzViewIdVariableItemList,
-    SubGhzViewIdFrequencyAnalyzer,
-    SubGhzViewIdReadRAW,
-
-    SubGhzViewIdStatic,
-    SubGhzViewIdTestCarrier,
-    SubGhzViewIdTestPacket,
-} SubGhzViewId;
+    SubGhzLoadTypeFileNoLoad,
+    SubGhzLoadTypeFileKey,
+    SubGhzLoadTypeFileRaw,
+} SubGhzLoadTypeFile;

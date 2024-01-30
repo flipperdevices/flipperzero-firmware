@@ -1,3 +1,4 @@
+#include "../helpers/subghz/subghz.h"
 #include "../xremote.h"
 
 enum SubmenuIndex {

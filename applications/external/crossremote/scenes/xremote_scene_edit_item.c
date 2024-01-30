@@ -1,5 +1,5 @@
 #include "../xremote.h"
-#include "../models/cross/xremote_remote.h"
+#include "../models/cross/xremote_cross_remote.h"
 
 enum SubmenuIndexEdit {
     SubmenuIndexRename = 10,
@@ -32,7 +32,7 @@ bool xremote_scene_edit_item_on_event(void* context, SceneManagerEvent event) {
         return true;
     } else if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SubmenuIndexDelete) {
-            cross_remote_remove_item(app->cross_remote, app->edit_item);
+            xremote_cross_remote_remove_item(app->cross_remote, app->edit_item);
         } else if(event.event == SubmenuIndexRename) {
             scene_manager_next_scene(app->scene_manager, XRemoteSceneSaveRemoteItem);
             //scene_manager_next_scene(app->scene_manager, XRemoteSceneWip);

@@ -65,7 +65,8 @@ bool xremote_scene_ir_remote_on_event(void* context, SceneManagerEvent event) {
             const char* button_name = xremote_ir_remote_button_get_name(ir_button);
             InfraredSignal* signal = xremote_ir_remote_button_get_signal(ir_button);
 
-            cross_remote_add_ir_item(app->cross_remote, button_name, signal);
+            xremote_cross_remote_add_ir_item(
+                app->cross_remote, button_name, signal, app->ir_timing);
             scene_manager_next_scene(app->scene_manager, XRemoteSceneCreate);
             consumed = true;
         }
