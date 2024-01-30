@@ -33,6 +33,8 @@ MfDesfireError mf_desfire_send_chunks(
     MfDesfireError error = MfDesfireErrorNone;
 
     do {
+        uint8_t cmd = bit_buffer_get_byte(tx_buffer, 0);
+        FURI_LOG_I(TAG, "CMD: %02X", cmd);
         Iso14443_4aError iso14443_4a_error = iso14443_4a_poller_send_block(
             instance->iso14443_4a_poller, tx_buffer, instance->rx_buffer);
 
@@ -46,6 +48,12 @@ MfDesfireError mf_desfire_send_chunks(
 
         if(bit_buffer_get_size_bytes(instance->rx_buffer) > sizeof(uint8_t)) {
             bit_buffer_copy_right(rx_buffer, instance->rx_buffer, sizeof(uint8_t));
+        } else if(bit_buffer_get_size_bytes(instance->rx_buffer) == 1) {
+            uint8_t error_code = bit_buffer_get_byte(instance->rx_buffer, 0);
+            if(error_code != 0) {
+                FURI_LOG_E(TAG, "Error code: %02X", error_code);
+                // error = MfDesfireErrorProtocol;
+            }
         } else {
             bit_buffer_reset(rx_buffer);
         }
