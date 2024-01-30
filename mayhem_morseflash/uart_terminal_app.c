@@ -2,6 +2,7 @@
 
 #include <furi.h>
 #include <furi_hal.h>
+#include <expansion/expansion.h>
 
 static bool uart_terminal_app_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
@@ -91,6 +92,10 @@ void uart_terminal_app_free(UART_TerminalApp* app) {
 int32_t uart_terminal_app(void* p) {
     UNUSED(p);
 
+    // Disable expansion protocol to avoid interference with UART Handle
+    Expansion* expansion = furi_record_open(RECORD_EXPANSION);
+    expansion_disable(expansion);
+
     furi_hal_power_disable_external_3_3v();
     furi_hal_power_disable_otg();
     furi_delay_ms(200);
@@ -111,6 +116,10 @@ int32_t uart_terminal_app(void* p) {
     uart_terminal_app_free(uart_terminal_app);
 
     furi_hal_power_disable_otg();
+
+    // Return previous state of expansion
+    expansion_enable(expansion);
+    furi_record_close(RECORD_EXPANSION);
 
     return 0;
 }

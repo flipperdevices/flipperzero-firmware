@@ -1,5 +1,7 @@
 #include "camera.h"
 
+#include <expansion/expansion.h>
+
 static void camera_view_draw_callback(Canvas* canvas, void* _model) {
     UartDumpModel* model = _model;
 
@@ -305,11 +307,19 @@ static void camera_app_free(UartEchoApp* app) {
 int32_t camera_app(void* p) {
     UNUSED(p);
 
+    // Disable expansion protocol to avoid interference with UART Handle
+    Expansion* expansion = furi_record_open(RECORD_EXPANSION);
+    expansion_disable(expansion);
+
     UartEchoApp* app = camera_app_alloc();
     view_dispatcher_run(app->view_dispatcher);
     camera_app_free(app);
 
     furi_hal_power_disable_otg();
+
+    // Return previous state of expansion
+    expansion_enable(expansion);
+    furi_record_close(RECORD_EXPANSION);
 
     return 0;
 }

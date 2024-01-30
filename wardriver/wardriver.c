@@ -1,6 +1,8 @@
 #include "wardriver.h"
 #include "wardriver_uart.h"
 
+#include <expansion/expansion.h>
+
 void save_file(Context* ctx) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
     FuriHalRtcDateTime datetime;
@@ -226,6 +228,10 @@ static void render_callback(Canvas* canvas, void* context) {
 }
 
 int32_t wardriver_app() {
+    // Disable expansion protocol to avoid interference with UART Handle
+    Expansion* expansion = furi_record_open(RECORD_EXPANSION);
+    expansion_disable(expansion);
+
     // turn off 5v, so it gets reset on startup
     if(furi_hal_power_is_otg_enabled()) {
         furi_hal_power_disable_otg();
@@ -345,6 +351,10 @@ int32_t wardriver_app() {
     if(furi_hal_power_is_otg_enabled()) {
         furi_hal_power_disable_otg();
     }
+
+    // Return previous state of expansion
+    expansion_enable(expansion);
+    furi_record_close(RECORD_EXPANSION);
 
     return 0;
 }
