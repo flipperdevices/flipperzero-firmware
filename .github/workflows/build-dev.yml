@@ -1,4 +1,4 @@
-name: "Dev Branch - Build & Upload FAP"
+name: "Dev - Build & Upload FAP"
 on:
   push:
     branches:
@@ -6,23 +6,23 @@ on:
 jobs:
   ufbt-build-action:
     runs-on: ubuntu-latest
-    name: "Build: ${{ matrix.name }}."
+    name: "Build: Dev"
     steps:
-      - name: "Checkout."
+      - name: "Checkout"
         uses: actions/checkout@v3
         with:
           submodules: recursive
 
       # Flipper Zero ufbt action
       # https://github.com/flipperdevices/flipperzero-ufbt-action
-      - name: "Build app."
+      - name: "Build"
         uses: flipperdevices/flipperzero-ufbt-action@v0.1
         id: build-app
         with:
           app-dir: ./fap
           sdk-channel: dev
 
-      - name: "Create zip archive (dev)"
+      - name: "Create Zip Archive (dev)"
         uses: actions/upload-artifact@v3
         with:
           name: ${{ github.event.repository.name }}-dev-${{ steps.build-app.outputs.suffix }}.zip
