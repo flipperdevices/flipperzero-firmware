@@ -49,6 +49,7 @@ XRemote* xremote_app_alloc() {
     app->transmitting = 0;
     app->ir_timing = 1000;
     app->ir_timing_char = "1000";
+    app->stop_transmit = false;
 
     // Load configs
     xremote_read_settings(app);
@@ -58,11 +59,13 @@ XRemote* xremote_app_alloc() {
 
     app->ir_remote_buffer = xremote_ir_remote_alloc();
     app->ir_worker = infrared_worker_alloc();
-    app->cross_remote = cross_remote_alloc();
+    app->cross_remote = xremote_cross_remote_alloc();
 
     app->sg_remote_buffer = xremote_sg_remote_alloc();
 
     app->loading = loading_alloc();
+
+    app->subghz = subghz_alloc();
 
     app->text_input = text_input_alloc();
     view_dispatcher_add_view(
@@ -122,6 +125,10 @@ void xremote_app_free(XRemote* app) {
     scene_manager_free(app->scene_manager);
 
     infrared_worker_free(app->ir_worker);
+
+    xremote_cross_remote_free(app->cross_remote);
+
+    subghz_free(app->subghz);
 
     // View Dispatcher
     view_dispatcher_remove_view(app->view_dispatcher, XRemoteViewIdMenu);

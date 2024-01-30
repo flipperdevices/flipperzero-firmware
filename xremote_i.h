@@ -87,6 +87,7 @@ typedef enum {
     XRemoteTransmittingIdle,
     XRemoteTransmittingStart,
     XRemoteTransmittingStop,
+    XRemoteTransmittingStopSubghz,
 } XRemoteRemoteTransmissionStatus;
 
 struct InfraredSignal {
@@ -99,10 +100,11 @@ struct InfraredSignal {
 
 struct CrossRemoteItem {
     FuriString* name;
+    FuriString* filename;
     InfraredSignal* ir_signal;
     SubGhzRemote* sg_signal;
     int16_t type;
-    int32_t time;
+    uint32_t time;
 };
 
 typedef struct CrossRemote CrossRemote;

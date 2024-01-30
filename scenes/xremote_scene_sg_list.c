@@ -20,7 +20,7 @@ void xremote_scene_sg_list_on_enter(void* context) {
 
         xremote_sg_remote_load(app->sg_remote_buffer, app->file_path);
         //xremote_ir_remote_load(app->ir_remote_buffer, app->file_path);
-        cross_remote_add_subghz(app->cross_remote, app->sg_remote_buffer);
+        xremote_cross_remote_add_subghz(app->cross_remote, app->sg_remote_buffer);
     }
 
     if(success) {

@@ -1,17 +1,15 @@
 ## Cross Remote
 
-This app combines your IR commands into a playlist that can be run with one click. Pauses can be set inbetween, as IR devices typically are not so fast. 
+This app combines your IR and SubGhz commands into a playlist that can be run with one click. Pauses can be set inbetween, as IR/SubGhz devices typically are not so fast. 
 
 ## Features
 - Read out commands you recorded in the IR app
+- Read out commands you saved as .sub files
 - Combine commands to a chain/playlist 
 - Add pauses inbetween commands 
 - Save your command chain / playlist to flipper
 - Disable LED effects if not wanted
 - Configure duration of IR Signals
-
-## In Development
-- Ability to also add SubGhz commands 
 
 ## What good is this?
 

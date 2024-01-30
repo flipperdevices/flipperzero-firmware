@@ -16,7 +16,7 @@ void xremote_scene_xr_list_edit_on_enter(void* context) {
 
     if(success) {
         //Load Remote into buffer
-        success = cross_remote_load(app->cross_remote, app->file_path);
+        success = xremote_cross_remote_load(app->cross_remote, app->file_path);
     }
 
     if(success) {
