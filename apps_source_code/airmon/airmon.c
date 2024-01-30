@@ -256,7 +256,7 @@ int32_t airmon_app(void* p) {
 
     // Release all resources
     airmon_context_free(ctx);
-    
+
     // Return previous state of expansion
     expansion_enable(expansion);
     furi_record_close(RECORD_EXPANSION);

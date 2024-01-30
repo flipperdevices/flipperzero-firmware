@@ -210,8 +210,7 @@ static void uart_hex_input_view_draw_callback(Canvas* canvas, void* _model) {
     }
 }
 
-static void
-    uart_hex_input_handle_up(UART_TextInput* uart_text_input, UART_TextInputModel* model) {
+static void uart_hex_input_handle_up(UART_TextInput* uart_text_input, UART_TextInputModel* model) {
     UNUSED(uart_text_input);
     if(model->selected_row > 0) {
         model->selected_row--;

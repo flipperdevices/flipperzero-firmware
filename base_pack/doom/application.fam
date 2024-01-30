@@ -13,6 +13,6 @@ App(
     fap_category="Games",
     fap_icon_assets="assets",
     fap_author="@xMasterX & @Svarich & @hedger (original code by @p4nic4ttack)",
-    fap_version="1.1",
+    fap_version="1.2",
     fap_description="Will it run Doom?",
 )
