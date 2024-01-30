@@ -1,0 +1,45 @@
+name: "Release Branch - Build & Upload FAP"
+on:
+  push:
+    branches:
+      - main
+  schedule:
+    # Run every day at 00:00 UTC (midnight) to build the latest release
+    # for new and upcoming firmware.
+    - cron: "0 0 * * *"
+jobs:
+  ufbt-build-action:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - name: "dev"
+            sdk-channel: dev
+
+          - name: "rc"
+            sdk-channel: rc
+
+          - name: "release"
+            sdk-channel: release
+
+    name: "Build: ${{ matrix.name }}."
+    steps:
+      - name: "Checkout."
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      # Flipper Zero ufbt action
+      # https://github.com/flipperdevices/flipperzero-ufbt-action
+      - name: "Build app."
+        uses: flipperdevices/flipperzero-ufbt-action@v0.1
+        id: build-app
+        with:
+          app-dir: ./fap
+          sdk-channel: ${{ matrix.sdk-channel }}
+
+      - name: "Create zip archives (dev/release/rc)"
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ github.event.repository.name }}-${{ matrix.name }}-${{ steps.build-app.outputs.suffix }}.zip
+          path: ${{ steps.build-app.outputs.fap-artifacts }}

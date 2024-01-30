@@ -1,20 +1,11 @@
-name: "PR - Lint & build."
-on: pull_request
+name: "Dev Branch PR - Lint & Build Test"
+on:
+  pull_request:
+    branches:
+      - dev
 jobs:
   ufbt-test-build-action:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        include:
-          - name: "dev"
-            sdk-channel: dev
-
-          - name: "rc"
-            sdk-channel: rc
-
-          - name: "release"
-            sdk-channel: release
-
     name: "PR Build: ${{ matrix.name }}."
     steps:
       - name: "PR - Checkout."
