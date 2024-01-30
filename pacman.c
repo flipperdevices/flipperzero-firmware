@@ -41,7 +41,17 @@ typedef enum {
     PacmanEventIdOkPressed = 42 // Custom event to process OK button getting pressed down
 } PacManEvenId;
 
-typedef enum { CharacterPacman, CharacterGhost, CharacterNothing } Character;
+typedef enum {
+    EntityPacman,
+    EntityGhost,
+    EntityNothing,
+    EntityWall,
+    EntityCandy,
+    EntitySuperCandy,
+    EntityCherry,
+    EntityBase,
+    EntityVoid
+} Entity;
 
 typedef struct {
     ViewDispatcher* view_dispatcher; // Switches between views
@@ -65,10 +75,10 @@ typedef struct {
     uint8_t x; // The x coordinate
 } PacmanGameModel;
 
-typedef struct {
-    bool candy;
-    Character character;
-} Box;
+// typedef struct {
+//     bool candy;
+//     Character character;
+// } Box;
 
 /**
  * @brief      Callback for exiting the application.
@@ -132,7 +142,55 @@ static void pacman_submenu_callback(void* context, uint32_t index) {
 // static const Box empty_box = {.candy = true, .character = CharacterNothing};
 
 // Filling the matrix of empty boxes
-static const Box map[10][10] = {[0 ... 9] = {[0 ... 9] = {true, CharacterNothing}}};
+//static const Box map[10][10] = {[0 ... 9] = {[0 ... 9] = {true, CharacterNothing}}};
+
+// Initial map configuration
+static const char* map_config[] = {
+    "CCCCCCCCWCCCCCCCC",
+    "CWWCWWWCWCWWWCWWC",
+    "CCCCCCCCCCCCCCCCC",
+    "CWWCWCWWWWWCWCWWC",
+    "CCCCWCCCWCCCWCCCC",
+    "NNNCCCBBBBBCCCNNN",
+    "CCCCWCCCWCCCWCCCC",
+    "CWWCWCWWWWWCWCWWC",
+    "CCCCCCCCCCCCCCCCC",
+    "CWWCWWWCWCWWWCWWC",
+    "CCCCCCCCWCCCCCCCC",
+};
+
+/**
+ * @brief      Sets up the map matrix according to the config matrix.
+ * @details    Parses the characters in the config matrix and creates the correspoding enum matrix.
+ * @param      config The config matrix (actually array of strings).
+ * @return     The initialized Entity matrix.
+*/
+static void setup_map(char* config[], Entity map[][17], int size) {
+    for(int i = 0; i < 11; i++) {
+        for(int j = 0; j < size; j++) {
+            char symbol = config[i][j];
+            switch(symbol) {
+            case 'C':
+                map[i][j] = EntityCandy;
+                break;
+            case 'W':
+                map[i][j] = EntityWall;
+                break;
+            case 'N':
+                map[i][j] = EntityNothing;
+                break;
+            case 'B':
+                map[i][j] = EntityBase;
+                break;
+            case 'S':
+                map[i][j] = EntitySuperCandy;
+                break;
+            default:
+                map[i][j] = EntityVoid;
+            }
+        }
+    }
+}
 
 /**
  * Our 1st sample setting is a team color.  We have 3 options: red, green, and blue.
