@@ -10,6 +10,7 @@
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
 #include <stdlib.h>
+#include <expansion/expansion.h>
 
 #include "FlipperZeroWiFiModuleDefines.h"
 
@@ -838,6 +839,10 @@ void send_serial_command(SWiFiScannerApp* app, ESerialCommand command) {
 int32_t wifi_scanner_app(void* p) {
     UNUSED(p);
 
+    // Disable expansion protocol to avoid interference with UART Handle
+    Expansion* expansion = furi_record_open(RECORD_EXPANSION);
+    expansion_disable(expansion);
+
     WIFI_APP_LOG_I("Init");
 
     // FuriTimer* timer = furi_timer_alloc(blink_test_update, FuriTimerTypePeriodic, event_queue);
@@ -874,6 +879,9 @@ int32_t wifi_scanner_app(void* p) {
     if(!app->mutex) {
         WIFI_APP_LOG_E("cannot create mutex\r\n");
         free(app);
+        // Return previous state of expansion
+        expansion_enable(expansion);
+        furi_record_close(RECORD_EXPANSION);
         return 255;
     }
 
@@ -1060,6 +1068,10 @@ int32_t wifi_scanner_app(void* p) {
         furi_hal_power_disable_otg();
     }
 #endif
+
+    // Return previous state of expansion
+    expansion_enable(expansion);
+    furi_record_close(RECORD_EXPANSION);
 
     return 0;
 }
