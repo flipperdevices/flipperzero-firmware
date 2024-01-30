@@ -4,20 +4,20 @@
 
 void camera_suite_view_camera_callback(CameraSuiteCustomEvent event, void* context) {
     furi_assert(context);
-    CameraSuite* app = static_cast<CameraSuite*>(context);
+    CameraSuite* app = context;
     view_dispatcher_send_custom_event(app->view_dispatcher, event);
 }
 
 void camera_suite_scene_camera_on_enter(void* context) {
     furi_assert(context);
-    CameraSuite* app = static_cast<CameraSuite*>(context);
+    CameraSuite* app = context;
     camera_suite_view_camera_set_callback(
         app->camera_suite_view_camera, camera_suite_view_camera_callback, app);
     view_dispatcher_switch_to_view(app->view_dispatcher, CameraSuiteViewIdCamera);
 }
 
 bool camera_suite_scene_camera_on_event(void* context, SceneManagerEvent event) {
-    CameraSuite* app = static_cast<CameraSuite*>(context);
+    CameraSuite* app = context;
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
@@ -47,6 +47,6 @@ bool camera_suite_scene_camera_on_event(void* context, SceneManagerEvent event) 
 }
 
 void camera_suite_scene_camera_on_exit(void* context) {
-    CameraSuite* app = static_cast<CameraSuite*>(context);
+    CameraSuite* app = context;
     UNUSED(app);
 }

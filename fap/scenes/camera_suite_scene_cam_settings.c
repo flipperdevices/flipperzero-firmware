@@ -50,7 +50,7 @@ const uint32_t jpeg_value[2] = {
 };
 
 static void camera_suite_scene_cam_settings_set_camera_orientation(VariableItem* item) {
-    CameraSuite* app = static_cast<CameraSuite*>(variable_item_get_context(item));
+    CameraSuite* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
 
     variable_item_set_current_value_text(item, orientation_text[index]);
@@ -58,7 +58,7 @@ static void camera_suite_scene_cam_settings_set_camera_orientation(VariableItem*
 }
 
 static void camera_suite_scene_cam_settings_set_camera_dither(VariableItem* item) {
-    CameraSuite* app = static_cast<CameraSuite*>(variable_item_get_context(item));
+    CameraSuite* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
 
     variable_item_set_current_value_text(item, dither_text[index]);
@@ -66,7 +66,7 @@ static void camera_suite_scene_cam_settings_set_camera_dither(VariableItem* item
 }
 
 static void camera_suite_scene_cam_settings_set_flash(VariableItem* item) {
-    CameraSuite* app = static_cast<CameraSuite*>(variable_item_get_context(item));
+    CameraSuite* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
 
     variable_item_set_current_value_text(item, flash_text[index]);
@@ -74,7 +74,7 @@ static void camera_suite_scene_cam_settings_set_flash(VariableItem* item) {
 }
 
 static void camera_suite_scene_cam_settings_set_jpeg(VariableItem* item) {
-    CameraSuite* app = static_cast<CameraSuite*>(variable_item_get_context(item));
+    CameraSuite* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
 
     variable_item_set_current_value_text(item, jpeg_text[index]);
@@ -82,12 +82,12 @@ static void camera_suite_scene_cam_settings_set_jpeg(VariableItem* item) {
 }
 
 void camera_suite_scene_cam_settings_submenu_callback(void* context, uint32_t index) {
-    CameraSuite* app = static_cast<CameraSuite*>(context);
+    CameraSuite* app = context;
     view_dispatcher_send_custom_event(app->view_dispatcher, index);
 }
 
 void camera_suite_scene_cam_settings_on_enter(void* context) {
-    CameraSuite* app = static_cast<CameraSuite*>(context);
+    CameraSuite* app = context;
     VariableItem* item;
     uint8_t value_index;
 
@@ -138,7 +138,7 @@ void camera_suite_scene_cam_settings_on_enter(void* context) {
 }
 
 bool camera_suite_scene_cam_settings_on_event(void* context, SceneManagerEvent event) {
-    CameraSuite* app = static_cast<CameraSuite*>(context);
+    CameraSuite* app = context;
     UNUSED(app);
     bool consumed = false;
     if(event.type == SceneManagerEventTypeCustom) {
@@ -147,7 +147,7 @@ bool camera_suite_scene_cam_settings_on_event(void* context, SceneManagerEvent e
 }
 
 void camera_suite_scene_cam_settings_on_exit(void* context) {
-    CameraSuite* app = static_cast<CameraSuite*>(context);
+    CameraSuite* app = context;
     variable_item_list_set_selected_item(app->variable_item_list, 0);
     variable_item_list_reset(app->variable_item_list);
 }

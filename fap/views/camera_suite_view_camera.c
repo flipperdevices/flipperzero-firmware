@@ -33,7 +33,7 @@ static void camera_suite_view_camera_draw(Canvas* canvas, void* uart_dump_model)
     furi_assert(canvas);
     furi_assert(uart_dump_model);
 
-    UartDumpModel* model = static_cast<UartDumpModel*>(uart_dump_model);
+    UartDumpModel* model = uart_dump_model;
 
     // Clear the screen.
     canvas_set_color(canvas, ColorBlack);
@@ -152,10 +152,10 @@ static void camera_suite_view_camera_draw(Canvas* canvas, void* uart_dump_model)
 static void save_image_to_flipper_sd_card(void* uart_dump_model) {
     furi_assert(uart_dump_model);
 
-    UartDumpModel* model = static_cast<UartDumpModel*>(uart_dump_model);
+    UartDumpModel* model = uart_dump_model;
 
     // This pointer is used to access the storage.
-    Storage* storage = static_cast<Storage*>(furi_record_open(RECORD_STORAGE));
+    Storage* storage = furi_record_open(RECORD_STORAGE);
 
     // This pointer is used to access the filesystem.
     File* file = storage_file_alloc(storage);
@@ -245,16 +245,15 @@ static bool camera_suite_view_camera_input(InputEvent* input_event, void* camera
     furi_assert(camera_view_instance);
     furi_assert(input_event);
 
-    CameraSuiteViewCamera* instance = static_cast<CameraSuiteViewCamera*>(camera_view_instance);
+    CameraSuiteViewCamera* instance = camera_view_instance;
     uint8_t data[1];
 
     if(input_event->type == InputTypeRelease) {
         if(input_event->key) {
             // Stop all sounds, reset the LED.
-            with_view_model_cpp(
+            with_view_model(
                 instance->view,
-                UartDumpModel*,
-                model,
+                UartDumpModel * model,
                 {
                     UNUSED(model);
                     camera_suite_play_bad_bump(instance->context);
@@ -266,10 +265,9 @@ static bool camera_suite_view_camera_input(InputEvent* input_event, void* camera
     } else if(input_event->type == InputTypePress) {
         switch(input_event->key) {
         case InputKeyBack: {
-            with_view_model_cpp(
+            with_view_model(
                 instance->view,
-                UartDumpModel*,
-                model,
+                UartDumpModel * model,
                 {
                     UNUSED(model);
 
@@ -285,10 +283,9 @@ static bool camera_suite_view_camera_input(InputEvent* input_event, void* camera
             break;
         }
         case InputKeyLeft: {
-            with_view_model_cpp(
+            with_view_model(
                 instance->view,
-                UartDumpModel*,
-                model,
+                UartDumpModel * model,
                 {
                     // Play sound.
                     camera_suite_play_happy_bump(instance->context);
@@ -317,10 +314,9 @@ static bool camera_suite_view_camera_input(InputEvent* input_event, void* camera
             break;
         }
         case InputKeyRight: {
-            with_view_model_cpp(
+            with_view_model(
                 instance->view,
-                UartDumpModel*,
-                model,
+                UartDumpModel * model,
                 {
                     // Play sound.
                     camera_suite_play_happy_bump(instance->context);
@@ -349,10 +345,9 @@ static bool camera_suite_view_camera_input(InputEvent* input_event, void* camera
             break;
         }
         case InputKeyUp: {
-            with_view_model_cpp(
+            with_view_model(
                 instance->view,
-                UartDumpModel*,
-                model,
+                UartDumpModel * model,
                 {
                     UNUSED(model);
 
@@ -372,10 +367,9 @@ static bool camera_suite_view_camera_input(InputEvent* input_event, void* camera
             break;
         }
         case InputKeyDown: {
-            with_view_model_cpp(
+            with_view_model(
                 instance->view,
-                UartDumpModel*,
-                model,
+                UartDumpModel * model,
                 {
                     UNUSED(model);
 
@@ -395,10 +389,9 @@ static bool camera_suite_view_camera_input(InputEvent* input_event, void* camera
             break;
         }
         case InputKeyOk: {
-            with_view_model_cpp(
+            with_view_model(
                 instance->view,
-                UartDumpModel*,
-                model,
+                UartDumpModel * model,
                 {
                     // Play sound.
                     camera_suite_play_long_bump(instance->context);
@@ -434,12 +427,12 @@ static void camera_suite_view_camera_exit(void* camera_view_instance) {
 static void camera_suite_view_camera_enter(void* camera_view_instance) {
     furi_assert(camera_view_instance);
 
-    CameraSuiteViewCamera* instance = static_cast<CameraSuiteViewCamera*>(camera_view_instance);
+    CameraSuiteViewCamera* instance = camera_view_instance;
 
     uint8_t data[1];
 
     // Get the camera suite instance context.
-    CameraSuite* app_context = static_cast<CameraSuite*>(instance->context);
+    CameraSuite* app_context = instance->context;
 
     // Start serial stream to Flipper Zero.
     data[0] = 'S';
@@ -462,10 +455,9 @@ static void camera_suite_view_camera_enter(void* camera_view_instance) {
     furi_hal_serial_tx(instance->camera_serial_handle, data, 1);
     furi_delay_ms(50);
 
-    with_view_model_cpp(
+    with_view_model(
         instance->view,
-        UartDumpModel*,
-        model,
+        UartDumpModel * model,
         { camera_suite_view_camera_model_init(model, app_context); },
         true);
 }
@@ -477,7 +469,7 @@ static void camera_on_irq_cb(
     furi_assert(handle);
     furi_assert(camera_view_instance);
 
-    CameraSuiteViewCamera* instance = static_cast<CameraSuiteViewCamera*>(camera_view_instance);
+    CameraSuiteViewCamera* instance = camera_view_instance;
 
     if(event == FuriHalSerialRxEventData) {
         uint8_t data = furi_hal_serial_async_rx(handle);
@@ -537,7 +529,7 @@ static void process_ringbuffer(UartDumpModel* model, uint8_t const byte) {
 static int32_t camera_suite_camera_worker(void* camera_view_instance) {
     furi_assert(camera_view_instance);
 
-    CameraSuiteViewCamera* instance = static_cast<CameraSuiteViewCamera*>(camera_view_instance);
+    CameraSuiteViewCamera* instance = camera_view_instance;
 
     while(1) {
         // Wait for any event on the worker thread.
@@ -562,10 +554,9 @@ static int32_t camera_suite_camera_worker(void* camera_view_instance) {
                 length =
                     furi_stream_buffer_receive(instance->camera_rx_stream, data, buffer_size, 0);
                 if(length > 0) {
-                    with_view_model_cpp(
+                    with_view_model(
                         instance->view,
-                        UartDumpModel*,
-                        model,
+                        UartDumpModel * model,
                         {
                             // Process the data.
                             for(size_t i = 0; i < length; i++) {
@@ -576,8 +567,8 @@ static int32_t camera_suite_camera_worker(void* camera_view_instance) {
                 }
             } while(length > 0);
 
-            with_view_model_cpp(
-                instance->view, UartDumpModel*, model, { UNUSED(model); }, true);
+            with_view_model(
+                instance->view, UartDumpModel * model, { UNUSED(model); }, true);
         }
     }
 
@@ -586,8 +577,7 @@ static int32_t camera_suite_camera_worker(void* camera_view_instance) {
 
 CameraSuiteViewCamera* camera_suite_view_camera_alloc() {
     // Allocate memory for the instance
-    CameraSuiteViewCamera* instance =
-        static_cast<CameraSuiteViewCamera*>(malloc(sizeof(CameraSuiteViewCamera)));
+    CameraSuiteViewCamera* instance = malloc(sizeof(CameraSuiteViewCamera));
 
     // Allocate the view object
     instance->view = view_alloc();
@@ -646,8 +636,8 @@ void camera_suite_view_camera_free(CameraSuiteViewCamera* instance) {
     furi_hal_serial_deinit(instance->camera_serial_handle);
     furi_hal_serial_control_release(instance->camera_serial_handle);
 
-    with_view_model_cpp(
-        instance->view, UartDumpModel*, model, { UNUSED(model); }, true);
+    with_view_model(
+        instance->view, UartDumpModel * model, { UNUSED(model); }, true);
     view_free(instance->view);
     free(instance);
 }

@@ -5,8 +5,7 @@ static void camera_suite_view_wifi_camera_draw(Canvas* canvas, void* wifi_model)
     furi_assert(canvas);
     furi_assert(wifi_model);
 
-    CameraSuiteViewWiFiCameraModel* model =
-        static_cast<CameraSuiteViewWiFiCameraModel*>(wifi_model);
+    CameraSuiteViewWiFiCameraModel* model = wifi_model;
 
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
@@ -22,8 +21,7 @@ static void camera_suite_view_wifi_camera_draw(Canvas* canvas, void* wifi_model)
 static int32_t camera_suite_wifi_camera_worker(void* wifi_view_instance) {
     furi_assert(wifi_view_instance);
 
-    CameraSuiteViewWiFiCamera* instance =
-        static_cast<CameraSuiteViewWiFiCamera*>(wifi_view_instance);
+    CameraSuiteViewWiFiCamera* instance = wifi_view_instance;
 
     while(1) {
         uint32_t events =
@@ -45,10 +43,9 @@ static int32_t camera_suite_wifi_camera_worker(void* wifi_view_instance) {
                 if(length > 0) {
                     data[length] = '\0';
 
-                    with_view_model_cpp(
+                    with_view_model(
                         instance->view,
-                        CameraSuiteViewWiFiCameraModel*,
-                        model,
+                        CameraSuiteViewWiFiCameraModel * model,
                         {
                             furi_string_cat_printf(model->log, "%s", data);
 
@@ -63,8 +60,8 @@ static int32_t camera_suite_wifi_camera_worker(void* wifi_view_instance) {
                 }
             } while(length > 0);
 
-            with_view_model_cpp(
-                instance->view, CameraSuiteViewWiFiCameraModel*, model, { UNUSED(model); }, true);
+            with_view_model(
+                instance->view, CameraSuiteViewWiFiCameraModel * model, { UNUSED(model); }, true);
         }
     }
 
@@ -76,17 +73,15 @@ static bool
     furi_assert(wifi_view_instance);
     furi_assert(input_event);
 
-    CameraSuiteViewWiFiCamera* instance =
-        static_cast<CameraSuiteViewWiFiCamera*>(wifi_view_instance);
+    CameraSuiteViewWiFiCamera* instance = wifi_view_instance;
     uint8_t data[1];
 
     if(input_event->type == InputTypeRelease) {
         switch(input_event->key) {
         default:
-            with_view_model_cpp(
+            with_view_model(
                 instance->view,
-                CameraSuiteViewWiFiCameraModel*,
-                model,
+                CameraSuiteViewWiFiCameraModel * model,
                 {
                     UNUSED(model);
                     // Stop all sounds, reset the LED.
@@ -100,10 +95,9 @@ static bool
     } else if(input_event->type == InputTypePress) {
         switch(input_event->key) {
         case InputKeyBack: {
-            with_view_model_cpp(
+            with_view_model(
                 instance->view,
-                CameraSuiteViewWiFiCameraModel*,
-                model,
+                CameraSuiteViewWiFiCameraModel * model,
                 {
                     UNUSED(model);
 
@@ -145,18 +139,16 @@ static void camera_suite_view_wifi_camera_model_init(CameraSuiteViewWiFiCameraMo
 static void camera_suite_view_wifi_camera_enter(void* wifi_view_instance) {
     furi_assert(wifi_view_instance);
 
-    CameraSuiteViewWiFiCamera* instance =
-        static_cast<CameraSuiteViewWiFiCamera*>(wifi_view_instance);
+    CameraSuiteViewWiFiCamera* instance = wifi_view_instance;
 
     // Start wifi camera stream.
     uint8_t data[1] = {'W'};
     furi_hal_serial_tx(instance->wifi_serial_handle, data, 1);
     furi_delay_ms(50);
 
-    with_view_model_cpp(
+    with_view_model(
         instance->view,
-        CameraSuiteViewWiFiCameraModel*,
-        model,
+        CameraSuiteViewWiFiCameraModel * model,
         { camera_suite_view_wifi_camera_model_init(model); },
         true);
 }
@@ -168,8 +160,7 @@ static void wifi_camera_on_irq_cb(
     furi_assert(handle);
     furi_assert(wifi_view_instance);
 
-    CameraSuiteViewWiFiCamera* instance =
-        static_cast<CameraSuiteViewWiFiCamera*>(wifi_view_instance);
+    CameraSuiteViewWiFiCamera* instance = wifi_view_instance;
 
     if(event == FuriHalSerialRxEventData) {
         uint8_t data = furi_hal_serial_async_rx(handle);
@@ -180,8 +171,7 @@ static void wifi_camera_on_irq_cb(
 
 CameraSuiteViewWiFiCamera* camera_suite_view_wifi_camera_alloc() {
     // Allocate memory for the instance
-    CameraSuiteViewWiFiCamera* instance =
-        (CameraSuiteViewWiFiCamera*)malloc(sizeof(CameraSuiteViewWiFiCamera));
+    CameraSuiteViewWiFiCamera* instance = malloc(sizeof(CameraSuiteViewWiFiCamera));
 
     // Allocate the view object
     instance->view = view_alloc();
@@ -224,10 +214,9 @@ CameraSuiteViewWiFiCamera* camera_suite_view_wifi_camera_alloc() {
     // Set exit callback
     view_set_exit_callback(instance->view, camera_suite_view_wifi_camera_exit);
 
-    with_view_model_cpp(
+    with_view_model(
         instance->view,
-        CameraSuiteViewWiFiCameraModel*,
-        model,
+        CameraSuiteViewWiFiCameraModel * model,
         { camera_suite_view_wifi_camera_model_init(model); },
         true);
 
@@ -249,10 +238,9 @@ void camera_suite_view_wifi_camera_free(CameraSuiteViewWiFiCamera* instance) {
     furi_hal_serial_deinit(instance->wifi_serial_handle);
     furi_hal_serial_control_release(instance->wifi_serial_handle);
 
-    with_view_model_cpp(
+    with_view_model(
         instance->view,
-        CameraSuiteViewWiFiCameraModel*,
-        model,
+        CameraSuiteViewWiFiCameraModel * model,
         { furi_string_free(model->log); },
         true);
     view_free(instance->view);

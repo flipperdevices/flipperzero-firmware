@@ -32,7 +32,7 @@ const uint32_t led_value[2] = {
 };
 
 static void camera_suite_scene_app_settings_set_haptic(VariableItem* item) {
-    CameraSuite* app = static_cast<CameraSuite*>(variable_item_get_context(item));
+    CameraSuite* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
 
     variable_item_set_current_value_text(item, haptic_text[index]);
@@ -40,26 +40,26 @@ static void camera_suite_scene_app_settings_set_haptic(VariableItem* item) {
 }
 
 static void camera_suite_scene_app_settings_set_speaker(VariableItem* item) {
-    CameraSuite* app = static_cast<CameraSuite*>(variable_item_get_context(item));
+    CameraSuite* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, speaker_text[index]);
     app->speaker = speaker_value[index];
 }
 
 static void camera_suite_scene_app_settings_set_led(VariableItem* item) {
-    CameraSuite* app = static_cast<CameraSuite*>(variable_item_get_context(item));
+    CameraSuite* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, led_text[index]);
     app->led = led_value[index];
 }
 
 void camera_suite_scene_app_settings_submenu_callback(void* context, uint32_t index) {
-    CameraSuite* app = static_cast<CameraSuite*>(context);
+    CameraSuite* app = context;
     view_dispatcher_send_custom_event(app->view_dispatcher, index);
 }
 
 void camera_suite_scene_app_settings_on_enter(void* context) {
-    CameraSuite* app = static_cast<CameraSuite*>(context);
+    CameraSuite* app = context;
     VariableItem* item;
     uint8_t value_index;
 
@@ -96,7 +96,7 @@ void camera_suite_scene_app_settings_on_enter(void* context) {
 }
 
 bool camera_suite_scene_app_settings_on_event(void* context, SceneManagerEvent event) {
-    CameraSuite* app = static_cast<CameraSuite*>(context);
+    CameraSuite* app = context;
     UNUSED(app);
     bool consumed = false;
     if(event.type == SceneManagerEventTypeCustom) {
@@ -105,7 +105,7 @@ bool camera_suite_scene_app_settings_on_event(void* context, SceneManagerEvent e
 }
 
 void camera_suite_scene_app_settings_on_exit(void* context) {
-    CameraSuite* app = static_cast<CameraSuite*>(context);
+    CameraSuite* app = context;
     variable_item_list_set_selected_item(app->variable_item_list, 0);
     variable_item_list_reset(app->variable_item_list);
 }

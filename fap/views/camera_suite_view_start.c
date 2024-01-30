@@ -107,15 +107,14 @@ static void camera_suite_view_start_model_init(CameraSuiteViewStartModel* const 
 
 bool camera_suite_view_start_input(InputEvent* event, void* context) {
     furi_assert(context);
-    CameraSuiteViewStart* instance = static_cast<CameraSuiteViewStart*>(context);
+    CameraSuiteViewStart* instance = context;
     if(event->type == InputTypeRelease) {
         switch(event->key) {
         case InputKeyBack:
             // Exit application.
-            with_view_model_cpp(
+            with_view_model(
                 instance->view,
-                CameraSuiteViewStartModel*,
-                model,
+                CameraSuiteViewStartModel * model,
                 {
                     UNUSED(model);
                     instance->callback(CameraSuiteCustomEventStartBack, instance->context);
@@ -124,10 +123,9 @@ bool camera_suite_view_start_input(InputEvent* event, void* context) {
             break;
         case InputKeyOk:
             // Start the application.
-            with_view_model_cpp(
+            with_view_model(
                 instance->view,
-                CameraSuiteViewStartModel*,
-                model,
+                CameraSuiteViewStartModel * model,
                 {
                     UNUSED(model);
                     instance->callback(CameraSuiteCustomEventStartOk, instance->context);
@@ -153,17 +151,16 @@ void camera_suite_view_start_exit(void* context) {
 void camera_suite_view_start_enter(void* context) {
     furi_assert(context);
     CameraSuiteViewStart* instance = (CameraSuiteViewStart*)context;
-    with_view_model_cpp(
+    with_view_model(
         instance->view,
-        CameraSuiteViewStartModel*,
-        model,
+        CameraSuiteViewStartModel * model,
         { camera_suite_view_start_model_init(model); },
         true);
 }
 
 CameraSuiteViewStart* camera_suite_view_start_alloc() {
     // Allocate memory for the instance
-    CameraSuiteViewStart* instance = (CameraSuiteViewStart*)malloc(sizeof(CameraSuiteViewStart));
+    CameraSuiteViewStart* instance = malloc(sizeof(CameraSuiteViewStart));
 
     // Allocate the view object
     instance->view = view_alloc();
@@ -180,10 +177,9 @@ CameraSuiteViewStart* camera_suite_view_start_alloc() {
     // Set input callback
     view_set_input_callback(instance->view, camera_suite_view_start_input);
 
-    with_view_model_cpp(
+    with_view_model(
         instance->view,
-        CameraSuiteViewStartModel*,
-        model,
+        CameraSuiteViewStartModel * model,
         { camera_suite_view_start_model_init(model); },
         true);
 
@@ -193,8 +189,8 @@ CameraSuiteViewStart* camera_suite_view_start_alloc() {
 void camera_suite_view_start_free(CameraSuiteViewStart* instance) {
     furi_assert(instance);
 
-    with_view_model_cpp(
-        instance->view, CameraSuiteViewStartModel*, model, { UNUSED(model); }, true);
+    with_view_model(
+        instance->view, CameraSuiteViewStartModel * model, { UNUSED(model); }, true);
     view_free(instance->view);
     free(instance);
 }

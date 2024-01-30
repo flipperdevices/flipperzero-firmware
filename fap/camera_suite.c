@@ -2,27 +2,27 @@
 
 bool camera_suite_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
-    CameraSuite* app = static_cast<CameraSuite*>(context);
+    CameraSuite* app = context;
     return scene_manager_handle_custom_event(app->scene_manager, event);
 }
 
 void camera_suite_tick_event_callback(void* context) {
     furi_assert(context);
-    CameraSuite* app = static_cast<CameraSuite*>(context);
+    CameraSuite* app = context;
     scene_manager_handle_tick_event(app->scene_manager);
 }
 
 // Leave app if back button pressed.
 bool camera_suite_navigation_event_callback(void* context) {
     furi_assert(context);
-    CameraSuite* app = static_cast<CameraSuite*>(context);
+    CameraSuite* app = context;
     return scene_manager_handle_back_event(app->scene_manager);
 }
 
 CameraSuite* camera_suite_app_alloc() {
-    CameraSuite* app = static_cast<CameraSuite*>(malloc(sizeof(CameraSuite)));
-    app->gui = static_cast<Gui*>(furi_record_open(RECORD_GUI));
-    app->notification = static_cast<NotificationApp*>(furi_record_open(RECORD_NOTIFICATION));
+    CameraSuite* app = malloc(sizeof(CameraSuite));
+    app->gui = furi_record_open(RECORD_GUI);
+    app->notification = furi_record_open(RECORD_NOTIFICATION);
 
     // Turn backlight on.
     notification_message(app->notification, &sequence_display_backlight_on);
