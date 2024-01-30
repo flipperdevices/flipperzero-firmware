@@ -40,7 +40,6 @@ static bool picopass_elite_dict_attack_change_dict(Picopass* picopass) {
                 PICOPASS_KEY_LEN);
             scene_state = PicopassSceneEliteDictAttackDictElite;
         }
-        picopass->dict_attack_ctx.card_detected = true;
         picopass->dict_attack_ctx.total_keys = keys_dict_get_total_keys(picopass->dict);
         picopass->dict_attack_ctx.current_key = 0;
         picopass->dict_attack_ctx.name = picopass_dict_name[scene_state];
@@ -153,7 +152,7 @@ void picopass_scene_elite_dict_attack_on_enter(void* context) {
             PICOPASS_KEY_LEN);
         state = PicopassSceneEliteDictAttackDictStandard;
     }
-    picopass->dict_attack_ctx.card_detected = true;
+    picopass->dict_attack_ctx.card_detected = false;
     picopass->dict_attack_ctx.total_keys = keys_dict_get_total_keys(picopass->dict);
     picopass->dict_attack_ctx.current_key = 0;
     picopass->dict_attack_ctx.name = picopass_dict_name[state];
