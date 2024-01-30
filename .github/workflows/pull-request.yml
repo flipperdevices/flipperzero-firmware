@@ -1,22 +1,6 @@
 name: "Lint & build PR."
 on: pull_request
 jobs:
-  ufbt-lint-action:
-    runs-on: ubuntu-latest
-    name: "Lint PR: ${{ github.event.pull_request.head.repo.name }}."
-    steps:
-      - name: "Checkout."
-        uses: actions/checkout@v3
-        with:
-          submodules: recursive
-
-      - name: "Lint."
-        uses: flipperdevices/flipperzero-ufbt-action@v0.1
-        with:
-          app-dir: ./fap
-          skip-setup: true
-          task: lint
-
   ufbt-build-action:
     runs-on: ubuntu-latest
     strategy:
@@ -37,6 +21,13 @@ jobs:
         uses: actions/checkout@v3
         with:
           submodules: recursive
+
+      - name: "Lint."
+        uses: flipperdevices/flipperzero-ufbt-action@v0.1
+        with:
+          app-dir: ./fap
+          skip-setup: true
+          task: lint
 
       # Flipper Zero ufbt action
       # https://github.com/flipperdevices/flipperzero-ufbt-action
