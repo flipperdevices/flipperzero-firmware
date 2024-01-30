@@ -18,7 +18,7 @@ void weather_station_scene_about_on_enter(void* context) {
     temp_str = furi_string_alloc();
     furi_string_printf(temp_str, "\e#%s\n", "Information");
 
-    furi_string_cat_printf(temp_str, "Version: %s\n", WS_VERSION_APP);
+    furi_string_cat_printf(temp_str, "Version: %s\n", FAP_VERSION);
     furi_string_cat_printf(temp_str, "Developed by: %s\n", WS_DEVELOPED);
     furi_string_cat_printf(temp_str, "Github: %s\n\n", WS_GITHUB);
 
