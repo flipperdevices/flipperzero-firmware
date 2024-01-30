@@ -2,6 +2,14 @@
 
 #include "sensors/ICM42688P.h"
 
+typedef struct {
+    bool (*mouse_move)(int8_t dx, int8_t dy);
+    bool (*mouse_key_press)(uint8_t button);
+    bool (*mouse_key_release)(uint8_t button);
+    bool (*mouse_scroll)(int8_t value);
+    uint32_t report_rate_max;
+} ImuHidApi;
+
 typedef enum {
     ImuMouseKeyRight,
     ImuMouseKeyLeft,
@@ -9,8 +17,10 @@ typedef enum {
 
 typedef struct ImuThread ImuThread;
 
-ImuThread* imu_start(ICM42688P* icm42688p);
+ImuThread* imu_start(ICM42688P* icm42688p, const ImuHidApi* hid);
 
 void imu_stop(ImuThread* imu);
 
 void imu_mouse_key_press(ImuThread* imu, ImuMouseKey key, bool state);
+
+void imu_mouse_scroll_mode(ImuThread* imu, bool enable);
