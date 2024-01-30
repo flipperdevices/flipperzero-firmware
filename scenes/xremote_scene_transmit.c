@@ -82,11 +82,8 @@ void xremote_scene_transmit_send_pause(XRemote* app, CrossRemoteItem* item) {
 void xremote_scene_transmit_send_subghz(XRemote* app, CrossRemoteItem* item) {
     app->transmitting = true;
     xremote_scene_ir_notification_message(app, SubGhzNotificationMessageBlinkStartSend);
-    // ADD SEND METHOD HERE
-    subghz_send(app, furi_string_get_cstr(item->filename)); //currently crashes, null pointer
-    //furi_thread_flags_wait(0, FuriFlagWaitAny, 2000); //Remove later
-    //app->transmitting = false;
-    //xremote_scene_ir_notification_message(app, SubGhzNotificationMessageBlinkStop);
+    subghz_send(app, furi_string_get_cstr(item->filename)); 
+    //furi_thread_flags_wait(0, FuriFlagWaitAny, 2000);
 }
 
 void xremote_scene_transmit_send_signal(void* context, CrossRemoteItem* item) {
@@ -109,8 +106,6 @@ void xremote_scene_transmit_send_signal(void* context, CrossRemoteItem* item) {
     } else if(item->type == XRemoteRemoteItemTypeSubGhz) {
         xremote_scene_transmit_send_subghz(app, item);
     }
-
-    //xremote_cross_remote_set_transmitting(remote, XRemoteTransmittingStop);
 }
 
 void xremote_scene_transmit_run_remote(void* context) {
@@ -124,14 +119,12 @@ void xremote_scene_transmit_run_remote(void* context) {
             xremote_cross_remote_set_transmitting(remote, XRemoteTransmittingStart);
             CrossRemoteItem* item = xremote_cross_remote_get_item(remote, i);
             xremote_scene_transmit_send_signal(app, item);
-            //furi_thread_flags_wait(0, FuriFlagWaitAny, 2000);
             //furi_thread_flags_wait(0, FuriFlagWaitAny, 1000);
-            //xremote_scene_ir_notification_message(app, InfraredNotificationMessageBlinkStartSend);
         } else if(xremote_cross_remote_get_transmitting(remote) == XRemoteTransmittingStopSubghz) {
             i++;
             app->state_notifications = SubGhzNotificationStateIDLE;
-            subghz_txrx_stop(app->subghz->txrx);
             app->transmitting = false;
+            subghz_txrx_stop(app->subghz->txrx);
             xremote_scene_ir_notification_message(app, SubGhzNotificationMessageBlinkStop);
             xremote_cross_remote_set_transmitting(remote, XRemoteTransmittingIdle);
             //furi_thread_flags_wait(0, FuriFlagWaitAny, 1000);
@@ -142,7 +135,6 @@ void xremote_scene_transmit_run_remote(void* context) {
     }
     xremote_scene_ir_notification_message(app, InfraredNotificationMessageBlinkStop);
 
-    //scene_manager_next_scene(app->scene_manager, XRemoteSceneXrList);
     scene_manager_previous_scene(app->scene_manager);
     //xremote_transmit_model_set_name(app->xremote_transmit, xremote_cross_remote_get_name(remote));
 }
@@ -167,8 +159,8 @@ bool xremote_scene_transmit_on_event(void* context, SceneManagerEvent event) {
                 FURI_LOG_D("SUBGHZ", "stop event");
                 //app->stop_transmit = true;
                 app->state_notifications = SubGhzNotificationStateIDLE;
-                subghz_txrx_stop(app->subghz->txrx);
                 app->transmitting = false;
+                subghz_txrx_stop(app->subghz->txrx);
                 xremote_scene_ir_notification_message(app, SubGhzNotificationMessageBlinkStop);
                 xremote_cross_remote_set_transmitting(app->cross_remote, XRemoteTransmittingStop);
                 break;
@@ -189,7 +181,7 @@ bool xremote_scene_transmit_on_event(void* context, SceneManagerEvent event) {
 void xremote_scene_transmit_on_exit(void* context) {
     XRemote* app = context;
     app->transmitting = false;
-    subghz_txrx_stop(app->subghz->txrx);
     app->state_notifications = SubGhzNotificationStateIDLE;
+    subghz_txrx_stop(app->subghz->txrx);
     //xremote_cross_remote_set_transmitting(remote, XRemoteTransmittingIdle);
 }

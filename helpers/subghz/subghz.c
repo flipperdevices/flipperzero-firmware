@@ -3,23 +3,18 @@
 #include "subghz_i.h"
 #include "../../helpers/xremote_custom_event.h"
 #include "../../helpers/xremote_led.h"
-//#include "../meal_pager_storage.h"
 
 SubGhz* subghz_alloc() {
     SubGhz* subghz = malloc(sizeof(SubGhz));
 
     subghz->file_path = furi_string_alloc();
-
     subghz->txrx = subghz_txrx_alloc();
 
     return subghz;
 }
 
 void subghz_free(SubGhz* subghz) {
-    //TxRx
     subghz_txrx_free(subghz->txrx);
-
-    // Furi strings
     furi_string_free(subghz->file_path);
 
     // The rest
@@ -54,8 +49,6 @@ void subghz_send(void* context, const char* path) {
     subghz_txrx_set_raw_file_encoder_worker_callback_end(
         app->subghz->txrx, subghz_scene_transmit_callback_end_tx, app);
     app->state_notifications = SubGhzNotificationStateTx;
-
-
 
     FURI_LOG_D(TAG, "Finished Transmitting");
 }
