@@ -31,7 +31,7 @@ You can also download the [release](https://github.com/derskythe/flipperzero-sub
 ![image](https://github.com/DarkFlippers/flipperzero-subbrute/assets/31771569/9f428d6e-59fd-4517-895d-fb185f8d884f)
 
 Here you can select the protocol and frequency that will be used for bruteforce. 
-According to our observations, `CAME 12bit 433MHz` is the most protocol, so it is selected by default.
+According to our observations, `CAME 12bit 433MHz` is the most common protocol, so it is selected by default.
 To identify other devices and protocols, you should inspect the device.
 According to the protocol, when probe a key, each value is sent 3 times. 
 Most of the devices this works but there are devices that don't work and more repetitions are needed. 
