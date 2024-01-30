@@ -47,6 +47,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: [update honeywell proto to latest one (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/35a93e6eefbdb2624a6139197de825e97cb5dd4b)
 - OFW PR: [BadUSB: media keys, Fn/Globe key commands #3403 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/3403)
 - Updated: [Cross Remote v2.0 (By leedave)](https://github.com/leedave/flipper-zero-cross-remote)
+- [Small Fix for SubGHz Last Settings (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/ed3cd21f5ccb4b5696953a6cb879a73f49fb69cf)
 - To Be Merged OFW PRs: [3352](https://github.com/flipperdevices/flipperzero-firmware/pull/3352), [3302](https://github.com/flipperdevices/flipperzero-firmware/pull/3302), [3211](https://github.com/flipperdevices/flipperzero-firmware/pull/3211), [3366](https://github.com/flipperdevices/flipperzero-firmware/pull/3366), [3250](https://github.com/flipperdevices/flipperzero-firmware/pull/3250), [3402](https://github.com/flipperdevices/flipperzero-firmware/pull/3402) & [3409](https://github.com/flipperdevices/flipperzero-firmware/pull/3409)
 
 ## IN THIS BRANCH:
