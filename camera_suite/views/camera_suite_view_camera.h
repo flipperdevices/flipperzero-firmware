@@ -43,16 +43,16 @@ typedef enum {
     WorkerEventRx = (1 << 2),
 } WorkerEventFlags;
 
-#define WORKER_EVENTS_MASK (WorkerEventStop | WorkerEventRx)
+#define CAMERA_WORKER_EVENTS_MASK (WorkerEventStop | WorkerEventRx)
 
 // Forward declaration
 typedef void (*CameraSuiteViewCameraCallback)(CameraSuiteCustomEvent event, void* context);
 
 typedef struct CameraSuiteViewCamera {
     CameraSuiteViewCameraCallback callback;
-    FuriStreamBuffer* rx_stream;
+    FuriStreamBuffer* camera_rx_stream;
     FuriHalSerialHandle* serial_handle;
-    FuriThread* worker_thread;
+    FuriThread* camera_worker_thread;
     NotificationApp* notification;
     View* view;
     void* context;
