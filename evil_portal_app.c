@@ -3,6 +3,7 @@
 
 #include <furi.h>
 #include <furi_hal.h>
+#include <expansion/expansion.h>
 
 static bool evil_portal_app_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
@@ -127,6 +128,11 @@ void evil_portal_app_free(Evil_PortalApp* app) {
 
 int32_t evil_portal_app(void* p) {
     UNUSED(p);
+
+    // Disable expansion protocol to avoid interference with UART Handle
+    Expansion* expansion = furi_record_open(RECORD_EXPANSION);
+    expansion_disable(expansion);
+
     Evil_PortalApp* evil_portal_app = evil_portal_app_alloc();
 
     bool otg_was_enabled = furi_hal_power_is_otg_enabled();
@@ -150,6 +156,10 @@ int32_t evil_portal_app(void* p) {
     if(furi_hal_power_is_otg_enabled() && !otg_was_enabled) {
         furi_hal_power_disable_otg();
     }
+
+    // Return previous state of expansion
+    expansion_enable(expansion);
+    furi_record_close(RECORD_EXPANSION);
 
     return 0;
 }
