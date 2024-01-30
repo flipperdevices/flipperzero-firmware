@@ -167,7 +167,7 @@ static void mag_free(Mag* mag) {
 // entry point for app
 int32_t mag_app(void* p) {
     UNUSED(p);
-    
+
     // Disable expansion protocol to avoid interference with UART Handle
     Expansion* expansion = furi_record_open(RECORD_EXPANSION);
     expansion_disable(expansion);

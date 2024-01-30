@@ -203,7 +203,7 @@ int32_t uhf_app_main(void* ctx) {
     UHFApp* uhf_app = uhf_alloc();
 
     // enable 5v pin
-     uint8_t attempts = 0;
+    uint8_t attempts = 0;
     bool otg_was_enabled = furi_hal_power_is_otg_enabled();
     while(!furi_hal_power_is_otg_enabled() && attempts++ < 5) {
         furi_hal_power_enable_otg();
@@ -216,7 +216,7 @@ int32_t uhf_app_main(void* ctx) {
     view_dispatcher_run(uhf_app->view_dispatcher);
 
     // disable 5v pin
-     if(furi_hal_power_is_otg_enabled() && !otg_was_enabled) {
+    if(furi_hal_power_is_otg_enabled() && !otg_was_enabled) {
         furi_hal_power_disable_otg();
     }
     // furi_hal_gpio_disable_int_callback()

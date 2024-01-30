@@ -228,7 +228,7 @@ void ifttt_virtual_button_app_free(VirtualButtonApp* app) {
 
 int32_t ifttt_virtual_button_app(void* p) {
     UNUSED(p);
-    
+
     // Disable expansion protocol to avoid interference with UART Handle
     Expansion* expansion = furi_record_open(RECORD_EXPANSION);
     expansion_disable(expansion);
