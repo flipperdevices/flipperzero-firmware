@@ -46,9 +46,13 @@ EmvError emv_poller_get_processing_options(EmvPoller* instance);
 
 EmvError emv_poller_read_sfi_record(EmvPoller* instance, uint8_t sfi, uint8_t record_num);
 
-EmvError emv_poller_read_files(EmvPoller* instance);
+EmvError emv_poller_read_afl(EmvPoller* instance);
 
-EmvError emv_poller_read(EmvPoller* instance);
+EmvError emv_poller_read_log_entry(EmvPoller* instance);
+
+EmvError emv_poller_get_pin_try_counter(EmvPoller* instance);
+
+EmvError emv_poller_get_last_online_atc(EmvPoller* instance);
 
 #ifdef __cplusplus
 }

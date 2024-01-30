@@ -6,9 +6,8 @@
 
 #define TAG "EMVPoller"
 
-// SKOLKO?????????????????????????????????????????????????????????????????
+// MAX Le is 255 bytes + 2 for CRC
 #define EMV_BUF_SIZE (512U)
-#define EMV_RESULT_BUF_SIZE (512U)
 
 typedef NfcCommand (*EmvPollerReadHandler)(EmvPoller* instance);
 
@@ -24,8 +23,6 @@ static EmvPoller* emv_poller_alloc(Iso14443_4aPoller* iso14443_4a_poller) {
     instance->data = emv_alloc();
     instance->tx_buffer = bit_buffer_alloc(EMV_BUF_SIZE);
     instance->rx_buffer = bit_buffer_alloc(EMV_BUF_SIZE);
-    instance->input_buffer = bit_buffer_alloc(EMV_BUF_SIZE);
-    instance->result_buffer = bit_buffer_alloc(EMV_RESULT_BUF_SIZE);
 
     instance->state = EmvPollerStateIdle;
 
@@ -44,14 +41,10 @@ static void emv_poller_free(EmvPoller* instance) {
     emv_free(instance->data);
     bit_buffer_free(instance->tx_buffer);
     bit_buffer_free(instance->rx_buffer);
-    bit_buffer_free(instance->input_buffer);
-    bit_buffer_free(instance->result_buffer);
     free(instance);
 }
 
 static NfcCommand emv_poller_handler_idle(EmvPoller* instance) {
-    bit_buffer_reset(instance->input_buffer);
-    bit_buffer_reset(instance->result_buffer);
     bit_buffer_reset(instance->tx_buffer);
     bit_buffer_reset(instance->rx_buffer);
 
@@ -71,7 +64,6 @@ static NfcCommand emv_poller_handler_select_ppse(EmvPoller* instance) {
         instance->state = EmvPollerStateSelectApplication;
     } else {
         FURI_LOG_E(TAG, "Failed to select PPSE");
-        iso14443_4a_poller_halt(instance->iso14443_4a_poller);
         instance->state = EmvPollerStateReadFailed;
     }
 
@@ -83,12 +75,11 @@ static NfcCommand emv_poller_handler_select_application(EmvPoller* instance) {
 
     if(instance->error == EmvErrorNone) {
         FURI_LOG_D(TAG, "Select application success");
-        instance->state = EmvPollerStateGetProcessingOptions;
     } else {
         FURI_LOG_E(TAG, "Failed to select application");
-        iso14443_4a_poller_halt(instance->iso14443_4a_poller);
-        instance->state = EmvPollerStateReadFailed;
+        // We have to try GPO request with empty tag
     }
+    instance->state = EmvPollerStateGetProcessingOptions;
 
     return NfcCommandContinue;
 }
@@ -98,28 +89,28 @@ static NfcCommand emv_poller_handler_get_processing_options(EmvPoller* instance)
 
     if(instance->error == EmvErrorNone) {
         FURI_LOG_D(TAG, "Get processing options success");
-        instance->state = EmvPollerStateReadSuccess;
     } else {
         FURI_LOG_E(TAG, "Failed to get processing options");
-        iso14443_4a_poller_halt(instance->iso14443_4a_poller);
-        instance->state = EmvPollerStateReadFiles;
     }
 
+    // Read another informations
+    instance->state = EmvPollerStateReadFiles;
     return NfcCommandContinue;
 }
 
 static NfcCommand emv_poller_handler_read_files(EmvPoller* instance) {
-    instance->error = emv_poller_read_files(instance);
+    emv_poller_read_afl(instance);
+    emv_poller_read_log_entry(instance);
 
-    if(instance->error == EmvErrorNone) {
-        FURI_LOG_D(TAG, "Read files success");
-        instance->state = EmvPollerStateReadSuccess;
-    } else {
-        FURI_LOG_E(TAG, "Failed to read files");
-        iso14443_4a_poller_halt(instance->iso14443_4a_poller);
-        instance->state = EmvPollerStateReadFailed;
-    }
+    instance->state = EmvPollerStateReadExtra;
+    return NfcCommandContinue;
+}
 
+static NfcCommand emv_poller_handler_read_extra_data(EmvPoller* instance) {
+    emv_poller_get_last_online_atc(instance);
+    emv_poller_get_pin_try_counter(instance);
+
+    instance->state = EmvPollerStateReadSuccess;
     return NfcCommandContinue;
 }
 
@@ -133,7 +124,7 @@ static NfcCommand emv_poller_handler_read_fail(EmvPoller* instance) {
 }
 
 static NfcCommand emv_poller_handler_read_success(EmvPoller* instance) {
-    FURI_LOG_D(TAG, "Read success.");
+    FURI_LOG_D(TAG, "Read success");
     iso14443_4a_poller_halt(instance->iso14443_4a_poller);
     instance->emv_event.type = EmvPollerEventTypeReadSuccess;
     NfcCommand command = instance->callback(instance->general_event, instance->context);
@@ -146,6 +137,7 @@ static const EmvPollerReadHandler emv_poller_read_handler[EmvPollerStateNum] = {
     [EmvPollerStateSelectApplication] = emv_poller_handler_select_application,
     [EmvPollerStateGetProcessingOptions] = emv_poller_handler_get_processing_options,
     [EmvPollerStateReadFiles] = emv_poller_handler_read_files,
+    [EmvPollerStateReadExtra] = emv_poller_handler_read_extra_data,
     [EmvPollerStateReadFailed] = emv_poller_handler_read_fail,
     [EmvPollerStateReadSuccess] = emv_poller_handler_read_success,
 };
