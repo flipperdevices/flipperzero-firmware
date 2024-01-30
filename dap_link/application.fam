@@ -9,7 +9,7 @@ App(
     ],
     stack_size=4 * 1024,
     fap_description="Enables use of Flipper as a debug probe for ARM devices, implements the CMSIS-DAP protocol",
-    fap_version="1.1",
+    fap_version="1.2",
     fap_icon="dap_link.png",
     fap_category="GPIO",
     fap_private_libs=[
