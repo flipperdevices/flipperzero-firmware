@@ -11,6 +11,7 @@
 #include <gui/elements.h>
 #include <gui/view_dispatcher.h>
 #include <gui/modules/dialog_ex.h>
+#include <expansion/expansion.h>
 
 #define LINES_ON_SCREEN 6
 #define COLUMNS_ON_SCREEN 21
@@ -306,9 +307,18 @@ static void uart_echo_app_free(WiFiMapApp* app) {
 
 int32_t wifi_map_app(void* p) {
     UNUSED(p);
+    // Disable expansion protocol to avoid interference with UART Handle
+    Expansion* expansion = furi_record_open(RECORD_EXPANSION);
+    expansion_disable(expansion);
+    
     FURI_LOG_D(TAG, "wifi_map_app");
     WiFiMapApp* app = uart_echo_app_alloc();
     view_dispatcher_run(app->view_dispatcher);
     uart_echo_app_free(app);
+
+    // Return previous state of expansion
+    expansion_enable(expansion);
+    furi_record_close(RECORD_EXPANSION);
+
     return 0;
 }

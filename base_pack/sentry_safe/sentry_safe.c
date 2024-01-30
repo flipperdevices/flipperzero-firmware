@@ -4,6 +4,7 @@
 #include <stdlib.h>
 
 #include <furi_hal.h>
+#include <expansion/expansion.h>
 
 typedef struct {
     uint8_t status;
@@ -83,6 +84,10 @@ void try_code(int a, int b, int c, int d, int e) {
 int32_t sentry_safe_app(void* p) {
     UNUSED(p);
 
+    // Disable expansion protocol to avoid interference with UART Handle
+    Expansion* expansion = furi_record_open(RECORD_EXPANSION);
+    expansion_disable(expansion);
+
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(Event));
 
     SentryState* sentry_state = malloc(sizeof(SentryState));
@@ -94,6 +99,9 @@ int32_t sentry_safe_app(void* p) {
         FURI_LOG_E("SentrySafe", "cannot create mutex\r\n");
         furi_message_queue_free(event_queue);
         free(sentry_state);
+        // Return previous state of expansion
+        expansion_enable(expansion);
+        furi_record_close(RECORD_EXPANSION);
         return 255;
     }
 
@@ -164,6 +172,10 @@ int32_t sentry_safe_app(void* p) {
     furi_message_queue_free(event_queue);
     furi_mutex_free(sentry_state->mutex);
     free(sentry_state);
+
+    // Return previous state of expansion
+    expansion_enable(expansion);
+    furi_record_close(RECORD_EXPANSION);
 
     return 0;
 }

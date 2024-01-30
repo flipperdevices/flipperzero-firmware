@@ -3,6 +3,7 @@
 #include <furi_hal_power.h>
 #include <furi.h>
 #include <furi_hal.h>
+#include <expansion/expansion.h>
 
 static bool wifi_deauther_app_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
@@ -90,9 +91,20 @@ void wifi_deauther_app_free(WifideautherApp* app) {
 }
 
 int32_t wifi_deauther_app(void* p) {
-    furi_hal_power_enable_otg();
-    furi_delay_ms(600);
     UNUSED(p);
+    // Disable expansion protocol to avoid interference with UART Handle
+    Expansion* expansion = furi_record_open(RECORD_EXPANSION);
+    expansion_disable(expansion);
+
+    // Enable 5v power, multiple attempts to avoid issues with power chip protection false triggering
+    uint8_t attempts = 0;
+    bool otg_was_enabled = furi_hal_power_is_otg_enabled();
+    while(!furi_hal_power_is_otg_enabled() && attempts++ < 5) {
+        furi_hal_power_enable_otg();
+        furi_delay_ms(10);
+    }
+    furi_delay_ms(600);
+
     WifideautherApp* wifi_deauther_app = wifi_deauther_app_alloc();
 
     wifi_deauther_app->uart = wifi_deauther_uart_init(wifi_deauther_app);
@@ -100,7 +112,14 @@ int32_t wifi_deauther_app(void* p) {
     view_dispatcher_run(wifi_deauther_app->view_dispatcher);
 
     wifi_deauther_app_free(wifi_deauther_app);
-    furi_hal_power_disable_otg();
+    
+    if(furi_hal_power_is_otg_enabled() && !otg_was_enabled) {
+        furi_hal_power_disable_otg();
+    }
+
+    // Return previous state of expansion
+    expansion_enable(expansion);
+    furi_record_close(RECORD_EXPANSION);
 
     return 0;
 }

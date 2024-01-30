@@ -9,6 +9,8 @@
 #include <stm32wbxx_ll_usart.h>
 #include <stm32wbxx_ll_lpuart.h>
 
+#include <expansion/expansion.h>
+
 #include "dap_link.h"
 #include "dap_config.h"
 #include "gui/dap_gui.h"
@@ -510,6 +512,9 @@ DapConfig* dap_app_get_config(DapApp* app) {
 
 int32_t dap_link_app(void* p) {
     UNUSED(p);
+    // Disable expansion protocol to avoid interference with UART Handle
+    Expansion* expansion = furi_record_open(RECORD_EXPANSION);
+    expansion_disable(expansion);
 
     if(furi_hal_usb_is_locked()) {
         DialogsApp* dialogs = furi_record_open(RECORD_DIALOGS);
@@ -526,6 +531,9 @@ int32_t dap_link_app(void* p) {
         dialog_message_show(dialogs, message);
         dialog_message_free(message);
         furi_record_close(RECORD_DIALOGS);
+        // Return previous state of expansion
+        expansion_enable(expansion);
+        furi_record_close(RECORD_EXPANSION);
         return -1;
     }
 
@@ -550,6 +558,10 @@ int32_t dap_link_app(void* p) {
 
     // free app
     dap_app_free(app);
+
+    // Return previous state of expansion
+    expansion_enable(expansion);
+    furi_record_close(RECORD_EXPANSION);
 
     return 0;
 }

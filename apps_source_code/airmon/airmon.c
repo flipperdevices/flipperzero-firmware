@@ -5,6 +5,8 @@
 #include <core/thread.h>
 #include <core/kernel.h>
 
+#include <expansion/expansion.h>
+
 #include "airmon_icons.h"
 #include "airmon_pms.h"
 #include "airmon_aqi.h"
@@ -236,9 +238,16 @@ static void airmon_context_free(AirmonContext* ctx) {
 int32_t airmon_app(void* p) {
     UNUSED(p);
 
+    // Disable expansion protocol to avoid interference with UART Handle
+    Expansion* expansion = furi_record_open(RECORD_EXPANSION);
+    expansion_disable(expansion);
+
     // Allocate all of the necessary structures
     AirmonContext* ctx = airmon_context_alloc();
     if(!ctx) {
+        // Return previous state of expansion
+        expansion_enable(expansion);
+        furi_record_close(RECORD_EXPANSION);
         return 255;
     }
 
@@ -247,6 +256,10 @@ int32_t airmon_app(void* p) {
 
     // Release all resources
     airmon_context_free(ctx);
+    
+    // Return previous state of expansion
+    expansion_enable(expansion);
+    furi_record_close(RECORD_EXPANSION);
 
     return 0;
 }

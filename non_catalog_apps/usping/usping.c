@@ -13,6 +13,7 @@
 #include <gui/elements.h>
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
+#include <expansion/expansion.h>
 
 typedef enum {
     EventTypeTick,
@@ -178,6 +179,10 @@ static void usping_measure(PluginState* const plugin_state) {
 }
 
 int32_t usping_app() {
+    // Disable expansion protocol to avoid interference with UART Handle
+    Expansion* expansion = furi_record_open(RECORD_EXPANSION);
+    expansion_disable(expansion);
+
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(PluginEvent));
 
     PluginState* plugin_state = malloc(sizeof(PluginState));
@@ -196,6 +201,9 @@ int32_t usping_app() {
         furi_hal_power_suppress_charge_exit();
         furi_message_queue_free(event_queue);
         free(plugin_state);
+        // Return previous state of expansion
+        expansion_enable(expansion);
+        furi_record_close(RECORD_EXPANSION);
         return 255;
     }
 
@@ -266,6 +274,10 @@ int32_t usping_app() {
     furi_message_queue_free(event_queue);
     furi_mutex_free(plugin_state->mutex);
     free(plugin_state);
+    
+    // Return previous state of expansion
+    expansion_enable(expansion);
+    furi_record_close(RECORD_EXPANSION);
 
     return 0;
 }

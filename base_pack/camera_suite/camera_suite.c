@@ -1,5 +1,6 @@
 #include "camera_suite.h"
 #include <stdlib.h>
+#include <expansion/expansion.h>
 
 bool camera_suite_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
@@ -122,6 +123,11 @@ void camera_suite_app_free(CameraSuite* app) {
 /** Main entry point for initialization. */
 int32_t camera_suite_app(void* p) {
     UNUSED(p);
+
+    // Disable expansion protocol to avoid interference with UART Handle
+    Expansion* expansion = furi_record_open(RECORD_EXPANSION);
+    expansion_disable(expansion);
+
     CameraSuite* app = camera_suite_app_alloc();
     view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
     // Init with start scene.
@@ -131,5 +137,10 @@ int32_t camera_suite_app(void* p) {
     camera_suite_save_settings(app);
     furi_hal_power_suppress_charge_exit();
     camera_suite_app_free(app);
+
+    // Return previous state of expansion
+    expansion_enable(expansion);
+    furi_record_close(RECORD_EXPANSION);
+
     return 0;
 }

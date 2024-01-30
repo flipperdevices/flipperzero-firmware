@@ -1,4 +1,5 @@
 #include "mag_i.h"
+#include <expansion/expansion.h>
 
 #define TAG "Mag"
 
@@ -174,8 +175,13 @@ static void mag_free(Mag* mag) {
 
 // entry point for app
 int32_t mag_app(void* p) {
-    Mag* mag = mag_alloc();
     UNUSED(p);
+    
+    // Disable expansion protocol to avoid interference with UART Handle
+    Expansion* expansion = furi_record_open(RECORD_EXPANSION);
+    expansion_disable(expansion);
+
+    Mag* mag = mag_alloc();
 
     mag_make_app_folder(mag);
 
@@ -198,6 +204,10 @@ int32_t mag_app(void* p) {
     }
 
     mag_free(mag);
+
+    // Return previous state of expansion
+    expansion_enable(expansion);
+    furi_record_close(RECORD_EXPANSION);
 
     return 0;
 }

@@ -6,6 +6,7 @@
 #include <furi_hal.h>
 #include <gui/view_dispatcher.h>
 #include <gui/modules/dialog_ex.h>
+#include <expansion/expansion.h>
 
 #include "../include/pwnagotchi.h"
 #include "../include/protocol.h"
@@ -348,8 +349,18 @@ static void flipagotchi_app_free(FlipagotchiApp* app) {
 
 int32_t flipagotchi_app(void* p) {
     UNUSED(p);
+
+    // Disable expansion protocol to avoid interference with UART Handle
+    Expansion* expansion = furi_record_open(RECORD_EXPANSION);
+    expansion_disable(expansion);
+
     FlipagotchiApp* app = flipagotchi_app_alloc();
     view_dispatcher_run(app->view_dispatcher);
     flipagotchi_app_free(app);
+
+    // Return previous state of expansion
+    expansion_enable(expansion);
+    furi_record_close(RECORD_EXPANSION);
+
     return 0;
 }

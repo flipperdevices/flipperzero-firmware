@@ -6,6 +6,7 @@
 #include <gui/canvas_i.h>
 #include <gui/gui.h>
 #include <input/input.h>
+#include <expansion/expansion.h>
 //#include <math.h>
 //#include <notification/notification.h>
 //#include <notification/notification_messages.h>
@@ -315,6 +316,10 @@ static int32_t uart_worker(void* context) {
 int32_t esp8266_deauth_app(void* p) {
     UNUSED(p);
 
+    // Disable expansion protocol to avoid interference with UART Handle
+    Expansion* expansion = furi_record_open(RECORD_EXPANSION);
+    expansion_disable(expansion);
+
     DEAUTH_APP_LOG_I("Init");
 
     // FuriTimer* timer = furi_timer_alloc(blink_test_update, FuriTimerTypePeriodic, event_queue);
@@ -363,6 +368,9 @@ int32_t esp8266_deauth_app(void* p) {
     if(!app->mutex) {
         DEAUTH_APP_LOG_E("cannot create mutex\r\n");
         free(app);
+        // Return previous state of expansion
+        expansion_enable(expansion);
+        furi_record_close(RECORD_EXPANSION);
         return 255;
     }
 
@@ -540,6 +548,10 @@ int32_t esp8266_deauth_app(void* p) {
         furi_hal_power_disable_otg();
     }
 #endif
+
+    // Return previous state of expansion
+    expansion_enable(expansion);
+    furi_record_close(RECORD_EXPANSION);
 
     return 0;
 }
