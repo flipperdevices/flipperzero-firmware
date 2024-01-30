@@ -1,3 +1,7 @@
+## 1.12
+ - Add support for non-secure Picopass
+ - Change Read to use all dictionaries
+ - Improve saving of cards authenticated with NR-MAC
 ## 1.11
  - Update working with keys with new API
  - Display more tag information
