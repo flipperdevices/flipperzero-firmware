@@ -29,8 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0129-2138-0.93.9-6aa7be4](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-01-30 03:10 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-01-30 03:10 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-01-30 11:45 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-01-30 11:45 EST`
 - [Added Pirate Profile Pic (By cyberartemio)](https://github.com/cyberartemio/flipper-pirates-asset-pack/blob/main/Pirates/Icons/Passport/passport_okay_46x49.png)
 - Updated: [ESP32 Camera Suite v1.6 (By CodyTolene)](https://github.com/CodyTolene/Flipper-Zero-Camera-Suite)
 - Updated: [USB Mass Storage v1.3 (By nminaylov)](https://github.com/flipperdevices/flipperzero-good-faps/tree/nm/usb_mass_storage_app/mass_storage) (Changes from xMasterX)
@@ -47,7 +47,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: [update honeywell proto to latest one (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/35a93e6eefbdb2624a6139197de825e97cb5dd4b)
 - OFW PR: [BadUSB: media keys, Fn/Globe key commands #3403 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/3403)
 - Updated: [Cross Remote v2.0 (By leedave)](https://github.com/leedave/flipper-zero-cross-remote)
-- To Be Merged OFW PRs: [3352](https://github.com/flipperdevices/flipperzero-firmware/pull/3352), [3302](https://github.com/flipperdevices/flipperzero-firmware/pull/3302), [3211](https://github.com/flipperdevices/flipperzero-firmware/pull/3211), [3366](https://github.com/flipperdevices/flipperzero-firmware/pull/3366), [3250](https://github.com/flipperdevices/flipperzero-firmware/pull/3250) & [3402](https://github.com/flipperdevices/flipperzero-firmware/pull/3402)
+- To Be Merged OFW PRs: [3352](https://github.com/flipperdevices/flipperzero-firmware/pull/3352), [3302](https://github.com/flipperdevices/flipperzero-firmware/pull/3302), [3211](https://github.com/flipperdevices/flipperzero-firmware/pull/3211), [3366](https://github.com/flipperdevices/flipperzero-firmware/pull/3366), [3250](https://github.com/flipperdevices/flipperzero-firmware/pull/3250), [3402](https://github.com/flipperdevices/flipperzero-firmware/pull/3402) & [3409](https://github.com/flipperdevices/flipperzero-firmware/pull/3409)
 
 <a name="release">
 
