@@ -1,4 +1,5 @@
 #include "seader_i.h"
+#include <expansion/expansion.h>
 
 #define TAG "Seader"
 
@@ -194,6 +195,11 @@ void seader_show_loading_popup(void* context, bool show) {
 
 int32_t seader_app(void* p) {
     UNUSED(p);
+
+    // Disable expansion protocol to avoid interference with UART Handle
+    Expansion* expansion = furi_record_open(RECORD_EXPANSION);
+    expansion_disable(expansion);
+
     Seader* seader = seader_alloc();
 
     scene_manager_next_scene(seader->scene_manager, SeaderSceneStart);
@@ -201,6 +207,10 @@ int32_t seader_app(void* p) {
     view_dispatcher_run(seader->view_dispatcher);
 
     seader_free(seader);
+
+    // Return previous state of expansion
+    expansion_enable(expansion);
+    furi_record_close(RECORD_EXPANSION);
 
     return 0;
 }
