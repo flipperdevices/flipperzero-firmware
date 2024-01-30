@@ -39,7 +39,6 @@ typedef enum {
     GapStateStartingAdv,
     GapStateAdvFast,
     GapStateAdvLowPower,
-    GapStateAdvOHS, // Alias for low power adv, just used to enable OHS features
     GapStateConnected,
 } GapState;
 
