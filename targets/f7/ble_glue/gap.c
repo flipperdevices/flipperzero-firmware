@@ -5,7 +5,8 @@
 
 #include <furi_hal.h>
 #include <furi.h>
-#include <bt/bt_service/bt_i.h>
+#include <bt/bt_service/bt.h>
+#include <storage/storage.h>
 
 #define TAG "BtGap"
 
