@@ -18,6 +18,6 @@ App(
     fap_file_assets="files",
     fap_author="bettse",
     fap_weburl="https://github.com/bettse/flipperzero-good-faps/tree/dev/picopass",
-    fap_version="1.12",
+    fap_version="1.13",
     fap_description="App to communicate with NFC tags using the PicoPass(iClass) format",
 )
