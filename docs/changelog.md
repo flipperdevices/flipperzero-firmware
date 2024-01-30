@@ -2,6 +2,9 @@
 - SubGhz Functionality added
 - Slight change in Storage format to enalbe individual IR timings later (feature request)
 - Fixed more memory leaks
+- Fixed error where Flipper crashes after deleting a command chain
+- Updated Manifest for better CFW support
+- Updated readme for new inputs
 
 ## v1.1
 - Patched memory leak in storage

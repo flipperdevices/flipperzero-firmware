@@ -252,7 +252,7 @@ bool xremote_cross_remote_save_new(CrossRemote* remote, const char* name) {
 static void xremote_cross_remote_reset(CrossRemote* remote) {
     furi_string_reset(remote->name);
     furi_string_reset(remote->path);
-    CrossRemoteItemArray_clear(remote->items);
+    xremote_cross_remote_clear_items(remote);
     remote->transmitting = 0;
 }
 
@@ -260,9 +260,8 @@ bool xremote_cross_remote_delete(CrossRemote* remote) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
     FS_Error status = storage_common_remove(storage, furi_string_get_cstr(remote->path));
 
-    xremote_cross_remote_reset(remote);
-
     furi_record_close(RECORD_STORAGE);
+    xremote_cross_remote_reset(remote);
     return (status == FSE_OK || status == FSE_NOT_EXIST);
 }
 
