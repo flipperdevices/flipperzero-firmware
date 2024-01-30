@@ -68,6 +68,7 @@ FuriHalBtProfileConfig profile_config[FuriHalBtProfileNumber] = {
                             .slave_latency = 0,
                             .supervisor_timeout = 0,
                         },
+                    .disable_haystack = false
                 },
         },
     [FuriHalBtProfileHidKeyboard] =
@@ -88,6 +89,7 @@ FuriHalBtProfileConfig profile_config[FuriHalBtProfileNumber] = {
                             .slave_latency = 0,
                             .supervisor_timeout = 0,
                         },
+                    .disable_haystack = true
                 },
         },
 };

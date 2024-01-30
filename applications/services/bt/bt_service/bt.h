@@ -8,6 +8,7 @@ extern "C" {
 #endif
 
 #define RECORD_BT "bt"
+#define BT_LE_MAX_LENGTH 31
 
 typedef struct Bt Bt;
 

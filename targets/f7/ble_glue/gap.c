@@ -5,11 +5,15 @@
 
 #include <furi_hal.h>
 #include <furi.h>
+#include <bt/bt_service/bt_i.h>
 
 #define TAG "BtGap"
 
 #define FAST_ADV_TIMEOUT 30000
 #define INITIAL_ADV_TIMEOUT 60000
+
+#define OHS_FILE_PATH EXT_PATH("haystack_keyfile")
+#define OHS_KEY_LENGTH 28
 
 #define GAP_INTERVAL_TO_MS(x) (uint16_t)((x)*1.25)
 
@@ -31,10 +35,12 @@ typedef struct {
     FuriMutex* state_mutex;
     GapEventCallback on_event_cb;
     void* context;
+    uint8_t haystack_adv_packet[BT_LE_MAX_LENGTH];
     FuriTimer* advertise_timer;
     FuriThread* thread;
     FuriMessageQueue* command_queue;
     bool enable_adv;
+    bool enable_haystack;
 } Gap;
 
 typedef enum {
@@ -367,6 +373,28 @@ static void gap_init_svc(Gap* gap) {
     aci_gap_configure_whitelist();
 }
 
+/** Advertisement payload */
+static uint8_t haystack_adv_data_template[BT_LE_MAX_LENGTH] = {
+    0x1e,       /* Length (30) */
+    0xff,       /* Manufacturer Specific Data (type 0xff) */
+    0x4c, 0x00, /* Company ID (Apple) */
+    0x12, 0x19, /* Offline Finding type and length */
+    0x10,       /* State */
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, /* First two bits */
+    0x00, /* Hint (0x00) */
+};
+
+static void gap_set_payload_from_key(uint8_t *payload, uint8_t *public_key)
+{
+    /* copy last 22 bytes */
+    memcpy(&payload[7], &public_key[6], 22);
+    /* append two bits of public key */
+    payload[29] = public_key[0] >> 6;
+}
+
 static void gap_advertise_start(GapState new_state) {
     tBleStatus status;
     uint16_t min_interval;
@@ -399,15 +427,34 @@ static void gap_advertise_start(GapState new_state) {
         max_interval,
         CFG_IDENTITY_ADDRESS,
         0,
-        strlen(gap->service.adv_name),
-        (uint8_t*)gap->service.adv_name,
-        gap->service.adv_svc_uuid_len,
-        gap->service.adv_svc_uuid,
+        gap->enable_haystack ? 0 : strlen(gap->service.adv_name),
+        gap->enable_haystack ? NULL : (uint8_t*)gap->service.adv_name,
+        gap->enable_haystack ? 0 : gap->service.adv_svc_uuid_len,
+        gap->enable_haystack ? NULL : gap->service.adv_svc_uuid,
         0,
         0);
     if(status) {
         FURI_LOG_E(TAG, "set_discoverable failed %d", status);
     }
+
+    if(gap->enable_haystack) {
+        // Free advertising buffer
+        status = aci_gap_delete_ad_type(AD_TYPE_FLAGS); //Remove AD to free advertising buffer
+        if(status) {
+            FURI_LOG_E(TAG, "aci_gap_delete_ad_type failed %d", status);
+        }
+        status = aci_gap_delete_ad_type(AD_TYPE_TX_POWER_LEVEL); //Remove AD to free advertising buffer
+        if(status) {
+            FURI_LOG_E(TAG, "aci_gap_delete_ad_type failed %d", status);
+        }
+
+        // Update adv data for openhaystack
+        status = aci_gap_update_adv_data(0x1F, gap->haystack_adv_packet); //Update advertising data
+        if(status) {
+            FURI_LOG_E(TAG, "aci_gap_update_adv_data failed %d", status);
+        }
+    }
+
     gap->state = new_state;
     GapEvent event = {.type = GapEventTypeStartAdvertising};
     gap->on_event_cb(event, gap->context);
@@ -469,6 +516,71 @@ static void gap_advetise_timer_callback(void* context) {
     furi_check(furi_message_queue_put(gap->command_queue, &command, 0) == FuriStatusOk);
 }
 
+// For some reason Gap has the mac address bytes reversed,
+// So assign them in reverse for proper ordering
+static void gap_set_addr_from_key(uint8_t addr[GAP_MAC_ADDR_SIZE], uint8_t *public_key)
+{
+    addr[5] = public_key[0] | 0b11000000;
+    addr[4] = public_key[1];
+    addr[3] = public_key[2];
+    addr[2] = public_key[3];
+    addr[1] = public_key[4];
+    addr[0] = public_key[5];
+}
+
+static bool gap_haystack_file_read(Gap* gap) {
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    File* keyfile = storage_file_alloc(storage);
+    bool success = false;
+
+    if(storage_file_exists(storage, OHS_FILE_PATH)) {
+        // Open File
+        if(!storage_file_open(keyfile, OHS_FILE_PATH, FSAM_READ, FSOM_OPEN_EXISTING)) {
+            FURI_LOG_E(TAG, "OHS Keyfile exists, but can't be opened.");
+            storage_file_close(keyfile);
+            goto cleanup;
+        }
+
+        uint8_t buff[OHS_KEY_LENGTH];
+        const size_t file_size = storage_file_size(keyfile);
+        if(file_size != sizeof(buff) + 1) {
+            FURI_LOG_E(TAG, "OHS Keyfile was the wrong size! Size of: %d.", file_size);
+            storage_file_close(keyfile);
+            goto cleanup;
+        }
+
+        // There is a stray 0x01 at the beginning of the file, seek to after it.
+        storage_file_seek(keyfile, 1, true);
+
+        if(storage_file_read(keyfile, buff, sizeof(buff)) <= 0) {
+            FURI_LOG_E(TAG, "OHS Keyfile read size was incorrect!");
+            storage_file_close(keyfile);
+            goto cleanup;
+        }
+
+        FURI_LOG_I(TAG, "Enabling OHS as a valid advertisement key was found!");
+
+        // Setup the adv packet
+        memcpy(&gap->haystack_adv_packet[0], &haystack_adv_data_template[0], sizeof(uint8_t[BT_LE_MAX_LENGTH]));
+
+        gap_set_addr_from_key(gap->config->mac_address, buff);
+        gap_set_payload_from_key(gap->haystack_adv_packet, buff);
+
+        gap->haystack_adv_packet[30] = gap->config->mac_address[0];
+
+        gap->enable_haystack = true;
+        success = true;
+
+        storage_file_close(keyfile);
+    }
+
+    // Cleanup
+    cleanup:
+    free(keyfile);
+    furi_record_close(RECORD_STORAGE);
+    return success;
+}
+
 bool gap_init(GapConfig* config, GapEventCallback on_event_cb, void* context) {
     if(!ble_glue_is_radio_stack_ready()) {
         return false;
@@ -480,7 +592,17 @@ bool gap_init(GapConfig* config, GapEventCallback on_event_cb, void* context) {
     gap->advertise_timer = furi_timer_alloc(gap_advetise_timer_callback, FuriTimerTypeOnce, NULL);
     // Initialization of GATT & GAP layer
     gap->service.adv_name = config->adv_name;
+
+    // Init OpenHaystack if a key is found
+    gap->enable_haystack = false;
+    if(!config->disable_haystack) {
+        if(!gap_haystack_file_read(gap)) {
+            FURI_LOG_D(TAG, "No OHS adv key was found.");
+        }
+    }
+
     gap_init_svc(gap);
+
     // Initialization of the BLE Services
     SVCCTL_Init();
     // Initialization of the GAP state

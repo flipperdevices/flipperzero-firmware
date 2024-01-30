@@ -39,6 +39,7 @@ typedef enum {
     GapStateStartingAdv,
     GapStateAdvFast,
     GapStateAdvLowPower,
+    GapStateAdvOHS, // Alias for low power adv, just used to enable OHS features
     GapStateConnected,
 } GapState;
 
@@ -69,6 +70,7 @@ typedef struct {
     uint8_t mac_address[GAP_MAC_ADDR_SIZE];
     char adv_name[FURI_HAL_VERSION_DEVICE_NAME_LENGTH];
     GapConnectionParamsRequest conn_param;
+    bool disable_haystack;
 } GapConfig;
 
 bool gap_init(GapConfig* config, GapEventCallback on_event_cb, void* context);
