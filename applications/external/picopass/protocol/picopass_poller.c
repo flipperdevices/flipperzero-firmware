@@ -455,7 +455,9 @@ NfcCommand picopass_poller_read_block_handler(PicopassPoller* instance) {
             block.data[6],
             block.data[7]);
         memcpy(
-            instance->data->card_data[instance->current_block].data, block.data, sizeof(PicopassBlock));
+            instance->data->card_data[instance->current_block].data,
+            block.data,
+            sizeof(PicopassBlock));
         instance->current_block++;
     } while(false);
 
