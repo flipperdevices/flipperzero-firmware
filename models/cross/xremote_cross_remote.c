@@ -89,7 +89,11 @@ const char* xremote_cross_remote_get_name(CrossRemote* remote) {
     return furi_string_get_cstr(remote->name);
 }
 
-bool xremote_cross_remote_add_ir_item(CrossRemote* remote, const char* name, InfraredSignal* signal, uint32_t timing) {
+bool xremote_cross_remote_add_ir_item(
+    CrossRemote* remote,
+    const char* name,
+    InfraredSignal* signal,
+    uint32_t timing) {
     CrossRemoteItem* item = xremote_cross_remote_item_alloc();
     xremote_cross_remote_item_set_type(item, XRemoteRemoteItemTypeInfrared);
     xremote_cross_remote_item_set_name(item, name);
@@ -213,7 +217,8 @@ static bool xremote_cross_remote_store(CrossRemote* remote) {
                     xremote_cross_remote_item_get_name(item),
                     xremote_cross_remote_item_get_time(item));
             } else if(item->type == XRemoteRemoteItemTypePause) {
-                success = xremote_cross_remote_item_pause_save(ff, item->time, xremote_cross_remote_item_get_name(item));
+                success = xremote_cross_remote_item_pause_save(
+                    ff, item->time, xremote_cross_remote_item_get_name(item));
             } else if(item->type == XRemoteRemoteItemTypeSubGhz) {
                 success = xremote_cross_remote_item_sg_signal_save(
                     xremote_cross_remote_item_get_sg_signal(item),
@@ -264,4 +269,3 @@ bool xremote_cross_remote_delete(CrossRemote* remote) {
     xremote_cross_remote_reset(remote);
     return (status == FSE_OK || status == FSE_NOT_EXIST);
 }
-

@@ -28,7 +28,6 @@ void subghz_scene_transmit_callback_end_tx(void* context) {
     view_dispatcher_send_custom_event(
         app->view_dispatcher, XRemoteCustomEventViewTransmitterSendStop);
 
-
     //app->state_notifications = SubGhzNotificationStateIDLE;
     //subghz_txrx_stop(app->subghz->txrx);
     //app->transmitting = false;

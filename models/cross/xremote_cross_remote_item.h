@@ -24,5 +24,13 @@ SubGhzRemote* xremote_cross_remote_item_get_sg_signal(CrossRemoteItem* item);
 void xremote_cross_remote_item_set_sg_signal(CrossRemoteItem* item, SubGhzRemote* subghz);
 
 bool xremote_cross_remote_item_pause_save(FlipperFormat* ff, uint32_t time, const char* name);
-bool xremote_cross_remote_item_ir_signal_save(InfraredSignal* signal, FlipperFormat* ff, const char* name, uint32_t time);
-bool xremote_cross_remote_item_sg_signal_save(SubGhzRemote* remote, FlipperFormat* ff, const char* name, const char* filename);
+bool xremote_cross_remote_item_ir_signal_save(
+    InfraredSignal* signal,
+    FlipperFormat* ff,
+    const char* name,
+    uint32_t time);
+bool xremote_cross_remote_item_sg_signal_save(
+    SubGhzRemote* remote,
+    FlipperFormat* ff,
+    const char* name,
+    const char* filename);

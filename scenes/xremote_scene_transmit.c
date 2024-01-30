@@ -64,7 +64,7 @@ void xremote_scene_transmit_send_ir_signal(XRemote* app, CrossRemoteItem* item) 
     infrared_worker_tx_start(app->ir_worker);
     app->transmitting = true;
     uint32_t time = app->ir_timing;
-    if (item->time > 0) {
+    if(item->time > 0) {
         time = item->time;
     }
     furi_thread_flags_wait(0, FuriFlagWaitAny, time);
@@ -82,12 +82,12 @@ void xremote_scene_transmit_send_pause(XRemote* app, CrossRemoteItem* item) {
 void xremote_scene_transmit_send_subghz(XRemote* app, CrossRemoteItem* item) {
     app->transmitting = true;
     xremote_scene_ir_notification_message(app, SubGhzNotificationMessageBlinkStartSend);
-    if (furi_string_utf8_length(item->filename) < 3) {
+    if(furi_string_utf8_length(item->filename) < 3) {
         xremote_cross_remote_set_transmitting(app->cross_remote, XRemoteTransmittingStop);
         app->transmitting = false;
         return;
     }
-    subghz_send(app, furi_string_get_cstr(item->filename)); 
+    subghz_send(app, furi_string_get_cstr(item->filename));
     //furi_thread_flags_wait(0, FuriFlagWaitAny, 2000);
 }
 
@@ -100,7 +100,8 @@ void xremote_scene_transmit_send_signal(void* context, CrossRemoteItem* item) {
         return;
     }
 
-    xremote_transmit_model_set_name(app->xremote_transmit, xremote_cross_remote_item_get_name(item));
+    xremote_transmit_model_set_name(
+        app->xremote_transmit, xremote_cross_remote_item_get_name(item));
     xremote_transmit_model_set_type(app->xremote_transmit, item->type);
     if(item->type == XRemoteRemoteItemTypeInfrared) {
         xremote_scene_transmit_send_ir_signal(app, item);
@@ -160,26 +161,19 @@ bool xremote_scene_transmit_on_event(void* context, SceneManagerEvent event) {
     if(event.type == SceneManagerEventTypeCustom) {
         FURI_LOG_D(TAG, "Custom Event");
         switch(event.event) {
-            case XRemoteCustomEventViewTransmitterSendStop:
-                FURI_LOG_D("SUBGHZ", "stop event"); // doesn't trigger
-                //app->stop_transmit = true;
-                /*app->state_notifications = SubGhzNotificationStateIDLE;
-                app->transmitting = false;
-                subghz_txrx_stop(app->subghz->txrx);
-                xremote_scene_ir_notification_message(app, SubGhzNotificationMessageBlinkStop);
-                xremote_cross_remote_set_transmitting(app->cross_remote, XRemoteTransmittingStop);*/
-                break;
-            default: 
-                break;
+        case XRemoteCustomEventViewTransmitterSendStop:
+            FURI_LOG_D("SUBGHZ", "stop event"); // doesn't trigger
+            break;
+        default:
+            break;
         }
     } else if(event.type == SceneManagerEventTypeTick) {
         FURI_LOG_D(TAG, "Tick Event");
-        if (app->state_notifications == SubGhzNotificationStateTx && app->led == 1) {
+        if(app->state_notifications == SubGhzNotificationStateTx && app->led == 1) {
             //blink for subghz
         }
     }
 
-    
     return consumed;
 }
 
@@ -187,6 +181,4 @@ void xremote_scene_transmit_on_exit(void* context) {
     XRemote* app = context;
     app->transmitting = false;
     app->state_notifications = SubGhzNotificationStateIDLE;
-    //subghz_txrx_stop(app->subghz->txrx);
-    //xremote_cross_remote_set_transmitting(remote, XRemoteTransmittingIdle);
 }
