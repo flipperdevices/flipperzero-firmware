@@ -38,7 +38,7 @@ void subghz_scene_transmit_callback_end_tx(void* context) {
 
 void subghz_send(void* context, const char* path) {
     XRemote* app = context;
-    
+
     subghz_load_protocol_from_file(app->subghz, path);
     FURI_LOG_D(TAG, "Starting Transmission");
     subghz_txrx_tx_start(

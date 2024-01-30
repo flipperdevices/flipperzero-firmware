@@ -73,13 +73,15 @@ static bool xremote_cross_remote_item_read_sg(CrossRemoteItem* item, FlipperForm
     buf = furi_string_alloc();
     item->type = XRemoteRemoteItemTypeSubGhz;
     item->time = 0;
-
     do {
-        if(!flipper_format_read_string(ff, "name", item->name)) break;
-        if(!flipper_format_read_string(ff, "filename", item->filename)) break;
-        success = true;
+        success = flipper_format_read_string(ff, "name", item->name) &&
+                  flipper_format_read_string(ff, "filename", item->filename);
+        if(!success) break;
+
     } while(false);
     furi_string_free(buf);
+    FURI_LOG_D(TAG, "final name: %s", furi_string_get_cstr(item->name));
+    FURI_LOG_D(TAG, "final filename: %s", furi_string_get_cstr(item->filename));
 
     return success;
 }
@@ -205,6 +207,10 @@ void xremote_cross_remote_item_set_name(CrossRemoteItem* item, const char* name)
     furi_string_set(item->name, name);
 }
 
+void xremote_cross_remote_item_set_filename(CrossRemoteItem* item, const char* filename) {
+    furi_string_set(item->filename, filename);
+}
+
 void xremote_cross_remote_item_set_time(CrossRemoteItem* item, uint32_t time) {
     item->time = time;
 }
@@ -219,6 +225,10 @@ void xremote_cross_remote_item_set_sg_signal(CrossRemoteItem* item, SubGhzRemote
 
 const char* xremote_cross_remote_item_get_name(CrossRemoteItem* item) {
     return furi_string_get_cstr(item->name);
+}
+
+const char* xremote_cross_remote_item_get_filename(CrossRemoteItem* item) {
+    return furi_string_get_cstr(item->filename);
 }
 
 InfraredSignal* xremote_cross_remote_item_get_ir_signal(CrossRemoteItem* item) {
@@ -256,11 +266,11 @@ bool xremote_cross_remote_item_pause_save(FlipperFormat* ff, uint32_t time, cons
     return true;
 }
 
-bool xremote_cross_remote_item_sg_signal_save(SubGhzRemote* remote, FlipperFormat* ff, const char* name) {
+bool xremote_cross_remote_item_sg_signal_save(SubGhzRemote* remote, FlipperFormat* ff, const char* name, const char* filename) {
     if(!flipper_format_write_comment_cstr(ff, "") ||
        !flipper_format_write_string_cstr(ff, "remote_type", "SG") ||
        !flipper_format_write_string_cstr(ff, "name", name) ||
-       !flipper_format_write_string_cstr(ff, "filename", xremote_sg_remote_get_filename(remote))) {
+       !flipper_format_write_string_cstr(ff, "filename", filename)) {
         return false;
     }
     return xremote_sg_signal_save_data(remote, ff);

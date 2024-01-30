@@ -111,10 +111,11 @@ bool xremote_cross_remote_add_pause(CrossRemote* remote, int time) {
 }
 
 bool xremote_cross_remote_add_subghz(CrossRemote* remote, SubGhzRemote* subghz) {
-    UNUSED(subghz);
     CrossRemoteItem* item = xremote_cross_remote_item_alloc();
     xremote_cross_remote_item_set_type(item, XRemoteRemoteItemTypeSubGhz);
     xremote_cross_remote_item_set_name(item, xremote_sg_remote_get_name(subghz));
+    xremote_cross_remote_item_set_filename(item, xremote_sg_remote_get_filename(subghz));
+    FURI_LOG_D(TAG, "add subghz: %s", xremote_sg_remote_get_filename(subghz));
     xremote_cross_remote_item_set_sg_signal(item, subghz);
 
     CrossRemoteItemArray_push_back(remote->items, item);
@@ -217,7 +218,8 @@ static bool xremote_cross_remote_store(CrossRemote* remote) {
                 success = xremote_cross_remote_item_sg_signal_save(
                     xremote_cross_remote_item_get_sg_signal(item),
                     ff,
-                    xremote_cross_remote_item_get_name(item));
+                    xremote_cross_remote_item_get_name(item),
+                    xremote_cross_remote_item_get_filename(item));
             }
             if(!success) {
                 break;

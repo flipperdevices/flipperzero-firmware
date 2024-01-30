@@ -82,6 +82,11 @@ void xremote_scene_transmit_send_pause(XRemote* app, CrossRemoteItem* item) {
 void xremote_scene_transmit_send_subghz(XRemote* app, CrossRemoteItem* item) {
     app->transmitting = true;
     xremote_scene_ir_notification_message(app, SubGhzNotificationMessageBlinkStartSend);
+    if (furi_string_utf8_length(item->filename) < 3) {
+        xremote_cross_remote_set_transmitting(app->cross_remote, XRemoteTransmittingStop);
+        app->transmitting = false;
+        return;
+    }
     subghz_send(app, furi_string_get_cstr(item->filename)); 
     //furi_thread_flags_wait(0, FuriFlagWaitAny, 2000);
 }
@@ -156,13 +161,13 @@ bool xremote_scene_transmit_on_event(void* context, SceneManagerEvent event) {
         FURI_LOG_D(TAG, "Custom Event");
         switch(event.event) {
             case XRemoteCustomEventViewTransmitterSendStop:
-                FURI_LOG_D("SUBGHZ", "stop event");
+                FURI_LOG_D("SUBGHZ", "stop event"); // doesn't trigger
                 //app->stop_transmit = true;
-                app->state_notifications = SubGhzNotificationStateIDLE;
+                /*app->state_notifications = SubGhzNotificationStateIDLE;
                 app->transmitting = false;
                 subghz_txrx_stop(app->subghz->txrx);
                 xremote_scene_ir_notification_message(app, SubGhzNotificationMessageBlinkStop);
-                xremote_cross_remote_set_transmitting(app->cross_remote, XRemoteTransmittingStop);
+                xremote_cross_remote_set_transmitting(app->cross_remote, XRemoteTransmittingStop);*/
                 break;
             default: 
                 break;
@@ -182,6 +187,6 @@ void xremote_scene_transmit_on_exit(void* context) {
     XRemote* app = context;
     app->transmitting = false;
     app->state_notifications = SubGhzNotificationStateIDLE;
-    subghz_txrx_stop(app->subghz->txrx);
+    //subghz_txrx_stop(app->subghz->txrx);
     //xremote_cross_remote_set_transmitting(remote, XRemoteTransmittingIdle);
 }
