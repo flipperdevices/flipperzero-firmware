@@ -136,5 +136,8 @@ size_t sprite_get_height(Sprite* sprite) {
 }
 
 void canvas_draw_sprite(Canvas* canvas, Sprite* sprite, int32_t x, int32_t y) {
+    furi_check(sprite->width);
+    furi_check(sprite->height);
+    furi_check(sprite->data);
     canvas_draw_xbm(canvas, x, y, sprite->width, sprite->height, sprite->data);
 }
