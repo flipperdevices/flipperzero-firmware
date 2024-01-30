@@ -9,7 +9,7 @@ App(
     fap_icon_assets_symbol="xremote",
     fap_category="Infrared",
     fap_author="Leedave",
-    fap_weburl="https://github.com/leedave/Leeds-Flipper-Zero-Applications",
-    fap_version="1.1",
+    fap_weburl="https://github.com/leedave/flipper-zero-cross-remote",
+    fap_version="2.0",
     fap_description="One-Click, sends multiple commands",
 )

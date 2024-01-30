@@ -2,9 +2,9 @@
 
 ## Current State
 - Infrared working
+- SubGhz working
 - Pause working
-- SubGhz in Development
-- Edit/Rename/Delete features in development
+- IR Timing features in development
 
 ## What this is?
 This app combines commands used in IR and SubGhz into playlists that can be run with one click
@@ -29,6 +29,10 @@ Wouldn't it be nicer to simply click one button and let everything happen? This 
 - Save chained commands to a file<br>
 - Add pauses, becaue target systems are not always fast enough for multiple commands<br>
 - Run file containing chained IR & SubGhz commands<br>
+
+### Limitations
+SubGhz commands will stop working if you move/rename/delete the original files on your Flipper. This is because 
+of how the Flippers SubGhz worker expects data. 
 
 ## How to install on Flipper Zero
 - If you do not have one, download a firmware<br>

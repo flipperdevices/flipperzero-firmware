@@ -50,6 +50,8 @@ typedef enum {
     XRemoteCustomEventPauseSetUp,
     XRemoteCustomEventPauseSetDown,
     XRemoteCustomEventPauseSetOk,
+
+    XRemoteCustomEventViewTransmitterSendStop,
 } XRemoteCustomEvent;
 
 static inline uint32_t xremote_custom_menu_event_pack(uint16_t type, int16_t value) {

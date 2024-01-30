@@ -82,7 +82,7 @@ bool xremote_pause_set_input(InputEvent* event, void* context) {
                 XRemotePauseSetModel * model,
                 {
                     XRemote* app = instance->context;
-                    cross_remote_add_pause(app->cross_remote, model->time);
+                    xremote_cross_remote_add_pause(app->cross_remote, model->time);
                 },
                 true);
 
