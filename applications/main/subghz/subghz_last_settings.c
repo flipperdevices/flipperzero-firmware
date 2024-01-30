@@ -143,6 +143,7 @@ void subghz_last_settings_load(SubGhzLastSettings* instance, size_t preset_count
         instance->enable_hopping = false;
         instance->enable_listen_after_tx = false;
         instance->enable_sound = false;
+        instance->delete_old_signals = false;
         instance->ignore_filter = 0x00;
         // See bin_raw_value in applications/main/subghz/scenes/subghz_scene_receiver_config.c
         instance->filter = SubGhzProtocolFlag_Decodable;
