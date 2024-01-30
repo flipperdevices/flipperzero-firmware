@@ -21,16 +21,16 @@ void picopass_scene_device_info_on_enter(void* context) {
     dolphin_deed(DolphinDeedNfcReadSuccess);
 
     // Setup view
-    PicopassBlock* AA1 = picopass->dev->dev_data.AA1;
+    PicopassBlock* card_data = picopass->dev->dev_data.card_data;
     PicopassPacs* pacs = &picopass->dev->dev_data.pacs;
     Widget* widget = picopass->widget;
 
     uint8_t csn[PICOPASS_BLOCK_LEN] = {0};
-    memcpy(csn, AA1[PICOPASS_CSN_BLOCK_INDEX].data, PICOPASS_BLOCK_LEN);
+    memcpy(csn, card_data[PICOPASS_CSN_BLOCK_INDEX].data, PICOPASS_BLOCK_LEN);
     for(uint8_t i = 0; i < PICOPASS_BLOCK_LEN; i++) {
         furi_string_cat_printf(csn_str, "%02X ", csn[i]);
     }
-    bool sio = 0x30 == AA1[PICOPASS_ICLASS_PACS_CFG_BLOCK_INDEX].data[0];
+    bool sio = 0x30 == card_data[PICOPASS_ICLASS_PACS_CFG_BLOCK_INDEX].data[0];
 
     if(sio) {
         furi_string_cat_printf(wiegand_str, "SIO");
