@@ -1,4 +1,5 @@
 #include "uhf_app_i.h"
+#include <expansion/expansion.h>
 
 char* convertToHexString(uint8_t* array, size_t length) {
     if(array == NULL || length == 0) {
@@ -194,19 +195,37 @@ void uhf_show_loading_popup(void* ctx, bool show) {
 
 int32_t uhf_app_main(void* ctx) {
     UNUSED(ctx);
+
+    // Disable expansion protocol to avoid interference with UART Handle
+    Expansion* expansion = furi_record_open(RECORD_EXPANSION);
+    expansion_disable(expansion);
+
     UHFApp* uhf_app = uhf_alloc();
 
     // enable 5v pin
-    furi_hal_power_enable_otg();
+     uint8_t attempts = 0;
+    bool otg_was_enabled = furi_hal_power_is_otg_enabled();
+    while(!furi_hal_power_is_otg_enabled() && attempts++ < 5) {
+        furi_hal_power_enable_otg();
+        furi_delay_ms(10);
+    }
+    furi_delay_ms(200);
     // init pin a2
     // furi_hal_gpio_init_simple(&gpio_ext_pa7, GpioModeOutputPushPull);
     scene_manager_next_scene(uhf_app->scene_manager, UHFSceneModuleInfo);
     view_dispatcher_run(uhf_app->view_dispatcher);
 
     // disable 5v pin
-    furi_hal_power_disable_otg();
+     if(furi_hal_power_is_otg_enabled() && !otg_was_enabled) {
+        furi_hal_power_disable_otg();
+    }
     // furi_hal_gpio_disable_int_callback()
     // exit app
     uhf_free(uhf_app);
+
+    // Return previous state of expansion
+    expansion_enable(expansion);
+    furi_record_close(RECORD_EXPANSION);
+
     return 0;
 }
