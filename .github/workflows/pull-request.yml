@@ -1,15 +1,22 @@
-name: "Build & upload."
-on:
-  push:
-    branches:
-      # Run on push to main.
-      - main
-
-  schedule:
-    # Run every day at 00:00 UTC (midnight)
-    - cron: "0 0 * * *"
-
+name: "Lint & build PR."
+on: pull_request
 jobs:
+  ufbt-lint-action:
+    runs-on: ubuntu-latest
+    name: "Lint PR: ${{ github.event.pull_request.head.repo.name }}."
+    steps:
+      - name: "Checkout."
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: "Lint."
+        uses: flipperdevices/flipperzero-ufbt-action@v0.1
+        with:
+          app-dir: ./fap
+          skip-setup: true
+          task: lint
+
   ufbt-build-action:
     runs-on: ubuntu-latest
     strategy:
@@ -24,7 +31,7 @@ jobs:
           - name: "release"
             sdk-channel: release
 
-    name: "Build: ${{ matrix.name }} release."
+    name: "Build: ${{ matrix.name }} test PR release."
     steps:
       - name: "Checkout."
         uses: actions/checkout@v3
@@ -39,9 +46,3 @@ jobs:
         with:
           app-dir: ./fap
           sdk-channel: ${{ matrix.sdk-channel }}
-
-      - name: "Create zip archives (dev/release/rc)"
-        uses: actions/upload-artifact@v3
-        with:
-          name: ${{ github.event.repository.name }}-${{ matrix.name }}-${{ steps.build-app.outputs.suffix }}.zip
-          path: ${{ steps.build-app.outputs.fap-artifacts }}
