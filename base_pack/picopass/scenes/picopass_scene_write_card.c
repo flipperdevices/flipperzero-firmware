@@ -22,7 +22,7 @@ NfcCommand picopass_scene_write_poller_callback(PicopassPollerEvent event, void*
             event.data->req_write.perform_write = false;
         } else {
             event.data->req_write.block_num = block_num;
-            event.data->req_write.block = &picopass->dev->dev_data.AA1[block_num];
+            event.data->req_write.block = &picopass->dev->dev_data.card_data[block_num];
             event.data->req_write.perform_write = true;
             block_num++;
             scene_manager_set_scene_state(

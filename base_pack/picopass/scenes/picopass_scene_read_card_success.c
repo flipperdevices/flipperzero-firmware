@@ -28,24 +28,24 @@ void picopass_scene_read_card_success_on_enter(void* context) {
     notification_message(picopass->notifications, &sequence_success);
 
     // Setup view
-    PicopassBlock* AA1 = picopass->dev->dev_data.AA1;
+    PicopassBlock* card_data = picopass->dev->dev_data.card_data;
     PicopassPacs* pacs = &picopass->dev->dev_data.pacs;
     Widget* widget = picopass->widget;
 
     uint8_t csn[PICOPASS_BLOCK_LEN] = {0};
-    memcpy(csn, AA1[PICOPASS_CSN_BLOCK_INDEX].data, PICOPASS_BLOCK_LEN);
+    memcpy(csn, card_data[PICOPASS_CSN_BLOCK_INDEX].data, PICOPASS_BLOCK_LEN);
     for(uint8_t i = 0; i < PICOPASS_BLOCK_LEN; i++) {
         furi_string_cat_printf(csn_str, "%02X", csn[i]);
     }
 
     // We can't test the pacs->key in case it is intentionally all 0's and we can't test the key block since it is populated with the diversified key before each key test, so we approximate with the PACS config block being blank.
     bool zero_config = picopass_is_memset(
-        AA1[PICOPASS_ICLASS_PACS_CFG_BLOCK_INDEX].data, 0x00, PICOPASS_BLOCK_LEN);
+        card_data[PICOPASS_ICLASS_PACS_CFG_BLOCK_INDEX].data, 0x00, PICOPASS_BLOCK_LEN);
     bool empty = picopass_is_memset(
-        AA1[PICOPASS_ICLASS_PACS_CFG_BLOCK_INDEX].data, 0xFF, PICOPASS_BLOCK_LEN);
-    bool SE = 0x30 == AA1[PICOPASS_ICLASS_PACS_CFG_BLOCK_INDEX].data[0];
-    bool configCard = (AA1[PICOPASS_ICLASS_PACS_CFG_BLOCK_INDEX].data[7] >> 2 & 3) == 2;
-    bool secured = (AA1[PICOPASS_CONFIG_BLOCK_INDEX].data[7] & PICOPASS_FUSE_CRYPT10) !=
+        card_data[PICOPASS_ICLASS_PACS_CFG_BLOCK_INDEX].data, 0xFF, PICOPASS_BLOCK_LEN);
+    bool SE = 0x30 == card_data[PICOPASS_ICLASS_PACS_CFG_BLOCK_INDEX].data[0];
+    bool configCard = (card_data[PICOPASS_ICLASS_PACS_CFG_BLOCK_INDEX].data[7] >> 2 & 3) == 2;
+    bool secured = (card_data[PICOPASS_CONFIG_BLOCK_INDEX].data[7] & PICOPASS_FUSE_CRYPT10) !=
                    PICOPASS_FUSE_CRYPT0;
     bool hid_csn = picopass_device_hid_csn(picopass->dev);
 
@@ -134,7 +134,7 @@ void picopass_scene_read_card_success_on_enter(void* context) {
         }
 
         bool no_key =
-            picopass_is_memset(AA1[PICOPASS_SECURE_KD_BLOCK_INDEX].data, 0xFF, PICOPASS_BLOCK_LEN);
+            picopass_is_memset(card_data[PICOPASS_SECURE_KD_BLOCK_INDEX].data, 0xFF, PICOPASS_BLOCK_LEN);
 
         if(no_key) {
             furi_string_cat_printf(key_str, "No Key: used NR-MAC");
