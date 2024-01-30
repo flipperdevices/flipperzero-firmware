@@ -23,6 +23,8 @@ bool ducky_is_line_end(const char chr);
 
 uint16_t ducky_get_keycode_by_name(const char* param);
 
+uint16_t ducky_get_media_keycode_by_name(const char* param);
+
 bool ducky_get_number(const char* param, uint32_t* val);
 
 void ducky_numlock_on(BadBtScript* bad_bt);

@@ -820,15 +820,19 @@ static int32_t bad_kb_worker(void* context) {
                     worker_state = BadKbStateIdle; // Stop executing script
                     if(bad_kb->bt) {
                         furi_hal_bt_hid_kb_release_all();
+                        furi_hal_bt_hid_consumer_key_release_all();
                     } else {
                         furi_hal_hid_kb_release_all();
+                        furi_hal_hid_consumer_key_release_all();
                     }
                 } else if(flags & WorkerEvtDisconnect) {
                     worker_state = BadKbStateNotConnected; // Disconnected
                     if(bad_kb->bt) {
                         furi_hal_bt_hid_kb_release_all();
+                        furi_hal_bt_hid_consumer_key_release_all();
                     } else {
                         furi_hal_hid_kb_release_all();
+                        furi_hal_hid_consumer_key_release_all();
                     }
                 } else if(flags & WorkerEvtPauseResume) {
                     pause_state = BadKbStateRunning;
@@ -851,8 +855,10 @@ static int32_t bad_kb_worker(void* context) {
                     bad_kb->st.state = worker_state;
                     if(bad_kb->bt) {
                         furi_hal_bt_hid_kb_release_all();
+                        furi_hal_bt_hid_consumer_key_release_all();
                     } else {
                         furi_hal_hid_kb_release_all();
+                        furi_hal_hid_consumer_key_release_all();
                     }
                 } else if(delay_val == SCRIPT_STATE_END) { // End of script
                     delay_val = 0;
@@ -860,8 +866,10 @@ static int32_t bad_kb_worker(void* context) {
                     bad_kb->st.state = BadKbStateDone;
                     if(bad_kb->bt) {
                         furi_hal_bt_hid_kb_release_all();
+                        furi_hal_bt_hid_consumer_key_release_all();
                     } else {
                         furi_hal_hid_kb_release_all();
+                        furi_hal_hid_consumer_key_release_all();
                     }
                     continue;
                 } else if(delay_val == SCRIPT_STATE_STRING_START) { // Start printing string with delays
@@ -895,8 +903,10 @@ static int32_t bad_kb_worker(void* context) {
                     worker_state = BadKbStateNotConnected; // Disconnected
                     if(bad_kb->bt) {
                         furi_hal_bt_hid_kb_release_all();
+                        furi_hal_bt_hid_consumer_key_release_all();
                     } else {
                         furi_hal_hid_kb_release_all();
+                        furi_hal_hid_consumer_key_release_all();
                     }
                 }
                 bad_kb->st.state = worker_state;
@@ -917,16 +927,20 @@ static int32_t bad_kb_worker(void* context) {
                     bad_kb->st.state = worker_state;
                     if(bad_kb->bt) {
                         furi_hal_bt_hid_kb_release_all();
+                        furi_hal_bt_hid_consumer_key_release_all();
                     } else {
                         furi_hal_hid_kb_release_all();
+                        furi_hal_hid_consumer_key_release_all();
                     }
                 } else if(flags & WorkerEvtDisconnect) {
                     worker_state = BadKbStateNotConnected; // Disconnected
                     bad_kb->st.state = worker_state;
                     if(bad_kb->bt) {
                         furi_hal_bt_hid_kb_release_all();
+                        furi_hal_bt_hid_consumer_key_release_all();
                     } else {
                         furi_hal_hid_kb_release_all();
+                        furi_hal_hid_consumer_key_release_all();
                     }
                 } else if(flags & WorkerEvtPauseResume) {
                     if(pause_state == BadKbStateRunning) {
@@ -960,15 +974,19 @@ static int32_t bad_kb_worker(void* context) {
                     worker_state = BadKbStateIdle; // Stop executing script
                     if(bad_kb->bt) {
                         furi_hal_bt_hid_kb_release_all();
+                        furi_hal_bt_hid_consumer_key_release_all();
                     } else {
                         furi_hal_hid_kb_release_all();
+                        furi_hal_hid_consumer_key_release_all();
                     }
                 } else if(flags & WorkerEvtDisconnect) {
                     worker_state = BadKbStateNotConnected; // Disconnected
                     if(bad_kb->bt) {
                         furi_hal_bt_hid_kb_release_all();
+                        furi_hal_bt_hid_consumer_key_release_all();
                     } else {
                         furi_hal_hid_kb_release_all();
+                        furi_hal_hid_consumer_key_release_all();
                     }
                 } else if(flags & WorkerEvtPauseResume) {
                     pause_state = BadKbStateStringDelay;

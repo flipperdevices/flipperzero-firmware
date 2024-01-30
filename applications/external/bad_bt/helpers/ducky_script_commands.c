@@ -146,6 +146,35 @@ static int32_t ducky_fnc_release(BadBtScript* bad_bt, const char* line, int32_t 
     return 0;
 }
 
+static int32_t ducky_fnc_media(BadBtScript* bad_bt, const char* line, int32_t param) {
+    UNUSED(param);
+
+    line = &line[ducky_get_command_len(line) + 1];
+    uint16_t key = ducky_get_media_keycode_by_name(line);
+    if(key == HID_CONSUMER_UNASSIGNED) {
+        return ducky_error(bad_bt, "No keycode defined for %s", line);
+    }
+    furi_hal_bt_hid_kb_press(key);
+    furi_hal_bt_hid_consumer_key_release(key);
+    return 0;
+}
+
+static int32_t ducky_fnc_globe(BadBtScript* bad_bt, const char* line, int32_t param) {
+    UNUSED(param);
+
+    line = &line[ducky_get_command_len(line) + 1];
+    uint16_t key = ducky_get_keycode(bad_bt, line, true);
+    if(key == HID_KEYBOARD_NONE) {
+        return ducky_error(bad_bt, "No keycode defined for %s", line);
+    }
+
+    furi_hal_bt_hid_consumer_key_press(HID_CONSUMER_FN_GLOBE);
+    furi_hal_bt_hid_kb_press(key);
+    furi_hal_bt_hid_kb_release(key);
+    furi_hal_bt_hid_consumer_key_release(HID_CONSUMER_FN_GLOBE);
+    return 0;
+}
+
 static int32_t ducky_fnc_waitforbutton(BadBtScript* bad_bt, const char* line, int32_t param) {
     UNUSED(param);
     UNUSED(bad_bt);
@@ -172,6 +201,8 @@ static const DuckyCmd ducky_commands[] = {
     {"HOLD", ducky_fnc_hold, -1},
     {"RELEASE", ducky_fnc_release, -1},
     {"WAIT_FOR_BUTTON_PRESS", ducky_fnc_waitforbutton, -1},
+    {"MEDIA", ducky_fnc_media, -1},
+    {"GLOBE", ducky_fnc_globe, -1},
 };
 
 #define TAG "BadBT"

@@ -686,9 +686,11 @@ static int32_t bad_bt_worker(void* context) {
                 } else if(flags & WorkerEvtStartStop) {
                     worker_state = BadBtStateIdle; // Stop executing script
                     furi_hal_bt_hid_kb_release_all();
+                    furi_hal_bt_hid_consumer_key_release_all();
                 } else if(flags & WorkerEvtDisconnect) {
                     worker_state = BadBtStateNotConnected; // Disconnected
                     furi_hal_bt_hid_kb_release_all();
+                    furi_hal_bt_hid_consumer_key_release_all();
                 } else if(flags & WorkerEvtPauseResume) {
                     pause_state = BadBtStateRunning;
                     worker_state = BadBtStatePaused; // Pause
@@ -709,11 +711,13 @@ static int32_t bad_bt_worker(void* context) {
                     worker_state = BadBtStateScriptError;
                     bad_bt->st.state = worker_state;
                     furi_hal_bt_hid_kb_release_all();
+                    furi_hal_bt_hid_consumer_key_release_all();
                 } else if(delay_val == SCRIPT_STATE_END) { // End of script
                     delay_val = 0;
                     worker_state = BadBtStateIdle;
                     bad_bt->st.state = BadBtStateDone;
                     furi_hal_bt_hid_kb_release_all();
+                    furi_hal_bt_hid_consumer_key_release_all();
                     continue;
                 } else if(delay_val == SCRIPT_STATE_STRING_START) { // Start printing string with delays
                     delay_val = bad_bt->defdelay;
@@ -745,6 +749,7 @@ static int32_t bad_bt_worker(void* context) {
                 } else if(flags & WorkerEvtDisconnect) {
                     worker_state = BadBtStateNotConnected; // Disconnected
                     furi_hal_bt_hid_kb_release_all();
+                    furi_hal_bt_hid_consumer_key_release_all();
                 }
                 bad_bt->st.state = worker_state;
                 continue;
@@ -763,10 +768,12 @@ static int32_t bad_bt_worker(void* context) {
                     worker_state = BadBtStateIdle; // Stop executing script
                     bad_bt->st.state = worker_state;
                     furi_hal_bt_hid_kb_release_all();
+                    furi_hal_bt_hid_consumer_key_release_all();
                 } else if(flags & WorkerEvtDisconnect) {
                     worker_state = BadBtStateNotConnected; // Disconnected
                     bad_bt->st.state = worker_state;
                     furi_hal_bt_hid_kb_release_all();
+                    furi_hal_bt_hid_consumer_key_release_all();
                 } else if(flags & WorkerEvtPauseResume) {
                     if(pause_state == BadBtStateRunning) {
                         if(delay_val > 0) {
@@ -798,9 +805,11 @@ static int32_t bad_bt_worker(void* context) {
                 } else if(flags & WorkerEvtStartStop) {
                     worker_state = BadBtStateIdle; // Stop executing script
                     furi_hal_bt_hid_kb_release_all();
+                    furi_hal_bt_hid_consumer_key_release_all();
                 } else if(flags & WorkerEvtDisconnect) {
                     worker_state = BadBtStateNotConnected; // Disconnected
                     furi_hal_bt_hid_kb_release_all();
+                    furi_hal_bt_hid_consumer_key_release_all();
                 } else if(flags & WorkerEvtPauseResume) {
                     pause_state = BadBtStateStringDelay;
                     worker_state = BadBtStatePaused; // Pause
