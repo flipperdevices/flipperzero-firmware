@@ -27,9 +27,9 @@ void picopass_scene_read_factory_success_on_enter(void* context) {
     // Setup view
     Widget* widget = picopass->widget;
     //PicopassPacs* pacs = &picopass->dev->dev_data.pacs;
-    PicopassBlock* AA1 = picopass->dev->dev_data.AA1;
+    PicopassBlock* card_data = picopass->dev->dev_data.card_data;
 
-    uint8_t* configBlock = AA1[PICOPASS_CONFIG_BLOCK_INDEX].data;
+    uint8_t* configBlock = card_data[PICOPASS_CONFIG_BLOCK_INDEX].data;
     uint8_t fuses = configBlock[7];
 
     if((fuses & 0x80) == 0x80) {
