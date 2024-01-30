@@ -2,6 +2,7 @@
 
 #include <furi.h>
 #include <furi_hal.h>
+#include <expansion/expansion.h>
 
 static bool gpio_app_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
@@ -101,11 +102,20 @@ void gpio_app_free(GpioApp* app) {
 
 int32_t gpio_app(void* p) {
     UNUSED(p);
+
+    // Disable expansion protocol to avoid interference with UART Handle
+    Expansion* expansion = furi_record_open(RECORD_EXPANSION);
+    expansion_disable(expansion);
+
     GpioApp* gpio_app = gpio_app_alloc();
 
     view_dispatcher_run(gpio_app->view_dispatcher);
 
     gpio_app_free(gpio_app);
+
+    // Return previous state of expansion
+    expansion_enable(expansion);
+    furi_record_close(RECORD_EXPANSION);
 
     return 0;
 }
