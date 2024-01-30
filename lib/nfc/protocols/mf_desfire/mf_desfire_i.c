@@ -796,9 +796,12 @@ bool mf_desfire_application_save(
             const MfDesfireFileData* file_data = simple_array_cget(data->file_data, i);
             if(file_data == NULL) {
                 FURI_LOG_E(TAG, "file_data %ld is null", i);
-                break;
+                // break;
             }
-            if(!mf_desfire_file_data_save(file_data, furi_string_get_cstr(sub_prefix), ff)) break;
+            if(file_data) {
+                if(!mf_desfire_file_data_save(file_data, furi_string_get_cstr(sub_prefix), ff))
+                    break;
+            }
         }
 
         if(i != file_count) break;
