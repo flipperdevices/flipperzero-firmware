@@ -42,6 +42,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - [Improved IR Ext Module Detection & Power for Infrared & IR Remote (By Sil333033 & Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/370f0c7159750d40d166adf565438324f0d57e08)
 - UL: [more contrast values for replacement displays (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/47a7c66527cbf4a976a5d6bfd111644c4fe01ac3)
 - Updated: [Five Nights at Flipper's v1.2 (By sillygir1)](https://github.com/sillygir1/flipperzero-fnaf)
+- Updated Default Games Only Menu to include the latest 7 games (By RogueMaster)
 - To Be Merged OFW PRs: [3352](https://github.com/flipperdevices/flipperzero-firmware/pull/3352), [3302](https://github.com/flipperdevices/flipperzero-firmware/pull/3302), [3211](https://github.com/flipperdevices/flipperzero-firmware/pull/3211), [3366](https://github.com/flipperdevices/flipperzero-firmware/pull/3366) & [3250](https://github.com/flipperdevices/flipperzero-firmware/pull/3250)
 
 <a name="release">
