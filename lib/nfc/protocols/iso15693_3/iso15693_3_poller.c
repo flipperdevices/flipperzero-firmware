@@ -69,7 +69,20 @@ static NfcCommand iso15693_3_poller_run(NfcGenericEvent event, void* context) {
     NfcCommand command = NfcCommandContinue;
 
     if(nfc_event->type == NfcEventTypePollerReady) {
-        if(instance->state != Iso15693_3PollerStateActivated) {
+        if(instance->state == Iso15693_3PollerStateIdle) {
+            instance->iso15693_3_event.type = Iso15693_3PollerEventTypeRequestMode;
+            command = instance->callback(instance->general_event, instance->context);
+            if(instance->iso15693_3_event_data.mode == Iso15693_3PollerModeRead) {
+                instance->state = Iso15693_3PollerStateColResInProgress;
+            } else {
+                instance->state = Iso15693_3PollerStateBypass;
+            }
+        }
+        if(instance->state == Iso15693_3PollerStateBypass) {
+            instance->iso15693_3_event.type = Iso15693_3PollerEventTypeReady;
+            command = instance->callback(instance->general_event, instance->context);
+        }
+        if(instance->state == Iso15693_3PollerStateColResInProgress) {
             Iso15693_3Error error = iso15693_3_poller_activate(instance, instance->data);
             if(error == Iso15693_3ErrorNone) {
                 instance->iso15693_3_event.type = Iso15693_3PollerEventTypeReady;
@@ -81,8 +94,11 @@ static NfcCommand iso15693_3_poller_run(NfcGenericEvent event, void* context) {
                 command = instance->callback(instance->general_event, instance->context);
                 // Add delay to switch context
                 furi_delay_ms(100);
+                instance->state = Iso15693_3PollerStateColResFailed;
             }
-        } else {
+        }
+
+        if(instance->state == Iso15693_3PollerStateActivated) {
             instance->iso15693_3_event.type = Iso15693_3PollerEventTypeReady;
             instance->iso15693_3_event_data.error = Iso15693_3ErrorNone;
             command = instance->callback(instance->general_event, instance->context);

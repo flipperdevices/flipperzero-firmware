@@ -14,6 +14,7 @@ extern "C" {
 
 typedef enum {
     Iso15693_3PollerStateIdle,
+    Iso15693_3PollerStateBypass,
     Iso15693_3PollerStateColResInProgress,
     Iso15693_3PollerStateColResFailed,
     Iso15693_3PollerStateActivated,
