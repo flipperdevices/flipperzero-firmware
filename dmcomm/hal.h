@@ -2,13 +2,16 @@
 #define HAL_HEADERS
 
 #include "flipper.h"
+#include "../app_state.h"
 
 typedef uint8_t byte;
 typedef bool boolean;
 
-void boilerplate_led_set_rgb(void* context, int red, int green, int blue);
+void setApp(void* ctx);
 
-void boilerplate_led_reset(void* context);
+void boilerplate_led_set_rgb(int red, int green, int blue);
+
+void boilerplate_led_reset();
 
 void ledOn();
 void ledOff();

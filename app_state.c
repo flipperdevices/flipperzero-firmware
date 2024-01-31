@@ -38,6 +38,9 @@ App* app_alloc() {
     app->text_box = text_box_alloc();
     app->text_box_store = furi_string_alloc();
 
+    app->dmcomm_input_buffer = furi_string_alloc();
+    app->dmcomm_output_buffer = furi_string_alloc();
+
     file_browser_configure(app->file_browser, "*", NULL, true, false, &I_badusb_10px, true);
 
     view_dispatcher_add_view(
@@ -57,6 +60,9 @@ App* app_alloc() {
 
     view_dispatcher_add_view(
         app->view_dispatcher, FcomFileSelectView, file_browser_get_view(app->file_browser));
+
+
+    setApp(app);
 
     app->dmcomm_run = true;
     app->dcomm_thread = furi_thread_alloc();

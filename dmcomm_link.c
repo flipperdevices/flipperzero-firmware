@@ -3,22 +3,21 @@
 int32_t dmcomm_reader(void* context) {
     FURI_LOG_I(TAG, "dmcomm_reader start");
     App* app = context;
-
-    uint32_t loops = 0;
+    setup();
     while(app->dmcomm_run) {
-        furi_delay_ms(100);
-        loops += 1;
-        if(loops > 10)
-        {
-          loops = 0;
-          FURI_CRITICAL_ENTER();
-          FURI_LOG_I(TAG, "dmcomm_reader loop");
-          FURI_CRITICAL_EXIT();
-        }
+        loop();
     }
 
     FURI_LOG_I(TAG, "dmcomm_reader end");
     return 0;
+}
+
+void dmcomm_sendcommand(void* context, const char* cmd)
+{
+    FURI_LOG_I(TAG, "dmcomm_reader start");
+    App* app = context;
+
+    furi_string_cat_str(app->dmcomm_input_buffer, cmd);
 }
 
 /*

@@ -1,19 +1,27 @@
 #include "hal.h"
-#include "../app_state.h"
 
-void digitalWrite(const GpioPin* pin, bool level)
+App* context = NULL;
+
+const char* getPinName(const GpioPin* pin)
 {
-    furi_hal_gpio_write(pin, level);
+  if(pin == &gpio_ext_pc3)
+    return "out";
+  if(pin == &gpio_ext_pb3)
+    return "notOE";
+  if(pin == &gpio_ext_pa4)
+    return "Ain";
+  if(pin == &gpio_ext_pb2)
+    return "probe";
+  return "unknown";
 }
 
-int analogRead(const GpioPin* pin)
+void setApp(void* v)
 {
-  if(furi_hal_gpio_read(pin))
-    return 500;
-  return 0;
+  App* ctx = v;
+  context = ctx;
 }
 
-void boilerplate_led_set_rgb(void* context, int red, int green, int blue) {
+void boilerplate_led_set_rgb(int red, int green, int blue) {
     App* app = context;
 
     NotificationMessage notification_led_message_1;
@@ -37,7 +45,7 @@ void boilerplate_led_set_rgb(void* context, int red, int green, int blue) {
     furi_thread_flags_wait(0, FuriFlagWaitAny, 10); //Delay, prevent removal from RAM before LED value set    
 }
 
-void boilerplate_led_reset(void* context) {
+void boilerplate_led_reset() {
     App* app = context;
     notification_message(app->notification, &sequence_reset_red);
     notification_message(app->notification, &sequence_reset_green);
@@ -46,22 +54,42 @@ void boilerplate_led_reset(void* context) {
     furi_thread_flags_wait(0, FuriFlagWaitAny, 300); //Delay, prevent removal from RAM before LED value set    
 }
 
+void digitalWrite(const GpioPin* pin, bool level)
+{
+    FURI_LOG_I(TAG, "digitalWrite %s %d", getPinName(pin), level);
+    furi_hal_gpio_write(pin, level);
+}
+
+int analogRead(const GpioPin* pin)
+{
+  if(furi_hal_gpio_read(pin))
+  {
+    FURI_LOG_I(TAG, "analogRead %s 1", getPinName(pin));
+    return 500;
+  }
+  FURI_LOG_I(TAG, "analogRead %s 0", getPinName(pin));
+  return 0;
+}
 
 void ledOn() {
-    boilerplate_led_set_rgb(NULL, 255, 0, 0);
+  FURI_LOG_I(TAG, "ledOn");
+    boilerplate_led_set_rgb(255, 0, 0);
 }
 
 void ledOff() {
-    boilerplate_led_reset(NULL);
+  FURI_LOG_I(TAG, "ledOff");
+    boilerplate_led_reset();
 }
 
 
 void Serial_prints(const char* c)
 {
+  FURI_LOG_I(TAG, "Serial_prints %s", c);
   UNUSED(c);
 }
 void Serial_printlns(const char* c)
 {
+  FURI_LOG_I(TAG, "%s", c);
   UNUSED(c);
 }
 void Serial_println(void)
@@ -69,10 +97,12 @@ void Serial_println(void)
 }
 void Serial_printi(const int c)
 {
+  FURI_LOG_I(TAG, "Serial_printi %d", c);
   UNUSED(c);
 }
 void Serial_printf(const float c, int acc)
 {
+  FURI_LOG_I(TAG, "Serial_printf %f %d", (double)c, acc);
   UNUSED(c);
   UNUSED(acc);
 }
@@ -84,6 +114,7 @@ const char *F(const char* i)
 
 void delay(int ms)
 {
+  //FURI_LOG_I(TAG, "delay %d", ms);
   furi_delay_ms(ms);
 }
 
@@ -99,21 +130,33 @@ uint32_t millis()
 
 void Serial_writei(int i)
 {
+  FURI_LOG_I(TAG, "%d", i);
   UNUSED(i);
 }
 
 int Serial_available(void)
 {
-  return 0;
+  //FURI_LOG_I(TAG, "Serial_available");
+  return 1;
 }
 
 int Serial_read(void)
 {
-  return 0;
+  int ret = 0;
+  if(!furi_string_empty(context->dmcomm_input_buffer))
+  {
+    FURI_LOG_I(TAG, "Serial_read");
+    const char s = furi_string_get_char(context->dmcomm_input_buffer, 0);
+    FURI_LOG_I(TAG, " reading from: %c", s);
+    ret = (int)s;
+    furi_string_right(context->dmcomm_input_buffer, 1);
+  }
+  return ret;
 }
 
 void Serial_writeb(const byte* data, int len)
 {
+  FURI_LOG_I(TAG, "Serial_writeb %d", len);
   UNUSED(data);
   UNUSED(len);
 }

@@ -31,6 +31,8 @@ typedef struct App {
     AppState* state;
     bool dmcomm_run;
     FuriThread* dcomm_thread;
+    FuriString* dmcomm_input_buffer;
+    FuriString* dmcomm_output_buffer;
 
     bool serial_run;
     FuriThread* serial_thread;
