@@ -161,6 +161,7 @@ int32_t nfc_playlist_emulation_task(void* context) {
 
     furi_string_free(line);
     file_stream_close(stream);
+    furi_record_close(RECORD_STORAGE);
     stream_free(stream);
 
     return 0;

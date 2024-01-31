@@ -5,21 +5,24 @@ static void (*const nfc_playlist_scene_on_enter_handlers[])(void*) = {
     nfc_playlist_main_menu_scene_on_enter,
     nfc_playlist_settings_scene_on_enter,
     nfc_playlist_emulation_scene_on_enter,
-    nfc_playlist_file_select_scene_on_enter
+    nfc_playlist_file_select_scene_on_enter,
+    nfc_playlist_file_edit_scene_on_enter
 };
 
 static bool (*const nfc_playlist_scene_on_event_handlers[])(void*, SceneManagerEvent) = {
     nfc_playlist_main_menu_scene_on_event,
     nfc_playlist_settings_scene_on_event,
     nfc_playlist_emulation_scene_on_event,
-    nfc_playlist_file_select_scene_on_event
+    nfc_playlist_file_select_scene_on_event,
+    nfc_playlist_file_edit_scene_on_event
 };
 
 static void (*const nfc_playlist_scene_on_exit_handlers[])(void*) = {
     nfc_playlist_main_menu_scene_on_exit,
     nfc_playlist_settings_scene_on_exit,
     nfc_playlist_emulation_scene_on_exit,
-    nfc_playlist_file_select_scene_on_exit
+    nfc_playlist_file_select_scene_on_exit,
+    nfc_playlist_file_edit_scene_on_exit
 };
 
 static const SceneManagerHandlers nfc_playlist_scene_manager_handlers = {
@@ -66,6 +69,7 @@ static NfcPlaylist* nfc_playlist_alloc() {
     view_dispatcher_add_view(nfc_playlist->view_dispatcher, NfcPlaylistView_Settings, variable_item_list_get_view(nfc_playlist->variable_item_list));
     view_dispatcher_add_view(nfc_playlist->view_dispatcher, NfcPlaylistView_Popup, popup_get_view(nfc_playlist->popup));
     view_dispatcher_add_view(nfc_playlist->view_dispatcher, NfcPlaylistView_FileSelect, file_browser_get_view(nfc_playlist->file_browser));
+    view_dispatcher_add_view(nfc_playlist->view_dispatcher, NfcPlaylistView_FileEdit, submenu_get_view(nfc_playlist->submenu));
     return nfc_playlist;
 }
 
@@ -76,6 +80,7 @@ static void nfc_playlist_free(NfcPlaylist* nfc_playlist) {
     view_dispatcher_remove_view(nfc_playlist->view_dispatcher, NfcPlaylistView_Settings);
     view_dispatcher_remove_view(nfc_playlist->view_dispatcher, NfcPlaylistView_Popup);
     view_dispatcher_remove_view(nfc_playlist->view_dispatcher, NfcPlaylistView_FileSelect);
+    view_dispatcher_remove_view(nfc_playlist->view_dispatcher, NfcPlaylistView_FileEdit);
     view_dispatcher_free(nfc_playlist->view_dispatcher);
     variable_item_list_free(nfc_playlist->variable_item_list);
     submenu_free(nfc_playlist->submenu);
