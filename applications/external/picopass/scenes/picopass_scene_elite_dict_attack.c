@@ -152,6 +152,7 @@ void picopass_scene_elite_dict_attack_on_enter(void* context) {
             PICOPASS_KEY_LEN);
         state = PicopassSceneEliteDictAttackDictStandard;
     }
+    dict_attack_reset(picopass->dict_attack);
     picopass->dict_attack_ctx.card_detected = false;
     picopass->dict_attack_ctx.total_keys = keys_dict_get_total_keys(picopass->dict);
     picopass->dict_attack_ctx.current_key = 0;

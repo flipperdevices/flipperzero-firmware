@@ -84,8 +84,8 @@ static void dict_attack_draw_callback(Canvas* canvas, void* model) {
             m->sectors_read,
             m->sectors_total);
         canvas_draw_str_aligned(canvas, 0, 43, AlignLeft, AlignTop, draw_str);
+        elements_button_center(canvas, "Skip");
     }
-    elements_button_center(canvas, "Skip");
 }
 
 static bool dict_attack_input_callback(InputEvent* event, void* context) {
