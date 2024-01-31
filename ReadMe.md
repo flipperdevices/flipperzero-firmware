@@ -48,6 +48,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW PR: [BadUSB: media keys, Fn/Globe key commands #3403 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/3403)
 - Updated: [Cross Remote v2.0 (By leedave)](https://github.com/leedave/flipper-zero-cross-remote)
 - [Small Fix for SubGHz Last Settings (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/ed3cd21f5ccb4b5696953a6cb879a73f49fb69cf)
+- RFID: [auto-stop emulation after 5min feature added (By Leptopt1los)](https://github.com/DarkFlippers/unleashed-firmware/commit/19a5f02d662c77f96fed0048a7984d094bdd67ca) & [rename timers, stop before free (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/89e1620883df64692685265c922b9961bb9c54cd)
 - To Be Merged OFW PRs: [3352](https://github.com/flipperdevices/flipperzero-firmware/pull/3352), [3302](https://github.com/flipperdevices/flipperzero-firmware/pull/3302), [3211](https://github.com/flipperdevices/flipperzero-firmware/pull/3211), [3366](https://github.com/flipperdevices/flipperzero-firmware/pull/3366), [3250](https://github.com/flipperdevices/flipperzero-firmware/pull/3250), [3402](https://github.com/flipperdevices/flipperzero-firmware/pull/3402) & [3409](https://github.com/flipperdevices/flipperzero-firmware/pull/3409)
 
 <a name="release">

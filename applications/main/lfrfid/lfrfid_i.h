@@ -64,6 +64,7 @@ enum LfRfidCustomEvent {
     LfRfidEventWriteTooLongToWrite,
     LfRfidEventRpcLoadFile,
     LfRfidEventRpcSessionClose,
+    LfRfidEventEmulationTimeExpired,
 };
 
 typedef enum {
