@@ -3,6 +3,7 @@
 
 enum SubmenuIndexEdit {
     SubmenuIndexRename = 10,
+    SubmenuIndexTiming,
     SubmenuIndexDelete,
 };
 
@@ -15,6 +16,12 @@ void xremote_scene_edit_item_on_enter(void* context) {
     XRemote* app = context;
     submenu_add_item(
         app->editmenu, "Rename", SubmenuIndexRename, xremote_scene_edit_item_submenu_callback, app);
+    
+    if(xremote_cross_remote_get_item_type(app->cross_remote, app->edit_item) == XRemoteRemoteItemTypeInfrared) {
+        submenu_add_item(
+        app->editmenu, "Set Timing", SubmenuIndexRename, xremote_scene_edit_item_submenu_callback, app);
+    }
+
     submenu_add_item(
         app->editmenu, "Delete", SubmenuIndexDelete, xremote_scene_edit_item_submenu_callback, app);
 
