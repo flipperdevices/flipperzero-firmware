@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <stdbool.h>
+#include <log_saver.h>
 
 #define COMMAND_LENGTH 16
 
