@@ -5,7 +5,7 @@
 #include <storage/storage.h>
 #include <string.h>
 
-#define PORTAL_FILE_DIRECTORY_PATH EXT_PATH("apps_data/.evil_portal")
+#define PORTAL_FILE_DIRECTORY_PATH APP_ASSETS_PATH("")
 #define HTML_EXTENSION ".html"
 #define HTML_FOLDER PORTAL_FILE_DIRECTORY_PATH "/html"
 #define EVIL_PORTAL_INDEX_SAVE_PATH PORTAL_FILE_DIRECTORY_PATH "/index.html"
