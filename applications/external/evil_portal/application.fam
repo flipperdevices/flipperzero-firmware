@@ -11,6 +11,6 @@ App(
     fap_icon_assets_symbol="evil_portal",
     fap_author="bigbrodude6119",
     fap_weburl="https://github.com/bigbrodude6119/flipper-zero-evil-portal",
-    fap_version=(0, 2),
+    fap_version=(0, 3),
     fap_description="An evil captive portal Wi-Fi access point using the Flipper Zero and Wi-Fi dev board WIP",
 )
