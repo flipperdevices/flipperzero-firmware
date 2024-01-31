@@ -96,20 +96,23 @@ static void expansion_test_app_start(ExpansionTestApp* instance) {
     instance->thread_id = furi_thread_get_current_id();
     instance->expansion = furi_record_open(RECORD_EXPANSION);
     instance->handle = furi_hal_serial_control_acquire(MODULE_SERIAL_ID);
+    furi_check(instance->handle);
     // Configure the serial port
     furi_hal_serial_init(instance->handle, EXPANSION_PROTOCOL_DEFAULT_BAUD_RATE);
     // Start waiting for the initial pulse
-    expansion_enable(instance->expansion, HOST_SERIAL_ID);
+    expansion_set_listen_serial(instance->expansion, HOST_SERIAL_ID);
 
     furi_hal_serial_async_rx_start(
         instance->handle, expansion_test_app_serial_rx_callback, instance, false);
 }
 
 static void expansion_test_app_stop(ExpansionTestApp* instance) {
+    // Disable expansion module support
+    expansion_disable(instance->expansion);
     // Give back the module handle
     furi_hal_serial_control_release(instance->handle);
-    // Turn expansion module support off
-    expansion_disable(instance->expansion);
+    // Restore expansion user settings
+    expansion_enable(instance->expansion);
     furi_record_close(RECORD_EXPANSION);
 }
 
