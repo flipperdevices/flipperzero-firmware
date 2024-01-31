@@ -51,6 +51,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - RFID: [auto-stop emulation after 5min feature added (By Leptopt1los)](https://github.com/DarkFlippers/unleashed-firmware/commit/19a5f02d662c77f96fed0048a7984d094bdd67ca) & [rename timers, stop before free (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/89e1620883df64692685265c922b9961bb9c54cd)
 - SubGHz: [fix dea mio formula (By Leptopt1los)](https://github.com/DarkFlippers/unleashed-firmware/commit/4fd0ce3eb576c1d6de0173dde1f67dda95ec4225)
 - SubGHz: [raw erase fixes (By Willy-JL)](https://github.com/DarkFlippers/unleashed-firmware/commit/289fbe56be11f2de36b66481f1f8e6fa4b24c4a1)
+- Updated: [YuriCable Pro Max v0.1 (By arag0re)](https://github.com/arag0re/fz-yuricable-pro-max)
 - To Be Merged OFW PRs: [3352](https://github.com/flipperdevices/flipperzero-firmware/pull/3352), [3302](https://github.com/flipperdevices/flipperzero-firmware/pull/3302), [3211](https://github.com/flipperdevices/flipperzero-firmware/pull/3211), [3366](https://github.com/flipperdevices/flipperzero-firmware/pull/3366), [3250](https://github.com/flipperdevices/flipperzero-firmware/pull/3250), [3402](https://github.com/flipperdevices/flipperzero-firmware/pull/3402) & [3409](https://github.com/flipperdevices/flipperzero-firmware/pull/3409)
 
 <a name="release">

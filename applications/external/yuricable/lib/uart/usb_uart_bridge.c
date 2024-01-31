@@ -195,6 +195,7 @@ static int32_t usb_uart_worker(void* context) {
                     usb_uart->st.rx_cnt += len;
                     furi_check(furi_mutex_acquire(usb_uart->usb_mutex, FuriWaitForever) == FuriStatusOk);
                     furi_hal_cdc_send(usb_uart->cfg.vcp_ch, usb_uart->rx_buf, len);
+                    save_log_and_write((char*)usb_uart->rx_buf, len);
                     furi_check(furi_mutex_release(usb_uart->usb_mutex) == FuriStatusOk);
                 } else {
                     furi_stream_buffer_reset(usb_uart->rx_stream);
