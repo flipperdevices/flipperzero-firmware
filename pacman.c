@@ -15,7 +15,8 @@
 
 #define TAG "PacMan"
 
-#define BOX_SIZE = 20
+#define MAP_SIZE_W 17
+#define MAP_SIZE_H 31
 
 // Change this to BACKLIGHT_AUTO if you don't want the backlight to be continuously on.
 #define BACKLIGHT_ON 1
@@ -45,7 +46,12 @@ typedef enum {
     EntityPacman,
     EntityGhost,
     EntityNothing,
-    EntityWall,
+    EntityTopLeftWall,
+    EntityTopRightWall,
+    EntityBottomLeftWall,
+    EntityBottomRightWall,
+    EntityHorizontalWall,
+    EntityVerticalWall,
     EntityCandy,
     EntitySuperCandy,
     EntityCherry,
@@ -139,6 +145,28 @@ static void pacman_submenu_callback(void* context, uint32_t index) {
     }
 }
 
+// int main() {
+//     int rows = 3;
+//     int cols = 4;
+
+//     // Dynamically allocate memory for the matrix
+//     int **matrix = (int **)malloc(rows * sizeof(int *));
+//     for (int i = 0; i < rows; i++) {
+//         matrix[i] = (int *)malloc(cols * sizeof(int));
+//     }
+
+//     // Access and manipulate the matrix elements
+//     matrix[1][2] = 42;
+
+//     // Free the allocated memory when done
+//     for (int i = 0; i < rows; i++) {
+//         free(matrix[i]);
+//     }
+//     free(matrix);
+
+//     return 0;
+// }
+
 // static const Box empty_box = {.candy = true, .character = CharacterNothing};
 
 // Filling the matrix of empty boxes
@@ -146,17 +174,37 @@ static void pacman_submenu_callback(void* context, uint32_t index) {
 
 // Initial map configuration
 static const char* map_config[] = {
-    "CCCCCCCCWCCCCCCCC",
-    "CWWCWWWCWCWWWCWWC",
-    "CCCCCCCCCCCCCCCCC",
-    "CWWCWCWWWWWCWCWWC",
-    "CCCCWCCCWCCCWCCCC",
-    "NNNCCCBBBBBCCCNNN",
-    "CCCCWCCCWCCCWCCCC",
-    "CWWCWCWWWWWCWCWWC",
-    "CCCCCCCCCCCCCCCCC",
-    "CWWCWWWCWCWWWCWWC",
-    "CCCCCCCCWCCCCCCCC",
+    "┌------------┐┌-----------┐",
+    "|CCCCCCCCCCCC||CCCCCCCCCCCC|",
+    "|C┌--┐C┌---┐C||C┌---┐C┌--┐C|",
+    "|C|  |C|   |C||C|   |C|  |C|",
+    "|C└--┘C└---┘C└┘C└---┘C└--┘C|",
+    "|CCCCCCCCCCCCCCCCCCCCCCCCCC|",
+    "|C┌--┐C┌┐C┌------┐C┌┐C┌--┐C|",
+    "|C└--┘C||C└--┐┌--┘C||C└--┘C|",
+    "|CCCCCC||CCCC||CCCC||CCCCCC|",
+    "└----┐C|└--┐ || ┌--┘|C┌----┘",
+    "     |C|┌--┘ └┘ └--┐|C|     ",
+    "     |C||          ||C|     ",
+    "     |C|| ┌--  --┐ ||C|     ",
+    "-----┘C└┘ |BBBBBB| └┘C└-----",
+    "      C   |BBBBBB|   C      ",
+    "-----┐C┌┐ |BBBBBB| ┌┐C┌-----",
+    "     |C|| └------┘ ||C|     ",
+    "     |C||          ||C|     ",
+    "     |C|| ┌------┐ ||C|     ",
+    "┌----┘C└┘ └--┐┌--┘ └┘C└----┐",
+    "|CCCCCCCCCCCC||CCCCCCCCCCCC|",
+    "|C┌--┐C┌---┐C||C┌---┐C┌--┐C|",
+    "|C└-┐|C└---┘C└┘C└---┘C|┌-┘C|",
+    "|CCC||CCCCCCCCCCCCCCCC||CCC|",
+    "└-┐C||C┌┐C┌------┐C┌┐C||C┌-┘",
+    "┌-┘C└┘C||C└--┐┌--┘C||C└┘C└-┐",
+    "|CCCCCC||CCCC||CCCC||CCCCCC|",
+    "|C┌----┘└--┐C||C┌--┘└----┐C|",
+    "|C└--------┘C└┘C└--------┘C|",
+    "|CCCCCCCCCCCCCCCCCCCCCCCCCC|",
+    "└--------------------------┘"
 };
 
 /**
@@ -165,25 +213,31 @@ static const char* map_config[] = {
  * @param      config The config matrix (actually array of strings).
  * @return     The initialized Entity matrix.
 */
-static void setup_map(char* config[], Entity map[][17], int size) {
-    for(int i = 0; i < 11; i++) {
-        for(int j = 0; j < size; j++) {
-            char symbol = config[i][j];
+static void setup_map(Entity map[][MAP_SIZE_W]) {
+    for(int i = 0; i < MAP_SIZE_H; i++) {
+        for(int j = 0; j < MAP_SIZE_W; j++) {
+            int symbol = map_config[i][j];  // Int to prevent to go beyond char range
             switch(symbol) {
             case 'C':
                 map[i][j] = EntityCandy;
                 break;
-            case 'W':
-                map[i][j] = EntityWall;
+            case '|':
+                map[i][j] = EntityVerticalWall;
                 break;
-            case 'N':
-                map[i][j] = EntityNothing;
+            case '-':
+                map[i][j] = EntityHorizontalWall;
                 break;
-            case 'B':
-                map[i][j] = EntityBase;
+            case 0x250C:  // '┌'
+                map[i][j] = EntityTopLeftWall;
                 break;
-            case 'S':
-                map[i][j] = EntitySuperCandy;
+            case 0x2510:  // '┐'
+                map[i][j] = EntityTopRightWall;
+                break;
+            case 0x2518:  // '┘'
+                map[i][j] = EntityBottomRightWall;
+                break;
+            case 0x2514:  // '└'
+                map[i][j] = EntityBottomLeftWall;
                 break;
             default:
                 map[i][j] = EntityVoid;
@@ -191,6 +245,8 @@ static void setup_map(char* config[], Entity map[][17], int size) {
         }
     }
 }
+
+static Entity map[MAP_SIZE_H][MAP_SIZE_W];
 
 /**
  * Our 1st sample setting is a team color.  We have 3 options: red, green, and blue.
@@ -302,25 +358,6 @@ static void pacman_view_game_draw_callback(Canvas* canvas, void* model) {
     canvas_draw_str(canvas, 44, 60, furi_string_get_cstr(xstr));
     furi_string_free(xstr);
 }
-// static void pacman_view_game_draw_callback(Canvas* canvas, void* model) {
-//     PacmanGameModel* my_model = (PacmanGameModel*)model;
-//     canvas_draw_icon(canvas, my_model->x, 20, &I_ghost_14x14);
-//     canvas_draw_str(canvas, 1, 10, "LEFT/RIGHT to change x");
-//     FuriString* xstr = furi_string_alloc();
-//     furi_string_printf(xstr, "x: %u  OK=play tone", my_model->x);
-//     canvas_draw_str(canvas, 44, 24, furi_string_get_cstr(xstr));
-//     furi_string_printf(xstr, "random: %u", (uint8_t)(furi_hal_random_get() % 256));
-//     canvas_draw_str(canvas, 44, 36, furi_string_get_cstr(xstr));
-//     furi_string_printf(
-//         xstr,
-//         "team: %s (%u)",
-//         setting_1_names[my_model->setting_1_index],
-//         setting_1_values[my_model->setting_1_index]);
-//     canvas_draw_str(canvas, 44, 48, furi_string_get_cstr(xstr));
-//     furi_string_printf(xstr, "name: %s", furi_string_get_cstr(my_model->setting_2_name));
-//     canvas_draw_str(canvas, 44, 60, furi_string_get_cstr(xstr));
-//     furi_string_free(xstr);
-// }
 
 /**
  * @brief      Callback for timer elapsed.
@@ -575,21 +612,13 @@ static void pacman_app_free(PacmanApp* app) {
  * @param      _p  Input parameter - unused
  * @return     0 - Success
 */
-int32_t main_pacman_app(void* _p) {
+int32_t pacman_app(void* _p) {
     UNUSED(_p);
 
     PacmanApp* app = pacman_app_alloc();
     view_dispatcher_run(app->view_dispatcher);
 
-    pacman_app_free(app);
-    return 0;
-}
-
-int32_t pacman_app(void* p) {
-    UNUSED(p);
-
-    PacmanApp* app = pacman_app_alloc();
-    view_dispatcher_run(app->view_dispatcher);
+    setup_map(map);
 
     pacman_app_free(app);
     return 0;
