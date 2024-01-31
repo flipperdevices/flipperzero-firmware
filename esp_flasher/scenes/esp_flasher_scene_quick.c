@@ -7,6 +7,7 @@ enum QuickState {
     QuickS2DevXeon_Blackmagic,
     QuickWROOMMultiFucc,
     QuickWROOMMultiFucc_Marauder,
+    QuickWROOMMultiFucc_Wardriver,
     QuickWROOM,
     QuickWROOM_Marauder,
     QuickS2,
@@ -74,6 +75,7 @@ void esp_flasher_scene_quick_on_enter(void* context) {
             app);
         break;
     case QuickWROOMMultiFucc_Marauder:
+    case QuickWROOMMultiFucc_Wardriver:
     case QuickWROOM_Marauder:
         submenu_set_header(submenu, "Choose Firmware:");
         submenu_add_item(
@@ -82,6 +84,14 @@ void esp_flasher_scene_quick_on_enter(void* context) {
             state > QuickWROOM ? QuickWROOM_Marauder : QuickWROOMMultiFucc_Marauder,
             esp_flasher_scene_quick_submenu_callback,
             app);
+        if(state < QuickWROOM) {
+            submenu_add_item(
+                submenu,
+                "Wardriver",
+                QuickWROOMMultiFucc_Wardriver,
+                esp_flasher_scene_quick_submenu_callback,
+                app);
+        }
         break;
     default:
         break;
@@ -144,6 +154,11 @@ bool esp_flasher_scene_quick_on_event(void* context, SceneManagerEvent event) {
             app0 = APP_DATA_PATH("assets/marauder/boot_app0.bin");
             firm =
                 APP_DATA_PATH("assets/marauder/WROOM/esp32_marauder.dev_board_pro.bin");
+            break;
+
+        case QuickWROOMMultiFucc_Wardriver:
+            enter_bootloader = true;
+            boot = APP_DATA_PATH("assets/wardriver/f0-wardrive-wroom_2.bin");
             break;
 
         default:
