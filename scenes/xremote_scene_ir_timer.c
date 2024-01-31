@@ -13,14 +13,15 @@ void xremote_scene_ir_timer_on_enter(void* context) {
     size_t enter_name_length = 5;
     char* str = "Transmit in ms (0 - 9999)";
     const char* constStr = str;
+    CrossRemoteItem* item = xremote_cross_remote_get_item(app->cross_remote, app->edit_item);
     int_input_set_header_text(int_input, constStr);
-    snprintf(app->text_store[0], 5, "%u", 5);
+    snprintf(app->text_store[1], 5, "%lu", item->time);
 
     int_input_set_result_callback(
         int_input,
         xremote_scene_ir_timer_callback,
         context,
-        app->text_store[0],
+        app->text_store[1],
         enter_name_length,
         false);
 
@@ -35,6 +36,11 @@ bool xremote_scene_ir_timer_on_event(void* context, SceneManagerEvent event) {
         scene_manager_previous_scene(app->scene_manager);
         return true;
     } else if(event.type == SceneManagerEventTypeCustom) {
+        CrossRemoteItem* item = xremote_cross_remote_get_item(app->cross_remote, app->edit_item);
+        xremote_cross_remote_item_set_time(item, atoi(app->text_store[1]));
+        if (item->time > 9999) {
+            item->time = 9999;
+        }
         //app->first_station = atoi(app->text_store[0]);
         /*if(app->first_station > app->max_station) {
             app->first_station = app->max_station;
