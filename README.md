@@ -70,6 +70,7 @@
 - GAME BOY Logo Generator MALVEKE
 - [GAME BOY Pokemon Trading MALVEKE](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Pokemon-Trading?tab=readme-ov-file#instructions-for-use)
 - [GAME BOY Emulator MALVEKE(POC)](./flipper_companion_apps/applications/external/malveke_gb_emulator/README.md)
+- [[ESP32] WiFi Marauder](https://github.com/0xchocolate/flipperzero-wifi-marauder)
 
 ## Contributors
 [![Contributors](https://contrib.rocks/image?repo=EstebanFuentealba/MALVEKE-Flipper-Zero)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/graphs/contributors)
