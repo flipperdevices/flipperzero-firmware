@@ -26,7 +26,7 @@ const message = ref("");
 const state = ref("");
 const version = ref('2.5.1');
 
-const versionPath = computed(()=> version.value.replace(/\./, '_'));
+const versionPath = computed(()=> version.value.replace(/\./g, '_'));
 const manifest = computed(()=> {
   return {
   name: "[MALVEKE] Firmware",
