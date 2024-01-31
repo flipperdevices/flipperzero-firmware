@@ -144,6 +144,11 @@ void xremote_cross_remote_rename_item(CrossRemote* remote, size_t index, const c
     xremote_cross_remote_item_set_name(item, name);
 }
 
+int16_t xremote_cross_remote_get_item_type(CrossRemote* remote, size_t index) {
+    CrossRemoteItem* item = xremote_cross_remote_get_item(remote, index);
+    return xremote_cross_remote_item_get_type(item);
+}
+
 static void xremote_cross_remote_set_name(CrossRemote* remote, const char* name) {
     furi_string_set(remote->name, name);
 }

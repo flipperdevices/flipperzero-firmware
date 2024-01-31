@@ -224,6 +224,10 @@ void xremote_cross_remote_item_set_sg_signal(CrossRemoteItem* item, SubGhzRemote
     item->sg_signal = subghz;
 }
 
+int16_t xremote_cross_remote_item_get_type(CrossRemoteItem* item) {
+    return item->type;
+}
+
 const char* xremote_cross_remote_item_get_name(CrossRemoteItem* item) {
     return furi_string_get_cstr(item->name);
 }

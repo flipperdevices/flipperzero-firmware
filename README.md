@@ -4,7 +4,7 @@
 - Infrared working
 - SubGhz working
 - Pause working
-- IR Timing features in development
+- IR Timing features working
 
 ## What this is?
 This app combines commands used in IR and SubGhz into playlists that can be run with one click
