@@ -68,6 +68,12 @@ XRemote* xremote_app_alloc() {
     app->subghz = subghz_alloc();
 
     app->text_input = text_input_alloc();
+
+    // Custom made int keyboard
+    app->int_input = int_input_alloc();
+    view_dispatcher_add_view(
+        app->view_dispatcher, XRemoteViewIdIntInput, int_input_get_view(app->int_input));
+
     view_dispatcher_add_view(
         app->view_dispatcher, XRemoteViewIdTextInput, text_input_get_view(app->text_input));
 
@@ -141,6 +147,7 @@ void xremote_app_free(XRemote* app) {
     view_dispatcher_remove_view(app->view_dispatcher, XRemoteViewIdTransmit);
     view_dispatcher_remove_view(app->view_dispatcher, XRemoteViewIdPauseSet);
     text_input_free(app->text_input);
+    int_input_free(app->int_input);
     button_menu_free(app->button_menu_create);
     button_menu_free(app->button_menu_create_add);
     button_menu_free(app->button_menu_ir);
