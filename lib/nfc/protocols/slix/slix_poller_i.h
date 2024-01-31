@@ -19,6 +19,7 @@ typedef enum {
 
 struct SlixPoller {
     Iso15693_3Poller* iso15693_3_poller;
+    SlixType type;
     SlixData* data;
     SlixPollerState poller_state;
     SlixError error;
