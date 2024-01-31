@@ -17,7 +17,7 @@
             <div
               class="flex items-center flex-1 uppercase text-3xl md:text-3xl z-10 text-primary font-haxrcorp-4089 mr-2"
             >
-              Version:
+              PCB Version:
             </div>
             <div
               class="relative flex rounded-md text-lg md:text-lg px-4 border-2 relative font-haxrcorp-4089 uppercase cursor-pointer"
