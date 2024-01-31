@@ -32,7 +32,7 @@ void lfrfid_scene_emulate_on_enter(void* context) {
     lfrfid_worker_emulate_start(app->lfworker, (LFRFIDProtocol)app->protocol_id);
     notification_message(app->notifications, &sequence_blink_start_magenta);
 
-    timer_auto_exit = 
+    timer_auto_exit =
         furi_timer_alloc(lfrfid_scene_emulate_popup_callback, FuriTimerTypeOnce, app);
     furi_timer_start(timer_auto_exit, LFRFID_EMULATION_TIME_MAX_MS);
 
