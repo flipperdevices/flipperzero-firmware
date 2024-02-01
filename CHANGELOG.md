@@ -1,4 +1,7 @@
 # Unitemp changelog
+## Unitemp 1.4
+- Remove version value from application manifest
+- Small fix (Thanks for JamesDavid)
 ## Unitemp 1.3
 - New FZ API satisfaction
 ## Unitemp 1.2
