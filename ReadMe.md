@@ -4,7 +4,7 @@
 &nbsp;<a href='https://shop.rogue-master.net/' target='_blank'><img src='https://rogue-master.net/img/Merch.png' alt='RM Merch'' title='RM Merch'></a>
 &nbsp;<a href='https://github.com/RogueMaster/awesome-flipperzero-withModules' target='_blank'><img src='https://rogue-master.net/img/Resources.png' alt='More Research / Assets' title='More Research / Assets'></a></h1>
 
-# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0126-2134-0.93.9-ecf789c.tgz&channel=RM0126-2134-0.93.9-ecf789c&version=0.93.9) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0126-2134-0.93.9-ecf789c-NoAnim.tgz&channel=RM0126-2134-0.93.9-ecf789c-NoAnim&version=0.93.9)
+# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0201-1533-0.93.9-c1b41c3.tgz&channel=RM0201-1533-0.93.9-c1b41c3&version=0.93.9) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0201-1533-0.93.9-c1b41c3-NoAnim.tgz&channel=RM0201-1533-0.93.9-c1b41c3-NoAnim&version=0.93.9)
 
 ## Thank you so much to our RM Pro/SUPER Patreon supporters! Because of people like you, we are able to offer the best and most up-to-date Flipper Zero Firmware!
 
@@ -31,32 +31,6 @@ This software is for experimental purposes only and is not meant for any illegal
 
 - Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-01-31 23:30 EST`
 - Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-01-31 23:30 EST`
-- [Added Pirate Profile Pic (By cyberartemio)](https://github.com/cyberartemio/flipper-pirates-asset-pack/blob/main/Pirates/Icons/Passport/passport_okay_46x49.png)
-- Updated: [ESP32 Camera Suite v1.6 (By CodyTolene)](https://github.com/CodyTolene/Flipper-Zero-Camera-Suite)
-- Updated: [USB Mass Storage v1.3 (By nminaylov)](https://github.com/flipperdevices/flipperzero-good-faps/tree/nm/usb_mass_storage_app/mass_storage) (Changes from xMasterX)
-- Updated: [ESP Flasher v1.4 (By 0xchocolate)](https://github.com/0xchocolate/flipperzero-esp-flasher) (Changes from xMasterX)
-- UL: [fix archive filebrowser bugs (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/7db331d35a9658d752c637c8571c85c2d0626e45)
-- UL: [subghz keeloq fix emulation for multiple systems and extend support for 2 (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/ec9971614fe62221a938956e4fa82c82f46a6dd2)
-- UL: [Subghz save files with receive time (seconds added) (By xMasterX & Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/a8207c21dd56e2c838cc7346931d0fb9892a6b20)
-- UL: [subghz dea_mio fixes and programming mode support (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/cbe36a3ca49a38d350b06baf3deb3a8d2fcc4187)
-- [Improved IR Ext Module Detection & Power for Infrared & IR Remote (By Sil333033 & Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/370f0c7159750d40d166adf565438324f0d57e08) [Original concept (By codeallnight)](https://github.com/jamisonderek/flipper-zero-tutorials/blob/main/gpio/ir_blaster/cfw-ir-blaster.patch)
-- UL: [more contrast values for replacement displays (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/47a7c66527cbf4a976a5d6bfd111644c4fe01ac3)
-- Updated: [Five Nights at Flipper's v1.2 (By sillygir1)](https://github.com/sillygir1/flipperzero-fnaf)
-- Updated: [Default Games Only Menu to include the latest 7 games (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/25c0e196483ac1af9dd2786bbb3aa596c9347f99)
-- OFW PR: [BadUSB: Layout for it-IT-mac layout #3401 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/3401)
-- UL: [update honeywell proto to latest one (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/35a93e6eefbdb2624a6139197de825e97cb5dd4b)
-- OFW PR: [BadUSB: media keys, Fn/Globe key commands #3403 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/3403)
-- [Small Fix for SubGHz Last Settings (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/ed3cd21f5ccb4b5696953a6cb879a73f49fb69cf)
-- RFID: [auto-stop emulation after 5min feature added (By Leptopt1los)](https://github.com/DarkFlippers/unleashed-firmware/commit/19a5f02d662c77f96fed0048a7984d094bdd67ca) & [rename timers, stop before free (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/89e1620883df64692685265c922b9961bb9c54cd)
-- SubGHz: [fix dea mio formula (By Leptopt1los)](https://github.com/DarkFlippers/unleashed-firmware/commit/4fd0ce3eb576c1d6de0173dde1f67dda95ec4225)
-- SubGHz: [raw erase fixes (By Willy-JL)](https://github.com/DarkFlippers/unleashed-firmware/commit/289fbe56be11f2de36b66481f1f8e6fa4b24c4a1)
-- Updated: [YuriCable Pro Max v0.1 (By arag0re)](https://github.com/arag0re/fz-yuricable-pro-max)
-- UL: [LFRFID: Don't Stop emulation after 5 mins to avoid antenna damage if debug is ON (By Leptopt1los)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/54161f3d8362cb8ddc708d0eecb5cbf8901207be)
-- UL: [LFRFID: Fixed T5577 custom password input (By Leptopt1los)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/54161f3d8362cb8ddc708d0eecb5cbf8901207be)
-- UL: [OFW PR 3410: lfrfid/em4100: added support for different bit rates (By Mrkvak) (RF/32 full support, RF/16 support without reading (16clk removed for now))](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/54161f3d8362cb8ddc708d0eecb5cbf8901207be)
-- Updated: [Cross Remote v2.1 (By leedave)](https://github.com/leedave/flipper-zero-cross-remote)
-- UL: [LFRFID: enter password scene events handler fix (By Leptopt1los)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/89955b2585d4e33e3cce7aed8fe0ad9417728a0c)
-- Updated: [Restaurant Pager Trigger v1.2 (By leedave)](https://github.com/leedave/flipper-zero-meal-pager) (Fixes by xMasterX)
 - To Be Merged OFW PRs: [3352](https://github.com/flipperdevices/flipperzero-firmware/pull/3352), [3302](https://github.com/flipperdevices/flipperzero-firmware/pull/3302), [3211](https://github.com/flipperdevices/flipperzero-firmware/pull/3211), [3366](https://github.com/flipperdevices/flipperzero-firmware/pull/3366), [3250](https://github.com/flipperdevices/flipperzero-firmware/pull/3250), [3402](https://github.com/flipperdevices/flipperzero-firmware/pull/3402) & [3409](https://github.com/flipperdevices/flipperzero-firmware/pull/3409)
 
 <a name="release">
@@ -558,4 +532,4 @@ $ ./fbt dolphin_ext
 - [Desktop Favorite Binds To Allow Opening Custom Game Menu. Whomever can complete this gets 3 months of subscriber builds. Patrons can DM me to add their monthly towards this bounty.](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/756)
 - `Bluetooth Audio` APP to allow flipper to pair to external speaker or headphones for wav/mp3 playback ($200 USD in ETH or BTC) (Don't think this is possible)
 
-# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0126-2134-0.93.9-ecf789c.tgz&channel=RM0126-2134-0.93.9-ecf789c&version=0.93.9) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0126-2134-0.93.9-ecf789c-NoAnim.tgz&channel=RM0126-2134-0.93.9-ecf789c-NoAnim&version=0.93.9)
+# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0201-1533-0.93.9-c1b41c3.tgz&channel=RM0201-1533-0.93.9-c1b41c3&version=0.93.9) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0201-1533-0.93.9-c1b41c3-NoAnim.tgz&channel=RM0201-1533-0.93.9-c1b41c3-NoAnim&version=0.93.9)
