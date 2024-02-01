@@ -112,9 +112,3 @@ typedef struct CrossRemoteItem CrossRemoteItem;
 
 typedef struct XRemoteTransmit XRemoteTransmit;
 typedef struct XRemotePauseSet XRemotePauseSet;
-//typedef struct XRemoteInfoscreen XRemoteInfoscreen;
-
-//typedef struct InfraredRemote InfraredRemote;
-//typedef struct InfraredRemoteButton InfraredRemoteButton;
-//typedef struct InfraredSignal InfraredSignal;
-//typedef struct InfraredRawSignal InfraredRawSignal;
