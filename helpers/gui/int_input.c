@@ -2,7 +2,6 @@
 
 #include <gui/elements.h>
 #include <furi.h>
-#include <assets_icons.h>
 
 /** IntInput type */
 struct IntInput {
