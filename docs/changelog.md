@@ -1,3 +1,6 @@
+## 2.2
+- Fixed incompatibility to Flipper-catalog / uFBT compiler
+
 ## v2.1
 - Added ability to individually set IR Signal time
 
