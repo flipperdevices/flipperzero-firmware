@@ -1,12 +1,13 @@
 ## New changes
 * NFC: **Fixed stuck Saved success screen**
+* NFC: **Fixed crash when reading mifare classic tag then going to add manually menu and adding NFC-A tag**
 * NFC: Fixed EMV txs render
 * NFC/LFRFID: Don't Stop emulation after 5 mins to avoid antenna damage if debug is ON (by @Leptopt1los)
 * LFRFID: Fixed T5577 custom password input (by @Leptopt1los)
 * OFW PR 3410: lfrfid/em4100: added support for different bit rates - by @Mrkvak (RF/32 full support, RF/16 support without reading (16clk removed for now))
 * OFW PR 3412: Fixed MyKey LockID - by @zProAle
---
-Changes from 070 release:
+<br>----<br>
+**Changes from 070 release:**<br>
 * NFC: **EMV parser** added (by @Leptopt1los and @wosk | PR #700)
 * NFC: Metromoney parser balance fix (by @Leptopt1los | PR #699)
 * NFC/LFRFID: Stop emulation after 5 mins to avoid antenna damage (by @Leptopt1los)
