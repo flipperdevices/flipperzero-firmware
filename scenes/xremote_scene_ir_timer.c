@@ -38,7 +38,7 @@ bool xremote_scene_ir_timer_on_event(void* context, SceneManagerEvent event) {
     } else if(event.type == SceneManagerEventTypeCustom) {
         CrossRemoteItem* item = xremote_cross_remote_get_item(app->cross_remote, app->edit_item);
         xremote_cross_remote_item_set_time(item, atoi(app->text_store[1]));
-        if (item->time > 9999) {
+        if(item->time > 9999) {
             item->time = 9999;
         }
         //app->first_station = atoi(app->text_store[0]);
