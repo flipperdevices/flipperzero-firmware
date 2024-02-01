@@ -19,16 +19,12 @@ void xremote_scene_sg_list_on_enter(void* context) {
         view_dispatcher_switch_to_view(app->view_dispatcher, XRemoteViewIdStack);
 
         xremote_sg_remote_load(app->sg_remote_buffer, app->file_path);
-        //xremote_ir_remote_load(app->ir_remote_buffer, app->file_path);
         xremote_cross_remote_add_subghz(app->cross_remote, app->sg_remote_buffer);
     }
 
     if(success) {
         //Load Remote Button View
-        //scene_manager_next_scene(app->scene_manager, XRemoteSceneCreateAdd);
-        //scene_manager_next_scene(app->scene_manager, XRemoteSceneWip);
         scene_manager_next_scene(app->scene_manager, XRemoteSceneCreate);
-        //scene_manager_next_scene(app->scene_manager, XRemoteSceneIrRemote);
     } else {
         scene_manager_previous_scene(app->scene_manager);
     }

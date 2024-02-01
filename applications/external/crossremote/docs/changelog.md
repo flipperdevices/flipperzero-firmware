@@ -1,3 +1,9 @@
+## 2.3
+- Fixed Crash after creating chains with SubGhz Items
+
+## 2.2
+- Fixed incompatibility to Flipper-catalog / uFBT compiler
+
 ## v2.1
 - Added ability to individually set IR Signal time
 

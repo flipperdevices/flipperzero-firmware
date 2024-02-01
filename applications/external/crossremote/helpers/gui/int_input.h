@@ -6,6 +6,7 @@
 #pragma once
 
 #include <gui/view.h>
+#include "xremote_icons.h"
 
 #ifdef __cplusplus
 extern "C" {
