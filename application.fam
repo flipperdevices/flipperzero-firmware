@@ -11,5 +11,3 @@ App(
     fap_author="Leedave",
     fap_description="One-Click, sends multiple commands",
     fap_weburl="https://github.com/leedave/flipper-zero-cross-remote",
-    sdk_headers=["<lib/subghz/protocols/protocol_items.h>"],
-)
