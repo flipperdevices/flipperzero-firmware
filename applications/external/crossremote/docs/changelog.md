@@ -1,3 +1,6 @@
+## v2.1
+- Added ability to individually set IR Signal time
+
 ## v2.0
 - SubGhz Functionality added
 - Slight change in Storage format to enalbe individual IR timings later (feature request)
