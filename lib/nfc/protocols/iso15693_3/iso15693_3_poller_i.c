@@ -32,15 +32,15 @@ static Iso15693_3Error iso15693_3_poller_filter_error(Iso15693_3Error error) {
     }
 }
 
-static Iso15693_3Error iso15693_3_poller_prepare_trx(Iso15693_3Poller* instance) {
-    furi_assert(instance);
+// static Iso15693_3Error iso15693_3_poller_prepare_trx(Iso15693_3Poller* instance) {
+//     furi_assert(instance);
 
-    if(instance->state == Iso15693_3PollerStateIdle) {
-        return iso15693_3_poller_activate(instance, NULL);
-    }
+//     if(instance->state == Iso15693_3PollerStateIdle) {
+//         return iso15693_3_poller_activate(instance, NULL);
+//     }
 
-    return Iso15693_3ErrorNone;
-}
+//     return Iso15693_3ErrorNone;
+// }
 
 static Iso15693_3Error iso15693_3_poller_frame_exchange(
     Iso15693_3Poller* instance,
@@ -293,8 +293,8 @@ Iso15693_3Error iso15693_3_poller_send_frame(
     Iso15693_3Error ret;
 
     do {
-        ret = iso15693_3_poller_prepare_trx(instance);
-        if(ret != Iso15693_3ErrorNone) break;
+        // ret = iso15693_3_poller_prepare_trx(instance);
+        // if(ret != Iso15693_3ErrorNone) break;
 
         ret = iso15693_3_poller_frame_exchange(instance, tx_buffer, rx_buffer, fwt);
     } while(false);

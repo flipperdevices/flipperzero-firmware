@@ -84,6 +84,43 @@ static NfcCommand slix_poller_handler_read_signature(SlixPoller* instance) {
     return NfcCommandContinue;
 }
 
+static NfcCommand slix_poller_handler_privacy_unlock(SlixPoller* instance) {
+    NfcCommand command = NfcCommandContinue;
+    instance->poller_state = SlixPollerStateError;
+
+    FURI_LOG_I(TAG, "Requesting password from app");
+    instance->slix_event.type = SlixPollerEventTypePrivacyUnlockRequest;
+    command = instance->callback(instance->general_event, instance->context);
+    if(instance->slix_event_data.privacy_password.password_set) {
+        SlixPassword pwd = instance->slix_event_data.privacy_password.password;
+        FURI_LOG_I(TAG, "Received password %08lX from app", pwd);
+        instance->error = slix_poller_get_random_number(instance, &instance->random_number);
+        if(instance->error != SlixErrorNone) {
+            FURI_LOG_E(TAG, "Error in get random number: %d", instance->error);
+        } else {
+            FURI_LOG_I(TAG, "Received random number: %04X", instance->random_number);
+            instance->error = slix_poller_set_password(instance, SlixPasswordTypePrivacy, pwd);
+            if(instance->error != SlixErrorNone) {
+                FURI_LOG_E(TAG, "Error setting password: %d", instance->error);
+                command = NfcCommandReset;
+                instance->poller_state = SlixPollerStateError;
+            } else {
+                instance->data->passwords[SlixPasswordTypePrivacy] = pwd;
+                FURI_LOG_I(TAG, "Privacy mode disabled");
+                instance->poller_state = SlixPollerStateIdle;
+                command = NfcCommandReset;
+            }
+        }
+    } else {
+        instance->error = SlixErrorTimeout;
+        instance->poller_state = SlixPollerStateError;
+    }
+
+    furi_delay_ms(1000);
+
+    return command;
+}
+
 static NfcCommand slix_poller_handler_error(SlixPoller* instance) {
     instance->slix_event_data.error = instance->error;
     instance->slix_event.type = SlixPollerEventTypeError;
@@ -103,6 +140,7 @@ static const SlixPollerStateHandler slix_poller_state_handler[SlixPollerStateNum
     [SlixPollerStateError] = slix_poller_handler_error,
     [SlixPollerStateGetNxpSysInfo] = slix_poller_handler_get_nfc_system_info,
     [SlixPollerStateReadSignature] = slix_poller_handler_read_signature,
+    [SlixPollerStatePrivacyUnlock] = slix_poller_handler_privacy_unlock,
     [SlixPollerStateReady] = slix_poller_handler_ready,
 };
 
@@ -130,8 +168,8 @@ static NfcCommand slix_poller_run(NfcGenericEvent event, void* context) {
     if(iso15693_3_event->type == Iso15693_3PollerEventTypeReady) {
         command = slix_poller_state_handler[instance->poller_state](instance);
     } else if(iso15693_3_event->type == Iso15693_3PollerEventTypeError) {
-        instance->slix_event.type = SlixPollerEventTypeError;
-        command = instance->callback(instance->general_event, instance->context);
+        instance->poller_state = SlixPollerStatePrivacyUnlock;
+        command = slix_poller_state_handler[instance->poller_state](instance);
     }
 
     return command;

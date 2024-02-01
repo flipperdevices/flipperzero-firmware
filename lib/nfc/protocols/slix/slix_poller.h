@@ -18,14 +18,21 @@ typedef struct SlixPoller SlixPoller;
  */
 typedef enum {
     SlixPollerEventTypeError, /**< An error occured while reading card. */
+    SlixPollerEventTypePrivacyUnlockRequest,
     SlixPollerEventTypeReady, /**< The card was successfully read by the poller. */
 } SlixPollerEventType;
+
+typedef struct {
+    SlixPassword password;
+    bool password_set;
+} SlixPollerEventDataPrivacyUnlockContext;
 
 /**
  * @brief Slixs poller event data.
  */
 typedef union {
     SlixError error; /**< Error code indicating card reaing fail reason. */
+    SlixPollerEventDataPrivacyUnlockContext privacy_password;
 } SlixPollerEventData;
 
 /**
@@ -79,6 +86,11 @@ SlixError slix_poller_get_nxp_system_info(SlixPoller* instance, SlixSystemInfo* 
  * @return SlixErrorNone on success, an error code on failure.
  */
 SlixError slix_poller_read_signature(SlixPoller* instance, SlixSignature* data);
+
+SlixError slix_poller_get_random_number(SlixPoller* instance, SlixRandomNumber* data);
+
+SlixError
+    slix_poller_set_password(SlixPoller* instance, SlixPasswordType type, SlixPassword password);
 
 #ifdef __cplusplus
 }

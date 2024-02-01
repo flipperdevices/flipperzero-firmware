@@ -74,6 +74,7 @@ typedef enum {
 typedef uint32_t SlixPassword;
 typedef uint8_t SlixSignature[SLIX_SIGNATURE_SIZE];
 typedef bool SlixPrivacy;
+typedef uint16_t SlixRandomNumber;
 
 typedef struct {
     uint8_t pointer;

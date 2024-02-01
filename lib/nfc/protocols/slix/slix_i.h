@@ -76,6 +76,8 @@ SlixError slix_get_nxp_system_info_response_parse(SlixData* data, const BitBuffe
 
 SlixError slix_read_signature_response_parse(SlixSignature data, const BitBuffer* buf);
 
+SlixError slix_get_random_number_response_parse(SlixRandomNumber* data, const BitBuffer* buf);
+
 // Setters
 void slix_set_password(SlixData* data, SlixPasswordType password_type, SlixPassword password);
 
