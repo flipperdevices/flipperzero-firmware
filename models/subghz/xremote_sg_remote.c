@@ -19,7 +19,7 @@ SubGhzRemote* xremote_sg_remote_alloc() {
     SubGhzRemote* remote = malloc(sizeof(SubGhzRemote));
     remote->name = furi_string_alloc();
     remote->filename = furi_string_alloc();
-    
+
     return remote;
 }
 
