@@ -29,8 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0131-2042-0.93.9-3f7ed17](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-01-31 20:42 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-01-31 20:42 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-01-31 23:15 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-01-31 23:15 EST`
 - [Added Pirate Profile Pic (By cyberartemio)](https://github.com/cyberartemio/flipper-pirates-asset-pack/blob/main/Pirates/Icons/Passport/passport_okay_46x49.png)
 - Updated: [ESP32 Camera Suite v1.6 (By CodyTolene)](https://github.com/CodyTolene/Flipper-Zero-Camera-Suite)
 - Updated: [USB Mass Storage v1.3 (By nminaylov)](https://github.com/flipperdevices/flipperzero-good-faps/tree/nm/usb_mass_storage_app/mass_storage) (Changes from xMasterX)
@@ -192,7 +192,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: [NFC: Fixed EMV txs render (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/54161f3d8362cb8ddc708d0eecb5cbf8901207be)
 - UL: [NFC: Dont Stop emulation after 5 mins to avoid antenna damage if debug is ON (By Leptopt1los)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/54161f3d8362cb8ddc708d0eecb5cbf8901207be)
 - UL: [OFW PR 3412: Fixed MyKey LockID (By zProAle)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/54161f3d8362cb8ddc708d0eecb5cbf8901207be)
-- UL: [NFC: Fixed crash when reading mifare classic tag then going to add manually menu and adding NFC-A tag (By xMasterX)]()
+- UL: [NFC: Fixed crash when reading mifare classic tag then going to add manually menu and adding NFC-A tag (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/34c28700d51d2c8f3bd7f5d78233aec411ad00e7)
 
 <a name="release">
 
