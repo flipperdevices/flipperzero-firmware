@@ -109,8 +109,9 @@ bool meal_pager_transmit_input(InputEvent* event, void* context) {
                 instance->view,
                 Meal_PagerTransmitModel * model,
                 {
-                    UNUSED(model);
-                    instance->callback(Meal_PagerCustomEventTransmitBack, instance->context);
+                    if(model->sending != 0) {
+                        //instance->callback(Meal_PagerCustomEventTransmitBack, instance->context);
+                    }
                 },
                 true);
             break;
@@ -171,7 +172,15 @@ void meal_pager_transmit_free(Meal_PagerTransmit* instance) {
     furi_assert(instance);
 
     with_view_model(
-        instance->view, Meal_PagerTransmitModel * model, { UNUSED(model); }, true);
+        instance->view,
+        Meal_PagerTransmitModel * model,
+        {
+            model->pager_type = 0;
+            model->station = 0;
+            model->pager = 0;
+            model->sending = 0;
+        },
+        true);
     view_free(instance->view);
     free(instance);
 }
