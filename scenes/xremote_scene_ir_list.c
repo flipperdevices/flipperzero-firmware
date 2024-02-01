@@ -23,11 +23,8 @@ void xremote_scene_ir_list_on_enter(void* context) {
 
     if(success) {
         //Load Remote Button View
-        //scene_manager_next_scene(app->scene_manager, XRemoteSceneCreateAdd);
-        //scene_manager_next_scene(app->scene_manager, XRemoteSceneWip);
         scene_manager_next_scene(app->scene_manager, XRemoteSceneIrRemote);
     } else {
-        //scene_manager_next_scene(app->scene_manager, XRemoteSceneWip);
         scene_manager_previous_scene(app->scene_manager);
     }
 }

@@ -1,3 +1,6 @@
+## 2.3
+- Fixed Crash after creating chains with SubGhz Items
+
 ## 2.2
 - Fixed incompatibility to Flipper-catalog / uFBT compiler
 

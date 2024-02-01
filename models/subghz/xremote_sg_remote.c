@@ -5,7 +5,6 @@
 struct SubGhzRemote {
     FuriString* name;
     FuriString* filename;
-    FuriString* path;
 };
 
 const char* xremote_sg_remote_get_name(SubGhzRemote* remote) {
@@ -20,13 +19,11 @@ SubGhzRemote* xremote_sg_remote_alloc() {
     SubGhzRemote* remote = malloc(sizeof(SubGhzRemote));
     remote->name = furi_string_alloc();
     remote->filename = furi_string_alloc();
-    remote->path = furi_string_alloc();
-
+    
     return remote;
 }
 
 void xremote_sg_remote_free(SubGhzRemote* remote) {
-    furi_string_free(remote->path);
     furi_string_free(remote->name);
     furi_string_free(remote->filename);
 
@@ -52,10 +49,7 @@ bool xremote_sg_remote_load(SubGhzRemote* remote, FuriString* path) {
         if(dotPosition != NULL) { // check if there is a dot in the file name
             *dotPosition = '\0'; // set the dot position to NULL character to truncate the string
         }
-        //remote->name = fileName;
         furi_string_set_str(remote->name, fileName);
-        //furi_string_set_str(remote->filename, fileName);
-        //free(fileName);
         uint32_t version;
         if(!flipper_format_read_header(ff, buf, &version)) break;
         if(!furi_string_equal(buf, "Flipper SubGhz RAW File") || (version != 1)) break;
