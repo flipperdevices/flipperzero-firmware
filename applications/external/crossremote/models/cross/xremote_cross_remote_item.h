@@ -15,6 +15,7 @@ void xremote_cross_remote_item_set_filename(CrossRemoteItem* item, const char* f
 const char* xremote_cross_remote_item_get_filename(CrossRemoteItem* item);
 
 void xremote_cross_remote_item_set_type(CrossRemoteItem* item, int type);
+int16_t xremote_cross_remote_item_get_type(CrossRemoteItem* item);
 void xremote_cross_remote_item_set_time(CrossRemoteItem* item, uint32_t time);
 uint32_t xremote_cross_remote_item_get_time(CrossRemoteItem* item);
 

@@ -23,6 +23,7 @@ void xremote_cross_remote_remove_item(CrossRemote* remote, size_t index);
 void xremote_cross_remote_rename_item(CrossRemote* remote, size_t index, const char* name);
 size_t xremote_cross_remote_get_item_count(CrossRemote* remote);
 CrossRemoteItem* xremote_cross_remote_get_item(CrossRemote* remote, size_t index);
+int16_t xremote_cross_remote_get_item_type(CrossRemote* remote, size_t index);
 
 bool xremote_cross_remote_save_new(CrossRemote* remote, const char* name);
 bool xremote_cross_remote_delete(CrossRemote* remote);

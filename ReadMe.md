@@ -46,7 +46,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW PR: [BadUSB: Layout for it-IT-mac layout #3401 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/3401)
 - UL: [update honeywell proto to latest one (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/35a93e6eefbdb2624a6139197de825e97cb5dd4b)
 - OFW PR: [BadUSB: media keys, Fn/Globe key commands #3403 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/3403)
-- Updated: [Cross Remote v2.0 (By leedave)](https://github.com/leedave/flipper-zero-cross-remote)
 - [Small Fix for SubGHz Last Settings (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/ed3cd21f5ccb4b5696953a6cb879a73f49fb69cf)
 - RFID: [auto-stop emulation after 5min feature added (By Leptopt1los)](https://github.com/DarkFlippers/unleashed-firmware/commit/19a5f02d662c77f96fed0048a7984d094bdd67ca) & [rename timers, stop before free (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/89e1620883df64692685265c922b9961bb9c54cd)
 - SubGHz: [fix dea mio formula (By Leptopt1los)](https://github.com/DarkFlippers/unleashed-firmware/commit/4fd0ce3eb576c1d6de0173dde1f67dda95ec4225)
@@ -55,6 +54,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - To Be Merged OFW PRs: [3352](https://github.com/flipperdevices/flipperzero-firmware/pull/3352), [3302](https://github.com/flipperdevices/flipperzero-firmware/pull/3302), [3211](https://github.com/flipperdevices/flipperzero-firmware/pull/3211), [3366](https://github.com/flipperdevices/flipperzero-firmware/pull/3366), [3250](https://github.com/flipperdevices/flipperzero-firmware/pull/3250), [3402](https://github.com/flipperdevices/flipperzero-firmware/pull/3402) & [3409](https://github.com/flipperdevices/flipperzero-firmware/pull/3409)
 - UL: LFRFID: Don't Stop emulation after 5 mins to avoid antenna damage if debug is ON (By Leptopt1los)
 - UL: LFRFID: Fixed T5577 custom password input (By Leptopt1los)
+- Updated: [Cross Remote v2.1 (By leedave)](https://github.com/leedave/flipper-zero-cross-remote)
 - UL: OFW PR 3410: lfrfid/em4100: added support for different bit rates (By Mrkvak) (RF/32 full support, RF/16 support without reading (16clk removed for now))
 
 ## IN THIS BRANCH:
@@ -502,7 +502,7 @@ $ ./fbt dolphin_ext
 - [Cookie Clicker v1.0 (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/hid/hid_cookie)
 - [Count Down Timer v1.2 (By 0w0mewo)](https://github.com/0w0mewo/fpz_cntdown_timer)
 - [Counter v1.3 (By Krulknul)](https://github.com/Krulknul/dolphin-counter)
-- [Cross Remote v2.0 (By leedave)](https://github.com/leedave/flipper-zero-cross-remote)
+- [Cross Remote v2.1 (By leedave)](https://github.com/leedave/flipper-zero-cross-remote)
 - [Crypto Dictionary v0.1 (By armixz)](https://github.com/armixz/Flipper-Zero-Crypto-Dictionary)
 - [Dab Timer v1.8 (By RogueMaster)](https://github.com/RogueMaster/flipperzero-dabtimer)
 - [DAP Link v1.1 (By DrZlo13)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/1897)
