@@ -194,7 +194,7 @@ void seader_send_payload(
 
 #ifdef ASN1_DEBUG
     if(er.encoded > -1) {
-        char payloadDebug[384] = {0};
+        char payloadDebug[1024] = {0};
         memset(payloadDebug, 0, sizeof(payloadDebug));
         (&asn_DEF_Payload)
             ->op->print_struct(
@@ -202,6 +202,8 @@ void seader_send_payload(
         if(strlen(payloadDebug) > 0) {
             FURI_LOG_D(TAG, "Sending payload[%d %d %d]: %s", to, from, replyTo, payloadDebug);
         }
+    } else {
+        FURI_LOG_W(TAG, "Failed to print_struct payload");
     }
 #endif
     //0xa0, 0xda, 0x02, 0x63, 0x00, 0x00, 0x0a,
