@@ -29,8 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0131-2042-0.93.9-3f7ed17](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-01-31 23:15 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-01-31 23:15 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-01-31 23:30 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-01-31 23:30 EST`
 - [Added Pirate Profile Pic (By cyberartemio)](https://github.com/cyberartemio/flipper-pirates-asset-pack/blob/main/Pirates/Icons/Passport/passport_okay_46x49.png)
 - Updated: [ESP32 Camera Suite v1.6 (By CodyTolene)](https://github.com/CodyTolene/Flipper-Zero-Camera-Suite)
 - Updated: [USB Mass Storage v1.3 (By nminaylov)](https://github.com/flipperdevices/flipperzero-good-faps/tree/nm/usb_mass_storage_app/mass_storage) (Changes from xMasterX)
@@ -56,6 +56,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: [OFW PR 3410: lfrfid/em4100: added support for different bit rates (By Mrkvak) (RF/32 full support, RF/16 support without reading (16clk removed for now))](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/54161f3d8362cb8ddc708d0eecb5cbf8901207be)
 - Updated: [Cross Remote v2.1 (By leedave)](https://github.com/leedave/flipper-zero-cross-remote)
 - UL: [LFRFID: enter password scene events handler fix (By Leptopt1los)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/89955b2585d4e33e3cce7aed8fe0ad9417728a0c)
+- Updated: [Restaurant Pager Trigger v1.2 (By leedave)](https://github.com/leedave/flipper-zero-meal-pager) (Fixes by xMasterX)
 - To Be Merged OFW PRs: [3352](https://github.com/flipperdevices/flipperzero-firmware/pull/3352), [3302](https://github.com/flipperdevices/flipperzero-firmware/pull/3302), [3211](https://github.com/flipperdevices/flipperzero-firmware/pull/3211), [3366](https://github.com/flipperdevices/flipperzero-firmware/pull/3366), [3250](https://github.com/flipperdevices/flipperzero-firmware/pull/3250), [3402](https://github.com/flipperdevices/flipperzero-firmware/pull/3402) & [3409](https://github.com/flipperdevices/flipperzero-firmware/pull/3409)
 
 <a name="release">
