@@ -18,6 +18,8 @@
 #include <infrared_transmit.h>
 #include <xc_icons.h>
 
+#include <assets_icons.h>
+
 #include "../infrared/infrared_remote.h"
 
 #define XREMOTE_BUTTON_COUNT 26
