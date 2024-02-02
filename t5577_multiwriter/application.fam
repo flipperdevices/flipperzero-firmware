@@ -1,6 +1,6 @@
 App(
     appid="t5577_multiwriter",
-    name="T5577 multiwriter",
+    name="T5577 Multiwriter",
     apptype=FlipperAppType.EXTERNAL,
     targets=["f7"],
     entry_point="t5577_multiwriter_app",
