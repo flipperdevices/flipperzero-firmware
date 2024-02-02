@@ -1,0 +1,12 @@
+App(
+    appid="usb_ccb",
+    name="USB Consumer Control",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="usb_ccb_app",
+    stack_size=1 * 1024,
+    fap_author="piraija",
+    fap_category="USB",
+    fap_description="USB Consumer Control",
+    fap_icon="usb_ccb_10px.png",
+    fap_version="1.0", 
+)
