@@ -76,39 +76,6 @@ static void emv_trace(EmvPoller* instance, const char* message) {
     }
 }
 
-static uint16_t emv_prepare_pdol(APDU* dest, APDU* src) {
-    bool tag_found;
-    for(uint16_t i = 0; i < src->size; i++) {
-        tag_found = false;
-        for(uint8_t j = 0; j < sizeof(pdol_values) / sizeof(PDOLValue*); j++) {
-            if(src->data[i] == pdol_values[j]->tag) {
-                // Found tag with 1 byte length
-                uint8_t len = src->data[++i];
-                memcpy(dest->data + dest->size, pdol_values[j]->data, len);
-                dest->size += len;
-                tag_found = true;
-                break;
-            } else if(((src->data[i] << 8) | src->data[i + 1]) == pdol_values[j]->tag) {
-                // Found tag with 2 byte length
-                i += 2;
-                uint8_t len = src->data[i];
-                memcpy(dest->data + dest->size, pdol_values[j]->data, len);
-                dest->size += len;
-                tag_found = true;
-                break;
-            }
-        }
-        if(!tag_found) {
-            // Unknown tag, fill zeros
-            i += 2;
-            uint8_t len = src->data[i];
-            memset(dest->data + dest->size, 0, len);
-            dest->size += len;
-        }
-    }
-    return dest->size;
-}
-
 static bool
     emv_decode_tlv_tag(const uint8_t* buff, uint16_t tag, uint8_t tlen, EmvApplication* app) {
     uint8_t i = 0;
@@ -147,12 +114,25 @@ static bool
         success = true;
         FURI_LOG_T(TAG, "found EMV_TAG_APP_PRIORITY %X: %d", tag, app->priority);
         break;
-    case EMV_TAG_CARD_NAME:
+    case EMV_TAG_APPL_LABEL:
+        memcpy(app->label, &buff[i], tlen);
+        app->label[tlen] = '\0';
+        success = true;
+        FURI_LOG_T(TAG, "found EMV_TAG_APPL_LABEL %x: %s", tag, app->label);
+        break;
+    case EMV_TAG_APPL_NAME:
+        furi_check(tlen < sizeof(app->name));
         memcpy(app->name, &buff[i], tlen);
         app->name[tlen] = '\0';
-        app->name_found = true;
         success = true;
-        FURI_LOG_T(TAG, "found EMV_TAG_CARD_NAME %x : %s", tag, app->name);
+        FURI_LOG_T(TAG, "found EMV_TAG_APPL_NAME %x: %s", tag, app->name);
+        break;
+    case EMV_TAG_APPL_EFFECTIVE:
+        app->eff_year = buff[i];
+        app->eff_month = buff[i + 1];
+        app->eff_day = buff[i + 2];
+        success = true;
+        FURI_LOG_T(TAG, "found EMV_TAG_APPL_EFFECTIVE %x:", tag);
         break;
     case EMV_TAG_PDOL:
         memcpy(app->pdol.data, &buff[i], tlen);
@@ -225,6 +205,7 @@ static bool
     case EMV_TAG_EXP_DATE:
         app->exp_year = buff[i];
         app->exp_month = buff[i + 1];
+        app->exp_day = buff[i + 2];
         success = true;
         FURI_LOG_T(TAG, "found EMV_TAG_EXP_DATE %x", tag);
         break;
@@ -404,6 +385,29 @@ static bool emv_decode_response_tlv(const uint8_t* buff, uint8_t len, EmvApplica
         i += tlen;
     }
     return success;
+}
+
+static void emv_prepare_pdol(APDU* dest, APDU* src) {
+    uint16_t tag = 0;
+    uint8_t tlen = 0;
+    uint8_t i = 0;
+    while(i < src->size) {
+        bool tag_found = emv_parse_tag(src->data, src->size, &tag, &tlen, &i);
+        if(tag_found) {
+            for(uint8_t j = 0; j < COUNT_OF(pdol_values); j++) {
+                if(tag == pdol_values[j]->tag) {
+                    memcpy(dest->data + dest->size, pdol_values[j]->data, tlen);
+                    dest->size += tlen;
+                    break;
+                }
+            }
+        } else {
+            // Unknown tag, fill zeros
+            furi_check(dest->size + tlen < sizeof(dest->data));
+            memset(dest->data + dest->size, 0, tlen);
+            dest->size += tlen;
+        }
+    }
 }
 
 EmvError emv_poller_select_ppse(EmvPoller* instance) {
