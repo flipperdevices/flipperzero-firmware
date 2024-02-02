@@ -4,6 +4,8 @@
 #include <flipper_format/flipper_format.h>
 #include <seader_icons.h>
 
+#include <assets_icons.h>
+
 #include <toolbox/protocols/protocol_dict.h>
 #include <lfrfid/protocols/lfrfid_protocols.h>
 #include <lfrfid/lfrfid_dict_file.h>
