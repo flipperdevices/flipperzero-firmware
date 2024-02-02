@@ -4,4 +4,3 @@ dist/*
 .editorconfig
 .env
 .ufbt
-.venv
