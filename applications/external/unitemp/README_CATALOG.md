@@ -1,5 +1,5 @@
 # Unitemp - Universal temperature sensor reader
-[Flipper Zero](https://flipperzero.one/) application for reading temperature, humidity and pressure sensors like a DHT11/22, DS18B20, BMP280, HTU21 and more. 
+Application for reading temperature, humidity and pressure sensors like a DHT11/22, DS18B20, BMP280, HTU21 and more. 
 ## List of supported sensors
 - DHT11
 - DHT12
