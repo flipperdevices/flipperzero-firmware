@@ -23,6 +23,8 @@
 #include "mfc_editor_icons.h"
 #include "scenes/mfc_editor_scene.h"
 
+#include <assets_icons.h>
+
 #define TAG "MFCEditor"
 
 #define NFC_APP_FOLDER ANY_PATH("nfc")
