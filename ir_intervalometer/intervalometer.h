@@ -1,0 +1,4 @@
+#ifndef INTERVALOMETER_H
+#define INTERVALOMETER_H
+
+#endif /* !INTERVALOMETER_H */
