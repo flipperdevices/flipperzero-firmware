@@ -34,7 +34,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Cross Remote v2.3 (By leedave)](https://github.com/leedave/flipper-zero-cross-remote)
 - Updated: [Sub-GHz Bruteforcer v3.9.2 (By Ganapati/xMasterX/derskythe)](https://github.com/derskythe/flipperzero-subbrute/tree/master)
 - Updated: [BLE Spam v4.4 (By Willy-JL & ECTO-1A & Spooks4576 with research from xMasterX; OFW API thanks to noproto)](https://github.com/noproto/apple_ble_spam_ofw) (Minor note updates)
-- Infrared Last Settings Default to Auto-Detect (By Willy-JL)
+- Infrared: Last Settings Default to Auto-Detect (By Willy-JL)
+- Infrared: Simpler Last Settings API (By Willy-JL)
 - To Be Merged OFW PRs: [3352](https://github.com/flipperdevices/flipperzero-firmware/pull/3352), [3302](https://github.com/flipperdevices/flipperzero-firmware/pull/3302), [3211](https://github.com/flipperdevices/flipperzero-firmware/pull/3211), [3366](https://github.com/flipperdevices/flipperzero-firmware/pull/3366), [3250](https://github.com/flipperdevices/flipperzero-firmware/pull/3250), [3402](https://github.com/flipperdevices/flipperzero-firmware/pull/3402) & [3409](https://github.com/flipperdevices/flipperzero-firmware/pull/3409)
 
 <a name="release">
