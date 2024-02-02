@@ -16,6 +16,8 @@
 #include "views/xremote_learn_view.h"
 #include "views/xremote_signal_view.h"
 
+#include "infrared_last_settings.h"
+
 #define TAG "XRemote"
 
 void xremote_get_version(char* version, size_t length) {
@@ -90,9 +92,16 @@ int32_t xremote_main(void* p) {
     xremote_app_submenu_add(app, "Settings", XRemoteViewSettings, xremote_submenu_callback);
     xremote_app_submenu_add(app, "About", XRemoteViewAbout, xremote_submenu_callback);
 
+    InfraredLastSettings* last_settings = infrared_last_settings_alloc();
+    infrared_last_settings_load(last_settings);
+    infrared_last_settings_apply(last_settings);
+
     /* Switch to main menu by default and run disparcher*/
     xremote_app_switch_to_view(app, XRemoteViewSubmenu);
     view_dispatcher_run(app->app_ctx->view_dispatcher);
+
+    infrared_last_settings_reset(last_settings);
+    infrared_last_settings_free(last_settings);
 
     /* Cleanup and exit */
     xremote_app_free(app);
