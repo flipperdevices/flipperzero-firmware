@@ -34,7 +34,7 @@ Connect the Plantower PMS5003/PMS7003/PMS9003 sensor according to the wiring dia
 ## Application controls
 
 Use left/right arrows for PM/AQI display mode switching. 
-Flipper LED will blink green once every successful sensor reads.
+Flipper LED will blink once every successful sensor reading by color according to the current AQI value.
 
 ## License
 
