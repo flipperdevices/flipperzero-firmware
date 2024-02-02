@@ -1724,3 +1724,136 @@ type: parsed
 protocol: RC6
 address: 00 00 00 00
 command: 21 00 00 00
+#
+#TCL 50P715X1
+name: Power
+type: parsed
+protocol: RCA
+address: 0F 00 00 00
+command: 54 00 00 00
+# 
+name: Setup
+type: parsed
+protocol: RCA
+address: 0F 00 00 00
+command: F3 00 00 00
+# 
+name: Input
+type: parsed
+protocol: RCA
+address: 0F 00 00 00
+command: C5 00 00 00
+# 
+name: Menu
+type: parsed
+protocol: RCA
+address: 0F 00 00 00
+command: 37 00 00 00
+# 
+name: List
+type: parsed
+protocol: RCA
+address: 0F 00 00 00
+command: 86 00 00 00
+# 
+name: Info
+type: parsed
+protocol: RCA
+address: 0F 00 00 00
+command: 3C 00 00 00
+# 
+name: Back
+type: parsed
+protocol: RCA
+address: 0F 00 00 00
+command: E4 00 00 00
+# 
+name: Ok
+type: parsed
+protocol: RCA
+address: 0F 00 00 00
+command: 2F 00 00 00
+# 
+name: Up
+type: parsed
+protocol: RCA
+address: 0F 00 00 00
+command: 9A 00 00 00
+# 
+name: Down
+type: parsed
+protocol: RCA
+address: 0F 00 00 00
+command: 1A 00 00 00
+# 
+name: Left
+type: parsed
+protocol: RCA
+address: 0F 00 00 00
+command: 6A 00 00 00
+# 
+name: Right
+type: parsed
+protocol: RCA
+address: 0F 00 00 00
+command: EA 00 00 00
+# 
+name: Fast_fo
+type: parsed
+protocol: RCA
+address: 0F 00 00 00
+command: 38 00 00 00
+# 
+name: Fast_ba
+type: parsed
+protocol: RCA
+address: 0F 00 00 00
+command: B8 00 00 00
+# 
+name: Pause
+type: parsed
+protocol: RCA
+address: 0F 00 00 00
+command: 98 00 00 00
+# 
+name: Play
+type: parsed
+protocol: RCA
+address: 0F 00 00 00
+command: A8 00 00 00
+# 
+name: Stop
+type: parsed
+protocol: RCA
+address: 0F 00 00 00
+command: F8 00 00 00
+# 
+name: Mute
+type: parsed
+protocol: RCA
+address: 0F 00 00 00
+command: FC 00 00 00
+# 
+name: Vol_up
+type: parsed
+protocol: RCA
+address: 0F 00 00 00
+command: F4 00 00 00
+# 
+name: Vol_dn
+type: parsed
+protocol: RCA
+address: 0F 00 00 00
+command: 74 00 00 00
+# 
+name: Ch_next
+type: parsed
+protocol: RCA
+address: 0F 00 00 00
+command: B4 00 00 00
+# 
+name: Ch_prev
+type: parsed
+protocol: RCA
+address: 0F 00 00 00
+command: 34 00 00 00
