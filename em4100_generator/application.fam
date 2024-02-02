@@ -1,5 +1,5 @@
 App(
-    appid="key_generator",
+    appid="em4100_generator",
     name="EM4100 Key generator",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="key_generator_main",
@@ -7,6 +7,7 @@ App(
     stack_size=1 * 1024,
     fap_category="RFID",
     fap_icon_assets="images",
+    fap_icon_assets_symbol="key_generator",
     fap_icon="icon.png",
     fap_author="@Milk-Cool",
     fap_weburl="https://github.com/Milk-Cool/fz-em4100-generator",

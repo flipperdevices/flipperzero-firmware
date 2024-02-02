@@ -12,8 +12,8 @@
 
 #include "key_generator_icons.h"
 
-#define DIR_PATH "/ext/rfidfuzzer"
-#define FILE_PATH "/ext/rfidfuzzer/generated.txt"
+#define DIR_PATH "/ext/lfrfid_fuzzer"
+#define FILE_PATH "/ext/lfrfid_fuzzer/em4100_gen.txt"
 
 FuriString* file_path;
 FuriString* key;
@@ -24,9 +24,9 @@ static void app_draw_callback(Canvas* canvas, void* ctx) {
 
     canvas_clear(canvas);
     canvas_draw_icon(canvas, 0, 0, &I_ok_64x64);
-    canvas_draw_str(canvas, 80, 24, "Saved as");
-    canvas_draw_str(canvas, 75, 36, "rfidfuzzer/");
-    canvas_draw_str(canvas, 70, 48, "generated.txt");
+    canvas_draw_str(canvas, 74, 24, "Saved as");
+    canvas_draw_str(canvas, 65, 36, "lfrfid_fuzzer/");
+    canvas_draw_str(canvas, 56, 48, "em4100_gen.txt");
 }
 
 static void app_input_callback(InputEvent* input_event, void* ctx) {
