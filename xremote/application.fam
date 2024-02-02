@@ -1,0 +1,17 @@
+App(
+    appid="flipper_xremote",
+    name="XRemote",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="xremote_main",
+    requires=["gui", "dialogs", "infrared"],
+    stack_size=3 * 1024,
+    order=1,
+    fap_version="1.1",
+    fap_category="Infrared",
+    fap_icon_assets="assets",
+    fap_icon_assets_symbol="xc",
+    fap_icon="assets/App_Icon_10x10.png",
+    fap_author="@kala13x",
+    fap_weburl="https://github.com/kala13x/flipper-xremote",
+    fap_description="Advanced infrared remote application",
+)
