@@ -13,6 +13,8 @@
 #include <gui/icon.h>
 #include <infrared_transmit.h>
 
+#include "infrared_last_settings.h"
+
 #include <input/input.h>
 
 #include <notification/notification.h>
@@ -628,6 +630,10 @@ int32_t flipvalo_app() {
 
     flipvalo_priv_init(fv_priv);
 
+    InfraredLastSettings* last_settings = infrared_last_settings_alloc();
+    infrared_last_settings_load(last_settings);
+    infrared_last_settings_apply(last_settings);
+
     if(!fv_priv->mutex) {
         FURI_LOG_E("Flipvalo", "Cannot create mutex\r\n");
         ret = 1;
@@ -724,6 +730,8 @@ cleanup:
         }
         view_port_free(view_port);
     }
+    infrared_last_settings_reset(last_settings);
+    infrared_last_settings_free(last_settings);
     if(event_queue) {
         furi_message_queue_free(event_queue);
     }
