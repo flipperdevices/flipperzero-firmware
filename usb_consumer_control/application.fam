@@ -8,5 +8,5 @@ App(
     fap_category="USB",
     fap_description="USB Consumer Control",
     fap_icon="usb_ccb_10px.png",
-    fap_version="1.0", 
+    fap_version="1.0",
 )

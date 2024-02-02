@@ -65,11 +65,14 @@ UsbCcb* usb_ccb_app_alloc() {
     // Submenu view
     app->submenu = submenu_alloc();
     submenu_set_header(app->submenu, "USB Consumer Control");
-    submenu_add_item(app->submenu, "About", UsbCcbSubmenuIndexAbout, usb_ccb_submenu_callback, app);
+    submenu_add_item(
+        app->submenu, "About", UsbCcbSubmenuIndexAbout, usb_ccb_submenu_callback, app);
     submenu_add_item(app->submenu, "Help", UsbCcbSubmenuIndexHelp, usb_ccb_submenu_callback, app);
-    submenu_add_item(app->submenu, "Start", UsbCcbSubmenuIndexStart, usb_ccb_submenu_callback, app);
+    submenu_add_item(
+        app->submenu, "Start", UsbCcbSubmenuIndexStart, usb_ccb_submenu_callback, app);
     view_set_previous_callback(submenu_get_view(app->submenu), usb_ccb_exit);
-    view_dispatcher_add_view(app->view_dispatcher, UsbCcbViewSubmenu, submenu_get_view(app->submenu));
+    view_dispatcher_add_view(
+        app->view_dispatcher, UsbCcbViewSubmenu, submenu_get_view(app->submenu));
 
     // Dialog view
     app->dialog = dialog_ex_alloc();
@@ -79,22 +82,29 @@ UsbCcb* usb_ccb_app_alloc() {
     dialog_ex_set_right_button_text(app->dialog, "Stay");
     dialog_ex_set_center_button_text(app->dialog, "Menu");
     dialog_ex_set_header(app->dialog, "Exit or return to menu?", 64, 11, AlignCenter, AlignTop);
-    view_dispatcher_add_view(app->view_dispatcher, UsbCcbViewExitConfirm, dialog_ex_get_view(app->dialog));
+    view_dispatcher_add_view(
+        app->view_dispatcher, UsbCcbViewExitConfirm, dialog_ex_get_view(app->dialog));
 
     // About view
     app->usb_ccb_about = usb_ccb_about_alloc();
-    view_set_previous_callback(usb_ccb_about_get_view(app->usb_ccb_about), usb_ccb_exit_confirm_view);
-    view_dispatcher_add_view(app->view_dispatcher, UsbCcbViewAbout, usb_ccb_about_get_view(app->usb_ccb_about));
+    view_set_previous_callback(
+        usb_ccb_about_get_view(app->usb_ccb_about), usb_ccb_exit_confirm_view);
+    view_dispatcher_add_view(
+        app->view_dispatcher, UsbCcbViewAbout, usb_ccb_about_get_view(app->usb_ccb_about));
 
     // Help view
     app->usb_ccb_help = usb_ccb_help_alloc();
-    view_set_previous_callback(usb_ccb_help_get_view(app->usb_ccb_help), usb_ccb_exit_confirm_view);
-    view_dispatcher_add_view(app->view_dispatcher, UsbCcbViewHelp, usb_ccb_help_get_view(app->usb_ccb_help));
+    view_set_previous_callback(
+        usb_ccb_help_get_view(app->usb_ccb_help), usb_ccb_exit_confirm_view);
+    view_dispatcher_add_view(
+        app->view_dispatcher, UsbCcbViewHelp, usb_ccb_help_get_view(app->usb_ccb_help));
 
     // Start view
     app->usb_ccb_start = usb_ccb_start_alloc();
-    view_set_previous_callback(usb_ccb_start_get_view(app->usb_ccb_start), usb_ccb_exit_confirm_view);
-    view_dispatcher_add_view(app->view_dispatcher, UsbCcbViewStart, usb_ccb_start_get_view(app->usb_ccb_start));
+    view_set_previous_callback(
+        usb_ccb_start_get_view(app->usb_ccb_start), usb_ccb_exit_confirm_view);
+    view_dispatcher_add_view(
+        app->view_dispatcher, UsbCcbViewStart, usb_ccb_start_get_view(app->usb_ccb_start));
 
     app->view_id = UsbCcbViewSubmenu;
     view_dispatcher_switch_to_view(app->view_dispatcher, app->view_id);
