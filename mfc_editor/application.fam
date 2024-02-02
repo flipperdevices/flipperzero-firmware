@@ -1,0 +1,19 @@
+App(
+    appid="mfc_editor",
+    name="MIFARE Classic Editor",
+    apptype=FlipperAppType.EXTERNAL,
+    targets=["f7"],
+    entry_point="mfc_editor_app",
+    requires=[
+        "storage",
+        "gui",
+    ],
+    stack_size=4 * 1024,
+    fap_description="Application for viewing and editing MIFARE Classic .nfc files",
+    fap_version="1.0",
+    fap_icon="assets/app_icon_10px.png",
+    fap_category="NFC",
+    fap_icon_assets="assets",
+    fap_author="TollyH",
+    fap_weburl="https://github.com/TollyH/flipper-apps/tree/main/mfc-editor",
+)
