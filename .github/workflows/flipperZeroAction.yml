@@ -12,6 +12,7 @@ jobs:
         id: build-app-gb-pokemon-trading
         with:
           # Set to 'release' to build for latest published release version
+          submodules: 'true'
           sdk-channel: release
           app-dir: ./
       - name: Upload app artifacts GAME BOY Pokemon Trading
