@@ -73,7 +73,28 @@ And use [**qFlipper**](https://flipperzero.one/update) to copy the generated **p
 
 These instructions assume that you are starting at the Flipper Zero desktop. Otherwise, press the Back button until you are at the desktop.
 
-- If using a MALVEKE board, plug it in to the GPIO header now. The app will auto-detect and select the correct pinout to support the MALVEKE EXT1 interface. If using the Flipper GB Link board, or any other pinout, they can be connected to the Flipper Zero now, or at any point in the future.
+- If you're using a MALVEKE PCB version, verify the **Pinout** configuration:
+
+    <p align='center'>
+        <br />
+        <img src="./docs/images/flipper-zero-flat-00.png" width="400" />
+        <br />
+    </p>
+
+    - MALVEKE **2.5** PCB Version: If you're using this version, select the `MALVEKE` configuration.
+        <p align='center'>
+            <br />
+            <img src="./docs/images/flipper-zero-flat-01.png" width="400" />
+            <br />
+        </p>
+
+    - MALVEKE **2.5.1** PCB Version: If you're using this version, select the `ORIGINAL`
+        <p align='center'>
+            <br />
+            <img src="./docs/images/flipper-zero-flat-02.png" width="400" />
+            <br />
+        </p>
+
 - Press the `OK` button on the Flipper to open the main menu.
 - Choose `Applications` from the menu.
 - Choose `GPIO` from the submenu.
