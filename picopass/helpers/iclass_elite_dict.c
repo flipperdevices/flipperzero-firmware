@@ -147,7 +147,7 @@ bool iclass_elite_dict_add_key(IclassEliteDict* dict, uint8_t* key) {
     furi_assert(dict->stream);
 
     FuriString* key_str = furi_string_alloc();
-    for(size_t i = 0; i < 6; i++) {
+    for(size_t i = 0; i < ICLASS_ELITE_KEY_LEN; i++) {
         furi_string_cat_printf(key_str, "%02X", key[i]);
     }
     furi_string_cat_printf(key_str, "\n");
