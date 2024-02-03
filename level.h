@@ -21,7 +21,7 @@ typedef struct {
 
 void level_behaviour_set(Level* level, LevelBehaviour behaviour, void* context);
 
-Entity* level_add_entity(Level* level, const EntityBehaviour* behaviour);
+Entity* level_add_entity(Level* level, const EntityDescription* behaviour);
 
 void level_remove_entity(Level* level, Entity* entity);
 

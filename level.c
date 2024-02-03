@@ -85,7 +85,7 @@ void level_behaviour_set(Level* level, LevelBehaviour behaviour, void* context) 
     level->context = context;
 }
 
-Entity* level_add_entity(Level* level, const EntityBehaviour* behaviour) {
+Entity* level_add_entity(Level* level, const EntityDescription* behaviour) {
     Entity* entity = entity_alloc(behaviour);
     EntityList_push_back(level->entities_to_add, entity);
     return entity;

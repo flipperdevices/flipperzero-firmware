@@ -7,11 +7,11 @@
 
 struct Entity {
     Vector position;
-    const EntityBehaviour* behaviour;
+    const EntityDescription* behaviour;
     void* context;
 };
 
-Entity* entity_alloc(const EntityBehaviour* behaviour) {
+Entity* entity_alloc(const EntityDescription* behaviour) {
     Entity* entity = malloc(sizeof(Entity));
     entity->position = VECTOR_ZERO;
     entity->behaviour = behaviour;

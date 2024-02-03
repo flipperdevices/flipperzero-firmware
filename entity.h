@@ -22,7 +22,7 @@ typedef struct {
     void (*update)(Entity* entity, Director* director, void* context);
     void (*render)(Entity* entity, Director* director, Canvas* canvas, void* context);
     size_t context_size;
-} EntityBehaviour;
+} EntityDescription;
 
 Vector entity_pos_get(Entity* entity);
 
