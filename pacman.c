@@ -107,6 +107,19 @@ typedef struct {
     uint8_t score;
 } PacmanGameModel;
 
+typedef struct start_positions {
+    uint8_t pacman_x;
+    uint8_t pacman_y;
+    uint8_t blinky_x;
+    uint8_t blinky_y;
+    uint8_t pinky_x;
+    uint8_t pinky_y;
+    uint8_t inky_x;
+    uint8_t inky_y;
+    uint8_t clyde_x;
+    uint8_t clyde_y;
+} StartPositions;
+
 /**
  * @brief      Callback for exiting the application.
  * @details    This function is called when user press back button.  We return VIEW_NONE to
@@ -199,7 +212,7 @@ static const char* map_config[] = {
     "|C|  |C|   |C||C|   |C|  |C|", "|C3--4C3---4C34C3---4C3--4C|", "|CCCCCCCCCCCCCCCCCCCCCCCCCC|",
     "|C1--2C12C1------2C12C1--2C|", "|C3--4C||C3--21--4C||C3--4C|", "|CCCCCC||CCCC||CCCC||CCCCCC|",
     "3----2C|3--2 || 1--4|C1----4", "     |C|1--4 34 3--2|C|     ", "     |C||          ||C|     ",
-    "     |C|| 1--  --2 ||C|     ", "-----4C34 |BbBpBi| 34C3-----", "      C   |BBBBBB|   C      ",
+    "     |C|| 1--  --2 ||C|     ", "-----4C34 |BBBBBB| 34C3-----", "      C   |BbcpiB|   C      ",
     "-----2C12 |BBBBBB| 12C1-----", "     |C|| 3------4 ||C|     ", "     |C||          ||C|     ",
     "     |C|| 1------2 ||C|     ", "1----4C34 3--21--4 34C3----2", "|CCCCCCCCCCCC||CCCCCCCCCCCC|",
     "|C1--2C1---2C||C1---2C1--2C|", "|C3-2|C3---4C34C3---4C|1-4C|", "|CCC||CCCCCCCCCCCCCCCC||CCC|",
@@ -213,7 +226,8 @@ static const char* map_config[] = {
  * @param      config The config matrix (actually array of strings).
  * @return     The initialized Entity matrix.
  */
-static void setup_map(Entity map[][MAP_SIZE_W]) {
+static StartPositions* setup_map(Entity map[][MAP_SIZE_W]) {
+    StartPositions* positions = (StartPositions*)malloc(sizeof(StartPositions));
     for(int i = 0; i < MAP_SIZE_H; i++) {
         for(int j = 0; j < MAP_SIZE_W; j++) {
             int symbol = map_config[i][j]; // Int to prevent to go beyond char range
@@ -241,17 +255,36 @@ static void setup_map(Entity map[][MAP_SIZE_W]) {
                 break;
             case 'P':
                 map[i][j] = EntityPacman;
+                positions->pacman_x = i * WALL_SIZE;
+                positions->pacman_y = j * WALL_SIZE;
+                break;
+            case 'c':
+                map[i][j] = EntityPacman;
+                positions->clyde_x = i * WALL_SIZE;
+                positions->clyde_y = j * WALL_SIZE;
                 break;
             case 'p':
+                map[i][j] = EntityGhost;
+                positions->pinky_x = i * WALL_SIZE;
+                positions->pinky_y = j * WALL_SIZE;
+                break;
             case 'i':
+                map[i][j] = EntityGhost;
+                positions->inky_x = i * WALL_SIZE;
+                positions->inky_y = j * WALL_SIZE;
+                break;
             case 'b':
                 map[i][j] = EntityGhost;
+                positions->blinky_x = i * WALL_SIZE;
+                positions->blinky_y = j * WALL_SIZE;
                 break;
             default:
                 map[i][j] = EntityVoid;
             }
         }
     }
+
+    return positions;
 }
 
 static Entity map[MAP_SIZE_H][MAP_SIZE_W];
@@ -379,6 +412,10 @@ static void draw_entities(Canvas* canvas, PacmanGameModel* model) {
     //     canvas, model->pacman->x, model->pacman->y, &I_pacman_open_14x14
     // );
     canvas_draw_box(canvas, model->pacman->x, model->pacman->y, 3, 3);
+    canvas_draw_box(canvas, model->inky->x, model->inky->y, 3, 3);
+    canvas_draw_box(canvas, model->pinky->x, model->pinky->y, 3, 3);
+    canvas_draw_box(canvas, model->blinky->x, model->blinky->y, 3, 3);
+    canvas_draw_box(canvas, model->clyde->x, model->clyde->y, 3, 3);
 }
 
 static uint8_t pacman_x_to_map_y(uint8_t x) {
@@ -441,7 +478,7 @@ static void pacman_view_game_draw_callback(Canvas* canvas, void* model) {
     // Character* blinky = my_model->blinky;
     // Character* pinky = my_model->pinky;
     // Character* inky = my_model->inky;
-    // Character* inky = my_model->clyde;
+    // Character* clyde = my_model->clyde;
     move_pacman(my_model);
     draw_entities(canvas, my_model);
     // canvas_draw_str(canvas, 1, 10, "LEFT/RIGHT to change x");
@@ -592,9 +629,13 @@ static bool pacman_view_game_input_callback(InputEvent* event, void* context) {
     return false;
 }
 
-static Character* character_alloc(PacmanGameModel* model) {
-    model->pacman = (Character*)malloc(sizeof(Character));
-    return model->pacman;
+static Character*
+    character_alloc(Character* character, uint8_t x, uint8_t y, Direction direction) {
+    character = (Character*)malloc(sizeof(Character));
+    character->x = x;
+    character->y = y;
+    character->direction = direction;
+    return character;
 }
 
 /**
@@ -602,7 +643,7 @@ static Character* character_alloc(PacmanGameModel* model) {
  * @details    This function allocates the pacman application resources.
  * @return     PacmanApp object.
  */
-static PacmanApp* pacman_app_alloc() {
+static PacmanApp* pacman_app_alloc(StartPositions* positions) {
     PacmanApp* app = (PacmanApp*)malloc(sizeof(PacmanApp));
 
     Gui* gui = furi_record_open(RECORD_GUI);
@@ -670,10 +711,16 @@ static PacmanApp* pacman_app_alloc() {
     PacmanGameModel* model = view_get_model(app->view_game);
     model->setting_1_index = setting_1_index;
     model->setting_2_name = setting_2_name;
-    model->pacman = character_alloc(model);
-    model->pacman->x = 2;
-    model->pacman->y = 2;
-    model->pacman->direction = DirectionRight;
+    model->pacman =
+        character_alloc(model->pacman, positions->pacman_x, positions->pacman_y, DirectionRight);
+    model->blinky =
+        character_alloc(model->blinky, positions->blinky_x, positions->blinky_y, DirectionIdle);
+    model->pinky =
+        character_alloc(model->pinky, positions->pinky_x, positions->pinky_y, DirectionIdle);
+    model->inky =
+        character_alloc(model->inky, positions->inky_x, positions->inky_y, DirectionIdle);
+    model->clyde =
+        character_alloc(model->clyde, positions->clyde_x, positions->clyde_y, DirectionIdle);
     view_dispatcher_add_view(app->view_dispatcher, PacmanViewGame, app->view_game);
 
     app->widget_about = widget_alloc();
@@ -737,9 +784,9 @@ static void pacman_app_free(PacmanApp* app) {
 int32_t pacman_app(void* _p) {
     UNUSED(_p);
 
-    setup_map(map);
+    StartPositions* positions = setup_map(map);
 
-    PacmanApp* app = pacman_app_alloc();
+    PacmanApp* app = pacman_app_alloc(positions);
     view_dispatcher_run(app->view_dispatcher);
     pacman_app_free(app);
     return 0;
