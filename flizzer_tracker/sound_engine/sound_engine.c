@@ -37,7 +37,10 @@ void sound_engine_init(
     furi_hal_interrupt_set_isr(FuriHalInterruptIdDma1Ch1, NULL, NULL);
 
     furi_hal_interrupt_set_isr_ex(
-        FuriHalInterruptIdDma1Ch1, 15, sound_engine_dma_isr, sound_engine);
+        FuriHalInterruptIdDma1Ch1,
+        FuriHalInterruptPriorityHighest,
+        sound_engine_dma_isr,
+        sound_engine);
 
     sound_engine_init_hardware(
         sample_rate, external_audio_output, sound_engine->audio_buffer, audio_buffer_size);
