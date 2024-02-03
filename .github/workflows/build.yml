@@ -45,7 +45,7 @@ jobs:
       - name: Upload app artifacts GB Cartridge
         uses: actions/upload-artifact@v3
         with:
-          name: ${{ github.event.repository.name }}-${{ steps.build-app-gb-cartridge.outputs.suffix }}
+          name: ${{ github.event.repository.name }}-official-${{ steps.build-app-gb-cartridge.outputs.suffix }}
           path: ${{ steps.build-app-gb-cartridge.outputs.fap-artifacts }}
       - name: Upload app artifacts GB Link Camera
         uses: actions/upload-artifact@v3
