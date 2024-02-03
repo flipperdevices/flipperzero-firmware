@@ -18,6 +18,8 @@ void entity_call_update(Entity* entity, Director* director);
 
 void entity_call_render(Entity* entity, Director* director, Canvas* canvas);
 
+size_t entities_get_count(void);
+
 #ifdef __cplusplus
 }
 #endif

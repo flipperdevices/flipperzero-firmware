@@ -1,8 +1,9 @@
 #include <furi.h>
-#include "fgeo/game_engine.h"
-#include "fgeo/director_i.h"
-#include "fgeo/level_manager_i.h"
-#include "fgeo/level_i.h"
+#include "game_engine.h"
+#include "director_i.h"
+#include "level_manager_i.h"
+#include "level_i.h"
+#include "entity_i.h"
 
 void game_setup(Level* level);
 void game_destroy(void);
@@ -42,6 +43,12 @@ int32_t game_app(void* p) {
 
     level_manager_free(level_manager);
     director_free(director);
+
+    size_t entities = entities_get_count();
+    if(entities != 0) {
+        FURI_LOG_E("Game", "Memory leak detected: %d entities still allocated", entities);
+        return -1;
+    }
 
     return 0;
 }
