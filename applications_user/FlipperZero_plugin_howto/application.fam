@@ -1,0 +1,16 @@
+# qv. https://github.com/flipperdevices/flipperzero-firmware/blob/dev/documentation/AppManifests.md
+
+App(
+    appid="bc_demo",
+    name="Bluechip Demo",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="bc_demo",
+    cdefines=["APP_BC_DEMO"],
+    requires=[
+        "gui",
+    ],
+    stack_size=2 * 1024,
+    order=20,
+    fap_icon="CS.png",
+    fap_category="Tutorial",
+)

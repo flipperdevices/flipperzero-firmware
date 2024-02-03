@@ -1,0 +1,10 @@
+App(
+    appid="mad_test_remote_button",
+    name="MAD Test Remote Button",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="mad_test_remote_button_app",
+    requires=["gui"],
+    stack_size=2 * 1024,
+    fap_icon="button.png",
+    fap_category="MAD",
+)

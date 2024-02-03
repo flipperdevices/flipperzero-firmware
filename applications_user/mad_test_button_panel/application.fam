@@ -1,0 +1,10 @@
+App(
+    appid="mad_test_button_panel",
+    name="MAD Test Button Panel",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="mad_test_button_panel_app",
+    requires=["gui"],
+    stack_size=2 * 1024,
+    fap_icon="button_panel.png",
+    fap_category="MAD",
+)

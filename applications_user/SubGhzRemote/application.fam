@@ -1,0 +1,11 @@
+App(
+    appid="sub_ghz_remote",
+    name="MAD Sub-GHz Remote",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="main_subghzremote_app",
+    requires=["gui"],
+    stack_size=2 * 1024,
+    fap_icon="button_panel.png",
+    fap_category="MAD",
+    fap_icon_assets="png",
+)

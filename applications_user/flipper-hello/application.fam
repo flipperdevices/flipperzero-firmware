@@ -1,0 +1,19 @@
+# For details & more options, see documentation/AppManifests.md in firmware repo
+# https://github.com/flipperdevices/flipperzero-firmware/blob/dev/documentation/AppManifests.md
+
+App(
+    appid="hello",  # Must be unique
+    name="Hello World",  # Displayed in menus
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="hello_app",
+    requires=["gui"],
+    stack_size=2 * 1024,
+    fap_category="Tutorial",
+    # Optional values
+    fap_version="0.1",
+    fap_icon="hi.png",  # 10x10 1-bit PNG
+    fap_description="A simple greeting app",
+    fap_author="Julien Champseix",
+    fap_weburl="https://github.com/birdypme/flipper-hello",
+    fap_icon_assets="images",  # Image assets to compile for this application
+)
