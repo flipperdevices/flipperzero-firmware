@@ -2,7 +2,9 @@
 #include "scences/file_edit.h"
 
 typedef enum {
-   NfcPlaylistMenuSelection_DeletePlaylist
+   NfcPlaylistMenuSelection_DeletePlaylist,
+   NfcPlaylistMenuSelection_RenamePlaylist,
+   NfcPlaylistMenuSelection_EditList
 } NfcPlaylistMenuSelection;
 
 void nfc_playlist_file_edit_menu_callback(void* context, uint32_t index) {
@@ -15,6 +17,13 @@ void nfc_playlist_file_edit_menu_callback(void* context, uint32_t index) {
          nfc_playlist->file_selected_check = false;
          nfc_playlist->file_path = nfc_playlist->base_file_path;
          scene_manager_previous_scene(nfc_playlist->scene_manager);
+         break;
+      }
+      case NfcPlaylistMenuSelection_RenamePlaylist: {
+         scene_manager_next_scene(nfc_playlist->scene_manager, NfcPlaylistScene_TextInput);
+         break;
+      }
+      case NfcPlaylistMenuSelection_EditList: {
          break;
       }
       default:
@@ -34,6 +43,15 @@ void nfc_playlist_file_edit_scene_on_enter(void* context) {
       NfcPlaylistMenuSelection_DeletePlaylist,
       nfc_playlist_file_edit_menu_callback,
       nfc_playlist);
+
+   submenu_add_lockable_item(
+      nfc_playlist->submenu,
+      "Rename Playlist",
+      NfcPlaylistMenuSelection_RenamePlaylist,
+      nfc_playlist_file_edit_menu_callback,
+      nfc_playlist,
+      true,
+      "Under construction");
 
    view_dispatcher_switch_to_view(nfc_playlist->view_dispatcher, NfcPlaylistView_FileEdit);
 }
