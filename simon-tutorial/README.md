@@ -1,8 +1,10 @@
 # Simon for FlipBoard
 
+[![](https://img.youtube.com/vi/7U9VUhN4e2w/0.jpg)](https://youtu.be/7U9VUhN4e2w)
+
 [YouTube](https://youtu.be/7U9VUhN4e2w?si=guzU2O7DOpNooAzJ)
 
-
+https://img.youtube.com/vi/7U9VUhN4e2w/0.jpg
 ## Introduction
 The FlipBoard is MacroPad for the Flipper from MakeItHackin!  We can use the device to create our own Simon memory game. Simon is a game where you have to remember and repeat a sequence of button presses. Each button has a different color and sound. The game starts by showing you one button press. You have to press the same button. Then the game adds another button press to the sequence. You have to press both buttons in the same order. The game keeps adding more button presses until you make a mistake or finish the song. This guide will show you how to build and play the game using the FlipBoard.
 
