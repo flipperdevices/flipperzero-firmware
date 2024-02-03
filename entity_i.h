@@ -6,7 +6,7 @@
 extern "C" {
 #endif
 
-Entity* entity_alloc(void);
+Entity* entity_alloc(const EntityBehaviour* behaviour);
 
 void entity_free(Entity* entity);
 
