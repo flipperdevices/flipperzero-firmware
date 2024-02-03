@@ -405,9 +405,9 @@ void tracker_engine_advance_channel(TrackerEngine* tracker_engine, uint8_t chan)
 
             else {
                 te_channel->vibrato_position += ((uint32_t)te_channel->vibrato_speed << 21);
-                vib = (int32_t)(sound_engine_triangle(te_channel->vibrato_position >> 9) -
-                                WAVE_AMP / 2) *
-                      (int32_t)te_channel->vibrato_depth / (256 * 128);
+                vib =
+                    (int32_t)(sound_engine_triangle(te_channel->vibrato_position >> 9) - WAVE_AMP / 2) *
+                    (int32_t)te_channel->vibrato_depth / (256 * 128);
             }
         }
 
@@ -442,9 +442,9 @@ void tracker_engine_advance_channel(TrackerEngine* tracker_engine, uint8_t chan)
             tracker_engine->sound_engine->channel[chan].pw = tracker_engine->channel[chan].pw;
         }
 
-        int32_t chn_note = (int16_t)(te_channel->fixed_note != 0xffff ? te_channel->fixed_note :
-                                                                        te_channel->note) +
-                           vib + ((int16_t)te_channel->arpeggio_note << 8);
+        int32_t chn_note =
+            (int16_t)(te_channel->fixed_note != 0xffff ? te_channel->fixed_note : te_channel->note) +
+            vib + ((int16_t)te_channel->arpeggio_note << 8);
 
         if(chn_note < 0) {
             chn_note = 0;
