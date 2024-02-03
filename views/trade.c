@@ -161,7 +161,7 @@ struct trade_ctx {
     uint8_t in_data;
     uint8_t out_data;
     uint8_t shift;
-    TradeBlockGenI* input_block;
+    PokemonData* input_pdata;
     struct patch_list* patch_list;
     void* gblink_handle;
     struct gblink_pins* gblink_pins;
@@ -186,7 +186,7 @@ static void pokemon_plist_recreate_callback(void* context, uint32_t arg) {
     UNUSED(arg);
     struct trade_ctx* trade = context;
 
-    plist_create(&(trade->patch_list), (TradeBlockGenI*)(trade->pdata->trade_block));
+    plist_create(&(trade->patch_list), trade->pdata);
 }
 
 /* Draws a whole screen image with Flipper mascot, Game Boy, etc. */
@@ -398,13 +398,13 @@ static uint8_t getTradeCentreResponse(struct trade_ctx* trade) {
     furi_assert(trade);
 
     uint8_t* trade_block_flat = (uint8_t*)trade->pdata->trade_block;
-    uint8_t* input_block_flat = (uint8_t*)trade->input_block;
-    uint8_t* input_party_flat = (uint8_t*)trade->input_block->party;
+    uint8_t* input_block_flat = (uint8_t*)trade->input_pdata->trade_block;
+    uint8_t* input_party_flat = (uint8_t*)trade->input_pdata->party;
     struct trade_model* model = NULL;
     uint8_t in = trade->in_data;
     uint8_t send = in;
     static bool patch_pt_2;
-    static int counter;
+    static size_t counter;
     static uint8_t in_pkmn_idx;
 
     /* TODO: Figure out how we should respond to a no_data_byte and/or how to
@@ -472,7 +472,7 @@ static uint8_t getTradeCentreResponse(struct trade_ctx* trade) {
         send = trade_block_flat[counter];
         counter++;
 
-        if(counter == sizeof(TradeBlockGenI)) {
+        if(counter == trade->input_pdata->trade_block_sz) {
             trade->trade_centre_state = TRADE_PATCH_HEADER;
             counter = 0;
         }
@@ -595,7 +595,7 @@ static uint8_t getTradeCentreResponse(struct trade_ctx* trade) {
             model->gameboy_status = GAMEBOY_TRADING;
 
             /* Copy the traded-in Pokemon's main data to our struct */
-	    pokemon_stat_memcpy(trade->pdata, trade->input_block, in_pkmn_idx);
+	    pokemon_stat_memcpy(trade->pdata, trade->input_pdata, in_pkmn_idx);
             model->curr_pokemon = pokemon_stat_get(trade->pdata, STAT_NUM, NONE);
 
             /* Schedule a callback outside of ISR context to rebuild the patch
@@ -678,7 +678,7 @@ void trade_enter_callback(void* context) {
     furi_timer_start(trade->draw_timer, furi_ms_to_ticks(250));
 
     /* Create a trade patch list from the current trade block */
-    plist_create(&(trade->patch_list), (TradeBlockGenI*)(trade->pdata->trade_block));
+    plist_create(&(trade->patch_list), trade->pdata);
 }
 
 void disconnect_pin(const GpioPin* pin) {
@@ -719,7 +719,7 @@ void* trade_alloc(
     memset(trade, '\0', sizeof(struct trade_ctx));
     trade->view = view_alloc();
     trade->pdata = pdata;
-    trade->input_block = malloc(sizeof(TradeBlockGenI));
+    trade->input_pdata = pokemon_data_alloc(pdata->gen);
     trade->patch_list = NULL;
     trade->gblink_pins = gblink_pins;
 
@@ -746,6 +746,6 @@ void trade_free(ViewDispatcher* view_dispatcher, uint32_t view_id, void* trade_c
 
     view_free_model(trade->view);
     view_free(trade->view);
-    free(trade->input_block);
+    pokemon_data_free(trade->input_pdata);
     free(trade);
 }
