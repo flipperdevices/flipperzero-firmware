@@ -8,31 +8,6 @@
 #include "views/select_pokemon.h"
 #include "pokemon_char_encode.h"
 
-
-/* The MALVEKE board has an esp32 which is set to TX on the flipper's default
- * UART pins. If this pin shows signs of something connected, assume a MALVEKE
- * board is being used.
- */
-static bool detect_malveke(void) {
-    bool rc;
-
-    furi_hal_gpio_init(&gpio_usart_rx, GpioModeInput, GpioPullDown, GpioSpeedVeryHigh);
-    //furi_hal_gpio_init(&gpio_swdio, GpioModeInput, GpioPullDown, GpioSpeedVeryHigh);
-    /* Delay a tick to let the IO pin changes settle */
-    furi_delay_tick(1);
-    rc = furi_hal_gpio_read(&gpio_usart_rx);
-    /* XXX: HACK: Need to clean this up later, but, newer MALVEKE boards use the
-     * original pinout. Using a second pin to detect if there is a pullup to
-     * determine if this is the board in use. In the future, it looks like the
-     * GPIO module auto-detect support might be the better way here.
-     */
-    if(furi_hal_gpio_read(&gpio_swdio)) rc = 0;
-    furi_hal_gpio_init_simple(&gpio_usart_rx, GpioModeAnalog);
-    //furi_hal_gpio_init_simple(&gpio_swdio, GpioModeAnalog);
-
-    return rc;
-}
-
 PokemonFap* pokemon_alloc() {
     PokemonFap* pokemon_fap = (PokemonFap*)malloc(sizeof(PokemonFap));
 
@@ -47,11 +22,7 @@ PokemonFap* pokemon_alloc() {
         ViewDispatcherTypeFullscreen);
 
     // Set up defaults
-    pokemon_fap->malveke_detected = detect_malveke();
-    memcpy(
-        &pokemon_fap->pins,
-        &common_pinouts[pokemon_fap->malveke_detected],
-        sizeof(struct gblink_pins));
+    memcpy(&pokemon_fap->pins, &common_pinouts[PINOUT_ORIGINAL], sizeof(struct gblink_pins));
 
     /* Set up gui modules used. It would be nice if these could be allocated and
      * freed as needed, however, the scene manager still requires pointers that
