@@ -11,7 +11,7 @@ static void select_move_selected_callback(void* context, uint32_t index) {
     uint32_t move = scene_manager_get_scene_state(pokemon_fap->scene_manager, SelectMoveScene);
 
     if(index == UINT32_MAX) {
-        pokemon_stat_set(pokemon_fap->pdata, STAT_MOVE, move, table_stat_base_get(pokemon_fap->pdata->pokemon_table, pokemon_fap->pdata, STAT_MOVE, move));
+        pokemon_stat_set(pokemon_fap->pdata, STAT_MOVE, move, table_stat_base_get(pokemon_fap->pdata, STAT_MOVE, move));
     } else {
         pokemon_stat_set(pokemon_fap->pdata, STAT_MOVE, move, index);
     }

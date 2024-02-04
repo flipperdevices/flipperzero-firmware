@@ -74,18 +74,18 @@ void select_shiny_scene_on_enter(void* context) {
     PokemonFap* pokemon_fap = (PokemonFap*)context;
 
     submenu_reset(pokemon_fap->submenu);
-
-    submenu_add_item(
-        pokemon_fap->submenu,
-        "Not Shiny",
-        0,
-        select_shiny_selected_callback,
-        pokemon_fap);
     
     submenu_add_item(
         pokemon_fap->submenu,
         "Shiny",
         1,
+        select_shiny_selected_callback,
+        pokemon_fap);
+
+    submenu_add_item(
+        pokemon_fap->submenu,
+        "Not Shiny",
+        0,
         select_shiny_selected_callback,
         pokemon_fap);
 }

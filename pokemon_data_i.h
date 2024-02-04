@@ -15,6 +15,17 @@ typedef enum {
     GROWTH_SLOW = 5,
 } Growth;
 
+typedef enum {
+    GENDER_F0 = 0x00,
+    GENDER_F12_5 = 0x1F,
+    GENDER_F25 = 0x3F,
+    GENDER_F50 = 0x7F,
+    GENDER_F75 = 0xBF,
+    GENDER_F100 = 0xFE,
+    GENDER_UNKNOWN = 0xFF,
+} Gender;
+
+
 struct __attribute__((__packed__)) named_list {
     const char* name;
     const uint8_t index;
@@ -40,8 +51,8 @@ struct __attribute__((__packed__)) pokemon_data_table {
     const uint8_t base_spc_def;
     const uint8_t type[2];
     const uint8_t move[4];
-    const uint8_t growth;
-    const uint8_t gender_ratio;
+    const Growth growth;
+    const Gender gender_ratio;
     /* XXX: Unsure if I want to implement this or not */
     //const uint8_t egg_cycles;
 };

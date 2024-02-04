@@ -61,8 +61,6 @@ void select_item_scene_on_enter(void* context) {
     submenu_set_selected_item(
         pokemon_fap->submenu,
         scene_manager_get_scene_state(pokemon_fap->scene_manager, SelectItemSetScene));
-
-    /* Clear cursor position */
     scene_manager_set_scene_state(pokemon_fap->scene_manager, SelectItemSetScene, 0);
 }
 

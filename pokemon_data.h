@@ -154,7 +154,7 @@ const char* namelist_name_get_pos(const NamedList* list, uint8_t pos);
 uint8_t namelist_gen_get_pos(const NamedList* list, uint8_t pos);
 int namelist_cnt(const NamedList* list);
 
-uint8_t table_stat_base_get(const PokemonTable* table, PokemonData *pdata, DataStat stat, DataStatSub num);
+uint8_t table_stat_base_get(PokemonData *pdata, DataStat stat, DataStatSub num);
 const char* table_stat_name_get(const PokemonTable* table, int num);
 const Icon *table_icon_get(const PokemonTable* table, int num);
 

@@ -8,6 +8,7 @@
 #include "pokemon_menu.h"
 #include "pokemon_stats.h"
 #include "pokemon_shiny.h"
+#include "pokemon_gender.h"
 
 static void scene_change_from_main_cb(void* context, uint32_t index) {
     PokemonFap* pokemon_fap = (PokemonFap*)context;
@@ -102,6 +103,7 @@ void gen_scene_on_enter(void* context) {
      * it here.
      */
     scene_manager_set_scene_state(pokemon_fap->scene_manager, SelectMoveScene, 0);
+    scene_manager_set_scene_state(pokemon_fap->scene_manager, SelectItemSetScene, 0);
 
     submenu_reset(pokemon_fap->submenu);
 
@@ -151,6 +153,10 @@ void gen_scene_on_enter(void* context) {
         snprintf(buf, sizeof(buf), "Shiny:   %s", select_shiny_is_shiny(pokemon_fap->pdata) ? "Yes" : "No");
         submenu_add_item(
             pokemon_fap->submenu, buf, SelectShinyScene, scene_change_from_main_cb, pokemon_fap);
+
+        snprintf(buf, sizeof(buf), "Gender:   %s", select_gender_get_gender(pokemon_fap->pdata));
+        submenu_add_item(
+            pokemon_fap->submenu, buf, SelectGenderScene, scene_change_from_main_cb, pokemon_fap);
     }
 
     snprintf(buf, sizeof(buf), "OT ID#:          %05d", pokemon_stat_get(pokemon_fap->pdata, STAT_OT_ID, NONE));
