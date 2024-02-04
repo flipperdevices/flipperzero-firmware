@@ -19,6 +19,7 @@ typedef enum {
     SelectItemSetScene,
     SelectTypeScene,
     SelectStatsScene,
+    SelectShinyScene,
     SelectOTIDScene,
     SelectOTNameScene,
     TradeScene,

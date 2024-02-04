@@ -67,15 +67,15 @@ typedef enum {
     STAT_EV_END = 15, // Sentry value
 
     STAT_IV = 15, // Sentry value
-    STAT_ATK_IV = 15,
+    STAT_ATK_IV = 16,
     STAT_DEF_IV,
     STAT_SPD_IV,
     STAT_SPC_IV,
     STAT_HP_IV,
-    STAT_IV_END = 20, // Sentry value
+    STAT_IV_END = 21, // Sentry value
 
     /* These won't ever really be needed in groups */
-    STAT_LEVEL = 20,
+    STAT_LEVEL = 21,
     STAT_INDEX,
     STAT_NUM,
     STAT_CONDITION,
@@ -163,7 +163,6 @@ uint16_t pokemon_stat_get(PokemonData *pdata, DataStat stat, DataStatSub num);
 void pokemon_stat_set(PokemonData *pdata, DataStat stat, DataStatSub which, uint16_t val);
 uint16_t pokemon_stat_ev_get(PokemonData *pdata, DataStat stat);
 void pokemon_stat_ev_set(PokemonData *pdata, DataStat stat, uint16_t val);
-uint8_t pokemon_stat_iv_get(PokemonData *pdata, DataStat stat);
 void pokemon_stat_iv_set(PokemonData *pdata, int val);
 void pokemon_exp_set(PokemonData *pdata, uint32_t exp);
 void pokemon_exp_calc(PokemonData *pdata);

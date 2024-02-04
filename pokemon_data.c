@@ -7,11 +7,12 @@
 
 #define RECALC_NONE 0x00
 #define RECALC_EXP 0x01
-#define RECALC_EVIVS 0x02
-#define RECALC_STATS 0x04
-#define RECALC_NICKNAME 0x08
-#define RECALC_MOVES 0x10
-#define RECALC_TYPES 0x20
+#define RECALC_EVS 0x02
+#define RECALC_IVS 0x04
+#define RECALC_STATS 0x08
+#define RECALC_NICKNAME 0x10
+#define RECALC_MOVES 0x20
+#define RECALC_TYPES 0x40
 #define RECALC_ALL 0xFF
 
 /* Const blocks used here */
@@ -178,10 +179,12 @@ void pokemon_recalculate(PokemonData* pdata, uint8_t recalc) {
 
     if(recalc & RECALC_EXP) pokemon_exp_calc(pdata);
 
-    if(recalc & RECALC_EVIVS) {
+    if(recalc & RECALC_EVS)
         pokemon_stat_ev_calc(pdata, pdata->stat_sel);
+
+    /* This just rerolls the IVs, nothing really to calculate */
+    if(recalc & RECALC_IVS)
         pokemon_stat_iv_calc(pdata, pdata->stat_sel);
-    }
 
     /* Note: This will still end up calculating spc_def on gen i pokemon.
      * However, the way the accessors are set up the calculated value will
@@ -560,6 +563,46 @@ void pokemon_stat_set(PokemonData* pdata, DataStat stat, DataStatSub which, uint
         if(gen == GEN_I) ((PokemonPartyGenI*)party)->iv = val;
         if(gen == GEN_II) ((PokemonPartyGenII*)party)->iv = val;
         break;
+    case STAT_ATK_IV:
+        if(gen == GEN_I) {
+            ((PokemonPartyGenI*)party)->iv &= ~(0x0F << 12);
+            ((PokemonPartyGenI*)party)->iv |= ((val & 0x0F) << 12);
+        }
+        if(gen == GEN_II) {
+            ((PokemonPartyGenII*)party)->iv &= ~(0x0F << 12);
+            ((PokemonPartyGenII*)party)->iv |= ((val & 0x0F) << 12);
+        }
+	break;
+    case STAT_DEF_IV:
+        if(gen == GEN_I) {
+            ((PokemonPartyGenI*)party)->iv &= ~(0x0F << 8);
+            ((PokemonPartyGenI*)party)->iv |= ((val & 0x0F) << 8);
+        }
+        if(gen == GEN_II) {
+            ((PokemonPartyGenII*)party)->iv &= ~(0x0F << 8);
+            ((PokemonPartyGenII*)party)->iv |= ((val & 0x0F) << 8);
+        }
+	break;
+    case STAT_SPD_IV:
+        if(gen == GEN_I) {
+            ((PokemonPartyGenI*)party)->iv &= ~(0x0F << 4);
+            ((PokemonPartyGenI*)party)->iv |= ((val & 0x0F) << 4);
+        }
+        if(gen == GEN_II) {
+            ((PokemonPartyGenII*)party)->iv &= ~(0x0F << 4);
+            ((PokemonPartyGenII*)party)->iv |= ((val & 0x0F) << 4);
+        }
+	break;
+    case STAT_SPC_IV:
+        if(gen == GEN_I) {
+            ((PokemonPartyGenI*)party)->iv &= ~(0x0F);
+            ((PokemonPartyGenI*)party)->iv |= (val & 0x0F);
+        }
+        if(gen == GEN_II) {
+            ((PokemonPartyGenII*)party)->iv &= ~(0x0F);
+            ((PokemonPartyGenII*)party)->iv |= (val & 0x0F);
+        }
+	break;
     case STAT_MOVE:
         if(gen == GEN_I) ((PokemonPartyGenI*)party)->move[which] = val;
         if(gen == GEN_II) ((PokemonPartyGenII*)party)->move[which] = val;
@@ -574,7 +617,7 @@ void pokemon_stat_set(PokemonData* pdata, DataStat stat, DataStatSub which, uint
             ((PokemonPartyGenI*)party)->level_again = val;
         }
         if(gen == GEN_II) ((PokemonPartyGenII*)party)->level = val;
-        recalc = (RECALC_STATS | RECALC_EXP | RECALC_EVIVS);
+        recalc = (RECALC_STATS | RECALC_EXP | RECALC_EVS);
         break;
     /* In Gen I, index is not relative at all to dex num.
      * In Gen II, index is the same as the dex num.
@@ -604,7 +647,7 @@ void pokemon_stat_set(PokemonData* pdata, DataStat stat, DataStatSub which, uint
         break;
     case STAT_SEL:
         pdata->stat_sel = val;
-	recalc = (RECALC_EVIVS | RECALC_STATS);
+	recalc = (RECALC_EVS | RECALC_IVS | RECALC_STATS);
         break;
     case STAT_EXP:
         if(gen == GEN_I) ((PokemonPartyGenI*)party)->exp[which] = val;

@@ -11,6 +11,7 @@
 #include "pokemon_item.h"
 #include "pokemon_type.h"
 #include "pokemon_stats.h"
+#include "pokemon_shiny.h"
 #include "pokemon_trade.h"
 #include "pokemon_pins.h"
 #include "pokemon_exit_confirm.h"
@@ -107,6 +108,7 @@ void (*const pokemon_scene_on_enter_handlers[])(void*) = {
     select_item_set_scene_on_enter,
     select_type_scene_on_enter,
     select_stats_scene_on_enter,
+    select_shiny_scene_on_enter,
     select_number_scene_on_enter,
     select_name_scene_on_enter,
     trade_scene_on_enter,
@@ -128,6 +130,7 @@ void (*const pokemon_scene_on_exit_handlers[])(void*) = {
     null_scene_on_exit,
     generic_scene_on_exit,
     null_scene_on_exit,
+    null_scene_on_exit,
     generic_scene_on_exit,
     generic_scene_on_exit,
     null_scene_on_exit,
@@ -136,6 +139,7 @@ void (*const pokemon_scene_on_exit_handlers[])(void*) = {
 };
 
 bool (*const pokemon_scene_on_event_handlers[])(void*, SceneManagerEvent) = {
+    null_scene_on_event,
     null_scene_on_event,
     null_scene_on_event,
     null_scene_on_event,

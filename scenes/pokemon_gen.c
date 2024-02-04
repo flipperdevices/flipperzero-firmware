@@ -7,6 +7,7 @@
 
 #include "pokemon_menu.h"
 #include "pokemon_stats.h"
+#include "pokemon_shiny.h"
 
 static void scene_change_from_main_cb(void* context, uint32_t index) {
     PokemonFap* pokemon_fap = (PokemonFap*)context;
@@ -145,6 +146,12 @@ void gen_scene_on_enter(void* context) {
         SelectStatsScene,
         scene_change_from_main_cb,
         pokemon_fap);
+
+    if (pokemon_fap->pdata->gen == GEN_II) {
+        snprintf(buf, sizeof(buf), "Shiny:   %s", select_shiny_is_shiny(pokemon_fap->pdata) ? "Yes" : "No");
+        submenu_add_item(
+            pokemon_fap->submenu, buf, SelectShinyScene, scene_change_from_main_cb, pokemon_fap);
+    }
 
     snprintf(buf, sizeof(buf), "OT ID#:          %05d", pokemon_stat_get(pokemon_fap->pdata, STAT_OT_ID, NONE));
     submenu_add_item(
