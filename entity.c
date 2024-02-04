@@ -5,9 +5,9 @@
 
 #define ENTITY_DEBUG(...) FURI_LOG_D("Entity", __VA_ARGS__)
 
-static size_t entities_count = 0;
+static int32_t entities_count = 0;
 
-size_t entities_get_count(void) {
+int32_t entities_get_count(void) {
     return entities_count;
 }
 
@@ -26,13 +26,13 @@ Entity* entity_alloc(const EntityDescription* behaviour) {
     if(behaviour && behaviour->context_size > 0) {
         entity->context = malloc(behaviour->context_size);
     }
-    ENTITY_DEBUG("Allocated entity at %p", entity);
+    ENTITY_DEBUG("Allocated at %p", entity);
     return entity;
 }
 
 void entity_free(Entity* entity) {
     entities_count--;
-    ENTITY_DEBUG("Freeing entity at %p", entity);
+    ENTITY_DEBUG("Freeing at %p", entity);
     if(entity->context) {
         free(entity->context);
     }
@@ -51,15 +51,15 @@ void* entity_context_get(Entity* entity) {
     return entity->context;
 }
 
-void entity_call_start(Entity* entity) {
+void entity_call_start(Level* level, Entity* entity) {
     if(entity->behaviour && entity->behaviour->start) {
-        entity->behaviour->start(entity->context);
+        entity->behaviour->start(entity, level, entity->context);
     }
 }
 
-void entity_call_stop(Entity* entity) {
+void entity_call_stop(Level* level, Entity* entity) {
     if(entity->behaviour && entity->behaviour->stop) {
-        entity->behaviour->stop(entity->context);
+        entity->behaviour->stop(entity, level, entity->context);
     }
 }
 

@@ -44,9 +44,9 @@ int32_t game_app(void* p) {
     level_manager_free(level_manager);
     director_free(director);
 
-    size_t entities = entities_get_count();
+    int32_t entities = entities_get_count();
     if(entities != 0) {
-        FURI_LOG_E("Game", "Memory leak detected: %d entities still allocated", entities);
+        FURI_LOG_E("Game", "Memory leak detected: %ld entities still allocated", entities);
         return -1;
     }
 

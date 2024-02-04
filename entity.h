@@ -17,8 +17,8 @@ typedef struct {
 #define VECTOR_ZERO ((Vector){0, 0})
 
 typedef struct {
-    void (*start)(void* context);
-    void (*stop)(void* context);
+    void (*start)(Entity* entity, Level* level, void* context);
+    void (*stop)(Entity* entity, Level* level, void* context);
     void (*update)(Entity* entity, Director* director, void* context);
     void (*render)(Entity* entity, Director* director, Canvas* canvas, void* context);
     size_t context_size;
