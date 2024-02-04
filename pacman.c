@@ -17,7 +17,7 @@
 #define TAG "PacMan"
 
 #define MAP_SIZE_W 28
-#define MAP_SIZE_H 31
+#define MAP_SIZE_H 37
 #define WALL_SIZE 2
 
 // Change this to BACKLIGHT_AUTO if you don't want the backlight to be continuously on.
@@ -47,7 +47,6 @@ typedef enum {
 typedef enum {
     EntityPacman,
     EntityGhost,
-    EntityNothing,
     EntityTopLeftWall,
     EntityTopRightWall,
     EntityBottomLeftWall,
@@ -86,14 +85,17 @@ typedef enum {
 } Direction;
 
 typedef struct {
-    uint8_t x; // The x coordinate
-    uint8_t y; // The y coordinate
+    float_t x; // The x coordinate
+    float_t y; // The y coordinate
     uint8_t map_x; // The x index according to the map
     uint8_t map_y; // The y index according to the mapW
     Direction direction; // The direction
     uint8_t target_x;
     uint8_t target_y;
+    float_t speed;
 } Character;
+
+typedef enum { GhostsModeScatter, GhostsModeeChase, GhostsModeFrightened } GhostsMode;
 
 typedef struct {
     uint32_t setting_1_index; // The team color setting index
@@ -105,6 +107,7 @@ typedef struct {
     Character* inky; // The inky character
     Character* clyde;
     uint8_t score;
+    GhostsMode ghosts_mode;
 } PacmanGameModel;
 
 typedef struct start_positions {
@@ -164,7 +167,7 @@ static uint32_t pacman_navigation_configure_callback(void* _context) {
  */
 static void pacman_submenu_callback(void* context, uint32_t index) {
     PacmanApp* app = (PacmanApp*)context;
-    switch(index) {
+    switch (index) {
     case PacmanSubmenuIndexConfigure:
         view_dispatcher_switch_to_view(app->view_dispatcher, PacmanViewConfigure);
         break;
@@ -208,17 +211,19 @@ static void pacman_submenu_callback(void* context, uint32_t index) {
 
 // Initial map configuration
 static const char* map_config[] = {
-    "1------------21------------2", "|PCCCCCCCCCCC||CCCCCCCCCCCC|", "|C1--2C1---2C||C1---2C1--2C|",
-    "|C|  |C|   |C||C|   |C|  |C|", "|C3--4C3---4C34C3---4C3--4C|", "|CCCCCCCCCCCCCCCCCCCCCCCCCC|",
-    "|C1--2C12C1------2C12C1--2C|", "|C3--4C||C3--21--4C||C3--4C|", "|CCCCCC||CCCC||CCCC||CCCCCC|",
-    "3----2C|3--2 || 1--4|C1----4", "     |C|1--4 34 3--2|C|     ", "     |C||          ||C|     ",
-    "     |C|| 1--  --2 ||C|     ", "-----4C34 |BBBBBB| 34C3-----", "      C   |BbcpiB|   C      ",
-    "-----2C12 |BBBBBB| 12C1-----", "     |C|| 3------4 ||C|     ", "     |C||          ||C|     ",
-    "     |C|| 1------2 ||C|     ", "1----4C34 3--21--4 34C3----2", "|CCCCCCCCCCCC||CCCCCCCCCCCC|",
-    "|C1--2C1---2C||C1---2C1--2C|", "|C3-2|C3---4C34C3---4C|1-4C|", "|CCC||CCCCCCCCCCCCCCCC||CCC|",
-    "3-2C||C12C1------2C12C||C1-4", "1-4C34C||C3--21--4C||C34C3-2", "|CCCCCC||CCCC||CCCC||CCCCCC|",
-    "|C1----43--2C||C1--43----2C|", "|C3--------4C34C3--------4C|", "|CCCCCCCCCCCCCCCCCCCCCCCCCC|",
-    "3--------------------------4"};
+    "                            ", "                            ", "                            ",
+    "                            ", "1------------21------------2", "|PCCCCCCCCCCC||CCCCCCCCCCCC|",
+    "|C1--2C1---2C||C1---2C1--2C|", "|C|  |C|   |C||C|   |C|  |C|", "|C3--4C3---4C34C3---4C3--4C|",
+    "|CCCCCCCCCCCCCCCCCCCCCCCCCC|", "|C1--2C12C1------2C12C1--2C|", "|C3--4C||C3--21--4C||C3--4C|",
+    "|CCCCCC||CCCC||CCCC||CCCCCC|", "3----2C|3--2 || 1--4|C1----4", "     |C|1--4 34 3--2|C|     ",
+    "     |C||          ||C|     ", "     |C|| 1--  --2 ||C|     ", "-----4C34 |BBBBBB| 34C3-----",
+    "      C   |BbcpiB|   C      ", "-----2C12 |BBBBBB| 12C1-----", "     |C|| 3------4 ||C|     ",
+    "     |C||          ||C|     ", "     |C|| 1------2 ||C|     ", "1----4C34 3--21--4 34C3----2",
+    "|CCCCCCCCCCCC||CCCCCCCCCCCC|", "|C1--2C1---2C||C1---2C1--2C|", "|C3-2|C3---4C34C3---4C|1-4C|",
+    "|CCC||CCCCCCCCCCCCCCCC||CCC|", "3-2C||C12C1------2C12C||C1-4", "1-4C34C||C3--21--4C||C34C3-2",
+    "|CCCCCC||CCCC||CCCC||CCCCCC|", "|C1----43--2C||C1--43----2C|", "|C3--------4C34C3--------4C|",
+    "|CCCCCCCCCCCCCCCCCCCCCCCCCC|", "3--------------------------4", "                            ",
+    "                            " };
 
 /**
  * @brief      Sets up the map matrix according to the config matrix.
@@ -228,10 +233,10 @@ static const char* map_config[] = {
  */
 static StartPositions* setup_map(Entity map[][MAP_SIZE_W]) {
     StartPositions* positions = (StartPositions*)malloc(sizeof(StartPositions));
-    for(int i = 0; i < MAP_SIZE_H; i++) {
-        for(int j = 0; j < MAP_SIZE_W; j++) {
-            int symbol = map_config[i][j]; // Int to prevent to go beyond char range
-            switch(symbol) {
+    for (int i = 0; i < MAP_SIZE_H; i++) {
+        for (int j = 0; j < MAP_SIZE_W; j++) {
+            int symbol = map_config[i][j];
+            switch (symbol) {
             case 'C':
                 map[i][j] = EntityCandy;
                 break;
@@ -283,7 +288,6 @@ static StartPositions* setup_map(Entity map[][MAP_SIZE_W]) {
             }
         }
     }
-
     return positions;
 }
 
@@ -293,8 +297,8 @@ static Entity map[MAP_SIZE_H][MAP_SIZE_W];
  * Our 1st sample setting is a team color.  We have 3 options: red, green, and blue.
  */
 static const char* setting_1_config_label = "Team color";
-static uint8_t setting_1_values[] = {1, 2, 4};
-static char* setting_1_names[] = {"Red", "Green", "Blue"};
+static uint8_t setting_1_values[] = { 1, 2, 4 };
+static char* setting_1_names[] = { "Red", "Green", "Blue" };
 static void pacman_setting_1_change(VariableItem* item) {
     PacmanApp* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
@@ -338,7 +342,7 @@ static void pacman_setting_item_clicked(void* context, uint32_t index) {
     index++; // The index starts at zero, but we want to start at 1.
 
     // Our configuration UI has the 2nd item as a text field.
-    if(index == 2) {
+    if (index == 2) {
         // Header to display on the text input screen.
         text_input_set_header_text(app->text_input, setting_2_entry_text);
 
@@ -375,9 +379,9 @@ static void pacman_setting_item_clicked(void* context, uint32_t index) {
 }
 
 static void draw_entities(Canvas* canvas, PacmanGameModel* model) {
-    for(int i = 0; i < MAP_SIZE_H; i++) {
-        for(int j = 0; j < MAP_SIZE_W; j++) {
-            switch(map[i][j]) {
+    for (int i = 0; i < MAP_SIZE_H; i++) {
+        for (int j = 0; j < MAP_SIZE_W; j++) {
+            switch (map[i][j]) {
             case EntityVerticalWall:
                 canvas_draw_icon(canvas, i * WALL_SIZE, j * WALL_SIZE, &I_horizontal_wall_3x3);
                 break;
@@ -418,11 +422,12 @@ static void draw_entities(Canvas* canvas, PacmanGameModel* model) {
     canvas_draw_box(canvas, model->clyde->x, model->clyde->y, 3, 3);
 }
 
-static uint8_t pacman_x_to_map_y(uint8_t x) {
-    return (uint8_t)(x / WALL_SIZE);
+static uint8_t pacman_x_to_map_y(float_t x) {
+    float_t result = x / WALL_SIZE;
+    return (uint8_t)result;
 }
 
-static uint8_t pacman_y_to_map_x(uint8_t y) {
+static uint8_t pacman_y_to_map_x(float_t y) {
     return (uint8_t)(MAP_SIZE_W - y / WALL_SIZE) - 1;
 }
 
@@ -431,23 +436,23 @@ static uint8_t pacman_y_to_map_x(uint8_t y) {
  * @param      entity   The entity you'd like to check
 */
 static bool is_wall(Entity entity) {
-    if(entity == EntityBottomLeftWall || entity == EntityBottomRightWall ||
-       entity == EntityTopLeftWall || entity == EntityTopRightWall ||
-       entity == EntityHorizontalWall || entity == EntityVerticalWall)
+    if (entity == EntityBottomLeftWall || entity == EntityBottomRightWall ||
+        entity == EntityTopLeftWall || entity == EntityTopRightWall ||
+        entity == EntityHorizontalWall || entity == EntityVerticalWall)
         return true;
     return false;
 }
 
 static void move_pacman(PacmanGameModel* model) {
     Character* pacman = model->pacman;
-    if(pacman->direction == DirectionLeft && !is_wall(map[pacman->map_y][pacman->map_x - 1]))
-        pacman->y += WALL_SIZE;
-    else if(pacman->direction == DirectionRight && !is_wall(map[pacman->map_y][pacman->map_x + 1]))
-        pacman->y -= WALL_SIZE;
-    else if(pacman->direction == DirectionUp && !is_wall(map[pacman->map_y - 1][pacman->map_x]))
-        pacman->x -= WALL_SIZE;
-    else if(pacman->direction == DirectionDown && !is_wall(map[pacman->map_y + 1][pacman->map_x]))
-        pacman->x += WALL_SIZE;
+    if (pacman->direction == DirectionLeft && (!is_wall(map[pacman->map_y][pacman->map_x - 1]) || (int)pacman->y % WALL_SIZE != 0))
+        pacman->y += pacman->speed;
+    else if (pacman->direction == DirectionRight && (!is_wall(map[pacman->map_y][pacman->map_x + 1]) || (int)pacman->y % WALL_SIZE != 0))
+        pacman->y -= pacman->speed;
+    else if (pacman->direction == DirectionUp && (!is_wall(map[pacman->map_y - 1][pacman->map_x]) || (int)pacman->x % WALL_SIZE != 0))
+        pacman->x -= pacman->speed;
+    else if (pacman->direction == DirectionDown && (!is_wall(map[pacman->map_y + 1][pacman->map_x]) || (int)pacman->x % WALL_SIZE != 0))
+        pacman->x += pacman->speed;
     else
         pacman->direction = DirectionIdle;
 
@@ -457,13 +462,28 @@ static void move_pacman(PacmanGameModel* model) {
     pacman->map_y = pacman_x_to_map_y(pacman->x);
     pacman->map_x = pacman_y_to_map_x(pacman->y);
 
-    if(previous_x != pacman->map_x || previous_y != pacman->map_y) {
-        if(map[pacman->map_y][pacman->map_x] == EntityCandy) model->score += 1;
+    if (previous_x != pacman->map_x || previous_y != pacman->map_y) {
+        if (map[pacman->map_y][pacman->map_x] == EntityCandy) model->score += 1;
         map[previous_y][previous_x] = EntityVoid;
     }
 
     map[pacman->map_y][pacman->map_x] = EntityPacman;
 }
+
+// static void move_ghosts(
+//     GhostsMode mode,
+//     Character* blinky,
+//     Character* pinky,
+//     Character* inky,
+//     Character* clyde) {
+//     swtich(mode) {
+//     case GhostsModeScatter:
+
+//         break;
+//     default:
+//         break;
+//     }
+// }
 
 /**
  * @brief      Callback for drawing the game screen.
@@ -479,7 +499,9 @@ static void pacman_view_game_draw_callback(Canvas* canvas, void* model) {
     // Character* pinky = my_model->pinky;
     // Character* inky = my_model->inky;
     // Character* clyde = my_model->clyde;
+    // GhostsMode mode = my_model->ghosts_mode;
     move_pacman(my_model);
+    // move_ghosts(mode, blinky, pinky, inky, clyde);
     draw_entities(canvas, my_model);
     // canvas_draw_str(canvas, 1, 10, "LEFT/RIGHT to change x");
     FuriString* xstr = furi_string_alloc();
@@ -487,7 +509,8 @@ static void pacman_view_game_draw_callback(Canvas* canvas, void* model) {
     canvas_draw_str(canvas, 80, 10, furi_string_get_cstr(xstr));
     furi_string_printf(xstr, "%d", my_model->pacman->direction);
     canvas_draw_str(canvas, 80, 20, furi_string_get_cstr(xstr));
-    furi_string_printf(xstr, "%d-%d", my_model->pacman->x, my_model->pacman->y);
+    furi_string_printf(
+        xstr, "%.2f-%.2f", (double)my_model->pacman->x, (double)my_model->pacman->y);
     canvas_draw_str(canvas, 80, 30, furi_string_get_cstr(xstr));
     furi_string_printf(xstr, "score: %d", my_model->score);
     canvas_draw_str(canvas, 80, 40, furi_string_get_cstr(xstr));
@@ -550,18 +573,18 @@ static void pacman_view_game_exit_callback(void* context) {
  */
 static bool pacman_view_game_custom_event_callback(uint32_t event, void* context) {
     PacmanApp* app = (PacmanApp*)context;
-    switch(event) {
+    switch (event) {
     case PacmanEventIdRedrawScreen:
         // Redraw screen by passing true to last parameter of with_view_model.
-        {
-            bool redraw = true;
-            with_view_model(
-                app->view_game, PacmanGameModel * _model, { UNUSED(_model); }, redraw);
-            return true;
-        }
+    {
+        bool redraw = true;
+        with_view_model(
+            app->view_game, PacmanGameModel * _model, { UNUSED(_model); }, redraw);
+        return true;
+    }
     case PacmanEventIdOkPressed:
         // Process the OK button.  We play a tone based on the x coordinate.
-        if(furi_hal_speaker_acquire(500)) {
+        if (furi_hal_speaker_acquire(500)) {
             float frequency;
             bool redraw = false;
             with_view_model(
@@ -590,35 +613,39 @@ static bool pacman_view_game_custom_event_callback(uint32_t event, void* context
 static bool pacman_view_game_input_callback(InputEvent* event, void* context) {
     PacmanApp* app = (PacmanApp*)context;
     bool redraw = false;
-    if(event->type == InputTypeShort) {
-        if(event->key == InputKeyLeft) {
+    if (event->type == InputTypeShort) {
+        if (event->key == InputKeyLeft) {
             // Left button clicked, reduce x coordinate.
             with_view_model(
                 app->view_game,
                 PacmanGameModel * model,
                 { model->pacman->direction = DirectionUp; },
                 redraw);
-        } else if(event->key == InputKeyRight) {
+        }
+        else if (event->key == InputKeyRight) {
             with_view_model(
                 app->view_game,
                 PacmanGameModel * model,
                 { model->pacman->direction = DirectionDown; },
                 redraw);
-        } else if(event->key == InputKeyUp) {
+        }
+        else if (event->key == InputKeyUp) {
             with_view_model(
                 app->view_game,
                 PacmanGameModel * model,
                 { model->pacman->direction = DirectionRight; },
                 redraw);
-        } else if(event->key == InputKeyDown) {
+        }
+        else if (event->key == InputKeyDown) {
             with_view_model(
                 app->view_game,
                 PacmanGameModel * model,
                 { model->pacman->direction = DirectionLeft; },
                 redraw);
         }
-    } else if(event->type == InputTypePress) {
-        if(event->key == InputKeyOk) {
+    }
+    else if (event->type == InputTypePress) {
+        if (event->key == InputKeyOk) {
             // We choose to send a custom event when user presses OK button.  pacman_custom_event_callback will
             // handle our PacmanEventIdOkPressed event.  We could have just put the code from
             // pacman_custom_event_callback here, it's a matter of preference.
@@ -630,11 +657,12 @@ static bool pacman_view_game_input_callback(InputEvent* event, void* context) {
 }
 
 static Character*
-    character_alloc(Character* character, uint8_t x, uint8_t y, Direction direction) {
+character_alloc(Character* character, float_t x, float_t y, Direction direction) {
     character = (Character*)malloc(sizeof(Character));
     character->x = x;
     character->y = y;
     character->direction = direction;
+    character->speed = 2;
     return character;
 }
 
@@ -722,6 +750,8 @@ static PacmanApp* pacman_app_alloc(StartPositions* positions) {
     model->clyde =
         character_alloc(model->clyde, positions->clyde_x, positions->clyde_y, DirectionIdle);
     view_dispatcher_add_view(app->view_dispatcher, PacmanViewGame, app->view_game);
+
+    model->ghosts_mode = GhostsModeScatter;
 
     app->widget_about = widget_alloc();
     widget_add_text_scroll_element(
