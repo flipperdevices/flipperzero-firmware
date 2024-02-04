@@ -1,3 +1,12 @@
+## v0.7.0
+
+Unified serial update! No more complicated wiring of 2x UART connections - all your boards are supported now, with PCAPs and text both going over just ONE, SINGLE serial channel! Thanks to @Willy-JL for adding this amazing feature and fixing up the app for the new APIs.
+
+Requires Marauder **FW v0.13.7** (or newer) flashed to your wifi board: https://github.com/justcallmekoko/ESP32Marauder/releases/latest
+
+<3 @0xchocolate (cococode)
+
+
 ## v0.6.6
 
 Bug fixes and new BLE spam commands! Thanks to @justcallmekoko for adding the new commands! I also fixed the script user input bug where it would hang after selecting "save".
