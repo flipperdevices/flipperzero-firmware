@@ -27,15 +27,15 @@ This software is for experimental purposes only and is not meant for any illegal
 
 <a name="latest">
 
-## Latest Updates - [PATREON: Latest Release RM0201-1547-0.93.9-0d0773c](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
+## Latest Updates - [PATREON: Latest Release RM0204-1741-0.93.9-4732906](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-02-01 23:07 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-02-01 23:07 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-02-04 17:41 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-02-04 17:41 EST`
 - Updated: [Cross Remote v2.3 (By leedave)](https://github.com/leedave/flipper-zero-cross-remote)
 - Updated: [Sub-GHz Bruteforcer v3.9.2 (By Ganapati/xMasterX/derskythe)](https://github.com/derskythe/flipperzero-subbrute/tree/master)
 - Updated: [BLE Spam v4.4 (By Willy-JL & ECTO-1A & Spooks4576 with research from xMasterX; OFW API thanks to noproto)](https://github.com/noproto/apple_ble_spam_ofw) (Minor note updates)
-- Infrared: Last Settings Default to Auto-Detect (By Willy-JL)
-- Infrared: Simpler Last Settings API (By Willy-JL)
+- Infrared: [Last Settings Default to Auto-Detect (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/739cc0c3624fc9289a5d2a6f39f6b359cc36d66f)
+- Infrared: [Simpler Last Settings API (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/81208988d1f25119b537aa2bb255a616e1a993f0)
 - To Be Merged OFW PRs: [3352](https://github.com/flipperdevices/flipperzero-firmware/pull/3352), [3302](https://github.com/flipperdevices/flipperzero-firmware/pull/3302), [3211](https://github.com/flipperdevices/flipperzero-firmware/pull/3211), [3366](https://github.com/flipperdevices/flipperzero-firmware/pull/3366), [3250](https://github.com/flipperdevices/flipperzero-firmware/pull/3250), [3402](https://github.com/flipperdevices/flipperzero-firmware/pull/3402) & [3409](https://github.com/flipperdevices/flipperzero-firmware/pull/3409)
 
 <a name="release">
