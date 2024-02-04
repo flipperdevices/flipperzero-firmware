@@ -104,6 +104,10 @@ void select_move_index_scene_on_enter(void* context) {
     for(i = 1;; i++) {
         name = namelist_name_get_pos(pokemon_fap->pdata->move_list, i);
         if(name == NULL) break;
+	/* TODO: Add check here for generation match. Currently, this will populate
+	 * the letters that have any move associated with them, even if not for the
+	 * generation currently being used.
+	 */
 	if(name[0] != letter[0]) {
             letter[0] = name[0];
             submenu_add_item(

@@ -15,6 +15,8 @@ typedef enum {
     SelectMoveScene,
     SelectMoveIndexScene,
     SelectMoveSetScene,
+    SelectItemScene,
+    SelectItemSetScene,
     SelectTypeScene,
     SelectStatsScene,
     SelectOTIDScene,

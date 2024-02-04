@@ -85,6 +85,7 @@ typedef enum {
     STAT_TRAINER_NAME,
     STAT_SEL, // which EV/IV calc to use
     STAT_EXP,
+    STAT_HELD_ITEM,
 } DataStat;
 
 typedef enum {

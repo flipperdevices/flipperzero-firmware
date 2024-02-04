@@ -8,6 +8,7 @@
 #include "pokemon_name_input.h"
 #include "pokemon_number_input.h"
 #include "pokemon_move.h"
+#include "pokemon_item.h"
 #include "pokemon_type.h"
 #include "pokemon_stats.h"
 #include "pokemon_trade.h"
@@ -102,6 +103,8 @@ void (*const pokemon_scene_on_enter_handlers[])(void*) = {
     select_move_scene_on_enter,
     select_move_index_scene_on_enter,
     select_move_set_scene_on_enter,
+    select_item_scene_on_enter,
+    select_item_set_scene_on_enter,
     select_type_scene_on_enter,
     select_stats_scene_on_enter,
     select_number_scene_on_enter,
@@ -121,6 +124,8 @@ void (*const pokemon_scene_on_exit_handlers[])(void*) = {
     null_scene_on_exit,
     null_scene_on_exit,
     null_scene_on_exit,
+    null_scene_on_exit,
+    null_scene_on_exit,
     generic_scene_on_exit,
     null_scene_on_exit,
     generic_scene_on_exit,
@@ -131,6 +136,8 @@ void (*const pokemon_scene_on_exit_handlers[])(void*) = {
 };
 
 bool (*const pokemon_scene_on_event_handlers[])(void*, SceneManagerEvent) = {
+    null_scene_on_event,
+    null_scene_on_event,
     null_scene_on_event,
     null_scene_on_event,
     null_scene_on_event,

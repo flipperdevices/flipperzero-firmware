@@ -117,6 +117,12 @@ void gen_scene_on_enter(void* context) {
     submenu_add_item(
         pokemon_fap->submenu, buf, SelectLevelScene, scene_change_from_main_cb, pokemon_fap);
 
+    if (pokemon_fap->pdata->gen == GEN_II) {
+        snprintf(buf, sizeof(buf), "Held Item:   %s", namelist_name_get_index(pokemon_fap->pdata->item_list, pokemon_stat_get(pokemon_fap->pdata, STAT_HELD_ITEM, NONE)));
+        submenu_add_item(
+            pokemon_fap->submenu, buf, SelectItemScene, scene_change_from_main_cb, pokemon_fap);
+    }
+
     submenu_add_item(
         pokemon_fap->submenu,
         "Select Moves",

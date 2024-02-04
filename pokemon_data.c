@@ -483,6 +483,9 @@ uint16_t pokemon_stat_get(PokemonData* pdata, DataStat stat, DataStatSub which) 
         if (gen == GEN_I) return ((PokemonPartyGenI*)party)->status_condition = val;
         if (gen == GEN_II) return ((PokemonPartyGenII*)party)->status_condition = val;
         break;
+    case STAT_HELD_ITEM:
+        if (gen == GEN_II) return ((PokemonPartyGenII*)party)->held_item;
+        break;
     default:
         furi_crash("STAT_GET: invalid stat");
         break;
@@ -610,6 +613,9 @@ void pokemon_stat_set(PokemonData* pdata, DataStat stat, DataStatSub which, uint
     case STAT_CONDITION:
         if (gen == GEN_I) ((PokemonPartyGenI*)party)->status_condition = val;
         if (gen == GEN_II) ((PokemonPartyGenII*)party)->status_condition = val;
+        break;
+    case STAT_HELD_ITEM:
+        if (gen == GEN_II) ((PokemonPartyGenII*)party)->held_item = val;
         break;
     default:
         furi_crash("STAT_SET: invalid stat");
