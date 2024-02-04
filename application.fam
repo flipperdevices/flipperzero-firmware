@@ -5,7 +5,7 @@ App(
     name="Digimon F-Com",  # Displayed in menus
     apptype=FlipperAppType.EXTERNAL,
     entry_point="fcom_app",
-    stack_size=2 * 1024,
+    stack_size=3 * 1024,
     fap_category="GPIO",
     # Optional values
     # fap_version="0.1",

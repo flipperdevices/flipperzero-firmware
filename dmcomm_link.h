@@ -6,8 +6,6 @@
 #include "dmcomm/dmcomm.h"
 
 int32_t dmcomm_reader(void* context);
-
-
 void dmcomm_sendcommand(void* context, const char* cmd);
 
 #endif

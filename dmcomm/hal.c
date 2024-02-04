@@ -2,6 +2,19 @@
 
 App* context = NULL;
 
+void setApp(void* v)
+{
+  App* ctx = v;
+  context = ctx;
+}
+
+DmcommCallback* serialCallback = NULL;
+
+void setSerialOutputCallback(DmcommCallback *cb)
+{
+  serialCallback = cb;
+}
+
 const char* getPinName(const GpioPin* pin)
 {
   if(pin == &gpio_ext_pc3)
@@ -15,11 +28,6 @@ const char* getPinName(const GpioPin* pin)
   return "unknown";
 }
 
-void setApp(void* v)
-{
-  App* ctx = v;
-  context = ctx;
-}
 
 void boilerplate_led_set_rgb(int red, int green, int blue) {
     App* app = context;
@@ -85,26 +93,38 @@ void ledOff() {
 void Serial_prints(const char* c)
 {
   FURI_LOG_I(TAG, "Serial_prints %s", c);
-  UNUSED(c);
+  furi_string_cat_printf(context->dmcomm_output_buffer, "%s", c);
 }
 void Serial_printlns(const char* c)
 {
   FURI_LOG_I(TAG, "%s", c);
-  UNUSED(c);
+  furi_string_cat_printf(context->dmcomm_output_buffer, "%s\n", c);
+  FURI_LOG_I(TAG, "SENDING LINE %s", furi_string_get_cstr(context->dmcomm_output_buffer));
+  // allocate string, copy data, send string to CB. CB deallocates
+  // no locking
+  furi_string_reset(context->dmcomm_output_buffer);
 }
+
 void Serial_println(void)
 {
+  furi_string_cat_printf(context->dmcomm_output_buffer, "\n");
+  FURI_LOG_I(TAG, "SENDING LINE %s", furi_string_get_cstr(context->dmcomm_output_buffer));
+  // allocate string, copy data, send string to CB. CB deallocates
+  // no locking
+  furi_string_reset(context->dmcomm_output_buffer);
 }
+
 void Serial_printi(const int c)
 {
   FURI_LOG_I(TAG, "Serial_printi %d", c);
-  UNUSED(c);
+  furi_string_cat_printf(context->dmcomm_output_buffer, "%d", c);
 }
 void Serial_printf(const float c, int acc)
 {
   FURI_LOG_I(TAG, "Serial_printf %f %d", (double)c, acc);
   UNUSED(c);
   UNUSED(acc);
+  //furi_string_cat_printf(dmcomm_output_buffer, "%d", c);
 }
 
 const char *F(const char* i)
@@ -131,32 +151,44 @@ uint32_t millis()
 void Serial_writei(int i)
 {
   FURI_LOG_I(TAG, "%d", i);
-  UNUSED(i);
+  furi_string_push_back(context->dmcomm_output_buffer, (char)((i >> 24) & 0xFF));
+  furi_string_push_back(context->dmcomm_output_buffer, (char)((i >> 16) & 0xFF));
+  furi_string_push_back(context->dmcomm_output_buffer, (char)((i >> 8) & 0xFF));
+  furi_string_push_back(context->dmcomm_output_buffer, (char)(i & 0xFF));
 }
 
 int Serial_available(void)
 {
-  //FURI_LOG_I(TAG, "Serial_available");
+  // We're using an always available buffer
   return 1;
 }
 
 int Serial_read(void)
 {
-  int ret = 0;
-  if(!furi_string_empty(context->dmcomm_input_buffer))
+  int ret = -1;
+
+  furi_check(furi_mutex_acquire(context->dmcomm_mutex, FuriWaitForever) == FuriStatusOk);
+  
+  char s;
+  size_t recieved = 1;
+  recieved = furi_stream_buffer_receive(
+      context->dmcomm_stream_buffer,
+      &s,
+      1,
+      1);
+    
+  if(recieved > 0)
   {
-    FURI_LOG_I(TAG, "Serial_read");
-    const char s = furi_string_get_char(context->dmcomm_input_buffer, 0);
-    FURI_LOG_I(TAG, " reading from: %c", s);
     ret = (int)s;
-    furi_string_right(context->dmcomm_input_buffer, 1);
   }
+  furi_check(furi_mutex_release(context->dmcomm_mutex) == FuriStatusOk);
+
   return ret;
 }
 
 void Serial_writeb(const byte* data, int len)
 {
   FURI_LOG_I(TAG, "Serial_writeb %d", len);
-  UNUSED(data);
-  UNUSED(len);
+  for(int i = 0; i < len; i++)
+    furi_string_push_back(context->dmcomm_output_buffer, (char)data[i]);
 }

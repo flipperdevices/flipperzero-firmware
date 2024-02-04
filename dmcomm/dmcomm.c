@@ -714,7 +714,7 @@ void serialPrintTrigger() {
 //try to read from serial into buffer;
 //read until end-of-line and replace that with a null terminator
 //return 0 on failure, or positive integer for number of characters read
-byte serialRead(byte * buffer) {
+byte serialRead(byte* buffer) {
     unsigned long timeStart;
     unsigned long time;
     int incomingInt;

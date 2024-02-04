@@ -1,5 +1,10 @@
 #include "dmcomm_link.h"
 
+/*
+ * dmcomm thread, runs the dmcomm loop. call init first.
+ * exits when the app dmcomm_run var is set to false.
+ * App runs this constantly on startup until app close.
+*/
 int32_t dmcomm_reader(void* context) {
     FURI_LOG_I(TAG, "dmcomm_reader start");
     App* app = context;
@@ -12,13 +17,28 @@ int32_t dmcomm_reader(void* context) {
     return 0;
 }
 
+/*
+ * Send a serial command to the dmcomm thread
+*/
 void dmcomm_sendcommand(void* context, const char* cmd)
 {
     FURI_LOG_I(TAG, "dmcomm_reader start");
     App* app = context;
+    
+    furi_mutex_acquire(app->dmcomm_mutex, FuriWaitForever);
 
-    furi_string_cat_str(app->dmcomm_input_buffer, cmd);
+    size_t sent = furi_stream_buffer_send(
+        app->dmcomm_stream_buffer,
+        cmd,
+        strlen(cmd),
+        1);
+
+    if(sent != strlen(cmd))
+        FURI_LOG_I(TAG, "partial send %d/%d", sent, strlen(cmd));
+
+    furi_mutex_release(app->dmcomm_mutex);
 }
+
 
 /*
 furi_thread_flags_set(furi_thread_get_id(context->reader_thread), ReaderThreadFlagExit);
