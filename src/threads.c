@@ -64,6 +64,8 @@ int32_t secondary_thread(void *ctx)
                     give_candy(context->game_state, &events);
                     if (process_events(context->game_state, events)) {
                         context->game_state->next_animation_index = 0;
+                        play_action(context->game_state);
+                        vibrate_short(context->game_state);
                         go_to_candy_animation(context);
                     }
                     break;
@@ -72,6 +74,8 @@ int32_t secondary_thread(void *ctx)
                     give_pill(context->game_state, &events);
                     if (process_events(context->game_state, events)) {
                         context->game_state->next_animation_index = 0;
+                        play_action(context->game_state);
+                        vibrate_short(context->game_state);
                         go_to_pill_animation(context);
                     }
                     break;

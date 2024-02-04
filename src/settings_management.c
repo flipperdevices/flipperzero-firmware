@@ -46,6 +46,10 @@ void vibrate_short(const struct GameState *game_state) {
     vibrate_ms(game_state, 100);
 }
 
+void vibrate_long(const struct GameState *game_state) {
+    vibrate_ms(game_state, 500);
+}
+
 // Sound
 
 static void play_sequence(const struct GameState *game_state, const NotificationSequence *sequence) {
@@ -61,6 +65,68 @@ const NotificationSequence settings_confirm_sequence = {
     NULL
 };
 
+const NotificationSequence level_up_sequence = {
+    &message_note_c5,
+    &message_delay_50,
+    &message_note_e5,
+    &message_delay_50,
+    &message_note_g5,
+    &message_delay_50,
+    &message_note_c6,
+    &message_delay_100,
+    NULL
+};
+
+const NotificationSequence starvation_sequence = {
+    &message_note_c5,
+    &message_delay_100,
+    &message_note_b4,
+    &message_delay_100,
+    &message_note_as4,
+    &message_delay_250,
+    NULL
+};
+
+const NotificationSequence ambulance_sequence = {
+    &message_note_d5,
+    &message_delay_250,
+    &message_note_as4,
+    &message_delay_250,
+    &message_note_d5,
+    &message_delay_250,
+    &message_note_as4,
+    &message_delay_250,
+    NULL
+};
+
+const NotificationSequence action_sequence = {
+    &message_note_g5,
+    &message_delay_50,
+    &message_note_c6,
+    &message_delay_100,
+    &message_note_c5,
+    &message_delay_50,
+    &message_note_c6,
+    &message_delay_100,
+    NULL
+};
+
 void play_settings_confirm(const struct GameState *game_state) {
     play_sequence(game_state, &settings_confirm_sequence);
+}
+
+void play_level_up(const struct GameState *game_state) {
+    play_sequence(game_state, &level_up_sequence);
+}
+
+void play_starvation(const struct GameState *game_state) {
+    play_sequence(game_state, &starvation_sequence);
+}
+
+void play_ambulance(const struct GameState *game_state) {
+    play_sequence(game_state, &ambulance_sequence);
+}
+
+void play_action(const struct GameState *game_state) {
+    play_sequence(game_state, &action_sequence);
 }

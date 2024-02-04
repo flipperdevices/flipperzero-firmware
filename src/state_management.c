@@ -4,6 +4,7 @@
 #include "state_management.h"
 #include "constants.h"
 #include "feature_management.h"
+#include "settings_management.h"
 #include "save_restore.h"
 #include "game_structs.h"
 
@@ -14,9 +15,11 @@ static uint32_t get_current_timestamp() {
 }
 
 static void fast_forward_state(struct GameState *game_state) {
+    MASK_VIBRO_SOUND(game_state)
     struct GameEvents events = { 0 };
     generate_new_random_events(game_state, &events);
     process_events(game_state, events);
+    UNMASK_VIBRO_SOUND(game_state)
 }
 
 static void init_persistent_state_object(struct GameState *game_state) {

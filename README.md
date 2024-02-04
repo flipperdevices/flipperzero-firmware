@@ -52,6 +52,4 @@ This application is still under initial development
 # TODO
 
 * Add animations for stage up
-* Add sound
-* Add vibration
 * Add happyness feature

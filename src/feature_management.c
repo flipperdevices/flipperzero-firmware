@@ -1,6 +1,7 @@
 #include <furi.h> // For FURI_LOG_D
 
 #include "feature_management.h"
+#include "settings_management.h"
 #include "constants.h"
 #include "random_generator.h"
 
@@ -59,6 +60,8 @@ bool apply_xp(struct GameState *game_state, struct GameEvents game_events) {
             game_state->persistent.xp = 0;
             game_state->persistent.stage++;
             FURI_LOG_I(LOG_TAG, "Evoluted to new stage %u!", game_state->persistent.stage);
+            play_level_up(game_state);
+            vibrate_long(game_state);
         } else {
             game_state->persistent.xp += game_events.xp;
             game_events.xp = 0;
@@ -123,6 +126,8 @@ bool apply_hu(struct GameState *game_state, struct GameEvents game_events) {
             // Started to starve
             game_state->persistent.hu = 0;
             FURI_LOG_I(LOG_TAG, "The pet is hungry!");
+            play_starvation(game_state);
+            vibrate_long(game_state);
         }
     } else if (hu > 0) {
         // Ate some food
@@ -175,6 +180,8 @@ void check_hp(const struct GameState *game_state, uint32_t current_timestamp, st
                 FURI_LOG_I(LOG_TAG, "The pet is losing HP for starvation!");
             } else {
                 FURI_LOG_I(LOG_TAG, "The pet is losing HP for an illness!");
+                play_ambulance(game_state);
+                vibrate_long(game_state);
             }
             game_events->hp -= random_uniform(LOSE_HP_MIN, LOSE_HP_MAX);
         }
