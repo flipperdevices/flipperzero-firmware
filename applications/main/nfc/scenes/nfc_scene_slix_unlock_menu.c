@@ -39,11 +39,11 @@ bool nfc_scene_slix_unlock_menu_on_event(void* context, SceneManagerEvent event)
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SubmenuIndexSlixUnlockMenuManual) {
-            instance->slix_unlock->method = SlixUnlockMethodManual;
+            slix_unlock_set_method(instance->slix_unlock, SlixUnlockMethodManual);
             scene_manager_next_scene(instance->scene_manager, NfcSceneSlixKeyInput);
             consumed = true;
         } else if(event.event == SubmenuIndexSlixUnlockMenuTonieBox) {
-            instance->slix_unlock->method = SlixUnlockMethodTonieBox;
+            slix_unlock_set_method(instance->slix_unlock, SlixUnlockMethodTonieBox);
             scene_manager_next_scene(instance->scene_manager, NfcSceneSlixUnlock);
             consumed = true;
         }

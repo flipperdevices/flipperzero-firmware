@@ -3,6 +3,8 @@
 void nfc_scene_slix_key_input_byte_input_callback(void* context) {
     NfcApp* instance = context;
 
+    SlixPassword password = *(uint32_t*)instance->byte_input_store;
+    slix_unlock_set_password(instance->slix_unlock, password);
     view_dispatcher_send_custom_event(instance->view_dispatcher, NfcCustomEventByteInputDone);
 }
 
@@ -17,8 +19,8 @@ void nfc_scene_slix_key_input_on_enter(void* context) {
         nfc_scene_slix_key_input_byte_input_callback,
         NULL,
         instance,
-        instance->slix_unlock->password,
-        sizeof(instance->slix_unlock->password));
+        instance->byte_input_store,
+        sizeof(SlixPassword));
     view_dispatcher_switch_to_view(instance->view_dispatcher, NfcViewByteInput);
 }
 

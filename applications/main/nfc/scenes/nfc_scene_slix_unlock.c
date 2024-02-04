@@ -10,8 +10,10 @@ NfcCommand nfc_scene_slix_unlock_worker_callback(NfcGenericEvent event, void* co
     NfcApp* instance = context;
     SlixPollerEvent* slix_event = event.event_data;
     if(slix_event->type == SlixPollerEventTypePrivacyUnlockRequest) {
-        slix_event->data->privacy_password.password = 0x5B6EFD7F;
-        slix_event->data->privacy_password.password_set = true;
+        SlixPassword pwd = 0;
+        bool get_password_success = slix_unlock_get_next_password(instance->slix_unlock, &pwd);
+        slix_event->data->privacy_password.password = pwd;
+        slix_event->data->privacy_password.password_set = get_password_success;
     } else if(slix_event->type == SlixPollerEventTypeError) {
         view_dispatcher_send_custom_event(instance->view_dispatcher, NfcCustomEventPollerFailure);
     } else if(slix_event->type == SlixPollerEventTypeReady) {
