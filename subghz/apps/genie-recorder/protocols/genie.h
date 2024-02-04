@@ -1,6 +1,12 @@
 #pragma once
 
-#include "base.h"
+#include <lib/subghz/types.h>
+#include <lib/subghz/protocols/base.h>
+#include <lib/subghz/blocks/const.h>
+#include <lib/subghz/blocks/decoder.h>
+#include <lib/subghz/blocks/encoder.h>
+#include <lib/subghz/blocks/math.h>
+#include "generic.h"
 
 #define SUBGHZ_PROTOCOL_GENIE_NAME "Genie"
 
