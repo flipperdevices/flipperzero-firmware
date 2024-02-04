@@ -28,7 +28,7 @@ void infrared_last_settings_load(InfraredLastSettings* instance) {
 
     bool temp_extpower = false;
     bool temp_extout = false;
-    bool temp_auto_detect = false;
+    bool temp_auto_detect = true;
 
     if(FSE_OK == storage_sd_status(storage) && INFRARED_LAST_SETTINGS_PATH &&
        flipper_format_file_open_existing(fff_data_file, INFRARED_LAST_SETTINGS_PATH)) {
