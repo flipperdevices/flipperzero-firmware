@@ -39,11 +39,15 @@ bool nfc_scene_slix_unlock_success_on_event(void* context, SceneManagerEvent eve
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == GuiButtonTypeLeft) {
-            consumed = scene_manager_previous_scene(instance->scene_manager);
+            scene_manager_next_scene(instance->scene_manager, NfcSceneRetryConfirm);
+            consumed = true;
         } else if(event.event == GuiButtonTypeRight) {
             scene_manager_next_scene(instance->scene_manager, NfcSceneSavedMenu);
             consumed = true;
         }
+    } else if(event.type == SceneManagerEventTypeBack) {
+        scene_manager_next_scene(instance->scene_manager, NfcSceneExitConfirm);
+        consumed = true;
     }
 
     return consumed;

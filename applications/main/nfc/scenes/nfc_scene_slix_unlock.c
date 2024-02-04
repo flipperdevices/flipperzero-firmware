@@ -52,6 +52,9 @@ bool nfc_scene_slix_unlock_on_event(void* context, SceneManagerEvent event) {
             scene_manager_next_scene(instance->scene_manager, NfcSceneSlixUnlockSuccess);
             consumed = true;
         }
+    } else if(event.type == SceneManagerEventTypeBack) {
+        consumed = scene_manager_search_and_switch_to_previous_scene(
+            instance->scene_manager, NfcSceneSlixUnlockMenu);
     }
 
     return consumed;
