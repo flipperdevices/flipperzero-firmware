@@ -115,13 +115,43 @@ void level_remove_entity(Level* level, Entity* entity) {
     entity_call_stop(level, entity);
 }
 
-void level_update(Level* level, Director* director) {
-    level_process_add(level);
-    level_process_remove(level);
-
+static void level_process_update(Level* level, Director* director) {
     FOREACH(item, level->entities) {
         entity_call_update(*item, director);
     }
+}
+
+static void level_process_collision(Level* level, Director* director) {
+    EntityList_it_t it_first;
+    EntityList_it_t it_second;
+
+    EntityList_it(it_first, level->entities);
+    while(!EntityList_end_p(it_first)) {
+        if(entity_collider_exists(*EntityList_cref(it_first))) {
+            // start second iterator at the next entity,
+            // so we don't check the same pair twice
+            EntityList_it_set(it_second, it_first);
+            EntityList_next(it_second);
+            while(!EntityList_end_p(it_second)) {
+                if(entity_collider_exists(*EntityList_cref(it_second))) {
+                    Entity* first = *EntityList_ref(it_first);
+                    Entity* second = *EntityList_ref(it_second);
+                    if(entity_collider_check_collision(first, second)) {
+                        entity_call_collision(first, second, director);
+                        entity_call_collision(second, first, director);
+                    }
+                }
+                EntityList_next(it_second);
+            }
+        }
+        EntityList_next(it_first);
+    }
+}
+void level_update(Level* level, Director* director) {
+    level_process_add(level);
+    level_process_remove(level);
+    level_process_update(level, director);
+    level_process_collision(level, director);
 }
 
 void level_render(Level* level, Director* director, Canvas* canvas) {

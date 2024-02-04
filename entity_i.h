@@ -18,6 +18,12 @@ void entity_call_update(Entity* entity, Director* director);
 
 void entity_call_render(Entity* entity, Director* director, Canvas* canvas);
 
+void entity_call_collision(Entity* entity, Entity* other, Director* director);
+
+bool entity_collider_check_collision(Entity* entity, Entity* other);
+
+bool entity_collider_exists(Entity* entity);
+
 int32_t entities_get_count(void);
 
 #ifdef __cplusplus
