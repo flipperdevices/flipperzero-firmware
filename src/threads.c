@@ -3,6 +3,7 @@
 #include "threads.h"
 #include "constants.h"
 #include "game_structs.h"
+#include "settings_management.h"
 #include "state_management.h"
 #include "gui/utils.h"
 
@@ -32,6 +33,7 @@ int32_t secondary_thread(void *ctx)
     FURI_LOG_D(LOG_TAG, "Secondary thread started");
 
     // Start by initializing everything
+    init_settings(context->game_state);
     init_state(context->game_state);
 
     // Now we are ready to open the main scene
@@ -48,6 +50,7 @@ int32_t secondary_thread(void *ctx)
             switch(message.type) {
                 case SAVE_AND_EXIT:
                     FURI_LOG_T(LOG_TAG, "Received termination message");
+                    persist_settings(context->game_state);
                     persist_state(context->game_state);
                     return 0;
                 case RESET_STATE:

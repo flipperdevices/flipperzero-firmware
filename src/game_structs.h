@@ -41,10 +41,16 @@ struct PersistentGameState {
     uint32_t last_recorded_hp_update; // Same as above
 };
 
+struct PersistentSettings {
+    uint8_t vibration;
+    uint8_t sound;
+};
+
 /* Internal state of the game. Some of the info are persisted on
  * the storage */
 struct GameState {
     struct PersistentGameState persistent;
+    struct PersistentSettings settings;
     // Transient information
     uint32_t next_animation_index;
 };

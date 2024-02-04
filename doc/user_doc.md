@@ -6,8 +6,10 @@ and how the state progresses.
 In the settings menu it's possible to re-initialize
 the game. All progresses will be lost.
 
-From the settings it is also possible to access the
-"about" screen.
+It is also possile to enable or disable the vibration
+and the sound.
+
+In the settings you can also find the "about" screen.
 
 ## Features
 ### Experience

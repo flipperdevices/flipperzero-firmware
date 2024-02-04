@@ -32,7 +32,7 @@ static void init_persistent_state_object(struct GameState *game_state) {
 
 void init_state(struct GameState *game_state) {
     // Try to load the state from the storage
-    if(!load_from_file(&game_state->persistent)) {
+    if (!load_state_from_file(&game_state->persistent)) {
         init_persistent_state_object(game_state);
     } else {
         // State loaded from file. Actualize it up to
@@ -44,9 +44,9 @@ void init_state(struct GameState *game_state) {
 }
 
 void persist_state(struct GameState *game_state) {
-    bool result = save_to_file(&game_state->persistent);
+    bool result = save_state_to_file(&game_state->persistent);
     if (!result) {
-        furi_crash("Unable to save to storage");
+        furi_crash("Unable to save state to storage");
     }
 }
 

@@ -5,11 +5,36 @@
 #include "scenes.h"
 #include "../../flipper_structs.h"
 #include "../../constants.h"
+#include "../../settings_management.h"
 
 enum ButtonIndexes {
     reset_game,
+    vibration,
+    sound,
     about
 };
+
+static const char* off_on_options[] = {"OFF", "ON"};
+
+static void vibration_cb(VariableItem *item) {
+    struct ApplicationContext *context = variable_item_get_context(item);
+    uint8_t index = variable_item_get_current_value_index(item);
+
+    variable_item_set_current_value_text(item, off_on_options[index]);
+    context->game_state->settings.vibration = index;
+
+    vibrate_short(context->game_state);
+}
+
+static void sound_cb(VariableItem *item) {
+    struct ApplicationContext *context = variable_item_get_context(item);
+    uint8_t index = variable_item_get_current_value_index(item);
+
+    variable_item_set_current_value_text(item, off_on_options[index]);
+    context->game_state->settings.sound = index;
+
+    play_settings_confirm(context->game_state);
+}
 
 static void settings_enter_callback(void *ctx, uint32_t index) {
     struct ApplicationContext *context = (struct ApplicationContext *)ctx;
@@ -23,9 +48,16 @@ void scene_settings_on_enter(void *ctx) {
     VariableItemList* vil = context->variable_item_list_module;
     FURI_LOG_T(LOG_TAG, "scene_settings_on_enter");
 
+    VariableItem *item;
     variable_item_list_reset(vil);
     variable_item_list_add(vil, "Reset game", 0, NULL, NULL); // Index 0 (reset_game)
-    variable_item_list_add(vil,"About", 0, NULL, NULL); // Index 1 (about)
+    item = variable_item_list_add(vil, "Vibration", 2, vibration_cb, context); // Index 1 (vibration)
+    variable_item_set_current_value_index(item, context->game_state->settings.vibration);
+    variable_item_set_current_value_text(item, off_on_options[context->game_state->settings.vibration]);
+    item = variable_item_list_add(vil, "Sound", 2, sound_cb, context); // Index 2 (sound)
+    variable_item_set_current_value_index(item, context->game_state->settings.sound);
+    variable_item_set_current_value_text(item, off_on_options[context->game_state->settings.sound]);
+    variable_item_list_add(vil,"About", 0, NULL, NULL); // Index 3 (about)
 
     variable_item_list_set_enter_callback(vil, settings_enter_callback, context);
 
