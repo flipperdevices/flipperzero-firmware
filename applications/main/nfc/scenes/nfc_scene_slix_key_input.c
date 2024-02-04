@@ -1,9 +1,11 @@
 #include "../nfc_app_i.h"
 
+#include <nfc/helpers/nfc_util.h>
+
 void nfc_scene_slix_key_input_byte_input_callback(void* context) {
     NfcApp* instance = context;
 
-    SlixPassword password = *(uint32_t*)instance->byte_input_store;
+    SlixPassword password = nfc_util_bytes2num(instance->byte_input_store, sizeof(SlixPassword));
     slix_unlock_set_password(instance->slix_unlock, password);
     view_dispatcher_send_custom_event(instance->view_dispatcher, NfcCustomEventByteInputDone);
 }
