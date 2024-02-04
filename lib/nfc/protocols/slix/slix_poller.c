@@ -88,35 +88,35 @@ static NfcCommand slix_poller_handler_privacy_unlock(SlixPoller* instance) {
     NfcCommand command = NfcCommandContinue;
     instance->poller_state = SlixPollerStateError;
 
-    FURI_LOG_I(TAG, "Requesting password from app");
     instance->slix_event.type = SlixPollerEventTypePrivacyUnlockRequest;
     command = instance->callback(instance->general_event, instance->context);
-    if(instance->slix_event_data.privacy_password.password_set) {
+
+    bool slix_unlocked = false;
+    do {
+        if(!instance->slix_event_data.privacy_password.password_set) break;
         SlixPassword pwd = instance->slix_event_data.privacy_password.password;
-        FURI_LOG_I(TAG, "Received password %08lX from app", pwd);
+        FURI_LOG_I(TAG, "Trying to disable privacy mode with password: %08lX", pwd);
+
         instance->error = slix_poller_get_random_number(instance, &instance->random_number);
+        if(instance->error != SlixErrorNone) break;
+
+        instance->error = slix_poller_set_password(instance, SlixPasswordTypePrivacy, pwd);
         if(instance->error != SlixErrorNone) {
-            FURI_LOG_E(TAG, "Error in get random number: %d", instance->error);
-        } else {
-            FURI_LOG_I(TAG, "Received random number: %04X", instance->random_number);
-            instance->error = slix_poller_set_password(instance, SlixPasswordTypePrivacy, pwd);
-            if(instance->error != SlixErrorNone) {
-                FURI_LOG_E(TAG, "Error setting password: %d", instance->error);
-                command = NfcCommandReset;
-                instance->poller_state = SlixPollerStateError;
-            } else {
-                instance->data->passwords[SlixPasswordTypePrivacy] = pwd;
-                FURI_LOG_I(TAG, "Privacy mode disabled");
-                instance->poller_state = SlixPollerStateIdle;
-                command = NfcCommandReset;
-            }
+            command = NfcCommandReset;
+            break;
         }
-    } else {
+
+        FURI_LOG_I(TAG, "Privacy mode disabled");
+        instance->data->passwords[SlixPasswordTypePrivacy] = pwd;
+        instance->poller_state = SlixPollerStateIdle;
+        slix_unlocked = true;
+    } while(false);
+
+    if(!slix_unlocked) {
         instance->error = SlixErrorTimeout;
         instance->poller_state = SlixPollerStateError;
+        furi_delay_ms(100);
     }
-
-    furi_delay_ms(1000);
 
     return command;
 }
