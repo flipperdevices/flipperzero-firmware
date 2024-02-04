@@ -18,7 +18,43 @@
 const NamedList move_list[];
 const NamedList type_list[];
 const NamedList stat_list[];
+const NamedList item_list[];
 const PokemonTable pokemon_table[];
+
+/* These line up with the DataStat enum */
+const char *stat_text[] = {
+    "ATK",
+    "DEF",
+    "SPD",
+    "SPC_ATK",
+    "SPC_DEF",
+    "HP",
+    "Type",
+    "Move",
+    "Growth",
+    "Gender Ratio",
+    "ATK_EV",
+    "DEF_EV",
+    "SPD_EV",
+    "SPC_EV",
+    "HP_EV",
+    "IV",
+    "ATK_IV",
+    "DEF_IV",
+    "SPD_IV",
+    "SPC_IV",
+    "HP_IV",
+    "Lvl.",
+    "Idx.",
+    "Num.",
+    "Cond.",
+    "Nick.",
+    "OT Name",
+    "OT ID",
+    "Trainer Name",
+    "EV/IV Sel.",
+    "Exp.",
+};
 
 /* Allocates a chunk of memory for the trade data block and sets up some
  * default values.
@@ -26,33 +62,53 @@ const PokemonTable pokemon_table[];
 PokemonData* pokemon_data_alloc(uint8_t gen) {
     PokemonData* pdata;
 
-    /* XXX: This will change depending on generation */
     pdata = malloc(sizeof(PokemonData));
-    pdata->trade_block_sz = sizeof(TradeBlockGenI);
-    pdata->trade_block = malloc(pdata->trade_block_sz);
-
-
     pdata->gen = gen;
-
-    /* Clear struct to be all TERM_ bytes as the various name strings need this */
-    memset(pdata->trade_block, TERM_, sizeof(TradeBlockGenI));
-
-    /* The party_members element needs to be 0xff for unused */
-    memset(((TradeBlockGenI*)pdata->trade_block)->party_members, 0xFF, sizeof(((TradeBlockGenI*)pdata->trade_block)->party_members));
-
-    pdata->party = ((TradeBlockGenI*)pdata->trade_block)->party;
-
-    /* Zero the main party data, TERM_ in there can cause weirdness */
-    memset(pdata->party, 0x00, sizeof((*pdata->party)));
-
-    /* Set our Name, the pokemon's default OT name and ID */
-    ((TradeBlockGenI*)pdata->trade_block)->party_cnt = 1;
 
     /* Set up lists */
     pdata->move_list = move_list;
     pdata->type_list = type_list;
     pdata->stat_list = stat_list;
+    pdata->item_list = item_list;
     pdata->pokemon_table = pokemon_table;
+
+    switch (gen) {
+    case GEN_I:
+        /* Allocate trade block and set its size for the trade view to use */
+        pdata->trade_block_sz = sizeof(TradeBlockGenI);
+        pdata->trade_block = malloc(pdata->trade_block_sz);
+
+        /* The party_members element needs to be 0xff for unused */
+        memset(((TradeBlockGenI*)pdata->trade_block)->party_members, 0xFF, sizeof(((TradeBlockGenI*)pdata->trade_block)->party_members));
+
+        pdata->party = ((TradeBlockGenI*)pdata->trade_block)->party;
+
+        /* Set party count to 1 */
+        ((TradeBlockGenI*)pdata->trade_block)->party_cnt = 1;
+
+        /* Set the max pokedex number, 0 indexed */
+	pdata->dex_max = 150;
+        break;
+    case GEN_II:
+        /* Allocate trade block and set its size for the trade view to use */
+        pdata->trade_block_sz = sizeof(TradeBlockGenII);
+        pdata->trade_block = malloc(pdata->trade_block_sz);
+
+        /* The party_members element needs to be 0xff for unused */
+        memset(((TradeBlockGenII*)pdata->trade_block)->party_members, 0xFF, sizeof(((TradeBlockGenII*)pdata->trade_block)->party_members));
+
+        pdata->party = ((TradeBlockGenII*)pdata->trade_block)->party;
+
+        /* Set party count to 1 */
+        ((TradeBlockGenII*)pdata->trade_block)->party_cnt = 1;
+
+        /* Set the max pokedex number, 0 indexed */
+	pdata->dex_max = 250;
+        break;
+    default:
+        furi_crash("Invalid Gen");
+        break;
+    }
 
     /* Trainer/OT name, not to exceed 7 characters! */
     pokemon_name_set(pdata, STAT_TRAINER_NAME, "Flipper");
@@ -127,6 +183,10 @@ void pokemon_recalculate(PokemonData* pdata, uint8_t recalc) {
         pokemon_stat_iv_calc(pdata, pdata->stat_sel);
     }
 
+    /* Note: This will still end up calculating spc_def on gen i pokemon.
+     * However, the way the accessors are set up the calculated value will
+     * never be written anywhere. This is just wasted CPU time.
+     */
     if(recalc & RECALC_STATS) {
         for(i = STAT; i < STAT_END; i++) {
             pokemon_stat_calc(pdata, i);
@@ -194,19 +254,23 @@ const char* table_stat_name_get(const PokemonTable* table, int num) {
 void pokemon_name_set(PokemonData* pdata, DataStat stat, char* name) {
     furi_assert(pdata);
     size_t len;
+    uint8_t gen = pdata->gen;
     uint8_t* ptr = NULL;
 
     switch(stat) {
     case STAT_NICKNAME:
-        ptr = ((TradeBlockGenI*)pdata->trade_block)->nickname[0].str;
+        if (gen == GEN_I) ptr = ((TradeBlockGenI*)pdata->trade_block)->nickname[0].str;
+        if (gen == GEN_II) ptr = ((TradeBlockGenII*)pdata->trade_block)->nickname[0].str;
         len = 10;
         break;
     case STAT_OT_NAME:
-        ptr = ((TradeBlockGenI*)pdata->trade_block)->ot_name[0].str;
+        if (gen == GEN_I) ptr = ((TradeBlockGenI*)pdata->trade_block)->ot_name[0].str;
+        if (gen == GEN_II) ptr = ((TradeBlockGenII*)pdata->trade_block)->ot_name[0].str;
         len = 7;
         break;
     case STAT_TRAINER_NAME:
-        ptr = ((TradeBlockGenI*)pdata->trade_block)->trainer_name.str;
+        if (gen == GEN_I) ptr = ((TradeBlockGenI*)pdata->trade_block)->trainer_name.str;
+        if (gen == GEN_II) ptr = ((TradeBlockGenII*)pdata->trade_block)->trainer_name.str;
         len = 7;
         break;
     default:
@@ -219,19 +283,22 @@ void pokemon_name_set(PokemonData* pdata, DataStat stat, char* name) {
 
     /* Set the encoded name in the buffer */
     pokemon_str_to_encoded_array(ptr, name, len);
-    FURI_LOG_D(TAG, "[data] %d name set to %s", stat, name);
+    FURI_LOG_D(TAG, "[data] %s name set to %s", stat_text[stat], name);
 }
 
 void pokemon_name_get(PokemonData* pdata, DataStat stat, char* dest, size_t len) {
     furi_assert(pdata);
     uint8_t* ptr = NULL;
+    uint8_t gen = pdata->gen;
 
     switch(stat) {
     case STAT_NICKNAME:
-        ptr = ((TradeBlockGenI*)pdata->trade_block)->nickname[0].str;
+        if (gen == GEN_I) ptr = ((TradeBlockGenI*)pdata->trade_block)->nickname[0].str;
+        if (gen == GEN_II) ptr = ((TradeBlockGenII*)pdata->trade_block)->nickname[0].str;
         break;
     case STAT_OT_NAME:
-        ptr = ((TradeBlockGenI*)pdata->trade_block)->ot_name[0].str;
+        if (gen == GEN_I) ptr = ((TradeBlockGenI*)pdata->trade_block)->ot_name[0].str;
+        if (gen == GEN_II) ptr = ((TradeBlockGenII*)pdata->trade_block)->ot_name[0].str;
         break;
     default:
         furi_crash("name_get invalid");
@@ -263,9 +330,6 @@ void pokemon_default_nickname_set(char* dest, PokemonData* pdata, size_t n) {
     }
 }
 
-/* XXX: This could also just pass the pokemon number? */
-/* XXX: does no bounds checking of stat */
-/* XXX: does no bounds checking of num */
 uint8_t table_stat_base_get(const PokemonTable* table, PokemonData* pdata, DataStat stat, DataStatSub num) {
     furi_assert(pdata);
     int pkmnnum = pokemon_stat_get(pdata, STAT_NUM, NONE);
@@ -277,8 +341,13 @@ uint8_t table_stat_base_get(const PokemonTable* table, PokemonData* pdata, DataS
         return table[pkmnnum].base_def;
     case STAT_BASE_SPD:
         return table[pkmnnum].base_spd;
-    case STAT_BASE_SPC:
-        return table[pkmnnum].base_spc;
+    /*case STAT_BASE_SPC:*/
+    case STAT_BASE_SPC_ATK:
+        if (pdata->gen == GEN_I) return table[pkmnnum].base_spc;
+        if (pdata->gen == GEN_II) return table[pkmnnum].base_spc_atk;
+        break;
+    case STAT_BASE_SPC_DEF:
+        return table[pkmnnum].base_spc_def;
     case STAT_BASE_HP:
         return table[pkmnnum].base_hp;
     case STAT_BASE_TYPE:
@@ -287,6 +356,12 @@ uint8_t table_stat_base_get(const PokemonTable* table, PokemonData* pdata, DataS
         return table[pkmnnum].move[num];
     case STAT_BASE_GROWTH:
         return table[pkmnnum].growth;
+    case STAT_BASE_GENDER_RATIO:
+        return table[pkmnnum].gender_ratio;
+/* XXX: Unsure if I want to implement this
+    case STAT_BASE_EGG_CYCLES:
+        return table[pkmnnum].egg_cycles;
+*/
     default:
         furi_crash("BASE_GET: invalid stat");
         break;
@@ -309,75 +384,105 @@ uint16_t pokemon_stat_get(PokemonData* pdata, DataStat stat, DataStatSub which) 
     switch(stat) {
     case STAT_ATK:
         if(gen == GEN_I) val = ((PokemonPartyGenI*)party)->atk;
+        if(gen == GEN_II) val = ((PokemonPartyGenII*)party)->atk;
         break;
     case STAT_DEF:
         if(gen == GEN_I) val = ((PokemonPartyGenI*)party)->def;
+        if(gen == GEN_II) val = ((PokemonPartyGenII*)party)->def;
         break;
     case STAT_SPD:
         if(gen == GEN_I) val = ((PokemonPartyGenI*)party)->spd;
+        if(gen == GEN_II) val = ((PokemonPartyGenII*)party)->spd;
         break;
-    case STAT_SPC:
+    /*case STAT_SPC:*/
+    case STAT_SPC_ATK:
         if(gen == GEN_I) val = ((PokemonPartyGenI*)party)->spc;
+        if(gen == GEN_II) val = ((PokemonPartyGenII*)party)->spc_atk;
+        break;
+    case STAT_SPC_DEF:
+        if(gen == GEN_II) val = ((PokemonPartyGenII*)party)->spc_def;
         break;
     case STAT_HP:
         if(gen == GEN_I) val = ((PokemonPartyGenI*)party)->hp;
+        if(gen == GEN_II) val = ((PokemonPartyGenII*)party)->hp;
         break;
     case STAT_ATK_EV:
         if(gen == GEN_I) val = ((PokemonPartyGenI*)party)->atk_ev;
+        if(gen == GEN_II) val = ((PokemonPartyGenII*)party)->atk_ev;
         break;
     case STAT_DEF_EV:
         if(gen == GEN_I) val = ((PokemonPartyGenI*)party)->def_ev;
+        if(gen == GEN_II) val = ((PokemonPartyGenII*)party)->def_ev;
         break;
     case STAT_SPD_EV:
         if(gen == GEN_I) val = ((PokemonPartyGenI*)party)->spd_ev;
+        if(gen == GEN_II) val = ((PokemonPartyGenII*)party)->spd_ev;
         break;
     case STAT_SPC_EV:
         if(gen == GEN_I) val = ((PokemonPartyGenI*)party)->spc_ev;
+        if(gen == GEN_II) val = ((PokemonPartyGenII*)party)->spc_ev;
         break;
     case STAT_HP_EV:
         if(gen == GEN_I) val = ((PokemonPartyGenI*)party)->hp_ev;
+        if(gen == GEN_II) val = ((PokemonPartyGenII*)party)->hp_ev;
         break;
     case STAT_ATK_IV:
         if(gen == GEN_I) return (((PokemonPartyGenI*)party)->iv >> 12) & 0x0F;
+        if(gen == GEN_II) return (((PokemonPartyGenII*)party)->iv >> 12) & 0x0F;
 	break;
     case STAT_DEF_IV:
         if(gen == GEN_I) return (((PokemonPartyGenI*)party)->iv >> 8) & 0x0F;
+        if(gen == GEN_II) return (((PokemonPartyGenII*)party)->iv >> 8) & 0x0F;
 	break;
     case STAT_SPD_IV:
         if(gen == GEN_I) return (((PokemonPartyGenI*)party)->iv >> 4) & 0x0F;
+        if(gen == GEN_II) return (((PokemonPartyGenII*)party)->iv >> 4) & 0x0F;
 	break;
     case STAT_SPC_IV:
         if(gen == GEN_I) return ((PokemonPartyGenI*)party)->iv & 0x0F;
+        if(gen == GEN_II) return ((PokemonPartyGenII*)party)->iv & 0x0F;
 	break;
     case STAT_HP_IV:
         if(gen == GEN_I) return (((PokemonPartyGenI*)party)->iv & 0xAA) >> 4;
+        if(gen == GEN_II) return (((PokemonPartyGenII*)party)->iv & 0xAA) >> 4;
 	break;
     case STAT_LEVEL:
         if(gen == GEN_I) return ((PokemonPartyGenI*)party)->level;
+        if(gen == GEN_II) return ((PokemonPartyGenII*)party)->level;
 	break;
     case STAT_INDEX:
         if(gen == GEN_I) return ((PokemonPartyGenI*)party)->index;
+        if(gen == GEN_II) return ((PokemonPartyGenII*)party)->index;
 	break;
+    /* In Gen I, index is not relative at all to dex num.
+     * In Gen II, index is the same as the dex num.
+     */
     case STAT_NUM:
-        if(gen == GEN_I) val = ((PokemonPartyGenI*)party)->index;
-        return table_pokemon_pos_get(pdata->pokemon_table, val);
+        if(gen == GEN_I) {
+            val = ((PokemonPartyGenI*)party)->index;
+            return table_pokemon_pos_get(pdata->pokemon_table, val);
+        }
+        if(gen == GEN_II) return ((PokemonPartyGenII*)party)->index;
+        break;
     case STAT_MOVE:
         if(gen == GEN_I) return ((PokemonPartyGenI*)party)->move[which];
+        if(gen == GEN_II) return ((PokemonPartyGenII*)party)->move[which];
 	break;
     case STAT_TYPE:
         if(gen == GEN_I) return ((PokemonPartyGenI*)party)->type[which];
 	break;
     case STAT_OT_ID:
         if(gen == GEN_I) val = ((PokemonPartyGenI*)party)->ot_id;
+        if(gen == GEN_II) val = ((PokemonPartyGenII*)party)->ot_id;
         break;
     case STAT_SEL:
         if(gen == GEN_I) return pdata->stat_sel;
+        if(gen == GEN_II) return pdata->stat_sel;
 	break;
     case STAT_CONDITION:
         if (gen == GEN_I) return ((PokemonPartyGenI*)party)->status_condition = val;
+        if (gen == GEN_II) return ((PokemonPartyGenII*)party)->status_condition = val;
         break;
-    case STAT_GEN:
-	return GEN_I;
     default:
         furi_crash("STAT_GET: invalid stat");
         break;
@@ -396,84 +501,121 @@ void pokemon_stat_set(PokemonData* pdata, DataStat stat, DataStatSub which, uint
     switch(stat) {
     case STAT_ATK:
         if(gen == GEN_I) ((PokemonPartyGenI*)party)->atk = val_swap;
+        if(gen == GEN_II) ((PokemonPartyGenII*)party)->atk = val_swap;
         break;
     case STAT_DEF:
         if(gen == GEN_I) ((PokemonPartyGenI*)party)->def = val_swap;
+        if(gen == GEN_II) ((PokemonPartyGenII*)party)->def = val_swap;
         break;
     case STAT_SPD:
         if(gen == GEN_I) ((PokemonPartyGenI*)party)->spd = val_swap;
         break;
-    case STAT_SPC:
+    /*case STAT_SPC:*/
+    case STAT_SPC_ATK:
         if(gen == GEN_I) ((PokemonPartyGenI*)party)->spc = val_swap;
+        if(gen == GEN_II) ((PokemonPartyGenII*)party)->spc_atk = val_swap;
+        break;
+    case STAT_SPC_DEF:
+        if(gen == GEN_II) ((PokemonPartyGenII*)party)->spc_def = val_swap;
         break;
     case STAT_HP:
-        if(gen == GEN_I) ((PokemonPartyGenI*)party)->hp = val_swap;
-        if(gen == GEN_I) ((PokemonPartyGenI*)party)->max_hp = val_swap;
+        if(gen == GEN_I) {
+            ((PokemonPartyGenI*)party)->hp = val_swap;
+            ((PokemonPartyGenI*)party)->max_hp = val_swap;
+        }
+        if (gen == GEN_II) {
+            ((PokemonPartyGenII*)party)->hp = val_swap;
+            ((PokemonPartyGenII*)party)->max_hp = val_swap;
+        }
         break;
     case STAT_ATK_EV:
         if(gen == GEN_I) ((PokemonPartyGenI*)party)->atk_ev = val_swap;
+        if(gen == GEN_II) ((PokemonPartyGenII*)party)->atk_ev = val_swap;
         break;
     case STAT_DEF_EV:
         if(gen == GEN_I) ((PokemonPartyGenI*)party)->def_ev = val_swap;
+        if(gen == GEN_II) ((PokemonPartyGenII*)party)->def_ev = val_swap;
         break;
     case STAT_SPD_EV:
         if(gen == GEN_I) ((PokemonPartyGenI*)party)->spd_ev = val_swap;
+        if(gen == GEN_II) ((PokemonPartyGenII*)party)->spd_ev = val_swap;
         break;
     case STAT_SPC_EV:
         if(gen == GEN_I) ((PokemonPartyGenI*)party)->spc_ev = val_swap;
+        if(gen == GEN_II) ((PokemonPartyGenII*)party)->spc_ev = val_swap;
         break;
     case STAT_HP_EV:
         if(gen == GEN_I) ((PokemonPartyGenI*)party)->hp_ev = val_swap;
+        if(gen == GEN_II) ((PokemonPartyGenII*)party)->hp_ev = val_swap;
         break;
     case STAT_IV:
         /* This is assumed to always be:
 	 * atk, def, spd, spc
 	 * each taking up 4 bits of 16.
 	 */
+        /* XXX: This may need to be swapped? Not sure */
         if(gen == GEN_I) ((PokemonPartyGenI*)party)->iv = val;
+        if(gen == GEN_II) ((PokemonPartyGenII*)party)->iv = val;
         break;
     case STAT_MOVE:
         if(gen == GEN_I) ((PokemonPartyGenI*)party)->move[which] = val;
+        if(gen == GEN_II) ((PokemonPartyGenII*)party)->move[which] = val;
         break;
     case STAT_TYPE:
+        /* Gen II doesn't have type assignment */
         if(gen == GEN_I) ((PokemonPartyGenI*)party)->type[which] = val;
         break;
     case STAT_LEVEL:
-        if(gen == GEN_I) ((PokemonPartyGenI*)party)->level = val;
-        if(gen == GEN_I) ((PokemonPartyGenI*)party)->level_again = val;
+        if(gen == GEN_I) {
+            ((PokemonPartyGenI*)party)->level = val;
+            ((PokemonPartyGenI*)party)->level_again = val;
+        }
+        if(gen == GEN_II) ((PokemonPartyGenII*)party)->level = val;
         recalc = (RECALC_STATS | RECALC_EXP | RECALC_EVIVS);
         break;
+    /* In Gen I, index is not relative at all to dex num.
+     * In Gen II, index is the same as the dex num.
+     */
     case STAT_INDEX:
         if(gen == GEN_I) {
             ((PokemonPartyGenI*)party)->index = val;
             ((TradeBlockGenI*)pdata->trade_block)->party_members[0] = val;
         }
+	if (gen == GEN_II) {
+            ((PokemonPartyGenII*)party)->index = val;
+            ((TradeBlockGenII*)pdata->trade_block)->party_members[0] = val;
+        }
         recalc = RECALC_ALL; // Always recalculate everything if we selected a different pokemon
         break;
     case STAT_NUM:
-        pokemon_stat_set(pdata, STAT_INDEX, NONE, pdata->pokemon_table[val].index);
+        if (gen == GEN_I) pokemon_stat_set(pdata, STAT_INDEX, NONE, pdata->pokemon_table[val].index);
+	if (gen == GEN_II) {
+            ((PokemonPartyGenII*)party)->index = val;
+            ((TradeBlockGenII*)pdata->trade_block)->party_members[0] = val;
+        }
+        recalc = RECALC_ALL; // Always recalculate everything if we selected a different pokemon
         break;
     case STAT_OT_ID:
         if(gen == GEN_I) ((PokemonPartyGenI*)party)->ot_id = val_swap;
+        if(gen == GEN_II) ((PokemonPartyGenII*)party)->ot_id = val_swap;
         break;
     case STAT_SEL:
-        if(gen == GEN_I) pdata->stat_sel = val;
+        pdata->stat_sel = val;
 	recalc = (RECALC_EVIVS | RECALC_STATS);
         break;
     case STAT_EXP:
         if(gen == GEN_I) ((PokemonPartyGenI*)party)->exp[which] = val;
+        if(gen == GEN_II) ((PokemonPartyGenII*)party)->exp[which] = val;
 	break;
     case STAT_CONDITION:
         if (gen == GEN_I) ((PokemonPartyGenI*)party)->status_condition = val;
+        if (gen == GEN_II) ((PokemonPartyGenII*)party)->status_condition = val;
         break;
-    case STAT_GEN:
-	/* XXX: This needs to go away */
-	break;
     default:
         furi_crash("STAT_SET: invalid stat");
         break;
     }
-    FURI_LOG_D(TAG, "[data] stat %d:%d set to %d", stat, which, val);
+    FURI_LOG_D(TAG, "[data] stat %s:%d set to %d", stat_text[stat], which, val);
     pokemon_recalculate(pdata, recalc);
 }
 
@@ -491,7 +633,9 @@ uint16_t pokemon_stat_ev_get(PokemonData* pdata, DataStat stat) {
     case STAT_SPD:
         next = STAT_SPD_EV;
         break;
-    case STAT_SPC:
+    /*case STAT_SPC:*/
+    case STAT_SPC_ATK:
+    case STAT_SPC_DEF:
         next = STAT_SPC_EV;
         break;
     case STAT_HP:
@@ -546,7 +690,9 @@ uint8_t pokemon_stat_iv_get(PokemonData* pdata, DataStat stat) {
     case STAT_SPD:
         next = STAT_SPD_IV;
         break;
-    case STAT_SPC:
+    /*case STAT_SPC:*/
+    case STAT_SPC_ATK:
+    case STAT_SPC_DEF:
         next = STAT_SPC_IV;
         break;
     case STAT_HP:
@@ -666,6 +812,7 @@ void pokemon_stat_calc(PokemonData* pdata, DataStat stat) {
     pokemon_stat_set(pdata, stat, NONE, stat_tmp);
 }
 
+/* XXX: FIXME: TODO: This needs addressing ASAP for gen ii */
 void pokemon_stat_memcpy(PokemonData* dst, PokemonData* src, uint8_t which) {
    /* Copy the traded-in Pokemon's main data to our struct */
    /* XXX: Can use pokemon_stat_set */
@@ -1230,3 +1377,231 @@ const NamedList stat_list[] = {
     {},
 };
 
+const NamedList item_list[] = {
+{"No Item", 0x00, GEN_II},
+{"Amulet Coin",	0x5B,	GEN_II},
+{"Antidote",	0x09,	GEN_II},
+{"Awakening",	0x0C,	GEN_II},
+{"Basement Key",	0x85,	GEN_II},
+{"Berry",	0xAD,	GEN_II},
+{"Berry Juice",	0x8B,	GEN_II},
+{"Berserk Gene",	0x98,	GEN_II},
+{"Bicycle",	0x07,	GEN_II},
+{"Big Mushroom",	0x57,	GEN_II},
+{"Big Pearl",	0x6F,	GEN_II},
+{"Bitter Berry",	0x53,	GEN_II},
+{"Blackbelt",	0x62,	GEN_II},
+{"Black Glasses",	0x66,	GEN_II},
+{"Blk Apricorn",	0x63,	GEN_II},
+{"Blu Apricorn",	0x59,	GEN_II},
+{"Blue Card (C Only)",	0x74,	GEN_II},
+{"Bluesky Mail",	0xBB,	GEN_II},
+{"Brick Piece",	0xB4,	GEN_II},
+{"Bright Powder",	0x03,	GEN_II},
+{"Burn Heal",	0x0A,	GEN_II},
+{"Burnt Berry",	0x4F,	GEN_II},
+{"Calcium",	0x1F,	GEN_II},
+{"Carbos",	0x1D,	GEN_II},
+{"Card Key",	0x7F,	GEN_II},
+{"Charcoal",	0x8A,	GEN_II},
+{"Cleanse Tag",	0x5E,	GEN_II},
+{"Clear Bell (C Only)",	0x46,	GEN_II},
+{"Coin Case",	0x36,	GEN_II},
+{"Dire Hit",	0x2C,	GEN_II},
+{"Dragon Fang",	0x90,	GEN_II},
+{"Dragon Scale",	0x97,	GEN_II},
+{"Egg Ticket (C Only)",	0x81,	GEN_II},
+{"Elixir",	0x41,	GEN_II},
+{"Energy Powder",	0x79,	GEN_II},
+{"Energy Root",	0x7A,	GEN_II},
+{"Eon Mail",	0xB9,	GEN_II},
+{"Escape Rope",	0x13,	GEN_II},
+{"Ether",	0x3F,	GEN_II},
+{"Everstone",	0x70,	GEN_II},
+{"Exp. Share",	0x39,	GEN_II},
+{"Fast Ball",	0xA1,	GEN_II},
+{"Fire Stone",	0x16,	GEN_II},
+{"Flower Mail",	0x9E,	GEN_II},
+{"Focus Band",	0x77,	GEN_II},
+{"Fresh Water",	0x2E,	GEN_II},
+{"Friend Ball",	0xA4,	GEN_II},
+{"Full Heal",	0x26,	GEN_II},
+{"Full Restore",	0x0E,	GEN_II},
+{"Gold Berry",	0xAE,	GEN_II},
+{"Gold Leaf",	0x4B,	GEN_II},
+{"Good Rod",	0x3B,	GEN_II},
+{"Gorgeous Box",	0xA8,	GEN_II},
+{"Great Ball",	0x04,	GEN_II},
+{"Grn Apricorn",	0x5D,	GEN_II},
+{"GS Ball (C Only)",	0x73,	GEN_II},
+{"Guard Spec.",	0x29,	GEN_II},
+{"Hard Stone",	0x7D,	GEN_II},
+{"Heal Powder",	0x7B,	GEN_II},
+{"Heavy Ball",	0x9D,	GEN_II},
+{"HM01",	0xF3,	GEN_II},
+{"HM02",	0xF4,	GEN_II},
+{"HM03",	0xF5,	GEN_II},
+{"HM04",	0xF6,	GEN_II},
+{"HM05",	0xF7,	GEN_II},
+{"HM06",	0xF8,	GEN_II},
+{"HM07",	0xF9,	GEN_II},
+{"HP Up",	0x1A,	GEN_II},
+{"Hyper Potion",	0x10,	GEN_II},
+{"Ice Berry",	0x50,	GEN_II},
+{"Ice Heal",	0x0B,	GEN_II},
+{"Iron",	0x1C,	GEN_II},
+{"Itemfinder",	0x37,	GEN_II},
+{"King's Rock",	0x52,	GEN_II},
+{"Leaf Stone",	0x22,	GEN_II},
+{"Leftovers",	0x92,	GEN_II},
+{"Lemonade",	0x30,	GEN_II},
+{"Level Ball",	0x9F,	GEN_II},
+{"Light Ball",	0xA3,	GEN_II},
+{"Litebluemail",	0xB6,	GEN_II},
+{"Lost Item",	0x82,	GEN_II},
+{"Love Ball",	0xA6,	GEN_II},
+{"Lovely Mail",	0xB8,	GEN_II},
+{"Lucky Egg",	0x7E,	GEN_II},
+{"Lucky Punch",	0x1E,	GEN_II},
+{"Lure Ball",	0xA0,	GEN_II},
+{"Machine Part",	0x80,	GEN_II},
+{"Magnet",	0x6C,	GEN_II},
+{"Master Ball",	0x01,	GEN_II},
+{"Max Elixir",	0x15,	GEN_II},
+{"Max Ether",	0x40,	GEN_II},
+{"Max Potion",	0x0F,	GEN_II},
+{"Max Repel",	0x2B,	GEN_II},
+{"Max Revive",	0x28,	GEN_II},
+{"Metal Coat",	0x8F,	GEN_II},
+{"Metal Powder",	0x23,	GEN_II},
+{"Mint Berry",	0x54,	GEN_II},
+{"MiracleBerry",	0x6D,	GEN_II},
+{"Miracle Seed",	0x75,	GEN_II},
+{"Mirage Mail",	0xBD,	GEN_II},
+{"Moomoo Milk",	0x48,	GEN_II},
+{"Moon Ball",	0xA5,	GEN_II},
+{"Moon Stone",	0x08,	GEN_II},
+{"Morph Mail",	0xBA,	GEN_II},
+{"Music Mail",	0xBC,	GEN_II},
+{"Mystery Berry",	0x96,	GEN_II},
+{"Mystery Egg",	0x45,	GEN_II},
+{"Mystic Water",	0x5F,	GEN_II},
+{"Never-Melt Ice",	0x6B,	GEN_II},
+{"Normal Box",	0xA7,	GEN_II},
+{"Nugget",	0x24,	GEN_II},
+{"Old Rod",	0x3A,	GEN_II},
+{"Paralyze Heal",	0x0D,	GEN_II},
+{"Park Ball",	0xB1,	GEN_II},
+{"Pass",	0x86,	GEN_II},
+{"Pear	l",	0x6E,	GEN_II},
+{"Pink Bow",	0x68,	GEN_II},
+{"Pnk Apricorn",	0x65,	GEN_II},
+{"Poison Barb",	0x51,	GEN_II},
+{"Poke Ball",	0x05,	GEN_II},
+{"Poke Doll",	0x25,	GEN_II},
+{"Polkadot Bow",	0xAA,	GEN_II},
+{"Portraitmail",	0xB7,	GEN_II},
+{"Potion",	0x12,	GEN_II},
+{"PP Up",	0x3E,	GEN_II},
+{"Protein",	0x1B,	GEN_II},
+{"PRZCureBerry",	0x4E,	GEN_II},
+{"PSNCureBerry",	0x4A,	GEN_II},
+{"Quick Claw",	0x49,	GEN_II},
+{"Rage Candy Bar",	0x72,	GEN_II},
+{"Rainbow Wing",	0xB2,	GEN_II},
+{"Rare Candy",	0x20,	GEN_II},
+{"Red Apricorn",	0x55,	GEN_II},
+{"Red Scale",	0x42,	GEN_II},
+{"Repel",	0x14,	GEN_II},
+{"Revival Herb",	0x7C,	GEN_II},
+{"Revive",	0x27,	GEN_II},
+{"Sacred Ash",	0x9C,	GEN_II},
+{"Scope Lens",	0x8C,	GEN_II},
+{"Secret Potion",	0x43,	GEN_II},
+{"Sharp Beak",	0x4D,	GEN_II},
+{"Silver Leaf",	0x3C,	GEN_II},
+{"Silver Powder",	0x58,	GEN_II},
+{"Silver Wing",	0x47,	GEN_II},
+{"Slowpoke Tail",	0x67,	GEN_II},
+{"Smoke Ball",	0x6A,	GEN_II},
+{"Soda Pop",	0x2F,	GEN_II},
+{"Soft Sand",	0x4C,	GEN_II},
+{"Spell Tag",	0x71,	GEN_II},
+{"Squirt Bottle",	0xAF,	GEN_II},
+{"S.S. Ticket",	0x44,	GEN_II},
+{"Stardust",	0x83,	GEN_II},
+{"Star Piece",	0x84,	GEN_II},
+{"Stick",	0x69,	GEN_II},
+{"Sun Stone",	0xA9,	GEN_II},
+{"Super Potion",	0x11,	GEN_II},
+{"Super Repel",	0x2A,	GEN_II},
+{"Super Rod",	0x3D,	GEN_II},
+{"Surf Mail",	0xB5,	GEN_II},
+{"Teru-sama",	0x5A,	GEN_II},
+{"Teru-sama",	0x78,	GEN_II},
+{"Thick Club",	0x76,	GEN_II},
+{"Thunder Stone",	0x17,	GEN_II},
+{"Tiny Mushroom",	0x56,	GEN_II},
+{"TM01",	0xBF,	GEN_II},
+{"TM02",	0xC0,	GEN_II},
+{"TM03",	0xC1,	GEN_II},
+{"TM04",	0xC2,	GEN_II},
+{"TM05",	0xC4,	GEN_II},
+{"TM06",	0xC5,	GEN_II},
+{"TM07",	0xC6,	GEN_II},
+{"TM08",	0xC7,	GEN_II},
+{"TM09",	0xC8,	GEN_II},
+{"TM10",	0xC9,	GEN_II},
+{"TM11",	0xCA,	GEN_II},
+{"TM12",	0xCB,	GEN_II},
+{"TM13",	0xCC,	GEN_II},
+{"TM14",	0xCD,	GEN_II},
+{"TM15",	0xCE,	GEN_II},
+{"TM16",	0xCF,	GEN_II},
+{"TM17",	0xD0,	GEN_II},
+{"TM18",	0xD1,	GEN_II},
+{"TM19",	0xD2,	GEN_II},
+{"TM20",	0xD3,	GEN_II},
+{"TM21",	0xD4,	GEN_II},
+{"TM22",	0xD5,	GEN_II},
+{"TM23",	0xD6,	GEN_II},
+{"TM24",	0xD7,	GEN_II},
+{"TM25",	0xD8,	GEN_II},
+{"TM26",	0xD9,	GEN_II},
+{"TM27",	0xDA,	GEN_II},
+{"TM28",	0xDB,	GEN_II},
+{"TM29",	0xDD,	GEN_II},
+{"TM30",	0xDE,	GEN_II},
+{"TM31",	0xDF,	GEN_II},
+{"TM32",	0xE0,	GEN_II},
+{"TM33",	0xE1,	GEN_II},
+{"TM34",	0xE2,	GEN_II},
+{"TM35",	0xE3,	GEN_II},
+{"TM36",	0xE4,	GEN_II},
+{"TM37",	0xE5,	GEN_II},
+{"TM38",	0xE6,	GEN_II},
+{"TM39",	0xE7,	GEN_II},
+{"TM40",	0xE8,	GEN_II},
+{"TM41",	0xE9,	GEN_II},
+{"TM42",	0xEA,	GEN_II},
+{"TM43",	0xEB,	GEN_II},
+{"TM44",	0xEC,	GEN_II},
+{"TM45",	0xED,	GEN_II},
+{"TM46",	0xEE,	GEN_II},
+{"TM47",	0xEF,	GEN_II},
+{"TM48",	0xF0,	GEN_II},
+{"TM49",	0xF1,	GEN_II},
+{"TM50",	0xF2,	GEN_II},
+{"Twisted Spoon",	0x60,	GEN_II},
+{"Ultra Ball",	0x02,	GEN_II},
+{"Up-Grade",	0xAC,	GEN_II},
+{"Water Stone",	0x18,	GEN_II},
+{"Wht Apricorn",	0x61,	GEN_II},
+{"X Accuracy",	0x21,	GEN_II},
+{"X Attack",	0x31,	GEN_II},
+{"X Defend",	0x33,	GEN_II},
+{"X Special",	0x35,	GEN_II},
+{"X Speed",	0x34,	GEN_II},
+{"Ylw Apricorn",	0x5C,	GEN_II},
+{ },
+};

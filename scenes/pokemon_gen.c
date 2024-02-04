@@ -84,7 +84,7 @@ void gen_scene_on_enter(void* context) {
 
 	/* Allocate select and trade views */
         /* Allocates its own view and adds it to the main view_dispatcher */
-        pokemon_fap->select = select_pokemon_alloc(pokemon_fap, pokemon_fap->view_dispatcher, pokemon_fap->scene_manager, AppViewSelectPokemon);
+        pokemon_fap->select = select_pokemon_alloc(pokemon_fap->pdata, pokemon_fap->view_dispatcher, pokemon_fap->scene_manager, AppViewSelectPokemon);
 
         // Trade View
         /* Allocates its own view and adds it to the main view_dispatcher */
@@ -124,12 +124,14 @@ void gen_scene_on_enter(void* context) {
         scene_change_from_main_cb,
         pokemon_fap);
 
-    submenu_add_item(
-        pokemon_fap->submenu,
-        "Select Types",
-        SelectTypeScene,
-        scene_change_from_main_cb,
-        pokemon_fap);
+    if (pokemon_fap->pdata->gen == GEN_I) {
+        submenu_add_item(
+            pokemon_fap->submenu,
+            "Select Types",
+            SelectTypeScene,
+            scene_change_from_main_cb,
+            pokemon_fap);
+    }
 
     submenu_add_item(
         pokemon_fap->submenu,

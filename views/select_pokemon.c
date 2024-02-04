@@ -13,7 +13,7 @@ struct select_model {
 /* Anonymous struct */
 struct select_ctx {
     View* view;
-    PokemonFap *pokemon_fap;
+    PokemonData *pdata;
     SceneManager *scene_manager;
 };
 
@@ -34,6 +34,7 @@ static void select_pokemon_render_callback(Canvas* canvas, void* model) {
     canvas_draw_str_aligned(canvas, (128 - 40), 5, AlignCenter, AlignTop, "Select Pokemon");
 
     canvas_set_font(canvas, FontPrimary);
+    /* XXX: Need to remake this and have it more on the right side */
     elements_button_center(canvas, "OK");
 }
 
@@ -56,7 +57,7 @@ static bool select_pokemon_input_callback(InputEvent* event, void* context) {
     switch(event->key) {
     /* Advance to next view with the selected pokemon */
     case InputKeyOk:
-        pokemon_stat_set(select->pokemon_fap->pdata, STAT_NUM, NONE, selected_pokemon);
+        pokemon_stat_set(select->pdata, STAT_NUM, NONE, selected_pokemon);
         scene_manager_previous_scene(select->scene_manager);
         consumed = true;
         break;
@@ -64,7 +65,7 @@ static bool select_pokemon_input_callback(InputEvent* event, void* context) {
     /* Move back one through the pokedex listing */
     case InputKeyLeft:
         if(selected_pokemon == 0)
-            selected_pokemon = 150;
+            selected_pokemon = select->pdata->dex_max;
         else
             selected_pokemon--;
         consumed = true;
@@ -77,13 +78,13 @@ static bool select_pokemon_input_callback(InputEvent* event, void* context) {
         if(selected_pokemon >= 10)
             selected_pokemon -= 10;
         else
-            selected_pokemon = 150;
+            selected_pokemon = select->pdata->dex_max;
         consumed = true;
         break;
 
     /* Move forward one through the pokedex listing */
     case InputKeyRight:
-        if(selected_pokemon == 150)
+        if(selected_pokemon == select->pdata->dex_max)
             selected_pokemon = 0;
         else
             selected_pokemon++;
@@ -94,7 +95,7 @@ static bool select_pokemon_input_callback(InputEvent* event, void* context) {
          * overflow.
          */
     case InputKeyUp:
-        if(selected_pokemon <= 140)
+        if(selected_pokemon <= (select->pdata->dex_max - 10))
             selected_pokemon += 10;
         else
             selected_pokemon = 0;
@@ -122,19 +123,19 @@ void select_pokemon_enter_callback(void* context) {
         select->view,
         struct select_model * model,
         {
-            model->curr_pokemon = pokemon_stat_get(select->pokemon_fap->pdata, STAT_NUM, NONE);
-            model->pokemon_table = select->pokemon_fap->pdata->pokemon_table;
+            model->curr_pokemon = pokemon_stat_get(select->pdata, STAT_NUM, NONE);
+            model->pokemon_table = select->pdata->pokemon_table;
         },
         true);
 }
 
-void* select_pokemon_alloc(PokemonFap* pokemon_fap, ViewDispatcher* view_dispatcher, SceneManager* scene_manager, uint32_t viewid) {
-    furi_assert(pokemon_fap);
+void* select_pokemon_alloc(PokemonData* pdata, ViewDispatcher* view_dispatcher, SceneManager* scene_manager, uint32_t viewid) {
+    furi_assert(pdata);
 
     struct select_ctx *select = malloc(sizeof(struct select_ctx));
 
     select->view = view_alloc();
-    select->pokemon_fap = pokemon_fap;
+    select->pdata = pdata;
     select->scene_manager = scene_manager;
 
     view_set_context(select->view, select);

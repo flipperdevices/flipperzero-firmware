@@ -25,11 +25,20 @@ typedef enum {
     STAT_BASE_ATK = 0,
     STAT_BASE_DEF,
     STAT_BASE_SPD,
-    STAT_BASE_SPC,
+    /* NOTE! While accessing SPC/APC_AT will do the correct thing for both
+     * Gen I and Gen II, accessing SPC_DEF for Gen I will return a value
+     * that is not used in Gen I games. This normally isn't an issue, but
+     * is a potential gotcha to be aware of.
+     */
+    STAT_BASE_SPC = 3,
+    STAT_BASE_SPC_ATK = 3,
+    STAT_BASE_SPC_DEF,
     STAT_BASE_HP,
     STAT_BASE_TYPE,
     STAT_BASE_MOVE,
     STAT_BASE_GROWTH,
+    STAT_BASE_GENDER_RATIO,
+    //STAT_BASE_EGG_CYCLES,
     STAT_BASE_END, // Sentry value
 
     /* XXX: Add icon/image/name ptr here? */
@@ -40,19 +49,22 @@ typedef enum {
     STAT_ATK = 0,
     STAT_DEF,
     STAT_SPD,
-    STAT_SPC,
+    /* Gen I uses SPC, Gen II uses SPC_ATK and SPC_DEF */
+    STAT_SPC = 3,
+    STAT_SPC_ATK = 3,
+    STAT_SPC_DEF,
     STAT_HP,
-    STAT_END = 5, // Sentry value
-    STAT_TYPE = 5,
+    STAT_END = 6, // Sentry value
+    STAT_TYPE = 6,
     STAT_MOVE,
 
-    STAT_EV = 9, // Sentry value
-    STAT_ATK_EV = 9,
+    STAT_EV = 10, // Sentry value
+    STAT_ATK_EV = 10,
     STAT_DEF_EV,
     STAT_SPD_EV,
     STAT_SPC_EV,
     STAT_HP_EV,
-    STAT_EV_END, // Sentry value
+    STAT_EV_END = 15, // Sentry value
 
     STAT_IV = 15, // Sentry value
     STAT_ATK_IV = 15,
@@ -60,10 +72,10 @@ typedef enum {
     STAT_SPD_IV,
     STAT_SPC_IV,
     STAT_HP_IV,
-    STAT_IV_END, // Sentry value
+    STAT_IV_END = 20, // Sentry value
 
     /* These won't ever really be needed in groups */
-    STAT_LEVEL,
+    STAT_LEVEL = 20,
     STAT_INDEX,
     STAT_NUM,
     STAT_CONDITION,
@@ -72,7 +84,6 @@ typedef enum {
     STAT_OT_ID,
     STAT_TRAINER_NAME,
     STAT_SEL, // which EV/IV calc to use
-    STAT_GEN,
     STAT_EXP,
 } DataStat;
 
@@ -113,6 +124,7 @@ struct pokemon_data {
     const NamedList* move_list;
     const NamedList* stat_list;
     const NamedList* type_list;
+    const NamedList* item_list;
     const PokemonTable* pokemon_table;
     /* Pointer to the live trade_block */
     void* trade_block;
@@ -126,6 +138,8 @@ struct pokemon_data {
 
     /* Current generation */
     uint8_t gen;
+    /* 0 indexed max pokedex number */
+    uint8_t dex_max;
 };
 typedef struct pokemon_data PokemonData;
 

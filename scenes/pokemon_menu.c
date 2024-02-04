@@ -17,6 +17,7 @@
 static void scene_change_from_main_cb(void* context, uint32_t index) {
     PokemonFap* pokemon_fap = (PokemonFap*)context;
 
+    /* XXX: This is wrong? */
     /* Bit of a hack, encode the generation in the upper 16 bits of the Gen
      * scene state. This gets cleared on first entry by the gen scene and
      * shouldn't be an issue. It's the easiest way to communicat what generation
@@ -49,6 +50,12 @@ void main_menu_scene_on_enter(void* context) {
         pokemon_fap->submenu,
         "Gen I    (R/B/Y non-JPN)",
         GenITradeScene,
+        scene_change_from_main_cb,
+        pokemon_fap);
+    submenu_add_item(
+        pokemon_fap->submenu,
+        "Gen II   (G/S/C non-JPN)",
+        GenIITradeScene,
         scene_change_from_main_cb,
         pokemon_fap);
     submenu_add_item(
@@ -88,7 +95,7 @@ void generic_scene_on_exit(void* context) {
 void (*const pokemon_scene_on_enter_handlers[])(void*) = {
     main_menu_scene_on_enter,
     gen_scene_on_enter,
-    null_scene_on_exit,
+    gen_scene_on_enter,
     select_pokemon_scene_on_enter,
     select_name_scene_on_enter,
     select_number_scene_on_enter,
