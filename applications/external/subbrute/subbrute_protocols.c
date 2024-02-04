@@ -37,6 +37,17 @@ const SubBruteProtocol subbrute_protocol_came_12bit_315 = {
     .file = CAMEFileProtocol};
 
 /**
+ * CAME 12bit 330MHz
+ */
+const SubBruteProtocol subbrute_protocol_came_12bit_330 = {
+    .frequency = 330000000,
+    .bits = 12,
+    .te = 0,
+    .repeat = 3,
+    .preset = FuriHalSubGhzPresetOok650Async,
+    .file = CAMEFileProtocol};
+
+/**
  * CAME 12bit 433MHz
  */
 const SubBruteProtocol subbrute_protocol_came_12bit_433 = {
@@ -409,6 +420,7 @@ static const char* subbrute_protocol_names[] = {
     [SubBruteAttackCAME12bit303] = "CAME 12bit 303MHz",
     [SubBruteAttackCAME12bit307] = "CAME 12bit 307MHz",
     [SubBruteAttackCAME12bit315] = "CAME 12bit 315MHz",
+    [SubBruteAttackCAME12bit330] = "CAME 12bit 330MHz",
     [SubBruteAttackCAME12bit433] = "CAME 12bit 433MHz",
     [SubBruteAttackCAME12bit868] = "CAME 12bit 868MHz",
     [SubBruteAttackNICE12bit433] = "NICE 12bit 433MHz",
@@ -460,6 +472,7 @@ const SubBruteProtocol* subbrute_protocol_registry[] = {
     [SubBruteAttackCAME12bit303] = &subbrute_protocol_came_12bit_303,
     [SubBruteAttackCAME12bit307] = &subbrute_protocol_came_12bit_307,
     [SubBruteAttackCAME12bit315] = &subbrute_protocol_came_12bit_315,
+    [SubBruteAttackCAME12bit330] = &subbrute_protocol_came_12bit_330,
     [SubBruteAttackCAME12bit433] = &subbrute_protocol_came_12bit_433,
     [SubBruteAttackCAME12bit868] = &subbrute_protocol_came_12bit_868,
     [SubBruteAttackNICE12bit433] = &subbrute_protocol_nice_12bit_433,
