@@ -73,8 +73,8 @@ static bool emv_parse(const NfcDevice* device, FuriString* parsed_data) {
     const EmvApplication app = data->emv_application;
 
     do {
-        if(app.name_found)
-            furi_string_cat_printf(parsed_data, "\e#%s\n", app.name);
+        if(strlen(app.label))
+            furi_string_cat_printf(parsed_data, "\e#%s\n", app.label);
         else
             furi_string_cat_printf(parsed_data, "\e#%s\n", "EMV");
 
@@ -105,7 +105,7 @@ static bool emv_parse(const NfcDevice* device, FuriString* parsed_data) {
             furi_string_cat_printf(parsed_data, "Currency: %s\n", furi_string_get_cstr(str));
 
         if(app.pin_try_counter != 0xFF)
-            furi_string_cat_printf(parsed_data, "PIN attempts left: %d\n", app.pin_try_counter);
+            furi_string_cat_printf(parsed_data, "PIN try left: %d\n", app.pin_try_counter);
 
         parsed = true;
     } while(false);
