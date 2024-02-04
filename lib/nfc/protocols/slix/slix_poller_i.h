@@ -4,7 +4,7 @@
 
 #include "slix_poller.h"
 
-#define SLIX_POLLER_SET_PASSWORD_FWT (20000)
+#define SLIX_POLLER_SET_PASSWORD_FWT (100000)
 
 #ifdef __cplusplus
 extern "C" {

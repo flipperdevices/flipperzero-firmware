@@ -98,8 +98,10 @@ SlixError
 
     bool skip_uid = (type == SlixPasswordTypePrivacy);
     slix_poller_prepare_request(instance, SLIX_CMD_SET_PASSWORD, skip_uid);
+
     uint8_t password_type = (0x01 << type);
     bit_buffer_append_byte(instance->tx_buffer, password_type);
+
     uint8_t rn_l = instance->random_number >> 8;
     uint8_t rn_h = instance->random_number;
     uint32_t double_rand_num = (rn_h << 24) | (rn_l << 16) | (rn_h << 8) | rn_l;
@@ -111,7 +113,8 @@ SlixError
     SlixError error = SlixErrorNone;
 
     do {
-        error = slix_poller_send_frame(instance, instance->tx_buffer, instance->rx_buffer, 0);
+        error = slix_poller_send_frame(
+            instance, instance->tx_buffer, instance->rx_buffer, SLIX_POLLER_SET_PASSWORD_FWT);
         if(error != SlixErrorNone) break;
 
         size_t rx_len = bit_buffer_get_size_bytes(instance->rx_buffer);
