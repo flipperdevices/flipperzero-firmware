@@ -13,7 +13,7 @@ static const char* gender_str[] = {
 /* This returns a string pointer if the gender is static, NULL if it is not and
  * the gender needs to be calculated.
  */
-static const char* select_gender_is_static(PokemonData* pdata, uint8_t ratio)
+const char* select_gender_is_static(PokemonData* pdata, uint8_t ratio)
 {
     switch (ratio) {
     case 0xFF:
@@ -32,7 +32,7 @@ static const char* select_gender_is_static(PokemonData* pdata, uint8_t ratio)
     return NULL;
 }
 
-const char* select_gender_get_gender(PokemonData* pdata) {
+const char* select_gender_get(PokemonData* pdata) {
     uint8_t ratio = table_stat_base_get(pdata, STAT_BASE_GENDER_RATIO, NONE);
     uint8_t atk_iv;
     const char* rc;
@@ -85,17 +85,6 @@ static void select_gender_selected_callback(void* context, uint32_t index) {
 
 void select_gender_scene_on_enter(void* context) {
     PokemonFap* pokemon_fap = (PokemonFap*)context;
-    uint8_t ratio = table_stat_base_get(pokemon_fap->pdata, STAT_BASE_GENDER_RATIO, NONE);
-
-    /* First, before we do anything, check if we can even change the gender of
-     * the selected pokemon. If not, immediately exit the scene and don't trigger
-     * any kind of drawing.
-     */
-    if (select_gender_is_static(pokemon_fap->pdata, ratio)) {
-        scene_manager_previous_scene(pokemon_fap->scene_manager);
-	return;
-    }
-
 
     submenu_reset(pokemon_fap->submenu);
 

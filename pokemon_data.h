@@ -3,9 +3,10 @@
 
 #pragma once
 
-#include <stdint.h>
 #include <furi.h>
+#include <gui/icon.h>
 #include <math.h>
+#include <stdint.h>
 
 /* Generation defines */
 #define GEN_I 0x01
