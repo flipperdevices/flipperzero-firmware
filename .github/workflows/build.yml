@@ -172,5 +172,5 @@ jobs:
         if: ${{ steps.names.outputs.event_type == 'tag' && matrix.target == env.DEFAULT_TARGET && endsWith(github.ref,'-rc') != true }}
         uses: ./.github/actions/send_notifications
         with:
-          google-credentials: ${{ secrets.GOOGLE_CREDENTIALS }}
+          google-credentials: ${{ secrets.GOOGLE_CLOUD_NOTIFIER_CREDENTIALS }}
           firmware-version: ${{ steps.names.outputs.suffix }}
