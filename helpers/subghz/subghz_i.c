@@ -33,7 +33,7 @@ bool subghz_tx_start(SubGhz* subghz, FlipperFormat* flipper_format) {
             subghz->dialogs, "Error in protocol\nparameters\ndescription");
         break;
     case SubGhzTxRxStartTxStateErrorOnlyRx:
-       // FURI_LOG_D(TAG, 'Cannot send, only RX possible');
+        // FURI_LOG_D(TAG, 'Cannot send, only RX possible');
         break;
 
     default:
