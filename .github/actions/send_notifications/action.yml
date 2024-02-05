@@ -1,0 +1,30 @@
+name: Send FCM notification
+author: lionzxy
+description: |
+  This action sends emails about the release of a new firmware version to FCM devices such as Android or iOS devices
+
+inputs:
+  google-credentials:
+    description: The Google Cloud Service Account Key JSON to use for authentication
+    required: true
+  firmware-version:
+    description: Firmware's version, e.g. 0.13.37
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Auth in Google Cloud
+      uses: 'google-github-actions/auth@v2'
+      id: google_auth
+      with:
+        credentials_json: '${{ inputs.google-credentials }}'
+        token_format: "access_token"
+        create_credentials_file: false
+    - name: Send push to FCM
+      shell: bash
+      run: |
+        curl -X POST -H "Authorization: Bearer ${{ steps.google_auth.outputs.access_token }}" \
+          -H "Content-Type: application/json" \
+          -d '{"message":{"notification":{"title":"Firmware Update Available","body":"New firmware version is ready to install: ${{ inputs.firmware-version }}"},"condition":"'flipper_update_firmware_release' in topics"}}' \
+          https://fcm.googleapis.com/v1/projects/flipper-zero-app/messages:send
