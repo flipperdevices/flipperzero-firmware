@@ -10,6 +10,7 @@ This app combines your IR and SubGhz commands into a playlist that can be run wi
 - Save your command chain / playlist to flipper
 - Disable LED effects if not wanted
 - Configure duration of IR Signals
+- Configure default duration of Encoded SubGhz Signals
 
 ## What good is this?
 
