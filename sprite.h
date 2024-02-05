@@ -1,6 +1,6 @@
 #pragma once
 #include <stdbool.h>
-#include <storage/storage.h>
+#include <stddef.h>
 #include <gui/canvas.h>
 
 #ifdef __cplusplus
@@ -10,17 +10,9 @@ extern "C" {
 typedef struct Sprite Sprite;
 
 /** Sprite allocator
- * @return Sprite*  Sprite instance
+ * @return Sprite*  Sprite instance or NULL, if failed
  */
-Sprite* sprite_alloc();
-
-/** Load sprite from bmp file
- * @param sprite Sprite instance
- * @param storage Storage instance
- * @param bmp_path path to bmp file
- * @return bool true if success
- */
-bool sprite_load_from_bmp(Sprite* sprite, Storage* storage, const char* bmp_path);
+Sprite* sprite_alloc(const char* path);
 
 /** Sprite deallocator
  * @param sprite Sprite instance
