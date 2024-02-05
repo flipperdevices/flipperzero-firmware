@@ -98,6 +98,14 @@ Join in on the fun and contribute to the development. You could add new function
 - [Computer Hoy](https://computerhoy.com/ciberseguridad/flipper-zero-tiene-nuevo-objetivo-consolas-videojuegos-1335020)
 - [FayerWayer](https://www.fayerwayer.com/internet/2023/11/14/flipper-zero-el-llamado-tamagotchi-de-los-hackers-se-mete-en-el-mundo-de-las-consolas-de-videojuegos/)
 
+## Accessories
+- GAME BOY Color https://s.click.aliexpress.com/e/_DCmD4pb
+- GAME BOY Advance https://s.click.aliexpress.com/e/_DEVxELP
+- Game Boy Game Link Cable https://s.click.aliexpress.com/e/_DFBSYNT
+- GPS Module NEO-8M https://s.click.aliexpress.com/e/_DD4XD6h
+- CC1101 Module https://s.click.aliexpress.com/e/_Dc93ZP7
+- NRF24L01 Module https://s.click.aliexpress.com/e/_Dlw2IXf
+
 ## Acknowledgements
 This project builds upon the excellent work of [Just Call Me Koko](https://github.com/justcallmekoko/), the [ESP32Marauder](https://github.com/justcallmekoko/ESP32Marauder)
 
