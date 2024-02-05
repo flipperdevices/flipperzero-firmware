@@ -23,6 +23,7 @@ void xremote_infoscreen_set_callback(
 
 void xremote_infoscreen_draw(Canvas* canvas, XRemoteInfoscreenModel* model) {
     UNUSED(model);
+    char buffer[64];
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
     canvas_set_font(canvas, FontPrimary);
@@ -30,6 +31,9 @@ void xremote_infoscreen_draw(Canvas* canvas, XRemoteInfoscreenModel* model) {
     canvas_set_font(canvas, FontSecondary);
     canvas_draw_str_aligned(canvas, 64, 22, AlignCenter, AlignTop, "Chain IR and SubGhz");
     canvas_draw_str_aligned(canvas, 64, 32, AlignCenter, AlignTop, "Commands");
+
+    snprintf(buffer, sizeof(buffer), "Version: %s", XREMOTE_VERSION);
+    canvas_draw_str_aligned(canvas, 64, 42, AlignCenter, AlignTop, buffer);
     elements_button_center(canvas, "Back");
 }
 

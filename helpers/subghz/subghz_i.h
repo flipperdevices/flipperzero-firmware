@@ -43,6 +43,7 @@ typedef struct SubGhz SubGhz;
 struct SubGhz {
     SubGhzTxRx* txrx;
     FuriString* file_path;
+    DialogsApp* dialogs;
     //FuriString* file_path_tmp;
     //char file_name_tmp[SUBGHZ_MAX_LEN_NAME]; // just left it in to make the object not empty
     //SubGhzNotificationState state_notifications;
@@ -67,13 +68,14 @@ struct SubGhz {
 //void subghz_blink_start(SubGhz* subghz);
 //void subghz_blink_stop(SubGhz* subghz);
 
-//bool subghz_tx_start(SubGhz* subghz, FlipperFormat* flipper_format);
+// Used on Encoded SubGhz
+bool subghz_tx_start(SubGhz* subghz, FlipperFormat* flipper_format);
 //void subghz_dialog_message_show_only_rx(SubGhz* subghz);
 
 bool subghz_key_load(SubGhz* subghz, const char* file_path); //, bool show_dialog);
 bool subghz_load_protocol_from_file(SubGhz* subghz, const char* path);
 //bool subghz_file_available(SubGhz* subghz);
-//SubGhzLoadTypeFile subghz_get_load_type_file(SubGhz* subghz);
+SubGhzLoadTypeFile subghz_get_load_type_file(SubGhz* subghz);
 
 //void subghz_lock(SubGhz* subghz);
 //void subghz_unlock(SubGhz* subghz);

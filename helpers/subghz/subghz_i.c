@@ -26,14 +26,14 @@ void subghz_set_default_preset(SubGhz* subghz) {
         0);
 }*/
 
-/*bool subghz_tx_start(SubGhz* subghz, FlipperFormat* flipper_format) {
+bool subghz_tx_start(SubGhz* subghz, FlipperFormat* flipper_format) {
     switch(subghz_txrx_tx_start(subghz->txrx, flipper_format)) {
     case SubGhzTxRxStartTxStateErrorParserOthers:
         dialog_message_show_storage_error(
             subghz->dialogs, "Error in protocol\nparameters\ndescription");
         break;
     case SubGhzTxRxStartTxStateErrorOnlyRx:
-        FURI_LOG_D(TAG, 'Cannot send, only RX possible');
+        // FURI_LOG_D(TAG, 'Cannot send, only RX possible');
         break;
 
     default:
@@ -41,7 +41,7 @@ void subghz_set_default_preset(SubGhz* subghz) {
         break;
     }
     return false;
-}*/
+}
 
 bool subghz_key_load(SubGhz* subghz, const char* file_path) { //, bool show_dialog) {
     furi_assert(subghz);
@@ -182,34 +182,17 @@ bool subghz_key_load(SubGhz* subghz, const char* file_path) { //, bool show_dial
     return false;
 }
 
-/*SubGhzLoadTypeFile subghz_get_load_type_file(SubGhz* subghz) {
+SubGhzLoadTypeFile subghz_get_load_type_file(SubGhz* subghz) {
     furi_assert(subghz);
     return subghz->load_type_file;
-}*/
+}
 
 bool subghz_load_protocol_from_file(SubGhz* subghz, const char* path) {
     furi_assert(subghz);
 
-    //FuriString* file_path = furi_string_alloc();
-
     bool res = false;
 
-    /*DialogsFileBrowserOptions browser_options;
-    dialog_file_browser_set_basic_options(
-        &browser_options, SUBGHZ_APP_FILENAME_EXTENSION, &I_sub1_10px);
-    browser_options.base_path = SUBGHZ_APP_FOLDER;
-
-    // Input events and views are managed by file_select
-    bool res = dialog_file_browser_show(
-        subghz->dialogs, subghz->file_path, subghz->file_path, &browser_options);
-
-    if(res) {*/
-    //res = subghz_key_load(subghz, furi_string_get_cstr(subghz->file_path), true);
     res = subghz_key_load(subghz, path); //, true);
-    //}
-
-    //furi_string_free(file_path);
-
     return res;
 }
 
