@@ -335,7 +335,7 @@ bool totp_scene_generate_token_handle_event(
         return true;
     }
 
-    if(event->input.type == InputTypeLong && event->input.key == InputKeyBack) {
+    if(event->input.type == InputTypePress && event->input.key == InputKeyBack) {
         return false;
     }
 
