@@ -79,12 +79,18 @@ bool totp_scene_authenticate_handle_event(
         return true;
     }
 
-    if(event->input.type == InputTypePress && event->input.key == InputKeyBack) {
+    if(event->input.type == InputTypeShort && event->input.key == InputKeyBack) {
         return false;
     }
 
     SceneState* scene_state = plugin_state->current_scene_state;
-    if(event->input.type == InputTypePress) {
+    if((event->input.type == InputTypeLong || event->input.type == InputTypeRepeat) &&
+       event->input.key == InputKeyBack) {
+        if(scene_state->code_length > 0) {
+            scene_state->code_input[scene_state->code_length - 1] = 0;
+            scene_state->code_length--;
+        }
+    } else if(event->input.type == InputTypePress) {
         switch(event->input.key) {
         case InputKeyUp:
             if(scene_state->code_length < MAX_CODE_LENGTH) {
@@ -146,10 +152,6 @@ bool totp_scene_authenticate_handle_event(
             break;
         }
         case InputKeyBack:
-            if(scene_state->code_length > 0) {
-                scene_state->code_input[scene_state->code_length - 1] = 0;
-                scene_state->code_length--;
-            }
             break;
         default:
             break;
