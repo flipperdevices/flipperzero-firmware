@@ -1,5 +1,6 @@
 #pragma once
 #include <furi.h>
+#include <string.h>
 #include <gui/gui.h>
 #include <gui/view_dispatcher.h>
 #include <gui/scene_manager.h>

@@ -37,12 +37,14 @@ void nfc_playlist_file_edit_scene_on_enter(void* context) {
 
    submenu_set_header(nfc_playlist->submenu, "Edit Playlist");
 
-   submenu_add_item(
+   submenu_add_lockable_item(
       nfc_playlist->submenu,
       "Delete Playlist",
       NfcPlaylistMenuSelection_DeletePlaylist,
       nfc_playlist_file_edit_menu_callback,
-      nfc_playlist);
+      nfc_playlist,
+      !nfc_playlist->file_selected_check,
+      "Playlist\nNot\nSelected");
 
    submenu_add_lockable_item(
       nfc_playlist->submenu,
@@ -50,8 +52,8 @@ void nfc_playlist_file_edit_scene_on_enter(void* context) {
       NfcPlaylistMenuSelection_RenamePlaylist,
       nfc_playlist_file_edit_menu_callback,
       nfc_playlist,
-      true,
-      "Under construction");
+      !nfc_playlist->file_selected_check,
+      "Playlist\nNot\nSelected");
 
    view_dispatcher_switch_to_view(nfc_playlist->view_dispatcher, NfcPlaylistView_FileEdit);
 }

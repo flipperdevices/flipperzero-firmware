@@ -12,8 +12,7 @@ All the playlists should be placed in ext/apps_data/nfc_playlist and an example 
 An example file can be found in the repository
 
 ## How to build
-This app was design, built and tested using the <a href="https://github.com/Flipper-XFW/Xtreme-Firmware">Xtreme firmware</a> i don't see why it wont work with other firmwares but do keep this in mind when building it with FBT/uFBT
+This app was design, built and tested using the <a href="https://github.com/Flipper-XFW/Xtreme-Firmware">Xtreme firmware</a> so keep that in mind when building the FAP for yourself
 
-## Ideas
-- [X] Add the ability to change playlist
-- [ ] Make it so changed settings are saved (maybe make it so settings can be specified for each playlist changing the settings based on the playlist selected)
+## Known Issues
+- A weird crash after renaming a playlist multiple times
