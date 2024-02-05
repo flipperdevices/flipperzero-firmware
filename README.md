@@ -102,6 +102,7 @@ Join in on the fun and contribute to the development. You could add new function
 - GAME BOY Color https://s.click.aliexpress.com/e/_DCmD4pb
 - GAME BOY Advance https://s.click.aliexpress.com/e/_DEVxELP
 - GAME BOY Cartridge (rewritables) https://s.click.aliexpress.com/e/_DFUTJ1J
+- GAME BOY Advance Cartridge (rewritables) https://s.click.aliexpress.com/e/_Dm3DILn
 - Game Boy Game Link Cable https://s.click.aliexpress.com/e/_DFBSYNT
 - GPS Module NEO-8M https://s.click.aliexpress.com/e/_DD4XD6h
 - CC1101 Module https://s.click.aliexpress.com/e/_Dc93ZP7
