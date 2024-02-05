@@ -61,7 +61,7 @@ void subghz_send(void* context, const char* path) {
     } else {
         subghz_tx_start(app->subghz, subghz_txrx_get_fff_data(app->subghz->txrx));
         app->state_notifications = SubGhzNotificationStateTx;
-        furi_thread_flags_wait(0, FuriFlagWaitAny, 500);
+        furi_thread_flags_wait(0, FuriFlagWaitAny, app->sg_timing);
         app->state_notifications = SubGhzNotificationStateIDLE;
         subghz_txrx_stop(app->subghz->txrx);
 
