@@ -51,7 +51,7 @@ typedef struct {
    uint8_t emulate_delay;
    bool emulate_led_indicator;
    FuriString* file_path;
-   char* text_input_data;
+   char* playlist_name;
 } NfcPlaylist;
 
 static const int options_emulate_timeout[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };

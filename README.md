@@ -15,4 +15,4 @@ An example file can be found in the repository
 This app was design, built and tested using the <a href="https://github.com/Flipper-XFW/Xtreme-Firmware">Xtreme firmware</a> so keep that in mind when building the FAP for yourself
 
 ## Known Issues
-- A weird crash after renaming a playlist multiple times
+- A weird freeze which occurs when trying to rename a playlist (occurs randomly doesn't happen when renaming it the first time)
