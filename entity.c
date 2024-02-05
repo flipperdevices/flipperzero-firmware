@@ -3,7 +3,11 @@
 #include <stdlib.h>
 #include <furi.h>
 
-#define ENTITY_DEBUG(...) FURI_LOG_D("Entity", __VA_ARGS__)
+#ifdef ENTITY_DEBUG
+#define ENTITY_D(...) FURI_LOG_D("Entity", __VA_ARGS__)
+#else
+#define ENTITY_D(...)
+#endif
 
 static int32_t entities_count = 0;
 
@@ -27,13 +31,13 @@ typedef struct {
             float height;
         } rect;
     };
-} ColliderDescription;
+} Collider;
 
 struct Entity {
     Vector position;
     const EntityDescription* description;
     void* context;
-    ColliderDescription* collider;
+    Collider* collider;
 };
 
 Entity* entity_alloc(const EntityDescription* description) {
@@ -46,20 +50,20 @@ Entity* entity_alloc(const EntityDescription* description) {
         entity->context = malloc(description->context_size);
     }
     entity->collider = NULL;
-    ENTITY_DEBUG("Allocated at %p", entity);
+    ENTITY_D("Allocated at %p", entity);
     return entity;
 }
 
 void entity_collider_add_circle(Entity* entity, float radius) {
     furi_check(entity->collider == NULL, "Collider already added");
-    entity->collider = malloc(sizeof(ColliderDescription));
+    entity->collider = malloc(sizeof(Collider));
     entity->collider->type = ColliderTypeCircle;
     entity->collider->circle.radius = radius;
 }
 
 void entity_collider_add_rect(Entity* entity, float width, float height) {
     furi_check(entity->collider == NULL, "Collider already added");
-    entity->collider = malloc(sizeof(ColliderDescription));
+    entity->collider = malloc(sizeof(Collider));
     entity->collider->type = ColliderTypeRect;
     entity->collider->rect.width = width;
     entity->collider->rect.height = height;
@@ -67,7 +71,7 @@ void entity_collider_add_rect(Entity* entity, float width, float height) {
 
 void entity_free(Entity* entity) {
     entities_count--;
-    ENTITY_DEBUG("Freeing at %p", entity);
+    ENTITY_D("Freeing at %p", entity);
     if(entity->context) {
         free(entity->context);
     }
@@ -180,4 +184,15 @@ bool entity_collider_check_collision(Entity* entity, Entity* other) {
 
 bool entity_collider_exists(Entity* entity) {
     return entity->collider != NULL;
+}
+
+void entity_send_event(Entity* entity, uint32_t type, EntityEventValue value) {
+    if(entity->description && entity->description->event) {
+        EntityEvent event = {
+            .type = type,
+            .sender = entity,
+            .value = value,
+        };
+        entity->description->event(entity, NULL, event, entity->context);
+    }
 }
