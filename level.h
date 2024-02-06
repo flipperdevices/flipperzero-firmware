@@ -9,17 +9,12 @@ extern "C" {
 typedef struct Level Level;
 
 typedef struct {
+    void (*alloc)(Level* level, void* context);
+    void (*free)(Level* level, void* context);
     void (*start)(Level* level, void* context);
     void (*stop)(Level* level, void* context);
-    void (*update_pre)(Level* level, Director* director, void* context);
-    void (*update_post)(Level* level, Director* director, void* context);
-    void (*render_pre)(Level* level, Director* director, Canvas* canvas, void* context);
-    void (*render_post)(Level* level, Director* director, Canvas* canvas, void* context);
+    size_t context_size;
 } LevelBehaviour;
-
-#define LEVEL_BEHAVIOUR_EMPTY ((LevelBehaviour){NULL, NULL, NULL, NULL, NULL, NULL})
-
-void level_behaviour_set(Level* level, LevelBehaviour behaviour, void* context);
 
 void level_clear(Level* level);
 

@@ -5,3 +5,11 @@
 #include "level_manager.h"
 #include "director.h"
 #include "entity.h"
+
+typedef struct {
+    void (*start)(LevelManager* level_manager, void* context);
+    void (*stop)(void* context);
+    size_t context_size;
+} Game;
+
+extern const Game game;

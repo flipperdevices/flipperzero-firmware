@@ -20,9 +20,12 @@ LevelManager* level_manager_alloc() {
 }
 
 void level_manager_free(LevelManager* lm) {
+    level_call_stop(lm->current_level);
+
     LevelList_it_t it;
     LevelList_it(it, lm->levels);
     while(!LevelList_end_p(it)) {
+        level_call_free(*LevelList_cref(it));
         level_free(*LevelList_cref(it));
         LevelList_next(it);
     }
@@ -31,12 +34,14 @@ void level_manager_free(LevelManager* lm) {
     free(lm);
 }
 
-Level* level_manager_add_level(LevelManager* manager) {
-    UNUSED(manager);
-    Level* level = level_alloc();
-    LevelList_push_back(manager->levels, level);
-    if(!manager->current_level) {
-        manager->current_level = level;
+Level* level_manager_add_level(LevelManager* lm, const LevelBehaviour* behaviour) {
+    UNUSED(lm);
+    Level* level = level_alloc(behaviour);
+    LevelList_push_back(lm->levels, level);
+    level_call_alloc(level);
+    if(!lm->current_level) {
+        lm->current_level = level;
+        level_call_start(level);
     }
     return level;
 }
@@ -51,9 +56,12 @@ Level* level_manager_current_level_get(LevelManager* lm) {
 
 void level_manager_update(LevelManager* lm, Director* director) {
     if(lm->next_level) {
+        level_call_stop(lm->current_level);
         lm->current_level = lm->next_level;
+        level_call_start(lm->current_level);
         lm->next_level = NULL;
     }
+
     level_update(lm->current_level, director);
 }
 

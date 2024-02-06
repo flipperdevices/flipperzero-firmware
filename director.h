@@ -18,6 +18,8 @@ LevelManager* director_level_manager_get(Director* director);
 
 Level* director_level_get(Director* director);
 
+void* director_game_context_get(Director* director);
+
 #ifdef __cplusplus
 }
 #endif

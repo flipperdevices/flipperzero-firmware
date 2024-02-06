@@ -7,7 +7,7 @@ extern "C" {
 
 typedef struct LevelManager LevelManager;
 
-Level* level_manager_add_level(LevelManager* manager);
+Level* level_manager_add_level(LevelManager* manager, const LevelBehaviour* behaviour);
 
 void level_manager_next_level_set(LevelManager* manager, Level* level);
 

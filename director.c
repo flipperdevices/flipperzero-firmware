@@ -8,6 +8,7 @@ struct Director {
     RunningGameEngine* engine;
     LevelManager* level_manager;
     InputState input;
+    void* game_context;
 };
 
 Director* director_alloc() {
@@ -46,4 +47,12 @@ LevelManager* director_level_manager_get(Director* director) {
 
 Level* director_level_get(Director* director) {
     return level_manager_current_level_get(director->level_manager);
+}
+
+void* director_game_context_get(Director* director) {
+    return director->game_context;
+}
+
+void director_game_context_set(Director* director, void* context) {
+    director->game_context = context;
 }

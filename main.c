@@ -1,12 +1,10 @@
 #include <furi.h>
+#include "engine.h"
 #include "game_engine.h"
 #include "director_i.h"
 #include "level_manager_i.h"
 #include "level_i.h"
 #include "entity_i.h"
-
-void game_setup(Level* level);
-void game_destroy(void);
 
 static void frame_cb(RunningGameEngine* engine, Canvas* canvas, InputState input, void* context) {
     Director* director = context;
@@ -24,9 +22,13 @@ int32_t game_app(void* p) {
     Director* director = director_alloc();
     LevelManager* level_manager = level_manager_alloc();
     director_level_manager_set(director, level_manager);
-    Level* level = level_manager_add_level(level_manager);
 
-    game_setup(level);
+    void* game_context = NULL;
+    if(game.context_size > 0) {
+        game_context = malloc(game.context_size);
+        director_game_context_set(director, game_context);
+    }
+    game.start(level_manager, NULL);
 
     GameEngineSettings settings = game_engine_settings_init();
     settings.fps = 60.0f;
@@ -39,10 +41,13 @@ int32_t game_app(void* p) {
     game_engine_run(engine);
     game_engine_free(engine);
 
-    game_destroy();
-
     level_manager_free(level_manager);
     director_free(director);
+
+    game.stop(game_context);
+    if(game_context) {
+        free(game_context);
+    }
 
     int32_t entities = entities_get_count();
     if(entities != 0) {

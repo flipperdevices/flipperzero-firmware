@@ -16,17 +16,21 @@ struct Level {
     EntityList_t entities;
     EntityList_t to_add;
     EntityList_t to_remove;
-    LevelBehaviour behaviour;
+    const LevelBehaviour* behaviour;
     void* context;
 };
 
-Level* level_alloc(void) {
+Level* level_alloc(const LevelBehaviour* behaviour) {
     Level* level = malloc(sizeof(Level));
     EntityList_init(level->entities);
     EntityList_init(level->to_add);
     EntityList_init(level->to_remove);
-    level->behaviour = LEVEL_BEHAVIOUR_EMPTY;
-    level->context = NULL;
+    level->behaviour = behaviour;
+    if(behaviour->context_size > 0) {
+        level->context = malloc(behaviour->context_size);
+    } else {
+        level->context = NULL;
+    }
     LEVEL_DEBUG("Allocated level at %p", level);
     return level;
 }
@@ -72,6 +76,10 @@ void level_free(Level* level) {
     EntityList_clear(level->to_add);
     EntityList_clear(level->to_remove);
 
+    if(level->behaviour->context_size > 0) {
+        free(level->context);
+    }
+
     LEVEL_DEBUG("Freeing level at %p", level);
     free(level);
 }
@@ -102,13 +110,8 @@ void level_clear(Level* level) {
     } while(!EntityList_empty_p(level->to_add) || !EntityList_empty_p(level->to_remove));
 }
 
-void level_behaviour_set(Level* level, LevelBehaviour behaviour, void* context) {
-    level->behaviour = behaviour;
-    level->context = context;
-}
-
-Entity* level_add_entity(Level* level, const EntityDescription* behaviour) {
-    Entity* entity = entity_alloc(behaviour);
+Entity* level_add_entity(Level* level, const EntityDescription* description) {
+    Entity* entity = entity_alloc(description);
     EntityList_push_back(level->to_add, entity);
     entity_call_start(level, entity);
     return entity;
@@ -162,5 +165,29 @@ void level_update(Level* level, Director* director) {
 void level_render(Level* level, Director* director, Canvas* canvas) {
     FOREACH(item, level->entities) {
         entity_call_render(*item, director, canvas);
+    }
+}
+
+void level_call_start(Level* level) {
+    if(level->behaviour->start) {
+        level->behaviour->start(level, level->context);
+    }
+}
+
+void level_call_stop(Level* level) {
+    if(level->behaviour->stop) {
+        level->behaviour->stop(level, level->context);
+    }
+}
+
+void level_call_alloc(Level* level) {
+    if(level->behaviour->alloc) {
+        level->behaviour->alloc(level, level->context);
+    }
+}
+
+void level_call_free(Level* level) {
+    if(level->behaviour->free) {
+        level->behaviour->free(level, level->context);
     }
 }
