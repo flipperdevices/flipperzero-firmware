@@ -162,8 +162,9 @@ class Main(App):
             "scripts.dir",
         )
 
+        sdk_bundle_path = self.get_dist_path(self.get_dist_file_name("sdk", "zip"))
         with zipfile.ZipFile(
-            self.get_dist_path(self.get_dist_file_name("sdk", "zip")),
+            sdk_bundle_path,
             "w",
             zipfile.ZIP_DEFLATED,
         ) as zf:
@@ -204,6 +205,10 @@ class Main(App):
                     }
                 ),
             )
+
+        self.logger.info(
+            fg.boldgreen(f"SDK bundle can be found at:\n\t{sdk_bundle_path}")
+        )
 
     def bundle_update_package(self):
         self.logger.debug(
