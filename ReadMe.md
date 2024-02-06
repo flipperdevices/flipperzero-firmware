@@ -137,7 +137,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - [NFC: Skip system dict bug fixed (By Leptopt1los)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/7de861bb4ccec9c016ef996db4753a550835fc90)
 - [NFC: Set ATQA scene bit numbering changed (By Leptopt1los)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/4e068ba59316201bfaeea29eb708def7905b113f)
 - [NFC parsers false read() positive return fixed (By Leptopt1los)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/db0c7e4fad5c214c36aa8753d27befe49676a985) [Also Applied to other MFC Parsers (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/3608d5bc5f31f65f39f4debfc8b9799d76fc804e)
-- OFW PR: NFC: [Parser for ITSO (UK) #3325 (By gsp8181)](https://github.com/flipperdevices/flipperzero-firmware/pull/3325)
 - Updated: [Mifare Fuzzer v1.3 (By spheeere98)](https://github.com/spheeere98/mifare_fuzzer) [Card emulation for Mifare Fuzzer #38 (By Kondenko)](https://github.com/xMasterX/all-the-plugins/pull/38)
 - Updated: [ShapShup v1.1 (By derskythe)](https://github.com/derskythe/flipperzero-shapshup)
 - OFW: [Fix MyKey production date parsing #3332 (By augustozanellato)](https://github.com/flipperdevices/flipperzero-firmware/pull/3332)
@@ -181,6 +180,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [NFC UI refactor #3382 (By RebornedBrain)](https://github.com/flipperdevices/flipperzero-firmware/pull/3382)
 - OFW: [NFC Rework more info scene for Ultralight cards #3391 (By RebornedBrain)](https://github.com/flipperdevices/flipperzero-firmware/pull/3391)
 - OFW: [NFC: fix application opening from browser #3396 (By RebornedBrain)](https://github.com/flipperdevices/flipperzero-firmware/pull/3396)
+- OFW: NFC: [Parser for ITSO (UK) #3325 (By gsp8181)](https://github.com/flipperdevices/flipperzero-firmware/pull/3325)
 
 <a name="release">
 

@@ -7,13 +7,6 @@
 #include <applications/services/locale/locale.h>
 #include <furi_hal_rtc.h>
 
-#define FURI_HAL_RTC_SECONDS_PER_MINUTE 60
-#define FURI_HAL_RTC_SECONDS_PER_HOUR (FURI_HAL_RTC_SECONDS_PER_MINUTE * 60)
-#define FURI_HAL_RTC_SECONDS_PER_DAY (FURI_HAL_RTC_SECONDS_PER_HOUR * 24)
-#define FURI_HAL_RTC_EPOCH_START_YEAR 1970
-#define FURI_HAL_RTC_IS_LEAP_YEAR(year) \
-    ((((year) % 4 == 0) && ((year) % 100 != 0)) || ((year) % 400 == 0))
-
 static const MfDesfireApplicationId itso_app_id = {.data = {0x16, 0x02, 0xa0}};
 static const MfDesfireFileId itso_file_id = 0x0f;
 
@@ -27,32 +20,6 @@ uint64_t swap_uint64(uint64_t val) {
     val = ((val << 8) & 0xFF00FF00FF00FF00ULL) | ((val >> 8) & 0x00FF00FF00FF00FFULL);
     val = ((val << 16) & 0xFFFF0000FFFF0000ULL) | ((val >> 16) & 0x0000FFFF0000FFFFULL);
     return (val << 32) | (val >> 32);
-}
-
-void timestamp_to_datetime(uint32_t timestamp, FuriHalRtcDateTime* datetime) {
-    uint32_t days = timestamp / FURI_HAL_RTC_SECONDS_PER_DAY;
-    uint32_t seconds_in_day = timestamp % FURI_HAL_RTC_SECONDS_PER_DAY;
-
-    datetime->year = FURI_HAL_RTC_EPOCH_START_YEAR;
-
-    while(days >= furi_hal_rtc_get_days_per_year(datetime->year)) {
-        days -= furi_hal_rtc_get_days_per_year(datetime->year);
-        (datetime->year)++;
-    }
-
-    datetime->month = 1;
-    while(days >= furi_hal_rtc_get_days_per_month(
-                      FURI_HAL_RTC_IS_LEAP_YEAR(datetime->year), datetime->month)) {
-        days -= furi_hal_rtc_get_days_per_month(
-            FURI_HAL_RTC_IS_LEAP_YEAR(datetime->year), datetime->month);
-        (datetime->month)++;
-    }
-
-    datetime->day = days + 1;
-    datetime->hour = seconds_in_day / FURI_HAL_RTC_SECONDS_PER_HOUR;
-    datetime->minute =
-        (seconds_in_day % FURI_HAL_RTC_SECONDS_PER_HOUR) / FURI_HAL_RTC_SECONDS_PER_MINUTE;
-    datetime->second = seconds_in_day % FURI_HAL_RTC_SECONDS_PER_MINUTE;
 }
 
 static bool itso_parse(const NfcDevice* device, FuriString* parsed_data) {
@@ -121,7 +88,7 @@ static bool itso_parse(const NfcDevice* device, FuriString* parsed_data) {
         }
 
         FuriHalRtcDateTime timestamp = {0};
-        timestamp_to_datetime(unixTimestamp, &timestamp);
+        furi_hal_rtc_timestamp_to_datetime(unixTimestamp, &timestamp);
         FuriString* timestamp_str = furi_string_alloc();
         locale_format_date(timestamp_str, &timestamp, locale_get_date_format(), "-");
 
