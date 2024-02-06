@@ -172,13 +172,13 @@ static bool kazan_read(Nfc* nfc, NfcDevice* device) {
         }
 
         error = mf_classic_poller_sync_read(nfc, &keys, data);
-        if(error != MfClassicErrorNone) {
+        if(error == MfClassicErrorNotPresent) {
             FURI_LOG_W(TAG, "Failed to read data: standart keys");
             break;
         }
-        if(!mf_classic_is_card_read(data)) {
+        if(error == MfClassicErrorPartialRead) {
             error = mf_classic_poller_sync_read(nfc, &keys_old, data);
-            if(error != MfClassicErrorNone) {
+            if(error == MfClassicErrorNotPresent) {
                 FURI_LOG_W(TAG, "Failed to read data: old keys");
                 break;
             }
@@ -186,7 +186,7 @@ static bool kazan_read(Nfc* nfc, NfcDevice* device) {
 
         nfc_device_set_data(device, NfcProtocolMfClassic, data);
 
-        is_read = mf_classic_is_card_read(data);
+        is_read = (error == MfClassicErrorNone);
     } while(false);
 
     mf_classic_free(data);

@@ -34,38 +34,38 @@ static MfClassicKeyPair microel_1k_keys[] = {
 
 const uint8_t verify_sector = 1;
 
-void calculateSumHex(const uint8_t* uid, size_t uidSize, uint8_t sumHex[]) {
+void calcolaSommaHex(const uint8_t* uid, size_t uidSize, uint8_t sommaHex[]) {
     const uint8_t xorKey[] = {0x01, 0x92, 0xA7, 0x75, 0x2B, 0xF9};
-    int sum = 0;
+    int somma = 0;
 
     for(size_t i = 0; i < uidSize; i++) {
-        sum += uid[i];
+        somma += uid[i];
     }
 
-    int sumTwoDigits = sum % 256;
+    int sommaDueNumeri = somma % 256;
 
     for(size_t i = 0; i < sizeof(xorKey); i++) {
-        sumHex[i] = sumTwoDigits ^ xorKey[i];
+        sommaHex[i] = sommaDueNumeri ^ xorKey[i];
     }
 }
 
 void generateKeyA(const uint8_t* uid, uint8_t uidSize, uint8_t keyA[]) {
-    uint8_t sumHex[6];
-    calculateSumHex(uid, uidSize, sumHex);
-    uint8_t firstCharacter = (sumHex[0] >> 4) & 0xF;
+    uint8_t sommaHex[6];
+    calcolaSommaHex(uid, uidSize, sommaHex);
+    uint8_t primoCarattere = (sommaHex[0] >> 4) & 0xF;
 
-    if(firstCharacter == 0x2 || firstCharacter == 0x3 || firstCharacter == 0xA ||
-       firstCharacter == 0xB) {
+    if(primoCarattere == 0x2 || primoCarattere == 0x3 || primoCarattere == 0xA ||
+       primoCarattere == 0xB) {
         // XOR WITH 0x40
-        for(size_t i = 0; i < sizeof(sumHex); i++) {
-            keyA[i] = 0x40 ^ sumHex[i];
+        for(size_t i = 0; i < sizeof(sommaHex); i++) {
+            keyA[i] = 0x40 ^ sommaHex[i];
         }
     } else if(
-        firstCharacter == 0x6 || firstCharacter == 0x7 || firstCharacter == 0xE ||
-        firstCharacter == 0xF) {
+        primoCarattere == 0x6 || primoCarattere == 0x7 || primoCarattere == 0xE ||
+        primoCarattere == 0xF) {
         // XOR WITH 0xC0
-        for(size_t i = 0; i < sizeof(sumHex); i++) {
-            keyA[i] = 0xC0 ^ sumHex[i];
+        for(size_t i = 0; i < sizeof(sommaHex); i++) {
+            keyA[i] = 0xC0 ^ sommaHex[i];
         }
     }
 }
@@ -75,6 +75,51 @@ void generateKeyB(uint8_t keyA[], size_t keyASize, uint8_t keyB[]) {
         keyB[i] = 0xFF ^ keyA[i];
     }
 }
+
+/*static bool microel_verify(Nfc* nfc) {
+    furi_assert(nfc);
+
+    bool verified = false;
+
+    do {
+        uint8_t block_num = mf_classic_get_first_block_num_of_sector(verify_sector);
+        FURI_LOG_D(TAG, "Verifying sector %u", verify_sector);
+
+        uint8_t uid[UID_LENGTH] = {0xd4, 0x23, 0xb7, 0x34};
+
+        size_t uid_len;
+        const uint8_t* uidn = mf_classic_get_uid(data, &uid_len);
+        FURI_LOG_D(TAG, "Microel provadiocane: UID identified: %02X%02X%02X%02X", uidn[0], uidn[1], uidn[2], uidn[3]);
+        if(uid_len != UID_LENGTH) break;
+        size_t uid_len = 0;
+        const uint8_t* originalUid = mf_classic_get_uid(data, &uid_len);
+        uint8_t uid[UID_LENGTH];  // Sostituisci UID_LENGTH con la lunghezza effettiva dell'UID
+        memcpy(uid, originalUid, UID_LENGTH);
+        FURI_LOG_D(TAG, "UID: %02X %02X %02X %02X", uid[0],uid[1],uid[2],uid[3]);
+        FURI_LOG_D(TAG, "UID GET: %02X %02X %02X %02X", originalUid[0],originalUid[1],originalUid[2],originalUid[3]);
+        //memcpy(uid, data->iso14443_3a_data->uid, UID_LENGTH);
+
+        // Generate key from uid
+        uint8_t keyA[KEY_LENGTH];
+        generateKeyA(uid, UID_LENGTH, keyA);
+
+        MfClassicKey key = {};
+        memcpy(key.data, keyA, KEY_LENGTH);
+
+        MfClassicAuthContext auth_ctx = {};
+        MfClassicError error =
+            mf_classic_poller_sync_auth(nfc, block_num, &key, MfClassicKeyTypeA, &auth_ctx);
+        if(error != MfClassicErrorNone) {
+            verified = false;
+            FURI_LOG_D(TAG, "Failed to read block %u: %d", block_num, error);
+            break;
+        }
+
+        verified = true;
+    } while(false);
+
+    return verified;
+}*/
 
 static bool microel_read(Nfc* nfc, NfcDevice* device) {
     FURI_LOG_D(TAG, "Entering Microel KDF");
@@ -120,14 +165,14 @@ static bool microel_read(Nfc* nfc, NfcDevice* device) {
         }
 
         error = mf_classic_poller_sync_read(nfc, &keys, data);
-        if(error != MfClassicErrorNone) {
+        if(error == MfClassicErrorNotPresent) {
             FURI_LOG_W(TAG, "Failed to read data");
             break;
         }
 
         nfc_device_set_data(device, NfcProtocolMfClassic, data);
 
-        is_read = mf_classic_is_card_read(data);
+        is_read = (error == MfClassicErrorNone);
     } while(false);
 
     mf_classic_free(data);
@@ -158,7 +203,7 @@ static bool microel_parse(const NfcDevice* device, FuriString* parsed_data) {
             mf_classic_get_sector_trailer_by_sector(data, verify_sector);
         uint64_t key = nfc_util_bytes2num(sec_tr->key_a.data, 6);
         uint64_t key_for_check_from_array = nfc_util_bytes2num(keyA, KEY_LENGTH);
-        if(key != key_for_check_from_array) return false;
+        if(key != key_for_check_from_array) break;
 
         //Get credit in block number 8
         const uint8_t* temp_ptr = data->block[4].data;
