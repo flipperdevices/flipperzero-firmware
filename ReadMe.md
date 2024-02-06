@@ -181,6 +181,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [NFC Rework more info scene for Ultralight cards #3391 (By RebornedBrain)](https://github.com/flipperdevices/flipperzero-firmware/pull/3391)
 - OFW: [NFC: fix application opening from browser #3396 (By RebornedBrain)](https://github.com/flipperdevices/flipperzero-firmware/pull/3396)
 - OFW: NFC: [Parser for ITSO (UK) #3325 (By gsp8181)](https://github.com/flipperdevices/flipperzero-firmware/pull/3325)
+- OFW: [NFC: MFC Unlock with Dictionary #3411 (By RebornedBrain)](https://github.com/flipperdevices/flipperzero-firmware/pull/3411)
 
 <a name="release">
 
