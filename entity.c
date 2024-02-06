@@ -27,8 +27,8 @@ typedef struct {
             float radius;
         } circle;
         struct {
-            float width;
-            float height;
+            float half_width;
+            float half_height;
         } rect;
     };
 } Collider;
@@ -38,6 +38,7 @@ struct Entity {
     const EntityDescription* description;
     void* context;
     Collider* collider;
+    Vector collider_offset;
 };
 
 Entity* entity_alloc(const EntityDescription* description) {
@@ -50,6 +51,7 @@ Entity* entity_alloc(const EntityDescription* description) {
         entity->context = malloc(description->context_size);
     }
     entity->collider = NULL;
+    entity->collider_offset = VECTOR_ZERO;
     ENTITY_D("Allocated at %p", entity);
     return entity;
 }
@@ -65,8 +67,23 @@ void entity_collider_add_rect(Entity* entity, float width, float height) {
     furi_check(entity->collider == NULL, "Collider already added");
     entity->collider = malloc(sizeof(Collider));
     entity->collider->type = ColliderTypeRect;
-    entity->collider->rect.width = width;
-    entity->collider->rect.height = height;
+    entity->collider->rect.half_width = width / 2;
+    entity->collider->rect.half_height = height / 2;
+}
+
+void entity_collider_offset_set(Entity* entity, Vector offset) {
+    entity->collider_offset = offset;
+}
+
+Vector entity_collider_offset_get(Entity* entity) {
+    return entity->collider_offset;
+}
+
+static Vector entity_collider_position_get(Entity* entity) {
+    return (Vector){
+        .x = entity->position.x + entity->collider_offset.x,
+        .y = entity->position.y + entity->collider_offset.y,
+    };
 }
 
 void entity_free(Entity* entity) {
@@ -128,37 +145,46 @@ void entity_call_collision(Entity* entity, Entity* other, Director* director) {
 }
 
 bool entity_collider_circle_circle(Entity* entity, Entity* other) {
-    float dx = entity->position.x - other->position.x;
-    float dy = entity->position.y - other->position.y;
+    Vector pos1 = entity_collider_position_get(entity);
+    Vector pos2 = entity_collider_position_get(other);
+
+    float dx = pos1.x - pos2.x;
+    float dy = pos1.y - pos2.y;
     float distance = sqrtf(dx * dx + dy * dy);
     return distance < entity->collider->circle.radius + other->collider->circle.radius;
 }
 
 bool entity_collider_rect_rect(Entity* entity, Entity* other) {
-    float left1 = entity->position.x - entity->collider->rect.width / 2;
-    float right1 = entity->position.x + entity->collider->rect.width / 2;
-    float top1 = entity->position.y - entity->collider->rect.height / 2;
-    float bottom1 = entity->position.y + entity->collider->rect.height / 2;
+    Vector pos1 = entity_collider_position_get(entity);
+    Vector pos2 = entity_collider_position_get(other);
 
-    float left2 = other->position.x - other->collider->rect.width / 2;
-    float right2 = other->position.x + other->collider->rect.width / 2;
-    float top2 = other->position.y - other->collider->rect.height / 2;
-    float bottom2 = other->position.y + other->collider->rect.height / 2;
+    float left1 = pos1.x - entity->collider->rect.half_width;
+    float right1 = pos1.x + entity->collider->rect.half_width;
+    float top1 = pos1.y - entity->collider->rect.half_height;
+    float bottom1 = pos1.y + entity->collider->rect.half_height;
+
+    float left2 = pos2.x - other->collider->rect.half_width;
+    float right2 = pos2.x + other->collider->rect.half_width;
+    float top2 = pos2.y - other->collider->rect.half_height;
+    float bottom2 = pos2.y + other->collider->rect.half_height;
 
     return left1 < right2 && right1 > left2 && top1 < bottom2 && bottom1 > top2;
 }
 
 bool entity_collider_circle_rect(Entity* entity, Entity* other) {
-    float left = other->position.x - other->collider->rect.width / 2;
-    float right = other->position.x + other->collider->rect.width / 2;
-    float top = other->position.y - other->collider->rect.height / 2;
-    float bottom = other->position.y + other->collider->rect.height / 2;
+    Vector pos1 = entity_collider_position_get(entity);
+    Vector pos2 = entity_collider_position_get(other);
 
-    float closestX = fmaxf(left, fminf(entity->position.x, right));
-    float closestY = fmaxf(top, fminf(entity->position.y, bottom));
+    float left = pos2.x - other->collider->rect.half_width;
+    float right = pos2.x + other->collider->rect.half_width;
+    float top = pos2.y - other->collider->rect.half_height;
+    float bottom = pos2.y + other->collider->rect.half_height;
 
-    float dx = entity->position.x - closestX;
-    float dy = entity->position.y - closestY;
+    float closestX = fmaxf(left, fminf(pos1.x, right));
+    float closestY = fmaxf(top, fminf(pos1.y, bottom));
+
+    float dx = pos1.x - closestX;
+    float dy = pos1.y - closestY;
     float distance = sqrtf(dx * dx + dy * dy);
     return distance < entity->collider->circle.radius;
 }

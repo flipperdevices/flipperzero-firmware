@@ -49,6 +49,10 @@ void entity_collider_add_circle(Entity* entity, float radius);
 
 void entity_collider_add_rect(Entity* entity, float width, float height);
 
+void entity_collider_offset_set(Entity* entity, Vector offset);
+
+Vector entity_collider_offset_get(Entity* entity);
+
 void entity_send_event(Entity* entity, uint32_t type, EntityEventValue value);
 
 #ifdef __cplusplus
