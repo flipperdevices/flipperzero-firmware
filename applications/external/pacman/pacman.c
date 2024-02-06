@@ -167,7 +167,7 @@ static uint32_t pacman_navigation_configure_callback(void* _context) {
  */
 static void pacman_submenu_callback(void* context, uint32_t index) {
     PacmanApp* app = (PacmanApp*)context;
-    switch (index) {
+    switch(index) {
     case PacmanSubmenuIndexConfigure:
         view_dispatcher_switch_to_view(app->view_dispatcher, PacmanViewConfigure);
         break;
@@ -223,7 +223,7 @@ static const char* map_config[] = {
     "|CCC||CCCCCCCCCCCCCCCC||CCC|", "3-2C||C12C1------2C12C||C1-4", "1-4C34C||C3--21--4C||C34C3-2",
     "|CCCCCC||CCCC||CCCC||CCCCCC|", "|C1----43--2C||C1--43----2C|", "|C3--------4C34C3--------4C|",
     "|CCCCCCCCCCCCCCCCCCCCCCCCCC|", "3--------------------------4", "                            ",
-    "                            " };
+    "                            "};
 
 /**
  * @brief      Sets up the map matrix according to the config matrix.
@@ -233,10 +233,10 @@ static const char* map_config[] = {
  */
 static StartPositions* setup_map(Entity map[][MAP_SIZE_W]) {
     StartPositions* positions = (StartPositions*)malloc(sizeof(StartPositions));
-    for (int i = 0; i < MAP_SIZE_H; i++) {
-        for (int j = 0; j < MAP_SIZE_W; j++) {
+    for(int i = 0; i < MAP_SIZE_H; i++) {
+        for(int j = 0; j < MAP_SIZE_W; j++) {
             int symbol = map_config[i][j];
-            switch (symbol) {
+            switch(symbol) {
             case 'C':
                 map[i][j] = EntityCandy;
                 break;
@@ -297,8 +297,8 @@ static Entity map[MAP_SIZE_H][MAP_SIZE_W];
  * Our 1st sample setting is a team color.  We have 3 options: red, green, and blue.
  */
 static const char* setting_1_config_label = "Team color";
-static uint8_t setting_1_values[] = { 1, 2, 4 };
-static char* setting_1_names[] = { "Red", "Green", "Blue" };
+static uint8_t setting_1_values[] = {1, 2, 4};
+static char* setting_1_names[] = {"Red", "Green", "Blue"};
 static void pacman_setting_1_change(VariableItem* item) {
     PacmanApp* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
@@ -342,7 +342,7 @@ static void pacman_setting_item_clicked(void* context, uint32_t index) {
     index++; // The index starts at zero, but we want to start at 1.
 
     // Our configuration UI has the 2nd item as a text field.
-    if (index == 2) {
+    if(index == 2) {
         // Header to display on the text input screen.
         text_input_set_header_text(app->text_input, setting_2_entry_text);
 
@@ -379,9 +379,9 @@ static void pacman_setting_item_clicked(void* context, uint32_t index) {
 }
 
 static void draw_entities(Canvas* canvas, PacmanGameModel* model) {
-    for (int i = 0; i < MAP_SIZE_H; i++) {
-        for (int j = 0; j < MAP_SIZE_W; j++) {
-            switch (map[i][j]) {
+    for(int i = 0; i < MAP_SIZE_H; i++) {
+        for(int j = 0; j < MAP_SIZE_W; j++) {
+            switch(map[i][j]) {
             case EntityVerticalWall:
                 canvas_draw_icon(canvas, i * WALL_SIZE, j * WALL_SIZE, &I_horizontal_wall_3x3);
                 break;
@@ -436,22 +436,29 @@ static uint8_t pacman_y_to_map_x(float_t y) {
  * @param      entity   The entity you'd like to check
 */
 static bool is_wall(Entity entity) {
-    if (entity == EntityBottomLeftWall || entity == EntityBottomRightWall ||
-        entity == EntityTopLeftWall || entity == EntityTopRightWall ||
-        entity == EntityHorizontalWall || entity == EntityVerticalWall)
+    if(entity == EntityBottomLeftWall || entity == EntityBottomRightWall ||
+       entity == EntityTopLeftWall || entity == EntityTopRightWall ||
+       entity == EntityHorizontalWall || entity == EntityVerticalWall)
         return true;
     return false;
 }
 
 static void move_pacman(PacmanGameModel* model) {
     Character* pacman = model->pacman;
-    if (pacman->direction == DirectionLeft && (!is_wall(map[pacman->map_y][pacman->map_x - 1]) || (int)pacman->y % WALL_SIZE != 0))
+    if(pacman->direction == DirectionLeft &&
+       (!is_wall(map[pacman->map_y][pacman->map_x - 1]) || (int)pacman->y % WALL_SIZE != 0))
         pacman->y += pacman->speed;
-    else if (pacman->direction == DirectionRight && (!is_wall(map[pacman->map_y][pacman->map_x + 1]) || (int)pacman->y % WALL_SIZE != 0))
+    else if(
+        pacman->direction == DirectionRight &&
+        (!is_wall(map[pacman->map_y][pacman->map_x + 1]) || (int)pacman->y % WALL_SIZE != 0))
         pacman->y -= pacman->speed;
-    else if (pacman->direction == DirectionUp && (!is_wall(map[pacman->map_y - 1][pacman->map_x]) || (int)pacman->x % WALL_SIZE != 0))
+    else if(
+        pacman->direction == DirectionUp &&
+        (!is_wall(map[pacman->map_y - 1][pacman->map_x]) || (int)pacman->x % WALL_SIZE != 0))
         pacman->x -= pacman->speed;
-    else if (pacman->direction == DirectionDown && (!is_wall(map[pacman->map_y + 1][pacman->map_x]) || (int)pacman->x % WALL_SIZE != 0))
+    else if(
+        pacman->direction == DirectionDown &&
+        (!is_wall(map[pacman->map_y + 1][pacman->map_x]) || (int)pacman->x % WALL_SIZE != 0))
         pacman->x += pacman->speed;
     else
         pacman->direction = DirectionIdle;
@@ -462,8 +469,8 @@ static void move_pacman(PacmanGameModel* model) {
     pacman->map_y = pacman_x_to_map_y(pacman->x);
     pacman->map_x = pacman_y_to_map_x(pacman->y);
 
-    if (previous_x != pacman->map_x || previous_y != pacman->map_y) {
-        if (map[pacman->map_y][pacman->map_x] == EntityCandy) model->score += 1;
+    if(previous_x != pacman->map_x || previous_y != pacman->map_y) {
+        if(map[pacman->map_y][pacman->map_x] == EntityCandy) model->score += 1;
         map[previous_y][previous_x] = EntityVoid;
     }
 
@@ -573,18 +580,18 @@ static void pacman_view_game_exit_callback(void* context) {
  */
 static bool pacman_view_game_custom_event_callback(uint32_t event, void* context) {
     PacmanApp* app = (PacmanApp*)context;
-    switch (event) {
+    switch(event) {
     case PacmanEventIdRedrawScreen:
         // Redraw screen by passing true to last parameter of with_view_model.
-    {
-        bool redraw = true;
-        with_view_model(
-            app->view_game, PacmanGameModel * _model, { UNUSED(_model); }, redraw);
-        return true;
-    }
+        {
+            bool redraw = true;
+            with_view_model(
+                app->view_game, PacmanGameModel * _model, { UNUSED(_model); }, redraw);
+            return true;
+        }
     case PacmanEventIdOkPressed:
         // Process the OK button.  We play a tone based on the x coordinate.
-        if (furi_hal_speaker_acquire(500)) {
+        if(furi_hal_speaker_acquire(500)) {
             float frequency;
             bool redraw = false;
             with_view_model(
@@ -613,39 +620,35 @@ static bool pacman_view_game_custom_event_callback(uint32_t event, void* context
 static bool pacman_view_game_input_callback(InputEvent* event, void* context) {
     PacmanApp* app = (PacmanApp*)context;
     bool redraw = false;
-    if (event->type == InputTypeShort) {
-        if (event->key == InputKeyLeft) {
+    if(event->type == InputTypeShort) {
+        if(event->key == InputKeyLeft) {
             // Left button clicked, reduce x coordinate.
             with_view_model(
                 app->view_game,
                 PacmanGameModel * model,
                 { model->pacman->direction = DirectionUp; },
                 redraw);
-        }
-        else if (event->key == InputKeyRight) {
+        } else if(event->key == InputKeyRight) {
             with_view_model(
                 app->view_game,
                 PacmanGameModel * model,
                 { model->pacman->direction = DirectionDown; },
                 redraw);
-        }
-        else if (event->key == InputKeyUp) {
+        } else if(event->key == InputKeyUp) {
             with_view_model(
                 app->view_game,
                 PacmanGameModel * model,
                 { model->pacman->direction = DirectionRight; },
                 redraw);
-        }
-        else if (event->key == InputKeyDown) {
+        } else if(event->key == InputKeyDown) {
             with_view_model(
                 app->view_game,
                 PacmanGameModel * model,
                 { model->pacman->direction = DirectionLeft; },
                 redraw);
         }
-    }
-    else if (event->type == InputTypePress) {
-        if (event->key == InputKeyOk) {
+    } else if(event->type == InputTypePress) {
+        if(event->key == InputKeyOk) {
             // We choose to send a custom event when user presses OK button.  pacman_custom_event_callback will
             // handle our PacmanEventIdOkPressed event.  We could have just put the code from
             // pacman_custom_event_callback here, it's a matter of preference.
@@ -657,7 +660,7 @@ static bool pacman_view_game_input_callback(InputEvent* event, void* context) {
 }
 
 static Character*
-character_alloc(Character* character, float_t x, float_t y, Direction direction) {
+    character_alloc(Character* character, float_t x, float_t y, Direction direction) {
     character = (Character*)malloc(sizeof(Character));
     character->x = x;
     character->y = y;
