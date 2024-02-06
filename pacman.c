@@ -167,7 +167,7 @@ static uint32_t pacman_navigation_configure_callback(void* _context) {
  */
 static void pacman_submenu_callback(void* context, uint32_t index) {
     PacmanApp* app = (PacmanApp*)context;
-    switch (index) {
+    switch(index) {
     case PacmanSubmenuIndexConfigure:
         view_dispatcher_switch_to_view(app->view_dispatcher, PacmanViewConfigure);
         break;
@@ -214,16 +214,16 @@ static const char* map_config[] = {
     "                            ", "                            ", "                            ",
     "                            ", "1------------21------------2", "|PCCCCCCCCCCC||CCCCCCCCCCCC|",
     "|C1--2C1---2C||C1---2C1--2C|", "|C|  |C|   |C||C|   |C|  |C|", "|C3--4C3---4C34C3---4C3--4C|",
-    "|CCCCCCCCCCCCCCCCCCCCCCCCCC|", "|C1--2C12C1------2C12C1--2C|", "|C3--4C||C3--21--4C||C3--4C|",
+    "|CCCCCCCCCCCCCCCCCCCCbCCCCC|", "|C1--2C12C1------2C12C1--2C|", "|C3--4C||C3--21--4C||C3--4C|",
     "|CCCCCC||CCCC||CCCC||CCCCCC|", "3----2C|3--2 || 1--4|C1----4", "     |C|1--4 34 3--2|C|     ",
     "     |C||          ||C|     ", "     |C|| 1--  --2 ||C|     ", "-----4C34 |BBBBBB| 34C3-----",
-    "      C   |BbcpiB|   C      ", "-----2C12 |BBBBBB| 12C1-----", "     |C|| 3------4 ||C|     ",
+    "      C   |BBcpiB|   C      ", "-----2C12 |BBBBBB| 12C1-----", "     |C|| 3------4 ||C|     ",
     "     |C||          ||C|     ", "     |C|| 1------2 ||C|     ", "1----4C34 3--21--4 34C3----2",
     "|CCCCCCCCCCCC||CCCCCCCCCCCC|", "|C1--2C1---2C||C1---2C1--2C|", "|C3-2|C3---4C34C3---4C|1-4C|",
     "|CCC||CCCCCCCCCCCCCCCC||CCC|", "3-2C||C12C1------2C12C||C1-4", "1-4C34C||C3--21--4C||C34C3-2",
     "|CCCCCC||CCCC||CCCC||CCCCCC|", "|C1----43--2C||C1--43----2C|", "|C3--------4C34C3--------4C|",
     "|CCCCCCCCCCCCCCCCCCCCCCCCCC|", "3--------------------------4", "                            ",
-    "                            " };
+    "                            "};
 
 /**
  * @brief      Sets up the map matrix according to the config matrix.
@@ -233,10 +233,10 @@ static const char* map_config[] = {
  */
 static StartPositions* setup_map(Entity map[][MAP_SIZE_W]) {
     StartPositions* positions = (StartPositions*)malloc(sizeof(StartPositions));
-    for (int i = 0; i < MAP_SIZE_H; i++) {
-        for (int j = 0; j < MAP_SIZE_W; j++) {
+    for(int i = 0; i < MAP_SIZE_H; i++) {
+        for(int j = 0; j < MAP_SIZE_W; j++) {
             int symbol = map_config[i][j];
-            switch (symbol) {
+            switch(symbol) {
             case 'C':
                 map[i][j] = EntityCandy;
                 break;
@@ -297,8 +297,8 @@ static Entity map[MAP_SIZE_H][MAP_SIZE_W];
  * Our 1st sample setting is a team color.  We have 3 options: red, green, and blue.
  */
 static const char* setting_1_config_label = "Team color";
-static uint8_t setting_1_values[] = { 1, 2, 4 };
-static char* setting_1_names[] = { "Red", "Green", "Blue" };
+static uint8_t setting_1_values[] = {1, 2, 4};
+static char* setting_1_names[] = {"Red", "Green", "Blue"};
 static void pacman_setting_1_change(VariableItem* item) {
     PacmanApp* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
@@ -342,7 +342,7 @@ static void pacman_setting_item_clicked(void* context, uint32_t index) {
     index++; // The index starts at zero, but we want to start at 1.
 
     // Our configuration UI has the 2nd item as a text field.
-    if (index == 2) {
+    if(index == 2) {
         // Header to display on the text input screen.
         text_input_set_header_text(app->text_input, setting_2_entry_text);
 
@@ -379,9 +379,9 @@ static void pacman_setting_item_clicked(void* context, uint32_t index) {
 }
 
 static void draw_entities(Canvas* canvas, PacmanGameModel* model) {
-    for (int i = 0; i < MAP_SIZE_H; i++) {
-        for (int j = 0; j < MAP_SIZE_W; j++) {
-            switch (map[i][j]) {
+    for(int i = 0; i < MAP_SIZE_H; i++) {
+        for(int j = 0; j < MAP_SIZE_W; j++) {
+            switch(map[i][j]) {
             case EntityVerticalWall:
                 canvas_draw_icon(canvas, i * WALL_SIZE, j * WALL_SIZE, &I_horizontal_wall_3x3);
                 break;
@@ -436,26 +436,29 @@ static uint8_t pacman_y_to_map_x(float_t y) {
  * @param      entity   The entity you'd like to check
 */
 static bool is_wall(Entity entity) {
-    if (entity == EntityBottomLeftWall || entity == EntityBottomRightWall ||
-        entity == EntityTopLeftWall || entity == EntityTopRightWall ||
-        entity == EntityHorizontalWall || entity == EntityVerticalWall)
+    if(entity == EntityBottomLeftWall || entity == EntityBottomRightWall ||
+       entity == EntityTopLeftWall || entity == EntityTopRightWall ||
+       entity == EntityHorizontalWall || entity == EntityVerticalWall)
         return true;
     return false;
 }
 
 static void move_pacman(PacmanGameModel* model) {
     Character* pacman = model->pacman;
-    if (pacman->direction == DirectionLeft
-        && (!is_wall(map[pacman->map_y][pacman->map_x - 1]) || (int)pacman->y % WALL_SIZE != 0))
+    if(pacman->direction == DirectionLeft &&
+       (!is_wall(map[pacman->map_y][pacman->map_x - 1]) || (int)pacman->y % WALL_SIZE != 0))
         pacman->y += pacman->speed;
-    else if (pacman->direction == DirectionRight
-        && (!is_wall(map[pacman->map_y][pacman->map_x + 1]) || (int)pacman->y % WALL_SIZE != 0))
+    else if(
+        pacman->direction == DirectionRight &&
+        (!is_wall(map[pacman->map_y][pacman->map_x + 1]) || (int)pacman->y % WALL_SIZE != 0))
         pacman->y -= pacman->speed;
-    else if (pacman->direction == DirectionUp
-        && (!is_wall(map[pacman->map_y - 1][pacman->map_x]) || (int)pacman->x % WALL_SIZE != 0))
+    else if(
+        pacman->direction == DirectionUp &&
+        (!is_wall(map[pacman->map_y - 1][pacman->map_x]) || (int)pacman->x % WALL_SIZE != 0))
         pacman->x -= pacman->speed;
-    else if (pacman->direction == DirectionDown
-        && (!is_wall(map[pacman->map_y + 1][pacman->map_x]) || (int)pacman->x % WALL_SIZE != 0))
+    else if(
+        pacman->direction == DirectionDown &&
+        (!is_wall(map[pacman->map_y + 1][pacman->map_x]) || (int)pacman->x % WALL_SIZE != 0))
         pacman->x += pacman->speed;
     else
         pacman->direction = DirectionIdle;
@@ -466,8 +469,8 @@ static void move_pacman(PacmanGameModel* model) {
     pacman->map_y = pacman_x_to_map_y(pacman->x);
     pacman->map_x = pacman_y_to_map_x(pacman->y);
 
-    if (previous_x != pacman->map_x || previous_y != pacman->map_y) {
-        if (map[pacman->map_y][pacman->map_x] == EntityCandy) model->score += 1;
+    if(previous_x != pacman->map_x || previous_y != pacman->map_y) {
+        if(map[pacman->map_y][pacman->map_x] == EntityCandy) model->score += 1;
         map[previous_y][previous_x] = EntityVoid;
     }
 
@@ -478,48 +481,127 @@ static int opposite_direction(Direction direction) {
     return (direction + 2) % 4;
 }
 
-static Direction* get_allowed_directions(Character* ghost, Direction direction) {
-    Direction allowed_directions[] = { DirectionRight, DirectionDown, DirectionLeft, DirectionUp };
-    int allowed_directions_count = 3;
-    int map_x = ghost->map_x;
-    int map_y = ghost->map_y;
+static float_t calculate_distance(float_t x1, float_t y1, float_t x2, float_t y2) {
+    return sqrt(pow(x1 - x2, 2) + pow(y1 - y2, 2));
+}
+
+static Direction get_best_direction(Character* ghost) {
+    uint8_t x = ghost->map_x;
+    uint8_t y = ghost->map_y;
+    Direction direction = ghost->direction;
+    uint8_t allowed_directions_count = 0;
+
     Direction* allowed_directions = malloc(sizeof(Direction) * 4);
-    if (is_wall(map[map_y][map_x - 1])) allowed_directions_count--;
-    switch (direction) {
-    case DirectionLeft:
-        allowed_directions[0] = DirectionUp;
-        allowed_directions[1] = DirectionDown;
+    if(!is_wall(map[y][x - 1]) && direction != opposite_direction(DirectionLeft)) {
+        allowed_directions[allowed_directions_count] = DirectionLeft;
+        allowed_directions_count++;
+    }
+    if(!is_wall(map[y][x + 1]) && direction != opposite_direction(DirectionRight)) {
+        allowed_directions[allowed_directions_count] = DirectionRight;
+        allowed_directions_count++;
+    }
+    if(!is_wall(map[y + 1][x]) && direction != opposite_direction(DirectionDown)) {
+        allowed_directions[allowed_directions_count] = DirectionDown;
+        allowed_directions_count++;
+    }
+    if(!is_wall(map[y - 1][x]) && direction != opposite_direction(DirectionUp)) {
+        allowed_directions[allowed_directions_count] = DirectionUp;
+        allowed_directions_count++;
     }
 
-    static void move_to_target(Character * ghost) {
+    allowed_directions =
+        (Direction*)realloc(allowed_directions, sizeof(Direction) * allowed_directions_count);
 
-    }
+    // for(int i = 0; i < allowed_directions_count; i++)
+    //     FURI_LOG_D(TAG, "allowed_directions[%d] = %d", i, allowed_directions[i]);
 
-    static void move_ghosts(
-        GhostsMode mode,
-        Character * blinky,
-        Character * pinky,
-        Character * inky,
-        Character * clyde) {
-        switch (mode) {
-        case GhostsModeScatter:
-            move_to_target(blinky);
-            move_to_target(pinky);
-            move_to_target(inky);
-            move_to_target(clyde);
+    float_t shortest_distance = 999999999999.0;
+    Direction best_direction = DirectionIdle;
+
+    for(int i = 0; i < allowed_directions_count; i++) {
+        uint8_t new_x = x, new_y = y;
+        Direction current_direction = allowed_directions[i];
+        switch(current_direction) {
+        case DirectionDown:
+            new_y++;
             break;
-        case GhostsModeeChase:
-            move_to_target(blinky);
-            move_to_target(pinky);
-            move_to_target(inky);
-            move_to_target(clyde);
+        case DirectionUp:
+            new_y--;
             break;
-        case GhostsModeFrightened:
+        case DirectionLeft:
+            new_x--;
+            break;
+        case DirectionRight:
+            new_x++;
+            break;
+        default:
             break;
         }
+        float_t distance = calculate_distance(ghost->target_x, ghost->target_y, new_x, new_y);
+        if(distance < shortest_distance) {
+            shortest_distance = distance;
+            best_direction = current_direction;
+        }
+    }
+    // FURI_LOG_D(TAG, "Best is %d", best_direction);
+    return best_direction;
+}
+
+static void move_to_target(Character* ghost) {
+    Direction best_direction = get_best_direction(ghost);
+    ghost->direction = best_direction;
+    switch(best_direction) {
+    case DirectionLeft:
+        ghost->y += ghost->speed;
+        break;
+    case DirectionDown:
+        ghost->x += ghost->speed;
+        break;
+    case DirectionRight:
+        ghost->y -= ghost->speed;
+        break;
+    case DirectionUp:
+        ghost->x -= ghost->speed;
+        break;
+    default:
+        break;
     }
 
-    /**
+    ghost->map_y = pacman_x_to_map_y(ghost->x);
+    ghost->map_x = pacman_y_to_map_x(ghost->y);
+}
+
+static void move_ghosts(
+    GhostsMode mode,
+    Character* blinky,
+    Character* pinky,
+    Character* inky,
+    Character* clyde) {
+    switch(mode) {
+    case GhostsModeScatter:
+        // Actual targets used in the original game
+        blinky->target_x = 25;
+        blinky->target_y = 0;
+        pinky->target_x = 2;
+        pinky->target_y = 0;
+        inky->target_x = 27;
+        inky->target_y = 35;
+        clyde->target_x = 0;
+        clyde->target_y = 35;
+        break;
+    case GhostsModeeChase:
+        break;
+    case GhostsModeFrightened:
+        break;
+    }
+
+    move_to_target(blinky);
+    move_to_target(pinky);
+    move_to_target(inky);
+    move_to_target(clyde);
+}
+
+/**
      * @brief      Callback for drawing the game screen.
      * @details    This function is called when the screen needs to be redrawn, like when the model gets updated.
      *            This is where the map is actually drawed, images and enums don't correspond since they need to
@@ -527,331 +609,327 @@ static Direction* get_allowed_directions(Character* ghost, Direction direction) 
      * @param      canvas  The canvas to draw on.
      * @param      model   The model - MyModel object.
      */
-    static void pacman_view_game_draw_callback(Canvas * canvas, void* model) {
-        PacmanGameModel* my_model = (PacmanGameModel*)model;
-        Character* blinky = my_model->blinky;
-        Character* pinky = my_model->pinky;
-        Character* inky = my_model->inky;
-        Character* clyde = my_model->clyde;
-        GhostsMode mode = my_model->ghosts_mode;
-        move_pacman(my_model);
-        move_ghosts(mode, blinky, pinky, inky, clyde);
-        draw_entities(canvas, my_model);
-        // canvas_draw_str(canvas, 1, 10, "LEFT/RIGHT to change x");
-        FuriString* xstr = furi_string_alloc();
-        furi_string_printf(xstr, "[%d][%d]", my_model->pacman->map_y, my_model->pacman->map_x);
-        canvas_draw_str(canvas, 80, 10, furi_string_get_cstr(xstr));
-        furi_string_printf(xstr, "%d", my_model->pacman->direction);
-        canvas_draw_str(canvas, 80, 20, furi_string_get_cstr(xstr));
-        furi_string_printf(
-            xstr, "%.2f-%.2f", (double)my_model->pacman->x, (double)my_model->pacman->y);
-        canvas_draw_str(canvas, 80, 30, furi_string_get_cstr(xstr));
-        furi_string_printf(xstr, "score: %d", my_model->score);
-        canvas_draw_str(canvas, 80, 40, furi_string_get_cstr(xstr));
-        furi_string_printf(xstr, "x: %u  OK=play tone", my_model->x);
-        // canvas_draw_str(canvas, 44, 24, furi_string_get_cstr(xstr));
-        furi_string_printf(xstr, "random: %u", (uint8_t)(furi_hal_random_get() % 256));
-        // canvas_draw_str(canvas, 44, 36, furi_string_get_cstr(xstr));
-        furi_string_printf(
-            xstr,
-            "team: %s (%u)",
-            setting_1_names[my_model->setting_1_index],
-            setting_1_values[my_model->setting_1_index]);
-        // canvas_draw_str(canvas, 44, 48, furi_string_get_cstr(xstr));
-        furi_string_printf(xstr, "name: %s", furi_string_get_cstr(my_model->setting_2_name));
-        // canvas_draw_str(canvas, 44, 60, furi_string_get_cstr(xstr));
-        furi_string_free(xstr);
-    }
+static void pacman_view_game_draw_callback(Canvas* canvas, void* model) {
+    PacmanGameModel* my_model = (PacmanGameModel*)model;
+    Character* blinky = my_model->blinky;
+    Character* pinky = my_model->pinky;
+    Character* inky = my_model->inky;
+    Character* clyde = my_model->clyde;
+    GhostsMode mode = my_model->ghosts_mode;
+    move_pacman(my_model);
+    move_ghosts(mode, blinky, pinky, inky, clyde);
+    draw_entities(canvas, my_model);
+    // canvas_draw_str(canvas, 1, 10, "LEFT/RIGHT to change x");
+    FuriString* xstr = furi_string_alloc();
+    furi_string_printf(xstr, "[%d][%d]", my_model->pacman->map_y, my_model->pacman->map_x);
+    canvas_draw_str(canvas, 80, 10, furi_string_get_cstr(xstr));
+    furi_string_printf(xstr, "%d", my_model->pacman->direction);
+    canvas_draw_str(canvas, 80, 20, furi_string_get_cstr(xstr));
+    furi_string_printf(
+        xstr, "%.2f-%.2f", (double)my_model->pacman->x, (double)my_model->pacman->y);
+    canvas_draw_str(canvas, 80, 30, furi_string_get_cstr(xstr));
+    furi_string_printf(xstr, "score: %d", my_model->score);
+    canvas_draw_str(canvas, 80, 40, furi_string_get_cstr(xstr));
+    furi_string_printf(xstr, "x: %u  OK=play tone", my_model->x);
+    // canvas_draw_str(canvas, 44, 24, furi_string_get_cstr(xstr));
+    furi_string_printf(xstr, "random: %u", (uint8_t)(furi_hal_random_get() % 256));
+    // canvas_draw_str(canvas, 44, 36, furi_string_get_cstr(xstr));
+    furi_string_printf(
+        xstr,
+        "team: %s (%u)",
+        setting_1_names[my_model->setting_1_index],
+        setting_1_values[my_model->setting_1_index]);
+    // canvas_draw_str(canvas, 44, 48, furi_string_get_cstr(xstr));
+    furi_string_printf(xstr, "name: %s", furi_string_get_cstr(my_model->setting_2_name));
+    // canvas_draw_str(canvas, 44, 60, furi_string_get_cstr(xstr));
+    furi_string_free(xstr);
+}
 
-    /**
+/**
      * @brief      Callback for timer elapsed.
      * @details    This function is called when the timer is elapsed.  We use this to queue a redraw event.
      * @param      context  The context - PacmanApp object.
      */
-    static void pacman_view_game_timer_callback(void* context) {
-        PacmanApp* app = (PacmanApp*)context;
-        view_dispatcher_send_custom_event(app->view_dispatcher, PacmanEventIdRedrawScreen);
-    }
+static void pacman_view_game_timer_callback(void* context) {
+    PacmanApp* app = (PacmanApp*)context;
+    view_dispatcher_send_custom_event(app->view_dispatcher, PacmanEventIdRedrawScreen);
+}
 
-    /**
+/**
      * @brief      Callback when the user starts the game screen.
      * @details    This function is called when the user enters the game screen.  We start a timer to
      *           redraw the screen periodically (so the random number is refreshed).
      * @param      context  The context - PacmanApp object.
      */
-    static void pacman_view_game_enter_callback(void* context) {
-        uint32_t period = furi_ms_to_ticks(200);
-        PacmanApp* app = (PacmanApp*)context;
-        furi_assert(app->timer == NULL);
-        app->timer = furi_timer_alloc(pacman_view_game_timer_callback, FuriTimerTypePeriodic, context);
-        furi_timer_start(app->timer, period);
-    }
+static void pacman_view_game_enter_callback(void* context) {
+    uint32_t period = furi_ms_to_ticks(200);
+    PacmanApp* app = (PacmanApp*)context;
+    furi_assert(app->timer == NULL);
+    app->timer = furi_timer_alloc(pacman_view_game_timer_callback, FuriTimerTypePeriodic, context);
+    furi_timer_start(app->timer, period);
+}
 
-    /**
+/**
      * @brief      Callback when the user exits the game screen.
      * @details    This function is called when the user exits the game screen.  We stop the timer.
      * @param      context  The context - PacmanApp object.
      */
-    static void pacman_view_game_exit_callback(void* context) {
-        PacmanApp* app = (PacmanApp*)context;
-        furi_timer_stop(app->timer);
-        furi_timer_free(app->timer);
-        app->timer = NULL;
-    }
+static void pacman_view_game_exit_callback(void* context) {
+    PacmanApp* app = (PacmanApp*)context;
+    furi_timer_stop(app->timer);
+    furi_timer_free(app->timer);
+    app->timer = NULL;
+}
 
-    /**
+/**
      * @brief      Callback for custom events.
      * @details    This function is called when a custom event is sent to the view dispatcher.
      * @param      event    The event id - pacmanEventId value.
      * @param      context  The context - PacmanApp object.
      */
-    static bool pacman_view_game_custom_event_callback(uint32_t event, void* context) {
-        PacmanApp* app = (PacmanApp*)context;
-        switch (event) {
-        case PacmanEventIdRedrawScreen:
-            // Redraw screen by passing true to last parameter of with_view_model.
+static bool pacman_view_game_custom_event_callback(uint32_t event, void* context) {
+    PacmanApp* app = (PacmanApp*)context;
+    switch(event) {
+    case PacmanEventIdRedrawScreen:
+        // Redraw screen by passing true to last parameter of with_view_model.
         {
             bool redraw = true;
             with_view_model(
                 app->view_game, PacmanGameModel * _model, { UNUSED(_model); }, redraw);
             return true;
         }
-        case PacmanEventIdOkPressed:
-            // Process the OK button.  We play a tone based on the x coordinate.
-            if (furi_hal_speaker_acquire(500)) {
-                float frequency;
-                bool redraw = false;
-                with_view_model(
-                    app->view_game,
-                    PacmanGameModel * model,
-                    { frequency = model->x * 100 + 100; },
-                    redraw);
-                furi_hal_speaker_start(frequency, 1.0);
-                furi_delay_ms(100);
-                furi_hal_speaker_stop();
-                furi_hal_speaker_release();
-            }
-            return true;
-        default:
-            return false;
+    case PacmanEventIdOkPressed:
+        // Process the OK button.  We play a tone based on the x coordinate.
+        if(furi_hal_speaker_acquire(500)) {
+            float frequency;
+            bool redraw = false;
+            with_view_model(
+                app->view_game,
+                PacmanGameModel * model,
+                { frequency = model->x * 100 + 100; },
+                redraw);
+            furi_hal_speaker_start(frequency, 1.0);
+            furi_delay_ms(100);
+            furi_hal_speaker_stop();
+            furi_hal_speaker_release();
         }
+        return true;
+    default:
+        return false;
     }
+}
 
-    /**
+/**
      * @brief      Callback for game screen input.
      * @details    This function is called when the user presses a button while on the game screen.
      * @param      event    The event - InputEvent object.
      * @param      context  The context - PacmanApp object.
      * @return     true if the event was handled, false otherwise.
      */
-    static bool pacman_view_game_input_callback(InputEvent* event, void* context) {
-        PacmanApp* app = (PacmanApp*)context;
-        bool redraw = false;
-        if (event->type == InputTypeShort) {
-            if (event->key == InputKeyLeft) {
-                // Left button clicked, reduce x coordinate.
-                with_view_model(
-                    app->view_game,
-                    PacmanGameModel * model,
-                    { model->pacman->direction = DirectionUp; },
-                    redraw);
-            }
-            else if (event->key == InputKeyRight) {
-                with_view_model(
-                    app->view_game,
-                    PacmanGameModel * model,
-                    { model->pacman->direction = DirectionDown; },
-                    redraw);
-            }
-            else if (event->key == InputKeyUp) {
-                with_view_model(
-                    app->view_game,
-                    PacmanGameModel * model,
-                    { model->pacman->direction = DirectionRight; },
-                    redraw);
-            }
-            else if (event->key == InputKeyDown) {
-                with_view_model(
-                    app->view_game,
-                    PacmanGameModel * model,
-                    { model->pacman->direction = DirectionLeft; },
-                    redraw);
-            }
+static bool pacman_view_game_input_callback(InputEvent* event, void* context) {
+    PacmanApp* app = (PacmanApp*)context;
+    bool redraw = false;
+    if(event->type == InputTypeShort) {
+        if(event->key == InputKeyLeft) {
+            // Left button clicked, reduce x coordinate.
+            with_view_model(
+                app->view_game,
+                PacmanGameModel * model,
+                { model->pacman->direction = DirectionUp; },
+                redraw);
+        } else if(event->key == InputKeyRight) {
+            with_view_model(
+                app->view_game,
+                PacmanGameModel * model,
+                { model->pacman->direction = DirectionDown; },
+                redraw);
+        } else if(event->key == InputKeyUp) {
+            with_view_model(
+                app->view_game,
+                PacmanGameModel * model,
+                { model->pacman->direction = DirectionRight; },
+                redraw);
+        } else if(event->key == InputKeyDown) {
+            with_view_model(
+                app->view_game,
+                PacmanGameModel * model,
+                { model->pacman->direction = DirectionLeft; },
+                redraw);
         }
-        else if (event->type == InputTypePress) {
-            if (event->key == InputKeyOk) {
-                // We choose to send a custom event when user presses OK button.  pacman_custom_event_callback will
-                // handle our PacmanEventIdOkPressed event.  We could have just put the code from
-                // pacman_custom_event_callback here, it's a matter of preference.
-                view_dispatcher_send_custom_event(app->view_dispatcher, PacmanEventIdOkPressed);
-                return true;
-            }
+    } else if(event->type == InputTypePress) {
+        if(event->key == InputKeyOk) {
+            // We choose to send a custom event when user presses OK button.  pacman_custom_event_callback will
+            // handle our PacmanEventIdOkPressed event.  We could have just put the code from
+            // pacman_custom_event_callback here, it's a matter of preference.
+            view_dispatcher_send_custom_event(app->view_dispatcher, PacmanEventIdOkPressed);
+            return true;
         }
-        return false;
     }
+    return false;
+}
 
-    static Character*
-        character_alloc(Character* character, float_t x, float_t y, Direction direction) {
-        character = (Character*)malloc(sizeof(Character));
-        character->x = x;
-        character->y = y;
-        character->direction = direction;
-        character->speed = 2;
-        return character;
-    }
+static Character*
+    character_alloc(Character* character, float_t x, float_t y, Direction direction) {
+    character = (Character*)malloc(sizeof(Character));
+    character->x = x;
+    character->y = y;
+    character->direction = direction;
+    character->speed = 2;
+    return character;
+}
 
-    /**
+/**
      * @brief      Allocate the pacman application.
      * @details    This function allocates the pacman application resources.
      * @return     PacmanApp object.
      */
-    static PacmanApp* pacman_app_alloc(StartPositions* positions) {
-        PacmanApp* app = (PacmanApp*)malloc(sizeof(PacmanApp));
+static PacmanApp* pacman_app_alloc(StartPositions* positions) {
+    PacmanApp* app = (PacmanApp*)malloc(sizeof(PacmanApp));
 
-        Gui* gui = furi_record_open(RECORD_GUI);
+    Gui* gui = furi_record_open(RECORD_GUI);
 
-        app->view_dispatcher = view_dispatcher_alloc();
-        view_dispatcher_enable_queue(app->view_dispatcher);
-        view_dispatcher_attach_to_gui(app->view_dispatcher, gui, ViewDispatcherTypeFullscreen);
-        view_dispatcher_set_event_callback_context(app->view_dispatcher, app);
+    app->view_dispatcher = view_dispatcher_alloc();
+    view_dispatcher_enable_queue(app->view_dispatcher);
+    view_dispatcher_attach_to_gui(app->view_dispatcher, gui, ViewDispatcherTypeFullscreen);
+    view_dispatcher_set_event_callback_context(app->view_dispatcher, app);
 
-        app->submenu = submenu_alloc();
-        submenu_add_item(
-            app->submenu, "Config", PacmanSubmenuIndexConfigure, pacman_submenu_callback, app);
-        submenu_add_item(app->submenu, "Play", PacmanSubmenuIndexGame, pacman_submenu_callback, app);
-        submenu_add_item(app->submenu, "About", PacmanSubmenuIndexAbout, pacman_submenu_callback, app);
-        view_set_previous_callback(submenu_get_view(app->submenu), pacman_navigation_exit_callback);
-        view_dispatcher_add_view(
-            app->view_dispatcher, PacmanViewSubmenu, submenu_get_view(app->submenu));
-        view_dispatcher_switch_to_view(app->view_dispatcher, PacmanViewSubmenu);
+    app->submenu = submenu_alloc();
+    submenu_add_item(
+        app->submenu, "Config", PacmanSubmenuIndexConfigure, pacman_submenu_callback, app);
+    submenu_add_item(app->submenu, "Play", PacmanSubmenuIndexGame, pacman_submenu_callback, app);
+    submenu_add_item(app->submenu, "About", PacmanSubmenuIndexAbout, pacman_submenu_callback, app);
+    view_set_previous_callback(submenu_get_view(app->submenu), pacman_navigation_exit_callback);
+    view_dispatcher_add_view(
+        app->view_dispatcher, PacmanViewSubmenu, submenu_get_view(app->submenu));
+    view_dispatcher_switch_to_view(app->view_dispatcher, PacmanViewSubmenu);
 
-        app->text_input = text_input_alloc();
-        view_dispatcher_add_view(
-            app->view_dispatcher, PacmanViewTextInput, text_input_get_view(app->text_input));
-        app->temp_buffer_size = 32;
-        app->temp_buffer = (char*)malloc(app->temp_buffer_size);
+    app->text_input = text_input_alloc();
+    view_dispatcher_add_view(
+        app->view_dispatcher, PacmanViewTextInput, text_input_get_view(app->text_input));
+    app->temp_buffer_size = 32;
+    app->temp_buffer = (char*)malloc(app->temp_buffer_size);
 
-        app->variable_item_list_config = variable_item_list_alloc();
-        variable_item_list_reset(app->variable_item_list_config);
-        VariableItem* item = variable_item_list_add(
-            app->variable_item_list_config,
-            setting_1_config_label,
-            COUNT_OF(setting_1_values),
-            pacman_setting_1_change,
-            app);
-        uint8_t setting_1_index = 0;
-        variable_item_set_current_value_index(item, setting_1_index);
-        variable_item_set_current_value_text(item, setting_1_names[setting_1_index]);
+    app->variable_item_list_config = variable_item_list_alloc();
+    variable_item_list_reset(app->variable_item_list_config);
+    VariableItem* item = variable_item_list_add(
+        app->variable_item_list_config,
+        setting_1_config_label,
+        COUNT_OF(setting_1_values),
+        pacman_setting_1_change,
+        app);
+    uint8_t setting_1_index = 0;
+    variable_item_set_current_value_index(item, setting_1_index);
+    variable_item_set_current_value_text(item, setting_1_names[setting_1_index]);
 
-        FuriString* setting_2_name = furi_string_alloc();
-        furi_string_set_str(setting_2_name, setting_2_default_value);
-        app->setting_2_item = variable_item_list_add(
-            app->variable_item_list_config, setting_2_config_label, 1, NULL, NULL);
-        variable_item_set_current_value_text(
-            app->setting_2_item, furi_string_get_cstr(setting_2_name));
-        variable_item_list_set_enter_callback(
-            app->variable_item_list_config, pacman_setting_item_clicked, app);
+    FuriString* setting_2_name = furi_string_alloc();
+    furi_string_set_str(setting_2_name, setting_2_default_value);
+    app->setting_2_item = variable_item_list_add(
+        app->variable_item_list_config, setting_2_config_label, 1, NULL, NULL);
+    variable_item_set_current_value_text(
+        app->setting_2_item, furi_string_get_cstr(setting_2_name));
+    variable_item_list_set_enter_callback(
+        app->variable_item_list_config, pacman_setting_item_clicked, app);
 
-        view_set_previous_callback(
-            variable_item_list_get_view(app->variable_item_list_config),
-            pacman_navigation_submenu_callback);
-        view_dispatcher_add_view(
-            app->view_dispatcher,
-            PacmanViewConfigure,
-            variable_item_list_get_view(app->variable_item_list_config));
+    view_set_previous_callback(
+        variable_item_list_get_view(app->variable_item_list_config),
+        pacman_navigation_submenu_callback);
+    view_dispatcher_add_view(
+        app->view_dispatcher,
+        PacmanViewConfigure,
+        variable_item_list_get_view(app->variable_item_list_config));
 
-        app->view_game = view_alloc();
+    app->view_game = view_alloc();
 
-        view_set_draw_callback(app->view_game, pacman_view_game_draw_callback);
-        view_set_input_callback(app->view_game, pacman_view_game_input_callback);
-        view_set_previous_callback(app->view_game, pacman_navigation_submenu_callback);
-        view_set_enter_callback(app->view_game, pacman_view_game_enter_callback);
-        view_set_exit_callback(app->view_game, pacman_view_game_exit_callback);
-        view_set_context(app->view_game, app);
-        view_set_custom_callback(app->view_game, pacman_view_game_custom_event_callback);
-        view_allocate_model(app->view_game, ViewModelTypeLockFree, sizeof(PacmanGameModel));
-        PacmanGameModel* model = view_get_model(app->view_game);
-        model->setting_1_index = setting_1_index;
-        model->setting_2_name = setting_2_name;
-        model->pacman =
-            character_alloc(model->pacman, positions->pacman_x, positions->pacman_y, DirectionRight);
-        model->blinky =
-            character_alloc(model->blinky, positions->blinky_x, positions->blinky_y, DirectionIdle);
-        model->pinky =
-            character_alloc(model->pinky, positions->pinky_x, positions->pinky_y, DirectionIdle);
-        model->inky =
-            character_alloc(model->inky, positions->inky_x, positions->inky_y, DirectionIdle);
-        model->clyde =
-            character_alloc(model->clyde, positions->clyde_x, positions->clyde_y, DirectionIdle);
-        view_dispatcher_add_view(app->view_dispatcher, PacmanViewGame, app->view_game);
+    view_set_draw_callback(app->view_game, pacman_view_game_draw_callback);
+    view_set_input_callback(app->view_game, pacman_view_game_input_callback);
+    view_set_previous_callback(app->view_game, pacman_navigation_submenu_callback);
+    view_set_enter_callback(app->view_game, pacman_view_game_enter_callback);
+    view_set_exit_callback(app->view_game, pacman_view_game_exit_callback);
+    view_set_context(app->view_game, app);
+    view_set_custom_callback(app->view_game, pacman_view_game_custom_event_callback);
+    view_allocate_model(app->view_game, ViewModelTypeLockFree, sizeof(PacmanGameModel));
+    PacmanGameModel* model = view_get_model(app->view_game);
+    model->setting_1_index = setting_1_index;
+    model->setting_2_name = setting_2_name;
+    model->pacman =
+        character_alloc(model->pacman, positions->pacman_x, positions->pacman_y, DirectionRight);
+    model->blinky =
+        character_alloc(model->blinky, positions->blinky_x, positions->blinky_y, DirectionIdle);
+    model->pinky =
+        character_alloc(model->pinky, positions->pinky_x, positions->pinky_y, DirectionIdle);
+    model->inky =
+        character_alloc(model->inky, positions->inky_x, positions->inky_y, DirectionIdle);
+    model->clyde =
+        character_alloc(model->clyde, positions->clyde_x, positions->clyde_y, DirectionIdle);
+    view_dispatcher_add_view(app->view_dispatcher, PacmanViewGame, app->view_game);
 
-        model->ghosts_mode = GhostsModeScatter;
+    model->ghosts_mode = GhostsModeScatter;
 
-        app->widget_about = widget_alloc();
-        widget_add_text_scroll_element(
-            app->widget_about,
-            0,
-            0,
-            128,
-            64,
-            "The classic PacMan game on the flipper!.\n---\n\nauthor: @dan1me");
-        view_set_previous_callback(
-            widget_get_view(app->widget_about), pacman_navigation_submenu_callback);
-        view_dispatcher_add_view(
-            app->view_dispatcher, PacmanViewAbout, widget_get_view(app->widget_about));
+    app->widget_about = widget_alloc();
+    widget_add_text_scroll_element(
+        app->widget_about,
+        0,
+        0,
+        128,
+        64,
+        "The classic PacMan game on the flipper!.\n---\n\nauthor: @dan1me");
+    view_set_previous_callback(
+        widget_get_view(app->widget_about), pacman_navigation_submenu_callback);
+    view_dispatcher_add_view(
+        app->view_dispatcher, PacmanViewAbout, widget_get_view(app->widget_about));
 
-        app->notifications = furi_record_open(RECORD_NOTIFICATION);
-        view_dispatcher_switch_to_view(app->view_dispatcher, PacmanViewGame);
+    app->notifications = furi_record_open(RECORD_NOTIFICATION);
+    view_dispatcher_switch_to_view(app->view_dispatcher, PacmanViewGame);
 
 #ifdef BACKLIGHT_ON
-        notification_message(app->notifications, &sequence_display_backlight_enforce_on);
+    notification_message(app->notifications, &sequence_display_backlight_enforce_on);
 #endif
 
-        return app;
-    }
+    return app;
+}
 
-    /**
+/**
      * @brief      Free the pacman application.
      * @details    This function frees the pacman application resources.
      * @param      app  The pacman application object.
      */
-    static void pacman_app_free(PacmanApp* app) {
+static void pacman_app_free(PacmanApp* app) {
 #ifdef BACKLIGHT_ON
-        notification_message(app->notifications, &sequence_display_backlight_enforce_auto);
+    notification_message(app->notifications, &sequence_display_backlight_enforce_auto);
 #endif
-        furi_record_close(RECORD_NOTIFICATION);
+    furi_record_close(RECORD_NOTIFICATION);
 
-        view_dispatcher_remove_view(app->view_dispatcher, PacmanViewTextInput);
-        text_input_free(app->text_input);
-        free(app->temp_buffer);
-        view_dispatcher_remove_view(app->view_dispatcher, PacmanViewAbout);
-        widget_free(app->widget_about);
-        view_dispatcher_remove_view(app->view_dispatcher, PacmanViewGame);
-        view_free(app->view_game);
-        view_dispatcher_remove_view(app->view_dispatcher, PacmanViewConfigure);
-        variable_item_list_free(app->variable_item_list_config);
-        view_dispatcher_remove_view(app->view_dispatcher, PacmanViewSubmenu);
-        submenu_free(app->submenu);
-        view_dispatcher_free(app->view_dispatcher);
-        furi_record_close(RECORD_GUI);
+    view_dispatcher_remove_view(app->view_dispatcher, PacmanViewTextInput);
+    text_input_free(app->text_input);
+    free(app->temp_buffer);
+    view_dispatcher_remove_view(app->view_dispatcher, PacmanViewAbout);
+    widget_free(app->widget_about);
+    view_dispatcher_remove_view(app->view_dispatcher, PacmanViewGame);
+    view_free(app->view_game);
+    view_dispatcher_remove_view(app->view_dispatcher, PacmanViewConfigure);
+    variable_item_list_free(app->variable_item_list_config);
+    view_dispatcher_remove_view(app->view_dispatcher, PacmanViewSubmenu);
+    submenu_free(app->submenu);
+    view_dispatcher_free(app->view_dispatcher);
+    furi_record_close(RECORD_GUI);
 
-        free(app);
-    }
+    free(app);
+}
 
-    /**
+/**
      * @brief      Main function for pacman application.
      * @details    This function is the entry point for the pacman application.  It should be defined in
      *           application.fam as the entry_point setting.
      * @param      _p  Input parameter - unused
      * @return     0 - Success
      */
-    int32_t pacman_app(void* _p) {
-        UNUSED(_p);
+int32_t pacman_app(void* _p) {
+    UNUSED(_p);
 
-        StartPositions* positions = setup_map(map);
+    StartPositions* positions = setup_map(map);
 
-        PacmanApp* app = pacman_app_alloc(positions);
-        view_dispatcher_run(app->view_dispatcher);
-        pacman_app_free(app);
-        return 0;
-    }
+    PacmanApp* app = pacman_app_alloc(positions);
+    view_dispatcher_run(app->view_dispatcher);
+    pacman_app_free(app);
+    return 0;
+}
