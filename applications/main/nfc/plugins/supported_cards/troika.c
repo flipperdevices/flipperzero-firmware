@@ -168,27 +168,27 @@ static uint16_t troika_get_balance(
     // In layout 0x3 balance in bits 188:209 ( from sector start, length 22).
     // In layout 0x5 balance in bits 165:185 ( from sector start, length 20).
 
+    uint32_t balance = 0;
+    uint8_t balance_data_offset = 0;
+    bool supported_layout = false;
+
     if(layout == TroikaLayoutE && sub_layout == TroikaSublayout3) {
-        const uint8_t* temp_ptr = &data->block[start_block_num + 1].data[7];
-        uint32_t balance = 0;
-        balance |= (temp_ptr[0] & 0x3) << 18;
-        balance |= temp_ptr[1] << 10;
-        balance |= temp_ptr[2] << 2;
-        balance |= (temp_ptr[3] & 0xC0) >> 6;
-
-        return balance / 100;
+        balance_data_offset = 7;
+        supported_layout = true;
     } else if(layout == TroikaLayoutE && sub_layout == TroikaSublayout5) {
-        const uint8_t* temp_ptr = &data->block[start_block_num + 1].data[4];
-        uint32_t balance = 0;
+        balance_data_offset = 4;
+        supported_layout = true;
+    }
+
+    if(supported_layout) {
+        const uint8_t* temp_ptr = &data->block[start_block_num + 1].data[balance_data_offset];
         balance |= (temp_ptr[0] & 0x3) << 18;
         balance |= temp_ptr[1] << 10;
         balance |= temp_ptr[2] << 2;
         balance |= (temp_ptr[3] & 0xC0) >> 6;
-
-        return balance / 100;
-    } else {
-        return 0;
     }
+
+    return balance / 100;
 }
 
 static uint32_t troika_get_number(
