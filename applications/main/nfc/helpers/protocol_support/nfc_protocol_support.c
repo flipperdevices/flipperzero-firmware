@@ -520,8 +520,8 @@ static bool
 
                 const NfcProtocol protocol =
                     instance->protocols_detected[instance->protocols_detected_selected_idx];
-                consumed = nfc_protocol_support[protocol]->scene_save_name.on_event(
-                    instance, event.event);
+                consumed =
+                    nfc_protocol_support[protocol]->scene_save_name.on_event(instance, event);
             } else {
                 consumed = scene_manager_search_and_switch_to_previous_scene(
                     instance->scene_manager, NfcSceneStart);
