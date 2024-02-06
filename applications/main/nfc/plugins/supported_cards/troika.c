@@ -99,11 +99,9 @@ static TroikaLayout troika_get_layout(const MfClassicData* data, uint8_t start_b
 
     TroikaLayout result = TroikaLayoutUnknown;
     switch(layout) {
-    case 0x2:
-        result = TroikaLayout2;
-        break;
-    case 0xE:
-        result = TroikaLayoutE;
+    case TroikaLayout2:
+    case TroikaLayoutE:
+        result = layout;
         break;
     default:
         // If debug is enabled - pass the actual layout value for the debug text
@@ -126,14 +124,10 @@ static TroikaSubLayout troika_get_sub_layout(const MfClassicData* data, uint8_t 
 
     TroikaSubLayout result = TroikaSublayoutUnknown;
     switch(sub_layout) {
-    case 3:
-        result = TroikaSublayout3;
-        break;
-    case 5:
-        result = TroikaSublayout5;
-        break;
-    case 6:
-        result = TroikaSublayout6;
+    case TroikaSublayout3:
+    case TroikaSublayout5:
+    case TroikaSublayout6:
+        result = sub_layout;
         break;
     default:
         // If debug is enabled - pass the actual sublayout value for the debug text
