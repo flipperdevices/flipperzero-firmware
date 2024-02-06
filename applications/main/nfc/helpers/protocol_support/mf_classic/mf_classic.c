@@ -159,6 +159,7 @@ static void nfc_scene_saved_menu_on_enter_mf_classic(NfcApp* instance) {
             SubmenuIndexDetectReader,
             nfc_protocol_support_common_submenu_callback,
             instance);
+
         submenu_add_item(
             submenu,
             "Unlock with Dictionary",
@@ -172,6 +173,7 @@ static void nfc_scene_saved_menu_on_enter_mf_classic(NfcApp* instance) {
         SubmenuIndexWrite,
         nfc_protocol_support_common_submenu_callback,
         instance);
+
     submenu_add_item(
         submenu,
         "Update from Initial Card",
