@@ -66,6 +66,17 @@ static bool level_entity_in_list_p(EntityList_t list, Entity* entity) {
 }
 
 void level_free(Level* level) {
+    level_clear(level);
+
+    EntityList_clear(level->entities);
+    EntityList_clear(level->to_add);
+    EntityList_clear(level->to_remove);
+
+    LEVEL_DEBUG("Freeing level at %p", level);
+    free(level);
+}
+
+void level_clear(Level* level) {
     size_t iterations = 0;
 
     do {
@@ -89,13 +100,6 @@ void level_free(Level* level) {
         // entity_call_stop can call level_remove_entity or level_add_entity
         // so we need to process to_add and to_remove again
     } while(!EntityList_empty_p(level->to_add) || !EntityList_empty_p(level->to_remove));
-
-    EntityList_clear(level->entities);
-    EntityList_clear(level->to_add);
-    EntityList_clear(level->to_remove);
-
-    LEVEL_DEBUG("Freeing level at %p", level);
-    free(level);
 }
 
 void level_behaviour_set(Level* level, LevelBehaviour behaviour, void* context) {
@@ -147,6 +151,7 @@ static void level_process_collision(Level* level, Director* director) {
         EntityList_next(it_first);
     }
 }
+
 void level_update(Level* level, Director* director) {
     level_process_add(level);
     level_process_remove(level);
