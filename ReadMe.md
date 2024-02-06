@@ -143,7 +143,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [Fix MyKey production date parsing #3332 (By augustozanellato)](https://github.com/flipperdevices/flipperzero-firmware/pull/3332)
 - OFW: [NFC: parsers minor cleanup #3329 (By Leptopt1los)](https://github.com/flipperdevices/flipperzero-firmware/pull/3329)
 - OFW: [Ntag success write freeze when not saved card #3354 (By RebornedBrain)](https://github.com/flipperdevices/flipperzero-firmware/pull/3354)
-- OFW PR: NFC: [Parser for San Francisco Bay Area "Clipper" transit card. #3344 (By ke6jjj)](https://github.com/flipperdevices/flipperzero-firmware/pull/3344)
 - Updated: [NFC Maker NTAG215 (by Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/343cb39d08f60b75b537e1a31100707935cf6e9d)
 - NFC: [Parser for NDEF (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/ca82f485248e2355a8ee2c31bec3ecbf22de2b38)
 - OFW: [NFC: system dict skip when user dict is skipped fix #3356 (By Leptopt1los)](https://github.com/flipperdevices/flipperzero-firmware/pull/3356)
@@ -158,9 +157,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [NFC UI refactor #3369 (By RebornedBrain)](https://github.com/flipperdevices/flipperzero-firmware/pull/3369)
 - OFW PR: [NFC: Add write support for the password-protected MF ultralight tag #3364 (By nekolab)](https://github.com/flipperdevices/flipperzero-firmware/pull/3364)
 - Updated: [NFC Playlist v1.1 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
-- OFW PR: [NFC UI refactor #3382 (By RebornedBrain)](https://github.com/flipperdevices/flipperzero-firmware/pull/3382)
 - OFW PR: [NFC Parser Update For Troika #3390 (By assasinfil)](https://github.com/flipperdevices/flipperzero-firmware/pull/3390)
-- OFW PR: [NFC Rework more info scene for Ultralight cards #3391 (By RebornedBrain)](https://github.com/flipperdevices/flipperzero-firmware/pull/3391)
 - Updated: [NFC Magic v1.5 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966) [rework #67 (By gornekich)](https://github.com/flipperdevices/flipperzero-good-faps/pull/67) [fix gen4 detection #71 (By gornekich)](https://github.com/flipperdevices/flipperzero-good-faps/pull/71) [Specify in error scene that only Gen1 magic and Gen4 UMCs are supported #75 (By kitsunehunter)](https://github.com/flipperdevices/flipperzero-good-faps/pull/75) [UI / Scenes (By xMasterX) & Poller functions, minor UI fixes (By Leptopt1los)](https://github.com/xMasterX/all-the-plugins/commit/d70f146f15a6bab2272d4ebfe37001d7d5f0f556) [New options for gen4 cards #82 (By Leptopt1los)](https://github.com/flipperdevices/flipperzero-good-faps/pull/82)  [Fix support of 4K fobs #102 (By Leptopt1los)](https://github.com/flipperdevices/flipperzero-good-faps/pull/102) [Gen4 shadow mode management support #98 (By Leptopt1los) With Fixes By RogueMaster](https://github.com/flipperdevices/flipperzero-good-faps/pull/98)
 - Added: [MFC Editor v1.0 (By TollyH)](https://github.com/TollyH/flipper-apps)
 - UL: [fix NFC V dumps v3 crashing at info page (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/4bdffb1e885e219bcfb12d60bd5d374366e883cb)
@@ -180,6 +177,10 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW PR: [Slix disable privacy #3425 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3425)
 - OFW: [NFC: Troika layout fixes #3365 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3365)
 - OFW: [NFC: Display unread Mifare Classic bytes as question marks #3384 (By TollyH)](https://github.com/flipperdevices/flipperzero-firmware/pull/3384)
+- OFW: [NFC: Fix nfc_protocol_support_scene_save_name_on_event crash #3418 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/3418)
+- OFW: [NFC: Add an NFC parser for the San Francisco Bay Area "Clipper" transit card. #3344 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/3344)
+- OFW: [NFC UI refactor #3382 (By RebornedBrain)](https://github.com/flipperdevices/flipperzero-firmware/pull/3382)
+- OFW: [NFC Rework more info scene for Ultralight cards #3391 (By RebornedBrain)](https://github.com/flipperdevices/flipperzero-firmware/pull/3391)
 
 <a name="release">
 
