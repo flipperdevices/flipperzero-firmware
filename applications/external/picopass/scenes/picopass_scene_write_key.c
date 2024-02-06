@@ -17,6 +17,15 @@ NfcCommand picopass_scene_write_key_poller_callback(PicopassPollerEvent event, v
             event.data->req_write_key.key,
             picopass->write_key_context.key_to_write,
             PICOPASS_KEY_LEN);
+
+        // If there is no user dictionary, create it with the key they entered
+        // Prevent people who set all 0's from bricking their card
+        // TODO: Consider checking the elite user dict, when it exists, for the key
+        if(!iclass_elite_dict_check_presence(IclassEliteDictTypeUser)) {
+            IclassEliteDict* dict = iclass_elite_dict_alloc(IclassEliteDictTypeUser);
+            iclass_elite_dict_add_key(dict, picopass->write_key_context.key_to_write);
+            iclass_elite_dict_free(dict);
+        }
         event.data->req_write_key.is_elite_key = picopass->write_key_context.is_elite;
     } else if(event.type == PicopassPollerEventTypeSuccess) {
         view_dispatcher_send_custom_event(
