@@ -22,12 +22,7 @@ static const char ABOUT_TEXT[] = "Matagotchi\n"
                                  "For more info visit\n"
                                  "github.com/MrModd/Matagotchi";
 
-static const char LIFE_STAGE_STRING[][6] = {"Egg",
-                                            "Baby",
-                                            "Child",
-                                            "Teen",
-                                            "Adult",
-                                            "Dead"};
+static const char LIFE_STAGE_STRING[][6] = {"Egg", "Baby", "Child", "Teen", "Adult", "Dead"};
 
 /* Game state file info */
 #define GAME_STATE_STORAGE_STATE_FILENAME "matagotchi.save"
@@ -44,12 +39,13 @@ static const char LIFE_STAGE_STRING[][6] = {"Egg",
  * To compile with fbt use the following command:
  * ./fbt --extra-define=DEBUG launch APPSRC=matagotchi
  */
-static const uint32_t MAX_XP_PER_STAGE[] = {1,    // EGG
-                                            10,   // BABY
-                                            10,   // CHILD
-                                            10,   // TEEN
-                                            10,  // ADULT
-                                            0};   // DEAD
+static const uint32_t MAX_XP_PER_STAGE[] = {
+    1, // EGG
+    10, // BABY
+    10, // CHILD
+    10, // TEEN
+    10, // ADULT
+    0}; // DEAD
 /* Experience */
 #define NEW_XP_FREQUENCY 2 // One new XP every 2 seconds
 #define NEW_XP_PROBABILITY 50 // 50% of probability of getting a new XP
@@ -71,12 +67,13 @@ static const uint32_t MAX_XP_PER_STAGE[] = {1,    // EGG
 #define MAX_PILL_HP_RESTORE 6
 #else
 /* NORMAL PARAMETERS */
-static const uint32_t MAX_XP_PER_STAGE[] = {1,    // EGG
-                                            10,   // BABY
-                                            30,   // CHILD
-                                            40,   // TEEN
-                                            100,  // ADULT
-                                            0};   // DEAD
+static const uint32_t MAX_XP_PER_STAGE[] = {
+    1, // EGG
+    10, // BABY
+    30, // CHILD
+    40, // TEEN
+    100, // ADULT
+    0}; // DEAD
 /* Experience */
 #define NEW_XP_FREQUENCY 120 // One new XP every 120 seconds
 #define NEW_XP_PROBABILITY 70 // 70% of probability of getting a new XP

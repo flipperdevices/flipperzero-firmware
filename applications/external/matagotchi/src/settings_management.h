@@ -3,8 +3,8 @@
 
 #include "game_structs.h"
 
-void init_settings(struct GameState *);
-void persist_settings(struct GameState *);
+void init_settings(struct GameState*);
+void persist_settings(struct GameState*);
 
 /*
  * Temporary suppress vibration and sound.
@@ -17,20 +17,20 @@ void persist_settings(struct GameState *);
     game_state->settings.vibration = 0;                 \
     game_state->settings.sound = 0;
 
-#define UNMASK_VIBRO_SOUND(game_state)                  \
-    game_state->settings.vibration = vibration;         \
+#define UNMASK_VIBRO_SOUND(game_state)          \
+    game_state->settings.vibration = vibration; \
     game_state->settings.sound = sound;
 
 // Vibration
-void vibrate_short(const struct GameState *);
-void vibrate_long(const struct GameState *);
+void vibrate_short(const struct GameState*);
+void vibrate_long(const struct GameState*);
 
 // Sound
 
-void play_settings_confirm(const struct GameState *);
-void play_level_up(const struct GameState *);
-void play_starvation(const struct GameState *);
-void play_ambulance(const struct GameState *);
-void play_action(const struct GameState *);
+void play_settings_confirm(const struct GameState*);
+void play_level_up(const struct GameState*);
+void play_starvation(const struct GameState*);
+void play_ambulance(const struct GameState*);
+void play_action(const struct GameState*);
 
 #endif

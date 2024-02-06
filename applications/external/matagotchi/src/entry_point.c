@@ -23,7 +23,7 @@
 
 /******************** Initialisation & startup *****************************/
 
-static void init_gui(struct ApplicationContext *context) {
+static void init_gui(struct ApplicationContext* context) {
     // Init SceneManager
     context->scene_manager = scene_manager_alloc(&scene_handlers, context);
 
@@ -39,46 +39,39 @@ static void init_gui(struct ApplicationContext *context) {
     context->view_dispatcher = view_dispatcher_alloc();
     view_dispatcher_enable_queue(context->view_dispatcher);
     view_dispatcher_set_event_callback_context(context->view_dispatcher, context);
-    view_dispatcher_set_custom_event_callback(context->view_dispatcher,
-                                              view_dispatcher_custom_event_callback);
-    view_dispatcher_set_navigation_event_callback(context->view_dispatcher,
-                                                  view_dispatcher_navigation_event_callback);
+    view_dispatcher_set_custom_event_callback(
+        context->view_dispatcher, view_dispatcher_custom_event_callback);
+    view_dispatcher_set_navigation_event_callback(
+        context->view_dispatcher, view_dispatcher_navigation_event_callback);
 
     // Attach modules to view_dispatcher
-    view_dispatcher_add_view(context->view_dispatcher,
-                             scene_loading,
-                             loading_get_view(context->loading_module));
-    view_dispatcher_add_view(context->view_dispatcher,
-                             scene_main,
-                             button_panel_get_view(context->button_module));
+    view_dispatcher_add_view(
+        context->view_dispatcher, scene_loading, loading_get_view(context->loading_module));
+    view_dispatcher_add_view(
+        context->view_dispatcher, scene_main, button_panel_get_view(context->button_module));
     view_set_orientation(button_panel_get_view(context->button_module), ViewOrientationHorizontal);
-    view_dispatcher_add_view(context->view_dispatcher,
-                             scene_settings,
-                             variable_item_list_get_view(context->variable_item_list_module));
-    view_dispatcher_add_view(context->view_dispatcher,
-                             scene_reset,
-                             dialog_ex_get_view(context->dialog_ex_module));
-    view_dispatcher_add_view(context->view_dispatcher,
-                             scene_about,
-                             text_box_get_view(context->text_box_module));
-    view_dispatcher_add_view(context->view_dispatcher,
-                             scene_status,
-                             popup_get_view(context->popup_module));
-    view_dispatcher_add_view(context->view_dispatcher,
-                             scene_candy,
-                             popup_get_view(context->popup_module));
-    view_dispatcher_add_view(context->view_dispatcher,
-                             scene_pill,
-                             popup_get_view(context->popup_module));
+    view_dispatcher_add_view(
+        context->view_dispatcher,
+        scene_settings,
+        variable_item_list_get_view(context->variable_item_list_module));
+    view_dispatcher_add_view(
+        context->view_dispatcher, scene_reset, dialog_ex_get_view(context->dialog_ex_module));
+    view_dispatcher_add_view(
+        context->view_dispatcher, scene_about, text_box_get_view(context->text_box_module));
+    view_dispatcher_add_view(
+        context->view_dispatcher, scene_status, popup_get_view(context->popup_module));
+    view_dispatcher_add_view(
+        context->view_dispatcher, scene_candy, popup_get_view(context->popup_module));
+    view_dispatcher_add_view(
+        context->view_dispatcher, scene_pill, popup_get_view(context->popup_module));
 
     // Init GUI and attach the view_dispatcher to it
     context->gui = furi_record_open(RECORD_GUI);
-    view_dispatcher_attach_to_gui(context->view_dispatcher,
-                                  context->gui,
-                                  ViewDispatcherTypeFullscreen);
+    view_dispatcher_attach_to_gui(
+        context->view_dispatcher, context->gui, ViewDispatcherTypeFullscreen);
 }
 
-static void free_gui(struct ApplicationContext *context) {
+static void free_gui(struct ApplicationContext* context) {
     /* Free the view_dispatcher */
     view_dispatcher_remove_view(context->view_dispatcher, scene_pill);
     view_dispatcher_remove_view(context->view_dispatcher, scene_candy);
@@ -106,8 +99,8 @@ static void free_gui(struct ApplicationContext *context) {
 }
 
 /* Allocate the memory and initialise the variables */
-static struct ApplicationContext * context_alloc() {
-    struct ApplicationContext *context = malloc(sizeof(struct ApplicationContext));
+static struct ApplicationContext* context_alloc() {
+    struct ApplicationContext* context = malloc(sizeof(struct ApplicationContext));
     furi_assert(context);
 
     init_gui(context);
@@ -129,7 +122,7 @@ static struct ApplicationContext * context_alloc() {
 }
 
 /* Release the unused resources and deallocate memory */
-static void context_free(struct ApplicationContext *context) {
+static void context_free(struct ApplicationContext* context) {
     // Free the game state
     free(context->game_state);
 
@@ -149,7 +142,7 @@ int32_t matagotchi_app(void* p) {
     UNUSED(p);
 
     /* Allocate all of the necessary structures */
-    struct ApplicationContext *context = context_alloc();
+    struct ApplicationContext* context = context_alloc();
 
     /* Perform required RTOS init sequences */
     furi_hal_random_init(); // Init of the RNG unit

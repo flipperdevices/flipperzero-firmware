@@ -103,7 +103,7 @@ void button_panel_reset_selection(ButtonPanel* button_panel) {
         true);
 }
 
-void button_panel_get_selection(ButtonPanel* button_panel, uint16_t *x, uint16_t *y) {
+void button_panel_get_selection(ButtonPanel* button_panel, uint16_t* x, uint16_t* y) {
     with_view_model(
         button_panel->view,
         ButtonPanelModel * model,

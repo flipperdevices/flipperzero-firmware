@@ -37,6 +37,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Infrared: [Simpler Last Settings API (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/81208988d1f25119b537aa2bb255a616e1a993f0)
 - Updated: [Authenticator/TOTP v5.11.0 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
 - Updated: [Cross Remote v2.4 (By leedave)](https://github.com/leedave/flipper-zero-cross-remote)
+- Added: [Matagotchi v1.0 (By MrModd)](https://github.com/MrModd/Matagotchi)
 - To Be Merged OFW PRs: [3352](https://github.com/flipperdevices/flipperzero-firmware/pull/3352), [3302](https://github.com/flipperdevices/flipperzero-firmware/pull/3302), [3211](https://github.com/flipperdevices/flipperzero-firmware/pull/3211), [3366](https://github.com/flipperdevices/flipperzero-firmware/pull/3366), [3250](https://github.com/flipperdevices/flipperzero-firmware/pull/3250), [3402](https://github.com/flipperdevices/flipperzero-firmware/pull/3402) & [3409](https://github.com/flipperdevices/flipperzero-firmware/pull/3409)
 
 <a name="release">
@@ -260,6 +261,7 @@ $ ./fbt dolphin_ext
 - [Heap Defence v1.1 (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/fc776446de9fdd553b221c02668b925b689378d8) [(original by wquinoa & Vedmein)](https://github.com/Vedmein/flipperzero-firmware/tree/hd/svisto-perdelki)
 - [JetPack v1.1 (by timstrasser)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/1164e4d214efa38847e08c6387bf53578bc0d366)
 - [Mandelbrot Set v1.1 (By Possibly-Matt)](https://github.com/Possibly-Matt/flipperzero-firmware-wPlugins)
+- [Matagotchi v1.0 (By MrModd)](https://github.com/MrModd/Matagotchi)
 - [Minesweeper v1.2 (By panki27)](https://github.com/panki27/minesweeper)
 - [Minesweeper Redux v1.2 (By squee72564)](https://github.com/squee72564/F0_Minesweeper_Fap)
 - [Monty Hall v1.1 (By DevMilanIan)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/203)

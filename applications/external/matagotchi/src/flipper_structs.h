@@ -20,21 +20,22 @@
 /* Application context structure */
 struct ApplicationContext {
     /* GUI */
-    Gui *gui;
-    SceneManager *scene_manager;
-    ViewDispatcher *view_dispatcher;
+    Gui* gui;
+    SceneManager* scene_manager;
+    ViewDispatcher* view_dispatcher;
     /* Modules for GUI */
-    Loading *loading_module;
-    ButtonPanel *button_module;
-    VariableItemList *variable_item_list_module;
-    DialogEx *dialog_ex_module;
-    TextBox *text_box_module;
-    Popup *popup_module;
+    Loading* loading_module;
+    ButtonPanel* button_module;
+    VariableItemList* variable_item_list_module;
+    DialogEx* dialog_ex_module;
+    TextBox* text_box_module;
+    Popup* popup_module;
 
     /* Others */
-    FuriThread *secondary_thread;
-    FuriMessageQueue *threads_message_queue; // Message queue between main thread, GUI and secondary thread
-    struct GameState *game_state; // Read by draw_callback thread, written by the secondary thread
+    FuriThread* secondary_thread;
+    FuriMessageQueue*
+        threads_message_queue; // Message queue between main thread, GUI and secondary thread
+    struct GameState* game_state; // Read by draw_callback thread, written by the secondary thread
 };
 
 #endif

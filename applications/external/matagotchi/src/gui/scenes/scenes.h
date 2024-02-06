@@ -24,7 +24,7 @@ enum Scenes {
     scene_count // its enum value is the number of elements that preceeds it
 };
 
-static void (*const scene_on_enter_handlers[])(void *) = {
+static void (*const scene_on_enter_handlers[])(void*) = {
     scene_loading_on_enter,
     scene_main_on_enter,
     scene_settings_on_enter,
@@ -33,7 +33,7 @@ static void (*const scene_on_enter_handlers[])(void *) = {
     scene_status_on_enter,
     scene_candy_on_enter,
     scene_pill_on_enter};
-static bool (*const scene_on_event_handlers[])(void *, SceneManagerEvent) = {
+static bool (*const scene_on_event_handlers[])(void*, SceneManagerEvent) = {
     scene_loading_on_event,
     scene_main_on_event,
     scene_settings_on_event,
@@ -42,7 +42,7 @@ static bool (*const scene_on_event_handlers[])(void *, SceneManagerEvent) = {
     scene_status_on_event,
     scene_candy_on_event,
     scene_pill_on_event};
-static void (*const scene_on_exit_handlers[])(void *) = {
+static void (*const scene_on_exit_handlers[])(void*) = {
     scene_loading_on_exit,
     scene_main_on_exit,
     scene_settings_on_exit,

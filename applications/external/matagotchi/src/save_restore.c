@@ -3,7 +3,7 @@
 #include "save_restore.h"
 #include "constants.h"
 
-bool save_state_to_file(struct PersistentGameState *to_persist) {
+bool save_state_to_file(struct PersistentGameState* to_persist) {
     bool result = saved_struct_save(
         GAME_STATE_STORAGE_STATE_PATH,
         to_persist,
@@ -14,7 +14,7 @@ bool save_state_to_file(struct PersistentGameState *to_persist) {
     return result;
 }
 
-bool load_state_from_file(struct PersistentGameState *to_load) {
+bool load_state_from_file(struct PersistentGameState* to_load) {
     bool result = saved_struct_load(
         GAME_STATE_STORAGE_STATE_PATH,
         to_load,
@@ -25,7 +25,7 @@ bool load_state_from_file(struct PersistentGameState *to_load) {
     return result;
 }
 
-bool save_settings_to_file(struct PersistentSettings *to_persist) {
+bool save_settings_to_file(struct PersistentSettings* to_persist) {
     bool result = saved_struct_save(
         GAME_STATE_STORAGE_SETTINGS_PATH,
         to_persist,
@@ -36,7 +36,7 @@ bool save_settings_to_file(struct PersistentSettings *to_persist) {
     return result;
 }
 
-bool load_settings_from_file(struct PersistentSettings *to_load) {
+bool load_settings_from_file(struct PersistentSettings* to_load) {
     bool result = saved_struct_load(
         GAME_STATE_STORAGE_SETTINGS_PATH,
         to_load,

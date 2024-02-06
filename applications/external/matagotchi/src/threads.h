@@ -7,9 +7,9 @@
 
 /* Main thread used to monitor the GUI.
  * It blocks while the GUI is active. */
-void main_thread(struct ApplicationContext *);
+void main_thread(struct ApplicationContext*);
 
 /* Thread dedicated to the processing of game events */
-int32_t secondary_thread(void *);
+int32_t secondary_thread(void*);
 
 #endif

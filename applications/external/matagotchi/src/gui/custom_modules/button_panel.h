@@ -55,7 +55,7 @@ void button_panel_set_selection(ButtonPanel* button_panel, uint16_t x, uint16_t 
  * @param      x             column index
  * @param      y             row index
  */
-void button_panel_get_selection(ButtonPanel* button_panel, uint16_t *x, uint16_t *y);
+void button_panel_get_selection(ButtonPanel* button_panel, uint16_t* x, uint16_t* y);
 
 /** Reserve space for adding items.
  *

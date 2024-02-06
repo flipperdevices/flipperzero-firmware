@@ -18,15 +18,7 @@ struct ThreadsMessage {
     // to pass an argument for a specific message type
 };
 
-enum LifeStage {
-    EGG,
-    BABY,
-    CHILD,
-    TEEN,
-    ADULT,
-    DEAD,
-    LIFE_STAGES_NUM
-};
+enum LifeStage { EGG, BABY, CHILD, TEEN, ADULT, DEAD, LIFE_STAGES_NUM };
 
 struct PersistentGameState {
     enum LifeStage stage;

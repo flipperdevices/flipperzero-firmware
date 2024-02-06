@@ -3,8 +3,8 @@
 
 #include <gui/scene_manager.h>
 
-void scene_status_on_enter(void *);
-bool scene_status_on_event(void *, SceneManagerEvent);
-void scene_status_on_exit(void *);
+void scene_status_on_enter(void*);
+bool scene_status_on_event(void*, SceneManagerEvent);
+void scene_status_on_exit(void*);
 
 #endif
