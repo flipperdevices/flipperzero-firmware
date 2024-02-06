@@ -1,3 +1,9 @@
+## 2.4
+- Added support for encoded SubGhz files
+- Added timer for SubGhz transmission (not needed in RAW files)
+- Added version number to app info screen
+- Minor updates/instrutions in readme.md
+
 ## 2.3
 - Fixed Crash after creating chains with SubGhz Items
 

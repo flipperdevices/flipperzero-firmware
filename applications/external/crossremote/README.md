@@ -30,9 +30,16 @@ Wouldn't it be nicer to simply click one button and let everything happen? This 
 - Add pauses, becaue target systems are not always fast enough for multiple commands<br>
 - Run file containing chained IR & SubGhz commands<br>
 
+### Settings
+- LED FX, allow the LED to blink
+- Save settings, stores a file with your settings in it on exit
+- IR time ms, the default duration of an IR signal transmission. Individual times can be set
+- SubG. time ms, the default duration of a SubGhz signal. Only needed for Encoded signals, RAW files play until finished
+
 ### Limitations
-SubGhz commands will stop working if you move/rename/delete the original files on your Flipper. This is because 
-of how the Flippers SubGhz worker expects data. 
+SubGhz commands will stop working if you move/rename/delete the original files on your Flipper. This is because of how the Flippers SubGhz worker expects data. 
+
+After an upgrade a crash on exit can occur, due to small improvements to the file formats. Sorry about that, it only happens once. 
 
 ## How to install on Flipper Zero
 - If you do not have one, download a firmware<br>
