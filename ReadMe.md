@@ -166,7 +166,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - NFC: [EMV Protocol + Parser #700 (By Leptopt1los)](https://github.com/DarkFlippers/unleashed-firmware/pull/700)
 - [NFC/LFRFID: Stop emulation after 5 mins to avoid antenna damage & Typos Fixed (By Leptopt1los)](https://github.com/DarkFlippers/unleashed-firmware/commit/19a5f02d662c77f96fed0048a7984d094bdd67ca)
 - [NFC: EMV Parser Fixes (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/cbab316607ffb81ff07ce0816812935887e2c51a)
-- OFW PR: [NFC: fix application opening from browser #3396 (By RebornedBrain)](https://github.com/flipperdevices/flipperzero-firmware/pull/3396) [With patch changes (By xMasterX)](https://github.com/flipperdevices/flipperzero-firmware/pull/3396#issuecomment-1917897042) [With 2nd patch changes (By xMasterX)](https://github.com/flipperdevices/flipperzero-firmware/pull/3396#issuecomment-1919028003)
 - UL: [NFC: Fixed EMV txs render (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/54161f3d8362cb8ddc708d0eecb5cbf8901207be)
 - UL: [NFC: Dont Stop emulation after 5 mins to avoid antenna damage if debug is ON (By Leptopt1los)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/54161f3d8362cb8ddc708d0eecb5cbf8901207be)
 - UL: [OFW PR 3412: Fixed MyKey LockID (By zProAle)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/54161f3d8362cb8ddc708d0eecb5cbf8901207be)
@@ -181,6 +180,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [NFC: Add an NFC parser for the San Francisco Bay Area "Clipper" transit card. #3344 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/3344)
 - OFW: [NFC UI refactor #3382 (By RebornedBrain)](https://github.com/flipperdevices/flipperzero-firmware/pull/3382)
 - OFW: [NFC Rework more info scene for Ultralight cards #3391 (By RebornedBrain)](https://github.com/flipperdevices/flipperzero-firmware/pull/3391)
+- OFW: [NFC: fix application opening from browser #3396 (By RebornedBrain)](https://github.com/flipperdevices/flipperzero-firmware/pull/3396)
 
 <a name="release">
 
