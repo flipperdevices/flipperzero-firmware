@@ -40,6 +40,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Added: [PacMan WIP v0.1 (By DanieleMaffi)](https://github.com/DanieleMaffi/flipper-pacman)
 - Updated: [BMI Air Mouse v0.9 (By ginkage)](https://github.com/ginkage/FlippAirMouse/) `Req: BMI160`
 - Updated: [BLE Spam v4.4 (By Willy-JL & ECTO-1A & Spooks4576 with research from xMasterX; OFW API thanks to noproto)](https://github.com/noproto/apple_ble_spam_ofw) BleSpam: Fix click offset (By Willy-JL)
+- OFW: [Direct Draw apps can now be streamed via RPC. #3397 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/3397)
 - To Be Merged OFW PRs: [3352](https://github.com/flipperdevices/flipperzero-firmware/pull/3352), [3302](https://github.com/flipperdevices/flipperzero-firmware/pull/3302), [3211](https://github.com/flipperdevices/flipperzero-firmware/pull/3211), [3366](https://github.com/flipperdevices/flipperzero-firmware/pull/3366), [3250](https://github.com/flipperdevices/flipperzero-firmware/pull/3250), [3402](https://github.com/flipperdevices/flipperzero-firmware/pull/3402) & [3409](https://github.com/flipperdevices/flipperzero-firmware/pull/3409)
 
 ## IN THIS BRANCH:
