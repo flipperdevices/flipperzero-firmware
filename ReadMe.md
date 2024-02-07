@@ -43,7 +43,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [Direct Draw apps can now be streamed via RPC. #3397 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/3397)
 - To Be Merged OFW PRs: [3352](https://github.com/flipperdevices/flipperzero-firmware/pull/3352), [3302](https://github.com/flipperdevices/flipperzero-firmware/pull/3302), [3211](https://github.com/flipperdevices/flipperzero-firmware/pull/3211), [3366](https://github.com/flipperdevices/flipperzero-firmware/pull/3366), [3250](https://github.com/flipperdevices/flipperzero-firmware/pull/3250), [3402](https://github.com/flipperdevices/flipperzero-firmware/pull/3402), [3409](https://github.com/flipperdevices/flipperzero-firmware/pull/3409) & [3406](https://github.com/flipperdevices/flipperzero-firmware/pull/3406)
 
-## IN THIS BRANCH:
+## REFACTORS BRANCH MERGED FEB 6TH WITH ALL THESE NEW CHANGES:
 
 - Removed: NFC: [NFC - Machine Readable Travel Documents & ISO7816 #1866 (By qistoph)](https://github.com/flipperdevices/flipperzero-firmware/pull/1866)
 - Removed: NFC: Some [NFC FeliCa support (By nullableVoidPtr)](https://github.com/flipperdevices/flipperzero-firmware/pull/2093) (Felica support readded by NFC refactoring)
