@@ -451,6 +451,7 @@ enum {
 };
 enum {
     _ConfigCcExtraStart = ConfigExtraStart,
+    ConfigCcInfoFixed,
     ConfigCcInfoLock,
     ConfigCcInfoDevice,
     ConfigCcCOUNT,
