@@ -1,5 +1,30 @@
 #include "nfc_maker.h"
 
+const NfcDataGeneratorType ntag_generators[NtagMAX] = {
+    [Ntag203] = NfcDataGeneratorTypeNTAG203,
+    [Ntag213] = NfcDataGeneratorTypeNTAG213,
+    [Ntag215] = NfcDataGeneratorTypeNTAG215,
+    [Ntag216] = NfcDataGeneratorTypeNTAG216,
+    [NtagI2C1K] = NfcDataGeneratorTypeNTAGI2C1k,
+    [NtagI2C2K] = NfcDataGeneratorTypeNTAGI2C2k,
+};
+const char* ntag_names[NtagMAX] = {
+    [Ntag203] = "NTAG203",
+    [Ntag213] = "NTAG213",
+    [Ntag215] = "NTAG215",
+    [Ntag216] = "NTAG216",
+    [NtagI2C1K] = "NTAG I2C 1K",
+    [NtagI2C2K] = "NTAG I2C 2K",
+};
+const size_t ntag_sizes[NtagMAX] = {
+    [Ntag203] = 0x12 * NTAG_DATA_AREA_UNIT_SIZE,
+    [Ntag213] = 0x12 * NTAG_DATA_AREA_UNIT_SIZE,
+    [Ntag215] = 0x3E * NTAG_DATA_AREA_UNIT_SIZE,
+    [Ntag216] = 0x6D * NTAG_DATA_AREA_UNIT_SIZE,
+    [NtagI2C1K] = 0x6D * NTAG_DATA_AREA_UNIT_SIZE,
+    [NtagI2C2K] = 0xEA * NTAG_DATA_AREA_UNIT_SIZE,
+};
+
 static bool nfc_maker_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
     NfcMaker* app = context;
@@ -48,11 +73,19 @@ NfcMaker* nfc_maker_alloc() {
     app->popup = popup_alloc();
     view_dispatcher_add_view(app->view_dispatcher, NfcMakerViewPopup, popup_get_view(app->popup));
 
+    // Nfc Device
+    app->nfc_device = nfc_device_alloc();
+    app->ndef_buffer = malloc(MAX_NDEF_LEN);
+
     return app;
 }
 
 void nfc_maker_free(NfcMaker* app) {
     furi_assert(app);
+
+    // Nfc Device
+    nfc_device_free(app->nfc_device);
+    free(app->ndef_buffer);
 
     // Gui modules
     view_dispatcher_remove_view(app->view_dispatcher, NfcMakerViewSubmenu);

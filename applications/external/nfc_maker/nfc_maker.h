@@ -1,9 +1,12 @@
+#pragma once
+
+#include <furi.h>
 #include <gui/gui.h>
 #include <gui/view.h>
 #include <gui/modules/validators.h>
 #include <gui/view_dispatcher.h>
 #include <gui/scene_manager.h>
-#include "nfc_maker2_icons.h"
+#include <nfc_maker_icons.h>
 #include <gui/modules/submenu.h>
 #include "nfc_maker_text_input.h"
 #include <gui/modules/byte_input.h>
@@ -11,11 +14,8 @@
 #include "scenes/nfc_maker_scene.h"
 #include <lib/flipper_format/flipper_format.h>
 #include <toolbox/name_generator.h>
+#include <applications/main/nfc/nfc_app_i.h>
 #include <furi_hal_bt.h>
-#include "newstrnlen.h"
-
-#define NFC_MK_APP_FOLDER EXT_PATH("nfc")
-#define NFC_MK_APP_EXTENSION ".nfc"
 
 #define MAC_INPUT_LEN GAP_MAC_ADDR_SIZE
 #define MAIL_INPUT_LEN 128
@@ -23,6 +23,21 @@
 
 #define BIG_INPUT_LEN 248
 #define SMALL_INPUT_LEN 90
+
+#define NTAG_DATA_AREA_UNIT_SIZE 2 * MF_ULTRALIGHT_PAGE_SIZE
+typedef enum {
+    Ntag203,
+    Ntag213,
+    Ntag215,
+    Ntag216,
+    NtagI2C1K,
+    NtagI2C2K,
+    NtagMAX,
+} Ntag;
+extern const NfcDataGeneratorType ntag_generators[NtagMAX];
+extern const char* ntag_names[NtagMAX];
+extern const size_t ntag_sizes[NtagMAX];
+#define MAX_NDEF_LEN ntag_sizes[NtagI2C2K]
 
 typedef enum {
     WifiAuthenticationOpen = 0x01,
@@ -48,6 +63,9 @@ typedef struct {
     NFCMaker_TextInput* text_input;
     ByteInput* byte_input;
     Popup* popup;
+
+    NfcDevice* nfc_device;
+    uint8_t* ndef_buffer;
 
     uint8_t mac_buf[MAC_INPUT_LEN];
     char mail_buf[MAIL_INPUT_LEN];
