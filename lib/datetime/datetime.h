@@ -25,7 +25,7 @@ typedef struct {
  *
  * @return     { description_of_the_return_value }
  */
-bool datetimelib_validate_datetime(DateTime* datetime);
+bool datetime_validate_datetime(DateTime* datetime);
 
 /** Convert DateTime to UNIX timestamp
  * 
@@ -35,7 +35,7 @@ bool datetimelib_validate_datetime(DateTime* datetime);
  *
  * @return     UNIX Timestamp in seconds from UNIX epoch start
  */
-uint32_t datetimelib_datetime_to_timestamp(DateTime* datetime);
+uint32_t datetime_datetime_to_timestamp(DateTime* datetime);
 
 /** Convert UNIX timestamp to DateTime
  *
@@ -44,7 +44,7 @@ uint32_t datetimelib_datetime_to_timestamp(DateTime* datetime);
  * @param[in]  timestamp  UNIX Timestamp in seconds from UNIX epoch start
  * @param[out] datetime   The datetime (UTC)
  */
-void datetimelib_timestamp_to_datetime(uint32_t timestamp, DateTime* datetime);
+void datetime_timestamp_to_datetime(uint32_t timestamp, DateTime* datetime);
 
 /** Gets the number of days in the year according to the Gregorian calendar.
  *
@@ -52,7 +52,7 @@ void datetimelib_timestamp_to_datetime(uint32_t timestamp, DateTime* datetime);
  *
  * @return number of days in `year`.
  */
-uint16_t datetimelib_get_days_per_year(uint16_t year);
+uint16_t datetime_get_days_per_year(uint16_t year);
 
 /** Check if a year a leap year in the Gregorian calendar.
  *
@@ -60,7 +60,7 @@ uint16_t datetimelib_get_days_per_year(uint16_t year);
  *
  * @return true if `year` is a leap year.
  */
-bool datetimelib_is_leap_year(uint16_t year);
+bool datetime_is_leap_year(uint16_t year);
 
 /** Get the number of days in the month.
  *
@@ -68,7 +68,7 @@ bool datetimelib_is_leap_year(uint16_t year);
  * @param month month to check, where 1 = January
  * @return the number of days in the month
  */
-uint8_t datetimelib_get_days_per_month(bool leap_year, uint8_t month);
+uint8_t datetime_get_days_per_month(bool leap_year, uint8_t month);
 
 #ifdef __cplusplus
 }

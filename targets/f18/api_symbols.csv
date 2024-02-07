@@ -37,7 +37,7 @@ Header,+,applications/services/notification/notification_messages.h,,
 Header,+,applications/services/power/power_service/power.h,,
 Header,+,applications/services/rpc/rpc_app.h,,
 Header,+,applications/services/storage/storage.h,,
-Header,+,lib/datetimelib/datetimelib.h,,
+Header,+,lib/datetime/datetime.h,,
 Header,+,lib/digital_signal/digital_sequence.h,,
 Header,+,lib/digital_signal/digital_signal.h,,
 Header,+,lib/drivers/cc1101_regs.h,,
@@ -693,12 +693,12 @@ Function,+,crc32_calc_buffer,uint32_t,"uint32_t, const void*, size_t"
 Function,+,crc32_calc_file,uint32_t,"File*, const FileCrcProgressCb, void*"
 Function,-,ctermid,char*,char*
 Function,-,cuserid,char*,char*
-Function,+,datetimelib_datetime_to_timestamp,uint32_t,DateTime*
-Function,+,datetimelib_get_days_per_month,uint8_t,"_Bool, uint8_t"
-Function,+,datetimelib_get_days_per_year,uint16_t,uint16_t
-Function,+,datetimelib_is_leap_year,_Bool,uint16_t
-Function,+,datetimelib_timestamp_to_datetime,void,"uint32_t, DateTime*"
-Function,+,datetimelib_validate_datetime,_Bool,DateTime*
+Function,+,datetime_datetime_to_timestamp,uint32_t,DateTime*
+Function,+,datetime_get_days_per_month,uint8_t,"_Bool, uint8_t"
+Function,+,datetime_get_days_per_year,uint16_t,uint16_t
+Function,+,datetime_is_leap_year,_Bool,uint16_t
+Function,+,datetime_timestamp_to_datetime,void,"uint32_t, DateTime*"
+Function,+,datetime_validate_datetime,_Bool,DateTime*
 Function,+,dialog_ex_alloc,DialogEx*,
 Function,+,dialog_ex_disable_extended_events,void,DialogEx*
 Function,+,dialog_ex_enable_extended_events,void,DialogEx*

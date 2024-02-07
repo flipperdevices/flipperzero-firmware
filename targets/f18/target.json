@@ -36,7 +36,7 @@
         "heatshrink",
         "flipperformat",
         "flipper18",
-        "datetimelib"
+        "datetime"
     ],
     "excluded_sources": [
         "furi_hal_infrared.c",

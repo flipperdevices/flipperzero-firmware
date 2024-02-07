@@ -414,5 +414,5 @@ uint32_t furi_hal_rtc_get_pin_fails() {
 uint32_t furi_hal_rtc_get_timestamp() {
     DateTime datetime = {0};
     furi_hal_rtc_get_datetime(&datetime);
-    return datetimelib_datetime_to_timestamp(&datetime);
+    return datetime_datetime_to_timestamp(&datetime);
 }

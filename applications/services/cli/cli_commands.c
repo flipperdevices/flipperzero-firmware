@@ -135,7 +135,7 @@ void cli_command_date(Cli* cli, FuriString* args, void* context) {
             return;
         }
 
-        if(!datetimelib_validate_datetime(&datetime)) {
+        if(!datetime_validate_datetime(&datetime)) {
             printf("Invalid datetime data");
             return;
         }

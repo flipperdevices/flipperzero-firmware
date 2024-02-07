@@ -1,6 +1,6 @@
-#include "datetimelib.h"
+#include "datetime.h"
 
-#define TAG "DateTimeLib"
+#define TAG "DateTime"
 
 #define SECONDS_PER_MINUTE 60
 #define SECONDS_PER_HOUR (SECONDS_PER_MINUTE * 60)
@@ -8,13 +8,13 @@
 #define MONTHS_COUNT 12
 #define EPOCH_START_YEAR 1970
 
-static const uint8_t datetimelib_days_per_month[2][MONTHS_COUNT] = {
+static const uint8_t datetime_days_per_month[2][MONTHS_COUNT] = {
     {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31},
     {31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}};
 
-static const uint16_t datetimelib_days_per_year[] = {365, 366};
+static const uint16_t datetime_days_per_year[] = {365, 366};
 
-bool datetimelib_validate_datetime(DateTime* datetime) {
+bool datetime_validate_datetime(DateTime* datetime) {
     bool invalid = false;
 
     invalid |= (datetime->second > 59);
@@ -36,27 +36,26 @@ bool datetimelib_validate_datetime(DateTime* datetime) {
     return !invalid;
 }
 
-uint32_t datetimelib_datetime_to_timestamp(DateTime* datetime) {
+uint32_t datetime_datetime_to_timestamp(DateTime* datetime) {
     uint32_t timestamp = 0;
     uint8_t years = 0;
     uint8_t leap_years = 0;
 
     for(uint16_t y = EPOCH_START_YEAR; y < datetime->year; y++) {
-        if(datetimelib_is_leap_year(y)) {
+        if(datetime_is_leap_year(y)) {
             leap_years++;
         } else {
             years++;
         }
     }
 
-    timestamp +=
-        ((years * datetimelib_days_per_year[0]) + (leap_years * datetimelib_days_per_year[1])) *
-        SECONDS_PER_DAY;
+    timestamp += ((years * datetime_days_per_year[0]) + (leap_years * datetime_days_per_year[1])) *
+                 SECONDS_PER_DAY;
 
-    bool leap_year = datetimelib_is_leap_year(datetime->year);
+    bool leap_year = datetime_is_leap_year(datetime->year);
 
     for(uint8_t m = 1; m < datetime->month; m++) {
-        timestamp += datetimelib_get_days_per_month(leap_year, m) * SECONDS_PER_DAY;
+        timestamp += datetime_get_days_per_month(leap_year, m) * SECONDS_PER_DAY;
     }
 
     timestamp += (datetime->day - 1) * SECONDS_PER_DAY;
@@ -67,22 +66,22 @@ uint32_t datetimelib_datetime_to_timestamp(DateTime* datetime) {
     return timestamp;
 }
 
-void datetimelib_timestamp_to_datetime(uint32_t timestamp, DateTime* datetime) {
+void datetime_timestamp_to_datetime(uint32_t timestamp, DateTime* datetime) {
     uint32_t days = timestamp / SECONDS_PER_DAY;
     uint32_t seconds_in_day = timestamp % SECONDS_PER_DAY;
 
     datetime->year = EPOCH_START_YEAR;
 
-    while(days >= datetimelib_get_days_per_year(datetime->year)) {
-        days -= datetimelib_get_days_per_year(datetime->year);
+    while(days >= datetime_get_days_per_year(datetime->year)) {
+        days -= datetime_get_days_per_year(datetime->year);
         (datetime->year)++;
     }
 
     datetime->month = 1;
-    while(days >= datetimelib_get_days_per_month(
-                      datetimelib_is_leap_year(datetime->year), datetime->month)) {
-        days -= datetimelib_get_days_per_month(
-            datetimelib_is_leap_year(datetime->year), datetime->month);
+    while(days >=
+          datetime_get_days_per_month(datetime_is_leap_year(datetime->year), datetime->month)) {
+        days -=
+            datetime_get_days_per_month(datetime_is_leap_year(datetime->year), datetime->month);
         (datetime->month)++;
     }
 
@@ -92,14 +91,14 @@ void datetimelib_timestamp_to_datetime(uint32_t timestamp, DateTime* datetime) {
     datetime->second = seconds_in_day % SECONDS_PER_MINUTE;
 }
 
-uint16_t datetimelib_get_days_per_year(uint16_t year) {
-    return datetimelib_days_per_year[datetimelib_is_leap_year(year) ? 1 : 0];
+uint16_t datetime_get_days_per_year(uint16_t year) {
+    return datetime_days_per_year[datetime_is_leap_year(year) ? 1 : 0];
 }
 
-bool datetimelib_is_leap_year(uint16_t year) {
+bool datetime_is_leap_year(uint16_t year) {
     return (((year) % 4 == 0) && ((year) % 100 != 0)) || ((year) % 400 == 0);
 }
 
-uint8_t datetimelib_get_days_per_month(bool leap_year, uint8_t month) {
-    return datetimelib_days_per_month[leap_year ? 1 : 0][month - 1];
+uint8_t datetime_get_days_per_month(bool leap_year, uint8_t month) {
+    return datetime_days_per_month[leap_year ? 1 : 0][month - 1];
 }

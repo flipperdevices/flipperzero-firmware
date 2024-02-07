@@ -5,14 +5,14 @@ env.Append(
         Dir("."),
     ],
     CPPPATH=[
-        "#/lib/datetimelib",
+        "#/lib/datetime",
     ],
     SDK_HEADERS=[
-        File("datetimelib.h"),
+        File("datetime.h"),
     ],
 )
 
-libenv = env.Clone(FW_LIB_NAME="datetimelib")
+libenv = env.Clone(FW_LIB_NAME="datetime")
 libenv.ApplyLibFlags()
 
 sources = libenv.GlobRecursive("*.c*")

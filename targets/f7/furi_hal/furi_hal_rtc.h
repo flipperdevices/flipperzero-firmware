@@ -8,7 +8,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include <datetimelib/datetimelib.h>
+#include <datetime/datetime.h>
 
 #ifdef __cplusplus
 extern "C" {

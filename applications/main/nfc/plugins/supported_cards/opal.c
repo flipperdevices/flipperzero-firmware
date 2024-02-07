@@ -32,7 +32,7 @@
 
 #include <flipper_application/flipper_application.h>
 #include <applications/services/locale/locale.h>
-#include <datetimelib/datetimelib.h>
+#include <datetime/datetime.h>
 
 #include <lib/nfc/protocols/mf_desfire/mf_desfire.h>
 
@@ -93,7 +93,7 @@ static void opal_date_time_to_furi(uint16_t days, uint16_t minutes, DateTime* ou
 
     // What year is it?
     for(;;) {
-        const uint16_t num_days_in_year = datetimelib_get_days_per_year(out->year);
+        const uint16_t num_days_in_year = datetime_get_days_per_year(out->year);
         if(days < num_days_in_year) break;
         days -= num_days_in_year;
         out->year++;
@@ -104,8 +104,8 @@ static void opal_date_time_to_furi(uint16_t days, uint16_t minutes, DateTime* ou
 
     for(;;) {
         // What month is it?
-        const bool is_leap = datetimelib_is_leap_year(out->year);
-        const uint8_t num_days_in_month = datetimelib_get_days_per_month(is_leap, out->month);
+        const bool is_leap = datetime_is_leap_year(out->year);
+        const uint8_t num_days_in_month = datetime_get_days_per_month(is_leap, out->month);
         if(days <= num_days_in_month) break;
         days -= num_days_in_month;
         out->month++;
