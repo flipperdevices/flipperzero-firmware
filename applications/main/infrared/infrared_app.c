@@ -44,30 +44,42 @@ static void infrared_tick_event_callback(void* context) {
     scene_manager_handle_tick_event(infrared->scene_manager);
 }
 
-static void infrared_rpc_command_callback(RpcAppSystemEvent event, void* context) {
+static void infrared_rpc_command_callback(const RpcAppSystemEvent* event, void* context) {
     furi_assert(context);
     InfraredApp* infrared = context;
     furi_assert(infrared->rpc_ctx);
 
-    if(event == RpcAppEventSessionClose) {
+    if(event->type == RpcAppEventTypeSessionClose) {
         view_dispatcher_send_custom_event(
             infrared->view_dispatcher, InfraredCustomEventTypeRpcSessionClose);
         rpc_system_app_set_callback(infrared->rpc_ctx, NULL, NULL);
         infrared->rpc_ctx = NULL;
-    } else if(event == RpcAppEventAppExit) {
+    } else if(event->type == RpcAppEventTypeAppExit) {
         view_dispatcher_send_custom_event(
             infrared->view_dispatcher, InfraredCustomEventTypeRpcExit);
-    } else if(event == RpcAppEventLoadFile) {
+    } else if(event->type == RpcAppEventTypeLoadFile) {
+        furi_assert(event->data.type == RpcAppSystemEventDataTypeString);
+        furi_string_set(infrared->file_path, event->data.string);
         view_dispatcher_send_custom_event(
-            infrared->view_dispatcher, InfraredCustomEventTypeRpcLoad);
-    } else if(event == RpcAppEventButtonPress) {
-        view_dispatcher_send_custom_event(
-            infrared->view_dispatcher, InfraredCustomEventTypeRpcButtonPress);
-    } else if(event == RpcAppEventButtonRelease) {
+            infrared->view_dispatcher, InfraredCustomEventTypeRpcLoadFile);
+    } else if(event->type == RpcAppEventTypeButtonPress) {
+        furi_assert(
+            event->data.type == RpcAppSystemEventDataTypeString ||
+            event->data.type == RpcAppSystemEventDataTypeInt32);
+        if(event->data.type == RpcAppSystemEventDataTypeString) {
+            furi_string_set(infrared->button_name, event->data.string);
+            view_dispatcher_send_custom_event(
+                infrared->view_dispatcher, InfraredCustomEventTypeRpcButtonPressName);
+        } else {
+            infrared->app_state.current_button_index = event->data.i32;
+            view_dispatcher_send_custom_event(
+                infrared->view_dispatcher, InfraredCustomEventTypeRpcButtonPressIndex);
+        }
+    } else if(event->type == RpcAppEventTypeButtonRelease) {
         view_dispatcher_send_custom_event(
             infrared->view_dispatcher, InfraredCustomEventTypeRpcButtonRelease);
     } else {
-        rpc_system_app_confirm(infrared->rpc_ctx, event, false);
+        rpc_system_app_confirm(infrared->rpc_ctx, false);
     }
 }
 
@@ -398,18 +410,17 @@ void infrared_play_notification_message(
 }
 
 void infrared_show_loading_popup(const InfraredApp* infrared, bool show) {
-    TaskHandle_t timer_task = xTaskGetHandle(configTIMER_SERVICE_TASK_NAME);
     ViewStack* view_stack = infrared->view_stack;
     Loading* loading = infrared->loading;
 
     if(show) {
         // Raise timer priority so that animations can play
-        vTaskPrioritySet(timer_task, configMAX_PRIORITIES - 1);
+        furi_timer_set_thread_priority(FuriTimerThreadPriorityElevated);
         view_stack_add_view(view_stack, loading_get_view(loading));
     } else {
         view_stack_remove_view(view_stack, loading_get_view(loading));
         // Restore default timer priority
-        vTaskPrioritySet(timer_task, configTIMER_TASK_PRIORITY);
+        furi_timer_set_thread_priority(FuriTimerThreadPriorityNormal);
     }
 }
 

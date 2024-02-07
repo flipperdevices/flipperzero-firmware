@@ -3,7 +3,7 @@
 #include "dolphin_deed.h"
 #include <stdbool.h>
 #include <stdint.h>
-#include <time.h>
+#include <stddef.h>
 #include <storage/storage.h>
 
 #define DOLPHIN_STATE_OLD_PATH INT_PATH(".dolphin.state")

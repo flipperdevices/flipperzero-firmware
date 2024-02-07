@@ -28,7 +28,7 @@ static bool pass_input_validator(const char* text, FuriString* error, void* cont
     unsigned char key[KEY_BITS / 8];
 
     /* derive a key from the password */
-    sha256((unsigned char*)text, strlen(text), key);
+    mbedtls_sha256((unsigned char*)text, strlen(text), key, 0);
 
     /* initiate the crypto context */
     bool ret = crypto_ctx_set_key(state->crypto_ctx, key, state->name_prefix, furi_get_tick());

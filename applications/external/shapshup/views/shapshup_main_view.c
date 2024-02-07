@@ -138,7 +138,8 @@ bool shapshup_main_view_input(InputEvent* event, void* context) {
         // Consumed
         return false;
     } else if(event->key == InputKeyBack) {
-        shapshup_main_view_show_alert(instance, "Press long BACK to exit", 150);
+        shapshup_main_view_show_alert(
+            instance, "Press long BACK to EXIT", SHAPSHUP_ALERT_DEFAULT_TTL);
         return true;
     }
 
@@ -214,7 +215,7 @@ bool shapshup_main_view_input(InputEvent* event, void* context) {
         } else if(event->key == InputKeyDown) {
             instance->scale -= SCALE_STEP;
             if(instance->scale < SCALE_STEP) {
-                instance->scale = 0.1f;
+                instance->scale = SHAPSHUP_SCALE_MIN_VALUE;
             }
             offset_per_page = instance->raw_file != NULL ? calc_offset_per_page(
                                                                instance->raw_file->total_len,
@@ -227,7 +228,7 @@ bool shapshup_main_view_input(InputEvent* event, void* context) {
             shapshup_main_view_array_reset(instance);
             shapshup_main_view_create_shapes(instance, offset_per_page);
 
-            shapshup_main_view_show_alert(instance, "Zoom-in", 150);
+            shapshup_main_view_show_alert(instance, "Zoom-in", SHAPSHUP_ALERT_DEFAULT_TTL);
             with_view_model(
                 instance->view,
                 ShapShupMainViewModel * model,
@@ -241,7 +242,7 @@ bool shapshup_main_view_input(InputEvent* event, void* context) {
         } else if(event->key == InputKeyUp) {
             if(instance->scale < SCALE_STEP) {
                 instance->scale = SCALE_STEP;
-            } else if(SHAPSHUP_DEFAULT_SCALE_STEP - instance->scale > 0.01f) {
+            } else if(SHAPSHUP_DEFAULT_SCALE_STEP - instance->scale > SHAPSHUP_SCALE_MIN_VALUE) {
                 instance->scale += SCALE_STEP;
             }
 
@@ -259,7 +260,7 @@ bool shapshup_main_view_input(InputEvent* event, void* context) {
             shapshup_main_view_array_reset(instance);
             shapshup_main_view_create_shapes(instance, offset_per_page);
 
-            shapshup_main_view_show_alert(instance, "Zoom-out", 150);
+            shapshup_main_view_show_alert(instance, "Zoom-out", SHAPSHUP_ALERT_DEFAULT_TTL);
             with_view_model(
                 instance->view,
                 ShapShupMainViewModel * model,
@@ -359,7 +360,7 @@ ShapShupFileResults shapshup_main_view_load_file(ShapShupMainView* instance, con
         uint64_t offset_per_page = calc_offset_per_page(
             instance->raw_file->total_len, instance->raw_file->min_len, instance->scale);
 
-        // Reset array
+        // Reset an array
         shapshup_main_view_array_reset(instance);
         shapshup_main_view_create_shapes(instance, offset_per_page);
 
@@ -481,7 +482,7 @@ void shapshup_main_view_draw_scale(Canvas* canvas, ShapShupMainViewModel* model)
     char buffer[64];
 
     canvas_set_color(canvas, ColorBlack);
-    canvas_set_font(canvas, FontBatteryPercent);
+    canvas_set_font(canvas, FontSecondary);
     uint8_t width = canvas_width(canvas);
 
     // First and last scale pin
@@ -649,4 +650,9 @@ void format_number(uint64_t number_to_format, char* output_buffer) {
         c = (c + 1) % 3;
     }
     *--output_buffer = 0;
+}
+
+void format_frequency(uint32_t frequency, char* output_buffer) {
+    snprintf(
+        output_buffer, 32, "%03ld.%03ld MHz", frequency / 1000000 % 1000, frequency / 1000 % 1000);
 }

@@ -15,7 +15,7 @@
 #include <gui/view_dispatcher.h>
 #include <gui/view_stack.h>
 #include <dialogs/dialogs.h>
-#include <cfw.h>
+#include <cfw/cfw.h>
 
 #define NUM_MENU_ITEMS (6)
 

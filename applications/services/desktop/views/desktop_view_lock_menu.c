@@ -2,7 +2,7 @@
 #include <gui/elements.h>
 #include <dolphin/dolphin.h>
 #include <assets_icons.h>
-#include <cfw.h>
+#include <cfw/cfw.h>
 #include <furi_hal_rtc.h>
 
 #include "../desktop_i.h"

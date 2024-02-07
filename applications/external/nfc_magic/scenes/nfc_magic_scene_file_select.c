@@ -1,66 +1,51 @@
-#include "../nfc_magic_i.h"
+#include "../nfc_magic_app_i.h"
+#include <nfc/protocols/mf_classic/mf_classic.h>
 
-static bool nfc_magic_scene_file_select_is_file_suitable(NfcMagic* nfc_magic) {
-    NfcDevice* nfc_dev = nfc_magic->source_dev;
-    if(nfc_dev->format == NfcDeviceSaveFormatMifareClassic) {
-        switch(nfc_magic->dev->type) {
-        case MagicTypeClassicGen1:
-        case MagicTypeClassicDirectWrite:
-        case MagicTypeClassicAPDU:
-            if((nfc_dev->dev_data.mf_classic_data.type != MfClassicType1k) ||
-               (nfc_dev->dev_data.nfc_data.uid_len != nfc_magic->dev->uid_len)) {
-                return false;
+static bool nfc_magic_scene_file_select_is_file_suitable(NfcMagicApp* instance) {
+    NfcProtocol protocol = nfc_device_get_protocol(instance->source_dev);
+    size_t uid_len = 0;
+    nfc_device_get_uid(instance->source_dev, &uid_len);
+
+    bool suitable = false;
+    if(instance->protocol == NfcMagicProtocolGen1) {
+        if((uid_len == 4) && (protocol == NfcProtocolMfClassic)) {
+            const MfClassicData* mfc_data =
+                nfc_device_get_data(instance->source_dev, NfcProtocolMfClassic);
+            if(mfc_data->type == MfClassicType1k) {
+                suitable = true;
             }
-            return true;
-
-        case MagicTypeGen4:
-            return true;
-        default:
-            return false;
         }
-    } else if(
-        (nfc_dev->format == NfcDeviceSaveFormatMifareUl) &&
-        (nfc_dev->dev_data.nfc_data.uid_len == 7)) {
-        switch(nfc_magic->dev->type) {
-        case MagicTypeUltralightGen1:
-        case MagicTypeUltralightDirectWrite:
-        case MagicTypeUltralightC_Gen1:
-        case MagicTypeUltralightC_DirectWrite:
-        case MagicTypeGen4:
-            switch(nfc_dev->dev_data.mf_ul_data.type) {
-            case MfUltralightTypeNTAGI2C1K:
-            case MfUltralightTypeNTAGI2C2K:
-            case MfUltralightTypeNTAGI2CPlus1K:
-            case MfUltralightTypeNTAGI2CPlus2K:
-                return false;
-            default:
-                return true;
+    } else if(instance->protocol == NfcMagicProtocolGen4) {
+        if(protocol == NfcProtocolMfClassic) {
+            suitable = true;
+        } else if(protocol == NfcProtocolMfUltralight) {
+            const MfUltralightData* mfu_data =
+                nfc_device_get_data(instance->source_dev, NfcProtocolMfUltralight);
+            const Iso14443_3aData* iso3_data = mfu_data->iso14443_3a_data;
+            if(iso3_data->uid_len == 7) {
+                MfUltralightType mfu_type = mfu_data->type;
+                suitable = (mfu_type != MfUltralightTypeNTAGI2C1K) &&
+                           (mfu_type != MfUltralightTypeNTAGI2C2K) &&
+                           (mfu_type != MfUltralightTypeNTAGI2CPlus1K) &&
+                           (mfu_type != MfUltralightTypeNTAGI2CPlus2K);
             }
-        default:
-            return false;
         }
     }
 
-    return false;
+    return suitable;
 }
 
 void nfc_magic_scene_file_select_on_enter(void* context) {
-    NfcMagic* nfc_magic = context;
-    // Process file_select return
-    nfc_device_set_loading_callback(
-        nfc_magic->source_dev, nfc_magic_show_loading_popup, nfc_magic);
+    NfcMagicApp* instance = context;
 
-    if(!furi_string_size(nfc_magic->source_dev->load_path)) {
-        furi_string_set_str(nfc_magic->source_dev->load_path, NFC_APP_FOLDER);
-    }
-    if(nfc_file_select(nfc_magic->source_dev)) {
-        if(nfc_magic_scene_file_select_is_file_suitable(nfc_magic)) {
-            scene_manager_next_scene(nfc_magic->scene_manager, NfcMagicSceneWriteConfirm);
+    if(nfc_magic_load_from_file_select(instance)) {
+        if(nfc_magic_scene_file_select_is_file_suitable(instance)) {
+            scene_manager_next_scene(instance->scene_manager, NfcMagicSceneWriteConfirm);
         } else {
-            scene_manager_next_scene(nfc_magic->scene_manager, NfcMagicSceneWrongCard);
+            scene_manager_next_scene(instance->scene_manager, NfcMagicSceneWrongCard);
         }
     } else {
-        scene_manager_previous_scene(nfc_magic->scene_manager);
+        scene_manager_previous_scene(instance->scene_manager);
     }
 }
 
@@ -71,6 +56,5 @@ bool nfc_magic_scene_file_select_on_event(void* context, SceneManagerEvent event
 }
 
 void nfc_magic_scene_file_select_on_exit(void* context) {
-    NfcMagic* nfc_magic = context;
-    nfc_device_set_loading_callback(nfc_magic->source_dev, NULL, nfc_magic);
+    UNUSED(context);
 }

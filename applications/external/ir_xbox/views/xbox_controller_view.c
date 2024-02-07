@@ -1,5 +1,8 @@
 #include "xbox_controller_view.h"
 
+#include <infrared_worker.h>
+#include <infrared_transmit.h>
+
 struct XboxControllerView {
     View* view;
     NotificationApp* notifications;

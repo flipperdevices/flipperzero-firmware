@@ -1,3 +1,5 @@
+#pragma once
+
 #include "brainfuck_i.h"
 
 void initWorker(BFApp* application);

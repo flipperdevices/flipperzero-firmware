@@ -9,7 +9,7 @@
 #include <dolphin/helpers/dolphin_state.h>
 #include <furi.h>
 #include <m-array.h>
-#include <cfw.h>
+#include <cfw/cfw.h>
 #include <m-string.h>
 
 struct Menu {

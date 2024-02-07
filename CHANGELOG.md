@@ -1,24 +1,26 @@
 ## New changes
 * NFC: **Fixed stuck Saved success screen**
+* NFC: **Fixed crash when reading mifare classic tag then going to add manually menu and adding NFC-A tag**
 * NFC: Fixed EMV txs render
 * NFC/LFRFID: Don't Stop emulation after 5 mins to avoid antenna damage if debug is ON (by @Leptopt1los)
 * LFRFID: Fixed T5577 custom password input (by @Leptopt1los)
 * OFW PR 3410: lfrfid/em4100: added support for different bit rates - by @Mrkvak (RF/32 full support, RF/16 support without reading (16clk removed for now))
 * OFW PR 3412: Fixed MyKey LockID - by @zProAle
---
-Changes from 070 release:
+<br>----<br>
+**Changes from 070 release:**<br>
 * NFC: **EMV parser** added (by @Leptopt1los and @wosk | PR #700)
 * NFC: Metromoney parser balance fix (by @Leptopt1los | PR #699)
 * NFC/LFRFID: Stop emulation after 5 mins to avoid antenna damage (by @Leptopt1los)
 * Archive: Fix two filebrowser bugs
-* SubGHz: Programming mode for Dea Mio (right arrow button)
-* SubGHz: Keeloq fix emulation for multiple systems and extend add manually support for 2 of them (Dea Mio, Genius Bravo, GSN, Normstahl)
+* SubGHz: **Programming mode for Dea Mio** (right arrow button)
+* SubGHz: **Keeloq fix emulation for multiple systems and extend add manually support** for 2 of them (Dea Mio, Genius Bravo, GSN, Normstahl)
 * SubGHz: Fixed hopper state when entering Read via Freq analyzer
+* SubGHz: Raw erase fixes (by @Willy-JL)
 * SubGHz: Subghz save files with receive time (by @Willy-JL)
 * NFC: Fix NFC V dumps with v3 (pre refactor saves) crashing at info page
 * NFC: Zolotaya Korona Online parser added (by @Leptopt1los)
-* NFC: Add NFC NDEF parser (by @Willy-JL)
-* LF RFID: Write T5577 with random and custom password added (clear password via Extra actions) (by @Leptopt1los)
+* NFC: Add NFC **NDEF parser** (by @Willy-JL)
+* LF RFID: **Write T5577 with random and custom password** added (clear password via Extra actions) (by @Leptopt1los)
 * SubGHz: Update honeywell protocol (by @Willy-JL)
 * System: More contrast values for replacement displays (up to +8 or -8)
 * USB/BLE HID: Add macOS Music app volume control
@@ -31,12 +33,12 @@ Changes from 070 release:
 * OFW: Fix expansion protocol crash when fed lots of garbage
 * OFW: 0.98.0-rc various fixes
 * OFW: RFID CLI: better usage
-* OFW: Mf DESFire fixes
+* OFW: **Mf DESFire fixes**
 * OFW: NFC UI refactor
-* OFW: Expansion module protocol 
+* OFW: **Expansion module protocol** (+ expansion settings read and store in ram by @Willy-JL) 
 * OFW: Bugfix: Strip last parity bit from decoded FDX-B data
 * OFW: FuriHal: interrupt priorities and documentation
-* OFW: FuriHal: UART refactoring
+* OFW: FuriHal: **UART refactoring**
 * OFW: SubGhz: add `subghz tx_from_file` CLI cmd, major TX flow refactoring, various improvements and bug fixes
 * OFW: Furi_hal_rtc: new function
 * OFW: NFC UI refactor 

@@ -65,7 +65,8 @@ bool storage_settings_scene_wipe_device_on_event(void* context, SceneManagerEven
                 scene_manager_set_scene_state(
                     app->scene_manager, StorageSettingsWipeDevice, counter);
             } else {
-                furi_hal_rtc_set_flag(FuriHalRtcFlagFactoryReset);
+                furi_hal_rtc_reset_registers();
+                furi_hal_rtc_set_flag(FuriHalRtcFlagStorageFormatInternal);
                 scene_manager_set_scene_state(app->scene_manager, StorageSettingsFormatting, true);
                 scene_manager_next_scene(app->scene_manager, StorageSettingsFormatting);
             }

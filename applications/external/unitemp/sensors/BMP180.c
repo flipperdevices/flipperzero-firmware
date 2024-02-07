@@ -56,8 +56,8 @@ bool unitemp_BMP180_I2C_alloc(Sensor* sensor, char* args) {
     i2c_sensor->minI2CAdr = 0x77 << 1;
     i2c_sensor->maxI2CAdr = 0x77 << 1;
 
-    BMP180_instance* bmx280_instance = malloc(sizeof(BMP180_instance));
-    i2c_sensor->sensorInstance = bmx280_instance;
+    BMP180_instance* bmx180_instance = malloc(sizeof(BMP180_instance));
+    i2c_sensor->sensorInstance = bmx180_instance;
     return true;
 }
 

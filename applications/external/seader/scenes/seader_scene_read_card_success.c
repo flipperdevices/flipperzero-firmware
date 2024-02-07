@@ -36,7 +36,9 @@ void seader_scene_read_card_success_on_enter(void* context) {
         furi_string_cat_printf(credential_str, "0x%llX", credential->credential);
 
         if(credential->type == SeaderCredentialTypeNone) {
-            furi_string_set(type_str, "None");
+            furi_string_set(type_str, "Unknown");
+        } else if(credential->type == SeaderCredentialTypeVirtual) {
+            furi_string_set(type_str, "Virtual");
         } else if(credential->type == SeaderCredentialType14A) {
             furi_string_set(type_str, "14443A");
         } else if(credential->type == SeaderCredentialTypePicopass) {
@@ -97,6 +99,10 @@ bool seader_scene_read_card_success_on_event(void* context, SceneManagerEvent ev
             scene_manager_next_scene(seader->scene_manager, SeaderSceneCardMenu);
             consumed = true;
         }
+    } else if(event.type == SceneManagerEventTypeBack) {
+        scene_manager_search_and_switch_to_previous_scene(
+            seader->scene_manager, SeaderSceneSamPresent);
+        consumed = true;
     }
     return consumed;
 }

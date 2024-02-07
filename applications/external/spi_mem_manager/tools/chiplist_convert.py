@@ -93,6 +93,7 @@ def generateCArr(arr, filename):
             else:
                 print(" " + cur["writeMode"] + "},", file=out)
 
+
 def main():
     filename = "spi_mem_chip_arr.c"
     args = getArgs()

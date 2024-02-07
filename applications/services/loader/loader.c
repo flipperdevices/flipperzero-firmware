@@ -4,7 +4,7 @@
 #include <applications.h>
 #include <storage/storage.h>
 #include <furi_hal.h>
-#include <cfw.h>
+#include <cfw/cfw.h>
 #include <dialogs/dialogs.h>
 #include <toolbox/path.h>
 #include <flipper_application/flipper_application.h>
@@ -221,9 +221,11 @@ static void loader_make_mainmenu_file(Storage* storage) {
 
 static void loader_make_gamesmenu_file(Storage* storage) {
     if(!storage_file_exists(storage, CFW_MENU_GAMESMODE_PATH) &&
-       storage_file_exists(storage, CFG_PATH("cfw_gamesmenu.default.txt"))) {
+       storage_file_exists(storage, EXT_PATH("apps_assets/dab_timer/cfw_gamesmenu.default.txt"))) {
         storage_common_copy(
-            storage, CFG_PATH("cfw_gamesmenu.default.txt"), CFW_MENU_GAMESMODE_PATH);
+            storage,
+            EXT_PATH("apps_assets/dab_timer/cfw_gamesmenu.default.txt"),
+            CFW_MENU_GAMESMODE_PATH);
     }
 }
 
@@ -447,7 +449,7 @@ static FlipperInternalApplication const* loader_find_application_by_name_in_list
     const FlipperInternalApplication* list,
     const uint32_t n_apps) {
     for(size_t i = 0; i < n_apps; i++) {
-        if(strcmp(name, list[i].name) == 0) {
+        if((strcmp(name, list[i].name) == 0) || (strcmp(name, list[i].appid) == 0)) {
             return &list[i];
         }
     }

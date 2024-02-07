@@ -3,7 +3,7 @@ layout: home
 ---
 <script src="https://cdn.jsdelivr.net/npm/anchor-js/anchor.min.js"></script>
 
-A [Flipper Zero](https://flipperzero.one/) application (aka "fap") to interface with a SAM from the Flipper Zero over UART.
+A [Flipper Zero](https://flipperzero.one/) application (aka "fap") to interface with a SAM from the Flipper Zero over UART.  Latest release on the [App Catalog](https://lab.flipper.net/apps/seader).
 
 # FAQ
 
@@ -13,7 +13,7 @@ See "Probably Frequently Asked Questions:" on Red Team Tools [NARD SAM expansion
 
 ## Release
 
-Download release versions via the Flipper App Catalog in the mobile companion apps
+Download release versions via the [Flipper App Catalog](https://lab.flipper.net/apps/seader) in the mobile companion apps.
 
 ## Beta/Dev
 

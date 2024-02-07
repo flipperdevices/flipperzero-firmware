@@ -2,7 +2,7 @@
 
 #include <furi_hal.h>
 #include <notification/notification_messages.h>
-#include <cfw.h>
+#include <cfw/cfw.h>
 
 #define UART_CH \
     (CFW_SETTINGS()->uart_nmea_channel == UARTDefault ? FuriHalUartIdUSART1 : FuriHalUartIdLPUART1)

@@ -208,7 +208,7 @@ int32_t crossy_road() {
     //Permet de faire bouger les obstacles ave cun délai de 1 seconde
     FuriTimer* TimerDeplacementObstacle =
         furi_timer_alloc(CallbackDeplacementObstacle, FuriTimerTypePeriodic, &obstacleBouge);
-    furi_timer_start(TimerDeplacementObstacle, 1000 / portTICK_PERIOD_MS);
+    furi_timer_start(TimerDeplacementObstacle, 1000);
 
     while(true) {
         furi_check(furi_message_queue_get(event_queue, &event, FuriWaitForever) == FuriStatusOk);

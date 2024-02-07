@@ -16,7 +16,7 @@
 #define TAG "nrf24batch"
 #define VERSION "1.9"
 
-#define SCAN_APP_PATH_FOLDER "/ext/apps_data/nrf24batch"
+#define SCAN_APP_PATH_FOLDER APP_ASSETS_PATH("")
 #define LOG_FILEEXT ".txt"
 #define NRF_READ_TIMEOUT 300UL // ms
 #define WORK_PERIOD 2 // ms, Timer period

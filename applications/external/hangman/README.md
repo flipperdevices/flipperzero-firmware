@@ -23,4 +23,5 @@ The rules are very simple – "Flipper" guesses a word, you have to guess it by 
 
 * Programmer: Evgeny Stepanischev (@bolknote) 
 * Illustrator: Eva Stepanischeva (7 years)
+* Many thanks to the Institute of Applied Semiotics of the Academy of Sciences of the Republic of Tatarstan for the dictionary of Tatar words
 * README, DIALOG and BUTTONS UPDATED TO ENGLISH, HANGMAN IMAGE COLOR FIXED & ANIME DICTIONARY (By RogueMaster)

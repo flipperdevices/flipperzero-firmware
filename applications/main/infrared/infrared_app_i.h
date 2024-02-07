@@ -15,10 +15,10 @@
 #include <gui/modules/loading.h>
 #include <gui/modules/submenu.h>
 #include <gui/modules/dialog_ex.h>
+#include <gui/modules/variable_item_list.h>
 #include <gui/modules/text_input.h>
 #include <gui/modules/button_menu.h>
 #include <gui/modules/button_panel.h>
-#include <gui/modules/variable_item_list.h>
 
 #include <storage/storage.h>
 #include <dialogs/dialogs.h>

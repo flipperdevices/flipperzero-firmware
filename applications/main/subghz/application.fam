@@ -5,11 +5,23 @@ App(
     targets=["f7"],
     cdefines=["APP_SUBGHZ"],
     entry_point="subghz_app",
+    provides=[
+        "subghz_start",
+    ],
     icon="A_Sub1ghz_14",
     stack_size=3 * 1024,
-    order=10,
+    order=1,
+    resources="resources",
     fap_libs=["assets", "hwdrivers"],
     fap_category="Sub-GHz",
     # fap_icon_assets="images",
     fap_icon="icon.png",
+)
+
+App(
+    appid="subghz_start",
+    targets=["f7"],
+    apptype=FlipperAppType.STARTUP,
+    entry_point="subghz_on_system_start",
+    order=40,
 )

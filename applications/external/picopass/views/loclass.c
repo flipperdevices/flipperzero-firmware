@@ -1,5 +1,6 @@
 #include "loclass.h"
-#include "../picopass_worker_i.h"
+
+#include <picopass_device.h>
 
 #include <gui/elements.h>
 

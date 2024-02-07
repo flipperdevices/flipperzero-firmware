@@ -138,6 +138,7 @@ static bool subghz_protocol_keeloq_gen_data(
     uint64_t man = 0;
     uint64_t code_found_reverse;
     int res = 0;
+    // No mf name set? -> set to ""
     if(instance->manufacture_name == 0x0) {
         instance->manufacture_name = "";
     }
@@ -179,7 +180,11 @@ static bool subghz_protocol_keeloq_gen_data(
         hop = 0x00000000;
     }
     if(counter_up && prog_mode == PROG_MODE_OFF) {
+        // Counter increment conditions
+
+        // If counter is 0xFFFF we will reset it to 0
         if(instance->generic.cnt < 0xFFFF) {
+            // Increase counter with value set in global settings (mult)
             if((instance->generic.cnt + furi_hal_subghz_get_rolling_counter_mult()) > 0xFFFF) {
                 instance->generic.cnt = 0;
             } else {
@@ -192,13 +197,16 @@ static bool subghz_protocol_keeloq_gen_data(
     if(prog_mode == PROG_MODE_OFF) {
         // Protocols that do not use encryption
         if(strcmp(instance->manufacture_name, "Unknown") == 0) {
+            // Simple Replay of received code
             code_found_reverse = subghz_protocol_blocks_reverse_key(
                 instance->generic.data, instance->generic.data_count_bit);
             hop = code_found_reverse & 0x00000000ffffffff;
         } else if(strcmp(instance->manufacture_name, "AN-Motors") == 0) {
+            // An-Motors encode
             hop = (instance->generic.cnt & 0xFF) << 24 | (instance->generic.cnt & 0xFF) << 16 |
                   (btn & 0xF) << 12 | 0x404;
         } else if(strcmp(instance->manufacture_name, "HCS101") == 0) {
+            // HCS101 Encode
             hop = instance->generic.cnt << 16 | (btn & 0xF) << 12 | 0x000;
         } else {
             // Protocols that use encryption
@@ -254,6 +262,7 @@ static bool subghz_protocol_keeloq_gen_data(
                 // Dea_Mio -> modified serial in hop, uses last 3 digits modifying first one (example - 419 -> C19)
                 // (see formula in result_disc var) - simple learning
             }
+            // Old type selector fixage for compatibilitiy with old signal files
             uint8_t kl_type_en = instance->keystore->kl_type;
             for
                 M_EACH(
@@ -398,9 +407,11 @@ static bool
         subghz_custom_btn_set_original(btn);
     }
 
+    // No mf name set? -> set to ""
     if(instance->manufacture_name == 0x0) {
         instance->manufacture_name = "";
     }
+    // Prog mode checks and extra fixage of MF Names
     ProgMode prog_mode = subghz_custom_btn_get_prog_mode();
     if(prog_mode == PROG_MODE_KEELOQ_BFT) {
         instance->manufacture_name = "BFT";
@@ -968,6 +979,7 @@ static uint8_t subghz_protocol_keeloq_check_remote_controller_selector(
             }
         }
 
+    // MF not found
     *manufacture_name = "Unknown";
     keystore->mfname = "Unknown";
     instance->cnt = 0;
@@ -979,6 +991,7 @@ static void subghz_protocol_keeloq_check_remote_controller(
     SubGhzBlockGeneric* instance,
     SubGhzKeystore* keystore,
     const char** manufacture_name) {
+    // Reverse key, split FIX and HOP parts
     uint64_t key = subghz_protocol_blocks_reverse_key(instance->data, instance->data_count_bit);
     uint32_t key_fix = key >> 32;
     uint32_t key_hop = key & 0x00000000ffffffff;
@@ -995,7 +1008,7 @@ static void subghz_protocol_keeloq_check_remote_controller(
         }
 
         // Case when we have no mf name means that we are checking for the first time and we have to check all conditions
-        if((strlen(keystore->mfname) < 1) && strlen(*manufacture_name) < 1) {
+        if(strlen(keystore->mfname) < 1) {
             // Check key AN-Motors
             if((key_hop >> 24) == ((key_hop >> 16) & 0x00ff) &&
                (key_fix >> 28) == ((key_hop >> 12) & 0x0f) && (key_hop & 0xFFF) == 0x404) {
@@ -1011,16 +1024,33 @@ static void subghz_protocol_keeloq_check_remote_controller(
                     instance, key_fix, key_hop, keystore, manufacture_name);
             }
         } else {
-            subghz_protocol_keeloq_check_remote_controller_selector(
-                instance, key_fix, key_hop, keystore, manufacture_name);
+            // If we have mfname and its one of AN-Motors or HCS101 we should preform only check for this system
+            if(strcmp(keystore->mfname, "AN-Motors") == 0) {
+                // Force key to AN-Motors
+                *manufacture_name = "AN-Motors";
+                keystore->mfname = *manufacture_name;
+                instance->cnt = key_hop >> 16;
+            } else if(strcmp(keystore->mfname, "HCS101") == 0) {
+                // Force key to HCS101
+                *manufacture_name = "HCS101";
+                keystore->mfname = *manufacture_name;
+                instance->cnt = key_hop >> 16;
+            } else {
+                // Else we have mfname that is not AN-Motors or HCS101 we should check it via default selector
+                subghz_protocol_keeloq_check_remote_controller_selector(
+                    instance, key_fix, key_hop, keystore, manufacture_name);
+            }
         }
+        // Save original counter as temp counter in case of later usage of prog mode
         temp_counter = instance->cnt;
 
     } else if(prog_mode == PROG_MODE_KEELOQ_BFT) {
+        // When we are in prog mode we should fix mfname and apply temp counter
         *manufacture_name = "BFT";
         keystore->mfname = *manufacture_name;
         instance->cnt = temp_counter;
     } else if(prog_mode == PROG_MODE_KEELOQ_APRIMATIC) {
+        // When we are in prog mode we should fix mfname and apply temp counter
         *manufacture_name = "Aprimatic";
         keystore->mfname = *manufacture_name;
         instance->cnt = temp_counter;
@@ -1034,6 +1064,7 @@ static void subghz_protocol_keeloq_check_remote_controller(
         furi_crash("Unsupported Prog Mode");
     }
 
+    // Get serial and button code from FIX part of the key
     instance->serial = key_fix & 0x0FFFFFFF;
     instance->btn = key_fix >> 28;
 
@@ -1041,6 +1072,7 @@ static void subghz_protocol_keeloq_check_remote_controller(
     if(subghz_custom_btn_get_original() == 0) {
         subghz_custom_btn_set_original(instance->btn);
     }
+    // Set max custom buttons
     subghz_custom_btn_set_max(4);
 }
 

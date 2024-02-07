@@ -4,7 +4,7 @@ enum SubmenuIndex {
     SubmenuIndexSamMissing,
 };
 
-static void detect_callback(void* context) {
+static void seader_scene_start_detect_callback(void* context) {
     Seader* seader = context;
     view_dispatcher_send_custom_event(seader->view_dispatcher, SeaderWorkerEventSamMissing);
 }
@@ -25,7 +25,7 @@ void seader_scene_start_on_enter(void* context) {
     Popup* popup = seader->popup;
 
     popup_set_context(seader->popup, seader);
-    popup_set_callback(seader->popup, detect_callback);
+    popup_set_callback(seader->popup, seader_scene_start_detect_callback);
     popup_set_header(popup, "Detecting SAM", 58, 48, AlignCenter, AlignCenter);
     popup_set_timeout(seader->popup, 2500);
     popup_enable_timeout(seader->popup);
@@ -35,7 +35,6 @@ void seader_scene_start_on_enter(void* context) {
         seader->worker,
         SeaderWorkerStateCheckSam,
         seader->uart,
-        seader->credential,
         seader_sam_check_worker_callback,
         seader);
     view_dispatcher_switch_to_view(seader->view_dispatcher, SeaderViewPopup);
@@ -65,5 +64,5 @@ bool seader_scene_start_on_event(void* context, SceneManagerEvent event) {
 
 void seader_scene_start_on_exit(void* context) {
     Seader* seader = context;
-    submenu_reset(seader->submenu);
+    popup_reset(seader->popup);
 }

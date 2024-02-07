@@ -35,7 +35,7 @@ class GitVersion:
             or "unknown"
         )
 
-        version = os.environ.get("DIST_SUFFIX", None) or "0.93.9"
+        version = os.environ.get("DIST_SUFFIX", None) or "0.97.2"
 
         if "SOURCE_DATE_EPOCH" in os.environ:
             commit_date = datetime.utcfromtimestamp(
@@ -100,7 +100,7 @@ class Main(App):
             required=True,
         )
         self.parser_generate.add_argument(
-            "-fw-origin",
+            "--fw-origin",
             dest="firmware_origin",
             type=str,
             help="firmware origin",

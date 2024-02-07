@@ -52,6 +52,7 @@ void seader_ccid_check_for_sam(SeaderUartBridge* seader_uart) {
     hasSAM = false; // If someone is calling this, reset sam state
     powered[0] = false;
     powered[1] = false;
+    retries = 3;
     seader_ccid_GetSlotStatus(seader_uart, 0);
 }
 
@@ -130,7 +131,8 @@ void seader_ccid_XfrBlockToSlot(
     furi_thread_flags_set(furi_thread_get_id(seader_uart->tx_thread), WorkerEvtSamRx);
 }
 
-size_t seader_ccid_process(SeaderWorker* seader_worker, uint8_t* cmd, size_t cmd_len) {
+size_t seader_ccid_process(Seader* seader, uint8_t* cmd, size_t cmd_len) {
+    SeaderWorker* seader_worker = seader->worker;
     SeaderUartBridge* seader_uart = seader_worker->uart;
     CCID_Message message;
     message.consumed = 0;
@@ -153,7 +155,6 @@ size_t seader_ccid_process(SeaderWorker* seader_worker, uint8_t* cmd, size_t cmd
                 if(hasSAM && sam_slot == 0) {
                     break;
                 }
-                retries = 0;
                 sequence[0] = 0;
                 seader_ccid_IccPowerOn(seader_uart, 0);
                 break;
@@ -165,8 +166,6 @@ size_t seader_ccid_process(SeaderWorker* seader_worker, uint8_t* cmd, size_t cmd
                     retries = 3;
                 }
                 break;
-            default:
-                FURI_LOG_D(TAG, "Unknown slot 0 card event");
             };
 
             switch(cmd[1] & SLOT_1_MASK) {
@@ -179,7 +178,6 @@ size_t seader_ccid_process(SeaderWorker* seader_worker, uint8_t* cmd, size_t cmd
                 if(hasSAM && sam_slot == 1) {
                     break;
                 }
-                retries = 0;
                 sequence[1] = 0;
                 seader_ccid_IccPowerOn(seader_uart, 1);
                 break;
@@ -191,8 +189,6 @@ size_t seader_ccid_process(SeaderWorker* seader_worker, uint8_t* cmd, size_t cmd
                     retries = 3;
                 }
                 break;
-            default:
-                FURI_LOG_D(TAG, "Unknown slot 1 card event");
             };
 
             return 2;
@@ -234,6 +230,7 @@ size_t seader_ccid_process(SeaderWorker* seader_worker, uint8_t* cmd, size_t cmd
         }
         message.consumed += 2 + 10 + message.dwLength + 1;
 
+        /*
         if(message.dwLength == 0) {
             FURI_LOG_D(
                 TAG,
@@ -252,6 +249,7 @@ size_t seader_ccid_process(SeaderWorker* seader_worker, uint8_t* cmd, size_t cmd
                 message.dwLength,
                 display);
         }
+        */
 
         //0306 81 00000000 0000 0200 01 87
         //0306 81 00000000 0000 0100 01 84
@@ -302,7 +300,7 @@ size_t seader_ccid_process(SeaderWorker* seader_worker, uint8_t* cmd, size_t cmd
         if(message.bMessageType == CCID_MESSAGE_TYPE_RDR_to_PC_DataBlock) {
             if(hasSAM) {
                 if(message.bSlot == sam_slot) {
-                    seader_worker_process_sam_message(seader_worker, &message);
+                    seader_worker_process_sam_message(seader, &message);
                 } else {
                     FURI_LOG_D(TAG, "Discarding message on non-sam slot");
                 }

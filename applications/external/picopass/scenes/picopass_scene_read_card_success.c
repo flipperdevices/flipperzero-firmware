@@ -1,5 +1,6 @@
 #include "../picopass_i.h"
 #include <dolphin/dolphin.h>
+#include <picopass_keys.h>
 
 void picopass_scene_read_card_success_widget_callback(
     GuiButtonType result,
@@ -27,25 +28,42 @@ void picopass_scene_read_card_success_on_enter(void* context) {
     notification_message(picopass->notifications, &sequence_success);
 
     // Setup view
-    PicopassBlock* AA1 = picopass->dev->dev_data.AA1;
+    PicopassBlock* card_data = picopass->dev->dev_data.card_data;
     PicopassPacs* pacs = &picopass->dev->dev_data.pacs;
     Widget* widget = picopass->widget;
 
     uint8_t csn[PICOPASS_BLOCK_LEN] = {0};
-    memcpy(csn, AA1[PICOPASS_CSN_BLOCK_INDEX].data, PICOPASS_BLOCK_LEN);
+    memcpy(csn, card_data[PICOPASS_CSN_BLOCK_INDEX].data, PICOPASS_BLOCK_LEN);
     for(uint8_t i = 0; i < PICOPASS_BLOCK_LEN; i++) {
         furi_string_cat_printf(csn_str, "%02X", csn[i]);
     }
 
     // We can't test the pacs->key in case it is intentionally all 0's and we can't test the key block since it is populated with the diversified key before each key test, so we approximate with the PACS config block being blank.
-    bool no_key = picopass_is_memset(
-        AA1[PICOPASS_ICLASS_PACS_CFG_BLOCK_INDEX].data, 0x00, PICOPASS_BLOCK_LEN);
+    bool zero_config = picopass_is_memset(
+        card_data[PICOPASS_ICLASS_PACS_CFG_BLOCK_INDEX].data, 0x00, PICOPASS_BLOCK_LEN);
     bool empty = picopass_is_memset(
-        AA1[PICOPASS_ICLASS_PACS_CFG_BLOCK_INDEX].data, 0xFF, PICOPASS_BLOCK_LEN);
+        card_data[PICOPASS_ICLASS_PACS_CFG_BLOCK_INDEX].data, 0xFF, PICOPASS_BLOCK_LEN);
+    bool SE = 0x30 == card_data[PICOPASS_ICLASS_PACS_CFG_BLOCK_INDEX].data[0];
+    bool configCard = (card_data[PICOPASS_ICLASS_PACS_CFG_BLOCK_INDEX].data[7] >> 2 & 3) == 2;
+    bool secured = (card_data[PICOPASS_CONFIG_BLOCK_INDEX].data[7] & PICOPASS_FUSE_CRYPT10) !=
+                   PICOPASS_FUSE_CRYPT0;
+    bool hid_csn = picopass_device_hid_csn(picopass->dev);
 
-    if(no_key) {
+    if(!secured) {
+        furi_string_cat_printf(wiegand_str, "Non-Secured Chip");
+
+        if(!hid_csn) {
+            furi_string_cat_printf(credential_str, "Non-HID CSN");
+        }
+
+        widget_add_button_element(
+            widget,
+            GuiButtonTypeRight,
+            "More",
+            picopass_scene_read_card_success_widget_callback,
+            picopass);
+    } else if(zero_config) {
         furi_string_cat_printf(wiegand_str, "Read Failed");
-        bool hid_csn = picopass_device_hid_csn(picopass->dev);
 
         if(pacs->se_enabled) {
             furi_string_cat_printf(credential_str, "SE enabled");
@@ -59,6 +77,23 @@ void picopass_scene_read_card_success_on_enter(void* context) {
             "Menu",
             picopass_scene_read_card_success_widget_callback,
             picopass);
+        widget_add_button_element(
+            widget,
+            GuiButtonTypeRight,
+            "More",
+            picopass_scene_read_card_success_widget_callback,
+            picopass);
+    } else if(pacs->se_enabled) {
+        furi_string_cat_printf(credential_str, "SE enabled");
+        furi_string_cat_printf(wiegand_str, "SIO");
+        widget_add_button_element(
+            widget,
+            GuiButtonTypeRight,
+            "More",
+            picopass_scene_read_card_success_widget_callback,
+            picopass);
+    } else if(configCard) {
+        furi_string_cat_printf(wiegand_str, "Config Card");
     } else if(empty) {
         furi_string_cat_printf(wiegand_str, "Empty");
         widget_add_button_element(
@@ -69,15 +104,21 @@ void picopass_scene_read_card_success_on_enter(void* context) {
             picopass);
     } else if(pacs->bitLength == 0 || pacs->bitLength == 255) {
         // Neither of these are valid.  Indicates the block was all 0x00 or all 0xff
-        furi_string_cat_printf(wiegand_str, "Invalid PACS");
-
-        if(pacs->se_enabled) {
-            furi_string_cat_printf(credential_str, "SE enabled");
+        if(SE) {
+            furi_string_cat_printf(wiegand_str, "SIO");
+        } else {
+            furi_string_cat_printf(wiegand_str, "Invalid PACS");
         }
         widget_add_button_element(
             widget,
             GuiButtonTypeCenter,
             "Menu",
+            picopass_scene_read_card_success_widget_callback,
+            picopass);
+        widget_add_button_element(
+            widget,
+            GuiButtonTypeRight,
+            "More",
             picopass_scene_read_card_success_widget_callback,
             picopass);
     } else {
@@ -92,7 +133,12 @@ void picopass_scene_read_card_success_on_enter(void* context) {
             furi_string_cat_printf(credential_str, " +SIO");
         }
 
-        if(pacs->key) {
+        bool no_key = picopass_is_memset(
+            card_data[PICOPASS_SECURE_KD_BLOCK_INDEX].data, 0xFF, PICOPASS_BLOCK_LEN);
+
+        if(no_key) {
+            furi_string_cat_printf(key_str, "No Key: used NR-MAC");
+        } else if(pacs->key) {
             furi_string_cat_printf(key_str, "Key: ");
             uint8_t key[PICOPASS_BLOCK_LEN];
             memcpy(key, &pacs->key, PICOPASS_BLOCK_LEN);
@@ -169,6 +215,10 @@ bool picopass_scene_read_card_success_on_event(void* context, SceneManagerEvent 
             consumed = scene_manager_search_and_switch_to_another_scene(
                 picopass->scene_manager, PicopassSceneStart);
         }
+    } else if(event.type == SceneManagerEventTypeBack) {
+        scene_manager_search_and_switch_to_previous_scene(
+            picopass->scene_manager, PicopassSceneStart);
+        consumed = true;
     }
     return consumed;
 }

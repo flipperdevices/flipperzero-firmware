@@ -1400,7 +1400,6 @@ typedef struct w64wrapper {
         #endif
     #elif defined(FREERTOS)
         typedef unsigned int   THREAD_RETURN;
-        typedef TaskHandle_t   THREAD_TYPE;
         #define WOLFSSL_THREAD
     #elif defined(_MSC_VER)
         typedef unsigned      THREAD_RETURN;

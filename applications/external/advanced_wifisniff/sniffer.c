@@ -3,7 +3,7 @@
 #include <gui/gui.h>
 #include <notification/notification_messages.h>
 #include <toolbox/stream/file_stream.h>
-#include <cfw.h>
+#include <cfw/cfw.h>
 
 #include "helpers/minmea.h"
 #include "wifisniffer_icons.h"

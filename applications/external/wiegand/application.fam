@@ -9,5 +9,5 @@ App(
     fap_author="jamisonderek",
     fap_weburl="https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/gpio/wiegand",
     fap_version=(1, 3),
-    fap_description="This application supports W4, W8, W24, W26, W32, W34, W37, W40 and W48 formats.",
+    fap_description="This application supports W4, W8, W24, W26, W32, W34, W37, W40 and W48 formats and can be used to test Wiegand readers and keypads.",
 )

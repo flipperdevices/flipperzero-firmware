@@ -11,7 +11,6 @@
 #include <gui/modules/text_input.h>
 #include <m-dict.h>
 #include <loader/loader.h>
-#include "internal_defs.h"
 
 #define TEXT_BOX_STORE_SIZE (4096)
 #define TEXT_INPUT_STORE_SIZE (512)
@@ -37,5 +36,4 @@ typedef struct {
     char text_input_store[TEXT_INPUT_STORE_SIZE + 1];
     TextInput* text_input;
     ViewDispatcher* view_dispatcher;
-    ViewDispatcher_internal* view_dispatcher_i;
 } CliguiApp;

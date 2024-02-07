@@ -1,6 +1,6 @@
 #include <furi_hal.h>
 #include <lib/mlib/m-dict.h>
-#include <toolbox/sha256.h>
+#include <mbedtls/sha256.h>
 
 #ifndef FURI_HAL_CRYPTO_ADVANCED_AVAIL
 #include "crypto/gcm.h"
@@ -78,7 +78,7 @@ static uint64_t crypto_calc_run_id(FuriString* flipper_name, uint32_t tick) {
     memcpy(h_in + fn_len, &tick, sizeof(uint32_t));
 
     uint8_t h_out[256];
-    sha256(h_in, fn_len + sizeof(uint32_t), h_out);
+    mbedtls_sha256(h_in, fn_len + sizeof(uint32_t), h_out, 0);
 
     uint64_t run_id;
     memcpy(&run_id, h_out, sizeof(uint64_t));

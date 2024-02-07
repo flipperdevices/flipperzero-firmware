@@ -464,15 +464,15 @@ typedef struct IncludeFrame
 ** Prototypes
 ***************************************************************/
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+// #ifdef __cplusplus
+// extern "C" {
+// #endif
 
-ThrowCode pfCatch( ExecToken XT, pfTaskData_t *gCurrentTask );
+// ThrowCode pfCatch( ExecToken XT, pfTaskData_t *gCurrentTask );
 
-#ifdef __cplusplus
-}
-#endif
+// #ifdef __cplusplus
+// }
+// #endif
 
 /***************************************************************
 ** External Globals

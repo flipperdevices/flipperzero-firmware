@@ -1,6 +1,7 @@
 #pragma once
 
 #include "furi_hal.h"
+#include <FreeRTOS.h>
 
 #define RX_BUF_SIZE (320)
 

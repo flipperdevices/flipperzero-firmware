@@ -1,3 +1,7 @@
+## v.1.3
+
+Minimal changes for recent API updates
+
 ## v.1.2
 
  * Fix deadlock on disk eject

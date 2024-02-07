@@ -25,8 +25,7 @@ bool brainfuck_scene_file_create_on_event(void* context, SceneManagerEvent event
     bool consumed = false;
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == brainfuckCustomEventTextInputDone) {
-            furi_string_cat_printf(
-                app->BF_file_path, EXT_PATH("apps_data/brainfuck/%s.b"), tmpName);
+            furi_string_cat_printf(app->BF_file_path, "/ext/apps_data/brainfuck/%s.b", tmpName);
 
             //remove old file
             Storage* storage = furi_record_open(RECORD_STORAGE);

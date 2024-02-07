@@ -36,7 +36,7 @@ void seader_scene_credential_info_on_enter(void* context) {
         furi_string_cat_printf(credential_str, "0x%llX", credential->credential);
 
         if(credential->type == SeaderCredentialTypeNone) {
-            furi_string_set(type_str, "None");
+            furi_string_set(type_str, "Unknown");
         } else if(credential->type == SeaderCredentialType14A) {
             furi_string_set(type_str, "14443A");
         } else if(credential->type == SeaderCredentialTypePicopass) {

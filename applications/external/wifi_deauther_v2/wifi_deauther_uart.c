@@ -1,6 +1,7 @@
 #include "wifi_deauther_app_i.h"
 #include "wifi_deauther_uart.h"
 
+#include <FreeRTOS.h>
 #include <stream_buffer.h>
 
 #define BAUDRATE (115200)

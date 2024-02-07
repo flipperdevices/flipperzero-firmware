@@ -6,10 +6,11 @@ App(
     stack_size=8 * 1024,
     fap_icon="assets/chat_10px.png",
     fap_category="Sub-GHz",
+    fap_libs=["mbedtls"],
     fap_icon_assets="assets",
     fap_icon_assets_symbol="esubghz_chat",
     fap_author="twisted-pear",
     fap_weburl="https://github.com/twisted-pear/esubghz_chat",
-    fap_version=(1, 1),
+    fap_version=(1, 2),
     fap_description="This is a plugin for the Flipper Zero that reimplements the Sub-GHz chat feature that is available on the CLI. In addition it allows for basic encryption of messages.",
 )

@@ -3,6 +3,9 @@
 #include "thread.h"
 #include "string.h"
 
+#include <FreeRTOS.h>
+#include <task.h>
+
 typedef struct {
     FuriThreadStdoutWriteCallback write_callback;
     FuriString* buffer;
