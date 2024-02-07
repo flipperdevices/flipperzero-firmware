@@ -280,7 +280,7 @@ void nfc_maker_scene_save_generate_on_enter(void* context) {
     Submenu* submenu = app->submenu;
     size_t ndef_size = nfc_maker_scene_save_generate_populate_ndef_buffer(app);
 
-    submenu_set_header(submenu, "NTAG Type:");
+    submenu_set_header(submenu, "Tag Type:");
 
     for(Ntag ntag = 0; ntag < NtagMAX; ntag++) {
         submenu_add_lockable_item(
