@@ -63,7 +63,13 @@ class Main(App):
         return dist_target_path
 
     def note_dist_component(self, component: str, extension: str, srcpath: str) -> None:
-        self._dist_components[f"{component}.{extension}"] = srcpath
+        component_key = f"{component}.{extension}"
+        if component_key in self._dist_components:
+            self.logger.debug(
+                f"Skipping duplicate component {component_key} in {srcpath}"
+            )
+            return
+        self._dist_components[component_key] = srcpath
 
     def get_dist_file_name(self, dist_artifact_type: str, filetype: str) -> str:
         return f"{self.DIST_FILE_PREFIX}{self.target}-{dist_artifact_type}-{self.args.suffix}.{filetype}"
