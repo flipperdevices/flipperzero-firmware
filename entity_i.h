@@ -1,6 +1,6 @@
 #pragma once
 #include "entity.h"
-#include "director.h"
+#include "game_manager.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -14,11 +14,11 @@ void entity_call_start(Level* level, Entity* entity);
 
 void entity_call_stop(Level* level, Entity* entity);
 
-void entity_call_update(Entity* entity, Director* director);
+void entity_call_update(Entity* entity, GameManager* manager);
 
-void entity_call_render(Entity* entity, Director* director, Canvas* canvas);
+void entity_call_render(Entity* entity, GameManager* manager, Canvas* canvas);
 
-void entity_call_collision(Entity* entity, Entity* other, Director* director);
+void entity_call_collision(Entity* entity, Entity* other, GameManager* manager);
 
 bool entity_collider_check_collision(Entity* entity, Entity* other);
 

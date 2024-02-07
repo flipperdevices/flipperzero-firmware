@@ -1,6 +1,5 @@
 #pragma once
 #include "game_engine.h"
-#include "director.h"
 #include <stdlib.h>
 
 #ifdef __cplusplus
@@ -8,6 +7,8 @@ extern "C" {
 #endif
 
 typedef struct Entity Entity;
+
+typedef struct Level Level;
 
 typedef struct {
     float x;
@@ -27,13 +28,16 @@ typedef struct {
     EntityEventValue value;
 } EntityEvent;
 
+typedef struct Level Level;
+typedef struct GameManager GameManager;
+
 typedef struct {
     void (*start)(Entity* self, Level* level, void* context);
     void (*stop)(Entity* self, Level* level, void* context);
-    void (*update)(Entity* self, Director* director, void* context);
-    void (*render)(Entity* self, Director* director, Canvas* canvas, void* context);
-    void (*collision)(Entity* self, Entity* other, Director* director, void* context);
-    void (*event)(Entity* self, Director* director, EntityEvent event, void* context);
+    void (*update)(Entity* self, GameManager* manager, void* context);
+    void (*render)(Entity* self, GameManager* manager, Canvas* canvas, void* context);
+    void (*collision)(Entity* self, Entity* other, GameManager* manager, void* context);
+    void (*event)(Entity* self, GameManager* manager, EntityEvent event, void* context);
     size_t context_size;
 } EntityDescription;
 

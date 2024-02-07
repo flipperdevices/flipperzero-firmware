@@ -122,13 +122,13 @@ void level_remove_entity(Level* level, Entity* entity) {
     entity_call_stop(level, entity);
 }
 
-static void level_process_update(Level* level, Director* director) {
+static void level_process_update(Level* level, GameManager* manager) {
     FOREACH(item, level->entities) {
-        entity_call_update(*item, director);
+        entity_call_update(*item, manager);
     }
 }
 
-static void level_process_collision(Level* level, Director* director) {
+static void level_process_collision(Level* level, GameManager* manager) {
     EntityList_it_t it_first;
     EntityList_it_t it_second;
 
@@ -144,8 +144,8 @@ static void level_process_collision(Level* level, Director* director) {
                     Entity* first = *EntityList_ref(it_first);
                     Entity* second = *EntityList_ref(it_second);
                     if(entity_collider_check_collision(first, second)) {
-                        entity_call_collision(first, second, director);
-                        entity_call_collision(second, first, director);
+                        entity_call_collision(first, second, manager);
+                        entity_call_collision(second, first, manager);
                     }
                 }
                 EntityList_next(it_second);
@@ -155,16 +155,16 @@ static void level_process_collision(Level* level, Director* director) {
     }
 }
 
-void level_update(Level* level, Director* director) {
+void level_update(Level* level, GameManager* manager) {
     level_process_add(level);
     level_process_remove(level);
-    level_process_update(level, director);
-    level_process_collision(level, director);
+    level_process_update(level, manager);
+    level_process_collision(level, manager);
 }
 
-void level_render(Level* level, Director* director, Canvas* canvas) {
+void level_render(Level* level, GameManager* manager, Canvas* canvas) {
     FOREACH(item, level->entities) {
-        entity_call_render(*item, director, canvas);
+        entity_call_render(*item, manager, canvas);
     }
 }
 

@@ -9,9 +9,9 @@ Level* level_alloc(const LevelBehaviour* behaviour);
 
 void level_free(Level* level);
 
-void level_update(Level* level, Director* director);
+void level_update(Level* level, GameManager* manager);
 
-void level_render(Level* level, Director* director, Canvas* canvas);
+void level_render(Level* level, GameManager* manager, Canvas* canvas);
 
 void level_call_alloc(Level* level);
 

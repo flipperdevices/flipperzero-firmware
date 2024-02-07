@@ -126,21 +126,21 @@ void entity_call_stop(Level* level, Entity* entity) {
     }
 }
 
-void entity_call_update(Entity* entity, Director* director) {
+void entity_call_update(Entity* entity, GameManager* manager) {
     if(entity->description && entity->description->update) {
-        entity->description->update(entity, director, entity->context);
+        entity->description->update(entity, manager, entity->context);
     }
 }
 
-void entity_call_render(Entity* entity, Director* director, Canvas* canvas) {
+void entity_call_render(Entity* entity, GameManager* manager, Canvas* canvas) {
     if(entity->description && entity->description->render) {
-        entity->description->render(entity, director, canvas, entity->context);
+        entity->description->render(entity, manager, canvas, entity->context);
     }
 }
 
-void entity_call_collision(Entity* entity, Entity* other, Director* director) {
+void entity_call_collision(Entity* entity, Entity* other, GameManager* manager) {
     if(entity->description && entity->description->collision) {
-        entity->description->collision(entity, other, director, entity->context);
+        entity->description->collision(entity, other, manager, entity->context);
     }
 }
 

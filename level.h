@@ -1,12 +1,10 @@
 #pragma once
+#include <stddef.h>
 #include "entity.h"
-#include "director.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-typedef struct Level Level;
 
 typedef struct {
     void (*alloc)(Level* level, void* context);
