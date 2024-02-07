@@ -7,6 +7,7 @@
 
 #define TAG "HI!"
 #define KEY_LENGTH 6
+#define HI_KEY_TO_GEN 5
 #define UID_LENGTH 7
 
 typedef struct {
@@ -132,8 +133,8 @@ static bool hi_read(Nfc* nfc, NfcDevice* device) {
         uint8_t uid[UID_LENGTH];
         memcpy(uid, data->iso14443_3a_data->uid, UID_LENGTH);
 
-        uint8_t keyA[4][KEY_LENGTH];
-        uint8_t keyB[4][KEY_LENGTH];
+        uint8_t keyA[HI_KEY_TO_GEN][KEY_LENGTH];
+        uint8_t keyB[HI_KEY_TO_GEN][KEY_LENGTH];
         hi_generate_key(uid, keyA, keyB);
 
         for(size_t i = 0; i < mf_classic_get_total_sectors_num(data->type); i++) {

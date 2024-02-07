@@ -7,6 +7,7 @@
 
 #define TAG "MiZIP"
 #define KEY_LENGTH 6
+#define MIZIP_KEY_TO_GEN 5
 #define UID_LENGTH 4
 
 typedef struct {
@@ -47,7 +48,7 @@ static MfClassicKeyPair mizip_mini_keys[] = {
 };
 
 //KDF
-void mizip_generate_key(uint8_t* uid, uint8_t keyA[4][KEY_LENGTH], uint8_t keyB[4][KEY_LENGTH]) {
+void mizip_generate_key(uint8_t* uid, uint8_t keyA[5][KEY_LENGTH], uint8_t keyB[5][KEY_LENGTH]) {
     // Static XOR table for key generation
     static const uint8_t xor_table_keyA[4][6] = {
         {0x09, 0x12, 0x5A, 0x25, 0x89, 0xE5},
@@ -145,8 +146,8 @@ static bool mizip_read(Nfc* nfc, NfcDevice* device) {
         uint8_t uid[UID_LENGTH];
         memcpy(uid, data->iso14443_3a_data->uid, UID_LENGTH);
 
-        uint8_t keyA[4][KEY_LENGTH];
-        uint8_t keyB[4][KEY_LENGTH];
+        uint8_t keyA[MIZIP_KEY_TO_GEN][KEY_LENGTH];
+        uint8_t keyB[MIZIP_KEY_TO_GEN][KEY_LENGTH];
         mizip_generate_key(uid, keyA, keyB);
 
         for(size_t i = 0; i < mf_classic_get_total_sectors_num(data->type); i++) {
