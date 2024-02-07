@@ -26,7 +26,7 @@ int32_t game_app(void* p) {
     game.start(game_manager, game_context);
 
     GameEngineSettings settings = game_engine_settings_init();
-    settings.fps = 60.0f;
+    settings.target_fps = 60.0f;
     settings.show_fps = true;
     settings.always_backlight = true;
     settings.frame_callback = frame_cb;

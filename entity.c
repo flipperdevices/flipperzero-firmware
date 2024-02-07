@@ -15,32 +15,6 @@ int32_t entities_get_count(void) {
     return entities_count;
 }
 
-typedef enum {
-    ColliderTypeCircle,
-    ColliderTypeRect,
-} ColliderType;
-
-typedef struct {
-    ColliderType type;
-    union {
-        struct {
-            float radius;
-        } circle;
-        struct {
-            float half_width;
-            float half_height;
-        } rect;
-    };
-} Collider;
-
-struct Entity {
-    Vector position;
-    const EntityDescription* description;
-    void* context;
-    Collider* collider;
-    Vector collider_offset;
-};
-
 Entity* entity_alloc(const EntityDescription* description) {
     entities_count++;
     Entity* entity = malloc(sizeof(Entity));
@@ -53,6 +27,7 @@ Entity* entity_alloc(const EntityDescription* description) {
     entity->collider = NULL;
     entity->collider_offset = VECTOR_ZERO;
     ENTITY_D("Allocated at %p", entity);
+    entity->collider_dirty = false;
     return entity;
 }
 
@@ -61,6 +36,7 @@ void entity_collider_add_circle(Entity* entity, float radius) {
     entity->collider = malloc(sizeof(Collider));
     entity->collider->type = ColliderTypeCircle;
     entity->collider->circle.radius = radius;
+    entity->collider_dirty = true;
 }
 
 void entity_collider_add_rect(Entity* entity, float width, float height) {
@@ -69,10 +45,12 @@ void entity_collider_add_rect(Entity* entity, float width, float height) {
     entity->collider->type = ColliderTypeRect;
     entity->collider->rect.half_width = width / 2;
     entity->collider->rect.half_height = height / 2;
+    entity->collider_dirty = true;
 }
 
 void entity_collider_offset_set(Entity* entity, Vector offset) {
     entity->collider_offset = offset;
+    entity->collider_dirty = true;
 }
 
 Vector entity_collider_offset_get(Entity* entity) {
@@ -108,6 +86,7 @@ Vector entity_pos_get(Entity* entity) {
 
 void entity_pos_set(Entity* entity, Vector position) {
     entity->position = position;
+    entity->collider_dirty = true;
 }
 
 void* entity_context_get(Entity* entity) {
@@ -192,6 +171,10 @@ bool entity_collider_circle_rect(Entity* entity, Entity* other) {
 bool entity_collider_check_collision(Entity* entity, Entity* other) {
     furi_check(entity->collider);
     furi_check(other->collider);
+
+    // if(entity->description == other->description) {
+    //     return false;
+    // }
 
     if(entity->collider->type == ColliderTypeCircle) {
         if(other->collider->type == ColliderTypeCircle) {

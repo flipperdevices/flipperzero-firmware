@@ -6,6 +6,33 @@
 extern "C" {
 #endif
 
+typedef enum {
+    ColliderTypeCircle,
+    ColliderTypeRect,
+} ColliderType;
+
+typedef struct {
+    ColliderType type;
+    union {
+        struct {
+            float radius;
+        } circle;
+        struct {
+            float half_width;
+            float half_height;
+        } rect;
+    };
+} Collider;
+
+struct Entity {
+    Vector position;
+    const EntityDescription* description;
+    void* context;
+    Collider* collider;
+    Vector collider_offset;
+    bool collider_dirty;
+};
+
 Entity* entity_alloc(const EntityDescription* behaviour);
 
 void entity_free(Entity* entity);

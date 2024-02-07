@@ -134,24 +134,30 @@ static void level_process_collision(Level* level, GameManager* manager) {
 
     EntityList_it(it_first, level->entities);
     while(!EntityList_end_p(it_first)) {
-        if(entity_collider_exists(*EntityList_cref(it_first))) {
+        Entity* first = *EntityList_ref(it_first);
+        if(entity_collider_exists(first)) {
             // start second iterator at the next entity,
             // so we don't check the same pair twice
             EntityList_it_set(it_second, it_first);
             EntityList_next(it_second);
             while(!EntityList_end_p(it_second)) {
-                if(entity_collider_exists(*EntityList_cref(it_second))) {
-                    Entity* first = *EntityList_ref(it_first);
-                    Entity* second = *EntityList_ref(it_second);
-                    if(entity_collider_check_collision(first, second)) {
-                        entity_call_collision(first, second, manager);
-                        entity_call_collision(second, first, manager);
+                Entity* second = *EntityList_ref(it_second);
+                if(first->collider_dirty || second->collider_dirty) {
+                    if(entity_collider_exists(second)) {
+                        if(entity_collider_check_collision(first, second)) {
+                            entity_call_collision(first, second, manager);
+                            entity_call_collision(second, first, manager);
+                        }
                     }
                 }
                 EntityList_next(it_second);
             }
         }
         EntityList_next(it_first);
+    }
+
+    FOREACH(item, level->entities) {
+        (*item)->collider_dirty = false;
     }
 }
 
