@@ -36,7 +36,7 @@ typedef void (*GameEngineFrameCallback)(
     void* context);
 
 typedef struct {
-    float fps; // target fps
+    float target_fps; // target fps
     bool show_fps; // show fps counter
     bool always_backlight; // keep backlight on
     GameEngineStartCallback start_callback; // called when engine starts

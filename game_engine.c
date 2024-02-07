@@ -9,7 +9,7 @@ typedef _Atomic uint32_t AtomicUint32;
 
 GameEngineSettings game_engine_settings_init() {
     GameEngineSettings settings;
-    settings.fps = 30.0f;
+    settings.target_fps = 30.0f;
     settings.show_fps = false;
     settings.always_backlight = true;
     settings.start_callback = NULL;
@@ -128,7 +128,7 @@ void game_engine_run(GameEngine* engine) {
     }
 
     // start "game update" timer
-    clock_timer_start(clock_timer_callback, engine, engine->settings.fps);
+    clock_timer_start(clock_timer_callback, engine, engine->settings.target_fps);
 
     // init fps counter
     uint32_t time_start = DWT->CYCCNT;
@@ -175,6 +175,9 @@ void game_engine_run(GameEngine* engine) {
 
             // and output screen buffer
             canvas_commit(canvas);
+
+            // throttle a bit
+            furi_delay_tick(2);
         }
 
         if(flags & GameThreadFlagStop) {
@@ -208,5 +211,5 @@ float running_game_engine_get_delta_time(RunningGameEngine* engine) {
 }
 
 float running_game_engine_get_delta_frames(RunningGameEngine* engine) {
-    return engine->fps / engine->engine->settings.fps;
+    return engine->fps / engine->engine->settings.target_fps;
 }
