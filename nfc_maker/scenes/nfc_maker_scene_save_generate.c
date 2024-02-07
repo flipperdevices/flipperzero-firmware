@@ -127,60 +127,80 @@ size_t nfc_maker_scene_save_generate_populate_ndef_buffer(NfcMaker* app) {
         tnf = 0x02; // Media-type [RFC 2046]
         type = "application/vnd.wfa.wsc";
 
+        // https://android.googlesource.com/platform/packages/apps/Nfc/+/refs/heads/main/src/com/android/nfc/NfcWifiProtectedSetup.java
+        // https://github.com/bparmentier/WiFiKeyShare/blob/master/app/src/main/java/be/brunoparmentier/wifikeyshare/utils/NfcUtils.java
         uint8_t ssid_len = strnlen(app->small_buf1, SMALL_INPUT_LEN);
         uint8_t pass_len = strnlen(app->small_buf2, SMALL_INPUT_LEN);
         uint8_t data_len = ssid_len + pass_len;
         payload_len = data_len + 39;
         payload = payload_it = malloc(payload_len);
 
+        // CREDENTIAL_FIELD_ID
         *payload_it++ = 0x10;
         *payload_it++ = 0x0E;
+        // CREDENTIAL_FIELD_LEN
         *payload_it++ = 0x00;
-
         *payload_it++ = data_len + 43;
+        // CREDENTIAL_FIELD (contains all subsequent fields)
+
+        // NETWORK_INDEX_FIELD_ID
         *payload_it++ = 0x10;
         *payload_it++ = 0x26;
+        // NETWORK_INDEX_FIELD_LEN
         *payload_it++ = 0x00;
+        *payload_it++ = 0x01;
+        // NETWORK_INDEX_FIELD
+        *payload_it++ = 0x01;
 
-        *payload_it++ = 0x01;
-        *payload_it++ = 0x01;
+        // SSID_FIELD_ID
         *payload_it++ = 0x10;
         *payload_it++ = 0x45;
-
-        *payload_it++ = 0x00;
-        *payload_it++ = ssid_len;
+        // SSID_FIELD_LEN
+        *payload_it++ = ssid_len >> 8 & 0xFF;
+        *payload_it++ = ssid_len & 0xFF;
+        // SSID_FIELD
         memcpy(payload_it, app->small_buf1, ssid_len);
         payload_it += ssid_len;
+
+        // AUTH_TYPE_FIELD_ID
         *payload_it++ = 0x10;
         *payload_it++ = 0x03;
-
+        // AUTH_TYPE_FIELD_LEN
         *payload_it++ = 0x00;
         *payload_it++ = 0x02;
+        // AUTH_TYPE_FIELD
         *payload_it++ = 0x00;
         *payload_it++ = scene_manager_get_scene_state(app->scene_manager, NfcMakerSceneWifiAuth);
 
+        // ENC_TYPE_FIELD_ID
         *payload_it++ = 0x10;
         *payload_it++ = 0x0F;
+        // ENC_TYPE_FIELD_LEN
         *payload_it++ = 0x00;
         *payload_it++ = 0x02;
-
+        // ENC_TYPE_FIELD
         *payload_it++ = 0x00;
         *payload_it++ = scene_manager_get_scene_state(app->scene_manager, NfcMakerSceneWifiEncr);
+
+        // NETWORK_KEY_FIELD_ID
         *payload_it++ = 0x10;
         *payload_it++ = 0x27;
-
-        *payload_it++ = 0x00;
-        *payload_it++ = pass_len;
+        // NETWORK_KEY_FIELD_LEN
+        *payload_it++ = pass_len >> 8 & 0xFF;
+        *payload_it++ = pass_len & 0xFF;
+        // NETWORK_KEY_FIELD
         memcpy(payload_it, app->small_buf2, pass_len);
         payload_it += pass_len;
+
+        // MAC_ADDRESS_FIELD_ID
         *payload_it++ = 0x10;
         *payload_it++ = 0x20;
-
+        // MAC_ADDRESS_FIELD_LEN
         *payload_it++ = 0x00;
         *payload_it++ = 0x06;
+        // MAC_ADDRESS_FIELD
         *payload_it++ = 0xFF;
         *payload_it++ = 0xFF;
-
         *payload_it++ = 0xFF;
         *payload_it++ = 0xFF;
         *payload_it++ = 0xFF;
