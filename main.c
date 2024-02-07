@@ -23,7 +23,7 @@ int32_t game_app(void* p) {
         game_context = malloc(game.context_size);
         game_manager_game_context_set(game_manager, game_context);
     }
-    game.start(game_manager, NULL);
+    game.start(game_manager, game_context);
 
     GameEngineSettings settings = game_engine_settings_init();
     settings.fps = 60.0f;
