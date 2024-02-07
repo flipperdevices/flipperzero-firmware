@@ -3,6 +3,7 @@
 #include <nfc/nfc_device.h>
 #include <nfc/helpers/nfc_util.h>
 #include <nfc/protocols/mf_classic/mf_classic_poller_sync.h>
+#include <stdint.h>
 
 #define TAG "Microel"
 #define KEY_LENGTH 6
@@ -34,38 +35,47 @@ static MfClassicKeyPair microel_1k_keys[] = {
 
 const uint8_t verify_sector = 1;
 
-void calcolaSommaHex(const uint8_t* uid, size_t uidSize, uint8_t sommaHex[]) {
+void calculateSumHex(const uint8_t* uid, size_t uidSize, uint8_t sumHex[]) {
     const uint8_t xorKey[] = {0x01, 0x92, 0xA7, 0x75, 0x2B, 0xF9};
-    int somma = 0;
+    int sum = 0;
 
     for(size_t i = 0; i < uidSize; i++) {
-        somma += uid[i];
+        sum += uid[i];
     }
 
-    int sommaDueNumeri = somma % 256;
+    int sumTwoDigits = sum % 256;
+
+    if(sumTwoDigits % 2 == 1) {
+        sumTwoDigits += 2;
+    }
 
     for(size_t i = 0; i < sizeof(xorKey); i++) {
-        sommaHex[i] = sommaDueNumeri ^ xorKey[i];
+        sumHex[i] = sumTwoDigits ^ xorKey[i];
     }
 }
 
 void generateKeyA(const uint8_t* uid, uint8_t uidSize, uint8_t keyA[]) {
-    uint8_t sommaHex[6];
-    calcolaSommaHex(uid, uidSize, sommaHex);
-    uint8_t primoCarattere = (sommaHex[0] >> 4) & 0xF;
+    uint8_t sumHex[6];
+    calculateSumHex(uid, uidSize, sumHex);
+    uint8_t firstCharacter = (sumHex[0] >> 4) & 0xF;
 
-    if(primoCarattere == 0x2 || primoCarattere == 0x3 || primoCarattere == 0xA ||
-       primoCarattere == 0xB) {
+    if(firstCharacter == 0x2 || firstCharacter == 0x3 || firstCharacter == 0xA ||
+       firstCharacter == 0xB) {
         // XOR WITH 0x40
-        for(size_t i = 0; i < sizeof(sommaHex); i++) {
-            keyA[i] = 0x40 ^ sommaHex[i];
+        for(size_t i = 0; i < sizeof(sumHex); i++) {
+            keyA[i] = 0x40 ^ sumHex[i];
         }
     } else if(
-        primoCarattere == 0x6 || primoCarattere == 0x7 || primoCarattere == 0xE ||
-        primoCarattere == 0xF) {
+        firstCharacter == 0x6 || firstCharacter == 0x7 || firstCharacter == 0xE ||
+        firstCharacter == 0xF) {
         // XOR WITH 0xC0
-        for(size_t i = 0; i < sizeof(sommaHex); i++) {
-            keyA[i] = 0xC0 ^ sommaHex[i];
+        for(size_t i = 0; i < sizeof(sumHex); i++) {
+            keyA[i] = 0xC0 ^ sumHex[i];
+        }
+    } else {
+        //Key a is the same as sumHex
+        for(size_t i = 0; i < sizeof(sumHex); i++) {
+            keyA[i] = sumHex[i];
         }
     }
 }
@@ -75,51 +85,6 @@ void generateKeyB(uint8_t keyA[], size_t keyASize, uint8_t keyB[]) {
         keyB[i] = 0xFF ^ keyA[i];
     }
 }
-
-/*static bool microel_verify(Nfc* nfc) {
-    furi_assert(nfc);
-
-    bool verified = false;
-
-    do {
-        uint8_t block_num = mf_classic_get_first_block_num_of_sector(verify_sector);
-        FURI_LOG_D(TAG, "Verifying sector %u", verify_sector);
-
-        uint8_t uid[UID_LENGTH] = {0xd4, 0x23, 0xb7, 0x34};
-
-        size_t uid_len;
-        const uint8_t* uidn = mf_classic_get_uid(data, &uid_len);
-        FURI_LOG_D(TAG, "Microel provadiocane: UID identified: %02X%02X%02X%02X", uidn[0], uidn[1], uidn[2], uidn[3]);
-        if(uid_len != UID_LENGTH) break;
-        size_t uid_len = 0;
-        const uint8_t* originalUid = mf_classic_get_uid(data, &uid_len);
-        uint8_t uid[UID_LENGTH];  // Sostituisci UID_LENGTH con la lunghezza effettiva dell'UID
-        memcpy(uid, originalUid, UID_LENGTH);
-        FURI_LOG_D(TAG, "UID: %02X %02X %02X %02X", uid[0],uid[1],uid[2],uid[3]);
-        FURI_LOG_D(TAG, "UID GET: %02X %02X %02X %02X", originalUid[0],originalUid[1],originalUid[2],originalUid[3]);
-        //memcpy(uid, data->iso14443_3a_data->uid, UID_LENGTH);
-
-        // Generate key from uid
-        uint8_t keyA[KEY_LENGTH];
-        generateKeyA(uid, UID_LENGTH, keyA);
-
-        MfClassicKey key = {};
-        memcpy(key.data, keyA, KEY_LENGTH);
-
-        MfClassicAuthContext auth_ctx = {};
-        MfClassicError error =
-            mf_classic_poller_sync_auth(nfc, block_num, &key, MfClassicKeyTypeA, &auth_ctx);
-        if(error != MfClassicErrorNone) {
-            verified = false;
-            FURI_LOG_D(TAG, "Failed to read block %u: %d", block_num, error);
-            break;
-        }
-
-        verified = true;
-    } while(false);
-
-    return verified;
-}*/
 
 static bool microel_read(Nfc* nfc, NfcDevice* device) {
     FURI_LOG_D(TAG, "Entering Microel KDF");
@@ -137,16 +102,30 @@ static bool microel_read(Nfc* nfc, NfcDevice* device) {
         MfClassicError error = mf_classic_poller_sync_detect_type(nfc, &type);
         if(error != MfClassicErrorNone) break;
 
+        //Get UID and check if it is 4 bytes
         size_t uid_len;
         const uint8_t* uid = mf_classic_get_uid(data, &uid_len);
         FURI_LOG_D(TAG, "UID identified: %02X%02X%02X%02X", uid[0], uid[1], uid[2], uid[3]);
         if(uid_len != UID_LENGTH) break;
 
+        // Generate keys
         uint8_t keyA[KEY_LENGTH];
         uint8_t keyB[KEY_LENGTH];
         generateKeyA(uid, UID_LENGTH, keyA);
         generateKeyB(keyA, KEY_LENGTH, keyB);
 
+        // Check key 0a to verify if it is a microel card
+        MfClassicKey key = {0};
+        nfc_util_num2bytes(nfc_util_bytes2num(keyA, KEY_LENGTH), COUNT_OF(key.data), key.data);
+        const uint8_t block_num = mf_classic_get_first_block_num_of_sector(0); // This is 0
+        MfClassicAuthContext auth_context;
+        error =
+            mf_classic_poller_sync_auth(nfc, block_num, &key, MfClassicKeyTypeA, &auth_context);
+        if(error != MfClassicErrorNone) {
+            break;
+        }
+
+        // Save keys generated to stucture
         for(size_t i = 0; i < mf_classic_get_total_sectors_num(data->type); i++) {
             if(microel_1k_keys[i].a == 0x000000000000) {
                 microel_1k_keys[i].a = nfc_util_bytes2num(keyA, KEY_LENGTH);
@@ -155,7 +134,6 @@ static bool microel_read(Nfc* nfc, NfcDevice* device) {
                 microel_1k_keys[i].b = nfc_util_bytes2num(keyB, KEY_LENGTH);
             }
         }
-
         MfClassicDeviceKeys keys = {};
         for(size_t i = 0; i < mf_classic_get_total_sectors_num(data->type); i++) {
             nfc_util_num2bytes(microel_1k_keys[i].a, sizeof(MfClassicKey), keys.key_a[i].data);
@@ -203,7 +181,7 @@ static bool microel_parse(const NfcDevice* device, FuriString* parsed_data) {
             mf_classic_get_sector_trailer_by_sector(data, verify_sector);
         uint64_t key = nfc_util_bytes2num(sec_tr->key_a.data, 6);
         uint64_t key_for_check_from_array = nfc_util_bytes2num(keyA, KEY_LENGTH);
-        if(key != key_for_check_from_array) break;
+        if(key != key_for_check_from_array) return false;
 
         //Get credit in block number 8
         const uint8_t* temp_ptr = data->block[4].data;
@@ -232,7 +210,7 @@ static bool microel_parse(const NfcDevice* device, FuriString* parsed_data) {
 static const NfcSupportedCardsPlugin microel_plugin = {
     .protocol = NfcProtocolMfClassic,
     .verify =
-        NULL, // the verification I need is based on verifying the keys generated via uid and try to authenticate not like on mizip that there is default b0
+        NULL, // the verification I need is based on verifying the keys generated via uid and try to authenticate not like on mizip that there is default b0 but added verify in read function
     .read = microel_read,
     .parse = microel_parse,
 };

@@ -123,7 +123,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [USART Bridge: added support for software control of DE/RE pins #3280 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/3280)
 - OFW: [ufbt: changed toolchain environment invocation #3300 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3300)
 - OFW: [Keys Dict: fix PVS warnings #3299 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3299)
-- NFC: [Parser / KDF for mizip and mykey updated & addition of hi and microel (By zProAle)](https://github.com/zProAle/my_flipper_kdf)
 - Removed: [COGES NFC (For Coffee Machines) (By OFW + haisenteck)](https://github.com/haisenteck/flipperzero-Haisenteck/) (This functionality seems to be covered by KDF)
 - Added: [NFC Playlist v1.0 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
 - [NFC: Added zolotaya korona Parser & Fixes for Kazan & Metromoney(By Leptoptilos)](https://github.com/DarkFlippers/unleashed-firmware/commit/9b156fbdca06956c450d5ebb79f676a62dfde4b0)
@@ -187,6 +186,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - [NFC: Improve NDEF parser safety (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/364ae77e64dedacc729c330eb421ed2d3140b44d)
 - Removed: [NFC Maker NTAG203 (by Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/343cb39d08f60b75b537e1a31100707935cf6e9d)
 - Updated: [NFC Maker v1.2 (by Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/6a7d4b2906500226e827c2e0c78375359331ebf7)
+- NFC: [Parser / KDF for mizip and mykey updated & addition of hi and microel (By zProAle)](https://github.com/zProAle/my_flipper_kdf)
 
 <a name="release">
 
