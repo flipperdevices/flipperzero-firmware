@@ -40,7 +40,7 @@ bool nfc_maker_scene_bluetooth_on_event(void* context, SceneManagerEvent event) 
         switch(event.event) {
         case ByteInputResultOk:
             furi_hal_bt_reverse_mac_addr(app->mac_buf);
-            scene_manager_next_scene(app->scene_manager, NfcMakerSceneSave);
+            scene_manager_next_scene(app->scene_manager, NfcMakerSceneSaveGenerate);
             break;
         default:
             break;
