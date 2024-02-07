@@ -140,7 +140,7 @@ size_t nfc_maker_scene_save_generate_populate_ndef_buffer(NfcMaker* app) {
         *payload_it++ = 0x0E;
         // CREDENTIAL_FIELD_LEN
         *payload_it++ = 0x00;
-        *payload_it++ = data_len + 43;
+        *payload_it++ = data_len + 35;
         // CREDENTIAL_FIELD (contains all subsequent fields)
 
         // NETWORK_INDEX_FIELD_ID
