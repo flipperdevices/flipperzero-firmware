@@ -95,7 +95,7 @@ typedef struct {
     float_t speed;
 } Character;
 
-typedef enum { GhostsModeScatter, GhostsModeeChase, GhostsModeFrightened } GhostsMode;
+typedef enum { GhostsModeScatter, GhostsModeChase, GhostsModeFrightened } GhostsMode;
 
 typedef struct {
     uint32_t setting_1_index; // The team color setting index
@@ -122,6 +122,11 @@ typedef struct start_positions {
     uint8_t clyde_x;
     uint8_t clyde_y;
 } StartPositions;
+
+typedef struct {
+    uint8_t x;
+    uint8_t y;
+} Point;
 
 /**
  * @brief      Callback for exiting the application.
@@ -543,6 +548,9 @@ static Direction get_best_direction(Character* ghost) {
             best_direction = current_direction;
         }
     }
+
+    free(allowed_directions);
+
     // FURI_LOG_D(TAG, "Best is %d", best_direction);
     return best_direction;
 }
@@ -571,12 +579,26 @@ static void move_to_target(Character* ghost) {
     ghost->map_x = pacman_y_to_map_x(ghost->y);
 }
 
+static Point* get_inky_position(uint8_t target_x, uint8_t target_y, Character* blinky) {
+    Point* point = (Point*)malloc(sizeof(Point));
+    Point origin = {target_x, target_y};
+
+    Point translated_rotated_vector = {
+        -abs(blinky->map_x - origin.x), -abs(blinky->map_y - origin.y)};
+
+    point->x = origin.x + translated_rotated_vector.x;
+    point->y = origin.y + translated_rotated_vector.y;
+
+    return point;
+}
+
 static void move_ghosts(
     GhostsMode mode,
     Character* blinky,
     Character* pinky,
     Character* inky,
-    Character* clyde) {
+    Character* clyde,
+    Character* pacman) {
     switch(mode) {
     case GhostsModeScatter:
         // Actual targets used in the original game
@@ -589,8 +611,37 @@ static void move_ghosts(
         clyde->target_x = 0;
         clyde->target_y = 35;
         break;
-    case GhostsModeeChase:
+    case GhostsModeChase:
+        blinky->target_x = pacman->map_x;
+        blinky->target_y = pacman->map_y;
+        Point* inky_target;
+        switch(pacman->direction) {
+        case DirectionLeft:
+            pinky->target_x = pacman->map_x - 4;
+            pinky->target_y = pacman->map_y;
+            inky_target = get_inky_position(pacman->map_x - 2, pacman->map_y, blinky);
+            break;
+        case DirectionRight:
+            pinky->target_x = pacman->map_x + 4;
+            pinky->target_y = pacman->map_y;
+            inky_target = get_inky_position(pacman->map_x + 2, pacman->map_y, blinky);
+            break;
+        case DirectionUp:
+            pinky->target_x = pacman->map_x - 4;
+            pinky->target_y = pacman->map_y - 4;
+            inky_target = get_inky_position(pacman->map_x - 2, pacman->map_y - 2, blinky);
+            break;
+        case DirectionDown:
+            pinky->target_x = pacman->map_x;
+            pinky->target_y = pacman->map_y + 4;
+            inky_target = get_inky_position(pacman->map_x, pacman->map_y + 2, blinky);
+            break;
+        default:
+            break;
+        }
         break;
+        inky->target_x = inky_target->x;
+        inky->target_y = inky_target->y;
     case GhostsModeFrightened:
         break;
     }
@@ -617,7 +668,7 @@ static void pacman_view_game_draw_callback(Canvas* canvas, void* model) {
     Character* clyde = my_model->clyde;
     GhostsMode mode = my_model->ghosts_mode;
     move_pacman(my_model);
-    move_ghosts(mode, blinky, pinky, inky, clyde);
+    move_ghosts(mode, blinky, pinky, inky, clyde, my_model->pacman);
     draw_entities(canvas, my_model);
     // canvas_draw_str(canvas, 1, 10, "LEFT/RIGHT to change x");
     FuriString* xstr = furi_string_alloc();
@@ -863,7 +914,7 @@ static PacmanApp* pacman_app_alloc(StartPositions* positions) {
         character_alloc(model->clyde, positions->clyde_x, positions->clyde_y, DirectionIdle);
     view_dispatcher_add_view(app->view_dispatcher, PacmanViewGame, app->view_game);
 
-    model->ghosts_mode = GhostsModeScatter;
+    model->ghosts_mode = GhostsModeChase;
 
     app->widget_about = widget_alloc();
     widget_add_text_scroll_element(
