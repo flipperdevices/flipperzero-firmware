@@ -181,7 +181,7 @@ static bool microel_parse(const NfcDevice* device, FuriString* parsed_data) {
             mf_classic_get_sector_trailer_by_sector(data, verify_sector);
         uint64_t key = nfc_util_bytes2num(sec_tr->key_a.data, 6);
         uint64_t key_for_check_from_array = nfc_util_bytes2num(keyA, KEY_LENGTH);
-        if(key != key_for_check_from_array) return false;
+        if(key != key_for_check_from_array) break;
 
         //Get credit in block number 8
         const uint8_t* temp_ptr = data->block[4].data;

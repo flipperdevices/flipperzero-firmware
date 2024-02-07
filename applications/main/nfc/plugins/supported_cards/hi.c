@@ -40,7 +40,7 @@ static MfClassicKeyPair hi_1k_keys[] = {
 };
 
 //KDF
-void hi_generate_key(uint8_t* uid, uint8_t keyA[4][KEY_LENGTH], uint8_t keyB[4][KEY_LENGTH]) {
+void hi_generate_key(uint8_t* uid, uint8_t keyA[5][KEY_LENGTH], uint8_t keyB[5][KEY_LENGTH]) {
     // Static XOR table for key generation
     static const uint8_t xor_table_keyB[4][6] = {
         {0x1F, 0xC4, 0x4D, 0x94, 0x6A, 0x31},
