@@ -48,6 +48,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Restaurant Pager Trigger v1.3 (By leedave)](https://github.com/leedave/flipper-zero-meal-pager)
 - Updated: [PicoPass (iClass) v1.13 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass) [Picopass: save written key #126 (By bettse)](https://github.com/flipperdevices/flipperzero-good-faps/pull/126)
 - Updated: NFC: [Emv fixes #702 (By wosk)](https://github.com/DarkFlippers/unleashed-firmware/pull/702)
+- Updated: [Bluetooth/USB Remote v1.6 (By Cutch)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/1330) [Fix kb combo for BT Remote / Push to Talk / Teams / macOS (By cpressland)]()
+- NFC: [Upd MFC keys: added 41 from RRG pm3 (By Willy-JL)]()
 - To Be Merged OFW PRs: [3352](https://github.com/flipperdevices/flipperzero-firmware/pull/3352), [3302](https://github.com/flipperdevices/flipperzero-firmware/pull/3302), [3211](https://github.com/flipperdevices/flipperzero-firmware/pull/3211), [3366](https://github.com/flipperdevices/flipperzero-firmware/pull/3366), [3250](https://github.com/flipperdevices/flipperzero-firmware/pull/3250), [3402](https://github.com/flipperdevices/flipperzero-firmware/pull/3402), [3409](https://github.com/flipperdevices/flipperzero-firmware/pull/3409), [3406](https://github.com/flipperdevices/flipperzero-firmware/pull/3406) & [3431](https://github.com/flipperdevices/flipperzero-firmware/pull/3431)
 
 ## REFACTORS BRANCH MERGED FEB 6TH WITH ALL THESE NEW CHANGES:
