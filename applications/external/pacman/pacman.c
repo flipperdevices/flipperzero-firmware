@@ -77,10 +77,10 @@ typedef struct {
 } PacmanApp;
 
 typedef enum {
-    DirectionUp,
+    DirectionRight,
     DirectionDown,
     DirectionLeft,
-    DirectionRight,
+    DirectionUp,
     DirectionIdle
 } Direction;
 
@@ -95,7 +95,7 @@ typedef struct {
     float_t speed;
 } Character;
 
-typedef enum { GhostsModeScatter, GhostsModeeChase, GhostsModeFrightened } GhostsMode;
+typedef enum { GhostsModeScatter, GhostsModeChase, GhostsModeFrightened } GhostsMode;
 
 typedef struct {
     uint32_t setting_1_index; // The team color setting index
@@ -122,6 +122,11 @@ typedef struct start_positions {
     uint8_t clyde_x;
     uint8_t clyde_y;
 } StartPositions;
+
+typedef struct {
+    uint8_t x;
+    uint8_t y;
+} Point;
 
 /**
  * @brief      Callback for exiting the application.
@@ -214,10 +219,10 @@ static const char* map_config[] = {
     "                            ", "                            ", "                            ",
     "                            ", "1------------21------------2", "|PCCCCCCCCCCC||CCCCCCCCCCCC|",
     "|C1--2C1---2C||C1---2C1--2C|", "|C|  |C|   |C||C|   |C|  |C|", "|C3--4C3---4C34C3---4C3--4C|",
-    "|CCCCCCCCCCCCCCCCCCCCCCCCCC|", "|C1--2C12C1------2C12C1--2C|", "|C3--4C||C3--21--4C||C3--4C|",
+    "|CCCCCCCCCCCCCCCCCCCCbCCCCC|", "|C1--2C12C1------2C12C1--2C|", "|C3--4C||C3--21--4C||C3--4C|",
     "|CCCCCC||CCCC||CCCC||CCCCCC|", "3----2C|3--2 || 1--4|C1----4", "     |C|1--4 34 3--2|C|     ",
     "     |C||          ||C|     ", "     |C|| 1--  --2 ||C|     ", "-----4C34 |BBBBBB| 34C3-----",
-    "      C   |BbcpiB|   C      ", "-----2C12 |BBBBBB| 12C1-----", "     |C|| 3------4 ||C|     ",
+    "      C   |BBcpiB|   C      ", "-----2C12 |BBBBBB| 12C1-----", "     |C|| 3------4 ||C|     ",
     "     |C||          ||C|     ", "     |C|| 1------2 ||C|     ", "1----4C34 3--21--4 34C3----2",
     "|CCCCCCCCCCCC||CCCCCCCCCCCC|", "|C1--2C1---2C||C1---2C1--2C|", "|C3-2|C3---4C34C3---4C|1-4C|",
     "|CCC||CCCCCCCCCCCCCCCC||CCC|", "3-2C||C12C1------2C12C||C1-4", "1-4C34C||C3--21--4C||C34C3-2",
@@ -477,38 +482,193 @@ static void move_pacman(PacmanGameModel* model) {
     map[pacman->map_y][pacman->map_x] = EntityPacman;
 }
 
-// static void move_ghosts(
-//     GhostsMode mode,
-//     Character* blinky,
-//     Character* pinky,
-//     Character* inky,
-//     Character* clyde) {
-//     swtich(mode) {
-//     case GhostsModeScatter:
+static int opposite_direction(Direction direction) {
+    return (direction + 2) % 4;
+}
 
-//         break;
-//     default:
-//         break;
-//     }
-// }
+static float_t calculate_distance(float_t x1, float_t y1, float_t x2, float_t y2) {
+    return sqrt(pow(x1 - x2, 2) + pow(y1 - y2, 2));
+}
+
+static Direction get_best_direction(Character* ghost) {
+    uint8_t x = ghost->map_x;
+    uint8_t y = ghost->map_y;
+    Direction direction = ghost->direction;
+    uint8_t allowed_directions_count = 0;
+
+    Direction* allowed_directions = malloc(sizeof(Direction) * 4);
+    if(!is_wall(map[y][x - 1]) && direction != opposite_direction(DirectionLeft)) {
+        allowed_directions[allowed_directions_count] = DirectionLeft;
+        allowed_directions_count++;
+    }
+    if(!is_wall(map[y][x + 1]) && direction != opposite_direction(DirectionRight)) {
+        allowed_directions[allowed_directions_count] = DirectionRight;
+        allowed_directions_count++;
+    }
+    if(!is_wall(map[y + 1][x]) && direction != opposite_direction(DirectionDown)) {
+        allowed_directions[allowed_directions_count] = DirectionDown;
+        allowed_directions_count++;
+    }
+    if(!is_wall(map[y - 1][x]) && direction != opposite_direction(DirectionUp)) {
+        allowed_directions[allowed_directions_count] = DirectionUp;
+        allowed_directions_count++;
+    }
+
+    allowed_directions =
+        (Direction*)realloc(allowed_directions, sizeof(Direction) * allowed_directions_count);
+
+    // for(int i = 0; i < allowed_directions_count; i++)
+    //     FURI_LOG_D(TAG, "allowed_directions[%d] = %d", i, allowed_directions[i]);
+
+    float_t shortest_distance = 999999999999.0;
+    Direction best_direction = DirectionIdle;
+
+    for(int i = 0; i < allowed_directions_count; i++) {
+        uint8_t new_x = x, new_y = y;
+        Direction current_direction = allowed_directions[i];
+        switch(current_direction) {
+        case DirectionDown:
+            new_y++;
+            break;
+        case DirectionUp:
+            new_y--;
+            break;
+        case DirectionLeft:
+            new_x--;
+            break;
+        case DirectionRight:
+            new_x++;
+            break;
+        default:
+            break;
+        }
+        float_t distance = calculate_distance(ghost->target_x, ghost->target_y, new_x, new_y);
+        if(distance < shortest_distance) {
+            shortest_distance = distance;
+            best_direction = current_direction;
+        }
+    }
+
+    free(allowed_directions);
+
+    // FURI_LOG_D(TAG, "Best is %d", best_direction);
+    return best_direction;
+}
+
+static void move_to_target(Character* ghost) {
+    Direction best_direction = get_best_direction(ghost);
+    ghost->direction = best_direction;
+    switch(best_direction) {
+    case DirectionLeft:
+        ghost->y += ghost->speed;
+        break;
+    case DirectionDown:
+        ghost->x += ghost->speed;
+        break;
+    case DirectionRight:
+        ghost->y -= ghost->speed;
+        break;
+    case DirectionUp:
+        ghost->x -= ghost->speed;
+        break;
+    default:
+        break;
+    }
+
+    ghost->map_y = pacman_x_to_map_y(ghost->x);
+    ghost->map_x = pacman_y_to_map_x(ghost->y);
+}
+
+static Point* get_inky_position(uint8_t target_x, uint8_t target_y, Character* blinky) {
+    Point* point = (Point*)malloc(sizeof(Point));
+    Point origin = {target_x, target_y};
+
+    Point translated_rotated_vector = {
+        -abs(blinky->map_x - origin.x), -abs(blinky->map_y - origin.y)};
+
+    point->x = origin.x + translated_rotated_vector.x;
+    point->y = origin.y + translated_rotated_vector.y;
+
+    return point;
+}
+
+static void move_ghosts(
+    GhostsMode mode,
+    Character* blinky,
+    Character* pinky,
+    Character* inky,
+    Character* clyde,
+    Character* pacman) {
+    switch(mode) {
+    case GhostsModeScatter:
+        // Actual targets used in the original game
+        blinky->target_x = 25;
+        blinky->target_y = 0;
+        pinky->target_x = 2;
+        pinky->target_y = 0;
+        inky->target_x = 27;
+        inky->target_y = 35;
+        clyde->target_x = 0;
+        clyde->target_y = 35;
+        break;
+    case GhostsModeChase:
+        blinky->target_x = pacman->map_x;
+        blinky->target_y = pacman->map_y;
+        Point* inky_target;
+        switch(pacman->direction) {
+        case DirectionLeft:
+            pinky->target_x = pacman->map_x - 4;
+            pinky->target_y = pacman->map_y;
+            inky_target = get_inky_position(pacman->map_x - 2, pacman->map_y, blinky);
+            break;
+        case DirectionRight:
+            pinky->target_x = pacman->map_x + 4;
+            pinky->target_y = pacman->map_y;
+            inky_target = get_inky_position(pacman->map_x + 2, pacman->map_y, blinky);
+            break;
+        case DirectionUp:
+            pinky->target_x = pacman->map_x - 4;
+            pinky->target_y = pacman->map_y - 4;
+            inky_target = get_inky_position(pacman->map_x - 2, pacman->map_y - 2, blinky);
+            break;
+        case DirectionDown:
+            pinky->target_x = pacman->map_x;
+            pinky->target_y = pacman->map_y + 4;
+            inky_target = get_inky_position(pacman->map_x, pacman->map_y + 2, blinky);
+            break;
+        default:
+            break;
+        }
+        break;
+        inky->target_x = inky_target->x;
+        inky->target_y = inky_target->y;
+    case GhostsModeFrightened:
+        break;
+    }
+
+    move_to_target(blinky);
+    move_to_target(pinky);
+    move_to_target(inky);
+    move_to_target(clyde);
+}
 
 /**
- * @brief      Callback for drawing the game screen.
- * @details    This function is called when the screen needs to be redrawn, like when the model gets updated.
- *            This is where the map is actually drawed, images and enums don't correspond since they need to
- *            be rotated 90 degrees..
- * @param      canvas  The canvas to draw on.
- * @param      model   The model - MyModel object.
- */
+     * @brief      Callback for drawing the game screen.
+     * @details    This function is called when the screen needs to be redrawn, like when the model gets updated.
+     *            This is where the map is actually drawed, images and enums don't correspond since they need to
+     *            be rotated 90 degrees..
+     * @param      canvas  The canvas to draw on.
+     * @param      model   The model - MyModel object.
+     */
 static void pacman_view_game_draw_callback(Canvas* canvas, void* model) {
     PacmanGameModel* my_model = (PacmanGameModel*)model;
-    // Character* blinky = my_model->blinky;
-    // Character* pinky = my_model->pinky;
-    // Character* inky = my_model->inky;
-    // Character* clyde = my_model->clyde;
-    // GhostsMode mode = my_model->ghosts_mode;
+    Character* blinky = my_model->blinky;
+    Character* pinky = my_model->pinky;
+    Character* inky = my_model->inky;
+    Character* clyde = my_model->clyde;
+    GhostsMode mode = my_model->ghosts_mode;
     move_pacman(my_model);
-    // move_ghosts(mode, blinky, pinky, inky, clyde);
+    move_ghosts(mode, blinky, pinky, inky, clyde, my_model->pacman);
     draw_entities(canvas, my_model);
     // canvas_draw_str(canvas, 1, 10, "LEFT/RIGHT to change x");
     FuriString* xstr = furi_string_alloc();
@@ -537,21 +697,21 @@ static void pacman_view_game_draw_callback(Canvas* canvas, void* model) {
 }
 
 /**
- * @brief      Callback for timer elapsed.
- * @details    This function is called when the timer is elapsed.  We use this to queue a redraw event.
- * @param      context  The context - PacmanApp object.
- */
+     * @brief      Callback for timer elapsed.
+     * @details    This function is called when the timer is elapsed.  We use this to queue a redraw event.
+     * @param      context  The context - PacmanApp object.
+     */
 static void pacman_view_game_timer_callback(void* context) {
     PacmanApp* app = (PacmanApp*)context;
     view_dispatcher_send_custom_event(app->view_dispatcher, PacmanEventIdRedrawScreen);
 }
 
 /**
- * @brief      Callback when the user starts the game screen.
- * @details    This function is called when the user enters the game screen.  We start a timer to
- *           redraw the screen periodically (so the random number is refreshed).
- * @param      context  The context - PacmanApp object.
- */
+     * @brief      Callback when the user starts the game screen.
+     * @details    This function is called when the user enters the game screen.  We start a timer to
+     *           redraw the screen periodically (so the random number is refreshed).
+     * @param      context  The context - PacmanApp object.
+     */
 static void pacman_view_game_enter_callback(void* context) {
     uint32_t period = furi_ms_to_ticks(200);
     PacmanApp* app = (PacmanApp*)context;
@@ -561,10 +721,10 @@ static void pacman_view_game_enter_callback(void* context) {
 }
 
 /**
- * @brief      Callback when the user exits the game screen.
- * @details    This function is called when the user exits the game screen.  We stop the timer.
- * @param      context  The context - PacmanApp object.
- */
+     * @brief      Callback when the user exits the game screen.
+     * @details    This function is called when the user exits the game screen.  We stop the timer.
+     * @param      context  The context - PacmanApp object.
+     */
 static void pacman_view_game_exit_callback(void* context) {
     PacmanApp* app = (PacmanApp*)context;
     furi_timer_stop(app->timer);
@@ -573,11 +733,11 @@ static void pacman_view_game_exit_callback(void* context) {
 }
 
 /**
- * @brief      Callback for custom events.
- * @details    This function is called when a custom event is sent to the view dispatcher.
- * @param      event    The event id - pacmanEventId value.
- * @param      context  The context - PacmanApp object.
- */
+     * @brief      Callback for custom events.
+     * @details    This function is called when a custom event is sent to the view dispatcher.
+     * @param      event    The event id - pacmanEventId value.
+     * @param      context  The context - PacmanApp object.
+     */
 static bool pacman_view_game_custom_event_callback(uint32_t event, void* context) {
     PacmanApp* app = (PacmanApp*)context;
     switch(event) {
@@ -611,12 +771,12 @@ static bool pacman_view_game_custom_event_callback(uint32_t event, void* context
 }
 
 /**
- * @brief      Callback for game screen input.
- * @details    This function is called when the user presses a button while on the game screen.
- * @param      event    The event - InputEvent object.
- * @param      context  The context - PacmanApp object.
- * @return     true if the event was handled, false otherwise.
- */
+     * @brief      Callback for game screen input.
+     * @details    This function is called when the user presses a button while on the game screen.
+     * @param      event    The event - InputEvent object.
+     * @param      context  The context - PacmanApp object.
+     * @return     true if the event was handled, false otherwise.
+     */
 static bool pacman_view_game_input_callback(InputEvent* event, void* context) {
     PacmanApp* app = (PacmanApp*)context;
     bool redraw = false;
@@ -670,10 +830,10 @@ static Character*
 }
 
 /**
- * @brief      Allocate the pacman application.
- * @details    This function allocates the pacman application resources.
- * @return     PacmanApp object.
- */
+     * @brief      Allocate the pacman application.
+     * @details    This function allocates the pacman application resources.
+     * @return     PacmanApp object.
+     */
 static PacmanApp* pacman_app_alloc(StartPositions* positions) {
     PacmanApp* app = (PacmanApp*)malloc(sizeof(PacmanApp));
 
@@ -754,7 +914,7 @@ static PacmanApp* pacman_app_alloc(StartPositions* positions) {
         character_alloc(model->clyde, positions->clyde_x, positions->clyde_y, DirectionIdle);
     view_dispatcher_add_view(app->view_dispatcher, PacmanViewGame, app->view_game);
 
-    model->ghosts_mode = GhostsModeScatter;
+    model->ghosts_mode = GhostsModeChase;
 
     app->widget_about = widget_alloc();
     widget_add_text_scroll_element(
@@ -780,10 +940,10 @@ static PacmanApp* pacman_app_alloc(StartPositions* positions) {
 }
 
 /**
- * @brief      Free the pacman application.
- * @details    This function frees the pacman application resources.
- * @param      app  The pacman application object.
- */
+     * @brief      Free the pacman application.
+     * @details    This function frees the pacman application resources.
+     * @param      app  The pacman application object.
+     */
 static void pacman_app_free(PacmanApp* app) {
 #ifdef BACKLIGHT_ON
     notification_message(app->notifications, &sequence_display_backlight_enforce_auto);
@@ -808,12 +968,12 @@ static void pacman_app_free(PacmanApp* app) {
 }
 
 /**
- * @brief      Main function for pacman application.
- * @details    This function is the entry point for the pacman application.  It should be defined in
- *           application.fam as the entry_point setting.
- * @param      _p  Input parameter - unused
- * @return     0 - Success
- */
+     * @brief      Main function for pacman application.
+     * @details    This function is the entry point for the pacman application.  It should be defined in
+     *           application.fam as the entry_point setting.
+     * @param      _p  Input parameter - unused
+     * @return     0 - Success
+     */
 int32_t pacman_app(void* _p) {
     UNUSED(_p);
 
