@@ -93,6 +93,7 @@ typedef struct {
     uint8_t target_x;
     uint8_t target_y;
     float_t speed;
+    bool is_in_base;
 } Character;
 
 typedef enum { GhostsModeScatter, GhostsModeChase, GhostsModeFrightened } GhostsMode;
@@ -172,7 +173,7 @@ static uint32_t pacman_navigation_configure_callback(void* _context) {
  */
 static void pacman_submenu_callback(void* context, uint32_t index) {
     PacmanApp* app = (PacmanApp*)context;
-    switch(index) {
+    switch (index) {
     case PacmanSubmenuIndexConfigure:
         view_dispatcher_switch_to_view(app->view_dispatcher, PacmanViewConfigure);
         break;
@@ -217,18 +218,18 @@ static void pacman_submenu_callback(void* context, uint32_t index) {
 // Initial map configuration
 static const char* map_config[] = {
     "                            ", "                            ", "                            ",
-    "                            ", "1------------21------------2", "|PCCCCCCCCCCC||CCCCCCCCCCCC|",
+    "                            ", "1------------21------------2", "|CCCCCCCCCCCC||CCCCCCCCCCCC|",
     "|C1--2C1---2C||C1---2C1--2C|", "|C|  |C|   |C||C|   |C|  |C|", "|C3--4C3---4C34C3---4C3--4C|",
-    "|CCCCCCCCCCCCCCCCCCCCbCCCCC|", "|C1--2C12C1------2C12C1--2C|", "|C3--4C||C3--21--4C||C3--4C|",
+    "|CCCCCCCCCCCCCCCCCCCCCCCCCC|", "|C1--2C12C1------2C12C1--2C|", "|C3--4C||C3--21--4C||C3--4C|",
     "|CCCCCC||CCCC||CCCC||CCCCCC|", "3----2C|3--2 || 1--4|C1----4", "     |C|1--4 34 3--2|C|     ",
-    "     |C||          ||C|     ", "     |C|| 1--  --2 ||C|     ", "-----4C34 |BBBBBB| 34C3-----",
-    "      C   |BBcpiB|   C      ", "-----2C12 |BBBBBB| 12C1-----", "     |C|| 3------4 ||C|     ",
+    "     |C||          ||C|     ", "     |C|| 1------2 ||C|     ", "-----4C34 |BBBBBB| 34C3-----",
+    "      C   |BbcpiB|   C      ", "-----2C12 |BBBBBB| 12C1-----", "     |C|| 3------4 ||C|     ",
     "     |C||          ||C|     ", "     |C|| 1------2 ||C|     ", "1----4C34 3--21--4 34C3----2",
     "|CCCCCCCCCCCC||CCCCCCCCCCCC|", "|C1--2C1---2C||C1---2C1--2C|", "|C3-2|C3---4C34C3---4C|1-4C|",
     "|CCC||CCCCCCCCCCCCCCCC||CCC|", "3-2C||C12C1------2C12C||C1-4", "1-4C34C||C3--21--4C||C34C3-2",
-    "|CCCCCC||CCCC||CCCC||CCCCCC|", "|C1----43--2C||C1--43----2C|", "|C3--------4C34C3--------4C|",
+    "|CCCCCC||CPCC||CCCC||CCCCCC|", "|C1----43--2C||C1--43----2C|", "|C3--------4C34C3--------4C|",
     "|CCCCCCCCCCCCCCCCCCCCCCCCCC|", "3--------------------------4", "                            ",
-    "                            "};
+    "                            " };
 
 /**
  * @brief      Sets up the map matrix according to the config matrix.
@@ -238,10 +239,10 @@ static const char* map_config[] = {
  */
 static StartPositions* setup_map(Entity map[][MAP_SIZE_W]) {
     StartPositions* positions = (StartPositions*)malloc(sizeof(StartPositions));
-    for(int i = 0; i < MAP_SIZE_H; i++) {
-        for(int j = 0; j < MAP_SIZE_W; j++) {
+    for (int i = 0; i < MAP_SIZE_H; i++) {
+        for (int j = 0; j < MAP_SIZE_W; j++) {
             int symbol = map_config[i][j];
-            switch(symbol) {
+            switch (symbol) {
             case 'C':
                 map[i][j] = EntityCandy;
                 break;
@@ -302,8 +303,8 @@ static Entity map[MAP_SIZE_H][MAP_SIZE_W];
  * Our 1st sample setting is a team color.  We have 3 options: red, green, and blue.
  */
 static const char* setting_1_config_label = "Team color";
-static uint8_t setting_1_values[] = {1, 2, 4};
-static char* setting_1_names[] = {"Red", "Green", "Blue"};
+static uint8_t setting_1_values[] = { 1, 2, 4 };
+static char* setting_1_names[] = { "Red", "Green", "Blue" };
 static void pacman_setting_1_change(VariableItem* item) {
     PacmanApp* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
@@ -347,7 +348,7 @@ static void pacman_setting_item_clicked(void* context, uint32_t index) {
     index++; // The index starts at zero, but we want to start at 1.
 
     // Our configuration UI has the 2nd item as a text field.
-    if(index == 2) {
+    if (index == 2) {
         // Header to display on the text input screen.
         text_input_set_header_text(app->text_input, setting_2_entry_text);
 
@@ -384,9 +385,9 @@ static void pacman_setting_item_clicked(void* context, uint32_t index) {
 }
 
 static void draw_entities(Canvas* canvas, PacmanGameModel* model) {
-    for(int i = 0; i < MAP_SIZE_H; i++) {
-        for(int j = 0; j < MAP_SIZE_W; j++) {
-            switch(map[i][j]) {
+    for (int i = 0; i < MAP_SIZE_H; i++) {
+        for (int j = 0; j < MAP_SIZE_W; j++) {
+            switch (map[i][j]) {
             case EntityVerticalWall:
                 canvas_draw_icon(canvas, i * WALL_SIZE, j * WALL_SIZE, &I_horizontal_wall_3x3);
                 break;
@@ -441,27 +442,27 @@ static uint8_t pacman_y_to_map_x(float_t y) {
  * @param      entity   The entity you'd like to check
 */
 static bool is_wall(Entity entity) {
-    if(entity == EntityBottomLeftWall || entity == EntityBottomRightWall ||
-       entity == EntityTopLeftWall || entity == EntityTopRightWall ||
-       entity == EntityHorizontalWall || entity == EntityVerticalWall)
+    if (entity == EntityBottomLeftWall || entity == EntityBottomRightWall ||
+        entity == EntityTopLeftWall || entity == EntityTopRightWall ||
+        entity == EntityHorizontalWall || entity == EntityVerticalWall)
         return true;
     return false;
 }
 
 static void move_pacman(PacmanGameModel* model) {
     Character* pacman = model->pacman;
-    if(pacman->direction == DirectionLeft &&
-       (!is_wall(map[pacman->map_y][pacman->map_x - 1]) || (int)pacman->y % WALL_SIZE != 0))
+    if (pacman->direction == DirectionLeft &&
+        (!is_wall(map[pacman->map_y][pacman->map_x - 1]) || (int)pacman->y % WALL_SIZE != 0))
         pacman->y += pacman->speed;
-    else if(
+    else if (
         pacman->direction == DirectionRight &&
         (!is_wall(map[pacman->map_y][pacman->map_x + 1]) || (int)pacman->y % WALL_SIZE != 0))
         pacman->y -= pacman->speed;
-    else if(
+    else if (
         pacman->direction == DirectionUp &&
         (!is_wall(map[pacman->map_y - 1][pacman->map_x]) || (int)pacman->x % WALL_SIZE != 0))
         pacman->x -= pacman->speed;
-    else if(
+    else if (
         pacman->direction == DirectionDown &&
         (!is_wall(map[pacman->map_y + 1][pacman->map_x]) || (int)pacman->x % WALL_SIZE != 0))
         pacman->x += pacman->speed;
@@ -474,8 +475,8 @@ static void move_pacman(PacmanGameModel* model) {
     pacman->map_y = pacman_x_to_map_y(pacman->x);
     pacman->map_x = pacman_y_to_map_x(pacman->y);
 
-    if(previous_x != pacman->map_x || previous_y != pacman->map_y) {
-        if(map[pacman->map_y][pacman->map_x] == EntityCandy) model->score += 1;
+    if (previous_x != pacman->map_x || previous_y != pacman->map_y) {
+        if (map[pacman->map_y][pacman->map_x] == EntityCandy) model->score += 1;
         map[previous_y][previous_x] = EntityVoid;
     }
 
@@ -497,19 +498,19 @@ static Direction get_best_direction(Character* ghost) {
     uint8_t allowed_directions_count = 0;
 
     Direction* allowed_directions = malloc(sizeof(Direction) * 4);
-    if(!is_wall(map[y][x - 1]) && direction != opposite_direction(DirectionLeft)) {
+    if (!is_wall(map[y][x - 1]) && direction != opposite_direction(DirectionLeft)) {
         allowed_directions[allowed_directions_count] = DirectionLeft;
         allowed_directions_count++;
     }
-    if(!is_wall(map[y][x + 1]) && direction != opposite_direction(DirectionRight)) {
+    if (!is_wall(map[y][x + 1]) && direction != opposite_direction(DirectionRight)) {
         allowed_directions[allowed_directions_count] = DirectionRight;
         allowed_directions_count++;
     }
-    if(!is_wall(map[y + 1][x]) && direction != opposite_direction(DirectionDown)) {
+    if (!is_wall(map[y + 1][x]) && direction != opposite_direction(DirectionDown)) {
         allowed_directions[allowed_directions_count] = DirectionDown;
         allowed_directions_count++;
     }
-    if(!is_wall(map[y - 1][x]) && direction != opposite_direction(DirectionUp)) {
+    if (!is_wall(map[y - 1][x]) && direction != opposite_direction(DirectionUp)) {
         allowed_directions[allowed_directions_count] = DirectionUp;
         allowed_directions_count++;
     }
@@ -523,10 +524,10 @@ static Direction get_best_direction(Character* ghost) {
     float_t shortest_distance = 999999999999.0;
     Direction best_direction = DirectionIdle;
 
-    for(int i = 0; i < allowed_directions_count; i++) {
+    for (int i = 0; i < allowed_directions_count; i++) {
         uint8_t new_x = x, new_y = y;
         Direction current_direction = allowed_directions[i];
-        switch(current_direction) {
+        switch (current_direction) {
         case DirectionDown:
             new_y++;
             break;
@@ -543,7 +544,7 @@ static Direction get_best_direction(Character* ghost) {
             break;
         }
         float_t distance = calculate_distance(ghost->target_x, ghost->target_y, new_x, new_y);
-        if(distance < shortest_distance) {
+        if (distance < shortest_distance) {
             shortest_distance = distance;
             best_direction = current_direction;
         }
@@ -556,40 +557,57 @@ static Direction get_best_direction(Character* ghost) {
 }
 
 static void move_to_target(Character* ghost) {
-    Direction best_direction = get_best_direction(ghost);
-    ghost->direction = best_direction;
-    switch(best_direction) {
-    case DirectionLeft:
-        ghost->y += ghost->speed;
-        break;
-    case DirectionDown:
-        ghost->x += ghost->speed;
-        break;
-    case DirectionRight:
-        ghost->y -= ghost->speed;
-        break;
-    case DirectionUp:
-        ghost->x -= ghost->speed;
-        break;
-    default:
-        break;
+    if (ghost->is_in_base) {
+        ghost->x = 13 * WALL_SIZE;
+        ghost->y = 15 * WALL_SIZE;
+        ghost->is_in_base = false;
+    }
+    else {
+        Direction best_direction = get_best_direction(ghost);
+        ghost->direction = best_direction;
+        switch (best_direction) {
+        case DirectionLeft:
+            ghost->y += ghost->speed;
+            break;
+        case DirectionDown:
+            ghost->x += ghost->speed;
+            break;
+        case DirectionRight:
+            ghost->y -= ghost->speed;
+            break;
+        case DirectionUp:
+            ghost->x -= ghost->speed;
+            break;
+        default:
+            break;
+        }
     }
 
     ghost->map_y = pacman_x_to_map_y(ghost->x);
     ghost->map_x = pacman_y_to_map_x(ghost->y);
 }
 
-static Point* get_inky_position(uint8_t target_x, uint8_t target_y, Character* blinky) {
-    Point* point = (Point*)malloc(sizeof(Point));
-    Point origin = {target_x, target_y};
+static void get_inky_target(uint8_t target_x, uint8_t target_y, Character* inky) {
+    Point origin = { target_x, target_y };
 
-    Point translated_rotated_vector = {
-        -abs(blinky->map_x - origin.x), -abs(blinky->map_y - origin.y)};
+    Point translated_rotated_vector = { -abs(inky->map_x - origin.x), -abs(inky->map_y - origin.y) };
 
-    point->x = origin.x + translated_rotated_vector.x;
-    point->y = origin.y + translated_rotated_vector.y;
+    inky->target_x = origin.x + translated_rotated_vector.x;
+    inky->target_y = origin.y + translated_rotated_vector.y;
 
-    return point;
+    return;
+}
+
+static void get_clyde_target(Character* pacman, Character* clyde) {
+    // When pacman is within 8 tiles to clyde, clyde will target the tile in scatter mode
+    if (abs(pacman->map_x - clyde->map_x) < 8 || abs(pacman->map_y - clyde->map_y) < 8) {
+        clyde->target_x = 0;
+        clyde->target_y = 35;
+        return;
+    }
+    clyde->target_x = pacman->map_x;
+    clyde->target_y = pacman->map_y;
+    return;
 }
 
 static void move_ghosts(
@@ -599,7 +617,7 @@ static void move_ghosts(
     Character* inky,
     Character* clyde,
     Character* pacman) {
-    switch(mode) {
+    switch (mode) {
     case GhostsModeScatter:
         // Actual targets used in the original game
         blinky->target_x = 25;
@@ -611,37 +629,36 @@ static void move_ghosts(
         clyde->target_x = 0;
         clyde->target_y = 35;
         break;
-    case GhostsModeChase:
-        blinky->target_x = pacman->map_x;
-        blinky->target_y = pacman->map_y;
-        Point* inky_target;
-        switch(pacman->direction) {
+    case GhostsModeChase: {
+        switch (pacman->direction) {
         case DirectionLeft:
             pinky->target_x = pacman->map_x - 4;
             pinky->target_y = pacman->map_y;
-            inky_target = get_inky_position(pacman->map_x - 2, pacman->map_y, blinky);
+            get_inky_target(pacman->map_x - 2, pacman->map_y, blinky);
             break;
         case DirectionRight:
             pinky->target_x = pacman->map_x + 4;
             pinky->target_y = pacman->map_y;
-            inky_target = get_inky_position(pacman->map_x + 2, pacman->map_y, blinky);
+            get_inky_target(pacman->map_x + 2, pacman->map_y, blinky);
             break;
         case DirectionUp:
             pinky->target_x = pacman->map_x - 4;
             pinky->target_y = pacman->map_y - 4;
-            inky_target = get_inky_position(pacman->map_x - 2, pacman->map_y - 2, blinky);
+            get_inky_target(pacman->map_x - 2, pacman->map_y - 2, blinky);
             break;
         case DirectionDown:
             pinky->target_x = pacman->map_x;
             pinky->target_y = pacman->map_y + 4;
-            inky_target = get_inky_position(pacman->map_x, pacman->map_y + 2, blinky);
+            get_inky_target(pacman->map_x, pacman->map_y + 2, blinky);
             break;
         default:
             break;
         }
+        get_clyde_target(pacman, clyde);
+        blinky->target_x = pacman->map_x;
+        blinky->target_y = pacman->map_y;
         break;
-        inky->target_x = inky_target->x;
-        inky->target_y = inky_target->y;
+    }
     case GhostsModeFrightened:
         break;
     }
@@ -650,6 +667,18 @@ static void move_ghosts(
     move_to_target(pinky);
     move_to_target(inky);
     move_to_target(clyde);
+}
+
+static bool check_has_lost(
+    Character* pacman,
+    Character* blinky,
+    Character* pinky,
+    Character* inky,
+    Character* clyde) {
+    Character* ghosts[] = { blinky, pinky, inky, clyde };
+    for (int i = 0; i < 4; i++)
+        if (pacman->map_x == ghosts[i]->map_x && pacman->map_y == ghosts[i]->map_y) return true;
+    return false;
 }
 
 /**
@@ -669,6 +698,7 @@ static void pacman_view_game_draw_callback(Canvas* canvas, void* model) {
     GhostsMode mode = my_model->ghosts_mode;
     move_pacman(my_model);
     move_ghosts(mode, blinky, pinky, inky, clyde, my_model->pacman);
+    bool has_lost = check_has_lost(my_model->pacman, blinky, pinky, inky, clyde);
     draw_entities(canvas, my_model);
     // canvas_draw_str(canvas, 1, 10, "LEFT/RIGHT to change x");
     FuriString* xstr = furi_string_alloc();
@@ -681,6 +711,8 @@ static void pacman_view_game_draw_callback(Canvas* canvas, void* model) {
     canvas_draw_str(canvas, 80, 30, furi_string_get_cstr(xstr));
     furi_string_printf(xstr, "score: %d", my_model->score);
     canvas_draw_str(canvas, 80, 40, furi_string_get_cstr(xstr));
+    furi_string_printf(xstr, "LOST! %d", has_lost);
+    canvas_draw_str(canvas, 80, 50, furi_string_get_cstr(xstr));
     furi_string_printf(xstr, "x: %u  OK=play tone", my_model->x);
     // canvas_draw_str(canvas, 44, 24, furi_string_get_cstr(xstr));
     furi_string_printf(xstr, "random: %u", (uint8_t)(furi_hal_random_get() % 256));
@@ -740,18 +772,18 @@ static void pacman_view_game_exit_callback(void* context) {
      */
 static bool pacman_view_game_custom_event_callback(uint32_t event, void* context) {
     PacmanApp* app = (PacmanApp*)context;
-    switch(event) {
+    switch (event) {
     case PacmanEventIdRedrawScreen:
         // Redraw screen by passing true to last parameter of with_view_model.
-        {
-            bool redraw = true;
-            with_view_model(
-                app->view_game, PacmanGameModel * _model, { UNUSED(_model); }, redraw);
-            return true;
-        }
+    {
+        bool redraw = true;
+        with_view_model(
+            app->view_game, PacmanGameModel * _model, { UNUSED(_model); }, redraw);
+        return true;
+    }
     case PacmanEventIdOkPressed:
         // Process the OK button.  We play a tone based on the x coordinate.
-        if(furi_hal_speaker_acquire(500)) {
+        if (furi_hal_speaker_acquire(500)) {
             float frequency;
             bool redraw = false;
             with_view_model(
@@ -780,35 +812,39 @@ static bool pacman_view_game_custom_event_callback(uint32_t event, void* context
 static bool pacman_view_game_input_callback(InputEvent* event, void* context) {
     PacmanApp* app = (PacmanApp*)context;
     bool redraw = false;
-    if(event->type == InputTypeShort) {
-        if(event->key == InputKeyLeft) {
+    if (event->type == InputTypeShort) {
+        if (event->key == InputKeyLeft) {
             // Left button clicked, reduce x coordinate.
             with_view_model(
                 app->view_game,
                 PacmanGameModel * model,
                 { model->pacman->direction = DirectionUp; },
                 redraw);
-        } else if(event->key == InputKeyRight) {
+        }
+        else if (event->key == InputKeyRight) {
             with_view_model(
                 app->view_game,
                 PacmanGameModel * model,
                 { model->pacman->direction = DirectionDown; },
                 redraw);
-        } else if(event->key == InputKeyUp) {
+        }
+        else if (event->key == InputKeyUp) {
             with_view_model(
                 app->view_game,
                 PacmanGameModel * model,
                 { model->pacman->direction = DirectionRight; },
                 redraw);
-        } else if(event->key == InputKeyDown) {
+        }
+        else if (event->key == InputKeyDown) {
             with_view_model(
                 app->view_game,
                 PacmanGameModel * model,
                 { model->pacman->direction = DirectionLeft; },
                 redraw);
         }
-    } else if(event->type == InputTypePress) {
-        if(event->key == InputKeyOk) {
+    }
+    else if (event->type == InputTypePress) {
+        if (event->key == InputKeyOk) {
             // We choose to send a custom event when user presses OK button.  pacman_custom_event_callback will
             // handle our PacmanEventIdOkPressed event.  We could have just put the code from
             // pacman_custom_event_callback here, it's a matter of preference.
@@ -820,12 +856,13 @@ static bool pacman_view_game_input_callback(InputEvent* event, void* context) {
 }
 
 static Character*
-    character_alloc(Character* character, float_t x, float_t y, Direction direction) {
+character_alloc(Character* character, float_t x, float_t y, Direction direction) {
     character = (Character*)malloc(sizeof(Character));
     character->x = x;
     character->y = y;
     character->direction = direction;
-    character->speed = 2;
+    character->speed = 1;
+    character->is_in_base = true;
     return character;
 }
 
