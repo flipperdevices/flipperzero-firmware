@@ -45,12 +45,14 @@ void nfc_playlist_main_menu_scene_on_enter(void* context) {
 
     submenu_set_header(nfc_playlist->submenu, "NFC Playlist");
 
-    submenu_add_item(
+    submenu_add_lockable_item(
         nfc_playlist->submenu,
         "Start",
         NfcPlaylistMenuSelection_Start,
         nfc_playlist_main_menu_menu_callback,
-        nfc_playlist);
+        nfc_playlist,
+        !nfc_playlist->file_selected_check,
+        "No\nplaylist\nselected");
 
     submenu_add_item(
         nfc_playlist->submenu,

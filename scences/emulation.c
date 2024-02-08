@@ -150,12 +150,7 @@ int32_t nfc_playlist_emulation_task(void* context) {
         popup_set_text(nfc_playlist->popup, "Press back", 64, 50, AlignCenter, AlignTop);
         stop_blink(nfc_playlist);
         EmulationState = NfcPlaylistEmulationState_Stopped;
-    } 
-    
-    else if (!nfc_playlist->file_selected_check) {
-        popup_set_header(nfc_playlist->popup, "No playlist selected", 64, 10, AlignCenter, AlignTop);
-        popup_set_text(nfc_playlist->popup, "Press back", 64, 50, AlignCenter, AlignTop);
-    } 
+    }
     
     else {
         popup_set_header(nfc_playlist->popup, "Failed to open playlist", 64, 10, AlignCenter, AlignTop);

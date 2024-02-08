@@ -41,8 +41,8 @@ void nfc_playlist_text_input_scene_on_enter(void* context) {
 }
 
 bool nfc_playlist_text_input_scene_on_event(void* context, SceneManagerEvent event) {
-   UNUSED(event);
    UNUSED(context);
+   UNUSED(event);
    return false;
 }
 

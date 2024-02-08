@@ -44,7 +44,7 @@ void nfc_playlist_file_edit_scene_on_enter(void* context) {
       nfc_playlist_file_edit_menu_callback,
       nfc_playlist,
       !nfc_playlist->file_selected_check,
-      "Playlist\nNot\nSelected");
+      "No\nplaylist\nselected");
 
    submenu_add_lockable_item(
       nfc_playlist->submenu,
@@ -53,7 +53,7 @@ void nfc_playlist_file_edit_scene_on_enter(void* context) {
       nfc_playlist_file_edit_menu_callback,
       nfc_playlist,
       !nfc_playlist->file_selected_check,
-      "Playlist\nNot\nSelected");
+      "No\nplaylist\nselected");
 
    view_dispatcher_switch_to_view(nfc_playlist->view_dispatcher, NfcPlaylistView_FileEdit);
 }
