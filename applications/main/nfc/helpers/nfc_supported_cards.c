@@ -268,11 +268,7 @@ bool nfc_supported_cards_parse(
     do {
         if(instance->load_state != NfcSupportedCardsLoadStateSuccess) break;
 
-        CompositeApiResolver* resolver = composite_api_resolver_alloc();
-        composite_api_resolver_add(resolver, firmware_api_interface);
-        composite_api_resolver_add(resolver, nfc_application_api_interface);
-        instance->load_context =
-            nfc_supported_cards_load_context_alloc(composite_api_resolver_get(resolver));
+        instance->load_context = nfc_supported_cards_load_context_alloc();
 
         NfcSupportedCardsPluginCache_it_t iter;
         for(NfcSupportedCardsPluginCache_it(iter, instance->plugins_cache_arr);
