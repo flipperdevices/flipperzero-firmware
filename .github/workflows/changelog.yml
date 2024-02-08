@@ -11,7 +11,7 @@ jobs:
     steps:
       - name: Build Changelog
         id: github_release
-        uses: mikepenz/release-changelog-builder-action@v3
+        uses: mikepenz/release-changelog-builder-action@v4
         with:
             configuration: "changelog-conf.json"
             ignorePreReleases: true
