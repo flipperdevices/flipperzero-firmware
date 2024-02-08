@@ -8,6 +8,10 @@
 **User Manual:** [Instruction Booklet](./MALVEKE_Instruction_Booklet.pdf)
 
 **Firmware**: [Install Firmware MALVEKE](./webinstaller/README.md)
+
+**WARNING ⚠️: Due to changes in Flipper Zero's [Serial API](https://github.com/flipperdevices/flipperzero-firmware/pull/3211), it currently only works with versions <= [0.97 of the Flipper Zero Oficial Firmware or Custom Firmware's](https://github.com/flipperdevices/flipperzero-firmware/releases/tag/0.97.1). We are working to support the newer versions.**
+
+
 <picture>
     <source media="(prefers-color-scheme: dark)" srcset="./assets/logo.png">
     <source media="(prefers-color-scheme: light)" srcset="./assets/logo-b.png">
