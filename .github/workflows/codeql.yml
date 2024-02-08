@@ -90,7 +90,7 @@ jobs:
 
       # Initializes the CodeQL tools for scanning.
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v2
+        uses: github/codeql-action/init@v3
         with:
           languages: ${{ matrix.language }}
           setup-python-dependencies: true
@@ -152,12 +152,12 @@ jobs:
       #     ./fbt
       # uses: github/codeql-action/autobuild@v2
       - name: Resolve CodeQL Build Env
-        uses: github/codeql-action/resolve-environment@v2
+        uses: github/codeql-action/resolve-environment@v3
         with:
           language: ${{ matrix.language }}
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v2
+        uses: github/codeql-action/analyze@v3
         env:
           REF_NAME: ${{ env.REF_NAME }}
           CHECKOUT_PATH: ${{ env.OFW_PATH }}
@@ -174,7 +174,7 @@ jobs:
           checkout_path: "${{ github.workspace }}/${{ env.CHECKOUT_PATH }}"
 
       - name: Upload CodeQL SARIF
-        uses: github/codeql-action/upload-sarif@v2
+        uses: github/codeql-action/upload-sarif@v3
         env:
           REF_NAME: ${{ env.REF_NAME }}
           CHECKOUT_PATH: ${{ env.OFW_PATH }}
