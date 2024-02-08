@@ -14,5 +14,12 @@ An example file can be found in the repository
 ## How to build
 This app was design, built and tested using the <a href="https://github.com/Flipper-XFW/Xtreme-Firmware">Xtreme firmware</a> so keep that in mind when building the FAP for yourself
 
-## Known Issues
-- A weird freeze which occurs when trying to rename a playlist (occurs randomly doesn't happen when renaming it the first time)
+## Settings
+- Emulate time (How long the NFC card will be emulated for)
+- Delay time (How long the gap between the cards will be)
+- LED indicator (Whether or not the LED's will be on)
+- Reset settings (Puts all the settings back to the defaults)
+
+## Playlist editor
+- Delete playlist (Deletes the selected playlist)
+- Rename playlist (Renames the selected playlist the new name provided)
