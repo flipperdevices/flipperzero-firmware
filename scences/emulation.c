@@ -90,7 +90,10 @@ int32_t nfc_playlist_emulation_task(void* context) {
 
             if (EmulationState != NfcPlaylistEmulationState_Emulating) {break;}
 
-            char* file_name = strchr(file_path, '/') != NULL ? &strrchr(file_path, '/')[1] : file_path;
+            char const* full_file_name = strchr(file_path, '/') != NULL ? &strrchr(file_path, '/')[1] : file_path;
+            char file_name[sizeof(full_file_name)];
+            strcpy(file_name, full_file_name);
+            strtok(file_name, ".");
             char const* file_ext = &strrchr(file_path, '.')[1];
             int time_counter_ms = (options_emulate_timeout[nfc_playlist->emulate_timeout]*1000);
 
@@ -147,12 +150,7 @@ int32_t nfc_playlist_emulation_task(void* context) {
         popup_set_text(nfc_playlist->popup, "Press back", 64, 50, AlignCenter, AlignTop);
         stop_blink(nfc_playlist);
         EmulationState = NfcPlaylistEmulationState_Stopped;
-    } 
-    
-    else if (!nfc_playlist->file_selected_check) {
-        popup_set_header(nfc_playlist->popup, "No playlist selected", 64, 10, AlignCenter, AlignTop);
-        popup_set_text(nfc_playlist->popup, "Press back", 64, 50, AlignCenter, AlignTop);
-    } 
+    }
     
     else {
         popup_set_header(nfc_playlist->popup, "Failed to open playlist", 64, 10, AlignCenter, AlignTop);
@@ -161,6 +159,7 @@ int32_t nfc_playlist_emulation_task(void* context) {
 
     furi_string_free(line);
     file_stream_close(stream);
+    furi_record_close(RECORD_STORAGE);
     stream_free(stream);
 
     return 0;

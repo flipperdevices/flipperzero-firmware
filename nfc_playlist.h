@@ -10,6 +10,7 @@
 #include <gui/modules/variable_item_list.h>
 #include <gui/modules/submenu.h>
 #include <gui/modules/file_browser.h>
+#include <gui/modules/text_input.h>
 #include <notification/notification_messages.h>
 #include <nfc_playlist_worker.h>
 
@@ -17,7 +18,9 @@ typedef enum {
    NfcPlaylistView_Menu,
    NfcPlaylistView_Settings,
    NfcPlaylistView_Popup,
-   NfcPlaylistView_FileSelect
+   NfcPlaylistView_FileSelect,
+   NfcPlaylistView_FileEdit,
+   NfcPlaylistView_TextInput,
 } NfcPlayScenesView;
 
 typedef enum {
@@ -25,6 +28,8 @@ typedef enum {
    NfcPlaylistScene_Settings,
    NfcPlaylistScene_EmulatingPopup,
    NfcPlaylistScene_FileSelect,
+   NfcPlaylistScene_FileEdit,
+   NfcPlaylistScene_TextInput,
    NfcPlaylistScene_count
 } NfcPlaylistScene;
 
@@ -33,6 +38,7 @@ typedef struct {
    ViewDispatcher* view_dispatcher;
    VariableItemList* variable_item_list;
    FileBrowser* file_browser;
+   TextInput* text_input;
    Submenu* submenu;
    Popup* popup;
    NotificationApp* notification;
@@ -45,6 +51,7 @@ typedef struct {
    uint8_t emulate_delay;
    bool emulate_led_indicator;
    FuriString* file_path;
+   char* playlist_name;
 } NfcPlaylist;
 
 static const int options_emulate_timeout[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
