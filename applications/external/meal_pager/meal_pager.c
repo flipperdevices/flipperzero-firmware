@@ -69,9 +69,6 @@ Meal_Pager* meal_pager_app_alloc() {
 
     app->subghz = subghz_alloc();
 
-    // Custom made int keyboard
-    app->int_input = int_input_alloc();
-
     // Load configs
     meal_pager_read_settings(app);
 
@@ -123,19 +120,18 @@ void meal_pager_app_free(Meal_Pager* app) {
     int_input_free(app->int_input);
 
     view_dispatcher_free(app->view_dispatcher);
-
     variable_item_list_free(app->variable_item_list);
     meal_pager_transmit_free(app->meal_pager_transmit);
     meal_pager_startscreen_free(app->meal_pager_startscreen);
-
     furi_record_close(RECORD_GUI);
-    furi_record_close(RECORD_NOTIFICATION);
-    app->gui = NULL;
-    app->notification = NULL;
 
     // Close File Browser
     furi_record_close(RECORD_DIALOGS);
+    furi_record_close(RECORD_NOTIFICATION);
     furi_string_free(app->file_path);
+
+    app->gui = NULL;
+    app->notification = NULL;
 
     subghz_free(app->subghz);
 

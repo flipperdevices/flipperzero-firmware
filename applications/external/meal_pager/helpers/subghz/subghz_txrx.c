@@ -1,6 +1,6 @@
 #include "subghz_txrx_i.h"
 
-#include <lib/subghz/protocols/protocol_items.h>
+#include <lib/subghz/subghz_protocol_registry.h>
 #include <applications/drivers/subghz/cc1101_ext/cc1101_ext_interconnect.h>
 #include <lib/subghz/devices/cc1101_int/cc1101_int_interconnect.h>
 
