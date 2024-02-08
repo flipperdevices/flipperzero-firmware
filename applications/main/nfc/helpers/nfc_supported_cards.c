@@ -1,5 +1,5 @@
 #include "nfc_supported_cards.h"
-#include "nfc_app_api_interface.h"
+#include "../api/nfc_app_api_interface.h"
 
 #include "../plugins/supported_cards/nfc_supported_card_plugin.h"
 

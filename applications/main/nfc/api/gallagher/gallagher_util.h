@@ -6,7 +6,6 @@
 
 #pragma once
 
-#include <stdint.h>
 #include <lib/nfc/protocols/mf_classic/mf_classic.h>
 
 #define GALLAGHER_CREDENTIAL_SECTOR 15

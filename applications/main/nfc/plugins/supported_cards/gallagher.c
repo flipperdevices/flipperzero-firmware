@@ -5,8 +5,7 @@
 */
 
 #include "nfc_supported_card_plugin.h"
-#include "../../nfc_app_api.h"
-#include "../../helpers/gallagher_util.h"
+#include "../../api/gallagher/gallagher_util.h"
 
 #include <flipper_application/flipper_application.h>
 #include <nfc/protocols/mf_classic/mf_classic.h>
@@ -42,15 +41,13 @@ static bool gallagher_parse(const NfcDevice* device, FuriString* parsed_data) {
     // Test 2: The contents of the second block should be equal to the GALLAGHER_CARDAX_ASCII constant.
     const uint8_t* cardax_block_start_ptr =
         &data->block[credential_sector_start_block_number + 1].data[0];
-    if(memcmp(cardax_block_start_ptr, NFC_APP_API_GALLAGHER_CARDAX_ASCII, MF_CLASSIC_BLOCK_SIZE) !=
-       0) {
+    if(memcmp(cardax_block_start_ptr, GALLAGHER_CARDAX_ASCII, MF_CLASSIC_BLOCK_SIZE) != 0) {
         return false;
     }
 
     // Deobfuscate the credential data
     GallagherCredential credential;
-    nfc_app_api_gallagher_deobfuscate_and_parse_credential(
-        &credential, credential_block_start_ptr);
+    gallagher_deobfuscate_and_parse_credential(&credential, credential_block_start_ptr);
 
     char display_region = 'A';
     // Per https://github.com/megabug/gallagher-research/blob/master/formats/cardholder/cardholder.md,
