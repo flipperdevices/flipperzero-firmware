@@ -26,7 +26,7 @@ jobs:
           fetch-tags: true
 
       - name: "✏️ Generate release changelog"
-        uses: heinrichreimer/github-changelog-generator-action@v2.3
+        uses: heinrichreimer/github-changelog-generator-action@v2.4
         with:
           token: ${{ secrets.FLIPPER_TOKEN }}
           user: ${{ github.repository_owner }}
