@@ -55,7 +55,7 @@ jobs:
           Write-Output ('RELEASE_VERSION={0}' -f $ReleaseVersion) >> $env:GITHUB_ENV
 
       - name: Copy Firmware Files
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: "${{ matrix.url }}"
           clean: "true"
@@ -64,7 +64,7 @@ jobs:
 
       - name: Copy Repo Files
         if: ${{ matrix.src-included == 0 }}
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: "${{ vars.REPO_SELF }}"
           clean: "true"
