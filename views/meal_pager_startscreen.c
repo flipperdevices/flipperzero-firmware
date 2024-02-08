@@ -28,12 +28,15 @@ void meal_pager_startscreen_set_callback(
 
 void meal_pager_startscreen_draw(Canvas* canvas, Meal_PagerStartscreenModel* model) {
     UNUSED(model);
+    char buffer[64];
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
     canvas_set_font(canvas, FontPrimary);
     canvas_draw_str_aligned(canvas, 64, 10, AlignCenter, AlignTop, "Restaurant Pager");
     canvas_set_font(canvas, FontSecondary);
     canvas_draw_str_aligned(canvas, 64, 22, AlignCenter, AlignTop, "Trigger Tool");
+    snprintf(buffer, sizeof(buffer), "Version: %s", MEAL_PAGER_VERSION);
+    canvas_draw_str_aligned(canvas, 64, 42, AlignCenter, AlignTop, buffer);
     elements_button_center(canvas, "Start");
 }
 

@@ -1,3 +1,9 @@
+## v1.3
+- Fixed some memory leaks
+- Changed Subghz Protocol Registry to Fipper API conform variant
+- Version number in Start Screen
+- Code formatting
+
 ## v1.2
 - Fixed Memory bug in Last Station UI
 - Added auto-correction when entries in First/Last station/pager are out of range
