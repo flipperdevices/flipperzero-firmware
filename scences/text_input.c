@@ -5,19 +5,29 @@ void nfc_playlist_text_input_menu_callback(void* context) {
    NfcPlaylist* nfc_playlist = context;
    Storage* storage = furi_record_open(RECORD_STORAGE);
 
-   char path[28] = "/ext/apps_data/nfc_playlist/";
-   
-   int size = (strlen(nfc_playlist->playlist_name) + strlen(".txt") + strlen(path) + 1);
+   char const* old_file_path = (char*)furi_string_get_cstr(nfc_playlist->file_path);
+   char const* old_file_name = strchr(old_file_path, '/') != NULL ? &strrchr(old_file_path, '/')[1] : old_file_path;
 
-   char* new_file_name = (char*)malloc(size);
-   snprintf(new_file_name, size, "%s%s%s", path, nfc_playlist->playlist_name, ".txt");
-   storage_common_rename(storage, furi_string_get_cstr(nfc_playlist->file_path), new_file_name);
-   nfc_playlist->file_path = furi_string_alloc_set_str(new_file_name);
+   int file_path_size = (strlen(old_file_path) - strlen(old_file_name) + 1);
+
+   char* file_path = (char*)malloc(file_path_size);
+   snprintf(file_path, file_path_size, "%s", old_file_path);
+
+   int new_file_path_size = (strlen(nfc_playlist->playlist_name) + strlen(".txt") + file_path_size + 1);
+
+   char* new_file_name = (char*)malloc(new_file_path_size);
+   snprintf(new_file_name, new_file_path_size, "%s%s%s", file_path, nfc_playlist->playlist_name, ".txt");
+
+   if (!storage_file_exists(storage, new_file_name)) {
+      storage_common_rename_safe(storage, furi_string_get_cstr(nfc_playlist->file_path), new_file_name);
+      nfc_playlist->file_path = furi_string_alloc_set_str(new_file_name);
+   }
 
    free(new_file_name);
+   free(file_path);
    free(nfc_playlist->playlist_name);
    furi_record_close(RECORD_STORAGE);
-   
+
    scene_manager_previous_scene(nfc_playlist->scene_manager);
 }
 
