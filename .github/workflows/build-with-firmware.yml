@@ -51,7 +51,7 @@ jobs:
             src-included: 0
     steps:
       - name: Copy Firmware Files
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: ${{ matrix.url }}
           clean: true
@@ -60,7 +60,7 @@ jobs:
 
       - name: Copy Repo Files
         if: ${{ matrix.src-included == 0 }}
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: ${{ vars.REPO_SELF }}
           clean: true
