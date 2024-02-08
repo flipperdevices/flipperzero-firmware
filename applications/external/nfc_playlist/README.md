@@ -11,6 +11,15 @@ All the playlists should be placed in ext/apps_data/nfc_playlist and an example 
 ```
 An example file can be found in the repository
 
-## Ideas
-- [X] Add the ability to change playlist
-- [ ] Make it so changed settings are saved (maybe make it so settings can be specified for each playlist changing the settings based on the playlist selected)
+## How to build
+This app was design, built and tested using the <a href="https://github.com/Flipper-XFW/Xtreme-Firmware">Xtreme firmware</a> so keep that in mind when building the FAP for yourself
+
+## Settings
+- Emulate time (How long the NFC card will be emulated for)
+- Delay time (How long the gap between the cards will be)
+- LED indicator (Whether or not the LED's will be on)
+- Reset settings (Puts all the settings back to the defaults)
+
+## Playlist editor
+- Delete playlist (Deletes the selected playlist)
+- Rename playlist (Renames the selected playlist the new name provided)
