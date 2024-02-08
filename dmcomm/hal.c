@@ -64,7 +64,6 @@ void boilerplate_led_reset() {
 
 void digitalWrite(const GpioPin* pin, bool level)
 {
-    FURI_LOG_I(TAG, "digitalWrite %s %d", getPinName(pin), level);
     furi_hal_gpio_write(pin, level);
 }
 
@@ -72,10 +71,8 @@ int analogRead(const GpioPin* pin)
 {
   if(furi_hal_gpio_read(pin))
   {
-    FURI_LOG_I(TAG, "analogRead %s 1", getPinName(pin));
-    return 500;
+    return 600;
   }
-  FURI_LOG_I(TAG, "analogRead %s 0", getPinName(pin));
   return 0;
 }
 
@@ -140,12 +137,12 @@ void delay(int ms)
 
 uint32_t micros()
 {
-  return furi_get_tick() * 1000 / furi_ms_to_ticks(1);
+  return DWT->CYCCNT / furi_hal_cortex_instructions_per_microsecond();
 }
 
 uint32_t millis()
 {
-  return furi_get_tick() / furi_ms_to_ticks(1);
+  return micros() / 1000;
 }
 
 void Serial_writei(int i)

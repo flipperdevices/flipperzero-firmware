@@ -27,7 +27,9 @@ void fcom_read_code_scene_on_enter(void* context) {
 
     view_dispatcher_switch_to_view(app->view_dispatcher, FcomReadCodeView);
 
-    dmcomm_sendcommand(app, "X1-0459-7009\n");
+    // Code for DM20 copymon get
+    dmcomm_sendcommand(app, "V1-0C02-1207-810E-03AE-000E-000E-000E-000E-000E-@000E\n");
+    
     // start dcomm thread in read mode and flash LED.
     // when code is read, stop LED flashing and set right button to "Save"
 }

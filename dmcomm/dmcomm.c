@@ -366,10 +366,10 @@ void delayByTicks(unsigned long delay_micros) {
 void setup() {     
     //Serial.begin(9600);
 
-    furi_hal_gpio_init(probe_pin, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
-    furi_hal_gpio_init(dm_pin_out, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
-    furi_hal_gpio_init(dm_pin_notOE, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
-    furi_hal_gpio_init(dm_pin_Ain, GpioModeInput, GpioPullNo, GpioSpeedVeryHigh);
+    furi_hal_gpio_init(probe_pin, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow); //GpioSpeedVeryHigh);
+    furi_hal_gpio_init(dm_pin_out, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
+    furi_hal_gpio_init(dm_pin_notOE, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
+    furi_hal_gpio_init(dm_pin_Ain, GpioModeInput, GpioPullNo, GpioSpeedLow);
     //pinMode(probe_pin, OUTPUT);
     //pinMode(dm_pin_out, OUTPUT);
     //pinMode(dm_pin_notOE, OUTPUT);
@@ -525,26 +525,26 @@ void sendPacket(unsigned int bits) {
     Serial_printi(' ');
     currentPacketIndex ++;
     addLogEvent(log_self_enter_delay);
-    delayByTicks(dm_times.pre_high);
+    delayByTicks(dm_times.pre_high); // 3000
     
     addLogEvent(log_self_init_pulldown);
     busDriveLow();
-    delayByTicks(dm_times.pre_low);
+    delayByTicks(dm_times.pre_low); //59000
     
     addLogEvent(log_self_start_bit_high);
     busDriveHigh();
-    delayByTicks(dm_times.start_high);
+    delayByTicks(dm_times.start_high); //2083
     
     addLogEvent(log_self_start_bit_low);
     busDriveLow();
-    delayByTicks(dm_times.start_low);
+    delayByTicks(dm_times.start_low); //917
     
     busDriveHigh();
     for (i = 0; i < 16; i ++) {
-        sendBit(bits & 1);
+        sendBit(bits & 1); // 4300ish * 16 = 69,344
         bits >>= 1;
     }
-    delayByTicks(dm_times.send_recovery);
+    delayByTicks(dm_times.send_recovery); //400
     
     addLogEvent(log_self_release);
     busRelease();
@@ -864,8 +864,10 @@ void loop() {
     busRelease();
     if (active && doTick(true) == HIGH) {
         if (listenOnly) {
+            FURI_LOG_I(TAG, "comm listen");
             commListen();
         } else {
+            FURI_LOG_I(TAG, "comm basic");
             commBasic(goFirst, buffer);
         }
         if (debugMode != debug_off) {
