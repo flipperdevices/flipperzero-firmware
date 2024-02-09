@@ -134,58 +134,67 @@ static inline bool infrared_signal_read_message(InfraredSignal* signal, FlipperF
         InfraredMessage message;
         message.protocol = infrared_get_protocol_by_name(furi_string_get_cstr(buf));
 
-        success = flipper_format_read_hex(
-                      ff, INFRARED_SIGNAL_ADDRESS_KEY, (uint8_t*)&message.address, 4) &&
-                  flipper_format_read_hex(
-                      ff, INFRARED_SIGNAL_COMMAND_KEY, (uint8_t*)&message.command, 4) &&
-                  infrared_signal_is_message_valid(&message);
-
-        if(!success) break;
+        if(!flipper_format_read_hex(ff, INFRARED_SIGNAL_ADDRESS_KEY, (uint8_t*)&message.address, 4))
+            break;
+        if(!flipper_format_read_hex(ff, INFRARED_SIGNAL_COMMAND_KEY, (uint8_t*)&message.command, 4))
+            break;
+        if(!infrared_signal_is_message_valid(&message)) break;
 
         infrared_signal_set_message(signal, &message);
-    } while(0);
+        success = true;
+    } while(false);
 
     furi_string_free(buf);
     return success;
 }
 
 static inline bool infrared_signal_read_raw(InfraredSignal* signal, FlipperFormat* ff) {
-    uint32_t timings_size, frequency;
-    float duty_cycle;
+    bool success = false;
 
-    bool success = flipper_format_read_uint32(ff, INFRARED_SIGNAL_FREQUENCY_KEY, &frequency, 1) &&
-                   flipper_format_read_float(ff, INFRARED_SIGNAL_DUTY_CYCLE_KEY, &duty_cycle, 1) &&
-                   flipper_format_get_value_count(ff, INFRARED_SIGNAL_DATA_KEY, &timings_size);
+    do {
+        uint32_t frequency;
+        if(!flipper_format_read_uint32(ff, INFRARED_SIGNAL_FREQUENCY_KEY, &frequency, 1)) break;
 
-    if(!success || timings_size > MAX_TIMINGS_AMOUNT) {
-        return false;
-    }
+        float duty_cycle;
+        if(!flipper_format_read_float(ff, INFRARED_SIGNAL_DUTY_CYCLE_KEY, &duty_cycle, 1)) break;
 
-    uint32_t* timings = malloc(sizeof(uint32_t) * timings_size);
-    success = flipper_format_read_uint32(ff, INFRARED_SIGNAL_DATA_KEY, timings, timings_size);
+        uint32_t timings_size;
+        if(!flipper_format_get_value_count(ff, INFRARED_SIGNAL_DATA_KEY, &timings_size)) break;
 
-    if(success) {
+        if(timings_size > MAX_TIMINGS_AMOUNT) break;
+
+        uint32_t* timings = malloc(sizeof(uint32_t) * timings_size);
+        if(!flipper_format_read_uint32(ff, INFRARED_SIGNAL_DATA_KEY, timings, timings_size)) {
+            free(timings);
+            break;
+        }
         infrared_signal_set_raw_signal(signal, timings, timings_size, frequency, duty_cycle);
-    }
+        free(timings);
 
-    free(timings);
+        success = true;
+    } while(false);
+
     return success;
 }
 
-static bool infrared_signal_read_body(InfraredSignal* signal, FlipperFormat* ff) {
+bool infrared_signal_read_body(InfraredSignal* signal, FlipperFormat* ff) {
     FuriString* tmp = furi_string_alloc();
 
     bool success = false;
 
     do {
         if(!flipper_format_read_string(ff, INFRARED_SIGNAL_TYPE_KEY, tmp)) break;
+
         if(furi_string_equal(tmp, INFRARED_SIGNAL_TYPE_RAW)) {
-            success = infrared_signal_read_raw(signal, ff);
+            if(!infrared_signal_read_raw(signal, ff)) break;
         } else if(furi_string_equal(tmp, INFRARED_SIGNAL_TYPE_PARSED)) {
-            success = infrared_signal_read_message(signal, ff);
+            if(!infrared_signal_read_message(signal, ff)) break;
         } else {
-            FURI_LOG_E(TAG, "Unknown signal type");
+            FURI_LOG_E(TAG, "Unknown signal type: %s", furi_string_get_cstr(tmp));
+            break;
         }
+
+        success = true;
     } while(false);
 
     furi_string_free(tmp);
