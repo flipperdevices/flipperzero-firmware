@@ -46,12 +46,12 @@ void subghz_dialog_message_freq_error(SubGhz* subghz, bool only_rx) {
     const char* message_text = "Frequency\nis outside of\nsupported range.";
 
     if(only_rx) {
-        header_text = "Transmission is blocked";
+        header_text = "Transmission is Blocked!";
         message_text = "Frequency\nis outside of\ndefault range.\nCheck docs.";
     }
 
-    dialog_message_set_header(message, header_text, 63, 3, AlignCenter, AlignTop);
-    dialog_message_set_text(message, message_text, 0, 17, AlignLeft, AlignTop);
+    dialog_message_set_header(message, header_text, 63, 0, AlignCenter, AlignTop);
+    dialog_message_set_text(message, message_text, 1, 13, AlignLeft, AlignTop);
 
     dialog_message_set_icon(message, &I_WarningDolphinFlip_45x42, 83, 22);
 
