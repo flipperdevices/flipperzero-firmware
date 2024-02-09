@@ -44,6 +44,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - [Fix: This was leftover from old reverted OFW PR (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/02bd53f8c0423d02b01c1fd0507e6c866c29fc5e)
 - [Reset log level on flash for more responsiveness (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/67e7becc43b7701639baa873daa0149c054ba955)
 - Added: [Video Game Module Tool v1.0 (By gsurkov)](https://github.com/flipperdevices/flipperzero-good-faps/pull/127) - Commented out until expansion code is merged
+- OFW PR: [NFC: fix retry scene navigation logic #3439 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3439)
 - To Be Merged OFW PRs: [3352](https://github.com/flipperdevices/flipperzero-firmware/pull/3352), [3302](https://github.com/flipperdevices/flipperzero-firmware/pull/3302), [3211](https://github.com/flipperdevices/flipperzero-firmware/pull/3211), [3366](https://github.com/flipperdevices/flipperzero-firmware/pull/3366), [3250](https://github.com/flipperdevices/flipperzero-firmware/pull/3250), [3402](https://github.com/flipperdevices/flipperzero-firmware/pull/3402), [3409](https://github.com/flipperdevices/flipperzero-firmware/pull/3409), [3406](https://github.com/flipperdevices/flipperzero-firmware/pull/3406) & [3431](https://github.com/flipperdevices/flipperzero-firmware/pull/3431)
 
 <a name="release">
