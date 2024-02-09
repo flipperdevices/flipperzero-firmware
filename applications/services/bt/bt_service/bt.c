@@ -193,7 +193,8 @@ static uint16_t bt_serial_event_callback(SerialServiceEvent event, void* context
         FURI_LOG_I(TAG, "BLE restart request received");
         BtMessage message = {
             .type = BtMessageTypeSetProfile,
-            .data.profile_template = ble_profile_serial,
+            .data.profile.params = NULL,
+            .data.profile.template = ble_profile_serial,
         };
         furi_check(
             furi_message_queue_put(bt->message_queue, &message, FuriWaitForever) == FuriStatusOk);
@@ -388,8 +389,8 @@ static void bt_change_profile(Bt* bt, BtMessage* message) {
         bt_keys_storage_load(bt->keys_storage);
 
         bt->current_profile = furi_hal_bt_change_app(
-            message->data.profile_template,
-            message->data.profile_params,
+            message->data.profile.template,
+            message->data.profile.params,
             bt_on_gap_event_callback,
             bt);
         if(bt->current_profile) {

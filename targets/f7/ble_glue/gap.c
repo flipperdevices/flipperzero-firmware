@@ -14,7 +14,7 @@
 #define FAST_ADV_TIMEOUT 30000
 #define INITIAL_ADV_TIMEOUT 60000
 
-#define GAP_CONN_INTERVAL_TO_MS(x) (uint16_t)((x) * 1.25)
+#define GAP_CONN_INTERVAL_TO_MS(x) (uint16_t)((x)*1.25)
 
 typedef struct {
     uint16_t gap_svc_handle;

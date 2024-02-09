@@ -1,7 +1,7 @@
 #include "hid.h"
 
 #ifndef HID_TRANSPORT_BLE
-#error "HID_TRANSPORT_BLE must be defined "
+#error "HID_TRANSPORT_BLE must be defined"
 #endif
 
 void hid_hal_keyboard_press(Hid* instance, uint16_t event) {

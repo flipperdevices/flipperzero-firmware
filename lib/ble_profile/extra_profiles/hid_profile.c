@@ -388,7 +388,7 @@ static GapConfig template_config = {
 };
 
 static void ble_profile_hid_get_config(GapConfig* config, FuriHalBleProfileParams profile_params) {
-    UNUSED(profile_params);
+    BleProfileHidParams* hid_profile_params = profile_params;
 
     furi_check(config);
     memcpy(config, &template_config, sizeof(GapConfig));
@@ -402,9 +402,21 @@ static void ble_profile_hid_get_config(GapConfig* config, FuriHalBleProfileParam
 
     // Change MAC address for HID profile
     config->mac_address[2]++;
-    // Change name Flipper -> Control
+    if(hid_profile_params) {
+        config->mac_address[0] ^= hid_profile_params->mac_xor;
+        config->mac_address[1] ^= hid_profile_params->mac_xor >> 8;
+    }
+
+    // Change name
     const char* clicker_str = "Control";
-    memcpy(&config->adv_name[1], clicker_str, strlen(clicker_str));
+    if(hid_profile_params && hid_profile_params->device_name_prefix) {
+        clicker_str = hid_profile_params->device_name_prefix;
+    }
+    FuriString* name = furi_string_alloc_set(config->adv_name);
+    furi_check(furi_string_size(name) < sizeof(config->adv_name));
+    memset(config->adv_name, 0, sizeof(config->adv_name));
+    memcpy(config->adv_name, furi_string_get_cstr(name), furi_string_size(name));
+    furi_string_free(name);
 }
 
 static const FuriHalBleProfileTemplate profile_callbacks = {

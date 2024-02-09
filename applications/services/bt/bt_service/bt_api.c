@@ -14,8 +14,9 @@ FuriHalBleProfileBase* bt_profile_start(
         .lock = api_lock_alloc_locked(),
         .type = BtMessageTypeSetProfile,
         .profile_instance = &profile_instance,
-        .data.profile_template = profile_template};
-    message.data.profile_params = params;
+        .data.profile.params = params,
+        .data.profile.template = profile_template,
+    };
     furi_check(
         furi_message_queue_put(bt->message_queue, &message, FuriWaitForever) == FuriStatusOk);
     // Wait for unlock

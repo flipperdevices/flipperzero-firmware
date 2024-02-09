@@ -6,6 +6,15 @@
 extern "C" {
 #endif
 
+/** 
+ * Optional arguments to pass along with profile template as 
+ * FuriHalBleProfileParams for tuning profile behavior 
+ **/
+typedef struct {
+    const char* device_name_prefix; /**< Prefix for device name. Length must be less than 8 */
+    uint16_t mac_xor; /**< XOR mask for device address, for uniqueness */
+} BleProfileHidParams;
+
 /** Hid Keyboard Profile descriptor */
 extern const FuriHalBleProfileTemplate* ble_profile_hid;
 
