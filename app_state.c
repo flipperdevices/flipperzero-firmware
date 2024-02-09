@@ -38,7 +38,8 @@ App* app_alloc() {
     app->text_box = text_box_alloc();
     app->text_box_store = furi_string_alloc();
 
-    app->dmcomm_mutex = furi_mutex_alloc(FuriMutexTypeNormal);
+    app->dmcomm_input_mutex = furi_mutex_alloc(FuriMutexTypeNormal);
+    app->dmcomm_output_mutex = furi_mutex_alloc(FuriMutexTypeNormal);
     app->dmcomm_stream_buffer = furi_stream_buffer_alloc(128, 1);
     app->dmcomm_output_buffer = furi_string_alloc();
 
@@ -102,7 +103,8 @@ void app_free(App* app) {
     furi_thread_join(app->dcomm_thread);
     furi_thread_free(app->dcomm_thread);
 
-    furi_mutex_free(app->dmcomm_mutex);
+    furi_mutex_free(app->dmcomm_input_mutex);
+    furi_mutex_free(app->dmcomm_output_mutex);
     furi_stream_buffer_free(app->dmcomm_stream_buffer);
     furi_string_free(app->dmcomm_output_buffer);
 

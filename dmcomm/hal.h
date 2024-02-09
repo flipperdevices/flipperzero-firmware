@@ -9,7 +9,7 @@ typedef bool boolean;
 
 typedef void (*DmcommCallback)();
 
-void setSerialOutputCallback(DmcommCallback *cb);
+void setSerialOutputCallback(DmcommCallback cb);
 void setApp(void* ctx);
 
 void boilerplate_led_set_rgb(int red, int green, int blue);

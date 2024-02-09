@@ -11,6 +11,9 @@ typedef struct AppState {
     bool usbSerialEnabled;
     char current_code[MAX_FILENAME_LEN];
     char file_name_tmp[MAX_FILENAME_LEN];
+    bool waitForCode;
+    FuriString* r_code;
+    FuriString* s_code;
 } AppState;
 
 typedef struct App {
@@ -31,8 +34,9 @@ typedef struct App {
     AppState* state;
     bool dmcomm_run;
     FuriThread* dcomm_thread;
-    FuriMutex* dmcomm_mutex;
+    FuriMutex* dmcomm_input_mutex;
     FuriStreamBuffer* dmcomm_stream_buffer;
+    FuriMutex* dmcomm_output_mutex;
     FuriString* dmcomm_output_buffer;
 
     bool serial_run;

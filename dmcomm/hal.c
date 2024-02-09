@@ -8,9 +8,9 @@ void setApp(void* v)
   context = ctx;
 }
 
-DmcommCallback* serialCallback = NULL;
+DmcommCallback serialCallback = NULL;
 
-void setSerialOutputCallback(DmcommCallback *cb)
+void setSerialOutputCallback(DmcommCallback cb)
 {
   serialCallback = cb;
 }
@@ -89,39 +89,41 @@ void ledOff() {
 
 void Serial_prints(const char* c)
 {
-  FURI_LOG_I(TAG, "Serial_prints %s", c);
+  furi_check(furi_mutex_acquire(context->dmcomm_output_mutex, FuriWaitForever) == FuriStatusOk);
   furi_string_cat_printf(context->dmcomm_output_buffer, "%s", c);
+  furi_check(furi_mutex_release(context->dmcomm_output_mutex) == FuriStatusOk);
 }
 void Serial_printlns(const char* c)
 {
-  FURI_LOG_I(TAG, "%s", c);
+  furi_check(furi_mutex_acquire(context->dmcomm_output_mutex, FuriWaitForever) == FuriStatusOk);
   furi_string_cat_printf(context->dmcomm_output_buffer, "%s\n", c);
-  FURI_LOG_I(TAG, "SENDING LINE %s", furi_string_get_cstr(context->dmcomm_output_buffer));
-  // allocate string, copy data, send string to CB. CB deallocates
-  // no locking
-  furi_string_reset(context->dmcomm_output_buffer);
+  furi_check(furi_mutex_release(context->dmcomm_output_mutex) == FuriStatusOk);
+
+  if(serialCallback != NULL)
+    (*serialCallback)(context);
 }
 
 void Serial_println(void)
 {
+  furi_check(furi_mutex_acquire(context->dmcomm_output_mutex, FuriWaitForever) == FuriStatusOk);
   furi_string_cat_printf(context->dmcomm_output_buffer, "\n");
-  FURI_LOG_I(TAG, "SENDING LINE %s", furi_string_get_cstr(context->dmcomm_output_buffer));
-  // allocate string, copy data, send string to CB. CB deallocates
-  // no locking
-  furi_string_reset(context->dmcomm_output_buffer);
+  furi_check(furi_mutex_release(context->dmcomm_output_mutex) == FuriStatusOk);
+
+  if(serialCallback != NULL)
+    serialCallback(context);
 }
 
 void Serial_printi(const int c)
 {
-  FURI_LOG_I(TAG, "Serial_printi %d", c);
-  furi_string_cat_printf(context->dmcomm_output_buffer, "%d", c);
+  furi_check(furi_mutex_acquire(context->dmcomm_output_mutex, FuriWaitForever) == FuriStatusOk);
+  furi_string_cat_printf(context->dmcomm_output_buffer, "%c", (char)c);
+  furi_check(furi_mutex_release(context->dmcomm_output_mutex) == FuriStatusOk);
 }
 void Serial_printf(const float c, int acc)
 {
+  furi_check(furi_mutex_acquire(context->dmcomm_output_mutex, FuriWaitForever) == FuriStatusOk);
   FURI_LOG_I(TAG, "Serial_printf %f %d", (double)c, acc);
-  UNUSED(c);
-  UNUSED(acc);
-  //furi_string_cat_printf(dmcomm_output_buffer, "%d", c);
+  furi_check(furi_mutex_release(context->dmcomm_output_mutex) == FuriStatusOk);
 }
 
 const char *F(const char* i)
@@ -131,7 +133,6 @@ const char *F(const char* i)
 
 void delay(int ms)
 {
-  //FURI_LOG_I(TAG, "delay %d", ms);
   furi_delay_ms(ms);
 }
 
@@ -147,11 +148,9 @@ uint32_t millis()
 
 void Serial_writei(int i)
 {
-  FURI_LOG_I(TAG, "%d", i);
-  furi_string_push_back(context->dmcomm_output_buffer, (char)((i >> 24) & 0xFF));
-  furi_string_push_back(context->dmcomm_output_buffer, (char)((i >> 16) & 0xFF));
-  furi_string_push_back(context->dmcomm_output_buffer, (char)((i >> 8) & 0xFF));
-  furi_string_push_back(context->dmcomm_output_buffer, (char)(i & 0xFF));
+  furi_check(furi_mutex_acquire(context->dmcomm_output_mutex, FuriWaitForever) == FuriStatusOk);
+  furi_string_cat_printf(context->dmcomm_output_buffer, "%c", (char)i);
+  furi_check(furi_mutex_release(context->dmcomm_output_mutex) == FuriStatusOk);
 }
 
 int Serial_available(void)
@@ -163,29 +162,29 @@ int Serial_available(void)
 int Serial_read(void)
 {
   int ret = -1;
-
-  furi_check(furi_mutex_acquire(context->dmcomm_mutex, FuriWaitForever) == FuriStatusOk);
-  
   char s;
   size_t recieved = 1;
+
+  furi_check(furi_mutex_acquire(context->dmcomm_input_mutex, FuriWaitForever) == FuriStatusOk);
   recieved = furi_stream_buffer_receive(
       context->dmcomm_stream_buffer,
       &s,
       1,
       1);
-    
+  furi_check(furi_mutex_release(context->dmcomm_input_mutex) == FuriStatusOk);
+
   if(recieved > 0)
   {
     ret = (int)s;
   }
-  furi_check(furi_mutex_release(context->dmcomm_mutex) == FuriStatusOk);
 
   return ret;
 }
 
 void Serial_writeb(const byte* data, int len)
 {
-  FURI_LOG_I(TAG, "Serial_writeb %d", len);
+  furi_check(furi_mutex_acquire(context->dmcomm_output_mutex, FuriWaitForever) == FuriStatusOk);
   for(int i = 0; i < len; i++)
     furi_string_push_back(context->dmcomm_output_buffer, (char)data[i]);
+  furi_check(furi_mutex_release(context->dmcomm_output_mutex) == FuriStatusOk);
 }

@@ -25,7 +25,7 @@ void dmcomm_sendcommand(void* context, const char* cmd)
     FURI_LOG_I(TAG, "dmcomm_reader start");
     App* app = context;
     
-    furi_mutex_acquire(app->dmcomm_mutex, FuriWaitForever);
+    furi_mutex_acquire(app->dmcomm_input_mutex, FuriWaitForever);
 
     size_t sent = furi_stream_buffer_send(
         app->dmcomm_stream_buffer,
@@ -36,7 +36,7 @@ void dmcomm_sendcommand(void* context, const char* cmd)
     if(sent != strlen(cmd))
         FURI_LOG_I(TAG, "partial send %d/%d", sent, strlen(cmd));
 
-    furi_mutex_release(app->dmcomm_mutex);
+    furi_mutex_release(app->dmcomm_input_mutex);
 }
 
 
