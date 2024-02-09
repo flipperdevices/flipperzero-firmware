@@ -5,7 +5,7 @@ void nfc_playlist_text_input_menu_callback(void* context) {
    NfcPlaylist* nfc_playlist = context;
    Storage* storage = furi_record_open(RECORD_STORAGE);
 
-   char const* old_file_path = (char*)furi_string_get_cstr(nfc_playlist->file_path);
+   char const* old_file_path = (char*)furi_string_get_cstr(nfc_playlist->settings.file_path);
    char const* old_file_name = strchr(old_file_path, '/') != NULL ? &strrchr(old_file_path, '/')[1] : old_file_path;
 
    int file_path_size = (strlen(old_file_path) - strlen(old_file_name) + 1);
@@ -19,8 +19,8 @@ void nfc_playlist_text_input_menu_callback(void* context) {
    snprintf(new_file_name, new_file_path_size, "%s%s%s", file_path, nfc_playlist->playlist_name, ".txt");
 
    if (!storage_file_exists(storage, new_file_name)) {
-      storage_common_rename_safe(storage, furi_string_get_cstr(nfc_playlist->file_path), new_file_name);
-      nfc_playlist->file_path = furi_string_alloc_set_str(new_file_name);
+      storage_common_rename_safe(storage, furi_string_get_cstr(nfc_playlist->settings.file_path), new_file_name);
+      nfc_playlist->settings.file_path = furi_string_alloc_set_str(new_file_name);
    }
 
    free(new_file_name);

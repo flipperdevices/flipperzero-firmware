@@ -12,10 +12,10 @@ void nfc_playlist_file_edit_menu_callback(void* context, uint32_t index) {
    Storage* storage = furi_record_open(RECORD_STORAGE);
    switch(index) {
       case NfcPlaylistMenuSelection_DeletePlaylist: {
-         storage_simply_remove(storage, furi_string_get_cstr(nfc_playlist->file_path));
-         nfc_playlist->file_selected = false;
-         nfc_playlist->file_selected_check = false;
-         nfc_playlist->file_path = nfc_playlist->base_file_path;
+         storage_simply_remove(storage, furi_string_get_cstr(nfc_playlist->settings.file_path));
+         nfc_playlist->settings.file_selected = false;
+         nfc_playlist->settings.file_selected_check = false;
+         nfc_playlist->settings.file_path = nfc_playlist->settings.base_file_path;
          scene_manager_previous_scene(nfc_playlist->scene_manager);
          break;
       }
@@ -43,7 +43,7 @@ void nfc_playlist_file_edit_scene_on_enter(void* context) {
       NfcPlaylistMenuSelection_DeletePlaylist,
       nfc_playlist_file_edit_menu_callback,
       nfc_playlist,
-      !nfc_playlist->file_selected_check,
+      !nfc_playlist->settings.file_selected_check,
       "No\nplaylist\nselected");
 
    submenu_add_lockable_item(
@@ -52,7 +52,7 @@ void nfc_playlist_file_edit_scene_on_enter(void* context) {
       NfcPlaylistMenuSelection_RenamePlaylist,
       nfc_playlist_file_edit_menu_callback,
       nfc_playlist,
-      !nfc_playlist->file_selected_check,
+      !nfc_playlist->settings.file_selected_check,
       "No\nplaylist\nselected");
 
    view_dispatcher_switch_to_view(nfc_playlist->view_dispatcher, NfcPlaylistView_FileEdit);
