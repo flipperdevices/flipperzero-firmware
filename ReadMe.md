@@ -40,6 +40,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [HID app: keyboard modifiers fix #3378 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/3378)
 - OFW: [Update tv.ir Sony KD-55AG8 Smart TV #3399 (By tomellens)](https://github.com/flipperdevices/flipperzero-firmware/pull/3399)
 - OFW: [Update tv.ir TCL 50P715X1 #3421 (By JuicyPigWalker)](https://github.com/flipperdevices/flipperzero-firmware/pull/3421)
+- Updated: [NFC Playlist v1.3 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
 - To Be Merged OFW PRs: [3352](https://github.com/flipperdevices/flipperzero-firmware/pull/3352), [3302](https://github.com/flipperdevices/flipperzero-firmware/pull/3302), [3211](https://github.com/flipperdevices/flipperzero-firmware/pull/3211), [3366](https://github.com/flipperdevices/flipperzero-firmware/pull/3366), [3250](https://github.com/flipperdevices/flipperzero-firmware/pull/3250), [3402](https://github.com/flipperdevices/flipperzero-firmware/pull/3402), [3409](https://github.com/flipperdevices/flipperzero-firmware/pull/3409), [3406](https://github.com/flipperdevices/flipperzero-firmware/pull/3406) & [3431](https://github.com/flipperdevices/flipperzero-firmware/pull/3431)
 
 <a name="release">

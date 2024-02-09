@@ -29,8 +29,7 @@ static const SceneManagerHandlers nfc_playlist_scene_manager_handlers = {
     .on_enter_handlers = nfc_playlist_scene_on_enter_handlers,
     .on_event_handlers = nfc_playlist_scene_on_event_handlers,
     .on_exit_handlers = nfc_playlist_scene_on_exit_handlers,
-    .scene_num = NfcPlaylistScene_count,
-};
+    .scene_num = NfcPlaylistScene_count};
 
 static bool nfc_playlist_custom_callback(void* context, uint32_t custom_event) {
     furi_assert(context);

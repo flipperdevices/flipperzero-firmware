@@ -12,7 +12,7 @@ typedef enum {
     NfcPlaylistMenuSelection_Start,
     NfcPlaylistMenuSelection_FileSelect,
     NfcPlaylistMenuSelection_FileEdit,
-    NfcPlaylistMenuSelection_Settings,
+    NfcPlaylistMenuSelection_Settings
 } NfcPlaylistMenuSelection;
 
 void nfc_playlist_main_menu_menu_callback(void* context, uint32_t index) {
