@@ -137,7 +137,9 @@ typedef struct {
 } BleProfileHid;
 _Static_assert(offsetof(BleProfileHid, base) == 0, "Wrong layout");
 
-static FuriHalBleProfileBase* ble_profile_hid_start() {
+static FuriHalBleProfileBase* ble_profile_hid_start(FuriHalBleProfileParams profile_params) {
+    UNUSED(profile_params);
+
     BleProfileHid* profile = malloc(sizeof(BleProfileHid));
 
     profile->base.config = ble_profile_hid;
@@ -385,7 +387,9 @@ static GapConfig template_config = {
         },
 };
 
-static void ble_profile_hid_get_config(GapConfig* config) {
+static void ble_profile_hid_get_config(GapConfig* config, FuriHalBleProfileParams profile_params) {
+    UNUSED(profile_params);
+
     furi_check(config);
     memcpy(config, &template_config, sizeof(GapConfig));
     // Set mac address
@@ -403,10 +407,10 @@ static void ble_profile_hid_get_config(GapConfig* config) {
     memcpy(&config->adv_name[1], clicker_str, strlen(clicker_str));
 }
 
-static const FuriHalBleProfileConfig profile_callbacks = {
+static const FuriHalBleProfileTemplate profile_callbacks = {
     .start = ble_profile_hid_start,
     .stop = ble_profile_hid_stop,
     .get_gap_config = ble_profile_hid_get_config,
 };
 
-const FuriHalBleProfileConfig* ble_profile_hid = &profile_callbacks;
+const FuriHalBleProfileTemplate* ble_profile_hid = &profile_callbacks;

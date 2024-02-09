@@ -192,7 +192,9 @@ static uint16_t bt_serial_event_callback(SerialServiceEvent event, void* context
     } else if(event.event == SerialServiceEventTypesBleResetRequest) {
         FURI_LOG_I(TAG, "BLE restart request received");
         BtMessage message = {
-            .type = BtMessageTypeSetProfile, .data.profile_config = ble_profile_serial};
+            .type = BtMessageTypeSetProfile,
+            .data.profile_template = ble_profile_serial,
+        };
         furi_check(
             furi_message_queue_put(bt->message_queue, &message, FuriWaitForever) == FuriStatusOk);
     }
@@ -385,8 +387,11 @@ static void bt_change_profile(Bt* bt, BtMessage* message) {
 
         bt_keys_storage_load(bt->keys_storage);
 
-        bt->current_profile =
-            furi_hal_bt_change_app(message->data.profile_config, bt_on_gap_event_callback, bt);
+        bt->current_profile = furi_hal_bt_change_app(
+            message->data.profile_template,
+            message->data.profile_params,
+            bt_on_gap_event_callback,
+            bt);
         if(bt->current_profile) {
             FURI_LOG_I(TAG, "Bt App started");
             if(bt->bt_settings.enabled) {
@@ -444,7 +449,7 @@ int32_t bt_srv(void* p) {
 
     if(furi_hal_bt_is_gatt_gap_supported()) {
         bt->current_profile =
-            furi_hal_bt_start_app(ble_profile_serial, bt_on_gap_event_callback, bt);
+            furi_hal_bt_start_app(ble_profile_serial, NULL, bt_on_gap_event_callback, bt);
         if(!bt->current_profile) {
             FURI_LOG_E(TAG, "BLE App start failed");
         } else {

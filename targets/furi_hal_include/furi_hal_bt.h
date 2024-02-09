@@ -64,25 +64,27 @@ bool furi_hal_bt_is_testing_supported();
 
 /** Check if particular instance of profile belongs to given type
  *
- * @param profile   FuriHalBtProfile instance. If NULL, uses current profile
- * @param config    basic profile config to check against
+ * @param profile           FuriHalBtProfile instance. If NULL, uses current profile
+ * @param profile_template  basic profile template to check against
  *
  * @return          true on success
 */
 bool furi_hal_bt_check_profile_type(
     FuriHalBleProfileBase* profile,
-    const FuriHalBleProfileConfig* profile_config);
+    const FuriHalBleProfileTemplate* profile_template);
 
 /** Start BLE app
  *
- * @param profile   FuriHalBleProfileConfig instance
- * @param event_cb  GapEventCallback instance
- * @param context   pointer to context
+ * @param profile_template  FuriHalBleProfileTemplate instance
+ * @param params            Parameters to pass to the profile. Can be NULL
+ * @param event_cb          GapEventCallback instance
+ * @param context           pointer to context
  *
- * @return          instance of profile, NULL on failure
+ * @return                  instance of profile, NULL on failure
 */
 FURI_WARN_UNUSED FuriHalBleProfileBase* furi_hal_bt_start_app(
-    const FuriHalBleProfileConfig* profile_config,
+    const FuriHalBleProfileTemplate* profile_template,
+    FuriHalBleProfileParams params,
     GapEventCallback event_cb,
     void* context);
 
@@ -95,14 +97,15 @@ void furi_hal_bt_reinit();
 /** Change BLE app
  * Restarts 2nd core
  *
- * @param profile   FuriHalBleProfileConfig instance
+ * @param profile   FuriHalBleProfileTemplate instance
  * @param event_cb  GapEventCallback instance
  * @param context   pointer to context
  *
  * @return          instance of profile, NULL on failure
 */
 FURI_WARN_UNUSED FuriHalBleProfileBase* furi_hal_bt_change_app(
-    const FuriHalBleProfileConfig* profile_config,
+    const FuriHalBleProfileTemplate* profile_template,
+    FuriHalBleProfileParams profile_params,
     GapEventCallback event_cb,
     void* context);
 

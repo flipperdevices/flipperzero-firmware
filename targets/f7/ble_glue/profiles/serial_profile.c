@@ -16,7 +16,9 @@ typedef struct {
 } BleProfileSerial;
 _Static_assert(offsetof(BleProfileSerial, base) == 0, "Wrong layout");
 
-static FuriHalBleProfileBase* ble_profile_serial_start(void) {
+static FuriHalBleProfileBase* ble_profile_serial_start(FuriHalBleProfileParams profile_params) {
+    UNUSED(profile_params);
+
     BleProfileSerial* profile = malloc(sizeof(BleProfileSerial));
 
     profile->base.config = ble_profile_serial;
@@ -50,7 +52,10 @@ static GapConfig serial_template_config = {
         .supervisor_timeout = 0,
     }};
 
-static void ble_profile_serial_get_config(GapConfig* config) {
+static void
+    ble_profile_serial_get_config(GapConfig* config, FuriHalBleProfileParams profile_params) {
+    UNUSED(profile_params);
+
     furi_check(config);
     memcpy(config, &serial_template_config, sizeof(GapConfig));
     // Set mac address
@@ -63,13 +68,13 @@ static void ble_profile_serial_get_config(GapConfig* config) {
     config->adv_service_uuid |= furi_hal_version_get_hw_color();
 }
 
-static const FuriHalBleProfileConfig profile_callbacks = {
+static const FuriHalBleProfileTemplate profile_callbacks = {
     .start = ble_profile_serial_start,
     .stop = ble_profile_serial_stop,
     .get_gap_config = ble_profile_serial_get_config,
 };
 
-const FuriHalBleProfileConfig* ble_profile_serial = &profile_callbacks;
+const FuriHalBleProfileTemplate* ble_profile_serial = &profile_callbacks;
 
 void ble_profile_serial_set_event_callback(
     FuriHalBleProfileBase* profile,

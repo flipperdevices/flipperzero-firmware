@@ -1,7 +1,10 @@
 #include "bt_i.h"
 #include <profiles/serial_profile.h>
 
-FuriHalBleProfileBase* bt_profile_start(Bt* bt, const FuriHalBleProfileConfig* profile_config) {
+FuriHalBleProfileBase* bt_profile_start(
+    Bt* bt,
+    const FuriHalBleProfileTemplate* profile_template,
+    FuriHalBleProfileParams params) {
     furi_assert(bt);
 
     // Send message
@@ -10,9 +13,9 @@ FuriHalBleProfileBase* bt_profile_start(Bt* bt, const FuriHalBleProfileConfig* p
     BtMessage message = {
         .lock = api_lock_alloc_locked(),
         .type = BtMessageTypeSetProfile,
-        .data.profile_config = profile_config,
         .profile_instance = &profile_instance,
-    };
+        .data.profile_template = profile_template};
+    message.data.profile_params = params;
     furi_check(
         furi_message_queue_put(bt->message_queue, &message, FuriWaitForever) == FuriStatusOk);
     // Wait for unlock
@@ -23,7 +26,7 @@ FuriHalBleProfileBase* bt_profile_start(Bt* bt, const FuriHalBleProfileConfig* p
 }
 
 bool bt_profile_restore_default(Bt* bt) {
-    bt->current_profile = bt_profile_start(bt, ble_profile_serial);
+    bt->current_profile = bt_profile_start(bt, ble_profile_serial, NULL);
     return bt->current_profile != NULL;
 }
 

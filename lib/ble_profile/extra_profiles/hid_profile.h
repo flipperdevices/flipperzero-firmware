@@ -7,7 +7,7 @@ extern "C" {
 #endif
 
 /** Hid Keyboard Profile descriptor */
-extern const FuriHalBleProfileConfig* ble_profile_hid;
+extern const FuriHalBleProfileTemplate* ble_profile_hid;
 
 /** Press keyboard button
  *

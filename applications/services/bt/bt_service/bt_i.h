@@ -43,7 +43,8 @@ typedef union {
     uint32_t pin_code;
     uint8_t battery_level;
     bool power_state_charging;
-    const FuriHalBleProfileConfig* profile_config;
+    const FuriHalBleProfileTemplate* profile_template;
+    FuriHalBleProfileParams profile_params;
     BtKeyStorageUpdateData key_storage_data;
 } BtMessageData;
 

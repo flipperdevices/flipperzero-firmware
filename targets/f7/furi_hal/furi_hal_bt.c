@@ -155,20 +155,21 @@ static GapConfig current_config = {0};
 
 bool furi_hal_bt_check_profile_type(
     FuriHalBleProfileBase* profile,
-    const FuriHalBleProfileConfig* config) {
-    if(!profile || !config) {
+    const FuriHalBleProfileTemplate* profile_template) {
+    if(!profile || !profile_template) {
         return false;
     }
 
-    return profile->config == config;
+    return profile->config == profile_template;
 }
 
 FuriHalBleProfileBase* furi_hal_bt_start_app(
-    const FuriHalBleProfileConfig* profile_config,
+    const FuriHalBleProfileTemplate* profile_template,
+    FuriHalBleProfileParams params,
     GapEventCallback event_cb,
     void* context) {
     furi_assert(event_cb);
-    furi_check(profile_config);
+    furi_check(profile_template);
     furi_check(current_profile == NULL);
 
     do {
@@ -181,7 +182,7 @@ FuriHalBleProfileBase* furi_hal_bt_start_app(
             break;
         }
 
-        profile_config->get_gap_config(&current_config);
+        profile_template->get_gap_config(&current_config, params);
 
         if(!gap_init(&current_config, event_cb, context)) {
             gap_thread_stop();
@@ -190,7 +191,7 @@ FuriHalBleProfileBase* furi_hal_bt_start_app(
         }
         // Start selected profile services
         if(furi_hal_bt_is_gatt_gap_supported()) {
-            current_profile = profile_config->start();
+            current_profile = profile_template->start(params);
         }
     } while(false);
 
@@ -234,13 +235,14 @@ void furi_hal_bt_reinit() {
 }
 
 FuriHalBleProfileBase* furi_hal_bt_change_app(
-    const FuriHalBleProfileConfig* profile_config,
+    const FuriHalBleProfileTemplate* profile_template,
+    FuriHalBleProfileParams profile_params,
     GapEventCallback event_cb,
     void* context) {
     furi_assert(event_cb);
 
     furi_hal_bt_reinit();
-    return furi_hal_bt_start_app(profile_config, event_cb, context);
+    return furi_hal_bt_start_app(profile_template, profile_params, event_cb, context);
 }
 
 bool furi_hal_bt_is_active() {

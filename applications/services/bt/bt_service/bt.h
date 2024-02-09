@@ -25,13 +25,16 @@ typedef void (*BtStatusChangedCallback)(BtStatus status, void* context);
 /** Change BLE Profile
  * @note Call of this function leads to 2nd core restart
  *
- * @param bt        Bt instance
- * @param profile   BtProfile
+ * @param bt                 Bt instance
+ * @param profile_template   Profile template to change to
+ * @param params             Profile parameters. Can be NULL
  *
  * @return          true on success
  */
-FURI_WARN_UNUSED FuriHalBleProfileBase*
-    bt_profile_start(Bt* bt, const FuriHalBleProfileConfig* profile_config);
+FURI_WARN_UNUSED FuriHalBleProfileBase* bt_profile_start(
+    Bt* bt,
+    const FuriHalBleProfileTemplate* profile_template,
+    FuriHalBleProfileParams params);
 
 /** Stop current BLE Profile and restore default profile
  * @note Call of this function leads to 2nd core restart

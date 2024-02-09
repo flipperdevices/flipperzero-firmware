@@ -324,7 +324,7 @@ int32_t hid_ble_app(void* p) {
 
     furi_record_close(RECORD_STORAGE);
 
-    app->ble_hid_profile = bt_profile_start(app->bt, ble_profile_hid);
+    app->ble_hid_profile = bt_profile_start(app->bt, ble_profile_hid, NULL);
 
     furi_check(app->ble_hid_profile);
 
