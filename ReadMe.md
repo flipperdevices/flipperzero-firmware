@@ -41,8 +41,9 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [Update tv.ir Sony KD-55AG8 Smart TV #3399 (By tomellens)](https://github.com/flipperdevices/flipperzero-firmware/pull/3399)
 - OFW: [Update tv.ir TCL 50P715X1 #3421 (By JuicyPigWalker)](https://github.com/flipperdevices/flipperzero-firmware/pull/3421)
 - Updated: [NFC Playlist v1.3 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
-- [Fix: This was leftover from old reverted OFW PR (By Willy-JL)]()
-- [Reset log level on flash for more responsiveness (By Willy-JL)]()
+- [Fix: This was leftover from old reverted OFW PR (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/02bd53f8c0423d02b01c1fd0507e6c866c29fc5e)
+- [Reset log level on flash for more responsiveness (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/67e7becc43b7701639baa873daa0149c054ba955)
+- Added: [Video Game Module Tool v1.0 (By gsurkov)](https://github.com/flipperdevices/flipperzero-good-faps/pull/127) - Commented out until expansion code is merged
 - To Be Merged OFW PRs: [3352](https://github.com/flipperdevices/flipperzero-firmware/pull/3352), [3302](https://github.com/flipperdevices/flipperzero-firmware/pull/3302), [3211](https://github.com/flipperdevices/flipperzero-firmware/pull/3211), [3366](https://github.com/flipperdevices/flipperzero-firmware/pull/3366), [3250](https://github.com/flipperdevices/flipperzero-firmware/pull/3250), [3402](https://github.com/flipperdevices/flipperzero-firmware/pull/3402), [3409](https://github.com/flipperdevices/flipperzero-firmware/pull/3409), [3406](https://github.com/flipperdevices/flipperzero-firmware/pull/3406) & [3431](https://github.com/flipperdevices/flipperzero-firmware/pull/3431)
 
 <a name="release">
@@ -544,6 +545,7 @@ $ ./fbt dolphin_ext
 - [NFC Relay WIP (By leommxj)](https://github.com/leommxj/nfc_relay)
 - [TAS Playback (By rcombs)](https://github.com/rcombs/tas-playback)
 - [VB Migration Assistant v1.2 (By GMMan)](https://github.com/GMMan/flipperzero-vb-migrate)
+- [Video Game Module Tool v1.0 (By gsurkov)](https://github.com/flipperdevices/flipperzero-good-faps/pull/127)
 - Have a new app? Submit GitHub link to me on Discord for a special reward (if I add it to RM Firmware).
 
 ## Current Bounties $$ (Sorted By Difficulty - Easiest to Hardest)
