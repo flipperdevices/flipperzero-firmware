@@ -18,6 +18,7 @@ This app was design, built and tested using the <a href="https://github.com/Flip
 - Emulate time (How long the NFC card will be emulated for)
 - Delay time (How long the gap between the cards will be)
 - LED indicator (Whether or not the LED's will be on)
+- Hide error messages (Hides any errors about NFC files and just skips to the next one)
 - Reset settings (Puts all the settings back to the defaults)
 
 ## Playlist editor

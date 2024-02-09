@@ -41,6 +41,7 @@ typedef struct {
    uint8_t emulate_timeout;
    uint8_t emulate_delay;
    bool emulate_led_indicator;
+   bool hide_error;
 } NfcPlaylistSettings;
 
 typedef struct {
@@ -63,3 +64,4 @@ static const int default_emulate_timeout = 4;
 static const int options_emulate_delay[] = { 0, 1, 2, 3, 4, 5, 6 };
 static const int default_emulate_delay = 0;
 static const bool default_emulate_led_indicator = true;
+static const bool default_hide_error = false;
