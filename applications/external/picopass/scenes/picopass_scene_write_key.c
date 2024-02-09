@@ -49,6 +49,8 @@ void picopass_scene_write_key_on_enter(void* context) {
     // Prevent people who set all 0's from bricking their card
     // TODO: Consider checking the elite user dict, when it exists, for the key
     if(!iclass_elite_dict_check_presence(IclassEliteDictTypeUser)) {
+        storage_simply_mkdir(picopass->dev->storage, STORAGE_APP_DATA_PATH_PREFIX);
+        storage_simply_mkdir(picopass->dev->storage, APP_DATA_PATH("assets"));
         IclassEliteDict* dict = iclass_elite_dict_alloc(IclassEliteDictTypeUser);
         iclass_elite_dict_add_key(dict, picopass->write_key_context.key_to_write);
         iclass_elite_dict_free(dict);
