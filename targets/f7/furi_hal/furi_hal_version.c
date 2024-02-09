@@ -283,22 +283,6 @@ const char* furi_hal_version_get_hw_region_name() {
     return "R??";
 }
 
-const char* furi_hal_version_get_hw_region_name_otp() {
-    switch(furi_hal_version_get_hw_region_otp()) {
-    case FuriHalVersionRegionUnknown:
-        return "R00";
-    case FuriHalVersionRegionEuRu:
-        return "R01";
-    case FuriHalVersionRegionUsCaAu:
-        return "R02";
-    case FuriHalVersionRegionJp:
-        return "R03";
-    case FuriHalVersionRegionWorld:
-        return "R04";
-    }
-    return "R??";
-}
-
 FuriHalVersionDisplay furi_hal_version_get_hw_display() {
     return furi_hal_version.board_display;
 }

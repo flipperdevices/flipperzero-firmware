@@ -159,12 +159,6 @@ const char* furi_hal_version_get_hw_region_name();
  */
 FuriHalVersionRegion furi_hal_version_get_hw_region_otp();
 
-/** Get hardware region name (OTP)
- *
- * @return     Hardware Region name
- */
-const char* furi_hal_version_get_hw_region_name_otp();
-
 /** Get hardware display id
  *
  * @return     Display id
