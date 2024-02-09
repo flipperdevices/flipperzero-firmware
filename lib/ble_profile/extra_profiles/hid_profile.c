@@ -417,7 +417,6 @@ static void ble_profile_hid_get_config(GapConfig* config, FuriHalBleProfileParam
     if(furi_string_size(name) >= sizeof(config->adv_name)) {
         furi_string_left(name, sizeof(config->adv_name) - 1);
     }
-    furi_check(furi_string_size(name) < sizeof(config->adv_name));
     memset(config->adv_name, 0, sizeof(config->adv_name));
     memcpy(config->adv_name, furi_string_get_cstr(name), furi_string_size(name));
     furi_string_free(name);
