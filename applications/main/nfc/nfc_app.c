@@ -1,4 +1,5 @@
 #include "nfc_app_i.h"
+#include "helpers/protocol_support/nfc_protocol_support.h"
 
 #include <dolphin/dolphin.h>
 
@@ -50,6 +51,7 @@ NfcApp* nfc_app_alloc() {
     instance->nfc = nfc_alloc();
 
     instance->mf_ul_auth = mf_ultralight_auth_alloc();
+    instance->slix_unlock = slix_unlock_alloc();
     instance->mfc_key_cache = mf_classic_key_cache_alloc();
     instance->nfc_supported_cards = nfc_supported_cards_alloc();
 
@@ -140,6 +142,7 @@ void nfc_app_free(NfcApp* instance) {
     nfc_free(instance->nfc);
 
     mf_ultralight_auth_free(instance->mf_ul_auth);
+    slix_unlock_free(instance->slix_unlock);
     mf_classic_key_cache_free(instance->mfc_key_cache);
     nfc_supported_cards_free(instance->nfc_supported_cards);
 
@@ -445,6 +448,15 @@ void nfc_app_reset_detected_protocols(NfcApp* instance) {
     instance->protocols_detected_num = 0;
 }
 
+void nfc_append_filename_string_when_present(NfcApp* instance, FuriString* string) {
+    furi_assert(instance);
+    furi_assert(string);
+
+    if(!furi_string_empty(instance->file_name)) {
+        furi_string_cat_printf(string, "Name:%s\n", furi_string_get_cstr(instance->file_name));
+    }
+}
+
 static bool nfc_is_hal_ready() {
     if(furi_hal_nfc_is_hal_ready() != FuriHalNfcErrorNone) {
         // No connection to the chip, show an error screen
@@ -466,6 +478,15 @@ static bool nfc_is_hal_ready() {
     }
 }
 
+static void nfc_show_initial_scene_for_device(NfcApp* nfc) {
+    NfcProtocol prot = nfc_device_get_protocol(nfc->nfc_device);
+    uint32_t scene = nfc_protocol_support_has_feature(
+                         prot, NfcProtocolFeatureEmulateFull | NfcProtocolFeatureEmulateUid) ?
+                         NfcSceneEmulate :
+                         NfcSceneSavedMenu;
+    scene_manager_next_scene(nfc->scene_manager, scene);
+}
+
 int32_t nfc_app(void* p) {
     if(!nfc_is_hal_ready()) return 0;
 
@@ -485,7 +506,7 @@ int32_t nfc_app(void* p) {
 
             furi_string_set(nfc->file_path, args);
             if(nfc_load_file(nfc, nfc->file_path, false)) {
-                scene_manager_next_scene(nfc->scene_manager, NfcSceneEmulate);
+                nfc_show_initial_scene_for_device(nfc);
             } else {
                 view_dispatcher_stop(nfc->view_dispatcher);
             }
