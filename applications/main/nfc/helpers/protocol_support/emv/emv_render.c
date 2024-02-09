@@ -29,18 +29,6 @@ void nfc_render_emv_uid(const uint8_t* uid, const uint8_t uid_len, FuriString* s
     furi_string_cat_printf(str, "\n");
 }
 
-void nfc_render_emv_aid(const uint8_t* uid, const uint8_t uid_len, FuriString* str) {
-    if(uid_len == 0) return;
-
-    furi_string_cat_printf(str, "UID: ");
-
-    for(uint8_t i = 0; i < uid_len; i++) {
-        furi_string_cat_printf(str, "%02X ", uid[i]);
-    }
-
-    furi_string_cat_printf(str, "\n");
-}
-
 void nfc_render_emv_data(const EmvData* data, FuriString* str) {
     nfc_render_emv_pan(data->emv_application.pan, data->emv_application.pan_len, str);
     nfc_render_emv_name(data->emv_application.name, str);
@@ -63,11 +51,6 @@ void nfc_render_emv_pan(const uint8_t* data, const uint8_t len, FuriString* str)
     furi_string_cat_printf(str, "\n");
 }
 
-void nfc_render_emv_expired(const EmvApplication* apl, FuriString* str) {
-    if(apl->exp_month == 0) return;
-    furi_string_cat_printf(str, "Exp: %02X/%02X\n", apl->exp_month, apl->exp_year);
-}
-
 void nfc_render_emv_currency(uint16_t cur_code, FuriString* str) {
     if(!cur_code) return;
 
@@ -88,42 +71,14 @@ void nfc_render_emv_application(const EmvApplication* apl, FuriString* str) {
         return;
     }
 
-    furi_string_cat_printf(str, "Application:\n");
-
-    if(strlen(apl->label)) {
-        furi_string_cat_printf(str, "  Label: %s", apl->label);
-        furi_string_cat_printf(str, "\n");
-    }
-
-    if(strlen(apl->name)) {
-        furi_string_cat_printf(str, "  Name: %s", apl->name);
-        furi_string_cat_printf(str, "\n");
-    }
-
-    furi_string_cat_printf(str, "  AID:");
+    furi_string_cat_printf(str, "AID: ");
     for(uint8_t i = 0; i < len; i++) furi_string_cat_printf(str, "%02X", apl->aid[i]);
     furi_string_cat_printf(str, "\n");
-
-    if(apl->eff_month) {
-        furi_string_cat_printf(
-            str, "  Effective: 20%02X/%02X/%02X", apl->eff_year, apl->eff_month, apl->eff_day);
-        furi_string_cat_printf(str, "\n");
-    }
-    if(apl->exp_month) {
-        furi_string_cat_printf(
-            str, "  Expire: 20%02X/%02X/%02X", apl->exp_year, apl->exp_month, apl->exp_day);
-        furi_string_cat_printf(str, "\n");
-    }
-}
-
-static void nfc_render_emv_pin_try_counter(uint8_t counter, FuriString* str) {
-    if(counter == 0xff) return;
-    furi_string_cat_printf(str, "PIN try left: %d\n", counter);
 }
 
 void nfc_render_emv_transactions(const EmvApplication* apl, FuriString* str) {
     if(apl->transaction_counter)
-        furi_string_cat_printf(str, "Transactions: %d\n", apl->transaction_counter);
+        furi_string_cat_printf(str, "Transactions count: %d\n", apl->transaction_counter);
     if(apl->last_online_atc)
         furi_string_cat_printf(str, "Last Online ATC: %d\n", apl->last_online_atc);
 
@@ -136,27 +91,32 @@ void nfc_render_emv_transactions(const EmvApplication* apl, FuriString* str) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
     FuriString* tmp = furi_string_alloc();
 
-    //furi_string_cat_printf(str, "Transactions:\n");
+    furi_string_cat_printf(str, "Transactions:\n");
     for(int i = 0; i < len; i++) {
-        if(!apl->trans[i].amount) continue;
+        // If no date and amount - skip
+        if((!apl->trans[i].date) && (!apl->trans[i].amount)) continue;
         // transaction counter
         furi_string_cat_printf(str, "\e#%d: ", apl->trans[i].atc);
 
         // Print transaction amount
-        uint8_t* a = (uint8_t*)&apl->trans[i].amount;
-        bool top = true;
-        for(int x = 0; x < 6; x++) {
-            // cents
-            if(x == 5) {
-                furi_string_cat_printf(str, ".%02X", a[x]);
-                break;
-            }
-            if(a[x]) {
-                if(top) {
-                    furi_string_cat_printf(str, "%X", a[x]);
-                    top = false;
-                } else {
-                    furi_string_cat_printf(str, "%02X", a[x]);
+        if(!apl->trans[i].amount) {
+            furi_string_cat_printf(str, "???");
+        } else {
+            uint8_t* a = (uint8_t*)&apl->trans[i].amount;
+            bool top = true;
+            for(int x = 0; x < 6; x++) {
+                // cents
+                if(x == 5) {
+                    furi_string_cat_printf(str, ".%02X", a[x]);
+                    break;
+                }
+                if(a[x]) {
+                    if(top) {
+                        furi_string_cat_printf(str, "%X", a[x]);
+                        top = false;
+                    } else {
+                        furi_string_cat_printf(str, "%02X", a[x]);
+                    }
                 }
             }
         }
@@ -176,7 +136,7 @@ void nfc_render_emv_transactions(const EmvApplication* apl, FuriString* str) {
         if(apl->trans[i].date)
             furi_string_cat_printf(
                 str,
-                "%02lx/%02lx/%02lx ",
+                "%02lx.%02lx.%02lx  ",
                 apl->trans[i].date >> 16,
                 (apl->trans[i].date >> 8) & 0xff,
                 apl->trans[i].date & 0xff);
@@ -184,10 +144,13 @@ void nfc_render_emv_transactions(const EmvApplication* apl, FuriString* str) {
         if(apl->trans[i].time)
             furi_string_cat_printf(
                 str,
-                "%02lx:%02lx:%02lx\n",
+                "%02lx:%02lx:%02lx",
                 apl->trans[i].time & 0xff,
                 (apl->trans[i].time >> 8) & 0xff,
                 apl->trans[i].time >> 16);
+
+        // Line break
+        furi_string_cat_printf(str, "\n");
     }
 
     furi_string_free(tmp);
@@ -199,5 +162,4 @@ void nfc_render_emv_extra(const EmvData* data, FuriString* str) {
 
     nfc_render_emv_currency(data->emv_application.currency_code, str);
     nfc_render_emv_country(data->emv_application.country_code, str);
-    nfc_render_emv_pin_try_counter(data->emv_application.pin_try_counter, str);
 }
