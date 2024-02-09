@@ -65,7 +65,6 @@ static bool storage_file_open_internal(
             .path = path,
             .access_mode = access_mode,
             .open_mode = open_mode,
-            .thread_id = furi_thread_get_current_id(),
         }};
 
     file->type = FileTypeOpenFile;
@@ -317,7 +316,6 @@ static bool storage_dir_open_internal(File* file, const char* path) {
         .dopen = {
             .file = file,
             .path = path,
-            .thread_id = furi_thread_get_current_id(),
         }};
 
     file->type = FileTypeOpenDir;
@@ -421,7 +419,6 @@ FS_Error storage_common_timestamp(Storage* storage, const char* path, uint32_t* 
         .ctimestamp = {
             .path = path,
             .timestamp = timestamp,
-            .thread_id = furi_thread_get_current_id(),
         }};
 
     S_API_MESSAGE(StorageCommandCommonTimestamp);
@@ -435,7 +432,6 @@ FS_Error storage_common_stat(Storage* storage, const char* path, FileInfo* filei
         .cstat = {
             .path = path,
             .fileinfo = fileinfo,
-            .thread_id = furi_thread_get_current_id(),
         }};
 
     S_API_MESSAGE(StorageCommandCommonStat);
@@ -448,7 +444,6 @@ FS_Error storage_common_remove(Storage* storage, const char* path) {
     SAData data = {
         .path = {
             .path = path,
-            .thread_id = furi_thread_get_current_id(),
         }};
 
     S_API_MESSAGE(StorageCommandCommonRemove);
@@ -722,7 +717,6 @@ FS_Error storage_common_mkdir(Storage* storage, const char* path) {
     SAData data = {
         .path = {
             .path = path,
-            .thread_id = furi_thread_get_current_id(),
         }};
 
     S_API_MESSAGE(StorageCommandCommonMkDir);
@@ -742,7 +736,6 @@ FS_Error storage_common_fs_info(
             .fs_path = fs_path,
             .total_space = total_space,
             .free_space = free_space,
-            .thread_id = furi_thread_get_current_id(),
         }};
 
     S_API_MESSAGE(StorageCommandCommonFSInfo);
@@ -756,7 +749,6 @@ void storage_common_resolve_path_and_ensure_app_directory(Storage* storage, Furi
     SAData data = {
         .cresolvepath = {
             .path = path,
-            .thread_id = furi_thread_get_current_id(),
         }};
 
     S_API_MESSAGE(StorageCommandCommonResolvePath);
@@ -794,7 +786,6 @@ bool storage_common_equivalent_path(
             .path1 = path1,
             .path2 = path2,
             .truncate = truncate,
-            .thread_id = furi_thread_get_current_id(),
         }};
 
     S_API_MESSAGE(StorageCommandCommonEquivalentPath);
