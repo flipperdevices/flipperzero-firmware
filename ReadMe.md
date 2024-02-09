@@ -27,21 +27,21 @@ This software is for experimental purposes only and is not meant for any illegal
 
 <a name="latest">
 
-## Latest Updates - [PATREON: Latest Release RM0207-0044-0.97.2-99aa3a5](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
+## Latest Updates - [PATREON: Latest Release RM0208-2307-0.97.2-317add7](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-02-08 21:20 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-02-08 21:20 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-02-08 23:07 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-02-08 23:07 EST`
 - Updated: [Sub-GHz Bruteforcer v3.9.2 (By Ganapati/xMasterX/derskythe)](https://github.com/derskythe/flipperzero-subbrute/tree/master)
 - Infrared: [Last Settings Default to Auto-Detect (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/739cc0c3624fc9289a5d2a6f39f6b359cc36d66f)
 - Infrared: [Simpler Last Settings API (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/81208988d1f25119b537aa2bb255a616e1a993f0)
 - Updated: [Authenticator/TOTP v5.11.0 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
 - Updated: [Cross Remote v2.4 (By leedave)](https://github.com/leedave/flipper-zero-cross-remote)
 - Added: [Matagotchi v1.0 (By MrModd)](https://github.com/MrModd/Matagotchi)
+- Added: [PacMan WIP v0.1 (By DanieleMaffi)](https://github.com/DanieleMaffi/flipper-pacman)
 - Updated: [BMI Air Mouse v0.9 (By ginkage)](https://github.com/ginkage/FlippAirMouse/) `Req: BMI160`
 - Updated: [BLE Spam v4.4 (By Willy-JL & ECTO-1A & Spooks4576 with research from xMasterX; OFW API thanks to noproto)](https://github.com/noproto/apple_ble_spam_ofw) BleSpam: Fix click offset (By Willy-JL)
 - OFW: [Direct Draw apps can now be streamed via RPC. #3397 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/3397)
 - [All Refactors Changes from below have been added to 420](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/refactors/ReadMe.md)
-- Updated: [PacMan WIP v0.1 (By DanieleMaffi)](https://github.com/DanieleMaffi/flipper-pacman)
 - NFC: [Parser Fixes for Kazan and Zolotaya Korona (By Leptopt1los)](https://github.com/DarkFlippers/unleashed-firmware/tree/leptoptilos)
 - Updated: [NFC Playlist v1.3 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
 - Updated: [Restaurant Pager Trigger v1.3 (By leedave)](https://github.com/leedave/flipper-zero-meal-pager)
@@ -50,7 +50,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Bluetooth/USB Remote v1.6 (By Cutch)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/1330) [Fix kb combo for BT Remote / Push to Talk / Teams / macOS (By cpressland)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/f9ca27b3783b5d085705f1a8b5c1390aad52c577)
 - NFC: [Upd MFC keys: added 41 from RRG pm3 (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/1f7ad2d636b459c7eeb23919fe1e92a6a98da619)
 - Updated: [WiFi (Marauder) v6.6 (By 0xchocolate & tcpassos)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) `Req: ESP32 WITH MARAUDER FLASHED` - Fixed issue missing HTML folder (By RogueMaster)
-- Added: [PacMan WIP v0.1 (By DanieleMaffi)](https://github.com/DanieleMaffi/flipper-pacman)
+- Updated: [PacMan WIP v0.1 (By DanieleMaffi)](https://github.com/DanieleMaffi/flipper-pacman)
 - To Be Merged OFW PRs: [3352](https://github.com/flipperdevices/flipperzero-firmware/pull/3352), [3302](https://github.com/flipperdevices/flipperzero-firmware/pull/3302), [3211](https://github.com/flipperdevices/flipperzero-firmware/pull/3211), [3366](https://github.com/flipperdevices/flipperzero-firmware/pull/3366), [3250](https://github.com/flipperdevices/flipperzero-firmware/pull/3250), [3402](https://github.com/flipperdevices/flipperzero-firmware/pull/3402), [3409](https://github.com/flipperdevices/flipperzero-firmware/pull/3409), [3406](https://github.com/flipperdevices/flipperzero-firmware/pull/3406) & [3431](https://github.com/flipperdevices/flipperzero-firmware/pull/3431)
 
 ## REFACTORS BRANCH MERGED FEB 6TH WITH ALL THESE NEW CHANGES:
