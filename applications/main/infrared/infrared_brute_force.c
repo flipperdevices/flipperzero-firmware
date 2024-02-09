@@ -62,7 +62,7 @@ bool infrared_brute_force_calculate_messages(InfraredBruteForce* brute_force) {
     if(success) {
         FuriString* signal_name;
         signal_name = furi_string_alloc();
-        while(flipper_format_read_string(ff, "name", signal_name)) {
+        while(infrared_signal_read_name(ff, signal_name)) {
             InfraredBruteForceRecord* record =
                 InfraredBruteForceRecordDict_get(brute_force->records, signal_name);
             if(record) { //-V547
