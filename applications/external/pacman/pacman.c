@@ -93,6 +93,7 @@ typedef struct {
     uint8_t target_x;
     uint8_t target_y;
     float_t speed;
+    bool is_in_base;
 } Character;
 
 typedef enum { GhostsModeScatter, GhostsModeChase, GhostsModeFrightened } GhostsMode;
@@ -217,16 +218,16 @@ static void pacman_submenu_callback(void* context, uint32_t index) {
 // Initial map configuration
 static const char* map_config[] = {
     "                            ", "                            ", "                            ",
-    "                            ", "1------------21------------2", "|PCCCCCCCCCCC||CCCCCCCCCCCC|",
+    "                            ", "1------------21------------2", "|CCCCCCCCCCCC||CCCCCCCCCCCC|",
     "|C1--2C1---2C||C1---2C1--2C|", "|C|  |C|   |C||C|   |C|  |C|", "|C3--4C3---4C34C3---4C3--4C|",
-    "|CCCCCCCCCCCCCCCCCCCCbCCCCC|", "|C1--2C12C1------2C12C1--2C|", "|C3--4C||C3--21--4C||C3--4C|",
+    "|CCCCCCCCCCCCCCCCCCCCCCCCCC|", "|C1--2C12C1------2C12C1--2C|", "|C3--4C||C3--21--4C||C3--4C|",
     "|CCCCCC||CCCC||CCCC||CCCCCC|", "3----2C|3--2 || 1--4|C1----4", "     |C|1--4 34 3--2|C|     ",
     "     |C||          ||C|     ", "     |C|| 1--  --2 ||C|     ", "-----4C34 |BBBBBB| 34C3-----",
-    "      C   |BBcpiB|   C      ", "-----2C12 |BBBBBB| 12C1-----", "     |C|| 3------4 ||C|     ",
+    "      C   |BbcpiB|   C      ", "-----2C12 |BBBBBB| 12C1-----", "     |C|| 3------4 ||C|     ",
     "     |C||          ||C|     ", "     |C|| 1------2 ||C|     ", "1----4C34 3--21--4 34C3----2",
     "|CCCCCCCCCCCC||CCCCCCCCCCCC|", "|C1--2C1---2C||C1---2C1--2C|", "|C3-2|C3---4C34C3---4C|1-4C|",
     "|CCC||CCCCCCCCCCCCCCCC||CCC|", "3-2C||C12C1------2C12C||C1-4", "1-4C34C||C3--21--4C||C34C3-2",
-    "|CCCCCC||CCCC||CCCC||CCCCCC|", "|C1----43--2C||C1--43----2C|", "|C3--------4C34C3--------4C|",
+    "|CCCCCC||CPCC||CCCC||CCCCCC|", "|C1----43--2C||C1--43----2C|", "|C3--------4C34C3--------4C|",
     "|CCCCCCCCCCCCCCCCCCCCCCCCCC|", "3--------------------------4", "                            ",
     "                            "};
 
@@ -556,40 +557,56 @@ static Direction get_best_direction(Character* ghost) {
 }
 
 static void move_to_target(Character* ghost) {
-    Direction best_direction = get_best_direction(ghost);
-    ghost->direction = best_direction;
-    switch(best_direction) {
-    case DirectionLeft:
-        ghost->y += ghost->speed;
-        break;
-    case DirectionDown:
-        ghost->x += ghost->speed;
-        break;
-    case DirectionRight:
-        ghost->y -= ghost->speed;
-        break;
-    case DirectionUp:
-        ghost->x -= ghost->speed;
-        break;
-    default:
-        break;
+    if(ghost->is_in_base) {
+        ghost->x = 13 * WALL_SIZE;
+        ghost->y = 15 * WALL_SIZE;
+        ghost->is_in_base = false;
+    } else {
+        Direction best_direction = get_best_direction(ghost);
+        ghost->direction = best_direction;
+        switch(best_direction) {
+        case DirectionLeft:
+            ghost->y += ghost->speed;
+            break;
+        case DirectionDown:
+            ghost->x += ghost->speed;
+            break;
+        case DirectionRight:
+            ghost->y -= ghost->speed;
+            break;
+        case DirectionUp:
+            ghost->x -= ghost->speed;
+            break;
+        default:
+            break;
+        }
     }
 
     ghost->map_y = pacman_x_to_map_y(ghost->x);
     ghost->map_x = pacman_y_to_map_x(ghost->y);
 }
 
-static Point* get_inky_position(uint8_t target_x, uint8_t target_y, Character* blinky) {
-    Point* point = (Point*)malloc(sizeof(Point));
+static void get_inky_target(uint8_t target_x, uint8_t target_y, Character* inky) {
     Point origin = {target_x, target_y};
 
-    Point translated_rotated_vector = {
-        -abs(blinky->map_x - origin.x), -abs(blinky->map_y - origin.y)};
+    Point translated_rotated_vector = {-abs(inky->map_x - origin.x), -abs(inky->map_y - origin.y)};
 
-    point->x = origin.x + translated_rotated_vector.x;
-    point->y = origin.y + translated_rotated_vector.y;
+    inky->target_x = origin.x + translated_rotated_vector.x;
+    inky->target_y = origin.y + translated_rotated_vector.y;
 
-    return point;
+    return;
+}
+
+static void get_clyde_target(Character* pacman, Character* clyde) {
+    // When pacman is within 8 tiles to clyde, clyde will target the tile in scatter mode
+    if(abs(pacman->map_x - clyde->map_x) < 8 || abs(pacman->map_y - clyde->map_y) < 8) {
+        clyde->target_x = 0;
+        clyde->target_y = 35;
+        return;
+    }
+    clyde->target_x = pacman->map_x;
+    clyde->target_y = pacman->map_y;
+    return;
 }
 
 static void move_ghosts(
@@ -611,37 +628,36 @@ static void move_ghosts(
         clyde->target_x = 0;
         clyde->target_y = 35;
         break;
-    case GhostsModeChase:
-        blinky->target_x = pacman->map_x;
-        blinky->target_y = pacman->map_y;
-        Point* inky_target;
+    case GhostsModeChase: {
         switch(pacman->direction) {
         case DirectionLeft:
             pinky->target_x = pacman->map_x - 4;
             pinky->target_y = pacman->map_y;
-            inky_target = get_inky_position(pacman->map_x - 2, pacman->map_y, blinky);
+            get_inky_target(pacman->map_x - 2, pacman->map_y, blinky);
             break;
         case DirectionRight:
             pinky->target_x = pacman->map_x + 4;
             pinky->target_y = pacman->map_y;
-            inky_target = get_inky_position(pacman->map_x + 2, pacman->map_y, blinky);
+            get_inky_target(pacman->map_x + 2, pacman->map_y, blinky);
             break;
         case DirectionUp:
             pinky->target_x = pacman->map_x - 4;
             pinky->target_y = pacman->map_y - 4;
-            inky_target = get_inky_position(pacman->map_x - 2, pacman->map_y - 2, blinky);
+            get_inky_target(pacman->map_x - 2, pacman->map_y - 2, blinky);
             break;
         case DirectionDown:
             pinky->target_x = pacman->map_x;
             pinky->target_y = pacman->map_y + 4;
-            inky_target = get_inky_position(pacman->map_x, pacman->map_y + 2, blinky);
+            get_inky_target(pacman->map_x, pacman->map_y + 2, blinky);
             break;
         default:
             break;
         }
+        get_clyde_target(pacman, clyde);
+        blinky->target_x = pacman->map_x;
+        blinky->target_y = pacman->map_y;
         break;
-        inky->target_x = inky_target->x;
-        inky->target_y = inky_target->y;
+    }
     case GhostsModeFrightened:
         break;
     }
@@ -650,6 +666,18 @@ static void move_ghosts(
     move_to_target(pinky);
     move_to_target(inky);
     move_to_target(clyde);
+}
+
+static bool check_has_lost(
+    Character* pacman,
+    Character* blinky,
+    Character* pinky,
+    Character* inky,
+    Character* clyde) {
+    Character* ghosts[] = {blinky, pinky, inky, clyde};
+    for(int i = 0; i < 4; i++)
+        if(pacman->map_x == ghosts[i]->map_x && pacman->map_y == ghosts[i]->map_y) return true;
+    return false;
 }
 
 /**
@@ -669,6 +697,7 @@ static void pacman_view_game_draw_callback(Canvas* canvas, void* model) {
     GhostsMode mode = my_model->ghosts_mode;
     move_pacman(my_model);
     move_ghosts(mode, blinky, pinky, inky, clyde, my_model->pacman);
+    bool has_lost = check_has_lost(my_model->pacman, blinky, pinky, inky, clyde);
     draw_entities(canvas, my_model);
     // canvas_draw_str(canvas, 1, 10, "LEFT/RIGHT to change x");
     FuriString* xstr = furi_string_alloc();
@@ -681,6 +710,8 @@ static void pacman_view_game_draw_callback(Canvas* canvas, void* model) {
     canvas_draw_str(canvas, 80, 30, furi_string_get_cstr(xstr));
     furi_string_printf(xstr, "score: %d", my_model->score);
     canvas_draw_str(canvas, 80, 40, furi_string_get_cstr(xstr));
+    furi_string_printf(xstr, "LOST! %d", has_lost);
+    canvas_draw_str(canvas, 80, 50, furi_string_get_cstr(xstr));
     furi_string_printf(xstr, "x: %u  OK=play tone", my_model->x);
     // canvas_draw_str(canvas, 44, 24, furi_string_get_cstr(xstr));
     furi_string_printf(xstr, "random: %u", (uint8_t)(furi_hal_random_get() % 256));
@@ -825,7 +856,8 @@ static Character*
     character->x = x;
     character->y = y;
     character->direction = direction;
-    character->speed = 2;
+    character->speed = 1;
+    character->is_in_base = true;
     return character;
 }
 
