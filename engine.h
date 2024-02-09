@@ -6,6 +6,9 @@
 #include "game_manager.h"
 
 typedef struct {
+    float target_fps;
+    bool show_fps;
+    bool always_backlight;
     void (*start)(GameManager* game_manager, void* context);
     void (*stop)(void* context);
     size_t context_size;
