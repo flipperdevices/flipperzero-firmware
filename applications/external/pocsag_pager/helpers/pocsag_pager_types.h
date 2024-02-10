@@ -3,7 +3,7 @@
 #include <furi.h>
 #include <furi_hal.h>
 
-#define PCSG_VERSION_APP "0.1"
+#define PCSG_VERSION_APP "1.2"
 #define PCSG_DEVELOPED "@xMasterX & @Shmuma"
 #define PCSG_GITHUB "https://github.com/xMasterX/flipper-pager"
 
