@@ -13,7 +13,7 @@ void game_manager_update(GameManager* manager);
 
 void game_manager_render(GameManager* manager, Canvas* canvas);
 
-void game_manager_engine_set(GameManager* manager, RunningGameEngine* engine);
+void game_manager_engine_set(GameManager* manager, GameEngine* engine);
 
 void game_manager_input_set(GameManager* manager, InputState input);
 

@@ -25,10 +25,6 @@ struct GameEngine {
     FuriPubSub* input_pubsub;
     FuriThreadId thread_id;
     GameEngineSettings settings;
-};
-
-struct RunningGameEngine {
-    GameEngine* engine;
     float fps;
 };
 
@@ -48,6 +44,7 @@ GameEngine* game_engine_alloc(GameEngineSettings settings) {
     engine->input_pubsub = furi_record_open(RECORD_INPUT_EVENTS);
     engine->thread_id = furi_thread_get_current_id();
     engine->settings = settings;
+    engine->fps = 1.0f;
 
     return engine;
 }
@@ -133,11 +130,6 @@ void game_engine_run(GameEngine* engine) {
     // init fps counter
     uint32_t time_start = DWT->CYCCNT;
 
-    // create running engine
-    RunningGameEngine run = {
-        .engine = engine,
-    };
-
     while(true) {
         uint32_t flags =
             furi_thread_flags_wait(GameThreadFlagMask, FuriFlagWaitAny, FuriWaitForever);
@@ -162,15 +154,15 @@ void game_engine_run(GameEngine* engine) {
             canvas_reset(canvas);
 
             // calculate actual fps
-            run.fps = (float)SystemCoreClock / time_delta;
+            engine->fps = (float)SystemCoreClock / time_delta;
 
             // do the work
-            engine->settings.frame_callback(&run, canvas, input, engine->settings.context);
+            engine->settings.frame_callback(engine, canvas, input, engine->settings.context);
 
             // show fps if needed
             if(engine->settings.show_fps) {
                 canvas_set_color(canvas, ColorXOR);
-                canvas_printf(canvas, 0, 7, "%u", (uint32_t)roundf(run.fps));
+                canvas_printf(canvas, 0, 7, "%u", (uint32_t)roundf(engine->fps));
             }
 
             // and output screen buffer
@@ -202,14 +194,18 @@ void game_engine_run(GameEngine* engine) {
     }
 }
 
-void running_game_engine_stop(RunningGameEngine* run) {
-    furi_thread_flags_set(run->engine->thread_id, GameThreadFlagStop);
+void game_engine_stop(GameEngine* engine) {
+    furi_thread_flags_set(engine->thread_id, GameThreadFlagStop);
 }
 
-float running_game_engine_get_delta_time(RunningGameEngine* engine) {
+float game_engine_get_delta_time(GameEngine* engine) {
     return 1.0f / engine->fps;
 }
 
-float running_game_engine_get_delta_frames(RunningGameEngine* engine) {
-    return engine->fps / engine->engine->settings.target_fps;
+float game_engine_get_delta_frames(GameEngine* engine) {
+    return engine->fps / engine->settings.target_fps;
+}
+
+void game_engine_show_fps_set(GameEngine* engine, bool show_fps) {
+    engine->settings.show_fps = show_fps;
 }

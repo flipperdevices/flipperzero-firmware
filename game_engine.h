@@ -23,17 +23,12 @@ typedef struct {
 
 typedef struct GameEngine GameEngine;
 
-typedef struct RunningGameEngine RunningGameEngine;
-
 typedef void (*GameEngineStartCallback)(GameEngine* engine, void* context);
 
 typedef void (*GameEngineStopCallback)(GameEngine* engine, void* context);
 
-typedef void (*GameEngineFrameCallback)(
-    RunningGameEngine* engine,
-    Canvas* canvas,
-    InputState input,
-    void* context);
+typedef void (
+    *GameEngineFrameCallback)(GameEngine* engine, Canvas* canvas, InputState input, void* context);
 
 typedef struct {
     float target_fps; // target fps
@@ -64,22 +59,28 @@ void game_engine_run(GameEngine* engine);
  */
 void game_engine_free(GameEngine* engine);
 
-/** Stop the running Game Engine, will not block execution
- * @param engine RunningGameEngine instance
+/** Stop the Game Engine, will not block execution
+ * @param engine GameEngine instance
  */
-void running_game_engine_stop(RunningGameEngine* engine);
+void game_engine_stop(GameEngine* engine);
 
 /** Get delta time between current and previous frame
- * @param engine RunningGameEngine instance
+ * @param engine GameEngine instance
  * @return float  delta time in seconds
  */
-float running_game_engine_get_delta_time(RunningGameEngine* engine);
+float game_engine_get_delta_time(GameEngine* engine);
 
 /** Get delta frames between current and previous frame
- * @param engine RunningGameEngine instance
+ * @param engine GameEngine instance
  * @return float  delta frames
  */
-float running_game_engine_get_delta_frames(RunningGameEngine* engine);
+float game_engine_get_delta_frames(GameEngine* engine);
+
+/** Enable/disable show fps counter
+ * @param engine GameEngine instance
+ * @param show_fps show fps counter
+ */
+void game_engine_show_fps_set(GameEngine* engine, bool show_fps);
 
 #ifdef __cplusplus
 }
