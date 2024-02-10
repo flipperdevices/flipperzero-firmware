@@ -23,8 +23,8 @@ static void bt_draw_statusbar_callback(Canvas* canvas, void* context) {
     Bt* bt = context;
     uint8_t draw_offset = 0;
     if(bt->beacon_active) {
-        canvas_draw_icon(canvas, 0, 0, &I_BLE_beacon_8x8);
-        draw_offset += icon_get_width(&I_BLE_beacon_8x8) + ICON_SPACER;
+        canvas_draw_icon(canvas, 0, 0, &I_BLE_beacon_7x8);
+        draw_offset += icon_get_width(&I_BLE_beacon_7x8) + ICON_SPACER;
     }
     if(bt->status == BtStatusAdvertising) {
         canvas_draw_icon(canvas, draw_offset, 0, &I_Bluetooth_Idle_5x8);
@@ -345,7 +345,7 @@ static void bt_on_key_storage_change_callback(uint8_t* addr, uint16_t size, void
 static void bt_statusbar_update(Bt* bt) {
     uint8_t active_icon_width = 0;
     if(bt->beacon_active) {
-        active_icon_width = icon_get_width(&I_BLE_beacon_8x8) + ICON_SPACER;
+        active_icon_width = icon_get_width(&I_BLE_beacon_7x8) + ICON_SPACER;
     }
     if(bt->status == BtStatusAdvertising) {
         active_icon_width += icon_get_width(&I_Bluetooth_Idle_5x8);

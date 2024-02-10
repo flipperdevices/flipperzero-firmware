@@ -394,11 +394,6 @@ static void ble_profile_hid_get_config(GapConfig* config, FuriHalBleProfileParam
     memcpy(config, &template_config, sizeof(GapConfig));
     // Set mac address
     memcpy(config->mac_address, furi_hal_version_get_ble_mac(), sizeof(config->mac_address));
-    // Set advertise name
-    strlcpy(
-        config->adv_name,
-        furi_hal_version_get_ble_local_device_name_ptr(),
-        FURI_HAL_VERSION_DEVICE_NAME_LENGTH);
 
     // Change MAC address for HID profile
     config->mac_address[2]++;
@@ -407,17 +402,18 @@ static void ble_profile_hid_get_config(GapConfig* config, FuriHalBleProfileParam
         config->mac_address[1] ^= hid_profile_params->mac_xor >> 8;
     }
 
-    // Change name
+    // Set advertise name
+    memset(config->adv_name, 0, sizeof(config->adv_name));
+    FuriString* name = furi_string_alloc_set(furi_hal_version_get_ble_local_device_name_ptr());
+
     const char* clicker_str = "Control";
     if(hid_profile_params && hid_profile_params->device_name_prefix) {
         clicker_str = hid_profile_params->device_name_prefix;
     }
-    FuriString* name = furi_string_alloc_set(config->adv_name);
     furi_string_replace_str(name, "Flipper", clicker_str);
     if(furi_string_size(name) >= sizeof(config->adv_name)) {
         furi_string_left(name, sizeof(config->adv_name) - 1);
     }
-    memset(config->adv_name, 0, sizeof(config->adv_name));
     memcpy(config->adv_name, furi_string_get_cstr(name), furi_string_size(name));
     furi_string_free(name);
 }
