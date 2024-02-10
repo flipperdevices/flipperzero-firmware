@@ -29,6 +29,11 @@ if (!(Test-Path -LiteralPath "$toolchain_target_path\..")) {
     New-Item "$toolchain_target_path\.." -ItemType Directory -Force
 }
 
+if (Test-Path -LiteralPath "$toolchain_dist_temp_path") {
+    Write-Host "Cleaning up temp toolchain path.."
+    Remove-Item -LiteralPath "$toolchain_dist_temp_path" -Force -Recurse
+}
+
 Write-Host -NoNewline "Extracting Windows toolchain.."
 # This is faster than Expand-Archive
 Add-Type -Assembly "System.IO.Compression.Filesystem"
