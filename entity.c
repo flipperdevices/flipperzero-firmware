@@ -157,14 +157,14 @@ bool entity_collider_rect_rect(Entity* entity, Entity* other) {
     return left1 < right2 && right1 > left2 && top1 < bottom2 && bottom1 > top2;
 }
 
-bool entity_collider_circle_rect(Entity* entity, Entity* other) {
-    Vector pos1 = entity_collider_position_get(entity);
-    Vector pos2 = entity_collider_position_get(other);
+bool entity_collider_circle_rect(Entity* circle, Entity* rect) {
+    Vector pos1 = entity_collider_position_get(circle);
+    Vector pos2 = entity_collider_position_get(rect);
 
-    float left = pos2.x - other->collider->rect.half_width;
-    float right = pos2.x + other->collider->rect.half_width;
-    float top = pos2.y - other->collider->rect.half_height;
-    float bottom = pos2.y + other->collider->rect.half_height;
+    float left = pos2.x - rect->collider->rect.half_width;
+    float right = pos2.x + rect->collider->rect.half_width;
+    float top = pos2.y - rect->collider->rect.half_height;
+    float bottom = pos2.y + rect->collider->rect.half_height;
 
     float closestX = fmaxf(left, fminf(pos1.x, right));
     float closestY = fmaxf(top, fminf(pos1.y, bottom));
@@ -172,28 +172,26 @@ bool entity_collider_circle_rect(Entity* entity, Entity* other) {
     float dx = pos1.x - closestX;
     float dy = pos1.y - closestY;
     float distance = sqrtf(dx * dx + dy * dy);
-    return distance < entity->collider->circle.radius;
+    return distance < circle->collider->circle.radius;
 }
 
 bool entity_collider_check_collision(Entity* entity, Entity* other) {
     furi_check(entity->collider);
     furi_check(other->collider);
 
-    // if(entity->description == other->description) {
-    //     return false;
-    // }
-
     if(entity->collider->type == ColliderTypeCircle) {
+        Entity* circle = entity;
         if(other->collider->type == ColliderTypeCircle) {
-            return entity_collider_circle_circle(entity, other);
+            return entity_collider_circle_circle(circle, other);
         } else {
-            return entity_collider_circle_rect(entity, other);
+            return entity_collider_circle_rect(circle, other);
         }
     } else {
+        Entity* rect = entity;
         if(other->collider->type == ColliderTypeCircle) {
-            return entity_collider_circle_rect(other, entity);
+            return entity_collider_circle_rect(other, rect);
         } else {
-            return entity_collider_rect_rect(entity, other);
+            return entity_collider_rect_rect(rect, other);
         }
     }
 }
@@ -202,13 +200,18 @@ bool entity_collider_exists(Entity* entity) {
     return entity->collider != NULL;
 }
 
-void entity_send_event(Entity* entity, uint32_t type, EntityEventValue value) {
-    if(entity->description && entity->description->event) {
+void entity_send_event(
+    Entity* sender,
+    Entity* receiver,
+    GameManager* manager,
+    uint32_t type,
+    EntityEventValue value) {
+    if(receiver->description && receiver->description->event) {
         EntityEvent event = {
             .type = type,
-            .sender = entity,
+            .sender = sender,
             .value = value,
         };
-        entity->description->event(entity, NULL, event, entity->context);
+        receiver->description->event(receiver, manager, event, receiver->context);
     }
 }

@@ -124,6 +124,19 @@ void level_remove_entity(Level* level, Entity* entity) {
     entity_call_stop(entity, level->manager);
 }
 
+void level_send_event(
+    Level* level,
+    Entity* sender,
+    const EntityDescription* receiver_desc,
+    uint32_t type,
+    EntityEventValue value) {
+    FOREACH(item, level->entities) {
+        if(receiver_desc == entity_description_get(*item) || receiver_desc == NULL) {
+            entity_send_event(sender, *item, level->manager, type, value);
+        }
+    }
+}
+
 static void level_process_update(Level* level, GameManager* manager) {
     FOREACH(item, level->entities) {
         entity_call_update(*item, manager);

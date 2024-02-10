@@ -53,7 +53,12 @@ void entity_collider_offset_set(Entity* entity, Vector offset);
 
 Vector entity_collider_offset_get(Entity* entity);
 
-void entity_send_event(Entity* entity, uint32_t type, EntityEventValue value);
+void entity_send_event(
+    Entity* sender,
+    Entity* receiver,
+    GameManager* manager,
+    uint32_t type,
+    EntityEventValue value);
 
 #ifdef __cplusplus
 }
