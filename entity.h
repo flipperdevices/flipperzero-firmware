@@ -1,4 +1,5 @@
 #pragma once
+#include "vector.h"
 #include "game_engine.h"
 #include <stdlib.h>
 
@@ -9,13 +10,6 @@ extern "C" {
 typedef struct Entity Entity;
 
 typedef struct Level Level;
-
-typedef struct {
-    float x;
-    float y;
-} Vector;
-
-#define VECTOR_ZERO ((Vector){0, 0})
 
 typedef union {
     uint32_t value;
@@ -32,8 +26,8 @@ typedef struct Level Level;
 typedef struct GameManager GameManager;
 
 typedef struct {
-    void (*start)(Entity* self, Level* level, void* context);
-    void (*stop)(Entity* self, Level* level, void* context);
+    void (*start)(Entity* self, GameManager* manager, void* context);
+    void (*stop)(Entity* self, GameManager* manager, void* context);
     void (*update)(Entity* self, GameManager* manager, void* context);
     void (*render)(Entity* self, GameManager* manager, Canvas* canvas, void* context);
     void (*collision)(Entity* self, Entity* other, GameManager* manager, void* context);
@@ -52,6 +46,8 @@ void* entity_context_get(Entity* entity);
 void entity_collider_add_circle(Entity* entity, float radius);
 
 void entity_collider_add_rect(Entity* entity, float width, float height);
+
+void entity_collider_remove(Entity* entity);
 
 void entity_collider_offset_set(Entity* entity, Vector offset);
 

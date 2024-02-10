@@ -48,6 +48,13 @@ void entity_collider_add_rect(Entity* entity, float width, float height) {
     entity->collider_dirty = true;
 }
 
+void entity_collider_remove(Entity* entity) {
+    furi_check(entity->collider != NULL, "Collider not added");
+    free(entity->collider);
+    entity->collider = NULL;
+    entity->collider_dirty = false;
+}
+
 void entity_collider_offset_set(Entity* entity, Vector offset) {
     entity->collider_offset = offset;
     entity->collider_dirty = true;
@@ -93,15 +100,15 @@ void* entity_context_get(Entity* entity) {
     return entity->context;
 }
 
-void entity_call_start(Level* level, Entity* entity) {
+void entity_call_start(Entity* entity, GameManager* manager) {
     if(entity->description && entity->description->start) {
-        entity->description->start(entity, level, entity->context);
+        entity->description->start(entity, manager, entity->context);
     }
 }
 
-void entity_call_stop(Level* level, Entity* entity) {
+void entity_call_stop(Entity* entity, GameManager* manager) {
     if(entity->description && entity->description->stop) {
-        entity->description->stop(entity, level, entity->context);
+        entity->description->stop(entity, manager, entity->context);
     }
 }
 
