@@ -94,23 +94,23 @@ WifiMarauderApp* wifi_marauder_app_alloc() {
 void wifi_marauder_make_app_folder(WifiMarauderApp* app) {
     furi_assert(app);
 
-    if(!storage_common_exists(storage, MARAUDER_APP_FOLDER) && !storage_simply_mkdir(app->storage, MARAUDER_APP_FOLDER)) {
+    if(!storage_common_exists(app->storage, MARAUDER_APP_FOLDER) && !storage_simply_mkdir(app->storage, MARAUDER_APP_FOLDER)) {
         dialog_message_show_storage_error(app->dialogs, "Cannot create\napp folder");
     }
 
-    if(!storage_common_exists(storage, MARAUDER_APP_FOLDER_PCAPS) && !storage_simply_mkdir(app->storage, MARAUDER_APP_FOLDER_PCAPS)) {
+    if(!storage_common_exists(app->storage, MARAUDER_APP_FOLDER_PCAPS) && !storage_simply_mkdir(app->storage, MARAUDER_APP_FOLDER_PCAPS)) {
         dialog_message_show_storage_error(app->dialogs, "Cannot create\npcaps folder");
     }
 
-    if(!storage_common_exists(storage, MARAUDER_APP_FOLDER_LOGS) && !storage_simply_mkdir(app->storage, MARAUDER_APP_FOLDER_LOGS)) {
+    if(!storage_common_exists(app->storage, MARAUDER_APP_FOLDER_LOGS) && !storage_simply_mkdir(app->storage, MARAUDER_APP_FOLDER_LOGS)) {
         dialog_message_show_storage_error(app->dialogs, "Cannot create\npcaps folder");
     }
 
-    if(!storage_common_exists(storage, MARAUDER_APP_FOLDER_SCRIPTS) && !storage_simply_mkdir(app->storage, MARAUDER_APP_FOLDER_SCRIPTS)) {
+    if(!storage_common_exists(app->storage, MARAUDER_APP_FOLDER_SCRIPTS) && !storage_simply_mkdir(app->storage, MARAUDER_APP_FOLDER_SCRIPTS)) {
         dialog_message_show_storage_error(app->dialogs, "Cannot create\nscripts folder");
     }
 
-    if(!storage_common_exists(storage, MARAUDER_APP_FOLDER_HTML) && !storage_simply_mkdir(app->storage, MARAUDER_APP_FOLDER_HTML)) {
+    if(!storage_common_exists(app->storage, MARAUDER_APP_FOLDER_HTML) && !storage_simply_mkdir(app->storage, MARAUDER_APP_FOLDER_HTML)) {
         dialog_message_show_storage_error(app->dialogs, "Cannot create\nhtml folder");
     }
 }
