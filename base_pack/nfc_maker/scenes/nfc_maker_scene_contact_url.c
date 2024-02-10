@@ -39,7 +39,7 @@ bool nfc_maker_scene_contact_url_on_event(void* context, SceneManagerEvent event
         consumed = true;
         switch(event.event) {
         case TextInputResultOk:
-            scene_manager_next_scene(app->scene_manager, NfcMakerSceneSave);
+            scene_manager_next_scene(app->scene_manager, NfcMakerSceneSaveGenerate);
             break;
         default:
             break;
