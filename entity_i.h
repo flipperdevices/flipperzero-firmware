@@ -37,9 +37,9 @@ Entity* entity_alloc(const EntityDescription* behaviour);
 
 void entity_free(Entity* entity);
 
-void entity_call_start(Level* level, Entity* entity);
+void entity_call_start(Entity* entity, GameManager* manager);
 
-void entity_call_stop(Level* level, Entity* entity);
+void entity_call_stop(Entity* entity, GameManager* manager);
 
 void entity_call_update(Entity* entity, GameManager* manager);
 

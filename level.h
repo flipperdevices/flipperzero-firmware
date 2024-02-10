@@ -6,11 +6,13 @@
 extern "C" {
 #endif
 
+typedef struct GameManager GameManager;
+
 typedef struct {
-    void (*alloc)(Level* level, void* context);
-    void (*free)(Level* level, void* context);
-    void (*start)(Level* level, void* context);
-    void (*stop)(Level* level, void* context);
+    void (*alloc)(Level* level, GameManager* manager, void* context);
+    void (*free)(Level* level, GameManager* manager, void* context);
+    void (*start)(Level* level, GameManager* manager, void* context);
+    void (*stop)(Level* level, GameManager* manager, void* context);
     size_t context_size;
 } LevelBehaviour;
 

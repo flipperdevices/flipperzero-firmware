@@ -5,25 +5,17 @@
 #include "level_i.h"
 #include "entity_i.h"
 
-static void frame_cb(RunningGameEngine* engine, Canvas* canvas, InputState input, void* context) {
+static void frame_cb(GameEngine* engine, Canvas* canvas, InputState input, void* context) {
+    UNUSED(engine);
     GameManager* game_manager = context;
     game_manager_input_set(game_manager, input);
-    game_manager_engine_set(game_manager, engine);
     game_manager_update(game_manager);
     game_manager_render(game_manager, canvas);
 }
 
 int32_t game_app(void* p) {
     UNUSED(p);
-
     GameManager* game_manager = game_manager_alloc();
-
-    void* game_context = NULL;
-    if(game.context_size > 0) {
-        game_context = malloc(game.context_size);
-        game_manager_game_context_set(game_manager, game_context);
-    }
-    game.start(game_manager, game_context);
 
     GameEngineSettings settings = game_engine_settings_init();
     settings.target_fps = game.target_fps;
@@ -33,6 +25,15 @@ int32_t game_app(void* p) {
     settings.context = game_manager;
 
     GameEngine* engine = game_engine_alloc(settings);
+    game_manager_engine_set(game_manager, engine);
+
+    void* game_context = NULL;
+    if(game.context_size > 0) {
+        game_context = malloc(game.context_size);
+        game_manager_game_context_set(game_manager, game_context);
+    }
+    game.start(game_manager, game_context);
+
     game_engine_run(engine);
     game_engine_free(engine);
 

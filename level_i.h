@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-Level* level_alloc(const LevelBehaviour* behaviour);
+Level* level_alloc(const LevelBehaviour* behaviour, GameManager* manager);
 
 void level_free(Level* level);
 

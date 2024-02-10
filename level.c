@@ -18,10 +18,12 @@ struct Level {
     EntityList_t to_remove;
     const LevelBehaviour* behaviour;
     void* context;
+    GameManager* manager;
 };
 
-Level* level_alloc(const LevelBehaviour* behaviour) {
+Level* level_alloc(const LevelBehaviour* behaviour, GameManager* manager) {
     Level* level = malloc(sizeof(Level));
+    level->manager = manager;
     EntityList_init(level->entities);
     EntityList_init(level->to_add);
     EntityList_init(level->to_remove);
@@ -113,13 +115,13 @@ void level_clear(Level* level) {
 Entity* level_add_entity(Level* level, const EntityDescription* description) {
     Entity* entity = entity_alloc(description);
     EntityList_push_back(level->to_add, entity);
-    entity_call_start(level, entity);
+    entity_call_start(entity, level->manager);
     return entity;
 }
 
 void level_remove_entity(Level* level, Entity* entity) {
     EntityList_push_back(level->to_remove, entity);
-    entity_call_stop(level, entity);
+    entity_call_stop(entity, level->manager);
 }
 
 static void level_process_update(Level* level, GameManager* manager) {
@@ -176,24 +178,24 @@ void level_render(Level* level, GameManager* manager, Canvas* canvas) {
 
 void level_call_start(Level* level) {
     if(level->behaviour->start) {
-        level->behaviour->start(level, level->context);
+        level->behaviour->start(level, level->manager, level->context);
     }
 }
 
 void level_call_stop(Level* level) {
     if(level->behaviour->stop) {
-        level->behaviour->stop(level, level->context);
+        level->behaviour->stop(level, level->manager, level->context);
     }
 }
 
 void level_call_alloc(Level* level) {
     if(level->behaviour->alloc) {
-        level->behaviour->alloc(level, level->context);
+        level->behaviour->alloc(level, level->manager, level->context);
     }
 }
 
 void level_call_free(Level* level) {
     if(level->behaviour->free) {
-        level->behaviour->free(level, level->context);
+        level->behaviour->free(level, level->manager, level->context);
     }
 }
