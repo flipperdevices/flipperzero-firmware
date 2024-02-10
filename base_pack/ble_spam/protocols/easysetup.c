@@ -305,7 +305,7 @@ static void extra_config(Ctx* ctx) {
         variable_item_set_current_value_index(item, value_index);
         variable_item_set_current_value_text(item, model_name);
 
-        variable_item_list_add(list, "Works on Android 13 and up", 0, NULL, NULL);
+        variable_item_list_add(list, "Works on Android 13 only", 0, NULL, NULL);
         break;
     }
     case EasysetupTypeWatch: {

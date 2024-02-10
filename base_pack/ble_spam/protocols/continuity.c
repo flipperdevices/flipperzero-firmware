@@ -451,6 +451,7 @@ enum {
 };
 enum {
     _ConfigCcExtraStart = ConfigExtraStart,
+    ConfigCcInfoFixed,
     ConfigCcInfoLock,
     ConfigCcInfoDevice,
     ConfigCcCOUNT,
@@ -778,6 +779,7 @@ static void extra_config(Ctx* ctx) {
         break;
     }
     case ContinuityTypeCustomCrash: {
+        variable_item_list_add(list, "CRASH FIXED IN IOS 17.2", 0, NULL, NULL);
         variable_item_list_add(list, "Lock+unlock helps to crash", 0, NULL, NULL);
         variable_item_list_add(list, "Works on iPhone 12 and up", 0, NULL, NULL);
         break;
