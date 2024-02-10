@@ -1,6 +1,9 @@
 #include "totp_scene_authenticate.h"
 #include <dialogs/dialogs.h>
 #include <totp_icons.h>
+#if __has_include(<assets_icons.h>)
+#include <assets_icons.h>
+#endif
 #include "../../../types/common.h"
 #include "../../constants.h"
 #include "../../../services/config/config.h"
@@ -79,12 +82,18 @@ bool totp_scene_authenticate_handle_event(
         return true;
     }
 
-    if(event->input.type == InputTypeLong && event->input.key == InputKeyBack) {
+    if(event->input.type == InputTypeShort && event->input.key == InputKeyBack) {
         return false;
     }
 
     SceneState* scene_state = plugin_state->current_scene_state;
-    if(event->input.type == InputTypePress) {
+    if((event->input.type == InputTypeLong || event->input.type == InputTypeRepeat) &&
+       event->input.key == InputKeyBack) {
+        if(scene_state->code_length > 0) {
+            scene_state->code_input[scene_state->code_length - 1] = 0;
+            scene_state->code_length--;
+        }
+    } else if(event->input.type == InputTypePress) {
         switch(event->input.key) {
         case InputKeyUp:
             if(scene_state->code_length < MAX_CODE_LENGTH) {
@@ -139,17 +148,17 @@ bool totp_scene_authenticate_handle_event(
                     SCREEN_HEIGHT_CENTER - 5,
                     AlignCenter,
                     AlignCenter);
+#if __has_include(<assets_icons.h>)
+                dialog_message_set_icon(message, &I_WarningDolphinFlip_45x42, 83, 22);
+#else
                 dialog_message_set_icon(message, &I_DolphinCommon_56x48, 72, 17);
+#endif
                 dialog_message_show(plugin_state->dialogs_app, message);
                 dialog_message_free(message);
             }
             break;
         }
         case InputKeyBack:
-            if(scene_state->code_length > 0) {
-                scene_state->code_input[scene_state->code_length - 1] = 0;
-                scene_state->code_length--;
-            }
             break;
         default:
             break;
