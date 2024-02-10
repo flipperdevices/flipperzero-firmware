@@ -212,6 +212,7 @@ static bool kazan_read(Nfc* nfc, NfcDevice* device) {
             FURI_BIT_SET(keys_v2.key_b_mask, i);
             FURI_BIT_SET(keys_v3.key_b_mask, i);
         }
+
         error = mf_classic_poller_sync_read(nfc, &keys_v1, data);
         if(error == MfClassicErrorNotPresent) {
             FURI_LOG_W(TAG, "Failed to read data: keys_v1");
