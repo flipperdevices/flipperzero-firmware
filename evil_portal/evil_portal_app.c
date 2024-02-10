@@ -40,8 +40,6 @@ Evil_PortalApp* evil_portal_app_alloc() {
 
     app->view_dispatcher = view_dispatcher_alloc();
 
-    app->loading = loading_alloc();
-
     app->scene_manager = scene_manager_alloc(&evil_portal_scene_handlers, app);
     view_dispatcher_enable_queue(app->view_dispatcher);
     view_dispatcher_set_event_callback_context(app->view_dispatcher, app);
@@ -54,8 +52,6 @@ Evil_PortalApp* evil_portal_app_alloc() {
         app->view_dispatcher, evil_portal_app_tick_event_callback, 100);
 
     view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
-
-    app->view_stack = view_stack_alloc();
 
     app->var_item_list = variable_item_list_alloc();
     view_dispatcher_add_view(
@@ -91,14 +87,12 @@ void evil_portal_app_free(Evil_PortalApp* app) {
 
     // Views
     view_dispatcher_remove_view(app->view_dispatcher, Evil_PortalAppViewVarItemList);
+    variable_item_list_free(app->var_item_list);
+    view_dispatcher_remove_view(app->view_dispatcher, Evil_PortalAppViewTextInput);
+    text_input_free(app->text_input);
     view_dispatcher_remove_view(app->view_dispatcher, Evil_PortalAppViewConsoleOutput);
-
     text_box_free(app->text_box);
     furi_string_free(app->text_box_store);
-    text_input_free(app->text_input);
-
-    view_stack_free(app->view_stack);
-    loading_free(app->loading);
 
     // View dispatcher
     view_dispatcher_free(app->view_dispatcher);
