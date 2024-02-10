@@ -17,7 +17,7 @@ App(
     ],
     fap_icon="icons/logo.png",
     fap_category="NFC",
-    fap_version="2.3",
+    fap_version="2.4",
     fap_author="bettse",
 #    fap_extbuild=(
 #        ExtFile(
