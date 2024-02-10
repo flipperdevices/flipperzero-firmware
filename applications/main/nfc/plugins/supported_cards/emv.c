@@ -95,21 +95,33 @@ static bool emv_parse(const NfcDevice* device, FuriString* parsed_data) {
 
         if(strlen(app.name)) furi_string_cat_printf(parsed_data, "Name: %s\n", app.name);
 
-        if(app.issue_month)
-            furi_string_cat_printf(
-                parsed_data,
-                "Issue: %02X.%02X.20%02X\n",
-                app.issue_day,
-                app.issue_month,
-                app.issue_year);
+        if(app.effective_month) {
+            char day[] = "??";
+            if(app.effective_day) itoa(app.effective_day, day, 16);
+            if(day[1] == '\0') {
+                day[1] = day[0];
+                day[0] = '0';
+            }
 
-        if(app.exp_month)
             furi_string_cat_printf(
                 parsed_data,
-                "Expires: %02X.%02X.20%02X\n",
-                app.exp_day,
-                app.exp_month,
-                app.exp_year);
+                "Effective: %s.%02X.20%02X\n",
+                day,
+                app.effective_month,
+                app.effective_year);
+        }
+
+        if(app.exp_month) {
+            char day[] = "??";
+            if(app.exp_day) itoa(app.exp_day, day, 16);
+            if(day[1] == '\0') {
+                day[1] = day[0];
+                day[0] = '0';
+            }
+
+            furi_string_cat_printf(
+                parsed_data, "Expires: %s.%02X.20%02X\n", day, app.exp_month, app.exp_year);
+        }
 
         FuriString* str = furi_string_alloc();
         bool storage_readed = emv_get_country_name(app.country_code, str);
@@ -121,8 +133,9 @@ static bool emv_parse(const NfcDevice* device, FuriString* parsed_data) {
         if(storage_readed)
             furi_string_cat_printf(parsed_data, "Currency: %s\n", furi_string_get_cstr(str));
 
-        if(app.pin_try_counter != 0xFF)
-            furi_string_cat_printf(parsed_data, "PIN attempts left: %d\n", app.pin_try_counter);
+        if(app.pin_attempts_counter != 0xFF)
+            furi_string_cat_printf(
+                parsed_data, "PIN attempts left: %d\n", app.pin_attempts_counter);
 
         parsed = true;
     } while(false);
