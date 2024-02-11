@@ -10,6 +10,7 @@
 #include <furi_hal_random.h>
 #include <furi_hal_pwm.h>
 #include <furi_hal_power.h>
+#include <expansion/expansion.h>
 
 #include <storage/storage.h>
 #include <stream/buffered_file_stream.h>
@@ -179,6 +180,9 @@ static void gpiocallback(void* ctx) {
 }
 
 int32_t flipper_geiger_app() {
+    Expansion* expansion = furi_record_open(RECORD_EXPANSION);
+    expansion_disable(expansion);
+
     EventApp event;
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(EventApp));
 
@@ -200,6 +204,9 @@ int32_t flipper_geiger_app() {
     mutexVal.mutex = furi_mutex_alloc(FuriMutexTypeNormal);
     if(!mutexVal.mutex) {
         furi_message_queue_free(event_queue);
+
+        expansion_enable(expansion);
+        furi_record_close(RECORD_EXPANSION);
         return 255;
     }
 
@@ -401,6 +408,9 @@ int32_t flipper_geiger_app() {
     view_port_free(view_port);
     furi_timer_free(timer);
     furi_record_close(RECORD_GUI);
+
+    expansion_enable(expansion);
+    furi_record_close(RECORD_EXPANSION);
 
     return 0;
 }
