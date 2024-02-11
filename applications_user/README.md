@@ -1,1 +1,1 @@
-Put your custom applications in this folder.
+Put your custom applications in this folder (or use applications/external).
