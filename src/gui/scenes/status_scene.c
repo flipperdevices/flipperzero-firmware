@@ -28,7 +28,7 @@ static void scene_status_refresh_view(Popup *popup, struct ApplicationContext *c
                      AlignLeft, AlignTop); // Horizontal, Vertical
     popup_set_text(popup,
                    stats_text,
-                   70, 20,
+                   64, 20,
                    AlignLeft, AlignTop);
 }
 

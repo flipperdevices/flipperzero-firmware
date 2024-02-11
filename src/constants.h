@@ -40,7 +40,7 @@ static const char LIFE_STAGE_STRING[][6] = {"Egg",
 /* Game parameters */
 #ifdef DEBUG
 /*
- * DEBUG PARAMETERS (quick evolution)
+ * DEBUG PARAMETERS (fast evolution)
  * To compile with fbt use the following command:
  * ./fbt --extra-define=DEBUG launch APPSRC=matagotchi
  */
@@ -72,26 +72,26 @@ static const uint32_t MAX_XP_PER_STAGE[] = {1,    // EGG
 #else
 /* NORMAL PARAMETERS */
 static const uint32_t MAX_XP_PER_STAGE[] = {1,    // EGG
-                                            10,   // BABY
-                                            30,   // CHILD
-                                            40,   // TEEN
-                                            100,  // ADULT
+                                            100,   // BABY
+                                            300,   // CHILD
+                                            400,   // TEEN
+                                            999,  // ADULT
                                             0};   // DEAD
 /* Experience */
-#define NEW_XP_FREQUENCY 120 // One new XP every 120 seconds
-#define NEW_XP_PROBABILITY 70 // 70% of probability of getting a new XP
+#define NEW_XP_FREQUENCY 120 // One new XP every 2 mins
+#define NEW_XP_PROBABILITY 30 // 30% of probability of getting a new XP
 /* Hunger */
 #define MAX_HU 100
-#define LOSE_HU_FREQUENCY 600 // Lose one HU every 600 seconds
-#define LOSE_HU_PROBABILITY 80 // 80% of probability of losing an HU
+#define LOSE_HU_FREQUENCY 600 // Lose one HU every 10 mins
+#define LOSE_HU_PROBABILITY 40 // 40% of probability of losing an HU
 #define LOSE_HU_MIN 1 // Lose a random number between MIN and MAX when the probability is hit
-#define LOSE_HU_MAX 5
-#define MIN_CANDY_HU_RESTORE 5 // Restore a random number between MIN and MAX
-#define MAX_CANDY_HU_RESTORE 10
+#define LOSE_HU_MAX 4
+#define MIN_CANDY_HU_RESTORE 10 // Restore a random number between MIN and MAX
+#define MAX_CANDY_HU_RESTORE 50
 /* Health */
 #define MAX_HP 100
-#define CHECK_HP_FREQUENCY 300 // Check every 300 seconds
-#define LOSE_HP_PROBABILITY 10 // 10% of probability of losing an HP (getting sick)
+#define CHECK_HP_FREQUENCY 300 // Check every 5 mins
+#define LOSE_HP_PROBABILITY 5 // 5% of probability of losing an HP (getting sick)
 #define LOSE_HP_MIN 1 // Lose a random number between MIN and MAX when the probability is hit
 #define LOSE_HP_MAX 5
 #define MIN_PILL_HP_RESTORE 10 // Restore a random number between MIN and MAX
