@@ -47,9 +47,9 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW PR: [NFC: fix retry scene navigation logic #3439 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3439)
 - [Update version string pocsag_pager_types.h from 0.1 to 1.2 #13 (By seelenamt)](https://github.com/xMasterX/flipper-pager/pull/13)
 - Updated: [WiFi (Marauder) v6.6 (By 0xchocolate & tcpassos)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) `Req: ESP32 WITH MARAUDER FLASHED` Removed Create App Folder Bug
-- Updated: [NFC: Emv fixes #702 (By wosk_& Leptopt1los)](https://github.com/DarkFlippers/unleashed-firmware/pull/702)
 - UL: [NFC: fit full name on display (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/8a86571068f8d82093bbfe71308efcf8eabee77a)
 - [EvilPortal: Fix some memory management (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/1e07bbaf6cf3dc464b7174d95c72b77f34e03c21)
+- Updated: [NFC: Emv fixes #702 (By wosk_& Leptopt1los)](https://github.com/DarkFlippers/unleashed-firmware/pull/702)
 - To Be Merged OFW PRs: [3352](https://github.com/flipperdevices/flipperzero-firmware/pull/3352), [3302](https://github.com/flipperdevices/flipperzero-firmware/pull/3302), [3211](https://github.com/flipperdevices/flipperzero-firmware/pull/3211), [3366](https://github.com/flipperdevices/flipperzero-firmware/pull/3366), [3250](https://github.com/flipperdevices/flipperzero-firmware/pull/3250), [3402](https://github.com/flipperdevices/flipperzero-firmware/pull/3402), [3409](https://github.com/flipperdevices/flipperzero-firmware/pull/3409), [3406](https://github.com/flipperdevices/flipperzero-firmware/pull/3406) & [3431](https://github.com/flipperdevices/flipperzero-firmware/pull/3431)
 
 <a name="release">
