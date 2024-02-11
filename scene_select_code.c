@@ -1,3 +1,8 @@
+/*
+Selects a code from a file picker
+
+Then goes to send code screen
+*/
 #include "flipper.h"
 #include "app_state.h"
 #include "scenes.h"

@@ -1,3 +1,11 @@
+/*
+Initializes a text box window
+Turns on USB serial
+Wires up data streams between USB serial and dmcomm
+Prints truncated output to text box
+
+On exit, disconnects and shuts down USB serial
+*/
 #include "flipper.h"
 #include "app_state.h"
 #include "scenes.h"

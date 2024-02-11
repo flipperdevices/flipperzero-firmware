@@ -1,3 +1,11 @@
+/*
+Sends the code to the DMComm and initiates sending
+
+Displays current code we are sending in bold
+Waits for and displays last recieved code in thin text
+Right will go to the save code dialog for the new code (if there is one)
+*/
+
 #include "flipper.h"
 #include "app_state.h"
 #include "scenes.h"

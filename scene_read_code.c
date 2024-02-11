@@ -1,3 +1,12 @@
+/*
+Listen to two devices chat and then allow options for saving either code
+
+Left save s code
+Right save r code
+Back return
+
+Post save should go back to us
+*/
 #include "flipper.h"
 #include "app_state.h"
 #include "scenes.h"

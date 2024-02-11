@@ -1,3 +1,9 @@
+/*
+List of menu options
+
+
+*/
+
 #include "flipper.h"
 #include "app_state.h"
 #include "scenes.h"
@@ -6,7 +12,7 @@
 /* main menu scene */
 
 /*
-Read -> Reads a code sent by a digimon (always waits) -> Save UI
+Listen -> Reads a code sent by 2 other devices we listen to -> Save UI
 Saved -> Code Picker -> Send screen (Either in "Press OK to Send" or "Waiting for Remote") -> Save UI
 Add Manually -> Keyboard Entry -> Save UI
 USB Serial -> Text Box scene showing serial log
@@ -20,7 +26,7 @@ void fcom_main_menu_scene_on_enter(void* context) {
     App* app = context;
     submenu_reset(app->submenu);
     //submenu_set_header(app->submenu, "F-Com");
-    submenu_add_item(app->submenu, "Read", MainMenuSelectionRead, fcom_menu_callback, app);
+    submenu_add_item(app->submenu, "Listen", MainMenuSelectionRead, fcom_menu_callback, app);
     submenu_add_item(app->submenu, "Saved", MainMenuSelectionSaved, fcom_menu_callback, app);
     submenu_add_item(app->submenu, "Add Manually", MainMenuSelectionAdd, fcom_menu_callback, app);
     submenu_add_item(app->submenu, "USB A-Com", MainMenuSelectionSerial, fcom_menu_callback, app);

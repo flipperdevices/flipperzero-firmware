@@ -1,3 +1,10 @@
+/*
+Takes the code in result_code and opens a file name KB
+
+Saves the code into that file and then goes to the send code
+dialog and clears app state
+*/
+
 #include "flipper.h"
 #include "app_state.h"
 #include "scenes.h"
