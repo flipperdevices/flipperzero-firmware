@@ -61,6 +61,7 @@ The negative side of increasing the number of repetitions will be a longer key f
 - CAME 12bit 303MHz
 - CAME 12bit 307MHz
 - CAME 12bit 315MHz
+- CAME 12bit 330MHz
 - CAME 12bit 433MHz
 - CAME 12bit 868MHz
 

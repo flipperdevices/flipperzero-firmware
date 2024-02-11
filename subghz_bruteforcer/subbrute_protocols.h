@@ -75,6 +75,7 @@ typedef enum {
  * - `SubBruteAttackCAME12bit303`: CAME 12-bit 303 MHz sub-brute attack.
  * - `SubBruteAttackCAME12bit307`: CAME 12-bit 307 MHz sub-brute attack.
  * - `SubBruteAttackCAME12bit315`: CAME 12-bit 315 MHz sub-brute attack.
+ * - `SubBruteAttackCAME12bit315`: CAME 12-bit 330 MHz sub-brute attack.
  * - `SubBruteAttackCAME12bit433`: CAME 12-bit 433 MHz sub-brute attack.
  * - `SubBruteAttackCAME12bit868`: CAME 12-bit 868 MHz sub-brute attack.
  * - `SubBruteAttackNICE12bit433`: NICE 12-bit 433 MHz sub-brute attack.
@@ -115,6 +116,7 @@ typedef enum {
     SubBruteAttackCAME12bit303,
     SubBruteAttackCAME12bit307,
     SubBruteAttackCAME12bit315,
+    SubBruteAttackCAME12bit330,
     SubBruteAttackCAME12bit433,
     SubBruteAttackCAME12bit868,
     SubBruteAttackNICE12bit433,
