@@ -50,6 +50,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: [NFC: fit full name on display (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/8a86571068f8d82093bbfe71308efcf8eabee77a)
 - [EvilPortal: Fix some memory management (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/1e07bbaf6cf3dc464b7174d95c72b77f34e03c21)
 - Updated: [NFC: Emv fixes #702 (By wosk_& Leptopt1los)](https://github.com/DarkFlippers/unleashed-firmware/pull/702)
+- Updated: [Matagotchi v1.0 (By MrModd)](https://github.com/MrModd/Matagotchi)
 - To Be Merged OFW PRs: [3352](https://github.com/flipperdevices/flipperzero-firmware/pull/3352), [3302](https://github.com/flipperdevices/flipperzero-firmware/pull/3302), [3211](https://github.com/flipperdevices/flipperzero-firmware/pull/3211), [3366](https://github.com/flipperdevices/flipperzero-firmware/pull/3366), [3250](https://github.com/flipperdevices/flipperzero-firmware/pull/3250), [3402](https://github.com/flipperdevices/flipperzero-firmware/pull/3402), [3409](https://github.com/flipperdevices/flipperzero-firmware/pull/3409), [3406](https://github.com/flipperdevices/flipperzero-firmware/pull/3406) & [3431](https://github.com/flipperdevices/flipperzero-firmware/pull/3431)
 
 <a name="release">

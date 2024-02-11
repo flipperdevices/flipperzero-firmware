@@ -31,7 +31,7 @@ static void scene_status_refresh_view(Popup* popup, struct ApplicationContext* c
         5, // x, y position
         AlignLeft,
         AlignTop); // Horizontal, Vertical
-    popup_set_text(popup, stats_text, 70, 20, AlignLeft, AlignTop);
+    popup_set_text(popup, stats_text, 64, 20, AlignLeft, AlignTop);
 }
 
 void scene_status_on_enter(void* ctx) {
