@@ -16,7 +16,7 @@
 
 #define TAG "PacMan"
 
-#define MAP_SIZE_W 28
+#define MAP_SIZE_W 30
 #define MAP_SIZE_H 37
 #define WALL_SIZE 2
 
@@ -57,6 +57,7 @@ typedef enum {
     EntitySuperCandy,
     EntityCherry,
     EntityBase,
+    EntityTeleport,
     EntityVoid
 } Entity;
 
@@ -103,12 +104,13 @@ typedef struct {
     uint8_t y;
 } Point;
 
-typedef struct start_positions {
+typedef struct {
     Point* pacman;
     Point* blinky;
     Point* pinky;
     Point* inky;
     Point* clyde;
+    Point** teleports;
 } StartPositions;
 
 typedef struct {
@@ -213,19 +215,43 @@ static void pacman_submenu_callback(void* context, uint32_t index) {
 
 // Initial map configuration
 static const char* map_config[] = {
-    "                            ", "                            ", "                            ",
-    "                            ", "1------------21------------2", "|CCCCCCCCCCCC||CCCCCCCCCCCC|",
-    "|C1--2C1---2C||C1---2C1--2C|", "|C|  |C|   |C||C|   |C|  |C|", "|C3--4C3---4C34C3---4C3--4C|",
-    "|CCCCCCCCCCCCCCCCCCCCCCCCCC|", "|C1--2C12C1------2C12C1--2C|", "|C3--4C||C3--21--4C||C3--4C|",
-    "|CCCCCC||CCCC||CCCC||CCCCCC|", "3----2C|3--2 || 1--4|C1----4", "     |C|1--4 34 3--2|C|     ",
-    "     |C||          ||C|     ", "     |C|| 1------2 ||C|     ", "-----4C34 |BBBBBB| 34C3-----",
-    "      C   |BbcpiB|   C      ", "-----2C12 |BBBBBB| 12C1-----", "     |C|| 3------4 ||C|     ",
-    "     |C||          ||C|     ", "     |C|| 1------2 ||C|     ", "1----4C34 3--21--4 34C3----2",
-    "|CCCCCCCCCCCC||CCCCCCCCCCCC|", "|C1--2C1---2C||C1---2C1--2C|", "|C3-2|C3---4C34C3---4C|1-4C|",
-    "|CCC||CCCCCCCCCCCCCCCC||CCC|", "3-2C||C12C1------2C12C||C1-4", "1-4C34C||C3--21--4C||C34C3-2",
-    "|CCCCCC||CPCC||CCCC||CCCCCC|", "|C1----43--2C||C1--43----2C|", "|C3--------4C34C3--------4C|",
-    "|CCCCCCCCCCCCCCCCCCCCCCCCCC|", "3--------------------------4", "                            ",
-    "                            " };
+    "                              ",
+    "                              ",
+    "                              ",
+    "                              ",
+    " 1------------21------------2 ",
+    " |CCCCCCCCCCCC||CCCCCCCCCCCC| ",
+    " |C1--2C1---2C||C1---2C1--2C| ",
+    " |C|  |C|   |C||C|   |C|  |C| ",
+    " |C3--4C3---4C34C3---4C3--4C| ",
+    " |CCCCCCCCCCCCCCCCCCCCCCCCCC| ",
+    " |C1--2C12C1------2C12C1--2C| ",
+    " |C3--4C||C3--21--4C||C3--4C| ",
+    " |CCCCCC||CCCC||CCCC||CCCCCC| ",
+    " 3----2C|3--2 || 1--4|C1----4 ",
+    "      |C|1--4 34 3--2|C|      ",
+    "      |C||          ||C|      ",
+    "      |C|| 1------2 ||C|      ",
+    "------4C34 |BBBBBB| 34C3------",
+    "T      C   |BbcpiB|   C      T",
+    "------2C12 |BBBBBB| 12C1------",
+    "      |C|| 3------4 ||C|      ",
+    "      |C||          ||C|      ",
+    "      |C|| 1------2 ||C|      ",
+    " 1----4C34 3--21--4 34C3----2 ",
+    " |CCCCCCCCCCCC||CCCCCCCCCCCC| ",
+    " |C1--2C1---2C||C1---2C1--2C| ",
+    " |C3-2|C3---4C34C3---4C|1-4C| ",
+    " |CCC||CCCCCCCCCCCCCCCC||CCC| ",
+    " 3-2C||C12C1------2C12C||C1-4 ",
+    " 1-4C34C||C3--21--4C||C34C3-2 ",
+    " |CCCCCC||CPCC||CCCC||CCCCCC| ",
+    " |C1----43--2C||C1--43----2C| ",
+    " |C3--------4C34C3--------4C| ",
+    " |CCCCCCCCCCCCCCCCCCCCCCCCCC| ",
+    " 3--------------------------4 ",
+    "                              ",
+    "                              " };
 
 static StartPositions* start_positions_alloc() {
     StartPositions* positions = (StartPositions*)malloc(sizeof(StartPositions));
@@ -234,17 +260,21 @@ static StartPositions* start_positions_alloc() {
     positions->inky = (Point*)malloc(sizeof(Point));
     positions->pinky = (Point*)malloc(sizeof(Point));
     positions->clyde = (Point*)malloc(sizeof(Point));
+    positions->teleports = (Point**)malloc(sizeof(Point*) * 2);
+    for (int i = 0; i < 2; i++)
+        positions->teleports[i] = (Point*)malloc(sizeof(Point));
     return positions;
 }
 
 /**
- * @brief      Sets up the map matrix according to the config matrix.
+ * @brief      Sets up  the map matrix according to the config matrix.
  * @details    Parses the characters in the config matrix and creates the correspoding enum matrix.
  * @param      config The config matrix (actually array of strings).
  * @return     The initialized Entity matrix.
  */
 static StartPositions* setup_map(Entity map[][MAP_SIZE_W]) {
     StartPositions* positions = start_positions_alloc();
+    int teleports_count = 0;
     for (int i = 0; i < MAP_SIZE_H; i++) {
         for (int j = 0; j < MAP_SIZE_W; j++) {
             int symbol = map_config[i][j];
@@ -294,6 +324,11 @@ static StartPositions* setup_map(Entity map[][MAP_SIZE_W]) {
                 map[i][j] = EntityGhost;
                 positions->blinky->x = i * WALL_SIZE;
                 positions->blinky->y = j * WALL_SIZE;
+                break;
+            case 'T':
+                map[i][j] = EntityTeleport;
+                positions->teleports[teleports_count]->x = i * WALL_SIZE;
+                positions->teleports[teleports_count++]->y = j * WALL_SIZE;
                 break;
             default:
                 map[i][j] = EntityVoid;
@@ -457,6 +492,7 @@ static bool is_wall(Entity entity) {
 
 static void move_pacman(PacmanGameModel* model) {
     Character* pacman = model->pacman;
+
     if (pacman->direction == DirectionLeft &&
         (!is_wall(map[pacman->map_y][pacman->map_x - 1]) || (int)pacman->y % WALL_SIZE != 0))
         pacman->y += pacman->speed;
@@ -477,6 +513,15 @@ static void move_pacman(PacmanGameModel* model) {
 
     uint8_t previous_x = pacman->map_x;
     uint8_t previous_y = pacman->map_y;
+
+    if (map[previous_y][previous_x] == EntityTeleport) {
+        int teleport_num = 1;
+        if (previous_x == model->start_positions->teleports[1]->x &&
+            previous_y == model->start_positions->teleports[1]->y)
+            teleport_num = 0;
+        pacman->x = model->start_positions->teleports[teleport_num]->x;
+        pacman->y = model->start_positions->teleports[teleport_num]->y;
+    }
 
     pacman->map_y = pacman_x_to_map_y(pacman->x);
     pacman->map_x = pacman_y_to_map_x(pacman->y);
@@ -943,6 +988,7 @@ static PacmanApp* pacman_app_alloc(StartPositions* positions) {
     view_set_custom_callback(app->view_game, pacman_view_game_custom_event_callback);
     view_allocate_model(app->view_game, ViewModelTypeLockFree, sizeof(PacmanGameModel));
     PacmanGameModel* model = view_get_model(app->view_game);
+    model->start_positions = positions;
     model->setting_1_index = setting_1_index;
     model->setting_2_name = setting_2_name;
     model->pacman =
