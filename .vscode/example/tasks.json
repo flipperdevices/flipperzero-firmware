@@ -22,6 +22,12 @@
             "command": "./fbt format"
         },
         {
+            "label": "[FBT] Format PY (and FAM) Files",
+            "group": "build",
+            "type": "shell",
+            "command": "./fbt format_py"
+        },
+        {
             "label": "[FBT] Clear",
             "group": "build",
             "type": "shell",
