@@ -156,7 +156,6 @@ static void _draw_pressure(Canvas* canvas, Sensor* sensor) {
     canvas_draw_icon(canvas, x + 3, y + 4, &I_pressure_7x13);
 
     int16_t press_int = sensor->pressure;
-    // Change Temp for Pressure
     int8_t press_dec = (int16_t)(sensor->pressure * 10) % 10;
 
     //Целая часть давления
