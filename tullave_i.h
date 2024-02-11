@@ -1,21 +1,24 @@
 #pragma once
 
 #include "tullave.h"
-#include "lib/tullave/tullave_worker.h"
 
-#include "lib/tullave/protocols/tullave_apdu.h"
+#include "lib/tullave/protocols/tullave_data.h"
 
 #include <furi.h>
 
 #include <gui/gui.h>
 #include <gui/view_dispatcher.h>
 #include <gui/scene_manager.h>
-
-#include <notification/notification_messages.h>
-
 #include <gui/modules/submenu.h>
 #include <gui/modules/popup.h>
 #include <gui/modules/widget.h>
+
+#include <notification/notification_messages.h>
+
+#include <lib/nfc/nfc.h>
+#include <lib/nfc/nfc_device.h>
+
+#include <nfc/protocols/iso14443_4a/iso14443_4a_poller.h>
 
 #include "scenes/tullave_scene.h"
 
@@ -24,8 +27,8 @@
 
 typedef enum { TuLlaveViewMenu, TuLlaveViewWidget, TuLlaveViewPopup } TuLlaveView;
 
-struct TuLlave {
-    TuLlaveWorker* worker;
+// Main structure for the application
+struct TuLlaveApp {
     NotificationApp* notifications;
     ViewDispatcher* view_dispatcher;
     Gui* gui;
@@ -33,14 +36,30 @@ struct TuLlave {
     Widget* widget;
     Submenu* submenu;
     Popup* popup;
+    Nfc* nfc;
+    NfcDevice* nfc_device;
+    NfcPoller* nfc_poller;
+    TuLlaveData* card_data;
 };
 
-TuLlave* tullave_alloc();
+// NfC Poller custom events
+typedef enum {
+    //Start enum in 100 to preserve first 100 events for GUI actions. Taken from Nfc Flipper App.
+    NfcCustomEventReserved = 100,
+    NfcPollerEventSuccess
+} NfcCustomEvent;
 
-void tullave_free(TuLlave* t_llave);
+/**
+ * Allocates and initializes TuLlaveApp main structure, required to initialize the application
+*/
+TuLlaveApp* tullave_alloc();
 
-int32_t tullave_co_main(void* p);
+/**
+ * Frees the space utilized by TuLlaveApp main structure
+*/
+void tullave_free(TuLlaveApp* t_llave);
 
-void tullave_blink_start(TuLlave* t_llave);
-
-void tullave_blink_stop(TuLlave* t_llave);
+/**
+ * Application entrypoint
+*/
+int32_t tullave_main(void* p);

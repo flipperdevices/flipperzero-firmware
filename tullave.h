@@ -1,3 +1,3 @@
 #pragma once
 
-typedef struct TuLlave TuLlave;
+typedef struct TuLlaveApp TuLlaveApp;

@@ -5,7 +5,7 @@ App(
     entry_point="tullave_main",
     targets=["f7"],
     requires=[
-        "gui",
+        "gui"
     ],
     fap_icon="app_assets/tullave_logo_10px.png",
     fap_libs=[
