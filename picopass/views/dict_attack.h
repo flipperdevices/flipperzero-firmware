@@ -4,6 +4,8 @@
 #include <gui/modules/widget.h>
 #include <picopass_icons.h>
 
+#include <assets_icons.h>
+
 typedef struct DictAttack DictAttack;
 
 typedef void (*DictAttackCallback)(void* context);

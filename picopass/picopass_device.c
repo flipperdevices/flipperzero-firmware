@@ -4,11 +4,11 @@
 #include <flipper_format/flipper_format.h>
 #include <picopass_icons.h>
 
+#include <assets_icons.h>
+
 #include <toolbox/protocols/protocol_dict.h>
 #include <lfrfid/protocols/lfrfid_protocols.h>
 #include <lfrfid/lfrfid_dict_file.h>
-
-#include <assets_icons.h>
 
 #define TAG "PicopassDevice"
 
