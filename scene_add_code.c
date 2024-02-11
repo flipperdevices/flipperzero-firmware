@@ -24,7 +24,7 @@ bool add_code_text_input_validator(const char* text, FuriString* error, void* co
 
 void add_code_text_input_callback(void* context) {
     App* app = context;
-    FURI_LOG_I(TAG, "save_text_input_callback %s", app->state->current_code);
+    FURI_LOG_I(TAG, "save_text_input_callback %s", app->state->result_code);
     scene_manager_handle_custom_event(app->scene_manager, SaveCodeInputRead);
 }
 
@@ -38,7 +38,7 @@ void fcom_add_code_scene_on_enter(void* context) {
     text_input_set_result_callback(app->text_input,
                                    add_code_text_input_callback,
                                    app,
-                                   app->state->current_code,
+                                   app->state->result_code,
                                    MAX_FILENAME_LEN,
                                    true);
     view_dispatcher_switch_to_view(app->view_dispatcher, FcomKeyboardView);

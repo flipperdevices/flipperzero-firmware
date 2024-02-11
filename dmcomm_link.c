@@ -22,7 +22,7 @@ int32_t dmcomm_reader(void* context) {
 */
 void dmcomm_sendcommand(void* context, const char* cmd)
 {
-    FURI_LOG_I(TAG, "dmcomm_reader start");
+    FURI_LOG_I(TAG, "dmcomm_sendcommand");
     App* app = context;
     
     furi_mutex_acquire(app->dmcomm_input_mutex, FuriWaitForever);

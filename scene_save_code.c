@@ -37,7 +37,7 @@ void save_text_input_callback(void* context) {
         if(!flipper_format_file_open_new(fff_file, path_cstr)) break;
         if(!flipper_format_write_header_cstr(fff_file, "F-Com Code File", 0)) break;
         if(!flipper_format_write_comment_cstr(fff_file, "Digimon DMCommm Code")) break;
-        if(!flipper_format_write_string_cstr(fff_file, "Code", app->state->current_code)) break;
+        if(!flipper_format_write_string_cstr(fff_file, "Code", app->state->result_code)) break;
 
     // signal that the file was written successfully
     } while(0);

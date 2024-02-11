@@ -119,13 +119,14 @@ void Serial_printi(const int c)
   furi_string_cat_printf(context->dmcomm_output_buffer, "%c", (char)c);
   furi_check(furi_mutex_release(context->dmcomm_output_mutex) == FuriStatusOk);
 }
+/*
 void Serial_printf(const float c, int acc)
 {
   furi_check(furi_mutex_acquire(context->dmcomm_output_mutex, FuriWaitForever) == FuriStatusOk);
   FURI_LOG_I(TAG, "Serial_printf %f %d", (double)c, acc);
   furi_check(furi_mutex_release(context->dmcomm_output_mutex) == FuriStatusOk);
 }
-
+*/
 const char *F(const char* i)
 {
   return i;

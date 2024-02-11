@@ -25,7 +25,7 @@ void Serial_prints(const char* c);
 void Serial_printlns(const char* c);
 void Serial_println(void);
 void Serial_printi(const int c);
-void Serial_printf(const float c, int acc);
+//void Serial_printf(const float c, int acc);
 const char *F(const char* i);
 void delay(int ms);
 int analogRead(const GpioPin* pin);

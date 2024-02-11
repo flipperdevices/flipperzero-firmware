@@ -83,8 +83,11 @@ AppState* app_state_alloc() {
 
     // Allocate and start dcomm
     state->usbSerialEnabled = false;
+    state->result_code[0] = 0;
     state->current_code[0] = 0;
     state->file_name_tmp[0] = 0;
+    state->r_code = furi_string_alloc();
+    state->s_code = furi_string_alloc();
  
     return state;
 }

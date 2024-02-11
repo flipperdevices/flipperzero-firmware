@@ -10,6 +10,7 @@
 typedef struct AppState {
     bool usbSerialEnabled;
     char current_code[MAX_FILENAME_LEN];
+    char result_code[MAX_FILENAME_LEN];
     char file_name_tmp[MAX_FILENAME_LEN];
     bool waitForCode;
     FuriString* r_code;

@@ -40,7 +40,7 @@ static void file_browser_callback(void* context) {
 }
 
 void fcom_select_code_scene_on_enter(void* context) {
-    FURI_LOG_I(TAG, "fcom_read_scene_on_enter");
+    FURI_LOG_I(TAG, "fcom_select_code_scene_on_enter");
     App* app = context;
 
     file_browser_set_callback(app->file_browser, file_browser_callback, app);
@@ -52,7 +52,7 @@ void fcom_select_code_scene_on_enter(void* context) {
 }
 
 bool fcom_select_code_scene_on_event(void* context, SceneManagerEvent event) {
-    FURI_LOG_I(TAG, "fcom_read_scene_on_event");
+    FURI_LOG_I(TAG, "fcom_select_code_scene_on_event");
     UNUSED(context);
     UNUSED(event);
 
@@ -67,7 +67,7 @@ bool fcom_select_code_scene_on_event(void* context, SceneManagerEvent event) {
 }
 
 void fcom_select_code_scene_on_exit(void* context) {
-    FURI_LOG_I(TAG, "fcom_read_scene_on_exit");
+    FURI_LOG_I(TAG, "fcom_select_code_scene_on_exit");
     UNUSED(context);
     App* app = context;
     UNUSED(app);
