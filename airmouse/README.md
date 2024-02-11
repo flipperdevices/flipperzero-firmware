@@ -1,7 +1,7 @@
 [!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/ginkage)
 [![paypal](https://www.paypalobjects.com/en_GB/i/btn/btn_donate_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=LF9S5WAF6E4VA)
 
-# Flipper Air Mouse
+# BMI Air Mouse
 
 ## Brief
 
@@ -48,15 +48,6 @@ Reality:
 ## Software
 
 The code is based on the original Bosch [driver](https://github.com/BoschSensortec/BMI160_driver/) and an orientation tracking implementation from the Google [Cardboard](https://github.com/googlevr/cardboard/tree/master/sdk/sensors) project
-
-If you're familiar with Flipper applications, start in the [firmware](https://github.com/flipperdevices/flipperzero-firmware) checkout folder and do the following:
-```
-cd applications/plugins
-git clone https://github.com/ginkage/FlippAirMouse
-cd ../..
-./fbt fap_air_mouse
-```
-If you're not familiar with those, just grab a `fap` file from Releases.
 
 ## License
 
