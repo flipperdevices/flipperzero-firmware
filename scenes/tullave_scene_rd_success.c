@@ -38,9 +38,11 @@ void tullave_scene_read_success_on_enter(void* context) {
 }
 
 bool tullave_scene_read_success_on_event(void* context, SceneManagerEvent event) {
-    UNUSED(context);
-    UNUSED(event);
-
+    TuLlaveApp* instance = context;
+    if(event.type == SceneManagerEventTypeBack) {
+        // Free data, so a new data could be read.
+        tullave_data_free(instance->card_data);
+    }
     return false;
 }
 

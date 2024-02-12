@@ -57,11 +57,12 @@ bool tullave_read_info_iso14443_4a_card_number(Iso14443_4aPoller* iso_poller, Tu
     bit_buffer_copy_bytes(tx_data, read_card_number_cmd, sizeof(read_card_number_cmd));
 
     Iso14443_4aError error = iso14443_4a_poller_send_block(iso_poller, tx_data, rx_data);
-    const uint8_t* apdu_resp = &bit_buffer_get_data(rx_data)[TULLAVE_NUM_CARD_OFFSET];
+    const uint8_t* apdu_resp = bit_buffer_get_data(rx_data);
 
     if(error == Iso14443_4aErrorNone && apdu_resp[0] == APDU_SW1_GOOD_RESPONSE) {
         uint8_t hexa_card_num[TULLAVE_CARD_NUM_LEN];
-        uint8_to_hex_chars(apdu_resp, hexa_card_num, TULLAVE_CARD_NUM_LEN);
+        const uint8_t* raw_card_num = &apdu_resp[TULLAVE_NUM_CARD_OFFSET];
+        uint8_to_hex_chars(raw_card_num, hexa_card_num, TULLAVE_CARD_NUM_LEN);
         data->card_number = furi_string_alloc_printf("%s", hexa_card_num);
         return true;
     }
@@ -80,7 +81,9 @@ void tullave_read_info_iso14443_4a(Iso14443_4aPoller* iso_poller, TuLlaveApp* in
     const Iso14443_4aData* data =
         nfc_device_get_data(instance->nfc_device, NfcProtocolIso14443_4a);
 
-    TuLlaveData* info = tullave_data_alloc();
+    instance->card_data = tullave_data_alloc();
+    TuLlaveData* info = instance->card_data;
+
     // The UID can be read directly from the NFC-generic Poller
     tullave_iso14443_4a_format_bytes(
         info->nfc_uid, data->iso14443_3a_data->uid, data->iso14443_3a_data->uid_len);
@@ -90,15 +93,13 @@ void tullave_read_info_iso14443_4a(Iso14443_4aPoller* iso_poller, TuLlaveApp* in
     // If card number could not be read, it does not make sense to try read other sections
     if(!was_num_read) {
         furi_string_free(info->card_number);
-        info->card_number = furi_string_alloc_set_str("ERR. Card not supported.");
+        info->card_number = furi_string_alloc_set_str("ERR. Not Supported.");
         return;
     }
 
     // Read card balance
     tullave_read_info_iso14443_4a_balance(iso_poller, info);
-
-    // Set the card data on the instance.
-    instance->card_data = info;
+    info->data_collected = true;
 }
 
 NfcCommand tullave_scene_read_poller_callback_iso14443_4a(NfcGenericEvent event, void* context) {

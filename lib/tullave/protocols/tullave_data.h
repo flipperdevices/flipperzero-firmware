@@ -11,6 +11,7 @@ typedef struct {
     uint64_t balance;
     FuriString* card_number;
     FuriString* nfc_uid;
+    bool data_collected;
 } TuLlaveData;
 
 /**
