@@ -11,6 +11,7 @@
 #include <locale/locale.h>
 #include <toolbox/crc32_calc.h>
 #include <mbedtls/md5.h>
+#include <expansion/expansion.h>
 
 #define SCREEN_SIZE_X 128
 #define SCREEN_SIZE_Y 64
@@ -96,6 +97,9 @@ static void gpiocallback(void* ctx) {
 }
 
 int32_t flipper_atomicdiceroller_app() {
+    Expansion* expansion = furi_record_open(RECORD_EXPANSION);
+    expansion_disable(expansion);
+    
     furi_hal_bus_enable(FuriHalBusTIM2);
     LL_TIM_SetCounterMode(TIM2, LL_TIM_COUNTERMODE_UP);
     LL_TIM_SetClockDivision(TIM2, LL_TIM_CLOCKDIVISION_DIV1);
@@ -119,6 +123,8 @@ int32_t flipper_atomicdiceroller_app() {
     mutexVal.mutex = furi_mutex_alloc(FuriMutexTypeNormal);
     if(!mutexVal.mutex) {
         furi_message_queue_free(event_queue);
+        expansion_enable(expansion);
+        furi_record_close(RECORD_EXPANSION);
         return 255;
     }
 
@@ -349,6 +355,9 @@ int32_t flipper_atomicdiceroller_app() {
     furi_timer_free(timer);
     furi_timer_free(timerPause);
     furi_record_close(RECORD_GUI);
+
+    expansion_enable(expansion);
+    furi_record_close(RECORD_EXPANSION);
 
     return 0;
 }
