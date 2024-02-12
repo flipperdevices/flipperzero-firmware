@@ -88,11 +88,11 @@ void desktop_lock_menu_draw_callback(Canvas* canvas, void* model) {
         canvas_set_color(canvas, ColorBlack);
         canvas_set_font(canvas, FontBatteryPercent);
 
-        int x, y, w, h;
+        int8_t x, y, w, h;
         bool selected, toggle;
         bool enabled = false;
-        uint value = 0;
-        int total = 58;
+        uint8_t value = 0;
+        int8_t total = 58;
         const Icon* icon = NULL;
         for(size_t i = 0; i < DesktopLockMenuIndexTotalCount; ++i) {
             selected = m->idx == i;
