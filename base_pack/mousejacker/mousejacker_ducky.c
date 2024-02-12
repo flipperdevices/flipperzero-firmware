@@ -97,7 +97,7 @@ static uint32_t mj_ducky_get_command_len(const char* line) {
 
 static bool mj_get_ducky_key(char* key, size_t keylen, MJDuckyKey* dk) {
     //FURI_LOG_D(TAG, "looking up key %s with length %d", key, keylen);
-    for(uint i = 0; i < sizeof(mj_ducky_keys) / sizeof(MJDuckyKey); i++) {
+    for(size_t i = 0; i < sizeof(mj_ducky_keys) / sizeof(MJDuckyKey); i++) {
         if(strlen(mj_ducky_keys[i].name) == keylen &&
            !strncmp(mj_ducky_keys[i].name, key, keylen)) {
             memcpy(dk, &mj_ducky_keys[i], sizeof(MJDuckyKey));
@@ -108,11 +108,11 @@ static bool mj_get_ducky_key(char* key, size_t keylen, MJDuckyKey* dk) {
     return false;
 }
 
-static void checksum(uint8_t* payload, uint len) {
+static void checksum(uint8_t* payload, size_t len) {
     // This is also from the KeyKeriki paper
     // Thanks Thorsten and Max!
     uint8_t cksum = 0xff;
-    for(uint n = 0; n < len - 2; n++) cksum = (cksum - payload[n]) & 0xff;
+    for(size_t n = 0; n < len - 2; n++) cksum = (cksum - payload[n]) & 0xff;
     cksum = (cksum + 1) & 0xff;
     payload[len - 1] = cksum;
 }

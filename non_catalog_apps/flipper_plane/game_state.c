@@ -29,11 +29,11 @@ void game_state_reinit(GameState* const game_state) {
 void check_collision(GameState* const game_state) {
     /*
         to make collision detection easier, 
-        convert the u_int16_t to an array of 
-        u_int8_t's
+        convert the uint16_t to an array of 
+        uint8_t's
     */
-    u_int8_t currentRow[sizeof(uint16_t) * 8];
-    u_int16_t mapCopy = game_state->map[(int)game_state->paper->y + 3];
+    uint8_t currentRow[sizeof(uint16_t) * 8];
+    uint16_t mapCopy = game_state->map[(int)game_state->paper->y + 3];
     for(unsigned int j = 0; j < sizeof(uint16_t) * 8; j++) {
         if(mapCopy & 0x8000) {
             currentRow[j] = 1;

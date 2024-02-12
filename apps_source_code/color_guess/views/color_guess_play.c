@@ -323,8 +323,6 @@ ColorGuessPlay* color_guess_play_alloc() {
 void color_guess_play_free(ColorGuessPlay* instance) {
     furi_assert(instance);
 
-    with_view_model(
-        instance->view, ColorGuessPlayModel * model, { free(model->digit); }, true);
     view_free(instance->view);
     free(instance);
 }
