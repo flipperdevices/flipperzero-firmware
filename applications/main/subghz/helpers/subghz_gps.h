@@ -1,10 +1,8 @@
 #include <furi_hal.h>
 #include <cfw/cfw.h>
-#include "minmea.h"
 
-#define UART_CH                                                                  \
-    (CFW_SETTINGS()->uart_nmea_channel == UARTDefault ? FuriHalUartIdUSART1 : \
-                                                           FuriHalUartIdLPUART1)
+#define UART_CH \
+    (CFW_SETTINGS()->uart_nmea_channel == UARTDefault ? FuriHalUartIdUSART1 : FuriHalUartIdLPUART1)
 
 #define RX_BUF_SIZE 1024
 
@@ -60,6 +58,14 @@ void subghz_gps_start(SubGhzGPS* subghz_gps);
  * @return void
 */
 void subghz_gps_stop(SubGhzGPS* subghz_gps);
+
+/**
+ * Set baudrate for GPS
+ * 
+ * @param baudrate Baudrate
+ * @return void
+*/
+void subghz_gps_set_baudrate(uint32_t baudrate);
 
 /**
  * Convert degree to radian
