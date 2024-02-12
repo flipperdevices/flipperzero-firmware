@@ -29,8 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0210-1603-0.97.2-2707a31](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-02-11 01:03 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-02-11 01:03 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-02-11 23:06 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-02-11 23:06 EST`
 - OFW: [NFC: Add support for Gallagher access control (MIFARE Classic only) #3306 (By nickmooney)](https://github.com/flipperdevices/flipperzero-firmware/pull/3306)
 - OFW: [NFC: Slix disable privacy #3425 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3425)
 - OFW: [NFC: Added NFC plugin; Some parser #3335 (By zProAle)](https://github.com/flipperdevices/flipperzero-firmware/pull/3335)
@@ -52,7 +52,10 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Matagotchi v1.0 (By MrModd)](https://github.com/MrModd/Matagotchi)
 - Updated: [PacMan WIP v0.1 (By DanieleMaffi)](https://github.com/DanieleMaffi/flipper-pacman)
 - Updated: [NFC: Emv fixes #702 (By wosk_& Leptopt1los)](https://github.com/DarkFlippers/unleashed-firmware/pull/702)
-- To Be Merged OFW PRs: [3352](https://github.com/flipperdevices/flipperzero-firmware/pull/3352), [3302](https://github.com/flipperdevices/flipperzero-firmware/pull/3302), [3211](https://github.com/flipperdevices/flipperzero-firmware/pull/3211), [3366](https://github.com/flipperdevices/flipperzero-firmware/pull/3366), [3250](https://github.com/flipperdevices/flipperzero-firmware/pull/3250), [3402](https://github.com/flipperdevices/flipperzero-firmware/pull/3402), [3409](https://github.com/flipperdevices/flipperzero-firmware/pull/3409), [3406](https://github.com/flipperdevices/flipperzero-firmware/pull/3406) & [3431](https://github.com/flipperdevices/flipperzero-firmware/pull/3431)
+- OFW: [NFC: fix retry scene navigation logic #3439 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3439) - Was Already In RM
+- OFW: [Check universal remote files before loading #3438 (By gsurkov)](https://github.com/flipperdevices/flipperzero-firmware/pull/3438)
+- OFW: [Fixed MyKey LockID #3412 (By zProAle)](https://github.com/flipperdevices/flipperzero-firmware/pull/3412) - Was Already In RM
+- To Be Merged OFW PRs: [3352](https://github.com/flipperdevices/flipperzero-firmware/pull/3352), [3302](https://github.com/flipperdevices/flipperzero-firmware/pull/3302), [3211](https://github.com/flipperdevices/flipperzero-firmware/pull/3211), [3366](https://github.com/flipperdevices/flipperzero-firmware/pull/3366), [3250](https://github.com/flipperdevices/flipperzero-firmware/pull/3250), [3402](https://github.com/flipperdevices/flipperzero-firmware/pull/3402), [3409](https://github.com/flipperdevices/flipperzero-firmware/pull/3409), [3406](https://github.com/flipperdevices/flipperzero-firmware/pull/3406), [3431](https://github.com/flipperdevices/flipperzero-firmware/pull/3431), [3254](https://github.com/flipperdevices/flipperzero-firmware/pull/3254) & [3429](https://github.com/flipperdevices/flipperzero-firmware/pull/3429)
 
 <a name="release">
 
