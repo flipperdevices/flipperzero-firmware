@@ -28,6 +28,8 @@ Pin 6  - Vdd  - Drain voltage (3.3V to 5V DC)              - 3v3
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
 
+#include <expansion/expansion.h>
+
 #define TAG "memsic_2125_app"
 
 typedef enum {
@@ -138,7 +140,9 @@ static void render_callback(Canvas* canvas, void* ctx) {
 // Program entry point
 int32_t memsic_2125_app(void* p) {
     UNUSED(p);
-
+    
+    Expansion* expansion = furi_record_open(RECORD_EXPANSION);
+    expansion_disable(expansion);
     // Configure our initial data.
     DemoContext* demo_context = malloc(sizeof(DemoContext));
     demo_context->data = malloc(sizeof(DemoData));
@@ -222,6 +226,9 @@ int32_t memsic_2125_app(void* p) {
     furi_string_free(demo_context->data->buffer);
     free(demo_context->data);
     free(demo_context);
+
+    expansion_enable(expansion);
+    furi_record_close(RECORD_EXPANSION);
 
     return 0;
 }

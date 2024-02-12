@@ -7,6 +7,7 @@
 #include <locale/locale.h>
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
+#include <expansion/expansion.h>
 
 #define TAG_MEMSIC "memsic_2125_app"
 #define TAG_COUNTER "step_counter_app"
@@ -95,6 +96,9 @@ static void render_callback(Canvas* canvas, void* ctx) {
 int32_t step_counter_app(void* p) {
     UNUSED(p);
 
+    Expansion* expansion = furi_record_open(RECORD_EXPANSION);
+    expansion_disable(expansion);
+
     StepCounterContext* stepContext = malloc(sizeof(StepCounterContext));
     stepContext->data = malloc(sizeof(StepCounterData));
     stepContext->data->pin = gpio_accelerometer;
@@ -152,5 +156,8 @@ int32_t step_counter_app(void* p) {
     free(stepContext->data);
     free(stepContext);
 
+    expansion_enable(expansion);
+    furi_record_close(RECORD_EXPANSION);
+    
     return 0;
 }

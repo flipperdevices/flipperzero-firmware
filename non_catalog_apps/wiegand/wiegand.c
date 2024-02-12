@@ -1,4 +1,5 @@
 #include "wiegand.h"
+#include <expansion/expansion.h>
 
 const GpioPin* const pinD0 = &gpio_ext_pa4;
 const GpioPin* const pinD0mosfet = &gpio_ext_pb3;
@@ -112,6 +113,10 @@ void app_free(void* context) {
 
 int wiegand_app(void* p) {
     UNUSED(p);
+
+    Expansion* expansion = furi_record_open(RECORD_EXPANSION);
+    expansion_disable(expansion);
+
     App* app = app_alloc();
 
     Gui* gui = furi_record_open(RECORD_GUI);
@@ -120,5 +125,8 @@ int wiegand_app(void* p) {
     view_dispatcher_run(app->view_dispatcher);
 
     app_free(app);
+
+    expansion_enable(expansion);
+    furi_record_close(RECORD_EXPANSION);
     return 0;
 }
