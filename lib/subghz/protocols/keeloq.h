@@ -79,7 +79,7 @@ void subghz_protocol_decoder_keeloq_feed(void* context, bool level, uint32_t dur
  * @param context Pointer to a SubGhzProtocolDecoderKeeloq instance
  * @return hash Hash sum
  */
-uint8_t subghz_protocol_decoder_keeloq_get_hash_data(void* context);
+uint32_t subghz_protocol_decoder_keeloq_get_hash_data(void* context);
 
 /**
  * Serialize data SubGhzProtocolDecoderKeeloq.

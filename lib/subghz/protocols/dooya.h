@@ -78,7 +78,7 @@ void subghz_protocol_decoder_dooya_feed(void* context, bool level, uint32_t dura
  * @param context Pointer to a SubGhzProtocolDecoderDooya instance
  * @return hash Hash sum
  */
-uint8_t subghz_protocol_decoder_dooya_get_hash_data(void* context);
+uint32_t subghz_protocol_decoder_dooya_get_hash_data(void* context);
 
 /**
  * Serialize data SubGhzProtocolDecoderDooya.

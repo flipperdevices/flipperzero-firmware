@@ -73,10 +73,12 @@ const SubGhzProtocol subghz_protocol_princeton = {
     .type = SubGhzProtocolTypeStatic,
     .flag = SubGhzProtocolFlag_433 | SubGhzProtocolFlag_868 | SubGhzProtocolFlag_315 |
             SubGhzProtocolFlag_AM | SubGhzProtocolFlag_Decodable | SubGhzProtocolFlag_Load |
-            SubGhzProtocolFlag_Save | SubGhzProtocolFlag_Send | SubGhzProtocolFlag_Princeton,
+            SubGhzProtocolFlag_Save | SubGhzProtocolFlag_Send,
 
     .decoder = &subghz_protocol_princeton_decoder,
     .encoder = &subghz_protocol_princeton_encoder,
+
+    .filter = SubGhzProtocolFilter_Princeton,
 };
 
 void* subghz_protocol_encoder_princeton_alloc(SubGhzEnvironment* environment) {
@@ -303,10 +305,10 @@ static void subghz_protocol_princeton_check_remote_controller(SubGhzBlockGeneric
     instance->btn = instance->data & 0xF;
 }
 
-uint8_t subghz_protocol_decoder_princeton_get_hash_data(void* context) {
+uint32_t subghz_protocol_decoder_princeton_get_hash_data(void* context) {
     furi_assert(context);
     SubGhzProtocolDecoderPrinceton* instance = context;
-    return subghz_protocol_blocks_get_hash_data(
+    return subghz_protocol_blocks_get_hash_data_long(
         &instance->decoder, (instance->decoder.decode_count_bit / 8) + 1);
 }
 

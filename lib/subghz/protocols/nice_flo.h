@@ -78,7 +78,7 @@ void subghz_protocol_decoder_nice_flo_feed(void* context, bool level, uint32_t d
  * @param context Pointer to a SubGhzProtocolDecoderNiceFlo instance
  * @return hash Hash sum
  */
-uint8_t subghz_protocol_decoder_nice_flo_get_hash_data(void* context);
+uint32_t subghz_protocol_decoder_nice_flo_get_hash_data(void* context);
 
 /**
  * Serialize data SubGhzProtocolDecoderNiceFlo.

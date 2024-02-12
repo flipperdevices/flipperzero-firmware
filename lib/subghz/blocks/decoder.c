@@ -25,3 +25,15 @@ uint8_t subghz_protocol_blocks_get_hash_data(SubGhzBlockDecoder* decoder, size_t
     }
     return hash;
 }
+
+uint32_t subghz_protocol_blocks_get_hash_data_long(SubGhzBlockDecoder* decoder, size_t len) {
+    union {
+        uint32_t full;
+        uint8_t split[4];
+    } hash = {0};
+    uint8_t* p = (uint8_t*)&decoder->decode_data;
+    for(size_t i = 0; i < len; i++) {
+        hash.split[i % sizeof(hash)] ^= p[i];
+    }
+    return hash.full;
+}

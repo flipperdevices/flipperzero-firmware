@@ -28,7 +28,7 @@ void subghz_protocol_decoder_honeywell_reset(void* context);
 
 void subghz_protocol_decoder_honeywell_feed(void* context, bool level, uint32_t duration);
 
-uint8_t subghz_protocol_decoder_honeywell_get_hash_data(void* context);
+uint32_t subghz_protocol_decoder_honeywell_get_hash_data(void* context);
 
 SubGhzProtocolStatus subghz_protocol_decoder_honeywell_serialize(
     void* context,

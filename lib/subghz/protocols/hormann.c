@@ -288,10 +288,10 @@ static void subghz_protocol_hormann_check_remote_controller(SubGhzBlockGeneric* 
     instance->btn = (instance->data >> 4) & 0xF;
 }
 
-uint8_t subghz_protocol_decoder_hormann_get_hash_data(void* context) {
+uint32_t subghz_protocol_decoder_hormann_get_hash_data(void* context) {
     furi_assert(context);
     SubGhzProtocolDecoderHormann* instance = context;
-    return subghz_protocol_blocks_get_hash_data(
+    return subghz_protocol_blocks_get_hash_data_long(
         &instance->decoder, (instance->decoder.decode_count_bit / 8) + 1);
 }
 

@@ -960,12 +960,19 @@ void subghz_protocol_decoder_bin_raw_data_input_rssi(
     }
 }
 
-uint8_t subghz_protocol_decoder_bin_raw_get_hash_data(void* context) {
+uint32_t subghz_protocol_decoder_bin_raw_get_hash_data(void* context) {
     furi_assert(context);
     SubGhzProtocolDecoderBinRAW* instance = context;
-    return subghz_protocol_blocks_add_bytes(
-        instance->data + instance->data_markup[0].byte_bias,
-        subghz_protocol_bin_raw_get_full_byte(instance->data_markup[0].bit_count));
+    union {
+        uint32_t full;
+        uint8_t split[4];
+    } hash = {0};
+    uint8_t* p = instance->data + instance->data_markup[0].byte_bias;
+    size_t len = subghz_protocol_bin_raw_get_full_byte(instance->data_markup[0].bit_count);
+    for(size_t i = 0; i < len; i++) {
+        hash.split[i % sizeof(hash)] ^= p[i];
+    }
+    return hash.full;
 }
 
 SubGhzProtocolStatus subghz_protocol_decoder_bin_raw_serialize(

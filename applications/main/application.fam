@@ -29,6 +29,7 @@ App(
         "ibutton_start",
         "onewire_start",
         "subghz_start",
+        "subghz_load_extended_settings",
         "infrared_start",
         "lfrfid_start",
         "nfc_start",

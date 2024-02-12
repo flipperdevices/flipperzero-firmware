@@ -79,7 +79,7 @@ void subghz_protocol_decoder_intertechno_v3_feed(void* context, bool level, uint
  * @param context Pointer to a SubGhzProtocolDecoderIntertechno_V3 instance
  * @return hash Hash sum
  */
-uint8_t subghz_protocol_decoder_intertechno_v3_get_hash_data(void* context);
+uint32_t subghz_protocol_decoder_intertechno_v3_get_hash_data(void* context);
 
 /**
  * Serialize data SubGhzProtocolDecoderIntertechno_V3.

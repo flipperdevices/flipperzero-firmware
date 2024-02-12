@@ -723,10 +723,10 @@ static const char* subghz_protocol_somfy_keytis_get_name_button(uint8_t btn) {
     return btn <= 0xf ? name_btn[btn] : name_btn[0];
 }
 
-uint8_t subghz_protocol_decoder_somfy_keytis_get_hash_data(void* context) {
+uint32_t subghz_protocol_decoder_somfy_keytis_get_hash_data(void* context) {
     furi_assert(context);
     SubGhzProtocolDecoderSomfyKeytis* instance = context;
-    return subghz_protocol_blocks_get_hash_data(
+    return subghz_protocol_blocks_get_hash_data_long(
         &instance->decoder, (instance->decoder.decode_count_bit / 8) + 1);
 }
 

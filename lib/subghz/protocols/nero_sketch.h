@@ -78,7 +78,7 @@ void subghz_protocol_decoder_nero_sketch_feed(void* context, bool level, uint32_
  * @param context Pointer to a SubGhzProtocolDecoderNeroSketch instance
  * @return hash Hash sum
  */
-uint8_t subghz_protocol_decoder_nero_sketch_get_hash_data(void* context);
+uint32_t subghz_protocol_decoder_nero_sketch_get_hash_data(void* context);
 
 /**
  * Serialize data SubGhzProtocolDecoderNeroSketch.

@@ -43,7 +43,7 @@ void subghz_protocol_decoder_scher_khan_feed(void* context, bool level, uint32_t
  * @param context Pointer to a SubGhzProtocolDecoderScherKhan instance
  * @return hash Hash sum
  */
-uint8_t subghz_protocol_decoder_scher_khan_get_hash_data(void* context);
+uint32_t subghz_protocol_decoder_scher_khan_get_hash_data(void* context);
 
 /**
  * Serialize data SubGhzProtocolDecoderScherKhan.

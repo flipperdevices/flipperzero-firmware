@@ -399,10 +399,10 @@ static void subghz_protocol_intertechno_v3_check_remote_controller(SubGhzBlockGe
     }
 }
 
-uint8_t subghz_protocol_decoder_intertechno_v3_get_hash_data(void* context) {
+uint32_t subghz_protocol_decoder_intertechno_v3_get_hash_data(void* context) {
     furi_assert(context);
     SubGhzProtocolDecoderIntertechno_V3* instance = context;
-    return subghz_protocol_blocks_get_hash_data(
+    return subghz_protocol_blocks_get_hash_data_long(
         &instance->decoder, (instance->decoder.decode_count_bit / 8) + 1);
 }
 

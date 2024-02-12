@@ -322,10 +322,10 @@ static void subghz_protocol_holtek_th12x_check_remote_controller(SubGhzBlockGene
     instance->cnt = (instance->data >> 4) & 0xFF;
 }
 
-uint8_t subghz_protocol_decoder_holtek_th12x_get_hash_data(void* context) {
+uint32_t subghz_protocol_decoder_holtek_th12x_get_hash_data(void* context) {
     furi_assert(context);
     SubGhzProtocolDecoderHoltek_HT12X* instance = context;
-    return subghz_protocol_blocks_get_hash_data(
+    return subghz_protocol_blocks_get_hash_data_long(
         &instance->decoder, (instance->decoder.decode_count_bit / 8) + 1);
 }
 

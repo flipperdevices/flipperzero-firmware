@@ -42,6 +42,13 @@ void subghz_protocol_blocks_add_to_128_bit(
  */
 uint8_t subghz_protocol_blocks_get_hash_data(SubGhzBlockDecoder* decoder, size_t len);
 
+/**
+ * Getting the long hash sum of the last randomly received parcel.
+ * @param decoder Pointer to a SubGhzBlockDecoder instance
+ * @return hash Hash sum
+ */
+uint32_t subghz_protocol_blocks_get_hash_data_long(SubGhzBlockDecoder* decoder, size_t len);
+
 #ifdef __cplusplus
 }
 #endif

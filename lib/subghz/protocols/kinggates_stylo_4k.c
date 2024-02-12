@@ -501,10 +501,10 @@ static void subghz_protocol_kinggates_stylo_4k_remote_controller(
     }
 }
 
-uint8_t subghz_protocol_decoder_kinggates_stylo_4k_get_hash_data(void* context) {
+uint32_t subghz_protocol_decoder_kinggates_stylo_4k_get_hash_data(void* context) {
     furi_assert(context);
     SubGhzProtocolDecoderKingGates_stylo_4k* instance = context;
-    return subghz_protocol_blocks_get_hash_data(
+    return subghz_protocol_blocks_get_hash_data_long(
         &instance->decoder, (instance->decoder.decode_count_bit / 8) + 1);
 }
 

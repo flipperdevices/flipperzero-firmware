@@ -78,7 +78,7 @@ void subghz_protocol_decoder_kinggates_stylo_4k_feed(void* context, bool level, 
  * @param context Pointer to a SubGhzProtocolDecoderKingGates_stylo_4k instance
  * @return hash Hash sum
  */
-uint8_t subghz_protocol_decoder_kinggates_stylo_4k_get_hash_data(void* context);
+uint32_t subghz_protocol_decoder_kinggates_stylo_4k_get_hash_data(void* context);
 
 /**
  * Serialize data SubGhzProtocolDecoderKingGates_stylo_4k.

@@ -78,7 +78,7 @@ void subghz_protocol_decoder_gate_tx_feed(void* context, bool level, uint32_t du
  * @param context Pointer to a SubGhzProtocolDecoderGateTx instance
  * @return hash Hash sum
  */
-uint8_t subghz_protocol_decoder_gate_tx_get_hash_data(void* context);
+uint32_t subghz_protocol_decoder_gate_tx_get_hash_data(void* context);
 
 /**
  * Serialize data SubGhzProtocolDecoderGateTx.

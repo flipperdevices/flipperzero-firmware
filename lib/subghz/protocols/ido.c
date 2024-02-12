@@ -173,10 +173,10 @@ static void subghz_protocol_ido_check_remote_controller(SubGhzBlockGeneric* inst
     instance->btn = (code_fix >> 20) & 0x0F;
 }
 
-uint8_t subghz_protocol_decoder_ido_get_hash_data(void* context) {
+uint32_t subghz_protocol_decoder_ido_get_hash_data(void* context) {
     furi_assert(context);
     SubGhzProtocolDecoderIDo* instance = context;
-    return subghz_protocol_blocks_get_hash_data(
+    return subghz_protocol_blocks_get_hash_data_long(
         &instance->decoder, (instance->decoder.decode_count_bit / 8) + 1);
 }
 

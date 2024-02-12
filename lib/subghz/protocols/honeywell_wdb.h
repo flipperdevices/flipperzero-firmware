@@ -78,7 +78,7 @@ void subghz_protocol_decoder_honeywell_wdb_feed(void* context, bool level, uint3
  * @param context Pointer to a SubGhzProtocolDecoderHoneywell_WDB instance
  * @return hash Hash sum
  */
-uint8_t subghz_protocol_decoder_honeywell_wdb_get_hash_data(void* context);
+uint32_t subghz_protocol_decoder_honeywell_wdb_get_hash_data(void* context);
 
 /**
  * Serialize data SubGhzProtocolDecoderHoneywell_WDB.

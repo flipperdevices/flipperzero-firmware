@@ -80,10 +80,12 @@ const SubGhzProtocol subghz_protocol_nice_flor_s = {
     .type = SubGhzProtocolTypeDynamic,
     .flag = SubGhzProtocolFlag_433 | SubGhzProtocolFlag_868 | SubGhzProtocolFlag_AM |
             SubGhzProtocolFlag_Decodable | SubGhzProtocolFlag_Load | SubGhzProtocolFlag_Save |
-            SubGhzProtocolFlag_Send | SubGhzProtocolFlag_NiceFlorS,
+            SubGhzProtocolFlag_Send,
 
     .decoder = &subghz_protocol_nice_flor_s_decoder,
     .encoder = &subghz_protocol_nice_flor_s_encoder,
+
+    .filter = SubGhzProtocolFilter_NiceFlorS,
 };
 
 static void subghz_protocol_nice_flor_s_remote_controller(
@@ -691,10 +693,10 @@ static void subghz_protocol_nice_flor_s_remote_controller(
     subghz_custom_btn_set_max(4);
 }
 
-uint8_t subghz_protocol_decoder_nice_flor_s_get_hash_data(void* context) {
+uint32_t subghz_protocol_decoder_nice_flor_s_get_hash_data(void* context) {
     furi_assert(context);
     SubGhzProtocolDecoderNiceFlorS* instance = context;
-    return subghz_protocol_blocks_get_hash_data(
+    return subghz_protocol_blocks_get_hash_data_long(
         &instance->decoder, (instance->decoder.decode_count_bit / 8) + 1);
 }
 

@@ -510,10 +510,10 @@ void subghz_protocol_decoder_secplus_v1_feed(void* context, bool level, uint32_t
     }
 }
 
-uint8_t subghz_protocol_decoder_secplus_v1_get_hash_data(void* context) {
+uint32_t subghz_protocol_decoder_secplus_v1_get_hash_data(void* context) {
     furi_assert(context);
     SubGhzProtocolDecoderSecPlus_v1* instance = context;
-    return subghz_protocol_blocks_get_hash_data(
+    return subghz_protocol_blocks_get_hash_data_long(
         &instance->decoder, (instance->decoder.decode_count_bit / 8) + 1);
 }
 

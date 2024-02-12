@@ -78,7 +78,7 @@ void subghz_protocol_decoder_somfy_keytis_feed(void* context, bool level, uint32
  * @param context Pointer to a SubGhzProtocolDecoderSomfyKeytis instance
  * @return hash Hash sum
  */
-uint8_t subghz_protocol_decoder_somfy_keytis_get_hash_data(void* context);
+uint32_t subghz_protocol_decoder_somfy_keytis_get_hash_data(void* context);
 
 /**
  * Serialize data SubGhzProtocolDecoderSomfyKeytis.

@@ -77,7 +77,7 @@ void subghz_protocol_decoder_alutech_at_4n_feed(void* context, bool level, uint3
  * @param context Pointer to a SubGhzProtocolDecoderAlutech_at_4n instance
  * @return hash Hash sum
  */
-uint8_t subghz_protocol_decoder_alutech_at_4n_get_hash_data(void* context);
+uint32_t subghz_protocol_decoder_alutech_at_4n_get_hash_data(void* context);
 
 /**
  * Serialize data SubGhzProtocolDecoderAlutech_at_4n.

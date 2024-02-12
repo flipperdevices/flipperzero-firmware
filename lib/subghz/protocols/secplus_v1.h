@@ -79,7 +79,7 @@ void subghz_protocol_decoder_secplus_v1_feed(void* context, bool level, uint32_t
  * @param context Pointer to a SubGhzProtocolDecoderSecPlus_v1 instance
  * @return hash Hash sum
  */
-uint8_t subghz_protocol_decoder_secplus_v1_get_hash_data(void* context);
+uint32_t subghz_protocol_decoder_secplus_v1_get_hash_data(void* context);
 
 /**
  * Serialize data SubGhzProtocolDecoderSecPlus_v1.

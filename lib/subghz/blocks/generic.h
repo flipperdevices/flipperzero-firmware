@@ -17,6 +17,8 @@ typedef struct SubGhzBlockGeneric SubGhzBlockGeneric;
 
 struct SubGhzBlockGeneric {
     const char* protocol_name;
+    float latitude;
+    float longitude;
     uint64_t data;
     uint64_t data_2;
     uint32_t serial;

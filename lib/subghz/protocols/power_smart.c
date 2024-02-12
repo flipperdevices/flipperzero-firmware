@@ -335,10 +335,10 @@ static const char* subghz_protocol_power_smart_get_name_button(uint8_t btn) {
     return name_btn[btn];
 }
 
-uint8_t subghz_protocol_decoder_power_smart_get_hash_data(void* context) {
+uint32_t subghz_protocol_decoder_power_smart_get_hash_data(void* context) {
     furi_assert(context);
     SubGhzProtocolDecoderPowerSmart* instance = context;
-    return subghz_protocol_blocks_get_hash_data(
+    return subghz_protocol_blocks_get_hash_data_long(
         &instance->decoder, (instance->decoder.decode_count_bit / 8) + 1);
 }
 

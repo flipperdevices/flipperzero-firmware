@@ -66,6 +66,16 @@ SubGhzProtocolStatus subghz_block_generic_serialize(
                 break;
             }
         }
+        if(!flipper_format_write_float(flipper_format, "Latitute", &preset->latitude, 1)) {
+            FURI_LOG_E(TAG, "Unable to add Latitute");
+            res = SubGhzProtocolStatusErrorParserLatitude;
+            break;
+        }
+        if(!flipper_format_write_float(flipper_format, "Longitude", &preset->longitude, 1)) {
+            FURI_LOG_E(TAG, "Unable to add Longitude");
+            res = SubGhzProtocolStatusErrorParserLongitude;
+            break;
+        }
         if(!flipper_format_write_string_cstr(flipper_format, "Protocol", instance->protocol_name)) {
             FURI_LOG_E(TAG, "Unable to add Protocol");
             res = SubGhzProtocolStatusErrorParserProtocolName;

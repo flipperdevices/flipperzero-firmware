@@ -682,10 +682,10 @@ static uint8_t subghz_protocol_came_atomo_get_btn_code() {
     return btn;
 }
 
-uint8_t subghz_protocol_decoder_came_atomo_get_hash_data(void* context) {
+uint32_t subghz_protocol_decoder_came_atomo_get_hash_data(void* context) {
     furi_assert(context);
     SubGhzProtocolDecoderCameAtomo* instance = context;
-    return subghz_protocol_blocks_get_hash_data(
+    return subghz_protocol_blocks_get_hash_data_long(
         &instance->decoder, (instance->decoder.decode_count_bit / 8) + 1);
 }
 

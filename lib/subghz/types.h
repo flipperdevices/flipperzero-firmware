@@ -37,6 +37,8 @@ typedef struct {
     uint32_t frequency;
     uint8_t* data;
     size_t data_size;
+    float latitude;
+    float longitude;
 } SubGhzRadioPreset;
 
 typedef enum {
@@ -59,6 +61,8 @@ typedef enum {
     SubGhzProtocolStatusErrorEncoderGetUpload = (-12), ///< Payload encoder failure
     // Special Values
     SubGhzProtocolStatusErrorProtocolNotFound = (-13), ///< Protocol not found
+    SubGhzProtocolStatusErrorParserLatitude = (-14), ///< Missing `Latitude`
+    SubGhzProtocolStatusErrorParserLongitude = (-15), ///< Missing `Longitude`
     SubGhzProtocolStatusReserved = 0x7FFFFFFF, ///< Prevents enum down-size compiler optimization.
 } SubGhzProtocolStatus;
 
@@ -74,7 +78,7 @@ typedef SubGhzProtocolStatus (*SubGhzDeserialize)(void* context, FlipperFormat* 
 // Decoder specific
 typedef void (*SubGhzDecoderFeed)(void* decoder, bool level, uint32_t duration);
 typedef void (*SubGhzDecoderReset)(void* decoder);
-typedef uint8_t (*SubGhzGetHashData)(void* decoder);
+typedef uint32_t (*SubGhzGetHashData)(void* decoder);
 typedef void (*SubGhzGetString)(void* decoder, FuriString* output);
 
 // Encoder specific
@@ -108,7 +112,7 @@ typedef enum {
     SubGhzProtocolTypeStatic,
     SubGhzProtocolTypeDynamic,
     SubGhzProtocolTypeRAW,
-    SubGhzProtocolWeatherStation,
+    SubGhzProtocolWeatherStation, // Unused, kept for compatibility
     SubGhzProtocolCustom,
     SubGhzProtocolTypeBinRAW,
 } SubGhzProtocolType;
@@ -125,12 +129,17 @@ typedef enum {
     SubGhzProtocolFlag_Load = (1 << 8),
     SubGhzProtocolFlag_Send = (1 << 9),
     SubGhzProtocolFlag_BinRAW = (1 << 10),
-    SubGhzProtocolFlag_StarLine = (1 << 11),
-    SubGhzProtocolFlag_AutoAlarms = (1 << 12),
-    SubGhzProtocolFlag_Magellan = (1 << 13),
-    SubGhzProtocolFlag_Princeton = (1 << 14),
-    SubGhzProtocolFlag_NiceFlorS = (1 << 15),
 } SubGhzProtocolFlag;
+
+typedef enum {
+    SubGhzProtocolFilter_StarLine = (1 << 0),
+    SubGhzProtocolFilter_AutoAlarms = (1 << 1),
+    SubGhzProtocolFilter_Magellan = (1 << 2),
+    SubGhzProtocolFilter_Princeton = (1 << 3),
+    SubGhzProtocolFilter_NiceFlorS = (1 << 4),
+    SubGhzProtocolFilter_Weather = (1 << 5),
+    SubGhzProtocolFilter_TPMS = (1 << 6),
+} SubGhzProtocolFilter;
 
 struct SubGhzProtocol {
     const char* name;
@@ -139,4 +148,6 @@ struct SubGhzProtocol {
 
     const SubGhzProtocolEncoder* encoder;
     const SubGhzProtocolDecoder* decoder;
+
+    SubGhzProtocolFilter filter;
 };

@@ -651,10 +651,10 @@ static void subghz_protocol_alutech_at_4n_remote_controller(
     subghz_custom_btn_set_max(4);
 }
 
-uint8_t subghz_protocol_decoder_alutech_at_4n_get_hash_data(void* context) {
+uint32_t subghz_protocol_decoder_alutech_at_4n_get_hash_data(void* context) {
     furi_assert(context);
     SubGhzProtocolDecoderAlutech_at_4n* instance = context;
-    return (uint8_t)instance->crc;
+    return instance->crc;
 }
 
 SubGhzProtocolStatus subghz_protocol_decoder_alutech_at_4n_serialize(

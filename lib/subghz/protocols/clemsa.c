@@ -310,10 +310,10 @@ static void subghz_protocol_clemsa_check_remote_controller(SubGhzBlockGeneric* i
     instance->btn = (instance->data & 0x03);
 }
 
-uint8_t subghz_protocol_decoder_clemsa_get_hash_data(void* context) {
+uint32_t subghz_protocol_decoder_clemsa_get_hash_data(void* context) {
     furi_assert(context);
     SubGhzProtocolDecoderClemsa* instance = context;
-    return subghz_protocol_blocks_get_hash_data(
+    return subghz_protocol_blocks_get_hash_data_long(
         &instance->decoder, (instance->decoder.decode_count_bit / 8) + 1);
 }
 

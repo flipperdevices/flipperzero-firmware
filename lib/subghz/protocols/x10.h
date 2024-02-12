@@ -52,7 +52,7 @@ bool subghz_protocol_x10_validate(void* context);
  * @param context Pointer to a SubGhzProtocolDecoderFaacSLH instance
  * @return hash Hash sum
  */
-uint8_t subghz_protocol_decoder_x10_get_hash_data(void* context);
+uint32_t subghz_protocol_decoder_x10_get_hash_data(void* context);
 
 /**
  * Serialize data SubGhzProtocolDecoderX10.

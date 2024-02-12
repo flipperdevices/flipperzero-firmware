@@ -78,7 +78,7 @@ void subghz_protocol_decoder_doitrand_feed(void* context, bool level, uint32_t d
  * @param context Pointer to a SubGhzProtocolDecoderDoitrand instance
  * @return hash Hash sum
  */
-uint8_t subghz_protocol_decoder_doitrand_get_hash_data(void* context);
+uint32_t subghz_protocol_decoder_doitrand_get_hash_data(void* context);
 
 /**
  * Serialize data SubGhzProtocolDecoderDoitrand.

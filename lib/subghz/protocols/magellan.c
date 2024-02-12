@@ -64,11 +64,12 @@ const SubGhzProtocol subghz_protocol_magellan = {
     .name = SUBGHZ_PROTOCOL_MAGELLAN_NAME,
     .type = SubGhzProtocolTypeStatic,
     .flag = SubGhzProtocolFlag_433 | SubGhzProtocolFlag_AM | SubGhzProtocolFlag_Decodable |
-            SubGhzProtocolFlag_Load | SubGhzProtocolFlag_Save | SubGhzProtocolFlag_Send |
-            SubGhzProtocolFlag_Magellan,
+            SubGhzProtocolFlag_Load | SubGhzProtocolFlag_Save | SubGhzProtocolFlag_Send,
 
     .decoder = &subghz_protocol_magellan_decoder,
     .encoder = &subghz_protocol_magellan_encoder,
+
+    .filter = SubGhzProtocolFilter_Magellan,
 };
 
 void* subghz_protocol_encoder_magellan_alloc(SubGhzEnvironment* environment) {
@@ -391,10 +392,10 @@ static void subghz_protocol_magellan_get_event_serialize(uint8_t event, FuriStri
         ((event >> 7) & 0x1 ? ", ?" : ""));
 }
 
-uint8_t subghz_protocol_decoder_magellan_get_hash_data(void* context) {
+uint32_t subghz_protocol_decoder_magellan_get_hash_data(void* context) {
     furi_assert(context);
     SubGhzProtocolDecoderMagellan* instance = context;
-    return subghz_protocol_blocks_get_hash_data(
+    return subghz_protocol_blocks_get_hash_data_long(
         &instance->decoder, (instance->decoder.decode_count_bit / 8) + 1);
 }
 
