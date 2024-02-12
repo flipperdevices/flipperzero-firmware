@@ -160,8 +160,11 @@ void rpc_session_set_terminated_callback(
  * command is gets processed - it's safe either. But case of it is quite
  * odd: client sends close request and sends command after.
  */
-size_t
-    rpc_session_feed(RpcSession* session, uint8_t* encoded_bytes, size_t size, uint32_t timeout) {
+size_t rpc_session_feed(
+    RpcSession* session,
+    const uint8_t* encoded_bytes,
+    size_t size,
+    uint32_t timeout) {
     furi_assert(session);
     furi_assert(encoded_bytes);
 
@@ -185,6 +188,12 @@ bool rpc_pb_stream_read(pb_istream_t* istream, pb_byte_t* buf, size_t count) {
     RpcSession* session = istream->state;
     furi_assert(session);
     furi_assert(istream->bytes_left);
+
+    /* TODO FL-3768 this function may be called after
+       marking the worker for termination */
+    if(session->terminate) {
+        return false;
+    }
 
     uint32_t flags = 0;
     size_t bytes_received = 0;

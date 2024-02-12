@@ -1,5 +1,4 @@
 #include "canvas_i.h"
-#include "icon_i.h"
 #include "icon_animation_i.h"
 
 #include <furi.h>
@@ -17,6 +16,12 @@ const CanvasFontParameters canvas_font_params[FontTotalNumber] = {
 Canvas* canvas_init() {
     Canvas* canvas = malloc(sizeof(Canvas));
     canvas->compress_icon = compress_icon_alloc();
+
+    // Initialize mutex
+    canvas->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
+
+    // Initialize callback array
+    CanvasCallbackPairArray_init(canvas->canvas_callback_pair);
 
     // Setup u8g2
     u8g2_Setup_st756x_flipper(&canvas->fb, U8G2_R0, u8x8_hw_spi_stm32, u8g2_gpio_and_delay_stm32);
@@ -36,7 +41,19 @@ Canvas* canvas_init() {
 void canvas_free(Canvas* canvas) {
     furi_assert(canvas);
     compress_icon_free(canvas->compress_icon);
+    CanvasCallbackPairArray_clear(canvas->canvas_callback_pair);
+    furi_mutex_free(canvas->mutex);
     free(canvas);
+}
+
+static void canvas_lock(Canvas* canvas) {
+    furi_assert(canvas);
+    furi_check(furi_mutex_acquire(canvas->mutex, FuriWaitForever) == FuriStatusOk);
+}
+
+static void canvas_unlock(Canvas* canvas) {
+    furi_assert(canvas);
+    furi_check(furi_mutex_release(canvas->mutex) == FuriStatusOk);
 }
 
 void canvas_reset(Canvas* canvas) {
@@ -52,6 +69,18 @@ void canvas_reset(Canvas* canvas) {
 void canvas_commit(Canvas* canvas) {
     furi_assert(canvas);
     u8g2_SendBuffer(&canvas->fb);
+
+    // Iterate over callbacks
+    canvas_lock(canvas);
+    for
+        M_EACH(p, canvas->canvas_callback_pair, CanvasCallbackPairArray_t) {
+            p->callback(
+                canvas_get_buffer(canvas),
+                canvas_get_buffer_size(canvas),
+                canvas_get_orientation(canvas),
+                p->context);
+        }
+    canvas_unlock(canvas);
 }
 
 uint8_t* canvas_get_buffer(Canvas* canvas) {
@@ -150,7 +179,7 @@ void canvas_draw_str(Canvas* canvas, uint8_t x, uint8_t y, const char* str) {
     if(!str) return;
     x += canvas->offset_x;
     y += canvas->offset_y;
-    u8g2_DrawUTF8(&canvas->fb, x, y, str);
+    u8g2_DrawStr(&canvas->fb, x, y, str);
 }
 
 void canvas_draw_str_aligned(
@@ -169,10 +198,10 @@ void canvas_draw_str_aligned(
     case AlignLeft:
         break;
     case AlignRight:
-        x -= u8g2_GetUTF8Width(&canvas->fb, str);
+        x -= u8g2_GetStrWidth(&canvas->fb, str);
         break;
     case AlignCenter:
-        x -= (u8g2_GetUTF8Width(&canvas->fb, str) / 2);
+        x -= (u8g2_GetStrWidth(&canvas->fb, str) / 2);
         break;
     default:
         furi_crash();
@@ -193,13 +222,13 @@ void canvas_draw_str_aligned(
         break;
     }
 
-    u8g2_DrawUTF8(&canvas->fb, x, y, str);
+    u8g2_DrawStr(&canvas->fb, x, y, str);
 }
 
 uint16_t canvas_string_width(Canvas* canvas, const char* str) {
     furi_assert(canvas);
     if(!str) return 0;
-    return u8g2_GetUTF8Width(&canvas->fb, str);
+    return u8g2_GetStrWidth(&canvas->fb, str);
 }
 
 uint8_t canvas_glyph_width(Canvas* canvas, uint16_t symbol) {
@@ -541,4 +570,29 @@ void canvas_set_orientation(Canvas* canvas, CanvasOrientation orientation) {
 
 CanvasOrientation canvas_get_orientation(const Canvas* canvas) {
     return canvas->orientation;
+}
+
+void canvas_add_framebuffer_callback(Canvas* canvas, CanvasCommitCallback callback, void* context) {
+    furi_assert(canvas);
+
+    const CanvasCallbackPair p = {callback, context};
+
+    canvas_lock(canvas);
+    furi_assert(!CanvasCallbackPairArray_count(canvas->canvas_callback_pair, p));
+    CanvasCallbackPairArray_push_back(canvas->canvas_callback_pair, p);
+    canvas_unlock(canvas);
+}
+
+void canvas_remove_framebuffer_callback(
+    Canvas* canvas,
+    CanvasCommitCallback callback,
+    void* context) {
+    furi_assert(canvas);
+
+    const CanvasCallbackPair p = {callback, context};
+
+    canvas_lock(canvas);
+    furi_assert(CanvasCallbackPairArray_count(canvas->canvas_callback_pair, p) == 1);
+    CanvasCallbackPairArray_remove_val(canvas->canvas_callback_pair, p);
+    canvas_unlock(canvas);
 }

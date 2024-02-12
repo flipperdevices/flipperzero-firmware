@@ -10,8 +10,8 @@ void nfc_scene_delete_success_on_enter(void* context) {
 
     // Setup view
     Popup* popup = nfc->popup;
-    popup_set_icon(popup, 0, 2, &I_DolphinMafia_115x62);
-    popup_set_header(popup, "Deleted", 83, 19, AlignLeft, AlignBottom);
+    popup_set_icon(popup, 0, 2, &I_DolphinMafia_119x62);
+    popup_set_header(popup, "Deleted", 80, 19, AlignLeft, AlignBottom);
     popup_set_timeout(popup, 1500);
     popup_set_context(popup, nfc);
     popup_set_callback(popup, nfc_scene_delete_success_popup_callback);
@@ -31,6 +31,11 @@ bool nfc_scene_delete_success_on_event(void* context, SceneManagerEvent event) {
             } else {
                 consumed = scene_manager_search_and_switch_to_previous_scene(
                     nfc->scene_manager, NfcSceneFileSelect);
+
+                if(!consumed) {
+                    scene_manager_stop(nfc->scene_manager);
+                    view_dispatcher_stop(nfc->view_dispatcher);
+                }
             }
         }
     }

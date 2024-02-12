@@ -9,6 +9,7 @@
 typedef struct {
     bool setup_done;
     FuriStreamBuffer* rx_stream;
+    FuriHalSerialHandle* serial_handle;
     struct mjs* mjs;
 } JsUartInst;
 
@@ -19,11 +20,13 @@ typedef struct {
 
 ARRAY_DEF(PatternArray, PatternArrayItem, M_POD_OPLIST);
 
-static void js_uart_on_irq_cb(UartIrqEvent ev, uint8_t data, void* context) {
+static void
+    js_uart_on_async_rx(FuriHalSerialHandle* handle, FuriHalSerialRxEvent event, void* context) {
     JsUartInst* uart = context;
     furi_assert(uart);
 
-    if(ev == UartIrqEventRXNE) {
+    if(event & FuriHalSerialRxEventData) {
+        uint8_t data = furi_hal_serial_async_rx(handle);
         furi_stream_buffer_send(uart->rx_stream, &data, 1, 0);
         js_flags_set(uart->mjs, ThreadEventCustomDataRx);
     }
@@ -57,9 +60,12 @@ static void js_uart_setup(struct mjs* mjs) {
     }
 
     uart->rx_stream = furi_stream_buffer_alloc(RX_BUF_LEN, 1);
-    furi_hal_uart_init(FuriHalUartIdLPUART1, baudrate);
-    furi_hal_uart_set_irq_cb(FuriHalUartIdLPUART1, js_uart_on_irq_cb, uart);
-    uart->setup_done = true;
+    uart->serial_handle = furi_hal_serial_control_acquire(FuriHalSerialIdLpuart);
+    if(uart->serial_handle) {
+        furi_hal_serial_init(uart->serial_handle, baudrate);
+        furi_hal_serial_async_rx_start(uart->serial_handle, js_uart_on_async_rx, uart, false);
+        uart->setup_done = true;
+    }
 }
 
 static void js_uart_write(struct mjs* mjs) {
@@ -84,14 +90,14 @@ static void js_uart_write(struct mjs* mjs) {
                 args_correct = false;
                 break;
             }
-            furi_hal_uart_tx(FuriHalUartIdLPUART1, (uint8_t*)arg_str, str_len);
+            furi_hal_serial_tx(uart->serial_handle, (uint8_t*)arg_str, str_len);
         } else if(mjs_is_number(arg)) {
             uint32_t byte_val = mjs_get_int32(mjs, arg);
             if(byte_val > 0xFF) {
                 args_correct = false;
                 break;
             }
-            furi_hal_uart_tx(FuriHalUartIdLPUART1, (uint8_t*)&byte_val, 1);
+            furi_hal_serial_tx(uart->serial_handle, (uint8_t*)&byte_val, 1);
         } else if(mjs_is_array(arg)) {
             size_t array_len = mjs_array_length(mjs, arg);
             for(size_t i = 0; i < array_len; i++) {
@@ -105,7 +111,7 @@ static void js_uart_write(struct mjs* mjs) {
                     args_correct = false;
                     break;
                 }
-                furi_hal_uart_tx(FuriHalUartIdLPUART1, (uint8_t*)&byte_val, 1);
+                furi_hal_serial_tx(uart->serial_handle, (uint8_t*)&byte_val, 1);
             }
             if(!args_correct) {
                 break;
@@ -117,7 +123,7 @@ static void js_uart_write(struct mjs* mjs) {
             }
             size_t len = 0;
             char* buf = mjs_array_buf_get_ptr(mjs, array_buf, &len);
-            furi_hal_uart_tx(FuriHalUartIdLPUART1, (uint8_t*)buf, len);
+            furi_hal_serial_tx(uart->serial_handle, (uint8_t*)buf, len);
         } else {
             args_correct = false;
             break;
@@ -552,8 +558,10 @@ static void* js_uart_create(struct mjs* mjs, mjs_val_t* object) {
 static void js_uart_destroy(void* inst) {
     JsUartInst* js_uart = inst;
     if(js_uart->setup_done) {
-        furi_hal_uart_set_irq_cb(FuriHalUartIdLPUART1, NULL, NULL);
-        furi_hal_uart_deinit(FuriHalUartIdLPUART1);
+        furi_hal_serial_async_rx_stop(js_uart->serial_handle);
+        furi_hal_serial_deinit(js_uart->serial_handle);
+        furi_hal_serial_control_release(js_uart->serial_handle);
+        js_uart->serial_handle = NULL;
         furi_stream_buffer_free(js_uart->rx_stream);
     }
     free(js_uart);
