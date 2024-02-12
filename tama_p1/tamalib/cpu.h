@@ -52,22 +52,22 @@
 #define SET_RAM_MEMORY(buffer, n, v)                                                         \
     {                                                                                        \
         buffer[RAM_TO_MEMORY(n)] = (buffer[RAM_TO_MEMORY(n)] & ~(0xF << (((n) % 2) << 2))) | \
-                                   ((v)&0xF) << (((n) % 2) << 2);                            \
+                                   ((v) & 0xF) << (((n) % 2) << 2);                          \
     }
 #define SET_DISP1_MEMORY(buffer, n, v)                                                           \
     {                                                                                            \
         buffer[DISP1_TO_MEMORY(n)] = (buffer[DISP1_TO_MEMORY(n)] & ~(0xF << (((n) % 2) << 2))) | \
-                                     ((v)&0xF) << (((n) % 2) << 2);                              \
+                                     ((v) & 0xF) << (((n) % 2) << 2);                            \
     }
 #define SET_DISP2_MEMORY(buffer, n, v)                                                           \
     {                                                                                            \
         buffer[DISP2_TO_MEMORY(n)] = (buffer[DISP2_TO_MEMORY(n)] & ~(0xF << (((n) % 2) << 2))) | \
-                                     ((v)&0xF) << (((n) % 2) << 2);                              \
+                                     ((v) & 0xF) << (((n) % 2) << 2);                            \
     }
 #define SET_IO_MEMORY(buffer, n, v)                                                        \
     {                                                                                      \
         buffer[IO_TO_MEMORY(n)] = (buffer[IO_TO_MEMORY(n)] & ~(0xF << (((n) % 2) << 2))) | \
-                                  ((v)&0xF) << (((n) % 2) << 2);                           \
+                                  ((v) & 0xF) << (((n) % 2) << 2);                         \
     }
 #define SET_MEMORY(buffer, n, v)                                   \
     {                                                              \
