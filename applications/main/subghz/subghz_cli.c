@@ -63,6 +63,8 @@ static SubGhzEnvironment* subghz_cli_environment_init(void) {
     } else {
         printf("Load_keystore keeloq_mfcodes_user \033[0;33mAbsent\033[0m\r\n");
     }
+    subghz_environment_set_came_atomo_rainbow_table_file_name(
+        environment, SUBGHZ_CAME_ATOMO_DIR_NAME);
     subghz_environment_set_alutech_at_4n_rainbow_table_file_name(
         environment, SUBGHZ_ALUTECH_AT_4N_DIR_NAME);
     subghz_environment_set_nice_flor_s_rainbow_table_file_name(
