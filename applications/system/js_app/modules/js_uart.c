@@ -562,8 +562,9 @@ static void js_uart_destroy(void* inst) {
         furi_hal_serial_deinit(js_uart->serial_handle);
         furi_hal_serial_control_release(js_uart->serial_handle);
         js_uart->serial_handle = NULL;
-        furi_stream_buffer_free(js_uart->rx_stream);
     }
+
+    furi_stream_buffer_free(js_uart->rx_stream);
     free(js_uart);
 }
 
