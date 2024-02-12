@@ -122,15 +122,11 @@ void wifi_marauder_scene_console_output_on_enter(void* context) {
                 app->log_file_path,
                 sequential_file_resolve_path(
                     app->storage, MARAUDER_APP_FOLDER_LOGS, prefix, "log"));
-            if(app->log_file_path != NULL) {
-                if(storage_file_open(
-                       app->log_file, app->log_file_path, FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
-                    app->is_writing_log = true;
-                } else {
-                    dialog_message_show_storage_error(app->dialogs, "Cannot open log file");
-                }
+            if(storage_file_open(
+                   app->log_file, app->log_file_path, FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
+                app->is_writing_log = true;
             } else {
-                dialog_message_show_storage_error(app->dialogs, "Cannot resolve log path");
+                dialog_message_show_storage_error(app->dialogs, "Cannot open log file");
             }
         }
 
