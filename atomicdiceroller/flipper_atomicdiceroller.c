@@ -123,7 +123,6 @@ int32_t flipper_atomicdiceroller_app() {
     mutexVal.mutex = furi_mutex_alloc(FuriMutexTypeNormal);
     if(!mutexVal.mutex) {
         furi_message_queue_free(event_queue);
-
         expansion_enable(expansion);
         furi_record_close(RECORD_EXPANSION);
         return 255;
