@@ -62,7 +62,7 @@ bool cfw_app_apply(CfwApp* app) {
             while(flipper_format_delete_key(file, "Frequency"))
                 ;
             FrequencyList_it(it, app->subghz_static_freqs);
-            for(size_t  i = 0; i < FrequencyList_size(app->subghz_static_freqs); i++) {
+            for(size_t i = 0; i < FrequencyList_size(app->subghz_static_freqs); i++) {
                 flipper_format_write_uint32(
                     file, "Frequency", FrequencyList_get(app->subghz_static_freqs, i), 1);
             }
@@ -70,7 +70,7 @@ bool cfw_app_apply(CfwApp* app) {
             if(!flipper_format_rewind(file)) break;
             while(flipper_format_delete_key(file, "Hopper_frequency"))
                 ;
-            for(size_t  i = 0; i < FrequencyList_size(app->subghz_hopper_freqs); i++) {
+            for(size_t i = 0; i < FrequencyList_size(app->subghz_hopper_freqs); i++) {
                 flipper_format_write_uint32(
                     file, "Hopper_frequency", FrequencyList_get(app->subghz_hopper_freqs, i), 1);
             }
@@ -79,7 +79,24 @@ bool cfw_app_apply(CfwApp* app) {
     }
 
     if(app->save_subghz) {
-        furi_hal_subghz_set_extend_settings(app->subghz_extend, app->subghz_bypass);
+        FlipperFormat* file = flipper_format_file_alloc(storage);
+        do {
+            if(!flipper_format_file_open_always(file, "/ext/subghz/assets/extend_range.txt"))
+                break;
+            if(!flipper_format_write_header_cstr(file, "Flipper SubGhz Setting File", 1)) break;
+            if(!flipper_format_write_comment_cstr(
+                   file, "Whether to allow extended ranges that can break your flipper"))
+                break;
+            if(!flipper_format_write_bool(
+                   file, "use_ext_range_at_own_risk", &app->subghz_extend, 1))
+                break;
+            if(!flipper_format_write_comment_cstr(
+                   file, "Whether to ignore the default TX region settings"))
+                break;
+            if(!flipper_format_write_bool(file, "ignore_default_tx_region", &app->subghz_bypass, 1))
+                break;
+        } while(0);
+        flipper_format_free(file);
     }
 
     if(app->save_name) {
@@ -250,9 +267,14 @@ CfwApp* cfw_app_alloc() {
         }
     } while(false);
     flipper_format_free(file);
-    furi_record_close(RECORD_STORAGE);
 
-    furi_hal_subghz_get_extend_settings(&app->subghz_extend, &app->subghz_bypass);
+    file = flipper_format_file_alloc(storage);
+    if(flipper_format_file_open_existing(file, "/ext/subghz/assets/extend_range.txt")) {
+        flipper_format_read_bool(file, "use_ext_range_at_own_risk", &app->subghz_extend, 1);
+        flipper_format_read_bool(file, "ignore_default_tx_region", &app->subghz_bypass, 1);
+    }
+    flipper_format_free(file);
+    furi_record_close(RECORD_STORAGE);
 
     strlcpy(app->device_name, furi_hal_version_get_name_ptr(), FURI_HAL_VERSION_ARRAY_NAME_LENGTH);
 

@@ -5,6 +5,10 @@
 #include <lib/toolbox/path.h>
 #include <float_tools.h>
 #include "subghz_i.h"
+#include <applications/main/archive/helpers/archive_helpers_ext.h>
+#include <cfw/cfw.h>
+
+#include "subghz_fap.h"
 
 #define TAG "SubGhzApp"
 
@@ -58,6 +62,7 @@ static void subghz_load_custom_presets(SubGhzSetting* setting) {
     furi_assert(setting);
 
     const char* presets[][2] = {
+        // FM95
         {"FM95",
          "02 0D 0B 06 08 32 07 04 14 00 13 02 12 04 11 83 10 67 15 24 18 18 19 16 1D 91 1C 00 1B 07 20 FB 22 10 21 56 00 00 C0 00 00 00 00 00 00 00"},
 
@@ -90,7 +95,7 @@ static void subghz_load_custom_presets(SubGhzSetting* setting) {
 #endif
 }
 
-SubGhz* subghz_alloc(bool raw_send_only) {
+SubGhz* subghz_alloc(bool alloc_for_tx_only) {
     SubGhz* subghz = malloc(sizeof(SubGhz));
 
     subghz->file_path = furi_string_alloc();
@@ -119,27 +124,7 @@ SubGhz* subghz_alloc(bool raw_send_only) {
 #endif
     subghz->txrx = subghz_txrx_alloc();
 
-    //Load settings from history now.
-    SubGhzSetting* setting = subghz_txrx_get_setting(subghz->txrx);
-    subghz_load_custom_presets(setting);
-
-    // Load last used values for Read, Read RAW, etc. or default
-    subghz->last_settings = subghz_last_settings_alloc();
-    size_t preset_count = subghz_setting_get_preset_count(setting);
-    subghz_last_settings_load(subghz->last_settings, preset_count);
-#ifdef FURI_DEBUG
-    subghz_last_settings_log(subghz->last_settings);
-#endif
-
-    //If the user has Listen after TX on in the Config, we want to load as normal.
-    //That way, we can have all our functionality even if loaded from browser.
-    //If Listen after TX isnt on, the FAP will load as raw_send_only.
-    bool ListenAfterTX = subghz->last_settings->enable_listen_after_tx;
-
-    //Put the Listen after TX back to what the user selected.
-    subghz->ListenAfterTX = ListenAfterTX;
-
-    if(!raw_send_only || ListenAfterTX) {
+    if(!alloc_for_tx_only) {
         // SubMenu
         subghz->submenu = submenu_alloc();
         view_dispatcher_add_view(
@@ -156,7 +141,7 @@ SubGhz* subghz_alloc(bool raw_send_only) {
     subghz->popup = popup_alloc();
     view_dispatcher_add_view(
         subghz->view_dispatcher, SubGhzViewIdPopup, popup_get_view(subghz->popup));
-    if(!raw_send_only || ListenAfterTX) {
+    if(!alloc_for_tx_only) {
         // Text Input
         subghz->text_input = text_input_alloc();
         view_dispatcher_add_view(
@@ -185,7 +170,7 @@ SubGhz* subghz_alloc(bool raw_send_only) {
         subghz->view_dispatcher,
         SubGhzViewIdTransmitter,
         subghz_view_transmitter_get_view(subghz->subghz_transmitter));
-    if(!raw_send_only || ListenAfterTX) {
+    if(!alloc_for_tx_only) {
         // Variable Item List
         subghz->variable_item_list = variable_item_list_alloc();
         view_dispatcher_add_view(
@@ -202,7 +187,7 @@ SubGhz* subghz_alloc(bool raw_send_only) {
             subghz_frequency_analyzer_get_view(subghz->subghz_frequency_analyzer));
     }
     // Read RAW
-    subghz->subghz_read_raw = subghz_read_raw_alloc(raw_send_only);
+    subghz->subghz_read_raw = subghz_read_raw_alloc(alloc_for_tx_only);
     view_dispatcher_add_view(
         subghz->view_dispatcher,
         SubGhzViewIdReadRAW,
@@ -214,7 +199,18 @@ SubGhz* subghz_alloc(bool raw_send_only) {
     //init TxRx & Protocol & History & KeyBoard
     subghz_unlock(subghz);
 
-    if(!raw_send_only || ListenAfterTX) {
+    SubGhzSetting* setting = subghz_txrx_get_setting(subghz->txrx);
+
+    subghz_load_custom_presets(setting);
+
+    // Load last used values for Read, Read RAW, etc. or default
+    subghz->last_settings = subghz_last_settings_alloc();
+    size_t preset_count = subghz_setting_get_preset_count(setting);
+    subghz_last_settings_load(subghz->last_settings, preset_count);
+#ifdef FURI_DEBUG
+    subghz_last_settings_log(subghz->last_settings);
+#endif
+    if(!alloc_for_tx_only) {
 #if SUBGHZ_LAST_SETTING_SAVE_PRESET
         subghz_txrx_set_preset_internal(
             subghz->txrx, subghz->last_settings->frequency, subghz->last_settings->preset_index);
@@ -228,23 +224,19 @@ SubGhz* subghz_alloc(bool raw_send_only) {
 
     subghz->secure_data = malloc(sizeof(SecureData));
 
-    //Put the Speaker Back to what the user selected.
-    subghz_txrx_speaker_set_state(
-        subghz->txrx,
-        subghz->last_settings->enable_sound ? SubGhzSpeakerStateEnable :
-                                              SubGhzSpeakerStateDisable);
-
-    if(!raw_send_only || ListenAfterTX) {
+    if(!alloc_for_tx_only) {
+        subghz->remove_duplicates = subghz->last_settings->remove_duplicates;
         subghz->ignore_filter = subghz->last_settings->ignore_filter;
         subghz->filter = subghz->last_settings->filter;
     } else {
         subghz->filter = SubGhzProtocolFlag_Decodable;
         subghz->ignore_filter = 0x0;
+        subghz->remove_duplicates = false;
     }
     subghz_txrx_receiver_set_filter(subghz->txrx, subghz->filter);
     subghz_txrx_set_need_save_callback(subghz->txrx, subghz_save_to_file, subghz);
 
-    if(!raw_send_only || ListenAfterTX) {
+    if(!alloc_for_tx_only) {
         if(!float_is_equal(subghz->last_settings->rssi, 0)) {
             subghz_threshold_rssi_set(subghz->threshold_rssi, subghz->last_settings->rssi);
         } else {
@@ -258,10 +250,16 @@ SubGhz* subghz_alloc(bool raw_send_only) {
     //Init Error_str
     subghz->error_str = furi_string_alloc();
 
+    subghz->gps = subghz_gps_init();
+    if(subghz->last_settings->gps_baudrate != 0) {
+        subghz_gps_set_baudrate(subghz->gps, subghz->last_settings->gps_baudrate);
+        subghz_gps_start(subghz->gps);
+    }
+
     return subghz;
 }
 
-void subghz_free(SubGhz* subghz, bool raw_send_only) {
+void subghz_free(SubGhz* subghz, bool alloc_for_tx_only) {
     furi_assert(subghz);
 
     if(subghz->rpc_ctx) {
@@ -275,8 +273,7 @@ void subghz_free(SubGhz* subghz, bool raw_send_only) {
     subghz_txrx_stop(subghz->txrx);
     subghz_txrx_sleep(subghz->txrx);
 
-    bool ListenAfterTX = subghz->last_settings->enable_listen_after_tx;
-    if(!raw_send_only) {
+    if(!alloc_for_tx_only) {
         // Receiver
         view_dispatcher_remove_view(subghz->view_dispatcher, SubGhzViewIdReceiver);
         subghz_view_receiver_free(subghz->subghz_receiver);
@@ -299,7 +296,7 @@ void subghz_free(SubGhz* subghz, bool raw_send_only) {
     // Transmitter
     view_dispatcher_remove_view(subghz->view_dispatcher, SubGhzViewIdTransmitter);
     subghz_view_transmitter_free(subghz->subghz_transmitter);
-    if(!raw_send_only || ListenAfterTX) {
+    if(!alloc_for_tx_only) {
         // Variable Item List
         view_dispatcher_remove_view(subghz->view_dispatcher, SubGhzViewIdVariableItemList);
         variable_item_list_free(subghz->variable_item_list);
@@ -311,7 +308,7 @@ void subghz_free(SubGhz* subghz, bool raw_send_only) {
     // Read RAW
     view_dispatcher_remove_view(subghz->view_dispatcher, SubGhzViewIdReadRAW);
     subghz_read_raw_free(subghz->subghz_read_raw);
-    if(!raw_send_only || ListenAfterTX) {
+    if(!alloc_for_tx_only) {
         // Submenu
         view_dispatcher_remove_view(subghz->view_dispatcher, SubGhzViewIdMenu);
         submenu_free(subghz->submenu);
@@ -330,12 +327,10 @@ void subghz_free(SubGhz* subghz, bool raw_send_only) {
     furi_record_close(RECORD_GUI);
     subghz->gui = NULL;
 
-    subghz_last_settings_free(subghz->last_settings);
-
     // threshold rssi
     subghz_threshold_rssi_free(subghz->threshold_rssi);
 
-    if(!raw_send_only || ListenAfterTX) {
+    if(!alloc_for_tx_only) {
         subghz_history_free(subghz->history);
     }
 
@@ -355,23 +350,36 @@ void subghz_free(SubGhz* subghz, bool raw_send_only) {
     furi_string_free(subghz->file_path);
     furi_string_free(subghz->file_path_tmp);
 
+    // GPS
+    if(subghz->last_settings->gps_baudrate != 0) {
+        subghz_gps_stop(subghz->gps);
+    }
+    subghz_gps_deinit(subghz->gps);
+
+    subghz_last_settings_free(subghz->last_settings);
+
     // The rest
     free(subghz);
 }
 
-int32_t subghz_app(void* p) {
-    bool raw_send_only;
+int32_t subghz_app(char* p) {
+    bool alloc_for_tx;
     if(p && strlen(p)) {
-        raw_send_only = true;
+        alloc_for_tx = true;
     } else {
-        raw_send_only = false;
+        alloc_for_tx = false;
     }
 
-    SubGhz* subghz = subghz_alloc(raw_send_only);
-    subghz->raw_send_only = raw_send_only;
-    subghz->raw_send_only_old = raw_send_only;
+    SubGhz* subghz = subghz_alloc(alloc_for_tx);
+
+    if(alloc_for_tx) {
+        subghz->raw_send_only = true;
+    } else {
+        subghz->raw_send_only = false;
+    }
 
     // Check argument and run corresponding scene
+    bool is_favorite = process_favorite_launch(&p) && CFW_SETTINGS()->favorite_timeout;
     if(p && strlen(p)) {
         uint32_t rpc_ctx = 0;
 
@@ -388,6 +396,7 @@ int32_t subghz_app(void* p) {
             if(subghz_key_load(subghz, p, true)) {
                 furi_string_set(subghz->file_path, (const char*)p);
 
+                subghz->fav_timeout = is_favorite;
                 if(subghz_get_load_type_file(subghz) == SubGhzLoadTypeFileRaw) {
                     //Load Raw TX
                     subghz_rx_key_state_set(subghz, SubGhzRxKeyStateRAWLoad);
@@ -422,9 +431,14 @@ int32_t subghz_app(void* p) {
 
     view_dispatcher_run(subghz->view_dispatcher);
 
+    if(subghz->timer) {
+        furi_timer_stop(subghz->timer);
+        furi_timer_free(subghz->timer);
+    }
+
     furi_hal_power_suppress_charge_exit();
 
-    subghz_free(subghz, subghz->raw_send_only_old);
+    subghz_free(subghz, alloc_for_tx);
 
     return 0;
 }

@@ -8,15 +8,6 @@
 #define RAW_FILE_NAME "R_"
 #define TAG "SubGhzSceneReadRAW"
 
-const NotificationSequence subghz_sequence_raw_beep = {
-    &message_vibro_on,
-    &message_note_c6,
-    &message_delay_50,
-    &message_sound_off,
-    &message_vibro_off,
-    NULL,
-};
-
 bool subghz_scene_read_raw_update_filename(SubGhz* subghz) {
     bool ret = false;
     //set the path to read the file
@@ -134,6 +125,12 @@ void subghz_scene_read_raw_on_enter(void* context) {
     furi_string_free(file_name);
 
     view_dispatcher_switch_to_view(subghz->view_dispatcher, SubGhzViewIdReadRAW);
+
+    // Start sending immediately with favorites
+    if(subghz->fav_timeout) {
+        scene_manager_handle_custom_event(
+            subghz->scene_manager, SubGhzCustomEventViewReadRAWSendStart);
+    }
 }
 
 bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
@@ -161,7 +158,7 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
                 scene_manager_next_scene(subghz->scene_manager, SubGhzSceneNeedSaving);
             } else {
                 //Restore default setting
-                if(subghz->raw_send_only || subghz->ListenAfterTX) {
+                if(subghz->raw_send_only) {
                     subghz_txrx_set_default_preset(subghz->txrx, 0);
                 } else {
                     subghz_txrx_set_default_preset(subghz->txrx, subghz->last_settings->frequency);
@@ -237,7 +234,6 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
                         "",
                         subghz_threshold_rssi_get(subghz->threshold_rssi));
                 } else {
-                    notification_message(subghz->notifications, &subghz_sequence_raw_beep);
                     if(scene_manager_has_previous_scene(subghz->scene_manager, SubGhzSceneSaved) ||
                        !scene_manager_has_previous_scene(subghz->scene_manager, SubGhzSceneStart)) {
                         dolphin_deed(DolphinDeedSubGhzSend);
@@ -261,32 +257,14 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
             subghz->state_notifications = SubGhzNotificationStateIDLE;
             subghz_txrx_stop(subghz->txrx);
             subghz_read_raw_stop_send(subghz->subghz_read_raw);
+
+            // Exit / stop with favorites
+            if(subghz->fav_timeout) {
+                while(scene_manager_handle_back_event(subghz->scene_manager))
+                    ;
+                view_dispatcher_stop(subghz->view_dispatcher);
+            }
             consumed = true;
-
-            //Go back to the Scan/Repeater if the Listen After TX flag is on.
-            if(subghz->ListenAfterTX) { /*   && !subghz->raw_send_only) {  
-                ^^ This is the bug fix that caused all these changes, didnt like it! */
-                //We are switching to Receive, so change this now.
-                subghz->raw_send_only = false;
-
-                //needed save?
-                if((subghz_rx_key_state_get(subghz) == SubGhzRxKeyStateAddKey) ||
-                   (subghz_rx_key_state_get(subghz) == SubGhzRxKeyStateBack)) {
-                    subghz_rx_key_state_set(subghz, SubGhzRxKeyStateIDLE);
-                    scene_manager_next_scene(subghz->scene_manager, SubGhzSceneNeedSavingRX);
-                } else {
-                    if(scene_manager_has_previous_scene(
-                           subghz->scene_manager, SubGhzSceneReceiver)) {
-                        //Scene exists, go back to it
-                        scene_manager_search_and_switch_to_previous_scene(
-                            subghz->scene_manager, SubGhzSceneReceiver);
-                    } else {
-                        //Scene not started, start it now.
-                        scene_manager_next_scene(subghz->scene_manager, SubGhzSceneReceiver);
-                    }
-                }
-            };
-
             break;
 
         case SubGhzCustomEventViewReadRAWIDLE:

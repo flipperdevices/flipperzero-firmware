@@ -34,7 +34,7 @@ void subghz_view_receiver_add_data_statusbar(
     const char* history_stat_str,
     bool hopping_enabled,
     bool bin_raw_enabled,
-    bool repeater_enabled);
+    SubGhzRepeaterState repeater_enabled);
 
 void subghz_view_receiver_set_radio_device_type(
     SubGhzViewReceiver* subghz_receiver,
@@ -48,7 +48,8 @@ void subghz_view_receiver_add_item_to_menu(
     SubGhzViewReceiver* subghz_receiver,
     const char* name,
     const char* time,
-    uint8_t type);
+    uint8_t type,
+    uint16_t repeats);
 
 uint16_t subghz_view_receiver_get_idx_menu(SubGhzViewReceiver* subghz_receiver);
 

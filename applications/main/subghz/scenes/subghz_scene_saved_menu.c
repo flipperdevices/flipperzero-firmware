@@ -4,6 +4,7 @@ enum SubmenuIndex {
     SubmenuIndexEmulate,
     SubmenuIndexEdit,
     SubmenuIndexDelete,
+    SubmenuIndexGeo,
 };
 
 void subghz_scene_saved_menu_submenu_callback(void* context, uint32_t index) {
@@ -34,6 +35,24 @@ void subghz_scene_saved_menu_on_enter(void* context) {
         subghz_scene_saved_menu_submenu_callback,
         subghz);
 
+    FuriString* lat_str = furi_string_alloc();
+    FuriString* lon_str = furi_string_alloc();
+
+    subghz_txrx_get_latitude_and_longitude(subghz->txrx, lat_str, lon_str);
+
+    if(strcmp(furi_string_get_cstr(lat_str), "nan") != 0 &&
+       strcmp(furi_string_get_cstr(lon_str), "nan") != 0) {
+        submenu_add_item(
+            subghz->submenu,
+            "Geographic info",
+            SubmenuIndexGeo,
+            subghz_scene_saved_menu_submenu_callback,
+            subghz);
+    }
+
+    furi_string_free(lon_str);
+    furi_string_free(lat_str);
+
     submenu_set_selected_item(
         subghz->submenu,
         scene_manager_get_scene_state(subghz->scene_manager, SubGhzSceneSavedMenu));
@@ -59,6 +78,11 @@ bool subghz_scene_saved_menu_on_event(void* context, SceneManagerEvent event) {
             scene_manager_set_scene_state(
                 subghz->scene_manager, SubGhzSceneSavedMenu, SubmenuIndexEdit);
             scene_manager_next_scene(subghz->scene_manager, SubGhzSceneSaveName);
+            return true;
+        } else if(event.event == SubmenuIndexGeo) {
+            scene_manager_set_scene_state(
+                subghz->scene_manager, SubGhzSceneSavedMenu, SubmenuIndexGeo);
+            scene_manager_next_scene(subghz->scene_manager, SubGhzSceneSavedShowGps);
             return true;
         }
     }

@@ -10,6 +10,7 @@
 #include "views/subghz_read_raw.h"
 
 #include <gui/gui.h>
+#include <assets_icons.h>
 #include <dialogs/dialogs.h>
 #include <gui/scene_manager.h>
 #include <notification/notification_messages.h>
@@ -38,6 +39,7 @@
 #include "helpers/subghz_threshold_rssi.h"
 
 #include "helpers/subghz_txrx.h"
+#include "helpers/subghz_gps.h"
 
 #define SUBGHZ_MAX_LEN_NAME 64
 #define SUBGHZ_EXT_PRESET_NAME true
@@ -77,7 +79,6 @@ struct SubGhz {
     SubGhzFrequencyAnalyzer* subghz_frequency_analyzer;
     SubGhzReadRAW* subghz_read_raw;
     bool raw_send_only;
-    bool raw_send_only_old;
 
     bool save_datetime_set;
     FuriHalRtcDateTime save_datetime;
@@ -85,16 +86,10 @@ struct SubGhz {
     SubGhzLastSettings* last_settings;
 
     SubGhzProtocolFlag filter;
-    SubGhzProtocolFlag ignore_filter;
+    SubGhzProtocolFilter ignore_filter;
+    bool remove_duplicates;
     FuriString* error_str;
     SubGhzLock lock;
-    SubGhzRepeater repeater;
-    FlipperFormat* repeater_tx;
-    uint32_t RepeaterTXLength;
-    uint32_t RepeaterStartTime;
-    VariableItem* BIN_Raw_menu;
-    bool BINRawStateChanged;
-    bool ListenAfterTX;
 
     SecureData* secure_data;
 
@@ -103,9 +98,15 @@ struct SubGhz {
     SubGhzThresholdRssi* threshold_rssi;
     SubGhzRxKeyState rx_key_state;
     SubGhzHistory* history;
+    SubGhzGPS* gps;
+    SubGhzRepeaterState repeater;
+    bool repeater_bin_raw_was_off;
 
     uint16_t idx_menu_chosen;
     SubGhzLoadTypeFile load_type_file;
+
+    bool fav_timeout;
+    FuriTimer* timer;
 
     void* rpc_ctx;
 };

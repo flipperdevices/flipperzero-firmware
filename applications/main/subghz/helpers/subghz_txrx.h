@@ -47,6 +47,8 @@ bool subghz_txrx_is_database_loaded(SubGhzTxRx* instance);
  * @param instance Pointer to a SubGhzTxRx
  * @param preset_name Name of preset
  * @param frequency Frequency in Hz
+ * @param latitude Latitude in float
+ * @param longitude Longitude in float
  * @param preset_data Data of preset
  * @param preset_data_size Size of preset data
  */
@@ -54,6 +56,8 @@ void subghz_txrx_set_preset(
     SubGhzTxRx* instance,
     const char* preset_name,
     uint32_t frequency,
+    float latitude,
+    float longitude,
     uint8_t* preset_data,
     size_t preset_data_size);
 
@@ -86,6 +90,18 @@ void subghz_txrx_get_frequency_and_modulation(
     FuriString* frequency,
     FuriString* modulation,
     bool long_name);
+
+/**
+ * Get string latitude and longitude
+ * 
+ * @param instance Pointer to a SubGhzTxRx
+ * @param latitude Pointer to a string latitude
+ * @param longitude Pointer to a string longitude
+*/
+void subghz_txrx_get_latitude_and_longitude(
+    SubGhzTxRx* instance,
+    FuriString* latitude,
+    FuriString* longitude);
 
 /**
  * Start TX CC1101
@@ -197,22 +213,6 @@ void subghz_txrx_speaker_set_state(SubGhzTxRx* instance, SubGhzSpeakerState stat
  * @return SubGhzSpeakerState 
  */
 SubGhzSpeakerState subghz_txrx_speaker_get_state(SubGhzTxRx* instance);
-
-/**
- * Set state repeater
- * 
- * @param instance Pointer to a SubGhzTxRx 
- * @param state State speaker
- */
-void subghz_txrx_repeater_set_state(SubGhzRepeater* instance, SubGhzRepeater state);
-
-/**
- * Get state repeater
- * 
- * @param instance Pointer to a SubGhzRepeater 
- * @return SubGhzRepeater
- */
-SubGhzRepeater subghz_txrx_repeater_get_state(SubGhzRepeater* instance);
 
 /**
  * load decoder by name protocol

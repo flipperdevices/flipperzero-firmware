@@ -3,25 +3,50 @@ App(
     name="Sub-GHz",
     apptype=FlipperAppType.APP,
     targets=["f7"],
-    cdefines=["APP_SUBGHZ"],
     entry_point="subghz_app",
-    provides=[
-        "subghz_start",
-    ],
     icon="A_Sub1ghz_14",
     stack_size=3 * 1024,
-    order=1,
+    order=10,
+    # Sources separation breaks linking with subghz on internal, commented for now
+    # sources=[
+    #     "*.c",
+    #     "!subghz_cli.c",
+    #     "!helpers/subghz_chat.c",
+    #     "!subghz_extended_freq.c",
+    # ],
     resources="resources",
-    fap_libs=["assets", "hwdrivers"],
-    fap_category="Sub-GHz",
-    # fap_icon_assets="images",
+    fap_libs=["hwdrivers"],
     fap_icon="icon.png",
+    fap_category="Sub-GHz",
+    sdk_headers=["subghz_fap.h"],
 )
+
+App(
+    appid="subghz_fap",
+    name="SubGHz",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="subghz_fap",
+    stack_size=3 * 1024,
+    sources=["subghz_fap.c"],
+    fap_icon="icon.png",
+    fap_category="Sub-GHz",
+)
+
 
 App(
     appid="subghz_start",
     targets=["f7"],
     apptype=FlipperAppType.STARTUP,
     entry_point="subghz_on_system_start",
+    # sources=["subghz_cli.c", "helpers/subghz_chat.c"],
     order=40,
+)
+
+App(
+    appid="subghz_load_extended_settings",
+    targets=["f7"],
+    apptype=FlipperAppType.STARTUP,
+    entry_point="subghz_extended_freq",
+    # sources=["subghz_extended_freq.c"],
+    order=650,
 )

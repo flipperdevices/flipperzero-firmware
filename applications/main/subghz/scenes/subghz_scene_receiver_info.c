@@ -1,18 +1,8 @@
 #include "../subghz_i.h"
-#include <assets_icons.h>
 
 #include <lib/subghz/blocks/custom_btn.h>
 
 #define TAG "SubGhzSceneReceiverInfo"
-
-const NotificationSequence subghz_sequence_info_beep = {
-    &message_vibro_on,
-    &message_note_c6,
-    &message_delay_50,
-    &message_sound_off,
-    &message_vibro_off,
-    NULL,
-};
 
 void subghz_scene_receiver_info_callback(GuiButtonType result, InputType type, void* context) {
     furi_assert(context);
@@ -27,6 +17,11 @@ void subghz_scene_receiver_info_callback(GuiButtonType result, InputType type, v
     } else if((result == GuiButtonTypeRight) && (type == InputTypeShort)) {
         view_dispatcher_send_custom_event(
             subghz->view_dispatcher, SubGhzCustomEventSceneReceiverInfoSave);
+    } else if(
+        (result == GuiButtonTypeLeft) && (type == InputTypeShort) &&
+        subghz->last_settings->gps_baudrate != 0) {
+        view_dispatcher_send_custom_event(
+            subghz->view_dispatcher, SubGhzCustomEventSceneReceiverInfoSats);
     }
 }
 
@@ -47,6 +42,8 @@ static bool subghz_scene_receiver_info_update_parser(void* context) {
             subghz->txrx,
             furi_string_get_cstr(preset->name),
             preset->frequency,
+            0,
+            0,
             preset->data,
             preset->data_size);
 
@@ -84,6 +81,15 @@ void subghz_scene_receiver_info_draw_widget(SubGhz* subghz) {
         widget_add_string_multiline_element(
             subghz->widget, 0, 0, AlignLeft, AlignTop, FontSecondary, furi_string_get_cstr(text));
 
+        if(subghz->last_settings->gps_baudrate != 0) {
+            widget_add_button_element(
+                subghz->widget,
+                GuiButtonTypeLeft,
+                "Geo",
+                subghz_scene_receiver_info_callback,
+                subghz);
+        }
+
         furi_string_free(frequency_str);
         furi_string_free(modulation_str);
         furi_string_free(text);
@@ -110,6 +116,8 @@ void subghz_scene_receiver_info_draw_widget(SubGhz* subghz) {
         widget_add_string_element(
             subghz->widget, 13, 8, AlignLeft, AlignBottom, FontSecondary, "Error history parse.");
     }
+
+    view_dispatcher_switch_to_view(subghz->view_dispatcher, SubGhzViewIdWidget);
 }
 
 void subghz_scene_receiver_info_on_enter(void* context) {
@@ -118,15 +126,10 @@ void subghz_scene_receiver_info_on_enter(void* context) {
     subghz_custom_btns_reset();
 
     subghz_scene_receiver_info_draw_widget(subghz);
-    view_dispatcher_switch_to_view(subghz->view_dispatcher, SubGhzViewIdWidget);
 
-    /* This does not work. The receiving does not happen, and they know it.
-       So, why do we turn on the notification that we receive?
-       THe user thinks its receiving, dont matter if SubGHZ is technically on.
-    if(!subghz_history_get_text_space_left(subghz->history, NULL)) {
+    if(!subghz_history_full(subghz->history)) {
         subghz->state_notifications = SubGhzNotificationStateRx;
     }
-	*/
 }
 
 bool subghz_scene_receiver_info_on_event(void* context, SceneManagerEvent event) {
@@ -137,62 +140,43 @@ bool subghz_scene_receiver_info_on_event(void* context, SceneManagerEvent event)
                 return false;
             }
             //CC1101 Stop RX -> Start TX
-            // subghz_txrx_hopper_pause(subghz->txrx);
+            subghz_txrx_hopper_pause(subghz->txrx);
             if(!subghz_tx_start(
                    subghz,
                    subghz_history_get_raw_data(subghz->history, subghz->idx_menu_chosen))) {
-                // subghz_txrx_rx_start(subghz->txrx);
-                // subghz_txrx_hopper_unpause(subghz->txrx);
-                subghz->state_notifications = SubGhzNotificationStateIDLE;
+                subghz_txrx_rx_start(subghz->txrx);
+                subghz_txrx_hopper_unpause(subghz->txrx);
+                subghz->state_notifications = SubGhzNotificationStateRx;
             } else {
                 subghz->state_notifications = SubGhzNotificationStateTx;
             }
-            notification_message(subghz->notifications, &subghz_sequence_info_beep);
             return true;
         } else if(event.event == SubGhzCustomEventSceneReceiverInfoTxStop) {
             //CC1101 Stop Tx -> Start RX
             subghz->state_notifications = SubGhzNotificationStateIDLE;
+
+            widget_reset(subghz->widget);
+            subghz_scene_receiver_info_draw_widget(subghz);
+
             subghz_txrx_stop(subghz->txrx);
+            if(!scene_manager_has_previous_scene(subghz->scene_manager, SubGhzSceneDecodeRAW)) {
+                subghz_txrx_rx_start(subghz->txrx);
 
-            //Go back to the Scan/Repeater if the Listen After TX flag is on.
-            if(subghz->ListenAfterTX) {
-                if(scene_manager_has_previous_scene(
-                       subghz->scene_manager, SubGhzSceneReceiverInfo)) {
-                    //Scene exists, go back to it
-                    scene_manager_search_and_switch_to_previous_scene(
-                        subghz->scene_manager, SubGhzSceneReceiver);
-                } else {
-                    //Scene not started, start it now.
-                    scene_manager_next_scene(subghz->scene_manager, SubGhzSceneReceiver);
+                subghz_txrx_hopper_unpause(subghz->txrx);
+                if(!subghz_history_full(subghz->history)) {
+                    subghz->state_notifications = SubGhzNotificationStateRx;
                 }
-            } else {
-                widget_reset(subghz->widget);
-                subghz_scene_receiver_info_draw_widget(subghz);
             }
-
-            // if(!scene_manager_has_previous_scene(subghz->scene_manager, SubGhzSceneDecodeRAW)) {
-            // subghz_txrx_rx_start(subghz->txrx);
-
-            // subghz_txrx_hopper_unpause(subghz->txrx);
-            // if(!subghz_history_get_text_space_left(subghz->history, NULL)) {
-            // subghz->state_notifications = SubGhzNotificationStateRx;
-            // }
-            // }
             return true;
         } else if(event.event == SubGhzCustomEventSceneReceiverInfoSave) {
             //CC1101 Stop RX -> Save
             subghz->state_notifications = SubGhzNotificationStateIDLE;
-            // subghz_txrx_hopper_set_state(subghz->txrx, SubGhzHopperStateOFF);
+            subghz_txrx_hopper_set_state(subghz->txrx, SubGhzHopperStateOFF);
 
-            // subghz_txrx_stop(subghz->txrx);
+            subghz_txrx_stop(subghz->txrx);
             if(!subghz_scene_receiver_info_update_parser(subghz)) {
                 return false;
             }
-
-            //I am turning off the Radio, if the FLipper people want to fix the bug they can!
-            subghz->state_notifications = SubGhzNotificationStateIDLE;
-            subghz_txrx_stop(subghz->txrx);
-            subghz_txrx_hopper_pause(subghz->txrx);
 
             if(subghz_txrx_protocol_is_serializable(subghz->txrx)) {
                 subghz_file_name_clear(subghz);
@@ -203,6 +187,13 @@ bool subghz_scene_receiver_info_on_event(void* context, SceneManagerEvent event)
                 scene_manager_next_scene(subghz->scene_manager, SubGhzSceneSaveName);
             }
             return true;
+        } else if(event.event == SubGhzCustomEventSceneReceiverInfoSats) {
+            if(subghz->last_settings->gps_baudrate != 0) {
+                scene_manager_next_scene(subghz->scene_manager, SubGhzSceneShowGps);
+                return true;
+            } else {
+                return false;
+            }
         }
     } else if(event.type == SceneManagerEventTypeTick) {
         if(subghz_txrx_hopper_get_state(subghz->txrx) != SubGhzHopperStateOFF) {
@@ -213,7 +204,15 @@ bool subghz_scene_receiver_info_on_event(void* context, SceneManagerEvent event)
             notification_message(subghz->notifications, &sequence_blink_magenta_10);
             break;
         case SubGhzNotificationStateRx:
-            notification_message(subghz->notifications, &sequence_blink_cyan_10);
+            if(subghz->last_settings->gps_baudrate != 0) {
+                if(subghz->gps->satellites > 0) {
+                    notification_message(subghz->notifications, &sequence_blink_green_10);
+                } else {
+                    notification_message(subghz->notifications, &sequence_blink_red_10);
+                }
+            } else {
+                notification_message(subghz->notifications, &sequence_blink_cyan_10);
+            }
             break;
         case SubGhzNotificationStateRxDone:
             notification_message(subghz->notifications, &sequence_blink_green_100);

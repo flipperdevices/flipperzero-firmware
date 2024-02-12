@@ -1,5 +1,4 @@
 #include "../subghz_i.h"
-#include <assets_icons.h>
 #include "../helpers/subghz_custom_event.h"
 
 void subghz_scene_show_error_sub_popup_callback(void* context) {

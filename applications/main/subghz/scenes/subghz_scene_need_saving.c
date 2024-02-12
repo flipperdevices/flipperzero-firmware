@@ -16,8 +16,7 @@ void subghz_scene_need_saving_on_enter(void* context) {
     SubGhz* subghz = context;
 
     widget_add_string_multiline_element(
-        subghz->widget, 64, 13, AlignCenter, AlignCenter, FontPrimary, "Exit to SubGhz Menu?");
-
+        subghz->widget, 64, 13, AlignCenter, AlignCenter, FontPrimary, "Discard Signals?");
     widget_add_string_multiline_element(
         subghz->widget,
         64,
@@ -30,7 +29,7 @@ void subghz_scene_need_saving_on_enter(void* context) {
     widget_add_button_element(
         subghz->widget, GuiButtonTypeRight, "Stay", subghz_scene_need_saving_callback, subghz);
     widget_add_button_element(
-        subghz->widget, GuiButtonTypeLeft, "Exit", subghz_scene_need_saving_callback, subghz);
+        subghz->widget, GuiButtonTypeLeft, "Continue", subghz_scene_need_saving_callback, subghz);
 
     view_dispatcher_switch_to_view(subghz->view_dispatcher, SubGhzViewIdWidget);
 }
@@ -58,12 +57,18 @@ bool subghz_scene_need_saving_on_event(void* context, SceneManagerEvent event) {
                 }
 
                 subghz_txrx_set_preset(
-                    subghz->txrx, "AM650", subghz->last_settings->frequency, NULL, 0);
-
-                if(!scene_manager_search_and_switch_to_previous_scene(
-                       subghz->scene_manager, SubGhzSceneStart)) {
-                    scene_manager_next_scene(subghz->scene_manager, SubGhzSceneStart);
-                };
+                    subghz->txrx, "AM650", subghz->last_settings->frequency, 0, 0, NULL, 0);
+                scene_manager_search_and_switch_to_previous_scene(
+                    subghz->scene_manager, SubGhzSceneStart);
+            } else if(state == SubGhzRxKeyStateTX) {
+                subghz->repeater = SubGhzRepeaterStateOn;
+                subghz->last_settings->repeater_state = SubGhzRepeaterStateOn;
+                if((subghz->filter & SubGhzProtocolFlag_BinRAW) == 0) {
+                    subghz->filter = SubGhzProtocolFlag_Decodable | SubGhzProtocolFlag_BinRAW;
+                    subghz_txrx_receiver_set_filter(subghz->txrx, subghz->filter);
+                    subghz->repeater_bin_raw_was_off = true;
+                }
+                scene_manager_previous_scene(subghz->scene_manager);
             } else {
                 scene_manager_previous_scene(subghz->scene_manager);
             }

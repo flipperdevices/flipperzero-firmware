@@ -37,6 +37,8 @@ volatile FuriHalSubGhz furi_hal_subghz = {
     .async_mirror_pin = NULL,
     .rolling_counter_mult = 1,
     .ext_power_amp = false,
+    .extended_frequency_i = false,
+    .bypassed_frequency_i = false,
 };
 
 int8_t furi_hal_subghz_get_rolling_counter_mult(void) {
@@ -45,6 +47,14 @@ int8_t furi_hal_subghz_get_rolling_counter_mult(void) {
 
 void furi_hal_subghz_set_rolling_counter_mult(int8_t mult) {
     furi_hal_subghz.rolling_counter_mult = mult;
+}
+
+void furi_hal_subghz_set_extended_frequency(bool state_i) {
+    furi_hal_subghz.extended_frequency_i = state_i;
+}
+
+void furi_hal_subghz_set_bypassed_frequency(bool state_i) {
+    furi_hal_subghz.bypassed_frequency_i = state_i;
 }
 
 void furi_hal_subghz_set_ext_power_amp(bool enabled) {
@@ -343,47 +353,10 @@ uint32_t furi_hal_subghz_set_frequency_and_path(uint32_t value) {
     return value;
 }
 
-void furi_hal_subghz_get_extend_settings(bool* extend, bool* bypass) {
-    *extend = false;
-    *bypass = false;
-    Storage* storage = furi_record_open(RECORD_STORAGE);
-    FlipperFormat* file = flipper_format_file_alloc(storage);
-
-    if(flipper_format_file_open_existing(file, "/ext/subghz/assets/extend_range.txt")) {
-        flipper_format_read_bool(file, "use_ext_range_at_own_risk", extend, 1);
-        flipper_format_read_bool(file, "ignore_default_tx_region", bypass, 1);
-    }
-
-    flipper_format_free(file);
-    furi_record_close(RECORD_STORAGE);
-}
-
-void furi_hal_subghz_set_extend_settings(bool extend, bool bypass) {
-    Storage* storage = furi_record_open(RECORD_STORAGE);
-    FlipperFormat* file = flipper_format_file_alloc(storage);
-
-    do {
-        if(!flipper_format_file_open_always(file, "/ext/subghz/assets/extend_range.txt")) break;
-        if(!flipper_format_write_header_cstr(file, "Flipper SubGhz Setting File", 1)) break;
-        if(!flipper_format_write_comment_cstr(
-               file, "Whether to allow extended ranges that can break your flipper"))
-            break;
-        if(!flipper_format_write_bool(file, "use_ext_range_at_own_risk", &extend, 1)) break;
-        if(!flipper_format_write_comment_cstr(
-               file, "Whether to ignore the default TX region settings"))
-            break;
-        if(!flipper_format_write_bool(file, "ignore_default_tx_region", &bypass, 1)) break;
-    } while(0);
-
-    flipper_format_free(file);
-    furi_record_close(RECORD_STORAGE);
-}
-
 bool furi_hal_subghz_is_tx_allowed(uint32_t value) {
     //checking regional settings
-    bool is_extended = false;
-    bool is_allowed = false;
-    furi_hal_subghz_get_extend_settings(&is_extended, &is_allowed);
+    bool is_extended = furi_hal_subghz.extended_frequency_i;
+    bool is_allowed = furi_hal_subghz.bypassed_frequency_i;
 
     switch(furi_hal_version_get_hw_region()) {
     case FuriHalVersionRegionEuRu:

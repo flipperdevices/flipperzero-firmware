@@ -6,7 +6,11 @@
 static void subghz_scene_receiver_update_statusbar(void* context) {
     SubGhz* subghz = context;
     FuriString* history_stat_str = furi_string_alloc();
-    if(!subghz_history_get_text_space_left(subghz->history, history_stat_str)) {
+    if(!subghz_history_get_text_space_left(
+           subghz->history,
+           history_stat_str,
+           subghz->gps->satellites,
+           subghz->last_settings->delete_old_signals)) {
         FuriString* frequency_str = furi_string_alloc();
         FuriString* modulation_str = furi_string_alloc();
 
@@ -20,7 +24,7 @@ static void subghz_scene_receiver_update_statusbar(void* context) {
             furi_string_get_cstr(history_stat_str),
             subghz_txrx_hopper_get_state(subghz->txrx) != SubGhzHopperStateOFF,
             READ_BIT(subghz->filter, SubGhzProtocolFlag_BinRAW) > 0,
-            (subghz->repeater != SubGhzRepeaterOff));
+            subghz->repeater);
 
         furi_string_free(frequency_str);
         furi_string_free(modulation_str);
@@ -32,7 +36,7 @@ static void subghz_scene_receiver_update_statusbar(void* context) {
             "",
             subghz_txrx_hopper_get_state(subghz->txrx) != SubGhzHopperStateOFF,
             READ_BIT(subghz->filter, SubGhzProtocolFlag_BinRAW) > 0,
-            (subghz->repeater != SubGhzRepeaterOff));
+            subghz->repeater);
     }
     furi_string_free(history_stat_str);
 }
@@ -53,6 +57,22 @@ static void subghz_scene_add_to_history_callback(
     FuriString* item_time = furi_string_alloc();
     uint16_t idx = subghz_history_get_item(subghz->history);
     SubGhzRadioPreset preset = subghz_txrx_get_preset(subghz->txrx);
+    preset.latitude = subghz->gps->latitude;
+    preset.longitude = subghz->gps->longitude;
+
+    if(subghz->last_settings->delete_old_signals && subghz_history_full(subghz->history)) {
+        subghz_view_receiver_disable_draw_callback(subghz->subghz_receiver);
+
+        while(idx > 0 && subghz_history_full(subghz->history)) {
+            subghz_history_delete_item(subghz->history, 0);
+            subghz_view_receiver_delete_item(subghz->subghz_receiver, 0);
+            idx--;
+        }
+
+        subghz_view_receiver_enable_draw_callback(subghz->subghz_receiver);
+        subghz_scene_receiver_update_statusbar(subghz);
+        subghz->idx_menu_chosen = subghz_view_receiver_get_idx_menu(subghz->subghz_receiver);
+    }
 
     if(subghz_history_add_to_history(subghz->history, decoder_base, &preset)) {
         furi_string_reset(item_name);
@@ -60,13 +80,34 @@ static void subghz_scene_add_to_history_callback(
 
         subghz->state_notifications = SubGhzNotificationStateRxDone;
 
+        if(subghz->remove_duplicates) {
+            // Look in history for signal hash
+            uint32_t hash_data = subghz_protocol_decoder_base_get_hash_data_long(decoder_base);
+            subghz_view_receiver_disable_draw_callback(subghz->subghz_receiver);
+            for(uint16_t i = idx; i > 0; i--) {
+                i--; // Iterating in reverse with off by one
+                if(subghz_history_get_hash_data(subghz->history, i) == hash_data &&
+                   subghz_history_get_protocol(subghz->history, i) == decoder_base->protocol) {
+                    // Remove previous instance and update menu index
+                    subghz_history_delete_item(subghz->history, i);
+                    subghz_view_receiver_delete_item(subghz->subghz_receiver, i);
+                    idx--;
+                }
+                i++;
+            }
+            // Restore ui state
+            subghz->idx_menu_chosen = subghz_view_receiver_get_idx_menu(subghz->subghz_receiver);
+            subghz_view_receiver_enable_draw_callback(subghz->subghz_receiver);
+        }
+
         subghz_history_get_text_item_menu(subghz->history, item_name, idx);
         subghz_history_get_time_item_menu(subghz->history, item_time, idx);
         subghz_view_receiver_add_item_to_menu(
             subghz->subghz_receiver,
             furi_string_get_cstr(item_name),
             furi_string_get_cstr(item_time),
-            subghz_history_get_type_protocol(subghz->history, idx));
+            subghz_history_get_type_protocol(subghz->history, idx),
+            subghz_history_get_repeats(subghz->history, idx));
 
         subghz_scene_receiver_update_statusbar(subghz);
     }
@@ -184,7 +225,8 @@ void subghz_scene_decode_raw_on_enter(void* context) {
                 subghz->subghz_receiver,
                 furi_string_get_cstr(item_name),
                 furi_string_get_cstr(item_time),
-                subghz_history_get_type_protocol(subghz->history, i));
+                subghz_history_get_type_protocol(subghz->history, i),
+                subghz_history_get_repeats(subghz->history, i));
         }
         subghz_view_receiver_set_idx_menu(subghz->subghz_receiver, subghz->idx_menu_chosen);
     }

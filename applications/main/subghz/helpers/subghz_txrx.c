@@ -97,12 +97,16 @@ void subghz_txrx_set_preset(
     SubGhzTxRx* instance,
     const char* preset_name,
     uint32_t frequency,
+    float latitude,
+    float longitude,
     uint8_t* preset_data,
     size_t preset_data_size) {
     furi_assert(instance);
     furi_string_set(instance->preset->name, preset_name);
     SubGhzRadioPreset* preset = instance->preset;
     preset->frequency = frequency;
+    preset->latitude = latitude;
+    preset->longitude = longitude;
     preset->data = preset_data;
     preset->data_size = preset_data_size;
 }
@@ -151,6 +155,20 @@ void subghz_txrx_get_frequency_and_modulation(
         } else {
             furi_string_printf(modulation, "%.2s", furi_string_get_cstr(preset->name));
         }
+    }
+}
+
+void subghz_txrx_get_latitude_and_longitude(
+    SubGhzTxRx* instance,
+    FuriString* latitude,
+    FuriString* longitude) {
+    furi_assert(instance);
+    SubGhzRadioPreset* preset = instance->preset;
+    if(latitude != NULL) {
+        furi_string_printf(latitude, "%f", (double)preset->latitude);
+    }
+    if(longitude != NULL) {
+        furi_string_printf(longitude, "%f", (double)preset->longitude);
     }
 }
 
@@ -287,7 +305,7 @@ SubGhzTxRxStartTxState subghz_txrx_tx_start(SubGhzTxRx* instance, FlipperFormat*
             ret = SubGhzTxRxStartTxStateErrorParserOthers;
         }
         if(ret != SubGhzTxRxStartTxStateOk) {
-            subghz_transmitter_free(instance->transmitter);
+            if(instance->transmitter) subghz_transmitter_free(instance->transmitter);
             if(instance->txrx_state != SubGhzTxRxStateIDLE) {
                 subghz_txrx_idle(instance);
             }
@@ -504,19 +522,9 @@ void subghz_txrx_speaker_set_state(SubGhzTxRx* instance, SubGhzSpeakerState stat
     instance->speaker_state = state;
 }
 
-void subghz_txrx_repeater_set_state(SubGhzRepeater* instance, SubGhzRepeater state) {
-    furi_assert(instance);
-    *instance = state;
-}
-
 SubGhzSpeakerState subghz_txrx_speaker_get_state(SubGhzTxRx* instance) {
     furi_assert(instance);
     return instance->speaker_state;
-}
-
-SubGhzRepeater subghz_txrx_repeater_get_state(SubGhzRepeater* instance) {
-    furi_assert(instance);
-    return *instance;
 }
 
 bool subghz_txrx_load_decoder_by_name_protocol(SubGhzTxRx* instance, const char* name_protocol) {
@@ -690,7 +698,7 @@ void subghz_txrx_set_default_preset(SubGhzTxRx* instance, uint32_t frequency) {
     if(frequency == 0) {
         frequency = subghz_setting_get_default_frequency(subghz_txrx_get_setting(instance));
     }
-    subghz_txrx_set_preset(instance, default_modulation, frequency, NULL, 0);
+    subghz_txrx_set_preset(instance, default_modulation, frequency, 0, 0, NULL, 0);
 }
 
 const char*
@@ -705,6 +713,8 @@ const char*
         instance,
         preset_name,
         frequency,
+        0,
+        0,
         subghz_setting_get_preset_data(setting, index),
         subghz_setting_get_preset_data_size(setting, index));
 

@@ -25,16 +25,17 @@ typedef struct {
     bool external_module_power_5v_disable;
     bool external_module_power_amp;
     // saved so as not to change the version
-    bool timestamp_file_names;
+    bool protocol_file_names;
+    uint32_t gps_baudrate;
     bool enable_hopping;
-    bool enable_listen_after_tx;
+    uint32_t repeater_state;
     bool enable_sound;
-
-    uint32_t RepeaterState;
+    bool remove_duplicates;
     uint32_t ignore_filter;
     uint32_t filter;
     float rssi;
     bool delete_old_signals;
+    bool autosave;
 } SubGhzLastSettings;
 
 SubGhzLastSettings* subghz_last_settings_alloc(void);

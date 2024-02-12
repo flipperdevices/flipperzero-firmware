@@ -67,6 +67,8 @@ typedef struct {
 
     uint8_t rolling_counter_mult;
     bool ext_power_amp : 1;
+    bool extended_frequency_i : 1;
+    bool bypassed_frequency_i : 1;
 } FuriHalSubGhz;
 
 extern volatile FuriHalSubGhz furi_hal_subghz;
@@ -204,20 +206,6 @@ bool furi_hal_subghz_is_frequency_valid(uint32_t value);
  * @return     real frequency in Hz
  */
 uint32_t furi_hal_subghz_set_frequency_and_path(uint32_t value);
-
-/** Read extend and bypass settings values into out params
- *
- * @param      extend  pointer to bool for extend
- * @param      bypass  pointer to bool for bypass
- */
-void furi_hal_subghz_get_extend_settings(bool* extend, bool* bypass);
-
-/** Set extend and bypass settings values to file
- *
- * @param      extend  bool for extend
- * @param      bypass  bool for bypass
- */
-void furi_hal_subghz_set_extend_settings(bool extend, bool bypass);
 
 /** Сheck if transmission is allowed on this frequency with your current config
  *

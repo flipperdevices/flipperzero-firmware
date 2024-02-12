@@ -13,16 +13,18 @@
 #define SUBGHZ_LAST_SETTING_FIELD_FREQUENCY_ANALYZER_TRIGGER "FATrigger"
 #define SUBGHZ_LAST_SETTING_FIELD_EXTERNAL_MODULE_ENABLED "External"
 #define SUBGHZ_LAST_SETTING_FIELD_EXTERNAL_MODULE_POWER "ExtPower"
-#define SUBGHZ_LAST_SETTING_FIELD_TIMESTAMP_FILE_NAMES "TimestampNames"
+#define SUBGHZ_LAST_SETTING_FIELD_PROTOCOL_FILE_NAMES "TimestampNames"
 #define SUBGHZ_LAST_SETTING_FIELD_EXTERNAL_MODULE_POWER_AMP "ExtPowerAmp"
+#define SUBGHZ_LAST_SETTING_FIELD_GPS "Gps"
 #define SUBGHZ_LAST_SETTING_FIELD_HOPPING_ENABLE "Hopping"
+#define SUBGHZ_LAST_SETTING_FIELD_REMOVE_DUPLICATES "RemoveDuplicates"
 #define SUBGHZ_LAST_SETTING_FIELD_IGNORE_FILTER "IgnoreFilter"
 #define SUBGHZ_LAST_SETTING_FIELD_FILTER "Filter"
 #define SUBGHZ_LAST_SETTING_FIELD_RSSI_THRESHOLD "RSSI"
 #define SUBGHZ_LAST_SETTING_FIELD_REPEATER "Repeater"
-#define SUBGHZ_LAST_SETTING_FIELD_LISTEN_AFTER_TX "ListenAfterTX"
-#define SUBGHZ_LAST_SETTING_FIELD_SOUND "Sound"
+#define SUBGHZ_LAST_SETTING_FIELD_ENABLE_SOUND "Sound"
 #define SUBGHZ_LAST_SETTING_FIELD_DELETE_OLD "DelOldSignals"
+#define SUBGHZ_LAST_SETTING_FIELD_AUTOSAVE "Autosave"
 
 SubGhzLastSettings* subghz_last_settings_alloc(void) {
     SubGhzLastSettings* instance = malloc(sizeof(SubGhzLastSettings));
@@ -46,12 +48,13 @@ void subghz_last_settings_load(SubGhzLastSettings* instance, size_t preset_count
     bool temp_external_module_enabled = false;
     bool temp_external_module_power_5v_disable = false;
     bool temp_external_module_power_amp = false;
-    bool temp_timestamp_file_names = false;
+    bool temp_protocol_file_names = false;
     bool temp_enable_hopping = false;
-    bool temp_enable_listen_after_tx = false;
     bool temp_enable_sound = false;
-    uint32_t temp_RepeaterState = false;
+    uint32_t temp_repeater_state;
+    bool temp_remove_duplicates = false;
     bool temp_delete_old_sig = false;
+    bool temp_autosave = false;
     uint32_t temp_ignore_filter = 0;
     uint32_t temp_filter = 0;
     float temp_rssi = 0;
@@ -61,8 +64,13 @@ void subghz_last_settings_load(SubGhzLastSettings* instance, size_t preset_count
     bool rssi_was_read = false;
     bool filter_was_read = false;
     bool ignore_filter_was_read = false;
+    bool remove_duplicates_was_read = false;
     bool frequency_analyzer_feedback_level_was_read = false;
     bool frequency_analyzer_trigger_was_read = false;
+    bool repeater_was_read = false;
+    bool enable_sound_was_read = false;
+
+    uint32_t temp_gps_baudrate = 0;
 
     if(FSE_OK == storage_sd_status(storage) && SUBGHZ_LAST_SETTINGS_PATH &&
        flipper_format_file_open_existing(fff_data_file, SUBGHZ_LAST_SETTINGS_PATH)) {
@@ -92,14 +100,16 @@ void subghz_last_settings_load(SubGhzLastSettings* instance, size_t preset_count
             1);
         flipper_format_read_bool(
             fff_data_file,
-            SUBGHZ_LAST_SETTING_FIELD_TIMESTAMP_FILE_NAMES,
-            (bool*)&temp_timestamp_file_names,
+            SUBGHZ_LAST_SETTING_FIELD_PROTOCOL_FILE_NAMES,
+            (bool*)&temp_protocol_file_names,
             1);
         flipper_format_read_bool(
             fff_data_file,
             SUBGHZ_LAST_SETTING_FIELD_EXTERNAL_MODULE_POWER_AMP,
             (bool*)&temp_external_module_power_amp,
             1);
+        flipper_format_read_uint32(
+            fff_data_file, SUBGHZ_LAST_SETTING_FIELD_GPS, (uint32_t*)&temp_gps_baudrate, 1);
         flipper_format_read_bool(
             fff_data_file,
             SUBGHZ_LAST_SETTING_FIELD_HOPPING_ENABLE,
@@ -107,6 +117,11 @@ void subghz_last_settings_load(SubGhzLastSettings* instance, size_t preset_count
             1);
         rssi_was_read = flipper_format_read_float(
             fff_data_file, SUBGHZ_LAST_SETTING_FIELD_RSSI_THRESHOLD, (float*)&temp_rssi, 1);
+        remove_duplicates_was_read = flipper_format_read_bool(
+            fff_data_file,
+            SUBGHZ_LAST_SETTING_FIELD_REMOVE_DUPLICATES,
+            (bool*)&temp_remove_duplicates,
+            1);
         ignore_filter_was_read = flipper_format_read_uint32(
             fff_data_file,
             SUBGHZ_LAST_SETTING_FIELD_IGNORE_FILTER,
@@ -114,17 +129,15 @@ void subghz_last_settings_load(SubGhzLastSettings* instance, size_t preset_count
             1);
         filter_was_read = flipper_format_read_uint32(
             fff_data_file, SUBGHZ_LAST_SETTING_FIELD_FILTER, (uint32_t*)&temp_filter, 1);
-        flipper_format_read_uint32(
-            fff_data_file, SUBGHZ_LAST_SETTING_FIELD_REPEATER, (uint32_t*)&temp_RepeaterState, 1);
-        flipper_format_read_bool(
-            fff_data_file,
-            SUBGHZ_LAST_SETTING_FIELD_LISTEN_AFTER_TX,
-            (bool*)&temp_enable_listen_after_tx,
-            1);
-        flipper_format_read_bool(
-            fff_data_file, SUBGHZ_LAST_SETTING_FIELD_SOUND, (bool*)&temp_enable_sound, 1);
+        repeater_was_read = flipper_format_read_uint32(
+            fff_data_file, SUBGHZ_LAST_SETTING_FIELD_REPEATER, (uint32_t*)&temp_repeater_state, 1);
+        enable_sound_was_read = flipper_format_read_bool(
+            fff_data_file, SUBGHZ_LAST_SETTING_FIELD_ENABLE_SOUND, (bool*)&temp_enable_sound, 1);
         flipper_format_read_bool(
             fff_data_file, SUBGHZ_LAST_SETTING_FIELD_DELETE_OLD, (bool*)&temp_delete_old_sig, 1);
+        flipper_format_read_bool(
+            fff_data_file, SUBGHZ_LAST_SETTING_FIELD_AUTOSAVE, (bool*)&temp_autosave, 1);
+
     } else {
         FURI_LOG_E(TAG, "Error open file %s", SUBGHZ_LAST_SETTINGS_PATH);
     }
@@ -138,17 +151,19 @@ void subghz_last_settings_load(SubGhzLastSettings* instance, size_t preset_count
             SUBGHZ_LAST_SETTING_FREQUENCY_ANALYZER_FEEDBACK_LEVEL;
         instance->frequency_analyzer_trigger = SUBGHZ_LAST_SETTING_FREQUENCY_ANALYZER_TRIGGER;
         instance->external_module_enabled = false;
-        instance->timestamp_file_names = false;
+        instance->protocol_file_names = false;
         instance->external_module_power_amp = false;
+        instance->gps_baudrate = 0;
         instance->enable_hopping = false;
-        instance->enable_listen_after_tx = false;
-        instance->enable_sound = false;
+        instance->remove_duplicates = false;
+        instance->repeater_state = 0;
+        instance->enable_sound = 0;
         instance->delete_old_signals = false;
+        instance->autosave = false;
         instance->ignore_filter = 0x00;
         // See bin_raw_value in applications/main/subghz/scenes/subghz_scene_receiver_config.c
         instance->filter = SubGhzProtocolFlag_Decodable;
         instance->rssi = SUBGHZ_RAW_THRESHOLD_MIN;
-        instance->RepeaterState = SubGhzRepeaterOff;
     } else {
         instance->frequency = temp_frequency;
         instance->frequency_analyzer_feedback_level =
@@ -177,18 +192,20 @@ void subghz_last_settings_load(SubGhzLastSettings* instance, size_t preset_count
 
         instance->external_module_power_5v_disable = temp_external_module_power_5v_disable;
 
-        instance->timestamp_file_names = temp_timestamp_file_names;
+        instance->protocol_file_names = temp_protocol_file_names;
 
         instance->delete_old_signals = temp_delete_old_sig;
+
+        instance->autosave = temp_autosave;
 
         // External power amp CC1101
         instance->external_module_power_amp = temp_external_module_power_amp;
 
         instance->rssi = rssi_was_read ? temp_rssi : SUBGHZ_RAW_THRESHOLD_MIN;
         instance->enable_hopping = temp_enable_hopping;
-        instance->enable_listen_after_tx = temp_enable_listen_after_tx;
-        instance->enable_sound = temp_enable_sound;
-        instance->RepeaterState = temp_RepeaterState;
+        instance->repeater_state = repeater_was_read ? temp_repeater_state : 0;
+        instance->enable_sound = enable_sound_was_read ? temp_enable_sound : false;
+        instance->remove_duplicates = remove_duplicates_was_read ? temp_remove_duplicates : false;
         instance->ignore_filter = ignore_filter_was_read ? temp_ignore_filter : 0x00;
 #if SUBGHZ_LAST_SETTING_SAVE_BIN_RAW
         instance->filter = filter_was_read ? temp_filter : SubGhzProtocolFlag_Decodable;
@@ -203,6 +220,8 @@ void subghz_last_settings_load(SubGhzLastSettings* instance, size_t preset_count
 #endif
         // Set globally in furi hal
         furi_hal_subghz_set_ext_power_amp(instance->external_module_power_amp);
+
+        instance->gps_baudrate = temp_gps_baudrate;
     }
 
     flipper_format_file_close(fff_data_file);
@@ -270,8 +289,8 @@ bool subghz_last_settings_save(SubGhzLastSettings* instance) {
         }
         if(!flipper_format_insert_or_update_bool(
                file,
-               SUBGHZ_LAST_SETTING_FIELD_TIMESTAMP_FILE_NAMES,
-               &instance->timestamp_file_names,
+               SUBGHZ_LAST_SETTING_FIELD_PROTOCOL_FILE_NAMES,
+               &instance->protocol_file_names,
                1)) {
             break;
         }
@@ -282,12 +301,23 @@ bool subghz_last_settings_save(SubGhzLastSettings* instance) {
                1)) {
             break;
         }
+        if(!flipper_format_insert_or_update_uint32(
+               file, SUBGHZ_LAST_SETTING_FIELD_GPS, &instance->gps_baudrate, 1)) {
+            break;
+        }
         if(!flipper_format_insert_or_update_bool(
                file, SUBGHZ_LAST_SETTING_FIELD_HOPPING_ENABLE, &instance->enable_hopping, 1)) {
             break;
         }
         if(!flipper_format_insert_or_update_float(
                file, SUBGHZ_LAST_SETTING_FIELD_RSSI_THRESHOLD, &instance->rssi, 1)) {
+            break;
+        }
+        if(!flipper_format_insert_or_update_bool(
+               file,
+               SUBGHZ_LAST_SETTING_FIELD_REMOVE_DUPLICATES,
+               &instance->remove_duplicates,
+               1)) {
             break;
         }
         if(!flipper_format_insert_or_update_uint32(
@@ -299,22 +329,19 @@ bool subghz_last_settings_save(SubGhzLastSettings* instance) {
             break;
         }
         if(!flipper_format_insert_or_update_uint32(
-               file, SUBGHZ_LAST_SETTING_FIELD_REPEATER, &instance->RepeaterState, 1)) {
+               file, SUBGHZ_LAST_SETTING_FIELD_REPEATER, &instance->repeater_state, 1)) {
             break;
         }
         if(!flipper_format_insert_or_update_bool(
-               file,
-               SUBGHZ_LAST_SETTING_FIELD_LISTEN_AFTER_TX,
-               &instance->enable_listen_after_tx,
-               1)) {
-            break;
-        }
-        if(!flipper_format_insert_or_update_bool(
-               file, SUBGHZ_LAST_SETTING_FIELD_SOUND, &instance->enable_sound, 1)) {
+               file, SUBGHZ_LAST_SETTING_FIELD_ENABLE_SOUND, &instance->enable_sound, 1)) {
             break;
         }
         if(!flipper_format_insert_or_update_bool(
                file, SUBGHZ_LAST_SETTING_FIELD_DELETE_OLD, &instance->delete_old_signals, 1)) {
+            break;
+        }
+        if(!flipper_format_insert_or_update_bool(
+               file, SUBGHZ_LAST_SETTING_FIELD_AUTOSAVE, &instance->autosave, 1)) {
             break;
         }
         saved = true;
@@ -349,29 +376,35 @@ void subghz_last_settings_log(SubGhzLastSettings* instance) {
     FURI_LOG_I(
         TAG,
         "Frequency: %03ld.%02ld, FeedbackLevel: %ld, FATrigger: %.2f, External: %s, ExtPower: %s, TimestampNames: %s, ExtPowerAmp: %s,\n"
-        "Hopping: %s,\nPreset: %ld, RSSI: %.2f, "
-        "Starline: %s, Cars: %s, Magellan: %s, NiceFloR-S: %s, BinRAW: %s, Repeater: %lu, ListenAfterTX %s, Sound: %s",
+        "GPSBaudrate: %ld, Hopping: %s,\nPreset: %ld, RSSI: %.2f, "
+        "BinRAW: %s, Repeater: %lu, Duplicates: %s, Autosave: %s, Starline: %s, Cars: %s, Magellan: %s, NiceFloR-S: %s, Weather: %s, TPMS: %s, Sound: %s",
         instance->frequency / 1000000 % 1000,
         instance->frequency / 10000 % 100,
         instance->frequency_analyzer_feedback_level,
         (double)instance->frequency_analyzer_trigger,
         bool_to_char(instance->external_module_enabled),
         bool_to_char(instance->external_module_power_5v_disable),
-        bool_to_char(instance->timestamp_file_names),
+        bool_to_char(instance->protocol_file_names),
         bool_to_char(instance->external_module_power_amp),
+        instance->gps_baudrate,
         bool_to_char(instance->enable_hopping),
         instance->preset_index,
         (double)instance->rssi,
-        subghz_last_settings_log_filter_get_index(
-            instance->ignore_filter, SubGhzProtocolFlag_StarLine),
-        subghz_last_settings_log_filter_get_index(
-            instance->ignore_filter, SubGhzProtocolFlag_AutoAlarms),
-        subghz_last_settings_log_filter_get_index(
-            instance->ignore_filter, SubGhzProtocolFlag_Magellan),
-        subghz_last_settings_log_filter_get_index(
-            instance->ignore_filter, SubGhzProtocolFlag_NiceFlorS),
         subghz_last_settings_log_filter_get_index(instance->filter, SubGhzProtocolFlag_BinRAW),
-        instance->RepeaterState,
-        bool_to_char(instance->enable_listen_after_tx),
+        instance->repeater_state,
+        bool_to_char(instance->remove_duplicates),
+        bool_to_char(instance->autosave),
+        subghz_last_settings_log_filter_get_index(
+            instance->ignore_filter, SubGhzProtocolFilter_StarLine),
+        subghz_last_settings_log_filter_get_index(
+            instance->ignore_filter, SubGhzProtocolFilter_AutoAlarms),
+        subghz_last_settings_log_filter_get_index(
+            instance->ignore_filter, SubGhzProtocolFilter_Magellan),
+        subghz_last_settings_log_filter_get_index(
+            instance->ignore_filter, SubGhzProtocolFilter_NiceFlorS),
+        subghz_last_settings_log_filter_get_index(
+            instance->ignore_filter, SubGhzProtocolFilter_Weather),
+        subghz_last_settings_log_filter_get_index(
+            instance->ignore_filter, SubGhzProtocolFilter_TPMS),
         bool_to_char(instance->enable_sound));
 }

@@ -1,6 +1,6 @@
 #include "subghz_i.h"
-#include <assets_icons.h>
 
+#include "assets_icons.h"
 #include "subghz/types.h"
 #include <math.h>
 #include <furi.h>
@@ -50,8 +50,8 @@ void subghz_dialog_message_freq_error(SubGhz* subghz, bool only_rx) {
         message_text = "Frequency\nis outside of\ndefault range.\nCheck docs.";
     }
 
-    dialog_message_set_header(message, header_text, 63, 0, AlignCenter, AlignTop);
-    dialog_message_set_text(message, message_text, 1, 13, AlignLeft, AlignTop);
+    dialog_message_set_header(message, header_text, 64, 3, AlignCenter, AlignTop);
+    dialog_message_set_text(message, message_text, 3, 23, AlignLeft, AlignTop);
 
     dialog_message_set_icon(message, &I_WarningDolphinFlip_45x42, 83, 22);
 
@@ -71,6 +71,8 @@ bool subghz_key_load(SubGhz* subghz, const char* file_path, bool show_dialog) {
     SubGhzLoadKeyState load_key_state = SubGhzLoadKeyStateParseErr;
     FuriString* temp_str = furi_string_alloc();
     uint32_t temp_data32;
+    float temp_lat = NAN; // NAN or 0.0?? because 0.0 is valid value
+    float temp_lon = NAN;
 
     do {
         stream_clean(fff_data_stream);
@@ -136,12 +138,24 @@ bool subghz_key_load(SubGhz* subghz, const char* file_path, bool show_dialog) {
                 break;
             }
         }
+
+        //Load latitute and longitude if present, strict mode to avoid reading the whole file twice
+        flipper_format_set_strict_mode(fff_data_file, true);
+        if(!flipper_format_read_float(fff_data_file, "Latitute", (float*)&temp_lat, 1) ||
+           !flipper_format_read_float(fff_data_file, "Longitude", (float*)&temp_lon, 1)) {
+            FURI_LOG_W(TAG, "Missing Latitude and Longitude (optional)");
+            flipper_format_rewind(fff_data_file);
+        }
+        flipper_format_set_strict_mode(fff_data_file, false);
+
         size_t preset_index =
             subghz_setting_get_inx_preset_by_name(setting, furi_string_get_cstr(temp_str));
         subghz_txrx_set_preset(
             subghz->txrx,
             furi_string_get_cstr(temp_str),
             temp_data32,
+            temp_lat,
+            temp_lon,
             subghz_setting_get_preset_data(setting, preset_index),
             subghz_setting_get_preset_data_size(setting, preset_index));
 
