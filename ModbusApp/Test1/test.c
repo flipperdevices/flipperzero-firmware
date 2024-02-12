@@ -7,6 +7,7 @@
 #include <gui/modules/submenu.h>
 #include <gui/modules/variable_item_list.h>
 #include <gui/modules/text_box.h>
+#include <assets_icons.h>
 
 #include <stm32wbxx_ll_lpuart.h>
 #include <stm32wbxx_ll_usart.h>
@@ -29,9 +30,9 @@
 #define TEXT_BOX_LEN 4096
 #define FURI_HAL_SERIAL_USART_OVERSAMPLING 0x00000000U
 //////////////////////////   Defining Structs  //////////////////////////
-typedef enum { Main_Scene, Settings_Scene, Sniffer_Scene, Scene_Num } Scenes;
+typedef enum { Main_Scene, Settings_Scene, ConsoleOutput_Scene, Scene_Num } Scenes;
 typedef enum { Submenu_View, VarList_View, TextBox_View } Views;
-typedef enum { Settings_Option, Sniffer_Option } Main_options;
+typedef enum { Settings_Option, Sniffer_Option, Read_LOG_Option } Main_options;
 
 typedef struct {
     uint8_t baudrate;
@@ -110,6 +111,32 @@ void makePaths(App* app) {
     if(!storage_simply_mkdir(app->storage, PATHLOGS)) {
         dialog_message_show_storage_error(app->dialogs, "Cannot create\nlogs folder");
     }
+}
+bool OpenLogFile(App* app) {
+    // browse for files
+    FuriString* predefined_filepath = furi_string_alloc_set_str(PATHLOGS);
+    FuriString* selected_filepath = furi_string_alloc();
+    DialogsFileBrowserOptions browser_options;
+    dialog_file_browser_set_basic_options(&browser_options, ".log", NULL);
+    if(!dialog_file_browser_show(
+           app->dialogs, selected_filepath, predefined_filepath, &browser_options)) {
+        return false;
+    }
+
+    if(storage_file_open(
+           app->LOGfile, furi_string_get_cstr(selected_filepath), FSAM_READ, FSOM_OPEN_EXISTING)) {
+        furi_string_reset(app->text);
+        char buf[storage_file_size(app->LOGfile)];
+        storage_file_read(app->LOGfile, buf, sizeof(buf));
+        furi_string_cat_str(app->text, buf);
+        app->uart->cfg->saveLOG = false;
+    } else
+        dialog_message_show_storage_error(app->dialogs, "Cannot open File");
+    storage_file_close(app->LOGfile);
+    furi_string_free(selected_filepath);
+    furi_string_free(predefined_filepath);
+
+    return true;
 }
 ///////////////////////////////   UART   ///////////////////////////////////////
 
@@ -294,7 +321,12 @@ void mainOptionsCB(void* context, uint32_t index) {
         scene_manager_next_scene(app->sceneManager, Settings_Scene);
         break;
     case Sniffer_Option:
-        scene_manager_next_scene(app->sceneManager, Sniffer_Scene);
+        scene_manager_set_scene_state(app->sceneManager, ConsoleOutput_Scene, Sniffer_Option);
+        scene_manager_next_scene(app->sceneManager, ConsoleOutput_Scene);
+        break;
+    case Read_LOG_Option:
+        scene_manager_set_scene_state(app->sceneManager, ConsoleOutput_Scene, Read_LOG_Option);
+        scene_manager_next_scene(app->sceneManager, ConsoleOutput_Scene);
         break;
     default:
         break;
@@ -306,6 +338,7 @@ void Main_Scene_OnEnter(void* context) {
     submenu_set_header(app->subMenu, "Main");
     submenu_add_item(app->subMenu, "Settings", Settings_Option, mainOptionsCB, app);
     submenu_add_item(app->subMenu, "Sniffer", Sniffer_Option, mainOptionsCB, app);
+    submenu_add_item(app->subMenu, "Read LOG", Read_LOG_Option, mainOptionsCB, app);
     view_dispatcher_switch_to_view(app->viewDispatcher, Submenu_View);
 }
 bool Main_Scene_OnEvent(void* context, SceneManagerEvent event) {
@@ -385,6 +418,7 @@ void CFG_Scene_OnExit(void* context) {
             app->logFilePath, sequential_file_resolve_path(app->storage, PATHLOGS, "Log", "log"));
         if(app->logFilePath != NULL) {
             if(storage_file_open(app->LOGfile, app->logFilePath, FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
+                furi_string_reset(app->text);
                 app->LOGfileReady = true;
             } else {
                 dialog_message_show_storage_error(app->dialogs, "Cannot open log file");
@@ -400,19 +434,24 @@ void CFG_Scene_OnExit(void* context) {
 //////////////////////////   Sniffer Scene  //////////////////////////
 void Sniffer_Scene_OnEnter(void* context) {
     App* app = context;
-    text_box_reset(app->textBox);
-    text_box_set_font(app->textBox, TextBoxFontText);
-    text_box_set_focus(app->textBox, TextBoxFocusEnd);
-    furi_string_cat_str(app->text, "Baudrate: ");
-    furi_string_cat_str(app->text, baudrateValues[app->uart->cfg->baudrate]);
-    furi_string_cat_str(app->text, "\nData Width: ");
-    furi_string_cat_str(app->text, dataWidthValues[app->uart->cfg->dataWidth]);
-    furi_string_cat_str(app->text, "\nStop bits: ");
-    furi_string_cat_str(app->text, stopBitsValues[app->uart->cfg->stopBits]);
-    furi_string_cat_str(app->text, "\nParity: ");
-    furi_string_cat_str(app->text, parityValues[app->uart->cfg->parity]);
+    if(scene_manager_get_scene_state(app->sceneManager, ConsoleOutput_Scene) == Sniffer_Option) {
+        text_box_reset(app->textBox);
+        text_box_set_font(app->textBox, TextBoxFontText);
+        text_box_set_focus(app->textBox, TextBoxFocusEnd);
+        furi_string_cat_str(app->text, "Baudrate: ");
+        furi_string_cat_str(app->text, baudrateValues[app->uart->cfg->baudrate]);
+        furi_string_cat_str(app->text, "\nData Width: ");
+        furi_string_cat_str(app->text, dataWidthValues[app->uart->cfg->dataWidth]);
+        furi_string_cat_str(app->text, "\nStop bits: ");
+        furi_string_cat_str(app->text, stopBitsValues[app->uart->cfg->stopBits]);
+        furi_string_cat_str(app->text, "\nParity: ");
+        furi_string_cat_str(app->text, parityValues[app->uart->cfg->parity]);
+        furi_string_cat_str(app->text, "\n");
+    } else if(
+        scene_manager_get_scene_state(app->sceneManager, ConsoleOutput_Scene) == Read_LOG_Option) {
+        OpenLogFile(app);
+    }
     text_box_set_text(app->textBox, furi_string_get_cstr(app->text));
-    furi_string_cat_str(app->text, "\n");
     view_dispatcher_switch_to_view(app->viewDispatcher, TextBox_View);
 }
 bool Sniffer_Scene_OnEvent(void* context, SceneManagerEvent event) {
