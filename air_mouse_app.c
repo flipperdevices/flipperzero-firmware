@@ -10,11 +10,10 @@
 #include "views/air_mouse_view.h"
 #include <furi_hal_usb_hid.h>
 #include <storage/storage.h>
-#include <expansion/expansion.h>
 
 #define TAG "SensorModule"
 
-#define AIRMOUSE_BT_KEYS_STORAGE_NAME ".airm_bt_hid.keys"
+#define BLE_HID_KEYS_PATH "/ext/apps_data/hid_ble/.bt_hid.keys"
 
 typedef struct {
     Gui* gui;
@@ -63,7 +62,7 @@ static void ble_hid_remove_pairing(void) {
     // Wait 2nd core to update nvm storage
     furi_delay_ms(200);
 
-    bt_keys_storage_set_storage_path(bt, APP_DATA_PATH(AIRMOUSE_BT_KEYS_STORAGE_NAME));
+    bt_keys_storage_set_storage_path(bt, BLE_HID_KEYS_PATH);
     bt_forget_bonded_devices(bt);
 
     // Wait 2nd core to update nvm storage
@@ -88,7 +87,7 @@ static Bt* ble_hid_init(AirMouseApp* app) {
     // Wait 2nd core to update nvm storage
     furi_delay_ms(200);
 
-    bt_keys_storage_set_storage_path(bt, APP_DATA_PATH(AIRMOUSE_BT_KEYS_STORAGE_NAME));
+    bt_keys_storage_set_storage_path(bt, BLE_HID_KEYS_PATH);
 
     furi_check(bt_set_profile(bt, BtProfileHidKeyboard));
 
@@ -212,10 +211,6 @@ static void air_mouse_free(AirMouseApp* app) {
 
 int32_t air_mouse_app(void* arg) {
     UNUSED(arg);
-
-    Expansion* expansion = furi_record_open(RECORD_EXPANSION);
-    expansion_disable(expansion);
-
     AirMouseApp* app = air_mouse_alloc();
 
     app->icm42688p_device = malloc(sizeof(FuriHalSpiBusHandle));
@@ -241,9 +236,5 @@ int32_t air_mouse_app(void* arg) {
     free(app->icm42688p_device);
 
     air_mouse_free(app);
-
-    expansion_enable(expansion);
-    furi_record_close(RECORD_EXPANSION);
-
     return 0;
 }
