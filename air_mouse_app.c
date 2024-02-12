@@ -10,6 +10,7 @@
 #include "views/air_mouse_view.h"
 #include <furi_hal_usb_hid.h>
 #include <storage/storage.h>
+#include <expansion/expansion.h>
 
 #define TAG "SensorModule"
 
@@ -211,6 +212,10 @@ static void air_mouse_free(AirMouseApp* app) {
 
 int32_t air_mouse_app(void* arg) {
     UNUSED(arg);
+
+    Expansion* expansion = furi_record_open(RECORD_EXPANSION);
+    expansion_disable(expansion);
+
     AirMouseApp* app = air_mouse_alloc();
 
     app->icm42688p_device = malloc(sizeof(FuriHalSpiBusHandle));
@@ -236,5 +241,9 @@ int32_t air_mouse_app(void* arg) {
     free(app->icm42688p_device);
 
     air_mouse_free(app);
+
+    expansion_enable(expansion);
+    furi_record_close(RECORD_EXPANSION);
+
     return 0;
 }
