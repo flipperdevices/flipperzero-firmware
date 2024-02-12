@@ -1,4 +1,5 @@
 #include "i2ctools_i.h"
+#include <expansion/expansion.h>
 
 void i2ctools_draw_callback(Canvas* canvas, void* ctx) {
     furi_assert(ctx);
@@ -40,6 +41,10 @@ void i2ctools_input_callback(InputEvent* input_event, void* ctx) {
 
 int32_t i2ctools_app(void* p) {
     UNUSED(p);
+
+    Expansion* expansion = furi_record_open(RECORD_EXPANSION);
+    expansion_disable(expansion);
+
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(InputEvent));
 
     // Alloc i2ctools
@@ -48,6 +53,8 @@ int32_t i2ctools_app(void* p) {
     if(!i2ctools->mutex) {
         FURI_LOG_E(APP_NAME, "cannot create mutex\r\n");
         free(i2ctools);
+        expansion_enable(expansion);
+        furi_record_close(RECORD_EXPANSION);
         return -1;
     }
 
@@ -227,5 +234,9 @@ int32_t i2ctools_app(void* p) {
     furi_mutex_free(i2ctools->mutex);
     free(i2ctools);
     furi_record_close(RECORD_GUI);
+
+    expansion_enable(expansion);
+    furi_record_close(RECORD_EXPANSION);
+
     return 0;
 }
