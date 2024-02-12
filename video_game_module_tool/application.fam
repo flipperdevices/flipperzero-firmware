@@ -1,0 +1,17 @@
+App(
+    appid="video_game_module_tool",
+    name="Video Game Module Tool",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="vgm_tool_app",
+    requires=[
+        "gui",
+        "dialogs",
+    ],
+    stack_size=2048,
+    fap_description="Update Video Game Module's firmware directly from Flipper",
+    fap_version="1.0",
+    fap_icon="vgm_tool.png",
+    fap_category="Tools",
+    fap_icon_assets="icons",
+    fap_file_assets="files",
+)
