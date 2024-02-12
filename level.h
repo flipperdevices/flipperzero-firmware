@@ -63,7 +63,15 @@ void level_send_event(
  * @param description entity description, NULL for all entities
  * @return size_t entity count 
  */
-size_t level_get_entity_count(const Level* level, const EntityDescription* description);
+size_t level_entity_count(const Level* level, const EntityDescription* description);
+
+/**
+ * @brief Get the context of the level
+ * 
+ * @param level level instance
+ * @return void* context
+ */
+void* level_context_get(Level* level);
 
 #ifdef __cplusplus
 }

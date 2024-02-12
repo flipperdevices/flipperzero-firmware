@@ -219,7 +219,7 @@ void level_call_free(Level* level) {
     }
 }
 
-size_t level_get_entity_count(const Level* level, const EntityDescription* description) {
+size_t level_entity_count(const Level* level, const EntityDescription* description) {
     size_t count = 0;
     FOREACH(item, level->entities) {
         if(description == NULL || description == entity_description_get(*item)) {
@@ -242,4 +242,8 @@ size_t level_get_entity_count(const Level* level, const EntityDescription* descr
     }
 
     return count;
+}
+
+void* level_context_get(Level* level) {
+    return level->context;
 }
