@@ -10,12 +10,13 @@
 #include <furi_hal_random.h>
 #include <furi_hal_pwm.h>
 #include <furi_hal_power.h>
-#include <expansion/expansion.h>
 
 #include <storage/storage.h>
 #include <stream/buffered_file_stream.h>
 
 #include <locale/locale.h>
+
+#include <expansion/expansion.h>
 
 #define SCREEN_SIZE_X 128
 #define SCREEN_SIZE_Y 64
@@ -204,7 +205,6 @@ int32_t flipper_geiger_app() {
     mutexVal.mutex = furi_mutex_alloc(FuriMutexTypeNormal);
     if(!mutexVal.mutex) {
         furi_message_queue_free(event_queue);
-
         expansion_enable(expansion);
         furi_record_close(RECORD_EXPANSION);
         return 255;
