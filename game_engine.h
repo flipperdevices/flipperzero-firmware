@@ -1,5 +1,6 @@
 #pragma once
 #include <stdbool.h>
+#include "canvas.h"
 #include <gui/canvas.h>
 
 #ifdef __cplusplus

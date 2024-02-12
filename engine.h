@@ -5,6 +5,10 @@
 #include "entity.h"
 #include "game_manager.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
     float target_fps;
     bool show_fps;
@@ -15,3 +19,7 @@ typedef struct {
 } Game;
 
 extern const Game game;
+
+#ifdef __cplusplus
+}
+#endif

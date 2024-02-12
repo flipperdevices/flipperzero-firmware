@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
     float x;
     float y;
@@ -22,3 +26,7 @@ Vector vector_subf(Vector a, float b);
 Vector vector_mulf(Vector a, float b);
 
 Vector vector_divf(Vector a, float b);
+
+#ifdef __cplusplus
+}
+#endif
