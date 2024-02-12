@@ -78,30 +78,35 @@ bool mifare_fuzzer_scene_emulator_on_event(void* context, SceneManagerEvent even
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == MifareFuzzerEventStartAttack) {
             NfcDevice* nfc_device = NULL;
-            const MfClassicData* mf_classic_data = NULL;
             bool nfc_device_parsed = false;
             if(app->card_file_path) {
                 nfc_device = app->worker->nfc_device;
                 const char* path = furi_string_get_cstr(app->card_file_path);
                 if(nfc_device_load(nfc_device, path)) {
                     nfc_device_parsed = true;
-                    mf_classic_data = nfc_device_get_data(nfc_device, NfcProtocolMfClassic);
-                    if(mf_classic_data->type == MfClassicType1k) {
-                        app->card = MifareCardClassic1k;
-                    } else if(mf_classic_data->type == MfClassicType4k) {
-                        app->card = MifareCardClassic4k;
-                    } else if(nfc_device_get_protocol(nfc_device) == NfcProtocolMfUltralight) {
+                    NfcProtocol protocol = nfc_device_get_protocol(nfc_device);
+                    if(protocol == NfcProtocolMfClassic) {
+                        const MfClassicData* mfc_data = nfc_device_get_data(nfc_device, protocol);
+                        if(mfc_data->type == MfClassicType1k) {
+                            app->card = MifareCardClassic1k;
+                        } else if(mfc_data->type == MfClassicType4k) {
+                            app->card = MifareCardClassic4k;
+                        } else {
+                            nfc_device_parsed = false;
+                        }
+                    } else if(protocol == NfcProtocolMfUltralight) {
                         app->card = MifareCardUltralight;
                     }
-                    mifare_fuzzer_emulator_set_card(emulator, app->card, app->card_file_path);
+                    if(nfc_device_parsed) {
+                        mifare_fuzzer_emulator_set_card(emulator, app->card, app->card_file_path);
+                    }
                 }
             }
 
-            Iso14443_3aData* nfc_data;
-            if(mf_classic_data) {
-                nfc_data = mf_classic_data->iso14443_3a_data;
-            } else {
-                nfc_data = iso14443_3a_alloc();
+            Iso14443_3aData* nfc_data = iso14443_3a_alloc();
+            if(nfc_device_parsed) {
+                iso14443_3a_copy(
+                    nfc_data, nfc_device_get_data(nfc_device, NfcProtocolIso14443_3a));
             }
 
             // Stop worker
