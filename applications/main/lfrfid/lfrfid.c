@@ -1,6 +1,7 @@
 #include "lfrfid_i.h"
 #include <lfrfid_icons.h>
 #include <dolphin/dolphin.h>
+#include <applications/main/archive/helpers/archive_helpers_ext.h>
 
 //TODO: use .txt file in resources for passwords.
 const uint32_t default_passwords[] = {
@@ -213,6 +214,7 @@ int32_t lfrfid_app(void* p) {
 
     lfrfid_make_app_folder(app);
 
+    bool is_favorite = process_favorite_launch(&args);
     if(args && strlen(args)) {
         uint32_t rpc_ctx_ptr = 0;
         if(sscanf(args, "RPC %lX", &rpc_ctx_ptr) == 1) {
@@ -228,6 +230,7 @@ int32_t lfrfid_app(void* p) {
             if(lfrfid_load_key_data(app, app->file_path, true)) {
                 view_dispatcher_attach_to_gui(
                     app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
+                app->fav_timeout = is_favorite;
                 scene_manager_next_scene(app->scene_manager, LfRfidSceneEmulate);
                 dolphin_deed(DolphinDeedRfidEmulate);
             } else {

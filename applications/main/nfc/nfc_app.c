@@ -1,6 +1,7 @@
 #include "nfc_app_i.h"
 #include "nfc_icons.h"
 #include "helpers/protocol_support/nfc_protocol_support.h"
+#include <applications/main/archive/helpers/archive_helpers_ext.h>
 
 #include <dolphin/dolphin.h>
 
@@ -494,6 +495,7 @@ int32_t nfc_app(void* p) {
     NfcApp* nfc = nfc_app_alloc();
     const char* args = p;
 
+    bool is_favorite = process_favorite_launch((char**)&args);
     if(args && strlen(args)) {
         if(sscanf(args, "RPC %p", &nfc->rpc_ctx) == 1) {
             rpc_system_app_set_callback(nfc->rpc_ctx, nfc_app_rpc_command_callback, nfc);
@@ -507,6 +509,7 @@ int32_t nfc_app(void* p) {
 
             furi_string_set(nfc->file_path, args);
             if(nfc_load_file(nfc, nfc->file_path, false)) {
+                nfc->fav_timeout = is_favorite;
                 nfc_show_initial_scene_for_device(nfc);
             } else {
                 view_dispatcher_stop(nfc->view_dispatcher);

@@ -52,6 +52,7 @@ typedef struct {
     bool sort_dirs_first;
     bool dark_mode;
     uint32_t charge_cap;
+    uint32_t favorite_timeout;
     SpiHandle spi_cc1101_handle;
     SpiHandle spi_nrf24_handle;
     UARTChannel uart_esp_channel;

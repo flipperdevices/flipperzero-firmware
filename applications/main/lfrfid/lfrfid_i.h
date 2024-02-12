@@ -136,6 +136,7 @@ struct LfRfid {
     uint8_t write_block;
     //uint8_t read_page;
     //uint8_t read_block;
+    bool fav_timeout;
 };
 
 typedef enum {

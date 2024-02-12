@@ -2,6 +2,7 @@
 
 #include <toolbox/path.h>
 #include <dolphin/dolphin.h>
+#include <applications/main/archive/helpers/archive_helpers_ext.h>
 
 #define TAG "IButtonApp"
 
@@ -266,13 +267,14 @@ void ibutton_widget_callback(GuiButtonType result, InputType type, void* context
     }
 }
 
-int32_t ibutton_app(void* arg) {
+int32_t ibutton_app(char* arg) {
     iButton* ibutton = ibutton_alloc();
 
     ibutton_make_app_folder(ibutton);
 
     bool key_loaded = false;
 
+    bool is_favorite = process_favorite_launch(&arg);
     if((arg != NULL) && (strlen(arg) != 0)) {
         if(sscanf(arg, "RPC %lX", (uint32_t*)&ibutton->rpc) == 1) {
             FURI_LOG_D(TAG, "Running in RPC mode");
@@ -303,7 +305,11 @@ int32_t ibutton_app(void* arg) {
         }
     }
 
-    view_dispatcher_run(ibutton->view_dispatcher);
+    if(is_favorite) {
+        favorite_timeout_run(ibutton->view_dispatcher, ibutton->scene_manager);
+    } else {
+        view_dispatcher_run(ibutton->view_dispatcher);
+    }
 
     if(ibutton->rpc) {
         rpc_system_app_set_callback(ibutton->rpc, NULL, NULL);

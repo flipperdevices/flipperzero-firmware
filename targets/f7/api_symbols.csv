@@ -1,6 +1,7 @@
 entry,status,name,type,params
 Version,+,50.3,,
 Header,+,applications/drivers/subghz/cc1101_ext/cc1101_ext_interconnect.h,,
+Header,+,applications/main/archive/helpers/archive_helpers_ext.h,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
 Header,+,applications/services/cli/cli_vcp.h,,
@@ -951,6 +952,8 @@ Function,-,expm1l,long double,long double
 Function,-,fabs,double,double
 Function,-,fabsf,float,float
 Function,-,fabsl,long double,long double
+Function,+,favorite_timeout_callback,void,void*
+Function,+,favorite_timeout_run,void,"ViewDispatcher*, SceneManager*"
 Function,-,fclose,int,FILE*
 Function,-,fcloseall,int,
 Function,-,fdim,double,"double, double"
@@ -2716,6 +2719,7 @@ Function,+,powf,float,"float, float"
 Function,-,powl,long double,"long double, long double"
 Function,+,pretty_format_bytes_hex_canonical,void,"FuriString*, size_t, const char*, const uint8_t*, size_t"
 Function,-,printf,int,"const char*, ..."
+Function,+,process_favorite_launch,_Bool,char**
 Function,+,property_value_out,void,"PropertyValueContext*, const char*, unsigned int, ..."
 Function,+,protocol_dict_alloc,ProtocolDict*,"const ProtocolBase**, size_t"
 Function,+,protocol_dict_decoders_feed,ProtocolId,"ProtocolDict*, _Bool, uint32_t"
@@ -2798,8 +2802,9 @@ Function,-,rintl,long double,long double
 Function,-,round,double,double
 Function,+,roundf,float,float
 Function,-,roundl,long double,long double
+Function,+,rpc_get_sessions_count,size_t,Rpc*
 Function,+,rpc_session_close,void,RpcSession*
-Function,+,rpc_session_feed,size_t,"RpcSession*, uint8_t*, size_t, uint32_t"
+Function,+,rpc_session_feed,size_t,"RpcSession*, const uint8_t*, size_t, uint32_t"
 Function,+,rpc_session_get_available_size,size_t,RpcSession*
 Function,+,rpc_session_get_owner,RpcOwner,RpcSession*
 Function,+,rpc_session_open,RpcSession*,"Rpc*, RpcOwner"

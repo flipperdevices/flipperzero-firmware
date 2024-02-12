@@ -2,6 +2,8 @@
 
 #include "nfc_app_i.h"
 
+#include <cfw/cfw.h>
+
 #define NFC_EMULATION_TIME_MAX_MS (5 * 60 * 1000)
 
 FuriTimer* timer_auto_exit;
@@ -21,8 +23,12 @@ void nfc_scene_emulate_on_enter(void* context) {
     timer_auto_exit =
         furi_timer_alloc(nfc_scene_emulate_timer_callback, FuriTimerTypeOnce, instance);
 
-    if(!furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug))
-        furi_timer_start(timer_auto_exit, NFC_EMULATION_TIME_MAX_MS);
+    if(!furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug) || instance->fav_timeout)
+        furi_timer_start(
+            timer_auto_exit,
+            instance->fav_timeout ?
+                CFW_SETTINGS()->favorite_timeout * furi_kernel_get_tick_frequency() :
+                NFC_EMULATION_TIME_MAX_MS);
 }
 
 bool nfc_scene_emulate_on_event(void* context, SceneManagerEvent event) {
