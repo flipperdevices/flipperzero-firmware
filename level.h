@@ -56,6 +56,15 @@ void level_send_event(
     uint32_t type,
     EntityEventValue value);
 
+/**
+ * @brief Get the count of entities of a certain type in the level, or all entities if description is NULL
+ * 
+ * @param level level instance
+ * @param description entity description, NULL for all entities
+ * @return size_t entity count 
+ */
+size_t level_get_entity_count(const Level* level, const EntityDescription* description);
+
 #ifdef __cplusplus
 }
 #endif

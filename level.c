@@ -135,6 +135,12 @@ void level_send_event(
             entity_send_event(sender, *item, level->manager, type, value);
         }
     }
+
+    FOREACH(item, level->to_add) {
+        if(receiver_desc == entity_description_get(*item) || receiver_desc == NULL) {
+            entity_send_event(sender, *item, level->manager, type, value);
+        }
+    }
 }
 
 static void level_process_update(Level* level, GameManager* manager) {
@@ -211,4 +217,29 @@ void level_call_free(Level* level) {
     if(level->behaviour->free) {
         level->behaviour->free(level, level->manager, level->context);
     }
+}
+
+size_t level_get_entity_count(const Level* level, const EntityDescription* description) {
+    size_t count = 0;
+    FOREACH(item, level->entities) {
+        if(description == NULL || description == entity_description_get(*item)) {
+            count++;
+        }
+    }
+
+    // subtract entities that are in to_remove
+    FOREACH(item, level->to_remove) {
+        if(description == NULL || description == entity_description_get(*item)) {
+            count--;
+        }
+    }
+
+    // add entities that are in to_add
+    FOREACH(item, level->to_add) {
+        if(description == NULL || description == entity_description_get(*item)) {
+            count++;
+        }
+    }
+
+    return count;
 }
