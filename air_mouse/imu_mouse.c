@@ -10,9 +10,9 @@
 #define FILTER_SAMPLE_FREQ 1000.f
 #define FILTER_BETA 0.08f
 
-#define HID_RATE_DIV 5
-
-#define SENSITIVITY_K 30.f
+#define SCROLL_RATE_DIV 50
+#define SCROLL_SENSITIVITY_K 0.25f
+#define MOUSE_SENSITIVITY_K 30.f
 #define EXP_RATE 1.1f
 
 #define IMU_CALI_AVG 64
@@ -24,11 +24,13 @@ typedef enum {
     ImuMouseRightRelease = (1 << 3),
     ImuMouseLeftPress = (1 << 4),
     ImuMouseLeftRelease = (1 << 5),
+    ImuMouseScrollOn = (1 << 6),
+    ImuMouseScrollOff = (1 << 7),
 } ImuThreadFlags;
 
 #define FLAGS_ALL                                                                 \
     (ImuMouseStop | ImuMouseNewData | ImuMouseRightPress | ImuMouseRightRelease | \
-     ImuMouseLeftPress | ImuMouseLeftRelease)
+     ImuMouseLeftPress | ImuMouseLeftRelease | ImuMouseScrollOn | ImuMouseScrollOff)
 
 typedef struct {
     float q0;
@@ -43,6 +45,7 @@ typedef struct {
 struct ImuThread {
     FuriThread* thread;
     ICM42688P* icm42688p;
+    const ImuHidApi* hid;
     ImuProcessedData processed_data;
 };
 
@@ -139,15 +142,17 @@ static int8_t mouse_exp_rate(float in) {
 static int32_t imu_thread(void* context) {
     furi_assert(context);
     ImuThread* imu = context;
+    furi_assert(imu->hid);
 
     float yaw_last = 0.f;
     float pitch_last = 0.f;
+    float scroll_pitch = 0.f;
     float diff_x = 0.f;
     float diff_y = 0.f;
     uint32_t sample_cnt = 0;
+    uint32_t hid_rate_div = FILTER_SAMPLE_FREQ / imu->hid->report_rate_max;
 
-    FuriHalUsbInterface* usb_mode_prev = furi_hal_usb_get_config();
-    furi_hal_usb_set_config(&usb_hid, NULL);
+    bool scroll_mode = false;
 
     calibrate_gyro(imu);
 
@@ -168,16 +173,23 @@ static int32_t imu_thread(void* context) {
         }
 
         if(events & ImuMouseRightPress) {
-            furi_hal_hid_mouse_press(HID_MOUSE_BTN_RIGHT);
+            imu->hid->mouse_key_press(HID_MOUSE_BTN_RIGHT);
         }
         if(events & ImuMouseRightRelease) {
-            furi_hal_hid_mouse_release(HID_MOUSE_BTN_RIGHT);
+            imu->hid->mouse_key_release(HID_MOUSE_BTN_RIGHT);
         }
         if(events & ImuMouseLeftPress) {
-            furi_hal_hid_mouse_press(HID_MOUSE_BTN_LEFT);
+            imu->hid->mouse_key_press(HID_MOUSE_BTN_LEFT);
         }
         if(events & ImuMouseLeftRelease) {
-            furi_hal_hid_mouse_release(HID_MOUSE_BTN_LEFT);
+            imu->hid->mouse_key_release(HID_MOUSE_BTN_LEFT);
+        }
+        if(events & ImuMouseScrollOn) {
+            scroll_pitch = pitch_last;
+            scroll_mode = true;
+        }
+        if(events & ImuMouseScrollOff) {
+            scroll_mode = false;
         }
 
         if(events & ImuMouseNewData) {
@@ -187,23 +199,43 @@ static int32_t imu_thread(void* context) {
                 icm42688_fifo_read(imu->icm42688p, &data);
                 imu_process_data(imu, &data);
 
-                if((imu->processed_data.pitch > -75.f) && (imu->processed_data.pitch < 75.f) &&
-                   (isfinite(imu->processed_data.pitch) != 0)) {
-                    diff_x += imu_angle_diff(yaw_last, imu->processed_data.yaw) * SENSITIVITY_K;
-                    diff_y +=
-                        imu_angle_diff(pitch_last, -imu->processed_data.pitch) * SENSITIVITY_K;
+                if((imu->processed_data.pitch < -75.f) || (imu->processed_data.pitch > 75.f) ||
+                   (isfinite(imu->processed_data.pitch) == 0)) {
+                    continue;
+                }
+
+                if(scroll_mode) {
+                    yaw_last = imu->processed_data.yaw;
+                    pitch_last = -imu->processed_data.pitch;
+
+                    sample_cnt++;
+                    if(sample_cnt >= SCROLL_RATE_DIV) {
+                        sample_cnt = 0;
+
+                        float scroll_speed =
+                            -imu_angle_diff(scroll_pitch, -imu->processed_data.pitch) *
+                            SCROLL_SENSITIVITY_K;
+                        scroll_speed = CLAMP(scroll_speed, 127.f, -127.f);
+
+                        imu->hid->mouse_scroll(scroll_speed);
+                    }
+                } else {
+                    diff_x +=
+                        imu_angle_diff(yaw_last, imu->processed_data.yaw) * MOUSE_SENSITIVITY_K;
+                    diff_y += imu_angle_diff(pitch_last, -imu->processed_data.pitch) *
+                              MOUSE_SENSITIVITY_K;
 
                     yaw_last = imu->processed_data.yaw;
                     pitch_last = -imu->processed_data.pitch;
 
                     sample_cnt++;
-                    if(sample_cnt >= HID_RATE_DIV) {
+                    if(sample_cnt >= hid_rate_div) {
                         sample_cnt = 0;
 
                         float mouse_x = CLAMP(diff_x, 127.f, -127.f);
                         float mouse_y = CLAMP(diff_y, 127.f, -127.f);
 
-                        furi_hal_hid_mouse_move(mouse_exp_rate(mouse_x), mouse_exp_rate(mouse_y));
+                        imu->hid->mouse_move(mouse_exp_rate(mouse_x), mouse_exp_rate(mouse_y));
 
                         diff_x -= (float)(int8_t)mouse_x;
                         diff_y -= (float)(int8_t)mouse_y;
@@ -213,8 +245,7 @@ static int32_t imu_thread(void* context) {
         }
     }
 
-    furi_hal_hid_mouse_release(HID_MOUSE_BTN_RIGHT | HID_MOUSE_BTN_LEFT);
-    furi_hal_usb_set_config(usb_mode_prev, NULL);
+    imu->hid->mouse_key_release(HID_MOUSE_BTN_RIGHT | HID_MOUSE_BTN_LEFT);
 
     icm42688_fifo_disable(imu->icm42688p);
 
@@ -233,9 +264,16 @@ void imu_mouse_key_press(ImuThread* imu, ImuMouseKey key, bool state) {
     furi_thread_flags_set(furi_thread_get_id(imu->thread), flag);
 }
 
-ImuThread* imu_start(ICM42688P* icm42688p) {
+void imu_mouse_scroll_mode(ImuThread* imu, bool enable) {
+    furi_assert(imu);
+    uint32_t flag = (enable) ? (ImuMouseScrollOn) : (ImuMouseScrollOff);
+    furi_thread_flags_set(furi_thread_get_id(imu->thread), flag);
+}
+
+ImuThread* imu_start(ICM42688P* icm42688p, const ImuHidApi* hid) {
     ImuThread* imu = malloc(sizeof(ImuThread));
     imu->icm42688p = icm42688p;
+    imu->hid = hid;
     imu->thread = furi_thread_alloc_ex("ImuThread", 4096, imu_thread, imu);
     furi_thread_start(imu->thread);
 

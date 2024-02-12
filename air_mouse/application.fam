@@ -1,6 +1,7 @@
 App(
-    appid="air_mouse",
+    appid="vgm_air_mouse",
     name="Air Mouse",
+    fap_description="Video Game Module Air Mouse",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="air_mouse_app",
     stack_size=4 * 1024,
