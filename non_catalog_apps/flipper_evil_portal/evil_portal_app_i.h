@@ -42,8 +42,6 @@ struct Evil_PortalApp {
     TextInput* text_input;
     DialogsApp* dialogs;
     FuriString* file_path;
-    Loading* loading;
-    ViewStack* view_stack;
 
     int selected_menu_index;
     int selected_option_index[NUM_MENU_ITEMS];
