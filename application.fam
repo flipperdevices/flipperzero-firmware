@@ -16,6 +16,6 @@ App(
     order=20,
     fap_author="@Round-Pi & (Fixes by @Willy-JL)",
     fap_weburl="https://github.com/Round-Pi/flipperzero-text2sam",
-    fap_version="1.2",
+    fap_version="1.3",
     fap_description="Convert text to speech on your Flipper Zero with SAM (Software Automatic Mouth).",
 )
