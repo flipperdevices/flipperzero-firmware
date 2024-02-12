@@ -127,6 +127,7 @@ void addPeriodToTVMString() {
     //TODO: handle this
 }
 void computeTVM() {
+    tvm_cpt_now = true;
 }
 
 static void app_input_callback(InputEvent* input_event, void* ctx) {
@@ -156,6 +157,8 @@ int32_t fin_calc(void* p) {
     while(running) {
         if(furi_message_queue_get(event_queue, &event, 100) == FuriStatusOk) {
             if((event.type == InputTypePress)) {
+                //something was pressed, denoting calculation is probably meaningless now
+                tvm_cpt_now = false;
                 // Input happens here
                 switch(event.key) {
                 case InputKeyUp:
