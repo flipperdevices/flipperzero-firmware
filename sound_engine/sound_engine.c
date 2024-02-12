@@ -14,10 +14,6 @@ void sound_engine_init(
         free(sound_engine->audio_buffer);
     }
 
-    if(sound_engine->sine_lut) {
-        free(sound_engine->sine_lut);
-    }
-
     memset(sound_engine, 0, sizeof(SoundEngine));
 
     sound_engine->audio_buffer = malloc(audio_buffer_size * sizeof(sound_engine->audio_buffer[0]));
