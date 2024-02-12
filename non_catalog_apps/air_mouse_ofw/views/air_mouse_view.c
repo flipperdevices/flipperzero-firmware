@@ -1,7 +1,7 @@
 #include "air_mouse_view.h"
 #include <gui/elements.h>
 #include "../imu_mouse.h"
-#include "air_mouse_ofw_icons.h"
+#include "vgm_air_mouse_icons.h"
 
 struct AirMouseView {
     View* view;
