@@ -10,6 +10,10 @@
 // Apparently The highest balance supported by TuLlave is 999999 COP
 #define TULLAVE_BAL_LEN 6
 
+// APDU SW1 byte indicating the response from the card was successful
+// This is used in the first read of the card (read card number)
+#define APDU_SW1_GOOD_RESPONSE 0x6f
+
 /**
  * Sends the ADPU Command to read tullave balance and parses the result
  * The iso_poller is obtained in the NFCPoller callback

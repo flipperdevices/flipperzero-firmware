@@ -57,12 +57,11 @@ bool tullave_read_info_iso14443_4a_card_number(Iso14443_4aPoller* iso_poller, Tu
     bit_buffer_copy_bytes(tx_data, read_card_number_cmd, sizeof(read_card_number_cmd));
 
     Iso14443_4aError error = iso14443_4a_poller_send_block(iso_poller, tx_data, rx_data);
+    const uint8_t* apdu_resp = &bit_buffer_get_data(rx_data)[TULLAVE_NUM_CARD_OFFSET];
 
-    if(error == Iso14443_4aErrorNone) {
+    if(error == Iso14443_4aErrorNone && apdu_resp[0] == APDU_SW1_GOOD_RESPONSE) {
         uint8_t hexa_card_num[TULLAVE_CARD_NUM_LEN];
-        const uint8_t* raw_card_num = &bit_buffer_get_data(rx_data)[TULLAVE_NUM_CARD_OFFSET];
-        uint8_to_hex_chars(raw_card_num, hexa_card_num, TULLAVE_CARD_NUM_LEN);
-
+        uint8_to_hex_chars(apdu_resp, hexa_card_num, TULLAVE_CARD_NUM_LEN);
         data->card_number = furi_string_alloc_printf("%s", hexa_card_num);
         return true;
     }
@@ -88,9 +87,11 @@ void tullave_read_info_iso14443_4a(Iso14443_4aPoller* iso_poller, TuLlaveApp* in
 
     // Read card number
     bool was_num_read = tullave_read_info_iso14443_4a_card_number(iso_poller, info);
+    // If card number could not be read, it does not make sense to try read other sections
     if(!was_num_read) {
         furi_string_free(info->card_number);
-        info->card_number = furi_string_alloc_set_str("ERR. Unable to read number.");
+        info->card_number = furi_string_alloc_set_str("ERR. Card not supported.");
+        return;
     }
 
     // Read card balance
