@@ -79,7 +79,7 @@ static void draw_digit(Canvas* canvas, uint8_t row, uint8_t column, uint8_t valu
     uint8_t top = FRAME_TOP + 1 + (row * (CELL_INNER_SIZE + 1));
 
     for(uint8_t r = 0; r < CELL_INNER_SIZE; r++) {
-        for(u_int8_t c = 0; c < CELL_INNER_SIZE; c++) {
+        for(uint8_t c = 0; c < CELL_INNER_SIZE; c++) {
             if(digits[value - 1][r][c] == 1) {
                 canvas_draw_dot(canvas, left + c, top + r);
             }
@@ -268,8 +268,8 @@ void move_down(uint8_t table[CELLS_COUNT][CELLS_COUNT], MoveResult* const move_r
 void add_new_digit(GameState* const game_state) {
     uint8_t empty_cell_indexes[CELLS_COUNT * CELLS_COUNT];
     uint8_t empty_cells_count = 0;
-    for(u_int8_t i = 0; i < CELLS_COUNT; i++) {
-        for(u_int8_t j = 0; j < CELLS_COUNT; j++) {
+    for(uint8_t i = 0; i < CELLS_COUNT; i++) {
+        for(uint8_t j = 0; j < CELLS_COUNT; j++) {
             if(game_state->table[i][j] == 0) {
                 empty_cell_indexes[empty_cells_count++] = i * CELLS_COUNT + j;
             }
@@ -278,8 +278,8 @@ void add_new_digit(GameState* const game_state) {
     if(empty_cells_count == 0) return;
 
     int random_empty_cell_index = empty_cell_indexes[random() % empty_cells_count];
-    u_int8_t row = random_empty_cell_index / CELLS_COUNT;
-    u_int8_t col = random_empty_cell_index % CELLS_COUNT;
+    uint8_t row = random_empty_cell_index / CELLS_COUNT;
+    uint8_t col = random_empty_cell_index % CELLS_COUNT;
 
     int random_value_percent = random() % 100;
     game_state->table[row][col] = random_value_percent < 90 ? 1 : 2; // 90% for 2, 25% for 4
@@ -339,7 +339,7 @@ bool is_game_over(GameState* const game_state) {
 
     // check if table contains at least one empty cell
     for(uint8_t i = 0; i < CELLS_COUNT; i++) {
-        for(u_int8_t j = 0; j < CELLS_COUNT; j++) {
+        for(uint8_t j = 0; j < CELLS_COUNT; j++) {
             if(game_state->table[i][j] == 0) {
                 FURI_LOG_I("is_game_over", "has empty cells");
                 return false;
