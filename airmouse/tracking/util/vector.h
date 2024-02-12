@@ -17,6 +17,7 @@
 #define CARDBOARD_SDK_UTIL_VECTOR_H_
 
 #include <array>
+#include <cstddef>
 
 namespace cardboard {
 
