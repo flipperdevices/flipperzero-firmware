@@ -139,7 +139,7 @@ bool esp_flasher_scene_quick_on_event(void* context, SceneManagerEvent event) {
             part = APP_ASSETS_PATH("marauder/esp32_marauder.ino.partitions.bin");
             app0 = APP_ASSETS_PATH("marauder/boot_app0.bin");
             firm =
-                APP_ASSETS_PATH("marauder/WROOM/esp32_marauder.marauder_dev_board_pro.bin");
+                APP_ASSETS_PATH("marauder/WROOM/esp32_marauder.dev_board_pro.bin");
             break;
 
         default:
