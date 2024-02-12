@@ -138,7 +138,7 @@ void picopass_scene_read_card_success_on_enter(void* context) {
 
         if(no_key) {
             furi_string_cat_printf(key_str, "No Key: used NR-MAC");
-        } else if(pacs->key) {
+        } else {
             furi_string_cat_printf(key_str, "Key: ");
             uint8_t key[PICOPASS_BLOCK_LEN];
             memcpy(key, &pacs->key, PICOPASS_BLOCK_LEN);
