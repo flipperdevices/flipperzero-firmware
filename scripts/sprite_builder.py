@@ -39,17 +39,24 @@ def xbm2fxbm(data):
 def process_sprites(input_dir, output_dir):
     for root, dirs, files in os.walk(input_dir):
         for file in files:
-            input_file_path = os.path.join(root, file)
-            rel_path = os.path.relpath(input_file_path, input_dir)
-            new_rel_path = os.path.splitext(rel_path)[0] + ".fxbm"
-            output_file_path = os.path.join(output_dir, new_rel_path)
+            if file.startswith('.'):
+                continue
+            
+            try:
+                input_file_path = os.path.join(root, file)
+                rel_path = os.path.relpath(input_file_path, input_dir)
+                new_rel_path = os.path.splitext(rel_path)[0] + ".fxbm"
+                output_file_path = os.path.join(output_dir, new_rel_path)
 
-            os.makedirs(os.path.dirname(output_file_path), exist_ok=True)
+                os.makedirs(os.path.dirname(output_file_path), exist_ok=True)
 
-            print(f"Converting '{rel_path}' to '{new_rel_path}'")
-            with open(output_file_path, "wb") as f:
+                print(f"Converting '{rel_path}' to '{new_rel_path}'")
                 xbm = image2xbm(input_file_path)
-                f.write(xbm2fxbm(xbm))
+                img_data = xbm2fxbm(xbm)
+                with open(output_file_path, "wb") as f:
+                    f.write(img_data)
+            except Exception as e:
+                print(f"Cannot convert '{rel_path}': {e}")
 
 def clear_directory(directory):
     for root, dirs, files in os.walk(directory, topdown=False):
