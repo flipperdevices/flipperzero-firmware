@@ -98,7 +98,7 @@ int32_t uhf_worker_task(void* ctx) {
 
 UHFWorker* uhf_worker_alloc() {
     UHFWorker* uhf_worker = (UHFWorker*)malloc(sizeof(UHFWorker));
-    uhf_worker->thread = furi_thread_alloc_ex("UHFWorker", 8 * 1024, uhf_worker_task, uhf_worker);
+    uhf_worker->thread = furi_thread_alloc_ex("UHFWorker", UHF_WORKER_STACK_SIZE, uhf_worker_task, uhf_worker);
     uhf_worker->module = m100_module_alloc();
     uhf_worker->callback = NULL;
     uhf_worker->ctx = NULL;

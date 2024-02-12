@@ -4,6 +4,8 @@
 #include <furi_hal.h>
 #include "uhf_module.h"
 
+#define UHF_WORKER_STACK_SIZE 1 * 1024
+
 typedef enum {
     // Init states
     UHFWorkerStateNone,

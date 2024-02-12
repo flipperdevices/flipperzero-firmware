@@ -16,19 +16,21 @@ UHFUart* uhf_uart_alloc(){
     uart->bus = FuriHalBusUSART1;
     uart->handle = furi_hal_serial_control_acquire(FuriHalSerialIdUsart);
     uart->init_by_app = !furi_hal_bus_is_enabled(uart->bus);
-    uart->baudrate = UHF_UART_DEFAULT_BAUDRATE;
     uart->tick = UHF_UART_WAIT_TICK;
     if(uart->init_by_app){
         furi_hal_serial_init(uart->handle, uart->baudrate);
     }
-    uart->callback = NULL;
+    uhf_uart_set_baudrate(uart, UHF_UART_DEFAULT_BAUDRATE);
     uart->buffer = buffer_alloc(UHF_UART_RX_BUFFER_SIZE);
     uart->thread = furi_thread_alloc_ex("UHFUartWorker", UHF_UART_WORKER_STACK_SIZE, NULL, uart);
     furi_thread_start(uart->thread);
+    uhf_uart_set_receive_byte_callback(uart, uhf_uart_default_rx_callback, uart, false);
+    return uart;
 }   
 
 void uhf_uart_free(UHFUart* uart){
-    furi_thread_stop(uart->thread);
+    // furi_thread_flags_set(furi_thread_get_id(uart->thread), UHFUartWorkerExitingFlag);
+    furi_thread_join(uart->thread);
     furi_thread_free(uart->thread);
     buffer_free(uart->buffer);
     if(uart->init_by_app){
@@ -38,15 +40,15 @@ void uhf_uart_free(UHFUart* uart){
     free(uart);
 }
 
-void uhf_uart_set_receive_byte_callback(UHFUart* uart, FuriHalSerialAsyncRxCallback callback, bool report_errors, void *ctx){
-    furi_hal_serial_set_async_rx_callback(uart->handle, callback, report_errors, ctx);
+void uhf_uart_set_receive_byte_callback(UHFUart* uart, FuriHalSerialAsyncRxCallback callback, void *ctx, bool report_errors){
+    furi_hal_serial_async_rx_start(uart->handle, callback, ctx, report_errors);
 }
 
 void uhf_uart_send(UHFUart* uart, uint8_t* data, size_t size){
     furi_hal_serial_tx(uart->handle, data, size);
 }
 
-void uhf_uart_send_wait(UHFUart* uart, uint8_t* data, uint16_t size){
+void uhf_uart_send_wait(UHFUart* uart, uint8_t* data, size_t size){
     uhf_uart_send(uart, data, size);
     furi_hal_serial_tx_wait_complete(uart->handle);
 }
