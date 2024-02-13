@@ -79,6 +79,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [JS serial module fixes #3445 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/3445)
 - [Many Updates, Cleanup and Merge Fixes (By xMasterX & Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/010720b1f48eee5f66f6c48e49a267290345f73f)
 - Updated: [PacMan WIP v0.1 (By DanieleMaffi)](https://github.com/DanieleMaffi/flipper-pacman)
+- [Fix plugin symbol warnings (imported from fap api table) (By Willy-JL)]()
 
 <a name="release">
 

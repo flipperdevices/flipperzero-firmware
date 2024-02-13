@@ -290,6 +290,34 @@ def _validate_app_imports(target, source, env):
         for line in f:
             app_syms.add(line.split()[0])
     unresolved_syms = app_syms - sdk_cache.get_valid_names()
+    ignore_syms = [
+        sym
+        for sym in unresolved_syms
+        if sym.startswith(
+            (
+                # advanced_plugin
+                "app_api_accumulator_",
+                # js_
+                "js_delay_with_flags",
+                "js_flags_wait",
+                "js_flags_set",
+                # totp_
+                "totp_",
+                "token_info_",
+                "memset_s",
+            )
+        )
+        and any(
+            prefix in source[0].path
+            for prefix in [
+                "advanced_plugin",
+                "js_",
+                "totp_",
+            ]
+        )
+    ]
+    for sym in ignore_syms:
+        unresolved_syms.remove(sym)
     if unresolved_syms:
         warning_msg = fg.brightyellow(
             f"{source[0].path}: app may not be runnable. Symbols not resolved using firmware's API: "
