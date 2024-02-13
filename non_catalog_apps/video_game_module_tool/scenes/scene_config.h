@@ -1,0 +1,7 @@
+ADD_SCENE(probe, Probe)
+ADD_SCENE(start, Start)
+ADD_SCENE(confirm, Confirm)
+ADD_SCENE(install, Install)
+ADD_SCENE(file_select, FileSelect)
+ADD_SCENE(success, Success)
+ADD_SCENE(error, Error)
