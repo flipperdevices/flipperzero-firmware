@@ -99,6 +99,19 @@ typedef struct {
 typedef enum { GhostsModeScatter, GhostsModeChase, GhostsModeFrightened } GhostsMode;
 
 typedef struct {
+    uint8_t x;
+    uint8_t y;
+} Point;
+
+typedef struct start_positions {
+    Point* pacman;
+    Point* blinky;
+    Point* pinky;
+    Point* inky;
+    Point* clyde;
+} StartPositions;
+
+typedef struct {
     uint32_t setting_1_index; // The team color setting index
     FuriString* setting_2_name; // The name setting
     uint8_t x; // The x coordinate
@@ -109,25 +122,8 @@ typedef struct {
     Character* clyde;
     uint8_t score;
     GhostsMode ghosts_mode;
+    StartPositions* start_positions;
 } PacmanGameModel;
-
-typedef struct start_positions {
-    uint8_t pacman_x;
-    uint8_t pacman_y;
-    uint8_t blinky_x;
-    uint8_t blinky_y;
-    uint8_t pinky_x;
-    uint8_t pinky_y;
-    uint8_t inky_x;
-    uint8_t inky_y;
-    uint8_t clyde_x;
-    uint8_t clyde_y;
-} StartPositions;
-
-typedef struct {
-    uint8_t x;
-    uint8_t y;
-} Point;
 
 /**
  * @brief      Callback for exiting the application.
@@ -231,6 +227,16 @@ static const char* map_config[] = {
     "|CCCCCCCCCCCCCCCCCCCCCCCCCC|", "3--------------------------4", "                            ",
     "                            " };
 
+static StartPositions* start_positions_alloc() {
+    StartPositions* positions = (StartPositions*)malloc(sizeof(StartPositions));
+    positions->pacman = (Point*)malloc(sizeof(Point));
+    positions->blinky = (Point*)malloc(sizeof(Point));
+    positions->inky = (Point*)malloc(sizeof(Point));
+    positions->pinky = (Point*)malloc(sizeof(Point));
+    positions->clyde = (Point*)malloc(sizeof(Point));
+    return positions;
+}
+
 /**
  * @brief      Sets up the map matrix according to the config matrix.
  * @details    Parses the characters in the config matrix and creates the correspoding enum matrix.
@@ -238,7 +244,7 @@ static const char* map_config[] = {
  * @return     The initialized Entity matrix.
  */
 static StartPositions* setup_map(Entity map[][MAP_SIZE_W]) {
-    StartPositions* positions = (StartPositions*)malloc(sizeof(StartPositions));
+    StartPositions* positions = start_positions_alloc();
     for (int i = 0; i < MAP_SIZE_H; i++) {
         for (int j = 0; j < MAP_SIZE_W; j++) {
             int symbol = map_config[i][j];
@@ -266,28 +272,28 @@ static StartPositions* setup_map(Entity map[][MAP_SIZE_W]) {
                 break;
             case 'P':
                 map[i][j] = EntityPacman;
-                positions->pacman_x = i * WALL_SIZE;
-                positions->pacman_y = j * WALL_SIZE;
+                positions->pacman->x = i * WALL_SIZE;
+                positions->pacman->y = j * WALL_SIZE;
                 break;
             case 'c':
                 map[i][j] = EntityPacman;
-                positions->clyde_x = i * WALL_SIZE;
-                positions->clyde_y = j * WALL_SIZE;
+                positions->clyde->x = i * WALL_SIZE;
+                positions->clyde->y = j * WALL_SIZE;
                 break;
             case 'p':
                 map[i][j] = EntityGhost;
-                positions->pinky_x = i * WALL_SIZE;
-                positions->pinky_y = j * WALL_SIZE;
+                positions->pinky->x = i * WALL_SIZE;
+                positions->pinky->y = j * WALL_SIZE;
                 break;
             case 'i':
                 map[i][j] = EntityGhost;
-                positions->inky_x = i * WALL_SIZE;
-                positions->inky_y = j * WALL_SIZE;
+                positions->inky->x = i * WALL_SIZE;
+                positions->inky->y = j * WALL_SIZE;
                 break;
             case 'b':
                 map[i][j] = EntityGhost;
-                positions->blinky_x = i * WALL_SIZE;
-                positions->blinky_y = j * WALL_SIZE;
+                positions->blinky->x = i * WALL_SIZE;
+                positions->blinky->y = j * WALL_SIZE;
                 break;
             default:
                 map[i][j] = EntityVoid;
@@ -940,15 +946,15 @@ static PacmanApp* pacman_app_alloc(StartPositions* positions) {
     model->setting_1_index = setting_1_index;
     model->setting_2_name = setting_2_name;
     model->pacman =
-        character_alloc(model->pacman, positions->pacman_x, positions->pacman_y, DirectionRight);
+        character_alloc(model->pacman, positions->pacman->x, positions->pacman->y, DirectionRight);
     model->blinky =
-        character_alloc(model->blinky, positions->blinky_x, positions->blinky_y, DirectionIdle);
+        character_alloc(model->blinky, positions->blinky->x, positions->blinky->y, DirectionIdle);
     model->pinky =
-        character_alloc(model->pinky, positions->pinky_x, positions->pinky_y, DirectionIdle);
+        character_alloc(model->pinky, positions->pinky->x, positions->pinky->y, DirectionIdle);
     model->inky =
-        character_alloc(model->inky, positions->inky_x, positions->inky_y, DirectionIdle);
+        character_alloc(model->inky, positions->inky->x, positions->inky->y, DirectionIdle);
     model->clyde =
-        character_alloc(model->clyde, positions->clyde_x, positions->clyde_y, DirectionIdle);
+        character_alloc(model->clyde, positions->clyde->x, positions->clyde->y, DirectionIdle);
     view_dispatcher_add_view(app->view_dispatcher, PacmanViewGame, app->view_game);
 
     model->ghosts_mode = GhostsModeChase;
