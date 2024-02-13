@@ -15,6 +15,7 @@ typedef struct AppState {
     bool waitForCode;
     FuriString* r_code;
     FuriString* s_code;
+    FcomScene save_code_return_scene;
 } AppState;
 
 typedef struct App {

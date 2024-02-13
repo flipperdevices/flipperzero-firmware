@@ -4,6 +4,7 @@
 #include "flipper.h"
 #include "scene_main_menu.h"
 #include "scene_add_code.h"
+#include "scene_listen_menu.h"
 #include "scene_read_code.h"
 #include "scene_save_code.h"
 #include "scene_select_code.h"
@@ -12,6 +13,7 @@
 
 /** The current scene */
 typedef enum { FcomMainMenuScene, 
+               FcomListenMenuScene,
                FcomReadCodeScene,
                FcomCodeSelectScene,
                FcomSendCodeScene,

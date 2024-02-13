@@ -5,19 +5,19 @@
 
 /** main menu options enum */
 typedef enum {
-    MainMenuSelectionRead,
+    MainMenuSelectionListen,
     MainMenuSelectionSaved,
     MainMenuSelectionAdd,
     MainMenuSelectionSerial,
-} ResistorsMainMenuSceneIndex;
+} FcomMainMenuSceneIndex;
 
 /** main menu events */
 typedef enum {
-    MainMenuSceneSelectionEventRead,
+    MainMenuSceneSelectionEventListen,
     MainMenuSceneSelectionEventSaved,
     MainMenuSceneSelectionEventAdd,
     MainMenuSceneSelectionEventSerial,
-} ResistorsMainMenuEvent;
+} FcomMainMenuEvent;
 
 void fcom_main_menu_scene_on_enter(void* context);
 bool fcom_main_menu_scene_on_event(void* context, SceneManagerEvent event);

@@ -49,8 +49,9 @@ void fcom_serial_scene_on_exit(void* context) {
     UNUSED(context);
     App* app = context;
     UNUSED(app);
-    // shut down dcomm
-    // clean up
+
+    // Cancel any command the usb serial user was sending
+    dmcomm_sendcommand(app, "0\n");
 }
 
 

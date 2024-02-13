@@ -88,6 +88,7 @@ AppState* app_state_alloc() {
     state->file_name_tmp[0] = 0;
     state->r_code = furi_string_alloc();
     state->s_code = furi_string_alloc();
+    state->save_code_return_scene = FcomMainMenuScene;
  
     return state;
 }

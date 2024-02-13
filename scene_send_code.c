@@ -131,6 +131,7 @@ void send_code_dialog_callback(DialogExResult result, void* context) {
             strncpy(app->state->result_code, furi_string_get_cstr(app->state->r_code), MAX_FILENAME_LEN);
         else
             strncpy(app->state->result_code, furi_string_get_cstr(app->state->s_code), MAX_FILENAME_LEN);
+        app->state->save_code_return_scene = FcomSendCodeScene;
         scene_manager_next_scene(app->scene_manager, FcomSaveCodeScene);
     }
 }
@@ -174,14 +175,8 @@ void fcom_send_code_scene_on_exit(void* context) {
     App* app = context;
     UNUSED(app);
 
-    if(app->state->waitForCode)
-    {
-        // Shut down dmcomm if we're waiting
-        dmcomm_sendcommand(app, "0\n");
-        app->state->waitForCode = false;
-    }
-    // shut down dcomm
-    // clean up
+    dmcomm_sendcommand(app, "0\n");
+    app->state->waitForCode = false;
 }
 
 

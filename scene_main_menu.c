@@ -26,7 +26,7 @@ void fcom_main_menu_scene_on_enter(void* context) {
     App* app = context;
     submenu_reset(app->submenu);
     //submenu_set_header(app->submenu, "F-Com");
-    submenu_add_item(app->submenu, "Listen", MainMenuSelectionRead, fcom_menu_callback, app);
+    submenu_add_item(app->submenu, "Listen", MainMenuSelectionListen, fcom_menu_callback, app);
     submenu_add_item(app->submenu, "Saved", MainMenuSelectionSaved, fcom_menu_callback, app);
     submenu_add_item(app->submenu, "Add Manually", MainMenuSelectionAdd, fcom_menu_callback, app);
     submenu_add_item(app->submenu, "USB A-Com", MainMenuSelectionSerial, fcom_menu_callback, app);
@@ -38,9 +38,9 @@ void fcom_main_menu_scene_on_enter(void* context) {
 void fcom_menu_callback(void* context, uint32_t index) {
     App* app = context;
     switch(index) {
-    case MainMenuSelectionRead:
+    case MainMenuSelectionListen:
         scene_manager_handle_custom_event(
-            app->scene_manager, MainMenuSceneSelectionEventRead);
+            app->scene_manager, MainMenuSceneSelectionEventListen);
         break;
     case MainMenuSelectionSaved:
         scene_manager_handle_custom_event(
@@ -64,8 +64,8 @@ bool fcom_main_menu_scene_on_event(void* context, SceneManagerEvent event) {
     switch(event.type) {
     case SceneManagerEventTypeCustom:
         switch(event.event) {
-        case MainMenuSceneSelectionEventRead:
-            scene_manager_next_scene(app->scene_manager, FcomReadCodeScene);
+        case MainMenuSceneSelectionEventListen:
+            scene_manager_next_scene(app->scene_manager, FcomListenMenuScene);
             consumed = true;
             break;
         case MainMenuSceneSelectionEventSaved:

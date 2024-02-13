@@ -52,6 +52,7 @@ bool fcom_add_code_scene_on_event(void* context, SceneManagerEvent event) {
         case SceneManagerEventTypeCustom:
             switch(event.event) {
                 case SaveCodeInputRead:
+                    app->state->save_code_return_scene = FcomMainMenuScene;
                     scene_manager_next_scene(app->scene_manager, FcomSaveCodeScene);
                     consumed = true;
                     break;

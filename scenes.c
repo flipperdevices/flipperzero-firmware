@@ -5,6 +5,7 @@
 /** collection of all scene on_enter handlers */
 void (*const fcom_scene_on_enter_handlers[])(void*) = {
     fcom_main_menu_scene_on_enter,
+    fcom_listen_menu_scene_on_enter,
     fcom_read_code_scene_on_enter,
     fcom_select_code_scene_on_enter,
     fcom_send_code_scene_on_enter,
@@ -16,6 +17,7 @@ void (*const fcom_scene_on_enter_handlers[])(void*) = {
 /** collection of all scene on event handlers */
 bool (*const fcom_scene_on_event_handlers[])(void*, SceneManagerEvent) = {
     fcom_main_menu_scene_on_event,
+    fcom_listen_menu_scene_on_event,
     fcom_read_code_scene_on_event,
     fcom_select_code_scene_on_event,
     fcom_send_code_scene_on_event,
@@ -27,6 +29,7 @@ bool (*const fcom_scene_on_event_handlers[])(void*, SceneManagerEvent) = {
 /** collection of all scene on exit handlers */
 void (*const fcom_scene_on_exit_handlers[])(void*) = {
     fcom_main_menu_scene_on_exit,
+    fcom_listen_menu_scene_on_exit,
     fcom_read_code_scene_on_exit,
     fcom_select_code_scene_on_exit,
     fcom_send_code_scene_on_exit,
