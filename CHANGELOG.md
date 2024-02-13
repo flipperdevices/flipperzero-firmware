@@ -51,7 +51,6 @@
 <br><br>
 #### Known NFC post-refactor regressions list: 
 - Mifare Mini clones reading is broken (original mini working fine) (OFW)
-- EMV simple data parser was removed with protocol with refactoring (OFW)
 - Option to unlock Slix-L (NFC V) with preset or custom password was removed with refactoring (OFW)
 - NFC CLI was removed with refactoring (OFW)
 - Current list of affected apps: https://github.com/xMasterX/all-the-plugins/tree/dev/apps_broken_by_last_refactors

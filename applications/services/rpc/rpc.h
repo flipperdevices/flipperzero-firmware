@@ -35,6 +35,7 @@ typedef enum {
     RpcOwnerUnknown = 0,
     RpcOwnerBle,
     RpcOwnerUsb,
+    RpcOwnerUart,
     RpcOwnerCount,
 } RpcOwner;
 

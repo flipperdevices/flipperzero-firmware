@@ -1,6 +1,5 @@
 #include <furi_hal_os.h>
 #include <furi_hal_clock.h>
-#include <furi_hal_console.h>
 #include <furi_hal_power.h>
 #include <furi_hal_gpio.h>
 #include <furi_hal_resources.h>
@@ -18,8 +17,8 @@
 #define FURI_HAL_IDLE_TIMER_CLK_HZ 32768
 #define FURI_HAL_OS_TICK_HZ configTICK_RATE_HZ
 
-#define FURI_HAL_OS_IDLE_CNT_TO_TICKS(x) (((x)*FURI_HAL_OS_TICK_HZ) / FURI_HAL_IDLE_TIMER_CLK_HZ)
-#define FURI_HAL_OS_TICKS_TO_IDLE_CNT(x) (((x)*FURI_HAL_IDLE_TIMER_CLK_HZ) / FURI_HAL_OS_TICK_HZ)
+#define FURI_HAL_OS_IDLE_CNT_TO_TICKS(x) (((x) * FURI_HAL_OS_TICK_HZ) / FURI_HAL_IDLE_TIMER_CLK_HZ)
+#define FURI_HAL_OS_TICKS_TO_IDLE_CNT(x) (((x) * FURI_HAL_IDLE_TIMER_CLK_HZ) / FURI_HAL_OS_TICK_HZ)
 
 #define FURI_HAL_IDLE_TIMER_TICK_PER_EPOCH (FURI_HAL_OS_IDLE_CNT_TO_TICKS(FURI_HAL_IDLE_TIMER_MAX))
 #define FURI_HAL_OS_MAX_SLEEP (FURI_HAL_IDLE_TIMER_TICK_PER_EPOCH - 1)
@@ -195,7 +194,8 @@ void vPortSuppressTicksAndSleep(TickType_t expected_idle_ticks) {
         if(completed_ticks > 0) {
             if(completed_ticks > expected_idle_ticks) {
 #ifdef FURI_HAL_OS_DEBUG
-                furi_hal_console_printf(">%lu\r\n", completed_ticks - expected_idle_ticks);
+                furi_log_print_raw_format(
+                    FuriLogLevelDebug, ">%lu\r\n", completed_ticks - expected_idle_ticks);
 #endif
                 completed_ticks = expected_idle_ticks;
             }
@@ -208,8 +208,8 @@ void vPortSuppressTicksAndSleep(TickType_t expected_idle_ticks) {
 
 void vApplicationStackOverflowHook(TaskHandle_t xTask, char* pcTaskName) {
     UNUSED(xTask);
-    furi_hal_console_puts("\r\n\r\n stack overflow in ");
-    furi_hal_console_puts(pcTaskName);
-    furi_hal_console_puts("\r\n\r\n");
+    furi_log_puts("\r\n\r\n stack overflow in ");
+    furi_log_puts(pcTaskName);
+    furi_log_puts("\r\n\r\n");
     furi_crash("StackOverflow");
 }

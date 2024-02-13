@@ -122,7 +122,28 @@ void canvas_draw_u8g2_bitmap(
     uint8_t width,
     uint8_t height,
     const uint8_t* bitmap,
-    uint8_t rotation);
+    IconRotation rotation);
+
+/** Add canvas commit callback.
+ *
+ * This callback will be called upon Canvas commit.
+ * 
+ * @param      canvas    Canvas instance
+ * @param      callback  CanvasCommitCallback
+ * @param      context   CanvasCommitCallback context
+ */
+void canvas_add_framebuffer_callback(Canvas* canvas, CanvasCommitCallback callback, void* context);
+
+/** Remove canvas commit callback.
+ *
+ * @param      canvas    Canvas instance
+ * @param      callback  CanvasCommitCallback
+ * @param      context   CanvasCommitCallback context
+ */
+void canvas_remove_framebuffer_callback(
+    Canvas* canvas,
+    CanvasCommitCallback callback,
+    void* context);
 
 /** Add canvas commit callback.
  *
