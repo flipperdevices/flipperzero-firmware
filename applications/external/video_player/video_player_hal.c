@@ -102,7 +102,8 @@ void player_init_hardware_and_play(VideoPlayerApp* player) {
         UNUSED(unu);
     }*/
 
-    furi_hal_interrupt_set_isr_ex(FuriHalInterruptIdDma1Ch1, 15, video_player_dma_isr, player);
+    furi_hal_interrupt_set_isr_ex(
+        FuriHalInterruptIdDma1Ch1, FuriHalInterruptPriorityHighest, video_player_dma_isr, player);
 
     // START!!
     LL_TIM_EnableDMAReq_UPDATE(SAMPLE_RATE_TIMER);
@@ -118,7 +119,8 @@ void player_deinit_hardware() {
     }
 
     furi_hal_gpio_init(&gpio_ext_pa6, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
-    furi_hal_interrupt_set_isr_ex(FuriHalInterruptIdDma1Ch1, 15, NULL, NULL);
+    furi_hal_interrupt_set_isr_ex(
+        FuriHalInterruptIdDma1Ch1, FuriHalInterruptPriorityHighest, NULL, NULL);
 
     if(furi_hal_bus_is_enabled(FuriHalBusTIM1)) {
         furi_hal_bus_disable(FuriHalBusTIM1);
