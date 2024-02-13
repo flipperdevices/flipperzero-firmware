@@ -7,7 +7,10 @@ static void subghz_scene_receiver_update_statusbar(void* context) {
     SubGhz* subghz = context;
     FuriString* history_stat_str = furi_string_alloc();
     if(!subghz_history_get_text_space_left(
-           subghz->history, history_stat_str, subghz->gps->satellites)) {
+           subghz->history,
+           history_stat_str,
+           subghz->gps->satellites,
+           subghz->last_settings->delete_old_signals)) {
         FuriString* frequency_str = furi_string_alloc();
         FuriString* modulation_str = furi_string_alloc();
 
@@ -57,6 +60,20 @@ static void subghz_scene_add_to_history_callback(
     preset.latitude = subghz->gps->latitude;
     preset.longitude = subghz->gps->longitude;
 
+    if(subghz->last_settings->delete_old_signals && subghz_history_full(subghz->history)) {
+        subghz_view_receiver_disable_draw_callback(subghz->subghz_receiver);
+
+        while(idx > 0 && subghz_history_full(subghz->history)) {
+            subghz_history_delete_item(subghz->history, 0);
+            subghz_view_receiver_delete_item(subghz->subghz_receiver, 0);
+            idx--;
+        }
+
+        subghz_view_receiver_enable_draw_callback(subghz->subghz_receiver);
+        subghz_scene_receiver_update_statusbar(subghz);
+        subghz->idx_menu_chosen = subghz_view_receiver_get_idx_menu(subghz->subghz_receiver);
+    }
+
     if(subghz_history_add_to_history(subghz->history, decoder_base, &preset)) {
         furi_string_reset(item_name);
         furi_string_reset(item_time);
@@ -69,7 +86,8 @@ static void subghz_scene_add_to_history_callback(
             subghz_view_receiver_disable_draw_callback(subghz->subghz_receiver);
             for(uint16_t i = idx; i > 0; i--) {
                 i--; // Iterating in reverse with off by one
-                if(subghz_history_get_hash_data(subghz->history, i) == hash_data) {
+                if(subghz_history_get_hash_data(subghz->history, i) == hash_data &&
+                   subghz_history_get_protocol(subghz->history, i) == decoder_base->protocol) {
                     // Remove previous instance and update menu index
                     subghz_history_delete_item(subghz->history, i);
                     subghz_view_receiver_delete_item(subghz->subghz_receiver, i);
@@ -80,9 +98,6 @@ static void subghz_scene_add_to_history_callback(
             // Restore ui state
             subghz->idx_menu_chosen = subghz_view_receiver_get_idx_menu(subghz->subghz_receiver);
             subghz_view_receiver_enable_draw_callback(subghz->subghz_receiver);
-            if(subghz_history_get_last_index(subghz->history) == 0) {
-                subghz_rx_key_state_set(subghz, SubGhzRxKeyStateStart);
-            }
         }
 
         subghz_history_get_text_item_menu(subghz->history, item_name, idx);

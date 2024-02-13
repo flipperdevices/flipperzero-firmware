@@ -252,7 +252,7 @@ SubGhz* subghz_alloc(bool alloc_for_tx_only) {
 
     subghz->gps = subghz_gps_init();
     if(subghz->last_settings->gps_baudrate != 0) {
-        subghz_gps_set_baudrate(subghz->last_settings->gps_baudrate);
+        subghz_gps_set_baudrate(subghz->gps, subghz->last_settings->gps_baudrate);
         subghz_gps_start(subghz->gps);
     }
 

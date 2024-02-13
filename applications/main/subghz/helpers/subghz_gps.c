@@ -1,5 +1,4 @@
 #include "subghz_gps.h"
-#include "minmea.h"
 
 static void subghz_gps_uart_parse_nmea(SubGhzGPS* subghz_gps, char* line) {
     switch(minmea_sentence_id(line, false)) {
@@ -133,12 +132,16 @@ SubGhzGPS* subghz_gps_init() {
     }
 
     furi_hal_uart_set_irq_cb(UART_CH, subghz_gps_uart_on_irq_cb, subghz_gps);
+    furi_hal_uart_set_br(UART_CH, 9600);
 
     return subghz_gps;
 }
 
 void subghz_gps_deinit(SubGhzGPS* subghz_gps) {
     furi_assert(subghz_gps);
+    furi_thread_free(subghz_gps->thread);
+
+    free(subghz_gps);
 
     furi_hal_uart_set_irq_cb(UART_CH, NULL, NULL);
     if(UART_CH == FuriHalUartIdLPUART1) {
@@ -146,11 +149,6 @@ void subghz_gps_deinit(SubGhzGPS* subghz_gps) {
     } else {
         furi_hal_console_enable();
     }
-
-    furi_thread_free(subghz_gps->thread);
-    furi_stream_buffer_free(subghz_gps->rx_stream);
-
-    free(subghz_gps);
 }
 
 void subghz_gps_start(SubGhzGPS* subghz_gps) {
@@ -160,10 +158,6 @@ void subghz_gps_start(SubGhzGPS* subghz_gps) {
 void subghz_gps_stop(SubGhzGPS* subghz_gps) {
     furi_thread_flags_set(furi_thread_get_id(subghz_gps->thread), WorkerEvtStop);
     furi_thread_join(subghz_gps->thread);
-}
-
-void subghz_gps_set_baudrate(uint32_t baudrate) {
-    furi_hal_uart_set_br(UART_CH, baudrate);
 }
 
 double subghz_gps_deg2rad(double deg) {
