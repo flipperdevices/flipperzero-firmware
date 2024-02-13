@@ -389,6 +389,7 @@ static void gap_init_svc(Gap* gap) {
         aci_gap_set_io_capability(IO_CAP_DISPLAY_YES_NO);
         keypress_supported = true;
     }
+
     // Setup  authentication
     aci_gap_set_authentication_requirement(
         conf_bonding,
@@ -444,8 +445,6 @@ static void gap_advertise_start(GapState new_state) {
         0);
     if(status) {
         FURI_LOG_E(TAG, "set_discoverable failed %d", status);
-    } else {
-        FURI_LOG_D(TAG, "set_discoverable success");
     }
     gap->state = new_state;
     GapEvent event = {.type = GapEventTypeStartAdvertising};

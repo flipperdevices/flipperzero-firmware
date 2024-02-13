@@ -4,6 +4,7 @@
 
 #include "princeton.h"
 #include "keeloq.h"
+#include "genie.h"
 #include "star_line.h"
 #include "nice_flo.h"
 #include "came.h"
@@ -67,6 +68,5 @@
 #include "pocsag.h"
 #include "schrader_gg4.h"
 #include "bin_raw.h"
-#include "genie.h"
 #include "mastercode.h"
 #include "x10.h"

@@ -58,7 +58,9 @@ int main() {
         furi_hal_power_reset();
     } else {
         furi_hal_light_sequence("rgb G");
-        furi_hal_set_is_normal_boot(true);
+        if(boot_mode != FuriHalRtcBootModePostUpdate && boot_mode != FuriHalRtcBootModePreUpdate) {
+            furi_hal_set_is_normal_boot(true);
+        }
         furi_thread_start(main_thread);
     }
 #endif

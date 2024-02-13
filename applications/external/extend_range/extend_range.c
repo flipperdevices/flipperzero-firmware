@@ -10,6 +10,7 @@
 
 #include <gui/gui.h>
 #include <input/input.h>
+#include <power/power_service/power.h>
 
 #include <flipper_format/flipper_format.h>
 
@@ -91,6 +92,8 @@ void extend_range_draw_callback(Canvas* canvas, void* ctx) {
         break;
     case 0:
         canvas_draw_str(canvas, 2, 60, "Success. Reboot now.");
+        furi_delay_ms(1000);
+        power_reboot(PowerBootModeNormal);
         break;
     case 1:
         canvas_draw_str(canvas, 2, 60, "File not found");

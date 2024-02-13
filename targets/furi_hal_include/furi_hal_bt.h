@@ -224,7 +224,6 @@ float furi_hal_bt_get_rssi();
  */
 uint32_t furi_hal_bt_get_transmitted_packets();
 
-// BadBT Stuff
 /** Reverse a MAC address byte order in-place
  * @param[in] mac       mac address to reverse
 */

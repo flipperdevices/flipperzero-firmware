@@ -239,7 +239,7 @@ bool furi_hal_bt_start_app(FuriHalBtProfile profile, GapEventCallback event_cb, 
             strlcpy(
                 config->adv_name,
                 furi_hal_version_get_ble_local_device_name_ptr(),
-                FURI_HAL_BT_ADV_NAME_LENGTH);
+                FURI_HAL_VERSION_DEVICE_NAME_LENGTH);
 
             config->adv_service_uuid |= furi_hal_version_get_hw_color();
         } else if(profile == FuriHalBtProfileHidKeyboard) {
@@ -254,11 +254,11 @@ bool furi_hal_bt_start_app(FuriHalBtProfile profile, GapEventCallback event_cb, 
                 config->mac_address[2]++;
             }
             // Change name Flipper -> Control
-            if(strnlen(config->adv_name, FURI_HAL_BT_ADV_NAME_LENGTH) < 2 ||
-               strnlen(config->adv_name + 1, FURI_HAL_BT_ADV_NAME_LENGTH - 1) < 1) {
+            if(strnlen(config->adv_name, FURI_HAL_VERSION_DEVICE_NAME_LENGTH) < 2 ||
+               strnlen(config->adv_name + 1, FURI_HAL_VERSION_DEVICE_NAME_LENGTH - 1) < 1) {
                 snprintf(
                     config->adv_name,
-                    FURI_HAL_BT_ADV_NAME_LENGTH,
+                    FURI_HAL_VERSION_DEVICE_NAME_LENGTH,
                     "%cControl %s",
                     AD_TYPE_COMPLETE_LOCAL_NAME,
                     furi_hal_version_get_name_ptr());
@@ -505,13 +505,10 @@ void furi_hal_bt_set_profile_adv_name(
     furi_assert(name);
 
     if(strlen(name) == 0) {
-        memset(
-            &(profile_config[profile].config.adv_name[1]),
-            0,
-            strlen(&(profile_config[profile].config.adv_name[1])));
+        memset(&(profile_config[profile].config.adv_name[1]), 0, FURI_HAL_BT_ADV_NAME_LENGTH);
     } else {
         profile_config[profile].config.adv_name[0] = AD_TYPE_COMPLETE_LOCAL_NAME;
-        memcpy(&(profile_config[profile].config.adv_name[1]), name, FURI_HAL_BT_ADV_NAME_LENGTH);
+        strlcpy(&(profile_config[profile].config.adv_name[1]), name, FURI_HAL_BT_ADV_NAME_LENGTH);
     }
 }
 

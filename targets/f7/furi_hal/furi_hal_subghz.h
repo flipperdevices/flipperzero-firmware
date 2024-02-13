@@ -31,48 +31,6 @@ typedef enum {
     FuriHalSubGhzPath868, /**< Center Frequency: 868MHz. Path 3: SW1RF3-SW2RF3, LCLC */
 } FuriHalSubGhzPath;
 
-/** SubGhz state */
-typedef enum {
-    SubGhzStateInit, /**< Init pending */
-    SubGhzStateBroken, /**< Chip power-on self test failed */
-    SubGhzStateIdle, /**< Idle, energy save mode */
-
-    SubGhzStateAsyncRx, /**< Async RX started */
-
-    SubGhzStateAsyncTx, /**< Async TX started, DMA and timer is on */
-    SubGhzStateAsyncTxLast, /**< Async TX continue, DMA completed and timer got last value to go */
-    SubGhzStateAsyncTxEnd, /**< Async TX complete, cleanup needed */
-
-} SubGhzState;
-
-/** SubGhz regulation, receive transmission on the current frequency for the
- * region */
-typedef enum {
-    SubGhzRegulationOnlyRx, /**only Rx*/
-    SubGhzRegulationTxRx, /**TxRx*/
-} SubGhzRegulation;
-
-/** SubGhz radio types */
-typedef enum {
-    SubGhzRadioInternal,
-    SubGhzRadioExternal,
-} SubGhzRadioType;
-
-/** Structure for accessing SubGhz settings*/
-typedef struct {
-    volatile SubGhzState state;
-    volatile SubGhzRegulation regulation;
-    volatile FuriHalSubGhzPreset preset;
-    const GpioPin* async_mirror_pin;
-
-    uint8_t rolling_counter_mult;
-    bool ext_power_amp : 1;
-    bool extended_frequency_i : 1;
-    bool bypassed_frequency_i : 1;
-} FuriHalSubGhz;
-
-extern volatile FuriHalSubGhz furi_hal_subghz;
-
 /* Mirror RX/TX async modulation signal to specified pin
  *
  * @warning    Configures pin to output mode. Make sure it is not connected

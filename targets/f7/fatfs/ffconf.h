@@ -68,7 +68,11 @@
 #define _USE_FASTSEEK 1
 /* This option switches fast seek feature. (0:Disable or 1:Enable) */
 
+#ifdef FURI_RAM_EXEC
+#define _USE_EXPAND 0
+#else
 #define _USE_EXPAND 1
+#endif
 /* This option switches f_expand function. (0:Disable or 1:Enable) */
 
 #define _USE_CHMOD 0

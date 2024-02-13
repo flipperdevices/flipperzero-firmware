@@ -91,12 +91,19 @@ typedef struct {
 static FuriHalVersion furi_hal_version = {0};
 
 void furi_hal_version_set_name(const char* name) {
-    if(name != NULL) {
+    uint32_t udn = LL_FLASH_GetUDN();
+    if(name == NULL) {
+        name = version_get_custom_name(NULL);
+        if(name != NULL) {
+            udn = *((uint32_t*)name);
+        }
+    }
+    if(name != NULL && strlen(name)) {
         strlcpy(furi_hal_version.name, name, FURI_HAL_VERSION_ARRAY_NAME_LENGTH);
         snprintf(
             furi_hal_version.device_name,
             FURI_HAL_VERSION_DEVICE_NAME_LENGTH,
-            "x%s",
+            "x%s", // Someone tell me why that X is needed - it's for BLE adv name type (6 lines below)
             furi_hal_version.name);
     } else {
         snprintf(furi_hal_version.device_name, FURI_HAL_VERSION_DEVICE_NAME_LENGTH, "xFlipper");
@@ -105,17 +112,11 @@ void furi_hal_version_set_name(const char* name) {
     furi_hal_version.device_name[0] = AD_TYPE_COMPLETE_LOCAL_NAME;
 
     // BLE Mac address
-    uint32_t udn = LL_FLASH_GetUDN();
-    if(version_get_custom_name(NULL) != NULL) {
-        udn = *((uint32_t*)version_get_custom_name(NULL));
-    }
-
     uint32_t company_id = LL_FLASH_GetSTCompanyID();
     // uint32_t device_id = LL_FLASH_GetDeviceID();
     // Some flippers return 0x27 (flippers with chip revision 2003 6495) instead of 0x26 (flippers with chip revision 2001 6495)
     // Mobile apps expects it to return 0x26
     // Hardcoded here temporarily until mobile apps is updated to handle 0x27
-
     uint32_t device_id = 0x26;
     furi_hal_version.ble_mac[0] = (uint8_t)(udn & 0x000000FF);
     furi_hal_version.ble_mac[1] = (uint8_t)((udn & 0x0000FF00) >> 8);
@@ -138,11 +139,7 @@ static void furi_hal_version_load_otp_v0() {
     furi_hal_version.board_body = otp->board_body;
     furi_hal_version.board_connect = otp->board_connect;
 
-    if(version_get_custom_name(NULL) != NULL) {
-        furi_hal_version_set_name(version_get_custom_name(NULL));
-    } else {
-        furi_hal_version_set_name(otp->name);
-    }
+    furi_hal_version_set_name(otp->name);
 }
 
 static void furi_hal_version_load_otp_v1() {
@@ -156,11 +153,7 @@ static void furi_hal_version_load_otp_v1() {
     furi_hal_version.board_color = otp->board_color;
     furi_hal_version.board_region = otp->board_region;
 
-    if(version_get_custom_name(NULL) != NULL) {
-        furi_hal_version_set_name(version_get_custom_name(NULL));
-    } else {
-        furi_hal_version_set_name(otp->name);
-    }
+    furi_hal_version_set_name(otp->name);
 }
 
 static void furi_hal_version_load_otp_v2() {
@@ -180,11 +173,7 @@ static void furi_hal_version_load_otp_v2() {
     if(otp->board_color != 0xFF) {
         furi_hal_version.board_color = otp->board_color;
         furi_hal_version.board_region = otp->board_region;
-        if(version_get_custom_name(NULL) != NULL) {
-            furi_hal_version_set_name(version_get_custom_name(NULL));
-        } else {
-            furi_hal_version_set_name(otp->name);
-        }
+        furi_hal_version_set_name(otp->name);
     } else {
         furi_hal_version.board_color = 0;
         furi_hal_version.board_region = 0;

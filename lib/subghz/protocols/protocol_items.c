@@ -3,6 +3,7 @@
 const SubGhzProtocol* subghz_protocol_registry_items[] = {
     &subghz_protocol_gate_tx,
     &subghz_protocol_keeloq,
+    &subghz_protocol_genie,
     &subghz_protocol_star_line,
     &subghz_protocol_nice_flo,
     &subghz_protocol_came,
@@ -66,7 +67,6 @@ const SubGhzProtocol* subghz_protocol_registry_items[] = {
     &subghz_protocol_pocsag,
     &tpms_protocol_schrader_gg4,
     &subghz_protocol_bin_raw,
-    &subghz_protocol_genie,
     &subghz_protocol_mastercode,
     &subghz_protocol_x10,
 };

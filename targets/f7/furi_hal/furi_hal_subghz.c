@@ -1,5 +1,4 @@
 #include <furi_hal_subghz.h>
-#include <furi_hal_subghz_configs.h>
 #include <lib/subghz/devices/cc1101_configs.h>
 
 #include <furi_hal_region.h>
@@ -28,6 +27,36 @@ static uint32_t furi_hal_subghz_debug_gpio_buff[2] = {0};
 #define SUBGHZ_DMA_CH1_IRQ (FuriHalInterruptIdDma2Ch1)
 #define SUBGHZ_DMA_CH1_DEF SUBGHZ_DMA, SUBGHZ_DMA_CH1_CHANNEL
 #define SUBGHZ_DMA_CH2_DEF SUBGHZ_DMA, SUBGHZ_DMA_CH2_CHANNEL
+
+/** SubGhz state */
+typedef enum {
+    SubGhzStateInit, /**< Init pending */
+    SubGhzStateBroken, /**< Chip power-on self test failed */
+    SubGhzStateIdle, /**< Idle, energy save mode */
+
+    SubGhzStateAsyncRx, /**< Async RX started */
+
+    SubGhzStateAsyncTx, /**< Async TX started, DMA and timer is on */
+
+} SubGhzState;
+
+/** SubGhz regulation, receive transmission on the current frequency for the
+ * region */
+typedef enum {
+    SubGhzRegulationOnlyRx, /**only Rx*/
+    SubGhzRegulationTxRx, /**TxRx*/
+} SubGhzRegulation;
+
+typedef struct {
+    volatile SubGhzState state;
+    volatile SubGhzRegulation regulation;
+    const GpioPin* async_mirror_pin;
+
+    int8_t rolling_counter_mult;
+    bool ext_power_amp : 1;
+    bool extended_frequency_i : 1;
+    bool bypassed_frequency_i : 1;
+} FuriHalSubGhz;
 
 volatile FuriHalSubGhz furi_hal_subghz = {
     .state = SubGhzStateInit,
@@ -236,6 +265,7 @@ bool furi_hal_subghz_rx_pipe_not_empty() {
     cc1101_read_reg(
         &furi_hal_spi_bus_handle_subghz, (CC1101_STATUS_RXBYTES) | CC1101_BURST, (uint8_t*)status);
     furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
+    // TODO: Find reason why RXFIFO_OVERFLOW doesnt work correctly
     if(status->NUM_RXBYTES > 0) {
         return true;
     } else {
@@ -329,9 +359,10 @@ uint8_t furi_hal_subghz_get_lqi() {
 
 /* 
  Modified by @tkerby & MX to the full YARD Stick One extended range of 281-361 MHz, 378-481 MHz, and 749-962 MHz. 
- These changes are at your own risk. The PLL may not lock and FZ devs have warned of possible damage
+ These changes are at your own risk. The PLL may not lock and FZ devs have warned of possible damage!
  Set flag use_ext_range_at_own_risk in extend_range.txt to use
  */
+
 bool furi_hal_subghz_is_frequency_valid(uint32_t value) {
     if(!(value >= 281000000 && value <= 361000000) &&
        !(value >= 378000000 && value <= 481000000) &&
@@ -377,13 +408,6 @@ bool furi_hal_subghz_is_tx_allowed(uint32_t value) {
            !(value >= 433050000 && value <= 434790000) &&
            !(value >= 915000000 && value <= 928000000)) {
         } else {
-            if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
-                if((value >= 304100000 && value <= 321950000) &&
-                   ((furi_hal_subghz.preset == FuriHalSubGhzPresetOok270Async) ||
-                    (furi_hal_subghz.preset == FuriHalSubGhzPresetOok650Async))) {
-                    furi_hal_subghz_load_patable(furi_hal_subghz_preset_ook_async_patable_au);
-                }
-            }
             is_allowed = true;
         }
         break;
@@ -743,7 +767,7 @@ bool furi_hal_subghz_start_async_tx(FuriHalSubGhzAsyncTxCallback callback, void*
     furi_assert(callback);
 
     //If transmission is prohibited by regional settings
-    // if(furi_hal_subghz.regulation != SubGhzRegulationTxRx) return false;
+    if(furi_hal_subghz.regulation != SubGhzRegulationTxRx) return false;
 
     furi_hal_subghz_async_tx.callback = callback;
     furi_hal_subghz_async_tx.callback_context = context;
