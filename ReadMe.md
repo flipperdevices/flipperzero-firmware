@@ -29,8 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0213-0003-0.97.2-ad1ab9e](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-02-13 00:03 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-02-13 00:03 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-02-13 17:17 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-02-13 17:17 EST`
 - OFW: [NFC: Add support for Gallagher access control (MIFARE Classic only) #3306 (By nickmooney)](https://github.com/flipperdevices/flipperzero-firmware/pull/3306)
 - OFW: [NFC: Slix disable privacy #3425 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3425)
 - OFW: [NFC: Added NFC plugin; Some parser #3335 (By zProAle)](https://github.com/flipperdevices/flipperzero-firmware/pull/3335)
@@ -65,8 +65,20 @@ This software is for experimental purposes only and is not meant for any illegal
 - [Fixes for SubGHz extend/bypass & other assorted tweaks (By RogueMaster)(Using code from Willy-JL & xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/75c493b05f57afb5df7ea3c4da06802844fae767)
 - Updated: [Plantower PMSx003 sensor reader v1.2 (By 3cky)](https://github.com/3cky/flipperzero-airmon) `Req: Plantower PMS5003/PMS7003/PMS9003`
 - Updated: [NFC: Emv fixes #702 (By wosk_& Leptopt1los)](https://github.com/DarkFlippers/unleashed-firmware/pull/702)
+- OFW: [FuriHal: UART refactoring #3211 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3211)
+- OFW: [FuriHal: interrupt priorities and documentation #3366 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3366)
+- OFW: [Expansion module protocol #3250 (By gsurkov)](https://github.com/flipperdevices/flipperzero-firmware/pull/3250)
+- OFW: [0.98.0-rc various fixes #3402 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3402)
+- OFW: [Fix expansion protocol crash when fed lots of garbage #3409 (By gsurkov)](https://github.com/flipperdevices/flipperzero-firmware/pull/3409)
+- OFW: [FuriHal: various GPIO improvements #3406 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3406)
+- OFW: [furi/core/timer: resolve timer handle use-after-free post deletion (was #3381) #3431 (By kbembedded)](https://github.com/flipperdevices/flipperzero-firmware/pull/3431)
+- OFW: [New toolchain with gcc 12 #3254 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/3254)
+- OFW: [Expansion module service improvements #3429 (By gsurkov)](https://github.com/flipperdevices/flipperzero-firmware/pull/3429)
+- OFW: [JavaScript runner #3286 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/3286)
+- OFW: [mjs: minor fixes #3442 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/3442)
+- OFW: [JS serial module fixes #3445 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/3445)
+- [Many Updates, Cleanup and Merge Fixes (By xMasterX & Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/010720b1f48eee5f66f6c48e49a267290345f73f)
 - Updated: [PacMan WIP v0.1 (By DanieleMaffi)](https://github.com/DanieleMaffi/flipper-pacman)
-- To Be Merged OFW PRs: [3211](https://github.com/flipperdevices/flipperzero-firmware/pull/3211), [3366](https://github.com/flipperdevices/flipperzero-firmware/pull/3366), [3250](https://github.com/flipperdevices/flipperzero-firmware/pull/3250), [3402](https://github.com/flipperdevices/flipperzero-firmware/pull/3402), [3409](https://github.com/flipperdevices/flipperzero-firmware/pull/3409), [3406](https://github.com/flipperdevices/flipperzero-firmware/pull/3406), [3431](https://github.com/flipperdevices/flipperzero-firmware/pull/3431), [3254](https://github.com/flipperdevices/flipperzero-firmware/pull/3254), [3429](https://github.com/flipperdevices/flipperzero-firmware/pull/3429), [3286](https://github.com/flipperdevices/flipperzero-firmware/pull/3286), [3442](https://github.com/flipperdevices/flipperzero-firmware/pull/3442) & [3445](https://github.com/flipperdevices/flipperzero-firmware/pull/3445)
 
 <a name="release">
 
