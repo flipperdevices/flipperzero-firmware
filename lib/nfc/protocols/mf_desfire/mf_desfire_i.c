@@ -86,7 +86,7 @@ bool mf_desfire_key_settings_parse(MfDesfireKeySettings* data, const BitBuffer* 
         uint8_t flags : 4;
     } MfDesfireKeySettingsLayout;
 
-    const bool can_parse = bit_buffer_get_size_bytes(buf) == sizeof(MfDesfireKeySettingsLayout);
+    bool can_parse = bit_buffer_get_size_bytes(buf) == sizeof(MfDesfireKeySettingsLayout);
 
     if(can_parse) {
         MfDesfireKeySettingsLayout layout;
@@ -106,6 +106,15 @@ bool mf_desfire_key_settings_parse(MfDesfireKeySettings* data, const BitBuffer* 
             printf("%02X ", bit_buffer_get_byte(buf, i));
         }
         printf("\r\n");
+        can_parse = true;
+        data->is_master_key_changeable = true;
+        data->is_free_directory_list = false;
+        data->is_free_create_delete = true;
+        data->is_config_changeable = true;
+
+        data->change_key_id = 0;
+        data->max_keys = 1;
+        data->flags = 0;
     }
 
     return can_parse;
@@ -744,6 +753,7 @@ bool mf_desfire_application_save(
     bool success = false;
 
     do {
+        FURI_LOG_I(TAG, "Saving key settings");
         if(!mf_desfire_key_settings_save(&data->key_settings, prefix, ff)) break;
 
         const uint32_t key_version_count = data->key_settings.max_keys;
