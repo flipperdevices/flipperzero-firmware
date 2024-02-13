@@ -291,6 +291,8 @@ static void serial_deinit(Uart* uart) {
 static int32_t uart_worker(void* context) {
     App* app = context;
     while(1) {
+        furi_hal_gpio_write(&gpio_ext_pc0, false);
+        furi_hal_gpio_write(&gpio_ext_pc1, false);
         uint32_t events =
             furi_thread_flags_wait(WORKER_ALL_RX_EVENTS, FuriFlagWaitAny, FuriWaitForever);
         furi_check((events & FuriFlagError) == 0);
@@ -306,6 +308,7 @@ static int32_t uart_worker(void* context) {
                 handle_rx_data_cb(app->uart->rxBuff, len, app);
             }
         }
+        //TODO: Serial Write & enable DE/RE pinsy
     }
 
     furi_stream_buffer_free(app->uart->rxBuff);
@@ -589,6 +592,8 @@ void modbus_app_free(App* app) {
 //////////////////////////   Entry Point   //////////////////////////
 int32_t test_app(void* p) {
     UNUSED(p);
+    furi_hal_gpio_init_simple(&gpio_ext_pc0, GpioModeOutputPushPull);
+    furi_hal_gpio_init_simple(&gpio_ext_pc1, GpioModeOutputPushPull);
     App* app = modbus_app_alloc();
     Gui* gui = furi_record_open(RECORD_GUI);
     view_dispatcher_attach_to_gui(app->viewDispatcher, gui, ViewDispatcherTypeFullscreen);
@@ -596,5 +601,7 @@ int32_t test_app(void* p) {
     view_dispatcher_run(app->viewDispatcher);
     furi_record_close(RECORD_GUI);
     modbus_app_free(app);
+    furi_hal_gpio_init_simple(&gpio_ext_pc0, GpioModeAnalog);
+    furi_hal_gpio_init_simple(&gpio_ext_pc1, GpioModeAnalog);
     return 0;
 }
