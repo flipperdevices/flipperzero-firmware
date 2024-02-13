@@ -1,5 +1,7 @@
 # Airmon for Flipper Zero
 
+[![FAP Build](https://github.com/3cky/flipperzero-airmon/actions/workflows/build.yml/badge.svg)](https://github.com/3cky/flipperzero-airmon/actions/workflows/build.yml)
+
 A simple Flipper Zero air quality monitoring application. 
 It displays measured PM1.0/PM2.5/PM10 [Particulate Matter] concentrations 
 and calculated [Air Quality Index (AQI)].

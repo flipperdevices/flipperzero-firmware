@@ -62,7 +62,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - [NFC Parser updates (By zProAle)](https://github.com/zProAle/my_flipper_kdf/commit/c46c31e032237a139197c77de79bd55191d91b18)
 - Updated: [YuriCable Pro Max v0.2 (By arag0re)](https://github.com/arag0re/fz-yuricable-pro-max)
 - [Fixes for SubGHz extend/bypass & other assorted tweaks (By RogueMaster)(Using code from Willy-JL & xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/75c493b05f57afb5df7ea3c4da06802844fae767)
-- Updated: [Plantower PMSx003 sensor reader v1.2 (By 3cky)](https://github.com/3cky/flipperzero-airmon) `Req: Plantower PMS5003/PMS7003/PMS9003`
 - Updated: [NFC: Emv fixes #702 (By wosk_& Leptopt1los)](https://github.com/DarkFlippers/unleashed-firmware/pull/702)
 - OFW: [FuriHal: UART refactoring #3211 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3211)
 - OFW: [FuriHal: interrupt priorities and documentation #3366 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3366)
@@ -80,6 +79,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [PacMan WIP v0.1 (By DanieleMaffi)](https://github.com/DanieleMaffi/flipper-pacman)
 - [Fix plugin symbol warnings (imported from fap api table) (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/13448f2e90b0862b5f354170b3ff4c5e3a4a1461)
 - Added: [Video Game Module Tool v1.0 (By gsurkov)](https://github.com/flipperdevices/flipperzero-good-faps/pull/127)
+- Updated: [Plantower PMSx003 sensor reader v1.2 (By 3cky)](https://github.com/3cky/flipperzero-airmon) `Req: Plantower PMS5003/PMS7003/PMS9003`
 
 <a name="release">
 
