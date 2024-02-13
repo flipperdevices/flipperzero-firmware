@@ -81,6 +81,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Added: [Video Game Module Tool v1.0 (By gsurkov)](https://github.com/flipperdevices/flipperzero-good-faps/pull/127)
 - Updated: [Plantower PMSx003 sensor reader v1.2 (By 3cky)](https://github.com/3cky/flipperzero-airmon) `Req: Plantower PMS5003/PMS7003/PMS9003`
 - Updated: [ESP Flasher v1.5 (By 0xchocolate)](https://github.com/0xchocolate/flipperzero-esp-flasher)
+- Updated: [Flizzer Tracker v0.5 (By LTVA1)](https://github.com/LTVA1/flizzer_tracker)
 
 <a name="release">
 
@@ -431,7 +432,7 @@ $ ./fbt dolphin_ext
 - [FlipBIP Crypto Wallet v1.14 (By xtruan)](https://github.com/xtruan/FlipBIP)
 - [Flipper Aid v1.0 (By spaghety)](https://github.com/spaghety/flipper-aid)
 - [Flipper Tag v1.0 (By thejudge156)](https://github.com/thejudge156/flippertag)
-- [Flizzer Tracker v0.4 (By LTVA1)](https://github.com/LTVA1/flizzer_tracker)
+- [Flizzer Tracker v0.5 (By LTVA1)](https://github.com/LTVA1/flizzer_tracker)
 - [FM Radio v1.1 (By coolshrimp)](https://github.com/coolshrimp/flipperzero-firmware-wPlugins/tree/420/applications/external/fm_radio)
 - [Gas Sensor v0.1 (By iancohee)](https://github.com/iancohee/gas_sensor_fap) `Req: BME680 / SGP30`
 - [Genie Recorder v2.5 (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/subghz/apps/genie-recorder)
