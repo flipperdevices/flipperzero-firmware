@@ -227,10 +227,8 @@ static int32_t esp_flasher_flash_bin(void* context) {
         loader_port_debug_print(err_msg);
     }
 
-    uint32_t start_time = furi_get_tick();
+    // higher BR
     if(!err && app->turbospeed) {
-        loader_port_debug_print("Connected\n");
-
         loader_port_debug_print("Increasing speed for faster flash\n");
         err = esp_loader_change_transmission_rate(FAST_BAUDRATE);
         if(err != ESP_LOADER_SUCCESS) {
@@ -238,29 +236,28 @@ static int32_t esp_flasher_flash_bin(void* context) {
             snprintf(
                 err_msg, sizeof(err_msg), "Cannot change transmission rate. Error: %u\n", err);
             loader_port_debug_print(err_msg);
-            return 0;
         }
-        furi_hal_uart_set_br(UART_CH, FAST_BAUDRATE);
+        esp_flasher_uart_set_br(app->uart, FAST_BAUDRATE);
     }
 
     if(!err) {
         loader_port_debug_print("Connected\n");
+        uint32_t start_time = furi_get_tick();
+
         if(!_switch_fw(app)) {
             _flash_all_files(app);
         }
         app->switch_fw = SwitchNotSet;
 
-        if(app->turbospeed) {
-            loader_port_debug_print("Restoring transmission rate\n");
-            furi_hal_uart_set_br(UART_CH, DEFAULT_BAUDRATE);
-        }
-
         FuriString* flash_time =
             furi_string_alloc_printf("Flash took: %lds\n", (furi_get_tick() - start_time) / 1000);
-
         loader_port_debug_print(furi_string_get_cstr(flash_time));
-
         furi_string_free(flash_time);
+
+        if(app->turbospeed) {
+            loader_port_debug_print("Restoring transmission rate\n");
+            esp_flasher_uart_set_br(app->uart, BAUDRATE);
+        }
 
         loader_port_debug_print(
             "Done flashing. Please reset the board manually if it doesn't auto-reset.\n");
@@ -368,7 +365,7 @@ esp_loader_error_t loader_port_read(uint8_t* data, uint16_t size, uint32_t timeo
 
 esp_loader_error_t loader_port_write(const uint8_t* data, uint16_t size, uint32_t timeout) {
     UNUSED(timeout);
-    esp_flasher_uart_tx((uint8_t*)data, size);
+    if(global_app) esp_flasher_uart_tx(global_app->uart, (uint8_t*)data, size);
     return ESP_LOADER_SUCCESS;
 }
 
@@ -381,13 +378,9 @@ void loader_port_reset_target(void) {
 void loader_port_enter_bootloader(void) {
     // Also support for the Multi-fucc and Xeon boards
     furi_hal_gpio_write(&gpio_swclk, false);
-    if(furi_hal_power_is_otg_enabled()) {
-        furi_hal_power_disable_otg();
-    }
+    furi_hal_power_disable_otg();
     loader_port_delay_ms(100);
-    if(!furi_hal_power_is_otg_enabled()) {
-        furi_hal_power_enable_otg();
-    }
+    furi_hal_power_enable_otg();
     furi_hal_gpio_init_simple(&gpio_swclk, GpioModeAnalog);
     loader_port_delay_ms(100);
 
