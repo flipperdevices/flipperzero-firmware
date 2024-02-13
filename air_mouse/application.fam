@@ -1,7 +1,8 @@
 App(
     appid="vgm_air_mouse",
     name="Air Mouse",
-    fap_description="Video Game Module Air Mouse",
+    fap_version="1.1",
+    fap_description="Turn Flipper Zero with the Video Game Module into an air mouse",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="air_mouse_app",
     stack_size=4 * 1024,
