@@ -1,0 +1,16 @@
+App(
+    appid="air_arkanoid",
+    name="Air Arkanoid",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="game_app",
+    stack_size=4 * 1024,
+    fap_icon="icon.png",
+    fap_category="Games",
+    fap_file_assets="assets",
+    fap_extbuild=(
+        ExtFile(
+            path="${FAP_SRC_DIR}/assets",
+            command="python3 ${FAP_SRC_DIR}/engine/scripts/sprite_builder.py ${FAP_SRC_DIR.abspath}/sprites ${TARGET.abspath}/sprites",
+        ),
+    ),
+)
