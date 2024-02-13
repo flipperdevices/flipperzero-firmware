@@ -255,22 +255,26 @@ void computeTVM() {
         double attempted_i = 0;
         double shrink_by = .01;
         double precision = .0005;
-        bool overflowed = false;
+        int overflowed = 0;
         bool borked = false;
+
+        // if both FV and PV are same sign, and payment is positive its borked.
+        if((tvm_fv < 0 && tvm_pv < 0) || ((tvm_fv >= 0 && tvm_pv > 0) && tvm_pmt > 0)) {
+            borked = true;
+            FURI_LOG_W("WARNING tag", "PV and FV were same sign, borked");
+        }
 
         //if fv is 0, this calc fails. so we swap fv and pv if so
         if(tvm_fv == 0) {
             tvm_fv = -tvm_pv;
             tvm_pv = 0;
+            FURI_LOG_W("WARNING tag", "Swapping PV and FV for solve I");
         }
 
-        // if both FV and PV are same sign, its borked.
-        if((tvm_fv < 0 && tvm_pv < 0) || (tvm_fv >= 0 && tvm_pv > 0)) {
-            borked = true;
-        }
         //if any 2 are 0, its bad
         if((tvm_fv == 0 && tvm_pmt == 0) || (tvm_pv == 0 && tvm_pmt == 0) ||
            (tvm_pv == 0 && tvm_fv == 0)) {
+            FURI_LOG_W("WARNING tag", "No SIGN change");
             borked = true;
         }
 
@@ -278,8 +282,13 @@ void computeTVM() {
         do {
             //if it got this low, go back to the top and pray
             if(attempted_i < -40) {
-                overflowed = true;
+                FURI_LOG_W("WARNING tag", "Overfl -");
+                overflowed++;
                 attempted_i = 40;
+            } else if(attempted_i > 40) {
+                FURI_LOG_W("WARNING tag", "Overfl +");
+                overflowed++;
+                attempted_i = -40;
             }
 
             // make the guess
@@ -312,7 +321,8 @@ void computeTVM() {
                 }
             }
             FURI_LOG_I("INFORMATION tag", "Interest Rate attempt: %.4f", attempted_i);
-            if(attempted_i < 0 && overflowed) {
+            if(overflowed > 1) {
+                FURI_LOG_W("WARNING tag", "Overflowed 2x, kill");
                 //Somethings wrong, not solveable
                 borked = true;
                 break;
