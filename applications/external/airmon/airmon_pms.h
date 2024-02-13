@@ -1,7 +1,6 @@
 #pragma once
 
 #include <furi_hal.h>
-#include <notification/notification_messages.h>
 
 #define RX_BUF_SIZE 64
 
@@ -26,8 +25,7 @@ typedef struct {
     FuriStreamBuffer* rx_stream;
     uint8_t rx_buf[RX_BUF_SIZE];
 
-    NotificationApp* notifications;
-
+    uint32_t pms_data_timestamp;
     AirmonPmsData pms_data;
 } AirmonPmsContext;
 
