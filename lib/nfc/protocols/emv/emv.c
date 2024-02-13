@@ -28,7 +28,7 @@ const NfcDeviceBase nfc_device_emv = {
 EmvData* emv_alloc() {
     EmvData* data = malloc(sizeof(EmvData));
     data->iso14443_4a_data = iso14443_4a_alloc();
-    data->emv_application.pin_attempts_counter = 0xff;
+    data->emv_application.pin_try_counter = 0xff;
 
     return data;
 }
@@ -76,10 +76,12 @@ bool emv_load(EmvData* data, FlipperFormat* ff, uint32_t version) {
 
         EmvApplication* app = &data->emv_application;
 
+        flipper_format_read_string(ff, "Cardholder name", temp_str);
+        strcpy(app->cardholder_name, furi_string_get_cstr(temp_str));
+
         flipper_format_read_string(ff, "Application name", temp_str);
         strcpy(app->application_name, furi_string_get_cstr(temp_str));
 
-        //Read label
         flipper_format_read_string(ff, "Application label", temp_str);
         strcpy(app->application_label, furi_string_get_cstr(temp_str));
 
@@ -95,6 +97,10 @@ bool emv_load(EmvData* data, FlipperFormat* ff, uint32_t version) {
 
         if(!flipper_format_read_hex(ff, "AID", app->aid, aid_len)) break;
 
+        if(!flipper_format_read_hex(
+               ff, "Application interchange profile", app->application_interchange_profile, 2))
+            break;
+
         if(!flipper_format_read_hex(ff, "Country code", (uint8_t*)&app->country_code, 2)) break;
 
         if(!flipper_format_read_hex(ff, "Currency code", (uint8_t*)&app->currency_code, 2)) break;
@@ -107,9 +113,9 @@ bool emv_load(EmvData* data, FlipperFormat* ff, uint32_t version) {
         if(!flipper_format_read_hex(ff, "Effective month", &app->effective_month, 1)) break;
         if(!flipper_format_read_hex(ff, "Effective day", &app->effective_day, 1)) break;
 
-        uint32_t pin_attempts_counter;
-        if(!flipper_format_read_uint32(ff, "PIN attempts left", &pin_attempts_counter, 1)) break;
-        app->pin_attempts_counter = pin_attempts_counter;
+        uint32_t pin_try_counter;
+        if(!flipper_format_read_uint32(ff, "PIN try counter", &pin_try_counter, 1)) break;
+        app->pin_try_counter = pin_try_counter;
 
         parsed = true;
     } while(false);
@@ -131,6 +137,8 @@ bool emv_save(const EmvData* data, FlipperFormat* ff) {
 
         if(!flipper_format_write_comment_cstr(ff, "EMV specific data:\n")) break;
 
+        if(!flipper_format_write_string_cstr(ff, "Cardholder name", app.cardholder_name)) break;
+
         if(!flipper_format_write_string_cstr(ff, "Application name", app.application_name)) break;
 
         if(!flipper_format_write_string_cstr(ff, "Application label", app.application_label))
@@ -146,6 +154,10 @@ bool emv_save(const EmvData* data, FlipperFormat* ff) {
 
         if(!flipper_format_write_hex(ff, "AID", app.aid, aid_len)) break;
 
+        if(!flipper_format_write_hex(
+               ff, "Application interchange profile", app.application_interchange_profile, 2))
+            break;
+
         if(!flipper_format_write_hex(ff, "Country code", (uint8_t*)&app.country_code, 2)) break;
 
         if(!flipper_format_write_hex(ff, "Currency code", (uint8_t*)&app.currency_code, 2)) break;
@@ -160,8 +172,7 @@ bool emv_save(const EmvData* data, FlipperFormat* ff) {
             break;
         if(!flipper_format_write_hex(ff, "Effective day", (uint8_t*)&app.effective_day, 1)) break;
 
-        if(!flipper_format_write_uint32(
-               ff, "PIN attempts left", (uint32_t*)&app.pin_attempts_counter, 1))
+        if(!flipper_format_write_uint32(ff, "PIN try counter", (uint32_t*)&app.pin_try_counter, 1))
             break;
 
         saved = true;
