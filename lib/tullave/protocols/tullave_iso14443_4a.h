@@ -23,11 +23,11 @@
  * 
  * @param iso_poller
  *          The poller obtained in the NFCPoller callback
- * @param data
- *          Data where the balance will be stored
+ * @param instance
+ *          TuLlave application instance
  * 
 */
-void tullave_read_info_iso14443_4a_balance(Iso14443_4aPoller* iso_poller, TuLlaveData* data);
+void tullave_read_info_iso14443_4a_balance(Iso14443_4aPoller* iso_poller, TuLlaveApp* instance);
 
 /**
  * Sends the APDU Command to read card number and initially selecting the APDU app 
@@ -37,14 +37,14 @@ void tullave_read_info_iso14443_4a_balance(Iso14443_4aPoller* iso_poller, TuLlav
  * 
  * @param iso_poller
  *          The poller obtained in the NFCPoller callback
- * 
- * @param data 
- *          Data where the card number will be stored
+ *
+ * @param instance
+ *          TuLlave application instance 
  * 
  * @return true if card number was read, otherwise return false
  * 
 */
-bool tullave_read_info_iso14443_4a_card_number(Iso14443_4aPoller* iso_poller, TuLlaveData* data);
+void tullave_read_info_iso14443_4a_card_number(Iso14443_4aPoller* iso_poller, TuLlaveApp* instance);
 
 /**
  * Read all known info of TuLlave card (card_number, balance, history)

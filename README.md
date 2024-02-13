@@ -63,4 +63,4 @@ https://www.youtube.com/watch?v=cTCp4IVq9g0
 
 ## Bugs
 
-* Limit readings only for TuLlave. Other NFC-A Tags are read showing garbage in the main window.
+* Limit readings only for TuLlave. Other NFC-A Tags are read showing garbage in the main window (**Fixed!**).

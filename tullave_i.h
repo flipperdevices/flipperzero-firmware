@@ -27,6 +27,8 @@
 
 typedef enum { TuLlaveViewMenu, TuLlaveViewWidget, TuLlaveViewPopup } TuLlaveView;
 
+typedef enum { TuLlaveErrorNone = 0x100, TuLlaveErrorCardNotSupported } TuLlaveError;
+
 // Main structure for the application
 struct TuLlaveApp {
     NotificationApp* notifications;
@@ -40,13 +42,16 @@ struct TuLlaveApp {
     NfcDevice* nfc_device;
     NfcPoller* nfc_poller;
     TuLlaveData* card_data;
+    TuLlaveError err_code;
 };
 
 // NfC Poller custom events
 typedef enum {
     //Start enum in 100 to preserve first 100 events for GUI actions. Taken from Nfc Flipper App.
     NfcCustomEventReserved = 100,
-    NfcPollerEventSuccess
+    NfcPollerEventReadingData,
+    NfcPollerEventSuccess,
+    NfcPollerEventError
 } NfcCustomEvent;
 
 /**

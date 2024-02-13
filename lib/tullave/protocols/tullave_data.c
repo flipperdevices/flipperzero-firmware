@@ -26,6 +26,5 @@ TuLlaveData* tullave_data_alloc() {
     buffer->nfc_uid = furi_string_alloc_set_str("");
     buffer->card_number = furi_string_alloc_set_str("");
     buffer->balance = 0;
-    buffer->data_collected = false;
     return buffer;
 }

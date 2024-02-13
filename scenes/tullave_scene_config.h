@@ -7,3 +7,4 @@
 ADD_SCENE(tullave, start, Start)
 ADD_SCENE(tullave, detect, Detect)
 ADD_SCENE(tullave, read_success, RdSuccess)
+ADD_SCENE(tullave, error, Error)

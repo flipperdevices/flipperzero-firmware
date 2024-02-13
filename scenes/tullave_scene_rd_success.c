@@ -11,6 +11,7 @@ void tullave_scene_read_widget_callback(GuiButtonType result, InputType type, vo
 void tullave_scene_read_success_on_enter(void* context) {
     TuLlaveApp* instance = context;
 
+    notification_message(instance->notifications, &sequence_success);
     notification_message(instance->notifications, &sequence_set_green_255);
 
     widget_add_button_element(
@@ -34,6 +35,7 @@ void tullave_scene_read_success_on_enter(void* context) {
     widget_add_text_scroll_element(
         instance->widget, 0, 0, 128, 52, furi_string_get_cstr(widget_text));
     furi_string_free(widget_text);
+
     view_dispatcher_switch_to_view(instance->view_dispatcher, TuLlaveViewWidget);
 }
 
