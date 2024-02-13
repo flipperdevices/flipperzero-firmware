@@ -11,14 +11,20 @@ static void select_move_selected_callback(void* context, uint32_t index) {
     uint32_t move = scene_manager_get_scene_state(pokemon_fap->scene_manager, SelectMoveScene);
 
     if(index == UINT32_MAX) {
-        pokemon_stat_set(pokemon_fap->pdata, STAT_MOVE, move, table_stat_base_get(pokemon_fap->pdata->pokemon_table, pokemon_fap->pdata, STAT_MOVE, move));
+        pokemon_stat_set(
+            pokemon_fap->pdata,
+            STAT_MOVE,
+            move,
+            table_stat_base_get(
+                pokemon_fap->pdata->pokemon_table, pokemon_fap->pdata, STAT_MOVE, move));
     } else {
         pokemon_stat_set(pokemon_fap->pdata, STAT_MOVE, move, index);
     }
     FURI_LOG_D(
         TAG,
         "[move] Set move %s to %d",
-        namelist_name_get_index(pokemon_fap->pdata->move_list, pokemon_stat_get(pokemon_fap->pdata, STAT_MOVE, move)),
+        namelist_name_get_index(
+            pokemon_fap->pdata->move_list, pokemon_stat_get(pokemon_fap->pdata, STAT_MOVE, move)),
         (int)move);
 
     /* Move back to move menu */
@@ -57,7 +63,9 @@ void select_move_scene_on_enter(void* context) {
             sizeof(buf),
             "Move %d:         %s",
             i + 1,
-            namelist_name_get_index(pokemon_fap->pdata->move_list, pokemon_stat_get(pokemon_fap->pdata, STAT_MOVE, i)));
+            namelist_name_get_index(
+                pokemon_fap->pdata->move_list,
+                pokemon_stat_get(pokemon_fap->pdata, STAT_MOVE, i)));
         submenu_add_item(pokemon_fap->submenu, buf, i, select_move_number_callback, pokemon_fap);
     }
 
@@ -76,7 +84,7 @@ void select_move_index_scene_on_enter(void* context) {
     int i;
     char letter[2] = {'\0'};
     char buf[32];
-    const char *name;
+    const char* name;
     uint32_t move_num = scene_manager_get_scene_state(pokemon_fap->scene_manager, SelectMoveScene);
 
     submenu_reset(pokemon_fap->submenu);
@@ -96,7 +104,8 @@ void select_move_index_scene_on_enter(void* context) {
         sizeof(buf),
         "Default [%s]",
         namelist_name_get_index(
-            pokemon_fap->pdata->move_list, pokemon_stat_get(pokemon_fap->pdata, STAT_MOVE, move_num)));
+            pokemon_fap->pdata->move_list,
+            pokemon_stat_get(pokemon_fap->pdata, STAT_MOVE, move_num)));
     submenu_add_item(
         pokemon_fap->submenu, buf, UINT32_MAX, select_move_selected_callback, pokemon_fap);
 
@@ -104,7 +113,7 @@ void select_move_index_scene_on_enter(void* context) {
     for(i = 1;; i++) {
         name = namelist_name_get_pos(pokemon_fap->pdata->move_list, i);
         if(name == NULL) break;
-	if(name[0] != letter[0]) {
+        if(name[0] != letter[0]) {
             letter[0] = name[0];
             submenu_add_item(
                 pokemon_fap->submenu, letter, letter[0], select_move_index_callback, pokemon_fap);
@@ -129,14 +138,14 @@ void select_move_set_scene_on_enter(void* context) {
     for(i = 1;; i++) {
         name = namelist_name_get_pos(pokemon_fap->pdata->move_list, i);
         if(name == NULL) break;
-        if(name[0] == letter && (pokemon_fap->pdata->gen & namelist_gen_get_pos(pokemon_fap->pdata->move_list, i))) {
+        if(name[0] == letter &&
+           (pokemon_fap->pdata->gen & namelist_gen_get_pos(pokemon_fap->pdata->move_list, i))) {
             submenu_add_item(
                 pokemon_fap->submenu,
-		name,
-		namelist_index_get(pokemon_fap->pdata->move_list, i),
+                name,
+                namelist_index_get(pokemon_fap->pdata->move_list, i),
                 select_move_selected_callback,
                 pokemon_fap);
-        }
-	;
+        };
     }
 }

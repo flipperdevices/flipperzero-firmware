@@ -8,7 +8,6 @@
 #include "views/select_pokemon.h"
 #include "pokemon_char_encode.h"
 
-
 /* The MALVEKE board has an esp32 which is set to TX on the flipper's default
  * UART pins. If this pin shows signs of something connected, assume a MALVEKE
  * board is being used.

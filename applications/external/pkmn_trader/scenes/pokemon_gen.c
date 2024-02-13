@@ -48,7 +48,7 @@ static void scene_change_from_main_cb(void* context, uint32_t index) {
 bool gen_back_event_callback(void* context) {
     furi_assert(context);
     PokemonFap* pokemon_fap = context;
-    
+
     scene_manager_next_scene(pokemon_fap->scene_manager, ConfirmExitScene);
     return true;
 }
@@ -62,7 +62,7 @@ void gen_scene_on_enter(void* context) {
     uint32_t state;
 
     // Set up trade party struct
-    if (!pokemon_fap->pdata) {
+    if(!pokemon_fap->pdata) {
         state = scene_manager_get_scene_state(pokemon_fap->scene_manager, GenITradeScene);
         switch(state) {
         case GenITradeScene:
@@ -77,14 +77,18 @@ void gen_scene_on_enter(void* context) {
         }
         pokemon_fap->pdata = pokemon_data_alloc(state);
 
-	/* Clear the scene state as this is the first entry in to this scene
+        /* Clear the scene state as this is the first entry in to this scene
 	 * we definitely want to be completely reset.
 	 */
-	scene_manager_set_scene_state(pokemon_fap->scene_manager, GenITradeScene, 0);
+        scene_manager_set_scene_state(pokemon_fap->scene_manager, GenITradeScene, 0);
 
-	/* Allocate select and trade views */
+        /* Allocate select and trade views */
         /* Allocates its own view and adds it to the main view_dispatcher */
-        pokemon_fap->select = select_pokemon_alloc(pokemon_fap, pokemon_fap->view_dispatcher, pokemon_fap->scene_manager, AppViewSelectPokemon);
+        pokemon_fap->select = select_pokemon_alloc(
+            pokemon_fap,
+            pokemon_fap->view_dispatcher,
+            pokemon_fap->scene_manager,
+            AppViewSelectPokemon);
 
         // Trade View
         /* Allocates its own view and adds it to the main view_dispatcher */
@@ -104,7 +108,11 @@ void gen_scene_on_enter(void* context) {
 
     submenu_reset(pokemon_fap->submenu);
 
-    snprintf(buf, sizeof(buf), "Pokemon:   %s", table_stat_name_get(pokemon_fap->pdata->pokemon_table, pkmn_num));
+    snprintf(
+        buf,
+        sizeof(buf),
+        "Pokemon:   %s",
+        table_stat_name_get(pokemon_fap->pdata->pokemon_table, pkmn_num));
     submenu_add_item(
         pokemon_fap->submenu, buf, SelectPokemonScene, scene_change_from_main_cb, pokemon_fap);
 
@@ -113,7 +121,11 @@ void gen_scene_on_enter(void* context) {
     submenu_add_item(
         pokemon_fap->submenu, buf, SelectNicknameScene, scene_change_from_main_cb, pokemon_fap);
 
-    snprintf(buf, sizeof(buf), "Level:           %d", pokemon_stat_get(pokemon_fap->pdata, STAT_LEVEL, NONE));
+    snprintf(
+        buf,
+        sizeof(buf),
+        "Level:           %d",
+        pokemon_stat_get(pokemon_fap->pdata, STAT_LEVEL, NONE));
     submenu_add_item(
         pokemon_fap->submenu, buf, SelectLevelScene, scene_change_from_main_cb, pokemon_fap);
 
@@ -133,12 +145,17 @@ void gen_scene_on_enter(void* context) {
 
     submenu_add_item(
         pokemon_fap->submenu,
-        namelist_name_get_index(pokemon_fap->pdata->stat_list, pokemon_stat_get(pokemon_fap->pdata, STAT_SEL, NONE)),
+        namelist_name_get_index(
+            pokemon_fap->pdata->stat_list, pokemon_stat_get(pokemon_fap->pdata, STAT_SEL, NONE)),
         SelectStatsScene,
         scene_change_from_main_cb,
         pokemon_fap);
 
-    snprintf(buf, sizeof(buf), "OT ID#:          %05d", pokemon_stat_get(pokemon_fap->pdata, STAT_OT_ID, NONE));
+    snprintf(
+        buf,
+        sizeof(buf),
+        "OT ID#:          %05d",
+        pokemon_stat_get(pokemon_fap->pdata, STAT_OT_ID, NONE));
     submenu_add_item(
         pokemon_fap->submenu, buf, SelectOTIDScene, scene_change_from_main_cb, pokemon_fap);
 

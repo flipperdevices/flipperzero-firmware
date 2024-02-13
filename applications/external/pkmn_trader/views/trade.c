@@ -595,7 +595,7 @@ static uint8_t getTradeCentreResponse(struct trade_ctx* trade) {
             model->gameboy_status = GAMEBOY_TRADING;
 
             /* Copy the traded-in Pokemon's main data to our struct */
-	    pokemon_stat_memcpy(trade->pdata, trade->input_block, in_pkmn_idx);
+            pokemon_stat_memcpy(trade->pdata, trade->input_block, in_pkmn_idx);
             model->curr_pokemon = pokemon_stat_get(trade->pdata, STAT_NUM, NONE);
 
             /* Schedule a callback outside of ISR context to rebuild the patch

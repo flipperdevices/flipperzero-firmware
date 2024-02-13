@@ -107,7 +107,6 @@ typedef enum {
     MAXIV_MAXEV,
 } EvIv;
 
-
 /* The struct is laid out exactly as the data trasfer that gets sent for trade
  * information. It has to be packed in order to not have padding in the Flipper.
  * Packing is always potentially filled with pitfalls, however this has worked
@@ -208,21 +207,25 @@ const char* namelist_name_get_pos(const NamedList* list, uint8_t pos);
 uint8_t namelist_gen_get_pos(const NamedList* list, uint8_t pos);
 int namelist_cnt(const NamedList* list);
 
-uint8_t table_stat_base_get(const PokemonTable* table, PokemonData *pdata, DataStat stat, DataStatSub num);
+uint8_t table_stat_base_get(
+    const PokemonTable* table,
+    PokemonData* pdata,
+    DataStat stat,
+    DataStatSub num);
 const char* table_stat_name_get(const PokemonTable* table, int num);
-const Icon *table_icon_get(const PokemonTable* table, int num);
+const Icon* table_icon_get(const PokemonTable* table, int num);
 
 void pokemon_stat_memcpy(PokemonData* dst, void* traded, uint8_t which);
-uint16_t pokemon_stat_get(PokemonData *pdata, DataStat stat, DataStatSub num);
-void pokemon_stat_set(PokemonData *pdata, DataStat stat, DataStatSub which, uint16_t val);
-uint16_t pokemon_stat_ev_get(PokemonData *pdata, DataStat stat);
-void pokemon_stat_ev_set(PokemonData *pdata, DataStat stat, uint16_t val);
-uint8_t pokemon_stat_iv_get(PokemonData *pdata, DataStat stat);
-void pokemon_stat_iv_set(PokemonData *pdata, int val);
-void pokemon_exp_set(PokemonData *pdata, uint32_t exp);
-void pokemon_exp_calc(PokemonData *pdata);
-void pokemon_stat_calc(PokemonData *pdata, DataStat stat);
-void pokemon_default_nickname_set(char* dest, PokemonData *pdata, size_t n);
-void pokemon_name_set(PokemonData *pdata, DataStat stat, char* name);
-void pokemon_name_get(PokemonData *pdata, DataStat stat, char* dest, size_t len);
+uint16_t pokemon_stat_get(PokemonData* pdata, DataStat stat, DataStatSub num);
+void pokemon_stat_set(PokemonData* pdata, DataStat stat, DataStatSub which, uint16_t val);
+uint16_t pokemon_stat_ev_get(PokemonData* pdata, DataStat stat);
+void pokemon_stat_ev_set(PokemonData* pdata, DataStat stat, uint16_t val);
+uint8_t pokemon_stat_iv_get(PokemonData* pdata, DataStat stat);
+void pokemon_stat_iv_set(PokemonData* pdata, int val);
+void pokemon_exp_set(PokemonData* pdata, uint32_t exp);
+void pokemon_exp_calc(PokemonData* pdata);
+void pokemon_stat_calc(PokemonData* pdata, DataStat stat);
+void pokemon_default_nickname_set(char* dest, PokemonData* pdata, size_t n);
+void pokemon_name_set(PokemonData* pdata, DataStat stat, char* name);
+void pokemon_name_get(PokemonData* pdata, DataStat stat, char* dest, size_t len);
 #endif /* POKEMON_DATA_H */

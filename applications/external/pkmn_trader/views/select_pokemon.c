@@ -13,8 +13,8 @@ struct select_model {
 /* Anonymous struct */
 struct select_ctx {
     View* view;
-    PokemonFap *pokemon_fap;
-    SceneManager *scene_manager;
+    PokemonFap* pokemon_fap;
+    SceneManager* scene_manager;
 };
 
 static void select_pokemon_render_callback(Canvas* canvas, void* model) {
@@ -25,7 +25,12 @@ static void select_pokemon_render_callback(Canvas* canvas, void* model) {
     snprintf(pokedex_num, sizeof(pokedex_num), "#%03d", curr_pokemon + 1);
     canvas_set_font(canvas, FontPrimary);
     canvas_draw_str_aligned(
-        canvas, 55, 54 / 2, AlignLeft, AlignTop, table_stat_name_get(view_model->pokemon_table, curr_pokemon));
+        canvas,
+        55,
+        54 / 2,
+        AlignLeft,
+        AlignTop,
+        table_stat_name_get(view_model->pokemon_table, curr_pokemon));
 
     canvas_set_font(canvas, FontSecondary);
     canvas_draw_str_aligned(canvas, 55, 38, AlignLeft, AlignTop, pokedex_num);
@@ -38,7 +43,7 @@ static void select_pokemon_render_callback(Canvas* canvas, void* model) {
 }
 
 static bool select_pokemon_input_callback(InputEvent* event, void* context) {
-    struct select_ctx *select = (struct select_ctx*)context;
+    struct select_ctx* select = (struct select_ctx*)context;
     bool consumed = false;
     uint8_t selected_pokemon;
 
@@ -116,7 +121,7 @@ static bool select_pokemon_input_callback(InputEvent* event, void* context) {
 }
 
 void select_pokemon_enter_callback(void* context) {
-    struct select_ctx *select = (struct select_ctx*)context;
+    struct select_ctx* select = (struct select_ctx*)context;
 
     with_view_model(
         select->view,
@@ -128,10 +133,14 @@ void select_pokemon_enter_callback(void* context) {
         true);
 }
 
-void* select_pokemon_alloc(PokemonFap* pokemon_fap, ViewDispatcher* view_dispatcher, SceneManager* scene_manager, uint32_t viewid) {
+void* select_pokemon_alloc(
+    PokemonFap* pokemon_fap,
+    ViewDispatcher* view_dispatcher,
+    SceneManager* scene_manager,
+    uint32_t viewid) {
     furi_assert(pokemon_fap);
 
-    struct select_ctx *select = malloc(sizeof(struct select_ctx));
+    struct select_ctx* select = malloc(sizeof(struct select_ctx));
 
     select->view = view_alloc();
     select->pokemon_fap = pokemon_fap;
@@ -149,8 +158,8 @@ void* select_pokemon_alloc(PokemonFap* pokemon_fap, ViewDispatcher* view_dispatc
     return select;
 }
 
-void select_pokemon_free(ViewDispatcher* view_dispatcher, uint32_t viewid, void *select_ctx) {
-    struct select_ctx *select = (struct select_ctx*)select_ctx;
+void select_pokemon_free(ViewDispatcher* view_dispatcher, uint32_t viewid, void* select_ctx) {
+    struct select_ctx* select = (struct select_ctx*)select_ctx;
 
     view_dispatcher_remove_view(view_dispatcher, viewid);
 

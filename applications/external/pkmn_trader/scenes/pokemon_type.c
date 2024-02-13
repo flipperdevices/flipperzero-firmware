@@ -6,7 +6,7 @@
 
 struct type_cb {
     DataStatSub type;
-    PokemonFap *pokemon_fap;
+    PokemonFap* pokemon_fap;
 };
 
 static struct type_cb type_cb[] = {
@@ -28,8 +28,13 @@ static void select_type_callback(VariableItem* item) {
     struct type_cb* context = variable_item_get_context(item);
     uint8_t pos = variable_item_get_current_value_index(item);
 
-    variable_item_set_current_value_text(item, namelist_name_get_pos(context->pokemon_fap->pdata->type_list, pos));
-    pokemon_stat_set(context->pokemon_fap->pdata, STAT_TYPE, context->type, namelist_index_get(context->pokemon_fap->pdata->type_list, pos));
+    variable_item_set_current_value_text(
+        item, namelist_name_get_pos(context->pokemon_fap->pdata->type_list, pos));
+    pokemon_stat_set(
+        context->pokemon_fap->pdata,
+        STAT_TYPE,
+        context->type,
+        namelist_index_get(context->pokemon_fap->pdata->type_list, pos));
 }
 
 void select_type_scene_on_enter(void* context) {
@@ -57,7 +62,8 @@ void select_type_scene_on_enter(void* context) {
             &type_cb[i]);
 
         variable_item_set_current_value_index(vitype[i], pos);
-        variable_item_set_current_value_text(vitype[i], namelist_name_get_pos(pokemon_fap->pdata->type_list, pos));
+        variable_item_set_current_value_text(
+            vitype[i], namelist_name_get_pos(pokemon_fap->pdata->type_list, pos));
     }
 
     view_dispatcher_add_view(

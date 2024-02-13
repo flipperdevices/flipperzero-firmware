@@ -29,7 +29,13 @@ void pokemon_exit_confirm_on_enter(void* context) {
     dialog_ex_set_left_button_text(dialog_ex, "Exit");
     dialog_ex_set_right_button_text(dialog_ex, "Stay");
     dialog_ex_set_header(dialog_ex, "Exit to Main Menu?", 64, 0, AlignCenter, AlignTop);
-    dialog_ex_set_text(dialog_ex, "Current configuration and/or\ntrade status will be lost!", 64, 12, AlignCenter, AlignTop);
+    dialog_ex_set_text(
+        dialog_ex,
+        "Current configuration and/or\ntrade status will be lost!",
+        64,
+        12,
+        AlignCenter,
+        AlignTop);
     dialog_ex_set_context(dialog_ex, pokemon_fap);
     dialog_ex_set_result_callback(dialog_ex, pokemon_exit_confirm_dialog_callback);
 
@@ -66,7 +72,8 @@ bool pokemon_exit_confirm_on_event(void* context, SceneManagerEvent event) {
 
             // Free views
             /* These each remove themselves from the view_dispatcher */
-            select_pokemon_free(pokemon_fap->view_dispatcher, AppViewSelectPokemon, pokemon_fap->select);
+            select_pokemon_free(
+                pokemon_fap->view_dispatcher, AppViewSelectPokemon, pokemon_fap->select);
             trade_free(pokemon_fap->view_dispatcher, AppViewTrade, pokemon_fap->trade);
 
             pokemon_fap->pdata = NULL;
