@@ -366,7 +366,7 @@ $ ./fbt dolphin_ext
 - [Calculator v1.1 (By n-o-T-I-n-s-a-n-e)](https://github.com/n-o-T-I-n-s-a-n-e)
 - [Calendar (By Adiras)](https://github.com/Adiras/flipperzero-calendar)
 - [Camera (By Z4urce)](https://github.com/Z4urce/flipper-camera) `Req: ESP32-CAM`
-- [Ceasar Cipher v1.1 (By panki27)](https://github.com/panki27/caesar-cipher)
+- [Caesar Cipher v1.1 (By panki27)](https://github.com/panki27/caesar-cipher)
 - [CFW Settings - Imported/Modified By RogueMaster (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/ecf91524a956f773881d564c4ada833f844264ca)
 - [Chronometer (By nmrr)](https://github.com/nmrr/flipperzero-chronometer)
 - [CLI Bridge (By ranchordo)](https://github.com/ranchordo/flipperzero-cli-bridge)
