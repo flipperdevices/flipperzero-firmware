@@ -3,7 +3,7 @@
 #include <gui/canvas.h>
 #include <gui/elements.h>
 
-#include "vgm_tool_icons.h"
+#include "video_game_module_tool_icons.h"
 
 struct Progress {
     View* view;

@@ -2,7 +2,7 @@
 
 #include <furi.h>
 
-#include "vgm_tool_icons.h"
+#include "video_game_module_tool_icons.h"
 
 void scene_probe_on_enter(void* context) {
     App* app = context;

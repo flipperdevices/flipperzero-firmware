@@ -13,7 +13,7 @@
 
 #define TAG "SensorModule"
 
-#define HID_BT_KEYS_STORAGE_NAME ".bt_hid.keys"
+#define BLE_HID_KEYS_PATH "/ext/apps_data/hid_ble/.bt_hid.keys"
 
 typedef struct {
     Gui* gui;
@@ -62,7 +62,7 @@ static void ble_hid_remove_pairing(void) {
     // Wait 2nd core to update nvm storage
     furi_delay_ms(200);
 
-    bt_keys_storage_set_storage_path(bt, APP_DATA_PATH(HID_BT_KEYS_STORAGE_NAME));
+    bt_keys_storage_set_storage_path(bt, BLE_HID_KEYS_PATH);
     bt_forget_bonded_devices(bt);
 
     // Wait 2nd core to update nvm storage
@@ -87,7 +87,7 @@ static Bt* ble_hid_init(AirMouseApp* app) {
     // Wait 2nd core to update nvm storage
     furi_delay_ms(200);
 
-    bt_keys_storage_set_storage_path(bt, APP_DATA_PATH(HID_BT_KEYS_STORAGE_NAME));
+    bt_keys_storage_set_storage_path(bt, BLE_HID_KEYS_PATH);
 
     furi_check(bt_set_profile(bt, BtProfileHidKeyboard));
 

@@ -4,7 +4,7 @@
 #include <notification/notification_messages.h>
 
 #include "custom_event.h"
-#include "vgm_tool_icons.h"
+#include "video_game_module_tool_icons.h"
 
 static void
     scene_success_button_callback(GuiButtonType button_type, InputType input_type, void* context) {
