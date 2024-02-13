@@ -276,6 +276,7 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
                 scene_manager_next_scene(desktop->scene_manager, DesktopSceneDebug);
                 consumed = true;
             }
+            break;
         }
         case DesktopDummyEventOpenLeft:
             desktop_scene_main_open_fav_or_profile(
