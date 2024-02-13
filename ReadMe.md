@@ -83,6 +83,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [ESP Flasher v1.5 (By 0xchocolate)](https://github.com/0xchocolate/flipperzero-esp-flasher)
 - Updated: [Flizzer Tracker v0.5 (By LTVA1)](https://github.com/LTVA1/flizzer_tracker)
 - Updated: [MH-Z19 CO2 Sensor v0.2 (By meshchaninov)](https://github.com/meshchaninov/flipper-zero-mh-z19)
+- Updated: [Pokemon Trading v1.7 (By EstebanFuentealba & kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
 
 <a name="release">
 
@@ -507,7 +508,7 @@ $ ./fbt dolphin_ext
 - [PicoPass (iClass) v1.13 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass) [PicoPass Emulation (By nvx)](https://github.com/nvx/flipperzero-firmware/tree/picopass_emulation)
 - [Plantower PMSx003 sensor reader v1.2 (By 3cky)](https://github.com/3cky/flipperzero-airmon) `Req: Plantower PMS5003/PMS7003/PMS9003`
 - [POCSAG Pager v1.2 (By XMasterx & Shmuma)](https://github.com/xMasterX/flipper-pager)
-- [Pokemon Trading v1.6 (By EstebanFuentealba & kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
+- [Pokemon Trading v1.7 (By EstebanFuentealba & kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
 - [Pomodoro Timer v1.2 (By sbrin)](https://github.com/sbrin/flipperzero_pomodoro)
 - [Pomodoro 2 v1.3 (By Th3Un1q3)](https://github.com/Th3Un1q3/flipp_pomodoro)
 - [Programmer Calculator v0.9 (By armixz)](https://github.com/armixz/Flipper-Zero-Programmer-Calculator)

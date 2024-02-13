@@ -7,6 +7,8 @@
 
 typedef enum {
     MainMenuScene,
+    GenITradeScene, // Formerly main menu scene
+    GenIITradeScene,
     SelectPokemonScene,
     SelectNicknameScene,
     SelectLevelScene,
@@ -19,9 +21,12 @@ typedef enum {
     SelectOTNameScene,
     TradeScene,
     SelectPinsScene,
+    ConfirmExitScene,
     SceneCount,
 } AppScene;
 
 extern const SceneManagerHandlers pokemon_scene_manager_handlers;
+
+bool main_menu_back_event_callback(void* context);
 
 #endif // POKEMON_MENU_H

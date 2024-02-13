@@ -4,11 +4,10 @@
 #pragma once
 
 #include <gui/view.h>
-#include "../pokemon_app.h"
+#include "../pokemon_data.h"
 
 void* trade_alloc(
-    TradeBlock* trade_block,
-    const PokemonTable* table,
+    PokemonData* pdata,
     struct gblink_pins* gblink_pins,
     ViewDispatcher* view_dispatcher,
     uint32_t view_id);
