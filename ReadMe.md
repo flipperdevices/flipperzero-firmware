@@ -61,6 +61,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - [SubGhz: GPS support (By Sil333033) & SubGHz Repeater (By LeeroysHub) & Optimizations (By Willy-JL) & Merge Fixes (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/3e5e1870621b52caad8fd1287e116c542703984a)
 - [SubGhz: add subghz tx_from_file CLI cmd, major TX flow refactoring, various improvements and bug fixes #3302 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/3302)
 - [MassStorage: Limit to .img and .iso files (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/4a166a50c68808104e2a52eaad2f3aded5f07d21)
+- [NFC Parser updates (By zProAle)](https://github.com/zProAle/my_flipper_kdf/commit/c46c31e032237a139197c77de79bd55191d91b18)
 - To Be Merged OFW PRs: [3211](https://github.com/flipperdevices/flipperzero-firmware/pull/3211), [3366](https://github.com/flipperdevices/flipperzero-firmware/pull/3366), [3250](https://github.com/flipperdevices/flipperzero-firmware/pull/3250), [3402](https://github.com/flipperdevices/flipperzero-firmware/pull/3402), [3409](https://github.com/flipperdevices/flipperzero-firmware/pull/3409), [3406](https://github.com/flipperdevices/flipperzero-firmware/pull/3406), [3431](https://github.com/flipperdevices/flipperzero-firmware/pull/3431), [3254](https://github.com/flipperdevices/flipperzero-firmware/pull/3254) & [3429](https://github.com/flipperdevices/flipperzero-firmware/pull/3429)
 
 <a name="release">

@@ -3,7 +3,6 @@
 #include <nfc/nfc_device.h>
 #include <nfc/helpers/nfc_util.h>
 #include <nfc/protocols/mf_classic/mf_classic_poller_sync.h>
-#include <stdint.h>
 
 #define TAG "MiZIP"
 #define KEY_LENGTH 6
@@ -198,7 +197,7 @@ static bool mizip_parse(const NfcDevice* device, FuriString* parsed_data) {
         MfClassicSectorTrailer* sec_tr =
             mf_classic_get_sector_trailer_by_sector(data, cfg.verify_sector);
         uint64_t key = nfc_util_bytes2num(sec_tr->key_b.data, 6);
-        if(key != cfg.keys[cfg.verify_sector].b) return false;
+        if(key != cfg.keys[cfg.verify_sector].b) break;
 
         //Get UID
         uint8_t uid[UID_LENGTH];

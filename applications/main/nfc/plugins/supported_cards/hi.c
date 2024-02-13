@@ -3,7 +3,6 @@
 #include <nfc/nfc_device.h>
 #include <nfc/helpers/nfc_util.h>
 #include <nfc/protocols/mf_classic/mf_classic_poller_sync.h>
-#include <stdint.h>
 
 #define TAG "HI!"
 #define KEY_LENGTH 6
