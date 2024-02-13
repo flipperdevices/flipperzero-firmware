@@ -10,7 +10,8 @@
 //pinpad variables for movement and stuff
 int pinpad_x = 0;
 int pinpad_y = 0;
-int pinpad_values[4][3] = {{1, 2, 3}, {4, 5, 6}, {7, 8, 9}, {-1, 0, -1}};
+char pinpad_values[5][3] =
+    {{'1', '2', '3'}, {'4', '5', '6'}, {'7', '8', '9'}, {'x', '0', 'x'}, {'x', '.', 'x'}};
 // pinpad constants for display
 const int pinpad_x_base_offset = 84;
 const int pinpad_y_base_offset = 4;
@@ -18,11 +19,13 @@ const int pinpad_x_offset = 15;
 const int pinpad_y_offset = 12;
 
 //TVM values
-float tvm_n = 0;
-float tvm_i = 0;
-float tvm_pv = 0;
-float tvm_pmt = 0;
-float tvm_fv = 0;
+double tvm_n = 0;
+double tvm_i = 0;
+double tvm_pv = 0;
+double tvm_pmt = 0;
+double tvm_fv = 0;
+//TVM Strings
+char tvm_Strings[5][9] = {"0", "0", "0", "0", "0"};
 
 // TVM cursor variables
 int tvm_cursor_position = 0;
@@ -88,6 +91,13 @@ static void app_draw_callback(Canvas* canvas, void* ctx) {
     canvas_draw_line(canvas, 127, 38, 83, 38);
     canvas_draw_line(canvas, 112, 3, 112, 61);
 
+    // Now draw the numbers as strings
+    canvas_draw_str(canvas, 33, 47, tvm_Strings[3]); //PMT
+    canvas_draw_str(canvas, 33, 35, tvm_Strings[2]); //PV
+    canvas_draw_str(canvas, 33, 23, tvm_Strings[1]); //I
+    canvas_draw_str(canvas, 33, 12, tvm_Strings[0]); //N
+    canvas_draw_str(canvas, 33, 59, tvm_Strings[4]); //FV
+
     //now draw the stuff that moves
 
     // tvm cursor
@@ -116,18 +126,133 @@ static void app_draw_callback(Canvas* canvas, void* ctx) {
         9);
 }
 
+int contains_char(const char* str, char c) {
+    // Iterate through each character of the string
+    while(*str != '\0') {
+        // If the current character matches the desired character
+        if(*str == c) {
+            return 1; // Return true
+        }
+        str++; // Move to the next character
+    }
+    return 0; // Return false if the character is not found
+}
+
 void addNumberToTVMString() {
-    //TODO: handle this
+    // Find the length of the string
+    int length = strlen(tvm_Strings[tvm_cursor_position]);
+
+    // do some sanity checks
+    // if user inputs '.', but one is present, don't add one
+    if(contains_char(tvm_Strings[tvm_cursor_position], '.') &&
+       pinpad_values[pinpad_y][pinpad_x] == '.') {
+        return;
+    }
+    //if the value is "0", delete it and replace
+    if(length == 1 && tvm_Strings[tvm_cursor_position][0] == '0') {
+        tvm_Strings[tvm_cursor_position][0] = pinpad_values[pinpad_y][pinpad_x];
+        return;
+    }
+
+    // Check if there is space to append the character
+    if(length < 7) {
+        // Append the character and update the null terminator
+        tvm_Strings[tvm_cursor_position][length] = pinpad_values[pinpad_y][pinpad_x];
+        tvm_Strings[tvm_cursor_position][length + 1] = '\0';
+    }
 }
 
 void turnTVMnumberNegative() {
-    //TODO: handle this
+    // Find the length of the string
+    int length = strlen(tvm_Strings[tvm_cursor_position]);
+
+    //if the number is already negative, make it positive
+    // Shift all characters one position to the left
+    if(tvm_Strings[tvm_cursor_position][0] == '-') {
+        for(int i = 0; tvm_Strings[tvm_cursor_position][i] != '\0'; i++) {
+            tvm_Strings[tvm_cursor_position][i] = tvm_Strings[tvm_cursor_position][i + 1];
+        }
+    } else {
+        // make it negative if there is a number to make negative
+        if(length < 8 && tvm_Strings[tvm_cursor_position][0] != '0') {
+            for(int i = length; i >= 0; i--) {
+                tvm_Strings[tvm_cursor_position][i + 1] = tvm_Strings[tvm_cursor_position][i];
+            }
+            // Insert the - at the beginning of the string
+            tvm_Strings[tvm_cursor_position][0] = '-';
+        }
+    }
 }
-void addPeriodToTVMString() {
-    //TODO: handle this
+
+// nothing from any of the standard libraries worked, so we do this manually
+double str_to_double(const char* str) {
+    double result = 0.0;
+    int dot_position = -1;
+    int i = 0;
+    int sign = 1;
+
+    if(str[0] == '-') {
+        sign = -1;
+        i++;
+    }
+
+    for(; str[i] != '\0'; i++) {
+        if(str[i] == '.') {
+            dot_position = i;
+            continue;
+        }
+        result = result * 10 + (str[i] - '0');
+    }
+
+    if(dot_position != -1) {
+        int exponent = dot_position - i + 1;
+        result *= pow(10, exponent);
+    }
+
+    return sign * result;
 }
+
 void computeTVM() {
     tvm_cpt_now = true;
+    // convert all strings to doubles
+    tvm_n = str_to_double(tvm_Strings[0]);
+    tvm_i = str_to_double(tvm_Strings[1]) / 100;
+    tvm_pv = str_to_double(tvm_Strings[2]);
+    tvm_pmt = str_to_double(tvm_Strings[3]);
+    tvm_fv = str_to_double(tvm_Strings[4]);
+    // log it because it used to give issue
+    FURI_LOG_I("INFORMATION tag", "Number of Period (tvm_n): %.2f", tvm_n);
+    FURI_LOG_I("INFORMATION tag", "Interest Rate (tvm_i): %.2lf", tvm_i);
+    FURI_LOG_I("INFORMATION tag", "Present value (tvm_pv): %.2lf", tvm_pv);
+    FURI_LOG_I("INFORMATION tag", "Payment (tvm_pmt): %.2lf", tvm_pmt);
+    FURI_LOG_I("INFORMATION tag", "Future value (tvm_fv): %.2lf", tvm_fv);
+
+    // solve for each situation:
+
+    //solve FV
+    if(tvm_cursor_position == 4) {
+        tvm_fv =
+            (tvm_pv * pow(1 + tvm_i, tvm_n) + tvm_pmt * ((pow(1 + tvm_i, tvm_n) - 1) / tvm_i)) *
+            -1;
+        snprintf(tvm_Strings[4], sizeof(tvm_Strings[4]), "%.2f", tvm_fv);
+        FURI_LOG_I("INFORMATION tag", "Future value solved (tvm_fv): %.2f", tvm_fv);
+    }
+    //solve N
+    else if(tvm_cursor_position == 0) {
+        // Checking for divide by zero error
+        if(tvm_i == 0) {
+            if(tvm_pmt == 0)
+                tvm_n = (tvm_fv - tvm_pv); // Case of simple interest, PMT = 0
+            else
+                tvm_n = (tvm_fv - tvm_pv) / tvm_pmt; // Case of future value of annuity, PMT != 0
+        } else {
+            // Calculation for the number of periods (n)
+            tvm_n = log((tvm_fv - tvm_pmt) / tvm_pv + 1) / log(1 + tvm_i);
+        }
+
+        snprintf(tvm_Strings[0], sizeof(tvm_Strings[0]), "%.2f", tvm_n);
+        FURI_LOG_I("INFORMATION tag", "N of Periods solved (tvm_n): %.2f", tvm_n);
+    }
 }
 
 static void app_input_callback(InputEvent* input_event, void* ctx) {
@@ -193,8 +318,8 @@ int32_t fin_calc(void* p) {
                     }
                     break;
                 case InputKeyOk:
-                    //if a number is inputted, handle that
-                    if(pinpad_y <= 2 || (pinpad_x == 1 && pinpad_y == 3)) {
+                    //if a number or . is inputted, handle that
+                    if(pinpad_y <= 2 || (pinpad_x == 1)) {
                         addNumberToTVMString();
                     }
                     // if - is pressed, turn the number negative
@@ -217,17 +342,14 @@ int32_t fin_calc(void* p) {
                             tvm_cursor_position = 0;
                         }
                     }
-                    // if . pressed, handle that
-                    else if(pinpad_x == 1 && pinpad_y == 4) {
-                        addPeriodToTVMString();
-                    }
                     // if compute pressed, handle that
                     else if(pinpad_x == 2 && pinpad_y == 3) {
                         computeTVM();
                     }
                     break;
                 case InputKeyBack:
-
+                    // if back pressed, wipe out the current string
+                    strcpy(tvm_Strings[tvm_cursor_position], "0");
                     break;
                 default:
                     break;
