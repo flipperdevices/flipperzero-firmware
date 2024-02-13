@@ -155,10 +155,11 @@ static float BME680_compensate_humidity(I2CSensor* i2c_sensor, int32_t hum_adc) 
     var1 =
         (float)((float)hum_adc) - (((float)bme680_instance->hum_cal.dig_H1 * 16.0f) +
                                    (((float)bme680_instance->hum_cal.dig_H3 / 2.0f) * temp_comp));
-    var2 = var1 *
-           ((float)(((float)bme680_instance->hum_cal.dig_H2 / 262144.0f) *
-                    (1.0f + (((float)bme680_instance->hum_cal.dig_H4 / 16384.0f) * temp_comp) +
-                     (((float)bme680_instance->hum_cal.dig_H5 / 1048576.0f) * temp_comp * temp_comp))));
+    var2 =
+        var1 * ((float)(((float)bme680_instance->hum_cal.dig_H2 / 262144.0f) *
+                        (1.0f + (((float)bme680_instance->hum_cal.dig_H4 / 16384.0f) * temp_comp) +
+                         (((float)bme680_instance->hum_cal.dig_H5 / 1048576.0f) * temp_comp *
+                          temp_comp))));
     var3 = (float)bme680_instance->hum_cal.dig_H6 / 16384.0f;
     var4 = (float)bme680_instance->hum_cal.dig_H7 / 2097152.0f;
     calc_hum = var2 + ((var3 + (var4 * temp_comp)) * var2 * var2);
@@ -256,9 +257,11 @@ static bool BME680_readCalValues(I2CSensor* i2c_sensor) {
 
     /* Humidity related coefficients */
     bme680_instance->hum_cal.dig_H1 =
-        (uint16_t)(((uint16_t)coeff_array[BME680_H1_MSB_REG] << BME680_HUM_REG_SHIFT_VAL) | (coeff_array[BME680_H1_LSB_REG] & BME680_BIT_H1_DATA_MSK));
+        (uint16_t)(((uint16_t)coeff_array[BME680_H1_MSB_REG] << BME680_HUM_REG_SHIFT_VAL) |
+                   (coeff_array[BME680_H1_LSB_REG] & BME680_BIT_H1_DATA_MSK));
     bme680_instance->hum_cal.dig_H2 =
-        (uint16_t)(((uint16_t)coeff_array[BME680_H2_MSB_REG] << BME680_HUM_REG_SHIFT_VAL) | ((coeff_array[BME680_H2_LSB_REG]) >> BME680_HUM_REG_SHIFT_VAL));
+        (uint16_t)(((uint16_t)coeff_array[BME680_H2_MSB_REG] << BME680_HUM_REG_SHIFT_VAL) |
+                   ((coeff_array[BME680_H2_LSB_REG]) >> BME680_HUM_REG_SHIFT_VAL));
     bme680_instance->hum_cal.dig_H3 = (int8_t)coeff_array[BME680_H3_REG];
     bme680_instance->hum_cal.dig_H4 = (int8_t)coeff_array[BME680_H4_REG];
     bme680_instance->hum_cal.dig_H5 = (int8_t)coeff_array[BME680_H5_REG];

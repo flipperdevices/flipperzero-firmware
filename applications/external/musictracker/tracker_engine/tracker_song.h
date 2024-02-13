@@ -74,7 +74,7 @@ typedef enum {
 } Effect;
 
 #define EFFECT_DATA_2(x, y) ((x) | ((y) << 3))
-#define EFFECT_DATA_GET_X(data) ((data)&0x07)
+#define EFFECT_DATA_GET_X(data) ((data) & 0x07)
 #define EFFECT_DATA_GET_Y(data) (((data) >> 3) & 0x07)
 #define EFFECT_DATA_NONE 0
 #define EFFECT_DATA_1_MAX 0x3F
@@ -89,7 +89,7 @@ typedef enum {
 #define PATTERN_SIZE 64
 
 #define ROW_MAKE(note, effect, data) \
-    ((Row)(((note)&0x3F) | (((effect)&0xF) << 6) | (((data)&0x3F) << 10)))
+    ((Row)(((note) & 0x3F) | (((effect) & 0xF) << 6) | (((data) & 0x3F) << 10)))
 
 typedef struct {
     Row rows[PATTERN_SIZE];

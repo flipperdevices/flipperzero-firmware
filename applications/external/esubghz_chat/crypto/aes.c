@@ -75,34 +75,34 @@ static uint32_t RCON[10]; // AES round constants
 /*
  *  AES forward and reverse encryption round processing macros
  */
-#define AES_FROUND(X0, X1, X2, X3, Y0, Y1, Y2, Y3)                                     \
-    {                                                                                  \
-        X0 = *RK++ ^ FT0[(Y0)&0xFF] ^ FT1[(Y1 >> 8) & 0xFF] ^ FT2[(Y2 >> 16) & 0xFF] ^ \
-             FT3[(Y3 >> 24) & 0xFF];                                                   \
-                                                                                       \
-        X1 = *RK++ ^ FT0[(Y1)&0xFF] ^ FT1[(Y2 >> 8) & 0xFF] ^ FT2[(Y3 >> 16) & 0xFF] ^ \
-             FT3[(Y0 >> 24) & 0xFF];                                                   \
-                                                                                       \
-        X2 = *RK++ ^ FT0[(Y2)&0xFF] ^ FT1[(Y3 >> 8) & 0xFF] ^ FT2[(Y0 >> 16) & 0xFF] ^ \
-             FT3[(Y1 >> 24) & 0xFF];                                                   \
-                                                                                       \
-        X3 = *RK++ ^ FT0[(Y3)&0xFF] ^ FT1[(Y0 >> 8) & 0xFF] ^ FT2[(Y1 >> 16) & 0xFF] ^ \
-             FT3[(Y2 >> 24) & 0xFF];                                                   \
+#define AES_FROUND(X0, X1, X2, X3, Y0, Y1, Y2, Y3)                                       \
+    {                                                                                    \
+        X0 = *RK++ ^ FT0[(Y0) & 0xFF] ^ FT1[(Y1 >> 8) & 0xFF] ^ FT2[(Y2 >> 16) & 0xFF] ^ \
+             FT3[(Y3 >> 24) & 0xFF];                                                     \
+                                                                                         \
+        X1 = *RK++ ^ FT0[(Y1) & 0xFF] ^ FT1[(Y2 >> 8) & 0xFF] ^ FT2[(Y3 >> 16) & 0xFF] ^ \
+             FT3[(Y0 >> 24) & 0xFF];                                                     \
+                                                                                         \
+        X2 = *RK++ ^ FT0[(Y2) & 0xFF] ^ FT1[(Y3 >> 8) & 0xFF] ^ FT2[(Y0 >> 16) & 0xFF] ^ \
+             FT3[(Y1 >> 24) & 0xFF];                                                     \
+                                                                                         \
+        X3 = *RK++ ^ FT0[(Y3) & 0xFF] ^ FT1[(Y0 >> 8) & 0xFF] ^ FT2[(Y1 >> 16) & 0xFF] ^ \
+             FT3[(Y2 >> 24) & 0xFF];                                                     \
     }
 
-#define AES_RROUND(X0, X1, X2, X3, Y0, Y1, Y2, Y3)                                     \
-    {                                                                                  \
-        X0 = *RK++ ^ RT0[(Y0)&0xFF] ^ RT1[(Y3 >> 8) & 0xFF] ^ RT2[(Y2 >> 16) & 0xFF] ^ \
-             RT3[(Y1 >> 24) & 0xFF];                                                   \
-                                                                                       \
-        X1 = *RK++ ^ RT0[(Y1)&0xFF] ^ RT1[(Y0 >> 8) & 0xFF] ^ RT2[(Y3 >> 16) & 0xFF] ^ \
-             RT3[(Y2 >> 24) & 0xFF];                                                   \
-                                                                                       \
-        X2 = *RK++ ^ RT0[(Y2)&0xFF] ^ RT1[(Y1 >> 8) & 0xFF] ^ RT2[(Y0 >> 16) & 0xFF] ^ \
-             RT3[(Y3 >> 24) & 0xFF];                                                   \
-                                                                                       \
-        X3 = *RK++ ^ RT0[(Y3)&0xFF] ^ RT1[(Y2 >> 8) & 0xFF] ^ RT2[(Y1 >> 16) & 0xFF] ^ \
-             RT3[(Y0 >> 24) & 0xFF];                                                   \
+#define AES_RROUND(X0, X1, X2, X3, Y0, Y1, Y2, Y3)                                       \
+    {                                                                                    \
+        X0 = *RK++ ^ RT0[(Y0) & 0xFF] ^ RT1[(Y3 >> 8) & 0xFF] ^ RT2[(Y2 >> 16) & 0xFF] ^ \
+             RT3[(Y1 >> 24) & 0xFF];                                                     \
+                                                                                         \
+        X1 = *RK++ ^ RT0[(Y1) & 0xFF] ^ RT1[(Y0 >> 8) & 0xFF] ^ RT2[(Y3 >> 16) & 0xFF] ^ \
+             RT3[(Y2 >> 24) & 0xFF];                                                     \
+                                                                                         \
+        X2 = *RK++ ^ RT0[(Y2) & 0xFF] ^ RT1[(Y1 >> 8) & 0xFF] ^ RT2[(Y0 >> 16) & 0xFF] ^ \
+             RT3[(Y3 >> 24) & 0xFF];                                                     \
+                                                                                         \
+        X3 = *RK++ ^ RT0[(Y3) & 0xFF] ^ RT1[(Y2 >> 8) & 0xFF] ^ RT2[(Y1 >> 16) & 0xFF] ^ \
+             RT3[(Y0 >> 24) & 0xFF];                                                     \
     }
 
 /*
@@ -392,16 +392,16 @@ int aes_cipher(aes_context* ctx, const uchar input[16], uchar output[16]) {
 
         AES_RROUND(Y0, Y1, Y2, Y3, X0, X1, X2, X3);
 
-        X0 = *RK++ ^ ((uint32_t)RSb[(Y0)&0xFF]) ^ ((uint32_t)RSb[(Y3 >> 8) & 0xFF] << 8) ^
+        X0 = *RK++ ^ ((uint32_t)RSb[(Y0) & 0xFF]) ^ ((uint32_t)RSb[(Y3 >> 8) & 0xFF] << 8) ^
              ((uint32_t)RSb[(Y2 >> 16) & 0xFF] << 16) ^ ((uint32_t)RSb[(Y1 >> 24) & 0xFF] << 24);
 
-        X1 = *RK++ ^ ((uint32_t)RSb[(Y1)&0xFF]) ^ ((uint32_t)RSb[(Y0 >> 8) & 0xFF] << 8) ^
+        X1 = *RK++ ^ ((uint32_t)RSb[(Y1) & 0xFF]) ^ ((uint32_t)RSb[(Y0 >> 8) & 0xFF] << 8) ^
              ((uint32_t)RSb[(Y3 >> 16) & 0xFF] << 16) ^ ((uint32_t)RSb[(Y2 >> 24) & 0xFF] << 24);
 
-        X2 = *RK++ ^ ((uint32_t)RSb[(Y2)&0xFF]) ^ ((uint32_t)RSb[(Y1 >> 8) & 0xFF] << 8) ^
+        X2 = *RK++ ^ ((uint32_t)RSb[(Y2) & 0xFF]) ^ ((uint32_t)RSb[(Y1 >> 8) & 0xFF] << 8) ^
              ((uint32_t)RSb[(Y0 >> 16) & 0xFF] << 16) ^ ((uint32_t)RSb[(Y3 >> 24) & 0xFF] << 24);
 
-        X3 = *RK++ ^ ((uint32_t)RSb[(Y3)&0xFF]) ^ ((uint32_t)RSb[(Y2 >> 8) & 0xFF] << 8) ^
+        X3 = *RK++ ^ ((uint32_t)RSb[(Y3) & 0xFF]) ^ ((uint32_t)RSb[(Y2 >> 8) & 0xFF] << 8) ^
              ((uint32_t)RSb[(Y1 >> 16) & 0xFF] << 16) ^ ((uint32_t)RSb[(Y0 >> 24) & 0xFF] << 24);
     } else /* ENCRYPT */
     {
@@ -414,16 +414,16 @@ int aes_cipher(aes_context* ctx, const uchar input[16], uchar output[16]) {
 
         AES_FROUND(Y0, Y1, Y2, Y3, X0, X1, X2, X3);
 
-        X0 = *RK++ ^ ((uint32_t)FSb[(Y0)&0xFF]) ^ ((uint32_t)FSb[(Y1 >> 8) & 0xFF] << 8) ^
+        X0 = *RK++ ^ ((uint32_t)FSb[(Y0) & 0xFF]) ^ ((uint32_t)FSb[(Y1 >> 8) & 0xFF] << 8) ^
              ((uint32_t)FSb[(Y2 >> 16) & 0xFF] << 16) ^ ((uint32_t)FSb[(Y3 >> 24) & 0xFF] << 24);
 
-        X1 = *RK++ ^ ((uint32_t)FSb[(Y1)&0xFF]) ^ ((uint32_t)FSb[(Y2 >> 8) & 0xFF] << 8) ^
+        X1 = *RK++ ^ ((uint32_t)FSb[(Y1) & 0xFF]) ^ ((uint32_t)FSb[(Y2 >> 8) & 0xFF] << 8) ^
              ((uint32_t)FSb[(Y3 >> 16) & 0xFF] << 16) ^ ((uint32_t)FSb[(Y0 >> 24) & 0xFF] << 24);
 
-        X2 = *RK++ ^ ((uint32_t)FSb[(Y2)&0xFF]) ^ ((uint32_t)FSb[(Y3 >> 8) & 0xFF] << 8) ^
+        X2 = *RK++ ^ ((uint32_t)FSb[(Y2) & 0xFF]) ^ ((uint32_t)FSb[(Y3 >> 8) & 0xFF] << 8) ^
              ((uint32_t)FSb[(Y0 >> 16) & 0xFF] << 16) ^ ((uint32_t)FSb[(Y1 >> 24) & 0xFF] << 24);
 
-        X3 = *RK++ ^ ((uint32_t)FSb[(Y3)&0xFF]) ^ ((uint32_t)FSb[(Y0 >> 8) & 0xFF] << 8) ^
+        X3 = *RK++ ^ ((uint32_t)FSb[(Y3) & 0xFF]) ^ ((uint32_t)FSb[(Y0 >> 8) & 0xFF] << 8) ^
              ((uint32_t)FSb[(Y1 >> 16) & 0xFF] << 16) ^ ((uint32_t)FSb[(Y2 >> 24) & 0xFF] << 24);
 
 #if AES_DECRYPTION // whether AES decryption is supported

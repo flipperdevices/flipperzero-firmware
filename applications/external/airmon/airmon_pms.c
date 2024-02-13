@@ -28,7 +28,10 @@ typedef enum {
 
 #define WORKER_ALL_RX_EVENTS (WorkerEvtStop | WorkerEvtRxDone)
 
-static void airmon_pms_uart_on_irq_cb(FuriHalSerialHandle* handle, FuriHalSerialRxEvent event, void* context) {
+static void airmon_pms_uart_on_irq_cb(
+    FuriHalSerialHandle* handle,
+    FuriHalSerialRxEvent event,
+    void* context) {
     UNUSED(handle);
 
     AirmonPmsContext* pms_context = context;
@@ -38,14 +41,14 @@ static void airmon_pms_uart_on_irq_cb(FuriHalSerialHandle* handle, FuriHalSerial
         furi_stream_buffer_send(pms_context->rx_stream, &data, 1, 0);
         furi_thread_flags_set(furi_thread_get_id(pms_context->thread), WorkerEvtRxDone);
     }
-
 }
 
 static void airmon_pms_serial_init(AirmonPmsContext* pms_context) {
     pms_context->serial = furi_hal_serial_control_acquire(FuriHalSerialIdUsart);
     furi_check(pms_context->serial);
     furi_hal_serial_init(pms_context->serial, PMS_BAUDRATE);
-    furi_hal_serial_async_rx_start(pms_context->serial, airmon_pms_uart_on_irq_cb, pms_context, true);
+    furi_hal_serial_async_rx_start(
+        pms_context->serial, airmon_pms_uart_on_irq_cb, pms_context, true);
 }
 
 static void airmon_pms_serial_deinit(AirmonPmsContext* pms_context) {

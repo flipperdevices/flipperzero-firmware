@@ -61,7 +61,8 @@ static void cfw_app_scene_protocols_esp32_channel_changed(VariableItem* item) {
                                            FuriHalSerialIdUsart :
                                            FuriHalSerialIdLpuart;
     variable_item_set_current_value_text(
-        item, CFW_SETTINGS()->uart_esp_channel == FuriHalSerialIdUsart ? UART_DEFAULT : UART_EXTRA);
+        item,
+        CFW_SETTINGS()->uart_esp_channel == FuriHalSerialIdUsart ? UART_DEFAULT : UART_EXTRA);
     app->save_settings = true;
 }
 
@@ -71,7 +72,8 @@ static void cfw_app_scene_protocols_nmea_channel_changed(VariableItem* item) {
                                             FuriHalSerialIdUsart :
                                             FuriHalSerialIdLpuart;
     variable_item_set_current_value_text(
-        item, CFW_SETTINGS()->uart_nmea_channel == FuriHalSerialIdUsart ? UART_DEFAULT : UART_EXTRA);
+        item,
+        CFW_SETTINGS()->uart_nmea_channel == FuriHalSerialIdUsart ? UART_DEFAULT : UART_EXTRA);
     app->save_settings = true;
 }
 
@@ -81,7 +83,8 @@ static void cfw_app_scene_protocols_general_channel_changed(VariableItem* item) 
                                                FuriHalSerialIdUsart :
                                                FuriHalSerialIdLpuart;
     variable_item_set_current_value_text(
-        item, CFW_SETTINGS()->uart_general_channel == FuriHalSerialIdUsart ? UART_DEFAULT : UART_EXTRA);
+        item,
+        CFW_SETTINGS()->uart_general_channel == FuriHalSerialIdUsart ? UART_DEFAULT : UART_EXTRA);
     app->save_settings = true;
 }
 
@@ -116,11 +119,7 @@ void cfw_app_scene_protocols_on_enter(void* context) {
         item, cfw_settings->spi_nrf24_handle == SpiDefault ? SPI_DEFAULT : SPI_EXTRA);
 
     item = variable_item_list_add(
-        var_item_list,
-        "ESP32/ESP8266 UART",
-        2,
-        cfw_app_scene_protocols_esp32_channel_changed,
-        app);
+        var_item_list, "ESP32/ESP8266 UART", 2, cfw_app_scene_protocols_esp32_channel_changed, app);
     variable_item_set_current_value_index(item, cfw_settings->uart_esp_channel);
     variable_item_set_current_value_text(
         item, cfw_settings->uart_esp_channel == FuriHalSerialIdUsart ? UART_DEFAULT : UART_EXTRA);
@@ -132,14 +131,11 @@ void cfw_app_scene_protocols_on_enter(void* context) {
         item, cfw_settings->uart_nmea_channel == FuriHalSerialIdUsart ? UART_DEFAULT : UART_EXTRA);
 
     item = variable_item_list_add(
-        var_item_list,
-        "General UART",
-        2,
-        cfw_app_scene_protocols_general_channel_changed,
-        app);
+        var_item_list, "General UART", 2, cfw_app_scene_protocols_general_channel_changed, app);
     variable_item_set_current_value_index(item, cfw_settings->uart_general_channel);
     variable_item_set_current_value_text(
-        item, cfw_settings->uart_general_channel == FuriHalSerialIdUsart ? UART_DEFAULT : UART_EXTRA);
+        item,
+        cfw_settings->uart_general_channel == FuriHalSerialIdUsart ? UART_DEFAULT : UART_EXTRA);
 
     variable_item_list_set_enter_callback(
         var_item_list, cfw_app_scene_protocols_var_item_list_callback, app);

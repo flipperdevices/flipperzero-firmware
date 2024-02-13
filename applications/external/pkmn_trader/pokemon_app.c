@@ -1932,7 +1932,7 @@ void pokemon_trade_block_set_default_name(char* dest, PokemonFap* pokemon_fap, s
 
 #define UINT32_TO_EXP(input, output_array)                     \
     do {                                                       \
-        (output_array)[2] = (uint8_t)((input)&0xFF);           \
+        (output_array)[2] = (uint8_t)((input) & 0xFF);         \
         (output_array)[1] = (uint8_t)(((input) >> 8) & 0xFF);  \
         (output_array)[0] = (uint8_t)(((input) >> 16) & 0xFF); \
     } while(0)

@@ -27,7 +27,7 @@
 // Root Spawn
 #define ROOT_SIZE_X 7
 #define ROOT_SIZE_Y 7
-#define ROOT(Y, X) ((Y)*ROOT_SIZE_X + (X))
+#define ROOT(Y, X) ((Y) * ROOT_SIZE_X + (X))
 
 #define SPAWN_DIRECTIONS 2
 #define GROW_STEPS 4

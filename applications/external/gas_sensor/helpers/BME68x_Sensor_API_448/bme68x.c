@@ -868,9 +868,9 @@ static uint32_t
         UINT32_C(125000)};
 
     /*lint -save -e704 */
-    var1 =
-        (int64_t)((1340 + (5 * (int64_t)dev->calib.range_sw_err)) * ((int64_t)lookup_table1[gas_range])) >>
-        16;
+    var1 = (int64_t)((1340 + (5 * (int64_t)dev->calib.range_sw_err)) *
+                     ((int64_t)lookup_table1[gas_range])) >>
+           16;
     var2 = (((int64_t)((int64_t)gas_res_adc << 15) - (int64_t)(16777216)) + var1);
     var3 = (((int64_t)lookup_table2[gas_range] * (int64_t)var1) >> 9);
     calc_gas_res = (uint32_t)((var3 + ((int64_t)var2 >> 1)) / (int64_t)var2);
@@ -998,10 +998,9 @@ static float calc_humidity(uint16_t hum_adc, const struct bme68x_dev* dev) {
     temp_comp = ((dev->calib.t_fine) / 5120.0f);
     var1 = (float)((float)hum_adc) -
            (((float)dev->calib.par_h1 * 16.0f) + (((float)dev->calib.par_h3 / 2.0f) * temp_comp));
-    var2 = var1 *
-           ((float)(((float)dev->calib.par_h2 / 262144.0f) *
-                    (1.0f + (((float)dev->calib.par_h4 / 16384.0f) * temp_comp) +
-                     (((float)dev->calib.par_h5 / 1048576.0f) * temp_comp * temp_comp))));
+    var2 = var1 * ((float)(((float)dev->calib.par_h2 / 262144.0f) *
+                           (1.0f + (((float)dev->calib.par_h4 / 16384.0f) * temp_comp) +
+                            (((float)dev->calib.par_h5 / 1048576.0f) * temp_comp * temp_comp))));
     var3 = (float)dev->calib.par_h6 / 16384.0f;
     var4 = (float)dev->calib.par_h7 / 2097152.0f;
     calc_hum = var2 + ((var3 + (var4 * temp_comp)) * var2 * var2);
@@ -1062,9 +1061,8 @@ static float
     var1 = (1340.0f + (5.0f * dev->calib.range_sw_err));
     var2 = (var1) * (1.0f + lookup_k1_range[gas_range] / 100.0f);
     var3 = 1.0f + (lookup_k2_range[gas_range] / 100.0f);
-    calc_gas_res =
-        1.0f /
-        (float)(var3 * (0.000000125f) * gas_range_f * (((gas_res_f - 512.0f) / var2) + 1.0f));
+    calc_gas_res = 1.0f / (float)(var3 * (0.000000125f) * gas_range_f *
+                                  (((gas_res_f - 512.0f) / var2) + 1.0f));
 
     return calc_gas_res;
 }
@@ -1102,11 +1100,9 @@ static uint8_t calc_res_heat(uint16_t temp, const struct bme68x_dev* dev) {
     var3 = ((float)dev->calib.par_gh3 / (1024.0f));
     var4 = (var1 * (1.0f + (var2 * (float)temp)));
     var5 = (var4 + (var3 * (float)dev->amb_temp));
-    res_heat =
-        (uint8_t)(3.4f *
-                  ((var5 * (4 / (4 + (float)dev->calib.res_heat_range)) *
-                    (1 / (1 + ((float)dev->calib.res_heat_val * 0.002f)))) -
-                   25));
+    res_heat = (uint8_t)(3.4f * ((var5 * (4 / (4 + (float)dev->calib.res_heat_range)) *
+                                  (1 / (1 + ((float)dev->calib.res_heat_val * 0.002f)))) -
+                                 25));
 
     return res_heat;
 }
@@ -1159,10 +1155,10 @@ static int8_t read_field_data(uint8_t index, struct bme68x_data* data, struct bm
         data->meas_index = buff[1];
 
         /* read the raw data from the sensor */
-        adc_pres =
-            (uint32_t)(((uint32_t)buff[2] * 4096) | ((uint32_t)buff[3] * 16) | ((uint32_t)buff[4] / 16));
-        adc_temp =
-            (uint32_t)(((uint32_t)buff[5] * 4096) | ((uint32_t)buff[6] * 16) | ((uint32_t)buff[7] / 16));
+        adc_pres = (uint32_t)(((uint32_t)buff[2] * 4096) | ((uint32_t)buff[3] * 16) |
+                              ((uint32_t)buff[4] / 16));
+        adc_temp = (uint32_t)(((uint32_t)buff[5] * 4096) | ((uint32_t)buff[6] * 16) |
+                              ((uint32_t)buff[7] / 16));
         adc_hum = (uint16_t)(((uint32_t)buff[8] * 256) | (uint32_t)buff[9]);
         adc_gas_res_low = (uint16_t)((uint32_t)buff[13] * 4 | (((uint32_t)buff[14]) / 64));
         adc_gas_res_high = (uint16_t)((uint32_t)buff[15] * 4 | (((uint32_t)buff[16]) / 64));
@@ -1246,10 +1242,10 @@ static int8_t read_all_field_data(struct bme68x_data* const data[], struct bme68
         data[i]->meas_index = buff[off + 1];
 
         /* read the raw data from the sensor */
-        adc_pres =
-            (uint32_t)(((uint32_t)buff[off + 2] * 4096) | ((uint32_t)buff[off + 3] * 16) | ((uint32_t)buff[off + 4] / 16));
-        adc_temp =
-            (uint32_t)(((uint32_t)buff[off + 5] * 4096) | ((uint32_t)buff[off + 6] * 16) | ((uint32_t)buff[off + 7] / 16));
+        adc_pres = (uint32_t)(((uint32_t)buff[off + 2] * 4096) | ((uint32_t)buff[off + 3] * 16) |
+                              ((uint32_t)buff[off + 4] / 16));
+        adc_temp = (uint32_t)(((uint32_t)buff[off + 5] * 4096) | ((uint32_t)buff[off + 6] * 16) |
+                              ((uint32_t)buff[off + 7] / 16));
         adc_hum = (uint16_t)(((uint32_t)buff[off + 8] * 256) | (uint32_t)buff[off + 9]);
         adc_gas_res_low =
             (uint16_t)((uint32_t)buff[off + 13] * 4 | (((uint32_t)buff[off + 14]) / 64));
@@ -1628,8 +1624,8 @@ static int8_t analyze_sensor_data(const struct bme68x_data* data, uint8_t n_meas
     }
 
     if(n_meas >= 6) {
-        cent_res =
-            (uint32_t)((5 * (data[3].gas_resistance + data[5].gas_resistance)) / (2 * data[4].gas_resistance));
+        cent_res = (uint32_t)((5 * (data[3].gas_resistance + data[5].gas_resistance)) /
+                              (2 * data[4].gas_resistance));
     }
 
     if(cent_res < 6) {
@@ -1689,10 +1685,10 @@ static int8_t get_calib_data(struct bme68x_dev* dev) {
         dev->calib.par_p10 = (uint8_t)(coeff_array[BME68X_IDX_P10]);
 
         /* Humidity related coefficients */
-        dev->calib.par_h1 =
-            (uint16_t)(((uint16_t)coeff_array[BME68X_IDX_H1_MSB] << 4) | (coeff_array[BME68X_IDX_H1_LSB] & BME68X_BIT_H1_DATA_MSK));
-        dev->calib.par_h2 =
-            (uint16_t)(((uint16_t)coeff_array[BME68X_IDX_H2_MSB] << 4) | ((coeff_array[BME68X_IDX_H2_LSB]) >> 4));
+        dev->calib.par_h1 = (uint16_t)(((uint16_t)coeff_array[BME68X_IDX_H1_MSB] << 4) |
+                                       (coeff_array[BME68X_IDX_H1_LSB] & BME68X_BIT_H1_DATA_MSK));
+        dev->calib.par_h2 = (uint16_t)(((uint16_t)coeff_array[BME68X_IDX_H2_MSB] << 4) |
+                                       ((coeff_array[BME68X_IDX_H2_LSB]) >> 4));
         dev->calib.par_h3 = (int8_t)coeff_array[BME68X_IDX_H3];
         dev->calib.par_h4 = (int8_t)coeff_array[BME68X_IDX_H4];
         dev->calib.par_h5 = (int8_t)coeff_array[BME68X_IDX_H5];

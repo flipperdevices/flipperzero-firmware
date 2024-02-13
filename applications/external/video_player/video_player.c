@@ -225,7 +225,10 @@ int32_t video_player_app(void* p) {
                             player->header_size);
                         stream_seek(player->stream, seek, StreamOffsetFromStart);
 
-                        player->progress = (uint8_t)((int64_t)stream_tell(player->stream) * (int64_t)126 / ((int64_t)player->num_frames * (int64_t)player->frame_size + (int64_t)player->header_size));
+                        player->progress =
+                            (uint8_t)((int64_t)stream_tell(player->stream) * (int64_t)126 /
+                                      ((int64_t)player->num_frames * (int64_t)player->frame_size +
+                                       (int64_t)player->header_size));
 
                         if(event.input.type == InputTypeRelease) {
                             player->seeking = false;
@@ -244,7 +247,10 @@ int32_t video_player_app(void* p) {
                             player->header_size);
                         stream_seek(player->stream, seek, StreamOffsetFromStart);
 
-                        player->progress = (uint8_t)((int64_t)stream_tell(player->stream) * (int64_t)126 / ((int64_t)player->num_frames * (int64_t)player->frame_size + (int64_t)player->header_size));
+                        player->progress =
+                            (uint8_t)((int64_t)stream_tell(player->stream) * (int64_t)126 /
+                                      ((int64_t)player->num_frames * (int64_t)player->frame_size +
+                                       (int64_t)player->header_size));
 
                         if(event.input.type == InputTypeRelease) {
                             player->seeking = false;
