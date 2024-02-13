@@ -264,13 +264,6 @@ void computeTVM() {
             FURI_LOG_W("WARNING tag", "PV and FV were same sign, borked");
         }
 
-        //if fv is 0, this calc fails. so we swap fv and pv if so
-        if(tvm_fv == 0) {
-            tvm_fv = -tvm_pv;
-            tvm_pv = 0;
-            FURI_LOG_W("WARNING tag", "Swapping PV and FV for solve I");
-        }
-
         //if any 2 are 0, its bad
         if((tvm_fv == 0 && tvm_pmt == 0) || (tvm_pv == 0 && tvm_pmt == 0) ||
            (tvm_pv == 0 && tvm_fv == 0)) {
@@ -329,7 +322,7 @@ void computeTVM() {
             }
         } while((fabs(attempted_fv) > fabs(tvm_fv) + precision ||
                  fabs(attempted_fv) < fabs(tvm_fv) - precision) &&
-                !borked);
+                !borked && attempted_i == 0);
 
         // if we are here, we lived and have a close enough i, or its borked
         if(borked) {
