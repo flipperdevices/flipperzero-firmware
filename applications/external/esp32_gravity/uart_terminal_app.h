@@ -4,7 +4,7 @@
 extern "C" {
 #endif
 
-typedef struct GravityApp GravityApp;
+typedef struct UART_TerminalApp UART_TerminalApp;
 
 #ifdef __cplusplus
 }

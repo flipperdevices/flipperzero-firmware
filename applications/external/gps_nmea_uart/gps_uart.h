@@ -4,8 +4,7 @@
 #include <notification/notification_messages.h>
 #include <cfw/cfw.h>
 
-#define UART_CH \
-    (CFW_SETTINGS()->uart_nmea_channel == UARTDefault ? FuriHalUartIdUSART1 : FuriHalUartIdLPUART1)
+#define UART_CH (CFW_SETTINGS()->uart_nmea_channel)
 
 #define RX_BUF_SIZE 1024
 
@@ -42,6 +41,7 @@ typedef struct {
     FuriThread* thread;
     FuriStreamBuffer* rx_stream;
     uint8_t rx_buf[RX_BUF_SIZE];
+    FuriHalSerialHandle* serial_handle;
 
     NotificationApp* notifications;
     uint32_t baudrate;

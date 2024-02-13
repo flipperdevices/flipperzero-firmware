@@ -68,9 +68,9 @@ void play_halfbit(bool value, MagSetting* setting) {
         //(value) ? furi_hal_nfc_ll_txrx_on() : furi_hal_nfc_ll_txrx_off();
 
         if(last_value == 2 || value != (bool)last_value) {
-            // furi_hal_nfc_ll_txrx_on();
+            //furi_hal_nfc_ll_txrx_on();
             //furi_delay_us(64);
-            // furi_hal_nfc_ll_txrx_off();
+            //furi_hal_nfc_ll_txrx_off();
         }
         break;
     case MagTxCC1101_434:
@@ -153,7 +153,6 @@ void tx_deinit_rfid() {
     furi_hal_gpio_write(RFID_PIN_OUT, 0);
 
     furi_hal_rfid_pins_reset();
-    furi_hal_power_disable_otg();
 }
 
 void tx_init_rf(int hz) {
@@ -187,7 +186,6 @@ bool tx_init(MagSetting* setting) {
         tx_init_rfid();
         break;
     case MagTxStateGPIO:
-        furi_hal_power_enable_otg();
         // gpio_item_configure_all_pins(GpioModeOutputPushPull);
         furi_hal_gpio_init(GPIO_PIN_A, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
         furi_hal_gpio_init(GPIO_PIN_B, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
@@ -206,7 +204,7 @@ bool tx_init(MagSetting* setting) {
         tx_init_rfid();
         break;
     case MagTxStateNFC:
-        // furi_hal_nfc_exit_sleep();
+        //furi_hal_nfc_exit_sleep();
         break;
     case MagTxCC1101_434:
         tx_init_rf(434000000);
@@ -238,7 +236,6 @@ bool tx_deinit(MagSetting* setting) {
         furi_hal_gpio_init(GPIO_PIN_ENABLE, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
 
         //gpio_item_configure_all_pins(GpioModeAnalog);
-        furi_hal_power_disable_otg();
         break;
     case MagTxStatePiezo:
         tx_deinit_piezo();
@@ -248,8 +245,8 @@ bool tx_deinit(MagSetting* setting) {
         tx_deinit_rfid();
         break;
     case MagTxStateNFC:
-        // furi_hal_nfc_ll_txrx_off();
-        // furi_hal_nfc_start_sleep();
+        //furi_hal_nfc_ll_txrx_off();
+        //furi_hal_nfc_start_sleep();
         break;
     case MagTxCC1101_434:
     case MagTxCC1101_868:

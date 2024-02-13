@@ -8,6 +8,8 @@
 #include "views/select_pokemon.h"
 #include "pokemon_char_encode.h"
 
+#include <expansion/expansion.h>
+
 /* The MALVEKE board has an esp32 which is set to TX on the flipper's default
  * UART pins. If this pin shows signs of something connected, assume a MALVEKE
  * board is being used.
@@ -104,6 +106,9 @@ int32_t pokemon_app(void* p) {
     UNUSED(p);
     PokemonFap* pokemon_fap = pokemon_alloc();
 
+    Expansion* expansion = furi_record_open(RECORD_EXPANSION);
+    expansion_disable(expansion);
+
     furi_hal_light_set(LightRed, 0x00);
     furi_hal_light_set(LightGreen, 0x00);
     furi_hal_light_set(LightBlue, 0x00);
@@ -113,6 +118,9 @@ int32_t pokemon_app(void* p) {
 
     // Free resources
     free_app(pokemon_fap);
+
+    expansion_enable(expansion);
+    furi_record_close(RECORD_EXPANSION);
 
     return 0;
 }

@@ -10,36 +10,31 @@ typedef enum {
 
 #define WORKER_ALL_RX_EVENTS (WorkerEvtStop | WorkerEvtRxDone)
 
-static void gps_uart_on_irq_cb(UartIrqEvent ev, uint8_t data, void* context) {
+static void
+    gps_uart_on_irq_cb(FuriHalSerialHandle* handle, FuriHalSerialRxEvent event, void* context) {
     GpsUart* gps_uart = (GpsUart*)context;
 
-    if(ev == UartIrqEventRXNE) {
+    if(event == FuriHalSerialRxEventData) {
+        uint8_t data = furi_hal_serial_async_rx(handle);
         furi_stream_buffer_send(gps_uart->rx_stream, &data, 1, 0);
         furi_thread_flags_set(furi_thread_get_id(gps_uart->thread), WorkerEvtRxDone);
     }
 }
 
 static void gps_uart_serial_init(GpsUart* gps_uart) {
-    if(UART_CH == FuriHalUartIdUSART1) {
-        furi_hal_console_disable();
-    } else if(UART_CH == FuriHalUartIdLPUART1) {
-        furi_hal_uart_init(UART_CH, gps_uart->baudrate);
-    }
+    gps_uart->serial_handle = furi_hal_serial_control_acquire(UART_CH);
+    furi_check(gps_uart->serial_handle);
+    furi_hal_serial_init(gps_uart->serial_handle, gps_uart->baudrate);
+    furi_hal_serial_async_rx_start(gps_uart->serial_handle, gps_uart_on_irq_cb, gps_uart, false);
 
-    furi_hal_uart_set_irq_cb(UART_CH, gps_uart_on_irq_cb, gps_uart);
-    furi_hal_uart_set_br(UART_CH, gps_uart->baudrate);
-
-    furi_hal_uart_tx(UART_CH, (uint8_t*)"wakey wakey\r\n", strlen("wakey wakey\r\n"));
+    furi_hal_serial_tx(
+        gps_uart->serial_handle, (uint8_t*)"wakey wakey\r\n", strlen("wakey wakey\r\n"));
 }
 
 static void gps_uart_serial_deinit(GpsUart* gps_uart) {
     UNUSED(gps_uart);
-    furi_hal_uart_set_irq_cb(UART_CH, NULL, NULL);
-    if(UART_CH == FuriHalUartIdLPUART1) {
-        furi_hal_uart_deinit(UART_CH);
-    } else {
-        furi_hal_console_enable();
-    }
+    furi_hal_serial_deinit(gps_uart->serial_handle);
+    furi_hal_serial_control_release(gps_uart->serial_handle);
 }
 
 static void gps_uart_parse_nmea(GpsUart* gps_uart, char* line) {

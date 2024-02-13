@@ -84,7 +84,7 @@ const uint8_t u8g2_font_tom_thumb_4x6_tr[725] =
     "y\11\227\307$\225dJ\0z\7\223\310\254\221\6{\10\227\310\251\32D\1|\6\265\310(\1}\11"
     "\227\310\310\14RR\0~\6\213\313\215\4\0\0\0\4\377\377\0";
 
-static int get_mode_gaps(int index) {
+static int32_t get_mode_gaps(int32_t index) {
     if(index <= 0) {
         return EASY_GAPS;
     }
@@ -138,8 +138,8 @@ static void save_game(SudokuState* app) {
 // inspired by game_2048
 static void gray_canvas(Canvas* const canvas) {
     canvas_set_color(canvas, ColorWhite);
-    for(int x = 0, mx = canvas_width(canvas); x < mx; x += 2) {
-        for(int y = 0, my = canvas_height(canvas); y != my; y++) {
+    for(int32_t x = 0, mx = canvas_width(canvas); x < mx; x += 2) {
+        for(int32_t y = 0, my = canvas_height(canvas); y != my; y++) {
             canvas_draw_dot(canvas, x + (y % 2 == 1 ? 0 : 1), y);
         }
     }
@@ -152,11 +152,11 @@ static void draw_callback(Canvas* canvas, void* ctx) {
     canvas_clear(canvas);
     canvas_set_custom_u8g2_font(canvas, u8g2_font_tom_thumb_4x6_tr);
 
-    int gapX = 0;
-    int xOffset = 2;
-    int yOffset = -2;
-    for(int i = 0; i != BOARD_SIZE; ++i) {
-        int gapY = 0;
+    int32_t gapX = 0;
+    int32_t xOffset = 2;
+    int32_t yOffset = -2;
+    for(int32_t i = 0; i != BOARD_SIZE; ++i) {
+        int32_t gapY = 0;
         bool vflag = state->vertivalFlags & (1 << i);
         if((i % 3) == 0) gapX += 2;
         if(vflag) {
@@ -169,7 +169,7 @@ static void draw_callback(Canvas* canvas, void* ctx) {
                 i * FONT_SIZE + gapX + xOffset + FONT_SIZE - 3,
                 0);
         }
-        for(int j = 0; j != BOARD_SIZE; ++j) {
+        for(int32_t j = 0; j != BOARD_SIZE; ++j) {
             if((j % 3) == 0) gapY += 4;
             canvas_set_color(canvas, ColorBlack);
             if(i == 0) {
@@ -187,7 +187,7 @@ static void draw_callback(Canvas* canvas, void* ctx) {
             bool userInput = state->board[i][j] & USER_INPUT_FLAG;
             bool cursor = i == state->cursorX && j == state->cursorY;
             if(!userInput) {
-                int xBoxOffset = cursor ? -1 : 0;
+                int32_t xBoxOffset = cursor ? -1 : 0;
                 // draw black box around the locked number
                 canvas_draw_box(
                     canvas,
@@ -206,7 +206,7 @@ static void draw_callback(Canvas* canvas, void* ctx) {
                     FONT_SIZE + 1,
                     FONT_SIZE + 1);
             }
-            int value = state->board[i][j] & VALUE_MASK;
+            int32_t value = state->board[i][j] & VALUE_MASK;
             if(value != 0) {
                 canvas_draw_glyph(
                     canvas,
@@ -218,9 +218,9 @@ static void draw_callback(Canvas* canvas, void* ctx) {
     }
     canvas_set_color(canvas, ColorBlack);
     gapX = 0;
-    int gapY = 0;
+    int32_t gapY = 0;
     yOffset = 2;
-    for(int i = 1; i != BOARD_SIZE / 3; ++i) {
+    for(int32_t i = 1; i != BOARD_SIZE / 3; ++i) {
         gapX += i;
         gapY += i * 2;
         // vertical lines
@@ -242,20 +242,20 @@ static void draw_callback(Canvas* canvas, void* ctx) {
     if(state->state == GameStateVictory || state->state == GameStatePaused) {
         gray_canvas(canvas);
         canvas_set_color(canvas, ColorWhite);
-        int w = canvas_width(canvas);
-        int h = canvas_height(canvas);
-        int winW = 58;
-        int winH = 48;
-        int winX = (w - winW) / 2;
-        int winY = (h - winH) / 2;
+        int32_t w = canvas_width(canvas);
+        int32_t h = canvas_height(canvas);
+        int32_t winW = 58;
+        int32_t winH = 48;
+        int32_t winX = (w - winW) / 2;
+        int32_t winY = (h - winH) / 2;
         canvas_draw_rbox(canvas, winX, winY, winW, winH, 4);
         canvas_set_color(canvas, ColorBlack);
         canvas_draw_rframe(canvas, winX, winY, winW, winH, 4);
 
-        int offX = 6;
-        int offY = 3;
-        int itemH = FONT_SIZE + 2;
-        for(int i = 0; i < MENU_ITEMS_COUNT; i++) {
+        int32_t offX = 6;
+        int32_t offY = 3;
+        int32_t itemH = FONT_SIZE + 2;
+        for(int32_t i = 0; i < MENU_ITEMS_COUNT; i++) {
             if(i == state->menuCursor) {
                 canvas_set_color(canvas, ColorBlack);
                 canvas_draw_box(
@@ -283,12 +283,12 @@ static void input_callback(InputEvent* input_event, void* ctx) {
 
 // static void print_board(SudokuState* state) {
 //     char buf[BOARD_SIZE * 2 + 1];
-//     for(int i = 0; i < BOARD_SIZE * 2; ++i) {
+//     for(int32_t i = 0; i < BOARD_SIZE * 2; ++i) {
 //         buf[i] = ' ';
 //     }
 //     buf[BOARD_SIZE * 2] = 0;
-//     for(int i = 0; i != BOARD_SIZE; ++i) {
-//         for(int j = 0; j != BOARD_SIZE; ++j) {
+//     for(int32_t i = 0; i != BOARD_SIZE; ++i) {
+//         for(int32_t j = 0; j != BOARD_SIZE; ++j) {
 //             buf[j * 2] = state->board[j][i] == 0 ? '_' : '0' + state->board[j][i];
 //         }
 //         FURI_LOG_D(TAG, "%s", buf);
@@ -296,24 +296,24 @@ static void input_callback(InputEvent* input_event, void* ctx) {
 // }
 
 static void init_board(SudokuState* state) {
-    for(int i = 0; i != BOARD_SIZE; ++i) {
-        for(int j = 0; j != BOARD_SIZE; ++j) {
+    for(int32_t i = 0; i != BOARD_SIZE; ++i) {
+        for(int32_t j = 0; j != BOARD_SIZE; ++j) {
             state->board[i][j] = 1 + (i * BOARD_SIZE_3 + i / 3 + j) % 9;
         }
     }
 }
 
-static void shuffle_board(SudokuState* state, int times) {
+static void shuffle_board(SudokuState* state, int32_t times) {
     uint8_t tmp[BOARD_SIZE];
-    for(int t = 0; t < times; ++t) {
+    for(int32_t t = 0; t < times; ++t) {
         // swap numbers
-        int swapX, swapY;
+        int32_t swapX, swapY;
         do {
             swapX = 1 + furi_hal_random_get() % BOARD_SIZE;
             swapY = 1 + furi_hal_random_get() % BOARD_SIZE;
         } while(swapX == swapY);
-        for(int i = 0; i != BOARD_SIZE; ++i) {
-            for(int j = 0; j != BOARD_SIZE; ++j) {
+        for(int32_t i = 0; i != BOARD_SIZE; ++i) {
+            for(int32_t j = 0; j != BOARD_SIZE; ++j) {
                 if(state->board[i][j] == swapX) {
                     state->board[i][j] = swapY;
                 } else if(state->board[i][j] == swapY) {
@@ -322,9 +322,9 @@ static void shuffle_board(SudokuState* state, int times) {
             }
         }
         // swap columns
-        for(int i = 0; i != BOARD_SIZE_3; ++i) {
-            int swapX, swapY;
-            int offset = i * BOARD_SIZE_3;
+        for(int32_t i = 0; i != BOARD_SIZE_3; ++i) {
+            int32_t swapX, swapY;
+            int32_t offset = i * BOARD_SIZE_3;
             do {
                 swapX = offset + furi_hal_random_get() % BOARD_SIZE_3;
                 swapY = offset + furi_hal_random_get() % BOARD_SIZE_3;
@@ -334,23 +334,23 @@ static void shuffle_board(SudokuState* state, int times) {
             memcpy(state->board[swapY], tmp, BOARD_SIZE);
         }
         // swap rows
-        for(int i = 0; i != BOARD_SIZE_3; ++i) {
-            int swapX, swapY;
-            int offset = i * BOARD_SIZE_3;
+        for(int32_t i = 0; i != BOARD_SIZE_3; ++i) {
+            int32_t swapX, swapY;
+            int32_t offset = i * BOARD_SIZE_3;
             do {
                 swapX = offset + furi_hal_random_get() % BOARD_SIZE_3;
                 swapY = offset + furi_hal_random_get() % BOARD_SIZE_3;
             } while(swapX == swapY);
-            for(int k = 0; k != BOARD_SIZE; ++k) {
+            for(int32_t k = 0; k != BOARD_SIZE; ++k) {
                 FURI_SWAP(state->board[k][swapX], state->board[k][swapY]);
             }
         }
     }
 }
 
-static void add_gaps(SudokuState* state, int inputCells) {
-    for(int i = 0; i <= inputCells; ++i) {
-        int x, y;
+static void add_gaps(SudokuState* state, int32_t inputCells) {
+    for(int32_t i = 0; i <= inputCells; ++i) {
+        int32_t x, y;
         do {
             x = furi_hal_random_get() % BOARD_SIZE;
             y = furi_hal_random_get() % BOARD_SIZE;
@@ -363,11 +363,11 @@ static bool validate_board(SudokuState* state) {
     bool res = true;
     // check vertical lines for duplicates
     state->vertivalFlags = 0;
-    for(int i = 0; i != BOARD_SIZE; ++i) {
-        uint flags = 0;
+    for(int32_t i = 0; i != BOARD_SIZE; ++i) {
+        uint32_t flags = 0;
         bool ok = true;
-        for(int j = 0; j != BOARD_SIZE; ++j) {
-            int value = state->board[i][j] & VALUE_MASK;
+        for(int32_t j = 0; j != BOARD_SIZE; ++j) {
+            int32_t value = state->board[i][j] & VALUE_MASK;
             if(value == 0) {
                 ok = false;
                 res = false;
@@ -384,11 +384,11 @@ static bool validate_board(SudokuState* state) {
     }
     // check horizontal lines for duplicates
     state->horizontalFlags = 0;
-    for(int i = 0; i != BOARD_SIZE; ++i) {
+    for(int32_t i = 0; i != BOARD_SIZE; ++i) {
         bool ok = true;
-        uint flags = 0;
-        for(int j = 0; j != BOARD_SIZE; ++j) {
-            int value = state->board[j][i] & VALUE_MASK;
+        uint32_t flags = 0;
+        for(int32_t j = 0; j != BOARD_SIZE; ++j) {
+            int32_t value = state->board[j][i] & VALUE_MASK;
             if(value == 0) {
                 ok = false;
                 res = false;
@@ -407,13 +407,13 @@ static bool validate_board(SudokuState* state) {
         return res;
     }
     // check 3x3 squares for duplicates
-    for(int i = 0; i != BOARD_SIZE_3; ++i) {
-        for(int j = 0; j != BOARD_SIZE_3; ++j) {
-            uint flags = 0;
-            for(int k = 0; k != BOARD_SIZE_3; ++k) {
-                for(int l = 0; l != BOARD_SIZE_3; ++l) {
-                    int value = state->board[i * BOARD_SIZE_3 + k][j * BOARD_SIZE_3 + l] &
-                                VALUE_MASK;
+    for(int32_t i = 0; i != BOARD_SIZE_3; ++i) {
+        for(int32_t j = 0; j != BOARD_SIZE_3; ++j) {
+            uint32_t flags = 0;
+            for(int32_t k = 0; k != BOARD_SIZE_3; ++k) {
+                for(int32_t l = 0; l != BOARD_SIZE_3; ++l) {
+                    int32_t value = state->board[i * BOARD_SIZE_3 + k][j * BOARD_SIZE_3 + l] &
+                                    VALUE_MASK;
                     if(flags & (1 << value)) {
                         return false;
                     }
@@ -426,12 +426,12 @@ static bool validate_board(SudokuState* state) {
 }
 
 // fast validation, checks only one given cell
-static bool board_cell_is_valid(SudokuState* state, int x, int y) {
+static bool board_cell_is_valid(SudokuState* state, int32_t x, int32_t y) {
     // check vertical lines for duplicates
     {
-        uint flags = 0;
-        for(int j = 0; j != BOARD_SIZE; ++j) {
-            int value = state->board[x][j];
+        uint32_t flags = 0;
+        for(int32_t j = 0; j != BOARD_SIZE; ++j) {
+            int32_t value = state->board[x][j];
             if(value == 0) {
                 continue;
             }
@@ -443,9 +443,9 @@ static bool board_cell_is_valid(SudokuState* state, int x, int y) {
     }
     // check horizontal lines for duplicates
     {
-        uint flags = 0;
-        for(int j = 0; j != BOARD_SIZE; ++j) {
-            int value = state->board[j][y];
+        uint32_t flags = 0;
+        for(int32_t j = 0; j != BOARD_SIZE; ++j) {
+            int32_t value = state->board[j][y];
             if(value == 0) {
                 continue;
             }
@@ -458,12 +458,12 @@ static bool board_cell_is_valid(SudokuState* state, int x, int y) {
     // check 3x3 squares for duplicates
     {
         {
-            int p = x - x % BOARD_SIZE_3;
-            int q = y - y % BOARD_SIZE_3;
-            uint flags = 0;
-            for(int k = 0; k != BOARD_SIZE_3; ++k) {
-                for(int l = 0; l != BOARD_SIZE_3; ++l) {
-                    int value = state->board[p + k][q + l];
+            int32_t p = x - x % BOARD_SIZE_3;
+            int32_t q = y - y % BOARD_SIZE_3;
+            uint32_t flags = 0;
+            for(int32_t k = 0; k != BOARD_SIZE_3; ++k) {
+                for(int32_t l = 0; l != BOARD_SIZE_3; ++l) {
+                    int32_t value = state->board[p + k][q + l];
                     if(value == 0) {
                         continue;
                     }
@@ -478,7 +478,7 @@ static bool board_cell_is_valid(SudokuState* state, int x, int y) {
     return true;
 }
 
-static bool solve_board(SudokuState* state, int x, int y) {
+static bool solve_board(SudokuState* state, int32_t x, int32_t y) {
     if(x == BOARD_SIZE) {
         x = 0;
         if(++y == BOARD_SIZE) {
@@ -494,8 +494,8 @@ static bool solve_board(SudokuState* state, int x, int y) {
             }
         }
     }
-    int offset = furi_hal_random_get() % BOARD_SIZE;
-    for(int val = 1; val <= BOARD_SIZE; ++val) {
+    int32_t offset = furi_hal_random_get() % BOARD_SIZE;
+    for(int32_t val = 1; val <= BOARD_SIZE; ++val) {
         state->board[x][y] = (val + offset) % BOARD_SIZE + 1;
         if(board_cell_is_valid(state, x, y) && solve_board(state, x + 1, y)) {
             return true;
@@ -516,9 +516,9 @@ static bool start_game(SudokuState* state) {
     state->cursorY = 0;
     state->blockInputUntilRelease = false;
     bool generated = false;
-    for(int i = 0; i != 3; i++) {
+    for(int32_t i = 0; i != 3; i++) {
         if(generate_board(state)) {
-            FURI_LOG_D(TAG, "generate_board success on %d iteration", i);
+            FURI_LOG_D(TAG, "generate_board success on %ld iteration", i);
             generated = true;
             break;
         }
@@ -634,8 +634,8 @@ int32_t sudoku_main(void* p) {
                     break;
                 case InputKeyOk:
                     if(userInput && !state->blockInputUntilRelease) {
-                        int flags = state->board[state->cursorX][state->cursorY] & FLAGS_MASK;
-                        int value = state->board[state->cursorX][state->cursorY] & VALUE_MASK;
+                        int32_t flags = state->board[state->cursorX][state->cursorY] & FLAGS_MASK;
+                        int32_t value = state->board[state->cursorX][state->cursorY] & VALUE_MASK;
                         state->board[state->cursorX][state->cursorY] = flags | ((value + 1) % 10);
                         invalidField = true;
                     }
@@ -651,8 +651,8 @@ int32_t sudoku_main(void* p) {
                     dolphin_deed(DolphinDeedPluginGameWin);
                     state->state = GameStateVictory;
                     state->menuCursor = 0;
-                    for(int i = 0; i != BOARD_SIZE; ++i) {
-                        for(int j = 0; j != BOARD_SIZE; ++j) {
+                    for(int32_t i = 0; i != BOARD_SIZE; ++i) {
+                        for(int32_t j = 0; j != BOARD_SIZE; ++j) {
                             state->board[i][j] &= ~USER_INPUT_FLAG;
                         }
                     }

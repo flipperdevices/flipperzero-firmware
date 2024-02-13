@@ -6,7 +6,6 @@
 #include <usb_hid.h>
 #include "usbd_core.h"
 #include "usb_std.h"
-#include "filelogger.h"
 
 #include "usbif.h"
 #include <storage/storage.h>

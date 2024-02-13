@@ -1371,32 +1371,30 @@ int32_t tanks_game_app(void* p) {
                         memset(incomingMessage, 0x00, message_max_len);
                         subghz_tx_rx_worker_read(subghz_txrx, incomingMessage, message_max_len);
 
-                        if(incomingMessage != NULL) {
-                            tanks_state->received++;
+                        tanks_state->received++;
 
-                            switch(incomingMessage[0]) {
-                            case GoesUp:
-                                tanks_state->p2->moving = true;
-                                tanks_state->p2->direction = DirectionUp;
-                                break;
-                            case GoesRight:
-                                tanks_state->p2->moving = true;
-                                tanks_state->p2->direction = DirectionRight;
-                                break;
-                            case GoesDown:
-                                tanks_state->p2->moving = true;
-                                tanks_state->p2->direction = DirectionDown;
-                                break;
-                            case GoesLeft:
-                                tanks_state->p2->moving = true;
-                                tanks_state->p2->direction = DirectionLeft;
-                                break;
-                            case Shoots:
-                                tanks_state->p2->shooting = true;
-                                break;
-                            default:
-                                break;
-                            }
+                        switch(incomingMessage[0]) {
+                        case GoesUp:
+                            tanks_state->p2->moving = true;
+                            tanks_state->p2->direction = DirectionUp;
+                            break;
+                        case GoesRight:
+                            tanks_state->p2->moving = true;
+                            tanks_state->p2->direction = DirectionRight;
+                            break;
+                        case GoesDown:
+                            tanks_state->p2->moving = true;
+                            tanks_state->p2->direction = DirectionDown;
+                            break;
+                        case GoesLeft:
+                            tanks_state->p2->moving = true;
+                            tanks_state->p2->direction = DirectionLeft;
+                            break;
+                        case Shoots:
+                            tanks_state->p2->shooting = true;
+                            break;
+                        default:
+                            break;
                         }
                     }
 

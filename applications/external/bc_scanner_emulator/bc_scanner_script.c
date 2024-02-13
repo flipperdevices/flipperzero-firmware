@@ -17,9 +17,8 @@
 #define UART_BAUD 19200
 #define UART_PORT 0
 
-/**
- * 
- */
+#define UART_CH (FuriHalSerialIdUsart)
+
 typedef enum {
     WorkerEvtToggle = (1 << 0),
     WorkerEvtEnd = (1 << 1),
@@ -27,9 +26,6 @@ typedef enum {
     WorkerEvtDisconnect = (1 << 3),
 } WorkerEvtFlags;
 
-/**
- *
- */
 struct BarCodeScript {
     BarCodeState st;
     FuriString* file_path;
@@ -37,11 +33,9 @@ struct BarCodeScript {
     uint8_t file_buf[FILE_BUFFER_LEN];
     uint8_t buf_len;
     bool is_file_end;
+    FuriHalSerialHandle* serial_handle;
 };
 
-/**
- * Speaker scanning sound
- */
 static void scan_sound() {
     if(furi_hal_speaker_is_mine() || furi_hal_speaker_acquire(1000)) {
         float frequency = 4000;
@@ -54,45 +48,32 @@ static void scan_sound() {
     }
 }
 
-/**
- *
- */
-static void usb_uart_serial_init() {
+static void usb_uart_serial_init(BarCodeScript* bc_context) {
     furi_hal_usb_unlock();
     Cli* cli = furi_record_open(RECORD_CLI);
     cli_session_close(cli);
     furi_record_close(RECORD_CLI);
     furi_check(furi_hal_usb_set_config(&usb_cdc_single, NULL) == true);
-    furi_hal_console_disable();
-    furi_hal_uart_set_br(FuriHalUartIdUSART1, UART_BAUD);
+
+    bc_context->serial_handle = furi_hal_serial_control_acquire(UART_CH);
+    furi_check(bc_context->serial_handle);
+    furi_hal_serial_init(bc_context->serial_handle, UART_BAUD);
 }
 
-/**
- *
- */
-static void usb_uart_serial_deinit() {
+static void usb_uart_serial_deinit(BarCodeScript* bc_context) {
     furi_hal_usb_unlock();
     furi_check(furi_hal_usb_set_config(&usb_cdc_single, NULL) == true);
     Cli* cli = furi_record_open(RECORD_CLI);
     cli_session_open(cli, &cli_vcp);
     furi_record_close(RECORD_CLI);
-    furi_hal_console_enable();
+    furi_hal_serial_deinit(bc_context->serial_handle);
+    furi_hal_serial_control_release(bc_context->serial_handle);
 }
-/**
- *
- * @param chr
- * @return
- */
+
 static bool is_bc_end(const char chr) {
     return ((chr == '\0') || (chr == '\r') || (chr == '\n')); //TODO SPACE NEED???
 }
 
-/**
- *
- * @param bc_script
- * @param script_file
- * @return
- */
 static uint16_t bc_script_read_file(BarCodeScript* bc_script, File* script_file) {
     UNUSED(is_bc_end);
     bc_script->st.line_nb = 0;
@@ -104,11 +85,6 @@ static uint16_t bc_script_read_file(BarCodeScript* bc_script, File* script_file)
     return ret;
 }
 
-/**
- * Main worker
- * @param context
- * @return
- */
 static int32_t bc_scanner_worker(void* context) {
     BarCodeScript* bc_script = context;
 
@@ -121,7 +97,7 @@ static int32_t bc_scanner_worker(void* context) {
     //uint8_t buff[5] = {'p', 'r', 'i', 'v', 'k'};
     //uint8_t state = 99;
 
-    usb_uart_serial_init();
+    usb_uart_serial_init(bc_script);
 
     while(1) {
         //state = furi_hal_cdc_get_ctrl_line_state(FuriHalUartIdUSART1);
@@ -192,18 +168,14 @@ static int32_t bc_scanner_worker(void* context) {
         }
     }
 
-    usb_uart_serial_deinit();
+    usb_uart_serial_deinit(bc_script);
     storage_file_close(script_file);
     storage_file_free(script_file);
     FURI_LOG_I(WORKER_TAG, "End");
 
     return 0;
 }
-/**
- * Open bc_scanner script
- * @param file_path
- * @return
- */
+
 BarCodeScript* bc_scanner_script_open(FuriString* file_path) {
     FURI_LOG_D(WORKER_TAG, "bc_scanner_script_open");
     furi_assert(file_path);
@@ -221,10 +193,6 @@ BarCodeScript* bc_scanner_script_open(FuriString* file_path) {
     return bc_script;
 } //-V773
 
-/**
- *
- * @param bc_script
- */
 void bc_scanner_script_close(BarCodeScript* bc_script) {
     furi_assert(bc_script);
     furi_thread_flags_set(furi_thread_get_id(bc_script->thread), WorkerEvtEnd);
@@ -235,19 +203,11 @@ void bc_scanner_script_close(BarCodeScript* bc_script) {
     FURI_LOG_D(WORKER_TAG, "bc_scanner_script_close");
 }
 
-/**
- *
- * @param bc_script
- */
 void bc_scanner_script_toggle(BarCodeScript* bc_script) {
     furi_assert(bc_script);
     furi_thread_flags_set(furi_thread_get_id(bc_script->thread), WorkerEvtToggle);
 }
-/**
- *
- * @param bc_script
- * @return
- */
+
 BarCodeState* bc_scanner_script_get_state(BarCodeScript* bc_script) {
     furi_assert(bc_script);
     return &(bc_script->st);

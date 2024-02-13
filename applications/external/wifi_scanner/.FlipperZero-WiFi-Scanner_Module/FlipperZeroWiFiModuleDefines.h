@@ -15,3 +15,5 @@
 #define FLIPPERZERO_SERIAL_BAUD 115200
 
 #define NA 0
+
+#define UART_CH (FuriHalSerialIdUsart)

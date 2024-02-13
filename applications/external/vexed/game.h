@@ -58,11 +58,11 @@ typedef enum {
 } GameOver;
 
 typedef struct {
-    u_int32_t frameNo;
-    u_int32_t dir;
-    u_int32_t x;
-    u_int32_t y;
-    u_int32_t delay;
+    uint32_t frameNo;
+    uint32_t dir;
+    uint32_t x;
+    uint32_t y;
+    uint32_t delay;
 } MoveInfo;
 
 typedef struct {

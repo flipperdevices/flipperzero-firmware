@@ -39,12 +39,12 @@ bool flipbip_load_file(
     const char* file_name) {
     bool ret = false;
     const char* path;
+    char path_buf[FILE_MAX_PATH_LEN] = {0};
     if(file_type == FlipBipFileKey) {
         path = FLIPBIP_KEY_PATH;
     } else if(file_type == FlipBipFileDat) {
         path = FLIPBIP_DAT_PATH;
     } else {
-        char path_buf[FILE_MAX_PATH_LEN] = {0};
         strcpy(path_buf, FLIPBIP_APP_BASE_FOLDER); // 22
         strcpy(path_buf + strlen(path_buf), "/");
         strcpy(path_buf + strlen(path_buf), file_name);
@@ -96,12 +96,12 @@ bool flipbip_load_file(
 bool flipbip_has_file(const FlipBipFile file_type, const char* file_name, const bool remove) {
     bool ret = false;
     const char* path;
+    char path_buf[FILE_MAX_PATH_LEN] = {0};
     if(file_type == FlipBipFileKey) {
         path = FLIPBIP_KEY_PATH;
     } else if(file_type == FlipBipFileDat) {
         path = FLIPBIP_DAT_PATH;
     } else {
-        char path_buf[FILE_MAX_PATH_LEN] = {0};
         strcpy(path_buf, FLIPBIP_APP_BASE_FOLDER); // 22
         strcpy(path_buf + strlen(path_buf), "/");
         strcpy(path_buf + strlen(path_buf), file_name);
@@ -127,6 +127,7 @@ bool flipbip_save_file(
     bool ret = false;
     const char* path;
     const char* path_bak;
+    char path_buf[FILE_MAX_PATH_LEN] = {0};
     if(file_type == FlipBipFileKey) {
         path = FLIPBIP_KEY_PATH;
         path_bak = FLIPBIP_KEY_PATH_BAK;
@@ -134,7 +135,6 @@ bool flipbip_save_file(
         path = FLIPBIP_DAT_PATH;
         path_bak = FLIPBIP_DAT_PATH_BAK;
     } else {
-        char path_buf[FILE_MAX_PATH_LEN] = {0};
         strcpy(path_buf, FLIPBIP_APP_BASE_FOLDER); // 22
         strcpy(path_buf + strlen(path_buf), "/");
         strcpy(path_buf + strlen(path_buf), file_name);

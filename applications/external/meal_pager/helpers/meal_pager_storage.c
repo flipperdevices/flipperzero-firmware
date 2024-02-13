@@ -183,8 +183,6 @@ void meal_pager_read_settings(void* context) {
         return;
     }
 
-    furi_string_free(temp_str);
-
     flipper_format_read_uint32(fff_file, MEAL_PAGER_SETTINGS_KEY_PAGER_TYPE, &app->pager_type, 1);
     meal_pager_set_max_values(app);
     flipper_format_read_uint32(
@@ -202,6 +200,8 @@ void meal_pager_read_settings(void* context) {
         fff_file, MEAL_PAGER_SETTINGS_KEY_SAVE_SETTINGS, &app->save_settings, 1);
 
     flipper_format_rewind(fff_file);
+
+    furi_string_free(temp_str);
 
     meal_pager_close_config_file(fff_file);
     meal_pager_close_storage();
@@ -226,26 +226,26 @@ void meal_pager_set_max_values(void* context) {
     }
     if(app->first_station > app->max_station) {
         app->first_station = app->max_station;
-        snprintf(app->text_store[0], 5, "%lu", app->first_station);
+        snprintf(app->text_store[0], sizeof(app->text_store[0]), "%lu", app->first_station);
     }
     if(app->last_station > app->max_station) {
         app->last_station = app->max_station;
-        snprintf(app->text_store[1], 5, "%lu", app->last_station);
+        snprintf(app->text_store[1], sizeof(app->text_store[1]), "%lu", app->last_station);
     }
     if(app->last_station < app->first_station) {
         app->last_station = app->first_station;
-        snprintf(app->text_store[1], 5, "%lu", app->last_station);
+        snprintf(app->text_store[1], sizeof(app->text_store[1]), "%lu", app->last_station);
     }
     if(app->first_pager > app->max_pager) {
         app->first_pager = app->max_pager;
-        snprintf(app->text_store[2], 4, "%lu", app->first_pager);
+        snprintf(app->text_store[2], sizeof(app->text_store[2]), "%lu", app->first_pager);
     }
     if(app->last_pager > app->max_pager) {
         app->last_pager = app->max_pager;
-        snprintf(app->text_store[3], 4, "%lu", app->last_pager);
+        snprintf(app->text_store[3], sizeof(app->text_store[3]), "%lu", app->last_pager);
     }
     if(app->last_pager < app->first_pager) {
         app->last_pager = app->first_pager;
-        snprintf(app->text_store[3], 4, "%lu", app->last_pager);
+        snprintf(app->text_store[3], sizeof(app->text_store[3]), "%lu", app->last_pager);
     }
 }

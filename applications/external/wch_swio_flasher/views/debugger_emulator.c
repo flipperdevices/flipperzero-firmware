@@ -42,14 +42,14 @@ typedef struct {
     uint16_t animation_visible;
 } DebuggerEmulatorModel;
 
-static void draw_log0(Canvas* canvas, u_int8_t x, uint8_t y) {
+static void draw_log0(Canvas* canvas, uint8_t x, uint8_t y) {
     canvas_draw_line(canvas, x, y + 1, x, y + 3);
     canvas_draw_line(canvas, x + 3, y + 1, x + 3, y + 3);
     canvas_draw_line(canvas, x + 1, y, x + 2, y);
     canvas_draw_line(canvas, x + 1, y + 4, x + 2, y + 4);
 }
 
-static void draw_log1(Canvas* canvas, u_int8_t x, uint8_t y) {
+static void draw_log1(Canvas* canvas, uint8_t x, uint8_t y) {
     canvas_draw_line(canvas, x, y, x, y + 4);
 }
 

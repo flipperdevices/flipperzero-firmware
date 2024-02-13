@@ -1,8 +1,10 @@
 #pragma once
 
 #include <furi_hal.h>
+#include <notification/notification_messages.h>
 
 #define RX_BUF_SIZE 64
+#define UART_CH (FuriHalSerialIdUsart)
 
 typedef struct {
     uint16_t pm1_0cf; // PM1.0 ug/m3 (ultrafine particles)
@@ -28,6 +30,7 @@ typedef struct {
 
     uint32_t pms_data_timestamp;
     AirmonPmsData pms_data;
+    FuriHalSerialHandle* serial_handle;
 } AirmonPmsContext;
 
 AirmonPmsContext* airmon_pms_context_alloc();

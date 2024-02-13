@@ -86,8 +86,6 @@ void uart_terminal_scene_console_output_on_enter(void* context) {
     uart_terminal_uart_set_handle_rx_data_cb(
         app->uart, uart_terminal_console_output_handle_rx_data_cb); // setup callback for rx thread
 
-    uint8_t uart_ch = app->uart_ch;
-
     if(app->hex_mode) {
         // Send binary packet
         if(app->selected_tx_string) {
@@ -98,7 +96,7 @@ void uart_terminal_scene_console_output_on_enter(void* context) {
                 byte |= (hex_char_to_byte(*str) << ((1 - digit_num) * 4));
 
                 if(++digit_num == 2) {
-                    uart_terminal_uart_tx(uart_ch, &byte, 1);
+                    uart_terminal_uart_tx(app->uart, &byte, 1);
                     digit_num = 0;
                     byte = 0;
                 }
@@ -106,7 +104,7 @@ void uart_terminal_scene_console_output_on_enter(void* context) {
             }
 
             if(digit_num) {
-                uart_terminal_uart_tx(uart_ch, &byte, 1);
+                uart_terminal_uart_tx(app->uart, &byte, 1);
             }
         }
     } else {
@@ -114,12 +112,16 @@ void uart_terminal_scene_console_output_on_enter(void* context) {
         if(app->is_command && app->selected_tx_string) {
             if(app->TERMINAL_MODE == 1) {
                 uart_terminal_uart_tx(
-                    uart_ch, (uint8_t*)(app->selected_tx_string), strlen(app->selected_tx_string));
-                uart_terminal_uart_tx(uart_ch, (uint8_t*)("\r\n"), 2);
+                    app->uart,
+                    (uint8_t*)(app->selected_tx_string),
+                    strlen(app->selected_tx_string));
+                uart_terminal_uart_tx(app->uart, (uint8_t*)("\r\n"), 2);
             } else {
                 uart_terminal_uart_tx(
-                    uart_ch, (uint8_t*)(app->selected_tx_string), strlen(app->selected_tx_string));
-                uart_terminal_uart_tx(uart_ch, (uint8_t*)("\n"), 1);
+                    app->uart,
+                    (uint8_t*)(app->selected_tx_string),
+                    strlen(app->selected_tx_string));
+                uart_terminal_uart_tx(app->uart, (uint8_t*)("\n"), 1);
             }
         }
     }

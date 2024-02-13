@@ -14,10 +14,8 @@
 #include <stream/stream.h>
 #include <stream/buffered_file_stream.h>
 #include <toolbox/stream/file_stream.h>
-#include "filelogger.h"
 #include "constants.h"
 #include "hidtransfer_icons.h"
-#include <assets_icons.h>
 
 #define HEX_VIEWER_APP_PATH_FOLDER "/any"
 #define HEX_VIEWER_APP_EXTENSION "*"
@@ -409,8 +407,6 @@ bool inputCallback(InputEvent* event, void* context) {
 
 int32_t hidtransfer_app() {
     furi_log_set_level(FuriLogLevelDebug);
-    furi_hal_console_enable();
-
     FURI_LOG_D(TAG, "APP STARTED");
 
     FuriHalUsbInterface* mode = furi_hal_usb_get_config();

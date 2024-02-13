@@ -49,7 +49,7 @@ typedef enum {
 
 static IconAnimation* animations[4];
 
-typedef u_int8_t byte;
+typedef uint8_t byte;
 
 typedef enum {
     GameStatusVibro = 1 << 0,

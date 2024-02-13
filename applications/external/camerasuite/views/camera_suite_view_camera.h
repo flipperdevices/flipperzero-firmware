@@ -2,7 +2,8 @@
 
 #include <furi.h>
 #include <furi_hal.h>
-#include <furi_hal_uart.h>
+#include <furi_hal_serial_control.h>
+#include <furi_hal_serial.h>
 #include <gui/elements.h>
 #include <gui/gui.h>
 #include <gui/icon_i.h>
@@ -15,6 +16,10 @@
 #include <storage/storage.h>
 
 #include "../helpers/camera_suite_custom_event.h"
+
+#include <camera_suite_icons.h>
+
+#define UART_CH (FuriHalSerialIdUsart)
 
 #define BITMAP_HEADER_LENGTH 62
 #define FRAME_BIT_DEPTH 1
@@ -38,15 +43,16 @@ typedef enum {
     WorkerEventRx = (1 << 2),
 } WorkerEventFlags;
 
-#define CAMERA_WORKER_EVENTS_MASK (WorkerEventStop | WorkerEventRx)
+#define WORKER_EVENTS_MASK (WorkerEventStop | WorkerEventRx)
 
 // Forward declaration
 typedef void (*CameraSuiteViewCameraCallback)(CameraSuiteCustomEvent event, void* context);
 
 typedef struct CameraSuiteViewCamera {
     CameraSuiteViewCameraCallback callback;
-    FuriStreamBuffer* camera_rx_stream;
-    FuriThread* camera_worker_thread;
+    FuriStreamBuffer* rx_stream;
+    FuriHalSerialHandle* serial_handle;
+    FuriThread* worker_thread;
     NotificationApp* notification;
     View* view;
     void* context;
