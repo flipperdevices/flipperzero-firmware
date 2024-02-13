@@ -19,7 +19,7 @@
 #include <mass_storage_icons.h>
 
 #define MASS_STORAGE_APP_PATH_FOLDER APP_ASSETS_PATH("")
-#define MASS_STORAGE_APP_EXTENSION ".img"
+#define MASS_STORAGE_APP_EXTENSION ".img|.iso"
 #define MASS_STORAGE_FILE_NAME_LEN 40
 
 struct MassStorageApp {
