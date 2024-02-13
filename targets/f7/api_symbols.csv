@@ -1536,7 +1536,6 @@ Function,+,furi_hal_sd_max_mount_retry_count,uint8_t,
 Function,+,furi_hal_sd_presence_init,void,
 Function,+,furi_hal_sd_read_blocks,FuriStatus,"uint32_t*, uint32_t, uint32_t"
 Function,+,furi_hal_sd_write_blocks,FuriStatus,"const uint32_t*, uint32_t, uint32_t"
-Function,-,furi_hal_set_is_normal_boot,void,_Bool
 Function,+,furi_hal_serial_async_rx,uint8_t,FuriHalSerialHandle*
 Function,+,furi_hal_serial_async_rx_available,_Bool,FuriHalSerialHandle*
 Function,+,furi_hal_serial_async_rx_start,void,"FuriHalSerialHandle*, FuriHalSerialAsyncRxCallback, void*, _Bool"
@@ -1564,6 +1563,7 @@ Function,+,furi_hal_serial_set_br,void,"FuriHalSerialHandle*, uint32_t"
 Function,+,furi_hal_serial_suspend,void,FuriHalSerialHandle*
 Function,+,furi_hal_serial_tx,void,"FuriHalSerialHandle*, const uint8_t*, size_t"
 Function,+,furi_hal_serial_tx_wait_complete,void,FuriHalSerialHandle*
+Function,-,furi_hal_set_is_normal_boot,void,_Bool
 Function,+,furi_hal_speaker_acquire,_Bool,uint32_t
 Function,-,furi_hal_speaker_deinit,void,
 Function,-,furi_hal_speaker_init,void,
@@ -2552,7 +2552,7 @@ Function,+,mjs_create,mjs*,void*
 Function,+,mjs_dataview_get_buf,mjs_val_t,"mjs*, mjs_val_t"
 Function,+,mjs_del,int,"mjs*, mjs_val_t, const char*, size_t"
 Function,+,mjs_destroy,void,mjs*
-Function,-,mjs_disasm_all,void,"mjs*, MjsPrintCallback, void*"
+Function,+,mjs_disasm_all,void,"mjs*, MjsPrintCallback, void*"
 Function,+,mjs_disown,int,"mjs*, mjs_val_t*"
 Function,-,mjs_dump,void,"mjs*, int, MjsPrintCallback, void*"
 Function,+,mjs_exec,mjs_err_t,"mjs*, const char*, mjs_val_t*"

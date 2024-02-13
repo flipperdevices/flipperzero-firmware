@@ -98,7 +98,6 @@ static bool furi_hal_crypto_generate_unique_keys(uint8_t start_slot, uint8_t end
             FURI_LOG_E(TAG, "Error writing key to slot %u", slot);
             return false;
         }
-        explicit_bzero(key_data, sizeof(key_data));
     }
     return true;
 }
@@ -192,7 +191,6 @@ bool furi_hal_crypto_enclave_store_key(FuriHalCryptoKey* key, uint8_t* slot) {
     memcpy(pParam.KeyData, key->data, key_data_size);
 
     SHCI_CmdStatus_t shci_state = SHCI_C2_FUS_StoreUsrKey(&pParam, slot);
-    explicit_bzero(&pParam, sizeof(pParam));
     furi_check(furi_mutex_release(furi_hal_crypto_mutex) == FuriStatusOk);
     return (shci_state == SHCI_Success);
 }

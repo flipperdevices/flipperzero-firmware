@@ -276,7 +276,6 @@ void crypto_cli_store_key(Cli* cli, FuriString* args) {
         }
     } while(0);
 
-    explicit_bzero(data, sizeof(data));
     furi_string_free(key_type);
 }
 

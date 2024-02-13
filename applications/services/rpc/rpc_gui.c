@@ -385,15 +385,6 @@ static void rpc_system_gui_virtual_display_frame_process(const PB_Main* request,
     (void)session;
 }
 
-static const Icon* rpc_system_gui_get_owner_icon(RpcOwner owner) {
-    switch(owner) {
-    case RpcOwnerUart:
-        return &I_Exp_module_connected_12x8;
-    default:
-        return &I_Rpc_active_7x8;
-    }
-}
-
 static void rpc_active_session_icon_draw_callback(Canvas* canvas, void* context) {
     furi_assert(canvas);
     RpcGuiSystem* rpc_gui = context;

@@ -1,7 +1,7 @@
 Import("ENV")
 
 
-if ENV["DEBUG"]:
+if ENV["DEBUG"] and ENV["IS_BASE_FIRMWARE"]:
     ENV.Append(
         CPPDEFINES=[
             "FURI_DEBUG",
@@ -28,7 +28,7 @@ else:
             "NDEBUG",
         ],
         CCFLAGS=[
-            "-Og",
+            "-Og" if ENV["IS_BASE_FIRMWARE"] else "-Os",
         ],
     )
 

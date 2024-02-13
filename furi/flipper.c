@@ -5,6 +5,17 @@
 #include <furi_hal_version.h>
 #include <furi_hal_memory.h>
 #include <furi_hal_rtc.h>
+#include <storage/storage.h>
+#include <gui/canvas_i.h>
+#include <bt/bt_settings.h>
+#include <bt/bt_service/bt_i.h>
+#include <power/power_settings.h>
+#include <desktop/desktop_settings.h>
+#include <notification/notification_app.h>
+#include <dolphin/helpers/dolphin_state.h>
+#include <applications/main/u2f/u2f_data.h>
+#include <expansion/expansion_settings_filename.h>
+#include <applications/main/archive/helpers/archive_favorites.h>
 #include <cfw/private.h>
 #include <cfw/namespoof.h>
 

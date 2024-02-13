@@ -19,9 +19,9 @@ CfwSettings cfw_settings = {
     .favorite_timeout = 0, // OFF
     .spi_cc1101_handle = SpiDefault, // &furi_hal_spi_bus_handle_external
     .spi_nrf24_handle = SpiDefault, // &furi_hal_spi_bus_handle_external
-    .uart_esp_channel = UARTDefault, // pin 13,14
-    .uart_nmea_channel = UARTDefault, // pin 13,14
-    .uart_general_channel = UARTDefault, // pin 13,14
+    .uart_esp_channel = FuriHalSerialIdUsart, // pin 13,14
+    .uart_nmea_channel = FuriHalSerialIdUsart, // pin 13,14
+    .uart_general_channel = FuriHalSerialIdUsart, // pin 13,14
     .rgb_backlight = false, // OFF
     .lcd_style = 0, // Static
 };

@@ -207,7 +207,7 @@ static void subghz_scene_add_to_history_callback(
                                           decoder_base->protocol->name :
                                           SUBGHZ_APP_FILENAME_PREFIX;
                     FuriHalRtcDateTime time = subghz_history_get_datetime(history, idx);
-                    name_generator_make_detailed_datetime(file, sizeof(file), suf, &time, true);
+                    name_generator_make_detailed_datetime(file, sizeof(file), suf, &time);
                     // Dir name
                     FuriString* path = furi_string_alloc_set(SUBGHZ_APP_FOLDER "/Autosave");
                     char* dir = strdup(furi_string_get_cstr(path));

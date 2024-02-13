@@ -115,8 +115,6 @@ struct LfRfid {
     uint8_t* old_key_data;
     uint8_t* new_key_data;
 
-    uint8_t password[4];
-
     RpcAppSystem* rpc_ctx;
     LfRfidRpcState rpc_state;
 

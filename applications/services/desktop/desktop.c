@@ -564,7 +564,6 @@ Desktop* desktop_alloc() {
         desktop->view_dispatcher, desktop_back_event_callback);
 
     desktop->lock_menu = desktop_lock_menu_alloc();
-    desktop->debug_view = desktop_debug_alloc();
     desktop->hw_mismatch_popup = popup_alloc();
     desktop->locked_view = desktop_view_locked_alloc();
     desktop->pin_input_view = desktop_view_pin_input_alloc();
@@ -598,8 +597,6 @@ Desktop* desktop_alloc() {
         desktop->view_dispatcher,
         DesktopViewIdLockMenu,
         desktop_lock_menu_get_view(desktop->lock_menu));
-    view_dispatcher_add_view(
-        desktop->view_dispatcher, DesktopViewIdDebug, desktop_debug_get_view(desktop->debug_view));
     view_dispatcher_add_view(
         desktop->view_dispatcher,
         DesktopViewIdHwMismatch,

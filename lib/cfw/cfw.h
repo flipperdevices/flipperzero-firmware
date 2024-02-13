@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <furi_hal_serial_types.h>
 // #include <gui/icon_i.h>
 // #include <power/power_service/power.h>
 
@@ -36,12 +37,6 @@ typedef enum {
     SpiCount,
 } SpiHandle;
 
-typedef enum {
-    UARTDefault, // pin 13,14
-    UARTExtra, // pin 15,16
-    UARTCount,
-} UARTChannel;
-
 typedef struct {
     char* manifest_name;
     MenuStyle menu_style;
@@ -55,9 +50,9 @@ typedef struct {
     uint32_t favorite_timeout;
     SpiHandle spi_cc1101_handle;
     SpiHandle spi_nrf24_handle;
-    UARTChannel uart_esp_channel;
-    UARTChannel uart_nmea_channel;
-    UARTChannel uart_general_channel;
+    FuriHalSerialId uart_esp_channel;
+    FuriHalSerialId uart_nmea_channel;
+    FuriHalSerialId uart_general_channel;
     bool rgb_backlight;
     uint32_t lcd_style;
 } CfwSettings;

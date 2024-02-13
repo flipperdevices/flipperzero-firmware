@@ -1,10 +1,8 @@
 #include <furi_hal.h>
 #include <cfw/cfw.h>
-#include "minmea.h"
+#include <expansion/expansion.h>
 
-#define UART_CH                                                                  \
-    (CFW_SETTINGS()->uart_nmea_channel == UARTDefault ? FuriHalUartIdUSART1 : \
-                                                           FuriHalUartIdLPUART1)
+#define UART_CH (CFW_SETTINGS()->uart_nmea_channel)
 
 #define RX_BUF_SIZE 1024
 
@@ -16,9 +14,11 @@ typedef enum {
 #define WORKER_ALL_RX_EVENTS (WorkerEvtStop | WorkerEvtRxDone)
 
 typedef struct {
+    Expansion* expansion;
     FuriThread* thread;
     FuriStreamBuffer* rx_stream;
     uint8_t rx_buf[RX_BUF_SIZE];
+    FuriHalSerialHandle* serial_handle;
 
     FuriTimer* timer;
 
@@ -60,6 +60,14 @@ void subghz_gps_start(SubGhzGPS* subghz_gps);
  * @return void
 */
 void subghz_gps_stop(SubGhzGPS* subghz_gps);
+
+/**
+ * Set baudrate for GPS
+ * 
+ * @param baudrate Baudrate
+ * @return void
+*/
+void subghz_gps_set_baudrate(SubGhzGPS* subghz_gps, uint32_t baudrate);
 
 /**
  * Convert degree to radian

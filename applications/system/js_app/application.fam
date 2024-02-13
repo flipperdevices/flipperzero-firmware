@@ -1,11 +1,18 @@
 App(
     appid="js_app",
     name="JS Runner",
-    apptype=FlipperAppType.SYSTEM,
+    apptype=FlipperAppType.EXTERNAL,
     entry_point="js_app",
+    sources=[
+        "*.c*",
+        "!modules",
+        "modules/js_flipper.c",
+    ],
     stack_size=2 * 1024,
     resources="examples",
     order=0,
+    fap_icon="icon.png",
+    fap_category="assets",
 )
 
 App(

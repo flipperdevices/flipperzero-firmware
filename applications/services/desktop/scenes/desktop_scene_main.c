@@ -162,11 +162,6 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
             break;
 
-        case DesktopMainEventOpenDebug:
-            scene_manager_next_scene(desktop->scene_manager, DesktopSceneDebug);
-            consumed = true;
-            break;
-
         case DesktopMainEventOpenArchive:
 #ifdef APP_ARCHIVE
             desktop_switch_to_app(desktop, &FLIPPER_ARCHIVE);
@@ -273,9 +268,10 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
                 desktop_scene_main_open_app_or_profile(desktop, CLOCK_APP);
             } else {
                 furi_record_close(RECORD_STORAGE);
-                scene_manager_next_scene(desktop->scene_manager, DesktopSceneDebug);
+                animation_manager_new_idle_process(desktop->animation_manager);
                 consumed = true;
             }
+            break;
         }
         case DesktopDummyEventOpenLeft:
             desktop_scene_main_open_fav_or_profile(

@@ -23,6 +23,10 @@ extern "C" {
 #define FURI_NORETURN noreturn
 #endif
 
+#if !defined(FURI_RAM_EXEC) && !defined(FURI_DEBUG)
+#define __FURI_TRACE
+#endif
+
 // Flags instead of pointers will save ~4 bytes on furi_assert and furi_check calls.
 #define __FURI_ASSERT_MESSAGE_FLAG (0x01)
 #define __FURI_CHECK_MESSAGE_FLAG (0x02)

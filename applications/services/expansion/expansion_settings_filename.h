@@ -6,4 +6,5 @@
 /**
  * @brief File name used for expansion settings.
  */
-#define EXPANSION_SETTINGS_FILE_NAME ".expansion.settings"
+#define EXPANSION_SETTINGS_OLD_PATH INT_PATH(".expansion.settings")
+#define EXPANSION_SETTINGS_PATH CFG_PATH("expansion.settings")

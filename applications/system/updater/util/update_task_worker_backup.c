@@ -163,6 +163,17 @@ static bool update_task_post_update(UpdateTask* update_task) {
 
         CHECK_RESULT(lfs_backup_unpack(update_task->storage, furi_string_get_cstr(file_path)));
 
+        // Fix flags for production / development
+#ifdef FURI_DEBUG
+        furi_hal_rtc_set_flag(FuriHalRtcFlagDebug);
+        furi_hal_rtc_set_flag(FuriHalRtcFlagLegacySleep);
+#else
+        furi_hal_rtc_reset_flag(FuriHalRtcFlagDebug);
+        furi_hal_rtc_reset_flag(FuriHalRtcFlagLegacySleep);
+        furi_hal_rtc_set_log_level(FuriLogLevelNone);
+        furi_hal_rtc_set_heap_track_mode(FuriHalRtcHeapTrackModeNone);
+#endif
+
         if(update_task->state.groups & UpdateTaskStageGroupResources) {
             TarUnpackProgress progress = {
                 .update_task = update_task,

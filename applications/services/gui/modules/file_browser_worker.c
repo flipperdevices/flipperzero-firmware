@@ -91,6 +91,7 @@ static void browser_parse_ext_filter(ExtFilterArray_t ext_filter, const char* fi
 
     size_t str_offset = 0;
     FuriString* ext_temp = furi_string_alloc();
+    ExtFilterArray_reset(ext_filter);
     while(1) {
         size_t ext_len = strcspn(&filter_str[str_offset], "|");
 
