@@ -92,8 +92,6 @@ void extend_range_draw_callback(Canvas* canvas, void* ctx) {
         break;
     case 0:
         canvas_draw_str(canvas, 2, 60, "Success. Reboot now.");
-        furi_delay_ms(1000);
-        power_reboot(PowerBootModeNormal);
         break;
     case 1:
         canvas_draw_str(canvas, 2, 60, "File not found");
@@ -228,6 +226,10 @@ int32_t extend_range_app(void* p) {
     while(furi_message_queue_get(event_queue, &event, FuriWaitForever) == FuriStatusOk) {
         if(event.type == InputTypeShort && event.key == InputKeyBack) break;
         handle_key(&event);
+        if(global_ret_val == 0) {
+            furi_delay_ms(1000);
+            power_reboot(PowerBootModeNormal);
+        }
     }
 
     gui_remove_view_port(gui, view_port);

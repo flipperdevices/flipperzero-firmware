@@ -80,7 +80,7 @@ void airmon_pms_process_data_frame(AirmonPmsContext* pms_context) {
     d->ct2_5 = UINT16BE(p + 18);
     d->ct5_0 = UINT16BE(p + 20);
     d->ct10 = UINT16BE(p + 22);
-    
+
     pms_context->pms_data_timestamp = furi_get_tick();
 
     furi_mutex_release(pms_context->mutex);

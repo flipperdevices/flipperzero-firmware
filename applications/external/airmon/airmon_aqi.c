@@ -25,8 +25,7 @@ const char* const aqi_categories[NUM_LEVELS] = {
     "Unhealthy",
     "Very Unhealthy",
     "Hazardous",
-    "Very Hazardous"
-};
+    "Very Hazardous"};
 
 int airmon_aqi_breakpoint_idx(const float bps[], float value) {
     int i = 0;

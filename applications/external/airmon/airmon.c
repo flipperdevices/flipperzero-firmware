@@ -84,7 +84,7 @@ const NotificationSequence sequence_blink_maroon_100 = {
 
 static void airmon_blink(AirmonContext* ctx, int aqi_value) {
     int aqi_level = airmon_aqi_level(aqi_value);
-    const NotificationSequence *sequence;
+    const NotificationSequence* sequence;
     switch(aqi_level) {
     case 0:
         // Good - Green
@@ -164,7 +164,10 @@ static void airmon_draw_callback(Canvas* canvas, void* ctx) {
     // Draw PM/AQI value
     canvas_set_font(canvas, FontBigNumbers);
     if(data_is_valid) {
-        snprintf(buffer, STR_BUF_SIZE, "%d", 
+        snprintf(
+            buffer,
+            STR_BUF_SIZE,
+            "%d",
             (context->display_mode == AirmonDisplayModeAqi) ? aqi_value : pm_value);
     } else {
         snprintf(buffer, STR_BUF_SIZE, "--");
@@ -175,7 +178,8 @@ static void airmon_draw_callback(Canvas* canvas, void* ctx) {
     const uint8_t legend_y = canvas_h / 2;
     if(context->display_mode == AirmonDisplayModeAqi) {
         canvas_set_font(canvas, FontSecondary);
-        snprintf(buffer, STR_BUF_SIZE, "%s", data_is_valid ? airmon_aqi_category(aqi_value) : "Unknown");
+        snprintf(
+            buffer, STR_BUF_SIZE, "%s", data_is_valid ? airmon_aqi_category(aqi_value) : "Unknown");
         canvas_draw_str_aligned(canvas, canvas_w / 2, legend_y + 5, AlignCenter, AlignTop, buffer);
     } else {
         const Icon* density_icon = &I_Density_33x11;
@@ -222,7 +226,7 @@ static void airmon_draw_callback(Canvas* canvas, void* ctx) {
     }
 
     airmon_draw_battery(canvas, context);
-    
+
     // Blink LED if data was updated
     if(data_timestamp > context->last_data_timestamp) {
         airmon_blink(context, aqi_value);
