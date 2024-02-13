@@ -237,17 +237,36 @@ void computeTVM() {
         snprintf(tvm_Strings[4], sizeof(tvm_Strings[4]), "%.2f", tvm_fv);
         FURI_LOG_I("INFORMATION tag", "Future value solved (tvm_fv): %.2f", tvm_fv);
     }
+    // solve PV
+    else if(tvm_cursor_position == 2) {
+        tvm_pv =
+            -tvm_fv / pow(1 + tvm_i, tvm_n) - (tvm_pmt / tvm_i) * (1 - pow(1 + tvm_i, -tvm_n));
+
+        snprintf(tvm_Strings[2], sizeof(tvm_Strings[2]), "%.2f", tvm_pv);
+        FURI_LOG_I("INFORMATION tag", "Present value solved (tvm_pv): %.2f", tvm_pv);
+
+    }
     //solve N
     else if(tvm_cursor_position == 0) {
-        // Checking for divide by zero error
-        if(tvm_i == 0) {
-            if(tvm_pmt == 0)
-                tvm_n = (tvm_fv - tvm_pv); // Case of simple interest, PMT = 0
-            else
-                tvm_n = (tvm_fv - tvm_pv) / tvm_pmt; // Case of future value of annuity, PMT != 0
-        } else {
-            // Calculation for the number of periods (n)
-            tvm_n = log((tvm_fv - tvm_pmt) / tvm_pv + 1) / log(1 + tvm_i);
+        // If there's no payment
+        if(tvm_pmt == 0) {
+            // Check for divide by zero
+            if(tvm_i == 0) {
+                if(tvm_fv == tvm_pv) {
+                    // If future value equals present value, any number of periods will satisfy this condition
+                    tvm_n =
+                        INFINITY; // return positive infinity indicating indefinite number of periods
+                } else {
+                    // If future value doesn't equal present value and interest rate is 0, cannot solve for periods
+                    tvm_n = NAN; // return Not-a-Number
+                }
+            } else {
+                tvm_n = log((tvm_fv * -1) / tvm_pv) / log(1 + tvm_i);
+            }
+        }
+        // If there is a payment
+        else {
+            // TODO : implement this
         }
 
         snprintf(tvm_Strings[0], sizeof(tvm_Strings[0]), "%.2f", tvm_n);
