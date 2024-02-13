@@ -584,34 +584,50 @@ bool mf_desfire_key_settings_save(
 
     do {
         furi_string_printf(key, "%s %s", prefix, MF_DESFIRE_FFF_CHANGE_KEY_ID_KEY);
-        if(!flipper_format_write_hex(ff, furi_string_get_cstr(key), &data->change_key_id, 1))
+        if(!flipper_format_write_hex(ff, furi_string_get_cstr(key), &data->change_key_id, 1)) {
+            FURI_LOG_E(TAG, "Failed to save MF_DESFIRE_FFF_CHANGE_KEY_ID_KEY");
             break;
+        }
 
         furi_string_printf(key, "%s %s", prefix, MF_DESFIRE_FFF_CONFIG_CHANGEABLE_KEY);
         if(!flipper_format_write_bool(
-               ff, furi_string_get_cstr(key), &data->is_config_changeable, 1))
+               ff, furi_string_get_cstr(key), &data->is_config_changeable, 1)) {
+            FURI_LOG_E(TAG, "Failed to save MF_DESFIRE_FFF_CONFIG_CHANGEABLE_KEY");
             break;
+        }
 
         furi_string_printf(key, "%s %s", prefix, MF_DESFIRE_FFF_FREE_CREATE_DELETE_KEY);
         if(!flipper_format_write_bool(
-               ff, furi_string_get_cstr(key), &data->is_free_create_delete, 1))
+               ff, furi_string_get_cstr(key), &data->is_free_create_delete, 1)) {
+            FURI_LOG_E(TAG, "Failed to save MF_DESFIRE_FFF_FREE_CREATE_DELETE_KEY");
             break;
+        }
 
         furi_string_printf(key, "%s %s", prefix, MF_DESFIRE_FFF_FREE_DIR_LIST_KEY);
         if(!flipper_format_write_bool(
-               ff, furi_string_get_cstr(key), &data->is_free_directory_list, 1))
+               ff, furi_string_get_cstr(key), &data->is_free_directory_list, 1)) {
+            FURI_LOG_E(TAG, "Failed to save MF_DESFIRE_FFF_FREE_DIR_LIST_KEY");
             break;
+        }
 
         furi_string_printf(key, "%s %s", prefix, MF_DESFIRE_FFF_KEY_CHANGEABLE_KEY);
         if(!flipper_format_write_bool(
-               ff, furi_string_get_cstr(key), &data->is_master_key_changeable, 1))
+               ff, furi_string_get_cstr(key), &data->is_master_key_changeable, 1)) {
+            FURI_LOG_E(TAG, "Failed to save MF_DESFIRE_FFF_KEY_CHANGEABLE_KEY");
             break;
+        }
 
         furi_string_printf(key, "%s %s", prefix, MF_DESFIRE_FFF_FLAGS_KEY);
-        if(!flipper_format_write_hex(ff, furi_string_get_cstr(key), &data->flags, 1)) break;
+        if(!flipper_format_write_hex(ff, furi_string_get_cstr(key), &data->flags, 1)) {
+            FURI_LOG_E(TAG, "Failed to save MF_DESFIRE_FFF_FLAGS_KEY");
+            break;
+        }
 
         furi_string_printf(key, "%s %s", prefix, MF_DESFIRE_FFF_MAX_KEYS_KEY);
-        if(!flipper_format_write_hex(ff, furi_string_get_cstr(key), &data->max_keys, 1)) break;
+        if(!flipper_format_write_hex(ff, furi_string_get_cstr(key), &data->max_keys, 1)) {
+            FURI_LOG_E(TAG, "Failed to save MF_DESFIRE_FFF_MAX_KEYS_KEY");
+            break;
+        }
 
         success = true;
     } while(false);
@@ -727,7 +743,12 @@ bool mf_desfire_file_data_save(
     const MfDesfireFileData* data,
     const char* prefix,
     FlipperFormat* ff) {
+    if(data->data == NULL) {
+        FURI_LOG_E(TAG, "file data save data->data is null");
+        return false;
+    }
     const uint32_t data_size = simple_array_get_count(data->data);
+    FURI_LOG_I(TAG, "Saving data size %ld", data_size);
     return data_size > 0 ? flipper_format_write_hex(
                                ff, prefix, simple_array_cget_data(data->data), data_size) :
                            true;
@@ -765,8 +786,10 @@ bool mf_desfire_application_save(
                 break;
             }
             if(!mf_desfire_key_version_save(
-                   simple_array_cget(data->key_versions, i), prefix, i, ff))
+                   simple_array_cget(data->key_versions, i), prefix, i, ff)) {
+                FURI_LOG_E(TAG, "Failed to save key version %ld", i);
                 break;
+            }
         }
 
         if(i != key_version_count) break;
@@ -776,8 +799,12 @@ bool mf_desfire_application_save(
             break;
         }
         const uint32_t file_count = simple_array_get_count(data->file_ids);
-        if(!mf_desfire_file_ids_save(simple_array_get_data(data->file_ids), file_count, prefix, ff))
+        FURI_LOG_I(TAG, "Saving file ids. File count: %ld", file_count);
+        if(!mf_desfire_file_ids_save(
+               simple_array_get_data(data->file_ids), file_count, prefix, ff)) {
+            FURI_LOG_E(TAG, "Failed to save file ids");
             break;
+        }
 
         for(i = 0; i < file_count; ++i) {
             const MfDesfireFileId* file_id = simple_array_cget(data->file_ids, i);
@@ -797,8 +824,12 @@ bool mf_desfire_application_save(
                 FURI_LOG_E(TAG, "file_settings %ld is null", i);
                 break;
             }
-            if(!mf_desfire_file_settings_save(file_settings, furi_string_get_cstr(sub_prefix), ff))
+            FURI_LOG_I(TAG, "Saving file settings for file %ld", i);
+            if(!mf_desfire_file_settings_save(
+                   file_settings, furi_string_get_cstr(sub_prefix), ff)) {
+                FURI_LOG_E(TAG, "Failed to save file settings %ld", i);
                 break;
+            }
             if(data->file_data == NULL) {
                 FURI_LOG_E(TAG, "data->file_data %ld is null", i);
                 break;
@@ -809,8 +840,12 @@ bool mf_desfire_application_save(
                 // break;
             }
             if(file_data) {
-                if(!mf_desfire_file_data_save(file_data, furi_string_get_cstr(sub_prefix), ff))
+                FURI_LOG_I(TAG, "Saving file data for file %ld", i);
+                if(!mf_desfire_file_data_save(file_data, furi_string_get_cstr(sub_prefix), ff)) {
+                    FURI_LOG_E(TAG, "Failed to save file data %ld", i);
+
                     break;
+                }
             }
         }
 
