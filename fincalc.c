@@ -307,6 +307,9 @@ void computeTVM() {
                                 tvm_pmt * ((pow(1 + attempted_i, tvm_n) - 1) / attempted_i)) *
                                -1;
                 // if it is now larger, cut shrink by in half and keep going
+                if(fabs(attempted_fv) > fabs(tvm_fv) + precision) {
+                    shrink_by = shrink_by / 2;
+                }
             }
             FURI_LOG_I("INFORMATION tag", "Interest Rate attempt: %.4f", attempted_i);
             if(attempted_i < 0 && overflowed) {
