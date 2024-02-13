@@ -4,9 +4,9 @@
 #include <furi_hal.h>
 
 #include <lib/subghz/receiver.h>
-#include <lib/subghz/protocols/protocol_items.h>
 #include <lib/subghz/devices/cc1101_int/cc1101_int_interconnect.h>
 #include <lib/subghz/devices/devices.h>
+#include "protocols/genie.h"
 
 typedef void (*SubghzPacketCallback)(FuriString* buffer, void* context);
 
@@ -18,7 +18,9 @@ typedef enum {
     SUBGHZ_RECEIVER_UNINITIALIZED,
 } SubghzReceiverState;
 
-typedef struct {
+typedef struct GenieSubGhz GenieSubGhz;
+
+struct GenieSubGhz {
     SubGhzEnvironment* environment;
     FuriStreamBuffer* stream;
     FuriThread* thread;
@@ -27,7 +29,7 @@ typedef struct {
     SubghzReceiverState status;
     SubghzPacketCallback callback;
     void* callback_context;
-} GenieSubGhz;
+};
 
 GenieSubGhz* genie_subghz_alloc();
 void genie_subghz_free(GenieSubGhz* subghz);
