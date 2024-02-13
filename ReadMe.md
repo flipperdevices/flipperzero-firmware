@@ -29,8 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0213-0003-0.97.2-ad1ab9e](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-02-13 17:17 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-02-13 17:17 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-02-13 17:24 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-02-13 17:24 EST`
 - OFW: [NFC: Add support for Gallagher access control (MIFARE Classic only) #3306 (By nickmooney)](https://github.com/flipperdevices/flipperzero-firmware/pull/3306)
 - OFW: [NFC: Slix disable privacy #3425 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3425)
 - OFW: [NFC: Added NFC plugin; Some parser #3335 (By zProAle)](https://github.com/flipperdevices/flipperzero-firmware/pull/3335)
@@ -43,7 +43,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [NFC Playlist v1.3 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
 - [Fix: This was leftover from old reverted OFW PR (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/02bd53f8c0423d02b01c1fd0507e6c866c29fc5e)
 - [Reset log level on flash for more responsiveness (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/67e7becc43b7701639baa873daa0149c054ba955)
-- Added: [Video Game Module Tool v1.0 (By gsurkov)](https://github.com/flipperdevices/flipperzero-good-faps/pull/127) - Commented out until expansion code is merged
 - OFW PR: [NFC: fix retry scene navigation logic #3439 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3439)
 - [Update version string pocsag_pager_types.h from 0.1 to 1.2 #13 (By seelenamt)](https://github.com/xMasterX/flipper-pager/pull/13)
 - Updated: [WiFi (Marauder) v6.6 (By 0xchocolate & tcpassos)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) `Req: ESP32 WITH MARAUDER FLASHED` Removed Create App Folder Bug
@@ -79,7 +78,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [JS serial module fixes #3445 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/3445)
 - [Many Updates, Cleanup and Merge Fixes (By xMasterX & Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/010720b1f48eee5f66f6c48e49a267290345f73f)
 - Updated: [PacMan WIP v0.1 (By DanieleMaffi)](https://github.com/DanieleMaffi/flipper-pacman)
-- [Fix plugin symbol warnings (imported from fap api table) (By Willy-JL)]()
+- [Fix plugin symbol warnings (imported from fap api table) (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/13448f2e90b0862b5f354170b3ff4c5e3a4a1461)
+- Added: [Video Game Module Tool v1.0 (By gsurkov)](https://github.com/flipperdevices/flipperzero-good-faps/pull/127)
 
 <a name="release">
 
@@ -346,6 +346,7 @@ $ ./fbt dolphin_ext
 - [Tic Tac Toe v1.1 (By gotnull)](https://github.com/gotnull/flipperzero-firmware-wPlugins)
 - [Ultimate Tic-Tac-Toe v1.1 (By Racso)](https://github.com/Racso/fzero-apps)
 - [Vexed v1.0.1 (By dlvoy)](https://github.com/dlvoy/flipper-zero-vexed)
+- [Video Game Module Tool v1.0 (By gsurkov)](https://github.com/flipperdevices/flipperzero-good-faps/pull/127)
 - [Video Poker v1.2 (By PixlEmly)](https://github.com/PixlEmly/flipperzero-firmware-testing/blob/420/applications/VideoPoker/poker.c)
 - [Yatzee v1.1 (By emfleak)](https://github.com/emfleak/flipperzero-yatzee)
 - [Zero v1.4 (By Racso)](https://github.com/Racso/fzero-apps)
@@ -578,7 +579,6 @@ $ ./fbt dolphin_ext
 - [NFC Relay WIP (By leommxj)](https://github.com/leommxj/nfc_relay)
 - [TAS Playback (By rcombs)](https://github.com/rcombs/tas-playback)
 - [VB Migration Assistant v1.2 (By GMMan)](https://github.com/GMMan/flipperzero-vb-migrate)
-- [Video Game Module Tool v1.0 (By gsurkov)](https://github.com/flipperdevices/flipperzero-good-faps/pull/127)
 - Have a new app? Submit GitHub link to me on Discord for a special reward (if I add it to RM Firmware).
 
 ## Current Bounties $$ (Sorted By Difficulty - Easiest to Hardest)
