@@ -246,6 +246,89 @@ void computeTVM() {
         FURI_LOG_I("INFORMATION tag", "Present value solved (tvm_pv): %.2f", tvm_pv);
 
     }
+    // solve I
+    else if(tvm_cursor_position == 1) {
+        // Genuinely not sure how this should be done. I'm gonna try a bold search approach?
+
+        //Given N, PV, PMT, and the correct FV, Try to converge down to the correct FV
+        double attempted_fv = 0;
+        double attempted_i = 0;
+        double shrink_by = .01;
+        double precision = .0005;
+        bool overflowed = false;
+        bool borked = false;
+
+        //if fv is 0, this calc fails. so we swap fv and pv if so
+        if(tvm_fv == 0) {
+            tvm_fv = -tvm_pv;
+            tvm_pv = 0;
+        }
+
+        // if both FV and PV are same sign, its borked.
+        if((tvm_fv < 0 && tvm_pv < 0) || (tvm_fv >= 0 && tvm_pv > 0)) {
+            borked = true;
+        }
+        //if any 2 are 0, its bad
+        if((tvm_fv == 0 && tvm_pmt == 0) || (tvm_pv == 0 && tvm_pmt == 0) ||
+           (tvm_pv == 0 && tvm_fv == 0)) {
+            borked = true;
+        }
+
+        // try to find the value
+        do {
+            //if it got this low, go back to the top and pray
+            if(attempted_i < -40) {
+                overflowed = true;
+                attempted_i = 40;
+            }
+
+            // make the guess
+            attempted_fv = (tvm_pv * pow(1 + attempted_i, tvm_n) +
+                            tvm_pmt * ((pow(1 + attempted_i, tvm_n) - 1) / attempted_i)) *
+                           -1;
+
+            //if overshot, bring it down and try again
+            if(fabs(attempted_fv) > fabs(tvm_fv) + precision) {
+                attempted_i = attempted_i - shrink_by;
+                // trying again
+                attempted_fv = (tvm_pv * pow(1 + attempted_i, tvm_n) +
+                                tvm_pmt * ((pow(1 + attempted_i, tvm_n) - 1) / attempted_i)) *
+                               -1;
+                // if it is now smaller, cut shrink by in half and keep going
+                if(fabs(attempted_fv) < fabs(tvm_fv) - precision) {
+                    shrink_by = shrink_by / 2;
+                }
+            }
+            // if undershot, bring it up and try again
+            else {
+                attempted_i = attempted_i + shrink_by;
+                // try again
+                attempted_fv = (tvm_pv * pow(1 + attempted_i, tvm_n) +
+                                tvm_pmt * ((pow(1 + attempted_i, tvm_n) - 1) / attempted_i)) *
+                               -1;
+                // if it is now larger, cut shrink by in half and keep going
+            }
+            FURI_LOG_I("INFORMATION tag", "Interest Rate attempt: %.4f", attempted_i);
+            if(attempted_i < 0 && overflowed) {
+                //Somethings wrong, not solveable
+                borked = true;
+                break;
+            }
+        } while((fabs(attempted_fv) > fabs(tvm_fv) + precision ||
+                 fabs(attempted_fv) < fabs(tvm_fv) - precision) &&
+                !borked);
+
+        // if we are here, we lived and have a close enough i, or its borked
+        if(borked) {
+            snprintf(tvm_Strings[1], sizeof(tvm_Strings[1]), "Error");
+        } else {
+            tvm_i = attempted_i * 100;
+            snprintf(tvm_Strings[1], sizeof(tvm_Strings[1]), "%.2f", tvm_i);
+        }
+
+        FURI_LOG_I("INFORMATION tag", "Interest Rate solved (tvm_i): %.2f", tvm_i);
+
+    }
     //solve N
     else if(tvm_cursor_position == 0) {
         // If there's no payment
