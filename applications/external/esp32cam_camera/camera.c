@@ -1,5 +1,7 @@
 #include "camera.h"
 
+#include <expansion/expansion.h>
+
 static void camera_view_draw_callback(Canvas* canvas, void* _model) {
     UartDumpModel* model = _model;
 
@@ -24,10 +26,10 @@ static void camera_view_draw_callback(Canvas* canvas, void* _model) {
         {
           // Init marauder into stream mode
           uint8_t data[] = "\nstream\n";
-          furi_hal_uart_tx(FuriHalUartIdUSART1, data, sizeof(data));
+          furi_hal_serial_tx(app->serial_handle, data, sizeof(data));
         }*/
 
-        canvas_draw_icon(canvas, 85, 21, &I_WarningDolphinFlip_45x42);
+        canvas_draw_icon(canvas, 80, 21, &I_WarningDolphinFlip_45x42);
         canvas_set_font(canvas, FontSecondary);
         canvas_draw_str(canvas, 8, 12, "Waiting ESP32-CAM...");
         canvas_draw_str(canvas, 20, 24, "VCC - 3V3/5V");
@@ -42,7 +44,7 @@ void get_timefilename(FuriString* name) {
     furi_hal_rtc_get_datetime(&datetime);
     furi_string_printf(
         name,
-        EXT_PATH("DCIM/%.4d%.2d%.2d-%.2d%.2d%.2d.bmp"),
+        APP_DATA_PATH("%.4d%.2d%.2d-%.2d%.2d%.2d.bmp"),
         datetime.year,
         datetime.month,
         datetime.day,
@@ -117,7 +119,8 @@ static bool camera_view_input_callback(InputEvent* event, void* context) {
         } else if(event->key == InputKeyOk) {
             save_image(context);
         }
-        furi_hal_uart_tx(FuriHalUartIdUSART1, data, 1);
+        UartEchoApp* app = context;
+        furi_hal_serial_tx(app->serial_handle, data, 1);
     }
 
     return false;
@@ -128,11 +131,13 @@ static uint32_t camera_exit(void* context) {
     return VIEW_NONE;
 }
 
-static void camera_on_irq_cb(UartIrqEvent ev, uint8_t data, void* context) {
+static void
+    camera_on_irq_cb(FuriHalSerialHandle* handle, FuriHalSerialRxEvent event, void* context) {
     furi_assert(context);
     UartEchoApp* app = context;
 
-    if(ev == UartIrqEventRXNE) {
+    if(event == FuriHalSerialRxEventData) {
+        uint8_t data = furi_hal_serial_async_rx(handle);
         furi_stream_buffer_send(app->rx_stream, &data, 1, 0);
         furi_thread_flags_set(furi_thread_get_id(app->worker_thread), WorkerEventRx);
     }
@@ -193,7 +198,7 @@ static int32_t camera_worker(void* context) {
                 length = furi_stream_buffer_receive(app->rx_stream, data, intended_data_size, 0);
 
                 if(length > 0) {
-                    //furi_hal_uart_tx(FuriHalUartIdUSART1, data, length);
+                    //furi_hal_serial_tx(app->serial_handle, data, length);
                     with_view_model(
                         app->view,
                         UartDumpModel * model,
@@ -254,9 +259,10 @@ static UartEchoApp* camera_app_alloc() {
     furi_thread_start(app->worker_thread);
 
     // Enable uart listener
-    furi_hal_console_disable();
-    furi_hal_uart_set_br(FuriHalUartIdUSART1, 230400);
-    furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, camera_on_irq_cb, app);
+    app->serial_handle = furi_hal_serial_control_acquire(FuriHalSerialIdUsart);
+    furi_check(app->serial_handle);
+    furi_hal_serial_init(app->serial_handle, 230400);
+    furi_hal_serial_async_rx_start(app->serial_handle, camera_on_irq_cb, app, false);
 
     furi_hal_power_disable_external_3_3v();
     furi_hal_power_disable_otg();
@@ -265,7 +271,7 @@ static UartEchoApp* camera_app_alloc() {
     furi_hal_power_enable_otg();
     for(int i = 0; i < 2; i++) {
         furi_delay_ms(500);
-        furi_hal_uart_tx(FuriHalUartIdUSART1, (uint8_t[1]){'c'}, 1);
+        furi_hal_serial_tx(app->serial_handle, (uint8_t[1]){'c'}, 1);
     }
     furi_delay_ms(1);
     return app;
@@ -274,7 +280,8 @@ static UartEchoApp* camera_app_alloc() {
 static void camera_app_free(UartEchoApp* app) {
     furi_assert(app);
 
-    furi_hal_console_enable(); // this will also clear IRQ callback so thread is no longer referenced
+    furi_hal_serial_deinit(app->serial_handle);
+    furi_hal_serial_control_release(app->serial_handle);
 
     furi_thread_flags_set(furi_thread_get_id(app->worker_thread), WorkerEventStop);
     furi_thread_join(app->worker_thread);
@@ -300,11 +307,19 @@ static void camera_app_free(UartEchoApp* app) {
 int32_t camera_app(void* p) {
     UNUSED(p);
 
+    // Disable expansion protocol to avoid interference with UART Handle
+    Expansion* expansion = furi_record_open(RECORD_EXPANSION);
+    expansion_disable(expansion);
+
     UartEchoApp* app = camera_app_alloc();
     view_dispatcher_run(app->view_dispatcher);
     camera_app_free(app);
 
     furi_hal_power_disable_otg();
+
+    // Return previous state of expansion
+    expansion_enable(expansion);
+    furi_record_close(RECORD_EXPANSION);
 
     return 0;
 }

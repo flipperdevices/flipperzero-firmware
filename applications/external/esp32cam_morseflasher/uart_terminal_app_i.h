@@ -9,19 +9,15 @@
 #include <gui/view_dispatcher.h>
 #include <gui/scene_manager.h>
 #include <gui/modules/text_box.h>
-#include <gui/modules/variable_item_list.h>
 #include "uart_text_input.h"
+#include <gui/modules/variable_item_list.h>
 
-#define GRAVITY_VERSION "0.6.0"
+#define NUM_MENU_ITEMS (3)
 
-#define NUM_MENU_ITEMS (23)
-
-#define UART_TERMINAL_TEXT_BOX_STORE_SIZE (1024)
+#define UART_TERMINAL_TEXT_BOX_STORE_SIZE (4096)
 #define UART_TERMINAL_TEXT_INPUT_STORE_SIZE (512)
 #define UART_CH (FuriHalSerialIdUsart)
-
-/* GRAVITY: Import GravityMode etc. */
-#include "esp_flip_struct.h"
+#define BAUDRATE (230400)
 
 struct UART_TerminalApp {
     Gui* gui;
@@ -44,10 +40,6 @@ struct UART_TerminalApp {
     bool is_custom_tx_string;
     bool focus_console_start;
     bool show_stopscan_tip;
-    int BAUDRATE;
-    int TERMINAL_MODE; //1=AT mode, 0=other mode
-
-    GravityCommand gravityCommand; /* Gravity command */
 };
 
 typedef enum {

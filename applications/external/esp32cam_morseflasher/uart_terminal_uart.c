@@ -1,9 +1,6 @@
 #include "uart_terminal_app_i.h"
 #include "uart_terminal_uart.h"
 
-//#define UART_CH (FuriHalUartIdUSART1)
-//#define BAUDRATE (115200)
-
 struct UART_TerminalUart {
     UART_TerminalApp* app;
     FuriThread* rx_thread;
@@ -26,6 +23,7 @@ void uart_terminal_uart_set_handle_rx_data_cb(
 }
 
 #define WORKER_ALL_RX_EVENTS (WorkerEvtStop | WorkerEvtRxDone)
+
 void uart_terminal_uart_on_irq_cb(
     FuriHalSerialHandle* handle,
     FuriHalSerialRxEvent event,
@@ -66,8 +64,8 @@ void uart_terminal_uart_tx(UART_TerminalUart* uart, uint8_t* data, size_t len) {
 
 UART_TerminalUart* uart_terminal_uart_init(UART_TerminalApp* app) {
     UART_TerminalUart* uart = malloc(sizeof(UART_TerminalUart));
+
     uart->app = app;
-    // Init all rx stream and thread early to avoid crashes
     uart->rx_stream = furi_stream_buffer_alloc(RX_BUF_SIZE, 1);
     uart->rx_thread = furi_thread_alloc();
     furi_thread_set_name(uart->rx_thread, "UART_TerminalUartRxThread");
@@ -77,12 +75,9 @@ UART_TerminalUart* uart_terminal_uart_init(UART_TerminalApp* app) {
 
     furi_thread_start(uart->rx_thread);
 
-    if(app->BAUDRATE == 0) {
-        app->BAUDRATE = 115200;
-    }
     uart->serial_handle = furi_hal_serial_control_acquire(UART_CH);
     furi_check(uart->serial_handle);
-    furi_hal_serial_init(uart->serial_handle, app->BAUDRATE);
+    furi_hal_serial_init(uart->serial_handle, BAUDRATE);
     furi_hal_serial_async_rx_start(uart->serial_handle, uart_terminal_uart_on_irq_cb, uart, false);
 
     return uart;
