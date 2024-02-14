@@ -2,7 +2,7 @@
 
 App(
     appid="financial_calc",
-    name="FinancialCalc",
+    name="Financial Calculator",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="fin_calc",
     requires=[
@@ -10,6 +10,10 @@ App(
     ],
     stack_size=1 * 1024,
     fap_icon="iconimage.png",
-    fap_category="",
+    fap_category="Tools",
     fap_icon_assets="assets",
+    fap_author="@schaene",
+    fap_weburl="https://github.com/schaene/Flipper-Financial-Calculator",
+    fap_version="1.0",
+    fap_description="Solve TVM Problems with this calculator",
 )
