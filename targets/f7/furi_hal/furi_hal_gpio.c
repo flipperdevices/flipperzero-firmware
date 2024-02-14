@@ -214,10 +214,10 @@ void furi_hal_gpio_enable_int_callback(const GpioPin* gpio) {
     furi_assert(gpio);
 
     FURI_CRITICAL_ENTER();
-    uint8_t pin_num = furi_hal_gpio_get_pin_num(gpio);
-    if(gpio_interrupt[pin_num].callback) {
-        gpio_interrupt[pin_num].ready = true;
-    }
+
+    const uint32_t exti_line = GET_EXTI_LINE(gpio->pin);
+    LL_EXTI_EnableIT_0_31(exti_line);
+
     FURI_CRITICAL_EXIT();
 }
 
