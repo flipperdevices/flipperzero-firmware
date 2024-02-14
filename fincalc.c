@@ -82,8 +82,8 @@ static void app_draw_callback(Canvas* canvas, void* ctx) {
     canvas_draw_str(canvas, 118, 36, "9");
     canvas_draw_str(canvas, 88, 48, "-");
     canvas_draw_str(canvas, 103, 48, "0");
-    canvas_draw_icon(canvas, 87, 52, &I_I_Pin_Arrow_Up);
-    canvas_draw_icon(canvas, 117, 52, &I_I_Pin_Arrow_Down);
+    canvas_draw_icon(canvas, 87, 52, &I_Pin_Arrow_Up);
+    canvas_draw_icon(canvas, 117, 52, &I_Pin_Arrow_Down);
     canvas_draw_xbm(canvas, 105, 57, 2, 2, DECIMAL_IMAGE);
     canvas_draw_xbm(canvas, 114, 41, 11, 7, CPT_IMAGE);
     canvas_draw_line(canvas, 83, 50, 126, 50);
