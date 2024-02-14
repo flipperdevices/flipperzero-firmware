@@ -3,11 +3,11 @@
 
 ---
 
-Have you ever thought to yourself "Man, I wish I could figure out the Future Value of a 200,000 investment, over the span of 5 years, with a 7.5% interest rate, but all I have is my Flipper Zero"?
+Have you ever thought to yourself "Man, I wish I could figure out the Future Value of a $12,000 investment, over the span of 3 years, with a 7.5% interest rate, in which I pay another $3,500 into each year, but all I have is my Flipper Zero"?
 
 ![Calculator](demoimg.png)
 
-Neither have I, and please get help if you find yourself in this situation.
+Neither have I, and please get help if you have.
 
 Nonetheless, if you find yourself in this precarious siutation, Here's the tool to do this.
 
@@ -22,6 +22,9 @@ Nonetheless, if you find yourself in this precarious siutation, Here's the tool 
 - Select the UP or DOWN arrow buttons to traverse the TVM values.
     - The current selected value is indicated by a small hollow rectangle.
 - Select the CPT button to solve for the highlighted value.
+    - The value being calculated will be indicated by a small solid rectangle.
+
+![CalculatorDemo](demonstration.gif)
 
 ---
 
