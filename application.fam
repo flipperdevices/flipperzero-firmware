@@ -16,4 +16,5 @@ App(
     fap_icon="icon.png",
     fap_icon_assets="assets",
     fap_libs=["assets"],
+	fap_version="1.4"
 )
