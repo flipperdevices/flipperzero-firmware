@@ -16,7 +16,7 @@
 #include "views/xremote_learn_view.h"
 #include "views/xremote_signal_view.h"
 
-#include "infrared_last_settings.h"
+#include <infrared/infrared_last_settings.h>
 
 #define TAG "XRemote"
 

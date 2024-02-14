@@ -13,7 +13,7 @@
 #include <gui/icon.h>
 #include <infrared_transmit.h>
 
-#include "infrared_last_settings.h"
+#include <infrared/infrared_last_settings.h>
 
 #include <input/input.h>
 
