@@ -675,61 +675,96 @@ bool mf_desfire_file_settings_save(
     FuriString* key = furi_string_alloc();
 
     do {
+        FURI_LOG_I(TAG, "Saving MF_DESFIRE_FFF_FILE_TYPE_KEY");
         furi_string_printf(key, "%s %s", prefix, MF_DESFIRE_FFF_FILE_TYPE_KEY);
-        if(!flipper_format_write_hex(ff, furi_string_get_cstr(key), (const uint8_t*)&data->type, 1))
+        if(!flipper_format_write_hex(
+               ff, furi_string_get_cstr(key), (const uint8_t*)&data->type, 1)) {
+            FURI_LOG_E(TAG, "Failed to save MF_DESFIRE_FFF_FILE_TYPE_KEY");
             break;
+        }
 
+        FURI_LOG_I(TAG, "Saving MF_DESFIRE_FFF_FILE_COMM_SETTINGS_KEY");
         furi_string_printf(key, "%s %s", prefix, MF_DESFIRE_FFF_FILE_COMM_SETTINGS_KEY);
-        if(!flipper_format_write_hex(ff, furi_string_get_cstr(key), (const uint8_t*)&data->comm, 1))
+        if(!flipper_format_write_hex(
+               ff, furi_string_get_cstr(key), (const uint8_t*)&data->comm, 1)) {
+            FURI_LOG_E(TAG, "Failed to save MF_DESFIRE_FFF_FILE_COMM_SETTINGS_KEY");
             break;
+        }
 
+        FURI_LOG_I(TAG, "Saving MF_DESFIRE_FFF_FILE_ACCESS_RIGHTS_KEY");
         furi_string_printf(key, "%s %s", prefix, MF_DESFIRE_FFF_FILE_ACCESS_RIGHTS_KEY);
         if(!flipper_format_write_hex(
                ff,
                furi_string_get_cstr(key),
                (const uint8_t*)&data->access_rights,
-               sizeof(MfDesfireFileAccessRights)))
+               sizeof(MfDesfireFileAccessRights))) {
+            FURI_LOG_E(TAG, "Failed to save MF_DESFIRE_FFF_FILE_ACCESS_RIGHTS_KEY");
             break;
+        }
 
         if(data->type == MfDesfireFileTypeStandard || data->type == MfDesfireFileTypeBackup) {
+            FURI_LOG_I(TAG, "Saving MF_DESFIRE_FFF_FILE_SIZE_KEY");
             furi_string_printf(key, "%s %s", prefix, MF_DESFIRE_FFF_FILE_SIZE_KEY);
-            if(!flipper_format_write_uint32(ff, furi_string_get_cstr(key), &data->data.size, 1))
+            if(!flipper_format_write_uint32(ff, furi_string_get_cstr(key), &data->data.size, 1)) {
+                FURI_LOG_E(TAG, "Failed to save MF_DESFIRE_FFF_FILE_SIZE_KEY");
                 break;
+            }
 
         } else if(data->type == MfDesfireFileTypeValue) {
+            FURI_LOG_I(TAG, "Saving MF_DESFIRE_FFF_FILE_HI_LIMIT_KEY");
             furi_string_printf(key, "%s %s", prefix, MF_DESFIRE_FFF_FILE_HI_LIMIT_KEY);
             if(!flipper_format_write_uint32(
-                   ff, furi_string_get_cstr(key), &data->value.hi_limit, 1))
+                   ff, furi_string_get_cstr(key), &data->value.hi_limit, 1)) {
+                FURI_LOG_E(TAG, "Failed to save MF_DESFIRE_FFF_FILE_HI_LIMIT_KEY");
                 break;
+            }
 
+            FURI_LOG_I(TAG, "Saving MF_DESFIRE_FFF_FILE_LO_LIMIT_KEY");
             furi_string_printf(key, "%s %s", prefix, MF_DESFIRE_FFF_FILE_LO_LIMIT_KEY);
             if(!flipper_format_write_uint32(
-                   ff, furi_string_get_cstr(key), &data->value.lo_limit, 1))
+                   ff, furi_string_get_cstr(key), &data->value.lo_limit, 1)) {
+                FURI_LOG_E(TAG, "Failed to save MF_DESFIRE_FFF_FILE_LO_LIMIT_KEY");
                 break;
+            }
 
+            FURI_LOG_I(TAG, "Saving MF_DESFIRE_FFF_FILE_LIMIT_CREDIT_VALUE_KEY");
             furi_string_printf(key, "%s %s", prefix, MF_DESFIRE_FFF_FILE_LIMIT_CREDIT_VALUE_KEY);
             if(!flipper_format_write_uint32(
-                   ff, furi_string_get_cstr(key), &data->value.limited_credit_value, 1))
+                   ff, furi_string_get_cstr(key), &data->value.limited_credit_value, 1)) {
+                FURI_LOG_E(TAG, "Failed to save MF_DESFIRE_FFF_FILE_LIMIT_CREDIT_VALUE_KEY");
                 break;
+            }
 
+            FURI_LOG_I(TAG, "Saving MF_DESFIRE_FFF_FILE_LIMIT_CREDIT_ENABLED_KEY");
             furi_string_printf(key, "%s %s", prefix, MF_DESFIRE_FFF_FILE_LIMIT_CREDIT_ENABLED_KEY);
             if(!flipper_format_write_bool(
-                   ff, furi_string_get_cstr(key), &data->value.limited_credit_enabled, 1))
+                   ff, furi_string_get_cstr(key), &data->value.limited_credit_enabled, 1)) {
+                FURI_LOG_E(TAG, "Failed to save MF_DESFIRE_FFF_FILE_LIMIT_CREDIT_ENABLED_KEY");
                 break;
+            }
         } else if(
             data->type == MfDesfireFileTypeLinearRecord ||
             data->type == MfDesfireFileTypeCyclicRecord) {
+            FURI_LOG_I(TAG, "Saving MF_DESFIRE_FFF_FILE_SIZE_KEY");
             furi_string_printf(key, "%s %s", prefix, MF_DESFIRE_FFF_FILE_SIZE_KEY);
-            if(!flipper_format_write_uint32(ff, furi_string_get_cstr(key), &data->record.size, 1))
+            if(!flipper_format_write_uint32(ff, furi_string_get_cstr(key), &data->record.size, 1)) {
+                FURI_LOG_E(TAG, "Failed to save MF_DESFIRE_FFF_FILE_SIZE_KEY");
                 break;
+            }
 
+            FURI_LOG_I(TAG, "Saving MF_DESFIRE_FFF_FILE_MAX_KEY");
             furi_string_printf(key, "%s %s", prefix, MF_DESFIRE_FFF_FILE_MAX_KEY);
-            if(!flipper_format_write_uint32(ff, furi_string_get_cstr(key), &data->record.max, 1))
+            if(!flipper_format_write_uint32(ff, furi_string_get_cstr(key), &data->record.max, 1)) {
+                FURI_LOG_E(TAG, "Failed to save MF_DESFIRE_FFF_FILE_MAX_KEY");
                 break;
+            }
 
+            FURI_LOG_I(TAG, "Saving MF_DESFIRE_FFF_FILE_CUR_KEY");
             furi_string_printf(key, "%s %s", prefix, MF_DESFIRE_FFF_FILE_CUR_KEY);
-            if(!flipper_format_write_uint32(ff, furi_string_get_cstr(key), &data->record.cur, 1))
+            if(!flipper_format_write_uint32(ff, furi_string_get_cstr(key), &data->record.cur, 1)) {
+                FURI_LOG_E(TAG, "Failed to save MF_DESFIRE_FFF_FILE_CUR_KEY");
                 break;
+            }
         }
 
         success = true;
