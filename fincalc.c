@@ -298,6 +298,7 @@ int32_t fin_calc(void* p) {
                 //something was pressed, denoting calculation is probably meaningless now
                 tvm_cpt_now = false;
                 // Input happens here
+                // If any arrow button pressed, move along the input pad
                 switch(event.key) {
                 case InputKeyUp:
                     if(pinpad_y != 0) {
@@ -331,6 +332,7 @@ int32_t fin_calc(void* p) {
                     }
                     break;
                 case InputKeyOk:
+                    // handled as an action
                     //if a number or . is inputted, handle that
                     if(pinpad_y <= 2 || (pinpad_x == 1)) {
                         addNumberToTVMString();
@@ -371,6 +373,7 @@ int32_t fin_calc(void* p) {
             if((event.type == InputTypeRepeat)) {
                 switch(event.key) {
                 case InputKeyBack:
+                    // if held, exit the app
                     running = false;
                     break;
                 default:
