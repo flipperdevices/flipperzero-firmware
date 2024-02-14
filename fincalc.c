@@ -214,6 +214,7 @@ double str_to_double(const char* str) {
 }
 
 void computeTVM() {
+    // highlights the value being computed
     tvm_cpt_now = true;
     // convert all strings to doubles
     tvm_n = str_to_double(tvm_Strings[0]);
@@ -221,12 +222,12 @@ void computeTVM() {
     tvm_pv = str_to_double(tvm_Strings[2]);
     tvm_pmt = str_to_double(tvm_Strings[3]);
     tvm_fv = str_to_double(tvm_Strings[4]);
-    // log it because it used to give issue
-    FURI_LOG_I("INFORMATION tag", "Number of Period (tvm_n): %.2f", tvm_n);
-    FURI_LOG_I("INFORMATION tag", "Interest Rate (tvm_i): %.2lf", tvm_i);
-    FURI_LOG_I("INFORMATION tag", "Present value (tvm_pv): %.2lf", tvm_pv);
-    FURI_LOG_I("INFORMATION tag", "Payment (tvm_pmt): %.2lf", tvm_pmt);
-    FURI_LOG_I("INFORMATION tag", "Future value (tvm_fv): %.2lf", tvm_fv);
+    // uncomment to log in case of issue
+    //FURI_LOG_I("INFORMATION", "Number of Period (tvm_n): %.2f", tvm_n);
+    //FURI_LOG_I("INFORMATION", "Interest Rate (tvm_i): %.2lf", tvm_i);
+    //FURI_LOG_I("INFORMATION", "Present value (tvm_pv): %.2lf", tvm_pv);
+    //FURI_LOG_I("INFORMATION", "Payment (tvm_pmt): %.2lf", tvm_pmt);
+    //FURI_LOG_I("INFORMATION", "Future value (tvm_fv): %.2lf", tvm_fv);
 
     // solve for each situation:
 
@@ -234,13 +235,13 @@ void computeTVM() {
     if(tvm_cursor_position == 4) {
         tvm_fv = findFV(tvm_n, tvm_i, tvm_pv, tvm_pmt);
         snprintf(tvm_Strings[4], sizeof(tvm_Strings[4]), "%.4f", tvm_fv);
-        FURI_LOG_I("INFORMATION tag", "Future value solved (tvm_fv): %.4f", tvm_fv);
+        FURI_LOG_I("INFORMATION", "Future value solved (tvm_fv): %.4f", tvm_fv);
     }
     // solve PV
     else if(tvm_cursor_position == 2) {
         tvm_pv = findPV(tvm_n, tvm_i, tvm_pmt, tvm_fv);
         snprintf(tvm_Strings[2], sizeof(tvm_Strings[2]), "%.4f", tvm_pv);
-        FURI_LOG_I("INFORMATION tag", "Present value solved (tvm_pv): %.4f", tvm_pv);
+        FURI_LOG_I("INFORMATION", "Present value solved (tvm_pv): %.4f", tvm_pv);
 
     }
     // solve I
@@ -248,7 +249,7 @@ void computeTVM() {
         tvm_i = findI(tvm_n, tvm_pmt, tvm_pv, tvm_fv) * 100;
         snprintf(tvm_Strings[1], sizeof(tvm_Strings[1]), "%.4f", tvm_i);
 
-        FURI_LOG_I("INFORMATION tag", "Interest Rate solved (tvm_i): %.4f", tvm_i);
+        FURI_LOG_I("INFORMATION", "Interest Rate solved (tvm_i): %.4f", tvm_i);
 
     }
     //solve N
@@ -256,14 +257,14 @@ void computeTVM() {
         tvm_n = findN(tvm_i, tvm_pv, tvm_pmt, tvm_fv);
 
         snprintf(tvm_Strings[0], sizeof(tvm_Strings[0]), "%.4f", tvm_n);
-        FURI_LOG_I("INFORMATION tag", "N of Periods solved (tvm_n): %.4f", tvm_n);
+        FURI_LOG_I("INFORMATION", "N of Periods solved (tvm_n): %.4f", tvm_n);
     }
     //solve PMT
     else if(tvm_cursor_position == 3) {
         tvm_pmt = findPMT(tvm_n, tvm_i, tvm_pv, tvm_fv);
 
         snprintf(tvm_Strings[3], sizeof(tvm_Strings[3]), "%.4f", tvm_pmt);
-        FURI_LOG_I("INFORMATION tag", "N of Periods solved (tvm_n): %.4f", tvm_pmt);
+        FURI_LOG_I("INFORMATION", "N of Periods solved (tvm_n): %.4f", tvm_pmt);
     }
 }
 
