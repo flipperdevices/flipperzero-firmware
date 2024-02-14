@@ -19,7 +19,7 @@
 
 #include <cfw/cfw.h>
 
-#define UART_CH (CFW_SETTINGS->uart_esp_channel)
+#define UART_CH (cfw_settings.uart_esp_channel)
 
 #define BITMAP_HEADER_LENGTH 62
 #define FRAME_BIT_DEPTH 1

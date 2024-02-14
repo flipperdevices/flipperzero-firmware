@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <furi_hal_spi.h>
+#include <cfw/cfw.h>
 
 #ifdef __cplusplus
 extern "C" {

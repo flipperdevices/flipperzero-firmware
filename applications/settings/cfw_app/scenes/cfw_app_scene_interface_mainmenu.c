@@ -206,7 +206,7 @@ bool cfw_app_scene_interface_mainmenu_on_event(void* context, SceneManagerEvent 
             variable_item_set_current_value_index(item, app->mainmenu_app_index);
             variable_item_set_values_count(item, count);
             break;
-		}
+        }
         case VarItemListIndexAddApp:
             scene_manager_set_scene_state(app->scene_manager, CfwAppSceneInterfaceMainmenuAdd, 0);
             scene_manager_next_scene(app->scene_manager, CfwAppSceneInterfaceMainmenuAdd);
