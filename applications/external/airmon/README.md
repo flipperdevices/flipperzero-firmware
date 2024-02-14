@@ -1,7 +1,5 @@
 # Airmon for Flipper Zero
 
-[![FAP Build](https://github.com/3cky/flipperzero-airmon/actions/workflows/build.yml/badge.svg)](https://github.com/3cky/flipperzero-airmon/actions/workflows/build.yml)
-
 A simple Flipper Zero air quality monitoring application. 
 It displays measured PM1.0/PM2.5/PM10 [Particulate Matter] concentrations 
 and calculated [Air Quality Index (AQI)].
@@ -36,7 +34,7 @@ Connect the Plantower PMS5003/PMS7003/PMS9003 sensor according to the wiring dia
 ## Application controls
 
 Use left/right arrows for PM/AQI display mode switching. 
-Flipper LED will blink once every successful sensor reading by color according to the current AQI value.
+Flipper LED will blink green once every successful sensor reads.
 
 ## License
 

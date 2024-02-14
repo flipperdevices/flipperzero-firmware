@@ -25,10 +25,10 @@ typedef struct {
     FuriMutex* mutex;
     FuriThread* thread;
     FuriStreamBuffer* rx_stream;
-    FuriHalSerialHandle* serial;
     uint8_t rx_buf[RX_BUF_SIZE];
 
-    uint32_t pms_data_timestamp;
+    NotificationApp* notifications;
+
     AirmonPmsData pms_data;
     FuriHalSerialHandle* serial_handle;
 } AirmonPmsContext;
