@@ -7,7 +7,7 @@
 #include <input/input.h>
 #include <dialogs/dialogs.h>
 #include <ir_remote_icons.h>
-#include "infrared_last_settings.h"
+#include <infrared/infrared_last_settings.h>
 
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
