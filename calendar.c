@@ -200,12 +200,13 @@ int32_t calendar_app(void* p) {
         }
     }
 
-    free(calendar_data);
     furi_message_queue_free(event_queue);
 
     gui_remove_view_port(gui, view_port);
     view_port_free(view_port);
     furi_record_close(RECORD_GUI);
+    free(calendar_data);
+    free(ctx);
 
     return 0;
 }

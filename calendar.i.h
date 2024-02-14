@@ -6,5 +6,3 @@
 
 #include <stdio.h>
 #include <furi_hal.h>
-
-#include <lib/mjs/mjs_util_public.h>
