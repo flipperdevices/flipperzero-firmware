@@ -64,13 +64,13 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [YuriCable Pro Max v0.2 (By arag0re)](https://github.com/arag0re/fz-yuricable-pro-max)
 - [Fixes for SubGHz extend/bypass & other assorted tweaks (By RogueMaster)(Using code from Willy-JL & xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/75c493b05f57afb5df7ea3c4da06802844fae767)
 - Updated: [Plantower PMSx003 sensor reader v1.2 (By 3cky)](https://github.com/3cky/flipperzero-airmon) `Req: Plantower PMS5003/PMS7003/PMS9003`
-- Updated: [NFC: Emv fixes #702 (By wosk_& Leptopt1los)](https://github.com/DarkFlippers/unleashed-firmware/pull/702)
 - Updated: [PacMan WIP v0.1 (By DanieleMaffi)](https://github.com/DanieleMaffi/flipper-pacman)
 - Added: [Financial Calculator v1.0 (By schaene)](https://github.com/schaene/Flipper-Financial-Calculator)
 - [Revert USB CDC changes from #3358 causing glitchy updates (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/d826a1dac8523f033a09eb3144485d08d57fd825)
 - Updated: [Sub-GHz Remote (Refactored) + Configurator v1.3 (By gid9798)](https://github.com/DarkFlippers/SubGHz_Remote) [Custom modulations in subghz remote (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/52cedc15324b8eaa7cc1e878b2311ce6a368c222)
 - Updated: [Sub-GHz setting updates for static/hopper frequencies (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/ce2349146001c1689207d952f36de80f72c3c742)
 - Updated: [Simpler IR last settings import (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/9f5c48ed9e560faee1fa225f1443d106d9359420)
+- Updated: [NFC: Emv fixes #702 (By wosk_& Leptopt1los)](https://github.com/DarkFlippers/unleashed-firmware/pull/702)
 - To Be Merged OFW PRs: [3211](https://github.com/flipperdevices/flipperzero-firmware/pull/3211), [3366](https://github.com/flipperdevices/flipperzero-firmware/pull/3366), [3250](https://github.com/flipperdevices/flipperzero-firmware/pull/3250), [3402](https://github.com/flipperdevices/flipperzero-firmware/pull/3402), [3409](https://github.com/flipperdevices/flipperzero-firmware/pull/3409), [3406](https://github.com/flipperdevices/flipperzero-firmware/pull/3406), [3431](https://github.com/flipperdevices/flipperzero-firmware/pull/3431), [3254](https://github.com/flipperdevices/flipperzero-firmware/pull/3254), [3429](https://github.com/flipperdevices/flipperzero-firmware/pull/3429), [3286](https://github.com/flipperdevices/flipperzero-firmware/pull/3286), [3442](https://github.com/flipperdevices/flipperzero-firmware/pull/3442) & [3445](https://github.com/flipperdevices/flipperzero-firmware/pull/3445)
 
 <a name="release">
