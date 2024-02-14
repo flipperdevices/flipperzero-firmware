@@ -66,6 +66,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Plantower PMSx003 sensor reader v1.2 (By 3cky)](https://github.com/3cky/flipperzero-airmon) `Req: Plantower PMS5003/PMS7003/PMS9003`
 - Updated: [NFC: Emv fixes #702 (By wosk_& Leptopt1los)](https://github.com/DarkFlippers/unleashed-firmware/pull/702)
 - Updated: [PacMan WIP v0.1 (By DanieleMaffi)](https://github.com/DanieleMaffi/flipper-pacman)
+- Added: [Financial Calculator v1.0 (By schaene)](https://github.com/schaene/Flipper-Financial-Calculator)
 - To Be Merged OFW PRs: [3211](https://github.com/flipperdevices/flipperzero-firmware/pull/3211), [3366](https://github.com/flipperdevices/flipperzero-firmware/pull/3366), [3250](https://github.com/flipperdevices/flipperzero-firmware/pull/3250), [3402](https://github.com/flipperdevices/flipperzero-firmware/pull/3402), [3409](https://github.com/flipperdevices/flipperzero-firmware/pull/3409), [3406](https://github.com/flipperdevices/flipperzero-firmware/pull/3406), [3431](https://github.com/flipperdevices/flipperzero-firmware/pull/3431), [3254](https://github.com/flipperdevices/flipperzero-firmware/pull/3254), [3429](https://github.com/flipperdevices/flipperzero-firmware/pull/3429), [3286](https://github.com/flipperdevices/flipperzero-firmware/pull/3286), [3442](https://github.com/flipperdevices/flipperzero-firmware/pull/3442) & [3445](https://github.com/flipperdevices/flipperzero-firmware/pull/3445)
 
 <a name="release">
@@ -407,6 +408,7 @@ $ ./fbt dolphin_ext
 - [Extend Range (By maede97)](https://github.com/maede97/flipperzero-extend-range) (Allows SubGHz Unlock!)
 - [EXTRA Demo (By Milk-Cool)](https://github.com/Milk-Cool/EXTRA-demo) (This app has VERY useful functions!)
 - [FAP Boilerplate (By leedave)](https://github.com/leedave/flipper-zero-fap-boilerplate)
+- [Financial Calculator v1.0 (By schaene)](https://github.com/schaene/Flipper-Financial-Calculator)
 - [Flashlight v1.1 (By xMasterX)](https://github.com/xMasterX/flipper-flashlight)
 - [Flipagotchi WIP (By Matt-London)](https://github.com/Matt-London/pwnagotchi-flipper)
 - [FlipBoard Blinky v2.1 (By jamisonderek)](https://github.com/jamisonderek/flipboard)

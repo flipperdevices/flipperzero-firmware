@@ -1,18 +1,13 @@
-# qv. https://github.com/flipperdevices/flipperzero-firmware/blob/dev/documentation/AppManifests.md
-
 App(
     appid="financial_calc",
     name="Financial Calculator",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="fin_calc",
-    requires=[
-        "gui",
-    ],
     stack_size=1 * 1024,
     fap_icon="iconimage.png",
     fap_category="Tools",
     fap_icon_assets="assets",
-    fap_author="@schaene",
+    fap_author="schaene",
     fap_weburl="https://github.com/schaene/Flipper-Financial-Calculator",
     fap_version="1.0",
     fap_description="Solve TVM Problems with this calculator",
