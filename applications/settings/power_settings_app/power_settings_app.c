@@ -1,5 +1,6 @@
 #include "power_settings_app.h"
-#include "../about/about.h"
+#include <flipper_application/flipper_application.h>
+#include <loader/firmware_api/firmware_api.h>
 
 static bool power_settings_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
@@ -22,8 +23,7 @@ static void power_settings_tick_event_callback(void* context) {
 PowerSettingsApp* power_settings_app_alloc(uint32_t first_scene, ViewDispatcherType type) {
     PowerSettingsApp* app = malloc(sizeof(PowerSettingsApp));
 
-    app->about_battery = true;
-    // app->about_battery = first_scene == PowerSettingsAppSceneBatteryInfo;
+    app->about_battery = first_scene == PowerSettingsAppSceneBatteryInfo;
 
     // Records
     app->gui = furi_record_open(RECORD_GUI);
@@ -113,7 +113,26 @@ int32_t power_settings_app(void* p) {
         view_dispatcher_run(app->view_dispatcher);
         if(app->battery_info->exit_to_about) {
             app->battery_info->exit_to_about = false;
-            if(about_settings_app("about_battery")) {
+
+            bool stay = false;
+            FlipperApplication* fap = flipper_application_alloc(
+                furi_record_open(RECORD_STORAGE), firmware_api_interface);
+            do {
+                FlipperApplicationPreloadStatus preload_res =
+                    flipper_application_preload(fap, EXT_PATH("apps/assets/about.fap"));
+                if(preload_res != FlipperApplicationPreloadStatusSuccess) break;
+                FlipperApplicationLoadStatus load_status = flipper_application_map_to_memory(fap);
+                if(load_status != FlipperApplicationLoadStatusSuccess) break;
+                FuriThread* thread = flipper_application_alloc_thread(fap, NULL);
+                furi_thread_set_appid(thread, "about");
+                furi_thread_start(thread);
+                furi_thread_join(thread);
+                if(furi_thread_get_return_code(thread) == 1) stay = true;
+            } while(0);
+            flipper_application_free(fap);
+            furi_record_close(RECORD_STORAGE);
+
+            if(stay) {
                 scene_manager_next_scene(app->scene_manager, first_scene);
                 continue;
             }

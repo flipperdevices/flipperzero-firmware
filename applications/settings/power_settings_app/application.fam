@@ -11,4 +11,5 @@ App(
     flags=["InsomniaSafe"],
     stack_size=1 * 1024,
     order=40,
+    fap_category="assets",
 )

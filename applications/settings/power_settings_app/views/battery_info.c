@@ -79,6 +79,7 @@ static void draw_battery(Canvas* canvas, BatteryInfoModel* data, int x, int y) {
         }
     } else {
         snprintf(header, sizeof(header), "Napping...");
+        snprintf(value, sizeof(value), "(~%ld mA)", ABS(current));
     }
 
     if(data->alt) {
@@ -91,9 +92,14 @@ static void draw_battery(Canvas* canvas, BatteryInfoModel* data, int x, int y) {
             canvas_draw_str_aligned(canvas, x + 92, y + 19, AlignCenter, AlignCenter, value);
         }
     } else {
-        canvas_draw_str_aligned(canvas, 92, y + 3, AlignCenter, AlignCenter, emote);
-        canvas_draw_str_aligned(canvas, 92, y + 15, AlignCenter, AlignCenter, header);
-        canvas_draw_str_aligned(canvas, 92, y + 27, AlignCenter, AlignCenter, value);
+        if(!strcmp(emote, "")) {
+            canvas_draw_str_aligned(canvas, x + 92, y + 9, AlignCenter, AlignCenter, header);
+            canvas_draw_str_aligned(canvas, x + 92, y + 21, AlignCenter, AlignCenter, value);
+        } else {
+            canvas_draw_str_aligned(canvas, 92, y + 3, AlignCenter, AlignCenter, emote);
+            canvas_draw_str_aligned(canvas, 92, y + 15, AlignCenter, AlignCenter, header);
+            canvas_draw_str_aligned(canvas, 92, y + 27, AlignCenter, AlignCenter, value);
+        }
     }
 }
 

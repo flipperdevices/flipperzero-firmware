@@ -1,7 +1,7 @@
 App(
     appid="bt",
     name="BtSrv",
-    apptype=FlipperAppType.SERVICE,
+    apptype=FlipperAppType.EXTSETTINGS,
     entry_point="bt_srv",
     cdefines=["SRV_BT"],
     requires=[
@@ -14,7 +14,7 @@ App(
     ],
     stack_size=1 * 1024,
     order=1000,
-    sdk_headers=["bt_service/bt.h"],
+    sdk_headers=["bt_service/bt.h", "bt_settings.h"],
 )
 
 App(
