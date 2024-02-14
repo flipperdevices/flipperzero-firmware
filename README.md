@@ -1,8 +1,6 @@
 # Flipper-Financial-Calculator
 **Very basic TVM calculator for Flipper Zero**
 
----
-
 Have you ever thought to yourself "Man, I wish I could figure out the Future Value of a $12,000 investment, over the span of 3 years, with a 7.5% interest rate, in which I pay another $3,500 into each year, but all I have is my Flipper Zero"?
 
 ![Calculator](screenshot.png)
@@ -10,8 +8,6 @@ Have you ever thought to yourself "Man, I wish I could figure out the Future Val
 Neither have I, and please get help if you have.
 
 Nonetheless, if you find yourself in this precarious siutation, Here's the tool to do this.
-
----
 
 ## Instructions
 - Press the arrow keys to move around the pinpad.
@@ -25,8 +21,6 @@ Nonetheless, if you find yourself in this precarious siutation, Here's the tool 
     - The value being calculated will be indicated by a small solid rectangle.
 
 ![CalculatorDemo](demonstration.gif)
-
----
 
 ## Limitations
 - Numbers can only be 9 digits long.
