@@ -37,6 +37,7 @@
         "heatshrink",
         "flipperformat",
         "flipper18",
+        "bit_lib",
         "datetime"
     ],
     "excluded_sources": [
