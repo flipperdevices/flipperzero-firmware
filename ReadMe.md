@@ -29,8 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0213-0003-0.97.2-ad1ab9e](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-02-14 01:15 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-02-14 01:15 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-02-14 01:35 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-02-14 01:35 EST`
 - OFW: [NFC: Add support for Gallagher access control (MIFARE Classic only) #3306 (By nickmooney)](https://github.com/flipperdevices/flipperzero-firmware/pull/3306)
 - OFW: [NFC: Slix disable privacy #3425 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3425)
 - OFW: [NFC: Added NFC plugin; Some parser #3335 (By zProAle)](https://github.com/flipperdevices/flipperzero-firmware/pull/3335)
@@ -62,13 +62,18 @@ This software is for experimental purposes only and is not meant for any illegal
 - [NFC Parser updates (By zProAle)](https://github.com/zProAle/my_flipper_kdf/commit/c46c31e032237a139197c77de79bd55191d91b18)
 - Updated: [YuriCable Pro Max v0.2 (By arag0re)](https://github.com/arag0re/fz-yuricable-pro-max)
 - [Fixes for SubGHz extend/bypass & other assorted tweaks (By RogueMaster)(Using code from Willy-JL & xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/75c493b05f57afb5df7ea3c4da06802844fae767)
-- Updated: [NFC: Emv fixes #702 (By wosk_& Leptopt1los)](https://github.com/DarkFlippers/unleashed-firmware/pull/702)
+- Updated: [Plantower PMSx003 sensor reader v1.2 (By 3cky)](https://github.com/3cky/flipperzero-airmon) `Req: Plantower PMS5003/PMS7003/PMS9003`
 - Updated: [PacMan WIP v0.1 (By DanieleMaffi)](https://github.com/DanieleMaffi/flipper-pacman)
 - Added: [Financial Calculator v1.0 (By schaene)](https://github.com/schaene/Flipper-Financial-Calculator)
 - [Revert USB CDC changes from #3358 causing glitchy updates (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/d826a1dac8523f033a09eb3144485d08d57fd825)
 - Updated: [Sub-GHz Remote (Refactored) + Configurator v1.3 (By gid9798)](https://github.com/DarkFlippers/SubGHz_Remote) [Custom modulations in subghz remote (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/52cedc15324b8eaa7cc1e878b2311ce6a368c222)
 - Updated: [Sub-GHz setting updates for static/hopper frequencies (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/ce2349146001c1689207d952f36de80f72c3c742)
 - Updated: [Simpler IR last settings import (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/9f5c48ed9e560faee1fa225f1443d106d9359420)
+- Updated: [NFC: Emv fixes #702 (By wosk_& Leptopt1los)](https://github.com/DarkFlippers/unleashed-firmware/pull/702)
+- OFW: [NFC: FIX ISO15693 emulation #3444 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3444)
+- OFW: [Add Model JTC Genesis 5.5 to IR #3388 (By pattyland)](https://github.com/flipperdevices/flipperzero-firmware/pull/3388)
+- OFW: [Gui text box: fix formatted string memory reservation #3447 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3447)
+- To Be Merged OFW PRs: [3448](https://github.com/flipperdevices/flipperzero-firmware/pull/3448), [3446](https://github.com/flipperdevices/flipperzero-firmware/pull/3446) & [3383](https://github.com/flipperdevices/flipperzero-firmware/pull/3383)
 
 ## CHANGES FROM THIS BRANCH:
 

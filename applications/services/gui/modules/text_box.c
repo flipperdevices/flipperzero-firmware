@@ -104,7 +104,7 @@ static void text_box_insert_endline(Canvas* canvas, TextBoxModel* model) {
         // Set text position to 5th line from the end
         for(uint8_t i = 0; i < line_num - 5; i++) {
             while(*model->text_pos++ != '\n') {
-            }
+            };
         }
         model->scroll_num = line_num - 4;
         model->scroll_pos = line_num - 5;
@@ -116,6 +116,10 @@ static void text_box_insert_endline(Canvas* canvas, TextBoxModel* model) {
 
 static void text_box_view_draw_callback(Canvas* canvas, void* _model) {
     TextBoxModel* model = _model;
+
+    if(!model->text) {
+        return;
+    }
 
     canvas_clear(canvas);
     if(model->font == TextBoxFontText) {
