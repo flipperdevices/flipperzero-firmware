@@ -18,7 +18,7 @@
 #include "UnitempViews.h"
 #include "unitemp_icons.h"
 
-extern const Icon I_DolphinCommon_56x48;
+extern const Icon I_WarningDolphinFlip_45x42;
 
 void unitemp_widgets_alloc(void) {
     app->widget = widget_alloc();
@@ -164,7 +164,7 @@ void unitemp_widget_help_switch(void) {
     widget_reset(app->widget);
 
     widget_add_icon_element(app->widget, 3, 7, &I_repo_qr_50x50);
-    widget_add_icon_element(app->widget, 71, 15, &I_DolphinCommon_56x48);
+    widget_add_icon_element(app->widget, 71, 15, &I_WarningDolphinFlip_45x42);
 
     widget_add_string_multiline_element(
         app->widget, 55, 5, AlignLeft, AlignTop, FontSecondary, "You can find help\nthere");
