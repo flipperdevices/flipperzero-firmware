@@ -49,7 +49,7 @@ void ws_protocol_decoder_wendox_w6726_feed(void* context, bool level, uint32_t d
  * @param context Pointer to a WSProtocolDecoderWendoxW6726 instance
  * @return hash Hash sum
  */
-uint8_t ws_protocol_decoder_wendox_w6726_get_hash_data(void* context);
+uint32_t ws_protocol_decoder_wendox_w6726_get_hash_data(void* context);
 
 /**
  * Serialize data WSProtocolDecoderWendoxW6726.

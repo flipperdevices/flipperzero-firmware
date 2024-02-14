@@ -49,7 +49,7 @@ void ws_protocol_decoder_lacrosse_tx141thbv2_feed(void* context, bool level, uin
  * @param context Pointer to a WSProtocolDecoderLaCrosse_TX141THBv2 instance
  * @return hash Hash sum
  */
-uint8_t ws_protocol_decoder_lacrosse_tx141thbv2_get_hash_data(void* context);
+uint32_t ws_protocol_decoder_lacrosse_tx141thbv2_get_hash_data(void* context);
 
 /**
  * Serialize data WSProtocolDecoderLaCrosse_TX141THBv2.

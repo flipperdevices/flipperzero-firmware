@@ -1,19 +1,11 @@
 App(
-    appid="nrf24_mouse_jacker",
-    name="[NRF24] Mouse Jacker",
+    appid="mouse_jacker",
+    name="Mouse Jacker",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="mousejacker_app",
-    requires=[
-        "gui",
-        "dialogs",
-    ],
     stack_size=2 * 1024,
-    order=60,
     fap_icon="mouse_10px.png",
-    fap_category="GPIO",
-    fap_author="@mothball187 & @xMasterX",
-    fap_version="1.2",
-    fap_description="App works with NRF24 Sniffer app to perform mousejack attacks",
+    fap_category="GPIO/NRF24",
     fap_icon_assets="images",
     fap_private_libs=[
         Lib(
@@ -23,4 +15,8 @@ App(
             ],
         ),
     ],
+    fap_icon_assets_symbol="nrf24_mouse_jacker",
+    fap_author="mothball187 & xMasterX",
+    fap_version="1.2",
+    fap_description="App works with NRF24 Sniffer app to perform mousejack attacks",
 )

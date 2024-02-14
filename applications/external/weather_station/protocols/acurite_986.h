@@ -49,7 +49,7 @@ void ws_protocol_decoder_acurite_986_feed(void* context, bool level, uint32_t du
  * @param context Pointer to a WSProtocolDecoderAcurite_986 instance
  * @return hash Hash sum
  */
-uint8_t ws_protocol_decoder_acurite_986_get_hash_data(void* context);
+uint32_t ws_protocol_decoder_acurite_986_get_hash_data(void* context);
 
 /**
  * Serialize data WSProtocolDecoderAcurite_986.

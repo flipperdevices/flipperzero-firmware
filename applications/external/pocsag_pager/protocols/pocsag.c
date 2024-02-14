@@ -335,7 +335,7 @@ void subghz_protocol_decoder_pocsag_feed(void* context, bool level, uint32_t dur
     }
 }
 
-uint8_t subghz_protocol_decoder_pocsag_get_hash_data(void* context) {
+uint32_t subghz_protocol_decoder_pocsag_get_hash_data(void* context) {
     furi_assert(context);
     SubGhzProtocolDecoderPocsag* instance = context;
     uint8_t hash = 0;

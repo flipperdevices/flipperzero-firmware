@@ -12,8 +12,9 @@ void lfrfid_alert_dialog(void* context, char* text) {
         message, text, SCREEN_WIDTH_CENTER, SCREEN_HEIGHT_CENTER, AlignCenter, AlignCenter);
     DialogMessageButton dialog_result = dialog_message_show(app->dialogs, message);
     dialog_message_free(message);
-    if(dialog_result == DialogMessageButtonRight)
-        ;
+    UNUSED(dialog_result);
+    // if(dialog_result == DialogMessageButtonRight)
+    // ;
     return;
 }
 

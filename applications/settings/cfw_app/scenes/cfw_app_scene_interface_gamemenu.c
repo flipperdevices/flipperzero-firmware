@@ -82,7 +82,6 @@ static void cfw_app_scene_interface_gamemenu_move_app_changed(VariableItem* item
 
 void cfw_app_scene_interface_gamemenu_on_enter(void* context) {
     CfwApp* app = context;
-    CfwSettings* cfw_settings = CFW_SETTINGS();
     VariableItemList* var_item_list = app->var_item_list;
     VariableItem* item;
 
@@ -92,9 +91,9 @@ void cfw_app_scene_interface_gamemenu_on_enter(void* context) {
         MenuStyleCount,
         cfw_app_scene_interface_gamemenu_menu_style_changed,
         app);
-    variable_item_set_current_value_index(item, cfw_settings->game_menu_style);
+    variable_item_set_current_value_index(item, cfw_settings.game_menu_style);
     variable_item_set_current_value_text(
-        item, game_menu_style_names[cfw_settings->game_menu_style]);
+        item, game_menu_style_names[cfw_settings.game_menu_style]);
 
     item = variable_item_list_add(
         var_item_list,
@@ -102,9 +101,9 @@ void cfw_app_scene_interface_gamemenu_on_enter(void* context) {
         CharList_size(app->gamemenu_app_names),
         cfw_app_scene_interface_gamemenu_start_point_changed,
         app);
-    if((cfw_settings->game_start_point) &&
-       (cfw_settings->game_start_point < CharList_size(app->gamemenu_app_names))) {
-        app->game_start_point_index = cfw_settings->game_start_point;
+    if((cfw_settings.game_start_point) &&
+       (cfw_settings.game_start_point < CharList_size(app->gamemenu_app_names))) {
+        app->game_start_point_index = cfw_settings.game_start_point;
     } else {
         app->game_start_point_index = 0;
     }
@@ -188,22 +187,10 @@ bool cfw_app_scene_interface_gamemenu_on_event(void* context, SceneManagerEvent 
         case VarItemListIndexMoveApp: {
             app->save_gamemenu_apps = true;
             app->require_reboot = true;
-            size_t count = CharList_size(app->gamemenu_app_labels);
-            VariableItem* item = variable_item_list_get(app->var_item_list, VarItemListIndexApp);
-            if(count) {
-                app->gamemenu_app_index = CLAMP(app->gamemenu_app_index, count - 1, 0U);
-                char label[20];
-                snprintf(label, 20, "App  %u/%u", 1 + app->gamemenu_app_index, count);
-                variable_item_set_item_label(item, label);
-                variable_item_set_current_value_text(
-                    item, *CharList_get(app->mainmenu_app_labels, app->gamemenu_app_index));
-            } else {
-                app->gamemenu_app_index = 0;
-                variable_item_set_item_label(item, "App");
-                variable_item_set_current_value_text(item, "None");
-            }
-            variable_item_set_current_value_index(item, app->gamemenu_app_index);
-            variable_item_set_values_count(item, count);
+            scene_manager_previous_scene(app->scene_manager);
+            scene_manager_set_scene_state(
+                app->scene_manager, CfwAppSceneInterfaceGamemenu, VarItemListIndexMoveApp);
+            scene_manager_next_scene(app->scene_manager, CfwAppSceneInterfaceGamemenu);
             break;
         }
         case VarItemListIndexAddApp:

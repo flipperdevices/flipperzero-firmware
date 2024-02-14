@@ -49,7 +49,7 @@ void ws_protocol_decoder_auriol_th_feed(void* context, bool level, uint32_t dura
  * @param context Pointer to a WSProtocolDecoderAuriol_TH instance
  * @return hash Hash sum
  */
-uint8_t ws_protocol_decoder_auriol_th_get_hash_data(void* context);
+uint32_t ws_protocol_decoder_auriol_th_get_hash_data(void* context);
 
 /**
  * Serialize data WSProtocolDecoderAuriol_TH.

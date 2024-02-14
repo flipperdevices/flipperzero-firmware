@@ -23,7 +23,7 @@ static SonicareHead sonicare_get_head_type(const MfUltralightData* data) {
     // page 34 byte 0 is always 0x30 for the white brushes i have, so i guess thats white
     // TODO: Get a black brush and test this
 
-    if(data->page[34].data == 0x30) {
+    if(data->page[34].data[0] == 0x30) {
         return SonicareHeadWhite;
     } else {
         return SonicareHeadUnkown;
@@ -48,11 +48,10 @@ static bool sonicare_parse(const NfcDevice* device, FuriString* parsed_data) {
     bool parsed = false;
 
     do {
-        // string "philips" is stored in these pages
-        if(data->page[5].data[3] != 0x70 && data->page[6].data[0] != 0x68 &&
-           data->page[6].data[1] != 0x69 && data->page[6].data[2] != 0x6C &&
-           data->page[6].data[3] != 0x69 && data->page[7].data[0] != 0x70 &&
-           data->page[7].data[1] != 0x73) {
+        // Check for NDEF link match
+        const char* test = "philips.com/nfcbrushheadtap";
+        // Data is a array of arrays, cast to char array and compare
+        if(strncmp(test, (const char*)&data->page[5].data[3], strlen(test)) != 0) {
             FURI_LOG_D(TAG, "Not a Philips Sonicare head");
             break;
         }

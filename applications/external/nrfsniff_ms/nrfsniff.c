@@ -349,7 +349,17 @@ int32_t nrfsniff_app(void* p) {
         furi_delay_ms(10);
     }
 
+    furi_delay_ms(100);
+
     nrf24_init();
+
+    bool nrf_ready = false;
+    if(nrf24_check_connected(nrf24_HANDLE)) {
+        nrf_ready = true;
+    } else {
+        nrf_ready = false;
+        FURI_LOG_E(TAG, "NRF24 not connected");
+    }
 
     // Set system callbacks
     ViewPort* view_port = view_port_alloc();
@@ -409,16 +419,39 @@ int32_t nrfsniff_app(void* p) {
                         break;
                     case InputKeyOk:
                         // toggle sniffing
-                        sniffing_state = !sniffing_state;
-                        if(sniffing_state) {
-                            clear_cache();
-                            start_sniffing();
-                            start = furi_get_tick();
-                        } else
-                            wrap_up(storage, notification);
+                        if(nrf_ready) {
+                            sniffing_state = !sniffing_state;
+                            if(sniffing_state) {
+                                clear_cache();
+                                start_sniffing();
+                                start = furi_get_tick();
+                            } else {
+                                wrap_up(storage, notification);
+                            }
+                        } else {
+                            notification_message(notification, &sequence_error);
+                            if(nrf24_check_connected(nrf24_HANDLE)) {
+                                nrf_ready = true;
+                            } else {
+                                nrf_ready = false;
+                                FURI_LOG_E(TAG, "NRF24 not connected");
+                            }
+                        }
                         break;
                     case InputKeyBack:
-                        if(event.input.type == InputTypeLong) processing = false;
+                        if(nrf_ready) {
+                            if(sniffing_state) {
+                                wrap_up(storage, notification);
+                            }
+                        } else {
+                            if(nrf24_check_connected(nrf24_HANDLE)) {
+                                nrf_ready = true;
+                            } else {
+                                nrf_ready = false;
+                                FURI_LOG_E(TAG, "NRF24 not connected");
+                            }
+                        }
+                        processing = false;
                         break;
                     default:
                         break;
@@ -460,6 +493,10 @@ int32_t nrfsniff_app(void* p) {
         view_port_update(view_port);
     }
 
+    if(furi_hal_power_is_otg_enabled() && !otg_was_enabled) {
+        furi_hal_power_disable_otg();
+    }
+
     clear_cache();
     sample_time = DEFAULT_SAMPLE_TIME;
     target_rate = 8; // rate can be either 8 (2Mbps) or 0 (1Mbps)
@@ -474,10 +511,6 @@ int32_t nrfsniff_app(void* p) {
     furi_message_queue_free(event_queue);
     furi_mutex_free(plugin_state->mutex);
     free(plugin_state);
-
-    if(furi_hal_power_is_otg_enabled() && !otg_was_enabled) {
-        furi_hal_power_disable_otg();
-    }
 
     return 0;
 }

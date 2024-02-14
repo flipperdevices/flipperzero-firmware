@@ -62,14 +62,13 @@ static void cfw_app_scene_misc_screen_lcd_style_changed(VariableItem* item) {
 
 void cfw_app_scene_misc_screen_on_enter(void* context) {
     CfwApp* app = context;
-    CfwSettings* cfw_settings = CFW_SETTINGS();
     VariableItemList* var_item_list = app->var_item_list;
     VariableItem* item;
 
     item = variable_item_list_add(
         var_item_list, "Dark Mode", 2, cfw_app_scene_misc_screen_dark_mode_changed, app);
-    variable_item_set_current_value_index(item, cfw_settings->dark_mode);
-    variable_item_set_current_value_text(item, cfw_settings->dark_mode ? "ON" : "OFF");
+    variable_item_set_current_value_index(item, cfw_settings.dark_mode);
+    variable_item_set_current_value_text(item, cfw_settings.dark_mode ? "ON" : "OFF");
 
     item = variable_item_list_add(
         var_item_list, "Left Handed", 2, cfw_app_scene_misc_screen_hand_orient_changed, app);
@@ -78,7 +77,7 @@ void cfw_app_scene_misc_screen_on_enter(void* context) {
     variable_item_set_current_value_text(item, value ? "ON" : "OFF");
 
     item = variable_item_list_add(var_item_list, "RGB Backlight", 1, NULL, app);
-    variable_item_set_current_value_text(item, cfw_settings->rgb_backlight ? "ON" : "OFF");
+    variable_item_set_current_value_text(item, cfw_settings.rgb_backlight ? "ON" : "OFF");
 
     item = variable_item_list_add(
         var_item_list,
@@ -86,9 +85,9 @@ void cfw_app_scene_misc_screen_on_enter(void* context) {
         COUNT_OF(lcd_styles),
         cfw_app_scene_misc_screen_lcd_style_changed,
         app);
-    variable_item_set_current_value_index(item, cfw_settings->lcd_style);
-    variable_item_set_current_value_text(item, lcd_styles[cfw_settings->lcd_style]);
-    variable_item_set_locked(item, !cfw_settings->rgb_backlight, "Needs RGB\nBacklight!");
+    variable_item_set_current_value_index(item, cfw_settings.lcd_style);
+    variable_item_set_current_value_text(item, lcd_styles[cfw_settings.lcd_style]);
+    variable_item_set_locked(item, !cfw_settings.rgb_backlight, "Needs RGB\nBacklight!");
 
     variable_item_list_set_enter_callback(
         var_item_list, cfw_app_scene_misc_screen_var_item_list_callback, app);

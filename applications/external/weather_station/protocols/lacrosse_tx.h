@@ -49,7 +49,7 @@ void ws_protocol_decoder_lacrosse_tx_feed(void* context, bool level, uint32_t du
  * @param context Pointer to a WSProtocolDecoderLaCrosse_TX instance
  * @return hash Hash sum
  */
-uint8_t ws_protocol_decoder_lacrosse_tx_get_hash_data(void* context);
+uint32_t ws_protocol_decoder_lacrosse_tx_get_hash_data(void* context);
 
 /**
  * Serialize data WSProtocolDecoderLaCrosse_TX.

@@ -221,10 +221,10 @@ void ws_protocol_decoder_ambient_weather_feed(void* context, bool level, uint32_
     }
 }
 
-uint8_t ws_protocol_decoder_ambient_weather_get_hash_data(void* context) {
+uint32_t ws_protocol_decoder_ambient_weather_get_hash_data(void* context) {
     furi_assert(context);
     WSProtocolDecoderAmbient_Weather* instance = context;
-    return subghz_protocol_blocks_get_hash_data(
+    return subghz_protocol_blocks_get_hash_data_long(
         &instance->decoder, (instance->decoder.decode_count_bit / 8) + 1);
 }
 

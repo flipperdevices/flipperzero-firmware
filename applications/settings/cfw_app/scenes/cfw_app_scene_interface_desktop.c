@@ -163,7 +163,6 @@ static void cfw_app_scene_interface_desktop_dumbmode_icon_changed(VariableItem* 
 
 void cfw_app_scene_interface_desktop_on_enter(void* context) {
     CfwApp* app = context;
-    CfwSettings* cfw_settings = CFW_SETTINGS();
     VariableItemList* var_item_list = app->var_item_list;
 
     VariableItem* item;
@@ -215,7 +214,7 @@ void cfw_app_scene_interface_desktop_on_enter(void* context) {
                             ManifestFilesArray_push_back(ManifestFiles, NewManifestInfo);
 
                             //Select in menu if its our manifest.
-                            if(strcmp(NewManifestInfo->FileName, cfw_settings->manifest_name) == 0)
+                            if(strcmp(NewManifestInfo->FileName, cfw_settings.manifest_name) == 0)
                                 current_manifest = ManifestFileCount;
 
                             //Count the added Files.

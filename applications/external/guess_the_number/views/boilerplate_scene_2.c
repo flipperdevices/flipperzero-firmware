@@ -8,6 +8,7 @@
 #include "../helpers/boilerplate_haptic.h"
 #include "../helpers/boilerplate_speaker.h"
 #include "../helpers/boilerplate_led.h"
+#include "../helpers/flipchess_fonts.h"
 
 struct BoilerplateScene2 {
     View* view;
@@ -45,7 +46,7 @@ void boilerplate_scene_2_draw(Canvas* canvas, BoilerplateScene2Model* model) {
     canvas_draw_str_aligned(canvas, 0, 30, AlignLeft, AlignTop, guessBuffer);
 
     // Draw the game message
-    canvas_set_font(canvas, FontScummRoman);
+    canvas_set_custom_u8g2_font(canvas, _u8g2_font_lucasarts_scumm_subtitle_o_tr);
     canvas_draw_str_aligned(canvas, 0, 50, AlignLeft, AlignTop, model->game_message);
 }
 

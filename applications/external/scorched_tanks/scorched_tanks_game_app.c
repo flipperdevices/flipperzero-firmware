@@ -51,7 +51,7 @@ double scorched_tanks_tan[91] = {
     -2.246,  -2.356,  -2.475,    -2.605, -2.747, -2.904, -3.078, -3.271, -3.487,  -3.732,  -4.011,
     -4.331,  -4.704,  -5.144,    -5.671, -6.313, -7.115, -8.144, -9.513, -11.429, -14.298, -19.077,
     -28.627, -57.254, -90747.269};
-unsigned char scorched_tanks_ground_modifiers[SCREEN_WIDTH] = {
+uint8_t scorched_tanks_ground_modifiers[SCREEN_WIDTH] = {
     0,  0,  0,  0,  0,  0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
     0,  0,  0,  0,  0,  0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
     0,  0,  2,  4,  6,  8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 28, 26, 24, 22, 20,
@@ -78,10 +78,10 @@ typedef struct {
 } PointDetailed;
 
 typedef struct {
-    unsigned char locationX;
-    unsigned char hp;
+    uint8_t locationX;
+    uint8_t hp;
     int aimAngle;
-    unsigned char firePower;
+    uint8_t firePower;
 } Tank;
 
 typedef struct {
@@ -92,7 +92,7 @@ typedef struct {
     bool isShooting;
     int windSpeed;
     Point trajectory[SCREEN_WIDTH];
-    unsigned char trajectoryAnimationStep;
+    uint8_t trajectoryAnimationStep;
     PointDetailed bulletPosition;
     PointDetailed bulletVector;
     FuriMutex* mutex;
@@ -115,7 +115,7 @@ int scorched_tanks_random(int min, int max) {
 void scorched_tanks_generate_ground(Game* game_state) {
     int lastHeight = 45;
 
-    for(unsigned char a = 0; a < SCREEN_WIDTH; a++) {
+    for(uint8_t a = 0; a < SCREEN_WIDTH; a++) {
         int diffHeight = scorched_tanks_random(-2, 3);
         int changeLength = scorched_tanks_random(1, 6);
 
@@ -216,31 +216,37 @@ void scorched_tanks_calculate_trajectory(Game* game_state) {
     }
 }
 
-static void scorched_tanks_draw_tank(
-    Canvas* const canvas,
-    unsigned char x,
-    unsigned char y,
-    bool isPlayer) {
-    unsigned char lineIndex = 0;
+static void scorched_tanks_draw_tank(Canvas* const canvas, uint8_t x, uint8_t y, bool isPlayer) {
+    uint8_t lineIndex = 0;
 
     if(isPlayer) {
         // Draw tank base
-        canvas_draw_line(canvas, x - 3, y - lineIndex, x + 3, y - lineIndex++);
-        canvas_draw_line(canvas, x - 4, y - lineIndex, x + 4, y - lineIndex++);
-        canvas_draw_line(canvas, x - 4, y - lineIndex, x + 4, y - lineIndex++);
+        canvas_draw_line(canvas, x - 3, y - lineIndex, x + 3, y - lineIndex);
+        lineIndex++;
+        canvas_draw_line(canvas, x - 4, y - lineIndex, x + 4, y - lineIndex);
+        lineIndex++;
+        canvas_draw_line(canvas, x - 4, y - lineIndex, x + 4, y - lineIndex);
+        lineIndex++;
 
         // draw turret
-        canvas_draw_line(canvas, x - 2, y - lineIndex, x + 1, y - lineIndex++);
-        canvas_draw_line(canvas, x - 2, y - lineIndex, x, y - lineIndex++);
+        canvas_draw_line(canvas, x - 2, y - lineIndex, x + 1, y - lineIndex);
+        lineIndex++;
+        canvas_draw_line(canvas, x - 2, y - lineIndex, x, y - lineIndex);
+        lineIndex++;
     } else {
         // Draw tank base
-        canvas_draw_line(canvas, x - 3, y - lineIndex, x + 3, y - lineIndex++);
-        canvas_draw_line(canvas, x - 4, y - lineIndex, x + 4, y - lineIndex++);
-        canvas_draw_line(canvas, x - 4, y - lineIndex, x + 4, y - lineIndex++);
+        canvas_draw_line(canvas, x - 3, y - lineIndex, x + 3, y - lineIndex);
+        lineIndex++;
+        canvas_draw_line(canvas, x - 4, y - lineIndex, x + 4, y - lineIndex);
+        lineIndex++;
+        canvas_draw_line(canvas, x - 4, y - lineIndex, x + 4, y - lineIndex);
+        lineIndex++;
 
         // draw turret
-        canvas_draw_line(canvas, x - 1, y - lineIndex, x + 2, y - lineIndex++);
-        canvas_draw_line(canvas, x, y - lineIndex, x + 2, y - lineIndex++);
+        canvas_draw_line(canvas, x - 1, y - lineIndex, x + 2, y - lineIndex);
+        lineIndex++;
+        canvas_draw_line(canvas, x, y - lineIndex, x + 2, y - lineIndex);
+        lineIndex++;
     }
 }
 
@@ -317,7 +323,7 @@ static void scorched_tanks_render_callback(Canvas* const canvas, void* ctx) {
 
     canvas_set_font(canvas, FontSecondary);
 
-    char buffer2[12];
+    char buffer2[18];
     snprintf(buffer2, sizeof(buffer2), "wind: %i", game_state->windSpeed - MAX_WIND / 2);
     canvas_draw_str(canvas, 55, 10, buffer2);
 
@@ -416,8 +422,8 @@ static void scorched_tanks_fire(Game* game_state) {
         if(game_state->isPlayerTurn) {
             double sinFromAngle = scorched_tanks_sin[game_state->player.aimAngle];
             double cosFromAngle = scorched_tanks_cos[game_state->player.aimAngle];
-            unsigned char aimX1 = game_state->player.locationX;
-            unsigned char aimY1 =
+            uint8_t aimX1 = game_state->player.locationX;
+            uint8_t aimY1 =
                 game_state->ground[game_state->player.locationX].y - TANK_COLLIDER_SIZE;
             int aimX2 = aimX1 + TANK_BARREL_LENGTH * cosFromAngle;
             int aimY2 = aimY1 + TANK_BARREL_LENGTH * sinFromAngle;
@@ -430,9 +436,8 @@ static void scorched_tanks_fire(Game* game_state) {
         } else {
             double sinFromAngle = scorched_tanks_sin[game_state->enemy.aimAngle];
             double cosFromAngle = scorched_tanks_cos[game_state->enemy.aimAngle];
-            unsigned char aimX1 = game_state->enemy.locationX;
-            unsigned char aimY1 =
-                game_state->ground[game_state->enemy.locationX].y - TANK_COLLIDER_SIZE;
+            uint8_t aimX1 = game_state->enemy.locationX;
+            uint8_t aimY1 = game_state->ground[game_state->enemy.locationX].y - TANK_COLLIDER_SIZE;
             int aimX2 = aimX1 + TANK_BARREL_LENGTH * cosFromAngle;
             int aimY2 = aimY1 + TANK_BARREL_LENGTH * sinFromAngle;
             aimX2 = aimX1 - (aimX2 - aimX1);
@@ -492,7 +497,7 @@ int32_t scorched_tanks_game_app(void* p) {
 
     ScorchedTanksEvent event;
     for(bool processing = true; processing;) {
-        FuriStatus event_status = furi_message_queue_get(event_queue, &event, 50);
+        furi_message_queue_get(event_queue, &event, 50);
         furi_mutex_acquire(game_state->mutex, FuriWaitForever);
 
         if(event.type == EventTypeKey) { // && game->isPlayerTurn

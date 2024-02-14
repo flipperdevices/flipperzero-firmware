@@ -5,6 +5,7 @@
 #include <furi_hal_serial.h>
 #include <gui/canvas_i.h>
 #include <gui/gui.h>
+#include <cfw/cfw.h>
 #include <input/input.h>
 #include <expansion/expansion.h>
 //#include <math.h>

@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <furi_hal_spi.h>
+#include <cfw/cfw.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -40,7 +41,9 @@ extern "C" {
 
 #define nrf24_TIMEOUT 500
 #define nrf24_CE_PIN &gpio_ext_pb2
-#define nrf24_HANDLE &furi_hal_spi_bus_handle_external
+#define nrf24_HANDLE                                                                         \
+    (cfw_settings.spi_nrf24_handle == SpiDefault ? &furi_hal_spi_bus_handle_external : \
+                                                         &furi_hal_spi_bus_handle_external_extra)
 
 /* Low level API */
 
@@ -360,6 +363,13 @@ void int32_to_bytes(uint32_t val, uint8_t* out, bool bigendian);
  * @return     32-bit value
  */
 uint32_t bytes_to_int32(uint8_t* bytes, bool bigendian);
+
+/** Check if the nrf24 is connected
+ * @param      handle  - pointer to FuriHalSpiHandle
+ * 
+ * @return     true if connected, otherwise false
+*/
+bool nrf24_check_connected(FuriHalSpiBusHandle* handle);
 
 #ifdef __cplusplus
 }

@@ -49,7 +49,7 @@ void ws_protocol_decoder_thermopro_tx4_feed(void* context, bool level, uint32_t 
  * @param context Pointer to a WSProtocolDecoderThermoPRO_TX4 instance
  * @return hash Hash sum
  */
-uint8_t ws_protocol_decoder_thermopro_tx4_get_hash_data(void* context);
+uint32_t ws_protocol_decoder_thermopro_tx4_get_hash_data(void* context);
 
 /**
  * Serialize data WSProtocolDecoderThermoPRO_TX4.

@@ -1,7 +1,9 @@
 #include "wifi_marauder_app_i.h"
 #include "wifi_marauder_uart.h"
 
-#define UART_CH (FuriHalSerialIdUsart)
+#include <cfw/cfw.h>
+
+#define UART_CH (cfw_settings.uart_esp_channel)
 #define BAUDRATE (115200)
 
 struct WifiMarauderUart {

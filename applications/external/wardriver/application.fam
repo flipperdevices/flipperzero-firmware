@@ -1,6 +1,6 @@
 App(
     appid="wardriver",
-    name="Wardriver GPS",
+    name="Wardriver",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="wardriver_app",
     stack_size=2048,

@@ -117,7 +117,6 @@ static void cfw_app_scene_misc_screen_rainbow_saturation_changed(VariableItem* i
 
 void cfw_app_scene_misc_screen_rgb_settings_on_enter(void* context) {
     CfwApp* app = context;
-    CfwSettings* cfw_settings = CFW_SETTINGS();
     VariableItemList* var_item_list = app->var_item_list;
     VariableItem* item;
     uint8_t value_index;
@@ -134,7 +133,7 @@ void cfw_app_scene_misc_screen_rgb_settings_on_enter(void* context) {
     size_t lcd_sz = COUNT_OF(lcd_colors);
 
     RgbColor color;
-    switch(cfw_settings->lcd_style) {
+    switch(cfw_settings.lcd_style) {
     case 0:
         item = variable_item_list_add(
             var_item_list,
@@ -247,7 +246,6 @@ void cfw_app_scene_misc_screen_rgb_settings_on_enter(void* context) {
 
 bool cfw_app_scene_misc_screen_rgb_settings_on_event(void* context, SceneManagerEvent event) {
     CfwApp* app = context;
-    CfwSettings* cfw_settings = CFW_SETTINGS();
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
@@ -257,7 +255,7 @@ bool cfw_app_scene_misc_screen_rgb_settings_on_event(void* context, SceneManager
         case VarItemListIndexLcdColor0:
         case VarItemListIndexLcdColor1:
         case VarItemListIndexLcdColor2:
-            if(cfw_settings->lcd_style == 0 || cfw_settings->lcd_style == 1) {
+            if(cfw_settings.lcd_style == 0 || cfw_settings.lcd_style == 1) {
                 scene_manager_set_scene_state(
                     app->scene_manager,
                     CfwAppSceneMiscScreenColor,
