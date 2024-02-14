@@ -122,7 +122,6 @@ bool OpenLogFile(App* app) {
            app->dialogs, selected_filepath, predefined_filepath, &browser_options)) {
         return false;
     }
-
     if(storage_file_open(
            app->LOGfile, furi_string_get_cstr(selected_filepath), FSAM_READ, FSOM_OPEN_EXISTING)) {
         furi_string_reset(app->text);
@@ -240,20 +239,26 @@ static void Serial_Begin(FuriHalSerialHandle* handle, LL_USART_InitTypeDef USART
 void handle_rx_data_cb(uint8_t* buf, size_t len, void* context) {
     furi_assert(context);
     App* app = context;
-
-    if(app->LOGfileReady) {
-        storage_file_write(app->LOGfile, buf, len);
-    }
-
     app->textLen += len;
     if(app->textLen >= TEXT_BOX_LEN - 1) {
         furi_string_right(app->text, app->textLen / 2);
         app->textLen = furi_string_size(app->text) + len;
     }
-
-    buf[len] = '\0';
-    furi_string_cat_printf(app->text, "%s", buf);
-
+    //buf[len] = '\0';
+    FuriString* data = furi_string_alloc();
+    furi_string_reserve(data, len);
+    for(size_t i = 0; i < len; i++) {
+        furi_string_cat_printf(data, "%02X", buf[i]);
+    }
+    furi_string_cat_printf(data, "%s", "\n");
+    for(size_t i = 0; i < furi_string_size(data); i++) {
+        buf[i] = (uint8_t)furi_string_get_char(data, i);
+    }
+    furi_string_cat_printf(app->text, "%s", furi_string_get_cstr(data));
+    if(app->LOGfileReady) {
+        storage_file_write(app->LOGfile, buf, furi_string_size(data));
+    }
+    furi_string_free(data);
     view_dispatcher_send_custom_event(app->viewDispatcher, Refresh);
 }
 static void
@@ -308,7 +313,7 @@ static int32_t uart_worker(void* context) {
                 handle_rx_data_cb(app->uart->rxBuff, len, app);
             }
         }
-        //TODO: Serial Write & enable DE/RE pinsy
+        //TODO: Serial Write & enable DE/RE pins
     }
 
     furi_stream_buffer_free(app->uart->rxBuff);
@@ -406,7 +411,7 @@ void CFG_Scene_OnEnter(void* context) {
     variable_item_set_current_value_index(item, app->uart->cfg->saveLOG ? 1 : 0);
     variable_item_set_current_value_text(item, saveLOGValues[app->uart->cfg->saveLOG ? 1 : 0]);
 
-    variable_item_list_set_selected_item(app->varList, 1);
+    variable_item_list_set_selected_item(app->varList, 0);
     view_dispatcher_switch_to_view(app->viewDispatcher, VarList_View);
 }
 bool CFG_Scene_OnEvent(void* context, SceneManagerEvent event) {
