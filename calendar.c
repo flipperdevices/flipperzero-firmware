@@ -98,9 +98,15 @@ static void calendar_draw_callback(Canvas* canvas, void* ctx) {
                 break;
             }
 
-            char buffer[4];
             canvas_set_font(canvas, FontSecondary);
-            canvas_draw_str(canvas, x, y, itoa(day_of_month, buffer, 10));
+
+            FuriString* dayStr;
+            dayStr = furi_string_alloc();
+            furi_string_printf(dayStr, "%d", day_of_month);
+
+            canvas_draw_str(canvas, x, y, furi_string_get_cstr(dayStr));
+            furi_string_free(dayStr);
+
             day_of_month++;
             x += 12;
         }
@@ -138,25 +144,37 @@ static void calendar_input_callback(InputEvent* input_event, void* ctx) {
     if(input_event->key == InputKeyLeft && input_event->type == InputTypeRelease) {
         calendar_data->selected_month--;
         if(calendar_data->selected_month < 1) {
-            calendar_data->selected_month = 12;
-            calendar_data->selected_year--;
+            if(calendar_data->selected_year > 2000) {
+                calendar_data->selected_month = 12;
+                calendar_data->selected_year--;
+            } else {
+                calendar_data->selected_month = 1;
+            }
         }
     }
 
     if(input_event->key == InputKeyRight && input_event->type == InputTypeRelease) {
         calendar_data->selected_month++;
         if(calendar_data->selected_month > 12) {
-            calendar_data->selected_month = 1;
-            calendar_data->selected_year++;
+            if(calendar_data->selected_year < 2099) {
+                calendar_data->selected_month = 1;
+                calendar_data->selected_year++;
+            } else {
+                calendar_data->selected_month = 12;
+            }
         }
     }
 
     if(input_event->key == InputKeyUp && input_event->type == InputTypeRelease) {
-        calendar_data->selected_year++;
+        if(calendar_data->selected_year < 2099) {
+            calendar_data->selected_year++;
+        }
     }
 
     if(input_event->key == InputKeyDown && input_event->type == InputTypeRelease) {
-        calendar_data->selected_year--;
+        if(calendar_data->selected_year > 2000) {
+            calendar_data->selected_year--;
+        }
     }
 
     furi_message_queue_put(event_queue, input_event, FuriWaitForever);
