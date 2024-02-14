@@ -86,7 +86,7 @@ static void ArchiveFile_t_clear(ArchiveFile_t* obj) {
 }
 
 static int ArchiveFile_t_cmp(const ArchiveFile_t* a, const ArchiveFile_t* b) {
-    if(CFW_SETTINGS()->sort_dirs_first) {
+    if(cfw_settings.sort_dirs_first) {
         if(a->type == ArchiveFileTypeFolder && b->type != ArchiveFileTypeFolder) {
             return -1;
         }

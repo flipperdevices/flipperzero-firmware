@@ -12,7 +12,9 @@
 #include <gui/modules/text_input.h>
 #include <gui/modules/variable_item_list.h>
 
-#define UART_CH (FuriHalSerialIdUsart)
+#include <cfw/cfw.h>
+
+#define UART_CH (cfw_settings.uart_esp_channel)
 
 #define NUM_MENU_ITEMS (11)
 

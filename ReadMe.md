@@ -91,6 +91,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [VGM Air Mouse v1.1 (By nminaylov)](https://github.com/flipperdevices/flipperzero-good-faps/tree/nm/motion_mouse_app) `Req: ICM42688`
 - Updated: [Video Game Module Tool v1.1 (By gsurkov)](https://github.com/flipperdevices/flipperzero-good-faps/pull/127)
 - Added: [Air Arkanoid  v1.1 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-good-faps/pull/141) - Commented out due to ModuleNotFoundError: No module named 'PIL'
+- [Deploy resources for extapps too & CFW Settings improvements (By Willy-JL)]()
 
 <a name="release">
 

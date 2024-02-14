@@ -379,7 +379,7 @@ int32_t subghz_app(char* p) {
     }
 
     // Check argument and run corresponding scene
-    bool is_favorite = process_favorite_launch(&p) && CFW_SETTINGS()->favorite_timeout;
+    bool is_favorite = process_favorite_launch(&p) && cfw_settings.favorite_timeout;
     if(p && strlen(p)) {
         uint32_t rpc_ctx = 0;
 

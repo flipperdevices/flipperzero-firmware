@@ -4,7 +4,7 @@
 
 #include <cfw/cfw.h>
 
-#define UART_CH (CFW_SETTINGS()->uart_esp_channel)
+#define UART_CH (cfw_settings.uart_esp_channel)
 #define BAUDRATE (115200)
 #define FAST_BAUDRATE (921600)
 

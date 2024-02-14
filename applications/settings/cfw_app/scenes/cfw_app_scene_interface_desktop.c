@@ -77,7 +77,7 @@ static void cfw_app_scene_interface_desktop_anim_style_changed(VariableItem* ite
     uint8_t index = variable_item_get_current_value_index(item);
     ManifestInfo* CurrentManifest = *ManifestFilesArray_get(ManifestFiles, index);
     variable_item_set_current_value_text(item, CurrentManifest->MenuName);
-    CFW_SETTINGS()->manifest_name = CurrentManifest->FileName;
+    cfw_settings.manifest_name = CurrentManifest->FileName;
     app->save_settings = true;
 }
 

@@ -118,7 +118,3 @@ void CFW_SETTINGS_SAVE() {
     flipper_format_free(file);
     furi_record_close(RECORD_STORAGE);
 }
-
-CfwSettings* CFW_SETTINGS() {
-    return &cfw_settings;
-}

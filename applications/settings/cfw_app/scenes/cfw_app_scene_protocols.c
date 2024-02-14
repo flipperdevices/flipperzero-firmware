@@ -39,52 +39,52 @@ static void cfw_app_scene_protocols_subghz_bypass_changed(VariableItem* item) {
 
 static void cfw_app_scene_protocols_cc1101_handle_changed(VariableItem* item) {
     CfwApp* app = variable_item_get_context(item);
-    CFW_SETTINGS()->spi_cc1101_handle =
+    cfw_settings.spi_cc1101_handle =
         variable_item_get_current_value_index(item) == 0 ? SpiDefault : SpiExtra;
     variable_item_set_current_value_text(
-        item, CFW_SETTINGS()->spi_cc1101_handle == SpiDefault ? SPI_DEFAULT : SPI_EXTRA);
+        item, cfw_settings.spi_cc1101_handle == SpiDefault ? SPI_DEFAULT : SPI_EXTRA);
     app->save_settings = true;
 }
 
 static void cfw_app_scene_protocols_nrf24_handle_changed(VariableItem* item) {
     CfwApp* app = variable_item_get_context(item);
-    CFW_SETTINGS()->spi_nrf24_handle =
+    cfw_settings.spi_nrf24_handle =
         variable_item_get_current_value_index(item) == 0 ? SpiDefault : SpiExtra;
     variable_item_set_current_value_text(
-        item, CFW_SETTINGS()->spi_nrf24_handle == SpiDefault ? SPI_DEFAULT : SPI_EXTRA);
+        item, cfw_settings.spi_nrf24_handle == SpiDefault ? SPI_DEFAULT : SPI_EXTRA);
     app->save_settings = true;
 }
 
 static void cfw_app_scene_protocols_esp32_channel_changed(VariableItem* item) {
     CfwApp* app = variable_item_get_context(item);
-    CFW_SETTINGS()->uart_esp_channel = variable_item_get_current_value_index(item) == 0 ?
+    cfw_settings.uart_esp_channel = variable_item_get_current_value_index(item) == 0 ?
                                            FuriHalSerialIdUsart :
                                            FuriHalSerialIdLpuart;
     variable_item_set_current_value_text(
         item,
-        CFW_SETTINGS()->uart_esp_channel == FuriHalSerialIdUsart ? UART_DEFAULT : UART_EXTRA);
+        cfw_settings.uart_esp_channel == FuriHalSerialIdUsart ? UART_DEFAULT : UART_EXTRA);
     app->save_settings = true;
 }
 
 static void cfw_app_scene_protocols_nmea_channel_changed(VariableItem* item) {
     CfwApp* app = variable_item_get_context(item);
-    CFW_SETTINGS()->uart_nmea_channel = variable_item_get_current_value_index(item) == 0 ?
+    cfw_settings.uart_nmea_channel = variable_item_get_current_value_index(item) == 0 ?
                                             FuriHalSerialIdUsart :
                                             FuriHalSerialIdLpuart;
     variable_item_set_current_value_text(
         item,
-        CFW_SETTINGS()->uart_nmea_channel == FuriHalSerialIdUsart ? UART_DEFAULT : UART_EXTRA);
+        cfw_settings.uart_nmea_channel == FuriHalSerialIdUsart ? UART_DEFAULT : UART_EXTRA);
     app->save_settings = true;
 }
 
 static void cfw_app_scene_protocols_general_channel_changed(VariableItem* item) {
     CfwApp* app = variable_item_get_context(item);
-    CFW_SETTINGS()->uart_general_channel = variable_item_get_current_value_index(item) == 0 ?
+    cfw_settings.uart_general_channel = variable_item_get_current_value_index(item) == 0 ?
                                                FuriHalSerialIdUsart :
                                                FuriHalSerialIdLpuart;
     variable_item_set_current_value_text(
         item,
-        CFW_SETTINGS()->uart_general_channel == FuriHalSerialIdUsart ? UART_DEFAULT : UART_EXTRA);
+        cfw_settings.uart_general_channel == FuriHalSerialIdUsart ? UART_DEFAULT : UART_EXTRA);
     app->save_settings = true;
 }
 

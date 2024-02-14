@@ -4,7 +4,7 @@
 #include <notification/notification_messages.h>
 #include <cfw/cfw.h>
 
-#define UART_CH (CFW_SETTINGS()->uart_nmea_channel)
+#define UART_CH (cfw_settings.uart_nmea_channel)
 
 #define RX_BUF_SIZE 1024
 

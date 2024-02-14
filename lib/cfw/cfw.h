@@ -58,7 +58,7 @@ typedef struct {
 } CfwSettings;
 
 void CFW_SETTINGS_SAVE();
-CfwSettings* CFW_SETTINGS();
+extern CfwSettings cfw_settings;
 
 #ifdef __cplusplus
 }

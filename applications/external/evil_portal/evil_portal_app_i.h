@@ -18,7 +18,7 @@
 #define NUM_MENU_ITEMS (6)
 
 #define EVIL_PORTAL_TEXT_BOX_STORE_SIZE (4096)
-#define UART_CH (CFW_SETTINGS()->uart_esp_channel)
+#define UART_CH (cfw_settings.uart_esp_channel)
 
 #define SET_HTML_CMD "sethtml"
 #define SET_AP_CMD "setap"

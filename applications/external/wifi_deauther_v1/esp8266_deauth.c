@@ -14,7 +14,7 @@
 
 #include "FlipperZeroWiFiDeauthModuleDefines.h"
 
-#define UART_CH (FuriHalSerialIdUsart)
+#define UART_CH (cfw_settings.uart_esp_channel)
 
 #define DEAUTH_APP_DEBUG 0
 

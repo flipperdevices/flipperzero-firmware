@@ -9,10 +9,10 @@
 
 void nrf24_init() {
     // this is needed if multiple SPI devices are connected to the same bus but with different CS pins
-    if(CFW_SETTINGS()->spi_nrf24_handle == SpiDefault) {
+    if(cfw_settings.spi_nrf24_handle == SpiDefault) {
         furi_hal_gpio_init_simple(&gpio_ext_pc3, GpioModeOutputPushPull);
         furi_hal_gpio_write(&gpio_ext_pc3, true);
-    } else if(CFW_SETTINGS()->spi_nrf24_handle == SpiExtra) {
+    } else if(cfw_settings.spi_nrf24_handle == SpiExtra) {
         furi_hal_gpio_init_simple(&gpio_ext_pa4, GpioModeOutputPushPull);
         furi_hal_gpio_write(&gpio_ext_pa4, true);
     }
@@ -30,9 +30,9 @@ void nrf24_deinit() {
     furi_hal_gpio_init(nrf24_CE_PIN, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
 
     // resetting the CS pins to floating
-    if(CFW_SETTINGS()->spi_nrf24_handle == SpiDefault) {
+    if(cfw_settings.spi_nrf24_handle == SpiDefault) {
         furi_hal_gpio_init_simple(&gpio_ext_pc3, GpioModeAnalog);
-    } else if(CFW_SETTINGS()->spi_nrf24_handle == SpiExtra) {
+    } else if(cfw_settings.spi_nrf24_handle == SpiExtra) {
         furi_hal_gpio_init_simple(&gpio_ext_pa4, GpioModeAnalog);
     }
 }

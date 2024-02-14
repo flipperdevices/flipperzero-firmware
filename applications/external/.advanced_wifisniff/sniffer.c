@@ -16,11 +16,9 @@
 #define MAX_SSID_LENGTH 32
 #define MAX_BSSID_LENGTH 18
 
-#define UART_CH_ESP \
-    (CFW_SETTINGS()->uart_esp_channel == UARTDefault ? FuriHalUartIdUSART1 : FuriHalUartIdLPUART1)
+#define UART_CH_ESP (cfw_settings.uart_esp_channel)
 
-#define UART_CH_GPS \
-    (CFW_SETTINGS()->uart_nmea_channel == UARTDefault ? FuriHalUartIdUSART1 : FuriHalUartIdLPUART1)
+#define UART_CH_GPS (cfw_settings.uart_nmea_channel)
 
 #define WORKER_ALL_RX_EVENTS (WorkerEvtStop | WorkerEvtRxDone)
 

@@ -31,7 +31,7 @@ static void cfw_app_scene_interface_mainmenu_menu_style_changed(VariableItem* it
     CfwApp* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, menu_style_names[index]);
-    CFW_SETTINGS()->menu_style = index;
+    cfw_settings.menu_style = index;
     app->save_settings = true;
 }
 
@@ -40,7 +40,7 @@ static void cfw_app_scene_interface_mainmenu_start_point_changed(VariableItem* i
     app->start_point_index = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(
         item, *CharList_get(app->mainmenu_app_names, app->start_point_index));
-    CFW_SETTINGS()->start_point = app->start_point_index;
+    cfw_settings.start_point = app->start_point_index;
     app->save_settings = true;
     app->require_reboot = true;
 }
@@ -186,14 +186,27 @@ bool cfw_app_scene_interface_mainmenu_on_event(void* context, SceneManagerEvent 
                 app->scene_manager, CfwAppSceneInterfaceMainmenu, VarItemListIndexRemoveApp);
             scene_manager_next_scene(app->scene_manager, CfwAppSceneInterfaceMainmenu);
             break;
-        case VarItemListIndexMoveApp:
+        case VarItemListIndexMoveApp: {
             app->save_mainmenu_apps = true;
             app->require_reboot = true;
-            scene_manager_previous_scene(app->scene_manager);
-            scene_manager_set_scene_state(
-                app->scene_manager, CfwAppSceneInterfaceMainmenu, VarItemListIndexMoveApp);
-            scene_manager_next_scene(app->scene_manager, CfwAppSceneInterfaceMainmenu);
+            size_t count = CharList_size(app->mainmenu_app_labels);
+            VariableItem* item = variable_item_list_get(app->var_item_list, VarItemListIndexApp);
+            if(count) {
+                app->mainmenu_app_index = CLAMP(app->mainmenu_app_index, count - 1, 0U);
+                char label[20];
+                snprintf(label, 20, "App  %u/%u", 1 + app->mainmenu_app_index, count);
+                variable_item_set_item_label(item, label);
+                variable_item_set_current_value_text(
+                    item, *CharList_get(app->mainmenu_app_labels, app->mainmenu_app_index));
+            } else {
+                app->mainmenu_app_index = 0;
+                variable_item_set_item_label(item, "App");
+                variable_item_set_current_value_text(item, "None");
+            }
+            variable_item_set_current_value_index(item, app->mainmenu_app_index);
+            variable_item_set_values_count(item, count);
             break;
+		}
         case VarItemListIndexAddApp:
             scene_manager_set_scene_state(app->scene_manager, CfwAppSceneInterfaceMainmenuAdd, 0);
             scene_manager_next_scene(app->scene_manager, CfwAppSceneInterfaceMainmenuAdd);

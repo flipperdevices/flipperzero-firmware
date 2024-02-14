@@ -18,7 +18,7 @@ static void cfw_app_scene_misc_charge_cap_changed(VariableItem* item) {
     uint32_t value = (variable_item_get_current_value_index(item) + 1) * CHARGE_CAP_INTV;
     snprintf(cap_str, 6, "%lu%%", value);
     variable_item_set_current_value_text(item, cap_str);
-    CFW_SETTINGS()->charge_cap = value;
+    cfw_settings.charge_cap = value;
     app->save_settings = true;
 }
 

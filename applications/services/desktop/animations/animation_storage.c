@@ -36,7 +36,7 @@ static bool animation_storage_load_single_manifest_info(
 
     FuriString* anim_manifest;
     anim_manifest = furi_string_alloc();
-    char* my_manifest_name = CFW_SETTINGS()->manifest_name;
+    char* my_manifest_name = cfw_settings.manifest_name;
 
     //Get the filename to process.
     furi_string_printf(anim_manifest, "%s/%s", EXT_PATH("dolphin"), my_manifest_name);

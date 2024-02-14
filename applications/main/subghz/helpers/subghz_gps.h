@@ -2,7 +2,7 @@
 #include <cfw/cfw.h>
 #include <expansion/expansion.h>
 
-#define UART_CH (CFW_SETTINGS()->uart_nmea_channel)
+#define UART_CH (cfw_settings.uart_nmea_channel)
 
 #define RX_BUF_SIZE 1024
 

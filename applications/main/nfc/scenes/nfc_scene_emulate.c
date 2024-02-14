@@ -27,7 +27,7 @@ void nfc_scene_emulate_on_enter(void* context) {
         furi_timer_start(
             timer_auto_exit,
             instance->fav_timeout ?
-                CFW_SETTINGS()->favorite_timeout * furi_kernel_get_tick_frequency() :
+                cfw_settings.favorite_timeout * furi_kernel_get_tick_frequency() :
                 NFC_EMULATION_TIME_MAX_MS);
 }
 

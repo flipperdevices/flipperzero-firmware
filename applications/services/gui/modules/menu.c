@@ -448,9 +448,9 @@ static bool menu_input_callback(InputEvent* event, void* context) {
 
     MenuStyle this_menu_style;
     if(menu->gamemode) {
-        this_menu_style = CFW_SETTINGS()->game_menu_style;
+        this_menu_style = cfw_settings.game_menu_style;
     } else {
-        this_menu_style = CFW_SETTINGS()->menu_style;
+        this_menu_style = cfw_settings.menu_style;
     }
 
     if(this_menu_style == MenuStyleVertical &&
@@ -564,9 +564,9 @@ Menu* menu_pos_alloc(size_t pos, bool gamemode) {
 
     MenuStyle this_menu_style;
     if(menu->gamemode) {
-        this_menu_style = CFW_SETTINGS()->game_menu_style;
+        this_menu_style = cfw_settings.game_menu_style;
     } else {
-        this_menu_style = CFW_SETTINGS()->menu_style;
+        this_menu_style = cfw_settings.menu_style;
     }
 
     with_view_model(
