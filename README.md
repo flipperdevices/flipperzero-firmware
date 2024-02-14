@@ -5,7 +5,7 @@
 
 Have you ever thought to yourself "Man, I wish I could figure out the Future Value of a $12,000 investment, over the span of 3 years, with a 7.5% interest rate, in which I pay another $3,500 into each year, but all I have is my Flipper Zero"?
 
-![Calculator](demoimg.png)
+![Calculator](screenshot.png)
 
 Neither have I, and please get help if you have.
 
