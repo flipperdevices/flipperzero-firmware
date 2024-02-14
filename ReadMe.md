@@ -29,8 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0213-0003-0.97.2-ad1ab9e](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-02-14 13:03 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-02-14 13:03 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-02-14 01:15 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-02-14 01:15 EST`
 - OFW: [NFC: Add support for Gallagher access control (MIFARE Classic only) #3306 (By nickmooney)](https://github.com/flipperdevices/flipperzero-firmware/pull/3306)
 - OFW: [NFC: Slix disable privacy #3425 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3425)
 - OFW: [NFC: Added NFC plugin; Some parser #3335 (By zProAle)](https://github.com/flipperdevices/flipperzero-firmware/pull/3335)
@@ -70,7 +70,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - [Revert USB CDC changes from #3358 causing glitchy updates (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/d826a1dac8523f033a09eb3144485d08d57fd825)
 - Updated: [Sub-GHz Remote (Refactored) + Configurator v1.3 (By gid9798)](https://github.com/DarkFlippers/SubGHz_Remote) [Custom modulations in subghz remote (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/52cedc15324b8eaa7cc1e878b2311ce6a368c222)
 - Updated: [Sub-GHz setting updates for static/hopper frequencies (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/ce2349146001c1689207d952f36de80f72c3c742)
-- Updated: [Simpler IR last settings import (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/ce2349146001c1689207d952f36de80f72c3c742)
+- Updated: [Simpler IR last settings import (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/9f5c48ed9e560faee1fa225f1443d106d9359420)
 - To Be Merged OFW PRs: [3211](https://github.com/flipperdevices/flipperzero-firmware/pull/3211), [3366](https://github.com/flipperdevices/flipperzero-firmware/pull/3366), [3250](https://github.com/flipperdevices/flipperzero-firmware/pull/3250), [3402](https://github.com/flipperdevices/flipperzero-firmware/pull/3402), [3409](https://github.com/flipperdevices/flipperzero-firmware/pull/3409), [3406](https://github.com/flipperdevices/flipperzero-firmware/pull/3406), [3431](https://github.com/flipperdevices/flipperzero-firmware/pull/3431), [3254](https://github.com/flipperdevices/flipperzero-firmware/pull/3254), [3429](https://github.com/flipperdevices/flipperzero-firmware/pull/3429), [3286](https://github.com/flipperdevices/flipperzero-firmware/pull/3286), [3442](https://github.com/flipperdevices/flipperzero-firmware/pull/3442) & [3445](https://github.com/flipperdevices/flipperzero-firmware/pull/3445)
 
 <a name="release">
