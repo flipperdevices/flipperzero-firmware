@@ -253,10 +253,17 @@ void computeTVM() {
     }
     //solve N
     else if(tvm_cursor_position == 0) {
-        tvm_n = FindN(tvm_i, tvm_pv, tvm_pmt, tvm_fv);
+        tvm_n = findN(tvm_i, tvm_pv, tvm_pmt, tvm_fv);
 
         snprintf(tvm_Strings[0], sizeof(tvm_Strings[0]), "%.4f", tvm_n);
         FURI_LOG_I("INFORMATION tag", "N of Periods solved (tvm_n): %.4f", tvm_n);
+    }
+    //solve PMT
+    else if(tvm_cursor_position == 3) {
+        tvm_pmt = findPMT(tvm_n, tvm_i, tvm_pv, tvm_fv);
+
+        snprintf(tvm_Strings[3], sizeof(tvm_Strings[3]), "%.4f", tvm_pmt);
+        FURI_LOG_I("INFORMATION tag", "N of Periods solved (tvm_n): %.4f", tvm_pmt);
     }
 }
 

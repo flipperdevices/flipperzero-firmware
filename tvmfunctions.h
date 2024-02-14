@@ -83,7 +83,7 @@ double findI(double tvm_n, double tvm_pmt, double tvm_pv, double tvm_fv) {
     return NAN;
 }
 
-double FindN(double tvm_i, double tvm_pv, double tvm_pmt, double tvm_fv) {
+double findN(double tvm_i, double tvm_pv, double tvm_pmt, double tvm_fv) {
     if(tvm_i == 0) {
         if(tvm_pmt == 0) {
             return NAN;
@@ -110,4 +110,13 @@ double FindN(double tvm_i, double tvm_pv, double tvm_pmt, double tvm_fv) {
 
         return (log(tempVarFV) - log(tempVarPV)) / log(tvm_i + 1);
     }
+}
+
+double findPMT(double tvm_n, double tvm_i, double tvm_pv, double tvm_fv) {
+    // if i is 0, this is a simple equation
+    if(tvm_i == 0) {
+        return (-tvm_fv - tvm_pv) / tvm_n;
+    }
+    // do the more complicated equation
+    return ((-tvm_fv - tvm_pv * pow(tvm_i + 1, tvm_n)) / (pow(tvm_i + 1, tvm_n) - 1)) * tvm_i;
 }
