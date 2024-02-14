@@ -7,7 +7,7 @@
 #include <storage/storage.h>
 #include "desktop_settings_filename.h"
 
-#define DESKTOP_SETTINGS_VER (14)
+#define DESKTOP_SETTINGS_VER (13)
 
 #define DESKTOP_SETTINGS_OLD_PATH CFG_PATH(DESKTOP_SETTINGS_FILE_NAME)
 #define DESKTOP_SETTINGS_PATH INT_PATH(DESKTOP_SETTINGS_FILE_NAME)

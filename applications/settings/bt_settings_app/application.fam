@@ -10,4 +10,5 @@ App(
     ],
     order=10,
     fap_category="assets",
+    fap_libs=["assets"],
 )

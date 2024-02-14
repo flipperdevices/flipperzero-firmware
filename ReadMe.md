@@ -29,8 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0214-0221-0.97.2-958c47c](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-02-14 02:21 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-02-14 02:21 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-02-15 09:50 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-02-15 09:50 EST`
 - OFW: [NFC: Add support for Gallagher access control (MIFARE Classic only) #3306 (By nickmooney)](https://github.com/flipperdevices/flipperzero-firmware/pull/3306)
 - OFW: [NFC: Slix disable privacy #3425 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3425)
 - OFW: [NFC: Added NFC plugin; Some parser #3335 (By zProAle)](https://github.com/flipperdevices/flipperzero-firmware/pull/3335)
@@ -75,7 +75,10 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [Add Model JTC Genesis 5.5 to IR #3388 (By pattyland)](https://github.com/flipperdevices/flipperzero-firmware/pull/3388)
 - OFW: [Gui text box: fix formatted string memory reservation #3447 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3447)
 - Updated: [Temp Sensors Reader 1.5 (By quen0n)](https://github.com/quen0n/Unitemp-Flipper-Zero-Plugin)
-- [API Cleanup, External Settings, Power Setting Additions & Some ByteInput optimizations (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/13f8661fde6626fb295f5cae24467fb3e48c2c23)
+- [API Cleanup, External Settings, Power Setting Additions & Some ByteInput optimizations (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/f3c6b1715b7982f610af9c1572cd1fc4df32855d)
+- Sorry, due to Desktop Settings change to FAP, you may need to re-configure your favorite apps.
+- Updated: [Chess v2.0 (By xtruan)](https://github.com/xtruan/flipper-chess)
+- Updated: [Guess The Number v1.2 (By kWAYTV)](https://github.com/kWAYTV/guess-the-number-fz)
 - To Be Merged OFW PRs: [3211](https://github.com/flipperdevices/flipperzero-firmware/pull/3211), [3366](https://github.com/flipperdevices/flipperzero-firmware/pull/3366), [3250](https://github.com/flipperdevices/flipperzero-firmware/pull/3250), [3402](https://github.com/flipperdevices/flipperzero-firmware/pull/3402), [3409](https://github.com/flipperdevices/flipperzero-firmware/pull/3409), [3406](https://github.com/flipperdevices/flipperzero-firmware/pull/3406), [3431](https://github.com/flipperdevices/flipperzero-firmware/pull/3431), [3254](https://github.com/flipperdevices/flipperzero-firmware/pull/3254), [3429](https://github.com/flipperdevices/flipperzero-firmware/pull/3429), [3286](https://github.com/flipperdevices/flipperzero-firmware/pull/3286), [3442](https://github.com/flipperdevices/flipperzero-firmware/pull/3442), [3445](https://github.com/flipperdevices/flipperzero-firmware/pull/3445), [3448](https://github.com/flipperdevices/flipperzero-firmware/pull/3448), [3446](https://github.com/flipperdevices/flipperzero-firmware/pull/3446) & [3383](https://github.com/flipperdevices/flipperzero-firmware/pull/3383)
 
 <a name="release">
@@ -284,7 +287,7 @@ $ ./fbt dolphin_ext
 - [Asteroids v1.1 (By antirez)](https://github.com/antirez/flipper-asteroids) [(Modified By SimplyMinimal)](https://github.com/SimplyMinimal/FlipperZero-Asteroids)
 - [BlackJack v1.1 (By teeebor)](https://github.com/teeebor/flipper_games)
 - [Bomberduck v1.1 (By leo-need-more-coffee)](https://github.com/leo-need-more-coffee/flipperzero-bomberduck)
-- [Chess v1.9 (By xtruan)](https://github.com/xtruan/flipper-chess)
+- [Chess v2.0 (By xtruan)](https://github.com/xtruan/flipper-chess)
 - [Chess Clock (By ihatecsv)](https://github.com/ihatecsv/flipper_chess_clock)
 - [City Bloxx (By Milk-Cool)](https://github.com/Milk-Cool/fz-citybloxx)
 - [Color Guess v1.3 (By leedave)](https://github.com/leedave/Leeds-Flipper-Zero-Applications)
@@ -298,7 +301,7 @@ $ ./fbt dolphin_ext
 - [Five Nights at Flipper's v1.2 (By sillygir1)](https://github.com/sillygir1/flipperzero-fnaf)
 - [Flappy Bird v1.1 (By DroomOne)](https://github.com/DroomOne/flipperzero-firmware/tree/dev/applications/flappy_bird) [Flappy: Border hitboxes, bigger Pilars (By TQMatvey)](https://github.com/DarkFlippers/unleashed-firmware/pull/114) [Increase pilars line width to improve visibility (By ahumeniy)](https://github.com/DarkFlippers/unleashed-firmware/pull/140)
 - [Game of Life v1.1 (Updated to work by tgxn) (By itsyourbedtime)](https://github.com/tgxn/flipperzero-firmware/blob/dev/applications/game_of_life/game_of_life.c)
-- [Guess The Number v1.1 (By kWAYTV)](https://github.com/kWAYTV/guess-the-number-fz)
+- [Guess The Number v1.2 (By kWAYTV)](https://github.com/kWAYTV/guess-the-number-fz)
 - [Hangman v1.5 (By Evgeny Stepanischev & Eva Stepanischeva)](https://github.com/bolknote/Flipper-Zero-Hangman-Game) [With Anime Dictionary (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/9f0385f14547be5a3bdbc85323399e8b01b27607)
 - [Heap Defence v1.1 (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/fc776446de9fdd553b221c02668b925b689378d8) [(original by wquinoa & Vedmein)](https://github.com/Vedmein/flipperzero-firmware/tree/hd/svisto-perdelki)
 - [JetPack v1.1 (by timstrasser)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/1164e4d214efa38847e08c6387bf53578bc0d366)

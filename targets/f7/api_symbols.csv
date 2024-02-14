@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,=,50.5,,
+Version,+,50.5,,
 Header,+,applications/drivers/subghz/cc1101_ext/cc1101_ext_interconnect.h,,
 Header,+,applications/main/archive/helpers/archive_helpers_ext.h,,
 Header,+,applications/main/subghz/subghz_fap.h,,
@@ -285,7 +285,7 @@ Header,+,targets/furi_hal_include/furi_hal_version.h,,
 Header,+,targets/furi_hal_include/furi_hal_vibro.h,,
 Function,+,CFW_SETTINGS,CfwSettings*,
 Function,+,CFW_SETTINGS_SAVE,void,
-Function,-,DESKTOP_SETTINGS_LOAD,_Bool,DesktopSettings*
+Function,+,DESKTOP_SETTINGS_LOAD,_Bool,DesktopSettings*
 Function,+,DESKTOP_SETTINGS_SAVE,_Bool,DesktopSettings*
 Function,-,LL_ADC_CommonDeInit,ErrorStatus,ADC_Common_TypeDef*
 Function,-,LL_ADC_CommonInit,ErrorStatus,"ADC_Common_TypeDef*, const LL_ADC_CommonInitTypeDef*"
@@ -711,7 +711,7 @@ Function,+,bt_set_profile_adv_name,void,"Bt*, const char*, ..."
 Function,+,bt_set_profile_mac_address,void,"Bt*, const uint8_t[6]"
 Function,+,bt_set_profile_pairing_method,void,"Bt*, GapPairing"
 Function,+,bt_set_status_changed_callback,void,"Bt*, BtStatusChangedCallback, void*"
-Function,-,bt_settings_load,_Bool,BtSettings*
+Function,+,bt_settings_load,_Bool,BtSettings*
 Function,+,bt_settings_save,_Bool,BtSettings*
 Function,+,buffered_file_stream_alloc,Stream*,Storage*
 Function,+,buffered_file_stream_close,_Bool,Stream*

@@ -343,6 +343,7 @@ void bt_close_rpc_connection(Bt* bt) {
 
 static void bt_change_profile(Bt* bt, BtMessage* message) {
     if(furi_hal_bt_is_ble_gatt_gap_supported()) {
+        bt_settings_load(&bt->bt_settings);
         bt_close_rpc_connection(bt);
 
         FuriHalBtProfile furi_profile;

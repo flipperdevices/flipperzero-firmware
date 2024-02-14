@@ -1,7 +1,7 @@
 App(
     appid="bt",
     name="BtSrv",
-    apptype=FlipperAppType.EXTSETTINGS,
+    apptype=FlipperAppType.SERVICE,
     entry_point="bt_srv",
     cdefines=["SRV_BT"],
     requires=[
