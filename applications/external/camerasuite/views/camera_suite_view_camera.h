@@ -17,9 +17,9 @@
 
 #include "../helpers/camera_suite_custom_event.h"
 
-#include <camera_suite_icons.h>
+#include <cfw/cfw.h>
 
-#define UART_CH (FuriHalSerialIdUsart)
+#define UART_CH (CFW_SETTINGS->uart_esp_channel)
 
 #define BITMAP_HEADER_LENGTH 62
 #define FRAME_BIT_DEPTH 1
@@ -43,16 +43,16 @@ typedef enum {
     WorkerEventRx = (1 << 2),
 } WorkerEventFlags;
 
-#define WORKER_EVENTS_MASK (WorkerEventStop | WorkerEventRx)
+#define CAMERA_WORKER_EVENTS_MASK (WorkerEventStop | WorkerEventRx)
 
 // Forward declaration
 typedef void (*CameraSuiteViewCameraCallback)(CameraSuiteCustomEvent event, void* context);
 
 typedef struct CameraSuiteViewCamera {
     CameraSuiteViewCameraCallback callback;
-    FuriStreamBuffer* rx_stream;
+    FuriStreamBuffer* camera_rx_stream;
     FuriHalSerialHandle* serial_handle;
-    FuriThread* worker_thread;
+    FuriThread* camera_worker_thread;
     NotificationApp* notification;
     View* view;
     void* context;
