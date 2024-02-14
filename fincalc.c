@@ -4,6 +4,7 @@
 #include <gui/gui.h>
 #include <input/input.h>
 #include "financial_calc_icons.h"
+#include <tvmfunctions.h>
 
 //init some variables / constants
 
@@ -231,135 +232,31 @@ void computeTVM() {
 
     //solve FV
     if(tvm_cursor_position == 4) {
-        tvm_fv =
-            (tvm_pv * pow(1 + tvm_i, tvm_n) + tvm_pmt * ((pow(1 + tvm_i, tvm_n) - 1) / tvm_i)) *
-            -1;
-        snprintf(tvm_Strings[4], sizeof(tvm_Strings[4]), "%.2f", tvm_fv);
-        FURI_LOG_I("INFORMATION tag", "Future value solved (tvm_fv): %.2f", tvm_fv);
+        tvm_fv = findFV(tvm_n, tvm_i, tvm_pv, tvm_pmt);
+        snprintf(tvm_Strings[4], sizeof(tvm_Strings[4]), "%.4f", tvm_fv);
+        FURI_LOG_I("INFORMATION tag", "Future value solved (tvm_fv): %.4f", tvm_fv);
     }
     // solve PV
     else if(tvm_cursor_position == 2) {
-        tvm_pv =
-            -tvm_fv / pow(1 + tvm_i, tvm_n) - (tvm_pmt / tvm_i) * (1 - pow(1 + tvm_i, -tvm_n));
-
-        snprintf(tvm_Strings[2], sizeof(tvm_Strings[2]), "%.2f", tvm_pv);
-        FURI_LOG_I("INFORMATION tag", "Present value solved (tvm_pv): %.2f", tvm_pv);
+        tvm_pv = findPV(tvm_n, tvm_i, tvm_pmt, tvm_fv);
+        snprintf(tvm_Strings[2], sizeof(tvm_Strings[2]), "%.4f", tvm_pv);
+        FURI_LOG_I("INFORMATION tag", "Present value solved (tvm_pv): %.4f", tvm_pv);
 
     }
     // solve I
     else if(tvm_cursor_position == 1) {
-        // Genuinely not sure how this should be done. I'm gonna try a bold search approach?
+        tvm_i = findI(tvm_n, tvm_pmt, tvm_pv, tvm_fv) * 100;
+        snprintf(tvm_Strings[1], sizeof(tvm_Strings[1]), "%.4f", tvm_i);
 
-        //Given N, PV, PMT, and the correct FV, Try to converge down to the correct FV
-        double attempted_fv = 0;
-        double attempted_i = 0;
-        double shrink_by = .01;
-        double precision = .0005;
-        int overflowed = 0;
-        bool borked = false;
-
-        // if both FV and PV are same sign, and payment is positive its borked.
-        if((tvm_fv < 0 && tvm_pv < 0) || ((tvm_fv >= 0 && tvm_pv > 0) && tvm_pmt > 0)) {
-            borked = true;
-            FURI_LOG_W("WARNING tag", "PV and FV were same sign, borked");
-        }
-
-        //if any 2 are 0, its bad
-        if((tvm_fv == 0 && tvm_pmt == 0) || (tvm_pv == 0 && tvm_pmt == 0) ||
-           (tvm_pv == 0 && tvm_fv == 0)) {
-            FURI_LOG_W("WARNING tag", "No SIGN change");
-            borked = true;
-        }
-
-        // try to find the value
-        do {
-            //if it got this low, go back to the top and pray
-            if(attempted_i < -40) {
-                FURI_LOG_W("WARNING tag", "Overfl -");
-                overflowed++;
-                attempted_i = 40;
-            } else if(attempted_i > 40) {
-                FURI_LOG_W("WARNING tag", "Overfl +");
-                overflowed++;
-                attempted_i = -40;
-            }
-
-            // make the guess
-            attempted_fv = (tvm_pv * pow(1 + attempted_i, tvm_n) +
-                            tvm_pmt * ((pow(1 + attempted_i, tvm_n) - 1) / attempted_i)) *
-                           -1;
-
-            //if overshot, bring it down and try again
-            if(fabs(attempted_fv) > fabs(tvm_fv) + precision) {
-                attempted_i = attempted_i - shrink_by;
-                // trying again
-                attempted_fv = (tvm_pv * pow(1 + attempted_i, tvm_n) +
-                                tvm_pmt * ((pow(1 + attempted_i, tvm_n) - 1) / attempted_i)) *
-                               -1;
-                // if it is now smaller, cut shrink by in half and keep going
-                if(fabs(attempted_fv) < fabs(tvm_fv) - precision) {
-                    shrink_by = shrink_by / 2;
-                }
-            }
-            // if undershot, bring it up and try again
-            else {
-                attempted_i = attempted_i + shrink_by;
-                // try again
-                attempted_fv = (tvm_pv * pow(1 + attempted_i, tvm_n) +
-                                tvm_pmt * ((pow(1 + attempted_i, tvm_n) - 1) / attempted_i)) *
-                               -1;
-                // if it is now larger, cut shrink by in half and keep going
-                if(fabs(attempted_fv) > fabs(tvm_fv) + precision) {
-                    shrink_by = shrink_by / 2;
-                }
-            }
-            FURI_LOG_I("INFORMATION tag", "Interest Rate attempt: %.4f", attempted_i);
-            if(overflowed > 1) {
-                FURI_LOG_W("WARNING tag", "Overflowed 2x, kill");
-                //Somethings wrong, not solveable
-                borked = true;
-                break;
-            }
-        } while((fabs(attempted_fv) > fabs(tvm_fv) + precision ||
-                 fabs(attempted_fv) < fabs(tvm_fv) - precision) &&
-                !borked && attempted_i == 0);
-
-        // if we are here, we lived and have a close enough i, or its borked
-        if(borked) {
-            snprintf(tvm_Strings[1], sizeof(tvm_Strings[1]), "Error");
-        } else {
-            tvm_i = attempted_i * 100;
-            snprintf(tvm_Strings[1], sizeof(tvm_Strings[1]), "%.2f", tvm_i);
-        }
-
-        FURI_LOG_I("INFORMATION tag", "Interest Rate solved (tvm_i): %.2f", tvm_i);
+        FURI_LOG_I("INFORMATION tag", "Interest Rate solved (tvm_i): %.4f", tvm_i);
 
     }
     //solve N
     else if(tvm_cursor_position == 0) {
-        // If there's no payment
-        if(tvm_pmt == 0) {
-            // Check for divide by zero
-            if(tvm_i == 0) {
-                if(tvm_fv == tvm_pv) {
-                    // If future value equals present value, any number of periods will satisfy this condition
-                    tvm_n =
-                        INFINITY; // return positive infinity indicating indefinite number of periods
-                } else {
-                    // If future value doesn't equal present value and interest rate is 0, cannot solve for periods
-                    tvm_n = NAN; // return Not-a-Number
-                }
-            } else {
-                tvm_n = log((tvm_fv * -1) / tvm_pv) / log(1 + tvm_i);
-            }
-        }
-        // If there is a payment
-        else {
-            // TODO : implement this
-        }
+        tvm_n = FindN(tvm_i, tvm_pv, tvm_pmt, tvm_fv);
 
-        snprintf(tvm_Strings[0], sizeof(tvm_Strings[0]), "%.2f", tvm_n);
-        FURI_LOG_I("INFORMATION tag", "N of Periods solved (tvm_n): %.2f", tvm_n);
+        snprintf(tvm_Strings[0], sizeof(tvm_Strings[0]), "%.4f", tvm_n);
+        FURI_LOG_I("INFORMATION tag", "N of Periods solved (tvm_n): %.4f", tvm_n);
     }
 }
 
