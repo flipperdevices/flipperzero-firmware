@@ -3,7 +3,6 @@
 //#include "subghz_i.h"
 
 #include <furi.h>
-#include <m-list.h>
 #include <lib/subghz/devices/cc1101_configs.h>
 
 #define TAG "SubGhzSetting"
@@ -163,25 +162,19 @@ static void subghz_setting_load_default_preset(
     memcpy(&item->custom_preset_data[0], &preset_data[0], item->custom_preset_data_size);
 }
 
-static void subghz_setting_load_default_region(
-    SubGhzSetting* instance,
-    const uint32_t frequencies[],
-    const uint32_t hopper_frequencies[]) {
+static void subghz_setting_load_frequencies(FrequencyList_t list, const uint32_t* frequencies) {
+    while(*frequencies) {
+        FrequencyList_push_back(list, *frequencies);
+        frequencies++;
+    }
+}
+
+static void subghz_setting_load_default_region(SubGhzSetting* instance) {
     furi_assert(instance);
 
     FrequencyList_reset(instance->frequencies);
     FrequencyList_reset(instance->hopper_frequencies);
     subghz_setting_preset_reset(instance);
-
-    while(*frequencies) {
-        FrequencyList_push_back(instance->frequencies, *frequencies);
-        frequencies++;
-    }
-
-    while(*hopper_frequencies) {
-        FrequencyList_push_back(instance->hopper_frequencies, *hopper_frequencies);
-        hopper_frequencies++;
-    }
 
     subghz_setting_load_default_preset(
         instance, "AM270", subghz_device_cc1101_preset_ook_270khz_async_regs);
@@ -197,8 +190,7 @@ static void subghz_setting_load_default_region(
 
 // Region check removed
 void subghz_setting_load_default(SubGhzSetting* instance) {
-    subghz_setting_load_default_region(
-        instance, subghz_frequency_list, subghz_hopper_frequency_list);
+    subghz_setting_load_default_region(instance);
 }
 
 void subghz_setting_load(SubGhzSetting* instance, const char* file_path) {
@@ -237,11 +229,12 @@ void subghz_setting_load(SubGhzSetting* instance, const char* file_path) {
             temp_bool = true;
             flipper_format_read_bool(fff_data_file, "Add_standard_frequencies", &temp_bool, 1);
             if(!temp_bool) {
-                FURI_LOG_I(TAG, "Removing standard frequencies");
-                FrequencyList_reset(instance->frequencies);
-                FrequencyList_reset(instance->hopper_frequencies);
+                FURI_LOG_I(TAG, "Skipping standard frequencies");
             } else {
-                FURI_LOG_I(TAG, "Keeping standard frequencies");
+                FURI_LOG_I(TAG, "Adding standard frequencies");
+                subghz_setting_load_frequencies(instance->frequencies, subghz_frequency_list);
+                subghz_setting_load_frequencies(
+                    instance->hopper_frequencies, subghz_hopper_frequency_list);
             }
 
             // Load frequencies
@@ -302,10 +295,14 @@ void subghz_setting_load(SubGhzSetting* instance, const char* file_path) {
     flipper_format_free(fff_data_file);
     furi_record_close(RECORD_STORAGE);
 
-    if(!FrequencyList_size(instance->frequencies) ||
-       !FrequencyList_size(instance->hopper_frequencies)) {
-        FURI_LOG_E(TAG, "Error loading user settings, loading default settings");
-        subghz_setting_load_default(instance);
+    if(!FrequencyList_size(instance->frequencies)) {
+        FURI_LOG_E(TAG, "Empty static frequency list, loading default ones");
+        subghz_setting_load_frequencies(instance->frequencies, subghz_frequency_list);
+    }
+    if(!FrequencyList_size(instance->hopper_frequencies)) {
+        FURI_LOG_E(TAG, "Empty hopper frequency list, loading default ones");
+        subghz_setting_load_frequencies(
+            instance->hopper_frequencies, subghz_hopper_frequency_list);
     }
 }
 
