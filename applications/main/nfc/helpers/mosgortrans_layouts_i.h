@@ -4,6 +4,7 @@
 #include <nfc/protocols/mf_classic/mf_classic.h>
 #include <furi_hal_rtc.h>
 #include <nfc/helpers/nfc_util.h>
+#include <bit_lib/bit_lib.h>
 
 #define TAG2 "Mosgortrans"
 
