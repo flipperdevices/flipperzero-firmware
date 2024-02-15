@@ -1,5 +1,7 @@
 # Simple Calendar App for Flipper Zero
 
+![Screenshot](screenshots/ss0.png)
+
 This repository contains the source code for a simple calendar application designed for the Flipper Zero device. The app provides an intuitive display of the days of the month and supports basic navigation to explore different months and years.
 
 ## Features
