@@ -70,7 +70,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Sub-GHz Remote (Refactored) + Configurator v1.3 (By gid9798)](https://github.com/DarkFlippers/SubGHz_Remote) [Custom modulations in subghz remote (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/52cedc15324b8eaa7cc1e878b2311ce6a368c222)
 - Updated: [Sub-GHz setting updates for static/hopper frequencies (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/ce2349146001c1689207d952f36de80f72c3c742)
 - Updated: [Simpler IR last settings import (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/9f5c48ed9e560faee1fa225f1443d106d9359420)
-- Updated: [NFC: Emv fixes #702 (By wosk_& Leptopt1los)](https://github.com/DarkFlippers/unleashed-firmware/pull/702)
 - OFW: [NFC: FIX ISO15693 emulation #3444 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3444)
 - OFW: [Add Model JTC Genesis 5.5 to IR #3388 (By pattyland)](https://github.com/flipperdevices/flipperzero-firmware/pull/3388)
 - OFW: [Gui text box: fix formatted string memory reservation #3447 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3447)
@@ -79,6 +78,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Sorry, due to Desktop Settings change to FAP, you may need to re-configure your favorite apps.
 - Updated: [Chess v2.0 (By xtruan)](https://github.com/xtruan/flipper-chess)
 - Updated: [Guess The Number v1.2 (By kWAYTV)](https://github.com/kWAYTV/guess-the-number-fz)
+- Updated: [NFC: Emv fixes #702 (By wosk_& Leptopt1los)](https://github.com/DarkFlippers/unleashed-firmware/pull/702)
 - To Be Merged OFW PRs: [3211](https://github.com/flipperdevices/flipperzero-firmware/pull/3211), [3366](https://github.com/flipperdevices/flipperzero-firmware/pull/3366), [3250](https://github.com/flipperdevices/flipperzero-firmware/pull/3250), [3402](https://github.com/flipperdevices/flipperzero-firmware/pull/3402), [3409](https://github.com/flipperdevices/flipperzero-firmware/pull/3409), [3406](https://github.com/flipperdevices/flipperzero-firmware/pull/3406), [3431](https://github.com/flipperdevices/flipperzero-firmware/pull/3431), [3254](https://github.com/flipperdevices/flipperzero-firmware/pull/3254), [3429](https://github.com/flipperdevices/flipperzero-firmware/pull/3429), [3286](https://github.com/flipperdevices/flipperzero-firmware/pull/3286), [3442](https://github.com/flipperdevices/flipperzero-firmware/pull/3442), [3445](https://github.com/flipperdevices/flipperzero-firmware/pull/3445), [3448](https://github.com/flipperdevices/flipperzero-firmware/pull/3448), [3446](https://github.com/flipperdevices/flipperzero-firmware/pull/3446) & [3383](https://github.com/flipperdevices/flipperzero-firmware/pull/3383)
 
 <a name="release">
