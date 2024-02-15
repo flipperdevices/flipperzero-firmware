@@ -179,7 +179,7 @@ static void save_image_to_flipper_sd_card(void* model) {
     FuriString* file_name = furi_string_alloc();
 
     // Get the current date and time.
-    FuriHalRtcDateTime datetime = {0};
+    DateTime datetime = {0};
     furi_hal_rtc_get_datetime(&datetime);
 
     // Create the file name.
