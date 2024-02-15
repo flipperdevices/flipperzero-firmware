@@ -117,7 +117,7 @@ uint8_t listen_addr[5];
 uint8_t listen_addr_len = 0;
 char* ListenFields = NULL; // ptr to string: field1,field2,... max 5 field now
 bool ListenNew;
-FuriHalRtcDateTime ListenLastTime = {0};
+DateTime ListenLastTime = {0};
 uint32_t ListenPrev = 0;
 uint32_t ListenLast = 0;
 FuriString** Read_cmd = NULL; // Names of read cmd
@@ -1039,7 +1039,7 @@ static void save_batch(void) {
     FURI_LOG_D(TAG, "Save Batch");
     char *p, *p2;
     stream_seek(file_stream, 0, StreamOffsetFromEnd);
-    FuriHalRtcDateTime dt;
+    DateTime dt;
     furi_hal_rtc_get_datetime(&dt);
     stream_write_format(file_stream, "\n%s ", SettingsFld_WriteBatch);
     p = (char*)furi_string_get_cstr(ReadBatch_cmd[view_cmd[rwt_read_batch]]);
@@ -1447,7 +1447,7 @@ void work_timer_callback(void* ctx) {
                     if(rw_type == rwt_listen) {
                         ListenPrev = ListenLast;
                         furi_hal_rtc_get_datetime(&ListenLastTime);
-                        ListenLast = furi_hal_rtc_datetime_to_timestamp(&ListenLastTime);
+                        ListenLast = datetime_datetime_to_timestamp(&ListenLastTime);
                         ListenNew = true;
                     } else if(send_status != sst_receiving)
                         break;
