@@ -29,8 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0214-0221-0.97.2-958c47c](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-02-15 09:50 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-02-15 09:50 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-02-15 11:25 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-02-15 11:25 EST`
 - OFW: [NFC: Add support for Gallagher access control (MIFARE Classic only) #3306 (By nickmooney)](https://github.com/flipperdevices/flipperzero-firmware/pull/3306)
 - OFW: [NFC: Slix disable privacy #3425 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3425)
 - OFW: [NFC: Added NFC plugin; Some parser #3335 (By zProAle)](https://github.com/flipperdevices/flipperzero-firmware/pull/3335)
@@ -78,12 +78,12 @@ This software is for experimental purposes only and is not meant for any illegal
 - Sorry, due to Desktop Settings change to FAP, you may need to re-configure your favorite apps.
 - Updated: [Chess v2.0 (By xtruan)](https://github.com/xtruan/flipper-chess)
 - Updated: [Guess The Number v1.2 (By kWAYTV)](https://github.com/kWAYTV/guess-the-number-fz)
-- Updated: [NFC: Emv fixes #702 (By wosk_& Leptopt1los)](https://github.com/DarkFlippers/unleashed-firmware/pull/702)
 - OFW: [bit_lib and nfc_util refactor #3383 (By Leptopt1los)](https://github.com/flipperdevices/flipperzero-firmware/pull/3383)
 - [Firmware bit_lib cleanup (By Leptopt1los & xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/cc457fade24dc291f099ecde4c5435973e37bdbc)
 - OFW: [T5577 lib: write with mask function added #3362 (By Leptopt1los)](https://github.com/flipperdevices/flipperzero-firmware/pull/3362)
 - OFW: [lfrfid/em4100: added support for different bit rates #3410 (By Mrkvak)](https://github.com/flipperdevices/flipperzero-firmware/pull/3410)
 - Updated: [NFC Seader v2.3 (By bettse)](https://github.com/bettse/seader)
+- Updated: [NFC: Emv fixes #702 (By wosk_& Leptopt1los)](https://github.com/DarkFlippers/unleashed-firmware/pull/702)
 - To Be Merged OFW PRs: [3211](https://github.com/flipperdevices/flipperzero-firmware/pull/3211), [3366](https://github.com/flipperdevices/flipperzero-firmware/pull/3366), [3250](https://github.com/flipperdevices/flipperzero-firmware/pull/3250), [3402](https://github.com/flipperdevices/flipperzero-firmware/pull/3402), [3409](https://github.com/flipperdevices/flipperzero-firmware/pull/3409), [3406](https://github.com/flipperdevices/flipperzero-firmware/pull/3406), [3431](https://github.com/flipperdevices/flipperzero-firmware/pull/3431), [3254](https://github.com/flipperdevices/flipperzero-firmware/pull/3254), [3429](https://github.com/flipperdevices/flipperzero-firmware/pull/3429), [3286](https://github.com/flipperdevices/flipperzero-firmware/pull/3286), [3442](https://github.com/flipperdevices/flipperzero-firmware/pull/3442), [3445](https://github.com/flipperdevices/flipperzero-firmware/pull/3445), [3448](https://github.com/flipperdevices/flipperzero-firmware/pull/3448), [3446](https://github.com/flipperdevices/flipperzero-firmware/pull/3446), [3386](https://github.com/flipperdevices/flipperzero-firmware/pull/3386) & [3450](https://github.com/flipperdevices/flipperzero-firmware/pull/3450)
 
 <a name="release">
