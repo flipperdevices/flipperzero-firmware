@@ -264,7 +264,7 @@ int32_t flipper_geiger_app() {
                     if(recordData == 0) {
                         notification_message(notification, &sequence_set_only_red_255);
 
-                        FuriHalRtcDateTime datetime;
+                        DateTime datetime;
                         furi_hal_rtc_get_datetime(&datetime);
 
                         char path[64];
