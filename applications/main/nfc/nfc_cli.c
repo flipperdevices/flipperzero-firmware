@@ -306,10 +306,9 @@ static NfcCommand nfc_cli_iso14443_3a_poller_callback(NfcGenericEventEx event, v
     return command;
 }
 
-static void nfc_cli_iso14443_3a(Cli* cli, FuriString* args) {
-    UNUSED(cli);
-
+static void nfc_cli_iso14443_3a_poll_handler(FuriString* args) {
     FuriString* tmp_str = furi_string_alloc();
+
     size_t cmd_ascii_len = 0;
     PollCommandSettings settings = {
         .activation_required = true,
@@ -321,15 +320,6 @@ static void nfc_cli_iso14443_3a(Cli* cli, FuriString* args) {
     PollCommandArray_it_t iter;
 
     do {
-        if(!args_read_string_and_trim(args, tmp_str)) {
-            nfc_cli_iso14443_3a_print_usage();
-            break;
-        }
-        if(furi_string_cmp_str(tmp_str, "poll") != 0) {
-            nfc_cli_iso14443_3a_print_usage();
-            break;
-        }
-
         bool read_data_success = true;
         while(true) {
             cmd_ascii_len = args_get_first_word_length(args);
@@ -448,13 +438,35 @@ static void nfc_cli_iso14443_3a(Cli* cli, FuriString* args) {
         nfc_cli_poller_context_free(instance);
     } while(false);
 
-    furi_string_free(tmp_str);
     for(PollCommandArray_it(iter, cmd_arr); !PollCommandArray_end_p(iter);
         PollCommandArray_next(iter)) {
         const PollCommand* cmd = PollCommandArray_cref(iter);
         bit_buffer_free(cmd->buffer_tx);
     }
     PollCommandArray_clear(cmd_arr);
+    furi_string_free(tmp_str);
+}
+
+static void nfc_cli_iso14443_3a(Cli* cli, FuriString* args) {
+    UNUSED(cli);
+
+    FuriString* tmp_str = furi_string_alloc();
+
+    do {
+        if(!args_read_string_and_trim(args, tmp_str)) {
+            nfc_cli_iso14443_3a_print_usage();
+            break;
+        }
+        if(furi_string_cmp_str(tmp_str, "poll") == 0) {
+            nfc_cli_iso14443_3a_poll_handler(args);
+        } else {
+            nfc_cli_iso14443_3a_print_usage();
+            break;
+        }
+
+    } while(false);
+
+    furi_string_free(tmp_str);
 }
 
 static void nfc_cli_field(Cli* cli, FuriString* args) {
