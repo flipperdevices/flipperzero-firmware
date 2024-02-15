@@ -17,8 +17,8 @@
 #define FURI_HAL_IDLE_TIMER_CLK_HZ 32768
 #define FURI_HAL_OS_TICK_HZ configTICK_RATE_HZ
 
-#define FURI_HAL_OS_IDLE_CNT_TO_TICKS(x) (((x)*FURI_HAL_OS_TICK_HZ) / FURI_HAL_IDLE_TIMER_CLK_HZ)
-#define FURI_HAL_OS_TICKS_TO_IDLE_CNT(x) (((x)*FURI_HAL_IDLE_TIMER_CLK_HZ) / FURI_HAL_OS_TICK_HZ)
+#define FURI_HAL_OS_IDLE_CNT_TO_TICKS(x) (((x) * FURI_HAL_OS_TICK_HZ) / FURI_HAL_IDLE_TIMER_CLK_HZ)
+#define FURI_HAL_OS_TICKS_TO_IDLE_CNT(x) (((x) * FURI_HAL_IDLE_TIMER_CLK_HZ) / FURI_HAL_OS_TICK_HZ)
 
 #define FURI_HAL_IDLE_TIMER_TICK_PER_EPOCH (FURI_HAL_OS_IDLE_CNT_TO_TICKS(FURI_HAL_IDLE_TIMER_MAX))
 #define FURI_HAL_OS_MAX_SLEEP (FURI_HAL_IDLE_TIMER_TICK_PER_EPOCH - 1)
@@ -194,7 +194,8 @@ void vPortSuppressTicksAndSleep(TickType_t expected_idle_ticks) {
         if(completed_ticks > 0) {
             if(completed_ticks > expected_idle_ticks) {
 #ifdef FURI_HAL_OS_DEBUG
-                furi_hal_console_printf(">%lu\r\n", completed_ticks - expected_idle_ticks);
+                furi_log_print_raw_format(
+                    FuriLogLevelDebug, ">%lu\r\n", completed_ticks - expected_idle_ticks);
 #endif
                 completed_ticks = expected_idle_ticks;
             }
