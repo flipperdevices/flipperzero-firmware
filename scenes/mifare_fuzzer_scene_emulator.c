@@ -243,7 +243,7 @@ bool mifare_fuzzer_scene_emulator_on_event(void* context, SceneManagerEvent even
         //FURI_LOG_D(TAG, "mifare_fuzzer_scene_emulator_on_event() :: SceneManagerEventTypeTick");
 
         // Used to check tick length (not perfect but enough)
-        //FuriHalRtcDateTime curr_dt;
+        //DateTime curr_dt;
         //furi_hal_rtc_get_datetime(&curr_dt);
         //FURI_LOG_D(TAG, "Time is: %.2d:%.2d:%.2d", curr_dt.hour, curr_dt.minute, curr_dt.second);
 
