@@ -1,22 +1,30 @@
 #pragma once
 
-#include <dialogs/dialogs.h>
-#include <flipper_format/flipper_format.h>
 #include <furi.h>
 #include <furi_hal.h>
+
 #include <gui/gui.h>
 #include <gui/view.h>
 #include <gui/view_dispatcher.h>
 #include <gui/scene_manager.h>
+#include <cli/cli.h>
+#include <notification/notification_messages.h>
+
 #include <gui/modules/submenu.h>
 #include <gui/modules/dialog_ex.h>
 #include <gui/modules/popup.h>
 #include <gui/modules/text_input.h>
 #include <gui/modules/byte_input.h>
 #include <gui/modules/widget.h>
+
+#include <lfrfid/views/lfrfid_view_read.h>
+
 #include <notification/notification_messages.h>
-#include <rpc/rpc_app.h>
+#include <dialogs/dialogs.h>
 #include <storage/storage.h>
+#include <flipper_format/flipper_format.h>
+
+#include <rpc/rpc_app.h>
 
 #include <toolbox/protocols/protocol_dict.h>
 #include <toolbox/path.h>
@@ -24,9 +32,9 @@
 #include <lfrfid/protocols/lfrfid_protocols.h>
 #include <lfrfid/lfrfid_worker.h>
 
-#include "views/lfrfid_view_read.h"
-#include "scenes/lfrfid_scene.h"
+#include <lfrfid/scenes/lfrfid_scene.h>
 
+#define LFRFID_KEY_NAME_SIZE 22
 #define LFRFID_TEXT_STORE_SIZE 40
 
 #define LFRFID_APP_FOLDER ANY_PATH("lfrfid")
@@ -37,11 +45,6 @@
 
 #define LFRFID_APP_RAW_ASK_EXTENSION ".ask.raw"
 #define LFRFID_APP_RAW_PSK_EXTENSION ".psk.raw"
-
-#define SCREEN_WIDTH (128)
-#define SCREEN_HEIGHT (64)
-#define SCREEN_WIDTH_CENTER (SCREEN_WIDTH >> 1)
-#define SCREEN_HEIGHT_CENTER (SCREEN_HEIGHT >> 1)
 
 enum LfRfidCustomEvent {
     LfRfidEventNext = 100,
@@ -72,24 +75,6 @@ typedef enum {
     LfRfidRpcStateEmulating,
 } LfRfidRpcState;
 
-typedef enum {
-    LfRfidUsePassword = 1 << 0,
-    LfRfidSetConfigurationLockBit = 1 << 1,
-    LfRfidSetPasswordLockBit = 1 << 2,
-    LfRfidSetMasterKeyDisableTestMode = 1 << 3,
-    LfRfidDisablePasswordMode = 1 << 4,
-    LfRfidWriteBlockMode = 1 << 5,
-    LfRfidWriteBlockLockBit = 1 << 6,
-    LfRfidReadBlockMode = 1 << 7,
-    LfRfidTestModeAccess = 1 << 8
-} LfRfidExtraOptions;
-
-typedef enum {
-    LfRfidSettingHexGeneric = 1 << 0,
-    LfRfidSettingCurrentPassword = 1 << 1,
-    LfRfidSettingNewPassword = 1 << 2,
-} LfRfidSettingHex;
-
 typedef struct LfRfid LfRfid;
 
 struct LfRfid {
@@ -115,6 +100,8 @@ struct LfRfid {
     uint8_t* old_key_data;
     uint8_t* new_key_data;
 
+    uint8_t password[4];
+
     RpcAppSystem* rpc_ctx;
     LfRfidRpcState rpc_state;
 
@@ -128,14 +115,6 @@ struct LfRfid {
     // Custom views
     LfRfidReadView* read_view;
 
-    LfRfidExtraOptions extra_options;
-    uint8_t* password;
-    uint8_t* new_password;
-    LfRfidSettingHex setting_hex;
-    uint8_t write_page;
-    uint8_t write_block;
-    //uint8_t read_page;
-    //uint8_t read_block;
     bool fav_timeout;
 };
 

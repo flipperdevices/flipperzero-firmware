@@ -33,7 +33,7 @@ void lfrfid_scene_save_name_on_enter(void* context) {
         lfrfid_text_input_callback,
         app,
         app->text_store,
-        LFRFID_TEXT_STORE_SIZE,
+        LFRFID_KEY_NAME_SIZE,
         key_name_is_empty);
 
     FURI_LOG_I("", "%s %s", furi_string_get_cstr(folder_path), app->text_store);

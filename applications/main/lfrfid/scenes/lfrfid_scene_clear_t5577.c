@@ -11,9 +11,9 @@ static void lfrfid_clear_t5577_password_and_config_to_EM(LfRfid* app) {
     uint8_t default_passwords_len;
     const uint32_t* default_passwords = lfrfid_get_t5577_default_passwords(&default_passwords_len);
 
-    popup_set_header(popup, "Removing\npassword", 102, 10, AlignCenter, AlignCenter);
+    popup_set_header(popup, "Removing\npassword", 90, 36, AlignCenter, AlignCenter);
     popup_set_icon(popup, 0, 3, &I_RFIDDolphinSend_97x61);
-    popup_set_text(popup, curr_buf, 92, 33, AlignCenter, AlignCenter);
+    popup_set_text(popup, curr_buf, 90, 56, AlignCenter, AlignCenter);
     notification_message(app->notifications, &sequence_blink_start_magenta);
 
     LFRFIDT5577 data = {
