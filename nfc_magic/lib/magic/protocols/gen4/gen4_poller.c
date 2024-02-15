@@ -2,8 +2,8 @@
 #include "protocols/gen4/gen4_poller.h"
 #include <nfc/protocols/iso14443_3a/iso14443_3a.h>
 #include <nfc/protocols/iso14443_3a/iso14443_3a_poller.h>
-#include <lib/bit_lib/bit_lib.h>
 #include <nfc/nfc_poller.h>
+#include <bit_lib.h>
 
 #define GEN4_POLLER_THREAD_FLAG_DETECTED (1U << 0)
 

@@ -15,6 +15,7 @@
 #include <gui/modules/text_input.h>
 #include <gui/modules/byte_input.h>
 #include <gui/modules/widget.h>
+#include <views/dict_attack.h>
 
 #include <input/input.h>
 
@@ -30,15 +31,23 @@
 
 #include <nfc/nfc.h>
 #include <nfc/nfc_device.h>
+#include <nfc/nfc_poller.h>
+#include <toolbox/keys_dict.h>
 
 #include "lib/magic/nfc_magic_scanner.h"
 #include "lib/magic/protocols/nfc_magic_protocols.h"
 #include "lib/magic/protocols/gen1a/gen1a_poller.h"
+#include "lib/magic/protocols/gen2/gen2_poller.h"
 #include "lib/magic/protocols/gen4/gen4_poller.h"
+
+#include "lib/nfc/protocols/mf_classic/mf_classic_poller.h"
 
 #define NFC_APP_FOLDER ANY_PATH("nfc")
 #define NFC_APP_EXTENSION ".nfc"
 #define NFC_APP_SHADOW_EXTENSION ".shd"
+
+#define NFC_APP_MF_CLASSIC_DICT_USER_PATH (NFC_APP_FOLDER "/assets/mf_classic_dict_user.nfc")
+#define NFC_APP_MF_CLASSIC_DICT_SYSTEM_PATH (NFC_APP_FOLDER "/assets/mf_classic_dict.nfc")
 
 #define NFC_MAGIC_APP_BYTE_INPUT_STORE_SIZE (4)
 
@@ -50,7 +59,25 @@ enum NfcMagicAppCustomEvent {
     NfcMagicAppCustomEventWorkerExit,
     NfcMagicAppCustomEventByteInputDone,
     NfcMagicAppCustomEventTextInputDone,
+    NfcMagicAppCustomEventCardDetected,
+    NfcMagicAppCustomEventCardLost,
+    NfcMagicAppCustomEventDictAttackDataUpdate,
+    NfcMagicAppCustomEventDictAttackComplete,
+    NfcMagicAppCustomEventDictAttackSkip,
 };
+
+typedef struct {
+    KeysDict* dict;
+    uint8_t sectors_total;
+    uint8_t sectors_read;
+    uint8_t current_sector;
+    uint8_t keys_found;
+    size_t dict_keys_total;
+    size_t dict_keys_current;
+    bool is_key_attack;
+    uint8_t key_attack_current_sector;
+    bool is_card_present;
+} NfcMagicAppMfClassicDictAttackContext;
 
 struct NfcMagicApp {
     ViewDispatcher* view_dispatcher;
@@ -61,14 +88,23 @@ struct NfcMagicApp {
 
     SceneManager* scene_manager;
     NfcDevice* source_dev;
+    NfcDevice* target_dev;
     FuriString* file_name;
     FuriString* file_path;
 
     Nfc* nfc;
     NfcMagicProtocol protocol;
     NfcMagicScanner* scanner;
+    NfcPoller* poller;
     Gen1aPoller* gen1a_poller;
+
+    Gen2Poller* gen2_poller;
+    bool gen2_poller_is_wipe_mode;
+
     Gen4Poller* gen4_poller;
+
+    NfcMagicAppMfClassicDictAttackContext nfc_dict_context;
+    DictAttack* dict_attack;
 
     uint32_t gen4_password;
     uint32_t gen4_password_new;
@@ -95,6 +131,7 @@ typedef enum {
     NfcMagicAppViewTextInput,
     NfcMagicAppViewByteInput,
     NfcMagicAppViewWidget,
+    NfcMagicAppViewDictAttack,
 } NfcMagicAppView;
 
 void nfc_magic_app_blink_start(NfcMagicApp* nfc_magic);
