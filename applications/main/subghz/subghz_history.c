@@ -210,10 +210,7 @@ bool subghz_history_get_text_space_left(
             furi_string_printf(output, "%02u", instance->last_index_write);
             return false;
         } else {
-            FuriHalRtcDateTime datetime;
-            furi_hal_rtc_get_datetime(&datetime);
-
-            if(furi_hal_rtc_datetime_to_timestamp(&datetime) % 2) {
+            if(furi_hal_rtc_get_timestamp() % 2) {
                 furi_string_printf(output, "%02u", instance->last_index_write);
             } else {
                 furi_string_printf(output, "%d sats", sats);

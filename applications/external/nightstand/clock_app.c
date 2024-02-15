@@ -225,9 +225,7 @@ static void clock_tick(void* ctx) {
 
 void timer_start_stop(ClockState* plugin_state) {
     // START/STOP TIMER
-    FuriHalRtcDateTime curr_dt;
-    furi_hal_rtc_get_datetime(&curr_dt);
-    uint32_t curr_ts = furi_hal_rtc_datetime_to_timestamp(&curr_dt);
+    uint32_t curr_ts = furi_hal_rtc_get_timestamp();
 
     if(plugin_state->timer_running) {
         // Update stopped seconds

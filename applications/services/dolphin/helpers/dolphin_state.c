@@ -108,9 +108,7 @@ bool dolphin_state_load(DolphinState* dolphin_state) {
 }
 
 uint64_t dolphin_state_timestamp() {
-    DateTime datetime;
-    furi_hal_rtc_get_datetime(&datetime);
-    return datetime_datetime_to_timestamp(&datetime);
+    return furi_hal_rtc_get_timestamp();
 }
 
 bool dolphin_state_is_levelup(int icounter) {

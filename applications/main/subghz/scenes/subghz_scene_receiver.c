@@ -206,7 +206,7 @@ static void subghz_scene_add_to_history_callback(
                     const char* suf = subghz->last_settings->protocol_file_names ?
                                           decoder_base->protocol->name :
                                           SUBGHZ_APP_FILENAME_PREFIX;
-                    FuriHalRtcDateTime time = subghz_history_get_datetime(history, idx);
+                    DateTime time = subghz_history_get_datetime(history, idx);
                     name_generator_make_detailed_datetime(file, sizeof(file), suf, &time);
                     // Dir name
                     FuriString* path = furi_string_alloc_set(SUBGHZ_APP_FOLDER "/Autosave");
@@ -493,7 +493,7 @@ bool subghz_scene_receiver_on_event(void* context, SceneManagerEvent event) {
                 subghz->threshold_rssi, subghz_txrx_radio_device_get_rssi(subghz->txrx));
 
             if(subghz->last_settings->gps_baudrate != 0) {
-                FuriHalRtcDateTime datetime;
+                DateTime datetime;
                 furi_hal_rtc_get_datetime(&datetime);
                 if((datetime.second - subghz->gps->fix_second) > 15) {
                     subghz->gps->latitude = NAN;
