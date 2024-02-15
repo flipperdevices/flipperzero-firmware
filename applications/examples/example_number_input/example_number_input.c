@@ -21,7 +21,9 @@ static ExampleNumberInput* example_number_input_alloc() {
         app->view_dispatcher, example_number_input_custom_event_callback);
     app->number_input = number_input_alloc();
     view_dispatcher_add_view(
-        app->view_dispatcher, ExampleNumberInputViewIdNumberInput, number_input_get_view(app->number_input));
+        app->view_dispatcher,
+        ExampleNumberInputViewIdNumberInput,
+        number_input_get_view(app->number_input));
     app->show_number = example_number_input_show_number_alloc();
     view_dispatcher_add_view(
         app->view_dispatcher,
@@ -30,12 +32,11 @@ static ExampleNumberInput* example_number_input_alloc() {
     app->view_stack = view_stack_alloc();
     view_dispatcher_add_view(
         app->view_dispatcher, ExampleNumberInputViewIdStack, view_stack_get_view(app->view_stack));
-    
+
     return app;
 }
 
-static void example_number_input_free(ExampleNumberInput* app)
-{
+static void example_number_input_free(ExampleNumberInput* app) {
     furi_assert(app);
     scene_manager_free(app->scene_manager);
     number_input_free(app->number_input);

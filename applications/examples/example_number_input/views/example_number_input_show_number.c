@@ -20,23 +20,28 @@ void example_number_input_show_number_set_callback(
     instance->context = context;
 }
 
-void example_number_input_show_number_draw(Canvas* canvas, ExampleNumberInputShowNumberModel* model) {
+void example_number_input_show_number_draw(
+    Canvas* canvas,
+    ExampleNumberInputShowNumberModel* model) {
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
     canvas_set_font(canvas, FontPrimary);
     canvas_draw_str_aligned(canvas, 64, 10, AlignCenter, AlignTop, "The Number is");
     canvas_set_font(canvas, FontSecondary);
     canvas_draw_str_aligned(canvas, 64, 22, AlignCenter, AlignTop, model->number);
-    
+
     elements_button_center(canvas, "Change");
 }
 
-static void example_number_input_show_number_model_init(ExampleNumberInputShowNumberModel* const model) {
+static void
+    example_number_input_show_number_model_init(ExampleNumberInputShowNumberModel* const model) {
     UNUSED(model);
     //model->number = "1";
 }
 
-void example_number_input_show_number_model_set_number(ExampleNumberInputShowNumber* instance, const char* number) {
+void example_number_input_show_number_model_set_number(
+    ExampleNumberInputShowNumber* instance,
+    const char* number) {
     furi_assert(instance);
     ExampleNumberInputShowNumberModel* model = view_get_model(instance->view);
     model->number = number;
@@ -54,7 +59,8 @@ bool example_number_input_show_number_input(InputEvent* event, void* context) {
                 ExampleNumberInputShowNumberModel * model,
                 {
                     UNUSED(model);
-                    instance->callback(ExampleNumberInputCustomEventShowNumberBack, instance->context);
+                    instance->callback(
+                        ExampleNumberInputCustomEventShowNumberBack, instance->context);
                 },
                 true);
             break;
@@ -64,7 +70,8 @@ bool example_number_input_show_number_input(InputEvent* event, void* context) {
                 ExampleNumberInputShowNumberModel * model,
                 {
                     UNUSED(model);
-                    instance->callback(ExampleNumberInputCustomEventShowNumberOk, instance->context);
+                    instance->callback(
+                        ExampleNumberInputCustomEventShowNumberOk, instance->context);
                 },
                 true);
             break;
@@ -92,9 +99,11 @@ void example_number_input_show_number_enter(void* context) {
 ExampleNumberInputShowNumber* example_number_input_show_number_alloc() {
     ExampleNumberInputShowNumber* instance = malloc(sizeof(ExampleNumberInputShowNumber));
     instance->view = view_alloc();
-    view_allocate_model(instance->view, ViewModelTypeLocking, sizeof(ExampleNumberInputShowNumberModel));
+    view_allocate_model(
+        instance->view, ViewModelTypeLocking, sizeof(ExampleNumberInputShowNumberModel));
     view_set_context(instance->view, instance); // furi_assert crashes in events without this
-    view_set_draw_callback(instance->view, (ViewDrawCallback)example_number_input_show_number_draw);
+    view_set_draw_callback(
+        instance->view, (ViewDrawCallback)example_number_input_show_number_draw);
     view_set_input_callback(instance->view, example_number_input_show_number_input);
 
     with_view_model(

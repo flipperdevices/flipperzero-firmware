@@ -6,9 +6,12 @@
 
 typedef struct ExampleNumberInputShowNumber ExampleNumberInputShowNumber;
 
-typedef void (*ExampleNumberInputShowNumberCallback)(ExampleNumberInputCustomEvent event, void* context);
+typedef void (
+    *ExampleNumberInputShowNumberCallback)(ExampleNumberInputCustomEvent event, void* context);
 
-void example_number_input_show_number_model_set_number(ExampleNumberInputShowNumber* instance, const char* number);
+void example_number_input_show_number_model_set_number(
+    ExampleNumberInputShowNumber* instance,
+    const char* number);
 void example_number_input_show_number_set_callback(
     ExampleNumberInputShowNumber* example_number_input_show_number,
     ExampleNumberInputShowNumberCallback callback,
