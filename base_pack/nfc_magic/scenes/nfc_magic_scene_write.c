@@ -5,7 +5,7 @@ enum {
     NfcMagicSceneWriteStateCardFound,
 };
 
-NfcCommand nfc_mafic_scene_write_gen1_poller_callback(Gen1aPollerEvent event, void* context) {
+NfcCommand nfc_magic_scene_write_gen1_poller_callback(Gen1aPollerEvent event, void* context) {
     NfcMagicApp* instance = context;
     furi_assert(event.data);
 
@@ -33,7 +33,39 @@ NfcCommand nfc_mafic_scene_write_gen1_poller_callback(Gen1aPollerEvent event, vo
     return command;
 }
 
-NfcCommand nfc_mafic_scene_write_gen4_poller_callback(Gen4PollerEvent event, void* context) {
+NfcCommand nfc_magic_scene_write_gen2_poller_callback(Gen2PollerEvent event, void* context) {
+    NfcMagicApp* instance = context;
+    furi_assert(event.data);
+
+    NfcCommand command = NfcCommandContinue;
+
+    if(event.type == Gen2PollerEventTypeDetected) {
+        view_dispatcher_send_custom_event(
+            instance->view_dispatcher, NfcMagicCustomEventCardDetected);
+    } else if(event.type == Gen2PollerEventTypeRequestMode) {
+        event.data->poller_mode.mode = Gen2PollerModeWrite;
+    } else if(event.type == Gen2PollerEventTypeRequestDataToWrite) {
+        const MfClassicData* mfc_data =
+            nfc_device_get_data(instance->source_dev, NfcProtocolMfClassic);
+        event.data->data_to_write.mfc_data = mfc_data;
+    } else if(event.type == Gen2PollerEventTypeRequestTargetData) {
+        const MfClassicData* mfc_data =
+            nfc_device_get_data(instance->target_dev, NfcProtocolMfClassic);
+        event.data->target_data.mfc_data = mfc_data;
+    } else if(event.type == Gen2PollerEventTypeSuccess) {
+        view_dispatcher_send_custom_event(
+            instance->view_dispatcher, NfcMagicCustomEventWorkerSuccess);
+        command = NfcCommandStop;
+    } else if(event.type == Gen2PollerEventTypeFail) {
+        view_dispatcher_send_custom_event(
+            instance->view_dispatcher, NfcMagicCustomEventWorkerFail);
+        command = NfcCommandStop;
+    }
+
+    return command;
+}
+
+NfcCommand nfc_magic_scene_write_gen4_poller_callback(Gen4PollerEvent event, void* context) {
     NfcMagicApp* instance = context;
     furi_assert(event.data);
 
@@ -90,12 +122,20 @@ void nfc_magic_scene_write_on_enter(void* context) {
     if(instance->protocol == NfcMagicProtocolGen1) {
         instance->gen1a_poller = gen1a_poller_alloc(instance->nfc);
         gen1a_poller_start(
-            instance->gen1a_poller, nfc_mafic_scene_write_gen1_poller_callback, instance);
+            instance->gen1a_poller, nfc_magic_scene_write_gen1_poller_callback, instance);
+    } else if(instance->protocol == NfcMagicProtocolGen2) {
+        instance->gen2_poller = gen2_poller_alloc(instance->nfc);
+        gen2_poller_start(
+            instance->gen2_poller, nfc_magic_scene_write_gen2_poller_callback, instance);
+    } else if(instance->protocol == NfcMagicProtocolClassic) {
+        instance->gen2_poller = gen2_poller_alloc(instance->nfc);
+        gen2_poller_start(
+            instance->gen2_poller, nfc_magic_scene_write_gen2_poller_callback, instance);
     } else {
         instance->gen4_poller = gen4_poller_alloc(instance->nfc);
         gen4_poller_set_password(instance->gen4_poller, instance->gen4_password);
         gen4_poller_start(
-            instance->gen4_poller, nfc_mafic_scene_write_gen4_poller_callback, instance);
+            instance->gen4_poller, nfc_magic_scene_write_gen4_poller_callback, instance);
     }
 }
 
@@ -132,7 +172,12 @@ void nfc_magic_scene_write_on_exit(void* context) {
     if(instance->protocol == NfcMagicProtocolGen1) {
         gen1a_poller_stop(instance->gen1a_poller);
         gen1a_poller_free(instance->gen1a_poller);
-    } else {
+    } else if(
+        instance->protocol == NfcMagicProtocolGen2 ||
+        instance->protocol == NfcMagicProtocolClassic) {
+        gen2_poller_stop(instance->gen2_poller);
+        gen2_poller_free(instance->gen2_poller);
+    } else if(instance->protocol == NfcMagicProtocolGen4) {
         gen4_poller_stop(instance->gen4_poller);
         gen4_poller_free(instance->gen4_poller);
     }
