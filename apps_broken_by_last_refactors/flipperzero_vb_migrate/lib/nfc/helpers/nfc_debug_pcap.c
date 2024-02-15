@@ -88,7 +88,7 @@ void nfc_debug_pcap_process_data(
     bool crc_dropped) {
     furi_assert(instance);
     furi_assert(data);
-    FuriHalRtcDateTime datetime;
+    DateTime datetime;
     furi_hal_rtc_get_datetime(&datetime);
 
     uint8_t event = 0;
@@ -117,7 +117,7 @@ void nfc_debug_pcap_process_data(
         uint8_t event;
         uint16_t len;
     } __attribute__((__packed__)) pkt_hdr = {
-        .ts_sec = furi_hal_rtc_datetime_to_timestamp(&datetime),
+        .ts_sec = datetime_datetime_to_timestamp(&datetime),
         .ts_usec = 0,
         .incl_len = len + 4,
         .orig_len = len + 4,

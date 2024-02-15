@@ -11,7 +11,7 @@ void avr_isp_scene_input_name_text_callback(void* context) {
 }
 
 void avr_isp_scene_input_name_get_timefilename(FuriString* name) {
-    FuriHalRtcDateTime datetime = {0};
+    DateTime datetime = {0};
     furi_hal_rtc_get_datetime(&datetime);
     furi_string_printf(
         name,

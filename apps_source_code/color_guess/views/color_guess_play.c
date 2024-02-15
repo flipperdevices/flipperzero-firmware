@@ -55,9 +55,9 @@ void color_guess_play_new_round(void* context, ColorGuessPlayModel* model) {
     furi_assert(context);
     ColorGuess* app = context;
     //Reset timer
-    FuriHalRtcDateTime date_time;
+    DateTime date_time;
     furi_hal_rtc_get_datetime(&date_time);
-    model->timestamp_start = furi_hal_rtc_datetime_to_timestamp(&date_time);
+    model->timestamp_start = datetime_datetime_to_timestamp(&date_time);
     model->success = 0;
     model->closeness = 0;
     model->prev_closeness = 0;
@@ -154,9 +154,9 @@ void color_guess_play_draw(Canvas* canvas, ColorGuessPlayModel* model) {
     }
     const int cursorOffset = 30;
     const int newCursorPos = (model->cursorpos * 12) + cursorOffset;
-    FuriHalRtcDateTime date_time;
+    DateTime date_time;
     furi_hal_rtc_get_datetime(&date_time);
-    uint32_t timestamp = furi_hal_rtc_datetime_to_timestamp(&date_time);
+    uint32_t timestamp = datetime_datetime_to_timestamp(&date_time);
     uint32_t time_elapsed = timestamp - model->timestamp_start;
     model->time_spent = time_elapsed;
 

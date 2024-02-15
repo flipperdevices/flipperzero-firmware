@@ -84,9 +84,9 @@ static float queue_avg(queue* q) {
 
 // TOO SLOW!
 //uint64_t dolphin_state_timestamp() {
-//    FuriHalRtcDateTime datetime;
+//    DateTime datetime;
 //    furi_hal_rtc_get_datetime(&datetime);
-//    return furi_hal_rtc_datetime_to_timestamp(&datetime);
+//    return datetime_datetime_to_timestamp(&datetime);
 //}
 //
 typedef struct {

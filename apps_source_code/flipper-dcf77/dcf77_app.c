@@ -26,7 +26,7 @@ uint8_t get_dcf_message_bit(uint8_t* message, uint8_t bit) {
 
 // should it still be const?
 static void update_dcf77_message_from_rtc(AppFSM* app_fsm) {
-    FuriHalRtcDateTime dt;
+    DateTime dt;
     furi_hal_rtc_get_datetime(&dt);
     app_fsm->bit_number = dt.second;
     app_fsm->next_message = malloc(8);
@@ -165,7 +165,7 @@ static void render_callback(Canvas* const canvas, void* ctx) {
     canvas_draw_frame(canvas, 0, 0, 128, 64);
     canvas_set_font(canvas, FontPrimary);
     snprintf(buffer, 64, "%1x.%1x=%01x", bit_number / 8, (bit_number % 8), bit_value);
-    FuriHalRtcDateTime dt;
+    DateTime dt;
     furi_hal_rtc_get_datetime(&dt);
     //canvas_draw_str_aligned(canvas, 64, 10, AlignCenter, AlignBottom, "DCF77 emulator");
     snprintf(
@@ -270,7 +270,7 @@ static void on_timer_tick(AppFSM* app_fsm) {
     static bool last_output = false;
     bool output = true;
 
-    FuriHalRtcDateTime dt;
+    DateTime dt;
     furi_hal_rtc_get_datetime(&dt);
     app_fsm->bit_number = dt.second;
     app_fsm->bit_value = get_dcf_message_bit(app_fsm->dcf77_message, app_fsm->bit_number);

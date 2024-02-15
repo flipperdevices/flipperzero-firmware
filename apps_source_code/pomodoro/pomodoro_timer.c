@@ -77,9 +77,9 @@ void pomodoro_timer_process(PomodoroTimer* pomodoro_timer, InputEvent* event) {
                     model->ok_pressed = false;
 
                     // START/STOP TIMER
-                    FuriHalRtcDateTime curr_dt;
+                    DateTime curr_dt;
                     furi_hal_rtc_get_datetime(&curr_dt);
-                    uint32_t current_timestamp = furi_hal_rtc_datetime_to_timestamp(&curr_dt);
+                    uint32_t current_timestamp = datetime_datetime_to_timestamp(&curr_dt);
 
                     // STARTED -> PAUSED
                     if(model->timer_running) {
@@ -116,9 +116,9 @@ void pomodoro_timer_process(PomodoroTimer* pomodoro_timer, InputEvent* event) {
 void pomodoro_draw_callback(Canvas* canvas, void* context, int max_seconds, int max_seconds_rest) {
     furi_assert(context);
     PomodoroTimerModel* model = context;
-    FuriHalRtcDateTime curr_dt;
+    DateTime curr_dt;
     furi_hal_rtc_get_datetime(&curr_dt);
-    uint32_t current_timestamp = furi_hal_rtc_datetime_to_timestamp(&curr_dt);
+    uint32_t current_timestamp = datetime_datetime_to_timestamp(&curr_dt);
 
     // Header
     canvas_set_font(canvas, FontPrimary);

@@ -136,7 +136,7 @@ static void data_display_draw_callback(Canvas* canvas, void* model) {
 	canvas_set_font(canvas, FontPrimary);
 	canvas_draw_str(canvas, 0, 48, "Time:");
 	
-	FuriHalRtcDateTime datetime;
+	DateTime datetime;
 	furi_hal_rtc_get_datetime(&datetime);
 	locale_format_time(s, &datetime, locale_get_time_format(), false);
 
