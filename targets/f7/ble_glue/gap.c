@@ -14,7 +14,7 @@
 #define FAST_ADV_TIMEOUT 30000
 #define INITIAL_ADV_TIMEOUT 60000
 
-#define GAP_CONN_INTERVAL_TO_MS(x) (uint16_t)((x)*1.25)
+#define GAP_INTERVAL_TO_MS(x) (uint16_t)((x) * 1.25)
 
 typedef struct {
     uint16_t gap_svc_handle;
@@ -66,7 +66,7 @@ static void gap_verify_connection_parameters(Gap* gap) {
         TAG,
         "Connection parameters: Connection Interval: %d (%d ms), Slave Latency: %d, Supervision Timeout: %d",
         gap->connection_params.conn_interval,
-        GAP_CONN_INTERVAL_TO_MS(gap->connection_params.conn_interval),
+        GAP_INTERVAL_TO_MS(gap->connection_params.conn_interval),
         gap->connection_params.slave_latency,
         gap->connection_params.supervisor_timeout);
 

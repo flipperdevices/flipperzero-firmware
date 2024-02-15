@@ -29,9 +29,11 @@ static const char* known_ext[] = {
     [ArchiveFileTypeBadUsb] = ".txt",
     [ArchiveFileTypeU2f] = "?",
     [ArchiveFileTypeApplication] = ".fap",
+    [ArchiveFileTypeJS] = ".js",
     [ArchiveFileTypeUpdateManifest] = ".fuf",
     [ArchiveFileTypeFolder] = "?",
     [ArchiveFileTypeUnknown] = "*",
+    [ArchiveFileTypeAppOrJs] = ".fap|.js",
 };
 
 static const ArchiveFileTypeEnum known_type[] = {
@@ -43,7 +45,7 @@ static const ArchiveFileTypeEnum known_type[] = {
     [ArchiveTabInfrared] = ArchiveFileTypeInfrared,
     [ArchiveTabBadUsb] = ArchiveFileTypeBadUsb,
     [ArchiveTabU2f] = ArchiveFileTypeU2f,
-    [ArchiveTabApplications] = ArchiveFileTypeApplication,
+    [ArchiveTabApplications] = ArchiveFileTypeAppOrJs,
     [ArchiveTabBrowser] = ArchiveFileTypeUnknown,
 };
 
