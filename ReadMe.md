@@ -29,8 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0214-0221-0.97.2-958c47c](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-02-14 02:21 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-02-14 02:21 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-02-15 11:25 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-02-15 11:25 EST`
 - OFW: [NFC: Add support for Gallagher access control (MIFARE Classic only) #3306 (By nickmooney)](https://github.com/flipperdevices/flipperzero-firmware/pull/3306)
 - OFW: [NFC: Slix disable privacy #3425 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3425)
 - OFW: [NFC: Added NFC plugin; Some parser #3335 (By zProAle)](https://github.com/flipperdevices/flipperzero-firmware/pull/3335)
@@ -69,12 +69,21 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Sub-GHz Remote (Refactored) + Configurator v1.3 (By gid9798)](https://github.com/DarkFlippers/SubGHz_Remote) [Custom modulations in subghz remote (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/52cedc15324b8eaa7cc1e878b2311ce6a368c222)
 - Updated: [Sub-GHz setting updates for static/hopper frequencies (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/ce2349146001c1689207d952f36de80f72c3c742)
 - Updated: [Simpler IR last settings import (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/9f5c48ed9e560faee1fa225f1443d106d9359420)
-- Updated: [NFC: Emv fixes #702 (By wosk_& Leptopt1los)](https://github.com/DarkFlippers/unleashed-firmware/pull/702)
 - OFW: [NFC: FIX ISO15693 emulation #3444 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3444)
 - OFW: [Add Model JTC Genesis 5.5 to IR #3388 (By pattyland)](https://github.com/flipperdevices/flipperzero-firmware/pull/3388)
 - OFW: [Gui text box: fix formatted string memory reservation #3447 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3447)
 - Updated: [Temp Sensors Reader 1.5 (By quen0n)](https://github.com/quen0n/Unitemp-Flipper-Zero-Plugin)
-- To Be Merged OFW PRs: [3448](https://github.com/flipperdevices/flipperzero-firmware/pull/3448), [3446](https://github.com/flipperdevices/flipperzero-firmware/pull/3446) & [3383](https://github.com/flipperdevices/flipperzero-firmware/pull/3383)
+- [API Cleanup, External Settings, Power Setting Additions & Some ByteInput optimizations (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/f3c6b1715b7982f610af9c1572cd1fc4df32855d)
+- Sorry, due to Desktop Settings change to FAP, you may need to re-configure your favorite apps.
+- Updated: [Chess v2.0 (By xtruan)](https://github.com/xtruan/flipper-chess)
+- Updated: [Guess The Number v1.2 (By kWAYTV)](https://github.com/kWAYTV/guess-the-number-fz)
+- OFW: [bit_lib and nfc_util refactor #3383 (By Leptopt1los)](https://github.com/flipperdevices/flipperzero-firmware/pull/3383)
+- [Firmware bit_lib cleanup (By Leptopt1los & xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/cc457fade24dc291f099ecde4c5435973e37bdbc)
+- OFW: [T5577 lib: write with mask function added #3362 (By Leptopt1los)](https://github.com/flipperdevices/flipperzero-firmware/pull/3362)
+- OFW: [lfrfid/em4100: added support for different bit rates #3410 (By Mrkvak)](https://github.com/flipperdevices/flipperzero-firmware/pull/3410)
+- Updated: [NFC Seader v2.3 (By bettse)](https://github.com/bettse/seader)
+- Updated: [NFC: Emv fixes #702 (By wosk_& Leptopt1los)](https://github.com/DarkFlippers/unleashed-firmware/pull/702)
+- To Be Merged OFW PRs: [3448](https://github.com/flipperdevices/flipperzero-firmware/pull/3448), [3446](https://github.com/flipperdevices/flipperzero-firmware/pull/3446), [3386](https://github.com/flipperdevices/flipperzero-firmware/pull/3386) & [3450](https://github.com/flipperdevices/flipperzero-firmware/pull/3450)
 
 ## CHANGES FROM THIS BRANCH:
 
@@ -314,7 +323,7 @@ $ ./fbt dolphin_ext
 - [Asteroids v1.1 (By antirez)](https://github.com/antirez/flipper-asteroids) [(Modified By SimplyMinimal)](https://github.com/SimplyMinimal/FlipperZero-Asteroids)
 - [BlackJack v1.1 (By teeebor)](https://github.com/teeebor/flipper_games)
 - [Bomberduck v1.1 (By leo-need-more-coffee)](https://github.com/leo-need-more-coffee/flipperzero-bomberduck)
-- [Chess v1.9 (By xtruan)](https://github.com/xtruan/flipper-chess)
+- [Chess v2.0 (By xtruan)](https://github.com/xtruan/flipper-chess)
 - [Chess Clock (By ihatecsv)](https://github.com/ihatecsv/flipper_chess_clock)
 - [City Bloxx (By Milk-Cool)](https://github.com/Milk-Cool/fz-citybloxx)
 - [Color Guess v1.3 (By leedave)](https://github.com/leedave/Leeds-Flipper-Zero-Applications)
@@ -328,7 +337,7 @@ $ ./fbt dolphin_ext
 - [Five Nights at Flipper's v1.2 (By sillygir1)](https://github.com/sillygir1/flipperzero-fnaf)
 - [Flappy Bird v1.1 (By DroomOne)](https://github.com/DroomOne/flipperzero-firmware/tree/dev/applications/flappy_bird) [Flappy: Border hitboxes, bigger Pilars (By TQMatvey)](https://github.com/DarkFlippers/unleashed-firmware/pull/114) [Increase pilars line width to improve visibility (By ahumeniy)](https://github.com/DarkFlippers/unleashed-firmware/pull/140)
 - [Game of Life v1.1 (Updated to work by tgxn) (By itsyourbedtime)](https://github.com/tgxn/flipperzero-firmware/blob/dev/applications/game_of_life/game_of_life.c)
-- [Guess The Number v1.1 (By kWAYTV)](https://github.com/kWAYTV/guess-the-number-fz)
+- [Guess The Number v1.2 (By kWAYTV)](https://github.com/kWAYTV/guess-the-number-fz)
 - [Hangman v1.5 (By Evgeny Stepanischev & Eva Stepanischeva)](https://github.com/bolknote/Flipper-Zero-Hangman-Game) [With Anime Dictionary (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/9f0385f14547be5a3bdbc85323399e8b01b27607)
 - [Heap Defence v1.2 (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/fc776446de9fdd553b221c02668b925b689378d8) [(original by wquinoa & Vedmein)](https://github.com/Vedmein/flipperzero-firmware/tree/hd/svisto-perdelki)
 - [JetPack v1.1 (by timstrasser)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/1164e4d214efa38847e08c6387bf53578bc0d366)

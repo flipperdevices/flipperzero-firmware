@@ -49,6 +49,7 @@
         "heatshrink",
         "cfw",
         "flipperformat",
-        "flipper7"
+        "flipper7",
+        "bit_lib"
     ]
 }

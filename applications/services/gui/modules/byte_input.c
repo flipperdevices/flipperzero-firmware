@@ -18,17 +18,17 @@ typedef struct {
 typedef struct {
     const char* header;
     uint8_t* bytes;
-    uint16_t bytes_count;
+    uint8_t bytes_count;
 
     ByteInputCallback input_callback;
     ByteChangedCallback changed_callback;
     void* callback_context;
 
     bool selected_high_nibble;
-    uint16_t selected_byte;
+    uint8_t selected_byte;
     int8_t selected_row; // row -2 - mini_editor, -1 - input, row 0 & 1 - keyboard
     uint8_t selected_column;
-    uint16_t first_visible_byte;
+    uint8_t first_visible_byte;
 } ByteInputModel;
 
 static const uint8_t keyboard_origin_x = 7;
@@ -47,7 +47,7 @@ static const ByteInputKey keyboard_keys_row_1[] = {
     {'5', 55, 12},
     {'6', 66, 12},
     {'7', 77, 12},
-    {backspace_symbol, 103, 4},
+    {backspace_symbol, 100, 3},
 };
 
 static const ByteInputKey keyboard_keys_row_2[] = {
@@ -121,30 +121,12 @@ static char byte_input_get_nibble_text(uint8_t byte, bool high_nibble) {
     }
     byte = byte & 0x0F;
 
-    switch(byte & 0x0F) {
-    case 0x0:
-    case 0x1:
-    case 0x2:
-    case 0x3:
-    case 0x4:
-    case 0x5:
-    case 0x6:
-    case 0x7:
-    case 0x8:
-    case 0x9:
+    if(byte <= 0x9) {
         byte = byte + '0';
-        break;
-    case 0xA:
-    case 0xB:
-    case 0xC:
-    case 0xD:
-    case 0xE:
-    case 0xF:
+    } else if(byte <= 0xF) {
         byte = byte - 0xA + 'A';
-        break;
-    default:
+    } else {
         byte = '!';
-        break;
     }
 
     return byte;
@@ -170,7 +152,7 @@ static void byte_input_draw_input(Canvas* canvas, ByteInputModel* model) {
     canvas_draw_icon(canvas, 2, 19, &I_ButtonLeftSmall_3x5);
     canvas_draw_icon(canvas, 123, 19, &I_ButtonRightSmall_3x5);
 
-    for(uint16_t i = model->first_visible_byte;
+    for(uint8_t i = model->first_visible_byte;
         i < model->first_visible_byte + MIN(model->bytes_count, max_drawable_bytes);
         i++) {
         uint8_t byte_position = i - model->first_visible_byte;
@@ -295,7 +277,7 @@ static void byte_input_draw_input_selected(Canvas* canvas, ByteInputModel* model
     canvas_draw_icon(canvas, 2, 19, &I_ButtonLeftSmall_3x5);
     canvas_draw_icon(canvas, 122, 19, &I_ButtonRightSmall_3x5);
 
-    for(uint16_t i = model->first_visible_byte;
+    for(uint8_t i = model->first_visible_byte;
         i < model->first_visible_byte + MIN(model->bytes_count, max_drawable_bytes);
         i++) {
         uint8_t byte_position = i - model->first_visible_byte;
@@ -355,31 +337,13 @@ static void byte_input_draw_input_selected(Canvas* canvas, ByteInputModel* model
  * @param      value        char value
  * @param      high_nibble  set high nibble
  */
-static void byte_input_set_nibble(uint8_t* data, uint16_t position, char value, bool high_nibble) {
-    switch(value) {
-    case '0':
-    case '1':
-    case '2':
-    case '3':
-    case '4':
-    case '5':
-    case '6':
-    case '7':
-    case '8':
-    case '9':
+static void byte_input_set_nibble(uint8_t* data, uint8_t position, char value, bool high_nibble) {
+    if(value >= '0' && value <= '9') {
         value = value - '0';
-        break;
-    case 'A':
-    case 'B':
-    case 'C':
-    case 'D':
-    case 'E':
-    case 'F':
+    } else if(value >= 'A' && value <= 'F') {
         value = value - 'A' + 10;
-        break;
-    default:
+    } else {
         value = 0;
-        break;
     }
 
     if(high_nibble) {
@@ -654,40 +618,23 @@ static void byte_input_view_draw_callback(Canvas* canvas, void* _model) {
             const ByteInputKey* keys = byte_input_get_row(row);
 
             for(size_t column = 0; column < column_count; column++) {
+                bool selected = model->selected_row == row && model->selected_column == column;
+                const Icon* icon = NULL;
                 if(keys[column].value == enter_symbol) {
-                    canvas_set_color(canvas, ColorBlack);
-                    if(model->selected_row == row && model->selected_column == column) {
-                        canvas_draw_icon(
-                            canvas,
-                            keyboard_origin_x + keys[column].x,
-                            keyboard_origin_y + keys[column].y,
-                            &I_KeySaveSelected_24x11);
-                    } else {
-                        canvas_draw_icon(
-                            canvas,
-                            keyboard_origin_x + keys[column].x,
-                            keyboard_origin_y + keys[column].y,
-                            &I_KeySave_24x11);
-                    }
+                    icon = selected ? &I_KeySaveSelected_24x11 : &I_KeySave_24x11;
                 } else if(keys[column].value == backspace_symbol) {
-                    canvas_set_color(canvas, ColorBlack);
-                    if(model->selected_row == row && model->selected_column == column) {
-                        canvas_draw_icon(
-                            canvas,
-                            keyboard_origin_x + keys[column].x,
-                            keyboard_origin_y + keys[column].y,
-                            &I_KeyBackspaceSelected_16x9);
-                    } else {
-                        canvas_draw_icon(
-                            canvas,
-                            keyboard_origin_x + keys[column].x,
-                            keyboard_origin_y + keys[column].y,
-                            &I_KeyBackspace_16x9);
-                    }
+                    icon = selected ? &I_KeyBackspaceSelected_16x9 : &I_KeyBackspace_16x9;
+                }
+                canvas_set_color(canvas, ColorBlack);
+                if(icon != NULL) {
+                    canvas_draw_icon(
+                        canvas,
+                        keyboard_origin_x + keys[column].x,
+                        keyboard_origin_y + keys[column].y,
+                        icon);
                 } else {
-                    if(model->selected_row == row && model->selected_column == column) {
-                        canvas_set_color(canvas, ColorBlack);
-                        canvas_draw_box(
+                    if(selected) {
+                        elements_slightly_rounded_box(
                             canvas,
                             keyboard_origin_x + keys[column].x - 3,
                             keyboard_origin_y + keys[column].y - 10,
@@ -697,15 +644,12 @@ static void byte_input_view_draw_callback(Canvas* canvas, void* _model) {
                     } else if(
                         model->selected_row == -1 && row == 0 &&
                         model->selected_column == column) {
-                        canvas_set_color(canvas, ColorBlack);
-                        canvas_draw_frame(
+                        elements_slightly_rounded_frame(
                             canvas,
                             keyboard_origin_x + keys[column].x - 3,
                             keyboard_origin_y + keys[column].y - 10,
                             11,
                             13);
-                    } else {
-                        canvas_set_color(canvas, ColorBlack);
                     }
 
                     canvas_draw_glyph(
@@ -732,64 +676,52 @@ static bool byte_input_view_input_callback(InputEvent* event, void* context) {
     furi_assert(byte_input);
     bool consumed = false;
 
-    if(event->type == InputTypeShort || event->type == InputTypeRepeat) {
-        switch(event->key) {
-        case InputKeyLeft:
-            with_view_model(
-                byte_input->view, ByteInputModel * model, { byte_input_handle_left(model); }, true);
-            consumed = true;
-            break;
-        case InputKeyRight:
-            with_view_model(
-                byte_input->view,
-                ByteInputModel * model,
-                { byte_input_handle_right(model); },
-                true);
-            consumed = true;
-            break;
-        case InputKeyUp:
-            with_view_model(
-                byte_input->view, ByteInputModel * model, { byte_input_handle_up(model); }, true);
-            consumed = true;
-            break;
-        case InputKeyDown:
-            with_view_model(
-                byte_input->view, ByteInputModel * model, { byte_input_handle_down(model); }, true);
-            consumed = true;
-            break;
-        case InputKeyOk:
-            with_view_model(
-                byte_input->view, ByteInputModel * model, { byte_input_handle_ok(model); }, true);
-            consumed = true;
-            break;
-        default:
-            break;
-        }
-    }
+    with_view_model(
+        byte_input->view,
+        ByteInputModel * model,
+        {
+            if(event->type == InputTypeShort || event->type == InputTypeRepeat) {
+                switch(event->key) {
+                case InputKeyLeft:
+                    byte_input_handle_left(model);
+                    consumed = true;
+                    break;
+                case InputKeyRight:
+                    byte_input_handle_right(model);
+                    consumed = true;
+                    break;
+                case InputKeyUp:
+                    byte_input_handle_up(model);
+                    consumed = true;
+                    break;
+                case InputKeyDown:
+                    byte_input_handle_down(model);
+                    consumed = true;
+                    break;
+                case InputKeyOk:
+                    byte_input_handle_ok(model);
+                    consumed = true;
+                    break;
+                default:
+                    break;
+                }
+            }
 
-    if(event->type == InputTypeShort && event->key == InputKeyBack) {
-        // Back to keyboard
-        with_view_model(
-            byte_input->view,
-            ByteInputModel * model,
-            {
+            if(event->type == InputTypeShort && event->key == InputKeyBack) {
+                // Back to keyboard
                 if(model->selected_row == -2) {
                     model->selected_row += 1;
                     consumed = true;
                 };
-            },
-            true);
-    }
+            }
 
-    if((event->type == InputTypeLong || event->type == InputTypeRepeat) &&
-       event->key == InputKeyBack) {
-        with_view_model(
-            byte_input->view,
-            ByteInputModel * model,
-            { byte_input_clear_selected_byte(model); },
-            true);
-        consumed = true;
-    }
+            if((event->type == InputTypeLong || event->type == InputTypeRepeat) &&
+               event->key == InputKeyBack) {
+                byte_input_clear_selected_byte(model);
+                consumed = true;
+            }
+        },
+        true);
 
     return consumed;
 }
@@ -848,7 +780,7 @@ void byte_input_set_result_callback(
     ByteChangedCallback changed_callback,
     void* callback_context,
     uint8_t* bytes,
-    uint16_t bytes_count) {
+    uint8_t bytes_count) {
     with_view_model(
         byte_input->view,
         ByteInputModel * model,

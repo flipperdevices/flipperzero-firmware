@@ -1,12 +1,11 @@
 #pragma once
 
-#include "desktop_settings_filename.h"
-
 #include <furi_hal.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <toolbox/saved_struct.h>
 #include <storage/storage.h>
+#include "desktop_settings_filename.h"
 
 #define DESKTOP_SETTINGS_VER (13)
 
@@ -16,22 +15,6 @@
 #define PIN_MAX_LENGTH 12
 
 #define DESKTOP_SETTINGS_RUN_PIN_SETUP_ARG "run_pin_setup"
-
-#define DESKTOP_SETTINGS_SAVE(x) \
-    saved_struct_save(           \
-        DESKTOP_SETTINGS_PATH,   \
-        (x),                     \
-        sizeof(DesktopSettings), \
-        DESKTOP_SETTINGS_MAGIC,  \
-        DESKTOP_SETTINGS_VER)
-
-#define DESKTOP_SETTINGS_LOAD(x) \
-    saved_struct_load(           \
-        DESKTOP_SETTINGS_PATH,   \
-        (x),                     \
-        sizeof(DesktopSettings), \
-        DESKTOP_SETTINGS_MAGIC,  \
-        DESKTOP_SETTINGS_VER)
 
 #define MAX_PIN_SIZE 10
 #define MIN_PIN_SIZE 4
@@ -101,3 +84,15 @@ typedef struct {
     FavoriteApp favorite_apps[FavoriteAppNumber];
     FavoriteApp dummy_apps[DummyAppNumber];
 } DesktopSettings;
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+bool DESKTOP_SETTINGS_SAVE(DesktopSettings* x);
+
+bool DESKTOP_SETTINGS_LOAD(DesktopSettings* x);
+
+#ifdef __cplusplus
+}
+#endif

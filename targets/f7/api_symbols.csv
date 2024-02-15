@@ -4,8 +4,10 @@ Header,+,applications/drivers/subghz/cc1101_ext/cc1101_ext_interconnect.h,,
 Header,+,applications/main/archive/helpers/archive_helpers_ext.h,,
 Header,+,applications/main/subghz/subghz_fap.h,,
 Header,+,applications/services/bt/bt_service/bt.h,,
+Header,+,applications/services/bt/bt_settings.h,,
 Header,+,applications/services/cli/cli.h,,
 Header,+,applications/services/cli/cli_vcp.h,,
+Header,+,applications/services/desktop/desktop_settings.h,,
 Header,+,applications/services/dialogs/dialogs.h,,
 Header,+,applications/services/dolphin/dolphin.h,,
 Header,+,applications/services/dolphin/helpers/dolphin_state.h,,
@@ -37,10 +39,13 @@ Header,+,applications/services/loader/firmware_api/firmware_api.h,,
 Header,+,applications/services/loader/loader.h,,
 Header,+,applications/services/locale/locale.h,,
 Header,+,applications/services/notification/notification.h,,
+Header,+,applications/services/notification/notification_app.h,,
 Header,+,applications/services/notification/notification_messages.h,,
 Header,+,applications/services/power/power_service/power.h,,
+Header,+,applications/services/power/power_settings.h,,
 Header,+,applications/services/rpc/rpc_app.h,,
 Header,+,applications/services/storage/storage.h,,
+Header,+,lib/bit_lib/bit_lib.h,,
 Header,+,lib/cfw/cfw.h,,
 Header,+,lib/digital_signal/digital_sequence.h,,
 Header,+,lib/digital_signal/digital_signal.h,,
@@ -67,7 +72,6 @@ Header,+,lib/lfrfid/lfrfid_raw_file.h,,
 Header,+,lib/lfrfid/lfrfid_raw_worker.h,,
 Header,+,lib/lfrfid/lfrfid_worker.h,,
 Header,+,lib/lfrfid/protocols/lfrfid_protocols.h,,
-Header,+,lib/lfrfid/tools/bit_lib.h,,
 Header,+,lib/libusb_stm32/inc/hid_usage_button.h,,
 Header,+,lib/libusb_stm32/inc/hid_usage_consumer.h,,
 Header,+,lib/libusb_stm32/inc/hid_usage_desktop.h,,
@@ -291,6 +295,8 @@ Header,+,targets/furi_hal_include/furi_hal_usb_hid_u2f.h,,
 Header,+,targets/furi_hal_include/furi_hal_version.h,,
 Header,+,targets/furi_hal_include/furi_hal_vibro.h,,
 Function,+,CFW_SETTINGS_SAVE,void,
+Function,+,DESKTOP_SETTINGS_LOAD,_Bool,DesktopSettings*
+Function,+,DESKTOP_SETTINGS_SAVE,_Bool,DesktopSettings*
 Function,-,LL_ADC_CommonDeInit,ErrorStatus,ADC_Common_TypeDef*
 Function,-,LL_ADC_CommonInit,ErrorStatus,"ADC_Common_TypeDef*, const LL_ADC_CommonInitTypeDef*"
 Function,-,LL_ADC_CommonStructInit,void,LL_ADC_CommonInitTypeDef*
@@ -388,6 +394,8 @@ Function,-,LL_USART_DeInit,ErrorStatus,const USART_TypeDef*
 Function,+,LL_USART_Init,ErrorStatus,"USART_TypeDef*, const LL_USART_InitTypeDef*"
 Function,-,LL_USART_StructInit,void,LL_USART_InitTypeDef*
 Function,-,LL_mDelay,void,uint32_t
+Function,+,LOAD_POWER_SETTINGS,_Bool,uint32_t*
+Function,+,SAVE_POWER_SETTINGS,_Bool,uint32_t*
 Function,-,SK6805_get_led_count,uint8_t,
 Function,-,SK6805_init,void,
 Function,-,SK6805_set_led_color,void,"uint8_t, uint8_t, uint8_t, uint8_t"
@@ -659,6 +667,9 @@ Function,+,bit_buffer_write_bytes,void,"const BitBuffer*, void*, size_t"
 Function,+,bit_buffer_write_bytes_mid,void,"const BitBuffer*, void*, size_t, size_t"
 Function,+,bit_buffer_write_bytes_with_parity,void,"const BitBuffer*, void*, size_t, size_t*"
 Function,+,bit_lib_add_parity,size_t,"const uint8_t*, size_t, uint8_t*, size_t, uint8_t, uint8_t, BitLibParity"
+Function,+,bit_lib_bytes_to_num_bcd,uint64_t,"const uint8_t*, uint8_t, _Bool*"
+Function,+,bit_lib_bytes_to_num_be,uint64_t,"const uint8_t*, uint8_t"
+Function,+,bit_lib_bytes_to_num_le,uint64_t,"const uint8_t*, uint8_t"
 Function,+,bit_lib_copy_bits,void,"uint8_t*, size_t, size_t, const uint8_t*, size_t"
 Function,+,bit_lib_crc16,uint16_t,"const uint8_t*, size_t, uint16_t, uint16_t, _Bool, _Bool, uint16_t"
 Function,+,bit_lib_crc8,uint16_t,"const uint8_t*, size_t, uint8_t, uint8_t, _Bool, _Bool, uint8_t"
@@ -667,6 +678,9 @@ Function,+,bit_lib_get_bit_count,uint8_t,uint32_t
 Function,+,bit_lib_get_bits,uint8_t,"const uint8_t*, size_t, uint8_t"
 Function,+,bit_lib_get_bits_16,uint16_t,"const uint8_t*, size_t, uint8_t"
 Function,+,bit_lib_get_bits_32,uint32_t,"const uint8_t*, size_t, uint8_t"
+Function,+,bit_lib_get_bits_64,uint64_t,"const uint8_t*, size_t, uint8_t"
+Function,+,bit_lib_num_to_bytes_be,void,"uint64_t, uint8_t, uint8_t*"
+Function,+,bit_lib_num_to_bytes_le,void,"uint64_t, uint8_t, uint8_t*"
 Function,+,bit_lib_print_bits,void,"const uint8_t*, size_t"
 Function,+,bit_lib_print_regions,void,"const BitLibRegion*, size_t, const uint8_t*, size_t"
 Function,+,bit_lib_push_bit,void,"uint8_t*, size_t, _Bool"
@@ -715,6 +729,8 @@ Function,+,bt_set_profile_adv_name,void,"Bt*, const char*, ..."
 Function,+,bt_set_profile_mac_address,void,"Bt*, const uint8_t[6]"
 Function,+,bt_set_profile_pairing_method,void,"Bt*, GapPairing"
 Function,+,bt_set_status_changed_callback,void,"Bt*, BtStatusChangedCallback, void*"
+Function,+,bt_settings_load,_Bool,BtSettings*
+Function,+,bt_settings_save,_Bool,BtSettings*
 Function,+,buffered_file_stream_alloc,Stream*,Storage*
 Function,+,buffered_file_stream_close,_Bool,Stream*
 Function,+,buffered_file_stream_get_error,FS_Error,Stream*
@@ -740,7 +756,7 @@ Function,+,byte_input_alloc,ByteInput*,
 Function,+,byte_input_free,void,ByteInput*
 Function,+,byte_input_get_view,View*,ByteInput*
 Function,+,byte_input_set_header_text,void,"ByteInput*, const char*"
-Function,+,byte_input_set_result_callback,void,"ByteInput*, ByteInputCallback, ByteChangedCallback, void*, uint8_t*, uint16_t"
+Function,+,byte_input_set_result_callback,void,"ByteInput*, ByteInputCallback, ByteChangedCallback, void*, uint8_t*, uint8_t"
 Function,-,bzero,void,"void*, size_t"
 Function,+,calloc,void*,"size_t, size_t"
 Function,+,canvas_clear,void,Canvas*
@@ -933,7 +949,7 @@ Function,+,emv_load,_Bool,"EmvData*, FlipperFormat*, uint32_t"
 Function,+,emv_poller_get_last_online_atc,EmvError,EmvPoller*
 Function,+,emv_poller_get_pin_try_counter,EmvError,EmvPoller*
 Function,+,emv_poller_get_processing_options,EmvError,EmvPoller*
-Function,+,emv_poller_read_afl,EmvError,EmvPoller*
+Function,+,emv_poller_read_afl,EmvError,"EmvPoller*, _Bool, uint16_t*"
 Function,+,emv_poller_read_log_entry,EmvError,EmvPoller*
 Function,+,emv_poller_read_sfi_record,EmvError,"EmvPoller*, uint8_t, uint8_t"
 Function,+,emv_poller_select_application,EmvError,EmvPoller*
@@ -2718,16 +2734,14 @@ Function,+,nfc_set_guard_time_us,void,"Nfc*, uint32_t"
 Function,+,nfc_set_mask_receive_time_fc,void,"Nfc*, uint32_t"
 Function,+,nfc_start,void,"Nfc*, NfcEventCallback, void*"
 Function,+,nfc_stop,void,Nfc*
-Function,+,nfc_util_bytes2num,uint64_t,"const uint8_t*, uint8_t"
-Function,+,nfc_util_bytes2num_little_endian,uint64_t,"const uint8_t*, uint8_t"
 Function,+,nfc_util_even_parity32,uint8_t,uint32_t
-Function,+,nfc_util_num2bytes,void,"uint64_t, uint8_t, uint8_t*"
 Function,+,nfc_util_odd_parity,void,"const uint8_t*, uint8_t*, uint8_t"
 Function,+,nfc_util_odd_parity8,uint8_t,uint8_t
 Function,+,notification_internal_message,void,"NotificationApp*, const NotificationSequence*"
 Function,+,notification_internal_message_block,void,"NotificationApp*, const NotificationSequence*"
 Function,+,notification_message,void,"NotificationApp*, const NotificationSequence*"
 Function,+,notification_message_block,void,"NotificationApp*, const NotificationSequence*"
+Function,+,notification_message_save_settings,void,NotificationApp*
 Function,-,nrand48,long,unsigned short[3]
 Function,-,on_exit,int,"void (*)(int, void*), void*"
 Function,+,onewire_host_alloc,OneWireHost*,const GpioPin*
@@ -3416,9 +3430,6 @@ Function,+,submenu_set_orientation,void,"Submenu*, ViewOrientation"
 Function,+,submenu_set_selected_item,void,"Submenu*, uint32_t"
 Function,-,system,int,const char*
 Function,+,t5577_write,void,LFRFIDT5577*
-Function,+,t5577_write_page_block_pass,void,"uint8_t, uint8_t, _Bool, uint32_t, _Bool, uint32_t"
-Function,+,t5577_write_page_block_pass_with_start_and_stop,void,"uint8_t, uint8_t, _Bool, uint32_t, _Bool, uint32_t"
-Function,+,t5577_write_page_block_simple_with_start_and_stop,void,"uint8_t, uint8_t, _Bool, uint32_t"
 Function,+,t5577_write_with_mask,void,"LFRFIDT5577*, uint8_t, _Bool, uint32_t"
 Function,+,t5577_write_with_pass,void,"LFRFIDT5577*, uint32_t"
 Function,-,tan,double,double
@@ -3617,6 +3628,8 @@ Variable,+,FLIPPER_DEBUG_APPS,const FlipperInternalApplication[],
 Variable,+,FLIPPER_DEBUG_APPS_COUNT,const size_t,
 Variable,+,FLIPPER_EXTERNAL_APPS,const FlipperExternalApplication[],
 Variable,+,FLIPPER_EXTERNAL_APPS_COUNT,const size_t,
+Variable,+,FLIPPER_EXTSETTINGS_APPS,const FlipperExternalApplication[],
+Variable,+,FLIPPER_EXTSETTINGS_APPS_COUNT,const size_t,
 Variable,+,FLIPPER_ON_SYSTEM_START,const FlipperInternalOnStartHook[],
 Variable,+,FLIPPER_ON_SYSTEM_START_COUNT,const size_t,
 Variable,+,FLIPPER_SERVICES,const FlipperInternalApplication[],

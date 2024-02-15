@@ -1,9 +1,10 @@
 App(
     appid="notification_settings",
     name="LCD and Notifications",
-    apptype=FlipperAppType.SETTINGS,
+    apptype=FlipperAppType.EXTSETTINGS,
     entry_point="notification_settings_app",
     requires=["notification"],
     stack_size=1 * 1024,
     order=20,
+    fap_category="assets",
 )

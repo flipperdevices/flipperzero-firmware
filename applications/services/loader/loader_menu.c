@@ -149,6 +149,14 @@ static void loader_menu_build_submenu(LoaderMenuApp* app, LoaderMenu* loader_men
             loader_menu_callback,
             loader_menu);
     }
+    for(size_t i = 0; i < FLIPPER_EXTSETTINGS_APPS_COUNT; i++) {
+        submenu_add_item(
+            app->settings_menu,
+            FLIPPER_EXTSETTINGS_APPS[i].name,
+            (uint32_t)FLIPPER_EXTSETTINGS_APPS[i].name,
+            loader_menu_callback,
+            loader_menu);
+    }
 }
 
 static LoaderMenuApp* loader_menu_app_alloc(LoaderMenu* loader_menu) {

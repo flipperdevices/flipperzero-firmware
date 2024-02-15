@@ -58,4 +58,12 @@ struct NotificationApp {
     NotificationSettings settings;
 };
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void notification_message_save_settings(NotificationApp* app);
+
+#ifdef __cplusplus
+}
+#endif
