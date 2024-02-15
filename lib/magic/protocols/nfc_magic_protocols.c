@@ -4,6 +4,8 @@
 
 static const char* nfc_magic_protocol_names[NfcMagicProtocolNum] = {
     [NfcMagicProtocolGen1] = "Classic Gen 1A/B",
+    [NfcMagicProtocolGen2] = "Classic Gen 2",
+    [NfcMagicProtocolClassic] = "Classic (possibly not magic)",
     [NfcMagicProtocolGen4] = "Gen 4 GTU",
 };
 

@@ -30,6 +30,14 @@ static bool nfc_magic_scene_file_select_is_file_suitable(NfcMagicApp* instance) 
                            (mfu_type != MfUltralightTypeNTAGI2CPlus2K);
             }
         }
+    } else if(instance->protocol == NfcMagicProtocolGen2) {
+        if(protocol == NfcProtocolMfClassic) {
+            suitable = true;
+        }
+    } else if(instance->protocol == NfcMagicProtocolClassic) {
+        if(protocol == NfcProtocolMfClassic) {
+            suitable = true;
+        }
     }
 
     return suitable;
@@ -40,7 +48,13 @@ void nfc_magic_scene_file_select_on_enter(void* context) {
 
     if(nfc_magic_load_from_file_select(instance)) {
         if(nfc_magic_scene_file_select_is_file_suitable(instance)) {
-            scene_manager_next_scene(instance->scene_manager, NfcMagicSceneWriteConfirm);
+            if(instance->protocol == NfcMagicProtocolClassic ||
+               instance->protocol == NfcMagicProtocolGen2) {
+                scene_manager_next_scene(
+                    instance->scene_manager, NfcMagicSceneMfClassicDictAttack);
+            } else {
+                scene_manager_next_scene(instance->scene_manager, NfcMagicSceneWriteConfirm);
+            }
         } else {
             scene_manager_next_scene(instance->scene_manager, NfcMagicSceneWrongCard);
         }
