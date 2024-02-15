@@ -196,9 +196,6 @@ static bool troika_parse(const NfcDevice* device, FuriString* parsed_data) {
             bit_lib_bytes_to_num_be(sec_tr->key_a.data, COUNT_OF(sec_tr->key_a.data));
         if(key != cfg.keys[cfg.data_sector].a) break;
 
-        // Get the block number of the block that contains the data
-        const uint8_t start_block_num = mf_classic_get_first_block_num_of_sector(cfg.data_sector);
-
         FuriString* metro_result = furi_string_alloc();
         FuriString* ground_result = furi_string_alloc();
         FuriString* tat_result = furi_string_alloc();
