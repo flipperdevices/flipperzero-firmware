@@ -1,17 +1,14 @@
-# For details & more options, see documentation/AppManifests.md in firmware repo
-
 App(
-    appid="techart_calendar",  # Must be unique
-    name="Calendar",  # Displayed in menus
+    appid="techart_calendar",
+    name="Calendar TECHART",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="calendar_app",
     stack_size=2 * 1024,
     fap_category="Tools",
-    # Optional values
-    fap_version="1.0",
-    fap_icon="calendar.png",  # 10x10 1-bit PNG
-    # fap_description="A simple app",
+    fap_icon="calendar.png",
+    fap_icon_assets="images",
     fap_author="TechArtDev",
     fap_weburl="https://github.com/techartdev/Calendar/",
-    fap_icon_assets="images",  # Image assets to compile for this application
+    fap_version="1.0",
+    fap_description="Simple calendar app",
 )
