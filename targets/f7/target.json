@@ -38,6 +38,7 @@
         "one_wire",
         "ibutton",
         "music_worker",
+        "mjs",
         "mbedtls",
         "lfrfid",
         "flipper_application",
@@ -47,6 +48,8 @@
         "update_util",
         "heatshrink",
         "flipperformat",
-        "flipper7"
+        "flipper7",
+        "bit_lib",
+        "datetime"
     ]
 }

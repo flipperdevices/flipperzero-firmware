@@ -23,6 +23,7 @@ ADD_SCENE(nfc, debug, Debug)
 ADD_SCENE(nfc, field, Field)
 ADD_SCENE(nfc, retry_confirm, RetryConfirm)
 ADD_SCENE(nfc, exit_confirm, ExitConfirm)
+ADD_SCENE(nfc, save_confirm, SaveConfirm)
 
 ADD_SCENE(nfc, mf_ultralight_write, MfUltralightWrite)
 ADD_SCENE(nfc, mf_ultralight_write_success, MfUltralightWriteSuccess)
@@ -57,5 +58,10 @@ ADD_SCENE(nfc, set_type, SetType)
 ADD_SCENE(nfc, set_sak, SetSak)
 ADD_SCENE(nfc, set_atqa, SetAtqa)
 ADD_SCENE(nfc, set_uid, SetUid)
+
+ADD_SCENE(nfc, slix_unlock_menu, SlixUnlockMenu)
+ADD_SCENE(nfc, slix_key_input, SlixKeyInput)
+ADD_SCENE(nfc, slix_unlock, SlixUnlock)
+ADD_SCENE(nfc, slix_unlock_success, SlixUnlockSuccess)
 
 ADD_SCENE(nfc, generate_info, GenerateInfo)

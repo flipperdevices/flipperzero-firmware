@@ -101,7 +101,7 @@ void cli_command_date(Cli* cli, FuriString* args, void* context) {
     UNUSED(cli);
     UNUSED(context);
 
-    FuriHalRtcDateTime datetime = {0};
+    DateTime datetime = {0};
 
     if(furi_string_size(args) > 0) {
         uint16_t hours, minutes, seconds, month, day, year, weekday;
@@ -135,7 +135,7 @@ void cli_command_date(Cli* cli, FuriString* args, void* context) {
             return;
         }
 
-        if(!furi_hal_rtc_validate_datetime(&datetime)) {
+        if(!datetime_validate_datetime(&datetime)) {
             printf("Invalid datetime data");
             return;
         }
@@ -211,7 +211,12 @@ void cli_command_log(Cli* cli, FuriString* args, void* context) {
     furi_log_level_to_string(furi_log_get_level(), &current_level);
     printf("Current log level: %s\r\n", current_level);
 
-    furi_hal_console_set_tx_callback(cli_command_log_tx_callback, ring);
+    FuriLogHandler log_handler = {
+        .callback = cli_command_log_tx_callback,
+        .context = ring,
+    };
+
+    furi_log_add_handler(log_handler);
 
     printf("Use <log ?> to list available log levels\r\n");
     printf("Press CTRL+C to stop...\r\n");
@@ -220,7 +225,7 @@ void cli_command_log(Cli* cli, FuriString* args, void* context) {
         cli_write(cli, buffer, ret);
     }
 
-    furi_hal_console_set_tx_callback(NULL, NULL);
+    furi_log_remove_handler(log_handler);
 
     if(restore_log_level) {
         // There will be strange behaviour if log level is set from settings while log command is running
