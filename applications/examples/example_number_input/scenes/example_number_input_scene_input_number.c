@@ -14,7 +14,6 @@ void example_number_input_scene_input_number_on_enter(void* context) {
     char* str = "Enter a number (0 - 9999)";
     const char* constStr = str;
     number_input_set_header_text(number_input, constStr);
-
     number_input_set_result_callback(
         number_input,
         example_number_input_scene_input_number_callback,
