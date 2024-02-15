@@ -4,6 +4,7 @@ App(
     apptype=FlipperAppType.SETTINGS,
     entry_point="expansion_settings_app",
     requires=["gui"],
+    flags=["InsomniaSafe"],
     stack_size=1 * 1024,
     order=80,
 )

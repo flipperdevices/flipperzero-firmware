@@ -84,7 +84,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [NFC Seader v2.3 (By bettse)](https://github.com/bettse/seader)
 - Added: [Calendar TECHART v1.0 (By techartdev)](https://github.com/techartdev/Calendar)
 - Updated: [NFC: Emv fixes #702 (By wosk_& Leptopt1los)](https://github.com/DarkFlippers/unleashed-firmware/pull/702)
-- To Be Merged OFW PRs: [3448](https://github.com/flipperdevices/flipperzero-firmware/pull/3448), [3446](https://github.com/flipperdevices/flipperzero-firmware/pull/3446), [3386](https://github.com/flipperdevices/flipperzero-firmware/pull/3386) & [3450](https://github.com/flipperdevices/flipperzero-firmware/pull/3450)
 
 ## CHANGES FROM THIS BRANCH:
 
@@ -117,6 +116,11 @@ This software is for experimental purposes only and is not meant for any illegal
 - Added: [Air Arkanoid  v1.1 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-good-faps/pull/141) - Commented out due to ModuleNotFoundError: No module named 'PIL'
 - [Many refactor fixes (By xMasterX & Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/2d0790e6b23ceff5a682b2c2845f5e1258d31761)
 - [Deploy resources for extapps too & CFW Settings improvements (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/91527fa0e32d630e055fe6caeb34ab3c51de5513)
+- OFW: [VSCode integration fixes for new toolchain #3448 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/3448)
+- OFW: [JS, archive and file browser worker fixes #3446 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/3446)
+- OFW: [FuriHalRtc refactor: new datetime lib #3386 (By Leptopt1los)](https://github.com/flipperdevices/flipperzero-firmware/pull/3386)
+- OFW: [Archive: fixed Apps tab ext filter #3450 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/3450)
+- UL: [SubGhz: Magellan Event Code Update #713 (By wooferguy)](https://github.com/DarkFlippers/unleashed-firmware/pull/713)
 
 <a name="release">
 

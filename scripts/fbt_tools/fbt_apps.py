@@ -23,10 +23,6 @@ class ApplicationsCGenerator:
         FlipperAppType.SYSTEM: ("FlipperInternalApplication", "FLIPPER_SYSTEM_APPS"),
         FlipperAppType.APP: ("FlipperInternalApplication", "FLIPPER_APPS"),
         FlipperAppType.DEBUG: ("FlipperInternalApplication", "FLIPPER_DEBUG_APPS"),
-        FlipperAppType.SETTINGS: (
-            "FlipperInternalApplication",
-            "FLIPPER_SETTINGS_APPS",
-        ),
         FlipperAppType.STARTUP: (
             "FlipperInternalOnStartHook",
             "FLIPPER_ON_SYSTEM_START",
@@ -38,9 +34,9 @@ class ApplicationsCGenerator:
             "FlipperExternalApplication",
             "FLIPPER_EXTERNAL_APPS",
         ),
-        FlipperAppType.EXTSETTINGS: (
+        FlipperAppType.SETTINGS: (
             "FlipperExternalApplication",
-            "FLIPPER_EXTSETTINGS_APPS",
+            "FLIPPER_SETTINGS_APPS",
         ),
     }
 
@@ -62,7 +58,7 @@ class ApplicationsCGenerator:
      .appid = "{app.appid}", 
      .stack_size = {app.stack_size},
      .icon = {f"&{app.icon}" if app.icon else "NULL"},
-     .flags = {'|'.join(f"FlipperInternalApplicationFlag{flag}" for flag in app.flags)} }}"""
+     .flags = {'|'.join(f"FlipperApplicationFlag{flag}" for flag in app.flags)} }}"""
 
     def get_external_app_descr(self, app: FlipperApplication):
         app_path = "/ext/apps"
@@ -73,7 +69,8 @@ class ApplicationsCGenerator:
     {{
      .name = "{app.name}",
      .icon = {f"&{app.icon}" if app.icon else "NULL"},
-     .path = "{app_path}" }}"""
+     .path = "{app_path}",
+     .flags = {'|'.join(f"FlipperApplicationFlag{flag}" for flag in app.flags)} }}"""
 
     def generate(self):
         contents = [

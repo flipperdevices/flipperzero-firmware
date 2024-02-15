@@ -4,6 +4,7 @@ App(
     apptype=FlipperAppType.MENUEXTERNAL,
     targets=["f7"],
     entry_point="cfw_app",
+    flags=["InsomniaSafe"],
     stack_size=3 * 1024,
     icon="A_RM_14",
     order=90,

@@ -26,11 +26,6 @@ static void loader_cli_list() {
     for(size_t i = 0; i < FLIPPER_SETTINGS_APPS_COUNT; i++) {
         printf("\t%s\r\n", FLIPPER_SETTINGS_APPS[i].name);
     }
-    for(size_t i = 0; i < FLIPPER_EXTSETTINGS_APPS_COUNT; i++) {
-        printf("\t%s\r\n", FLIPPER_EXTSETTINGS_APPS[i].name);
-    }
-    printf(
-        "For external applications, specify full path to '.fap' file.\r\nExample: \"/ext/apps/Main/clock.fap\"");
 }
 
 static void loader_cli_info(Loader* loader) {
