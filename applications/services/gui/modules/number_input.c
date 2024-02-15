@@ -1,11 +1,11 @@
-#include "int_input.h"
+#include "number_input.h"
 
 #include <gui/elements.h>
 #include <furi.h>
 #include <assets_icons.h>
 
-/** IntInput type */
-struct IntInput {
+/** NumberInput type */
+struct NumberInput {
     View* view;
 };
 
@@ -13,7 +13,7 @@ typedef struct {
     const char text;
     const uint8_t x;
     const uint8_t y;
-} IntInputKey;
+} NumberInputKey;
 
 typedef struct {
     const char* header;
@@ -21,12 +21,12 @@ typedef struct {
     size_t text_buffer_size;
     bool clear_default_text;
 
-    IntInputCallback callback;
+    NumberInputCallback callback;
     void* callback_context;
 
     int8_t selected_row;
     uint8_t selected_column;
-} IntInputModel;
+} NumberInputModel;
 
 static const uint8_t keyboard_origin_x = 7;
 static const uint8_t keyboard_origin_y = 31;
@@ -34,7 +34,7 @@ static const uint8_t keyboard_row_count = 2;
 static const uint8_t enter_symbol = '\r';
 static const uint8_t backspace_symbol = '\b';
 
-static const IntInputKey keyboard_keys_row_1[] = {
+static const NumberInputKey keyboard_keys_row_1[] = {
     {'0', 0, 12},
     {'1', 11, 12},
     {'2', 22, 12},
@@ -43,7 +43,7 @@ static const IntInputKey keyboard_keys_row_1[] = {
     {backspace_symbol, 103, 4},
 };
 
-static const IntInputKey keyboard_keys_row_2[] = {
+static const NumberInputKey keyboard_keys_row_2[] = {
     {'5', 0, 26},
     {'6', 11, 26},
     {'7', 22, 26},
@@ -58,7 +58,7 @@ static const IntInputKey keyboard_keys_row_2[] = {
  *
  * @return     uint8_t Row size
  */
-static uint8_t int_input_get_row_size(uint8_t row_index) {
+static uint8_t number_input_get_row_size(uint8_t row_index) {
     uint8_t row_size = 0;
 
     switch(row_index + 1) {
@@ -79,10 +79,10 @@ static uint8_t int_input_get_row_size(uint8_t row_index) {
  *
  * @param      row_index  Index of row
  *
- * @return     const IntInputKey* Row pointer
+ * @return     const NumberInputKey* Row pointer
  */
-static const IntInputKey* int_input_get_row(uint8_t row_index) {
-    const IntInputKey* row = NULL;
+static const NumberInputKey* number_input_get_row(uint8_t row_index) {
+    const NumberInputKey* row = NULL;
 
     switch(row_index + 1) {
     case 1:
@@ -103,7 +103,7 @@ static const IntInputKey* int_input_get_row(uint8_t row_index) {
  * @param      canvas  The canvas
  * @param      model   The model
  */
-static void int_input_draw_input(Canvas* canvas, IntInputModel* model) {
+static void number_input_draw_input(Canvas* canvas, NumberInputModel* model) {
     const uint8_t text_x = 8;
     const uint8_t text_y = 25;
 
@@ -113,7 +113,7 @@ static void int_input_draw_input(Canvas* canvas, IntInputModel* model) {
     canvas_draw_str(canvas, text_x, text_y, text);
 }
 
-static void int_input_backspace_cb(IntInputModel* model) {
+static void number_input_backspace_cb(NumberInputModel* model) {
     uint8_t text_length = model->clear_default_text ? 1 : strlen(model->text_buffer);
     if(text_length > 0) {
         model->text_buffer[text_length - 1] = 0;
@@ -124,7 +124,7 @@ static void int_input_backspace_cb(IntInputModel* model) {
  *
  * @param      model  The model
  */
-static void int_input_handle_up(IntInputModel* model) {
+static void number_input_handle_up(NumberInputModel* model) {
     if(model->selected_row > 0) {
         model->selected_row--;
     }
@@ -134,7 +134,7 @@ static void int_input_handle_up(IntInputModel* model) {
  *
  * @param      model  The model
  */
-static void int_input_handle_down(IntInputModel* model) {
+static void number_input_handle_down(NumberInputModel* model) {
     if(model->selected_row < keyboard_row_count - 1) {
         model->selected_row += 1;
     }
@@ -144,11 +144,11 @@ static void int_input_handle_down(IntInputModel* model) {
  *
  * @param      model  The model
  */
-static void int_input_handle_left(IntInputModel* model) {
+static void number_input_handle_left(NumberInputModel* model) {
     if(model->selected_column > 0) {
         model->selected_column--;
     } else {
-        model->selected_column = int_input_get_row_size(model->selected_row) - 1;
+        model->selected_column = number_input_get_row_size(model->selected_row) - 1;
     }
 }
 
@@ -156,8 +156,8 @@ static void int_input_handle_left(IntInputModel* model) {
  *
  * @param      model  The model
  */
-static void int_input_handle_right(IntInputModel* model) {
-    if(model->selected_column < int_input_get_row_size(model->selected_row) - 1) {
+static void number_input_handle_right(NumberInputModel* model) {
+    if(model->selected_column < number_input_get_row_size(model->selected_row) - 1) {
         model->selected_column++;
     } else {
         model->selected_column = 0;
@@ -168,13 +168,13 @@ static void int_input_handle_right(IntInputModel* model) {
  *
  * @param      model  The model
  */
-static void int_input_handle_ok(IntInputModel* model) {
-    char selected = int_input_get_row(model->selected_row)[model->selected_column].text;
+static void number_input_handle_ok(NumberInputModel* model) {
+    char selected = number_input_get_row(model->selected_row)[model->selected_column].text;
     size_t text_length = strlen(model->text_buffer);
     if(selected == enter_symbol) {
         model->callback(model->callback_context);
     } else if(selected == backspace_symbol) {
-        int_input_backspace_cb(model);
+        number_input_backspace_cb(model);
     } else {
         if(model->clear_default_text) {
             text_length = 0;
@@ -192,23 +192,23 @@ static void int_input_handle_ok(IntInputModel* model) {
  * @param      canvas  The canvas
  * @param      _model  The model
  */
-static void int_input_view_draw_callback(Canvas* canvas, void* _model) {
-    IntInputModel* model = _model;
+static void number_input_view_draw_callback(Canvas* canvas, void* _model) {
+    NumberInputModel* model = _model;
     uint8_t text_length = model->text_buffer ? strlen(model->text_buffer) : 0;
     UNUSED(text_length);
 
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
 
-    int_input_draw_input(canvas, model);
+    number_input_draw_input(canvas, model);
 
     canvas_set_font(canvas, FontSecondary);
     canvas_draw_str(canvas, 2, 9, model->header);
     canvas_set_font(canvas, FontKeyboard);
     // Draw keyboard
     for(uint8_t row = 0; row < keyboard_row_count; row++) {
-        const uint8_t column_count = int_input_get_row_size(row);
-        const IntInputKey* keys = int_input_get_row(row);
+        const uint8_t column_count = number_input_get_row_size(row);
+        const NumberInputKey* keys = number_input_get_row(row);
 
         for(size_t column = 0; column < column_count; column++) {
             if(keys[column].text == enter_symbol) {
@@ -281,33 +281,33 @@ static void int_input_view_draw_callback(Canvas* canvas, void* _model) {
  * @return     true
  * @return     false
  */
-static bool int_input_view_input_callback(InputEvent* event, void* context) {
-    IntInput* int_input = context;
-    furi_assert(int_input);
+static bool number_input_view_input_callback(InputEvent* event, void* context) {
+    NumberInput* number_input = context;
+    furi_assert(number_input);
 
     bool consumed = false;
 
     // Fetch the model
-    IntInputModel* model = view_get_model(int_input->view);
+    NumberInputModel* model = view_get_model(number_input->view);
 
     if(event->type == InputTypeShort || event->type == InputTypeLong ||
        event->type == InputTypeRepeat) {
         consumed = true;
         switch(event->key) {
         case InputKeyLeft:
-            int_input_handle_left(model);
+            number_input_handle_left(model);
             break;
         case InputKeyRight:
-            int_input_handle_right(model);
+            number_input_handle_right(model);
             break;
         case InputKeyUp:
-            int_input_handle_up(model);
+            number_input_handle_up(model);
             break;
         case InputKeyDown:
-            int_input_handle_down(model);
+            number_input_handle_down(model);
             break;
         case InputKeyOk:
-            int_input_handle_ok(model);
+            number_input_handle_ok(model);
             break;
         default:
             consumed = false;
@@ -316,17 +316,16 @@ static bool int_input_view_input_callback(InputEvent* event, void* context) {
     }
 
     // commit view
-    view_commit_model(int_input->view, consumed);
+    view_commit_model(number_input->view, consumed);
 
     return consumed;
 }
 
-void int_input_reset(IntInput* int_input) {
-    FURI_LOG_D("INT_INPUT", "Resetting Model");
-    furi_assert(int_input);
+void number_input_reset(NumberInput* number_input) {
+    furi_assert(number_input);
     with_view_model(
-        int_input->view,
-        IntInputModel * model,
+        number_input->view,
+        NumberInputModel * model,
         {
             model->header = "";
             model->selected_row = 0;
@@ -340,40 +339,40 @@ void int_input_reset(IntInput* int_input) {
         true);
 }
 
-IntInput* int_input_alloc() {
-    IntInput* int_input = malloc(sizeof(IntInput));
-    int_input->view = view_alloc();
-    view_set_context(int_input->view, int_input);
-    view_allocate_model(int_input->view, ViewModelTypeLocking, sizeof(IntInputModel));
-    view_set_draw_callback(int_input->view, int_input_view_draw_callback);
-    view_set_input_callback(int_input->view, int_input_view_input_callback);
+NumberInput* number_input_alloc() {
+    NumberInput* number_input = malloc(sizeof(NumberInput));
+    number_input->view = view_alloc();
+    view_set_context(number_input->view, number_input);
+    view_allocate_model(number_input->view, ViewModelTypeLocking, sizeof(NumberInputModel));
+    view_set_draw_callback(number_input->view, number_input_view_draw_callback);
+    view_set_input_callback(number_input->view, number_input_view_input_callback);
 
-    int_input_reset(int_input);
+    number_input_reset(number_input);
 
-    return int_input;
+    return number_input;
 }
 
-void int_input_free(IntInput* int_input) {
-    furi_assert(int_input);
-    view_free(int_input->view);
-    free(int_input);
+void number_input_free(NumberInput* number_input) {
+    furi_assert(number_input);
+    view_free(number_input->view);
+    free(number_input);
 }
 
-View* int_input_get_view(IntInput* int_input) {
-    furi_assert(int_input);
-    return int_input->view;
+View* number_input_get_view(NumberInput* number_input) {
+    furi_assert(number_input);
+    return number_input->view;
 }
 
-void int_input_set_result_callback(
-    IntInput* int_input,
-    IntInputCallback callback,
+void number_input_set_result_callback(
+    NumberInput* number_input,
+    NumberInputCallback callback,
     void* callback_context,
     char* text_buffer,
     size_t text_buffer_size,
     bool clear_default_text) {
     with_view_model(
-        int_input->view,
-        IntInputModel * model,
+        number_input->view,
+        NumberInputModel * model,
         {
             model->callback = callback;
             model->callback_context = callback_context;
@@ -384,7 +383,7 @@ void int_input_set_result_callback(
         true);
 }
 
-void int_input_set_header_text(IntInput* int_input, const char* text) {
+void number_input_set_header_text(NumberInput* number_input, const char* text) {
     with_view_model(
-        int_input->view, IntInputModel * model, { model->header = text; }, true);
+        number_input->view, NumberInputModel * model, { model->header = text; }, true);
 }

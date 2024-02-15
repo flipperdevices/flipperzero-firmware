@@ -1,5 +1,5 @@
 /**
- * @file int_input.h
+ * @file number_input.h
  * GUI: Integer string keyboard view module API
  */
 
@@ -11,38 +11,38 @@
 extern "C" {
 #endif
 
-/** Int input anonymous structure  */
-typedef struct IntInput IntInput;
+/** Number input anonymous structure  */
+typedef struct NumberInput NumberInput;
 
 /** callback that is executed on save button press */
-typedef void (*IntInputCallback)(void* context);
+typedef void (*NumberInputCallback)(void* context);
 
 /** callback that is executed when byte buffer is changed */
-typedef void (*IntChangedCallback)(void* context);
+typedef void (*NumberChangedCallback)(void* context);
 
-/** Allocate and initialize Int input. This Int input is used to enter Ints.
+/** Allocate and initialize Number input. This Number input is used to enter Numbers (Integers).
  *
- * @return     IntInput instance pointer
+ * @return     NumberInput instance pointer
  */
-IntInput* int_input_alloc();
+NumberInput* number_input_alloc();
 
 /** Deinitialize and free byte input
  *
- * @param      int_input  Int input instance
+ * @param      number_input  Number input instance
  */
-void int_input_free(IntInput* int_input);
+void number_input_free(NumberInput* number_input);
 
 /** Get byte input view
  *
- * @param      int_input  byte input instance
+ * @param      number_input  byte input instance
  *
  * @return     View instance that can be used for embedding
  */
-View* int_input_get_view(IntInput* int_input);
+View* number_input_get_view(NumberInput* number_input);
 
 /** Set byte input result callback
  *
- * @param      int_input          byte input instance
+ * @param      number_input          byte input instance
  * @param      input_callback     input callback fn
  * @param      changed_callback   changed callback fn
  * @param      callback_context   callback context
@@ -51,9 +51,9 @@ View* int_input_get_view(IntInput* int_input);
  * @param      clear_default_text clear previous entry
  */
 
-void int_input_set_result_callback(
-    IntInput* int_input,
-    IntInputCallback input_callback,
+void number_input_set_result_callback(
+    NumberInput* number_input,
+    NumberInputCallback input_callback,
     void* callback_context,
     char* text_buffer,
     size_t text_buffer_size,
@@ -61,10 +61,10 @@ void int_input_set_result_callback(
 
 /** Set byte input header text
  *
- * @param      int_input  byte input instance
+ * @param      number_input  byte input instance
  * @param      text        text to be shown
  */
-void int_input_set_header_text(IntInput* int_input, const char* text);
+void number_input_set_header_text(NumberInput* number_input, const char* text);
 
 #ifdef __cplusplus
 }
