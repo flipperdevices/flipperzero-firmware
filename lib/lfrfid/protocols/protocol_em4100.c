@@ -39,50 +39,51 @@ typedef struct {
     uint8_t clock_per_bit;
 } ProtocolEM4100;
 
-uint16_t protocol_em4100_get_time_divisor(ProtocolEM4100 *proto) {
-	switch (proto->clock_per_bit) {
-		case 64:
-			return 1;
-		case 32:
-			return 2;
-		case 16:
-			return 4;
-		default:
-			return 1;
-	}
+uint16_t protocol_em4100_get_time_divisor(ProtocolEM4100* proto) {
+    switch(proto->clock_per_bit) {
+    case 64:
+        return 1;
+    case 32:
+        return 2;
+    case 16:
+        return 4;
+    default:
+        return 1;
+    }
 }
 
-uint32_t protocol_em4100_get_t5577_bitrate(ProtocolEM4100 *proto) {
-	switch (proto->clock_per_bit) {
-		case 64:
-			return LFRFID_T5577_BITRATE_RF_64;
-		case 32:
-			return LFRFID_T5577_BITRATE_RF_32;
-		case 16:
-			return LFRFID_T5577_BITRATE_RF_16;
-		default:
-			return LFRFID_T5577_BITRATE_RF_64;
-	}
+uint32_t protocol_em4100_get_t5577_bitrate(ProtocolEM4100* proto) {
+    switch(proto->clock_per_bit) {
+    case 64:
+        return LFRFID_T5577_BITRATE_RF_64;
+    case 32:
+        return LFRFID_T5577_BITRATE_RF_32;
+    case 16:
+        return LFRFID_T5577_BITRATE_RF_16;
+    default:
+        return LFRFID_T5577_BITRATE_RF_64;
+    }
 }
 
-uint16_t protocol_em4100_get_short_time_low(ProtocolEM4100 *proto) {
-	return EM_READ_SHORT_TIME_BASE / protocol_em4100_get_time_divisor(proto) - EM_READ_JITTER_TIME_BASE / protocol_em4100_get_time_divisor(proto);
+uint16_t protocol_em4100_get_short_time_low(ProtocolEM4100* proto) {
+    return EM_READ_SHORT_TIME_BASE / protocol_em4100_get_time_divisor(proto) -
+           EM_READ_JITTER_TIME_BASE / protocol_em4100_get_time_divisor(proto);
 }
 
-uint16_t protocol_em4100_get_short_time_high(ProtocolEM4100 *proto) {
-	return EM_READ_SHORT_TIME_BASE / protocol_em4100_get_time_divisor(proto) + EM_READ_JITTER_TIME_BASE / protocol_em4100_get_time_divisor(proto);
+uint16_t protocol_em4100_get_short_time_high(ProtocolEM4100* proto) {
+    return EM_READ_SHORT_TIME_BASE / protocol_em4100_get_time_divisor(proto) +
+           EM_READ_JITTER_TIME_BASE / protocol_em4100_get_time_divisor(proto);
 }
 
-uint16_t protocol_em4100_get_long_time_low(ProtocolEM4100 *proto) {
-	return EM_READ_LONG_TIME_BASE / protocol_em4100_get_time_divisor(proto) - EM_READ_JITTER_TIME_BASE / protocol_em4100_get_time_divisor(proto);
-
+uint16_t protocol_em4100_get_long_time_low(ProtocolEM4100* proto) {
+    return EM_READ_LONG_TIME_BASE / protocol_em4100_get_time_divisor(proto) -
+           EM_READ_JITTER_TIME_BASE / protocol_em4100_get_time_divisor(proto);
 }
 
-uint16_t protocol_em4100_get_long_time_high(ProtocolEM4100 *proto) {
-	return EM_READ_LONG_TIME_BASE / protocol_em4100_get_time_divisor(proto) + EM_READ_JITTER_TIME_BASE / protocol_em4100_get_time_divisor(proto);
+uint16_t protocol_em4100_get_long_time_high(ProtocolEM4100* proto) {
+    return EM_READ_LONG_TIME_BASE / protocol_em4100_get_time_divisor(proto) +
+           EM_READ_JITTER_TIME_BASE / protocol_em4100_get_time_divisor(proto);
 }
-
-
 
 ProtocolEM4100* protocol_em4100_alloc(void) {
     ProtocolEM4100* proto = malloc(sizeof(ProtocolEM4100));
@@ -101,8 +102,6 @@ ProtocolEM4100* protocol_em4100_32_alloc(void) {
     proto->clock_per_bit = 32;
     return (void*)proto;
 };
-
-
 
 void protocol_em4100_free(ProtocolEM4100* proto) {
     free(proto);
@@ -199,13 +198,16 @@ bool protocol_em4100_decoder_feed(ProtocolEM4100* proto, bool level, uint32_t du
 
     ManchesterEvent event = ManchesterEventReset;
 
-    if(duration > protocol_em4100_get_short_time_low(proto) && duration < protocol_em4100_get_short_time_high(proto)) {
+    if(duration > protocol_em4100_get_short_time_low(proto) &&
+       duration < protocol_em4100_get_short_time_high(proto)) {
         if(!level) {
             event = ManchesterEventShortHigh;
         } else {
             event = ManchesterEventShortLow;
         }
-    } else if(duration > protocol_em4100_get_long_time_low(proto) && duration < protocol_em4100_get_long_time_high(proto)) {
+    } else if(
+        duration > protocol_em4100_get_long_time_low(proto) &&
+        duration < protocol_em4100_get_long_time_high(proto)) {
         if(!level) {
             event = ManchesterEventLongHigh;
         } else {
@@ -327,7 +329,11 @@ bool protocol_em4100_write_data(ProtocolEM4100* protocol, void* data) {
 void protocol_em4100_render_data(ProtocolEM4100* protocol, FuriString* result) {
     uint8_t* data = protocol->data;
     furi_string_printf(
-        result, "FC: %03u, Card: %05u (RF/%u)", data[2], (uint16_t)((data[3] << 8) | (data[4])), protocol->clock_per_bit);
+        result,
+        "FC: %03u, Card: %05u (RF/%u)",
+        data[2],
+        (uint16_t)((data[3] << 8) | (data[4])),
+        protocol->clock_per_bit);
 };
 
 const ProtocolBase protocol_em4100 = {
@@ -353,7 +359,6 @@ const ProtocolBase protocol_em4100 = {
     .render_brief_data = (ProtocolRenderData)protocol_em4100_render_data,
     .write_data = (ProtocolWriteData)protocol_em4100_write_data,
 };
-
 
 const ProtocolBase protocol_em4100_32 = {
     .name = "EM4100/32",
