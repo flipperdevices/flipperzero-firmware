@@ -1,0 +1,14 @@
+App(
+    appid="techart_calendar",
+    name="Calendar TECHART",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="calendar_app",
+    stack_size=2 * 1024,
+    fap_category="Tools",
+    fap_icon="calendar.png",
+    fap_icon_assets="images",
+    fap_author="TechArtDev",
+    fap_weburl="https://github.com/techartdev/Calendar/",
+    fap_version="1.0",
+    fap_description="Simple calendar app",
+)
