@@ -24,9 +24,13 @@ while read repo branch subdir; do
     fi
     if grep "Automatic merge failed; fix conflicts and then commit the result." <<< "$result" > /dev/null; then
         echo "MERGE_MSG: Merge ${path} from ${repo}"
-        echo "Waiting for current index to be resolved..."
         notify-send -a Git -i git "Subtree merge failed" "Resolve current index to continue" &> /dev/null | true
-        while ! git diff --quiet || ! git diff --cached --quiet || ! git merge HEAD &> /dev/null; do
+        while true; do
+            echo "Resolve current index then press Enter..."
+            read
+            if git diff --quiet && git diff --cached --quiet && git merge HEAD &> /dev/null; then
+                break
+            fi
             sleep 1
         done
     fi
