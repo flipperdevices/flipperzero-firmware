@@ -124,6 +124,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [FuriHalRtc refactor: new datetime lib #3386 (By Leptopt1los)](https://github.com/flipperdevices/flipperzero-firmware/pull/3386)
 - OFW: [Archive: fixed Apps tab ext filter #3450 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/3450)
 - [DateTime lib refafactor fixes (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/a0809ddc7c1ee7364b2b3b30615c67c34328ea27)
+- Updated: [Dab Timer v1.9 (By RogueMaster)](https://github.com/RogueMaster/flipperzero-dabtimer)
 
 <a name="release">
 
@@ -437,7 +438,7 @@ $ ./fbt dolphin_ext
 - [Counter v1.3 (By Krulknul)](https://github.com/Krulknul/dolphin-counter)
 - [Cross Remote v2.4 (By leedave)](https://github.com/leedave/flipper-zero-cross-remote)
 - [Crypto Dictionary v0.1 (By armixz)](https://github.com/armixz/Flipper-Zero-Crypto-Dictionary)
-- [Dab Timer v1.8 (By RogueMaster)](https://github.com/RogueMaster/flipperzero-dabtimer)
+- [Dab Timer v1.9 (By RogueMaster)](https://github.com/RogueMaster/flipperzero-dabtimer)
 - [DAP Link v1.2 (By DrZlo13)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/1897)
 - [DCF77 Transmitter v1.1 (By arha)](https://github.com/arha/flipper-dcf77)
 - [Deauther PWNDTOOLS V2.6.0 (By HEX0DAYS)](https://github.com/HEX0DAYS/FlipperZero-PWNDTOOLS) `Req: ESP8266` [Original](https://github.com/SpacehuhnTech/esp8266_deauther)
