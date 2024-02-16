@@ -11,7 +11,7 @@ App(
     sources=[
         "*.c*",
         "!plugins",
-        "!nfc_cli.c",
+        "!cli",
     ],
     fap_libs=["assets", "mbedtls"],
     fap_icon="icon.png",
@@ -178,6 +178,6 @@ App(
     targets=["f7"],
     apptype=FlipperAppType.STARTUP,
     entry_point="nfc_on_system_start",
-    sources=["nfc_cli.c"],
+    sources=["cli/nfc_cli.c"],
     order=30,
 )
