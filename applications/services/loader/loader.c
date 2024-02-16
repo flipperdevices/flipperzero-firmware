@@ -748,8 +748,8 @@ static LoaderStatus loader_do_start_by_name(
         {
             Storage* storage = furi_record_open(RECORD_STORAGE);
             if(storage_file_exists(storage, name)) {
-                status =
-                    loader_start_external_app(loader, storage, name, args, error_message, flags, false);
+                status = loader_start_external_app(
+                    loader, storage, name, args, error_message, flags, false);
                 if(status == LoaderStatusErrorApiMismatch) {
                     status = loader_start_external_app(
                         loader, storage, name, args, error_message, flags, true);
