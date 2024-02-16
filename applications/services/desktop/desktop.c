@@ -410,7 +410,7 @@ static void desktop_clock_timer_callback(void* context) {
         if(gui_get_count_of_enabled_view_port_in_layer(desktop->gui, GuiLayerStatusBarLeftSlim) <
            6) {
             desktop_clock_upd_time(desktop, false);
-            FuriHalRtcDateTime curr_dt;
+            DateTime curr_dt;
             furi_hal_rtc_get_datetime(&curr_dt);
 
             if(desktop->minute != curr_dt.minute) {
@@ -434,7 +434,7 @@ static void desktop_clock_timer_callback(void* context) {
     case ICON_STYLE_STOCK:
         if(gui_get_count_of_enabled_view_port_in_layer(desktop->gui, GuiLayerStatusBarLeft) < 6) {
             desktop_clock_upd_time(desktop, false);
-            FuriHalRtcDateTime curr_dt;
+            DateTime curr_dt;
             furi_hal_rtc_get_datetime(&curr_dt);
 
             if(desktop->minute != curr_dt.minute) {
@@ -743,7 +743,7 @@ Desktop* desktop_alloc() {
     desktop->update_clock_timer =
         furi_timer_alloc(desktop_clock_timer_callback, FuriTimerTypePeriodic, desktop);
 
-    FuriHalRtcDateTime curr_dt;
+    DateTime curr_dt;
     furi_hal_rtc_get_datetime(&curr_dt);
 
     desktop_clock_upd_time(desktop, true);

@@ -26,6 +26,7 @@ class FlipperAppType(Enum):
     STARTUP = "StartupHook"
     EXTERNAL = "External"
     MENUEXTERNAL = "MenuExternal"
+    EXTSETTINGS = "ExtSettings"
     METAPACKAGE = "Package"
     PLUGIN = "Plugin"
 
@@ -252,6 +253,7 @@ class AppBuildset:
         FlipperAppType.APP,
         FlipperAppType.DEBUG,
         FlipperAppType.ARCHIVE,
+        FlipperAppType.SETTINGS,
         FlipperAppType.STARTUP,
     )
     EXTERNAL_APP_TYPES_MAP = {
@@ -260,7 +262,7 @@ class AppBuildset:
         FlipperAppType.PLUGIN: True,
         FlipperAppType.DEBUG: True,
         FlipperAppType.MENUEXTERNAL: False,
-        FlipperAppType.SETTINGS: False,
+        FlipperAppType.EXTSETTINGS: False,
     }
 
     @classmethod

@@ -1,7 +1,7 @@
 App(
     appid="system_settings",
     name="System",
-    apptype=FlipperAppType.SETTINGS,
+    apptype=FlipperAppType.EXTSETTINGS,
     entry_point="system_settings_app",
     requires=["gui", "locale"],
     flags=["InsomniaSafe"],

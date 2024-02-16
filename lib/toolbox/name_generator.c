@@ -49,7 +49,7 @@ void name_generator_make_auto_datetime(
     size_t max_name_size,
     const char* prefix,
     DateTime* custom_time) {
-    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDetailedFilename)) {
+    if(!furi_hal_rtc_is_flag_set(FuriHalRtcFlagRandomFilename)) {
         name_generator_make_detailed_datetime(name, max_name_size, prefix, custom_time);
     } else {
         name_generator_make_random_prefixed(name, max_name_size, prefix);
