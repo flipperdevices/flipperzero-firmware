@@ -123,6 +123,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [JS, archive and file browser worker fixes #3446 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/3446)
 - OFW: [FuriHalRtc refactor: new datetime lib #3386 (By Leptopt1los)](https://github.com/flipperdevices/flipperzero-firmware/pull/3386)
 - OFW: [Archive: fixed Apps tab ext filter #3450 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/3450)
+- [DateTime lib refafactor fixes (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/a0809ddc7c1ee7364b2b3b30615c67c34328ea27)
 
 <a name="release">
 
