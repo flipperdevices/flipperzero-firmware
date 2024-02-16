@@ -36,7 +36,7 @@ static void draw_battery(Canvas* canvas, BatteryInfoModel* data, int x, int y) {
     }
 
     // Draw bubble
-    elements_bubble(canvas, 53, 0, 71, data->alt ? 28 : 39);
+    elements_bubble(canvas, 53, 0, 71, 28);
 
     // Set text
     if(current > 0) {
@@ -82,25 +82,14 @@ static void draw_battery(Canvas* canvas, BatteryInfoModel* data, int x, int y) {
         snprintf(value, sizeof(value), "(~%ld mA)", ABS(current));
     }
 
-    if(data->alt) {
-        if(!strcmp(value, "")) {
-            canvas_draw_str_aligned(canvas, x + 92, y + 14, AlignCenter, AlignCenter, header);
-        } else if(!strcmp(header, "")) {
-            canvas_draw_str_aligned(canvas, x + 92, y + 14, AlignCenter, AlignCenter, value);
-        } else {
-            canvas_draw_str_aligned(canvas, x + 92, y + 9, AlignCenter, AlignCenter, header);
-            canvas_draw_str_aligned(canvas, x + 92, y + 19, AlignCenter, AlignCenter, value);
-        }
-    } else {
-        if(!strcmp(emote, "")) {
-            canvas_draw_str_aligned(canvas, x + 92, y + 9, AlignCenter, AlignCenter, header);
-            canvas_draw_str_aligned(canvas, x + 92, y + 21, AlignCenter, AlignCenter, value);
-        } else {
-            canvas_draw_str_aligned(canvas, 92, y + 3, AlignCenter, AlignCenter, emote);
-            canvas_draw_str_aligned(canvas, 92, y + 15, AlignCenter, AlignCenter, header);
-            canvas_draw_str_aligned(canvas, 92, y + 27, AlignCenter, AlignCenter, value);
-        }
-    }
+	if(!strcmp(value, "")) {
+		canvas_draw_str_aligned(canvas, x + 92, y + 14, AlignCenter, AlignCenter, header);
+	} else if(!strcmp(header, "")) {
+		canvas_draw_str_aligned(canvas, x + 92, y + 14, AlignCenter, AlignCenter, value);
+	} else {
+		canvas_draw_str_aligned(canvas, x + 92, y + 9, AlignCenter, AlignCenter, header);
+		canvas_draw_str_aligned(canvas, x + 92, y + 19, AlignCenter, AlignCenter, value);
+	}
 }
 
 static void battery_info_draw_callback(Canvas* canvas, void* context) {
@@ -109,7 +98,7 @@ static void battery_info_draw_callback(Canvas* canvas, void* context) {
 
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
-    draw_battery(canvas, model, 0, model->alt ? 0 : 5);
+    draw_battery(canvas, model, 0, 0);
 
     char batt_level[10];
     char temperature[10];
@@ -134,21 +123,17 @@ static void battery_info_draw_callback(Canvas* canvas, void* context) {
         (uint32_t)(model->gauge_voltage * 10) % 10UL);
     snprintf(health, sizeof(health), "%d%%", model->health);
 
-    int h = model->alt ? 28 : 42;
+    int h = 28;
     draw_stat(canvas, 8, h, &I_Battery_16x16, batt_level);
     draw_stat(canvas, 40, h, &I_Temperature_16x16, temperature);
     draw_stat(canvas, 72, h, &I_Voltage_16x16, voltage);
     draw_stat(canvas, 104, h, &I_Health_16x16, health);
 
-    if(model->alt) {
-        // elements_button_left(canvas, "Back");
-        // elements_button_right(canvas, "Next");
-        char uptime[17];
-        uint32_t sec = furi_get_tick() / furi_kernel_get_tick_frequency();
-        snprintf(
-            uptime, sizeof(uptime), "Up %02lu:%02lu:%02lu", sec / 3600, sec / 60 % 60, sec % 60);
-        canvas_draw_str_aligned(canvas, 64, 61, AlignCenter, AlignBottom, uptime);
-    }
+	char uptime[17];
+	uint32_t sec = furi_get_tick() / furi_kernel_get_tick_frequency();
+	snprintf(
+		uptime, sizeof(uptime), "Up %02lu:%02lu:%02lu", sec / 3600, sec / 60 % 60, sec % 60);
+	canvas_draw_str_aligned(canvas, 64, 61, AlignCenter, AlignBottom, uptime);
 }
 
 static bool battery_info_input_callback(InputEvent* event, void* context) {

@@ -49,7 +49,7 @@ void tpms_protocol_decoder_schrader_gg4_feed(void* context, bool level, uint32_t
  * @param context Pointer to a TPMSProtocolDecoderSchraderGG4 instance
  * @return hash Hash sum
  */
-uint8_t tpms_protocol_decoder_schrader_gg4_get_hash_data(void* context);
+uint32_t tpms_protocol_decoder_schrader_gg4_get_hash_data(void* context);
 
 /**
  * Serialize data TPMSProtocolDecoderSchraderGG4.
