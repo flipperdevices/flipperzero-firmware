@@ -11,6 +11,6 @@ App(
     flags=["InsomniaSafe"],
     stack_size=1 * 1024,
     order=1000,
-    fap_category="assets",
+    fap_category="Settings",
     fap_icon_assets="assets",
 )

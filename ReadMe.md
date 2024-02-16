@@ -29,8 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0215-1147-0.97.2-099447d](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-02-15 11:47 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-02-15 11:47 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-02-16 00:12 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-02-16 00:12 EST`
 - OFW: [NFC: Add support for Gallagher access control (MIFARE Classic only) #3306 (By nickmooney)](https://github.com/flipperdevices/flipperzero-firmware/pull/3306)
 - OFW: [NFC: Slix disable privacy #3425 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3425)
 - OFW: [NFC: Added NFC plugin; Some parser #3335 (By zProAle)](https://github.com/flipperdevices/flipperzero-firmware/pull/3335)
@@ -84,6 +84,9 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [NFC Seader v2.3 (By bettse)](https://github.com/bettse/seader)
 - Added: [Calendar TECHART v1.0 (By techartdev)](https://github.com/techartdev/Calendar)
 - Updated: [NFC: Emv fixes #702 (By wosk_& Leptopt1los)](https://github.com/DarkFlippers/unleashed-firmware/pull/702)
+- UL: [SubGhz: Magellan Event Code Update #713 (By wooferguy)](https://github.com/DarkFlippers/unleashed-firmware/pull/713)
+- [Remaining Power Settings app made external (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/59edfc2470000bb794b9e22bd4e4c9748da0e873)
+- [TPMS Protocol fixes from uint8_t to uint32_t on SubGHz hash data & Battery Mode always shows uptime (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/bf0fa7299f382c21cf2f218f9a2a48e785cf2024)
 
 ## CHANGES FROM THIS BRANCH:
 
@@ -120,7 +123,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [JS, archive and file browser worker fixes #3446 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/3446)
 - OFW: [FuriHalRtc refactor: new datetime lib #3386 (By Leptopt1los)](https://github.com/flipperdevices/flipperzero-firmware/pull/3386)
 - OFW: [Archive: fixed Apps tab ext filter #3450 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/3450)
-- UL: [SubGhz: Magellan Event Code Update #713 (By wooferguy)](https://github.com/DarkFlippers/unleashed-firmware/pull/713)
 
 <a name="release">
 
