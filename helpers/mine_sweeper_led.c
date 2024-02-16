@@ -53,9 +53,7 @@ void mine_sweeper_led_blink_cyan(void* context) {
 
 void mine_sweeper_led_reset(void* context) {
     MineSweeperApp* app = context;
-    notification_message(app->notification, &sequence_reset_red);
-    notification_message(app->notification, &sequence_reset_green);
-    notification_message(app->notification, &sequence_reset_blue);
+    notification_message(app->notification, &sequence_reset_rgb);
     
     furi_thread_flags_wait(0, FuriFlagWaitAny, 300); //Delay, prevent removal from RAM before LED value set    
 }
