@@ -67,7 +67,6 @@ typedef enum {
 typedef struct {
     FuriMutex* mutex;
     FuriMessageQueue* event_queue;
-    FuriHalRtcDateTime datetime;
     DesktopSettings* desktop_settings;
     LocaleDateFormat date_format;
     LocaleTimeFormat time_format;
