@@ -1,7 +1,14 @@
 #pragma once
 
-#include <lib/nfc/protocols/iso14443_3a/iso14443_3a.h>
+#include <nfc/protocols/iso14443_4a/iso14443_4a.h>
+#include <lib/toolbox/simple_array.h>
 #include <furi.h>
+
+/**
+ * Structure to store TuLlave transaction data
+*/
+typedef struct {
+} TuLlaveTransaction;
 
 /**
  * Structure to store data TuLlave collected data
@@ -10,7 +17,8 @@
 typedef struct {
     uint64_t balance;
     FuriString* card_number;
-    FuriString* nfc_uid;
+    SimpleArray* transaction_history;
+    Iso14443_4aData* iso_data;
 } TuLlaveData;
 
 /**
@@ -27,7 +35,7 @@ typedef struct {
  *          buffer size
  *  
 */
-void tullave_iso14443_4a_format_bytes(FuriString* str, const uint8_t* const data, size_t size);
+void tullave_data_format_bytes(FuriString* str, const uint8_t* const data, size_t size);
 
 /**
  * Converts a bytes array into their respective representation of

@@ -7,6 +7,11 @@ FuriString* tullave_scene_error_parse_err_code(TuLlaveError err_code) {
         furi_string_set_str(err_txt, "Card is not recognized or not supported.");
         break;
     }
+    case TuLlaveErrorCouldNotReadCompleteData: {
+        furi_string_set_str(
+            err_txt, "Could not read complete card data. Please do not move the card.");
+        break;
+    }
     case TuLlaveErrorNone: {
         break;
     }
@@ -16,15 +21,17 @@ FuriString* tullave_scene_error_parse_err_code(TuLlaveError err_code) {
 }
 
 void tullave_scene_error_on_enter(void* context) {
+    furi_assert(context);
     TuLlaveApp* instance = context;
 
     notification_message(instance->notifications, &sequence_error);
     notification_message(instance->notifications, &sequence_set_red_255);
 
     FuriString* widget_title =
-        furi_string_alloc_printf("\e#TuLlave Error: 0x%03x", instance->err_code);
+        furi_string_alloc_printf("\e#TuLlave Error: 0x%03x", instance->tullave_poller->err_code);
     FuriString* widget_text = furi_string_alloc();
-    FuriString* err_code_txt = tullave_scene_error_parse_err_code(instance->err_code);
+    FuriString* err_code_txt =
+        tullave_scene_error_parse_err_code(instance->tullave_poller->err_code);
 
     widget_add_text_box_element(
         instance->widget,
