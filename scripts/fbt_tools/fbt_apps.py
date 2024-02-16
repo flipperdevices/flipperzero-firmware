@@ -62,7 +62,7 @@ class ApplicationsCGenerator:
      .appid = "{app.appid}", 
      .stack_size = {app.stack_size},
      .icon = {f"&{app.icon}" if app.icon else "NULL"},
-     .flags = {'|'.join(f"FlipperInternalApplicationFlag{flag}" for flag in app.flags)} }}"""
+     .flags = {'|'.join(f"FlipperApplicationFlag{flag}" for flag in app.flags)} }}"""
 
     def get_external_app_descr(self, app: FlipperApplication):
         app_path = "/ext/apps"
@@ -73,7 +73,8 @@ class ApplicationsCGenerator:
     {{
      .name = "{app.name}",
      .icon = {f"&{app.icon}" if app.icon else "NULL"},
-     .path = "{app_path}" }}"""
+     .path = "{app_path}",
+     .flags = {'|'.join(f"FlipperApplicationFlag{flag}" for flag in app.flags)} }}"""
 
     def generate(self):
         contents = [

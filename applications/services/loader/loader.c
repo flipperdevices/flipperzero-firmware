@@ -19,15 +19,18 @@
 
 // helpers
 
-static const char* loader_find_external_application_by_name(const char* app_name) {
+static const char*
+    loader_find_external_application_by_name(const char* app_name, FlipperApplicationFlag* flags) {
     for(size_t i = 0; i < FLIPPER_EXTERNAL_APPS_COUNT; i++) {
         if(strcmp(FLIPPER_EXTERNAL_APPS[i].name, app_name) == 0) {
+            *flags = FLIPPER_EXTERNAL_APPS[i].flags;
             return FLIPPER_EXTERNAL_APPS[i].path;
         }
     }
 
     for(size_t i = 0; i < FLIPPER_EXTSETTINGS_APPS_COUNT; i++) {
         if(strcmp(FLIPPER_EXTSETTINGS_APPS[i].name, app_name) == 0) {
+            *flags = FLIPPER_EXTSETTINGS_APPS[i].flags;
             return FLIPPER_EXTSETTINGS_APPS[i].path;
         }
     }
@@ -56,9 +59,10 @@ LoaderStatus
 LoaderStatus loader_start_with_gui_error(Loader* loader, const char* name, const char* args) {
     FuriString* error_message = furi_string_alloc();
     LoaderStatus status = loader_start(loader, name, args, error_message);
+    FlipperApplicationFlag flags = FlipperApplicationFlagDefault;
 
     if(status == LoaderStatusErrorUnknownApp &&
-       loader_find_external_application_by_name(name) != NULL) {
+       loader_find_external_application_by_name(name, &flags) != NULL) {
         // Special case for external apps
         DialogsApp* dialogs = furi_record_open(RECORD_DIALOGS);
         DialogMessage* message = dialog_message_alloc();
@@ -484,7 +488,7 @@ static const FlipperInternalApplication* loader_find_application_by_name(const c
     return NULL;
 }
 
-static void loader_start_app_thread(Loader* loader, FlipperInternalApplicationFlag flags) {
+static void loader_start_app_thread(Loader* loader, FlipperApplicationFlag flags) {
     // setup heap trace
     FuriHalRtcHeapTrackMode mode = furi_hal_rtc_get_heap_track_mode();
     if(mode > FuriHalRtcHeapTrackModeNone) {
@@ -494,7 +498,7 @@ static void loader_start_app_thread(Loader* loader, FlipperInternalApplicationFl
     }
 
     // setup insomnia
-    if(!(flags & FlipperInternalApplicationFlagInsomniaSafe)) {
+    if(!(flags & FlipperApplicationFlagInsomniaSafe)) {
         furi_hal_power_insomnia_enter();
         loader->app.insomniac = true;
     } else {
@@ -567,6 +571,7 @@ static LoaderStatus loader_start_external_app(
     const char* path,
     const char* args,
     FuriString* error_message,
+    FlipperApplicationFlag flags,
     bool ignore_mismatch) {
     LoaderStatus status = loader_make_success_status(error_message);
 
@@ -642,7 +647,9 @@ static LoaderStatus loader_start_external_app(
             __asm volatile("bkpt 0");
         }
 
-        loader_start_app_thread(loader, FlipperInternalApplicationFlagDefault);
+        loader_start_app_thread(loader, flags);
+
+        return status;
     } while(0);
 
     if(status != LoaderStatusOk) {
@@ -729,8 +736,9 @@ static LoaderStatus loader_do_start_by_name(
         }
 
         // check External Applications
+        FlipperApplicationFlag flags = FlipperApplicationFlagDefault;
         {
-            const char* path = loader_find_external_application_by_name(name);
+            const char* path = loader_find_external_application_by_name(name, &flags);
             if(path) {
                 name = path;
             }
@@ -741,10 +749,10 @@ static LoaderStatus loader_do_start_by_name(
             Storage* storage = furi_record_open(RECORD_STORAGE);
             if(storage_file_exists(storage, name)) {
                 status =
-                    loader_start_external_app(loader, storage, name, args, error_message, false);
+                    loader_start_external_app(loader, storage, name, args, error_message, flags, false);
                 if(status == LoaderStatusErrorApiMismatch) {
                     status = loader_start_external_app(
-                        loader, storage, name, args, error_message, true);
+                        loader, storage, name, args, error_message, flags, true);
                 }
                 furi_record_close(RECORD_STORAGE);
                 break;

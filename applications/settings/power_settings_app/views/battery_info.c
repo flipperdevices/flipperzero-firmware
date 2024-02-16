@@ -1,7 +1,7 @@
 #include "battery_info.h"
 #include <furi.h>
 #include <gui/elements.h>
-#include <assets_icons.h>
+#include <power_settings_icons.h>
 #include <locale/locale.h>
 
 #define LOW_CHARGE_THRESHOLD (10)

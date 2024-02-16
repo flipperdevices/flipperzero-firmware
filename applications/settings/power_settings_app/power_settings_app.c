@@ -119,7 +119,7 @@ int32_t power_settings_app(void* p) {
                 furi_record_open(RECORD_STORAGE), firmware_api_interface);
             do {
                 FlipperApplicationPreloadStatus preload_res =
-                    flipper_application_preload(fap, EXT_PATH("apps/assets/about.fap"));
+                    flipper_application_preload(fap, EXT_PATH("apps/Settings/about.fap"));
                 if(preload_res != FlipperApplicationPreloadStatusSuccess) break;
                 FlipperApplicationLoadStatus load_status = flipper_application_map_to_memory(fap);
                 if(load_status != FlipperApplicationLoadStatusSuccess) break;

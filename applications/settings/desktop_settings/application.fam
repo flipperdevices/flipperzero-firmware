@@ -7,8 +7,9 @@ App(
         "desktop",
         "gui",
     ],
+    flags=["InsomniaSafe"],
     stack_size=1 * 1024,
     order=50,
-    fap_category="assets",
+    fap_category="Settings",
     fap_libs=["assets"],
 )
