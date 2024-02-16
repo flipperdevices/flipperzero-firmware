@@ -19,9 +19,6 @@
 #include "unitemp_icons.h"
 
 #include <assets_icons.h>
-// extern const Icon I_ButtonRight_4x7;
-// extern const Icon I_ButtonLeft_4x7;
-// extern const Icon I_Ok_btn_9x9;
 
 static View* view;
 
@@ -156,6 +153,7 @@ static void _draw_pressure(Canvas* canvas, Sensor* sensor) {
     canvas_draw_icon(canvas, x + 3, y + 4, &I_pressure_7x13);
 
     int16_t press_int = sensor->pressure;
+    // Change Temp for Pressure
     int8_t press_dec = (int16_t)(sensor->pressure * 10) % 10;
 
     //Целая часть давления
