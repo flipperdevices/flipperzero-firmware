@@ -10,7 +10,7 @@ We leverage that boot mode to perform OTA firmware updates, including operations
 
 Installation of OTA updates goes through 3 stages:
 
-### 1. Backing up internal storage (`/int`)
+### 1. Backing up internal storage (/int)
 
 It is a special partition of Flipper's flash memory, taking up all available space not used by the firmware code. Newer versions of firmware may be of different size, and simply installing them would cause flash repartitioning and data loss.
 
