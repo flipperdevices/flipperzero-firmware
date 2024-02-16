@@ -44,6 +44,7 @@ libs = env.BuildModules(
         "heatshrink",
         "bit_lib",
         "cfw",
+        "datetime",
     ],
 )
 

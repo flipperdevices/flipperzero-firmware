@@ -166,7 +166,7 @@ static void desktop_topbar_icon_draw_callback(Canvas* canvas, void* context) {
 static void desktop_clock_upd_time(Desktop* desktop, bool forced) {
     furi_assert(desktop);
 
-    FuriHalRtcDateTime curr_dt;
+    DateTime curr_dt;
     furi_hal_rtc_get_datetime(&curr_dt);
 
     if(forced) {

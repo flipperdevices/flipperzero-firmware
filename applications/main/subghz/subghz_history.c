@@ -13,7 +13,7 @@ typedef struct {
     FlipperFormat* flipper_string;
     uint8_t type;
     SubGhzRadioPreset* preset;
-    FuriHalRtcDateTime datetime;
+    DateTime datetime;
     uint32_t hash_data;
     const SubGhzProtocol* protocol;
     uint16_t repeats;
@@ -170,13 +170,13 @@ const char* subghz_history_get_protocol_name(SubGhzHistory* instance, uint16_t i
     return furi_string_get_cstr(instance->tmp_string);
 }
 
-FuriHalRtcDateTime subghz_history_get_datetime(SubGhzHistory* instance, uint16_t idx) {
+DateTime subghz_history_get_datetime(SubGhzHistory* instance, uint16_t idx) {
     furi_assert(instance);
     SubGhzHistoryItem* item = SubGhzHistoryItemArray_get(instance->history->data, idx);
     if(item) {
         return item->datetime;
     } else {
-        return (FuriHalRtcDateTime){};
+        return (DateTime){};
     }
 }
 
@@ -233,7 +233,7 @@ void subghz_history_get_text_item_menu(SubGhzHistory* instance, FuriString* outp
 
 void subghz_history_get_time_item_menu(SubGhzHistory* instance, FuriString* output, uint16_t idx) {
     SubGhzHistoryItem* item = SubGhzHistoryItemArray_get(instance->history->data, idx);
-    FuriHalRtcDateTime* t = &item->datetime;
+    DateTime* t = &item->datetime;
     furi_string_printf(output, "%.2d:%.2d:%.2d ", t->hour, t->minute, t->second);
 }
 
