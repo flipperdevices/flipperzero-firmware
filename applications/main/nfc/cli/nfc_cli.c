@@ -733,16 +733,14 @@ static void nfc_cli(Cli* cli, FuriString* args, void* context) {
             nfc_cli_detect(cli, args);
             break;
         }
-        if(furi_string_cmp_str(cmd, "iso14443-3a") == 0) {
-            nfc_cli_iso14443_3a(cli, args);
-            break;
-        }
         if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
             if(furi_string_cmp_str(cmd, "field") == 0) {
                 nfc_cli_field(cli, args);
                 break;
             }
         }
+        if(nfc_cli_protocol_support_cmd_process(cli, cmd)) break;
+        UNUSED(nfc_cli_iso14443_3a);
 
         nfc_cli_print_usage();
     } while(false);
