@@ -271,7 +271,7 @@ static NfcCommand nfc_cli_iso14443_3a_poller_callback(NfcGenericEventEx event, v
                     rx_message.data.tx_data,
                     instance->rx_data,
                     rx_message.data.timeout_fc);
-                if(error == Iso14443_3aErrorNone) {
+                if((error == Iso14443_3aErrorNone) || (error == Iso14443_3aErrorWrongCrc)) {
                     tx_message.type = NfcCliWorkerMessageTypeRx;
                     tx_message.data.rx_data.rx_data = instance->rx_data;
                     // TODO handle return
@@ -537,13 +537,82 @@ void nfc_cli_poller_start_handler_activate(FuriString* cmd, NfcCliPollContext* c
 }
 
 void nfc_cli_poller_start_handler_poll(FuriString* cmd, NfcCliPollContext* context) {
-    UNUSED(cmd);
-    UNUSED(context);
+    NfcCliPollContext* instance = context;
+    FuriString* tmp_str = furi_string_alloc();
+    BitBuffer* buff = bit_buffer_alloc(256);
+
+    do {
+        size_t cmd_ascii_len = args_get_first_word_length(cmd);
+        if((cmd_ascii_len % 2) != 0) {
+            printf("Incorrect data length: %d\r\n", cmd_ascii_len);
+            break;
+        }
+        if(cmd_ascii_len == 0) break;
+
+        if(!args_read_string_and_trim(cmd, tmp_str)) {
+            printf("Failed to read data\r\n");
+            break;
+        }
+
+        uint8_t data[256] = {};
+        if(!args_read_hex_bytes(tmp_str, data, cmd_ascii_len / 2)) {
+            printf("Failed to read hex bytes\r\n");
+            break;
+        }
+
+        bit_buffer_copy_bytes(buff, data, cmd_ascii_len / 2);
+
+        printf("\r\nTx:");
+        for(size_t i = 0; i < bit_buffer_get_size_bytes(buff); i++) {
+            printf(" %02X", bit_buffer_get_byte(buff, i));
+        }
+
+        NfcCliWorkerMessage rx_message = {};
+        NfcCliUserMessage tx_message = {
+            .type = NfcCliUserMessageTypeTx,
+            .data =
+                {
+                    .add_crc = true,
+                    .timeout_fc = 200000,
+                    .tx_data = buff,
+                },
+        };
+        // TODO process return
+        furi_message_queue_put(instance->poller_queue, &tx_message, FuriWaitForever);
+        furi_message_queue_get(instance->cli_queue, &rx_message, FuriWaitForever);
+
+        if(rx_message.type == NfcCliWorkerMessageTypeError) {
+            printf("\r\nRx: error %d", rx_message.data.error.error);
+        } else if(rx_message.type == NfcCliWorkerMessageTypeRx) {
+            printf("\r\nRx:");
+            for(size_t i = 0; i < bit_buffer_get_size_bytes(rx_message.data.rx_data.rx_data);
+                i++) {
+                printf(" %02X", bit_buffer_get_byte(rx_message.data.rx_data.rx_data, i));
+            }
+        }
+        printf("\r\n");
+
+    } while(false);
+
+    furi_string_free(tmp_str);
+    bit_buffer_free(buff);
 }
 
 void nfc_cli_poller_start_handler_reset(FuriString* cmd, NfcCliPollContext* context) {
     UNUSED(cmd);
-    UNUSED(context);
+    NfcCliPollContext* instance = context;
+
+    NfcCliWorkerMessage rx_message = {};
+    NfcCliUserMessage tx_message = {
+        .type = NfcCliUserMessageTypeReset,
+    };
+    // TODO process return
+    furi_message_queue_put(instance->poller_queue, &tx_message, FuriWaitForever);
+    furi_message_queue_get(instance->cli_queue, &rx_message, FuriWaitForever);
+    if(!(rx_message.type == NfcCliWorkerMessageTypeError &&
+         rx_message.data.error.error == NfcCliWorkerErrorNone)) {
+        printf("\r\nReset failed with error %d\r\n", rx_message.data.error.error);
+    }
 }
 
 NfcPollerStartCmdHandler nfc_cli_poller_start_handlers[] = {
