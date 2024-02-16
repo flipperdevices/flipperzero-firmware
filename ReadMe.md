@@ -87,6 +87,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: [SubGhz: Magellan Event Code Update #713 (By wooferguy)](https://github.com/DarkFlippers/unleashed-firmware/pull/713)
 - [Remaining Power Settings app made external (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/59edfc2470000bb794b9e22bd4e4c9748da0e873)
 - [TPMS Protocol fixes from uint8_t to uint32_t on SubGHz hash data & Battery Mode always shows uptime (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/bf0fa7299f382c21cf2f218f9a2a48e785cf2024)
+- Updated: [NFC Magic v1.6 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966)
 
 ## CHANGES FROM THIS BRANCH:
 
@@ -522,7 +523,7 @@ $ ./fbt dolphin_ext
 - [Mx2125 Dual-Axis Accelerometer (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/gpio)
 - [Mx2125 Step Counter v1.0 (By 47lecoste a.k.a. grugnoymeme)](https://github.com/grugnoymeme/flipperzero-stepcounter-fap)
 - [Name Changer (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/488) (Change Flipper name)
-- [NFC Magic v1.5 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966)
+- [NFC Magic v1.6 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966)
 - [NFC Maker v1.2 (by Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/343cb39d08f60b75b537e1a31100707935cf6e9d)
 - [NFC Playlist v1.3 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
 - [NFC Seader v2.4 (By bettse)](https://github.com/bettse/seader)
