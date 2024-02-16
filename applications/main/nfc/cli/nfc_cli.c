@@ -13,6 +13,8 @@
 #include <nfc/protocols/iso14443_3a/iso14443_3a.h>
 #include <nfc/protocols/iso14443_3a/iso14443_3a_poller.h>
 
+#include "protocol_support/nfc_cli_protocol_support.h"
+
 #include <m-array.h>
 
 #define FLAG_EVENT (1 << 10)
@@ -59,10 +61,11 @@ static void nfc_cli_print_usage() {
     printf("Usage:\r\n");
     printf("nfc <cmd>\r\n");
     printf("Cmd list:\r\n");
-    printf("\tdetect\t - detect NFC tag\r\n");
+    printf("\tdetect\t\t - detect NFC tag\r\n");
     if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
-        printf("\tfield\t - turn field on\r\n");
+        printf("\tfield\t\t - turn field on\r\n");
     }
+    nfc_cli_protocol_support_print_usage();
 }
 
 void nfc_cli_detect_scanner_callback(NfcScannerEvent event, void* context) {
