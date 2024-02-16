@@ -82,14 +82,14 @@ static void draw_battery(Canvas* canvas, BatteryInfoModel* data, int x, int y) {
         snprintf(value, sizeof(value), "(~%ld mA)", ABS(current));
     }
 
-	if(!strcmp(value, "")) {
-		canvas_draw_str_aligned(canvas, x + 92, y + 14, AlignCenter, AlignCenter, header);
-	} else if(!strcmp(header, "")) {
-		canvas_draw_str_aligned(canvas, x + 92, y + 14, AlignCenter, AlignCenter, value);
-	} else {
-		canvas_draw_str_aligned(canvas, x + 92, y + 9, AlignCenter, AlignCenter, header);
-		canvas_draw_str_aligned(canvas, x + 92, y + 19, AlignCenter, AlignCenter, value);
-	}
+    if(!strcmp(value, "")) {
+        canvas_draw_str_aligned(canvas, x + 92, y + 14, AlignCenter, AlignCenter, header);
+    } else if(!strcmp(header, "")) {
+        canvas_draw_str_aligned(canvas, x + 92, y + 14, AlignCenter, AlignCenter, value);
+    } else {
+        canvas_draw_str_aligned(canvas, x + 92, y + 9, AlignCenter, AlignCenter, header);
+        canvas_draw_str_aligned(canvas, x + 92, y + 19, AlignCenter, AlignCenter, value);
+    }
 }
 
 static void battery_info_draw_callback(Canvas* canvas, void* context) {
@@ -129,11 +129,10 @@ static void battery_info_draw_callback(Canvas* canvas, void* context) {
     draw_stat(canvas, 72, h, &I_Voltage_16x16, voltage);
     draw_stat(canvas, 104, h, &I_Health_16x16, health);
 
-	char uptime[17];
-	uint32_t sec = furi_get_tick() / furi_kernel_get_tick_frequency();
-	snprintf(
-		uptime, sizeof(uptime), "Up %02lu:%02lu:%02lu", sec / 3600, sec / 60 % 60, sec % 60);
-	canvas_draw_str_aligned(canvas, 64, 61, AlignCenter, AlignBottom, uptime);
+    char uptime[17];
+    uint32_t sec = furi_get_tick() / furi_kernel_get_tick_frequency();
+    snprintf(uptime, sizeof(uptime), "Up %02lu:%02lu:%02lu", sec / 3600, sec / 60 % 60, sec % 60);
+    canvas_draw_str_aligned(canvas, 64, 61, AlignCenter, AlignBottom, uptime);
 }
 
 static bool battery_info_input_callback(InputEvent* event, void* context) {
