@@ -447,9 +447,162 @@ static void nfc_cli_iso14443_3a_poll_handler(FuriString* args) {
     furi_string_free(tmp_str);
 }
 
-static void nfc_cli_iso14443_3a(Cli* cli, FuriString* args) {
-    UNUSED(cli);
+static void nfc_cli_iso14443_3a_start_poller_usage() {
+    printf("Available commands:\r\n");
+    printf("activate - activates tag\r\n");
+    printf("poll - transieve and receive frames\r\n");
+    printf("reset - resets the field\r\n");
+    printf("help - displays command list\r\n");
+    printf("Press Ctrl+C to abort\r\n");
+}
 
+static bool nfc_cli_start_poller_process_input(Cli* cli, FuriString* cmd) {
+    bool exit = false;
+    furi_string_reset(cmd);
+
+    printf("... ");
+    fflush(stdout);
+
+    char c = 0;
+    while(cli_read(cli, (uint8_t*)&c, 1) == 1) {
+        if(c == CliSymbolAsciiETX) {
+            printf("\r\n");
+            exit = true;
+            break;
+        } else if(c >= 0x20 && c < 0x7F) {
+            putc(c, stdout);
+            fflush(stdout);
+            furi_string_push_back(cmd, c);
+        } else if(c == CliSymbolAsciiCR) {
+            furi_string_trim(cmd);
+            if(furi_string_size(cmd)) {
+                printf("\r\n");
+                fflush(stdout);
+                break;
+            } else {
+                printf("\r\n... ");
+                fflush(stdout);
+            }
+        }
+    }
+
+    return exit;
+}
+
+typedef void (*NfcCliPollerStartHandler)(FuriString* cmd, NfcCliPollContext* context);
+
+typedef struct {
+    const char* cmd;
+    NfcCliPollerStartHandler handler;
+} NfcPollerStartCmdHandler;
+
+static void nfc_cli_iso14443_3a_dump_activation_data(
+    const NfcDeviceData* data,
+    FuriString* activation_info) {
+    furi_assert(data);
+    furi_assert(activation_info);
+
+    const Iso14443_3aData* iso3_data = data;
+    furi_string_printf(activation_info, "UID:");
+    for(size_t i = 0; i < iso3_data->uid_len; i++) {
+        furi_string_cat_printf(activation_info, " %02X", iso3_data->uid[i]);
+    }
+    furi_string_cat_printf(
+        activation_info,
+        " ATQA: %02X%02X SAK: %02X",
+        iso3_data->atqa[0],
+        iso3_data->atqa[1],
+        iso3_data->sak);
+}
+
+void nfc_cli_poller_start_handler_activate(FuriString* cmd, NfcCliPollContext* context) {
+    UNUSED(cmd);
+    NfcCliPollContext* instance = context;
+    NfcCliWorkerMessage rx_message = {};
+    NfcCliUserMessage tx_message = {
+        .type = NfcCliUserMessageTypeActivate,
+    };
+    // TODO process return
+    furi_message_queue_put(instance->poller_queue, &tx_message, FuriWaitForever);
+    furi_message_queue_get(instance->cli_queue, &rx_message, FuriWaitForever);
+    if(rx_message.type == NfcCliWorkerMessageTypeError &&
+       rx_message.data.error.error == NfcCliWorkerErrorNone) {
+        const NfcDeviceData* nfc_data = nfc_poller_get_data(instance->poller);
+        nfc_cli_iso14443_3a_dump_activation_data(nfc_data, cmd);
+        printf("\r\nActivation succes: %s\r\n", furi_string_get_cstr(cmd));
+    } else {
+        printf("\r\nActivation failed with error %d\r\n", rx_message.data.error.error);
+    }
+    fflush(stdout);
+}
+
+void nfc_cli_poller_start_handler_poll(FuriString* cmd, NfcCliPollContext* context) {
+    UNUSED(cmd);
+    UNUSED(context);
+}
+
+void nfc_cli_poller_start_handler_reset(FuriString* cmd, NfcCliPollContext* context) {
+    UNUSED(cmd);
+    UNUSED(context);
+}
+
+NfcPollerStartCmdHandler nfc_cli_poller_start_handlers[] = {
+    {
+        .cmd = "activate",
+        .handler = nfc_cli_poller_start_handler_activate,
+    },
+    {
+        .cmd = "poll",
+        .handler = nfc_cli_poller_start_handler_poll,
+    },
+    {
+        .cmd = "reset",
+        .handler = nfc_cli_poller_start_handler_reset,
+    },
+};
+
+static void nfc_cli_iso14443_3a_start_poller_handler(Cli* cli) {
+    FuriString* tmp_str = furi_string_alloc();
+    FuriString* cmd_str = furi_string_alloc();
+
+    printf("Poller started\r\n");
+    nfc_cli_iso14443_3a_start_poller_usage();
+    NfcCliPollContext* instance = nfc_cli_poller_context_alloc(NfcProtocolIso14443_3a);
+    nfc_poller_start_ex(instance->poller, nfc_cli_iso14443_3a_poller_callback, instance);
+
+    while(!nfc_cli_start_poller_process_input(cli, tmp_str)) {
+        if(!args_read_string_and_trim(tmp_str, cmd_str)) {
+            continue;
+        }
+
+        bool command_found = false;
+        for(size_t i = 0; i < COUNT_OF(nfc_cli_poller_start_handlers); i++) {
+            if(furi_string_cmp_str(cmd_str, nfc_cli_poller_start_handlers[i].cmd) == 0) {
+                nfc_cli_poller_start_handlers[i].handler(tmp_str, instance);
+                command_found = true;
+            }
+        }
+        if(!command_found) {
+            nfc_cli_iso14443_3a_start_poller_usage();
+        }
+    }
+
+    NfcCliUserMessage rx_message = {};
+    NfcCliUserMessage tx_message = {
+        .type = NfcCliUserMessageTypeAbort,
+    };
+    // TODO process return
+    furi_message_queue_put(instance->poller_queue, &tx_message, FuriWaitForever);
+    furi_message_queue_get(instance->cli_queue, &rx_message, FuriWaitForever);
+
+    printf("Poller stopped\r\n");
+
+    nfc_cli_poller_context_free(instance);
+    furi_string_free(cmd_str);
+    furi_string_free(tmp_str);
+}
+
+static void nfc_cli_iso14443_3a(Cli* cli, FuriString* args) {
     FuriString* tmp_str = furi_string_alloc();
 
     do {
@@ -459,6 +612,8 @@ static void nfc_cli_iso14443_3a(Cli* cli, FuriString* args) {
         }
         if(furi_string_cmp_str(tmp_str, "poll") == 0) {
             nfc_cli_iso14443_3a_poll_handler(args);
+        } else if(furi_string_cmp_str(tmp_str, "start_poller") == 0) {
+            nfc_cli_iso14443_3a_start_poller_handler(cli);
         } else {
             nfc_cli_iso14443_3a_print_usage();
             break;
