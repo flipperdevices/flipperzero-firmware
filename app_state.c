@@ -1,4 +1,5 @@
 #include "app_state.h"
+#include "dmcomm/hal.h"
 
 /*
 TODO:
@@ -37,6 +38,7 @@ App* app_alloc() {
     app->file_browser = file_browser_alloc(app->file_path);
     app->text_box = text_box_alloc();
     app->text_box_store = furi_string_alloc();
+    app->text_box_mutex = furi_mutex_alloc(FuriMutexTypeNormal);
 
     app->dmcomm_input_mutex = furi_mutex_alloc(FuriMutexTypeNormal);
     app->dmcomm_output_mutex = furi_mutex_alloc(FuriMutexTypeNormal);
@@ -99,6 +101,7 @@ void app_quit(App* app) {
 
 void app_free(App* app) {
     furi_assert(app);
+    ledOff();
 
     // Stop and deallocate usb serial if enabled
     // Stop and deallocate dcomm
@@ -107,6 +110,7 @@ void app_free(App* app) {
     furi_thread_join(app->dcomm_thread);
     furi_thread_free(app->dcomm_thread);
 
+    furi_mutex_free(app->text_box_mutex);
     furi_mutex_free(app->dmcomm_input_mutex);
     furi_mutex_free(app->dmcomm_output_mutex);
     furi_stream_buffer_free(app->dmcomm_stream_buffer);

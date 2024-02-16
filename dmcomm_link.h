@@ -7,5 +7,6 @@
 
 int32_t dmcomm_reader(void* context);
 void dmcomm_sendcommand(void* context, const char* cmd);
+void dmcomm_senddata(void* context, uint8_t* data, size_t len);
 
 #endif

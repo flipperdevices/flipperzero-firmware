@@ -12,6 +12,58 @@ On exit, disconnects and shuts down USB serial
 #include "scene_serial.h"
 #include <furi_hal_cortex.h>
 
+typedef struct {
+    UsbUartConfig cfg;
+    UsbUartState state;
+} SceneUsbUartBridge;
+
+static SceneUsbUartBridge* scene_usb_uart;
+
+void usb_uart_tx(void* context, uint8_t* data, size_t len)
+{
+    App* app = context;
+    // got some data
+
+    char out[65];
+    memset(out, 0, 65);
+    memcpy(out, data, len);
+    furi_check(furi_mutex_acquire(app->text_box_mutex, FuriWaitForever) == FuriStatusOk);
+    furi_string_cat_str(app->text_box_store, out);
+    size_t l = furi_string_size(app->text_box_store);
+    // Trim if necessary
+    if(l > 64)
+        furi_string_right(app->text_box_store, 64 - l);
+    furi_check(furi_mutex_release(app->text_box_mutex) == FuriStatusOk);
+    view_dispatcher_send_custom_event(app->view_dispatcher, SerialCustomEventTextUpdate);
+
+    dmcomm_senddata(app, data, len);
+}
+
+
+void dmcomm_tx(void* context)
+{
+    furi_assert(context);
+    App* app = context;
+
+    furi_check(furi_mutex_acquire(app->dmcomm_output_mutex, FuriWaitForever) == FuriStatusOk);
+    const char *out = furi_string_get_cstr(app->dmcomm_output_buffer);
+    FURI_LOG_I(TAG, "DMComm Data: %s", out);
+
+
+    furi_check(furi_mutex_acquire(app->text_box_mutex, FuriWaitForever) == FuriStatusOk);
+    furi_string_cat_str(app->text_box_store, out);
+    size_t len = furi_string_size(app->text_box_store);
+    // Trim if necessary
+    if(len > 64)
+        furi_string_right(app->text_box_store, 64 - len);
+    furi_check(furi_mutex_release(app->text_box_mutex) == FuriStatusOk);
+    view_dispatcher_send_custom_event(app->view_dispatcher, SerialCustomEventTextUpdate);
+
+
+    usb_uart_send(app->usb_uart_bridge, (uint8_t*)out, strlen(out)); 
+    furi_string_reset(app->dmcomm_output_buffer);
+    furi_check(furi_mutex_release(app->dmcomm_output_mutex) == FuriStatusOk);
+}
 
 void fcom_serial_scene_on_enter(void* context) {
     FURI_LOG_I(TAG, "fcom_serial_scene_on_enter");
@@ -26,11 +78,30 @@ void fcom_serial_scene_on_enter(void* context) {
 
     text_box_set_text(app->text_box, furi_string_get_cstr(app->text_box_store));
 
+    // Initialize USB UART
+    scene_usb_uart = malloc(sizeof(SceneUsbUartBridge));
+    scene_usb_uart->cfg.vcp_ch = 0; // 0 disables logging/CLI, 1 runs alongside
+    scene_usb_uart->cfg.baudrate_mode = 4;
+    scene_usb_uart->cfg.baudrate = 4; // 9600
+    scene_usb_uart->cfg.cb = usb_uart_tx;
+    scene_usb_uart->cfg.ctx = context;
+    app->usb_uart_bridge = usb_uart_enable(&scene_usb_uart->cfg);
+
+    usb_uart_get_config(app->usb_uart_bridge, &scene_usb_uart->cfg);
+    usb_uart_get_state(app->usb_uart_bridge, &scene_usb_uart->state);
+
+    setSerialOutputCallback(dmcomm_tx);
+    //gpio_usb_uart_set_callback(app->gpio_usb_uart, gpio_scene_usb_uart_callback, app);
+
+    // Keep screen on
+    notification_message(app->notification, &sequence_display_backlight_enforce_on);
+
     view_dispatcher_switch_to_view(app->view_dispatcher, FcomSerialView);
 }
 
 bool fcom_serial_scene_on_event(void* context, SceneManagerEvent event) {
     FURI_LOG_I(TAG, "fcom_serial_scene_on_event");
+    App* app = context;
     UNUSED(context);
     UNUSED(event);
 
@@ -40,8 +111,25 @@ bool fcom_serial_scene_on_event(void* context, SceneManagerEvent event) {
     // Save goes to text input ("Name the card")
     // Emulate goes to Send screen "Send" press OK sends the code
     //
+    bool consumed = false;
+    if(event.type == SceneManagerEventTypeTick) {
+        // Update serial text buffer
+        //uint32_t tx_cnt_last = scene_usb_uart->state.tx_cnt;
+        //uint32_t rx_cnt_last = scene_usb_uart->state.rx_cnt;
+        usb_uart_get_state(app->usb_uart_bridge, &scene_usb_uart->state);
+        //gpio_usb_uart_update_state(
+        //    app->gpio_usb_uart, &scene_usb_uart->cfg, &scene_usb_uart->state);
+    }
+    if(event.type == SceneManagerEventTypeCustom) {
+        if(event.event == SerialCustomEventTextUpdate) {
+            furi_check(furi_mutex_acquire(app->text_box_mutex, FuriWaitForever) == FuriStatusOk);
+            text_box_set_text(app->text_box, furi_string_get_cstr(app->text_box_store));
+            furi_check(furi_mutex_release(app->text_box_mutex) == FuriStatusOk);
+            consumed = true;
+        }
+    }
 
-    return false; //consumed event
+    return consumed; //consumed event
 }
 
 void fcom_serial_scene_on_exit(void* context) {
@@ -50,6 +138,13 @@ void fcom_serial_scene_on_exit(void* context) {
     App* app = context;
     UNUSED(app);
 
+    setSerialOutputCallback(NULL);
+
+    usb_uart_disable(app->usb_uart_bridge);
+    free(scene_usb_uart);
+
+    // let screen darken
+    notification_message(app->notification, &sequence_display_backlight_enforce_auto);
     // Cancel any command the usb serial user was sending
     dmcomm_sendcommand(app, "0\n");
 }

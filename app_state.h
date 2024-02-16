@@ -30,6 +30,8 @@ typedef struct App {
     FileBrowser* file_browser;
     FuriString* file_path;
     TextBox* text_box;
+
+    FuriMutex* text_box_mutex;
     FuriString* text_box_store;
 
     // Interfaces to other things
@@ -43,6 +45,7 @@ typedef struct App {
 
     bool serial_run;
     FuriThread* serial_thread;
+    UsbUartBridge* usb_uart_bridge;
 
     NotificationApp* notification;
     Storage* storage;

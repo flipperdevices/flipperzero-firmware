@@ -175,6 +175,8 @@ void fcom_send_code_scene_on_exit(void* context) {
     App* app = context;
     UNUSED(app);
 
+    setSerialOutputCallback(NULL);
+
     dmcomm_sendcommand(app, "0\n");
     app->state->waitForCode = false;
 }
