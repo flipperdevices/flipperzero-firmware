@@ -24,7 +24,7 @@ typedef void (*NumberChangedCallback)(void* context);
  *
  * @return     NumberInput instance pointer
  */
-NumberInput* number_input_alloc();
+NumberInput* number_input_alloc(void);
 
 /** Deinitialize and free byte input
  *

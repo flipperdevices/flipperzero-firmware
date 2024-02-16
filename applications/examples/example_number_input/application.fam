@@ -1,5 +1,5 @@
 App(
-    appid="number_input",
+    appid="example_number_input",
     name="Example: Number Input",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="example_number_input",

@@ -339,7 +339,7 @@ void number_input_reset(NumberInput* number_input) {
         true);
 }
 
-NumberInput* number_input_alloc() {
+NumberInput* number_input_alloc(void) {
     NumberInput* number_input = malloc(sizeof(NumberInput));
     number_input->view = view_alloc();
     view_set_context(number_input->view, number_input);
