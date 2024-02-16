@@ -43,7 +43,7 @@ typedef struct {
     char* bssid;
     int8_t rssi;
     uint8_t channel;
-    FuriHalRtcDateTime datetime;
+    DateTime datetime;
     uint16_t packetRxCount;
     uint16_t packetTxCount;
     float latitude;

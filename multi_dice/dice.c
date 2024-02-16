@@ -20,7 +20,7 @@ typedef struct {
 typedef struct {
     FuriMutex* mutex;
     FuriMessageQueue* event_queue;
-    FuriHalRtcDateTime datetime;
+    DateTime datetime;
     uint8_t diceSelect;
     uint8_t diceQty;
     uint8_t diceRoll;

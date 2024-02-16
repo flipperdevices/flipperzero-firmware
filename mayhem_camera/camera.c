@@ -40,7 +40,7 @@ static void camera_view_draw_callback(Canvas* canvas, void* _model) {
 }
 
 void get_timefilename(FuriString* name) {
-    FuriHalRtcDateTime datetime = {0};
+    DateTime datetime = {0};
     furi_hal_rtc_get_datetime(&datetime);
     furi_string_printf(
         name,
