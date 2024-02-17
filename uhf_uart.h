@@ -13,6 +13,7 @@
 
 typedef void (*CallbackFunction)(uint8_t *data, void *ctx);
 
+
 typedef enum{
     UHFUartWorkerWaitingFlag,
     UHFUartWorkerExitingFlag
@@ -31,6 +32,8 @@ typedef struct{
     void *ctx;
     volatile int tick;
 } UHFUart;
+
+int32_t uhf_uart_worker_callback(void *ctx);
 
 UHFUart* uhf_uart_alloc();
 void uhf_uart_free(UHFUart* uart);

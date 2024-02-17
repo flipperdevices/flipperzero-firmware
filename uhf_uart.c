@@ -1,5 +1,17 @@
 #include "uhf_uart.h"
 
+
+int32_t uhf_uart_worker_callback(void *ctx){
+    // UHFUart* uart = (UHFUart*)ctx;
+    UNUSED(ctx);
+    // while(true){
+    //     if(uart->tick > 0){
+    //         furi_thread_sleep(uart->tick);
+    //         uart->tick--;
+    //     }
+    // }
+    return 0;
+}
 void uhf_uart_default_rx_callback(FuriHalSerialHandle *handle, FuriHalSerialRxEvent event, void* ctx) {
     UHFUart* uart = (UHFUart*)ctx;
     Buffer* buffer = (Buffer*)uart->buffer;
@@ -22,7 +34,7 @@ UHFUart* uhf_uart_alloc(){
     }
     uhf_uart_set_baudrate(uart, UHF_UART_DEFAULT_BAUDRATE);
     uart->buffer = buffer_alloc(UHF_UART_RX_BUFFER_SIZE);
-    uart->thread = furi_thread_alloc_ex("UHFUartWorker", UHF_UART_WORKER_STACK_SIZE, NULL, uart);
+    uart->thread = furi_thread_alloc_ex("UHFUartWorker", UHF_UART_WORKER_STACK_SIZE, uhf_uart_worker_callback, uart);
     furi_thread_start(uart->thread);
     uhf_uart_set_receive_byte_callback(uart, uhf_uart_default_rx_callback, uart, false);
     return uart;
