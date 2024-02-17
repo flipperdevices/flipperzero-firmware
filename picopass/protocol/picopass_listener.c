@@ -47,7 +47,8 @@ static void picopass_listener_loclass_update_csn(PicopassListener* instance) {
 
     uint8_t key[PICOPASS_BLOCK_LEN] = {};
     loclass_iclass_calc_div_key(csn, picopass_iclass_key, key, false);
-    memcpy(instance->data->card_data[PICOPASS_SECURE_KD_BLOCK_INDEX].data, key, PICOPASS_BLOCK_LEN);
+    memcpy(
+        instance->data->card_data[PICOPASS_SECURE_KD_BLOCK_INDEX].data, key, PICOPASS_BLOCK_LEN);
 
     picopass_listener_init_cipher_state_key(instance, key);
 }
@@ -176,7 +177,9 @@ PicopassListenerCommand
             }
         } else {
             bit_buffer_copy_bytes(
-                instance->tx_buffer, instance->data->card_data[block_num].data, PICOPASS_BLOCK_LEN);
+                instance->tx_buffer,
+                instance->data->card_data[block_num].data,
+                PICOPASS_BLOCK_LEN);
         }
         PicopassError error = picopass_listener_send_frame(instance, instance->tx_buffer);
         if(error != PicopassErrorNone) {
@@ -530,7 +533,9 @@ PicopassListenerCommand
             }
         } else {
             bit_buffer_copy_bytes(
-                instance->tx_buffer, instance->data->card_data[block_num].data, PICOPASS_BLOCK_LEN);
+                instance->tx_buffer,
+                instance->data->card_data[block_num].data,
+                PICOPASS_BLOCK_LEN);
         }
 
         PicopassError error = picopass_listener_send_frame(instance, instance->tx_buffer);

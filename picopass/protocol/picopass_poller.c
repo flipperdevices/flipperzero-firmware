@@ -95,7 +95,8 @@ NfcCommand picopass_poller_pre_auth_handler(PicopassPoller* instance) {
             sizeof(PicopassSerialNum));
         instance->data->card_data[PICOPASS_CSN_BLOCK_INDEX].valid = true;
         picopass_poller_print_block(
-            "csn %02x%02x%02x%02x%02x%02x%02x%02x", instance->data->card_data[PICOPASS_CSN_BLOCK_INDEX]);
+            "csn %02x%02x%02x%02x%02x%02x%02x%02x",
+            instance->data->card_data[PICOPASS_CSN_BLOCK_INDEX]);
 
         PicopassBlock block = {};
         error = picopass_poller_read_block(instance, PICOPASS_CONFIG_BLOCK_INDEX, &block);
@@ -441,7 +442,9 @@ NfcCommand picopass_poller_read_block_handler(PicopassPoller* instance) {
             block.data[6],
             block.data[7]);
         memcpy(
-            instance->data->card_data[instance->current_block].data, block.data, PICOPASS_BLOCK_LEN);
+            instance->data->card_data[instance->current_block].data,
+            block.data,
+            PICOPASS_BLOCK_LEN);
         instance->data->card_data[instance->current_block].valid = true;
         instance->current_block++;
     } while(false);
