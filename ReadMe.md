@@ -29,8 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0216-1719-0.97.2-378d9a8](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-02-16 17:19 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-02-16 17:19 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-02-16 21:15 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-02-16 21:15 EST`
 - OFW: [NFC: Add support for Gallagher access control (MIFARE Classic only) #3306 (By nickmooney)](https://github.com/flipperdevices/flipperzero-firmware/pull/3306)
 - OFW: [NFC: Slix disable privacy #3425 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3425)
 - OFW: [NFC: Added NFC plugin; Some parser #3335 (By zProAle)](https://github.com/flipperdevices/flipperzero-firmware/pull/3335)
@@ -92,7 +92,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW PR: NFC: [Parser for Santiago, Chile BIP transit card #3456 (By rbasoalto)](https://github.com/flipperdevices/flipperzero-firmware/pull/3456)
 - Updated: [Minesweeper Redux v1.2 (By squee72564)](https://github.com/squee72564/F0_Minesweeper_Fap)
 - SubGHz: [Protocol Fixes for Var Type size on get_hash_data functions (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/d521af2786b79bb5abe4e8888449c1800b4e2ffe)
-- NFC: [Plugin fixes for bitlib on Bip/Chile Parser (By rbasoalto), Skylanders (By RogueMaster) & SonicCare (By Willy-JL)]()
+- NFC: [Plugin fixes for bitlib on Bip/Chile Parser (By rbasoalto), Skylanders (By RogueMaster) & SonicCare (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/f5a78af7baaa96dd4cd018c5e3d38dfa5ad89a36)
 - To Be Merged OFW PRs: [3211](https://github.com/flipperdevices/flipperzero-firmware/pull/3211), [3366](https://github.com/flipperdevices/flipperzero-firmware/pull/3366), [3250](https://github.com/flipperdevices/flipperzero-firmware/pull/3250), [3402](https://github.com/flipperdevices/flipperzero-firmware/pull/3402), [3409](https://github.com/flipperdevices/flipperzero-firmware/pull/3409), [3406](https://github.com/flipperdevices/flipperzero-firmware/pull/3406), [3431](https://github.com/flipperdevices/flipperzero-firmware/pull/3431), [3254](https://github.com/flipperdevices/flipperzero-firmware/pull/3254), [3429](https://github.com/flipperdevices/flipperzero-firmware/pull/3429), [3286](https://github.com/flipperdevices/flipperzero-firmware/pull/3286), [3442](https://github.com/flipperdevices/flipperzero-firmware/pull/3442), [3445](https://github.com/flipperdevices/flipperzero-firmware/pull/3445), [3448](https://github.com/flipperdevices/flipperzero-firmware/pull/3448), [3446](https://github.com/flipperdevices/flipperzero-firmware/pull/3446), [3386](https://github.com/flipperdevices/flipperzero-firmware/pull/3386), [3450](https://github.com/flipperdevices/flipperzero-firmware/pull/3450) & [3272](https://github.com/flipperdevices/flipperzero-firmware/pull/3272)
 
 <a name="release">
