@@ -1,6 +1,7 @@
 #include "ble_spam.h"
 #include <gui/gui.h>
 #include <furi_hal_bt.h>
+#include <extra_beacon.h>
 #include <gui/elements.h>
 
 #include "protocols/_protocols.h"
@@ -138,7 +139,7 @@ static Attack attacks[] = {
 
 #define ATTACKS_COUNT ((signed)COUNT_OF(attacks))
 
-static uint16_t delays[] = {20, 50, 100, 200};
+static uint16_t delays[] = {20, 50, 100, 200, 500};
 
 typedef struct {
     Ctx ctx;
@@ -147,10 +148,10 @@ typedef struct {
     uint8_t lock_count;
     FuriTimer* lock_timer;
 
-    bool resume;
+    // bool resume;
     bool advertising;
     uint8_t delay;
-    uint8_t mac[GAP_MAC_ADDR_SIZE];
+    GapExtraBeaconConfig config;
     FuriThread* thread;
     int8_t index;
     bool ignore_bruteforce;
@@ -190,9 +191,10 @@ static int32_t adv_thread(void* _ctx) {
     uint8_t size;
     uint16_t delay;
     uint8_t* packet;
+    GapExtraBeaconConfig* config = &state->config;
     Payload* payload = &attacks[state->index].payload;
     const Protocol* protocol = attacks[state->index].protocol;
-    if(!payload->random_mac) furi_hal_random_fill_buf(state->mac, sizeof(state->mac));
+    if(!payload->random_mac) furi_hal_random_fill_buf(config->address, sizeof(config->address));
     if(state->ctx.led_indicator) start_blink(state);
 
     while(state->advertising) {
@@ -206,14 +208,17 @@ static int32_t adv_thread(void* _ctx) {
         } else {
             protocols[rand() % protocols_count]->make_packet(&size, &packet, NULL);
         }
-        furi_hal_bt_custom_adv_set(packet, size);
+
+        delay = delays[state->delay];
+        config->min_adv_interval_ms = config->max_adv_interval_ms = delay;
+        if(payload->random_mac) furi_hal_random_fill_buf(config->address, sizeof(config->address));
+        furi_check(furi_hal_bt_extra_beacon_set_config(config));
+        furi_check(furi_hal_bt_extra_beacon_set_data(packet, size));
         free(packet);
 
-        if(payload->random_mac) furi_hal_random_fill_buf(state->mac, sizeof(state->mac));
-        delay = delays[state->delay];
-        furi_hal_bt_custom_adv_start(delay, delay, 0x00, state->mac, 0x1F);
+        furi_check(furi_hal_bt_extra_beacon_start());
         furi_thread_flags_wait(true, FuriFlagWaitAny, delay);
-        furi_hal_bt_custom_adv_stop();
+        furi_hal_bt_extra_beacon_stop();
     }
 
     if(state->ctx.led_indicator) stop_blink(state);
@@ -225,11 +230,11 @@ static void toggle_adv(State* state) {
         state->advertising = false;
         furi_thread_flags_set(furi_thread_get_id(state->thread), true);
         furi_thread_join(state->thread);
-        if(state->resume) furi_hal_bt_start_advertising();
+        // if(state->resume) furi_hal_bt_start_advertising();
     } else {
         state->advertising = true;
-        state->resume = furi_hal_bt_is_active();
-        furi_hal_bt_stop_advertising();
+        // state->resume = furi_hal_bt_is_active();
+        // furi_hal_bt_stop_advertising();
         furi_thread_start(state->thread);
     }
 }
@@ -375,7 +380,7 @@ static void draw_callback(Canvas* canvas, void* _ctx) {
             "App+Spam: \e#WillyJL\e# XFW\n"
             "Apple+Crash: \e#ECTO-1A\e#\n"
             "Android+Win: \e#Spooks4576\e#\n"
-            "                                   Version \e#4.4\e#",
+            "                                   Version \e#5.0\e#",
             false);
         break;
     default: {
@@ -534,29 +539,33 @@ static bool input_callback(InputEvent* input, void* _ctx) {
                 }
             } else {
                 if(!advertising) {
-                    bool resume = furi_hal_bt_is_active();
-                    furi_hal_bt_stop_advertising();
+                    // bool resume = furi_hal_bt_is_active();
+                    // furi_hal_bt_stop_advertising();
+                    GapExtraBeaconConfig* config = &state->config;
                     Payload* payload = &attacks[state->index].payload;
                     const Protocol* protocol = attacks[state->index].protocol;
 
                     uint8_t size;
                     uint8_t* packet;
                     protocol->make_packet(&size, &packet, payload);
-                    furi_hal_bt_custom_adv_set(packet, size);
+
+                    uint16_t delay = delays[state->delay];
+                    config->min_adv_interval_ms = config->max_adv_interval_ms = delay;
+                    if(payload->random_mac || input->type == InputTypeLong)
+                        furi_hal_random_fill_buf(config->address, sizeof(config->address));
+                    furi_check(furi_hal_bt_extra_beacon_set_config(config));
+                    furi_check(furi_hal_bt_extra_beacon_set_data(packet, size));
                     free(packet);
 
-                    if(payload->random_mac || input->type == InputTypeLong)
-                        furi_hal_random_fill_buf(state->mac, sizeof(state->mac));
-                    uint16_t delay = delays[state->delay];
-                    furi_hal_bt_custom_adv_start(delay, delay, 0x00, state->mac, 0x1F);
+                    furi_check(furi_hal_bt_extra_beacon_start());
                     if(state->ctx.led_indicator)
                         notification_message(state->ctx.notification, &solid_message);
                     furi_delay_ms(10);
-                    furi_hal_bt_custom_adv_stop();
+                    furi_hal_bt_extra_beacon_stop();
 
                     if(state->ctx.led_indicator)
                         notification_message_block(state->ctx.notification, &sequence_reset_rgb);
-                    if(resume) furi_hal_bt_start_advertising();
+                    // if(resume) furi_hal_bt_start_advertising();
                 }
             }
             break;
@@ -617,6 +626,9 @@ static bool back_event_callback(void* _ctx) {
 int32_t ble_spam(void* p) {
     UNUSED(p);
     State* state = malloc(sizeof(State));
+    state->config.adv_channel_map = GapAdvChannelMapAll;
+    state->config.adv_power_level = GapAdvPowerLevel_6dBm;
+    state->config.address_type = GapAddressTypePublic;
     state->thread = furi_thread_alloc();
     furi_thread_set_callback(state->thread, adv_thread);
     furi_thread_set_context(state->thread, state);
