@@ -197,13 +197,17 @@ static bool picopass_device_save_file(
             if(!flipper_format_write_comment_cstr(file, "Picopass blocks")) break;
             bool block_saved = true;
 
-            size_t app_limit = card_data[PICOPASS_CONFIG_BLOCK_INDEX].data[0] < PICOPASS_MAX_APP_LIMIT ?
+            size_t app_limit = card_data[PICOPASS_CONFIG_BLOCK_INDEX].data[0] <
+                                       PICOPASS_MAX_APP_LIMIT ?
                                    card_data[PICOPASS_CONFIG_BLOCK_INDEX].data[0] :
                                    PICOPASS_MAX_APP_LIMIT;
             for(size_t i = 0; i < app_limit; i++) {
                 furi_string_printf(temp_str, "Block %d", i);
                 if(!flipper_format_write_hex(
-                       file, furi_string_get_cstr(temp_str), card_data[i].data, PICOPASS_BLOCK_LEN)) {
+                       file,
+                       furi_string_get_cstr(temp_str),
+                       card_data[i].data,
+                       PICOPASS_BLOCK_LEN)) {
                     block_saved = false;
                     break;
                 }
