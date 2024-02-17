@@ -1,5 +1,11 @@
 #pragma once
 
+/*
+USB CDC controller linkage copied from flipper zero firmware
+and modified to remove the serial bridge and just link to
+some buffer streams
+*/
+
 #include "flipper.h"
 #include <stdint.h>
 #include <stdbool.h>

@@ -8,14 +8,13 @@
 #define MAX_FILENAME_LEN 64
 
 typedef struct AppState {
-    bool usbSerialEnabled;
-    char current_code[MAX_FILENAME_LEN];
-    char result_code[MAX_FILENAME_LEN];
-    char file_name_tmp[MAX_FILENAME_LEN];
+    char current_code[MAX_FILENAME_LEN]; // What the user loaded
+    char result_code[MAX_FILENAME_LEN]; // What dmcomm sent back
+    char file_name_tmp[MAX_FILENAME_LEN]; // Filename to save codes as
     bool waitForCode;
-    FuriString* r_code;
-    FuriString* s_code;
-    FcomScene save_code_return_scene;
+    FuriString* s_code; // First code sent
+    FuriString* r_code; // Second code sent
+    FcomScene save_code_return_scene; // What scene we should go back to when done saving
 } AppState;
 
 typedef struct App {
@@ -31,22 +30,22 @@ typedef struct App {
     FuriString* file_path;
     TextBox* text_box;
 
-    FuriMutex* text_box_mutex;
+    FuriMutex* text_box_mutex; // lock so UI/Serial callbacks can communicate safely
     FuriString* text_box_store;
 
     // Interfaces to other things
     AppState* state;
+
+    // dmcomm Thread things
     bool dmcomm_run;
     FuriThread* dcomm_thread;
-    FuriMutex* dmcomm_input_mutex;
-    FuriStreamBuffer* dmcomm_stream_buffer;
-    FuriMutex* dmcomm_output_mutex;
-    FuriString* dmcomm_output_buffer;
+    FuriStreamBuffer* dmcomm_input_stream;
+    FuriStreamBuffer* dmcomm_output_stream;
 
-    bool serial_run;
-    FuriThread* serial_thread;
+    // USB serial bridge
     UsbUartBridge* usb_uart_bridge;
 
+    // System handles
     NotificationApp* notification;
     Storage* storage;
 } App;

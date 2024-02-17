@@ -40,10 +40,8 @@ App* app_alloc() {
     app->text_box_store = furi_string_alloc();
     app->text_box_mutex = furi_mutex_alloc(FuriMutexTypeNormal);
 
-    app->dmcomm_input_mutex = furi_mutex_alloc(FuriMutexTypeNormal);
-    app->dmcomm_output_mutex = furi_mutex_alloc(FuriMutexTypeNormal);
-    app->dmcomm_stream_buffer = furi_stream_buffer_alloc(128, 1);
-    app->dmcomm_output_buffer = furi_string_alloc();
+    app->dmcomm_input_stream = furi_stream_buffer_alloc(128, 1);
+    app->dmcomm_output_stream = furi_stream_buffer_alloc(128, 1);
 
     file_browser_configure(app->file_browser, "*", NULL, true, false, &I_badusb_10px, true);
 
@@ -84,7 +82,6 @@ AppState* app_state_alloc() {
     AppState* state = malloc(sizeof(AppState));
 
     // Allocate and start dcomm
-    state->usbSerialEnabled = false;
     state->result_code[0] = 0;
     state->current_code[0] = 0;
     state->file_name_tmp[0] = 0;
@@ -101,25 +98,16 @@ void app_quit(App* app) {
 
 void app_free(App* app) {
     furi_assert(app);
-    ledOff();
 
-    // Stop and deallocate usb serial if enabled
-    // Stop and deallocate dcomm
-
+    // Terminate our dmcomm thread
     app->dmcomm_run = false;
+    dmcomm_sendcommand(app, "0\n"); // force a loop for fast exit
     furi_thread_join(app->dcomm_thread);
     furi_thread_free(app->dcomm_thread);
 
     furi_mutex_free(app->text_box_mutex);
-    furi_mutex_free(app->dmcomm_input_mutex);
-    furi_mutex_free(app->dmcomm_output_mutex);
-    furi_stream_buffer_free(app->dmcomm_stream_buffer);
-    furi_string_free(app->dmcomm_output_buffer);
-
-    furi_record_close(RECORD_NOTIFICATION);
-    app->notification = NULL;
-    furi_record_close(RECORD_STORAGE);
-    app->storage = NULL;
+    furi_stream_buffer_free(app->dmcomm_input_stream);
+    furi_stream_buffer_free(app->dmcomm_output_stream);
 
     free(app->state);
 
@@ -140,6 +128,13 @@ void app_free(App* app) {
 
     scene_manager_free(app->scene_manager);
     view_dispatcher_free(app->view_dispatcher);
+
+    ledOff(); // Do this after dmcomm is closed, so it doesn't turn it back on before we exit
+
+    furi_record_close(RECORD_NOTIFICATION);
+    app->notification = NULL;
+    furi_record_close(RECORD_STORAGE);
+    app->storage = NULL;
 
     free(app);
 }

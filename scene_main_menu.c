@@ -2,21 +2,16 @@
 List of menu options
 
 
+Listen -> Reads a code sent by 2 other devices we listen to -> Save UI
+Saved -> Code Picker -> Send screen (Either in "Press OK to Send" or "Waiting for Remote") -> Save UI
+Add Manually -> Keyboard Entry -> Save UI
+USB Serial -> Text Box scene showing serial log
 */
 
 #include "flipper.h"
 #include "app_state.h"
 #include "scenes.h"
 #include "scene_main_menu.h"
-
-/* main menu scene */
-
-/*
-Listen -> Reads a code sent by 2 other devices we listen to -> Save UI
-Saved -> Code Picker -> Send screen (Either in "Press OK to Send" or "Waiting for Remote") -> Save UI
-Add Manually -> Keyboard Entry -> Save UI
-USB Serial -> Text Box scene showing serial log
-*/
 
 /* 
 Setup our scene widgets and create callback hooks 

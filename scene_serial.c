@@ -5,6 +5,10 @@ Wires up data streams between USB serial and dmcomm
 Prints truncated output to text box
 
 On exit, disconnects and shuts down USB serial
+
+TODO: dmcomm outputs a lot of white space, we should
+probably, at some point, filter the USB/Dmcomm stuff to 
+'interesting' data, so the screen isn't mostly blank
 */
 #include "flipper.h"
 #include "app_state.h"
@@ -21,8 +25,8 @@ static SceneUsbUartBridge* scene_usb_uart;
 
 void usb_uart_tx(void* context, uint8_t* data, size_t len)
 {
+    // USB -> dmcomm
     App* app = context;
-    // got some data
 
     char out[65];
     memset(out, 0, 65);
@@ -42,13 +46,20 @@ void usb_uart_tx(void* context, uint8_t* data, size_t len)
 
 void dmcomm_tx(void* context)
 {
+    // dmcomm -> USB
     furi_assert(context);
     App* app = context;
 
-    furi_check(furi_mutex_acquire(app->dmcomm_output_mutex, FuriWaitForever) == FuriStatusOk);
-    const char *out = furi_string_get_cstr(app->dmcomm_output_buffer);
-    FURI_LOG_I(TAG, "DMComm Data: %s", out);
+    char out[64];
+    size_t recieved = 0;
+    memset(out, 0, 64);
 
+    recieved = furi_stream_buffer_receive(
+        app->dmcomm_output_stream,
+        &out,
+        63,
+        0);
+    FURI_LOG_I(TAG, "DMComm Data: %s", out);
 
     furi_check(furi_mutex_acquire(app->text_box_mutex, FuriWaitForever) == FuriStatusOk);
     furi_string_cat_str(app->text_box_store, out);
@@ -60,9 +71,7 @@ void dmcomm_tx(void* context)
     view_dispatcher_send_custom_event(app->view_dispatcher, SerialCustomEventTextUpdate);
 
 
-    usb_uart_send(app->usb_uart_bridge, (uint8_t*)out, strlen(out)); 
-    furi_string_reset(app->dmcomm_output_buffer);
-    furi_check(furi_mutex_release(app->dmcomm_output_mutex) == FuriStatusOk);
+    usb_uart_send(app->usb_uart_bridge, (uint8_t*)out, recieved);
 }
 
 void fcom_serial_scene_on_enter(void* context) {
@@ -91,9 +100,8 @@ void fcom_serial_scene_on_enter(void* context) {
     usb_uart_get_state(app->usb_uart_bridge, &scene_usb_uart->state);
 
     setSerialOutputCallback(dmcomm_tx);
-    //gpio_usb_uart_set_callback(app->gpio_usb_uart, gpio_scene_usb_uart_callback, app);
 
-    // Keep screen on
+    // Keep screen on while we're in serial mode
     notification_message(app->notification, &sequence_display_backlight_enforce_on);
 
     view_dispatcher_switch_to_view(app->view_dispatcher, FcomSerialView);
@@ -102,23 +110,13 @@ void fcom_serial_scene_on_enter(void* context) {
 bool fcom_serial_scene_on_event(void* context, SceneManagerEvent event) {
     FURI_LOG_I(TAG, "fcom_serial_scene_on_event");
     App* app = context;
-    UNUSED(context);
-    UNUSED(event);
 
-    // wait for event, then transfer to
-    // Display code and Retry/More
-    // More goes to submenu "Save" / "Emulate" 
-    // Save goes to text input ("Name the card")
-    // Emulate goes to Send screen "Send" press OK sends the code
-    //
     bool consumed = false;
     if(event.type == SceneManagerEventTypeTick) {
-        // Update serial text buffer
+        // Update serial state, we could reference these data counts too if we wanted
         //uint32_t tx_cnt_last = scene_usb_uart->state.tx_cnt;
         //uint32_t rx_cnt_last = scene_usb_uart->state.rx_cnt;
         usb_uart_get_state(app->usb_uart_bridge, &scene_usb_uart->state);
-        //gpio_usb_uart_update_state(
-        //    app->gpio_usb_uart, &scene_usb_uart->cfg, &scene_usb_uart->state);
     }
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SerialCustomEventTextUpdate) {
@@ -134,17 +132,15 @@ bool fcom_serial_scene_on_event(void* context, SceneManagerEvent event) {
 
 void fcom_serial_scene_on_exit(void* context) {
     FURI_LOG_I(TAG, "fcom_serial_scene_on_exit");
-    UNUSED(context);
     App* app = context;
-    UNUSED(app);
 
     setSerialOutputCallback(NULL);
-
     usb_uart_disable(app->usb_uart_bridge);
     free(scene_usb_uart);
 
     // let screen darken
     notification_message(app->notification, &sequence_display_backlight_enforce_auto);
+    
     // Cancel any command the usb serial user was sending
     dmcomm_sendcommand(app, "0\n");
 }

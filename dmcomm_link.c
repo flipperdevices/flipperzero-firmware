@@ -18,92 +18,38 @@ int32_t dmcomm_reader(void* context) {
 }
 
 /*
- * Send a serial command to the dmcomm thread
+Send a serial command to the dmcomm thread
+
+Used for comms by app (non USB)
 */
 void dmcomm_sendcommand(void* context, const char* cmd)
 {
     FURI_LOG_I(TAG, "dmcomm_sendcommand");
     App* app = context;
-    
-    furi_mutex_acquire(app->dmcomm_input_mutex, FuriWaitForever);
 
     size_t sent = furi_stream_buffer_send(
-        app->dmcomm_stream_buffer,
+        app->dmcomm_input_stream,
         cmd,
         strlen(cmd),
-        1);
+        0);
 
-    if(sent != strlen(cmd))
+    if(sent != strlen(cmd)) // Shouldn't happen
         FURI_LOG_I(TAG, "partial send %d/%d", sent, strlen(cmd));
-
-    furi_mutex_release(app->dmcomm_input_mutex);
 }
 
+/*
+Send binary data, used for USB serial link
+*/
 void dmcomm_senddata(void* context, uint8_t* data, size_t len)
 {
     App* app = context;
-    
-    furi_mutex_acquire(app->dmcomm_input_mutex, FuriWaitForever);
 
     size_t sent = furi_stream_buffer_send(
-        app->dmcomm_stream_buffer,
+        app->dmcomm_input_stream,
         data,
         len,
-        1);
+        0);
 
-    if(sent != len)
+    if(sent != len) // Shouldn't happen
         FURI_LOG_I(TAG, "partial send %d/%d", sent, len);
-
-    furi_mutex_release(app->dmcomm_input_mutex);
 }
-
-
-/*
-furi_thread_flags_set(furi_thread_get_id(context->reader_thread), ReaderThreadFlagExit);
-
-static int32_t example_thermo_reader_thread_callback(void* ctx) {
-    ExampleThermoContext* context = ctx;
-
-    for(;;) {
-        example_thermo_request_temperature(context);
-
-        const uint32_t flags =
-            furi_thread_flags_wait(ReaderThreadFlagExit, FuriFlagWaitAny, UPDATE_PERIOD_MS);
-
-        if(flags != (unsigned)FuriFlagErrorTimeout) break;
-
-        example_thermo_read_temperature(context);
-    }
-
-    return 0;
-}*/
-
-/*
-
-struct LFRFIDRawFile {
-    Stream* stream;
-    uint32_t max_buffer_size;
-
-    uint8_t* buffer;
-    uint32_t buffer_size;
-    size_t buffer_counter;
-};
-
-Storage* storage = furi_record_open(RECORD_STORAGE);
-
-file->stream = file_stream_alloc(storage);
-file->buffer = NULL;
-
-READ  file_stream_open(file->stream, file_path, FSAM_READ, FSOM_OPEN_EXISTING);
-
-read data:
-size_t size_read = stream_read(file->stream, (uint8_t*)&buffer, sizeof(buffer));
-
-
-WRITE file_stream_open(file->stream, file_path, FSAM_READ_WRITE, FSOM_CREATE_ALWAYS);
-size_t size_wrote = stream_write(file->stream, (uint8_t*)&buffer, sizeof(buffer));
-
-stream_free(file->stream);
-
-furi_record_close(RECORD_STORAGE);
-*/

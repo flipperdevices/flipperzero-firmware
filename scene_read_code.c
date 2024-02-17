@@ -6,6 +6,8 @@ Right save r code
 Back return
 
 Post save should go back to us
+
+TODO: Need to test this... It may not actually work as-is
 */
 #include "flipper.h"
 #include "app_state.h"
@@ -13,13 +15,24 @@ Post save should go back to us
 #include "scene_read_code.h"
 #include <furi_hal_cortex.h>
 
+/*
+Callback from dmcomm thread with serial results
+*/
 void scb(void* context)
 {
     furi_assert(context);
     App* app = context;
 
-    furi_check(furi_mutex_acquire(app->dmcomm_output_mutex, FuriWaitForever) == FuriStatusOk);  
-    const char *out = furi_string_get_cstr(app->dmcomm_output_buffer);
+    char out[64];
+    size_t recieved = 0;
+    memset(out, 0, 64);
+
+    recieved = furi_stream_buffer_receive(
+        app->dmcomm_output_stream,
+        &out,
+        63,
+        0);
+    UNUSED(recieved);
     FURI_LOG_I(TAG, "DMComm Data: %s", out);
   
     if(app->state->waitForCode)
@@ -82,20 +95,17 @@ void scb(void* context)
         FURI_LOG_I(TAG, "s code %s", furi_string_get_cstr(app->state->s_code));
         FURI_LOG_I(TAG, "r code %s", furi_string_get_cstr(app->state->r_code));
 
-        dialog_ex_set_header(app->dialog, furi_string_get_cstr(app->state->s_code), 10, 12, AlignLeft, AlignTop);
-        dialog_ex_set_text(app->dialog, furi_string_get_cstr(app->state->r_code), 10, 24, AlignLeft, AlignTop);
-
         //if spackets == rpackets and spackets = code packets, then present code for saving
         if(rpackets > 0 && spackets > 0 && rpackets == spackets)
         {
+            dialog_ex_set_header(app->dialog, furi_string_get_cstr(app->state->s_code), 10, 12, AlignLeft, AlignTop);
+            dialog_ex_set_text(app->dialog, furi_string_get_cstr(app->state->r_code), 10, 24, AlignLeft, AlignTop);
+
             app->state->waitForCode = false;
             dialog_ex_set_left_button_text(app->dialog, "Save Top");
             dialog_ex_set_right_button_text(app->dialog, "Save Bot");
         }
     }
-
-    furi_string_reset(app->dmcomm_output_buffer);
-    furi_check(furi_mutex_release(app->dmcomm_output_mutex) == FuriStatusOk);
 
     FURI_LOG_I(TAG, "done");
 }
@@ -108,11 +118,13 @@ void read_code_dialog_callback(DialogExResult result, void* context) {
     if(result == DialogExResultRight) {
         FURI_LOG_I(TAG, "DialogExResultRight");
         // copy r_code
+        strncpy(app->state->result_code, furi_string_get_cstr(app->state->r_code), MAX_FILENAME_LEN);
         scene_manager_next_scene(app->scene_manager, FcomSaveCodeScene);
     }
     if(result == DialogExResultLeft) {
         FURI_LOG_I(TAG, "DialogExResultLeft");
         // copy s_code
+        strncpy(app->state->result_code, furi_string_get_cstr(app->state->s_code), MAX_FILENAME_LEN);
         scene_manager_next_scene(app->scene_manager, FcomSaveCodeScene);
     }
 }
@@ -120,11 +132,15 @@ void read_code_dialog_callback(DialogExResult result, void* context) {
 void fcom_read_code_scene_on_enter(void* context) {
     FURI_LOG_I(TAG, "fcom_read_code_scene_on_enter");
     App* app = context;
+
+    // TODO: somehow if we return from save dialog, don't clear and restart the read
+    // because we will want to allow to save both codes
+
     dialog_ex_set_header(app->dialog, "Waiting For Data", 64, 12, AlignCenter, AlignTop);
     dialog_ex_set_text(app->dialog, "Connect to device bus and transfer data", 10, 24, AlignLeft, AlignTop);
     dialog_ex_set_left_button_text(app->dialog, NULL);
     dialog_ex_set_right_button_text(app->dialog, NULL);
-    dialog_ex_set_center_button_text(app->dialog, NULL);
+    dialog_ex_set_center_button_text(app->dialog, NULL); // This will eventually be a "resend" button
     dialog_ex_set_result_callback(app->dialog, read_code_dialog_callback);
     dialog_ex_set_context(app->dialog, app);
 

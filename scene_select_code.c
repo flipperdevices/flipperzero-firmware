@@ -61,25 +61,14 @@ bool fcom_select_code_scene_on_event(void* context, SceneManagerEvent event) {
     UNUSED(context);
     UNUSED(event);
 
-    // wait for event, then transfer to
-    // Display code and Retry/More
-    // More goes to submenu "Save" / "Emulate" 
-    // Save goes to text input ("Name the card")
-    // Emulate goes to Send screen "Send" press OK sends the code
-    //
-
     return false; //consumed event
 }
 
 void fcom_select_code_scene_on_exit(void* context) {
     FURI_LOG_I(TAG, "fcom_select_code_scene_on_exit");
-    UNUSED(context);
     App* app = context;
-    UNUSED(app);
 
     file_browser_stop(app->file_browser);
-    // shut down dcomm
-    // clean up
 }
 
 

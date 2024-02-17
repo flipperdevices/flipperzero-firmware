@@ -12,13 +12,25 @@ Right will go to the save code dialog for the new code (if there is one)
 #include "scene_send_code.h"
 #include <furi_hal_cortex.h>
 
+/*
+Callback from dmcomm serial output. Similar to the callback in read code,
+but output is single sided
+*/
 void scbs(void* context)
 {
     furi_assert(context);
     App* app = context;
 
-    furi_check(furi_mutex_acquire(app->dmcomm_output_mutex, FuriWaitForever) == FuriStatusOk);  
-    const char *out = furi_string_get_cstr(app->dmcomm_output_buffer);
+    char out[64];
+    size_t recieved = 0;
+    memset(out, 0, 64);
+
+    recieved = furi_stream_buffer_receive(
+        app->dmcomm_output_stream,
+        &out,
+        63,
+        0);
+    UNUSED(recieved);
     FURI_LOG_I(TAG, "DMComm Data: %s", out);
   
     if(app->state->waitForCode)
@@ -78,25 +90,21 @@ void scbs(void* context)
         }
 
 
-        FURI_LOG_I(TAG, "s code %s", furi_string_get_cstr(app->state->s_code));
-        FURI_LOG_I(TAG, "r code %s", furi_string_get_cstr(app->state->r_code));
-        if(strlen(app->state->current_code) > 2 && app->state->current_code[1] == '1')
-            dialog_ex_set_text(app->dialog, furi_string_get_cstr(app->state->r_code), 10, 24, AlignLeft, AlignTop);
-        else
-            dialog_ex_set_text(app->dialog, furi_string_get_cstr(app->state->s_code), 10, 24, AlignLeft, AlignTop);
-
         //if spackets == rpackets and spackets = code packets, then present code for saving
         if(rpackets > 0 && spackets > 0 && rpackets == spackets)
         {
-            app->state->waitForCode = false;
+            FURI_LOG_I(TAG, "s code %s", furi_string_get_cstr(app->state->s_code));
+            FURI_LOG_I(TAG, "r code %s", furi_string_get_cstr(app->state->r_code));
+            if(strlen(app->state->current_code) > 2 && app->state->current_code[1] == '1')
+                dialog_ex_set_text(app->dialog, furi_string_get_cstr(app->state->r_code), 10, 24, AlignLeft, AlignTop);
+            else
+                dialog_ex_set_text(app->dialog, furi_string_get_cstr(app->state->s_code), 10, 24, AlignLeft, AlignTop);
+
             dialog_ex_set_right_button_text(app->dialog, "Save");
+            app->state->waitForCode = false;
+            FURI_LOG_I(TAG, "done");
         }
     }
-
-    furi_string_reset(app->dmcomm_output_buffer);
-    furi_check(furi_mutex_release(app->dmcomm_output_mutex) == FuriStatusOk);
-
-    FURI_LOG_I(TAG, "done");
 }
 
 void send_code_dialog_callback(DialogExResult result, void* context) {
@@ -104,23 +112,6 @@ void send_code_dialog_callback(DialogExResult result, void* context) {
     furi_assert(context);
     App* app = context;
 
-    if(result == DialogExResultCenter) {
-        FURI_LOG_I(TAG, "DialogExResultCenter");
-        if(app->state->waitForCode)
-            return; // dont allow qeueing up multiple...
-
-        app->state->waitForCode = true;
-        setSerialOutputCallback(scbs);
-        furi_string_reset(app->state->r_code);
-        furi_string_reset(app->state->s_code);
-        dmcomm_sendcommand(app, app->state->current_code);
-        dmcomm_sendcommand(app, "\n");
-        FURI_LOG_I(TAG, "dmcomm_sendcommand");
-    }
-
-    if(result == DialogExResultLeft) {
-        // ignore
-    }
     if(result == DialogExResultRight) {
         if(furi_string_empty(app->state->r_code))
             return;
@@ -139,17 +130,22 @@ void send_code_dialog_callback(DialogExResult result, void* context) {
 void fcom_send_code_scene_on_enter(void* context) {
     FURI_LOG_I(TAG, "fcom_send_code_scene_on_enter");
     App* app = context;
-    // initialize dcomm
-    // start dcomm thread in read mode
 
     dialog_ex_set_header(app->dialog, app->state->current_code, 64, 2, AlignCenter, AlignTop);
     dialog_ex_set_text(app->dialog, "Response Code Goes Here", 10, 24, AlignLeft, AlignTop);
     dialog_ex_set_left_button_text(app->dialog, NULL);
     dialog_ex_set_right_button_text(app->dialog, NULL);
-    dialog_ex_set_center_button_text(app->dialog, "Send");
+    dialog_ex_set_center_button_text(app->dialog, NULL); // This will eventually be a "resend" button
     dialog_ex_set_result_callback(app->dialog, send_code_dialog_callback);
     dialog_ex_set_context(app->dialog, app);
 
+    // Setup dmcomm to send
+    app->state->waitForCode = true;
+    setSerialOutputCallback(scbs);
+    furi_string_reset(app->state->r_code);
+    furi_string_reset(app->state->s_code);
+    dmcomm_sendcommand(app, app->state->current_code);
+    dmcomm_sendcommand(app, "\n");
 
     view_dispatcher_switch_to_view(app->view_dispatcher, FcomSendCodeView);
 }
@@ -159,24 +155,15 @@ bool fcom_send_code_scene_on_event(void* context, SceneManagerEvent event) {
     UNUSED(context);
     UNUSED(event);
 
-    // wait for event, then transfer to
-    // Display code and Retry/More
-    // More goes to submenu "Save" / "Emulate" 
-    // Save goes to text input ("Name the card")
-    // Emulate goes to Send screen "Send" press OK sends the code
-    //
-
     return false; //consumed event
 }
 
 void fcom_send_code_scene_on_exit(void* context) {
     FURI_LOG_I(TAG, "fcom_send_code_scene_on_exit");
-    UNUSED(context);
     App* app = context;
-    UNUSED(app);
 
+    // Clear out dmcomm
     setSerialOutputCallback(NULL);
-
     dmcomm_sendcommand(app, "0\n");
     app->state->waitForCode = false;
 }

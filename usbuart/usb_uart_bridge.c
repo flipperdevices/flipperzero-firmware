@@ -17,14 +17,6 @@
 #define USB_CDC_BIT_RTS (1 << 1)
 #define USB_USART_DE_RE_PIN &gpio_ext_pa4
 
-/*
-static const GpioPin* flow_pins[][2] = {
-    {&gpio_ext_pa7, &gpio_ext_pa6}, // 2, 3
-    {&gpio_ext_pb2, &gpio_ext_pc3}, // 6, 7
-    {&gpio_ext_pc0, &gpio_ext_pc1}, // 16, 15
-};
-*/
-
 typedef enum {
     WorkerEvtStop = (1 << 0),
     WorkerEvtRxDone = (1 << 1),
@@ -53,7 +45,6 @@ struct UsbUartBridge {
     FuriThread* tx_thread;
 
     FuriStreamBuffer* rx_stream;
-    //FuriHalSerialHandle* serial_handle;
 
     FuriMutex* usb_mutex;
 
@@ -84,35 +75,12 @@ static const CdcCallbacks cdc_cb = {
 
 static int32_t usb_uart_tx_thread(void* context);
 
-/*
-static void usb_uart_on_irq_rx_dma_cb(
-    FuriHalSerialHandle* handle,
-    FuriHalSerialRxEvent ev,
-    size_t size,
-    void* context) {
-    UsbUartBridge* usb_uart = (UsbUartBridge*)context;
-
-    if(ev & (FuriHalSerialRxEventData | FuriHalSerialRxEventIdle)) {
-        uint8_t data[FURI_HAL_SERIAL_DMA_BUFFER_SIZE] = {0};
-        while(size) {
-            size_t ret = furi_hal_serial_dma_rx(
-                handle,
-                data,
-                (size > FURI_HAL_SERIAL_DMA_BUFFER_SIZE) ? FURI_HAL_SERIAL_DMA_BUFFER_SIZE : size);
-            furi_stream_buffer_send(usb_uart->rx_stream, data, ret, 0);
-            size -= ret;
-        };
-        furi_thread_flags_set(furi_thread_get_id(usb_uart->thread), WorkerEvtRxDone);
-    }
-}*/
-
 void usb_uart_send(UsbUartBridge* usb_uart, const uint8_t* data, size_t len)
 {
     furi_stream_buffer_send(usb_uart->rx_stream, data, len, 0);
     furi_thread_flags_set(furi_thread_get_id(usb_uart->thread), WorkerEvtRxDone);
 }
 
-// Good
 static void usb_uart_vcp_init(UsbUartBridge* usb_uart, uint8_t vcp_ch) {
     furi_hal_usb_unlock();
     if(vcp_ch == 0) {
@@ -129,7 +97,6 @@ static void usb_uart_vcp_init(UsbUartBridge* usb_uart, uint8_t vcp_ch) {
     furi_hal_cdc_set_callbacks(vcp_ch, (CdcCallbacks*)&cdc_cb, usb_uart);
 }
 
-// Good
 static void usb_uart_vcp_deinit(UsbUartBridge* usb_uart, uint8_t vcp_ch) {
     UNUSED(usb_uart);
     furi_hal_cdc_set_callbacks(vcp_ch, NULL, NULL);
@@ -138,26 +105,6 @@ static void usb_uart_vcp_deinit(UsbUartBridge* usb_uart, uint8_t vcp_ch) {
         cli_session_close(cli);
         furi_record_close(RECORD_CLI);
     }
-}
-/*
-static void usb_uart_set_baudrate(UsbUartBridge* usb_uart, uint32_t baudrate) {
-
-    struct usb_cdc_line_coding* line_cfg = furi_hal_cdc_get_port_settings(usb_uart->cfg.vcp_ch);
-    if(line_cfg->dwDTERate > 0) {
-        furi_hal_serial_set_br(usb_uart->serial_handle, line_cfg->dwDTERate);
-        usb_uart->st.baudrate_cur = line_cfg->dwDTERate;
-    }
-}*/
-
-static void usb_uart_update_ctrl_lines(UsbUartBridge* usb_uart) {
-    UNUSED(usb_uart);
-    /*if(usb_uart->cfg.flow_pins != 0) {
-        furi_assert((size_t)(usb_uart->cfg.flow_pins - 1) < COUNT_OF(flow_pins));
-        uint8_t state = furi_hal_cdc_get_ctrl_line_state(usb_uart->cfg.vcp_ch);
-
-        furi_hal_gpio_write(flow_pins[usb_uart->cfg.flow_pins - 1][0], !(state & USB_CDC_BIT_RTS));
-        furi_hal_gpio_write(flow_pins[usb_uart->cfg.flow_pins - 1][1], !(state & USB_CDC_BIT_DTR));
-    }*/
 }
 
 static int32_t usb_uart_worker(void* context) {
@@ -174,16 +121,6 @@ static int32_t usb_uart_worker(void* context) {
         furi_thread_alloc_ex("UsbUartTxWorker", 512, usb_uart_tx_thread, usb_uart);
 
     usb_uart_vcp_init(usb_uart, usb_uart->cfg.vcp_ch);
-    //usb_uart_serial_init(usb_uart, usb_uart->cfg.uart_ch);
-    //usb_uart_set_baudrate(usb_uart, usb_uart->cfg.baudrate);
-    /*if(usb_uart->cfg.flow_pins != 0) {
-        furi_assert((size_t)(usb_uart->cfg.flow_pins - 1) < COUNT_OF(flow_pins));
-        furi_hal_gpio_init_simple(
-            flow_pins[usb_uart->cfg.flow_pins - 1][0], GpioModeOutputPushPull);
-        furi_hal_gpio_init_simple(
-            flow_pins[usb_uart->cfg.flow_pins - 1][1], GpioModeOutputPushPull);
-        usb_uart_update_ctrl_lines(usb_uart);
-    }*/
 
     furi_thread_flags_set(furi_thread_get_id(usb_uart->tx_thread), WorkerEvtCdcRx);
 
@@ -222,69 +159,12 @@ static int32_t usb_uart_worker(void* context) {
                 events |= WorkerEvtCtrlLineSet;
                 events |= WorkerEvtLineCfgSet;
             }
-            /*if(usb_uart->cfg.uart_ch != usb_uart->cfg_new.uart_ch) {
-                furi_thread_flags_set(furi_thread_get_id(usb_uart->tx_thread), WorkerEvtTxStop);
-                furi_thread_join(usb_uart->tx_thread);
-
-                usb_uart_serial_deinit(usb_uart);
-                usb_uart_serial_init(usb_uart, usb_uart->cfg_new.uart_ch);
-
-                usb_uart->cfg.uart_ch = usb_uart->cfg_new.uart_ch;
-                usb_uart_set_baudrate(usb_uart, usb_uart->cfg.baudrate);
-
-                furi_thread_start(usb_uart->tx_thread);
-            }
-            if(usb_uart->cfg.baudrate != usb_uart->cfg_new.baudrate) {
-                usb_uart_set_baudrate(usb_uart, usb_uart->cfg_new.baudrate);
-                usb_uart->cfg.baudrate = usb_uart->cfg_new.baudrate;
-            }
-            if(usb_uart->cfg.flow_pins != usb_uart->cfg_new.flow_pins) {
-                if(usb_uart->cfg.flow_pins != 0) {
-                    furi_hal_gpio_init_simple(
-                        flow_pins[usb_uart->cfg.flow_pins - 1][0], GpioModeAnalog);
-                    furi_hal_gpio_init_simple(
-                        flow_pins[usb_uart->cfg.flow_pins - 1][1], GpioModeAnalog);
-                }
-                if(usb_uart->cfg_new.flow_pins != 0) {
-                    furi_assert((size_t)(usb_uart->cfg_new.flow_pins - 1) < COUNT_OF(flow_pins));
-                    furi_hal_gpio_init_simple(
-                        flow_pins[usb_uart->cfg_new.flow_pins - 1][0], GpioModeOutputPushPull);
-                    furi_hal_gpio_init_simple(
-                        flow_pins[usb_uart->cfg_new.flow_pins - 1][1], GpioModeOutputPushPull);
-                }
-                usb_uart->cfg.flow_pins = usb_uart->cfg_new.flow_pins;
-                events |= WorkerEvtCtrlLineSet;
-            }
-            if(usb_uart->cfg.software_de_re != usb_uart->cfg_new.software_de_re) {
-                usb_uart->cfg.software_de_re = usb_uart->cfg_new.software_de_re;
-                if(usb_uart->cfg.software_de_re != 0) {
-                    furi_hal_gpio_write(USB_USART_DE_RE_PIN, true);
-                    furi_hal_gpio_init(
-                        USB_USART_DE_RE_PIN, GpioModeOutputPushPull, GpioPullNo, GpioSpeedMedium);
-                } else {
-                    furi_hal_gpio_init(
-                        USB_USART_DE_RE_PIN, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
-                }
-            }*/
             api_lock_unlock(usb_uart->cfg_lock);
-        }
-        /*if(events & WorkerEvtLineCfgSet) {
-            if(usb_uart->cfg.baudrate == 0)
-                usb_uart_set_baudrate(usb_uart, usb_uart->cfg.baudrate);
-        }*/
-        if(events & WorkerEvtCtrlLineSet) {
-            usb_uart_update_ctrl_lines(usb_uart);
         }
     }
     usb_uart_vcp_deinit(usb_uart, usb_uart->cfg.vcp_ch);
-    //usb_uart_serial_deinit(usb_uart);
 
     furi_hal_gpio_init(USB_USART_DE_RE_PIN, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
-
-    /*if(usb_uart->cfg.flow_pins != 0) {
-        furi_hal_gpio_init_simple(flow_pins[usb_uart->cfg.flow_pins - 1][0], GpioModeAnalog);
-        furi_hal_gpio_init_simple(flow_pins[usb_uart->cfg.flow_pins - 1][1], GpioModeAnalog);
-    }*/
 
     furi_thread_flags_set(furi_thread_get_id(usb_uart->tx_thread), WorkerEvtTxStop);
     furi_thread_join(usb_uart->tx_thread);
@@ -321,16 +201,6 @@ static int32_t usb_uart_tx_thread(void* context) {
                 usb_uart->st.tx_cnt += len;
 
                 usb_uart->cfg.cb(usb_uart->cfg.ctx, data, len);
-
-                //if(usb_uart->cfg.software_de_re != 0)
-                //    furi_hal_gpio_write(USB_USART_DE_RE_PIN, false);
-
-                //furi_hal_serial_tx(usb_uart->serial_handle, data, len);
-
-                /*if(usb_uart->cfg.software_de_re != 0) {
-                    furi_hal_serial_tx_wait_complete(usb_uart->serial_handle);
-                    furi_hal_gpio_write(USB_USART_DE_RE_PIN, true);
-                }*/
             }
         }
     }
@@ -353,6 +223,7 @@ static void vcp_on_cdc_rx(void* context) {
 static void vcp_state_callback(void* context, uint8_t state) {
     UNUSED(context);
     UNUSED(state);
+    // Don't care
 }
 
 static void vcp_on_cdc_control_line(void* context, uint8_t state) {

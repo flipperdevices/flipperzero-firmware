@@ -77,27 +77,37 @@ int analogRead(const GpioPin* pin)
 }
 
 void ledOn() {
-  FURI_LOG_I(TAG, "ledOn");
     boilerplate_led_set_rgb(255, 0, 0);
 }
 
 void ledOff() {
-  FURI_LOG_I(TAG, "ledOff");
-    boilerplate_led_reset();
+  boilerplate_led_reset();
 }
-
 
 void Serial_prints(const char* c)
 {
-  furi_check(furi_mutex_acquire(context->dmcomm_output_mutex, FuriWaitForever) == FuriStatusOk);
-  furi_string_cat_printf(context->dmcomm_output_buffer, "%s", c);
-  furi_check(furi_mutex_release(context->dmcomm_output_mutex) == FuriStatusOk);
+  size_t sent = furi_stream_buffer_send(
+    context->dmcomm_output_stream,
+    c,
+    strlen(c),
+    0);
+  UNUSED(sent);
 }
+
 void Serial_printlns(const char* c)
 {
-  furi_check(furi_mutex_acquire(context->dmcomm_output_mutex, FuriWaitForever) == FuriStatusOk);
-  furi_string_cat_printf(context->dmcomm_output_buffer, "%s\n", c);
-  furi_check(furi_mutex_release(context->dmcomm_output_mutex) == FuriStatusOk);
+  size_t sent = furi_stream_buffer_send(
+    context->dmcomm_output_stream,
+    c,
+    strlen(c),
+    0);
+
+  sent = furi_stream_buffer_send(
+    context->dmcomm_output_stream,
+    "\n",
+    1,
+    0);
+  UNUSED(sent);
 
   if(serialCallback != NULL)
     (*serialCallback)(context);
@@ -105,9 +115,12 @@ void Serial_printlns(const char* c)
 
 void Serial_println(void)
 {
-  furi_check(furi_mutex_acquire(context->dmcomm_output_mutex, FuriWaitForever) == FuriStatusOk);
-  furi_string_cat_printf(context->dmcomm_output_buffer, "\n");
-  furi_check(furi_mutex_release(context->dmcomm_output_mutex) == FuriStatusOk);
+  size_t sent = furi_stream_buffer_send(
+    context->dmcomm_output_stream,
+    "\n",
+    1,
+    0);
+  UNUSED(sent);
 
   if(serialCallback != NULL)
     serialCallback(context);
@@ -115,18 +128,16 @@ void Serial_println(void)
 
 void Serial_printi(const int c)
 {
-  furi_check(furi_mutex_acquire(context->dmcomm_output_mutex, FuriWaitForever) == FuriStatusOk);
-  furi_string_cat_printf(context->dmcomm_output_buffer, "%c", (char)c);
-  furi_check(furi_mutex_release(context->dmcomm_output_mutex) == FuriStatusOk);
+  char str[10];
+  snprintf(str, 10, "%c", (char)c);
+  size_t sent = furi_stream_buffer_send(
+    context->dmcomm_output_stream,
+    str,
+    strlen(str),
+    0);
+  UNUSED(sent);
 }
-/*
-void Serial_printf(const float c, int acc)
-{
-  furi_check(furi_mutex_acquire(context->dmcomm_output_mutex, FuriWaitForever) == FuriStatusOk);
-  FURI_LOG_I(TAG, "Serial_printf %f %d", (double)c, acc);
-  furi_check(furi_mutex_release(context->dmcomm_output_mutex) == FuriStatusOk);
-}
-*/
+
 const char *F(const char* i)
 {
   return i;
@@ -149,9 +160,14 @@ uint32_t millis()
 
 void Serial_writei(int i)
 {
-  furi_check(furi_mutex_acquire(context->dmcomm_output_mutex, FuriWaitForever) == FuriStatusOk);
-  furi_string_cat_printf(context->dmcomm_output_buffer, "%c", (char)i);
-  furi_check(furi_mutex_release(context->dmcomm_output_mutex) == FuriStatusOk);
+  char str[10];
+  snprintf(str, 10, "%c", (char)i);
+  size_t sent = furi_stream_buffer_send(
+    context->dmcomm_output_stream,
+    str,
+    strlen(str),
+    0);
+  UNUSED(sent);
 }
 
 int Serial_available(void)
@@ -166,13 +182,11 @@ int Serial_read(void)
   char s;
   size_t recieved = 1;
 
-  furi_check(furi_mutex_acquire(context->dmcomm_input_mutex, FuriWaitForever) == FuriStatusOk);
   recieved = furi_stream_buffer_receive(
-      context->dmcomm_stream_buffer,
+      context->dmcomm_input_stream,
       &s,
       1,
       1);
-  furi_check(furi_mutex_release(context->dmcomm_input_mutex) == FuriStatusOk);
 
   if(recieved > 0)
   {
@@ -184,8 +198,16 @@ int Serial_read(void)
 
 void Serial_writeb(const byte* data, int len)
 {
-  furi_check(furi_mutex_acquire(context->dmcomm_output_mutex, FuriWaitForever) == FuriStatusOk);
+  char str[10];
+  size_t sent;
   for(int i = 0; i < len; i++)
-    furi_string_push_back(context->dmcomm_output_buffer, (char)data[i]);
-  furi_check(furi_mutex_release(context->dmcomm_output_mutex) == FuriStatusOk);
+  {
+    snprintf(str, 10, "%c", (char)data[i]);
+    sent = furi_stream_buffer_send(
+      context->dmcomm_output_stream,
+      str,
+      1,
+      0);
+  }
+  UNUSED(sent);
 }

@@ -49,11 +49,6 @@ void save_text_input_callback(void* context) {
     // signal that the file was written successfully
     } while(0);
 
-    /*if(!flipper_format_rewind(fff_file)) {
-        boilerplate_close_config_file(fff_file);
-        FURI_LOG_E(TAG, "Rewind error");
-    }*/
-
     flipper_format_file_close(fff_file);
     flipper_format_free(fff_file);
 
@@ -66,8 +61,6 @@ void save_text_input_callback(void* context) {
 void fcom_save_code_scene_on_enter(void* context) {
     FURI_LOG_I(TAG, "fcom_save_code_scene_on_enter");
     App* app = context;
-    // initialize dcomm
-    // start dcomm thread in read mode
 
     text_input_reset(app->text_input);
     text_input_set_header_text(app->text_input, "Set filename");
@@ -98,10 +91,6 @@ bool fcom_save_code_scene_on_event(void* context, SceneManagerEvent event) {
 void fcom_save_code_scene_on_exit(void* context) {
     FURI_LOG_I(TAG, "fcom_save_code_scene_on_exit");
     UNUSED(context);
-    App* app = context;
-    UNUSED(app);
-    // shut down dcomm
-    // clean up
 }
 
 

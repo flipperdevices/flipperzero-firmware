@@ -21,13 +21,16 @@
   DEALINGS IN THE SOFTWARE.
 */
 
+/*
+Lightly modified copy of the dmcomm arduino software to run on the flipper zero
+*/
+
 #include "dmcomm.h"
 
 #define BOARD_3V3
 
 //pin assignments
-
-//const byte led_pin = 13;
+//const byte led_pin = 13; handled by flipper api call
 const GpioPin*  dm_pin_out = &gpio_ext_pc3;
 const GpioPin*  dm_pin_notOE = &gpio_ext_pb3;
 const GpioPin*  dm_pin_Ain = &gpio_ext_pa4; //no analog pins on flipper but we can still sense v-high
@@ -366,6 +369,7 @@ void delayByTicks(unsigned long delay_micros) {
 void setup() {     
     //Serial.begin(9600);
 
+    // TODO: make pinMode a HAL function, just lazy.
     furi_hal_gpio_init(probe_pin, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow); //GpioSpeedVeryHigh);
     furi_hal_gpio_init(dm_pin_out, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
     furi_hal_gpio_init(dm_pin_notOE, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
@@ -776,6 +780,9 @@ void loop() {
         }
         if (buffer[0] == 't' || buffer[0] == 'T') {
             Serial_printlns(F("[test voltages]"));
+            // TODO: Technically the flipper zero has an ADC, but it isn't implemented in firmware
+            // We could implement this using the STM32 HAL ourselves. Reference the flipper zero
+            // oscilloscope application.
             //scanVoltages(true);
         }
         if ((buffer[0] == 'd' || buffer[0] == 'D') && i >= 2) {
