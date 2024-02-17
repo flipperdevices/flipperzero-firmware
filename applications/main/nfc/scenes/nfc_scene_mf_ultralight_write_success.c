@@ -12,8 +12,8 @@ void nfc_scene_mf_ultralight_write_success_on_enter(void* context) {
     notification_message(instance->notifications, &sequence_success);
 
     Popup* popup = instance->popup;
-    popup_set_icon(popup, 32, 5, &I_DolphinNice_96x59);
-    popup_set_header(popup, "Successfully\nwritten", 13, 22, AlignLeft, AlignBottom);
+    popup_set_icon(popup, 48, 6, &I_DolphinDone_80x58);
+    popup_set_header(popup, "Successfully\nwritten", 5, 22, AlignLeft, AlignBottom);
     popup_set_timeout(popup, 1500);
     popup_set_context(popup, instance);
     popup_set_callback(popup, nfc_scene_mf_ultralight_write_success_popup_callback);
@@ -28,8 +28,11 @@ bool nfc_scene_mf_ultralight_write_success_on_event(void* context, SceneManagerE
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == NfcCustomEventViewExit) {
+            bool was_saved =
+                scene_manager_has_previous_scene(instance->scene_manager, NfcSceneSavedMenu);
+
             consumed = scene_manager_search_and_switch_to_previous_scene(
-                instance->scene_manager, NfcSceneSavedMenu);
+                instance->scene_manager, was_saved ? NfcSceneSavedMenu : NfcSceneReadSuccess);
         }
     }
     return consumed;
