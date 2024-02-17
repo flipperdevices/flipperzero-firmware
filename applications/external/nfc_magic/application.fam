@@ -21,4 +21,5 @@ App(
     #  [UI / Scenes (By xMasterX) & Poller functions, minor UI fixes (By Leptopt1los)](https://github.com/xMasterX/all-the-plugins/commit/d70f146f15a6bab2272d4ebfe37001d7d5f0f556)
     #  [New options for gen4 cards #82 (By Leptopt1los)](https://github.com/flipperdevices/flipperzero-good-faps/pull/82)
     #  [Gen4 shadow mode management support #98 (By Leptopt1los)](https://github.com/flipperdevices/flipperzero-good-faps/pull/98)
+    #  [Magic Gen2 support #143 (By Astrrra)](https://github.com/flipperdevices/flipperzero-good-faps/pull/143)
 )

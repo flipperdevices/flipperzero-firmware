@@ -212,7 +212,7 @@ static InfraredApp* infrared_alloc() {
 static void infrared_free(InfraredApp* infrared) {
     furi_assert(infrared);
     ViewDispatcher* view_dispatcher = infrared->view_dispatcher;
-    // InfraredAppState* app_state = &infrared->app_state;
+    InfraredAppState* app_state = &infrared->app_state;
 
     if(infrared->rpc_ctx) {
         rpc_system_app_set_callback(infrared->rpc_ctx, NULL, NULL);
@@ -274,6 +274,7 @@ static void infrared_free(InfraredApp* infrared) {
     infrared_last_settings_reset(infrared->last_settings);
     infrared_last_settings_free(infrared->last_settings);
 
+    UNUSED(app_state);
     free(infrared);
 }
 

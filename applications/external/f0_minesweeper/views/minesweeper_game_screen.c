@@ -159,7 +159,9 @@ static void mine_sweeper_win_effect(void* context);
 static inline bool handle_player_move(
     MineSweeperGameScreen* instance,
     MineSweeperGameScreenModel* model,
-    InputEvent* event);
+    InputEvent* event,
+    bool is_game_ended);
+
 static int8_t
     handle_short_ok_input(MineSweeperGameScreen* instance, MineSweeperGameScreenModel* model);
 static int8_t
@@ -865,14 +867,17 @@ static void mine_sweeper_win_effect(void* context) {
 static inline bool handle_player_move(
     MineSweeperGameScreen* instance,
     MineSweeperGameScreenModel* model,
-    InputEvent* event) {
+    InputEvent* event,
+    bool is_game_ended) {
     bool consumed = false;
     bool is_outside_boundary;
 
     switch(event->key) {
     case InputKeyUp:
-        (model->curr_pos.x_abs - 1 < 0) ? mine_sweeper_oob_effect(instance) :
-                                          mine_sweeper_move_effect(instance);
+        if(!is_game_ended) {
+            (model->curr_pos.x_abs - 1 < 0) ? mine_sweeper_oob_effect(instance) :
+                                              mine_sweeper_move_effect(instance);
+        }
 
         model->curr_pos.x_abs = (model->curr_pos.x_abs - 1 < 0) ? 0 : model->curr_pos.x_abs - 1;
 
@@ -888,8 +893,11 @@ static inline bool handle_player_move(
 
     case InputKeyDown:
 
-        (model->curr_pos.x_abs + 1 >= model->board_height) ? mine_sweeper_oob_effect(instance) :
-                                                             mine_sweeper_move_effect(instance);
+        if(!is_game_ended) {
+            (model->curr_pos.x_abs + 1 >= model->board_height) ?
+                mine_sweeper_oob_effect(instance) :
+                mine_sweeper_move_effect(instance);
+        }
 
         model->curr_pos.x_abs = (model->curr_pos.x_abs + 1 >= model->board_height) ?
                                     model->board_height - 1 :
@@ -905,8 +913,10 @@ static inline bool handle_player_move(
         break;
 
     case InputKeyLeft:
-        (model->curr_pos.y_abs - 1 < 0) ? mine_sweeper_oob_effect(instance) :
-                                          mine_sweeper_move_effect(instance);
+        if(!is_game_ended) {
+            (model->curr_pos.y_abs - 1 < 0) ? mine_sweeper_oob_effect(instance) :
+                                              mine_sweeper_move_effect(instance);
+        }
 
         model->curr_pos.y_abs = (model->curr_pos.y_abs - 1 < 0) ? 0 : model->curr_pos.y_abs - 1;
 
@@ -921,8 +931,10 @@ static inline bool handle_player_move(
         break;
 
     case InputKeyRight:
-        (model->curr_pos.y_abs + 1 >= model->board_width) ? mine_sweeper_oob_effect(instance) :
-                                                            mine_sweeper_move_effect(instance);
+        if(!is_game_ended) {
+            (model->curr_pos.y_abs + 1 >= model->board_width) ? mine_sweeper_oob_effect(instance) :
+                                                                mine_sweeper_move_effect(instance);
+        }
 
         model->curr_pos.y_abs = (model->curr_pos.y_abs + 1 >= model->board_width) ?
                                     model->board_width - 1 :
@@ -1334,7 +1346,7 @@ static bool mine_sweeper_game_screen_view_end_input_callback(InputEvent* event, 
             } else if((event->type == InputTypePress || event->type == InputTypeRepeat)) {
                 // Any other input we consider generic player movement
 
-                consumed = handle_player_move(instance, model, event);
+                consumed = handle_player_move(instance, model, event, true);
             }
         },
         false);
@@ -1449,7 +1461,7 @@ static bool mine_sweeper_game_screen_view_play_input_callback(InputEvent* event,
                 event->type == InputTypePress ||
                 event->type == InputTypeRepeat) { // Finally handle move
 
-                consumed = handle_player_move(instance, model, event);
+                consumed = handle_player_move(instance, model, event, false);
             }
         },
         true);

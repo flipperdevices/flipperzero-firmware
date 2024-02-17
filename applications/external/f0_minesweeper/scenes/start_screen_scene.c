@@ -1,7 +1,6 @@
 #include "../minesweeper.h"
 
 typedef enum {
-    MineSweeperSceneStartScreenExitEvent,
     MineSweeperSceneStartScreenContinueEvent,
 } MineSweeperSceneStartScreenEvent;
 
@@ -12,11 +11,7 @@ bool minesweeper_scene_start_screen_input_callback(InputEvent* event, void* cont
     MineSweeperApp* app = context;
     bool consumed = false;
 
-    // Right now we continue if back is not pressed
-    if(event->key == InputKeyBack) {
-        consumed = scene_manager_handle_custom_event(
-            app->scene_manager, MineSweeperSceneStartScreenExitEvent);
-    } else {
+    if(event->key != InputKeyBack) {
         consumed = scene_manager_handle_custom_event(
             app->scene_manager, MineSweeperSceneStartScreenContinueEvent);
     }
@@ -60,11 +55,6 @@ bool minesweeper_scene_start_screen_on_event(void* context, SceneManagerEvent ev
         if(event.event == MineSweeperSceneStartScreenContinueEvent) {
             mine_sweeper_game_screen_reset_clock(app->game_screen);
             scene_manager_next_scene(app->scene_manager, MineSweeperSceneGameScreen);
-            consumed = true;
-        } else if(event.event == MineSweeperSceneStartScreenExitEvent) {
-            // Exit app
-            scene_manager_stop(app->scene_manager);
-            view_dispatcher_stop(app->view_dispatcher);
             consumed = true;
         }
     }

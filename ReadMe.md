@@ -27,10 +27,10 @@ This software is for experimental purposes only and is not meant for any illegal
 
 <a name="latest">
 
-## Latest Updates - [PATREON: Latest Release RM0215-1147-0.97.2-099447d](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
+## Latest Updates - [PATREON: Latest Release RM0216-1719-0.97.2-378d9a8](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-02-16 00:12 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-02-16 00:12 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-02-16 21:15 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-02-16 21:15 EST`
 - OFW: [NFC: Add support for Gallagher access control (MIFARE Classic only) #3306 (By nickmooney)](https://github.com/flipperdevices/flipperzero-firmware/pull/3306)
 - OFW: [NFC: Slix disable privacy #3425 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3425)
 - OFW: [NFC: Added NFC plugin; Some parser #3335 (By zProAle)](https://github.com/flipperdevices/flipperzero-firmware/pull/3335)
@@ -87,7 +87,11 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: [SubGhz: Magellan Event Code Update #713 (By wooferguy)](https://github.com/DarkFlippers/unleashed-firmware/pull/713)
 - [Remaining Power Settings app made external (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/59edfc2470000bb794b9e22bd4e4c9748da0e873)
 - [TPMS Protocol fixes from uint8_t to uint32_t on SubGHz hash data & Battery Mode always shows uptime (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/bf0fa7299f382c21cf2f218f9a2a48e785cf2024)
-- Updated: [NFC Magic v1.6 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966)
+- Updated: [NFC Magic v1.6 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966) [Magic Gen2 support #143 (By Astrrra)](https://github.com/flipperdevices/flipperzero-good-faps/pull/143)
+- OFW PR: NFC: [Parser for Santiago, Chile BIP transit card #3456 (By rbasoalto)](https://github.com/flipperdevices/flipperzero-firmware/pull/3456)
+- Updated: [Minesweeper Redux v1.2 (By squee72564)](https://github.com/squee72564/F0_Minesweeper_Fap)
+- SubGHz: [Protocol Fixes for Var Type size on get_hash_data functions (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/d521af2786b79bb5abe4e8888449c1800b4e2ffe)
+- NFC: [Plugin fixes for bitlib on Bip/Chile Parser (By rbasoalto), Skylanders (By RogueMaster) & SonicCare (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/f5a78af7baaa96dd4cd018c5e3d38dfa5ad89a36)
 
 ## CHANGES FROM THIS BRANCH:
 
@@ -269,6 +273,7 @@ $ ./fbt dolphin_ext
 - NFC: [Parser for Philips Sonicare toothbrush heads (By Sil333033, Research By Cyrill Künzi)](https://kuenzi.dev/toothbrush/)
 - NFC: [Parser for Saflok and Mykey (From noproto)](https://github.com/noproto/flipper_kdf)
 - NFC: [Parser for San Francisco Bay Area "Clipper" transit card. #3344 (By ke6jjj)](https://github.com/flipperdevices/flipperzero-firmware/pull/3344)
+- NFC: [Parser for Santiago, Chile BIP transit card #3456 (By rbasoalto)](https://github.com/flipperdevices/flipperzero-firmware/pull/3456)
 - NFC: [Parser for Zolotaya Korona Online parser added (By Leptopt1los)](https://github.com/DarkFlippers/unleashed-firmware/commit/9aae348cae2619c4b32373431c9bf802e234ee6a)
 - Plugins: 2048, Arkanoid, Snake, and Tetris show score. Thanks to [whoamins](https://github.com/flipperdevices/flipperzero-firmware/commit/7feda832ede1ba8468eff2ca055fef3ddbdc16ac) and [DevMilanIan](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/188) With position changes by RogueMaster. Also all + Tic Tac Toe updated by [Unleashed/Eng1n33r](https://github.com/DarkFlippers/unleashed-firmware) for stability.
 - Plugins: Icon for Clock [Thanks to Redlink](https://github.com/redlink2/flipperzero-firmware/tree/menuChanges)

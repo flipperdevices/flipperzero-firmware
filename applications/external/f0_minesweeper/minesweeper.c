@@ -116,6 +116,8 @@ static MineSweeperApp* app_alloc() {
 static void app_free(MineSweeperApp* app) {
     furi_assert(app);
 
+    notification_message(app->notification, &sequence_reset_rgb);
+
     // Remove each view from View Dispatcher
     for(MineSweeperView minesweeper_view = (MineSweeperView)0;
         minesweeper_view < MineSweeperViewCount;
