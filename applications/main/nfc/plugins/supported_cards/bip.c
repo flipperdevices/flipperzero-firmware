@@ -1,9 +1,8 @@
 #include "nfc_supported_card_plugin.h"
 
+#include <bit_lib/bit_lib.h>
 #include <flipper_application/flipper_application.h>
-
 #include <nfc/nfc_device.h>
-#include <nfc/helpers/nfc_util.h>
 #include <nfc/protocols/mf_classic/mf_classic_poller_sync.h>
 
 #define TAG "Bip"
@@ -56,13 +55,13 @@ bool bip_verify(Nfc* nfc) {
     FURI_LOG_D(TAG, "Verifying sector %u", verify_sector);
 
     MfClassicKey key_a_0 = {};
-    nfc_util_num2bytes(bip_keys_a[0], COUNT_OF(key_a_0.data), key_a_0.data);
+    bit_lib_num_to_bytes_be(bip_keys_a[0], COUNT_OF(key_a_0.data), key_a_0.data);
 
     MfClassicAuthContext auth_ctx = {};
     MfClassicError error =
         mf_classic_poller_sync_auth(nfc, block_num, &key_a_0, MfClassicKeyTypeA, &auth_ctx);
 
-    if(error != MfClassicErrorNone) {
+    if(error == MfClassicErrorNotPresent) {
         FURI_LOG_D(TAG, "Failed to read block %u: %d", block_num, error);
         verified = false;
     }
@@ -82,7 +81,7 @@ static bool bip_read(Nfc* nfc, NfcDevice* device) {
     do {
         MfClassicType type = MfClassicType1k;
         MfClassicError error = mf_classic_poller_sync_detect_type(nfc, &type);
-        if(error != MfClassicErrorNone) {
+        if(error == MfClassicErrorNotPresent) {
             FURI_LOG_W(TAG, "Card not MIFARE Classic 1k");
             break;
         }
@@ -90,9 +89,9 @@ static bool bip_read(Nfc* nfc, NfcDevice* device) {
         data->type = type;
         MfClassicDeviceKeys keys = {};
         for(size_t i = 0; i < mf_classic_get_total_sectors_num(data->type); i++) {
-            nfc_util_num2bytes(bip_keys_a[i], sizeof(MfClassicKey), keys.key_a[i].data);
+            bit_lib_num_to_bytes_be(bip_keys_a[i], sizeof(MfClassicKey), keys.key_a[i].data);
             FURI_BIT_SET(keys.key_a_mask, i);
-            nfc_util_num2bytes(bip_keys_b[i], sizeof(MfClassicKey), keys.key_b[i].data);
+            bit_lib_num_to_bytes_be(bip_keys_b[i], sizeof(MfClassicKey), keys.key_b[i].data);
             FURI_BIT_SET(keys.key_b_mask, i);
         }
 
@@ -162,7 +161,7 @@ static void print_bip_timestamp(const BipTimestamp* timestamp, FuriString* str) 
     furi_assert(str);
     furi_string_cat_printf(
         str,
-        "%4d-%02d-%02d %02d:%02d:%02d",
+        "%04u-%02u-%02u %02u:%02u:%02u",
         timestamp->year,
         timestamp->month,
         timestamp->day,
@@ -247,12 +246,12 @@ static bool bip_parse(const NfcDevice* device, FuriString* parsed_data) {
         // verify all sectors' keys
         for(size_t i = 0; i < mf_classic_get_total_sectors_num(data->type); i++) {
             MfClassicSectorTrailer* sec_tr = mf_classic_get_sector_trailer_by_sector(data, i);
-            uint64_t key = nfc_util_bytes2num(sec_tr->key_a.data, 6);
+            uint64_t key = bit_lib_bytes_to_num_be(sec_tr->key_a.data, 6);
             if(key != bip_keys_a[i]) {
                 parsed = false;
                 break;
             }
-            key = nfc_util_bytes2num(sec_tr->key_b.data, 6);
+            key = bit_lib_bytes_to_num_be(sec_tr->key_b.data, 6);
             if(key != bip_keys_b[i]) {
                 parsed = false;
                 break;

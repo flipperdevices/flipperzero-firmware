@@ -274,6 +274,7 @@ static void infrared_free(InfraredApp* infrared) {
     infrared_last_settings_reset(infrared->last_settings);
     infrared_last_settings_free(infrared->last_settings);
 
+    UNUSED(app_state);
     free(infrared);
 }
 
