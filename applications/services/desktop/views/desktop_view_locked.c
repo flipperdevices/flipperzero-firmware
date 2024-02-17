@@ -63,9 +63,9 @@ static void locked_view_timer_callback(void* context) {
 }
 
 static void desktop_view_locked_doors_draw(Canvas* canvas, DesktopViewLockedModel* model) {
-    uint32_t offset = model->door_offset;
-    uint32_t door_left_x = DOOR_L_FINAL_POS + offset;
-    uint32_t door_right_x = DOOR_R_FINAL_POS - offset;
+    int32_t offset = model->door_offset;
+    int32_t door_left_x = DOOR_L_FINAL_POS + offset;
+    int32_t door_right_x = DOOR_R_FINAL_POS - offset;
     size_t height = icon_get_height(&I_DoorLeft_70x55);
     canvas_draw_icon(canvas, door_left_x, canvas_height(canvas) - height, &I_DoorLeft_70x55);
     canvas_draw_icon(canvas, door_right_x, canvas_height(canvas) - height, &I_DoorRight_70x55);
