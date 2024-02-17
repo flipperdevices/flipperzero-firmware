@@ -130,6 +130,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [Archive: fixed Apps tab ext filter #3450 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/3450)
 - [DateTime lib refafactor fixes (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/a0809ddc7c1ee7364b2b3b30615c67c34328ea27)
 - Updated: [Dab Timer v1.9 (By RogueMaster)](https://github.com/RogueMaster/flipperzero-dabtimer)
+- [Refactor updates for FuriHalRTC datetime lib (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/1d8a6f06d32133bd75867b8bb1bf45fa369b750e)
 
 <a name="release">
 
