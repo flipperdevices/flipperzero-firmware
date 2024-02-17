@@ -9,4 +9,5 @@ App(
     fap_icon="airmouse_10x10.png",
     fap_icon_assets="assets",
     fap_category="GPIO",
+    fap_libs=["ble_profile"],
 )
