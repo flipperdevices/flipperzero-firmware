@@ -54,7 +54,7 @@ void save_text_input_callback(void* context) {
 
     // After we save, switch to the code sender automatically
     scene_manager_search_and_switch_to_previous_scene(app->scene_manager, FcomMainMenuScene);
-    scene_manager_next_scene(app->scene_manager, FcomSendCodeScene);
+    //scene_manager_next_scene(app->scene_manager, FcomSendCodeScene);
 }
 
 
