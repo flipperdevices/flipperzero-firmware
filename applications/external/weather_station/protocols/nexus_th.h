@@ -49,7 +49,7 @@ void ws_protocol_decoder_nexus_th_feed(void* context, bool level, uint32_t durat
  * @param context Pointer to a WSProtocolDecoderNexus_TH instance
  * @return hash Hash sum
  */
-uint8_t ws_protocol_decoder_nexus_th_get_hash_data(void* context);
+uint32_t ws_protocol_decoder_nexus_th_get_hash_data(void* context);
 
 /**
  * Serialize data WSProtocolDecoderNexus_TH.

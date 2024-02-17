@@ -233,10 +233,10 @@ void ws_protocol_decoder_emose601x_feed(void* context, bool level, uint32_t dura
     }
 }
 
-uint8_t ws_protocol_decoder_emose601x_get_hash_data(void* context) {
+uint32_t ws_protocol_decoder_emose601x_get_hash_data(void* context) {
     furi_assert(context);
     WSProtocolDecoderEmosE601x* instance = context;
-    return subghz_protocol_blocks_get_hash_data(
+    return subghz_protocol_blocks_get_hash_data_long(
         &instance->decoder, (instance->decoder.decode_count_bit / 8) + 1);
 }
 

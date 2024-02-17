@@ -49,7 +49,7 @@ void ws_protocol_decoder_gt_wt_03_feed(void* context, bool level, uint32_t durat
  * @param context Pointer to a WSProtocolDecoderGT_WT03 instance
  * @return hash Hash sum
  */
-uint8_t ws_protocol_decoder_gt_wt_03_get_hash_data(void* context);
+uint32_t ws_protocol_decoder_gt_wt_03_get_hash_data(void* context);
 
 /**
  * Serialize data WSProtocolDecoderGT_WT03.

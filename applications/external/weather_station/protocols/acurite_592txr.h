@@ -49,7 +49,7 @@ void ws_protocol_decoder_acurite_592txr_feed(void* context, bool level, uint32_t
  * @param context Pointer to a WSProtocolDecoderAcurite_592TXR instance
  * @return hash Hash sum
  */
-uint8_t ws_protocol_decoder_acurite_592txr_get_hash_data(void* context);
+uint32_t ws_protocol_decoder_acurite_592txr_get_hash_data(void* context);
 
 /**
  * Serialize data WSProtocolDecoderAcurite_592TXR.

@@ -49,7 +49,7 @@ void ws_protocol_decoder_ambient_weather_feed(void* context, bool level, uint32_
  * @param context Pointer to a WSProtocolDecoderAmbient_Weather instance
  * @return hash Hash sum
  */
-uint8_t ws_protocol_decoder_ambient_weather_get_hash_data(void* context);
+uint32_t ws_protocol_decoder_ambient_weather_get_hash_data(void* context);
 
 /**
  * Serialize data WSProtocolDecoderAmbient_Weather.

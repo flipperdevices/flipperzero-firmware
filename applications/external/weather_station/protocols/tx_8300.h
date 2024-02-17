@@ -49,7 +49,7 @@ void ws_protocol_decoder_tx_8300_feed(void* context, bool level, uint32_t durati
  * @param context Pointer to a WSProtocolDecoderTX_8300 instance
  * @return hash Hash sum
  */
-uint8_t ws_protocol_decoder_tx_8300_get_hash_data(void* context);
+uint32_t ws_protocol_decoder_tx_8300_get_hash_data(void* context);
 
 /**
  * Serialize data WSProtocolDecoderTX_8300.

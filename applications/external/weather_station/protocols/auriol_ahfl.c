@@ -209,10 +209,10 @@ void ws_protocol_decoder_auriol_ahfl_feed(void* context, bool level, uint32_t du
     }
 }
 
-uint8_t ws_protocol_decoder_auriol_ahfl_get_hash_data(void* context) {
+uint32_t ws_protocol_decoder_auriol_ahfl_get_hash_data(void* context) {
     furi_assert(context);
     WSProtocolDecoderAuriol_AHFL* instance = context;
-    return subghz_protocol_blocks_get_hash_data(
+    return subghz_protocol_blocks_get_hash_data_long(
         &instance->decoder, (instance->decoder.decode_count_bit / 8) + 1);
 }
 

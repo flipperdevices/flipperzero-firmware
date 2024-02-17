@@ -49,7 +49,7 @@ void ws_protocol_decoder_infactory_feed(void* context, bool level, uint32_t dura
  * @param context Pointer to a WSProtocolDecoderInfactory instance
  * @return hash Hash sum
  */
-uint8_t ws_protocol_decoder_infactory_get_hash_data(void* context);
+uint32_t ws_protocol_decoder_infactory_get_hash_data(void* context);
 
 /**
  * Serialize data WSProtocolDecoderInfactory.
