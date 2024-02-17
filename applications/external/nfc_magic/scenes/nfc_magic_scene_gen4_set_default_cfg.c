@@ -5,7 +5,8 @@ enum {
     NfcMagicSceneGen4SetDefCfgStateCardFound,
 };
 
-NfcCommand nfc_mafic_scene_gen4_set_default_cfg_poller_callback(Gen4PollerEvent event, void* context) {
+NfcCommand
+    nfc_mafic_scene_gen4_set_default_cfg_poller_callback(Gen4PollerEvent event, void* context) {
     NfcMagicApp* instance = context;
     furi_assert(event.data);
 

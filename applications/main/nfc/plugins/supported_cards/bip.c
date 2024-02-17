@@ -7,7 +7,7 @@
 
 #define TAG "Bip"
 
-#define SECTOR_BLOCK_OFFSET(sector, block) (((sector)*4) + (block))
+#define SECTOR_BLOCK_OFFSET(sector, block) (((sector) * 4) + (block))
 
 static const uint64_t bip_keys_a[] = {
     0x3a42f33af429,

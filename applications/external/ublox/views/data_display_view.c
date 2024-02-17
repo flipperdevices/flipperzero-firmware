@@ -131,14 +131,14 @@ static void data_display_draw_callback(Canvas* canvas, void* model) {
         canvas_draw_str(canvas, 105, 35, furi_string_get_cstr(s));
 
         /*** Draw time and battery ***/
-		// Note that these are not retrieved from an external state
-		// variable, because they don't have to be.
-		canvas_set_font(canvas, FontPrimary);
-		canvas_draw_str(canvas, 0, 48, "Time:");
-		
-		DateTime datetime;
-		furi_hal_rtc_get_datetime(&datetime);
-		locale_format_time(s, &datetime, locale_get_time_format(), false);
+        // Note that these are not retrieved from an external state
+        // variable, because they don't have to be.
+        canvas_set_font(canvas, FontPrimary);
+        canvas_draw_str(canvas, 0, 48, "Time:");
+
+        DateTime datetime;
+        furi_hal_rtc_get_datetime(&datetime);
+        locale_format_time(s, &datetime, locale_get_time_format(), false);
 
         canvas_set_font(canvas, FontSecondary);
         canvas_draw_str(canvas, 30, 48, furi_string_get_cstr(s));
