@@ -61,9 +61,3 @@ The following is the application structure with a breakdown of each folder:
 
 
 Right now the current structure of the application is heavily inspired from [leedave's](https://github.com/leedave/flipper-zero-fap-boilerplate) boilerplate repo.
-
-
-## TODO
-- Multi-threading for board verifier for faster solvable board generation
-- Maybe trying to further optimize the board verification algorithm if possible
-	- I could try adding all of the corners to the starting positions for the verifier and see if this works better; although it is more simple for the user to just start from tile 0,0 and go from there.

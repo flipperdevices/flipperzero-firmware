@@ -4,7 +4,7 @@
 &nbsp;<a href='https://shop.rogue-master.net/' target='_blank'><img src='https://rogue-master.net/img/Merch.png' alt='RM Merch'' title='RM Merch'></a>
 &nbsp;<a href='https://github.com/RogueMaster/awesome-flipperzero-withModules' target='_blank'><img src='https://rogue-master.net/img/Resources.png' alt='More Research / Assets' title='More Research / Assets'></a></h1>
 
-# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0208-2318-0.97.2-f563329.tgz&channel=RM0208-2318-0.97.2-f563329&version=0.97.2)
+# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0217-1146-0.97.2-cc1ffca.tgz&channel=RM0217-1146-0.97.2-cc1ffca&version=0.97.2)
 
 ## Thank you so much to our RM Pro/SUPER Patreon supporters! Because of people like you, we are able to offer the best and most up-to-date Flipper Zero Firmware!
 
@@ -27,71 +27,10 @@ This software is for experimental purposes only and is not meant for any illegal
 
 <a name="latest">
 
-## Latest Updates - [PATREON: Latest Release RM0216-1719-0.97.2-378d9a8](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
+## Latest Updates - [PATREON: Latest Release RM0217-1130-0.97.2-b49d478](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-02-16 21:15 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-02-16 21:15 EST`
-- OFW: [NFC: Add support for Gallagher access control (MIFARE Classic only) #3306 (By nickmooney)](https://github.com/flipperdevices/flipperzero-firmware/pull/3306)
-- OFW: [NFC: Slix disable privacy #3425 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3425)
-- OFW: [NFC: Added NFC plugin; Some parser #3335 (By zProAle)](https://github.com/flipperdevices/flipperzero-firmware/pull/3335)
-- OFW: [NFC: Custom UID entry when adding manually #3363 (By TollyH)](https://github.com/flipperdevices/flipperzero-firmware/pull/3363)
-- OFW: [UI SubGhz: fix UI only_rx scene #3379 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/3379)
-- OFW: [CLI: cat command crash workaround #3358 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/3358)
-- OFW: [HID app: keyboard modifiers fix #3378 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/3378)
-- OFW: [Update tv.ir Sony KD-55AG8 Smart TV #3399 (By tomellens)](https://github.com/flipperdevices/flipperzero-firmware/pull/3399)
-- OFW: [Update tv.ir TCL 50P715X1 #3421 (By JuicyPigWalker)](https://github.com/flipperdevices/flipperzero-firmware/pull/3421)
-- Updated: [NFC Playlist v1.3 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
-- [Fix: This was leftover from old reverted OFW PR (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/02bd53f8c0423d02b01c1fd0507e6c866c29fc5e)
-- [Reset log level on flash for more responsiveness (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/67e7becc43b7701639baa873daa0149c054ba955)
-- OFW PR: [NFC: fix retry scene navigation logic #3439 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3439)
-- [Update version string pocsag_pager_types.h from 0.1 to 1.2 #13 (By seelenamt)](https://github.com/xMasterX/flipper-pager/pull/13)
-- Updated: [WiFi (Marauder) v6.6 (By 0xchocolate & tcpassos)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) `Req: ESP32 WITH MARAUDER FLASHED` Removed Create App Folder Bug
-- UL: [NFC: fit full name on display (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/8a86571068f8d82093bbfe71308efcf8eabee77a)
-- [EvilPortal: Fix some memory management (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/1e07bbaf6cf3dc464b7174d95c72b77f34e03c21)
-- Updated: [Matagotchi v1.0 (By MrModd)](https://github.com/MrModd/Matagotchi)
-- Updated: [PacMan WIP v0.1 (By DanieleMaffi)](https://github.com/DanieleMaffi/flipper-pacman)
-- OFW: [NFC: fix retry scene navigation logic #3439 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3439) - Was Already In RM
-- OFW: [Check universal remote files before loading #3438 (By gsurkov)](https://github.com/flipperdevices/flipperzero-firmware/pull/3438)
-- OFW: [Fixed MyKey LockID #3412 (By zProAle)](https://github.com/flipperdevices/flipperzero-firmware/pull/3412) - Was Already In RM
-- Minor var type changes for the coming OFW update [3254](https://github.com/flipperdevices/flipperzero-firmware/pull/3254) (By Willy-JL)
-- [CFW Settings - favorite_timeout (By WillyJL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/4f3f47df9427ccd635ab1686a1cede30d8520c3d)
-- [SubGhz: Protocol integrations (Weather, Pocsag, TPMS) (By htotoo)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/d6a7bb66c370e44775f9cbb8b7b12c00d6bdbdc6)
-- [SubGhz: GPS support (By Sil333033) & SubGHz Repeater (By LeeroysHub) & Optimizations (By Willy-JL) & Merge Fixes (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/3e5e1870621b52caad8fd1287e116c542703984a)
-- [SubGhz: add subghz tx_from_file CLI cmd, major TX flow refactoring, various improvements and bug fixes #3302 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/3302)
-- [MassStorage: Limit to .img and .iso files (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/4a166a50c68808104e2a52eaad2f3aded5f07d21)
-- [NFC Parser updates (By zProAle)](https://github.com/zProAle/my_flipper_kdf/commit/c46c31e032237a139197c77de79bd55191d91b18)
-- Updated: [YuriCable Pro Max v0.2 (By arag0re)](https://github.com/arag0re/fz-yuricable-pro-max)
-- [Fixes for SubGHz extend/bypass & other assorted tweaks (By RogueMaster)(Using code from Willy-JL & xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/75c493b05f57afb5df7ea3c4da06802844fae767)
-- Updated: [Plantower PMSx003 sensor reader v1.2 (By 3cky)](https://github.com/3cky/flipperzero-airmon) `Req: Plantower PMS5003/PMS7003/PMS9003`
-- Updated: [PacMan WIP v0.1 (By DanieleMaffi)](https://github.com/DanieleMaffi/flipper-pacman)
-- Added: [Financial Calculator v1.0 (By schaene)](https://github.com/schaene/Flipper-Financial-Calculator)
-- [Revert USB CDC changes from #3358 causing glitchy updates (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/d826a1dac8523f033a09eb3144485d08d57fd825)
-- Updated: [Sub-GHz Remote (Refactored) + Configurator v1.3 (By gid9798)](https://github.com/DarkFlippers/SubGHz_Remote) [Custom modulations in subghz remote (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/52cedc15324b8eaa7cc1e878b2311ce6a368c222)
-- Updated: [Sub-GHz setting updates for static/hopper frequencies (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/ce2349146001c1689207d952f36de80f72c3c742)
-- Updated: [Simpler IR last settings import (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/9f5c48ed9e560faee1fa225f1443d106d9359420)
-- OFW: [NFC: FIX ISO15693 emulation #3444 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3444)
-- OFW: [Add Model JTC Genesis 5.5 to IR #3388 (By pattyland)](https://github.com/flipperdevices/flipperzero-firmware/pull/3388)
-- OFW: [Gui text box: fix formatted string memory reservation #3447 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3447)
-- Updated: [Temp Sensors Reader 1.5 (By quen0n)](https://github.com/quen0n/Unitemp-Flipper-Zero-Plugin)
-- [API Cleanup, External Settings, Power Setting Additions & Some ByteInput optimizations (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/f3c6b1715b7982f610af9c1572cd1fc4df32855d)
-- Sorry, due to Desktop Settings change to FAP, you may need to re-configure your favorite apps.
-- Updated: [Chess v2.0 (By xtruan)](https://github.com/xtruan/flipper-chess)
-- Updated: [Guess The Number v1.2 (By kWAYTV)](https://github.com/kWAYTV/guess-the-number-fz)
-- OFW: [bit_lib and nfc_util refactor #3383 (By Leptopt1los)](https://github.com/flipperdevices/flipperzero-firmware/pull/3383)
-- [Firmware bit_lib cleanup (By Leptopt1los & xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/cc457fade24dc291f099ecde4c5435973e37bdbc)
-- OFW: [T5577 lib: write with mask function added #3362 (By Leptopt1los)](https://github.com/flipperdevices/flipperzero-firmware/pull/3362)
-- OFW: [lfrfid/em4100: added support for different bit rates #3410 (By Mrkvak)](https://github.com/flipperdevices/flipperzero-firmware/pull/3410)
-- Updated: [NFC Seader v2.3 (By bettse)](https://github.com/bettse/seader)
-- Added: [Calendar TECHART v1.0 (By techartdev)](https://github.com/techartdev/Calendar)
-- Updated: [NFC: Emv fixes #702 (By wosk_& Leptopt1los)](https://github.com/DarkFlippers/unleashed-firmware/pull/702)
-- UL: [SubGhz: Magellan Event Code Update #713 (By wooferguy)](https://github.com/DarkFlippers/unleashed-firmware/pull/713)
-- [Remaining Power Settings app made external (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/59edfc2470000bb794b9e22bd4e4c9748da0e873)
-- [TPMS Protocol fixes from uint8_t to uint32_t on SubGHz hash data & Battery Mode always shows uptime (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/bf0fa7299f382c21cf2f218f9a2a48e785cf2024)
-- Updated: [NFC Magic v1.6 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966) [Magic Gen2 support #143 (By Astrrra)](https://github.com/flipperdevices/flipperzero-good-faps/pull/143)
-- OFW PR: NFC: [Parser for Santiago, Chile BIP transit card #3456 (By rbasoalto)](https://github.com/flipperdevices/flipperzero-firmware/pull/3456)
-- Updated: [Minesweeper Redux v1.2 (By squee72564)](https://github.com/squee72564/F0_Minesweeper_Fap)
-- SubGHz: [Protocol Fixes for Var Type size on get_hash_data functions (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/d521af2786b79bb5abe4e8888449c1800b4e2ffe)
-- NFC: [Plugin fixes for bitlib on Bip/Chile Parser (By rbasoalto), Skylanders (By RogueMaster) & SonicCare (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/f5a78af7baaa96dd4cd018c5e3d38dfa5ad89a36)
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-02-17 11:30 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-02-17 11:30 EST`
 
 ## CHANGES FROM THIS BRANCH:
 
@@ -361,7 +300,7 @@ $ ./fbt dolphin_ext
 - [Mandelbrot Set v1.1 (By Possibly-Matt)](https://github.com/Possibly-Matt/flipperzero-firmware-wPlugins)
 - [Matagotchi v1.0 (By MrModd)](https://github.com/MrModd/Matagotchi)
 - [Minesweeper v1.2 (By panki27)](https://github.com/panki27/minesweeper)
-- [Minesweeper Redux v1.2 (By squee72564)](https://github.com/squee72564/F0_Minesweeper_Fap)
+- [Minesweeper Redux v1.2.1 (By squee72564)](https://github.com/squee72564/F0_Minesweeper_Fap)
 - [Monty Hall v1.1 (By DevMilanIan)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/203)
 - [Multi Counter (By JadePossible)](https://github.com/JadePossible/Flipper-Multi-Counter)
 - [Nu Pogodi! (Ну, погоди!) v1.3 (By sionyx)](https://github.com/sionyx/flipper_nupogodi)
@@ -646,4 +585,4 @@ $ ./fbt dolphin_ext
 - [Desktop Favorite Binds To Allow Opening Custom Game Menu. Whomever can complete this gets 3 months of subscriber builds. Patrons can DM me to add their monthly towards this bounty.](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/756)
 - `Bluetooth Audio` APP to allow flipper to pair to external speaker or headphones for wav/mp3 playback ($200 USD in ETH or BTC) (Don't think this is possible)
 
-# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0208-2318-0.97.2-f563329.tgz&channel=RM0208-2318-0.97.2-f563329&version=0.97.2)
+# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0217-1146-0.97.2-cc1ffca.tgz&channel=RM0217-1146-0.97.2-cc1ffca&version=0.97.2)
