@@ -24,7 +24,7 @@ typedef struct {
     FuriMutex* mutex;
     FuriMessageQueue* event_queue;
     DesktopSettings* desktop_settings;
-    FuriHalRtcDateTime datetime;
+    DateTime datetime;
     uint8_t diceSelect;
     uint8_t diceQty;
     uint16_t diceRoll;

@@ -302,7 +302,7 @@ int32_t wifi_map_app(void* p) {
 
     FURI_LOG_I(TAG, "wifi_map_app starting...");
     WiFiMapApp* app = wifi_map_app_alloc();
-    FuriHalRtcDateTime* rtc = malloc(sizeof(FuriHalRtcDateTime));
+    DateTime* rtc = malloc(sizeof(DateTime));
     furi_hal_rtc_get_datetime(rtc);
     FuriString* datetime = furi_string_alloc();
     furi_string_printf(

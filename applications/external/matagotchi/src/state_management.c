@@ -9,9 +9,7 @@
 #include "game_structs.h"
 
 static uint32_t get_current_timestamp() {
-    FuriHalRtcDateTime current_time;
-    furi_hal_rtc_get_datetime(&current_time);
-    return furi_hal_rtc_datetime_to_timestamp(&current_time);
+    return furi_hal_rtc_get_timestamp();
 }
 
 static void fast_forward_state(struct GameState* game_state) {

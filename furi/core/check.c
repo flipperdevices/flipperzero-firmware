@@ -86,7 +86,7 @@ static void __furi_print_stack_info() {
 }
 
 static void __furi_print_bt_stack_info() {
-    const FuriHalBtHardfaultInfo* fault_info = furi_hal_bt_get_hardfault_info();
+    const BleGlueHardfaultInfo* fault_info = ble_glue_get_hardfault_info();
     if(fault_info == NULL) {
         furi_log_puts("\r\n\tcore2: not faulted");
     } else {
@@ -133,10 +133,12 @@ FURI_NORETURN void __furi_crash_implementation() {
 
     if(__furi_check_message == NULL) {
         __furi_check_message = "Fatal Error";
+#ifndef __FURI_TRACE
     } else if(__furi_check_message == (void*)__FURI_ASSERT_MESSAGE_FLAG) {
         __furi_check_message = "furi_assert failed";
     } else if(__furi_check_message == (void*)__FURI_CHECK_MESSAGE_FLAG) {
         __furi_check_message = "furi_check failed";
+#endif
     }
 
     furi_log_puts("\r\n\033[0;31m[CRASH]");

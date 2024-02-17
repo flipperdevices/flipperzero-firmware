@@ -2,9 +2,7 @@
 #include <furi_hal.h>
 
 q_char** q_shuffle(const uint8_t group_number) {
-    FuriHalRtcDateTime curr_dt;
-    furi_hal_rtc_get_datetime(&curr_dt);
-    const uint32_t current_timestamp = furi_hal_rtc_datetime_to_timestamp(&curr_dt);
+    const uint32_t current_timestamp = furi_hal_rtc_get_timestamp();
     srand(current_timestamp);
     const uint32_t group_size = Q_GROUPS[group_number].size;
     q_char** res_arr = malloc(group_size * sizeof(q_char*));

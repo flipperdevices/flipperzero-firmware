@@ -1,16 +1,10 @@
 #pragma once
 
 #include <gui/view.h>
+#include "../helpers/ducky_script.h"
 
+typedef struct BadKb BadKb;
 typedef void (*BadKbButtonCallback)(InputKey key, void* context);
-
-typedef struct {
-    View* view;
-    BadKbButtonCallback callback;
-    void* context;
-} BadKb;
-
-typedef struct BadKbState BadKbState;
 
 BadKb* bad_kb_alloc();
 

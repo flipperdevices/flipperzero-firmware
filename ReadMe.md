@@ -29,8 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0217-1130-0.97.2-b49d478](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-02-17 11:30 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-02-17 11:30 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-02-19 20:10 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-02-19 20:10 EST`
 - Updated: [WHC SWIO Flasher v1.0 (By sukvojte)](https://github.com/sukvojte/wch_swio_flasher)
 
 ## CHANGES FROM THIS BRANCH:
@@ -71,6 +71,15 @@ This software is for experimental purposes only and is not meant for any illegal
 - [DateTime lib refafactor fixes (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/a0809ddc7c1ee7364b2b3b30615c67c34328ea27)
 - Updated: [Dab Timer v1.9 (By RogueMaster)](https://github.com/RogueMaster/flipperzero-dabtimer)
 - [Refactor updates for FuriHalRTC datetime lib (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/8a8e53190859668b66faa4ab9a459a7f8e9cafa6)
+- Updated: [Bluetooth/USB Remote v1.7 (By Cutch)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/1330) [Accelerated Mouse Pointer (By LeeroysHub)](https://github.com/LeeroysHub/flipperzero-firmware-wPlugins/commit/f67680d5b004a72419550a8268802030a8421643)
+- [Add JS UsbDisk support (like Mass Storage) (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/498f64406455a1aef691655f26b44809c021965a)
+- [Sub-GHz: Fix led blink on decode raw - signal info (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/aa957a72232c3e83b183e4e455b7d59001ca3408)
+- OFW: [ble: profile rework #3272 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/3272)
+- [BLE Refactor & HID App Merge Fixes and Improvements (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/97384ce3cc8939f2713bd643c032d6a829b78f24)
+- OFW: [Add notification sending #3449 (By drunkbatya)](https://github.com/flipperdevices/flipperzero-firmware/pull/3449) - USELESS
+- OFW: [HID: Add confirmation dialogue to the remove pairing option #3263 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3263)
+- OFW: [Quote $FBT_TOOLCHAIN_PATH to avoid splitting #3459 (By shreve)](https://github.com/flipperdevices/flipperzero-firmware/pull/3459)
+- [Refactor updates for FuriHalRTC datetime lib (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/6a03d45915cab3723bb85fc61f7ecd7f5b278767)
 
 <a name="release">
 
@@ -353,20 +362,16 @@ $ ./fbt dolphin_ext
 - [AVR Flasher (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/2475)
 - [AZERTY Mouse Jacker (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/mousejacker) `Req: NRF24` (Uses AZERTY keyboard - Source Unknown)
 - [Bad KB (Modified PR#738 from pengu1ndev - Original from Willy-JL) #739 (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/739)
-- [Bad BT (By Willy-JL)(Imported By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/620)
 - [Barcode App (By Kingal1337)](https://github.com/Kingal1337/flipper-barcode-generator)
 - [BarCode Scanner Emulator (By polarikus)](https://github.com/polarikus/flipper-zero_bc_scanner_emulator) `Uses: COM-port`
 - [Battery Checker (By Programistich)](https://github.com/Programistich/battery_checker)
 - [BG Loader (By twisted-pear)](https://github.com/twisted-pear/bgloader)
 - [BlackJack Counter v1.0 (By grugnoymeme)](https://github.com/grugnoymeme/flipperzero-blackjack_counter-fap)
 - [BLE Spam v4.4 (By Willy-JL & ECTO-1A & Spooks4576 with research from xMasterX; OFW API thanks to noproto)](https://github.com/noproto/apple_ble_spam_ofw)
-- [Bluetooth/USB Remote v1.6 (By Cutch)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/1330) [Accelerated Mouse Pointer (By LeeroysHub)](https://github.com/LeeroysHub/flipperzero-firmware-wPlugins/commit/f67680d5b004a72419550a8268802030a8421643)
+- [Bluetooth/USB Remote v1.7 (By Cutch)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/1330) [Accelerated Mouse Pointer (By LeeroysHub)](https://github.com/LeeroysHub/flipperzero-firmware-wPlugins/commit/f67680d5b004a72419550a8268802030a8421643)
 - [BMI Air Mouse v0.9 (By ginkage)](https://github.com/ginkage/FlippAirMouse/) `Req: BMI160`
 - [BPM Tapper v1.1 (By panki27)](https://github.com/panki27/bpm-tapper)
 - [Brainfuck v1.2 (By nymda)](https://github.com/nymda/FlipperZeroBrainfuck)
-- [BT Remote for Kodi (Remixed By coded-with-claws)](https://github.com/coded-with-claws/flipperzero-tools/tree/main/applications_user/bt_hid_kodi)
-- [BT Serial (By maybe-hello-world)](https://github.com/maybe-hello-world/fbs)
-- [BT Toy Serial (By maybe-hello-world)](https://github.com/maybe-hello-world/flipper-bp)
 - [BT Trigger (By Nem0oo)](https://github.com/Nem0oo/flipper-zero_ios-bluetooth-trigger)
 - [Calculator v1.1 (By n-o-T-I-n-s-a-n-e)](https://github.com/n-o-T-I-n-s-a-n-e)
 - [Calendar (By Adiras)](https://github.com/Adiras/flipperzero-calendar)
@@ -380,7 +385,6 @@ $ ./fbt dolphin_ext
 - [Coffee-EEPROM (By wh00hw)](https://github.com/wh00hw/Coffee-EEPROM-FAP) For ethical pentest only.
 - [Continuity Tester (By benallen-dev)](https://github.com/benallen-dev/flipper-zero-apps/tree/main/continuity)
 - [Control 7-segment display with Flipper Zero (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/gpio)
-- [Cookie Clicker v1.0 (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/hid/hid_cookie)
 - [Count Down Timer v1.2 (By 0w0mewo)](https://github.com/0w0mewo/fpz_cntdown_timer)
 - [Counter v1.3 (By Krulknul)](https://github.com/Krulknul/dolphin-counter)
 - [Cross Remote v2.4 (By leedave)](https://github.com/leedave/flipper-zero-cross-remote)
@@ -483,7 +487,6 @@ $ ./fbt dolphin_ext
 - [Ocarina v1.1 (By invalidna-me)](https://github.com/invalidna-me/flipperzero-ocarina) [Here are the LOTZ Songs](https://www.zeldadungeon.net/wiki/Ocarina_of_Time_Songs)
 - [Orgasmotron (By jbohack)](https://github.com/jbohack) [(Original By qqmajikpp)](https://github.com/qqmajikpp/flipperzero-firmware-wPlugins)
 - [Password Generator v1.2 (By anakod)](https://github.com/anakod/flipper_passgen)
-- [PC Monitor v1.0 (By TheSainEyereg)](https://github.com/TheSainEyereg/flipper-pc-monitor) _Req: [Backend](https://github.com/TheSainEyereg/flipper-pc-monitor-backend)_
 - [Pet a Dolphin (By ugeneSmile)](https://github.com/EugeneSmile/PetADolphin)
 - [pForth (By twisted-pear)](https://github.com/twisted-pear/f0forth)
 - [PicoPass (iClass) v1.13 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass) [PicoPass Emulation (By nvx)](https://github.com/nvx/flipperzero-firmware/tree/picopass_emulation)
@@ -561,6 +564,10 @@ $ ./fbt dolphin_ext
 - If you can fix any of these, DM me on Discord for a surprise reward.
 - [Air Arkanoid  v1.1 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-good-faps/pull/141)
 - [APRS Cln Hello World (By NSV47)](https://github.com/NSV47/APRS_hello_world_clean)
+- [BT Remote for Kodi (Remixed By coded-with-claws)](https://github.com/coded-with-claws/flipperzero-tools/tree/main/applications_user/bt_hid_kodi)
+- [BT Serial (By maybe-hello-world)](https://github.com/maybe-hello-world/fbs)
+- [BT Toy Serial (By maybe-hello-world)](https://github.com/maybe-hello-world/flipper-bp)
+- [Cookie Clicker v1.0 (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/hid/hid_cookie)
 - [MALVEKE GAME BOY ADVANCE Cartridge v1.1 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external/malveke_gba_cartridge) `Req: Malveke`
 - [MALVEKE GAME BOY Cartridge (GB/GBC) v1.1 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external/malveke_gb_cartridge) `Req: Malveke`
 - [MALVEKE GAME BOY Emulator v1.0 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external/malveke_gb_emulator) `Req: Malveke`
@@ -570,6 +577,7 @@ $ ./fbt dolphin_ext
 - [MALVEKE PIN Test v1.0 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external/malveke_pin_test) `Req: Malveke`
 - [Mifare Nested v1.5.2 (By AloneLiberty)](https://github.com/AloneLiberty/FlipperNested)
 - [NFC Relay WIP (By leommxj)](https://github.com/leommxj/nfc_relay)
+- [PC Monitor v1.0 (By TheSainEyereg)](https://github.com/TheSainEyereg/flipper-pc-monitor) _Req: [Backend](https://github.com/TheSainEyereg/flipper-pc-monitor-backend)_
 - [SCD30 Carbon Dioxide Sensor (By heimskr)](https://github.com/heimskr/flipperzero-scd30)
 - [TAS Playback (By rcombs)](https://github.com/rcombs/tas-playback)
 - [VB Migration Assistant v1.2 (By GMMan)](https://github.com/GMMan/flipperzero-vb-migrate)

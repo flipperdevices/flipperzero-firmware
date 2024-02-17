@@ -83,6 +83,8 @@ static void dab_timer_render_callback(Canvas* const canvas, void* ctx) {
         furi_message_queue_put(plugin_state->event_queue, &event, 0);
         return;
     }
+    DateTime curr_dt;
+    furi_hal_rtc_get_datetime(&curr_dt);
     uint32_t curr_ts = furi_hal_rtc_get_timestamp();
     char time_string[TIME_LEN];
     char date_string[DATE_LEN];

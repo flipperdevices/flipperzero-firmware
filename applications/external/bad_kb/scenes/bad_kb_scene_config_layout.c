@@ -1,4 +1,4 @@
-#include "../bad_kb_app.h"
+#include "../bad_kb_app_i.h"
 #include "furi_hal_power.h"
 #include "furi_hal_usb.h"
 #include <storage/storage.h>

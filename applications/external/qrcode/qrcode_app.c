@@ -747,7 +747,7 @@ int32_t qrcode_app(void* p) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
     if(storage_common_stat(storage, QRCODE_FOLDER, NULL) == FSE_NOT_EXIST) {
         if(!storage_simply_mkdir(storage, QRCODE_FOLDER)) {
-            return;
+            return 0;
         }
     }
     storage_common_copy(storage, ANY_PATH("qrcodes"), QRCODE_FOLDER);

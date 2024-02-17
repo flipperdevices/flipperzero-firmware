@@ -162,11 +162,11 @@ bool uart_terminal_scene_start_on_event(void* context, SceneManagerEvent event) 
         } else if(event.event == UART_TerminalEventStartKeyboardText) {
             scene_manager_set_scene_state(
                 app->scene_manager, UART_TerminalSceneStart, app->selected_menu_index);
-            scene_manager_next_scene(app->scene_manager, UART_TerminalSceneTextInput);
+            scene_manager_next_scene(app->scene_manager, UART_TerminalSceneUART_TextInput);
         } else if(event.event == UART_TerminalEventStartKeyboardHex) {
             scene_manager_set_scene_state(
                 app->scene_manager, UART_TerminalSceneStart, app->selected_menu_index);
-            scene_manager_next_scene(app->scene_manager, UART_TerminalSceneHexInput);
+            scene_manager_next_scene(app->scene_manager, UART_TerminalSceneUART_HexInput);
         } else if(event.event == UART_TerminalEventStartConsole) {
             scene_manager_set_scene_state(
                 app->scene_manager, UART_TerminalSceneStart, app->selected_menu_index);

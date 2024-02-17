@@ -29,8 +29,8 @@ int calculateDayOfWeek(int year, int month, int day) {
     return dayOfWeek;
 }
 
-FuriHalRtcDateTime createDateTime(uint16_t year, uint8_t month, uint8_t day) {
-    FuriHalRtcDateTime date = {0, 0, 0, day, month, year, 0};
+DateTime createDateTime(uint16_t year, uint8_t month, uint8_t day) {
+    DateTime date = {0, 0, 0, day, month, year, 0};
 
     date.weekday = calculateDayOfWeek(year, month, day);
 
@@ -73,12 +73,12 @@ static void calendar_draw_callback(Canvas* canvas, void* ctx) {
     canvas_draw_line(canvas, 61, 1, 61, 61);
     canvas_draw_line(canvas, 73, 1, 73, 61);
 
-    FuriHalRtcDateTime date =
+    DateTime date =
         createDateTime(calendar_data->selected_year, calendar_data->selected_month, 1);
 
     int month = date.month;
     int days_in_month =
-        furi_hal_rtc_get_days_per_month(furi_hal_rtc_is_leap_year(date.year), month);
+        datetime_get_days_per_month(datetime_is_leap_year(date.year), month);
 
     int first_day_of_month = date.weekday;
     int day_of_month = 1;
@@ -192,7 +192,7 @@ int32_t calendar_app(void* p) {
     ctx->event_queue = event_queue;
     ctx->calendar_data = calendar_data;
 
-    FuriHalRtcDateTime currentDate;
+    DateTime currentDate;
     furi_hal_rtc_get_datetime(&currentDate);
 
     calendar_data->selected_month = currentDate.month;

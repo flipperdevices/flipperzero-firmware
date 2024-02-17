@@ -16,7 +16,7 @@ typedef struct {
 
 typedef struct {
     FuriString* buffer;
-    FuriHalRtcDateTime datetime;
+    DateTime datetime;
     LocaleTimeFormat timeformat;
     LocaleDateFormat dateformat;
 } ClockData;

@@ -15,6 +15,35 @@ extern "C" {
 #define SCRIPT_STATE_STRING_START (-5)
 #define SCRIPT_STATE_WAIT_FOR_BTN (-6)
 
+#define FILE_BUFFER_LEN 16
+
+struct BadKbScript {
+    FuriThread* thread;
+    BadKbState st;
+
+    FuriString* file_path;
+    FuriString* keyboard_layout;
+    uint8_t file_buf[FILE_BUFFER_LEN + 1];
+    uint8_t buf_start;
+    uint8_t buf_len;
+    bool file_end;
+
+    uint32_t defdelay;
+    uint32_t stringdelay;
+    uint16_t layout[128];
+
+    FuriString* line;
+    FuriString* line_prev;
+    uint32_t repeat_cnt;
+    uint8_t key_hold_nb;
+
+    FuriString* string_print;
+    size_t string_print_pos;
+
+    Bt* bt;
+    BadKbApp* app;
+};
+
 uint16_t ducky_get_keycode(BadKbScript* bad_kb, const char* param, bool accept_chars);
 
 uint32_t ducky_get_command_len(const char* line);

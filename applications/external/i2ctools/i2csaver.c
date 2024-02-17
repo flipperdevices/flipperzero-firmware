@@ -8,7 +8,7 @@ bool i2c_save_file(const char* content) {
     File* file = storage_file_alloc(storage);
 
     // Get timestamp
-    FuriHalRtcDateTime datetime;
+    DateTime datetime;
     furi_hal_rtc_get_datetime(&datetime);
     char timeStamp[30];
     snprintf(
