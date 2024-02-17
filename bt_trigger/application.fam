@@ -9,6 +9,7 @@ App(
     fap_icon="bt_trigger_logo.png",
     fap_category="Bluetooth",
     fap_icon_assets="assets",
+    fap_libs=["ble_profile"],
     fap_author="@Nem0oo",
     fap_weburl="https://github.com/Nem0oo/flipper-zero-bluetooth-trigger",
     fap_version="1.2",

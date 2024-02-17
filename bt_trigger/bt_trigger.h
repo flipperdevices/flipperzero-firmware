@@ -4,7 +4,7 @@
 #include <furi.h>
 #include <furi_hal_bt.h>
 #include <furi_hal_usb_hid.h>
-#include <furi_hal_bt_hid.h>
+#include <extra_profiles/hid_profile.h>
 #include <gui/gui.h>
 #include <input/input.h>
 #include <notification/notification_messages.h>
@@ -35,6 +35,7 @@ typedef struct {
 
 typedef struct {
     Bt* bt;
+    FuriHalBleProfileBase* ble_hid_profile;
     Gui* gui;
     NotificationApp* notifications;
     ViewPort* view_port;

@@ -5,16 +5,15 @@ __int32_t bt_trigger_app(void* p) {
     UNUSED(p);
     AppStruct* app = appStructAlloc();
 
-    //bt_disconnect(app->bt);
+    bt_disconnect(app->bt);
 
     // Wait 2nd core to update nvm storage
-    //furi_delay_ms(200);
+    furi_delay_ms(200);
 
     bt_keys_storage_set_storage_path(app->bt, HID_BT_KEYS_STORAGE_PATH);
 
-    if(!bt_set_profile(app->bt, BtProfileHidKeyboard)) {
-        FURI_LOG_E(TAG, "Failed to switch to HID profile");
-    }
+    app->ble_hid_profile = bt_profile_start(app->bt, ble_profile_hid, NULL);
+    furi_check(app->ble_hid_profile);
 
     furi_hal_bt_start_advertising();
     bt_set_status_changed_callback(app->bt, bt_hid_connection_status_changed_callback, app);
@@ -58,8 +57,10 @@ __int32_t bt_trigger_app(void* p) {
                     if(app->delay > 0) {
                         app->shooting = !app->shooting;
                         if(app->shooting) {
-                            furi_hal_bt_hid_consumer_key_press(HID_CONSUMER_VOLUME_INCREMENT);
-                            furi_hal_bt_hid_consumer_key_release(HID_CONSUMER_VOLUME_INCREMENT);
+                            ble_profile_hid_consumer_key_press(
+                                app->ble_hid_profile, HID_CONSUMER_VOLUME_INCREMENT);
+                            ble_profile_hid_consumer_key_release(
+                                app->ble_hid_profile, HID_CONSUMER_VOLUME_INCREMENT);
                             notification_message(app->notifications, &sequence_blink_blue_100);
                             app->shots++;
                             //Timer triggered every delay ms
@@ -87,8 +88,10 @@ __int32_t bt_trigger_app(void* p) {
                     break;
                 case(InputKeyRight): //Take a shot
                     if(!app->shooting) {
-                        furi_hal_bt_hid_consumer_key_press(HID_CONSUMER_VOLUME_INCREMENT);
-                        furi_hal_bt_hid_consumer_key_release(HID_CONSUMER_VOLUME_INCREMENT);
+                        ble_profile_hid_consumer_key_press(
+                            app->ble_hid_profile, HID_CONSUMER_VOLUME_INCREMENT);
+                        ble_profile_hid_consumer_key_release(
+                            app->ble_hid_profile, HID_CONSUMER_VOLUME_INCREMENT);
                         notification_message(app->notifications, &sequence_blink_blue_100);
                         app->shots++;
                     }
@@ -102,8 +105,10 @@ __int32_t bt_trigger_app(void* p) {
         case(EventTypeTick):
             if(app->shooting) {
                 //sending command to trigger via BT
-                furi_hal_bt_hid_consumer_key_press(HID_CONSUMER_VOLUME_INCREMENT);
-                furi_hal_bt_hid_consumer_key_release(HID_CONSUMER_VOLUME_INCREMENT);
+                ble_profile_hid_consumer_key_press(
+                    app->ble_hid_profile, HID_CONSUMER_VOLUME_INCREMENT);
+                ble_profile_hid_consumer_key_release(
+                    app->ble_hid_profile, HID_CONSUMER_VOLUME_INCREMENT);
                 notification_message(app->notifications, &sequence_blink_blue_100);
                 app->shots++;
             }
@@ -120,9 +125,7 @@ __int32_t bt_trigger_app(void* p) {
     // Wait 2nd core to update nvm storage
     furi_delay_ms(200);
     bt_keys_storage_set_default_path(app->bt);
-    if(!bt_set_profile(app->bt, BtProfileSerial)) {
-        FURI_LOG_E(TAG, "Failed to switch to Serial profile");
-    }
+    furi_check(bt_profile_restore_default(app->bt));
 
     //Freeing memory
     furi_message_queue_free(event_queue);
