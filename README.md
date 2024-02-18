@@ -28,6 +28,17 @@ Pin A3 - VPet+
 
 Pin GND - VPet-
 
+### Installation
+
+The F-Com app is compiled and installed with [ufbt](https://github.com/flipperdevices/flipperzero-ufbt)
+
+After installing ufbt, checkout the F-Com git repository, connect your flipper, and run "ufbt launch" to install.
+
+It will be installed under the GPIO section.
+
+This repository contains a selection of digiroms in the codes directory. You may copy them to the app_data/fcom directory on your
+flipper to make them accessible under the "Saved" menu option.
+
 ## Menu options
 
 ### Listen
