@@ -59,6 +59,7 @@ Settings load_settings() {
 
     FURI_LOG_D(APP_NAME, "Opening storage");
     Storage* storage = furi_record_open(RECORD_STORAGE);
+    storage_common_migrate(storage, EXT_PATH(".blackjack.settings"), CONFIG_FILE_PATH);
     FURI_LOG_D(APP_NAME, "Allocating file");
     FlipperFormat* file = flipper_format_file_alloc(storage);
 

