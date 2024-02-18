@@ -1,9 +1,5 @@
 #include "../camera_suite.h"
-#include <furi.h>
-#include <furi_hal.h>
-#include <input/input.h>
-#include <gui/elements.h>
-#include <dolphin/dolphin.h>
+#include "camera_suite_view_guide.h"
 
 struct CameraSuiteViewGuide {
     View* view;
@@ -80,7 +76,7 @@ void camera_suite_view_guide_exit(void* context) {
 
 void camera_suite_view_guide_enter(void* context) {
     furi_assert(context);
-    CameraSuiteViewGuide* instance = context;
+    CameraSuiteViewGuide* instance = (CameraSuiteViewGuide*)context;
     with_view_model(
         instance->view,
         CameraSuiteViewGuideModel * model,

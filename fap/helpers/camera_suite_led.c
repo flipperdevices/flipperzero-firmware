@@ -1,5 +1,5 @@
-#include "../camera_suite.h"
 #include "camera_suite_led.h"
+#include "../camera_suite.h"
 
 void camera_suite_led_set_rgb(void* context, int red, int green, int blue) {
     CameraSuite* app = context;

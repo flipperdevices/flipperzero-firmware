@@ -38,7 +38,7 @@ jobs:
           app-dir: ./fap
           sdk-channel: ${{ matrix.sdk-channel }}
 
-      - name: "Create Zip Archives (dev/release/rc)"
+      - name: "Create FAP Downloads (dev/release/rc)"
         uses: actions/upload-artifact@v3
         with:
           name: ${{ github.event.repository.name }}-${{ matrix.name }}-${{ steps.build-app.outputs.suffix }}.zip

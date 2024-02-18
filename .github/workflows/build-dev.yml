@@ -22,7 +22,7 @@ jobs:
           app-dir: ./fap
           sdk-channel: dev
 
-      - name: "Create Zip Archive (dev)"
+      - name: "Create FAP Download (dev)"
         uses: actions/upload-artifact@v3
         with:
           name: ${{ github.event.repository.name }}-dev-${{ steps.build-app.outputs.suffix }}.zip

@@ -1,7 +1,5 @@
-#include "../camera_suite.h"
 #include "camera_suite_speaker.h"
-
-#define NOTE_INPUT 587.33f
+#include "../camera_suite.h"
 
 void camera_suite_play_input_sound(void* context) {
     CameraSuite* app = context;
