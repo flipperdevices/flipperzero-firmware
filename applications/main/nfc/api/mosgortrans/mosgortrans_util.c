@@ -21,19 +21,37 @@ void from_minutes_to_datetime(uint32_t minutes, DateTime* datetime, uint16_t sta
 }
 
 typedef struct {
-    uint16_t view;
-    uint16_t type;
-    uint32_t number;
-    uint8_t layout;
-    uint8_t layout2;
-    uint16_t use_before_date;
-    uint16_t blank_type;
-    uint32_t start_trip_minutes;
-    uint8_t minutes_pass;
-    uint32_t remaining_funds;
-    uint16_t validator;
-    uint8_t blocked;
-    uint32_t hash;
+    uint16_t view; //101
+    uint16_t type; //102
+    uint32_t number; //201
+    uint8_t layout; //111
+    uint8_t layout2; //112
+    uint16_t use_before_date; //202
+    uint16_t blank_type; //121
+    uint32_t remaining_funds; //322
+    uint32_t hash; //502
+    uint16_t validator; //422
+    uint32_t start_trip_minutes; //405
+    uint8_t fare_trip; //441
+    uint8_t minutes_pass; //412
+    uint8_t transport_type_flag; //421.0
+    uint8_t transport_type1; //421.1
+    uint8_t transport_type2; //421.2
+    uint8_t transport_type3; //421.3
+    uint8_t transport_type4; //421.4
+    uint8_t blocked; //303
+    uint16_t type_of_extended; //122
+    uint16_t valid_to_date; //311
+    uint16_t activate_during; //302
+    uint32_t valid_for_minutes; //314
+    uint8_t transport_type; //421
+    uint8_t passage_in_metro; //431
+    uint8_t transfer_in_metro; //432
+    uint16_t remaining_trips; //321
+    uint32_t start_trip_neg_minutes; //404
+    uint8_t requires_activation; //301
+    uint8_t extended; //123
+    uint16_t hash1; //501.1
 } BlockData;
 
 void parse_layout_2(BlockData* data_block, const MfClassicBlock* block) {
@@ -115,11 +133,22 @@ void parse_layout_E2(BlockData* data_block, const MfClassicBlock* block) {
     data_block->layout = bit_lib_get_bits(block->data, 52, 4); //111
     data_block->layout2 = bit_lib_get_bits(block->data, 56, 5); //112
     data_block->use_before_date = bit_lib_get_bits_16(block->data, 71, 16); //202
-    data_block->blank_type = bit_lib_get_bits_16(block->data, 87, 10);
-    data_block->validator = bit_lib_get_bits_16(block->data, 177, 16);
-    data_block->minutes_pass = bit_lib_get_bits(block->data, 154, 8);
-    data_block->blocked = bit_lib_get_bits(block->data, 217, 1);
-    data_block->hash = bit_lib_get_bits_32(block->data, 224, 32);
+    data_block->blank_type = bit_lib_get_bits_16(block->data, 87, 10); //121
+    data_block->validator = bit_lib_get_bits_16(block->data, 177, 16); //422
+    data_block->minutes_pass = bit_lib_get_bits(block->data, 154, 8); //412
+    data_block->blocked = bit_lib_get_bits(block->data, 217, 1); //303
+    data_block->hash = bit_lib_get_bits_32(block->data, 224, 32); //502
+    data_block->type_of_extended = bit_lib_get_bits_16(block->data, 61, 10); //122
+    data_block->valid_to_date = bit_lib_get_bits_16(block->data, 97, 16); //311
+    data_block->activate_during = bit_lib_get_bits_16(block->data, 113, 9); //302
+    data_block->valid_for_minutes = bit_lib_get_bits_32(block->data, 131, 20); //314
+    data_block->transport_type = bit_lib_get_bits(block->data, 163, 2); //421
+    data_block->passage_in_metro = bit_lib_get_bits(block->data, 165, 1); //431
+    data_block->transfer_in_metro = bit_lib_get_bits(block->data, 166, 1); //432
+    data_block->remaining_trips = bit_lib_get_bits_16(block->data, 167, 10); //321
+    data_block->start_trip_neg_minutes = bit_lib_get_bits_32(block->data, 196, 20); //404
+    data_block->requires_activation = bit_lib_get_bits(block->data, 216, 1); //301
+    data_block->extended = bit_lib_get_bits(block->data, 218, 1); //123
 }
 
 void parse_layout_E3(BlockData* data_block, const MfClassicBlock* block) {
@@ -129,13 +158,19 @@ void parse_layout_E3(BlockData* data_block, const MfClassicBlock* block) {
     data_block->layout = bit_lib_get_bits(block->data, 52, 4); //111
     data_block->layout2 = bit_lib_get_bits(block->data, 56, 5); //112
     data_block->use_before_date = bit_lib_get_bits_16(block->data, 61, 16); //202
-    data_block->blank_type = bit_lib_get_bits_16(block->data, 77, 10);
-    data_block->validator = bit_lib_get_bits_16(block->data, 128, 16);
-    data_block->start_trip_minutes = bit_lib_get_bits_32(block->data, 144, 23);
-    data_block->minutes_pass = bit_lib_get_bits(block->data, 171, 7);
-    data_block->remaining_funds = bit_lib_get_bits_32(block->data, 188, 22);
-    data_block->blocked = bit_lib_get_bits(block->data, 212, 1);
-    data_block->hash = bit_lib_get_bits_32(block->data, 224, 32);
+    data_block->blank_type = bit_lib_get_bits_16(block->data, 77, 10); //121
+    data_block->remaining_funds = bit_lib_get_bits_32(block->data, 188, 22); //322
+    data_block->hash = bit_lib_get_bits_32(block->data, 224, 32); //502
+    data_block->validator = bit_lib_get_bits_16(block->data, 128, 16); //422
+    data_block->start_trip_minutes = bit_lib_get_bits_32(block->data, 144, 23); //405
+    data_block->fare_trip = bit_lib_get_bits(block->data, 210, 2); //441
+    data_block->minutes_pass = bit_lib_get_bits(block->data, 171, 7); //412
+    data_block->transport_type_flag = bit_lib_get_bits(block->data, 178, 2); //421.0
+    data_block->transport_type1 = bit_lib_get_bits(block->data, 180, 2); //421.1
+    data_block->transport_type2 = bit_lib_get_bits(block->data, 182, 2); //421.2
+    data_block->transport_type3 = bit_lib_get_bits(block->data, 184, 2); //421.3
+    data_block->transport_type4 = bit_lib_get_bits(block->data, 186, 2); //421.4
+    data_block->blocked = bit_lib_get_bits(block->data, 212, 1); //303
 }
 
 void parse_layout_E4(BlockData* data_block, const MfClassicBlock* block) {
@@ -145,11 +180,11 @@ void parse_layout_E4(BlockData* data_block, const MfClassicBlock* block) {
     data_block->layout = bit_lib_get_bits(block->data, 52, 4); //111
     data_block->layout2 = bit_lib_get_bits(block->data, 56, 5); //112
     data_block->use_before_date = bit_lib_get_bits_16(block->data, 71, 13); //202
-    data_block->blank_type = bit_lib_get_bits_16(block->data, 84, 10);
-    data_block->validator = bit_lib_get_bits_16(block->data, 179, 16);
-    data_block->minutes_pass = bit_lib_get_bits(block->data, 158, 7);
-    data_block->blocked = bit_lib_get_bits(block->data, 216, 1);
-    data_block->hash = bit_lib_get_bits_32(block->data, 224, 32);
+    data_block->blank_type = bit_lib_get_bits_16(block->data, 84, 10); //121
+    data_block->validator = bit_lib_get_bits_16(block->data, 179, 16); //422
+    data_block->minutes_pass = bit_lib_get_bits(block->data, 158, 7); //412
+    data_block->blocked = bit_lib_get_bits(block->data, 216, 1); //303
+    data_block->hash = bit_lib_get_bits_32(block->data, 224, 32); //502
 }
 
 void parse_layout_E5(BlockData* data_block, const MfClassicBlock* block) {
@@ -159,13 +194,13 @@ void parse_layout_E5(BlockData* data_block, const MfClassicBlock* block) {
     data_block->layout = bit_lib_get_bits(block->data, 52, 4); //111
     data_block->layout2 = bit_lib_get_bits(block->data, 56, 5); //112
     data_block->use_before_date = bit_lib_get_bits_16(block->data, 61, 16); //202
-    data_block->blank_type = bit_lib_get_bits_16(block->data, 74, 10);
-    data_block->validator = bit_lib_get_bits_16(block->data, 186, 16);
-    data_block->start_trip_minutes = bit_lib_get_bits_32(block->data, 128, 23);
-    data_block->minutes_pass = bit_lib_get_bits(block->data, 158, 7);
-    data_block->remaining_funds = bit_lib_get_bits_32(block->data, 167, 19);
-    data_block->blocked = bit_lib_get_bits(block->data, 202, 1);
-    data_block->hash = bit_lib_get_bits_32(block->data, 224, 32);
+    data_block->blank_type = bit_lib_get_bits_16(block->data, 74, 10); //121
+    data_block->validator = bit_lib_get_bits_16(block->data, 186, 16); //422
+    data_block->start_trip_minutes = bit_lib_get_bits_32(block->data, 128, 23); //405
+    data_block->minutes_pass = bit_lib_get_bits(block->data, 158, 7); //412
+    data_block->remaining_funds = bit_lib_get_bits_32(block->data, 167, 19); //322
+    data_block->blocked = bit_lib_get_bits(block->data, 202, 1); //303
+    data_block->hash = bit_lib_get_bits_32(block->data, 224, 32); //502
 }
 
 void parse_layout_E6(BlockData* data_block, const MfClassicBlock* block) {
@@ -175,11 +210,11 @@ void parse_layout_E6(BlockData* data_block, const MfClassicBlock* block) {
     data_block->layout = bit_lib_get_bits(block->data, 52, 4); //111
     data_block->layout2 = bit_lib_get_bits(block->data, 56, 5); //112
     data_block->use_before_date = bit_lib_get_bits_16(block->data, 71, 13); //202
-    data_block->blank_type = bit_lib_get_bits_16(block->data, 84, 10);
-    data_block->validator = bit_lib_get_bits_16(block->data, 189, 16);
-    data_block->minutes_pass = bit_lib_get_bits(block->data, 175, 7);
-    data_block->blocked = bit_lib_get_bits(block->data, 205, 1);
-    data_block->hash = bit_lib_get_bits_32(block->data, 224, 32);
+    data_block->blank_type = bit_lib_get_bits_16(block->data, 84, 10); //121
+    data_block->validator = bit_lib_get_bits_16(block->data, 189, 16); //422
+    data_block->minutes_pass = bit_lib_get_bits(block->data, 175, 7); //412
+    data_block->blocked = bit_lib_get_bits(block->data, 205, 1); //303
+    data_block->hash = bit_lib_get_bits_32(block->data, 224, 32); //502
 }
 
 void parse_layout_FCB(BlockData* data_block, const MfClassicBlock* block) {
@@ -187,15 +222,15 @@ void parse_layout_FCB(BlockData* data_block, const MfClassicBlock* block) {
     data_block->type = bit_lib_get_bits_16(block->data, 10, 10); //102
     data_block->number = bit_lib_get_bits_32(block->data, 20, 32); //201
     data_block->layout = bit_lib_get_bits(block->data, 52, 4); //111
-    data_block->hash = bit_lib_get_bits_32(block->data, 224, 32);
+    data_block->hash = bit_lib_get_bits_32(block->data, 224, 32); //502
 }
 
 void parse_layout_F0B(BlockData* data_block, const MfClassicBlock* block) {
-    data_block->view = bit_lib_get_bits_16(block->data, 0, 10);
-    data_block->type = bit_lib_get_bits_16(block->data, 10, 10);
-    data_block->number = bit_lib_get_bits_32(block->data, 20, 32);
-    data_block->layout = bit_lib_get_bits(block->data, 52, 4);
-    data_block->hash = bit_lib_get_bits_32(block->data, 112, 16);
+    data_block->view = bit_lib_get_bits_16(block->data, 0, 10); //101
+    data_block->type = bit_lib_get_bits_16(block->data, 10, 10); //102
+    data_block->number = bit_lib_get_bits_32(block->data, 20, 32); //201
+    data_block->layout = bit_lib_get_bits(block->data, 52, 4); //111
+    data_block->hash1 = bit_lib_get_bits_32(block->data, 112, 16); //501.1
 }
 
 bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* result) {
@@ -796,66 +831,87 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
     }
     case 0xE3:
     case 0x1C3: {
-        card_view = bit_lib_get_bits_16(block->data, 0, 10); //101
-        card_type = bit_lib_get_bits_16(block->data, 10, 10); //102
-        card_number = bit_lib_get_bits_32(block->data, 20, 32); //201
-        card_layout = bit_lib_get_bits(block->data, 52, 4); //111
-        card_layout2 = bit_lib_get_bits(block->data, 56, 5); //112
-        card_use_before_date = bit_lib_get_bits_16(block->data, 61, 16); //202
-        card_blank_type = bit_lib_get_bits_16(block->data, 77, 10); //121
-        card_validator = bit_lib_get_bits_16(block->data, 128, 16); //422
-        card_start_trip_minutes = bit_lib_get_bits_32(block->data, 144, 23); //405
-        card_minutes_pass = bit_lib_get_bits(block->data, 171, 7); //412
-        card_remaining_funds = bit_lib_get_bits_32(block->data, 188, 22) / 100; //322
-        card_blocked = bit_lib_get_bits(block->data, 212, 1); //303
-        card_hash = bit_lib_get_bits_32(block->data, 224, 32); //502
-        uint8_t card_fare_trip = bit_lib_get_bits(block->data, 210, 2); //441
-        uint8_t card_transport_type_flag = bit_lib_get_bits(block->data, 178, 2); //421.0
-        uint8_t card_transport_type1 = bit_lib_get_bits(block->data, 180, 2); //421.1
-        uint8_t card_transport_type2 = bit_lib_get_bits(block->data, 182, 2); //421.2
-        uint8_t card_transport_type3 = bit_lib_get_bits(block->data, 184, 2); //421.3
-        uint8_t card_transport_type4 = bit_lib_get_bits(block->data, 186, 2); //421.4
-        FURI_LOG_D(
-            TAG2,
-            "Card view: %x, type: %x, number: %lx, layout: %x, layout2: %x, use before date: %x, blank type: %x, remaining funds: %lx, hash: %lx, validator: %x, start trip minutes: %lx, fare trip: %x, minutes pass: %x, transport type flag: %x, transport type1: %x, transport type2: %x, transport type3: %x, transport type4: %x, blocked: %x",
-            card_view,
-            card_type,
-            card_number,
-            card_layout,
-            card_layout2,
-            card_use_before_date,
-            card_blank_type,
-            card_remaining_funds,
-            card_hash,
-            card_validator,
-            card_start_trip_minutes,
-            card_fare_trip,
-            card_minutes_pass,
-            card_transport_type_flag,
-            card_transport_type1,
-            card_transport_type2,
-            card_transport_type3,
-            card_transport_type4,
-            card_blocked);
+        parse_layout_E3(&data_block, block);
+        // number
+        furi_string_cat_printf(result, "Number: %010lu\n", data_block.number);
+        // use_before_date
         DateTime card_use_before_date_s = {0};
-        from_days_to_datetime(card_use_before_date, &card_use_before_date_s, 1992);
-
-        DateTime card_start_trip_minutes_s = {0};
-        from_minutes_to_datetime(card_start_trip_minutes, &card_start_trip_minutes_s, 2016);
-        furi_string_printf(
+        from_days_to_datetime(data_block.use_before_date, &card_use_before_date_s, 1992);
+        furi_string_cat_printf(
             result,
-            "Number: %010lu\nValid for: %02d.%02d.%04d\nBalance: %ld rub\nTrip from: %02d.%02d.%04d %02d:%02d\nValidator: %05d",
-            card_number,
+            "Valid for: %02d.%02d.%04d\n",
             card_use_before_date_s.day,
             card_use_before_date_s.month,
-            card_use_before_date_s.year,
-            card_remaining_funds,
+            card_use_before_date_s.year);
+        // remaining_funds
+        furi_string_cat_printf(result, "Balance: %ld rub\n", data_block.remaining_funds);
+        // start_trip_minutes
+        DateTime card_start_trip_minutes_s = {0};
+        from_minutes_to_datetime(data_block.start_trip_minutes, &card_start_trip_minutes_s, 2016);
+        furi_string_cat_printf(
+            result,
+            "Trip from: %02d.%02d.%04d %02d:%02d\n",
             card_start_trip_minutes_s.day,
             card_start_trip_minutes_s.month,
             card_start_trip_minutes_s.year,
             card_start_trip_minutes_s.hour,
-            card_start_trip_minutes_s.minute,
-            card_validator);
+            card_start_trip_minutes_s.minute);
+        // transport
+        FuriString* transport = furi_string_alloc();
+        switch(data_block.transport_type_flag) {
+        case 0:
+            furi_string_cat(transport, "");
+            break;
+        case 1:
+            uint8_t transport_type =
+                (data_block.transport_type1 || data_block.transport_type2 ||
+                 data_block.transport_type3 || data_block.transport_type4);
+            switch(transport_type) {
+            case 0:
+                furi_string_cat(transport, "");
+                break;
+            case 1:
+                furi_string_cat(transport, "Metro");
+                break;
+            case 2:
+                furi_string_cat(transport, "Monorail");
+                break;
+            case 3:
+                furi_string_cat(transport, "MCC");
+                break;
+            default:
+                break;
+            }
+            break;
+        case 2:
+            furi_string_cat(transport, "Ground");
+            break;
+        default:
+            furi_string_cat(transport, "Unknown");
+            break;
+        }
+        furi_string_cat_printf(result, "Transport: %s\n", furi_string_get_cstr(transport));
+        // validator
+        furi_string_cat_printf(result, "Validator: %05d", data_block.validator);
+        // fare
+        FuriString* fare = furi_string_alloc();
+        switch(data_block.fare_trip) {
+        case 0:
+            furi_string_cat(fare, "");
+            break;
+        case 1:
+            furi_string_cat(fare, "Single");
+            break;
+        case 2:
+            furi_string_cat(fare, "90 minutes");
+            break;
+        default:
+            furi_string_cat(fare, "Unknown");
+            break;
+        }
+        furi_string_cat_printf(result, "\nFare: %s", furi_string_get_cstr(fare));
+        furi_string_free(fare);
+        furi_string_free(transport);
         break;
     }
     case 0xE4:
