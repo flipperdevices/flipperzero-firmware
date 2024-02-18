@@ -208,7 +208,6 @@ bool subghz_history_get_text_space_left(
     if(output != NULL) {
         if(sats == 0) {
             furi_string_printf(output, "%02u", instance->last_index_write);
-            return false;
         } else {
             if(furi_hal_rtc_get_timestamp() % 2) {
                 furi_string_printf(output, "%02u", instance->last_index_write);
