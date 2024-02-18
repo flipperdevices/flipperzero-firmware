@@ -1,36 +1,86 @@
-# flipperzero_pomodoro
+# Flipp Pomodoro
+![Banner Image](docs/headline.gif)
 
-The Pomodoro Technique is a time management method developed by Francesco Cirillo in the late 1980s.[1] It uses a kitchen timer to break work into intervals, typically 25 minutes in length, separated by short breaks. Each interval is known as a pomodoro, from the Italian word for tomato, after the tomato-shaped kitchen timer Cirillo used as a university student.
+>Boost Your Productivity with the Pomodoro Timer for Flipper Zero! Don't let your flipper get bored, let him help you instead.
 
-Flipper Zero is a portable Tamagotchi-like multi-functional device developed for interaction with access control systems. The device is able to read, copy, and emulate radio-frequency (RFID) tags, radio remotes, and digital access keys.
+---
+* [Install](#install)
+* [Guide](#guide)
+* [Contributing](#contributing)
+* [Development](#development)
+    + [Track](#track)
+    + [Build and Package](#build-and-package)
 
-## Pomodoro timer application for Flipper Zero
+## Install
+[![Total Downloads](https://img.shields.io/github/downloads/Th3Un1q3/flipp_pomodoro/total?style=for-the-badge)](https://github.com/Th3Un1q3/flipp_pomodoro/releases/latest)
 
-Now available in Flipper Apps: https://lab.flipper.net/apps/pomodoro_timer
+Download from [releases](https://github.com/Th3Un1q3/flipp_pomodoro/releases/latest) and follow instructions there.
 
-Three timers available:
+[![Latest Release Date](https://img.shields.io/github/release-date/Th3Un1q3/flipp_pomodoro?label=Latest%20release%20&style=for-the-badge) ![Latest Release](https://img.shields.io/github/v/release/Th3Un1q3/flipp_pomodoro?label=Latest%20version&style=for-the-badge) ![GitHub release (latest by date)](https://img.shields.io/github/downloads/Th3Un1q3/flipp_pomodoro/latest/total?label=Latest%20downloaded&style=for-the-badge)](https://github.com/Th3Un1q3/flipp_pomodoro/releases/latest)
 
-- classic 25 min work, 5 min rest
-- long 50 min work, 10 min rest
-- sprint 10 min work, 2 min rest
+## Guide
 
-With tomato counter
+[About Pomodoro Technique](https://francescocirillo.com/products/the-pomodoro-technique)
 
-Plays sound alerts
+### `Focus` Phase
 
-Has built-in clocks
+![Working Screen](docs/working.png)
 
-Screenshots:
+Do the following:
+* Check your past notes
+* Choose a task and note it down
+* Work on the task until the Flipp Pomodoro rings
+* If task is done during `Focus` phase
+    * Review completed work
+    * Plan a task to focus on next
+    * Reflect what have you have learned
+* If task is not complete by the end of the `Focus` phase
+    * Place a bookmark and return to it during the next cycle
+    * Think how to define task the way it would fit into a single phase
+* If there is some distraction(remember: many things can wait 25 minutes)
+    * Incomming message - take a note and answer during `Rest` phase
+    * Genius idea - note a hint down, plan as a task or return to it when work is done
+    * Everything unavoidable - feel free to leave the cycle, once it's mitigated you have task to work on
 
-![](./misc/1.png)
+> Hint: By completing `Focus` phase your flipper gains good mood boost
 
-![](./misc/2.png)
+### `Rest` Phase
+![Resting Screen](docs/resting.png)
 
-![](./misc/3.png)
+Do the following:
+* Take a walk around or do a little stretch
+* Take some fresh air
+* Refill your drink
+* Answer pending messages
+* Talk to a colleague
 
-![](./misc/4.png)
+## Contributing
 
-![](./misc/5.png)
+[![GitHub Discussions](https://img.shields.io/github/discussions/Th3Un1q3/flipp_pomodoro?style=for-the-badge)](https://github.com/Th3Un1q3/flipp_pomodoro/discussions)
+
+I welcome contributions to this project! If you're interested in helping out, here are a few ways to get started:
+- Join [discussions](https://github.com/Th3Un1q3/flipp_pomodoro/discussions) to ask questions and share ideas with other contributors.
+- If you've found a bug or have an idea for a new feature, please open an issue on [issue tracker](https://github.com/Th3Un1q3/flipp_pomodoro/issues). Before opening a new issue, please search the existing issues to see if someone has already reported the problem.
+- If you're ready to start contributing code, please [fork](https://github.com/Th3Un1q3/flipp_pomodoro/fork) this GitHub repository and submit a [pull request](https://github.com/Th3Un1q3/flipp_pomodoro/pulls).
+
+## Development
+
+![GitHub commit activity (branch)](https://img.shields.io/github/commit-activity/m/Th3Un1q3/flipp_pomodoro?style=for-the-badge)
+
+### Track
+You can follow project development on the [project board](https://github.com/users/Th3Un1q3/projects/1).
 
 
-Compatible with firmware v. 0.80.1 from 28 Mar. 2023
+###  Build and Package
+Build application
+```shell
+# For standard(official) firmware
+bash tools/build.sh
+
+# For unleashed firmware
+bash tools/build.sh -f unleashed 
+
+# While flipper connected via USB and serial port is not bussy
+# Build, run on flipper and keep the app in `Productivity` directory
+bash tools/build.sh -f unleashed -i
+```

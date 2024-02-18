@@ -38,7 +38,6 @@ static void input_callback(InputEvent* input_event, void* ctx) {
 
 static void draw_callback(Canvas* const canvas, void* ctx) {
     furi_assert(ctx);
-
     const AppState* app_state = ctx;
     furi_mutex_acquire(app_state->mutex, FuriWaitForever);
     if(app_state == NULL) return;
@@ -188,7 +187,6 @@ bool load_game(GameState* game_state) {
 
 void save_game(const GameState* game_state) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
-
     if(storage_common_stat(storage, SAVING_DIRECTORY, NULL) == FSE_NOT_EXIST) {
         if(!storage_simply_mkdir(storage, SAVING_DIRECTORY)) {
             return;
@@ -331,6 +329,7 @@ int32_t game_reversi_app() {
                 furi_mutex_acquire(app_state.mutex, FuriWaitForever);
                 app_state.selected_menu_item = 0;
                 app_state.screen = AppScreenMenu;
+
                 furi_mutex_release(app_state.mutex);
                 view_port_update(view_port);
                 continue;
@@ -339,6 +338,7 @@ int32_t game_reversi_app() {
 
             furi_mutex_acquire(app_state.mutex, FuriWaitForever);
             is_finished = !handle_key(&app_state, input.key);
+
             furi_mutex_release(app_state.mutex);
             view_port_update(view_port);
         }

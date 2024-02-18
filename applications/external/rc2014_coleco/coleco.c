@@ -40,10 +40,10 @@ typedef struct {
 } PluginEvent;
 
 typedef struct {
-    FuriMutex* mutex;
     bool dpad;
     int row;
     int column;
+    FuriMutex* mutex;
 } Coleco;
 
 static void render_callback(Canvas* const canvas, void* context) {
@@ -175,12 +175,20 @@ static Coleco* coleco_alloc() {
     coleco->row = 0;
     coleco->column = 1;
 
+    coleco->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
+    if(!coleco->mutex) {
+        FURI_LOG_E("Coleco", "cannot create mutex\r\n");
+        free(coleco);
+        return NULL;
+    }
+
     return coleco;
 }
 
 static void coleco_free(Coleco* coleco) {
     furi_assert(coleco);
 
+    furi_mutex_free(coleco->mutex);
     free(coleco);
 }
 
@@ -190,11 +198,7 @@ int32_t coleco_app(void* p) {
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(PluginEvent));
 
     Coleco* coleco = coleco_alloc();
-
-    coleco->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
-    if(!coleco->mutex) {
-        FURI_LOG_E("Coleco", "cannot create mutex\r\n");
-        coleco_free(coleco);
+    if(coleco == NULL) {
         return 255;
     }
 
@@ -358,7 +362,6 @@ int32_t coleco_app(void* p) {
     furi_record_close("gui");
     view_port_free(view_port);
     furi_message_queue_free(event_queue);
-    furi_mutex_free(coleco->mutex);
     coleco_free(coleco);
     return 0;
 }

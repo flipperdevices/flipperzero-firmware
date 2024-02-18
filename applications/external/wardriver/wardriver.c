@@ -5,7 +5,7 @@
 
 void save_file(Context* ctx) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
-    FuriHalRtcDateTime datetime;
+    DateTime datetime;
     furi_hal_rtc_get_datetime(&datetime);
 
     FuriString* filename = furi_string_alloc();
@@ -154,7 +154,7 @@ static void draw_access_point(Canvas* canvas, Context* context) {
         ap.datetime.hour,
         ap.datetime.minute,
         ap.datetime.second,
-        furi_hal_rtc_get_timestamp() - furi_hal_rtc_datetime_to_timestamp(&ap.datetime));
+        furi_hal_rtc_get_timestamp() - datetime_datetime_to_timestamp(&ap.datetime));
     canvas_draw_str_aligned(
         canvas, 3, 59, AlignLeft, AlignBottom, furi_string_get_cstr(ctx->buffer));
 }

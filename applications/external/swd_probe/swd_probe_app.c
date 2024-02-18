@@ -961,6 +961,7 @@ static bool swd_scriptfunc_call(ScriptContext* ctx) {
             swd_script_log(ctx, FuriLogLevelError, "failed to parse filename");
             break;
         }
+        furi_string_cat_printf(filepath, "/%s", filename);
 
         swd_script_seek_newline(ctx);
         /* append extension */

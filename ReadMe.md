@@ -312,7 +312,7 @@ $ ./fbt dolphin_ext
 - [Race v1.1 (By zyuhel)](https://github.com/zyuhel/flipperzero-racegame)
 - [Reaction Test (By Milk-Cool)](https://github.com/Milk-Cool/fz-reaction-game)
 - [Reaction Time (By ihatecsv)](https://github.com/ihatecsv/flipper_reaction_time)
-- [Reversi v1.1 (By dimat)](https://github.com/dimat/flipperzero-reversi)
+- [Reversi v1.2 (By dimat)](https://github.com/dimat/flipperzero-reversi)
 - [Rock Paper Scissors v1.4 (By CodeAllNight/jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/subghz/plugins/rock_paper_scissors)
 - [Rock Paper Scissors 2 v1.0 (By benwoo1110)](https://github.com/benwoo1110/rps-FlipperZero)
 - [Root of Life v1.1 (By Xorboo)](https://github.com/Xorboo/root-of-life)
@@ -508,7 +508,7 @@ $ ./fbt dolphin_ext
 - [RGB LED (By flyandi)](https://github.com/flyandi/flipper_zero_rgb_led)
 - [R.O.B. Control (By riney)](https://github.com/riney/flip_rob)
 - [SAM (By Unknown)][Original?](https://github.com/ctoth/SAM)
-- [Scope (By anfractuosity)](https://github.com/anfractuosity/flipperscope)
+- [Oscilloscope v0.2 (By anfractuosity)](https://github.com/anfractuosity/flipperscope)
 - [SD SPI v0.2 (By Gl1tchub)](https://github.com/Gl1tchub/Flipperzero-SD-SPI) `Req: External SD Board`
 - [Sentry Safe v1.2 (By H4ckd4ddy)](https://github.com/H4ckd4ddy/flipperzero-sentry-safe-plugin) ([Pin Out](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/tree/420/applications/sentry_safe) from [UberGuidoZ](https://github.com/UberGuidoZ/))
 - [Servotester (By spin7ion)](https://github.com/spin7ion/flipper-servotester)

@@ -1337,8 +1337,8 @@ int32_t mfkey32_main() {
             }
         }
 
-        view_port_update(view_port);
         furi_mutex_release(program_state->mutex);
+        view_port_update(view_port);
     }
 
     furi_thread_free(program_state->mfkeythread);

@@ -7,11 +7,13 @@
 #include "evil_portal_icons.h"
 
 #include <gui/gui.h>
+#include <gui/modules/loading.h>
 #include <gui/modules/text_box.h>
 #include <gui/modules/text_input.h>
 #include <gui/modules/variable_item_list.h>
 #include <gui/scene_manager.h>
 #include <gui/view_dispatcher.h>
+#include <gui/view_stack.h>
 #include <dialogs/dialogs.h>
 #include <cfw/cfw.h>
 

@@ -7,7 +7,7 @@
 #include "view/pattern_editor.h"
 
 #include "font.h"
-#include "flizzer_tracker_icons.h"
+#include <flizzer_tracker_icons.h>
 
 #include <expansion/expansion.h>
 

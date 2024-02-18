@@ -1445,9 +1445,7 @@ void work_timer_callback(void* ctx) {
             for(uint8_t i = 0; i < 3; i++) {
                 if(nrf24_read_newpacket()) {
                     if(rw_type == rwt_listen) {
-                        ListenPrev = ListenLast;
-                        furi_hal_rtc_get_datetime(&ListenLastTime);
-                        ListenLast = datetime_datetime_to_timestamp(&ListenLastTime);
+                        ListenLast = furi_hal_rtc_get_timestamp();
                         ListenNew = true;
                     } else if(send_status != sst_receiving)
                         break;

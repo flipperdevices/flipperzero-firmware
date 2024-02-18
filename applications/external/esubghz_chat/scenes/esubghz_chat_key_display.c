@@ -88,8 +88,7 @@ void scene_on_enter_key_display(void* context) {
     dialog_ex_set_left_button_text(state->key_display, "Back");
 
     if(state->encrypted) {
-        // No way to share, NFC part is removed for now
-        //dialog_ex_set_center_button_text(state->key_display, "Share");
+        // dialog_ex_set_center_button_text(state->key_display, "Share");
     }
 
     dialog_ex_set_result_callback(state->key_display, key_display_result_cb);
@@ -119,6 +118,12 @@ bool scene_on_event_key_display(void* context, SceneManagerEvent event) {
             }
             consumed = true;
             break;
+
+            /* open key sharing popup */
+            // case ESubGhzChatEvent_KeyDisplayShare:
+            //     scene_manager_next_scene(state->scene_manager, ESubGhzChatScene_KeySharePopup);
+            //     consumed = true;
+            //     break;
         }
         break;
 
