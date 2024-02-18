@@ -15,12 +15,6 @@
 #include "genie.h"
 #include "keeloq_common.h"
 
-#include "../blocks/const.h"
-#include "../blocks/decoder.h"
-#include "../blocks/encoder.h"
-#include "../blocks/generic.h"
-#include "../blocks/math.h"
-
 #define TAG "SubGhzProtocolGenie"
 
 // Should be major version of supported Genie Recorder (.gne) files
@@ -379,12 +373,14 @@ static bool subghz_protocol_genie_gen_data(
  * @param instance Pointer to a SubGhzProtocolEncoderGenie instance
  * @return true On success
  */
-static bool
-    subghz_protocol_encoder_genie_get_upload(SubGhzProtocolEncoderGenie* instance, uint8_t btn) {
+static bool subghz_protocol_encoder_genie_get_upload(
+    SubGhzProtocolEncoderGenie* instance,
+    uint8_t btn,
+    bool counter_up) {
     furi_assert(instance);
 
     // Generate next key
-    if(!subghz_protocol_genie_gen_data(instance, btn, true)) {
+    if(!subghz_protocol_genie_gen_data(instance, btn, counter_up)) {
         return false;
     }
 
@@ -465,12 +461,21 @@ SubGhzProtocolStatus
 
         subghz_protocol_genie_set_sn_and_btn(&instance->generic);
 
+        uint32_t increment = 1;
+        flipper_format_read_uint32(flipper_format, "Increment", (uint32_t*)&increment, 1);
+
+        if(!flipper_format_rewind(flipper_format)) {
+            FURI_LOG_E(TAG, "Rewind error");
+            break;
+        }
+
         //optional parameter parameter
         flipper_format_read_uint32(
             flipper_format, "Repeat", (uint32_t*)&instance->encoder.repeat, 1);
 
         // Get_upload will generate the next key.
-        if(!subghz_protocol_encoder_genie_get_upload(instance, instance->generic.btn)) {
+        if(!subghz_protocol_encoder_genie_get_upload(
+               instance, instance->generic.btn, increment != 0)) {
             ret = SubGhzProtocolStatusErrorEncoderGetUpload;
             break;
         }
@@ -582,10 +587,14 @@ void subghz_protocol_decoder_genie_feed(void* context, bool level, uint32_t dura
                             subghz_protocol_genie_const.te_delta)) {
                 // Found end TX
                 instance->decoder.parser_step = GenieDecoderStepReset;
+
+                FURI_LOG_D(TAG, "Found end TX. Count bit: %d", instance->decoder.decode_count_bit);
+                // We expect 64-bits of data, but some Intellisense compatible remote send
+                // 66-bits or 69-bits of data (+5 extra bits).
                 if((instance->decoder.decode_count_bit >=
                     subghz_protocol_genie_const.min_count_bit_for_found) &&
                    (instance->decoder.decode_count_bit <=
-                    subghz_protocol_genie_const.min_count_bit_for_found + 2)) {
+                    subghz_protocol_genie_const.min_count_bit_for_found + 5)) {
                     if(instance->generic.data != instance->decoder.decode_data) {
                         instance->generic.data = instance->decoder.decode_data;
                         instance->generic.data_count_bit =

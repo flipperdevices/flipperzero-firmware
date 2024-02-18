@@ -1,6 +1,8 @@
 # IR-Blaster
 
 ## Overview
+Good news -- The latest Xtreme and RogueMaster firmware now contain the patch!  Additional settings and modifications were made by Sil333033.  Thanks to RogueMaster for crediting me with the original code.
+
 I created a YouTube video to explain how to modify official firmware to use an external IR Blaster.  Here is the [original video](https://www.youtube.com/watch?v=o_Tz68ju4Dg).  In the comments **Jeff-ss6qt** posted a question about if we can detect the IR hardware and switch automatically.  It turns out that we can!  This tutorial will show you how!  Here is the [updated video](https://youtu.be/gRizmfNbIsM) that discusses the patch below, which does auto-detection.
 
 [![Flipper Zero: Auto-detect IR Blaster](https://img.youtube.com/vi/gRizmfNbIsM/0.jpg)](https://youtu.be/gRizmfNbIsM)
