@@ -96,7 +96,7 @@ void scb(void* context)
         FURI_LOG_I(TAG, "r code %s", furi_string_get_cstr(app->state->r_code));
 
         //if spackets == rpackets and spackets = code packets, then present code for saving
-        if(rpackets > 0 && spackets > 0 && rpackets == spackets)
+        if(rpackets > 0 && spackets > 0 && abs(rpackets-spackets) <= 1)
         {
             dialog_ex_set_header(app->dialog, furi_string_get_cstr(app->state->s_code), 10, 12, AlignLeft, AlignTop);
             dialog_ex_set_text(app->dialog, furi_string_get_cstr(app->state->r_code), 10, 24, AlignLeft, AlignTop);

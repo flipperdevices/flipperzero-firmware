@@ -91,7 +91,7 @@ void scbs(void* context)
 
 
         //if spackets == rpackets and spackets = code packets, then present code for saving
-        if(rpackets > 0 && spackets > 0 && rpackets == spackets)
+        if(rpackets > 0 && spackets > 0 && abs(rpackets-spackets) <= 1)
         {
             FURI_LOG_I(TAG, "s code %s", furi_string_get_cstr(app->state->s_code));
             FURI_LOG_I(TAG, "r code %s", furi_string_get_cstr(app->state->r_code));
