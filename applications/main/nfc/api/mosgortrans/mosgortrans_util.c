@@ -20,9 +20,198 @@ void from_minutes_to_datetime(uint32_t minutes, DateTime* datetime, uint16_t sta
     datetime_timestamp_to_datetime(timestamp, datetime);
 }
 
-bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* result) {
-    uint16_t transport_departament = bit_lib_get_bits_16(block->data, 0, 10);
+typedef struct {
+    uint16_t view;
+    uint16_t type;
+    uint32_t number;
+    uint8_t layout;
+    uint8_t layout2;
+    uint16_t use_before_date;
+    uint16_t blank_type;
+    uint32_t start_trip_minutes;
+    uint8_t minutes_pass;
+    uint32_t remaining_funds;
+    uint16_t validator;
+    uint8_t blocked;
+    uint32_t hash;
+} BlockData;
 
+void parse_layout_2(BlockData* data_block, const MfClassicBlock* block) {
+    data_block->view = bit_lib_get_bits_16(block->data, 0, 10);
+    data_block->type = bit_lib_get_bits_16(block->data, 10, 10);
+    data_block->number = bit_lib_get_bits_32(block->data, 20, 32);
+    data_block->layout = bit_lib_get_bits(block->data, 52, 4);
+    data_block->use_before_date = bit_lib_get_bits_16(block->data, 56, 16);
+    data_block->validator = bit_lib_get_bits_16(block->data, 205, 16);
+    data_block->blocked = bit_lib_get_bits(block->data, 128, 1);
+}
+
+void parse_layout_6(BlockData* data_block, const MfClassicBlock* block) {
+    data_block->view = bit_lib_get_bits_16(block->data, 0, 10); //101
+    data_block->type = bit_lib_get_bits_16(block->data, 10, 10); //102
+    data_block->number = bit_lib_get_bits_32(block->data, 20, 32); //201
+    data_block->layout = bit_lib_get_bits(block->data, 52, 4); //111
+    data_block->use_before_date = bit_lib_get_bits_16(block->data, 56, 16); //202
+    data_block->blank_type = bit_lib_get_bits_16(block->data, 80, 10);
+    data_block->blocked = bit_lib_get_bits(block->data, 128, 1);
+}
+
+void parse_layout_8(BlockData* data_block, const MfClassicBlock* block) {
+    data_block->view = bit_lib_get_bits_16(block->data, 0, 10); //101
+    data_block->type = bit_lib_get_bits_16(block->data, 10, 10); //102
+    data_block->number = bit_lib_get_bits_32(block->data, 20, 32); //201
+    data_block->layout = bit_lib_get_bits(block->data, 52, 4); //111
+    data_block->use_before_date = bit_lib_get_bits_16(block->data, 56, 16); //202
+    data_block->hash = bit_lib_get_bits_32(block->data, 192, 32);
+}
+
+void parse_layout_A(BlockData* data_block, const MfClassicBlock* block) {
+    data_block->view = bit_lib_get_bits_16(block->data, 0, 10); //101
+    data_block->type = bit_lib_get_bits_16(block->data, 10, 10); //102
+    data_block->number = bit_lib_get_bits_32(block->data, 20, 32); //201
+    data_block->layout = bit_lib_get_bits(block->data, 52, 4); //111
+    data_block->start_trip_minutes = bit_lib_get_bits_32(block->data, 96, 19);
+    data_block->minutes_pass = bit_lib_get_bits(block->data, 119, 7);
+    data_block->hash = bit_lib_get_bits_32(block->data, 192, 32);
+}
+
+void parse_layout_C(BlockData* data_block, const MfClassicBlock* block) {
+    data_block->view = bit_lib_get_bits_16(block->data, 0, 10); //101
+    data_block->type = bit_lib_get_bits_16(block->data, 10, 10); //102
+    data_block->number = bit_lib_get_bits_32(block->data, 20, 32); //201
+    data_block->layout = bit_lib_get_bits(block->data, 52, 4); //111
+    data_block->use_before_date = bit_lib_get_bits_16(block->data, 56, 16); //202
+    data_block->hash = bit_lib_get_bits_32(block->data, 192, 32);
+}
+
+void parse_layout_D(BlockData* data_block, const MfClassicBlock* block) {
+    data_block->view = bit_lib_get_bits_16(block->data, 0, 10); //101
+    data_block->type = bit_lib_get_bits_16(block->data, 10, 10); //102
+    data_block->number = bit_lib_get_bits_32(block->data, 20, 32); //201
+    data_block->layout = bit_lib_get_bits(block->data, 52, 4); //111
+    data_block->use_before_date = bit_lib_get_bits_16(block->data, 64, 16); //202
+    data_block->hash = bit_lib_get_bits_32(block->data, 192, 32);
+}
+
+void parse_layout_E1(BlockData* data_block, const MfClassicBlock* block) {
+    data_block->view = bit_lib_get_bits_16(block->data, 0, 10); //101
+    data_block->type = bit_lib_get_bits_16(block->data, 10, 10); //102
+    data_block->number = bit_lib_get_bits_32(block->data, 20, 32); //201
+    data_block->layout = bit_lib_get_bits(block->data, 52, 4); //111
+    data_block->layout2 = bit_lib_get_bits(block->data, 56, 5); //112
+    data_block->use_before_date = bit_lib_get_bits_16(block->data, 61, 16); //202
+    data_block->blank_type = bit_lib_get_bits_16(block->data, 77, 10);
+    data_block->validator = bit_lib_get_bits_16(block->data, 128, 16);
+    data_block->minutes_pass = bit_lib_get_bits(block->data, 185, 8);
+    data_block->remaining_funds = bit_lib_get_bits_32(block->data, 196, 19);
+    data_block->blocked = bit_lib_get_bits(block->data, 202, 1);
+    data_block->hash = bit_lib_get_bits_32(block->data, 224, 32);
+}
+
+void parse_layout_E2(BlockData* data_block, const MfClassicBlock* block) {
+    data_block->view = bit_lib_get_bits_16(block->data, 0, 10); //101
+    data_block->type = bit_lib_get_bits_16(block->data, 10, 10); //102
+    data_block->number = bit_lib_get_bits_32(block->data, 20, 32); //201
+    data_block->layout = bit_lib_get_bits(block->data, 52, 4); //111
+    data_block->layout2 = bit_lib_get_bits(block->data, 56, 5); //112
+    data_block->use_before_date = bit_lib_get_bits_16(block->data, 71, 16); //202
+    data_block->blank_type = bit_lib_get_bits_16(block->data, 87, 10);
+    data_block->validator = bit_lib_get_bits_16(block->data, 177, 16);
+    data_block->minutes_pass = bit_lib_get_bits(block->data, 154, 8);
+    data_block->blocked = bit_lib_get_bits(block->data, 217, 1);
+    data_block->hash = bit_lib_get_bits_32(block->data, 224, 32);
+}
+
+void parse_layout_E3(BlockData* data_block, const MfClassicBlock* block) {
+    data_block->view = bit_lib_get_bits_16(block->data, 0, 10); //101
+    data_block->type = bit_lib_get_bits_16(block->data, 10, 10); //102
+    data_block->number = bit_lib_get_bits_32(block->data, 20, 32); //201
+    data_block->layout = bit_lib_get_bits(block->data, 52, 4); //111
+    data_block->layout2 = bit_lib_get_bits(block->data, 56, 5); //112
+    data_block->use_before_date = bit_lib_get_bits_16(block->data, 61, 16); //202
+    data_block->blank_type = bit_lib_get_bits_16(block->data, 77, 10);
+    data_block->validator = bit_lib_get_bits_16(block->data, 128, 16);
+    data_block->start_trip_minutes = bit_lib_get_bits_32(block->data, 144, 23);
+    data_block->minutes_pass = bit_lib_get_bits(block->data, 171, 7);
+    data_block->remaining_funds = bit_lib_get_bits_32(block->data, 188, 22);
+    data_block->blocked = bit_lib_get_bits(block->data, 212, 1);
+    data_block->hash = bit_lib_get_bits_32(block->data, 224, 32);
+}
+
+void parse_layout_E4(BlockData* data_block, const MfClassicBlock* block) {
+    data_block->view = bit_lib_get_bits_16(block->data, 0, 10); //101
+    data_block->type = bit_lib_get_bits_16(block->data, 10, 10); //102
+    data_block->number = bit_lib_get_bits_32(block->data, 20, 32); //201
+    data_block->layout = bit_lib_get_bits(block->data, 52, 4); //111
+    data_block->layout2 = bit_lib_get_bits(block->data, 56, 5); //112
+    data_block->use_before_date = bit_lib_get_bits_16(block->data, 71, 13); //202
+    data_block->blank_type = bit_lib_get_bits_16(block->data, 84, 10);
+    data_block->validator = bit_lib_get_bits_16(block->data, 179, 16);
+    data_block->minutes_pass = bit_lib_get_bits(block->data, 158, 7);
+    data_block->blocked = bit_lib_get_bits(block->data, 216, 1);
+    data_block->hash = bit_lib_get_bits_32(block->data, 224, 32);
+}
+
+void parse_layout_E5(BlockData* data_block, const MfClassicBlock* block) {
+    data_block->view = bit_lib_get_bits_16(block->data, 0, 10); //101
+    data_block->type = bit_lib_get_bits_16(block->data, 10, 10); //102
+    data_block->number = bit_lib_get_bits_32(block->data, 20, 32); //201
+    data_block->layout = bit_lib_get_bits(block->data, 52, 4); //111
+    data_block->layout2 = bit_lib_get_bits(block->data, 56, 5); //112
+    data_block->use_before_date = bit_lib_get_bits_16(block->data, 61, 16); //202
+    data_block->blank_type = bit_lib_get_bits_16(block->data, 74, 10);
+    data_block->validator = bit_lib_get_bits_16(block->data, 186, 16);
+    data_block->start_trip_minutes = bit_lib_get_bits_32(block->data, 128, 23);
+    data_block->minutes_pass = bit_lib_get_bits(block->data, 158, 7);
+    data_block->remaining_funds = bit_lib_get_bits_32(block->data, 167, 19);
+    data_block->blocked = bit_lib_get_bits(block->data, 202, 1);
+    data_block->hash = bit_lib_get_bits_32(block->data, 224, 32);
+}
+
+void parse_layout_E6(BlockData* data_block, const MfClassicBlock* block) {
+    data_block->view = bit_lib_get_bits_16(block->data, 0, 10); //101
+    data_block->type = bit_lib_get_bits_16(block->data, 10, 10); //102
+    data_block->number = bit_lib_get_bits_32(block->data, 20, 32); //201
+    data_block->layout = bit_lib_get_bits(block->data, 52, 4); //111
+    data_block->layout2 = bit_lib_get_bits(block->data, 56, 5); //112
+    data_block->use_before_date = bit_lib_get_bits_16(block->data, 71, 13); //202
+    data_block->blank_type = bit_lib_get_bits_16(block->data, 84, 10);
+    data_block->validator = bit_lib_get_bits_16(block->data, 189, 16);
+    data_block->minutes_pass = bit_lib_get_bits(block->data, 175, 7);
+    data_block->blocked = bit_lib_get_bits(block->data, 205, 1);
+    data_block->hash = bit_lib_get_bits_32(block->data, 224, 32);
+}
+
+void parse_layout_FCB(BlockData* data_block, const MfClassicBlock* block) {
+    data_block->view = bit_lib_get_bits_16(block->data, 0, 10); //101
+    data_block->type = bit_lib_get_bits_16(block->data, 10, 10); //102
+    data_block->number = bit_lib_get_bits_32(block->data, 20, 32); //201
+    data_block->layout = bit_lib_get_bits(block->data, 52, 4); //111
+    data_block->hash = bit_lib_get_bits_32(block->data, 224, 32);
+}
+
+void parse_layout_F0B(BlockData* data_block, const MfClassicBlock* block) {
+    data_block->view = bit_lib_get_bits_16(block->data, 0, 10);
+    data_block->type = bit_lib_get_bits_16(block->data, 10, 10);
+    data_block->number = bit_lib_get_bits_32(block->data, 20, 32);
+    data_block->layout = bit_lib_get_bits(block->data, 52, 4);
+    data_block->hash = bit_lib_get_bits_32(block->data, 112, 16);
+}
+
+bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* result) {
+    BlockData data_block = {};
+    const uint16_t valid_departments[] = {0x106, 0x108, 0x10A, 0x10E, 0x110, 0x117};
+    uint16_t transport_departament = bit_lib_get_bits_16(block->data, 0, 10);
+    bool departament_valid = false;
+    for(uint8_t i = 0; i < 6; i++) {
+        if(transport_departament == valid_departments[i]) {
+            departament_valid = true;
+            break;
+        }
+    }
+    if(!departament_valid) {
+        return false;
+    }
     FURI_LOG_I(TAG2, "Transport departament: %x", transport_departament);
 
     uint16_t layout_type = bit_lib_get_bits_16(block->data, 52, 4);
@@ -55,10 +244,11 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
         card_number = bit_lib_get_bits_32(block->data, 20, 32); //201
         card_layout = bit_lib_get_bits(block->data, 52, 4); //111
         card_use_before_date = bit_lib_get_bits_16(block->data, 56, 16); //202
+        card_validator = bit_lib_get_bits_16(block->data, 205, 16); //422
+        card_blocked = bit_lib_get_bits(block->data, 128, 1); //303
         uint8_t card_benefit_code = bit_lib_get_bits(block->data, 72, 8); //124
         uint32_t card_rfu1 = bit_lib_get_bits_32(block->data, 80, 32); //rfu1
         uint16_t card_crc16 = bit_lib_get_bits_16(block->data, 112, 16); //501.1
-        card_blocked = bit_lib_get_bits(block->data, 128, 1); //303
         uint16_t card_start_trip_time = bit_lib_get_bits_16(block->data, 177, 12); //403
         uint16_t card_start_trip_date = bit_lib_get_bits_16(block->data, 189, 16); //402
         uint16_t card_valid_from_date = bit_lib_get_bits_16(block->data, 157, 16); //311
@@ -71,7 +261,6 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
         uint16_t card_use_with_date = bit_lib_get_bits_16(block->data, 189, 16); //205
         uint8_t card_route = bit_lib_get_bits(block->data, 205, 1); //424
         uint16_t card_validator1 = bit_lib_get_bits_16(block->data, 206, 15); //422.1
-        card_validator = bit_lib_get_bits_16(block->data, 205, 16); //422
         uint16_t card_total_trips = bit_lib_get_bits_16(block->data, 221, 16); //331
         uint8_t card_write_enabled = bit_lib_get_bits(block->data, 237, 1); //write_enabled
         uint8_t card_rfu2 = bit_lib_get_bits(block->data, 238, 2); //rfu2
@@ -138,13 +327,13 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
         card_number = bit_lib_get_bits_32(block->data, 20, 32); //201
         card_layout = bit_lib_get_bits(block->data, 52, 4); //111
         card_use_before_date = bit_lib_get_bits_16(block->data, 56, 16); //202
+        card_blank_type = bit_lib_get_bits_16(block->data, 80, 10); //121.
+        card_blocked = bit_lib_get_bits(block->data, 128, 1); //303
         uint8_t card_geozone_a = bit_lib_get_bits(block->data, 72, 4); //GeoZoneA
         uint8_t card_geozone_b = bit_lib_get_bits(block->data, 76, 4); //GeoZoneB
-        card_blank_type = bit_lib_get_bits_16(block->data, 80, 10); //121.
         uint16_t card_type_of_extended = bit_lib_get_bits_16(block->data, 90, 10); //122
         uint32_t card_rfu1 = bit_lib_get_bits_16(block->data, 100, 12); //rfu1
         uint16_t card_crc16 = bit_lib_get_bits_16(block->data, 112, 16); //501.1
-        card_blocked = bit_lib_get_bits(block->data, 128, 1); //303
         uint16_t card_start_trip_time = bit_lib_get_bits_16(block->data, 129, 12); //403
         uint16_t card_start_trip_date = bit_lib_get_bits_16(block->data, 141, 16); //402
         uint16_t card_valid_from_date = bit_lib_get_bits_16(block->data, 157, 16); //311
@@ -216,6 +405,7 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
         card_number = bit_lib_get_bits_32(block->data, 20, 32); //201
         card_layout = bit_lib_get_bits(block->data, 52, 4); //111
         card_use_before_date = bit_lib_get_bits_16(block->data, 56, 16); //202
+        card_hash = bit_lib_get_bits_32(block->data, 192, 32); //502
         uint64_t card_rfu1 = bit_lib_get_bits_64(block->data, 72, 56); //rfu1
         uint16_t card_valid_from_date = bit_lib_get_bits_16(block->data, 128, 16); //311
         uint8_t card_valid_for_days = bit_lib_get_bits(block->data, 144, 8); //313
@@ -225,7 +415,6 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
         uint8_t card_remaining_trips = bit_lib_get_bits(block->data, 168, 8); //321
         uint8_t card_validator1 = bit_lib_get_bits(block->data, 193, 2); //422.1
         uint16_t card_validator = bit_lib_get_bits_16(block->data, 177, 15); //422
-        card_hash = bit_lib_get_bits_32(block->data, 192, 32); //502
         uint32_t card_rfu3 = bit_lib_get_bits_32(block->data, 224, 32); //rfu3
 
         FURI_LOG_D(
@@ -266,11 +455,12 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
         card_type = bit_lib_get_bits_16(block->data, 10, 10); //102
         card_number = bit_lib_get_bits_32(block->data, 20, 32); //201
         card_layout = bit_lib_get_bits(block->data, 52, 4); //111
+        card_start_trip_minutes = bit_lib_get_bits_32(block->data, 96, 19); //405
+        card_minutes_pass = bit_lib_get_bits(block->data, 119, 7); //412
+        card_hash = bit_lib_get_bits_32(block->data, 192, 32); //502
         uint16_t card_valid_from_date = bit_lib_get_bits_16(block->data, 64, 12); //311
         uint32_t card_valid_for_minutes = bit_lib_get_bits_32(block->data, 76, 19); //314
         uint8_t card_requires_activation = bit_lib_get_bits(block->data, 95, 1); //301
-        card_start_trip_minutes = bit_lib_get_bits_32(block->data, 96, 19); //405
-        card_minutes_pass = bit_lib_get_bits(block->data, 119, 7); //412
         uint8_t card_transport_type_flag = bit_lib_get_bits(block->data, 126, 2); //421.0
         uint8_t card_remaining_trips = bit_lib_get_bits(block->data, 128, 8); //321
         uint16_t card_validator = bit_lib_get_bits_16(block->data, 136, 16); //422
@@ -278,7 +468,6 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
         uint8_t card_transport_type2 = bit_lib_get_bits(block->data, 154, 2); //421.2
         uint8_t card_transport_type3 = bit_lib_get_bits(block->data, 156, 2); //421.3
         uint8_t card_transport_type4 = bit_lib_get_bits(block->data, 158, 2); //421.4
-        card_hash = bit_lib_get_bits_32(block->data, 192, 32); //502
 
         FURI_LOG_D(
             TAG2,
@@ -327,6 +516,7 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
         card_number = bit_lib_get_bits_32(block->data, 20, 32); //201
         card_layout = bit_lib_get_bits(block->data, 52, 4); //111
         card_use_before_date = bit_lib_get_bits_16(block->data, 56, 16); //202
+        card_hash = bit_lib_get_bits_32(block->data, 192, 32); //502
         uint64_t card_rfu1 = bit_lib_get_bits_64(block->data, 72, 56); //rfu1
         uint16_t card_valid_from_date = bit_lib_get_bits_16(block->data, 128, 16); //311
         uint8_t card_valid_for_days = bit_lib_get_bits(block->data, 144, 8); //313
@@ -334,7 +524,6 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
         uint16_t card_rfu2 = bit_lib_get_bits_16(block->data, 153, 13); //rfu2
         uint16_t card_remaining_trips = bit_lib_get_bits_16(block->data, 166, 10); //321
         uint16_t card_validator = bit_lib_get_bits_16(block->data, 176, 16); //422
-        card_hash = bit_lib_get_bits_32(block->data, 192, 32); //502
         uint16_t card_start_trip_date = bit_lib_get_bits_16(block->data, 224, 16); //402
         uint16_t card_start_trip_time = bit_lib_get_bits_16(block->data, 240, 11); //403
         uint8_t card_transport_type = bit_lib_get_bits(block->data, 251, 2); //421
@@ -388,8 +577,9 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
         card_type = bit_lib_get_bits_16(block->data, 10, 10); //102
         card_number = bit_lib_get_bits_32(block->data, 20, 32); //201
         card_layout = bit_lib_get_bits(block->data, 52, 4); //111
-        uint8_t card_rfu1 = bit_lib_get_bits(block->data, 56, 8); //rfu1
         card_use_before_date = bit_lib_get_bits_16(block->data, 64, 16); //202
+        card_hash = bit_lib_get_bits_32(block->data, 192, 32); //502
+        uint8_t card_rfu1 = bit_lib_get_bits(block->data, 56, 8); //rfu1
         uint16_t card_valid_for_time = bit_lib_get_bits_16(block->data, 80, 11); //316
         uint8_t card_rfu2 = bit_lib_get_bits(block->data, 91, 5); //rfu2
         uint16_t card_use_before_date2 = bit_lib_get_bits_16(block->data, 96, 16); //202.2
@@ -405,7 +595,6 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
         uint8_t card_passages_ground_transport = bit_lib_get_bits(block->data, 163, 3); //433
         uint16_t card_remaining_trips = bit_lib_get_bits_16(block->data, 166, 10); //321
         uint16_t card_validator = bit_lib_get_bits_16(block->data, 176, 16); //422
-        card_hash = bit_lib_get_bits_32(block->data, 192, 32); //502
         uint16_t card_start_trip_date = bit_lib_get_bits_16(block->data, 224, 16); //402
         uint16_t card_start_trip_time = bit_lib_get_bits_16(block->data, 240, 11); //403
         uint8_t card_transport_type2 = bit_lib_get_bits(block->data, 251, 2); //421.2
@@ -464,6 +653,7 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
             card_validator);
         break;
     }
+    case 0xE1:
     case 0x1C1: {
         card_view = bit_lib_get_bits_16(block->data, 0, 10); //101
         card_type = bit_lib_get_bits_16(block->data, 10, 10); //102
@@ -473,6 +663,10 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
         card_use_before_date = bit_lib_get_bits_16(block->data, 61, 16); //202.
         card_blank_type = bit_lib_get_bits_16(block->data, 77, 10); //121.
         card_validator = bit_lib_get_bits_16(block->data, 128, 16); //422
+        card_minutes_pass = bit_lib_get_bits(block->data, 185, 8); //412.
+        card_remaining_funds = bit_lib_get_bits_32(block->data, 196, 19) / 100; //322
+        card_blocked = bit_lib_get_bits(block->data, 202, 1); //303
+        card_hash = bit_lib_get_bits_32(block->data, 224, 32); //502
         uint16_t card_start_trip_date = bit_lib_get_bits_16(block->data, 144, 16); //402
         uint16_t card_start_trip_time = bit_lib_get_bits_16(block->data, 160, 11); //403
         uint8_t card_transport_type1 = bit_lib_get_bits(block->data, 171, 2); //421.1
@@ -480,12 +674,8 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
         uint8_t card_transfer_in_metro = bit_lib_get_bits(block->data, 177, 1); //432
         uint8_t card_passage_in_metro = bit_lib_get_bits(block->data, 178, 1); //431
         uint8_t card_passages_ground_transport = bit_lib_get_bits(block->data, 179, 3); //433
-        card_minutes_pass = bit_lib_get_bits(block->data, 185, 8); //412.
-        card_remaining_funds = bit_lib_get_bits_32(block->data, 196, 19) / 100; //322
         uint8_t card_fare_trip = bit_lib_get_bits(block->data, 215, 2); //441
-        card_blocked = bit_lib_get_bits(block->data, 202, 1); //303
         uint8_t card_zoo = bit_lib_get_bits(block->data, 218, 1); //zoo
-        card_hash = bit_lib_get_bits_32(block->data, 224, 32); //502
 
         FURI_LOG_D(
             TAG2,
@@ -531,29 +721,30 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
             card_validator);
         break;
     }
+    case 0xE2:
     case 0x1C2: {
         card_view = bit_lib_get_bits_16(block->data, 0, 10); //101
         card_type = bit_lib_get_bits_16(block->data, 10, 10); //102
         card_number = bit_lib_get_bits_32(block->data, 20, 32); //201
         card_layout = bit_lib_get_bits(block->data, 52, 4); //111
         card_layout2 = bit_lib_get_bits(block->data, 56, 5); //112
-        uint16_t card_type_of_extended = bit_lib_get_bits_16(block->data, 61, 10); //122
         card_use_before_date = bit_lib_get_bits_16(block->data, 71, 16); //202.
         card_blank_type = bit_lib_get_bits_16(block->data, 87, 10); //121.
+        card_validator = bit_lib_get_bits_16(block->data, 177, 16); //422
+        card_minutes_pass = bit_lib_get_bits(block->data, 154, 8); //412.
+        card_blocked = bit_lib_get_bits(block->data, 217, 1); //303
+        card_hash = bit_lib_get_bits_32(block->data, 224, 32); //502
+        uint16_t card_type_of_extended = bit_lib_get_bits_16(block->data, 61, 10); //122
         uint16_t card_valid_to_date = bit_lib_get_bits_16(block->data, 97, 16); //311
         uint16_t card_activate_during = bit_lib_get_bits_16(block->data, 113, 9); //302
         uint32_t card_valid_for_minutes = bit_lib_get_bits_32(block->data, 131, 20); //314
-        card_minutes_pass = bit_lib_get_bits(block->data, 154, 8); //412.
         uint8_t card_transport_type = bit_lib_get_bits(block->data, 163, 2); //421
         uint8_t card_passage_in_metro = bit_lib_get_bits(block->data, 165, 1); //431
         uint8_t card_transfer_in_metro = bit_lib_get_bits(block->data, 166, 1); //432
         uint16_t card_remaining_trips = bit_lib_get_bits_16(block->data, 167, 10); //321
-        card_validator = bit_lib_get_bits_16(block->data, 177, 16); //422
         uint32_t card_start_trip_neg_minutes = bit_lib_get_bits_32(block->data, 196, 20); //404
         uint8_t card_requires_activation = bit_lib_get_bits(block->data, 216, 1); //301
-        card_blocked = bit_lib_get_bits(block->data, 217, 1); //303
         uint8_t card_extended = bit_lib_get_bits(block->data, 218, 1); //123
-        card_hash = bit_lib_get_bits_32(block->data, 224, 32); //502
 
         FURI_LOG_D(
             TAG2,
@@ -603,6 +794,7 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
             card_validator);
         break;
     }
+    case 0xE3:
     case 0x1C3: {
         card_view = bit_lib_get_bits_16(block->data, 0, 10); //101
         card_type = bit_lib_get_bits_16(block->data, 10, 10); //102
@@ -611,18 +803,18 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
         card_layout2 = bit_lib_get_bits(block->data, 56, 5); //112
         card_use_before_date = bit_lib_get_bits_16(block->data, 61, 16); //202
         card_blank_type = bit_lib_get_bits_16(block->data, 77, 10); //121
-        card_remaining_funds = bit_lib_get_bits_32(block->data, 188, 22) / 100; //322
-        card_hash = bit_lib_get_bits_32(block->data, 224, 32); //502
         card_validator = bit_lib_get_bits_16(block->data, 128, 16); //422
         card_start_trip_minutes = bit_lib_get_bits_32(block->data, 144, 23); //405
-        uint8_t card_fare_trip = bit_lib_get_bits(block->data, 210, 2); //441
         card_minutes_pass = bit_lib_get_bits(block->data, 171, 7); //412
+        card_remaining_funds = bit_lib_get_bits_32(block->data, 188, 22) / 100; //322
+        card_blocked = bit_lib_get_bits(block->data, 212, 1); //303
+        card_hash = bit_lib_get_bits_32(block->data, 224, 32); //502
+        uint8_t card_fare_trip = bit_lib_get_bits(block->data, 210, 2); //441
         uint8_t card_transport_type_flag = bit_lib_get_bits(block->data, 178, 2); //421.0
         uint8_t card_transport_type1 = bit_lib_get_bits(block->data, 180, 2); //421.1
         uint8_t card_transport_type2 = bit_lib_get_bits(block->data, 182, 2); //421.2
         uint8_t card_transport_type3 = bit_lib_get_bits(block->data, 184, 2); //421.3
         uint8_t card_transport_type4 = bit_lib_get_bits(block->data, 186, 2); //421.4
-        card_blocked = bit_lib_get_bits(block->data, 212, 1); //303
         FURI_LOG_D(
             TAG2,
             "Card view: %x, type: %x, number: %lx, layout: %x, layout2: %x, use before date: %x, blank type: %x, remaining funds: %lx, hash: %lx, validator: %x, start trip minutes: %lx, fare trip: %x, minutes pass: %x, transport type flag: %x, transport type1: %x, transport type2: %x, transport type3: %x, transport type4: %x, blocked: %x",
@@ -666,32 +858,33 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
             card_validator);
         break;
     }
+    case 0xE4:
     case 0x1C4: {
         card_view = bit_lib_get_bits_16(block->data, 0, 10); //101
         card_type = bit_lib_get_bits_16(block->data, 10, 10); //102
         card_number = bit_lib_get_bits_32(block->data, 20, 32); //201
         card_layout = bit_lib_get_bits(block->data, 52, 4); //111
         card_layout2 = bit_lib_get_bits(block->data, 56, 5); //112
-        uint16_t card_type_of_extended = bit_lib_get_bits_16(block->data, 61, 10); //122
         card_use_before_date = bit_lib_get_bits_16(block->data, 71, 13); //202.
         card_blank_type = bit_lib_get_bits_16(block->data, 84, 10); //121.
+        card_validator = bit_lib_get_bits_16(block->data, 179, 16); //422
+        card_minutes_pass = bit_lib_get_bits(block->data, 158, 7); //412.
+        card_blocked = bit_lib_get_bits(block->data, 216, 1); //303
+        card_hash = bit_lib_get_bits_32(block->data, 224, 32); //502
+        uint16_t card_type_of_extended = bit_lib_get_bits_16(block->data, 61, 10); //122
         uint16_t card_valid_to_date = bit_lib_get_bits_16(block->data, 94, 13); //311
         uint16_t card_activate_during = bit_lib_get_bits_16(block->data, 107, 9); //302
         uint16_t card_extension_counter = bit_lib_get_bits_16(block->data, 116, 10); //304
         uint32_t card_valid_for_minutes = bit_lib_get_bits_32(block->data, 128, 20); //314
-        card_minutes_pass = bit_lib_get_bits(block->data, 158, 7); //412.
         uint8_t card_transport_type_flag = bit_lib_get_bits(block->data, 178, 2); //421.0
         uint8_t card_transport_type1 = bit_lib_get_bits(block->data, 180, 2); //421.1
         uint8_t card_transport_type2 = bit_lib_get_bits(block->data, 182, 2); //421.2
         uint8_t card_transport_type3 = bit_lib_get_bits(block->data, 184, 2); //421.3
         uint8_t card_transport_type4 = bit_lib_get_bits(block->data, 186, 2); //421.4
         uint16_t card_remaining_trips = bit_lib_get_bits_16(block->data, 169, 10); //321
-        card_validator = bit_lib_get_bits_16(block->data, 179, 16); //422
         uint32_t card_start_trip_neg_minutes = bit_lib_get_bits_32(block->data, 195, 20); //404
         uint8_t card_requires_activation = bit_lib_get_bits(block->data, 215, 1); //301
-        card_blocked = bit_lib_get_bits(block->data, 216, 1); //303
         uint8_t card_extended = bit_lib_get_bits(block->data, 217, 1); //123
-        card_hash = bit_lib_get_bits_32(block->data, 224, 32); //502
 
         FURI_LOG_D(
             TAG2,
@@ -745,6 +938,7 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
             card_validator);
         break;
     }
+    case 0xE5:
     case 0x1C5: {
         card_view = bit_lib_get_bits_16(block->data, 0, 10); //101
         card_type = bit_lib_get_bits_16(block->data, 10, 10); //102
@@ -753,17 +947,17 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
         card_layout2 = bit_lib_get_bits(block->data, 56, 5); //112
         card_use_before_date = bit_lib_get_bits_16(block->data, 61, 13); //202.
         card_blank_type = bit_lib_get_bits_16(block->data, 74, 10); //121.
-        uint32_t card_valid_to_time = bit_lib_get_bits_32(block->data, 84, 23); //317
-        uint16_t card_extension_counter = bit_lib_get_bits_16(block->data, 107, 10); //304
+        card_validator = bit_lib_get_bits_16(block->data, 186, 16); //422
         card_start_trip_minutes = bit_lib_get_bits_32(block->data, 128, 23); //405
-        uint8_t card_metro_ride_with = bit_lib_get_bits(block->data, 151, 7); //414
         card_minutes_pass = bit_lib_get_bits(block->data, 158, 7); //412.
         card_remaining_funds = bit_lib_get_bits_32(block->data, 167, 19) / 100; //322
-        card_validator = bit_lib_get_bits_16(block->data, 186, 16); //422
         card_blocked = bit_lib_get_bits(block->data, 202, 1); //303
+        card_hash = bit_lib_get_bits_32(block->data, 224, 32); //502
+        uint32_t card_valid_to_time = bit_lib_get_bits_32(block->data, 84, 23); //317
+        uint16_t card_extension_counter = bit_lib_get_bits_16(block->data, 107, 10); //304
+        uint8_t card_metro_ride_with = bit_lib_get_bits(block->data, 151, 7); //414
         uint16_t card_route = bit_lib_get_bits_16(block->data, 204, 12); //424
         uint8_t card_passages_ground_transport = bit_lib_get_bits(block->data, 216, 7); //433
-        card_hash = bit_lib_get_bits_32(block->data, 224, 32); //502
 
         FURI_LOG_D(
             TAG2,
@@ -808,27 +1002,28 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
             card_validator);
         break;
     }
+    case 0xE6:
     case 0x1C6: {
         card_view = bit_lib_get_bits_16(block->data, 0, 10); //101
         card_type = bit_lib_get_bits_16(block->data, 10, 10); //102
         card_number = bit_lib_get_bits_32(block->data, 20, 32); //201
         card_layout = bit_lib_get_bits(block->data, 52, 4); //111
         card_layout2 = bit_lib_get_bits(block->data, 56, 5); //112
-        uint16_t card_type_of_extended = bit_lib_get_bits_16(block->data, 61, 10); //122
         card_use_before_date = bit_lib_get_bits_16(block->data, 71, 13); //202.
         card_blank_type = bit_lib_get_bits_16(block->data, 84, 10); //121.
+        card_validator = bit_lib_get_bits_16(block->data, 189, 16); //422
+        card_minutes_pass = bit_lib_get_bits(block->data, 175, 7); //412.
+        card_blocked = bit_lib_get_bits(block->data, 205, 1); //303
+        card_hash = bit_lib_get_bits_32(block->data, 224, 32); //502
+        uint16_t card_type_of_extended = bit_lib_get_bits_16(block->data, 61, 10); //122
         uint32_t card_valid_from_date = bit_lib_get_bits_32(block->data, 94, 23); //311
         uint16_t card_extension_counter = bit_lib_get_bits_16(block->data, 117, 10); //304
         uint32_t card_valid_for_minutes = bit_lib_get_bits_32(block->data, 128, 20); //314
         uint32_t card_start_trip_neg_minutes = bit_lib_get_bits_32(block->data, 148, 20); //404
         uint8_t card_metro_ride_with = bit_lib_get_bits(block->data, 168, 7); //414
-        card_minutes_pass = bit_lib_get_bits(block->data, 175, 7); //412.
         uint16_t card_remaining_trips = bit_lib_get_bits_16(block->data, 182, 7); //321
-        card_validator = bit_lib_get_bits_16(block->data, 189, 16); //422
-        card_blocked = bit_lib_get_bits(block->data, 205, 1); //303
         uint8_t card_extended = bit_lib_get_bits(block->data, 206, 1); //123
         uint16_t card_route = bit_lib_get_bits_16(block->data, 212, 12); //424
-        card_hash = bit_lib_get_bits_32(block->data, 224, 32); //502
 
         FURI_LOG_D(
             TAG2,
@@ -881,6 +1076,7 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
         card_type = bit_lib_get_bits_16(block->data, 10, 10); //102
         card_number = bit_lib_get_bits_32(block->data, 20, 32); //201
         card_layout = bit_lib_get_bits(block->data, 52, 4); //111
+        card_hash = bit_lib_get_bits_32(block->data, 224, 32); //502.2
         uint16_t card_tech_code = bit_lib_get_bits_32(block->data, 56, 10); //tech_code
         uint16_t card_valid_to_minutes = bit_lib_get_bits_16(block->data, 66, 16); //311
         uint16_t card_valid_by_date = bit_lib_get_bits_16(block->data, 82, 16); //312
@@ -894,7 +1090,6 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
         uint16_t card_type3 = bit_lib_get_bits_16(block->data, 148, 10); //type3
         uint16_t card_app_code4 = bit_lib_get_bits_16(block->data, 168, 10); //app_code4
         uint16_t card_type4 = bit_lib_get_bits_16(block->data, 178, 10); //type4
-        card_hash = bit_lib_get_bits_32(block->data, 224, 32); //502.2
 
         FURI_LOG_D(
             TAG2,
@@ -937,10 +1132,10 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
         card_type = bit_lib_get_bits_16(block->data, 10, 10); //102
         card_number = bit_lib_get_bits_32(block->data, 20, 32); //201
         card_layout = bit_lib_get_bits(block->data, 52, 4); //111
+        uint16_t card_hash = bit_lib_get_bits_16(block->data, 112, 16); //502.1
         uint16_t card_tech_code = bit_lib_get_bits_32(block->data, 56, 10); //tech_code
         uint16_t card_valid_to_minutes = bit_lib_get_bits_16(block->data, 66, 16); //311
         uint16_t card_valid_by_date = bit_lib_get_bits_16(block->data, 82, 16); //312
-        uint16_t card_hash = bit_lib_get_bits_16(block->data, 112, 16); //502.1
 
         FURI_LOG_D(
             TAG2,
