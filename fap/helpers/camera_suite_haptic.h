@@ -1,3 +1,5 @@
+#pragma once
+
 #include <notification/notification_messages.h>
 
 void camera_suite_play_happy_bump(void* context);
