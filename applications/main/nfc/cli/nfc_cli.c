@@ -725,6 +725,7 @@ static void nfc_cli(Cli* cli, FuriString* args, void* context) {
     cmd = furi_string_alloc();
 
     do {
+        if(nfc_cli_protocol_support_cmd_process(cli, args)) break;
         if(!args_read_string_and_trim(args, cmd)) {
             nfc_cli_print_usage();
             break;
@@ -739,7 +740,6 @@ static void nfc_cli(Cli* cli, FuriString* args, void* context) {
                 break;
             }
         }
-        if(nfc_cli_protocol_support_cmd_process(cli, cmd)) break;
         UNUSED(nfc_cli_iso14443_3a);
 
         nfc_cli_print_usage();

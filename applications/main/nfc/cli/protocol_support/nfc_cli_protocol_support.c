@@ -3,29 +3,87 @@
 #include "nfc_cli_protocol_support_defs.h"
 
 #include <furi/furi.h>
+#include <lib/toolbox/args.h>
+#include <lib/toolbox/hex.h>
 
 void nfc_cli_protocol_support_print_usage() {
     for(size_t i = 0; i < NfcProtocolNum; i++) {
-        if(nfc_cli_protocol_support[i] != NULL) {
-            printf("\t%s\t - poll commands\r\n", nfc_cli_protocol_support[i]->cmd_name);
+        if(nfc_cli_protocol_support[i]) {
+            printf(
+                "\t%s\t\t - %s protocol commands\r\n",
+                nfc_cli_protocol_support[i]->cmd_name,
+                nfc_cli_protocol_support[i]->cmd_name);
         }
     }
 }
 
-bool nfc_cli_protocol_support_cmd_process(Cli* cli, FuriString* args) {
-    UNUSED(cli);
-    UNUSED(args);
+static void
+    nfc_cli_protocol_support_print_command_usage(NfcProtocol protocol, const char* input_cmd) {
+    if(input_cmd != NULL) {
+        printf("Incorrect command: %s\r\n", input_cmd);
+    }
 
-    bool processed = false;
-    for(size_t i = 0; i < NfcProtocolNum; i++) {
-        if(nfc_cli_protocol_support[i] != NULL) {
-            if(furi_string_cmp_str(args, nfc_cli_protocol_support[i]->cmd_name) == 0) {
-                printf("Processed\r\n");
-                processed = true;
-                break;
+    if(nfc_cli_protocol_support[protocol] != NULL) {
+        for(size_t i = 0; i < NfcCliProtocolSupportCommandNum; i++) {
+            if(nfc_cli_protocol_support[protocol]->cmd_handler[i] != NULL) {
+                printf("\t%s\r\n", nfc_cli_protocol_support_get_command_name(i));
             }
         }
     }
+}
+
+static void nfc_cli_protocol_support_handle_cmd(NfcProtocol protocol, Cli* cli, FuriString* args) {
+    FuriString* tmp_str = furi_string_alloc();
+
+    do {
+        bool command_processed = false;
+
+        if(!args_read_string_and_trim(args, tmp_str)) {
+            nfc_cli_protocol_support_print_command_usage(protocol, NULL);
+            break;
+        }
+
+        for(size_t i = 0; i < NfcCliProtocolSupportCommandNum; i++) {
+            if(furi_string_cmp_str(tmp_str, nfc_cli_protocol_support_get_command_name(i)) == 0) {
+                if(nfc_cli_protocol_support[protocol]->cmd_handler[i] != NULL) {
+                    nfc_cli_protocol_support[protocol]->cmd_handler[i](cli, args);
+                    command_processed = true;
+                }
+            }
+        }
+        if(command_processed) break;
+
+        nfc_cli_protocol_support_print_command_usage(protocol, furi_string_get_cstr(args));
+
+    } while(false);
+
+    furi_string_free(tmp_str);
+}
+
+bool nfc_cli_protocol_support_cmd_process(Cli* cli, FuriString* args) {
+    furi_assert(cli);
+    furi_assert(args);
+
+    FuriString* tmp_str = furi_string_alloc();
+
+    bool processed = false;
+    do {
+        if(!args_read_string_and_trim(args, tmp_str)) {
+            break;
+        }
+
+        for(size_t i = 0; i < NfcProtocolNum; i++) {
+            if(nfc_cli_protocol_support[i] != NULL) {
+                if(furi_string_cmp_str(tmp_str, nfc_cli_protocol_support[i]->cmd_name) == 0) {
+                    nfc_cli_protocol_support_handle_cmd(i, cli, args);
+                    processed = true;
+                    break;
+                }
+            }
+        }
+    } while(false);
+
+    furi_string_free(tmp_str);
 
     return processed;
 }
