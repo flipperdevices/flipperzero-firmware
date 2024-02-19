@@ -46,6 +46,7 @@ struct ImuThread {
     FuriThread* thread;
     ICM42688P* icm42688p;
     const ImuHidApi* hid;
+    void* hid_inst;
     ImuProcessedData processed_data;
 };
 
@@ -173,16 +174,16 @@ static int32_t imu_thread(void* context) {
         }
 
         if(events & ImuMouseRightPress) {
-            imu->hid->mouse_key_press(HID_MOUSE_BTN_RIGHT);
+            imu->hid->mouse_key_press(imu->hid_inst, HID_MOUSE_BTN_RIGHT);
         }
         if(events & ImuMouseRightRelease) {
-            imu->hid->mouse_key_release(HID_MOUSE_BTN_RIGHT);
+            imu->hid->mouse_key_release(imu->hid_inst, HID_MOUSE_BTN_RIGHT);
         }
         if(events & ImuMouseLeftPress) {
-            imu->hid->mouse_key_press(HID_MOUSE_BTN_LEFT);
+            imu->hid->mouse_key_press(imu->hid_inst, HID_MOUSE_BTN_LEFT);
         }
         if(events & ImuMouseLeftRelease) {
-            imu->hid->mouse_key_release(HID_MOUSE_BTN_LEFT);
+            imu->hid->mouse_key_release(imu->hid_inst, HID_MOUSE_BTN_LEFT);
         }
         if(events & ImuMouseScrollOn) {
             scroll_pitch = pitch_last;
@@ -217,7 +218,7 @@ static int32_t imu_thread(void* context) {
                             SCROLL_SENSITIVITY_K;
                         scroll_speed = CLAMP(scroll_speed, 127.f, -127.f);
 
-                        imu->hid->mouse_scroll(scroll_speed);
+                        imu->hid->mouse_scroll(imu->hid_inst, scroll_speed);
                     }
                 } else {
                     diff_x +=
@@ -235,7 +236,8 @@ static int32_t imu_thread(void* context) {
                         float mouse_x = CLAMP(diff_x, 127.f, -127.f);
                         float mouse_y = CLAMP(diff_y, 127.f, -127.f);
 
-                        imu->hid->mouse_move(mouse_exp_rate(mouse_x), mouse_exp_rate(mouse_y));
+                        imu->hid->mouse_move(
+                            imu->hid_inst, mouse_exp_rate(mouse_x), mouse_exp_rate(mouse_y));
 
                         diff_x -= (float)(int8_t)mouse_x;
                         diff_y -= (float)(int8_t)mouse_y;
@@ -245,7 +247,7 @@ static int32_t imu_thread(void* context) {
         }
     }
 
-    imu->hid->mouse_key_release(HID_MOUSE_BTN_RIGHT | HID_MOUSE_BTN_LEFT);
+    imu->hid->mouse_key_release(imu->hid_inst, HID_MOUSE_BTN_RIGHT | HID_MOUSE_BTN_LEFT);
 
     icm42688_fifo_disable(imu->icm42688p);
 
@@ -270,10 +272,11 @@ void imu_mouse_scroll_mode(ImuThread* imu, bool enable) {
     furi_thread_flags_set(furi_thread_get_id(imu->thread), flag);
 }
 
-ImuThread* imu_start(ICM42688P* icm42688p, const ImuHidApi* hid) {
+ImuThread* imu_start(ICM42688P* icm42688p, const ImuHidApi* hid, void* hid_inst) {
     ImuThread* imu = malloc(sizeof(ImuThread));
     imu->icm42688p = icm42688p;
     imu->hid = hid;
+    imu->hid_inst = hid_inst;
     imu->thread = furi_thread_alloc_ex("ImuThread", 4096, imu_thread, imu);
     furi_thread_start(imu->thread);
 

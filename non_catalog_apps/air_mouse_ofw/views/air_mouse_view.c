@@ -8,6 +8,7 @@ struct AirMouseView {
     void* imu_device;
     ImuThread* imu;
     const ImuHidApi* hid_api;
+    void* hid_inst;
     AirMouseViewExit exit_callback;
     void* context;
 };
@@ -107,7 +108,7 @@ static void air_mouse_view_enter(void* context) {
     furi_assert(context);
     AirMouseView* air_mouse = context;
     furi_assert(air_mouse->imu == NULL);
-    air_mouse->imu = imu_start(air_mouse->imu_device, air_mouse->hid_api);
+    air_mouse->imu = imu_start(air_mouse->imu_device, air_mouse->hid_api, air_mouse->hid_inst);
 }
 
 static void air_mouse_view_exit(void* context) {
@@ -157,9 +158,11 @@ void air_mouse_view_set_device(AirMouseView* air_mouse, void* imu_device) {
 void air_mouse_view_set_hid_api(
     AirMouseView* air_mouse,
     const ImuHidApi* hid,
+    void* hid_inst,
     bool is_ble_interface) {
     furi_assert(air_mouse);
     air_mouse->hid_api = hid;
+    air_mouse->hid_inst = hid_inst;
     with_view_model(
         air_mouse->view,
         AirMouseModel * model,
