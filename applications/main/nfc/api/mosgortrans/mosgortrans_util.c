@@ -308,7 +308,7 @@ void parse_layout_E6(BlockData* data_block, const MfClassicBlock* block) {
     data_block->metro_ride_with = bit_lib_get_bits(block->data, 0xA8, 7); //414
     data_block->minutes_pass = bit_lib_get_bits(block->data, 0xAF, 7); //412
     data_block->remaining_trips = bit_lib_get_bits(block->data, 0xB6, 7); //321
-    data_block->validator = bit_lib_get_bits_16(block->data, 0xDB, 16); //422
+    data_block->validator = bit_lib_get_bits_16(block->data, 0xBD, 16); //422
     data_block->blocked = bit_lib_get_bits(block->data, 0xCD, 1); //303
     data_block->extended = bit_lib_get_bits(block->data, 0xCE, 1); //123
     data_block->route = bit_lib_get_bits_16(block->data, 0xD4, 12); //424
@@ -1116,7 +1116,7 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
         furi_string_cat_printf(result, "Trips left: %d\n", data_block.remaining_trips);
         //valid_from_date
         DateTime card_use_from_date_s = {0};
-        from_days_to_datetime(data_block.valid_from_date, &card_use_from_date_s, 2019);
+        from_minutes_to_datetime(data_block.valid_from_date, &card_use_from_date_s, 2019);
         furi_string_cat_printf(
             result,
             "Valid from: %02d.%02d.%04d\n",
@@ -1126,7 +1126,7 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
         //valid_to_date
         DateTime card_use_to_date_s = {0};
         from_minutes_to_datetime(
-            data_block.valid_from_date * 24 * 60 + data_block.valid_for_minutes - 1,
+            data_block.valid_from_date + data_block.valid_for_minutes - 1,
             &card_use_to_date_s,
             2019);
         furi_string_cat_printf(
