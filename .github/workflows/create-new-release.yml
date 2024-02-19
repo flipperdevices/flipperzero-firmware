@@ -38,7 +38,7 @@ jobs:
       - id: commit_new_version
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: Updated version
+          commit_message: "chore: Updated version"
           push_options: "--force"
 
   create-release:
