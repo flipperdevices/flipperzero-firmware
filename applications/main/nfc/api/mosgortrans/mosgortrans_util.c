@@ -20,6 +20,16 @@ void from_minutes_to_datetime(uint32_t minutes, DateTime* datetime, uint16_t sta
     datetime_timestamp_to_datetime(timestamp, datetime);
 }
 
+void from_seconds_to_datetime(uint32_t seconds, DateTime* datetime, uint16_t start_year) {
+    uint32_t timestamp = seconds;
+    DateTime start_datetime = {0};
+    start_datetime.year = start_year - 1;
+    start_datetime.month = 12;
+    start_datetime.day = 31;
+    timestamp += datetime_datetime_to_timestamp(&start_datetime);
+    datetime_timestamp_to_datetime(timestamp, datetime);
+}
+
 typedef struct {
     uint16_t view; //101
     uint16_t type; //102
@@ -28,8 +38,10 @@ typedef struct {
     uint16_t blank_type; //121
     uint16_t type_of_extended; //122
     uint8_t extended; //123
+    uint8_t benefit_code; //124
     uint32_t number; //201
     uint16_t use_before_date; //202
+    uint16_t use_with_date; //205
     uint8_t requires_activation; //301
     uint16_t activate_during; //302
     uint16_t extension_counter; //304
@@ -45,6 +57,7 @@ typedef struct {
     uint16_t start_trip_time; //403
     uint32_t start_trip_neg_minutes; //404
     uint32_t start_trip_minutes; //405
+    uint8_t start_trip_seconds; //406
     uint8_t minutes_pass; //412
     uint8_t metro_ride_with; //414
     uint8_t transport_type; //421
@@ -70,17 +83,38 @@ typedef struct {
     uint8_t company; //Company
     uint8_t units; //Units
     uint16_t rfu1; //rfu1
+    uint8_t rfu2; //rfu2
+    uint8_t write_enabled; //write_enabled
 
 } BlockData;
 
 void parse_layout_2(BlockData* data_block, const MfClassicBlock* block) {
-    data_block->view = bit_lib_get_bits_16(block->data, 0, 10);
-    data_block->type = bit_lib_get_bits_16(block->data, 10, 10);
-    data_block->number = bit_lib_get_bits_32(block->data, 20, 32);
-    data_block->layout = bit_lib_get_bits(block->data, 52, 4);
-    data_block->use_before_date = bit_lib_get_bits_16(block->data, 56, 16);
-    data_block->validator = bit_lib_get_bits_16(block->data, 205, 16);
-    data_block->blocked = bit_lib_get_bits(block->data, 128, 1);
+    data_block->view = bit_lib_get_bits_16(block->data, 0x00, 10); //101
+    data_block->type = bit_lib_get_bits_16(block->data, 0x0A, 10); //102
+    data_block->number = bit_lib_get_bits_32(block->data, 0x14, 32); //201
+    data_block->layout = bit_lib_get_bits(block->data, 0x34, 4); //111
+    data_block->use_before_date = bit_lib_get_bits_16(block->data, 0x38, 16); //202
+    data_block->benefit_code = bit_lib_get_bits(block->data, 0x48, 8); //124
+    data_block->rfu1 = bit_lib_get_bits_32(block->data, 0x50, 32); //rfu1
+    data_block->crc16 = bit_lib_get_bits_16(block->data, 0x70, 16); //501.1
+    data_block->blocked = bit_lib_get_bits(block->data, 0x80, 1); //303
+    data_block->start_trip_time = bit_lib_get_bits_16(block->data, 0x81, 12); //403
+    data_block->start_trip_date = bit_lib_get_bits_16(block->data, 0x8D, 16); //402
+    data_block->valid_from_date = bit_lib_get_bits_16(block->data, 0x9D, 16); //311
+    data_block->valid_to_date = bit_lib_get_bits_16(block->data, 0xAD, 16); //312
+    data_block->start_trip_seconds = bit_lib_get_bits(block->data, 0xDB, 6); //406
+    data_block->transport_type1 = bit_lib_get_bits(block->data, 0xC3, 2); //421.1
+    data_block->transport_type2 = bit_lib_get_bits(block->data, 0xC5, 2); //421.2
+    data_block->transport_type3 = bit_lib_get_bits(block->data, 0xC7, 2); //421.3
+    data_block->transport_type4 = bit_lib_get_bits(block->data, 0xC9, 2); //421.4
+    data_block->use_with_date = bit_lib_get_bits_16(block->data, 0xBD, 16); //205
+    data_block->route = bit_lib_get_bits(block->data, 0xCD, 1); //424
+    data_block->validator1 = bit_lib_get_bits_16(block->data, 0xCE, 15); //422.1
+    data_block->validator = bit_lib_get_bits_16(block->data, 0xCD, 16);
+    data_block->total_trips = bit_lib_get_bits_16(block->data, 0xDD, 16); //331
+    data_block->write_enabled = bit_lib_get_bits(block->data, 0xED, 1); //write_enabled
+    data_block->rfu2 = bit_lib_get_bits(block->data, 0xEE, 2); //rfu2
+    data_block->crc16_2 = bit_lib_get_bits_16(block->data, 0xF0, 16); //501.2
 }
 
 void parse_layout_6(BlockData* data_block, const MfClassicBlock* block) {
@@ -364,86 +398,60 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
 
     switch(layout_type) {
     case 0x02: {
-        card_view = bit_lib_get_bits_16(block->data, 0, 10); //101
-        card_type = bit_lib_get_bits_16(block->data, 10, 10); //102
-        card_number = bit_lib_get_bits_32(block->data, 20, 32); //201
-        card_layout = bit_lib_get_bits(block->data, 52, 4); //111
-        card_use_before_date = bit_lib_get_bits_16(block->data, 56, 16); //202
-        card_validator = bit_lib_get_bits_16(block->data, 205, 16); //422
-        card_blocked = bit_lib_get_bits(block->data, 128, 1); //303
-        uint8_t card_benefit_code = bit_lib_get_bits(block->data, 72, 8); //124
-        uint32_t card_rfu1 = bit_lib_get_bits_32(block->data, 80, 32); //rfu1
-        uint16_t card_crc16 = bit_lib_get_bits_16(block->data, 112, 16); //501.1
-        uint16_t card_start_trip_time = bit_lib_get_bits_16(block->data, 177, 12); //403
-        uint16_t card_start_trip_date = bit_lib_get_bits_16(block->data, 189, 16); //402
-        uint16_t card_valid_from_date = bit_lib_get_bits_16(block->data, 157, 16); //311
-        uint16_t card_valid_by_date = bit_lib_get_bits_16(block->data, 173, 16); //312
-        uint8_t card_start_trip_seconds = bit_lib_get_bits(block->data, 189, 6); //406
-        uint8_t card_transport_type1 = bit_lib_get_bits(block->data, 180, 2); //421.1
-        uint8_t card_transport_type2 = bit_lib_get_bits(block->data, 182, 2); //421.2
-        uint8_t card_transport_type3 = bit_lib_get_bits(block->data, 184, 2); //421.3
-        uint8_t card_transport_type4 = bit_lib_get_bits(block->data, 186, 2); //421.4
-        uint16_t card_use_with_date = bit_lib_get_bits_16(block->data, 189, 16); //205
-        uint8_t card_route = bit_lib_get_bits(block->data, 205, 1); //424
-        uint16_t card_validator1 = bit_lib_get_bits_16(block->data, 206, 15); //422.1
-        uint16_t card_total_trips = bit_lib_get_bits_16(block->data, 221, 16); //331
-        uint8_t card_write_enabled = bit_lib_get_bits(block->data, 237, 1); //write_enabled
-        uint8_t card_rfu2 = bit_lib_get_bits(block->data, 238, 2); //rfu2
-        uint16_t card_crc16_2 = bit_lib_get_bits_16(block->data, 240, 16); //501.2
+        parse_layout_2(&data_block, block);
 
-        FURI_LOG_D(
-            TAG2,
-            "%x %x %lx %x %x %lx %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x",
-            card_view,
-            card_type,
-            card_number,
-            card_use_before_date,
-            card_benefit_code,
-            card_rfu1,
-            card_crc16,
-            card_blocked,
-            card_start_trip_time,
-            card_start_trip_date,
-            card_valid_from_date,
-            card_valid_by_date,
-            card_start_trip_seconds,
-            card_transport_type1,
-            card_transport_type2,
-            card_transport_type3,
-            card_transport_type4,
-            card_use_with_date,
-            card_route,
-            card_validator1,
-            card_validator,
-            card_total_trips,
-            card_write_enabled,
-            card_rfu2,
-            card_crc16_2);
-        if(card_valid_by_date == 0) {
+        if(data_block.valid_from_date == 0 || data_block.valid_to_date == 0) {
             return false;
         }
-        DateTime card_use_before_date_s = {0};
-        from_days_to_datetime(card_valid_by_date, &card_use_before_date_s, 1992);
 
-        DateTime card_start_trip_minutes_s = {0};
-        from_minutes_to_datetime(
-            (card_start_trip_date) * 24 * 60 + card_start_trip_time,
-            &card_start_trip_minutes_s,
-            1992);
-        furi_string_printf(
+        //number
+        furi_string_cat_printf(result, "Number: %010lu\n", data_block.number);
+        //use_before_date
+        DateTime card_use_before_date_s = {0};
+        from_days_to_datetime(data_block.use_before_date, &card_use_before_date_s, 1992);
+        furi_string_cat_printf(
             result,
-            "Number: %010lu\nValid for: %02d.%02d.%04d\nTrips: %d\nTrip from: %02d.%02d.%04d %02d:%02d\nValidator: %05d",
-            card_number,
+            "Use before: %02d.%02d.%04d\n",
             card_use_before_date_s.day,
             card_use_before_date_s.month,
-            card_use_before_date_s.year,
-            card_total_trips,
+            card_use_before_date_s.year);
+        //remaining_trips
+        furi_string_cat_printf(result, "Remaining trips: %d\n", data_block.total_trips);
+        //valid_from_date
+        DateTime card_valid_from_date_s = {0};
+        from_days_to_datetime(data_block.valid_from_date, &card_valid_from_date_s, 1992);
+        furi_string_cat_printf(
+            result,
+            "Valid from: %02d.%02d.%04d\n",
+            card_valid_from_date_s.day,
+            card_valid_from_date_s.month,
+            card_valid_from_date_s.year);
+        //valid_to_date
+        DateTime card_valid_to_date_s = {0};
+        from_days_to_datetime(data_block.valid_to_date, &card_valid_to_date_s, 1992);
+        furi_string_cat_printf(
+            result,
+            "Valid to: %02d.%02d.%04d\n",
+            card_valid_to_date_s.day,
+            card_valid_to_date_s.month,
+            card_valid_to_date_s.year);
+        //trip_number
+        furi_string_cat_printf(result, "Trip number: %d\n", data_block.total_trips);
+        //trip_from
+        DateTime card_start_trip_minutes_s = {0};
+        from_seconds_to_datetime(
+            data_block.start_trip_date * 24 * 60 * 60 + data_block.start_trip_time * 60 +
+                data_block.start_trip_seconds,
+            &card_start_trip_minutes_s,
+            1992);
+        furi_string_cat_printf(
+            result,
+            "Trip from: %02d.%02d.%04d %02d:%02d",
             card_start_trip_minutes_s.day,
             card_start_trip_minutes_s.month,
             card_start_trip_minutes_s.year,
             card_start_trip_minutes_s.hour,
-            card_start_trip_minutes_s.minute,
-            card_validator);
+            card_start_trip_minutes_s.minute);
         break;
     }
     case 0x06: {
@@ -927,7 +935,7 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
         parse_transport_type(&data_block, transport);
         furi_string_cat_printf(result, "Transport: %s\n", furi_string_get_cstr(transport));
         // validator
-        furi_string_cat_printf(result, "Validator: %05d", data_block.validator);
+        furi_string_cat_printf(result, "Validator: %05d\n", data_block.validator);
         // fare
         FuriString* fare = furi_string_alloc();
         switch(data_block.fare_trip) {
@@ -944,7 +952,7 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
             furi_string_cat(fare, "Unknown");
             break;
         }
-        furi_string_cat_printf(result, "\nFare: %s", furi_string_get_cstr(fare));
+        furi_string_cat_printf(result, "Fare: %s", furi_string_get_cstr(fare));
         furi_string_free(fare);
         furi_string_free(transport);
         break;
