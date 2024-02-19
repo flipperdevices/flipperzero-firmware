@@ -348,11 +348,14 @@ void parse_layout_FCB(BlockData* data_block, const MfClassicBlock* block) {
 }
 
 void parse_layout_F0B(BlockData* data_block, const MfClassicBlock* block) {
-    data_block->view = bit_lib_get_bits_16(block->data, 0, 10); //101
-    data_block->type = bit_lib_get_bits_16(block->data, 10, 10); //102
-    data_block->number = bit_lib_get_bits_32(block->data, 20, 32); //201
-    data_block->layout = bit_lib_get_bits(block->data, 52, 4); //111
-    data_block->hash1 = bit_lib_get_bits_32(block->data, 112, 16); //502.1
+    data_block->view = bit_lib_get_bits_16(block->data, 0x00, 10); //101
+    data_block->type = bit_lib_get_bits_16(block->data, 0x0A, 10); //102
+    data_block->number = bit_lib_get_bits_32(block->data, 0x14, 32); //201
+    data_block->layout = bit_lib_get_bits(block->data, 0x34, 4); //111
+    data_block->tech_code = bit_lib_get_bits_32(block->data, 0x38, 10); //tech_code
+    data_block->valid_from_date = bit_lib_get_bits_16(block->data, 0x42, 16); //311
+    data_block->valid_to_date = bit_lib_get_bits_16(block->data, 0x52, 16); //312
+    data_block->hash1 = bit_lib_get_bits_32(block->data, 0x70, 16); //502.1
 }
 
 void parse_transport_type(BlockData* data_block, FuriString* transport) {
@@ -1225,39 +1228,26 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
         break;
     }
     case 0x3C0B: {
-        card_view = bit_lib_get_bits_16(block->data, 0, 10); //101
-        card_type = bit_lib_get_bits_16(block->data, 10, 10); //102
-        card_number = bit_lib_get_bits_32(block->data, 20, 32); //201
-        card_layout = bit_lib_get_bits(block->data, 52, 4); //111
-        uint16_t card_hash = bit_lib_get_bits_16(block->data, 112, 16); //502.1
-        uint16_t card_tech_code = bit_lib_get_bits_32(block->data, 56, 10); //tech_code
-        uint16_t card_valid_to_minutes = bit_lib_get_bits_16(block->data, 66, 16); //311
-        uint16_t card_valid_by_date = bit_lib_get_bits_16(block->data, 82, 16); //312
-
-        FURI_LOG_D(
-            TAG2,
-            "%x %x %lx %x %x %x %x %x %x %x",
-            card_view,
-            card_type,
-            card_number,
-            card_layout,
-            card_tech_code,
-            card_use_before_date,
-            card_blank_type,
-            card_valid_to_minutes,
-            card_valid_by_date,
-            card_hash);
-        DateTime card_use_before_date_s = {0};
-        from_days_to_datetime(card_valid_by_date, &card_use_before_date_s, 1992);
-
-        furi_string_printf(
+        //number
+        furi_string_cat_printf(result, "Number: %010lu\n", data_block.number);
+        //valid_from_date
+        DateTime card_use_from_date_s = {0};
+        from_days_to_datetime(data_block.valid_from_date, &card_use_from_date_s, 1992);
+        furi_string_cat_printf(
             result,
-            "Number: %010lu\nValid for: %02d.%02d.%04d\nValidator: %05d",
-            card_number,
-            card_use_before_date_s.day,
-            card_use_before_date_s.month,
-            card_use_before_date_s.year,
-            card_validator);
+            "Valid from: %02d.%02d.%04d\n",
+            card_use_from_date_s.day,
+            card_use_from_date_s.month,
+            card_use_from_date_s.year);
+        //valid_to_date
+        DateTime card_use_to_date_s = {0};
+        from_days_to_datetime(data_block.valid_to_date, &card_use_to_date_s, 1992);
+        furi_string_cat_printf(
+            result,
+            "Valid to: %02d.%02d.%04d\n",
+            card_use_to_date_s.day,
+            card_use_to_date_s.month,
+            card_use_to_date_s.year);
         break;
     }
     default:
