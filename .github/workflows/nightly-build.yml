@@ -12,6 +12,7 @@ jobs:
         firmware: [od, os, xs, xd, ul]
 
     runs-on: ubuntu-latest
+    continue-on-error: true
     env:
       FBT_NO_SYNC: "true"
       TARGETS: f7
