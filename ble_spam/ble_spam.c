@@ -390,7 +390,7 @@ static void draw_callback(Canvas* canvas, void* _ctx) {
             "App+Spam: \e#WillyJL\e# XFW\n"
             "Apple+Crash: \e#ECTO-1A\e#\n"
             "Android+Win: \e#Spooks4576\e#\n"
-            "                                   Version \e#5.0\e#",
+            "                                   Version \e#5.1\e#",
             false);
         break;
     default: {
@@ -620,6 +620,15 @@ static bool back_event_callback(void* _ctx) {
 
 int32_t ble_spam(void* p) {
     UNUSED(p);
+    GapExtraBeaconConfig prev_cfg;
+    const GapExtraBeaconConfig* prev_cfg_ptr = furi_hal_bt_extra_beacon_get_config();
+    if(prev_cfg_ptr) {
+        memcpy(&prev_cfg, prev_cfg_ptr, sizeof(prev_cfg));
+    }
+    uint8_t prev_data[EXTRA_BEACON_MAX_DATA_SIZE];
+    uint8_t prev_data_len = furi_hal_bt_extra_beacon_get_data(&prev_data);
+    bool prev_active = furi_hal_bt_extra_beacon_is_active();
+
     State* state = malloc(sizeof(State));
     state->config.adv_channel_map = GapAdvChannelMapAll;
     state->config.adv_power_level = GapAdvPowerLevel_6dBm;
@@ -694,5 +703,13 @@ int32_t ble_spam(void* p) {
     furi_timer_free(state->lock_timer);
     furi_thread_free(state->thread);
     free(state);
+
+    if(prev_cfg_ptr) {
+        furi_check(furi_hal_bt_extra_beacon_set_config(&prev_cfg));
+    }
+    furi_check(furi_hal_bt_extra_beacon_set_data(&prev_data, prev_data_len));
+    if(prev_active) {
+        furi_check(furi_hal_bt_extra_beacon_start());
+    }
     return 0;
 }
