@@ -26,18 +26,10 @@
               },
               "type": {
                 "description": "Type of firmware reference. `index` - firmware from index; `git-release` - firmware from git releases; `direct-uri` - firmware from direct URI; `git-action` - firmware from github action artifacts",
-                "enum": [
-                  "index",
-                  "git-release",
-                  "direct-uri",
-                  "git-action"
-                ]
+                "enum": ["index", "git-release", "direct-uri", "git-action"]
               }
             },
-            "required": [
-              "alias",
-              "description"
-            ],
+            "required": ["alias", "description"],
             "unevaluatedProperties ": false
           },
           {
@@ -49,9 +41,7 @@
                       "const": "index"
                     }
                   },
-                  "required": [
-                    "type"
-                  ]
+                  "required": ["type"]
                 },
                 "then": {
                   "properties": {
@@ -61,13 +51,10 @@
                     },
                     "channel": {
                       "description": "Index channel to pull firmware from",
-                      "type": "string"
+                      "enum": ["dev", "rc", "release"]
                     }
                   },
-                  "required": [
-                    "index_url",
-                    "channel"
-                  ],
+                  "required": ["index_url", "channel"],
                   "unevaluatedProperties ": false
                 },
                 "else": false
@@ -79,9 +66,7 @@
                       "const": "git-release"
                     }
                   },
-                  "required": [
-                    "type"
-                  ]
+                  "required": ["type"]
                 },
                 "then": {
                   "properties": {
@@ -98,10 +83,7 @@
                       "type": "string"
                     }
                   },
-                  "required": [
-                    "git_repo",
-                    "git_release"
-                  ],
+                  "required": ["git_repo", "git_release"],
                   "unevaluatedProperties ": false
                 },
                 "else": false
@@ -113,21 +95,17 @@
                       "const": "direct-uri"
                     }
                   },
-                  "required": [
-                    "type"
-                  ]
+                  "required": ["type"]
                 },
                 "then": {
                   "properties": {
                     "uri": {
                       "description": "Firmware direct download uri",
                       "type": "string",
-                      "pattern": "^(https?|ftp):\/\/.+"
+                      "pattern": "^(https?|ftp)://.+"
                     }
                   },
-                  "required": [
-                    "uri"
-                  ],
+                  "required": ["uri"],
                   "unevaluatedProperties ": false
                 },
                 "else": false
@@ -139,9 +117,7 @@
                       "const": "git-action"
                     }
                   },
-                  "required": [
-                    "type"
-                  ]
+                  "required": ["type"]
                 },
                 "then": {
                   "properties": {
@@ -168,18 +144,10 @@
                     "git_event": {
                       "description": "Github event",
                       "type": "string",
-                      "enum": [
-                        "push",
-                        "pull_request",
-                        "issue"
-                      ]
+                      "enum": ["push", "pull_request", "issue"]
                     }
                   },
-                  "required": [
-                    "git_repo",
-                    "git_action",
-                    "git_artifact"
-                  ],
+                  "required": ["git_repo", "git_action", "git_artifact"],
                   "unevaluatedProperties ": false
                 },
                 "else": false
@@ -190,8 +158,6 @@
       }
     }
   },
-  "required": [
-    "firmwares"
-  ],
+  "required": ["firmwares"],
   "unevaluatedProperties ": false
 }

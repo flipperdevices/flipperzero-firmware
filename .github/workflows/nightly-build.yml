@@ -9,7 +9,7 @@ jobs:
   nightly-build:
     strategy:
       matrix:
-        firmware: [od, os, xs, xd, ul]
+        firmware: [od, os, xs, xd, ul, ud]
 
     runs-on: ubuntu-latest
     continue-on-error: true

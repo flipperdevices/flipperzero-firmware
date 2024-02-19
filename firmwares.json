@@ -2,33 +2,21 @@
   "$schema": "docs/firmwares.schema.json",
   "firmwares": [
     {
-      "alias": [
-        "od",
-        "official-dev",
-        "off-dev"
-      ],
+      "alias": ["od", "official-dev", "off-dev"],
       "description": "Official Dev",
       "type": "index",
       "index_url": "https://update.flipperzero.one/firmware/directory.json",
       "channel": "dev"
     },
     {
-      "alias": [
-        "os",
-        "official-stable",
-        "off-stbl"
-      ],
+      "alias": ["os", "official-stable", "off-stbl"],
       "description": "Official Stable",
       "type": "index",
       "index_url": "https://update.flipperzero.one/firmware/directory.json",
       "channel": "release"
     },
     {
-      "alias": [
-        "xs",
-        "xtreme-stable",
-        "xts"
-      ],
+      "alias": ["xs", "xtreme-stable", "xts"],
       "description": "Xtreme stable",
       "type": "git-release",
       "git_repo": "Flipper-XFW/Xtreme-Firmware",
@@ -36,11 +24,7 @@
       "sdk_filename_pattern": "-sdk\\.zip$"
     },
     {
-      "alias": [
-        "xd",
-        "xtreme-dev",
-        "xtd"
-      ],
+      "alias": ["xd", "xtreme-dev", "xtd"],
       "description": "Xtreme dev build",
       "type": "git-action",
       "git_repo": "Flipper-XFW/Xtreme-Firmware",
@@ -51,16 +35,18 @@
       "sdk_filename_pattern": "-sdk-.+\\.zip$"
     },
     {
-      "alias": [
-        "u",
-        "ul",
-        "unleashed"
-      ],
+      "alias": ["u", "ul", "unleashed"],
       "description": "Unleashed",
-      "type": "git-release",
-      "git_repo": "DarkFlippers/unleashed-firmware",
-      "git_release": "latest",
-      "sdk_filename_pattern": "-sdk-.+\\.zip$"
+      "type": "index",
+      "index_url": "https://up.unleashedflip.com/directory.json",
+      "channel": "release"
+    },
+    {
+      "alias": ["ud", "uld", "unleashed-dev"],
+      "description": "Unleashed dev build",
+      "type": "index",
+      "index_url": "https://up.unleashedflip.com/directory.json",
+      "channel": "dev"
     }
   ]
 }
