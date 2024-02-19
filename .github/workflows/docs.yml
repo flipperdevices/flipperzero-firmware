@@ -42,8 +42,8 @@ jobs:
       - name: 'Generate documentation'
         uses: mattnotmitt/doxygen-action@v1.9.5
         with:
-          working-directory: 'documentation/doxygen/'
-          doxyfile-path: './Doxyfile-awesome.cfg'
+          working-directory: 'documentation/'
+          doxyfile-path: './doxygen/Doxyfile-awesome.cfg'
 
       - name: 'Upload documentation'
         uses: jakejarvis/s3-sync-action@v0.5.1
