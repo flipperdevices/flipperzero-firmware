@@ -630,7 +630,7 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
         furi_string_cat_printf(result, "Number: %010lu\n", data_block.number);
         //use_before_date
         DateTime card_use_before_date_s = {0};
-        from_days_to_datetime(card_use_before_date, &card_use_before_date_s, 2016);
+        from_days_to_datetime(data_block.use_before_date, &card_use_before_date_s, 2016);
         furi_string_cat_printf(
             result,
             "Use before: %02d.%02d.%04d\n",
@@ -753,7 +753,7 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
         furi_string_cat_printf(result, "Number: %010lu\n", data_block.number);
         //use_before_date
         DateTime card_use_before_date_s = {0};
-        from_days_to_datetime(card_use_before_date, &card_use_before_date_s, 1992);
+        from_days_to_datetime(data_block.use_before_date, &card_use_before_date_s, 1992);
         furi_string_cat_printf(
             result,
             "Use before: %02d.%02d.%04d\n",
