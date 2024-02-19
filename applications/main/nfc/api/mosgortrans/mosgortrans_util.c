@@ -400,10 +400,6 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
     case 0x02: {
         parse_layout_2(&data_block, block);
 
-        if(data_block.valid_from_date == 0 || data_block.valid_to_date == 0) {
-            return false;
-        }
-
         //number
         furi_string_cat_printf(result, "Number: %010lu\n", data_block.number);
         //use_before_date
@@ -415,6 +411,11 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
             card_use_before_date_s.day,
             card_use_before_date_s.month,
             card_use_before_date_s.year);
+
+        if(data_block.valid_from_date == 0 || data_block.valid_to_date == 0) {
+            furi_string_cat(result, "\e#No ticket\n");
+            return true;
+        }
         //remaining_trips
         furi_string_cat_printf(result, "Remaining trips: %d\n", data_block.total_trips);
         //valid_from_date
@@ -1035,35 +1036,57 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
             card_use_before_date_s.month,
             card_use_before_date_s.year);
         //remaining_funds
-        furi_string_cat_printf(result, "Balance: %ld rub\n", data_block.remaining_funds);
+        furi_string_cat_printf(result, "Balance: %ld rub\n", data_block.remaining_funds / 100);
         //start_trip_minutes
-        DateTime card_start_trip_minutes_s = {0};
-        from_minutes_to_datetime(data_block.start_trip_minutes, &card_start_trip_minutes_s, 2019);
-        furi_string_cat_printf(
-            result,
-            "Trip from: %02d.%02d.%04d %02d:%02d\n",
-            card_start_trip_minutes_s.day,
-            card_start_trip_minutes_s.month,
-            card_start_trip_minutes_s.year,
-            card_start_trip_minutes_s.hour,
-            card_start_trip_minutes_s.minute);
+        if(data_block.start_trip_minutes) {
+            DateTime card_start_trip_minutes_s = {0};
+            from_minutes_to_datetime(
+                data_block.start_trip_minutes, &card_start_trip_minutes_s, 2019);
+            furi_string_cat_printf(
+                result,
+                "Trip from: %02d.%02d.%04d %02d:%02d\n",
+                card_start_trip_minutes_s.day,
+                card_start_trip_minutes_s.month,
+                card_start_trip_minutes_s.year,
+                card_start_trip_minutes_s.hour,
+                card_start_trip_minutes_s.minute);
+        }
         //start_m_trip_minutes
-        DateTime card_start_m_trip_minutes_s = {0};
-        from_minutes_to_datetime(
-            data_block.start_trip_minutes + data_block.metro_ride_with,
-            &card_start_m_trip_minutes_s,
-            2019);
-        furi_string_cat_printf(
-            result,
-            "(M) from: %02d.%02d.%04d %02d:%02d\n",
-            card_start_m_trip_minutes_s.day,
-            card_start_m_trip_minutes_s.month,
-            card_start_m_trip_minutes_s.year,
-            card_start_m_trip_minutes_s.hour,
-            card_start_m_trip_minutes_s.minute);
+        if(data_block.metro_ride_with) {
+            DateTime card_start_m_trip_minutes_s = {0};
+            from_minutes_to_datetime(
+                data_block.start_trip_minutes + data_block.metro_ride_with,
+                &card_start_m_trip_minutes_s,
+                2019);
+            furi_string_cat_printf(
+                result,
+                "(M) from: %02d.%02d.%04d %02d:%02d\n",
+                card_start_m_trip_minutes_s.day,
+                card_start_m_trip_minutes_s.month,
+                card_start_m_trip_minutes_s.year,
+                card_start_m_trip_minutes_s.hour,
+                card_start_m_trip_minutes_s.minute);
+        }
+        if(data_block.minutes_pass) {
+            DateTime card_start_change_trip_minutes_s = {0};
+            from_minutes_to_datetime(
+                data_block.start_trip_minutes + data_block.minutes_pass,
+                &card_start_change_trip_minutes_s,
+                2019);
+            furi_string_cat_printf(
+                result,
+                "Trip edit: %02d.%02d.%04d %02d:%02d\n",
+                card_start_change_trip_minutes_s.day,
+                card_start_change_trip_minutes_s.month,
+                card_start_change_trip_minutes_s.year,
+                card_start_change_trip_minutes_s.hour,
+                card_start_change_trip_minutes_s.minute);
+        }
         //transport
         //validator
-        furi_string_cat_printf(result, "Validator: %05d", data_block.validator);
+        if(data_block.validator) {
+            furi_string_cat_printf(result, "Validator: %05d", data_block.validator);
+        }
         break;
     }
     case 0xE6:
