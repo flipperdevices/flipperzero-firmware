@@ -12,7 +12,6 @@
 #define TAG "Troika"
 
 typedef struct {
-    uint8_t s;
     uint64_t a;
     uint64_t b;
 } MfClassicKeyPair;
@@ -23,65 +22,65 @@ typedef struct {
 } TroikaCardConfig;
 
 static const MfClassicKeyPair troika_1k_keys[] = {
-    {.s = 0, .a = 0xa0a1a2a3a4a5, .b = 0xfbf225dc5d58},
-    {.s = 1, .a = 0xa82607b01c0d, .b = 0x2910989b6880},
-    {.s = 2, .a = 0x2aa05ed1856f, .b = 0xeaac88e5dc99},
-    {.s = 3, .a = 0x2aa05ed1856f, .b = 0xeaac88e5dc99},
-    {.s = 4, .a = 0x73068f118c13, .b = 0x2b7f3253fac5},
-    {.s = 5, .a = 0xfbc2793d540b, .b = 0xd3a297dc2698},
-    {.s = 6, .a = 0x2aa05ed1856f, .b = 0xeaac88e5dc99},
-    {.s = 7, .a = 0xae3d65a3dad4, .b = 0x0f1c63013dba},
-    {.s = 8, .a = 0xa73f5dc1d333, .b = 0xe35173494a81},
-    {.s = 9, .a = 0x69a32f1c2f19, .b = 0x6b8bd9860763},
-    {.s = 10, .a = 0x9becdf3d9273, .b = 0xf8493407799d},
-    {.s = 11, .a = 0x08b386463229, .b = 0x5efbaecef46b},
-    {.s = 12, .a = 0xcd4c61c26e3d, .b = 0x31c7610de3b0},
-    {.s = 13, .a = 0xa82607b01c0d, .b = 0x2910989b6880},
-    {.s = 14, .a = 0x0e8f64340ba4, .b = 0x4acec1205d75},
-    {.s = 15, .a = 0x2aa05ed1856f, .b = 0xeaac88e5dc99},
+    {.a = 0xa0a1a2a3a4a5, .b = 0xfbf225dc5d58},
+    {.a = 0xa82607b01c0d, .b = 0x2910989b6880},
+    {.a = 0x2aa05ed1856f, .b = 0xeaac88e5dc99},
+    {.a = 0x2aa05ed1856f, .b = 0xeaac88e5dc99},
+    {.a = 0x73068f118c13, .b = 0x2b7f3253fac5},
+    {.a = 0xfbc2793d540b, .b = 0xd3a297dc2698},
+    {.a = 0x2aa05ed1856f, .b = 0xeaac88e5dc99},
+    {.a = 0xae3d65a3dad4, .b = 0x0f1c63013dba},
+    {.a = 0xa73f5dc1d333, .b = 0xe35173494a81},
+    {.a = 0x69a32f1c2f19, .b = 0x6b8bd9860763},
+    {.a = 0x9becdf3d9273, .b = 0xf8493407799d},
+    {.a = 0x08b386463229, .b = 0x5efbaecef46b},
+    {.a = 0xcd4c61c26e3d, .b = 0x31c7610de3b0},
+    {.a = 0xa82607b01c0d, .b = 0x2910989b6880},
+    {.a = 0x0e8f64340ba4, .b = 0x4acec1205d75},
+    {.a = 0x2aa05ed1856f, .b = 0xeaac88e5dc99},
 };
 
 static const MfClassicKeyPair troika_4k_keys[] = {
-    {.s = 0, .a = 0xEC29806D9738, .b = 0xFBF225DC5D58},
-    {.s = 1, .a = 0xA0A1A2A3A4A5, .b = 0x7DE02A7F6025},
-    {.s = 2, .a = 0x2AA05ED1856F, .b = 0xEAAC88E5DC99},
-    {.s = 3, .a = 0x2AA05ED1856F, .b = 0xEAAC88E5DC99},
-    {.s = 4, .a = 0x73068F118C13, .b = 0x2B7F3253FAC5},
-    {.s = 5, .a = 0xFBC2793D540B, .b = 0xD3A297DC2698},
-    {.s = 6, .a = 0x2AA05ED1856F, .b = 0xEAAC88E5DC99},
-    {.s = 7, .a = 0xAE3D65A3DAD4, .b = 0x0F1C63013DBA},
-    {.s = 8, .a = 0xA73F5DC1D333, .b = 0xE35173494A81},
-    {.s = 9, .a = 0x69A32F1C2F19, .b = 0x6B8BD9860763},
-    {.s = 10, .a = 0x9BECDF3D9273, .b = 0xF8493407799D},
-    {.s = 11, .a = 0x08B386463229, .b = 0x5EFBAECEF46B},
-    {.s = 12, .a = 0xCD4C61C26E3D, .b = 0x31C7610DE3B0},
-    {.s = 13, .a = 0xA82607B01C0D, .b = 0x2910989B6880},
-    {.s = 14, .a = 0x0E8F64340BA4, .b = 0x4ACEC1205D75},
-    {.s = 15, .a = 0x2AA05ED1856F, .b = 0xEAAC88E5DC99},
-    {.s = 16, .a = 0x6B02733BB6EC, .b = 0x7038CD25C408},
-    {.s = 17, .a = 0x403D706BA880, .b = 0xB39D19A280DF},
-    {.s = 18, .a = 0xC11F4597EFB5, .b = 0x70D901648CB9},
-    {.s = 19, .a = 0x0DB520C78C1C, .b = 0x73E5B9D9D3A4},
-    {.s = 20, .a = 0x3EBCE0925B2F, .b = 0x372CC880F216},
-    {.s = 21, .a = 0x16A27AF45407, .b = 0x9868925175BA},
-    {.s = 22, .a = 0xABA208516740, .b = 0xCE26ECB95252},
-    {.s = 23, .a = 0xCD64E567ABCD, .b = 0x8F79C4FD8A01},
-    {.s = 24, .a = 0x764CD061F1E6, .b = 0xA74332F74994},
-    {.s = 25, .a = 0x1CC219E9FEC1, .b = 0xB90DE525CEB6},
-    {.s = 26, .a = 0x2FE3CB83EA43, .b = 0xFBA88F109B32},
-    {.s = 27, .a = 0x07894FFEC1D6, .b = 0xEFCB0E689DB3},
-    {.s = 28, .a = 0x04C297B91308, .b = 0xC8454C154CB5},
-    {.s = 29, .a = 0x7A38E3511A38, .b = 0xAB16584C972A},
-    {.s = 30, .a = 0x7545DF809202, .b = 0xECF751084A80},
-    {.s = 31, .a = 0x5125974CD391, .b = 0xD3EAFB5DF46D},
-    {.s = 32, .a = 0xFFFFFFFFFFFF, .b = 0xFFFFFFFFFFFF},
-    {.s = 33, .a = 0xFFFFFFFFFFFF, .b = 0xFFFFFFFFFFFF},
-    {.s = 34, .a = 0xFFFFFFFFFFFF, .b = 0xFFFFFFFFFFFF},
-    {.s = 35, .a = 0xFFFFFFFFFFFF, .b = 0xFFFFFFFFFFFF},
-    {.s = 36, .a = 0xFFFFFFFFFFFF, .b = 0xFFFFFFFFFFFF},
-    {.s = 37, .a = 0xFFFFFFFFFFFF, .b = 0xFFFFFFFFFFFF},
-    {.s = 38, .a = 0xFFFFFFFFFFFF, .b = 0xFFFFFFFFFFFF},
-    {.s = 39, .a = 0xFFFFFFFFFFFF, .b = 0xFFFFFFFFFFFF},
+    {.a = 0xEC29806D9738, .b = 0xFBF225DC5D58}, //1
+    {.a = 0xA0A1A2A3A4A5, .b = 0x7DE02A7F6025}, //2
+    {.a = 0x2AA05ED1856F, .b = 0xEAAC88E5DC99}, //3
+    {.a = 0x2AA05ED1856F, .b = 0xEAAC88E5DC99}, //4
+    {.a = 0x73068F118C13, .b = 0x2B7F3253FAC5}, //5
+    {.a = 0xFBC2793D540B, .b = 0xD3A297DC2698}, //6
+    {.a = 0x2AA05ED1856F, .b = 0xEAAC88E5DC99}, //7
+    {.a = 0xAE3D65A3DAD4, .b = 0x0F1C63013DBA}, //8
+    {.a = 0xA73F5DC1D333, .b = 0xE35173494A81}, //9
+    {.a = 0x69A32F1C2F19, .b = 0x6B8BD9860763}, //10
+    {.a = 0x9BECDF3D9273, .b = 0xF8493407799D}, //11
+    {.a = 0x08B386463229, .b = 0x5EFBAECEF46B}, //12
+    {.a = 0xCD4C61C26E3D, .b = 0x31C7610DE3B0}, //13
+    {.a = 0xA82607B01C0D, .b = 0x2910989B6880}, //14
+    {.a = 0x0E8F64340BA4, .b = 0x4ACEC1205D75}, //15
+    {.a = 0x2AA05ED1856F, .b = 0xEAAC88E5DC99}, //16
+    {.a = 0x6B02733BB6EC, .b = 0x7038CD25C408}, //17
+    {.a = 0x403D706BA880, .b = 0xB39D19A280DF}, //18
+    {.a = 0xC11F4597EFB5, .b = 0x70D901648CB9}, //19
+    {.a = 0x0DB520C78C1C, .b = 0x73E5B9D9D3A4}, //20
+    {.a = 0x3EBCE0925B2F, .b = 0x372CC880F216}, //21
+    {.a = 0x16A27AF45407, .b = 0x9868925175BA}, //22
+    {.a = 0xABA208516740, .b = 0xCE26ECB95252}, //23
+    {.a = 0xCD64E567ABCD, .b = 0x8F79C4FD8A01}, //24
+    {.a = 0x764CD061F1E6, .b = 0xA74332F74994}, //25
+    {.a = 0x1CC219E9FEC1, .b = 0xB90DE525CEB6}, //26
+    {.a = 0x2FE3CB83EA43, .b = 0xFBA88F109B32}, //27
+    {.a = 0x07894FFEC1D6, .b = 0xEFCB0E689DB3}, //28
+    {.a = 0x04C297B91308, .b = 0xC8454C154CB5}, //29
+    {.a = 0x7A38E3511A38, .b = 0xAB16584C972A}, //30
+    {.a = 0x7545DF809202, .b = 0xECF751084A80}, //31
+    {.a = 0x5125974CD391, .b = 0xD3EAFB5DF46D}, //32
+    {.a = 0xFFFFFFFFFFFF, .b = 0xFFFFFFFFFFFF}, //33
+    {.a = 0xFFFFFFFFFFFF, .b = 0xFFFFFFFFFFFF}, //34
+    {.a = 0xFFFFFFFFFFFF, .b = 0xFFFFFFFFFFFF}, //35
+    {.a = 0xFFFFFFFFFFFF, .b = 0xFFFFFFFFFFFF}, //36
+    {.a = 0xFFFFFFFFFFFF, .b = 0xFFFFFFFFFFFF}, //37
+    {.a = 0xFFFFFFFFFFFF, .b = 0xFFFFFFFFFFFF}, //38
+    {.a = 0xFFFFFFFFFFFF, .b = 0xFFFFFFFFFFFF}, //39
+    {.a = 0xFFFFFFFFFFFF, .b = 0xFFFFFFFFFFFF}, //40
 };
 
 static bool troika_get_card_config(TroikaCardConfig* config, MfClassicType type) {
