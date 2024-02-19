@@ -1,6 +1,6 @@
 name: "FAP: Build"
 
-on: [push]
+on: [push, workflow_dispatch]
 
 jobs:
   ufbt-build-action:
