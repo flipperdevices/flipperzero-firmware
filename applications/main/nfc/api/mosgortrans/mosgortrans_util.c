@@ -1,5 +1,7 @@
 #include "mosgortrans_util.h"
 
+#define TAG "Mosgortrans"
+
 void from_days_to_datetime(uint32_t days, DateTime* datetime, uint16_t start_year) {
     uint32_t timestamp = days * 24 * 60 * 60;
     DateTime start_datetime = {0};
@@ -473,14 +475,14 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
     if(!departament_valid) {
         return false;
     }
-    FURI_LOG_I(TAG2, "Transport departament: %x", transport_departament);
+    FURI_LOG_I(TAG, "Transport departament: %x", transport_departament);
     uint16_t layout_type = bit_lib_get_bits_16(block->data, 52, 4);
     if(layout_type == 0xE) {
         layout_type = bit_lib_get_bits_16(block->data, 52, 9);
     } else if(layout_type == 0xF) {
         layout_type = bit_lib_get_bits_16(block->data, 52, 14);
     }
-    FURI_LOG_I(TAG2, "Layout type %x", layout_type);
+    FURI_LOG_I(TAG, "Layout type %x", layout_type);
     switch(layout_type) {
     case 0x02: {
         parse_layout_2(&data_block, block);
