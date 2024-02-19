@@ -15,6 +15,7 @@ App(
     fap_icon_assets="images",
     fap_icon="totp_10px.png",
     fap_file_assets="assets",
+    fap_libs=["ble_profile"],
     fap_private_libs=[
         Lib(
             name="base32",
