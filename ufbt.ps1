@@ -61,6 +61,11 @@ if ($run_cleanup) {
         Remove-Item "$ufbt_build_dir/*" -Recurse -Force
     }
 }
+
+$assets_py = Join-Path (Resolve-Path "~/") ".ufbt/current/scripts/assets.py"
+
+(Get-Content $assets_py -Raw) -replace '"../targets/f7/api_symbols.csv"', '"../sdk_headers/f7_sdk/targets/f7/api_symbols.csv"' | Set-Content $assets_py -NoNewline
+
 ufbt $args_ls
 
 Pop-Location

@@ -3,7 +3,7 @@ name: Auto CLang format
 on:
   pull_request:
     types: [opened, synchronize, reopened]
-    branches: ['master']
+    branches: ["master"]
 
 jobs:
   clang-format:
@@ -13,23 +13,23 @@ jobs:
       contents: write
 
     steps:
-    - uses: actions/checkout@v3
-      with:
-        fetch-depth: 0
-        ref: ${{ github.head_ref }}
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.head_ref }}
 
-    - name: Get last commit on ${{ github.base_ref }} branch
-      run: echo "BASE_HEAD_REF=$(git rev-parse origin/${{ github.base_ref }})" >> $GITHUB_ENV
+      - name: Get last commit on ${{ github.base_ref }} branch
+        run: echo "BASE_HEAD_REF=$(git rev-parse origin/${{ github.base_ref }})" >> $GITHUB_ENV
 
-    - uses: akopachov/git-clang-format-diff-action@v1.0.0
-      with:
-        style: file
-        commit: ${{ env.BASE_HEAD_REF }}
+      - uses: akopachov/git-clang-format-diff-action@v1.0.0
+        with:
+          style: file
+          commit: ${{ env.BASE_HEAD_REF }}
 
-    - name: Update Permissions
-      run: sudo chown --recursive $USER .
+      - name: Update Permissions
+        run: sudo chown --recursive $USER .
 
-    - uses: stefanzweifel/git-auto-commit-action@v4.16.0
-      with:
-        commit_message: CLang format changes
-        branch: ${{ github.head_ref }}
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: CLang format changes"
+          branch: ${{ github.head_ref }}

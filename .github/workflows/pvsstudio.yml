@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
   pull_request:
     types: [opened, synchronize, reopened]
-    branches: ['master']
+    branches: ["master"]
 jobs:
   build-analyze:
     runs-on: ubuntu-latest
@@ -12,10 +12,10 @@ jobs:
       TARGETS: f7
       DEFAULT_TARGET: f7
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
-          submodules: 'recursive'
+          fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
+          submodules: "recursive"
       - name: Install tools
         run: |
           wget -q -O - https://files.pvs-studio.com/etc/pubkey.txt \
@@ -27,17 +27,17 @@ jobs:
           pvs-studio-analyzer credentials ${{ secrets.PVS_STUDIO_CREDENTIALS }}
 
       - name: Install Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
-      
+          python-version: "3.10"
+
       - name: Install uFBT
         run: python3 -m pip install --upgrade ufbt
 
       - name: Build
         shell: pwsh
-        run: ./ufbt.ps1 xs --clean
-          
+        run: ./ufbt.ps1 xd --clean
+
       - name: Analyze
         run: |
           pvs-studio-analyzer analyze @.pvsoptions -f totp/.vscode/compile_commands.json -j -o PVS-Studio.log
