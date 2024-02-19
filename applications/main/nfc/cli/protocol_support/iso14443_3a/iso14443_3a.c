@@ -1,10 +1,9 @@
 #include "iso14443_3a.h"
 
-static void iso14443_3a_cmd_handler_poll(Cli* cli, FuriString* args) {
-    UNUSED(cli);
-    UNUSED(args);
+#include "../nfc_cli_protocol_support_common.h"
 
-    printf("Hello iso14443-3a poll\r\n");
+static void iso14443_3a_cmd_handler_poll(Cli* cli, FuriString* args) {
+    // nfc_cli_protocol_support_common_poll_handler(NfcProtocolIso14443_3a, )
 }
 
 static void iso14443_3a_cmd_handler_start_poller(Cli* cli, FuriString* args) {
