@@ -484,7 +484,6 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
     switch(layout_type) {
     case 0x02: {
         parse_layout_2(&data_block, block);
-
         //number
         furi_string_cat_printf(result, "Number: %010lu\n", data_block.number);
         //use_before_date
@@ -701,6 +700,7 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
         if(data_block.validator) {
             furi_string_cat_printf(result, "Validator: %05d\n", data_block.validator);
         }
+        furi_string_free(transport);
         break;
     }
     case 0x0C: {
@@ -743,7 +743,7 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
         }
         //validator
         if(data_block.validator) {
-            furi_string_cat_printf(result, "Validator: %05d\n", data_block.validator);
+            furi_string_cat_printf(result, "Validator: %05d", data_block.validator);
         }
         break;
     }
@@ -800,7 +800,7 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
         }
         //validator
         if(data_block.validator) {
-            furi_string_cat_printf(result, "Validator: %05d\n", data_block.validator);
+            furi_string_cat_printf(result, "Validator: %05d", data_block.validator);
         }
         break;
     }
@@ -867,6 +867,7 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
         if(data_block.validator) {
             furi_string_cat_printf(result, "Validator: %05d", data_block.validator);
         }
+        furi_string_free(transport);
         break;
     }
     case 0xE2:
@@ -974,6 +975,7 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
         if(data_block.validator) {
             furi_string_cat_printf(result, "Validator: %05d", data_block.validator);
         }
+        furi_string_free(transport);
         break;
     }
     case 0xE3:
@@ -1090,7 +1092,10 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
         parse_transport_type(&data_block, transport);
         furi_string_cat_printf(result, "Transport: %s\n", furi_string_get_cstr(transport));
         // validator
-        furi_string_cat_printf(result, "Validator: %05d", data_block.validator);
+        if(data_block.validator) {
+            furi_string_cat_printf(result, "Validator: %05d", data_block.validator);
+        }
+        furi_string_free(transport);
         break;
     }
     case 0xE5:
@@ -1257,7 +1262,7 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
         from_days_to_datetime(data_block.valid_to_date, &card_use_to_date_s, 1992);
         furi_string_cat_printf(
             result,
-            "Valid to: %02d.%02d.%04d\n",
+            "Valid to: %02d.%02d.%04d",
             card_use_to_date_s.day,
             card_use_to_date_s.month,
             card_use_to_date_s.year);
@@ -1280,7 +1285,7 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
         from_days_to_datetime(data_block.valid_to_date, &card_use_to_date_s, 1992);
         furi_string_cat_printf(
             result,
-            "Valid to: %02d.%02d.%04d\n",
+            "Valid to: %02d.%02d.%04d",
             card_use_to_date_s.day,
             card_use_to_date_s.month,
             card_use_to_date_s.year);
