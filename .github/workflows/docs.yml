@@ -6,11 +6,11 @@ on:
       - dev
     tags:
       - '*'
+  pull_request:
 
 env:
   TARGETS: f7
   DEFAULT_TARGET: f7
-  FBT_TOOLCHAIN_PATH: /runner/_work
 
 jobs:
   doxygen:
@@ -21,7 +21,7 @@ jobs:
         run: find ./ -mount -maxdepth 1 -exec rm -rf {} \;
 
       - name: 'Checkout code'
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           submodules: true
           fetch-depth: 1
