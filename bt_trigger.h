@@ -4,7 +4,7 @@
 #include <furi.h>
 #include <furi_hal_bt.h>
 #include <furi_hal_usb_hid.h>
-#include <furi_hal_bt_hid.h>
+#include <extra_profiles/hid_profile.h>
 #include <gui/gui.h>
 #include <input/input.h>
 #include <notification/notification_messages.h>
@@ -14,6 +14,7 @@
 #include <gui/modules/popup.h>
 #include <dolphin/dolphin.h>
 #include "bt_trigger_icons.h"
+
 
 #define HID_BT_KEYS_STORAGE_PATH EXT_PATH("apps_data/hid_ble/.bt_hid.keys")
 #define TAG "bt_trigger"
@@ -33,6 +34,7 @@ typedef struct {
 
 typedef struct {
     Bt* bt;
+    FuriHalBleProfileBase* ble_hid_profile;
     Gui* gui;
     NotificationApp* notifications;
     ViewPort* view_port;
