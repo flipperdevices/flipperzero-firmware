@@ -3,7 +3,7 @@
 #include "../types/token_info.h"
 #include "../types/automation_kb_layout.h"
 
-typedef bool (*TOTP_AUTOMATION_KEY_HANDLER)(uint16_t key);
+typedef bool (*TOTP_AUTOMATION_KEY_HANDLER)(uint16_t key, void* context);
 
 /**
  * @brief Executes token input automation using given key press\release handlers
@@ -14,6 +14,7 @@ typedef bool (*TOTP_AUTOMATION_KEY_HANDLER)(uint16_t key);
  * @param features automation features
  * @param keyboard_layout keyboard layout to be used
  * @param initial_delay initial delay before starting automation
+ * @param context context to be passed to key press\release handlers
  */
 void totp_type_code_worker_execute_automation(
     TOTP_AUTOMATION_KEY_HANDLER key_press_fn,
@@ -22,4 +23,5 @@ void totp_type_code_worker_execute_automation(
     uint8_t code_buffer_size,
     TokenAutomationFeature features,
     AutomationKeyboardLayout keyboard_layout,
-    uint16_t initial_delay);
+    uint16_t initial_delay,
+    void* context);
