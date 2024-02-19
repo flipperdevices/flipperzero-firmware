@@ -6,7 +6,6 @@ on:
       - dev
     tags:
       - '*'
-  pull_request:
 
 env:
   TARGETS: f7
