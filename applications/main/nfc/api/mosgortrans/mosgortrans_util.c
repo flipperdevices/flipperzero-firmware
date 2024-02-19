@@ -273,7 +273,7 @@ void parse_layout_E1(BlockData* data_block, const MfClassicBlock* block) {
     data_block->passage_in_metro = bit_lib_get_bits(block->data, 0xB2, 1); //431
     data_block->passages_ground_transport = bit_lib_get_bits(block->data, 0xB3, 3); //433
     data_block->minutes_pass = bit_lib_get_bits(block->data, 0xB9, 8); //412
-    data_block->remaining_funds = bit_lib_get_bits_32(block->data, 0x4C, 19); //322
+    data_block->remaining_funds = bit_lib_get_bits_32(block->data, 0xC4, 19); //322
     data_block->fare_trip = bit_lib_get_bits(block->data, 0xD7, 2); //441
     data_block->blocked = bit_lib_get_bits(block->data, 0x9D, 1); //303
     data_block->zoo = bit_lib_get_bits(block->data, 0xDA, 1); //zoo
@@ -503,7 +503,7 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
             return true;
         }
         //remaining_trips
-        furi_string_cat_printf(result, "Trips left: %d\n", data_block.total_trips);
+        furi_string_cat_printf(result, "Trips: %d\n", data_block.total_trips);
         //valid_from_date
         DateTime card_valid_from_date_s = {0};
         from_days_to_datetime(data_block.valid_from_date, &card_valid_from_date_s, 1992);
@@ -523,7 +523,7 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
             card_valid_to_date_s.month,
             card_valid_to_date_s.year);
         //trip_number
-        furi_string_cat_printf(result, "Trip number: %d\n", data_block.total_trips);
+        furi_string_cat_printf(result, "Trips: %d\n", data_block.total_trips);
         //trip_from
         DateTime card_start_trip_minutes_s = {0};
         from_seconds_to_datetime(
@@ -575,7 +575,7 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
             card_valid_to_date_s.month,
             card_valid_to_date_s.year);
         //trip_number
-        furi_string_cat_printf(result, "Trip number: %d\n", data_block.total_trips);
+        furi_string_cat_printf(result, "Trips: %d\n", data_block.total_trips);
         //trip_from
         DateTime card_start_trip_minutes_s = {0};
         from_minutes_to_datetime(
