@@ -474,30 +474,13 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
         return false;
     }
     FURI_LOG_I(TAG2, "Transport departament: %x", transport_departament);
-
     uint16_t layout_type = bit_lib_get_bits_16(block->data, 52, 4);
     if(layout_type == 0xE) {
         layout_type = bit_lib_get_bits_16(block->data, 52, 9);
     } else if(layout_type == 0xF) {
         layout_type = bit_lib_get_bits_16(block->data, 52, 14);
     }
-
     FURI_LOG_I(TAG2, "Layout type %x", layout_type);
-
-    uint16_t card_view = 0;
-    uint16_t card_type = 0;
-    uint32_t card_number = 0;
-    uint8_t card_layout = 0;
-    uint8_t card_layout2 = 0;
-    uint16_t card_use_before_date = 0;
-    uint16_t card_blank_type = 0;
-    uint32_t card_start_trip_minutes = 0;
-    uint8_t card_minutes_pass = 0;
-    uint32_t card_remaining_funds = 0;
-    uint16_t card_validator = 0;
-    uint8_t card_blocked = 0;
-    uint32_t card_hash = 0;
-
     switch(layout_type) {
     case 0x02: {
         parse_layout_2(&data_block, block);
@@ -836,7 +819,7 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
             card_use_before_date_s.month,
             card_use_before_date_s.year);
         //remaining_funds
-        furi_string_cat_printf(result, "Balance: %d rub\n", data_block.remaining_funds / 100);
+        furi_string_cat_printf(result, "Balance: %ld rub\n", data_block.remaining_funds / 100);
         //trip_from
         if(data_block.start_trip_date) {
             DateTime card_start_trip_minutes_s = {0};
@@ -868,6 +851,7 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
                 furi_string_cat(transport, "Unknown");
                 break;
             }
+            break;
         case 2:
             furi_string_cat(transport, "Ground");
             break;
@@ -1062,7 +1046,7 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
             card_use_before_date_s.month,
             card_use_before_date_s.year);
         // remaining_funds
-        furi_string_cat_printf(result, "Trips left: %ld\n", data_block.remaining_funds);
+        furi_string_cat_printf(result, "Balance: %ld rub\n", data_block.remaining_funds);
         // valid_from_date
         DateTime card_use_from_date_s = {0};
         from_days_to_datetime(data_block.valid_from_date, &card_use_from_date_s, 2016);
