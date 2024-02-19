@@ -626,7 +626,7 @@ int32_t ble_spam(void* p) {
         memcpy(&prev_cfg, prev_cfg_ptr, sizeof(prev_cfg));
     }
     uint8_t prev_data[EXTRA_BEACON_MAX_DATA_SIZE];
-    uint8_t prev_data_len = furi_hal_bt_extra_beacon_get_data(&prev_data);
+    uint8_t prev_data_len = furi_hal_bt_extra_beacon_get_data(prev_data);
     bool prev_active = furi_hal_bt_extra_beacon_is_active();
 
     State* state = malloc(sizeof(State));
@@ -707,7 +707,7 @@ int32_t ble_spam(void* p) {
     if(prev_cfg_ptr) {
         furi_check(furi_hal_bt_extra_beacon_set_config(&prev_cfg));
     }
-    furi_check(furi_hal_bt_extra_beacon_set_data(&prev_data, prev_data_len));
+    furi_check(furi_hal_bt_extra_beacon_set_data(prev_data, prev_data_len));
     if(prev_active) {
         furi_check(furi_hal_bt_extra_beacon_start());
     }
