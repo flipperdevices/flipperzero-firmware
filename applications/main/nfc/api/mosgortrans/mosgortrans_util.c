@@ -519,7 +519,7 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
             return true;
         }
         //remaining_trips
-        furi_string_cat_printf(result, "Remaining trips: %d\n", data_block.total_trips);
+        furi_string_cat_printf(result, "Trips left: %d\n", data_block.total_trips);
         //valid_from_date
         DateTime card_valid_from_date_s = {0};
         from_days_to_datetime(data_block.valid_from_date, &card_valid_from_date_s, 1992);
@@ -571,7 +571,7 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
             card_use_before_date_s.month,
             card_use_before_date_s.year);
         //remaining_trips
-        furi_string_cat_printf(result, "Remaining trips: %d\n", data_block.remaining_trips);
+        furi_string_cat_printf(result, "Trips left: %d\n", data_block.remaining_trips);
         //valid_from_date
         DateTime card_valid_from_date_s = {0};
         from_days_to_datetime(data_block.valid_from_date, &card_valid_from_date_s, 1992);
@@ -619,7 +619,7 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
         DateTime card_use_before_date_s = {0};
         from_days_to_datetime(data_block.use_before_date, &card_use_before_date_s, 1992);
         //remaining_trips
-        furi_string_cat_printf(result, "Remaining trips: %d\n", data_block.remaining_trips);
+        furi_string_cat_printf(result, "Trips left: %d\n", data_block.remaining_trips);
         //valid_from_date
         DateTime card_valid_from_date_s = {0};
         from_days_to_datetime(data_block.valid_from_date, &card_valid_from_date_s, 1992);
@@ -655,7 +655,7 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
             card_use_before_date_s.month,
             card_use_before_date_s.year);
         //remaining_trips
-        furi_string_cat_printf(result, "Remaining trips: %d\n", data_block.remaining_trips);
+        furi_string_cat_printf(result, "Trips left: %d\n", data_block.remaining_trips);
         //valid_from_date
         DateTime card_valid_from_date_s = {0};
         from_days_to_datetime(data_block.valid_from_date, &card_valid_from_date_s, 2016);
@@ -728,7 +728,7 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
         DateTime card_use_before_date_s = {0};
         from_days_to_datetime(data_block.use_before_date, &card_use_before_date_s, 1992);
         //remaining_trips
-        furi_string_cat_printf(result, "Remaining trips: %d\n", data_block.remaining_trips);
+        furi_string_cat_printf(result, "Trips left: %d\n", data_block.remaining_trips);
         //valid_from_date
         DateTime card_valid_from_date_s = {0};
         from_days_to_datetime(data_block.valid_from_date, &card_valid_from_date_s, 1992);
@@ -749,7 +749,7 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
             card_valid_to_date_s.month,
             card_valid_to_date_s.year);
         //remaining_trips
-        furi_string_cat_printf(result, "Remaining trips: %d\n", data_block.remaining_trips);
+        furi_string_cat_printf(result, "Trips left: %d\n", data_block.remaining_trips);
         //trip_from
         if(data_block.start_trip_date) {
             DateTime card_start_trip_minutes_s = {0};
@@ -778,7 +778,7 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
             card_use_before_date_s.month,
             card_use_before_date_s.year);
         //remaining_trips
-        furi_string_cat_printf(result, "Remaining trips: %d\n", data_block.remaining_trips);
+        furi_string_cat_printf(result, "Trips left: %d\n", data_block.remaining_trips);
         //valid_from_date
         DateTime card_valid_from_date_s = {0};
         from_days_to_datetime(data_block.valid_from_date, &card_valid_from_date_s, 1992);
@@ -887,75 +887,109 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
     }
     case 0xE2:
     case 0x1C2: {
-        card_view = bit_lib_get_bits_16(block->data, 0, 10); //101
-        card_type = bit_lib_get_bits_16(block->data, 10, 10); //102
-        card_number = bit_lib_get_bits_32(block->data, 20, 32); //201
-        card_layout = bit_lib_get_bits(block->data, 52, 4); //111
-        card_layout2 = bit_lib_get_bits(block->data, 56, 5); //112
-        card_use_before_date = bit_lib_get_bits_16(block->data, 71, 16); //202.
-        card_blank_type = bit_lib_get_bits_16(block->data, 87, 10); //121.
-        card_validator = bit_lib_get_bits_16(block->data, 177, 16); //422
-        card_minutes_pass = bit_lib_get_bits(block->data, 154, 8); //412.
-        card_blocked = bit_lib_get_bits(block->data, 217, 1); //303
-        card_hash = bit_lib_get_bits_32(block->data, 224, 32); //502
-        uint16_t card_type_of_extended = bit_lib_get_bits_16(block->data, 61, 10); //122
-        uint16_t card_valid_to_date = bit_lib_get_bits_16(block->data, 97, 16); //311
-        uint16_t card_activate_during = bit_lib_get_bits_16(block->data, 113, 9); //302
-        uint32_t card_valid_for_minutes = bit_lib_get_bits_32(block->data, 131, 20); //314
-        uint8_t card_transport_type = bit_lib_get_bits(block->data, 163, 2); //421
-        uint8_t card_passage_in_metro = bit_lib_get_bits(block->data, 165, 1); //431
-        uint8_t card_transfer_in_metro = bit_lib_get_bits(block->data, 166, 1); //432
-        uint16_t card_remaining_trips = bit_lib_get_bits_16(block->data, 167, 10); //321
-        uint32_t card_start_trip_neg_minutes = bit_lib_get_bits_32(block->data, 196, 20); //404
-        uint8_t card_requires_activation = bit_lib_get_bits(block->data, 216, 1); //301
-        uint8_t card_extended = bit_lib_get_bits(block->data, 218, 1); //123
-
-        FURI_LOG_D(
-            TAG2,
-            "%x %x %lx %x %x %x %x %x %x %x %lx %x %x %x %x %x %x %lx %x %x %x %lx",
-            card_view,
-            card_type,
-            card_number,
-            card_layout,
-            card_layout2,
-            card_type_of_extended,
-            card_use_before_date,
-            card_blank_type,
-            card_valid_to_date,
-            card_activate_during,
-            card_valid_for_minutes,
-            card_minutes_pass,
-            card_transport_type,
-            card_passage_in_metro,
-            card_transfer_in_metro,
-            card_remaining_trips,
-            card_validator,
-            card_start_trip_neg_minutes,
-            card_requires_activation,
-            card_blocked,
-            card_extended,
-            card_hash);
+        parse_layout_E2(&data_block, block);
+        //number
+        furi_string_cat_printf(result, "Number: %010lu\n", data_block.number);
+        //use_before_date
         DateTime card_use_before_date_s = {0};
-        from_days_to_datetime(card_use_before_date, &card_use_before_date_s, 2016);
-
-        DateTime card_start_trip_minutes_s = {0};
-        from_minutes_to_datetime(
-            (card_valid_to_date) * 24 * 60 + card_valid_for_minutes - card_start_trip_neg_minutes,
-            &card_start_trip_minutes_s,
-            2016); //-time
-        furi_string_printf(
+        from_days_to_datetime(data_block.use_before_date, &card_use_before_date_s, 1992);
+        furi_string_cat_printf(
             result,
-            "Number: %010lu\nValid for: %02d.%02d.%04d\nTrip from: %02d.%02d.%04d %02d:%02d\nValidator: %05d",
-            card_number,
+            "Use before: %02d.%02d.%04d\n",
             card_use_before_date_s.day,
             card_use_before_date_s.month,
-            card_use_before_date_s.year,
-            card_start_trip_minutes_s.day,
-            card_start_trip_minutes_s.month,
-            card_start_trip_minutes_s.year,
-            card_start_trip_minutes_s.hour,
-            card_start_trip_minutes_s.minute,
-            card_validator);
+            card_use_before_date_s.year);
+        //remaining_trips
+        furi_string_cat_printf(result, "Trips left: %d\n", data_block.remaining_trips);
+        //valid_from_date
+        DateTime card_valid_from_date_s = {0};
+        from_days_to_datetime(data_block.valid_from_date, &card_valid_from_date_s, 1992);
+        furi_string_cat_printf(
+            result,
+            "Valid from: %02d.%02d.%04d\n",
+            card_valid_from_date_s.day,
+            card_valid_from_date_s.month,
+            card_valid_from_date_s.year);
+        //valid_to_date
+        if(data_block.activate_during) {
+            DateTime card_valid_to_date_s = {0};
+            from_days_to_datetime(
+                data_block.valid_from_date + data_block.activate_during,
+                &card_valid_to_date_s,
+                1992);
+            furi_string_cat_printf(
+                result,
+                "Valid to: %02d.%02d.%04d\n",
+                card_valid_to_date_s.day,
+                card_valid_to_date_s.month,
+                card_valid_to_date_s.year);
+        } else {
+            DateTime card_valid_to_date_s = {0};
+            from_minutes_to_datetime(
+                data_block.valid_from_date * 24 * 60 + data_block.valid_for_minutes - 1,
+                &card_valid_to_date_s,
+                1992);
+            furi_string_cat_printf(
+                result,
+                "Valid to: %02d.%02d.%04d\n",
+                card_valid_to_date_s.day,
+                card_valid_to_date_s.month,
+                card_valid_to_date_s.year);
+        }
+        //trip_from
+        if(data_block.start_trip_neg_minutes) {
+            DateTime card_start_trip_minutes_s = {0};
+            from_minutes_to_datetime(
+                data_block.valid_to_date * 24 * 60 + data_block.valid_for_minutes -
+                    data_block.start_trip_neg_minutes,
+                &card_start_trip_minutes_s,
+                1992); //-time
+            furi_string_cat_printf(
+                result,
+                "Trip from: %02d.%02d.%04d %02d:%02d\n",
+                card_start_trip_minutes_s.day,
+                card_start_trip_minutes_s.month,
+                card_start_trip_minutes_s.year,
+                card_start_trip_minutes_s.hour,
+                card_start_trip_minutes_s.minute);
+        }
+        //trip_switch
+        if(data_block.minutes_pass) {
+            DateTime card_start_switch_trip_minutes_s = {0};
+            from_minutes_to_datetime(
+                data_block.valid_from_date * 24 * 60 + data_block.valid_for_minutes -
+                    data_block.start_trip_neg_minutes + data_block.minutes_pass,
+                &card_start_switch_trip_minutes_s,
+                1992);
+            furi_string_cat_printf(
+                result,
+                "Trip switch: %02d.%02d.%04d %02d:%02d\n",
+                card_start_switch_trip_minutes_s.day,
+                card_start_switch_trip_minutes_s.month,
+                card_start_switch_trip_minutes_s.year,
+                card_start_switch_trip_minutes_s.hour,
+                card_start_switch_trip_minutes_s.minute);
+        }
+        //transport
+        FuriString* transport = furi_string_alloc();
+        switch(data_block.transport_type) {
+        case 1:
+            furi_string_cat(transport, "Metro");
+            break;
+        case 2:
+            furi_string_cat(transport, "Monorail");
+            break;
+        case 3:
+            furi_string_cat(transport, "Ground");
+            break;
+        default:
+            furi_string_cat(transport, "Unknown");
+            break;
+        }
+        //validator
+        if(data_block.validator) {
+            furi_string_cat_printf(result, "Validator: %05d", data_block.validator);
+        }
         break;
     }
     case 0xE3:
@@ -1028,7 +1062,7 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
             card_use_before_date_s.month,
             card_use_before_date_s.year);
         // remaining_funds
-        furi_string_cat_printf(result, "Remaining trips: %ld\n", data_block.remaining_funds);
+        furi_string_cat_printf(result, "Trips left: %ld\n", data_block.remaining_funds);
         // valid_from_date
         DateTime card_use_from_date_s = {0};
         from_days_to_datetime(data_block.valid_from_date, &card_use_from_date_s, 2016);
