@@ -39,7 +39,7 @@ jobs:
       - name: Generate checksum
         run: |
           cd build
-          find . -type f -maxdepth 1 -exec sha256sum {} \; > checksum.txt
+          find . -type f -maxdepth 1 -name '*.zip' -exec sha256sum {} \; > checksum.txt
 
       - uses: actions/upload-artifact@v4
         with:
