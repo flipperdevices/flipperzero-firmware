@@ -61,10 +61,9 @@ static void totp_type_code_worker_type_code(TotpBtTypeCodeWorkerContext* context
 
     if(context->is_connected &&
        furi_mutex_acquire(context->code_buffer_sync, 500) == FuriStatusOk) {
-        totp_type_code_worker_execute_automation_ctx(
-            (TOTP_AUTOMATION_KEY_HANDLER_CTX)&ble_profile_hid_kb_press,
-            (TOTP_AUTOMATION_KEY_HANDLER_CTX)&ble_profile_hid_kb_release,
-            context->ble_hid_profile,
+        totp_type_code_worker_execute_automation(
+            &furi_hal_bt_hid_kb_press,
+            &furi_hal_bt_hid_kb_release,
             context->code_buffer,
             context->code_buffer_size,
             context->flags,
