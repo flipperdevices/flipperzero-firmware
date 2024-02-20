@@ -1,5 +1,7 @@
 # Flipper Zero BT Serial Example App
 
+UPDATE: this code might not working with the current version of FW because of API changes. WIP to update this repo.
+
 This is a very simple Serial-over-Bluetooth app for Flipper Zero. You can use it (but better not to :D) as a reference app for building your own solutions. 
 
 ## What does it do?
