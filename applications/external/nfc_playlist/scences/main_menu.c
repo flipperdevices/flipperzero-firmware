@@ -41,8 +41,8 @@ void nfc_playlist_main_menu_menu_callback(void* context, uint32_t index) {
 
 void nfc_playlist_main_menu_scene_on_enter(void* context) {
     NfcPlaylist* nfc_playlist = context;
-    if(!nfc_playlist->file_selected) {
-        nfc_playlist->file_selected = true;
+    if(!nfc_playlist->settings.file_selected) {
+        nfc_playlist->settings.file_selected = true;
         scene_manager_next_scene(nfc_playlist->scene_manager, NfcPlaylistScene_FileSelect);
         return;
     }
@@ -55,7 +55,7 @@ void nfc_playlist_main_menu_scene_on_enter(void* context) {
         NfcPlaylistMenuSelection_Start,
         nfc_playlist_main_menu_menu_callback,
         nfc_playlist,
-        !nfc_playlist->file_selected_check,
+        !nfc_playlist->settings.file_selected_check,
         "No\nplaylist\nselected");
 
     submenu_add_item(
@@ -78,7 +78,6 @@ void nfc_playlist_main_menu_scene_on_enter(void* context) {
         NfcPlaylistMenuSelection_Settings,
         nfc_playlist_main_menu_menu_callback,
         nfc_playlist);
-
     view_dispatcher_switch_to_view(nfc_playlist->view_dispatcher, NfcPlaylistView_Menu);
 }
 

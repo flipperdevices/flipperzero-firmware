@@ -19,7 +19,7 @@ typedef enum {
     NfcPlaylistView_Popup,
     NfcPlaylistView_FileSelect,
     NfcPlaylistView_FileEdit,
-    NfcPlaylistView_TextInput,
+    NfcPlaylistView_TextInput
 } NfcPlayScenesView;
 
 typedef enum {
@@ -33,6 +33,16 @@ typedef enum {
 } NfcPlaylistScene;
 
 typedef struct {
+    FuriString* base_file_path;
+    FuriString* file_path;
+    bool file_selected;
+    bool file_selected_check;
+    uint8_t emulate_timeout;
+    uint8_t emulate_delay;
+    bool emulate_led_indicator;
+} NfcPlaylistSettings;
+
+typedef struct {
     SceneManager* scene_manager;
     ViewDispatcher* view_dispatcher;
     VariableItemList* variable_item_list;
@@ -43,13 +53,7 @@ typedef struct {
     NotificationApp* notification;
     FuriThread* thread;
     NfcPlaylistWorker* nfc_playlist_worker;
-    FuriString* base_file_path;
-    bool file_selected;
-    bool file_selected_check;
-    uint8_t emulate_timeout;
-    uint8_t emulate_delay;
-    bool emulate_led_indicator;
-    FuriString* file_path;
+    NfcPlaylistSettings settings;
     char* playlist_name;
 } NfcPlaylist;
 

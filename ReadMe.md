@@ -32,7 +32,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-02-17 11:30 EST`
 - Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-02-17 11:30 EST`
 - Updated: [WHC SWIO Flasher v1.0 (By sukvojte)](https://github.com/sukvojte/wch_swio_flasher)
-- To Be Merged OFW PRs: [3211](https://github.com/flipperdevices/flipperzero-firmware/pull/3211), [3366](https://github.com/flipperdevices/flipperzero-firmware/pull/3366), [3250](https://github.com/flipperdevices/flipperzero-firmware/pull/3250), [3402](https://github.com/flipperdevices/flipperzero-firmware/pull/3402), [3409](https://github.com/flipperdevices/flipperzero-firmware/pull/3409), [3406](https://github.com/flipperdevices/flipperzero-firmware/pull/3406), [3431](https://github.com/flipperdevices/flipperzero-firmware/pull/3431), [3254](https://github.com/flipperdevices/flipperzero-firmware/pull/3254), [3429](https://github.com/flipperdevices/flipperzero-firmware/pull/3429), [3286](https://github.com/flipperdevices/flipperzero-firmware/pull/3286), [3442](https://github.com/flipperdevices/flipperzero-firmware/pull/3442), [3445](https://github.com/flipperdevices/flipperzero-firmware/pull/3445), [3448](https://github.com/flipperdevices/flipperzero-firmware/pull/3448), [3446](https://github.com/flipperdevices/flipperzero-firmware/pull/3446), [3386](https://github.com/flipperdevices/flipperzero-firmware/pull/3386), [3450](https://github.com/flipperdevices/flipperzero-firmware/pull/3450), [3272](https://github.com/flipperdevices/flipperzero-firmware/pull/3272), [3449](https://github.com/flipperdevices/flipperzero-firmware/pull/3449), [3263](https://github.com/flipperdevices/flipperzero-firmware/pull/3263)
+- Updated: [NFC Playlist v1.4 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
 
 <a name="release">
 
@@ -442,7 +442,7 @@ $ ./fbt dolphin_ext
 - [Name Changer (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/488) (Change Flipper name)
 - [NFC Magic v1.6 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966)
 - [NFC Maker v1.2 (by Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/343cb39d08f60b75b537e1a31100707935cf6e9d)
-- [NFC Playlist v1.3 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
+- [NFC Playlist v1.4 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
 - [NFC Seader v2.3 (By bettse)](https://github.com/bettse/seader)
 - [Nightstand Clock v1.1 (By nymda)](https://github.com/nymda/FlipperNightStand)
 - [Notes for FZ WIP (By AdrianN001)](https://github.com/AdrianN001/Flipper-Zero-Note-Application)

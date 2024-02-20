@@ -23,5 +23,5 @@ int32_t nfc_playlist_emulation_task(void* context);
 typedef enum NfcPlaylistEmulationState {
     NfcPlaylistEmulationState_Emulating,
     NfcPlaylistEmulationState_Stopped,
-    NfcPlaylistEmulationState_Canceled,
+    NfcPlaylistEmulationState_Canceled
 } NfcPlaylistEmulationState;
