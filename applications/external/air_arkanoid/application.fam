@@ -7,12 +7,13 @@ App(
     fap_icon="icon.png",
     fap_category="GPIO/VGM",
     fap_file_assets="assets",
-    fap_extbuild=(
-        ExtFile(
-            path="${FAP_SRC_DIR}/assets",
-            command="python3 ${FAP_SRC_DIR}/engine/scripts/sprite_builder.py ${FAP_SRC_DIR.abspath}/sprites ${TARGET.abspath}/sprites",
-        ),
-    ),
+    #  Seems to not work on windows
+    #  fap_extbuild=(
+    #      ExtFile(
+    #          path="${FAP_SRC_DIR}/assets",
+    #          command="python3 ${FAP_SRC_DIR}/engine/scripts/sprite_builder.py ${FAP_SRC_DIR.abspath}/sprites ${TARGET.abspath}/sprites",
+    #      ),
+    #  ),
     fap_author="DrZlo13",
     fap_weburl="https://github.com/flipperdevices/flipperzero-good-faps/pull/141",
     fap_version="1.1",
