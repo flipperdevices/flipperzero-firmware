@@ -68,7 +68,7 @@ static NfcPlaylist* nfc_playlist_alloc() {
    nfc_playlist->file_browser = file_browser_alloc(nfc_playlist->settings.file_path);
    nfc_playlist->text_input = text_input_alloc();
    nfc_playlist->popup = popup_alloc();
-
+  
    view_dispatcher_set_event_callback_context(nfc_playlist->view_dispatcher, nfc_playlist);
    view_dispatcher_set_custom_event_callback(nfc_playlist->view_dispatcher, nfc_playlist_custom_callback);
    view_dispatcher_set_navigation_event_callback(nfc_playlist->view_dispatcher, nfc_playlist_back_event_callback);
