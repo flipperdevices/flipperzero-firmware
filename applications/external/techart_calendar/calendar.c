@@ -73,12 +73,10 @@ static void calendar_draw_callback(Canvas* canvas, void* ctx) {
     canvas_draw_line(canvas, 61, 1, 61, 61);
     canvas_draw_line(canvas, 73, 1, 73, 61);
 
-    DateTime date =
-        createDateTime(calendar_data->selected_year, calendar_data->selected_month, 1);
+    DateTime date = createDateTime(calendar_data->selected_year, calendar_data->selected_month, 1);
 
     int month = date.month;
-    int days_in_month =
-        datetime_get_days_per_month(datetime_is_leap_year(date.year), month);
+    int days_in_month = datetime_get_days_per_month(datetime_is_leap_year(date.year), month);
 
     int first_day_of_month = date.weekday;
     int day_of_month = 1;
