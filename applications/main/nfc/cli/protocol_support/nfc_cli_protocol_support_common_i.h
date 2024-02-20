@@ -59,3 +59,10 @@ typedef struct {
     NfcCliUserMessageType type;
     NfcCliUserMessageData data;
 } NfcCliUserMessage;
+
+typedef void (*NfcCliStartPollerHandler)(FuriString* cmd, NfcCliPollerContext* context);
+
+typedef struct {
+    const char* cmd;
+    NfcCliStartPollerHandler handler;
+} NfcCliStartPollerCommand;
