@@ -83,6 +83,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [BLE Spam v5.1 (By Willy-JL & ECTO-1A & Spooks4576 with research from xMasterX)](https://github.com/noproto/apple_ble_spam_ofw) - Changes By Willy-JL
 - Updated: [USB Mass Storage v1.3 (By nminaylov)](https://github.com/flipperdevices/flipperzero-good-faps/tree/nm/usb_mass_storage_app/mass_storage) [Based on OFW#1060 (By kevinwallace)](https://github.com/flipperdevices/flipperzero-firmware/pull/1060) - Changes By Willy-JL
 - Updated: [Authenticator/TOTP v5.12.0 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
+- Updated: [PicoPass (iClass) v1.13 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass) [Picopass block tracking #125 (By bettse)](https://github.com/flipperdevices/flipperzero-good-faps/pull/125)
 
 <a name="release">
 

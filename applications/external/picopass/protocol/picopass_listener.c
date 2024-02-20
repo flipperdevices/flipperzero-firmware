@@ -43,14 +43,12 @@ static void picopass_listener_loclass_update_csn(PicopassListener* instance) {
     // collect LOCLASS_NUM_PER_CSN nonces in a row for each CSN
     const uint8_t* csn =
         loclass_csns[(instance->key_block_num / LOCLASS_NUM_PER_CSN) % LOCLASS_NUM_CSNS];
-    memcpy(instance->data->card_data[PICOPASS_CSN_BLOCK_INDEX].data, csn, sizeof(PicopassBlock));
+    memcpy(instance->data->card_data[PICOPASS_CSN_BLOCK_INDEX].data, csn, PICOPASS_BLOCK_LEN);
 
     uint8_t key[PICOPASS_BLOCK_LEN] = {};
     loclass_iclass_calc_div_key(csn, picopass_iclass_key, key, false);
     memcpy(
-        instance->data->card_data[PICOPASS_SECURE_KD_BLOCK_INDEX].data,
-        key,
-        sizeof(PicopassBlock));
+        instance->data->card_data[PICOPASS_SECURE_KD_BLOCK_INDEX].data, key, PICOPASS_BLOCK_LEN);
 
     picopass_listener_init_cipher_state_key(instance, key);
 }
@@ -122,7 +120,7 @@ PicopassListenerCommand
             bit_buffer_copy_bytes(
                 instance->tmp_buffer,
                 instance->data->card_data[PICOPASS_CSN_BLOCK_INDEX].data,
-                sizeof(PicopassBlock));
+                PICOPASS_BLOCK_LEN);
         } else {
             picopass_listener_write_anticoll_csn(instance, instance->tmp_buffer);
         }
@@ -143,7 +141,7 @@ PicopassListenerCommand
         bit_buffer_copy_bytes(
             instance->tx_buffer,
             instance->data->card_data[PICOPASS_CSN_BLOCK_INDEX].data,
-            sizeof(PicopassBlock));
+            PICOPASS_BLOCK_LEN);
 
         PicopassError error = picopass_listener_send_frame(instance, instance->tx_buffer);
         if(error != PicopassErrorNone) {
@@ -181,7 +179,7 @@ PicopassListenerCommand
             bit_buffer_copy_bytes(
                 instance->tx_buffer,
                 instance->data->card_data[block_num].data,
-                sizeof(PicopassBlock));
+                PICOPASS_BLOCK_LEN);
         }
         PicopassError error = picopass_listener_send_frame(instance, instance->tx_buffer);
         if(error != PicopassErrorNone) {
@@ -216,7 +214,7 @@ static PicopassListenerCommand
 
         // DATA(8)
         bit_buffer_copy_bytes(
-            instance->tx_buffer, instance->data->card_data[block_num].data, sizeof(PicopassBlock));
+            instance->tx_buffer, instance->data->card_data[block_num].data, PICOPASS_BLOCK_LEN);
         NfcError error = nfc_listener_tx(instance->nfc, instance->tx_buffer);
         if(error != NfcErrorNone) {
             FURI_LOG_D(TAG, "Failed to tx read check response: %d", error);
@@ -508,7 +506,7 @@ PicopassListenerCommand
         case PICOPASS_SECURE_KC_BLOCK_INDEX:
             if(!pers_mode && secured) {
                 new_block = instance->data->card_data[block_num];
-                for(size_t i = 0; i < sizeof(PicopassBlock); i++) {
+                for(size_t i = 0; i < PICOPASS_BLOCK_LEN; i++) {
                     new_block.data[i] ^= rx_data[i + 2];
                 }
                 break;
@@ -516,7 +514,7 @@ PicopassListenerCommand
             // Use default case when in personalisation mode
             // fallthrough
         default:
-            memcpy(new_block.data, &rx_data[2], sizeof(PicopassBlock));
+            memcpy(new_block.data, &rx_data[2], PICOPASS_BLOCK_LEN);
             break;
         }
 
@@ -537,7 +535,7 @@ PicopassListenerCommand
             bit_buffer_copy_bytes(
                 instance->tx_buffer,
                 instance->data->card_data[block_num].data,
-                sizeof(PicopassBlock));
+                PICOPASS_BLOCK_LEN);
         }
 
         PicopassError error = picopass_listener_send_frame(instance, instance->tx_buffer);
@@ -572,12 +570,12 @@ PicopassListenerCommand
         for(uint8_t i = block_start; i < block_start + 4; i++) {
             if(secured &&
                ((i == PICOPASS_SECURE_KD_BLOCK_INDEX) || (i == PICOPASS_SECURE_KC_BLOCK_INDEX))) {
-                for(size_t j = 0; j < sizeof(PicopassBlock); j++) {
+                for(size_t j = 0; j < PICOPASS_BLOCK_LEN; j++) {
                     bit_buffer_append_byte(instance->tx_buffer, 0xff);
                 }
             } else {
                 bit_buffer_append_bytes(
-                    instance->tx_buffer, instance->data->card_data[i].data, sizeof(PicopassBlock));
+                    instance->tx_buffer, instance->data->card_data[i].data, PICOPASS_BLOCK_LEN);
             }
         }
 
