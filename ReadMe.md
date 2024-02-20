@@ -86,7 +86,7 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 | WAV Player | ![Media Badge] | [OFW: DrZlo13](https://github.com/flipperdevices/flipperzero-firmware/tree/zlo/wav-player) | Fixed and improved by [LTVA1](https://github.com/LTVA1/wav_player) -> Also outputs audio on `PA6` `3(A6)` pin | [![UFW Badge]](https://lab.flipper.net/apps/wav_player) |
 | Metronome | ![Media Badge] | [by panki27](https://github.com/panki27/Metronome) |  | [![UFW Badge]](https://lab.flipper.net/apps/metronome) |
 | Morse Code | ![Media Badge] | [by wh00hw](https://github.com/wh00hw/MorseCodeFAP) |  | [![UFW Badge]](https://lab.flipper.net/apps/morse_code) |
-| **BadKB** plugin | ![BT Badge] | [by Willy-JL, ClaraCrazy, XFW contributors](https://github.com/Flipper-XFW/Xtreme-Firmware/tree/dev/applications/main/bad_kb) | BadKB (aka BadUSB via Bluetooth) | ![None Badge] |
+| **BadKB** plugin | ![Tools Badge] | [by Willy-JL, ClaraCrazy, XFW contributors](https://github.com/Flipper-XFW/Xtreme-Firmware/tree/dev/applications/main/bad_kb) | BadKB (aka BadUSB via Bluetooth) | ![None Badge] |
 | BLE Spam | ![BT Badge] | [by @Willy-JL & @ECTO-1A & @Spooks4576](https://github.com/Flipper-XFW/Xtreme-Firmware/tree/dev/applications/external/ble_spam) |  | ![None Badge] |
 
 ### Games
