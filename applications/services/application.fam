@@ -11,4 +11,5 @@ App(
         "loader",
         "power",
     ],
+    sdk_headers=["applications.h"],
 )

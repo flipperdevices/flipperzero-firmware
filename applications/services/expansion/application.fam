@@ -5,6 +5,8 @@ App(
     cdefines=["SRV_EXPANSION"],
     sdk_headers=[
         "expansion.h",
+        "expansion_i.h",
+        "expansion_settings.h",
     ],
     requires=["rpc_start"],
     provides=["expansion_settings"],
