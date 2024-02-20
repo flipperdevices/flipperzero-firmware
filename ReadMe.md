@@ -29,8 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0217-1130-0.97.2-b49d478](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-02-19 22:37 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-02-19 22:37 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-02-19 22:57 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-02-19 22:57 EST`
 - Updated: [WHC SWIO Flasher v1.0 (By sukvojte)](https://github.com/sukvojte/wch_swio_flasher)
 
 ## CHANGES FROM THIS BRANCH:
@@ -75,12 +75,13 @@ This software is for experimental purposes only and is not meant for any illegal
 - [Add JS UsbDisk support (like Mass Storage) (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/498f64406455a1aef691655f26b44809c021965a)
 - [Sub-GHz: Fix led blink on decode raw - signal info (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/aa957a72232c3e83b183e4e455b7d59001ca3408)
 - OFW: [ble: profile rework #3272 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/3272)
-- [BLE Refactor & HID App Merge Fixes and Improvements (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/97384ce3cc8939f2713bd643c032d6a829b78f24)
+- [BLE Refactor & HID App Merge Fixes and Improvements (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/426cb889730bbb5e60fa21cc963322d0023eb5c5)
 - OFW: [Add notification sending #3449 (By drunkbatya)](https://github.com/flipperdevices/flipperzero-firmware/pull/3449) - USELESS
 - OFW: [HID: Add confirmation dialogue to the remove pairing option #3263 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3263)
 - OFW: [Quote $FBT_TOOLCHAIN_PATH to avoid splitting #3459 (By shreve)](https://github.com/flipperdevices/flipperzero-firmware/pull/3459)
-- [Refactor updates for FuriHalRTC datetime lib (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/6a03d45915cab3723bb85fc61f7ecd7f5b278767)
-- Updated: [BLE Spam v5.1 (By Willy-JL & ECTO-1A & Spooks4576 with research from xMasterX)](https://github.com/noproto/apple_ble_spam_ofw)
+- [Refactor updates (on several RM only apps) for FuriHalRTC datetime lib (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/426cb889730bbb5e60fa21cc963322d0023eb5c5)
+- Updated: [BLE Spam v5.1 (By Willy-JL & ECTO-1A & Spooks4576 with research from xMasterX)](https://github.com/noproto/apple_ble_spam_ofw) - Changes By Willy-JL
+- Updated: [USB Mass Storage v1.3 (By nminaylov)](https://github.com/flipperdevices/flipperzero-good-faps/tree/nm/usb_mass_storage_app/mass_storage) [Based on OFW#1060 (By kevinwallace)](https://github.com/flipperdevices/flipperzero-firmware/pull/1060) - Changes By Willy-JL
 
 <a name="release">
 
