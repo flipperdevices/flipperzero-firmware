@@ -18,7 +18,6 @@ typedef struct {
 typedef enum {
     NfcCliProtocolRequestTypeActivate,
     NfcCliProtocolRequestTypeFrameExchange,
-    NfcCliProtocolRequestTypeActivateInfo,
 } NfcCliProtocolRequestType;
 
 typedef struct {
@@ -27,16 +26,11 @@ typedef struct {
 } NfcCliProtocolRequestFrameExchangeData;
 
 typedef struct {
-    const NfcDeviceData* dev_data;
-    FuriString* formatted_data;
-} NfcCliProtocolRequestActivateInfoData;
-
-typedef struct {
     NfcGenericInstance* poller;
     NfcCliPollerError error;
     union {
         NfcCliProtocolRequestFrameExchangeData frame_exchange;
-        NfcCliProtocolRequestActivateInfoData activation_info;
+        FuriString* activation_info;
     };
 } NfcCliProtocolRequestData;
 

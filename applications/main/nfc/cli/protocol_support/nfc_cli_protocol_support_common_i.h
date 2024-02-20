@@ -22,6 +22,7 @@ typedef struct {
     FuriMessageQueue* worker_queue;
     uint8_t buffer[NFC_CLI_PROTOCOL_SUPPORT_MAX_BUFFER_SIZE];
     BitBuffer* rx_data;
+    FuriString* formatted_data;
     NfcCliProtocolSupportCommonCallback callback;
 } NfcCliPollerContext;
 
@@ -50,6 +51,7 @@ typedef struct {
     NfcCliPollerError error;
     union {
         BitBuffer* rx_data;
+        FuriString* formatted_data;
     };
 } NfcCliUserMessageData;
 

@@ -15,6 +15,7 @@ static NfcCliPollerContext* nfc_cli_poller_context_alloc(NfcProtocol protocol) {
     instance->user_queue = furi_message_queue_alloc(8, sizeof(NfcCliUserMessage));
     instance->worker_queue = furi_message_queue_alloc(8, sizeof(NfcCliWorkerMessage));
     instance->rx_data = bit_buffer_alloc(NFC_CLI_PROTOCOL_SUPPORT_MAX_BUFFER_SIZE);
+    instance->formatted_data = furi_string_alloc();
 
     return instance;
 }
@@ -24,6 +25,7 @@ static void nfc_cli_poller_context_free(NfcCliPollerContext* instance) {
 
     nfc_poller_stop(instance->poller);
 
+    furi_string_free(instance->formatted_data);
     bit_buffer_free(instance->rx_data);
     furi_message_queue_free(instance->worker_queue);
     furi_message_queue_free(instance->user_queue);
@@ -67,12 +69,14 @@ static NfcCommand
             NfcCliProtocolRequest activate_request = {
                 .type = NfcCliProtocolRequestTypeActivate,
                 .data.poller = event.poller,
+                .data.activation_info = instance->formatted_data,
             };
             instance->callback(&activate_request);
 
             NfcCliUserMessage tx_message = {
                 .type = NfcCliUserMessageTypeStatus,
                 .data.error = activate_request.data.error,
+                .data.formatted_data = instance->formatted_data,
             };
             furi_check(
                 furi_message_queue_put(instance->user_queue, &tx_message, FuriWaitForever) ==
@@ -210,18 +214,9 @@ void nfc_cli_protocol_support_common_poll_handler(
                 break;
             }
 
-            NfcCliProtocolRequest request = {
-                .type = NfcCliProtocolRequestTypeActivateInfo,
-                .data.activation_info =
-                    {
-                        .dev_data = nfc_poller_get_data(instance->poller),
-                        .formatted_data = tmp_str,
-                    },
-            };
-            instance->callback(&request);
             printf(
                 "Activation success: %s\r\n",
-                furi_string_get_cstr(request.data.activation_info.formatted_data));
+                furi_string_get_cstr(rx_message.data.formatted_data));
         }
 
         for(NfcCliPollCmdDataArray_it(iter, cmd_arr); !NfcCliPollCmdDataArray_end_p(iter);

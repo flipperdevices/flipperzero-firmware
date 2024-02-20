@@ -29,8 +29,22 @@ static void iso14443_3a_request_handler(NfcCliProtocolRequest* request) {
     Iso14443_3aError error = Iso14443_3aErrorNone;
 
     if(request->type == NfcCliProtocolRequestTypeActivate) {
-        Iso14443_3aError error = iso14443_3a_poller_activate(poller, NULL);
+        Iso14443_3aData iso3_data = {};
+        Iso14443_3aError error = iso14443_3a_poller_activate(poller, &iso3_data);
         request->data.error = nfc_cli_iso14443_3a_process_error(error);
+        if(request->data.error == NfcCliPollerErrorNone) {
+            FuriString* activation_info = request->data.activation_info;
+            furi_string_printf(activation_info, "UID:");
+            for(size_t i = 0; i < iso3_data.uid_len; i++) {
+                furi_string_cat_printf(activation_info, " %02X", iso3_data.uid[i]);
+            }
+            furi_string_cat_printf(
+                activation_info,
+                " ATQA: %02X%02X SAK: %02X",
+                iso3_data.atqa[0],
+                iso3_data.atqa[1],
+                iso3_data.sak);
+        }
     } else if(request->type == NfcCliProtocolRequestTypeFrameExchange) {
         const NfcCliPollCmdData* tx_data = request->data.frame_exchange.tx_data;
         if(tx_data->append_crc) {
@@ -46,19 +60,6 @@ static void iso14443_3a_request_handler(NfcCliProtocolRequest* request) {
         } else {
             request->data.error = nfc_cli_iso14443_3a_process_error(error);
         }
-    } else if(request->type == NfcCliProtocolRequestTypeActivateInfo) {
-        const Iso14443_3aData* iso3_data = request->data.activation_info.dev_data;
-        FuriString* activation_info = request->data.activation_info.formatted_data;
-        furi_string_printf(activation_info, "UID:");
-        for(size_t i = 0; i < iso3_data->uid_len; i++) {
-            furi_string_cat_printf(activation_info, " %02X", iso3_data->uid[i]);
-        }
-        furi_string_cat_printf(
-            activation_info,
-            " ATQA: %02X%02X SAK: %02X",
-            iso3_data->atqa[0],
-            iso3_data->atqa[1],
-            iso3_data->sak);
     }
 }
 
