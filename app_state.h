@@ -12,6 +12,9 @@ typedef struct AppState {
     char result_code[MAX_FILENAME_LEN]; // What dmcomm sent back
     char file_name_tmp[MAX_FILENAME_LEN]; // Filename to save codes as
     bool waitForCode;
+    int codeLen;
+    int rpackets;
+    int spackets;
     FuriString* s_code; // First code sent
     FuriString* r_code; // Second code sent
     FcomScene save_code_return_scene; // What scene we should go back to when done saving

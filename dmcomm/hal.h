@@ -9,6 +9,11 @@ Kinda janky but works well enough for this
 #include "flipper.h"
 #include "../app_state.h"
 
+#define HIGH true
+#define LOW false
+#define INPUT 1
+#define OUTPUT 0
+
 typedef uint8_t byte;
 typedef bool boolean;
 
@@ -31,6 +36,7 @@ void Serial_println(void);
 void Serial_printi(const int c);
 const char *F(const char* i);
 void delay(int ms);
+void delayMicroseconds(int us);
 int analogRead(const GpioPin* pin);
 uint32_t micros();
 uint32_t millis();

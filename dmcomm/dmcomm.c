@@ -52,8 +52,6 @@ const unsigned int ended_capture_ms = 500;
 
 #define command_buffer_size 64 //no point having it bigger than system serial buffer
 #define log_length 1000
-#define HIGH true
-#define LOW false
 
 
 //bytes for log protocol

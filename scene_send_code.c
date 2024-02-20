@@ -15,6 +15,23 @@ Right will go to the save code dialog for the new code (if there is one)
 /*
 Callback from dmcomm serial output. Similar to the callback in read code,
 but output is single sided
+
+
+206199692 [I][FCOM] DMComm Data: s:800E r:023E s:218E r:A02E s:483E r:B69E s:142E r:28CE s:010E 
+206199696 [I][FCOM] reading code
+206199698 [I][FCOM] found s
+206199700 [I][FCOM] found r
+206199701 [I][FCOM] found s
+206199703 [I][FCOM] found r
+206199705 [I][FCOM] found s
+206199707 [I][FCOM] found r
+206199708 [I][FCOM] found s
+206199710 [I][FCOM] found r
+206199712 [I][FCOM] found s
+206199714 [I][FCOM] s code V1-800E-218E-483E-142E-010E
+206199717 [I][FCOM] r code V2-023E-A02E-B69E-28CE-0C6E-11FE
+206199726 [I][FCOM] done
+206210730 [I][FCOM] DMComm Data: r:0C6E s:A00E r:11FE
 */
 void scbs(void* context)
 {
@@ -36,14 +53,19 @@ void scbs(void* context)
     if(app->state->waitForCode)
     {
         FURI_LOG_I(TAG, "reading code");
-        furi_string_reset(app->state->r_code);
-        furi_string_reset(app->state->s_code);
-        int rpackets = 0;
-        int spackets = 0;
         int l = strlen(out);
         int first = true;
         for(int i = 0; i < l; i++)
         {
+            if(out[i] == 't')
+            { // reset for timeout and continue
+                app->state->spackets = 0;
+                app->state->rpackets = 0;
+                furi_string_reset(app->state->r_code);
+                furi_string_reset(app->state->s_code);
+            }
+
+            // Scode
             if(out[i] == 's' && i + 5 < l)
             {
                 FURI_LOG_I(TAG, "found s");
@@ -61,11 +83,17 @@ void scbs(void* context)
                     furi_string_cat_printf(app->state->s_code, "-");
 
                 i += 2; // :
-                for(int j = 0; j < 4; j++)
+                int limit = 4;
+                for(int j = 0; j < limit; j++)
+                {
+                    if(out[i] == '@' || out[i] == '^')
+                        limit++; // These are extra control characters
                     furi_string_push_back(app->state->s_code, out[i++]); // 4 hex
-                spackets++;
+                }
+                app->state->spackets++;
             }
 
+            // Rcode
             if(out[i] == 'r' && i + 5 < l)
             {
                 FURI_LOG_I(TAG, "found r");
@@ -83,15 +111,20 @@ void scbs(void* context)
                     furi_string_cat_printf(app->state->r_code, "-");
 
                 i += 2; // :
-                for(int j = 0; j < 4; j++)
+                int limit = 4;
+                for(int j = 0; j < limit; j++)
+                {
+                    if(out[i] == '@' || out[i] == '^')
+                        limit++; // These are extra control characters
                     furi_string_push_back(app->state->r_code, out[i++]); // 4 hex
-                rpackets++;
+                }
+                app->state->rpackets++;
             }
         }
 
 
         //if spackets == rpackets and spackets = code packets, then present code for saving
-        if(rpackets > 0 && spackets > 0 && abs(rpackets-spackets) <= 1)
+        if(app->state->rpackets == app->state->codeLen && app->state->spackets == app->state->codeLen)
         {
             FURI_LOG_I(TAG, "s code %s", furi_string_get_cstr(app->state->s_code));
             FURI_LOG_I(TAG, "r code %s", furi_string_get_cstr(app->state->r_code));
@@ -140,6 +173,14 @@ void fcom_send_code_scene_on_enter(void* context) {
     dialog_ex_set_context(app->dialog, app);
 
     // Setup dmcomm to send
+    app->state->codeLen = 0;
+    app->state->rpackets = 0;
+    app->state->spackets = 0;
+    for(size_t i = 0; i < strlen(app->state->current_code); i++)
+    {
+        if(app->state->current_code[i] == '-')
+            app->state->codeLen++;
+    }
     app->state->waitForCode = true;
     setSerialOutputCallback(scbs);
     furi_string_reset(app->state->r_code);

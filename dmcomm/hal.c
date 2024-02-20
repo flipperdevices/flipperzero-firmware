@@ -148,6 +148,11 @@ void delay(int ms)
   furi_delay_ms(ms);
 }
 
+void delayMicroseconds(int us)
+{
+  furi_delay_us(us);
+}
+
 uint32_t micros()
 {
   return DWT->CYCCNT / furi_hal_cortex_instructions_per_microsecond();
