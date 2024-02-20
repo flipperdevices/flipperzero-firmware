@@ -117,7 +117,7 @@ void drawTextSpace(int8_t x, int8_t y, char* txt, uint8_t space, Canvas* const c
     while((ch = txt[i]) != '\0') {
         drawChar(pos, y, ch, canvas);
         i++;
-        pos += CHAR_WIDTH + space;
+        pos += UICHAR_WIDTH + space;
 
         // shortcut on end of screen
         if(pos > SCREEN_WIDTH) return;
