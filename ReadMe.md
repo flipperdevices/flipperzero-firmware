@@ -29,8 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0220-1303-0.98.4-4f05be2](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-02-20 13:03 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-02-20 13:03 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-02-20 18:54 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-02-20 18:54 EST`
 - Updated: [WHC SWIO Flasher v1.0 (By sukvojte)](https://github.com/sukvojte/wch_swio_flasher)
 - OFW: [FuriHal: UART refactoring #3211 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3211)
 - OFW: [FuriHal: interrupt priorities and documentation #3366 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3366)
@@ -85,6 +85,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: PR: [Adding F13-F24 function key support to BadUSB #3468 (By gcvai)](https://github.com/flipperdevices/flipperzero-firmware/pull/3468)
 - Updated: [ESP Flasher v1.5 (By 0xchocolate)](https://github.com/0xchocolate/flipperzero-esp-flasher) [Updated Assets to Marauder 0.13.8 (By justcallmekoko)](https://github.com/justcallmekoko/ESP32Marauder/releases/tag/v0.13.8)
 - Updated: [NFC Playlist v1.4 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
+- UL: [Code improvements for coming C++ change (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/0fcd9a55d3b16a0af4ff2243327c6aa61b820f77)
+- Updated: [Epansion Module Settings as FAP (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/06ae2ca9cd17040f39dd1be34f73f6f59096ad9f)
 
 <a name="release">
 
