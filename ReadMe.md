@@ -84,6 +84,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Air Arkanoid  v1.1 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-good-faps/pull/141)
 - OFW: PR: [Adding F13-F24 function key support to BadUSB #3468 (By gcvai)](https://github.com/flipperdevices/flipperzero-firmware/pull/3468)
 - Updated: [ESP Flasher v1.5 (By 0xchocolate)](https://github.com/0xchocolate/flipperzero-esp-flasher) [Updated Assets to Marauder 0.13.8 (By justcallmekoko)](https://github.com/justcallmekoko/ESP32Marauder/releases/tag/v0.13.8)
+- Updated: [NFC Playlist v1.4 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
 
 <a name="release">
 
@@ -480,7 +481,7 @@ $ ./fbt dolphin_ext
 - [Name Changer (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/488) (Change Flipper name)
 - [NFC Magic v1.6 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966)
 - [NFC Maker v1.2 (by Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/343cb39d08f60b75b537e1a31100707935cf6e9d)
-- [NFC Playlist v1.3 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
+- [NFC Playlist v1.4 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
 - [NFC Seader v2.4 (By bettse)](https://github.com/bettse/seader)
 - [Nightstand Clock v1.1 (By nymda)](https://github.com/nymda/FlipperNightStand)
 - [Notes for FZ WIP (By AdrianN001)](https://github.com/AdrianN001/Flipper-Zero-Note-Application)
