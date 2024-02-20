@@ -9,7 +9,7 @@
 #include <storage/storage_sd_api.h>
 #include <power/power_service/power.h>
 
-#define MAX_NAME_LENGTH 255
+#define MAX_NAME_LENGTH 254
 
 static void storage_cli_print_usage() {
     printf("Usage:\r\n");

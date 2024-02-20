@@ -54,6 +54,8 @@ static StorageType storage_get_type_by_path(FuriString* path) {
         type = ST_EXT;
     } else if(memcmp(path_cstr, STORAGE_INT_PATH_PREFIX, strlen(STORAGE_INT_PATH_PREFIX)) == 0) {
         type = ST_INT;
+    } else if(memcmp(path_cstr, STORAGE_MNT_PATH_PREFIX, strlen(STORAGE_MNT_PATH_PREFIX)) == 0) {
+        type = ST_MNT;
     } else if(memcmp(path_cstr, STORAGE_ANY_PATH_PREFIX, strlen(STORAGE_ANY_PATH_PREFIX)) == 0) {
         type = ST_ANY;
     }
@@ -89,7 +91,6 @@ FS_Error storage_get_data(Storage* app, FuriString* path, StorageData** storage)
             storage_path_change_to_real_storage(path, type);
         }
 
-        furi_assert(type == ST_EXT || type == ST_INT);
         *storage = &app->storage[type];
 
         return FSE_OK;
@@ -713,6 +714,10 @@ void storage_process_message_internal(Storage* app, StorageMessage* message) {
         storage_path_trim_trailing_slashes(path2);
         storage_process_alias(app, path1, message->data->cequivpath.thread_id, false);
         storage_process_alias(app, path2, message->data->cequivpath.thread_id, false);
+        // Comparison is done on path name, same beginning of name != same file/folder
+        // Check with a / suffixed to ensure same file/folder name
+        furi_string_cat(path1, "/");
+        furi_string_cat(path2, "/");
         if(message->data->cequivpath.truncate) {
             furi_string_left(path2, furi_string_size(path1));
         }
@@ -739,6 +744,25 @@ void storage_process_message_internal(Storage* app, StorageMessage* message) {
         break;
     case StorageCommandSDStatus:
         message->return_data->error_value = storage_process_sd_status(app);
+        break;
+
+    // Virtual operations
+    case StorageCommandVirtualInit:
+        File* image = message->data->virtualinit.image;
+        StorageData* image_storage = get_storage_by_file(image, app->storage);
+        message->return_data->error_value = storage_process_virtual_init(image_storage, image);
+        break;
+    case StorageCommandVirtualFormat:
+        message->return_data->error_value = storage_process_virtual_format(&app->storage[ST_MNT]);
+        break;
+    case StorageCommandVirtualMount:
+        message->return_data->error_value = storage_process_virtual_mount(&app->storage[ST_MNT]);
+        break;
+    case StorageCommandVirtualUnmount:
+        message->return_data->error_value = storage_process_virtual_unmount(&app->storage[ST_MNT]);
+        break;
+    case StorageCommandVirtualQuit:
+        message->return_data->error_value = storage_process_virtual_quit(&app->storage[ST_MNT]);
         break;
     }
 

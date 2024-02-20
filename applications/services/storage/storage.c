@@ -44,6 +44,7 @@ Storage* storage_app_alloc() {
         storage_data_timestamp(&app->storage[i]);
     }
 
+    storage_mnt_init(&app->storage[ST_MNT]);
 #ifndef FURI_RAM_EXEC
     storage_int_init(&app->storage[ST_INT]);
 #endif
