@@ -20,7 +20,7 @@ typedef enum {
    NfcPlaylistView_Popup,
    NfcPlaylistView_FileSelect,
    NfcPlaylistView_FileEdit,
-   NfcPlaylistView_TextInput,
+   NfcPlaylistView_TextInput
 } NfcPlayScenesView;
 
 typedef enum {
@@ -58,8 +58,8 @@ typedef struct {
    char* playlist_name;
 } NfcPlaylist;
 
-static const int options_emulate_timeout[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
+static const int options_emulate_timeout[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
 static const int default_emulate_timeout = 4;
-static const int options_emulate_delay[] = { 0, 1, 2, 3, 4, 5, 6 };
+static const int options_emulate_delay[] = {0, 1, 2, 3, 4, 5, 6};
 static const int default_emulate_delay = 0;
 static const bool default_emulate_led_indicator = true;
