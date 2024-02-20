@@ -28,9 +28,7 @@ bool power_settings_scene_power_off_on_event(void* context, SceneManagerEvent ev
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == DialogExResultLeft) {
-            if(!scene_manager_previous_scene(app->scene_manager)) {
-                scene_manager_next_scene(app->scene_manager, PowerSettingsAppSceneBatteryInfo);
-            }
+            scene_manager_next_scene(app->scene_manager, PowerSettingsAppSceneBatteryInfo);
         } else if(event.event == DialogExResultRight) {
             power_off(app->power);
         }
