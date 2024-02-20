@@ -80,6 +80,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [HID: Add confirmation dialogue to the remove pairing option #3263 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3263)
 - OFW: [Quote $FBT_TOOLCHAIN_PATH to avoid splitting #3459 (By shreve)](https://github.com/flipperdevices/flipperzero-firmware/pull/3459)
 - [Refactor updates for FuriHalRTC datetime lib (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/6a03d45915cab3723bb85fc61f7ecd7f5b278767)
+- Updated: [BLE Spam v5.1 (By Willy-JL & ECTO-1A & Spooks4576 with research from xMasterX)](https://github.com/noproto/apple_ble_spam_ofw)
 
 <a name="release">
 
@@ -367,7 +368,7 @@ $ ./fbt dolphin_ext
 - [Battery Checker (By Programistich)](https://github.com/Programistich/battery_checker)
 - [BG Loader (By twisted-pear)](https://github.com/twisted-pear/bgloader)
 - [BlackJack Counter v1.0 (By grugnoymeme)](https://github.com/grugnoymeme/flipperzero-blackjack_counter-fap)
-- [BLE Spam v4.4 (By Willy-JL & ECTO-1A & Spooks4576 with research from xMasterX; OFW API thanks to noproto)](https://github.com/noproto/apple_ble_spam_ofw)
+- [BLE Spam v5.1 (By Willy-JL & ECTO-1A & Spooks4576 with research from xMasterX; OFW API thanks to noproto)](https://github.com/noproto/apple_ble_spam_ofw)
 - [Bluetooth/USB Remote v1.7 (By Cutch)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/1330) [Accelerated Mouse Pointer (By LeeroysHub)](https://github.com/LeeroysHub/flipperzero-firmware-wPlugins/commit/f67680d5b004a72419550a8268802030a8421643)
 - [BMI Air Mouse v0.9 (By ginkage)](https://github.com/ginkage/FlippAirMouse/) `Req: BMI160`
 - [BPM Tapper v1.1 (By panki27)](https://github.com/panki27/bpm-tapper)
