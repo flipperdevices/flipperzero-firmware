@@ -23,8 +23,6 @@ static NfcCliPollerContext* nfc_cli_poller_context_alloc(NfcProtocol protocol) {
 static void nfc_cli_poller_context_free(NfcCliPollerContext* instance) {
     furi_assert(instance);
 
-    nfc_poller_stop(instance->poller);
-
     furi_string_free(instance->formatted_data);
     bit_buffer_free(instance->rx_data);
     furi_message_queue_free(instance->worker_queue);
@@ -129,6 +127,7 @@ void nfc_cli_protocol_support_common_poll_handler(
     NfcCliPollCmdDataArray_t cmd_arr;
     NfcCliPollCmdDataArray_init(cmd_arr);
     NfcCliPollCmdDataArray_it_t iter;
+    NfcCliPollerContext* instance = nfc_cli_poller_context_alloc(protocol);
 
     do {
         // TODO parse parameters
@@ -154,15 +153,14 @@ void nfc_cli_protocol_support_common_poll_handler(
                 break;
             }
 
-            uint8_t data[256] = {};
-            if(!args_read_hex_bytes(tmp_str, data, cmd_ascii_len / 2)) {
+            if(!args_read_hex_bytes(tmp_str, instance->buffer, cmd_ascii_len / 2)) {
                 printf("Failed to read hex bytes\r\n");
                 read_data_success = false;
                 break;
             }
 
             BitBuffer* buff = bit_buffer_alloc(cmd_ascii_len / 2);
-            bit_buffer_copy_bytes(buff, data, cmd_ascii_len / 2);
+            bit_buffer_copy_bytes(buff, instance->buffer, cmd_ascii_len / 2);
             NfcCliPollCmdData cmd = {
                 .append_crc = params.append_crc,
                 .timeout = params.timeout,
@@ -182,7 +180,6 @@ void nfc_cli_protocol_support_common_poll_handler(
             break;
         }
 
-        NfcCliPollerContext* instance = nfc_cli_poller_context_alloc(protocol);
         instance->callback = callback;
         nfc_poller_start_ex(
             instance->poller, nfc_cli_protocol_support_poll_worker_callback, instance);
@@ -210,7 +207,7 @@ void nfc_cli_protocol_support_common_poll_handler(
                 furi_check(
                     furi_message_queue_get(instance->user_queue, &rx_message, FuriWaitForever) ==
                     FuriStatusOk);
-                nfc_cli_poller_context_free(instance);
+                nfc_poller_stop(instance->poller);
                 break;
             }
 
@@ -260,9 +257,10 @@ void nfc_cli_protocol_support_common_poll_handler(
             furi_message_queue_get(instance->user_queue, &rx_message, FuriWaitForever) ==
             FuriStatusOk);
 
-        nfc_cli_poller_context_free(instance);
+        nfc_poller_stop(instance->poller);
     } while(false);
 
+    nfc_cli_poller_context_free(instance);
     for(NfcCliPollCmdDataArray_it(iter, cmd_arr); !NfcCliPollCmdDataArray_end_p(iter);
         NfcCliPollCmdDataArray_next(iter)) {
         const NfcCliPollCmdData* cmd = NfcCliPollCmdDataArray_cref(iter);
@@ -505,6 +503,7 @@ void nfc_cli_protocol_support_common_start_poller_handler(
 
     printf("Poller stopped\r\n");
 
+    nfc_poller_stop(instance->poller);
     nfc_cli_poller_context_free(instance);
     furi_string_free(cmd_str);
     furi_string_free(tmp_str);
