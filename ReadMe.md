@@ -86,6 +86,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [PicoPass (iClass) v1.13 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass) [Picopass block tracking #125 (By bettse)](https://github.com/flipperdevices/flipperzero-good-faps/pull/125)
 - Updated: [Air Arkanoid  v1.1 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-good-faps/pull/141)
 - OFW: PR: [Adding F13-F24 function key support to BadUSB #3468 (By gcvai)](https://github.com/flipperdevices/flipperzero-firmware/pull/3468)
+- Updated: [ESP Flasher v1.5 (By 0xchocolate)](https://github.com/0xchocolate/flipperzero-esp-flasher) [Updated Assets to Marauder 0.13.8 (By justcallmekoko)](https://github.com/justcallmekoko/ESP32Marauder/releases/tag/v0.13.8)
 
 <a name="release">
 
