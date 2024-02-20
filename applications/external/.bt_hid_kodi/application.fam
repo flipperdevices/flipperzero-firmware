@@ -4,6 +4,7 @@ App(
     apptype=FlipperAppType.EXTERNAL,
     entry_point="bt_hid_kodi",
     stack_size=1 * 1024,
+    fap_libs=["ble_profile"],
     fap_icon_assets_symbol="bt_hid_kodi",
     fap_icon="bt_remote_10px.png",
     fap_icon_assets="assets",

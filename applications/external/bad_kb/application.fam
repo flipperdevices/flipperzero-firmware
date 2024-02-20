@@ -5,6 +5,7 @@ App(
     entry_point="bad_kb_app",
     stack_size=2 * 1024,
     icon="A_BadKb_14",
+    fap_libs=["ble_profile"],
     fap_category="USB",
     fap_icon="images/badkb_10px.png",
     fap_icon_assets="images",

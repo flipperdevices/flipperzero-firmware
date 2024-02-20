@@ -5,6 +5,7 @@ App(
     entry_point="bt_trigger_app",
     stack_size=1 * 1024,
     fap_icon="bt_trigger_logo.png",
+    fap_libs=["ble_profile"],
     fap_category="Bluetooth",
     fap_icon_assets="assets",
     fap_icon_assets_symbol="bt_trigger",

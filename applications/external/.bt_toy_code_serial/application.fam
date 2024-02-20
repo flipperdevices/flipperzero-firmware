@@ -4,6 +4,7 @@ App(
     apptype=FlipperAppType.EXTERNAL,
     entry_point="fbp_app",
     stack_size=1 * 1024,
+    fap_libs=["ble_profile"],
     fap_icon="ToySerial_10px.png",
     fap_category="Bluetooth",
 )
