@@ -1,0 +1,11 @@
+App(
+    appid="bad_kb",
+    name="Bad KB",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="bad_kb_app",
+    stack_size=2 * 1024,
+    order=70,
+    fap_icon="icon.png",
+    fap_category="Tools",
+    fap_libs=["assets"],
+)
