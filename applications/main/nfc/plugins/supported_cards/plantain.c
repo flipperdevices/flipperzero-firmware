@@ -170,29 +170,37 @@ static bool plantain_parse(const NfcDevice* device, FuriString* parsed_data) {
             bit_lib_bytes_to_num_be(sec_tr->key_a.data, COUNT_OF(sec_tr->key_a.data));
         if(key != cfg.keys[cfg.data_sector].a) break;
 
-        // Point to block 0 of sector 4, value 0
-        const uint8_t* temp_ptr = data->block[16].data;
-        // Read first 4 bytes of block 0 of sector 4 from last to first and convert them to uint32_t
-        // 38 18 00 00 becomes 00 00 18 38, and equals to 6200 decimal
-        uint32_t balance =
-            ((temp_ptr[3] << 24) | (temp_ptr[2] << 16) | (temp_ptr[1] << 8) | temp_ptr[0]) / 100;
-        // Read card number
-        // Point to block 0 of sector 0, value 0
-        temp_ptr = data->block[0].data;
-        // Read first 7 bytes of block 0 of sector 0 from last to first and convert them to uint64_t
-        // 04 31 16 8A 23 5C 80 becomes 80 5C 23 8A 16 31 04, and equals to 36130104729284868 decimal
-        uint8_t card_number_arr[7];
-        for(size_t i = 0; i < 7; i++) {
-            card_number_arr[i] = temp_ptr[6 - i];
-        }
-        // Copy card number to uint64_t
+        furi_string_printf(parsed_data, "\e#Plantain card\n");
         uint64_t card_number = 0;
         for(size_t i = 0; i < 7; i++) {
-            card_number = (card_number << 8) | card_number_arr[i];
+            card_number = (card_number << 8) | data->block[0].data[6 - i];
         }
 
-        furi_string_printf(
-            parsed_data, "\e#Plantain\nN:%llu-\nBalance:%lu\n", card_number, balance);
+        // Print card number with 4-digit groups
+        furi_string_cat_printf(parsed_data, "Number: ");
+        FuriString* card_number_s = furi_string_alloc();
+        furi_string_cat_printf(card_number_s, "%lld", card_number);
+        FuriString* tmp_s = furi_string_alloc_set_str("9643 3078 ");
+        for(uint8_t i = 0; i < 24; i += 4) {
+            for(uint8_t j = 0; j < 4; j++) {
+                furi_string_push_back(tmp_s, furi_string_get_char(card_number_s, i + j));
+            }
+            furi_string_push_back(tmp_s, ' ');
+        }
+        furi_string_cat_printf(parsed_data, "%s\n", furi_string_get_cstr(tmp_s));
+
+        uint32_t balance = 0;
+        for(uint8_t i = 0; i < 5; i++) {
+            balance = (balance << i * 8) | data->block[16].data[4 - i];
+        }
+        furi_string_cat_printf(parsed_data, "Balance: %ld", balance / 100);
+        uint16_t last_payment_timestamp = 0;
+        for(uint8_t i = 0; i < 3; i++) {
+            last_payment_timestamp = (last_payment_timestamp << 8) | data->block[18].data[4 - i];
+        }
+        
+        furi_string_free(card_number_s);
+        furi_string_free(tmp_s);
         parsed = true;
     } while(false);
 
