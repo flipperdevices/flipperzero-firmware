@@ -127,8 +127,6 @@ bool mass_storage_scene_create_image_on_event(void* context, SceneManagerEvent e
             const char* error = NULL;
             bool success = false;
 
-            size_t wipe_4k = 4096;
-            uint8_t* buffer = malloc(wipe_4k);
             do {
                 if(!storage_file_open(
                        app->file,
@@ -141,13 +139,13 @@ bool mass_storage_scene_create_image_on_event(void* context, SceneManagerEvent e
                 if(size == app->create_image_max) size--;
                 if(!storage_file_expand(app->file, size)) break;
 
-                // Zero out first 4k - partition table and adjacent data
-                if(!storage_file_seek(app->file, 0, true)) break;
-                if(!storage_file_write(app->file, buffer, wipe_4k)) break;
+                // Format as exFAT
+                if(storage_virtual_init(app->fs_api, app->file) != FSE_OK) break;
+                if(storage_virtual_format(app->fs_api) != FSE_OK) break;
+                if(storage_virtual_quit(app->fs_api) != FSE_OK) break;
 
                 success = true;
             } while(false);
-            free(buffer);
 
             if(!success) {
                 error = storage_file_get_error_desc(app->file);
