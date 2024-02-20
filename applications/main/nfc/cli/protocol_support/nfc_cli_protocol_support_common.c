@@ -308,6 +308,15 @@ static bool nfc_cli_protocol_support_common_process_input(Cli* cli, FuriString* 
                 printf("\r\n... ");
                 fflush(stdout);
             }
+        } else if(c == CliSymbolAsciiBackspace) {
+            size_t len = furi_string_size(cmd);
+            if(len > 0) {
+                // Other side
+                printf("\e[D\e[1P");
+                fflush(stdout);
+                // Our side
+                furi_string_left(cmd, len - 1);
+            }
         }
     }
 
