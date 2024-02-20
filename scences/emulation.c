@@ -29,7 +29,6 @@ void nfc_playlist_emulation_scene_on_exit(void* context) {
 
 void nfc_playlist_emulation_setup(void* context) {
    NfcPlaylist* nfc_playlist = context;
-
    nfc_playlist->thread = furi_thread_alloc_ex("NfcPlaylistEmulationWorker", 8192, nfc_playlist_emulation_task, nfc_playlist);
    nfc_playlist->nfc_playlist_worker = nfc_playlist_worker_alloc();
 }
