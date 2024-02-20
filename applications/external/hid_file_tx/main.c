@@ -14,10 +14,8 @@
 #include <stream/stream.h>
 #include <stream/buffered_file_stream.h>
 #include <toolbox/stream/file_stream.h>
-#include "filelogger.h"
 #include "constants.h"
 #include "hidtransfer_icons.h"
-#include <assets_icons.h>
 
 #define HEX_VIEWER_APP_PATH_FOLDER "/any"
 #define HEX_VIEWER_APP_EXTENSION "*"
@@ -365,7 +363,7 @@ static void dispatch_view(void* contextd, uint32_t index) {
             furi_string_cat_printf(
                 textBoxText, "\nCAUTION: %d messages are missing.", missingMsgs);
             FuriString* txtMsg = furi_string_alloc_printf("%d messages are missing.", missingMsgs);
-            popup_set_icon(popup, 4, 19, &I_Warning_30x23);
+            // popup_set_icon(popup, 4, 19, &I_Warning__30x23);
             popup_set_header(popup, "CAUTION", 53, 19, AlignLeft, AlignCenter);
             popup_set_text(popup, furi_string_get_cstr(txtMsg), 39, 28, AlignLeft, AlignTop);
             popup_set_callback(popup, &openMenu);
@@ -409,8 +407,6 @@ bool inputCallback(InputEvent* event, void* context) {
 
 int32_t hidtransfer_app() {
     furi_log_set_level(FuriLogLevelDebug);
-    furi_hal_console_enable();
-
     FURI_LOG_D(TAG, "APP STARTED");
 
     FuriHalUsbInterface* mode = furi_hal_usb_get_config();

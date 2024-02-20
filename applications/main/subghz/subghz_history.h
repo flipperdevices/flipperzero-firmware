@@ -37,6 +37,14 @@ void subghz_history_delete_item(SubGhzHistory* instance, uint16_t idx);
  */
 uint32_t subghz_history_get_hash_data(SubGhzHistory* instance, uint16_t idx);
 
+/** Get protocol pointer to history[idx]
+ * 
+ * @param instance - SubGhzHistory instance
+ * @param idx      - record index
+ * @return proto   - protocol pointer
+ */
+const SubGhzProtocol* subghz_history_get_protocol(SubGhzHistory* instance, uint16_t idx);
+
 /** Get repeat count to history[idx]
  * 
  * @param instance  - SubGhzHistory instance
@@ -86,6 +94,14 @@ uint8_t subghz_history_get_type_protocol(SubGhzHistory* instance, uint16_t idx);
  */
 const char* subghz_history_get_protocol_name(SubGhzHistory* instance, uint16_t idx);
 
+/** Get datetime from history[idx]
+ * 
+ * @param instance  - SubGhzHistory instance
+ * @param idx       - record index  
+ * @return datetime - DateTime received timestamp  
+ */
+DateTime subghz_history_get_datetime(SubGhzHistory* instance, uint16_t idx);
+
 /** Get string item menu to history[idx]
  * 
  * @param instance  - SubGhzHistory instance
@@ -107,9 +123,14 @@ void subghz_history_get_time_item_menu(SubGhzHistory* instance, FuriString* outp
  * @param instance  - SubGhzHistory instance
  * @param output    - FuriString* output
  * @param sats      - Number of satellites
+ * @param ignore_full - Ignore if history is full
  * @return bool - is FULL
  */
-bool subghz_history_get_text_space_left(SubGhzHistory* instance, FuriString* output, uint8_t sats);
+bool subghz_history_get_text_space_left(
+    SubGhzHistory* instance,
+    FuriString* output,
+    uint8_t sats,
+    bool ignore_full);
 
 /** Return last index
  *

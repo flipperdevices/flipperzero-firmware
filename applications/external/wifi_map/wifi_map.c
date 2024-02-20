@@ -9,11 +9,10 @@
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
 #include <gui/elements.h>
-#include <furi_hal_uart.h>
-#include <furi_hal_console.h>
 #include <gui/view_dispatcher.h>
 #include <gui/modules/dialog_ex.h>
 #include <locale/locale.h>
+#include <expansion/expansion.h>
 
 #define MAX_AP_LIST 20
 #define WORKER_EVENTS_MASK (WorkerEventStop | WorkerEventRx)
@@ -30,6 +29,7 @@ typedef struct {
     FuriThread* worker_thread;
     FuriStreamBuffer* rx_stream;
     File* file;
+    FuriHalSerialHandle* serial_handle;
 } WiFiMapApp;
 
 typedef struct WifiMapModel WifiMapModel;
@@ -143,11 +143,13 @@ static uint32_t uart_echo_exit(void* context) {
     return VIEW_NONE;
 }
 
-static void uart_echo_on_irq_cb(UartIrqEvent ev, uint8_t data, void* context) {
+static void
+    uart_echo_on_irq_cb(FuriHalSerialHandle* handle, FuriHalSerialRxEvent event, void* context) {
     furi_assert(context);
     WiFiMapApp* app = context;
 
-    if(ev == UartIrqEventRXNE) {
+    if(event == FuriHalSerialRxEventData) {
+        uint8_t data = furi_hal_serial_async_rx(handle);
         furi_stream_buffer_send(app->rx_stream, &data, 1, 0);
         furi_thread_flags_set(furi_thread_get_id(app->worker_thread), WorkerEventRx);
     }
@@ -244,9 +246,10 @@ static WiFiMapApp* wifi_map_app_alloc() {
     furi_thread_start(app->worker_thread);
 
     // Enable uart listener
-    furi_hal_console_disable();
-    furi_hal_uart_set_br(FuriHalUartIdUSART1, 115200);
-    furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, uart_echo_on_irq_cb, app);
+    app->serial_handle = furi_hal_serial_control_acquire(FuriHalSerialIdUsart);
+    furi_check(app->serial_handle);
+    furi_hal_serial_init(app->serial_handle, 115200);
+    furi_hal_serial_async_rx_start(app->serial_handle, uart_echo_on_irq_cb, app, false);
 
     return app;
 }
@@ -254,7 +257,8 @@ static WiFiMapApp* wifi_map_app_alloc() {
 static void wifi_map_app_free(WiFiMapApp* app) {
     furi_assert(app);
 
-    furi_hal_console_enable();
+    furi_hal_serial_deinit(app->serial_handle);
+    furi_hal_serial_control_release(app->serial_handle);
 
     furi_thread_flags_set(furi_thread_get_id(app->worker_thread), WorkerEventStop);
     furi_thread_join(app->worker_thread);
@@ -291,9 +295,14 @@ static void wifi_map_app_free(WiFiMapApp* app) {
 
 int32_t wifi_map_app(void* p) {
     UNUSED(p);
+
+    // Disable expansion protocol to avoid interference with UART Handle
+    Expansion* expansion = furi_record_open(RECORD_EXPANSION);
+    expansion_disable(expansion);
+
     FURI_LOG_I(TAG, "wifi_map_app starting...");
     WiFiMapApp* app = wifi_map_app_alloc();
-    FuriHalRtcDateTime* rtc = malloc(sizeof(FuriHalRtcDateTime));
+    DateTime* rtc = malloc(sizeof(DateTime));
     furi_hal_rtc_get_datetime(rtc);
     FuriString* datetime = furi_string_alloc();
     furi_string_printf(
@@ -312,6 +321,11 @@ int32_t wifi_map_app(void* p) {
     furi_string_free(datetime);
     free(rtc);
     wifi_map_app_free(app);
+
+    // Return previous state of expansion
+    expansion_enable(expansion);
+    furi_record_close(RECORD_EXPANSION);
+
     return 0;
 }
 

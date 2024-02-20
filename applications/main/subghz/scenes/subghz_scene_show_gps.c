@@ -7,7 +7,7 @@ void subghz_scene_show_gps_draw_satellites(void* context) {
     FuriString* text = furi_string_alloc();
     FuriString* time_text = furi_string_alloc();
 
-    FuriHalRtcDateTime datetime;
+    DateTime datetime;
     furi_hal_rtc_get_datetime(&datetime);
     if((datetime.second - subghz->gps->fix_second) > 15) {
         subghz->gps->latitude = NAN;

@@ -210,8 +210,6 @@ CfwApp* cfw_app_alloc() {
     view_dispatcher_add_view(
         app->view_dispatcher, CfwAppViewDialogEx, dialog_ex_get_view(app->dialog_ex));
 
-    CFW_SETTINGS();
-
     //Main Menu Add/Remove list + Start Point
 
     CharList_init(app->mainmenu_app_names);

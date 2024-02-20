@@ -39,9 +39,8 @@ void lfrfid_scene_emulate_on_enter(void* context) {
     if(!furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug) || app->fav_timeout)
         furi_timer_start(
             timer_auto_exit,
-            app->fav_timeout ?
-                CFW_SETTINGS()->favorite_timeout * furi_kernel_get_tick_frequency() :
-                LFRFID_EMULATION_TIME_MAX_MS);
+            app->fav_timeout ? cfw_settings.favorite_timeout * furi_kernel_get_tick_frequency() :
+                               LFRFID_EMULATION_TIME_MAX_MS);
 
     view_dispatcher_switch_to_view(app->view_dispatcher, LfRfidViewPopup);
 }

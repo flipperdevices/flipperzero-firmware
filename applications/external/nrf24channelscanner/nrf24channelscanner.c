@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <furi.h>
-#include <furi_hal.h>
+#include <furi_hal_power.h>
 #include <gui/gui.h>
 #include <input/input.h>
 #include <gui/elements.h>
@@ -258,7 +258,6 @@ int32_t nrf24channelscanner_main(void* p) {
     }
     nrf24_deinit();
 
-    //turn off 5v
     if(furi_hal_power_is_otg_enabled() && !otg_was_enabled) {
         furi_hal_power_disable_otg();
     }

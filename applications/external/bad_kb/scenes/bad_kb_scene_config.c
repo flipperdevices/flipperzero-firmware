@@ -1,5 +1,4 @@
-#include "../bad_kb_app.h"
-#include "../helpers/ducky_script.h"
+#include "../bad_kb_app_i.h"
 #include "furi_hal_power.h"
 #include "furi_hal_usb.h"
 
@@ -142,7 +141,7 @@ bool bad_kb_scene_config_on_event(void* context, SceneManagerEvent event) {
                 scene_manager_next_scene(bad_kb->scene_manager, BadKbSceneConfigBtMac);
                 break;
             case VarItemListIndexBtRandomizeMac:
-                furi_hal_random_fill_buf(bad_kb->config.bt_mac, BAD_KB_MAC_LEN);
+                furi_hal_random_fill_buf(bad_kb->config.ble.mac, sizeof(bad_kb->config.ble.mac));
                 bad_kb_config_refresh(bad_kb);
                 break;
             default:
@@ -166,8 +165,8 @@ bool bad_kb_scene_config_on_event(void* context, SceneManagerEvent event) {
             case VarItemListIndexUsbRandomizeVidPid:
                 furi_hal_random_fill_buf(
                     (void*)bad_kb->usb_vidpid_buf, sizeof(bad_kb->usb_vidpid_buf));
-                bad_kb->config.usb_cfg.vid = bad_kb->usb_vidpid_buf[0];
-                bad_kb->config.usb_cfg.pid = bad_kb->usb_vidpid_buf[1];
+                bad_kb->config.usb.vid = bad_kb->usb_vidpid_buf[0];
+                bad_kb->config.usb.pid = bad_kb->usb_vidpid_buf[1];
                 bad_kb_config_refresh(bad_kb);
                 break;
             default:

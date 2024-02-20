@@ -23,8 +23,6 @@
 #include "protocols/emv/emv.h"
 #include "helpers/nfc_emv_parser.h"
 
-#include <furi_hal_rtc.h>
-
 #define TAG "EMV"
 
 bool emv_get_currency_name(uint16_t cur_code, FuriString* currency_name) {
@@ -99,7 +97,7 @@ static bool emv_parse(const NfcDevice* device, FuriString* parsed_data) {
         }
 
         if(app.effective_month) {
-            char day[] = "dd";
+            char day[] = "--";
             if(app.effective_day) itoa(app.effective_day, day, 16);
             if(day[1] == '\0') {
                 day[1] = day[0];
@@ -117,7 +115,7 @@ static bool emv_parse(const NfcDevice* device, FuriString* parsed_data) {
         }
 
         if(app.exp_month) {
-            char day[] = "dd";
+            char day[] = "--";
             if(app.exp_day) itoa(app.exp_day, day, 16);
             if(day[1] == '\0') {
                 day[1] = day[0];

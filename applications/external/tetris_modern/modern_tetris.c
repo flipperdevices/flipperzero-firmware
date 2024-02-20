@@ -438,7 +438,7 @@ static void
 
 static void tetris_game_draw_b2b_count(Canvas* const canvas, const TetrisState* tetris_state) {
     if(tetris_state->b2b_count <= 0) return;
-    size_t b2b_size = snprintf(NULL, 0, "B2B%d", tetris_state->b2b_count) + 1; // +1 for the '\0'
+    size_t b2b_size = snprintf(NULL, 0, "B2B%d", tetris_state->b2b_count) + 2; // +1 for the '\0'
     char* str = malloc(b2b_size);
     snprintf(str, b2b_size, "B2B%d", tetris_state->b2b_count);
     return canvas_draw_str(canvas, 0, 19, str);

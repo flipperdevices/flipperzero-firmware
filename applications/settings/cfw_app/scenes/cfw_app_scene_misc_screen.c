@@ -16,7 +16,7 @@ static void cfw_app_scene_misc_screen_dark_mode_changed(VariableItem* item) {
     CfwApp* app = variable_item_get_context(item);
     bool value = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, value ? "ON" : "OFF");
-    CFW_SETTINGS()->dark_mode = value;
+    cfw_settings.dark_mode = value;
     app->save_settings = true;
 }
 
@@ -40,7 +40,7 @@ static void cfw_app_scene_misc_screen_lcd_style_changed(VariableItem* item) {
     CfwApp* app = variable_item_get_context(item);
     uint32_t value = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, lcd_styles[value]);
-    CFW_SETTINGS()->lcd_style = value;
+    cfw_settings.lcd_style = value;
 
     switch(value) {
     case 0:
@@ -62,14 +62,13 @@ static void cfw_app_scene_misc_screen_lcd_style_changed(VariableItem* item) {
 
 void cfw_app_scene_misc_screen_on_enter(void* context) {
     CfwApp* app = context;
-    CfwSettings* cfw_settings = CFW_SETTINGS();
     VariableItemList* var_item_list = app->var_item_list;
     VariableItem* item;
 
     item = variable_item_list_add(
         var_item_list, "Dark Mode", 2, cfw_app_scene_misc_screen_dark_mode_changed, app);
-    variable_item_set_current_value_index(item, cfw_settings->dark_mode);
-    variable_item_set_current_value_text(item, cfw_settings->dark_mode ? "ON" : "OFF");
+    variable_item_set_current_value_index(item, cfw_settings.dark_mode);
+    variable_item_set_current_value_text(item, cfw_settings.dark_mode ? "ON" : "OFF");
 
     item = variable_item_list_add(
         var_item_list, "Left Handed", 2, cfw_app_scene_misc_screen_hand_orient_changed, app);
@@ -78,7 +77,7 @@ void cfw_app_scene_misc_screen_on_enter(void* context) {
     variable_item_set_current_value_text(item, value ? "ON" : "OFF");
 
     item = variable_item_list_add(var_item_list, "RGB Backlight", 1, NULL, app);
-    variable_item_set_current_value_text(item, cfw_settings->rgb_backlight ? "ON" : "OFF");
+    variable_item_set_current_value_text(item, cfw_settings.rgb_backlight ? "ON" : "OFF");
 
     item = variable_item_list_add(
         var_item_list,
@@ -86,9 +85,9 @@ void cfw_app_scene_misc_screen_on_enter(void* context) {
         COUNT_OF(lcd_styles),
         cfw_app_scene_misc_screen_lcd_style_changed,
         app);
-    variable_item_set_current_value_index(item, cfw_settings->lcd_style);
-    variable_item_set_current_value_text(item, lcd_styles[cfw_settings->lcd_style]);
-    variable_item_set_locked(item, !cfw_settings->rgb_backlight, "Needs RGB\nBacklight!");
+    variable_item_set_current_value_index(item, cfw_settings.lcd_style);
+    variable_item_set_current_value_text(item, lcd_styles[cfw_settings.lcd_style]);
+    variable_item_set_locked(item, !cfw_settings.rgb_backlight, "Needs RGB\nBacklight!");
 
     variable_item_list_set_enter_callback(
         var_item_list, cfw_app_scene_misc_screen_var_item_list_callback, app);
@@ -108,7 +107,7 @@ bool cfw_app_scene_misc_screen_on_event(void* context, SceneManagerEvent event) 
         consumed = true;
         switch(event.event) {
         case VarItemListIndexRgbBacklight: {
-            bool change = CFW_SETTINGS()->rgb_backlight;
+            bool change = cfw_settings.rgb_backlight;
             if(!change) {
                 DialogMessage* msg = dialog_message_alloc();
                 dialog_message_set_header(msg, "RGB Backlight", 64, 0, AlignCenter, AlignTop);
@@ -126,11 +125,11 @@ bool cfw_app_scene_misc_screen_on_event(void* context, SceneManagerEvent event) 
                 dialog_message_free(msg);
             }
             if(change) {
-                CFW_SETTINGS()->rgb_backlight = !CFW_SETTINGS()->rgb_backlight;
+                cfw_settings.rgb_backlight = !cfw_settings.rgb_backlight;
                 app->save_settings = true;
                 app->save_backlight = true;
                 notification_message(app->notification, &sequence_display_backlight_on);
-                rgb_backlight_reconfigure(CFW_SETTINGS()->rgb_backlight);
+                rgb_backlight_reconfigure(cfw_settings.rgb_backlight);
                 scene_manager_next_scene(app->scene_manager, CfwAppSceneMiscScreen);
             }
             break;

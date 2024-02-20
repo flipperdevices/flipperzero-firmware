@@ -1,5 +1,5 @@
 #include "../helpers/ducky_script.h"
-#include "../bad_kb_app.h"
+#include "../bad_kb_app_i.h"
 #include "../views/bad_kb_view.h"
 #include <furi_hal.h>
 #include "toolbox/path.h"

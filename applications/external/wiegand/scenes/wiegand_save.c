@@ -85,7 +85,7 @@ void wiegand_save_scene_on_enter(void* context) {
     App* app = context;
     text_input_reset(app->text_input);
 
-    FuriHalRtcDateTime datetime;
+    DateTime datetime;
     furi_hal_rtc_get_datetime(&datetime);
     snprintf(
         app->file_name,

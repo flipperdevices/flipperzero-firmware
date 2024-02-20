@@ -11,7 +11,7 @@ void ublox_text_input_callback(void* context) {
 }
 
 FuriString* ublox_scene_enter_file_name_get_timename() {
-    FuriHalRtcDateTime datetime;
+    DateTime datetime;
     furi_hal_rtc_get_datetime(&datetime);
     FuriString* s = furi_string_alloc();
 

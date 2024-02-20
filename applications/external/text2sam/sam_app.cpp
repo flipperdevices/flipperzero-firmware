@@ -78,8 +78,6 @@ static void sam_state_free(AppState* const app_state) {
 
 static void save_message(FuriString* save_string) {
     Storage* storage = (Storage*)furi_record_open(RECORD_STORAGE);
-    storage_common_copy(storage, EXT_PATH("sam.txt"), SAM_SAVE_PATH);
-    storage_common_remove(storage, EXT_PATH("sam.txt"));
     File* file = storage_file_alloc(storage);
     if(storage_file_open(file, SAM_SAVE_PATH, FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
         storage_file_write(file, save_string, TEXT_BUFFER_SIZE);
@@ -91,6 +89,8 @@ static void save_message(FuriString* save_string) {
 
 static bool load_messages() {
     Storage* storage = (Storage*)furi_record_open(RECORD_STORAGE);
+    storage_common_copy(storage, EXT_PATH("sam.txt"), SAM_SAVE_PATH);
+    storage_common_remove(storage, EXT_PATH("sam.txt"));
     File* file = storage_file_alloc(storage);
     uint16_t bytes_read = 0;
     if(storage_file_open(file, SAM_SAVE_PATH, FSAM_READ, FSOM_OPEN_EXISTING)) {

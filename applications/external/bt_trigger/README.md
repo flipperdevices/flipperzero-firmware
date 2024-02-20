@@ -12,3 +12,4 @@ To take a picture remotely, do as follows:
 
 
 You can take multiple pictures by pressing the Ok button. You can also set the delay between shots by pressing the Up and Down buttons. The number of photos taken is displayed in the app. To reset the shot count, press the Left button.
+

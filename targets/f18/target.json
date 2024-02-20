@@ -27,6 +27,7 @@
         "assets",
         "one_wire",
         "music_worker",
+        "mjs",
         "mbedtls",
         "flipper_application",
         "toolbox",
@@ -37,7 +38,8 @@
         "cfw",
         "flipperformat",
         "flipper18",
-        "bit_lib"
+        "bit_lib",
+        "datetime"
     ],
     "excluded_sources": [
         "furi_hal_infrared.c",

@@ -10,13 +10,13 @@
 extern "C" {
 #endif
 
-#define STORAGE_COUNT (ST_INT + 1)
+#define STORAGE_COUNT (ST_ERROR - 1)
 
 #define APPS_DATA_PATH EXT_PATH("apps_data")
 #define APPS_ASSETS_PATH EXT_PATH("apps_assets")
 
 typedef struct {
-    //ViewPort* view_port;
+    // ViewPort* view_port;
     bool enabled;
 } StorageSDGui;
 

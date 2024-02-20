@@ -6,7 +6,6 @@
 #define LINTP(x, from_l, from_h, to_l, to_h) \
     (((x - (from_l)) / (from_h - (from_l))) * (to_h - (to_l)) + to_l)
 
-#define NUM_LEVELS 7
 #define NUM_BREAKPOINTS 8
 
 static const float pm2_5_breakpoints[NUM_BREAKPOINTS] =
@@ -18,14 +17,16 @@ static const float pm10_breakpoints[NUM_BREAKPOINTS] =
 static const float aqi_breakpoints[NUM_BREAKPOINTS] =
     {0.f, 51.f, 101.f, 151.f, 201.f, 301.f, 401.f, 500.f};
 
-const char* const aqi_categories[NUM_LEVELS] = {
+const char* const aqi_levels[NUM_BREAKPOINTS] = {
     "Good",
     "Moderate",
     "Unhealthy for Sensitive",
     "Unhealthy",
     "Very Unhealthy",
     "Hazardous",
-    "Very Hazardous"};
+    "Hazardous",
+    "Hazardous",
+};
 
 int airmon_aqi_breakpoint_idx(const float bps[], float value) {
     int i = 0;
@@ -53,10 +54,6 @@ int airmon_aqi(float pm2_5, float pm10) {
     return aqi2_5;
 }
 
-int airmon_aqi_level(int aqi) {
-    return CLAMP(airmon_aqi_breakpoint_idx(aqi_breakpoints, aqi), 0, NUM_LEVELS - 1);
-}
-
-const char* airmon_aqi_category(int aqi) {
-    return aqi_categories[airmon_aqi_level(aqi)];
+const char* airmon_aqi_level(int aqi) {
+    return aqi_levels[airmon_aqi_breakpoint_idx(aqi_breakpoints, aqi)];
 }

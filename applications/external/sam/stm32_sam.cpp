@@ -4510,7 +4510,7 @@ void STM32SAM::AdjustLengths() {
                 mem56 = flags[index];
 
             // not a consonant
-            if((flags[index] & 64) == 0) {
+            if((mem56 & 64) == 0) {
                 // RX or LX?
                 if((index == 18) || (index == 19)) // 'RX' & 'LX'
                 {
@@ -4519,7 +4519,7 @@ void STM32SAM::AdjustLengths() {
                     index = phonemeindex[X];
 
                     // next phoneme a consonant?
-                    if((flags[index] & 64) != 0) {
+                    if((mem56 & 64) != 0) {
                         // RULE: <VOWEL> RX | LX <CONSONANT>
 
                         // decrease length of vowel by 1 frame
@@ -5400,15 +5400,14 @@ void STM32SAM::sam(
         }
     }
 
+    if(i < 256) {
+        input[i] = phonetic ? '\x9b' : '[';
+    }
+
     if(!phonetic) {
-        strncat(input, "[", 256);
         if(!TextToPhonemes((unsigned char*)input)) {
-            // PrintUsage();
             return;
         }
-
-    } else {
-        strncat(input, "\x9b", 256);
     }
 
     SetInput(input);

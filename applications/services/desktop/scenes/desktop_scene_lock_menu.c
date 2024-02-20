@@ -30,7 +30,7 @@ void desktop_scene_lock_menu_on_enter(void* context) {
     desktop_lock_menu_set_dummy_mode_state(desktop->lock_menu, desktop->settings.dummy_mode);
     desktop_lock_menu_set_stealth_mode_state(
         desktop->lock_menu, furi_hal_rtc_is_flag_set(FuriHalRtcFlagStealthMode));
-    if(CFW_SETTINGS()->lock_menu_type) {
+    if(cfw_settings.lock_menu_type) {
         desktop_lock_menu_set_idx(desktop->lock_menu, 3);
     } else {
         desktop_lock_menu_set_idx(desktop->lock_menu, 0);

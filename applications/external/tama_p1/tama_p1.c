@@ -837,7 +837,7 @@ int32_t tama_p1_app(void* p) {
                 btn_state_t tama_btn_state = 0; // BTN_STATE_RELEASED is 0
 
                 if(in_menu) {
-                    // if(menu_cursor == 2 &&
+                    // if(menu_cursor >= 2 &&
                     // (event.input.key == InputKeyUp || event.input.key == InputKeyDown)) {
                     // tama_btn_state = BTN_STATE_RELEASED;
                     // }
@@ -1135,7 +1135,7 @@ int32_t tama_p1_app(void* p) {
                             break;
                         }
                     }
-                } else { // out of menu // TODO: clean up code -.-
+                } else { // out of menu
                     if(event.input.key == InputKeyBack && event.input.type == InputTypeLong) {
                         if(speed != 1) {
                             speed = 1;

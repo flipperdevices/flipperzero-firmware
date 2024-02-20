@@ -30,9 +30,9 @@ void tpms_view_receiver_info_update(TPMSReceiverInfo* tpms_receiver_info, Flippe
 
             tpms_block_generic_deserialize(model->generic, fff);
 
-            FuriHalRtcDateTime curr_dt;
+            DateTime curr_dt;
             furi_hal_rtc_get_datetime(&curr_dt);
-            model->curr_ts = furi_hal_rtc_datetime_to_timestamp(&curr_dt);
+            model->curr_ts = datetime_datetime_to_timestamp(&curr_dt);
         },
         true);
 }
@@ -172,9 +172,9 @@ static void tpms_view_receiver_info_timer(void* context) {
         tpms_receiver_info->view,
         TPMSReceiverInfoModel * model,
         {
-            FuriHalRtcDateTime curr_dt;
+            DateTime curr_dt;
             furi_hal_rtc_get_datetime(&curr_dt);
-            model->curr_ts = furi_hal_rtc_datetime_to_timestamp(&curr_dt);
+            model->curr_ts = datetime_datetime_to_timestamp(&curr_dt);
         },
         true);
 }

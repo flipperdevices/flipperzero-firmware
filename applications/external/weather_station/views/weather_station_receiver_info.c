@@ -30,9 +30,9 @@ void ws_view_receiver_info_update(WSReceiverInfo* ws_receiver_info, FlipperForma
 
             ws_block_generic_deserialize(model->generic, fff);
 
-            FuriHalRtcDateTime curr_dt;
+            DateTime curr_dt;
             furi_hal_rtc_get_datetime(&curr_dt);
-            model->curr_ts = furi_hal_rtc_datetime_to_timestamp(&curr_dt);
+            model->curr_ts = datetime_datetime_to_timestamp(&curr_dt);
         },
         true);
 }
@@ -186,9 +186,9 @@ static void ws_view_receiver_info_timer(void* context) {
         ws_receiver_info->view,
         WSReceiverInfoModel * model,
         {
-            FuriHalRtcDateTime curr_dt;
+            DateTime curr_dt;
             furi_hal_rtc_get_datetime(&curr_dt);
-            model->curr_ts = furi_hal_rtc_datetime_to_timestamp(&curr_dt);
+            model->curr_ts = datetime_datetime_to_timestamp(&curr_dt);
         },
         true);
 }

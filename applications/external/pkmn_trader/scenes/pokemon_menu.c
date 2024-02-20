@@ -1,20 +1,30 @@
 #include "../pokemon_app.h"
+#include "../pokemon_data.h"
 #include "../pokemon_char_encode.h"
 
 #include "pokemon_menu.h"
+#include "pokemon_gen.h"
 #include "pokemon_select.h"
-#include "pokemon_nickname.h"
-#include "pokemon_level.h"
+#include "pokemon_name_input.h"
+#include "pokemon_number_input.h"
 #include "pokemon_move.h"
 #include "pokemon_type.h"
 #include "pokemon_stats.h"
-#include "pokemon_ot_id.h"
-#include "pokemon_ot_name.h"
 #include "pokemon_trade.h"
 #include "pokemon_pins.h"
+#include "pokemon_exit_confirm.h"
 
 static void scene_change_from_main_cb(void* context, uint32_t index) {
     PokemonFap* pokemon_fap = (PokemonFap*)context;
+
+    /* Bit of a hack, encode the generation in the upper 16 bits of the Gen
+     * scene state. This gets cleared on first entry by the gen scene and
+     * shouldn't be an issue. It's the easiest way to communicat what generation
+     * to use without making another variable somewhere else.
+     * No matter the gen, we write it to GenI scene as any further Gen scene numbers
+     * are just used as markers
+     */
+    scene_manager_set_scene_state(pokemon_fap->scene_manager, GenITradeScene, index);
 
     /* Set scene state to the current index so we can have that element highlighted when
      * we return.
@@ -30,75 +40,20 @@ bool main_menu_back_event_callback(void* context) {
 }
 
 void main_menu_scene_on_enter(void* context) {
-    char buf[32];
-    char name_buf[11]; // All name buffers are 11 bytes at most, including term
     PokemonFap* pokemon_fap = (PokemonFap*)context;
 
-    /* Clear the scene state of the Move scene since that is used to set the
-     * highlighted meny item.
-     */
-    scene_manager_set_scene_state(pokemon_fap->scene_manager, SelectMoveScene, 0);
-
-    /* HACK: Since we may have come from trade view, we cannot assume that
-     * pokemon_fap->curr_pokemon is correct.
-     * The proper way to do this would be to instead of tracking curr_pokemon
-     * separately, have it always be derived fro the current trade_block.
-     */
-    pokemon_fap->curr_pokemon = pokemon_table_get_num_from_index(
-        pokemon_fap->pokemon_table, pokemon_fap->trade_block->party_members[0]);
-
     submenu_reset(pokemon_fap->submenu);
+    submenu_set_header(pokemon_fap->submenu, "Pokemon Trade Tool");
 
-    snprintf(
-        buf,
-        sizeof(buf),
-        "Pokemon:   %s",
-        pokemon_fap->pokemon_table[pokemon_fap->curr_pokemon].name);
-    submenu_add_item(
-        pokemon_fap->submenu, buf, SelectPokemonScene, scene_change_from_main_cb, pokemon_fap);
-    pokemon_encoded_array_to_str(
-        name_buf, (uint8_t*)pokemon_fap->trade_block->nickname, sizeof(name_buf));
-    snprintf(buf, sizeof(buf), "Nickname:  %s", name_buf);
-    submenu_add_item(
-        pokemon_fap->submenu, buf, SelectNicknameScene, scene_change_from_main_cb, pokemon_fap);
-    snprintf(buf, sizeof(buf), "Level:           %d", pokemon_fap->trade_block->party[0].level);
-    submenu_add_item(
-        pokemon_fap->submenu, buf, SelectLevelScene, scene_change_from_main_cb, pokemon_fap);
     submenu_add_item(
         pokemon_fap->submenu,
-        "Select Moves",
-        SelectMoveScene,
+        "Gen I    (R/B/Y non-JPN)",
+        GenITradeScene,
         scene_change_from_main_cb,
         pokemon_fap);
     submenu_add_item(
         pokemon_fap->submenu,
-        "Select Types",
-        SelectTypeScene,
-        scene_change_from_main_cb,
-        pokemon_fap);
-    submenu_add_item(
-        pokemon_fap->submenu,
-        stats_text[pokemon_fap->curr_stats],
-        SelectStatsScene,
-        scene_change_from_main_cb,
-        pokemon_fap);
-    snprintf(
-        buf,
-        sizeof(buf),
-        "OT ID#:          %05d",
-        __builtin_bswap16(pokemon_fap->trade_block->party[0].ot_id));
-    submenu_add_item(
-        pokemon_fap->submenu, buf, SelectOTIDScene, scene_change_from_main_cb, pokemon_fap);
-    pokemon_encoded_array_to_str(
-        name_buf, (uint8_t*)pokemon_fap->trade_block->ot_name, sizeof(name_buf));
-    snprintf(buf, sizeof(buf), "OT Name:      %s", name_buf);
-    submenu_add_item(
-        pokemon_fap->submenu, buf, SelectOTNameScene, scene_change_from_main_cb, pokemon_fap);
-    submenu_add_item(
-        pokemon_fap->submenu, "Trade PKMN", TradeScene, scene_change_from_main_cb, pokemon_fap);
-    submenu_add_item(
-        pokemon_fap->submenu,
-        "Select Pinout",
+        "Select EXT Pinout",
         SelectPinsScene,
         scene_change_from_main_cb,
         pokemon_fap);
@@ -109,6 +64,7 @@ void main_menu_scene_on_enter(void* context) {
 
     view_dispatcher_set_navigation_event_callback(
         pokemon_fap->view_dispatcher, main_menu_back_event_callback);
+
     view_dispatcher_switch_to_view(pokemon_fap->view_dispatcher, AppViewMainMenu);
 }
 
@@ -122,36 +78,49 @@ void null_scene_on_exit(void* context) {
     UNUSED(context);
 }
 
+void generic_scene_on_exit(void* context) {
+    PokemonFap* pokemon_fap = (PokemonFap*)context;
+
+    view_dispatcher_switch_to_view(pokemon_fap->view_dispatcher, AppViewMainMenu);
+    view_dispatcher_remove_view(pokemon_fap->view_dispatcher, AppViewOpts);
+}
+
 void (*const pokemon_scene_on_enter_handlers[])(void*) = {
     main_menu_scene_on_enter,
+    gen_scene_on_enter,
+    null_scene_on_exit,
     select_pokemon_scene_on_enter,
-    select_nickname_scene_on_enter,
-    select_level_scene_on_enter,
+    select_name_scene_on_enter,
+    select_number_scene_on_enter,
     select_move_scene_on_enter,
     select_move_index_scene_on_enter,
     select_move_set_scene_on_enter,
     select_type_scene_on_enter,
     select_stats_scene_on_enter,
-    select_ot_id_scene_on_enter,
-    select_ot_name_scene_on_enter,
+    select_number_scene_on_enter,
+    select_name_scene_on_enter,
     trade_scene_on_enter,
     select_pins_scene_on_enter,
+    pokemon_exit_confirm_on_enter,
 };
 
 void (*const pokemon_scene_on_exit_handlers[])(void*) = {
     null_scene_on_exit,
-    select_pokemon_scene_on_exit,
-    select_nickname_scene_on_exit,
-    select_level_scene_on_exit,
     null_scene_on_exit,
     null_scene_on_exit,
     null_scene_on_exit,
-    select_type_scene_on_exit,
+    generic_scene_on_exit,
+    generic_scene_on_exit,
     null_scene_on_exit,
-    select_ot_id_scene_on_exit,
-    select_ot_name_scene_on_exit,
     null_scene_on_exit,
-    select_pins_scene_on_exit,
+    null_scene_on_exit,
+    generic_scene_on_exit,
+    null_scene_on_exit,
+    generic_scene_on_exit,
+    generic_scene_on_exit,
+    null_scene_on_exit,
+    generic_scene_on_exit,
+    generic_scene_on_exit,
 };
 
 bool (*const pokemon_scene_on_event_handlers[])(void*, SceneManagerEvent) = {
@@ -168,6 +137,9 @@ bool (*const pokemon_scene_on_event_handlers[])(void*, SceneManagerEvent) = {
     null_scene_on_event,
     null_scene_on_event,
     null_scene_on_event,
+    null_scene_on_event,
+    null_scene_on_event,
+    pokemon_exit_confirm_on_event,
 };
 
 const SceneManagerHandlers pokemon_scene_manager_handlers = {

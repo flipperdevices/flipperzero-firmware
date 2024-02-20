@@ -1,9 +1,7 @@
 #pragma once
 
-#include <furi_hal_uart.h>
-
 /// Defines the channel that the pwnagotchi uses
-#define PWNAGOTCHI_UART_CHANNEL FuriHalUartIdUSART1
+#define PWNAGOTCHI_UART_CHANNEL (FuriHalSerialIdUsart)
 
 /// Defines the baudrate that the pwnagotchi will use
 #define PWNAGOTCHI_UART_BAUD 115200

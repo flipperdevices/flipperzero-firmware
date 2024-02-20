@@ -1,0 +1,14 @@
+App(
+    appid="minesweeper",
+    name="Minesweeper",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="minesweeper_app",
+    stack_size=8 * 1024,
+    fap_category="Games",
+    fap_icon="minesweeper_icon.png",
+    fap_author="panki27 & xMasterX",
+    #  [Fix minesweeper freeze bug, do some refactoring (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/56c11c70b3617764b6d2ea7b008c67dce517fa25)
+    #  [Show mine locations when game is lost #11 (By mac-edmondson)](https://github.com/panki27/minesweeper/pull/11)
+    fap_version=(1, 2),
+    fap_description="Minesweeper Game",
+)

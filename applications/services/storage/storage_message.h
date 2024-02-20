@@ -91,12 +91,22 @@ typedef struct {
 } SADataPath;
 
 typedef struct {
+    const char* old;
+    const char* new;
+    FuriThreadId thread_id;
+} SADataRename;
+
+typedef struct {
     File* file;
 } SADataFile;
 
 typedef struct {
     SDInfo* info;
 } SAInfo;
+
+typedef struct {
+    File* image;
+} SAVirtualInit;
 
 typedef union {
     SADataFOpen fopen;
@@ -118,8 +128,11 @@ typedef union {
 
     SADataFile file;
     SADataPath path;
+    SADataRename rename;
 
     SAInfo sdinfo;
+
+    SAVirtualInit virtualinit;
 } SAData;
 
 typedef union {
@@ -137,7 +150,6 @@ typedef enum {
     StorageCommandFileWrite,
     StorageCommandFileSeek,
     StorageCommandFileTell,
-    StorageCommandFileExpand,
     StorageCommandFileTruncate,
     StorageCommandFileSize,
     StorageCommandFileSync,
@@ -158,6 +170,13 @@ typedef enum {
     StorageCommandCommonResolvePath,
     StorageCommandSDMount,
     StorageCommandCommonEquivalentPath,
+
+    StorageCommandFileExpand,
+    StorageCommandVirtualInit,
+    StorageCommandVirtualFormat,
+    StorageCommandVirtualMount,
+    StorageCommandVirtualUnmount,
+    StorageCommandVirtualQuit,
 } StorageCommand;
 
 typedef struct {

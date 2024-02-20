@@ -75,7 +75,7 @@ void subghz_scene_transmitter_on_enter(void* context) {
         scene_manager_handle_custom_event(
             subghz->scene_manager, SubGhzCustomEventViewTransmitterSendStart);
         furi_timer_start(
-            subghz->timer, CFW_SETTINGS()->favorite_timeout * furi_kernel_get_tick_frequency());
+            subghz->timer, cfw_settings.favorite_timeout * furi_kernel_get_tick_frequency());
     }
 }
 

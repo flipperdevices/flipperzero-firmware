@@ -1,3 +1,5 @@
+#include "genie_file.h"
+
 #include <storage/storage.h>
 #include <flipper_format.h>
 
@@ -18,6 +20,13 @@
 #undef TAG
 #endif
 #define TAG "GenieFile"
+
+struct GenieFile {
+    uint32_t key_hi;
+    uint32_t key_lo; // sn
+    uint16_t last_sent;
+    uint16_t rec_count;
+};
 
 static void ensure_dir_exists(Storage* storage, char* dir) {
     if(!storage_dir_exists(storage, dir)) {
@@ -83,7 +92,7 @@ enum {
     GENIE_REC_COUNT = 10, // 2 bytes
     GENIE_RESERVED = 12, // 4 bytes
     GENIE_DATA = 16, // 64K bytes
-} genie_file;
+} genie_file_layout;
 
 static void genie_create_file(Storage* storage, char* name, uint32_t low) {
     File* file = storage_file_alloc(storage);
@@ -118,6 +127,181 @@ static uint32_t hex_to_i32(const char* data) {
                                     data[i] - '0';
     }
     return value;
+}
+
+GenieFile* genie_file_load(const char* path) {
+    GenieFile* genie_file = malloc(sizeof(GenieFile));
+    memset(genie_file, 0, sizeof(GenieFile));
+    bool load_success = false;
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+
+    File* file = NULL;
+    do {
+        if(!storage) {
+            FURI_LOG_E(TAG, "Failed to access storage.");
+            break;
+        }
+
+        file = storage_file_alloc(storage);
+        if(!file) {
+            FURI_LOG_E(TAG, "Failed to allocate file.");
+            break;
+        }
+
+        if(!storage_file_exists(storage, path)) {
+            FURI_LOG_D(TAG, "File does not exist: %s", path);
+            break;
+        }
+
+        if(storage_file_open(file, path, FSAM_READ_WRITE, FSOM_OPEN_EXISTING)) {
+            if(!storage_file_seek(file, GENIE_VERSION, true)) {
+                FURI_LOG_E(TAG, "Failed to seek to GENIE_VERSION @ %d", GENIE_VERSION);
+                break;
+            }
+
+            uint16_t version = storage_file_read16(file);
+            if((version >> 8) > GENIE_MAJOR_VERSION) {
+                FURI_LOG_E(TAG, "Unsupported version: %04X", version);
+                break;
+            }
+
+            if(!storage_file_seek(file, GENIE_SN, true)) {
+                FURI_LOG_E(TAG, "Failed to seek to GENIE_SN @ %d", GENIE_SN);
+                break;
+            }
+            genie_file->key_lo = storage_file_read32(file);
+
+            if(!storage_file_seek(file, GENIE_LAST_SENT, true)) {
+                FURI_LOG_E(TAG, "Failed to seek to GENIE_LAST_SENT @ %d", GENIE_LAST_SENT);
+                break;
+            }
+            genie_file->last_sent = storage_file_read16(file);
+
+            if(!storage_file_seek(file, GENIE_REC_COUNT, true)) {
+                FURI_LOG_E(TAG, "Failed to seek to GENIE_REC_COUNT @ %d", GENIE_REC_COUNT);
+                break;
+            }
+            genie_file->rec_count = storage_file_read16(file);
+
+            if(!storage_file_seek(file, GENIE_DATA + (genie_file->last_sent * 4), true)) {
+                FURI_LOG_E(
+                    TAG,
+                    "Failed to seek to GENIE_DATA+last_sent*4 @ %d",
+                    GENIE_DATA + (genie_file->last_sent * 4));
+                break;
+            }
+            genie_file->key_hi = storage_file_read32(file);
+
+            load_success = true;
+        }
+    } while(false);
+
+    if(file) {
+        storage_file_close(file);
+        storage_file_free(file);
+    }
+
+    furi_record_close(RECORD_STORAGE);
+
+    if(!load_success) {
+        free(genie_file);
+        genie_file = NULL;
+    }
+
+    return genie_file;
+}
+
+void genie_file_free(GenieFile* file) {
+    if(file) {
+        free(file);
+    }
+}
+
+uint32_t genie_file_get_key_hi(GenieFile* file) {
+    return file ? file->key_hi : 0;
+}
+
+uint32_t genie_file_get_key_lo(GenieFile* file) {
+    return file ? file->key_lo : 0;
+}
+
+uint16_t genie_file_get_last_sent(GenieFile* file) {
+    return file ? file->last_sent : 0;
+}
+
+void genie_file_set_last_sent(const char* genie_path, uint16_t last_sent) {
+    if(genie_path) {
+        Storage* storage = furi_record_open(RECORD_STORAGE);
+
+        File* file = NULL;
+        do {
+            if(!storage) {
+                FURI_LOG_E(TAG, "Failed to access storage.");
+                break;
+            }
+
+            file = storage_file_alloc(storage);
+            if(!file) {
+                FURI_LOG_E(TAG, "Failed to allocate file.");
+                break;
+            }
+
+            if(!storage_file_exists(storage, genie_path)) {
+                FURI_LOG_D(TAG, "File not found: %s", genie_path);
+                break;
+            }
+
+            if(storage_file_open(file, genie_path, FSAM_READ_WRITE, FSOM_OPEN_EXISTING)) {
+                if(!storage_file_seek(file, GENIE_VERSION, true)) {
+                    FURI_LOG_E(TAG, "Failed to seek to GENIE_VERSION @ %d", GENIE_VERSION);
+                    break;
+                }
+                uint16_t version = storage_file_read16(file);
+                if((version >> 8) > GENIE_MAJOR_VERSION) {
+                    FURI_LOG_E(TAG, "Unsupported version: %04X", version);
+                    break;
+                }
+
+                if(!storage_file_seek(file, GENIE_LAST_SENT, true)) {
+                    FURI_LOG_E(TAG, "Failed to seek to GENIE_LAST_SENT @ %d", GENIE_LAST_SENT);
+                    break;
+                }
+
+                if(!storage_file_write16(file, last_sent)) {
+                    FURI_LOG_E(TAG, "Failed to set last sent count to %d.", last_sent);
+                    break;
+                }
+            } else {
+                FURI_LOG_E(TAG, "Failed to open file");
+                break;
+            }
+        } while(false);
+
+        if(file) {
+            storage_file_close(file);
+            storage_file_free(file);
+        }
+
+        furi_record_close(RECORD_STORAGE);
+    }
+}
+
+uint16_t genie_file_get_rec_count(GenieFile* file) {
+    return file ? file->rec_count : 0;
+}
+
+uint16_t genie_rec_count_bin(uint32_t key_low) {
+    uint16_t count = 0;
+
+    char buffer[128] = {0};
+    snprintf(buffer, 128, "%s/%08lX.gne", GENIE_SAVE_FOLDER, key_low);
+    GenieFile* file = genie_file_load(buffer);
+    if(file) {
+        count = file->rec_count;
+        genie_file_free(file);
+    }
+
+    return count;
 }
 
 uint32_t genie_save_bin(const char* key) {
@@ -288,9 +472,10 @@ bool genie_save(uint32_t count, FuriString* key) {
 
 uint32_t genie_load() {
     uint32_t count = 0;
+    uint32_t key_hi = 0;
+    uint32_t key_lo = 0;
     Storage* storage = furi_record_open(RECORD_STORAGE);
     FuriString* buffer = furi_string_alloc();
-
     File* file = NULL;
     do {
         if(!storage) {
@@ -310,9 +495,18 @@ uint32_t genie_load() {
 
             char data[8 + 1 + 16 + 2 + 1] = {0};
 
+            int64_t offset = ((int64_t)storage_file_size(file)) - 120;
+            if(offset > 0) {
+                storage_file_seek(file, offset, true);
+                do {
+                    storage_file_read(file, data, 1);
+                } while(data[0] != '\n');
+            }
+
             while(storage_file_read(file, data, 8 + 1 + 16 + 2)) {
-                sscanf(data, "%08lX", &count);
-                FURI_LOG_D(TAG, "Read: %s, count: %ld", data, count);
+                sscanf(data, "%08lX,%08lX%08lX", &count, &key_hi, &key_lo);
+                FURI_LOG_D(
+                    TAG, "Read: %s, count: %ld, hi: %08lx, lo: %08lx", data, count, key_hi, key_lo);
             }
         }
     } while(false);
@@ -324,5 +518,13 @@ uint32_t genie_load() {
 
     furi_string_free(buffer);
     furi_record_close(RECORD_STORAGE);
+
+    if(key_lo) {
+        uint16_t count_bin = genie_rec_count_bin(key_lo);
+        if(count_bin > 0) {
+            count = count_bin;
+        }
+    }
+
     return count;
 }

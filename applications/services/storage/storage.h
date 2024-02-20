@@ -14,6 +14,7 @@ extern "C" {
 
 #define STORAGE_INT_PATH_PREFIX "/int"
 #define STORAGE_EXT_PATH_PREFIX "/ext"
+#define STORAGE_MNT_PATH_PREFIX "/mnt"
 #define STORAGE_ANY_PATH_PREFIX "/any"
 #define STORAGE_APP_DATA_PATH_PREFIX "/data"
 #define STORAGE_APP_ASSETS_PATH_PREFIX "/assets"
@@ -21,6 +22,7 @@ extern "C" {
 
 #define INT_PATH(path) STORAGE_INT_PATH_PREFIX "/" path
 #define EXT_PATH(path) STORAGE_EXT_PATH_PREFIX "/" path
+#define MNT_PATH(path) STORAGE_MNT_PATH_PREFIX "/" path
 #define ANY_PATH(path) STORAGE_ANY_PATH_PREFIX "/" path
 #define APP_DATA_PATH(path) STORAGE_APP_DATA_PATH_PREFIX "/" path
 #define APP_ASSETS_PATH(path) STORAGE_APP_ASSETS_PATH_PREFIX "/" path
@@ -154,6 +156,15 @@ bool storage_file_seek(File* file, uint32_t offset, bool from_start);
  * @return current access position.
  */
 uint64_t storage_file_tell(File* file);
+
+/**
+ * @brief Expand the file (allocate space for it).
+ *
+ * @param file pointer to the file instance to be expanded.
+ * @param size amount of bytes bytes to allocate.
+ * @return true if the file was successfully expanded, false otherwise.
+ */
+bool storage_file_expand(File* file, uint64_t size);
 
 /**
  * @brief Truncate the file size to the current access position.
@@ -529,6 +540,58 @@ FS_Error storage_int_backup(Storage* storage, const char* dstname);
  * @return FSE_OK if the storage was successfully restored, any other error code on failure.
  */
 FS_Error storage_int_restore(Storage* api, const char* dstname, Storage_name_converter converter);
+
+/******************* FatFs Virtual Mount Functions *******************/
+
+/**
+ * @brief Initialize virual API with given disk image.
+ *
+ * @param storage pointer to a storage API instance.
+ * @param image pointer to a File instance to base virtual mount on.
+ * @return FSE_OK if the image was setup successfully.
+ * @return FSE_ALREADY_OPEN if virtual API is already initialized.
+ */
+FS_Error storage_virtual_init(Storage* storage, File* image);
+
+/**
+ * @brief Format the virtual image.
+ *
+ * @param storage pointer to a storage API instance.
+ * @return FSE_OK if the image was formatted successfully.
+ * @return FSE_NOT_READY if virtual API is not initialized.
+ * @return FSE_INTERNAL if an unknown error occurred.
+ */
+FS_Error storage_virtual_format(Storage* storage);
+
+/**
+ * @brief Mount the virtual image to /mnt.
+ *
+ * @param storage pointer to a storage API instance.
+ * @return FSE_OK if the image was mounted successfully.
+ * @return FSE_NOT_READY if virtual API is not initialized.
+ * @return FSE_INVALID_PARAMETER if image has no supported filesystem.
+ * @return FSE_INTERNAL if an unknown error occurred.
+ */
+FS_Error storage_virtual_mount(Storage* storage);
+
+/**
+ * @brief Unmount the virtual image from /mnt.
+ *
+ * @param storage pointer to a storage API instance.
+ * @return FSE_OK if the image was unmounted successfully.
+ * @return FSE_NOT_READY if virtual API is not initialized.
+ * @return FSE_INTERNAL if an unknown error occurred.
+ */
+FS_Error storage_virtual_unmount(Storage* storage);
+
+/**
+ * @brief Quit virtual mount API, reset to allow new init.
+ *
+ * @param storage pointer to a storage API instance.
+ * @return FSE_OK if the image was unloaded successfully.
+ * @return FSE_NOT_READY if virtual API is not initialized.
+ */
+FS_Error storage_virtual_quit(Storage* storage);
 
 /***************** Simplified Functions ******************/
 

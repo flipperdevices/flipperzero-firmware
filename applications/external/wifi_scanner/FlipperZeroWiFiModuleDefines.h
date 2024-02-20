@@ -18,5 +18,4 @@
 
 #include <cfw/cfw.h>
 
-#define UART_CH \
-    (CFW_SETTINGS()->uart_esp_channel == UARTDefault ? FuriHalUartIdUSART1 : FuriHalUartIdLPUART1)
+#define UART_CH (cfw_settings.uart_esp_channel)

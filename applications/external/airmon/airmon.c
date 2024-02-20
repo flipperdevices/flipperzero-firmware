@@ -1,10 +1,11 @@
 #include <gui/gui.h>
 #include <gui/view_port.h>
 #include <power/power_service/power.h>
-#include <notification/notification_messages.h>
 
 #include <core/thread.h>
 #include <core/kernel.h>
+
+#include <expansion/expansion.h>
 
 #include "airmon_icons.h"
 #include "airmon_pms.h"
@@ -30,11 +31,8 @@ typedef struct {
     PowerInfo power_info;
     FuriMessageQueue* event_queue;
 
-    NotificationApp* notifications;
-
     AirmonDisplayMode display_mode;
 
-    uint32_t last_data_timestamp;
     AirmonPmsContext* pms_context;
 } AirmonContext;
 
@@ -46,73 +44,6 @@ typedef struct {
     AirmonEventType type;
     InputEvent input;
 } AirmonEvent;
-
-static const NotificationMessage message_green_165 = {
-    .type = NotificationMessageTypeLedGreen,
-    .data.led.value = 165,
-};
-
-static const NotificationMessage message_red_128 = {
-    .type = NotificationMessageTypeLedRed,
-    .data.led.value = 128,
-};
-
-static const NotificationMessage message_blue_128 = {
-    .type = NotificationMessageTypeLedBlue,
-    .data.led.value = 128,
-};
-
-const NotificationSequence sequence_blink_orange_100 = {
-    &message_red_255,
-    &message_green_165,
-    &message_delay_100,
-    NULL,
-};
-
-const NotificationSequence sequence_blink_purple_100 = {
-    &message_red_128,
-    &message_blue_128,
-    &message_delay_100,
-    NULL,
-};
-
-const NotificationSequence sequence_blink_maroon_100 = {
-    &message_red_128,
-    &message_delay_100,
-    NULL,
-};
-
-static void airmon_blink(AirmonContext* ctx, int aqi_value) {
-    int aqi_level = airmon_aqi_level(aqi_value);
-    const NotificationSequence* sequence;
-    switch(aqi_level) {
-    case 0:
-        // Good - Green
-        sequence = &sequence_blink_green_100;
-        break;
-    case 1:
-        // Moderate - Yellow
-        sequence = &sequence_blink_yellow_100;
-        break;
-    case 2:
-        // Unhealthy for Sensitive Groups - Orange
-        sequence = &sequence_blink_orange_100;
-        break;
-    case 3:
-        // Unhealthy - Red
-        sequence = &sequence_blink_red_100;
-        break;
-    case 4:
-        // Very Unhealthy - Purple
-        sequence = &sequence_blink_purple_100;
-        break;
-    default:
-        // Hazardous - Maroon
-        sequence = &sequence_blink_maroon_100;
-        break;
-    }
-    notification_message_block(ctx->notifications, sequence);
-}
 
 static void airmon_draw_battery(Canvas* canvas, AirmonContext* ctx) {
     // Sourced from https://github.com/flipperdevices/flipperzero-firmware/blob/09edf66a/applications/services/power/power_service/power.c#L9
@@ -135,51 +66,39 @@ static void airmon_draw_callback(Canvas* canvas, void* ctx) {
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
 
-    uint16_t pm_value;
-    uint16_t aqi_value;
-    uint32_t data_timestamp;
+    uint16_t data_value;
 
-    // Obtain PM/AQI values
+    // Obtain value to draw
     furi_mutex_acquire(pms_context->mutex, FuriWaitForever);
     switch(context->display_mode) {
     case AirmonDisplayModePm1_0:
-        pm_value = pms_context->pms_data.pm1_0at;
+        data_value = pms_context->pms_data.pm1_0at;
         break;
     case AirmonDisplayModePm2_5:
-        pm_value = pms_context->pms_data.pm2_5at;
+        data_value = pms_context->pms_data.pm2_5at;
         break;
     case AirmonDisplayModePm10:
-        pm_value = pms_context->pms_data.pm10at;
+        data_value = pms_context->pms_data.pm10at;
+        break;
+    case AirmonDisplayModeAqi:
+        data_value = airmon_aqi(pms_context->pms_data.pm2_5at, pms_context->pms_data.pm10at);
         break;
     default:
-        pm_value = 0;
+        data_value = 0;
         break;
     }
-    aqi_value = airmon_aqi(pms_context->pms_data.pm2_5at, pms_context->pms_data.pm10at);
-    data_timestamp = pms_context->pms_data_timestamp;
     furi_mutex_release(pms_context->mutex);
 
-    bool data_is_valid = (furi_get_tick() - data_timestamp < furi_ms_to_ticks(5000));
-
-    // Draw PM/AQI value
+    // Draw value
     canvas_set_font(canvas, FontBigNumbers);
-    if(data_is_valid) {
-        snprintf(
-            buffer,
-            STR_BUF_SIZE,
-            "%d",
-            (context->display_mode == AirmonDisplayModeAqi) ? aqi_value : pm_value);
-    } else {
-        snprintf(buffer, STR_BUF_SIZE, "--");
-    }
+    snprintf(buffer, STR_BUF_SIZE, "%d", data_value);
     canvas_draw_str_aligned(canvas, canvas_w / 2, canvas_h / 2, AlignCenter, AlignBottom, buffer);
 
-    // Draw PM/AQI value legend (density units of measurement / air quality level description)
+    // Draw value legend (air quality level / density units of measurement)
     const uint8_t legend_y = canvas_h / 2;
     if(context->display_mode == AirmonDisplayModeAqi) {
         canvas_set_font(canvas, FontSecondary);
-        snprintf(
-            buffer, STR_BUF_SIZE, "%s", data_is_valid ? airmon_aqi_category(aqi_value) : "Unknown");
+        snprintf(buffer, STR_BUF_SIZE, "%s", airmon_aqi_level(data_value));
         canvas_draw_str_aligned(canvas, canvas_w / 2, legend_y + 5, AlignCenter, AlignTop, buffer);
     } else {
         const Icon* density_icon = &I_Density_33x11;
@@ -226,12 +145,6 @@ static void airmon_draw_callback(Canvas* canvas, void* ctx) {
     }
 
     airmon_draw_battery(canvas, context);
-
-    // Blink LED if data was updated
-    if(data_timestamp > context->last_data_timestamp) {
-        airmon_blink(context, aqi_value);
-        context->last_data_timestamp = data_timestamp;
-    }
 }
 
 static void airmon_input_callback(InputEvent* input_event, void* ctx) {
@@ -249,8 +162,6 @@ static AirmonContext* airmon_context_alloc() {
         return NULL;
     }
 
-    ctx->last_data_timestamp = furi_get_tick();
-
     ctx->display_mode = AirmonDisplayModePm2_5;
 
     ctx->event_queue = furi_message_queue_alloc(8, sizeof(AirmonEvent));
@@ -261,7 +172,6 @@ static AirmonContext* airmon_context_alloc() {
 
     ctx->gui = furi_record_open(RECORD_GUI);
     ctx->power = furi_record_open(RECORD_POWER);
-    ctx->notifications = furi_record_open(RECORD_NOTIFICATION);
 
     gui_add_view_port(ctx->gui, ctx->view_port, GuiLayerFullscreen);
 
@@ -318,7 +228,6 @@ static void airmon_context_free(AirmonContext* ctx) {
 
     furi_record_close(RECORD_GUI);
     furi_record_close(RECORD_POWER);
-    furi_record_close(RECORD_NOTIFICATION);
 
     airmon_pms_context_free(ctx->pms_context);
 
@@ -329,9 +238,16 @@ static void airmon_context_free(AirmonContext* ctx) {
 int32_t airmon_app(void* p) {
     UNUSED(p);
 
+    // Disable expansion protocol to avoid interference with UART Handle
+    Expansion* expansion = furi_record_open(RECORD_EXPANSION);
+    expansion_disable(expansion);
+
     // Allocate all of the necessary structures
     AirmonContext* ctx = airmon_context_alloc();
     if(!ctx) {
+        // Return previous state of expansion
+        expansion_enable(expansion);
+        furi_record_close(RECORD_EXPANSION);
         return 255;
     }
 
@@ -340,6 +256,10 @@ int32_t airmon_app(void* p) {
 
     // Release all resources
     airmon_context_free(ctx);
+
+    // Return previous state of expansion
+    expansion_enable(expansion);
+    furi_record_close(RECORD_EXPANSION);
 
     return 0;
 }

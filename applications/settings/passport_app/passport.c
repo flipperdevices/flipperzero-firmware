@@ -157,8 +157,6 @@ void passport_alloc(Passport* passport) {
 
     //set first page shown
     passport->page = Main;
-
-    free(stats);
 }
 
 static void render_callback(Canvas* const canvas, void* ctx) {

@@ -1,6 +1,7 @@
+#include "../bad_kb_app_i.h"
 #include <furi_hal.h>
-#include <furi_hal_bt_hid.h>
 #include <furi_hal_usb_hid.h>
+#include "ble_hid.h"
 #include "ducky_script.h"
 #include "ducky_script_i.h"
 
@@ -83,10 +84,11 @@ static int32_t ducky_fnc_sysrq(BadKbScript* bad_kb, const char* line, int32_t pa
     line = &line[ducky_get_command_len(line) + 1];
     uint16_t key = ducky_get_keycode(bad_kb, line, true);
     if(bad_kb->bt) {
-        furi_hal_bt_hid_kb_press(KEY_MOD_LEFT_ALT | HID_KEYBOARD_PRINT_SCREEN);
-        furi_hal_bt_hid_kb_press(key);
+        ble_profile_hid_kb_press(
+            bad_kb->app->ble_hid, KEY_MOD_LEFT_ALT | HID_KEYBOARD_PRINT_SCREEN);
+        ble_profile_hid_kb_press(bad_kb->app->ble_hid, key);
         furi_delay_ms(bt_timeout);
-        furi_hal_bt_hid_kb_release_all();
+        ble_profile_hid_kb_release_all(bad_kb->app->ble_hid);
     } else {
         furi_hal_hid_kb_press(KEY_MOD_LEFT_ALT | HID_KEYBOARD_PRINT_SCREEN);
         furi_hal_hid_kb_press(key);
@@ -132,7 +134,7 @@ static int32_t ducky_fnc_hold(BadKbScript* bad_kb, const char* line, int32_t par
         return ducky_error(bad_kb, "Too many keys are hold");
     }
     if(bad_kb->bt) {
-        furi_hal_bt_hid_kb_press(key);
+        ble_profile_hid_kb_press(bad_kb->app->ble_hid, key);
     } else {
         furi_hal_hid_kb_press(key);
     }
@@ -152,7 +154,7 @@ static int32_t ducky_fnc_release(BadKbScript* bad_kb, const char* line, int32_t 
     }
     bad_kb->key_hold_nb--;
     if(bad_kb->bt) {
-        furi_hal_bt_hid_kb_release(key);
+        ble_profile_hid_kb_release(bad_kb->app->ble_hid, key);
     } else {
         furi_hal_hid_kb_release(key);
     }
@@ -168,8 +170,8 @@ static int32_t ducky_fnc_media(BadKbScript* bad_kb, const char* line, int32_t pa
         return ducky_error(bad_kb, "No keycode defined for %s", line);
     }
     if(bad_kb->bt) {
-        furi_hal_bt_hid_consumer_key_press(key);
-        furi_hal_bt_hid_consumer_key_release(key);
+        ble_profile_hid_kb_press(bad_kb->app->ble_hid, key);
+        ble_profile_hid_kb_release(bad_kb->app->ble_hid, key);
     } else {
         furi_hal_hid_consumer_key_press(key);
         furi_hal_hid_consumer_key_release(key);
@@ -187,10 +189,10 @@ static int32_t ducky_fnc_globe(BadKbScript* bad_kb, const char* line, int32_t pa
     }
 
     if(bad_kb->bt) {
-        furi_hal_bt_hid_consumer_key_press(HID_CONSUMER_FN_GLOBE);
-        furi_hal_bt_hid_kb_press(key);
-        furi_hal_bt_hid_kb_release(key);
-        furi_hal_bt_hid_consumer_key_release(HID_CONSUMER_FN_GLOBE);
+        ble_profile_hid_consumer_key_press(bad_kb->app->ble_hid, HID_CONSUMER_FN_GLOBE);
+        ble_profile_hid_kb_press(bad_kb->app->ble_hid, key);
+        ble_profile_hid_kb_release(bad_kb->app->ble_hid, key);
+        ble_profile_hid_consumer_key_release(bad_kb->app->ble_hid, HID_CONSUMER_FN_GLOBE);
     } else {
         furi_hal_hid_consumer_key_press(HID_CONSUMER_FN_GLOBE);
         furi_hal_hid_kb_press(key);

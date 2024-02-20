@@ -33,14 +33,13 @@ void cfw_app_scene_misc_screen_color_on_enter(void* context) {
 
 bool cfw_app_scene_misc_screen_color_on_event(void* context, SceneManagerEvent event) {
     CfwApp* app = context;
-    CfwSettings* cfw_settings = CFW_SETTINGS();
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
         consumed = true;
         switch(event.event) {
         case ByteInputResultOk:
-            switch(cfw_settings->lcd_style) {
+            switch(cfw_settings.lcd_style) {
             case 0:
                 notification_message(app->notification, &sequence_display_backlight_off);
                 rgb_backlight_set_color(0, &app->lcd_color);

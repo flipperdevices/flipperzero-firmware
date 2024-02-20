@@ -124,6 +124,13 @@ class Main(App):
         if not exists(self.args.directory):
             os.makedirs(self.args.directory)
 
+        stage_size = os.stat(self.args.stage).st_size
+        max_stage_size = 131072  # 2 * MAX_READ in src/update.c
+        if stage_size > max_stage_size:
+            self.logger.warn(
+                f"RAM {stage_basename} size too big ({stage_size} > {max_stage_size} bytes)"
+            )
+            return 2
         shutil.copyfile(self.args.stage, join(self.args.directory, stage_basename))
         dfu_size = 0
         if self.args.dfu:

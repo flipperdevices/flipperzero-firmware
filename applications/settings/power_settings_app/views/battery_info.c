@@ -1,7 +1,7 @@
 #include "battery_info.h"
 #include <furi.h>
 #include <gui/elements.h>
-#include <power_settings_icons.h>
+#include <assets_icons.h>
 #include <locale/locale.h>
 
 #define LOW_CHARGE_THRESHOLD (10)
@@ -141,7 +141,10 @@ static bool battery_info_input_callback(InputEvent* event, void* context) {
 
     BatteryInfo* battery_info = context;
 
-    if(event->type == InputTypeShort) {
+    bool about_battery;
+    with_view_model(
+        battery_info->view, BatteryInfoModel * model, { about_battery = model->alt; }, false);
+    if(about_battery && event->type == InputTypeShort) {
         if(event->key == InputKeyLeft) {
             event->key = InputKeyBack;
         } else if(event->key == InputKeyRight) {

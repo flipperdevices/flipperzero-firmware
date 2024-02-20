@@ -1,11 +1,17 @@
+#include "../bad_kb_app_i.h"
 #include "bad_kb_view.h"
 #include "../helpers/ducky_script.h"
-#include "../bad_kb_app.h"
 #include <toolbox/path.h>
 #include <gui/elements.h>
-#include "bad_kb_icons.h"
+#include <bt/bt_service/bt_i.h>
 
 #define MAX_NAME_LEN 64
+
+struct BadKb {
+    View* view;
+    BadKbButtonCallback callback;
+    void* context;
+};
 
 typedef struct {
     char file_name[MAX_NAME_LEN];
@@ -35,10 +41,15 @@ static void bad_kb_draw_callback(Canvas* canvas, void* _model) {
     }
     if(model->state.pin) {
         furi_string_cat_printf(disp_str, "  PIN: %ld", model->state.pin);
+    } else {
+        uint32_t e = model->state.elapsed;
+        furi_string_cat_printf(disp_str, "  %02lu:%02lu.%ld", e / 60 / 1000, e / 1000, e % 1000);
     }
     elements_string_fit_width(canvas, disp_str, 128 - 2);
     canvas_draw_str(
         canvas, 2, 8 + canvas_current_font_height(canvas), furi_string_get_cstr(disp_str));
+
+    furi_string_reset(disp_str);
 
     canvas_draw_icon(canvas, 22, 24, &I_UsbTree_48x22);
 
@@ -105,7 +116,7 @@ static void bad_kb_draw_callback(Canvas* canvas, void* _model) {
             canvas, 124, 47, AlignRight, AlignBottom, furi_string_get_cstr(disp_str));
         canvas_set_font(canvas, FontBigNumbers);
         furi_string_printf(
-            disp_str, "%u", ((model->state.line_cur - 1) * 100) / model->state.line_nb);
+            disp_str, "%zu", ((model->state.line_cur - 1) * 100) / model->state.line_nb);
         canvas_draw_str_aligned(
             canvas, 112, 37, AlignRight, AlignBottom, furi_string_get_cstr(disp_str));
         canvas_draw_icon(canvas, 115, 23, &I_Percent_10x14);
@@ -134,7 +145,7 @@ static void bad_kb_draw_callback(Canvas* canvas, void* _model) {
             canvas, 124, 47, AlignRight, AlignBottom, furi_string_get_cstr(disp_str));
         canvas_set_font(canvas, FontBigNumbers);
         furi_string_printf(
-            disp_str, "%u", ((model->state.line_cur - 1) * 100) / model->state.line_nb);
+            disp_str, "%zu", ((model->state.line_cur - 1) * 100) / model->state.line_nb);
         canvas_draw_str_aligned(
             canvas, 112, 37, AlignRight, AlignBottom, furi_string_get_cstr(disp_str));
         canvas_draw_icon(canvas, 115, 23, &I_Percent_10x14);
@@ -152,7 +163,7 @@ static void bad_kb_draw_callback(Canvas* canvas, void* _model) {
             canvas, 124, 47, AlignRight, AlignBottom, furi_string_get_cstr(disp_str));
         canvas_set_font(canvas, FontBigNumbers);
         furi_string_printf(
-            disp_str, "%u", ((model->state.line_cur - 1) * 100) / model->state.line_nb);
+            disp_str, "%zu", ((model->state.line_cur - 1) * 100) / model->state.line_nb);
         canvas_draw_str_aligned(
             canvas, 112, 37, AlignRight, AlignBottom, furi_string_get_cstr(disp_str));
         canvas_draw_icon(canvas, 115, 23, &I_Percent_10x14);

@@ -28,25 +28,30 @@ typedef enum {
 
 #define WORKER_ALL_RX_EVENTS (WorkerEvtStop | WorkerEvtRxDone)
 
-static void airmon_pms_uart_on_irq_cb(UartIrqEvent ev, uint8_t data, void* context) {
+static void airmon_pms_uart_on_irq_cb(
+    FuriHalSerialHandle* handle,
+    FuriHalSerialRxEvent event,
+    void* context) {
     AirmonPmsContext* pms_context = context;
 
-    if(ev == UartIrqEventRXNE) {
+    if(event == FuriHalSerialRxEventData) {
+        uint8_t data = furi_hal_serial_async_rx(handle);
         furi_stream_buffer_send(pms_context->rx_stream, &data, 1, 0);
         furi_thread_flags_set(furi_thread_get_id(pms_context->thread), WorkerEvtRxDone);
     }
 }
 
 static void airmon_pms_serial_init(AirmonPmsContext* pms_context) {
-    furi_hal_console_disable();
-    furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, airmon_pms_uart_on_irq_cb, pms_context);
-    furi_hal_uart_set_br(FuriHalUartIdUSART1, PMS_BAUDRATE);
+    pms_context->serial_handle = furi_hal_serial_control_acquire(UART_CH);
+    furi_check(pms_context->serial_handle);
+    furi_hal_serial_init(pms_context->serial_handle, PMS_BAUDRATE);
+    furi_hal_serial_async_rx_start(
+        pms_context->serial_handle, airmon_pms_uart_on_irq_cb, pms_context, false);
 }
 
 static void airmon_pms_serial_deinit(AirmonPmsContext* pms_context) {
-    UNUSED(pms_context);
-    furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, NULL, NULL);
-    furi_hal_console_enable();
+    furi_hal_serial_deinit(pms_context->serial_handle);
+    furi_hal_serial_control_release(pms_context->serial_handle);
 }
 
 bool airmon_pms_frame_valid(AirmonPmsContext* pms_context, size_t frame_len) {
@@ -81,19 +86,22 @@ void airmon_pms_process_data_frame(AirmonPmsContext* pms_context) {
     d->ct5_0 = UINT16BE(p + 20);
     d->ct10 = UINT16BE(p + 22);
 
-    pms_context->pms_data_timestamp = furi_get_tick();
-
     furi_mutex_release(pms_context->mutex);
 }
 
 void airmon_pms_process_frame(AirmonPmsContext* pms_context, size_t frame_len) {
     if(!airmon_pms_frame_valid(pms_context, frame_len)) {
-        FURI_LOG_W(TAG, "Invalid frame CRC");
+        notification_message_block(pms_context->notifications, &sequence_blink_red_10);
         return;
     }
 
     if(frame_len == PMS_DATA_FRAME_LEN) {
         airmon_pms_process_data_frame(pms_context);
+        notification_message_block(pms_context->notifications, &sequence_blink_green_10);
+    } else if(frame_len == PMS_CTRL_FRAME_LEN) {
+        notification_message_block(pms_context->notifications, &sequence_blink_blue_10);
+    } else {
+        notification_message_block(pms_context->notifications, &sequence_blink_magenta_10);
     }
 }
 
@@ -223,6 +231,8 @@ AirmonPmsContext* airmon_pms_context_alloc() {
 
     memset(&pms_context->pms_data, 0, sizeof(AirmonPmsData));
 
+    pms_context->notifications = furi_record_open(RECORD_NOTIFICATION);
+
     pms_context->thread = furi_thread_alloc();
     furi_thread_set_name(pms_context->thread, "AirmonPmsWorker");
     furi_thread_set_stack_size(pms_context->thread, 1024);
@@ -235,6 +245,7 @@ AirmonPmsContext* airmon_pms_context_alloc() {
 void airmon_pms_context_free(AirmonPmsContext* pms_context) {
     furi_assert(pms_context);
     furi_thread_free(pms_context->thread);
+    furi_record_close(RECORD_NOTIFICATION);
     free(pms_context);
 }
 

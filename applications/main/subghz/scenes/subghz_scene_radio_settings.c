@@ -155,7 +155,7 @@ static void subghz_scene_receiver_config_set_gps(VariableItem* item) {
 
     if(subghz->last_settings->gps_baudrate != 0) {
         subghz_gps_stop(subghz->gps);
-        subghz_gps_set_baudrate(subghz->last_settings->gps_baudrate);
+        subghz_gps_set_baudrate(subghz->gps, subghz->last_settings->gps_baudrate);
         subghz_gps_start(subghz->gps);
     } else {
         subghz_gps_stop(subghz->gps);

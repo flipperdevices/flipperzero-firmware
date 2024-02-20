@@ -1,7 +1,7 @@
 #include "seader_worker_i.h"
 
 #include <flipper_format/flipper_format.h>
-#include <bit_lib/bit_lib.h>
+#include <lib/bit_lib/bit_lib.h>
 
 #define TAG "SeaderWorker"
 

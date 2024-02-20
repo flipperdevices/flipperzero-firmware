@@ -9,6 +9,7 @@
 #include <cli/cli.h>
 #include <gui/gui.h>
 #include "furi_hal_rtc.h"
+#include <expansion/expansion.h>
 
 void draw_callback(Canvas* canvas, void* ctx) {
     PlayerViewModel* model = (PlayerViewModel*)ctx;
@@ -105,6 +106,9 @@ void draw_all(VideoPlayerApp* player) {
 int32_t video_player_app(void* p) {
     UNUSED(p);
 
+    Expansion* expansion = furi_record_open(RECORD_EXPANSION);
+    expansion_disable(expansion);
+
     Storage* storage = furi_record_open(RECORD_STORAGE);
     bool st = storage_simply_mkdir(storage, APPSDATA_FOLDER);
     st = storage_simply_mkdir(storage, VIDEO_PLAYER_FOLDER);
@@ -194,6 +198,8 @@ int32_t video_player_app(void* p) {
             if(player->quit) {
                 deinit_player(player);
                 player_deinit_hardware();
+                expansion_enable(expansion);
+                furi_record_close(RECORD_EXPANSION);
                 return 0;
             }
 
@@ -225,7 +231,10 @@ int32_t video_player_app(void* p) {
                             player->header_size);
                         stream_seek(player->stream, seek, StreamOffsetFromStart);
 
-                        player->progress = (uint8_t)((int64_t)stream_tell(player->stream) * (int64_t)126 / ((int64_t)player->num_frames * (int64_t)player->frame_size + (int64_t)player->header_size));
+                        player->progress =
+                            (uint8_t)((int64_t)stream_tell(player->stream) * (int64_t)126 /
+                                      ((int64_t)player->num_frames * (int64_t)player->frame_size +
+                                       (int64_t)player->header_size));
 
                         if(event.input.type == InputTypeRelease) {
                             player->seeking = false;
@@ -244,7 +253,10 @@ int32_t video_player_app(void* p) {
                             player->header_size);
                         stream_seek(player->stream, seek, StreamOffsetFromStart);
 
-                        player->progress = (uint8_t)((int64_t)stream_tell(player->stream) * (int64_t)126 / ((int64_t)player->num_frames * (int64_t)player->frame_size + (int64_t)player->header_size));
+                        player->progress =
+                            (uint8_t)((int64_t)stream_tell(player->stream) * (int64_t)126 /
+                                      ((int64_t)player->num_frames * (int64_t)player->frame_size +
+                                       (int64_t)player->header_size));
 
                         if(event.input.type == InputTypeRelease) {
                             player->seeking = false;
@@ -315,6 +327,9 @@ int32_t video_player_app(void* p) {
         deinit_player(player);
         player_deinit_hardware();
     }
+
+    expansion_enable(expansion);
+    furi_record_close(RECORD_EXPANSION);
 
     return 0;
 }

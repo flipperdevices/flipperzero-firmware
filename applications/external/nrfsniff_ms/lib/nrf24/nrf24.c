@@ -6,6 +6,13 @@
 #include <string.h>
 
 void nrf24_init() {
+    if(cfw_settings.spi_nrf24_handle == SpiDefault) {
+        furi_hal_gpio_init_simple(&gpio_ext_pc3, GpioModeOutputPushPull);
+        furi_hal_gpio_write(&gpio_ext_pc3, true);
+    } else if(cfw_settings.spi_nrf24_handle == SpiExtra) {
+        furi_hal_gpio_init_simple(&gpio_ext_pa4, GpioModeOutputPushPull);
+        furi_hal_gpio_write(&gpio_ext_pa4, true);
+    }
     furi_hal_spi_bus_handle_init(nrf24_HANDLE);
     furi_hal_spi_acquire(nrf24_HANDLE);
     furi_hal_gpio_init(nrf24_CE_PIN, GpioModeOutputPushPull, GpioPullUp, GpioSpeedVeryHigh);
@@ -17,6 +24,11 @@ void nrf24_deinit() {
     furi_hal_spi_bus_handle_deinit(nrf24_HANDLE);
     furi_hal_gpio_write(nrf24_CE_PIN, false);
     furi_hal_gpio_init(nrf24_CE_PIN, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
+    if(cfw_settings.spi_nrf24_handle == SpiDefault) {
+        furi_hal_gpio_init_simple(&gpio_ext_pc3, GpioModeAnalog);
+    } else if(cfw_settings.spi_nrf24_handle == SpiExtra) {
+        furi_hal_gpio_init_simple(&gpio_ext_pa4, GpioModeAnalog);
+    }
 }
 
 void nrf24_spi_trx(
@@ -517,4 +529,14 @@ uint8_t nrf24_find_channel(
     }
 
     return ch;
+}
+
+bool nrf24_check_connected(FuriHalSpiBusHandle* handle) {
+    uint8_t status = nrf24_status(handle);
+
+    if(status != 0x00) {
+        return true;
+    } else {
+        return false;
+    }
 }

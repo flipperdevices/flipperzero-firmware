@@ -89,7 +89,7 @@ static int BrowserItem_t_cmp(const BrowserItem_t* a, const BrowserItem_t* b) {
     if(b->type == BrowserItemTypeBack) {
         return 1;
     }
-    if(CFW_SETTINGS()->sort_dirs_first) {
+    if(cfw_settings.sort_dirs_first) {
         if(a->type == BrowserItemTypeFolder && b->type != BrowserItemTypeFolder) {
             return -1;
         }

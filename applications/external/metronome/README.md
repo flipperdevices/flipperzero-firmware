@@ -1,8 +1,19 @@
 # Metronome
 
-A metronome for the [Flipper Zero](https://flipperzero.one/) device. Goes along perfectly with my [BPM tapper](https://github.com/panki27/bpm-tapper).
+[![FAP Build](https://github.com/ezod/flipperzero-metronome/actions/workflows/build.yml/badge.svg)](https://github.com/ezod/flipperzero-metronome/actions/workflows/build.yml)
 
-![screenshot](img/screenshot.png)
+A metronome for the Flipper Zero.
+
+![ui](ui.png)
+
+## Installation
+
+1. Navigate to the [FAP Build](https://github.com/ezod/flipperzero-metronome/actions/workflows/build.yml)
+   GitHub action workflow, and select the most recent run.
+2. The FAP is built for both the `dev` and `release` channels of the official
+   firmware. Download the artifact corresponding to your firmware version.
+3. Extract `metronome.fap` from the ZIP file to `apps/Media` on your Flipper
+   Zero SD card.
 
 ## Features
 
@@ -13,9 +24,3 @@ A metronome for the [Flipper Zero](https://flipperzero.one/) device. Goes along 
 - Progress indicator
 - LED flashes accordingly
 - 3 different settings: Beep, Vibrate, Silent (push Down to change)
-
-## Compiling
-
-```
-./fbt fap_metronome
-```

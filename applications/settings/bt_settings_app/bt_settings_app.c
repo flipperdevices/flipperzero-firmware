@@ -16,7 +16,6 @@ BtSettingsApp* bt_settings_app_alloc() {
     BtSettingsApp* app = malloc(sizeof(BtSettingsApp));
 
     // Load settings
-    bt_settings_load(&app->settings);
     app->gui = furi_record_open(RECORD_GUI);
     app->bt = furi_record_open(RECORD_BT);
 

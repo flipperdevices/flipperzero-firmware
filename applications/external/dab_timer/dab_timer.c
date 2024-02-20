@@ -83,9 +83,9 @@ static void dab_timer_render_callback(Canvas* const canvas, void* ctx) {
         furi_message_queue_put(plugin_state->event_queue, &event, 0);
         return;
     }
-    FuriHalRtcDateTime curr_dt;
+    DateTime curr_dt;
     furi_hal_rtc_get_datetime(&curr_dt);
-    uint32_t curr_ts = furi_hal_rtc_datetime_to_timestamp(&curr_dt);
+    uint32_t curr_ts = furi_hal_rtc_get_timestamp();
     char time_string[TIME_LEN];
     char date_string[DATE_LEN];
     char meridian_string[MERIDIAN_LEN];
@@ -566,9 +566,7 @@ int32_t dab_timer_app(void* p) {
                         } else {
                             plugin_state->codeSequence = 0;
                             if(plugin_state->timer_start_timestamp != 0) {
-                                FuriHalRtcDateTime curr_dt;
-                                furi_hal_rtc_get_datetime(&curr_dt);
-                                uint32_t curr_ts = furi_hal_rtc_datetime_to_timestamp(&curr_dt);
+                                uint32_t curr_ts = furi_hal_rtc_get_timestamp();
                                 plugin_state->timer_start_timestamp = curr_ts;
                                 plugin_state->timer_stopped_seconds = 0;
                                 plugin_state->timerSecs = 0;
@@ -594,9 +592,7 @@ int32_t dab_timer_app(void* p) {
                                     notification_message(notification, &dab_timer_alert_startStop);
                                 }
                                 // START/STOP TIMER
-                                FuriHalRtcDateTime curr_dt;
-                                furi_hal_rtc_get_datetime(&curr_dt);
-                                uint32_t curr_ts = furi_hal_rtc_datetime_to_timestamp(&curr_dt);
+                                uint32_t curr_ts = furi_hal_rtc_get_timestamp();
                                 if(plugin_state->timer_running) {
                                     // Update stopped seconds
                                     plugin_state->timer_stopped_seconds =
@@ -675,9 +671,7 @@ int32_t dab_timer_app(void* p) {
                     }
                     if(plugin_state->songSelect == SoundAlertGoGoPoRa) {
                         if(plugin_state->timerSecs == plugin_state->alert_time) {
-                            FuriHalRtcDateTime curr_dt;
-                            furi_hal_rtc_get_datetime(&curr_dt);
-                            uint32_t curr_ts = furi_hal_rtc_datetime_to_timestamp(&curr_dt);
+                            uint32_t curr_ts = furi_hal_rtc_get_timestamp();
                             if(plugin_state->lastexp_timestamp + 10 <= curr_ts &&
                                plugin_state->w_test) {
                                 plugin_state->lastexp_timestamp = curr_ts;
@@ -699,9 +693,7 @@ int32_t dab_timer_app(void* p) {
                         }
                     } else if(plugin_state->songSelect == SoundAlertMario) {
                         if(plugin_state->timerSecs == plugin_state->alert_time) {
-                            FuriHalRtcDateTime curr_dt;
-                            furi_hal_rtc_get_datetime(&curr_dt);
-                            uint32_t curr_ts = furi_hal_rtc_datetime_to_timestamp(&curr_dt);
+                            uint32_t curr_ts = furi_hal_rtc_get_timestamp();
                             if(plugin_state->lastexp_timestamp + 10 <= curr_ts &&
                                plugin_state->w_test) {
                                 plugin_state->lastexp_timestamp = curr_ts;
@@ -719,9 +711,7 @@ int32_t dab_timer_app(void* p) {
                         }
                     } else {
                         if(plugin_state->timerSecs == plugin_state->alert_time) {
-                            FuriHalRtcDateTime curr_dt;
-                            furi_hal_rtc_get_datetime(&curr_dt);
-                            uint32_t curr_ts = furi_hal_rtc_datetime_to_timestamp(&curr_dt);
+                            uint32_t curr_ts = furi_hal_rtc_get_timestamp();
                             if(plugin_state->lastexp_timestamp + 10 <= curr_ts &&
                                plugin_state->w_test) {
                                 plugin_state->lastexp_timestamp = curr_ts;

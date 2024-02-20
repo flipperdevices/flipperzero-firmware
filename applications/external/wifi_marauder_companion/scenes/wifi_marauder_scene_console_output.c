@@ -104,8 +104,8 @@ void wifi_marauder_scene_console_output_on_enter(void* context) {
     wifi_marauder_uart_set_handle_rx_data_cb(
         app->uart,
         wifi_marauder_console_output_handle_rx_data_cb); // setup callback for general log rx thread
-    wifi_marauder_uart_set_handle_rx_data_cb(
-        app->lp_uart,
+    wifi_marauder_uart_set_handle_rx_pcap_cb(
+        app->uart,
         wifi_marauder_console_output_handle_rx_packets_cb); // setup callback for packets rx thread
 
     // Get ready to send command
@@ -122,15 +122,11 @@ void wifi_marauder_scene_console_output_on_enter(void* context) {
                 app->log_file_path,
                 sequential_file_resolve_path(
                     app->storage, MARAUDER_APP_FOLDER_LOGS, prefix, "log"));
-            if(app->log_file_path != NULL) {
-                if(storage_file_open(
-                       app->log_file, app->log_file_path, FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
-                    app->is_writing_log = true;
-                } else {
-                    dialog_message_show_storage_error(app->dialogs, "Cannot open log file");
-                }
+            if(storage_file_open(
+                   app->log_file, app->log_file_path, FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
+                app->is_writing_log = true;
             } else {
-                dialog_message_show_storage_error(app->dialogs, "Cannot resolve log path");
+                dialog_message_show_storage_error(app->dialogs, "Cannot open log file");
             }
         }
 
@@ -157,11 +153,15 @@ void wifi_marauder_scene_console_output_on_enter(void* context) {
         // Send command with newline '\n'
         if(app->selected_tx_string) {
             wifi_marauder_uart_tx(
-                (uint8_t*)(app->selected_tx_string), strlen(app->selected_tx_string));
-            wifi_marauder_uart_tx((uint8_t*)("\n"), 1);
+                app->uart, (uint8_t*)(app->selected_tx_string), strlen(app->selected_tx_string));
+            if(app->is_writing_pcap) {
+                wifi_marauder_uart_tx(app->uart, (uint8_t*)(" -serial\n"), strlen(" -serial\n"));
+            } else {
+                wifi_marauder_uart_tx(app->uart, (uint8_t*)("\n"), 1);
+            }
             if(send_html && the_html) {
-                wifi_marauder_uart_tx(the_html, html_size);
-                wifi_marauder_uart_tx((uint8_t*)("\n"), 1);
+                wifi_marauder_uart_tx(app->uart, the_html, html_size);
+                wifi_marauder_uart_tx(app->uart, (uint8_t*)("\n"), 1);
                 free(the_html);
                 send_html = false;
             }
@@ -169,7 +169,7 @@ void wifi_marauder_scene_console_output_on_enter(void* context) {
 
         // Run the script if the file with the script has been opened
         if(app->script != NULL) {
-            app->script_worker = wifi_marauder_script_worker_alloc();
+            app->script_worker = wifi_marauder_script_worker_alloc(app->uart);
             wifi_marauder_script_worker_start(app->script_worker, app->script);
         }
     }
@@ -195,16 +195,18 @@ void wifi_marauder_scene_console_output_on_exit(void* context) {
 
     // Automatically stop the scan when exiting view
     if(app->is_command) {
-        wifi_marauder_uart_tx((uint8_t*)("stopscan\n"), strlen("stopscan\n"));
+        wifi_marauder_uart_tx(app->uart, (uint8_t*)("stopscan\n"), strlen("stopscan\n"));
         furi_delay_ms(50);
     }
 
     // Unregister rx callback
     wifi_marauder_uart_set_handle_rx_data_cb(app->uart, NULL);
-    wifi_marauder_uart_set_handle_rx_data_cb(app->lp_uart, NULL);
+    wifi_marauder_uart_set_handle_rx_pcap_cb(app->uart, NULL);
 
-    wifi_marauder_script_worker_free(app->script_worker);
-    app->script_worker = NULL;
+    if(app->script_worker) {
+        wifi_marauder_script_worker_free(app->script_worker);
+        app->script_worker = NULL;
+    }
 
     app->is_writing_pcap = false;
     if(app->capture_file && storage_file_is_open(app->capture_file)) {

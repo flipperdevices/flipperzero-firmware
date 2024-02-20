@@ -2,6 +2,7 @@
 
 #include <furi.h>
 #include <furi_hal.h>
+#include <expansion/expansion.h>
 
 static bool uart_terminal_app_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
@@ -50,12 +51,6 @@ UART_TerminalApp* uart_terminal_app_alloc() {
         app->selected_option_index[i] = 0;
     }
 
-    app->setup_var_item_list = variable_item_list_alloc();
-    view_dispatcher_add_view(
-        app->view_dispatcher,
-        UART_TerminalAppViewSetup,
-        variable_item_list_get_view(app->setup_var_item_list));
-
     for(int i = 0; i < SETUP_MENU_ITEMS; ++i) {
         app->setup_selected_option_index[i] = 0;
     }
@@ -94,14 +89,17 @@ void uart_terminal_app_free(UART_TerminalApp* app) {
 
     // Views
     view_dispatcher_remove_view(app->view_dispatcher, UART_TerminalAppViewVarItemList);
-    view_dispatcher_remove_view(app->view_dispatcher, UART_TerminalAppViewSetup);
+    view_dispatcher_remove_view(app->view_dispatcher, UART_TerminalAppViewHelp);
     view_dispatcher_remove_view(app->view_dispatcher, UART_TerminalAppViewConsoleOutput);
     view_dispatcher_remove_view(app->view_dispatcher, UART_TerminalAppViewTextInput);
     view_dispatcher_remove_view(app->view_dispatcher, UART_TerminalAppViewHexInput);
 
+    variable_item_list_free(app->var_item_list);
+    widget_free(app->widget);
     text_box_free(app->text_box);
     furi_string_free(app->text_box_store);
     uart_text_input_free(app->text_input);
+    uart_hex_input_free(app->hex_input);
 
     // View dispatcher
     view_dispatcher_free(app->view_dispatcher);
@@ -117,6 +115,10 @@ void uart_terminal_app_free(UART_TerminalApp* app) {
 
 int32_t uart_terminal_app(void* p) {
     UNUSED(p);
+    // Disable expansion protocol to avoid interference with UART Handle
+    Expansion* expansion = furi_record_open(RECORD_EXPANSION);
+    expansion_disable(expansion);
+
     UART_TerminalApp* uart_terminal_app = uart_terminal_app_alloc();
 
     uart_terminal_app->uart = uart_terminal_uart_init(uart_terminal_app);
@@ -124,6 +126,10 @@ int32_t uart_terminal_app(void* p) {
     view_dispatcher_run(uart_terminal_app->view_dispatcher);
 
     uart_terminal_app_free(uart_terminal_app);
+
+    // Return previous state of expansion
+    expansion_enable(expansion);
+    furi_record_close(RECORD_EXPANSION);
 
     return 0;
 }

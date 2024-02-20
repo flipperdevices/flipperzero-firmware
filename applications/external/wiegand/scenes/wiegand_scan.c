@@ -59,7 +59,7 @@ static void wiegand_stop_scan(void* context) {
 static void wiegand_scan_found(void* context) {
     App* app = context;
 
-    FuriHalRtcDateTime datetime;
+    DateTime datetime;
     furi_hal_rtc_get_datetime(&datetime);
     snprintf(
         app->file_name,

@@ -8,6 +8,8 @@
 extern "C" {
 #endif
 
+/** logical drive path */
+extern char fatfs_path[4];
 /** File system object */
 extern FATFS fatfs_object;
 

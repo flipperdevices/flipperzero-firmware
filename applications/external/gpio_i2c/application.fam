@@ -3,7 +3,7 @@ App(
     name="GPIO with I2C",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="gpio_i2c_app",
-    stack_size=1 * 1024,
+    stack_size=2 * 1024,
     # icon="A_GPIO_14",
     fap_icon="gpioIcon.png",
     fap_category="GPIO",

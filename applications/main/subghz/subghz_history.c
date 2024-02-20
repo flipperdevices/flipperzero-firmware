@@ -13,8 +13,9 @@ typedef struct {
     FlipperFormat* flipper_string;
     uint8_t type;
     SubGhzRadioPreset* preset;
-    FuriHalRtcDateTime datetime;
+    DateTime datetime;
     uint32_t hash_data;
+    const SubGhzProtocol* protocol;
     uint16_t repeats;
     float latitude;
     float longitude;
@@ -67,6 +68,12 @@ uint32_t subghz_history_get_hash_data(SubGhzHistory* instance, uint16_t idx) {
     furi_assert(instance);
     SubGhzHistoryItem* item = SubGhzHistoryItemArray_get(instance->history->data, idx);
     return item->hash_data;
+}
+
+const SubGhzProtocol* subghz_history_get_protocol(SubGhzHistory* instance, uint16_t idx) {
+    furi_assert(instance);
+    SubGhzHistoryItem* item = SubGhzHistoryItemArray_get(instance->history->data, idx);
+    return item->protocol;
 }
 
 uint16_t subghz_history_get_repeats(SubGhzHistory* instance, uint16_t idx) {
@@ -163,6 +170,16 @@ const char* subghz_history_get_protocol_name(SubGhzHistory* instance, uint16_t i
     return furi_string_get_cstr(instance->tmp_string);
 }
 
+DateTime subghz_history_get_datetime(SubGhzHistory* instance, uint16_t idx) {
+    furi_assert(instance);
+    SubGhzHistoryItem* item = SubGhzHistoryItemArray_get(instance->history->data, idx);
+    if(item) {
+        return item->datetime;
+    } else {
+        return (DateTime){};
+    }
+}
+
 FlipperFormat* subghz_history_get_raw_data(SubGhzHistory* instance, uint16_t idx) {
     furi_assert(instance);
     SubGhzHistoryItem* item = SubGhzHistoryItemArray_get(instance->history->data, idx);
@@ -172,25 +189,27 @@ FlipperFormat* subghz_history_get_raw_data(SubGhzHistory* instance, uint16_t idx
         return NULL;
     }
 }
-bool subghz_history_get_text_space_left(SubGhzHistory* instance, FuriString* output, uint8_t sats) {
+bool subghz_history_get_text_space_left(
+    SubGhzHistory* instance,
+    FuriString* output,
+    uint8_t sats,
+    bool ignore_full) {
     furi_assert(instance);
-    if(memmgr_get_free_heap() < SUBGHZ_HISTORY_FREE_HEAP) {
-        if(output != NULL) furi_string_printf(output, "    Memory is FULL");
-        return true;
-    }
-    if(instance->last_index_write == SUBGHZ_HISTORY_MAX) {
-        if(output != NULL) furi_string_printf(output, "     History is FULL");
-        return true;
+    if(!ignore_full) {
+        if(memmgr_get_free_heap() < SUBGHZ_HISTORY_FREE_HEAP) {
+            if(output != NULL) furi_string_printf(output, "    Memory is FULL");
+            return true;
+        }
+        if(instance->last_index_write == SUBGHZ_HISTORY_MAX) {
+            if(output != NULL) furi_string_printf(output, "     History is FULL");
+            return true;
+        }
     }
     if(output != NULL) {
         if(sats == 0) {
             furi_string_printf(output, "%02u", instance->last_index_write);
-            return false;
         } else {
-            FuriHalRtcDateTime datetime;
-            furi_hal_rtc_get_datetime(&datetime);
-
-            if(furi_hal_rtc_datetime_to_timestamp(&datetime) % 2) {
+            if(furi_hal_rtc_get_timestamp() % 2) {
                 furi_string_printf(output, "%02u", instance->last_index_write);
             } else {
                 furi_string_printf(output, "%d sats", sats);
@@ -210,7 +229,7 @@ void subghz_history_get_text_item_menu(SubGhzHistory* instance, FuriString* outp
 
 void subghz_history_get_time_item_menu(SubGhzHistory* instance, FuriString* output, uint16_t idx) {
     SubGhzHistoryItem* item = SubGhzHistoryItemArray_get(instance->history->data, idx);
-    FuriHalRtcDateTime* t = &item->datetime;
+    DateTime* t = &item->datetime;
     furi_string_printf(output, "%.2d:%.2d:%.2d ", t->hour, t->minute, t->second);
 }
 
@@ -236,7 +255,7 @@ bool subghz_history_add_to_history(
     SubGhzHistoryItemArray_it_last(it, instance->history->data);
     while(!SubGhzHistoryItemArray_end_p(it)) {
         SubGhzHistoryItem* search = SubGhzHistoryItemArray_ref(it);
-        if(search->hash_data == hash_data) {
+        if(search->hash_data == hash_data && search->protocol == decoder_base->protocol) {
             repeats = search->repeats + 1;
             break;
         }
@@ -257,6 +276,7 @@ bool subghz_history_add_to_history(
     item->preset->data_size = preset->data_size;
     furi_hal_rtc_get_datetime(&item->datetime);
     item->hash_data = hash_data;
+    item->protocol = decoder_base->protocol;
     item->repeats = repeats;
     item->latitude = preset->latitude;
     item->longitude = preset->longitude;
@@ -341,7 +361,7 @@ void subghz_history_remove_duplicates(SubGhzHistory* instance) {
         while(!SubGhzHistoryItemArray_end_p(jt)) {
             SubGhzHistoryItem* j = SubGhzHistoryItemArray_ref(jt);
 
-            if(j->hash_data == i->hash_data) {
+            if(j->hash_data == i->hash_data && j->protocol == i->protocol) {
                 subghz_history_delete_item(instance, jt->index);
             }
             SubGhzHistoryItemArray_previous(jt);

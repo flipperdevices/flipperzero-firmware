@@ -31,7 +31,7 @@ bool ublox_scene_sync_time_on_event(void* context, SceneManagerEvent event) {
             // We don't have a timezone (or even UTC offset) in the
             // RTC, so we can only update the minute and second---not
             // even the date.
-            FuriHalRtcDateTime datetime;
+            DateTime datetime;
             furi_hal_rtc_get_datetime(&datetime);
             datetime.minute = (ublox->nav_timeutc).min;
             datetime.second = (ublox->nav_timeutc).sec;

@@ -1,4 +1,4 @@
-#include "../bad_kb_app.h"
+#include "../bad_kb_app_i.h"
 
 static void
     bad_kb_scene_error_event_callback(GuiButtonType result, InputType type, void* context) {

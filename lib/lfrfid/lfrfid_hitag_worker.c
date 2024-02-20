@@ -2251,7 +2251,8 @@ static int32_t lfrfid_hitag_worker_read_thread(void* thread_context) {
                     crc,
                     1,
                     213,
-                    (uint32_t)(1.05 * 33 * HITAG_BITPERIODS_MC)}; //always take 5% reading time buffer
+                    (uint32_t)(1.05 * 33 *
+                               HITAG_BITPERIODS_MC)}; //always take 5% reading time buffer
                 uint8_t type[] = {
                     HITAG_ON,
                     HITAG_SELECT,
@@ -2285,7 +2286,8 @@ static int32_t lfrfid_hitag_worker_read_thread(void* thread_context) {
                         crc,
                         1,
                         213,
-                        (uint32_t)(1.05 * 33 * HITAG_BITPERIODS_MC)}; //always take 5% reading time buffer
+                        (uint32_t)(1.05 * 33 *
+                                   HITAG_BITPERIODS_MC)}; //always take 5% reading time buffer
                     uint8_t type2[] = {
                         HITAG_ON, HITAG_CMD, HITAG_BYTE, HITAG_CRC, HITAG_STOP, HITAG_ON, HITAG_ON};
                     uint16_t len2 = 7;
@@ -2306,7 +2308,8 @@ static int32_t lfrfid_hitag_worker_read_thread(void* thread_context) {
                         crc,
                         1,
                         213,
-                        (uint32_t)(1.05 * 129 * HITAG_BITPERIODS_MC)}; //always take 5% reading time buffer
+                        (uint32_t)(1.05 * 129 *
+                                   HITAG_BITPERIODS_MC)}; //always take 5% reading time buffer
                     uint8_t type2[] = {
                         HITAG_ON, HITAG_CMD, HITAG_BYTE, HITAG_CRC, HITAG_STOP, HITAG_ON, HITAG_ON};
                     uint16_t len2 = 7;

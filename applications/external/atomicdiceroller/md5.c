@@ -115,7 +115,7 @@ void md5_process(md5_context* ctx, const unsigned char data[64]) {
     GET_UINT32_LE(X[14], data, 56);
     GET_UINT32_LE(X[15], data, 60);
 
-#define S(x, n) (((x) << (n)) | (((x)&0xFFFFFFFF) >> (32 - (n))))
+#define S(x, n) (((x) << (n)) | (((x) & 0xFFFFFFFF) >> (32 - (n))))
 
 #define P(a, b, c, d, k, s, t)      \
     {                               \

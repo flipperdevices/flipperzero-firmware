@@ -67,7 +67,7 @@ static void meal_pager_retekess_t119_generate_pager(
     //FURI_LOG_D(TAG, "Manchester: %s", manchester);
     char* rawSignal = genRawDataT119(200, 600, manchester);
     //FURI_LOG_D(TAG, "RAW_Data: %s", rawSignal);
-    for(u_int32_t i = 1; app->repeats >= i; i++) {
+    for(uint32_t i = 1; app->repeats >= i; i++) {
         flipper_format_write_string_cstr(ff, "RAW_Data", rawSignal);
     }
     //flipper_format_write_string_cstr(ff, "RAW_Data", rawSignal);
@@ -90,7 +90,7 @@ static void
     uint32ToBinaray(station, stationId, 13);
     reverse(stationId);
     meal_pager_transmit_model_set_station(app->meal_pager_transmit, app->current_station);
-    for(u_int32_t i = app->current_pager; i <= app->last_pager; i++) {
+    for(uint32_t i = app->current_pager; i <= app->last_pager; i++) {
         meal_pager_retekess_t119_generate_pager(app, stationId, i, ff);
         //furi_thread_flags_wait(0, FuriFlagWaitAny, 1);
         if(app->stop_transmit) {
@@ -117,7 +117,7 @@ bool meal_pager_retekess_t119_generate_all(void* context) {
         return success;
     }
 
-    for(u_int32_t i = app->current_station; i <= app->last_station; i++) {
+    for(uint32_t i = app->current_station; i <= app->last_station; i++) {
         meal_pager_retekess_t119_generate_station(app, i, ff);
         //furi_thread_flags_wait(0, FuriFlagWaitAny, 100);
         if(app->stop_transmit) {

@@ -12,9 +12,9 @@
 #include <timers.h>
 #include "log.h"
 #include <furi_hal_rtc.h>
-#include <furi_hal_console.h>
 
 #include <FreeRTOS.h>
+#include <stdint.h>
 #include <task.h>
 
 #define TAG "FuriThread"
@@ -190,6 +190,12 @@ void furi_thread_set_priority(FuriThread* thread, FuriThreadPriority priority) {
     furi_assert(thread->state == FuriThreadStateStopped);
     furi_assert(priority >= FuriThreadPriorityIdle && priority <= FuriThreadPriorityIsr);
     thread->priority = priority;
+}
+
+FuriThreadPriority furi_thread_get_priority(FuriThread* thread) {
+    furi_assert(thread);
+    TaskHandle_t hTask = furi_thread_get_id(thread);
+    return (FuriThreadPriority)uxTaskPriorityGet(hTask);
 }
 
 void furi_thread_set_current_priority(FuriThreadPriority priority) {
@@ -466,22 +472,23 @@ uint32_t furi_thread_flags_wait(uint32_t flags, uint32_t options, uint32_t timeo
     return (rflags);
 }
 
-uint32_t furi_thread_enumerate(FuriThreadId* thread_array, uint32_t array_items) {
+uint32_t furi_thread_enumerate(FuriThreadId* thread_array, uint32_t array_item_count) {
     uint32_t i, count;
     TaskStatus_t* task;
 
-    if(FURI_IS_IRQ_MODE() || (thread_array == NULL) || (array_items == 0U)) {
+    if(FURI_IS_IRQ_MODE() || (thread_array == NULL) || (array_item_count == 0U)) {
         count = 0U;
     } else {
         vTaskSuspendAll();
 
         count = uxTaskGetNumberOfTasks();
         task = pvPortMalloc(count * sizeof(TaskStatus_t));
+        configRUN_TIME_COUNTER_TYPE total_run_time;
 
         if(task != NULL) {
-            count = uxTaskGetSystemState(task, count, NULL);
+            count = uxTaskGetSystemState(task, count, &total_run_time);
 
-            for(i = 0U; (i < count) && (i < array_items); i++) {
+            for(i = 0U; (i < count) && (i < array_item_count); i++) {
                 thread_array[i] = (FuriThreadId)task[i].xHandle;
             }
             count = i;
@@ -543,7 +550,7 @@ static size_t __furi_thread_stdout_write(FuriThread* thread, const char* data, s
     if(thread->output.write_callback != NULL) {
         thread->output.write_callback(data, size);
     } else {
-        furi_hal_console_tx((const uint8_t*)data, size);
+        furi_log_tx((const uint8_t*)data, size);
     }
     return size;
 }

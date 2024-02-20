@@ -63,11 +63,11 @@ static void render_callback(Canvas* const canvas, void* ctx) {
     float background_position = game_state->paper->y;
     for(int i = background_position; i < background_position + 10; i++) {
         /*
-            using a u_int32_t here so that bits 
+            using a uint32_t here so that bits 
             that have been shifted out can still 
             be read.
         */
-        u_int32_t currentRow = game_state->map[i];
+        uint32_t currentRow = game_state->map[i];
         for(unsigned int j = 0; j < sizeof(uint16_t) * 8; j++) {
             /*
                 0x8000 is 1 with 15 zeros

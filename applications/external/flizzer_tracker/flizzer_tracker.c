@@ -7,7 +7,9 @@
 #include "view/pattern_editor.h"
 
 #include "font.h"
-#include "flizzer_tracker_icons.h"
+#include <flizzer_tracker_icons.h>
+
+#include <expansion/expansion.h>
 
 void draw_callback(Canvas* canvas, void* ctx) {
     TrackerViewModel* model = (TrackerViewModel*)ctx;
@@ -97,6 +99,9 @@ bool input_callback(InputEvent* input_event, void* ctx) {
 
 int32_t flizzer_tracker_app(void* p) {
     UNUSED(p);
+
+    Expansion* expansion = furi_record_open(RECORD_EXPANSION);
+    expansion_disable(expansion);
 
     Storage* storage = furi_record_open(RECORD_STORAGE);
     bool st = storage_simply_mkdir(storage, APPSDATA_FOLDER);
@@ -213,6 +218,9 @@ int32_t flizzer_tracker_app(void* p) {
     save_config(tracker);
 
     deinit_tracker(tracker);
+
+    expansion_enable(expansion);
+    furi_record_close(RECORD_EXPANSION);
 
     return 0;
 }

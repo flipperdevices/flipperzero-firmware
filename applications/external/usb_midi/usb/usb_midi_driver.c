@@ -1,5 +1,4 @@
 #include <furi.h>
-#include <furi_hal_console.h>
 #include <usb.h>
 #include <usb_std.h>
 

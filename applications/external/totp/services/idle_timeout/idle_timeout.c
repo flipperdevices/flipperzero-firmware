@@ -3,7 +3,7 @@
 #include <furi/core/timer.h>
 
 #define IDLE_TIMER_CHECK_PERIODICITY_SEC (1)
-#define SEC_TO_TICKS(sec) ((sec)*1000)
+#define SEC_TO_TICKS(sec) ((sec) * 1000)
 
 struct IdleTimeoutContext {
     FuriTimer* timer;

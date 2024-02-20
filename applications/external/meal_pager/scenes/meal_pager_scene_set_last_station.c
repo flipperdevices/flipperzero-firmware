@@ -43,11 +43,11 @@ bool meal_pager_scene_set_last_station_on_event(void* context, SceneManagerEvent
         app->last_station = atoi(app->text_store[1]);
         if(app->last_station > app->max_station) {
             app->last_station = app->max_station;
-            snprintf(app->text_store[1], 5, "%lu", app->last_station);
+            snprintf(app->text_store[1], sizeof(app->text_store[1]), "%lu", app->last_station);
         }
         if(app->last_station < app->first_station) {
             app->last_station = app->first_station;
-            snprintf(app->text_store[1], 5, "%lu", app->last_station);
+            snprintf(app->text_store[1], sizeof(app->text_store[1]), "%lu", app->last_station);
         }
         app->last_station_char = app->text_store[1];
         scene_manager_previous_scene(app->scene_manager);

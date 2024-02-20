@@ -1,5 +1,4 @@
 #include "canvas_i.h"
-#include "icon_i.h"
 #include "icon_animation_i.h"
 
 #include <furi.h>
@@ -144,7 +143,7 @@ const CanvasFontParameters* canvas_get_font_params(const Canvas* canvas, Font fo
 
 void canvas_clear(Canvas* canvas) {
     furi_assert(canvas);
-    if(CFW_SETTINGS()->dark_mode) {
+    if(cfw_settings.dark_mode) {
         u8g2_FillBuffer(&canvas->fb);
     } else {
         u8g2_ClearBuffer(&canvas->fb);
@@ -153,7 +152,7 @@ void canvas_clear(Canvas* canvas) {
 
 void canvas_set_color(Canvas* canvas, Color color) {
     furi_assert(canvas);
-    if(CFW_SETTINGS()->dark_mode) {
+    if(cfw_settings.dark_mode) {
         if(color == ColorBlack) {
             color = ColorWhite;
         } else if(color == ColorWhite) {

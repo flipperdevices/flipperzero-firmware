@@ -8,6 +8,7 @@ App(
     fap_icon_assets="images",
     fap_icon="totp_10px.png",
     fap_file_assets="assets",
+    fap_libs=["ble_profile"],
     fap_private_libs=[
         Lib(
             name="base32",
@@ -36,7 +37,7 @@ App(
     ],
     fap_author="Alexander Kopachov (akopachov)",
     fap_weburl="https://github.com/akopachov/flipper-zero_authenticator",
-    fap_version="5.11.0",
+    fap_version="5.12.0",
     fap_description="Software-based TOTP/HOTP authenticator for Flipper Zero device",
 )
 

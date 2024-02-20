@@ -42,10 +42,15 @@ static void subghz_gps_uart_parse_nmea(SubGhzGPS* subghz_gps, char* line) {
     }
 }
 
-static void subghz_gps_uart_on_irq_cb(UartIrqEvent ev, uint8_t data, void* context) {
+static void subghz_gps_uart_on_irq_cb(
+    FuriHalSerialHandle* handle,
+    FuriHalSerialRxEvent event,
+    void* context) {
+    UNUSED(handle);
     SubGhzGPS* subghz_gps = (SubGhzGPS*)context;
 
-    if(ev == UartIrqEventRXNE) {
+    if(event == FuriHalSerialRxEventData) {
+        uint8_t data = furi_hal_serial_async_rx(handle);
         furi_stream_buffer_send(subghz_gps->rx_stream, &data, 1, 0);
         furi_thread_flags_set(furi_thread_get_id(subghz_gps->thread), WorkerEvtRxDone);
     }
@@ -126,13 +131,15 @@ SubGhzGPS* subghz_gps_init() {
     furi_thread_set_context(subghz_gps->thread, subghz_gps);
     furi_thread_set_callback(subghz_gps->thread, subghz_gps_uart_worker);
 
-    if(UART_CH == FuriHalUartIdUSART1) {
-        furi_hal_console_disable();
-    } else if(UART_CH == FuriHalUartIdLPUART1) {
-        furi_hal_uart_init(UART_CH, 9600);
-    }
+    subghz_gps->expansion = furi_record_open(RECORD_EXPANSION);
+    expansion_disable(subghz_gps->expansion);
 
-    furi_hal_uart_set_irq_cb(UART_CH, subghz_gps_uart_on_irq_cb, subghz_gps);
+    subghz_gps->serial_handle = furi_hal_serial_control_acquire(UART_CH);
+    furi_check(subghz_gps->serial_handle);
+    furi_hal_serial_init(subghz_gps->serial_handle, 9600);
+
+    furi_hal_serial_async_rx_start(
+        subghz_gps->serial_handle, subghz_gps_uart_on_irq_cb, subghz_gps, false);
 
     return subghz_gps;
 }
@@ -140,12 +147,11 @@ SubGhzGPS* subghz_gps_init() {
 void subghz_gps_deinit(SubGhzGPS* subghz_gps) {
     furi_assert(subghz_gps);
 
-    furi_hal_uart_set_irq_cb(UART_CH, NULL, NULL);
-    if(UART_CH == FuriHalUartIdLPUART1) {
-        furi_hal_uart_deinit(UART_CH);
-    } else {
-        furi_hal_console_enable();
-    }
+    furi_hal_serial_deinit(subghz_gps->serial_handle);
+    furi_hal_serial_control_release(subghz_gps->serial_handle);
+
+    expansion_enable(subghz_gps->expansion);
+    furi_record_close(RECORD_EXPANSION);
 
     furi_thread_free(subghz_gps->thread);
     furi_stream_buffer_free(subghz_gps->rx_stream);
@@ -162,8 +168,8 @@ void subghz_gps_stop(SubGhzGPS* subghz_gps) {
     furi_thread_join(subghz_gps->thread);
 }
 
-void subghz_gps_set_baudrate(uint32_t baudrate) {
-    furi_hal_uart_set_br(UART_CH, baudrate);
+void subghz_gps_set_baudrate(SubGhzGPS* subghz_gps, uint32_t baudrate) {
+    furi_hal_serial_set_br(subghz_gps->serial_handle, baudrate);
 }
 
 double subghz_gps_deg2rad(double deg) {
