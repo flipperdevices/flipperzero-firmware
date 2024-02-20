@@ -149,8 +149,11 @@ bool mass_storage_scene_create_image_on_event(void* context, SceneManagerEvent e
 
             if(!success) {
                 error = storage_file_get_error_desc(app->file);
+                FS_Error error = storage_file_get_error(app->file);
                 storage_file_close(app->file);
-                storage_common_remove(app->fs_api, furi_string_get_cstr(app->file_path));
+                if(error != FSE_EXIST) {
+                    storage_common_remove(app->fs_api, furi_string_get_cstr(app->file_path));
+                }
             }
             storage_file_free(app->file);
             mass_storage_app_show_loading_popup(app, false);
