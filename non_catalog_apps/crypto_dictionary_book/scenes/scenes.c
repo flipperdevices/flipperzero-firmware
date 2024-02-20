@@ -70,21 +70,21 @@ char* wrap_text(const char* text, size_t max_line_width) {
     // More realistic initial size estimation
     size_t allocated_size = len + len / max_line_width + 1;
     char* wrapped = malloc(allocated_size);
-    if (!wrapped) return NULL;
+    if(!wrapped) return NULL;
 
     size_t cur_line_len = 0;
     size_t wrapped_index = 0;
     size_t word_len = 0;
 
-    for (size_t i = 0; i < len; ++i) {
+    for(size_t i = 0; i < len; ++i) {
         word_len++;
-        if (text[i] == '\n') {
-            for (size_t j = i - word_len + 1; j <= i; ++j) {
+        if(text[i] == '\n') {
+            for(size_t j = i - word_len + 1; j <= i; ++j) {
                 // Check and reallocate if necessary before writing to the buffer
-                if (wrapped_index >= allocated_size) {
+                if(wrapped_index >= allocated_size) {
                     allocated_size *= 2;
                     char* new_wrapped = realloc(wrapped, allocated_size);
-                    if (!new_wrapped) {
+                    if(!new_wrapped) {
                         free(wrapped);
                         return NULL;
                     }
@@ -97,41 +97,41 @@ char* wrap_text(const char* text, size_t max_line_width) {
             continue;
         }
 
-        if (text[i] == ' ' || i == len - 1) {
-            if (word_len >= max_line_width) {
-                if (cur_line_len > 0) {
+        if(text[i] == ' ' || i == len - 1) {
+            if(word_len >= max_line_width) {
+                if(cur_line_len > 0) {
                     wrapped[wrapped_index++] = '\n';
                     cur_line_len = 0;
                 }
-                for (size_t j = i - word_len + 1; j <= i; ++j) {
+                for(size_t j = i - word_len + 1; j <= i; ++j) {
                     // Check and reallocate if necessary before writing to the buffer
-                    if (wrapped_index >= allocated_size) {
+                    if(wrapped_index >= allocated_size) {
                         allocated_size *= 2;
                         char* new_wrapped = realloc(wrapped, allocated_size);
-                        if (!new_wrapped) {
+                        if(!new_wrapped) {
                             free(wrapped);
                             return NULL;
                         }
                         wrapped = new_wrapped;
                     }
                     wrapped[wrapped_index++] = text[j];
-                    if (++cur_line_len >= max_line_width && text[j] != '\n') {
+                    if(++cur_line_len >= max_line_width && text[j] != '\n') {
                         wrapped[wrapped_index++] = '\n';
                         cur_line_len = 0;
                     }
                 }
-            } else if (cur_line_len + word_len > max_line_width) {
-                if (cur_line_len > 0) {
+            } else if(cur_line_len + word_len > max_line_width) {
+                if(cur_line_len > 0) {
                     wrapped[wrapped_index++] = '\n';
                     cur_line_len = 0;
                 }
             }
-            for (size_t j = i - word_len + 1; j <= i; ++j) {
+            for(size_t j = i - word_len + 1; j <= i; ++j) {
                 // Check and reallocate if necessary before writing to the buffer
-                if (wrapped_index >= allocated_size) {
+                if(wrapped_index >= allocated_size) {
                     allocated_size *= 2;
                     char* new_wrapped = realloc(wrapped, allocated_size);
-                    if (!new_wrapped) {
+                    if(!new_wrapped) {
                         free(wrapped);
                         return NULL;
                     }
@@ -148,7 +148,6 @@ char* wrap_text(const char* text, size_t max_line_width) {
     return wrapped;
 }
 
-
 void topic_scene_on_enter(void* context) {
     furi_assert(context);
     App* app = (App*)context;
@@ -162,13 +161,14 @@ void topic_scene_on_enter(void* context) {
     if(file_stream_open(app->file_stream, file_path, FSAM_READ, FSOM_OPEN_EXISTING)) {
         FuriString* line = furi_string_alloc();
         while(stream_read_line(app->file_stream, line)) {
-            dynamic_buffer_append(&dynamic_content, furi_string_get_cstr(line), furi_string_size(line));
+            dynamic_buffer_append(
+                &dynamic_content, furi_string_get_cstr(line), furi_string_size(line));
             dynamic_buffer_append(&dynamic_content, "\r\n", 1);
         }
         dynamic_buffer_append(&dynamic_content, "\0", 1);
         furi_string_free(line);
         file_stream_close(app->file_stream);
-        size_t max_line_width = WIDGET_WIDTH / CHAR_WIDTH;
+        size_t max_line_width = WIDGET_WIDTH / UICHAR_WIDTH;
         char* wrapped_text = wrap_text(dynamic_content.data, max_line_width);
         dynamic_buffer_free(&dynamic_content);
 

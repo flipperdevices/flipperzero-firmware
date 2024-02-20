@@ -15,7 +15,7 @@
 
 #define TAG "SensorModule"
 
-#define BLE_HID_KEYS_PATH "/ext/apps_data/hid_ble/.bt_hid.keys"
+#define HID_BT_KEYS_STORAGE_NAME ".bt_hid.keys"
 
 typedef struct {
     Gui* gui;
