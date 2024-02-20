@@ -55,17 +55,20 @@ static NfcPlaylist* nfc_playlist_alloc() {
    view_dispatcher_enable_queue(nfc_playlist->view_dispatcher);
    nfc_playlist->variable_item_list = variable_item_list_alloc();
    nfc_playlist->submenu = submenu_alloc();
-   nfc_playlist->base_file_path = furi_string_alloc_set_str("/ext/apps_data/nfc_playlist/");
-   nfc_playlist->file_path = nfc_playlist->base_file_path;
-   nfc_playlist->file_selected = false;
-   nfc_playlist->file_selected_check = false;
-   nfc_playlist->file_browser = file_browser_alloc(nfc_playlist->file_path);
+
+   nfc_playlist->settings.base_file_path = furi_string_alloc_set_str("/ext/apps_data/nfc_playlist/");
+   nfc_playlist->settings.file_path = nfc_playlist->settings.base_file_path;
+   nfc_playlist->settings.file_selected = false;
+   nfc_playlist->settings.file_selected_check = false;
+   nfc_playlist->settings.emulate_timeout = default_emulate_timeout;
+   nfc_playlist->settings.emulate_delay = default_emulate_delay;
+   nfc_playlist->settings.emulate_led_indicator = default_emulate_led_indicator;
+
+   nfc_playlist->notification = furi_record_open(RECORD_NOTIFICATION);
+   nfc_playlist->file_browser = file_browser_alloc(nfc_playlist->settings.file_path);
    nfc_playlist->text_input = text_input_alloc();
    nfc_playlist->popup = popup_alloc();
-   nfc_playlist->emulate_timeout = default_emulate_timeout;
-   nfc_playlist->emulate_delay = default_emulate_delay;
-   nfc_playlist->emulate_led_indicator = default_emulate_led_indicator;
-   nfc_playlist->notification = furi_record_open(RECORD_NOTIFICATION);
+  
    view_dispatcher_set_event_callback_context(nfc_playlist->view_dispatcher, nfc_playlist);
    view_dispatcher_set_custom_event_callback(nfc_playlist->view_dispatcher, nfc_playlist_custom_callback);
    view_dispatcher_set_navigation_event_callback(nfc_playlist->view_dispatcher, nfc_playlist_back_event_callback);
@@ -94,8 +97,8 @@ static void nfc_playlist_free(NfcPlaylist* nfc_playlist) {
    text_input_free(nfc_playlist->text_input);
    popup_free(nfc_playlist->popup);
    furi_record_close(RECORD_NOTIFICATION);
-   furi_string_free(nfc_playlist->base_file_path);
-   furi_string_free(nfc_playlist->file_path);
+   furi_string_free(nfc_playlist->settings.base_file_path);
+   furi_string_free(nfc_playlist->settings.file_path);
    free(nfc_playlist->playlist_name);
    free(nfc_playlist);
 }
