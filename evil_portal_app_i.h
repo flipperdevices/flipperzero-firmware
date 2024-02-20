@@ -7,19 +7,20 @@
 #include "evil_portal_icons.h"
 
 #include <gui/gui.h>
+#include <gui/modules/loading.h>
 #include <gui/modules/text_box.h>
 #include <gui/modules/text_input.h>
 #include <gui/modules/variable_item_list.h>
 #include <gui/scene_manager.h>
 #include <gui/view_dispatcher.h>
+#include <gui/view_stack.h>
 #include <dialogs/dialogs.h>
 #include <cfw/cfw.h>
 
 #define NUM_MENU_ITEMS (6)
 
 #define EVIL_PORTAL_TEXT_BOX_STORE_SIZE (4096)
-#define UART_CH \
-    (CFW_SETTINGS()->uart_esp_channel == UARTDefault ? FuriHalUartIdUSART1 : FuriHalUartIdLPUART1)
+#define UART_CH (cfw_settings.uart_esp_channel)
 
 #define SET_HTML_CMD "sethtml"
 #define SET_AP_CMD "setap"
