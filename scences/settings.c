@@ -5,7 +5,6 @@ typedef enum {
    NfcPlaylistSettings_Timeout,
    NfcPlaylistSettings_Delay,
    NfcPlaylistSettings_LedIndicator,
-   NfcPlaylistSettings_HideError,
    NfcPlaylistSettings_Reset
 } NfcPlaylistMenuSelection;
 
@@ -30,11 +29,6 @@ void nfc_playlist_settings_menu_callback(void* context, uint32_t index) {
       VariableItem* emulation_led_indicator_settings = variable_item_list_get(nfc_playlist->variable_item_list, NfcPlaylistSettings_LedIndicator);
       variable_item_set_current_value_index(emulation_led_indicator_settings, nfc_playlist->settings.emulate_led_indicator);
       variable_item_set_current_value_text(emulation_led_indicator_settings, nfc_playlist->settings.emulate_led_indicator ? "ON" : "OFF");
-
-      nfc_playlist->settings.hide_error = default_hide_error;
-      VariableItem* hide_error_indicator_settings = variable_item_list_get(nfc_playlist->variable_item_list, NfcPlaylistSettings_HideError);
-      variable_item_set_current_value_index(hide_error_indicator_settings, nfc_playlist->settings.hide_error);
-      variable_item_set_current_value_text(hide_error_indicator_settings, nfc_playlist->settings.hide_error ? "ON" : "OFF");
    }
 }
 
@@ -62,10 +56,6 @@ void nfc_playlist_settings_options_change_callback(VariableItem* item) {
       case NfcPlaylistSettings_LedIndicator:
          nfc_playlist->settings.emulate_led_indicator = option_value_index;
          variable_item_set_current_value_text(item, nfc_playlist->settings.emulate_led_indicator ? "ON" : "OFF");
-         break;
-      case NfcPlaylistSettings_HideError:
-         nfc_playlist->settings.hide_error = option_value_index;
-         variable_item_set_current_value_text(item, nfc_playlist->settings.hide_error ? "ON" : "OFF");
          break;
       default:
          break;
@@ -107,15 +97,6 @@ void nfc_playlist_settings_scene_on_enter(void* context) {
       nfc_playlist);
    variable_item_set_current_value_index(emulation_led_indicator_settings, nfc_playlist->settings.emulate_led_indicator);
    variable_item_set_current_value_text(emulation_led_indicator_settings, nfc_playlist->settings.emulate_led_indicator ? "ON" : "OFF");
-
-   VariableItem* hide_error_indicator_settings = variable_item_list_add(
-      nfc_playlist->variable_item_list,
-      "Hide error messages",
-      2,
-      nfc_playlist_settings_options_change_callback,
-      nfc_playlist);
-   variable_item_set_current_value_index(hide_error_indicator_settings, nfc_playlist->settings.hide_error);
-   variable_item_set_current_value_text(hide_error_indicator_settings, nfc_playlist->settings.hide_error ? "ON" : "OFF");
 
    variable_item_list_add(nfc_playlist->variable_item_list, "Reset settings", 0, NULL, NULL);
 

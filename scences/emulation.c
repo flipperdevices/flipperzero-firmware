@@ -1,7 +1,6 @@
 #include "nfc_playlist.h"
 #include "scences/emulation.h"
 
-bool hiding_error = false;
 NfcPlaylistEmulationState EmulationState = NfcPlaylistEmulationState_Stopped;
 
 void nfc_playlist_emulation_scene_on_enter(void* context) {
@@ -71,7 +70,7 @@ int32_t nfc_playlist_emulation_task(void* context) {
 
          if (strlen(file_path) <= 1) {continue;}
 
-         if (nfc_playlist->settings.emulate_delay > 0 && file_position > 0 && !hiding_error) {
+         if (nfc_playlist->settings.emulate_delay > 0 && file_position > 0) {
             popup_set_header(nfc_playlist->popup, "Delaying", 64, 10, AlignCenter, AlignTop);
             start_blink(nfc_playlist, NfcPlaylistLedState_Error);
             int time_counter_delay_ms = (options_emulate_delay[nfc_playlist->settings.emulate_delay]*1000);
@@ -86,7 +85,6 @@ int32_t nfc_playlist_emulation_task(void* context) {
             file_position++;
          }
 
-         if (hiding_error) {hiding_error = false;}
          if (EmulationState != NfcPlaylistEmulationState_Emulating) {break;}
 
          char const* full_file_name = strchr(file_path, '/') != NULL ? &strrchr(file_path, '/')[1] : file_path;
@@ -97,10 +95,6 @@ int32_t nfc_playlist_emulation_task(void* context) {
          int time_counter_ms = (options_emulate_timeout[nfc_playlist->settings.emulate_timeout]*1000);
 
          if (storage_file_exists(storage, file_path) == false) {
-            if (nfc_playlist->settings.hide_error) {
-               hiding_error = true;
-               continue;
-            }
             int popup_header_text_size = strlen(file_name) + 18;
             char popup_header_text[popup_header_text_size];
             snprintf(popup_header_text, popup_header_text_size, "%s\n%s", "ERROR not found:", file_name);
@@ -114,10 +108,6 @@ int32_t nfc_playlist_emulation_task(void* context) {
                time_counter_ms -= 50;
             }
          } else if (strcasestr(file_ext, "nfc") == NULL) {
-            if (nfc_playlist->settings.hide_error) {
-               hiding_error = true;
-               continue;
-            }
             int popup_header_text_size = strlen(file_name) + 21;
             char popup_header_text[popup_header_text_size];
             snprintf(popup_header_text, popup_header_text_size, "%s\n%s", "ERROR invalid file:", file_name);

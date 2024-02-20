@@ -63,7 +63,6 @@ static NfcPlaylist* nfc_playlist_alloc() {
    nfc_playlist->settings.emulate_timeout = default_emulate_timeout;
    nfc_playlist->settings.emulate_delay = default_emulate_delay;
    nfc_playlist->settings.emulate_led_indicator = default_emulate_led_indicator;
-   nfc_playlist->settings.hide_error = default_hide_error;
 
    nfc_playlist->notification = furi_record_open(RECORD_NOTIFICATION);
    nfc_playlist->file_browser = file_browser_alloc(nfc_playlist->settings.file_path);
