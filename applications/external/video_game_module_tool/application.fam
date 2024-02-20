@@ -5,7 +5,7 @@ App(
     entry_point="vgm_tool_app",
     stack_size=2048,
     fap_icon="vgm_tool.png",
-    fap_category="Tools",
+    fap_category="GPIO/VGM",
     fap_icon_assets="icons",
     fap_file_assets="files",
     fap_author="gsurkov",
