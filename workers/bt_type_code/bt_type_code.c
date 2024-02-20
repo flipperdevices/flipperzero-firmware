@@ -23,9 +23,9 @@ struct TotpBtTypeCodeWorkerContext {
     FuriThread* thread;
     FuriMutex* code_buffer_sync;
     Bt* bt;
+    FuriHalBleProfileBase* ble_hid_profile;
     bool is_advertising;
     bool is_connected;
-    FuriHalBleProfileBase* ble_hid_profile;
     AutomationKeyboardLayout keyboard_layout;
     uint16_t initial_delay;
 };
@@ -34,23 +34,15 @@ static inline bool totp_type_code_worker_stop_requested() {
     return furi_thread_flags_get() & TotpBtTypeCodeWorkerEventStop;
 }
 
-// static void totp_type_code_worker_bt_set_app_mac(uint8_t* mac) {
-//     uint8_t max_i;
-//     size_t uid_size = furi_hal_version_uid_size();
-//     if(uid_size < TOTP_BT_WORKER_BT_MAC_ADDRESS_LEN) {
-//         max_i = uid_size;
-//     } else {
-//         max_i = TOTP_BT_WORKER_BT_MAC_ADDRESS_LEN;
-//     }
+static bool hid_key_press(uint16_t button, void* context) {
+    FuriHalBleProfileBase* profile = context;
+    return ble_profile_hid_kb_press(profile, button);
+}
 
-//     const uint8_t* uid = (const uint8_t*)UID64_BASE; //-V566
-//     memcpy(mac, uid, max_i);
-//     for(uint8_t i = max_i; i < TOTP_BT_WORKER_BT_MAC_ADDRESS_LEN; i++) {
-//         mac[i] = 0;
-//     }
-
-//     mac[0] = 0b10;
-// }
+static bool hid_key_release(uint16_t button, void* context) {
+    FuriHalBleProfileBase* profile = context;
+    return ble_profile_hid_kb_release(profile, button);
+}
 
 static void totp_type_code_worker_type_code(TotpBtTypeCodeWorkerContext* context) {
     uint8_t i = 0;
@@ -61,15 +53,15 @@ static void totp_type_code_worker_type_code(TotpBtTypeCodeWorkerContext* context
 
     if(context->is_connected &&
        furi_mutex_acquire(context->code_buffer_sync, 500) == FuriStatusOk) {
-        totp_type_code_worker_execute_automation_ctx(
-            (TOTP_AUTOMATION_KEY_HANDLER_CTX)&ble_profile_hid_kb_press,
-            (TOTP_AUTOMATION_KEY_HANDLER_CTX)&ble_profile_hid_kb_release,
-            context->ble_hid_profile,
+        totp_type_code_worker_execute_automation(
+            &hid_key_press,
+            &hid_key_release,
             context->code_buffer,
             context->code_buffer_size,
             context->flags,
             context->keyboard_layout,
-            context->initial_delay);
+            context->initial_delay,
+            context->ble_hid_profile);
         furi_mutex_release(context->code_buffer_sync);
     }
 }
@@ -149,7 +141,7 @@ void totp_bt_type_code_worker_notify(
     furi_thread_flags_set(furi_thread_get_id(context->thread), event);
 }
 
-TotpBtTypeCodeWorkerContext* totp_bt_type_code_worker_init() {
+TotpBtTypeCodeWorkerContext* totp_bt_type_code_worker_init(uint16_t mac_xor) {
     TotpBtTypeCodeWorkerContext* context = malloc(sizeof(TotpBtTypeCodeWorkerContext));
     furi_check(context != NULL);
 
@@ -160,10 +152,8 @@ TotpBtTypeCodeWorkerContext* totp_bt_type_code_worker_init() {
     furi_delay_ms(200);
     bt_keys_storage_set_storage_path(context->bt, HID_BT_KEYS_STORAGE_PATH);
 
-    BleProfileHidParams params = {
-        .device_name_prefix = "TOTP",
-    };
-    context->ble_hid_profile = bt_profile_start(context->bt, ble_profile_hid, &params);
+    BleProfileHidParams ble_params = {.device_name_prefix = "TOTP", .mac_xor = mac_xor};
+    context->ble_hid_profile = bt_profile_start(context->bt, ble_profile_hid, &ble_params);
     furi_check(context->ble_hid_profile);
 
     furi_hal_bt_start_advertising();
@@ -183,14 +173,17 @@ void totp_bt_type_code_worker_free(TotpBtTypeCodeWorkerContext* context) {
 
     bt_set_status_changed_callback(context->bt, NULL, NULL);
 
+    furi_hal_bt_stop_advertising();
     context->is_advertising = false;
     context->is_connected = false;
 
     bt_disconnect(context->bt);
     furi_delay_ms(200);
     bt_keys_storage_set_default_path(context->bt);
+    if(!bt_profile_restore_default(context->bt)) {
+        FURI_LOG_E(LOGGING_TAG, "Failed to restore to default BT profile");
+    }
 
-    furi_check(bt_profile_restore_default(context->bt));
     furi_record_close(RECORD_BT);
     context->bt = NULL;
 

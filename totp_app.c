@@ -166,7 +166,8 @@ static bool totp_plugin_state_init(PluginState* const plugin_state) {
 
 #ifdef TOTP_BADBT_AUTOMATION_ENABLED
     if(plugin_state->automation_method & AutomationMethodBadBt) {
-        plugin_state->bt_type_code_worker_context = totp_bt_type_code_worker_init();
+        plugin_state->bt_type_code_worker_context = totp_bt_type_code_worker_init(
+            *((uint16_t*)plugin_state->crypto_settings.crypto_verify_data));
     } else {
         plugin_state->bt_type_code_worker_context = NULL;
     }
