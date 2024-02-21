@@ -8,7 +8,6 @@ Then goes to send code screen
 #include "scenes.h"
 #include "scene_select_code.h"
 
-
 static void file_browser_callback(void* context) {
     App* app = context;
     furi_assert(app);
@@ -21,7 +20,6 @@ static void file_browser_callback(void* context) {
     file_type = furi_string_alloc();
     string_value = furi_string_alloc();
     do {
-
         FURI_LOG_I(TAG, "opening %s", furi_string_get_cstr(app->file_path));
         if(!flipper_format_file_open_existing(file, furi_string_get_cstr(app->file_path))) break;
         FURI_LOG_I(TAG, "reading header");
@@ -30,7 +28,7 @@ static void file_browser_callback(void* context) {
         if(!flipper_format_read_string(file, "Code", string_value)) break;
         FURI_LOG_I(TAG, "read code %s", furi_string_get_cstr(string_value));
 
-    // signal that the file was read successfully
+        // signal that the file was read successfully
     } while(0);
 
     flipper_format_file_close(file);
@@ -70,5 +68,3 @@ void fcom_select_code_scene_on_exit(void* context) {
 
     file_browser_stop(app->file_browser);
 }
-
-

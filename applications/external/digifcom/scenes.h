@@ -12,24 +12,27 @@
 #include "scene_serial.h"
 
 /** The current scene */
-typedef enum { FcomMainMenuScene, 
-               FcomListenMenuScene,
-               FcomReadCodeScene,
-               FcomCodeSelectScene,
-               FcomSendCodeScene,
-               FcomAddCodeScene,
-               FcomSerialScene,
-               FcomSaveCodeScene,
-               FcomSceneCount } FcomScene;
+typedef enum {
+    FcomMainMenuScene,
+    FcomListenMenuScene,
+    FcomReadCodeScene,
+    FcomCodeSelectScene,
+    FcomSendCodeScene,
+    FcomAddCodeScene,
+    FcomSerialScene,
+    FcomSaveCodeScene,
+    FcomSceneCount
+} FcomScene;
 
 /** The current view */
-typedef enum { FcomMainMenuView,
-               FcomReadCodeView,
-               FcomSendCodeView,
-               FcomKeyboardView,
-               FcomSerialView,
-               FcomFileSelectView
-                } FcomView;
+typedef enum {
+    FcomMainMenuView,
+    FcomReadCodeView,
+    FcomSendCodeView,
+    FcomKeyboardView,
+    FcomSerialView,
+    FcomFileSelectView
+} FcomView;
 
 extern void (*const fcom_scene_on_enter_handlers[])(void*);
 extern bool (*const fcom_scene_on_event_handlers[])(void*, SceneManagerEvent);

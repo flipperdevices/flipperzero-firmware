@@ -16,7 +16,7 @@ App* app_alloc() {
 
     app->storage = furi_record_open(RECORD_STORAGE);
     app->notification = furi_record_open(RECORD_NOTIFICATION);
-    
+
     //Turn backlight on, believe me this makes testing your app easier
     notification_message(app->notification, &sequence_display_backlight_on);
 
@@ -25,10 +25,9 @@ App* app_alloc() {
     view_dispatcher_enable_queue(app->view_dispatcher);
     view_dispatcher_set_event_callback_context(app->view_dispatcher, app);
     view_dispatcher_set_custom_event_callback(app->view_dispatcher, fcom_custom_callback);
-    
+
     // Wire back button to scene manager
-    view_dispatcher_set_navigation_event_callback(
-        app->view_dispatcher, fcom_back_event_callback);
+    view_dispatcher_set_navigation_event_callback(app->view_dispatcher, fcom_back_event_callback);
 
     //Allocate our submenu and add the view
     app->submenu = submenu_alloc();
@@ -63,7 +62,6 @@ App* app_alloc() {
     view_dispatcher_add_view(
         app->view_dispatcher, FcomFileSelectView, file_browser_get_view(app->file_browser));
 
-
     setApp(app);
 
     app->dmcomm_run = true;
@@ -88,7 +86,7 @@ AppState* app_state_alloc() {
     state->r_code = furi_string_alloc();
     state->s_code = furi_string_alloc();
     state->save_code_return_scene = FcomMainMenuScene;
- 
+
     return state;
 }
 

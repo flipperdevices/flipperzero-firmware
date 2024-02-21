@@ -99,6 +99,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: PR: [Toolchain fixes #3451 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/3451)
 - Updated: [Temp Sensors Reader 1.6 (By quen0n)](https://github.com/quen0n/Unitemp-Flipper-Zero-Plugin) [Added hPa and dewpoint, fixed typos #34 (By edo-hr)](https://github.com/quen0nquen0n/unitemp-flipperzero/pull/34)
 - Added: [Canon Intervalometer v1.0 (By TravisCG)](https://github.com/TravisCG/canonivm)
+- Added: [Digimon F-Com v1.0 (By TylerWilley)](https://github.com/TylerWilley/flipper-f-com)
 
 <a name="release">
 
@@ -415,6 +416,7 @@ $ ./fbt dolphin_ext
 - [DCF77 Transmitter v1.1 (By arha)](https://github.com/arha/flipper-dcf77)
 - [Deauther PWNDTOOLS V2.6.0 (By HEX0DAYS)](https://github.com/HEX0DAYS/FlipperZero-PWNDTOOLS) `Req: ESP8266` [Original](https://github.com/SpacehuhnTech/esp8266_deauther)
 - [Device Info (By hedger)](https://github.com/hedger/flipperdevinfo)
+- [Digimon F-Com v1.0 (By TylerWilley)](https://github.com/TylerWilley/flipper-f-com)
 - [Distance Sensor v1.2 (By privet971)](https://github.com/privet971/FlipperZeroApps/tree/main/usping) `Req: Parallax (3 wires) SKU 28015`
 - [Distance Sensor v1.1 (By Sanqui)](https://github.com/Sanqui/flipperzero-firmware/tree/hc_sr04) `Req: HC-SR04` Ported/Modified by xMasterX
 - [Dolphin Trainer (By nymda)](https://github.com/nymda/FlipperAntidepressants) (Change Flipper level, experience and butthurt) [Level Changer (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/96b67d9d53b5a70e85f8bdd81dcbc602f90d46cd)

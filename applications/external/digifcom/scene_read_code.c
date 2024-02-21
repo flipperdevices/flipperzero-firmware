@@ -18,8 +18,7 @@ TODO: Need to test this... It may not actually work as-is
 /*
 Callback from dmcomm thread with serial results
 */
-void scb(void* context)
-{
+void scb(void* context) {
     furi_assert(context);
     App* app = context;
 
@@ -27,16 +26,11 @@ void scb(void* context)
     size_t recieved = 0;
     memset(out, 0, 64);
 
-    recieved = furi_stream_buffer_receive(
-        app->dmcomm_output_stream,
-        &out,
-        63,
-        0);
+    recieved = furi_stream_buffer_receive(app->dmcomm_output_stream, &out, 63, 0);
     UNUSED(recieved);
     FURI_LOG_I(TAG, "DMComm Data: %s", out);
-  
-    if(app->state->waitForCode)
-    {
+
+    if(app->state->waitForCode) {
         FURI_LOG_I(TAG, "reading code");
         furi_string_reset(app->state->r_code);
         furi_string_reset(app->state->s_code);
@@ -44,22 +38,16 @@ void scb(void* context)
         int spackets = 0;
         int l = strlen(out);
         int first = true;
-        for(int i = 0; i < l; i++)
-        {
-            if(out[i] == 's' && i + 5 < l)
-            {
+        for(int i = 0; i < l; i++) {
+            if(out[i] == 's' && i + 5 < l) {
                 FURI_LOG_I(TAG, "found s");
-                if(furi_string_empty(app->state->s_code))
-                {
-                    if(first)
-                    {
+                if(furi_string_empty(app->state->s_code)) {
+                    if(first) {
                         furi_string_cat_printf(app->state->s_code, "V1-");
                         first = false;
-                    }
-                    else
+                    } else
                         furi_string_cat_printf(app->state->s_code, "V2-");
-                }
-                else
+                } else
                     furi_string_cat_printf(app->state->s_code, "-");
 
                 i += 2; // :
@@ -68,20 +56,15 @@ void scb(void* context)
                 spackets++;
             }
 
-            if(out[i] == 'r' && i + 5 < l)
-            {
+            if(out[i] == 'r' && i + 5 < l) {
                 FURI_LOG_I(TAG, "found r");
-                if(furi_string_empty(app->state->r_code))
-                {
-                    if(first)
-                    {
+                if(furi_string_empty(app->state->r_code)) {
+                    if(first) {
                         furi_string_cat_printf(app->state->r_code, "V1-");
                         first = false;
-                    }
-                    else
+                    } else
                         furi_string_cat_printf(app->state->r_code, "V2-");
-                }
-                else
+                } else
                     furi_string_cat_printf(app->state->r_code, "-");
 
                 i += 2; // :
@@ -91,15 +74,15 @@ void scb(void* context)
             }
         }
 
-
         FURI_LOG_I(TAG, "s code %s", furi_string_get_cstr(app->state->s_code));
         FURI_LOG_I(TAG, "r code %s", furi_string_get_cstr(app->state->r_code));
 
         //if spackets == rpackets and spackets = code packets, then present code for saving
-        if(rpackets > 0 && spackets > 0 && abs(rpackets-spackets) <= 1)
-        {
-            dialog_ex_set_header(app->dialog, furi_string_get_cstr(app->state->s_code), 10, 12, AlignLeft, AlignTop);
-            dialog_ex_set_text(app->dialog, furi_string_get_cstr(app->state->r_code), 10, 24, AlignLeft, AlignTop);
+        if(rpackets > 0 && spackets > 0 && abs(rpackets - spackets) <= 1) {
+            dialog_ex_set_header(
+                app->dialog, furi_string_get_cstr(app->state->s_code), 10, 12, AlignLeft, AlignTop);
+            dialog_ex_set_text(
+                app->dialog, furi_string_get_cstr(app->state->r_code), 10, 24, AlignLeft, AlignTop);
 
             app->state->waitForCode = false;
             dialog_ex_set_left_button_text(app->dialog, "Save Top");
@@ -118,13 +101,15 @@ void read_code_dialog_callback(DialogExResult result, void* context) {
     if(result == DialogExResultRight) {
         FURI_LOG_I(TAG, "DialogExResultRight");
         // copy r_code
-        strncpy(app->state->result_code, furi_string_get_cstr(app->state->r_code), MAX_FILENAME_LEN);
+        strncpy(
+            app->state->result_code, furi_string_get_cstr(app->state->r_code), MAX_FILENAME_LEN);
         scene_manager_next_scene(app->scene_manager, FcomSaveCodeScene);
     }
     if(result == DialogExResultLeft) {
         FURI_LOG_I(TAG, "DialogExResultLeft");
         // copy s_code
-        strncpy(app->state->result_code, furi_string_get_cstr(app->state->s_code), MAX_FILENAME_LEN);
+        strncpy(
+            app->state->result_code, furi_string_get_cstr(app->state->s_code), MAX_FILENAME_LEN);
         scene_manager_next_scene(app->scene_manager, FcomSaveCodeScene);
     }
 }
@@ -137,10 +122,12 @@ void fcom_read_code_scene_on_enter(void* context) {
     // because we will want to allow to save both codes
 
     dialog_ex_set_header(app->dialog, "Waiting For Data", 64, 12, AlignCenter, AlignTop);
-    dialog_ex_set_text(app->dialog, "Connect to device bus and transfer data", 10, 24, AlignLeft, AlignTop);
+    dialog_ex_set_text(
+        app->dialog, "Connect to device bus and transfer data", 10, 24, AlignLeft, AlignTop);
     dialog_ex_set_left_button_text(app->dialog, NULL);
     dialog_ex_set_right_button_text(app->dialog, NULL);
-    dialog_ex_set_center_button_text(app->dialog, NULL); // This will eventually be a "resend" button
+    dialog_ex_set_center_button_text(
+        app->dialog, NULL); // This will eventually be a "resend" button
     dialog_ex_set_result_callback(app->dialog, read_code_dialog_callback);
     dialog_ex_set_context(app->dialog, app);
 
@@ -174,5 +161,3 @@ void fcom_read_code_scene_on_exit(void* context) {
     dmcomm_sendcommand(app, "0\n");
     app->state->waitForCode = false;
 }
-
-

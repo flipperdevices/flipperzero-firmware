@@ -12,16 +12,18 @@ A menu to select which listen mode the fcom should enter
 #include "scenes.h"
 #include "scene_listen_menu.h"
 
-
 void fcom_listen_menu_callback(void* context, uint32_t index);
 void fcom_listen_menu_scene_on_enter(void* context) {
     FURI_LOG_I(TAG, "fcom_listen_menu_scene_on_enter");
     App* app = context;
     submenu_reset(app->submenu);
     //submenu_set_header(app->submenu, "F-Com");
-    submenu_add_item(app->submenu, "V-Pet / 2Prong", ListenMenuSelection2Prong, fcom_listen_menu_callback, app);
-    submenu_add_item(app->submenu, "PenX / 3Prong", ListenMenuSelection3Prong, fcom_listen_menu_callback, app);
-    submenu_add_item(app->submenu, "Xros Mini", ListenMenuSelectionXrosMini, fcom_listen_menu_callback, app);
+    submenu_add_item(
+        app->submenu, "V-Pet / 2Prong", ListenMenuSelection2Prong, fcom_listen_menu_callback, app);
+    submenu_add_item(
+        app->submenu, "PenX / 3Prong", ListenMenuSelection3Prong, fcom_listen_menu_callback, app);
+    submenu_add_item(
+        app->submenu, "Xros Mini", ListenMenuSelectionXrosMini, fcom_listen_menu_callback, app);
     //"5V on GPIO" to toggle on/off, which just sets up the bridge
     view_dispatcher_switch_to_view(app->view_dispatcher, FcomMainMenuView);
 }
@@ -32,12 +34,10 @@ void fcom_listen_menu_callback(void* context, uint32_t index) {
     App* app = context;
     switch(index) {
     case ListenMenuSelection2Prong:
-        scene_manager_handle_custom_event(
-            app->scene_manager, ListenMenuSceneSelectionEvent2Prong);
+        scene_manager_handle_custom_event(app->scene_manager, ListenMenuSceneSelectionEvent2Prong);
         break;
     case ListenMenuSelection3Prong:
-        scene_manager_handle_custom_event(
-            app->scene_manager, ListenMenuSceneSelectionEvent3Prong);
+        scene_manager_handle_custom_event(app->scene_manager, ListenMenuSceneSelectionEvent3Prong);
         break;
     case ListenMenuSelectionXrosMini:
         scene_manager_handle_custom_event(

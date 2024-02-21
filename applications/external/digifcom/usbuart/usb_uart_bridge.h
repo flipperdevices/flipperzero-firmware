@@ -29,7 +29,7 @@ typedef struct {
 
 UsbUartBridge* usb_uart_enable(UsbUartConfig* cfg);
 
-void usb_uart_send(UsbUartBridge* usb_uart, const uint8_t* data, size_t len);
+void usb_uart_send(UsbUartBridge* usb_uart, const uint8_t* data, uint16_t len);
 
 void usb_uart_disable(UsbUartBridge* usb_uart);
 

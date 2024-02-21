@@ -34,20 +34,16 @@ void fcom_menu_callback(void* context, uint32_t index) {
     App* app = context;
     switch(index) {
     case MainMenuSelectionListen:
-        scene_manager_handle_custom_event(
-            app->scene_manager, MainMenuSceneSelectionEventListen);
+        scene_manager_handle_custom_event(app->scene_manager, MainMenuSceneSelectionEventListen);
         break;
     case MainMenuSelectionSaved:
-        scene_manager_handle_custom_event(
-            app->scene_manager, MainMenuSceneSelectionEventSaved);
+        scene_manager_handle_custom_event(app->scene_manager, MainMenuSceneSelectionEventSaved);
         break;
     case MainMenuSelectionAdd:
-        scene_manager_handle_custom_event(
-            app->scene_manager, MainMenuSceneSelectionEventAdd);
+        scene_manager_handle_custom_event(app->scene_manager, MainMenuSceneSelectionEventAdd);
         break;
     case MainMenuSelectionSerial:
-        scene_manager_handle_custom_event(
-            app->scene_manager, MainMenuSceneSelectionEventSerial);
+        scene_manager_handle_custom_event(app->scene_manager, MainMenuSceneSelectionEventSerial);
         break;
     }
 }

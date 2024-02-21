@@ -29,7 +29,7 @@ void Serial_prints(const char* c);
 void Serial_printlns(const char* c);
 void Serial_println(void);
 void Serial_printi(const int c);
-const char *F(const char* i);
+const char* F(const char* i);
 void delay(int ms);
 int analogRead(const GpioPin* pin);
 uint32_t micros();

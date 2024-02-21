@@ -1,17 +1,19 @@
-# For details & more options, see documentation/AppManifests.md in firmware repo
-
 App(
-    appid="fcom",  # Must be unique
-    name="Digimon F-Com",  # Displayed in menus
+    appid="digimon_fcom",
+    name="Digimon F-Com",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="fcom_app",
     stack_size=3 * 1024,
+    fap_icon="digifcom_10px.png",
+    fap_file_assets=".codes",
+    fap_icon_assets="images",
+    fap_icon_assets_symbol="fcom",
     fap_category="GPIO",
-    # Optional values
-    # fap_version="0.1",
-    fap_icon="template.png",  # 10x10 1-bit PNG
-    # fap_description="A simple app",
-    # fap_author="J. Doe",
-    # fap_weburl="https://github.com/user/template",
-    fap_icon_assets="images",  # Image assets to compile for this application
+    fap_author="TylerWilley",
+    fap_weburl="https://github.com/TylerWilley/flipper-f-com",
+    fap_version=(1, 0),
+    fap_description="A Flipper Zero app that allows the flipper to communicate with Digimon V-Pets. Currently tested: DM20, DMX, PenZ, DMC unsupported",
+    #  Pin C3 - 2k resistor - Pin A3 - 6k resistor - Pin GND
+    #  Pin A3 - VPet+
+    #  Pin GND - VPet-
 )

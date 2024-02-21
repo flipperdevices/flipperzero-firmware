@@ -22,16 +22,11 @@ Send a serial command to the dmcomm thread
 
 Used for comms by app (non USB)
 */
-void dmcomm_sendcommand(void* context, const char* cmd)
-{
+void dmcomm_sendcommand(void* context, const char* cmd) {
     FURI_LOG_I(TAG, "dmcomm_sendcommand");
     App* app = context;
 
-    size_t sent = furi_stream_buffer_send(
-        app->dmcomm_input_stream,
-        cmd,
-        strlen(cmd),
-        0);
+    size_t sent = furi_stream_buffer_send(app->dmcomm_input_stream, cmd, strlen(cmd), 0);
 
     if(sent != strlen(cmd)) // Shouldn't happen
         FURI_LOG_I(TAG, "partial send %d/%d", sent, strlen(cmd));
@@ -40,15 +35,10 @@ void dmcomm_sendcommand(void* context, const char* cmd)
 /*
 Send binary data, used for USB serial link
 */
-void dmcomm_senddata(void* context, uint8_t* data, size_t len)
-{
+void dmcomm_senddata(void* context, uint8_t* data, size_t len) {
     App* app = context;
 
-    size_t sent = furi_stream_buffer_send(
-        app->dmcomm_input_stream,
-        data,
-        len,
-        0);
+    size_t sent = furi_stream_buffer_send(app->dmcomm_input_stream, data, len, 0);
 
     if(sent != len) // Shouldn't happen
         FURI_LOG_I(TAG, "partial send %d/%d", sent, len);

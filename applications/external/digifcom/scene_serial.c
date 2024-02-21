@@ -23,8 +23,7 @@ typedef struct {
 
 static SceneUsbUartBridge* scene_usb_uart;
 
-void usb_uart_tx(void* context, uint8_t* data, size_t len)
-{
+void usb_uart_tx(void* context, uint8_t* data, size_t len) {
     // USB -> dmcomm
     App* app = context;
 
@@ -35,17 +34,14 @@ void usb_uart_tx(void* context, uint8_t* data, size_t len)
     furi_string_cat_str(app->text_box_store, out);
     size_t l = furi_string_size(app->text_box_store);
     // Trim if necessary
-    if(l > 64)
-        furi_string_right(app->text_box_store, 64 - l);
+    if(l > 64) furi_string_right(app->text_box_store, 64 - l);
     furi_check(furi_mutex_release(app->text_box_mutex) == FuriStatusOk);
     view_dispatcher_send_custom_event(app->view_dispatcher, SerialCustomEventTextUpdate);
 
     dmcomm_senddata(app, data, len);
 }
 
-
-void dmcomm_tx(void* context)
-{
+void dmcomm_tx(void* context) {
     // dmcomm -> USB
     furi_assert(context);
     App* app = context;
@@ -54,22 +50,16 @@ void dmcomm_tx(void* context)
     size_t recieved = 0;
     memset(out, 0, 64);
 
-    recieved = furi_stream_buffer_receive(
-        app->dmcomm_output_stream,
-        &out,
-        63,
-        0);
+    recieved = furi_stream_buffer_receive(app->dmcomm_output_stream, &out, 63, 0);
     FURI_LOG_I(TAG, "DMComm Data: %s", out);
 
     furi_check(furi_mutex_acquire(app->text_box_mutex, FuriWaitForever) == FuriStatusOk);
     furi_string_cat_str(app->text_box_store, out);
     size_t len = furi_string_size(app->text_box_store);
     // Trim if necessary
-    if(len > 64)
-        furi_string_right(app->text_box_store, 64 - len);
+    if(len > 64) furi_string_right(app->text_box_store, 64 - len);
     furi_check(furi_mutex_release(app->text_box_mutex) == FuriStatusOk);
     view_dispatcher_send_custom_event(app->view_dispatcher, SerialCustomEventTextUpdate);
-
 
     usb_uart_send(app->usb_uart_bridge, (uint8_t*)out, recieved);
 }
@@ -140,9 +130,7 @@ void fcom_serial_scene_on_exit(void* context) {
 
     // let screen darken
     notification_message(app->notification, &sequence_display_backlight_enforce_auto);
-    
+
     // Cancel any command the usb serial user was sending
     dmcomm_sendcommand(app, "0\n");
 }
-
-
