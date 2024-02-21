@@ -74,6 +74,10 @@ void nfc_playlist_worker_set_nfc_data(NfcPlaylistWorker* nfc_playlist_worker, ch
    nfc_playlist_worker->nfc_protocol = nfc_device_get_protocol(nfc_playlist_worker->nfc_device);
 }
 
+void nfc_playlist_worker_clear_nfc_data(NfcPlaylistWorker* nfc_playlist_worker) {
+   nfc_device_clear(nfc_playlist_worker->nfc_device);
+}
+
 NfcDeviceData* nfc_playlist_worker_get_nfc_data(NfcPlaylistWorker* nfc_playlist_worker) {
    return nfc_playlist_worker->nfc_data;
 }

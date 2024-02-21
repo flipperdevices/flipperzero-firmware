@@ -136,6 +136,7 @@ int32_t nfc_playlist_emulation_task(void* context) {
                time_counter_ms -= 50;
             }
             nfc_playlist_worker_stop(nfc_playlist->nfc_playlist_worker);
+            nfc_playlist_worker_clear_nfc_data(nfc_playlist->nfc_playlist_worker);
          }
       }
       popup_reset(nfc_playlist->popup);
