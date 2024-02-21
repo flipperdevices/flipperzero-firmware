@@ -1,4 +1,6 @@
 let usbdisk = require("usbdisk");
+// print("Creating image...");
+// usbdisk.createImage("/ext/apps_data/mass_storage/128MB.img", 128 * 1024 * 1024);
 print("Starting UsbDisk...");
 usbdisk.start("/ext/apps_data/mass_storage/128MB.img");
 print("Started, waiting until ejected...");
