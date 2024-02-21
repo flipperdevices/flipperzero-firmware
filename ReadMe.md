@@ -88,7 +88,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Expansion Module Settings as FAP (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/06ae2ca9cd17040f39dd1be34f73f6f59096ad9f)
 - Updated: [RGB LED (By flyandi)](https://github.com/flyandi/flipper_zero_rgb_led) For C refactor (By RogueMaster)
 - Updated: [Doom v1.3 (By p4nic4ttack)](https://github.com/p4nic4ttack/doom-flipper-zero/) and several other apps with C refactor (By xMasterX)
-- OFW: PR: [Toolchain fixes #3451 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/3451)
 - UL: [Infrared asset updates (By amec0e)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/0c778233223e114f4f7688af3aa7995567113cf2a)
 - UL: [Revert: auto-stop emulation after 5min feature added (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/0614f9b87058676a766481daae4dc3c7762f975ce)
 - UL: [NFC: Parser updates (By Leptopt1los)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/a88adc2a27633b1f37c88f4a56377e5c433cd43b)
@@ -97,6 +96,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - [Fixed crash on install from Desktop (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/93c8101a539bd8542d6a13cd9ffa1142bde8ea1f)
 - [JS Drive Image Creation code (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/94d5d29b71ee514274d8a35bda3c1255625c79c6)
 - [Infrared: Fix for AC assets file (By amec0e)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/ee2c7bed9264ae19451bf947bcc42a588f0f69c7)
+- OFW: PR: [Toolchain fixes #3451 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/3451)
 
 <a name="release">
 
