@@ -29,8 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0220-1858-0.98.4-a489f55](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-02-20 20:09 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-02-20 20:09 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-02-20 22:20 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-02-20 22:20 EST`
 - Updated: [WHC SWIO Flasher v1.0 (By sukvojte)](https://github.com/sukvojte/wch_swio_flasher)
 - OFW: [FuriHal: UART refactoring #3211 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3211)
 - OFW: [FuriHal: interrupt priorities and documentation #3366 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3366)
@@ -91,6 +91,9 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [RGB LED (By flyandi)](https://github.com/flyandi/flipper_zero_rgb_led) For C refactor (By RogueMaster)
 - Updated: [Doom v1.3 (By p4nic4ttack)](https://github.com/p4nic4ttack/doom-flipper-zero/) and several other apps with C refactor (By xMasterX)
 - OFW: PR: [Toolchain fixes #3451 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/3451)
+- UL: [Infrared asset updates (By amec0e)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/0c778233223e114f4f7688af3aa7995567113cf2a)
+- UL: [Revert: auto-stop emulation after 5min feature added (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/0614f9b87058676a766481daae4dc3c7762f975ce)
+- UL: [NFC: Parser updates (By Leptopt1los)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/a88adc2a27633b1f37c88f4a56377e5c433cd43b)
 
 <a name="release">
 
