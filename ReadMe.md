@@ -86,7 +86,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [NFC Playlist v1.4 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
 - UL: [Code improvements for coming C version change (By hedger)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/0fcd9a55d3b16a0af4ff2243327c6aa61b820f77)
 - Updated: [Epansion Module Settings as FAP (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/06ae2ca9cd17040f39dd1be34f73f6f59096ad9f)
-- Web Installer install is not working right on desktop at the moment. Enter menu before plugging in your flipper to begin installation. Don't leave the main menu. Close web installer when Flipper starts the install process and Web Installer states "Update in progress, pay attention to your Flipper"
 - Updated: [RGB LED (By flyandi)](https://github.com/flyandi/flipper_zero_rgb_led) For C refactor (By RogueMaster)
 - Updated: [Doom v1.3 (By p4nic4ttack)](https://github.com/p4nic4ttack/doom-flipper-zero/) and several other apps with C refactor (By xMasterX)
 - OFW: PR: [Toolchain fixes #3451 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/3451)
@@ -95,6 +94,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: [NFC: Parser updates (By Leptopt1los)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/a88adc2a27633b1f37c88f4a56377e5c433cd43b)
 - Updated: OFW: PR: [Adding F13-F24 function key support to BadUSB #3468 (By gcvai)](https://github.com/flipperdevices/flipperzero-firmware/pull/3468)
 - Updated: [WiFi (Marauder) v7.0 (By 0xchocolate & tcpassos)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion)
+- Fixed crash on install from Desktop (By RogueMaster)
 
 <a name="release">
 

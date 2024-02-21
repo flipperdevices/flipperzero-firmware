@@ -55,7 +55,6 @@ typedef enum {
 typedef struct {
     RpcSession* session;
     Gui* gui;
-    const Icon* icon;
 
     // Receive part
     ViewPort* virtual_display_view_port;
@@ -386,9 +385,9 @@ static void rpc_system_gui_virtual_display_frame_process(const PB_Main* request,
 }
 
 static void rpc_active_session_icon_draw_callback(Canvas* canvas, void* context) {
+    UNUSED(context);
     furi_assert(canvas);
-    RpcGuiSystem* rpc_gui = context;
-    canvas_draw_icon(canvas, 0, 0, rpc_gui->icon);
+    canvas_draw_icon(canvas, 0, 0, &I_Rpc_active_7x8);
 }
 
 void* rpc_system_gui_alloc(RpcSession* session) {
@@ -451,15 +450,14 @@ void* rpc_system_gui_alloc(RpcSession* session) {
 
     /*
     // Active session icon
-    const RpcOwner owner = rpc_session_get_owner(rpc_gui->session);
-    if(owner != RpcOwnerBle) {
-        rpc_gui->icon = rpc_system_gui_get_owner_icon(owner);
-        rpc_gui->rpc_session_active_viewport = view_port_alloc();
-        view_port_set_width(rpc_gui->rpc_session_active_viewport, icon_get_width(rpc_gui->icon));
-        view_port_draw_callback_set(
-            rpc_gui->rpc_session_active_viewport, rpc_active_session_icon_draw_callback, rpc_gui);
-        gui_add_view_port(
-            rpc_gui->gui, rpc_gui->rpc_session_active_viewport, GuiLayerStatusBarLeft);
+    rpc_gui->rpc_session_active_viewport = view_port_alloc();
+    view_port_set_width(rpc_gui->rpc_session_active_viewport, icon_get_width(&I_Rpc_active_7x8));
+    view_port_draw_callback_set(
+        rpc_gui->rpc_session_active_viewport, rpc_active_session_icon_draw_callback, session);
+    if(rpc_session_get_owner(rpc_gui->session) != RpcOwnerBle) {
+        view_port_enabled_set(rpc_gui->rpc_session_active_viewport, true);
+    } else {
+        view_port_enabled_set(rpc_gui->rpc_session_active_viewport, false);
     }
     gui_add_view_port(rpc_gui->gui, rpc_gui->rpc_session_active_viewport, GuiLayerStatusBarLeft);
 	*/
