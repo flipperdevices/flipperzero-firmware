@@ -734,6 +734,7 @@ void elements_text_box(
             }
             line[line_num].y = total_height_min;
             line_num++;
+
             if(text[i + 1]) {
                 line[line_num].text = &text[i + 1];
             }
@@ -779,6 +780,11 @@ void elements_text_box(
     inversed = false;
     for(uint8_t i = 0; i < line_num; i++) {
         for(uint8_t j = 0; j < line[i].len; j++) {
+            // Skip empty lines
+            if(!line[i].text) {
+                break;
+            }
+
             // Process format symbols
             if(line[i].text[j] == ELEMENTS_BOLD_MARKER) {
                 if(bold) {
