@@ -98,6 +98,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - [Infrared: Fix for AC assets file (By amec0e)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/ee2c7bed9264ae19451bf947bcc42a588f0f69c7)
 - OFW: PR: [Toolchain fixes #3451 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/3451)
 - Updated: [Temp Sensors Reader 1.6 (By quen0n)](https://github.com/quen0n/Unitemp-Flipper-Zero-Plugin) [Added hPa and dewpoint, fixed typos #34 (By edo-hr)](https://github.com/quen0nquen0n/unitemp-flipperzero/pull/34)
+- Added: [Canon Intervalometer v1.0 (By TravisCG)](https://github.com/TravisCG/canonivm)
 
 <a name="release">
 
@@ -396,6 +397,7 @@ $ ./fbt dolphin_ext
 - [Calendar (By Adiras)](https://github.com/Adiras/flipperzero-calendar)
 - [Calendar TECHART v1.0 (By techartdev)](https://github.com/techartdev/Calendar/)
 - [Camera (By Z4urce)](https://github.com/Z4urce/flipper-camera) `Req: ESP32-CAM`
+- [Canon Intervalometer v1.0 (By TravisCG)](https://github.com/TravisCG/canonivm)
 - [Caesar Cipher v1.1 (By panki27)](https://github.com/panki27/caesar-cipher)
 - [CFW Settings - Imported/Modified By RogueMaster (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/ecf91524a956f773881d564c4ada833f844264ca)
 - [Chronometer (By nmrr)](https://github.com/nmrr/flipperzero-chronometer)

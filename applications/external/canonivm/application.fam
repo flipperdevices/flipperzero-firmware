@@ -1,0 +1,14 @@
+App(
+    appid="canonivm",
+    name="Canon Intervalometer",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="canonivm_main",
+    requires=["gui"],
+    stack_size=1 * 1024,
+    fap_icon="canonivm_10px.png",
+    fap_category="GPIO",
+    fap_author="TravisCG",
+    fap_weburl="https://github.com/TravisCG/canonivm",
+    fap_version=(1, 0),
+    fap_description="Canon intervalometer for Flipper Zero.",
+)
