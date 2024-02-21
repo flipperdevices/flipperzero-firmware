@@ -93,7 +93,7 @@ UnitempStatus unitemp_onewire_sensor_update(Sensor* sensor);
  * @param gpio Порт на котором необходимо создать шину
  * @return При успехе возвращает указатель на шину one wire
  */
-OneWireBus* uintemp_onewire_bus_alloc(const GPIO* gpio);
+OneWireBus* unitemp_onewire_bus_alloc(const GPIO* gpio);
 
 /**
  * @brief Инициализация шины one wire

@@ -19,6 +19,7 @@
 #include "interfaces/SingleWireSensor.h"
 #include "Sensors.h"
 #include "./views/UnitempViews.h"
+#include "math.h"
 
 #include <furi_hal_power.h>
 
@@ -26,8 +27,26 @@
 //Данные приложения
 Unitemp* app;
 
-void uintemp_celsiumToFarengate(Sensor* sensor) {
+void unitemp_celsiusToFahrenheit(Sensor* sensor) {
     sensor->temp = sensor->temp * (9.0 / 5.0) + 32;
+}
+
+float calculateDewPoint(float temperature, float relativeHumidity);
+
+void unitemp_rhToDewpointC(Sensor* sensor) {
+    sensor->hum = calculateDewPoint(sensor->temp, sensor->hum);
+}
+
+void unitemp_rhToDewpointF(Sensor* sensor) {
+    sensor->hum = calculateDewPoint(sensor->temp, sensor->hum) * (9.0 / 5.0) + 32;
+}
+
+float calculateDewPoint(float temperature, float relativeHumidity) {
+    float a = 17.27f;
+    float b = 237.7f;
+    float tempCalc = (a * temperature) / (b + temperature) + (float)log(relativeHumidity / 100.0f);
+    float dewPoint = (b * tempCalc) / (a - tempCalc);
+    return dewPoint;
 }
 
 void unitemp_pascalToMmHg(Sensor* sensor) {
@@ -35,6 +54,9 @@ void unitemp_pascalToMmHg(Sensor* sensor) {
 }
 void unitemp_pascalToKPa(Sensor* sensor) {
     sensor->pressure = sensor->pressure / 1000.0f;
+}
+void unitemp_pascalToHPa(Sensor* sensor) {
+    sensor->pressure = sensor->pressure / 100.0f;
 }
 void unitemp_pascalToInHg(Sensor* sensor) {
     sensor->pressure = sensor->pressure * 0.0002953007;
@@ -67,6 +89,7 @@ bool unitemp_saveSettings(void) {
     stream_write_format(
         app->file_stream, "INFINITY_BACKLIGHT %d\n", app->settings.infinityBacklight);
     stream_write_format(app->file_stream, "TEMP_UNIT %d\n", app->settings.temp_unit);
+    stream_write_format(app->file_stream, "HUMIDITY_UNIT %d\n", app->settings.humidity_unit);
     stream_write_format(app->file_stream, "PRESSURE_UNIT %d\n", app->settings.pressure_unit);
 
     //Закрытие потока и освобождение памяти
@@ -158,6 +181,10 @@ bool unitemp_loadSettings(void) {
             int p = 0;
             sscanf(((char*)(file_buf + line_end)), "\nTEMP_UNIT %d", &p);
             app->settings.temp_unit = p;
+        } else if(!strcmp(buff, "HUMIDITY_UNIT")) {
+            int p = 9;
+            sscanf(((char*)(file_buf + line_end)), "\nHUMIDITY_UNIT %d", &p);
+            app->settings.humidity_unit = p;
         } else if(!strcmp(buff, "PRESSURE_UNIT")) {
             //Чтение значения параметра
             int p = 0;
@@ -199,6 +226,7 @@ static bool unitemp_alloc(void) {
     //Установка значений по умолчанию
     app->settings.infinityBacklight = true; //Подсветка горит всегда
     app->settings.temp_unit = UT_TEMP_CELSIUS; //Единица измерения температуры - градусы Цельсия
+    app->settings.humidity_unit = UT_HUMIDITY_RELATIVE;
     app->settings.pressure_unit = UT_PRESSURE_MM_HG; //Единица измерения давления - мм рт. ст.
 
     app->gui = furi_record_open(RECORD_GUI);
