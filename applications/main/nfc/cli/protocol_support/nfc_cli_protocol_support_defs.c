@@ -3,6 +3,7 @@
 #include <stddef.h>
 
 #include "iso14443_3a/iso14443_3a.h"
+#include "iso14443_3b/iso14443_3b.h"
 
 static const char* nfc_cli_protocol_support_command_name[NfcCliProtocolSupportCommandNum] = {
     [NfcCliProtocolSupportCommandPoll] = "poll",
@@ -17,7 +18,7 @@ const char* nfc_cli_protocol_support_get_command_name(NfcCliProtocolSupportComma
 
 const NfcCliProtocolSupportBase* nfc_cli_protocol_support[NfcProtocolNum] = {
     [NfcProtocolIso14443_3a] = &nfc_cli_protocol_support_base_iso14443_3a,
-    [NfcProtocolIso14443_3b] = NULL,
+    [NfcProtocolIso14443_3b] = &nfc_cli_protocol_support_base_iso14443_3b,
     [NfcProtocolIso14443_4a] = NULL,
     [NfcProtocolIso14443_4b] = NULL,
     [NfcProtocolIso15693_3] = NULL,
