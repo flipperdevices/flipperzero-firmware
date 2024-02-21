@@ -131,7 +131,7 @@ bool mass_storage_scene_create_image_on_event(void* context, SceneManagerEvent e
                 if(!storage_file_open(
                        app->file,
                        furi_string_get_cstr(app->file_path),
-                       FSAM_WRITE,
+                       FSAM_READ | FSAM_WRITE,
                        FSOM_CREATE_NEW))
                     break;
 
@@ -140,11 +140,15 @@ bool mass_storage_scene_create_image_on_event(void* context, SceneManagerEvent e
                 if(!storage_file_expand(app->file, size)) break;
 
                 // Format as exFAT
-                if(storage_virtual_init(app->fs_api, app->file) != FSE_OK) break;
-                if(storage_virtual_format(app->fs_api) != FSE_OK) break;
-                if(storage_virtual_quit(app->fs_api) != FSE_OK) break;
-
-                success = true;
+                error = "Image formatting failed";
+                if(storage_virtual_init(app->fs_api, app->file) != FSE_OK) {
+                    if(storage_virtual_quit(app->fs_api) != FSE_OK) break;
+                    if(storage_virtual_init(app->fs_api, app->file) != FSE_OK) break;
+                }
+                if(storage_virtual_format(app->fs_api) == FSE_OK) {
+                    success = true;
+                }
+                storage_virtual_quit(app->fs_api);
             } while(false);
 
             if(!success) {

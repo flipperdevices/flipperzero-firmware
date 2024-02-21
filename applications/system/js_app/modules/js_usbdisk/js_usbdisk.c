@@ -1,5 +1,6 @@
 #include "../../js_modules.h"
 #include <furi_hal_usb.h>
+#include <toolbox/path.h>
 #include "mass_storage_usb.h"
 
 #define TAG "JsUsbdisk"
@@ -108,7 +109,7 @@ static void js_usbdisk_create_image(struct mjs* mjs) {
         Storage* storage = furi_record_open(RECORD_STORAGE);
         File* file = storage_file_alloc(storage);
         do {
-            if(!storage_file_open(file, path, FSAM_WRITE, FSOM_CREATE_NEW)) {
+            if(!storage_file_open(file, path, FSAM_READ | FSAM_WRITE, FSOM_CREATE_NEW)) {
                 error = storage_file_get_error_desc(file);
                 break;
             }
@@ -119,10 +120,14 @@ static void js_usbdisk_create_image(struct mjs* mjs) {
             }
 
             error = "Image formatting failed";
-            if(storage_virtual_init(storage, file) != FSE_OK) break;
-            if(storage_virtual_format(storage) != FSE_OK) break;
-            if(storage_virtual_quit(storage) != FSE_OK) break;
-            error = NULL;
+            if(storage_virtual_init(storage, file) != FSE_OK) {
+                if(storage_virtual_quit(storage) != FSE_OK) break;
+                if(storage_virtual_init(storage, file) != FSE_OK) break;
+            }
+            if(storage_virtual_format(storage) == FSE_OK) {
+                error = NULL;
+            }
+            storage_virtual_quit(storage);
         } while(0);
         storage_file_free(file);
         furi_record_close(RECORD_STORAGE);
@@ -194,7 +199,10 @@ static void js_usbdisk_start(struct mjs* mjs) {
 
     furi_hal_usb_unlock();
     usbdisk->was_ejected = false;
-    usbdisk->usb = mass_storage_usb_start(usbdisk->path, fn);
+    FuriString* name = furi_string_alloc();
+    path_extract_filename_no_ext(usbdisk->path, name);
+    usbdisk->usb = mass_storage_usb_start(furi_string_get_cstr(name), fn);
+    furi_string_free(name);
 
     mjs_return(mjs, MJS_UNDEFINED);
 }
