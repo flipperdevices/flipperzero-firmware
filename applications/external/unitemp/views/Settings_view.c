@@ -25,13 +25,16 @@ static VariableItemList* variable_item_list;
 
 static const char states[2][9] = {"Auto", "Infinity"};
 static const char temp_units[UT_TEMP_COUNT][3] = {"*C", "*F"};
-static const char pressure_units[UT_PRESSURE_COUNT][6] = {"mm Hg", "in Hg", "kPa", "hPA"};
 static const char heat_index_bool[2][4] = {"OFF", "ON"};
+static const char humidity_units[UT_HUMIDITY_COUNT][12] = {"Relative", "Dewpoint"};
+static const char pressure_units[UT_PRESSURE_COUNT][6] = {"mmHg", "inHg", "kPa", "hPa"};
 
 //Элемент списка - бесконечная подсветка
 VariableItem* infinity_backlight_item;
 //Единица измерения температуры
 VariableItem* temperature_unit_item;
+// Humidity unit
+VariableItem* humidity_unit_item;
 //Единица измерения давления
 VariableItem* pressure_unit_item;
 
@@ -59,6 +62,7 @@ static uint32_t _exit_callback(void* context) {
     app->settings.infinityBacklight =
         (bool)variable_item_get_current_value_index(infinity_backlight_item);
     app->settings.temp_unit = variable_item_get_current_value_index(temperature_unit_item);
+    app->settings.humidity_unit = variable_item_get_current_value_index(humidity_unit_item);
     app->settings.pressure_unit = variable_item_get_current_value_index(pressure_unit_item);
     app->settings.heat_index = variable_item_get_current_value_index(heat_index_item);
     unitemp_saveSettings();
@@ -89,6 +93,11 @@ static void _setting_change_callback(VariableItem* item) {
             temperature_unit_item,
             temp_units[variable_item_get_current_value_index(temperature_unit_item)]);
     }
+    if(item == humidity_unit_item) {
+        variable_item_set_current_value_text(
+            humidity_unit_item,
+            humidity_units[variable_item_get_current_value_index(humidity_unit_item)]);
+    }
     if(item == pressure_unit_item) {
         variable_item_set_current_value_text(
             pressure_unit_item,
@@ -113,6 +122,8 @@ void unitemp_Settings_alloc(void) {
         variable_item_list, "Backlight time", UT_TEMP_COUNT, _setting_change_callback, app);
     temperature_unit_item =
         variable_item_list_add(variable_item_list, "Temp. unit", 2, _setting_change_callback, app);
+    humidity_unit_item = variable_item_list_add(
+        variable_item_list, "Humidity unit", UT_HUMIDITY_COUNT, _setting_change_callback, app);
     pressure_unit_item = variable_item_list_add(
         variable_item_list, "Press. unit", UT_PRESSURE_COUNT, _setting_change_callback, app);
     heat_index_item = variable_item_list_add(
@@ -143,6 +154,12 @@ void unitemp_Settings_switch(void) {
     variable_item_set_current_value_text(
         temperature_unit_item,
         temp_units[variable_item_get_current_value_index(temperature_unit_item)]);
+
+    variable_item_set_current_value_index(
+        humidity_unit_item, app->settings.humidity_unit);
+    variable_item_set_current_value_text(
+        humidity_unit_item,
+        humidity_units[variable_item_get_current_value_index(humidity_unit_item)]);
 
     variable_item_set_current_value_index(
         pressure_unit_item, (uint8_t)app->settings.pressure_unit);

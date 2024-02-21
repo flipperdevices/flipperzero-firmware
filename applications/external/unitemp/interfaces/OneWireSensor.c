@@ -37,7 +37,7 @@ const SensorType Dallas = {
 // найденный восьмибайтовый адрес
 static uint8_t onewire_enum[8] = {0};
 
-OneWireBus* uintemp_onewire_bus_alloc(const GPIO* gpio) {
+OneWireBus* unitemp_onewire_bus_alloc(const GPIO* gpio) {
     if(gpio == NULL) {
         return NULL;
     }
@@ -225,7 +225,7 @@ bool unitemp_onewire_sensor_alloc(Sensor* sensor, char* args) {
 
     instance->familyCode = instance->deviceID[0];
 
-    instance->bus = uintemp_onewire_bus_alloc(unitemp_gpio_getFromInt(gpio));
+    instance->bus = unitemp_onewire_bus_alloc(unitemp_gpio_getFromInt(gpio));
 
     if(instance != NULL) {
         return true;

@@ -632,6 +632,18 @@ UnitempStatus unitemp_sensor_updateData(Sensor* sensor) {
         UNITEMP_DEBUG("Sensor %s update status %d", sensor->name, sensor->status);
     }
 
+    if(app->settings.humidity_unit == UT_HUMIDITY_DEWPOINT && app->settings.temp_unit == UT_TEMP_CELSIUS && sensor->status == UT_SENSORSTATUS_OK) {
+        unitemp_rhToDewpointC(sensor);
+    }
+
+    if(app->settings.humidity_unit == UT_HUMIDITY_DEWPOINT && app->settings.temp_unit == UT_TEMP_FAHRENHEIT && sensor->status == UT_SENSORSTATUS_OK) {
+        unitemp_rhToDewpointF(sensor);
+    }
+
+    if(app->settings.temp_unit == UT_TEMP_FAHRENHEIT && sensor->status == UT_SENSORSTATUS_OK) {
+        unitemp_celsiusToFahrenheit(sensor);
+    }
+
     if(sensor->status == UT_SENSORSTATUS_OK) {
         if(app->settings.heat_index &&
            ((sensor->type->datatype & (UT_TEMPERATURE | UT_HUMIDITY)) ==
@@ -639,7 +651,7 @@ UnitempStatus unitemp_sensor_updateData(Sensor* sensor) {
             unitemp_calculate_heat_index(sensor);
         }
         if(app->settings.temp_unit == UT_TEMP_FAHRENHEIT) {
-            uintemp_celsiumToFarengate(sensor);
+            unitemp_celsiusToFahrenheit(sensor);
         }
 
         sensor->temp += sensor->temp_offset / 10.f;
@@ -649,6 +661,8 @@ UnitempStatus unitemp_sensor_updateData(Sensor* sensor) {
             unitemp_pascalToInHg(sensor);
         } else if(app->settings.pressure_unit == UT_PRESSURE_KPA) {
             unitemp_pascalToKPa(sensor);
+        } else if(app->settings.pressure_unit == UT_PRESSURE_HPA) {
+            unitemp_pascalToHPa(sensor);
         }
     }
     return sensor->status;
