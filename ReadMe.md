@@ -85,9 +85,9 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: PR: [Adding F13-F24 function key support to BadUSB #3468 (By gcvai)](https://github.com/flipperdevices/flipperzero-firmware/pull/3468)
 - Updated: [ESP Flasher v1.5 (By 0xchocolate)](https://github.com/0xchocolate/flipperzero-esp-flasher) [Updated Assets to Marauder 0.13.8 (By justcallmekoko)](https://github.com/justcallmekoko/ESP32Marauder/releases/tag/v0.13.8)
 - Updated: [NFC Playlist v1.4 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
-- UL: [Code improvements for coming C++ change (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/0fcd9a55d3b16a0af4ff2243327c6aa61b820f77)
+- UL: [Code improvements for coming C version change (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/0fcd9a55d3b16a0af4ff2243327c6aa61b820f77)
 - Updated: [Epansion Module Settings as FAP (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/06ae2ca9cd17040f39dd1be34f73f6f59096ad9f)
-- Web Installer install is not working right on desktop at the moment. Enter menu before plugging in your flipper to begin installation. Close web installer when Flipper starts the install process.
+- Web Installer install is not working right on desktop at the moment. Enter menu before plugging in your flipper to begin installation. Don't leave the main menu. Close web installer when Flipper starts the install process and Web Installer states "Update in progress, pay attention to your Flipper"
 
 <a name="release">
 
