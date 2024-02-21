@@ -4,4 +4,4 @@
 #define NAMESPOOF_VERSION 1
 #define NAMESPOOF_PATH EXT_PATH("dolphin/name.txt")
 
-void NAMESPOOF_INIT();
+// void NAMESPOOF_INIT();

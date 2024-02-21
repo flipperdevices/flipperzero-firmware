@@ -100,6 +100,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Temp Sensors Reader 1.6 (By quen0n)](https://github.com/quen0n/Unitemp-Flipper-Zero-Plugin) [Added hPa and dewpoint, fixed typos #34 (By edo-hr)](https://github.com/quen0nquen0n/unitemp-flipperzero/pull/34)
 - Added: [Canon Intervalometer v1.0 (By TravisCG)](https://github.com/TravisCG/canonivm)
 - Added: [Digimon F-Com v1.0 (By TylerWilley)](https://github.com/TylerWilley/flipper-f-com)
+- [Fixed About & System settings not showing, BT Icon doubling on desktop & Name Changer (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/1764adc3b9a3d6be91ac5f5c4686dd7a1ee014b6)
 
 <a name="release">
 
