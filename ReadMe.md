@@ -94,6 +94,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: [Revert: auto-stop emulation after 5min feature added (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/0614f9b87058676a766481daae4dc3c7762f975ce)
 - UL: [NFC: Parser updates (By Leptopt1los)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/a88adc2a27633b1f37c88f4a56377e5c433cd43b)
 - Updated: OFW: PR: [Adding F13-F24 function key support to BadUSB #3468 (By gcvai)](https://github.com/flipperdevices/flipperzero-firmware/pull/3468)
+- Updated: [WiFi (Marauder) v7.0 (By 0xchocolate & tcpassos)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion)
 
 <a name="release">
 
@@ -567,7 +568,7 @@ $ ./fbt dolphin_ext
 - [Weather Station v1.5 (By Skorpionm)-OFW](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/weather_station)
 - [Wiegand Reader v1.3 (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/gpio)
 - [WiFi (Deauther) V2 (By Timmotools)](https://github.com/Timmotools/flipperzero_esp8266_deautherv2) `Req: ESP8266`
-- [WiFi (Marauder) v7.0 (By 0xchocolate & tcpassos)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) `Req: ESP32 WITH MARAUDER FLASHED` [ESP32 MARAUDER Firmware](https://github.com/tcpassos/ESP32Marauder)
+- [WiFi (Marauder) v7.0 (By 0xchocolate & tcpassos)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) `Req: ESP32 WITH MARAUDER FLASHED` [ESP32 MARAUDER Firmware](https://github.com/justcallmekoko/ESP32Marauder/releases/latest)
 - [Wifi Mapping (By carvilsi)](https://github.com/carvilsi/flipper0-wifi-map/tree/main) `Req: ESP32`
 - [Wii EC Analyzer v1.1 (By csBlueChip)](https://github.com/csBlueChip/FlipperZero_WiiEC)
 - [Wire Tester v1.1 (By unixispower)](https://gitlab.com/unixispower/flipper-wire-tester)
