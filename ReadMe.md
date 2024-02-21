@@ -95,7 +95,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: OFW: PR: [Adding F13-F24 function key support to BadUSB #3468 (By gcvai)](https://github.com/flipperdevices/flipperzero-firmware/pull/3468)
 - Updated: [WiFi (Marauder) v7.0 (By 0xchocolate & tcpassos)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion)
 - [Fixed crash on install from Desktop (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/93c8101a539bd8542d6a13cd9ffa1142bde8ea1f)
-- [JS Drive Image Creation code (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/a118b3068a85d732b41ebe15fa4bd1507c190502)
+- [JS Drive Image Creation code (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/94d5d29b71ee514274d8a35bda3c1255625c79c6)
+- [Infrared: Fix for AC assets file (By amec0e)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/ee2c7bed9264ae19451bf947bcc42a588f0f69c7)
 
 <a name="release">
 
