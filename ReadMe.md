@@ -119,7 +119,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Open qFlipper
 - Connect to Flipper Zero
 - Press "Install from file"
-- Navigate to downloaded RM*.TGZ/ZIP
+- Navigate to downloaded RM*.TGZ
 - Confirm the file and install
 
 ## Build
