@@ -27,10 +27,10 @@ This software is for experimental purposes only and is not meant for any illegal
 
 <a name="latest">
 
-## Latest Updates - [PATREON: Latest Release RM0221-0108-0.98.4-6edd79f](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
+## Latest Updates - [PATREON: Latest Release RM0221-1853-0.98.4-514accc](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-02-21 18:52 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-02-21 18:52 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-02-21 18:53 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-02-21 18:53 EST`
 - Updated: [WHC SWIO Flasher v1.0 (By sukvojte)](https://github.com/sukvojte/wch_swio_flasher)
 - OFW: [FuriHal: UART refactoring #3211 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3211)
 - OFW: [FuriHal: interrupt priorities and documentation #3366 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3366)
@@ -100,7 +100,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Temp Sensors Reader 1.6 (By quen0n)](https://github.com/quen0n/Unitemp-Flipper-Zero-Plugin) [Added hPa and dewpoint, fixed typos #34 (By edo-hr)](https://github.com/quen0nquen0n/unitemp-flipperzero/pull/34)
 - Added: [Canon Intervalometer v1.0 (By TravisCG)](https://github.com/TravisCG/canonivm)
 - Added: [Digimon F-Com v1.0 (By TylerWilley)](https://github.com/TylerWilley/flipper-f-com)
-- [Fixed About & System settings not showing, BT Icon doubling on desktop & Name Changer (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/2258bd0a386d8cafb672ad726ab483aa9fe90f2c) & [Fixed BT Setting not knowing setting](6050bb87a545efc2f87a0f0cf50e98f60a197805)
+- [Fixed About & System settings not showing, BT Icon doubling on desktop & Name Changer (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/2258bd0a386d8cafb672ad726ab483aa9fe90f2c) & [Fixed BT Setting not knowing setting](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/6050bb87a545efc2f87a0f0cf50e98f60a197805)
 
 <a name="release">
 
