@@ -88,6 +88,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: [Code improvements for coming C version change (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/0fcd9a55d3b16a0af4ff2243327c6aa61b820f77)
 - Updated: [Epansion Module Settings as FAP (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/06ae2ca9cd17040f39dd1be34f73f6f59096ad9f)
 - Web Installer install is not working right on desktop at the moment. Enter menu before plugging in your flipper to begin installation. Don't leave the main menu. Close web installer when Flipper starts the install process and Web Installer states "Update in progress, pay attention to your Flipper"
+- Updated: [Doom v1.3 (By p4nic4ttack)](https://github.com/p4nic4ttack/doom-flipper-zero/) and several other apps with C refactor (By xMasterX)
 
 <a name="release">
 
@@ -306,7 +307,7 @@ $ ./fbt dolphin_ext
 - [Crossy Road v1.0 (By Mikael098)](https://github.com/Mikael098/CrossyRoad-FlipperZero-)
 - [Dice (RM) Including SEX/WAR/8BALL/WEED/DRINK DICE v2.1 (By RogueMaster)](https://github.com/RogueMaster/flipperzero-dice)
 - [DnD Dice v1.3 (By Ka3u6y6a)](https://github.com/Ka3u6y6a/flipper-zero-dice)
-- [Doom v1.2 (By p4nic4ttack)](https://github.com/p4nic4ttack/doom-flipper-zero/) (ported and fixed by xMasterX & Svarich & hedger)
+- [Doom v1.3 (By p4nic4ttack)](https://github.com/p4nic4ttack/doom-flipper-zero/) (ported and fixed by xMasterX & Svarich & hedger)
 - [DVD Bounce (By schaene)](https://github.com/schaene/Flipper-DVD-Bounce)
 - [Etch-A-Sketch (By SimplyMinimal)](https://github.com/SimplyMinimal/FlipperZero-Etch-A-Sketch)
 - [Five Nights at Flipper's v1.2 (By sillygir1)](https://github.com/sillygir1/flipperzero-fnaf)

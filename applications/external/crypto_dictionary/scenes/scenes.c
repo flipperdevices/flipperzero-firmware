@@ -168,7 +168,7 @@ void topic_scene_on_enter(void* context) {
         dynamic_buffer_append(&dynamic_content, "\0", 1);
         furi_string_free(line);
         file_stream_close(app->file_stream);
-        size_t max_line_width = WIDGET_WIDTH / CHAR_WIDTH;
+        size_t max_line_width = WIDGET_WIDTH / UICHAR_WIDTH;
         char* wrapped_text = wrap_text(dynamic_content.data, max_line_width);
         dynamic_buffer_free(&dynamic_content);
 

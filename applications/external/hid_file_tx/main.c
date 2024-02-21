@@ -389,7 +389,8 @@ static void dispatch_view(void* contextd, uint32_t index) {
     }
 }
 
-bool eventCallback() {
+static bool eventCallback(void* context) {
+    UNUSED(context);
     return false;
 }
 
