@@ -2,13 +2,6 @@
 
 #include "nfc_app_i.h"
 
-void nfc_scene_emulate_timer_callback(void* context) {
-    NfcApp* instance = context;
-
-    view_dispatcher_send_custom_event(
-        instance->view_dispatcher, NfcCustomEventEmulationTimeExpired);
-}
-
 void nfc_scene_emulate_on_enter(void* context) {
     nfc_protocol_support_on_enter(NfcProtocolSupportSceneEmulate, context);
 }
