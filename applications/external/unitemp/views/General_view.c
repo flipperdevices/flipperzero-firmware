@@ -102,7 +102,8 @@ static void _draw_humidity(Canvas* canvas, Sensor* sensor, const uint8_t pos[2])
         // Relative humidity
         snprintf(app->buff, BUFF_SIZE, "%d", (uint8_t)sensor->hum);
         canvas_set_font(canvas, FontBigNumbers);
-        canvas_draw_str_aligned(canvas, pos[0] + 27, pos[1] + 10, AlignCenter, AlignCenter, app->buff);
+        canvas_draw_str_aligned(
+            canvas, pos[0] + 27, pos[1] + 10, AlignCenter, AlignCenter, app->buff);
         uint8_t int_len = canvas_string_width(canvas, app->buff);
         // Adding '%' for relative humidity
         canvas_set_font(canvas, FontPrimary);
@@ -112,7 +113,8 @@ static void _draw_humidity(Canvas* canvas, Sensor* sensor, const uint8_t pos[2])
         int humidity_dec = abs((int16_t)(sensor->hum * 10) % 10);
         snprintf(app->buff, BUFF_SIZE, "%d", (int16_t)sensor->hum);
         canvas_set_font(canvas, FontBigNumbers);
-        canvas_draw_str_aligned(canvas, pos[0] + 27, pos[1] + 10, AlignCenter, AlignCenter, app->buff);
+        canvas_draw_str_aligned(
+            canvas, pos[0] + 27, pos[1] + 10, AlignCenter, AlignCenter, app->buff);
         uint8_t int_len = canvas_string_width(canvas, app->buff);
         // Printing the decimal part similar to temperature display
         snprintf(app->buff, BUFF_SIZE, ".%d", humidity_dec);

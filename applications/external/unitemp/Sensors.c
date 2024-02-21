@@ -632,11 +632,13 @@ UnitempStatus unitemp_sensor_updateData(Sensor* sensor) {
         UNITEMP_DEBUG("Sensor %s update status %d", sensor->name, sensor->status);
     }
 
-    if(app->settings.humidity_unit == UT_HUMIDITY_DEWPOINT && app->settings.temp_unit == UT_TEMP_CELSIUS && sensor->status == UT_SENSORSTATUS_OK) {
+    if(app->settings.humidity_unit == UT_HUMIDITY_DEWPOINT &&
+       app->settings.temp_unit == UT_TEMP_CELSIUS && sensor->status == UT_SENSORSTATUS_OK) {
         unitemp_rhToDewpointC(sensor);
     }
 
-    if(app->settings.humidity_unit == UT_HUMIDITY_DEWPOINT && app->settings.temp_unit == UT_TEMP_FAHRENHEIT && sensor->status == UT_SENSORSTATUS_OK) {
+    if(app->settings.humidity_unit == UT_HUMIDITY_DEWPOINT &&
+       app->settings.temp_unit == UT_TEMP_FAHRENHEIT && sensor->status == UT_SENSORSTATUS_OK) {
         unitemp_rhToDewpointF(sensor);
     }
 

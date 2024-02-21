@@ -155,8 +155,7 @@ void unitemp_Settings_switch(void) {
         temperature_unit_item,
         temp_units[variable_item_get_current_value_index(temperature_unit_item)]);
 
-    variable_item_set_current_value_index(
-        humidity_unit_item, app->settings.humidity_unit);
+    variable_item_set_current_value_index(humidity_unit_item, app->settings.humidity_unit);
     variable_item_set_current_value_text(
         humidity_unit_item,
         humidity_units[variable_item_get_current_value_index(humidity_unit_item)]);

@@ -75,7 +75,7 @@ typedef enum {
 typedef enum {
     UT_HUMIDITY_RELATIVE, // Relative humidity
     UT_HUMIDITY_DEWPOINT, // Dewpoint
-    UT_HUMIDITY_COUNT     // Number of humidity modes
+    UT_HUMIDITY_COUNT // Number of humidity modes
 } humidityUnit;
 /* Объявление структур */
 //Настройки плагина
