@@ -8,6 +8,8 @@ Back return
 Post save should go back to us
 
 TODO: Need to test this... It may not actually work as-is
+
+(It probably won't anymore for sure)
 */
 #include "flipper.h"
 #include "app_state.h"

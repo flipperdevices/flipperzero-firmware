@@ -40,8 +40,8 @@ App* app_alloc() {
     app->text_box_store = furi_string_alloc();
     app->text_box_mutex = furi_mutex_alloc(FuriMutexTypeNormal);
 
-    app->dmcomm_input_stream = furi_stream_buffer_alloc(128, 1);
-    app->dmcomm_output_stream = furi_stream_buffer_alloc(128, 1);
+    app->dmcomm_input_stream = furi_stream_buffer_alloc(256, 1);
+    app->dmcomm_output_stream = furi_stream_buffer_alloc(256, 1);
 
     file_browser_configure(app->file_browser, "*", NULL, true, false, &I_badusb_10px, true);
 

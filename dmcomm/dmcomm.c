@@ -392,6 +392,7 @@ unsigned long busWaitTime(byte level, unsigned long timeout) {
     byte logicLevel;
     do {
         logicLevel = doTick(false);
+        delayMicroseconds(10);
         time = micros() - timeStart;
     } while (logicLevel != level && time <= timeout);
     return time;
@@ -482,16 +483,16 @@ int rcvPacketGet(unsigned int * bits, unsigned long timeout1) {
             r = i + r - 1; //number of bits received
             Serial_prints(F("t:"));
             Serial_printi(i);
-            Serial_printi(':');
+            Serial_printc(':');
             serialPrintHex((*bits) >> (16-r), 4);
-            Serial_printi(' ');
+            Serial_printc(' ');
             addLogEvent(log_opp_exit_fail);
             return r;
         }
     }
     Serial_prints(F("r:"));
     serialPrintHex(*bits, 4);
-    Serial_printi(' ');
+    Serial_printc(' ');
     addLogEvent(log_opp_exit_ok);
     return 0;
 }
@@ -524,7 +525,7 @@ void sendPacket(unsigned int bits) {
     byte i;
     Serial_prints(F("s:"));
     serialPrintHex(bits, 4);
-    Serial_printi(' ');
+    Serial_printc(' ');
     currentPacketIndex ++;
     addLogEvent(log_self_enter_delay);
     delayByTicks(dm_times.pre_high); // 3000
@@ -735,6 +736,7 @@ byte serialRead(byte* buffer) {
                 Serial_printlns(F("too late"));
                 return 0;
             }
+            delay(1);
         } while (incomingInt == -1);
         incomingByte = incomingInt;
         if (incomingByte != '\r' && incomingByte != '\n') {
@@ -802,19 +804,19 @@ void loop() {
             if (debugMode != debug_off) {
                 Serial_prints(F("trigger="));
                 serialPrintTrigger();
-                Serial_printi(' ');
+                Serial_printc(' ');
             }
         }
         active = true;
         if (buffer[0] == 'v' || buffer[0] == 'V') {
             timingID = 'V';
-            Serial_printi('V');
+            Serial_printc('V');
         } else if (buffer[0] == 'x' || buffer[0] == 'X') {
             timingID = 'X';
-            Serial_printi('X');
+            Serial_printc('X');
         } else if (buffer[0] == 'y' || buffer[0] == 'Y') {
             timingID = 'Y';
-            Serial_printi('Y');
+            Serial_printc('Y');
         } else {
             timingID = 'V';
             active = false;
@@ -826,18 +828,18 @@ void loop() {
             if (buffer[1] == '0') {
                 listenOnly = true;
                 goFirst = false;
-                Serial_printi('0');
+                Serial_printc('0');
             } else if (buffer[1] == '1') {
                 listenOnly = false;
                 goFirst = true;
-                Serial_printi('1');
+                Serial_printc('1');
             } else if (buffer[1] == '2') {
                 listenOnly = false;
                 goFirst = false;
-                Serial_printi('2');
+                Serial_printc('2');
             } else {
                 active = false;
-                Serial_printi('?');
+                Serial_printc('?');
             }
         }
         if (i < 7 && !listenOnly) {
@@ -869,10 +871,10 @@ void loop() {
     busRelease();
     if (active && doTick(true) == HIGH) {
         if (listenOnly) {
-            FURI_LOG_I(TAG, "comm listen");
+            //FURI_LOG_I(TAG, "comm listen");
             commListen();
         } else {
-            FURI_LOG_I(TAG, "comm basic");
+            //FURI_LOG_I(TAG, "comm basic");
             commBasic(goFirst, buffer);
         }
         if (debugMode != debug_off) {
@@ -893,7 +895,7 @@ void loop() {
         if (debugMode != debug_off) {
             for (i = 0; i < logIndex; i ++) {
                 serialPrintHex(logBuf[i], 2);
-                Serial_printi(' ');
+                Serial_printc(' ');
             }
             Serial_printlns("");
         }

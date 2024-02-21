@@ -77,11 +77,13 @@ int analogRead(const GpioPin* pin)
 }
 
 void ledOn() {
-    boilerplate_led_set_rgb(255, 0, 0);
+    App* app = context;
+    notification_message(app->notification, &sequence_set_only_blue_255);
 }
 
 void ledOff() {
-  boilerplate_led_reset();
+    App* app = context;
+    notification_message(app->notification, &sequence_reset_rgb);
 }
 
 void Serial_prints(const char* c)
@@ -126,10 +128,22 @@ void Serial_println(void)
     serialCallback(context);
 }
 
-void Serial_printi(const int c)
+void Serial_printc(const char c)
 {
   char str[10];
-  snprintf(str, 10, "%c", (char)c);
+  snprintf(str, 10, "%c", c);
+  size_t sent = furi_stream_buffer_send(
+    context->dmcomm_output_stream,
+    str,
+    strlen(str),
+    0);
+  UNUSED(sent);
+}
+
+void Serial_printi(const int i)
+{
+  char str[10];
+  snprintf(str, 10, "%d", i);
   size_t sent = furi_stream_buffer_send(
     context->dmcomm_output_stream,
     str,

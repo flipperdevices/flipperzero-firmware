@@ -33,6 +33,7 @@ void digitalWrite(const GpioPin* pin, bool level);
 void Serial_prints(const char* c);
 void Serial_printlns(const char* c);
 void Serial_println(void);
+void Serial_printc(const char c);
 void Serial_printi(const int c);
 const char *F(const char* i);
 void delay(int ms);

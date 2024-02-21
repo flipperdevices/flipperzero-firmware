@@ -3,6 +3,10 @@
 
 #include "flipper.h"
 
+typedef enum {
+    SerialInputAvailable,
+} SendCodeEvent;
+
 void fcom_send_code_scene_on_enter(void* context);
 bool fcom_send_code_scene_on_event(void* context, SceneManagerEvent event);
 void fcom_send_code_scene_on_exit(void* context);

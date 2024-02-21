@@ -1,6 +1,7 @@
 
 #include "dmcomm-lib/DMComm.h"
 
+#ifdef WORKING
 void setup()
 {
     LED_Indicator led = LED_Indicator();
@@ -24,3 +25,4 @@ void loop()
 {
     serial_follower.loop();
 }
+#endif
