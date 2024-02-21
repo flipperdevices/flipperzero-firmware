@@ -71,7 +71,7 @@ void led_init() {
 
     furi_hal_gpio_init_ex(
         &gpio_led, GpioModeAltFunctionPushPull, GpioPullNo, GpioSpeedLow, GpioAltFn1TIM1);
-    furi_hal_interrupt_set_isr_ex(FuriHalInterruptIdDma1Ch1, 4,(void (*)(void *)) handle_dma, NULL);
+    furi_hal_interrupt_set_isr_ex(FuriHalInterruptIdDma1Ch1, 4, (void (*)(void*))handle_dma, NULL);
 
     FURI_CRITICAL_ENTER();
     LL_TIM_DeInit(TIM1);
