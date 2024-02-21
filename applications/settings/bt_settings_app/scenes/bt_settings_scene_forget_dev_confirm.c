@@ -35,10 +35,11 @@ bool bt_settings_scene_forget_dev_confirm_on_event(void* context, SceneManagerEv
 
             // Also remove keys of BadBT, Bluetooth Remote, TOTP Authenticator
             Storage* storage = furi_record_open(RECORD_STORAGE);
+            // EXTRA CLEANUP LINES HAVE BEEN ADDED HERE THAT CAN PROBABLY BE REMOVED
+            storage_simply_remove(storage, EXT_PATH("apps_data/authenticator/.bt_hid.keys"));
             storage_simply_remove(storage, EXT_PATH("apps_data/badbt/.badbt.keys"));
             storage_simply_remove(storage, EXT_PATH("apps_data/badkb/.badkb.keys"));
             storage_simply_remove(storage, EXT_PATH("apps_data/hid_ble/.bt_hid.keys"));
-            storage_simply_remove(storage, EXT_PATH("apps_data/authenticator/.bt_hid.keys"));
             storage_simply_remove(storage, EXT_PATH("authenticator/.bt_hid.keys"));
             storage_simply_remove(storage, EXT_PATH("badbt/.badbt.keys"));
             storage_simply_remove(storage, EXT_PATH("badkb/.badkb.keys"));
