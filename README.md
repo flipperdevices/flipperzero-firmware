@@ -54,6 +54,9 @@ Build has been made with official toolchain, **API Mismatch** error may appear i
 
 ## Changelog
 
+* 2024-02-22
+  * Bug fix
+
 * 2023-12-13
   * Output range can be selected, other range will be added later
   * MD5 library is now a local library because this library has been removed in the toolchain
