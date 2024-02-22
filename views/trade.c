@@ -23,6 +23,9 @@
  *
  * 7) Once the player on the Game Boy side uses the trade table, a block of data is
  *     transmitted. This starts with 10x PREAMBLE(0xFD) bytes, 10x random bytes (to
+ *
+ *     I missed another 9x fd bytes after rand? State machine below confirms these bytes
+ *
  *     sync the RNG between two devices, unused at this time), and then the 415 trade_block,
  *     struct gets transferred. At the end of this is 3 ending bytes, DF FE 15. And, weirdly,
  *     3 PREAMBLE(0xFD) bytes.
@@ -111,11 +114,17 @@
 #define PKMN_MASTER 0x01
 #define PKMN_SLAVE 0x02
 #define PKMN_CONNECTED 0x60
-#define PKMN_TRADE_ACCEPT 0x62
-#define PKMN_TRADE_REJECT 0x61
-#define PKMN_TABLE_LEAVE 0x6f
-#define PKMN_SEL_NUM_MASK 0x60
-#define PKMN_SEL_NUM_ONE 0x60
+#define PKMN_CONNECTED_II 0x61
+#define PKMN_TRADE_ACCEPT_GEN_I 0x62
+#define PKMN_TRADE_ACCEPT_GEN_II 0x72
+#define PKMN_TRADE_REJECT_GEN_I 0x61
+#define PKMN_TRADE_REJECT_GEN_II 0x71
+#define PKMN_TABLE_LEAVE_GEN_I 0x6f
+#define PKMN_TABLE_LEAVE_GEN_II 0x7f
+#define PKMN_SEL_NUM_MASK_GEN_I 0x60
+#define PKMN_SEL_NUM_MASK_GEN_II 0x70
+#define PKMN_SEL_NUM_ONE_GEN_I 0x60
+#define PKMN_SEL_NUM_ONE_GEN_II 0x70
 
 #define PKMN_ACTION 0x60
 
@@ -305,16 +314,16 @@ static void trade_draw_callback(Canvas* canvas, void* view_model) {
  */
 static uint8_t getConnectResponse(struct trade_ctx* trade) {
     furi_assert(trade);
-    uint8_t ret;
+    uint8_t ret = trade->in_data;
 
     switch(trade->in_data) {
     case PKMN_CONNECTED:
+    case PKMN_CONNECTED_II:
         with_view_model(
             trade->view,
             struct trade_model * model,
             { model->gameboy_status = GAMEBOY_CONN_TRUE; },
             false);
-        ret = PKMN_CONNECTED;
         break;
     case PKMN_MASTER:
         ret = PKMN_SLAVE;
@@ -361,8 +370,15 @@ static uint8_t getMenuResponse(struct trade_ctx* trade) {
 
     switch(trade->in_data) {
     case PKMN_CONNECTED:
-        response = PKMN_CONNECTED;
+    case PKMN_CONNECTED_II:
+        response = trade->in_data;
         break;
+    case ITEM_2_HIGHLIGHTED:
+	if (trade->pdata->gen == GEN_I) {
+            response = trade->in_data;
+	    break;
+	}
+	[[fallthrough]];
     case PKMN_TRADE_CENTRE:
         with_view_model(
             trade->view,
@@ -406,6 +422,7 @@ static uint8_t getTradeCentreResponse(struct trade_ctx* trade) {
     static bool patch_pt_2;
     static size_t counter;
     static uint8_t in_pkmn_idx;
+    static bool startup_test;
 
     /* TODO: Figure out how we should respond to a no_data_byte and/or how to
      * send one and what response to expect.
@@ -437,16 +454,48 @@ static uint8_t getTradeCentreResponse(struct trade_ctx* trade) {
         break;
 
     /* This state runs through the end of the random preamble */
+    /* XXX: This whole state is now a mess of hacks thanks to gen II.
+     * The correct way to implement this, at some point, would be to
+     * enforce synchronization of canceling by waiting until the GB
+     * starts to issue clocks. But, I'm actually not sure that would
+     * work and would probably behave the same way as it does after this
+     * fixup.
+     */
     case TRADE_INIT:
         if(in == SERIAL_PREAMBLE_BYTE) {
             counter++;
             model->gameboy_status = GAMEBOY_WAITING;
-        } else if((in & PKMN_SEL_NUM_MASK) == PKMN_SEL_NUM_MASK) {
-            send = PKMN_TABLE_LEAVE;
+        /* XXX: Unsure exactly how this sequence works or what it does */
+        /* The next couple of conditionals only apply to gen ii */
+        } else if (in == 0x75) {
+            startup_test = true;
+        /* This is a convoluted statement to catch if the GB tries to send anything
+	 * than 0x76 after 0x75. No clue what these values are, but anything outside
+	 * of that is going to be part of the trade confirmatino most likely.
+	 */
+        } else if (in == 0x76) {
+          ;
+        } else if ((startup_test) && ((in & 0x70) == 0x70) && (in != 0x76)) {
+	    send = PKMN_TABLE_LEAVE_GEN_II;
+        /* XXX: This I think was originally a hack. I think this is checking to see if 0x60 is being sent
+	 * at init, which means we exited trade screen, and re-entered trade screen while GB was still at the table.
+	 * If the GB tries to do anything other than start giving the random preamble, then indicate that we
+	 * wand to leave the table.
+	 * The hack is how we check to see if the GB is sending a trade request
+	 * This needs to be tested for gen ii, and then probably documented a bit better for future sake
+	 */
+        } else if(trade->pdata->gen == GEN_I && (in & PKMN_SEL_NUM_MASK_GEN_I) == PKMN_SEL_NUM_MASK_GEN_I) {
+            send = PKMN_TABLE_LEAVE_GEN_I;
+        } else if(trade->pdata->gen == GEN_II && (in & PKMN_SEL_NUM_MASK_GEN_II) == PKMN_SEL_NUM_MASK_GEN_II) {
+            send = PKMN_TABLE_LEAVE_GEN_II;
+	}
+        if (in == PKMN_TABLE_LEAVE_GEN_II) {
+            startup_test = false;
         }
         if(counter == SERIAL_RNS_LENGTH) {
             trade->trade_centre_state = TRADE_RANDOM;
             counter = 0;
+	    startup_test = false;
         }
         break;
 
@@ -455,7 +504,7 @@ static uint8_t getTradeCentreResponse(struct trade_ctx* trade) {
      * numbers are for synchronizing the PRNG between the two systems,
      * we do not use these numbers at this time.
      *
-     * This waits through the end of the trade block preamble, a total of 20
+     * This waits through the end of the trade block preamble, a total of 19
      * bytes.
      */
     case TRADE_RANDOM:
@@ -503,8 +552,8 @@ static uint8_t getTradeCentreResponse(struct trade_ctx* trade) {
 	 * the 3x 0xFD that we should be transmitting as part of the patch
 	 * list header.
 	 */
-        if(counter > 7) {
-            send = plist_index_get(trade->patch_list, (counter - 8));
+        if(counter > 8) {
+            send = plist_index_get(trade->patch_list, (counter - 9));
         }
 
         /* Patch received data */
@@ -555,18 +604,28 @@ static uint8_t getTradeCentreResponse(struct trade_ctx* trade) {
     /* Handle the Game Boy selecting a Pokemon to trade, or leaving the table */
     case TRADE_PENDING:
         /* If the player leaves the trade menu and returns to the room */
-        if(in == PKMN_TABLE_LEAVE) {
+	if (in == 0x20) break; // HACK TODO this is mail header. This should fix flipper getting ahead
+	if (in == 0xFF) break; // HACK TODO this is mail header. This should fix flipper getting ahead
+        if (trade->pdata->gen == GEN_I && in == PKMN_TABLE_LEAVE_GEN_I) {
             trade->trade_centre_state = TRADE_RESET;
-            send = PKMN_TABLE_LEAVE;
+            send = PKMN_TABLE_LEAVE_GEN_I;
+            model->gameboy_status = GAMEBOY_READY;
+        } else if (trade->pdata->gen == GEN_II && in == PKMN_TABLE_LEAVE_GEN_II) {
+            trade->trade_centre_state = TRADE_RESET;
+            send = PKMN_TABLE_LEAVE_GEN_II;
             model->gameboy_status = GAMEBOY_READY;
             /* If the player selected a Pokemon to send from the Game Boy */
-        } else if((in & PKMN_SEL_NUM_MASK) == PKMN_SEL_NUM_MASK) {
+        } else if(trade->pdata->gen == GEN_I && (in & PKMN_SEL_NUM_MASK_GEN_I) == PKMN_SEL_NUM_MASK_GEN_I) {
             in_pkmn_idx = in;
-            send = PKMN_SEL_NUM_ONE; // We always send the first Pokemon
+            send = PKMN_SEL_NUM_ONE_GEN_I; // We always send the first Pokemon
             model->gameboy_status = GAMEBOY_TRADE_PENDING;
             /* BLANKs are sent in a few places, we want to do nothing about them
 	 * unless the Game Boy already sent us an index they want to trade.
 	 */
+        } else if(trade->pdata->gen == GEN_II && (in & PKMN_SEL_NUM_MASK_GEN_II) == PKMN_SEL_NUM_MASK_GEN_II) {
+            in_pkmn_idx = in;
+            send = PKMN_SEL_NUM_ONE_GEN_II; // We always send the first Pokemon
+            model->gameboy_status = GAMEBOY_TRADE_PENDING;
         } else if(in == PKMN_BLANK) {
             if(in_pkmn_idx != 0) {
                 send = 0;
@@ -578,10 +637,10 @@ static uint8_t getTradeCentreResponse(struct trade_ctx* trade) {
 
     /* Handle the Game Boy accepting or rejecting a trade deal */
     case TRADE_CONFIRMATION:
-        if(in == PKMN_TRADE_REJECT) {
+        if(in == PKMN_TRADE_REJECT_GEN_I || in == PKMN_TRADE_REJECT_GEN_II) {
             trade->trade_centre_state = TRADE_SELECT;
             model->gameboy_status = GAMEBOY_WAITING;
-        } else if(in == PKMN_TRADE_ACCEPT) {
+        } else if(in == PKMN_TRADE_ACCEPT_GEN_I || in == PKMN_TRADE_ACCEPT_GEN_II) {
             trade->trade_centre_state = TRADE_DONE;
         }
         break;
