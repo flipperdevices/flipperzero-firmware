@@ -6,9 +6,7 @@ extern "C" {
 
 typedef enum {
     NfcMagicProtocolGen1,
-    NfcMagicProtocolGen2,
     NfcMagicProtocolGen4,
-    NfcMagicProtocolClassic, // Last to give priority to the others
 
     NfcMagicProtocolNum,
     NfcMagicProtocolInvalid,
