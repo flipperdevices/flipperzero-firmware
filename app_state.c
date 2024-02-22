@@ -72,7 +72,8 @@ App* app_alloc() {
     furi_thread_set_priority(app->dcomm_thread, FuriThreadPriorityHigh);
     furi_thread_set_stack_size(app->dcomm_thread, 8 * 1024);
     furi_thread_set_name(app->dcomm_thread, "DMCOMMWorker");
-    furi_thread_set_callback(app->dcomm_thread, dmcomm_reader);
+    //furi_thread_set_callback(app->dcomm_thread, dmcomm_reader);
+    furi_thread_set_callback(app->dcomm_thread, fcom_thread);
     furi_thread_start(app->dcomm_thread);
 
     return app;

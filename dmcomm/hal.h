@@ -9,6 +9,12 @@ Kinda janky but works well enough for this
 #include "flipper.h"
 #include "../app_state.h"
 
+#ifdef __cplusplus
+#define EXTERNC extern "C"
+#else
+#define EXTERNC
+#endif
+
 #define HIGH true
 #define LOW false
 #define INPUT 1
@@ -35,14 +41,17 @@ void Serial_printlns(const char* c);
 void Serial_println(void);
 void Serial_printc(const char c);
 void Serial_printi(const int c);
-const char *F(const char* i);
-void delay(int ms);
-void delayMicroseconds(int us);
+EXTERNC const char *F(const char* i);
+EXTERNC void delay(int ms);
+EXTERNC void delayMicroseconds(int us);
 int analogRead(const GpioPin* pin);
-uint32_t micros();
-uint32_t millis();
+EXTERNC uint32_t micros();
+EXTERNC uint32_t millis();
 void Serial_writei(int i);
 int Serial_available(void);
 int Serial_read(void);
 void Serial_writeb(const byte* data, int len);
+
+
+#undef EXTERNC
 #endif

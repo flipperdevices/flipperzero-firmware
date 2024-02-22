@@ -7,6 +7,7 @@
 class Print
 {
 public:
+  virtual ~Print() {};
   virtual size_t write(uint8_t) = 0;
   virtual size_t write(const char *buffer, size_t size) = 0;
   virtual size_t print(const char[]) = 0;
@@ -21,6 +22,8 @@ public:
 class Stream : public Print
 {
 public:
+  Stream(App* app);
+  virtual ~Stream() {};
   size_t write(uint8_t);
   size_t write(const char *buffer, size_t size);
   size_t print(const char[]);
@@ -29,4 +32,6 @@ public:
   size_t println(const char[]);
   size_t println(int, int = DEC);
   int read();
+private:
+  App* app;
 };

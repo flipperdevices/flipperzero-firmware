@@ -107,6 +107,7 @@ void DigitalProngInput::setThreshold(uint16_t threshold_mV) {
 bool DigitalProngInput::isActive() {
     return digitalRead(pin_in_) == active_level_;
 }
+#endif
 
 AnalogProngInput::AnalogProngInput(uint8_t pin_in, uint16_t reference_voltage_mV, uint8_t read_resolution) :
         pin_in_(pin_in), reference_voltage_mV_(reference_voltage_mV), read_resolution_(read_resolution) {
@@ -119,7 +120,7 @@ AnalogProngInput::~AnalogProngInput() {
 }
 
 void AnalogProngInput::begin() {
-    pinMode(pin_in_, INPUT);
+    //pinMode(pin_in_, INPUT);
 }
 
 void AnalogProngInput::end() {}
@@ -131,15 +132,16 @@ void AnalogProngInput::setThreshold(uint16_t threshold_mV) {
 }
 
 bool AnalogProngInput::isActive() {
-    uint16_t read = analogRead(pin_in_);
-    return (read >= threshold_units_) != (active_level_ == LOW);  // != as XOR
+    //uint16_t read = analogRead(pin_in_);
+    //return (read >= threshold_units_) != (active_level_ == LOW);  // != as XOR
+    return true;
 }
 
 uint16_t AnalogProngInput::voltage() {
-    uint32_t max_input = (1 << read_resolution_) - 1;
-    uint32_t read = analogRead(pin_in_);
-    return (uint16_t) (read * reference_voltage_mV_ / max_input);
+    //uint32_t max_input = (1 << read_resolution_) - 1;
+    //uint32_t read = analogRead(pin_in_);
+    //return (uint16_t) (read * reference_voltage_mV_ / max_input);
+    return 0;
 }
-#endif
 
 }  // namespace DMComm

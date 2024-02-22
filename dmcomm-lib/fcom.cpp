@@ -1,28 +1,66 @@
-
+#include "fcom.h"
+#include "app_state.h"
 #include "dmcomm-lib/DMComm.h"
+#include "dmcomm-lib/flipper_led.h"
+#include "dmcomm-lib/flipper_pin_control.h"
 
-#ifdef WORKING
-void setup()
+using namespace DMComm;
+
+/*
+Just a static class to hold a bunch of pointers
+so we can deallocate em later
+*/
+class FComState {
+public:
+    FComState() {};
+    Stream* stream;
+    FlipperIndicator* led;
+    FComOutput* output;
+    FComInput* input;
+
+    ClassicCommunicator* classic_comm;
+    ColorCommunicator* color_comm;
+    Controller* controller;
+    SerialFollower* serial_follower;
+};
+
+static FComState fcom_state;
+
+void setup_fcom(void* context)
 {
-    LED_Indicator led = LED_Indicator();
-    DComOutput output = FcomOutput(C3, DMCOMM_NO_PIN);
-    DigitalProngInput input = DigitalProngInput(A4);
+    App* app = (App*)context;
+    fcom_state.stream = new Stream(app);
+    fcom_state.led = new FlipperIndicator(app);
+    fcom_state.output = new FComOutput(&gpio_ext_pc3);
+    fcom_state.input = new FComInput(&gpio_ext_pa4);
     //AnalogProngInput analog_input = AnalogProngInput(A3, 5000, 10);
     //ProngTester prong_tester = ProngTester(output, input, analog_input);
 
-    ClassicCommunicator classic_comm = ClassicCommunicator(output, input);
-    ColorCommunicator color_comm = ColorCommunicator(output, input);
-    Controller controller = Controller();
-    SerialFollower serial_follower = SerialFollower(controller, Stream);
+    fcom_state.classic_comm = new ClassicCommunicator(*fcom_state.output, *fcom_state.input);
+    fcom_state.color_comm = new ColorCommunicator(*fcom_state.output, *fcom_state.input);
+    fcom_state.controller = new Controller();
+    fcom_state.serial_follower = new SerialFollower(*fcom_state.controller, *fcom_state.stream);
 
-    controller.add(classic_comm);
-    controller.add(color_comm);
-    serial_follower.setIndicator(led);
+    fcom_state.controller->add(*fcom_state.classic_comm);
+    fcom_state.controller->add(*fcom_state.color_comm);
+    fcom_state.serial_follower->setIndicator(*fcom_state.led);
     //serial_follower.setProngTester(prong_tester);
 }
 
-void loop()
+void loop_fcom()
 {
-    serial_follower.loop();
+    fcom_state.serial_follower->loop();
 }
-#endif
+
+void destroy_fcom()
+{
+    // Deallocate everything
+    delete fcom_state.serial_follower;
+    delete fcom_state.controller;
+    delete fcom_state.color_comm;
+    delete fcom_state.classic_comm;
+    delete fcom_state.input;
+    delete fcom_state.output;
+    delete fcom_state.led;
+    delete fcom_state.stream;
+}

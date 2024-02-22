@@ -3,6 +3,9 @@
 #ifndef DMCOMM_PIN_CONTROL_H_
 #define DMCOMM_PIN_CONTROL_H_
 
+#include "dmcomm/hal.h"
+#include "portable/dmcomm_portable_misc.h"
+
 namespace DMComm {
 
 class BaseProngOutput {
