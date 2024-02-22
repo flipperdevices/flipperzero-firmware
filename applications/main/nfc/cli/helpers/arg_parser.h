@@ -27,6 +27,8 @@ char arg_parser_get_identifier(ArgParser* instance);
 
 const char* arg_parser_get_value(ArgParser* instance);
 
-const char* arg_parser_get_error_message(ArgParser* instance);
+void arg_parser_get_error_message(ArgParser* instance, FuriString* error_str);
 
-const char* arg_parser_get_help_message(ArgParser* instance);
+void arg_parser_get_help_message(ArgParser* instance, FuriString* help_str);
+
+const char* arg_parser_get_next_argument(ArgParser* instance);

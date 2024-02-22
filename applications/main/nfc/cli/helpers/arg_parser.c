@@ -6,6 +6,9 @@
 #include <toolbox/args.h>
 #include <m-array.h>
 
+#define ARG_PARSER_PRINT_DISTANCE 4
+#define ARG_PARSER_PRINT_MIN_INDENTION 20
+
 ARRAY_DEF(ArgParserArgumentArray, FuriString*, FURI_STRING_OPLIST);
 
 struct ArgParser {
@@ -417,14 +420,142 @@ const char* arg_parser_get_value(ArgParser* instance) {
     return instance->value;
 }
 
-const char* arg_parser_get_error_message(ArgParser* instance) {
+void arg_parser_get_error_message(ArgParser* instance, FuriString* error_str) {
     furi_assert(instance);
+    furi_assert(error_str);
 
-    return "error";
+    int error_index;
+    char error_letter;
+
+    error_index = instance->error_index;
+    if(error_index < 0) {
+        return;
+    }
+
+    error_letter = instance->error_letter;
+    FuriString* error_arg = *ArgParserArgumentArray_get(instance->arg_arr, error_index);
+    if(error_letter) {
+        furi_string_printf(
+            error_str,
+            "Unknown option '%c' in '%s'.\n",
+            error_letter,
+            furi_string_get_cstr(error_arg));
+    } else {
+        furi_string_printf(error_str, "Unknown option '%s'.\n", furi_string_get_cstr(error_arg));
+    }
 }
 
-const char* arg_parser_get_help_message(ArgParser* instance) {
+static void arg_parser_print_value(
+    const ArgParserOptions* option,
+    size_t* accessor_length,
+    FuriString* str) {
+    if(option->value_name != NULL) {
+        *accessor_length += furi_string_cat_printf(str, "=%s", option->value_name);
+    }
+}
+
+static void arg_parser_print_letters(
+    const ArgParserOptions* option,
+    bool* first,
+    size_t* accessor_length,
+    FuriString* str) {
+    const char* access_letter;
+    access_letter = option->access_letters;
+    if(access_letter != NULL) {
+        while(*access_letter) {
+            if(*first) {
+                *accessor_length += furi_string_cat_printf(str, "-%c", *access_letter);
+                *first = false;
+            } else {
+                *accessor_length += furi_string_cat_printf(str, ", -%c", *access_letter);
+            }
+            ++access_letter;
+        }
+    }
+}
+
+static void arg_parser_print_name(
+    const ArgParserOptions* option,
+    bool* first,
+    size_t* accessor_length,
+    FuriString* str) {
+    if(option->access_name != NULL) {
+        if(*first) {
+            *accessor_length += furi_string_cat_printf(str, "--%s", option->access_name);
+        } else {
+            *accessor_length += furi_string_cat_printf(str, ", --%s", option->access_name);
+        }
+    }
+}
+
+static size_t arg_parser_get_print_indention(ArgParser* instance) {
+    size_t option_index, indention, result;
+    const ArgParserOptions* option;
+
+    result = ARG_PARSER_PRINT_MIN_INDENTION;
+
+    for(option_index = 0; option_index < instance->option_count; ++option_index) {
+        indention = ARG_PARSER_PRINT_DISTANCE;
+        option = &instance->options[option_index];
+        if(option->access_letters != NULL && *option->access_letters) {
+            indention += strlen(option->access_letters) * 4 - 2;
+            if(option->access_name != NULL) {
+                indention += strlen(option->access_name) + 4;
+            }
+        } else if(option->access_name != NULL) {
+            indention += strlen(option->access_name) + 2;
+        }
+
+        if(option->value_name != NULL) {
+            indention += strlen(option->value_name) + 1;
+        }
+
+        if(indention > result) {
+            result = indention;
+        }
+    }
+
+    return result;
+}
+
+void arg_parser_get_help_message(ArgParser* instance, FuriString* help_str) {
+    furi_assert(instance);
+    furi_assert(help_str);
+
+    size_t option_index, indention, i, accessor_length;
+    const ArgParserOptions* option;
+    bool first;
+
+    indention = arg_parser_get_print_indention(instance);
+    furi_string_reset(help_str);
+
+    for(option_index = 0; option_index < instance->option_count; ++option_index) {
+        option = &instance->options[option_index];
+        accessor_length = 0;
+        first = true;
+
+        furi_string_cat_printf(help_str, "  ");
+
+        arg_parser_print_letters(option, &first, &accessor_length, help_str);
+        arg_parser_print_name(option, &first, &accessor_length, help_str);
+        arg_parser_print_value(option, &accessor_length, help_str);
+
+        for(i = accessor_length; i < indention; ++i) {
+            furi_string_cat_printf(help_str, " ");
+        }
+
+        furi_string_cat_printf(help_str, " %s\r\n", option->description);
+    }
+}
+
+const char* arg_parser_get_next_argument(ArgParser* instance) {
     furi_assert(instance);
 
-    return "help";
+    const char* next_arg = NULL;
+    if(instance->index < instance->argc) {
+        FuriString* arg = *ArgParserArgumentArray_get(instance->arg_arr, instance->index++);
+        next_arg = furi_string_get_cstr(arg);
+    }
+
+    return next_arg;
 }
