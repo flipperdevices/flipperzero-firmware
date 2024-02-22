@@ -32,34 +32,22 @@ bool flasher_init(void) {
     FURI_LOG_D(TAG, "Attaching the target");
 
     board_init();
+    swd_init();
 
-    bool success = false;
-    FURI_CRITICAL_ENTER();
-    do {
-        swd_init();
-        if(!target_attach(RP2040_CORE0_ADDR)) {
-            FURI_LOG_E(TAG, "Failed to attach target");
-            break;
-        }
-        success = true;
-    } while(false);
-    FURI_CRITICAL_EXIT();
-
-    if(!success) {
+    if(!target_attach(RP2040_CORE0_ADDR)) {
+        FURI_LOG_E(TAG, "Failed to attach target");
         flasher_deinit();
+        return false;
     }
 
-    return success;
+    return true;
 }
 
 void flasher_deinit(void) {
     FURI_LOG_D(TAG, "Detaching target and restoring pins");
 
-    FURI_CRITICAL_ENTER();
     target_detach();
     swd_deinit();
-    FURI_CRITICAL_EXIT();
-
     board_reset();
     board_deinit();
 }
@@ -70,24 +58,15 @@ void flasher_set_callback(FlasherCallback callback, void* context) {
 }
 
 static inline bool flasher_init_chip(void) {
-    FURI_CRITICAL_ENTER();
-    const bool success = rp2040_init();
-    FURI_CRITICAL_EXIT();
-    return success;
+    return rp2040_init();
 }
 
 static inline bool flasher_erase_sector(uint32_t address) {
-    FURI_CRITICAL_ENTER();
-    const bool success = rp2040_flash_erase_sector(address);
-    FURI_CRITICAL_EXIT();
-    return success;
+    return rp2040_flash_erase_sector(address);
 }
 
 static inline bool flasher_program_page(uint32_t address, const void* data, size_t data_size) {
-    FURI_CRITICAL_ENTER();
-    const bool success = rp2040_flash_program_page(address, data, data_size);
-    FURI_CRITICAL_EXIT();
-    return success;
+    return rp2040_flash_program_page(address, data, data_size);
 }
 
 static void flasher_emit_progress(uint8_t start, uint8_t weight, uint8_t progress) {
