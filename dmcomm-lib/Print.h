@@ -31,7 +31,9 @@ public:
   size_t println(void);
   size_t println(const char[]);
   size_t println(int, int = DEC);
+  void set_callback(DmcommCallback cb);
   int read();
 private:
   App* app;
+  DmcommCallback cb;
 };

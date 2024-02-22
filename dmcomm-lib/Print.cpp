@@ -1,7 +1,12 @@
 #include "Print.h"
 #include "flipper.h"
 
-Stream::Stream(App* app) : app(app) {}
+Stream::Stream(App* app) : app(app), cb(NULL) {}
+
+void Stream::set_callback(DmcommCallback cb)
+{
+  cb = cb;
+}
 
 size_t Stream::write(uint8_t i)
 {
@@ -61,6 +66,8 @@ size_t Stream::println(void)
       "\n",
       1,
       0);
+  if(cb != NULL)
+    cb();
 }
 
 size_t Stream::println(const char buffer[])
@@ -72,9 +79,11 @@ size_t Stream::println(const char buffer[])
       0);
   sent += furi_stream_buffer_send(
       app->dmcomm_output_stream,
-      buffer,
-      strlen(buffer),
+      "\n",
+      1,
       0);
+  if(cb != NULL)
+    cb();
   return sent;
 }
 
@@ -89,10 +98,10 @@ size_t Stream::println(int i, int fmt)
     str,
     strlen(str),
     0);
-  return sent;
 
-  //if(serialCallback != NULL)
-  //  serialCallback(context);
+  if(cb != NULL)
+    cb();
+  return sent;
 }
 
 int Stream::read()

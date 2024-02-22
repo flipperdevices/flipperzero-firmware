@@ -26,6 +26,11 @@ public:
 
 static FComState fcom_state;
 
+void set_serial_callback(DmcommCallback cb)
+{
+    fcom_state.stream->set_callback(cb);
+}
+
 void setup_fcom(void* context)
 {
     App* app = (App*)context;
@@ -33,6 +38,9 @@ void setup_fcom(void* context)
     fcom_state.led = new FlipperIndicator(app);
     fcom_state.output = new FComOutput(&gpio_ext_pc3);
     fcom_state.input = new FComInput(&gpio_ext_pa4);
+
+    // Maybe one day I'll copy the flipper oscilloscope analog STM code
+    // and make this work...
     //AnalogProngInput analog_input = AnalogProngInput(A3, 5000, 10);
     //ProngTester prong_tester = ProngTester(output, input, analog_input);
 

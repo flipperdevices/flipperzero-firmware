@@ -210,7 +210,7 @@ int Serial_read(void)
   if(recieved > 0)
   {
     ret = (int)s;
-  }
+}
 
   return ret;
 }

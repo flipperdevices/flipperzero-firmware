@@ -9,6 +9,7 @@ Right will go to the save code dialog for the new code (if there is one)
 #include "flipper.h"
 #include "app_state.h"
 #include "scenes.h"
+#include "dmcomm-lib/fcom.h"
 #include "scene_send_code.h"
 #include <furi_hal_cortex.h>
 
@@ -188,7 +189,8 @@ void fcom_send_code_scene_on_enter(void* context) {
             app->state->codeLen++;
     }
     app->state->waitForCode = true;
-    setSerialOutputCallback(scbs);
+    //setSerialOutputCallback(scbs);
+    set_serial_callback(scbs);
     furi_string_reset(app->state->r_code);
     furi_string_reset(app->state->s_code);
     dmcomm_sendcommand(app, app->state->current_code);
