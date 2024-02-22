@@ -23,12 +23,16 @@
 #define DATAWIDTH_VALUES 3
 #define STOPBITS_VALUES 4
 #define PARITY_VALUES 3
+#define TIMEOUT_VALUES 255
+#define DIGITALFORMAT_VALUES 2
+#define ANALOGFORMAT_VALUES 2
 #define SAVE_LOG_VALUES 2
 
-#define RX_BUF_SIZE 320
+#define RX_BUF_SIZE 255
 #define UART_CH FuriHalSerialIdUsart
 #define TEXT_BOX_LEN 4096
 #define FURI_HAL_SERIAL_USART_OVERSAMPLING 0x00000000U
+#define TIMEOUT_SCALER 50
 //////////////////////////   Defining Structs  //////////////////////////
 typedef enum { Main_Scene, Settings_Scene, ConsoleOutput_Scene, Scene_Num } Scenes;
 typedef enum { Submenu_View, VarList_View, TextBox_View } Views;
@@ -39,6 +43,8 @@ typedef struct {
     uint8_t dataWidth;
     uint8_t stopBits;
     uint8_t parity;
+    uint8_t timeout;
+    bool hexOutput;
     bool saveLOG;
 } Config;
 
@@ -49,6 +55,10 @@ typedef struct {
     FuriHalSerialHandle* serial_handle;
     uint8_t rxBuff[RX_BUF_SIZE + 1];
 } Uart;
+typedef struct {
+    bool slave;
+    FuriString* timeout;
+} Modbus;
 
 typedef struct {
     SceneManager* sceneManager;
@@ -56,6 +66,7 @@ typedef struct {
     Submenu* subMenu;
     VariableItemList* varList;
     Uart* uart;
+    Modbus* modbus;
     DialogsApp* dialogs;
     Storage* storage;
     File* LOGfile;
@@ -65,6 +76,8 @@ typedef struct {
     TextBox* textBox;
     FuriString* text;
     size_t textLen;
+
+    FuriTimer* timer;
 } App;
 
 typedef enum {
@@ -72,6 +85,8 @@ typedef enum {
     DataWidth_Option,
     StopBits_Option,
     Parity_Option,
+    TimeOut_Option,
+    OutputFormat_Option,
     SaveLOG_Option
 } Settings_Options;
 
@@ -176,6 +191,16 @@ static const char* dataWidthValues[] = {"7", "8", "9"};
 static const char* stopBitsValues[] = {"0.5", "1", "1.5", "2"};
 static const char* parityValues[] = {"None", "Even", "Odd"};
 static const char* saveLOGValues[] = {"OFF", "ON"};
+static const char* outputFormatValues[] = {"Default", "HEX"};
+static const char* functionNames[] = {
+    "Read Coils(01)",
+    "Read Discrete Inputs(02)",
+    "Read Holding Registers(03)",
+    "Read Input Registers(04)",
+    "Write Single Coil(05)",
+    "Write Single Register(06)",
+    "Write Multiple Coils(0F)",
+    "Write Multiple Registers(10)"};
 
 LL_USART_InitTypeDef buildUartSettings(Config* cfg) {
     LL_USART_InitTypeDef USART_InitStruct;
@@ -236,30 +261,157 @@ static void Serial_Begin(FuriHalSerialHandle* handle, LL_USART_InitTypeDef USART
     furi_hal_serial_set_br(handle, USART_InitStruct.BaudRate);
     LL_USART_DisableIT_ERROR(USART1);
 }
+uint16_t getCRC(uint8_t* buf, uint8_t len) {
+    uint16_t crc = 0xFFFF;
+
+    for(int pos = 0; pos < len; pos++) {
+        crc ^= (uint16_t)buf[pos]; // XOR byte into least sig. byte of crc
+
+        for(int i = 8; i != 0; i--) { // Loop over each bit
+            if((crc & 0x0001) != 0) { // If the LSB is set
+                crc >>= 1; // Shift right and XOR 0xA001
+                crc ^= 0xA001;
+            } else // Else LSB is not set
+                crc >>= 1; // Just shift right
+        }
+    }
+    return crc;
+}
+
+void discreteValuesParser(void* context, uint8_t* buff, size_t len) {
+    App* app = context;
+    uint8_t value = 0;
+    uint8_t offset = 0;
+    while(len) {
+        memcpy(&value, buff + offset, 1);
+        offset++;
+        if(!app->uart->cfg->hexOutput) {
+            furi_string_cat_printf(app->text, "\n-Byte%d: \n->", offset);
+            for(int i = 0; i < 8; i++)
+                furi_string_cat_printf(
+                    app->text,
+                    "%s%s",
+                    value >> i && 0x01 ? "ON" : "OFF",
+                    i == 3 ? "\n->" :
+                    i == 7 ? "" :
+                             ",");
+        } else
+            furi_string_cat_printf(app->text, "\n->Byte%d: 0x%02X", offset, value);
+        len--;
+    }
+}
+void analogValuesParser(void* context, uint8_t* buff, size_t len) {
+    App* app = context;
+    uint16_t value = 0;
+    uint8_t offset = 0;
+    while(len) {
+        memcpy(&value + 8, buff + offset, 1);
+        offset++;
+        memcpy(&value, buff + offset, 1);
+        offset++;
+        furi_string_cat_printf(
+            app->text,
+            app->uart->cfg->hexOutput ? "\n->Reg%d: 0x%04X" : "\n->Reg%d: %d",
+            offset / 2,
+            value);
+        len--;
+    }
+}
+void pduParser(void* context, bool slave, uint8_t Fn, uint8_t* pdu, size_t len) {
+    App* app = context;
+    size_t offset = 0;
+    uint16_t address = 0;
+    uint16_t qty = 0;
+    uint16_t bCount = 0;
+    uint16_t value = 0;
+    UNUSED(len);
+    //TODO: Handle error codes, unsupported codes & detect type-length missmatch
+    memcpy(slave && Fn <= 4 ? &bCount : &address, pdu + offset, slave && Fn <= 4 ? 1 : 2);
+    offset += slave && Fn <= 4 ? 1 : 2;
+    address = address >> 8 | address << 8;
+    if(app->uart->cfg->hexOutput)
+        furi_string_cat_printf(
+            app->text,
+            slave && Fn <= 4 ? "\nbCount: 0x%02X" : "\nAddress: 0x%04X",
+            slave && Fn <= 4 ? bCount : address);
+    else
+        furi_string_cat_printf(
+            app->text,
+            slave && Fn <= 4 ? "\nbCount: %d" : "\nAddress: %d",
+            slave && Fn <= 4 ? bCount : address);
+
+    if(Fn >= 0x0F || (!slave && Fn <= 0x04)) {
+        memcpy(&qty, pdu + offset, 2);
+        offset += 2;
+        qty = qty >> 8 | qty << 8;
+        furi_string_cat_printf(
+            app->text, app->uart->cfg->hexOutput ? "\nQty: 0x%04X" : "\nQty: %d", qty);
+    } else if(Fn >= 0x05) {
+        memcpy(&value, pdu + offset, 2);
+        offset += 2;
+        value = value >> 8 | value << 8;
+        furi_string_cat_printf(
+            app->text, app->uart->cfg->hexOutput ? "\nValue: 0x%04X" : "\nValue: %d", value);
+    } else if(Fn <= 0x02)
+        discreteValuesParser(app, pdu + offset, bCount);
+    else
+        analogValuesParser(app, pdu + offset, bCount / 2);
+
+    if(Fn >= 0x0F && !slave) {
+        memcpy(&bCount, pdu + offset, 1);
+        offset++;
+        furi_string_cat_printf(
+            app->text, app->uart->cfg->hexOutput ? "\nbCount: 0x%02X" : "\nbCount: %d", bCount);
+        if(Fn == 0x0F)
+            discreteValuesParser(app, pdu + offset, bCount);
+        else
+            analogValuesParser(app, pdu + offset, bCount / 2);
+    }
+}
+
 void handle_rx_data_cb(uint8_t* buf, size_t len, void* context) {
     furi_assert(context);
     App* app = context;
     app->textLen += len;
+    buf[len] = '\0';
     if(app->textLen >= TEXT_BOX_LEN - 1) {
         furi_string_right(app->text, app->textLen / 2);
         app->textLen = furi_string_size(app->text) + len;
     }
-    //buf[len] = '\0';
     FuriString* data = furi_string_alloc();
-    furi_string_reserve(data, len);
+    furi_string_reset(data);
     for(size_t i = 0; i < len; i++) {
         furi_string_cat_printf(data, "%02X", buf[i]);
     }
-    furi_string_cat_printf(data, "%s", "\n");
-    for(size_t i = 0; i < furi_string_size(data); i++) {
-        buf[i] = (uint8_t)furi_string_get_char(data, i);
-    }
-    furi_string_cat_printf(app->text, "%s", furi_string_get_cstr(data));
-    if(app->LOGfileReady) {
-        storage_file_write(app->LOGfile, buf, furi_string_size(data));
-    }
+    uint8_t Slave;
+    uint8_t Fn;
+    size_t pduLen = len - 4;
+    uint16_t crc;
+    //uint16_t mycrc = getCRC(buf,len-2);
+
+    memcpy(&Slave, buf, 1);
+    memcpy(&Fn, buf + 1, 1);
+    memcpy(&crc, buf + len - 2, 2);
+    furi_string_cat_printf(
+        app->text, "\n------%s-------", app->modbus->slave ? "-SLAVE" : "MASTER");
+    furi_string_cat_printf(app->text, "\n%s", functionNames[Fn < 6 ? Fn - 1 : Fn - 9]);
+    furi_string_cat_printf(
+        app->text, app->uart->cfg->hexOutput ? "\nSlave: 0x%02X" : "\nSlave: %d", Slave);
+    pduParser(app, app->modbus->slave, Fn, buf + 2, pduLen);
+    crc = crc >> 8 | crc << 8;
+    furi_string_cat_printf(app->text, "\nDRC: 0x%02X", crc);
+    //for(size_t i = 0; i < furi_s tring_size(data); i++)buf[i] = (uint8_t)furi_string_get_char(data, i);
+    //furi_string_cat_printf(app->text, "%s", furi_string_get_cstr(data));
+    //if(app->LOGfileReady) storage_file_write(app->LOGfile, buf, furi_string_size(data));
     furi_string_free(data);
     view_dispatcher_send_custom_event(app->viewDispatcher, Refresh);
+    if(app->modbus->slave) {
+        app->modbus->slave = false;
+        furi_timer_stop(app->timer);
+    } else {
+        app->modbus->slave = true;
+        furi_timer_start(app->timer, app->uart->cfg->timeout * TIMEOUT_SCALER);
+    }
 }
 static void
     on_rx_cb(FuriHalSerialHandle* handle, FuriHalSerialRxEvent ev, size_t size, void* context) {
@@ -292,6 +444,10 @@ static void serial_deinit(Uart* uart) {
     furi_hal_serial_deinit(uart->serial_handle);
     furi_hal_serial_control_release(uart->serial_handle);
     uart->serial_handle = NULL;
+}
+void timerDone(void* context) {
+    App* app = context;
+    app->modbus->slave = false;
 }
 static int32_t uart_worker(void* context) {
     App* app = context;
@@ -364,7 +520,6 @@ void itemChangedCB(VariableItem* item) {
     App* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
     uint8_t selectedIndex = variable_item_list_get_selected_item_index(app->varList);
-
     switch(selectedIndex) {
     case BaudRate_Option:
         variable_item_set_current_value_text(item, baudrateValues[index]);
@@ -380,11 +535,21 @@ void itemChangedCB(VariableItem* item) {
         break;
     case Parity_Option:
         variable_item_set_current_value_text(item, parityValues[index]);
-        app->uart->cfg->parity = index;
+        app->uart->cfg->timeout = index;
+        break;
+    case TimeOut_Option:
+        app->uart->cfg->timeout = index;
+        variable_item_set_current_value_index(item, index);
+        furi_string_printf(app->modbus->timeout, "%d", index * TIMEOUT_SCALER);
+        variable_item_set_current_value_text(item, furi_string_get_cstr(app->modbus->timeout));
+        break;
+    case OutputFormat_Option:
+        variable_item_set_current_value_text(item, outputFormatValues[index]);
+        app->uart->cfg->hexOutput = index;
         break;
     case SaveLOG_Option:
         variable_item_set_current_value_text(item, saveLOGValues[index]);
-        app->uart->cfg->saveLOG = index ? true : false;
+        app->uart->cfg->saveLOG = index;
         break;
     default:
         break;
@@ -407,6 +572,15 @@ void CFG_Scene_OnEnter(void* context) {
     item = variable_item_list_add(app->varList, "Parity", PARITY_VALUES, itemChangedCB, app);
     variable_item_set_current_value_index(item, app->uart->cfg->parity);
     variable_item_set_current_value_text(item, parityValues[app->uart->cfg->parity]);
+    item = variable_item_list_add(app->varList, "TimeOut(ms)", TIMEOUT_VALUES, itemChangedCB, app);
+    variable_item_set_current_value_index(item, app->uart->cfg->timeout);
+    furi_string_printf(app->modbus->timeout, "%d", app->uart->cfg->timeout * TIMEOUT_SCALER);
+    variable_item_set_current_value_text(item, furi_string_get_cstr(app->modbus->timeout));
+    item = variable_item_list_add(
+        app->varList, "Output Format", DIGITALFORMAT_VALUES, itemChangedCB, app);
+    variable_item_set_current_value_index(item, app->uart->cfg->hexOutput ? 1 : 0);
+    variable_item_set_current_value_text(
+        item, outputFormatValues[app->uart->cfg->hexOutput ? 1 : 0]);
     item = variable_item_list_add(app->varList, "Save LOG?", SAVE_LOG_VALUES, itemChangedCB, app);
     variable_item_set_current_value_index(item, app->uart->cfg->saveLOG ? 1 : 0);
     variable_item_set_current_value_text(item, saveLOGValues[app->uart->cfg->saveLOG ? 1 : 0]);
@@ -446,15 +620,13 @@ void Sniffer_Scene_OnEnter(void* context) {
         text_box_reset(app->textBox);
         text_box_set_font(app->textBox, TextBoxFontText);
         text_box_set_focus(app->textBox, TextBoxFocusEnd);
-        furi_string_cat_str(app->text, "Baudrate: ");
-        furi_string_cat_str(app->text, baudrateValues[app->uart->cfg->baudrate]);
-        furi_string_cat_str(app->text, "\nData Width: ");
-        furi_string_cat_str(app->text, dataWidthValues[app->uart->cfg->dataWidth]);
-        furi_string_cat_str(app->text, "\nStop bits: ");
-        furi_string_cat_str(app->text, stopBitsValues[app->uart->cfg->stopBits]);
-        furi_string_cat_str(app->text, "\nParity: ");
-        furi_string_cat_str(app->text, parityValues[app->uart->cfg->parity]);
-        furi_string_cat_str(app->text, "\n");
+        furi_string_cat_printf(
+            app->text, "Baudrate: %s", baudrateValues[app->uart->cfg->baudrate]);
+        furi_string_cat_printf(
+            app->text, "\nData Width: %s", dataWidthValues[app->uart->cfg->dataWidth]);
+        furi_string_cat_printf(
+            app->text, "\nStop bits: %s", stopBitsValues[app->uart->cfg->stopBits]);
+        furi_string_cat_printf(app->text, "\nParity: %s", parityValues[app->uart->cfg->parity]);
     } else if(
         scene_manager_get_scene_state(app->sceneManager, ConsoleOutput_Scene) == Read_LOG_Option) {
         OpenLogFile(app);
@@ -518,6 +690,8 @@ Config* Config_Alloc() {
     config->dataWidth = 1;
     config->stopBits = 1;
     config->parity = 0;
+    config->timeout = 10;
+    config->hexOutput = false;
     config->saveLOG = false;
     return config;
 }
@@ -535,6 +709,14 @@ Uart* Uart_Alloc(void* context) {
     return uart;
 }
 
+Modbus* Modbus_alloc(void* context) {
+    App* app = context;
+    UNUSED(app);
+    Modbus* modbus = malloc(sizeof(Modbus));
+    modbus->slave = false;
+    modbus->timeout = furi_string_alloc();
+    return modbus;
+}
 static App* modbus_app_alloc() {
     App* app = malloc(sizeof(App));
     app->dialogs = furi_record_open(RECORD_DIALOGS);
@@ -558,6 +740,9 @@ static App* modbus_app_alloc() {
     furi_string_reserve(app->text, TEXT_BOX_LEN);
     makePaths(app);
 
+    app->timer = furi_timer_alloc(timerDone, FuriTimerTypeOnce, app);
+    furi_timer_set_thread_priority(FuriTimerThreadPriorityElevated);
+    app->modbus = Modbus_alloc(app);
     app->uart = Uart_Alloc(app);
     return app;
 }
@@ -573,9 +758,14 @@ void uartFree(void* context) {
     }
 
     serial_deinit(app->uart);
-
     free(app->uart->cfg);
     free(app->uart);
+    free(app->modbus);
+    furi_timer_free(app->timer);
+}
+void ModbusFree(void* context) {
+    Modbus* modbus = context;
+    furi_string_free(modbus->timeout);
 }
 void modbus_app_free(App* app) {
     furi_assert(app);
@@ -587,6 +777,7 @@ void modbus_app_free(App* app) {
     submenu_free(app->subMenu);
     view_dispatcher_free(app->viewDispatcher);
     scene_manager_free(app->sceneManager);
+    ModbusFree(app);
     uartFree(app);
     storage_file_free(app->LOGfile);
     furi_record_close(RECORD_STORAGE);
