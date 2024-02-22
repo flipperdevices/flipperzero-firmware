@@ -8,14 +8,14 @@ static bool bad_kb_file_select(BadKbApp* bad_kb) {
 
     bad_kb_app_show_loading_popup(bad_kb, true);
     Storage* storage = furi_record_open(RECORD_STORAGE);
-    if(storage_dir_exists(storage, EXT_PATH("badusb"))) {
+    if(storage_dir_exists(storage, EXT_PATH("badkb"))) {
         DialogMessage* message = dialog_message_alloc();
         dialog_message_set_header(message, "Migrate BadUSB?", 64, 0, AlignCenter, AlignTop);
         dialog_message_set_buttons(message, "No", NULL, "Yes");
         dialog_message_set_text(
             message,
-            "A badusb folder was found!\n"
-            "XFW uses the badkb folder.\n"
+            "A badkb folder was found!\n"
+            "RM uses the badusb folder.\n"
             "Want to transfer the files?",
             64,
             32,
@@ -25,7 +25,8 @@ static bool bad_kb_file_select(BadKbApp* bad_kb) {
         dialog_message_free(message);
         furi_record_close(RECORD_DIALOGS);
         if(res == DialogMessageButtonRight) {
-            storage_common_migrate(storage, EXT_PATH("badusb"), BAD_KB_APP_BASE_FOLDER);
+            storage_common_copy(storage, EXT_PATH("badkb"), BAD_KB_APP_BASE_FOLDER);
+            storage_common_remove(storage, EXT_PATH("badkb"));
         }
     }
     storage_simply_mkdir(storage, BAD_KB_APP_BASE_FOLDER);
