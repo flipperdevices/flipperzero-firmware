@@ -49,6 +49,7 @@ steps:
       - rm -f artifacts-base/Games/snake.fap
       - rm -f artifacts-base/USB/hid_usb.fap
       - rm -f artifacts-base/Bluetooth/hid_ble.fap
+      - rm -rf artifacts-base/Scripts/
       - cd ..
       - mkdir base_pack_build
       - mv unleashed-firmware/artifacts-base/ base_pack_build
@@ -88,6 +89,7 @@ steps:
       - rm -f artifacts-extra/Games/snake.fap
       - rm -f artifacts-extra/USB/hid_usb.fap
       - rm -f artifacts-extra/Bluetooth/hid_ble.fap
+      - rm -rf artifacts-extra/Scripts/
       - cd ..
       - mkdir extra_pack_build
       - mv unleashed-firmware/artifacts-extra/ extra_pack_build
