@@ -9,11 +9,16 @@ char* _wifi_marauder_get_prefix_from_cmd(const char* command) {
 }
 
 bool _wifi_marauder_is_save_pcaps_enabled(WifiMarauderApp* app) {
-    if(!app->ok_to_save_pcaps) {
-        return false;
-    }
     // If it is a script that contains a sniff function
     if(app->script != NULL) {
+        if(app->script->save_pcap == WifiMarauderScriptBooleanFalse) {
+            return false;
+        }
+        if(app->script->save_pcap == WifiMarauderScriptBooleanUndefined) {
+            if(!app->ok_to_save_pcaps) {
+                return false;
+            }
+        }
         return wifi_marauder_script_has_stage(app->script, WifiMarauderScriptStageTypeSniffRaw) ||
                wifi_marauder_script_has_stage(
                    app->script, WifiMarauderScriptStageTypeSniffBeacon) ||
@@ -23,6 +28,9 @@ bool _wifi_marauder_is_save_pcaps_enabled(WifiMarauderApp* app) {
                wifi_marauder_script_has_stage(
                    app->script, WifiMarauderScriptStageTypeSniffPmkid) ||
                wifi_marauder_script_has_stage(app->script, WifiMarauderScriptStageTypeSniffPwn);
+    }
+    if(!app->ok_to_save_pcaps) {
+        return false;
     }
     // If it is a sniff function
     return app->is_command && app->selected_tx_string &&
@@ -152,12 +160,17 @@ void wifi_marauder_scene_console_output_on_enter(void* context) {
 
         // Send command with newline '\n'
         if(app->selected_tx_string) {
-            wifi_marauder_uart_tx(
-                app->uart, (uint8_t*)(app->selected_tx_string), strlen(app->selected_tx_string));
-            if(app->is_writing_pcap) {
-                wifi_marauder_uart_tx(app->uart, (uint8_t*)(" -serial\n"), strlen(" -serial\n"));
-            } else {
-                wifi_marauder_uart_tx(app->uart, (uint8_t*)("\n"), 1);
+            if(app->script == NULL) {
+                wifi_marauder_uart_tx(
+                    app->uart,
+                    (uint8_t*)(app->selected_tx_string),
+                    strlen(app->selected_tx_string));
+                if(app->is_writing_pcap) {
+                    wifi_marauder_uart_tx(
+                        app->uart, (uint8_t*)(" -serial\n"), strlen(" -serial\n"));
+                } else {
+                    wifi_marauder_uart_tx(app->uart, (uint8_t*)("\n"), 1);
+                }
             }
             if(send_html && the_html) {
                 wifi_marauder_uart_tx(app->uart, the_html, html_size);
