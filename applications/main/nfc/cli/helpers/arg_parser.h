@@ -4,35 +4,29 @@
 #include <stddef.h>
 #include <furi/core/string.h>
 
-typedef enum {
-    ArgParserArgumentTypeBool,
-    ArgParserArgumentTypeUint32,
-    ArgParserArgumentTypeHexArray,
-} ArgParserArgumentType;
-
 typedef struct {
-    ArgParserArgumentType type;
-    union {
-        bool* data_bool;
-        uint32_t* data_uint32;
-        uint8_t* data_array;
-    };
-} ArgParserArgument;
+    const char identifier;
+    const char* access_letters;
+    const char* access_name;
+    const char* value_name;
+    const char* description;
+} ArgParserOptions;
 
 typedef struct ArgParser ArgParser;
 
-ArgParser* arg_parser_alloc();
+ArgParser* arg_parser_alloc(
+    const ArgParserOptions* options,
+    size_t option_count,
+    const FuriString* command);
 
 void arg_parser_free(ArgParser* instance);
 
-void arg_parser_add_argument(
-    ArgParser* instance,
-    char arg_symbol,
-    bool is_optional,
-    ArgParserArgumentType type);
+bool arg_parser_fetch(ArgParser* instance);
 
-void arg_parser_set_mandatory_argument_type(ArgParser* instance, ArgParserArgumentType type);
+char arg_parser_get_identifier(ArgParser* instance);
 
-bool arg_parser_parse(ArgParser* instance, FuriString* str);
+const char* arg_parser_get_value(ArgParser* instance);
 
-const ArgParserArgument* arg_parser_get_next_argument(ArgParser* instance);
+const char* arg_parser_get_error_message(ArgParser* instance);
+
+const char* arg_parser_get_help_message(ArgParser* instance);
