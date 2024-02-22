@@ -23,6 +23,9 @@
  *
  * 7) Once the player on the Game Boy side uses the trade table, a block of data is
  *     transmitted. This starts with 10x PREAMBLE(0xFD) bytes, 10x random bytes (to
+ *
+ *     I missed another 9x fd bytes after rand? State machine below confirms these bytes
+ *
  *     sync the RNG between two devices, unused at this time), and then the 415 trade_block,
  *     struct gets transferred. At the end of this is 3 ending bytes, DF FE 15. And, weirdly,
  *     3 PREAMBLE(0xFD) bytes.
@@ -111,6 +114,7 @@
 #define PKMN_MASTER 0x01
 #define PKMN_SLAVE 0x02
 #define PKMN_CONNECTED 0x60
+#define PKMN_CONNECTED_II 0x61
 #define PKMN_TRADE_ACCEPT 0x62
 #define PKMN_TRADE_REJECT 0x61
 #define PKMN_TABLE_LEAVE 0x6f
@@ -305,16 +309,16 @@ static void trade_draw_callback(Canvas* canvas, void* view_model) {
  */
 static uint8_t getConnectResponse(struct trade_ctx* trade) {
     furi_assert(trade);
-    uint8_t ret;
+    uint8_t ret = trade->in_data;
 
     switch(trade->in_data) {
     case PKMN_CONNECTED:
+    case PKMN_CONNECTED_II:
         with_view_model(
             trade->view,
             struct trade_model * model,
             { model->gameboy_status = GAMEBOY_CONN_TRUE; },
             false);
-        ret = PKMN_CONNECTED;
         break;
     case PKMN_MASTER:
         ret = PKMN_SLAVE;
@@ -361,9 +365,11 @@ static uint8_t getMenuResponse(struct trade_ctx* trade) {
 
     switch(trade->in_data) {
     case PKMN_CONNECTED:
-        response = PKMN_CONNECTED;
+    case PKMN_CONNECTED_II:
+        response = trade->in_data;
         break;
     case PKMN_TRADE_CENTRE:
+    case ITEM_2_HIGHLIGHTED:
         with_view_model(
             trade->view,
             struct trade_model * model,
@@ -441,9 +447,11 @@ static uint8_t getTradeCentreResponse(struct trade_ctx* trade) {
         if(in == SERIAL_PREAMBLE_BYTE) {
             counter++;
             model->gameboy_status = GAMEBOY_WAITING;
+        } else if ((in & 0x70)) {  // 0x70 is mask for trade center, and I think 0x5 is an indication of link speed. XXX: Need to take this in to account and set timeout from it
+	    send = in;
         } else if((in & PKMN_SEL_NUM_MASK) == PKMN_SEL_NUM_MASK) {
             send = PKMN_TABLE_LEAVE;
-        }
+	}
         if(counter == SERIAL_RNS_LENGTH) {
             trade->trade_centre_state = TRADE_RANDOM;
             counter = 0;
@@ -455,7 +463,7 @@ static uint8_t getTradeCentreResponse(struct trade_ctx* trade) {
      * numbers are for synchronizing the PRNG between the two systems,
      * we do not use these numbers at this time.
      *
-     * This waits through the end of the trade block preamble, a total of 20
+     * This waits through the end of the trade block preamble, a total of 19
      * bytes.
      */
     case TRADE_RANDOM:
@@ -555,6 +563,8 @@ static uint8_t getTradeCentreResponse(struct trade_ctx* trade) {
     /* Handle the Game Boy selecting a Pokemon to trade, or leaving the table */
     case TRADE_PENDING:
         /* If the player leaves the trade menu and returns to the room */
+	if (in == 0x20) break; // HACK TODO this is mail header. This should fix flipper getting ahead
+	if (in == 0xFF) break; // HACK TODO this is mail header. This should fix flipper getting ahead
         if(in == PKMN_TABLE_LEAVE) {
             trade->trade_centre_state = TRADE_RESET;
             send = PKMN_TABLE_LEAVE;
