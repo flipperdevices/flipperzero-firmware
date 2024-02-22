@@ -19,7 +19,7 @@ void nfc_magic_scene_magic_info_on_enter(void* context) {
 
     widget_add_icon_element(widget, 84, 22, &I_WarningDolphinFlip_45x42);
     widget_add_string_element(
-        widget, 3, 4, AlignLeft, AlignTop, FontPrimary, "Supported card detected");
+        widget, 3, 4, AlignLeft, AlignTop, FontPrimary, "Magic card detected");
     widget_add_string_element(
         widget,
         3,
@@ -47,14 +47,8 @@ bool nfc_magic_scene_magic_info_on_event(void* context, SceneManagerEvent event)
             if(instance->protocol == NfcMagicProtocolGen1) {
                 scene_manager_next_scene(instance->scene_manager, NfcMagicSceneGen1Menu);
                 consumed = true;
-            } else if(instance->protocol == NfcMagicProtocolGen4) {
+            } else {
                 scene_manager_next_scene(instance->scene_manager, NfcMagicSceneGen4Menu);
-                consumed = true;
-            } else if(instance->protocol == NfcMagicProtocolGen2) {
-                scene_manager_next_scene(instance->scene_manager, NfcMagicSceneGen2Menu);
-                consumed = true;
-            } else if(instance->protocol == NfcMagicProtocolClassic) {
-                scene_manager_next_scene(instance->scene_manager, NfcMagicSceneMfClassicMenu);
                 consumed = true;
             }
         }
