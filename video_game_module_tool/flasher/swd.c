@@ -146,8 +146,6 @@ static uint32_t __attribute__((optimize("-O3"))) swd_rx(uint32_t n_cycles) {
 }
 
 static bool __attribute__((optimize("-O3"))) swd_rx_parity(uint32_t* data, uint32_t n_cycles) {
-    furi_assert(data);
-
     const uint32_t rx_value = swd_rx(n_cycles);
     swd_delay_half_cycle();
 
@@ -196,7 +194,6 @@ void swd_init(void) {
 
 void swd_deinit(void) {
     swd_enter_dormant_state();
-
     furi_hal_gpio_init_simple(&gpio_swclk, GpioModeAnalog);
     furi_hal_gpio_init_simple(&gpio_swdio, GpioModeAnalog);
 }
