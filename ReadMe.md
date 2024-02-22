@@ -34,6 +34,7 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 | DAP Link | ![GPIO Badge] |  | [![Official Badge]](https://lab.flipper.net/apps/dap_link) |
 | SPI Mem Manager | ![GPIO Badge] |  | [![Official Badge]](https://lab.flipper.net/apps/spi_mem_manager) |
 | Signal Generator | ![GPIO Badge] |  | [![Official Badge]](https://lab.flipper.net/apps/signal_generator) |
+| Video Game Module Tool | ![GPIO Badge] | [by gsurkov](https://github.com/flipperdevices/flipperzero-good-faps/pull/127/files) | [![Official Badge]](https://lab.flipper.net/apps/video_game_module_tool) |
 | Mfkey32 | ![NFC Badge] |  | [![Official Badge]](https://lab.flipper.net/apps/mfkey32) |
 | PicoPass | ![NFC Badge] |  | [![Official Badge]](https://lab.flipper.net/apps/picopass) |
 | Nfc Magic | ![NFC Badge] |  | [![Official Badge]](https://lab.flipper.net/apps/nfc_magic) |
@@ -44,6 +45,7 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 | Bluetooth Remote | ![BT Badge] | Renamed, added Mouse `Clicker`/`Jiggler` & `Tikshorts`, Added `PTT`, `Movie` by @hryamzik - Moved back to [firmware repo](https://github.com/DarkFlippers/unleashed-firmware/tree/dev/applications/system) | ![None Badge] |
 | USB Mass Storage | ![USB Badge] | [by hedger & nminaylov](https://github.com/flipperdevices/flipperzero-good-faps) | [![Official Badge]](https://lab.flipper.net/apps/mass_storage) |
 | Snake Game | ![Games Badge] | Moved back to [firmware repo](https://github.com/DarkFlippers/unleashed-firmware/tree/dev/applications/system) | ![None Badge] |
+| Air Arkanoid | ![Games Badge] | [by DrZlo13](https://github.com/flipperdevices/flipperzero-good-faps/pull/141/files) | [![Official Badge]](https://lab.flipper.net/apps/air_arkanoid) |
 | Music Player | ![Media Badge] |  | [![Official Badge]](https://lab.flipper.net/apps/music_player) |
 
 ### Community and Unleashed Apps in default pack:
@@ -155,7 +157,6 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 | Tarot spread | ![Games Badge] | [by pionaiki](https://github.com/pionaiki/fz-tarot) |  | ![None Badge] |
 | Vexed | ![Games Badge] | [by dlvoy](https://github.com/dlvoy/flipper-zero-vexed) |  | ![None Badge] |
 | Paper Plane | ![Games Badge] | [by Larry-the-Pig](https://github.com/Larry-the-Pig/flipper-plane) |  | ![None Badge] |
-| Air Arkanoid | ![Games Badge] | [by DrZlo13](https://github.com/flipperdevices/flipperzero-good-faps/pull/141/files) |  | [![Official Badge]](https://lab.flipper.net/apps/air_arkanoid) |
 | Air Mouse | ![GPIO Badge] | [by ginkage](https://github.com/ginkage/FlippAirMouse/) |  | [![Author Badge]](https://lab.flipper.net/apps/air_mouse) |
 | Plantower PMSx003 sensor reader | ![GPIO Badge] | [by 3cky](https://github.com/3cky/flipperzero-airmon) |  | [![UFW Badge]](https://lab.flipper.net/apps/airmon) |
 | Bar code scanner emulator via COM port | ![GPIO Badge] | [by polarikus](https://github.com/polarikus/flipper-zero_bc_scanner_emulator) |  | ![None Badge] |
@@ -253,7 +254,6 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 | Simple calendar app | ![Tools Badge] | [by Adiras](https://github.com/Adiras/flipperzero-calendar) |  | ![None Badge] |
 | Programmer Calculator | ![Tools Badge] | [by armixz](https://github.com/armixz/Flipper-Zero-Programmer-Calculator) |  | ![None Badge] |
 | Tone Generator | ![Tools Badge] | [by GEMISIS](https://github.com/GEMISIS/tone_gen/) |  | ![None Badge] |
-| Video Game Module Tool | ![Tools Badge] | [by gsurkov](https://github.com/flipperdevices/flipperzero-good-faps/pull/127/files) |  | [![Official Badge]](https://lab.flipper.net/apps/video_game_module_tool) |
 | USB HID Autofire | ![USB Badge] | [by pbek](https://github.com/pbek/usb_hid_autofire) |  | ![None Badge] |
 | USB Consumer Control | ![USB Badge] | [by WithSecureLabs](https://github.com/WithSecureLabs/usb-consumer-control/tree/main) |  | ![None Badge] |
 | HID File Transfer | ![USB Badge] | [by Kavakuo](https://github.com/Kavakuo/HID-File-Transfer) | Get client app in [original repo](https://github.com/Kavakuo/HID-File-Transfer) | ![None Badge] |
