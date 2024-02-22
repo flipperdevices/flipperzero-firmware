@@ -33,6 +33,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-02-21 22:23 EST`
 - Updated: [Bad KB (Modified PR#738 from pengu1ndev - Original from Willy-JL) #739 (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/739)
 - [JS: Add basic storage module API & Mass Storage Virtual Mount improvements (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/34febddeeb6f94aebcbd92ca919c7d50ab361d93)
+- Updated: [Video Game Module Tool v1.2 (By gsurkov)](https://github.com/flipperdevices/flipperzero-good-faps/pull/127) [VGM Tool: Fix crashes #149 (By gsurkov)](https://github.com/flipperdevices/flipperzero-good-faps/pull/149)
 
 <a name="release">
 
@@ -302,7 +303,7 @@ $ ./fbt dolphin_ext
 - [Tic Tac Toe v1.1 (By gotnull)](https://github.com/gotnull/flipperzero-firmware-wPlugins)
 - [Ultimate Tic-Tac-Toe v1.1 (By Racso)](https://github.com/Racso/fzero-apps)
 - [Vexed v1.0.1 (By dlvoy)](https://github.com/dlvoy/flipper-zero-vexed)
-- [Video Game Module Tool v1.1 (By gsurkov)](https://github.com/flipperdevices/flipperzero-good-faps/pull/127)
+- [Video Game Module Tool v1.2 (By gsurkov)](https://github.com/flipperdevices/flipperzero-good-faps/pull/127)
 - [Video Poker v1.2 (By PixlEmly)](https://github.com/PixlEmly/flipperzero-firmware-testing/blob/420/applications/VideoPoker/poker.c)
 - [Yatzee v1.1 (By emfleak)](https://github.com/emfleak/flipperzero-yatzee)
 - [Zero v1.4 (By Racso)](https://github.com/Racso/fzero-apps)
