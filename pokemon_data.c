@@ -430,23 +430,32 @@ uint16_t pokemon_stat_get(PokemonData* pdata, DataStat stat, DataStatSub which) 
         if(gen == GEN_I) val = ((PokemonPartyGenI*)party)->hp_ev;
         if(gen == GEN_II) val = ((PokemonPartyGenII*)party)->hp_ev;
         break;
-    case STAT_ATK_IV:
+    /* NOTE:
+     * IVs are stored in a 16 bit value, split between the 4 nibbles. Multiple
+     * sources agree that most significant to least is attack, defense, speed,
+     * and special. However, there are byte order differences so that puts the
+     * order as speed, special, attack, defense. The following cases are adjusted
+     * for that.
+     */
+    case STAT_SPD_IV:
         if(gen == GEN_I) return (((PokemonPartyGenI*)party)->iv >> 12) & 0x0F;
         if(gen == GEN_II) return (((PokemonPartyGenII*)party)->iv >> 12) & 0x0F;
 	break;
-    case STAT_DEF_IV:
+    case STAT_SPC_IV:
         if(gen == GEN_I) return (((PokemonPartyGenI*)party)->iv >> 8) & 0x0F;
         if(gen == GEN_II) return (((PokemonPartyGenII*)party)->iv >> 8) & 0x0F;
 	break;
-    case STAT_SPD_IV:
+    case STAT_ATK_IV:
         if(gen == GEN_I) return (((PokemonPartyGenI*)party)->iv >> 4) & 0x0F;
         if(gen == GEN_II) return (((PokemonPartyGenII*)party)->iv >> 4) & 0x0F;
 	break;
-    case STAT_SPC_IV:
+    case STAT_DEF_IV:
         if(gen == GEN_I) return ((PokemonPartyGenI*)party)->iv & 0x0F;
         if(gen == GEN_II) return ((PokemonPartyGenII*)party)->iv & 0x0F;
 	break;
     case STAT_HP_IV:
+	/* XXX: I think this needs to be bswapped before the & and >> */
+	/* XXX: This is also horribly wrong? */
         if(gen == GEN_I) return (((PokemonPartyGenI*)party)->iv & 0xAA) >> 4;
         if(gen == GEN_II) return (((PokemonPartyGenII*)party)->iv & 0xAA) >> 4;
 	break;
@@ -456,7 +465,7 @@ uint16_t pokemon_stat_get(PokemonData* pdata, DataStat stat, DataStatSub which) 
 	break;
     case STAT_INDEX:
         if(gen == GEN_I) return ((PokemonPartyGenI*)party)->index;
-        if(gen == GEN_II) return ((PokemonPartyGenII*)party)->index;
+        if(gen == GEN_II) return ((PokemonPartyGenII*)party)->index-1;
 	break;
     /* In Gen I, index is not relative at all to dex num.
      * In Gen II, index is the same as the dex num.
@@ -466,7 +475,7 @@ uint16_t pokemon_stat_get(PokemonData* pdata, DataStat stat, DataStatSub which) 
             val = ((PokemonPartyGenI*)party)->index;
             return table_pokemon_pos_get(pdata->pokemon_table, val);
         }
-        if(gen == GEN_II) return ((PokemonPartyGenII*)party)->index;
+        if(gen == GEN_II) return ((PokemonPartyGenII*)party)->index-1;
         break;
     case STAT_MOVE:
         if(gen == GEN_I) return ((PokemonPartyGenI*)party)->move[which];
@@ -560,11 +569,14 @@ void pokemon_stat_set(PokemonData* pdata, DataStat stat, DataStatSub which, uint
 	 * atk, def, spd, spc
 	 * each taking up 4 bits of 16.
 	 */
-        /* XXX: This may need to be swapped? Not sure */
+        /* This does NOT need to be swapped as the individual IV nibble
+	 * manipulation puts things in gameboy order when in the Party
+	 * data structure.
+	 */
         if(gen == GEN_I) ((PokemonPartyGenI*)party)->iv = val;
         if(gen == GEN_II) ((PokemonPartyGenII*)party)->iv = val;
         break;
-    case STAT_ATK_IV:
+    case STAT_SPD_IV:
         if(gen == GEN_I) {
             ((PokemonPartyGenI*)party)->iv &= ~(0x0F << 12);
             ((PokemonPartyGenI*)party)->iv |= ((val & 0x0F) << 12);
@@ -574,7 +586,7 @@ void pokemon_stat_set(PokemonData* pdata, DataStat stat, DataStatSub which, uint
             ((PokemonPartyGenII*)party)->iv |= ((val & 0x0F) << 12);
         }
 	break;
-    case STAT_DEF_IV:
+    case STAT_SPC_IV:
         if(gen == GEN_I) {
             ((PokemonPartyGenI*)party)->iv &= ~(0x0F << 8);
             ((PokemonPartyGenI*)party)->iv |= ((val & 0x0F) << 8);
@@ -584,7 +596,7 @@ void pokemon_stat_set(PokemonData* pdata, DataStat stat, DataStatSub which, uint
             ((PokemonPartyGenII*)party)->iv |= ((val & 0x0F) << 8);
         }
 	break;
-    case STAT_SPD_IV:
+    case STAT_ATK_IV:
         if(gen == GEN_I) {
             ((PokemonPartyGenI*)party)->iv &= ~(0x0F << 4);
             ((PokemonPartyGenI*)party)->iv |= ((val & 0x0F) << 4);
@@ -594,7 +606,7 @@ void pokemon_stat_set(PokemonData* pdata, DataStat stat, DataStatSub which, uint
             ((PokemonPartyGenII*)party)->iv |= ((val & 0x0F) << 4);
         }
 	break;
-    case STAT_SPC_IV:
+    case STAT_DEF_IV:
         if(gen == GEN_I) {
             ((PokemonPartyGenI*)party)->iv &= ~(0x0F);
             ((PokemonPartyGenI*)party)->iv |= (val & 0x0F);
@@ -629,18 +641,14 @@ void pokemon_stat_set(PokemonData* pdata, DataStat stat, DataStatSub which, uint
             ((TradeBlockGenI*)pdata->trade_block)->party_members[0] = val;
         }
 	if (gen == GEN_II) {
-            ((PokemonPartyGenII*)party)->index = val;
-            ((TradeBlockGenII*)pdata->trade_block)->party_members[0] = val;
+            ((PokemonPartyGenII*)party)->index = val+1;
+            ((TradeBlockGenII*)pdata->trade_block)->party_members[0] = val+1;
         }
         recalc = RECALC_ALL; // Always recalculate everything if we selected a different pokemon
         break;
     case STAT_NUM:
         if (gen == GEN_I) pokemon_stat_set(pdata, STAT_INDEX, NONE, pdata->pokemon_table[val].index);
-	if (gen == GEN_II) {
-            ((PokemonPartyGenII*)party)->index = val;
-            ((TradeBlockGenII*)pdata->trade_block)->party_members[0] = val;
-        }
-        recalc = RECALC_ALL; // Always recalculate everything if we selected a different pokemon
+	if (gen == GEN_II) pokemon_stat_set(pdata, STAT_INDEX, NONE, val);
         break;
     case STAT_OT_ID:
         if(gen == GEN_I) ((PokemonPartyGenI*)party)->ot_id = val_swap;
