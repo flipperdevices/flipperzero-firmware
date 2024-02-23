@@ -202,13 +202,19 @@ static void dab_timer_render_callback(Canvas* const canvas, void* ctx) {
         } else {
             canvas_draw_icon(canvas, 1, 32, &I_cool_flipagotchi);
         }
+#if __has_include(<cfw/cfw.h>)
         canvas_set_font(canvas, FontBatteryPercent);
         canvas_draw_str_aligned(canvas, 117, 11, AlignCenter, AlignCenter, alertTime);
-        canvas_set_font(canvas, FontSecondary);
-        canvas_set_font(canvas, FontBatteryPercent);
         if(plugin_state->time_format == LocaleTimeFormat12h)
             canvas_draw_str_aligned(canvas, 117, 4, AlignCenter, AlignCenter, meridian_string);
         canvas_draw_str_aligned(canvas, 96, 20, AlignCenter, AlignTop, date_string); // DRAW DATE
+#else
+        canvas_set_font(canvas, FontSecondary);
+        canvas_draw_str_aligned(canvas, 118, 12, AlignCenter, AlignCenter, alertTime);
+        if(plugin_state->time_format == LocaleTimeFormat12h)
+            canvas_draw_str_aligned(canvas, 118, 4, AlignCenter, AlignCenter, meridian_string);
+        canvas_draw_str_aligned(canvas, 64, 20, AlignCenter, AlignTop, date_string); // DRAW DATE
+#endif
     } else if(
         plugin_state->faceType == FaceStyleOriginal ||
         plugin_state->faceType == FaceStyleOriginalInverted) {
@@ -239,15 +245,28 @@ static void dab_timer_render_callback(Canvas* const canvas, void* ctx) {
                 canvas, 64, 8, AlignCenter, AlignCenter, time_string); // DRAW TIME
             canvas_draw_str_aligned(
                 canvas, 64, 32, AlignCenter, AlignTop, timer_string); // DRAW TIMER
+#if __has_include(<cfw/cfw.h>)
             canvas_set_font(canvas, FontBatteryPercent);
             if(plugin_state->time_format == LocaleTimeFormat12h)
                 canvas_draw_str_aligned(canvas, 117, 4, AlignCenter, AlignCenter, meridian_string);
             canvas_draw_str_aligned(canvas, 117, 11, AlignCenter, AlignCenter, alertTime);
+#else
+            canvas_set_font(canvas, FontSecondary);
+            if(plugin_state->time_format == LocaleTimeFormat12h)
+                canvas_draw_str_aligned(canvas, 118, 4, AlignCenter, AlignCenter, meridian_string);
+            canvas_draw_str_aligned(canvas, 118, 12, AlignCenter, AlignCenter, alertTime);
+#endif
             canvas_draw_str_aligned(
                 canvas, 64, 20, AlignCenter, AlignTop, date_string); // DRAW DATE
+#if __has_include(<cfw/cfw.h>)
             canvas_set_font(canvas, FontSecondary);
+#endif
         } else {
+#if __has_include(<cfw/cfw.h>)
             if(plugin_state->w_test) canvas_set_font(canvas, FontBatteryPercent);
+#else
+            if(plugin_state->w_test) canvas_set_font(canvas, FontSecondary);
+#endif
             if(plugin_state->w_test && timer_start_timestamp != 0) {
                 uint32_t elapsed_secs = timer_running ? (curr_ts - timer_start_timestamp) :
                                                         timer_stopped_seconds;
@@ -263,6 +282,7 @@ static void dab_timer_render_callback(Canvas* const canvas, void* ctx) {
                     &I_EviSmile2_18x21};
                 static const Icon* const count_anim3[4] = {
                     &I_frame_01, &I_frame_02, &I_frame_03, &I_frame_02};
+#if __has_include(<cfw/cfw.h>)
                 canvas_draw_icon(canvas, -5, 15, count_anim[elapsed_secs_img]);
                 canvas_draw_icon(canvas, 90, 0, count_anim2[elapsed_secs_img2]);
                 canvas_draw_icon(canvas, 110, 5, count_anim3[elapsed_secs_img2]);
@@ -274,10 +294,32 @@ static void dab_timer_render_callback(Canvas* const canvas, void* ctx) {
             canvas_set_font(canvas, FontBatteryPercent);
             if(plugin_state->time_format == LocaleTimeFormat12h)
                 canvas_draw_str_aligned(canvas, 69, 15, AlignCenter, AlignCenter, meridian_string);
+#else
+                canvas_draw_icon(canvas, -6, 14, count_anim[elapsed_secs_img]);
+                canvas_draw_icon(canvas, 55, -2, count_anim2[elapsed_secs_img2]);
+                canvas_draw_icon(canvas, 40, 4, count_anim3[elapsed_secs_img2]);
+                canvas_draw_str_aligned(
+                    canvas, 97, 38, AlignCenter, AlignCenter, timer_string); // DRAW TIMER
+                canvas_draw_str_aligned(
+                    canvas, 97, 26, AlignCenter, AlignCenter, time_string); // DRAW TIME
+                if(plugin_state->time_format == LocaleTimeFormat12h)
+                    canvas_draw_str_aligned(
+                        canvas, 97, 14, AlignCenter, AlignCenter, meridian_string);
+            } else {
+                canvas_draw_str_aligned(
+                    canvas, 64, 26, AlignCenter, AlignCenter, time_string); // DRAW TIME
+                canvas_set_font(canvas, FontSecondary);
+                if(plugin_state->time_format == LocaleTimeFormat12h)
+                    canvas_draw_str_aligned(
+                        canvas, 100, 14, AlignCenter, AlignCenter, meridian_string);
+            }
+#endif
             if(!plugin_state->w_test)
                 canvas_draw_str_aligned(
                     canvas, 64, 38, AlignCenter, AlignTop, date_string); // DRAW DATE
+#if __has_include(<cfw/cfw.h>)
             canvas_set_font(canvas, FontSecondary);
+#endif
         }
     } else if(
         plugin_state->faceType == FaceStyleOriginalSmall ||
@@ -299,7 +341,11 @@ static void dab_timer_render_callback(Canvas* const canvas, void* ctx) {
             }
             canvas_set_color(canvas, ColorBlack);
         }
+#if __has_include(<cfw/cfw.h>)
         canvas_set_font(canvas, FontBatteryPercent);
+#else
+        canvas_set_font(canvas, FontSecondary);
+#endif
         if(timer_start_timestamp != 0) {
             int32_t elapsed_secs = timer_running ? (curr_ts - timer_start_timestamp) :
                                                    timer_stopped_seconds;
@@ -308,6 +354,7 @@ static void dab_timer_render_callback(Canvas* const canvas, void* ctx) {
                 canvas, 64, 31, AlignCenter, AlignTop, timer_string); // DRAW TIMER
         }
         canvas_draw_str_aligned(
+#if __has_include(<cfw/cfw.h>)
             canvas, 64, 26, AlignCenter, AlignCenter, time_string); // DRAW TIME
         canvas_set_font(canvas, FontBatteryPercent);
         if(plugin_state->time_format == LocaleTimeFormat12h)
@@ -316,6 +363,14 @@ static void dab_timer_render_callback(Canvas* const canvas, void* ctx) {
             canvas_draw_str_aligned(
                 canvas, 64, 38, AlignCenter, AlignTop, date_string); // DRAW DATE
         canvas_set_font(canvas, FontSecondary);
+#else
+            canvas, 64, 24, AlignCenter, AlignCenter, time_string); // DRAW TIME
+        if(plugin_state->time_format == LocaleTimeFormat12h)
+            canvas_draw_str_aligned(canvas, 94, 24, AlignCenter, AlignCenter, meridian_string);
+        if(!plugin_state->w_test)
+            canvas_draw_str_aligned(
+                canvas, 64, 40, AlignCenter, AlignTop, date_string); // DRAW DATE
+#endif
     } else if(
         plugin_state->faceType == FaceStyleCircle ||
         plugin_state->faceType == FaceStyleCircleInverted) {
@@ -332,10 +387,10 @@ static void dab_timer_render_callback(Canvas* const canvas, void* ctx) {
             }
             canvas_set_color(canvas, ColorBlack);
         }
-        int8_t width = canvas_width(canvas);
-        int8_t height = canvas_height(canvas);
+        int8_t width = 124;
+        int8_t height = 64;
         Vector2 clock_center = {
-            .x = 28 + width / 2,
+            .x = 30 + width / 2,
             .y = height / 2,
         };
         uint8_t radius = MIN(width, height) / 2 - 2;
@@ -385,7 +440,9 @@ static void dab_timer_render_callback(Canvas* const canvas, void* ctx) {
             }
             canvas_set_color(canvas, ColorBlack);
         }
+#if __has_include(<cfw/cfw.h>)
         canvas_set_font(canvas, FontBatteryPercent);
+#endif
         if(timer_start_timestamp != 0) {
             uint32_t elapsed_secs = timer_running ? (curr_ts - timer_start_timestamp) :
                                                     timer_stopped_seconds;
