@@ -1473,6 +1473,8 @@ static bool mine_sweeper_game_screen_view_play_input_callback(InputEvent* event,
 
                 } else if (is_win_condition_triggered) {
 
+                    dolphin_deed(DolphinDeedPluginGameWin);
+
                     mine_sweeper_win_effect(instance);
 
                     view_set_draw_callback(instance->view, mine_sweeper_game_screen_view_end_draw_callback);
