@@ -14,10 +14,12 @@ static Vector2 angle_to_vector2(float angle_in_degrees, uint8_t distance, Vector
     return vec;
 }
 
+#if __has_include(<cfw/cfw.h>)
 static void dab_timer_dumbmode_changed(DesktopSettings* settings) {
     settings->is_dumbmode = !settings->is_dumbmode;
     DESKTOP_SETTINGS_SAVE(settings);
 }
+#endif
 
 void dab_timer_render_binary_face(
     Canvas* const canvas,
@@ -415,7 +417,11 @@ static void dab_timer_render_callback(Canvas* const canvas, void* ctx) {
     if(plugin_state->faceType != FaceStyleCircle && plugin_state->faceType != FaceStyleBinary &&
        plugin_state->faceType != FaceStyleCircleInverted &&
        plugin_state->faceType != FaceStyleBinaryInverted) {
+#if __has_include(<cfw/cfw.h>)
         if(!plugin_state->desktop_settings->is_dumbmode && !plugin_state->w_test) {
+#else
+        if(!plugin_state->w_test) {
+#endif
             if(timer_running) {
                 elements_button_center(canvas, "Stop");
             } else {
@@ -435,7 +441,11 @@ static void dab_timer_render_callback(Canvas* const canvas, void* ctx) {
                 elements_button_right(canvas, "S:Cont");
             }
         }
+#if __has_include(<cfw/cfw.h>)
         if(plugin_state->w_test && plugin_state->desktop_settings->is_dumbmode) {
+#else
+        if(plugin_state->w_test) {
+#endif
             canvas_draw_icon(canvas, 0, 0, &I_GameModeIcon_11x8);
         }
     }
@@ -445,7 +455,9 @@ static void dab_timer_state_init(DabTimerState* const plugin_state) {
     memset(plugin_state, 0, sizeof(DabTimerState));
     plugin_state->alert_time = 80;
     plugin_state->date_format = locale_get_date_format();
+#if __has_include(<cfw/cfw.h>)
     plugin_state->desktop_settings = malloc(sizeof(DesktopSettings));
+#endif
     plugin_state->curEmotiveFace = 0;
     plugin_state->codeSequence = 0;
     plugin_state->faceType = FaceStylePwn;
@@ -548,7 +560,9 @@ int32_t dab_timer_app(void* p) {
                         if(plugin_state->codeSequence == 5 || plugin_state->codeSequence == 7) {
                             plugin_state->codeSequence++;
                             if(plugin_state->codeSequence == 8) {
+#if __has_include(<cfw/cfw.h>)
                                 dab_timer_dumbmode_changed(plugin_state->desktop_settings);
+#endif
                                 plugin_state->w_test = true; // OH HEY NOW LETS GAIN EXP & MORE FUN
                             }
                         } else {
@@ -627,9 +641,11 @@ int32_t dab_timer_app(void* p) {
                     }
                     if(plugin_state->codeSequence == 10) {
                         plugin_state->codeSequence = 0;
+#if __has_include(<cfw/cfw.h>)
                         plugin_state->desktop_settings->is_dumbmode =
                             true; // MAKE SURE IT'S ON SO IT GETS TURNED OFF
                         dab_timer_dumbmode_changed(plugin_state->desktop_settings);
+#endif
                         if(plugin_state->songSelect == SoundAlertMario ||
                            plugin_state->songSelect == SoundAlertGoGoPoRa ||
                            plugin_state->songSelect == SoundAlertCont ||
@@ -638,7 +654,11 @@ int32_t dab_timer_app(void* p) {
                             notification_message(notification, &sequence_rainbow);
                             notification_message(notification, &sequence_rainbow);
                         }
+#if __has_include(<cfw/cfw.h>)
                         dolphin_deed(getRandomDeed());
+#else
+                        dolphin_deed(DolphinDeedBadUsbPlayScript);
+#endif
                     }
                 } else if(event.input.type == InputTypeLong) {
                     if(event.input.key == InputKeyLeft) {
@@ -675,7 +695,11 @@ int32_t dab_timer_app(void* p) {
                             if(plugin_state->lastexp_timestamp + 10 <= curr_ts &&
                                plugin_state->w_test) {
                                 plugin_state->lastexp_timestamp = curr_ts;
+#if __has_include(<cfw/cfw.h>)
                                 dolphin_deed(getRandomDeed());
+#else
+                                dolphin_deed(DolphinDeedBadUsbPlayScript);
+#endif
                             }
                             notification_message(notification, &dab_timer_alert_pr1);
                         }
@@ -697,7 +721,11 @@ int32_t dab_timer_app(void* p) {
                             if(plugin_state->lastexp_timestamp + 10 <= curr_ts &&
                                plugin_state->w_test) {
                                 plugin_state->lastexp_timestamp = curr_ts;
+#if __has_include(<cfw/cfw.h>)
                                 dolphin_deed(getRandomDeed());
+#else
+                                dolphin_deed(DolphinDeedBadUsbPlayScript);
+#endif
                             }
                             notification_message(notification, &dab_timer_alert_mario1);
                         }
@@ -715,7 +743,11 @@ int32_t dab_timer_app(void* p) {
                             if(plugin_state->lastexp_timestamp + 10 <= curr_ts &&
                                plugin_state->w_test) {
                                 plugin_state->lastexp_timestamp = curr_ts;
+#if __has_include(<cfw/cfw.h>)
                                 dolphin_deed(getRandomDeed());
+#else
+                                dolphin_deed(DolphinDeedBadUsbPlayScript);
+#endif
                             }
                             notification_message(notification, &dab_timer_alert_silent);
                             notification_message(notification, &sequence_rainbow);
