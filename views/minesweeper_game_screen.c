@@ -203,7 +203,7 @@ static void setup_board(MineSweeperGameScreen* instance) {
     MineSweeperGameScreenTileType tiles[MINESWEEPER_BOARD_MAX_TILES];
     memset(&tiles, MineSweeperGameScreenTileZero, sizeof(tiles));
 
-    // Randomly place tiles except in the corners to help guarantee solvability
+    // Randomly place mines except in the corners to help guarantee solvability
     for (uint16_t i = 0; i < num_mines; i++) {
 
         uint16_t rand_pos;
@@ -1373,34 +1373,12 @@ static bool mine_sweeper_game_screen_view_end_input_callback(InputEvent* event, 
                 // After restart flagged is triggered this should also trigger and restart the game
 
                 mine_sweeper_led_reset(instance->context);
-
-                mine_sweeper_game_screen_reset_clock(instance);
-                view_set_draw_callback(
-                        instance->view,
-                        mine_sweeper_game_screen_view_play_draw_callback);
-                view_set_input_callback(
-                        instance->view,
-                        mine_sweeper_game_screen_view_play_input_callback);
-
-                // Here we are going to generate a valid map for the player 
-                bool is_valid_board = false;
-
-                size_t memsz = sizeof(MineSweeperTile) * MINESWEEPER_BOARD_MAX_TILES;
-
-                do {
-                    setup_board(instance);
-
-                    memset(board_t, 0, memsz);
-                    memcpy(board_t, model->board, sizeof(MineSweeperTile) * (model->board_width * model->board_height));
-
-                    is_valid_board = check_board_with_verifier(
-                                                    board_t,
-                                                    model->board_width,
-                                                    model->board_height,
-                                                    model->mines_left);
                 
-
-                } while (model->ensure_solvable_board && !is_valid_board);
+                mine_sweeper_game_screen_reset(instance,
+                                               model->board_width,
+                                               model->board_height,
+                                               model->board_difficulty,
+                                               model->ensure_solvable_board);
 
                 consumed = true;
 
@@ -1571,42 +1549,7 @@ MineSweeperGameScreen* mine_sweeper_game_screen_alloc(uint8_t width, uint8_t hei
         true
     );
 
-    // Reset the clock - This will set the start time at the allocation of the game screen
-    // but this is a public api as well and can be called in a scene for more accurate start times
-    mine_sweeper_game_screen_reset_clock(mine_sweeper_game_screen);
-
-    // We need to initize board width and height before setup
-    mine_sweeper_game_screen_set_board_information(mine_sweeper_game_screen, width, height, difficulty, ensure_solvable);
-
-    // Here we are going to generate a valid map for the player 
-    bool is_valid_board = false;
-    size_t memsz = sizeof(MineSweeperTile) * MINESWEEPER_BOARD_MAX_TILES;
-
-    do {
-        setup_board(mine_sweeper_game_screen);
-
-        uint16_t num_mines = 1;
-
-        uint16_t board_width = 16; //default values
-        uint16_t board_height = 7; //default values
-
-        with_view_model(
-            mine_sweeper_game_screen->view,
-            MineSweeperGameScreenModel * model,
-            {
-                num_mines = model->mines_left;
-                board_width = model->board_width;
-                board_height = model->board_height;
-
-                memset(board_t, 0, memsz);
-                memcpy(board_t, model->board, sizeof(MineSweeperTile) * (board_width * board_height));
-            },
-            true
-        );
-    
-        is_valid_board = check_board_with_verifier(board_t, board_width, board_height, num_mines);
-
-    } while (ensure_solvable && !is_valid_board);
+    mine_sweeper_game_screen_reset(mine_sweeper_game_screen, width, height, difficulty, ensure_solvable);
 
     return mine_sweeper_game_screen;
 }
@@ -1634,15 +1577,8 @@ void mine_sweeper_game_screen_free(MineSweeperGameScreen* instance) {
 void mine_sweeper_game_screen_reset(MineSweeperGameScreen* instance, uint8_t width, uint8_t height, uint8_t difficulty, bool ensure_solvable) {
     furi_assert(instance);
     
-    instance->input_callback = NULL;
-    
-    // Reset led
-    mine_sweeper_led_reset(instance->context);
-    
     // We need to initize board width and height before setup
     mine_sweeper_game_screen_set_board_information(instance, width, height, difficulty, ensure_solvable);
-
-    mine_sweeper_game_screen_reset_clock(instance);
 
     // Here we are going to generate a valid map for the player 
     bool is_valid_board = false;
@@ -1670,9 +1606,14 @@ void mine_sweeper_game_screen_reset(MineSweeperGameScreen* instance, uint8_t wid
             true
         );
     
-        is_valid_board = check_board_with_verifier(board_t, board_width, board_height, num_mines);
+        if (ensure_solvable) is_valid_board = check_board_with_verifier(board_t, board_width, board_height, num_mines);
 
     } while (ensure_solvable && !is_valid_board);
+
+    view_set_draw_callback(instance->view, mine_sweeper_game_screen_view_play_draw_callback);
+    view_set_input_callback(instance->view, mine_sweeper_game_screen_view_play_input_callback);
+
+    mine_sweeper_game_screen_reset_clock(instance);
 
 }
 
