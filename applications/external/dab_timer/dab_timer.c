@@ -473,7 +473,9 @@ static void dab_timer_state_init(DabTimerState* const plugin_state) {
 void dab_timer_free(DabTimerState* plugin_state) {
     furi_record_close(RECORD_GUI);
     furi_record_close(RECORD_NOTIFICATION);
+#if __has_include(<cfw/cfw.h>)
     free(plugin_state->desktop_settings);
+#endif
     furi_message_queue_free(plugin_state->event_queue);
     furi_mutex_free(plugin_state->mutex);
     free(plugin_state);
@@ -514,7 +516,9 @@ int32_t dab_timer_app(void* p) {
         free(plugin_state);
         return 255;
     }
+#if __has_include(<cfw/cfw.h>)
     DESKTOP_SETTINGS_LOAD(plugin_state->desktop_settings);
+#endif
     // Set system callbacks
     ViewPort* view_port = view_port_alloc();
     view_port_draw_callback_set(view_port, dab_timer_render_callback, plugin_state);
@@ -598,7 +602,9 @@ int32_t dab_timer_app(void* p) {
                             plugin_state->codeSequence++;
                         } else {
                             plugin_state->codeSequence = 0;
+#if __has_include(<cfw/cfw.h>)
                             if(!plugin_state->desktop_settings->is_dumbmode) {
+#endif
                                 if(plugin_state->songSelect == SoundAlertMario ||
                                    plugin_state->songSelect == SoundAlertGoGoPoRa ||
                                    plugin_state->songSelect == SoundAlertCont ||
@@ -623,7 +629,9 @@ int32_t dab_timer_app(void* p) {
                                     }
                                 }
                                 plugin_state->timer_running = !plugin_state->timer_running;
+#if __has_include(<cfw/cfw.h>)
                             }
+#endif
                         }
                         break;
                     case InputKeyBack:
