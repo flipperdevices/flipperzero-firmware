@@ -36,8 +36,8 @@ void usb_uart_tx(void* context, uint8_t* data, size_t len)
     furi_string_cat_str(app->text_box_store, out);
     size_t l = furi_string_size(app->text_box_store);
     // Trim if necessary
-    if(l > 64)
-        furi_string_right(app->text_box_store, 64 - l);
+    if(l > 128)
+        furi_string_right(app->text_box_store, l - 128);
     furi_check(furi_mutex_release(app->text_box_mutex) == FuriStatusOk);
     view_dispatcher_send_custom_event(app->view_dispatcher, SerialCustomEventTextUpdate);
 
@@ -60,14 +60,14 @@ void dmcomm_tx(void* context)
         &out,
         63,
         0);
-    FURI_LOG_I(TAG, "DMComm Data: %s", out);
+    //FURI_LOG_I(TAG, "DMComm Data: %s", out);
 
     furi_check(furi_mutex_acquire(app->text_box_mutex, FuriWaitForever) == FuriStatusOk);
     furi_string_cat_str(app->text_box_store, out);
     size_t len = furi_string_size(app->text_box_store);
     // Trim if necessary
-    if(len > 64)
-        furi_string_right(app->text_box_store, 64 - len);
+    if(len > 128)
+        furi_string_right(app->text_box_store, len - 128);
     furi_check(furi_mutex_release(app->text_box_mutex) == FuriStatusOk);
     view_dispatcher_send_custom_event(app->view_dispatcher, SerialCustomEventTextUpdate);
 
@@ -87,6 +87,7 @@ void fcom_serial_scene_on_enter(void* context) {
     furi_string_push_back(app->text_box_store, '\n');
 
     text_box_set_text(app->text_box, furi_string_get_cstr(app->text_box_store));
+    text_box_set_focus(app->text_box, TextBoxFocusEnd);
 
     // Initialize USB UART
     scene_usb_uart = malloc(sizeof(SceneUsbUartBridge));
