@@ -1283,7 +1283,7 @@ static void mine_sweeper_game_screen_view_play_draw_callback(Canvas* canvas, voi
     furi_string_printf(
             model->info_str,
             "X:%03hhd",
-            model->curr_pos.x_abs);
+            model->curr_pos.y_abs);
 
     canvas_draw_str_aligned(
             canvas,
@@ -1297,7 +1297,7 @@ static void mine_sweeper_game_screen_view_play_draw_callback(Canvas* canvas, voi
     furi_string_printf(
             model->info_str,
             "Y:%03hhd",
-            model->curr_pos.y_abs);
+            model->curr_pos.x_abs);
 
     canvas_draw_str_aligned(
             canvas,
