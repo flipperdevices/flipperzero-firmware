@@ -8,6 +8,12 @@ I will use this repository for my Flipper Zero projects.  The various README.md 
 Feel free to reach out to me at Discord with any questions or leave them in the [issues section](https://github.com/jamisonderek/flipper-zero-tutorials/issues) for this project.
 
 
+## Video Game Module
+### air_labyrinth
+[game](./vgm/apps/air_labyrinth/README.md) - This is a game where you control a ball through a maze.  The game uses the accelerometer in the Video Game Module to control the ball.  For best experience, it is recommended to connect the VGM to the HDMI input on a TV.  The game is also displayed on the Flipper Zero's screen.
+
+NOTE: This game uses the game `engine`, so you must recursively clone the `flipper-zero-tutorials` repository to get the `engine` submodule, or download the [https://github.com/flipperdevices/flipperzero-game-engine](https://github.com/flipperdevices/flipperzero-game-engine) into a folder called `./vmg/apps/air_labyrinth/engine`.
+
 ## YouTube
 ### videos
 [video index](./youtube/README.md) - This is a list of my various YouTube video tutorials.
