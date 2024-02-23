@@ -1,0 +1,302 @@
+Security+1.0
+
+
+Filetype: Flipper SubGhz RAW File
+Version: 1
+Frequency: 315000000
+Preset: FuriHalSubGhzPresetOok650Async
+Protocol: RAW
+RAW_Data: -59500 500 -1500 500 -1000 1000 -1500 500 -500 1500 -1500 500 -500 1500 -1500 500 -1000 1000 -1500 500 -1500 500 -1500 500 -1000 1000 -1500 500 -500 1500 -1500 500 -1500 500 -1500 500 -1000 1000 -1500 500 -1500 500 -58000
+RAW_Data: 1500 -1500 500 -500 1500 -1500 500 -1000 1000 -1500 500 -1500 500 -1500 500 -1000 1000 -1500 500 -500 1500 -1000 1000 -1000 1000 -1500 500 -500 1500 -500 1500 -500 1500 -1000 1000 -500 1500 -1000 1000 -500 1500
+*Repeat above 10 times.
+
+The data is a series of digits between 0..2:
+0: -1500 500
+1: -1000 1000
+2: -500 1500
+_: -50K+ xxx
+
+Packets…
+_01020201000102000100
+_02010001021102221212
+
+
+Rolling [Count] is every other digit (base 3), then reverse the bits...
+ v v v v v v v v v v  
+_01020201000102000100
+_02010001021102221212
+ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^
+
+00000000000000010211
+
+(((((0*3+1) * 3 + 0) * 3 + 2) * 3 + 1) * 3 + 1) = 103 
+103   = 00000000 00000000 00000000 01100111b
+Reverse 11100110 00000000 00000000 00000000b = 0xE6000000  [Count]
+
+Digits in acc from both.
+                    
+_01020201000102000100  
+_02010001021102221212
+
+Acc adds digit from rolling or decoded fixed.
+Decoded fixed digit is "(n*3 + digit - acc) % 3"
+Acc clears between packets.
+Extract fix requires an accumulator of all previous digits.
+
+_01020201000102000100  
+
+acc=0+0 (digit 0)
+(0*3 + 1 - 0) = 1     fixed:1    acc=0+1=1
+acc=1+0 (digit 0)
+(0*3 + 2 - 1) = 1     fixed:11    acc=1+1=2
+acc=2+0 (digit 0)
+(0*3 + 2 - 2) = 0     fixed:110    acc=2+0=2
+acc=2+0 (digit 0)
+(1*3 + 1 - 2) = 2     fixed:1102    acc=2+2=4
+acc=4+0 (digit 0)
+(2*3 + 0 - 4) = 2     fixed:11022    acc=4+2=6
+acc=6+0 (digit 0)
+(2*3 + 1 - 6) = 1     fixed:110221    acc=6+1=7
+acc=7+0 (digit 0)
+(2*3 + 2 - 7) = 1     fixed:1102211    acc=7+1=8
+acc=8+0 (digit 0)
+(3*3 + 0 - 8) = 1     fixed:11022111    acc=8+1=9
+acc=9+0 (digit 0)
+(3*3 + 1 - 9) = 1     fixed:110221111    acc=9+1=10
+acc=9+0 (digit 0)
+(4*3 + 0 - 10) = 2    fixed:1102211112    acc=10+2=12
+acc=0 (end of packet 1)
+
+_02010001021102221212
+
+acc=0+0 (digit 0)
+(0*3 + 2 - 0) = 2     fixed:1102211112_2    acc=0+2=2
+acc=2+0 (digit 0)
+(1*3 + 1 - 2) = 2     fixed:1102211112_22    acc=2+2=4
+acc=4+0 (digit 0)
+(2*3 + 0 - 4) = 2     fixed:1102211112_222    acc=4+2=6
+acc=6+0 (digit 0)
+(2*3 + 1 - 6) = 1     fixed:1102211112_2221    acc=6+1=7
+acc=7+0 (digit 0)
+(2*3 + 2 - 7) = 1     fixed:1102211112_22211    acc=7+1=8
+acc=8+1 (digit 1)
+(3*3 + 1 - 9) = 1     fixed:1102211112_222111    acc=9+1=10
+acc=10+0 (digit 0)
+(3*3 + 2 - 10) = 1     fixed:1102211112_2221111    acc=10+1=11
+acc=11+2 (digit 2)
+(4*3 + 2 - 13) = 1     fixed:1102211112_22211111    acc=13+1=14
+acc=14+1 (digit 1)
+(5*3 + 2 - 15) = 2     fixed:1102211112_222111112    acc=15+2=17
+acc=17+1 (digit 1)
+(6*3 + 2 - 18) = 2     fixed:1102211112_2221111122    acc=15+2=17
+
+1102211112 2221111122  (0x63A4A76D or 1671735149 decimal)
+
+0x63A4A76D/27 decimal = 0x3B0C3D4
+1671735149 % 27 decimal = 17 decimal. = 122 base3 (1*9+2*3+2).
+
+Serial/Count…
+[Fixed]  Serial = 0x63A4A76D   (sn=0x3B0C3D4, Id1=1, Id0=2, Btn=2)
+[Rolling] Count = 0xE6000000
+
+
+Filetype: Flipper SubGhz Key File
+Version: 1
+Frequency: 315000000
+Preset: FuriHalSubGhzPresetOok650Async
+Protocol: Security+ 1.0
+Bit: 42
+Key: 63 A4 A7 6D E6 00 00 00
+
+
+
+Security+2.0
+=============
+
+Filetype: Flipper SubGhz RAW File
+Version: 1
+Frequency: 315000000
+Preset: FuriHalSubGhzPresetOok650Async
+Protocol: RAW
+RAW_Data: 250 -250 250 -250 250 -250 250 -250 250 -250 250 -250 250 -250 250 -250 250 -250 250 -250 250 -250 250 -250 250 -250 250 -250 250 -250 250 -500 250 -250 250 -250 250 -250 500 -250 250 -250 250 -250 250 -250 250 -250 250 -250 250 -250 250 -250 250 -500 500 -500 250 -250 500 -500 250 -250 250 -250 250 -250 250 -250 500 -500 250 -250 250 -250 250 -250 250 -250 250 -250 500 -500 500 -250 250 -250 250 -500 500 -500 500 -500 250 -250 500 -250 250 -500 500 -250 250 -68000
+RAW_Data: 250 -250 250 -250 250 -250 250 -250 250 -250 250 -250 250 -250 250 -250 250 -250 250 -250 250 -250 250 -250 250 -250 250 -250 250 -250 250 -500 250 -250 250 -250 250 -250 500 -500 500 -250 250 -500 500 -500 500 -250 250 -500 500 -250 250 -500 500 -500 250 -250 500 -500 250 -250 500 -500 250 -250 500 -250 250 -250 250 -500 250 -250 500 -250 250 -500 250 -250 250 -250 250 -250 250 -250 500 -500 250 -250 250 -250 250 -250 250 -250 250 -250 500 -68000
+
+Repeats 10 times.
+
+Convert into 250 groups...  (positive is 1, negative is 0)
+250=1  500=11  -250=0   -500=00
+
+Bitstream:
+101010101010101010101010101010100101010110101010101010101001100101100101010101100101010101011001101010011001100101101001101 0... (272 zeros)
+101010101010101010101010101010100101010110011010011001101001101001100101100101100101101010010110100101010101100101010101011 0... (272 zeros)
+
+Group into pairs:
+10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 01 01 01 01 10 10 10 10 10 10 10 10 10 01 10 01 01 10 01 01 01 01 01 10 01 01 01 01 01 01 10 01 10 10 10 01 10 01 10 01 01 10 10 01 10 10 ...
+
+10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 01 01 01 01 10 01 10 10 01 10 01 10 10 01 10 10 01 10 01 01 10 01 01 10 01 01 10 10 10 01 01 10 10 01 01 01 01 01 10 01 01 01 01 01 01 10 ...
+
+Second digit is value (explain examples... 10 = 0, 01 = 1)
+
+00000000000000001111000000000101101111101111110100010101100100
+3C016FBF4564   [Pk1]
+
+00000000000000001111010010100100101101101100011001111101111110
+3D292DB19F7E   [Pk2]
+
+Filetype: Flipper SubGhz Key File
+Version: 1
+Frequency: 315000000
+Preset: FuriHalSubGhzPresetOok650Async
+Protocol: Security+ 2.0
+Bit: 62
+Key: 00 00 3D 29 2D B1 9F 7E
+Secplus_packet_1: 00 00 3C 01 6F BF 45 64
+
+             PK1: 00 00 3C 01 6F BF 45 64
+             PK2: 00 00 3D 29 2D B1 9F 7E
+
+secplus_packet_1:  
+00000000000000001111000000000101101111101111110100010101100100 [Pk1]  3C016FBF4564
+                                  9  8  7  6  5  4  3  2  1  0 [p2]
+                                 9  8  7  6  5  4  3  2  1  0  [p1]
+                                9  8  7  6  5  4  3  2  1  0   [p0]
+                            3210                               [invert]
+                        3210                                   [order]
+
+     base3 digits...  p2[1:0] p2[3:2] p2[5:4] p2[7:6] p2[9:8]  [roll 8..4]
+base3 digits... invert[1:0] invert[3:2] order[1:0] order[3:2]  [roll 3..0]
+fixed1 = p0*1024+p1
+
+invert method: subghz_protocol_secplus_v2_mix_invet
+order method:  subghz_protocol_secplus_v2_mix_order_decode
+
+Repeat above for 2nd packet.
+
+reorder rolling digits (rp2[8],rp1[8],rp2[4:7],rp1[4:7],rp2[0:3],rp1[0:3]) 
+rolling digits from base3 to binary.
+Count = reverse(rolling 28-bit)
+Btn = fixed1 [20:12]
+Sn = (fixed1 [19:0],fixed2)
+
+
+Can you show me the "25 steps" to decode a Security+2.0 signal.
+
+
+
+3C016FBF4564  001111000000000101101111101111110100010101100100 [Pk1]
+                                  9  8  7  6  5  4  3  2  1  0 [p2]
+               p2 = 1111000100b = 964
+
+3C016FBF4564  001111000000000101101111101111110100010101100100 [Pk1]
+                                 9  8  7  6  5  4  3  2  1  0  [p1]
+               p1 = 0101101000b = 360
+
+3C016FBF4564  001111000000000101101111101111110100010101100100 [Pk1]
+                                9  8  7  6  5  4  3  2  1  0   [p0]
+               p0 = 1111110111b = 1015
+
+
+3C016FBF4564  001111000000000101101111101111110100010101100100 [Pk1]
+                            3210                               [invert]
+            invert method = 0101b = 0x5
+
+3C016FBF4564  001111000000000101101111101111110100010101100100 [Pk1]
+                        3210                                   [order]
+         order method = 0000b = 0x0
+
+
+invert method 0x5 in subghz_protocol_secplus_v2_mix_invet
+method 0x5 : invert p0 and p2 bits. subghz_protocol_secplus_v2_mix_invet
+
+               p0 = 1111110111b
+                    0000001000b = 8 decimal
+               p1 = 0101101000b 
+                    0101101000b = 360 decimal
+               p2 = 1111000100b 
+                    0000111011b = 59 decimal
+
+order method 0x0:  subghz_protocol_secplus_v2_mix_order_decode
+method 0x0 : swap p1 and p2   subghz_protocol_secplus_v2_mix_order_decode
+
+               p0 = 0000001000b = 8
+               p1 = 0000111011b = 59 decimal
+               p2 = 0101101000b = 360 decimal
+                    9876543210
+                   
+            base3 digits... p2[1:0] p2[3:2] p2[5:4] p2[7:6] p2[9:8]  [roll 8..4]
+                            02211xxxx
+
+            base3 digits... invert[1:0] invert[3:2] order[1:0] order[3:2]  [roll 3..0]
+                                 1100
+
+            rollH1 [8..0] = 022111100                
+                   
+fixed1 = p0*1024+p1    8*1024+59     8192+59 = 8251
+
+
+
+3D292DB19F7E  001111010010100100101101101100011001111101111110 [Pk2]
+                                9  8  7  6  5  4  3  2  1  0   [p0]
+               p0 = 1111001111b = 975
+
+3D292DB19F7E  001111010010100100101101101100011001111101111110 [Pk2]
+                                 9  8  7  6  5  4  3  2  1  0  [p1]
+               p1 = 0000101011b = 43
+
+3D292DB19F7E  001111010010100100101101101100011001111101111110 [Pk2]
+                                  9  8  7  6  5  4  3  2  1  0 [p2]
+               p2 = 1110111110b = 958
+
+3D292DB19F7E  001111010010100100101101101100011001111101111110 [Pk2]
+                            3210 invert
+            invert method = 0100b = 0x4
+
+3D292DB19F7E  001111010010100100101101101100011001111101111110 [Pk2]
+                        3210     order
+         order method = 1010b = 0xA
+
+invert method 0x4: subghz_protocol_secplus_v2_mix_invet
+method 0x4 : invert all.
+
+               p0 = 1111001111b 
+                    0000110000 = 48 decimal
+               p1 = 0000101011b 
+                    1111010100 = 980 decimal
+               p2 = 1110111110b
+                    0001000001 = 65 decimal
+
+order method 0xa:  subghz_protocol_secplus_v2_mix_order_decode
+method 0xa : no reodering
+
+               p0 = 0000110000 = 48 decimal
+               p1 = 1111010100 = 980 decimal
+               p2 = 0001000001 = 65 decimal
+                    9876543210
+
+            base3 digits... p2[1:0] p2[3:2] p2[5:4] p2[7:6] p2[9:8]  [roll 8..4]
+                            10010xxxx
+
+            base3 digits... invert[1:0] invert[3:2] order[1:0] order[3:2]  [roll 3..0]
+                                 0122
+
+            rollH2 [8..0] = 100100122
+
+fixed2 = p0*1024+p1   48*1024+980   = 50132
+
+fixed2 = 50132 decimal = 1100001111010100b
+fixed1 = 8251 decimal =  0010000000111011b
+
+rollH1 [8..0] =          022111100                
+rollH2 [8..0] =          100100122
+
+reorder rolling digits (rH2[8],rH1[8],rH2[4:7],rH1[4:7],rH2[0:3],rH1[0:3]) 
+            reverse... 100100112222100011 (base3)
+                     = 134217895 decimal
+                     = 1000000000000000000010100111 binary
+            reverse... 1110010100000000000000000001 binary
+                       0xE500001
+
+Count = 0xE500001
+Btn = fixed1 [15:12]                 0010b = 2 dec
+Sn = (fixed1 [11:0] fixed2[15:0])    000000111011_1100001111010100b = 0x3BC3D4
+
