@@ -112,7 +112,7 @@ static bool check_board_with_verifier(
         const uint8_t board_height,
         uint16_t total_mines);
 
-static inline void bfs_tile_clear_verifier(
+static void bfs_tile_clear_verifier(
         MineSweeperTile* board,
         const uint8_t board_width,
         const uint8_t board_height,
@@ -155,7 +155,7 @@ static void mine_sweeper_oob_effect(void* context);
 static void mine_sweeper_lose_effect(void* context);
 static void mine_sweeper_win_effect(void* context);
 
-static inline bool handle_player_move(
+static bool handle_player_move(
         MineSweeperGameScreen* instance,
         MineSweeperGameScreenModel* model,
         InputEvent* event,
@@ -443,7 +443,7 @@ static bool check_board_with_verifier(
  * but also pushes new edges to the deq passed in. There is a separate function used
  * for the bfs_tile_clear used on the user click
  */
-static inline void bfs_tile_clear_verifier(
+static void bfs_tile_clear_verifier(
         MineSweeperTile* board,
         const uint8_t board_width,
         const uint8_t board_height,
@@ -533,7 +533,7 @@ static inline void bfs_tile_clear_verifier(
 /**
  * This is a bfs_tile clear used in the input callbacks to clear the board on user input
  */
-static inline uint16_t bfs_tile_clear(
+static uint16_t bfs_tile_clear(
         MineSweeperTile* board,
         const uint8_t board_width,
         const uint8_t board_height,
@@ -885,7 +885,7 @@ static void mine_sweeper_win_effect(void* context) {
 
 }
 
-static inline bool handle_player_move(MineSweeperGameScreen* instance, MineSweeperGameScreenModel* model, InputEvent* event, bool is_game_ended) {
+static bool handle_player_move(MineSweeperGameScreen* instance, MineSweeperGameScreenModel* model, InputEvent* event, bool is_game_ended) {
 
     bool consumed = false;
     bool is_outside_boundary;
@@ -985,13 +985,15 @@ static int8_t handle_short_ok_input(MineSweeperGameScreen* instance, MineSweeper
     MineSweeperGameScreenTileState state = model->board[curr_pos_1d].tile_state;
     MineSweeperGameScreenTileType type = model->board[curr_pos_1d].tile_type;
 
-    // LOSE/WIN CONDITION OR TILE CLEAR
     if (state == MineSweeperGameScreenTileStateUncleared && type == MineSweeperGameScreenTileMine) {
 
+        // If the user short presses OK on a mine they lose
         is_lose_condition_triggered = true;
         model->board[curr_pos_1d].tile_state = MineSweeperGameScreenTileStateCleared;
 
     } else if (state == MineSweeperGameScreenTileStateUncleared) {
+        
+        // The user can win if the last tiles are cleared and all flags are correctly set
 
         uint16_t tiles_cleared = bfs_tile_clear(
                                     model->board,
@@ -1002,21 +1004,20 @@ static int8_t handle_short_ok_input(MineSweeperGameScreen* instance, MineSweeper
 
         model->tiles_left -= tiles_cleared;
 
-        // Check win condition
         if (model->mines_left == 0 && model->flags_left == 0 && model->tiles_left == 0) {
             is_win_condition_triggered = true;
-        } else {
-            // if not met play ok effect
-            mine_sweeper_short_ok_effect(instance);
         }
     }
 
     if (is_lose_condition_triggered) {
+        mine_sweeper_lose_effect(instance);
         return -1;
     } else if (is_win_condition_triggered) {
+        mine_sweeper_win_effect(instance);
         return 1;
     }
     
+    mine_sweeper_short_ok_effect(instance);
     return 0;
 }
 
@@ -1043,15 +1044,19 @@ static int8_t handle_long_ok_input(MineSweeperGameScreen* instance, MineSweeperG
     // with the lose effect and crash
     if (!is_win_condition_triggered && !is_lose_condition_triggered &&
         type != MineSweeperGameScreenTileZero) {
-        mine_sweeper_long_ok_effect(instance);
     }
 
     if (is_lose_condition_triggered) {
+        mine_sweeper_lose_effect(instance);
         return -1;
     } else if (is_win_condition_triggered) {
+        mine_sweeper_win_effect(instance);
         return 1;
     }
-    
+
+    if (type != MineSweeperGameScreenTileZero)
+        mine_sweeper_long_ok_effect(instance);
+
     return 0;
 }
 
@@ -1075,12 +1080,10 @@ static bool handle_long_back_flag_input(MineSweeperGameScreen* instance, MineSwe
         model->flags_left--;
     }
 
-    // WIN CONDITION
     // This can be a win condition where the non-mine tiles are cleared and they place the last flag
     if (model->flags_left == 0 && model->mines_left == 0 && model->tiles_left == 0) {
         is_win_condition_triggered = true;
         mine_sweeper_win_effect(instance);
-        mine_sweeper_led_set_rgb(instance->context, 0, 0, 255);
     } else {
         mine_sweeper_flag_effect(instance);
     }
@@ -1415,45 +1418,31 @@ static bool mine_sweeper_game_screen_view_play_input_callback(InputEvent* event,
 
             } else if ( event->key == InputKeyOk) { // Attempt to Clear Space !! THIS CAN BE A LOSE CONDITION
 
-                bool is_lose_condition_triggered = false;
-                bool is_win_condition_triggered = false;
-
+                // ret : -1 = lose, 1 = win, 0 = neutral
+                int8_t input_result = 0;
 
                 if (!model->is_holding_down_button && event->type == InputTypePress) { 
                     
-                    //ret : -1 lose condition, 1 win condition, 0 neutral 
-                    int8_t ret = handle_short_ok_input(instance, model);
+                    input_result = handle_short_ok_input(instance, model);
 
-                    if (ret != 0) {
-                        (ret == -1) ? (is_lose_condition_triggered = true) : (is_win_condition_triggered = true);
-                    }
-
-                // LOSE/WIN CONDITION OR CLEAR SURROUNDING
                 } else if (!model->is_holding_down_button && event->type == InputTypeLong) {
-                    
-                    //ret : -1 lose condition, 1 win condition, 0 neutral 
-                    int8_t ret = handle_long_ok_input(instance, model);
 
-                    if (ret != 0) {
-                        (ret == -1) ? (is_lose_condition_triggered = true) : (is_win_condition_triggered = true);
-                    }
+                    // LOSE/WIN CONDITION OR CLEAR SURROUNDING
+                    input_result = handle_long_ok_input(instance, model);
 
                 } 
 
                 // Check  if win or lose condition was triggered on OK press
-                if (is_lose_condition_triggered) {
+                if (input_result == -1) {
 
                     model->has_lost_game = true;
-                    mine_sweeper_lose_effect(instance);
 
                     view_set_draw_callback(instance->view, mine_sweeper_game_screen_view_end_draw_callback);
                     view_set_input_callback(instance->view, mine_sweeper_game_screen_view_end_input_callback);
 
-                } else if (is_win_condition_triggered) {
+                } else if (input_result == 1) {
 
                     dolphin_deed(DolphinDeedPluginGameWin);
-
-                    mine_sweeper_win_effect(instance);
 
                     view_set_draw_callback(instance->view, mine_sweeper_game_screen_view_end_draw_callback);
                     view_set_input_callback(instance->view, mine_sweeper_game_screen_view_end_input_callback);
@@ -1462,7 +1451,7 @@ static bool mine_sweeper_game_screen_view_play_input_callback(InputEvent* event,
 
                 consumed = true;
 
-            } else if (event->key == InputKeyBack) { // We can use holding the back button for either
+            } else if (event->key == InputKeyBack) {       // We can use holding the back button for either
                                                            // Setting a flag on a covered tile, or moving to
                                                            // the next closest covered tile on when on a uncovered
                                                            // tile
@@ -1471,22 +1460,21 @@ static bool mine_sweeper_game_screen_view_play_input_callback(InputEvent* event,
                                                                                                 // short presses should take
                                                                                                 // us to the menu
 
-                    bool is_win_condition_triggered = false;
 
                     uint16_t curr_pos_1d = model->curr_pos.x_abs * model->board_width + model->curr_pos.y_abs;
                     MineSweeperGameScreenTileState state = model->board[curr_pos_1d].tile_state;
                     
-
                     if (state == MineSweeperGameScreenTileStateCleared) {
 
-                        // BFS to closest uncovered position
+                        // BFS to set user position to a close uncovered position
                         bfs_to_closest_tile(instance, model);
 
                         model->is_holding_down_button = true;
 
-
-                    // Flag or Unflag tile and check win condition 
                     } else if (!model->is_holding_down_button && state != MineSweeperGameScreenTileStateCleared) { 
+
+                        // Flag or Unflag tile and check win condition 
+                        bool is_win_condition_triggered = false;
 
                         is_win_condition_triggered = handle_long_back_flag_input(instance, model); 
                         
@@ -1494,6 +1482,8 @@ static bool mine_sweeper_game_screen_view_play_input_callback(InputEvent* event,
 
                         if (is_win_condition_triggered) {
 
+                            dolphin_deed(DolphinDeedPluginGameWin);
+                            
                             view_set_draw_callback(instance->view, mine_sweeper_game_screen_view_end_draw_callback);
                             view_set_input_callback(instance->view, mine_sweeper_game_screen_view_end_input_callback);
 
@@ -1505,8 +1495,7 @@ static bool mine_sweeper_game_screen_view_play_input_callback(InputEvent* event,
 
                 }
             } else if (event->type == InputTypePress || event->type == InputTypeRepeat) { // Finally handle move
-
-                        consumed = handle_player_move(instance, model, event, false);
+                consumed = handle_player_move(instance, model, event, false);
             }
         },
         true
