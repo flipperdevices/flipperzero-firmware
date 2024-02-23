@@ -12,6 +12,7 @@
 - I have made some changes to file names and accepted some PRs that were open.
 - Also gave it a more descriptive application.fam file.
 - [Fixed to compile on 0.94.1 (By RogueMaster)](https://github.com/RogueMaster/flipperzero-evil-portal/commit/85df877fc6841db1d67adf3d0d4e822412da468f)
+- [Fixed to compile on OFW + Unleashed (By RogueMaster)](https://github.com/RogueMaster/flipperzero-evil-portal/commit/7a01dc9e88f9979a432b43fb742b4fe849c6357b)
 
 # Flipper Zero Evil Portal
 
