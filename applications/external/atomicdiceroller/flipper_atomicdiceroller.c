@@ -189,6 +189,7 @@ int32_t flipper_atomicdiceroller_app() {
     view_port_input_callback_set(view_port, input_callback, event_queue);
 
     furi_hal_gpio_add_int_callback(&gpio_ext_pa7, gpiocallback, event_queue);
+    furi_hal_gpio_enable_int_callback(&gpio_ext_pa7);
 
     Gui* gui = furi_record_open(RECORD_GUI);
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
