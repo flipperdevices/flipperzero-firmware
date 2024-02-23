@@ -13,6 +13,7 @@
 #include <input/input.h>
 #include <furi.h>
 #include <furi_hal.h>
+#include <dolphin/dolphin.h>
 
 #include "minesweeper_redux_icons.h"
 #include "minesweeper_game_screen_i.h"
