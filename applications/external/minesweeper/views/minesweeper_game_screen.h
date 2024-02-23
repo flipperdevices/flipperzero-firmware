@@ -6,6 +6,9 @@
 #ifndef MINEWEEPER_GAME_SCREEN_H
 #define MINEWEEPER_GAME_SCREEN_H
 
+#include <math.h>
+#include <limits.h>
+
 #include <gui/view.h>
 
 #include <gui/elements.h>
@@ -13,6 +16,7 @@
 #include <input/input.h>
 #include <furi.h>
 #include <furi_hal.h>
+#include <dolphin/dolphin.h>
 
 #include "minesweeper_redux_icons.h"
 #include "minesweeper_game_screen_i.h"

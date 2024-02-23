@@ -69,6 +69,8 @@ bool minesweeper_scene_confirmation_screen_on_event(void* context, SceneManagerE
             // to the temp one on the next on enter
             app->is_settings_changed = false;
 
+            mine_sweeper_led_reset(app);
+
             // Reset the game board
             mine_sweeper_game_screen_reset(
                 app->game_screen,
