@@ -134,8 +134,10 @@ bool entity_collider_circle_circle(Entity* entity, Entity* other) {
     Vector pos1 = entity_collider_position_get(entity);
     Vector pos2 = entity_collider_position_get(other);
 
-    Vector delta = vector_sub(pos1, pos2);
-    return vector_length(delta) < entity->collider->circle.radius + other->collider->circle.radius;
+    float dx = pos1.x - pos2.x;
+    float dy = pos1.y - pos2.y;
+    float distance = sqrtf(dx * dx + dy * dy);
+    return distance < entity->collider->circle.radius + other->collider->circle.radius;
 }
 
 bool entity_collider_rect_rect(Entity* entity, Entity* other) {
