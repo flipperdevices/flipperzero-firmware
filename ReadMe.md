@@ -36,8 +36,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - Reverted: [NFC Magic v1.5 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966) Gen 2 changes were corruptiung cards.
 - Updated: [YuriCable Pro Max v0.3 (By arag0re)](https://github.com/arag0re/fz-yuricable-pro-max)
 - Updated: [Evil Portal v0.5 (By bigbrodude6119)](https://github.com/bigbrodude6119/flipper-zero-evil-portal)
-- Updated: [Dab Timer v1.9.1 (By RogueMaster)](https://github.com/RogueMaster/flipperzero-dabtimer)
 - Updated: [Dice (RM) Including SEX/WAR/8BALL/WEED/DRINK DICE v2.2 (By RogueMaster)](https://github.com/RogueMaster/flipperzero-dice)
+- Updated: [Dab Timer v1.9.2 (By RogueMaster)](https://github.com/RogueMaster/flipperzero-dabtimer) - Fixed circular clock face & works with OFW!
 
 <a name="release">
 

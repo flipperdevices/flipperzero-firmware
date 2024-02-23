@@ -12,7 +12,7 @@ App(
     resources="examples",
     order=0,
     fap_icon="icon.png",
-    fap_category="assets",
+    fap_category="Main",
 )
 
 App(
