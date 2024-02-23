@@ -481,6 +481,7 @@ static void bfs_tile_clear_verifier(
         
         // If in visited set
         if (point_set_cget(set, pos) != NULL || point_set_cget(*visited, pos) != NULL) {
+            continue;
         } 
         
         // If it is cleared continue
@@ -494,7 +495,7 @@ static void bfs_tile_clear_verifier(
         // Add point to visited set
         point_set_push(set, pos);
 
-        //When we hit a potential edge
+        // When we hit a potential edge
         if (board[curr_pos_1d].tile_type != MineSweeperGameScreenTileZero) {
 
             // We can push this edge into edges if it is not in visited, as it is a new edge
@@ -573,19 +574,19 @@ static uint16_t bfs_tile_clear(
             continue;
         } 
         
-        // If it is not uncleared continue
-        if (board[curr_pos_1d].tile_state != MineSweeperGameScreenTileStateUncleared) {
+        // If it is cleared continue
+        if (board[curr_pos_1d].tile_state == MineSweeperGameScreenTileStateCleared) {
             continue;
         }
         
         // Else set tile to cleared
         board[curr_pos_1d].tile_state = MineSweeperGameScreenTileStateCleared;
         
-        // Increment total number of cleared tiles
-        ret++;
-
         // Add point to visited set
         point_set_push(set, pos);
+
+        // Increment total number of cleared tiles
+        ret++;
 
         // If it is not a zero tile continue
         if (board[curr_pos_1d].tile_type != MineSweeperGameScreenTileZero) {
