@@ -15,7 +15,7 @@ static FelicaError felica_poller_process_error(NfcError error) {
     }
 }
 
-static FelicaError felica_poller_frame_exchange(
+FelicaError felica_poller_frame_exchange(
     FelicaPoller* instance,
     const BitBuffer* tx_buffer,
     BitBuffer* rx_buffer,

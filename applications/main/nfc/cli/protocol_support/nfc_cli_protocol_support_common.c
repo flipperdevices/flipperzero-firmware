@@ -68,6 +68,7 @@ static NfcCommand
         } else if(rx_message.type == NfcCliWorkerMessageTypeActivate) {
             NfcCliProtocolRequest activate_request = {
                 .type = NfcCliProtocolRequestTypeActivate,
+                .data.nfc = instance->nfc,
                 .data.poller = event.poller,
                 .data.activation_info = instance->formatted_data,
             };
@@ -86,6 +87,7 @@ static NfcCommand
                 .type = NfcCliProtocolRequestTypeFrameExchange,
                 .data =
                     {
+                        .nfc = instance->nfc,
                         .poller = event.poller,
                         .frame_exchange =
                             {

@@ -17,6 +17,8 @@ static Iso14443_3bError nfc_cli_iso14443_3b_process_nfc_error(NfcError error) {
         ret = Iso14443_3bErrorColResFailed;
         break;
     }
+
+    return ret;
 }
 
 static NfcCliPollerError nfc_cli_iso14443_3b_process_error(Iso14443_3bError error) {
@@ -65,7 +67,10 @@ static void iso14443_3b_request_handler(NfcCliProtocolRequest* request) {
                 poller, tx_data->tx_data, request->data.frame_exchange.rx_data);
         } else {
             NfcError nfc_error = nfc_poller_trx(
-                poller, tx_data->tx_data, request->data.frame_exchange.rx_data, tx_data->timeout);
+                request->data.nfc,
+                tx_data->tx_data,
+                request->data.frame_exchange.rx_data,
+                tx_data->timeout);
             error = nfc_cli_iso14443_3b_process_nfc_error(nfc_error);
         }
 

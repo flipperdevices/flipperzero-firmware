@@ -26,6 +26,7 @@ typedef struct {
 } NfcCliProtocolRequestFrameExchangeData;
 
 typedef struct {
+    Nfc* nfc;
     NfcGenericInstance* poller;
     NfcCliPollerError error;
     union {
