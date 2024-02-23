@@ -38,6 +38,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Evil Portal v0.5 (By bigbrodude6119)](https://github.com/bigbrodude6119/flipper-zero-evil-portal)
 - Updated: [Dice (RM) Including SEX/WAR/8BALL/WEED/DRINK DICE v2.2 (By RogueMaster)](https://github.com/RogueMaster/flipperzero-dice)
 - Updated: [Dab Timer v1.9.2 (By RogueMaster)](https://github.com/RogueMaster/flipperzero-dabtimer) - Fixed circular clock face & works with OFW!
+- Updated: [WiFi (Marauder) v7.0 (By 0xchocolate & tcpassos)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) `Req: ESP32 WITH MARAUDER FLASHED` Now using Evil Portal assets.
 
 <a name="release">
 
