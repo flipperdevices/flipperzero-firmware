@@ -142,6 +142,8 @@ int32_t minesweeper_app(void* p) {
     MineSweeperApp* app = app_alloc();
     FURI_LOG_I(TAG, "Mine Sweeper app allocated with size : %d", sizeof(*app));
 
+    dolphin_deed(DolphinDeedPluginGameStart);
+
     // This will be the initial scene on app startup
     scene_manager_next_scene(app->scene_manager, MineSweeperSceneStartScreen);
 
