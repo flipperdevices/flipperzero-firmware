@@ -70,7 +70,7 @@ int32_t nfc_playlist_emulation_task(void* context) {
 
          if (strlen(file_path) <= 1) {continue;}
 
-         if (nfc_playlist->settings.emulate_delay > 0 && file_position > 0) {
+         if (nfc_playlist->settings.emulate_delay > 0 && file_position != 0) {
             popup_set_header(nfc_playlist->popup, "Delaying", 64, 10, AlignCenter, AlignTop);
             start_blink(nfc_playlist, NfcPlaylistLedState_Error);
             int time_counter_delay_ms = (options_emulate_delay[nfc_playlist->settings.emulate_delay]*1000);
@@ -138,6 +138,7 @@ int32_t nfc_playlist_emulation_task(void* context) {
             nfc_playlist_worker_stop(nfc_playlist->nfc_playlist_worker);
             nfc_playlist_worker_clear_nfc_data(nfc_playlist->nfc_playlist_worker);
          }
+         free(file_path);
       }
       popup_reset(nfc_playlist->popup);
       popup_set_header(nfc_playlist->popup, EmulationState == NfcPlaylistEmulationState_Canceled ? "Emulation stopped" : "Emulation finished", 64, 10, AlignCenter, AlignTop);
