@@ -333,6 +333,7 @@ void nfc_cli_protocol_support_common_poll_handler(
         nfc_poller_stop(instance->poller);
     } while(false);
 
+    arg_parser_free(parser);
     nfc_cli_poller_context_free(instance);
     for(NfcCliPollCmdDataArray_it(iter, cmd_arr); !NfcCliPollCmdDataArray_end_p(iter);
         NfcCliPollCmdDataArray_next(iter)) {
@@ -420,6 +421,36 @@ void nfc_cli_protocol_support_common_start_poller_handle_activate(
     fflush(stdout);
 }
 
+static const ArgParserOptions nfc_cli_protocol_support_common_start_poller_poll_options[] = {
+    {
+        .identifier = 'c',
+        .access_letters = "c",
+        .access_name = NULL,
+        .value_name = NULL,
+        .description = "Append CRC",
+    },
+    {
+        .identifier = 'b',
+        .access_letters = "b",
+        .access_name = "bits",
+        .value_name = "BITS",
+        .description = "Bits in last byte",
+    },
+    {
+        .identifier = 't',
+        .access_letters = "t",
+        .access_name = "timeout",
+        .value_name = "TIMEOUT",
+        .description = "Timeout in fc",
+    },
+    {
+        .identifier = 'h',
+        .access_letters = "h",
+        .access_name = "help",
+        .description = "Shows the command help",
+    },
+};
+
 void nfc_cli_protocol_support_common_start_poller_handle_poll(
     FuriString* cmd,
     NfcCliPollerContext* instance) {
@@ -427,30 +458,82 @@ void nfc_cli_protocol_support_common_start_poller_handle_poll(
 
     NfcCliPollCmdData poll_cmd_data = {
         .tx_data = bit_buffer_alloc(NFC_CLI_PROTOCOL_SUPPORT_MAX_BUFFER_SIZE),
-        .append_crc = true,
+        .append_crc = false,
         .timeout = 200000,
     };
+    uint32_t bits_in_last_byte = 8;
 
+    ArgParser* parser = arg_parser_alloc(
+        nfc_cli_protocol_support_common_start_poller_poll_options,
+        COUNT_OF(nfc_cli_protocol_support_common_start_poller_poll_options),
+        cmd);
+
+    bool read_success = true;
     do {
-        // TODO parse params here
-        size_t cmd_ascii_len = args_get_first_word_length(cmd);
-        if((cmd_ascii_len % 2) != 0) {
-            printf("Incorrect data length: %d\r\n", cmd_ascii_len);
+        while(arg_parser_fetch(parser) && read_success) {
+            switch(arg_parser_get_identifier(parser)) {
+            case 'b':
+                if(sscanf(arg_parser_get_value(parser), "%ld", &bits_in_last_byte) != 1) {
+                    read_success = false;
+                    break;
+                }
+                if((bits_in_last_byte == 0) || (bits_in_last_byte > 8)) {
+                    printf("Bits must be in range [1..7]");
+                    read_success = false;
+                    break;
+                }
+                break;
+            case 'c':
+                poll_cmd_data.append_crc = true;
+                break;
+            case 't':
+                if(sscanf(arg_parser_get_value(parser), "%ld", &poll_cmd_data.timeout) != 1) {
+                    read_success = false;
+                }
+                break;
+            case 'h':
+                printf("Usage: poll\r\n");
+                arg_parser_get_help_message(parser, tmp_str);
+                printf("%s\r\n", furi_string_get_cstr(tmp_str));
+                break;
+            case '?':
+                arg_parser_get_error_message(parser, tmp_str);
+                printf("%s\r\n", furi_string_get_cstr(tmp_str));
+                read_success = false;
+                break;
+            }
+        }
+        if(!read_success) break;
+
+        const char* additional_args = arg_parser_get_next_argument(parser);
+        if(additional_args == NULL) {
+            read_success = false;
             break;
         }
-        if(cmd_ascii_len == 0) break;
 
-        if(!args_read_string_and_trim(cmd, tmp_str)) {
-            printf("Failed to read data\r\n");
+        size_t cmd_ascii_len = strlen(additional_args);
+        if(((cmd_ascii_len % 2) != 0) || (cmd_ascii_len == 0)) {
+            printf("Incorrect data length %d in argument: %s\r\n", cmd_ascii_len, additional_args);
+            read_success = false;
             break;
         }
 
-        if(!args_read_hex_bytes(tmp_str, instance->buffer, cmd_ascii_len / 2)) {
+        // TODO Make lib function
+        for(size_t i = 0; i < cmd_ascii_len / 2; i++) {
+            if(!args_char_to_hex(
+                   additional_args[i * 2], additional_args[i * 2 + 1], &(instance->buffer[i]))) {
+                read_success = false;
+                break;
+            }
+        }
+        if(!read_success) {
             printf("Failed to read hex bytes\r\n");
             break;
         }
 
         bit_buffer_copy_bytes(poll_cmd_data.tx_data, instance->buffer, cmd_ascii_len / 2);
+        size_t total_bits = (cmd_ascii_len / 2) * 8 - (8 - bits_in_last_byte);
+        bit_buffer_set_size(poll_cmd_data.tx_data, total_bits);
 
         printf("\r\nTx:");
         for(size_t i = 0; i < bit_buffer_get_size_bytes(poll_cmd_data.tx_data); i++) {
