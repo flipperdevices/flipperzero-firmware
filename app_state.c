@@ -131,7 +131,7 @@ void app_free(App* app) {
     view_dispatcher_free(app->view_dispatcher);
 
     notification_message(app->notification, &sequence_reset_rgb);
-    furi_thread_flags_wait(0, FuriFlagWaitAny, 300);
+    //furi_thread_flags_wait(0, FuriFlagWaitAny, 300);
 
     furi_record_close(RECORD_NOTIFICATION);
     app->notification = NULL;

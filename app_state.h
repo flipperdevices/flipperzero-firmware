@@ -6,10 +6,11 @@
 #include "dmcomm_link.h"
 
 #define MAX_FILENAME_LEN 64
+#define MAX_DIGIROM_LEN 128
 
 typedef struct AppState {
-    char current_code[MAX_FILENAME_LEN]; // What the user loaded
-    char result_code[MAX_FILENAME_LEN]; // What dmcomm sent back
+    char current_code[MAX_DIGIROM_LEN]; // What the user loaded
+    char result_code[MAX_DIGIROM_LEN]; // What dmcomm sent back
     char file_name_tmp[MAX_FILENAME_LEN]; // Filename to save codes as
     bool waitForCode;
     int codeLen;

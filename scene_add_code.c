@@ -39,7 +39,7 @@ void fcom_add_code_scene_on_enter(void* context) {
                                    add_code_text_input_callback,
                                    app,
                                    app->state->result_code,
-                                   MAX_FILENAME_LEN,
+                                   MAX_DIGIROM_LEN,
                                    true);
     view_dispatcher_switch_to_view(app->view_dispatcher, FcomKeyboardView);
 }

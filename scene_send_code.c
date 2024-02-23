@@ -159,9 +159,9 @@ void send_code_dialog_callback(DialogExResult result, void* context) {
             return;
         // save code
         if(strlen(app->state->current_code) > 2 && app->state->current_code[1] == '1')
-            strncpy(app->state->result_code, furi_string_get_cstr(app->state->r_code), MAX_FILENAME_LEN);
+            strncpy(app->state->result_code, furi_string_get_cstr(app->state->r_code), MAX_DIGIROM_LEN);
         else
-            strncpy(app->state->result_code, furi_string_get_cstr(app->state->s_code), MAX_FILENAME_LEN);
+            strncpy(app->state->result_code, furi_string_get_cstr(app->state->s_code), MAX_DIGIROM_LEN);
         app->state->save_code_return_scene = FcomSendCodeScene;
         scene_manager_next_scene(app->scene_manager, FcomSaveCodeScene);
     }
@@ -225,7 +225,7 @@ void fcom_send_code_scene_on_exit(void* context) {
     App* app = context;
 
     // Clear out dmcomm
-    setSerialOutputCallback(NULL);
+    set_serial_callback(NULL);
     dmcomm_sendcommand(app, "0\n");
     app->state->waitForCode = false;
 }

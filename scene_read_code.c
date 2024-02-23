@@ -14,13 +14,14 @@ TODO: Need to test this... It may not actually work as-is
 #include "flipper.h"
 #include "app_state.h"
 #include "scenes.h"
+#include "dmcomm-lib/fcom.h"
 #include "scene_read_code.h"
 #include <furi_hal_cortex.h>
 
 /*
 Callback from dmcomm thread with serial results
 */
-void scb(void* context)
+void processReadInput(void* context)
 {
     furi_assert(context);
     App* app = context;
@@ -112,6 +113,14 @@ void scb(void* context)
     FURI_LOG_I(TAG, "done");
 }
 
+void read_code_cb(void* context)
+{
+    // This needs to be pretty short or it will delay comms
+    furi_assert(context);
+    App* app = context;
+    view_dispatcher_send_custom_event(app->view_dispatcher, SerialInputAvailable);
+}
+
 void read_code_dialog_callback(DialogExResult result, void* context) {
     furi_assert(context);
     App* app = context;
@@ -120,13 +129,13 @@ void read_code_dialog_callback(DialogExResult result, void* context) {
     if(result == DialogExResultRight) {
         FURI_LOG_I(TAG, "DialogExResultRight");
         // copy r_code
-        strncpy(app->state->result_code, furi_string_get_cstr(app->state->r_code), MAX_FILENAME_LEN);
+        strncpy(app->state->result_code, furi_string_get_cstr(app->state->r_code), MAX_DIGIROM_LEN);
         scene_manager_next_scene(app->scene_manager, FcomSaveCodeScene);
     }
     if(result == DialogExResultLeft) {
         FURI_LOG_I(TAG, "DialogExResultLeft");
         // copy s_code
-        strncpy(app->state->result_code, furi_string_get_cstr(app->state->s_code), MAX_FILENAME_LEN);
+        strncpy(app->state->result_code, furi_string_get_cstr(app->state->s_code), MAX_DIGIROM_LEN);
         scene_manager_next_scene(app->scene_manager, FcomSaveCodeScene);
     }
 }
@@ -148,22 +157,32 @@ void fcom_read_code_scene_on_enter(void* context) {
 
     view_dispatcher_switch_to_view(app->view_dispatcher, FcomReadCodeView);
 
-    setSerialOutputCallback(scb);
-
+    app->state->waitForCode = true;
+    set_serial_callback(read_code_cb);
     furi_string_reset(app->state->r_code);
     furi_string_reset(app->state->s_code);
-
-    app->state->waitForCode = true;
 
     dmcomm_sendcommand(app, app->state->current_code);
 }
 
 bool fcom_read_code_scene_on_event(void* context, SceneManagerEvent event) {
     FURI_LOG_I(TAG, "fcom_read_code_scene_on_event");
-    UNUSED(context);
-    UNUSED(event);
-
-    return false; //consumed event
+    App* app = context;
+    bool consumed = false;
+    switch(event.type) {
+        case SceneManagerEventTypeCustom:
+            switch(event.event) {
+                case SerialInputAvailable:
+                    processReadInput(app);
+                    consumed = true;
+                    break;
+            }
+            break;
+        default: // eg. SceneManagerEventTypeBack, SceneManagerEventTypeTick
+            consumed = false;
+            break;
+    }
+    return consumed;
 }
 
 void fcom_read_code_scene_on_exit(void* context) {
@@ -172,7 +191,7 @@ void fcom_read_code_scene_on_exit(void* context) {
     App* app = context;
     UNUSED(app);
 
-    setSerialOutputCallback(NULL);
+    set_serial_callback(NULL);
     dmcomm_sendcommand(app, "0\n");
     app->state->waitForCode = false;
 }

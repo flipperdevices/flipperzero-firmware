@@ -55,17 +55,17 @@ bool fcom_listen_menu_scene_on_event(void* context, SceneManagerEvent event) {
     case SceneManagerEventTypeCustom:
         switch(event.event) {
         case ListenMenuSceneSelectionEvent2Prong:
-            strncpy(app->state->current_code, "V0\n", MAX_FILENAME_LEN);
+            strncpy(app->state->current_code, "V0\n", MAX_DIGIROM_LEN);
             scene_manager_next_scene(app->scene_manager, FcomReadCodeScene);
             consumed = true;
             break;
         case ListenMenuSceneSelectionEvent3Prong:
-            strncpy(app->state->current_code, "X0\n", MAX_FILENAME_LEN);
+            strncpy(app->state->current_code, "X0\n", MAX_DIGIROM_LEN);
             scene_manager_next_scene(app->scene_manager, FcomReadCodeScene);
             consumed = true;
             break;
         case ListenMenuSceneSelectionEventXrosMini:
-            strncpy(app->state->current_code, "Y0\n", MAX_FILENAME_LEN);
+            strncpy(app->state->current_code, "Y0\n", MAX_DIGIROM_LEN);
             scene_manager_next_scene(app->scene_manager, FcomReadCodeScene);
             consumed = true;
             break;

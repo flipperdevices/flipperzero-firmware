@@ -36,7 +36,7 @@ static void file_browser_callback(void* context) {
     flipper_format_file_close(file);
     flipper_format_free(file);
 
-    strncpy(app->state->current_code, furi_string_get_cstr(string_value), MAX_FILENAME_LEN);
+    strncpy(app->state->current_code, furi_string_get_cstr(string_value), MAX_DIGIROM_LEN);
 
     FURI_LOG_I(TAG, "file_browser_callback read %s", app->state->current_code);
 
