@@ -5,7 +5,7 @@ App(
     entry_point="game_app",
     stack_size=4 * 1024,
     fap_icon="icon.png",
-    fap_category="Games",
+    fap_category="GPIO/VGM",
     fap_file_assets="assets",
     #  fap_extbuild=(
     #      ExtFile(
