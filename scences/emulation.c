@@ -87,10 +87,8 @@ int32_t nfc_playlist_emulation_task(void* context) {
 
          if (EmulationState != NfcPlaylistEmulationState_Emulating) {break;}
 
-         char const* full_file_name = strchr(file_path, '/') != NULL ? &strrchr(file_path, '/')[1] : file_path;
-         char file_name[sizeof(full_file_name)];
-         strcpy(file_name, full_file_name);
-         strtok(file_name, ".");
+
+         char* file_name = strchr(file_path, '/') != NULL ? &strrchr(file_path, '/')[1] : file_path;
          char const* file_ext = &strrchr(file_path, '.')[1];
          int time_counter_ms = (options_emulate_timeout[nfc_playlist->settings.emulate_timeout]*1000);
 
