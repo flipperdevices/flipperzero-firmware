@@ -3,6 +3,22 @@
 
 #include "../nfc_cli_protocol_support_common.h"
 
+static Iso14443_3bError nfc_cli_iso14443_3b_process_nfc_error(NfcError error) {
+    Iso14443_3bError ret = Iso14443_3bErrorNone;
+
+    switch(error) {
+    case NfcErrorNone:
+        ret = Iso14443_3bErrorNone;
+        break;
+    case NfcErrorTimeout:
+        ret = Iso14443_3bErrorTimeout;
+        break;
+    default:
+        ret = Iso14443_3bErrorColResFailed;
+        break;
+    }
+}
+
 static NfcCliPollerError nfc_cli_iso14443_3b_process_error(Iso14443_3bError error) {
     NfcCliPollerError ret = NfcCliPollerErrorNone;
 
@@ -47,9 +63,10 @@ static void iso14443_3b_request_handler(NfcCliProtocolRequest* request) {
         if(tx_data->append_crc) {
             error = iso14443_3b_poller_send_frame(
                 poller, tx_data->tx_data, request->data.frame_exchange.rx_data);
-            // } else {
-            //     nfc_poller_trx(
-            //         poller, tx_data->tx_data, request->data.frame_exchange.rx_data, tx_data->timeout);
+        } else {
+            NfcError nfc_error = nfc_poller_trx(
+                poller, tx_data->tx_data, request->data.frame_exchange.rx_data, tx_data->timeout);
+            error = nfc_cli_iso14443_3b_process_nfc_error(nfc_error);
         }
 
         if(error == Iso14443_3bErrorWrongCrc) {
