@@ -130,7 +130,8 @@ void app_free(App* app) {
     scene_manager_free(app->scene_manager);
     view_dispatcher_free(app->view_dispatcher);
 
-    ledOff(); // Do this after dmcomm is closed, so it doesn't turn it back on before we exit
+    notification_message(app->notification, &sequence_reset_rgb);
+    furi_thread_flags_wait(0, FuriFlagWaitAny, 300);
 
     furi_record_close(RECORD_NOTIFICATION);
     app->notification = NULL;

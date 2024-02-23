@@ -28,6 +28,7 @@ static FComState fcom_state;
 
 void set_serial_callback(DmcommCallback cb)
 {
+    FURI_LOG_I(TAG, "set_serial_callback %p", cb);
     fcom_state.stream->set_callback(cb);
 }
 

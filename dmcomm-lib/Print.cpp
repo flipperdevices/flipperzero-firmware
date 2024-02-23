@@ -3,9 +3,10 @@
 
 Stream::Stream(App* app) : app(app), cb(NULL) {}
 
-void Stream::set_callback(DmcommCallback cb)
+void Stream::set_callback(DmcommCallback callback)
 {
-  cb = cb;
+  FURI_LOG_I(TAG, "set_callback %p", callback);
+  this->cb = callback;
 }
 
 size_t Stream::write(uint8_t i)
@@ -49,7 +50,7 @@ size_t Stream::print(int i, int fmt)
 {
   UNUSED(fmt);
   char str[10];
-  snprintf(str, 10, "%d\n", i);
+  snprintf(str, 10, "%d", i);
 
   size_t sent = furi_stream_buffer_send(
     app->dmcomm_output_stream,
@@ -61,13 +62,14 @@ size_t Stream::print(int i, int fmt)
 
 size_t Stream::println(void)
 {
-  return furi_stream_buffer_send(
+  size_t sent = furi_stream_buffer_send(
       app->dmcomm_output_stream,
       "\n",
       1,
       0);
   if(cb != NULL)
-    cb();
+    cb(app);
+  return sent;
 }
 
 size_t Stream::println(const char buffer[])
@@ -83,7 +85,7 @@ size_t Stream::println(const char buffer[])
       1,
       0);
   if(cb != NULL)
-    cb();
+    cb(app);
   return sent;
 }
 
@@ -98,9 +100,8 @@ size_t Stream::println(int i, int fmt)
     str,
     strlen(str),
     0);
-
   if(cb != NULL)
-    cb();
+    cb(app);
   return sent;
 }
 

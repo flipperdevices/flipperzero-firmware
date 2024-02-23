@@ -13,6 +13,7 @@ probably, at some point, filter the USB/Dmcomm stuff to
 #include "flipper.h"
 #include "app_state.h"
 #include "scenes.h"
+#include "dmcomm-lib/fcom.h"
 #include "scene_serial.h"
 #include <furi_hal_cortex.h>
 
@@ -99,7 +100,7 @@ void fcom_serial_scene_on_enter(void* context) {
     usb_uart_get_config(app->usb_uart_bridge, &scene_usb_uart->cfg);
     usb_uart_get_state(app->usb_uart_bridge, &scene_usb_uart->state);
 
-    setSerialOutputCallback(dmcomm_tx);
+    set_serial_callback(dmcomm_tx);
 
     // Keep screen on while we're in serial mode
     notification_message(app->notification, &sequence_display_backlight_enforce_on);
@@ -134,7 +135,7 @@ void fcom_serial_scene_on_exit(void* context) {
     FURI_LOG_I(TAG, "fcom_serial_scene_on_exit");
     App* app = context;
 
-    setSerialOutputCallback(NULL);
+    set_serial_callback(NULL);
     usb_uart_disable(app->usb_uart_bridge);
     free(scene_usb_uart);
 

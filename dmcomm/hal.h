@@ -23,7 +23,7 @@ Kinda janky but works well enough for this
 typedef uint8_t byte;
 typedef bool boolean;
 
-typedef void (*DmcommCallback)();
+typedef void (*DmcommCallback)(void*);
 
 void setSerialOutputCallback(DmcommCallback cb);
 void setApp(void* ctx);
