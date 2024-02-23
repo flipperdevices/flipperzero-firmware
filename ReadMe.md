@@ -39,9 +39,10 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Dice (RM) Including SEX/WAR/8BALL/WEED/DRINK DICE v2.2 (By RogueMaster)](https://github.com/RogueMaster/flipperzero-dice)
 - Updated: [Dab Timer v1.9.2 (By RogueMaster)](https://github.com/RogueMaster/flipperzero-dabtimer) - Fixed circular clock face & works with OFW!
 - Updated: [WiFi (Marauder) v7.0 (By 0xchocolate & tcpassos)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) `Req: ESP32 WITH MARAUDER FLASHED` Now using Evil Portal assets.
-- Added: [Air Labyrinth v0.1 (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/vgm/apps/air_labyrinth)
-- Updated: [Game Engine (By DrZlo13)](https://github.com/flipperdevices/flipperzero-game-engine) on Air Arkanoid & Air Labyrinth
+- Added: [Air Labyrinth v0.1 (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/vgm/apps/air_labyrinth) `Req: Video Game Module By Flipper Devices`
+- Updated: [Game Engine (By DrZlo13)](https://github.com/flipperdevices/flipperzero-game-engine) on Air Arkanoid & Air Labyrinth `Req: Video Game Module By Flipper Devices`
 - Updated: [Minesweeper Redux v1.4 (By squee72564)](https://github.com/squee72564/F0_Minesweeper_Fap)
+- Updated: [Matagotchi v1.1 (By MrModd)](https://github.com/MrModd/Matagotchi) [Refactor features to ease the addition of new ones #3](https://github.com/MrModd/Matagotchi/pull/3)
 
 <a name="release">
 
@@ -272,7 +273,7 @@ $ ./fbt dolphin_ext
 - [Heap Defence v1.2 (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/fc776446de9fdd553b221c02668b925b689378d8) [(original by wquinoa & Vedmein)](https://github.com/Vedmein/flipperzero-firmware/tree/hd/svisto-perdelki)
 - [JetPack v1.1 (by timstrasser)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/1164e4d214efa38847e08c6387bf53578bc0d366)
 - [Mandelbrot Set v1.1 (By Possibly-Matt)](https://github.com/Possibly-Matt/flipperzero-firmware-wPlugins)
-- [Matagotchi v1.0 (By MrModd)](https://github.com/MrModd/Matagotchi)
+- [Matagotchi v1.1 (By MrModd)](https://github.com/MrModd/Matagotchi)
 - [Minesweeper v1.2 (By panki27)](https://github.com/panki27/minesweeper)
 - [Minesweeper Redux v1.4 (By squee72564)](https://github.com/squee72564/F0_Minesweeper_Fap)
 - [Monty Hall v1.1 (By DevMilanIan)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/203)
