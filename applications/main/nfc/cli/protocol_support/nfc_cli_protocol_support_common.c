@@ -1,5 +1,7 @@
 #include "nfc_cli_protocol_support_common_i.h"
 
+#include "../helpers/arg_parser.h"
+
 #include <furi/furi.h>
 #include <toolbox/args.h>
 
@@ -113,6 +115,36 @@ static NfcCommand
     return command;
 }
 
+static const ArgParserOptions nfc_cli_protocol_support_common_poll_options[] = {
+    {
+        .identifier = 'a',
+        .access_letters = "a",
+        .access_name = "activate",
+        .value_name = NULL,
+        .description = "Pass activation procedure",
+    },
+    {
+        .identifier = 'c',
+        .access_letters = "c",
+        .access_name = NULL,
+        .value_name = NULL,
+        .description = "Append CRC",
+    },
+    {
+        .identifier = 't',
+        .access_letters = "t",
+        .access_name = "timeout",
+        .value_name = "TIMEOUT",
+        .description = "Timeout in fc",
+    },
+    {
+        .identifier = 'h',
+        .access_letters = "h",
+        .access_name = "help",
+        .description = "Shows the command help",
+    },
+};
+
 void nfc_cli_protocol_support_common_poll_handler(
     NfcProtocol protocol,
     Cli* cli,
@@ -129,35 +161,75 @@ void nfc_cli_protocol_support_common_poll_handler(
     NfcCliPollCmdDataArray_it_t iter;
     NfcCliPollerContext* instance = nfc_cli_poller_context_alloc(protocol);
 
+    NfcCliPollCmdParameters params = {
+        .activation_required = false,
+        .append_crc = false,
+        .timeout = 200000,
+    };
+
+    ArgParser* parser = arg_parser_alloc(
+        nfc_cli_protocol_support_common_poll_options,
+        COUNT_OF(nfc_cli_protocol_support_common_poll_options),
+        args);
+
+    bool read_success = true;
     do {
-        // TODO parse parameters
-        NfcCliPollCmdParameters params = {
-            .activation_required = true,
-            .append_crc = true,
-            .timeout = 200000,
-        };
+        while(arg_parser_fetch(parser) && read_success) {
+            switch(arg_parser_get_identifier(parser)) {
+            case 'a':
+                params.activation_required = true;
+                break;
+            case 'c':
+                params.append_crc = true;
+                break;
+            case 't':
+                if(sscanf(arg_parser_get_value(parser), "%ld", &params.timeout) != 1) {
+                    read_success = false;
+                }
+                break;
+            case 'h':
+                printf("Usage: poll\r\n");
+                arg_parser_get_help_message(parser, tmp_str);
+                printf("%s\r\n", furi_string_get_cstr(tmp_str));
+                break;
+            case '?':
+                arg_parser_get_error_message(parser, tmp_str);
+                printf("%s\r\n", furi_string_get_cstr(tmp_str));
+                read_success = false;
+                break;
+            }
+        }
+        if(!read_success) break;
 
-        bool read_data_success = true;
         while(true) {
-            size_t cmd_ascii_len = args_get_first_word_length(args);
-            if((cmd_ascii_len % 2) != 0) {
-                printf("Incorrect data length: %d\r\n", cmd_ascii_len);
-                read_data_success = false;
+            const char* additional_args = arg_parser_get_next_argument(parser);
+            if(additional_args == NULL) break;
+
+            size_t cmd_ascii_len = strlen(additional_args);
+            if(((cmd_ascii_len % 2) != 0) || (cmd_ascii_len == 0)) {
+                printf(
+                    "Incorrect data length %d in argument: %s\r\n",
+                    cmd_ascii_len,
+                    additional_args);
+                read_success = false;
                 break;
             }
-            if(cmd_ascii_len == 0) break;
 
-            if(!args_read_string_and_trim(args, tmp_str)) {
-                printf("Failed to read data\r\n");
-                read_data_success = false;
-                break;
+            // TODO Make lib function
+            for(size_t i = 0; i < cmd_ascii_len / 2; i++) {
+                if(!args_char_to_hex(
+                       additional_args[i * 2],
+                       additional_args[i * 2 + 1],
+                       &(instance->buffer[i]))) {
+                    read_success = false;
+                    break;
+                }
             }
-
-            if(!args_read_hex_bytes(tmp_str, instance->buffer, cmd_ascii_len / 2)) {
+            if(!read_success) {
                 printf("Failed to read hex bytes\r\n");
-                read_data_success = false;
                 break;
             }
+            if(!read_success) break;
 
             BitBuffer* buff = bit_buffer_alloc(cmd_ascii_len / 2);
             bit_buffer_copy_bytes(buff, instance->buffer, cmd_ascii_len / 2);
@@ -169,9 +241,10 @@ void nfc_cli_protocol_support_common_poll_handler(
             NfcCliPollCmdDataArray_push_back(cmd_arr, cmd);
         }
 
-        if(!read_data_success) {
-            nfc_cli_protocol_support_poll_print_usage();
-            break;
+        if(!read_success) {
+            printf("Usage: nfc poll\r\n");
+            arg_parser_get_help_message(parser, tmp_str);
+            printf("%s\r\n", furi_string_get_cstr(tmp_str));
         }
 
         if(NfcCliPollCmdDataArray_size(cmd_arr) == 0) {

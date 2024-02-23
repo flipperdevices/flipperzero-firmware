@@ -170,94 +170,10 @@ static void nfc_cli(Cli* cli, FuriString* args, void* context) {
     furi_string_free(cmd);
 }
 
-const ArgParserOptions option[] = {
-    {.identifier = 's',
-     .access_letters = "s",
-     .access_name = NULL,
-     .value_name = NULL,
-     .description = "Simple flag"},
-
-    {.identifier = 'm',
-     .access_letters = "mMoO",
-     .access_name = NULL,
-     .value_name = NULL,
-     .description = "Multiple access letters"},
-
-    {.identifier = 'l',
-     .access_letters = NULL,
-     .access_name = "long",
-     .value_name = NULL,
-     .description = "Long parameter name"},
-
-    {.identifier = 'k',
-     .access_letters = "k",
-     .access_name = "key",
-     .value_name = "VALUE",
-     .description = "Parameter value"},
-
-    {.identifier = 'h',
-     .access_letters = "h",
-     .access_name = "help",
-     .description = "Shows the command help"},
-};
-
-static void _nfc_cli(Cli* cli, FuriString* args, void* context) {
-    UNUSED(cli);
-    UNUSED(context);
-    ArgParser* parser = arg_parser_alloc(option, COUNT_OF(option), args);
-
-    bool simple_flag = false;
-    bool multiple_flag = false;
-    bool long_flag = false;
-    const char* value = NULL;
-    FuriString* tmp_str = furi_string_alloc();
-
-    while(arg_parser_fetch(parser)) {
-        switch(arg_parser_get_identifier(parser)) {
-        case 's':
-            simple_flag = true;
-            break;
-        case 'm':
-            multiple_flag = true;
-            break;
-        case 'l':
-            long_flag = true;
-            break;
-        case 'k':
-            value = arg_parser_get_value(parser);
-            break;
-        case 'h':
-            printf("Usage: cargsdemo [OPTION]...\r\n");
-            arg_parser_get_help_message(parser, tmp_str);
-            printf("%s\r\n", furi_string_get_cstr(tmp_str));
-            break;
-        case '?':
-            arg_parser_get_error_message(parser, tmp_str);
-            printf("%s\r\n", furi_string_get_cstr(tmp_str));
-            break;
-        }
-    }
-
-    printf(
-        "simple_flag: %i, multiple_flag: %i, long_flag: %i, key: %s\r\n",
-        simple_flag,
-        multiple_flag,
-        long_flag,
-        value ? value : "-");
-
-    while(true) {
-        const char* additional_args = arg_parser_get_next_argument(parser);
-        if(additional_args == NULL) break;
-        printf("Extra argument: %s\r\n", additional_args);
-    }
-
-    furi_string_free(tmp_str);
-}
-
 void nfc_on_system_start() {
 #ifdef SRV_CLI
     Cli* cli = furi_record_open(RECORD_CLI);
-    cli_add_command(cli, "nfc", CliCommandFlagDefault, _nfc_cli, NULL);
+    cli_add_command(cli, "nfc", CliCommandFlagDefault, nfc_cli, NULL);
     UNUSED(nfc_cli);
     furi_record_close(RECORD_CLI);
 #else
