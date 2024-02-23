@@ -720,6 +720,9 @@ static void bfs_to_closest_tile(MineSweeperGameScreen* instance, MineSweeperGame
 
     furi_assert(model);
 
+    point_deq_t deq2;
+    point_deq_init(deq2);
+
     // Init both the set and dequeue
     point_deq_t deq;
     point_set_t set;
@@ -734,36 +737,45 @@ static void bfs_to_closest_tile(MineSweeperGameScreen* instance, MineSweeperGame
     Point_t pos;
     pointobj_init(pos);
 
-    // Starting position is current pos
+    // Starting position is current position of the model
     Point start_pos = (Point){.x = model->curr_pos.x_abs, .y = model->curr_pos.y_abs};
     pointobj_set_point(pos, start_pos);
 
     point_deq_push_back(deq, pos);
+
+    bool is_first_uncleared_tile_found = false;
 
     while (point_deq_size(deq) > 0) {
         point_deq_pop_front(&pos, deq);
         Point curr_pos = pointobj_get_point(pos);
         uint16_t curr_pos_1d = curr_pos.x * model->board_width + curr_pos.y;
 
-        // If the current tile is uncleared and not start pos we save result
-        // to this position and break 
-        if (model->board[curr_pos_1d].tile_state == MineSweeperGameScreenTileStateUncleared &&
-                !(start_pos.x ==  curr_pos.x && start_pos.y == curr_pos.y)) {
-
-            result = curr_pos;
-            break;
-        }
-        
-        // If in visited set continue
+        // If we have already visited this tile continue
         if (point_set_cget(set, pos) != NULL) {
             continue;
         } 
-        
+
         // Add point to visited set
         point_set_push(set, pos);
 
+        // Do not continue if we have found some valid tiles and this is a cleared tiled
+        if (is_first_uncleared_tile_found &&
+            model->board[curr_pos_1d].tile_state == MineSweeperGameScreenTileStateCleared) {
+            continue;
+        }
+        
+        // Add this potential candidate tile to the other deque to be compared with other candidates
+        if (model->board[curr_pos_1d].tile_state == MineSweeperGameScreenTileStateUncleared) {
+            
+            if (!is_first_uncleared_tile_found)
+                is_first_uncleared_tile_found = true;
+            
+            pointobj_set_point(pos, curr_pos);
+            point_deq_push_back(deq2, pos);
+            continue;
+        }
 
-        // Process all surrounding neighbors and add valid to dequeue
+        // Process all surrounding neighbors for cleared tiles and add valid to dequeue
         for (uint8_t i = 0; i < 8; i++) {
             int16_t dx = curr_pos.x + (int16_t)offsets[i][0];
             int16_t dy = curr_pos.y + (int16_t)offsets[i][1];
@@ -780,6 +792,27 @@ static void bfs_to_closest_tile(MineSweeperGameScreen* instance, MineSweeperGame
 
     point_set_clear(set);
     point_deq_clear(deq);
+    
+    // Loop through all valid candidates and save the one with lowest euclidean distance
+    double min_distance = INT_MAX;
+
+    while (point_deq_size(deq2) > 0) {
+        point_deq_pop_front(&pos, deq2);
+        Point curr_pos = pointobj_get_point(pos);
+        int x_abs = abs(curr_pos.x - start_pos.x); 
+        int y_abs = abs(curr_pos.y - start_pos.y); 
+        double distance = sqrt(x_abs*x_abs + y_abs*y_abs);
+
+        if (distance < min_distance) {
+            result = curr_pos;
+            min_distance = distance;
+        } else if (distance == min_distance && (furi_hal_random_get() % 2) == 0) {
+            result = curr_pos;
+            min_distance = distance;
+        }
+    }
+
+    point_deq_clear(deq2);
 
     // Save cursor to new closest tile position
     // If the cursor moves outisde of the model boundaries we need to

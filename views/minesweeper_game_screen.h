@@ -6,6 +6,9 @@
 #ifndef MINEWEEPER_GAME_SCREEN_H
 #define MINEWEEPER_GAME_SCREEN_H
 
+#include <math.h>
+#include <limits.h>
+
 #include <gui/view.h>
 
 #include <gui/elements.h>
