@@ -31,17 +31,18 @@ typedef enum {
 
     WorkerEvtTxStop = (1 << 2),
     WorkerEvtCdcRx = (1 << 3),
+    WorkerEvtCdcTxComplete = (1 << 4),
 
-    WorkerEvtCfgChange = (1 << 4),
+    WorkerEvtCfgChange = (1 << 5),
 
-    WorkerEvtLineCfgSet = (1 << 5),
-    WorkerEvtCtrlLineSet = (1 << 6),
+    WorkerEvtLineCfgSet = (1 << 6),
+    WorkerEvtCtrlLineSet = (1 << 7),
 
 } WorkerEvtFlags;
 
 #define WORKER_ALL_RX_EVENTS                                                      \
     (WorkerEvtStop | WorkerEvtRxDone | WorkerEvtCfgChange | WorkerEvtLineCfgSet | \
-     WorkerEvtCtrlLineSet)
+     WorkerEvtCtrlLineSet | WorkerEvtCdcTxComplete)
 #define WORKER_ALL_TX_EVENTS (WorkerEvtTxStop | WorkerEvtCdcRx)
 
 struct UsbUartBridge {
@@ -52,6 +53,7 @@ struct UsbUartBridge {
     FuriThread* tx_thread;
 
     FuriStreamBuffer* rx_stream;
+    FuriHalSerialHandle* serial_handle;
 
     FuriMutex* usb_mutex;
 
@@ -85,11 +87,23 @@ static const CdcCallbacks cdc_cb = {
 
 static int32_t usb_uart_tx_thread(void* context);
 
-static void usb_uart_on_irq_cb(UartIrqEvent ev, uint8_t data, void* context) {
+static void usb_uart_on_irq_rx_dma_cb(
+    FuriHalSerialHandle* handle,
+    FuriHalSerialRxEvent ev,
+    size_t size,
+    void* context) {
     UsbUartBridge* usb_uart = (UsbUartBridge*)context;
 
-    if(ev == UartIrqEventRXNE) {
-        furi_stream_buffer_send(usb_uart->rx_stream, &data, 1, 0);
+    if(ev & (FuriHalSerialRxEventData | FuriHalSerialRxEventIdle)) {
+        uint8_t data[FURI_HAL_SERIAL_DMA_BUFFER_SIZE] = {0};
+        while(size) {
+            size_t ret = furi_hal_serial_dma_rx(
+                handle,
+                data,
+                (size > FURI_HAL_SERIAL_DMA_BUFFER_SIZE) ? FURI_HAL_SERIAL_DMA_BUFFER_SIZE : size);
+            furi_stream_buffer_send(usb_uart->rx_stream, data, ret, 0);
+            size -= ret;
+        };
         furi_thread_flags_set(furi_thread_get_id(usb_uart->thread), WorkerEvtRxDone);
     }
 }
@@ -121,32 +135,33 @@ static void usb_uart_vcp_deinit(UsbUartBridge* usb_uart, uint8_t vcp_ch) {
 }
 
 static void usb_uart_serial_init(UsbUartBridge* usb_uart, uint8_t uart_ch) {
-    if(uart_ch == FuriHalUartIdUSART1) {
-        furi_hal_console_disable();
-    } else if(uart_ch == FuriHalUartIdLPUART1) {
-        furi_hal_uart_init(uart_ch, 115200);
-    }
-    furi_hal_uart_set_irq_cb(uart_ch, usb_uart_on_irq_cb, usb_uart);
+    furi_assert(!usb_uart->serial_handle);
+
+    usb_uart->serial_handle = furi_hal_serial_control_acquire(uart_ch);
+    furi_assert(usb_uart->serial_handle);
+
+    furi_hal_serial_init(usb_uart->serial_handle, 115200);
+    furi_hal_serial_dma_rx_start(
+        usb_uart->serial_handle, usb_uart_on_irq_rx_dma_cb, usb_uart, false);
 }
 
-static void usb_uart_serial_deinit(UsbUartBridge* usb_uart, uint8_t uart_ch) {
-    UNUSED(usb_uart);
-    furi_hal_uart_set_irq_cb(uart_ch, NULL, NULL);
-    if(uart_ch == FuriHalUartIdUSART1)
-        furi_hal_console_enable();
-    else if(uart_ch == FuriHalUartIdLPUART1)
-        furi_hal_uart_deinit(uart_ch);
+static void usb_uart_serial_deinit(UsbUartBridge* usb_uart) {
+    furi_assert(usb_uart->serial_handle);
+
+    furi_hal_serial_deinit(usb_uart->serial_handle);
+    furi_hal_serial_control_release(usb_uart->serial_handle);
+    usb_uart->serial_handle = NULL;
 }
 
 static void usb_uart_set_baudrate(UsbUartBridge* usb_uart, uint32_t baudrate) {
     if(baudrate != 0) {
-        furi_hal_uart_set_br(usb_uart->cfg.uart_ch, baudrate);
+        furi_hal_serial_set_br(usb_uart->serial_handle, baudrate);
         usb_uart->st.baudrate_cur = baudrate;
     } else {
         struct usb_cdc_line_coding* line_cfg =
             furi_hal_cdc_get_port_settings(usb_uart->cfg.vcp_ch);
         if(line_cfg->dwDTERate > 0) {
-            furi_hal_uart_set_br(usb_uart->cfg.uart_ch, line_cfg->dwDTERate);
+            furi_hal_serial_set_br(usb_uart->serial_handle, line_cfg->dwDTERate);
             usb_uart->st.baudrate_cur = line_cfg->dwDTERate;
         }
     }
@@ -208,7 +223,7 @@ static int32_t usb_uart_worker(void* context) {
             furi_thread_flags_wait(WORKER_ALL_RX_EVENTS, FuriFlagWaitAny, FuriWaitForever);
         furi_check(!(events & FuriFlagError));
         if(events & WorkerEvtStop) break;
-        if(events & WorkerEvtRxDone) {
+        if(events & (WorkerEvtRxDone | WorkerEvtCdcTxComplete)) {
             size_t len = furi_stream_buffer_receive(
                 usb_uart->rx_stream, usb_uart->rx_buf, USB_CDC_PKT_LEN, 0);
             if(len > 0) {
@@ -241,7 +256,7 @@ static int32_t usb_uart_worker(void* context) {
                 furi_thread_flags_set(furi_thread_get_id(usb_uart->tx_thread), WorkerEvtTxStop);
                 furi_thread_join(usb_uart->tx_thread);
 
-                usb_uart_serial_deinit(usb_uart, usb_uart->cfg.uart_ch);
+                usb_uart_serial_deinit(usb_uart);
                 usb_uart_serial_init(usb_uart, usb_uart->cfg_new.uart_ch);
 
                 usb_uart->cfg.uart_ch = usb_uart->cfg_new.uart_ch;
@@ -293,7 +308,7 @@ static int32_t usb_uart_worker(void* context) {
         }
     }
     usb_uart_vcp_deinit(usb_uart, usb_uart->cfg.vcp_ch);
-    usb_uart_serial_deinit(usb_uart, usb_uart->cfg.uart_ch);
+    usb_uart_serial_deinit(usb_uart);
 
     furi_hal_gpio_init(USB_USART_DE_RE_PIN, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
 
@@ -390,18 +405,10 @@ static int32_t usb_uart_tx_thread(void* context) {
                 if(usb_uart->cfg.software_de_re != 0)
                     furi_hal_gpio_write(USB_USART_DE_RE_PIN, false);
 
-                usb_uart_send_data(usb_uart, data, len);
+                furi_hal_serial_tx(usb_uart->serial_handle, data, len);
 
                 if(usb_uart->cfg.software_de_re != 0) {
-                    //TODO: FL-3276 port to new USART API
-                    if(usb_uart->cfg.uart_ch == FuriHalUartIdUSART1) {
-                        while(!LL_USART_IsActiveFlag_TC(USART1))
-                            ;
-                    } else if(usb_uart->cfg.uart_ch == FuriHalUartIdLPUART1) {
-                        while(!LL_LPUART_IsActiveFlag_TC(LPUART1))
-                            ;
-                    }
-
+                    furi_hal_serial_tx_wait_complete(usb_uart->serial_handle);
                     furi_hal_gpio_write(USB_USART_DE_RE_PIN, true);
                 }
             }
@@ -416,6 +423,7 @@ static int32_t usb_uart_tx_thread(void* context) {
 static void vcp_on_cdc_tx_complete(void* context) {
     UsbUartBridge* usb_uart = (UsbUartBridge*)context;
     furi_semaphore_release(usb_uart->tx_sem);
+    furi_thread_flags_set(furi_thread_get_id(usb_uart->thread), WorkerEvtCdcTxComplete);
 }
 
 static void vcp_on_cdc_rx(void* context) {
@@ -442,11 +450,8 @@ static void vcp_on_line_config(void* context, struct usb_cdc_line_coding* config
 
 UsbUartBridge* usb_uart_enable(UsbUartConfig* cfg) {
     UsbUartBridge* usb_uart = malloc(sizeof(UsbUartBridge));
-
     memcpy(&(usb_uart->cfg_new), cfg, sizeof(UsbUartConfig));
-
     usb_uart->thread = furi_thread_alloc_ex("UsbUartWorker", 1024, usb_uart_worker, usb_uart);
-
     furi_thread_start(usb_uart->thread);
     return usb_uart;
 }
@@ -492,5 +497,5 @@ void usb_uart_get_state(UsbUartBridge* usb_uart, UsbUartState* st) {
 }
 
 void usb_uart_send_data(UsbUartBridge* usb_uart, uint8_t* data, size_t data_size) {
-    furi_hal_uart_tx(usb_uart->cfg.uart_ch, data, data_size);
+    furi_hal_serial_tx(usb_uart->serial_handle, data, data_size);
 }

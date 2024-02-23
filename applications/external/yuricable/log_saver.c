@@ -44,7 +44,7 @@ void save_log_and_write(char* str, size_t len) {
     if(strstr(aggregate_buffer, END_MARKER) != NULL) {
         Storage* storage = furi_record_open(RECORD_STORAGE);
         File* file = storage_file_alloc(storage);
-        FuriHalRtcDateTime currentDate;
+        DateTime currentDate;
         furi_hal_rtc_get_datetime(&currentDate);
         char dateTimeStr[64];
         snprintf(
