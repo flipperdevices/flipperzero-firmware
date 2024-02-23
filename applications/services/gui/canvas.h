@@ -21,6 +21,7 @@ typedef enum {
 } Color;
 
 /** Provide defines to permit checking if new are fonts available*/
+#define CANVAS_HAS_FONT_BATTERYPERCENT = 1
 #define CANVAS_HAS_FONT_EUROCORP = 1
 
 /** Fonts enumeration */
