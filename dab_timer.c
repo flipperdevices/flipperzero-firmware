@@ -202,7 +202,7 @@ static void dab_timer_render_callback(Canvas* const canvas, void* ctx) {
         } else {
             canvas_draw_icon(canvas, 1, 32, &I_cool_flipagotchi);
         }
-#if __has_include(<cfw/cfw.h>)
+#ifdef CANVAS_HAS_FONT_BATTERYPERCENT
         canvas_set_font(canvas, FontBatteryPercent);
         canvas_draw_str_aligned(canvas, 117, 11, AlignCenter, AlignCenter, alertTime);
         if(plugin_state->time_format == LocaleTimeFormat12h)
@@ -245,7 +245,7 @@ static void dab_timer_render_callback(Canvas* const canvas, void* ctx) {
                 canvas, 64, 8, AlignCenter, AlignCenter, time_string); // DRAW TIME
             canvas_draw_str_aligned(
                 canvas, 64, 32, AlignCenter, AlignTop, timer_string); // DRAW TIMER
-#if __has_include(<cfw/cfw.h>)
+#ifdef CANVAS_HAS_FONT_BATTERYPERCENT
             canvas_set_font(canvas, FontBatteryPercent);
             if(plugin_state->time_format == LocaleTimeFormat12h)
                 canvas_draw_str_aligned(canvas, 117, 4, AlignCenter, AlignCenter, meridian_string);
@@ -258,11 +258,11 @@ static void dab_timer_render_callback(Canvas* const canvas, void* ctx) {
 #endif
             canvas_draw_str_aligned(
                 canvas, 64, 20, AlignCenter, AlignTop, date_string); // DRAW DATE
-#if __has_include(<cfw/cfw.h>)
+#ifdef CANVAS_HAS_FONT_BATTERYPERCENT
             canvas_set_font(canvas, FontSecondary);
 #endif
         } else {
-#if __has_include(<cfw/cfw.h>)
+#ifdef CANVAS_HAS_FONT_BATTERYPERCENT
             if(plugin_state->w_test) canvas_set_font(canvas, FontBatteryPercent);
 #else
             if(plugin_state->w_test) canvas_set_font(canvas, FontSecondary);
@@ -282,7 +282,7 @@ static void dab_timer_render_callback(Canvas* const canvas, void* ctx) {
                     &I_EviSmile2_18x21};
                 static const Icon* const count_anim3[4] = {
                     &I_frame_01, &I_frame_02, &I_frame_03, &I_frame_02};
-#if __has_include(<cfw/cfw.h>)
+#ifdef CANVAS_HAS_FONT_BATTERYPERCENT
                 canvas_draw_icon(canvas, -5, 15, count_anim[elapsed_secs_img]);
                 canvas_draw_icon(canvas, 90, 0, count_anim2[elapsed_secs_img2]);
                 canvas_draw_icon(canvas, 110, 5, count_anim3[elapsed_secs_img2]);
@@ -317,7 +317,7 @@ static void dab_timer_render_callback(Canvas* const canvas, void* ctx) {
             if(!plugin_state->w_test)
                 canvas_draw_str_aligned(
                     canvas, 64, 38, AlignCenter, AlignTop, date_string); // DRAW DATE
-#if __has_include(<cfw/cfw.h>)
+#ifdef CANVAS_HAS_FONT_BATTERYPERCENT
             canvas_set_font(canvas, FontSecondary);
 #endif
         }
@@ -341,7 +341,7 @@ static void dab_timer_render_callback(Canvas* const canvas, void* ctx) {
             }
             canvas_set_color(canvas, ColorBlack);
         }
-#if __has_include(<cfw/cfw.h>)
+#ifdef CANVAS_HAS_FONT_BATTERYPERCENT
         canvas_set_font(canvas, FontBatteryPercent);
 #else
         canvas_set_font(canvas, FontSecondary);
@@ -354,7 +354,7 @@ static void dab_timer_render_callback(Canvas* const canvas, void* ctx) {
                 canvas, 64, 31, AlignCenter, AlignTop, timer_string); // DRAW TIMER
         }
         canvas_draw_str_aligned(
-#if __has_include(<cfw/cfw.h>)
+#ifdef CANVAS_HAS_FONT_BATTERYPERCENT
             canvas, 64, 26, AlignCenter, AlignCenter, time_string); // DRAW TIME
         canvas_set_font(canvas, FontBatteryPercent);
         if(plugin_state->time_format == LocaleTimeFormat12h)
@@ -440,7 +440,7 @@ static void dab_timer_render_callback(Canvas* const canvas, void* ctx) {
             }
             canvas_set_color(canvas, ColorBlack);
         }
-#if __has_include(<cfw/cfw.h>)
+#ifdef CANVAS_HAS_FONT_BATTERYPERCENT
         canvas_set_font(canvas, FontBatteryPercent);
 #endif
         if(timer_start_timestamp != 0) {
