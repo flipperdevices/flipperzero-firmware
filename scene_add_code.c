@@ -69,7 +69,6 @@ bool fcom_add_code_scene_on_event(void* context, SceneManagerEvent event) {
 void fcom_add_code_scene_on_exit(void* context) {
     FURI_LOG_I(TAG, "fcom_read_scene_on_exit");
     UNUSED(context);
-    UNUSED(app);
 }
 
 
