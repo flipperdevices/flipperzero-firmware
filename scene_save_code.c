@@ -3,6 +3,22 @@ Takes the code in result_code and opens a file name KB
 
 Saves the code into that file and then goes to the send code
 dialog and clears app state
+
+TODO:
+
+Codes need @ and ^ to denote checksum and xor characters
+
+Codes should save using the special characters listed on 
+https://humulos.com/digimon/0NL1NE/converter/
+
+In order to do this I should save a code-type
+
+When loading a code type, I can assume saving response codes as the same type.
+
+If there is no code type on load, and there are no special chars, I can have the user
+specify the code type.
+
+Code type should be specified on save as well for manual add
 */
 
 #include "flipper.h"
@@ -52,9 +68,8 @@ void save_text_input_callback(void* context) {
     flipper_format_file_close(fff_file);
     flipper_format_free(fff_file);
 
-    // After we save, switch to the code sender automatically
+    // After we save, switch to main menu
     scene_manager_search_and_switch_to_previous_scene(app->scene_manager, FcomMainMenuScene);
-    //scene_manager_next_scene(app->scene_manager, FcomSendCodeScene);
 }
 
 

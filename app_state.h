@@ -1,3 +1,17 @@
+/*
+Handles the life cycle of the flipper app.
+
+Holds all the app-global memory stuff we need.
+Flipper will call app_alloc, then app_state_alloc.
+Then it runs the application UI code.
+On exit it calls app_quit and then app_free.
+
+We need to take care to deallocate everything we allocate
+in these methods, or it will leak memory and through repeated
+launches the flipper will run out of mem. (though this isn't
+super serious because the flipper is pretty easy to just reboot)
+*/
+
 #ifndef APP_HEADERS
 #define APP_HEADERS
 
@@ -6,12 +20,16 @@
 #include "dmcomm_link.h"
 
 #define MAX_FILENAME_LEN 64
+#define MAX_DIGIROM_LEN 128
 
 typedef struct AppState {
-    char current_code[MAX_FILENAME_LEN]; // What the user loaded
-    char result_code[MAX_FILENAME_LEN]; // What dmcomm sent back
+    char current_code[MAX_DIGIROM_LEN]; // What the user loaded
+    char result_code[MAX_DIGIROM_LEN]; // What dmcomm sent back
     char file_name_tmp[MAX_FILENAME_LEN]; // Filename to save codes as
-    bool waitForCode;
+    bool waitForCode; // If we're reading a code, only read the first one
+    int codeLen; // How many packets the current code has
+    int rpackets; // count of how many packets we've got. Should match current_code.
+    int spackets; // count of how many packets we've sent. Should match current_code
     FuriString* s_code; // First code sent
     FuriString* r_code; // Second code sent
     FcomScene save_code_return_scene; // What scene we should go back to when done saving

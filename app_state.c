@@ -1,15 +1,5 @@
 #include "app_state.h"
-#include "dmcomm/hal.h"
-
-/*
-TODO:
-- convert dmcomm loop into a furi thread
-- replace serial read/write with furi notification messages
-
-- create and start USB serial thread in serial bit
-- create thread to link USB serial to dmcomm
-
-*/
+#include "arduino.h"
 
 App* app_alloc() {
     App* app = malloc(sizeof(App));
@@ -40,8 +30,8 @@ App* app_alloc() {
     app->text_box_store = furi_string_alloc();
     app->text_box_mutex = furi_mutex_alloc(FuriMutexTypeNormal);
 
-    app->dmcomm_input_stream = furi_stream_buffer_alloc(128, 1);
-    app->dmcomm_output_stream = furi_stream_buffer_alloc(128, 1);
+    app->dmcomm_input_stream = furi_stream_buffer_alloc(256, 1);
+    app->dmcomm_output_stream = furi_stream_buffer_alloc(256, 1);
 
     file_browser_configure(app->file_browser, "*", NULL, true, false, &I_badusb_10px, true);
 
@@ -63,16 +53,14 @@ App* app_alloc() {
     view_dispatcher_add_view(
         app->view_dispatcher, FcomFileSelectView, file_browser_get_view(app->file_browser));
 
-
-    setApp(app);
-
     app->dmcomm_run = true;
     app->dcomm_thread = furi_thread_alloc();
     furi_thread_set_context(app->dcomm_thread, app);
     furi_thread_set_priority(app->dcomm_thread, FuriThreadPriorityHigh);
     furi_thread_set_stack_size(app->dcomm_thread, 8 * 1024);
     furi_thread_set_name(app->dcomm_thread, "DMCOMMWorker");
-    furi_thread_set_callback(app->dcomm_thread, dmcomm_reader);
+    //furi_thread_set_callback(app->dcomm_thread, dmcomm_reader);
+    furi_thread_set_callback(app->dcomm_thread, fcom_thread);
     furi_thread_start(app->dcomm_thread);
 
     return app;
@@ -129,7 +117,8 @@ void app_free(App* app) {
     scene_manager_free(app->scene_manager);
     view_dispatcher_free(app->view_dispatcher);
 
-    ledOff(); // Do this after dmcomm is closed, so it doesn't turn it back on before we exit
+    notification_message(app->notification, &sequence_reset_rgb);
+    //furi_thread_flags_wait(0, FuriFlagWaitAny, 300);
 
     furi_record_close(RECORD_NOTIFICATION);
     app->notification = NULL;

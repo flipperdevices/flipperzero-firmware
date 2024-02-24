@@ -1,10 +1,11 @@
 #include "dmcomm_link.h"
+#include "dmcomm-lib/fcom.h"
 
 /*
  * dmcomm thread, runs the dmcomm loop. call init first.
  * exits when the app dmcomm_run var is set to false.
  * App runs this constantly on startup until app close.
-*/
+*
 int32_t dmcomm_reader(void* context) {
     FURI_LOG_I(TAG, "dmcomm_reader start");
     App* app = context;
@@ -14,6 +15,18 @@ int32_t dmcomm_reader(void* context) {
     }
 
     FURI_LOG_I(TAG, "dmcomm_reader end");
+    return 0;
+}*/
+
+int32_t fcom_thread(void* context) {
+    FURI_LOG_I(TAG, "fcom_thread start");
+    App* app = context;
+    setup_fcom(context);
+    while(app->dmcomm_run) {
+        loop_fcom();
+    }
+    destroy_fcom();
+    FURI_LOG_I(TAG, "fcom_thread end");
     return 0;
 }
 

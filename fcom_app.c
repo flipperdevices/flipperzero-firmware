@@ -1,6 +1,6 @@
 #include "flipper.h"
 #include "app_state.h"
-#include "dmcomm/hal.h"
+#include "arduino.h"
 
 int32_t fcom_app(void* p) {
     UNUSED(p);

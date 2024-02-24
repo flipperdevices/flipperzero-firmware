@@ -20,12 +20,10 @@ void fcom_menu_callback(void* context, uint32_t index);
 void fcom_main_menu_scene_on_enter(void* context) {
     App* app = context;
     submenu_reset(app->submenu);
-    //submenu_set_header(app->submenu, "F-Com");
     submenu_add_item(app->submenu, "Listen", MainMenuSelectionListen, fcom_menu_callback, app);
     submenu_add_item(app->submenu, "Saved", MainMenuSelectionSaved, fcom_menu_callback, app);
     submenu_add_item(app->submenu, "Add Manually", MainMenuSelectionAdd, fcom_menu_callback, app);
     submenu_add_item(app->submenu, "USB A-Com", MainMenuSelectionSerial, fcom_menu_callback, app);
-    //"5V on GPIO" to toggle on/off, which just sets up the bridge
     view_dispatcher_switch_to_view(app->view_dispatcher, FcomMainMenuView);
 }
 
