@@ -7,7 +7,10 @@ Currently tested:
 - DM20
 - DMX
 - PenZ
-- DMC unsupported
+- DMC
+- PenOG
+- PenProg
+- PenX
 
 Untested:
 - All other pets (Pen20, Original Pets, etc)
