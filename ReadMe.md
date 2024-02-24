@@ -50,6 +50,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Matagotchi v1.1 (By MrModd)](https://github.com/MrModd/Matagotchi) [Refactor features to ease the addition of new ones #3](https://github.com/MrModd/Matagotchi/pull/3)
 - Updated: [NFC Seader v2.4 (By bettse)](https://github.com/bettse/seader)
 - New Evil Portal asset: [Better Facebook Portal #100 (By MadeBySaints)](https://github.com/bigbrodude6119/flipper-zero-evil-portal/pull/100)
+- SubGhz: [Display Weather Station temperature in units matching system locale (By cquick01)](71612171c6b732042fa4d41baf3f62c2307c233a)
+- SubGhz: [Display Weather Station temperature in units matching system locale (By cquick01)]()
 
 <a name="release">
 
