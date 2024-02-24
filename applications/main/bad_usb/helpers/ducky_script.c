@@ -596,7 +596,8 @@ static int32_t bad_usb_worker(void* context) {
                 continue;
             }
         } else if(worker_state == BadUsbStateStringDelay) { // State: print string with delays
-            uint32_t delay = (bad_usb->stringdelay == 0) ? bad_usb->defstringdelay : bad_usb->stringdelay;
+            uint32_t delay = (bad_usb->stringdelay == 0) ? bad_usb->defstringdelay :
+                                                           bad_usb->stringdelay;
             uint32_t flags = bad_usb_flags_get(
                 WorkerEvtEnd | WorkerEvtStartStop | WorkerEvtPauseResume | WorkerEvtDisconnect,
                 delay);

@@ -4,7 +4,7 @@ A menu to select which listen mode the fcom should enter
 -2 prong / vpet
 -3 prong / penx
 -xros mini
-(possibly color in the future)
+-color
 */
 
 #include "flipper.h"
@@ -17,14 +17,14 @@ void fcom_listen_menu_scene_on_enter(void* context) {
     FURI_LOG_I(TAG, "fcom_listen_menu_scene_on_enter");
     App* app = context;
     submenu_reset(app->submenu);
-    //submenu_set_header(app->submenu, "F-Com");
     submenu_add_item(
         app->submenu, "V-Pet / 2Prong", ListenMenuSelection2Prong, fcom_listen_menu_callback, app);
     submenu_add_item(
         app->submenu, "PenX / 3Prong", ListenMenuSelection3Prong, fcom_listen_menu_callback, app);
     submenu_add_item(
         app->submenu, "Xros Mini", ListenMenuSelectionXrosMini, fcom_listen_menu_callback, app);
-    //"5V on GPIO" to toggle on/off, which just sets up the bridge
+    submenu_add_item(
+        app->submenu, "Color", ListenMenuSelectionColor, fcom_listen_menu_callback, app);
     view_dispatcher_switch_to_view(app->view_dispatcher, FcomMainMenuView);
 }
 
@@ -43,6 +43,9 @@ void fcom_listen_menu_callback(void* context, uint32_t index) {
         scene_manager_handle_custom_event(
             app->scene_manager, ListenMenuSceneSelectionEventXrosMini);
         break;
+    case ListenMenuSelectionColor:
+        scene_manager_handle_custom_event(app->scene_manager, ListenMenuSceneSelectionEventColor);
+        break;
     }
 }
 
@@ -55,17 +58,22 @@ bool fcom_listen_menu_scene_on_event(void* context, SceneManagerEvent event) {
     case SceneManagerEventTypeCustom:
         switch(event.event) {
         case ListenMenuSceneSelectionEvent2Prong:
-            strncpy(app->state->current_code, "V0\n", MAX_FILENAME_LEN);
+            strncpy(app->state->current_code, "V0\n", MAX_DIGIROM_LEN);
             scene_manager_next_scene(app->scene_manager, FcomReadCodeScene);
             consumed = true;
             break;
         case ListenMenuSceneSelectionEvent3Prong:
-            strncpy(app->state->current_code, "X0\n", MAX_FILENAME_LEN);
+            strncpy(app->state->current_code, "X0\n", MAX_DIGIROM_LEN);
             scene_manager_next_scene(app->scene_manager, FcomReadCodeScene);
             consumed = true;
             break;
         case ListenMenuSceneSelectionEventXrosMini:
-            strncpy(app->state->current_code, "Y0\n", MAX_FILENAME_LEN);
+            strncpy(app->state->current_code, "Y0\n", MAX_DIGIROM_LEN);
+            scene_manager_next_scene(app->scene_manager, FcomReadCodeScene);
+            consumed = true;
+            break;
+        case ListenMenuSceneSelectionEventColor:
+            strncpy(app->state->current_code, "C0\n", MAX_DIGIROM_LEN);
             scene_manager_next_scene(app->scene_manager, FcomReadCodeScene);
             consumed = true;
             break;

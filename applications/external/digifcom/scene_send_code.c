@@ -9,95 +9,109 @@ Right will go to the save code dialog for the new code (if there is one)
 #include "flipper.h"
 #include "app_state.h"
 #include "scenes.h"
+#include "dmcomm_lib/fcom.h"
 #include "scene_send_code.h"
 #include <furi_hal_cortex.h>
 
-/*
-Callback from dmcomm serial output. Similar to the callback in read code,
-but output is single sided
-*/
-void scbs(void* context) {
+// These need to persist between processInput calls as the serial data comes in at random points
+static char curcode = 0;
+static bool first = false;
+
+void processInput(void* context) {
     furi_assert(context);
     App* app = context;
 
     char out[64];
-    size_t recieved = 0;
+    size_t recieved = 1;
     memset(out, 0, 64);
 
-    recieved = furi_stream_buffer_receive(app->dmcomm_output_stream, &out, 63, 0);
-    UNUSED(recieved);
-    FURI_LOG_I(TAG, "DMComm Data: %s", out);
+    while(recieved > 0) {
+        recieved = furi_stream_buffer_receive(app->dmcomm_output_stream, &out, 63, 5);
 
-    if(app->state->waitForCode) {
-        FURI_LOG_I(TAG, "reading code");
-        furi_string_reset(app->state->r_code);
-        furi_string_reset(app->state->s_code);
-        int rpackets = 0;
-        int spackets = 0;
-        int l = strlen(out);
-        int first = true;
-        for(int i = 0; i < l; i++) {
-            if(out[i] == 's' && i + 5 < l) {
-                FURI_LOG_I(TAG, "found s");
-                if(furi_string_empty(app->state->s_code)) {
-                    if(first) {
-                        furi_string_cat_printf(app->state->s_code, "V1-");
-                        first = false;
-                    } else
-                        furi_string_cat_printf(app->state->s_code, "V2-");
-                } else
-                    furi_string_cat_printf(app->state->s_code, "-");
+        if(app->state->waitForCode && recieved > 0) {
+            FURI_LOG_I(TAG, "DMComm Sent Data: %d <%s>", recieved, out);
+            //FURI_LOG_I(TAG, "reading code");
+            int l = strlen(out);
+            for(int i = 0; i < l; i++) {
+                if(out[i] == 't') { // reset for timeout and continue :(
+                    curcode = 0;
+                    first = true;
+                    app->state->spackets = 0;
+                    app->state->rpackets = 0;
+                    furi_string_reset(app->state->r_code);
+                    furi_string_reset(app->state->s_code);
+                } else if(out[i] == 's') { // Starts an s code block
+                    curcode = 's';
+                    if(furi_string_empty(app->state->s_code)) {
+                        furi_string_push_back(app->state->s_code, app->state->current_code[0]);
+                        if(first) {
+                            first = false;
+                            furi_string_push_back(app->state->s_code, '1');
+                        } else
+                            furi_string_push_back(app->state->s_code, '2');
+                    }
+                    furi_string_push_back(app->state->s_code, '-');
+                } else if(out[i] == 'r') { // Starts an r code block
+                    curcode = 'r';
+                    if(furi_string_empty(app->state->r_code)) {
+                        furi_string_push_back(app->state->r_code, app->state->current_code[0]);
+                        if(first) {
+                            first = false;
+                            furi_string_push_back(app->state->r_code, '1');
+                        } else
+                            furi_string_push_back(app->state->r_code, '2');
+                    }
+                    furi_string_push_back(app->state->r_code, '-');
+                } else if(
+                    ('A' <= out[i] && out[i] <= 'Z') ||
+                    ('0' <= out[i] &&
+                     out[i] <= '9')) { // If we're reading a code, read alphanum into the code
+                    if(curcode == 's') furi_string_push_back(app->state->s_code, out[i]);
+                    if(curcode == 'r') furi_string_push_back(app->state->r_code, out[i]);
+                } else if(curcode != 0 && out[i] == ' ') { // If we're reading a code, a space ends it
+                    if(curcode == 's') app->state->spackets++;
+                    if(curcode == 'r') app->state->rpackets++;
+                    curcode = 0;
+                }
 
-                i += 2; // :
-                for(int j = 0; j < 4; j++)
-                    furi_string_push_back(app->state->s_code, out[i++]); // 4 hex
-                spackets++;
+                // if spackets == rpackets and spackets = code packets, then present code for saving
+                // and stop scanning for new codes. Perhaps shutdown dmcomm at this point?
+                if(app->state->rpackets == app->state->codeLen &&
+                   app->state->spackets == app->state->codeLen) {
+                    FURI_LOG_I(TAG, "s code %s", furi_string_get_cstr(app->state->s_code));
+                    FURI_LOG_I(TAG, "r code %s", furi_string_get_cstr(app->state->r_code));
+                    if(strlen(app->state->current_code) > 2 && app->state->current_code[1] == '1')
+                        dialog_ex_set_text(
+                            app->dialog,
+                            furi_string_get_cstr(app->state->r_code),
+                            10,
+                            24,
+                            AlignLeft,
+                            AlignTop);
+                    else
+                        dialog_ex_set_text(
+                            app->dialog,
+                            furi_string_get_cstr(app->state->s_code),
+                            10,
+                            24,
+                            AlignLeft,
+                            AlignTop);
+
+                    dialog_ex_set_right_button_text(app->dialog, "Save");
+                    app->state->waitForCode = false;
+                    break; // stop reading data
+                    FURI_LOG_I(TAG, "done");
+                }
             }
-
-            if(out[i] == 'r' && i + 5 < l) {
-                FURI_LOG_I(TAG, "found r");
-                if(furi_string_empty(app->state->r_code)) {
-                    if(first) {
-                        furi_string_cat_printf(app->state->r_code, "V1-");
-                        first = false;
-                    } else
-                        furi_string_cat_printf(app->state->r_code, "V2-");
-                } else
-                    furi_string_cat_printf(app->state->r_code, "-");
-
-                i += 2; // :
-                for(int j = 0; j < 4; j++)
-                    furi_string_push_back(app->state->r_code, out[i++]); // 4 hex
-                rpackets++;
-            }
-        }
-
-        //if spackets == rpackets and spackets = code packets, then present code for saving
-        if(rpackets > 0 && spackets > 0 && abs(rpackets - spackets) <= 1) {
-            FURI_LOG_I(TAG, "s code %s", furi_string_get_cstr(app->state->s_code));
-            FURI_LOG_I(TAG, "r code %s", furi_string_get_cstr(app->state->r_code));
-            if(strlen(app->state->current_code) > 2 && app->state->current_code[1] == '1')
-                dialog_ex_set_text(
-                    app->dialog,
-                    furi_string_get_cstr(app->state->r_code),
-                    10,
-                    24,
-                    AlignLeft,
-                    AlignTop);
-            else
-                dialog_ex_set_text(
-                    app->dialog,
-                    furi_string_get_cstr(app->state->s_code),
-                    10,
-                    24,
-                    AlignLeft,
-                    AlignTop);
-
-            dialog_ex_set_right_button_text(app->dialog, "Save");
-            app->state->waitForCode = false;
-            FURI_LOG_I(TAG, "done");
         }
     }
+}
+
+void scbs(void* context) {
+    // This needs to be pretty short or it will delay comms
+    furi_assert(context);
+    App* app = context;
+    view_dispatcher_send_custom_event(app->view_dispatcher, SerialInputAvailable);
 }
 
 void send_code_dialog_callback(DialogExResult result, void* context) {
@@ -106,19 +120,25 @@ void send_code_dialog_callback(DialogExResult result, void* context) {
     App* app = context;
 
     if(result == DialogExResultRight) {
+        // If we are still waiting for a code, don't do anything
+        if(app->state->waitForCode) return;
+        // If either code is empty, then don't do anything
         if(furi_string_empty(app->state->r_code)) return;
         if(furi_string_empty(app->state->s_code)) return;
+
         // save code
         if(strlen(app->state->current_code) > 2 && app->state->current_code[1] == '1')
             strncpy(
                 app->state->result_code,
                 furi_string_get_cstr(app->state->r_code),
-                MAX_FILENAME_LEN);
+                MAX_DIGIROM_LEN);
         else
             strncpy(
                 app->state->result_code,
                 furi_string_get_cstr(app->state->s_code),
-                MAX_FILENAME_LEN);
+                MAX_DIGIROM_LEN);
+
+        // Come back to this scene after code save
         app->state->save_code_return_scene = FcomSendCodeScene;
         scene_manager_next_scene(app->scene_manager, FcomSaveCodeScene);
     }
@@ -128,6 +148,7 @@ void fcom_send_code_scene_on_enter(void* context) {
     FURI_LOG_I(TAG, "fcom_send_code_scene_on_enter");
     App* app = context;
 
+    // Initialize our GUI
     dialog_ex_set_header(app->dialog, app->state->current_code, 64, 2, AlignCenter, AlignTop);
     dialog_ex_set_text(app->dialog, "Response Code Goes Here", 10, 24, AlignLeft, AlignTop);
     dialog_ex_set_left_button_text(app->dialog, NULL);
@@ -138,22 +159,46 @@ void fcom_send_code_scene_on_enter(void* context) {
     dialog_ex_set_context(app->dialog, app);
 
     // Setup dmcomm to send
+    curcode = 0;
+    first = true;
+    app->state->codeLen = 0;
+    app->state->rpackets = 0;
+    app->state->spackets = 0;
+    for(size_t i = 0; i < strlen(app->state->current_code); i++) {
+        if(app->state->current_code[i] == '-') app->state->codeLen++;
+    }
     app->state->waitForCode = true;
-    setSerialOutputCallback(scbs);
+    set_serial_callback(scbs);
     furi_string_reset(app->state->r_code);
     furi_string_reset(app->state->s_code);
+
+    // Trigger send
     dmcomm_sendcommand(app, app->state->current_code);
     dmcomm_sendcommand(app, "\n");
 
+    // start UI
     view_dispatcher_switch_to_view(app->view_dispatcher, FcomSendCodeView);
 }
 
 bool fcom_send_code_scene_on_event(void* context, SceneManagerEvent event) {
     FURI_LOG_I(TAG, "fcom_send_code_scene_on_event");
-    UNUSED(context);
-    UNUSED(event);
-
-    return false; //consumed event
+    App* app = context;
+    bool consumed = false;
+    switch(event.type) {
+    case SceneManagerEventTypeCustom:
+        switch(event.event) {
+        case SerialInputAvailable:
+            // DMComm sent us some data, so process it
+            processInput(app);
+            consumed = true;
+            break;
+        }
+        break;
+    default: // eg. SceneManagerEventTypeBack, SceneManagerEventTypeTick
+        consumed = false;
+        break;
+    }
+    return consumed;
 }
 
 void fcom_send_code_scene_on_exit(void* context) {
@@ -161,7 +206,9 @@ void fcom_send_code_scene_on_exit(void* context) {
     App* app = context;
 
     // Clear out dmcomm
-    setSerialOutputCallback(NULL);
+    set_serial_callback(NULL);
+
+    // pause dmcomm
     dmcomm_sendcommand(app, "0\n");
     app->state->waitForCode = false;
 }

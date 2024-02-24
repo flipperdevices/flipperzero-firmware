@@ -20,11 +20,11 @@ static void file_browser_callback(void* context) {
     file_type = furi_string_alloc();
     string_value = furi_string_alloc();
     do {
-        FURI_LOG_I(TAG, "opening %s", furi_string_get_cstr(app->file_path));
+        //FURI_LOG_I(TAG, "opening %s", furi_string_get_cstr(app->file_path));
         if(!flipper_format_file_open_existing(file, furi_string_get_cstr(app->file_path))) break;
-        FURI_LOG_I(TAG, "reading header");
+        //FURI_LOG_I(TAG, "reading header");
         if(!flipper_format_read_header(file, file_type, &version)) break;
-        FURI_LOG_I(TAG, "read header %s %d", furi_string_get_cstr(file_type), (int)version);
+        //FURI_LOG_I(TAG, "read header %s %d", furi_string_get_cstr(file_type), (int)version);
         if(!flipper_format_read_string(file, "Code", string_value)) break;
         FURI_LOG_I(TAG, "read code %s", furi_string_get_cstr(string_value));
 
@@ -34,12 +34,11 @@ static void file_browser_callback(void* context) {
     flipper_format_file_close(file);
     flipper_format_free(file);
 
-    strncpy(app->state->current_code, furi_string_get_cstr(string_value), MAX_FILENAME_LEN);
+    strncpy(app->state->current_code, furi_string_get_cstr(string_value), MAX_DIGIROM_LEN);
 
     FURI_LOG_I(TAG, "file_browser_callback read %s", app->state->current_code);
 
     scene_manager_next_scene(app->scene_manager, FcomSendCodeScene);
-    //view_dispatcher_send_custom_event(app->view_dispatcher, SceneManagerEventTypeCustom);
 }
 
 void fcom_select_code_scene_on_enter(void* context) {

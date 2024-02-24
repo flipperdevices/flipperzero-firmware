@@ -1,13 +1,18 @@
 
 # Flipper Zero F-Com
 
+## Overview
+
 A Flipper Zero app that allows the flipper to communicate with Digimon V-Pets.
 
 Currently tested:
 - DM20
 - DMX
 - PenZ
-- DMC unsupported
+- DMC
+- PenOG
+- PenProg
+- PenX
 
 Untested:
 - All other pets (Pen20, Original Pets, etc)
@@ -18,17 +23,23 @@ Based on:
 - The Flipper Zero Boilerplate App: https://github.com/leedave/flipper-zero-fap-boilerplate
 - The Flipper Zero Firmware: https://github.com/flipperdevices/flipperzero-firmware
 
-## Overview
+### Youtube Example
+
+[![Video showing app in action](https://img.youtube.com/vi/pggRzHnXlF4/0.jpg)](https://www.youtube.com/watch?v=pggRzHnXlF4)
+
+## Flipper Hat Module
 
 You will need to construct a circuit similar to the A-Com circuit described in teh dmcomm-project github.
 
-Pin C3 - 2k resistor - Pin A3 - 6k resistor - Pin GND
+![Schematic](screenshots/flipper_vpet_circuit.png)
 
-Pin A3 - VPet+
+Pin C3 - 2k resistor - Pin A4 - 10k resistor - Pin GND
+
+Pin A4 - VPet+
 
 Pin GND - VPet-
 
-### Installation
+## Installation
 
 The F-Com app is compiled and installed with [ufbt](https://github.com/flipperdevices/flipperzero-ufbt)
 
