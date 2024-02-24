@@ -60,7 +60,7 @@ void nfc_playlist_main_menu_scene_on_enter(void* context) {
       NfcPlaylistMenuSelection_FileSelect,
       nfc_playlist_main_menu_menu_callback,
       nfc_playlist);
-   
+
    submenu_add_item(
       nfc_playlist->submenu,
       "Edit playlist",
@@ -101,7 +101,7 @@ bool nfc_playlist_main_menu_scene_on_event(void* context, SceneManagerEvent even
          default:
             break;
       }
-   } 
+   }
    return consumed;
 }
 

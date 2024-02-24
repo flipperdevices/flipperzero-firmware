@@ -1,11 +1,6 @@
 # FlipperZero_NFC_Playlist:
 The idea behind this app is to allow for you to test multiple copies of NFC's at once as a bulk test
 
-## Know issue:
-At the end of some playlists it will cause the flipperZero to crash there is no eta when it come to the fix of this as i still trying to figure out what is causing the issue, it appears to of started after an update to the firmware so is probably just a compatibility issue
-
-Any help in finding or fixing the issue would be amazing
-
 ## How it works:
 When starting the app you are greeted by a select file option where you choose the playlist you wanna run.
 
