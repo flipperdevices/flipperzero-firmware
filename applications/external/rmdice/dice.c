@@ -5,7 +5,7 @@
 #include <gui/gui.h>
 #include <input/input.h>
 #include <dolphin/dolphin.h>
-#include "dice_icons.h"
+#include "dice_rm_icons.h"
 
 #if __has_include(<cfw/cfw.h>)
 #include "applications/settings/desktop_settings/desktop_settings_app.h"
@@ -141,16 +141,16 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
                 "What are you waiting for?",
                 "You could do worse things.",
                 "Sure, I won't tell.",
-                "Yeah, you got this. Would I lie to you?",
+                "Yeah, u got this. Would I lie?",
                 "Looks like fun to me. ",
                 "Yeah, sure, why not?",
                 "DO IT!!!",
                 "Who's it gonna hurt?",
                 "Can you blame someone else?",
                 "Ask me again later.",
-                "Maybe, maybe not, I can't tell right now. ",
+                "I can't tell right now.",
                 "Are you the betting type? ",
-                "Don't blame me if you get caught.",
+                "Don't blame me if you caught.",
                 "What have you got to lose?",
                 "I wouldn't if I were you.",
                 "My money's on the snowball.",
@@ -401,7 +401,11 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
             canvas_draw_str_aligned(canvas, 64, 26, AlignCenter, AlignCenter, state->strings[2]);
             canvas_draw_str_aligned(canvas, 64, 34, AlignCenter, AlignCenter, state->strings[3]);
         } else if(state->diceSelect == 228 || state->diceSelect == 229) {
+#ifdef CANVAS_HAS_FONT_BATTERYPERCENT
             canvas_set_font(canvas, FontBatteryPercent);
+#else
+            canvas_set_font(canvas, FontSecondary);
+#endif
             canvas_draw_str_aligned(canvas, 64, 20, AlignCenter, AlignCenter, state->strings[1]);
             canvas_set_font(canvas, FontSecondary);
             canvas_draw_str_aligned(canvas, 64, 8, AlignCenter, AlignCenter, state->strings[0]);

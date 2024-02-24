@@ -3,6 +3,8 @@ GamesMenuList Version 0
 /ext/apps/Games/2048_improved.fap
 /ext/apps/Games/4_in_a_row.fap
 /ext/apps/Games/99.fap
+/ext/apps/GPIO/VGM/air_arkanoid.fap
+/ext/apps/GPIO/VGM/air_labyrinth.fap
 /ext/apps/Games/arkanoid.fap
 /ext/apps/Games/asteroids.fap
 /ext/apps/Games/blackjack.fap
@@ -13,7 +15,7 @@ GamesMenuList Version 0
 /ext/apps/Games/color_guess.fap
 /ext/apps/Games/connect_wires.fap
 /ext/apps/Games/crossy_road.fap
-/ext/apps/Games/dice.fap
+/ext/apps/Games/dice_rm.fap
 /ext/apps/Games/dnd_dice_app.fap
 /ext/apps/Games/doom.fap
 /ext/apps/Games/dvd_bouncer.fap
@@ -22,7 +24,7 @@ GamesMenuList Version 0
 /ext/apps/Games/flappybird.fap
 /ext/apps/Games/game15.fap
 /ext/apps/Games/gameoflife.fap
-/ext/apps/Games/guess_the_number_dev.fap
+/ext/apps/Games/guess_the_number.fap
 /ext/apps/Games/hangman.fap
 /ext/apps/Games/heap_defence.fap
 /ext/apps/Games/jetpack.fap
@@ -32,6 +34,7 @@ GamesMenuList Version 0
 /ext/apps/Games/montyhall.fap
 /ext/apps/Games/multi_counter.fap
 /ext/apps/Games/nu_pogodi.fap
+/ext/apps/Games/pacman.fap
 /ext/apps/Games/paint.fap
 /ext/apps/Games/paper_plane.fap
 /ext/apps/Games/pong.fap
@@ -57,13 +60,16 @@ GamesMenuList Version 0
 /ext/apps/Games/super_chip.fap
 /ext/apps/Games/tama_p1.fap
 /ext/apps/Games/tanks.fap
+/ext/apps/Games/tarot.fap
 /ext/apps/Games/tetris.fap
 /ext/apps/Games/tetris_modern.fap
 /ext/apps/Games/tictactoe.fap
 /ext/apps/Games/tic_tac_toe_multi.fap
 /ext/apps/Games/trex_runner.fap
 /ext/apps/Games/ultimate_tic_tac_toe.fap
+/ext/apps/GPIO/VGM/vgm_air_mouse.fap
 /ext/apps/Games/vexed.fap
+/ext/apps/GPIO/VGM/video_game_module_tool.fap
 /ext/apps/Games/videopoker.fap
 /ext/apps/Games/yatzee.fap
 /ext/apps/Games/zero.fap
