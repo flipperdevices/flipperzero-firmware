@@ -18,6 +18,7 @@ Right will go to the save code dialog for the new code (if there is one)
 // These need to persist between processInput calls as the serial data comes in at random points
 static char curcode = 0;
 static bool first = false;
+static bool assert_next_colon = false; // Necessary for managing state
 
 void processInput(void* context)
 {
@@ -26,16 +27,16 @@ void processInput(void* context)
 
     char out[64];
     size_t recieved = 1;
-    memset(out, 0, 64);
 
     while(recieved > 0)
     {
+        memset(out, 0, 64);
         recieved = furi_stream_buffer_receive(
             app->dmcomm_output_stream,
             &out,
             63,
             5);
-    
+
         if(app->state->waitForCode && recieved > 0)
         {
             FURI_LOG_I(TAG, "DMComm Sent Data: %d <%s>", recieved, out);
@@ -43,8 +44,9 @@ void processInput(void* context)
             int l = strlen(out);
             for(int i = 0; i < l; i++)
             {
-                if(out[i] == 't')
+                if(out[i] == 't' || (assert_next_colon && out[i] != ':'))
                 { // reset for timeout and continue :(
+                    //FURI_LOG_I(TAG, "reset codes");
                     curcode = 0;
                     first = true;
                     app->state->spackets = 0;
@@ -52,35 +54,49 @@ void processInput(void* context)
                     furi_string_reset(app->state->r_code);
                     furi_string_reset(app->state->s_code);
                 }
-                else if(out[i] == 's')
+                if(assert_next_colon)
+                    assert_next_colon = false;
+                if(out[i] == 's')
                 { // Starts an s code block
                     curcode = 's';
+                    assert_next_colon = true;
+                    //FURI_LOG_I(TAG, "read s");
                     if(furi_string_empty(app->state->s_code))
                     {
                         furi_string_push_back(app->state->s_code, app->state->current_code[0]);
                         if(first)
                         {
+                            //FURI_LOG_I(TAG, "s first");
                             first = false;
                             furi_string_push_back(app->state->s_code, '1');
                         }
                         else
+                        {
+                            //FURI_LOG_I(TAG, "s second");
                             furi_string_push_back(app->state->s_code, '2');
+                        }
                     }
                     furi_string_push_back(app->state->s_code, '-');
                 }
                 else if(out[i] == 'r')
                 { // Starts an r code block
                     curcode = 'r';
+                    assert_next_colon = true;
+                    //FURI_LOG_I(TAG, "read r");
                     if(furi_string_empty(app->state->r_code))
                     {
                         furi_string_push_back(app->state->r_code, app->state->current_code[0]);
                         if(first)
                         {
+                            //FURI_LOG_I(TAG, "r first");
                             first = false;
                             furi_string_push_back(app->state->r_code, '1');
                         }
                         else
+                        {
+                            //FURI_LOG_I(TAG, "r second");
                             furi_string_push_back(app->state->r_code, '2');
+                        }
                     }
                     furi_string_push_back(app->state->r_code, '-');
                 }
@@ -91,7 +107,7 @@ void processInput(void* context)
                     if(curcode == 'r')
                         furi_string_push_back(app->state->r_code, out[i]);
                 }
-                else if(curcode != 0 && out[i] == ' ')
+                else if(curcode != 0 && (out[i] == ' ' || out[i] == '\n'))
                 { // If we're reading a code, a space ends it
                     if(curcode == 's')
                         app->state->spackets++;
