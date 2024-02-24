@@ -13,28 +13,6 @@ Right will go to the save code dialog for the new code (if there is one)
 #include "scene_send_code.h"
 #include <furi_hal_cortex.h>
 
-/*
-Callback from dmcomm serial output. Similar to the callback in read code,
-but output is single sided
-
-
-206199692 [I][FCOM] DMComm Data: s:800E r:023E s:218E r:A02E s:483E r:B69E s:142E r:28CE s:010E 
-206199696 [I][FCOM] reading code
-206199698 [I][FCOM] found s
-206199700 [I][FCOM] found r
-206199701 [I][FCOM] found s
-206199703 [I][FCOM] found r
-206199705 [I][FCOM] found s
-206199707 [I][FCOM] found r
-206199708 [I][FCOM] found s
-206199710 [I][FCOM] found r
-206199712 [I][FCOM] found s
-206199714 [I][FCOM] s code V1-800E-218E-483E-142E-010E
-206199717 [I][FCOM] r code V2-023E-A02E-B69E-28CE-0C6E-11FE
-206199726 [I][FCOM] done
-206210730 [I][FCOM] DMComm Data: r:0C6E s:A00E r:11FE
-*/
-
 // These need to persist between processInput calls as the serial data comes in at random points
 static char curcode = 0;
 static bool first = false;
@@ -77,13 +55,14 @@ void processInput(void* context)
                     curcode = 's';
                     if(furi_string_empty(app->state->s_code))
                     {
+                        furi_string_push_back(app->state->s_code, app->state->current_code[0]);
                         if(first)
                         {
                             first = false;
-                            furi_string_cat_printf(app->state->s_code, "V1");
+                            furi_string_push_back(app->state->s_code, '1');
                         }
                         else
-                            furi_string_cat_printf(app->state->s_code, "V2");
+                            furi_string_push_back(app->state->s_code, '2');
                     }
                     furi_string_push_back(app->state->s_code, '-');
                 }
@@ -92,13 +71,14 @@ void processInput(void* context)
                     curcode = 'r';
                     if(furi_string_empty(app->state->r_code))
                     {
+                        furi_string_push_back(app->state->r_code, app->state->current_code[0]);
                         if(first)
                         {
                             first = false;
-                            furi_string_cat_printf(app->state->r_code, "V1");
+                            furi_string_push_back(app->state->r_code, '1');
                         }
                         else
-                            furi_string_cat_printf(app->state->r_code, "V2");
+                            furi_string_push_back(app->state->r_code, '2');
                     }
                     furi_string_push_back(app->state->r_code, '-');
                 }
@@ -153,15 +133,22 @@ void send_code_dialog_callback(DialogExResult result, void* context) {
     App* app = context;
 
     if(result == DialogExResultRight) {
+        // If we are still waiting for a code, don't do anything
+        if(app->state->waitForCode)
+            return;
+        // If either code is empty, then don't do anything
         if(furi_string_empty(app->state->r_code))
             return;
         if(furi_string_empty(app->state->s_code))
             return;
+
         // save code
         if(strlen(app->state->current_code) > 2 && app->state->current_code[1] == '1')
             strncpy(app->state->result_code, furi_string_get_cstr(app->state->r_code), MAX_DIGIROM_LEN);
         else
             strncpy(app->state->result_code, furi_string_get_cstr(app->state->s_code), MAX_DIGIROM_LEN);
+        
+        // Come back to this scene after code save
         app->state->save_code_return_scene = FcomSendCodeScene;
         scene_manager_next_scene(app->scene_manager, FcomSaveCodeScene);
     }
@@ -171,6 +158,7 @@ void fcom_send_code_scene_on_enter(void* context) {
     FURI_LOG_I(TAG, "fcom_send_code_scene_on_enter");
     App* app = context;
 
+    // Initialize our GUI
     dialog_ex_set_header(app->dialog, app->state->current_code, 64, 2, AlignCenter, AlignTop);
     dialog_ex_set_text(app->dialog, "Response Code Goes Here", 10, 24, AlignLeft, AlignTop);
     dialog_ex_set_left_button_text(app->dialog, NULL);
@@ -194,9 +182,12 @@ void fcom_send_code_scene_on_enter(void* context) {
     set_serial_callback(scbs);
     furi_string_reset(app->state->r_code);
     furi_string_reset(app->state->s_code);
+
+    // Trigger send
     dmcomm_sendcommand(app, app->state->current_code);
     dmcomm_sendcommand(app, "\n");
 
+    // start UI
     view_dispatcher_switch_to_view(app->view_dispatcher, FcomSendCodeView);
 }
 
@@ -208,6 +199,7 @@ bool fcom_send_code_scene_on_event(void* context, SceneManagerEvent event) {
         case SceneManagerEventTypeCustom:
             switch(event.event) {
                 case SerialInputAvailable:
+                    // DMComm sent us some data, so process it
                     processInput(app);
                     consumed = true;
                     break;
@@ -226,6 +218,8 @@ void fcom_send_code_scene_on_exit(void* context) {
 
     // Clear out dmcomm
     set_serial_callback(NULL);
+
+    // pause dmcomm
     dmcomm_sendcommand(app, "0\n");
     app->state->waitForCode = false;
 }

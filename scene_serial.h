@@ -1,3 +1,9 @@
+/*
+Starts a USB Serial CDC device on the flipper's USB port
+and then binds it to the dmcomm serial streams.
+
+This turns the flipper basically into an A-Com
+*/
 #ifndef SCENE_SERIAL_HEADERS
 #define SCENE_SERIAL_HEADERS
 

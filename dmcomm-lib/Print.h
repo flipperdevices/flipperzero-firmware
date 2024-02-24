@@ -1,4 +1,4 @@
-#include "dmcomm/hal.h"
+#include "arduino.h"
 
 #define DEC 10
 #define HEX 16

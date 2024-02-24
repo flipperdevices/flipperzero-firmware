@@ -1,3 +1,6 @@
+/*
+Main Menu
+*/
 #ifndef SCENE_MAIN_MENU_HEADERS
 #define SCENE_MAIN_MENU_HEADERS
 

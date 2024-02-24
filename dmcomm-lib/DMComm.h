@@ -3,7 +3,7 @@
 #ifndef DMCOMM_H_
 #define DMCOMM_H_
 
-#include "dmcomm/hal.h"
+#include "arduino.h"
 
 #define DMCOMM_NO_PIN 0xFF
 #define DMCOMM_SIGNAL_TIMED_OUT 0xFFFFFFFF

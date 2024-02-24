@@ -17,18 +17,18 @@ void digitalWriteMaybe(uint8_t pin, uint8_t val) {
     }
 }
 #else
+
+/*
+This initialization is handled by the flipper pin classes
+*/
 void pinModeMaybe(uint8_t pin, uint8_t mode) {
+    UNUSED(pin);
     UNUSED(mode);
-    if (pin != DMCOMM_NO_PIN) {
-        //pinMode(pin, mode);
-    }
 }
 
 void digitalWriteMaybe(uint8_t pin, uint8_t val) {
+    UNUSED(pin);
     UNUSED(val);
-    if (pin != DMCOMM_NO_PIN) {
-        //digitalWrite(pin, val);
-    }
 }
 #endif
 } /* namespace DMComm */

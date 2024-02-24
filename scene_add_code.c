@@ -9,11 +9,12 @@ bool add_code_text_input_validator(const char* text, FuriString* error, void* co
     UNUSED(context);
     int len = strlen(text);
     // TODO: Add code validation
-    // First character is YVX
+    // First character is YVXC
     // Second is 012
     // Dash
-    // Group of 4 hex (with possible additional @ or ^ characters preceeding each hex digit)
+    // Group of hex (with possible additional @ or ^ characters preceeding each hex digit)
     // repeat
+    // Perhaps length of groups based on code type?
     if(len < 4)
     {
         furi_string_printf(error, "Code is invalid.");
@@ -68,7 +69,6 @@ bool fcom_add_code_scene_on_event(void* context, SceneManagerEvent event) {
 void fcom_add_code_scene_on_exit(void* context) {
     FURI_LOG_I(TAG, "fcom_read_scene_on_exit");
     UNUSED(context);
-    App* app = context;
     UNUSED(app);
 }
 

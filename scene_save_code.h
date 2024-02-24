@@ -1,3 +1,7 @@
+/*
+Takes a file name for input and then saves the code
+entered in the add_code scene
+*/
 #ifndef SCENE_HCSR04_HEADERS
 #define SCENE_HCSR04_HEADERS
 

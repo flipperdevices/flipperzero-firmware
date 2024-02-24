@@ -1,3 +1,7 @@
+/*
+Opens a file browser to pick an fcom code file from the flipper file system
+Reads that code, and then invokes the send code scene.
+*/
 #ifndef SCENE_SELECT_CODE_HEADERS
 #define SCENE_SELECT_CODE_HEADERS
 

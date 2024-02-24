@@ -1,15 +1,5 @@
 #include "app_state.h"
-#include "dmcomm/hal.h"
-
-/*
-TODO:
-- convert dmcomm loop into a furi thread
-- replace serial read/write with furi notification messages
-
-- create and start USB serial thread in serial bit
-- create thread to link USB serial to dmcomm
-
-*/
+#include "arduino.h"
 
 App* app_alloc() {
     App* app = malloc(sizeof(App));
@@ -62,9 +52,6 @@ App* app_alloc() {
 
     view_dispatcher_add_view(
         app->view_dispatcher, FcomFileSelectView, file_browser_get_view(app->file_browser));
-
-
-    setApp(app);
 
     app->dmcomm_run = true;
     app->dcomm_thread = furi_thread_alloc();
