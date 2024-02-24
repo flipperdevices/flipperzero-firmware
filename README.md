@@ -33,9 +33,9 @@ You will need to construct a circuit similar to the A-Com circuit described in t
 
 ![Schematic](screenshots/flipper_vpet_circuit.png)
 
-Pin C3 - 2k resistor - Pin A4 - 10k resistor - Pin GND
+Pin C3 - 2k resistor - Pin B2 - 10k resistor - Pin GND
 
-Pin A4 - VPet+
+Pin B2 - VPet+
 
 Pin GND - VPet-
 

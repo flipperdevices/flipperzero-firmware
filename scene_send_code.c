@@ -13,6 +13,8 @@ Right will go to the save code dialog for the new code (if there is one)
 #include "scene_send_code.h"
 #include <furi_hal_cortex.h>
 
+#define MAX_DISPLAY_BYTES 36
+
 // These need to persist between processInput calls as the serial data comes in at random points
 static char curcode = 0;
 static bool first = false;
@@ -104,10 +106,14 @@ void processInput(void* context)
                 {
                     FURI_LOG_I(TAG, "s code %s", furi_string_get_cstr(app->state->s_code));
                     FURI_LOG_I(TAG, "r code %s", furi_string_get_cstr(app->state->r_code));
+                    
                     if(strlen(app->state->current_code) > 2 && app->state->current_code[1] == '1')
-                        dialog_ex_set_text(app->dialog, furi_string_get_cstr(app->state->r_code), 10, 24, AlignLeft, AlignTop);
+                        furi_string_set_strn(app->dialog_text, furi_string_get_cstr(app->state->r_code), MAX_DISPLAY_BYTES);
                     else
-                        dialog_ex_set_text(app->dialog, furi_string_get_cstr(app->state->s_code), 10, 24, AlignLeft, AlignTop);
+                        furi_string_set_strn(app->dialog_text, furi_string_get_cstr(app->state->s_code), MAX_DISPLAY_BYTES);
+                    if(furi_string_size(app->dialog_text) >= MAX_DISPLAY_BYTES)
+                        furi_string_cat(app->dialog_text, "...");
+                    dialog_ex_set_text(app->dialog, furi_string_get_cstr(app->dialog_text), 10, 24, AlignLeft, AlignTop);
 
                     dialog_ex_set_right_button_text(app->dialog, "Save");
                     app->state->waitForCode = false;
@@ -159,7 +165,10 @@ void fcom_send_code_scene_on_enter(void* context) {
     App* app = context;
 
     // Initialize our GUI
-    dialog_ex_set_header(app->dialog, app->state->current_code, 64, 2, AlignCenter, AlignTop);
+    furi_string_set_strn(app->dialog_header, app->state->current_code, MAX_DISPLAY_BYTES);
+    if(furi_string_size(app->dialog_header) >= MAX_DISPLAY_BYTES)
+        furi_string_cat(app->dialog_header, "...");
+    dialog_ex_set_header(app->dialog, furi_string_get_cstr(app->dialog_header), 64, 2, AlignCenter, AlignTop);
     dialog_ex_set_text(app->dialog, "Response Code Goes Here", 10, 24, AlignLeft, AlignTop);
     dialog_ex_set_left_button_text(app->dialog, NULL);
     dialog_ex_set_right_button_text(app->dialog, NULL);

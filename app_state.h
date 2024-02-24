@@ -43,11 +43,14 @@ typedef struct App {
     // Widgets for views
     Submenu* submenu;
     DialogEx* dialog;
+    FuriString* dialog_header;
+    FuriString* dialog_text;
+
     TextInput* text_input;
     FileBrowser* file_browser;
     FuriString* file_path;
-    TextBox* text_box;
 
+    TextBox* text_box;
     FuriMutex* text_box_mutex; // lock so UI/Serial callbacks can communicate safely
     FuriString* text_box_store;
 
