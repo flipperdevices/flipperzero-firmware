@@ -134,7 +134,7 @@ static void ws_protocol_acurite_986_remote_controller(WSBlockGeneric* instance) 
     if(temp & 0x80) {
         temp = -(temp & 0x7F);
     }
-    instance->temp = locale_fahrenheit_to_celsius((float)temp);
+    instance->temp = (float)temp;
     instance->btn = WS_NO_BTN;
     instance->humidity = WS_NO_HUMIDITY;
 }
@@ -256,12 +256,13 @@ SubGhzProtocolStatus
 void ws_protocol_decoder_acurite_986_get_string(void* context, FuriString* output) {
     furi_assert(context);
     WSProtocolDecoderAcurite_986* instance = context;
+    bool locale_is_metric = furi_hal_rtc_get_locale_units() == FuriHalRtcLocaleUnitsMetric;
     furi_string_cat_printf(
         output,
         "%s\r\n%dbit\r\n"
         "Key:0x%lX%08lX\r\n"
         "Sn:0x%lX Ch:%d  Bat:%d\r\n"
-        "Temp:%3.1f C Hum:%d%%",
+        "Temp:%3.1f %c Hum:%d%%",
         instance->generic.protocol_name,
         instance->generic.data_count_bit,
         (uint32_t)(instance->generic.data >> 32),
@@ -269,6 +270,8 @@ void ws_protocol_decoder_acurite_986_get_string(void* context, FuriString* outpu
         instance->generic.id,
         instance->generic.channel,
         instance->generic.battery_low,
-        (double)instance->generic.temp,
+        (double)(locale_is_metric ? locale_fahrenheit_to_celsius(instance->generic.temp) :
+                                    instance->generic.temp),
+        locale_is_metric ? 'C' : 'F',
         instance->generic.humidity);
 }
