@@ -53,8 +53,7 @@ static NfcPlaylist* nfc_playlist_alloc() {
     nfc_playlist->variable_item_list = variable_item_list_alloc();
     nfc_playlist->submenu = submenu_alloc();
 
-    nfc_playlist->settings.base_file_path =
-        furi_string_alloc_set_str("/ext/apps_data/nfc_playlist/");
+    nfc_playlist->settings.base_file_path = furi_string_alloc_set_str(NFC_PLAYLIST_FOLDER);
     nfc_playlist->settings.file_path = nfc_playlist->settings.base_file_path;
     nfc_playlist->settings.file_selected = false;
     nfc_playlist->settings.file_selected_check = false;

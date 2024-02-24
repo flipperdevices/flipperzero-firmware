@@ -13,6 +13,8 @@
 #include <notification/notification_messages.h>
 #include <nfc_playlist_worker.h>
 
+#define NFC_PLAYLIST_FOLDER "/ext/apps_data/nfc_playlist"
+
 typedef enum {
     NfcPlaylistView_Menu,
     NfcPlaylistView_Settings,
