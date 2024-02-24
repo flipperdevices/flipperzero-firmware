@@ -21,6 +21,8 @@ Based on:
 - The Flipper Zero Boilerplate App: https://github.com/leedave/flipper-zero-fap-boilerplate
 - The Flipper Zero Firmware: https://github.com/flipperdevices/flipperzero-firmware
 
+## Youtube Example
+
 [![Video showing app in action](https://img.youtube.com/vi/pggRzHnXlF4/0.jpg)](https://www.youtube.com/watch?v=pggRzHnXlF4)
 
 ## Overview
