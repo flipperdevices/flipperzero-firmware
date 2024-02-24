@@ -4,11 +4,12 @@ App(
     apptype=FlipperAppType.EXTERNAL,
     entry_point="matagotchi_app",
     requires=["gui"],
-    stack_size=1 * 1024,
+    stack_size=2 * 1024,
     fap_icon="matagotchi_10px.png",
     fap_icon_assets="assets",
     fap_category="Games",
     fap_description="Tamagotchi like game",
     fap_author="MrModd",
-    fap_weburl="https://github.com/MrModd/Matagotchi"
+    fap_weburl="https://github.com/MrModd/Matagotchi",
+    fap_version="1.0"
 )
