@@ -1,7 +1,7 @@
 App(
     appid="power_settings",
     name="Power",
-    apptype=FlipperAppType.SETTINGS,
+    apptype=FlipperAppType.EXTSETTINGS,
     entry_point="power_settings_app",
     requires=[
         "gui",
@@ -11,6 +11,6 @@ App(
     flags=["InsomniaSafe"],
     stack_size=1 * 1024,
     order=40,
-    #  fap_category="Settings",
-    #  fap_icon_assets="assets",
+    fap_category="Settings",
+    fap_libs=["assets"],
 )

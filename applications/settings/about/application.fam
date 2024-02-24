@@ -1,7 +1,7 @@
 App(
     appid="about",
     name="About",
-    apptype=FlipperAppType.SETTINGS,
+    apptype=FlipperAppType.EXTSETTINGS,
     entry_point="about_settings_app",
     cdefines=["APP_ABOUT"],
     requires=[
@@ -11,5 +11,6 @@ App(
     flags=["InsomniaSafe"],
     stack_size=1 * 1024,
     order=1000,
-    #  fap_category="Settings",
+    fap_category="Settings",
+    fap_libs=["assets"],
 )

@@ -133,12 +133,13 @@ static DialogMessageButton about_screen_hw_version(DialogsApp* dialogs, DialogMe
 
     furi_string_cat_printf(
         buffer,
-        "%d.F%dB%dC%d %s %s\n",
+        "%d.F%dB%dC%d %s:%s %s\n",
         furi_hal_version_get_hw_version(),
         furi_hal_version_get_hw_target(),
         furi_hal_version_get_hw_body(),
         furi_hal_version_get_hw_connect(),
         furi_hal_version_get_hw_region_name(),
+        furi_hal_region_get_name(),
         my_name ? my_name : "Unknown");
 
     furi_string_cat_printf(buffer, "Serial Number:\n");
@@ -147,7 +148,7 @@ static DialogMessageButton about_screen_hw_version(DialogsApp* dialogs, DialogMe
         furi_string_cat_printf(buffer, "%02X", uid[i]);
     }
 
-    dialog_message_set_header(message, "HW Version Info:", 0, 0, AlignLeft, AlignTop);
+    dialog_message_set_header(message, "Hardware Info:", 0, 0, AlignLeft, AlignTop);
     dialog_message_set_text(message, furi_string_get_cstr(buffer), 0, 13, AlignLeft, AlignTop);
     result = dialog_message_show(dialogs, message);
     furi_string_free(buffer);
@@ -161,9 +162,7 @@ static DialogMessageButton about_screen_fw_version(DialogsApp* dialogs, DialogMe
     buffer = furi_string_alloc();
     const Version* ver = furi_hal_version_get_firmware_version();
     const BleGlueC2Info* c2_ver = NULL;
-#ifdef SRV_BT
     c2_ver = ble_glue_get_c2_info();
-#endif
 
     if(!ver) { //-V1051
         furi_string_cat_printf(buffer, "No info\n");
@@ -172,19 +171,19 @@ static DialogMessageButton about_screen_fw_version(DialogsApp* dialogs, DialogMe
         furi_hal_info_get_api_version(&api_major, &api_minor);
         furi_string_cat_printf(
             buffer,
-            "%s [%s]\n%s%s [%d.%d] %s\n[%d] %s",
+            "%s   %s\n%s%s   F%d:%d.%d   %s\n%s",
             version_get_version(ver),
             version_get_builddate(ver),
-            version_get_dirty_flag(ver) ? "[!] " : "",
+            version_get_dirty_flag(ver) ? "[!]" : "",
             version_get_githash(ver),
+            version_get_target(ver),
             api_major,
             api_minor,
-            c2_ver ? c2_ver->StackTypeString : "<none>",
-            version_get_target(ver),
+            c2_ver ? c2_ver->StackTypeString : "",
             version_get_gitbranch(ver));
     }
 
-    dialog_message_set_header(message, "FW Version Info:", 0, 0, AlignLeft, AlignTop);
+    dialog_message_set_header(message, "Firmware Info:", 0, 0, AlignLeft, AlignTop);
     dialog_message_set_text(message, furi_string_get_cstr(buffer), 0, 13, AlignLeft, AlignTop);
     result = dialog_message_show(dialogs, message);
     furi_string_free(buffer);
@@ -194,6 +193,8 @@ static DialogMessageButton about_screen_fw_version(DialogsApp* dialogs, DialogMe
 
 const AboutDialogScreen about_screens[] = {
     about_screen_product,
+    about_screen_hw_version,
+    about_screen_fw_version,
     about_screen_compliance,
     about_screen_address,
     about_screen_icon1,
@@ -201,9 +202,7 @@ const AboutDialogScreen about_screens[] = {
     about_screen_cert_china_0,
     about_screen_cert_china_1,
     about_screen_cert_taiwan,
-    about_screen_cert_mexico,
-    about_screen_hw_version,
-    about_screen_fw_version};
+    about_screen_cert_mexico};
 
 int32_t about_settings_app(void* p) {
     UNUSED(p);
