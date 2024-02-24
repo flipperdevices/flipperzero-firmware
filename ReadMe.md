@@ -45,6 +45,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - [Neater about information, and About and Power Settings load from SD (By Willy-JL with tweaks By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/f9c139e51bbfe19eb59cf5ac146f20972acbba52)
 - Updated: [Dice (RM) Including SEX/WAR/8BALL/WEED/DRINK DICE v2.3 (By RogueMaster)](https://github.com/RogueMaster/flipperzero-dice) Now compiles on OFW!
 - [Game Mode Menu updated to have more games & VGM applications (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/)
+- Updated: [NFC Playlist v1.4 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
 
 <a name="release">
 

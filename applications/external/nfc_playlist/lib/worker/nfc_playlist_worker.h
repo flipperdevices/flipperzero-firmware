@@ -29,4 +29,5 @@ int32_t nfc_playlist_worker_task(void* context);
 
 bool nfc_playlist_worker_is_emulating(NfcPlaylistWorker* nfc_playlist_worker);
 void nfc_playlist_worker_set_nfc_data(NfcPlaylistWorker* nfc_playlist_worker, char* file_path);
+void nfc_playlist_worker_clear_nfc_data(NfcPlaylistWorker* nfc_playlist_worker);
 NfcDeviceData* nfc_playlist_worker_get_nfc_data(NfcPlaylistWorker* nfc_playlist_worker);
