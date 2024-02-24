@@ -21,6 +21,8 @@ Based on:
 - The Flipper Zero Boilerplate App: https://github.com/leedave/flipper-zero-fap-boilerplate
 - The Flipper Zero Firmware: https://github.com/flipperdevices/flipperzero-firmware
 
+[![Video showing app in action](https://img.youtube.com/vi/pggRzHnXlF4/0.jpg)](https://www.youtube.com/watch?v=pggRzHnXlF4)
+
 ## Overview
 
 You will need to construct a circuit similar to the A-Com circuit described in teh dmcomm-project github.
