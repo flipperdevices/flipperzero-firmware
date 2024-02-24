@@ -1,5 +1,5 @@
 #include <furi.h> // For FURI_LOG_D
-#include <furi_hal.h> // For RTC handling
+#include <datetime/datetime.h> // For RTC handling
 
 #include "state_management.h"
 #include "constants.h"
@@ -9,9 +9,9 @@
 #include "game_structs.h"
 
 static uint32_t get_current_timestamp() {
-    FuriHalRtcDateTime current_time;
+    DateTime current_time;
     furi_hal_rtc_get_datetime(&current_time);
-    return furi_hal_rtc_datetime_to_timestamp(&current_time);
+    return datetime_datetime_to_timestamp(&current_time);
 }
 
 static void fast_forward_state(struct GameState *game_state) {
