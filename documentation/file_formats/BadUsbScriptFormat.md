@@ -87,10 +87,12 @@ Up to 5 keys can be hold simultaneously.
 ## String delay
 
 Delay between keypresses.
-| Command      | Parameters        | Notes                                         |
-| ------------ | ----------------- | --------------------------------------------- |
-| STRING_DELAY | Delay value in ms | Applied once to next appearing STRING command |
-| STRINGDELAY  | Delay value in ms | Same as STRING_DELAY                          |
+| Command              | Parameters        | Notes                                         |
+| -------------------- | ----------------- | --------------------------------------------- |
+| STRING_DELAY         | Delay value in ms | Applied once to next appearing STRING command |
+| STRINGDELAY          | Delay value in ms | Same as STRING_DELAY                          |
+| DEFAULT_STRING_DELAY | Delay value in ms | Apply to every appearing STRING command       |
+| DEFAULTSTRINGDELAY   | Delay value in ms | Same as DEFAULT_STRING_DELAY                  |
 
 ## Repeat
 
