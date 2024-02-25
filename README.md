@@ -1,8 +1,6 @@
 # FlipperApp-TuLlave
 
-This is a personal project to add the capability of reading TuLlave cards to the Flipper Zero. It uses some of the Flipper Zero NFC modules and their respective transport stack.
-
-Initially, the intention of this project was to explore how to interact with the Flipper Zero firmware. Enjoy!
+This is a project to add the capability of reading TuLlave cards to the Flipper Zero device. TuLlave is a contactless smart card used to pay for public transport services in Bogotá, Colombia. It operates on the MIFARE Classic protocol, which is supported by the Flipper Zero NFC module.
 
 ## Features
 
