@@ -8,7 +8,7 @@
 #include "../blanks/tm2004.h"
 
 #define DALLAS_GENERIC_FAMILY_CODE 0x00U
-#define DALLAS_GENERIC_FAMILY_NAME "Raw Data"
+#define DALLAS_GENERIC_FAMILY_NAME "(non-specific)"
 
 typedef struct {
     OneWireSlave* bus;

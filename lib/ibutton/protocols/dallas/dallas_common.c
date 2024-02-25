@@ -250,12 +250,12 @@ void dallas_common_render_crc_error(FuriString* result, const DallasCommonRomDat
 
     for(size_t i = 0; i < data_size; ++i) {
         furi_string_cat_printf(
-            result, (i < data_size - 1) ? "%02X " : "\e#%02X\e#", rom_data->bytes[i]);
+            result, (i < data_size - 1) ? "%02X " : "\e!%02X\e!", rom_data->bytes[i]);
     }
 
     furi_string_cat_printf(
         result,
-        "\nExpected CRC: \e#%02X\e#",
+        "\nExpected CRC: \e!%02X\e!",
         maxim_crc8(rom_data->bytes, sizeof(DallasCommonRomData) - 1, MAXIM_CRC8_INIT));
 }
 
