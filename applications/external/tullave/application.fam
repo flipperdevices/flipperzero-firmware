@@ -1,0 +1,21 @@
+App(
+    appid="tullave",
+    name="TuLlave",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="tullave_main",
+    targets=["f7"],
+    requires=[
+        "gui"
+    ],
+    fap_icon="app_assets/tullave_logo_10px.png",
+    fap_libs=[
+        "assets",
+    ],
+    fap_private_libs=[
+        Lib(
+            name="tullave",
+        ),
+    ],
+    stack_size=4 * 1024,
+    fap_category="NFC",
+)
