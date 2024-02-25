@@ -459,6 +459,38 @@ bool seader_sam_save_serial(Seader* seader, uint8_t* buf, size_t size) {
     return saved;
 }
 
+bool seader_sam_save_serial_QR(Seader* seader, uint8_t* buf, size_t size) {
+    SeaderCredential* cred = seader->credential;
+
+    const char* file_header = "QRCode";
+    const uint32_t file_version = 0;
+
+    bool saved = false;
+    FlipperFormat* file = flipper_format_file_alloc(cred->storage);
+    FuriString* temp_str;
+    temp_str = furi_string_alloc();
+
+    do {
+        storage_simply_mkdir(cred->storage, EXT_PATH("qrcodes"));
+        furi_string_printf(
+            temp_str, "%s/%s%s", EXT_PATH("qrcodes"), "seader_sam_serial", ".qrcode");
+
+        // Open file
+        if(!flipper_format_file_open_always(file, furi_string_get_cstr(temp_str))) break;
+        if(!flipper_format_write_header_cstr(file, file_header, file_version)) break;
+
+        if(!flipper_format_write_hex(file, "Message", buf, size)) break;
+        saved = true;
+    } while(false);
+
+    if(!saved) {
+        dialog_message_show_storage_error(cred->dialogs, "Can not save\nQR file");
+    }
+    furi_string_free(temp_str);
+    flipper_format_free(file);
+    return saved;
+}
+
 bool seader_parse_serial_number(Seader* seader, uint8_t* buf, size_t size) {
     memset(display, 0, sizeof(display));
     for(uint8_t i = 0; i < size; i++) {
@@ -467,6 +499,7 @@ bool seader_parse_serial_number(Seader* seader, uint8_t* buf, size_t size) {
 
     FURI_LOG_D(TAG, "Received serial: %s", display);
 
+    seader_sam_save_serial_QR(seader, buf, size);
     return seader_sam_save_serial(seader, buf, size);
 }
 
