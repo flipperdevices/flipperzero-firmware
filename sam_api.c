@@ -1,5 +1,6 @@
 
 #include "sam_api.h"
+#include <toolbox/path.h>
 
 #define TAG "SAMAPI"
 
@@ -7,6 +8,7 @@
 #define ASN1_PREFIX 6
 #define ASN1_DEBUG true
 #define SEADER_ICLASS_SR_SIO_BASE_BLOCK 10
+#define SEADER_SERIAL_FILE_NAME "sam_serial"
 
 const uint8_t picopass_iclass_key[] = {0xaf, 0xa7, 0x85, 0xa7, 0xda, 0xb3, 0x33, 0x78};
 
@@ -420,14 +422,52 @@ bool seader_parse_version(SeaderWorker* seader_worker, uint8_t* buf, size_t size
     return rtn;
 }
 
-bool seader_parse_serial_number(uint8_t* buf, size_t size) {
+bool seader_sam_save_serial(Seader* seader, uint8_t* buf, size_t size) {
+    SeaderCredential* cred = seader->credential;
+
+    const char* file_header = "SAM Serial Number";
+    const uint32_t file_version = 1;
+    bool use_load_path = true;
+    bool saved = false;
+    FlipperFormat* file = flipper_format_file_alloc(cred->storage);
+    FuriString* temp_str;
+    temp_str = furi_string_alloc();
+
+    do {
+        if(use_load_path && !furi_string_empty(cred->load_path)) {
+            // Get directory name
+            path_extract_dirname(furi_string_get_cstr(cred->load_path), temp_str);
+            // Make path to file to save
+            furi_string_cat_printf(temp_str, "/%s%s", SEADER_SERIAL_FILE_NAME, ".txt");
+        } else {
+            furi_string_printf(
+                temp_str, "%s/%s%s", STORAGE_APP_DATA_PATH_PREFIX, SEADER_SERIAL_FILE_NAME, ".txt");
+        }
+        // Open file
+        if(!flipper_format_file_open_always(file, furi_string_get_cstr(temp_str))) break;
+        if(!flipper_format_write_header_cstr(file, file_header, file_version)) break;
+
+        if(!flipper_format_write_hex(file, "Chip Serial Number", buf, size)) break;
+        saved = true;
+    } while(false);
+
+    if(!saved) {
+        dialog_message_show_storage_error(cred->dialogs, "Can not save\nserial file");
+    }
+    furi_string_free(temp_str);
+    flipper_format_free(file);
+    return saved;
+}
+
+bool seader_parse_serial_number(Seader* seader, uint8_t* buf, size_t size) {
     memset(display, 0, sizeof(display));
     for(uint8_t i = 0; i < size; i++) {
         snprintf(display + (i * 2), sizeof(display), "%02x", buf[i]);
     }
 
     FURI_LOG_D(TAG, "Received serial: %s", display);
-    return (size == 12);
+
+    return seader_sam_save_serial(seader, buf, size);
 }
 
 bool seader_parse_sam_response(Seader* seader, SamResponse_t* samResponse) {
@@ -447,7 +487,7 @@ bool seader_parse_sam_response(Seader* seader, SamResponse_t* samResponse) {
         }
     } else if(seader_parse_version(seader_worker, samResponse->buf, samResponse->size)) {
         seader_worker_send_serial_number(seader_worker);
-    } else if(seader_parse_serial_number(samResponse->buf, samResponse->size)) {
+    } else if(seader_parse_serial_number(seader, samResponse->buf, samResponse->size)) {
         // no-op
     } else if(seader_unpack_pacs(seader, samResponse->buf, samResponse->size)) {
         view_dispatcher_send_custom_event(seader->view_dispatcher, SeaderCustomEventPollerSuccess);
