@@ -28,6 +28,7 @@ Thank you so much to the following contributors for providing awesome portals.
 - `Delta_Airlines.html` by [roshanravan](https://github.com/roshanravan)
 - `Discord.html` by [JMcrafter26](https://github.com/bigbrodude6119/flipper-zero-evil-portal/pull/67)
 - `Facebook.html` by [roshanravan](https://github.com/roshanravan)
+- `Facebook2.html` by [MadeBySaints](https://github.com/bigbrodude6119/flipper-zero-evil-portal/pull/100)
 - `FakeHack.html` by [roshanravan](https://github.com/roshanravan)
 - `FakeHack2.html` by [roshanravan](https://github.com/roshanravan)
 - `Google_Mobile.html` by [breaching](https://github.com/breaching)
