@@ -41,13 +41,14 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [WiFi (Marauder) v7.0 (By 0xchocolate & tcpassos)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) `Req: ESP32 WITH MARAUDER FLASHED` Now using Evil Portal assets.
 - Added: [Air Labyrinth v0.1 (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/vgm/apps/air_labyrinth) `Req: Video Game Module By Flipper Devices`
 - Updated: [Minesweeper Redux v1.4 (By squee72564)](https://github.com/squee72564/F0_Minesweeper_Fap)
-- Updated: [Matagotchi v1.1 (By MrModd)](https://github.com/MrModd/Matagotchi) [Refactor features to ease the addition of new ones #3](https://github.com/MrModd/Matagotchi/pull/3)
 - [Neater about information, and About and Power Settings load from SD (By Willy-JL with tweaks By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/f9c139e51bbfe19eb59cf5ac146f20972acbba52)
 - Updated: [Dice (RM) Including SEX/WAR/8BALL/WEED/DRINK DICE v2.3 (By RogueMaster)](https://github.com/RogueMaster/flipperzero-dice) Now compiles on OFW!
 - [Game Mode Menu updated to have more games & VGM applications (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/)
 - OFW: PR: [Add support for DEFAULT_STRING_DELAY in Bad USB App #3476 (By atomofiron)](https://github.com/flipperdevices/flipperzero-firmware/pull/3476)
 - Updated: [NFC Playlist v1.4 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
 - Updated: [Digimon F-Com v1.0 (By TylerWilley)](https://github.com/TylerWilley/flipper-f-com)
+- Updated: [NFC Seader v2.4 (By bettse)](https://github.com/bettse/seader)
+- Updated: [Matagotchi v1.1 (By MrModd)](https://github.com/MrModd/Matagotchi) [Refactor features to ease the addition of new ones #3](https://github.com/MrModd/Matagotchi/pull/3)
 
 <a name="release">
 

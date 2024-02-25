@@ -3,7 +3,7 @@ App(
     name="Matagotchi",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="matagotchi_app",
-    stack_size=1 * 1024,
+    stack_size=2 * 1024,
     fap_icon="matagotchi_10px.png",
     fap_icon_assets="assets",
     fap_category="Games",
