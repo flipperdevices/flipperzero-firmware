@@ -277,7 +277,7 @@ EthernetSaveConfig* ethernet_save_process_malloc() {
 
 void ethernet_save_process_print(EthernetSaveConfig* config, const char* str) {
     furi_assert(config);
-    FuriHalRtcDateTime datetime = {0};
+    DateTime datetime = {0};
     furi_hal_rtc_get_datetime(&datetime);
     storage_printf(
         config->log_file,
