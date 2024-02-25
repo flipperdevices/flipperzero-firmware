@@ -47,8 +47,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: PR: [Add support for DEFAULT_STRING_DELAY in Bad USB App #3476 (By atomofiron)](https://github.com/flipperdevices/flipperzero-firmware/pull/3476)
 - Updated: [NFC Playlist v1.4 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
 - Updated: [Digimon F-Com v1.0 (By TylerWilley)](https://github.com/TylerWilley/flipper-f-com)
-- Updated: [NFC Seader v2.4 (By bettse)](https://github.com/bettse/seader)
 - Updated: [Matagotchi v1.1 (By MrModd)](https://github.com/MrModd/Matagotchi) [Refactor features to ease the addition of new ones #3](https://github.com/MrModd/Matagotchi/pull/3)
+- Updated: [NFC Seader v2.4 (By bettse)](https://github.com/bettse/seader)
 
 <a name="release">
 
