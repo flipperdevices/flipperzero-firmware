@@ -7,6 +7,12 @@ This is a project to add the capability of reading TuLlave cards to the Flipper 
 1. Read TuLlave card balance from your Flipper Zero. 
 2. Read TuLlave transaction history.
 
+## Installation.
+
+1. Download the latest FAP binary from Releases.
+2. Power-Off your Flipper Zero and extract the SD Card. Then, put the FAP file into the apps/NFC directory.
+3. Insert your SD Card again in the Flipper Zero. You can Find TuLlave into: Apps > NFC > TuLlave, on the main menu.
+
 ## Build
 
 ### Requirements
@@ -61,4 +67,4 @@ https://www.youtube.com/watch?v=cTCp4IVq9g0
 
 ## TODO
 
-* Recover the UI Reading state to inform user that do not move the card.
+* Recover the UI Reading state to inform user that do not move the card during Transaction History Reading.
