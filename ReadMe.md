@@ -29,8 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0223-2141-0.98.4-fea2da1](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-02-25 18:01 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-02-25 18:01 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-02-25 18:10 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-02-25 18:10 EST`
 - Updated: [J305 Geiger Counter v1.2 (By nmrr)](https://github.com/nmrr/flipperzero-geigercounter)
 - Updated: [Atomic Dice Roller v1.1 (By nmrr)](https://github.com/nmrr/flipperzero-atomicdiceroller)
 - Reverted: [NFC Magic v1.5 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966) Gen 2 changes were corruptiung cards.
@@ -50,8 +50,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Matagotchi v1.1 (By MrModd)](https://github.com/MrModd/Matagotchi) [Refactor features to ease the addition of new ones #3](https://github.com/MrModd/Matagotchi/pull/3)
 - Updated: [NFC Seader v2.4 (By bettse)](https://github.com/bettse/seader)
 - New Evil Portal asset: [Better Facebook Portal #100 (By MadeBySaints)](https://github.com/bigbrodude6119/flipper-zero-evil-portal/pull/100)
-- SubGhz: [Display Weather Station temperature in units matching system locale (By cquick01)](71612171c6b732042fa4d41baf3f62c2307c233a)
-- SubGhz: [Display Weather Station temperature in units matching system locale (By cquick01)]()
+- SubGhz: [Display Weather Station temperature in units matching system locale (By cquick01)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/71612171c6b732042fa4d41baf3f62c2307c233a)
+- RGB Mod: [Fixing random RGB flickering (By HaxSam)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/0ceb531e893a2e182c0ebf88373c4dd00e5bbd0d)
 
 <a name="release">
 
