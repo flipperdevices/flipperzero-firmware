@@ -1,4 +1,5 @@
 #include "string.h"
+#include <arm_acle.h>
 #include <m-string.h>
 
 struct FuriString {
@@ -258,7 +259,37 @@ void furi_string_set_n(FuriString* v, const FuriString* ref, size_t offset, size
 }
 
 size_t furi_string_utf8_length(FuriString* str) {
-    return string_length_u(str->string);
+    const char * cstr = string_get_cstr(str->string);
+
+    size_t len = 0;
+    int8x4_t zero = 0x00000000;
+    int8x4_t one  = 0x01010101;
+    int8x4_t threshold = -1077952577; // -65, -65, -65, -65
+
+    for (;;) {
+        uint8x4_t result;
+        int8x4_t vec = *(int8x4_t *) cstr;
+
+        __uadd8(0xFFFFFFFF, vec); result = __sel(zero, one);
+        if (result > 0) {
+            if (result == 0x01000000) {
+                __ssub8(threshold, vec); result = __sel(zero, one);
+                return __usada8(result, 1, len);
+            }
+            break;
+        }
+
+        __ssub8(threshold, vec); result = __sel(zero, one);
+        len = __usada8(result, zero, len);
+
+        cstr += sizeof(uint8x4_t);
+    }
+
+    for (signed char c; (c = *cstr); cstr++) {
+        len += c >= -64;
+    }
+
+    return len;
 }
 
 void furi_string_utf8_push(FuriString* str, FuriStringUnicodeValue u) {
