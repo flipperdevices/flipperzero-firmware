@@ -36,7 +36,7 @@ void setup_fcom(void* context) {
     fcom_state.stream = new Stream(app);
     fcom_state.led = new FlipperIndicator(app);
     fcom_state.output = new FComOutput(&gpio_ext_pc3);
-    fcom_state.input = new FComInput(&gpio_ext_pa4);
+    fcom_state.input = new FComInput(&gpio_ext_pb2);
 
     // Maybe one day I'll copy the flipper oscilloscope analog STM code
     // and make this work...

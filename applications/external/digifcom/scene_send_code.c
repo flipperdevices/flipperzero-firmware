@@ -13,9 +13,12 @@ Right will go to the save code dialog for the new code (if there is one)
 #include "scene_send_code.h"
 #include <furi_hal_cortex.h>
 
+#define MAX_DISPLAY_BYTES 36
+
 // These need to persist between processInput calls as the serial data comes in at random points
 static char curcode = 0;
 static bool first = false;
+static bool assert_next_colon = false; // Necessary for managing state
 
 void processInput(void* context) {
     furi_assert(context);
@@ -23,9 +26,9 @@ void processInput(void* context) {
 
     char out[64];
     size_t recieved = 1;
-    memset(out, 0, 64);
 
     while(recieved > 0) {
+        memset(out, 0, 64);
         recieved = furi_stream_buffer_receive(app->dmcomm_output_stream, &out, 63, 5);
 
         if(app->state->waitForCode && recieved > 0) {
@@ -33,33 +36,47 @@ void processInput(void* context) {
             //FURI_LOG_I(TAG, "reading code");
             int l = strlen(out);
             for(int i = 0; i < l; i++) {
-                if(out[i] == 't') { // reset for timeout and continue :(
+                if(out[i] == 't' ||
+                   (assert_next_colon && out[i] != ':')) { // reset for timeout and continue :(
+                    //FURI_LOG_I(TAG, "reset codes");
                     curcode = 0;
                     first = true;
                     app->state->spackets = 0;
                     app->state->rpackets = 0;
                     furi_string_reset(app->state->r_code);
                     furi_string_reset(app->state->s_code);
-                } else if(out[i] == 's') { // Starts an s code block
+                }
+                if(assert_next_colon) assert_next_colon = false;
+                if(out[i] == 's') { // Starts an s code block
                     curcode = 's';
+                    assert_next_colon = true;
+                    //FURI_LOG_I(TAG, "read s");
                     if(furi_string_empty(app->state->s_code)) {
                         furi_string_push_back(app->state->s_code, app->state->current_code[0]);
                         if(first) {
+                            //FURI_LOG_I(TAG, "s first");
                             first = false;
                             furi_string_push_back(app->state->s_code, '1');
-                        } else
+                        } else {
+                            //FURI_LOG_I(TAG, "s second");
                             furi_string_push_back(app->state->s_code, '2');
+                        }
                     }
                     furi_string_push_back(app->state->s_code, '-');
                 } else if(out[i] == 'r') { // Starts an r code block
                     curcode = 'r';
+                    assert_next_colon = true;
+                    //FURI_LOG_I(TAG, "read r");
                     if(furi_string_empty(app->state->r_code)) {
                         furi_string_push_back(app->state->r_code, app->state->current_code[0]);
                         if(first) {
+                            //FURI_LOG_I(TAG, "r first");
                             first = false;
                             furi_string_push_back(app->state->r_code, '1');
-                        } else
+                        } else {
+                            //FURI_LOG_I(TAG, "r second");
                             furi_string_push_back(app->state->r_code, '2');
+                        }
                     }
                     furi_string_push_back(app->state->r_code, '-');
                 } else if(
@@ -68,7 +85,9 @@ void processInput(void* context) {
                      out[i] <= '9')) { // If we're reading a code, read alphanum into the code
                     if(curcode == 's') furi_string_push_back(app->state->s_code, out[i]);
                     if(curcode == 'r') furi_string_push_back(app->state->r_code, out[i]);
-                } else if(curcode != 0 && out[i] == ' ') { // If we're reading a code, a space ends it
+                } else if(
+                    curcode != 0 && (out[i] == ' ' ||
+                                     out[i] == '\n')) { // If we're reading a code, a space ends it
                     if(curcode == 's') app->state->spackets++;
                     if(curcode == 'r') app->state->rpackets++;
                     curcode = 0;
@@ -80,22 +99,26 @@ void processInput(void* context) {
                    app->state->spackets == app->state->codeLen) {
                     FURI_LOG_I(TAG, "s code %s", furi_string_get_cstr(app->state->s_code));
                     FURI_LOG_I(TAG, "r code %s", furi_string_get_cstr(app->state->r_code));
+
                     if(strlen(app->state->current_code) > 2 && app->state->current_code[1] == '1')
-                        dialog_ex_set_text(
-                            app->dialog,
+                        furi_string_set_strn(
+                            app->dialog_text,
                             furi_string_get_cstr(app->state->r_code),
-                            10,
-                            24,
-                            AlignLeft,
-                            AlignTop);
+                            MAX_DISPLAY_BYTES);
                     else
-                        dialog_ex_set_text(
-                            app->dialog,
+                        furi_string_set_strn(
+                            app->dialog_text,
                             furi_string_get_cstr(app->state->s_code),
-                            10,
-                            24,
-                            AlignLeft,
-                            AlignTop);
+                            MAX_DISPLAY_BYTES);
+                    if(furi_string_size(app->dialog_text) >= MAX_DISPLAY_BYTES)
+                        furi_string_cat(app->dialog_text, "...");
+                    dialog_ex_set_text(
+                        app->dialog,
+                        furi_string_get_cstr(app->dialog_text),
+                        10,
+                        24,
+                        AlignLeft,
+                        AlignTop);
 
                     dialog_ex_set_right_button_text(app->dialog, "Save");
                     app->state->waitForCode = false;
@@ -149,7 +172,11 @@ void fcom_send_code_scene_on_enter(void* context) {
     App* app = context;
 
     // Initialize our GUI
-    dialog_ex_set_header(app->dialog, app->state->current_code, 64, 2, AlignCenter, AlignTop);
+    furi_string_set_strn(app->dialog_header, app->state->current_code, MAX_DISPLAY_BYTES);
+    if(furi_string_size(app->dialog_header) >= MAX_DISPLAY_BYTES)
+        furi_string_cat(app->dialog_header, "...");
+    dialog_ex_set_header(
+        app->dialog, furi_string_get_cstr(app->dialog_header), 64, 2, AlignCenter, AlignTop);
     dialog_ex_set_text(app->dialog, "Response Code Goes Here", 10, 24, AlignLeft, AlignTop);
     dialog_ex_set_left_button_text(app->dialog, NULL);
     dialog_ex_set_right_button_text(app->dialog, NULL);

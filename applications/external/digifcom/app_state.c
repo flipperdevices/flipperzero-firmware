@@ -22,6 +22,8 @@ App* app_alloc() {
     //Allocate our submenu and add the view
     app->submenu = submenu_alloc();
     app->dialog = dialog_ex_alloc();
+    app->dialog_header = furi_string_alloc();
+    app->dialog_text = furi_string_alloc();
     app->text_input = text_input_alloc();
     app->file_path = furi_string_alloc();
     app->file_browser = file_browser_alloc(app->file_path);
@@ -107,6 +109,8 @@ void app_free(App* app) {
 
     submenu_free(app->submenu);
     dialog_ex_free(app->dialog);
+    furi_string_free(app->dialog_header);
+    furi_string_free(app->dialog_text);
     text_input_free(app->text_input);
     furi_string_free(app->file_path);
     file_browser_free(app->file_browser);
