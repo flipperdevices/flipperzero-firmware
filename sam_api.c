@@ -459,7 +459,7 @@ bool seader_sam_save_serial(Seader* seader, uint8_t* buf, size_t size) {
     return saved;
 }
 
-bool seader_sam_save_serial_QR(Seader* seader, uint8_t* buf, size_t size) {
+bool seader_sam_save_serial_QR(Seader* seader, char* serial) {
     SeaderCredential* cred = seader->credential;
 
     const char* file_header = "QRCode";
@@ -479,7 +479,7 @@ bool seader_sam_save_serial_QR(Seader* seader, uint8_t* buf, size_t size) {
         if(!flipper_format_file_open_always(file, furi_string_get_cstr(temp_str))) break;
         if(!flipper_format_write_header_cstr(file, file_header, file_version)) break;
 
-        if(!flipper_format_write_hex(file, "Message", buf, size)) break;
+        if(!flipper_format_write_string_cstr(file, "Message", serial)) break;
         saved = true;
     } while(false);
 
@@ -499,7 +499,7 @@ bool seader_parse_serial_number(Seader* seader, uint8_t* buf, size_t size) {
 
     FURI_LOG_D(TAG, "Received serial: %s", display);
 
-    seader_sam_save_serial_QR(seader, buf, size);
+    seader_sam_save_serial_QR(seader, display);
     return seader_sam_save_serial(seader, buf, size);
 }
 
