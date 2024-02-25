@@ -4,13 +4,7 @@ App(
     apptype=FlipperAppType.EXTERNAL,
     entry_point="tullave_main",
     targets=["f7"],
-    requires=[
-        "gui"
-    ],
     fap_icon="app_assets/tullave_logo_10px.png",
-    fap_libs=[
-        "assets",
-    ],
     fap_private_libs=[
         Lib(
             name="tullave",
@@ -18,4 +12,9 @@ App(
     ],
     stack_size=4 * 1024,
     fap_category="NFC",
+    fap_icon_assets="app_assets",
+    fap_author="zqu4rtz",
+    fap_weburl="https://github.com/zqu4rtz/FlipperApp-TuLlave",
+    fap_version=(1, 0),
+    fap_description="This is a project to add the capability of reading TuLlave cards to the Flipper Zero device. TuLlave is a contactless smart card used to pay for public transport services in Bogota, Colombia. It operates on the MIFARE Classic protocol, which is supported by the Flipper Zero NFC module.",
 )

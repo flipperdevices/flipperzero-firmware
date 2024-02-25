@@ -21,8 +21,9 @@
 
 #include "scenes/tullave_scene.h"
 
-// Requires to have fap_libs=["assets"] in the application.fam to read F0 asset icons.
-#include <assets_icons.h>
+// Requires to have fap_libs=["assets"] in the application.fam to read F0 asset icons. (Fixed By RM)
+// #include <assets_icons.h>
+#include <tullave_icons.h>
 
 typedef enum { TuLlaveViewMenu, TuLlaveViewWidget, TuLlaveViewPopup } TuLlaveView;
 

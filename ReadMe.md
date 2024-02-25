@@ -52,6 +52,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - New Evil Portal asset: [Better Facebook Portal #100 (By MadeBySaints)](https://github.com/bigbrodude6119/flipper-zero-evil-portal/pull/100)
 - SubGhz: [Display Weather Station temperature in units matching system locale (By cquick01)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/71612171c6b732042fa4d41baf3f62c2307c233a)
 - RGB Mod: [Fixing random RGB flickering (By HaxSam)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/0ceb531e893a2e182c0ebf88373c4dd00e5bbd0d)
+- Added: [TuLlave v1.0 (By zqu4rtz)](https://github.com/zqu4rtz/FlipperApp-TuLlave)
 
 <a name="release">
 
@@ -511,6 +512,7 @@ $ ./fbt dolphin_ext
 - [The C Prog. Language v0.2 (By armixz)](https://github.com/armixz/Flipper-Zero-The-C-Programming-Language)
 - [Tone Generator v1.0 (By GEMISIS)](https://github.com/GEMISIS/tone_gen)
 - [TPMS Reader (By wosk)](https://github.com/wosk/flipperzero-tpms)
+- [TuLlave v1.0 (By zqu4rtz)](https://github.com/zqu4rtz/FlipperApp-TuLlave)
 - [Tuning Fork v1.1 (By besya)](https://github.com/besya/flipperzero-tuning-fork)
 - [UART Echo (By DrZlo13)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/831)
 - [UART Terminal v1.4 (By cool4uma)](https://github.com/cool4uma/UART_Terminal)
