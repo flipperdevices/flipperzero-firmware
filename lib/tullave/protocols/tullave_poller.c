@@ -60,8 +60,9 @@ NfcCommand tullave_poller_read_initialize(TuLlavePoller* poller) {
     bit_buffer_reset(poller->tx_data);
     bit_buffer_reset(poller->rx_data);
 
-    //Initializes the card data structure
-    poller->card_data = tullave_data_alloc();
+    // We need to store the initial ISO 14443-4a data, where resides the UID and other useful information
+    // This is for further emulation.
+    tullave_data_set_iso_data(poller->card_data, poller->iso_poller->data);
     poller->read_state = TuLlaveStateReadCardNumber;
     return NfcCommandContinue;
 }
@@ -95,7 +96,7 @@ NfcCommand tullave_poller_read_card_number(TuLlavePoller* poller) {
     const uint8_t* apdu_resp = bit_buffer_get_data(poller->rx_data);
     if(error == Iso14443_4aErrorNone && apdu_resp[0] == APDU_SW1_GOOD_RESPONSE) {
         uint8_t hexa_card_num[TULLAVE_CARD_NUM_LEN];
-        const uint8_t* raw_card_num = &apdu_resp[TULLAVE_NUM_CARD_OFFSET];
+        const uint8_t* raw_card_num = &apdu_resp[8];
         uint8_to_hex_chars(raw_card_num, hexa_card_num, TULLAVE_CARD_NUM_LEN);
         data->card_number = furi_string_alloc_printf("%s", hexa_card_num);
         poller->err_code = TuLlaveErrorNone;
@@ -124,7 +125,7 @@ NfcCommand tullave_poller_read_balance(TuLlavePoller* poller) {
         const uint8_t* raw_bal_response = bit_buffer_get_data(poller->rx_data);
         memcpy(c_bal, &raw_bal_response[5], 2);
         memcpy(&c_bal[2], raw_bal_response, 4);
-        data->balance = uint8_to_integer_big_endian(c_bal, TULLAVE_BAL_LEN);
+        data->balance = tullave_data_uint8_to_balance(c_bal, TULLAVE_BAL_LEN);
         poller->read_state = TuLlaveStateReadHistory;
         command = NfcCommandContinue;
     }
@@ -135,17 +136,37 @@ NfcCommand tullave_poller_read_history(TuLlavePoller* poller) {
     //Debug command: nfc apdu 00b201242e (index-2 contains number of the transaction)
     //Up to 10 transactions are supported.
     uint8_t read_hist_cmd[] = {0x00, 0xb2, 0x00, 0x24, 0x2e};
-    uint8_t i = 0;
     Iso14443_4aError error = Iso14443_4aErrorNone;
-    do {
-        i++;
-        read_hist_cmd[2] = i;
-
+    TuLlaveTransaction* trans_record;
+    uint8_t c_bal[TULLAVE_BAL_TRAN_LEN] = {0x0};
+    simple_array_init(poller->card_data->transaction_history, TULLAVE_HIST_MAX_TRANSACTIONS);
+    for(size_t i = 0; i < TULLAVE_HIST_MAX_TRANSACTIONS; i++) {
+        read_hist_cmd[2] = i + 1;
         bit_buffer_copy_bytes(poller->tx_data, read_hist_cmd, sizeof(read_hist_cmd));
         error = tullave_iso14443_4a_send_apdu(poller);
+        if(error != Iso14443_4aErrorNone) {
+            break;
+        }
+        const uint8_t* raw_response = bit_buffer_get_data(poller->rx_data);
+        trans_record = simple_array_get(poller->card_data->transaction_history, i);
+        trans_record->datetime = malloc(sizeof(TuLlaveTime));
+        // Parse the transaction date
+        tullave_data_uint8_to_time(
+            &raw_response[26], TULLAVE_TIME_BYTES_LEN, trans_record->datetime);
 
-        //TODO: Parse response
-    } while(i < TULLAVE_HIST_MAX_TRANSACTIONS && error == Iso14443_4aErrorNone);
+        // Parse the remaining balance
+        memcpy(c_bal, &raw_response[3], 3);
+        trans_record->final_balance = tullave_data_uint8_to_balance(c_bal, TULLAVE_BAL_TRAN_LEN);
+
+        // Parse the transaction cost
+        memset(c_bal, 0x0, TULLAVE_BAL_TRAN_LEN);
+        memcpy(c_bal, &raw_response[11], 3);
+        trans_record->cost = tullave_data_uint8_to_balance(c_bal, TULLAVE_BAL_TRAN_LEN);
+
+        // Lastly, parse the transaction type.
+        // If the enum does not have the specific number, this could generate unexpected results
+        trans_record->type = raw_response[0];
+    }
     // This is the last command in the read chain
     poller->read_state = TuLlaveStateReadCompleted;
     return NfcCommandStop;

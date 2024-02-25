@@ -16,8 +16,8 @@
 
 #include <notification/notification_messages.h>
 
-#include <lib/nfc/nfc.h>
-#include <lib/nfc/nfc_device.h>
+#include <nfc/nfc.h>
+#include <nfc/nfc_device.h>
 
 #include "scenes/tullave_scene.h"
 

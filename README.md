@@ -4,13 +4,18 @@ This is a personal project to add the capability of reading TuLlave cards to the
 
 Initially, the intention of this project was to explore how to interact with the Flipper Zero firmware. Enjoy!
 
+## Features
+
+1. Read TuLlave card balance from your Flipper Zero. 
+2. Read TuLlave transaction history.
+
 ## Build
 
 ### Requirements
 
 * Flipper Zero device.
 * [Flipper Zero Firmware](https://github.com/flipperdevices/flipperzero-firmware) in order to compile this project.
-* Firmware version. Works fine with 0.98.2 version.
+* Firmware version. It is compatible with versions greater than or equal to 0.98.2.
 * Visual Studio Code.
 * ST-Link V2 for debugging purposes. Highly recommended.
 
@@ -58,9 +63,4 @@ https://www.youtube.com/watch?v=cTCp4IVq9g0
 
 ## TODO
 
-* Read Blance and Card Info from TuLlave (**Done**).
-* Implement TuLlave_Analyzer to read the Transaction History.
-
-## Bugs
-
-* Limit readings only for TuLlave. Other NFC-A Tags are read showing garbage in the main window (**Fixed!**).
+* Recover the UI Reading state to inform user that do not move the card.

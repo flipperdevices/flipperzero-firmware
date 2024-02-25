@@ -3,20 +3,20 @@
 enum SubmenuIndex { SubmenuIndexRead };
 
 void tullave_scene_start_submenu_callback(void* context, uint32_t index) {
-    TuLlaveApp* t_llave = context;
-    view_dispatcher_send_custom_event(t_llave->view_dispatcher, index);
+    TuLlaveApp* instance = context;
+    view_dispatcher_send_custom_event(instance->view_dispatcher, index);
 }
 
 void tullave_scene_start_on_enter(void* context) {
-    TuLlaveApp* t_llave = context;
+    TuLlaveApp* instance = context;
 
-    Submenu* submenu = t_llave->submenu;
+    Submenu* submenu = instance->submenu;
     submenu_add_item(
-        submenu, "Read Info", SubmenuIndexRead, tullave_scene_start_submenu_callback, t_llave);
+        submenu, "Read Info", SubmenuIndexRead, tullave_scene_start_submenu_callback, instance);
 
     submenu_set_selected_item(
-        submenu, scene_manager_get_scene_state(t_llave->scene_manager, TuLlaveSceneStart));
-    view_dispatcher_switch_to_view(t_llave->view_dispatcher, TuLlaveViewMenu);
+        submenu, scene_manager_get_scene_state(instance->scene_manager, TuLlaveSceneStart));
+    view_dispatcher_switch_to_view(instance->view_dispatcher, TuLlaveViewMenu);
 }
 
 bool tullave_scene_start_on_event(void* context, SceneManagerEvent event) {

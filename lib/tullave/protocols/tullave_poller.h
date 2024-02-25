@@ -2,19 +2,20 @@
 
 #include <furi.h>
 #include <nfc/protocols/nfc_poller_base.h>
-#include <nfc/protocols/iso14443_4a/iso14443_4a_poller.h>
-#include <lib/toolbox/bit_buffer.h>
-#include <lib/toolbox/hex.h>
+#include <nfc/nfc_poller.h>
+#include <nfc/protocols/iso14443_4a/iso14443_4a_poller_i.h>
+#include <toolbox/bit_buffer.h>
+#include <toolbox/hex.h>
 #include "../tullave_data.h"
 
 // I have not seeing a response greater than 53 bytes
 #define TULLAVE_BIT_BUFFER_MAX 53
-// The card number in the initial response is after the first 8 bytes
-#define TULLAVE_NUM_CARD_OFFSET 8
 // As I know all cards contain only 16 digits
 #define TULLAVE_CARD_NUM_LEN 16
 // Apparently The highest balance supported by TuLlave is 999999 COP
 #define TULLAVE_BAL_LEN 6
+// Balance in transaction only have 24 bits (3 bytes)
+#define TULLAVE_BAL_TRAN_LEN 3
 // Apparently this is the max number of trasnactions supported by the TrasmiApp
 #define TULLAVE_HIST_MAX_TRANSACTIONS 10
 

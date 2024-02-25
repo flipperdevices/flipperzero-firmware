@@ -78,13 +78,15 @@ void tullave_scene_detect_on_enter(void* context) {
 
     notification_message(instance->notifications, &sequence_blink_start_blue);
 
+    // This initializes the poller and the card_data structure
     instance->tullave_poller = tullave_poller_alloc();
     // The context is required for the poller, so we can recover it in the callback.
     // This is useful if we need to invoke methods that are not currently supported by the poller like
     // view_dispatcher_send_custom_event
     instance->tullave_poller->context = instance;
     instance->tullave_poller->callback = tullave_scene_detect_poller_callback;
-    //Only ISO14443-3a is supported for TuLlave Reading
+
+    // Only ISO14443-4a is supported for TuLlave Reading
     instance->nfc_poller = nfc_poller_alloc(instance->nfc, NfcProtocolIso14443_4a);
     nfc_poller_start(instance->nfc_poller, tullave_poller_run, instance->tullave_poller);
 }
