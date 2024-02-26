@@ -154,7 +154,7 @@ class Main(App):
             if os.name == "nt":
                 port.device = f"\\\\.\\{port.device}"
             return port.device
-        
+
     def find_wifi_board_bootloader_damn_windows(self):
         self.logger.info("Trying to find WiFi board using VID:PID")
         # idk why, but python thinks that list_ports.grep returns tuple[str, str, str]
@@ -233,7 +233,9 @@ class Main(App):
             if os.name == "nt":
                 flash_command = flash_command.replace("esptool.py", "python -m esptool")
             else:
-                flash_command = flash_command.replace("esptool.py", "python3 -m esptool")
+                flash_command = flash_command.replace(
+                    "esptool.py", "python3 -m esptool"
+                )
 
             args = flash_command.split()
             args = list(filter(None, args))
