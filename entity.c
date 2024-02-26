@@ -2,6 +2,7 @@
 #include "entity_i.h"
 #include <stdlib.h>
 #include <furi.h>
+#include <math.h>
 
 #ifdef ENTITY_DEBUG
 #define ENTITY_D(...) FURI_LOG_D("Entity", __VA_ARGS__)
