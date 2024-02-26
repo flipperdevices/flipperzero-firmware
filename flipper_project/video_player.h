@@ -77,12 +77,14 @@ typedef struct {
     int32_t frames_per_turn; //frames / 126, how many frames to wind forwards/backwards when seeking
 
     uint8_t progress;
+    uint8_t volume;
 
     bool playing;
 
     bool quit;
 
     bool seeking; //to display progress bar
+    bool changing_volume;
 
     bool silent;
 } VideoPlayerApp;
