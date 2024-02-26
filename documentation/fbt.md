@@ -71,8 +71,7 @@ To use language servers other than the default VS Code C/C++ language server, us
 - `debug` - build and flash firmware, then attach with gdb with firmware's .elf loaded.
 - `debug_other`, `debug_other_blackmagic` - attach GDB without loading any `.elf`. It will allow you to manually add external `.elf` files with `add-symbol-file` in GDB.
 - `updater_debug` - attach GDB with the updater's `.elf` loaded.
-- `devboard_flash` - update WiFi dev board with the latest release firmware.
-- `devboard_flash_dev` - update WiFi dev board with the latest dev firmware.
+- `devboard_flash` - update WiFi dev board with the latest release firmware. You can specify update channel by adding `ARGS="-c dev"` to the command line.
 - `blackmagic` - debug firmware with Blackmagic probe (WiFi dev board).
 - `openocd` - just start OpenOCD.
 - `get_blackmagic` - output the blackmagic address in the GDB remote format. Useful for IDE integration.

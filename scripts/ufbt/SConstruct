@@ -323,15 +323,7 @@ dist_env.PhonyTarget(
     "devboard_flash", [["${PYTHON3}", "${FBT_SCRIPT_DIR}/wifi_board.py"]]
 )
 
-# Update WiFi devboard firmware with dev channel
-dist_env.PhonyTarget(
-    "devboard_flash_dev",
-    [["${PYTHON3}", "${FBT_SCRIPT_DIR}/wifi_board.py", "-c", "dev"]],
-)
-
-
 # Linter
-
 dist_env.PhonyTarget(
     "lint",
     [["${PYTHON3}", "${FBT_SCRIPT_DIR}/lint.py", "check", "${LINT_SOURCES}"]],
