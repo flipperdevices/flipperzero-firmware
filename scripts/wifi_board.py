@@ -156,6 +156,7 @@ class Main(App):
             return port.device
         
     def find_wifi_board_bootloader_damn_windows(self):
+        self.logger.info("Trying to find WiFi board using VID:PID")
         # idk why, but python thinks that list_ports.grep returns tuple[str, str, str]
         ports: list[ListPortInfo] = list(list_ports.grep("VID:PID=303A:0002"))  # type: ignore
 
