@@ -1,12 +1,24 @@
 #include "infrared_app_i.h"
 
+#include <furi_hal_power.h>
+#include <furi_hal_infrared.h>
+
 #include <string.h>
 #include <toolbox/path.h>
+#include <toolbox/saved_struct.h>
 #include <dolphin/dolphin.h>
 
 #define TAG "InfraredApp"
 
 #define INFRARED_TX_MIN_INTERVAL_MS 50U
+
+#define INFRARED_SETTINGS_PATH INT_PATH(".infrared.settings")
+#define INFRARED_SETTINGS_VERSION (0)
+#define INFRARED_SETTINGS_MAGIC (0x1F)
+
+typedef struct {
+    uint8_t tx_pin;
+} InfraredSettings;
 
 static const NotificationSequence*
     infrared_notification_sequences[InfraredNotificationMessageCount] = {
@@ -178,6 +190,12 @@ static InfraredApp* infrared_alloc() {
     infrared->popup = popup_alloc();
     view_dispatcher_add_view(view_dispatcher, InfraredViewPopup, popup_get_view(infrared->popup));
 
+    infrared->var_item_list = variable_item_list_alloc();
+    view_dispatcher_add_view(
+        view_dispatcher,
+        InfraredViewVariableList,
+        variable_item_list_get_view(infrared->var_item_list));
+
     infrared->view_stack = view_stack_alloc();
     view_dispatcher_add_view(
         view_dispatcher, InfraredViewStack, view_stack_get_view(infrared->view_stack));
@@ -226,6 +244,9 @@ static void infrared_free(InfraredApp* infrared) {
 
     view_dispatcher_remove_view(view_dispatcher, InfraredViewPopup);
     popup_free(infrared->popup);
+
+    view_dispatcher_remove_view(view_dispatcher, InfraredViewVariableList);
+    variable_item_list_free(infrared->var_item_list);
 
     view_dispatcher_remove_view(view_dispatcher, InfraredViewStack);
     view_stack_free(infrared->view_stack);
@@ -423,6 +444,51 @@ void infrared_show_error_message(const InfraredApp* infrared, const char* fmt, .
     va_end(args);
 }
 
+void infrared_set_tx_pin(InfraredApp* infrared, InfraredTxPin tx_pin) {
+    // furi_hal_infrared...
+    infrared->app_state.tx_pin = tx_pin;
+}
+
+void infrared_enable_otg(InfraredApp* infrared, bool enable) {
+    if(enable) {
+        furi_hal_power_enable_otg();
+    } else {
+        furi_hal_power_disable_otg();
+    }
+    infrared->app_state.is_otg_enabled = enable;
+}
+
+static void infrared_load_settings(InfraredApp* infrared) {
+    InfraredSettings settings = {0};
+
+    if(!saved_struct_load(
+           INFRARED_SETTINGS_PATH,
+           &settings,
+           sizeof(InfraredSettings),
+           INFRARED_SETTINGS_MAGIC,
+           INFRARED_SETTINGS_VERSION)) {
+        FURI_LOG_D(TAG, "Failed to load settings, using defaults");
+        infrared_save_settings(infrared);
+    }
+
+    infrared_set_tx_pin(infrared, settings.tx_pin);
+}
+
+void infrared_save_settings(InfraredApp* infrared) {
+    InfraredSettings settings = {
+        .tx_pin = infrared->app_state.tx_pin,
+    };
+
+    if(!saved_struct_save(
+           INFRARED_SETTINGS_PATH,
+           &settings,
+           sizeof(InfraredSettings),
+           INFRARED_SETTINGS_MAGIC,
+           INFRARED_SETTINGS_VERSION)) {
+        FURI_LOG_E(TAG, "Failed to save settings");
+    }
+}
+
 void infrared_signal_received_callback(void* context, InfraredWorkerSignal* received_signal) {
     furi_assert(context);
     InfraredApp* infrared = context;
@@ -463,6 +529,7 @@ void infrared_popup_closed_callback(void* context) {
 int32_t infrared_app(void* p) {
     InfraredApp* infrared = infrared_alloc();
 
+    infrared_load_settings(infrared);
     infrared_make_app_folder(infrared);
 
     bool is_remote_loaded = false;
@@ -505,6 +572,9 @@ int32_t infrared_app(void* p) {
 
     view_dispatcher_run(infrared->view_dispatcher);
 
+    infrared_set_tx_pin(infrared, InfraredTxPinInternal);
+    infrared_enable_otg(infrared, false);
     infrared_free(infrared);
+
     return 0;
 }
