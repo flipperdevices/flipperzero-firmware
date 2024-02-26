@@ -118,6 +118,7 @@
 #define PKMN_TRADE_ACCEPT 0x62
 #define PKMN_TRADE_REJECT 0x61
 #define PKMN_TABLE_LEAVE 0x6f
+#define PKMN_TABLE_LEAVE 0x6f
 #define PKMN_SEL_NUM_MASK 0x60
 #define PKMN_SEL_NUM_ONE 0x60
 
@@ -565,7 +566,7 @@ static uint8_t getTradeCentreResponse(struct trade_ctx* trade) {
         /* If the player leaves the trade menu and returns to the room */
 	if (in == 0x20) break; // HACK TODO this is mail header. This should fix flipper getting ahead
 	if (in == 0xFF) break; // HACK TODO this is mail header. This should fix flipper getting ahead
-        if(in == PKMN_TABLE_LEAVE) {
+        if(in == PKMN_TABLE_LEAVE || 0x60) {
             trade->trade_centre_state = TRADE_RESET;
             send = PKMN_TABLE_LEAVE;
             model->gameboy_status = GAMEBOY_READY;
