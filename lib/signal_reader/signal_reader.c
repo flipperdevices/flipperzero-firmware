@@ -228,6 +228,7 @@ void signal_reader_start(SignalReader* instance, SignalReaderCallback callback, 
     /* We need the EXTI to be configured as interrupt generating line, but no ISR registered */
     furi_hal_gpio_init(
         instance->pin, GpioModeInterruptRiseFall, instance->pull, GpioSpeedVeryHigh);
+    furi_hal_gpio_enable_int_callback(instance->pin);
 
     /* Set DMAMUX request generation signal ID on specified DMAMUX channel */
     LL_DMAMUX_SetRequestSignalID(
@@ -278,7 +279,10 @@ void signal_reader_start(SignalReader* instance, SignalReaderCallback callback, 
 
     // Start DMA irq, higher priority than normal
     furi_hal_interrupt_set_isr_ex(
-        SIGNAL_READER_DMA_GPIO_IRQ, 14, furi_hal_sw_digital_pin_dma_rx_isr, instance);
+        SIGNAL_READER_DMA_GPIO_IRQ,
+        FuriHalInterruptPriorityHighest,
+        furi_hal_sw_digital_pin_dma_rx_isr,
+        instance);
 
     // Start DMA Sync timer
     LL_DMA_EnableChannel(SIGNAL_READER_DMA_CNT_SYNC_DEF);
@@ -305,6 +309,8 @@ void signal_reader_stop(SignalReader* instance) {
     furi_assert(instance);
 
     furi_hal_interrupt_set_isr(SIGNAL_READER_DMA_GPIO_IRQ, NULL, NULL);
+
+    furi_hal_gpio_disable_int_callback(instance->pin);
 
     // Deinit DMA Rx pin
     LL_DMA_DeInit(SIGNAL_READER_DMA_GPIO_DEF);

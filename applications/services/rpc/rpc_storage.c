@@ -1,17 +1,17 @@
-#include "flipper.pb.h"
 #include <core/common_defines.h>
 #include <core/memmgr.h>
 #include <core/record.h>
-#include "pb_decode.h"
-#include "rpc/rpc.h"
-#include "rpc_i.h"
-#include "storage.pb.h"
-#include "storage/filesystem_api_defines.h"
-#include "storage/storage.h"
-#include <stdint.h>
+#include <rpc/rpc.h>
+#include <rpc/rpc_i.h>
+#include <storage/filesystem_api_defines.h>
+#include <storage/storage.h>
 #include <lib/toolbox/md5_calc.h>
 #include <lib/toolbox/path.h>
 #include <update_util/lfs_backup.h>
+
+#include <pb_decode.h>
+#include <storage.pb.h>
+#include <flipper.pb.h>
 
 #define TAG "RpcStorage"
 
@@ -395,9 +395,12 @@ static void rpc_system_storage_read_process(const PB_Main* request, void* contex
 
                 response->has_next = fs_operation_success && (size_left > 0);
             } else {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Warray-bounds"
                 response->content.storage_read_response.file.data =
                     malloc(PB_BYTES_ARRAY_T_ALLOCSIZE(0));
                 response->content.storage_read_response.file.data->size = 0;
+#pragma GCC diagnostic pop
                 response->content.storage_read_response.has_file = true;
                 response->has_next = false;
                 fs_operation_success = true;

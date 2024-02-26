@@ -21,7 +21,6 @@ void nfc_scene_select_protocol_on_enter(void* context) {
     } else {
         prefix = "Read as";
         submenu_set_header(submenu, "Multi-protocol card");
-        notification_message(instance->notifications, &sequence_single_vibro);
     }
 
     for(uint32_t i = 0; i < instance->protocols_detected_num; i++) {
@@ -30,6 +29,8 @@ void nfc_scene_select_protocol_on_enter(void* context) {
             "%s %s",
             prefix,
             nfc_device_get_protocol_name(instance->protocols_detected[i]));
+
+        furi_string_replace_str(temp_str, "Mifare", "MIFARE");
         submenu_add_item(
             submenu,
             furi_string_get_cstr(temp_str),

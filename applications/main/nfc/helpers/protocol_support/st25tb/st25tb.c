@@ -13,6 +13,7 @@ static void nfc_scene_info_on_enter_st25tb(NfcApp* instance) {
     const St25tbData* data = nfc_device_get_data(device, NfcProtocolSt25tb);
 
     FuriString* temp_str = furi_string_alloc();
+    nfc_append_filename_string_when_present(instance, temp_str);
     furi_string_cat_printf(
         temp_str, "\e#%s\n", nfc_device_get_name(device, NfcDeviceNameTypeFull));
     nfc_render_st25tb_info(data, NfcProtocolFormatTypeFull, temp_str);
@@ -29,7 +30,9 @@ static NfcCommand nfc_scene_read_poller_callback_st25tb(NfcGenericEvent event, v
     NfcApp* instance = context;
     const St25tbPollerEvent* st25tb_event = event.event_data;
 
-    if(st25tb_event->type == St25tbPollerEventTypeReady) {
+    if(st25tb_event->type == St25tbPollerEventTypeRequestMode) {
+        st25tb_event->data->mode_request.mode = St25tbPollerModeRead;
+    } else if(st25tb_event->type == St25tbPollerEventTypeSuccess) {
         nfc_device_set_data(
             instance->nfc_device, NfcProtocolSt25tb, nfc_poller_get_data(instance->poller));
         view_dispatcher_send_custom_event(instance->view_dispatcher, NfcCustomEventPollerSuccess);
@@ -58,8 +61,8 @@ static void nfc_scene_read_success_on_enter_st25tb(NfcApp* instance) {
     furi_string_free(temp_str);
 }
 
-static bool nfc_scene_saved_menu_on_event_st25tb(NfcApp* instance, uint32_t event) {
-    if(event == SubmenuIndexCommonEdit) {
+static bool nfc_scene_saved_menu_on_event_st25tb(NfcApp* instance, SceneManagerEvent event) {
+    if(event.type == SceneManagerEventTypeCustom && event.event == SubmenuIndexCommonEdit) {
         scene_manager_next_scene(instance->scene_manager, NfcSceneSetUid);
         return true;
     }
