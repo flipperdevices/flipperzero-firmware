@@ -17,8 +17,6 @@
 
 #include <m-array.h>
 
-#include "helpers/arg_parser.h"
-
 #define FLAG_EVENT (1 << 10)
 
 typedef struct {

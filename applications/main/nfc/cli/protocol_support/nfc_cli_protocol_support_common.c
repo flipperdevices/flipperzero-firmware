@@ -1,9 +1,8 @@
 #include "nfc_cli_protocol_support_common_i.h"
 
-#include "../helpers/arg_parser.h"
-
 #include <furi/furi.h>
 #include <toolbox/args.h>
+#include <toolbox/arg_parser.h>
 
 static void nfc_cli_protocol_support_poll_print_usage() {
     printf("Usage:\r\n");
