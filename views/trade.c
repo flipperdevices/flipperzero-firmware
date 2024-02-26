@@ -511,8 +511,8 @@ static uint8_t getTradeCentreResponse(struct trade_ctx* trade) {
 	 * the 3x 0xFD that we should be transmitting as part of the patch
 	 * list header.
 	 */
-        if(counter > 7) {
-            send = plist_index_get(trade->patch_list, (counter - 8));
+        if(counter > 8) {
+            send = plist_index_get(trade->patch_list, (counter - 9));
         }
 
         /* Patch received data */
