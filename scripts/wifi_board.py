@@ -154,10 +154,30 @@ class Main(App):
             if os.name == "nt":
                 port.device = f"\\\\.\\{port.device}"
             return port.device
+        
+    def find_wifi_board_bootloader_damn_windows(self):
+        self.logger.info("Trying to find WiFi board using VID:PID")
+        # idk why, but python thinks that list_ports.grep returns tuple[str, str, str]
+        ports: list[ListPortInfo] = list(list_ports.grep("VID:PID=303A:0002"))  # type: ignore
+
+        if len(ports) == 0:
+            # Blackmagic probe serial port not found, will be handled later
+            pass
+        elif len(ports) > 1:
+            raise Exception("More than one WiFi board found")
+        else:
+            port = ports[0]
+            if os.name == "nt":
+                port.device = f"\\\\.\\{port.device}"
+            return port.device
 
     def update(self):
         try:
             port = self.find_wifi_board_bootloader()
+
+            # Damn windows fix
+            if port is None and os.name == "nt":
+                port = self.find_wifi_board_bootloader_damn_windows()
         except Exception as e:
             self.logger.error(f"{e}")
             return 1
@@ -179,6 +199,10 @@ class Main(App):
                 self.logger.info(
                     "Please connect WiFi board to your computer, hold down BOOT button and press RESET button"
                 )
+                if os.name != "nt":
+                    self.logger.info(
+                        "If you are using Linux, you may need to add udev rule to access the device"
+                    )
             return 1
 
         # get temporary dir
@@ -205,7 +229,13 @@ class Main(App):
                 "--after hard_reset", "--after no_reset_stub"
             )
 
-            args = flash_command.split(" ")[0:]
+            # hellish toolchain fix
+            if os.name == "nt":
+                flash_command = flash_command.replace("esptool.py", "python -m esptool")
+            else:
+                flash_command = flash_command.replace("esptool.py", "python3 -m esptool")
+
+            args = flash_command.split()
             args = list(filter(None, args))
 
             esptool_params = []
