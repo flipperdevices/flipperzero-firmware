@@ -4,27 +4,27 @@ param (
 )
 
 $build_commands = @{
-    od  = [PSCustomObject]@{
+    od = [PSCustomObject]@{
         Name         = "Official Dev";
         ArtifactName = "totp_official-dev_fw{FEATURES_SUFFIX}.zip";
     }
-    os  = [PSCustomObject]@{
+    os = [PSCustomObject]@{
         Name         = "Official Stable";
         ArtifactName = "totp_official-stable_fw{FEATURES_SUFFIX}.zip";
     }
-    xs  = [PSCustomObject]@{
+    xs = [PSCustomObject]@{
         Name         = "Xtreme (stable)";
         ArtifactName = "totp_xtreme_fw{FEATURES_SUFFIX}.zip";
     }
-    xd  = [PSCustomObject]@{
+    xd = [PSCustomObject]@{
         Name         = "Xtreme (dev)";
         ArtifactName = "totp_xtreme_dev_fw{FEATURES_SUFFIX}.zip";
     }
-    ul  = [PSCustomObject]@{
+    ul = [PSCustomObject]@{
         Name         = "Unleashed";
         ArtifactName = "totp_unleashed_fw{FEATURES_SUFFIX}.zip";
     }
-    uld = [PSCustomObject]@{
+    ud = [PSCustomObject]@{
         Name         = "Unleashed (dev)";
         ArtifactName = "totp_unleashed_dev_fw{FEATURES_SUFFIX}.zip";
     }
