@@ -100,8 +100,9 @@ void processInput(void* context)
                     }
                     furi_string_push_back(app->state->r_code, '-');
                 }
-                else if(('A' <= out[i] && out[i] <= 'Z') || ('0' <= out[i] && out[i] <= '9'))
+                else if(curcode != 0 && (('A' <= out[i] && out[i] <= 'Z') || ('0' <= out[i] && out[i] <= '9')))
                 { // If we're reading a code, read alphanum into the code
+                    //FURI_LOG_I(TAG, "read char %c", out[i]);
                     if(curcode == 's')
                         furi_string_push_back(app->state->s_code, out[i]);
                     if(curcode == 'r')
@@ -109,6 +110,7 @@ void processInput(void* context)
                 }
                 else if(curcode != 0 && (out[i] == ' ' || out[i] == '\n'))
                 { // If we're reading a code, a space ends it
+                    //FURI_LOG_I(TAG, "code done");
                     if(curcode == 's')
                         app->state->spackets++;
                     if(curcode == 'r')
