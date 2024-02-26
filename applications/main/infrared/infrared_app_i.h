@@ -26,6 +26,7 @@
 #include <notification/notification_messages.h>
 
 #include <infrared_worker.h>
+#include <furi_hal_infrared.h>
 
 #include "infrared_app.h"
 #include "infrared_remote.h"
@@ -78,14 +79,6 @@ typedef enum {
 } InfraredEditMode;
 
 /**
- * @brief Enumeration of Tx pin modes.
- */
-typedef enum {
-    InfraredTxPinInternal, /**< Tx pin connected to internal transmitter */
-    InfraredTxPinPA7, /**< Tx pin routed to GPIO pin 2 (PA7) */
-} InfraredTxPin;
-
-/**
  * @brief Infrared application state type.
  */
 typedef struct {
@@ -98,7 +91,7 @@ typedef struct {
     int32_t current_button_index; /**< Selected button index (move destination). */
     int32_t prev_button_index; /**< Previous button index (move source). */
     uint32_t last_transmit_time; /**< Lat time a signal was transmitted. */
-    InfraredTxPin tx_pin;
+    FuriHalInfraredTxPin tx_pin;
 } InfraredAppState;
 
 /**
@@ -282,7 +275,7 @@ void infrared_show_error_message(const InfraredApp* infrared, const char* fmt, .
  * @param[in] infrared pointer to the application instance.
  * @param[in] tx_pin pin to be used for signal transmission.
  */
-void infrared_set_tx_pin(InfraredApp* infrared, InfraredTxPin tx_pin);
+void infrared_set_tx_pin(InfraredApp* infrared, FuriHalInfraredTxPin tx_pin);
 
 /**
  * @brief Enable or disable 5V at the GPIO pin 1.

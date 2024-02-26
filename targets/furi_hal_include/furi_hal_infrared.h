@@ -17,6 +17,12 @@ extern "C" {
 #define INFRARED_MIN_FREQUENCY 10000
 
 typedef enum {
+    FuriHalInfraredTxPinInternal,
+    FuriHalInfraredTxPinExtPA7,
+    FuriHalInfraredTxPinMax,
+} FuriHalInfraredTxPin;
+
+typedef enum {
     FuriHalInfraredTxGetDataStateOk, /**< New data obtained */
     FuriHalInfraredTxGetDataStateDone, /**< New data obtained, and this is end of package */
     FuriHalInfraredTxGetDataStateLastDone, /**< New data obtained, and this is end of package and no more data available */
@@ -142,6 +148,12 @@ void furi_hal_infrared_async_tx_wait_termination(void);
 void furi_hal_infrared_async_tx_set_signal_sent_isr_callback(
     FuriHalInfraredTxSignalSentISRCallback callback,
     void* context);
+
+/** Set which pin will be used to transmit infrared signals.
+ *
+ * @param[in]   tx_pin  pin to be used for signal transmission.
+ */
+void furi_hal_infrared_set_tx_output(FuriHalInfraredTxPin tx_pin);
 
 #ifdef __cplusplus
 }

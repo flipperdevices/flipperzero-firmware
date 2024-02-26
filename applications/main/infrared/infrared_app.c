@@ -1,7 +1,6 @@
 #include "infrared_app_i.h"
 
 #include <furi_hal_power.h>
-#include <furi_hal_infrared.h>
 
 #include <string.h>
 #include <toolbox/path.h>
@@ -444,8 +443,8 @@ void infrared_show_error_message(const InfraredApp* infrared, const char* fmt, .
     va_end(args);
 }
 
-void infrared_set_tx_pin(InfraredApp* infrared, InfraredTxPin tx_pin) {
-    // furi_hal_infrared...
+void infrared_set_tx_pin(InfraredApp* infrared, FuriHalInfraredTxPin tx_pin) {
+    furi_hal_infrared_set_tx_output(tx_pin);
     infrared->app_state.tx_pin = tx_pin;
 }
 
@@ -572,7 +571,7 @@ int32_t infrared_app(void* p) {
 
     view_dispatcher_run(infrared->view_dispatcher);
 
-    infrared_set_tx_pin(infrared, InfraredTxPinInternal);
+    infrared_set_tx_pin(infrared, FuriHalInfraredTxPinInternal);
     infrared_enable_otg(infrared, false);
     infrared_free(infrared);
 
