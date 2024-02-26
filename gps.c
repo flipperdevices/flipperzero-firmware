@@ -107,6 +107,7 @@ int32_t gps_app(void* p) {
                 "Error power otg enable. BQ2589 check otg fault = %d",
                 furi_hal_power_check_otg_fault() ? 1 : 0);
         }
+    }
 
     GpsUart* gps_uart = gps_uart_enable();
 
