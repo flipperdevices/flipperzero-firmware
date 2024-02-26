@@ -163,16 +163,27 @@ int32_t pc_monitor_app(void* p) {
     UNUSED(p);
     PcMonitorApp* app = pc_monitor_alloc();
 
-    if(furi_hal_bt_is_active()) {
-        furi_hal_bt_serial_set_event_callback(BT_SERIAL_BUFFER_SIZE, bt_serial_callback, app);
-        furi_hal_bt_start_advertising();
+    bt_disconnect(app->bt);
 
-        app->bt_state = BtStateWaiting;
-        FURI_LOG_D(TAG, "Bluetooth is active!");
-    } else {
-        app->bt_state = BtStateInactive;
-        FURI_LOG_W(TAG, "Please, enable the Bluetooth and restart the app");
-    }
+    // Wait 2nd core to update nvm storage
+    furi_delay_ms(200);
+
+    bt_keys_storage_set_storage_path(app->bt, APP_DATA_PATH(".bt_serial.keys"));
+
+    BleProfileSerialParams params = {
+        .device_name_prefix = "PC Mon",
+        .mac_xor = 0x0002,
+    };
+    app->ble_serial_profile = bt_profile_start(app->bt, ble_profile_serial, &params);
+
+    furi_check(app->ble_serial_profile);
+
+    ble_profile_serial_set_event_callback(
+        app->ble_serial_profile, BT_SERIAL_BUFFER_SIZE, bt_serial_callback, app);
+    furi_hal_bt_start_advertising();
+
+    app->bt_state = BtStateWaiting;
+    FURI_LOG_D(TAG, "Bluetooth is active!");
 
     // Main loop
     InputEvent event;
@@ -186,7 +197,16 @@ int32_t pc_monitor_app(void* p) {
             app->bt_state = BtStateLost;
     }
 
-    furi_hal_bt_serial_set_event_callback(0, NULL, NULL);
+    ble_profile_serial_set_event_callback(app->ble_serial_profile, 0, NULL, NULL);
+
+    bt_disconnect(app->bt);
+
+    // Wait 2nd core to update nvm storage
+    furi_delay_ms(200);
+
+    bt_keys_storage_set_default_path(app->bt);
+
+    furi_check(bt_profile_restore_default(app->bt));
 
     pc_monitor_free(app);
 
