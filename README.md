@@ -55,11 +55,12 @@ the hardware setup.
 * Beitian BE-280
 * Beitian BN-280ZF
 * Beitian BN-357ZF
-* Royaltek RBT-2100LP
-* [u-blox NEO-6M]
-* [u-blox NEO-7M]
-* [Uputronics u-blox MAX-M8C Pico]
 * Fastrax UP500
+* [mRo GPS u-Blox Neo-M8N]
+* Royaltek RBT-2100LP
+* [u-Blox NEO-6M]
+* [u-Blox NEO-7M]
+* [Uputronics u-blox MAX-M8C Pico]
 
 If you have verified this application working with a module not listed here,
 please submit a PR adding it to the list.
@@ -71,8 +72,9 @@ of the repository.
 
 [Adafruit Ultimate GPS Breakout]: https://www.adafruit.com/product/746
 [minmea]: https://github.com/kosma/minmea
+[mRo GPS u-Blox Neo-M8N]: https://store.mrobotics.io/product-p/m10034-solo.htm
 [qFlipper]: https://flipperzero.one/update
-[u-blox NEO-6M]: https://www.u-blox.com/en/product/neo-6-series
-[u-blox NEO-7M]: https://www.u-blox.com/en/product/neo-7-series
+[u-Blox NEO-6M]: https://www.u-blox.com/en/product/neo-6-series
+[u-Blox NEO-7M]: https://www.u-blox.com/en/product/neo-7-series
 [uFBT]: https://github.com/flipperdevices/flipperzero-ufbt
 [Uputronics u-blox MAX-M8C Pico]: https://store.uputronics.com/index.php?route=product/product&product_id=72
