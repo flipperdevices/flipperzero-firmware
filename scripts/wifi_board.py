@@ -226,7 +226,7 @@ class Main(App):
 
             # Damn windows, again!
             if os.name == "nt":
-                flash_command = flash_command.replace("esptool.py", "esptool.exe")
+                flash_command = flash_command.replace("esptool.py", "python -m esptool")
 
             args = flash_command.split(" ")[0:]
             args = list(filter(None, args))
