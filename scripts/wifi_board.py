@@ -224,9 +224,10 @@ class Main(App):
                 "--after hard_reset", "--after no_reset_stub"
             )
 
-            # Damn windows, again!
             if os.name == "nt":
                 flash_command = flash_command.replace("esptool.py", "python -m esptool")
+            else:
+                flash_command = flash_command.replace("esptool.py", "python3 -m esptool")
 
             args = flash_command.split(" ")[0:]
             args = list(filter(None, args))
