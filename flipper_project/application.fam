@@ -6,7 +6,7 @@ App(
     cdefines=["APP_VIDEO_PLAYER"],
     stack_size=2 * 1024,
     order=90,
-	fap_version=(0, 2),
+	fap_version=(0, 3),
 	fap_description="An app that plays video along with sound on Flipper Zero.",
 	fap_author="LTVA",
     fap_weburl="https://github.com/LTVA1/flipper_video_player",
