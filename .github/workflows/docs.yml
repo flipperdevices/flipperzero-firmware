@@ -4,8 +4,6 @@ on:
   push:
     branches:
       - dev
-    tags:
-      - '*'
 
 env:
   TARGETS: f7
