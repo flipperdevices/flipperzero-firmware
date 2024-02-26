@@ -59,6 +59,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [Toolchain fixes #3451 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/3451)
 - OFW: PR: [WiFi board: fixed update script on Windows (unfortunately also Mac and Linux) #3485 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/3485)
 - Updated: [Video Player v0.3 (By LTVA1)](https://github.com/LTVA1/flipper-zero-video-player)
+- Updated: [Air Arkanoid  v1.1 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-good-faps/pull/141) `Req: Video Game Module By Flipper Devices`
 
 <a name="release">
 
