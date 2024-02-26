@@ -168,6 +168,8 @@ int32_t pc_monitor_app(void* p) {
     // Wait 2nd core to update nvm storage
     furi_delay_ms(200);
 
+    bt_keys_storage_set_storage_path(app->bt, APP_DATA_PATH(".bt_serial.keys"));
+
     BleProfileSerialParams params = {
         .device_name_prefix = "PC Mon",
         .mac_xor = 0x0002,
@@ -201,6 +203,8 @@ int32_t pc_monitor_app(void* p) {
 
     // Wait 2nd core to update nvm storage
     furi_delay_ms(200);
+
+    bt_keys_storage_set_default_path(app->bt);
 
     furi_check(bt_profile_restore_default(app->bt));
 

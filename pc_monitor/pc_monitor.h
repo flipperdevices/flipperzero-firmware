@@ -9,6 +9,7 @@
 #include <gui/elements.h>
 #include <notification/notification_messages.h>
 #include <input/input.h>
+#include <storage/storage.h>
 
 #define TAG "PCMonitor"
 #define BT_SERIAL_BUFFER_SIZE 128
