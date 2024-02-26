@@ -38,7 +38,7 @@ typedef struct {
     bool backlight_on;
     SpeedUnit speed_units;
 	
-	FuriHalSerialHandle* serial_handle;
+    FuriHalSerialHandle* serial_handle;
 
     GpsStatus status;
 } GpsUart;

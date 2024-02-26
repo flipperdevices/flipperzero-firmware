@@ -42,14 +42,14 @@ static void render_callback(Canvas* const canvas, void* context) {
 
         switch(gps_uart->speed_units) {
         case KPH:
-            snprintf(buffer, 64, "%.2f Km/h", (double)(gps_uart->status.speed * KNOTS_TO_KPH));
+            snprintf(buffer, 64, "%.2f kph", (double)(gps_uart->status.speed * KNOTS_TO_KPH));
             break;
         case MPH:
-            snprintf(buffer, 64, "%.2f Mi/h", (double)(gps_uart->status.speed * KNOTS_TO_MPH));
+            snprintf(buffer, 64, "%.2f mph", (double)(gps_uart->status.speed * KNOTS_TO_MPH));
             break;
         case KNOTS:
         default:
-            snprintf(buffer, 64, "%.2f Kn", (double)gps_uart->status.speed);
+            snprintf(buffer, 64, "%.2f kn", (double)gps_uart->status.speed);
             break;
         }
 
@@ -95,13 +95,18 @@ int32_t gps_app(void* p) {
 
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(PluginEvent));
 
-    uint8_t attempts = 0;
     bool otg_was_enabled = furi_hal_power_is_otg_enabled();
-    while(!furi_hal_power_is_otg_enabled() && attempts++ < 5) {
-        furi_hal_power_enable_otg();
-        furi_delay_ms(10);
+    uint8_t attempts = 5;
+    while(--attempts > 0) {
+        if(furi_hal_power_enable_otg()) break;
     }
-    furi_delay_ms(200);
+    if(attempts == 0) {
+        if(furi_hal_power_get_usb_voltage() < 4.5f) {
+            FURI_LOG_E(
+                TAG,
+                "Error power otg enable. BQ2589 check otg fault = %d",
+                furi_hal_power_check_otg_fault() ? 1 : 0);
+        }
 
     GpsUart* gps_uart = gps_uart_enable();
 
