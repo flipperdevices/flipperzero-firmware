@@ -11,8 +11,8 @@ constexpr HashtableApiInterface applicaton_hashtable_api_interface{
         .api_version_minor = 0,
         .resolver_callback = &elf_resolve_from_hashtable,
     },
-    .table_cbegin = app_api_table.cbegin(),
-    .table_cend = app_api_table.cend(),
+    app_api_table.cbegin(),
+    app_api_table.cend(),
 };
 
 extern "C" const ElfApiInterface* const application_api_interface =
