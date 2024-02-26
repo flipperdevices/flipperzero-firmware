@@ -199,6 +199,10 @@ class Main(App):
                 self.logger.info(
                     "Please connect WiFi board to your computer, hold down BOOT button and press RESET button"
                 )
+                if os.name != "nt":
+                    self.logger.info(
+                        "If you are using Linux, you may need to add udev rule to access the device"
+                    )
             return 1
 
         # get temporary dir
@@ -225,12 +229,13 @@ class Main(App):
                 "--after hard_reset", "--after no_reset_stub"
             )
 
+            # hellish toolchain fix
             if os.name == "nt":
                 flash_command = flash_command.replace("esptool.py", "python -m esptool")
             else:
                 flash_command = flash_command.replace("esptool.py", "python3 -m esptool")
 
-            args = flash_command.split(" ")[0:]
+            args = flash_command.split()
             args = list(filter(None, args))
 
             esptool_params = []

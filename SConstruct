@@ -336,9 +336,14 @@ distenv.PhonyTarget(
     "cli", [["${PYTHON3}", "${FBT_SCRIPT_DIR}/serial_cli.py", "-p", "${FLIP_PORT}"]]
 )
 
-# Update WiFi devboard firmware
+# Update WiFi devboard firmware with release channel
 distenv.PhonyTarget(
     "devboard_flash", [["${PYTHON3}", "${FBT_SCRIPT_DIR}/wifi_board.py"]]
+)
+
+# Update WiFi devboard firmware with dev channel
+distenv.PhonyTarget(
+    "devboard_flash_dev", [["${PYTHON3}", "${FBT_SCRIPT_DIR}/wifi_board.py", "-c", "dev"]]
 )
 
 
