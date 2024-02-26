@@ -103,7 +103,7 @@ int32_t gps_app(void* p) {
     if(attempts == 0) {
         if(furi_hal_power_get_usb_voltage() < 4.5f) {
             FURI_LOG_E(
-                TAG,
+                "GPS",
                 "Error power otg enable. BQ2589 check otg fault = %d",
                 furi_hal_power_check_otg_fault() ? 1 : 0);
         }
