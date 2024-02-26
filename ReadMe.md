@@ -53,6 +53,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - SubGhz: [Display Weather Station temperature in units matching system locale (By cquick01)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/71612171c6b732042fa4d41baf3f62c2307c233a)
 - RGB Mod: [Fixing random RGB flickering (By HaxSam)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/0ceb531e893a2e182c0ebf88373c4dd00e5bbd0d)
 - Added: [TuLlave v1.0 (By zqu4rtz)](https://github.com/zqu4rtz/FlipperApp-TuLlave)
+- Added: [Ethernet W5500 v1.0 (By karasevia)](https://github.com/karasevia/finik_eth) `Req: W5500`
 
 <a name="release">
 
@@ -389,6 +390,7 @@ $ ./fbt dolphin_ext
 - [ESP32CAM Motion Detection v0.1 (By eried)](https://github.com/eried/flipperzero-mayhem)
 - [ESP32CAM Nanny Cam v0.1 (By eried)](https://github.com/eried/flipperzero-mayhem)
 - [ESP32CAM QR Code v0.1 (By eried)](https://github.com/eried/flipperzero-mayhem)
+- [Ethernet W5500 v1.0 (By karasevia)](https://github.com/karasevia/finik_eth) `Req: W5500`
 - [Evil Portal v0.5 (By bigbrodude6119)](https://github.com/bigbrodude6119/flipper-zero-evil-portal)
 - [Extend Range (By maede97)](https://github.com/maede97/flipperzero-extend-range) (Allows SubGHz Unlock!)
 - [EXTRA Demo (By Milk-Cool)](https://github.com/Milk-Cool/EXTRA-demo) (This app has VERY useful functions!)
