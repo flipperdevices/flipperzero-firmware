@@ -26,6 +26,6 @@ typedef struct EthernetSaveConfig {
 #define ETHERNET_SAVE_DEFAULT_PING_IP \
     { 8, 8, 8, 8 }
 
-EthernetSaveConfig* ehternet_save_process_malloc();
-void ehternet_save_process_free(EthernetSaveConfig* config);
-void ehternet_save_process_print(EthernetSaveConfig* config, const char* str);
+EthernetSaveConfig* ethernet_save_process_malloc();
+void ethernet_save_process_free(EthernetSaveConfig* config);
+void ethernet_save_process_print(EthernetSaveConfig* config, const char* str);

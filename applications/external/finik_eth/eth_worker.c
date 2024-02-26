@@ -5,7 +5,6 @@
 #include <furi_hal.h>
 #include "dhcp.h"
 #include "socket.h"
-#include "stm32wbxx_hal_gpio.h"
 #include <wizchip_conf.h>
 
 #define TAG "EthWorker"
@@ -15,7 +14,7 @@ static EthWorker* static_worker = NULL;
 EthWorker* eth_worker_alloc() {
     EthWorker* worker = malloc(sizeof(EthWorker));
 
-    worker->config = ehternet_save_process_malloc();
+    worker->config = ethernet_save_process_malloc();
     furi_assert(worker->config);
 
     worker->init_process = ethernet_view_process_malloc(EthWorkerProcessInit, worker->config);
@@ -50,7 +49,7 @@ void eth_worker_free(EthWorker* worker) {
     ethernet_view_process_free(worker->stat_process);
     ethernet_view_process_free(worker->ping_process);
     ethernet_view_process_free(worker->reset_process);
-    ehternet_save_process_free(worker->config);
+    ethernet_save_process_free(worker->config);
 
     furi_timer_stop(worker->timer);
     furi_timer_free(worker->timer);
@@ -88,7 +87,7 @@ void eth_worker_set_active_process(EthWorker* worker, EthWorkerProcess state) {
 
 void eth_worker_log(EthWorker* worker, const char* str) {
     furi_assert(worker);
-    ehternet_save_process_print(worker->config, str);
+    ethernet_save_process_print(worker->config, str);
 }
 
 static EthViewProcess* get_process(EthWorker* worker, EthWorkerProcess process) {
@@ -120,7 +119,7 @@ void eth_log(EthWorkerProcess process, const char* format, ...) {
     va_end(args);
 
     FURI_LOG_I(TAG, "%s", string);
-    ehternet_save_process_print(static_worker->config, string);
+    ethernet_save_process_print(static_worker->config, string);
     ethernet_view_process_print(get_process(static_worker, process), string);
     if(process != EthWorkerProcessReset) {
         ethernet_view_process_print(get_process(static_worker, EthWorkerProcessReset), string);
@@ -226,8 +225,8 @@ void eth_run(EthWorker* worker, EthWorkerProcess process) {
 /************************** Ethernet Worker Thread *****************************/
 
 static uint8_t ip_assigned = 0;
-static GpioPin cspin = {.port = GPIOA, .pin = GPIO_PIN_4};
-static GpioPin resetpin = {.port = GPIOC, .pin = GPIO_PIN_3};
+static GpioPin cspin = {.port = GPIOA, .pin = LL_GPIO_PIN_4};
+static GpioPin resetpin = {.port = GPIOC, .pin = LL_GPIO_PIN_3};
 
 static void W5500_Select(void) {
     furi_hal_gpio_write(&cspin, false);

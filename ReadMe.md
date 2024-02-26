@@ -54,6 +54,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - RGB Mod: [Fixing random RGB flickering (By HaxSam)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/0ceb531e893a2e182c0ebf88373c4dd00e5bbd0d)
 - Added: [TuLlave v1.0 (By zqu4rtz)](https://github.com/zqu4rtz/FlipperApp-TuLlave)
 - Added: [Ethernet W5500 v1.0 (By karasevia)](https://github.com/karasevia/finik_eth) `Req: W5500`
+- Updated: [Ethernet W5500 v1.0 (By karasevia)](https://github.com/karasevia/finik_eth) `Req: W5500` [Hex UI fix #4 (By arag0re)](https://github.com/karasevia/finik_eth/pull/4)
 
 <a name="release">
 
