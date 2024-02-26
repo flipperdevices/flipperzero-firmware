@@ -154,10 +154,29 @@ class Main(App):
             if os.name == "nt":
                 port.device = f"\\\\.\\{port.device}"
             return port.device
+        
+    def find_wifi_board_bootloader_damn_windows(self):
+        # idk why, but python thinks that list_ports.grep returns tuple[str, str, str]
+        ports: list[ListPortInfo] = list(list_ports.grep("VID:PID=303A:0002"))  # type: ignore
+
+        if len(ports) == 0:
+            # Blackmagic probe serial port not found, will be handled later
+            pass
+        elif len(ports) > 1:
+            raise Exception("More than one WiFi board found")
+        else:
+            port = ports[0]
+            if os.name == "nt":
+                port.device = f"\\\\.\\{port.device}"
+            return port.device
 
     def update(self):
         try:
             port = self.find_wifi_board_bootloader()
+
+            # Damn windows fix
+            if port is None and os.name == "nt":
+                port = self.find_wifi_board_bootloader_damn_windows()
         except Exception as e:
             self.logger.error(f"{e}")
             return 1
@@ -204,6 +223,10 @@ class Main(App):
             flash_command = flash_command.replace(
                 "--after hard_reset", "--after no_reset_stub"
             )
+
+            # Damn windows, again!
+            if os.name == "nt":
+                flash_command = flash_command.replace("esptool.py", "esptool.exe")
 
             args = flash_command.split(" ")[0:]
             args = list(filter(None, args))
