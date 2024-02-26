@@ -325,7 +325,8 @@ dist_env.PhonyTarget(
 
 # Update WiFi devboard firmware with dev channel
 dist_env.PhonyTarget(
-    "devboard_flash_dev", [["${PYTHON3}", "${FBT_SCRIPT_DIR}/wifi_board.py", "-c", "dev"]]
+    "devboard_flash_dev",
+    [["${PYTHON3}", "${FBT_SCRIPT_DIR}/wifi_board.py", "-c", "dev"]],
 )
 
 
