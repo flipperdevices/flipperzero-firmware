@@ -1,3 +1,8 @@
+# Video Player v0.3 #
+
+## Added ##
+- Volume control with up and down arrow keys
+
 # Video Player v0.2 #
 
 ## Added ##

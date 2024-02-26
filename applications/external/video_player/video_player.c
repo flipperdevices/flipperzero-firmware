@@ -85,6 +85,14 @@ void draw_progress_bar(VideoPlayerApp* player) {
     canvas_draw_box(player->canvas, 1, 59, player->progress, 4);
 }
 
+void draw_volume_bar(VideoPlayerApp* player) {
+    canvas_set_color(player->canvas, ColorWhite);
+    canvas_draw_box(player->canvas, 122, 0, 6, 64);
+    canvas_set_color(player->canvas, ColorBlack);
+    canvas_draw_frame(player->canvas, 123, 0, 5, 64);
+    canvas_draw_box(player->canvas, 124, 64 - player->volume / 4, 4, player->volume / 4);
+}
+
 void draw_all(VideoPlayerApp* player) {
     canvas_reset(player->canvas);
 
@@ -98,6 +106,10 @@ void draw_all(VideoPlayerApp* player) {
 
     if(player->seeking) {
         draw_progress_bar(player);
+    }
+
+    if(player->changing_volume) {
+        draw_volume_bar(player);
     }
 
     canvas_commit(player->canvas);
@@ -204,6 +216,9 @@ int32_t video_player_app(void* p) {
             }
 
             player->playing = true;
+            player->volume = 0xff;
+            player->seeking = false;
+            player->changing_volume = false;
 
             //vTaskPrioritySet(furi_thread_get_current_id(), FuriThreadPriorityIdle);
             furi_thread_set_current_priority(FuriThreadPriorityIdle);
@@ -266,6 +281,30 @@ int32_t video_player_app(void* p) {
                         furi_message_queue_put(player->event_queue, &event, 0);
                     }
 
+                    if(event.input.key == InputKeyUp) {
+                        player->changing_volume = true;
+
+                        if(player->volume < 0xff - 3) {
+                            player->volume += 4;
+                        }
+
+                        if(event.input.type == InputTypeRelease) {
+                            player->changing_volume = false;
+                        }
+                    }
+
+                    if(event.input.key == InputKeyDown) {
+                        player->changing_volume = true;
+
+                        if(player->volume > 3) {
+                            player->volume -= 4;
+                        }
+
+                        if(event.input.type == InputTypeRelease) {
+                            player->changing_volume = false;
+                        }
+                    }
+
                     if(player->playing) {
                         player_start();
                     }
@@ -289,6 +328,10 @@ int32_t video_player_app(void* p) {
                         stream_read(player->stream, audio_buffer, player->audio_chunk_size);
                     }
 
+                    for(int i = 0; i < player->audio_chunk_size; i++) {
+                        audio_buffer[i] = (int)audio_buffer[i] * player->volume / 0xff;
+                    }
+
                     player->frames_played++;
 
                     draw_all(player);
@@ -306,6 +349,10 @@ int32_t video_player_app(void* p) {
 
                     else {
                         stream_read(player->stream, audio_buffer, player->audio_chunk_size);
+                    }
+
+                    for(int i = 0; i < player->audio_chunk_size; i++) {
+                        audio_buffer[i] = (int)audio_buffer[i] * player->volume / 0xff;
                     }
 
                     player->frames_played++;
