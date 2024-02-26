@@ -3,7 +3,7 @@
 #include <furi.h>
 #include <furi_hal.h>
 #include <furi_hal_bt.h>
-#include <furi_hal_bt_serial.h>
+#include "helpers/ble_serial.h"
 #include <bt/bt_service/bt.h>
 #include <gui/gui.h>
 #include <gui/elements.h>
@@ -48,6 +48,7 @@ typedef struct {
     FuriMutex* app_mutex;
     FuriMessageQueue* event_queue;
     NotificationApp* notification;
+    FuriHalBleProfileBase* ble_serial_profile;
 
     BtState bt_state;
     DataStruct data;
