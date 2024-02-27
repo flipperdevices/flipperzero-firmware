@@ -26,6 +26,5 @@ App(
         "subghz_start",
         "infrared_start",
         "lfrfid_start",
-        "nfc_start",
     ],
 )
