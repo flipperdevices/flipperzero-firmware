@@ -1,24 +1,27 @@
+#include "nfc_cli_app_i.h"
+
 #include <furi.h>
-#include <gui/gui.h>
-#include <gui/view.h>
-#include <gui/view_dispatcher.h>
-#include <gui/modules/widget.h>
-#include <cli/cli.h>
-
-typedef struct {
-    Cli* cli;
-    Gui* gui;
-    ViewDispatcher* view_dispatcher;
-    Widget* widget;
-} NfcCliApp;
-
-typedef enum {
-    NfcCliAppViewWidget,
-} NfcCliAppView;
 
 uint32_t nfc_cli_app_exit(void* context) {
     UNUSED(context);
     return VIEW_NONE;
+}
+
+static bool nfc_cli_app_view_dispatcher_navigation_callback(void* context) {
+    bool consumed = false;
+    NfcCliApp* instance = context;
+
+    UNUSED(instance);
+    return consumed;
+}
+
+static bool nfc_cli_app_view_dispatcher_custom_event_callback(void* context, uint32_t event) {
+    bool consumed = false;
+    NfcCliApp* instance = context;
+    UNUSED(event);
+
+    UNUSED(instance);
+    return consumed;
 }
 
 static NfcCliApp* nfc_cli_app_alloc() {
@@ -36,12 +39,19 @@ static NfcCliApp* nfc_cli_app_alloc() {
 
     // Widget view
     instance->widget = widget_alloc();
-    widget_add_string_element(
-        instance->widget, 64, 19, AlignCenter, AlignBottom, FontPrimary, "NFC CLI");
     view_dispatcher_add_view(
         instance->view_dispatcher, NfcCliAppViewWidget, widget_get_view(instance->widget));
-    view_set_previous_callback(widget_get_view(instance->widget), nfc_cli_app_exit);
+    view_dispatcher_set_event_callback_context(instance->view_dispatcher, instance);
+    view_dispatcher_set_navigation_event_callback(
+        instance->view_dispatcher, nfc_cli_app_view_dispatcher_navigation_callback);
+    view_dispatcher_set_custom_event_callback(
+        instance->view_dispatcher, nfc_cli_app_view_dispatcher_custom_event_callback);
 
+    if(cli_is_connected(instance->cli)) {
+        nfc_cli_config_widget(instance, NfcCliWidgetConfigCliSessionRunning);
+    } else {
+        nfc_cli_config_widget(instance, NfcCliWidgetConfigCliSessionWait);
+    }
     view_dispatcher_switch_to_view(instance->view_dispatcher, NfcCliAppViewWidget);
 
     return instance;

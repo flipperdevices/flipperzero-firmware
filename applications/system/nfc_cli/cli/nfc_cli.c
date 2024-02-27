@@ -4,14 +4,9 @@
 #include <lib/toolbox/args.h>
 #include <lib/toolbox/hex.h>
 
-#include <furi_hal_nfc.h>
-
 #include <nfc/nfc.h>
 #include <nfc/nfc_scanner.h>
 #include <nfc/nfc_poller.h>
-
-#include <nfc/protocols/iso14443_3a/iso14443_3a.h>
-#include <nfc/protocols/iso14443_3a/iso14443_3a_poller.h>
 
 #include "protocol_support/nfc_cli_protocol_support.h"
 
@@ -113,30 +108,7 @@ static void nfc_cli_detect(Cli* cli, FuriString* args) {
     nfc_cli_context_free(instance);
 }
 
-static void nfc_cli_field(Cli* cli, FuriString* args) {
-    UNUSED(args);
-    // Check if nfc worker is not busy
-    if(furi_hal_nfc_is_hal_ready() != FuriHalNfcErrorNone) {
-        printf("NFC chip failed to start\r\n");
-        return;
-    }
-
-    furi_hal_nfc_acquire();
-    furi_hal_nfc_low_power_mode_stop();
-    furi_hal_nfc_poller_field_on();
-
-    printf("Field is on. Don't leave device in this mode for too long.\r\n");
-    printf("Press Ctrl+C to abort\r\n");
-
-    while(!cli_cmd_interrupt_received(cli)) {
-        furi_delay_ms(50);
-    }
-
-    furi_hal_nfc_low_power_mode_start();
-    furi_hal_nfc_release();
-}
-
-static void nfc_cli(Cli* cli, FuriString* args, void* context) {
+static void nfc_scanner(Cli* cli, FuriString* args, void* context) {
     UNUSED(context);
     FuriString* cmd;
     cmd = furi_string_alloc();
@@ -145,22 +117,10 @@ static void nfc_cli(Cli* cli, FuriString* args, void* context) {
     FuriString* tmp_str = furi_string_alloc_set(args);
 
     do {
-        if(nfc_cli_protocol_support_cmd_process(cli, tmp_str)) break;
-        if(!args_read_string_and_trim(args, cmd)) {
-            nfc_cli_print_usage();
-            break;
-        }
         if(furi_string_cmp_str(cmd, "detect") == 0) {
             nfc_cli_detect(cli, args);
             break;
         }
-        if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
-            if(furi_string_cmp_str(cmd, "field") == 0) {
-                nfc_cli_field(cli, args);
-                break;
-            }
-        }
-
         nfc_cli_print_usage();
     } while(false);
 
@@ -168,13 +128,17 @@ static void nfc_cli(Cli* cli, FuriString* args, void* context) {
     furi_string_free(cmd);
 }
 
-void nfc_on_system_start() {
-#ifdef SRV_CLI
+void nfc_cli_add_commands() {
     Cli* cli = furi_record_open(RECORD_CLI);
-    cli_add_command(cli, "nfc", CliCommandFlagDefault, nfc_cli, NULL);
-    UNUSED(nfc_cli);
+    cli_add_command(cli, "nfc_scan", CliCommandFlagDefault, nfc_scanner, NULL);
+    cli_add_command(
+        cli, "iso14443-3a", CliCommandFlagDefault, nfc_cli_protocol_support_cmd_process, NULL);
     furi_record_close(RECORD_CLI);
-#else
-    UNUSED(nfc_cli);
-#endif
+}
+
+void nfc_cli_delete_commands() {
+    Cli* cli = furi_record_open(RECORD_CLI);
+    cli_delete_command(cli, "nfc_scan");
+    cli_delete_command(cli, "iso14443-3a");
+    furi_record_close(RECORD_CLI);
 }

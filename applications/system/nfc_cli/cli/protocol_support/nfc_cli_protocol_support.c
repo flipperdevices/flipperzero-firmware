@@ -60,13 +60,13 @@ static void nfc_cli_protocol_support_handle_cmd(NfcProtocol protocol, Cli* cli, 
     furi_string_free(tmp_str);
 }
 
-bool nfc_cli_protocol_support_cmd_process(Cli* cli, FuriString* args) {
+void nfc_cli_protocol_support_cmd_process(Cli* cli, FuriString* args, void* context) {
     furi_assert(cli);
     furi_assert(args);
+    UNUSED(context);
 
     FuriString* tmp_str = furi_string_alloc();
 
-    bool processed = false;
     do {
         if(!args_read_string_and_trim(args, tmp_str)) {
             break;
@@ -76,14 +76,10 @@ bool nfc_cli_protocol_support_cmd_process(Cli* cli, FuriString* args) {
             if(nfc_cli_protocol_support[i] != NULL) {
                 if(furi_string_cmp_str(tmp_str, nfc_cli_protocol_support[i]->cmd_name) == 0) {
                     nfc_cli_protocol_support_handle_cmd(i, cli, args);
-                    processed = true;
-                    break;
                 }
             }
         }
     } while(false);
 
     furi_string_free(tmp_str);
-
-    return processed;
 }
