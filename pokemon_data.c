@@ -525,6 +525,7 @@ void pokemon_stat_set(PokemonData* pdata, DataStat stat, DataStatSub which, uint
         break;
     case STAT_SPD:
         if(gen == GEN_I) ((PokemonPartyGenI*)party)->spd = val_swap;
+        if(gen == GEN_II) ((PokemonPartyGenII*)party)->spd = val_swap;
         break;
     /*case STAT_SPC:*/
     case STAT_SPC_ATK:
