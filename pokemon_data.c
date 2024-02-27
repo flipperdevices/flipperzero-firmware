@@ -877,19 +877,36 @@ void pokemon_stat_memcpy(PokemonData* dst, PokemonData* src, uint8_t which) {
    /* XXX: TODO: While slower, want to implement this as a handful of functions to
     * get from the traded struct and set the main struct.
     */
-   ((TradeBlockGenI*)dst->trade_block)->party_members[0] = ((TradeBlockGenI*)src->trade_block)->party_members[which];
-   memcpy(
-       &(((TradeBlockGenI*)dst->trade_block)->party[0]),
-       &(((TradeBlockGenI*)src->trade_block)->party[which]),
-       sizeof(PokemonPartyGenI));
-   memcpy(
-       &(((TradeBlockGenI*)dst->trade_block)->nickname[0]),
-       &(((TradeBlockGenI*)src->trade_block)->nickname[which]),
-       sizeof(struct name));
-   memcpy(
-       &(((TradeBlockGenI*)dst->trade_block)->ot_name[0]),
-       &(((TradeBlockGenI*)src->trade_block)->ot_name[which]),
-       sizeof(struct name));
+
+    if (dst->gen == GEN_I){
+        ((TradeBlockGenI*)dst->trade_block)->party_members[0] = ((TradeBlockGenI*)src->trade_block)->party_members[which];
+        memcpy(
+            &(((TradeBlockGenI*)dst->trade_block)->party[0]),
+            &(((TradeBlockGenI*)src->trade_block)->party[which]),
+            sizeof(PokemonPartyGenI));
+        memcpy(
+            &(((TradeBlockGenI*)dst->trade_block)->nickname[0]),
+            &(((TradeBlockGenI*)src->trade_block)->nickname[which]),
+            sizeof(struct name));
+        memcpy(
+            &(((TradeBlockGenI*)dst->trade_block)->ot_name[0]),
+            &(((TradeBlockGenI*)src->trade_block)->ot_name[which]),
+            sizeof(struct name));
+    } else if (dst->gen == GEN_II) {
+        ((TradeBlockGenI*)dst->trade_block)->party_members[0] = ((TradeBlockGenI*)src->trade_block)->party_members[which];
+        memcpy(
+            &(((TradeBlockGenII*)dst->trade_block)->party[0]),
+            &(((TradeBlockGenII*)src->trade_block)->party[which]),
+            sizeof(PokemonPartyGenI));
+        memcpy(
+            &(((TradeBlockGenII*)dst->trade_block)->nickname[0]),
+            &(((TradeBlockGenII*)src->trade_block)->nickname[which]),
+            sizeof(struct name));
+        memcpy(
+            &(((TradeBlockGenII*)dst->trade_block)->ot_name[0]),
+            &(((TradeBlockGenII*)src->trade_block)->ot_name[which]),
+            sizeof(struct name));
+    }
 }
 
 const PokemonTable pokemon_table[] = {
