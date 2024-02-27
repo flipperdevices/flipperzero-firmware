@@ -59,21 +59,29 @@ bool fcom_listen_menu_scene_on_event(void* context, SceneManagerEvent event) {
         switch(event.event) {
         case ListenMenuSceneSelectionEvent2Prong:
             strncpy(app->state->current_code, "V0\n", MAX_DIGIROM_LEN);
+            furi_string_reset(app->state->r_code);
+            furi_string_reset(app->state->s_code);
             scene_manager_next_scene(app->scene_manager, FcomReadCodeScene);
             consumed = true;
             break;
         case ListenMenuSceneSelectionEvent3Prong:
             strncpy(app->state->current_code, "X0\n", MAX_DIGIROM_LEN);
+            furi_string_reset(app->state->r_code);
+            furi_string_reset(app->state->s_code);
             scene_manager_next_scene(app->scene_manager, FcomReadCodeScene);
             consumed = true;
             break;
         case ListenMenuSceneSelectionEventXrosMini:
             strncpy(app->state->current_code, "Y0\n", MAX_DIGIROM_LEN);
+            furi_string_reset(app->state->r_code);
+            furi_string_reset(app->state->s_code);
             scene_manager_next_scene(app->scene_manager, FcomReadCodeScene);
             consumed = true;
             break;
         case ListenMenuSceneSelectionEventColor:
             strncpy(app->state->current_code, "C0\n", MAX_DIGIROM_LEN);
+            furi_string_reset(app->state->r_code);
+            furi_string_reset(app->state->s_code);
             scene_manager_next_scene(app->scene_manager, FcomReadCodeScene);
             consumed = true;
             break;

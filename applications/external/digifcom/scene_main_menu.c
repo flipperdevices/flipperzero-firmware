@@ -18,6 +18,7 @@ Setup our scene widgets and create callback hooks
 */
 void fcom_menu_callback(void* context, uint32_t index);
 void fcom_main_menu_scene_on_enter(void* context) {
+    FURI_LOG_I(TAG, "fcom_main_menu_scene_on_enter");
     App* app = context;
     submenu_reset(app->submenu);
     submenu_add_item(app->submenu, "Listen", MainMenuSelectionListen, fcom_menu_callback, app);
@@ -48,6 +49,7 @@ void fcom_menu_callback(void* context, uint32_t index) {
 
 /** main menu event handler - switches scene based on the event */
 bool fcom_main_menu_scene_on_event(void* context, SceneManagerEvent event) {
+    FURI_LOG_I(TAG, "fcom_main_menu_scene_on_event");
     App* app = context;
     bool consumed = false;
     switch(event.type) {
@@ -79,6 +81,7 @@ bool fcom_main_menu_scene_on_event(void* context, SceneManagerEvent event) {
 }
 
 void fcom_main_menu_scene_on_exit(void* context) {
+    FURI_LOG_I(TAG, "fcom_main_menu_scene_on_exit");
     App* app = context;
     submenu_reset(app->submenu);
 }

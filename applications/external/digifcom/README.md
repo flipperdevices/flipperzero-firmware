@@ -6,20 +6,38 @@
 A Flipper Zero app that allows the flipper to communicate with Digimon V-Pets.
 
 Currently tested:
-- DM20
-- DMX
-- PenZ
-- DMC
-- PenOG
-- PenProg
-- PenX
+Classic:
+- 1997 Digital Monster
+- 1998 Digimon Pendulum
+- 1999 Digivice
+- 2000 D-3
+- 2000 D-Terminal
+- 2002 D-Scanner
+- 2002 Digimon Pendulum Progress
+- 2003 Digimon Pendulum X
+- 2005 Digimon Accel
+- 2005 Digimon Mini
+- 2006 Digivice iC
+
+Modern:
+- 2017 Digital Monster Ver.20th
+- 2018 Digimon Pendulum Ver.20th
+- 2019 Digital Monster X
+- 2020 Digimon Pendulum Z
+- 2021 Digivice Ver.Complete
+
+Color:
+- 2023 Digital Monster COLOR
 
 Untested:
-- All other pets (Pen20, Original Pets, etc)
+- All other pets
 - Listen Mode
+
+Thanks to [Joushiikuta](https://www.youtube.com/@joushiikuta) for testing the classic devices which I do not have.
 
 Based on:
 - The DMComm project by BladeSabre: https://github.com/dmcomm/dmcomm-project
+- The updated DMComm Arduino library by BladeSabre: https://github.com/dmcomm/dmcomm-arduino-lib
 - The Flipper Zero Boilerplate App: https://github.com/leedave/flipper-zero-fap-boilerplate
 - The Flipper Zero Firmware: https://github.com/flipperdevices/flipperzero-firmware
 
@@ -33,11 +51,17 @@ You will need to construct a circuit similar to the A-Com circuit described in t
 
 ![Schematic](screenshots/flipper_vpet_circuit.png)
 
-Pin C3 - 2k resistor - Pin B2 - 10k resistor - Pin GND
+Pin C3 - 4k resistor - Pin B2 - 20k resistor - Pin GND
 
 Pin B2 - VPet+
 
 Pin GND - VPet-
+
+The 4k/20k resistor pairing is confirmed to work with the older devices. If you only need modern device support 2k/10k is also compatible, though it will not work with older devices.
+
+[Joushiikuta](https://www.youtube.com/@joushiikuta) has created an awesome gerber file for a compatible PCB located [here](pcb/20240225_FlipperZero_F-Com_PCB_Thickness_1.6mm_Gerber.zip) (included with permission)
+
+You will also need compatible right angle header pins and SMD resistors.
 
 ## Installation
 

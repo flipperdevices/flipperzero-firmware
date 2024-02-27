@@ -65,7 +65,8 @@ void save_text_input_callback(void* context) {
     flipper_format_free(fff_file);
 
     // After we save, switch to main menu
-    scene_manager_search_and_switch_to_previous_scene(app->scene_manager, FcomMainMenuScene);
+    scene_manager_search_and_switch_to_previous_scene(
+        app->scene_manager, app->state->save_code_return_scene);
 }
 
 void fcom_save_code_scene_on_enter(void* context) {
