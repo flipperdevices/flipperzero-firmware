@@ -120,7 +120,7 @@
 #define PKMN_TRADE_REJECT_GEN_I 0x61
 #define PKMN_TRADE_REJECT_GEN_II 0x71
 #define PKMN_TABLE_LEAVE_GEN_I 0x6f
-#define PKMN_TABLE_LEAVE_GEN_II 0x60
+#define PKMN_TABLE_LEAVE_GEN_II 0x7f
 #define PKMN_SEL_NUM_MASK_GEN_I 0x60
 #define PKMN_SEL_NUM_MASK_GEN_II 0x70
 #define PKMN_SEL_NUM_ONE_GEN_I 0x60
@@ -461,8 +461,10 @@ static uint8_t getTradeCentreResponse(struct trade_ctx* trade) {
 	 * The hack is how we check to see if the GB is sending a trade request
 	 * This needs to be tested for gen ii, and then probably documented a bit better for future sake
 	 */
-        } else if((in & PKMN_SEL_NUM_MASK_GEN_I) == PKMN_SEL_NUM_MASK_GEN_I) {
+        } else if(trade->pdata->gen == GEN_I && (in & PKMN_SEL_NUM_MASK_GEN_I) == PKMN_SEL_NUM_MASK_GEN_I) {
             send = PKMN_TABLE_LEAVE_GEN_I;
+        } else if(trade->pdata->gen == GEN_II && (in & PKMN_SEL_NUM_MASK_GEN_II) == PKMN_SEL_NUM_MASK_GEN_II) {
+            send = PKMN_TABLE_LEAVE_GEN_II;
 	}
         if(counter == SERIAL_RNS_LENGTH) {
             trade->trade_centre_state = TRADE_RANDOM;
