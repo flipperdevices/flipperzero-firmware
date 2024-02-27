@@ -2,10 +2,7 @@
 
 #include <furi.h>
 
-uint32_t nfc_cli_app_exit(void* context) {
-    UNUSED(context);
-    return VIEW_NONE;
-}
+#define NFC_CLI_APP_CLI_SESSION_UPDATE_TIME_MS (200)
 
 static bool nfc_cli_app_view_dispatcher_navigation_callback(void* context) {
     bool consumed = false;
@@ -22,6 +19,24 @@ static bool nfc_cli_app_view_dispatcher_custom_event_callback(void* context, uin
 
     UNUSED(instance);
     return consumed;
+}
+
+static void nfc_cli_app_update_cli_status(NfcCliApp* instance) {
+    if(instance->is_cli_connected != cli_is_connected(instance->cli)) {
+        instance->is_cli_connected = cli_is_connected(instance->cli);
+        NfcCliWidgetConfig new_config = instance->is_cli_connected ?
+                                            NfcCliWidgetConfigCliSessionRunning :
+                                            NfcCliWidgetConfigCliSessionWait;
+        nfc_cli_config_widget(instance, new_config);
+    }
+}
+
+static void nfc_cli_app_view_dispatcher_tick_event_callback(void* context) {
+    NfcCliApp* instance = context;
+
+    if(instance->widget_config != NfcCliWidgetConfigAbortConfirm) {
+        nfc_cli_app_update_cli_status(instance);
+    }
 }
 
 static NfcCliApp* nfc_cli_app_alloc() {
@@ -46,12 +61,17 @@ static NfcCliApp* nfc_cli_app_alloc() {
         instance->view_dispatcher, nfc_cli_app_view_dispatcher_navigation_callback);
     view_dispatcher_set_custom_event_callback(
         instance->view_dispatcher, nfc_cli_app_view_dispatcher_custom_event_callback);
+    view_dispatcher_set_tick_event_callback(
+        instance->view_dispatcher,
+        nfc_cli_app_view_dispatcher_tick_event_callback,
+        NFC_CLI_APP_CLI_SESSION_UPDATE_TIME_MS);
 
-    if(cli_is_connected(instance->cli)) {
-        nfc_cli_config_widget(instance, NfcCliWidgetConfigCliSessionRunning);
-    } else {
-        nfc_cli_config_widget(instance, NfcCliWidgetConfigCliSessionWait);
-    }
+    instance->is_cli_connected = cli_is_connected(instance->cli);
+    NfcCliWidgetConfig new_config = instance->is_cli_connected ?
+                                        NfcCliWidgetConfigCliSessionRunning :
+                                        NfcCliWidgetConfigCliSessionWait;
+    nfc_cli_config_widget(instance, new_config);
+
     view_dispatcher_switch_to_view(instance->view_dispatcher, NfcCliAppViewWidget);
 
     return instance;

@@ -21,6 +21,7 @@ typedef struct {
     ViewDispatcher* view_dispatcher;
     Widget* widget;
     NfcCliWidgetConfig widget_config;
+    bool is_cli_connected;
 } NfcCliApp;
 
 typedef enum {
