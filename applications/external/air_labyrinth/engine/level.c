@@ -62,7 +62,7 @@ static void level_process_remove(Level* level) {
     EntityList_clear(level->to_remove);
 }
 
-static bool level_entity_in_list_p(EntityList_t list, Entity* entity) {
+static bool level_entity_in_list_p(const EntityList_t list, Entity* entity) {
     FOREACH(item, list) {
         if(*item == entity) {
             return true;
@@ -242,6 +242,33 @@ size_t level_entity_count(const Level* level, const EntityDescription* descripti
     }
 
     return count;
+}
+
+Entity* level_entity_get(const Level* level, const EntityDescription* description, size_t index) {
+    size_t count = 0;
+    FOREACH(item, level->entities) {
+        if(description == NULL || description == entity_description_get(*item)) {
+            if(!level_entity_in_list_p(level->to_remove, *item)) {
+                if(count == index) {
+                    return *item;
+                }
+                count++;
+            }
+        }
+    }
+
+    FOREACH(item, level->to_add) {
+        if(description == NULL || description == entity_description_get(*item)) {
+            if(!level_entity_in_list_p(level->to_remove, *item)) {
+                if(count == index) {
+                    return *item;
+                }
+                count++;
+            }
+        }
+    }
+
+    return NULL;
 }
 
 void* level_context_get(Level* level) {

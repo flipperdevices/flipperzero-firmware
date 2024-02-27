@@ -26,3 +26,19 @@ size_t canvas_printf_width(Canvas* canvas, const char* format, ...) {
 
     return size;
 }
+
+void canvas_draw_str_aligned_outline(
+    Canvas* canvas,
+    uint8_t x,
+    uint8_t y,
+    Align h,
+    Align v,
+    const char* cstr) {
+    canvas_invert_color(canvas);
+    canvas_draw_str_aligned(canvas, x + 1, y + 0, h, v, cstr);
+    canvas_draw_str_aligned(canvas, x - 1, y - 0, h, v, cstr);
+    canvas_draw_str_aligned(canvas, x + 0, y + 1, h, v, cstr);
+    canvas_draw_str_aligned(canvas, x - 0, y - 1, h, v, cstr);
+    canvas_invert_color(canvas);
+    canvas_draw_str_aligned(canvas, x, y, h, v, cstr);
+}

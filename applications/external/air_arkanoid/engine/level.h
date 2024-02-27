@@ -66,6 +66,17 @@ void level_send_event(
 size_t level_entity_count(const Level* level, const EntityDescription* description);
 
 /**
+ * @brief Get an entity of a certain type in the level
+ * Returns NULL if the index is out of bounds
+ * 
+ * @param level level instance
+ * @param description entity description, NULL for all entities
+ * @param index entity index
+ * @return Entity* entity
+ */
+Entity* level_entity_get(const Level* level, const EntityDescription* description, size_t index);
+
+/**
  * @brief Get the context of the level
  * 
  * @param level level instance
