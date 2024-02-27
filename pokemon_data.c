@@ -384,6 +384,7 @@ uint16_t pokemon_stat_get(PokemonData* pdata, DataStat stat, DataStatSub which) 
     void* party = pdata->party;
     int gen = pdata->gen;
     uint16_t val = 0;
+    uint8_t hp_iv = 0;
 
     switch(stat) {
     case STAT_ATK:
@@ -454,10 +455,21 @@ uint16_t pokemon_stat_get(PokemonData* pdata, DataStat stat, DataStatSub which) 
         if(gen == GEN_II) return ((PokemonPartyGenII*)party)->iv & 0x0F;
 	break;
     case STAT_HP_IV:
-	/* XXX: I think this needs to be bswapped before the & and >> */
-	/* XXX: This is also horribly wrong? */
-        if(gen == GEN_I) return (((PokemonPartyGenI*)party)->iv & 0xAA) >> 4;
-        if(gen == GEN_II) return (((PokemonPartyGenII*)party)->iv & 0xAA) >> 4;
+        /* NOTE:
+	 * HP IV is calculated as the LSB of each other IV, assembled in the
+	 * same bit order down to a single nibble.
+	 */
+        if(gen == GEN_I) val = (((PokemonPartyGenI*)party)->iv);
+        if(gen == GEN_II) val = (((PokemonPartyGenII*)party)->iv);
+	/* NOTE:
+	 * As noted above, we store the IV in the trade struct in the byte order
+	 * of the gameboy which is swapped from the Flipper's byte order.
+	 */
+        hp_iv |= ((val & 0x0010) >> 1);  // ATK IV, MSbit of the hp_iv nibble
+        hp_iv |= ((val & 0x0001) << 2);  // DEF IV, right of ATK IV in hp_iv nibble
+	hp_iv |= ((val & 0x1000) >> 11); // SPD IV, right of DEF IV in hp_iv nibble
+	hp_iv |= ((val & 0x0100) >> 8);  // SPC IV, right of SPD IV in hp_iv nibble
+	return hp_iv;
 	break;
     case STAT_LEVEL:
         if(gen == GEN_I) return ((PokemonPartyGenI*)party)->level;
