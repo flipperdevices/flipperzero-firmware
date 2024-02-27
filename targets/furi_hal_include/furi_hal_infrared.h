@@ -149,9 +149,20 @@ void furi_hal_infrared_async_tx_set_signal_sent_isr_callback(
     FuriHalInfraredTxSignalSentISRCallback callback,
     void* context);
 
-/**
+/** Detect which pin has an external IR module connected.
  *
- * @returns
+ * External IR modules are detected by enabling a weak pull-up
+ * on supported pins and testing whether the input is still low.
+ *
+ * This method works best on modules that employ a FET with a
+ * strong pull-down or a BJT for driving IR LEDs.
+ *
+ * The module MUST pull the input voltage down to at least 0.9V
+ * or lower in order for it to be detected.
+ *
+ * If no module has been detected, FuriHalInfraredTxPinInternal is returned.
+ *
+ * @return numeric identifier of the first pin with a module detected.
  */
 FuriHalInfraredTxPin furi_hal_infrared_detect_tx_output(void);
 
