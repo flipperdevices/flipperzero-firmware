@@ -149,6 +149,12 @@ void furi_hal_infrared_async_tx_set_signal_sent_isr_callback(
     FuriHalInfraredTxSignalSentISRCallback callback,
     void* context);
 
+/**
+ *
+ * @returns
+ */
+FuriHalInfraredTxPin furi_hal_infrared_detect_tx_output(void);
+
 /** Set which pin will be used to transmit infrared signals.
  *
  * @param[in]   tx_pin  pin to be used for signal transmission.

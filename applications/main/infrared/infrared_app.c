@@ -444,7 +444,16 @@ void infrared_show_error_message(const InfraredApp* infrared, const char* fmt, .
 }
 
 void infrared_set_tx_pin(InfraredApp* infrared, FuriHalInfraredTxPin tx_pin) {
-    furi_hal_infrared_set_tx_output(tx_pin);
+    if(tx_pin < FuriHalInfraredTxPinMax) {
+        furi_hal_infrared_set_tx_output(tx_pin);
+    } else {
+        FuriHalInfraredTxPin tx_pin_detected = furi_hal_infrared_detect_tx_output();
+        furi_hal_infrared_set_tx_output(tx_pin_detected);
+        if(tx_pin_detected != FuriHalInfraredTxPinInternal) {
+            infrared_enable_otg(infrared, true);
+        }
+    }
+
     infrared->app_state.tx_pin = tx_pin;
 }
 

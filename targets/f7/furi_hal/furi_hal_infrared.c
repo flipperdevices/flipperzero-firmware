@@ -1,6 +1,7 @@
 #include <furi_hal_infrared.h>
 #include <furi_hal_interrupt.h>
 #include <furi_hal_resources.h>
+#include <furi_hal_cortex.h>
 #include <furi_hal_bus.h>
 
 #include <stm32wbxx_ll_tim.h>
@@ -698,6 +699,20 @@ void furi_hal_infrared_async_tx_set_signal_sent_isr_callback(
     void* context) {
     infrared_tim_tx.signal_sent_callback = callback;
     infrared_tim_tx.signal_sent_context = context;
+}
+
+FuriHalInfraredTxPin furi_hal_infrared_detect_tx_output(void) {
+    for(FuriHalInfraredTxPin pin = FuriHalInfraredTxPinInternal + 1; pin < FuriHalInfraredTxPinMax;
+        ++pin) {
+        const GpioPin* gpio = infrared_tx_pins[pin];
+        furi_hal_gpio_init(gpio, GpioModeInput, GpioPullUp, GpioSpeedLow);
+        furi_hal_cortex_delay_us(1000U);
+        const bool level = furi_hal_gpio_read(gpio);
+        furi_hal_gpio_init(gpio, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
+        if(!level) return pin;
+    }
+
+    return FuriHalInfraredTxPinInternal;
 }
 
 void furi_hal_infrared_set_tx_output(FuriHalInfraredTxPin tx_pin) {

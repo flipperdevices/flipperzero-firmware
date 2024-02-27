@@ -3,6 +3,7 @@
 static const char* infrared_scene_gpio_settings_pin_text[] = {
     "Flipper",
     "2 (A7)",
+    "Detect",
 };
 
 static const char* infrared_scene_gpio_settings_otg_text[] = {
@@ -30,8 +31,7 @@ static void infrared_scene_gpio_settings_otg_change_callback(VariableItem* item)
         infrared_custom_event_pack(InfraredCustomEventTypeGpioOtgChanged, index));
 }
 
-void infrared_scene_gpio_settings_on_enter(void* context) {
-    InfraredApp* infrared = context;
+static void infrared_scene_gpio_settings_init(InfraredApp* infrared) {
     VariableItemList* var_item_list = infrared->var_item_list;
     VariableItem* item;
     uint8_t value_index;
@@ -54,10 +54,21 @@ void infrared_scene_gpio_settings_on_enter(void* context) {
         infrared_scene_gpio_settings_otg_change_callback,
         infrared);
 
-    value_index = infrared->app_state.is_otg_enabled;
-    variable_item_set_current_value_index(item, value_index);
-    variable_item_set_current_value_text(item, infrared_scene_gpio_settings_otg_text[value_index]);
+    if(infrared->app_state.tx_pin < FuriHalInfraredTxPinMax) {
+        value_index = infrared->app_state.is_otg_enabled;
+        variable_item_set_current_value_index(item, value_index);
+        variable_item_set_current_value_text(
+            item, infrared_scene_gpio_settings_otg_text[value_index]);
+    } else {
+        variable_item_set_values_count(item, 1);
+        variable_item_set_current_value_index(item, 0);
+        variable_item_set_current_value_text(item, "Auto");
+    }
+}
 
+void infrared_scene_gpio_settings_on_enter(void* context) {
+    InfraredApp* infrared = context;
+    infrared_scene_gpio_settings_init(infrared);
     view_dispatcher_switch_to_view(infrared->view_dispatcher, InfraredViewVariableList);
 }
 
@@ -72,6 +83,8 @@ bool infrared_scene_gpio_settings_on_event(void* context, SceneManagerEvent even
 
         if(custom_event_type == InfraredCustomEventTypeGpioTxPinChanged) {
             infrared_set_tx_pin(infrared, custom_event_value);
+            variable_item_list_reset(infrared->var_item_list);
+            infrared_scene_gpio_settings_init(infrared);
         } else if(custom_event_type == InfraredCustomEventTypeGpioOtgChanged) {
             infrared_enable_otg(infrared, custom_event_value);
         }
