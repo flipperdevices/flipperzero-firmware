@@ -11,6 +11,7 @@ void Stream::set_callback(DmcommCallback callback)
 
 size_t Stream::write(uint8_t i)
 {
+  if(cb == NULL) return 0;
   char str[10];
   snprintf(str, 10, "%c", (char)i);
   size_t sent = furi_stream_buffer_send(
@@ -23,6 +24,7 @@ size_t Stream::write(uint8_t i)
 
 size_t Stream::write(const char *buffer, size_t size)
 {
+  if(cb == NULL) return 0;
   char str[10];
   size_t sent = 0;
   for(size_t i = 0; i < size; i++)
@@ -39,6 +41,7 @@ size_t Stream::write(const char *buffer, size_t size)
 
 size_t Stream::print(const char buffer[])
 {
+  if(cb == NULL) return 0;
   return furi_stream_buffer_send(
       app->dmcomm_output_stream,
       buffer,
@@ -48,6 +51,7 @@ size_t Stream::print(const char buffer[])
 
 size_t Stream::print(int i, int fmt)
 {
+  if(cb == NULL) return 0;
   UNUSED(fmt);
   char str[10];
   snprintf(str, 10, "%d", i);
@@ -62,6 +66,7 @@ size_t Stream::print(int i, int fmt)
 
 size_t Stream::println(void)
 {
+  if(cb == NULL) return 0;
   size_t sent = furi_stream_buffer_send(
       app->dmcomm_output_stream,
       "\n",
@@ -74,6 +79,7 @@ size_t Stream::println(void)
 
 size_t Stream::println(const char buffer[])
 {
+  if(cb == NULL) return 0;
   size_t sent = furi_stream_buffer_send(
       app->dmcomm_output_stream,
       buffer,
@@ -91,6 +97,7 @@ size_t Stream::println(const char buffer[])
 
 size_t Stream::println(int i, int fmt)
 {
+  if(cb == NULL) return 0;
   UNUSED(fmt);
   char str[10];
   snprintf(str, 10, "%d\n", i);

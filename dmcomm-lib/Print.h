@@ -4,9 +4,6 @@ implementation of the Print/Stream classes
 but the underlying I/O is to two flipper stream buffers
 instead of an arduino serial interface.
 
-TODO:
-- When no callback is set, don't shove crap into the output
-buffer, it just fills it up for no reason.
 */
 #include "arduino.h"
 

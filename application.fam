@@ -8,7 +8,7 @@ App(
     stack_size=3 * 1024,
     fap_category="GPIO",
     # Optional values
-    # fap_version="0.1",
+    fap_version="0.2",
     fap_icon="template.png",  # 10x10 1-bit PNG
     # fap_description="A simple app",
     # fap_author="J. Doe",
