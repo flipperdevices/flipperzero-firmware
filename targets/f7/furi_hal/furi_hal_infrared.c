@@ -702,8 +702,8 @@ void furi_hal_infrared_async_tx_set_signal_sent_isr_callback(
 }
 
 FuriHalInfraredTxPin furi_hal_infrared_detect_tx_output(void) {
-    for(FuriHalInfraredTxPin pin = FuriHalInfraredTxPinInternal + 1;
-        pin < FuriHalInfraredTxPinMax; //-V1008
+    for(FuriHalInfraredTxPin pin = FuriHalInfraredTxPinInternal + 1; //-V1008
+        pin < FuriHalInfraredTxPinMax;
         ++pin) {
         const GpioPin* gpio = infrared_tx_pins[pin];
         furi_hal_gpio_init(gpio, GpioModeInput, GpioPullUp, GpioSpeedLow);
