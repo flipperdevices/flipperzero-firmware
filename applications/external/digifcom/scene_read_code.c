@@ -52,7 +52,7 @@ reset:
 #include "flipper.h"
 #include "app_state.h"
 #include "scenes.h"
-#include "dmcomm-lib/fcom.h"
+#include "dmcomm_lib/fcom.h"
 #include "scene_read_code.h"
 #include <furi_hal_cortex.h>
 
