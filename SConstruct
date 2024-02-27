@@ -374,7 +374,14 @@ distenv.PhonyTarget(
 
 # Update WiFi devboard firmware with release channel
 distenv.PhonyTarget(
-    "devboard_flash", [["${PYTHON3}", "${FBT_SCRIPT_DIR}/wifi_board.py", "${ARGS}"]]
+    "devboard_flash",
+    [
+        [
+            "${PYTHON3}",
+            "${FBT_SCRIPT_DIR}/wifi_board.py",
+            "${ARGS}",
+        ]
+    ],
 )
 
 

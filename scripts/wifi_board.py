@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
 
-from flipper.app import App
-from serial.tools.list_ports_common import ListPortInfo
-
+import json
 import logging
 import os
-import tempfile
 import subprocess
-import serial.tools.list_ports as list_ports
-import json
-import requests
 import tarfile
+import tempfile
+
+import requests
+import serial.tools.list_ports as list_ports
+from flipper.app import App
+from serial.tools.list_ports_common import ListPortInfo
 
 
 class UpdateDownloader:
