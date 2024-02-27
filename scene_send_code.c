@@ -4,6 +4,33 @@ Sends the code to the DMComm and initiates sending
 Displays current code we are sending in bold
 Waits for and displays last recieved code in thin text
 Right will go to the save code dialog for the new code (if there is one)
+
+TODO:
+
+Switch to a state machine like:
+
+idle:
+ r -> pending r code
+ s -> pending s code
+ t -> reset
+ newline -> save validate
+ anything else -> reset
+
+pending code:
+ : -> read code
+ anything else -> reset
+
+read code:
+ A-Z,0-9 -> populate code
+ space -> end code -> idle
+ anything else -> reset
+
+save validate:
+ if code valid -> done
+ if not valid -> reset
+
+reset:
+ clear code then -> idle
 */
 
 #include "flipper.h"

@@ -26,6 +26,7 @@ public:
     bool isActive();
     void setThreshold(uint16_t threshold_mV);
     uint16_t voltage();
+    uint32_t waitFor(bool active, uint32_t timeout);
 private:
     const GpioPin* pin_in_;
 };

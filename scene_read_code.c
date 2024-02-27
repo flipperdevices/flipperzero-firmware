@@ -15,13 +15,20 @@ r_code = V2-F3OC-EE11
 
 It's probably more complicated than it needs to be atm :/
 
-TODO: Refactor the serial reader into a state machine
+TODO:
+- For some reason... this hangs the UI while DMComm is doing stuff. I remember it happening similar before but don't remember why.
+- Refactor the serial reader into a state machine
 
 something like:
 
-idle:
+idle r:
  r -> pending r code
- s -> pending s code
+ t -> save validate (reset for send code)
+ newline -> save validate
+ anything else -> reset
+
+idle s:
+ r -> pending s code
  t -> save validate (reset for send code)
  newline -> save validate
  anything else -> reset
@@ -32,7 +39,7 @@ pending code:
 
 read code:
  A-Z,0-9 -> populate code
- space -> end code -> idle
+ space -> end code -> idle <opposite code s/r>
  anything else -> reset
 
 save validate:
@@ -40,7 +47,7 @@ save validate:
  if not valid -> reset
 
 reset:
- clear code then -> idle
+ clear code then -> idle s
 */
 #include "flipper.h"
 #include "app_state.h"
@@ -284,7 +291,10 @@ void fcom_read_code_scene_on_enter(void* context) {
     if(hasData)
         dmcomm_sendcommand(app, "0\n");
     else
+    {
         dmcomm_sendcommand(app, app->state->current_code);
+        //dmcomm_sendcommand(app, "\n");  \n is included from listen menu
+    }
 }
 
 bool fcom_read_code_scene_on_event(void* context, SceneManagerEvent event) {
