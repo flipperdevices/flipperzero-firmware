@@ -115,12 +115,16 @@
 #define PKMN_SLAVE 0x02
 #define PKMN_CONNECTED 0x60
 #define PKMN_CONNECTED_II 0x61
-#define PKMN_TRADE_ACCEPT 0x62
-#define PKMN_TRADE_REJECT 0x61
-#define PKMN_TABLE_LEAVE 0x6f
-#define PKMN_TABLE_LEAVE 0x6f
-#define PKMN_SEL_NUM_MASK 0x60
-#define PKMN_SEL_NUM_ONE 0x60
+#define PKMN_TRADE_ACCEPT_GEN_I 0x62
+#define PKMN_TRADE_ACCEPT_GEN_II 0x72
+#define PKMN_TRADE_REJECT_GEN_I 0x61
+#define PKMN_TRADE_REJECT_GEN_II 0x71
+#define PKMN_TABLE_LEAVE_GEN_I 0x6f
+#define PKMN_TABLE_LEAVE_GEN_II 0x60
+#define PKMN_SEL_NUM_MASK_GEN_I 0x60
+#define PKMN_SEL_NUM_MASK_GEN_II 0x70
+#define PKMN_SEL_NUM_ONE_GEN_I 0x60
+#define PKMN_SEL_NUM_ONE_GEN_II 0x70
 
 #define PKMN_ACTION 0x60
 
@@ -450,8 +454,15 @@ static uint8_t getTradeCentreResponse(struct trade_ctx* trade) {
             model->gameboy_status = GAMEBOY_WAITING;
         } else if ((in & 0x70)) {  // 0x70 is mask for trade center, and I think 0x5 is an indication of link speed. XXX: Need to take this in to account and set timeout from it
 	    send = in;
-        } else if((in & PKMN_SEL_NUM_MASK) == PKMN_SEL_NUM_MASK) {
-            send = PKMN_TABLE_LEAVE;
+        /* XXX: This I think was originally a hack. I think this is checking to see if 0x60 is being sent
+	 * at init, which means we exited trade screen, and re-entered trade screen while GB was still at the table.
+	 * If the GB tries to do anything other than start giving the random preamble, then indicate that we
+	 * wand to leave the table.
+	 * The hack is how we check to see if the GB is sending a trade request
+	 * This needs to be tested for gen ii, and then probably documented a bit better for future sake
+	 */
+        } else if((in & PKMN_SEL_NUM_MASK_GEN_I) == PKMN_SEL_NUM_MASK_GEN_I) {
+            send = PKMN_TABLE_LEAVE_GEN_I;
 	}
         if(counter == SERIAL_RNS_LENGTH) {
             trade->trade_centre_state = TRADE_RANDOM;
@@ -566,18 +577,26 @@ static uint8_t getTradeCentreResponse(struct trade_ctx* trade) {
         /* If the player leaves the trade menu and returns to the room */
 	if (in == 0x20) break; // HACK TODO this is mail header. This should fix flipper getting ahead
 	if (in == 0xFF) break; // HACK TODO this is mail header. This should fix flipper getting ahead
-        if(in == PKMN_TABLE_LEAVE || 0x60) {
+        if (trade->pdata->gen == GEN_I && in == PKMN_TABLE_LEAVE_GEN_I) {
             trade->trade_centre_state = TRADE_RESET;
-            send = PKMN_TABLE_LEAVE;
+            send = PKMN_TABLE_LEAVE_GEN_I;
+            model->gameboy_status = GAMEBOY_READY;
+        } else if (trade->pdata->gen == GEN_II && in == PKMN_TABLE_LEAVE_GEN_II) {
+            trade->trade_centre_state = TRADE_RESET;
+            send = PKMN_TABLE_LEAVE_GEN_II;
             model->gameboy_status = GAMEBOY_READY;
             /* If the player selected a Pokemon to send from the Game Boy */
-        } else if((in & PKMN_SEL_NUM_MASK) == PKMN_SEL_NUM_MASK) {
+        } else if(trade->pdata->gen == GEN_I && (in & PKMN_SEL_NUM_MASK_GEN_I) == PKMN_SEL_NUM_MASK_GEN_I) {
             in_pkmn_idx = in;
-            send = PKMN_SEL_NUM_ONE; // We always send the first Pokemon
+            send = PKMN_SEL_NUM_ONE_GEN_I; // We always send the first Pokemon
             model->gameboy_status = GAMEBOY_TRADE_PENDING;
             /* BLANKs are sent in a few places, we want to do nothing about them
 	 * unless the Game Boy already sent us an index they want to trade.
 	 */
+        } else if(trade->pdata->gen == GEN_II && (in & PKMN_SEL_NUM_MASK_GEN_II) == PKMN_SEL_NUM_MASK_GEN_II) {
+            in_pkmn_idx = in;
+            send = PKMN_SEL_NUM_ONE_GEN_II; // We always send the first Pokemon
+            model->gameboy_status = GAMEBOY_TRADE_PENDING;
         } else if(in == PKMN_BLANK) {
             if(in_pkmn_idx != 0) {
                 send = 0;
@@ -589,10 +608,10 @@ static uint8_t getTradeCentreResponse(struct trade_ctx* trade) {
 
     /* Handle the Game Boy accepting or rejecting a trade deal */
     case TRADE_CONFIRMATION:
-        if(in == PKMN_TRADE_REJECT) {
+        if(in == PKMN_TRADE_REJECT_GEN_I || in == PKMN_TRADE_REJECT_GEN_II) {
             trade->trade_centre_state = TRADE_SELECT;
             model->gameboy_status = GAMEBOY_WAITING;
-        } else if(in == PKMN_TRADE_ACCEPT) {
+        } else if(in == PKMN_TRADE_ACCEPT_GEN_I || in == PKMN_TRADE_ACCEPT_GEN_II) {
             trade->trade_centre_state = TRADE_DONE;
         }
         break;
