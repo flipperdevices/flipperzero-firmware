@@ -642,10 +642,6 @@ UnitempStatus unitemp_sensor_updateData(Sensor* sensor) {
         unitemp_rhToDewpointF(sensor);
     }
 
-    if(app->settings.temp_unit == UT_TEMP_FAHRENHEIT && sensor->status == UT_SENSORSTATUS_OK) {
-        unitemp_celsiusToFahrenheit(sensor);
-    }
-
     if(sensor->status == UT_SENSORSTATUS_OK) {
         if(app->settings.heat_index &&
            ((sensor->type->datatype & (UT_TEMPERATURE | UT_HUMIDITY)) ==
