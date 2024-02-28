@@ -4,23 +4,6 @@
 
 #define NFC_CLI_APP_CLI_SESSION_UPDATE_TIME_MS (200)
 
-static bool nfc_cli_app_view_dispatcher_navigation_callback(void* context) {
-    bool consumed = false;
-    NfcCliApp* instance = context;
-
-    UNUSED(instance);
-    return consumed;
-}
-
-static bool nfc_cli_app_view_dispatcher_custom_event_callback(void* context, uint32_t event) {
-    bool consumed = false;
-    NfcCliApp* instance = context;
-    UNUSED(event);
-
-    UNUSED(instance);
-    return consumed;
-}
-
 static void nfc_cli_app_update_cli_status(NfcCliApp* instance) {
     if(instance->is_cli_connected != cli_is_connected(instance->cli)) {
         instance->is_cli_connected = cli_is_connected(instance->cli);
@@ -29,6 +12,40 @@ static void nfc_cli_app_update_cli_status(NfcCliApp* instance) {
                                             NfcCliWidgetConfigCliSessionWait;
         nfc_cli_config_widget(instance, new_config);
     }
+}
+
+static bool nfc_cli_app_view_dispatcher_navigation_callback(void* context) {
+    bool consumed = false;
+    NfcCliApp* instance = context;
+
+    if(nfc_cli_is_command_in_progress(instance->nfc_cli)) {
+        if(instance->widget_config != NfcCliWidgetConfigAbortConfirm) {
+            nfc_cli_config_widget(instance, NfcCliWidgetConfigAbortConfirm);
+        }
+        consumed = true;
+    }
+
+    return consumed;
+}
+
+static bool nfc_cli_app_view_dispatcher_custom_event_callback(void* context, uint32_t event) {
+    bool consumed = false;
+    NfcCliApp* instance = context;
+
+    // Process events from Abort Confirm view
+    if(event == GuiButtonTypeLeft) {
+        nfc_cli_abort_command(instance->nfc_cli);
+        view_dispatcher_stop(instance->view_dispatcher);
+        consumed = true;
+    } else if(event == GuiButtonTypeRight) {
+        NfcCliWidgetConfig new_config = instance->is_cli_connected ?
+                                            NfcCliWidgetConfigCliSessionRunning :
+                                            NfcCliWidgetConfigCliSessionWait;
+        nfc_cli_config_widget(instance, new_config);
+        consumed = true;
+    }
+
+    return consumed;
 }
 
 static void nfc_cli_app_view_dispatcher_tick_event_callback(void* context) {
@@ -45,6 +62,9 @@ static NfcCliApp* nfc_cli_app_alloc() {
     // Records
     instance->cli = furi_record_open(RECORD_CLI);
     instance->gui = furi_record_open(RECORD_GUI);
+
+    // NFC CLI
+    instance->nfc_cli = nfc_cli_alloc(instance->cli);
 
     // View dispatcher
     instance->view_dispatcher = view_dispatcher_alloc();
@@ -78,6 +98,8 @@ static NfcCliApp* nfc_cli_app_alloc() {
 }
 
 static void nfc_cli_app_free(NfcCliApp* instance) {
+    nfc_cli_free(instance->nfc_cli);
+
     view_dispatcher_remove_view(instance->view_dispatcher, NfcCliAppViewWidget);
     widget_free(instance->widget);
 

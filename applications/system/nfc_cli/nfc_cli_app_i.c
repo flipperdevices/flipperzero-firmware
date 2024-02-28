@@ -46,10 +46,10 @@ static void nfc_cli_app_widget_setup_abort_confirm_callback(
 
 static void nfc_cli_app_widget_setup_abort_confirm(NfcCliApp* instance) {
     widget_add_string_multiline_element(
-        instance->widget, 64, 0, AlignCenter, AlignTop, FontSecondary, "Exit the NFC CLI?");
+        instance->widget, 64, 0, AlignCenter, AlignTop, FontPrimary, "Exit the NFC CLI?");
     widget_add_string_multiline_element(
         instance->widget,
-        0,
+        64,
         13,
         AlignCenter,
         AlignTop,
@@ -59,6 +59,12 @@ static void nfc_cli_app_widget_setup_abort_confirm(NfcCliApp* instance) {
         instance->widget,
         GuiButtonTypeLeft,
         "Exit",
+        nfc_cli_app_widget_setup_abort_confirm_callback,
+        instance);
+    widget_add_button_element(
+        instance->widget,
+        GuiButtonTypeRight,
+        "Stay",
         nfc_cli_app_widget_setup_abort_confirm_callback,
         instance);
 }
