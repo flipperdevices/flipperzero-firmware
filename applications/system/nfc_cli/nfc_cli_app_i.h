@@ -1,7 +1,7 @@
 #pragma once
 
 #include <gui/gui.h>
-#include <assets_icons.h>
+#include "nfc_cli_icons.h"
 #include <gui/view.h>
 #include <gui/view_dispatcher.h>
 #include <gui/modules/widget.h>

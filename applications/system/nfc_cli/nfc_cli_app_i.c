@@ -13,11 +13,13 @@ static void nfc_cli_app_widget_setup_cli_session_wait(NfcCliApp* instance) {
         AlignTop,
         FontSecondary,
         "Connect to USB to use\nCLI commands");
+    widget_add_icon_element(instance->widget, 20, 30, &I_PC_connect_84x21);
 }
 
 static void nfc_cli_app_widget_setup_cli_session_running(NfcCliApp* instance) {
     widget_add_string_element(
         instance->widget, 96, 0, AlignCenter, AlignTop, FontPrimary, "Connected!");
+    widget_add_icon_element(instance->widget, 0, 0, &I_Connected_cyberhelmet_64x64);
     widget_add_text_box_element(
         instance->widget,
         64,
@@ -30,7 +32,7 @@ static void nfc_cli_app_widget_setup_cli_session_running(NfcCliApp* instance) {
         false);
     widget_add_string_element(
         instance->widget, 64, 64, AlignLeft, AlignBottom, FontSecondary, "Exit = ");
-    // widget_add_icon_element(instance->widget, 95, 57, &I_back_btn_10x8);
+    widget_add_icon_element(instance->widget, 95, 57, &I_back_btn_10x8);
 }
 
 static void nfc_cli_app_widget_setup_abort_confirm_callback(
