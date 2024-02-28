@@ -55,6 +55,7 @@ struct FuriHalSpiBusHandle {
     const GpioPin* mosi;
     const GpioPin* sck;
     const GpioPin* cs;
+    bool cs_active_high; /**< Set to true if the CS pin is active high. In most cases, this should be false. */
 };
 
 #ifdef __cplusplus

@@ -267,6 +267,7 @@ FuriHalSpiBusHandle furi_hal_spi_bus_handle_external = {
     .mosi = &gpio_ext_pa7,
     .sck = &gpio_ext_pb3,
     .cs = &gpio_ext_pa4,
+    .cs_active_high = false,
 };
 
 inline static void furi_hal_spi_bus_d_handle_event_callback(
@@ -323,6 +324,7 @@ FuriHalSpiBusHandle furi_hal_spi_bus_handle_display = {
     .mosi = &gpio_spi_d_mosi,
     .sck = &gpio_spi_d_sck,
     .cs = &gpio_display_cs,
+    .cs_active_high = false,
 };
 
 static void furi_hal_spi_bus_handle_sd_fast_event_callback(
@@ -338,6 +340,7 @@ FuriHalSpiBusHandle furi_hal_spi_bus_handle_sd_fast = {
     .mosi = &gpio_spi_d_mosi,
     .sck = &gpio_spi_d_sck,
     .cs = &gpio_sdcard_cs,
+    .cs_active_high = false,
 };
 
 static void furi_hal_spi_bus_handle_sd_slow_event_callback(
@@ -353,4 +356,5 @@ FuriHalSpiBusHandle furi_hal_spi_bus_handle_sd_slow = {
     .mosi = &gpio_spi_d_mosi,
     .sck = &gpio_spi_d_sck,
     .cs = &gpio_sdcard_cs,
+    .cs_active_high = false,
 };
