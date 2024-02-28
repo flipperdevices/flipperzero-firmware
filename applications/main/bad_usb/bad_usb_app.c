@@ -84,7 +84,8 @@ static void bad_usb_save_settings(BadUsbApp* app) {
                    fff, BAD_USB_SETTINGS_FILE_TYPE, BAD_USB_SETTINGS_VERSION))
                 break;
             if(!flipper_format_write_string(fff, "layout", app->keyboard_layout)) break;
-            if(!flipper_format_write_uint32(fff, "interface", (const uint32_t*)&app->interface, 1))
+            uint32_t interface_id = app->interface;
+            if(!flipper_format_write_uint32(fff, "interface", (const uint32_t*)&interface_id, 1))
                 break;
         } while(0);
     }
