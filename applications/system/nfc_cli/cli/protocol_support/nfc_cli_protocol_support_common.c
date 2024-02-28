@@ -215,17 +215,8 @@ void nfc_cli_protocol_support_common_poll_handler(
                 break;
             }
 
-            // TODO Make lib function
-            for(size_t i = 0; i < cmd_ascii_len / 2; i++) {
-                if(!args_char_to_hex(
-                       additional_args[i * 2],
-                       additional_args[i * 2 + 1],
-                       &(instance->buffer[i]))) {
-                    read_success = false;
-                    break;
-                }
-            }
-            if(!read_success) {
+            furi_string_set_str(tmp_str, additional_args);
+            if(!args_read_hex_bytes(tmp_str, instance->buffer, cmd_ascii_len / 2)) {
                 printf("Failed to read hex bytes\r\n");
                 break;
             }
@@ -510,23 +501,16 @@ void nfc_cli_protocol_support_common_start_poller_handle_poll(
             read_success = false;
             break;
         }
-
         size_t cmd_ascii_len = strlen(additional_args);
+
         if(((cmd_ascii_len % 2) != 0) || (cmd_ascii_len == 0)) {
             printf("Incorrect data length %d in argument: %s\r\n", cmd_ascii_len, additional_args);
             read_success = false;
             break;
         }
 
-        // TODO Make lib function
-        for(size_t i = 0; i < cmd_ascii_len / 2; i++) {
-            if(!args_char_to_hex(
-                   additional_args[i * 2], additional_args[i * 2 + 1], &(instance->buffer[i]))) {
-                read_success = false;
-                break;
-            }
-        }
-        if(!read_success) {
+        furi_string_set_str(tmp_str, additional_args);
+        if(!args_read_hex_bytes(tmp_str, instance->buffer, cmd_ascii_len / 2)) {
             printf("Failed to read hex bytes\r\n");
             break;
         }
