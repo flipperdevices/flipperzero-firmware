@@ -4,11 +4,6 @@
 #include <toolbox/args.h>
 #include <toolbox/arg_parser.h>
 
-static void nfc_cli_protocol_support_poll_print_usage() {
-    printf("Usage:\r\n");
-    printf("iso14443-3a poll <hex_data>:\r\n");
-}
-
 static NfcCliPollerContext* nfc_cli_poller_context_alloc(Nfc* nfc, NfcProtocol protocol) {
     NfcCliPollerContext* instance = malloc(sizeof(NfcCliPollerContext));
     instance->nfc = nfc;
@@ -240,7 +235,8 @@ void nfc_cli_protocol_support_common_poll_handler(
 
         if(NfcCliPollCmdDataArray_size(cmd_arr) == 0) {
             printf("No data to send\r\n");
-            nfc_cli_protocol_support_poll_print_usage();
+            arg_parser_get_help_message(parser, tmp_str);
+            printf("%s\r\n", furi_string_get_cstr(tmp_str));
             break;
         }
 
