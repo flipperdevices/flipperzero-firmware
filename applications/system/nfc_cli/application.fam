@@ -2,7 +2,7 @@ App(
     appid="nfc_cli",
     name="NFC CLI",
     apptype=FlipperAppType.EXTERNAL,
-    targets =["f7"],
+    targets=["f7"],
     entry_point="nfc_cli_app",
     requires=["gui"],
     stack_size=1 * 1024,
