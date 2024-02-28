@@ -259,34 +259,32 @@ void furi_string_set_n(FuriString* v, const FuriString* ref, size_t offset, size
 }
 
 size_t furi_string_utf8_length(FuriString* str) {
+    size_t len = string_size(str->string);
     const char * cstr = string_get_cstr(str->string);
+    const char* end = cstr + len;
 
-    size_t len = 0;
-    int8x4_t zero = 0x00000000;
-    int8x4_t one  = 0x01010101;
-    int8x4_t threshold = -1077952577; // -65, -65, -65, -65
+    if(len >= sizeof(uint8x4_t)) {
+        const char* vend = end - sizeof(uint8x4_t);
 
-    for (;;) {
-        uint8x4_t result;
-        int8x4_t vec = *(int8x4_t *) cstr;
+        int8x4_t zero = 0x00000000;
+        int8x4_t one = 0x01010101;
+        int8x4_t threshold = -1077952577; // -65, -65, -65, -65
 
-        __uadd8(0xFFFFFFFF, vec); result = __sel(zero, one);
-        if (result > 0) {
-            if (result == 0x01000000) {
-                __ssub8(threshold, vec); result = __sel(zero, one);
-                return __usada8(result, 1, len);
-            }
-            break;
-        }
+        do {
+            int8x4_t vec = *(int8x4_t*)cstr;
 
-        __ssub8(threshold, vec); result = __sel(zero, one);
-        len = __usada8(result, zero, len);
+            __ssub8(threshold, vec);
+            uint8x4_t result = __sel(one, zero);
 
-        cstr += sizeof(uint8x4_t);
+            len -= __usada8(result, zero, 0);
+
+            cstr += sizeof(uint8x4_t);
+        } while(cstr <= vend);
     }
 
-    for (signed char c; (c = *cstr); cstr++) {
-        len += c >= -64;
+    while(cstr < end) {
+        signed char c = *cstr++;
+        len -= c < -64;
     }
 
     return len;
