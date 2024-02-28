@@ -62,6 +62,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Air Labyrinth v0.1 (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/vgm/apps/air_labyrinth) `Req: Video Game Module By Flipper Devices`
 - Updated: [Digimon F-Com v1.1 (By TylerWilley)](https://github.com/TylerWilley/flipper-f-com)
 - OFW: [FBT/uFBT: Enable C++20/GNU23 in VSCode IntelliSense #3394 (By CookiePLMonster)](https://github.com/flipperdevices/flipperzero-firmware/pull/3394)
+- Updated: [Bad KB (Modified PR#738 from pengu1ndev - Original from Willy-JL) #739 (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/739) As of this update, still the most feature rich BadKB from all CFW.
+- UL: [SubGHz: Settings - Added frequency: 430.50 #721 (By MizumasuShoichi)](https://github.com/DarkFlippers/unleashed-firmware/pull/721)
 
 <a name="release">
 
