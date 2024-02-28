@@ -18,6 +18,8 @@ Building:
         Build all FAP apps
     fap_{APPID}, launch APPSRC={APPID}:
         Build FAP app with appid={APPID}; upload & start it over USB
+    cdb:
+        regenerate "compile_commands.json" file (for IDE integration)
 
 Flashing & debugging:
     flash, *jflash:
@@ -44,7 +46,11 @@ How to create a new application:
     4. Run `ufbt launch` to build and upload your application.
 
 How to open a shell with toolchain environment and other build tools:
-    In your shell, type "source `ufbt -s env`". You can also use "." instead of "source".
+    In your shell, type "eval `ufbt -s env`".
+
+How to update uFBT SDK:
+    Run "ufbt update" to fetch latest SDK.
+    You can also specify branch, target and/or channel options. See "ufbt update -h" for details.
 """
 
 

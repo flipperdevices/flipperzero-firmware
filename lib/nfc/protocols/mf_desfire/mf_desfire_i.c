@@ -56,7 +56,7 @@ bool mf_desfire_version_parse(MfDesfireVersion* data, const BitBuffer* buf) {
 }
 
 bool mf_desfire_free_memory_parse(MfDesfireFreeMemory* data, const BitBuffer* buf) {
-    typedef struct __attribute__((packed)) {
+    typedef struct FURI_PACKED {
         uint32_t bytes_free : 3 * BITS_IN_BYTE;
     } MfDesfireFreeMemoryLayout;
 
@@ -74,7 +74,7 @@ bool mf_desfire_free_memory_parse(MfDesfireFreeMemory* data, const BitBuffer* bu
 }
 
 bool mf_desfire_key_settings_parse(MfDesfireKeySettings* data, const BitBuffer* buf) {
-    typedef struct __attribute__((packed)) {
+    typedef struct FURI_PACKED {
         bool is_master_key_changeable : 1;
         bool is_free_directory_list : 1;
         bool is_free_create_delete : 1;
@@ -143,30 +143,30 @@ bool mf_desfire_file_id_parse(MfDesfireFileId* data, uint32_t index, const BitBu
 bool mf_desfire_file_settings_parse(MfDesfireFileSettings* data, const BitBuffer* buf) {
     bool parsed = false;
 
-    typedef struct __attribute__((packed)) {
+    typedef struct FURI_PACKED {
         uint8_t type;
         uint8_t comm;
         uint16_t access_rights;
     } MfDesfireFileSettingsHeader;
 
-    typedef struct __attribute__((packed)) {
+    typedef struct FURI_PACKED {
         uint32_t size : 3 * BITS_IN_BYTE;
     } MfDesfireFileSettingsData;
 
-    typedef struct __attribute__((packed)) {
+    typedef struct FURI_PACKED {
         uint32_t lo_limit;
         uint32_t hi_limit;
         uint32_t limited_credit_value;
         uint8_t limited_credit_enabled;
     } MfDesfireFileSettingsValue;
 
-    typedef struct __attribute__((packed)) {
+    typedef struct FURI_PACKED {
         uint32_t size : 3 * BITS_IN_BYTE;
         uint32_t max : 3 * BITS_IN_BYTE;
         uint32_t cur : 3 * BITS_IN_BYTE;
     } MfDesfireFileSettingsRecord;
 
-    typedef struct __attribute__((packed)) {
+    typedef struct FURI_PACKED {
         MfDesfireFileSettingsHeader header;
         union {
             MfDesfireFileSettingsData data;
@@ -179,44 +179,53 @@ bool mf_desfire_file_settings_parse(MfDesfireFileSettings* data, const BitBuffer
         const size_t data_size = bit_buffer_get_size_bytes(buf);
         const size_t min_data_size =
             sizeof(MfDesfireFileSettingsHeader) + sizeof(MfDesfireFileSettingsData);
+        const size_t max_data_size =
+            sizeof(MfDesfireFileSettingsHeader) + sizeof(MfDesfireFileSettingsValue);
 
         if(data_size < min_data_size) break;
+        if(data_size <= max_data_size) {
+            MfDesfireFileSettingsLayout layout;
+            bit_buffer_write_bytes(buf, &layout, sizeof(MfDesfireFileSettingsLayout));
 
-        MfDesfireFileSettingsLayout layout;
-        bit_buffer_write_bytes(buf, &layout, sizeof(MfDesfireFileSettingsLayout));
+            data->type = layout.header.type;
+            data->comm = layout.header.comm;
+            data->access_rights = layout.header.access_rights;
 
-        data->type = layout.header.type;
-        data->comm = layout.header.comm;
-        data->access_rights = layout.header.access_rights;
+            if(data->type == MfDesfireFileTypeStandard || data->type == MfDesfireFileTypeBackup) {
+                if(data_size != min_data_size) break;
 
-        if(data->type == MfDesfireFileTypeStandard || data->type == MfDesfireFileTypeBackup) {
-            if(data_size != min_data_size) break;
+                data->data.size = layout.data.size;
+            } else if(data->type == MfDesfireFileTypeValue) {
+                if(data_size !=
+                   sizeof(MfDesfireFileSettingsHeader) + sizeof(MfDesfireFileSettingsValue))
+                    break;
 
-            data->data.size = layout.data.size;
+                data->value.lo_limit = layout.value.lo_limit;
+                data->value.hi_limit = layout.value.hi_limit;
+                data->value.limited_credit_value = layout.value.limited_credit_value;
+                data->value.limited_credit_enabled = layout.value.limited_credit_enabled;
 
-        } else if(data->type == MfDesfireFileTypeValue) {
-            if(data_size !=
-               sizeof(MfDesfireFileSettingsHeader) + sizeof(MfDesfireFileSettingsValue))
+            } else if(
+                data->type == MfDesfireFileTypeLinearRecord ||
+                data->type == MfDesfireFileTypeCyclicRecord) {
+                if(data_size !=
+                   sizeof(MfDesfireFileSettingsHeader) + sizeof(MfDesfireFileSettingsRecord))
+                    break;
+
+                data->record.size = layout.record.size;
+                data->record.max = layout.record.max;
+                data->record.cur = layout.record.cur;
+
+            } else {
                 break;
-
-            data->value.lo_limit = layout.value.lo_limit;
-            data->value.hi_limit = layout.value.hi_limit;
-            data->value.limited_credit_value = layout.value.limited_credit_value;
-            data->value.limited_credit_enabled = layout.value.limited_credit_enabled;
-
-        } else if(
-            data->type == MfDesfireFileTypeLinearRecord ||
-            data->type == MfDesfireFileTypeCyclicRecord) {
-            if(data_size !=
-               sizeof(MfDesfireFileSettingsHeader) + sizeof(MfDesfireFileSettingsRecord))
-                break;
-
-            data->record.size = layout.record.size;
-            data->record.max = layout.record.max;
-            data->record.cur = layout.record.cur;
-
+            }
         } else {
-            break;
+            // TODO FL-3750: process HID Desfire command response here
+            // Set default fields for now
+            data->type = 0;
+            data->comm = 0;
+            data->access_rights = 0;
+            data->data.size = 0;
         }
 
         parsed = true;
@@ -478,19 +487,25 @@ bool mf_desfire_application_load(MfDesfireApplication* data, const char* prefix,
     do {
         if(!mf_desfire_key_settings_load(&data->key_settings, prefix, ff)) break;
 
-        const uint32_t key_version_count = data->key_settings.max_keys;
-        simple_array_init(data->key_versions, key_version_count);
-
         uint32_t i;
-        for(i = 0; i < key_version_count; ++i) {
-            if(!mf_desfire_key_version_load(simple_array_get(data->key_versions, i), prefix, i, ff))
-                break;
+        const uint32_t key_version_count = data->key_settings.max_keys;
+        if(key_version_count) {
+            simple_array_init(data->key_versions, key_version_count);
+
+            for(i = 0; i < key_version_count; ++i) {
+                if(!mf_desfire_key_version_load(
+                       simple_array_get(data->key_versions, i), prefix, i, ff))
+                    break;
+            }
+
+            if(i != key_version_count) break;
         }
 
-        if(i != key_version_count) break;
-
         uint32_t file_count;
-        if(!mf_desfire_file_count_load(&file_count, prefix, ff)) break;
+        if(!mf_desfire_file_count_load(&file_count, prefix, ff)) {
+            success = true;
+            break;
+        }
 
         simple_array_init(data->file_ids, file_count);
         if(!mf_desfire_file_ids_load(simple_array_get_data(data->file_ids), file_count, prefix, ff))
