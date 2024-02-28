@@ -66,6 +66,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: [SubGHz: Settings - Added frequency: 430.50 #721 (By MizumasuShoichi)](https://github.com/DarkFlippers/unleashed-firmware/pull/721)
 - Updated: [Temp Sensors Reader 1.6 (By quen0n)](https://github.com/quen0n/Unitemp-Flipper-Zero-Plugin) `Req: BMP180/BMP280/BME280/BME680/DHT11/DHT22(AM2302)/AM2301/AM2320/HTU2XD/HTU21x/HDC1080/MAX31855/MAX6675/SCD30` Fixed double conversion (By RogueMaster)
 - Updated: [JS Runner v1.0 (By nminaylov)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/3286)
+- Updated: [GPS v1.4 (By ezod)](https://github.com/ezod/flipperzero-gps) `Req: NMEA 0183`
 
 <a name="release">
 
@@ -426,7 +427,7 @@ $ ./fbt dolphin_ext
 - [GPIO Reader (biotinker) (By biotinker)](https://github.com/biotinker/flipperzero-gpioreader)
 - [GPIO Reader v1.1 (Aurelilc) (By aureli1c)](https://github.com/aureli1c/flipperzero_GPIO_read)
 - [GPIO w I2C (By gornekich)-OFW] with [I²C-Scanner #1431 (By GitChris3004)](https://github.com/flipperdevices/flipperzero-firmware/pull/1431) and [read EEPROM of SFP Modules using I2C (By marcusju)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/198)
-- [GPS v1.3 (By ezod)](https://github.com/ezod/flipperzero-gps) `Req: NMEA 0183`
+- [GPS v1.4 (By ezod)](https://github.com/ezod/flipperzero-gps) `Req: NMEA 0183`
 - [HEX Editor v1.3 (By dunaevai135)](https://github.com/dunaevai135/flipper-zero-hex_editor)
 - [HEX Viewer v2.0 (By QtRoS)](https://github.com/QtRoS/flipperzero-firmware)
 - [HID File Transfer v1.0 (By Kavakuo)](https://github.com/Kavakuo/HID-File-Transfer)

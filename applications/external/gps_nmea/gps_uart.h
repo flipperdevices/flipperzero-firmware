@@ -4,9 +4,8 @@
 #include <notification/notification_messages.h>
 #include <cfw/cfw.h>
 
-#define UART_CH (cfw_settings.uart_nmea_channel)
-
 #define RX_BUF_SIZE 1024
+#define UART_CH (cfw_settings.uart_nmea_channel)
 
 static const int gps_baudrates[6] = {4800, 9600, 19200, 38400, 57600, 115200};
 static int current_gps_baudrate = 1;
@@ -45,10 +44,10 @@ typedef struct {
 
     NotificationApp* notifications;
     uint32_t baudrate;
-    bool backlight_enabled;
+    bool backlight_on;
+    bool changing_baudrate;
     bool deep_sleep_enabled;
     SpeedUnit speed_units;
-    ViewState view_state;
 
     GpsStatus status;
 } GpsUart;
