@@ -383,10 +383,10 @@ static void ducky_script_preload(BadKbScript* bad_kb, File* script_file) {
     app->has_bt_id = strncmp(line_tmp, ducky_cmd_bt_id, strlen(ducky_cmd_bt_id)) == 0;
 
     if(app->has_usb_id) {
-        app->is_bt = false;
+        //app->is_bt = false;
         app->set_usb_id = ducky_set_usb_id(bad_kb, &line_tmp[strlen(ducky_cmd_id) + 1]);
     } else if(app->has_bt_id) {
-        app->is_bt = true;
+        //app->is_bt = true;
         app->set_bt_id = ducky_set_bt_id(bad_kb, &line_tmp[strlen(ducky_cmd_bt_id) + 1]);
     }
 

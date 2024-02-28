@@ -55,7 +55,7 @@ static int32_t ducky_fnc_string(BadKbScript* bad_kb, const char* line, int32_t p
         furi_string_cat(bad_kb->string_print, "\n");
     }
 
-    if(bad_kb->stringdelay == 0) { // stringdelay not set - run command immidiately
+    if(bad_kb->stringdelay == 0) { // stringdelay not set - run command immediately
         bool state = ducky_string(bad_kb, furi_string_get_cstr(bad_kb->string_print));
         if(!state) {
             return ducky_error(bad_kb, "Invalid string %s", line);

@@ -51,11 +51,11 @@ void bad_kb_scene_config_on_enter(void* context) {
         var_item_list, "Connection", 2, bad_kb_scene_config_connection_callback, bad_kb);
     variable_item_set_current_value_index(item, bad_kb->is_bt);
     variable_item_set_current_value_text(item, bad_kb->is_bt ? "BT" : "USB");
-    if(bad_kb->has_usb_id) {
+    /*if(bad_kb->has_usb_id) {
         variable_item_set_locked(item, true, "Script has\nID cmd!\nLocked to\nUSB Mode!");
     } else if(bad_kb->has_bt_id) {
         variable_item_set_locked(item, true, "Script has\nBT_ID cmd!\nLocked to\nBT Mode!");
-    }
+    }*/
 
     if(bad_kb->is_bt) {
         item = variable_item_list_add(
