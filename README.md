@@ -5,7 +5,7 @@
 
 A Flipper Zero app that allows the flipper to communicate with Digimon V-Pets.
 
-Currently tested:
+Currently tested devices:
 Classic:
 - 1997 Digital Monster
 - 1998 Digimon Pendulum
@@ -28,6 +28,15 @@ Modern:
 
 Color:
 - 2023 Digital Monster COLOR
+
+Currently tested apps:
+- W0rld (via Chrome web browser serial)
+- Alpha Terminal and Alpha Serial (Android)
+- Alpha Terminal (Windows)
+- ACom Wiki (Android)
+
+Unsupported Apps:
+- Alpha Serial (Windows) still doesn't seem to detect it
 
 Untested:
 - All other pets
