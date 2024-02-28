@@ -67,7 +67,7 @@ void nfc_cli_scanner(NfcCli* instance, FuriString* args) {
 
     size_t protocols_detected = cli_scanner->protocols_detected_num;
     if(protocols_detected) {
-        printf("Detected %d protocols:\r\n", protocols_detected);
+        printf("Detected %zu protocols:\r\n", protocols_detected);
         for(size_t i = 0; i < protocols_detected; i++) {
             printf("%s\r\n", protocol_names[cli_scanner->protocols_detected[i]]);
         }

@@ -263,7 +263,7 @@ static void arg_parser_shift(ArgParser* instance, int start, int option, int end
 
     // There is no shift is required if the start and the option have the same
     // index.
-    if(left_shift == 0) {
+    if(left_shift == 0) { //-V1051
         return;
     }
 
@@ -292,7 +292,7 @@ static void arg_parser_shift(ArgParser* instance, int start, int option, int end
     instance->index = end - left_shift;
 
     // The error index may have changed, we need to fix that as well.
-    if(instance->error_index >= start) {
+    if(instance->error_index >= start) { //-V1051
         if(instance->error_index < option) {
             instance->error_index += right_shift;
         } else if(instance->error_index < end) {

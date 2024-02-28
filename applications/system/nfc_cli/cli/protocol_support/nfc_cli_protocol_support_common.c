@@ -183,7 +183,7 @@ void nfc_cli_protocol_support_common_poll_handler(
                 params.append_crc = true;
                 break;
             case 't':
-                if(sscanf(arg_parser_get_value(parser), "%ld", &params.timeout) != 1) {
+                if(sscanf(arg_parser_get_value(parser), "%lu", &params.timeout) != 1) {
                     read_success = false;
                 }
                 break;
@@ -208,7 +208,7 @@ void nfc_cli_protocol_support_common_poll_handler(
             size_t cmd_ascii_len = strlen(additional_args);
             if(((cmd_ascii_len % 2) != 0) || (cmd_ascii_len == 0)) {
                 printf(
-                    "Incorrect data length %d in argument: %s\r\n",
+                    "Incorrect data length %zu in argument: %s\r\n",
                     cmd_ascii_len,
                     additional_args);
                 read_success = false;
@@ -218,9 +218,9 @@ void nfc_cli_protocol_support_common_poll_handler(
             furi_string_set_str(tmp_str, additional_args);
             if(!args_read_hex_bytes(tmp_str, instance->buffer, cmd_ascii_len / 2)) {
                 printf("Failed to read hex bytes\r\n");
+                read_success = false;
                 break;
             }
-            if(!read_success) break;
 
             BitBuffer* buff = bit_buffer_alloc(cmd_ascii_len / 2);
             bit_buffer_copy_bytes(buff, instance->buffer, cmd_ascii_len / 2);
@@ -464,7 +464,7 @@ void nfc_cli_protocol_support_common_start_poller_handle_poll(
         while(arg_parser_fetch(parser) && read_success) {
             switch(arg_parser_get_identifier(parser)) {
             case 'b':
-                if(sscanf(arg_parser_get_value(parser), "%ld", &bits_in_last_byte) != 1) {
+                if(sscanf(arg_parser_get_value(parser), "%lu", &bits_in_last_byte) != 1) {
                     read_success = false;
                     break;
                 }
@@ -478,7 +478,7 @@ void nfc_cli_protocol_support_common_start_poller_handle_poll(
                 poll_cmd_data.append_crc = true;
                 break;
             case 't':
-                if(sscanf(arg_parser_get_value(parser), "%ld", &poll_cmd_data.timeout) != 1) {
+                if(sscanf(arg_parser_get_value(parser), "%lu", &poll_cmd_data.timeout) != 1) {
                     read_success = false;
                 }
                 break;
@@ -504,7 +504,8 @@ void nfc_cli_protocol_support_common_start_poller_handle_poll(
         size_t cmd_ascii_len = strlen(additional_args);
 
         if(((cmd_ascii_len % 2) != 0) || (cmd_ascii_len == 0)) {
-            printf("Incorrect data length %d in argument: %s\r\n", cmd_ascii_len, additional_args);
+            printf(
+                "Incorrect data length %zu in argument: %s\r\n", cmd_ascii_len, additional_args);
             read_success = false;
             break;
         }
