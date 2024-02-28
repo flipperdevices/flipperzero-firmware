@@ -67,6 +67,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Temp Sensors Reader 1.6 (By quen0n)](https://github.com/quen0n/Unitemp-Flipper-Zero-Plugin) `Req: BMP180/BMP280/BME280/BME680/DHT11/DHT22(AM2302)/AM2301/AM2320/HTU2XD/HTU21x/HDC1080/MAX31855/MAX6675/SCD30` Fixed double conversion (By RogueMaster)
 - Updated: [JS Runner v1.0 (By nminaylov & DrZlo13)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/3286)
 - Updated: [GPS v1.4 (By ezod)](https://github.com/ezod/flipperzero-gps) `Req: NMEA 0183`
+- LFRFID: [Added lfrfid protocol EM4100/40/RAW #722 (By hippocache)](https://github.com/DarkFlippers/unleashed-firmware/pull/722)
 
 <a name="release">
 
