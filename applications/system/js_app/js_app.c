@@ -3,7 +3,7 @@
 #include <storage/storage.h>
 #include "js_app_i.h"
 #include <toolbox/path.h>
-#include <assets_icons.h>
+#include <js_app_icons.h>
 
 #define TAG "JS app"
 

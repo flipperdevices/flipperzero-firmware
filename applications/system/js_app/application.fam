@@ -13,6 +13,11 @@ App(
     order=0,
     fap_icon="icon.png",
     fap_category="Main",
+    fap_icon_assets="assets",
+    fap_author="nminaylov",
+    fap_weburl="https://github.com/flipperdevices/flipperzero-firmware/pull/3286",
+    fap_version=(1, 0),
+    fap_description="JS scripting engine based on MJS lib",
 )
 
 App(

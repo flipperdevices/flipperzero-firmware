@@ -33,7 +33,7 @@ static const char* archive_get_flipper_app_name(ArchiveFileTypeEnum file_type) {
     case ArchiveFileTypeUpdateManifest:
         return "UpdaterApp";
     case ArchiveFileTypeJS:
-        return EXT_PATH("apps/assets/js_app.fap");
+        return EXT_PATH("apps/Main/js_app.fap");
     default:
         return NULL;
     }
