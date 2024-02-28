@@ -36,7 +36,6 @@ size_t nfc_cli_read(NfcCli* instance, uint8_t* data, size_t data_size) {
 }
 
 static void nfc_cli(Cli* cli, FuriString* args, void* context) {
-    UNUSED(context);
     UNUSED(cli);
 
     NfcCli* instance = context;
