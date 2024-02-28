@@ -68,6 +68,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [JS Runner v1.0 (By nminaylov & DrZlo13)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/3286)
 - Updated: [GPS v1.4 (By ezod)](https://github.com/ezod/flipperzero-gps) `Req: NMEA 0183`
 - LFRFID: [Added lfrfid protocol EM4100/40/RAW #722 (By hippocache)](https://github.com/DarkFlippers/unleashed-firmware/pull/722)
+- OFW: [Gui: reset canvas orientation and frame when entering direct draw mode #3488 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/3488)
 
 <a name="release">
 
