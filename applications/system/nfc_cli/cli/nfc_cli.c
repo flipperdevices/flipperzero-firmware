@@ -1,4 +1,5 @@
 #include "nfc_cli_i.h"
+#include "protocol_support/nfc_cli_protocol_support.h"
 
 #include <furi.h>
 
@@ -8,7 +9,7 @@ static void nfc_cli_print_usage() {
     printf("Cmd list:\r\n");
     printf("\tdetect\t\t - detect NFC tag\r\n");
     printf("\tfield\t\t - turn field on\r\n");
-    // nfc_cli_protocol_support_print_usage();
+    nfc_cli_protocol_support_print_usage();
 }
 
 bool nfc_cli_abort_received(NfcCli* instance) {
@@ -16,6 +17,22 @@ bool nfc_cli_abort_received(NfcCli* instance) {
 
     return cli_cmd_interrupt_received(instance->cli) ||
            (instance->command_status == NfcCliCommandStatusAbortRequested);
+}
+
+size_t nfc_cli_read(NfcCli* instance, uint8_t* data, size_t data_size) {
+    furi_assert(instance);
+
+    size_t bytes_read = 0;
+    while(bytes_read == 0) {
+        bytes_read = cli_read_timeout(instance->cli, data, data_size, 20);
+        if(instance->command_status == NfcCliCommandStatusAbortRequested) {
+            *data = CliSymbolAsciiETX;
+            bytes_read = 1;
+            break;
+        }
+    }
+
+    return bytes_read;
 }
 
 static void nfc_cli(Cli* cli, FuriString* args, void* context) {
@@ -26,10 +43,12 @@ static void nfc_cli(Cli* cli, FuriString* args, void* context) {
     instance->command_status = NfcCliCommandStatusStarted;
 
     FuriString* cmd = furi_string_alloc();
-    // Remove this shit
-    FuriString* tmp_str = furi_string_alloc_set(args);
 
     do {
+        // Try first protocols commands
+        if(nfc_cli_protocol_support_cmd_process(instance, args)) break;
+
+        // Try other commands
         if(!args_read_string_and_trim(args, cmd)) {
             nfc_cli_print_usage();
             break;
@@ -45,7 +64,6 @@ static void nfc_cli(Cli* cli, FuriString* args, void* context) {
         nfc_cli_print_usage();
     } while(false);
 
-    furi_string_free(tmp_str);
     furi_string_free(cmd);
 
     instance->command_status = NfcCliCommandStatusIdle;

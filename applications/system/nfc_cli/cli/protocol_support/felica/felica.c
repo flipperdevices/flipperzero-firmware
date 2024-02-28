@@ -79,16 +79,14 @@ static void felica_request_handler(NfcCliProtocolRequest* request) {
     }
 }
 
-static void felica_cmd_handler_poll(Cli* cli, FuriString* args) {
-    UNUSED(cli);
-
+static void felica_cmd_handler_poll(NfcCli* nfc_cli, FuriString* args) {
     nfc_cli_protocol_support_common_poll_handler(
-        NfcProtocolFelica, cli, args, felica_request_handler);
+        NfcProtocolFelica, nfc_cli, args, felica_request_handler);
 }
 
-static void felica_cmd_handler_start_poller(Cli* cli, FuriString* args) {
+static void felica_cmd_handler_start_poller(NfcCli* nfc_cli, FuriString* args) {
     nfc_cli_protocol_support_common_start_poller_handler(
-        NfcProtocolFelica, cli, args, felica_request_handler);
+        NfcProtocolFelica, nfc_cli, args, felica_request_handler);
 }
 
 const NfcCliProtocolSupportBase nfc_cli_protocol_support_base_felica = {

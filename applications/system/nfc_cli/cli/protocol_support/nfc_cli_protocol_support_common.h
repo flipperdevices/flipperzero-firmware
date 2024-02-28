@@ -1,7 +1,7 @@
 #pragma once
 
 #include <nfc/nfc_poller.h>
-#include <cli/cli.h>
+#include "../nfc_cli_i.h"
 
 typedef enum {
     NfcCliPollerErrorNone,
@@ -44,12 +44,12 @@ typedef void (*NfcCliProtocolSupportCommonCallback)(NfcCliProtocolRequest* reque
 
 void nfc_cli_protocol_support_common_poll_handler(
     NfcProtocol protocol,
-    Cli* cli,
+    NfcCli* nfc_cli,
     FuriString* args,
     NfcCliProtocolSupportCommonCallback callback);
 
 void nfc_cli_protocol_support_common_start_poller_handler(
     NfcProtocol protocol,
-    Cli* cli,
+    NfcCli* nfc_cli,
     FuriString* args,
     NfcCliProtocolSupportCommonCallback callback);

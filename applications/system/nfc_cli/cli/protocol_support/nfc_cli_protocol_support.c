@@ -32,7 +32,8 @@ static void
     }
 }
 
-static void nfc_cli_protocol_support_handle_cmd(NfcProtocol protocol, Cli* cli, FuriString* args) {
+static void
+    nfc_cli_protocol_support_handle_cmd(NfcProtocol protocol, NfcCli* nfc_cli, FuriString* args) {
     FuriString* tmp_str = furi_string_alloc();
 
     do {
@@ -46,7 +47,7 @@ static void nfc_cli_protocol_support_handle_cmd(NfcProtocol protocol, Cli* cli, 
         for(size_t i = 0; i < NfcCliProtocolSupportCommandNum; i++) {
             if(furi_string_cmp_str(tmp_str, nfc_cli_protocol_support_get_command_name(i)) == 0) {
                 if(nfc_cli_protocol_support[protocol]->cmd_handler[i] != NULL) {
-                    nfc_cli_protocol_support[protocol]->cmd_handler[i](cli, args);
+                    nfc_cli_protocol_support[protocol]->cmd_handler[i](nfc_cli, args);
                     command_processed = true;
                 }
             }
@@ -60,26 +61,33 @@ static void nfc_cli_protocol_support_handle_cmd(NfcProtocol protocol, Cli* cli, 
     furi_string_free(tmp_str);
 }
 
-void nfc_cli_protocol_support_cmd_process(Cli* cli, FuriString* args, void* context) {
-    furi_assert(cli);
+bool nfc_cli_protocol_support_cmd_process(NfcCli* nfc_cli, const FuriString* args) {
+    furi_assert(nfc_cli);
     furi_assert(args);
-    UNUSED(context);
 
-    FuriString* tmp_str = furi_string_alloc();
+    bool processed = false;
+
+    FuriString* args_copy = furi_string_alloc_set(args);
+    FuriString* protocol_str = furi_string_alloc();
 
     do {
-        if(!args_read_string_and_trim(args, tmp_str)) {
+        if(!args_read_string_and_trim(args_copy, protocol_str)) {
             break;
         }
 
         for(size_t i = 0; i < NfcProtocolNum; i++) {
             if(nfc_cli_protocol_support[i] != NULL) {
-                if(furi_string_cmp_str(tmp_str, nfc_cli_protocol_support[i]->cmd_name) == 0) {
-                    nfc_cli_protocol_support_handle_cmd(i, cli, args);
+                if(furi_string_cmp_str(protocol_str, nfc_cli_protocol_support[i]->cmd_name) == 0) {
+                    nfc_cli_protocol_support_handle_cmd(i, nfc_cli, args_copy);
+                    processed = true;
+                    break;
                 }
             }
         }
     } while(false);
 
-    furi_string_free(tmp_str);
+    furi_string_free(protocol_str);
+    furi_string_free(args_copy);
+
+    return processed;
 }

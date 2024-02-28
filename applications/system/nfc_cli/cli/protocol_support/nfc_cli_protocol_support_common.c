@@ -9,9 +9,9 @@ static void nfc_cli_protocol_support_poll_print_usage() {
     printf("iso14443-3a poll <hex_data>:\r\n");
 }
 
-static NfcCliPollerContext* nfc_cli_poller_context_alloc(NfcProtocol protocol) {
+static NfcCliPollerContext* nfc_cli_poller_context_alloc(Nfc* nfc, NfcProtocol protocol) {
     NfcCliPollerContext* instance = malloc(sizeof(NfcCliPollerContext));
-    instance->nfc = nfc_alloc();
+    instance->nfc = nfc;
     instance->poller = nfc_poller_alloc(instance->nfc, protocol);
     instance->user_queue = furi_message_queue_alloc(8, sizeof(NfcCliUserMessage));
     instance->worker_queue = furi_message_queue_alloc(8, sizeof(NfcCliWorkerMessage));
@@ -29,7 +29,6 @@ static void nfc_cli_poller_context_free(NfcCliPollerContext* instance) {
     furi_message_queue_free(instance->worker_queue);
     furi_message_queue_free(instance->user_queue);
     nfc_poller_free(instance->poller);
-    nfc_free(instance->nfc);
 }
 
 static NfcCommand
@@ -148,10 +147,10 @@ static const ArgParserOptions nfc_cli_protocol_support_common_poll_options[] = {
 
 void nfc_cli_protocol_support_common_poll_handler(
     NfcProtocol protocol,
-    Cli* cli,
+    NfcCli* nfc_cli,
     FuriString* args,
     NfcCliProtocolSupportCommonCallback callback) {
-    UNUSED(cli);
+    UNUSED(nfc_cli);
     furi_assert(protocol < NfcProtocolNum);
     furi_assert(args);
     furi_assert(callback);
@@ -160,7 +159,7 @@ void nfc_cli_protocol_support_common_poll_handler(
     NfcCliPollCmdDataArray_t cmd_arr;
     NfcCliPollCmdDataArray_init(cmd_arr);
     NfcCliPollCmdDataArray_it_t iter;
-    NfcCliPollerContext* instance = nfc_cli_poller_context_alloc(protocol);
+    NfcCliPollerContext* instance = nfc_cli_poller_context_alloc(nfc_cli->nfc, protocol);
 
     NfcCliPollCmdParameters params = {
         .activation_required = false,
@@ -354,7 +353,7 @@ static void nfc_cli_protocol_support_common_start_poller_print_usage() {
     printf("Press Ctrl+C to abort\r\n");
 }
 
-static bool nfc_cli_protocol_support_common_process_input(Cli* cli, FuriString* cmd) {
+static bool nfc_cli_protocol_support_common_process_input(NfcCli* nfc_cli, FuriString* cmd) {
     bool exit = false;
     furi_string_reset(cmd);
 
@@ -362,7 +361,7 @@ static bool nfc_cli_protocol_support_common_process_input(Cli* cli, FuriString* 
     fflush(stdout);
 
     char c = 0;
-    while(cli_read(cli, (uint8_t*)&c, 1) == 1) {
+    while(nfc_cli_read(nfc_cli, (uint8_t*)&c, 1) == 1) {
         if(c == CliSymbolAsciiETX) {
             printf("\r\n");
             exit = true;
@@ -610,11 +609,11 @@ NfcCliStartPollerCommand nfc_cli_protocol_support_common_start_poller_handlers[]
 
 void nfc_cli_protocol_support_common_start_poller_handler(
     NfcProtocol protocol,
-    Cli* cli,
+    NfcCli* nfc_cli,
     FuriString* args,
     NfcCliProtocolSupportCommonCallback callback) {
     furi_assert(protocol < NfcProtocolNum);
-    furi_assert(cli);
+    furi_assert(nfc_cli);
     furi_assert(args);
     furi_assert(callback);
 
@@ -623,11 +622,11 @@ void nfc_cli_protocol_support_common_start_poller_handler(
 
     FuriString* tmp_str = furi_string_alloc();
     FuriString* cmd_str = furi_string_alloc();
-    NfcCliPollerContext* instance = nfc_cli_poller_context_alloc(protocol);
+    NfcCliPollerContext* instance = nfc_cli_poller_context_alloc(nfc_cli->nfc, protocol);
     instance->callback = callback;
     nfc_poller_start_ex(instance->poller, nfc_cli_protocol_support_poll_worker_callback, instance);
 
-    while(!nfc_cli_protocol_support_common_process_input(cli, tmp_str)) {
+    while(!nfc_cli_protocol_support_common_process_input(nfc_cli, tmp_str)) {
         if(!args_read_string_and_trim(tmp_str, cmd_str)) {
             continue;
         }

@@ -1,7 +1,7 @@
 #pragma once
 
-#include <cli/cli.h>
+#include "../nfc_cli_i.h"
 
 void nfc_cli_protocol_support_print_usage();
 
-void nfc_cli_protocol_support_cmd_process(Cli* cli, FuriString* args, void* context);
+bool nfc_cli_protocol_support_cmd_process(NfcCli* nfc_cli, const FuriString* args);

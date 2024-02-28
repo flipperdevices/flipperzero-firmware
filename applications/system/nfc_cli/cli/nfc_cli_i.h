@@ -21,6 +21,8 @@ struct NfcCli {
 
 bool nfc_cli_abort_received(NfcCli* instance);
 
+size_t nfc_cli_read(NfcCli* instance, uint8_t* data, size_t data_size);
+
 void nfc_cli_scanner(NfcCli* instance, FuriString* args);
 
 void nfc_cli_field(NfcCli* instance, FuriString* args);

@@ -1,8 +1,7 @@
 #pragma once
 
 #include <nfc/protocols/nfc_protocol.h>
-#include <furi/core/string.h>
-#include <cli/cli.h>
+#include "../nfc_cli_i.h"
 
 typedef enum {
     NfcCliProtocolSupportCommandPoll,
@@ -11,7 +10,7 @@ typedef enum {
     NfcCliProtocolSupportCommandNum,
 } NfcCliProtocolSupportCommand;
 
-typedef void (*NfcCliProtocolSupportCommandHandler)(Cli* cli, FuriString* args);
+typedef void (*NfcCliProtocolSupportCommandHandler)(NfcCli* nfc_cli, FuriString* args);
 
 typedef struct {
     NfcProtocol protocol;

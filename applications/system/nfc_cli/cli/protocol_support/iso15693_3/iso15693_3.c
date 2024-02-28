@@ -79,16 +79,14 @@ static void iso15693_3_request_handler(NfcCliProtocolRequest* request) {
     }
 }
 
-static void iso15693_3_cmd_handler_poll(Cli* cli, FuriString* args) {
-    UNUSED(cli);
-
+static void iso15693_3_cmd_handler_poll(NfcCli* nfc_cli, FuriString* args) {
     nfc_cli_protocol_support_common_poll_handler(
-        NfcProtocolIso15693_3, cli, args, iso15693_3_request_handler);
+        NfcProtocolIso15693_3, nfc_cli, args, iso15693_3_request_handler);
 }
 
-static void iso15693_3_cmd_handler_start_poller(Cli* cli, FuriString* args) {
+static void iso15693_3_cmd_handler_start_poller(NfcCli* nfc_cli, FuriString* args) {
     nfc_cli_protocol_support_common_start_poller_handler(
-        NfcProtocolIso15693_3, cli, args, iso15693_3_request_handler);
+        NfcProtocolIso15693_3, nfc_cli, args, iso15693_3_request_handler);
 }
 
 const NfcCliProtocolSupportBase nfc_cli_protocol_support_base_iso15693_3 = {
