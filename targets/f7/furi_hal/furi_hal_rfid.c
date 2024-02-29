@@ -618,7 +618,8 @@ static void furi_hal_rfid_rtf_pull_out_dma_stop() {
     furi_hal_rfid_rtf_carrier_in_IC_mode();
 }
 
-static void furi_hal_rfid_rtf_pull_out_dma_isr() {
+static void furi_hal_rfid_rtf_pull_out_dma_isr(void* context) {
+    UNUSED(context);
     // currently no HT interrupt enabled, only TC
     if(LL_DMA_IsActiveFlag_TC1(FURI_HAL_RFID_RTF_PULL_OUT_DMA)) {
         LL_DMA_ClearFlag_TC1(FURI_HAL_RFID_RTF_PULL_OUT_DMA);
