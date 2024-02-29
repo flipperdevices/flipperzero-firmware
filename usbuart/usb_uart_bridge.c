@@ -127,17 +127,6 @@ static void usb_uart_vcp_init(UsbUartBridge* usb_uart, uint8_t vcp_ch) {
         Cli* cli = furi_record_open(RECORD_CLI);
         cli_session_close(cli);
         furi_record_close(RECORD_CLI);
-        /*
-        NOTE: We need to replace the vid/pid so alpha terminal/serial android
-        detect this as an arduino... But we can't reference the cdc_init
-        method 'cause it's in the firmware's private code. So overwrite
-        our handles here instead.
-        */
-        usb_cdc_fcom.init = usb_cdc_single.init;
-        usb_cdc_fcom.deinit = usb_cdc_single.deinit;
-        usb_cdc_fcom.wakeup = usb_cdc_single.wakeup;
-        usb_cdc_fcom.suspend = usb_cdc_single.suspend;
-        usb_cdc_fcom.cfg_descr = usb_cdc_single.cfg_descr;
         furi_check(furi_hal_usb_set_config(&usb_cdc_fcom, NULL) == true);
     } else {
         furi_check(furi_hal_usb_set_config(&usb_cdc_dual, NULL) == true);
@@ -290,6 +279,18 @@ static void vcp_on_line_config(void* context, struct usb_cdc_line_coding* config
 }
 
 UsbUartBridge* usb_uart_enable(UsbUartConfig* cfg) {
+    /*
+    NOTE: We need to replace the vid/pid so alpha terminal/serial android
+    detect this as an arduino... But we can't reference the cdc_init
+    method 'cause it's in the firmware's private code. So overwrite
+    our handles here instead.
+    */
+    usb_cdc_fcom.init = usb_cdc_single.init;
+    usb_cdc_fcom.deinit = usb_cdc_single.deinit;
+    usb_cdc_fcom.wakeup = usb_cdc_single.wakeup;
+    usb_cdc_fcom.suspend = usb_cdc_single.suspend;
+    usb_cdc_fcom.cfg_descr = usb_cdc_single.cfg_descr;
+
     UsbUartBridge* usb_uart = malloc(sizeof(UsbUartBridge));
 
     memcpy(&(usb_uart->cfg_new), cfg, sizeof(UsbUartConfig));
