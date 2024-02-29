@@ -59,7 +59,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: PR: [WiFi board: fixed update script on Windows (unfortunately also Mac and Linux) #3485 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/3485)
 - Updated: [Air Arkanoid  v1.1 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-good-faps/pull/141) `Req: Video Game Module By Flipper Devices`
 - Updated: [Air Labyrinth v0.1 (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/vgm/apps/air_labyrinth) `Req: Video Game Module By Flipper Devices`
-- Updated: [Digimon F-Com v1.1 (By TylerWilley)](https://github.com/TylerWilley/flipper-f-com)
 - OFW: [FBT/uFBT: Enable C++20/GNU23 in VSCode IntelliSense #3394 (By CookiePLMonster)](https://github.com/flipperdevices/flipperzero-firmware/pull/3394)
 - Updated: [Bad KB (Modified PR#738 from pengu1ndev - Original from Willy-JL) #739 (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/739) As of this update, still the most feature rich BadKB from all CFW.
 - UL: [SubGHz: Settings - Added frequency: 430.50 #721 (By MizumasuShoichi)](https://github.com/DarkFlippers/unleashed-firmware/pull/721)
@@ -69,6 +68,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - LFRFID: [Added lfrfid protocol EM4100/40/RAW #722 (By hippocache)](https://github.com/DarkFlippers/unleashed-firmware/pull/722)
 - OFW: [Gui: reset canvas orientation and frame when entering direct draw mode #3488 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/3488)
 - Updated: [WiFi (Marauder) v7.0 (By 0xchocolate & tcpassos)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) `Req: ESP32 WITH MARAUDER FLASHED` Fixed Evil Portal assets issue.
+- Updated: [Digimon F-Com v1.1 (By TylerWilley)](https://github.com/TylerWilley/flipper-f-com)
 
 <a name="release">
 

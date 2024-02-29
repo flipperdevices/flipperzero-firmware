@@ -90,13 +90,21 @@ uint8_t SerialFollower::serialRead() {
     int16_t incoming_int;
     uint8_t incoming_byte;
     uint8_t i = 0;
-    if(serial_.available() == 0) {
+    bool first = true;
+    if (serial_.available() == 0) {
         return 0;
     }
     time_start = millis();
     do {
         do {
             incoming_int = serial_.read();
+            // if we have nothing to read, and this is the first character
+            // then exit immediately, this makes our loop really tight while we are active
+            if(first && incoming_int == -1)
+            {
+                return 0;
+            }
+            first = false;
             time = millis() - time_start;
             if(time > DMCOMM_SERIAL_TIMEOUT_MILLIS) {
                 serial_.println(F("[No EOL received]"));

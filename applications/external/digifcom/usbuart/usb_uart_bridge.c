@@ -80,13 +80,50 @@ void usb_uart_send(UsbUartBridge* usb_uart, const uint8_t* data, uint16_t len) {
     furi_thread_flags_set(furi_thread_get_id(usb_uart->thread), WorkerEvtRxDone);
 }
 
+/* Copied from furi_hal_usb_cdc.c so we can change our vid/pid for alpha terminal/serial */
+
+#define USB_EP0_SIZE 8
+
+enum UsbDevDescStr {
+    UsbDevLang = 0,
+    UsbDevManuf = 1,
+    UsbDevProduct = 2,
+    UsbDevSerial = 3,
+};
+
+static const struct usb_device_descriptor cdc_device_desc = {
+    .bLength = sizeof(struct usb_device_descriptor),
+    .bDescriptorType = USB_DTYPE_DEVICE,
+    .bcdUSB = VERSION_BCD(2, 0, 0),
+    .bDeviceClass = USB_CLASS_IAD,
+    .bDeviceSubClass = USB_SUBCLASS_IAD,
+    .bDeviceProtocol = USB_PROTO_IAD,
+    .bMaxPacketSize0 = USB_EP0_SIZE,
+    .idVendor = 0x2341,
+    .idProduct = 0x0,
+    .bcdDevice = VERSION_BCD(1, 0, 0),
+    .iManufacturer = UsbDevManuf,
+    .iProduct = UsbDevProduct,
+    .iSerialNumber = UsbDevSerial,
+    .bNumConfigurations = 1,
+};
+
+static const struct usb_string_descriptor dev_manuf_desc = USB_STRING_DESC("Flipper Devices Inc.");
+
+FuriHalUsbInterface usb_cdc_fcom = {
+    .dev_descr = (struct usb_device_descriptor*)&cdc_device_desc,
+    .str_manuf_descr = (void*)&dev_manuf_desc,
+    .str_prod_descr = NULL,
+    .str_serial_descr = NULL,
+};
+
 static void usb_uart_vcp_init(UsbUartBridge* usb_uart, uint8_t vcp_ch) {
     furi_hal_usb_unlock();
     if(vcp_ch == 0) {
         Cli* cli = furi_record_open(RECORD_CLI);
         cli_session_close(cli);
         furi_record_close(RECORD_CLI);
-        furi_check(furi_hal_usb_set_config(&usb_cdc_single, NULL) == true);
+        furi_check(furi_hal_usb_set_config(&usb_cdc_fcom, NULL) == true);
     } else {
         furi_check(furi_hal_usb_set_config(&usb_cdc_dual, NULL) == true);
         Cli* cli = furi_record_open(RECORD_CLI);
@@ -163,7 +200,7 @@ static int32_t usb_uart_worker(void* context) {
     }
     usb_uart_vcp_deinit(usb_uart, usb_uart->cfg.vcp_ch);
 
-    furi_hal_gpio_init(USB_USART_DE_RE_PIN, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
+    //furi_hal_gpio_init(USB_USART_DE_RE_PIN, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
 
     furi_thread_flags_set(furi_thread_get_id(usb_uart->tx_thread), WorkerEvtTxStop);
     furi_thread_join(usb_uart->tx_thread);
@@ -174,7 +211,7 @@ static int32_t usb_uart_worker(void* context) {
     furi_semaphore_free(usb_uart->tx_sem);
 
     furi_hal_usb_unlock();
-    furi_check(furi_hal_usb_set_config(&usb_cdc_single, NULL) == true);
+    furi_check(furi_hal_usb_set_config(&usb_cdc_fcom, NULL) == true);
     Cli* cli = furi_record_open(RECORD_CLI);
     cli_session_open(cli, &cli_vcp);
     furi_record_close(RECORD_CLI);
@@ -238,6 +275,18 @@ static void vcp_on_line_config(void* context, struct usb_cdc_line_coding* config
 }
 
 UsbUartBridge* usb_uart_enable(UsbUartConfig* cfg) {
+    /*
+    NOTE: We need to replace the vid/pid so alpha terminal/serial android
+    detect this as an arduino... But we can't reference the cdc_init
+    method 'cause it's in the firmware's private code. So overwrite
+    our handles here instead.
+    */
+    usb_cdc_fcom.init = usb_cdc_single.init;
+    usb_cdc_fcom.deinit = usb_cdc_single.deinit;
+    usb_cdc_fcom.wakeup = usb_cdc_single.wakeup;
+    usb_cdc_fcom.suspend = usb_cdc_single.suspend;
+    usb_cdc_fcom.cfg_descr = usb_cdc_single.cfg_descr;
+
     UsbUartBridge* usb_uart = malloc(sizeof(UsbUartBridge));
 
     memcpy(&(usb_uart->cfg_new), cfg, sizeof(UsbUartConfig));
