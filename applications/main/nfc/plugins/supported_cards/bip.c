@@ -243,19 +243,17 @@ static bool bip_parse(const NfcDevice* device, FuriString* parsed_data) {
     const MfClassicData* data = nfc_device_get_data(device, NfcProtocolMfClassic);
 
     do {
-        // verify all sectors' keys
-        for(size_t i = 0; i < mf_classic_get_total_sectors_num(data->type); i++) {
-            MfClassicSectorTrailer* sec_tr = mf_classic_get_sector_trailer_by_sector(data, i);
-            uint64_t key = bit_lib_bytes_to_num_be(sec_tr->key_a.data, 6);
-            if(key != bip_keys_a[i]) {
-                parsed = false;
-                break;
-            }
-            key = bit_lib_bytes_to_num_be(sec_tr->key_b.data, 6);
-            if(key != bip_keys_b[i]) {
-                parsed = false;
-                break;
-            }
+        // verify first sector keys
+        MfClassicSectorTrailer* sec_tr = mf_classic_get_sector_trailer_by_sector(data, 0);
+        uint64_t key = bit_lib_bytes_to_num_be(sec_tr->key_a.data, 6);
+        if(key != bip_keys_a[0]) {
+            parsed = false;
+            break;
+        }
+        key = bit_lib_bytes_to_num_be(sec_tr->key_b.data, 6);
+        if(key != bip_keys_b[0]) {
+            parsed = false;
+            break;
         }
 
         // Get Card ID, little-endian 4 bytes at sector 0 block 1, bytes 4-7
@@ -292,10 +290,8 @@ static bool bip_parse(const NfcDevice* device, FuriString* parsed_data) {
                 &data->block[SECTOR_BLOCK_OFFSET(11, i)].data[10], &charge->amount);
         }
 
-        parsed = true;
-    } while(false);
+        // All data is now parsed and stored in bip_data, now print it
 
-    if(parsed) {
         // Print basic info
         furi_string_printf(
             parsed_data,
@@ -345,10 +341,10 @@ static bool bip_parse(const NfcDevice* device, FuriString* parsed_data) {
             print_bip_timestamp(&charge->timestamp, parsed_data);
         }
 
-        return true;
-    } else {
-        return false;
-    }
+        parsed = true;
+    } while(false);
+
+    return parsed;
 }
 
 /* Actual implementation of app<>plugin interface */
