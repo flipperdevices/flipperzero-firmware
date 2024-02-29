@@ -112,13 +112,10 @@ static const struct usb_device_descriptor cdc_device_desc = {
 static const struct usb_string_descriptor dev_manuf_desc = USB_STRING_DESC("Flipper Devices Inc.");
 
 FuriHalUsbInterface usb_cdc_fcom = {
-
     .dev_descr = (struct usb_device_descriptor*)&cdc_device_desc,
-
     .str_manuf_descr = (void*)&dev_manuf_desc,
     .str_prod_descr = NULL,
     .str_serial_descr = NULL,
-
 };
 
 static void usb_uart_vcp_init(UsbUartBridge* usb_uart, uint8_t vcp_ch) {
@@ -204,7 +201,7 @@ static int32_t usb_uart_worker(void* context) {
     }
     usb_uart_vcp_deinit(usb_uart, usb_uart->cfg.vcp_ch);
 
-    furi_hal_gpio_init(USB_USART_DE_RE_PIN, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
+    //furi_hal_gpio_init(USB_USART_DE_RE_PIN, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
 
     furi_thread_flags_set(furi_thread_get_id(usb_uart->tx_thread), WorkerEvtTxStop);
     furi_thread_join(usb_uart->tx_thread);
