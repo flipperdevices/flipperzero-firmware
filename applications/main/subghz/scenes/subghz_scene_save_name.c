@@ -15,7 +15,7 @@ void subghz_scene_save_name_text_input_callback(void* context) {
 }
 
 void subghz_scene_save_name_get_timefilename(FuriString* name) {
-    FuriHalRtcDateTime datetime = {0};
+    DateTime datetime = {0};
     furi_hal_rtc_get_datetime(&datetime);
     furi_string_printf(
         name,
@@ -132,7 +132,7 @@ bool subghz_scene_save_name_on_event(void* context, SceneManagerEvent event) {
                     scene_manager_set_scene_state(
                         subghz->scene_manager, SubGhzSceneReadRAW, SubGhzCustomEventManagerNoSet);
                 } else {
-                    subghz_file_name_clear(subghz);
+                    furi_string_reset(subghz->file_path_tmp);
                 }
 
                 scene_manager_next_scene(subghz->scene_manager, SubGhzSceneSaveSuccess);

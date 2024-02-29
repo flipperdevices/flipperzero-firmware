@@ -53,7 +53,7 @@ static void desktop_dummy_mode_icon_draw_callback(Canvas* canvas, void* context)
 static void desktop_clock_update(Desktop* desktop) {
     furi_assert(desktop);
 
-    FuriHalRtcDateTime curr_dt;
+    DateTime curr_dt;
     furi_hal_rtc_get_datetime(&curr_dt);
     bool time_format_12 = locale_get_time_format() == LocaleTimeFormat12h;
 
@@ -414,7 +414,7 @@ bool desktop_api_is_locked(Desktop* instance) {
 
 void desktop_api_unlock(Desktop* instance) {
     furi_assert(instance);
-    view_dispatcher_send_custom_event(instance->view_dispatcher, DesktopLockedEventUnlocked);
+    view_dispatcher_send_custom_event(instance->view_dispatcher, DesktopGlobalApiUnlock);
 }
 
 FuriPubSub* desktop_api_get_status_pubsub(Desktop* instance) {

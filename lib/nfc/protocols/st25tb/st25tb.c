@@ -1,6 +1,5 @@
 #include "st25tb.h"
 
-#include "core/string.h"
 #include "flipper_format.h"
 #include <furi.h>
 
@@ -231,4 +230,24 @@ bool st25tb_set_uid(St25tbData* data, const uint8_t* uid, size_t uid_len) {
 St25tbData* st25tb_get_base_data(const St25tbData* data) {
     UNUSED(data);
     furi_crash("No base data");
+}
+
+St25tbType st25tb_get_type_from_uid(const uint8_t* uid) {
+    switch(uid[2] >> 2) {
+    case 0x0:
+    case 0x3:
+        return St25tbTypeX4k;
+    case 0x4:
+        return St25tbTypeX512;
+    case 0x6:
+        return St25tbType512Ac;
+    case 0x7:
+        return St25tbType04k;
+    case 0xc:
+        return St25tbType512At;
+    case 0xf:
+        return St25tbType02k;
+    default:
+        furi_crash("unsupported st25tb type");
+    }
 }

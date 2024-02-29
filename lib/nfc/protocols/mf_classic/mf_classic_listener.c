@@ -3,7 +3,7 @@
 #include <nfc/protocols/nfc_listener_base.h>
 
 #include <nfc/helpers/iso14443_crc.h>
-#include <nfc/helpers/nfc_util.h>
+#include <bit_lib/bit_lib.h>
 
 #include <furi.h>
 #include <furi_hal_random.h>
@@ -33,16 +33,19 @@ static void mf_classic_listener_reset_state(MfClassicListener* instance) {
     instance->state = MfClassicListenerStateIdle;
     instance->cmd_in_progress = false;
     instance->current_cmd_handler_idx = 0;
+    instance->write_block = 0;
     instance->transfer_value = 0;
+    instance->transfer_valid = false;
     instance->value_cmd = MfClassicValueCommandInvalid;
 }
 
 static MfClassicListenerCommand
     mf_classic_listener_halt_handler(MfClassicListener* instance, BitBuffer* buff) {
+    UNUSED(instance);
+
     MfClassicListenerCommand command = MfClassicListenerCommandNack;
 
     if(bit_buffer_get_byte(buff, 1) == MF_CLASSIC_CMD_HALT_LSB) {
-        mf_classic_listener_reset_state(instance);
         command = MfClassicListenerCommandSleep;
     }
 
@@ -58,24 +61,22 @@ static MfClassicListenerCommand mf_classic_listener_auth_first_part_handler(
     do {
         instance->state = MfClassicListenerStateIdle;
 
-        if(block_num >= instance->total_block_num) {
-            mf_classic_listener_reset_state(instance);
-            break;
-        }
+        if(block_num >= instance->total_block_num) break;
 
         uint8_t sector_num = mf_classic_get_sector_by_block(block_num);
 
         MfClassicSectorTrailer* sec_tr =
             mf_classic_get_sector_trailer_by_sector(instance->data, sector_num);
         MfClassicKey* key = (key_type == MfClassicKeyTypeA) ? &sec_tr->key_a : &sec_tr->key_b;
-        uint64_t key_num = nfc_util_bytes2num(key->data, sizeof(MfClassicKey));
+        uint64_t key_num = bit_lib_bytes_to_num_be(key->data, sizeof(MfClassicKey));
         uint32_t cuid = iso14443_3a_get_cuid(instance->data->iso14443_3a_data);
 
         instance->auth_context.key_type = key_type;
         instance->auth_context.block_num = block_num;
 
         furi_hal_random_fill_buf(instance->auth_context.nt.data, sizeof(MfClassicNt));
-        uint32_t nt_num = nfc_util_bytes2num(instance->auth_context.nt.data, sizeof(MfClassicNt));
+        uint32_t nt_num =
+            bit_lib_bytes_to_num_be(instance->auth_context.nt.data, sizeof(MfClassicNt));
 
         crypto1_init(instance->crypto, key_num);
         if(instance->comm_state == MfClassicListenerCommStatePlain) {
@@ -88,7 +89,7 @@ static MfClassicListenerCommand mf_classic_listener_auth_first_part_handler(
             command = MfClassicListenerCommandProcessed;
         } else {
             uint8_t key_stream[4] = {};
-            nfc_util_num2bytes(nt_num ^ cuid, sizeof(uint32_t), key_stream);
+            bit_lib_num_to_bytes_be(nt_num ^ cuid, sizeof(uint32_t), key_stream);
             bit_buffer_copy_bytes(
                 instance->tx_plain_buffer, instance->auth_context.nt.data, sizeof(MfClassicNt));
             crypto1_encrypt(
@@ -134,7 +135,7 @@ static MfClassicListenerCommand
         instance->cmd_in_progress = false;
 
         if(bit_buffer_get_size_bytes(buff) != (sizeof(MfClassicNr) + sizeof(MfClassicAr))) {
-            mf_classic_listener_reset_state(instance);
+            command = MfClassicListenerCommandSleep;
             break;
         }
         bit_buffer_write_bytes_mid(buff, instance->auth_context.nr.data, 0, sizeof(MfClassicNr));
@@ -147,21 +148,24 @@ static MfClassicListenerCommand
             instance->callback(instance->generic_event, instance->context);
         }
 
-        uint32_t nr_num = nfc_util_bytes2num(instance->auth_context.nr.data, sizeof(MfClassicNr));
-        uint32_t ar_num = nfc_util_bytes2num(instance->auth_context.ar.data, sizeof(MfClassicAr));
+        uint32_t nr_num =
+            bit_lib_bytes_to_num_be(instance->auth_context.nr.data, sizeof(MfClassicNr));
+        uint32_t ar_num =
+            bit_lib_bytes_to_num_be(instance->auth_context.ar.data, sizeof(MfClassicAr));
 
         crypto1_word(instance->crypto, nr_num, 1);
-        uint32_t nt_num = nfc_util_bytes2num(instance->auth_context.nt.data, sizeof(MfClassicNt));
+        uint32_t nt_num =
+            bit_lib_bytes_to_num_be(instance->auth_context.nt.data, sizeof(MfClassicNt));
         uint32_t secret_poller = ar_num ^ crypto1_word(instance->crypto, 0, 0);
         if(secret_poller != prng_successor(nt_num, 64)) {
-            FURI_LOG_D(
+            FURI_LOG_T(
                 TAG, "Wrong reader key: %08lX != %08lX", secret_poller, prng_successor(nt_num, 64));
-            mf_classic_listener_reset_state(instance);
+            command = MfClassicListenerCommandSleep;
             break;
         }
 
         uint32_t at_num = prng_successor(nt_num, 96);
-        nfc_util_num2bytes(at_num, sizeof(uint32_t), instance->auth_context.at.data);
+        bit_lib_num_to_bytes_be(at_num, sizeof(uint32_t), instance->auth_context.at.data);
         bit_buffer_copy_bytes(
             instance->tx_plain_buffer, instance->auth_context.at.data, sizeof(MfClassicAr));
         crypto1_encrypt(
@@ -241,11 +245,13 @@ static MfClassicListenerCommand mf_classic_listener_write_block_first_part_handl
 
         uint8_t block_num = bit_buffer_get_byte(buff, 1);
         if(block_num >= instance->total_block_num) break;
+        if(block_num == 0) break;
 
         uint8_t sector_num = mf_classic_get_sector_by_block(block_num);
         uint8_t auth_sector_num = mf_classic_get_sector_by_block(auth_ctx->block_num);
         if(sector_num != auth_sector_num) break;
 
+        instance->write_block = block_num;
         instance->cmd_in_progress = true;
         instance->current_cmd_handler_idx++;
         command = MfClassicListenerCommandAck;
@@ -266,12 +272,23 @@ static MfClassicListenerCommand mf_classic_listener_write_block_second_part_hand
         size_t buff_size = bit_buffer_get_size_bytes(buff);
         if(buff_size != sizeof(MfClassicBlock)) break;
 
-        uint8_t block_num = auth_ctx->block_num;
+        uint8_t block_num = instance->write_block;
         MfClassicKeyType key_type = auth_ctx->key_type;
         MfClassicBlock block = instance->data->block[block_num];
 
         if(mf_classic_is_sector_trailer(block_num)) {
             MfClassicSectorTrailer* sec_tr = (MfClassicSectorTrailer*)&block;
+
+            // Check if any writing is allowed
+            if(!mf_classic_is_allowed_access(
+                   instance->data, block_num, key_type, MfClassicActionKeyAWrite) &&
+               !mf_classic_is_allowed_access(
+                   instance->data, block_num, key_type, MfClassicActionKeyBWrite) &&
+               !mf_classic_is_allowed_access(
+                   instance->data, block_num, key_type, MfClassicActionACWrite)) {
+                break;
+            }
+
             if(mf_classic_is_allowed_access(
                    instance->data, block_num, key_type, MfClassicActionKeyAWrite)) {
                 bit_buffer_write_bytes_mid(buff, sec_tr->key_a.data, 0, sizeof(MfClassicKey));
@@ -338,6 +355,7 @@ static MfClassicListenerCommand
             break;
         }
 
+        instance->transfer_valid = true;
         instance->cmd_in_progress = true;
         instance->current_cmd_handler_idx++;
         command = MfClassicListenerCommandAck;
@@ -382,6 +400,7 @@ static MfClassicListenerCommand
         }
 
         instance->transfer_value += data;
+        instance->transfer_valid = true;
 
         instance->cmd_in_progress = true;
         instance->current_cmd_handler_idx++;
@@ -411,6 +430,7 @@ static MfClassicListenerCommand
         mf_classic_value_to_block(
             instance->transfer_value, block_num, &instance->data->block[block_num]);
         instance->transfer_value = 0;
+        instance->transfer_valid = false;
 
         command = MfClassicListenerCommandAck;
     } while(false);
@@ -463,6 +483,13 @@ static const MfClassicListenerCmd mf_classic_listener_cmd_handlers[] = {
     {
         .cmd_start_byte = MF_CLASSIC_CMD_HALT_MSB,
         .cmd_len_bits = 2 * 8,
+        .command_num = COUNT_OF(mf_classic_listener_halt_handlers),
+        .handler = mf_classic_listener_halt_handlers,
+    },
+    {
+        // This crutch is necessary since some devices (like Pixel) send 15-bit "HALT" command ...
+        .cmd_start_byte = MF_CLASSIC_CMD_HALT_MSB,
+        .cmd_len_bits = 15,
         .command_num = COUNT_OF(mf_classic_listener_halt_handlers),
         .handler = mf_classic_listener_halt_handlers,
     },
@@ -581,10 +608,19 @@ NfcCommand mf_classic_listener_run(NfcGenericEvent event, void* context) {
         if(mfc_command == MfClassicListenerCommandAck) {
             mf_classic_listener_send_short_frame(instance, MF_CLASSIC_CMD_ACK);
         } else if(mfc_command == MfClassicListenerCommandNack) {
-            mf_classic_listener_send_short_frame(instance, MF_CLASSIC_CMD_NACK);
+            // Calculate nack based on the transfer buffer validity
+            uint8_t nack = MF_CLASSIC_CMD_NACK;
+            if(!instance->transfer_valid) {
+                nack += MF_CLASSIC_CMD_NACK_TRANSFER_INVALID;
+            }
+
+            mf_classic_listener_send_short_frame(instance, nack);
+            mf_classic_listener_reset_state(instance);
+            command = NfcCommandSleep;
         } else if(mfc_command == MfClassicListenerCommandSilent) {
             command = NfcCommandReset;
         } else if(mfc_command == MfClassicListenerCommandSleep) {
+            mf_classic_listener_reset_state(instance);
             command = NfcCommandSleep;
         }
     } else if(iso3_event->type == Iso14443_3aListenerEventTypeHalted) {
