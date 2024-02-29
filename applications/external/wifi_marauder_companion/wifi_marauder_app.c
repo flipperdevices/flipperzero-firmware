@@ -115,6 +115,11 @@ void wifi_marauder_make_app_folder(WifiMarauderApp* app) {
         dialog_message_show_storage_error(app->dialogs, "Cannot create\nscripts folder");
     }
 
+    if(!storage_common_exists(app->storage, MARAUDER_APP_FOLDER_EVILPORTAL) &&
+       !storage_simply_mkdir(app->storage, MARAUDER_APP_FOLDER_EVILPORTAL)) {
+        dialog_message_show_storage_error(app->dialogs, "Cannot create\nevil portal\nfolder");
+    }
+
     if(!storage_common_exists(app->storage, MARAUDER_APP_FOLDER_HTML) &&
        !storage_simply_mkdir(app->storage, MARAUDER_APP_FOLDER_HTML)) {
         dialog_message_show_storage_error(app->dialogs, "Cannot create\nhtml folder");
