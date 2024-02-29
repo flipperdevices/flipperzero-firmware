@@ -4,7 +4,7 @@
 &nbsp;<a href='https://shop.rogue-master.net/' target='_blank'><img src='https://rogue-master.net/img/Merch.png' alt='RM Merch'' title='RM Merch'></a>
 &nbsp;<a href='https://github.com/RogueMaster/awesome-flipperzero-withModules' target='_blank'><img src='https://rogue-master.net/img/Resources.png' alt='More Research / Assets' title='More Research / Assets'></a></h1>
 
-# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0222-1041-0.98.4-31a21ce.tgz&channel=RM0222-1041-0.98.4-31a21ce&version=0.98.4)
+# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0229-1532-0.98.4-db50161.tgz&channel=RM0229-1532-0.98.4-db50161&version=0.98.4)
 
 ## Thank you so much to our RM Pro/SUPER Patreon supporters! Because of people like you, we are able to offer the best and most up-to-date Flipper Zero Firmware!
 
@@ -31,44 +31,6 @@ This software is for experimental purposes only and is not meant for any illegal
 
 - Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-02-29 15:20 EST`
 - Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-02-29 15:20 EST`
-- Updated: [J305 Geiger Counter v1.2 (By nmrr)](https://github.com/nmrr/flipperzero-geigercounter)
-- Updated: [Atomic Dice Roller v1.1 (By nmrr)](https://github.com/nmrr/flipperzero-atomicdiceroller)
-- Reverted: [NFC Magic v1.5 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966) Gen 2 changes were corruptiung cards.
-- Updated: [YuriCable Pro Max v0.3 (By arag0re)](https://github.com/arag0re/fz-yuricable-pro-max)
-- Updated: [Evil Portal v0.5 (By bigbrodude6119)](https://github.com/bigbrodude6119/flipper-zero-evil-portal)
-- Updated: [Dice (RM) Including SEX/WAR/8BALL/WEED/DRINK DICE v2.2 (By RogueMaster)](https://github.com/RogueMaster/flipperzero-dice)
-- Updated: [Dab Timer v1.9.2 (By RogueMaster)](https://github.com/RogueMaster/flipperzero-dabtimer) - Fixed circular clock face & works with OFW!
-- Added: [Air Labyrinth v0.1 (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/vgm/apps/air_labyrinth) `Req: Video Game Module By Flipper Devices`
-- Updated: [Minesweeper Redux v1.4 (By squee72564)](https://github.com/squee72564/F0_Minesweeper_Fap)
-- [Neater about information, and About and Power Settings load from SD (By Willy-JL with tweaks By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/f9c139e51bbfe19eb59cf5ac146f20972acbba52)
-- Updated: [Dice (RM) Including SEX/WAR/8BALL/WEED/DRINK DICE v2.3 (By RogueMaster)](https://github.com/RogueMaster/flipperzero-dice) Now compiles on OFW!
-- [Game Mode Menu updated to have more games & VGM applications (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/)
-- OFW: PR: [Add support for DEFAULT_STRING_DELAY in Bad USB App #3476 (By atomofiron)](https://github.com/flipperdevices/flipperzero-firmware/pull/3476)
-- Updated: [NFC Playlist v1.4 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
-- Updated: [Matagotchi v1.1 (By MrModd)](https://github.com/MrModd/Matagotchi) [Refactor features to ease the addition of new ones #3](https://github.com/MrModd/Matagotchi/pull/3)
-- Updated: [NFC Seader v2.4 (By bettse)](https://github.com/bettse/seader)
-- New Evil Portal asset: [Better Facebook Portal #100 (By MadeBySaints)](https://github.com/bigbrodude6119/flipper-zero-evil-portal/pull/100)
-- SubGhz: [Display Weather Station temperature in units matching system locale (By cquick01)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/71612171c6b732042fa4d41baf3f62c2307c233a)
-- RGB Mod: [Fixing random RGB flickering (By HaxSam)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/0ceb531e893a2e182c0ebf88373c4dd00e5bbd0d)
-- Added: [TuLlave v1.0 (By zqu4rtz)](https://github.com/zqu4rtz/FlipperApp-TuLlave)
-- Added: [Ethernet W5500 v1.0 (By karasevia)](https://github.com/karasevia/finik_eth) `Req: W5500`
-- Updated: [Ethernet W5500 v1.0 (By karasevia)](https://github.com/karasevia/finik_eth) `Req: W5500` [Hex UI fix #4 (By arag0re)](https://github.com/karasevia/finik_eth/pull/4)
-- Updated: [PC Monitor v1.1 (By TheSainEyereg)](https://github.com/TheSainEyereg/flipper-pc-monitor) _Req: [Backend](https://github.com/TheSainEyereg/flipper-pc-monitor-backend) [Fix for new BLE API (req pairing again, different MAC) (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/19d72ae11a580b40b0ae1fc3368674bbd5a32bfc)
-- OFW: [Toolchain fixes #3451 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/3451)
-- Updated: [Video Player v0.3 (By LTVA1)](https://github.com/LTVA1/flipper-zero-video-player)
-- OFW: PR: [WiFi board: fixed update script on Windows (unfortunately also Mac and Linux) #3485 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/3485)
-- Updated: [Air Arkanoid  v1.1 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-good-faps/pull/141) `Req: Video Game Module By Flipper Devices`
-- Updated: [Air Labyrinth v0.1 (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/vgm/apps/air_labyrinth) `Req: Video Game Module By Flipper Devices`
-- OFW: [FBT/uFBT: Enable C++20/GNU23 in VSCode IntelliSense #3394 (By CookiePLMonster)](https://github.com/flipperdevices/flipperzero-firmware/pull/3394)
-- Updated: [Bad KB (Modified PR#738 from pengu1ndev - Original from Willy-JL) #739 (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/739) As of this update, still the most feature rich BadKB from all CFW.
-- UL: [SubGHz: Settings - Added frequency: 430.50 #721 (By MizumasuShoichi)](https://github.com/DarkFlippers/unleashed-firmware/pull/721)
-- Updated: [Temp Sensors Reader 1.6 (By quen0n)](https://github.com/quen0n/Unitemp-Flipper-Zero-Plugin) `Req: BMP180/BMP280/BME280/BME680/DHT11/DHT22(AM2302)/AM2301/AM2320/HTU2XD/HTU21x/HDC1080/MAX31855/MAX6675/SCD30` Fixed double conversion (By RogueMaster)
-- Updated: [JS Runner v1.0 (By nminaylov & DrZlo13)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/3286)
-- Updated: [GPS v1.4 (By ezod)](https://github.com/ezod/flipperzero-gps) `Req: NMEA 0183`
-- LFRFID: [Added lfrfid protocol EM4100/40/RAW #722 (By hippocache)](https://github.com/DarkFlippers/unleashed-firmware/pull/722)
-- OFW: [Gui: reset canvas orientation and frame when entering direct draw mode #3488 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/3488)
-- Updated: [WiFi (Marauder) v7.0 (By 0xchocolate & tcpassos)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) `Req: ESP32 WITH MARAUDER FLASHED` Fixed Evil Portal assets issue.
-- Updated: [Digimon F-Com v1.1 (By TylerWilley)](https://github.com/TylerWilley/flipper-f-com)
 
 <a name="release">
 
@@ -589,4 +551,4 @@ $ ./fbt dolphin_ext
 - [Desktop Favorite Binds To Allow Opening Custom Game Menu. Whomever can complete this gets 3 months of subscriber builds. Patrons can DM me to add their monthly towards this bounty.](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/756)
 - `Bluetooth Audio` APP to allow flipper to pair to external speaker or headphones for wav/mp3 playback ($200 USD in ETH or BTC) (Don't think this is possible)
 
-# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0222-1041-0.98.4-31a21ce.tgz&channel=RM0222-1041-0.98.4-31a21ce&version=0.98.4)
+# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0229-1532-0.98.4-db50161.tgz&channel=RM0229-1532-0.98.4-db50161&version=0.98.4)
