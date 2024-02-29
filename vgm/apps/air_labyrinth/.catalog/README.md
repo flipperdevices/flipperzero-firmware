@@ -1,5 +1,4 @@
 # Air Labyrinth
-![Air Labyrinth](./screenshots/1.png)
 
 This is a simple game where you have to navigate a ball through a maze. The game is controlled by tilting the Flipper Zero with a Video Game Module attached.  You can also play the game using the Flipper Zero's d-pad.
 
