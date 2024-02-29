@@ -57,37 +57,17 @@ static bool washcity_verify(Nfc* nfc) {
     bool verified = false;
 
     do {
-        MfClassicAuthContext auth_context;
+        const uint8_t verify_sector_number = 1;
+        const uint8_t verify_block_number =
+            mf_classic_get_first_block_num_of_sector(verify_sector_number);
+        FURI_LOG_D(TAG, "Verifying sector %u", verify_sector_number);
+
         MfClassicKey key = {0};
-        uint8_t verify_sector_number = 0;
-        uint8_t verify_block_number = 0;
-        MfClassicError error = MfClassicErrorNone;
-
-        // verify first key thats not a commonly used key
-        verify_sector_number = 1;
-        verify_block_number = mf_classic_get_first_block_num_of_sector(verify_sector_number) + 1;
-        FURI_LOG_D(TAG, "Verifying sector %u", verify_sector_number);
-
         bit_lib_num_to_bytes_be(
             washcity_1k_keys[verify_sector_number].a, COUNT_OF(key.data), key.data);
 
-        error = mf_classic_poller_sync_auth(
-            nfc, verify_block_number, &key, MfClassicKeyTypeA, &auth_context);
-        if(error != MfClassicErrorNone) {
-            FURI_LOG_D(TAG, "Failed to read block %u: %d", verify_block_number, error);
-            break;
-        }
-
-        // verify a second key to reduce chance of false-positive hit by chance dramatically
-        key = (MfClassicKey){0};
-        verify_sector_number = 9;
-        verify_block_number = mf_classic_get_first_block_num_of_sector(verify_sector_number) + 1;
-        FURI_LOG_D(TAG, "Verifying sector %u", verify_sector_number);
-
-        bit_lib_num_to_bytes_be(
-            washcity_1k_keys[verify_sector_number].a, COUNT_OF(key.data), key.data);
-
-        error = mf_classic_poller_sync_auth(
+        MfClassicAuthContext auth_context;
+        MfClassicError error = mf_classic_poller_sync_auth(
             nfc, verify_block_number, &key, MfClassicKeyTypeA, &auth_context);
         if(error != MfClassicErrorNone) {
             FURI_LOG_D(TAG, "Failed to read block %u: %d", verify_block_number, error);
