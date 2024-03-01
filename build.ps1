@@ -28,6 +28,14 @@ $build_commands = @{
         Name         = "Unleashed (dev)";
         ArtifactName = "totp_unleashed_dev_fw{FEATURES_SUFFIX}.zip";
     }
+    ms = [PSCustomObject]@{
+        Name         = "Momentum (stable)";
+        ArtifactName = "totp_momentum_fw{FEATURES_SUFFIX}.zip";
+    }
+    md = [PSCustomObject]@{
+        Name         = "Momentum (dev)";
+        ArtifactName = "totp_momentum_dev_fw{FEATURES_SUFFIX}.zip";
+    }
 }
 
 Push-Location $PSScriptRoot

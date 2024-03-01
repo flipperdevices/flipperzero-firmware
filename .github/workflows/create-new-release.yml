@@ -65,7 +65,7 @@ jobs:
   build:
     strategy:
       matrix:
-        firmware: [od, os, xs, xd, ul, ud]
+        firmware: [od, os, xs, xd, ul, ud, ms, md]
 
     runs-on: ubuntu-latest
     needs: [set-new-version, create-release]

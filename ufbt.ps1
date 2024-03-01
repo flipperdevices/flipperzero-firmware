@@ -10,6 +10,9 @@ elseif (('official-stable', 'off-stbl', 'os').Contains($args[0])) {
 elseif (('xtreme-stable', 'xts', 'xs', 'xtreme-dev', 'xtd', 'xd', 'u', 'ul', 'unleashed', 'ud', 'uld', 'unleashed-dev').Contains($args[0])) {
     $FW_CDEF = "TOTP_FIRMWARE_XTREME_UL"
 }
+elseif (('momentum-stable', 'mts', 'ms', 'momentum-dev', 'mtd', 'md').Contains($args[0])) {
+    $FW_CDEF = "TOTP_FIRMWARE_MOMENTUM"
+}
 else {
     throw "Unable to recognize which firmware to use"
 }

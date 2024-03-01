@@ -47,6 +47,25 @@
       "type": "index",
       "index_url": "https://up.unleashedflip.com/directory.json",
       "channel": "dev"
+    },
+    {
+      "alias": ["ms", "momentum-stable", "mts"],
+      "description": "Momentum stable",
+      "type": "git-release",
+      "git_repo": "Next-Flip/Momentum-Firmware",
+      "git_release": "latest",
+      "sdk_filename_pattern": "-sdk\\.zip$"
+    },
+    {
+      "alias": ["md", "momentum-dev", "mtd"],
+      "description": "Momentum dev build",
+      "type": "git-action",
+      "git_repo": "Next-Flip/Momentum-Firmware",
+      "git_action": "build.yml",
+      "git_artifact": "dist",
+      "git_branch": "dev",
+      "git_event": "push",
+      "sdk_filename_pattern": "-sdk-.+\\.zip$"
     }
   ]
 }
