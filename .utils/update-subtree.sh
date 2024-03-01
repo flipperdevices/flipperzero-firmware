@@ -12,22 +12,32 @@ if [ "${1}" = "" ]; then
 fi
 path="${1}"
 
-while read repo branch subdir; do
+while read -u $remote repo branch subdir; do
     if [ "${repo:0:1}" = "#" ]; then
         continue
     fi
-    exec 69>&1
+    exec {capture}>&1
     if [ "${subdir}" = "/" ]; then
-        result="$(git subtree pull -P "${path}" "${repo}" "${branch}" -m "Merge ${path} from ${repo}" 2>&1 | tee /proc/self/fd/69)"
+        result="$(git subtree pull -P "${path}" "${repo}" "${branch}" -m "Merge ${path} from ${repo}" 2>&1 | tee /proc/self/fd/$capture)"
     else
-        result="$(bash .utils/subtree-subdir-helper.sh "${path}" "${repo}" "${branch}" "${subdir}" merge 2>&1 | tee /proc/self/fd/69)"
+        result="$(bash .utils/subtree-subdir-helper.sh "${path}" "${repo}" "${branch}" "${subdir}" merge 2>&1 | tee /proc/self/fd/$capture)"
     fi
     if grep "Automatic merge failed; fix conflicts and then commit the result." <<< "$result" > /dev/null; then
         echo "MERGE_MSG: Merge ${path} from ${repo}"
-        echo "Waiting for current index to be resolved..."
         notify-send -a Git -i git "Subtree merge failed" "Resolve current index to continue" &> /dev/null | true
-        while ! git diff --quiet || ! git diff --cached --quiet || ! git merge HEAD &> /dev/null; do
+        while true; do
+            echo "Resolve current index then press Enter..."
+            read
+            if git diff --quiet && git diff --cached --quiet && git merge HEAD &> /dev/null; then
+                break
+            fi
             sleep 1
         done
     fi
-done < "${path}/.gitsubtree"
+    if grep "Please commit your changes or stash them before you switch branches." <<< "$result" > /dev/null; then
+        exit 1
+    fi
+    if grep "fatal: working tree has modifications." <<< "$result" > /dev/null; then
+        exit 1
+    fi
+done {remote}< "${path}/.gitsubtree"

@@ -198,10 +198,11 @@ static void uart_parse_esp(void* context, char* line) {
     }
 }
 
-static void uart_cb_esp(UartIrqEvent ev, uint8_t data, void* context) {
+static void uart_cb_esp(FuriHalSerialHandle* handle, FuriHalSerialRxEvent event, void* context) {
     Context* ctx = (Context*)context;
 
-    if(ev == UartIrqEventRXNE) {
+    if(event == FuriHalSerialRxEventData) {
+        uint8_t data = furi_hal_serial_async_rx(handle);
         furi_stream_buffer_send(ctx->rx_stream_esp, &data, 1, 0);
         furi_thread_flags_set(furi_thread_get_id(ctx->thread_esp), WorkerEvtRxDone);
     }
@@ -321,10 +322,11 @@ static void uart_parse_gps(Context* ctx, char* line) {
     }
 }
 
-static void uart_cb_gps(UartIrqEvent ev, uint8_t data, void* context) {
+static void uart_cb_gps(FuriHalSerialHandle* handle, FuriHalSerialRxEvent event, void* context) {
     Context* ctx = (Context*)context;
 
-    if(ev == UartIrqEventRXNE) {
+    if(event == FuriHalSerialRxEventData) {
+        uint8_t data = furi_hal_serial_async_rx(handle);
         furi_stream_buffer_send(ctx->rx_stream_gps, &data, 1, 0);
         furi_thread_flags_set(furi_thread_get_id(ctx->thread_gps), WorkerEvtRxDone);
     }
@@ -415,13 +417,10 @@ void wardriver_uart_init(Context* ctx) {
 
     furi_thread_start(ctx->thread_esp);
 
-    if(UART_CH_ESP == FuriHalUartIdUSART1) {
-        furi_hal_console_disable();
-    } else if(UART_CH_ESP == FuriHalUartIdLPUART1) {
-        furi_hal_uart_init(UART_CH_ESP, 115200);
-    }
-    furi_hal_uart_set_br(UART_CH_ESP, 115200);
-    furi_hal_uart_set_irq_cb(UART_CH_ESP, uart_cb_esp, ctx);
+    ctx->serial_handle_esp = furi_hal_serial_control_acquire(UART_CH_ESP);
+    furi_check(ctx->serial_handle_esp);
+    furi_hal_serial_init(ctx->serial_handle_esp, 115200);
+    furi_hal_serial_async_rx_start(ctx->serial_handle_esp, uart_cb_esp, ctx, false);
 
     if(UART_CH_ESP != UART_CH_GPS) {
         ctx->rx_stream_gps = furi_stream_buffer_alloc(RX_BUF_SIZE, 1);
@@ -434,13 +433,10 @@ void wardriver_uart_init(Context* ctx) {
 
         furi_thread_start(ctx->thread_gps);
 
-        if(UART_CH_GPS == FuriHalUartIdUSART1) {
-            furi_hal_console_disable();
-        } else if(UART_CH_GPS == FuriHalUartIdLPUART1) {
-            furi_hal_uart_init(UART_CH_GPS, 9600);
-        }
-        furi_hal_uart_set_br(UART_CH_GPS, 9600);
-        furi_hal_uart_set_irq_cb(UART_CH_GPS, uart_cb_gps, ctx);
+        ctx->serial_handle_gps = furi_hal_serial_control_acquire(UART_CH_GPS);
+        furi_check(ctx->serial_handle_gps);
+        furi_hal_serial_init(ctx->serial_handle_gps, 9600);
+        furi_hal_serial_async_rx_start(ctx->serial_handle_gps, uart_cb_gps, ctx, false);
     }
 
     return;
@@ -450,27 +446,21 @@ void wardriver_uart_deinit(Context* ctx) {
     furi_thread_flags_set(furi_thread_get_id(ctx->thread_esp), WorkerEvtStop);
     furi_thread_join(ctx->thread_esp);
     furi_thread_free(ctx->thread_esp);
-    furi_hal_uart_set_irq_cb(UART_CH_ESP, NULL, NULL);
     furi_stream_buffer_free(ctx->rx_stream_esp);
 
     if(UART_CH_ESP != UART_CH_GPS) {
         furi_thread_flags_set(furi_thread_get_id(ctx->thread_gps), WorkerEvtStop);
         furi_thread_join(ctx->thread_gps);
         furi_thread_free(ctx->thread_gps);
-        furi_hal_uart_set_irq_cb(UART_CH_GPS, NULL, NULL);
         furi_stream_buffer_free(ctx->rx_stream_gps);
     }
 
-    if(UART_CH_ESP == FuriHalUartIdLPUART1) {
-        furi_hal_uart_deinit(UART_CH_ESP);
-    } else if(UART_CH_ESP == FuriHalUartIdUSART1) {
-        furi_hal_console_enable();
-    }
+    furi_hal_serial_deinit(ctx->serial_handle_esp);
+    furi_hal_serial_control_release(ctx->serial_handle_esp);
 
-    if(UART_CH_GPS == FuriHalUartIdLPUART1) {
-        furi_hal_uart_deinit(UART_CH_GPS);
-    } else if(UART_CH_GPS == FuriHalUartIdUSART1) {
-        furi_hal_console_enable();
+    if(UART_CH_ESP != UART_CH_GPS) {
+        furi_hal_serial_deinit(ctx->serial_handle_gps);
+        furi_hal_serial_control_release(ctx->serial_handle_gps);
     }
 
     return;

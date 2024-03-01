@@ -136,13 +136,6 @@ static struct log mynewt_log;
 
 #endif /* DEBUG_WOLFSSL */
 
-#ifdef DEBUG_VECTOR_REGISTER_ACCESS
-THREAD_LS_T int wc_svr_count = 0;
-THREAD_LS_T const char *wc_svr_last_file = NULL;
-THREAD_LS_T int wc_svr_last_line = -1;
-#endif
-
-
 /* allow this to be set to NULL, so logs can be redirected to default output */
 int wolfSSL_SetLoggingCb(wolfSSL_Logging_cb f)
 {
@@ -443,7 +436,7 @@ WOLFSSL_API int WOLFSSL_IS_DEBUG_ON(void)
 #endif /* !WOLFSSL_DEBUG_ERRORS_ONLY */
 #endif /* DEBUG_WOLFSSL */
 
-#if defined(OPENSSL_EXTRA) || defined(DEBUG_WOLFSSL_VERBOSE)
+#if defined(OPENSSL_EXTRA) || defined(DEBUG_WOLFSSL_VERBOSE) || defined(HAVE_MEMCACHED)
 
 #ifdef WOLFSSL_HAVE_ERROR_QUEUE
 
@@ -1463,7 +1456,8 @@ void wc_ERR_print_errors_fp(XFILE fp)
 
 #endif /* !defined(NO_FILESYSTEM) && !defined(NO_STDIO_FILESYSTEM) */
 
-#endif /* defined(OPENSSL_EXTRA) || defined(DEBUG_WOLFSSL_VERBOSE) */
+#endif /* defined(OPENSSL_EXTRA) || defined(DEBUG_WOLFSSL_VERBOSE)
+          || defined(HAVE_MEMCACHED) */
 
 /*
  * When using OPENSSL_EXTRA or DEBUG_WOLFSSL_VERBOSE macro then WOLFSSL_ERROR is
@@ -1546,4 +1540,3 @@ void WOLFSSL_ERROR_MSG(const char* msg)
 }
 
 #endif  /* DEBUG_WOLFSSL || WOLFSSL_NGINX || WOLFSSL_HAPROXY */
-

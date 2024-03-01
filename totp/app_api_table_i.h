@@ -4,6 +4,7 @@
 #include <lib/toolbox/args.h>
 #include <memset_s.h>
 #include "services/crypto/crypto_facade.h"
+#include "types/crypto_settings.h"
 #include "ui/scene_director.h"
 #include "services/config/config.h"
 #include "services/kb_layouts/kb_layout_provider.h"
@@ -74,4 +75,8 @@ static constexpr auto app_api_table = sort(create_array_t<sym_entry>(
     API_METHOD(
         totp_kb_layout_provider_get_layout_name,
         bool,
-        (AutomationKeyboardLayout, char*, size_t))));
+        (AutomationKeyboardLayout, char*, size_t)),
+    API_METHOD(
+        totp_crypto_decrypt,
+        uint8_t*,
+        (const uint8_t*, const size_t, const CryptoSettings*, size_t*))));

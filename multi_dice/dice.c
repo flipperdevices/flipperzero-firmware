@@ -20,7 +20,7 @@ typedef struct {
 typedef struct {
     FuriMutex* mutex;
     FuriMessageQueue* event_queue;
-    FuriHalRtcDateTime datetime;
+    DateTime datetime;
     uint8_t diceSelect;
     uint8_t diceQty;
     uint8_t diceRoll;
@@ -147,47 +147,6 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
                 state->rollTime[0]);
             uint8_t d1_i = rand() % COUNT_OF(eightBall);
             snprintf(state->strings[1], sizeof(state->strings[1]), "%s", eightBall[d1_i]);
-        } else if(state->diceSelect == 230) {
-            const char* diceOne[] = {
-                "Nibble",
-                "Massage",
-                "Touch",
-                "Caress",
-                "Pet",
-                "Fondle",
-                "Suck",
-                "Lick",
-                "Blow",
-                "Kiss",
-                "???"};
-            const char* diceTwo[] = {
-                "Navel",
-                "Ears",
-                "Lips",
-                "Neck",
-                "Hand",
-                "Thigh",
-                "Nipple",
-                "Breasts",
-                "???",
-                "Genitals"};
-            state->diceRoll =
-                ((rand() % state->diceSelect) + 1); // JUST TO GET IT GOING? AND FIX BUG
-            snprintf(state->diceType[0], sizeof(state->diceType[0]), "%s", "SEX?");
-            snprintf(
-                state->strings[0],
-                sizeof(state->strings[0]),
-                "%s at %s",
-                state->diceType[0],
-                state->rollTime[0]);
-            uint8_t d1_i = rand() % COUNT_OF(diceOne);
-            uint8_t d2_i = rand() % COUNT_OF(diceTwo);
-            snprintf(
-                state->strings[1],
-                sizeof(state->strings[1]),
-                "%s %s",
-                diceOne[d1_i],
-                diceTwo[d2_i]);
         } else if(state->diceSelect == 231) {
             const char* deckOne[] = {"2H", "2C", "2D", "2S", "3H", "3C",  "3D",  "3S",  "4H",
                                      "4C", "4D", "4S", "5H", "5C", "5D",  "5S",  "6H",  "6C",
@@ -405,8 +364,6 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
         elements_button_right(canvas, "8BALL");
     } else if(state->diceSelect == 228) {
         elements_button_right(canvas, "DBALL");
-    } else if(state->diceSelect == 230) {
-        elements_button_right(canvas, "SEX");
     } else if(state->diceSelect == 231) {
         elements_button_right(canvas, "WAR");
     } else if(state->diceSelect == 232) {
@@ -500,8 +457,6 @@ int32_t dice_app(void* p) {
                         } else if(plugin_state->diceSelect == 20) {
                             plugin_state->diceSelect = 100;
                         } else if(plugin_state->diceSelect == 100) {
-                            plugin_state->diceSelect = 230;
-                        } else if(plugin_state->diceSelect == 230) {
                             plugin_state->playerOneScore = 0;
                             plugin_state->playerTwoScore = 0;
                             plugin_state->diceSelect = 231;

@@ -112,18 +112,12 @@ void subbrute_main_view_draw_is_byte_selected(Canvas* canvas, SubBruteMainViewMo
 #ifdef FURI_DEBUG
     //FURI_LOG_D(TAG, "key_from_file: %s", model->key_from_file);
 #endif
-    //char msg_index[18];
-    //snprintf(msg_index, sizeof(msg_index), "Field index: %d", model->index);
     canvas_set_font(canvas, FontSecondary);
     canvas_draw_str_aligned(
         canvas, 64, 17, AlignCenter, AlignTop, "Please select values to calc:");
 
     subbrute_main_view_center_displayed_key(
         canvas, model->key_from_file, model->index, model->two_bytes);
-    //const char* line = furi_string_get_cstr(menu_items);
-    //canvas_set_font(canvas, FontSecondary);
-    //canvas_draw_str_aligned(
-    //    canvas, 64, 37, AlignCenter, AlignTop, furi_string_get_cstr(menu_items));
 
     elements_button_center(canvas, "Select");
     if(model->index > 0) {
@@ -132,6 +126,7 @@ void subbrute_main_view_draw_is_byte_selected(Canvas* canvas, SubBruteMainViewMo
     if(model->index < 7) {
         elements_button_right(canvas, " ");
     }
+
     // Switch to another mode
     if(model->two_bytes) {
         elements_button_top_left(canvas, "One byte");

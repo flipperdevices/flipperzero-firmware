@@ -1,3 +1,4 @@
+#include "picopass_i.h"
 #include "picopass_listener_i.h"
 #include "picopass_keys.h"
 
@@ -42,11 +43,14 @@ static void picopass_listener_loclass_update_csn(PicopassListener* instance) {
     // collect LOCLASS_NUM_PER_CSN nonces in a row for each CSN
     const uint8_t* csn =
         loclass_csns[(instance->key_block_num / LOCLASS_NUM_PER_CSN) % LOCLASS_NUM_CSNS];
-    memcpy(instance->data->AA1[PICOPASS_CSN_BLOCK_INDEX].data, csn, sizeof(PicopassBlock));
+    memcpy(instance->data->card_data[PICOPASS_CSN_BLOCK_INDEX].data, csn, sizeof(PicopassBlock));
 
     uint8_t key[PICOPASS_BLOCK_LEN] = {};
     loclass_iclass_calc_div_key(csn, picopass_iclass_key, key, false);
-    memcpy(instance->data->AA1[PICOPASS_SECURE_KD_BLOCK_INDEX].data, key, sizeof(PicopassBlock));
+    memcpy(
+        instance->data->card_data[PICOPASS_SECURE_KD_BLOCK_INDEX].data,
+        key,
+        sizeof(PicopassBlock));
 
     picopass_listener_init_cipher_state_key(instance, key);
 }
@@ -117,7 +121,7 @@ PicopassListenerCommand
            (instance->state == PicopassListenerStateIdle)) {
             bit_buffer_copy_bytes(
                 instance->tmp_buffer,
-                instance->data->AA1[PICOPASS_CSN_BLOCK_INDEX].data,
+                instance->data->card_data[PICOPASS_CSN_BLOCK_INDEX].data,
                 sizeof(PicopassBlock));
         } else {
             picopass_listener_write_anticoll_csn(instance, instance->tmp_buffer);
@@ -138,7 +142,7 @@ PicopassListenerCommand
         instance->state = PicopassListenerStateSelected;
         bit_buffer_copy_bytes(
             instance->tx_buffer,
-            instance->data->AA1[PICOPASS_CSN_BLOCK_INDEX].data,
+            instance->data->card_data[PICOPASS_CSN_BLOCK_INDEX].data,
             sizeof(PicopassBlock));
 
         PicopassError error = picopass_listener_send_frame(instance, instance->tx_buffer);
@@ -161,15 +165,23 @@ PicopassListenerCommand
         uint8_t block_num = bit_buffer_get_byte(buf, 1);
         if(block_num > PICOPASS_MAX_APP_LIMIT) break;
 
+        bool secured = (instance->data->card_data[PICOPASS_CONFIG_BLOCK_INDEX].data[7] &
+                        PICOPASS_FUSE_CRYPT10) != PICOPASS_FUSE_CRYPT0;
+
+        // TODO: Check CRC?
+        // TODO: Check auth?
+
         bit_buffer_reset(instance->tx_buffer);
-        if((block_num == PICOPASS_SECURE_KD_BLOCK_INDEX) ||
-           (block_num == PICOPASS_SECURE_KC_BLOCK_INDEX)) {
+        if(secured && ((block_num == PICOPASS_SECURE_KD_BLOCK_INDEX) ||
+                       (block_num == PICOPASS_SECURE_KC_BLOCK_INDEX))) {
             for(size_t i = 0; i < PICOPASS_BLOCK_LEN; i++) {
                 bit_buffer_append_byte(instance->tx_buffer, 0xff);
             }
         } else {
             bit_buffer_copy_bytes(
-                instance->tx_buffer, instance->data->AA1[block_num].data, sizeof(PicopassBlock));
+                instance->tx_buffer,
+                instance->data->card_data[block_num].data,
+                sizeof(PicopassBlock));
         }
         PicopassError error = picopass_listener_send_frame(instance, instance->tx_buffer);
         if(error != PicopassErrorNone) {
@@ -192,6 +204,8 @@ static PicopassListenerCommand
         uint8_t block_num = bit_buffer_get_byte(buf, 1);
         if(block_num != PICOPASS_SECURE_EPURSE_BLOCK_INDEX) break;
 
+        // note that even non-secure chips seem to reply to READCHECK still
+
         // loclass mode doesn't do any card side crypto, just logs the readers crypto, so no-op in this mode
         // we can also no-op if the key block is the same, CHECK re-inits if it failed already
         if((instance->key_block_num != key_block_num) &&
@@ -202,7 +216,7 @@ static PicopassListenerCommand
 
         // DATA(8)
         bit_buffer_copy_bytes(
-            instance->tx_buffer, instance->data->AA1[block_num].data, sizeof(PicopassBlock));
+            instance->tx_buffer, instance->data->card_data[block_num].data, sizeof(PicopassBlock));
         NfcError error = nfc_listener_tx(instance->nfc, instance->tx_buffer);
         if(error != NfcErrorNone) {
             FURI_LOG_D(TAG, "Failed to tx read check response: %d", error);
@@ -235,10 +249,9 @@ PicopassListenerCommand
 #ifndef PICOPASS_DEBUG_IGNORE_LOCLASS_STD_KEY
         // loclass mode stores the derived standard debit key in Kd to check
 
-        PicopassBlock key = instance->data->AA1[PICOPASS_SECURE_KD_BLOCK_INDEX];
+        PicopassBlock key = instance->data->card_data[PICOPASS_SECURE_KD_BLOCK_INDEX];
         uint8_t rmac[4];
-        uint8_t rx_data[9] = {};
-        bit_buffer_write_bytes(buf, rx_data, sizeof(rx_data));
+        const uint8_t* rx_data = bit_buffer_get_data(buf);
         loclass_opt_doReaderMAC_2(instance->cipher_state, &rx_data[1], rmac, key.data);
 
         if(!memcmp(&rx_data[5], rmac, 4)) {
@@ -277,8 +290,8 @@ PicopassListenerCommand
                 loclass_writer_write_params(
                     instance->writer,
                     instance->key_block_num + i - LOCLASS_NUM_PER_CSN,
-                    instance->data->AA1[PICOPASS_CSN_BLOCK_INDEX].data,
-                    instance->data->AA1[PICOPASS_SECURE_EPURSE_BLOCK_INDEX].data,
+                    instance->data->card_data[PICOPASS_CSN_BLOCK_INDEX].data,
+                    instance->data->card_data[PICOPASS_SECURE_EPURSE_BLOCK_INDEX].data,
                     instance->loclass_mac_buffer + (i * 8),
                     instance->loclass_mac_buffer + (i * 8) + 4);
             }
@@ -300,33 +313,99 @@ PicopassListenerCommand
 }
 
 PicopassListenerCommand
+    picopass_listener_save_mac(PicopassListener* instance, const uint8_t* rx_data) {
+    PicopassListenerCommand command = PicopassListenerCommandSilent;
+    Picopass* picopass = instance->context;
+
+    PicopassDevice* dev = picopass->dev;
+
+    const uint8_t* csn = instance->data->card_data[PICOPASS_CSN_BLOCK_INDEX].data;
+    const uint8_t* epurse = instance->data->card_data[PICOPASS_SECURE_EPURSE_BLOCK_INDEX].data;
+
+    FuriString* temp_str = furi_string_alloc();
+    FuriString* filename = furi_string_alloc();
+    FlipperFormat* file = flipper_format_file_alloc(dev->storage);
+
+    for(size_t i = 0; i < PICOPASS_BLOCK_LEN; i++) {
+        furi_string_cat_printf(filename, "%02x", csn[i]);
+    }
+    furi_string_cat_printf(filename, "_");
+    for(size_t i = 0; i < PICOPASS_BLOCK_LEN; i++) {
+        furi_string_cat_printf(filename, "%02x", epurse[i]);
+    }
+
+    furi_string_printf(
+        temp_str, "%s/%s%s", STORAGE_APP_DATA_PATH_PREFIX, furi_string_get_cstr(filename), ".mac");
+    do {
+        // Open file
+        if(!flipper_format_file_open_always(file, furi_string_get_cstr(temp_str))) break;
+
+        if(!flipper_format_write_hex(file, "NR-MAC", rx_data + 1, PICOPASS_BLOCK_LEN)) break;
+
+        FURI_LOG_D(
+            TAG,
+            "Saved nr-mac: %02x %02x %02x %02x %02x %02x %02x %02x",
+            // Skip command byte [0]
+            rx_data[1],
+            rx_data[2],
+            rx_data[3],
+            rx_data[4],
+            rx_data[5],
+            rx_data[6],
+            rx_data[7],
+            rx_data[8]);
+
+        notification_message(picopass->notifications, &sequence_double_vibro);
+        command = PicopassListenerCommandStop;
+        view_dispatcher_send_custom_event(
+            picopass->view_dispatcher, PicopassCustomEventNrMacSaved);
+    } while(0);
+
+    furi_string_free(temp_str);
+    furi_string_free(filename);
+    flipper_format_free(file);
+
+    return command;
+}
+
+PicopassListenerCommand
     picopass_listener_check_handler_emulation(PicopassListener* instance, BitBuffer* buf) {
     PicopassListenerCommand command = PicopassListenerCommandSilent;
 
     do {
+        bool secured = (instance->data->card_data[PICOPASS_CONFIG_BLOCK_INDEX].data[7] &
+                        PICOPASS_FUSE_CRYPT10) != PICOPASS_FUSE_CRYPT0;
+        if(!secured) break;
+
         uint8_t rmac[4] = {};
         uint8_t tmac[4] = {};
-        const uint8_t* key = instance->data->AA1[instance->key_block_num].data;
-        // Since nr isn't const in loclass_opt_doBothMAC_2() copy buffer
-        uint8_t rx_data[9] = {};
-        bit_buffer_write_bytes(buf, rx_data, sizeof(rx_data));
-        loclass_opt_doBothMAC_2(instance->cipher_state, &rx_data[1], rmac, tmac, key);
+        const uint8_t* key = instance->data->card_data[instance->key_block_num].data;
+        bool no_key = picopass_is_memset(key, 0x00, PICOPASS_BLOCK_LEN);
+        const uint8_t* rx_data = bit_buffer_get_data(buf);
+
+        if(no_key) {
+            // We're emulating a partial dump of an iClass SE card and should capture the NR and MAC
+            command = picopass_listener_save_mac(instance, rx_data);
+            break;
+        } else {
+            loclass_opt_doBothMAC_2(instance->cipher_state, &rx_data[1], rmac, tmac, key);
 
 #ifndef PICOPASS_DEBUG_IGNORE_BAD_RMAC
-        if(memcmp(&rx_data[5], rmac, 4)) {
-            // Bad MAC from reader, do not send a response.
-            FURI_LOG_I(TAG, "Got bad MAC from reader");
-            // Reset the cipher state since we don't do it in READCHECK
-            picopass_listener_init_cipher_state(instance);
-            break;
-        }
+            if(memcmp(&rx_data[5], rmac, PICOPASS_MAC_LEN)) {
+                // Bad MAC from reader, do not send a response.
+                FURI_LOG_I(TAG, "Got bad MAC from reader");
+                // Reset the cipher state since we don't do it in READCHECK
+                picopass_listener_init_cipher_state(instance);
+                break;
+            }
 #endif
 
-        bit_buffer_copy_bytes(instance->tx_buffer, tmac, sizeof(tmac));
-        NfcError error = nfc_listener_tx(instance->nfc, instance->tx_buffer);
-        if(error != NfcErrorNone) {
-            FURI_LOG_D(TAG, "Failed tx update response: %d", error);
-            break;
+            bit_buffer_copy_bytes(instance->tx_buffer, tmac, sizeof(tmac));
+            NfcError error = nfc_listener_tx(instance->nfc, instance->tx_buffer);
+            if(error != NfcErrorNone) {
+                FURI_LOG_D(TAG, "Failed tx update response: %d", error);
+                break;
+            }
         }
 
         command = PicopassListenerCommandProcessed;
@@ -358,29 +437,33 @@ PicopassListenerCommand
         if(instance->mode == PicopassListenerModeLoclass) break;
         if(instance->state != PicopassListenerStateSelected) break;
 
-        PicopassBlock config_block = instance->data->AA1[PICOPASS_CONFIG_BLOCK_INDEX];
+        PicopassBlock config_block = instance->data->card_data[PICOPASS_CONFIG_BLOCK_INDEX];
         bool pers_mode = PICOPASS_LISTENER_HAS_MASK(config_block.data[7], PICOPASS_FUSE_PERS);
+        bool secured = (instance->data->card_data[PICOPASS_CONFIG_BLOCK_INDEX].data[7] &
+                        PICOPASS_FUSE_CRYPT10) != PICOPASS_FUSE_CRYPT0;
 
         const uint8_t* rx_data = bit_buffer_get_data(buf);
         uint8_t block_num = rx_data[1];
         if(block_num == PICOPASS_CSN_BLOCK_INDEX) break; // CSN is always read only
         if(!pers_mode && PICOPASS_LISTENER_HAS_MASK(config_block.data[3], 0x80))
             break; // Chip is in RO mode, no updated possible (even ePurse)
-        if(!pers_mode && (block_num == PICOPASS_SECURE_AIA_BLOCK_INDEX))
+        if(!pers_mode && ((secured && block_num == PICOPASS_SECURE_AIA_BLOCK_INDEX) ||
+                          (!secured && block_num == PICOPASS_NONSECURE_AIA_BLOCK_INDEX)))
             break; // AIA can only be set in personalisation mode
-        if(!pers_mode &&
+        if(!pers_mode && secured &&
            ((block_num == PICOPASS_SECURE_KD_BLOCK_INDEX ||
              block_num == PICOPASS_SECURE_KC_BLOCK_INDEX) &&
             (!PICOPASS_LISTENER_HAS_MASK(config_block.data[7], PICOPASS_FUSE_CRYPT10))))
-            break;
+            break; // TODO: Is this the right response?
 
         if(block_num >= 6 && block_num <= 12) {
             // bit0 is block6, up to bit6 being block12
             if(!PICOPASS_LISTENER_HAS_MASK(config_block.data[3], (1 << (block_num - 6)))) {
                 // Block is marked as read-only, deny writing
-                break;
+                break; // TODO: Is this the right response?
             }
         }
+
         // TODO: Check CRC/SIGN depending on if in secure mode
         // Check correct key
         // -> Kd only allows decrementing e-Purse
@@ -413,16 +496,18 @@ PicopassListenerCommand
             break;
 
         case PICOPASS_SECURE_EPURSE_BLOCK_INDEX:
-            // ePurse updates swap first and second half of the block each update
-            memcpy(&new_block.data[4], &rx_data[2], 4);
-            memcpy(&new_block.data[0], &rx_data[6], 4);
+            if(secured) {
+                // ePurse updates swap first and second half of the block each update on secure cards
+                memcpy(&new_block.data[4], &rx_data[2], 4);
+                memcpy(&new_block.data[0], &rx_data[6], 4);
+            }
             break;
 
         case PICOPASS_SECURE_KD_BLOCK_INDEX:
             // fallthrough
         case PICOPASS_SECURE_KC_BLOCK_INDEX:
-            if(!pers_mode) {
-                new_block = instance->data->AA1[block_num];
+            if(!pers_mode && secured) {
+                new_block = instance->data->card_data[block_num];
                 for(size_t i = 0; i < sizeof(PicopassBlock); i++) {
                     new_block.data[i] ^= rx_data[i + 2];
                 }
@@ -435,22 +520,24 @@ PicopassListenerCommand
             break;
         }
 
-        instance->data->AA1[block_num] = new_block;
-        if((block_num == instance->key_block_num) ||
-           (block_num == PICOPASS_SECURE_EPURSE_BLOCK_INDEX)) {
+        instance->data->card_data[block_num] = new_block;
+        if(secured && ((block_num == instance->key_block_num) ||
+                       (block_num == PICOPASS_SECURE_EPURSE_BLOCK_INDEX))) {
             picopass_listener_init_cipher_state(instance);
         }
 
         bit_buffer_reset(instance->tx_buffer);
-        if((block_num == PICOPASS_SECURE_KD_BLOCK_INDEX) ||
-           (block_num == PICOPASS_SECURE_KC_BLOCK_INDEX)) {
+        if(secured && ((block_num == PICOPASS_SECURE_KD_BLOCK_INDEX) ||
+                       (block_num == PICOPASS_SECURE_KC_BLOCK_INDEX))) {
             // Key updates always return FF's
             for(size_t i = 0; i < PICOPASS_BLOCK_LEN; i++) {
                 bit_buffer_append_byte(instance->tx_buffer, 0xff);
             }
         } else {
             bit_buffer_copy_bytes(
-                instance->tx_buffer, instance->data->AA1[block_num].data, sizeof(PicopassBlock));
+                instance->tx_buffer,
+                instance->data->card_data[block_num].data,
+                sizeof(PicopassBlock));
         }
 
         PicopassError error = picopass_listener_send_frame(instance, instance->tx_buffer);
@@ -475,18 +562,22 @@ PicopassListenerCommand
         uint8_t block_start = bit_buffer_get_byte(buf, 1);
         if(block_start + 4 >= PICOPASS_MAX_APP_LIMIT) break;
 
+        bool secured = (instance->data->card_data[PICOPASS_CONFIG_BLOCK_INDEX].data[7] &
+                        PICOPASS_FUSE_CRYPT10) != PICOPASS_FUSE_CRYPT0;
+
         // TODO: Check CRC?
         // TODO: Check auth?
 
         bit_buffer_reset(instance->tx_buffer);
         for(uint8_t i = block_start; i < block_start + 4; i++) {
-            if((i == PICOPASS_SECURE_KD_BLOCK_INDEX) || (i == PICOPASS_SECURE_KC_BLOCK_INDEX)) {
+            if(secured &&
+               ((i == PICOPASS_SECURE_KD_BLOCK_INDEX) || (i == PICOPASS_SECURE_KC_BLOCK_INDEX))) {
                 for(size_t j = 0; j < sizeof(PicopassBlock); j++) {
                     bit_buffer_append_byte(instance->tx_buffer, 0xff);
                 }
             } else {
                 bit_buffer_append_bytes(
-                    instance->tx_buffer, instance->data->AA1[i].data, sizeof(PicopassBlock));
+                    instance->tx_buffer, instance->data->card_data[i].data, sizeof(PicopassBlock));
             }
         }
 
@@ -558,6 +649,7 @@ static const PicopassListenerCmd picopass_listener_cmd_handlers[] = {
         .cmd_len_bits = 8 * 4,
         .handler = picopass_listener_read4_handler,
     },
+    // TODO: RFAL_PICOPASS_CMD_DETECT
 };
 
 PicopassListener* picopass_listener_alloc(Nfc* nfc, const PicopassDeviceData* data) {

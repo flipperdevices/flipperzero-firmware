@@ -139,6 +139,9 @@ void lightmeter_app_free(LightMeterApp* app) {
 
     bh1750_set_power_state(0);
 
+    // Free cfg path string
+    furi_string_free(app->cfg_path);
+
     free(app->config);
     free(app);
 }

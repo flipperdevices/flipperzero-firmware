@@ -9,7 +9,7 @@
 #define bmp_font_width_pxs 192
 #define bmp_font_height_pxs 48
 #define CHAR_MAP " 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ.,-_(){}[]#"
-#define CHAR_WIDTH 4
+#define UICHAR_WIDTH 4
 #define CHAR_HEIGHT 6
 
 #define BMP_GUN_WIDTH 32

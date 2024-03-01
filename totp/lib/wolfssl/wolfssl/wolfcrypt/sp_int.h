@@ -945,6 +945,7 @@ MP_API int sp_abs(const sp_int* a, sp_int* r);
 MP_API int sp_cmp_mag(const sp_int* a, const sp_int* b);
 #endif
 MP_API int sp_cmp(const sp_int* a, const sp_int* b);
+MP_API int sp_cmp_ct(const sp_int* a, const sp_int* b, unsigned int n);
 
 MP_API int sp_is_bit_set(const sp_int* a, unsigned int b);
 MP_API int sp_count_bits(const sp_int* a);
@@ -1030,14 +1031,17 @@ MP_API int sp_exptmod_nct(const sp_int* b, const sp_int* e, const sp_int* m,
 
 #if defined(WOLFSSL_SP_MATH_ALL) || defined(OPENSSL_ALL)
 MP_API int sp_div_2d(const sp_int* a, int e, sp_int* r, sp_int* rem);
-MP_API int sp_mod_2d(const sp_int* a, int e, sp_int* r);
 MP_API int sp_mul_2d(const sp_int* a, int e, sp_int* r);
+#endif
+#if defined(WOLFSSL_SP_MATH_ALL) || defined(HAVE_ECC) || defined(OPENSSL_ALL)
+MP_API int sp_mod_2d(const sp_int* a, int e, sp_int* r);
 #endif
 
 MP_API int sp_sqr(const sp_int* a, sp_int* r);
 MP_API int sp_sqrmod(const sp_int* a, const sp_int* m, sp_int* r);
 
-MP_API int sp_mont_red(sp_int* a, const sp_int* m, sp_int_digit mp);
+MP_API int sp_mont_red_ex(sp_int* a, const sp_int* m, sp_int_digit mp, int ct);
+#define sp_mont_red(a, m, mp)               sp_mont_red_ex(a, m, mp, 0)
 MP_API int sp_mont_setup(const sp_int* m, sp_int_digit* rho);
 MP_API int sp_mont_norm(sp_int* norm, const sp_int* m);
 
@@ -1085,7 +1089,8 @@ WOLFSSL_LOCAL void sp_memzero_check(sp_int* sp);
 #define mp_div_3(a, r, rem)                 sp_div_d(a, 3, r, rem)
 #define mp_rshb(A,x)                        sp_rshb(A,x,A)
 #define mp_is_bit_set(a,b)                  sp_is_bit_set(a,(unsigned int)(b))
-#define mp_montgomery_reduce                sp_mont_red
+#define mp_montgomery_reduce(a, m, mp)      sp_mont_red_ex(a, m, mp, 0)
+#define mp_montgomery_reduce_ct(a, m, mp)   sp_mont_red_ex(a, m, mp, 1)
 #define mp_montgomery_setup                 sp_mont_setup
 #define mp_montgomery_calc_normalization    sp_mont_norm
 
@@ -1117,6 +1122,7 @@ WOLFSSL_LOCAL void sp_memzero_check(sp_int* sp);
 #define mp_cond_swap_ct_ex                  sp_cond_swap_ct_ex
 #define mp_cmp_mag                          sp_cmp_mag
 #define mp_cmp                              sp_cmp
+#define mp_cmp_ct                           sp_cmp_ct
 #define mp_count_bits                       sp_count_bits
 #define mp_cnt_lsb                          sp_cnt_lsb
 #define mp_leading_bit                      sp_leading_bit

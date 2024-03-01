@@ -10,9 +10,9 @@ Firmware is needed for the ESP32-CAM module, see here for more information: http
 
 Button mappings:
 
-**Up** = Contrast Up
+**Up** = Contrast Up.
 
-**Down** = Contrast Down
+**Down** = Contrast Down.
 
 **Left** = Toggle invert.
 
@@ -30,8 +30,8 @@ Settings:
 
 **Dithering Type** Change between the Cycle Floyd–Steinberg, Jarvis-Judice-Ninke, and Stucki dithering types.
 
-**Haptic FX** = Toggle haptic feedback on/off.
+**Haptic Effects** = Toggle haptic feedback on/off.
 
-**Sound FX** = Toggle sound effects on/off.
+**Sound Effects** = Toggle sound effects on/off.
 
-**LED FX** = Toggle LED effects on/off.
+**LED Effects** = Toggle LED effects on/off.

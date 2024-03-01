@@ -16,6 +16,8 @@
 
 #include <locale/locale.h>
 
+#include <expansion/expansion.h>
+
 #define SCREEN_SIZE_X 128
 #define SCREEN_SIZE_Y 64
 
@@ -145,7 +147,7 @@ static void draw_callback(Canvas* canvas, void* ctx) {
     } else {
         canvas_set_font(canvas, FontPrimary);
         canvas_draw_str_aligned(canvas, 64, 10, AlignCenter, AlignBottom, "Geiger Counter");
-        canvas_draw_str_aligned(canvas, 64, 20, AlignCenter, AlignBottom, "Version 20230806");
+        canvas_draw_str_aligned(canvas, 64, 20, AlignCenter, AlignBottom, "Version 20240222");
         canvas_draw_str_aligned(canvas, 64, 40, AlignCenter, AlignBottom, "github.com/nmrr");
     }
 }
@@ -179,6 +181,9 @@ static void gpiocallback(void* ctx) {
 }
 
 int32_t flipper_geiger_app() {
+    Expansion* expansion = furi_record_open(RECORD_EXPANSION);
+    expansion_disable(expansion);
+
     EventApp event;
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(EventApp));
 
@@ -200,6 +205,8 @@ int32_t flipper_geiger_app() {
     mutexVal.mutex = furi_mutex_alloc(FuriMutexTypeNormal);
     if(!mutexVal.mutex) {
         furi_message_queue_free(event_queue);
+        expansion_enable(expansion);
+        furi_record_close(RECORD_EXPANSION);
         return 255;
     }
 
@@ -208,6 +215,7 @@ int32_t flipper_geiger_app() {
     view_port_input_callback_set(view_port, input_callback, event_queue);
 
     furi_hal_gpio_add_int_callback(&gpio_ext_pa7, gpiocallback, event_queue);
+    furi_hal_gpio_enable_int_callback(&gpio_ext_pa7);
 
     Gui* gui = furi_record_open(RECORD_GUI);
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
@@ -257,7 +265,7 @@ int32_t flipper_geiger_app() {
                     if(recordData == 0) {
                         notification_message(notification, &sequence_set_only_red_255);
 
-                        FuriHalRtcDateTime datetime;
+                        DateTime datetime;
                         furi_hal_rtc_get_datetime(&datetime);
 
                         char path[64];
@@ -401,6 +409,9 @@ int32_t flipper_geiger_app() {
     view_port_free(view_port);
     furi_timer_free(timer);
     furi_record_close(RECORD_GUI);
+
+    expansion_enable(expansion);
+    furi_record_close(RECORD_EXPANSION);
 
     return 0;
 }

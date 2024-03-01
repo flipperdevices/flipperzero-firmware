@@ -1,3 +1,10 @@
+## v1.5
+
+Fixes app to build with the new API. Thanks @Willy-JL for doing the hard part!
+
+<3 @0xchocolate (cococode)
+
+
 ## v1.4
 
 Turbo mode (gotta go fast)! The app now supports flashing as fast as possible (921600 baud with built-in retries). In my testing, this sped up a 1:37min flash to 23 seconds. Now we can't go back to the slow way!

@@ -3,10 +3,14 @@
 enum SubmenuIndex {
     /** Camera. */
     SubmenuIndexSceneCamera = 10,
+    /** WiFi Camera */
+    SubmenuIndexSceneWiFiCamera,
+    /** Cam settings menu. */
+    SubmenuIndexCamSettings,
+    /** App settings menu. */
+    SubmenuIndexAppSettings,
     /** Guide/how-to. */
     SubmenuIndexGuide,
-    /** Settings menu. */
-    SubmenuIndexSettings,
 };
 
 void camera_suite_scene_menu_submenu_callback(void* context, uint32_t index) {
@@ -19,16 +23,36 @@ void camera_suite_scene_menu_on_enter(void* context) {
 
     submenu_add_item(
         app->submenu,
-        "Open Camera",
+        "Stream Camera to Screen",
         SubmenuIndexSceneCamera,
         camera_suite_scene_menu_submenu_callback,
         app);
-    submenu_add_item(
-        app->submenu, "Guide", SubmenuIndexGuide, camera_suite_scene_menu_submenu_callback, app);
+
     submenu_add_item(
         app->submenu,
-        "Settings",
-        SubmenuIndexSettings,
+        "Stream Camera to WiFi",
+        SubmenuIndexSceneWiFiCamera,
+        camera_suite_scene_menu_submenu_callback,
+        app);
+
+    submenu_add_item(
+        app->submenu,
+        "Camera Settings",
+        SubmenuIndexCamSettings,
+        camera_suite_scene_menu_submenu_callback,
+        app);
+
+    submenu_add_item(
+        app->submenu,
+        "Application Settings",
+        SubmenuIndexAppSettings,
+        camera_suite_scene_menu_submenu_callback,
+        app);
+
+    submenu_add_item(
+        app->submenu,
+        "Camera Suite Guide",
+        SubmenuIndexGuide,
         camera_suite_scene_menu_submenu_callback,
         app);
 
@@ -52,15 +76,25 @@ bool camera_suite_scene_menu_on_event(void* context, SceneManagerEvent event) {
                 app->scene_manager, CameraSuiteSceneMenu, SubmenuIndexSceneCamera);
             scene_manager_next_scene(app->scene_manager, CameraSuiteSceneCamera);
             return true;
+        } else if(event.event == SubmenuIndexSceneWiFiCamera) {
+            scene_manager_set_scene_state(
+                app->scene_manager, CameraSuiteSceneMenu, SubmenuIndexSceneWiFiCamera);
+            scene_manager_next_scene(app->scene_manager, CameraSuiteSceneWiFiCamera);
+            return true;
+        } else if(event.event == SubmenuIndexAppSettings) {
+            scene_manager_set_scene_state(
+                app->scene_manager, CameraSuiteSceneMenu, SubmenuIndexAppSettings);
+            scene_manager_next_scene(app->scene_manager, CameraSuiteSceneAppSettings);
+            return true;
+        } else if(event.event == SubmenuIndexCamSettings) {
+            scene_manager_set_scene_state(
+                app->scene_manager, CameraSuiteSceneMenu, SubmenuIndexCamSettings);
+            scene_manager_next_scene(app->scene_manager, CameraSuiteSceneCamSettings);
+            return true;
         } else if(event.event == SubmenuIndexGuide) {
             scene_manager_set_scene_state(
                 app->scene_manager, CameraSuiteSceneMenu, SubmenuIndexGuide);
             scene_manager_next_scene(app->scene_manager, CameraSuiteSceneGuide);
-            return true;
-        } else if(event.event == SubmenuIndexSettings) {
-            scene_manager_set_scene_state(
-                app->scene_manager, CameraSuiteSceneMenu, SubmenuIndexSettings);
-            scene_manager_next_scene(app->scene_manager, CameraSuiteSceneSettings);
             return true;
         }
     }

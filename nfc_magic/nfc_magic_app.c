@@ -23,6 +23,7 @@ void nfc_magic_app_tick_event_callback(void* context) {
 
 void nfc_magic_app_show_loading_popup(void* context, bool show) {
     NfcMagicApp* instance = context;
+
     if(show) {
         // Raise timer priority so that animations can play
         furi_timer_set_thread_priority(FuriTimerThreadPriorityElevated);

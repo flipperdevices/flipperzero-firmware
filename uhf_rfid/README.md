@@ -1,18 +1,30 @@
 # [UHF]RFID App for FlipperZero
 
 <div style="
-display: flex;
-flex-direction: row;
-justify-content: space-evenly;
+display: grid;
+grid-template-columns: repeat(2, 1fr);
+grid-template-rows: repeat(2, 1fr);
+gap: 2px;
+justify-items: center;
 align-items: center;
+width: 100vw;
 ">
   <img style="
-    width: 350px;"
+    width: 280px;
+    height: auto;"
     src="assets/img/uhf_demo_app2.jpg">
   <img style="
-    border-radius: 10px;
-    width: 400px;"
-  src="assets/img/uhf_demo_app.jpg">
+    width: 280px;
+    height: auto;"
+    src="assets/img/uhf_demo_app.jpg">
+  <img style="
+    width: 280px;
+    height: auto;"
+  src="assets/img/P_20231205_154700.jpg">
+  <img style="
+    width: 280px;
+    height: auto;"
+  src="assets/img/P_20231205_154717.jpg">
 </div>
 
 ## Overview
@@ -21,8 +33,7 @@ This repository contains a UHF RFID application developed for FlipperZero, a ver
 
 ## What's Ongoing
 
-Working on the settings page to allow for changing of the module's settings.
-Adding options like settings the access password, baud rate, rf power, channel, etc.
+Adding features to the app to make it more usable and stable. Currently, also addressing the issue page to fix bugs and improve the app. And also add the planned and requested features. For example, UI Change to show all info from initial scan; feature to identify the tag type and show the info accordingly; and more.
 
 ## What's Changed
 
@@ -33,17 +44,22 @@ Adding options like settings the access password, baud rate, rf power, channel, 
 
 ## Features
 
-- [x] Read Single UHF RFID tag.
-- [x] View saved UHF RFID tag.
-- [x] Write Single UHF RFID tag.
-- [ ] Change Module setting parameters. **(In Progress)**
-  - [x] Set Baudrates 
+- [x] Read Single UHF RFID tag
+  - [x] EPC Bank
+  - [x] TID Bank
+  - [x] USER Bank
+- [x] View saved UHF RFID tags
+- [x] Write Single UHF RFID tag
+  - [x] EPC Bank
+  - [ ] TID Bank (Not Supported if locked)
+  - [x] USER Bank
+- [ ] Change Module setting parameters **(In Progress)**
+  - [x] Set Baudrates
+  - [x] Set RF Power
+  - [x] Set Region
   - [ ] Set/Reset Access Password
   - [ ] Set Kill Password
   - [ ] Kill Tag
-  - [x] Set RF Power
-  - [x] Set Region
-
 - [ ] Edit/Create new data to write.
 - Extras
   - [ ] Read multiple tags at once
@@ -74,7 +90,7 @@ To run this application on FlipperZero, you will need:
 1. Power on your FlipperZero device.
 2. Connect the uhf module to the flipper via gpio.
 3. Navigate to the UHF RFID app on FlipperZero's menu.
-4. Currently Reading the EPC tag is the only usable option
+4. Currently Read for EPC, TID, USER Banks are supported, as well as saving and Writing EPC, USER Banks
    ... will further update this page as it development goes
 
 ## Contributions

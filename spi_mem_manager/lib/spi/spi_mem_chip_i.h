@@ -42,7 +42,8 @@ typedef enum {
     SPIMemChipVendorFudan,
     SPIMemChipVendorGenitop,
     SPIMemChipVendorParagon,
-    SPIMemChipVendorXTX
+    SPIMemChipVendorXTX,
+    SPIMemChipVendorXMC
 } SPIMemChipVendor;
 
 typedef enum {

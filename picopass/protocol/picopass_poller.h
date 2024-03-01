@@ -16,6 +16,7 @@ typedef enum {
     PicopassPollerEventTypeRequestWriteKey,
     PicopassPollerEventTypeSuccess,
     PicopassPollerEventTypeFail,
+    PicopassPollerEventTypeAuthFail,
 } PicopassPollerEventType;
 
 typedef enum {

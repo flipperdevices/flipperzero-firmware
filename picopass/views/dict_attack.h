@@ -2,6 +2,9 @@
 #include <stdint.h>
 #include <gui/view.h>
 #include <gui/modules/widget.h>
+#include <picopass_icons.h>
+
+#include <assets_icons.h>
 
 typedef struct DictAttack DictAttack;
 

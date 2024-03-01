@@ -19,7 +19,7 @@ You just need to install the [latest firmware](https://github.com/DarkFlippers/u
 <br />
 You can also download the [release](https://github.com/derskythe/flipperzero-subbrute/releases/latest) and unzip/untar it to the `SD Card/apps/Sub-GHz` directory.
 <br />
-> **Warning**
+> [!WARNING]
 > 
 > The application is not compatible with the official firmware version.
 > Also, it has not been tested on other firmware versions other than [Unleashed Firmware](https://github.com/DarkFlippers/unleashed-firmware) and [OFW](https://github.com/flipperdevices/flipperzero-firmware).
@@ -31,7 +31,7 @@ You can also download the [release](https://github.com/derskythe/flipperzero-sub
 ![image](https://github.com/DarkFlippers/flipperzero-subbrute/assets/31771569/9f428d6e-59fd-4517-895d-fb185f8d884f)
 
 Here you can select the protocol and frequency that will be used for bruteforce. 
-According to our observations, `CAME 12bit 433MHz` is the most protocol, so it is selected by default.
+According to our observations, `CAME 12bit 433MHz` is the most common protocol, so it is selected by default.
 To identify other devices and protocols, you should inspect the device.
 According to the protocol, when probe a key, each value is sent 3 times. 
 Most of the devices this works but there are devices that don't work and more repetitions are needed. 
@@ -61,6 +61,7 @@ The negative side of increasing the number of repetitions will be a longer key f
 - CAME 12bit 303MHz
 - CAME 12bit 307MHz
 - CAME 12bit 315MHz
+- CAME 12bit 330MHz
 - CAME 12bit 433MHz
 - CAME 12bit 868MHz
 
@@ -104,7 +105,7 @@ The negative side of increasing the number of repetitions will be a longer key f
 
 ### UNILARM
 
-> **Note**
+> [!NOTE]
 > 
 > Only dip switch combinations, not full 25bit bruteforce
 
@@ -113,7 +114,7 @@ The negative side of increasing the number of repetitions will be a longer key f
 
 ### SMC5326
 
-> **Note**
+> [!NOTE]
 > 
 > Only dip switch combinations, not full 25bit bruteforce
 
@@ -122,7 +123,7 @@ The negative side of increasing the number of repetitions will be a longer key f
 
 ### PT2260
 
-> **Note**
+> [!NOTE]
 > 
 > Only for 8 dip switch remote, not full 24bit bruteforce
 

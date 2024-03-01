@@ -203,7 +203,8 @@ void totp_scene_generate_token_activate(PluginState* plugin_state) {
 
     if(plugin_state->automation_method & AutomationMethodBadBt) {
         if(plugin_state->bt_type_code_worker_context == NULL) {
-            plugin_state->bt_type_code_worker_context = totp_bt_type_code_worker_init();
+            plugin_state->bt_type_code_worker_context = totp_bt_type_code_worker_init(
+                *((uint16_t*)plugin_state->crypto_settings.crypto_verify_data));
         }
         totp_bt_type_code_worker_start(
             plugin_state->bt_type_code_worker_context,
@@ -337,7 +338,7 @@ bool totp_scene_generate_token_handle_event(
         return true;
     }
 
-    if(event->input.type == InputTypeLong && event->input.key == InputKeyBack) {
+    if(event->input.type == InputTypePress && event->input.key == InputKeyBack) {
         return false;
     }
 

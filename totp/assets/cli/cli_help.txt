@@ -12,6 +12,7 @@ Usage:
   totp (timezone | tz) [<timezone>]
   totp reset
   totp automation [-k <layout>] [-w <delay>] [<automation>...]
+  totp export
 
 Commands:
   help, h, ?       Show command usage help
@@ -27,6 +28,7 @@ Commands:
   timezone, tz     Get or set current timezone
   reset            Reset application to default settings
   automation       Get or set automation settings
+  export           Exports and prints all the tokens into URI-list format
 
 Arguments:
   name          Token name

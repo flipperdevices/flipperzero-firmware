@@ -4,6 +4,7 @@
 #include <furi.h>
 #include <gui/gui.h>
 #include <string.h>
+#include <expansion/expansion.h>
 
 typedef enum {
     EventTypeTick,
@@ -131,6 +132,10 @@ static void input_callback(InputEvent* input_event, FuriMessageQueue* event_queu
 int32_t gps_app(void* p) {
     UNUSED(p);
 
+    // Disable expansion protocol to avoid interference with UART Handle
+    Expansion* expansion = furi_record_open(RECORD_EXPANSION);
+    expansion_disable(expansion);
+
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(PluginEvent));
 
     GpsUart* gps_uart = gps_uart_enable();
@@ -139,6 +144,9 @@ int32_t gps_app(void* p) {
     if(!gps_uart->mutex) {
         FURI_LOG_E("GPS", "cannot create mutex\r\n");
         free(gps_uart);
+        // Return previous state of expansion
+        expansion_enable(expansion);
+        furi_record_close(RECORD_EXPANSION);
         return 255;
     }
 
@@ -232,8 +240,10 @@ int32_t gps_app(void* p) {
                         gps_uart->deep_sleep_enabled = !gps_uart->deep_sleep_enabled;
 
                         // tested on Telit SE868-A and SL871L-S
-                        furi_hal_uart_tx(
-                            UART_CH, (uint8_t*)"$PMTK161,0*28\r\n", strlen("$PMTK161,0*28\r\n"));
+                        furi_hal_serial_tx(
+                            gps_uart->serial_handle,
+                            (uint8_t*)"$PMTK161,0*28\r\n",
+                            strlen("$PMTK161,0*28\r\n"));
 
                         furi_mutex_release(gps_uart->mutex);
                         view_port_update(view_port);
@@ -268,6 +278,10 @@ int32_t gps_app(void* p) {
     if(furi_hal_power_is_otg_enabled() && !otg_was_enabled) {
         furi_hal_power_disable_otg();
     }
+
+    // Return previous state of expansion
+    expansion_enable(expansion);
+    furi_record_close(RECORD_EXPANSION);
 
     return 0;
 }

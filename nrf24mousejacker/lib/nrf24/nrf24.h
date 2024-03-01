@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <furi_hal_spi.h>
 
-#include <xtreme/xtreme.h>
+#include <momentum/momentum.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -42,9 +42,9 @@ extern "C" {
 
 #define nrf24_TIMEOUT 500
 #define nrf24_CE_PIN &gpio_ext_pb2
-#define nrf24_HANDLE                                                                         \
-    (xtreme_settings.spi_nrf24_handle == SpiDefault ? &furi_hal_spi_bus_handle_external : \
-                                                         &furi_hal_spi_bus_handle_external_extra)
+#define nrf24_HANDLE                                                                        \
+    (momentum_settings.spi_nrf24_handle == SpiDefault ? &furi_hal_spi_bus_handle_external : \
+                                                        &furi_hal_spi_bus_handle_external_extra)
 
 /* Low level API */
 

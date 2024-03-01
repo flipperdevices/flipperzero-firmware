@@ -3,6 +3,7 @@
 #include <gui/elements.h>
 
 typedef enum {
+    DictAttackStateStart,
     DictAttackStateRead,
     DictAttackStateCardRemoved,
 } DictAttackState;
@@ -29,7 +30,12 @@ typedef struct {
 
 static void dict_attack_draw_callback(Canvas* canvas, void* model) {
     DictAttackViewModel* m = model;
-    if(m->state == DictAttackStateCardRemoved) {
+    if(m->state == DictAttackStateStart) {
+        canvas_draw_icon(canvas, 0, 8, &I_RFIDDolphinReceive_97x61);
+        canvas_set_font(canvas, FontPrimary);
+        elements_multiline_text_aligned(
+            canvas, 128, 40, AlignRight, AlignCenter, "Apply card to\nthe back");
+    } else if(m->state == DictAttackStateCardRemoved) {
         canvas_set_font(canvas, FontPrimary);
         canvas_draw_str_aligned(canvas, 64, 4, AlignCenter, AlignTop, "Lost the tag!");
         canvas_set_font(canvas, FontSecondary);
@@ -47,7 +53,8 @@ static void dict_attack_draw_callback(Canvas* canvas, void* model) {
                 "Reuse key check for sector: %d",
                 m->key_attack_current_sector);
         } else {
-            snprintf(draw_str, sizeof(draw_str), "Unlocking sector: %d", m->sector_current);
+            snprintf(
+                draw_str, sizeof(draw_str), "Unlocking Application Area %d", m->sector_current + 1);
         }
         canvas_draw_str_aligned(canvas, 0, 10, AlignLeft, AlignTop, draw_str);
         float dict_progress = m->dict_keys_total == 0 ?
@@ -71,10 +78,14 @@ static void dict_attack_draw_callback(Canvas* canvas, void* model) {
         snprintf(draw_str, sizeof(draw_str), "Keys found: %d/%d", m->keys_found, m->keys_total);
         canvas_draw_str_aligned(canvas, 0, 33, AlignLeft, AlignTop, draw_str);
         snprintf(
-            draw_str, sizeof(draw_str), "Sectors Read: %d/%d", m->sectors_read, m->sectors_total);
+            draw_str,
+            sizeof(draw_str),
+            "Application Area Read: %d/%d",
+            m->sectors_read,
+            m->sectors_total);
         canvas_draw_str_aligned(canvas, 0, 43, AlignLeft, AlignTop, draw_str);
+        elements_button_center(canvas, "Skip");
     }
-    elements_button_center(canvas, "Skip");
 }
 
 static bool dict_attack_input_callback(InputEvent* event, void* context) {
@@ -121,7 +132,7 @@ void dict_attack_reset(DictAttack* dict_attack) {
         dict_attack->view,
         DictAttackViewModel * model,
         {
-            model->state = DictAttackStateRead;
+            model->state = DictAttackStateStart;
             model->sectors_total = 1;
             model->sectors_read = 0;
             model->sector_current = 0;
@@ -176,7 +187,12 @@ void dict_attack_set_card_removed(DictAttack* dict_attack) {
     with_view_model(
         dict_attack->view,
         DictAttackViewModel * model,
-        { model->state = DictAttackStateCardRemoved; },
+        {
+            // Only mark card as removed it if had been Read
+            if(model->state == DictAttackStateRead) {
+                model->state = DictAttackStateCardRemoved;
+            }
+        },
         true);
 }
 

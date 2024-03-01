@@ -28,7 +28,7 @@ void picopass_scene_save_name_on_enter(void* context) {
         picopass_scene_save_name_text_input_callback,
         picopass,
         picopass->text_store,
-        PICOPASS_DEV_NAME_MAX_LEN,
+        sizeof(picopass->text_store),
         dev_name_empty);
 
     FuriString* folder_path;

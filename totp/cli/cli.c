@@ -17,6 +17,7 @@
 #include "plugins/automation/meta.h"
 #include "plugins/details/meta.h"
 #include "plugins/version/meta.h"
+#include "plugins/export/meta.h"
 #include "cli_plugin_interface.h"
 #include "../app_api_interface.h"
 
@@ -137,6 +138,8 @@ static void totp_cli_handler(Cli* cli, FuriString* args, void* context) {
         external_plugin_name = TOTP_CLI_PLUGIN_DETAILS_FILE_NAME;
     } else if(furi_string_cmp_str(cmd, TOTP_CLI_COMMAND_VERSION) == 0) {
         external_plugin_name = TOTP_CLI_PLUGIN_VERSION_FILE_NAME;
+    } else if(furi_string_cmp_str(cmd, TOTP_CLI_COMMAND_EXPORT) == 0) {
+        external_plugin_name = TOTP_CLI_PLUGIN_EXPORT_FILE_NAME;
     } else {
         totp_cli_print_unknown_command(cmd);
     }

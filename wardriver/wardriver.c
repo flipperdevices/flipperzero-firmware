@@ -1,9 +1,11 @@
 #include "wardriver.h"
 #include "wardriver_uart.h"
 
+#include <expansion/expansion.h>
+
 void save_file(Context* ctx) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
-    FuriHalRtcDateTime datetime;
+    DateTime datetime;
     furi_hal_rtc_get_datetime(&datetime);
 
     FuriString* filename = furi_string_alloc();
@@ -46,7 +48,7 @@ void save_file(Context* ctx) {
         "WigleWifi-1.4",
         "appRelease=v2.0",
         "model=S33",
-        "release=XtremeFW",
+        "release=MomentumFW",
         "Flipper Zero",
         "",
         "Wardriver",
@@ -152,7 +154,7 @@ static void draw_access_point(Canvas* canvas, Context* context) {
         ap.datetime.hour,
         ap.datetime.minute,
         ap.datetime.second,
-        furi_hal_rtc_get_timestamp() - furi_hal_rtc_datetime_to_timestamp(&ap.datetime));
+        furi_hal_rtc_get_timestamp() - datetime_datetime_to_timestamp(&ap.datetime));
     canvas_draw_str_aligned(
         canvas, 3, 59, AlignLeft, AlignBottom, furi_string_get_cstr(ctx->buffer));
 }
@@ -173,7 +175,7 @@ static void render_callback(Canvas* canvas, void* context) {
             canvas_draw_str(canvas, 0, 10, "GPS channel invalid!");
             canvas_draw_str(canvas, 0, 20, "Change UART");
             canvas_draw_str(canvas, 0, 30, "channel");
-            canvas_draw_str(canvas, 0, 40, "in the Xtreme");
+            canvas_draw_str(canvas, 0, 40, "in the Momentum");
             canvas_draw_str(canvas, 0, 50, "app");
         } else {
             furi_string_printf(
@@ -203,7 +205,7 @@ static void render_callback(Canvas* canvas, void* context) {
 
         elements_button_left(canvas, "Back");
 
-        canvas_draw_icon(canvas, 71, 15, &I_DolphinCommon_56x48);
+        canvas_draw_icon(canvas, 82, 20, &I_WarningDolphinFlip_45x42);
         break;
     case NO_APS:
         canvas_draw_str(canvas, 80, 30, "No AP's");
@@ -226,6 +228,10 @@ static void render_callback(Canvas* canvas, void* context) {
 }
 
 int32_t wardriver_app() {
+    // Disable expansion protocol to avoid interference with UART Handle
+    Expansion* expansion = furi_record_open(RECORD_EXPANSION);
+    expansion_disable(expansion);
+
     // turn off 5v, so it gets reset on startup
     if(furi_hal_power_is_otg_enabled()) {
         furi_hal_power_disable_otg();
@@ -345,6 +351,10 @@ int32_t wardriver_app() {
     if(furi_hal_power_is_otg_enabled()) {
         furi_hal_power_disable_otg();
     }
+
+    // Return previous state of expansion
+    expansion_enable(expansion);
+    furi_record_close(RECORD_EXPANSION);
 
     return 0;
 }

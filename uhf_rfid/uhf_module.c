@@ -6,19 +6,22 @@
 
 volatile uint16_t tick = 0;
 
-void rx_callback(UartIrqEvent event, uint8_t data, void* ctx) {
+void rx_callback(FuriHalSerialHandle* handle, FuriHalSerialRxEvent event, void* ctx) {
     UNUSED(event);
     Buffer* buffer = ctx;
     if(buffer->closed) return; // buffer closed
-    buffer_append_single(buffer, data); // append data
-    if(data == FRAME_END) buffer_close(buffer); // end of frame
-    tick = WAIT_TICK; // reset tick
+    if(event == FuriHalSerialRxEventData) {
+        uint8_t data = furi_hal_serial_async_rx(handle);
+        buffer_append_single(buffer, data); // append data
+        if(data == FRAME_END) buffer_close(buffer); // end of frame
+        tick = WAIT_TICK; // reset tick
+    }
 }
 
 static M100ResponseType setup_and_send_rx(M100Module* module, uint8_t* cmd, size_t cmd_length) {
     buffer_reset(module->buf);
     tick = WAIT_TICK;
-    furi_hal_uart_tx(FuriHalUartIdUSART1, cmd, cmd_length);
+    furi_hal_serial_tx(module->serial_handle, cmd, cmd_length);
     while(--tick) {
         furi_delay_us(5);
     }
@@ -53,11 +56,16 @@ M100Module* m100_module_alloc() {
     module->baudrate = DEFAULT_BAUDRATE;
     module->transmitting_power = DEFAULT_TRANSMITTING_POWER;
     module->region = DEFAULT_WORKING_REGION;
-    furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, rx_callback, module->buf);
+    module->serial_handle = furi_hal_serial_control_acquire(FuriHalSerialIdUsart);
+    furi_check(module->serial_handle);
+    furi_hal_serial_init(module->serial_handle, module->baudrate);
+    furi_hal_serial_async_rx_start(module->serial_handle, rx_callback, module->buf, false);
     return module;
 }
 
 void m100_module_free(M100Module* module) {
+    furi_hal_serial_deinit(module->serial_handle);
+    furi_hal_serial_control_release(module->serial_handle);
     m100_module_info_free(module->info);
     buffer_free(module->buf);
     free(module);
@@ -195,9 +203,9 @@ M100ResponseType m100_set_select(M100Module* module, UHFTag* uhf_tag) {
 
 UHFTag* m100_get_select_param(M100Module* module) {
     buffer_reset(module->buf);
-    furi_hal_uart_set_irq_cb(FuriHalUartIdLPUART1, rx_callback, module->buf);
-    furi_hal_uart_tx(
-        FuriHalUartIdUSART1,
+    // furi_hal_uart_set_irq_cb(FuriHalUartIdLPUART1, rx_callback, module->buf);
+    furi_hal_serial_tx(
+        module->serial_handle,
         (uint8_t*)&CMD_GET_SELECT_PARAMETER.cmd,
         CMD_GET_SELECT_PARAMETER.length);
     furi_delay_ms(DELAY_MS);
@@ -318,8 +326,8 @@ M100ResponseType m100_write_label_data_storage(
     cmd[cmd_length - 2] = checksum(cmd + 1, cmd_length - 3);
     cmd[cmd_length - 1] = FRAME_END;
     // send cmd
-    // furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, rx_callback, module->buf);
-    // furi_hal_uart_tx(FuriHalUartIdUSART1, cmd, cmd_length);
+    // furi_hal_serial_async_rx_start(module->serial_handle, rx_callback, module->buf, false);
+    // furi_hal_serial_tx(module->serial_handle, cmd, cmd_length);
     // unsigned int delay = DELAY_MS / 2;
     // unsigned int timeout = 15;
     // while(!buffer_get_size(module->buf)) {
@@ -343,8 +351,8 @@ void m100_set_baudrate(M100Module* module, uint32_t baudrate) {
     cmd[6] = 0xFF & br_mod; // pow LSB
     cmd[5] = 0xFF & (br_mod >> 8); // pow MSB
     cmd[length - 2] = checksum(cmd + 1, length - 3);
-    furi_hal_uart_tx(FuriHalUartIdUSART1, cmd, length);
-    furi_hal_uart_set_br(FuriHalUartIdUSART1, baudrate);
+    furi_hal_serial_tx(module->serial_handle, cmd, length);
+    furi_hal_serial_set_br(module->serial_handle, baudrate);
     module->baudrate = baudrate;
 }
 

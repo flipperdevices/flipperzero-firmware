@@ -2,8 +2,8 @@
 
 #include <furi.h>
 #include <furi_hal.h>
-#include <furi_hal_console.h>
-#include <furi_hal_uart.h>
+#include <furi_hal_serial_control.h>
+#include <furi_hal_serial.h>
 #include <gui/elements.h>
 #include <gui/gui.h>
 #include <gui/icon_i.h>
@@ -17,10 +17,9 @@
 
 #include "../helpers/camera_suite_custom_event.h"
 
-#include <xtreme/xtreme.h>
+#include <momentum/momentum.h>
 
-#define UART_CH \
-    (xtreme_settings.uart_esp_channel == UARTDefault ? FuriHalUartIdUSART1 : FuriHalUartIdLPUART1)
+#define UART_CH (momentum_settings.uart_esp_channel)
 
 #define BITMAP_HEADER_LENGTH 62
 #define FRAME_BIT_DEPTH 1
@@ -38,22 +37,22 @@ static const unsigned char bitmap_header[BITMAP_HEADER_LENGTH] = {
     0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0x00};
 
-extern const Icon I_DolphinCommon_56x48;
 typedef enum {
     WorkerEventReserved = (1 << 0), // Reserved for StreamBuffer internal event
     WorkerEventStop = (1 << 1),
     WorkerEventRx = (1 << 2),
 } WorkerEventFlags;
 
-#define WORKER_EVENTS_MASK (WorkerEventStop | WorkerEventRx)
+#define CAMERA_WORKER_EVENTS_MASK (WorkerEventStop | WorkerEventRx)
 
 // Forward declaration
 typedef void (*CameraSuiteViewCameraCallback)(CameraSuiteCustomEvent event, void* context);
 
 typedef struct CameraSuiteViewCamera {
     CameraSuiteViewCameraCallback callback;
-    FuriStreamBuffer* rx_stream;
-    FuriThread* worker_thread;
+    FuriStreamBuffer* camera_rx_stream;
+    FuriHalSerialHandle* serial_handle;
+    FuriThread* camera_worker_thread;
     NotificationApp* notification;
     View* view;
     void* context;

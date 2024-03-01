@@ -16,6 +16,7 @@
 #include <gui/modules/loading.h>
 #include <gui/modules/text_input.h>
 #include <gui/modules/byte_input.h>
+#include <gui/modules/text_box.h>
 #include <gui/modules/widget.h>
 
 #include <input/input.h>
@@ -31,11 +32,11 @@
 #include <assets_icons.h>
 
 #include <nfc/nfc.h>
-#include <nfc/helpers/nfc_dict.h>
+#include <toolbox/keys_dict.h>
 #include "protocol/picopass_poller.h"
 #include "protocol/picopass_listener.h"
 
-#define PICOPASS_TEXT_STORE_SIZE 128
+#define PICOPASS_TEXT_STORE_SIZE 129
 
 #define PICOPASS_ICLASS_ELITE_DICT_FLIPPER_NAME APP_ASSETS_PATH("iclass_elite_dict.txt")
 #define PICOPASS_ICLASS_STANDARD_DICT_FLIPPER_NAME APP_ASSETS_PATH("iclass_standard_dict.txt")
@@ -53,6 +54,7 @@ enum PicopassCustomEvent {
     PicopassCustomEventDictAttackUpdateView,
     PicopassCustomEventLoclassGotMac,
     PicopassCustomEventLoclassGotStandardKey,
+    PicopassCustomEventNrMacSaved,
 
     PicopassCustomEventPollerSuccess,
     PicopassCustomEventPollerFail,
@@ -89,9 +91,10 @@ struct Picopass {
     Nfc* nfc;
     PicopassPoller* poller;
     PicopassListener* listener;
-    NfcDict* dict;
+    KeysDict* dict;
+    uint32_t last_error_notify_ticks;
 
-    char text_store[PICOPASS_TEXT_STORE_SIZE + 1];
+    char text_store[PICOPASS_TEXT_STORE_SIZE];
     FuriString* text_box_store;
     uint8_t byte_input_store[PICOPASS_BLOCK_LEN];
 
@@ -101,6 +104,7 @@ struct Picopass {
     Loading* loading;
     TextInput* text_input;
     ByteInput* byte_input;
+    TextBox* text_box;
     Widget* widget;
     DictAttack* dict_attack;
     Loclass* loclass;
@@ -116,6 +120,7 @@ typedef enum {
     PicopassViewLoading,
     PicopassViewTextInput,
     PicopassViewByteInput,
+    PicopassViewTextBox,
     PicopassViewWidget,
     PicopassViewDictAttack,
     PicopassViewLoclass,

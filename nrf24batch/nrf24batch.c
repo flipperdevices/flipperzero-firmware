@@ -117,7 +117,7 @@ uint8_t listen_addr[5];
 uint8_t listen_addr_len = 0;
 char* ListenFields = NULL; // ptr to string: field1,field2,... max 5 field now
 bool ListenNew;
-FuriHalRtcDateTime ListenLastTime = {0};
+DateTime ListenLastTime = {0};
 uint32_t ListenPrev = 0;
 uint32_t ListenLast = 0;
 FuriString** Read_cmd = NULL; // Names of read cmd
@@ -1039,7 +1039,7 @@ static void save_batch(void) {
     FURI_LOG_D(TAG, "Save Batch");
     char *p, *p2;
     stream_seek(file_stream, 0, StreamOffsetFromEnd);
-    FuriHalRtcDateTime dt;
+    DateTime dt;
     furi_hal_rtc_get_datetime(&dt);
     stream_write_format(file_stream, "\n%s ", SettingsFld_WriteBatch);
     p = (char*)furi_string_get_cstr(ReadBatch_cmd[view_cmd[rwt_read_batch]]);
@@ -1445,9 +1445,7 @@ void work_timer_callback(void* ctx) {
             for(uint8_t i = 0; i < 3; i++) {
                 if(nrf24_read_newpacket()) {
                     if(rw_type == rwt_listen) {
-                        ListenPrev = ListenLast;
-                        furi_hal_rtc_get_datetime(&ListenLastTime);
-                        ListenLast = furi_hal_rtc_datetime_to_timestamp(&ListenLastTime);
+                        ListenLast = furi_hal_rtc_get_timestamp();
                         ListenNew = true;
                     } else if(send_status != sst_receiving)
                         break;
@@ -1539,12 +1537,12 @@ int32_t nrf24batch_app(void* p) {
         FuriStatus event_status = furi_message_queue_get(event_queue, &event, 100);
         furi_mutex_acquire(APP->plugin_state->mutex, FuriWaitForever);
 
-        static FuriLogLevel FuriLogLevel = FuriLogLevelDefault;
-        if(furi_log_get_level() != FuriLogLevel) {
-            FuriLogLevel = furi_log_get_level();
-            if(FuriLogLevel == FuriLogLevelDebug)
-                furi_hal_uart_set_br(FuriHalUartIdUSART1, 1843200);
-        }
+        // static FuriLogLevel FuriLogLevel = FuriLogLevelDefault;
+        // if(furi_log_get_level() != FuriLogLevel) {
+        //     FuriLogLevel = furi_log_get_level();
+        //     if(FuriLogLevel == FuriLogLevelDebug)
+        //         furi_hal_uart_set_br(FuriHalUartIdUSART1, 1843200);
+        // }
         if(what_doing == 2 && rw_type == rwt_read_cmd && ReadRepeat &&
            furi_get_tick() - NRF_time > (uint32_t)(ReadCmdRepeatPeriod * 1000)) {
             ERR = 0;

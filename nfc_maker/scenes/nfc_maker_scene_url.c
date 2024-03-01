@@ -16,7 +16,7 @@ void nfc_maker_scene_url_on_enter(void* context) {
 
     text_input_set_header_text(text_input, "Enter Plain URL:");
 
-    strlcpy(app->big_buf, "https://flipper-xtre.me", BIG_INPUT_LEN);
+    strlcpy(app->big_buf, "https://momentum-fw.dev", BIG_INPUT_LEN);
 
     text_input_set_result_callback(
         text_input,
@@ -39,7 +39,7 @@ bool nfc_maker_scene_url_on_event(void* context, SceneManagerEvent event) {
         consumed = true;
         switch(event.event) {
         case TextInputResultOk:
-            scene_manager_next_scene(app->scene_manager, NfcMakerSceneSave);
+            scene_manager_next_scene(app->scene_manager, NfcMakerSceneSaveGenerate);
             break;
         default:
             break;

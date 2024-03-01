@@ -3,6 +3,7 @@
 
 // Hacked together by @Willy-JL and @Spooks4576
 // Documentation at https://developers.google.com/nearby/fast-pair/specifications/introduction
+// https://bluetoothdb.com
 
 static const struct {
     uint32_t value;
@@ -531,6 +532,7 @@ static const struct {
     {0xCB2FE7, "soundcore Motion X500"},
 
     // Custom debug popups
+    {0x73A6F2, "Momentum Firmware"},
     {0xD99CA1, "Flipper Zero"},
     {0x77FF67, "Free Robux"},
     {0xAA187F, "Free VBucks"},
@@ -538,8 +540,6 @@ static const struct {
     {0x87B25F, "Animated Rickroll"},
     {0xF38C02, "Boykisser"},
     {0x1448C9, "BLM"},
-    {0xD5AB33, "Xtreme"},
-    {0x0C0B67, "Xtreme Cta"},
     {0x13B39D, "Talking Sasquach"},
     {0xAA1FE1, "ClownMaster"},
     {0x7C6CDB, "Obama"},
@@ -746,7 +746,6 @@ void scene_fastpair_model_on_enter(void* _ctx) {
     FastpairCfg* cfg = &payload->cfg.fastpair;
     Submenu* submenu = ctx->submenu;
     uint32_t selected = 0;
-    submenu_reset(submenu);
 
     submenu_add_item(submenu, "Random", 0, model_callback, ctx);
     if(payload->mode == PayloadModeRandom) {
@@ -781,7 +780,8 @@ bool scene_fastpair_model_on_event(void* _ctx, SceneManagerEvent event) {
     return false;
 }
 void scene_fastpair_model_on_exit(void* _ctx) {
-    UNUSED(_ctx);
+    Ctx* ctx = _ctx;
+    submenu_reset(ctx->submenu);
 }
 
 static void model_custom_callback(void* _ctx) {

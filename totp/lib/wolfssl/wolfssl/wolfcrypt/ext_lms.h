@@ -48,8 +48,8 @@ typedef struct hss_extra_info  hss_extra_info;
 
 struct LmsKey {
     unsigned             levels;                      /* Number of tree levels. */
-    param_set_t          lm_type[MAX_HSS_LEVELS];     /* Height parm per level. */
-    param_set_t          lm_ots_type[MAX_HSS_LEVELS]; /* Winternitz parm per level. */
+    param_set_t          lm_type[MAX_HSS_LEVELS];     /* Height param per level. */
+    param_set_t          lm_ots_type[MAX_HSS_LEVELS]; /* Winternitz param per level. */
     unsigned char        pub[HSS_MAX_PUBLIC_KEY_LEN];
 #ifndef WOLFSSL_LMS_VERIFY_ONLY
     hss_working_key *    working_key;

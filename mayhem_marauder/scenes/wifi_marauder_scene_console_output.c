@@ -122,15 +122,11 @@ void wifi_marauder_scene_console_output_on_enter(void* context) {
                 app->log_file_path,
                 sequential_file_resolve_path(
                     app->storage, MARAUDER_APP_FOLDER_LOGS, prefix, "log"));
-            if(app->log_file_path != NULL) {
-                if(storage_file_open(
-                       app->log_file, app->log_file_path, FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
-                    app->is_writing_log = true;
-                } else {
-                    dialog_message_show_storage_error(app->dialogs, "Cannot open log file");
-                }
+            if(storage_file_open(
+                   app->log_file, app->log_file_path, FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
+                app->is_writing_log = true;
             } else {
-                dialog_message_show_storage_error(app->dialogs, "Cannot resolve log path");
+                dialog_message_show_storage_error(app->dialogs, "Cannot open log file");
             }
         }
 
@@ -144,16 +140,32 @@ void wifi_marauder_scene_console_output_on_enter(void* context) {
             }
         }
 
+        bool send_html = false;
+        uint8_t* the_html = NULL;
+        size_t html_size = 0;
+        if(app->selected_tx_string && strncmp(
+                                          "evilportal -c sethtmlstr",
+                                          app->selected_tx_string,
+                                          strlen("evilportal -c sethtmlstr")) == 0) {
+            send_html = wifi_marauder_ep_read_html_file(app, &the_html, &html_size);
+        }
+
         // Send command with newline '\n'
         if(app->selected_tx_string) {
             wifi_marauder_uart_tx(
-                (uint8_t*)(app->selected_tx_string), strlen(app->selected_tx_string));
-            wifi_marauder_uart_tx((uint8_t*)("\n"), 1);
+                app->uart, (uint8_t*)(app->selected_tx_string), strlen(app->selected_tx_string));
+            wifi_marauder_uart_tx(app->uart, (uint8_t*)("\n"), 1);
+            if(send_html && the_html) {
+                wifi_marauder_uart_tx(app->uart, the_html, html_size);
+                wifi_marauder_uart_tx(app->uart, (uint8_t*)("\n"), 1);
+                free(the_html);
+                send_html = false;
+            }
         }
 
         // Run the script if the file with the script has been opened
         if(app->script != NULL) {
-            app->script_worker = wifi_marauder_script_worker_alloc();
+            app->script_worker = wifi_marauder_script_worker_alloc(app->uart);
             wifi_marauder_script_worker_start(app->script_worker, app->script);
         }
     }
@@ -179,7 +191,7 @@ void wifi_marauder_scene_console_output_on_exit(void* context) {
 
     // Automatically stop the scan when exiting view
     if(app->is_command) {
-        wifi_marauder_uart_tx((uint8_t*)("stopscan\n"), strlen("stopscan\n"));
+        wifi_marauder_uart_tx(app->uart, (uint8_t*)("stopscan\n"), strlen("stopscan\n"));
         furi_delay_ms(50);
     }
 

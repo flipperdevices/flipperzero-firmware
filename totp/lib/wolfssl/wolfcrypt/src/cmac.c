@@ -137,6 +137,8 @@ int wc_InitCmac_ex(Cmac* cmac, const byte* key, word32 keySz,
         return BAD_FUNC_ARG;
     }
 
+    ret = wc_AesInit(&cmac->aes, heap, devId);
+
 #if defined(WOLFSSL_SE050) && defined(WOLFSSL_SE050_CRYPT)
     cmac->useSWCrypt = useSW;
     if (cmac->useSWCrypt == 1) {
@@ -144,7 +146,10 @@ int wc_InitCmac_ex(Cmac* cmac, const byte* key, word32 keySz,
     }
 #endif
 
-    ret = wc_AesSetKey(&cmac->aes, key, keySz, NULL, AES_ENCRYPTION);
+    if (ret == 0) {
+        ret = wc_AesSetKey(&cmac->aes, key, keySz, NULL, AES_ENCRYPTION);
+    }
+
     if (ret == 0) {
         byte l[AES_BLOCK_SIZE];
 
@@ -218,8 +223,24 @@ int wc_CmacUpdate(Cmac* cmac, const byte* in, word32 inSz)
     return ret;
 }
 
+int wc_CmacFree(Cmac* cmac)
+{
+    if (cmac == NULL)
+        return BAD_FUNC_ARG;
+#if defined(WOLFSSL_HASH_KEEP)
+    /* TODO: msg is leaked if wc_CmacFinal() is not called
+     * e.g. when multiple calls to wc_CmacUpdate() and one fails but
+     * wc_CmacFinal() not called. */
+    if (cmac->msg != NULL) {
+        XFREE(cmac->msg, cmac->heap, DYNAMIC_TYPE_TMP_BUFFER);
+    }
+#endif
+    wc_AesFree(&cmac->aes);
+    ForceZero(cmac, sizeof(Cmac));
+    return 0;
+}
 
-int wc_CmacFinal(Cmac* cmac, byte* out, word32* outSz)
+int wc_CmacFinalNoFree(Cmac* cmac, byte* out, word32* outSz)
 {
     int ret;
     const byte* subKey;
@@ -271,21 +292,18 @@ int wc_CmacFinal(Cmac* cmac, byte* out, word32* outSz)
         XMEMCPY(out, cmac->digest, *outSz);
     }
 
-#if defined(WOLFSSL_HASH_KEEP)
-    /* TODO: msg is leaked if wc_CmacFinal() is not called
-     * e.g. when multiple calls to wc_CmacUpdate() and one fails but
-     * wc_CmacFinal() not called. */
-    if (cmac->msg != NULL) {
-        XFREE(cmac->msg, cmac->heap, DYNAMIC_TYPE_TMP_BUFFER);
-        cmac->msg = NULL;
-    }
-#endif
-    wc_AesFree(&cmac->aes);
-    ForceZero(cmac, sizeof(Cmac));
-
-    return ret;
+    return 0;
 }
 
+int wc_CmacFinal(Cmac* cmac, byte* out, word32* outSz) {
+    int ret;
+
+    if (cmac == NULL)
+        return BAD_FUNC_ARG;
+    ret = wc_CmacFinalNoFree(cmac, out, outSz);
+    (void)wc_CmacFree(cmac);
+    return ret;
+}
 
 int wc_AesCmacGenerate(byte* out, word32* outSz,
                        const byte* in, word32 inSz,

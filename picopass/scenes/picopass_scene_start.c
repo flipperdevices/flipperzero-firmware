@@ -1,7 +1,6 @@
 #include "../picopass_i.h"
 enum SubmenuIndex {
     SubmenuIndexRead,
-    SubmenuIndexEliteDictAttack,
     SubmenuIndexSaved,
     SubmenuIndexLoclass,
 };
@@ -16,12 +15,6 @@ void picopass_scene_start_on_enter(void* context) {
     Submenu* submenu = picopass->submenu;
     submenu_add_item(
         submenu, "Read Card", SubmenuIndexRead, picopass_scene_start_submenu_callback, picopass);
-    submenu_add_item(
-        submenu,
-        "Elite Dict. Attack",
-        SubmenuIndexEliteDictAttack,
-        picopass_scene_start_submenu_callback,
-        picopass);
     submenu_add_item(
         submenu, "Saved", SubmenuIndexSaved, picopass_scene_start_submenu_callback, picopass);
 
@@ -42,7 +35,7 @@ bool picopass_scene_start_on_event(void* context, SceneManagerEvent event) {
         if(event.event == SubmenuIndexRead) {
             scene_manager_set_scene_state(
                 picopass->scene_manager, PicopassSceneStart, SubmenuIndexRead);
-            scene_manager_next_scene(picopass->scene_manager, PicopassSceneReadCard);
+            scene_manager_next_scene(picopass->scene_manager, PicopassSceneEliteDictAttack);
             consumed = true;
         } else if(event.event == SubmenuIndexSaved) {
             // Explicitly save state so that the correct item is
@@ -50,11 +43,6 @@ bool picopass_scene_start_on_event(void* context, SceneManagerEvent event) {
             scene_manager_set_scene_state(
                 picopass->scene_manager, PicopassSceneStart, SubmenuIndexSaved);
             scene_manager_next_scene(picopass->scene_manager, PicopassSceneFileSelect);
-            consumed = true;
-        } else if(event.event == SubmenuIndexEliteDictAttack) {
-            scene_manager_set_scene_state(
-                picopass->scene_manager, PicopassSceneStart, SubmenuIndexEliteDictAttack);
-            scene_manager_next_scene(picopass->scene_manager, PicopassSceneEliteDictAttack);
             consumed = true;
         } else if(event.event == SubmenuIndexLoclass) {
             scene_manager_set_scene_state(

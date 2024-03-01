@@ -9,7 +9,7 @@ void fuzzer_scene_save_success_on_enter(void* context) {
     PacsFuzzerApp* app = context;
     Popup* popup = app->popup;
 
-    popup_set_icon(popup, 32, 5, &I_DolphinNice_96x59);
+    popup_set_icon(popup, 36, 5, &I_DolphinDone_80x58);
     popup_set_header(popup, "Saved!", 5, 7, AlignLeft, AlignTop);
     popup_set_context(popup, app);
     popup_set_callback(popup, fuzzer_scene_save_popup_timeout_callback);

@@ -1,4 +1,5 @@
 #include "ifttt_virtual_button.h"
+#include <expansion/expansion.h>
 
 #define IFTTT_FOLDER "/ext/apps_data/ifttt"
 #define IFTTT_CONFIG_FOLDER "/ext/apps_data/ifttt/config"
@@ -91,7 +92,10 @@ Settings* load_settings() {
     return settings;
 }
 
-void send_serial_command_config(ESerialCommand command, Settings* settings) {
+void send_serial_command_config(
+    FuriHalSerialHandle* serial_handle,
+    ESerialCommand command,
+    Settings* settings) {
     uint8_t data[1] = {0};
 
     char config_tmp[100];
@@ -126,7 +130,7 @@ void send_serial_command_config(ESerialCommand command, Settings* settings) {
             return;
         }
 
-        furi_hal_uart_tx(FuriHalUartIdUSART1, data, 1);
+        furi_hal_serial_tx(serial_handle, data, 1);
     }
 }
 
@@ -155,6 +159,10 @@ VirtualButtonApp* ifttt_virtual_button_app_alloc(uint32_t first_scene) {
     app->gui = furi_record_open(RECORD_GUI);
     app->power = furi_record_open(RECORD_POWER);
 
+    app->serial_handle = furi_hal_serial_control_acquire(FuriHalSerialIdUsart);
+    furi_check(app->serial_handle);
+    furi_hal_serial_init(app->serial_handle, FLIPPERZERO_SERIAL_BAUD);
+
     // View dispatcher
     app->view_dispatcher = view_dispatcher_alloc();
     app->scene_manager = scene_manager_alloc(&virtual_button_scene_handlers, app);
@@ -169,7 +177,7 @@ VirtualButtonApp* ifttt_virtual_button_app_alloc(uint32_t first_scene) {
     view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
 
     // Views
-    app->sen_view = send_view_alloc();
+    app->sen_view = send_view_alloc(app->serial_handle);
     view_dispatcher_add_view(
         app->view_dispatcher, VirtualButtonAppViewSendView, send_view_get_view(app->sen_view));
 
@@ -212,11 +220,18 @@ void ifttt_virtual_button_app_free(VirtualButtonApp* app) {
     furi_record_close(RECORD_POWER);
     furi_record_close(RECORD_GUI);
 
+    furi_hal_serial_deinit(app->serial_handle);
+    furi_hal_serial_control_release(app->serial_handle);
+
     free(app);
 }
 
 int32_t ifttt_virtual_button_app(void* p) {
     UNUSED(p);
+
+    // Disable expansion protocol to avoid interference with UART Handle
+    Expansion* expansion = furi_record_open(RECORD_EXPANSION);
+    expansion_disable(expansion);
 
     Storage* storage = furi_record_open(RECORD_STORAGE);
     if(!storage_simply_mkdir(storage, IFTTT_FOLDER)) {
@@ -228,9 +243,14 @@ int32_t ifttt_virtual_button_app(void* p) {
     uint32_t first_scene = VirtualButtonAppSceneStart;
     VirtualButtonApp* app = ifttt_virtual_button_app_alloc(first_scene);
     memcpy(&app->settings, load_settings(), sizeof(Settings));
-    send_serial_command_config(ESerialCommand_Config, &(app->settings));
+    send_serial_command_config(app->serial_handle, ESerialCommand_Config, &(app->settings));
 
     view_dispatcher_run(app->view_dispatcher);
     ifttt_virtual_button_app_free(app);
+
+    // Return previous state of expansion
+    expansion_enable(expansion);
+    furi_record_close(RECORD_EXPANSION);
+
     return 0;
 }

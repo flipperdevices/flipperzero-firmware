@@ -1127,6 +1127,7 @@ static int wc_HpkeContextOpenBase(Hpke* hpke, HpkeBaseContext* context,
         return BAD_FUNC_ARG;
     }
 
+    XMEMSET(nonce, 0, sizeof(nonce));
 #ifdef WOLFSSL_SMALL_STACK
     aes_key = (Aes*)XMALLOC(sizeof(Aes), hpke->heap, DYNAMIC_TYPE_AES);
     if (aes_key == NULL) {

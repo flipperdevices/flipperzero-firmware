@@ -32,6 +32,9 @@ bool picopass_scene_emulate_on_event(void* context, SceneManagerEvent event) {
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == PicopassCustomEventWorkerExit) {
             consumed = true;
+        } else if(event.event == PicopassCustomEventNrMacSaved) {
+            scene_manager_next_scene(picopass->scene_manager, PicopassSceneNrMacSaved);
+            consumed = true;
         }
     } else if(event.type == SceneManagerEventTypeBack) {
         consumed = scene_manager_previous_scene(picopass->scene_manager);

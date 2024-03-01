@@ -305,7 +305,7 @@ static void extra_config(Ctx* ctx) {
         variable_item_set_current_value_index(item, value_index);
         variable_item_set_current_value_text(item, model_name);
 
-        variable_item_list_add(list, "Works on Android 13 and up", 0, NULL, NULL);
+        variable_item_list_add(list, "Works on Android 13 only", 0, NULL, NULL);
         break;
     }
     case EasysetupTypeWatch: {
@@ -398,7 +398,6 @@ void scene_easysetup_buds_model_on_enter(void* _ctx) {
     EasysetupCfg* cfg = &payload->cfg.easysetup;
     Submenu* submenu = ctx->submenu;
     uint32_t selected = 0;
-    submenu_reset(submenu);
 
     submenu_add_item(submenu, "Random", 0, buds_model_callback, ctx);
     if(payload->mode == PayloadModeRandom) {
@@ -434,7 +433,8 @@ bool scene_easysetup_buds_model_on_event(void* _ctx, SceneManagerEvent event) {
     return false;
 }
 void scene_easysetup_buds_model_on_exit(void* _ctx) {
-    UNUSED(_ctx);
+    Ctx* ctx = _ctx;
+    submenu_reset(ctx->submenu);
 }
 
 static void buds_model_custom_callback(void* _ctx) {
@@ -505,7 +505,6 @@ void scene_easysetup_watch_model_on_enter(void* _ctx) {
     EasysetupCfg* cfg = &payload->cfg.easysetup;
     Submenu* submenu = ctx->submenu;
     uint32_t selected = 0;
-    submenu_reset(submenu);
 
     submenu_add_item(submenu, "Random", 0, watch_model_callback, ctx);
     if(payload->mode == PayloadModeRandom) {
@@ -541,7 +540,8 @@ bool scene_easysetup_watch_model_on_event(void* _ctx, SceneManagerEvent event) {
     return false;
 }
 void scene_easysetup_watch_model_on_exit(void* _ctx) {
-    UNUSED(_ctx);
+    Ctx* ctx = _ctx;
+    submenu_reset(ctx->submenu);
 }
 
 static void watch_model_custom_callback(void* _ctx) {

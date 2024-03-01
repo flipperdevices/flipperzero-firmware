@@ -59,15 +59,100 @@ static void camera_suite_view_camera_draw(Canvas* canvas, void* model) {
         }
     }
 
-    // Draw the guide if the camera is not initialized.
+    // Draw the pinout guide if the camera is not initialized.
     if(!uartDumpModel->is_initialized) {
-        canvas_draw_icon(canvas, 74, 16, &I_DolphinCommon_56x48);
+        // Clear the screen.
+        canvas_clear(canvas);
+
+        // Draw the ESP32-CAM module.
         canvas_set_font(canvas, FontSecondary);
-        canvas_draw_str(canvas, 8, 12, "Connect the ESP32-CAM");
-        canvas_draw_str(canvas, 20, 24, "VCC - 3V3");
-        canvas_draw_str(canvas, 20, 34, "GND - GND");
-        canvas_draw_str(canvas, 20, 44, "U0R - TX");
-        canvas_draw_str(canvas, 20, 54, "U0T - RX");
+        canvas_draw_str(canvas, 47, 50, "ESP32");
+        canvas_set_font(canvas, FontSecondary);
+        canvas_draw_str(canvas, 52, 58, "CAM");
+        canvas_draw_dot(canvas, 84, 3);
+        canvas_draw_box(canvas, 50, 35, 23, 7);
+        canvas_draw_circle(canvas, 42, 12, 1);
+        canvas_draw_circle(canvas, 42, 16, 1);
+        canvas_draw_circle(canvas, 42, 20, 1);
+        canvas_draw_circle(canvas, 42, 24, 1);
+        canvas_draw_circle(canvas, 42, 28, 1);
+        canvas_draw_circle(canvas, 42, 32, 1);
+        canvas_draw_circle(canvas, 42, 36, 1);
+        canvas_draw_circle(canvas, 42, 8, 1);
+        canvas_draw_circle(canvas, 59, 15, 1);
+        canvas_draw_circle(canvas, 61, 17, 5);
+        canvas_draw_circle(canvas, 61, 17, 9);
+        canvas_draw_circle(canvas, 80, 12, 1);
+        canvas_draw_circle(canvas, 80, 16, 1);
+        canvas_draw_circle(canvas, 80, 20, 1);
+        canvas_draw_circle(canvas, 80, 24, 1);
+        canvas_draw_circle(canvas, 80, 28, 1);
+        canvas_draw_circle(canvas, 80, 32, 1);
+        canvas_draw_circle(canvas, 80, 36, 1);
+        canvas_draw_circle(canvas, 80, 42, 1);
+        canvas_draw_circle(canvas, 80, 8, 1);
+        canvas_draw_line(canvas, 38, 4, 38, 58);
+        canvas_draw_line(canvas, 39, 3, 83, 3);
+        canvas_draw_line(canvas, 40, 2, 84, 2);
+        canvas_draw_line(canvas, 48, 4, 74, 4);
+        canvas_draw_line(canvas, 48, 5, 48, 26);
+        canvas_draw_line(canvas, 55, 27, 49, 27);
+        canvas_draw_line(canvas, 56, 25, 56, 36);
+        canvas_draw_line(canvas, 64, 21, 63, 21);
+        canvas_draw_line(canvas, 65, 15, 65, 17);
+        canvas_draw_line(canvas, 66, 15, 64, 18);
+        canvas_draw_line(canvas, 66, 16, 64, 19);
+        canvas_draw_line(canvas, 66, 18, 60, 21);
+        canvas_draw_line(canvas, 66, 19, 61, 21);
+        canvas_draw_line(canvas, 66, 25, 66, 36);
+        canvas_draw_line(canvas, 73, 27, 67, 27);
+        canvas_draw_line(canvas, 74, 5, 74, 26);
+        canvas_draw_line(canvas, 75, 4, 75, 25);
+        canvas_draw_line(canvas, 83, 59, 39, 59);
+        canvas_draw_line(canvas, 84, 4, 84, 58);
+        canvas_draw_line(canvas, 85, 2, 85, 57);
+        canvas_draw_frame(canvas, 78, 40, 5, 5);
+
+        // Draw the pinout lines.
+        canvas_draw_line(canvas, 39, 8, 21, 8);
+        canvas_draw_line(canvas, 87, 24, 83, 24);
+        canvas_draw_line(canvas, 87, 32, 83, 32);
+        canvas_draw_line(canvas, 88, 23, 88, 13);
+        canvas_draw_line(canvas, 88, 33, 88, 43);
+        canvas_draw_line(canvas, 89, 12, 126, 12);
+        canvas_draw_line(canvas, 126, 28, 83, 28);
+        canvas_draw_line(canvas, 126, 44, 89, 44);
+
+        // Draw the pinout labels.
+        canvas_set_font(canvas, FontSecondary);
+        canvas_draw_str(canvas, 91, 11, "VCC-3V");
+        canvas_set_font(canvas, FontSecondary);
+        canvas_draw_str(canvas, 91, 27, "U0R-TX");
+        canvas_set_font(canvas, FontSecondary);
+        canvas_draw_str(canvas, 91, 43, "U0T-RX");
+        canvas_set_font(canvas, FontSecondary);
+        canvas_draw_str(canvas, 2, 12, "GND");
+        canvas_set_font(canvas, FontSecondary);
+        canvas_draw_str(canvas, 12, 21, "-GND");
+
+        // Draw the "Please Connect Module!" text.
+        canvas_set_font(canvas, FontSecondary);
+        canvas_draw_str(canvas, 2, 40, "Please");
+        canvas_set_font(canvas, FontSecondary);
+        canvas_draw_str(canvas, 2, 49, "Connect");
+        canvas_set_font(canvas, FontSecondary);
+        canvas_draw_str(canvas, 2, 58, "Module!");
+
+        // Draw the "Back" text and button logo.
+        canvas_set_font(canvas, FontSecondary);
+        canvas_draw_str(canvas, 92, 57, "Back");
+        canvas_draw_line(canvas, 116, 49, 116, 53);
+        canvas_draw_line(canvas, 115, 50, 115, 52);
+        canvas_draw_dot(canvas, 114, 51);
+        canvas_draw_line(canvas, 117, 51, 121, 51);
+        canvas_draw_line(canvas, 122, 52, 123, 53);
+        canvas_draw_line(canvas, 123, 54, 122, 55);
+        canvas_draw_line(canvas, 121, 56, 117, 56);
     }
 }
 
@@ -94,7 +179,7 @@ static void save_image_to_flipper_sd_card(void* model) {
     FuriString* file_name = furi_string_alloc();
 
     // Get the current date and time.
-    FuriHalRtcDateTime datetime = {0};
+    DateTime datetime = {0};
     furi_hal_rtc_get_datetime(&datetime);
 
     // Create the file name.
@@ -196,7 +281,7 @@ static bool camera_suite_view_camera_input(InputEvent* event, void* context) {
                     UNUSED(model);
 
                     // Stop camera stream.
-                    furi_hal_uart_tx(UART_CH, (uint8_t[]){'s'}, 1);
+                    furi_hal_serial_tx(instance->serial_handle, (uint8_t[]){'s'}, 1);
                     furi_delay_ms(50);
 
                     // Go back to the main menu.
@@ -217,13 +302,13 @@ static bool camera_suite_view_camera_input(InputEvent* event, void* context) {
 
                     if(model->is_inverted) {
                         // Camera: Set invert to false on the ESP32-CAM.
-                        furi_hal_uart_tx(UART_CH, (uint8_t[]){'i'}, 1);
+                        furi_hal_serial_tx(instance->serial_handle, (uint8_t[]){'i'}, 1);
                         furi_delay_ms(50);
 
                         model->is_inverted = false;
                     } else {
                         // Camera: Set invert to true on the ESP32-CAM.
-                        furi_hal_uart_tx(UART_CH, (uint8_t[]){'I'}, 1);
+                        furi_hal_serial_tx(instance->serial_handle, (uint8_t[]){'I'}, 1);
                         furi_delay_ms(50);
 
                         model->is_inverted = true;
@@ -246,13 +331,13 @@ static bool camera_suite_view_camera_input(InputEvent* event, void* context) {
 
                     if(model->is_dithering_enabled) {
                         // Camera: Disable dithering.
-                        furi_hal_uart_tx(UART_CH, (uint8_t[]){'d'}, 1);
+                        furi_hal_serial_tx(instance->serial_handle, (uint8_t[]){'d'}, 1);
                         furi_delay_ms(50);
 
                         model->is_dithering_enabled = false;
                     } else {
                         // Camera: Enable dithering.
-                        furi_hal_uart_tx(UART_CH, (uint8_t[]){'D'}, 1);
+                        furi_hal_serial_tx(instance->serial_handle, (uint8_t[]){'D'}, 1);
                         furi_delay_ms(50);
 
                         model->is_dithering_enabled = true;
@@ -276,7 +361,7 @@ static bool camera_suite_view_camera_input(InputEvent* event, void* context) {
                     camera_suite_led_set_rgb(instance->context, 0, 0, 255);
 
                     // Camera: Increase contrast.
-                    furi_hal_uart_tx(UART_CH, (uint8_t[]){'C'}, 1);
+                    furi_hal_serial_tx(instance->serial_handle, (uint8_t[]){'C'}, 1);
                     furi_delay_ms(50);
 
                     instance->callback(CameraSuiteCustomEventSceneCameraUp, instance->context);
@@ -297,7 +382,7 @@ static bool camera_suite_view_camera_input(InputEvent* event, void* context) {
                     camera_suite_led_set_rgb(instance->context, 0, 0, 255);
 
                     // Camera: Reduce contrast.
-                    furi_hal_uart_tx(UART_CH, (uint8_t[]){'c'}, 1);
+                    furi_hal_serial_tx(instance->serial_handle, (uint8_t[]){'c'}, 1);
                     furi_delay_ms(50);
 
                     instance->callback(CameraSuiteCustomEventSceneCameraDown, instance->context);
@@ -316,7 +401,7 @@ static bool camera_suite_view_camera_input(InputEvent* event, void* context) {
                     camera_suite_led_set_rgb(instance->context, 0, 0, 255);
 
                     // @todo - Save picture directly to ESP32-CAM.
-                    // furi_hal_uart_tx(UART_CH, (uint8_t[]){'P'}, 1);
+                    // furi_hal_serial_tx(instance->serial_handle, (uint8_t[]){'P'}, 1);
 
                     // Save currently displayed image to the Flipper Zero SD card.
                     save_image_to_flipper_sd_card(model);
@@ -332,6 +417,7 @@ static bool camera_suite_view_camera_input(InputEvent* event, void* context) {
         }
         }
     }
+
     return false;
 }
 
@@ -349,22 +435,22 @@ static void camera_suite_view_camera_enter(void* context) {
     CameraSuite* instance_context = instance->context;
 
     // Start camera stream.
-    furi_hal_uart_tx(UART_CH, (uint8_t[]){'S'}, 1);
+    furi_hal_serial_tx(instance->serial_handle, (uint8_t[]){'S'}, 1);
     furi_delay_ms(50);
 
     // Get/set dither type.
     uint8_t dither_type = instance_context->dither;
-    furi_hal_uart_tx(UART_CH, &dither_type, 1);
+    furi_hal_serial_tx(instance->serial_handle, &dither_type, 1);
     furi_delay_ms(50);
 
     // Make sure the camera is not inverted.
-    furi_hal_uart_tx(UART_CH, (uint8_t[]){'i'}, 1);
+    furi_hal_serial_tx(instance->serial_handle, (uint8_t[]){'i'}, 1);
     furi_delay_ms(50);
 
     // Toggle flash on or off based on the current state. If the user has this
     // on the flash will stay on the entire time the user is in the camera view.
     uint8_t flash_state = instance_context->flash ? 'F' : 'f';
-    furi_hal_uart_tx(UART_CH, &flash_state, 1);
+    furi_hal_serial_tx(instance->serial_handle, &flash_state, 1);
     furi_delay_ms(50);
 
     with_view_model(
@@ -374,19 +460,20 @@ static void camera_suite_view_camera_enter(void* context) {
         true);
 }
 
-static void camera_on_irq_cb(UartIrqEvent uartIrqEvent, uint8_t data, void* context) {
-    furi_assert(uartIrqEvent);
-    furi_assert(data);
+static void
+    camera_on_irq_cb(FuriHalSerialHandle* handle, FuriHalSerialRxEvent event, void* context) {
+    furi_assert(handle);
     furi_assert(context);
 
     // Cast `context` to `CameraSuiteViewCamera*` and store it in `instance`.
     CameraSuiteViewCamera* instance = context;
 
     // If `uartIrqEvent` is `UartIrqEventRXNE`, send the data to the
-    // `rx_stream` and set the `WorkerEventRx` flag.
-    if(uartIrqEvent == UartIrqEventRXNE) {
-        furi_stream_buffer_send(instance->rx_stream, &data, 1, 0);
-        furi_thread_flags_set(furi_thread_get_id(instance->worker_thread), WorkerEventRx);
+    // `camera_rx_stream` and set the `WorkerEventRx` flag.
+    if(event == FuriHalSerialRxEventData) {
+        uint8_t data = furi_hal_serial_async_rx(handle);
+        furi_stream_buffer_send(instance->camera_rx_stream, &data, 1, 0);
+        furi_thread_flags_set(furi_thread_get_id(instance->camera_worker_thread), WorkerEventRx);
     }
 }
 
@@ -438,31 +525,39 @@ static void process_ringbuffer(UartDumpModel* model, uint8_t const byte) {
     }
 }
 
-static int32_t camera_worker(void* context) {
+static int32_t camera_suite_camera_worker(void* context) {
     furi_assert(context);
 
     CameraSuiteViewCamera* instance = context;
 
     while(1) {
+        // Wait for any event on the worker thread.
         uint32_t events =
-            furi_thread_flags_wait(WORKER_EVENTS_MASK, FuriFlagWaitAny, FuriWaitForever);
+            furi_thread_flags_wait(CAMERA_WORKER_EVENTS_MASK, FuriFlagWaitAny, FuriWaitForever);
+
+        // Check if an error occurred.
         furi_check((events & FuriFlagError) == 0);
 
+        // Check if the thread should stop.
         if(events & WorkerEventStop) {
             break;
         } else if(events & WorkerEventRx) {
             size_t length = 0;
+            // Read all available data from the stream buffer.
             do {
-                size_t intended_data_size = 64;
-                uint8_t data[intended_data_size];
+                // Read up to 64 bytes from the stream buffer.
+                size_t buffer_size = 64;
+                // Allocate a buffer for the data.
+                uint8_t data[buffer_size];
+                // Read the data from the stream buffer.
                 length =
-                    furi_stream_buffer_receive(instance->rx_stream, data, intended_data_size, 0);
-
+                    furi_stream_buffer_receive(instance->camera_rx_stream, data, buffer_size, 0);
                 if(length > 0) {
                     with_view_model(
                         instance->view,
                         UartDumpModel * model,
                         {
+                            // Process the data.
                             for(size_t i = 0; i < length; i++) {
                                 process_ringbuffer(model, data[i]);
                             }
@@ -487,7 +582,7 @@ CameraSuiteViewCamera* camera_suite_view_camera_alloc() {
     instance->view = view_alloc();
 
     // Allocate a stream buffer
-    instance->rx_stream = furi_stream_buffer_alloc(2048, 1);
+    instance->camera_rx_stream = furi_stream_buffer_alloc(2048, 1);
 
     // Allocate model
     view_allocate_model(instance->view, ViewModelTypeLocking, sizeof(UartDumpModel));
@@ -508,22 +603,18 @@ CameraSuiteViewCamera* camera_suite_view_camera_alloc() {
     view_set_exit_callback(instance->view, camera_suite_view_camera_exit);
 
     // Allocate a thread for this camera to run on.
-    FuriThread* thread = furi_thread_alloc_ex("UsbUartWorker", 2048, camera_worker, instance);
-    instance->worker_thread = thread;
-    furi_thread_start(instance->worker_thread);
-
-    // Enable uart listener
-    if(UART_CH == UART_CH) {
-        furi_hal_console_disable();
-    } else if(UART_CH == FuriHalUartIdLPUART1) {
-        furi_hal_uart_init(UART_CH, 230400);
-    }
+    FuriThread* thread = furi_thread_alloc_ex(
+        "Camera_Suite_Camera_Rx_Thread", 2048, camera_suite_camera_worker, instance);
+    instance->camera_worker_thread = thread;
+    furi_thread_start(instance->camera_worker_thread);
 
     // 115200 is the default baud rate for the ESP32-CAM.
-    furi_hal_uart_set_br(UART_CH, 230400);
+    instance->serial_handle = furi_hal_serial_control_acquire(UART_CH);
+    furi_check(instance->serial_handle);
+    furi_hal_serial_init(instance->serial_handle, 230400);
 
     // Enable UART1 and set the IRQ callback.
-    furi_hal_uart_set_irq_cb(UART_CH, camera_on_irq_cb, instance);
+    furi_hal_serial_async_rx_start(instance->serial_handle, camera_on_irq_cb, instance, false);
 
     return instance;
 }
@@ -531,21 +622,17 @@ CameraSuiteViewCamera* camera_suite_view_camera_alloc() {
 void camera_suite_view_camera_free(CameraSuiteViewCamera* instance) {
     furi_assert(instance);
 
-    // Remove the IRQ callback.
-    furi_hal_uart_set_irq_cb(UART_CH, NULL, NULL);
-
     // Free the worker thread.
-    furi_thread_free(instance->worker_thread);
+    furi_thread_flags_set(furi_thread_get_id(instance->camera_worker_thread), WorkerEventStop);
+    furi_thread_join(instance->camera_worker_thread);
+    furi_thread_free(instance->camera_worker_thread);
 
     // Free the allocated stream buffer.
-    furi_stream_buffer_free(instance->rx_stream);
+    furi_stream_buffer_free(instance->camera_rx_stream);
 
     // Re-enable the console.
-    if(UART_CH == FuriHalUartIdLPUART1) {
-        furi_hal_uart_deinit(UART_CH);
-    } else {
-        furi_hal_console_enable();
-    }
+    furi_hal_serial_deinit(instance->serial_handle);
+    furi_hal_serial_control_release(instance->serial_handle);
 
     with_view_model(
         instance->view, UartDumpModel * model, { UNUSED(model); }, true);

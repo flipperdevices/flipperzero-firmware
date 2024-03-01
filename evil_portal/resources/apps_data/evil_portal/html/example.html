@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<!-- Based on southwest_airline.html from https://github.com/bigbrodude6119/flipper-zero-evil-portal -->
+
+<head>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f9f9f9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+
+    .container {
+      background: #fff;
+      padding: 20px;
+      border-radius: 5px;
+      box-shadow: 0 0 10px #999;
+      max-width: 400px;
+    }
+
+    .logo {
+      text-align: center;
+    }
+
+    svg {
+      width: 80%;
+    }
+
+    .subtext {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 10px;
+      border-radius: 5px;
+      border: 1px solid #ddd;
+      font-size: 1rem;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+      background: #0066ff;
+      color: #fff;
+      font-size: 1.1rem;
+      cursor: pointer;
+    }
+
+    @media (max-width: 500px) {
+      .container {
+        max-width: 90%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <div class="logo">
+      <h1>Evil Portal</h1>
+    </div>
+    <p class="subtext">This is an example page for Evil Portal. Do not submit real information here.</p>
+
+    <form action="/get" method="GET">
+
+      <div class="form-group">
+        <input type="text" name="email" class="form-control" placeholder="Username" required>
+      </div>
+
+      <div class="form-group">
+        <input type="password" name="password" class="form-control" placeholder="Password" required>
+      </div>
+
+      <button type="submit">Submit</button>
+
+    </form>
+
+  </div>
+
+</body>
+
+</html>

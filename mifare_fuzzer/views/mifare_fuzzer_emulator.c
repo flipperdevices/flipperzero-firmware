@@ -60,8 +60,8 @@ static void mifare_fuzzer_emulator_draw_callback(Canvas* canvas, void* _model) {
     canvas_draw_str(canvas, 15, 22, model->mifare_card_dsc);
     // Timing
     furi_string_printf(furi_string, "%d", model->ticks_between_cards);
-    canvas_draw_str(canvas, 90, 22, "t:");
-    canvas_draw_str(canvas, 100, 22, furi_string_get_cstr(furi_string));
+    canvas_draw_str(canvas, 100, 33, "t:");
+    canvas_draw_str(canvas, 110, 33, furi_string_get_cstr(furi_string));
     // Attack
     canvas_draw_str(canvas, 4, 33, "a:");
     canvas_draw_str(canvas, 15, 33, model->attack_dsc);
@@ -202,7 +202,8 @@ View* mifare_fuzzer_emulator_get_view(MifareFuzzerEmulator* mifare_fuzzer_emulat
 /// @param mifare_card
 void mifare_fuzzer_emulator_set_card(
     MifareFuzzerEmulator* mifare_fuzzer_emulator,
-    MifareCard mifare_card) {
+    MifareCard mifare_card,
+    FuriString* name) {
     furi_assert(mifare_fuzzer_emulator);
     furi_assert(mifare_card);
 
@@ -211,16 +212,23 @@ void mifare_fuzzer_emulator_set_card(
         MifareFuzzerEmulatorModel * model,
         {
             model->mifare_card = mifare_card;
-            switch(mifare_card) {
-            case MifareCardClassic1k:
-                model->mifare_card_dsc = "Classic 1k";
-                break;
-            case MifareCardClassic4k:
-                model->mifare_card_dsc = "Classic 4k";
-                break;
-            case MifareCardUltralight:
-                model->mifare_card_dsc = "Ultralight";
-                break;
+            if(name == NULL) {
+                switch(mifare_card) {
+                case MifareCardClassic1k:
+                    model->mifare_card_dsc = "Classic 1k";
+                    break;
+                case MifareCardClassic4k:
+                    model->mifare_card_dsc = "Classic 4k";
+                    break;
+                case MifareCardUltralight:
+                    model->mifare_card_dsc = "Ultralight";
+                    break;
+                }
+            } else {
+                FuriString* card_name = furi_string_alloc_set(name);
+                size_t filename_start = furi_string_search_rchar(card_name, '/') + 1;
+                furi_string_right(card_name, filename_start);
+                model->mifare_card_dsc = furi_string_get_cstr(card_name);
             }
         },
         true);

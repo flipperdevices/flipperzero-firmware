@@ -89,7 +89,6 @@ typedef struct wc_CryptoInfo {
 #if HAVE_ANONYMOUS_INLINE_AGGREGATES
     union {
 #endif
-#if !defined(NO_RSA) || defined(HAVE_ECC)
     struct {
         int type; /* enum wc_PkType */
 #if HAVE_ANONYMOUS_INLINE_AGGREGATES
@@ -206,7 +205,6 @@ typedef struct wc_CryptoInfo {
         };
 #endif
     } pk;
-#endif /* !NO_RSA || HAVE_ECC */
 #if !defined(NO_AES) || !defined(NO_DES3)
     struct {
         int type; /* enum wc_CipherType */

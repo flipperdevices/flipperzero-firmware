@@ -17,7 +17,7 @@ void nfc_magic_scene_magic_info_on_enter(void* context) {
 
     notification_message(instance->notifications, &sequence_success);
 
-    widget_add_icon_element(widget, 73, 17, &I_DolphinCommon_56x48);
+    widget_add_icon_element(widget, 84, 22, &I_WarningDolphinFlip_45x42);
     widget_add_string_element(
         widget, 3, 4, AlignLeft, AlignTop, FontPrimary, "Magic card detected");
     widget_add_string_element(
@@ -52,6 +52,9 @@ bool nfc_magic_scene_magic_info_on_event(void* context, SceneManagerEvent event)
                 consumed = true;
             }
         }
+    } else if(event.type == SceneManagerEventTypeBack) {
+        consumed = scene_manager_search_and_switch_to_previous_scene(
+            instance->scene_manager, NfcMagicSceneStart);
     }
     return consumed;
 }

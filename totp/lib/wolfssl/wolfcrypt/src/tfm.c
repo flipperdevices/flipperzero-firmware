@@ -79,9 +79,9 @@
         #undef WOLFSSL_ESP32_CRYPT_RSA_PRI_MULMOD
     #endif
 
-    /* Note with HW there's a EPS_RSA_EXPT_XBTIS setting
+    /* Note with HW there's a ESP_RSA_EXPT_XBITS setting
      * as for some small numbers, SW may be faster.
-     * See ESP_LOGV messages for EPS_RSA_EXPT_XBTIS values. */
+     * See ESP_LOGV messages for ESP_RSA_EXPT_XBITS values. */
 
 #endif /* WOLFSSL_ESP32_CRYPT_RSA_PRI */
 
@@ -3428,6 +3428,36 @@ int fp_sqr(fp_int *A, fp_int *B)
        goto clean;
     }
 
+#if defined(WOLFSSL_ESP32_CRYPT_RSA_PRI_MP_MUL)
+    if (esp_hw_validation_active()) {
+        ESP_LOGV(TAG, "Skipping call to esp_mp_mul "
+                      "during active validation.");
+    }
+    else {
+        err = esp_mp_mul(A, A, B); /* HW accelerated multiply  */
+        switch (err) {
+            case MP_OKAY:
+                goto clean; /* success */
+                break;
+
+            case WC_HW_WAIT_E: /* MP_HW_BUSY math HW busy, fall back */
+            case MP_HW_FALLBACK:    /* forced fallback from HW to SW */
+            case MP_HW_VALIDATION_ACTIVE: /* use SW to compare to HW */
+                /* fall back to software, below */
+                break;
+
+            default:
+                /* Once we've failed, exit without trying to continue.
+                 * We may have mangled operands: (e.g. Z = X * Z)
+                 * Future implementation may consider saving operands,
+                 * but errors should never occur. */
+                goto clean;  /* error */
+                break;
+        }
+    }
+    /* fall through to software calcs */
+#endif /* WOLFSSL_ESP32_CRYPT_RSA_PRI_MP_MUL */
+
 #if defined(TFM_SQR3) && FP_SIZE >= 6
         if (y <= 3) {
            err = fp_sqr_comba3(A,B);
@@ -4021,12 +4051,16 @@ int fp_read_unsigned_bin(fp_int *a, const unsigned char *b, int c)
   /* zero the int */
   fp_zero (a);
 
+  if (c < 0) {
+      return FP_VAL;
+  }
+
   if (c == 0) {
       return FP_OKAY;
   }
 
   /* if input b excess max, then truncate */
-  if (c > 0 && (word32)c > maxC) {
+  if ((word32)c > maxC) {
      int excess = (c - maxC);
      c -= excess;
      b += excess;
@@ -4829,6 +4863,12 @@ int mp_div_2d(fp_int* a, int b, fp_int* c, fp_int* d)
   return MP_OKAY;
 }
 
+int mp_mod_2d(fp_int* a, int b, fp_int* c)
+{
+  fp_mod_2d(a, b, c);
+  return MP_OKAY;
+}
+
 /* copy (src = a) to (dst = b) */
 void fp_copy(const fp_int *a, fp_int *b)
 {
@@ -4884,12 +4924,12 @@ int mp_copy(const fp_int* a, fp_int* b)
     return MP_OKAY;
 }
 
-int mp_isodd(mp_int* a)
+int mp_isodd(const mp_int* a)
 {
     return fp_isodd(a);
 }
 
-int mp_iszero(mp_int* a)
+int mp_iszero(const mp_int* a)
 {
     return fp_iszero(a);
 }
@@ -6019,15 +6059,8 @@ int mp_read_radix(mp_int *a, const char *str, int radix)
 
 #endif /* !defined(NO_DSA) || defined(HAVE_ECC) */
 
-#ifdef HAVE_ECC
+#if defined(HAVE_ECC) || (!defined(NO_RSA) && defined(WC_RSA_BLINDING))
 
-/* fast math conversion */
-int mp_sqr(fp_int *A, fp_int *B)
-{
-    return fp_sqr(A, B);
-}
-
-/* fast math conversion */
 int mp_montgomery_reduce(fp_int *a, fp_int *m, fp_digit mp)
 {
     return fp_montgomery_reduce(a, m, mp);
@@ -6045,6 +6078,17 @@ int mp_montgomery_setup(fp_int *a, fp_digit *rho)
     return fp_montgomery_setup(a, rho);
 }
 
+#endif /* HAVE_ECC || (!NO_RSA && WC_RSA_BLINDING) */
+
+#ifdef HAVE_ECC
+
+/* fast math conversion */
+int mp_sqr(fp_int *A, fp_int *B)
+{
+    return fp_sqr(A, B);
+}
+
+/* fast math conversion */
 int mp_div_2(fp_int * a, fp_int * b)
 {
     fp_div_2(a, b);

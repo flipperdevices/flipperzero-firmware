@@ -2,7 +2,7 @@
 
 enum SubmenuIndex {
     SubmenuIndexCheck,
-    SubmenuIndexAuthenticateGen4,
+    SubmenuIndexGen4ActionsMenu,
 };
 
 void nfc_magic_scene_start_submenu_callback(void* context, uint32_t index) {
@@ -22,8 +22,8 @@ void nfc_magic_scene_start_on_enter(void* context) {
         instance);
     submenu_add_item(
         submenu,
-        "Authenticate Gen4",
-        SubmenuIndexAuthenticateGen4,
+        "Gen4 Actions",
+        SubmenuIndexGen4ActionsMenu,
         nfc_magic_scene_start_submenu_callback,
         instance);
 
@@ -44,8 +44,8 @@ bool nfc_magic_scene_start_on_event(void* context, SceneManagerEvent event) {
                 instance->scene_manager, NfcMagicSceneStart, SubmenuIndexCheck);
             scene_manager_next_scene(instance->scene_manager, NfcMagicSceneCheck);
             consumed = true;
-        } else if(event.event == SubmenuIndexAuthenticateGen4) {
-            scene_manager_next_scene(instance->scene_manager, NfcMagicSceneKeyInput);
+        } else if(event.event == SubmenuIndexGen4ActionsMenu) {
+            scene_manager_next_scene(instance->scene_manager, NfcMagicSceneGen4ActionsMenu);
         }
     }
 

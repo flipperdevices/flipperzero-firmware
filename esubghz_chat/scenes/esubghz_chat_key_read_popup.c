@@ -150,7 +150,7 @@
 
 //         popup_reset(state->nfc_popup);
 //         popup_set_header(state->nfc_popup, "Key\nread!", 13, 22, AlignLeft, AlignBottom);
-//         popup_set_icon(state->nfc_popup, 32, 5, &I_DolphinNice_96x59);
+//         popup_set_icon(state->nfc_popup, 36, 5, &I_DolphinDone_80x58);
 
 //         popup_set_timeout(state->nfc_popup, KEY_READ_POPUP_MS);
 //         popup_set_context(state->nfc_popup, state);

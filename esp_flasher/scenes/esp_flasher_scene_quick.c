@@ -2,11 +2,17 @@
 
 enum QuickState {
     QuickStart,
-    QuickWifidevS2,
-    QuickWifidevS2Blackmagic,
-    QuickWifidevS2Marauder,
-    QuickDevproWroom,
-    QuickDevproWroomMarauder,
+    QuickS2DevXeon,
+    QuickS2DevXeon_Marauder,
+    QuickS2DevXeon_Blackmagic,
+    QuickWROOMMultiFucc,
+    QuickWROOMMultiFucc_Marauder,
+    QuickWROOMMultiFucc_Wardriver,
+    QuickWROOM,
+    QuickWROOM_Marauder,
+    QuickS2,
+    QuickS2_Marauder,
+    QuickS2_Blackmagic,
 };
 
 void esp_flasher_scene_quick_submenu_callback(void* context, uint32_t index) {
@@ -24,46 +30,68 @@ void esp_flasher_scene_quick_on_enter(void* context) {
 
     switch(state) {
     case QuickStart:
-    case QuickWifidevS2:
-    case QuickDevproWroom:
+    case QuickS2DevXeon:
+    case QuickWROOMMultiFucc:
+    case QuickWROOM:
+    case QuickS2:
         submenu_set_header(submenu, "Choose Board:");
         submenu_add_item(
             submenu,
-            "WiFi Dev (ESP32-S2)",
-            QuickWifidevS2,
+            "Flipper WiFi Board / Xeon",
+            QuickS2DevXeon,
             esp_flasher_scene_quick_submenu_callback,
             app);
         submenu_add_item(
             submenu,
-            "Dev Pro (ESP32-WROOM)",
-            QuickDevproWroom,
+            "Multi-Fucc",
+            QuickWROOMMultiFucc,
             esp_flasher_scene_quick_submenu_callback,
             app);
+        submenu_add_item(
+            submenu,
+            "Other ESP32-WROOM",
+            QuickWROOM,
+            esp_flasher_scene_quick_submenu_callback,
+            app);
+        submenu_add_item(
+            submenu, "Other ESP32-S2", QuickS2, esp_flasher_scene_quick_submenu_callback, app);
         break;
-    case QuickWifidevS2Blackmagic:
-    case QuickWifidevS2Marauder:
+    case QuickS2DevXeon_Marauder:
+    case QuickS2DevXeon_Blackmagic:
+    case QuickS2_Marauder:
+    case QuickS2_Blackmagic:
         submenu_set_header(submenu, "Choose Firmware:");
+        submenu_add_item(
+            submenu,
+            "Marauder (has Evil Portal)",
+            state > QuickS2 ? QuickS2_Marauder : QuickS2DevXeon_Marauder,
+            esp_flasher_scene_quick_submenu_callback,
+            app);
         submenu_add_item(
             submenu,
             "Black Magic",
-            QuickWifidevS2Blackmagic,
-            esp_flasher_scene_quick_submenu_callback,
-            app);
-        submenu_add_item(
-            submenu,
-            "Marauder (has Evil Portal)",
-            QuickWifidevS2Marauder,
+            state > QuickS2 ? QuickS2_Blackmagic : QuickS2DevXeon_Blackmagic,
             esp_flasher_scene_quick_submenu_callback,
             app);
         break;
-    case QuickDevproWroomMarauder:
+    case QuickWROOMMultiFucc_Marauder:
+    case QuickWROOMMultiFucc_Wardriver:
+    case QuickWROOM_Marauder:
         submenu_set_header(submenu, "Choose Firmware:");
         submenu_add_item(
             submenu,
             "Marauder (has Evil Portal)",
-            QuickDevproWroomMarauder,
+            state > QuickWROOM ? QuickWROOM_Marauder : QuickWROOMMultiFucc_Marauder,
             esp_flasher_scene_quick_submenu_callback,
             app);
+        if(state < QuickWROOM) {
+            submenu_add_item(
+                submenu,
+                "Wardriver",
+                QuickWROOMMultiFucc_Wardriver,
+                esp_flasher_scene_quick_submenu_callback,
+                app);
+        }
         break;
     default:
         break;
@@ -82,7 +110,6 @@ bool esp_flasher_scene_quick_on_event(void* context, SceneManagerEvent event) {
     if(event.type == SceneManagerEventTypeCustom) {
         consumed = true;
 
-        bool flash = true;
         bool enter_bootloader = false;
         const char* boot = NULL; // 0x1000
         const char* part = NULL; // 0x8000
@@ -90,78 +117,96 @@ bool esp_flasher_scene_quick_on_event(void* context, SceneManagerEvent event) {
         const char* firm = NULL; // 0x10000
 
         switch(event.event) {
-        case QuickWifidevS2:
-        case QuickDevproWroom:
+        case QuickS2DevXeon:
+        case QuickWROOMMultiFucc:
+        case QuickWROOM:
+        case QuickS2:
             scene_manager_set_scene_state(
                 app->scene_manager, EspFlasherSceneQuick, event.event + 1);
             scene_manager_next_scene(app->scene_manager, EspFlasherSceneQuick);
-            flash = false;
+            return consumed;
+
+        case QuickS2DevXeon_Marauder:
+            enter_bootloader = true;
+            /* fallthrough */
+        case QuickS2_Marauder:
+            boot = APP_DATA_PATH("assets/marauder/S2/esp32_marauder.ino.bootloader.bin");
+            part = APP_DATA_PATH("assets/marauder/esp32_marauder.ino.partitions.bin");
+            app0 = APP_DATA_PATH("assets/marauder/boot_app0.bin");
+            firm = APP_DATA_PATH("assets/marauder/S2/esp32_marauder.flipper.bin");
             break;
-        case QuickWifidevS2Blackmagic:
+
+        case QuickS2DevXeon_Blackmagic:
+            enter_bootloader = true;
+            /* fallthrough */
+        case QuickS2_Blackmagic:
             boot = APP_DATA_PATH("assets/blackmagic/bootloader.bin");
             part = APP_DATA_PATH("assets/blackmagic/partition-table.bin");
             firm = APP_DATA_PATH("assets/blackmagic/blackmagic.bin");
-            enter_bootloader = true;
             break;
-        case QuickWifidevS2Marauder:
-            boot = APP_DATA_PATH("assets/marauder/WifidevS2/esp32_marauder.ino.bootloader.bin");
+
+        case QuickWROOMMultiFucc_Marauder:
+            enter_bootloader = true;
+            /* fallthrough */
+        case QuickWROOM_Marauder:
+            boot = APP_DATA_PATH("assets/marauder/WROOM/esp32_marauder.ino.bootloader.bin");
             part = APP_DATA_PATH("assets/marauder/esp32_marauder.ino.partitions.bin");
             app0 = APP_DATA_PATH("assets/marauder/boot_app0.bin");
-            firm = APP_DATA_PATH("assets/marauder/WifidevS2/esp32_marauder_flipper_sd_serial.bin");
+            firm = APP_DATA_PATH("assets/marauder/WROOM/esp32_marauder.dev_board_pro.bin");
+            break;
+
+        case QuickWROOMMultiFucc_Wardriver:
             enter_bootloader = true;
+            boot = APP_DATA_PATH("assets/wardriver/f0-wardrive-wroom_2.bin");
             break;
-        case QuickDevproWroomMarauder:
-            boot = APP_DATA_PATH("assets/marauder/DevproWroom/esp32_marauder.ino.bootloader.bin");
-            part = APP_DATA_PATH("assets/marauder/esp32_marauder.ino.partitions.bin");
-            app0 = APP_DATA_PATH("assets/marauder/boot_app0.bin");
-            firm = APP_DATA_PATH("assets/marauder/DevproWroom/esp32_marauder_dev_board_pro.bin");
-            break;
+
         default:
-            flash = false;
             consumed = false;
-            break;
+            return consumed;
         }
 
-        if(flash) {
-            scene_manager_set_scene_state(app->scene_manager, EspFlasherSceneQuick, event.event);
-            memset(app->selected_flash_options, 0, sizeof(app->selected_flash_options));
-            app->bin_file_path_boot[0] = '\0';
-            app->bin_file_path_part[0] = '\0';
-            app->bin_file_path_nvs[0] = '\0';
-            app->bin_file_path_boot_app0[0] = '\0';
-            app->bin_file_path_app_a[0] = '\0';
-            app->bin_file_path_app_b[0] = '\0';
-            app->bin_file_path_custom[0] = '\0';
+        scene_manager_set_scene_state(app->scene_manager, EspFlasherSceneQuick, event.event);
+        memset(app->selected_flash_options, 0, sizeof(app->selected_flash_options));
+        app->bin_file_path_boot[0] = '\0';
+        app->bin_file_path_part[0] = '\0';
+        app->bin_file_path_nvs[0] = '\0';
+        app->bin_file_path_boot_app0[0] = '\0';
+        app->bin_file_path_app_a[0] = '\0';
+        app->bin_file_path_app_b[0] = '\0';
+        app->bin_file_path_custom[0] = '\0';
 
-            if(boot) {
-                app->selected_flash_options[SelectedFlashBoot] = true;
-                strncpy(app->bin_file_path_boot, boot, sizeof(app->bin_file_path_boot));
-            }
-            if(part) {
-                app->selected_flash_options[SelectedFlashPart] = true;
-                strncpy(app->bin_file_path_part, part, sizeof(app->bin_file_path_part));
-            }
-            if(app0) {
-                app->selected_flash_options[SelectedFlashBootApp0] = true;
-                strncpy(app->bin_file_path_boot_app0, app0, sizeof(app->bin_file_path_boot_app0));
-            }
-            if(firm) {
-                app->selected_flash_options[SelectedFlashAppA] = true;
-                strncpy(app->bin_file_path_app_a, firm, sizeof(app->bin_file_path_app_a));
-            }
-
-            app->reset = false;
-            app->quickflash = true;
-            app->turbospeed = true;
-            app->boot = enter_bootloader;
-            scene_manager_next_scene(app->scene_manager, EspFlasherSceneConsoleOutput);
+        if(boot) {
+            app->selected_flash_options[SelectedFlashBoot] = true;
+            strncpy(app->bin_file_path_boot, boot, sizeof(app->bin_file_path_boot));
         }
+        if(part) {
+            app->selected_flash_options[SelectedFlashPart] = true;
+            strncpy(app->bin_file_path_part, part, sizeof(app->bin_file_path_part));
+        }
+        if(app0) {
+            app->selected_flash_options[SelectedFlashBootApp0] = true;
+            strncpy(app->bin_file_path_boot_app0, app0, sizeof(app->bin_file_path_boot_app0));
+        }
+        if(firm) {
+            app->selected_flash_options[SelectedFlashAppA] = true;
+            strncpy(app->bin_file_path_app_a, firm, sizeof(app->bin_file_path_app_a));
+        }
+
+        app->reset = false;
+        app->quickflash = true;
+        app->turbospeed = true;
+        app->boot = enter_bootloader;
+        scene_manager_next_scene(app->scene_manager, EspFlasherSceneConsoleOutput);
     } else if(event.type == SceneManagerEventTypeBack) {
         uint32_t state = scene_manager_get_scene_state(app->scene_manager, EspFlasherSceneQuick);
-        if(state > QuickDevproWroom)
-            state = QuickDevproWroom;
-        else if(state > QuickWifidevS2)
-            state = QuickWifidevS2;
+        if(state > QuickS2)
+            state = QuickS2;
+        else if(state > QuickWROOM)
+            state = QuickWROOM;
+        else if(state > QuickWROOMMultiFucc)
+            state = QuickWROOMMultiFucc;
+        else if(state > QuickS2DevXeon)
+            state = QuickS2DevXeon;
         scene_manager_set_scene_state(app->scene_manager, EspFlasherSceneQuick, state);
     }
 

@@ -39,6 +39,7 @@ typedef struct {
     uint16_t transmitting_power;
     bool freq_hopping;
     Buffer* buf;
+    FuriHalSerialHandle* serial_handle;
 } M100Module;
 
 M100ModuleInfo* m100_module_info_alloc();

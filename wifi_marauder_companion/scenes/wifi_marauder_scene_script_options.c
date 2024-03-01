@@ -19,8 +19,8 @@ void wifi_marauder_scene_script_options_save_script(WifiMarauderApp* app) {
     wifi_marauder_script_save_json(app->storage, script_path, app->script);
 
     DialogMessage* message = dialog_message_alloc();
-    dialog_message_set_text(message, "Saved!", 88, 32, AlignCenter, AlignCenter);
-    dialog_message_set_icon(message, &I_DolphinCommon_56x48, 5, 6);
+    dialog_message_set_text(message, "Saved!", 5, 7, AlignLeft, AlignTop);
+    dialog_message_set_icon(message, &I_DolphinDone_80x58, 36, 5);
     dialog_message_set_buttons(message, NULL, "Ok", NULL);
     dialog_message_show(app->dialogs, message);
     dialog_message_free(message);
