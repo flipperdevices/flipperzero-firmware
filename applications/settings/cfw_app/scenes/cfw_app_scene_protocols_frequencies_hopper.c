@@ -87,7 +87,7 @@ bool cfw_app_scene_protocols_frequencies_hopper_on_event(void* context, SceneMan
                 variable_item_list_get(app->var_item_list, VarItemListIndexHopperFrequency);
             variable_item_set_values_count(item, FrequencyList_size(app->subghz_hopper_freqs));
             if(FrequencyList_size(app->subghz_hopper_freqs)) {
-                app->subghz_hopper_index -= removed;
+                app->subghz_hopper_index -= MIN(removed, app->subghz_hopper_index);
                 uint32_t value =
                     *FrequencyList_get(app->subghz_hopper_freqs, app->subghz_hopper_index);
                 char text[10] = {0};
