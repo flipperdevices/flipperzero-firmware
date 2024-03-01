@@ -205,10 +205,53 @@ enum {
     WOLF_ENUM_DUMMY_LAST_ELEMENT(AES)
 };
 
+#ifdef WC_AES_BITSLICED
+    #ifdef WC_AES_BS_WORD_SIZE
+        #define BS_WORD_SIZE        WC_AES_BS_WORD_SIZE
+    #elif defined(NO_64BIT)
+        #define BS_WORD_SIZE        32
+    #else
+        #define BS_WORD_SIZE        64
+    #endif
+
+    /* Number of bits to a block. */
+    #define AES_BLOCK_BITS      (AES_BLOCK_SIZE * 8)
+    /* Number of bytes of input that can be processed in one call. */
+    #define BS_BLOCK_SIZE       (AES_BLOCK_SIZE * BS_WORD_SIZE)
+    /* Number of words in a block.  */
+    #define BS_BLOCK_WORDS      (AES_BLOCK_BITS / BS_WORD_SIZE)
+
+    #if BS_WORD_SIZE == 64
+        typedef word64          bs_word;
+        #define BS_WORD_SHIFT   6
+        #define bs_bswap(x)     ByteReverseWord64(x)
+    #elif BS_WORD_SIZE == 32
+        typedef word32          bs_word;
+        #define BS_WORD_SHIFT   5
+        #define bs_bswap(x)     ByteReverseWord32(x)
+    #elif BS_WORD_SIZE == 16
+        typedef word16          bs_word;
+        #define BS_WORD_SHIFT   4
+        #define bs_bswap(x)     ByteReverseWord16(x)
+    #elif BS_WORD_SIZE == 8
+        typedef word8           bs_word;
+        #define BS_WORD_SHIFT   3
+        #define bs_bswap(x)     (x)
+    #else
+        #error "Word size not supported"
+    #endif
+#endif
+
 struct Aes {
-    /* AESNI needs key first, rounds 2nd, not sure why yet */
     ALIGN16 word32 key[60];
+#ifdef WC_AES_BITSLICED
+    /* Extra key schedule space required for bit-slicing technique. */
+    ALIGN16 bs_word bs_key[15 * AES_BLOCK_SIZE * BS_WORD_SIZE];
+#endif
     word32  rounds;
+#ifdef WC_AES_C_DYNAMIC_FALLBACK
+    word32 key_C_fallback[60];
+#endif
     int     keylen;
 
     ALIGN16 word32 reg[AES_BLOCK_SIZE / sizeof(word32)];      /* for CBC mode */
@@ -337,6 +380,11 @@ struct Aes {
     byte         nonceSet:1;
     byte         ctrSet:1;
 #endif
+#ifdef WC_DEBUG_CIPHER_LIFECYCLE
+    void *CipherLifecycleTag; /* used for dummy allocation and initialization,
+                               * trackable by sanitizers.
+                               */
+#endif
 };
 
 #ifndef WC_AES_TYPE_DEFINED
@@ -349,6 +397,26 @@ typedef struct XtsAes {
     Aes aes;
     Aes tweak;
 } XtsAes;
+#endif
+
+#if (!defined(WC_AESFREE_IS_MANDATORY)) &&                              \
+    (defined(WC_DEBUG_CIPHER_LIFECYCLE) ||                              \
+     (defined(WOLFSSL_ASYNC_CRYPT) && defined(WC_ASYNC_ENABLE_AES)) ||  \
+     defined(WOLFSSL_AFALG) || defined(WOLFSSL_AFALG_XILINX_AES) ||     \
+     defined(WOLFSSL_KCAPI_AES) ||                                      \
+     (defined(WOLFSSL_DEVCRYPTO) &&                                     \
+      (defined(WOLFSSL_DEVCRYPTO_AES) ||                                \
+       defined(WOLFSSL_DEVCRYPTO_CBC))) ||                              \
+     defined(WOLFSSL_IMXRT_DCP) ||                                      \
+     (defined(WOLFSSL_AESGCM_STREAM) && defined(WOLFSSL_SMALL_STACK) && \
+      !defined(WOLFSSL_AESNI)) ||                                       \
+     (defined(WOLFSSL_SE050) && defined(WOLFSSL_SE050_CRYPT)) ||        \
+     (defined(WOLFSSL_HAVE_PSA) && !defined(WOLFSSL_PSA_NO_AES)) ||     \
+     defined(WOLFSSL_MAXQ10XX_CRYPTO) ||                                \
+     ((defined(WOLFSSL_RENESAS_FSPSM_TLS) ||                            \
+       defined(WOLFSSL_RENESAS_FSPSM_CRYPTONLY)) &&                     \
+      !defined(NO_WOLFSSL_RENESAS_FSPSM_AES)))
+#define WC_AESFREE_IS_MANDATORY
 #endif
 
 #ifdef HAVE_AESGCM
@@ -551,6 +619,11 @@ WOLFSSL_API int wc_AesGcmDecryptFinal(Aes* aes, const byte* authTag,
 #endif /* HAVE_AES_KEYWRAP */
 
 #ifdef WOLFSSL_AES_XTS
+
+WOLFSSL_API int wc_AesXtsInit(XtsAes* aes, void* heap, int devId);
+
+WOLFSSL_API int wc_AesXtsSetKeyNoInit(XtsAes* aes, const byte* key,
+         word32 len, int dir);
 
 WOLFSSL_API int wc_AesXtsSetKey(XtsAes* aes, const byte* key,
          word32 len, int dir, void* heap, int devId);

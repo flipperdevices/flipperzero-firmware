@@ -92,6 +92,12 @@ Possible ECC enable options:
  *                      Enables implementations that protect data that is in
  *                      encrypted memory.
  *                                                              default: off
+ * WOLFSSL_ECC_GEN_REJECT_SAMPLING
+ *                      Enables generation of scalar (private key and ECDSA
+ *                      nonce) to be performed using reject sampling algorithm.
+ *                      Use this when CPU state can be closely observed by
+ *                      attacker.
+ *                                                              default: off
  */
 
 /*
@@ -218,7 +224,7 @@ ECC Curve Sizes:
 #if !defined(WOLFSSL_ATECC508A) && !defined(WOLFSSL_ATECC608A) && \
     !defined(WOLFSSL_CRYPTOCELL) && !defined(WOLFSSL_SILABS_SE_ACCEL) && \
     !defined(WOLFSSL_KCAPI_ECC) && !defined(WOLFSSL_SE050) && \
-    !defined(WOLFSSL_XILINX_CRYPT_VERSAL)
+    !defined(WOLFSSL_XILINX_CRYPT_VERSAL) && !defined(WOLFSSL_STM32_PKA)
     #undef  HAVE_ECC_VERIFY_HELPER
     #define HAVE_ECC_VERIFY_HELPER
 #endif
@@ -337,7 +343,7 @@ enum {
         #endif
         #define ecc_oid_secp112r1_sz CODED_SECP112R1_SZ
     #endif /* !NO_ECC_SECP */
-    #ifdef HAVE_ECC_SECPR2
+    #if defined(HAVE_ECC_SECPR2) && defined(HAVE_ECC_KOBLITZ)
         #ifdef HAVE_OID_ENCODING
             #define CODED_SECP112R2    {1,3,132,0,7}
             #define CODED_SECP112R2_SZ 5
@@ -351,7 +357,7 @@ enum {
             #define ecc_oid_secp112r2 CODED_SECP112R2
         #endif
         #define ecc_oid_secp112r2_sz CODED_SECP112R2_SZ
-    #endif /* HAVE_ECC_SECPR2 */
+    #endif /* HAVE_ECC_SECPR2 && HAVE_ECC_KOBLITZ */
 #endif /* ECC112 */
 #ifdef ECC128
     #ifndef NO_ECC_SECP
@@ -369,7 +375,7 @@ enum {
         #endif
         #define ecc_oid_secp128r1_sz CODED_SECP128R1_SZ
     #endif /* !NO_ECC_SECP */
-    #ifdef HAVE_ECC_SECPR2
+    #if defined(HAVE_ECC_SECPR2) && defined(HAVE_ECC_KOBLITZ)
         #ifdef HAVE_OID_ENCODING
             #define CODED_SECP128R2    {1,3,132,0,29}
             #define CODED_SECP128R2_SZ 5
@@ -383,7 +389,7 @@ enum {
             #define ecc_oid_secp128r2 CODED_SECP128R2
         #endif
         #define ecc_oid_secp128r2_sz CODED_SECP128R2_SZ
-    #endif /* HAVE_ECC_SECPR2 */
+    #endif /* HAVE_ECC_SECPR2 && HAVE_ECC_KOBLITZ */
 #endif /* ECC128 */
 #ifdef ECC160
 #ifndef FP_ECC
@@ -790,7 +796,7 @@ const ecc_set_type ecc_sets[] = {
         1,                              /* cofactor   */
     },
     #endif /* !NO_ECC_SECP */
-    #ifdef HAVE_ECC_SECPR2
+    #if defined(HAVE_ECC_SECPR2) && defined(HAVE_ECC_KOBLITZ)
     {
         14,                             /* size/bytes */
         ECC_SECP112R2,                  /* ID         */
@@ -806,7 +812,7 @@ const ecc_set_type ecc_sets[] = {
         ECC_SECP112R2_OID,              /* oid sum    */
         4,                              /* cofactor   */
     },
-    #endif /* HAVE_ECC_SECPR2 */
+    #endif /* HAVE_ECC_SECPR2 && HAVE_ECC_KOBLITZ */
 #endif /* ECC112 */
 #ifdef ECC128
     #ifndef NO_ECC_SECP
@@ -826,7 +832,7 @@ const ecc_set_type ecc_sets[] = {
         1,                                  /* cofactor   */
     },
     #endif /* !NO_ECC_SECP */
-    #ifdef HAVE_ECC_SECPR2
+    #if defined(HAVE_ECC_SECPR2) && defined(HAVE_ECC_KOBLITZ)
     {
         16,                                 /* size/bytes */
         ECC_SECP128R2,                      /* ID         */
@@ -842,7 +848,7 @@ const ecc_set_type ecc_sets[] = {
         ECC_SECP128R2_OID,                  /* oid sum    */
         4,                                  /* cofactor   */
     },
-    #endif /* HAVE_ECC_SECPR2 */
+    #endif /* HAVE_ECC_SECPR2 && HAVE_ECC_KOBLITZ */
 #endif /* ECC128 */
 #ifdef ECC160
 #ifndef FP_ECC
@@ -5135,6 +5141,7 @@ int wc_ecc_point_is_at_infinity(ecc_point* p)
 int wc_ecc_gen_k(WC_RNG* rng, int size, mp_int* k, mp_int* order)
 {
 #ifndef WC_NO_RNG
+#ifndef WOLFSSL_ECC_GEN_REJECT_SAMPLING
     int err;
     byte buf[ECC_MAXSIZE_GEN];
 
@@ -5176,6 +5183,54 @@ int wc_ecc_gen_k(WC_RNG* rng, int size, mp_int* k, mp_int* order)
 #endif
 
     return err;
+#else
+    int err;
+    byte buf[ECC_MAXSIZE_GEN];
+    int bits;
+
+    if ((rng == NULL) || (size < 0) || (size + 8 > ECC_MAXSIZE_GEN) ||
+            (k == NULL) || (order == NULL)) {
+        return BAD_FUNC_ARG;
+    }
+
+    /* Get actual bit count of order. */
+    bits = mp_count_bits(order);
+    size = (bits + 7) >> 3;
+
+    /* generate number in range of order through rejection sampling. */
+    /* see section A.2.2 and A.4.2 in FIPS 186-5 */
+    do {
+        /* A.2.2 step 3: make up random string */
+        err = wc_RNG_GenerateBlock(rng, buf, (word32)size);
+    #ifdef WOLFSSL_CHECK_MEM_ZERO
+        wc_MemZero_Add("wc_ecc_gen_k buf", buf, size);
+    #endif
+        /* Generated multiple of 8 bits but now make it size of order. */
+        if ((bits & 0x7) > 0) {
+            buf[0] &= (1 << (bits & 0x7)) - 1;
+        }
+
+        /* A.2.2 step 4: convert to integer. */
+        /* A.4.2 step 3: Convert the bit string to integer x. */
+        if (err == 0) {
+            err = mp_read_unsigned_bin(k, buf, (word32)size);
+        }
+
+        /* A.4.2 step 4, 5: x must be in range [1, n-1] */
+        if ((err == MP_OKAY) && !mp_iszero(k) &&
+                (mp_cmp_ct(k, order, order->used) == MP_LT)) {
+            break;
+        }
+    }
+    while (err == MP_OKAY);
+
+    ForceZero(buf, ECC_MAXSIZE_GEN);
+#ifdef WOLFSSL_CHECK_MEM_ZERO
+    wc_MemZero_Check(buf, ECC_MAXSIZE_GEN);
+#endif
+
+    return err;
+#endif
 #else
     (void)rng;
     (void)size;
@@ -7801,6 +7856,13 @@ int ecc_projective_dbl_point_safe(ecc_point *P, ecc_point *R, mp_int* a,
     }
     else {
         err = _ecc_projective_dbl_point(P, R, a, modulus, mp);
+        if ((err == MP_OKAY) && mp_iszero(R->z)) {
+           err = mp_set(R->x, 0);
+           if (err == MP_OKAY)
+               err = mp_set(R->y, 0);
+           if (err == MP_OKAY)
+               err = mp_set(R->z, 1);
+        }
     }
 
     return err;
@@ -13059,7 +13121,7 @@ int wc_ecc_mulmod_ex(const mp_int* k, ecc_point *G, ecc_point *R, mp_int* a,
 #ifndef WOLFSSL_SP_NO_256
     if (mp_count_bits(modulus) == 256) {
         int ret;
-        SAVE_VECTOR_REGISTERS(return _svr_ret);
+        SAVE_VECTOR_REGISTERS(return _svr_ret;);
         ret = sp_ecc_mulmod_256(k, G, R, map, heap);
         RESTORE_VECTOR_REGISTERS();
         return ret;
@@ -13068,7 +13130,7 @@ int wc_ecc_mulmod_ex(const mp_int* k, ecc_point *G, ecc_point *R, mp_int* a,
 #ifdef WOLFSSL_SP_384
     if (mp_count_bits(modulus) == 384) {
         int ret;
-        SAVE_VECTOR_REGISTERS(return _svr_ret);
+        SAVE_VECTOR_REGISTERS(return _svr_ret;);
         ret = sp_ecc_mulmod_384(k, G, R, map, heap);
         RESTORE_VECTOR_REGISTERS();
         return ret;
@@ -13077,7 +13139,7 @@ int wc_ecc_mulmod_ex(const mp_int* k, ecc_point *G, ecc_point *R, mp_int* a,
 #ifdef WOLFSSL_SP_521
     if (mp_count_bits(modulus) == 521) {
         int ret;
-        SAVE_VECTOR_REGISTERS(return _svr_ret);
+        SAVE_VECTOR_REGISTERS(return _svr_ret;);
         ret = sp_ecc_mulmod_521(k, G, R, map, heap);
         RESTORE_VECTOR_REGISTERS();
         return ret;
@@ -13228,7 +13290,7 @@ int wc_ecc_mulmod_ex2(const mp_int* k, ecc_point *G, ecc_point *R, mp_int* a,
 #if defined(WOLFSSL_SM2) && defined(WOLFSSL_SP_SM2)
     if ((mp_count_bits(modulus) == 256) && (!mp_is_bit_set(modulus, 224))) {
         int ret;
-        SAVE_VECTOR_REGISTERS(return _svr_ret);
+        SAVE_VECTOR_REGISTERS(return _svr_ret;);
         ret = sp_ecc_mulmod_sm2_256(k, G, R, map, heap);
         RESTORE_VECTOR_REGISTERS();
         return ret;
@@ -13237,7 +13299,7 @@ int wc_ecc_mulmod_ex2(const mp_int* k, ecc_point *G, ecc_point *R, mp_int* a,
 #ifndef WOLFSSL_SP_NO_256
     if (mp_count_bits(modulus) == 256) {
         int ret;
-        SAVE_VECTOR_REGISTERS(return _svr_ret);
+        SAVE_VECTOR_REGISTERS(return _svr_ret;);
         ret = sp_ecc_mulmod_256(k, G, R, map, heap);
         RESTORE_VECTOR_REGISTERS();
         return ret;
@@ -13246,7 +13308,7 @@ int wc_ecc_mulmod_ex2(const mp_int* k, ecc_point *G, ecc_point *R, mp_int* a,
 #ifdef WOLFSSL_SP_384
     if (mp_count_bits(modulus) == 384) {
         int ret;
-        SAVE_VECTOR_REGISTERS(return _svr_ret);
+        SAVE_VECTOR_REGISTERS(return _svr_ret;);
         ret = sp_ecc_mulmod_384(k, G, R, map, heap);
         RESTORE_VECTOR_REGISTERS();
         return ret;
@@ -13255,7 +13317,7 @@ int wc_ecc_mulmod_ex2(const mp_int* k, ecc_point *G, ecc_point *R, mp_int* a,
 #ifdef WOLFSSL_SP_521
     if (mp_count_bits(modulus) == 521) {
         int ret;
-        SAVE_VECTOR_REGISTERS(return _svr_ret);
+        SAVE_VECTOR_REGISTERS(return _svr_ret;);
         ret = sp_ecc_mulmod_521(k, G, R, map, heap);
         RESTORE_VECTOR_REGISTERS();
         return ret;

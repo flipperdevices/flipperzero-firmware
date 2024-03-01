@@ -3068,47 +3068,83 @@ int mp_submod(mp_int* a, mp_int* b, mp_int* c, mp_int* d)
 /* d = a + b (mod c) */
 int mp_addmod(mp_int* a, mp_int* b, mp_int* c, mp_int* d)
 {
-   int     res;
-   mp_int  t;
+  int     res;
+  mp_int  t;
 
-   if ((res = mp_init (&t)) != MP_OKAY) {
-     return res;
-   }
+  if ((res = mp_init (&t)) != MP_OKAY) {
+    return res;
+  }
 
-   res = mp_add (a, b, &t);
-   if (res == MP_OKAY) {
-       res = mp_mod (&t, c, d);
-   }
+  res = mp_add (a, b, &t);
+  if (res == MP_OKAY) {
+    res = mp_mod (&t, c, d);
+  }
 
-   mp_clear (&t);
+  mp_clear (&t);
 
-   return res;
+  return res;
 }
 
 /* d = a - b (mod c) - a < c and b < c and positive */
 int mp_submod_ct(mp_int* a, mp_int* b, mp_int* c, mp_int* d)
 {
-    int res;
+  int     res;
+  mp_int  t;
+  mp_int* r = d;
 
-    res = mp_sub(a, b, d);
-    if (res == MP_OKAY && mp_isneg(d)) {
-        res = mp_add(d, c, d);
+  if (c == d) {
+    r = &t;
+
+    if ((res = mp_init (r)) != MP_OKAY) {
+      return res;
     }
+  }
 
-    return res;
+  res = mp_sub (a, b, r);
+  if (res == MP_OKAY) {
+    if (mp_isneg (r)) {
+      res = mp_add (r, c, d);
+    } else if (c == d) {
+      res = mp_copy (r, d);
+    }
+  }
+
+  if (c == d) {
+    mp_clear (r);
+  }
+
+  return res;
 }
 
 /* d = a + b (mod c) - a < c and b < c and positive */
 int mp_addmod_ct(mp_int* a, mp_int* b, mp_int* c, mp_int* d)
 {
-    int res;
+  int     res;
+  mp_int  t;
+  mp_int* r = d;
 
-    res = mp_add(a, b, d);
-    if (res == MP_OKAY && mp_cmp(d, c) != MP_LT) {
-        res = mp_sub(d, c, d);
+  if (c == d) {
+    r = &t;
+
+    if ((res = mp_init (r)) != MP_OKAY) {
+      return res;
     }
+  }
 
-    return res;
+  res = mp_add (a, b, r);
+  if (res == MP_OKAY) {
+    if (mp_cmp (r, c) != MP_LT) {
+      res = mp_sub (r, c, d);
+    } else if (c == d) {
+      res = mp_copy (r, d);
+    }
+  }
+
+  if (c == d) {
+    mp_clear (r);
+  }
+
+  return res;
 }
 
 /* computes b = a*a */
@@ -4389,9 +4425,6 @@ int mp_add_d (mp_int* a, mp_digit b, mp_int* c) /* //NOLINT(misc-no-recursion) *
   /* old number of used digits in c */
   oldused = c->used;
 
-  /* sign always positive */
-  c->sign = MP_ZPOS;
-
   /* source alias */
   tmpa    = a->dp;
 
@@ -4441,6 +4474,9 @@ int mp_add_d (mp_int* a, mp_digit b, mp_int* c) /* //NOLINT(misc-no-recursion) *
       */
      ix       = 1;
   }
+
+  /* sign always positive */
+  c->sign = MP_ZPOS;
 
   /* now zero to oldused */
   while (ix++ < oldused) {

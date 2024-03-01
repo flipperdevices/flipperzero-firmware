@@ -901,6 +901,10 @@ enum ECC_TYPES
 /* Maximum OID dotted form size. */
 #define ASN1_OID_DOTTED_MAX_SZ         16
 
+#ifndef WOLFSSL_ASN_MAX_LENGTH_SZ
+    #define WOLFSSL_ASN_MAX_LENGTH_SZ 5 /* 1 byte length + 4 bytes of number */
+#endif
+
 enum Misc_ASN {
     MAX_SALT_SIZE       =  64,     /* MAX PKCS Salt length */
     MAX_IV_SIZE         =  64,     /* MAX PKCS Iv length */
@@ -943,18 +947,18 @@ enum Misc_ASN {
 #endif
     MAX_SIG_SZ          = 256,
     MAX_ALGO_SZ         =  20,
-    MAX_SHORT_SZ        =   6,     /* asn int + byte len + 4 byte length */
-    MAX_LENGTH_SZ       =   4,     /* Max length size for DER encoding */
-    MAX_SEQ_SZ          =   5,     /* enum(seq | con) + length(4) */
-    MAX_SET_SZ          =   5,     /* enum(set | con) + length(4) */
-    MAX_OCTET_STR_SZ    =   5,     /* enum(set | con) + length(4) */
-    MAX_EXP_SZ          =   5,     /* enum(contextspec|con|exp) + length(4) */
-    MAX_PRSTR_SZ        =   5,     /* enum(prstr) + length(4) */
+    MAX_LENGTH_SZ       = WOLFSSL_ASN_MAX_LENGTH_SZ, /* Max length size for DER encoding */
+    MAX_SHORT_SZ        = (1 + MAX_LENGTH_SZ),     /* asn int + byte len + 4 byte length */
+    MAX_SEQ_SZ          = (1 + MAX_LENGTH_SZ), /* enum(seq | con) + length(5) */
+    MAX_SET_SZ          = (1 + MAX_LENGTH_SZ), /* enum(set | con) + length(5) */
+    MAX_OCTET_STR_SZ    = (1 + MAX_LENGTH_SZ), /* enum(set | con) + length(5) */
+    MAX_EXP_SZ          = (1 + MAX_LENGTH_SZ), /* enum(contextspec|con|exp) + length(5) */
+    MAX_PRSTR_SZ        = (1 + MAX_LENGTH_SZ), /* enum(prstr) + length(5) */
     MAX_VERSION_SZ      =   5,     /* enum + id + version(byte) + (header(2))*/
-    MAX_ENCODED_DIG_ASN_SZ= 9,     /* enum(bit or octet) + length(4) */
+    MAX_ENCODED_DIG_ASN_SZ = (5 + MAX_LENGTH_SZ),   /* enum(bit or octet) + length(5) */
     MAX_ENCODED_DIG_SZ  =  64 + MAX_ENCODED_DIG_ASN_SZ, /* asn header + sha512 */
-    MAX_RSA_INT_SZ      = 517,     /* RSA raw sz 4096 for bits + tag + len(4) */
-    MAX_DSA_INT_SZ      = 389,     /* DSA raw sz 3072 for bits + tag + len(4) */
+    MAX_RSA_INT_SZ      = (512 + 1 + MAX_LENGTH_SZ), /* RSA raw sz 4096 for bits + tag + len(5) */
+    MAX_DSA_INT_SZ      = (384 + 1 + MAX_LENGTH_SZ), /* DSA raw sz 3072 for bits + tag + len(5) */
     MAX_DSA_PUBKEY_SZ   = (DSA_PUB_INTS * MAX_DSA_INT_SZ) + (2 * MAX_SEQ_SZ) +
                           2 + MAX_LENGTH_SZ, /* Maximum size of a DSA public
                                       key taken from wc_SetDsaPublicKey. */
@@ -1004,7 +1008,6 @@ enum Misc_ASN {
     MAX_CERTPOL_NB      = CTC_MAX_CERTPOL_NB,/* Max number of Cert Policy */
     MAX_CERTPOL_SZ      = CTC_MAX_CERTPOL_SZ,
 #endif
-    MAX_AIA_SZ          = 2,       /* Max Authority Info Access extension size*/
     OCSP_NONCE_EXT_SZ   = 35,      /* OCSP Nonce Extension size */
     MAX_OCSP_EXT_SZ     = 58,      /* Max OCSP Extension length */
     MAX_OCSP_NONCE_SZ   = 16,      /* OCSP Nonce size           */
@@ -1717,6 +1720,9 @@ struct DecodedCert {
 
 #if defined(HAVE_ECC) || defined(HAVE_ED25519) || defined(HAVE_ED448)
     word32  pkCurveOID;           /* Public Key's curve OID */
+    #ifdef WOLFSSL_CUSTOM_CURVES
+        int  pkCurveSize;         /* Public Key's curve size */
+    #endif
 #endif /* HAVE_ECC */
     const byte* beforeDate;
     int     beforeDateLen;

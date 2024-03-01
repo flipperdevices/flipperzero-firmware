@@ -231,7 +231,7 @@ const char * wc_LmsKey_RcToStr(enum wc_LmsRc lmsEc)
 
 /* Init an LMS key.
  *
- * Call this before setting the parms of an LMS key.
+ * Call this before setting the params of an LMS key.
  *
  * Returns 0 on success.
  * */
@@ -404,7 +404,7 @@ int wc_LmsKey_SetParameters(LmsKey * key, int levels, int height,
         key->lm_ots_type[i] = ots;
     }
 
-    /* Move the state to parms set.
+    /* Move the state to params set.
      * Key is ready for MakeKey or Reload. */
     key->state = WC_LMS_STATE_PARMSET;
 
@@ -656,7 +656,7 @@ int wc_LmsKey_MakeKey(LmsKey* key, WC_RNG * rng)
     return 0;
 }
 
-/* Reload a key that has been prepared with the appropriate parms and
+/* Reload a key that has been prepared with the appropriate params and
  * data. Use this if you wish to resume signing with an existing key.
  *
  * Write/read callbacks, and context data, must be set prior.

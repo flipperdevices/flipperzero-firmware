@@ -1180,7 +1180,7 @@ SP_NOINLINE static void sp_256_mul_10(sp_digit* r, const sp_digit* a,
  * a   First number to multiply in Montgomery form.
  * b   Second number to multiply in Montgomery form.
  * m   Modulus (prime).
- * mp  Montgomery mulitplier.
+ * mp  Montgomery multiplier.
  */
 static void sp_256_mont_mul_10(sp_digit* r, const sp_digit* a, const sp_digit* b,
         const sp_digit* m, sp_digit mp)
@@ -1281,7 +1281,7 @@ SP_NOINLINE static void sp_256_sqr_10(sp_digit* r, const sp_digit* a)
  * r   Result of squaring.
  * a   Number to square in Montgomery form.
  * m   Modulus (prime).
- * mp  Montgomery mulitplier.
+ * mp  Montgomery multiplier.
  */
 static void sp_256_mont_sqr_10(sp_digit* r, const sp_digit* a, const sp_digit* m,
         sp_digit mp)
@@ -1297,7 +1297,7 @@ static void sp_256_mont_sqr_10(sp_digit* r, const sp_digit* a, const sp_digit* m
  * a   Number to square in Montgomery form.
  * n   Number of times to square.
  * m   Modulus (prime).
- * mp  Montgomery mulitplier.
+ * mp  Montgomery multiplier.
  */
 static void sp_256_mont_sqr_n_10(sp_digit* r, const sp_digit* a, int n,
         const sp_digit* m, sp_digit mp)

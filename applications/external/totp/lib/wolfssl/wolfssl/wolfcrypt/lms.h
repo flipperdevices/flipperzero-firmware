@@ -94,8 +94,8 @@ enum wc_LmsParm {
 /* enum wc_LmsState is to help track the state of an LMS/HSS Key. */
 enum wc_LmsState {
     WC_LMS_STATE_FREED,      /* Key has been freed from memory. */
-    WC_LMS_STATE_INITED,     /* Key has been inited, ready to set parms.*/
-    WC_LMS_STATE_PARMSET,    /* Parms are set, ready to MakeKey or Reload. */
+    WC_LMS_STATE_INITED,     /* Key has been inited, ready to set params.*/
+    WC_LMS_STATE_PARMSET,    /* Params are set, ready to MakeKey or Reload. */
     WC_LMS_STATE_OK,         /* Able to sign signatures and verify. */
     WC_LMS_STATE_VERIFYONLY, /* A public only LmsKey. */
     WC_LMS_STATE_BAD,        /* Can't guarantee key's state. */

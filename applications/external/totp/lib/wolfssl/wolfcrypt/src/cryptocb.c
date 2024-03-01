@@ -33,7 +33,7 @@
  * WOLF_CRYPTO_CB_CMD
  *
  * enable debug InfoString functions
- * DEBUG_CRYPTO_CB
+ * DEBUG_CRYPTOCB
  */
 
 #ifdef HAVE_CONFIG_H

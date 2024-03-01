@@ -27,14 +27,3 @@ There is a companion app for desktop allowing you to interract with Flipper Auth
 [PVS-Studio](https://pvs-studio.com/en/pvs-studio/?utm_source=github&utm_medium=organic&utm_campaign=open_source) - static analyzer for C, C++, C#, and Java code.
 
 [SonarCloud](https://www.sonarsource.com/products/sonarcloud/) - cloud-based code quality and security service
-
-## Want to say thank you?
-
-* Buy me a coffee [here](https://ko-fi.com/akopachov) (No account needed, one-time)
-* Become a patron at [Patreon](https://patreon.com/akopachov) (Account needed)
-* [Z.Cash](https://z.cash/): `t1PCzJrd96RUfzjzhBERfXEFvSi7W6V86hM`
-* [TON](https://ton.org/): `EQCSBzoTb1B7RhXnka5RegmdjHR3gQwRVgZHNPPqzjjvlW9T`
-
-## Have questions?
-
-Checkout [FAQ](https://github.com/akopachov/flipper-zero_authenticator/wiki/FAQ)

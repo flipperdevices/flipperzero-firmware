@@ -559,6 +559,10 @@ int wc_PKCS12_PBKDF_ex(byte* output, const byte* passwd, int passLen,
 #endif /* HAVE_PKCS12 */
 
 #ifdef HAVE_SCRYPT
+#ifdef NO_HMAC
+   #error scrypt requires HMAC
+#endif
+
 /* Rotate the 32-bit value a by b bits to the left.
  *
  * a  32-bit value.
