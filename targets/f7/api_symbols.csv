@@ -2691,6 +2691,7 @@ Function,+,nfc_poller_stop,void,NfcPoller*
 Function,+,nfc_poller_trx,NfcError,"Nfc*, const BitBuffer*, BitBuffer*, uint32_t"
 Function,+,nfc_protocol_get_parent,NfcProtocol,NfcProtocol
 Function,+,nfc_protocol_has_parent,_Bool,"NfcProtocol, NfcProtocol"
+Function,+,nfc_reset,void,Nfc*
 Function,+,nfc_scanner_alloc,NfcScanner*,Nfc*
 Function,+,nfc_scanner_free,void,NfcScanner*
 Function,+,nfc_scanner_start,void,"NfcScanner*, NfcScannerCallback, void*"

@@ -93,6 +93,7 @@ void nfc_listener_free(NfcListener* instance) {
 
     nfc_listener_list_free(instance);
     nfc_device_free(instance->nfc_dev);
+    nfc_reset(instance->nfc);
     free(instance);
 }
 

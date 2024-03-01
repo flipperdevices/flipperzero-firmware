@@ -281,6 +281,16 @@ void nfc_config(Nfc* instance, NfcMode mode, NfcTech tech) {
     instance->config_state = NfcConfigurationStateDone;
 }
 
+void nfc_reset(Nfc* instance) {
+    furi_assert(instance);
+
+    if(instance->config_state == NfcConfigurationStateDone) {
+        furi_hal_nfc_reset_mode();
+        instance->config_state = NfcConfigurationStateIdle;
+    }
+    furi_hal_nfc_low_power_mode_start();
+}
+
 void nfc_set_fdt_poll_fc(Nfc* instance, uint32_t fdt_poll_fc) {
     furi_assert(instance);
     instance->fdt_poll_fc = fdt_poll_fc;

@@ -151,6 +151,13 @@ void nfc_free(Nfc* instance);
 void nfc_config(Nfc* instance, NfcMode mode, NfcTech tech);
 
 /**
+ * @brief Reset Nfc configuration and start low power mode.
+ *
+ * @param[in,out] instance pointer to the instance to be configured.
+ */
+void nfc_reset(Nfc* instance);
+
+/**
  * @brief Set poller frame delay time.
  *
  * @param[in,out] instance pointer to the instance to be modified.

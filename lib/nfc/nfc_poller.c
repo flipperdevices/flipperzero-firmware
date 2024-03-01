@@ -91,6 +91,7 @@ void nfc_poller_free(NfcPoller* instance) {
     furi_assert(instance);
 
     nfc_poller_list_free(instance);
+    nfc_reset(instance->nfc);
     free(instance);
 }
 
