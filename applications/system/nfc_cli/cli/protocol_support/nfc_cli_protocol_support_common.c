@@ -231,6 +231,7 @@ void nfc_cli_protocol_support_common_poll_handler(
             printf("Usage: nfc poll\r\n");
             arg_parser_get_help_message(parser, tmp_str);
             printf("%s\r\n", furi_string_get_cstr(tmp_str));
+            break;
         }
 
         if(NfcCliPollCmdDataArray_size(cmd_arr) == 0) {
