@@ -30,6 +30,8 @@ void nfc_playlist_text_input_menu_callback(void* context) {
         storage_common_rename(
             storage, furi_string_get_cstr(nfc_playlist->settings.file_path), new_file_name);
         nfc_playlist->settings.file_path = furi_string_alloc_set_str(new_file_name);
+    } else {
+        scene_manager_next_scene(nfc_playlist->scene_manager, NfcPlaylistScene_FileExistsError);
     }
 
     free(new_file_name);

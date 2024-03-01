@@ -74,13 +74,6 @@ void nfc_playlist_main_menu_scene_on_enter(void* context) {
 
     submenu_add_item(
         nfc_playlist->submenu,
-        "Edit playlist",
-        NfcPlaylistMenuSelection_FileEdit,
-        nfc_playlist_main_menu_menu_callback,
-        nfc_playlist);
-
-    submenu_add_item(
-        nfc_playlist->submenu,
         "Settings",
         NfcPlaylistMenuSelection_Settings,
         nfc_playlist_main_menu_menu_callback,

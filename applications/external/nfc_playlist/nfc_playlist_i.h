@@ -4,4 +4,5 @@
 #include "scences/emulation.h"
 #include "scences/file_select.h"
 #include "scences/file_edit.h"
+#include "scences/file_exists_error.h"
 #include "scences/text_input.h"

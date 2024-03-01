@@ -91,6 +91,10 @@ static NfcPlaylist* nfc_playlist_alloc() {
         submenu_get_view(nfc_playlist->submenu));
     view_dispatcher_add_view(
         nfc_playlist->view_dispatcher,
+        NfcPlaylistView_FileExistsError,
+        popup_get_view(nfc_playlist->popup));
+    view_dispatcher_add_view(
+        nfc_playlist->view_dispatcher,
         NfcPlaylistView_TextInput,
         text_input_get_view(nfc_playlist->text_input));
     return nfc_playlist;
@@ -104,6 +108,7 @@ static void nfc_playlist_free(NfcPlaylist* nfc_playlist) {
     view_dispatcher_remove_view(nfc_playlist->view_dispatcher, NfcPlaylistView_Popup);
     view_dispatcher_remove_view(nfc_playlist->view_dispatcher, NfcPlaylistView_FileSelect);
     view_dispatcher_remove_view(nfc_playlist->view_dispatcher, NfcPlaylistView_FileEdit);
+    view_dispatcher_remove_view(nfc_playlist->view_dispatcher, NfcPlaylistView_FileExistsError);
     view_dispatcher_remove_view(nfc_playlist->view_dispatcher, NfcPlaylistView_TextInput);
     view_dispatcher_free(nfc_playlist->view_dispatcher);
     variable_item_list_free(nfc_playlist->variable_item_list);
