@@ -14,7 +14,6 @@ void nfc_playlist_worker_free(NfcPlaylistWorker* nfc_playlist_worker) {
    furi_thread_free(nfc_playlist_worker->thread);
    nfc_free(nfc_playlist_worker->nfc);
    nfc_device_free(nfc_playlist_worker->nfc_device);
-   nfc_listener_free(nfc_playlist_worker->nfc_listener);
    free(nfc_playlist_worker);
 }
 
