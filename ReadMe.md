@@ -35,6 +35,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Authenticator/TOTP v5.12.0 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
 - Updated: [CFW Settings - Imported/Modified By RogueMaster (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/ecf91524a956f773881d564c4ada833f844264ca) [Fix crash on frequency remove for leftmost index (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/70ac8e1596bb03800c3b133d192c8cc7e03bcb14)
 - Updated: [NFC Playlist v1.4 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
+- OFW: PR: [Gui: lefty mode for direct draw #3490 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/3490)
 
 <a name="release">
 
