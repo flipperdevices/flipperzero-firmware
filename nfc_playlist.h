@@ -20,6 +20,7 @@ typedef enum {
    NfcPlaylistView_Popup,
    NfcPlaylistView_FileSelect,
    NfcPlaylistView_FileEdit,
+   NfcPlaylistView_FileExistsError,
    NfcPlaylistView_TextInput
 } NfcPlayScenesView;
 
@@ -29,6 +30,7 @@ typedef enum {
    NfcPlaylistScene_EmulatingPopup,
    NfcPlaylistScene_FileSelect,
    NfcPlaylistScene_FileEdit,
+   NfcPlaylistScene_FileExistsError,
    NfcPlaylistScene_TextInput,
    NfcPlaylistScene_count
 } NfcPlaylistScene;
