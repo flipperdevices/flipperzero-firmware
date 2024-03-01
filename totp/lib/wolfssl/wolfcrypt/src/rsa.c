@@ -2495,6 +2495,7 @@ static int RsaFunctionPrivate(mp_int* tmp, RsaKey* key, WC_RNG* rng)
 {
     int    ret = 0;
 #if defined(WC_RSA_BLINDING) && !defined(WC_NO_RNG)
+    mp_digit mp = 0;
     DECL_MP_INT_SIZE_DYN(rnd, mp_bitsused(&key->n), RSA_MAX_SIZE);
     DECL_MP_INT_SIZE_DYN(rndi, mp_bitsused(&key->n), RSA_MAX_SIZE);
 #endif /* WC_RSA_BLINDING && !WC_NO_RNG */
@@ -2627,9 +2628,31 @@ static int RsaFunctionPrivate(mp_int* tmp, RsaKey* key, WC_RNG* rng)
 #endif   /* RSA_LOW_MEM */
 
 #if defined(WC_RSA_BLINDING) && !defined(WC_NO_RNG)
-    /* unblind */
-    if (ret == 0 && mp_mulmod(tmp, rndi, &key->n, tmp) != MP_OKAY)
+    /* Multiply result (tmp) by blinding invertor (rndi).
+     * Use Montgomery form to make operation more constant time.
+     */
+    if ((ret == 0) && (mp_montgomery_setup(&key->n, &mp) != MP_OKAY)) {
         ret = MP_MULMOD_E;
+    }
+    if ((ret == 0) && (mp_montgomery_calc_normalization(rnd, &key->n) !=
+            MP_OKAY)) {
+        ret = MP_MULMOD_E;
+    }
+    /* Convert blinding invert to Montgomery form. */
+    if ((ret == 0) && (mp_mul(rndi, rnd, rndi) != MP_OKAY)) {
+        ret = MP_MULMOD_E;
+    }
+    if ((ret == 0) && (mp_mod(rndi, &key->n, rndi) != MP_OKAY)) {
+        ret = MP_MULMOD_E;
+    }
+    /* Multiply result by blinding invert. */
+    if ((ret == 0) && (mp_mul(tmp, rndi, tmp) != MP_OKAY)) {
+        ret = MP_MULMOD_E;
+    }
+    /* Reduce result. */
+    if ((ret == 0) && (mp_montgomery_reduce_ct(tmp, &key->n, mp) != MP_OKAY)) {
+        ret = MP_MULMOD_E;
+    }
 
     mp_forcezero(rndi);
     mp_forcezero(rnd);
@@ -3520,8 +3543,9 @@ static int RsaPrivateDecryptEx(const byte* in, word32 inLen, byte* out,
                              mgf, label, labelSz, saltLen,
                              mp_count_bits(&key->n), key->heap);
 #endif
-        if (rsa_type == RSA_PUBLIC_DECRYPT && ret > (int)outLen)
+        if (rsa_type == RSA_PUBLIC_DECRYPT && ret > (int)outLen) {
             ret = RSA_BUFFER_E;
+        }
         else if (ret >= 0 && pad != NULL) {
             /* only copy output if not inline */
             if (outPtr == NULL) {
@@ -3547,8 +3571,9 @@ static int RsaPrivateDecryptEx(const byte* in, word32 inLen, byte* out,
                     XMEMCPY(out, pad, (size_t)ret);
                 }
             }
-            else
+            else {
                 *outPtr = pad;
+            }
 
 #if !defined(WOLFSSL_RSA_VERIFY_ONLY)
             ret = ctMaskSelInt(ctMaskLTE(ret, (int)outLen), ret, RSA_BUFFER_E);

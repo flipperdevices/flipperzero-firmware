@@ -421,6 +421,7 @@ user_settings_asm.h
 # Espressif sdk config default should be saved in sdkconfig.defaults
 # we won't track the actual working sdkconfig files
 /IDE/Espressif/**/sdkconfig
+/IDE/Espressif/**/sdkconfig.old
 
 # auto-created CMake backups
 **/CMakeLists.txt.old

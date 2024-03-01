@@ -251,9 +251,189 @@ WOLFSSL_LOCAL void wc_MemZero_Add(const char* name, const void* addr,
 WOLFSSL_LOCAL void wc_MemZero_Check(void* addr, size_t len);
 #endif
 
+#ifdef WC_DEBUG_CIPHER_LIFECYCLE
+WOLFSSL_LOCAL int wc_debug_CipherLifecycleInit(void **CipherLifecycleTag,
+                                               void *heap);
+WOLFSSL_LOCAL int wc_debug_CipherLifecycleCheck(void *CipherLifecycleTag,
+                                                int abort_p);
+WOLFSSL_LOCAL int wc_debug_CipherLifecycleFree(void **CipherLifecycleTag,
+                                               void *heap, int abort_p);
+#else
+#define wc_debug_CipherLifecycleInit(CipherLifecycleTag, heap) \
+        ((void)(CipherLifecycleTag), (void)(heap), 0)
+#define wc_debug_CipherLifecycleCheck(CipherLifecycleTag, abort_p) \
+        ((void)(CipherLifecycleTag), (void)(abort_p), 0)
+#define wc_debug_CipherLifecycleFree(CipherLifecycleTag, heap, abort_p) \
+        ((void)(CipherLifecycleTag), (void)(heap), (void)(abort_p), 0)
+#endif
+
+#ifdef DEBUG_VECTOR_REGISTER_ACCESS
+    WOLFSSL_API extern THREAD_LS_T int wc_svr_count;
+    WOLFSSL_API extern THREAD_LS_T const char *wc_svr_last_file;
+    WOLFSSL_API extern THREAD_LS_T int wc_svr_last_line;
+
+    #ifdef DEBUG_VECTOR_REGISTERS_ABORT_ON_FAIL
+        #define DEBUG_VECTOR_REGISTERS_EXTRA_FAIL_CLAUSE abort();
+    #elif defined(DEBUG_VECTOR_REGISTERS_EXIT_ON_FAIL)
+        #define DEBUG_VECTOR_REGISTERS_EXTRA_FAIL_CLAUSE exit(1);
+    #else
+        #define DEBUG_VECTOR_REGISTERS_EXTRA_FAIL_CLAUSE
+    #endif
+
+    #define SAVE_VECTOR_REGISTERS(fail_clause) {                    \
+        int _svr_ret = wc_debug_vector_registers_retval;            \
+        if (_svr_ret != 0) { fail_clause }                          \
+        ++wc_svr_count;                                             \
+        if (wc_svr_count > 5) {                                     \
+            fprintf(stderr,                                         \
+                    ("%s @ L%d : incr : "                           \
+                     "wc_svr_count %d (last op %s L%d)\n"),         \
+                    __FILE__,                                       \
+                    __LINE__,                                       \
+                    wc_svr_count,                                   \
+                    wc_svr_last_file,                               \
+                    wc_svr_last_line);                              \
+            DEBUG_VECTOR_REGISTERS_EXTRA_FAIL_CLAUSE                \
+        }                                                           \
+        wc_svr_last_file = __FILE__;                                \
+        wc_svr_last_line = __LINE__;                                \
+    }
+
+    WOLFSSL_API extern THREAD_LS_T int wc_debug_vector_registers_retval;
+
+#ifndef WC_DEBUG_VECTOR_REGISTERS_RETVAL_INITVAL
+#define WC_DEBUG_VECTOR_REGISTERS_RETVAL_INITVAL 0
+#endif
+#define WC_DEBUG_SET_VECTOR_REGISTERS_RETVAL(x) do { \
+            if (((x) != 0) && (wc_svr_count > 0)) {                 \
+                fprintf(stderr,                                     \
+                        ("%s @ L%d : incr : "                       \
+                         "wc_svr_count %d (last op %s L%d)\n"),     \
+                        __FILE__,                                   \
+                        __LINE__,                                   \
+                        wc_svr_count,                               \
+                        wc_svr_last_file,                           \
+                        wc_svr_last_line);                          \
+                DEBUG_VECTOR_REGISTERS_EXTRA_FAIL_CLAUSE            \
+            }                                                       \
+        wc_debug_vector_registers_retval = (x);                     \
+    } while (0)
+
+#ifdef DEBUG_VECTOR_REGISTER_ACCESS_FUZZING
+    #ifndef WC_DEBUG_VECTOR_REGISTERS_FUZZING_SEED
+        #define WC_DEBUG_VECTOR_REGISTERS_FUZZING_SEED 0
+    #endif
+        WOLFSSL_LOCAL int SAVE_VECTOR_REGISTERS2_fuzzer(void);
+
+    #define SAVE_VECTOR_REGISTERS2(...) ({                          \
+        int _svr2_val = SAVE_VECTOR_REGISTERS2_fuzzer();            \
+        if (_svr2_val == 0) {                                       \
+            ++wc_svr_count;                                         \
+            if (wc_svr_count > 5) {                                 \
+                fprintf(stderr,                                     \
+                        ("%s @ L%d : incr : "                       \
+                         "wc_svr_count %d (last op %s L%d)\n"),     \
+                        __FILE__,                                   \
+                        __LINE__,                                   \
+                        wc_svr_count,                               \
+                        wc_svr_last_file,                           \
+                        wc_svr_last_line);                          \
+                DEBUG_VECTOR_REGISTERS_EXTRA_FAIL_CLAUSE            \
+            }                                                       \
+            wc_svr_last_file = __FILE__;                            \
+            wc_svr_last_line = __LINE__;                            \
+            _svr2_val = 0;                                          \
+        }                                                           \
+        _svr2_val;                                                  \
+    })
+
+#else
+
+    #define SAVE_VECTOR_REGISTERS2(...) ({                          \
+        int _svr2_val;                                              \
+        if (wc_debug_vector_registers_retval != 0) {                \
+            if (wc_svr_count > 0) {                                 \
+                fprintf(stderr,                                     \
+                        ("%s @ L%d : incr : "                       \
+                        "wc_svr_count %d (last op %s L%d)\n"),      \
+                        __FILE__,                                   \
+                        __LINE__,                                   \
+                        wc_svr_count,                               \
+                        wc_svr_last_file,                           \
+                        wc_svr_last_line);                          \
+                DEBUG_VECTOR_REGISTERS_EXTRA_FAIL_CLAUSE            \
+            }                                                       \
+            _svr2_val = wc_debug_vector_registers_retval;           \
+        } else {                                                    \
+            ++wc_svr_count;                                         \
+            if (wc_svr_count > 5) {                                 \
+                fprintf(stderr,                                     \
+                        ("%s @ L%d : incr : "                       \
+                         "wc_svr_count %d (last op %s L%d)\n"),     \
+                        __FILE__,                                   \
+                        __LINE__,                                   \
+                        wc_svr_count,                               \
+                        wc_svr_last_file,                           \
+                        wc_svr_last_line);                          \
+                DEBUG_VECTOR_REGISTERS_EXTRA_FAIL_CLAUSE            \
+            }                                                       \
+            wc_svr_last_file = __FILE__;                            \
+            wc_svr_last_line = __LINE__;                            \
+            _svr2_val = 0;                                          \
+        }                                                           \
+        _svr2_val;                                                  \
+    })
+
+#endif
+
+    #define ASSERT_SAVED_VECTOR_REGISTERS(fail_clause) do {         \
+        if (wc_svr_count <= 0) {                                    \
+            fprintf(stderr,                                         \
+                    ("ASSERT_SAVED_VECTOR_REGISTERS : %s @ L%d : "  \
+                    "wc_svr_count %d (last op %s L%d)\n"),          \
+                    __FILE__,                                       \
+                    __LINE__,                                       \
+                    wc_svr_count,                                   \
+                    wc_svr_last_file,                               \
+                    wc_svr_last_line);                              \
+            DEBUG_VECTOR_REGISTERS_EXTRA_FAIL_CLAUSE                \
+            { fail_clause }                                         \
+        }                                                           \
+    } while (0)
+    #define ASSERT_RESTORED_VECTOR_REGISTERS(fail_clause) do {      \
+        if (wc_svr_count != 0) {                                    \
+            fprintf(stderr,                                         \
+                    ("ASSERT_RESTORED_VECTOR_REGISTERS : %s @ L%d"  \
+                     " : wc_svr_count %d (last op %s L%d)\n"),      \
+                    __FILE__,                                       \
+                    __LINE__,                                       \
+                    wc_svr_count,                                   \
+                    wc_svr_last_file,                               \
+                    wc_svr_last_line);                              \
+            DEBUG_VECTOR_REGISTERS_EXTRA_FAIL_CLAUSE                \
+            { fail_clause }                                         \
+        }                                                           \
+    } while (0)
+    #define RESTORE_VECTOR_REGISTERS(...) do {                      \
+        --wc_svr_count;                                             \
+        if ((wc_svr_count > 4) || (wc_svr_count < 0)) {             \
+            fprintf(stderr,                                         \
+                    ("%s @ L%d : decr : "                           \
+                     "wc_svr_count %d (last op %s L%d)\n"),         \
+                    __FILE__,                                       \
+                    __LINE__,                                       \
+                    wc_svr_count,                                   \
+                    wc_svr_last_file,                               \
+                    wc_svr_last_line);                              \
+            DEBUG_VECTOR_REGISTERS_EXTRA_FAIL_CLAUSE                \
+        }                                                           \
+        wc_svr_last_file = __FILE__;                                \
+        wc_svr_last_line = __LINE__;                                \
+    } while(0)
+#endif
+
 #ifdef __cplusplus
     }  /* extern "C" */
 #endif
 
 #endif /* WOLFSSL_MEMORY_H */
-

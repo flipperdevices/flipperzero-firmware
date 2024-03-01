@@ -97,7 +97,7 @@ static int sha256_cb(const unsigned char *in, unsigned long long inlen,
 
 /* Init an XMSS key.
  *
- * Call this before setting the parms of an XMSS key.
+ * Call this before setting the params of an XMSS key.
  *
  *  key         [in]  The XMSS key to init.
  *  heap        [in]  Unused.
@@ -201,7 +201,7 @@ static int wc_XmssKey_SetOid(XmssKey * key, uint32_t oid, int is_xmssmt)
 
 /* Set the XMSS key parameter string.
  *
- * The input string must be one of the supported parm set names in
+ * The input string must be one of the supported param set names in
  * the "Name" section from the table in wolfssl/wolfcrypt/xmss.h,
  * e.g. "XMSS-SHA2_10_256" or "XMSSMT-SHA2_20/4_256".
  *

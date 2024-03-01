@@ -3394,7 +3394,8 @@ int wc_GenerateSeed(OS_Seed* os, byte* output, word32 sz)
 
         /* Espressif ESP32 */
         #include <esp_system.h>
-        #if defined(CONFIG_IDF_TARGET_ESP32S3)
+        #if defined(CONFIG_IDF_TARGET_ESP32S2) || \
+            defined(CONFIG_IDF_TARGET_ESP32S3)
             #include <esp_random.h>
         #endif
 
@@ -3506,23 +3507,16 @@ int wc_GenerateSeed(OS_Seed* os, byte* output, word32 sz)
      * extern int myRngFunc(byte* output, word32 sz);
      */
 
-#elif defined(WOLFSSL_SAFERTOS) || defined(WOLFSSL_LEANPSK) || \
-      defined(WOLFSSL_IAR_ARM)  || defined(WOLFSSL_MDK_ARM) || \
-      defined(WOLFSSL_uITRON4)  || defined(WOLFSSL_uTKERNEL2) || \
-      defined(WOLFSSL_LPC43xx)  || defined(NO_STM32_RNG) || \
-      defined(MBED)             || defined(WOLFSSL_EMBOS) || \
-      defined(WOLFSSL_GENSEED_FORTEST) || defined(WOLFSSL_CHIBIOS) || \
-      defined(WOLFSSL_CONTIKI)  || defined(WOLFSSL_AZSPHERE)
-
-    /* these platforms do not have a default random seed and
-       you'll need to implement your own wc_GenerateSeed or define via
-       CUSTOM_RAND_GENERATE_BLOCK */
-
-    #define USE_TEST_GENSEED
-
 #elif defined(WOLFSSL_ZEPHYR)
 
+        #include <version.h>
+
+    #if KERNEL_VERSION_NUMBER >= 0x30500
+        #include <zephyr/random/random.h>
+    #else
         #include <zephyr/random/rand32.h>
+    #endif
+
     #ifndef _POSIX_C_SOURCE
         #include <zephyr/posix/time.h>
     #else
@@ -3622,6 +3616,20 @@ int wc_GenerateSeed(OS_Seed* os, byte* output, word32 sz)
         }
         return ret;
     }
+
+#elif defined(WOLFSSL_SAFERTOS) || defined(WOLFSSL_LEANPSK) || \
+      defined(WOLFSSL_IAR_ARM)  || defined(WOLFSSL_MDK_ARM) || \
+      defined(WOLFSSL_uITRON4)  || defined(WOLFSSL_uTKERNEL2) || \
+      defined(WOLFSSL_LPC43xx)  || defined(NO_STM32_RNG) || \
+      defined(MBED)             || defined(WOLFSSL_EMBOS) || \
+      defined(WOLFSSL_GENSEED_FORTEST) || defined(WOLFSSL_CHIBIOS) || \
+      defined(WOLFSSL_CONTIKI)  || defined(WOLFSSL_AZSPHERE)
+
+    /* these platforms do not have a default random seed and
+       you'll need to implement your own wc_GenerateSeed or define via
+       CUSTOM_RAND_GENERATE_BLOCK */
+
+    #define USE_TEST_GENSEED
 
 #elif defined(NO_DEV_RANDOM)
 
