@@ -58,9 +58,9 @@ int flipperzero_dcf77_app_main(void *p)
   AppData    app_data;
   InputEvent event;
 
+  app_data.is_dst = false;
   furi_hal_rtc_get_datetime(&app_data.dt);
   set_dcf77_time(&app_data.dt, app_data.is_dst);
-  app_data.is_dst = false;
 
   ViewPort         *view_port = view_port_alloc();
   FuriMessageQueue *event_queue = furi_message_queue_alloc(8, sizeof(InputEvent));
