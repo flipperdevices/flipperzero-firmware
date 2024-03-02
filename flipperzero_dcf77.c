@@ -138,10 +138,10 @@ int flipperzero_dcf77_app_main(void *p)
 
   view_port_enabled_set(view_port, false);
   gui_remove_view_port(gui, view_port);
-  furi_record_close(RECORD_GUI);
   furi_record_close(RECORD_NOTIFICATION);
-  view_port_free(view_port);
+  furi_record_close(RECORD_GUI);
   furi_message_queue_free(event_queue);
+  view_port_free(view_port);
 
   return 0;
 }
