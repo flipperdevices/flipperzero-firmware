@@ -1,0 +1,15 @@
+App(
+    appid="flipperzero_dcf77",
+    name="DCF77 Time Sync",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="flipperzero_dcf77_app_main",
+    requires=["gui"],
+    stack_size=1 * 1024,
+    order=10,
+    fap_icon="icons/app.png",
+    fap_category="Tools",
+    fap_author="@mdaskalov",
+    fap_weburl="https://github.com/mdaskalov/flipperzero-dcf77",
+    fap_version="1.0",
+    fap_description="Sends DCF77 time signal on the RFID antena and the A4 GPIO pin",
+)
