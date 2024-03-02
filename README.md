@@ -10,3 +10,5 @@
 ### Schema
 
 ![schematics](schematics.png)
+
+(The photo from the N3 connector created by Martin Pot. [Source](https://martybugs.net/blog/blog.cgi/gear/CanonN3Connector.html))
