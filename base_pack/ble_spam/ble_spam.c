@@ -479,8 +479,7 @@ static bool input_callback(InputEvent* input, void* _ctx) {
 
     if(state->ctx.lock_keyboard) {
         consumed = true;
-        with_view_model(
-            state->main_view, State * *model, { (*model)->lock_warning = true; }, true);
+        state->lock_warning = true;
         if(state->lock_count == 0) {
             furi_timer_start(state->lock_timer, 1000);
         }
@@ -506,7 +505,9 @@ static bool input_callback(InputEvent* input, void* _ctx) {
                     if(advertising) toggle_adv(state);
                     state->ctx.attack = &attacks[state->index];
                     scene_manager_set_scene_state(state->ctx.scene_manager, SceneConfig, 0);
+                    view_commit_model(view, consumed);
                     scene_manager_next_scene(state->ctx.scene_manager, SceneConfig);
+                    return consumed;
                 } else if(input->type == InputTypeShort) {
                     toggle_adv(state);
                 }
