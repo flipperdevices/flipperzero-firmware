@@ -29,14 +29,14 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0301-1601-0.98.4-37584b5](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-03-02 01:10 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-03-02 01:10 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-03-02 13:05 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-03-02 13:05 EST`
 - OFW: [WiFi board: fixed update script on Windows (unfortunately also Mac and Linux) #3485 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/3485)
 - Updated: [Authenticator/TOTP v5.12.0 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
 - Updated: [CFW Settings - Imported/Modified By RogueMaster (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/ecf91524a956f773881d564c4ada833f844264ca) [Fix crash on frequency remove for leftmost index (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/70ac8e1596bb03800c3b133d192c8cc7e03bcb14)
-- Updated: [NFC Playlist v1.4 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
 - OFW: PR: [Gui: lefty mode for direct draw #3490 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/3490)
 - [BleSpam: FIx hang on hold ok while running attack (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/9017f4eb39169e6c7280232d05bec2c6c591ad0e)
+- Updated: [NFC Playlist v1.4 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
 
 <a name="release">
 
