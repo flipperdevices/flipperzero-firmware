@@ -129,6 +129,7 @@ PokemonData* pokemon_data_alloc(uint8_t gen) {
     case GEN_I:
         /* Allocate trade block and set its size for the trade view to use */
         pdata->trade_block_sz = sizeof(TradeBlockGenI);
+        pdata->party_sz = sizeof(PokemonPartyGenI) * 6;
         pdata->trade_block = malloc(pdata->trade_block_sz);
 
         /* The party_members element needs to be 0xff for unused */
@@ -148,6 +149,7 @@ PokemonData* pokemon_data_alloc(uint8_t gen) {
     case GEN_II:
         /* Allocate trade block and set its size for the trade view to use */
         pdata->trade_block_sz = sizeof(TradeBlockGenII);
+        pdata->party_sz = sizeof(PokemonPartyGenII) * 6;
         pdata->trade_block = malloc(pdata->trade_block_sz);
 
         /* The party_members element needs to be 0xff for unused */
