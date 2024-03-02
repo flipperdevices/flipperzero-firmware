@@ -8,8 +8,8 @@
 #include "common.h"
 #include "../services/crypto/crypto_facade.h"
 
-#define ESTIMATE_BASE32_PLAIN_LENGTH(base32_length) ((base32_length)*0.625f)
-#define ESTIMATE_BASE64_PLAIN_LENGTH(base64_length) ((base64_length)*0.75f)
+#define ESTIMATE_BASE32_PLAIN_LENGTH(base32_length) ((base32_length) * 0.625f)
+#define ESTIMATE_BASE64_PLAIN_LENGTH(base64_length) ((base64_length) * 0.75f)
 
 TokenInfo* token_info_alloc() {
     TokenInfo* tokenInfo = malloc(sizeof(TokenInfo));
