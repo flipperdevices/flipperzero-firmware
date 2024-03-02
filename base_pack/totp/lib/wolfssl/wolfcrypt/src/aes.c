@@ -114,7 +114,6 @@ block cipher mechanism that uses n-bit binary string parameter key with 128-bits
     #pragma warning(disable: 4127)
 #endif
 
-
 /* Define AES implementation includes and functions */
 #if defined(STM32_CRYPTO)
      /* STM32F2/F4/F7/L4/L5/H7/WB55 hardware AES support for ECB, CBC, CTR and GCM modes */
@@ -131,6 +130,12 @@ block cipher mechanism that uses n-bit binary string parameter key with 128-bits
         CRYP_InitTypeDef cryptInit;
         CRYP_KeyInitTypeDef keyInit;
     #endif
+
+#ifdef WC_DEBUG_CIPHER_LIFECYCLE
+        ret = wc_debug_CipherLifecycleCheck(aes->CipherLifecycleTag, 0);
+        if (ret < 0)
+            return ret;
+#endif
 
     #ifdef WOLFSSL_STM32_CUBEMX
         ret = wc_Stm32_Aes_Init(aes, &hcryp);
@@ -226,6 +231,12 @@ block cipher mechanism that uses n-bit binary string parameter key with 128-bits
         CRYP_InitTypeDef cryptInit;
         CRYP_KeyInitTypeDef keyInit;
     #endif
+
+#ifdef WC_DEBUG_CIPHER_LIFECYCLE
+        ret = wc_debug_CipherLifecycleCheck(aes->CipherLifecycleTag, 0);
+        if (ret < 0)
+            return ret;
+#endif
 
     #ifdef WOLFSSL_STM32_CUBEMX
         ret = wc_Stm32_Aes_Init(aes, &hcryp);
@@ -343,6 +354,12 @@ block cipher mechanism that uses n-bit binary string parameter key with 128-bits
             if (ret != 0)
                 return ret;
 
+#ifdef WC_DEBUG_CIPHER_LIFECYCLE
+            ret = wc_debug_CipherLifecycleCheck(aes->CipherLifecycleTag, 0);
+            if (ret < 0)
+                return ret;
+#endif
+
             if (wolfSSL_CryptHwMutexLock() == 0) {
                 LTC_AES_EncryptEcb(LTC_BASE, inBlock, outBlock, AES_BLOCK_SIZE,
                     key, keySize);
@@ -359,6 +376,12 @@ block cipher mechanism that uses n-bit binary string parameter key with 128-bits
             int ret = wc_AesGetKeySize(aes, &keySize);
             if (ret != 0)
                 return ret;
+
+#ifdef WC_DEBUG_CIPHER_LIFECYCLE
+            ret = wc_debug_CipherLifecycleCheck(aes->CipherLifecycleTag, 0);
+            if (ret < 0)
+                return ret;
+#endif
 
             if (wolfSSL_CryptHwMutexLock() == 0) {
                 LTC_AES_DecryptEcb(LTC_BASE, inBlock, outBlock, AES_BLOCK_SIZE,
@@ -384,6 +407,14 @@ block cipher mechanism that uses n-bit binary string parameter key with 128-bits
     static WARN_UNUSED_RESULT int wc_AesEncrypt(
         Aes* aes, const byte* inBlock, byte* outBlock)
     {
+#ifdef WC_DEBUG_CIPHER_LIFECYCLE
+        {
+            int ret = wc_debug_CipherLifecycleCheck(aes->CipherLifecycleTag, 0);
+            if (ret < 0)
+                return ret;
+        }
+#endif
+
         if (wolfSSL_CryptHwMutexLock() == 0) {
         #ifdef FREESCALE_MMCAU_CLASSIC
             if ((wc_ptr_t)outBlock % WOLFSSL_MMCAU_ALIGNMENT) {
@@ -403,6 +434,13 @@ block cipher mechanism that uses n-bit binary string parameter key with 128-bits
     static WARN_UNUSED_RESULT int wc_AesDecrypt(
         Aes* aes, const byte* inBlock, byte* outBlock)
     {
+#ifdef WC_DEBUG_CIPHER_LIFECYCLE
+        {
+            int ret = wc_debug_CipherLifecycleCheck(aes->CipherLifecycleTag, 0);
+            if (ret < 0)
+                return ret;
+        }
+#endif
         if (wolfSSL_CryptHwMutexLock() == 0) {
         #ifdef FREESCALE_MMCAU_CLASSIC
             if ((wc_ptr_t)outBlock % WOLFSSL_MMCAU_ALIGNMENT) {
@@ -428,6 +466,13 @@ block cipher mechanism that uses n-bit binary string parameter key with 128-bits
     static WARN_UNUSED_RESULT int wc_AesEncrypt(
         Aes* aes, const byte* inBlock, byte* outBlock)
     {
+#ifdef WC_DEBUG_CIPHER_LIFECYCLE
+        {
+            int ret = wc_debug_CipherLifecycleCheck(aes->CipherLifecycleTag, 0);
+            if (ret < 0)
+                return ret;
+        }
+#endif
         /* Thread mutex protection handled in Pic32Crypto */
         return wc_Pic32AesCrypt(aes->key, aes->keylen, NULL, 0,
             outBlock, inBlock, AES_BLOCK_SIZE,
@@ -439,6 +484,13 @@ block cipher mechanism that uses n-bit binary string parameter key with 128-bits
     static WARN_UNUSED_RESULT int wc_AesDecrypt(
         Aes* aes, const byte* inBlock, byte* outBlock)
     {
+#ifdef WC_DEBUG_CIPHER_LIFECYCLE
+        {
+            int ret = wc_debug_CipherLifecycleCheck(aes->CipherLifecycleTag, 0);
+            if (ret < 0)
+                return ret;
+        }
+#endif
         /* Thread mutex protection handled in Pic32Crypto */
         return wc_Pic32AesCrypt(aes->key, aes->keylen, NULL, 0,
             outBlock, inBlock, AES_BLOCK_SIZE,
@@ -454,6 +506,13 @@ block cipher mechanism that uses n-bit binary string parameter key with 128-bits
         Aes* aes, const byte* inBlock, byte* outBlock)
     {
         int ret;
+
+#ifdef WC_DEBUG_CIPHER_LIFECYCLE
+        ret = wc_debug_CipherLifecycleCheck(aes->CipherLifecycleTag, 0);
+        if (ret < 0)
+            return ret;
+#endif
+
         ret = wolfSSL_CryptHwMutexLock();
         if (ret == 0) {
             ret = nrf51_aes_encrypt(inBlock, (byte*)aes->key, aes->rounds,
@@ -475,7 +534,7 @@ block cipher mechanism that uses n-bit binary string parameter key with 128-bits
 
     /* We'll use SW for fallback:
      *   unsupported key lengths. (e.g. ESP32-S3)
-     *   chipsets not ikmplemented.
+     *   chipsets not implemented.
      *   hardware busy. */
     #define NEED_AES_TABLES
     #define NEED_AES_HW_FALLBACK
@@ -483,12 +542,19 @@ block cipher mechanism that uses n-bit binary string parameter key with 128-bits
     #undef  WOLFSSL_AES_DIRECT
     #define WOLFSSL_AES_DIRECT
 
-    /* If we choose to never have a fallback to SW: */
+    /* Encrypt: If we choose to never have a fallback to SW: */
     #if !defined(NEED_AES_HW_FALLBACK) && (defined(HAVE_AESGCM) || defined(WOLFSSL_AES_DIRECT))
     static WARN_UNUSED_RESULT int wc_AesEncrypt( /* calling this one when NO_AES_192 is defined */
         Aes* aes, const byte* inBlock, byte* outBlock)
     {
         int ret;
+
+#ifdef WC_DEBUG_CIPHER_LIFECYCLE
+        ret = wc_debug_CipherLifecycleCheck(aes->CipherLifecycleTag, 0);
+        if (ret < 0)
+            return ret;
+#endif
+
         /* Thread mutex protection handled in esp_aes_hw_InUse */
     #ifdef NEED_AES_HW_FALLBACK
         if (wc_esp32AesSupportedKeyLen(aes)) {
@@ -501,12 +567,17 @@ block cipher mechanism that uses n-bit binary string parameter key with 128-bits
     }
     #endif
 
-    /* If we choose to never have a fallback to SW */
+    /* Decrypt: If we choose to never have a fallback to SW: */
     #if !defined(NEED_AES_HW_FALLBACK) && (defined(HAVE_AES_DECRYPT) && defined(WOLFSSL_AES_DIRECT))
     static WARN_UNUSED_RESULT int wc_AesDecrypt(
         Aes* aes, const byte* inBlock, byte* outBlock)
     {
         int ret = 0;
+#ifdef WC_DEBUG_CIPHER_LIFECYCLE
+        ret = wc_debug_CipherLifecycleCheck(aes->CipherLifecycleTag, 0);
+        if (ret < 0)
+            return ret;
+#endif
         /* Thread mutex protection handled in esp_aes_hw_InUse */
     #ifdef NEED_AES_HW_FALLBACK
         if (wc_esp32AesSupportedKeyLen(aes)) {
@@ -535,7 +606,7 @@ block cipher mechanism that uses n-bit binary string parameter key with 128-bits
         #define AESNI_ALIGN 16
     #endif
 
-    static int checkAESNI = 0;
+    static int checkedAESNI = 0;
     static int haveAESNI  = 0;
     static word32 intel_flags = 0;
 
@@ -550,71 +621,73 @@ block cipher mechanism that uses n-bit binary string parameter key with 128-bits
     /* tell C compiler these are asm functions in case any mix up of ABI underscore
        prefix between clang/gcc/llvm etc */
     #ifdef HAVE_AES_CBC
-        void AES_CBC_encrypt(const unsigned char* in, unsigned char* out,
+        void AES_CBC_encrypt_AESNI(const unsigned char* in, unsigned char* out,
                              unsigned char* ivec, unsigned long length,
                              const unsigned char* KS, int nr)
-                             XASM_LINK("AES_CBC_encrypt");
+                             XASM_LINK("AES_CBC_encrypt_AESNI");
 
         #ifdef HAVE_AES_DECRYPT
             #if defined(WOLFSSL_AESNI_BY4) || defined(WOLFSSL_X86_BUILD)
-                void AES_CBC_decrypt_by4(const unsigned char* in, unsigned char* out,
+                void AES_CBC_decrypt_AESNI_by4(const unsigned char* in, unsigned char* out,
                                          unsigned char* ivec, unsigned long length,
                                          const unsigned char* KS, int nr)
-                                         XASM_LINK("AES_CBC_decrypt_by4");
+                                         XASM_LINK("AES_CBC_decrypt_AESNI_by4");
             #elif defined(WOLFSSL_AESNI_BY6)
-                void AES_CBC_decrypt_by6(const unsigned char* in, unsigned char* out,
+                void AES_CBC_decrypt_AESNI_by6(const unsigned char* in, unsigned char* out,
                                          unsigned char* ivec, unsigned long length,
                                          const unsigned char* KS, int nr)
-                                         XASM_LINK("AES_CBC_decrypt_by6");
+                                         XASM_LINK("AES_CBC_decrypt_AESNI_by6");
             #else /* WOLFSSL_AESNI_BYx */
-                void AES_CBC_decrypt_by8(const unsigned char* in, unsigned char* out,
+                void AES_CBC_decrypt_AESNI_by8(const unsigned char* in, unsigned char* out,
                                          unsigned char* ivec, unsigned long length,
                                          const unsigned char* KS, int nr)
-                                         XASM_LINK("AES_CBC_decrypt_by8");
+                                         XASM_LINK("AES_CBC_decrypt_AESNI_by8");
             #endif /* WOLFSSL_AESNI_BYx */
         #endif /* HAVE_AES_DECRYPT */
     #endif /* HAVE_AES_CBC */
 
-    void AES_ECB_encrypt(const unsigned char* in, unsigned char* out,
+    void AES_ECB_encrypt_AESNI(const unsigned char* in, unsigned char* out,
                          unsigned long length, const unsigned char* KS, int nr)
-                         XASM_LINK("AES_ECB_encrypt");
+                         XASM_LINK("AES_ECB_encrypt_AESNI");
 
     #ifdef HAVE_AES_DECRYPT
-        void AES_ECB_decrypt(const unsigned char* in, unsigned char* out,
+        void AES_ECB_decrypt_AESNI(const unsigned char* in, unsigned char* out,
                              unsigned long length, const unsigned char* KS, int nr)
-                             XASM_LINK("AES_ECB_decrypt");
+                             XASM_LINK("AES_ECB_decrypt_AESNI");
     #endif
 
-    void AES_128_Key_Expansion(const unsigned char* userkey,
+    void AES_128_Key_Expansion_AESNI(const unsigned char* userkey,
                                unsigned char* key_schedule)
-                               XASM_LINK("AES_128_Key_Expansion");
+                               XASM_LINK("AES_128_Key_Expansion_AESNI");
 
-    void AES_192_Key_Expansion(const unsigned char* userkey,
+    void AES_192_Key_Expansion_AESNI(const unsigned char* userkey,
                                unsigned char* key_schedule)
-                               XASM_LINK("AES_192_Key_Expansion");
+                               XASM_LINK("AES_192_Key_Expansion_AESNI");
 
-    void AES_256_Key_Expansion(const unsigned char* userkey,
+    void AES_256_Key_Expansion_AESNI(const unsigned char* userkey,
                                unsigned char* key_schedule)
-                               XASM_LINK("AES_256_Key_Expansion");
+                               XASM_LINK("AES_256_Key_Expansion_AESNI");
 
 
-    static WARN_UNUSED_RESULT int AES_set_encrypt_key(
+    static WARN_UNUSED_RESULT int AES_set_encrypt_key_AESNI(
         const unsigned char *userKey, const int bits, Aes* aes)
     {
         int ret;
+
+        ASSERT_SAVED_VECTOR_REGISTERS();
 
         if (!userKey || !aes)
             return BAD_FUNC_ARG;
 
         switch (bits) {
             case 128:
-               AES_128_Key_Expansion (userKey,(byte*)aes->key); aes->rounds = 10;
+               AES_128_Key_Expansion_AESNI (userKey,(byte*)aes->key); aes->rounds = 10;
                return 0;
             case 192:
-               AES_192_Key_Expansion (userKey,(byte*)aes->key); aes->rounds = 12;
+               AES_192_Key_Expansion_AESNI (userKey,(byte*)aes->key); aes->rounds = 12;
                return 0;
             case 256:
-               AES_256_Key_Expansion (userKey,(byte*)aes->key); aes->rounds = 14;
+               AES_256_Key_Expansion_AESNI (userKey,(byte*)aes->key); aes->rounds = 14;
                return 0;
             default:
                 ret = BAD_FUNC_ARG;
@@ -624,7 +697,7 @@ block cipher mechanism that uses n-bit binary string parameter key with 128-bits
     }
 
     #ifdef HAVE_AES_DECRYPT
-        static WARN_UNUSED_RESULT int AES_set_decrypt_key(
+        static WARN_UNUSED_RESULT int AES_set_decrypt_key_AESNI(
             const unsigned char* userKey, const int bits, Aes* aes)
         {
             word32 nr;
@@ -636,6 +709,8 @@ block cipher mechanism that uses n-bit binary string parameter key with 128-bits
             __m128i *Key_Schedule;
             __m128i *Temp_Key_Schedule;
 
+            ASSERT_SAVED_VECTOR_REGISTERS();
+
             if (!userKey || !aes)
                 return BAD_FUNC_ARG;
 
@@ -645,7 +720,7 @@ block cipher mechanism that uses n-bit binary string parameter key with 128-bits
                 return MEMORY_E;
 #endif
 
-            if (AES_set_encrypt_key(userKey,bits,temp_key) == BAD_FUNC_ARG) {
+            if (AES_set_encrypt_key_AESNI(userKey,bits,temp_key) == BAD_FUNC_ARG) {
 #ifdef WOLFSSL_SMALL_STACK
                 XFREE(temp_key, aes->heap, DYNAMIC_TYPE_AES);
 #endif
@@ -657,12 +732,6 @@ block cipher mechanism that uses n-bit binary string parameter key with 128-bits
 
             nr = temp_key->rounds;
             aes->rounds = nr;
-
-#ifdef WOLFSSL_SMALL_STACK
-            SAVE_VECTOR_REGISTERS(XFREE(temp_key, aes->heap, DYNAMIC_TYPE_AES); return _svr_ret;);
-#else
-            SAVE_VECTOR_REGISTERS(return _svr_ret;);
-#endif
 
             Key_Schedule[nr] = Temp_Key_Schedule[0];
             Key_Schedule[nr-1] = _mm_aesimc_si128(Temp_Key_Schedule[1]);
@@ -687,8 +756,6 @@ block cipher mechanism that uses n-bit binary string parameter key with 128-bits
 
             Key_Schedule[0] = Temp_Key_Schedule[nr];
 
-            RESTORE_VECTOR_REGISTERS();
-
 #ifdef WOLFSSL_SMALL_STACK
             XFREE(temp_key, aes->heap, DYNAMIC_TYPE_AES);
 #endif
@@ -704,6 +771,14 @@ block cipher mechanism that uses n-bit binary string parameter key with 128-bits
         static WARN_UNUSED_RESULT int wc_AesEncrypt(
             Aes* aes, const byte* inBlock, byte* outBlock)
         {
+#ifdef WC_DEBUG_CIPHER_LIFECYCLE
+            {
+                int ret =
+                    wc_debug_CipherLifecycleCheck(aes->CipherLifecycleTag, 0);
+                if (ret < 0)
+                    return ret;
+            }
+#endif
             return wc_AesEncryptDirect(aes, outBlock, inBlock);
         }
 
@@ -846,6 +921,13 @@ block cipher mechanism that uses n-bit binary string parameter key with 128-bits
     static WARN_UNUSED_RESULT int wc_AesEncrypt(
         Aes* aes, const byte* inBlock, byte* outBlock)
     {
+#ifdef WC_DEBUG_CIPHER_LIFECYCLE
+        {
+            int ret = wc_debug_CipherLifecycleCheck(aes->CipherLifecycleTag, 0);
+            if (ret < 0)
+                return ret;
+        }
+#endif
         return AES_ECB_encrypt(aes, inBlock, outBlock, AES_BLOCK_SIZE);
     }
     #endif
@@ -854,16 +936,23 @@ block cipher mechanism that uses n-bit binary string parameter key with 128-bits
     static WARN_UNUSED_RESULT int wc_AesDecrypt(
         Aes* aes, const byte* inBlock, byte* outBlock)
     {
+#ifdef WC_DEBUG_CIPHER_LIFECYCLE
+        {
+            int ret = wc_debug_CipherLifecycleCheck(aes->CipherLifecycleTag, 0);
+            if (ret < 0)
+                return ret;
+        }
+#endif
         return AES_ECB_decrypt(aes, inBlock, outBlock, AES_BLOCK_SIZE);
     }
     #endif
 
 #elif defined(WOLFSSL_KCAPI_AES)
-    /* Only CBC and GCM that are in wolfcrypt/src/port/kcapi/kcapi_aes.c */
+    /* Only CBC and GCM are in wolfcrypt/src/port/kcapi/kcapi_aes.c */
     #if defined(WOLFSSL_AES_COUNTER) || defined(HAVE_AESCCM) || \
         defined(WOLFSSL_CMAC) || defined(WOLFSSL_AES_OFB) || \
         defined(WOLFSSL_AES_CFB) || defined(HAVE_AES_ECB) || \
-        defined(WOLFSSL_AES_DIRECT) || \
+        defined(WOLFSSL_AES_DIRECT) || defined(WOLFSSL_AES_XTS) || \
         (defined(HAVE_AES_CBC) && defined(WOLFSSL_NO_KCAPI_AES_CBC))
 
         #define NEED_AES_TABLES
@@ -881,10 +970,10 @@ block cipher mechanism that uses n-bit binary string parameter key with 128-bits
 
 #ifdef NEED_AES_TABLES
 
-#if (!defined(WOLFSSL_SILABS_SE_ACCEL) &&  \
-     !defined(WOLFSSL_ESP32_CRYPT_RSA_PRI) \
-    ) || \
-    (defined(WOLFSSL_ESP32_CRYPT_RSA_PRI) && defined(NEED_AES_HW_FALLBACK))
+#ifndef WC_AES_BITSLICED
+#if !defined(WOLFSSL_SILABS_SE_ACCEL) ||  \
+     defined(NO_ESP32_CRYPT) || defined(NO_WOLFSSL_ESP32_CRYPT_AES) || \
+     defined(NEED_AES_HW_FALLBACK)
 static const FLASH_QUALIFIER word32 rcon[] = {
     0x01000000, 0x02000000, 0x04000000, 0x08000000,
     0x10000000, 0x20000000, 0x40000000, 0x80000000,
@@ -1534,11 +1623,14 @@ static WARN_UNUSED_RESULT word32 inv_col_mul(
     byte t0 = t9 ^ tb ^ td;
     return t0 ^ AES_XTIME(AES_XTIME(AES_XTIME(t0 ^ te) ^ td ^ te) ^ tb ^ te);
 }
-#endif
+#endif /* HAVE_AES_CBC || WOLFSSL_AES_DIRECT */
+#endif /* WOLFSSL_AES_SMALL_TABLES */
 #endif
 
 #if defined(HAVE_AES_CBC) || defined(WOLFSSL_AES_DIRECT) || \
                                     defined(HAVE_AESCCM) || defined(HAVE_AESGCM)
+
+#ifndef WC_AES_BITSLICED
 
 #ifndef WC_CACHE_LINE_SZ
     #if defined(__x86_64__) || defined(_M_X64) || \
@@ -1596,25 +1688,25 @@ static WARN_UNUSED_RESULT WC_INLINE word32 PreFetchSBox(void)
 
 #ifdef WOLFSSL_AES_TOUCH_LINES
 #if WC_CACHE_LINE_SZ == 128
-    #define WC_CACHE_LINE_BITS 5
-    #define WC_CACHE_LINE_MASK_HI 0xe0
-    #define WC_CACHE_LINE_MASK_LO 0x1f
-    #define WC_CACHE_LINE_ADD     0x20
+    #define WC_CACHE_LINE_BITS      5
+    #define WC_CACHE_LINE_MASK_HI   0xe0
+    #define WC_CACHE_LINE_MASK_LO   0x1f
+    #define WC_CACHE_LINE_ADD       0x20
 #elif WC_CACHE_LINE_SZ == 64
-    #define WC_CACHE_LINE_BITS 4
-    #define WC_CACHE_LINE_MASK_HI 0xf0
-    #define WC_CACHE_LINE_MASK_LO 0x0f
-    #define WC_CACHE_LINE_ADD     0x10
+    #define WC_CACHE_LINE_BITS      4
+    #define WC_CACHE_LINE_MASK_HI   0xf0
+    #define WC_CACHE_LINE_MASK_LO   0x0f
+    #define WC_CACHE_LINE_ADD       0x10
 #elif WC_CACHE_LINE_SZ == 32
-    #define WC_CACHE_LINE_BITS 3
-    #define WC_CACHE_LINE_MASK_HI 0xf8
-    #define WC_CACHE_LINE_MASK_LO 0x07
-    #define WC_CACHE_LINE_ADD     0x08
-#elif WC_CACHE_LINE_SZ = 16
-    #define WC_CACHE_LINE_BITS 2
-    #define WC_CACHE_LINE_MASK_HI 0xfc
-    #define WC_CACHE_LINE_MASK_LO 0x03
-    #define WC_CACHE_LINE_ADD     0x04
+    #define WC_CACHE_LINE_BITS      3
+    #define WC_CACHE_LINE_MASK_HI   0xf8
+    #define WC_CACHE_LINE_MASK_LO   0x07
+    #define WC_CACHE_LINE_ADD       0x08
+#elif WC_CACHE_LINE_SZ == 16
+    #define WC_CACHE_LINE_BITS      2
+    #define WC_CACHE_LINE_MASK_HI   0xfc
+    #define WC_CACHE_LINE_MASK_LO   0x03
+    #define WC_CACHE_LINE_ADD       0x04
 #else
     #error Cache line size not supported
 #endif
@@ -1800,6 +1892,7 @@ static word32 GetTable8_4(const byte* t, byte o0, byte o1, byte o2, byte o3)
 }
 #endif
 #else
+
 #define GetTable(t, o)  t[o]
 #define GetTable8(t, o) t[o]
 #define GetTable_Multi(t, t0, o0, t1, o1, t2, o2, t3, o3)  \
@@ -1811,105 +1904,24 @@ static word32 GetTable8_4(const byte* t, byte o0, byte o1, byte o2, byte o3)
      ((word32)(t)[o2] <<  8) | ((word32)(t)[o3] <<  0))
 #endif
 
-      /* this section disabled with NO_AES_192 */
-static WARN_UNUSED_RESULT int wc_AesEncrypt( /* calling this one when missing NO_AES_192  */
-    Aes* aes, const byte* inBlock, byte* outBlock)
+/* Encrypt a block using AES.
+ *
+ * @param [in]  aes       AES object.
+ * @param [in]  inBlock   Block to encrypt.
+ * @param [out] outBlock  Encrypted block.
+ * @param [in]  r         Rounds divided by 2.
+ */
+static void AesEncrypt_C(Aes* aes, const byte* inBlock, byte* outBlock,
+        word32 r)
 {
     word32 s0, s1, s2, s3;
     word32 t0, t1, t2, t3;
-    word32 r;
     const word32* rk;
 
-    if (aes == NULL) {
-        return BAD_FUNC_ARG;
-    }
-
-    r = aes->rounds >> 1;
+#ifdef WC_AES_C_DYNAMIC_FALLBACK
+    rk = aes->key_C_fallback;
+#else
     rk = aes->key;
-
-    if (r > 7 || r == 0) {
-        WOLFSSL_ERROR_VERBOSE(KEYUSAGE_E);
-        return KEYUSAGE_E;
-    }
-
-#ifdef WOLFSSL_AESNI
-    if (haveAESNI && aes->use_aesni) {
-        #ifdef DEBUG_AESNI
-            printf("about to aes encrypt\n");
-            printf("in  = %p\n", inBlock);
-            printf("out = %p\n", outBlock);
-            printf("aes->key = %p\n", aes->key);
-            printf("aes->rounds = %d\n", aes->rounds);
-            printf("sz = %d\n", AES_BLOCK_SIZE);
-        #endif
-
-        /* check alignment, decrypt doesn't need alignment */
-        if ((wc_ptr_t)inBlock % AESNI_ALIGN) {
-        #ifndef NO_WOLFSSL_ALLOC_ALIGN
-            byte* tmp = (byte*)XMALLOC(AES_BLOCK_SIZE + AESNI_ALIGN, aes->heap,
-                                                      DYNAMIC_TYPE_TMP_BUFFER);
-            byte* tmp_align;
-            if (tmp == NULL)
-                return MEMORY_E;
-
-            tmp_align = tmp + (AESNI_ALIGN - ((wc_ptr_t)tmp % AESNI_ALIGN));
-
-            XMEMCPY(tmp_align, inBlock, AES_BLOCK_SIZE);
-            AES_ECB_encrypt(tmp_align, tmp_align, AES_BLOCK_SIZE,
-                    (byte*)aes->key, (int)aes->rounds);
-            XMEMCPY(outBlock, tmp_align, AES_BLOCK_SIZE);
-            XFREE(tmp, aes->heap, DYNAMIC_TYPE_TMP_BUFFER);
-            return 0;
-        #else
-            WOLFSSL_MSG("AES-ECB encrypt with bad alignment");
-            WOLFSSL_ERROR_VERBOSE(BAD_ALIGN_E);
-            return BAD_ALIGN_E;
-        #endif
-        }
-
-        AES_ECB_encrypt(inBlock, outBlock, AES_BLOCK_SIZE, (byte*)aes->key,
-                        (int)aes->rounds);
-
-        return 0;
-    }
-    else {
-        #ifdef DEBUG_AESNI
-            printf("Skipping AES-NI\n");
-        #endif
-    }
-#endif
-#if defined(WOLFSSL_SCE) && !defined(WOLFSSL_SCE_NO_AES)
-    AES_ECB_encrypt(aes, inBlock, outBlock, AES_BLOCK_SIZE);
-    return 0;
-#endif
-
-#if defined(WOLFSSL_IMXRT_DCP)
-    if (aes->keylen == 16) {
-        DCPAesEcbEncrypt(aes, outBlock, inBlock, AES_BLOCK_SIZE);
-        return 0;
-    }
-#endif
-
-#if defined(WOLFSSL_SE050) && defined(WOLFSSL_SE050_CRYPT)
-    if (aes->useSWCrypt == 0) {
-        return se050_aes_crypt(aes, inBlock, outBlock, AES_BLOCK_SIZE,
-                               AES_ENCRYPTION, kAlgorithm_SSS_AES_ECB);
-    }
-#endif
-
-#if defined(WOLFSSL_ESPIDF) && defined(NEED_AES_HW_FALLBACK)
-    ESP_LOGV(TAG, "wc_AesEncrypt fallback check");
-    if (wc_esp32AesSupportedKeyLen(aes)) {
-        return wc_esp32AesEncrypt(aes, inBlock, outBlock);
-    }
-    else {
-        /* For example, the ESP32-S3 does not support HW for len = 24,
-         * so fall back to SW */
-    #ifdef DEBUG_WOLFSSL
-        ESP_LOGW(TAG, "wc_AesEncrypt HW Falling back, unsupported keylen = %d",
-                      aes->keylen);
-    #endif
-    }
 #endif
 
     /*
@@ -2170,6 +2182,686 @@ static WARN_UNUSED_RESULT int wc_AesEncrypt( /* calling this one when missing NO
     XMEMCPY(outBlock +     sizeof(s0), &s1, sizeof(s1));
     XMEMCPY(outBlock + 2 * sizeof(s0), &s2, sizeof(s2));
     XMEMCPY(outBlock + 3 * sizeof(s0), &s3, sizeof(s3));
+}
+
+#if defined(HAVE_AES_ECB) && !(defined(WOLFSSL_IMX6_CAAM) && \
+    !defined(NO_IMX6_CAAM_AES) && !defined(WOLFSSL_QNX_CAAM))
+/* Encrypt a number of blocks using AES.
+ *
+ * @param [in]  aes  AES object.
+ * @param [in]  in   Block to encrypt.
+ * @param [out] out  Encrypted block.
+ * @param [in]  sz   Number of blocks to encrypt.
+ */
+static void AesEncryptBlocks_C(Aes* aes, const byte* in, byte* out, word32 sz)
+{
+    word32 i;
+
+    for (i = 0; i < sz; i += AES_BLOCK_SIZE) {
+        AesEncrypt_C(aes, in, out, aes->rounds >> 1);
+        in += AES_BLOCK_SIZE;
+        out += AES_BLOCK_SIZE;
+    }
+}
+#endif
+
+#else
+
+/* Bit-sliced implementation based on work by "circuit minimization team" (CMT):
+ *   http://cs-www.cs.yale.edu/homes/peralta/CircuitStuff/CMT.html
+ */
+/* http://cs-www.cs.yale.edu/homes/peralta/CircuitStuff/SLP_AES_113.txt */
+static void bs_sub_bytes(bs_word u[8])
+{
+    bs_word y1, y2, y3, y4, y5, y6, y7, y8, y9;
+    bs_word y10, y11, y12, y13, y14, y15, y16, y17, y18, y19;
+    bs_word y20, y21;
+    bs_word t0, t1, t2, t3, t4, t5, t6, t7, t8, t9;
+    bs_word t10, t11, t12, t13, t14, t15, t16, t17, t18, t19;
+    bs_word t20, t21, t22, t23, t24, t25, t26, t27, t28, t29;
+    bs_word t30, t31, t32, t33, t34, t35, t36, t37, t38, t39;
+    bs_word t40, t41, t42, t43, t44, t45;
+    bs_word z0, z1, z2, z3, z4, z5, z6, z7, z8, z9;
+    bs_word z10, z11, z12, z13, z14, z15, z16, z17;
+    bs_word tc1, tc2, tc3, tc4, tc5, tc6, tc7, tc8, tc9;
+    bs_word tc10, tc11, tc12, tc13, tc14, tc16, tc17, tc18;
+    bs_word tc20, tc21, tc26;
+    bs_word U0, U1, U2, U3, U4, U5, U6, U7;
+    bs_word S0, S1, S2, S3, S4, S5, S6, S7;
+
+    U0 = u[7];
+    U1 = u[6];
+    U2 = u[5];
+    U3 = u[4];
+    U4 = u[3];
+    U5 = u[2];
+    U6 = u[1];
+    U7 = u[0];
+
+    y14 = U3 ^ U5;
+    y13 = U0 ^ U6;
+    y9 = U0 ^ U3;
+    y8 = U0 ^ U5;
+    t0 = U1 ^ U2;
+    y1 = t0 ^ U7;
+    y4 = y1 ^ U3;
+    y12 = y13 ^ y14;
+    y2 = y1 ^ U0;
+    y5 = y1 ^ U6;
+    y3 = y5 ^ y8;
+    t1 = U4 ^ y12;
+    y15 = t1 ^ U5;
+    y20 = t1 ^ U1;
+    y6 = y15 ^ U7;
+    y10 = y15 ^ t0;
+    y11 = y20 ^ y9;
+    y7 = U7 ^ y11;
+    y17 = y10 ^ y11;
+    y19 = y10 ^ y8;
+    y16 = t0 ^ y11;
+    y21 = y13 ^ y16;
+    y18 = U0 ^ y16;
+    t2 = y12 & y15;
+    t3 = y3 & y6;
+    t4 = t3 ^ t2;
+    t5 = y4 & U7;
+    t6 = t5 ^ t2;
+    t7 = y13 & y16;
+    t8 = y5 & y1;
+    t9 = t8 ^ t7;
+    t10 = y2 & y7;
+    t11 = t10 ^ t7;
+    t12 = y9 & y11;
+    t13 = y14 & y17;
+    t14 = t13 ^ t12;
+    t15 = y8 & y10;
+    t16 = t15 ^ t12;
+    t17 = t4 ^ y20;
+    t18 = t6 ^ t16;
+    t19 = t9 ^ t14;
+    t20 = t11 ^ t16;
+    t21 = t17 ^ t14;
+    t22 = t18 ^ y19;
+    t23 = t19 ^ y21;
+    t24 = t20 ^ y18;
+    t25 = t21 ^ t22;
+    t26 = t21 & t23;
+    t27 = t24 ^ t26;
+    t28 = t25 & t27;
+    t29 = t28 ^ t22;
+    t30 = t23 ^ t24;
+    t31 = t22 ^ t26;
+    t32 = t31 & t30;
+    t33 = t32 ^ t24;
+    t34 = t23 ^ t33;
+    t35 = t27 ^ t33;
+    t36 = t24 & t35;
+    t37 = t36 ^ t34;
+    t38 = t27 ^ t36;
+    t39 = t29 & t38;
+    t40 = t25 ^ t39;
+    t41 = t40 ^ t37;
+    t42 = t29 ^ t33;
+    t43 = t29 ^ t40;
+    t44 = t33 ^ t37;
+    t45 = t42 ^ t41;
+    z0 = t44 & y15;
+    z1 = t37 & y6;
+    z2 = t33 & U7;
+    z3 = t43 & y16;
+    z4 = t40 & y1;
+    z5 = t29 & y7;
+    z6 = t42 & y11;
+    z7 = t45 & y17;
+    z8 = t41 & y10;
+    z9 = t44 & y12;
+    z10 = t37 & y3;
+    z11 = t33 & y4;
+    z12 = t43 & y13;
+    z13 = t40 & y5;
+    z14 = t29 & y2;
+    z15 = t42 & y9;
+    z16 = t45 & y14;
+    z17 = t41 & y8;
+    tc1 = z15 ^ z16;
+    tc2 = z10 ^ tc1;
+    tc3 = z9 ^ tc2;
+    tc4 = z0 ^ z2;
+    tc5 = z1 ^ z0;
+    tc6 = z3 ^ z4;
+    tc7 = z12 ^ tc4;
+    tc8 = z7 ^ tc6;
+    tc9 = z8 ^ tc7;
+    tc10 = tc8 ^ tc9;
+    tc11 = tc6 ^ tc5;
+    tc12 = z3 ^ z5;
+    tc13 = z13 ^ tc1;
+    tc14 = tc4 ^ tc12;
+    S3 = tc3 ^ tc11;
+    tc16 = z6 ^ tc8;
+    tc17 = z14 ^ tc10;
+    tc18 = tc13 ^ tc14;
+    S7 = ~(z12 ^ tc18);
+    tc20 = z15 ^ tc16;
+    tc21 = tc2 ^ z11;
+    S0 = tc3 ^ tc16;
+    S6 = ~(tc10 ^ tc18);
+    S4 = tc14 ^ S3;
+    S1 = ~(S3 ^ tc16);
+    tc26 = tc17 ^ tc20;
+    S2 = ~(tc26 ^ z17);
+    S5 = tc21 ^ tc17;
+
+    u[0] = S7;
+    u[1] = S6;
+    u[2] = S5;
+    u[3] = S4;
+    u[4] = S3;
+    u[5] = S2;
+    u[6] = S1;
+    u[7] = S0;
+}
+
+#define BS_MASK_BIT_SET(w, j, bmask) \
+    (((bs_word)0 - (((w) >> (j)) & (bs_word)1)) & (bmask))
+
+#define BS_TRANS_8(t, o, w, bmask, s)                   \
+    t[o + s + 0] |= BS_MASK_BIT_SET(w, s + 0, bmask);   \
+    t[o + s + 1] |= BS_MASK_BIT_SET(w, s + 1, bmask);   \
+    t[o + s + 2] |= BS_MASK_BIT_SET(w, s + 2, bmask);   \
+    t[o + s + 3] |= BS_MASK_BIT_SET(w, s + 3, bmask);   \
+    t[o + s + 4] |= BS_MASK_BIT_SET(w, s + 4, bmask);   \
+    t[o + s + 5] |= BS_MASK_BIT_SET(w, s + 5, bmask);   \
+    t[o + s + 6] |= BS_MASK_BIT_SET(w, s + 6, bmask);   \
+    t[o + s + 7] |= BS_MASK_BIT_SET(w, s + 7, bmask)
+
+static void bs_transpose(bs_word* t, bs_word* blocks)
+{
+    bs_word bmask = 1;
+    int i;
+
+    XMEMSET(t, 0, sizeof(bs_word) * AES_BLOCK_BITS);
+
+    for (i = 0; i < BS_WORD_SIZE; i++) {
+        int j;
+        int o = 0;
+        for (j = 0; j < BS_BLOCK_WORDS; j++) {
+        #ifdef LITTLE_ENDIAN_ORDER
+            bs_word w = blocks[i * BS_BLOCK_WORDS + j];
+        #else
+            bs_word w = bs_bswap(blocks[i * BS_BLOCK_WORDS + j]);
+        #endif
+    #ifdef WOLFSSL_AES_NO_UNROLL
+            int k;
+            for (k = 0; k < BS_WORD_SIZE; k++) {
+                t[o + k] |= BS_MASK_BIT_SET(w, k, bmask);
+            }
+    #else
+            BS_TRANS_8(t, o, w, bmask,  0);
+        #if BS_WORD_SIZE >= 16
+            BS_TRANS_8(t, o, w, bmask,  8);
+        #endif
+        #if BS_WORD_SIZE >= 32
+            BS_TRANS_8(t, o, w, bmask, 16);
+            BS_TRANS_8(t, o, w, bmask, 24);
+        #endif
+        #if BS_WORD_SIZE >= 64
+            BS_TRANS_8(t, o, w, bmask, 32);
+            BS_TRANS_8(t, o, w, bmask, 40);
+            BS_TRANS_8(t, o, w, bmask, 48);
+            BS_TRANS_8(t, o, w, bmask, 56);
+        #endif
+    #endif
+            o += BS_WORD_SIZE;
+        }
+        bmask <<= 1;
+    }
+}
+
+#define BS_INV_TRANS_8(t, o, w, bmask, s)                                   \
+    t[o + (s + 0) * BS_BLOCK_WORDS] |= BS_MASK_BIT_SET(w, s + 0, bmask);    \
+    t[o + (s + 1) * BS_BLOCK_WORDS] |= BS_MASK_BIT_SET(w, s + 1, bmask);    \
+    t[o + (s + 2) * BS_BLOCK_WORDS] |= BS_MASK_BIT_SET(w, s + 2, bmask);    \
+    t[o + (s + 3) * BS_BLOCK_WORDS] |= BS_MASK_BIT_SET(w, s + 3, bmask);    \
+    t[o + (s + 4) * BS_BLOCK_WORDS] |= BS_MASK_BIT_SET(w, s + 4, bmask);    \
+    t[o + (s + 5) * BS_BLOCK_WORDS] |= BS_MASK_BIT_SET(w, s + 5, bmask);    \
+    t[o + (s + 6) * BS_BLOCK_WORDS] |= BS_MASK_BIT_SET(w, s + 6, bmask);    \
+    t[o + (s + 7) * BS_BLOCK_WORDS] |= BS_MASK_BIT_SET(w, s + 7, bmask)
+
+static void bs_inv_transpose(bs_word* t, bs_word* blocks)
+{
+    int o;
+
+    XMEMSET(t, 0, sizeof(bs_word) * AES_BLOCK_BITS);
+
+    for (o = 0; o < BS_BLOCK_WORDS; o++) {
+        int i;
+        for (i = 0; i < BS_WORD_SIZE; i++) {
+        #ifdef LITTLE_ENDIAN_ORDER
+            bs_word bmask = (bs_word)1 << i;
+        #else
+            bs_word bmask = bs_bswap((bs_word)1 << i);
+        #endif
+            bs_word w = blocks[(o << BS_WORD_SHIFT) + i];
+    #ifdef WOLFSSL_AES_NO_UNROLL
+            int j;
+            for (j = 0; j < BS_WORD_SIZE; j++) {
+                t[j * BS_BLOCK_WORDS + o] |= BS_MASK_BIT_SET(w, j, bmask);
+            }
+    #else
+            BS_INV_TRANS_8(t, o, w, bmask, 0);
+        #if BS_WORD_SIZE >= 16
+            BS_INV_TRANS_8(t, o, w, bmask, 8);
+        #endif
+        #if BS_WORD_SIZE >= 32
+            BS_INV_TRANS_8(t, o, w, bmask, 16);
+            BS_INV_TRANS_8(t, o, w, bmask, 24);
+        #endif
+        #if BS_WORD_SIZE >= 64
+            BS_INV_TRANS_8(t, o, w, bmask, 32);
+            BS_INV_TRANS_8(t, o, w, bmask, 40);
+            BS_INV_TRANS_8(t, o, w, bmask, 48);
+            BS_INV_TRANS_8(t, o, w, bmask, 56);
+        #endif
+    #endif
+        }
+    }
+}
+
+#define BS_ROW_OFF_0    0
+#define BS_ROW_OFF_1    32
+#define BS_ROW_OFF_2    64
+#define BS_ROW_OFF_3    96
+
+#define BS_ROW_ADD      (AES_BLOCK_BITS / 16 + AES_BLOCK_BITS / 4)
+#define BS_IDX_MASK     0x7f
+
+#define BS_ASSIGN_8(d, od, s, os)   \
+    d[(od) + 0] = s[(os) + 0];      \
+    d[(od) + 1] = s[(os) + 1];      \
+    d[(od) + 2] = s[(os) + 2];      \
+    d[(od) + 3] = s[(os) + 3];      \
+    d[(od) + 4] = s[(os) + 4];      \
+    d[(od) + 5] = s[(os) + 5];      \
+    d[(od) + 6] = s[(os) + 6];      \
+    d[(od) + 7] = s[(os) + 7]
+
+static void bs_shift_rows(bs_word* t, bs_word* b)
+{
+    int i;
+
+    for (i = 0; i < 128; i += 32) {
+        BS_ASSIGN_8(t, i +  0, b, (  0 + i) & BS_IDX_MASK);
+        BS_ASSIGN_8(t, i +  8, b, ( 40 + i) & BS_IDX_MASK);
+        BS_ASSIGN_8(t, i + 16, b, ( 80 + i) & BS_IDX_MASK);
+        BS_ASSIGN_8(t, i + 24, b, (120 + i) & BS_IDX_MASK);
+    }
+}
+
+#define BS_SHIFT_OFF_0  0
+#define BS_SHIFT_OFF_1  8
+#define BS_SHIFT_OFF_2  16
+#define BS_SHIFT_OFF_3  24
+
+/* Shift rows and mix columns.
+ * See: See https://eprint.iacr.org/2009/129.pdf - Appendix A
+ */
+
+#define BS_SHIFT_MIX_8(t, o, br0, br1, br2, br3, of)                \
+        of      = br0[7] ^ br1[7];                                  \
+        t[o+0] =                   br1[0] ^ br2[0] ^ br3[0] ^ of;   \
+        t[o+1] = br0[0] ^ br1[0] ^ br1[1] ^ br2[1] ^ br3[1] ^ of;   \
+        t[o+2] = br0[1] ^ br1[1] ^ br1[2] ^ br2[2] ^ br3[2];        \
+        t[o+3] = br0[2] ^ br1[2] ^ br1[3] ^ br2[3] ^ br3[3] ^ of;   \
+        t[o+4] = br0[3] ^ br1[3] ^ br1[4] ^ br2[4] ^ br3[4] ^ of;   \
+        t[o+5] = br0[4] ^ br1[4] ^ br1[5] ^ br2[5] ^ br3[5];        \
+        t[o+6] = br0[5] ^ br1[5] ^ br1[6] ^ br2[6] ^ br3[6];        \
+        t[o+7] = br0[6] ^ br1[6] ^ br1[7] ^ br2[7] ^ br3[7]
+
+static void bs_shift_mix(bs_word* t, bs_word* b)
+{
+    int i;
+    word8 or0 = BS_ROW_OFF_0 + BS_SHIFT_OFF_0;
+    word8 or1 = BS_ROW_OFF_1 + BS_SHIFT_OFF_1;
+    word8 or2 = BS_ROW_OFF_2 + BS_SHIFT_OFF_2;
+    word8 or3 = BS_ROW_OFF_3 + BS_SHIFT_OFF_3;
+
+    for (i = 0; i < AES_BLOCK_BITS; i += AES_BLOCK_BITS / 4) {
+        bs_word* br0 = b + or0;
+        bs_word* br1 = b + or1;
+        bs_word* br2 = b + or2;
+        bs_word* br3 = b + or3;
+        bs_word of;
+
+        BS_SHIFT_MIX_8(t, i +  0, br0, br1, br2, br3, of);
+        BS_SHIFT_MIX_8(t, i +  8, br1, br2, br3, br0, of);
+        BS_SHIFT_MIX_8(t, i + 16, br2, br3, br0, br1, of);
+        BS_SHIFT_MIX_8(t, i + 24, br3, br0, br1, br2, of);
+
+        or0 = (or0 + AES_BLOCK_BITS / 4) & BS_IDX_MASK;
+        or1 = (or1 + AES_BLOCK_BITS / 4) & BS_IDX_MASK;
+        or2 = (or2 + AES_BLOCK_BITS / 4) & BS_IDX_MASK;
+        or3 = (or3 + AES_BLOCK_BITS / 4) & BS_IDX_MASK;
+    }
+}
+
+static void bs_add_round_key(bs_word* out, bs_word* b, bs_word* rk)
+{
+    xorbufout((byte*)out, (byte*)b, (byte*)rk, BS_BLOCK_SIZE);
+}
+
+static void bs_sub_bytes_blocks(bs_word* b)
+{
+    int i;
+
+    for (i = 0; i < AES_BLOCK_BITS; i += 8) {
+        bs_sub_bytes(b + i);
+    }
+}
+
+static const FLASH_QUALIFIER byte bs_rcon[] = {
+    0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1B, 0x36,
+    /* for 128-bit blocks, Rijndael never uses more than 10 rcon values */
+};
+
+static void bs_ke_sub_bytes(unsigned char* out, unsigned char *in) {
+    bs_word block[AES_BLOCK_BITS];
+    bs_word trans[AES_BLOCK_BITS];
+
+    XMEMSET(block, 0, sizeof(block));
+    XMEMCPY(block, in, 4);
+
+    bs_transpose(trans, block);
+    bs_sub_bytes_blocks(trans);
+    bs_inv_transpose(block, trans);
+
+    XMEMCPY(out, block, 4);
+}
+
+static void bs_ke_transform(unsigned char* out, unsigned char *in, word8 i) {
+    /* Rotate the input 8 bits to the left */
+#ifdef LITTLE_ENDIAN_ORDER
+    *(word32*)out = rotrFixed(*(word32*)in, 8);
+#else
+    *(word32*)out = rotlFixed(*(word32*)in, 8);
+#endif
+    bs_ke_sub_bytes(out, out);
+    /* On just the first byte, add 2^i to the byte */
+    out[0] ^= bs_rcon[i];
+}
+
+static void bs_expand_key(unsigned char *in, word32 sz) {
+    unsigned char t[4];
+    word32 o;
+    word8 i = 0;
+
+    if (sz == 176) {
+        /* Total of 11 rounds - AES-128. */
+        for (o = 16; o < sz; o += 16) {
+            bs_ke_transform(t, in + o - 4, i);
+            i++;
+            *(word32*)(in + o +  0) = *(word32*)(in + o - 16) ^
+                                      *(word32*) t;
+            *(word32*)(in + o +  4) = *(word32*)(in + o - 12) ^
+                                      *(word32*)(in + o +  0);
+            *(word32*)(in + o +  8) = *(word32*)(in + o -  8) ^
+                                      *(word32*)(in + o +  4);
+            *(word32*)(in + o + 12) = *(word32*)(in + o -  4) ^
+                                      *(word32*)(in + o +  8);
+        }
+    }
+    else if (sz == 208) {
+        /* Total of 13 rounds - AES-192. */
+        for (o = 24; o < sz; o += 24) {
+            bs_ke_transform(t, in + o - 4, i);
+            i++;
+            *(word32*)(in + o +  0) = *(word32*)(in + o - 24) ^
+                                      *(word32*) t;
+            *(word32*)(in + o +  4) = *(word32*)(in + o - 20) ^
+                                      *(word32*)(in + o +  0);
+            *(word32*)(in + o +  8) = *(word32*)(in + o - 16) ^
+                                      *(word32*)(in + o +  4);
+            *(word32*)(in + o + 12) = *(word32*)(in + o - 12) ^
+                                      *(word32*)(in + o +  8);
+            *(word32*)(in + o + 16) = *(word32*)(in + o -  8) ^
+                                      *(word32*)(in + o + 12);
+            *(word32*)(in + o + 20) = *(word32*)(in + o -  4) ^
+                                      *(word32*)(in + o + 16);
+        }
+    }
+    else if (sz == 240) {
+        /* Total of 15 rounds - AES-256. */
+        for (o = 32; o < sz; o += 16) {
+            if ((o & 0x1f) == 0) {
+                bs_ke_transform(t, in + o - 4, i);
+                i++;
+            }
+            else {
+                bs_ke_sub_bytes(t, in + o - 4);
+            }
+            *(word32*)(in + o +  0) = *(word32*)(in + o - 32) ^
+                                      *(word32*) t;
+            *(word32*)(in + o +  4) = *(word32*)(in + o - 28) ^
+                                      *(word32*)(in + o +  0);
+            *(word32*)(in + o +  8) = *(word32*)(in + o - 24) ^
+                                      *(word32*)(in + o +  4);
+            *(word32*)(in + o + 12) = *(word32*)(in + o - 20) ^
+                                      *(word32*)(in + o +  8);
+        }
+    }
+}
+
+static void bs_set_key(bs_word* rk, const byte* key, word32 keyLen,
+    word32 rounds)
+{
+    int i;
+    byte bs_key[15 * AES_BLOCK_SIZE];
+    int ksSz = (rounds + 1) * AES_BLOCK_SIZE;
+    bs_word block[AES_BLOCK_BITS];
+
+    /* Fist round. */
+    XMEMCPY(bs_key, key, keyLen);
+    bs_expand_key(bs_key, ksSz);
+
+    for (i = 0; i < ksSz; i += AES_BLOCK_SIZE) {
+        int k;
+
+        XMEMCPY(block, bs_key + i, AES_BLOCK_SIZE);
+        for (k = BS_BLOCK_WORDS; k < AES_BLOCK_BITS; k += BS_BLOCK_WORDS) {
+            int l;
+            for (l = 0; l < BS_BLOCK_WORDS; l++) {
+                block[k + l] = block[l];
+            }
+        }
+        bs_transpose(rk, block);
+        rk += AES_BLOCK_BITS;
+    }
+}
+
+static void bs_encrypt(bs_word* state, bs_word* rk, word32 r)
+{
+    word32 i;
+    bs_word trans[AES_BLOCK_BITS];
+
+    bs_transpose(trans, state);
+
+    bs_add_round_key(trans, trans, rk);
+    for (i = 1; i < r; i++) {
+        bs_sub_bytes_blocks(trans);
+        bs_shift_mix(state, trans);
+        rk += AES_BLOCK_BITS;
+        bs_add_round_key(trans, state, rk);
+    }
+    bs_sub_bytes_blocks(trans);
+    bs_shift_rows(state, trans);
+    rk += AES_BLOCK_BITS;
+    bs_add_round_key(trans, state, rk);
+    bs_inv_transpose(state, trans);
+}
+
+/* Encrypt a block using AES.
+ *
+ * @param [in]  aes       AES object.
+ * @param [in]  inBlock   Block to encrypt.
+ * @param [out] outBlock  Encrypted block.
+ * @param [in]  r         Rounds divided by 2.
+ */
+static void AesEncrypt_C(Aes* aes, const byte* inBlock, byte* outBlock,
+        word32 r)
+{
+    bs_word state[AES_BLOCK_BITS];
+
+    (void)r;
+
+    XMEMCPY(state, inBlock, AES_BLOCK_SIZE);
+    XMEMSET(((byte*)state) + AES_BLOCK_SIZE, 0, sizeof(state) - AES_BLOCK_SIZE);
+
+    bs_encrypt(state, aes->bs_key, aes->rounds);
+
+    XMEMCPY(outBlock, state, AES_BLOCK_SIZE);
+}
+
+#if defined(HAVE_AES_ECB) && !(defined(WOLFSSL_IMX6_CAAM) && \
+    !defined(NO_IMX6_CAAM_AES) && !defined(WOLFSSL_QNX_CAAM))
+/* Encrypt a number of blocks using AES.
+ *
+ * @param [in]  aes  AES object.
+ * @param [in]  in   Block to encrypt.
+ * @param [out] out  Encrypted block.
+ * @param [in]  sz   Number of blocks to encrypt.
+ */
+static void AesEncryptBlocks_C(Aes* aes, const byte* in, byte* out, word32 sz)
+{
+    bs_word state[AES_BLOCK_BITS];
+
+    while (sz >= BS_BLOCK_SIZE) {
+        XMEMCPY(state, in, BS_BLOCK_SIZE);
+        bs_encrypt(state, aes->bs_key, aes->rounds);
+        XMEMCPY(out, state, BS_BLOCK_SIZE);
+        sz  -= BS_BLOCK_SIZE;
+        in  += BS_BLOCK_SIZE;
+        out += BS_BLOCK_SIZE;
+    }
+    if (sz > 0) {
+        XMEMCPY(state, in, sz);
+        XMEMSET(((byte*)state) + sz, 0, sizeof(state) - sz);
+        bs_encrypt(state, aes->bs_key, aes->rounds);
+        XMEMCPY(out, state, sz);
+    }
+}
+#endif
+
+#endif /* !WC_AES_BITSLICED */
+
+/* this section disabled with NO_AES_192 */
+/* calling this one when missing NO_AES_192  */
+static WARN_UNUSED_RESULT int wc_AesEncrypt(
+    Aes* aes, const byte* inBlock, byte* outBlock)
+{
+    word32 r;
+
+    if (aes == NULL) {
+        return BAD_FUNC_ARG;
+    }
+
+#ifdef WC_DEBUG_CIPHER_LIFECYCLE
+    {
+        int ret = wc_debug_CipherLifecycleCheck(aes->CipherLifecycleTag, 0);
+        if (ret < 0)
+            return ret;
+    }
+#endif
+
+    r = aes->rounds >> 1;
+
+    if (r > 7 || r == 0) {
+        WOLFSSL_ERROR_VERBOSE(KEYUSAGE_E);
+        return KEYUSAGE_E;
+    }
+
+#ifdef WOLFSSL_AESNI
+    if (aes->use_aesni) {
+        ASSERT_SAVED_VECTOR_REGISTERS();
+
+        #ifdef DEBUG_AESNI
+            printf("about to aes encrypt\n");
+            printf("in  = %p\n", inBlock);
+            printf("out = %p\n", outBlock);
+            printf("aes->key = %p\n", aes->key);
+            printf("aes->rounds = %d\n", aes->rounds);
+            printf("sz = %d\n", AES_BLOCK_SIZE);
+        #endif
+
+        /* check alignment, decrypt doesn't need alignment */
+        if ((wc_ptr_t)inBlock % AESNI_ALIGN) {
+        #ifndef NO_WOLFSSL_ALLOC_ALIGN
+            byte* tmp = (byte*)XMALLOC(AES_BLOCK_SIZE + AESNI_ALIGN, aes->heap,
+                                                      DYNAMIC_TYPE_TMP_BUFFER);
+            byte* tmp_align;
+            if (tmp == NULL)
+                return MEMORY_E;
+
+            tmp_align = tmp + (AESNI_ALIGN - ((wc_ptr_t)tmp % AESNI_ALIGN));
+
+            XMEMCPY(tmp_align, inBlock, AES_BLOCK_SIZE);
+            AES_ECB_encrypt_AESNI(tmp_align, tmp_align, AES_BLOCK_SIZE,
+                    (byte*)aes->key, (int)aes->rounds);
+            XMEMCPY(outBlock, tmp_align, AES_BLOCK_SIZE);
+            XFREE(tmp, aes->heap, DYNAMIC_TYPE_TMP_BUFFER);
+            return 0;
+        #else
+            WOLFSSL_MSG("AES-ECB encrypt with bad alignment");
+            WOLFSSL_ERROR_VERBOSE(BAD_ALIGN_E);
+            return BAD_ALIGN_E;
+        #endif
+        }
+
+        AES_ECB_encrypt_AESNI(inBlock, outBlock, AES_BLOCK_SIZE, (byte*)aes->key,
+                        (int)aes->rounds);
+
+        return 0;
+    }
+    else {
+        #ifdef DEBUG_AESNI
+            printf("Skipping AES-NI\n");
+        #endif
+    }
+#endif /* WOLFSSL_AESNI */
+#if defined(WOLFSSL_SCE) && !defined(WOLFSSL_SCE_NO_AES)
+    AES_ECB_encrypt(aes, inBlock, outBlock, AES_BLOCK_SIZE);
+    return 0;
+#endif
+
+#if defined(WOLFSSL_IMXRT_DCP)
+    if (aes->keylen == 16) {
+        DCPAesEcbEncrypt(aes, outBlock, inBlock, AES_BLOCK_SIZE);
+        return 0;
+    }
+#endif
+
+#if defined(WOLFSSL_SE050) && defined(WOLFSSL_SE050_CRYPT)
+    if (aes->useSWCrypt == 0) {
+        return se050_aes_crypt(aes, inBlock, outBlock, AES_BLOCK_SIZE,
+                               AES_ENCRYPTION, kAlgorithm_SSS_AES_ECB);
+    }
+#endif
+
+#if defined(WOLFSSL_ESPIDF) && defined(NEED_AES_HW_FALLBACK)
+    ESP_LOGV(TAG, "wc_AesEncrypt fallback check");
+    if (wc_esp32AesSupportedKeyLen(aes)) {
+        return wc_esp32AesEncrypt(aes, inBlock, outBlock);
+    }
+    else {
+        /* For example, the ESP32-S3 does not support HW for len = 24,
+         * so fall back to SW */
+    #ifdef DEBUG_WOLFSSL
+        ESP_LOGW(TAG, "wc_AesEncrypt HW Falling back, unsupported keylen = %d",
+                      aes->keylen);
+    #endif
+    }
+#endif
+
+    AesEncrypt_C(aes, inBlock, outBlock, r);
 
     return 0;
 } /* wc_AesEncrypt */
@@ -2180,6 +2872,7 @@ static WARN_UNUSED_RESULT int wc_AesEncrypt( /* calling this one when missing NO
                               !defined(WOLFSSL_SILABS_SE_ACCEL)) || \
     defined(WOLFSSL_AES_DIRECT)
 
+#ifndef WC_AES_BITSLICED
 #ifndef WC_NO_CACHE_RESISTANT
 #ifndef WOLFSSL_AES_SMALL_TABLES
 /* load 4 Td Tables into cache by cache line stride */
@@ -2215,78 +2908,24 @@ static WARN_UNUSED_RESULT WC_INLINE word32 PreFetchTd4(void)
 }
 #endif
 
-/* Software AES - ECB Decrypt */
-static WARN_UNUSED_RESULT int wc_AesDecrypt(
-    Aes* aes, const byte* inBlock, byte* outBlock)
+/* Decrypt a block using AES.
+ *
+ * @param [in]  aes       AES object.
+ * @param [in]  inBlock   Block to encrypt.
+ * @param [out] outBlock  Encrypted block.
+ * @param [in]  r         Rounds divided by 2.
+ */
+static void AesDecrypt_C(Aes* aes, const byte* inBlock, byte* outBlock,
+    word32 r)
 {
     word32 s0, s1, s2, s3;
     word32 t0, t1, t2, t3;
-    word32 r;
     const word32* rk;
 
-    if (aes == NULL) {
-        return BAD_FUNC_ARG;
-    }
-
-    r = aes->rounds >> 1;
+#ifdef WC_AES_C_DYNAMIC_FALLBACK
+    rk = aes->key_C_fallback;
+#else
     rk = aes->key;
-
-    if (r > 7 || r == 0) {
-        WOLFSSL_ERROR_VERBOSE(KEYUSAGE_E);
-        return KEYUSAGE_E;
-    }
-
-#ifdef WOLFSSL_AESNI
-    if (haveAESNI && aes->use_aesni) {
-        #ifdef DEBUG_AESNI
-            printf("about to aes decrypt\n");
-            printf("in  = %p\n", inBlock);
-            printf("out = %p\n", outBlock);
-            printf("aes->key = %p\n", aes->key);
-            printf("aes->rounds = %d\n", aes->rounds);
-            printf("sz = %d\n", AES_BLOCK_SIZE);
-        #endif
-
-        /* if input and output same will overwrite input iv */
-        if ((const byte*)aes->tmp != inBlock)
-            XMEMCPY(aes->tmp, inBlock, AES_BLOCK_SIZE);
-        AES_ECB_decrypt(inBlock, outBlock, AES_BLOCK_SIZE, (byte*)aes->key,
-                        (int)aes->rounds);
-        return 0;
-    }
-    else {
-        #ifdef DEBUG_AESNI
-            printf("Skipping AES-NI\n");
-        #endif
-    }
-#endif /* WOLFSSL_AESNI */
-#if defined(WOLFSSL_SCE) && !defined(WOLFSSL_SCE_NO_AES)
-    return AES_ECB_decrypt(aes, inBlock, outBlock, AES_BLOCK_SIZE);
-#endif
-#if defined(WOLFSSL_IMXRT_DCP)
-    if (aes->keylen == 16) {
-        DCPAesEcbDecrypt(aes, outBlock, inBlock, AES_BLOCK_SIZE);
-        return 0;
-    }
-#endif
-#if defined(WOLFSSL_SE050) && defined(WOLFSSL_SE050_CRYPT)
-    if (aes->useSWCrypt == 0) {
-        return se050_aes_crypt(aes, inBlock, outBlock, AES_BLOCK_SIZE,
-                               AES_DECRYPTION, kAlgorithm_SSS_AES_ECB);
-    }
-#endif
-#if defined(WOLFSSL_ESPIDF) && defined(NEED_AES_HW_FALLBACK)
-    if (wc_esp32AesSupportedKeyLen(aes)) {
-        return wc_esp32AesDecrypt(aes, inBlock, outBlock);
-    }
-    else {
-        /* For example, the ESP32-S3 does not support HW for len = 24,
-         * so fall back to SW */
-    #ifdef DEBUG_WOLFSSL
-        ESP_LOGW(TAG, "wc_AesDecrypt HW Falling back, "
-                        "unsupported keylen = %d", aes->keylen);
-    #endif
-    } /* else !wc_esp32AesSupportedKeyLen for ESP32 */
 #endif
 
     /*
@@ -2499,8 +3138,457 @@ static WARN_UNUSED_RESULT int wc_AesDecrypt(
     XMEMCPY(outBlock + 2 * sizeof(s0), &s2, sizeof(s2));
     XMEMCPY(outBlock + 3 * sizeof(s0), &s3, sizeof(s3));
 
+}
+
+#if defined(HAVE_AES_ECB) && !(defined(WOLFSSL_IMX6_CAAM) && \
+    !defined(NO_IMX6_CAAM_AES) && !defined(WOLFSSL_QNX_CAAM))
+/* Decrypt a number of blocks using AES.
+ *
+ * @param [in]  aes  AES object.
+ * @param [in]  in   Block to encrypt.
+ * @param [out] out  Encrypted block.
+ * @param [in]  sz   Number of blocks to encrypt.
+ */
+static void AesDecryptBlocks_C(Aes* aes, const byte* in, byte* out, word32 sz)
+{
+    word32 i;
+
+    for (i = 0; i < sz; i += AES_BLOCK_SIZE) {
+        AesDecrypt_C(aes, in, out, aes->rounds >> 1);
+        in += AES_BLOCK_SIZE;
+        out += AES_BLOCK_SIZE;
+    }
+}
+#endif
+
+#else
+
+/* http://cs-www.cs.yale.edu/homes/peralta/CircuitStuff/Sinv.txt */
+static void bs_inv_sub_bytes(bs_word u[8])
+{
+    bs_word U0, U1, U2, U3, U4, U5, U6, U7;
+    bs_word Y0, Y1, Y2, Y3, Y4, Y5, Y6, Y7;
+    bs_word RTL0, RTL1, RTL2;
+    bs_word sa0, sa1;
+    bs_word sb0, sb1;
+    bs_word ab0, ab1, ab2, ab3;
+    bs_word ab20, ab21, ab22, ab23;
+    bs_word al, ah, aa, bl, bh, bb;
+    bs_word abcd1, abcd2, abcd3, abcd4, abcd5, abcd6;
+    bs_word ph11, ph12, ph13, ph01, ph02, ph03;
+    bs_word pl01, pl02, pl03, pl11, pl12, pl13;
+    bs_word r1, r2, r3, r4, r5, r6, r7, r8, r9;
+    bs_word rr1, rr2;
+    bs_word r10, r11;
+    bs_word cp1, cp2, cp3, cp4;
+    bs_word vr1, vr2, vr3;
+    bs_word pr1, pr2, pr3;
+    bs_word wr1, wr2, wr3;
+    bs_word qr1, qr2, qr3;
+    bs_word tinv1, tinv2, tinv3, tinv4, tinv5, tinv6, tinv7, tinv8, tinv9;
+    bs_word tinv10, tinv11, tinv12, tinv13;
+    bs_word t01, t02;
+    bs_word d0, d1, d2, d3;
+    bs_word dl, dd, dh;
+    bs_word sd0, sd1;
+    bs_word p0, p1, p2, p3, p4, p6, p7;
+    bs_word X11, X13, X14, X16, X18, X19;
+    bs_word S0, S1, S2, S3, S4, S5, S6, S7;
+
+    U0 = u[7];
+    U1 = u[6];
+    U2 = u[5];
+    U3 = u[4];
+    U4 = u[3];
+    U5 = u[2];
+    U6 = u[1];
+    U7 = u[0];
+
+    Y0 = U0 ^ U3;
+    Y2 = ~(U1 ^ U3);
+    Y4 = U0 ^ Y2;
+    RTL0 = U6 ^ U7;
+    Y1 = Y2 ^ RTL0;
+    Y7 = ~(U2 ^ Y1);
+    RTL1 = U3 ^ U4;
+    Y6 = ~(U7 ^ RTL1);
+    Y3 = Y1 ^ RTL1;
+    RTL2 = ~(U0 ^ U2);
+    Y5 = U5 ^ RTL2;
+    sa1 = Y0 ^ Y2;
+    sa0 = Y1 ^ Y3;
+    sb1 = Y4 ^ Y6;
+    sb0 = Y5 ^ Y7;
+    ah = Y0 ^ Y1;
+    al = Y2 ^ Y3;
+    aa = sa0 ^ sa1;
+    bh = Y4 ^ Y5;
+    bl = Y6 ^ Y7;
+    bb = sb0 ^ sb1;
+    ab20 = sa0 ^ sb0;
+    ab22 = al ^ bl;
+    ab23 = Y3 ^ Y7;
+    ab21 = sa1 ^ sb1;
+    abcd1 = ah & bh;
+    rr1 = Y0 & Y4;
+    ph11 = ab20 ^ abcd1;
+    t01 = Y1 & Y5;
+    ph01 = t01 ^ abcd1;
+    abcd2 = al & bl;
+    r1 = Y2 & Y6;
+    pl11 = ab22 ^ abcd2;
+    r2 = Y3 & Y7;
+    pl01 = r2 ^ abcd2;
+    r3 = sa0 & sb0;
+    vr1 = aa & bb;
+    pr1 = vr1 ^ r3;
+    wr1 = sa1 & sb1;
+    qr1 = wr1 ^ r3;
+    ab0 = ph11 ^ rr1;
+    ab1 = ph01 ^ ab21;
+    ab2 = pl11 ^ r1;
+    ab3 = pl01 ^ qr1;
+    cp1 = ab0 ^ pr1;
+    cp2 = ab1 ^ qr1;
+    cp3 = ab2 ^ pr1;
+    cp4 = ab3 ^ ab23;
+    tinv1 = cp3 ^ cp4;
+    tinv2 = cp3 & cp1;
+    tinv3 = cp2 ^ tinv2;
+    tinv4 = cp1 ^ cp2;
+    tinv5 = cp4 ^ tinv2;
+    tinv6 = tinv5 & tinv4;
+    tinv7 = tinv3 & tinv1;
+    d2 = cp4 ^ tinv7;
+    d0 = cp2 ^ tinv6;
+    tinv8 = cp1 & cp4;
+    tinv9 = tinv4 & tinv8;
+    tinv10 = tinv4 ^ tinv2;
+    d1 = tinv9 ^ tinv10;
+    tinv11 = cp2 & cp3;
+    tinv12 = tinv1 & tinv11;
+    tinv13 = tinv1 ^ tinv2;
+    d3 = tinv12 ^ tinv13;
+    sd1 = d1 ^ d3;
+    sd0 = d0 ^ d2;
+    dl = d0 ^ d1;
+    dh = d2 ^ d3;
+    dd = sd0 ^ sd1;
+    abcd3 = dh & bh;
+    rr2 = d3 & Y4;
+    t02 = d2 & Y5;
+    abcd4 = dl & bl;
+    r4 = d1 & Y6;
+    r5 = d0 & Y7;
+    r6 = sd0 & sb0;
+    vr2 = dd & bb;
+    wr2 = sd1 & sb1;
+    abcd5 = dh & ah;
+    r7 = d3 & Y0;
+    r8 = d2 & Y1;
+    abcd6 = dl & al;
+    r9 = d1 & Y2;
+    r10 = d0 & Y3;
+    r11 = sd0 & sa0;
+    vr3 = dd & aa;
+    wr3 = sd1 & sa1;
+    ph12 = rr2 ^ abcd3;
+    ph02 = t02 ^ abcd3;
+    pl12 = r4 ^ abcd4;
+    pl02 = r5 ^ abcd4;
+    pr2 = vr2 ^ r6;
+    qr2 = wr2 ^ r6;
+    p0 = ph12 ^ pr2;
+    p1 = ph02 ^ qr2;
+    p2 = pl12 ^ pr2;
+    p3 = pl02 ^ qr2;
+    ph13 = r7 ^ abcd5;
+    ph03 = r8 ^ abcd5;
+    pl13 = r9 ^ abcd6;
+    pl03 = r10 ^ abcd6;
+    pr3 = vr3 ^ r11;
+    qr3 = wr3 ^ r11;
+    p4 = ph13 ^ pr3;
+    S7 = ph03 ^ qr3;
+    p6 = pl13 ^ pr3;
+    p7 = pl03 ^ qr3;
+    S3 = p1 ^ p6;
+    S6 = p2 ^ p6;
+    S0 = p3 ^ p6;
+    X11 = p0 ^ p2;
+    S5 = S0 ^ X11;
+    X13 = p4 ^ p7;
+    X14 = X11 ^ X13;
+    S1 = S3 ^ X14;
+    X16 = p1 ^ S7;
+    S2 = X14 ^ X16;
+    X18 = p0 ^ p4;
+    X19 = S5 ^ X16;
+    S4 = X18 ^ X19;
+
+    u[0] = S7;
+    u[1] = S6;
+    u[2] = S5;
+    u[3] = S4;
+    u[4] = S3;
+    u[5] = S2;
+    u[6] = S1;
+    u[7] = S0;
+}
+
+static void bs_inv_shift_rows(bs_word* b)
+{
+    bs_word t[AES_BLOCK_BITS];
+    int i;
+
+    for (i = 0; i < 128; i += 32) {
+        BS_ASSIGN_8(t, i +  0, b, (  0 + i) & BS_IDX_MASK);
+        BS_ASSIGN_8(t, i +  8, b, (104 + i) & BS_IDX_MASK);
+        BS_ASSIGN_8(t, i + 16, b, ( 80 + i) & BS_IDX_MASK);
+        BS_ASSIGN_8(t, i + 24, b, ( 56 + i) & BS_IDX_MASK);
+    }
+
+    XMEMCPY(b, t, sizeof(t));
+}
+
+#define O0  0
+#define O1  8
+#define O2  16
+#define O3  24
+
+#define BS_INV_MIX_SHIFT_8(br, b, O0, O1, O2, O3, of0, of1, of2)            \
+    of0 = b[O0+7] ^ b[O0+6] ^ b[O0+5] ^ b[O1 + 7] ^ b[O1+5] ^               \
+          b[O2+6] ^ b[O2+5] ^ b[O3+5];                                      \
+    of1 =           b[O0+7] ^ b[O0+6] ^             b[O1+6] ^               \
+          b[O2+7] ^ b[O2+6] ^ b[O3+6];                                      \
+    of2 =                     b[O0+7] ^             b[O1+7] ^               \
+                    b[O2+7] ^ b[O3+7];                                      \
+                                                                            \
+    br[0] =                                                   b[O1+0] ^     \
+            b[O2+0]                     ^ b[O3+0]           ^ of0;          \
+    br[1] = b[O0+0]                               ^ b[O1+0] ^ b[O1+1] ^     \
+            b[O2+1]                     ^ b[O3+1]           ^ of0 ^ of1;    \
+    br[2] = b[O0+1] ^ b[O0+0]                     ^ b[O1+1] ^ b[O1+2] ^     \
+            b[O2+2] ^ b[O2+0]           ^ b[O3+2]           ^ of1 ^ of2;    \
+    br[3] = b[O0+2] ^ b[O0+1] ^ b[O0+0] ^ b[O1+0] ^ b[O1+2] ^ b[O1+3] ^     \
+            b[O2+3] ^ b[O2+1] ^ b[O2+0] ^ b[O3+3] ^ b[O3+0] ^ of0 ^ of2;    \
+    br[4] = b[O0+3] ^ b[O0+2] ^ b[O0+1] ^ b[O1+1] ^ b[O1+3] ^ b[O1+4] ^     \
+            b[O2+4] ^ b[O2+2] ^ b[O2+1] ^ b[O3+4] ^ b[O3+1] ^ of0 ^ of1;    \
+    br[5] = b[O0+4] ^ b[O0+3] ^ b[O0+2] ^ b[O1+2] ^ b[O1+4] ^ b[O1+5] ^     \
+            b[O2+5] ^ b[O2+3] ^ b[O2+2] ^ b[O3+5] ^ b[O3+2] ^ of1 ^ of2;    \
+    br[6] = b[O0+5] ^ b[O0+4] ^ b[O0+3] ^ b[O1+3] ^ b[O1+5] ^ b[O1+6] ^     \
+            b[O2+6] ^ b[O2+4] ^ b[O2+3] ^ b[O3+6] ^ b[O3+3] ^ of2;          \
+    br[7] = b[O0+6] ^ b[O0+5] ^ b[O0+4] ^ b[O1+4] ^ b[O1+6] ^ b[O1+7] ^     \
+            b[O2+7] ^ b[O2+5] ^ b[O2+4] ^ b[O3+7] ^ b[O3+4]
+
+/* Inverse mix columns and shift rows. */
+static void bs_inv_mix_shift(bs_word* t, bs_word* b)
+{
+    bs_word* bp = b;
+    word8 or0 = BS_ROW_OFF_0 + BS_SHIFT_OFF_0;
+    word8 or1 = BS_ROW_OFF_1 + BS_SHIFT_OFF_1;
+    word8 or2 = BS_ROW_OFF_2 + BS_SHIFT_OFF_2;
+    word8 or3 = BS_ROW_OFF_3 + BS_SHIFT_OFF_3;
+    int i;
+
+    for (i = 0; i < AES_BLOCK_BITS / 4; i += AES_BLOCK_BITS / 16) {
+        bs_word* br;
+        bs_word of0;
+        bs_word of1;
+        bs_word of2;
+
+        br = t + or0;
+        BS_INV_MIX_SHIFT_8(br, bp, O0, O1, O2, O3, of0, of1, of2);
+        br = t + or1;
+        BS_INV_MIX_SHIFT_8(br, bp, O1, O2, O3, O0, of0, of1, of2);
+        br = t + or2;
+        BS_INV_MIX_SHIFT_8(br, bp, O2, O3, O0, O1, of0, of1, of2);
+        br = t + or3;
+        BS_INV_MIX_SHIFT_8(br, bp, O3, O0, O1, O2, of0, of1, of2);
+
+        or0 = (or0 + AES_BLOCK_BITS / 4) & BS_IDX_MASK;
+        or1 = (or1 + AES_BLOCK_BITS / 4) & BS_IDX_MASK;
+        or2 = (or2 + AES_BLOCK_BITS / 4) & BS_IDX_MASK;
+        or3 = (or3 + AES_BLOCK_BITS / 4) & BS_IDX_MASK;
+
+        bp += AES_BLOCK_BITS / 4;
+    }
+}
+
+static void bs_inv_sub_bytes_blocks(bs_word* b)
+{
+    int i;
+
+    for (i = 0; i < AES_BLOCK_BITS; i += 8) {
+        bs_inv_sub_bytes(b + i);
+    }
+}
+
+static void bs_decrypt(bs_word* state, bs_word* rk, word32 r)
+{
+    int i;
+    bs_word trans[AES_BLOCK_BITS];
+
+    bs_transpose(trans, state);
+
+    rk += r * AES_BLOCK_BITS;
+    bs_add_round_key(trans, trans, rk);
+    bs_inv_shift_rows(trans);
+    bs_inv_sub_bytes_blocks(trans);
+    rk -= AES_BLOCK_BITS;
+    bs_add_round_key(trans, trans, rk);
+    for (i = (int)r - 2; i >= 0; i--) {
+        bs_inv_mix_shift(state, trans);
+        bs_inv_sub_bytes_blocks(state);
+        rk -= AES_BLOCK_BITS;
+        bs_add_round_key(trans, state, rk);
+    }
+
+    bs_inv_transpose(state, trans);
+}
+
+#ifdef WOLFSSL_AES_DIRECT
+/* Decrypt a block using AES.
+ *
+ * @param [in]  aes       AES object.
+ * @param [in]  inBlock   Block to encrypt.
+ * @param [out] outBlock  Encrypted block.
+ * @param [in]  r         Rounds divided by 2.
+ */
+static void AesDecrypt_C(Aes* aes, const byte* inBlock, byte* outBlock,
+    word32 r)
+{
+    bs_word state[AES_BLOCK_BITS];
+
+    (void)r;
+
+    XMEMCPY(state, inBlock, AES_BLOCK_SIZE);
+    XMEMSET(((byte*)state) + AES_BLOCK_SIZE, 0, sizeof(state) - AES_BLOCK_SIZE);
+
+    bs_decrypt(state, aes->bs_key, aes->rounds);
+
+    XMEMCPY(outBlock, state, AES_BLOCK_SIZE);
+}
+#endif
+
+#if defined(HAVE_AES_ECB) && !(defined(WOLFSSL_IMX6_CAAM) && \
+    !defined(NO_IMX6_CAAM_AES) && !defined(WOLFSSL_QNX_CAAM))
+/* Decrypt a number of blocks using AES.
+ *
+ * @param [in]  aes  AES object.
+ * @param [in]  in   Block to encrypt.
+ * @param [out] out  Encrypted block.
+ * @param [in]  sz   Number of blocks to encrypt.
+ */
+static void AesDecryptBlocks_C(Aes* aes, const byte* in, byte* out, word32 sz)
+{
+    bs_word state[AES_BLOCK_BITS];
+
+    while (sz >= BS_BLOCK_SIZE) {
+        XMEMCPY(state, in, BS_BLOCK_SIZE);
+        bs_decrypt(state, aes->bs_key, aes->rounds);
+        XMEMCPY(out, state, BS_BLOCK_SIZE);
+        sz  -= BS_BLOCK_SIZE;
+        in  += BS_BLOCK_SIZE;
+        out += BS_BLOCK_SIZE;
+    }
+    if (sz > 0) {
+        XMEMCPY(state, in, sz);
+        XMEMSET(((byte*)state) + sz, 0, sizeof(state) - sz);
+        bs_decrypt(state, aes->bs_key, aes->rounds);
+        XMEMCPY(out, state, sz);
+    }
+}
+#endif
+
+#endif
+
+#if !defined(WC_AES_BITSLICED) || defined(WOLFSSL_AES_DIRECT)
+/* Software AES - ECB Decrypt */
+static WARN_UNUSED_RESULT int wc_AesDecrypt(
+    Aes* aes, const byte* inBlock, byte* outBlock)
+{
+    word32 r;
+
+    if (aes == NULL) {
+        return BAD_FUNC_ARG;
+    }
+
+#ifdef WC_DEBUG_CIPHER_LIFECYCLE
+    {
+        int ret = wc_debug_CipherLifecycleCheck(aes->CipherLifecycleTag, 0);
+        if (ret < 0)
+            return ret;
+    }
+#endif
+
+    r = aes->rounds >> 1;
+
+    if (r > 7 || r == 0) {
+        WOLFSSL_ERROR_VERBOSE(KEYUSAGE_E);
+        return KEYUSAGE_E;
+    }
+
+#ifdef WOLFSSL_AESNI
+    if (aes->use_aesni) {
+        ASSERT_SAVED_VECTOR_REGISTERS();
+
+        #ifdef DEBUG_AESNI
+            printf("about to aes decrypt\n");
+            printf("in  = %p\n", inBlock);
+            printf("out = %p\n", outBlock);
+            printf("aes->key = %p\n", aes->key);
+            printf("aes->rounds = %d\n", aes->rounds);
+            printf("sz = %d\n", AES_BLOCK_SIZE);
+        #endif
+
+        /* if input and output same will overwrite input iv */
+        if ((const byte*)aes->tmp != inBlock)
+            XMEMCPY(aes->tmp, inBlock, AES_BLOCK_SIZE);
+        AES_ECB_decrypt_AESNI(inBlock, outBlock, AES_BLOCK_SIZE, (byte*)aes->key,
+                        (int)aes->rounds);
+        return 0;
+    }
+    else {
+        #ifdef DEBUG_AESNI
+            printf("Skipping AES-NI\n");
+        #endif
+    }
+#endif /* WOLFSSL_AESNI */
+#if defined(WOLFSSL_SCE) && !defined(WOLFSSL_SCE_NO_AES)
+    return AES_ECB_decrypt(aes, inBlock, outBlock, AES_BLOCK_SIZE);
+#endif
+#if defined(WOLFSSL_IMXRT_DCP)
+    if (aes->keylen == 16) {
+        DCPAesEcbDecrypt(aes, outBlock, inBlock, AES_BLOCK_SIZE);
+        return 0;
+    }
+#endif
+#if defined(WOLFSSL_SE050) && defined(WOLFSSL_SE050_CRYPT)
+    if (aes->useSWCrypt == 0) {
+        return se050_aes_crypt(aes, inBlock, outBlock, AES_BLOCK_SIZE,
+                               AES_DECRYPTION, kAlgorithm_SSS_AES_ECB);
+    }
+#endif
+#if defined(WOLFSSL_ESPIDF) && defined(NEED_AES_HW_FALLBACK)
+    if (wc_esp32AesSupportedKeyLen(aes)) {
+        return wc_esp32AesDecrypt(aes, inBlock, outBlock);
+    }
+    else {
+        /* For example, the ESP32-S3 does not support HW for len = 24,
+         * so fall back to SW */
+    #ifdef DEBUG_WOLFSSL
+        ESP_LOGW(TAG, "wc_AesDecrypt HW Falling back, "
+                        "unsupported keylen = %d", aes->keylen);
+    #endif
+    } /* else !wc_esp32AesSupportedKeyLen for ESP32 */
+#endif
+
+    AesDecrypt_C(aes, inBlock, outBlock, r);
+
     return 0;
 } /* wc_AesDecrypt[_SW]() */
+#endif /* !WC_AES_BITSLICED || WOLFSSL_AES_DIRECT */
 #endif /* HAVE_AES_CBC || WOLFSSL_AES_DIRECT */
 #endif /* HAVE_AES_DECRYPT */
 
@@ -2525,6 +3613,14 @@ static WARN_UNUSED_RESULT int wc_AesDecrypt(
             keylen != 32)) {
             return BAD_FUNC_ARG;
         }
+
+#ifdef WC_DEBUG_CIPHER_LIFECYCLE
+        {
+            int ret = wc_debug_CipherLifecycleCheck(aes->CipherLifecycleTag, 0);
+            if (ret < 0)
+                return ret;
+        }
+#endif
 
         rk = aes->key;
         aes->keylen = keylen;
@@ -2599,6 +3695,14 @@ static WARN_UNUSED_RESULT int wc_AesDecrypt(
         if (aes == NULL)
             return BAD_FUNC_ARG;
 
+#ifdef WC_DEBUG_CIPHER_LIFECYCLE
+        {
+            int ret = wc_debug_CipherLifecycleCheck(aes->CipherLifecycleTag, 0);
+            if (ret < 0)
+                return ret;
+        }
+#endif
+
         aes->keylen = keylen;
         aes->rounds = keylen/4 + 6;
         XMEMCPY(aes->key, userKey, keylen);
@@ -2614,11 +3718,25 @@ static WARN_UNUSED_RESULT int wc_AesDecrypt(
         return 0;
     }
 #elif defined(FREESCALE_LTC)
-    int wc_AesSetKey(Aes* aes, const byte* userKey, word32 keylen, const byte* iv,
-                  int dir)
+    int wc_AesSetKeyLocal(Aes* aes, const byte* userKey, word32 keylen,
+        const byte* iv, int dir, int checkKeyLen)
     {
-        if (aes == NULL || !((keylen == 16) || (keylen == 24) || (keylen == 32)))
+        if (aes == NULL)
             return BAD_FUNC_ARG;
+
+#ifdef WC_DEBUG_CIPHER_LIFECYCLE
+        {
+            int ret = wc_debug_CipherLifecycleCheck(aes->CipherLifecycleTag, 0);
+            if (ret < 0)
+                return ret;
+        }
+#endif
+
+        if (checkKeyLen) {
+            if (!((keylen == 16) || (keylen == 24) || (keylen == 32)))
+                return BAD_FUNC_ARG;
+        }
+        (void)dir;
 
         aes->rounds = keylen/4 + 6;
         XMEMCPY(aes->key, userKey, keylen);
@@ -2631,14 +3749,21 @@ static WARN_UNUSED_RESULT int wc_AesDecrypt(
         return wc_AesSetIV(aes, iv);
     }
 
+    int wc_AesSetKey(Aes* aes, const byte* userKey, word32 keylen,
+        const byte* iv, int dir)
+    {
+        return wc_AesSetKeyLocal(aes, userKey, keylen, iv, dir, 1);
+    }
+
+
     int wc_AesSetKeyDirect(Aes* aes, const byte* userKey, word32 keylen,
                         const byte* iv, int dir)
     {
         return wc_AesSetKey(aes, userKey, keylen, iv, dir);
     }
 #elif defined(FREESCALE_MMCAU)
-    int wc_AesSetKey(Aes* aes, const byte* userKey, word32 keylen,
-        const byte* iv, int dir)
+    int wc_AesSetKeyLocal(Aes* aes, const byte* userKey, word32 keylen,
+        const byte* iv, int dir, int checkKeyLen)
     {
         int ret;
         byte* rk;
@@ -2648,10 +3773,21 @@ static WARN_UNUSED_RESULT int wc_AesDecrypt(
 
         (void)dir;
 
-        if (!((keylen == 16) || (keylen == 24) || (keylen == 32)))
-            return BAD_FUNC_ARG;
         if (aes == NULL)
             return BAD_FUNC_ARG;
+
+#ifdef WC_DEBUG_CIPHER_LIFECYCLE
+        {
+            int ret = wc_debug_CipherLifecycleCheck(aes->CipherLifecycleTag, 0);
+            if (ret < 0)
+                return ret;
+        }
+#endif
+
+        if (checkKeyLen) {
+            if (!((keylen == 16) || (keylen == 24) || (keylen == 32)))
+                return BAD_FUNC_ARG;
+        }
 
         rk = (byte*)aes->key;
         if (rk == NULL)
@@ -2703,6 +3839,12 @@ static WARN_UNUSED_RESULT int wc_AesDecrypt(
         return ret;
     }
 
+    int wc_AesSetKey(Aes* aes, const byte* userKey, word32 keylen,
+        const byte* iv, int dir)
+    {
+        return wc_AesSetKeyLocal(aes, userKey, keylen, iv, dir, 1);
+    }
+
     int wc_AesSetKeyDirect(Aes* aes, const byte* userKey, word32 keylen,
                         const byte* iv, int dir)
     {
@@ -2720,6 +3862,12 @@ static WARN_UNUSED_RESULT int wc_AesDecrypt(
 
         if (aes == NULL || keylen != 16)
             return BAD_FUNC_ARG;
+
+#ifdef WC_DEBUG_CIPHER_LIFECYCLE
+        ret = wc_debug_CipherLifecycleCheck(aes->CipherLifecycleTag, 0);
+        if (ret < 0)
+            return ret;
+#endif
 
         aes->keylen = keylen;
         aes->rounds = keylen/4 + 6;
@@ -2752,6 +3900,14 @@ static WARN_UNUSED_RESULT int wc_AesDecrypt(
         if (aes == NULL || (keylen != 16 && keylen != 24 && keylen != 32)) {
             return BAD_FUNC_ARG;
         }
+
+#ifdef WC_DEBUG_CIPHER_LIFECYCLE
+        {
+            int ret = wc_debug_CipherLifecycleCheck(aes->CipherLifecycleTag, 0);
+            if (ret < 0)
+                return ret;
+        }
+#endif
 
     #if !defined(WOLFSSL_AES_128)
         if (keylen == 16) {
@@ -2796,6 +3952,16 @@ static WARN_UNUSED_RESULT int wc_AesDecrypt(
             keylen != AES_256_KEY_SIZE)) {
             return BAD_FUNC_ARG;
         }
+
+#ifdef WC_DEBUG_CIPHER_LIFECYCLE
+        {
+            int ret2 =
+                wc_debug_CipherLifecycleCheck(aes->CipherLifecycleTag, 0);
+            if (ret2 < 0)
+                return ret2;
+        }
+#endif
+
     #if defined(AES_MAX_KEY_SIZE)
         if (keylen > (AES_MAX_KEY_SIZE/8)) {
             return BAD_FUNC_ARG;
@@ -2883,21 +4049,287 @@ static WARN_UNUSED_RESULT int wc_AesDecrypt(
  * or perhaps there's HW support for *some* keylengths
  * and we need both HW and SW. */
 #ifdef NEED_SOFTWARE_AES_SETKEY
+
+#ifdef NEED_AES_TABLES
+
+#ifndef WC_AES_BITSLICED
+/* Set the AES key and expand.
+ *
+ * @param [in]  aes    AES object.
+ * @param [in]  key    Block to encrypt.
+ * @param [in]  keySz  Number of bytes in key.
+ * @param [in]  dir    Direction of crypt: AES_ENCRYPTION or AES_DECRYPTION.
+ */
+static void AesSetKey_C(Aes* aes, const byte* key, word32 keySz, int dir)
+{
+#ifdef WC_AES_C_DYNAMIC_FALLBACK
+    word32* rk = aes->key_C_fallback;
+#else
+    word32* rk = aes->key;
+#endif
+    word32 temp;
+    unsigned int i = 0;
+
+    XMEMCPY(rk, key, keySz);
+#if defined(LITTLE_ENDIAN_ORDER) && !defined(WOLFSSL_PIC32MZ_CRYPT) && \
+    (!defined(WOLFSSL_ESP32_CRYPT) || defined(NO_WOLFSSL_ESP32_CRYPT_AES))
+    /* Always reverse words when using only SW */
+    {
+        ByteReverseWords(rk, rk, keySz);
+    }
+#else
+    /* Sometimes reverse words when using supported HW */
+    #if defined(WOLFSSL_ESPIDF)
+        /* Some platforms may need SW fallback (e.g. AES192) */
+        #if defined(NEED_AES_HW_FALLBACK)
+        {
+            ESP_LOGV(TAG, "wc_AesEncrypt fallback check");
+            if (wc_esp32AesSupportedKeyLen(aes)) {
+                /* don't reverse for HW supported key lengths */
+            }
+            else {
+                ByteReverseWords(rk, rk, keySz);
+            }
+        }
+        #else
+            /* If we don't need SW fallback, don't need to reverse words. */
+        #endif /* NEED_AES_HW_FALLBACK */
+    #endif /* WOLFSSL_ESPIDF */
+#endif /* LITTLE_ENDIAN_ORDER, etc */
+
+    switch (keySz) {
+#if defined(AES_MAX_KEY_SIZE) && AES_MAX_KEY_SIZE >= 128 && \
+        defined(WOLFSSL_AES_128)
+    case 16:
+    #ifdef WOLFSSL_CHECK_MEM_ZERO
+        temp = (word32)-1;
+        wc_MemZero_Add("wc_AesSetKeyLocal temp", &temp, sizeof(temp));
+    #endif
+        while (1)
+        {
+            temp  = rk[3];
+            rk[4] = rk[0] ^
+        #ifndef WOLFSSL_AES_SMALL_TABLES
+                (GetTable(Te[2], GETBYTE(temp, 2)) & 0xff000000) ^
+                (GetTable(Te[3], GETBYTE(temp, 1)) & 0x00ff0000) ^
+                (GetTable(Te[0], GETBYTE(temp, 0)) & 0x0000ff00) ^
+                (GetTable(Te[1], GETBYTE(temp, 3)) & 0x000000ff) ^
+        #else
+                ((word32)GetTable8(Tsbox, GETBYTE(temp, 2)) << 24) ^
+                ((word32)GetTable8(Tsbox, GETBYTE(temp, 1)) << 16) ^
+                ((word32)GetTable8(Tsbox, GETBYTE(temp, 0)) <<  8) ^
+                ((word32)GetTable8(Tsbox, GETBYTE(temp, 3))) ^
+        #endif
+                rcon[i];
+            rk[5] = rk[1] ^ rk[4];
+            rk[6] = rk[2] ^ rk[5];
+            rk[7] = rk[3] ^ rk[6];
+            if (++i == 10)
+                break;
+            rk += 4;
+        }
+        break;
+#endif /* 128 */
+
+#if defined(AES_MAX_KEY_SIZE) && AES_MAX_KEY_SIZE >= 192 && \
+        defined(WOLFSSL_AES_192)
+    case 24:
+    #ifdef WOLFSSL_CHECK_MEM_ZERO
+        temp = (word32)-1;
+        wc_MemZero_Add("wc_AesSetKeyLocal temp", &temp, sizeof(temp));
+    #endif
+        /* for (;;) here triggers a bug in VC60 SP4 w/ Pro Pack */
+        while (1)
+        {
+            temp = rk[ 5];
+            rk[ 6] = rk[ 0] ^
+        #ifndef WOLFSSL_AES_SMALL_TABLES
+                (GetTable(Te[2], GETBYTE(temp, 2)) & 0xff000000) ^
+                (GetTable(Te[3], GETBYTE(temp, 1)) & 0x00ff0000) ^
+                (GetTable(Te[0], GETBYTE(temp, 0)) & 0x0000ff00) ^
+                (GetTable(Te[1], GETBYTE(temp, 3)) & 0x000000ff) ^
+        #else
+                ((word32)GetTable8(Tsbox, GETBYTE(temp, 2)) << 24) ^
+                ((word32)GetTable8(Tsbox, GETBYTE(temp, 1)) << 16) ^
+                ((word32)GetTable8(Tsbox, GETBYTE(temp, 0)) <<  8) ^
+                ((word32)GetTable8(Tsbox, GETBYTE(temp, 3))) ^
+        #endif
+                rcon[i];
+            rk[ 7] = rk[ 1] ^ rk[ 6];
+            rk[ 8] = rk[ 2] ^ rk[ 7];
+            rk[ 9] = rk[ 3] ^ rk[ 8];
+            if (++i == 8)
+                break;
+            rk[10] = rk[ 4] ^ rk[ 9];
+            rk[11] = rk[ 5] ^ rk[10];
+            rk += 6;
+        }
+        break;
+#endif /* 192 */
+
+#if defined(AES_MAX_KEY_SIZE) && AES_MAX_KEY_SIZE >= 256 && \
+        defined(WOLFSSL_AES_256)
+    case 32:
+    #ifdef WOLFSSL_CHECK_MEM_ZERO
+        temp = (word32)-1;
+        wc_MemZero_Add("wc_AesSetKeyLocal temp", &temp, sizeof(temp));
+    #endif
+        while (1)
+        {
+            temp = rk[ 7];
+            rk[ 8] = rk[ 0] ^
+        #ifndef WOLFSSL_AES_SMALL_TABLES
+                (GetTable(Te[2], GETBYTE(temp, 2)) & 0xff000000) ^
+                (GetTable(Te[3], GETBYTE(temp, 1)) & 0x00ff0000) ^
+                (GetTable(Te[0], GETBYTE(temp, 0)) & 0x0000ff00) ^
+                (GetTable(Te[1], GETBYTE(temp, 3)) & 0x000000ff) ^
+        #else
+                ((word32)GetTable8(Tsbox, GETBYTE(temp, 2)) << 24) ^
+                ((word32)GetTable8(Tsbox, GETBYTE(temp, 1)) << 16) ^
+                ((word32)GetTable8(Tsbox, GETBYTE(temp, 0)) <<  8) ^
+                ((word32)GetTable8(Tsbox, GETBYTE(temp, 3))) ^
+        #endif
+                rcon[i];
+            rk[ 9] = rk[ 1] ^ rk[ 8];
+            rk[10] = rk[ 2] ^ rk[ 9];
+            rk[11] = rk[ 3] ^ rk[10];
+            if (++i == 7)
+                break;
+            temp = rk[11];
+            rk[12] = rk[ 4] ^
+        #ifndef WOLFSSL_AES_SMALL_TABLES
+                (GetTable(Te[2], GETBYTE(temp, 3)) & 0xff000000) ^
+                (GetTable(Te[3], GETBYTE(temp, 2)) & 0x00ff0000) ^
+                (GetTable(Te[0], GETBYTE(temp, 1)) & 0x0000ff00) ^
+                (GetTable(Te[1], GETBYTE(temp, 0)) & 0x000000ff);
+        #else
+                ((word32)GetTable8(Tsbox, GETBYTE(temp, 3)) << 24) ^
+                ((word32)GetTable8(Tsbox, GETBYTE(temp, 2)) << 16) ^
+                ((word32)GetTable8(Tsbox, GETBYTE(temp, 1)) <<  8) ^
+                ((word32)GetTable8(Tsbox, GETBYTE(temp, 0)));
+        #endif
+            rk[13] = rk[ 5] ^ rk[12];
+            rk[14] = rk[ 6] ^ rk[13];
+            rk[15] = rk[ 7] ^ rk[14];
+
+            rk += 8;
+        }
+        break;
+#endif /* 256 */
+    } /* switch */
+    ForceZero(&temp, sizeof(temp));
+
+#if defined(HAVE_AES_DECRYPT)
+    if (dir == AES_DECRYPTION) {
+        unsigned int j;
+
+#ifdef WC_AES_C_DYNAMIC_FALLBACK
+        rk = aes->key_C_fallback;
+#else
+        rk = aes->key;
+#endif
+
+        /* invert the order of the round keys: */
+        for (i = 0, j = 4* aes->rounds; i < j; i += 4, j -= 4) {
+            temp = rk[i    ]; rk[i    ] = rk[j    ]; rk[j    ] = temp;
+            temp = rk[i + 1]; rk[i + 1] = rk[j + 1]; rk[j + 1] = temp;
+            temp = rk[i + 2]; rk[i + 2] = rk[j + 2]; rk[j + 2] = temp;
+            temp = rk[i + 3]; rk[i + 3] = rk[j + 3]; rk[j + 3] = temp;
+        }
+        ForceZero(&temp, sizeof(temp));
+    #if !defined(WOLFSSL_AES_SMALL_TABLES)
+        /* apply the inverse MixColumn transform to all round keys but the
+           first and the last: */
+        for (i = 1; i < aes->rounds; i++) {
+            rk += 4;
+            rk[0] =
+                GetTable(Td[0], GetTable(Te[1], GETBYTE(rk[0], 3)) & 0xff) ^
+                GetTable(Td[1], GetTable(Te[1], GETBYTE(rk[0], 2)) & 0xff) ^
+                GetTable(Td[2], GetTable(Te[1], GETBYTE(rk[0], 1)) & 0xff) ^
+                GetTable(Td[3], GetTable(Te[1], GETBYTE(rk[0], 0)) & 0xff);
+            rk[1] =
+                GetTable(Td[0], GetTable(Te[1], GETBYTE(rk[1], 3)) & 0xff) ^
+                GetTable(Td[1], GetTable(Te[1], GETBYTE(rk[1], 2)) & 0xff) ^
+                GetTable(Td[2], GetTable(Te[1], GETBYTE(rk[1], 1)) & 0xff) ^
+                GetTable(Td[3], GetTable(Te[1], GETBYTE(rk[1], 0)) & 0xff);
+            rk[2] =
+                GetTable(Td[0], GetTable(Te[1], GETBYTE(rk[2], 3)) & 0xff) ^
+                GetTable(Td[1], GetTable(Te[1], GETBYTE(rk[2], 2)) & 0xff) ^
+                GetTable(Td[2], GetTable(Te[1], GETBYTE(rk[2], 1)) & 0xff) ^
+                GetTable(Td[3], GetTable(Te[1], GETBYTE(rk[2], 0)) & 0xff);
+            rk[3] =
+                GetTable(Td[0], GetTable(Te[1], GETBYTE(rk[3], 3)) & 0xff) ^
+                GetTable(Td[1], GetTable(Te[1], GETBYTE(rk[3], 2)) & 0xff) ^
+                GetTable(Td[2], GetTable(Te[1], GETBYTE(rk[3], 1)) & 0xff) ^
+                GetTable(Td[3], GetTable(Te[1], GETBYTE(rk[3], 0)) & 0xff);
+        }
+    #endif
+    }
+#else
+    (void)dir;
+#endif /* HAVE_AES_DECRYPT */
+
+#ifdef WOLFSSL_CHECK_MEM_ZERO
+    wc_MemZero_Check(&temp, sizeof(temp));
+#else
+    (void)temp;
+#endif
+}
+#else /* WC_AES_BITSLICED */
+/* Set the AES key and expand.
+ *
+ * @param [in]  aes    AES object.
+ * @param [in]  key    Block to encrypt.
+ * @param [in]  keySz  Number of bytes in key.
+ * @param [in]  dir    Direction of crypt: AES_ENCRYPTION or AES_DECRYPTION.
+ */
+static void AesSetKey_C(Aes* aes, const byte* key, word32 keySz, int dir)
+{
+    /* No need to invert when decrypting. */
+    (void)dir;
+
+    bs_set_key(aes->bs_key, key, keySz, aes->rounds);
+}
+#endif /* WC_AES_BITSLICED */
+
+#endif /* NEED_AES_TABLES */
+
     /* Software AES - SetKey */
     static WARN_UNUSED_RESULT int wc_AesSetKeyLocal(
         Aes* aes, const byte* userKey, word32 keylen, const byte* iv, int dir,
         int checkKeyLen)
     {
         int ret;
-        word32 *rk;
-    #ifdef NEED_AES_TABLES
-        word32 temp;
-        unsigned int i = 0;
-    #endif
     #ifdef WOLFSSL_IMX6_CAAM_BLOB
         byte   local[32];
         word32 localSz = 32;
     #endif
+
+        if (aes == NULL)
+            return BAD_FUNC_ARG;
+#ifdef WC_DEBUG_CIPHER_LIFECYCLE
+        ret = wc_debug_CipherLifecycleCheck(aes->CipherLifecycleTag, 0);
+        if (ret < 0)
+            return ret;
+#endif
+
+        switch (keylen) {
+    #if defined(AES_MAX_KEY_SIZE) && AES_MAX_KEY_SIZE >= 128 &&     \
+        defined(WOLFSSL_AES_128)
+        case 16:
+    #endif
+    #if defined(AES_MAX_KEY_SIZE) && AES_MAX_KEY_SIZE >= 192 &&     \
+        defined(WOLFSSL_AES_192)
+        case 24:
+    #endif
+    #if defined(AES_MAX_KEY_SIZE) && AES_MAX_KEY_SIZE >= 256 &&     \
+        defined(WOLFSSL_AES_256)
+        case 32:
+    #endif
+            break;
+        default:
+            return BAD_FUNC_ARG;
+        }
 
     #ifdef WOLFSSL_MAXQ10XX_CRYPTO
         if (wc_MAXQ10XX_AesSetKey(aes, userKey, keylen) != 0) {
@@ -2996,12 +4428,21 @@ static WARN_UNUSED_RESULT int wc_AesDecrypt(
 
         aes->keylen = (int)keylen;
         aes->rounds = (keylen/4) + 6;
+        ret = wc_AesSetIV(aes, iv);
+        if (ret != 0)
+            return ret;
+
+#ifdef WC_AES_C_DYNAMIC_FALLBACK
+#ifdef NEED_AES_TABLES
+        AesSetKey_C(aes, userKey, keylen, dir);
+#endif /* NEED_AES_TABLES */
+#endif /* WC_AES_C_DYNAMIC_FALLBACK */
 
     #ifdef WOLFSSL_AESNI
         aes->use_aesni = 0;
-        if (checkAESNI == 0) {
+        if (checkedAESNI == 0) {
             haveAESNI  = Check_CPU_support_AES();
-            checkAESNI = 1;
+            checkedAESNI = 1;
         }
         if (haveAESNI) {
             #ifdef WOLFSSL_LINUXKM
@@ -3009,18 +4450,33 @@ static WARN_UNUSED_RESULT int wc_AesDecrypt(
             if ((wc_ptr_t)&aes->key & (wc_ptr_t)0xf) {
                 return BAD_ALIGN_E;
             }
-            #endif
-            aes->use_aesni = 1;
-            if (iv)
-                XMEMCPY(aes->reg, iv, AES_BLOCK_SIZE);
-            else
-                XMEMSET(aes->reg, 0, AES_BLOCK_SIZE);
-            if (dir == AES_ENCRYPTION)
-                return AES_set_encrypt_key(userKey, (int)keylen * 8, aes);
-        #ifdef HAVE_AES_DECRYPT
-            else
-                return AES_set_decrypt_key(userKey, (int)keylen * 8, aes);
-        #endif
+            #endif /* WOLFSSL_LINUXKM */
+            ret = SAVE_VECTOR_REGISTERS2();
+            if (ret == 0) {
+                if (dir == AES_ENCRYPTION)
+                    ret = AES_set_encrypt_key_AESNI(userKey, (int)keylen * 8, aes);
+#ifdef HAVE_AES_DECRYPT
+                else
+                    ret = AES_set_decrypt_key_AESNI(userKey, (int)keylen * 8, aes);
+#endif
+
+                RESTORE_VECTOR_REGISTERS();
+
+                if (ret == 0)
+                    aes->use_aesni = 1;
+                else {
+#ifdef WC_AES_C_DYNAMIC_FALLBACK
+                    ret = 0;
+#endif
+                }
+                return ret;
+            } else {
+#ifdef WC_AES_C_DYNAMIC_FALLBACK
+                return 0;
+#else
+                return ret;
+#endif
+            }
         }
     #endif /* WOLFSSL_AESNI */
 
@@ -3054,210 +4510,49 @@ static WARN_UNUSED_RESULT int wc_AesDecrypt(
         }
 #endif
 
-        rk = aes->key;
-        XMEMCPY(rk, userKey, keylen);
+        XMEMCPY(aes->key, userKey, keylen);
 
+#ifndef WC_AES_BITSLICED
     #if defined(LITTLE_ENDIAN_ORDER) && !defined(WOLFSSL_PIC32MZ_CRYPT) && \
         (!defined(WOLFSSL_ESP32_CRYPT) || \
           defined(NO_WOLFSSL_ESP32_CRYPT_AES))
-            /* software */
-            ByteReverseWords(rk, rk, keylen);
+
+        /* software */
+        ByteReverseWords(aes->key, aes->key, keylen);
+
     #elif defined(WOLFSSL_ESP32_CRYPT) && !defined(NO_WOLFSSL_ESP32_CRYPT_AES)
         if (wc_esp32AesSupportedKeyLen(aes)) {
             /* supported lengths don't get reversed */
             ESP_LOGV(TAG, "wc_AesSetKeyLocal (no ByteReverseWords)");
         }
         else {
+            word32* rk = aes->key;
+
             /* For example, the ESP32-S3 does not support HW for len = 24,
              * so fall back to SW */
         #ifdef DEBUG_WOLFSSL
             ESP_LOGW(TAG, "wc_AesSetKeyLocal ByteReverseWords");
         #endif
-            /* When not ESP32 HW, we need to reverse endianess */
+            XMEMCPY(rk, userKey, keylen);
+            /* When not ESP32 HW, we need to reverse endianness */
             ByteReverseWords(rk, rk, keylen);
         }
     #endif
 
     #ifdef WOLFSSL_IMXRT_DCP
-        /* Implemented in wolfcrypt/src/port/nxp/dcp_port.c */
-        temp = 0;
-        if (keylen == 16)
-            temp = DCPAesSetKey(aes, userKey, keylen, iv, dir);
-        if (temp != 0)
-            return WC_HW_E;
+        {
+            /* Implemented in wolfcrypt/src/port/nxp/dcp_port.c */
+            word32 temp = 0;
+            if (keylen == 16)
+                temp = DCPAesSetKey(aes, userKey, keylen, iv, dir);
+            if (temp != 0)
+                return WC_HW_E;
+        }
     #endif
+#endif /* !WC_AES_BITSLICED */
 
 #ifdef NEED_AES_TABLES
-        switch (keylen) {
-    #if defined(AES_MAX_KEY_SIZE) && AES_MAX_KEY_SIZE >= 128 && \
-            defined(WOLFSSL_AES_128)
-        case 16:
-        #ifdef WOLFSSL_CHECK_MEM_ZERO
-            temp = (word32)-1;
-            wc_MemZero_Add("wc_AesSetKeyLocal temp", &temp, sizeof(temp));
-        #endif
-            while (1)
-            {
-                temp  = rk[3];
-                rk[4] = rk[0] ^
-            #ifndef WOLFSSL_AES_SMALL_TABLES
-                    (GetTable(Te[2], GETBYTE(temp, 2)) & 0xff000000) ^
-                    (GetTable(Te[3], GETBYTE(temp, 1)) & 0x00ff0000) ^
-                    (GetTable(Te[0], GETBYTE(temp, 0)) & 0x0000ff00) ^
-                    (GetTable(Te[1], GETBYTE(temp, 3)) & 0x000000ff) ^
-            #else
-                    ((word32)GetTable8(Tsbox, GETBYTE(temp, 2)) << 24) ^
-                    ((word32)GetTable8(Tsbox, GETBYTE(temp, 1)) << 16) ^
-                    ((word32)GetTable8(Tsbox, GETBYTE(temp, 0)) <<  8) ^
-                    ((word32)GetTable8(Tsbox, GETBYTE(temp, 3))) ^
-            #endif
-                    rcon[i];
-                rk[5] = rk[1] ^ rk[4];
-                rk[6] = rk[2] ^ rk[5];
-                rk[7] = rk[3] ^ rk[6];
-                if (++i == 10)
-                    break;
-                rk += 4;
-            }
-            break;
-    #endif /* 128 */
-
-    #if defined(AES_MAX_KEY_SIZE) && AES_MAX_KEY_SIZE >= 192 && \
-            defined(WOLFSSL_AES_192)
-        case 24:
-        #ifdef WOLFSSL_CHECK_MEM_ZERO
-            temp = (word32)-1;
-            wc_MemZero_Add("wc_AesSetKeyLocal temp", &temp, sizeof(temp));
-        #endif
-            /* for (;;) here triggers a bug in VC60 SP4 w/ Pro Pack */
-            while (1)
-            {
-                temp = rk[ 5];
-                rk[ 6] = rk[ 0] ^
-            #ifndef WOLFSSL_AES_SMALL_TABLES
-                    (GetTable(Te[2], GETBYTE(temp, 2)) & 0xff000000) ^
-                    (GetTable(Te[3], GETBYTE(temp, 1)) & 0x00ff0000) ^
-                    (GetTable(Te[0], GETBYTE(temp, 0)) & 0x0000ff00) ^
-                    (GetTable(Te[1], GETBYTE(temp, 3)) & 0x000000ff) ^
-            #else
-                    ((word32)GetTable8(Tsbox, GETBYTE(temp, 2)) << 24) ^
-                    ((word32)GetTable8(Tsbox, GETBYTE(temp, 1)) << 16) ^
-                    ((word32)GetTable8(Tsbox, GETBYTE(temp, 0)) <<  8) ^
-                    ((word32)GetTable8(Tsbox, GETBYTE(temp, 3))) ^
-            #endif
-                    rcon[i];
-                rk[ 7] = rk[ 1] ^ rk[ 6];
-                rk[ 8] = rk[ 2] ^ rk[ 7];
-                rk[ 9] = rk[ 3] ^ rk[ 8];
-                if (++i == 8)
-                    break;
-                rk[10] = rk[ 4] ^ rk[ 9];
-                rk[11] = rk[ 5] ^ rk[10];
-                rk += 6;
-            }
-            break;
-    #endif /* 192 */
-
-    #if defined(AES_MAX_KEY_SIZE) && AES_MAX_KEY_SIZE >= 256 && \
-            defined(WOLFSSL_AES_256)
-        case 32:
-        #ifdef WOLFSSL_CHECK_MEM_ZERO
-            temp = (word32)-1;
-            wc_MemZero_Add("wc_AesSetKeyLocal temp", &temp, sizeof(temp));
-        #endif
-            while (1)
-            {
-                temp = rk[ 7];
-                rk[ 8] = rk[ 0] ^
-            #ifndef WOLFSSL_AES_SMALL_TABLES
-                    (GetTable(Te[2], GETBYTE(temp, 2)) & 0xff000000) ^
-                    (GetTable(Te[3], GETBYTE(temp, 1)) & 0x00ff0000) ^
-                    (GetTable(Te[0], GETBYTE(temp, 0)) & 0x0000ff00) ^
-                    (GetTable(Te[1], GETBYTE(temp, 3)) & 0x000000ff) ^
-            #else
-                    ((word32)GetTable8(Tsbox, GETBYTE(temp, 2)) << 24) ^
-                    ((word32)GetTable8(Tsbox, GETBYTE(temp, 1)) << 16) ^
-                    ((word32)GetTable8(Tsbox, GETBYTE(temp, 0)) <<  8) ^
-                    ((word32)GetTable8(Tsbox, GETBYTE(temp, 3))) ^
-            #endif
-                    rcon[i];
-                rk[ 9] = rk[ 1] ^ rk[ 8];
-                rk[10] = rk[ 2] ^ rk[ 9];
-                rk[11] = rk[ 3] ^ rk[10];
-                if (++i == 7)
-                    break;
-                temp = rk[11];
-                rk[12] = rk[ 4] ^
-            #ifndef WOLFSSL_AES_SMALL_TABLES
-                    (GetTable(Te[2], GETBYTE(temp, 3)) & 0xff000000) ^
-                    (GetTable(Te[3], GETBYTE(temp, 2)) & 0x00ff0000) ^
-                    (GetTable(Te[0], GETBYTE(temp, 1)) & 0x0000ff00) ^
-                    (GetTable(Te[1], GETBYTE(temp, 0)) & 0x000000ff);
-            #else
-                    ((word32)GetTable8(Tsbox, GETBYTE(temp, 3)) << 24) ^
-                    ((word32)GetTable8(Tsbox, GETBYTE(temp, 2)) << 16) ^
-                    ((word32)GetTable8(Tsbox, GETBYTE(temp, 1)) <<  8) ^
-                    ((word32)GetTable8(Tsbox, GETBYTE(temp, 0)));
-            #endif
-                rk[13] = rk[ 5] ^ rk[12];
-                rk[14] = rk[ 6] ^ rk[13];
-                rk[15] = rk[ 7] ^ rk[14];
-
-                rk += 8;
-            }
-            break;
-    #endif /* 256 */
-
-        default:
-            return BAD_FUNC_ARG;
-        } /* switch */
-        ForceZero(&temp, sizeof(temp));
-
-    #if defined(HAVE_AES_DECRYPT)
-        if (dir == AES_DECRYPTION) {
-            unsigned int j;
-            rk = aes->key;
-
-            /* invert the order of the round keys: */
-            for (i = 0, j = 4* aes->rounds; i < j; i += 4, j -= 4) {
-                temp = rk[i    ]; rk[i    ] = rk[j    ]; rk[j    ] = temp;
-                temp = rk[i + 1]; rk[i + 1] = rk[j + 1]; rk[j + 1] = temp;
-                temp = rk[i + 2]; rk[i + 2] = rk[j + 2]; rk[j + 2] = temp;
-                temp = rk[i + 3]; rk[i + 3] = rk[j + 3]; rk[j + 3] = temp;
-            }
-            ForceZero(&temp, sizeof(temp));
-        #if !defined(WOLFSSL_AES_SMALL_TABLES)
-            /* apply the inverse MixColumn transform to all round keys but the
-               first and the last: */
-            for (i = 1; i < aes->rounds; i++) {
-                rk += 4;
-                rk[0] =
-                    GetTable(Td[0], GetTable(Te[1], GETBYTE(rk[0], 3)) & 0xff) ^
-                    GetTable(Td[1], GetTable(Te[1], GETBYTE(rk[0], 2)) & 0xff) ^
-                    GetTable(Td[2], GetTable(Te[1], GETBYTE(rk[0], 1)) & 0xff) ^
-                    GetTable(Td[3], GetTable(Te[1], GETBYTE(rk[0], 0)) & 0xff);
-                rk[1] =
-                    GetTable(Td[0], GetTable(Te[1], GETBYTE(rk[1], 3)) & 0xff) ^
-                    GetTable(Td[1], GetTable(Te[1], GETBYTE(rk[1], 2)) & 0xff) ^
-                    GetTable(Td[2], GetTable(Te[1], GETBYTE(rk[1], 1)) & 0xff) ^
-                    GetTable(Td[3], GetTable(Te[1], GETBYTE(rk[1], 0)) & 0xff);
-                rk[2] =
-                    GetTable(Td[0], GetTable(Te[1], GETBYTE(rk[2], 3)) & 0xff) ^
-                    GetTable(Td[1], GetTable(Te[1], GETBYTE(rk[2], 2)) & 0xff) ^
-                    GetTable(Td[2], GetTable(Te[1], GETBYTE(rk[2], 1)) & 0xff) ^
-                    GetTable(Td[3], GetTable(Te[1], GETBYTE(rk[2], 0)) & 0xff);
-                rk[3] =
-                    GetTable(Td[0], GetTable(Te[1], GETBYTE(rk[3], 3)) & 0xff) ^
-                    GetTable(Td[1], GetTable(Te[1], GETBYTE(rk[3], 2)) & 0xff) ^
-                    GetTable(Td[2], GetTable(Te[1], GETBYTE(rk[3], 1)) & 0xff) ^
-                    GetTable(Td[3], GetTable(Te[1], GETBYTE(rk[3], 0)) & 0xff);
-            }
-        #endif
-        }
-    #else
-        (void)dir;
-    #endif /* HAVE_AES_DECRYPT */
-        (void)temp;
+        AesSetKey_C(aes, userKey, keylen, dir);
 #endif /* NEED_AES_TABLES */
 
 #if defined(WOLFSSL_SCE) && !defined(WOLFSSL_SCE_NO_AES)
@@ -3275,9 +4570,6 @@ static WARN_UNUSED_RESULT int wc_AesDecrypt(
     #endif
     #ifdef WOLFSSL_IMX6_CAAM_BLOB
         ForceZero(local, sizeof(local));
-    #endif
-    #ifdef WOLFSSL_CHECK_MEM_ZERO
-        wc_MemZero_Check(&temp, sizeof(temp));
     #endif
         return ret;
     } /* wc_AesSetKeyLocal */
@@ -3300,13 +4592,20 @@ static WARN_UNUSED_RESULT int wc_AesDecrypt(
             return wc_AesSetKey_for_ESP32(aes, userKey, keylen, iv, dir);
         }
         else {
+        #if  defined(WOLFSSL_HW_METRICS)
+            /* It is interesting to know how many times we could not complete
+             * AES in hardware due to unsupported lengths. */
+            wc_esp32AesUnupportedLengthCountAdd();
+        #endif
         #ifdef DEBUG_WOLFSSL
             ESP_LOGW(TAG, "wc_AesSetKey HW Fallback, unsupported keylen = %d",
                            keylen);
         #endif
         }
-    #endif
+    #endif /* WOLFSSL_ESPIDF && NEED_AES_HW_FALLBACK */
+
         return wc_AesSetKeyLocal(aes, userKey, keylen, iv, dir, 1);
+
     } /* wc_AesSetKey() */
 
     #if defined(WOLFSSL_AES_DIRECT) || defined(WOLFSSL_AES_COUNTER)
@@ -3334,6 +4633,14 @@ int wc_AesSetIV(Aes* aes, const byte* iv)
     if (aes == NULL)
         return BAD_FUNC_ARG;
 
+#ifdef WC_DEBUG_CIPHER_LIFECYCLE
+    {
+        int ret = wc_debug_CipherLifecycleCheck(aes->CipherLifecycleTag, 0);
+        if (ret < 0)
+            return ret;
+    }
+#endif
+
     if (iv)
         XMEMCPY(aes->reg, iv, AES_BLOCK_SIZE);
     else
@@ -3347,6 +4654,50 @@ int wc_AesSetIV(Aes* aes, const byte* iv)
 
     return 0;
 }
+
+#ifdef WOLFSSL_AESNI
+
+#ifdef WC_AES_C_DYNAMIC_FALLBACK
+
+#define VECTOR_REGISTERS_PUSH { \
+        int orig_use_aesni = aes->use_aesni;                         \
+        if (aes->use_aesni && (SAVE_VECTOR_REGISTERS2() != 0)) {     \
+            aes->use_aesni = 0;                                      \
+        }                                                            \
+        WC_DO_NOTHING
+
+#define VECTOR_REGISTERS_POP                                         \
+        if (aes->use_aesni)                                          \
+            RESTORE_VECTOR_REGISTERS();                              \
+        else                                                         \
+            aes->use_aesni = orig_use_aesni;                         \
+    }                                                                \
+    WC_DO_NOTHING
+
+#else
+
+#define VECTOR_REGISTERS_PUSH { \
+        if (aes->use_aesni && ((ret = SAVE_VECTOR_REGISTERS2()) != 0)) { \
+            return ret;                                                  \
+        }                                                                \
+        WC_DO_NOTHING
+
+#define VECTOR_REGISTERS_POP \
+        if (aes->use_aesni) {                                            \
+            RESTORE_VECTOR_REGISTERS();                                  \
+        }                                                                \
+    }                                                                    \
+    WC_DO_NOTHING
+
+#endif
+
+#else /* !WOLFSSL_AESNI */
+
+#define VECTOR_REGISTERS_PUSH { WC_DO_NOTHING
+#define VECTOR_REGISTERS_POP } WC_DO_NOTHING
+
+#endif /* !WOLFSSL_AESNI */
+
 
 /* AES-DIRECT */
 #if defined(WOLFSSL_AES_DIRECT)
@@ -3363,53 +4714,43 @@ int wc_AesSetIV(Aes* aes, const byte* iv)
     #elif defined(WOLFSSL_DEVCRYPTO_AES)
         /* implemented in wolfcrypt/src/port/devcrypt/devcrypto_aes.c */
 
-    #elif defined(WOLFSSL_LINUXKM) && defined(WOLFSSL_AESNI)
-
-        WARN_UNUSED_RESULT int wc_AesEncryptDirect(
-            Aes* aes, byte* out, const byte* in)
-        {
-            int ret;
-            if (haveAESNI && aes->use_aesni)
-                SAVE_VECTOR_REGISTERS(return _svr_ret;);
-            ret = wc_AesEncrypt(aes, in, out);
-            if (haveAESNI && aes->use_aesni)
-                RESTORE_VECTOR_REGISTERS();
-            return ret;
-        }
-        /* vector reg save/restore is explicit in all below calls to
-         * wc_Aes{En,De}cryptDirect(), so bypass the public version with a
-         * macro.
-         */
-        #define wc_AesEncryptDirect(aes, out, in) wc_AesEncrypt(aes, in, out)
-        #ifdef HAVE_AES_DECRYPT
-        /* Allow direct access to one block decrypt */
-        WARN_UNUSED_RESULT int wc_AesDecryptDirect(
-            Aes* aes, byte* out, const byte* in)
-        {
-            int ret;
-            if (haveAESNI && aes->use_aesni)
-                SAVE_VECTOR_REGISTERS(return _svr_ret;);
-            ret = wc_AesDecrypt(aes, in, out);
-            if (haveAESNI && aes->use_aesni)
-                RESTORE_VECTOR_REGISTERS();
-            return ret;
-        }
-        #define wc_AesDecryptDirect(aes, out, in) wc_AesDecrypt(aes, in, out)
-        #endif /* HAVE_AES_DECRYPT */
-
     #else
 
         /* Allow direct access to one block encrypt */
         int wc_AesEncryptDirect(Aes* aes, byte* out, const byte* in)
         {
-            return wc_AesEncrypt(aes, in, out);
+            int ret;
+
+            if (aes == NULL)
+                return BAD_FUNC_ARG;
+            VECTOR_REGISTERS_PUSH;
+            ret = wc_AesEncrypt(aes, in, out);
+            VECTOR_REGISTERS_POP;
+            return ret;
         }
+
+        /* vector reg save/restore is explicit in all below calls to
+         * wc_Aes{En,De}cryptDirect(), so bypass the public version with a
+         * macro.
+         */
+        #define wc_AesEncryptDirect(aes, out, in) wc_AesEncrypt(aes, in, out)
+
         #ifdef HAVE_AES_DECRYPT
         /* Allow direct access to one block decrypt */
         int wc_AesDecryptDirect(Aes* aes, byte* out, const byte* in)
         {
-            return wc_AesDecrypt(aes, in, out);
+            int ret;
+
+            if (aes == NULL)
+                return BAD_FUNC_ARG;
+            VECTOR_REGISTERS_PUSH;
+            ret = wc_AesDecrypt(aes, in, out);
+            VECTOR_REGISTERS_POP;
+            return ret;
         }
+
+        #define wc_AesDecryptDirect(aes, out, in) wc_AesDecrypt(aes, in, out)
+
         #endif /* HAVE_AES_DECRYPT */
     #endif /* AES direct block */
 #endif /* WOLFSSL_AES_DIRECT */
@@ -3968,6 +5309,7 @@ int wc_AesSetIV(Aes* aes, const byte* iv)
     #ifdef HAVE_AES_DECRYPT
     int wc_AesCbcDecrypt(Aes* aes, byte* out, const byte* in, word32 sz)
     {
+        int ret;
         int offset = 0;
         byte* iv;
         byte temp_block[AES_BLOCK_SIZE];
@@ -3986,7 +5328,9 @@ int wc_AesSetIV(Aes* aes, const byte* iv)
         while (blocks--) {
             XMEMCPY(temp_block, in + offset, AES_BLOCK_SIZE);
 
-            wc_AesDecrypt(aes, in + offset, out + offset);
+            ret = wc_AesDecrypt(aes, in + offset, out + offset);
+            if (ret != 0)
+                return ret;
 
             /* XOR block with IV for CBC */
             xorbuf(out + offset, iv, AES_BLOCK_SIZE);
@@ -4112,6 +5456,7 @@ int wc_AesSetIV(Aes* aes, const byte* iv)
 int wc_AesCbcEncrypt(Aes* aes, byte* out, const byte* in, word32 sz)
     {
         word32 blocks;
+        int ret;
 
         if (aes == NULL || out == NULL || in == NULL) {
             return BAD_FUNC_ARG;
@@ -4175,10 +5520,23 @@ int wc_AesCbcEncrypt(Aes* aes, byte* out, const byte* in, word32 sz)
             return se050_aes_crypt(aes, in, out, sz, AES_ENCRYPTION,
                                    kAlgorithm_SSS_AES_CBC);
         }
-    #endif
-
-    #ifdef WOLFSSL_AESNI
-        if (haveAESNI) {
+        else
+    #elif defined(WOLFSSL_ESPIDF) && defined(NEED_AESCBC_HW_FALLBACK)
+        if (wc_esp32AesSupportedKeyLen(aes)) {
+            ESP_LOGV(TAG, "wc_AesCbcEncrypt calling wc_esp32AesCbcEncrypt");
+            return wc_esp32AesCbcEncrypt(aes, out, in, sz);
+        }
+        else {
+            /* For example, the ESP32-S3 does not support HW for len = 24,
+             * so fall back to SW */
+        #ifdef DEBUG_WOLFSSL
+            ESP_LOGW(TAG, "wc_AesCbcEncrypt HW Falling back, "
+                          "unsupported keylen = %d", aes->keylen);
+        #endif
+        }
+    #elif defined(WOLFSSL_AESNI)
+        VECTOR_REGISTERS_PUSH;
+        if (aes->use_aesni) {
             #ifdef DEBUG_AESNI
                 printf("about to aes cbc encrypt\n");
                 printf("in  = %p\n", in);
@@ -4195,66 +5553,55 @@ int wc_AesCbcEncrypt(Aes* aes, byte* out, const byte* in, word32 sz)
                 byte* tmp = (byte*)XMALLOC(sz + AES_BLOCK_SIZE + AESNI_ALIGN,
                                             aes->heap, DYNAMIC_TYPE_TMP_BUFFER);
                 byte* tmp_align;
-                if (tmp == NULL) return MEMORY_E;
+                if (tmp == NULL)
+                    ret = MEMORY_E;
+                else {
+                    tmp_align = tmp + (AESNI_ALIGN - ((wc_ptr_t)tmp % AESNI_ALIGN));
+                    XMEMCPY(tmp_align, in, sz);
+                    AES_CBC_encrypt_AESNI(tmp_align, tmp_align, (byte*)aes->reg, sz,
+                                          (byte*)aes->key, (int)aes->rounds);
+                    /* store iv for next call */
+                    XMEMCPY(aes->reg, tmp_align + sz - AES_BLOCK_SIZE, AES_BLOCK_SIZE);
 
-                tmp_align = tmp + (AESNI_ALIGN - ((wc_ptr_t)tmp % AESNI_ALIGN));
-                XMEMCPY(tmp_align, in, sz);
-                SAVE_VECTOR_REGISTERS(XFREE(tmp, aes->heap, DYNAMIC_TYPE_TMP_BUFFER); return _svr_ret;);
-                AES_CBC_encrypt(tmp_align, tmp_align, (byte*)aes->reg, sz,
-                                             (byte*)aes->key, (int)aes->rounds);
-                RESTORE_VECTOR_REGISTERS();
-                /* store iv for next call */
-                XMEMCPY(aes->reg, tmp_align + sz - AES_BLOCK_SIZE, AES_BLOCK_SIZE);
-
-                XMEMCPY(out, tmp_align, sz);
-                XFREE(tmp, aes->heap, DYNAMIC_TYPE_TMP_BUFFER);
-                return 0;
+                    XMEMCPY(out, tmp_align, sz);
+                    XFREE(tmp, aes->heap, DYNAMIC_TYPE_TMP_BUFFER);
+                    ret = 0;
+                }
             #else
                 WOLFSSL_MSG("AES-CBC encrypt with bad alignment");
                 WOLFSSL_ERROR_VERBOSE(BAD_ALIGN_E);
-                return BAD_ALIGN_E;
+                ret = BAD_ALIGN_E;
             #endif
+            } else {
+                AES_CBC_encrypt_AESNI(in, out, (byte*)aes->reg, sz, (byte*)aes->key,
+                                      (int)aes->rounds);
+                /* store iv for next call */
+                XMEMCPY(aes->reg, out + sz - AES_BLOCK_SIZE, AES_BLOCK_SIZE);
+
+                ret = 0;
             }
-
-            SAVE_VECTOR_REGISTERS(return _svr_ret;);
-            AES_CBC_encrypt(in, out, (byte*)aes->reg, sz, (byte*)aes->key,
-                            (int)aes->rounds);
-            RESTORE_VECTOR_REGISTERS();
-            /* store iv for next call */
-            XMEMCPY(aes->reg, out + sz - AES_BLOCK_SIZE, AES_BLOCK_SIZE);
-
-            return 0;
         }
+        else
+    #endif
+        {
+            ret = 0;
+            while (blocks--) {
+                xorbuf((byte*)aes->reg, in, AES_BLOCK_SIZE);
+                ret = wc_AesEncrypt(aes, (byte*)aes->reg, (byte*)aes->reg);
+                if (ret != 0)
+                    break;
+                XMEMCPY(out, aes->reg, AES_BLOCK_SIZE);
+
+                out += AES_BLOCK_SIZE;
+                in  += AES_BLOCK_SIZE;
+            }
+        }
+
+    #ifdef WOLFSSL_AESNI
+        VECTOR_REGISTERS_POP;
     #endif
 
-    #if defined(WOLFSSL_ESPIDF) && defined(NEED_AESCBC_HW_FALLBACK)
-        if (wc_esp32AesSupportedKeyLen(aes)) {
-            ESP_LOGV(TAG, "wc_AesCbcEncrypt calling wc_esp32AesCbcEncrypt");
-            return wc_esp32AesCbcEncrypt(aes, out, in, sz);
-        }
-        else {
-            /* For example, the ESP32-S3 does not support HW for len = 24,
-             * so fall back to SW */
-        #ifdef DEBUG_WOLFSSL
-            ESP_LOGW(TAG, "wc_AesCbcEncrypt HW Falling back, "
-                          "unsupported keylen = %d", aes->keylen);
-        #endif
-        }
-    #endif
-
-        while (blocks--) {
-            int ret;
-            xorbuf((byte*)aes->reg, in, AES_BLOCK_SIZE);
-            ret = wc_AesEncrypt(aes, (byte*)aes->reg, (byte*)aes->reg);
-            if (ret != 0)
-                return ret;
-            XMEMCPY(out, aes->reg, AES_BLOCK_SIZE);
-
-            out += AES_BLOCK_SIZE;
-            in  += AES_BLOCK_SIZE;
-        }
-
-        return 0;
+        return ret;
     } /* wc_AesCbcEncrypt */
 
 #ifdef HAVE_AES_DECRYPT
@@ -4262,6 +5609,8 @@ int wc_AesCbcEncrypt(Aes* aes, byte* out, const byte* in, word32 sz)
     int wc_AesCbcDecrypt(Aes* aes, byte* out, const byte* in, word32 sz)
     {
         word32 blocks;
+        int ret;
+
         if (aes == NULL || out == NULL || in == NULL) {
             return BAD_FUNC_ARG;
         }
@@ -4342,8 +5691,10 @@ int wc_AesCbcEncrypt(Aes* aes, byte* out, const byte* in, word32 sz)
         }
     #endif
 
+        VECTOR_REGISTERS_PUSH;
+
     #ifdef WOLFSSL_AESNI
-        if (haveAESNI) {
+        if (aes->use_aesni) {
             #ifdef DEBUG_AESNI
                 printf("about to aes cbc decrypt\n");
                 printf("in  = %p\n", in);
@@ -4356,39 +5707,103 @@ int wc_AesCbcEncrypt(Aes* aes, byte* out, const byte* in, word32 sz)
 
             /* if input and output same will overwrite input iv */
             XMEMCPY(aes->tmp, in + sz - AES_BLOCK_SIZE, AES_BLOCK_SIZE);
-            SAVE_VECTOR_REGISTERS(return _svr_ret;);
             #if defined(WOLFSSL_AESNI_BY4) || defined(WOLFSSL_X86_BUILD)
-            AES_CBC_decrypt_by4(in, out, (byte*)aes->reg, sz, (byte*)aes->key,
+            AES_CBC_decrypt_AESNI_by4(in, out, (byte*)aes->reg, sz, (byte*)aes->key,
                             aes->rounds);
             #elif defined(WOLFSSL_AESNI_BY6)
-            AES_CBC_decrypt_by6(in, out, (byte*)aes->reg, sz, (byte*)aes->key,
+            AES_CBC_decrypt_AESNI_by6(in, out, (byte*)aes->reg, sz, (byte*)aes->key,
                             aes->rounds);
             #else /* WOLFSSL_AESNI_BYx */
-            AES_CBC_decrypt_by8(in, out, (byte*)aes->reg, sz, (byte*)aes->key,
+            AES_CBC_decrypt_AESNI_by8(in, out, (byte*)aes->reg, sz, (byte*)aes->key,
                             (int)aes->rounds);
             #endif /* WOLFSSL_AESNI_BYx */
             /* store iv for next call */
-            RESTORE_VECTOR_REGISTERS();
             XMEMCPY(aes->reg, aes->tmp, AES_BLOCK_SIZE);
-            return 0;
+            ret = 0;
         }
+        else
     #endif
+        {
+            ret = 0;
+#ifdef WC_AES_BITSLICED
+            if (in != out) {
+                unsigned char dec[AES_BLOCK_SIZE * BS_WORD_SIZE];
 
-        while (blocks--) {
-            int ret;
-            XMEMCPY(aes->tmp, in, AES_BLOCK_SIZE);
-            ret = wc_AesDecrypt(aes, (byte*)aes->tmp, out);
-            if (ret != 0)
-                return ret;
-            xorbuf(out, (byte*)aes->reg, AES_BLOCK_SIZE);
-            /* store iv for next call */
-            XMEMCPY(aes->reg, aes->tmp, AES_BLOCK_SIZE);
+                while (blocks > BS_WORD_SIZE) {
+                    AesDecryptBlocks_C(aes, in, dec, AES_BLOCK_SIZE * BS_WORD_SIZE);
+                    xorbufout(out, dec, aes->reg, AES_BLOCK_SIZE);
+                    xorbufout(out + AES_BLOCK_SIZE, dec + AES_BLOCK_SIZE, in,
+                              AES_BLOCK_SIZE * (BS_WORD_SIZE - 1));
+                    XMEMCPY(aes->reg, in + (AES_BLOCK_SIZE * (BS_WORD_SIZE - 1)),
+                            AES_BLOCK_SIZE);
+                    in += AES_BLOCK_SIZE * BS_WORD_SIZE;
+                    out += AES_BLOCK_SIZE * BS_WORD_SIZE;
+                    blocks -= BS_WORD_SIZE;
+                }
+                if (blocks > 0) {
+                    AesDecryptBlocks_C(aes, in, dec, blocks * AES_BLOCK_SIZE);
+                    xorbufout(out, dec, aes->reg, AES_BLOCK_SIZE);
+                    xorbufout(out + AES_BLOCK_SIZE, dec + AES_BLOCK_SIZE, in,
+                              AES_BLOCK_SIZE * (blocks - 1));
+                    XMEMCPY(aes->reg, in + (AES_BLOCK_SIZE * (blocks - 1)),
+                            AES_BLOCK_SIZE);
+                    blocks = 0;
+                }
+            }
+            else {
+                unsigned char dec[AES_BLOCK_SIZE * BS_WORD_SIZE];
+                int i;
 
-            out += AES_BLOCK_SIZE;
-            in  += AES_BLOCK_SIZE;
+                while (blocks > BS_WORD_SIZE) {
+                    AesDecryptBlocks_C(aes, in, dec, AES_BLOCK_SIZE * BS_WORD_SIZE);
+                    XMEMCPY(aes->tmp, in + (BS_WORD_SIZE - 1) * AES_BLOCK_SIZE,
+                            AES_BLOCK_SIZE);
+                    for (i = BS_WORD_SIZE-1; i >= 1; i--) {
+                        xorbufout(out + i * AES_BLOCK_SIZE,
+                                  dec + i * AES_BLOCK_SIZE, in + (i - 1) * AES_BLOCK_SIZE,
+                                  AES_BLOCK_SIZE);
+                    }
+                    xorbufout(out, dec, aes->reg, AES_BLOCK_SIZE);
+                    XMEMCPY(aes->reg, aes->tmp, AES_BLOCK_SIZE);
+
+                    in += AES_BLOCK_SIZE * BS_WORD_SIZE;
+                    out += AES_BLOCK_SIZE * BS_WORD_SIZE;
+                    blocks -= BS_WORD_SIZE;
+                }
+                if (blocks > 0) {
+                    AesDecryptBlocks_C(aes, in, dec, blocks * AES_BLOCK_SIZE);
+                    XMEMCPY(aes->tmp, in + (blocks - 1) * AES_BLOCK_SIZE,
+                            AES_BLOCK_SIZE);
+                    for (i = blocks-1; i >= 1; i--) {
+                        xorbufout(out + i * AES_BLOCK_SIZE,
+                                  dec + i * AES_BLOCK_SIZE, in + (i - 1) * AES_BLOCK_SIZE,
+                                  AES_BLOCK_SIZE);
+                    }
+                    xorbufout(out, dec, aes->reg, AES_BLOCK_SIZE);
+                    XMEMCPY(aes->reg, aes->tmp, AES_BLOCK_SIZE);
+
+                    blocks = 0;
+                }
+            }
+#else
+            while (blocks--) {
+                XMEMCPY(aes->tmp, in, AES_BLOCK_SIZE);
+                ret = wc_AesDecrypt(aes, in, out);
+                if (ret != 0)
+                    return ret;
+                xorbuf(out, (byte*)aes->reg, AES_BLOCK_SIZE);
+                /* store iv for next call */
+                XMEMCPY(aes->reg, aes->tmp, AES_BLOCK_SIZE);
+
+                out += AES_BLOCK_SIZE;
+                in  += AES_BLOCK_SIZE;
+            }
+#endif
         }
 
-        return 0;
+        VECTOR_REGISTERS_POP;
+
+        return ret;
     }
 #endif /* HAVE_AES_DECRYPT */
 
@@ -4615,7 +6030,7 @@ int wc_AesCbcEncrypt(Aes* aes, byte* out, const byte* in, word32 sz)
         int wc_AesCtrEncrypt(Aes* aes, byte* out, const byte* in, word32 sz)
         {
             byte scratch[AES_BLOCK_SIZE];
-            int ret;
+            int ret = 0;
             word32 processed;
 
             if (aes == NULL || out == NULL || in == NULL) {
@@ -4642,6 +6057,8 @@ int wc_AesCbcEncrypt(Aes* aes, byte* out, const byte* in, word32 sz)
             in += processed;
             aes->left -= processed;
             sz -= processed;
+
+            VECTOR_REGISTERS_PUSH;
 
         #if defined(HAVE_AES_ECB) && !defined(WOLFSSL_PIC32MZ_CRYPT) && \
             !defined(XTRANSFORM_AESCTRBLOCK)
@@ -4676,13 +6093,8 @@ int wc_AesCbcEncrypt(Aes* aes, byte* out, const byte* in, word32 sz)
                     XTRANSFORM_AESCTRBLOCK(aes, out, in);
                 #else
                     ret = wc_AesEncrypt(aes, (byte*)aes->reg, scratch);
-                    if (ret != 0) {
-                        ForceZero(scratch, AES_BLOCK_SIZE);
-                    #ifdef WOLFSSL_CHECK_MEM_ZERO
-                        wc_MemZero_Check(scratch, AES_BLOCK_SIZE);
-                    #endif
-                        return ret;
-                    }
+                    if (ret != 0)
+                        break;
                     xorbuf(scratch, in, AES_BLOCK_SIZE);
                     XMEMCPY(out, scratch, AES_BLOCK_SIZE);
                 #endif
@@ -4697,25 +6109,25 @@ int wc_AesCbcEncrypt(Aes* aes, byte* out, const byte* in, word32 sz)
             }
 
             /* handle non block size remaining and store unused byte count in left */
-            if (sz) {
+            if ((ret == 0) && sz) {
                 ret = wc_AesEncrypt(aes, (byte*)aes->reg, (byte*)aes->tmp);
-                if (ret != 0) {
-                    ForceZero(scratch, AES_BLOCK_SIZE);
-                #ifdef WOLFSSL_CHECK_MEM_ZERO
-                    wc_MemZero_Check(scratch, AES_BLOCK_SIZE);
-                #endif
-                    return ret;
+                if (ret == 0) {
+                    IncrementAesCounter((byte*)aes->reg);
+                    aes->left = AES_BLOCK_SIZE - sz;
+                    xorbufout(out, in, aes->tmp, sz);
                 }
-                IncrementAesCounter((byte*)aes->reg);
-
-                aes->left = AES_BLOCK_SIZE - sz;
-                xorbufout(out, in, aes->tmp, sz);
             }
+
+            if (ret < 0)
+                ForceZero(scratch, AES_BLOCK_SIZE);
 
         #ifdef WOLFSSL_CHECK_MEM_ZERO
             wc_MemZero_Check(scratch, AES_BLOCK_SIZE);
         #endif
-            return 0;
+
+            VECTOR_REGISTERS_POP;
+
+            return ret;
         }
 
         int wc_AesCtrSetKey(Aes* aes, const byte* key, word32 len,
@@ -4981,11 +6393,6 @@ int wc_AesGcmSetKey(Aes* aes, const byte* key, word32 len)
 #ifdef WOLFSSL_AESGCM_STREAM
     aes->gcmKeySet = 1;
 #endif
-    #ifdef WOLFSSL_AESNI
-        /* AES-NI code generates its own H value. */
-        if (haveAESNI)
-            return ret;
-    #endif /* WOLFSSL_AESNI */
     #if defined(WOLFSSL_SECO_CAAM)
         if (aes->devId == WOLFSSL_SECO_DEVID) {
             return ret;
@@ -4998,8 +6405,14 @@ int wc_AesGcmSetKey(Aes* aes, const byte* key, word32 len)
     #endif /* WOLFSSL_RENESAS_RSIP && WOLFSSL_RENESAS_FSPSM_CRYPTONLY*/
 
 #if !defined(FREESCALE_LTC_AES_GCM)
-    if (ret == 0)
+    if (ret == 0) {
+        VECTOR_REGISTERS_PUSH;
+        /* AES-NI code generates its own H value, but generate it here too, to
+         * assure pure-C fallback is always usable.
+         */
         ret = wc_AesEncrypt(aes, iv, aes->gcm.H);
+        VECTOR_REGISTERS_POP;
+    }
     if (ret == 0) {
     #if defined(GCM_TABLE) || defined(GCM_TABLE_4BIT)
         GenerateM0(&aes->gcm);
@@ -5031,12 +6444,12 @@ int wc_AesGcmSetKey(Aes* aes, const byte* key, word32 len)
     #define HAVE_INTEL_AVX2
 #endif /* USE_INTEL_SPEEDUP */
 
-void AES_GCM_encrypt(const unsigned char *in, unsigned char *out,
+void AES_GCM_encrypt_aesni(const unsigned char *in, unsigned char *out,
                      const unsigned char* addt, const unsigned char* ivec,
                      unsigned char *tag, word32 nbytes,
                      word32 abytes, word32 ibytes,
                      word32 tbytes, const unsigned char* key, int nr)
-                     XASM_LINK("AES_GCM_encrypt");
+                     XASM_LINK("AES_GCM_encrypt_aesni");
 #ifdef HAVE_INTEL_AVX1
 void AES_GCM_encrypt_avx1(const unsigned char *in, unsigned char *out,
                           const unsigned char* addt, const unsigned char* ivec,
@@ -5057,12 +6470,12 @@ void AES_GCM_encrypt_avx2(const unsigned char *in, unsigned char *out,
 #endif /* HAVE_INTEL_AVX1 */
 
 #ifdef HAVE_AES_DECRYPT
-void AES_GCM_decrypt(const unsigned char *in, unsigned char *out,
+void AES_GCM_decrypt_aesni(const unsigned char *in, unsigned char *out,
                      const unsigned char* addt, const unsigned char* ivec,
                      const unsigned char *tag, word32 nbytes, word32 abytes,
                      word32 ibytes, word32 tbytes, const unsigned char* key,
                      int nr, int* res)
-                     XASM_LINK("AES_GCM_decrypt");
+                     XASM_LINK("AES_GCM_decrypt_aesni");
 #ifdef HAVE_INTEL_AVX1
 void AES_GCM_decrypt_avx1(const unsigned char *in, unsigned char *out,
                           const unsigned char* addt, const unsigned char* ivec,
@@ -6859,6 +8272,8 @@ int wc_AesGcmEncrypt(Aes* aes, byte* out, const byte* in, word32 sz,
                    byte* authTag, word32 authTagSz,
                    const byte* authIn, word32 authInSz)
 {
+    int ret;
+
     /* argument checks */
     if (aes == NULL || authTagSz > AES_BLOCK_SIZE || ivSz == 0) {
         return BAD_FUNC_ARG;
@@ -6933,38 +8348,41 @@ int wc_AesGcmEncrypt(Aes* aes, byte* out, const byte* in, word32 sz,
         authTag, authTagSz, authIn, authInSz);
 #endif /* STM32_CRYPTO_AES_GCM */
 
+    VECTOR_REGISTERS_PUSH;
+
 #ifdef WOLFSSL_AESNI
-    #ifdef HAVE_INTEL_AVX2
-    if (IS_INTEL_AVX2(intel_flags)) {
-        SAVE_VECTOR_REGISTERS(return _svr_ret;);
-        AES_GCM_encrypt_avx2(in, out, authIn, iv, authTag, sz, authInSz, ivSz,
-                            authTagSz, (const byte*)aes->key, (int)aes->rounds);
-        RESTORE_VECTOR_REGISTERS();
-        return 0;
-    }
-    else
-    #endif
-    #if defined(HAVE_INTEL_AVX1)
-    if (IS_INTEL_AVX1(intel_flags)) {
-        SAVE_VECTOR_REGISTERS(return _svr_ret;);
-        AES_GCM_encrypt_avx1(in, out, authIn, iv, authTag, sz, authInSz, ivSz,
-                            authTagSz, (const byte*)aes->key, (int)aes->rounds);
-        RESTORE_VECTOR_REGISTERS();
-        return 0;
-    }
-    else
-    #endif
-    if (haveAESNI) {
-        AES_GCM_encrypt(in, out, authIn, iv, authTag, sz, authInSz, ivSz,
-                            authTagSz, (const byte*)aes->key, (int)aes->rounds);
-        return 0;
-    }
-    else
+    if (aes->use_aesni) {
+#ifdef HAVE_INTEL_AVX2
+        if (IS_INTEL_AVX2(intel_flags)) {
+            AES_GCM_encrypt_avx2(in, out, authIn, iv, authTag, sz, authInSz, ivSz,
+                                 authTagSz, (const byte*)aes->key, (int)aes->rounds);
+            ret = 0;
+        }
+        else
 #endif
-    {
-        return AES_GCM_encrypt_C(aes, out, in, sz, iv, ivSz, authTag, authTagSz,
-                                                              authIn, authInSz);
+#if defined(HAVE_INTEL_AVX1)
+        if (IS_INTEL_AVX1(intel_flags)) {
+            AES_GCM_encrypt_avx1(in, out, authIn, iv, authTag, sz, authInSz, ivSz,
+                                 authTagSz, (const byte*)aes->key, (int)aes->rounds);
+            ret = 0;
+        } else
+#endif
+        {
+            AES_GCM_encrypt_aesni(in, out, authIn, iv, authTag, sz, authInSz, ivSz,
+                            authTagSz, (const byte*)aes->key, (int)aes->rounds);
+            ret = 0;
+        }
     }
+    else
+#endif /* WOLFSSL_AESNI */
+    {
+        ret = AES_GCM_encrypt_C(aes, out, in, sz, iv, ivSz, authTag, authTagSz,
+                                authIn, authInSz);
+    }
+
+    VECTOR_REGISTERS_POP;
+
+    return ret;
 }
 #endif
 
@@ -7415,6 +8833,7 @@ int wc_AesGcmDecrypt(Aes* aes, byte* out, const byte* in, word32 sz,
                      const byte* authTag, word32 authTagSz,
                      const byte* authIn, word32 authInSz)
 {
+    int ret;
 #ifdef WOLFSSL_AESNI
     int res = AES_GCM_AUTH_E;
 #endif
@@ -7493,49 +8912,61 @@ int wc_AesGcmDecrypt(Aes* aes, byte* out, const byte* in, word32 sz,
         authTag, authTagSz, authIn, authInSz);
 #endif /* STM32_CRYPTO_AES_GCM */
 
+    VECTOR_REGISTERS_PUSH;
+
 #ifdef WOLFSSL_AESNI
-    #ifdef HAVE_INTEL_AVX2
-    if (IS_INTEL_AVX2(intel_flags)) {
-        SAVE_VECTOR_REGISTERS(return _svr_ret;);
-        AES_GCM_decrypt_avx2(in, out, authIn, iv, authTag, sz, authInSz, ivSz,
-                            authTagSz, (byte*)aes->key, (int)aes->rounds, &res);
-        RESTORE_VECTOR_REGISTERS();
-        if (res == 0)
-            return AES_GCM_AUTH_E;
-        return 0;
-    }
-    else
-    #endif
-    #if defined(HAVE_INTEL_AVX1)
-    if (IS_INTEL_AVX1(intel_flags)) {
-        SAVE_VECTOR_REGISTERS(return _svr_ret;);
-        AES_GCM_decrypt_avx1(in, out, authIn, iv, authTag, sz, authInSz, ivSz,
-                            authTagSz, (byte*)aes->key, (int)aes->rounds, &res);
-        RESTORE_VECTOR_REGISTERS();
-        if (res == 0)
-            return AES_GCM_AUTH_E;
-        return 0;
-    }
-    else
-    #endif
-    if (haveAESNI) {
-        AES_GCM_decrypt(in, out, authIn, iv, authTag, sz, authInSz, ivSz,
-                            authTagSz, (byte*)aes->key, (int)aes->rounds, &res);
-        if (res == 0)
-            return AES_GCM_AUTH_E;
-        return 0;
-    }
-    else
+    if (aes->use_aesni) {
+#ifdef HAVE_INTEL_AVX2
+        if (IS_INTEL_AVX2(intel_flags)) {
+            AES_GCM_decrypt_avx2(in, out, authIn, iv, authTag, sz, authInSz, ivSz,
+                                 authTagSz, (byte*)aes->key, (int)aes->rounds, &res);
+            if (res == 0)
+                ret = AES_GCM_AUTH_E;
+            else
+                ret = 0;
+        }
+        else
 #endif
-    {
-        return AES_GCM_decrypt_C(aes, out, in, sz, iv, ivSz, authTag, authTagSz,
-                                                              authIn, authInSz);
+#if defined(HAVE_INTEL_AVX1)
+        if (IS_INTEL_AVX1(intel_flags)) {
+            AES_GCM_decrypt_avx1(in, out, authIn, iv, authTag, sz, authInSz, ivSz,
+                                 authTagSz, (byte*)aes->key, (int)aes->rounds, &res);
+            if (res == 0)
+                ret = AES_GCM_AUTH_E;
+            else
+                ret = 0;
+        }
+        else
+#endif
+        {
+            AES_GCM_decrypt_aesni(in, out, authIn, iv, authTag, sz, authInSz, ivSz,
+                            authTagSz, (byte*)aes->key, (int)aes->rounds, &res);
+            if (res == 0)
+                ret = AES_GCM_AUTH_E;
+            else
+                ret = 0;
+        }
     }
+    else
+#endif /* WOLFSSL_AESNI */
+    {
+        ret = AES_GCM_decrypt_C(aes, out, in, sz, iv, ivSz, authTag, authTagSz,
+                                                             authIn, authInSz);
+    }
+
+    VECTOR_REGISTERS_POP;
+
+    return ret;
 }
 #endif
 #endif /* HAVE_AES_DECRYPT || HAVE_AESGCM_DECRYPT */
 
 #ifdef WOLFSSL_AESGCM_STREAM
+
+#if defined(WC_AES_C_DYNAMIC_FALLBACK) && defined(WOLFSSL_AESNI)
+    #error "AES-GCM streaming with AESNI is incompatible with WC_AES_C_DYNAMIC_FALLBACK."
+#endif
+
 /* Initialize the AES GCM cipher with an IV. C implementation.
  *
  * @param [in, out] aes   AES object.
@@ -7546,6 +8977,10 @@ static WARN_UNUSED_RESULT int AesGcmInit_C(Aes* aes, const byte* iv, word32 ivSz
 {
     ALIGN32 byte counter[AES_BLOCK_SIZE];
     int ret;
+
+#ifdef WOLFSSL_AESNI
+    aes->use_aesni = 0;
+#endif
 
     if (ivSz == GCM_NONCE_MID_SZ) {
         /* Counter is IV with bottom 4 bytes set to: 0x00,0x00,0x00,0x01. */
@@ -7770,6 +9205,8 @@ extern void AES_GCM_encrypt_final_aesni(unsigned char* tag,
 static WARN_UNUSED_RESULT int AesGcmInit_aesni(
     Aes* aes, const byte* iv, word32 ivSz)
 {
+    ASSERT_SAVED_VECTOR_REGISTERS();
+
     /* Reset state fields. */
     aes->aSz = 0;
     aes->cSz = 0;
@@ -7781,28 +9218,25 @@ static WARN_UNUSED_RESULT int AesGcmInit_aesni(
 
 #ifdef HAVE_INTEL_AVX2
     if (IS_INTEL_AVX2(intel_flags)) {
-        SAVE_VECTOR_REGISTERS(return _svr_ret;);
         AES_GCM_init_avx2((byte*)aes->key, (int)aes->rounds, iv, ivSz,
             aes->gcm.H, AES_COUNTER(aes), AES_INITCTR(aes));
-        RESTORE_VECTOR_REGISTERS();
     }
     else
 #endif
 #ifdef HAVE_INTEL_AVX1
     if (IS_INTEL_AVX1(intel_flags)) {
-        SAVE_VECTOR_REGISTERS(return _svr_ret;);
         AES_GCM_init_avx1((byte*)aes->key, (int)aes->rounds, iv, ivSz,
             aes->gcm.H, AES_COUNTER(aes), AES_INITCTR(aes));
-        RESTORE_VECTOR_REGISTERS();
     }
     else
 #endif
     {
-        SAVE_VECTOR_REGISTERS(return _svr_ret;);
         AES_GCM_init_aesni((byte*)aes->key, (int)aes->rounds, iv, ivSz,
             aes->gcm.H, AES_COUNTER(aes), AES_INITCTR(aes));
-        RESTORE_VECTOR_REGISTERS();
     }
+
+    aes->use_aesni = 1;
+
     return 0;
 }
 
@@ -7945,7 +9379,8 @@ static WARN_UNUSED_RESULT int AesGcmEncryptUpdate_aesni(
     int partial;
     int ret;
 
-    SAVE_VECTOR_REGISTERS(return _svr_ret;);
+    ASSERT_SAVED_VECTOR_REGISTERS();
+
     /* Hash in A, the Authentication Data */
     ret = AesGcmAadUpdate_aesni(aes, a, aSz, (cSz > 0) && (c != NULL));
     if (ret != 0)
@@ -8055,7 +9490,6 @@ static WARN_UNUSED_RESULT int AesGcmEncryptUpdate_aesni(
             aes->cOver = (byte)partial;
         }
     }
-    RESTORE_VECTOR_REGISTERS();
     return 0;
 }
 
@@ -8074,7 +9508,8 @@ static WARN_UNUSED_RESULT int AesGcmEncryptFinal_aesni(
     /* AAD block incomplete when > 0 */
     byte over = aes->aOver;
 
-    SAVE_VECTOR_REGISTERS(return _svr_ret;);
+    ASSERT_SAVED_VECTOR_REGISTERS();
+
     if (aes->cOver > 0) {
         /* Cipher text block incomplete. */
         over = aes->cOver;
@@ -8121,7 +9556,7 @@ static WARN_UNUSED_RESULT int AesGcmEncryptFinal_aesni(
         AES_GCM_encrypt_final_aesni(AES_TAG(aes), authTag, authTagSz, aes->cSz,
             aes->aSz, aes->gcm.H, AES_INITCTR(aes));
     }
-    RESTORE_VECTOR_REGISTERS();
+
     return 0;
 }
 
@@ -8175,7 +9610,8 @@ static WARN_UNUSED_RESULT int AesGcmDecryptUpdate_aesni(
     int partial;
     int ret;
 
-    SAVE_VECTOR_REGISTERS(return _svr_ret;);
+    ASSERT_SAVED_VECTOR_REGISTERS();
+
     /* Hash in A, the Authentication Data */
     ret = AesGcmAadUpdate_aesni(aes, a, aSz, (cSz > 0) && (c != NULL));
     if (ret != 0)
@@ -8287,7 +9723,7 @@ static WARN_UNUSED_RESULT int AesGcmDecryptUpdate_aesni(
             aes->cOver = (byte)partial;
         }
     }
-    RESTORE_VECTOR_REGISTERS();
+
     return 0;
 }
 
@@ -8311,7 +9747,8 @@ static WARN_UNUSED_RESULT int AesGcmDecryptFinal_aesni(
     byte over = aes->aOver;
     byte *lastBlock = AES_LASTGBLOCK(aes);
 
-    SAVE_VECTOR_REGISTERS(return _svr_ret;);
+    ASSERT_SAVED_VECTOR_REGISTERS();
+
     if (aes->cOver > 0) {
         /* Cipher text block incomplete. */
         over = aes->cOver;
@@ -8356,7 +9793,7 @@ static WARN_UNUSED_RESULT int AesGcmDecryptFinal_aesni(
         AES_GCM_decrypt_final_aesni(AES_TAG(aes), authTag, authTagSz, aes->cSz,
             aes->aSz, aes->gcm.H, AES_INITCTR(aes), &res);
     }
-    RESTORE_VECTOR_REGISTERS();
+
     /* Return error code when calculated doesn't match input. */
     if (res == 0) {
         ret = AES_GCM_AUTH_E;
@@ -8425,15 +9862,10 @@ int wc_AesGcmInit(Aes* aes, const byte* key, word32 len, const byte* iv,
 
         if (iv != NULL) {
             /* Initialize with the IV. */
+            VECTOR_REGISTERS_PUSH;
+
         #ifdef WOLFSSL_AESNI
-            if (haveAESNI
-            #ifdef HAVE_INTEL_AVX2
-                || IS_INTEL_AVX2(intel_flags)
-            #endif
-            #ifdef HAVE_INTEL_AVX1
-                || IS_INTEL_AVX1(intel_flags)
-            #endif
-                ) {
+            if (aes->use_aesni) {
                 ret = AesGcmInit_aesni(aes, iv, ivSz);
             }
             else
@@ -8442,7 +9874,10 @@ int wc_AesGcmInit(Aes* aes, const byte* key, word32 len, const byte* iv,
                 ret = AesGcmInit_C(aes, iv, ivSz);
             }
 
-            aes->nonceSet = 1;
+            VECTOR_REGISTERS_POP;
+
+            if (ret == 0)
+                aes->nonceSet = 1;
         }
     }
 
@@ -8554,15 +9989,10 @@ int wc_AesGcmEncryptUpdate(Aes* aes, byte* out, const byte* in, word32 sz,
 
     if (ret == 0) {
         /* Encrypt with AAD and/or plaintext. */
-    #if defined(WOLFSSL_AESNI)
-        if (haveAESNI
-        #ifdef HAVE_INTEL_AVX2
-            || IS_INTEL_AVX2(intel_flags)
-        #endif
-        #ifdef HAVE_INTEL_AVX1
-            || IS_INTEL_AVX1(intel_flags)
-        #endif
-            ) {
+        VECTOR_REGISTERS_PUSH;
+
+    #ifdef WOLFSSL_AESNI
+        if (aes->use_aesni) {
             ret = AesGcmEncryptUpdate_aesni(aes, out, in, sz, authIn, authInSz);
         }
         else
@@ -8570,12 +10000,14 @@ int wc_AesGcmEncryptUpdate(Aes* aes, byte* out, const byte* in, word32 sz,
         {
             /* Encrypt the plaintext. */
             ret = AesGcmCryptUpdate_C(aes, out, in, sz);
-            if (ret != 0)
-                return ret;
-            /* Update the authentication tag with any authentication data and the
-             * new cipher text. */
-            GHASH_UPDATE(aes, authIn, authInSz, out, sz);
+            if (ret == 0) {
+                /* Update the authentication tag with any authentication data and the
+                 * new cipher text. */
+                GHASH_UPDATE(aes, authIn, authInSz, out, sz);
+            }
         }
+
+        VECTOR_REGISTERS_POP;
     }
 
     return ret;
@@ -8612,15 +10044,9 @@ int wc_AesGcmEncryptFinal(Aes* aes, byte* authTag, word32 authTagSz)
 
     if (ret == 0) {
         /* Calculate authentication tag. */
+        VECTOR_REGISTERS_PUSH;
     #ifdef WOLFSSL_AESNI
-        if (haveAESNI
-        #ifdef HAVE_INTEL_AVX2
-            || IS_INTEL_AVX2(intel_flags)
-        #endif
-        #ifdef HAVE_INTEL_AVX1
-            || IS_INTEL_AVX1(intel_flags)
-        #endif
-            ) {
+        if (aes->use_aesni) {
             ret = AesGcmEncryptFinal_aesni(aes, authTag, authTagSz);
         }
         else
@@ -8628,6 +10054,7 @@ int wc_AesGcmEncryptFinal(Aes* aes, byte* authTag, word32 authTagSz)
         {
             ret = AesGcmFinal_C(aes, authTag, authTagSz);
         }
+        VECTOR_REGISTERS_POP;
     }
 
     if ((ret == 0) && aes->ctrSet) {
@@ -8700,15 +10127,9 @@ int wc_AesGcmDecryptUpdate(Aes* aes, byte* out, const byte* in, word32 sz,
 
     if (ret == 0) {
         /* Decrypt with AAD and/or cipher text. */
-    #if defined(WOLFSSL_AESNI)
-        if (haveAESNI
-        #ifdef HAVE_INTEL_AVX2
-            || IS_INTEL_AVX2(intel_flags)
-        #endif
-        #ifdef HAVE_INTEL_AVX1
-            || IS_INTEL_AVX1(intel_flags)
-        #endif
-            ) {
+        VECTOR_REGISTERS_PUSH;
+    #ifdef WOLFSSL_AESNI
+        if (aes->use_aesni) {
             ret = AesGcmDecryptUpdate_aesni(aes, out, in, sz, authIn, authInSz);
         }
         else
@@ -8720,6 +10141,7 @@ int wc_AesGcmDecryptUpdate(Aes* aes, byte* out, const byte* in, word32 sz,
             /* Decrypt the cipher text. */
             ret = AesGcmCryptUpdate_C(aes, out, in, sz);
         }
+        VECTOR_REGISTERS_POP;
     }
 
     return ret;
@@ -8756,15 +10178,9 @@ int wc_AesGcmDecryptFinal(Aes* aes, const byte* authTag, word32 authTagSz)
 
     if (ret == 0) {
         /* Calculate authentication tag and compare with one passed in.. */
+        VECTOR_REGISTERS_PUSH;
     #ifdef WOLFSSL_AESNI
-        if (haveAESNI
-        #ifdef HAVE_INTEL_AVX2
-            || IS_INTEL_AVX2(intel_flags)
-        #endif
-        #ifdef HAVE_INTEL_AVX1
-            || IS_INTEL_AVX1(intel_flags)
-        #endif
-            ) {
+        if (aes->use_aesni) {
             ret = AesGcmDecryptFinal_aesni(aes, authTag, authTagSz);
         }
         else
@@ -8780,11 +10196,8 @@ int wc_AesGcmDecryptFinal(Aes* aes, const byte* authTag, word32 authTagSz)
                 }
             }
         }
+        VECTOR_REGISTERS_POP;
     }
-
-    /* reset the state */
-    if (ret == 0)
-        wc_AesFree(aes);
 
     return ret;
 }
@@ -9304,12 +10717,12 @@ int wc_AesCcmEncrypt(Aes* aes, byte* out, const byte* in, word32 inSz,
                    byte* authTag, word32 authTagSz,
                    const byte* authIn, word32 authInSz)
 {
-#ifndef WOLFSSL_AESNI
-    byte A[AES_BLOCK_SIZE];
-    byte B[AES_BLOCK_SIZE];
-#else
+#ifdef WOLFSSL_AESNI
     ALIGN128 byte A[AES_BLOCK_SIZE * 4];
     ALIGN128 byte B[AES_BLOCK_SIZE * 4];
+#else
+    byte A[AES_BLOCK_SIZE];
+    byte B[AES_BLOCK_SIZE];
 #endif
     byte lenSz;
     word32 i;
@@ -9358,67 +10771,38 @@ int wc_AesCcmEncrypt(Aes* aes, byte* out, const byte* in, word32 inSz,
     wc_MemZero_Add("wc_AesCcmEncrypt B", B, sizeof(B));
 #endif
 
+    VECTOR_REGISTERS_PUSH;
     ret = wc_AesEncrypt(aes, B, A);
-    if (ret != 0) {
-        ForceZero(B, sizeof(B));
-    #ifdef WOLFSSL_CHECK_MEM_ZERO
-        wc_MemZero_Check(B, sizeof(B));
-    #endif
-        return ret;
-    }
 #ifdef WOLFSSL_CHECK_MEM_ZERO
-    wc_MemZero_Add("wc_AesCcmEncrypt A", A, sizeof(A));
+    if (ret == 0)
+        wc_MemZero_Add("wc_AesCcmEncrypt A", A, sizeof(A));
 #endif
 
-    if (authInSz > 0) {
+    if ((ret == 0) && (authInSz > 0))
         ret = roll_auth(aes, authIn, authInSz, A);
-        if (ret != 0) {
-            ForceZero(A, sizeof(A));
-            ForceZero(B, sizeof(B));
-        #ifdef WOLFSSL_CHECK_MEM_ZERO
-            wc_MemZero_Check(A, sizeof(A));
-            wc_MemZero_Check(B, sizeof(B));
-        #endif
-            return ret;
-        }
-    }
-    if (inSz > 0) {
+
+    if ((ret == 0) && (inSz > 0))
         ret = roll_x(aes, in, inSz, A);
-        if (ret != 0) {
-            ForceZero(A, sizeof(A));
-            ForceZero(B, sizeof(B));
-        #ifdef WOLFSSL_CHECK_MEM_ZERO
-            wc_MemZero_Check(A, sizeof(A));
-            wc_MemZero_Check(B, sizeof(B));
-        #endif
-            return ret;
-        }
-    }
-    XMEMCPY(authTag, A, authTagSz);
 
-    B[0] = lenSz - 1;
-    for (i = 0; i < lenSz; i++)
-        B[AES_BLOCK_SIZE - 1 - i] = 0;
-    ret = wc_AesEncrypt(aes, B, A);
-    if (ret != 0) {
-        ForceZero(A, sizeof(A));
-        ForceZero(B, sizeof(B));
-    #ifdef WOLFSSL_CHECK_MEM_ZERO
-        wc_MemZero_Check(A, sizeof(A));
-        wc_MemZero_Check(B, sizeof(B));
-    #endif
-        return ret;
-    }
-    xorbuf(authTag, A, authTagSz);
+    if (ret == 0) {
+        XMEMCPY(authTag, A, authTagSz);
 
-    B[15] = 1;
+        B[0] = lenSz - 1;
+        for (i = 0; i < lenSz; i++)
+            B[AES_BLOCK_SIZE - 1 - i] = 0;
+        ret = wc_AesEncrypt(aes, B, A);
+    }
+
+    if (ret == 0) {
+        xorbuf(authTag, A, authTagSz);
+        B[15] = 1;
+    }
 #ifdef WOLFSSL_AESNI
-    if (haveAESNI && aes->use_aesni) {
-        SAVE_VECTOR_REGISTERS(return _svr_ret;);
+    if ((ret == 0) && aes->use_aesni) {
         while (inSz >= AES_BLOCK_SIZE * 4) {
             AesCcmCtrIncSet4(B, lenSz);
 
-            AES_ECB_encrypt(B, A, AES_BLOCK_SIZE * 4, (byte*)aes->key,
+            AES_ECB_encrypt_AESNI(B, A, AES_BLOCK_SIZE * 4, (byte*)aes->key,
                             (int)aes->rounds);
 
             xorbuf(A, in, AES_BLOCK_SIZE * 4);
@@ -9430,39 +10814,26 @@ int wc_AesCcmEncrypt(Aes* aes, byte* out, const byte* in, word32 inSz,
 
             AesCcmCtrInc4(B, lenSz);
         }
-        RESTORE_VECTOR_REGISTERS();
     }
 #endif
-    while (inSz >= AES_BLOCK_SIZE) {
-        ret = wc_AesEncrypt(aes, B, A);
-        if (ret != 0) {
-            ForceZero(A, sizeof(A));
-            ForceZero(B, sizeof(B));
-        #ifdef WOLFSSL_CHECK_MEM_ZERO
-            wc_MemZero_Check(A, sizeof(A));
-            wc_MemZero_Check(B, sizeof(B));
-        #endif
-            return ret;
-        }
-        xorbuf(A, in, AES_BLOCK_SIZE);
-        XMEMCPY(out, A, AES_BLOCK_SIZE);
+    if (ret == 0) {
+        while (inSz >= AES_BLOCK_SIZE) {
+            ret = wc_AesEncrypt(aes, B, A);
+            if (ret != 0)
+                break;
+            xorbuf(A, in, AES_BLOCK_SIZE);
+            XMEMCPY(out, A, AES_BLOCK_SIZE);
 
-        AesCcmCtrInc(B, lenSz);
-        inSz -= AES_BLOCK_SIZE;
-        in += AES_BLOCK_SIZE;
-        out += AES_BLOCK_SIZE;
-    }
-    if (inSz > 0) {
-        ret = wc_AesEncrypt(aes, B, A);
-        if (ret != 0) {
-            ForceZero(A, sizeof(A));
-            ForceZero(B, sizeof(B));
-        #ifdef WOLFSSL_CHECK_MEM_ZERO
-            wc_MemZero_Check(A, sizeof(A));
-            wc_MemZero_Check(B, sizeof(B));
-        #endif
-            return ret;
+            AesCcmCtrInc(B, lenSz);
+            inSz -= AES_BLOCK_SIZE;
+            in += AES_BLOCK_SIZE;
+            out += AES_BLOCK_SIZE;
         }
+    }
+    if ((ret == 0) && (inSz > 0)) {
+        ret = wc_AesEncrypt(aes, B, A);
+    }
+    if ((ret == 0) && (inSz > 0)) {
         xorbuf(A, in, inSz);
         XMEMCPY(out, A, inSz);
     }
@@ -9475,7 +10846,9 @@ int wc_AesCcmEncrypt(Aes* aes, byte* out, const byte* in, word32 inSz,
     wc_MemZero_Check(B, sizeof(B));
 #endif
 
-    return 0;
+    VECTOR_REGISTERS_POP;
+
+    return ret;
 }
 
 #ifdef HAVE_AES_DECRYPT
@@ -9485,19 +10858,19 @@ int  wc_AesCcmDecrypt(Aes* aes, byte* out, const byte* in, word32 inSz,
                    const byte* authTag, word32 authTagSz,
                    const byte* authIn, word32 authInSz)
 {
-#ifndef WOLFSSL_AESNI
-    byte A[AES_BLOCK_SIZE];
-    byte B[AES_BLOCK_SIZE];
-#else
+#ifdef WOLFSSL_AESNI
     ALIGN128 byte B[AES_BLOCK_SIZE * 4];
     ALIGN128 byte A[AES_BLOCK_SIZE * 4];
+#else
+    byte A[AES_BLOCK_SIZE];
+    byte B[AES_BLOCK_SIZE];
 #endif
     byte* o;
     byte lenSz;
     word32 i, oSz;
     byte mask = 0xFF;
     const word32 wordSz = (word32)sizeof(word32);
-    int ret;
+    int ret = 0;
 
     /* sanity check on arguments */
     if (aes == NULL || (inSz != 0 && (in == NULL || out == NULL)) ||
@@ -9540,13 +10913,14 @@ int  wc_AesCcmDecrypt(Aes* aes, byte* out, const byte* in, word32 inSz,
     wc_MemZero_Add("wc_AesCcmEncrypt B", B, sizeof(B));
 #endif
 
+    VECTOR_REGISTERS_PUSH;
+
 #ifdef WOLFSSL_AESNI
-    if (haveAESNI && aes->use_aesni) {
-        SAVE_VECTOR_REGISTERS(return _svr_ret;);
+    if (aes->use_aesni) {
         while (oSz >= AES_BLOCK_SIZE * 4) {
             AesCcmCtrIncSet4(B, lenSz);
 
-            AES_ECB_encrypt(B, A, AES_BLOCK_SIZE * 4, (byte*)aes->key,
+            AES_ECB_encrypt_AESNI(B, A, AES_BLOCK_SIZE * 4, (byte*)aes->key,
                             (int)aes->rounds);
 
             xorbuf(A, in, AES_BLOCK_SIZE * 4);
@@ -9558,131 +10932,79 @@ int  wc_AesCcmDecrypt(Aes* aes, byte* out, const byte* in, word32 inSz,
 
             AesCcmCtrInc4(B, lenSz);
         }
-        RESTORE_VECTOR_REGISTERS();
     }
 #endif
+
     while (oSz >= AES_BLOCK_SIZE) {
         ret = wc_AesEncrypt(aes, B, A);
-        if (ret != 0) {
-            ForceZero(A, sizeof(A));
-            ForceZero(B, sizeof(B));
-        #ifdef WOLFSSL_CHECK_MEM_ZERO
-            wc_MemZero_Check(A, sizeof(A));
-            wc_MemZero_Check(B, sizeof(B));
-        #endif
-            return ret;
-        }
+        if (ret != 0)
+            break;
         xorbuf(A, in, AES_BLOCK_SIZE);
         XMEMCPY(o, A, AES_BLOCK_SIZE);
-
         AesCcmCtrInc(B, lenSz);
         oSz -= AES_BLOCK_SIZE;
         in += AES_BLOCK_SIZE;
         o += AES_BLOCK_SIZE;
     }
-    if (inSz > 0) {
+
+    if ((ret == 0) && (inSz > 0))
         ret = wc_AesEncrypt(aes, B, A);
-        if (ret != 0) {
-            ForceZero(A, sizeof(A));
-            ForceZero(B, sizeof(B));
-        #ifdef WOLFSSL_CHECK_MEM_ZERO
-            wc_MemZero_Check(A, sizeof(A));
-            wc_MemZero_Check(B, sizeof(B));
-        #endif
-            return ret;
-        }
+
+    if ((ret == 0) && (inSz > 0)) {
         xorbuf(A, in, oSz);
         XMEMCPY(o, A, oSz);
+        for (i = 0; i < lenSz; i++)
+            B[AES_BLOCK_SIZE - 1 - i] = 0;
+        ret = wc_AesEncrypt(aes, B, A);
     }
 
-    for (i = 0; i < lenSz; i++)
-        B[AES_BLOCK_SIZE - 1 - i] = 0;
-    ret = wc_AesEncrypt(aes, B, A);
-    if (ret != 0) {
-        ForceZero(A, sizeof(A));
-        ForceZero(B, sizeof(B));
-    #ifdef WOLFSSL_CHECK_MEM_ZERO
-        wc_MemZero_Check(A, sizeof(A));
-        wc_MemZero_Check(B, sizeof(B));
-    #endif
-        return ret;
-    }
+    if (ret == 0) {
+        o = out;
+        oSz = inSz;
 
-    o = out;
-    oSz = inSz;
-
-    B[0] = (byte)((authInSz > 0 ? 64 : 0)
-                  + (8 * (((byte)authTagSz - 2) / 2))
-                  + (lenSz - 1));
-    for (i = 0; i < lenSz; i++) {
-        if (mask && i >= wordSz)
-            mask = 0x00;
-        B[AES_BLOCK_SIZE - 1 - i] = (byte)((inSz >> ((8 * i) & mask)) & mask);
-    }
-
-    ret = wc_AesEncrypt(aes, B, A);
-    if (ret != 0) {
-        ForceZero(A, sizeof(A));
-        ForceZero(B, sizeof(B));
-    #ifdef WOLFSSL_CHECK_MEM_ZERO
-        wc_MemZero_Check(A, sizeof(A));
-        wc_MemZero_Check(B, sizeof(B));
-    #endif
-        return ret;
-    }
-
-    if (authInSz > 0) {
-        ret = roll_auth(aes, authIn, authInSz, A);
-        if (ret != 0) {
-            ForceZero(A, sizeof(A));
-            ForceZero(B, sizeof(B));
-        #ifdef WOLFSSL_CHECK_MEM_ZERO
-            wc_MemZero_Check(A, sizeof(A));
-            wc_MemZero_Check(B, sizeof(B));
-        #endif
-            return ret;
+        B[0] = (byte)((authInSz > 0 ? 64 : 0)
+                      + (8 * (((byte)authTagSz - 2) / 2))
+                      + (lenSz - 1));
+        for (i = 0; i < lenSz; i++) {
+            if (mask && i >= wordSz)
+                mask = 0x00;
+            B[AES_BLOCK_SIZE - 1 - i] = (byte)((inSz >> ((8 * i) & mask)) & mask);
         }
+
+        ret = wc_AesEncrypt(aes, B, A);
     }
-    if (inSz > 0) {
+
+    if (ret == 0) {
+        if (authInSz > 0)
+            ret = roll_auth(aes, authIn, authInSz, A);
+    }
+    if ((ret == 0) && (inSz > 0))
         ret = roll_x(aes, o, oSz, A);
-        if (ret != 0) {
-            ForceZero(A, sizeof(A));
-            ForceZero(B, sizeof(B));
-        #ifdef WOLFSSL_CHECK_MEM_ZERO
-            wc_MemZero_Check(A, sizeof(A));
-            wc_MemZero_Check(B, sizeof(B));
-        #endif
-            return ret;
-        }
+
+    if (ret == 0) {
+        B[0] = lenSz - 1;
+        for (i = 0; i < lenSz; i++)
+            B[AES_BLOCK_SIZE - 1 - i] = 0;
+        ret = wc_AesEncrypt(aes, B, B);
     }
 
-    B[0] = lenSz - 1;
-    for (i = 0; i < lenSz; i++)
-        B[AES_BLOCK_SIZE - 1 - i] = 0;
-    ret = wc_AesEncrypt(aes, B, B);
-    if (ret != 0) {
-        ForceZero(A, sizeof(A));
-        ForceZero(B, sizeof(B));
-    #ifdef WOLFSSL_CHECK_MEM_ZERO
-        wc_MemZero_Check(A, sizeof(A));
-        wc_MemZero_Check(B, sizeof(B));
-    #endif
-        return ret;
-    }
-    xorbuf(A, B, authTagSz);
+    if (ret == 0)
+        xorbuf(A, B, authTagSz);
 
-    if (ConstantCompare(A, authTag, (int)authTagSz) != 0) {
-        /* If the authTag check fails, don't keep the decrypted data.
-         * Unfortunately, you need the decrypted data to calculate the
-         * check value. */
-        #if defined(HAVE_FIPS_VERSION) && (HAVE_FIPS_VERSION >= 2) && \
-            defined(ACVP_VECTOR_TESTING)
+    if (ret == 0) {
+        if (ConstantCompare(A, authTag, (int)authTagSz) != 0) {
+            /* If the authTag check fails, don't keep the decrypted data.
+             * Unfortunately, you need the decrypted data to calculate the
+             * check value. */
+            #if defined(HAVE_FIPS_VERSION) && (HAVE_FIPS_VERSION >= 2) &&   \
+                        defined(ACVP_VECTOR_TESTING)
             WOLFSSL_MSG("Preserve output for vector responses");
-        #else
+            #else
             if (inSz > 0)
                 XMEMSET(out, 0, inSz);
-        #endif
-        ret = AES_CCM_AUTH_E;
+            #endif
+            ret = AES_CCM_AUTH_E;
+        }
     }
 
     ForceZero(A, sizeof(A));
@@ -9693,6 +11015,8 @@ int  wc_AesCcmDecrypt(Aes* aes, byte* out, const byte* in, word32 inSz,
     wc_MemZero_Check(A, sizeof(A));
     wc_MemZero_Check(B, sizeof(B));
 #endif
+
+    VECTOR_REGISTERS_POP;
 
     return ret;
 }
@@ -9839,6 +11163,12 @@ int wc_AesInit(Aes* aes, void* heap, int devId)
 #if defined(WOLFSSL_RENESAS_FSPSM)
     XMEMSET(&aes->ctx, 0, sizeof(aes->ctx));
 #endif
+
+#ifdef WC_DEBUG_CIPHER_LIFECYCLE
+    if (ret == 0)
+        ret = wc_debug_CipherLifecycleInit(&aes->CipherLifecycleTag, aes->heap);
+#endif
+
     return ret;
 }
 
@@ -9893,6 +11223,10 @@ void wc_AesFree(Aes* aes)
 {
     if (aes == NULL)
         return;
+
+#ifdef WC_DEBUG_CIPHER_LIFECYCLE
+    (void)wc_debug_CipherLifecycleFree(&aes->CipherLifecycleTag, aes->heap, 1);
+#endif
 
 #if defined(WOLFSSL_ASYNC_CRYPT) && defined(WC_ASYNC_ENABLE_AES)
     wolfAsync_DevCtxFree(&aes->asyncDev, WOLFSSL_ASYNC_MARKER_AES);
@@ -9949,17 +11283,16 @@ void wc_AesFree(Aes* aes)
     wc_MAXQ10XX_AesFree(aes);
 #endif
 
-#ifdef WOLFSSL_CHECK_MEM_ZERO
-    wc_MemZero_Check(aes, sizeof(Aes));
-#endif
-
 #if ((defined(WOLFSSL_RENESAS_FSPSM_TLS) || \
     defined(WOLFSSL_RENESAS_FSPSM_CRYPTONLY)) && \
     !defined(NO_WOLFSSL_RENESAS_FSPSM_AES))
     wc_fspsm_Aesfree(aes);
 #endif
-}
 
+#ifdef WOLFSSL_CHECK_MEM_ZERO
+    wc_MemZero_Check(aes, sizeof(Aes));
+#endif
+}
 
 int wc_AesGetKeySize(Aes* aes, word32* keySize)
 {
@@ -10002,6 +11335,16 @@ int wc_AesGetKeySize(Aes* aes, word32* keySize)
 
 #endif /* !WOLFSSL_TI_CRYPT */
 
+/* the earlier do-nothing default definitions for VECTOR_REGISTERS_{PUSH,POP}
+ * are missed when WOLFSSL_TI_CRYPT or WOLFSSL_ARMASM.
+ */
+#ifndef VECTOR_REGISTERS_PUSH
+    #define VECTOR_REGISTERS_PUSH { WC_DO_NOTHING
+#endif
+#ifndef VECTOR_REGISTERS_POP
+    #define VECTOR_REGISTERS_POP } WC_DO_NOTHING
+#endif
+
 #ifdef HAVE_AES_ECB
 #if defined(WOLFSSL_IMX6_CAAM) && !defined(NO_IMX6_CAAM_AES) && \
         !defined(WOLFSSL_QNX_CAAM)
@@ -10039,16 +11382,17 @@ int wc_AesEcbDecrypt(Aes* aes, byte* out, const byte* in, word32 sz)
 static WARN_UNUSED_RESULT int _AesEcbEncrypt(
     Aes* aes, byte* out, const byte* in, word32 sz)
 {
-    word32 blocks = sz / AES_BLOCK_SIZE;
+    int ret = 0;
 
 #ifdef WOLF_CRYPTO_CB
     #ifndef WOLF_CRYPTO_CB_FIND
     if (aes->devId != INVALID_DEVID)
     #endif
     {
-        int ret = wc_CryptoCb_AesEcbEncrypt(aes, out, in, sz);
+        ret = wc_CryptoCb_AesEcbEncrypt(aes, out, in, sz);
         if (ret != CRYPTOCB_UNAVAILABLE)
             return ret;
+        ret = 0;
         /* fall-through when unavailable */
     }
 #endif
@@ -10056,38 +11400,50 @@ static WARN_UNUSED_RESULT int _AesEcbEncrypt(
     if (aes->keylen == 16)
         return DCPAesEcbEncrypt(aes, out, in, sz);
 #endif
+
+    VECTOR_REGISTERS_PUSH;
+
 #ifdef WOLFSSL_AESNI
-    if (haveAESNI && aes->use_aesni) {
-        SAVE_VECTOR_REGISTERS(return _svr_ret;);
-        AES_ECB_encrypt(in, out, sz, (byte*)aes->key, (int)aes->rounds);
-        RESTORE_VECTOR_REGISTERS();
-        blocks = 0;
+    if (aes->use_aesni) {
+        AES_ECB_encrypt_AESNI(in, out, sz, (byte*)aes->key, (int)aes->rounds);
     }
+    else
 #endif
-    while (blocks > 0) {
-      int ret = wc_AesEncryptDirect(aes, out, in);
-      if (ret != 0)
-        return ret;
-      out += AES_BLOCK_SIZE;
-      in  += AES_BLOCK_SIZE;
-      blocks--;
+    {
+#ifndef WOLFSSL_ARMASM
+        AesEncryptBlocks_C(aes, in, out, sz);
+#else
+        word32 i;
+
+        for (i = 0; i < sz; i += AES_BLOCK_SIZE) {
+            ret = wc_AesEncryptDirect(aes, out, in);
+            if (ret != 0)
+                break;
+            in += AES_BLOCK_SIZE;
+            out += AES_BLOCK_SIZE;
+        }
+#endif
     }
-    return 0;
+
+    VECTOR_REGISTERS_POP;
+
+    return ret;
 }
 
 static WARN_UNUSED_RESULT int _AesEcbDecrypt(
     Aes* aes, byte* out, const byte* in, word32 sz)
 {
-    word32 blocks = sz / AES_BLOCK_SIZE;
+    int ret = 0;
 
 #ifdef WOLF_CRYPTO_CB
     #ifndef WOLF_CRYPTO_CB_FIND
     if (aes->devId != INVALID_DEVID)
     #endif
     {
-        int ret = wc_CryptoCb_AesEcbDecrypt(aes, out, in, sz);
+        ret = wc_CryptoCb_AesEcbDecrypt(aes, out, in, sz);
         if (ret != CRYPTOCB_UNAVAILABLE)
             return ret;
+        ret = 0;
         /* fall-through when unavailable */
     }
 #endif
@@ -10095,51 +11451,56 @@ static WARN_UNUSED_RESULT int _AesEcbDecrypt(
     if (aes->keylen == 16)
         return DCPAesEcbDecrypt(aes, out, in, sz);
 #endif
+
+    VECTOR_REGISTERS_PUSH;
+
 #ifdef WOLFSSL_AESNI
-    if (haveAESNI && aes->use_aesni) {
-        SAVE_VECTOR_REGISTERS(return _svr_ret;);
-        AES_ECB_decrypt(in, out, sz, (byte*)aes->key, (int)aes->rounds);
-        RESTORE_VECTOR_REGISTERS();
-        blocks = 0;
+    if (aes->use_aesni) {
+        AES_ECB_decrypt_AESNI(in, out, sz, (byte*)aes->key, (int)aes->rounds);
     }
+    else
 #endif
-    while (blocks > 0) {
-      int ret = wc_AesDecryptDirect(aes, out, in);
-      if (ret != 0)
-        return ret;
-      out += AES_BLOCK_SIZE;
-      in  += AES_BLOCK_SIZE;
-      blocks--;
+    {
+#ifndef WOLFSSL_ARMASM
+        AesDecryptBlocks_C(aes, in, out, sz);
+#else
+        word32 i;
+
+        for (i = 0; i < sz; i += AES_BLOCK_SIZE) {
+            ret = wc_AesDecryptDirect(aes, out, in);
+            if (ret != 0)
+                break;
+            in += AES_BLOCK_SIZE;
+            out += AES_BLOCK_SIZE;
+        }
+#endif
     }
-    return 0;
+
+    VECTOR_REGISTERS_POP;
+
+    return ret;
 }
 
 int wc_AesEcbEncrypt(Aes* aes, byte* out, const byte* in, word32 sz)
 {
-    int ret;
-
     if ((in == NULL) || (out == NULL) || (aes == NULL))
       return BAD_FUNC_ARG;
+    if ((sz % AES_BLOCK_SIZE) != 0) {
+        return BAD_LENGTH_E;
+    }
 
-    SAVE_VECTOR_REGISTERS(return _svr_ret;);
-    ret = _AesEcbEncrypt(aes, out, in, sz);
-    RESTORE_VECTOR_REGISTERS();
-
-    return ret;
+    return _AesEcbEncrypt(aes, out, in, sz);
 }
 
 int wc_AesEcbDecrypt(Aes* aes, byte* out, const byte* in, word32 sz)
 {
-    int ret;
-
     if ((in == NULL) || (out == NULL) || (aes == NULL))
       return BAD_FUNC_ARG;
+    if ((sz % AES_BLOCK_SIZE) != 0) {
+        return BAD_LENGTH_E;
+    }
 
-    SAVE_VECTOR_REGISTERS(return _svr_ret;);
-    ret = _AesEcbDecrypt(aes, out, in, sz);
-    RESTORE_VECTOR_REGISTERS();
-
-    return ret;
+    return _AesEcbDecrypt(aes, out, in, sz);
 }
 #endif
 #endif /* HAVE_AES_ECB */
@@ -10181,7 +11542,7 @@ static WARN_UNUSED_RESULT int wc_AesFeedbackEncrypt(
     in += processed;
     sz -= processed;
 
-    SAVE_VECTOR_REGISTERS(return _svr_ret;);
+    VECTOR_REGISTERS_PUSH;
 
     while (sz >= AES_BLOCK_SIZE) {
         /* Using aes->tmp here for inline case i.e. in=out */
@@ -10227,7 +11588,8 @@ static WARN_UNUSED_RESULT int wc_AesFeedbackEncrypt(
     #endif
         aes->left -= sz;
     }
-    RESTORE_VECTOR_REGISTERS();
+
+    VECTOR_REGISTERS_POP;
 
     return ret;
 }
@@ -10271,7 +11633,7 @@ static WARN_UNUSED_RESULT int wc_AesFeedbackDecrypt(
     in += processed;
     sz -= processed;
 
-    SAVE_VECTOR_REGISTERS(return _svr_ret;);
+    VECTOR_REGISTERS_PUSH;
 
     while (sz > AES_BLOCK_SIZE) {
         /* Using aes->tmp here for inline case i.e. in=out */
@@ -10315,7 +11677,8 @@ static WARN_UNUSED_RESULT int wc_AesFeedbackDecrypt(
         aes->left = AES_BLOCK_SIZE - sz;
         xorbufout(out, in, aes->tmp, sz);
     }
-    RESTORE_VECTOR_REGISTERS();
+
+    VECTOR_REGISTERS_POP;
 
     return ret;
 }
@@ -10398,7 +11761,7 @@ static WARN_UNUSED_RESULT int wc_AesFeedbackCFB8(
         return 0;
     }
 
-    SAVE_VECTOR_REGISTERS(return _svr_ret;);
+    VECTOR_REGISTERS_PUSH;
 
     while (sz > 0) {
         ret = wc_AesEncryptDirect(aes, (byte*)aes->tmp, (byte*)aes->reg);
@@ -10430,7 +11793,7 @@ static WARN_UNUSED_RESULT int wc_AesFeedbackCFB8(
         sz  -= 1;
     }
 
-    RESTORE_VECTOR_REGISTERS();
+    VECTOR_REGISTERS_POP;
 
     return ret;
 }
@@ -10454,7 +11817,7 @@ static WARN_UNUSED_RESULT int wc_AesFeedbackCFB1(
         return 0;
     }
 
-    SAVE_VECTOR_REGISTERS(return _svr_ret;);
+    VECTOR_REGISTERS_PUSH;
 
     while (sz > 0) {
         ret = wc_AesEncryptDirect(aes, (byte*)aes->tmp, (byte*)aes->reg);
@@ -10507,7 +11870,7 @@ static WARN_UNUSED_RESULT int wc_AesFeedbackCFB1(
         }
     }
 
-    RESTORE_VECTOR_REGISTERS();
+    VECTOR_REGISTERS_POP;
 
     return ret;
 }
@@ -10685,7 +12048,7 @@ int wc_AesKeyWrap_ex(Aes *aes, const byte* in, word32 inSz, byte* out,
         XMEMCPY(tmp, iv, KEYWRAP_BLOCK_SIZE);
     }
 
-    SAVE_VECTOR_REGISTERS(return _svr_ret;);
+    VECTOR_REGISTERS_PUSH;
 
     for (j = 0; j <= 5; j++) {
         for (i = 1; i <= inSz / KEYWRAP_BLOCK_SIZE; i++) {
@@ -10708,7 +12071,8 @@ int wc_AesKeyWrap_ex(Aes *aes, const byte* in, word32 inSz, byte* out,
             break;
         r = out + KEYWRAP_BLOCK_SIZE;
     }
-    RESTORE_VECTOR_REGISTERS();
+
+    VECTOR_REGISTERS_POP;
 
     if (ret != 0)
         return ret;
@@ -10797,7 +12161,7 @@ int wc_AesKeyUnWrap_ex(Aes *aes, const byte* in, word32 inSz, byte* out,
     XMEMCPY(out, in + KEYWRAP_BLOCK_SIZE, inSz - KEYWRAP_BLOCK_SIZE);
     XMEMSET(t, 0, sizeof(t));
 
-    SAVE_VECTOR_REGISTERS(return _svr_ret;);
+    VECTOR_REGISTERS_PUSH;
 
     /* initialize counter to 6n */
     n = (inSz - 1) / KEYWRAP_BLOCK_SIZE;
@@ -10823,7 +12187,8 @@ int wc_AesKeyUnWrap_ex(Aes *aes, const byte* in, word32 inSz, byte* out,
         if (ret != 0)
             break;
     }
-    RESTORE_VECTOR_REGISTERS();
+
+    VECTOR_REGISTERS_POP;
 
     if (ret != 0)
         return ret;
@@ -10887,6 +12252,24 @@ int wc_AesKeyUnWrap(const byte* key, word32 keySz, const byte* in, word32 inSz,
 /* Galios Field to use */
 #define GF_XTS 0x87
 
+int wc_AesXtsInit(XtsAes* aes, void* heap, int devId)
+{
+    int    ret = 0;
+
+    if (aes == NULL) {
+        return BAD_FUNC_ARG;
+    }
+
+    if ((ret = wc_AesInit(&aes->tweak, heap, devId)) != 0) {
+        return ret;
+    }
+    if ((ret = wc_AesInit(&aes->aes, heap, devId)) != 0) {
+        return ret;
+    }
+
+    return 0;
+}
+
 /* This is to help with setting keys to correct encrypt or decrypt type.
  *
  * tweak AES key for tweak in XTS
@@ -10898,25 +12281,15 @@ int wc_AesKeyUnWrap(const byte* key, word32 keySz, const byte* in, word32 inSz,
  * heap  heap hint to use for memory. Can be NULL
  * devId id to use with async crypto. Can be 0
  *
- * Note: is up to user to call wc_AesFree on tweak and aes key when done.
- *
  * return 0 on success
  */
-int wc_AesXtsSetKey(XtsAes* aes, const byte* key, word32 len, int dir,
-        void* heap, int devId)
+int wc_AesXtsSetKeyNoInit(XtsAes* aes, const byte* key, word32 len, int dir)
 {
     word32 keySz;
     int    ret = 0;
 
     if (aes == NULL || key == NULL) {
         return BAD_FUNC_ARG;
-    }
-
-    if ((ret = wc_AesInit(&aes->tweak, heap, devId)) != 0) {
-        return ret;
-    }
-    if ((ret = wc_AesInit(&aes->aes, heap, devId)) != 0) {
-        return ret;
     }
 
     keySz = len/2;
@@ -10931,7 +12304,42 @@ int wc_AesXtsSetKey(XtsAes* aes, const byte* key, word32 len, int dir,
         if (ret != 0) {
             wc_AesFree(&aes->aes);
         }
+#ifdef WOLFSSL_AESNI
+        if (aes->aes.use_aesni != aes->tweak.use_aesni) {
+            if (aes->aes.use_aesni)
+                aes->aes.use_aesni = 0;
+            else
+                aes->tweak.use_aesni = 0;
+        }
+#endif
     }
+
+    return ret;
+}
+
+/* Combined call to wc_AesXtsInit() and wc_AesXtsSetKeyNoInit().
+ *
+ * Note: is up to user to call wc_AesXtsFree when done.
+ *
+ * return 0 on success
+ */
+int wc_AesXtsSetKey(XtsAes* aes, const byte* key, word32 len, int dir,
+        void* heap, int devId)
+{
+    int    ret = 0;
+
+    if (aes == NULL || key == NULL) {
+        return BAD_FUNC_ARG;
+    }
+
+    ret = wc_AesXtsInit(aes, heap, devId);
+    if (ret != 0)
+        return ret;
+
+    ret = wc_AesXtsSetKeyNoInit(aes, key, len, dir);
+
+    if (ret != 0)
+        wc_AesXtsFree(aes);
 
     return ret;
 }
@@ -11017,10 +12425,10 @@ int wc_AesXtsDecryptSector(XtsAes* aes, byte* out, const byte* in, word32 sz,
     #define HAVE_INTEL_AVX2
 #endif /* USE_INTEL_SPEEDUP */
 
-void AES_XTS_encrypt(const unsigned char *in, unsigned char *out, word32 sz,
+void AES_XTS_encrypt_aesni(const unsigned char *in, unsigned char *out, word32 sz,
                      const unsigned char* i, const unsigned char* key,
                      const unsigned char* key2, int nr)
-                     XASM_LINK("AES_XTS_encrypt");
+                     XASM_LINK("AES_XTS_encrypt_aesni");
 #ifdef HAVE_INTEL_AVX1
 void AES_XTS_encrypt_avx1(const unsigned char *in, unsigned char *out,
                           word32 sz, const unsigned char* i,
@@ -11030,10 +12438,10 @@ void AES_XTS_encrypt_avx1(const unsigned char *in, unsigned char *out,
 #endif /* HAVE_INTEL_AVX1 */
 
 #ifdef HAVE_AES_DECRYPT
-void AES_XTS_decrypt(const unsigned char *in, unsigned char *out, word32 sz,
+void AES_XTS_decrypt_aesni(const unsigned char *in, unsigned char *out, word32 sz,
                      const unsigned char* i, const unsigned char* key,
                      const unsigned char* key2, int nr)
-                     XASM_LINK("AES_XTS_decrypt");
+                     XASM_LINK("AES_XTS_decrypt_aesni");
 #ifdef HAVE_INTEL_AVX1
 void AES_XTS_decrypt_avx1(const unsigned char *in, unsigned char *out,
                           word32 sz, const unsigned char* i,
@@ -11110,23 +12518,17 @@ static int AesXtsEncrypt_sw(XtsAes* xaes, byte* out, const byte* in, word32 sz,
     XMEMSET(tmp, 0, AES_BLOCK_SIZE); /* set to 0's in case of improper AES
                                       * key setup passed to encrypt direct*/
 
-    SAVE_VECTOR_REGISTERS(return _svr_ret;);
-
     ret = wc_AesEncryptDirect(tweak, tmp, i);
 
-    if (ret != 0) {
-        RESTORE_VECTOR_REGISTERS();
+    if (ret != 0)
         return ret;
-    }
 
 #ifdef HAVE_AES_ECB
     /* encrypt all of buffer at once when possible */
     if (in != out) { /* can not handle inline */
         XMEMCPY(out, tmp, AES_BLOCK_SIZE);
-        if ((ret = _AesXtsHelper(aes, out, in, sz, AES_ENCRYPTION)) != 0) {
-            RESTORE_VECTOR_REGISTERS();
+        if ((ret = _AesXtsHelper(aes, out, in, sz, AES_ENCRYPTION)) != 0)
             return ret;
-        }
     }
 #endif
 
@@ -11143,10 +12545,8 @@ static int AesXtsEncrypt_sw(XtsAes* xaes, byte* out, const byte* in, word32 sz,
             XMEMCPY(buf, in, AES_BLOCK_SIZE);
             xorbuf(buf, tmp, AES_BLOCK_SIZE);
             ret = wc_AesEncryptDirect(aes, out, buf);
-            if (ret != 0) {
-                RESTORE_VECTOR_REGISTERS();
+            if (ret != 0)
                 return ret;
-            }
         }
         xorbuf(out, tmp, AES_BLOCK_SIZE);
 
@@ -11174,7 +12574,6 @@ static int AesXtsEncrypt_sw(XtsAes* xaes, byte* out, const byte* in, word32 sz,
 
         XMEMCPY(buf, out - AES_BLOCK_SIZE, AES_BLOCK_SIZE);
         if (sz >= AES_BLOCK_SIZE) { /* extra sanity check before copy */
-            RESTORE_VECTOR_REGISTERS();
             return BUFFER_E;
         }
         if (in != out) {
@@ -11194,7 +12593,6 @@ static int AesXtsEncrypt_sw(XtsAes* xaes, byte* out, const byte* in, word32 sz,
         if (ret == 0)
             xorbuf(out - AES_BLOCK_SIZE, tmp, AES_BLOCK_SIZE);
     }
-    RESTORE_VECTOR_REGISTERS();
 
     return ret;
 }
@@ -11214,6 +12612,8 @@ static int AesXtsEncrypt_sw(XtsAes* xaes, byte* out, const byte* in, word32 sz,
 int wc_AesXtsEncrypt(XtsAes* xaes, byte* out, const byte* in, word32 sz,
         const byte* i, word32 iSz)
 {
+    int ret;
+
     if (xaes == NULL || out == NULL || in == NULL) {
         return BAD_FUNC_ARG;
     }
@@ -11227,29 +12627,54 @@ int wc_AesXtsEncrypt(XtsAes* xaes, byte* out, const byte* in, word32 sz,
         return BAD_FUNC_ARG;
     }
 
-#ifdef WOLFSSL_AESNI
-    #if defined(HAVE_INTEL_AVX1)
-    if (IS_INTEL_AVX1(intel_flags)) {
-        SAVE_VECTOR_REGISTERS(return _svr_ret;);
-        AES_XTS_encrypt_avx1(in, out, sz, i, (const byte*)xaes->aes.key,
-            (const byte*)xaes->tweak.key, (int)xaes->aes.rounds);
-        RESTORE_VECTOR_REGISTERS();
-        return 0;
-    }
-    else
-    #endif
-    if (haveAESNI) {
-        AES_XTS_encrypt(in, out, sz, i, (const byte*)xaes->aes.key,
-            (const byte*)xaes->tweak.key, (int)xaes->aes.rounds);
-        return 0;
-    }
-    else
-#endif
     {
-        return AesXtsEncrypt_sw(xaes, out, in, sz, i);
-    }
-}
+#ifdef WOLFSSL_AESNI
+#ifdef WC_AES_C_DYNAMIC_FALLBACK
+        int orig_use_aesni = xaes->aes.use_aesni;
+#endif
+        if (xaes->aes.use_aesni && ((ret = SAVE_VECTOR_REGISTERS2()) != 0)) {
+#ifdef WC_AES_C_DYNAMIC_FALLBACK
+            xaes->aes.use_aesni = 0;
+            xaes->tweak.use_aesni = 0;
+#else
+            return ret;
+#endif
+        }
+        if (xaes->aes.use_aesni) {
+#if defined(HAVE_INTEL_AVX1)
+            if (IS_INTEL_AVX1(intel_flags)) {
+                AES_XTS_encrypt_avx1(in, out, sz, i, (const byte*)xaes->aes.key,
+                                     (const byte*)xaes->tweak.key, (int)xaes->aes.rounds);
+                ret = 0;
+            }
+            else
+#endif
+            {
+                AES_XTS_encrypt_aesni(in, out, sz, i, (const byte*)xaes->aes.key,
+                                      (const byte*)xaes->tweak.key, (int)xaes->aes.rounds);
+                ret = 0;
+            }
+        }
+        else
+#endif
+        {
+            ret = AesXtsEncrypt_sw(xaes, out, in, sz, i);
+        }
 
+#ifdef WOLFSSL_AESNI
+        if (xaes->aes.use_aesni)
+            RESTORE_VECTOR_REGISTERS();
+#ifdef WC_AES_C_DYNAMIC_FALLBACK
+        else if (orig_use_aesni) {
+            xaes->aes.use_aesni = orig_use_aesni;
+            xaes->tweak.use_aesni = orig_use_aesni;
+        }
+#endif
+#endif
+    }
+
+    return ret;
+}
 
 /* Same process as encryption but Aes key is AES_DECRYPTION type.
  *
@@ -11277,13 +12702,9 @@ static int AesXtsDecrypt_sw(XtsAes* xaes, byte* out, const byte* in, word32 sz,
     XMEMSET(tmp, 0, AES_BLOCK_SIZE); /* set to 0's in case of improper AES
                                       * key setup passed to decrypt direct*/
 
-    SAVE_VECTOR_REGISTERS(return _svr_ret;);
-
     ret = wc_AesEncryptDirect(tweak, tmp, i);
-    if (ret != 0) {
-        RESTORE_VECTOR_REGISTERS();
+    if (ret != 0)
         return ret;
-    }
 
     /* if Stealing then break out of loop one block early to handle special
      * case */
@@ -11295,10 +12716,8 @@ static int AesXtsDecrypt_sw(XtsAes* xaes, byte* out, const byte* in, word32 sz,
     /* decrypt all of buffer at once when possible */
     if (in != out) { /* can not handle inline */
         XMEMCPY(out, tmp, AES_BLOCK_SIZE);
-        if ((ret = _AesXtsHelper(aes, out, in, sz, AES_DECRYPTION)) != 0) {
-            RESTORE_VECTOR_REGISTERS();
+        if ((ret = _AesXtsHelper(aes, out, in, sz, AES_DECRYPTION)) != 0)
             return ret;
-        }
     }
 #endif
 
@@ -11312,10 +12731,8 @@ static int AesXtsDecrypt_sw(XtsAes* xaes, byte* out, const byte* in, word32 sz,
             XMEMCPY(buf, in, AES_BLOCK_SIZE);
             xorbuf(buf, tmp, AES_BLOCK_SIZE);
             ret = wc_AesDecryptDirect(aes, out, buf);
-            if (ret != 0) {
-                RESTORE_VECTOR_REGISTERS();
+            if (ret != 0)
                 return ret;
-            }
         }
         xorbuf(out, tmp, AES_BLOCK_SIZE);
 
@@ -11358,10 +12775,8 @@ static int AesXtsDecrypt_sw(XtsAes* xaes, byte* out, const byte* in, word32 sz,
         XMEMCPY(buf, in, AES_BLOCK_SIZE);
         xorbuf(buf, tmp2, AES_BLOCK_SIZE);
         ret = wc_AesDecryptDirect(aes, out, buf);
-        if (ret != 0) {
-            RESTORE_VECTOR_REGISTERS();
+        if (ret != 0)
             return ret;
-        }
         xorbuf(out, tmp2, AES_BLOCK_SIZE);
 
         /* tmp2 holds partial | last */
@@ -11373,7 +12788,6 @@ static int AesXtsDecrypt_sw(XtsAes* xaes, byte* out, const byte* in, word32 sz,
         /* Make buffer with end of cipher text | last */
         XMEMCPY(buf, tmp2, AES_BLOCK_SIZE);
         if (sz >= AES_BLOCK_SIZE) { /* extra sanity check before copy */
-            RESTORE_VECTOR_REGISTERS();
             return BUFFER_E;
         }
         XMEMCPY(buf, in,   sz);
@@ -11381,14 +12795,11 @@ static int AesXtsDecrypt_sw(XtsAes* xaes, byte* out, const byte* in, word32 sz,
 
         xorbuf(buf, tmp, AES_BLOCK_SIZE);
         ret = wc_AesDecryptDirect(aes, tmp2, buf);
-        if (ret != 0) {
-            RESTORE_VECTOR_REGISTERS();
+        if (ret != 0)
             return ret;
-        }
         xorbuf(tmp2, tmp, AES_BLOCK_SIZE);
         XMEMCPY(out - AES_BLOCK_SIZE, tmp2, AES_BLOCK_SIZE);
     }
-    RESTORE_VECTOR_REGISTERS();
 
     return ret;
 }
@@ -11408,6 +12819,8 @@ static int AesXtsDecrypt_sw(XtsAes* xaes, byte* out, const byte* in, word32 sz,
 int wc_AesXtsDecrypt(XtsAes* xaes, byte* out, const byte* in, word32 sz,
         const byte* i, word32 iSz)
 {
+    int ret;
+
     if (xaes == NULL || out == NULL || in == NULL) {
         return BAD_FUNC_ARG;
     }
@@ -11421,26 +12834,49 @@ int wc_AesXtsDecrypt(XtsAes* xaes, byte* out, const byte* in, word32 sz,
         return BAD_FUNC_ARG;
     }
 
-#ifdef WOLFSSL_AESNI
-    #if defined(HAVE_INTEL_AVX1)
-    if (IS_INTEL_AVX1(intel_flags)) {
-        SAVE_VECTOR_REGISTERS(return _svr_ret;);
-        AES_XTS_decrypt_avx1(in, out, sz, i, (const byte*)xaes->aes.key,
-            (const byte*)xaes->tweak.key, (int)xaes->aes.rounds);
-        RESTORE_VECTOR_REGISTERS();
-        return 0;
-    }
-    else
-    #endif
-    if (haveAESNI) {
-        AES_XTS_decrypt(in, out, sz, i, (const byte*)xaes->aes.key,
-            (const byte*)xaes->tweak.key, (int)xaes->aes.rounds);
-        return 0;
-    }
-    else
-#endif
     {
-        return AesXtsDecrypt_sw(xaes, out, in, sz, i);
+#ifdef WOLFSSL_AESNI
+#ifdef WC_AES_C_DYNAMIC_FALLBACK
+        int orig_use_aesni = xaes->aes.use_aesni;
+#endif
+
+        if (xaes->aes.use_aesni && (SAVE_VECTOR_REGISTERS2() != 0)) {
+            xaes->aes.use_aesni = 0;
+            xaes->tweak.use_aesni = 0;
+        }
+        if (xaes->aes.use_aesni) {
+#if defined(HAVE_INTEL_AVX1)
+            if (IS_INTEL_AVX1(intel_flags)) {
+                AES_XTS_decrypt_avx1(in, out, sz, i, (const byte*)xaes->aes.key,
+                                     (const byte*)xaes->tweak.key, (int)xaes->aes.rounds);
+                ret = 0;
+            }
+            else
+#endif
+            {
+                AES_XTS_decrypt_aesni(in, out, sz, i, (const byte*)xaes->aes.key,
+                                      (const byte*)xaes->tweak.key, (int)xaes->aes.rounds);
+                ret = 0;
+            }
+        }
+        else
+#endif
+        {
+            ret = AesXtsDecrypt_sw(xaes, out, in, sz, i);
+        }
+
+#ifdef WOLFSSL_AESNI
+        if (xaes->aes.use_aesni)
+            RESTORE_VECTOR_REGISTERS();
+#ifdef WC_AES_C_DYNAMIC_FALLBACK
+        else if (orig_use_aesni) {
+            xaes->aes.use_aesni = orig_use_aesni;
+            xaes->tweak.use_aesni = orig_use_aesni;
+        }
+#endif
+#endif
+
+        return ret;
     }
 }
 #endif /* !WOLFSSL_ARMASM || WOLFSSL_ARMASM_NO_HW_CRYPTO */
@@ -11812,6 +13248,7 @@ int  wc_AesEaxEncryptAuth(const byte* key, word32 keySz, byte* out,
     AesEax *eax = &eax_mem;
 #endif
     int ret;
+    int eaxInited = 0;
 
     if (key == NULL || out == NULL || in == NULL || nonce == NULL
                               || authTag == NULL || authIn == NULL) {
@@ -11832,6 +13269,7 @@ int  wc_AesEaxEncryptAuth(const byte* key, word32 keySz, byte* out,
                              authIn, authInSz)) != 0) {
         goto cleanup;
     }
+    eaxInited = 1;
 
     if ((ret = wc_AesEaxEncryptUpdate(eax, out, in, inSz, NULL, 0)) != 0) {
         goto cleanup;
@@ -11842,7 +13280,8 @@ int  wc_AesEaxEncryptAuth(const byte* key, word32 keySz, byte* out,
     }
 
 cleanup:
-    wc_AesEaxFree(eax);
+    if (eaxInited)
+        wc_AesEaxFree(eax);
 #if defined(WOLFSSL_SMALL_STACK)
     XFREE(eax, NULL, DYNAMIC_TYPE_AES_EAX);
 #endif
@@ -11872,6 +13311,7 @@ int  wc_AesEaxDecryptAuth(const byte* key, word32 keySz, byte* out,
     AesEax *eax = &eax_mem;
 #endif
     int ret;
+    int eaxInited = 0;
 
     if (key == NULL || out == NULL || in == NULL || nonce == NULL
                               || authTag == NULL || authIn == NULL) {
@@ -11893,6 +13333,7 @@ int  wc_AesEaxDecryptAuth(const byte* key, word32 keySz, byte* out,
 
         goto cleanup;
     }
+    eaxInited = 1;
 
     if ((ret = wc_AesEaxDecryptUpdate(eax, out, in, inSz, NULL, 0)) != 0) {
         goto cleanup;
@@ -11903,7 +13344,8 @@ int  wc_AesEaxDecryptAuth(const byte* key, word32 keySz, byte* out,
     }
 
 cleanup:
-    wc_AesEaxFree(eax);
+    if (eaxInited)
+        wc_AesEaxFree(eax);
 #if defined(WOLFSSL_SMALL_STACK)
     XFREE(eax, NULL, DYNAMIC_TYPE_AES_EAX);
 #endif
@@ -11926,6 +13368,9 @@ int  wc_AesEaxInit(AesEax* eax,
 {
     int ret = 0;
     word32 cmacSize;
+    int aesInited = 0;
+    int nonceCmacInited = 0;
+    int aadCmacInited = 0;
 
     if (eax == NULL || key == NULL ||  nonce == NULL) {
         return BAD_FUNC_ARG;
@@ -11934,14 +13379,16 @@ int  wc_AesEaxInit(AesEax* eax,
     XMEMSET(eax->prefixBuf, 0, sizeof(eax->prefixBuf));
 
     if ((ret = wc_AesInit(&eax->aes, NULL, INVALID_DEVID)) != 0) {
-        return ret;
+        goto out;
     }
+    aesInited = 1;
+
     if ((ret = wc_AesSetKey(&eax->aes,
                             key,
                             keySz,
                             NULL,
                             AES_ENCRYPTION)) != 0) {
-        return ret;
+        goto out;
     }
 
     /*
@@ -11955,26 +13402,27 @@ int  wc_AesEaxInit(AesEax* eax,
                            NULL)) != 0) {
         return ret;
     }
+    nonceCmacInited = 1;
 
     if ((ret = wc_CmacUpdate(&eax->nonceCmac,
                              eax->prefixBuf,
                              sizeof(eax->prefixBuf))) != 0) {
-        return ret;
+        goto out;
     }
 
     if ((ret = wc_CmacUpdate(&eax->nonceCmac, nonce, nonceSz)) != 0) {
-        return ret;
+        goto out;
     }
 
     cmacSize = AES_BLOCK_SIZE;
     if ((ret = wc_CmacFinal(&eax->nonceCmac,
                             eax->nonceCmacFinal,
                             &cmacSize)) != 0) {
-        return ret;
+        goto out;
     }
 
     if ((ret = wc_AesSetIV(&eax->aes, eax->nonceCmacFinal)) != 0) {
-        return ret;
+        goto out;
     }
 
     /*
@@ -11989,18 +13437,19 @@ int  wc_AesEaxInit(AesEax* eax,
                            keySz,
                            WC_CMAC_AES,
                            NULL)) != 0) {
-        return ret;
+        goto out;
     }
+    aadCmacInited = 1;
 
     if ((ret = wc_CmacUpdate(&eax->aadCmac,
                              eax->prefixBuf,
                              sizeof(eax->prefixBuf))) != 0) {
-        return ret;
+        goto out;
     }
 
     if (authIn != NULL) {
         if ((ret = wc_CmacUpdate(&eax->aadCmac, authIn, authInSz)) != 0) {
-            return ret;
+            goto out;
         }
     }
 
@@ -12015,13 +13464,24 @@ int  wc_AesEaxInit(AesEax* eax,
                            keySz,
                            WC_CMAC_AES,
                            NULL)) != 0) {
-        return ret;
+        goto out;
     }
 
     if ((ret = wc_CmacUpdate(&eax->ciphertextCmac,
                              eax->prefixBuf,
                              sizeof(eax->prefixBuf))) != 0) {
-        return ret;
+        goto out;
+    }
+
+out:
+
+    if (ret != 0) {
+        if (aesInited)
+            wc_AesFree(&eax->aes);
+        if (nonceCmacInited)
+            wc_CmacFree(&eax->nonceCmac);
+        if (aadCmacInited)
+            wc_CmacFree(&eax->aadCmac);
     }
 
     return ret;
@@ -12078,7 +13538,7 @@ int  wc_AesEaxEncryptUpdate(AesEax* eax, byte* out,
  * Decrypts input ciphertext using AES EAX mode, adding optional auth data to
  * the authentication stream
  *
- * Returns 0 on sucess
+ * Returns 0 on success
  * Returns error code on failure
  */
 int  wc_AesEaxDecryptUpdate(AesEax* eax, byte* out,
@@ -12152,17 +13612,17 @@ int wc_AesEaxEncryptFinal(AesEax* eax, byte* authTag, word32 authTagSz)
 
     /* Complete the OMAC for the ciphertext */
     cmacSize = AES_BLOCK_SIZE;
-    if ((ret = wc_CmacFinal(&eax->ciphertextCmac,
-                            eax->ciphertextCmacFinal,
-                            &cmacSize)) != 0) {
+    if ((ret = wc_CmacFinalNoFree(&eax->ciphertextCmac,
+                                  eax->ciphertextCmacFinal,
+                                  &cmacSize)) != 0) {
         return ret;
     }
 
     /* Complete the OMAC for auth data */
     cmacSize = AES_BLOCK_SIZE;
-    if ((ret = wc_CmacFinal(&eax->aadCmac,
-                            eax->aadCmacFinal,
-                            &cmacSize)) != 0) {
+    if ((ret = wc_CmacFinalNoFree(&eax->aadCmac,
+                                  eax->aadCmacFinal,
+                                  &cmacSize)) != 0) {
         return ret;
     }
 
@@ -12209,17 +13669,17 @@ int wc_AesEaxDecryptFinal(AesEax* eax,
 
     /* Complete the OMAC for the ciphertext */
     cmacSize = AES_BLOCK_SIZE;
-    if ((ret = wc_CmacFinal(&eax->ciphertextCmac,
-                            eax->ciphertextCmacFinal,
-                            &cmacSize)) != 0) {
+    if ((ret = wc_CmacFinalNoFree(&eax->ciphertextCmac,
+                                  eax->ciphertextCmacFinal,
+                                  &cmacSize)) != 0) {
         return ret;
     }
 
     /* Complete the OMAC for auth data */
     cmacSize = AES_BLOCK_SIZE;
-    if ((ret = wc_CmacFinal(&eax->aadCmac,
-                            eax->aadCmacFinal,
-                            &cmacSize)) != 0) {
+    if ((ret = wc_CmacFinalNoFree(&eax->aadCmac,
+                                  eax->aadCmacFinal,
+                                  &cmacSize)) != 0) {
         return ret;
     }
 
@@ -12256,8 +13716,8 @@ int wc_AesEaxDecryptFinal(AesEax* eax,
 }
 
 /*
- * Frees the underlying AES context. Must be called when done using the AES EAX
- * context structure
+ * Frees the underlying CMAC and AES contexts. Must be called when done using
+ * the AES EAX context structure.
  *
  * Returns 0 on success
  * Returns error code on failure
@@ -12268,6 +13728,8 @@ int wc_AesEaxFree(AesEax* eax)
         return BAD_FUNC_ARG;
     }
 
+    (void)wc_CmacFree(&eax->ciphertextCmac);
+    (void)wc_CmacFree(&eax->aadCmac);
     wc_AesFree(&eax->aes);
 
     return 0;

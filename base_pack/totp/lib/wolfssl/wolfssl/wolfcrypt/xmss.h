@@ -104,8 +104,8 @@ enum wc_XmssRc {
 /* enum wc_XmssState is to help track the state of an XMSS Key. */
 enum wc_XmssState {
     WC_XMSS_STATE_FREED,      /* Key has been freed from memory. */
-    WC_XMSS_STATE_INITED,     /* Key has been inited, ready to set parms.*/
-    WC_XMSS_STATE_PARMSET,    /* Parms are set, ready to MakeKey or Reload. */
+    WC_XMSS_STATE_INITED,     /* Key has been inited, ready to set params.*/
+    WC_XMSS_STATE_PARMSET,    /* Params are set, ready to MakeKey or Reload. */
     WC_XMSS_STATE_OK,         /* Able to sign signatures and verify. */
     WC_XMSS_STATE_VERIFYONLY, /* A public only XmssKey. */
     WC_XMSS_STATE_BAD,        /* Can't guarantee key's state. */

@@ -4627,7 +4627,7 @@ static int PKCS7_VerifySignedData(PKCS7* pkcs7, const byte* hashBuf,
                 WOLFSSL_MSG("PKCS#7 signedData needs to be version 1 or 3");
                 ret = ASN_VERSION_E;
             }
-            pkcs7->version = version;
+            pkcs7->version = (byte)version;
 
             /* Get the set of DigestAlgorithmIdentifiers */
             if (ret == 0 && GetSet(pkiMsg, &idx, &length, pkiMsgSz) < 0)
@@ -4913,7 +4913,7 @@ static int PKCS7_VerifySignedData(PKCS7* pkcs7, const byte* hashBuf,
             if (multiPart) {
                 pkcs7->stream->expected = contentLen + ASN_TAG_SZ;
             }
-            pkcs7->stream->multi = multiPart;
+            pkcs7->stream->multi = (byte)multiPart;
 
         #endif
             wc_PKCS7_ChangeState(pkcs7, WC_PKCS7_VERIFY_STAGE3);
@@ -5221,7 +5221,7 @@ static int PKCS7_VerifySignedData(PKCS7* pkcs7, const byte* hashBuf,
                         pkcs7->stream = stream;
                     #endif
                     }
-                    pkcs7->version = version;
+                    pkcs7->version = (byte)version;
         #ifdef ASN_BER_TO_DER
                     pkcs7->der = der;
         #endif
@@ -7692,7 +7692,7 @@ static int wc_PKCS7_PwriKek_KeyWrap(PKCS7* pkcs7, const byte* kek, word32 kekSz,
     if (*outSz < (word32)outLen)
         return BUFFER_E;
 
-    out[0] = cekSz;
+    out[0] = (byte)cekSz;
     out[1] = ~cek[0];
     out[2] = ~cek[1];
     out[3] = ~cek[2];
@@ -8697,6 +8697,7 @@ static int wc_PKCS7_DecryptKtri(PKCS7* pkcs7, byte* in, word32 inSz,
     mp_int serialNum[1];
     RsaKey privKey[1];
 #endif
+    XMEMSET(issuerHash, 0, sizeof(issuerHash));
 
 #if defined(WOLFSSL_SM2) && defined(WOLFSSL_SM3)
     keyIdSize = wc_HashGetDigestSize(wc_HashTypeConvert(HashIdAlg(
@@ -10844,7 +10845,7 @@ WOLFSSL_API int wc_PKCS7_DecodeEnvelopedData(PKCS7* pkcs7, byte* in,
     byte* encryptedContent = NULL;
     int explicitOctet = 0;
     word32 localIdx;
-    byte   tag;
+    byte   tag = 0;
 
     if (pkcs7 == NULL)
         return BAD_FUNC_ARG;
@@ -11824,6 +11825,10 @@ WOLFSSL_API int wc_PKCS7_DecodeAuthEnvelopedData(PKCS7* pkcs7, byte* in,
     }
 #endif
 
+#ifndef WOLFSSL_SMALL_STACK
+    XMEMSET(decryptedKey, 0, MAX_ENCRYPTED_KEY_SZ);
+#endif
+
     switch (pkcs7->state) {
         case WC_PKCS7_START:
         case WC_PKCS7_INFOSET_START:
@@ -11854,6 +11859,9 @@ WOLFSSL_API int wc_PKCS7_DecodeAuthEnvelopedData(PKCS7* pkcs7, byte* in,
             if (decryptedKey == NULL) {
                 ret = MEMORY_E;
                 break;
+            }
+            else {
+                XMEMSET(decryptedKey, 0, MAX_ENCRYPTED_KEY_SZ);
             }
         #ifndef NO_PKCS7_STREAM
             pkcs7->stream->key = decryptedKey;
