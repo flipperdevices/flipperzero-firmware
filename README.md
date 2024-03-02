@@ -12,3 +12,9 @@
 ![schematics](schematics.png)
 
 (The photo from the N3 connector created by Martin Pot. [Source](https://martybugs.net/blog/blog.cgi/gear/CanonN3Connector.html))
+
+### Final product
+
+![prototype](https://m.blog.hu/cy/cybernetic/image/barkacs/flippertest.jpg)
+
+![final](https://m.blog.hu/cy/cybernetic/image/barkacs/final.jpg)
