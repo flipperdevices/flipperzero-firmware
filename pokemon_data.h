@@ -53,6 +53,7 @@ struct pokemon_data {
     size_t trade_block_sz;
     /* Shortcut pointer to the actual party data in the trade block */
     void* party;
+    size_t party_sz;
 
     /* Current EV/IV stat selection */
     EvIv stat_sel;
