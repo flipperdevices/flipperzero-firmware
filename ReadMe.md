@@ -13,7 +13,7 @@ Apps contains changes needed to compile them on latest firmware, fixes has been 
 
 The Flipper and its community wouldn't be as rich as it is without your contributions and support. Thank you for all you have done.
 
-### Apps checked & updated at `22 Feb 20:42 GMT +3`
+### Apps checked & updated at `2 Mar 09:42 GMT +3`
 
 
 # Default pack
@@ -116,7 +116,8 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 |---|:---:|---|---|:---:|
 | BT Camera Trigger | ![BT Badge] | [by Nem0oo](https://github.com/Nem0oo/flipper-zero-bluetooth-trigger) |  | [![UFW Badge]](https://lab.flipper.net/apps/bt_trigger) |
 | BT Serial Example | ![BT Badge] | [by maybe-hello-world](https://github.com/maybe-hello-world/fbs) |  | ![None Badge] |
-| Bluetooth remote Keynote for Kodi | ![GPIO Badge] | [by coded-with-claws](https://github.com/coded-with-claws/flipperzero-tools) | read more details in original repo | ![None Badge] |
+| Bluetooth remote Keynote for Kodi | ![BT Badge] | [by coded-with-claws](https://github.com/coded-with-claws/flipperzero-tools) | read more details in original repo | ![None Badge] |
+| PC Monitor | ![BT Badge] | [by TheSainEyereg](https://github.com/TheSainEyereg/flipper-pc-monitor) | (+ App fixes for new api by @Willy-JL) - PC App (backend) is required! [Download here](https://github.com/TheSainEyereg/flipper-pc-monitor-backend/releases) | [![Author Badge]](https://lab.flipper.net/apps/pc_monitor) |
 | 4 in row | ![Games Badge] | [by leo-need-more-coffee](https://github.com/leo-need-more-coffee/flipperzero-4inrow) |  | [![UFW Badge]](https://lab.flipper.net/apps/4inrow) |
 | Asteroids | ![Games Badge] | [by antirez & SimplyMinimal](https://github.com/antirez/flipper-asteroids) | Modified by [SimplyMinimal](https://github.com/SimplyMinimal/FlipperZero-Asteroids) all changes can be found by clicking on [this link](https://github.com/SimplyMinimal/FlipperZero-Asteroids) | [![UFW Badge]](https://lab.flipper.net/apps/asteroids) |
 | Chess Clock | ![Games Badge] | [by ihatecsv](https://github.com/ihatecsv/flipper_chess_clock) |  | ![None Badge] |
@@ -225,6 +226,7 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 | Mifare Fuzzer | ![NFC Badge] | [by spheeere98](https://github.com/spheeere98/mifare_fuzzer) | Fixed crash on exit. / Update!: Ported to new NFC API [by @Sil333033](https://github.com/Flipper-XFW/Xtreme-Firmware/commit/ac5744328a28b73fb5022ce7baaa4332a824a739) | [![UFW Badge]](https://lab.flipper.net/apps/mifare_fuzzer) |
 | Seader | ![NFC Badge] | [by bettse](https://github.com/bettse/seader/tree/main) | `Interface with a SAM from the Flipper Zero over UART` | [![Author Badge]](https://lab.flipper.net/apps/seader) |
 | VB Lab Migration Assistant | ![NFC Badge] | [by GMMan (cyanic)](https://github.com/GMMan/flipperzero-vb-migrate) |  | [![Author Badge]](https://lab.flipper.net/apps/vb_migrate) |
+| NFC Playlist | ![NFC Badge] | [by acegoal07](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main) |  | ![None Badge] |
 | RFID Beacon | ![RFID Badge] | [by nmrr](https://github.com/nmrr/flipperzero-rfidbeacon)  | `A letter/number Morse beacon on 125 kHz` | ![None Badge] |
 | EM4100 universal keys generator (for RFID Fuzzer) | ![RFID Badge] | [by Milk-Cool](https://github.com/Milk-Cool/fz-em4100-generator) |  | [![Author Badge]](https://lab.flipper.net/apps/key_generator) |
 | (Q)M100 UHF RFID | ![RFID Badge] | [by frux-c](https://github.com/frux-c/uhf_rfid) | WIP -> (+Added icon by @xMasterX) | ![None Badge] |
