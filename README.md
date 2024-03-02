@@ -10,7 +10,7 @@ Normally the clock gets syncrhonized in two to five minutes depending on the sig
 The OK button changes the transmitted signal between CET and CEST (dst) time.
 
 # Antenna
-The RFID antenna could be in distance of up to 50cm. The signal gets recognized after few seconds.
+The RFID antenna wokrs best at distances of up to 50cm. The signal gets recognized in few seconds.
 
 When using the GPIO, best results are achieved if you connect a ferrite antenna over 330 ohm resistor and a capactior to ground.
 
