@@ -8,7 +8,7 @@
 #define MONTH_BIT   45
 #define YEAR_BIT    50
 
-static int dcf77_bits[] = {
+static uint8_t dcf77_bits[] = {
     0,                                        // 00: Start of minute
     8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 01: Weather broadcast / Civil warning bits
     8,                                        // 15: Call bit: abnormal transmitter operation
@@ -27,10 +27,10 @@ static int dcf77_bits[] = {
 
 void dcf77_encode(int start, int len, int val, int par)
 {
-  int parity = (par != -1 ? par : dcf77_bits[start]) & 1;
-  int byte = ((val / 10) << 4) + (val % 10);
+  uint8_t parity = (par != -1 ? par : dcf77_bits[start]) & 1;
+  uint8_t byte = ((val / 10) << 4) + (val % 10);
   for (int bit = 0; bit < len; bit++) {
-    int dcf77_bit = (byte >> bit) & 1;
+    uint8_t dcf77_bit = (byte >> bit) & 1;
     parity ^= dcf77_bit;
     dcf77_bits[start + bit] = (dcf77_bits[start + bit] & 0x0E) + dcf77_bit;
   }
@@ -48,7 +48,7 @@ void set_dcf77_time(FuriHalRtcDateTime *dt, bool is_dst)
   dcf77_encode(YEAR_BIT, 8, dt->year % 100, -1);
 }
 
-int get_dcf77_bit(int sec)
+bool get_dcf77_bit(int sec)
 {
   return dcf77_bits[sec % 60] & 1;
 }
