@@ -1,0 +1,13 @@
+App(
+    appid="pc_monitor",
+    name="PC monitor",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="pc_monitor_app",
+    requires=["bt", "gui"],
+    stack_size=1 * 1024,
+    fap_description="Application for monitoring PC resources",
+    fap_category="Bluetooth",
+    fap_icon="icons/icon_10px.png",
+    fap_version="1.0",
+    fap_author="Olejka",
+)
