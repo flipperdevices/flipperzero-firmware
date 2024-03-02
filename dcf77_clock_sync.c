@@ -51,7 +51,7 @@ static void app_input_callback(InputEvent *input_event, void *ctx)
   furi_message_queue_put(event_queue, input_event, FuriWaitForever);
 }
 
-int flipperzero_dcf77_app_main(void *p)
+int dcf77_clock_sync_app_main(void *p)
 {
   UNUSED(p);
 
