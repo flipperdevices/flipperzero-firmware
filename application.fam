@@ -11,5 +11,5 @@ App(
     fap_author="@mdaskalov",
     fap_weburl="https://github.com/mdaskalov/flipperzero-dcf77",
     fap_version="1.0",
-    fap_description="Sends DCF77 time signal on the RFID antena and the A4 GPIO pin",
+    fap_description="Emulate DCF77 time signal on the RFID antena and the A4 GPIO pin",
 )
