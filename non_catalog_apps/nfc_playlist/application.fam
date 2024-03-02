@@ -1,0 +1,22 @@
+App(
+    appid="nfc_playlist",
+    name="NFC Playlist",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="nfc_playlist_main",
+    requires=["gui", "nfc"],
+    stack_size=4 * 1024,
+    fap_category="NFC",
+    fap_author="@acegoal07",
+    fap_weburl="https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main",
+    fap_version="1.4",
+    fap_icon="icon.png",
+    fap_icon_assets="assets",
+    fap_private_libs=[
+        Lib(
+            name="worker",
+        ),
+        Lib(
+            name="led",
+        ),
+    ],
+)
