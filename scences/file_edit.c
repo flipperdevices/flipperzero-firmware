@@ -52,7 +52,7 @@ void nfc_playlist_file_edit_scene_on_enter(void* context) {
       NfcPlaylistMenuSelection_RenamePlaylist,
       nfc_playlist_file_edit_menu_callback,
       nfc_playlist,
-      true,
+      !nfc_playlist->settings.file_selected_check,
       "No\nplaylist\nselected");
 
    view_dispatcher_switch_to_view(nfc_playlist->view_dispatcher, NfcPlaylistView_FileEdit);
