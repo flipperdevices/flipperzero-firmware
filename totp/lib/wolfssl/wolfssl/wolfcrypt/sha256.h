@@ -201,7 +201,9 @@ struct wc_Sha256 {
     word32 len;
 #endif
 #if defined(WOLFSSL_ESP32_CRYPT) && \
-   !defined(NO_WOLFSSL_ESP32_CRYPT_HASH)
+   !defined(NO_WOLFSSL_ESP32_CRYPT_HASH) && \
+  (!defined(NO_WOLFSSL_ESP32_CRYPT_HASH_SHA256) || \
+   !defined(NO_WOLFSSL_ESP32_CRYPT_HASH_SHA224))
     WC_ESP32SHA ctx;
 #endif
 #ifdef WOLFSSL_MAXQ10XX_CRYPTO

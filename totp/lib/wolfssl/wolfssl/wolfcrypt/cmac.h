@@ -98,8 +98,14 @@ WOLFSSL_API
 int wc_CmacUpdate(Cmac* cmac,
                   const byte* in, word32 inSz);
 WOLFSSL_API
+int wc_CmacFinalNoFree(Cmac* cmac,
+                       byte* out, word32* outSz);
+WOLFSSL_API
 int wc_CmacFinal(Cmac* cmac,
                  byte* out, word32* outSz);
+
+WOLFSSL_API
+int wc_CmacFree(Cmac* cmac);
 
 WOLFSSL_API
 int wc_AesCmacGenerate(byte* out, word32* outSz,

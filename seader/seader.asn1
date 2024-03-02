@@ -6,6 +6,7 @@ RfStatus ::= OCTET STRING
 SamResponse ::= OCTET STRING
 -- omnikey_5326_dfr_softwaredeveloperguide 4.2
 PAC ::= BIT STRING
+NoArguments ::= NULL
 
 -- omnikey_5326_dfr_softwaredeveloperguide 3.3
 Payload ::= CHOICE {
@@ -23,7 +24,8 @@ ErrorResponse ::= SEQUENCE {
 SamCommand ::= CHOICE {
   requestPacs [1] IMPLICIT RequestPacs,
   version [2] IMPLICIT NULL,
-  cardDetected [13] IMPLICIT CardDetected
+  cardDetected [13] IMPLICIT CardDetected,
+  serialNumber [22] IMPLICIT NoArguments
 }
 
 CardDetected ::= SEQUENCE {

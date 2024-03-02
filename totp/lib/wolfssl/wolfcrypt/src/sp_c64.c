@@ -59,6 +59,7 @@
 #ifdef __IAR_SYSTEMS_ICC__
 #define __asm__        asm
 #define __volatile__   volatile
+#define WOLFSSL_NO_VAR_ASSIGN_REG
 #endif /* __IAR_SYSTEMS_ICC__ */
 #ifdef __KEIL__
 #define __asm__        __asm
@@ -2214,7 +2215,7 @@ int sp_RsaPublic_2048(const byte* in, word32 inLen, const mp_int* em,
     sp_digit* m = NULL;
     sp_digit* r = NULL;
     sp_digit* norm = NULL;
-    sp_digit e[1] = {0};
+    sp_uint64 e[1] = {0};
     sp_digit mp = 0;
     int i;
     int err = MP_OKAY;
@@ -2224,7 +2225,7 @@ int sp_RsaPublic_2048(const byte* in, word32 inLen, const mp_int* em,
     }
 
     if (err == MP_OKAY) {
-        if (mp_count_bits(em) > 61) {
+        if (mp_count_bits(em) > 64) {
             err = MP_READ_E;
         }
         else if (inLen > 256U) {
@@ -2253,12 +2254,12 @@ int sp_RsaPublic_2048(const byte* in, word32 inLen, const mp_int* em,
         norm = r;
 
         sp_2048_from_bin(a, 34, in, inLen);
-#if DIGIT_BIT >= 61
-        e[0] = (sp_digit)em->dp[0];
+#if DIGIT_BIT >= 64
+        e[0] = (sp_uint64)em->dp[0];
 #else
-        e[0] = (sp_digit)em->dp[0];
+        e[0] = (sp_uint64)em->dp[0];
         if (em->used > 1) {
-            e[0] |= ((sp_digit)em->dp[1]) << DIGIT_BIT;
+            e[0] |= ((sp_uint64)em->dp[1]) << DIGIT_BIT;
         }
 #endif
         if (e[0] == 0) {
@@ -2277,7 +2278,7 @@ int sp_RsaPublic_2048(const byte* in, word32 inLen, const mp_int* em,
         err = sp_2048_mod_34(a, a, m);
     }
     if (err == MP_OKAY) {
-        for (i=60; i>=0; i--) {
+        for (i=63; i>=0; i--) {
             if ((e[0] >> i) != 0) {
                 break;
             }
@@ -2314,14 +2315,14 @@ int sp_RsaPublic_2048(const byte* in, word32 inLen, const mp_int* em,
     sp_digit* a = NULL;
     sp_digit* m = NULL;
     sp_digit* r = NULL;
-    sp_digit e[1] = {0};
+    sp_uint64 e[1] = {0};
     int err = MP_OKAY;
 
     if (*outLen < 256U) {
         err = MP_TO_E;
     }
     if (err == MP_OKAY) {
-        if (mp_count_bits(em) > 61) {
+        if (mp_count_bits(em) > 64) {
             err = MP_READ_E;
         }
         else if (inLen > 256U) {
@@ -2350,12 +2351,12 @@ int sp_RsaPublic_2048(const byte* in, word32 inLen, const mp_int* em,
         m = r + 34 * 2;
 
         sp_2048_from_bin(a, 34, in, inLen);
-#if DIGIT_BIT >= 61
-        e[0] = (sp_digit)em->dp[0];
+#if DIGIT_BIT >= 64
+        e[0] = (sp_uint64)em->dp[0];
 #else
-        e[0] = (sp_digit)em->dp[0];
+        e[0] = (sp_uint64)em->dp[0];
         if (em->used > 1) {
-            e[0] |= ((sp_digit)em->dp[1]) << DIGIT_BIT;
+            e[0] |= ((sp_uint64)em->dp[1]) << DIGIT_BIT;
         }
 #endif
         if (e[0] == 0) {
@@ -2385,7 +2386,7 @@ int sp_RsaPublic_2048(const byte* in, word32 inLen, const mp_int* em,
             err = sp_2048_mod_34(a, a, m);
 
             if (err == MP_OKAY) {
-                for (i=60; i>=0; i--) {
+                for (i=63; i>=0; i--) {
                     if ((e[0] >> i) != 0) {
                         break;
                     }
@@ -5814,7 +5815,7 @@ int sp_RsaPublic_2048(const byte* in, word32 inLen, const mp_int* em,
     sp_digit* m = NULL;
     sp_digit* r = NULL;
     sp_digit* norm = NULL;
-    sp_digit e[1] = {0};
+    sp_uint64 e[1] = {0};
     sp_digit mp = 0;
     int i;
     int err = MP_OKAY;
@@ -5824,7 +5825,7 @@ int sp_RsaPublic_2048(const byte* in, word32 inLen, const mp_int* em,
     }
 
     if (err == MP_OKAY) {
-        if (mp_count_bits(em) > 57) {
+        if (mp_count_bits(em) > 64) {
             err = MP_READ_E;
         }
         else if (inLen > 256U) {
@@ -5853,12 +5854,12 @@ int sp_RsaPublic_2048(const byte* in, word32 inLen, const mp_int* em,
         norm = r;
 
         sp_2048_from_bin(a, 36, in, inLen);
-#if DIGIT_BIT >= 57
-        e[0] = (sp_digit)em->dp[0];
+#if DIGIT_BIT >= 64
+        e[0] = (sp_uint64)em->dp[0];
 #else
-        e[0] = (sp_digit)em->dp[0];
+        e[0] = (sp_uint64)em->dp[0];
         if (em->used > 1) {
-            e[0] |= ((sp_digit)em->dp[1]) << DIGIT_BIT;
+            e[0] |= ((sp_uint64)em->dp[1]) << DIGIT_BIT;
         }
 #endif
         if (e[0] == 0) {
@@ -5877,7 +5878,7 @@ int sp_RsaPublic_2048(const byte* in, word32 inLen, const mp_int* em,
         err = sp_2048_mod_36(a, a, m);
     }
     if (err == MP_OKAY) {
-        for (i=56; i>=0; i--) {
+        for (i=63; i>=0; i--) {
             if ((e[0] >> i) != 0) {
                 break;
             }
@@ -5914,14 +5915,14 @@ int sp_RsaPublic_2048(const byte* in, word32 inLen, const mp_int* em,
     sp_digit* a = NULL;
     sp_digit* m = NULL;
     sp_digit* r = NULL;
-    sp_digit e[1] = {0};
+    sp_uint64 e[1] = {0};
     int err = MP_OKAY;
 
     if (*outLen < 256U) {
         err = MP_TO_E;
     }
     if (err == MP_OKAY) {
-        if (mp_count_bits(em) > 57) {
+        if (mp_count_bits(em) > 64) {
             err = MP_READ_E;
         }
         else if (inLen > 256U) {
@@ -5950,12 +5951,12 @@ int sp_RsaPublic_2048(const byte* in, word32 inLen, const mp_int* em,
         m = r + 36 * 2;
 
         sp_2048_from_bin(a, 36, in, inLen);
-#if DIGIT_BIT >= 57
-        e[0] = (sp_digit)em->dp[0];
+#if DIGIT_BIT >= 64
+        e[0] = (sp_uint64)em->dp[0];
 #else
-        e[0] = (sp_digit)em->dp[0];
+        e[0] = (sp_uint64)em->dp[0];
         if (em->used > 1) {
-            e[0] |= ((sp_digit)em->dp[1]) << DIGIT_BIT;
+            e[0] |= ((sp_uint64)em->dp[1]) << DIGIT_BIT;
         }
 #endif
         if (e[0] == 0) {
@@ -5985,7 +5986,7 @@ int sp_RsaPublic_2048(const byte* in, word32 inLen, const mp_int* em,
             err = sp_2048_mod_36(a, a, m);
 
             if (err == MP_OKAY) {
-                for (i=56; i>=0; i--) {
+                for (i=63; i>=0; i--) {
                     if ((e[0] >> i) != 0) {
                         break;
                     }
@@ -9097,7 +9098,7 @@ int sp_RsaPublic_3072(const byte* in, word32 inLen, const mp_int* em,
     sp_digit* m = NULL;
     sp_digit* r = NULL;
     sp_digit* norm = NULL;
-    sp_digit e[1] = {0};
+    sp_uint64 e[1] = {0};
     sp_digit mp = 0;
     int i;
     int err = MP_OKAY;
@@ -9107,7 +9108,7 @@ int sp_RsaPublic_3072(const byte* in, word32 inLen, const mp_int* em,
     }
 
     if (err == MP_OKAY) {
-        if (mp_count_bits(em) > 60) {
+        if (mp_count_bits(em) > 64) {
             err = MP_READ_E;
         }
         else if (inLen > 384U) {
@@ -9136,12 +9137,12 @@ int sp_RsaPublic_3072(const byte* in, word32 inLen, const mp_int* em,
         norm = r;
 
         sp_3072_from_bin(a, 52, in, inLen);
-#if DIGIT_BIT >= 60
-        e[0] = (sp_digit)em->dp[0];
+#if DIGIT_BIT >= 64
+        e[0] = (sp_uint64)em->dp[0];
 #else
-        e[0] = (sp_digit)em->dp[0];
+        e[0] = (sp_uint64)em->dp[0];
         if (em->used > 1) {
-            e[0] |= ((sp_digit)em->dp[1]) << DIGIT_BIT;
+            e[0] |= ((sp_uint64)em->dp[1]) << DIGIT_BIT;
         }
 #endif
         if (e[0] == 0) {
@@ -9160,7 +9161,7 @@ int sp_RsaPublic_3072(const byte* in, word32 inLen, const mp_int* em,
         err = sp_3072_mod_52(a, a, m);
     }
     if (err == MP_OKAY) {
-        for (i=59; i>=0; i--) {
+        for (i=63; i>=0; i--) {
             if ((e[0] >> i) != 0) {
                 break;
             }
@@ -9197,14 +9198,14 @@ int sp_RsaPublic_3072(const byte* in, word32 inLen, const mp_int* em,
     sp_digit* a = NULL;
     sp_digit* m = NULL;
     sp_digit* r = NULL;
-    sp_digit e[1] = {0};
+    sp_uint64 e[1] = {0};
     int err = MP_OKAY;
 
     if (*outLen < 384U) {
         err = MP_TO_E;
     }
     if (err == MP_OKAY) {
-        if (mp_count_bits(em) > 60) {
+        if (mp_count_bits(em) > 64) {
             err = MP_READ_E;
         }
         else if (inLen > 384U) {
@@ -9233,12 +9234,12 @@ int sp_RsaPublic_3072(const byte* in, word32 inLen, const mp_int* em,
         m = r + 52 * 2;
 
         sp_3072_from_bin(a, 52, in, inLen);
-#if DIGIT_BIT >= 60
-        e[0] = (sp_digit)em->dp[0];
+#if DIGIT_BIT >= 64
+        e[0] = (sp_uint64)em->dp[0];
 #else
-        e[0] = (sp_digit)em->dp[0];
+        e[0] = (sp_uint64)em->dp[0];
         if (em->used > 1) {
-            e[0] |= ((sp_digit)em->dp[1]) << DIGIT_BIT;
+            e[0] |= ((sp_uint64)em->dp[1]) << DIGIT_BIT;
         }
 #endif
         if (e[0] == 0) {
@@ -9268,7 +9269,7 @@ int sp_RsaPublic_3072(const byte* in, word32 inLen, const mp_int* em,
             err = sp_3072_mod_52(a, a, m);
 
             if (err == MP_OKAY) {
-                for (i=59; i>=0; i--) {
+                for (i=63; i>=0; i--) {
                     if ((e[0] >> i) != 0) {
                         break;
                     }
@@ -12846,7 +12847,7 @@ int sp_RsaPublic_3072(const byte* in, word32 inLen, const mp_int* em,
     sp_digit* m = NULL;
     sp_digit* r = NULL;
     sp_digit* norm = NULL;
-    sp_digit e[1] = {0};
+    sp_uint64 e[1] = {0};
     sp_digit mp = 0;
     int i;
     int err = MP_OKAY;
@@ -12856,7 +12857,7 @@ int sp_RsaPublic_3072(const byte* in, word32 inLen, const mp_int* em,
     }
 
     if (err == MP_OKAY) {
-        if (mp_count_bits(em) > 57) {
+        if (mp_count_bits(em) > 64) {
             err = MP_READ_E;
         }
         else if (inLen > 384U) {
@@ -12885,12 +12886,12 @@ int sp_RsaPublic_3072(const byte* in, word32 inLen, const mp_int* em,
         norm = r;
 
         sp_3072_from_bin(a, 54, in, inLen);
-#if DIGIT_BIT >= 57
-        e[0] = (sp_digit)em->dp[0];
+#if DIGIT_BIT >= 64
+        e[0] = (sp_uint64)em->dp[0];
 #else
-        e[0] = (sp_digit)em->dp[0];
+        e[0] = (sp_uint64)em->dp[0];
         if (em->used > 1) {
-            e[0] |= ((sp_digit)em->dp[1]) << DIGIT_BIT;
+            e[0] |= ((sp_uint64)em->dp[1]) << DIGIT_BIT;
         }
 #endif
         if (e[0] == 0) {
@@ -12909,7 +12910,7 @@ int sp_RsaPublic_3072(const byte* in, word32 inLen, const mp_int* em,
         err = sp_3072_mod_54(a, a, m);
     }
     if (err == MP_OKAY) {
-        for (i=56; i>=0; i--) {
+        for (i=63; i>=0; i--) {
             if ((e[0] >> i) != 0) {
                 break;
             }
@@ -12946,14 +12947,14 @@ int sp_RsaPublic_3072(const byte* in, word32 inLen, const mp_int* em,
     sp_digit* a = NULL;
     sp_digit* m = NULL;
     sp_digit* r = NULL;
-    sp_digit e[1] = {0};
+    sp_uint64 e[1] = {0};
     int err = MP_OKAY;
 
     if (*outLen < 384U) {
         err = MP_TO_E;
     }
     if (err == MP_OKAY) {
-        if (mp_count_bits(em) > 57) {
+        if (mp_count_bits(em) > 64) {
             err = MP_READ_E;
         }
         else if (inLen > 384U) {
@@ -12982,12 +12983,12 @@ int sp_RsaPublic_3072(const byte* in, word32 inLen, const mp_int* em,
         m = r + 54 * 2;
 
         sp_3072_from_bin(a, 54, in, inLen);
-#if DIGIT_BIT >= 57
-        e[0] = (sp_digit)em->dp[0];
+#if DIGIT_BIT >= 64
+        e[0] = (sp_uint64)em->dp[0];
 #else
-        e[0] = (sp_digit)em->dp[0];
+        e[0] = (sp_uint64)em->dp[0];
         if (em->used > 1) {
-            e[0] |= ((sp_digit)em->dp[1]) << DIGIT_BIT;
+            e[0] |= ((sp_uint64)em->dp[1]) << DIGIT_BIT;
         }
 #endif
         if (e[0] == 0) {
@@ -13017,7 +13018,7 @@ int sp_RsaPublic_3072(const byte* in, word32 inLen, const mp_int* em,
             err = sp_3072_mod_54(a, a, m);
 
             if (err == MP_OKAY) {
-                for (i=56; i>=0; i--) {
+                for (i=63; i>=0; i--) {
                     if ((e[0] >> i) != 0) {
                         break;
                     }
@@ -16166,7 +16167,7 @@ int sp_RsaPublic_4096(const byte* in, word32 inLen, const mp_int* em,
     sp_digit* m = NULL;
     sp_digit* r = NULL;
     sp_digit* norm = NULL;
-    sp_digit e[1] = {0};
+    sp_uint64 e[1] = {0};
     sp_digit mp = 0;
     int i;
     int err = MP_OKAY;
@@ -16176,7 +16177,7 @@ int sp_RsaPublic_4096(const byte* in, word32 inLen, const mp_int* em,
     }
 
     if (err == MP_OKAY) {
-        if (mp_count_bits(em) > 59) {
+        if (mp_count_bits(em) > 64) {
             err = MP_READ_E;
         }
         else if (inLen > 512U) {
@@ -16205,12 +16206,12 @@ int sp_RsaPublic_4096(const byte* in, word32 inLen, const mp_int* em,
         norm = r;
 
         sp_4096_from_bin(a, 70, in, inLen);
-#if DIGIT_BIT >= 59
-        e[0] = (sp_digit)em->dp[0];
+#if DIGIT_BIT >= 64
+        e[0] = (sp_uint64)em->dp[0];
 #else
-        e[0] = (sp_digit)em->dp[0];
+        e[0] = (sp_uint64)em->dp[0];
         if (em->used > 1) {
-            e[0] |= ((sp_digit)em->dp[1]) << DIGIT_BIT;
+            e[0] |= ((sp_uint64)em->dp[1]) << DIGIT_BIT;
         }
 #endif
         if (e[0] == 0) {
@@ -16229,7 +16230,7 @@ int sp_RsaPublic_4096(const byte* in, word32 inLen, const mp_int* em,
         err = sp_4096_mod_70(a, a, m);
     }
     if (err == MP_OKAY) {
-        for (i=58; i>=0; i--) {
+        for (i=63; i>=0; i--) {
             if ((e[0] >> i) != 0) {
                 break;
             }
@@ -16266,14 +16267,14 @@ int sp_RsaPublic_4096(const byte* in, word32 inLen, const mp_int* em,
     sp_digit* a = NULL;
     sp_digit* m = NULL;
     sp_digit* r = NULL;
-    sp_digit e[1] = {0};
+    sp_uint64 e[1] = {0};
     int err = MP_OKAY;
 
     if (*outLen < 512U) {
         err = MP_TO_E;
     }
     if (err == MP_OKAY) {
-        if (mp_count_bits(em) > 59) {
+        if (mp_count_bits(em) > 64) {
             err = MP_READ_E;
         }
         else if (inLen > 512U) {
@@ -16302,12 +16303,12 @@ int sp_RsaPublic_4096(const byte* in, word32 inLen, const mp_int* em,
         m = r + 70 * 2;
 
         sp_4096_from_bin(a, 70, in, inLen);
-#if DIGIT_BIT >= 59
-        e[0] = (sp_digit)em->dp[0];
+#if DIGIT_BIT >= 64
+        e[0] = (sp_uint64)em->dp[0];
 #else
-        e[0] = (sp_digit)em->dp[0];
+        e[0] = (sp_uint64)em->dp[0];
         if (em->used > 1) {
-            e[0] |= ((sp_digit)em->dp[1]) << DIGIT_BIT;
+            e[0] |= ((sp_uint64)em->dp[1]) << DIGIT_BIT;
         }
 #endif
         if (e[0] == 0) {
@@ -16337,7 +16338,7 @@ int sp_RsaPublic_4096(const byte* in, word32 inLen, const mp_int* em,
             err = sp_4096_mod_70(a, a, m);
 
             if (err == MP_OKAY) {
-                for (i=58; i>=0; i--) {
+                for (i=63; i>=0; i--) {
                     if ((e[0] >> i) != 0) {
                         break;
                     }
@@ -19971,7 +19972,7 @@ int sp_RsaPublic_4096(const byte* in, word32 inLen, const mp_int* em,
     sp_digit* m = NULL;
     sp_digit* r = NULL;
     sp_digit* norm = NULL;
-    sp_digit e[1] = {0};
+    sp_uint64 e[1] = {0};
     sp_digit mp = 0;
     int i;
     int err = MP_OKAY;
@@ -19981,7 +19982,7 @@ int sp_RsaPublic_4096(const byte* in, word32 inLen, const mp_int* em,
     }
 
     if (err == MP_OKAY) {
-        if (mp_count_bits(em) > 53) {
+        if (mp_count_bits(em) > 64) {
             err = MP_READ_E;
         }
         else if (inLen > 512U) {
@@ -20010,12 +20011,12 @@ int sp_RsaPublic_4096(const byte* in, word32 inLen, const mp_int* em,
         norm = r;
 
         sp_4096_from_bin(a, 78, in, inLen);
-#if DIGIT_BIT >= 53
-        e[0] = (sp_digit)em->dp[0];
+#if DIGIT_BIT >= 64
+        e[0] = (sp_uint64)em->dp[0];
 #else
-        e[0] = (sp_digit)em->dp[0];
+        e[0] = (sp_uint64)em->dp[0];
         if (em->used > 1) {
-            e[0] |= ((sp_digit)em->dp[1]) << DIGIT_BIT;
+            e[0] |= ((sp_uint64)em->dp[1]) << DIGIT_BIT;
         }
 #endif
         if (e[0] == 0) {
@@ -20034,7 +20035,7 @@ int sp_RsaPublic_4096(const byte* in, word32 inLen, const mp_int* em,
         err = sp_4096_mod_78(a, a, m);
     }
     if (err == MP_OKAY) {
-        for (i=52; i>=0; i--) {
+        for (i=63; i>=0; i--) {
             if ((e[0] >> i) != 0) {
                 break;
             }
@@ -20071,14 +20072,14 @@ int sp_RsaPublic_4096(const byte* in, word32 inLen, const mp_int* em,
     sp_digit* a = NULL;
     sp_digit* m = NULL;
     sp_digit* r = NULL;
-    sp_digit e[1] = {0};
+    sp_uint64 e[1] = {0};
     int err = MP_OKAY;
 
     if (*outLen < 512U) {
         err = MP_TO_E;
     }
     if (err == MP_OKAY) {
-        if (mp_count_bits(em) > 53) {
+        if (mp_count_bits(em) > 64) {
             err = MP_READ_E;
         }
         else if (inLen > 512U) {
@@ -20107,12 +20108,12 @@ int sp_RsaPublic_4096(const byte* in, word32 inLen, const mp_int* em,
         m = r + 78 * 2;
 
         sp_4096_from_bin(a, 78, in, inLen);
-#if DIGIT_BIT >= 53
-        e[0] = (sp_digit)em->dp[0];
+#if DIGIT_BIT >= 64
+        e[0] = (sp_uint64)em->dp[0];
 #else
-        e[0] = (sp_digit)em->dp[0];
+        e[0] = (sp_uint64)em->dp[0];
         if (em->used > 1) {
-            e[0] |= ((sp_digit)em->dp[1]) << DIGIT_BIT;
+            e[0] |= ((sp_uint64)em->dp[1]) << DIGIT_BIT;
         }
 #endif
         if (e[0] == 0) {
@@ -20142,7 +20143,7 @@ int sp_RsaPublic_4096(const byte* in, word32 inLen, const mp_int* em,
             err = sp_4096_mod_78(a, a, m);
 
             if (err == MP_OKAY) {
-                for (i=52; i>=0; i--) {
+                for (i=63; i>=0; i--) {
                     if ((e[0] >> i) != 0) {
                         break;
                     }
@@ -21967,8 +21968,8 @@ SP_NOINLINE static void sp_256_mont_sqr_5(sp_digit* r, const sp_digit* a,
  * m   Modulus (prime).
  * mp  Montgomery multiplier.
  */
-static void sp_256_mont_sqr_n_5(sp_digit* r, const sp_digit* a, int n,
-        const sp_digit* m, sp_digit mp)
+SP_NOINLINE static void sp_256_mont_sqr_n_5(sp_digit* r,
+    const sp_digit* a, int n, const sp_digit* m, sp_digit mp)
 {
     sp_256_mont_sqr_5(r, a, m, mp);
     for (; n > 1; n--) {
@@ -27434,7 +27435,7 @@ int sp_ecc_verify_256_nb(sp_ecc_ctx_t* sp_ctx, const byte* hash,
 #endif /* HAVE_ECC_VERIFY */
 
 #ifdef HAVE_ECC_CHECK_KEY
-/* Check that the x and y oridinates are a valid point on the curve.
+/* Check that the x and y ordinates are a valid point on the curve.
  *
  * point  EC point.
  * heap   Heap to use if dynamically allocating.
@@ -27490,7 +27491,7 @@ static int sp_256_ecc_is_point_5(const sp_point_256* point,
     return err;
 }
 
-/* Check that the x and y oridinates are a valid point on the curve.
+/* Check that the x and y ordinates are a valid point on the curve.
  *
  * pX  X ordinate of EC point.
  * pY  Y ordinate of EC point.
@@ -28871,8 +28872,8 @@ SP_NOINLINE static void sp_384_mont_sqr_7(sp_digit* r, const sp_digit* a,
  * m   Modulus (prime).
  * mp  Montgomery multiplier.
  */
-static void sp_384_mont_sqr_n_7(sp_digit* r, const sp_digit* a, int n,
-        const sp_digit* m, sp_digit mp)
+SP_NOINLINE static void sp_384_mont_sqr_n_7(sp_digit* r,
+    const sp_digit* a, int n, const sp_digit* m, sp_digit mp)
 {
     sp_384_mont_sqr_7(r, a, m, mp);
     for (; n > 1; n--) {
@@ -34902,7 +34903,7 @@ int sp_ecc_verify_384_nb(sp_ecc_ctx_t* sp_ctx, const byte* hash,
 #endif /* HAVE_ECC_VERIFY */
 
 #ifdef HAVE_ECC_CHECK_KEY
-/* Check that the x and y oridinates are a valid point on the curve.
+/* Check that the x and y ordinates are a valid point on the curve.
  *
  * point  EC point.
  * heap   Heap to use if dynamically allocating.
@@ -34958,7 +34959,7 @@ static int sp_384_ecc_is_point_7(const sp_point_384* point,
     return err;
 }
 
-/* Check that the x and y oridinates are a valid point on the curve.
+/* Check that the x and y ordinates are a valid point on the curve.
  *
  * pX  X ordinate of EC point.
  * pY  Y ordinate of EC point.
@@ -36409,8 +36410,8 @@ SP_NOINLINE static void sp_521_mont_sqr_9(sp_digit* r, const sp_digit* a,
  * m   Modulus (prime).
  * mp  Montgomery multiplier.
  */
-static void sp_521_mont_sqr_n_9(sp_digit* r, const sp_digit* a, int n,
-        const sp_digit* m, sp_digit mp)
+SP_NOINLINE static void sp_521_mont_sqr_n_9(sp_digit* r,
+    const sp_digit* a, int n, const sp_digit* m, sp_digit mp)
 {
     sp_521_mont_sqr_9(r, a, m, mp);
     for (; n > 1; n--) {
@@ -42386,7 +42387,7 @@ int sp_ecc_verify_521_nb(sp_ecc_ctx_t* sp_ctx, const byte* hash,
 #endif /* HAVE_ECC_VERIFY */
 
 #ifdef HAVE_ECC_CHECK_KEY
-/* Check that the x and y oridinates are a valid point on the curve.
+/* Check that the x and y ordinates are a valid point on the curve.
  *
  * point  EC point.
  * heap   Heap to use if dynamically allocating.
@@ -42442,7 +42443,7 @@ static int sp_521_ecc_is_point_9(const sp_point_521* point,
     return err;
 }
 
-/* Check that the x and y oridinates are a valid point on the curve.
+/* Check that the x and y ordinates are a valid point on the curve.
  *
  * pX  X ordinate of EC point.
  * pY  Y ordinate of EC point.
@@ -53268,7 +53269,7 @@ static void sp_1024_from_bin(sp_digit* r, int size, const byte* a, int n)
     }
 }
 
-/* Check that the x and y oridinates are a valid point on the curve.
+/* Check that the x and y ordinates are a valid point on the curve.
  *
  * point  EC point.
  * heap   Heap to use if dynamically allocating.
@@ -53328,7 +53329,7 @@ static int sp_1024_ecc_is_point_18(const sp_point_1024* point,
     return err;
 }
 
-/* Check that the x and y oridinates are a valid point on the curve.
+/* Check that the x and y ordinates are a valid point on the curve.
  *
  * pX  X ordinate of EC point.
  * pY  Y ordinate of EC point.

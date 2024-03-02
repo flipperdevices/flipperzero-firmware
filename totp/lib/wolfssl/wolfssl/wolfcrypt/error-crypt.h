@@ -238,19 +238,19 @@ enum {
     BAD_LENGTH_E        = -279,  /* Value of length parameter is invalid. */
     ECDSA_KAT_FIPS_E    = -280,  /* ECDSA KAT failure */
     RSA_PAT_FIPS_E      = -281,  /* RSA Pairwise failure */
-    KDF_TLS12_KAT_FIPS_E = -282,  /* TLS12 KDF KAT failure */
-    KDF_TLS13_KAT_FIPS_E = -283,  /* TLS13 KDF KAT failure */
+    KDF_TLS12_KAT_FIPS_E = -282, /* TLS12 KDF KAT failure */
+    KDF_TLS13_KAT_FIPS_E = -283, /* TLS13 KDF KAT failure */
     KDF_SSH_KAT_FIPS_E  = -284,  /* SSH KDF KAT failure */
     DHE_PCT_E           = -285,  /* DHE Pairwise Consistency Test failure */
     ECC_PCT_E           = -286,  /* ECDHE Pairwise Consistency Test failure */
     FIPS_PRIVATE_KEY_LOCKED_E = -287, /* Cannot export private key. */
     PROTOCOLCB_UNAVAILABLE  = -288, /* Protocol callback unavailable */
-    AES_SIV_AUTH_E = -289, /* AES-SIV authentication failed */
-    NO_VALID_DEVID = -290, /* no valid device ID */
+    AES_SIV_AUTH_E      = -289,  /* AES-SIV authentication failed */
+    NO_VALID_DEVID      = -290,  /* no valid device ID */
 
-    IO_FAILED_E = -291,          /* Input/output failure */
-    SYSLIB_FAILED_E = -292,      /* System/library call failed */
-    USE_HW_PSK = -293,           /* Callback return to indicate HW has PSK */
+    IO_FAILED_E         = -291,  /* Input/output failure */
+    SYSLIB_FAILED_E     = -292,  /* System/library call failed */
+    USE_HW_PSK          = -293,  /* Callback return to indicate HW has PSK */
 
     ENTROPY_RT_E        = -294,  /* Entropy Repetition Test failed */
     ENTROPY_APT_E       = -295,  /* Entropy Adaptive Proportion Test failed */

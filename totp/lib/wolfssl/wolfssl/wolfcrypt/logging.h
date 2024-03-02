@@ -109,11 +109,12 @@ WOLFSSL_API void wolfSSL_SetLoggingPrefix(const char* prefix);
 
 
 #if (defined(OPENSSL_EXTRA) && !defined(_WIN32) && \
-        !defined(NO_ERROR_QUEUE)) || defined(DEBUG_WOLFSSL_VERBOSE)
+        !defined(NO_ERROR_QUEUE)) || defined(DEBUG_WOLFSSL_VERBOSE) \
+        || defined(HAVE_MEMCACHED)
 #define WOLFSSL_HAVE_ERROR_QUEUE
 #endif
 
-#if defined(OPENSSL_EXTRA) || defined(DEBUG_WOLFSSL_VERBOSE)
+#if defined(OPENSSL_EXTRA) || defined(DEBUG_WOLFSSL_VERBOSE) || defined(HAVE_MEMCACHED)
     WOLFSSL_LOCAL int wc_LoggingInit(void);
     WOLFSSL_LOCAL int wc_LoggingCleanup(void);
     WOLFSSL_LOCAL int wc_AddErrorNode(int error, int line, char* buf,
@@ -135,7 +136,7 @@ WOLFSSL_API void wolfSSL_SetLoggingPrefix(const char* prefix);
         WOLFSSL_API void wc_ERR_print_errors_cb(int (*cb)(const char *str,
                                                 size_t len, void *u), void *u);
     #endif
-#endif /* OPENSSL_EXTRA || DEBUG_WOLFSSL_VERBOSE */
+#endif /* OPENSSL_EXTRA || DEBUG_WOLFSSL_VERBOSE || HAVE_MEMCACHED */
 
 #ifdef WOLFSSL_FUNC_TIME
     /* WARNING: This code is only to be used for debugging performance.
