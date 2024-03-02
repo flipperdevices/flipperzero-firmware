@@ -6,7 +6,7 @@ App(
     requires=["gui"],
     stack_size=1 * 1024,
     order=10,
-    fap_icon="icons/app.png",
+    fap_icon="icons/app_10x10.png",
     fap_category="Tools",
     fap_author="@mdaskalov",
     fap_weburl="https://github.com/mdaskalov/flipperzero-dcf77",
