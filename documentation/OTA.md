@@ -1,4 +1,4 @@
-# Flipper Zero OTA update process
+# Flipper Zero OTA update process {#ota_updates}
 
 ## Executing code from RAM
 

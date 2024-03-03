@@ -1,4 +1,4 @@
-# Universal Remotes
+# Universal Remotes {#universal_remotes}
 
 ## Televisions
 

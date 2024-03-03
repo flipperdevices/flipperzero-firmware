@@ -1,4 +1,4 @@
-# Firmware update on Developer Board
+# Firmware update on Developer Board {#dev_board_fw_update}
 
 It's important to regularly update your Developer Board to keep it up to date. This tutorial will guide you through the necessary steps to successfully update the firmware of your Developer Board.
 

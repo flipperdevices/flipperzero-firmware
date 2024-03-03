@@ -1,4 +1,4 @@
-## What a Firmware Target is
+## What a Firmware Target is {#hardware_targets}
 
 Flipper's firmware is modular and supports different hardware configurations in a common code base. It encapsulates hardware-specific differences in `furi_hal`, board initialization code, linker files, SDK data and other information in a _target definition_.
 

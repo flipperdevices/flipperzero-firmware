@@ -1,4 +1,4 @@
-# Flipper Build Tool
+# Flipper Build Tool {#fbt}
 
 FBT is the entry point for firmware-related commands and utilities.
 It is invoked by `./fbt` in the firmware project root directory. Internally, it is a wrapper around [scons](https://scons.org/) build system.

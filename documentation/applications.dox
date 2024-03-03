@@ -1,0 +1,8 @@
+/**
+@page applications Application Programming
+
+- @subpage app_manifests
+- @subpage apps_on_sd_card
+- @subpage app_examples
+
+*/

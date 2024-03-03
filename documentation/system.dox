@@ -1,0 +1,10 @@
+/**
+@page system System Programming
+
+- @subpage furi_check
+- @subpage furi_hal_bus
+- @subpage furi_hal_debugging
+- @subpage hardware_targets
+- @subpage unit_tests
+
+*/

@@ -1,4 +1,4 @@
-# Unit tests
+# Unit tests {#unit_tests}
 
 ## Intro
 

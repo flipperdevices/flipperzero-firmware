@@ -1,0 +1,8 @@
+/**
+@page dev_tools Developer Tools
+
+- @subpage fbt
+- @subpage dev_board
+- @subpage ota_updates
+
+*/

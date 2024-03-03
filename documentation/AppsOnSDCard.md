@@ -1,4 +1,4 @@
-# FAP (Flipper Application Package)
+# FAP (Flipper Application Package) {#apps_on_sd_card}
 
 [fbt](./fbt.md) supports building applications as FAP files. FAPs are essentially `.elf` executables with extra metadata and resources bundled in.
 

@@ -1,4 +1,4 @@
-# File Formats for Flipper's SubGhz Subsystem
+# SubGhz Subsystem File Formats {#subghz_file_format}
 
 ## .sub File Format
 

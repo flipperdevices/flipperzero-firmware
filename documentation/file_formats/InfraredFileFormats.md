@@ -1,4 +1,4 @@
-# Infrared Flipper File Formats
+# Infrared Flipper File Formats {#infrared_file_format}
 
 ## Supported protocols list for "type: parsed"
 

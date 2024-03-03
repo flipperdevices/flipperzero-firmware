@@ -1,0 +1,8 @@
+/**
+@page dev_board Developer Board
+
+- @subpage dev_board_fw_update
+- @subpage dev_board_get_started
+- @subpage dev_board_reading_logs
+
+*/

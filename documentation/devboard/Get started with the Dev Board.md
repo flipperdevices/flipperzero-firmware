@@ -1,4 +1,4 @@
-# Get started with the Dev Board
+# Get started with the Dev Board {#dev_board_get_started}
 
 The Wi-Fi Developer Board serves as a tool to debug the Flipper Zero firmware. To debug the firmware, the initial step involves compiling the firmware from its source code. This process enables the debugging functionality within the firmware and generates all the necessary files required for debugging purposes.
 

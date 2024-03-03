@@ -1,4 +1,4 @@
-# Flipper Application Manifests (.fam)
+# Flipper Application Manifests (.fam) {#app_manifests}
 
 All components of Flipper Zero firmware — services, user applications, and system settings — are developed independently. Each component has a build system manifest file named `application.fam`, which defines the basic properties of that component and its relations to other parts of the system.
 

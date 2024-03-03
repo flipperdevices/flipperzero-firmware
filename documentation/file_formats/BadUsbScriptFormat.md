@@ -1,4 +1,4 @@
-# BadUSB File Format
+# BadUSB File Format {#badusb_file_format}
 
 ## Command syntax
 
