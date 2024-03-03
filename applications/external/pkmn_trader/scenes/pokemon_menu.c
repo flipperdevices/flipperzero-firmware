@@ -8,8 +8,11 @@
 #include "pokemon_name_input.h"
 #include "pokemon_number_input.h"
 #include "pokemon_move.h"
+#include "pokemon_item.h"
 #include "pokemon_type.h"
 #include "pokemon_stats.h"
+#include "pokemon_shiny.h"
+#include "pokemon_gender.h"
 #include "pokemon_trade.h"
 #include "pokemon_pins.h"
 #include "pokemon_exit_confirm.h"
@@ -17,6 +20,7 @@
 static void scene_change_from_main_cb(void* context, uint32_t index) {
     PokemonFap* pokemon_fap = (PokemonFap*)context;
 
+    /* XXX: This is wrong? */
     /* Bit of a hack, encode the generation in the upper 16 bits of the Gen
      * scene state. This gets cleared on first entry by the gen scene and
      * shouldn't be an issue. It's the easiest way to communicat what generation
@@ -49,6 +53,12 @@ void main_menu_scene_on_enter(void* context) {
         pokemon_fap->submenu,
         "Gen I    (R/B/Y non-JPN)",
         GenITradeScene,
+        scene_change_from_main_cb,
+        pokemon_fap);
+    submenu_add_item(
+        pokemon_fap->submenu,
+        "Gen II   (G/S/C non-JPN)",
+        GenIITradeScene,
         scene_change_from_main_cb,
         pokemon_fap);
     submenu_add_item(
@@ -86,60 +96,75 @@ void generic_scene_on_exit(void* context) {
 }
 
 void (*const pokemon_scene_on_enter_handlers[])(void*) = {
-    main_menu_scene_on_enter,
-    gen_scene_on_enter,
-    null_scene_on_exit,
-    select_pokemon_scene_on_enter,
-    select_name_scene_on_enter,
-    select_number_scene_on_enter,
-    select_move_scene_on_enter,
-    select_move_index_scene_on_enter,
-    select_move_set_scene_on_enter,
-    select_type_scene_on_enter,
-    select_stats_scene_on_enter,
-    select_number_scene_on_enter,
-    select_name_scene_on_enter,
-    trade_scene_on_enter,
-    select_pins_scene_on_enter,
-    pokemon_exit_confirm_on_enter,
+    main_menu_scene_on_enter, //MainMenuScene,
+    gen_scene_on_enter, //GenITradeScene,
+    gen_scene_on_enter, //GenIITradeScene,
+    select_pokemon_scene_on_enter, //SelectPokemonScene,
+    select_name_scene_on_enter, //SelectNicknameScene,
+    select_number_scene_on_enter, //SelectLevelScene,
+    select_move_scene_on_enter, //SelectMoveScene,
+    select_move_index_scene_on_enter, //SelectMoveIndexScene,
+    select_move_set_scene_on_enter, //SelectMoveSetScene,
+    select_item_scene_on_enter, //SelectItemScene,
+    select_item_set_scene_on_enter, //SelectItemSetScene,
+    select_type_scene_on_enter, //SelectTypeScene,
+    select_stats_scene_on_enter, //SelectStatsScene,
+    select_shiny_scene_on_enter, //SelectShinyScene,
+    select_gender_scene_on_enter, //SelectGenderScene,
+    select_name_scene_on_enter, //SelectUnownFormScene,
+    select_number_scene_on_enter, //SelectOTIDScene,
+    select_name_scene_on_enter, //SelectOTNameScene,
+    trade_scene_on_enter, //TradeScene,
+    select_pins_scene_on_enter, //SelectPinsScene,
+    pokemon_exit_confirm_on_enter, //ConfirmExitScene,
 };
 
 void (*const pokemon_scene_on_exit_handlers[])(void*) = {
-    null_scene_on_exit,
-    null_scene_on_exit,
-    null_scene_on_exit,
-    null_scene_on_exit,
-    generic_scene_on_exit,
-    generic_scene_on_exit,
-    null_scene_on_exit,
-    null_scene_on_exit,
-    null_scene_on_exit,
-    generic_scene_on_exit,
-    null_scene_on_exit,
-    generic_scene_on_exit,
-    generic_scene_on_exit,
-    null_scene_on_exit,
-    generic_scene_on_exit,
-    generic_scene_on_exit,
+    null_scene_on_exit, //MainMenuScene,
+    null_scene_on_exit, //GenITradeScene,
+    null_scene_on_exit, //GenIITradeScene,
+    null_scene_on_exit, //SelectPokemonScene,
+    generic_scene_on_exit, //SelectNicknameScene,
+    generic_scene_on_exit, //SelectLevelScene,
+    null_scene_on_exit, //SelectMoveScene,
+    null_scene_on_exit, //SelectMoveIndexScene,
+    null_scene_on_exit, //SelectMoveSetScene,
+    null_scene_on_exit, //SelectItemScene,
+    null_scene_on_exit, //SelectItemSetScene,
+    generic_scene_on_exit, //SelectTypeScene,
+    null_scene_on_exit, //SelectStatsScene,
+    null_scene_on_exit, //SelectShinyScene,
+    null_scene_on_exit, //SelectGenderScene,
+    generic_scene_on_exit, //SelectUnownFormScene,
+    generic_scene_on_exit, //SelectOTIDScene,
+    generic_scene_on_exit, //SelectOTNameScene,
+    null_scene_on_exit, //TradeScene,
+    generic_scene_on_exit, //SelectPinsScene,
+    generic_scene_on_exit, //ConfirmExitScene,
 };
 
 bool (*const pokemon_scene_on_event_handlers[])(void*, SceneManagerEvent) = {
-    null_scene_on_event,
-    null_scene_on_event,
-    null_scene_on_event,
-    null_scene_on_event,
-    null_scene_on_event,
-    null_scene_on_event,
-    null_scene_on_event,
-    null_scene_on_event,
-    null_scene_on_event,
-    null_scene_on_event,
-    null_scene_on_event,
-    null_scene_on_event,
-    null_scene_on_event,
-    null_scene_on_event,
-    null_scene_on_event,
-    pokemon_exit_confirm_on_event,
+    null_scene_on_event, //MainMenuScene,
+    null_scene_on_event, //GenITradeScene,
+    null_scene_on_event, //GenIITradeScene,
+    null_scene_on_event, //SelectPokemonScene,
+    null_scene_on_event, //SelectNicknameScene,
+    null_scene_on_event, //SelectLevelScene,
+    null_scene_on_event, //SelectMoveScene,
+    null_scene_on_event, //SelectMoveIndexScene,
+    null_scene_on_event, //SelectMoveSetScene,
+    null_scene_on_event, //SelectItemScene,
+    null_scene_on_event, //SelectItemSetScene,
+    null_scene_on_event, //SelectTypeScene,
+    null_scene_on_event, //SelectStatsScene,
+    null_scene_on_event, //SelectShinyScene,
+    null_scene_on_event, //SelectGenderScene,
+    null_scene_on_event, //SelectUnownFormScene,
+    null_scene_on_event, //SelectOTIDScene,
+    null_scene_on_event, //SelectOTNameScene,
+    null_scene_on_event, //TradeScene,
+    null_scene_on_event, //SelectPinsScene,
+    pokemon_exit_confirm_on_event, //ConfirmExitScene,
 };
 
 const SceneManagerHandlers pokemon_scene_manager_handlers = {

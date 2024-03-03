@@ -7,7 +7,7 @@
 #include "../pokemon_app.h"
 
 void* select_pokemon_alloc(
-    PokemonFap* pokemon_fap,
+    PokemonData* pdata,
     ViewDispatcher* view_dispatcher,
     SceneManager* scene_manager,
     uint32_t viewid);

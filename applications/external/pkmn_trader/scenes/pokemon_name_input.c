@@ -8,6 +8,7 @@
 #include "../pokemon_data.h"
 #include "../pokemon_char_encode.h"
 #include "pokemon_menu.h"
+#include "unown_form.h"
 
 static char name_buf[LEN_NAME_BUF];
 
@@ -42,10 +43,27 @@ static bool select_name_input_validator(const char* text, FuriString* error, voi
         }
     }
 
-    if(state == SelectNicknameScene) {
+    /* Check for Unown setting is a character */
+    if(state == SelectUnownFormScene) {
+        if(!isalpha((int)text[0])) {
+            furi_string_printf(error, "Form must\nbe a single\nletter!");
+            return false;
+        }
+    }
+
+    switch(state) {
+    case SelectNicknameScene:
         pokemon_name_set(pokemon_fap->pdata, STAT_NICKNAME, (char*)text);
-    } else {
+        break;
+    case SelectOTNameScene:
         pokemon_name_set(pokemon_fap->pdata, STAT_OT_NAME, (char*)text);
+        break;
+    case SelectUnownFormScene:
+        unown_form_set(pokemon_fap->pdata, text[0]);
+        break;
+    default:
+        furi_crash("Invalid scene");
+        break;
     }
 
     return true;
@@ -76,12 +94,23 @@ void select_name_scene_on_enter(void* context) {
         len = LEN_OT_NAME;
         stat = STAT_OT_NAME;
         break;
+    case SelectUnownFormScene:
+        header = "Enter Unown Letter Form";
+        len = 2;
+        stat = STAT_OT_NAME;
+        break;
     default:
         furi_crash("Name: invalid state");
         break;
     }
 
-    pokemon_name_get(pokemon_fap->pdata, stat, name_buf, len);
+    if(state == SelectUnownFormScene) {
+        /* Put the current letter in the buffer */
+        name_buf[0] = unown_form_get(pokemon_fap->pdata);
+        name_buf[1] = '\0';
+    } else {
+        pokemon_name_get(pokemon_fap->pdata, stat, name_buf, len);
+    }
 
     text_input_reset(pokemon_fap->text_input);
     text_input_set_validator(pokemon_fap->text_input, select_name_input_validator, pokemon_fap);

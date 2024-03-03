@@ -117,9 +117,6 @@ static void select_pins_rebuild_list(PokemonFap* pokemon_fap) {
         break;
     }
 
-    /* HACK: */
-    pokemon_fap->malveke_detected = builder.named_index;
-
     select_pins_set(pokemon_fap);
 
     variable_item_list_reset(pokemon_fap->variable_item_list);
@@ -148,10 +145,6 @@ static void select_pins_rebuild_list(PokemonFap* pokemon_fap) {
 
 void select_pins_scene_on_enter(void* context) {
     PokemonFap* pokemon_fap = (PokemonFap*)context;
-
-    /* TODO: Figure out what defaults we should use for pins based on attached board! */
-    /* HACK: */
-    if(builder.named_index < 2) builder.named_index = pokemon_fap->malveke_detected;
 
     select_pins_rebuild_list(pokemon_fap);
 
