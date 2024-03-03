@@ -228,6 +228,8 @@ A huge thanks to the following people and projects for making this possible:
 
 - This project is based on & forked from the [Flipper Zero Camera Application][flipperzero-camera] by [Z4urce][github-profile-z4urce]. Thanks Z4urce for the inspiration and the great work!
 - I based this projects application structure on the [Flipper Zero Boilerplate Application][flipper-zero-fap-boilerplate] by [leedave][github-profile-leedave]. Thanks leedave for the great boilerplate application that helped me learn how to structure a Flipper Zero application properly!
+- [WillyJL](github-profile-willyjl) for your guidance and wisdom.
+- [TalkingSasquach](github-profile-talkingsasquach) for all of your helpful [YouTube videos](youtube-talkingsasquach) and [Discord](discord-squachtopia).
 - The project images were drawn using the a application called "[lopaka][lopaka]" by [sbrin][github-profile-sbrin]. Thanks sbrin for your help in creating the images for this project!
 - The Flipper Zero community for all your support and feedback!
 
@@ -283,13 +285,17 @@ Cody Tolene
 
 [arduino-ide]: https://www.arduino.cc/en/software
 [btc-address-link]: https://explorer.btc.com/btc/address/bc1qfx3lvspkj0q077u3gnrnxqkqwyvcku2nml86wmudy7yf2u8edmqq0a5vnt
+[discord-squachtopia]: https://discord.gg/squachtopia
 [flipper-zero-apps]: https://docs.flipper.net/apps
 [flipper-zero-fap-boilerplate]: https://github.com/leedave/flipper-zero-fap-boilerplate
 [flipperzero-camera]: https://github.com/Z4urce/flipperzero-camera
 [github-actions-link]: https://github.com/CodyTolene/Flipper-Zero-Camera-Suite/actions?query=workflow%3A%22Build+%2B+upload.%22
 [github-profile-leedave]: https://github.com/leedave
 [github-profile-sbrin]: https://github.com/sbrin
+[github-profile-talkingsasquach]: https://github.com/skizzophrenic
+[github-profile-willyjl]: https://github.com/Willy-JL
 [github-profile-z4urce]: https://github.com/Z4urce
 [issues-link]: https://github.com/CodyTolene/Flipper-Zero-Camera-Suite/issues
 [lopaka]: https://github.com/sbrin/lopaka
 [pull-request-link]: https://github.com/CodyTolene/Flipper-Zero-Camera-Suite/pulls
+[youtube-talkingsasquach]: https://www.youtube.com/@TalkingSasquach
