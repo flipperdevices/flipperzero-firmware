@@ -228,8 +228,8 @@ A huge thanks to the following people and projects for making this possible:
 
 - This project is based on & forked from the [Flipper Zero Camera Application][flipperzero-camera] by [Z4urce][github-profile-z4urce]. Thanks Z4urce for the inspiration and the great work!
 - I based this projects application structure on the [Flipper Zero Boilerplate Application][flipper-zero-fap-boilerplate] by [leedave][github-profile-leedave]. Thanks leedave for the great boilerplate application that helped me learn how to structure a Flipper Zero application properly!
-- [WillyJL](github-profile-willyjl) for your guidance and wisdom.
-- [TalkingSasquach](github-profile-talkingsasquach) for all of your helpful [YouTube videos](youtube-talkingsasquach) and [Discord](discord-squachtopia).
+- [WillyJL][github-profile-willyjl] for your guidance and wisdom.
+- [TalkingSasquach][github-profile-talkingsasquach] for all of your helpful [YouTube videos][youtube-talkingsasquach] and [Discord community][discord-squachtopia].
 - The project images were drawn using the a application called "[lopaka][lopaka]" by [sbrin][github-profile-sbrin]. Thanks sbrin for your help in creating the images for this project!
 - The Flipper Zero community for all your support and feedback!
 
