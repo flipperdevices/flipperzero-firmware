@@ -417,6 +417,7 @@ static uint8_t getTradeCentreResponse(struct trade_ctx* trade) {
     static bool patch_pt_2;
     static size_t counter;
     static uint8_t in_pkmn_idx;
+    static bool startup_test;
 
     /* TODO: Figure out how we should respond to a no_data_byte and/or how to
      * send one and what response to expect.
@@ -448,12 +449,29 @@ static uint8_t getTradeCentreResponse(struct trade_ctx* trade) {
         break;
 
     /* This state runs through the end of the random preamble */
+    /* XXX: This whole state is now a mess of hacks thanks to gen II.
+     * The correct way to implement this, at some point, would be to
+     * enforce synchronization of canceling by waiting until the GB
+     * starts to issue clocks. But, I'm actually not sure that would
+     * work and would probably behave the same way as it does after this
+     * fixup.
+     */
     case TRADE_INIT:
         if(in == SERIAL_PREAMBLE_BYTE) {
             counter++;
             model->gameboy_status = GAMEBOY_WAITING;
-        } else if ((in & 0x70)) {  // 0x70 is mask for trade center, and I think 0x5 is an indication of link speed. XXX: Need to take this in to account and set timeout from it
-	    send = in;
+        /* XXX: Unsure exactly how this sequence works or what it does */
+        /* The next couple of conditionals only apply to gen ii */
+        } else if (in == 0x75) {
+            startup_test = true;
+        /* This is a convoluted statement to catch if the GB tries to send anything
+	 * than 0x76 after 0x75. No clue what these values are, but anything outside
+	 * of that is going to be part of the trade confirmatino most likely.
+	 */
+        } else if (in == 0x76) {
+          ;
+        } else if ((startup_test) && ((in & 0x70) == 0x70) && (in != 0x76)) {
+	    send = PKMN_TABLE_LEAVE_GEN_II;
         /* XXX: This I think was originally a hack. I think this is checking to see if 0x60 is being sent
 	 * at init, which means we exited trade screen, and re-entered trade screen while GB was still at the table.
 	 * If the GB tries to do anything other than start giving the random preamble, then indicate that we
@@ -466,9 +484,13 @@ static uint8_t getTradeCentreResponse(struct trade_ctx* trade) {
         } else if(trade->pdata->gen == GEN_II && (in & PKMN_SEL_NUM_MASK_GEN_II) == PKMN_SEL_NUM_MASK_GEN_II) {
             send = PKMN_TABLE_LEAVE_GEN_II;
 	}
+        if (in == PKMN_TABLE_LEAVE_GEN_II) {
+            startup_test = false;
+        }
         if(counter == SERIAL_RNS_LENGTH) {
             trade->trade_centre_state = TRADE_RANDOM;
             counter = 0;
+	    startup_test = false;
         }
         break;
 
