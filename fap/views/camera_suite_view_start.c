@@ -1,8 +1,5 @@
 #include "../camera_suite.h"
-#include <furi.h>
-#include <furi_hal.h>
-#include <input/input.h>
-#include <gui/elements.h>
+#include "camera_suite_view_start.h"
 
 void camera_suite_view_start_set_callback(
     CameraSuiteViewStart* instance,

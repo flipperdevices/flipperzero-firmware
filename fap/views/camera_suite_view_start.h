@@ -1,6 +1,5 @@
 #pragma once
 
-#include <gui/view.h>
 #include "../helpers/camera_suite_custom_event.h"
 
 typedef void (*CameraSuiteViewStartCallback)(CameraSuiteCustomEvent event, void* context);
