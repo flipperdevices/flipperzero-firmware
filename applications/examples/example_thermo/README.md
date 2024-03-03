@@ -1,4 +1,4 @@
-# 1-Wire Thermometer
+# 1-Wire Thermometer {#example_thermo}
 This example application demonstrates the use of the 1-Wire library with a DS18B20 thermometer. 
 It also covers basic GUI, input handling, threads and localisation.
 

@@ -1,4 +1,4 @@
-# Apps Assets folder Example
+# Apps Assets folder Example {#example_app_assets}
 
 This example shows how to use the Apps Assets folder to store data that is not part of the application itself, but is required for its operation, and that data is provided with the application.
 

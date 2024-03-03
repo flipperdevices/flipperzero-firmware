@@ -1,4 +1,4 @@
-# Application icons
+# Application icons {#example_app_images}
 
 To use icons, do the following:
 

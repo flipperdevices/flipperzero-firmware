@@ -1,4 +1,4 @@
-# Apps Data folder Example
+# Apps Data folder Example {#example_app_data}
 
 This example demonstrates how to utilize the Apps Data folder to store data that is not part of the app itself, such as user data, configuration files, and so forth.
 

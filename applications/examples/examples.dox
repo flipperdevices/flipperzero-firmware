@@ -1,0 +1,8 @@
+/**
+@page app_examples Application Examples
+
+- @subpage example_app_assets
+- @subpage example_app_data
+- @subpage example_app_images
+- @subpage example_thermo
+*/
