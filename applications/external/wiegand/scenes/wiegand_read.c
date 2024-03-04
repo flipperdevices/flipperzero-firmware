@@ -38,7 +38,9 @@ void wiegand_start_read(void* context) {
     App* app = context;
     data_saved = false;
     bit_count = 0;
-    furi_hal_power_enable_otg();
+    if(!furi_hal_power_is_otg_enabled()) {
+        furi_hal_power_enable_otg();
+    }
     furi_hal_gpio_init_simple(pinD0, GpioModeInterruptRiseFall);
     furi_hal_gpio_init_simple(pinD1, GpioModeInterruptRiseFall);
     furi_hal_gpio_add_int_callback(pinD0, wiegand_isr_d0, NULL);
