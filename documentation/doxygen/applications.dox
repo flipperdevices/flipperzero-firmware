@@ -1,8 +1,11 @@
 /**
 @page applications Application Programming
 
-- @subpage app_manifests
-- @subpage apps_on_sd_card
-- @subpage app_examples
+Flipper Zero features full support for custom applications which (usually) do not require any changes to the firmware.
 
+For easy application development, a software tool called [ufbt](https://github.com/flipperdevices/flipperzero-ufbt) is available.
+
+- @subpage apps_on_sd_card - Creating apps that can be dynamically loaded from the SD card
+- @subpage app_manifests - How applications announce themselves to the system
+- @subpage app_examples - Various application examples, complete with the source code
 */
