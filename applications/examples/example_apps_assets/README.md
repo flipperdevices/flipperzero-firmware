@@ -2,6 +2,10 @@
 
 This example shows how to use the Apps Assets folder to store data that is not part of the application itself, but is required for its operation, and that data is provided with the application.
 
+## Source code
+
+Source code for this example can be found [here](https://github.com/flipperdevices/flipperzero-firmware/tree/dev/applications/examples/example_apps_assets).
+
 ## What is the Apps Assets Folder?
 
 The **Apps Assets** folder is a folder where external applications unpack their assets.

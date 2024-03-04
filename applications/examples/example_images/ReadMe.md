@@ -1,5 +1,11 @@
 # Application icons {#example_app_images}
 
+## Source code
+
+Source code for this example can be found [here](https://github.com/flipperdevices/flipperzero-firmware/tree/dev/applications/examples/example_images).
+
+## General principle
+
 To use icons, do the following:
 
 * Add a line to the application manifest: `fap_icon_assets="folder"`, where `folder` points to the folder where your icons are located
