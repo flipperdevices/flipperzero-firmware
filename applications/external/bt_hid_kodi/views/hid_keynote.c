@@ -273,11 +273,11 @@ static void hid_keynote_process(HidKeynote* hid_keynote, InputEvent* event) {
                 }
                 if(event->key == InputKeyOk) {
                     if(!model->switch_space_return) {
-                       hid_hal_keyboard_press(hid_keynote->hid, HID_KEYBOARD_SPACEBAR);
-                       hid_hal_keyboard_release(hid_keynote->hid, HID_KEYBOARD_SPACEBAR);
+                        hid_hal_keyboard_press(hid_keynote->hid, HID_KEYBOARD_SPACEBAR);
+                        hid_hal_keyboard_release(hid_keynote->hid, HID_KEYBOARD_SPACEBAR);
                     } else {
-                       hid_hal_keyboard_press(hid_keynote->hid, HID_KEYBOARD_RETURN);
-                       hid_hal_keyboard_release(hid_keynote->hid, HID_KEYBOARD_RETURN);
+                        hid_hal_keyboard_press(hid_keynote->hid, HID_KEYBOARD_RETURN);
+                        hid_hal_keyboard_release(hid_keynote->hid, HID_KEYBOARD_RETURN);
                     }
                 }
             }
@@ -294,8 +294,11 @@ static bool hid_keynote_input_callback(InputEvent* event, void* context) {
         hid_hal_keyboard_release_all(hid_keynote->hid);
     } else if(event->type == InputTypeLong && event->key == InputKeyOk) {
         with_view_model(
-            hid_keynote->view, HidKeynoteModel * model, { model->switch_space_return = !model->switch_space_return; }, true);
-	consumed = true;
+            hid_keynote->view,
+            HidKeynoteModel * model,
+            { model->switch_space_return = !model->switch_space_return; },
+            true);
+        consumed = true;
     } else {
         hid_keynote_process(hid_keynote, event);
         consumed = true;

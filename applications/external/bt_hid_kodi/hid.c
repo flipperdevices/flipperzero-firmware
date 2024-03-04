@@ -66,7 +66,7 @@ Hid* hid_alloc() {
     // Keynote view
     app->hid_keynote = hid_keynote_alloc(app);
     view_dispatcher_add_view(
-       app->view_dispatcher, HidViewKeynote, hid_keynote_get_view(app->hid_keynote));
+        app->view_dispatcher, HidViewKeynote, hid_keynote_get_view(app->hid_keynote));
 
     // Open Keynote view
     app->view_id = HidViewKeynote;
