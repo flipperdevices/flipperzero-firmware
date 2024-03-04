@@ -43,6 +43,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Air Labyrinth v0.1 (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/vgm/apps/air_labyrinth) `Req: Video Game Module By Flipper Devices` [AirLabyrinth: Fix build on gcc12 (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/a10148803fca00aff8ff58c1c767e00862159413)
 - OFW: [Parser for Santiago, Chile BIP transit card #3456 (By rbasoalto)](https://github.com/flipperdevices/flipperzero-firmware/pull/3456)
 - Added: [DCF77 Clock Sync v1.2 (By mdaskalov)](https://github.com/mdaskalov/dcf77-clock-sync)
+- OFW: PR: [Troyka parser improvements #3390 (By assasinfil)](https://github.com/flipperdevices/flipperzero-firmware/pull/3390)
 
 <a name="release">
 
