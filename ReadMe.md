@@ -39,6 +39,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [NFC Playlist v1.4 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
 - Updated: [Pokemon Trading v1.8 (By EstebanFuentealba & kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons) [(Victory) Road to 2.0 #24 (By kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Pokemon-Trading/pull/24)
 - [AirArkanoid: Fix python3 on Windows #155 (By Willy-JL)](https://github.com/flipperdevices/flipperzero-good-faps/pull/155) Also applied to Air Labyrinth
+- [Added Memory Chip passport background (By Kuronons With Changes By RogueMaster) + Passport: Move text for better display (By Kuronons)](https://github.com/Kuronons/FZ_graphics/blob/main/Passport%20background/Passports%20(.png%20files%20-%20128x64px)/passport_MNTM.png)
 
 <a name="release">
 
@@ -147,7 +148,7 @@ $ ./fbt dolphin_ext
 - Desktop: Hold Right goes to About with Battery Info [(Thanks to Willy-JL)]
 - Development free space thanks to removal of unused debug tools and [thanks to ESurge](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/46/files) for removal of first start assets.
 - Dolphin: Assigned profile pic for levels 1-10 (Happy Lvl 1 Dolphin), 11-15 (Happy Lvl 2 Dolphin), 16-18 (Happy Lvl 3 Dolphin), 19-21 (Kid G0ku), 22-24 (Adult G0ku), 25-27 (SSJ G0ku) and 28-30 (SSJ3 G0ku)
-- Dolphin: CFW Settings: Passport: Now has 13 selectable backgrounds options and 38 profile image options. (Changes By RogueMaster with thanks to ESurge) (Section By ESurge)
+- Dolphin: CFW Settings: Passport: Now has 14 selectable backgrounds options and 38 profile image options. (Changes By RogueMaster with thanks to ESurge) (Section By ESurge)
 - Dolphin: Expanded max level from 3 to 30 using [Roll20](https://roll20.net/compendium/dnd5e/Monsters#h-Experience%20Points), Increased max deed XP per action type from 15 to 45 exp daily & updated animation manifest for max level 30 for all animations (By RogueMaster)
 - Dolphin: Level animation sequence for level 3+ to be lvl1->2 for levels 1-20 and lvl2->3 for levels 21-30.
 - Dolphin: Mood Stays Happy [(Thanks to biocage)](https://github.com/biocage/flipperzero-firmware), changed to Mood Stays Less Than 6 / Mood Stays High (but not in game mode) (By RogueMaster)
