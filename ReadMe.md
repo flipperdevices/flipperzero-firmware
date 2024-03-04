@@ -44,6 +44,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [Parser for Santiago, Chile BIP transit card #3456 (By rbasoalto)](https://github.com/flipperdevices/flipperzero-firmware/pull/3456)
 - Added: [DCF77 Clock Sync v1.2 (By mdaskalov)](https://github.com/mdaskalov/dcf77-clock-sync)
 - OFW: PR: [Troyka parser improvements #3390 (By assasinfil)](https://github.com/flipperdevices/flipperzero-firmware/pull/3390)
+- OFW: PR: [NFC: Fix washcity plugin verify function being to greedy #3467 (By philicious)](https://github.com/flipperdevices/flipperzero-firmware/pull/3467)
 
 <a name="release">
 
