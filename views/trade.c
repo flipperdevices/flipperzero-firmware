@@ -240,7 +240,7 @@ static void trade_draw_pkmn_avatar(Canvas* canvas, const Icon* icon) {
     furi_assert(canvas);
     furi_assert(icon);
 
-    canvas_draw_icon(canvas, 38, 11, icon);
+    canvas_draw_icon(canvas, 38, 0, icon);
     furi_hal_light_set(LightBlue, 0x00);
     furi_hal_light_set(LightGreen, 0x00);
 }
@@ -716,6 +716,7 @@ void trade_enter_callback(void* context) {
     } else if(model->gameboy_status > GAMEBOY_READY) {
         model->gameboy_status = GAMEBOY_READY;
     }
+    model->gameboy_status = GAMEBOY_READY;
     trade->trade_centre_state = TRADE_RESET;
     model->curr_pokemon = pokemon_stat_get(trade->pdata, STAT_NUM, NONE);
     model->ledon = false;
