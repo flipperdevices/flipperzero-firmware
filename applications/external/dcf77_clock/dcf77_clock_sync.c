@@ -86,8 +86,7 @@ void time_add(DateTime* from, DateTime* to, int add) {
     }
 
     to->month = 1;
-    while(days >=
-          datetime_get_days_per_month(datetime_is_leap_year(to->year), to->month)) {
+    while(days >= datetime_get_days_per_month(datetime_is_leap_year(to->year), to->month)) {
         days -= datetime_get_days_per_month(datetime_is_leap_year(to->year), to->month);
         (to->month)++;
     }
