@@ -9,14 +9,21 @@
 #define SCREEN_SIZE_X 128
 #define SCREEN_SIZE_Y 64
 #define DCF77_FREQ    77500
-#define DCF77_OFFSET  61
+#define DCF77_OFFSET  60
 #define SYNC_DELAY    50
 #define UPDATES       8
+
+#define SECONDS_PER_MINUTE 60
+#define SECONDS_PER_HOUR   (SECONDS_PER_MINUTE * 60)
+#define SECONDS_PER_DAY    (SECONDS_PER_HOUR * 24)
+#define MONTHS_COUNT       12
+#define EPOCH_START_YEAR   1970
 
 char *WEEKDAYS[] = {"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
 
 typedef struct {
     FuriHalRtcDateTime dt;
+    FuriHalRtcDateTime dcf_dt;
     bool               is_dst;
 } AppData;
 
@@ -51,6 +58,34 @@ static void app_input_callback(InputEvent *input_event, void *ctx)
   furi_message_queue_put(event_queue, input_event, FuriWaitForever);
 }
 
+void time_add(FuriHalRtcDateTime *from, FuriHalRtcDateTime *to, int add)
+{
+  uint32_t timestamp = furi_hal_rtc_datetime_to_timestamp(from) + add;
+
+  uint32_t days = timestamp / SECONDS_PER_DAY;
+  uint32_t seconds_in_day = timestamp % SECONDS_PER_DAY;
+
+  to->year = EPOCH_START_YEAR;
+
+  while (days >= furi_hal_rtc_get_days_per_year(to->year)) {
+    days -= furi_hal_rtc_get_days_per_year(to->year);
+    (to->year)++;
+  }
+
+  to->month = 1;
+  while (days >= furi_hal_rtc_get_days_per_month(furi_hal_rtc_is_leap_year(to->year), to->month)) {
+    days -= furi_hal_rtc_get_days_per_month(furi_hal_rtc_is_leap_year(to->year), to->month);
+    (to->month)++;
+  }
+
+  to->weekday = ((days + 4) % 7) + 1;
+
+  to->day = days + 1;
+  to->hour = seconds_in_day / SECONDS_PER_HOUR;
+  to->minute = (seconds_in_day % SECONDS_PER_HOUR) / SECONDS_PER_MINUTE;
+  to->second = seconds_in_day % SECONDS_PER_MINUTE;
+}
+
 int dcf77_clock_sync_app_main(void *p)
 {
   UNUSED(p);
@@ -60,7 +95,8 @@ int dcf77_clock_sync_app_main(void *p)
 
   app_data.is_dst = false;
   furi_hal_rtc_get_datetime(&app_data.dt);
-  set_dcf77_time(&app_data.dt, app_data.is_dst);
+  time_add(&app_data.dt, &app_data.dcf_dt, DCF77_OFFSET);
+  set_dcf77_time(&app_data.dcf_dt, app_data.is_dst);
 
   ViewPort         *view_port = view_port_alloc();
   FuriMessageQueue *event_queue = furi_message_queue_alloc(8, sizeof(InputEvent));
@@ -98,11 +134,8 @@ int dcf77_clock_sync_app_main(void *p)
       furi_hal_light_set(LightBlue, 0xFF);
     }
     else {
-      FuriHalRtcDateTime dcf_dt; // next minute
-      furi_hal_rtc_timestamp_to_datetime(furi_hal_rtc_datetime_to_timestamp(&app_data.dt) + DCF77_OFFSET, &dcf_dt);
-      // fix forgotten weekday
-      dcf_dt.weekday = (app_data.dt.day == dcf_dt.day) ? app_data.dt.weekday : (app_data.dt.weekday % 7) + 1;
-      set_dcf77_time(&dcf_dt, app_data.is_dst);
+      time_add(&app_data.dt, &app_data.dcf_dt, DCF77_OFFSET + 1);
+      set_dcf77_time(&app_data.dcf_dt, app_data.is_dst);
     }
 
     sec = app_data.dt.second;
