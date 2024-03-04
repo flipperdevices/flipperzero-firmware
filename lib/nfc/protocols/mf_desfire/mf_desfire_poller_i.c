@@ -34,6 +34,7 @@ MfDesfireError mf_desfire_send_chunks(
     FuriString* log_str = furi_string_alloc();
 
     do {
+        FURI_LOG_W(TAG, "Free size: %zu", memmgr_get_free_heap());
         furi_string_printf(log_str, "Poller:");
         for(size_t i = 0; i < bit_buffer_get_size_bytes(tx_buffer); i++) {
             furi_string_cat_printf(log_str, " %02X", bit_buffer_get_byte(tx_buffer, i));
@@ -72,9 +73,9 @@ MfDesfireError mf_desfire_send_chunks(
 
         while(bit_buffer_starts_with_byte(instance->rx_buffer, MF_DESFIRE_FLAG_HAS_NEXT)) {
             furi_string_printf(log_str, "Poller:");
-            for(size_t i = 0; i < bit_buffer_get_size_bytes(instance->rx_buffer); i++) {
+            for(size_t i = 0; i < bit_buffer_get_size_bytes(instance->tx_buffer); i++) {
                 furi_string_cat_printf(
-                    log_str, " %02X", bit_buffer_get_byte(instance->rx_buffer, i));
+                    log_str, " %02X", bit_buffer_get_byte(instance->tx_buffer, i));
             }
             FURI_LOG_I(TAG, "%s", furi_string_get_cstr(log_str));
 
