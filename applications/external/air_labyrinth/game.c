@@ -83,9 +83,9 @@ static void player_update(Entity* self, GameManager* manager, void* context) {
 
         player->trajectory = vector_add(
             player->trajectory,
-            (Vector){
+            ((Vector){
                 player_x_from_pitch(-imu_pitch_get(game_context->imu)),
-                player_y_from_roll(-imu_roll_get(game_context->imu))});
+                player_y_from_roll(-imu_roll_get(game_context->imu))}));
     }
 
     // Get game input
@@ -93,19 +93,19 @@ static void player_update(Entity* self, GameManager* manager, void* context) {
 
     // Control player movement
     if(input.held & GameKeyUp) {
-        player->trajectory = vector_add(player->trajectory, (Vector){0, -0.8});
+        player->trajectory = vector_add(player->trajectory, ((Vector){0, -0.8}));
     }
 
     if(input.held & GameKeyDown) {
-        player->trajectory = vector_add(player->trajectory, (Vector){0, +0.8});
+        player->trajectory = vector_add(player->trajectory, ((Vector){0, +0.8}));
     }
 
     if(input.held & GameKeyLeft) {
-        player->trajectory = vector_add(player->trajectory, (Vector){-0.8, 0});
+        player->trajectory = vector_add(player->trajectory, ((Vector){-0.8, 0}));
     }
 
     if(input.held & GameKeyRight) {
-        player->trajectory = vector_add(player->trajectory, (Vector){0.8, 0});
+        player->trajectory = vector_add(player->trajectory, ((Vector){0.8, 0}));
     }
 
     // Get player position

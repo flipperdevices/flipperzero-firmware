@@ -40,6 +40,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Pokemon Trading v1.8 (By EstebanFuentealba & kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons) [(Victory) Road to 2.0 #24 (By kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Pokemon-Trading/pull/24)
 - [AirArkanoid: Fix python3 on Windows #155 (By Willy-JL)](https://github.com/flipperdevices/flipperzero-good-faps/pull/155) Also applied to Air Labyrinth
 - [Added Memory Chip passport background (By Kuronons With Changes By RogueMaster) + Passport: Move text for better display (By Kuronons)](https://github.com/Kuronons/FZ_graphics/blob/main/Passport%20background/Passports%20(.png%20files%20-%20128x64px)/passport_MNTM.png)
+- Updated: [Air Labyrinth v0.1 (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/vgm/apps/air_labyrinth) `Req: Video Game Module By Flipper Devices` [AirLabyrinth: Fix build on gcc12 (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/9017f4eb39169e6c7280232d05bec2c6c591ad0e)
 
 <a name="release">
 
