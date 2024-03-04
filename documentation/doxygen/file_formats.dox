@@ -1,7 +1,7 @@
 /**
 @page file_formats File Formats
 
-Descriptions of various file formats used in Flipper Zero.
+Descriptions of various file formats used in Flipper Zero, grouped by applications that use them.
 
 - @subpage badusb_file_format
 - @subpage ibutton_file_format
