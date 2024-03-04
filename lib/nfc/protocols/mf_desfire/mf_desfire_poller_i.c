@@ -31,33 +31,69 @@ MfDesfireError mf_desfire_send_chunks(
     furi_assert(rx_buffer);
 
     MfDesfireError error = MfDesfireErrorNone;
+    FuriString* log_str = furi_string_alloc();
 
     do {
+        FURI_LOG_W(TAG, "Free size: %zu", memmgr_get_free_heap());
+        furi_string_printf(log_str, "Poller:");
+        for(size_t i = 0; i < bit_buffer_get_size_bytes(tx_buffer); i++) {
+            furi_string_cat_printf(log_str, " %02X", bit_buffer_get_byte(tx_buffer, i));
+        }
+        FURI_LOG_I(TAG, "%s", furi_string_get_cstr(log_str));
+
         Iso14443_4aError iso14443_4a_error = iso14443_4a_poller_send_block(
             instance->iso14443_4a_poller, tx_buffer, instance->rx_buffer);
 
         if(iso14443_4a_error != Iso14443_4aErrorNone) {
             error = mf_desfire_process_error(iso14443_4a_error);
+            FURI_LOG_E(TAG, "ISO-4 Error: %d", error);
             break;
         }
+
+        furi_string_printf(log_str, "Tag:");
+        for(size_t i = 0; i < bit_buffer_get_size_bytes(instance->rx_buffer); i++) {
+            furi_string_cat_printf(log_str, " %02X", bit_buffer_get_byte(instance->rx_buffer, i));
+        }
+        FURI_LOG_I(TAG, "%s", furi_string_get_cstr(log_str));
 
         bit_buffer_reset(instance->tx_buffer);
         bit_buffer_append_byte(instance->tx_buffer, MF_DESFIRE_FLAG_HAS_NEXT);
 
         if(bit_buffer_get_size_bytes(instance->rx_buffer) > sizeof(uint8_t)) {
             bit_buffer_copy_right(rx_buffer, instance->rx_buffer, sizeof(uint8_t));
+        } else if(bit_buffer_get_size_bytes(instance->rx_buffer) == 1) {
+            uint8_t error_code = bit_buffer_get_byte(instance->rx_buffer, 0);
+            if(error_code != 0) {
+                FURI_LOG_E(TAG, "Error code: %02X", error_code);
+                // error = MfDesfireErrorProtocol;
+            }
         } else {
             bit_buffer_reset(rx_buffer);
         }
 
         while(bit_buffer_starts_with_byte(instance->rx_buffer, MF_DESFIRE_FLAG_HAS_NEXT)) {
+            furi_string_printf(log_str, "Poller:");
+            for(size_t i = 0; i < bit_buffer_get_size_bytes(instance->tx_buffer); i++) {
+                furi_string_cat_printf(
+                    log_str, " %02X", bit_buffer_get_byte(instance->tx_buffer, i));
+            }
+            FURI_LOG_I(TAG, "%s", furi_string_get_cstr(log_str));
+
             Iso14443_4aError iso14443_4a_error = iso14443_4a_poller_send_block(
                 instance->iso14443_4a_poller, instance->tx_buffer, instance->rx_buffer);
 
             if(iso14443_4a_error != Iso14443_4aErrorNone) {
                 error = mf_desfire_process_error(iso14443_4a_error);
+                FURI_LOG_E(TAG, "ISO-4 Error: %d", error);
                 break;
             }
+
+            furi_string_printf(log_str, "Tag:");
+            for(size_t i = 0; i < bit_buffer_get_size_bytes(instance->rx_buffer); i++) {
+                furi_string_cat_printf(
+                    log_str, " %02X", bit_buffer_get_byte(instance->rx_buffer, i));
+            }
+            FURI_LOG_I(TAG, "%s", furi_string_get_cstr(log_str));
 
             const size_t rx_size = bit_buffer_get_size_bytes(instance->rx_buffer);
             const size_t rx_capacity_remaining =
@@ -70,6 +106,8 @@ MfDesfireError mf_desfire_send_chunks(
             }
         }
     } while(false);
+
+    furi_string_free(log_str);
 
     return error;
 }
@@ -129,9 +167,13 @@ MfDesfireError
     do {
         error = mf_desfire_send_chunks(instance, instance->input_buffer, instance->result_buffer);
 
-        if(error != MfDesfireErrorNone) break;
+        if(error != MfDesfireErrorNone) {
+            FURI_LOG_E(TAG, "Read Key settings failed: %d", error);
+            break;
+        }
 
         if(!mf_desfire_key_settings_parse(data, instance->result_buffer)) {
+            FURI_LOG_E(TAG, "Failed to parse read key settings cmd");
             error = MfDesfireErrorProtocol;
         }
     } while(false);

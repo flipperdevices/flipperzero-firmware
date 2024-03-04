@@ -49,6 +49,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [USB Mass Storage v1.3 (By nminaylov)](https://github.com/flipperdevices/flipperzero-good-faps/tree/nm/usb_mass_storage_app/mass_storage) [MassStorage: Fix image creation error message (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/5e1c7fafacda285a20a162a76b3b1257dedc2ba2)
 - Updated: [CFW Settings - Imported/Modified By RogueMaster (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/ecf91524a956f773881d564c4ada833f844264ca) [Removed unused UART General setting (By Sil333033)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/5e1c7fafacda285a20a162a76b3b1257dedc2ba2)
 - Updated: [Wiegand Reader v1.3 (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/gpio)
+- Updated: OFW: PR: [NFC: fix DESFire save #3395 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3395) Lots of logging added.
 
 <a name="release">
 
