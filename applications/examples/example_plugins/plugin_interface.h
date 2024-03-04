@@ -6,7 +6,6 @@
  */
 #pragma once
 
-
 #define PLUGIN_APP_ID "example_plugins"
 #define PLUGIN_API_VERSION 1
 
