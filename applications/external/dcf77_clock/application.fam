@@ -1,0 +1,15 @@
+App(
+    appid="dcf77_clock_sync",
+    name="DCF77 Clock Sync",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="dcf77_clock_sync_app_main",
+    requires=["gui"],
+    stack_size=1 * 1024,
+    order=10,
+    fap_icon="icons/app_10x10.png",
+    fap_category="Tools",
+    fap_author="@mdaskalov",
+    fap_weburl="https://github.com/mdaskalov/dcf77-clock-sync.git",
+    fap_version="1.1",
+    fap_description="Emulate DCF77 time signal on the RFID antena and the A4 GPIO pin",
+)
