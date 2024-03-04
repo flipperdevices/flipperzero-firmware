@@ -147,6 +147,7 @@ bool mass_storage_scene_create_image_on_event(void* context, SceneManagerEvent e
                 }
                 if(storage_virtual_format(app->fs_api) == FSE_OK) {
                     success = true;
+                    error = NULL;
                 }
                 storage_virtual_quit(app->fs_api);
             } while(false);

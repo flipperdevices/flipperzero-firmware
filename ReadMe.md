@@ -45,6 +45,9 @@ This software is for experimental purposes only and is not meant for any illegal
 - Added: [DCF77 Clock Sync v1.2 (By mdaskalov)](https://github.com/mdaskalov/dcf77-clock-sync)
 - OFW: PR: [Troyka parser improvements #3390 (By assasinfil)](https://github.com/flipperdevices/flipperzero-firmware/pull/3390)
 - OFW: PR: [NFC: Fix washcity plugin verify function being to greedy #3467 (By philicious)](https://github.com/flipperdevices/flipperzero-firmware/pull/3467)
+- Updated: [ESP Flasher v1.5 (By 0xchocolate)](https://github.com/0xchocolate/flipperzero-esp-flasher) Minor Power Change (By Willy-JL)
+- Updated: [USB Mass Storage v1.3 (By nminaylov)](https://github.com/flipperdevices/flipperzero-good-faps/tree/nm/usb_mass_storage_app/mass_storage) MassStorage: Fix image creation error message (By Willy-JL)
+- Updated: [CFW Settings - Imported/Modified By RogueMaster (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/ecf91524a956f773881d564c4ada833f844264ca) Removed unused UART General setting (By Sil333033)
 
 <a name="release">
 
