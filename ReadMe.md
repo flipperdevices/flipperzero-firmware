@@ -29,8 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0304-0317-0.98.4-bddaa62](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-03-04 03:17 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-03-04 03:17 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-03-04 13:45 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-03-04 13:45 EST`
 - OFW: [WiFi board: fixed update script on Windows (unfortunately also Mac and Linux) #3485 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/3485)
 - Updated: [Authenticator/TOTP v5.12.0 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
 - Updated: [CFW Settings - Imported/Modified By RogueMaster (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/ecf91524a956f773881d564c4ada833f844264ca) [Fix crash on frequency remove for leftmost index (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/70ac8e1596bb03800c3b133d192c8cc7e03bcb14)
@@ -45,9 +45,9 @@ This software is for experimental purposes only and is not meant for any illegal
 - Added: [DCF77 Clock Sync v1.2 (By mdaskalov)](https://github.com/mdaskalov/dcf77-clock-sync)
 - OFW: PR: [Troyka parser improvements #3390 (By assasinfil)](https://github.com/flipperdevices/flipperzero-firmware/pull/3390)
 - OFW: PR: [NFC: Fix washcity plugin verify function being to greedy #3467 (By philicious)](https://github.com/flipperdevices/flipperzero-firmware/pull/3467)
-- Updated: [ESP Flasher v1.5 (By 0xchocolate)](https://github.com/0xchocolate/flipperzero-esp-flasher) Minor Power Change (By Willy-JL)
-- Updated: [USB Mass Storage v1.3 (By nminaylov)](https://github.com/flipperdevices/flipperzero-good-faps/tree/nm/usb_mass_storage_app/mass_storage) MassStorage: Fix image creation error message (By Willy-JL)
-- Updated: [CFW Settings - Imported/Modified By RogueMaster (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/ecf91524a956f773881d564c4ada833f844264ca) Removed unused UART General setting (By Sil333033)
+- Updated: [ESP Flasher v1.5 (By 0xchocolate)](https://github.com/0xchocolate/flipperzero-esp-flasher) [Minor Power Change (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/5e1c7fafacda285a20a162a76b3b1257dedc2ba2)
+- Updated: [USB Mass Storage v1.3 (By nminaylov)](https://github.com/flipperdevices/flipperzero-good-faps/tree/nm/usb_mass_storage_app/mass_storage) [MassStorage: Fix image creation error message (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/5e1c7fafacda285a20a162a76b3b1257dedc2ba2)
+- Updated: [CFW Settings - Imported/Modified By RogueMaster (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/ecf91524a956f773881d564c4ada833f844264ca) [Removed unused UART General setting (By Sil333033)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/5e1c7fafacda285a20a162a76b3b1257dedc2ba2)
 - Updated: [Wiegand Reader v1.3 (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/gpio)
 
 <a name="release">
