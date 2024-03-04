@@ -41,6 +41,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - [AirArkanoid: Fix python3 on Windows #155 (By Willy-JL)](https://github.com/flipperdevices/flipperzero-good-faps/pull/155) Also applied to Air Labyrinth
 - [Added Memory Chip passport background (By Kuronons With Changes By RogueMaster) + Passport: Move text for better display (By Kuronons)](https://github.com/Kuronons/FZ_graphics/blob/main/Passport%20background/Passports%20(.png%20files%20-%20128x64px)/passport_MNTM.png)
 - Updated: [Air Labyrinth v0.1 (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/vgm/apps/air_labyrinth) `Req: Video Game Module By Flipper Devices` [AirLabyrinth: Fix build on gcc12 (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/a10148803fca00aff8ff58c1c767e00862159413)
+- OFW: [Parser for Santiago, Chile BIP transit card #3456 (By rbasoalto)](https://github.com/flipperdevices/flipperzero-firmware/pull/3456)
 
 <a name="release">
 
