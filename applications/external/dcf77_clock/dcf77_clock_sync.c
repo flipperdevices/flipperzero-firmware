@@ -8,173 +8,184 @@
 
 #define SCREEN_SIZE_X 128
 #define SCREEN_SIZE_Y 64
-#define DCF77_FREQ    77500
-#define DCF77_OFFSET  60
-#define SYNC_DELAY    50
-#define UPDATES       8
+#define DCF77_FREQ 77500
+#define DCF77_OFFSET 60
+#define SYNC_DELAY 50
+#define UPDATES 8
 
 #define SECONDS_PER_MINUTE 60
-#define SECONDS_PER_HOUR   (SECONDS_PER_MINUTE * 60)
-#define SECONDS_PER_DAY    (SECONDS_PER_HOUR * 24)
-#define MONTHS_COUNT       12
-#define EPOCH_START_YEAR   1970
+#define SECONDS_PER_HOUR (SECONDS_PER_MINUTE * 60)
+#define SECONDS_PER_DAY (SECONDS_PER_HOUR * 24)
+#define MONTHS_COUNT 12
+#define EPOCH_START_YEAR 1970
 
-char *WEEKDAYS[] = {"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
+char* WEEKDAYS[] = {"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
 
 typedef struct {
-    FuriHalRtcDateTime dt;
-    FuriHalRtcDateTime dcf_dt;
-    bool               is_dst;
+    DateTime dt;
+    DateTime dcf_dt;
+    bool is_dst;
 } AppData;
 
-static void app_draw_callback(Canvas *canvas, void *context)
-{
-  AppData *app_data = (AppData *)context;
+static void app_draw_callback(Canvas* canvas, void* context) {
+    AppData* app_data = (AppData*)context;
 
-  char buffer[64];
+    char buffer[64];
 
-  snprintf(buffer, sizeof(buffer), "%02u:%02u:%02u", app_data->dt.hour, app_data->dt.minute, app_data->dt.second);
+    snprintf(
+        buffer,
+        sizeof(buffer),
+        "%02u:%02u:%02u",
+        app_data->dt.hour,
+        app_data->dt.minute,
+        app_data->dt.second);
 
-  canvas_set_font(canvas, FontBigNumbers);
-  canvas_draw_str_aligned(canvas, SCREEN_SIZE_X / 2, SCREEN_SIZE_Y / 2, AlignCenter, AlignCenter, buffer);
+    canvas_set_font(canvas, FontBigNumbers);
+    canvas_draw_str_aligned(
+        canvas, SCREEN_SIZE_X / 2, SCREEN_SIZE_Y / 2, AlignCenter, AlignCenter, buffer);
 
-  const char *dow_str = WEEKDAYS[(app_data->dt.weekday - 1) % 7];
-  const char *dst_str = app_data->is_dst ? "CEST" : "CET";
-  snprintf(buffer, sizeof(buffer), "%s %02u-%02u-%04u %s", dow_str, app_data->dt.day, app_data->dt.month, app_data->dt.year, dst_str);
+    const char* dow_str = WEEKDAYS[(app_data->dt.weekday - 1) % 7];
+    const char* dst_str = app_data->is_dst ? "CEST" : "CET";
+    snprintf(
+        buffer,
+        sizeof(buffer),
+        "%s %02u-%02u-%04u %s",
+        dow_str,
+        app_data->dt.day,
+        app_data->dt.month,
+        app_data->dt.year,
+        dst_str);
 
-  canvas_set_font(canvas, FontSecondary);
-  canvas_draw_str_aligned(canvas, SCREEN_SIZE_X / 2, 0, AlignCenter, AlignTop, buffer);
+    canvas_set_font(canvas, FontSecondary);
+    canvas_draw_str_aligned(canvas, SCREEN_SIZE_X / 2, 0, AlignCenter, AlignTop, buffer);
 
-  if (app_data->dt.second < 59) {
-    char *data = get_dcf77_data(app_data->dt.second);
-    canvas_draw_str_aligned(canvas, SCREEN_SIZE_X, SCREEN_SIZE_Y, AlignRight, AlignBottom, data);
-  }
+    if(app_data->dt.second < 59) {
+        char* data = get_dcf77_data(app_data->dt.second);
+        canvas_draw_str_aligned(
+            canvas, SCREEN_SIZE_X, SCREEN_SIZE_Y, AlignRight, AlignBottom, data);
+    }
 }
 
-static void app_input_callback(InputEvent *input_event, void *ctx)
-{
-  furi_assert(ctx);
-  FuriMessageQueue *event_queue = ctx;
-  furi_message_queue_put(event_queue, input_event, FuriWaitForever);
+static void app_input_callback(InputEvent* input_event, void* ctx) {
+    furi_assert(ctx);
+    FuriMessageQueue* event_queue = ctx;
+    furi_message_queue_put(event_queue, input_event, FuriWaitForever);
 }
 
-void time_add(FuriHalRtcDateTime *from, FuriHalRtcDateTime *to, int add)
-{
-  uint32_t timestamp = furi_hal_rtc_datetime_to_timestamp(from) + add;
+void time_add(DateTime* from, DateTime* to, int add) {
+    uint32_t timestamp = datetime_datetime_to_timestamp(from) + add;
 
-  uint32_t days = timestamp / SECONDS_PER_DAY;
-  uint32_t seconds_in_day = timestamp % SECONDS_PER_DAY;
+    uint32_t days = timestamp / SECONDS_PER_DAY;
+    uint32_t seconds_in_day = timestamp % SECONDS_PER_DAY;
 
-  to->year = EPOCH_START_YEAR;
+    to->year = EPOCH_START_YEAR;
 
-  while (days >= furi_hal_rtc_get_days_per_year(to->year)) {
-    days -= furi_hal_rtc_get_days_per_year(to->year);
-    (to->year)++;
-  }
+    while(days >= datetime_get_days_per_year(to->year)) {
+        days -= datetime_get_days_per_year(to->year);
+        (to->year)++;
+    }
 
-  to->month = 1;
-  while (days >= furi_hal_rtc_get_days_per_month(furi_hal_rtc_is_leap_year(to->year), to->month)) {
-    days -= furi_hal_rtc_get_days_per_month(furi_hal_rtc_is_leap_year(to->year), to->month);
-    (to->month)++;
-  }
+    to->month = 1;
+    while(days >=
+          datetime_get_days_per_month(datetime_is_leap_year(to->year), to->month)) {
+        days -= datetime_get_days_per_month(datetime_is_leap_year(to->year), to->month);
+        (to->month)++;
+    }
 
-  to->weekday = ((days + 4) % 7) + 1;
+    to->weekday = ((days + 4) % 7) + 1;
 
-  to->day = days + 1;
-  to->hour = seconds_in_day / SECONDS_PER_HOUR;
-  to->minute = (seconds_in_day % SECONDS_PER_HOUR) / SECONDS_PER_MINUTE;
-  to->second = seconds_in_day % SECONDS_PER_MINUTE;
+    to->day = days + 1;
+    to->hour = seconds_in_day / SECONDS_PER_HOUR;
+    to->minute = (seconds_in_day % SECONDS_PER_HOUR) / SECONDS_PER_MINUTE;
+    to->second = seconds_in_day % SECONDS_PER_MINUTE;
 }
 
-int dcf77_clock_sync_app_main(void *p)
-{
-  UNUSED(p);
+int dcf77_clock_sync_app_main(void* p) {
+    UNUSED(p);
 
-  AppData    app_data;
-  InputEvent event;
+    AppData app_data;
+    InputEvent event;
 
-  app_data.is_dst = false;
-  furi_hal_rtc_get_datetime(&app_data.dt);
-  time_add(&app_data.dt, &app_data.dcf_dt, DCF77_OFFSET);
-  set_dcf77_time(&app_data.dcf_dt, app_data.is_dst);
+    app_data.is_dst = false;
+    furi_hal_rtc_get_datetime(&app_data.dt);
+    time_add(&app_data.dt, &app_data.dcf_dt, DCF77_OFFSET);
+    set_dcf77_time(&app_data.dcf_dt, app_data.is_dst);
 
-  ViewPort         *view_port = view_port_alloc();
-  FuriMessageQueue *event_queue = furi_message_queue_alloc(8, sizeof(InputEvent));
+    ViewPort* view_port = view_port_alloc();
+    FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(InputEvent));
 
-  view_port_draw_callback_set(view_port, app_draw_callback, &app_data);
-  view_port_input_callback_set(view_port, app_input_callback, event_queue);
+    view_port_draw_callback_set(view_port, app_draw_callback, &app_data);
+    view_port_input_callback_set(view_port, app_input_callback, event_queue);
 
-  Gui *gui = furi_record_open(RECORD_GUI);
-  gui_add_view_port(gui, view_port, GuiLayerFullscreen);
+    Gui* gui = furi_record_open(RECORD_GUI);
+    gui_add_view_port(gui, view_port, GuiLayerFullscreen);
 
-  NotificationApp *notification = furi_record_open(RECORD_NOTIFICATION);
-  notification_message_block(notification, &sequence_display_backlight_enforce_on);
+    NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
+    notification_message_block(notification, &sequence_display_backlight_enforce_on);
 
-  bool running = false;
-  bool exit = false;
-  int  sec = app_data.dt.second;
-  while (!exit) {
-    int silence_ms = 0;
-    // wait next second
-    while (app_data.dt.second == sec)
-      furi_hal_rtc_get_datetime(&app_data.dt);
+    bool running = false;
+    bool exit = false;
+    int sec = app_data.dt.second;
+    while(!exit) {
+        int silence_ms = 0;
+        // wait next second
+        while(app_data.dt.second == sec) furi_hal_rtc_get_datetime(&app_data.dt);
 
-    if (app_data.dt.second < 59) {
-      furi_hal_light_set(LightRed | LightGreen | LightBlue, 0);
-      if (running) {
+        if(app_data.dt.second < 59) {
+            furi_hal_light_set(LightRed | LightGreen | LightBlue, 0);
+            if(running) {
+                furi_hal_rfid_tim_read_stop();
+                furi_hal_pwm_stop(FuriHalPwmOutputIdLptim2PA4);
+                furi_hal_gpio_init(
+                    &gpio_ext_pa4, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
+            }
+            silence_ms = get_dcf77_bit(app_data.dt.second) ? 200 : 100;
+            furi_delay_ms(silence_ms);
+            furi_hal_rfid_tim_read_start(DCF77_FREQ, 0.5);
+            furi_hal_pwm_start(FuriHalPwmOutputIdLptim2PA4, DCF77_FREQ, 50);
+            running = true;
+            furi_hal_light_set(LightBlue, 0xFF);
+        } else {
+            time_add(&app_data.dt, &app_data.dcf_dt, DCF77_OFFSET + 1);
+            set_dcf77_time(&app_data.dcf_dt, app_data.is_dst);
+        }
+
+        sec = app_data.dt.second;
+        int wait_ms = (1000 - silence_ms - SYNC_DELAY) / UPDATES;
+        for(int i = 0; i < UPDATES; i++) {
+            if(furi_message_queue_get(event_queue, &event, wait_ms) == FuriStatusOk) {
+                if((event.type == InputTypePress) || (event.type == InputTypeRepeat)) {
+                    switch(event.key) {
+                    case InputKeyOk:
+                        app_data.is_dst = !app_data.is_dst;
+                        break;
+                    case InputKeyBack:
+                        exit = true;
+                        break;
+                    default:
+                        break;
+                    }
+                }
+            }
+            view_port_update(view_port);
+            if(exit) break;
+        }
+    }
+
+    if(running) {
         furi_hal_rfid_tim_read_stop();
         furi_hal_pwm_stop(FuriHalPwmOutputIdLptim2PA4);
-        furi_hal_gpio_init(&gpio_ext_pa4, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
-      }
-      silence_ms = get_dcf77_bit(app_data.dt.second) ? 200 : 100;
-      furi_delay_ms(silence_ms);
-      furi_hal_rfid_tim_read_start(DCF77_FREQ, 0.5);
-      furi_hal_pwm_start(FuriHalPwmOutputIdLptim2PA4, DCF77_FREQ, 50);
-      running = true;
-      furi_hal_light_set(LightBlue, 0xFF);
-    }
-    else {
-      time_add(&app_data.dt, &app_data.dcf_dt, DCF77_OFFSET + 1);
-      set_dcf77_time(&app_data.dcf_dt, app_data.is_dst);
+        furi_hal_light_set(LightRed | LightGreen | LightBlue, 0);
     }
 
-    sec = app_data.dt.second;
-    int wait_ms = (1000 - silence_ms - SYNC_DELAY) / UPDATES;
-    for (int i = 0; i < UPDATES; i++) {
-      if (furi_message_queue_get(event_queue, &event, wait_ms) == FuriStatusOk) {
-        if ((event.type == InputTypePress) || (event.type == InputTypeRepeat)) {
-          switch (event.key) {
-          case InputKeyOk:
-            app_data.is_dst = !app_data.is_dst;
-            break;
-          case InputKeyBack:
-            exit = true;
-            break;
-          default:
-            break;
-          }
-        }
-      }
-      view_port_update(view_port);
-      if (exit)
-        break;
-    }
-  }
+    notification_message_block(notification, &sequence_display_backlight_enforce_auto);
 
-  if (running) {
-    furi_hal_rfid_tim_read_stop();
-    furi_hal_pwm_stop(FuriHalPwmOutputIdLptim2PA4);
-    furi_hal_light_set(LightRed | LightGreen | LightBlue, 0);
-  }
+    view_port_enabled_set(view_port, false);
+    gui_remove_view_port(gui, view_port);
+    furi_record_close(RECORD_NOTIFICATION);
+    furi_record_close(RECORD_GUI);
+    furi_message_queue_free(event_queue);
+    view_port_free(view_port);
 
-  notification_message_block(notification, &sequence_display_backlight_enforce_auto);
-
-  view_port_enabled_set(view_port, false);
-  gui_remove_view_port(gui, view_port);
-  furi_record_close(RECORD_NOTIFICATION);
-  furi_record_close(RECORD_GUI);
-  furi_message_queue_free(event_queue);
-  view_port_free(view_port);
-
-  return 0;
+    return 0;
 }

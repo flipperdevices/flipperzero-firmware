@@ -42,6 +42,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - [Added Memory Chip passport background (By Kuronons With Changes By RogueMaster) + Passport: Move text for better display (By Kuronons)](https://github.com/Kuronons/FZ_graphics/blob/main/Passport%20background/Passports%20(.png%20files%20-%20128x64px)/passport_MNTM.png)
 - Updated: [Air Labyrinth v0.1 (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/vgm/apps/air_labyrinth) `Req: Video Game Module By Flipper Devices` [AirLabyrinth: Fix build on gcc12 (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/a10148803fca00aff8ff58c1c767e00862159413)
 - OFW: [Parser for Santiago, Chile BIP transit card #3456 (By rbasoalto)](https://github.com/flipperdevices/flipperzero-firmware/pull/3456)
+- Added: [DCF77 Clock Sync v1.2 (By mdaskalov)](https://github.com/mdaskalov/dcf77-clock-sync)
 
 <a name="release">
 
@@ -356,6 +357,7 @@ $ ./fbt dolphin_ext
 - [Crypto Dictionary v0.1 (By armixz)](https://github.com/armixz/Flipper-Zero-Crypto-Dictionary)
 - [Dab Timer v1.9.1 (By RogueMaster)](https://github.com/RogueMaster/flipperzero-dabtimer)
 - [DAP Link v1.2 (By DrZlo13)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/1897)
+- [DCF77 Clock Sync v1.2 (By mdaskalov)](https://github.com/mdaskalov/dcf77-clock-sync)
 - [DCF77 Transmitter v1.1 (By arha)](https://github.com/arha/flipper-dcf77)
 - [Deauther PWNDTOOLS V2.6.0 (By HEX0DAYS)](https://github.com/HEX0DAYS/FlipperZero-PWNDTOOLS) `Req: ESP8266` [Original](https://github.com/SpacehuhnTech/esp8266_deauther)
 - [Device Info (By hedger)](https://github.com/hedger/flipperdevinfo)
