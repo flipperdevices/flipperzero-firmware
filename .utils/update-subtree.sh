@@ -37,7 +37,7 @@ while read -u $remote repo branch subdir; do
     if grep "Please commit your changes or stash them before you switch branches." <<< "$result" > /dev/null; then
         exit 1
     fi
-    if grep "fatal: working tree has modifications." <<< "$result" > /dev/null; then
+    if grep "^fatal: " <<< "$result" > /dev/null; then
         exit 1
     fi
 done {remote}< "${path}/.gitsubtree"
