@@ -8,6 +8,7 @@
 #include <input/input.h>
 #include <gui/elements.h>
 #include <dolphin/dolphin.h>
+#include <datetime/datetime.h>
 
 struct ColorGuessPlay {
     View* view;
@@ -53,9 +54,9 @@ void color_guess_play_new_round(void* context, ColorGuessPlayModel* model) {
     furi_assert(context);
     ColorGuess* app = context;
     //Reset timer
-    FuriHalRtcDateTime date_time;
+    DateTime date_time;
     furi_hal_rtc_get_datetime(&date_time);
-    model->timestamp_start = furi_hal_rtc_datetime_to_timestamp(&date_time);
+    model->timestamp_start = datetime_datetime_to_timestamp(&date_time);
     model->success = 0;
     model->closeness = 0;
     model->prev_closeness = 0;
@@ -152,9 +153,9 @@ void color_guess_play_draw(Canvas* canvas, ColorGuessPlayModel* model) {
     }
     const int cursorOffset = 30;
     const int newCursorPos = (model->cursorpos * 12) + cursorOffset;
-    FuriHalRtcDateTime date_time;
+    DateTime date_time;
     furi_hal_rtc_get_datetime(&date_time);
-    uint32_t timestamp = furi_hal_rtc_datetime_to_timestamp(&date_time);
+    uint32_t timestamp = datetime_datetime_to_timestamp(&date_time);
     uint32_t time_elapsed = timestamp - model->timestamp_start;
     model->time_spent = time_elapsed;
 
@@ -213,9 +214,11 @@ bool color_guess_play_input(InputEvent* event, void* context) {
                 instance->view,
                 ColorGuessPlayModel * model,
                 {
-                    model->cursorpos--;
-                    if(model->cursorpos < 0) {
-                        model->cursorpos = 5;
+                    if(model->success != 1) {
+                        model->cursorpos--;
+                        if(model->cursorpos < 0) {
+                            model->cursorpos = 5;
+                        }
                     }
                 },
                 true);
@@ -225,9 +228,11 @@ bool color_guess_play_input(InputEvent* event, void* context) {
                 instance->view,
                 ColorGuessPlayModel * model,
                 {
-                    model->cursorpos++;
-                    if(model->cursorpos > 5) {
-                        model->cursorpos = 0;
+                    if(model->success != 1) {
+                        model->cursorpos++;
+                        if(model->cursorpos > 5) {
+                            model->cursorpos = 0;
+                        }
                     }
                 },
                 true);
@@ -237,12 +242,14 @@ bool color_guess_play_input(InputEvent* event, void* context) {
                 instance->view,
                 ColorGuessPlayModel * model,
                 {
-                    model->digit[model->cursorpos]++;
-                    if(model->digit[model->cursorpos] > 15) {
-                        model->digit[model->cursorpos] = 0;
+                    if(model->success != 1) {
+                        model->digit[model->cursorpos]++;
+                        if(model->digit[model->cursorpos] > 15) {
+                            model->digit[model->cursorpos] = 0;
+                        }
+                        color_guess_play_calculate_closeness(instance, model);
+                        play_haptic(instance->context, model);
                     }
-                    color_guess_play_calculate_closeness(instance, model);
-                    play_haptic(instance->context, model);
                 },
                 true);
             break;
@@ -251,12 +258,14 @@ bool color_guess_play_input(InputEvent* event, void* context) {
                 instance->view,
                 ColorGuessPlayModel * model,
                 {
-                    model->digit[model->cursorpos]--;
-                    if(model->digit[model->cursorpos] < 0) {
-                        model->digit[model->cursorpos] = 15;
+                    if(model->success != 1) {
+                        model->digit[model->cursorpos]--;
+                        if(model->digit[model->cursorpos] < 0) {
+                            model->digit[model->cursorpos] = 15;
+                        }
+                        color_guess_play_calculate_closeness(instance, model);
+                        play_haptic(instance->context, model);
                     }
-                    color_guess_play_calculate_closeness(instance, model);
-                    play_haptic(instance->context, model);
                 },
                 true);
             break;
@@ -322,7 +331,7 @@ void color_guess_play_free(ColorGuessPlay* instance) {
     furi_assert(instance);
 
     with_view_model(
-        instance->view, ColorGuessPlayModel * model, { free(model->digit); }, true);
+        instance->view, ColorGuessPlayModel * model, { free(model); }, true);
     view_free(instance->view);
     free(instance);
 }
