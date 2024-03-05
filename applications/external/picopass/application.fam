@@ -20,4 +20,5 @@ App(
     fap_weburl="https://github.com/bettse/flipperzero-good-faps/tree/dev/picopass",
     fap_version="1.13",
     fap_description="App to communicate with NFC tags using the PicoPass(iClass) format",
+    #  [PicoPass Emulation (By nvx)](https://github.com/nvx/flipperzero-firmware/tree/picopass_emulation)
 )
