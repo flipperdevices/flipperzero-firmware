@@ -6,7 +6,7 @@ App(
     entry_point="clock_app",
     requires=["gui"],
     stack_size=2 * 1024,
-    fap_version="1.0",
+    fap_version="1.1",
     fap_description="Simple clock app",
     fap_icon="clock.png",
     fap_category="Tools",
