@@ -41,8 +41,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - [Added Memory Chip passport background (By Kuronons With Changes By RogueMaster) + Passport: Move text for better display (By Kuronons)](https://github.com/Kuronons/FZ_graphics/blob/main/Passport%20background/Passports%20(.png%20files%20-%20128x64px)/passport_MNTM.png)
 - OFW: [Parser for Santiago, Chile BIP transit card #3456 (By rbasoalto)](https://github.com/flipperdevices/flipperzero-firmware/pull/3456)
 - Added: [DCF77 Clock Sync v1.2 (By mdaskalov)](https://github.com/mdaskalov/dcf77-clock-sync)
-- OFW: PR: [Troyka parser improvements #3390 (By assasinfil)](https://github.com/flipperdevices/flipperzero-firmware/pull/3390)
-- OFW: PR: [NFC: Fix washcity plugin verify function being to greedy #3467 (By philicious)](https://github.com/flipperdevices/flipperzero-firmware/pull/3467)
 - Updated: [ESP Flasher v1.5 (By 0xchocolate)](https://github.com/0xchocolate/flipperzero-esp-flasher) [Minor Power Change (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/5e1c7fafacda285a20a162a76b3b1257dedc2ba2)
 - Updated: [USB Mass Storage v1.3 (By nminaylov)](https://github.com/flipperdevices/flipperzero-good-faps/tree/nm/usb_mass_storage_app/mass_storage) [MassStorage: Fix image creation error message (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/5e1c7fafacda285a20a162a76b3b1257dedc2ba2)
 - Updated: [CFW Settings - Imported/Modified By RogueMaster (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/ecf91524a956f773881d564c4ada833f844264ca) [Removed unused UART General setting (By Sil333033)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/5e1c7fafacda285a20a162a76b3b1257dedc2ba2)
@@ -51,6 +49,9 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Air Labyrinth v0.1 (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/vgm/apps/air_labyrinth) `Req: Video Game Module By Flipper Devices` [AirLabyrinth: Fix build on gcc12 (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/a10148803fca00aff8ff58c1c767e00862159413)
 - [AirArkanoid: Fix python3 on Windows #155 (By Willy-JL)](https://github.com/flipperdevices/flipperzero-good-faps/pull/155) Also applied to Air Labyrinth
 - Updated: [BT Remote for Kodi v1.1 (Remixed By coded-with-claws)](https://github.com/coded-with-claws/flipperzero-tools/tree/main/applications_user/bt_hid_kodi)
+- OFW: [NFC: Fix washcity plugin verify function being to greedy #3467 (By philicious)](https://github.com/flipperdevices/flipperzero-firmware/pull/3467)
+- OFW: [Troyka parser improvements #3390 (By assasinfil)](https://github.com/flipperdevices/flipperzero-firmware/pull/3390)
+- OFW: [Archive: Fix item focus after aborting the Delete operation #3475 (By CookiePLMonster)](https://github.com/flipperdevices/flipperzero-firmware/pull/3475)
 
 <a name="release">
 
