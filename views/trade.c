@@ -92,6 +92,13 @@
 #include "../pokemon_data.h"
 #include "trade_patch_list.h"
 
+/* Uncomment the following line to enable graphics testing for the different
+ * phases of the trade view. Pressing the okay button will step through each
+ * gameboy_status. Note that while trades will still function with this enabled,
+ * forcing the advance of the status will certainly break trades.
+ */
+#define GRAPHICS_TESTING
+
 #define DELAY_MICROSECONDS 15
 #define PKMN_BLANK 0x00
 
@@ -159,7 +166,8 @@ typedef enum {
     GAMEBOY_WAITING,
     GAMEBOY_TRADE_PENDING,
     GAMEBOY_TRADING,
-    GAMEBOY_COLOSSEUM
+    GAMEBOY_COLOSSEUM,
+    GAMEBOY_STATE_COUNT
 } render_gameboy_state_t;
 
 /* Anonymous struct */
@@ -197,6 +205,29 @@ static void pokemon_plist_recreate_callback(void* context, uint32_t arg) {
 
     plist_create(&(trade->patch_list), trade->pdata);
 }
+
+#ifdef GRAPHICS_TESTING
+static bool trade_input_callback(InputEvent *event, void *context)
+{
+    struct trade_ctx* trade = context;
+    bool consumed = false;
+
+    if (event->type == InputTypePress && event->key == InputKeyOk) {
+        with_view_model(
+            trade->view,
+            struct trade_model *model,
+            {
+                model->gameboy_status++;
+                if (model->gameboy_status == GAMEBOY_STATE_COUNT)
+                    model->gameboy_status = GAMEBOY_CONN_FALSE;
+            },
+            true);
+        consumed = true;
+    }
+
+    return consumed;
+}
+#endif
 
 /* Draws a whole screen image with Flipper mascot, Game Boy, etc. */
 static void trade_draw_connect(Canvas* const canvas) {
@@ -711,7 +742,6 @@ void trade_enter_callback(void* context) {
     } else if(model->gameboy_status > GAMEBOY_READY) {
         model->gameboy_status = GAMEBOY_READY;
     }
-    model->gameboy_status = GAMEBOY_READY;
     trade->trade_centre_state = TRADE_RESET;
     model->curr_pokemon = pokemon_stat_get(trade->pdata, STAT_NUM, NONE);
     model->ledon = false;
@@ -786,6 +816,9 @@ void* trade_alloc(
     view_set_draw_callback(trade->view, trade_draw_callback);
     view_set_enter_callback(trade->view, trade_enter_callback);
     view_set_exit_callback(trade->view, trade_exit_callback);
+#ifdef GRAPHICS_TESTING
+    view_set_input_callback(trade->view, trade_input_callback);
+#endif
 
     view_dispatcher_add_view(view_dispatcher, view_id, trade->view);
 
