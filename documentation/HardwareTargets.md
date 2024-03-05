@@ -29,7 +29,7 @@ A target definition file, `target.json`, is a JSON file that can contain the fol
 
 Not all applications are available on different hardware targets. 
 
-* For applications built into the firmware, you have to specify a compatible application set using `FIRMWARE_APP_SET=...` fbt option. See [fbt docs](./fbt.md#firmware-application-set) for details on build configurations.
+* For applications built into the firmware, you have to specify a compatible application set using `FIRMWARE_APP_SET=...` fbt option. See [fbt docs](./fbt.md) for details on build configurations.
 
 * For applications built as external .faps, you have to explicitly specify compatible targets in application's manifest, `application.fam`. For example, to limit application to a single target, add `targets=["f7"],` to the manifest. It won't be built for other targets.
 

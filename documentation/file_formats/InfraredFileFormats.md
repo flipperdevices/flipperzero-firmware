@@ -73,9 +73,9 @@ Known protocols are represented in the `parsed` form, whereas non-recognized sig
 
 ### Examples
 
-- [TV Universal Library](/applications/main/infrared/resources/infrared/assets/tv.ir)
-- [A/C Universal Library](/applications/main/infrared/resources/infrared/assets/ac.ir)
-- [Audio Universal Library](/applications/main/infrared/resources/infrared/assets/audio.ir)
+- [TV Universal Library](https://github.com/flipperdevices/flipperzero-firmware/blob/dev/applications/main/infrared/resources/infrared/assets/tv.ir)
+- [A/C Universal Library](https://github.com/flipperdevices/flipperzero-firmware/blob/dev/applications/main/infrared/resources/infrared/assets/ac.ir)
+- [Audio Universal Library](https://github.com/flipperdevices/flipperzero-firmware/blob/dev/applications/main/infrared/resources/infrared/assets/audio.ir)
 
 ### Description
 
@@ -93,7 +93,7 @@ See [Universal Remotes](../UniversalRemotes.md) for more information.
 
 ### Examples
 
-See [Infrared Unit Tests](/applications/debug/unit_tests/resources/unit_tests/infrared/) for various examples.
+See [Infrared Unit Tests](https://github.com/flipperdevices/flipperzero-firmware/tree/dev/applications/debug/unit_tests/resources/unit_tests/infrared) for various examples.
 
 ### Description
 

@@ -83,7 +83,7 @@ To use language servers other than the default VS Code C/C++ language server, us
 
 ### Firmware targets
 
-- `faps` - build all external & plugin apps as [`.faps`](./AppsOnSDCard.md#fap-flipper-application-package).
+- `faps` - build all external & plugin apps as [`.faps`](AppsOnSDCard.md).
 - `fbt` also defines per-app targets. For example, for an app with `appid=snake_game` target names are:
   - `fap_snake_game`, etc. - build single app as `.fap` by its application ID.
   - Check out [`--extra-ext-apps`](#command-line-parameters) for force adding extra apps to external build.

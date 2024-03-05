@@ -2,7 +2,7 @@
 
 All components of Flipper Zero firmware — services, user applications, and system settings — are developed independently. Each component has a build system manifest file named `application.fam`, which defines the basic properties of that component and its relations to other parts of the system.
 
-When building firmware, `fbt` collects all application manifests and processes their dependencies. Then it builds only those components referenced in the current build configuration. See [FBT docs](./fbt.md#firmware-application-set) for details on build configurations.
+When building firmware, `fbt` collects all application manifests and processes their dependencies. Then it builds only those components referenced in the current build configuration. See [FBT docs](fbt.md) for details on build configurations.
 
 ## Application definition
 
@@ -55,7 +55,7 @@ The following parameters are used only for [FAPs](./AppsOnSDCard.md):
 - **fap_description**: string, may be empty. Short application description.
 - **fap_author**: string, may be empty. Application's author.
 - **fap_weburl**: string, may be empty. Application's homepage.
-- **fap_icon_assets**: string. If present, it defines a folder name to be used for gathering image assets for this application. These images will be preprocessed and built alongside the application. See [FAP assets](./AppsOnSDCard.md#fap-assets) for details.
+- **fap_icon_assets**: string. If present, it defines a folder name to be used for gathering image assets for this application. These images will be preprocessed and built alongside the application. See [FAP assets](AppsOnSDCard.md) for details.
 - **fap_extbuild**: provides support for parts of application sources to be built by external tools. Contains a list of `ExtFile(path="file name", command="shell command")` definitions. `fbt` will run the specified command for each file in the list.
 - **fal_embedded**: boolean, default `False`. Applies only to PLUGIN type. If `True`, the plugin will be embedded into host application's .fap file as a resource and extracted to `apps_assets/APPID` folder on its start. This allows plugins to be distributed as a part of the host application.
 
