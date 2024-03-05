@@ -56,6 +56,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [AVR Flasher v1.2 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/2475)
 - Updated: [VGM Air Mouse v1.2 (By nminaylov)](https://github.com/flipperdevices/flipperzero-good-faps/tree/nm/motion_mouse_app) `Req: ICM42688, or Video Game Module By Flipper Devices`
 - Updated: [Weather Station v1.5 (By Skorpionm)-OFW](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/weather_station)
+- Updated: [u-blox GPS v0.4 (By liamhays)](https://github.com/liamhays/ublox)
 
 <a name="release">
 
@@ -524,7 +525,7 @@ $ ./fbt dolphin_ext
 - [Tuning Fork v1.1 (By besya)](https://github.com/besya/flipperzero-tuning-fork)
 - [UART Echo (By DrZlo13)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/831)
 - [UART Terminal v1.4 (By cool4uma)](https://github.com/cool4uma/UART_Terminal)
-- [u-blox GPS v0.2 (By liamhays)](https://github.com/liamhays/ublox)
+- [u-blox GPS v0.4 (By liamhays)](https://github.com/liamhays/ublox)
 - [USB Consumer Control (By WithSecureLabs)](https://github.com/WithSecureLabs/usb-consumer-control)
 - [USB HID Autofire (By pbek)](https://github.com/pbek/usb_hid_autofire)
 - [USB Mass Storage v1.3 (By nminaylov)](https://github.com/flipperdevices/flipperzero-good-faps/tree/nm/usb_mass_storage_app/mass_storage) [Based on OFW#1060 (By kevinwallace)](https://github.com/flipperdevices/flipperzero-firmware/pull/1060)

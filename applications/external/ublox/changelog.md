@@ -1,3 +1,5 @@
+0.4:
+- Fix code to work with firmware 0.99 and up
 0.3:
 - Bugfixes: logging and error modes are much less broken
 - New features: battery percentage on the data display and automatic
