@@ -3,6 +3,7 @@
 
 #include <gui/gui.h>
 #include <locale/locale.h>
+#include <datetime/datetime.h>
 
 typedef enum {
     ClockEventTypeTick,
@@ -16,7 +17,7 @@ typedef struct {
 
 typedef struct {
     FuriString* buffer;
-    FuriHalRtcDateTime datetime;
+    DateTime datetime;
     LocaleTimeFormat timeformat;
     LocaleDateFormat dateformat;
 } ClockData;
