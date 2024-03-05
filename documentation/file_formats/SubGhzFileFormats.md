@@ -41,7 +41,7 @@ Built-in presets:
 - `FuriHalSubGhzPreset2FSKDev238Async` — 2 Frequency Shift Keying, deviation 2kHz, 270kHz bandwidth, async(IO throw GP0)
 - `FuriHalSubGhzPreset2FSKDev476Async` — 2 Frequency Shift Keying, deviation 47kHz, 270kHz bandwidth, async(IO throw GP0)
 
-### Transceiver Configuration Data
+### Transceiver Configuration Data {#transceiver-configuration-data}
 
 Transceiver configuration data is a string of bytes, encoded in hex format, separated by spaces. For CC1101 data structure is: `XX YY XX YY .. 00 00 ZZ ZZ ZZ ZZ ZZ ZZ ZZ ZZ`, where:
 
@@ -256,7 +256,7 @@ Header must contain the following fields:
 
 Repeating the same frequency will cause Flipper to listen to this frequency more often.
 
-#### Adding a Custom Preset
+#### Adding a Custom Preset {#adding-a-custom-preset}
 
 You can have as many presets as you want. Presets are embedded into `.sub` files, so another Flipper can load them directly from that file.
 Each preset is defined by the following fields:

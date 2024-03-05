@@ -103,7 +103,7 @@ To use language servers other than the default VS Code C/C++ language server, us
 - `proto_ver` - generate `.h` with a protobuf version
 - `dolphin_internal`, `dolphin_blocking` - generate `.c+.h` for corresponding dolphin assets
 
-## Command-line parameters
+## Command-line parameters {#command-line-parameters}
 
 - `--options optionfile.py` (default value `fbt_options.py`) - load a file with multiple configuration values
 - `--extra-int-apps=app1,app2,appN` - force listed apps to be built as internal with the `firmware` target

@@ -83,7 +83,7 @@ Filename extension: `.ir`
 
 This file format is used to store universal remote libraries. It is identical to the previous format, differing only in the `Filetype` field.
 It also has predefined button names for each universal library type, so that the universal remote application can understand them.
-See [Universal Remotes](/documentation/UniversalRemotes.md) for more information.
+See [Universal Remotes](../UniversalRemotes.md) for more information.
 
 ### Version history
 
@@ -142,4 +142,4 @@ and the number is a sequential integer: 1, 2, 3, etc., which produces names like
 | decoder_expected      | parsed_array | An array of parsed signals containing the expected decoder output. Also used as the encoder input. |
 | encoder_decoder_input | parsed_array | An array of parsed signals containing both the encoder-decoder input and expected output.             |
 
-See [Unit Tests](/documentation/UnitTests.md#infrared) for more info.
+See [Unit Tests](../UnitTests.md) for more info.
