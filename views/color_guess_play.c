@@ -8,7 +8,6 @@
 #include <input/input.h>
 #include <gui/elements.h>
 #include <dolphin/dolphin.h>
-#include <datetime/datetime.h>
 
 struct ColorGuessPlay {
     View* view;
