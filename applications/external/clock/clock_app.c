@@ -3,6 +3,7 @@
 
 #include <gui/gui.h>
 #include <locale/locale.h>
+#include <datetime/datetime.h>
 
 typedef enum {
     ClockEventTypeTick,
