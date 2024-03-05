@@ -59,6 +59,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [u-blox GPS v0.4 (By liamhays)](https://github.com/liamhays/ublox)
 - Updated: [Color Guess v1.4 (By leedave)](https://github.com/leedave/Leeds-Flipper-Zero-Applications)
 - Updated: [PicoPass (iClass) v1.13 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass)
+- Updated: [Dab Timer v1.9.1 (By RogueMaster)](https://github.com/RogueMaster/flipperzero-dabtimer)
+- Updated: [Dice (RM) Including SEX/WAR/8BALL/WEED/DRINK DICE v2.3 (By RogueMaster)](https://github.com/RogueMaster/flipperzero-dice)
 
 <a name="release">
 

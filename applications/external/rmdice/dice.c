@@ -1,10 +1,11 @@
+#include <datetime/datetime.h>
+#include <dolphin/dolphin.h>
 #include <furi.h>
 #include <furi_hal.h>
 #include "furi_hal_random.h"
 #include <gui/elements.h>
 #include <gui/gui.h>
 #include <input/input.h>
-#include <dolphin/dolphin.h>
 #include "dice_rm_icons.h"
 
 #if __has_include(<cfw/cfw.h>)
