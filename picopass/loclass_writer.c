@@ -5,6 +5,7 @@
 #include <storage/storage.h>
 #include <stream/stream.h>
 #include <stream/buffered_file_stream.h>
+#include <datetime/datetime.h>
 
 struct LoclassWriter {
     Stream* file_stream;
@@ -41,9 +42,9 @@ void loclass_writer_free(LoclassWriter* instance) {
 bool loclass_writer_write_start_stop(LoclassWriter* instance, bool start) {
     furi_assert(instance != NULL);
 
-    FuriHalRtcDateTime curr_dt;
+    DateTime curr_dt;
     furi_hal_rtc_get_datetime(&curr_dt);
-    uint32_t curr_ts = furi_hal_rtc_datetime_to_timestamp(&curr_dt);
+    uint32_t curr_ts = datetime_datetime_to_timestamp(&curr_dt);
 
     FuriString* str = furi_string_alloc_printf(
         "loclass-v1-info ts %lu %s\n", curr_ts, start ? "started" : "finished");
@@ -61,9 +62,9 @@ bool loclass_writer_write_params(
     const uint8_t mac[4]) {
     furi_assert(instance != NULL);
 
-    FuriHalRtcDateTime curr_dt;
+    DateTime curr_dt;
     furi_hal_rtc_get_datetime(&curr_dt);
-    uint32_t curr_ts = furi_hal_rtc_datetime_to_timestamp(&curr_dt);
+    uint32_t curr_ts = datetime_datetime_to_timestamp(&curr_dt);
 
     FuriString* str = furi_string_alloc_printf(
         "loclass-v1-mac ts %lu no %u "
