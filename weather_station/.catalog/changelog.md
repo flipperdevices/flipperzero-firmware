@@ -1,3 +1,5 @@
+## 1.5
+ - Update API
 ## 1.4
  - Add protocol EMOS E601x
 ## 1.3
