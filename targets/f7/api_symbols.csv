@@ -1033,6 +1033,7 @@ Function,-,exp2l,long double,long double
 Function,+,expansion_disable,void,Expansion*
 Function,+,expansion_enable,void,Expansion*
 Function,+,expansion_get_settings,ExpansionSettings*,Expansion*
+Function,+,expansion_is_connected,_Bool,Expansion*
 Function,+,expansion_set_listen_serial,void,"Expansion*, FuriHalSerialId"
 Function,-,expansion_settings_load,_Bool,ExpansionSettings*
 Function,+,expansion_settings_save,_Bool,ExpansionSettings*
