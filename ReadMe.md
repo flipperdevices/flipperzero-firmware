@@ -57,6 +57,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [VGM Air Mouse v1.2 (By nminaylov)](https://github.com/flipperdevices/flipperzero-good-faps/tree/nm/motion_mouse_app) `Req: ICM42688, or Video Game Module By Flipper Devices`
 - Updated: [Weather Station v1.5 (By Skorpionm)-OFW](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/weather_station)
 - Updated: [u-blox GPS v0.4 (By liamhays)](https://github.com/liamhays/ublox)
+- Updated: [Color Guess v1.4 (By leedave)](https://github.com/leedave/Leeds-Flipper-Zero-Applications)
 
 <a name="release">
 
@@ -271,7 +272,7 @@ $ ./fbt dolphin_ext
 - [Chess v2.0 (By xtruan)](https://github.com/xtruan/flipper-chess)
 - [Chess Clock (By ihatecsv)](https://github.com/ihatecsv/flipper_chess_clock)
 - [City Bloxx (By Milk-Cool)](https://github.com/Milk-Cool/fz-citybloxx)
-- [Color Guess v1.3 (By leedave)](https://github.com/leedave/Leeds-Flipper-Zero-Applications)
+- [Color Guess v1.4 (By leedave)](https://github.com/leedave/Leeds-Flipper-Zero-Applications)
 - [Connect Wires v1.0 (By AlexTaran)](https://github.com/AlexTaran/flipperzero)
 - [Crossy Road v1.0 (By Mikael098)](https://github.com/Mikael098/CrossyRoad-FlipperZero-)
 - [Dice (RM) Including SEX/WAR/8BALL/WEED/DRINK DICE v2.3 (By RogueMaster)](https://github.com/RogueMaster/flipperzero-dice)

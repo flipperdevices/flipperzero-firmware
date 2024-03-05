@@ -1,3 +1,7 @@
+## 1.4
+- Prevent value changing on win view
+- Fix issues with FW build 0.99.x
+
 ## 1.3
 - Patched Memory Leak in storage
 
