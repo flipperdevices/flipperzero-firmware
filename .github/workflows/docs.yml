@@ -37,7 +37,7 @@ jobs:
           python3 scripts/get_env.py "--event_file=${{ github.event_path }}" "--type=$TYPE"
 
       - name: 'Generate documentation'
-        uses: mattnotmitt/doxygen-action@v1.9.5
+        uses: mattnotmitt/doxygen-action@v1.9.8
         with:
           working-directory: 'documentation/'
           doxyfile-path: './doxygen/Doxyfile-awesome.cfg'
