@@ -53,6 +53,9 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [Troyka parser improvements #3390 (By assasinfil)](https://github.com/flipperdevices/flipperzero-firmware/pull/3390)
 - OFW: [Archive: Fix item focus after aborting the Delete operation #3475 (By CookiePLMonster)](https://github.com/flipperdevices/flipperzero-firmware/pull/3475)
 - Updated: [Clock v1.1 (By kowalski7cc)](https://github.com/kowalski7cc/flipperzero-firmware/tree/clock-v1)
+- Updated: [AVR Flasher v1.2 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/2475)
+- Updated: [VGM Air Mouse v1.2 (By nminaylov)](https://github.com/flipperdevices/flipperzero-good-faps/tree/nm/motion_mouse_app) `Req: ICM42688, or Video Game Module By Flipper Devices`
+- Updated: [Weather Station v1.5 (By Skorpionm)-OFW](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/weather_station)
 
 <a name="release">
 
@@ -334,7 +337,7 @@ $ ./fbt dolphin_ext
 - [Analog Clock v1.1 (By scrolltex)](https://github.com/scrolltex/flipper_analog_clock)
 - [Atomic Dice Roller v1.1 (By nmrr)](https://github.com/nmrr/flipperzero-atomicdiceroller)
 - [Authenticator/TOTP v5.12.0 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
-- [AVR Flasher (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/2475)
+- [AVR Flasher v1.2 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/2475)
 - [AZERTY Mouse Jacker (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/mousejacker) `Req: NRF24` (Uses AZERTY keyboard - Source Unknown)
 - [Bad KB (Modified PR#738 from pengu1ndev - Original from Willy-JL) #739 (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/739)
 - [Barcode App (By Kingal1337)](https://github.com/Kingal1337/flipper-barcode-generator)
@@ -526,7 +529,7 @@ $ ./fbt dolphin_ext
 - [USB HID Autofire (By pbek)](https://github.com/pbek/usb_hid_autofire)
 - [USB Mass Storage v1.3 (By nminaylov)](https://github.com/flipperdevices/flipperzero-good-faps/tree/nm/usb_mass_storage_app/mass_storage) [Based on OFW#1060 (By kevinwallace)](https://github.com/flipperdevices/flipperzero-firmware/pull/1060)
 - [USB Midi (By DrZlo13)](https://github.com/DrZlo13/flipper-zero-usb-midi) [Instructions by ESurge](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/applications/plugins/usb_midi/ReadMe.md)
-- [VGM Air Mouse v1.1 (By nminaylov)](https://github.com/flipperdevices/flipperzero-good-faps/tree/nm/motion_mouse_app) `Req: ICM42688, or Video Game Module By Flipper Devices`
+- [VGM Air Mouse v1.2 (By nminaylov)](https://github.com/flipperdevices/flipperzero-good-faps/tree/nm/motion_mouse_app) `Req: ICM42688, or Video Game Module By Flipper Devices`
 - [Video Player v0.3 (By LTVA1)](https://github.com/LTVA1/flipper-zero-video-player)
 - [Wardriver GPS v1.0 (By Sil333033)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/d4f7c1406dfdfa2768983e8723f5f2f6639aeefe)
 - [WAV Player v1.1 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/tree/zlo/wav-player) Updated by Atmanos & RogueMaster To Work.  [Updated by xMasterX](https://github.com/DarkFlippers/unleashed-firmware/commit/76d3f84a5eb069b749e3ad20df6fdbbc785eb253)

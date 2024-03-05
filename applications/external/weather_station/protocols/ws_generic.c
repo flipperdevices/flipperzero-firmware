@@ -111,9 +111,7 @@ SubGhzProtocolStatus ws_block_generic_serialize(
         }
 
         //DATE AGE set
-        DateTime curr_dt;
-        furi_hal_rtc_get_datetime(&curr_dt);
-        uint32_t curr_ts = datetime_datetime_to_timestamp(&curr_dt);
+        uint32_t curr_ts = furi_hal_rtc_get_timestamp();
 
         temp_data = curr_ts;
         if(!flipper_format_write_uint32(flipper_format, "Ts", &temp_data, 1)) {
