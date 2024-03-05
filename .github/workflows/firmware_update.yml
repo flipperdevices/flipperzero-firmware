@@ -1,0 +1,14 @@
+name: Firmware_Update
+on:
+  push:
+    branches: [ dev ]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger parent repository update 
+        run: |
+          curl -X POST https://api.github.com/repos/Flipper-XFW/Xtreme-Firmware/dispatches \
+          -H 'Accept: application/vnd.github.everest-preview+json' \
+          -u Flipper-XFW:${{ secrets.ACCESS_TOKEN }} \
+          --data '{"event_type": "app_update", "client_payload": { "repository": "Xtreme-Apps" }}'
