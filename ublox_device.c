@@ -104,15 +104,15 @@ UbloxFrame* ublox_bytes_to_frame(UbloxMessage* message) {
 
     if(ck_a != frame->ck_a) {
         FURI_LOG_E(TAG, "checksum A doesn't match! expected 0x%x, got 0x%x", ck_a, frame->ck_a);
+	free(frame->payload);
         free(frame);
-        free(frame->payload);
         return NULL;
     }
 
     if(ck_b != frame->ck_b) {
         FURI_LOG_E(TAG, "checksum B doesn't match! expected 0x%x, got 0x%x", ck_b, frame->ck_b);
+	free(frame->payload);
         free(frame);
-        free(frame->payload);
         return NULL;
     }
 

@@ -80,18 +80,12 @@ Ublox* ublox_alloc() {
     return ublox;
 }
 
-#define TAG "ublox"
-//#include "ublox_worker_i.h"
 void ublox_free(Ublox* ublox) {
     furi_assert(ublox);
 
     // no need to stop the worker, plus it causes the app to crash by NULL
     // pointer dereference from context in the worker struct
 
-    //FURI_LOG_I(TAG, "stop worker");
-    //ublox_worker_stop(ublox->worker);
-    //FURI_LOG_I(TAG, "%p", ublox->worker->context);
-    FURI_LOG_I(TAG, "free worker");
     ublox_worker_free(ublox->worker);
 
     view_dispatcher_remove_view(ublox->view_dispatcher, UbloxViewMenu);
