@@ -1,7 +1,9 @@
 #include <furi.h>
 #include <furi_hal.h>
-#include <furi_hal_bt_hid.h>
+#include <furi_hal_bt.h>
+#include <extra_profiles/hid_profile.h>
 #include <bt/bt_service/bt.h>
+
 #include <gui/gui.h>
 #include <gui/view_dispatcher.h>
 #include <gui/modules/submenu.h>
@@ -13,7 +15,7 @@
 
 #define TAG "SensorModule"
 
-#define BLE_HID_KEYS_PATH "/ext/apps_data/hid_ble/.bt_hid.keys"
+#define HID_BT_KEYS_STORAGE_NAME ".bt_hid.keys"
 
 typedef struct {
     Gui* gui;
@@ -25,6 +27,7 @@ typedef struct {
     ICM42688P* icm42688p;
     FuriHalUsbInterface* usb_mode_prev;
     Bt* bt;
+    FuriHalBleProfileBase* ble_hid_profile;
 } AirMouseApp;
 
 typedef enum {
@@ -39,19 +42,60 @@ enum StertSubmenuIndex {
     StartSubmenuIndexBleReset,
 };
 
+static const BleProfileHidParams ble_hid_params = {
+    .device_name_prefix = "AirMouse",
+    .mac_xor = 0x0001,
+};
+
+static bool usb_hid_mouse_move(void* inst, int8_t dx, int8_t dy) {
+    UNUSED(inst);
+    return furi_hal_hid_mouse_move(dx, dy);
+}
+
+static bool usb_hid_mouse_key_press(void* inst, uint8_t button) {
+    UNUSED(inst);
+    return furi_hal_hid_mouse_press(button);
+}
+
+static bool usb_hid_mouse_key_release(void* inst, uint8_t button) {
+    UNUSED(inst);
+    return furi_hal_hid_mouse_release(button);
+}
+
+static bool usb_hid_mouse_scroll(void* inst, int8_t value) {
+    UNUSED(inst);
+    return furi_hal_hid_mouse_scroll(value);
+}
+
 static const ImuHidApi hid_api_usb = {
-    .mouse_move = furi_hal_hid_mouse_move,
-    .mouse_key_press = furi_hal_hid_mouse_press,
-    .mouse_key_release = furi_hal_hid_mouse_release,
-    .mouse_scroll = furi_hal_hid_mouse_scroll,
+    .mouse_move = usb_hid_mouse_move,
+    .mouse_key_press = usb_hid_mouse_key_press,
+    .mouse_key_release = usb_hid_mouse_key_release,
+    .mouse_scroll = usb_hid_mouse_scroll,
     .report_rate_max = 200,
 };
 
+static bool ble_hid_mouse_move(void* inst, int8_t dx, int8_t dy) {
+    return ble_profile_hid_mouse_move(inst, dx, dy);
+}
+
+static bool ble_hid_mouse_key_press(void* inst, uint8_t button) {
+    return ble_profile_hid_mouse_press(inst, button);
+}
+
+static bool ble_hid_mouse_key_release(void* inst, uint8_t button) {
+    return ble_profile_hid_mouse_release(inst, button);
+}
+
+static bool ble_hid_mouse_scroll(void* inst, int8_t value) {
+    return ble_profile_hid_mouse_scroll(inst, value);
+}
+
 static const ImuHidApi hid_api_ble = {
-    .mouse_move = furi_hal_bt_hid_mouse_move,
-    .mouse_key_press = furi_hal_bt_hid_mouse_press,
-    .mouse_key_release = furi_hal_bt_hid_mouse_release,
-    .mouse_scroll = furi_hal_bt_hid_mouse_scroll,
+    .mouse_move = ble_hid_mouse_move,
+    .mouse_key_press = ble_hid_mouse_key_press,
+    .mouse_key_release = ble_hid_mouse_key_release,
+    .mouse_scroll = ble_hid_mouse_scroll,
     .report_rate_max = 30,
 };
 
@@ -62,14 +106,16 @@ static void ble_hid_remove_pairing(void) {
     // Wait 2nd core to update nvm storage
     furi_delay_ms(200);
 
-    bt_keys_storage_set_storage_path(bt, BLE_HID_KEYS_PATH);
+    furi_hal_bt_stop_advertising();
+
+    bt_keys_storage_set_storage_path(bt, APP_DATA_PATH(HID_BT_KEYS_STORAGE_NAME));
     bt_forget_bonded_devices(bt);
 
     // Wait 2nd core to update nvm storage
     furi_delay_ms(200);
     bt_keys_storage_set_default_path(bt);
 
-    furi_check(bt_set_profile(bt, BtProfileSerial));
+    furi_check(bt_profile_restore_default(bt));
     furi_record_close(RECORD_BT);
 }
 
@@ -80,32 +126,36 @@ static void ble_hid_connection_status_callback(BtStatus status, void* context) {
     air_mouse_view_set_connected_status(app->air_mouse_view, connected);
 }
 
-static Bt* ble_hid_init(AirMouseApp* app) {
-    Bt* bt = furi_record_open(RECORD_BT);
-    bt_disconnect(bt);
+static FuriHalBleProfileBase* ble_hid_init(AirMouseApp* app) {
+    app->bt = furi_record_open(RECORD_BT);
+    bt_disconnect(app->bt);
 
     // Wait 2nd core to update nvm storage
     furi_delay_ms(200);
 
-    bt_keys_storage_set_storage_path(bt, BLE_HID_KEYS_PATH);
+    bt_keys_storage_set_storage_path(app->bt, APP_DATA_PATH(HID_BT_KEYS_STORAGE_NAME));
 
-    furi_check(bt_set_profile(bt, BtProfileHidKeyboard));
+    FuriHalBleProfileBase* ble_hid_profile =
+        bt_profile_start(app->bt, ble_profile_hid, (void*)&ble_hid_params);
+    furi_check(ble_hid_profile);
 
     furi_hal_bt_start_advertising();
-    bt_set_status_changed_callback(bt, ble_hid_connection_status_callback, app);
-    return bt;
+    bt_set_status_changed_callback(app->bt, ble_hid_connection_status_callback, app);
+
+    return ble_hid_profile;
 }
 
-static void ble_hid_deinit(Bt* bt) {
-    bt_set_status_changed_callback(bt, NULL, NULL);
-    bt_disconnect(bt);
+static void ble_hid_deinit(AirMouseApp* app) {
+    bt_set_status_changed_callback(app->bt, NULL, NULL);
+    bt_disconnect(app->bt);
 
     // Wait 2nd core to update nvm storage
     furi_delay_ms(200);
-    bt_keys_storage_set_default_path(bt);
+    bt_keys_storage_set_default_path(app->bt);
 
-    furi_check(bt_set_profile(bt, BtProfileSerial));
+    furi_check(bt_profile_restore_default(app->bt));
     furi_record_close(RECORD_BT);
+    app->bt = NULL;
 }
 
 static uint32_t air_mouse_exit(void* context) {
@@ -123,8 +173,8 @@ static void air_mouse_hid_deinit(void* context) {
     AirMouseApp* app = context;
 
     if(app->bt) {
-        ble_hid_deinit(app->bt);
-        app->bt = NULL;
+        ble_hid_deinit(app);
+        app->ble_hid_profile = NULL;
     } else if(app->usb_mode_prev) {
         furi_hal_usb_set_config(app->usb_mode_prev, NULL);
         app->usb_mode_prev = NULL;
@@ -139,12 +189,12 @@ static void air_mouse_submenu_callback(void* context, uint32_t index) {
         furi_hal_usb_unlock();
         furi_hal_usb_set_config(&usb_hid, NULL);
 
-        air_mouse_view_set_hid_api(app->air_mouse_view, &hid_api_usb, false);
+        air_mouse_view_set_hid_api(app->air_mouse_view, &hid_api_usb, NULL, false);
         view_dispatcher_switch_to_view(app->view_dispatcher, AirMouseViewMain);
     } else if(index == StartSubmenuIndexBle) {
-        app->bt = ble_hid_init(app);
+        app->ble_hid_profile = ble_hid_init(app);
 
-        air_mouse_view_set_hid_api(app->air_mouse_view, &hid_api_ble, true);
+        air_mouse_view_set_hid_api(app->air_mouse_view, &hid_api_ble, app->ble_hid_profile, true);
         view_dispatcher_switch_to_view(app->view_dispatcher, AirMouseViewMain);
     } else if(index == StartSubmenuIndexBleReset) {
         ble_hid_remove_pairing();

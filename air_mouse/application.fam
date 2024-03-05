@@ -1,7 +1,7 @@
 App(
     appid="vgm_air_mouse",
     name="Air Mouse",
-    fap_version="1.1",
+    fap_version="1.2",
     fap_description="Turn Flipper Zero with the Video Game Module into an air mouse",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="air_mouse_app",
@@ -9,4 +9,5 @@ App(
     fap_icon="airmouse_10x10.png",
     fap_icon_assets="assets",
     fap_category="GPIO",
+    fap_libs=["ble_profile"],
 )
