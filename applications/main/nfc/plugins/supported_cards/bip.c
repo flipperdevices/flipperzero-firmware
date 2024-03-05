@@ -297,7 +297,7 @@ static bool bip_parse(const NfcDevice* device, FuriString* parsed_data) {
             parsed_data,
             "\e#Tarjeta Bip!\n"
             "Card Number: %lu\n"
-            "Balance: $%u (flags %x)\n"
+            "Balance: $%hu (flags %hu)\n"
             "Current Trip Window Ends:\n  @",
             bip_data.card_id,
             bip_data.balance,
