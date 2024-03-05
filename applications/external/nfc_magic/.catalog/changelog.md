@@ -1,16 +1,10 @@
+## 1.6
+ - Rework with new bit lib API
+
 ## 1.5
-
- - Get revision, get config moved into main Gen4 menu
- - New function: Set Gen4 card shadow mode
- - New function: Set Gen4 card direct write to block 0 mode
- - Fixed: back button did not allow to exit from some scenes while the card is next to the Flipper HF RFID antenna
-
-## 1.4 
-
  - Fix incorrect max sector configuration
 
 ## 1.4 
-
  - Auth with password option moved into new submenu "Gen4 actions"
  - New function: Get gen4 card revision
  - New function: Get gen4 card config (shows only when debug ON)
