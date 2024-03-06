@@ -39,6 +39,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [Auto-generated firmware documentation take two #2944 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/2944)
 - OFW: PR: [Fix Troika 4K parser keys #3499 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3499)
 - Added: [Pi Terminal v1.0 (By dagnazty & InfoSecREDD)](https://github.com/InfoSecREDD/Flip-pi)
+- [Air Arkanoid & Air Labyrinth: Use PYTHON3 var (By Willy-JL)]()
 
 <a name="release">
 
