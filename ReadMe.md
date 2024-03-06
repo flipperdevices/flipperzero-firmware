@@ -29,11 +29,12 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0305-1123-0.99.1-a8e557f](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-03-05 23:05 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-03-05 23:05 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-03-05 23:10 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-03-05 23:10 EST`
 - [Quick fix for rgb (By HaxSam)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/5bb4ab3a021a24406f7d3a996a119c3e2ea5dd87)
 - [Add is_connected api for expansion (By HaxSam)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/2f4186322bcd1899703fa22daeda29d554c3be2b)
 - [JS: Added Submenu support (By Spooks4576)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/6335d14c7498ab4b2e4b28fa707fe7f68d3843b5)
+- Updated: [BLE Spam v5.1 (By Willy-JL & ECTO-1A & Spooks4576 with research from xMasterX; OFW API thanks to noproto)](https://github.com/noproto/apple_ble_spam_ofw) [Added NameFlood option (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/f2a6af257c8ce8e47181329c59a8a4e44e927c58)
 
 <a name="release">
 
