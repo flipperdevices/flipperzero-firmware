@@ -84,6 +84,7 @@
 #include <furi.h>
 #include <furi_hal.h>
 
+#include <gui/elements.h>
 #include <gui/view.h>
 #include <pokemon_icons.h>
 #include <gblink.h>
@@ -148,6 +149,7 @@ typedef enum {
     TRADE_PATCH_HEADER,
     TRADE_PATCH_DATA,
     TRADE_SELECT,
+    TRADE_MAIL,
     TRADE_PENDING,
     TRADE_CONFIRMATION,
     TRADE_DONE
@@ -239,11 +241,12 @@ static bool trade_input_callback(InputEvent *event, void *context)
 static void trade_draw_connect(Canvas* const canvas) {
     furi_assert(canvas);
 
-    canvas_draw_frame(canvas, 0, 0, 128, 64);
-    canvas_draw_icon(canvas, 1, 21, &I_Connect_me_62x31);
-    canvas_draw_icon(canvas, 0, 53, &I_Background_128x11);
+    //canvas_draw_frame(canvas, 0, 0, 128, 64);
+    canvas_draw_icon(canvas, 8, 33, &I_dolphin);
+    canvas_draw_icon(canvas, 52, 33, &I_hand_cable);
+    //canvas_draw_icon(canvas, 0, 53, &I_Background_128x11);
     canvas_draw_icon(canvas, 80, 0, &I_game_boy);
-    canvas_draw_icon(canvas, 8, 2, &I_Space_65x18);
+    elements_frame(canvas, 9, 2, 64, 17);
     canvas_draw_str(canvas, 18, 13, "Connect GB");
 }
 
@@ -251,11 +254,12 @@ static void trade_draw_connect(Canvas* const canvas) {
 static void trade_draw_connected(Canvas* const canvas) {
     furi_assert(canvas);
 
-    canvas_draw_frame(canvas, 0, 0, 128, 64);
-    canvas_draw_icon(canvas, 1, 21, &I_Connected_62x31);
-    canvas_draw_icon(canvas, 0, 53, &I_Background_128x11);
+    //canvas_draw_frame(canvas, 0, 0, 128, 64);
+    canvas_draw_icon(canvas, 8, 33, &I_dolphin);
+    canvas_draw_icon(canvas, 52, 33, &I_hand_thumbsup);
+    //canvas_draw_icon(canvas, 0, 53, &I_Background_128x11);
     canvas_draw_icon(canvas, 80, 0, &I_game_boy);
-    canvas_draw_icon(canvas, 8, 2, &I_Space_65x18);
+    elements_frame(canvas, 9, 2, 64, 17);
     canvas_draw_str(canvas, 18, 13, "Connected!");
 }
 
@@ -265,11 +269,27 @@ static void trade_draw_connected(Canvas* const canvas) {
 static void trade_draw_frame(Canvas* canvas, const char* str) {
     furi_assert(canvas);
 
+    /* Paint the area behind the background bar and text box white to prevent overlap */
+    canvas_set_color(canvas, ColorWhite);
+    /* Background bar */
+    canvas_draw_box(canvas, 0, 53, 9, 7);
+    canvas_draw_box(canvas, 6, 56, 59, 6);
+    canvas_draw_box(canvas, 60, 53, 32, 7);
+    canvas_draw_box(canvas, 87, 56, 38, 6);
+    /* Text box */
+    canvas_draw_box(canvas, 59, 0, 67, 19);
+
+    canvas_set_color(canvas, ColorBlack);
+
+    /* Draw bar with transparencies */
+    canvas_set_bitmap_mode(canvas, 1);
     canvas_draw_icon(canvas, 0, 53, &I_Background_128x11);
-    canvas_draw_frame(canvas, 0, 0, 128, 64);
-    canvas_draw_icon(canvas, 24, 0, &I_Space_80x18);
-    canvas_draw_str(canvas, 48, 12, str);
-    canvas_draw_icon(canvas, 27, 1, &I_red_16x15);
+    canvas_set_bitmap_mode(canvas, 0);
+
+    /* Draw text box and populate it with string and Red icon */
+    elements_frame(canvas, 59, 0, 67, 19);
+    canvas_draw_str(canvas, 82, 12, str);
+    canvas_draw_icon(canvas, 61, 2, &I_red_16x15);
 }
 
 /* Draws the Pokemon's image in the middle of the screen */
@@ -277,7 +297,7 @@ static void trade_draw_pkmn_avatar(Canvas* canvas, const Icon* icon) {
     furi_assert(canvas);
     furi_assert(icon);
 
-    canvas_draw_icon(canvas, 38, 0, icon);
+    canvas_draw_icon(canvas, 2, 0, icon);
     furi_hal_light_set(LightBlue, 0x00);
     furi_hal_light_set(LightGreen, 0x00);
 }
@@ -330,10 +350,10 @@ static void trade_draw_callback(Canvas* canvas, void* view_model) {
         furi_hal_light_set(LightGreen, 0x00);
         if(model->ledon) {
             furi_hal_light_set(LightBlue, 0xff);
-            canvas_draw_icon(canvas, 0, 0, &I_gb_step_1);
+            canvas_draw_icon(canvas, 0, 5, &I_gb_step_1);
         } else {
             furi_hal_light_set(LightBlue, 0x00);
-            canvas_draw_icon(canvas, 0, 0, &I_gb_step_2);
+            canvas_draw_icon(canvas, 0, 5, &I_gb_step_2);
         }
         trade_draw_frame(canvas, "TRADING");
         break;
@@ -623,9 +643,28 @@ static uint8_t getTradeCentreResponse(struct trade_ctx* trade) {
 	 * preamble bytes, 7x 0x00, then 189 bytes for the patch list. A
 	 * total of 199 bytes transmitted.
 	 */
-        if(counter == 196) trade->trade_centre_state = TRADE_SELECT;
+	/* Gen I and II patch lists seem to be the same length */
+        if(counter == 196) {
+            if(trade->pdata->gen == GEN_I)
+                trade->trade_centre_state = TRADE_SELECT;
+	    else if(trade->pdata->gen == GEN_II)
+                trade->trade_centre_state = TRADE_MAIL;
+
+            counter = 0;
+        }
 
         break;
+
+    /* Preambled with 6x 0x20 bytes; 33*6 == 198 bytes of Mail, for each pokemon,
+     * even if they have no mail set; 14*6 == 84 bytes, for each pokemon's mail,
+     * the OT Name and ID; a 0xff; 100 zero bytes (unsure if they are always 0).
+     * This is 6 + 198 + 84 + 1 + 100 == 389.
+     */
+    case TRADE_MAIL:
+        counter++;
+	if (counter == 389)
+            trade->trade_centre_state = TRADE_SELECT;
+    break;
 
     /* Resets the incoming Pokemon index, and once a BLANK byte is received,
      * moves to the pending state.
@@ -641,8 +680,6 @@ static uint8_t getTradeCentreResponse(struct trade_ctx* trade) {
     /* Handle the Game Boy selecting a Pokemon to trade, or leaving the table */
     case TRADE_PENDING:
         /* If the player leaves the trade menu and returns to the room */
-	if (in == 0x20) break; // HACK TODO this is mail header. This should fix flipper getting ahead
-	if (in == 0xFF) break; // HACK TODO this is mail header. This should fix flipper getting ahead
         if (trade->pdata->gen == GEN_I && in == PKMN_TABLE_LEAVE_GEN_I) {
             trade->trade_centre_state = TRADE_RESET;
             send = PKMN_TABLE_LEAVE_GEN_I;
