@@ -37,6 +37,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [BLE Spam v5.1 (By Willy-JL & ECTO-1A & Spooks4576 with research from xMasterX; OFW API thanks to noproto)](https://github.com/noproto/apple_ble_spam_ofw) [Added NameFlood option (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/f2a6af257c8ce8e47181329c59a8a4e44e927c58)
 - Added: [Quac! v0.1 (By rdefeo)](https://github.com/rdefeo/quac)
 - OFW: [Auto-generated firmware documentation take two #2944 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/2944)
+- OFW: PR: [Fix Troika 4K parser keys #3499 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3499)
 
 <a name="release">
 
