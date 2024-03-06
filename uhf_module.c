@@ -16,7 +16,7 @@ volatile uint16_t tick = 0;
 // }
 
 static M100ResponseType setup_and_send_rx(M100Module* module, uint8_t* cmd, size_t cmd_length) {
-    uhf_uart_send_wait(module->uart, cmd, cmd_length);
+    uhf_uart_send(module->uart, cmd, cmd_length);
     buffer_close(module->uart->buffer);
     // Validation Checks
     uint8_t* data = buffer_get_data(module->uart->buffer);

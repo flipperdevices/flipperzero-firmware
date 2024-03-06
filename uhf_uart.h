@@ -15,8 +15,8 @@ typedef void (*CallbackFunction)(uint8_t *data, void *ctx);
 
 
 typedef enum{
-    UHFUartWorkerWaitingFlag,
-    UHFUartWorkerExitingFlag
+    UHFUartWorkerWaitingDataFlag = 1 << 0,
+    UHFUartWorkerExitingFlag = 1 << 1,
 }UHFUartWorkerEventFlag;
 
 // static void uhf_uart_received_byte_callback(FuriHalSerialHandle* handle, FuriHalSerialRxEvent event, void *ctx);
@@ -24,6 +24,7 @@ typedef enum{
 typedef struct{
     FuriHalBus bus;
     FuriHalSerialHandle *handle;
+    FuriStreamBuffer *rx_buff_stream;
     FuriThread *thread;
     CallbackFunction callback;
     Buffer *buffer;
