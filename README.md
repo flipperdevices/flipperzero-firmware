@@ -62,4 +62,4 @@ The signal files are played back as recorded. During playback/transmit, the LED 
 - Improved UI
 
 ## Building / Install
-This app is currently built with `ufbt`, intended for the stock firmware. I have not tested this on other firmwares. I will post the `.fap` shortly.
+This app is currently built with `ufbt`, intended for the stock firmware. I have not tested this on other firmwares. The `.fap` file can be found in the Releases section on the right.
