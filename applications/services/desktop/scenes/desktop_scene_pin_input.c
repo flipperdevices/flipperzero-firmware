@@ -90,11 +90,9 @@ void desktop_scene_pin_input_on_enter(void* context) {
     desktop_view_pin_input_set_label_button(desktop->pin_input_view, "OK");
     uint32_t attempts = furi_hal_rtc_get_pin_fails();
     state->enter_pin_string = furi_string_alloc();
-    furi_string_set_str(state->enter_pin_string, "Enter PIN (Fails: ");
-    furi_string_cat_printf(state->enter_pin_string, "%lu", attempts);
-    furi_string_cat_str(state->enter_pin_string, "):");
-    const char* enter_pin_cstr = furi_string_get_cstr(state->enter_pin_string);
+    furi_string_cat_printf(state->enter_pin_string, "Enter PIN (Fails: %lu):", attempts);
     if(attempts > 0) {
+        const char* enter_pin_cstr = furi_string_get_cstr(state->enter_pin_string);
         desktop_view_pin_input_set_label_secondary(
             desktop->pin_input_view, 30, 25, enter_pin_cstr);
     } else {
@@ -135,11 +133,10 @@ bool desktop_scene_pin_input_on_event(void* context, SceneManagerEvent event) {
             desktop_scene_locked_light_red(false);
             desktop_view_pin_input_set_label_primary(desktop->pin_input_view, 0, 0, NULL);
             uint32_t attempts = furi_hal_rtc_get_pin_fails();
-            furi_string_set_str(state->enter_pin_string, "Enter PIN (Fails: ");
-            furi_string_cat_printf(state->enter_pin_string, "%lu", attempts);
-            furi_string_cat_str(state->enter_pin_string, "):");
-            const char* enter_pin_cstr = furi_string_get_cstr(state->enter_pin_string);
+            furi_string_set_str(state->enter_pin_string, "");
+            furi_string_cat_printf(state->enter_pin_string, "Enter PIN (Fails: %lu):", attempts);
             if(attempts > 0) {
+                const char* enter_pin_cstr = furi_string_get_cstr(state->enter_pin_string);
                 desktop_view_pin_input_set_label_secondary(
                     desktop->pin_input_view, 30, 25, enter_pin_cstr);
             } else {
