@@ -110,7 +110,8 @@ bool desktop_scene_pin_input_on_event(void* context, SceneManagerEvent event) {
     Desktop* desktop = (Desktop*)context;
     bool consumed = false;
     uint32_t pin_timeout = 0;
-    DesktopScenePinInputState* state = malloc(sizeof(DesktopScenePinInputState));
+    DesktopScenePinInputState* state = (DesktopScenePinInputState*)scene_manager_get_scene_state(
+        desktop->scene_manager, DesktopScenePinInput);
     if(event.type == SceneManagerEventTypeCustom) {
         switch(event.event) {
         case DesktopPinInputEventUnlockFailed:
@@ -134,7 +135,6 @@ bool desktop_scene_pin_input_on_event(void* context, SceneManagerEvent event) {
             desktop_scene_locked_light_red(false);
             desktop_view_pin_input_set_label_primary(desktop->pin_input_view, 0, 0, NULL);
             uint32_t attempts = furi_hal_rtc_get_pin_fails();
-            state->enter_pin_string = furi_string_alloc();
             furi_string_set_str(state->enter_pin_string, "Enter PIN (Fails: ");
             furi_string_cat_printf(state->enter_pin_string, "%lu", attempts);
             furi_string_cat_str(state->enter_pin_string, "):");
