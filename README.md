@@ -51,7 +51,7 @@ Here's an example file layout for the screenshots above:
      -01_Power_Off.ir
 ```
 
-When the action files and folders are rendered for display, any `XX_` prefix will be stripped. Additionally, all underscores will be replaced with spaces. Casing is preserved.
+When the action files and folders are rendered for display, any `XX_` prefix will be stripped. All underscores will be replaced with spaces. Extensions will be stripped. Casing is preserved.
 
 ## Signal playback
 The signal files are played back as recorded. During playback/transmit, the LED light will flash green until the action is complete. For RFID signals, they are continuously played back for 3 seconds.
