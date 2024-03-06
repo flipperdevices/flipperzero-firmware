@@ -23,6 +23,7 @@ static FelicaPoller* felica_poller_alloc(Nfc* nfc) {
     nfc_set_guard_time_us(instance->nfc, FELICA_GUARD_TIME_US);
     nfc_set_fdt_poll_fc(instance->nfc, FELICA_FDT_POLL_FC);
     nfc_set_fdt_poll_poll_us(instance->nfc, FELICA_POLL_POLL_MIN_US);
+    mbedtls_des3_init(&instance->des_context);
     instance->data = felica_alloc();
 
     instance->felica_event.data = &instance->felica_event_data;
@@ -40,6 +41,7 @@ static void felica_poller_free(FelicaPoller* instance) {
     furi_assert(instance->rx_buffer);
     furi_assert(instance->data);
 
+    mbedtls_des3_free(&instance->des_context);
     bit_buffer_free(instance->tx_buffer);
     bit_buffer_free(instance->rx_buffer);
     felica_free(instance->data);
