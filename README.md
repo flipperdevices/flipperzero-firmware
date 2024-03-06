@@ -25,6 +25,11 @@ The app does not provide any recording functionality - you must use the existing
 ## File System Layout
 The key to organizing your Quac interface is to organize your `/ext/apps_data/quac` folder structure. Every individual file is assigned a button, and every folder/directory is a "group". Selecting a group will show you the contents of that folder/directory, whether they are individual files or more folders. There is no limit on the number of actions or folders - nest as deep as you want!
 
+## Navigation / Controls
+- Pressing `OK` on a folder will open/navigate to that folder and display it's contents.
+- Pressing `OK` on an action (indicated as a label surrounded by a border) will transmit that signal.
+- Pressing `Back` will take you up one folder
+
 You can organize your files by device type, or by function. For example, you may have a folder of "TV" actions, which correspond to Channel Up, Channel Down, Volume Up, Volume Down, etc. Or you may have a "Work Access" folder, which contains files/actions that correspond to Parking Gate, Garage Door, Lobby Entrance. 
 
 The files in a folder can be of mixed types. This is Quac's main strength! So continuing with the "Work Access" example, the Parking Gate can be Sub-Ghz and the Garage Door can be RFID.
