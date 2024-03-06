@@ -212,14 +212,20 @@ static bool trade_input_callback(InputEvent *event, void *context)
     struct trade_ctx* trade = context;
     bool consumed = false;
 
-    if (event->type == InputTypePress && event->key == InputKeyOk) {
+    if (event->type == InputTypePress) {
         with_view_model(
             trade->view,
             struct trade_model *model,
             {
-                model->gameboy_status++;
-                if (model->gameboy_status == GAMEBOY_STATE_COUNT)
-                    model->gameboy_status = GAMEBOY_CONN_FALSE;
+                if (event->key == InputKeyRight) {
+                    model->gameboy_status++;
+                    if (model->gameboy_status == GAMEBOY_STATE_COUNT)
+                        model->gameboy_status = GAMEBOY_CONN_FALSE;
+                } else if (event->key == InputKeyLeft) {
+                    if (model->gameboy_status == GAMEBOY_CONN_FALSE)
+                        model->gameboy_status = GAMEBOY_COLOSSEUM;
+                    else model->gameboy_status--;
+                }
             },
             true);
         consumed = true;
