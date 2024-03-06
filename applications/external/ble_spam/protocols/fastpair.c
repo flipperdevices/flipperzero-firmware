@@ -582,6 +582,7 @@ enum {
     _ConfigExtraStart = ConfigExtraStart,
     ConfigModel,
     ConfigInfoRequire,
+    ConfigInfoPatched,
     ConfigCOUNT,
 };
 static void config_callback(void* _ctx, uint32_t index) {
@@ -592,6 +593,8 @@ static void config_callback(void* _ctx, uint32_t index) {
         scene_manager_next_scene(ctx->scene_manager, SceneFastpairModel);
         break;
     case ConfigInfoRequire:
+        break;
+    case ConfigInfoPatched:
         break;
     default:
         ctx->fallback_config_enter(ctx, index);
@@ -679,6 +682,8 @@ static void extra_config(Ctx* ctx) {
     variable_item_set_current_value_text(item, model_name);
 
     variable_item_list_add(list, "Requires Google services", 0, NULL, NULL);
+
+    variable_item_list_add(list, "Patched on new Android", 0, NULL, NULL);
 
     variable_item_list_set_enter_callback(list, config_callback, ctx);
 }
