@@ -1,4 +1,6 @@
-# Quac! Remote
+
+
+# <img src="quac.png" alt="logo" width="30" style="image-rendering: pixelated;"/> Quac! Remote
 ## QUick ACtion Remote Control for Flipperzero
 This app allows you to organize previously recorded signals, of any type*, so that you can quickly and easily play them back. No more needing to recall whether that door is Sub-GHz or RFID! Just navigate to that action in **Quac** and press OK to send!
 
@@ -9,7 +11,16 @@ The app does not provide any recording functionality - you must use the existing
 ```
 
 ## Screenshots
-![text](screenshots/screenshot_1.png) ![text](screenshots/screenshot_2.png)
+<table align="center">
+  <tr>
+    <td align="center">Main View</td>
+    <td align="center">"Work" Actions</td>
+  </tr>
+  <tr>
+    <td><img src="screenshots/screenshot_1.png"/></td>
+    <td><img src="screenshots/screenshot_2.png"/></td>
+  </tr>
+</table>
 
 ## File System Layout
 The key to organizing your Quac interface is to organize your `/ext/apps_data/quac` folder structure. Every individual file is assigned a button, and every folder/directory is a "group". Selecting a group will show you the contents of that folder/directory, whether they are individual files or more folders. There is no limit on the number of actions or folders - nest as deep as you want!
@@ -36,3 +47,13 @@ Here's an example file layout for the screenshots above:
 
 When the action files and folders are rendered for display, any `XX_` prefix will be stripped. Additionally, all underscores will be replaced with spaces. Casing is preserved.
 
+## Signal playback
+The signal files are played back as recorded. During playback/transmit, the LED light will flash green until the action is complete. For RFID signals, they are continuously played back for 3 seconds.
+
+## Features on deck... maybe?
+- Horizontal layout
+- Customize length of RFID playback
+- Improved UI
+
+## Building / Install
+This app is currently built with `ufbt`, intended for the stock firmware. I have not tested this on other firmwares. I will post the `.fap` shortly.
