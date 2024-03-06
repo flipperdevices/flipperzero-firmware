@@ -16,7 +16,13 @@ void nfc_magic_scene_not_magic_on_enter(void* context) {
     widget_add_string_element(
         widget, 3, 4, AlignLeft, AlignTop, FontPrimary, "This is wrong card");
     widget_add_string_multiline_element(
-        widget, 4, 17, AlignLeft, AlignTop, FontSecondary, "Not magic or unsupported\ncard. Only Gen1 and \nGen4 UMC cards supported.");
+        widget,
+        4,
+        17,
+        AlignLeft,
+        AlignTop,
+        FontSecondary,
+        "Not magic or unsupported\ncard. Only Gen1 and \nGen4 UMC cards supported.");
     widget_add_button_element(
         widget, GuiButtonTypeLeft, "Retry", nfc_magic_scene_not_magic_widget_callback, instance);
 
