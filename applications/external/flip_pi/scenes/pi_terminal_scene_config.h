@@ -1,0 +1,6 @@
+ADD_SCENE(Pi_Terminal, start, Start)
+ADD_SCENE(Pi_Terminal, setup, Setup)
+ADD_SCENE(Pi_Terminal, console_output, ConsoleOutput)
+ADD_SCENE(Pi_Terminal, text_input, UART_TextInput)
+ADD_SCENE(Pi_Terminal, hex_input, UART_HexInput)
+ADD_SCENE(Pi_Terminal, help, Help)

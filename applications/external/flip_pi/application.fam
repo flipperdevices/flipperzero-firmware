@@ -1,0 +1,15 @@
+App(
+    appid="pi_terminal",
+    name="Pi Terminal",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="Pi_Terminal_app",
+    requires=["gui"],
+    stack_size=1 * 1024,
+    order=90,
+    fap_icon="Pi_Terminal.png",
+    fap_category="GPIO",
+    fap_icon_assets="assets",
+    fap_author="@dagnazty and @InfoSecREDD",
+    fap_version="1.0",
+    fap_description="Control Raspberry Pi Zero W and Zero W 2 via the Flipper Zero UART interface.",
+)
