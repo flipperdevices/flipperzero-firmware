@@ -268,14 +268,24 @@ static void trade_draw_connected(Canvas* const canvas) {
 static void trade_draw_frame(Canvas* canvas, const char* str) {
     furi_assert(canvas);
 
-    /* Paint the area behind the background bar white to prevent overlap */
+    /* Paint the area behind the background bar and text box white to prevent overlap */
     canvas_set_color(canvas, ColorWhite);
+    /* Background bar */
     canvas_draw_box(canvas, 0, 53, 9, 7);
-    canvas_draw_box(canvas, 6, 56, 58, 6);
+    canvas_draw_box(canvas, 6, 56, 59, 6);
+    canvas_draw_box(canvas, 60, 53, 32, 7);
+    canvas_draw_box(canvas, 87, 56, 38, 6);
+    /* Text box */
+    canvas_draw_box(canvas, 59, 0, 67, 19);
+
     canvas_set_color(canvas, ColorBlack);
+
+    /* Draw bar with transparencies */
     canvas_set_bitmap_mode(canvas, 1);
     canvas_draw_icon(canvas, 0, 53, &I_Background_128x11);
     canvas_set_bitmap_mode(canvas, 0);
+
+    /* Draw text box and populate it with string and Red icon */
     elements_frame(canvas, 59, 0, 67, 19);
     canvas_draw_str(canvas, 82, 12, str);
     canvas_draw_icon(canvas, 61, 2, &I_red_16x15);
@@ -339,10 +349,10 @@ static void trade_draw_callback(Canvas* canvas, void* view_model) {
         furi_hal_light_set(LightGreen, 0x00);
         if(model->ledon) {
             furi_hal_light_set(LightBlue, 0xff);
-            canvas_draw_icon(canvas, 0, 0, &I_gb_step_1);
+            canvas_draw_icon(canvas, 0, 5, &I_gb_step_1);
         } else {
             furi_hal_light_set(LightBlue, 0x00);
-            canvas_draw_icon(canvas, 0, 0, &I_gb_step_2);
+            canvas_draw_icon(canvas, 0, 5, &I_gb_step_2);
         }
         trade_draw_frame(canvas, "TRADING");
         break;
