@@ -1,21 +1,23 @@
-# Command syntax
+# BadUSB File Format {#badusb_file_format}
+
+## Command syntax
 
 BadUsb app uses extended Duckyscript syntax. It is compatible with classic USB Rubber Ducky 1.0 scripts but provides some additional commands and features, such as custom USB ID, ALT+Numpad input method, SYSRQ command, and more functional keys.
 
-# Script file format
+## Script file format
 
 BadUsb app can execute only text scripts from `.txt` files, no compilation is required. Both `\n` and `\r\n` line endings are supported. Empty lines are allowed. You can use spaces or tabs for line indentation.
 
-# Command set
+## Command set
 
-## Comment line
+### Comment line
 
 Just a single comment line. The interpreter will ignore all text after the REM command.
 | Command | Parameters   | Notes |
 | ------- | ------------ | ----- |
 | REM     | Comment text |       |
 
-## Delay
+### Delay
 
 Pause script execution by a defined time.
 | Command       | Parameters        | Notes                               |
@@ -24,7 +26,7 @@ Pause script execution by a defined time.
 | DEFAULT_DELAY | Delay value in ms | Add delay before every next command |
 | DEFAULTDELAY  | Delay value in ms | Same as DEFAULT_DELAY               |
 
-## Special keys
+### Special keys
 
 | Command            | Notes            |
 | ------------------ | ---------------- |
@@ -53,7 +55,7 @@ Pause script execution by a defined time.
 | APP                | Same as MENU     |
 | Fx                 | F1-F12 keys      |
 
-## Modifier keys
+### Modifier keys
 
 Can be combined with a special key command or a single character.
 | Command        | Notes      |
@@ -77,7 +79,15 @@ Up to 5 keys can be hold simultaneously.
 | HOLD    | Special key or single character | Press and hold key until RELEASE command |
 | RELEASE | Special key or single character | Release key                              |
 
-## String
+## Wait for button press
+
+Will wait indefinitely for a button to be pressed
+| Command               | Parameters   | Notes                                                                 |
+| --------------------- | ------------ | --------------------------------------------------------------------- |
+| WAIT_FOR_BUTTON_PRESS | None         | Will wait for the user to press a button to continue script execution |
+
+
+### String
 
 | Command  | Parameters  | Notes                                      |
 | -------  | ----------- | -----------------                          |
@@ -94,13 +104,13 @@ Delay between keypresses.
 | DEFAULT_STRING_DELAY | Delay value in ms | Apply to every appearing STRING command       |
 | DEFAULTSTRINGDELAY   | Delay value in ms | Same as DEFAULT_STRING_DELAY                  |
 
-## Repeat
+### Repeat
 
 | Command | Parameters                   | Notes                   |
 | ------- | ---------------------------- | ----------------------- |
 | REPEAT  | Number of additional repeats | Repeat previous command |
 
-## ALT+Numpad input
+### ALT+Numpad input
 
 On Windows and some Linux systems, you can print characters by holding `ALT` key and entering its code on Numpad.
 | Command   | Parameters     | Notes                                                           |
@@ -109,7 +119,7 @@ On Windows and some Linux systems, you can print characters by holding `ALT` key
 | ALTSTRING | Text string    | Print text string using ALT+Numpad method                       |
 | ALTCODE   | Text string    | Same as ALTSTRING, presents in some Duckyscript implementations |
 
-## SysRq
+### SysRq
 
 Send [SysRq command](https://en.wikipedia.org/wiki/Magic_SysRq_key)
 | Command | Parameters       | Notes |
