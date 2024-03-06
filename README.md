@@ -1,12 +1,15 @@
 # Quac! Remote
 ## QUick ACtion Remote Control for Flipperzero
-This app allows you to organize previously recorded signals, of any type*, so that you can quickly and easily play them back. No more needing to recall whether that door is Sub-GHz or RFID! Just navigate to that action in *Quac* and press OK to send!
+This app allows you to organize previously recorded signals, of any type*, so that you can quickly and easily play them back. No more needing to recall whether that door is Sub-GHz or RFID! Just navigate to that action in **Quac** and press OK to send!
 
 The app does not provide any recording functionality - you must use the existing Flipperzero apps to create the saved files for your action/device. Additionally, you must manage the folder structure manually on your SD card.
 
 ```
 Only Sub-Ghz (.sub) and RFID (.rfid) files are supported at this time, IR is coming soon!
 ```
+
+## Screenshots
+![text](screenshots/screenshot_1.png) ![text](screenshots/screenshot_2.png)
 
 ## File System Layout
 The key to organizing your Quac interface is to organize your `/ext/apps_data/quac` folder structure. Every individual file is assigned a button, and every folder/directory is a "group". Selecting a group will show you the contents of that folder/directory, whether they are individual files or more folders. There is no limit on the number of actions or folders - nest as deep as you want!
