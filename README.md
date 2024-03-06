@@ -25,7 +25,8 @@ Here's an example file layout:
     -00_Parking_Gate.sub
     -01_Garage_Door.rfid
     -02_Office.rfid
-  /01_Home_Theater
+  -01_Front_Door.rfid
+  /02_Home_Theater
      -00_Power_On.ir
      -01_Power_Off.ir
 ```
