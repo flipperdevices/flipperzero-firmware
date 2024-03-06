@@ -100,3 +100,10 @@ void Pi_Terminal_uart_free(Pi_TerminalUart* uart) {
 
     free(uart);
 }
+
+void Pi_Terminal_uart_send_ctrl_c(Pi_TerminalUart* uart) {
+    if(uart && uart->serial_handle) {
+        uint8_t ctrlC = 0x03; // Ctrl+C ASCII code
+        Pi_Terminal_uart_tx(uart, &ctrlC, 1);
+    }
+}

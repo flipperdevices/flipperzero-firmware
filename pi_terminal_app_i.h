@@ -14,7 +14,7 @@
 #include "pi_text_input.h"
 #include "pi_hex_input.h"
 
-#define START_MENU_ITEMS (8)
+#define START_MENU_ITEMS (9)
 #define SETUP_MENU_ITEMS (3)
 
 #define Pi_Terminal_TEXT_BOX_STORE_SIZE (4096)

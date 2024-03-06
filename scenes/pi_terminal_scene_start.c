@@ -9,6 +9,7 @@ typedef enum {
     SEND_AT_CMD,
     SEND_FAST_CMD,
     SEND_WIFITE,
+    SEND_CTRL_C,
     OPEN_HELP
 } ActionType;
 // Command availability in different modes
@@ -35,7 +36,7 @@ static const Pi_TerminalItem items[START_MENU_ITEMS] = {
     {"Send AT command", {""}, 1, SEND_AT_CMD, TEXT_MODE},
     {"Fast cmd",
      {"kali", "sudo help", "sudo uptime", "sudo reboot", "sudo poweroff"},
-     6,
+     5,
      SEND_FAST_CMD,
      TEXT_MODE},
     {"Wifite",
@@ -43,6 +44,7 @@ static const Pi_TerminalItem items[START_MENU_ITEMS] = {
       1,
       SEND_WIFITE,
       TEXT_MODE},
+    {"Send Ctrl+C", {""}, 1, SEND_CTRL_C, BOTH_MODES},
     {"Help", {""}, 1, OPEN_HELP, BOTH_MODES},
 };
 
@@ -90,6 +92,9 @@ static void Pi_Terminal_scene_start_var_list_enter_callback(void* context, uint3
     case OPEN_PORT:
         view_dispatcher_send_custom_event(app->view_dispatcher, Pi_TerminalEventStartConsole);
         return;
+    case SEND_CTRL_C:
+        Pi_Terminal_uart_send_ctrl_c(app->uart);
+        break;
     case OPEN_HELP:
         view_dispatcher_send_custom_event(app->view_dispatcher, Pi_TerminalEventStartHelp);
         return;
