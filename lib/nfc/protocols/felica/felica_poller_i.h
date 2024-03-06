@@ -107,6 +107,25 @@ FelicaError felica_poller_polling(
     const FelicaPollerPollingCommand* cmd,
     FelicaPollerPollingResponse* resp);
 
+FelicaError felica_poller_read_blocks(
+    FelicaPoller* instance,
+    const uint8_t block_count,
+    const uint8_t* const block_numbers,
+    FelicaPollerReadCommandResponse** const response_ptr);
+
+FelicaError felica_poller_write_blocks(
+    const FelicaPoller* instance,
+    const uint8_t block_count,
+    const uint8_t* const block_numbers,
+    const uint8_t* data,
+    FelicaPollerWriteCommandResponse** const response_ptr);
+
+FelicaError felica_poller_frame_exchange(
+    const FelicaPoller* instance,
+    const BitBuffer* tx_buffer,
+    BitBuffer* rx_buffer,
+    uint32_t fwt);
+
 #ifdef __cplusplus
 }
 #endif
