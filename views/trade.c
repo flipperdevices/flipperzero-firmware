@@ -84,6 +84,7 @@
 #include <furi.h>
 #include <furi_hal.h>
 
+#include <gui/elements.h>
 #include <gui/view.h>
 #include <pokemon_icons.h>
 #include <gblink.h>
@@ -239,11 +240,12 @@ static bool trade_input_callback(InputEvent *event, void *context)
 static void trade_draw_connect(Canvas* const canvas) {
     furi_assert(canvas);
 
-    canvas_draw_frame(canvas, 0, 0, 128, 64);
-    canvas_draw_icon(canvas, 1, 21, &I_Connect_me_62x31);
-    canvas_draw_icon(canvas, 0, 53, &I_Background_128x11);
+    //canvas_draw_frame(canvas, 0, 0, 128, 64);
+    canvas_draw_icon(canvas, 8, 33, &I_dolphin);
+    canvas_draw_icon(canvas, 52, 33, &I_hand_cable);
+    //canvas_draw_icon(canvas, 0, 53, &I_Background_128x11);
     canvas_draw_icon(canvas, 80, 0, &I_game_boy);
-    canvas_draw_icon(canvas, 8, 2, &I_Space_65x18);
+    elements_frame(canvas, 9, 2, 64, 17);
     canvas_draw_str(canvas, 18, 13, "Connect GB");
 }
 
@@ -251,11 +253,12 @@ static void trade_draw_connect(Canvas* const canvas) {
 static void trade_draw_connected(Canvas* const canvas) {
     furi_assert(canvas);
 
-    canvas_draw_frame(canvas, 0, 0, 128, 64);
-    canvas_draw_icon(canvas, 1, 21, &I_Connected_62x31);
-    canvas_draw_icon(canvas, 0, 53, &I_Background_128x11);
+    //canvas_draw_frame(canvas, 0, 0, 128, 64);
+    canvas_draw_icon(canvas, 8, 33, &I_dolphin);
+    canvas_draw_icon(canvas, 52, 33, &I_hand_thumbsup);
+    //canvas_draw_icon(canvas, 0, 53, &I_Background_128x11);
     canvas_draw_icon(canvas, 80, 0, &I_game_boy);
-    canvas_draw_icon(canvas, 8, 2, &I_Space_65x18);
+    elements_frame(canvas, 9, 2, 64, 17);
     canvas_draw_str(canvas, 18, 13, "Connected!");
 }
 
@@ -265,11 +268,17 @@ static void trade_draw_connected(Canvas* const canvas) {
 static void trade_draw_frame(Canvas* canvas, const char* str) {
     furi_assert(canvas);
 
+    /* Paint the area behind the background bar white to prevent overlap */
+    canvas_set_color(canvas, ColorWhite);
+    canvas_draw_box(canvas, 0, 53, 9, 7);
+    canvas_draw_box(canvas, 6, 56, 58, 6);
+    canvas_set_color(canvas, ColorBlack);
+    canvas_set_bitmap_mode(canvas, 1);
     canvas_draw_icon(canvas, 0, 53, &I_Background_128x11);
-    canvas_draw_frame(canvas, 0, 0, 128, 64);
-    canvas_draw_icon(canvas, 24, 0, &I_Space_80x18);
-    canvas_draw_str(canvas, 48, 12, str);
-    canvas_draw_icon(canvas, 27, 1, &I_red_16x15);
+    canvas_set_bitmap_mode(canvas, 0);
+    elements_frame(canvas, 59, 0, 67, 19);
+    canvas_draw_str(canvas, 82, 12, str);
+    canvas_draw_icon(canvas, 61, 2, &I_red_16x15);
 }
 
 /* Draws the Pokemon's image in the middle of the screen */
@@ -277,7 +286,7 @@ static void trade_draw_pkmn_avatar(Canvas* canvas, const Icon* icon) {
     furi_assert(canvas);
     furi_assert(icon);
 
-    canvas_draw_icon(canvas, 38, 0, icon);
+    canvas_draw_icon(canvas, 2, 0, icon);
     furi_hal_light_set(LightBlue, 0x00);
     furi_hal_light_set(LightGreen, 0x00);
 }
