@@ -2,6 +2,7 @@
 
 #include "felica_poller.h"
 
+#include <mbedtls/include/mbedtls/des.h>
 #include <toolbox/bit_buffer.h>
 
 #ifdef __cplusplus
@@ -18,11 +19,28 @@ extern "C" {
 typedef enum {
     FelicaPollerStateIdle,
     FelicaPollerStateActivated,
+    FelicaPollerStateAuthenticate,
+    FelicaPollerStateReadBlockAndMAC,
+    FelicaPollerStateReadBlocks,
+    FelicaPollerStateReadMAC,
+
+    FelicaPollerStateReadSuccess,
+    FelicaPollerStateReadFailed,
+
+    FelicaPollerStateNum
 } FelicaPollerState;
+
+typedef struct {
+    uint8_t data[16];
+} FelicaSessionKey;
 
 struct FelicaPoller {
     Nfc* nfc;
     FelicaPollerState state;
+
+    mbedtls_des3_context des_context;
+    FelicaSessionKey session_key;
+
     FelicaData* data;
     BitBuffer* tx_buffer;
     BitBuffer* rx_buffer;
@@ -31,6 +49,7 @@ struct FelicaPoller {
     FelicaPollerEvent felica_event;
     FelicaPollerEventData felica_event_data;
     NfcGenericCallback callback;
+    uint8_t block_index;
     void* context;
 };
 
@@ -45,6 +64,41 @@ typedef struct {
     FelicaPMm pmm;
     uint8_t request_data[2];
 } FelicaPollerPollingResponse;
+
+typedef struct {
+    uint8_t service_code : 4;
+    uint8_t access_mode : 3;
+    uint8_t length : 1;
+    uint8_t block_number;
+} FelicaBlockListElement;
+
+#pragma pack(push, 1)
+typedef struct {
+    uint8_t code;
+    FelicaIDm idm;
+    uint8_t service_num;
+    uint16_t service_code;
+    uint8_t block_count;
+} FelicaCommandHeader;
+#pragma pack(pop)
+
+typedef struct {
+    uint8_t length;
+    uint8_t response_code;
+    FelicaIDm idm;
+    uint8_t SF1;
+    uint8_t SF2;
+    uint8_t block_count;
+    uint8_t data[];
+} FelicaPollerReadCommandResponse;
+
+typedef struct {
+    uint8_t length;
+    uint8_t response_code;
+    FelicaIDm idm;
+    uint8_t SF1;
+    uint8_t SF2;
+} FelicaPollerWriteCommandResponse;
 
 const FelicaData* felica_poller_get_data(FelicaPoller* instance);
 
