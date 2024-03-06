@@ -8,13 +8,11 @@
 void scene_items_item_callback(void* context, int32_t index, InputType type) {
     App* app = context;
 
-    // FURI_LOG_I(TAG, "item_callback: %ld, %s", index, input_get_type_name(type));
     if(type == InputTypeShort || type == InputTypeRelease) {
-        // FURI_LOG_I(TAG, "You clicked button %li", index);
         app->selected_item = index;
         view_dispatcher_send_custom_event(app->view_dispatcher, Event_ButtonPressed);
     } else {
-        // FURI_LOG_I(TAG, "[Ignored event of type %i]", type);
+        // do nothing
     }
 }
 
@@ -43,7 +41,7 @@ void scene_items_on_enter(void* context) {
         }
     } else {
         FURI_LOG_W(TAG, "No items for: %s", furi_string_get_cstr(items_view->path));
-        // TODO: Display Error popup?
+        // TODO: Display Error popup? Empty folder?
     }
     // ...
 
@@ -61,11 +59,11 @@ bool scene_items_on_event(void* context, SceneManagerEvent event) {
             FURI_LOG_I(TAG, "button pressed is %d", app->selected_item);
             Item* item = ItemArray_get(app->items_view->items, app->selected_item);
             if(item->type == Item_Group) {
+                app->depth++;
                 ItemsView* new_items = item_get_items_view_from_path(app, item->path);
                 FURI_LOG_I(TAG, "calling item_items_view_free");
                 item_items_view_free(app->items_view);
                 app->items_view = new_items;
-                app->depth++;
                 scene_manager_next_scene(app->scene_manager, SR_Scene_Items);
             } else {
                 FURI_LOG_I(TAG, "Initiating item action: %s", furi_string_get_cstr(item->name));
@@ -89,10 +87,10 @@ bool scene_items_on_event(void* context, SceneManagerEvent event) {
             new_path = furi_string_alloc();
             path_extract_dirname(furi_string_get_cstr(app->items_view->path), new_path);
 
+            app->depth--;
             ItemsView* new_items = item_get_items_view_from_path(app, new_path);
             item_items_view_free(app->items_view);
             app->items_view = new_items;
-            app->depth--;
 
             furi_string_free(new_path);
         } else {

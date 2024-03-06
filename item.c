@@ -29,8 +29,10 @@ ItemsView* item_get_items_view_from_path(void* context, FuriString* input_path) 
 
     iview->name = furi_string_alloc();
     if(app->depth == 0) {
+        FURI_LOG_I(TAG, "Depth is ZERO!");
         furi_string_set_str(iview->name, QUAC_NAME);
     } else {
+        FURI_LOG_I(TAG, "Depth is %d", app->depth);
         path_extract_basename(cpath, iview->name);
         item_prettify_name(iview->name);
     }
