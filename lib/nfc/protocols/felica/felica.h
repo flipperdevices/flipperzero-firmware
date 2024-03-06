@@ -9,6 +9,7 @@ extern "C" {
 
 #define FELICA_IDM_SIZE (8U)
 #define FELICA_PMM_SIZE (8U)
+#define FELICA_DATA_BLOCK_SIZE (16U)
 
 #define FELICA_GUARD_TIME_US (20000U)
 #define FELICA_FDT_POLL_FC (10000U)
@@ -44,8 +45,40 @@ typedef struct {
 } FelicaPMm;
 
 typedef struct {
+    uint8_t SF1;
+    uint8_t SF2;
+    uint8_t data[FELICA_DATA_BLOCK_SIZE];
+} FelicaBlock;
+
+typedef struct {
+    FelicaBlock spad[14];
+    FelicaBlock reg;
+    FelicaBlock rc;
+    FelicaBlock mac;
+    FelicaBlock id;
+    FelicaBlock d_id;
+    FelicaBlock ser_c;
+    FelicaBlock sys_c;
+    FelicaBlock ckv;
+    FelicaBlock ck;
+    FelicaBlock mc;
+    FelicaBlock wcnt;
+    FelicaBlock mac_a;
+    FelicaBlock state;
+    FelicaBlock crc_check;
+} FelicaFileSystem;
+
+typedef union {
+    FelicaFileSystem fs;
+    uint8_t dump[sizeof(FelicaFileSystem)];
+} FelicaFSUnion;
+
+typedef struct {
     FelicaIDm idm;
     FelicaPMm pmm;
+    uint8_t blocks_total;
+    FelicaFSUnion data;
+    //uint8_t* dump;
 } FelicaData;
 
 extern const NfcDeviceBase nfc_device_felica;
