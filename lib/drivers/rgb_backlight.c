@@ -228,9 +228,6 @@ void rgb_backlight_reconfigure(bool enabled) {
     rgb_state.rainbow_hsv.s = rgb_settings.rainbow_saturation;
     rgb_backlight_update(rgb_state.last_brightness, false);
 
-    if(rgb_state.enabled && rgb_settings.rainbow_mode == RGBBacklightRainbowModeOff)
-        SK6805_update();
-
     furi_check(furi_mutex_release(rgb_state.mutex) == FuriStatusOk);
 }
 
@@ -289,10 +286,8 @@ void rgb_backlight_update(uint8_t brightness, bool tick) {
         return;
     }
 
-    bool brightness_changed = brightness != rgb_state.last_brightness;
     rgb_state.last_brightness = brightness;
-    if(rgb_settings.rainbow_mode != RGBBacklightRainbowModeOff || brightness_changed)
-        SK6805_update();
+    SK6805_update();
 
     furi_check(furi_mutex_release(rgb_state.mutex) == FuriStatusOk);
 }
