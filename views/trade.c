@@ -98,7 +98,7 @@
  * gameboy_status. Note that while trades will still function with this enabled,
  * forcing the advance of the status will certainly break trades.
  */
-#define GRAPHICS_TESTING
+//#define GRAPHICS_TESTING
 
 #define DELAY_MICROSECONDS 15
 #define PKMN_BLANK 0x00
