@@ -1,7 +1,7 @@
 #include "pi_hex_input.h"
 #include <gui/elements.h>
 #include "pi_terminal_icons.h"
-#include "Pi_Terminal_app_i.h"
+#include "pi_terminal_app_i.h"
 #include <furi.h>
 
 struct UART_TextInput {

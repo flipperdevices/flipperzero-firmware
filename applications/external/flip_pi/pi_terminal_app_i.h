@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Pi_Terminal_app.h"
-#include "scenes/Pi_Terminal_scene.h"
-#include "Pi_Terminal_custom_event.h"
-#include "Pi_Terminal_uart.h"
+#include "pi_terminal_app.h"
+#include "scenes/pi_terminal_scene.h"
+#include "pi_terminal_custom_event.h"
+#include "pi_terminal_uart.h"
 
 #include <gui/gui.h>
 #include <gui/view_dispatcher.h>

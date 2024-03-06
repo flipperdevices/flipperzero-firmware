@@ -1,4 +1,4 @@
-#include "../Pi_Terminal_app_i.h"
+#include "../pi_terminal_app_i.h"
 
 void Pi_Terminal_scene_help_widget_callback(GuiButtonType result, InputType type, void* context) {
     Pi_TerminalApp* app = context;

@@ -1,4 +1,4 @@
-#include "../Pi_Terminal_app_i.h"
+#include "../pi_terminal_app_i.h"
 
 void Pi_Terminal_scene_hex_input_callback(void* context) {
     Pi_TerminalApp* app = context;

@@ -1,4 +1,4 @@
-#include "../Pi_Terminal_app_i.h"
+#include "../pi_terminal_app_i.h"
 
 void Pi_Terminal_console_output_handle_rx_data_cb(uint8_t* buf, size_t len, void* context) {
     furi_assert(context);

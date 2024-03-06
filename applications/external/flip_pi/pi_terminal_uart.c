@@ -1,5 +1,5 @@
-#include "Pi_Terminal_app_i.h"
-#include "Pi_Terminal_uart.h"
+#include "pi_terminal_app_i.h"
+#include "pi_terminal_uart.h"
 
 struct Pi_TerminalUart {
     Pi_TerminalApp* app;

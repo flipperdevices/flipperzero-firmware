@@ -4,7 +4,7 @@ App(
     apptype=FlipperAppType.EXTERNAL,
     entry_point="Pi_Terminal_app",
     stack_size=1 * 1024,
-    fap_icon="Pi_Terminal.png",
+    fap_icon="pi_terminal.png",
     fap_category="GPIO",
     fap_icon_assets="assets",
     fap_author="dagnazty & InfoSecREDD",

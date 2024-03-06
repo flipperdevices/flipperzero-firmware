@@ -1,4 +1,4 @@
-#include "../Pi_Terminal_app_i.h"
+#include "../pi_terminal_app_i.h"
 
 // Command action type
 typedef enum {
