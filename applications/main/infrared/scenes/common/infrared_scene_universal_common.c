@@ -37,7 +37,7 @@ static void infrared_scene_universal_common_hide_popup(InfraredApp* infrared) {
 
 static void infrared_scene_universal_common_load_callback(void* context) {
     InfraredApp* infrared = context;
-    infrared->app_state.is_load_success =
+    infrared->app_state.is_task_success =
         infrared_brute_force_calculate_messages(infrared->brute_force);
 }
 
@@ -45,7 +45,7 @@ static void infrared_scene_universal_common_load_finished_callback(void* context
     InfraredApp* infrared = context;
     view_dispatcher_send_custom_event(
         infrared->view_dispatcher,
-        infrared_custom_event_pack(InfraredCustomEventTypeLoadFinished, 0));
+        infrared_custom_event_pack(InfraredCustomEventTypeTaskFinished, 0));
 }
 
 void infrared_scene_universal_common_on_enter(void* context) {
@@ -106,10 +106,10 @@ bool infrared_scene_universal_common_on_event(void* context, SceneManagerEvent e
                 } else {
                     scene_manager_next_scene(scene_manager, InfraredSceneErrorDatabases);
                 }
-            } else if(event_type == InfraredCustomEventTypeLoadFinished) {
+            } else if(event_type == InfraredCustomEventTypeTaskFinished) {
                 view_stack_remove_view(infrared->view_stack, loading_get_view(infrared->loading));
 
-                if(!infrared->app_state.is_load_success) {
+                if(!infrared->app_state.is_task_success) {
                     scene_manager_next_scene(infrared->scene_manager, InfraredSceneErrorDatabases);
                 }
             }

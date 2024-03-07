@@ -6,14 +6,14 @@
 
 static void infrared_scene_remote_list_load_callback(void* context) {
     InfraredApp* infrared = context;
-    infrared->app_state.is_load_success =
+    infrared->app_state.is_task_success =
         infrared_remote_load(infrared->remote, furi_string_get_cstr(infrared->file_path));
 }
 
 static void infrared_scene_remote_list_load_finished_callback(void* context) {
     InfraredApp* infrared = context;
     view_dispatcher_send_custom_event(
-        infrared->view_dispatcher, InfraredCustomEventTypeLoadFinished);
+        infrared->view_dispatcher, InfraredCustomEventTypeTaskFinished);
 }
 
 static void infrared_scene_remote_list_select_and_load(InfraredApp* infrared) {
@@ -48,10 +48,10 @@ bool infrared_scene_remote_list_on_event(void* context, SceneManagerEvent event)
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == InfraredCustomEventTypeLoadFinished) {
+        if(event.event == InfraredCustomEventTypeTaskFinished) {
             view_stack_remove_view(infrared->view_stack, loading_get_view(infrared->loading));
 
-            if(infrared->app_state.is_load_success) {
+            if(infrared->app_state.is_task_success) {
                 scene_manager_next_scene(infrared->scene_manager, InfraredSceneRemote);
             } else {
                 infrared_show_error_message(

@@ -1,9 +1,30 @@
 #include "../infrared_app_i.h"
 
+#include <toolbox/concurrent_runner.h>
+
+#define REMOTE_DELETE_STACK_SIZE (2048UL)
+
 static void
     infrared_scene_edit_delete_dialog_result_callback(DialogExResult result, void* context) {
     InfraredApp* infrared = context;
     view_dispatcher_send_custom_event(infrared->view_dispatcher, result);
+}
+
+static void infrared_scene_edit_delete_button_callback(void* context) {
+    InfraredApp* infrared = context;
+    infrared->app_state.is_task_success =
+        infrared_remote_delete_signal(infrared->remote, infrared->app_state.current_button_index);
+}
+
+static void infrared_scene_edit_delete_remote_callback(void* context) {
+    InfraredApp* infrared = context;
+    infrared->app_state.is_task_success = infrared_remote_remove(infrared->remote);
+}
+
+static void infrared_scene_edit_delete_finished_callback(void* context) {
+    InfraredApp* infrared = context;
+    view_dispatcher_send_custom_event(
+        infrared->view_dispatcher, InfraredCustomEventTypeTaskFinished);
 }
 
 void infrared_scene_edit_delete_on_enter(void* context) {
@@ -82,31 +103,39 @@ bool infrared_scene_edit_delete_on_event(void* context, SceneManagerEvent event)
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
+        InfraredAppState* app_state = &infrared->app_state;
+        const InfraredEditTarget edit_target = app_state->edit_target;
+
         if(event.event == DialogExResultLeft) {
             scene_manager_previous_scene(scene_manager);
-            consumed = true;
         } else if(event.event == DialogExResultRight) {
-            bool success = false;
-            InfraredRemote* remote = infrared->remote;
-            InfraredAppState* app_state = &infrared->app_state;
-            const InfraredEditTarget edit_target = app_state->edit_target;
+            view_stack_add_view(infrared->view_stack, loading_get_view(infrared->loading));
 
             if(edit_target == InfraredEditTargetButton) {
                 furi_assert(app_state->current_button_index != InfraredButtonIndexNone);
-                infrared_show_loading_popup(infrared, true);
-                success = infrared_remote_delete_signal(remote, app_state->current_button_index);
-                infrared_show_loading_popup(infrared, false);
-                app_state->current_button_index = InfraredButtonIndexNone;
+                // Delete button in a separate thread
+                concurrent_runner_start(
+                    REMOTE_DELETE_STACK_SIZE,
+                    infrared_scene_edit_delete_button_callback,
+                    infrared_scene_edit_delete_finished_callback,
+                    infrared);
             } else if(edit_target == InfraredEditTargetRemote) {
-                success = infrared_remote_remove(remote);
-                app_state->current_button_index = InfraredButtonIndexNone;
+                // Delete remote in a separate thread (for consistency)
+                concurrent_runner_start(
+                    REMOTE_DELETE_STACK_SIZE,
+                    infrared_scene_edit_delete_remote_callback,
+                    infrared_scene_edit_delete_finished_callback,
+                    infrared);
             } else {
                 furi_crash();
             }
+        } else if(event.event == InfraredCustomEventTypeTaskFinished) {
+            view_stack_remove_view(infrared->view_stack, loading_get_view(infrared->loading));
 
-            if(success) {
+            if(app_state->is_task_success) {
                 scene_manager_next_scene(scene_manager, InfraredSceneEditDeleteDone);
             } else {
+                const InfraredEditTarget edit_target = app_state->edit_target;
                 infrared_show_error_message(
                     infrared,
                     "Failed to\ndelete %s",
@@ -115,8 +144,10 @@ bool infrared_scene_edit_delete_on_event(void* context, SceneManagerEvent event)
                 scene_manager_search_and_switch_to_previous_scene_one_of(
                     scene_manager, possible_scenes, COUNT_OF(possible_scenes));
             }
-            consumed = true;
+
+            app_state->current_button_index = InfraredButtonIndexNone;
         }
+        consumed = true;
     }
 
     return consumed;

@@ -19,12 +19,13 @@
 #include <gui/modules/button_menu.h>
 #include <gui/modules/button_panel.h>
 
+#include <rpc/rpc_app.h>
 #include <storage/storage.h>
 #include <dialogs/dialogs.h>
 
 #include <notification/notification_messages.h>
 
-#include <infrared_worker.h>
+#include <infrared/worker/infrared_worker.h>
 
 #include "infrared_app.h"
 #include "infrared_remote.h"
@@ -35,8 +36,6 @@
 #include "views/infrared_progress_view.h"
 #include "views/infrared_debug_view.h"
 #include "views/infrared_move_view.h"
-
-#include "rpc/rpc_app.h"
 
 #define INFRARED_FILE_NAME_SIZE 100
 #define INFRARED_TEXT_STORE_NUM 2
@@ -83,7 +82,7 @@ typedef struct {
     bool is_learning_new_remote; /**< Learning new remote or adding to an existing one. */
     bool is_debug_enabled; /**< Whether to enable or disable debugging features. */
     bool is_transmitting; /**< Whether a signal is currently being transmitted. */
-    bool is_load_success; /**< Whether the last load operation was successful. */
+    bool is_task_success; /**< Whether the last concurrent operation was successful. */
     InfraredEditTarget edit_target : 8; /**< Selected editing target (a remote or a button). */
     InfraredEditMode edit_mode : 8; /**< Selected editing operation (rename or delete). */
     int32_t current_button_index; /**< Selected button index (move destination). */
@@ -239,17 +238,6 @@ void infrared_text_store_clear(InfraredApp* infrared, uint32_t bank);
 void infrared_play_notification_message(
     const InfraredApp* infrared,
     InfraredNotificationMessage message);
-
-/**
- * @brief Show a loading pop-up screen.
- *
- * In order for this to work, a Stack view must be currently active and
- * the main view must be added to it.
- *
- * @param[in] infrared pointer to the application instance.
- * @param[in] show whether to show or hide the pop-up.
- */
-void infrared_show_loading_popup(const InfraredApp* infrared, bool show);
 
 /**
  * @brief Show a formatted error messsage.

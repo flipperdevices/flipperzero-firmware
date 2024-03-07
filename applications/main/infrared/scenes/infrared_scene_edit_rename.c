@@ -1,7 +1,29 @@
 #include "../infrared_app_i.h"
 
 #include <string.h>
+
 #include <toolbox/path.h>
+#include <toolbox/concurrent_runner.h>
+
+#define REMOTE_RENAME_STACK_SIZE (2048UL)
+
+static void infrared_scene_edit_rename_button_callback(void* context) {
+    InfraredApp* infrared = context;
+    infrared->app_state.is_task_success = infrared_remote_rename_signal(
+        infrared->remote, infrared->app_state.current_button_index, infrared->text_store[0]);
+}
+
+static void infrared_scene_edit_rename_remote_callback(void* context) {
+    InfraredApp* infrared = context;
+    infrared->app_state.is_task_success =
+        infrared_rename_current_remote(infrared, infrared->text_store[0]);
+}
+
+static void infrared_scene_edit_rename_finished_callback(void* context) {
+    InfraredApp* infrared = context;
+    view_dispatcher_send_custom_event(
+        infrared->view_dispatcher, InfraredCustomEventTypeTaskFinished);
+}
 
 void infrared_scene_edit_rename_on_enter(void* context) {
     InfraredApp* infrared = context;
@@ -61,30 +83,39 @@ void infrared_scene_edit_rename_on_enter(void* context) {
 
 bool infrared_scene_edit_rename_on_event(void* context, SceneManagerEvent event) {
     InfraredApp* infrared = context;
-    InfraredRemote* remote = infrared->remote;
     SceneManager* scene_manager = infrared->scene_manager;
-    InfraredAppState* app_state = &infrared->app_state;
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
+        InfraredAppState* app_state = &infrared->app_state;
+        const InfraredEditTarget edit_target = app_state->edit_target;
+
         if(event.event == InfraredCustomEventTypeTextEditDone) {
-            bool success = false;
-            const InfraredEditTarget edit_target = app_state->edit_target;
+            view_stack_add_view(infrared->view_stack, loading_get_view(infrared->loading));
+
             if(edit_target == InfraredEditTargetButton) {
-                const int32_t current_button_index = app_state->current_button_index;
-                furi_assert(current_button_index != InfraredButtonIndexNone);
-                infrared_show_loading_popup(infrared, true);
-                success = infrared_remote_rename_signal(
-                    remote, current_button_index, infrared->text_store[0]);
-                infrared_show_loading_popup(infrared, false);
-                app_state->current_button_index = InfraredButtonIndexNone;
+                furi_assert(app_state->current_button_index != InfraredButtonIndexNone);
+                // Rename button in a separate thread
+                concurrent_runner_start(
+                    REMOTE_RENAME_STACK_SIZE,
+                    infrared_scene_edit_rename_button_callback,
+                    infrared_scene_edit_rename_finished_callback,
+                    infrared);
             } else if(edit_target == InfraredEditTargetRemote) {
-                success = infrared_rename_current_remote(infrared, infrared->text_store[0]);
+                // Rename remote in a separate thread (for consistency)
+                concurrent_runner_start(
+                    REMOTE_RENAME_STACK_SIZE,
+                    infrared_scene_edit_rename_remote_callback,
+                    infrared_scene_edit_rename_finished_callback,
+                    infrared);
             } else {
                 furi_crash();
             }
 
-            if(success) {
+        } else if(event.event == InfraredCustomEventTypeTaskFinished) {
+            view_stack_remove_view(infrared->view_stack, loading_get_view(infrared->loading));
+
+            if(app_state->is_task_success) {
                 scene_manager_next_scene(scene_manager, InfraredSceneEditRenameDone);
             } else {
                 infrared_show_error_message(
@@ -94,8 +125,10 @@ bool infrared_scene_edit_rename_on_event(void* context, SceneManagerEvent event)
                 scene_manager_search_and_switch_to_previous_scene(
                     scene_manager, InfraredSceneRemoteList);
             }
-            consumed = true;
+
+            app_state->current_button_index = InfraredButtonIndexNone;
         }
+        consumed = true;
     }
 
     return consumed;

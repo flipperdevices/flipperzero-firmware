@@ -397,21 +397,6 @@ void infrared_play_notification_message(
     notification_message(infrared->notifications, infrared_notification_sequences[message]);
 }
 
-void infrared_show_loading_popup(const InfraredApp* infrared, bool show) {
-    ViewStack* view_stack = infrared->view_stack;
-    Loading* loading = infrared->loading;
-
-    if(show) {
-        // Raise timer priority so that animations can play
-        furi_timer_set_thread_priority(FuriTimerThreadPriorityElevated);
-        view_stack_add_view(view_stack, loading_get_view(loading));
-    } else {
-        view_stack_remove_view(view_stack, loading_get_view(loading));
-        // Restore default timer priority
-        furi_timer_set_thread_priority(FuriTimerThreadPriorityNormal);
-    }
-}
-
 void infrared_show_error_message(const InfraredApp* infrared, const char* fmt, ...) {
     va_list args;
     va_start(args, fmt);
