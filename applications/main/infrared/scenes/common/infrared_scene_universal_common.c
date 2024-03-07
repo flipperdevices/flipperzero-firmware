@@ -1,6 +1,9 @@
 #include "../../infrared_app_i.h"
 
 #include <dolphin/dolphin.h>
+#include <toolbox/concurrent_runner.h>
+
+#define BRUTE_FORCE_LOADER_STACK_SIZE (2048UL)
 
 void infrared_scene_universal_common_item_callback(void* context, uint32_t index) {
     InfraredApp* infrared = context;
@@ -32,9 +35,34 @@ static void infrared_scene_universal_common_hide_popup(InfraredApp* infrared) {
     infrared_play_notification_message(infrared, InfraredNotificationMessageBlinkStop);
 }
 
+static void infrared_scene_universal_common_load_callback(void* context) {
+    InfraredApp* infrared = context;
+    infrared->app_state.is_load_success =
+        infrared_brute_force_calculate_messages(infrared->brute_force);
+}
+
+static void infrared_scene_universal_common_load_finished_callback(void* context) {
+    InfraredApp* infrared = context;
+    view_dispatcher_send_custom_event(
+        infrared->view_dispatcher,
+        infrared_custom_event_pack(InfraredCustomEventTypeLoadFinished, 0));
+}
+
 void infrared_scene_universal_common_on_enter(void* context) {
     InfraredApp* infrared = context;
+    view_set_orientation(view_stack_get_view(infrared->view_stack), ViewOrientationVertical);
+
     view_stack_add_view(infrared->view_stack, button_panel_get_view(infrared->button_panel));
+    view_stack_add_view(infrared->view_stack, loading_get_view(infrared->loading));
+
+    view_dispatcher_switch_to_view(infrared->view_dispatcher, InfraredViewStack);
+
+    // Load universal remote data in background
+    concurrent_runner_start(
+        BRUTE_FORCE_LOADER_STACK_SIZE,
+        infrared_scene_universal_common_load_callback,
+        infrared_scene_universal_common_load_finished_callback,
+        context);
 }
 
 bool infrared_scene_universal_common_on_event(void* context, SceneManagerEvent event) {
@@ -58,26 +86,34 @@ bool infrared_scene_universal_common_on_event(void* context, SceneManagerEvent e
             if(infrared_custom_event_get_type(event.event) == InfraredCustomEventTypeBackPressed) {
                 infrared_brute_force_stop(brute_force);
                 infrared_scene_universal_common_hide_popup(infrared);
-                consumed = true;
             }
+            consumed = true;
         }
     } else {
         if(event.type == SceneManagerEventTypeBack) {
             scene_manager_previous_scene(scene_manager);
             consumed = true;
         } else if(event.type == SceneManagerEventTypeCustom) {
-            if(infrared_custom_event_get_type(event.event) ==
-               InfraredCustomEventTypeButtonSelected) {
+            uint16_t event_type;
+            int16_t event_value;
+            infrared_custom_event_unpack(event.event, &event_type, &event_value);
+
+            if(event_type == InfraredCustomEventTypeButtonSelected) {
                 uint32_t record_count;
-                if(infrared_brute_force_start(
-                       brute_force, infrared_custom_event_get_value(event.event), &record_count)) {
+                if(infrared_brute_force_start(brute_force, event_value, &record_count)) {
                     dolphin_deed(DolphinDeedIrSend);
                     infrared_scene_universal_common_show_popup(infrared, record_count);
                 } else {
                     scene_manager_next_scene(scene_manager, InfraredSceneErrorDatabases);
                 }
-                consumed = true;
+            } else if(event_type == InfraredCustomEventTypeLoadFinished) {
+                view_stack_remove_view(infrared->view_stack, loading_get_view(infrared->loading));
+
+                if(!infrared->app_state.is_load_success) {
+                    scene_manager_next_scene(infrared->scene_manager, InfraredSceneErrorDatabases);
+                }
             }
+            consumed = true;
         }
     }
 

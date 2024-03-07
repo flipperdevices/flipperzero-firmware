@@ -14,6 +14,7 @@ enum InfraredCustomEventType {
     InfraredCustomEventTypePopupClosed,
     InfraredCustomEventTypeButtonSelected,
     InfraredCustomEventTypeBackPressed,
+    InfraredCustomEventTypeLoadFinished,
 
     InfraredCustomEventTypeRpcLoadFile,
     InfraredCustomEventTypeRpcExit,

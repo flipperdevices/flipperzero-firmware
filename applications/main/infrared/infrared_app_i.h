@@ -83,6 +83,7 @@ typedef struct {
     bool is_learning_new_remote; /**< Learning new remote or adding to an existing one. */
     bool is_debug_enabled; /**< Whether to enable or disable debugging features. */
     bool is_transmitting; /**< Whether a signal is currently being transmitted. */
+    bool is_load_success; /**< Whether the last load operation was successful. */
     InfraredEditTarget edit_target : 8; /**< Selected editing target (a remote or a button). */
     InfraredEditMode edit_mode : 8; /**< Selected editing operation (rename or delete). */
     int32_t current_button_index; /**< Selected button index (move destination). */
