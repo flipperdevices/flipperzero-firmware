@@ -399,7 +399,7 @@ static void draw_callback(Canvas* canvas, void* _ctx) {
             "App+Spam: \e#WillyJL\e#\n"
             "Apple+Crash: \e#ECTO-1A\e#\n"
             "Android+Win: \e#Spooks4576\e#\n"
-            "                                   Version \e#5.1\e#",
+            "                                   Version \e#" FAP_VERSION "\e#",
             false);
         break;
     default: {
@@ -490,12 +490,14 @@ static bool input_callback(InputEvent* input, void* _ctx) {
         consumed = true;
         state->lock_warning = true;
         if(state->lock_count == 0) {
+            furi_timer_set_thread_priority(FuriTimerThreadPriorityElevated);
             furi_timer_start(state->lock_timer, 1000);
         }
         if(input->type == InputTypeShort && input->key == InputKeyBack) {
             state->lock_count++;
         }
         if(state->lock_count >= 3) {
+            furi_timer_set_thread_priority(FuriTimerThreadPriorityElevated);
             furi_timer_start(state->lock_timer, 1);
         }
     } else if(
@@ -613,6 +615,7 @@ static void lock_timer_callback(void* _ctx) {
     with_view_model(
         state->main_view, State * *model, { (*model)->lock_warning = false; }, true);
     state->lock_count = 0;
+    furi_timer_set_thread_priority(FuriTimerThreadPriorityNormal);
 }
 
 static void tick_event_callback(void* _ctx) {
