@@ -109,6 +109,8 @@ char pokemon_char_to_encoded(int byte) {
         return y_;
     case 'z':
         return z_;
+    case '-':
+        return HYPHEN_;
     case '0':
         return _0_;
     case '1':
@@ -255,6 +257,8 @@ int pokemon_encoded_to_char(char byte) {
         return 'y';
     case z_:
         return 'z';
+    case HYPHEN_:
+        return '-';
     case _0_:
         return '0';
     case _1_:
