@@ -87,6 +87,7 @@
 #define D_ARR_ 0xee
 #define MALE_ 0xef
 #define FEMALE_ 0xf5
+#define HYPHEN_ 0xe3
 #define _0_ 0xf6
 #define _1_ 0xf7
 #define _2_ 0xf8
