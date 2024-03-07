@@ -92,10 +92,11 @@ void desktop_scene_pin_input_on_enter(void* context) {
     uint32_t attempts = furi_hal_rtc_get_pin_fails();
     state->enter_pin_string = furi_string_alloc();
     furi_string_cat_printf(state->enter_pin_string, "Wrong Attempts: %lu", attempts);
-    if(attempts > 0) {
-        const char* enter_pin_cstr = furi_string_get_cstr(state->enter_pin_string);
-        desktop_view_pin_input_set_label_tertiary(desktop->pin_input_view, 64, 60, enter_pin_cstr);
+    if(!(attempts > 0)) {
+        furi_string_reset(state->enter_pin_string);
     }
+    const char* enter_pin_cstr = furi_string_get_cstr(state->enter_pin_string);
+    desktop_view_pin_input_set_label_tertiary(desktop->pin_input_view, 64, 60, enter_pin_cstr);
     desktop_view_pin_input_set_pin_position(desktop->pin_input_view, 64, 37);
     desktop_view_pin_input_reset_pin(desktop->pin_input_view);
 
@@ -135,11 +136,12 @@ bool desktop_scene_pin_input_on_event(void* context, SceneManagerEvent event) {
             uint32_t attempts = furi_hal_rtc_get_pin_fails();
             furi_string_reset(state->enter_pin_string);
             furi_string_cat_printf(state->enter_pin_string, "Wrong Attempts: %lu", attempts);
-            if(attempts > 0) {
-                const char* enter_pin_cstr = furi_string_get_cstr(state->enter_pin_string);
-                desktop_view_pin_input_set_label_tertiary(
-                    desktop->pin_input_view, 64, 60, enter_pin_cstr);
+            if(!(attempts > 0)) {
+                furi_string_reset(state->enter_pin_string);
             }
+            const char* enter_pin_cstr = furi_string_get_cstr(state->enter_pin_string);
+            desktop_view_pin_input_set_label_tertiary(
+                desktop->pin_input_view, 64, 60, enter_pin_cstr);
             consumed = true;
             break;
         case DesktopPinInputEventUnlocked:
