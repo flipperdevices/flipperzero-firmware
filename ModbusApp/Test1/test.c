@@ -33,6 +33,14 @@
 #define TEXT_BOX_LEN 4096
 #define FURI_HAL_SERIAL_USART_OVERSAMPLING 0x00000000U
 #define TIMEOUT_SCALER 50
+
+#define FixedModbusSize 4
+#define FixedPaket \
+    ((!app->modbus->slave && FUNCTION <= 0x06) || (app->modbus->slave && FUNCTION >= 0x0F))
+#define SLAVE buf[0]
+#define FUNCTION buf[1]
+#define CRCH buf[len - 2]
+#define CRCL buf[len - 1]
 //////////////////////////   Defining Structs  //////////////////////////
 typedef enum { Main_Scene, Settings_Scene, ConsoleOutput_Scene, Scene_Num } Scenes;
 typedef enum { Submenu_View, VarList_View, TextBox_View } Views;
@@ -73,11 +81,12 @@ typedef struct {
     char logFilePath[100];
     bool LOGfileReady;
 
-    TextBox* textBox;
-    FuriString* text;
+    size_t rows;
     size_t textLen;
 
     FuriTimer* timer;
+    TextBox* textBox;
+    FuriString* text;
 } App;
 
 typedef enum {
@@ -139,17 +148,17 @@ bool OpenLogFile(App* app) {
     }
     if(storage_file_open(
            app->LOGfile, furi_string_get_cstr(selected_filepath), FSAM_READ, FSOM_OPEN_EXISTING)) {
+        app->uart->cfg->saveLOG = false;
         furi_string_reset(app->text);
         char buf[storage_file_size(app->LOGfile)];
         storage_file_read(app->LOGfile, buf, sizeof(buf));
+        buf[sizeof(buf)] = '\0';
         furi_string_cat_str(app->text, buf);
-        app->uart->cfg->saveLOG = false;
     } else
         dialog_message_show_storage_error(app->dialogs, "Cannot open File");
     storage_file_close(app->LOGfile);
     furi_string_free(selected_filepath);
     furi_string_free(predefined_filepath);
-
     return true;
 }
 ///////////////////////////////   UART   ///////////////////////////////////////
@@ -201,7 +210,18 @@ static const char* functionNames[] = {
     "Write Single Register(06)",
     "Write Multiple Coils(0F)",
     "Write Multiple Registers(10)"};
-
+static const char* exceptionCodes[] = {
+    "ILLEGAL FUNCTION",
+    "ILLEGAL DATA ADDRESS",
+    "ILLEGAL DATA VALUE ",
+    "SLAVE DEVICE FAILURE",
+    "ACKNOWLEDGE",
+    "SLAVE DEVICE BUSY ",
+    "",
+    "MEMORY PARITY ERROR ",
+    "",
+    "GATEWAY PATH UNAVAILABLE"
+    "GATEWAY TARGET DEVICE FAILED TO RESPOND"};
 LL_USART_InitTypeDef buildUartSettings(Config* cfg) {
     LL_USART_InitTypeDef USART_InitStruct;
     USART_InitStruct.PrescalerValue = LL_USART_PRESCALER_DIV1;
@@ -278,7 +298,7 @@ uint16_t getCRC(uint8_t* buf, uint8_t len) {
     return crc;
 }
 
-void discreteValuesParser(void* context, uint8_t* buff, size_t len) {
+void discreteValuesParser(void* context, uint8_t* buff, size_t len, FuriString* data) {
     App* app = context;
     uint8_t value = 0;
     uint8_t offset = 0;
@@ -286,21 +306,21 @@ void discreteValuesParser(void* context, uint8_t* buff, size_t len) {
         memcpy(&value, buff + offset, 1);
         offset++;
         if(!app->uart->cfg->hexOutput) {
-            furi_string_cat_printf(app->text, "\n-Byte%d: \n->", offset);
+            furi_string_cat_printf(data, "\n-Byte%d: \n->", offset);
             for(int i = 0; i < 8; i++)
                 furi_string_cat_printf(
-                    app->text,
+                    data,
                     "%s%s",
                     value >> i && 0x01 ? "ON" : "OFF",
                     i == 3 ? "\n->" :
                     i == 7 ? "" :
                              ",");
         } else
-            furi_string_cat_printf(app->text, "\n->Byte%d: 0x%02X", offset, value);
+            furi_string_cat_printf(data, "\n->Byte%d: 0x%02X", offset, value);
         len--;
     }
 }
-void analogValuesParser(void* context, uint8_t* buff, size_t len) {
+void analogValuesParser(void* context, uint8_t* buff, size_t len, FuriString* data) {
     App* app = context;
     uint16_t value = 0;
     uint8_t offset = 0;
@@ -310,101 +330,122 @@ void analogValuesParser(void* context, uint8_t* buff, size_t len) {
         memcpy(&value, buff + offset, 1);
         offset++;
         furi_string_cat_printf(
-            app->text,
+            data,
             app->uart->cfg->hexOutput ? "\n->Reg%d: 0x%04X" : "\n->Reg%d: %d",
             offset / 2,
             value);
         len--;
     }
 }
-void pduParser(void* context, bool slave, uint8_t Fn, uint8_t* pdu, size_t len) {
+void pduParser(void* context, bool slave, uint8_t* buf, size_t len, FuriString* data) {
     App* app = context;
-    size_t offset = 0;
+    size_t offset = 2;
     uint16_t address = 0;
     uint16_t qty = 0;
     uint16_t bCount = 0;
     uint16_t value = 0;
     UNUSED(len);
     //TODO: Handle error codes, unsupported codes & detect type-length missmatch
-    memcpy(slave && Fn <= 4 ? &bCount : &address, pdu + offset, slave && Fn <= 4 ? 1 : 2);
-    offset += slave && Fn <= 4 ? 1 : 2;
+    furi_string_cat_printf(
+        data, "\n%s", functionNames[FUNCTION < 6 ? FUNCTION - 1 : FUNCTION - 9]);
+    furi_string_cat_printf(
+        data, app->uart->cfg->hexOutput ? "\nSlave: 0x%02X" : "\nSlave: %d", SLAVE);
+    memcpy(
+        slave && FUNCTION <= 4 ? &bCount : &address, buf + offset, slave && FUNCTION <= 4 ? 1 : 2);
+
+    offset += slave && FUNCTION <= 4 ? 1 : 2;
     address = address >> 8 | address << 8;
     if(app->uart->cfg->hexOutput)
         furi_string_cat_printf(
-            app->text,
-            slave && Fn <= 4 ? "\nbCount: 0x%02X" : "\nAddress: 0x%04X",
-            slave && Fn <= 4 ? bCount : address);
+            data,
+            slave && FUNCTION <= 4 ? "\nbCount: 0x%02X" : "\nAddress: 0x%04X",
+            slave && FUNCTION <= 4 ? bCount : address);
     else
         furi_string_cat_printf(
-            app->text,
-            slave && Fn <= 4 ? "\nbCount: %d" : "\nAddress: %d",
-            slave && Fn <= 4 ? bCount : address);
+            data,
+            slave && FUNCTION <= 4 ? "\nbCount: %d" : "\nAddress: %d",
+            slave && FUNCTION <= 4 ? bCount : address);
 
-    if(Fn >= 0x0F || (!slave && Fn <= 0x04)) {
-        memcpy(&qty, pdu + offset, 2);
+    if(FUNCTION >= 0x0F || (!slave && FUNCTION <= 0x04)) {
+        memcpy(&qty, buf + offset, 2);
         offset += 2;
         qty = qty >> 8 | qty << 8;
         furi_string_cat_printf(
-            app->text, app->uart->cfg->hexOutput ? "\nQty: 0x%04X" : "\nQty: %d", qty);
-    } else if(Fn >= 0x05) {
-        memcpy(&value, pdu + offset, 2);
+            data, app->uart->cfg->hexOutput ? "\nQty: 0x%04X" : "\nQty: %d", qty);
+    } else if(FUNCTION >= 0x05) {
+        memcpy(&value, buf + offset, 2);
         offset += 2;
         value = value >> 8 | value << 8;
         furi_string_cat_printf(
-            app->text, app->uart->cfg->hexOutput ? "\nValue: 0x%04X" : "\nValue: %d", value);
-    } else if(Fn <= 0x02)
-        discreteValuesParser(app, pdu + offset, bCount);
+            data, app->uart->cfg->hexOutput ? "\nValue: 0x%04X" : "\nValue: %d", value);
+    } else if(FUNCTION <= 0x02)
+        discreteValuesParser(app, buf + offset, bCount, data);
     else
-        analogValuesParser(app, pdu + offset, bCount / 2);
+        analogValuesParser(app, buf + offset, bCount / 2, data);
 
-    if(Fn >= 0x0F && !slave) {
-        memcpy(&bCount, pdu + offset, 1);
+    if(FUNCTION >= 0x0F && !slave) {
+        memcpy(&bCount, buf + offset, 1);
         offset++;
         furi_string_cat_printf(
-            app->text, app->uart->cfg->hexOutput ? "\nbCount: 0x%02X" : "\nbCount: %d", bCount);
-        if(Fn == 0x0F)
-            discreteValuesParser(app, pdu + offset, bCount);
+            data, app->uart->cfg->hexOutput ? "\nbCount: 0x%02X" : "\nbCount: %d", bCount);
+        if(FUNCTION == 0x0F)
+            discreteValuesParser(app, buf + offset, bCount, data);
         else
-            analogValuesParser(app, pdu + offset, bCount / 2);
+            analogValuesParser(app, buf + offset, bCount / 2, data);
     }
+    furi_string_cat_printf(data, "\nDRC: 0x%02X", CRCL | CRCH << 8);
 }
-
+void ErrParser(uint8_t* buf, size_t len, FuriString* data) {
+    furi_string_cat_printf(
+        data, "\nException code (%02X): %s\n", FUNCTION, exceptionCodes[FUNCTION - 0x09]);
+    for(size_t i = 0; i < len; i++) furi_string_cat_printf(data, "%02X", buf[i]);
+}
+void ModbusParser(uint8_t* buf, size_t len, App* app, FuriString* data) {
+    if(FUNCTION > 0x80) {
+        ErrParser(buf, len, data);
+    } else if((FUNCTION > 0x06 && FUNCTION < 0x0F) || FUNCTION > 0x10) {
+        furi_string_cat_printf(data, "\nUNSUPPORTED!!!\nFUNCTION(0x%02X)\n", FUNCTION);
+        for(size_t i = 0; i < len; i++) furi_string_cat_printf(data, "%02X", buf[i]);
+    } else if(FixedPaket && len - 4 != FixedModbusSize) {
+        furi_string_cat_str(data, "\nLength-Type MissMatch!!!\n");
+        for(size_t i = 0; i < len; i++) furi_string_cat_printf(data, "%02X", buf[i]);
+        furi_string_cat_printf(
+            data,
+            "\nCheck Reponse TimeOut!!!\nCurrent: %dms",
+            app->uart->cfg->timeout * TIMEOUT_SCALER);
+    } else
+        pduParser(app, app->modbus->slave, buf, len, data);
+}
 void handle_rx_data_cb(uint8_t* buf, size_t len, void* context) {
     furi_assert(context);
     App* app = context;
-    app->textLen += len;
     buf[len] = '\0';
-    if(app->textLen >= TEXT_BOX_LEN - 1) {
-        furi_string_right(app->text, app->textLen / 2);
-        app->textLen = furi_string_size(app->text) + len;
-    }
+
     FuriString* data = furi_string_alloc();
     furi_string_reset(data);
-    for(size_t i = 0; i < len; i++) {
-        furi_string_cat_printf(data, "%02X", buf[i]);
+    furi_string_cat_printf(data, "\n------%s-------", app->modbus->slave ? "-SLAVE" : "MASTER");
+    if((CRCH | CRCL << 8) == getCRC(buf, len - 2)) {
+        ModbusParser(buf, len, app, data);
+    } else {
+        furi_string_cat_str(data, "\nCRC check Failed:\n");
+        for(size_t i = 0; i < len; i++) furi_string_cat_printf(data, "%02X", buf[i]);
     }
-    uint8_t Slave;
-    uint8_t Fn;
-    size_t pduLen = len - 4;
-    uint16_t crc;
-    //uint16_t mycrc = getCRC(buf,len-2);
 
-    memcpy(&Slave, buf, 1);
-    memcpy(&Fn, buf + 1, 1);
-    memcpy(&crc, buf + len - 2, 2);
-    furi_string_cat_printf(
-        app->text, "\n------%s-------", app->modbus->slave ? "-SLAVE" : "MASTER");
-    furi_string_cat_printf(app->text, "\n%s", functionNames[Fn < 6 ? Fn - 1 : Fn - 9]);
-    furi_string_cat_printf(
-        app->text, app->uart->cfg->hexOutput ? "\nSlave: 0x%02X" : "\nSlave: %d", Slave);
-    pduParser(app, app->modbus->slave, Fn, buf + 2, pduLen);
-    crc = crc >> 8 | crc << 8;
-    furi_string_cat_printf(app->text, "\nDRC: 0x%02X", crc);
-    //for(size_t i = 0; i < furi_s tring_size(data); i++)buf[i] = (uint8_t)furi_string_get_char(data, i);
-    //furi_string_cat_printf(app->text, "%s", furi_string_get_cstr(data));
-    //if(app->LOGfileReady) storage_file_write(app->LOGfile, buf, furi_string_size(data));
+    app->textLen += furi_string_size(data);
+    if(app->textLen >= 3500 - 1) {
+        furi_string_right(app->text, app->textLen / 2);
+        app->textLen = furi_string_size(app->text) + furi_string_size(data);
+    }
+
+    furi_string_cat_str(app->text, furi_string_get_cstr(data));
+
+    if(app->LOGfileReady)
+        storage_file_write(app->LOGfile, furi_string_get_cstr(data), furi_string_size(data));
+
     furi_string_free(data);
+
     view_dispatcher_send_custom_event(app->viewDispatcher, Refresh);
+
     if(app->modbus->slave) {
         app->modbus->slave = false;
         furi_timer_stop(app->timer);
@@ -627,24 +668,27 @@ void Sniffer_Scene_OnEnter(void* context) {
         furi_string_cat_printf(
             app->text, "\nStop bits: %s", stopBitsValues[app->uart->cfg->stopBits]);
         furi_string_cat_printf(app->text, "\nParity: %s", parityValues[app->uart->cfg->parity]);
+        furi_string_cat_printf(
+            app->text, "\nResponse TimeOut: %dms", app->uart->cfg->timeout * TIMEOUT_SCALER);
     } else if(
         scene_manager_get_scene_state(app->sceneManager, ConsoleOutput_Scene) == Read_LOG_Option) {
         OpenLogFile(app);
     }
-    text_box_set_text(app->textBox, furi_string_get_cstr(app->text));
     view_dispatcher_switch_to_view(app->viewDispatcher, TextBox_View);
+    text_box_set_text(app->textBox, furi_string_get_cstr(app->text));
 }
 bool Sniffer_Scene_OnEvent(void* context, SceneManagerEvent event) {
     App* app = context;
-
+    UNUSED(app);
     bool consumed = false;
-
     if(event.type == SceneManagerEventTypeCustom) {
+        consumed = true;
+        FURI_LOG_W("HOLA", "%d", furi_string_size(app->text));
         text_box_set_text(app->textBox, furi_string_get_cstr(app->text));
-        consumed = true;
-    } else if(event.type == SceneManagerEventTypeTick) {
-        consumed = true;
     }
+    //  else if(event.type == SceneManagerEventTypeTick) {
+    //     consumed = true;
+    //}
     return consumed;
 }
 void Sniffer_Scene_OnExit(void* context) {
@@ -681,7 +725,8 @@ static bool BackEventCB(void* context) {
 static void ThickEventCB(void* context) {
     furi_assert(context);
     App* app = context;
-    scene_manager_handle_tick_event(app->sceneManager);
+    UNUSED(app);
+    //scene_manager_handle_tick_event(app->sceneManager);
 }
 //////////////////////////   Allocating  //////////////////////////
 Config* Config_Alloc() {
@@ -737,7 +782,7 @@ static App* modbus_app_alloc() {
     app->textBox = text_box_alloc();
     view_dispatcher_add_view(app->viewDispatcher, TextBox_View, text_box_get_view(app->textBox));
     app->text = furi_string_alloc();
-    furi_string_reserve(app->text, TEXT_BOX_LEN);
+    furi_string_reserve(app->text, 1024);
     makePaths(app);
 
     app->timer = furi_timer_alloc(timerDone, FuriTimerTypeOnce, app);
@@ -770,6 +815,7 @@ void ModbusFree(void* context) {
 void modbus_app_free(App* app) {
     furi_assert(app);
     view_dispatcher_remove_view(app->viewDispatcher, TextBox_View);
+    furi_string_free(app->text);
     text_box_free(app->textBox);
     view_dispatcher_remove_view(app->viewDispatcher, VarList_View);
     variable_item_list_free(app->varList);
