@@ -27,8 +27,7 @@ void Pi_Terminal_console_output_handle_rx_data_cb(uint8_t* buf, size_t len, void
     furi_string_cat(app->text_box_store, new_str);
     furi_string_free(new_str);
 
-    view_dispatcher_send_custom_event(
-        app->view_dispatcher, Pi_TerminalEventRefreshConsoleOutput);
+    view_dispatcher_send_custom_event(app->view_dispatcher, Pi_TerminalEventRefreshConsoleOutput);
 }
 
 static uint8_t hex_char_to_byte(const char c) {

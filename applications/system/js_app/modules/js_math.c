@@ -19,7 +19,7 @@ static bool check_arg_count(struct mjs* mjs, size_t count) {
 }
 
 void mjs_abs(struct mjs* mjs) {
-    if (!check_arg_count(mjs, 1) || !mjs_is_number(mjs_arg(mjs, 0))) {
+    if(!check_arg_count(mjs, 1) || !mjs_is_number(mjs_arg(mjs, 0))) {
         mjs_return(mjs, MJS_UNDEFINED);
     }
     double x = mjs_get_double(mjs, mjs_arg(mjs, 0));
@@ -27,11 +27,11 @@ void mjs_abs(struct mjs* mjs) {
 }
 
 void mjs_acos(struct mjs* mjs) {
-    if (!check_arg_count(mjs, 1) || !mjs_is_number(mjs_arg(mjs, 0))) {
+    if(!check_arg_count(mjs, 1) || !mjs_is_number(mjs_arg(mjs, 0))) {
         mjs_return(mjs, MJS_UNDEFINED);
     }
     double x = mjs_get_double(mjs, mjs_arg(mjs, 0));
-    if (x < -1 || x > 1) {
+    if(x < -1 || x > 1) {
         ret_bad_args(mjs, "Invalid input value for Math.acos");
         mjs_return(mjs, MJS_UNDEFINED);
     }
@@ -39,11 +39,11 @@ void mjs_acos(struct mjs* mjs) {
 }
 
 void mjs_acosh(struct mjs* mjs) {
-    if (!check_arg_count(mjs, 1) || !mjs_is_number(mjs_arg(mjs, 0))) {
+    if(!check_arg_count(mjs, 1) || !mjs_is_number(mjs_arg(mjs, 0))) {
         mjs_return(mjs, MJS_UNDEFINED);
     }
     double x = mjs_get_double(mjs, mjs_arg(mjs, 0));
-    if (x < 1) {
+    if(x < 1) {
         ret_bad_args(mjs, "Invalid input value for Math.acosh");
         mjs_return(mjs, MJS_UNDEFINED);
     }
@@ -51,7 +51,7 @@ void mjs_acosh(struct mjs* mjs) {
 }
 
 void mjs_asin(struct mjs* mjs) {
-    if (!check_arg_count(mjs, 1) || !mjs_is_number(mjs_arg(mjs, 0))) {
+    if(!check_arg_count(mjs, 1) || !mjs_is_number(mjs_arg(mjs, 0))) {
         mjs_return(mjs, MJS_UNDEFINED);
     }
     double x = mjs_get_double(mjs, mjs_arg(mjs, 0));
@@ -59,7 +59,7 @@ void mjs_asin(struct mjs* mjs) {
 }
 
 void mjs_asinh(struct mjs* mjs) {
-    if (!check_arg_count(mjs, 1) || !mjs_is_number(mjs_arg(mjs, 0))) {
+    if(!check_arg_count(mjs, 1) || !mjs_is_number(mjs_arg(mjs, 0))) {
         mjs_return(mjs, MJS_UNDEFINED);
     }
     double x = mjs_get_double(mjs, mjs_arg(mjs, 0));
@@ -67,7 +67,7 @@ void mjs_asinh(struct mjs* mjs) {
 }
 
 void mjs_atan(struct mjs* mjs) {
-    if (!check_arg_count(mjs, 1) || !mjs_is_number(mjs_arg(mjs, 0))) {
+    if(!check_arg_count(mjs, 1) || !mjs_is_number(mjs_arg(mjs, 0))) {
         mjs_return(mjs, MJS_UNDEFINED);
     }
     double x = mjs_get_double(mjs, mjs_arg(mjs, 0));
@@ -75,7 +75,8 @@ void mjs_atan(struct mjs* mjs) {
 }
 
 void mjs_atan2(struct mjs* mjs) {
-    if (!check_arg_count(mjs, 2) || !mjs_is_number(mjs_arg(mjs, 0)) || !mjs_is_number(mjs_arg(mjs, 1))) {
+    if(!check_arg_count(mjs, 2) || !mjs_is_number(mjs_arg(mjs, 0)) ||
+       !mjs_is_number(mjs_arg(mjs, 1))) {
         mjs_return(mjs, MJS_UNDEFINED);
     }
     double y = mjs_get_double(mjs, mjs_arg(mjs, 0));
@@ -84,11 +85,11 @@ void mjs_atan2(struct mjs* mjs) {
 }
 
 void mjs_atanh(struct mjs* mjs) {
-    if (!check_arg_count(mjs, 1) || !mjs_is_number(mjs_arg(mjs, 0))) {
+    if(!check_arg_count(mjs, 1) || !mjs_is_number(mjs_arg(mjs, 0))) {
         mjs_return(mjs, MJS_UNDEFINED);
     }
     double x = mjs_get_double(mjs, mjs_arg(mjs, 0));
-    if (x <= -1 || x >= 1) {
+    if(x <= -1 || x >= 1) {
         ret_bad_args(mjs, "Invalid input value for Math.atanh");
         mjs_return(mjs, MJS_UNDEFINED);
     }
@@ -96,7 +97,7 @@ void mjs_atanh(struct mjs* mjs) {
 }
 
 void mjs_cbrt(struct mjs* mjs) {
-    if (!check_arg_count(mjs, 1) || !mjs_is_number(mjs_arg(mjs, 0))) {
+    if(!check_arg_count(mjs, 1) || !mjs_is_number(mjs_arg(mjs, 0))) {
         mjs_return(mjs, MJS_UNDEFINED);
     }
     double x = mjs_get_double(mjs, mjs_arg(mjs, 0));
@@ -104,7 +105,7 @@ void mjs_cbrt(struct mjs* mjs) {
 }
 
 void mjs_ceil(struct mjs* mjs) {
-    if (!check_arg_count(mjs, 1) || !mjs_is_number(mjs_arg(mjs, 0))) {
+    if(!check_arg_count(mjs, 1) || !mjs_is_number(mjs_arg(mjs, 0))) {
         mjs_return(mjs, MJS_UNDEFINED);
     }
     double x = mjs_get_double(mjs, mjs_arg(mjs, 0));
@@ -112,12 +113,12 @@ void mjs_ceil(struct mjs* mjs) {
 }
 
 void mjs_clz32(struct mjs* mjs) {
-    if (!check_arg_count(mjs, 1) || !mjs_is_number(mjs_arg(mjs, 0))) {
+    if(!check_arg_count(mjs, 1) || !mjs_is_number(mjs_arg(mjs, 0))) {
         mjs_return(mjs, MJS_UNDEFINED);
     }
     unsigned int x = (unsigned int)mjs_get_int(mjs, mjs_arg(mjs, 0));
     int count = 0;
-    while (x) {
+    while(x) {
         x >>= 1;
         count++;
     }
@@ -125,7 +126,7 @@ void mjs_clz32(struct mjs* mjs) {
 }
 
 void mjs_cos(struct mjs* mjs) {
-    if (!check_arg_count(mjs, 1) || !mjs_is_number(mjs_arg(mjs, 0))) {
+    if(!check_arg_count(mjs, 1) || !mjs_is_number(mjs_arg(mjs, 0))) {
         mjs_return(mjs, MJS_UNDEFINED);
     }
     double x = mjs_get_double(mjs, mjs_arg(mjs, 0));
@@ -133,13 +134,13 @@ void mjs_cos(struct mjs* mjs) {
 }
 
 void mjs_exp(struct mjs* mjs) {
-    if (!check_arg_count(mjs, 1) || !mjs_is_number(mjs_arg(mjs, 0))) {
+    if(!check_arg_count(mjs, 1) || !mjs_is_number(mjs_arg(mjs, 0))) {
         mjs_return(mjs, MJS_UNDEFINED);
     }
     double x = mjs_get_double(mjs, mjs_arg(mjs, 0));
     double result = 1;
     double term = 1;
-    for (int i = 1; i < 100; i++) {
+    for(int i = 1; i < 100; i++) {
         term *= x / i;
         result += term;
     }
@@ -147,7 +148,7 @@ void mjs_exp(struct mjs* mjs) {
 }
 
 void mjs_floor(struct mjs* mjs) {
-    if (!check_arg_count(mjs, 1) || !mjs_is_number(mjs_arg(mjs, 0))) {
+    if(!check_arg_count(mjs, 1) || !mjs_is_number(mjs_arg(mjs, 0))) {
         mjs_return(mjs, MJS_UNDEFINED);
     }
     double x = mjs_get_double(mjs, mjs_arg(mjs, 0));
@@ -155,16 +156,16 @@ void mjs_floor(struct mjs* mjs) {
 }
 
 void mjs_log(struct mjs* mjs) {
-    if (!check_arg_count(mjs, 1) || !mjs_is_number(mjs_arg(mjs, 0))) {
+    if(!check_arg_count(mjs, 1) || !mjs_is_number(mjs_arg(mjs, 0))) {
         mjs_return(mjs, MJS_UNDEFINED);
     }
     double x = mjs_get_double(mjs, mjs_arg(mjs, 0));
-    if (x <= 0) {
+    if(x <= 0) {
         ret_bad_args(mjs, "Invalid input value for Math.log");
         mjs_return(mjs, MJS_UNDEFINED);
     }
     double result = 0;
-    while (x >= MJS_E) {
+    while(x >= MJS_E) {
         x /= MJS_E;
         result++;
     }
@@ -172,7 +173,8 @@ void mjs_log(struct mjs* mjs) {
 }
 
 void mjs_max(struct mjs* mjs) {
-    if (!check_arg_count(mjs, 2) || !mjs_is_number(mjs_arg(mjs, 0)) || !mjs_is_number(mjs_arg(mjs, 1))) {
+    if(!check_arg_count(mjs, 2) || !mjs_is_number(mjs_arg(mjs, 0)) ||
+       !mjs_is_number(mjs_arg(mjs, 1))) {
         mjs_return(mjs, MJS_UNDEFINED);
     }
     double x = mjs_get_double(mjs, mjs_arg(mjs, 0));
@@ -181,7 +183,8 @@ void mjs_max(struct mjs* mjs) {
 }
 
 void mjs_min(struct mjs* mjs) {
-    if (!check_arg_count(mjs, 2) || !mjs_is_number(mjs_arg(mjs, 0)) || !mjs_is_number(mjs_arg(mjs, 1))) {
+    if(!check_arg_count(mjs, 2) || !mjs_is_number(mjs_arg(mjs, 0)) ||
+       !mjs_is_number(mjs_arg(mjs, 1))) {
         mjs_return(mjs, MJS_UNDEFINED);
     }
     double x = mjs_get_double(mjs, mjs_arg(mjs, 0));
@@ -190,20 +193,21 @@ void mjs_min(struct mjs* mjs) {
 }
 
 void mjs_pow(struct mjs* mjs) {
-    if (!check_arg_count(mjs, 2) || !mjs_is_number(mjs_arg(mjs, 0)) || !mjs_is_number(mjs_arg(mjs, 1))) {
+    if(!check_arg_count(mjs, 2) || !mjs_is_number(mjs_arg(mjs, 0)) ||
+       !mjs_is_number(mjs_arg(mjs, 1))) {
         mjs_return(mjs, MJS_UNDEFINED);
     }
     double base = mjs_get_double(mjs, mjs_arg(mjs, 0));
     double exponent = mjs_get_double(mjs, mjs_arg(mjs, 1));
     double result = 1;
-    for (int i = 0; i < exponent; i++) {
+    for(int i = 0; i < exponent; i++) {
         result *= base;
     }
     mjs_return(mjs, mjs_mk_number(mjs, result));
 }
 
 void mjs_random(struct mjs* mjs) {
-    if (!check_arg_count(mjs, 0)) {
+    if(!check_arg_count(mjs, 0)) {
         mjs_return(mjs, MJS_UNDEFINED);
     }
     const uint32_t random_val = furi_hal_random_get();
@@ -212,7 +216,7 @@ void mjs_random(struct mjs* mjs) {
 }
 
 void mjs_sign(struct mjs* mjs) {
-    if (!check_arg_count(mjs, 1) || !mjs_is_number(mjs_arg(mjs, 0))) {
+    if(!check_arg_count(mjs, 1) || !mjs_is_number(mjs_arg(mjs, 0))) {
         mjs_return(mjs, MJS_UNDEFINED);
     }
     double x = mjs_get_double(mjs, mjs_arg(mjs, 0));
@@ -220,13 +224,13 @@ void mjs_sign(struct mjs* mjs) {
 }
 
 void mjs_sin(struct mjs* mjs) {
-    if (!check_arg_count(mjs, 1) || !mjs_is_number(mjs_arg(mjs, 0))) {
+    if(!check_arg_count(mjs, 1) || !mjs_is_number(mjs_arg(mjs, 0))) {
         mjs_return(mjs, MJS_UNDEFINED);
     }
     double x = mjs_get_double(mjs, mjs_arg(mjs, 0));
     double result = x;
     double term = x;
-    for (int i = 1; i < 10; i++) {
+    for(int i = 1; i < 10; i++) {
         term *= -x * x / ((2 * i) * (2 * i + 1));
         result += term;
     }
@@ -234,31 +238,30 @@ void mjs_sin(struct mjs* mjs) {
 }
 
 void mjs_sqrt(struct mjs* mjs) {
-    if (!check_arg_count(mjs, 1) || !mjs_is_number(mjs_arg(mjs, 0))) {
+    if(!check_arg_count(mjs, 1) || !mjs_is_number(mjs_arg(mjs, 0))) {
         mjs_return(mjs, MJS_UNDEFINED);
     }
     double x = mjs_get_double(mjs, mjs_arg(mjs, 0));
-    if (x < 0) {
+    if(x < 0) {
         ret_bad_args(mjs, "Invalid input value for Math.sqrt");
         mjs_return(mjs, MJS_UNDEFINED);
     }
     double result = 1;
-    while (result * result < x) {
+    while(result * result < x) {
         result += (double)0.001;
     }
     mjs_return(mjs, mjs_mk_number(mjs, result));
 }
 
 void mjs_trunc(struct mjs* mjs) {
-    if (!check_arg_count(mjs, 1) || !mjs_is_number(mjs_arg(mjs, 0))) {
+    if(!check_arg_count(mjs, 1) || !mjs_is_number(mjs_arg(mjs, 0))) {
         mjs_return(mjs, MJS_UNDEFINED);
     }
     double x = mjs_get_double(mjs, mjs_arg(mjs, 0));
     mjs_return(mjs, mjs_mk_number(mjs, x < 0 ? ceil(x) : floor(x)));
 }
 
-
-static void* js_math_create(struct mjs *mjs, mjs_val_t* object) {
+static void* js_math_create(struct mjs* mjs, mjs_val_t* object) {
     mjs_val_t math_obj = mjs_mk_object(mjs);
     mjs_set(mjs, math_obj, "abs", ~0, MJS_MK_FN(mjs_abs));
     mjs_set(mjs, math_obj, "acos", ~0, MJS_MK_FN(mjs_acos));
@@ -286,9 +289,9 @@ static void* js_math_create(struct mjs *mjs, mjs_val_t* object) {
     mjs_set(mjs, math_obj, "PI", ~0, mjs_mk_number(mjs, MJS_PI));
     *object = math_obj;
     return object;
-}   
+}
 
-static void js_math_destroy(void *ptr) {
+static void js_math_destroy(void* ptr) {
     UNUSED(ptr);
 }
 

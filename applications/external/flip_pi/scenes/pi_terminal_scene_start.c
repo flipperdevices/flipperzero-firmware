@@ -39,11 +39,7 @@ static const Pi_TerminalItem items[START_MENU_ITEMS] = {
      5,
      SEND_FAST_CMD,
      TEXT_MODE},
-    {"Wifite",
-     {"sudo wifite"},
-      1,
-      SEND_WIFITE,
-      TEXT_MODE},
+    {"Wifite", {"sudo wifite"}, 1, SEND_WIFITE, TEXT_MODE},
     {"Send Ctrl+C", {""}, 1, SEND_CTRL_C, BOTH_MODES},
     {"Help", {""}, 1, OPEN_HELP, BOTH_MODES},
 };

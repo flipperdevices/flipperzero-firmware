@@ -29,8 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0305-2339-0.99.1-992f2cf](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-03-06 17:45 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-03-06 17:45 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-03-06 20:05 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-03-06 20:05 EST`
 - [Quick fix for rgb (By HaxSam)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/5bb4ab3a021a24406f7d3a996a119c3e2ea5dd87)
 - [Add is_connected api for expansion (By HaxSam)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/2f4186322bcd1899703fa22daeda29d554c3be2b)
 - [JS: Added Submenu support (By Spooks4576)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/6335d14c7498ab4b2e4b28fa707fe7f68d3843b5)
@@ -40,7 +40,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: PR: [Fix Troika 4K parser keys #3499 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3499)
 - Added: [Pi Terminal v1.0 (By dagnazty & InfoSecREDD)](https://github.com/InfoSecREDD/Flip-pi)
 - [Air Arkanoid & Air Labyrinth: Use PYTHON3 var (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/7eb47a5993e49a95903faad8b01bae63e872603c)
-- Updated: [JS Runner v1.0 (By nminaylov & DrZlo13)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/3286) [Added ble beacon, math and keyboard to JavaScript API (By Spooks4576)]()
+- Updated: [Pi Terminal v1.0 (By dagnazty & InfoSecREDD)](https://github.com/InfoSecREDD/Flip-pi) Fixed issue with capitalized code files.
+- Updated: [JS Runner v1.0 (By nminaylov & DrZlo13)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/3286) [Added ble beacon, math and keyboard to JavaScript API (By Spooks4576)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/41bb09492400026be66ef5f8b78f506f21361f1d)
 
 <a name="release">
 

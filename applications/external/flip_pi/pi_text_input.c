@@ -7,7 +7,7 @@
 struct UART_TextInput {
     View* view;
     FuriTimer* timer;
-    Pi_TerminalUart* uart; 
+    Pi_TerminalUart* uart;
 };
 
 typedef struct {
