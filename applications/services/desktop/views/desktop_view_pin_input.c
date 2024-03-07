@@ -173,7 +173,13 @@ static void desktop_view_pin_input_draw(Canvas* canvas, void* context) {
 
     if(model->tertiary_str && model->pin.length == 0) {
         canvas_set_font(canvas, FontSecondary);
-        canvas_draw_str(canvas, model->tertiary_str_x, model->tertiary_str_y, model->tertiary_str);
+        canvas_draw_str_aligned(
+            canvas,
+            model->tertiary_str_x,
+            model->tertiary_str_y,
+            AlignCenter,
+            AlignBottom,
+            model->tertiary_str);
     }
 }
 
