@@ -9,6 +9,10 @@ typedef struct {
     uint32_t result;
 } JsSubmenuInst;
 
+typedef enum {
+    JsSubmenuViewSubmenu,
+} JsSubmenuView;
+
 static JsSubmenuInst* get_this_ctx(struct mjs* mjs) {
     mjs_val_t obj_inst = mjs_get(mjs, mjs_get_this(mjs), INST_PROP_NAME, ~0);
     JsSubmenuInst* storage = mjs_get_ptr(mjs, obj_inst);
@@ -98,7 +102,7 @@ static void js_submenu_show(struct mjs* mjs) {
         submenu->view_dispatcher, furi_record_open(RECORD_GUI), ViewDispatcherTypeFullscreen);
     furi_record_close(RECORD_GUI);
 
-    view_dispatcher_switch_to_view(submenu->view_dispatcher, 0);
+    view_dispatcher_switch_to_view(submenu->view_dispatcher, JsSubmenuViewSubmenu);
 
     view_dispatcher_run(submenu->view_dispatcher);
 
@@ -117,13 +121,15 @@ static void* js_submenu_create(struct mjs* mjs, mjs_val_t* object) {
     submenu->submenu = submenu_alloc();
     submenu->view_dispatcher = view_dispatcher_alloc();
     view_dispatcher_enable_queue(submenu->view_dispatcher);
-    view_dispatcher_add_view(submenu->view_dispatcher, 0, submenu_get_view(submenu->submenu));
+    view_dispatcher_add_view(
+        submenu->view_dispatcher, JsSubmenuViewSubmenu, submenu_get_view(submenu->submenu));
     *object = submenu_obj;
     return submenu;
 }
 
 static void js_submenu_destroy(void* inst) {
     JsSubmenuInst* submenu = inst;
+    view_dispatcher_remove_view(submenu->view_dispatcher, JsSubmenuViewSubmenu);
     submenu_free(submenu->submenu);
     view_dispatcher_free(submenu->view_dispatcher);
     free(submenu);

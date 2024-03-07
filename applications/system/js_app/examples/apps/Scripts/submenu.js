@@ -8,4 +8,4 @@ submenu.setHeader("Select an option:");
 
 let result = submenu.show();
 
-print("Result: ", result);
+print("Result:", result);

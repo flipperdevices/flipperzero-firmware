@@ -39,7 +39,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [Auto-generated firmware documentation take two #2944 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/2944)
 - OFW: PR: [Fix Troika 4K parser keys #3499 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3499)
 - [Air Arkanoid & Air Labyrinth: Use PYTHON3 var (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/7eb47a5993e49a95903faad8b01bae63e872603c)
-- Updated: [JS Runner v1.0 (By nminaylov & DrZlo13)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/3286) [Added ble beacon, math and keyboard to JavaScript API (By Spooks4576)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/41bb09492400026be66ef5f8b78f506f21361f1d)
+- Updated: [JS Runner v1.0 (By nminaylov & DrZlo13)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/3286) [Added ble beacon, math and keyboard to JavaScript API (By Spooks4576)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/41bb09492400026be66ef5f8b78f506f21361f1d) + [Many improvements (By Willy-JL)]()
 
 <a name="release">
 
