@@ -84,6 +84,7 @@
 #include <furi.h>
 #include <furi_hal.h>
 
+#include <gui/elements.h>
 #include <gui/view.h>
 #include <pokemon_icons.h>
 #include <gblink.h>
@@ -91,6 +92,13 @@
 #include "../pokemon_app.h"
 #include "../pokemon_data.h"
 #include "trade_patch_list.h"
+
+/* Uncomment the following line to enable graphics testing for the different
+ * phases of the trade view. Pressing the okay button will step through each
+ * gameboy_status. Note that while trades will still function with this enabled,
+ * forcing the advance of the status will certainly break trades.
+ */
+//#define GRAPHICS_TESTING
 
 #define DELAY_MICROSECONDS 15
 #define PKMN_BLANK 0x00
@@ -159,7 +167,8 @@ typedef enum {
     GAMEBOY_WAITING,
     GAMEBOY_TRADE_PENDING,
     GAMEBOY_TRADING,
-    GAMEBOY_COLOSSEUM
+    GAMEBOY_COLOSSEUM,
+    GAMEBOY_STATE_COUNT
 } render_gameboy_state_t;
 
 /* Anonymous struct */
@@ -198,15 +207,45 @@ static void pokemon_plist_recreate_callback(void* context, uint32_t arg) {
     plist_create(&(trade->patch_list), trade->pdata);
 }
 
+#ifdef GRAPHICS_TESTING
+static bool trade_input_callback(InputEvent* event, void* context) {
+    struct trade_ctx* trade = context;
+    bool consumed = false;
+
+    if(event->type == InputTypePress) {
+        with_view_model(
+            trade->view,
+            struct trade_model * model,
+            {
+                if(event->key == InputKeyRight) {
+                    model->gameboy_status++;
+                    if(model->gameboy_status == GAMEBOY_STATE_COUNT)
+                        model->gameboy_status = GAMEBOY_CONN_FALSE;
+                } else if(event->key == InputKeyLeft) {
+                    if(model->gameboy_status == GAMEBOY_CONN_FALSE)
+                        model->gameboy_status = GAMEBOY_COLOSSEUM;
+                    else
+                        model->gameboy_status--;
+                }
+            },
+            true);
+        consumed = true;
+    }
+
+    return consumed;
+}
+#endif
+
 /* Draws a whole screen image with Flipper mascot, Game Boy, etc. */
 static void trade_draw_connect(Canvas* const canvas) {
     furi_assert(canvas);
 
-    canvas_draw_frame(canvas, 0, 0, 128, 64);
-    canvas_draw_icon(canvas, 1, 21, &I_Connect_me_62x31);
-    canvas_draw_icon(canvas, 0, 53, &I_Background_128x11);
+    //canvas_draw_frame(canvas, 0, 0, 128, 64);
+    canvas_draw_icon(canvas, 8, 33, &I_dolphin);
+    canvas_draw_icon(canvas, 52, 33, &I_hand_cable);
+    //canvas_draw_icon(canvas, 0, 53, &I_Background_128x11);
     canvas_draw_icon(canvas, 80, 0, &I_game_boy);
-    canvas_draw_icon(canvas, 8, 2, &I_Space_65x18);
+    elements_frame(canvas, 9, 2, 64, 17);
     canvas_draw_str(canvas, 18, 13, "Connect GB");
 }
 
@@ -214,11 +253,12 @@ static void trade_draw_connect(Canvas* const canvas) {
 static void trade_draw_connected(Canvas* const canvas) {
     furi_assert(canvas);
 
-    canvas_draw_frame(canvas, 0, 0, 128, 64);
-    canvas_draw_icon(canvas, 1, 21, &I_Connected_62x31);
-    canvas_draw_icon(canvas, 0, 53, &I_Background_128x11);
+    //canvas_draw_frame(canvas, 0, 0, 128, 64);
+    canvas_draw_icon(canvas, 8, 33, &I_dolphin);
+    canvas_draw_icon(canvas, 52, 33, &I_hand_thumbsup);
+    //canvas_draw_icon(canvas, 0, 53, &I_Background_128x11);
     canvas_draw_icon(canvas, 80, 0, &I_game_boy);
-    canvas_draw_icon(canvas, 8, 2, &I_Space_65x18);
+    elements_frame(canvas, 9, 2, 64, 17);
     canvas_draw_str(canvas, 18, 13, "Connected!");
 }
 
@@ -228,11 +268,27 @@ static void trade_draw_connected(Canvas* const canvas) {
 static void trade_draw_frame(Canvas* canvas, const char* str) {
     furi_assert(canvas);
 
+    /* Paint the area behind the background bar and text box white to prevent overlap */
+    canvas_set_color(canvas, ColorWhite);
+    /* Background bar */
+    canvas_draw_box(canvas, 0, 53, 9, 7);
+    canvas_draw_box(canvas, 6, 56, 59, 6);
+    canvas_draw_box(canvas, 60, 53, 32, 7);
+    canvas_draw_box(canvas, 87, 56, 38, 6);
+    /* Text box */
+    canvas_draw_box(canvas, 59, 0, 67, 19);
+
+    canvas_set_color(canvas, ColorBlack);
+
+    /* Draw bar with transparencies */
+    canvas_set_bitmap_mode(canvas, 1);
     canvas_draw_icon(canvas, 0, 53, &I_Background_128x11);
-    canvas_draw_frame(canvas, 0, 0, 128, 64);
-    canvas_draw_icon(canvas, 24, 0, &I_Space_80x18);
-    canvas_draw_str(canvas, 48, 12, str);
-    canvas_draw_icon(canvas, 27, 1, &I_red_16x15);
+    canvas_set_bitmap_mode(canvas, 0);
+
+    /* Draw text box and populate it with string and Red icon */
+    elements_frame(canvas, 59, 0, 67, 19);
+    canvas_draw_str(canvas, 82, 12, str);
+    canvas_draw_icon(canvas, 61, 2, &I_red_16x15);
 }
 
 /* Draws the Pokemon's image in the middle of the screen */
@@ -240,7 +296,7 @@ static void trade_draw_pkmn_avatar(Canvas* canvas, const Icon* icon) {
     furi_assert(canvas);
     furi_assert(icon);
 
-    canvas_draw_icon(canvas, 38, 11, icon);
+    canvas_draw_icon(canvas, 2, 0, icon);
     furi_hal_light_set(LightBlue, 0x00);
     furi_hal_light_set(LightGreen, 0x00);
 }
@@ -293,10 +349,10 @@ static void trade_draw_callback(Canvas* canvas, void* view_model) {
         furi_hal_light_set(LightGreen, 0x00);
         if(model->ledon) {
             furi_hal_light_set(LightBlue, 0xff);
-            canvas_draw_icon(canvas, 0, 0, &I_gb_step_1);
+            canvas_draw_icon(canvas, 0, 5, &I_gb_step_1);
         } else {
             furi_hal_light_set(LightBlue, 0x00);
-            canvas_draw_icon(canvas, 0, 0, &I_gb_step_2);
+            canvas_draw_icon(canvas, 0, 5, &I_gb_step_2);
         }
         trade_draw_frame(canvas, "TRADING");
         break;
@@ -795,6 +851,9 @@ void* trade_alloc(
     view_set_draw_callback(trade->view, trade_draw_callback);
     view_set_enter_callback(trade->view, trade_enter_callback);
     view_set_exit_callback(trade->view, trade_exit_callback);
+#ifdef GRAPHICS_TESTING
+    view_set_input_callback(trade->view, trade_input_callback);
+#endif
 
     view_dispatcher_add_view(view_dispatcher, view_id, trade->view);
 

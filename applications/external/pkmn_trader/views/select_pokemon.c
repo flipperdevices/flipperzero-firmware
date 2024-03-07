@@ -23,20 +23,21 @@ static void select_pokemon_render_callback(Canvas* canvas, void* model) {
     char pokedex_num[5];
 
     snprintf(pokedex_num, sizeof(pokedex_num), "#%03d", curr_pokemon + 1);
+    canvas_draw_icon(canvas, 0, 0, table_icon_get(view_model->pokemon_table, curr_pokemon));
     canvas_set_font(canvas, FontPrimary);
     canvas_draw_str_aligned(
         canvas,
-        55,
-        54 / 2,
+        58,
+        27,
         AlignLeft,
         AlignTop,
         table_stat_name_get(view_model->pokemon_table, curr_pokemon));
 
     canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str_aligned(canvas, 55, 38, AlignLeft, AlignTop, pokedex_num);
-    canvas_draw_icon(canvas, 0, 0, table_icon_get(view_model->pokemon_table, curr_pokemon));
-    canvas_draw_icon(canvas, 128 - 80, 0, &I_Space_80x18);
-    canvas_draw_str_aligned(canvas, (128 - 40), 5, AlignCenter, AlignTop, "Select Pokemon");
+    canvas_draw_str_aligned(canvas, 58, 38, AlignLeft, AlignTop, pokedex_num);
+    elements_frame(canvas, 55, 0, 71, 18);
+    //canvas_draw_icon(canvas, 128 - 80, 0, &I_Space_80x18);
+    canvas_draw_str_aligned(canvas, 90, 5, AlignCenter, AlignTop, "Select Pokemon");
 
     canvas_set_font(canvas, FontPrimary);
     /* XXX: Need to remake this and have it more on the right side */
