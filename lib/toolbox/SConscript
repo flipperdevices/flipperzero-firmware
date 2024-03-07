@@ -35,7 +35,7 @@ env.Append(
         File("simple_array.h"),
         File("bit_buffer.h"),
         File("keys_dict.h"),
-        File("concurrent_runner.h")
+        File("concurrent_runner.h"),
     ],
 )
 
