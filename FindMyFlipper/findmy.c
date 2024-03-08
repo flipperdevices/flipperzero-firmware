@@ -83,7 +83,7 @@ static void findmy_start(FindMy* app) {
     app->config.adv_power_level = GapAdvPowerLevel_0dBm + app->transmit_power;
     app->config.address_type = GapAddressTypePublic;
 
-    uint8_t mac[EXTRA_BEACON_MAC_ADDR_SIZE] = {0x4D, 0x61, 0x74, 0x4B, 0x75, 0x4B};
+    uint8_t mac[EXTRA_BEACON_MAC_ADDR_SIZE] = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66};
     furi_hal_bt_reverse_mac_addr(mac);
     memcpy(&app->config.address, mac, sizeof(app->config.address));
     furi_check(furi_hal_bt_extra_beacon_set_config(&app->config));
@@ -92,15 +92,37 @@ static void findmy_start(FindMy* app) {
     uint8_t* it = data;
 
     // For Apple AirTags
-    *it++ = 0x1E; // Length
+    *it++ = 0x1E, // Length
     *it++ = 0xFF; // Manufacturer Specific Data
     *it++ = 0x4C; // Company ID (Apple, Inc.)
     *it++ = 0x00; // State
     *it++ = 0x12; // Data - Public Key without the MAC address
-    *it++ = 0x81; // ...
-    *it++ = 0xB9; // ...
-    *it++ = 0x02; // First 2 bits are the version, the rest is the battery level
-    *it++ = 0x7E; // Hint (0x00)
+    *it++ = 0x19;
+    *it++ = 0x00;
+    *it++ = 0x00;
+    *it++ = 0x00;
+    *it++ = 0x00;
+    *it++ = 0x00;
+    *it++ = 0x00;
+    *it++ = 0x00;
+    *it++ = 0x00;
+    *it++ = 0x00;
+    *it++ = 0x00;
+    *it++ = 0x00;
+    *it++ = 0x00;
+    *it++ = 0x00;
+    *it++ = 0x00;
+    *it++ = 0x00;
+    *it++ = 0x00;
+    *it++ = 0x00;
+    *it++ = 0x00;
+    *it++ = 0x00;
+    *it++ = 0x00;
+    *it++ = 0x00;
+    *it++ = 0x00;
+    *it++ = 0x00;
+    *it++ = 0x00; // First 2 bits are the version, the rest is the battery level
+    *it++ = 0x00; // Hint (0x00)
 
     furi_check(furi_hal_bt_extra_beacon_set_data(data, it - data));
 }
