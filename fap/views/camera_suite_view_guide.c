@@ -46,7 +46,6 @@ static void camera_suite_view_guide_model_init(CameraSuiteViewGuideModel* const 
 bool camera_suite_view_guide_input(InputEvent* event, void* context) {
     furi_assert(context);
     CameraSuiteViewGuide* instance = context;
-
     if(event->type == InputTypeRelease) {
         switch(event->key) {
         case InputKeyBack:

@@ -59,10 +59,9 @@ void stream_to_serial() {
 }
 
 void start_serial_stream() {
-  camera_model.isStreamToWiFiEnabled = false;
-  set_camera_config_defaults(CAMERA_FUNCTION_SERIAL);
-  set_camera_model_defaults(CAMERA_FUNCTION_SERIAL);
-  set_camera_defaults(CAMERA_FUNCTION_SERIAL);
+  set_camera_config_defaults();
+  set_camera_model_defaults();
+  set_camera_defaults();
   camera_model.isStreamToSerialEnabled = true;
 }
 
