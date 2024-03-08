@@ -229,6 +229,9 @@ static int32_t adv_thread(void* _ctx) {
     const Protocol* protocol = attacks[state->index].protocol;
     if(!payload->random_mac) randomize_mac(state);
     if(state->ctx.led_indicator) start_blink(state);
+    if(furi_hal_bt_extra_beacon_is_active()) {
+        furi_check(furi_hal_bt_extra_beacon_stop());
+    }
 
     while(state->advertising) {
         if(protocol && payload->mode == PayloadModeBruteforce &&
@@ -241,7 +244,7 @@ static int32_t adv_thread(void* _ctx) {
         start_extra_beacon(state);
 
         furi_thread_flags_wait(true, FuriFlagWaitAny, delays[state->delay]);
-        furi_hal_bt_extra_beacon_stop();
+        furi_check(furi_hal_bt_extra_beacon_stop());
     }
 
     if(state->ctx.led_indicator) stop_blink(state);
@@ -564,13 +567,16 @@ static bool input_callback(InputEvent* input, void* _ctx) {
                 if(!advertising) {
                     Payload* payload = &attacks[state->index].payload;
                     if(input->type == InputTypeLong && !payload->random_mac) randomize_mac(state);
+                    if(furi_hal_bt_extra_beacon_is_active()) {
+                        furi_check(furi_hal_bt_extra_beacon_stop());
+                    }
 
                     start_extra_beacon(state);
 
                     if(state->ctx.led_indicator)
                         notification_message(state->ctx.notification, &solid_message);
                     furi_delay_ms(10);
-                    furi_hal_bt_extra_beacon_stop();
+                    furi_check(furi_hal_bt_extra_beacon_stop());
 
                     if(state->ctx.led_indicator)
                         notification_message_block(state->ctx.notification, &sequence_reset_rgb);
