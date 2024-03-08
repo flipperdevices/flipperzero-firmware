@@ -285,26 +285,36 @@ static void pokemon_plist_recreate_callback(void* context, uint32_t arg) {
 static void trade_draw_bottom_bar(Canvas* const canvas) {
     furi_assert(canvas);
 
-    //canvas_draw_frame(canvas, 0, 0, 128, 64);
-    canvas_draw_icon(canvas, 8, 33, &I_dolphin);
-    canvas_draw_icon(canvas, 52, 33, &I_hand_cable);
-    //canvas_draw_icon(canvas, 0, 53, &I_Background_128x11);
-    canvas_draw_icon(canvas, 80, 0, &I_game_boy);
-    elements_frame(canvas, 9, 2, 64, 17);
-    canvas_draw_str(canvas, 18, 13, "Connect GB");
+    /* Paint the area behind the bottom background bar white to prevent overlap */
+    canvas_set_color(canvas, ColorWhite);
+    canvas_draw_box(canvas, 0, 53, 9, 7);
+    canvas_draw_box(canvas, 6, 56, 59, 6);
+    canvas_draw_box(canvas, 60, 53, 32, 7);
+    canvas_draw_box(canvas, 87, 56, 38, 6);
+    canvas_set_color(canvas, ColorBlack);
+
+    /* Draw bar with transparencies */
+    canvas_set_bitmap_mode(canvas, 1);
+    canvas_draw_icon(canvas, 0, 53, &I_Background_128x11);
+    canvas_set_bitmap_mode(canvas, 0);
 }
 
 /* Draws a whole screen image with Flipper mascot, Game Boy, etc. */
-static void trade_draw_connected(Canvas* const canvas) {
+static void trade_draw_connection(Canvas* const canvas, bool connected) {
     furi_assert(canvas);
 
-    //canvas_draw_frame(canvas, 0, 0, 128, 64);
-    canvas_draw_icon(canvas, 8, 33, &I_dolphin);
-    canvas_draw_icon(canvas, 52, 33, &I_hand_thumbsup);
-    //canvas_draw_icon(canvas, 0, 53, &I_Background_128x11);
+    canvas_draw_icon(canvas, 9, 26, &I_dolphin);
+    trade_draw_bottom_bar(canvas);
     canvas_draw_icon(canvas, 80, 0, &I_game_boy);
     elements_frame(canvas, 9, 2, 64, 17);
-    canvas_draw_str(canvas, 18, 13, "Connected!");
+
+    if (connected) {
+        canvas_draw_str(canvas, 18, 13, "Connected!");
+        canvas_draw_icon(canvas, 61, 23, &I_hand_thumbsup);
+    } else {
+        canvas_draw_str(canvas, 18, 13, "Connect GB");
+        canvas_draw_icon(canvas, 56, 23, &I_hand_cable);
+    }
 }
 
 /* Draws a frame around the screen, with a box at the top for a text string,
@@ -313,22 +323,13 @@ static void trade_draw_connected(Canvas* const canvas) {
 static void trade_draw_frame(Canvas* canvas, const char* str) {
     furi_assert(canvas);
 
-    /* Paint the area behind the background bar and text box white to prevent overlap */
+    trade_draw_bottom_bar(canvas);
+
+    /* Paint the area behind the text box white to prevent overlap, similar
+     * to the bottom background bar */
     canvas_set_color(canvas, ColorWhite);
-    /* Background bar */
-    canvas_draw_box(canvas, 0, 53, 9, 7);
-    canvas_draw_box(canvas, 6, 56, 59, 6);
-    canvas_draw_box(canvas, 60, 53, 32, 7);
-    canvas_draw_box(canvas, 87, 56, 38, 6);
-    /* Text box */
     canvas_draw_box(canvas, 59, 0, 67, 19);
-
     canvas_set_color(canvas, ColorBlack);
-
-    /* Draw bar with transparencies */
-    canvas_set_bitmap_mode(canvas, 1);
-    canvas_draw_icon(canvas, 0, 53, &I_Background_128x11);
-    canvas_set_bitmap_mode(canvas, 0);
 
     /* Draw text box and populate it with string and Red icon */
     elements_frame(canvas, 59, 0, 67, 19);
@@ -371,12 +372,12 @@ static void trade_draw_callback(Canvas* canvas, void* view_model) {
     case GAMEBOY_CONN_FALSE:
         furi_hal_light_set(LightGreen, 0x00);
         furi_hal_light_set(LightRed, 0xff);
-        trade_draw_connect(canvas);
+        trade_draw_connection(canvas, false);
         break;
     case GAMEBOY_CONN_TRUE:
         furi_hal_light_set(LightGreen, 0xff);
         furi_hal_light_set(LightRed, 0x00);
-        trade_draw_connected(canvas);
+        trade_draw_connection(canvas, true);
         break;
     case GAMEBOY_READY:
         trade_draw_pkmn_avatar(canvas, icon);
