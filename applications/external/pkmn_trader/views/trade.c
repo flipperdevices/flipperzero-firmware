@@ -262,7 +262,7 @@ static void trade_draw_connection(Canvas* const canvas, bool connected) {
     canvas_draw_icon(canvas, 80, 0, &I_game_boy);
     elements_frame(canvas, 9, 2, 64, 17);
 
-    if (connected) {
+    if(connected) {
         canvas_draw_str(canvas, 18, 13, "Connected!");
         canvas_draw_icon(canvas, 61, 23, &I_hand_thumbsup);
     } else {

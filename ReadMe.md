@@ -42,6 +42,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [BLE Spam v6.0 (By Willy-JL & ECTO-1A & Spooks4576 with research from xMasterX; OFW API thanks to noproto)](https://github.com/noproto/apple_ble_spam_ofw) [Added NameFlood option (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/f2a6af257c8ce8e47181329c59a8a4e44e927c58) [Bug Fixes (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/74d69fb623378395ed8407261c95453d12e59cd5)
 - Updated: [Pokemon Trading v1.8 (By EstebanFuentealba & kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
 - Updated: [NFC Seader v2.5 (By bettse)](https://github.com/bettse/seader)
+- Updated: [BMI Air Mouse v0.9 (By ginkage)](https://github.com/ginkage/FlippAirMouse/) `Req: BMI160`
 
 <a name="release">
 

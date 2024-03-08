@@ -3,8 +3,9 @@
 
 #include <furi.h>
 #include <furi_hal_bt.h>
-#include <extra_profiles/hid_profile.h>
 #include <furi_hal_usb_hid.h>
+#include <profiles/serial_profile.h>
+#include <extra_profiles/hid_profile.h>
 #include <bt/bt_service/bt.h>
 #include <gui/elements.h>
 #include <notification/notification.h>
@@ -18,10 +19,10 @@ typedef struct ButtonEvent {
 #define BTN_EVT_QUEUE_SIZE 32
 
 struct BtMouse {
+    FuriHalBleProfileBase* hid;
     View* view;
     ViewDispatcher* view_dispatcher;
     Bt* bt;
-    FuriHalBleProfileBase* ble_hid_profile;
     NotificationApp* notifications;
     FuriMutex* mutex;
     FuriThread* thread;
@@ -119,7 +120,7 @@ static bool bt_mouse_input_callback(InputEvent* event, void* context) {
     bool consumed = false;
 
     if(event->type == InputTypeLong && event->key == InputKeyBack) {
-        ble_profile_hid_mouse_release_all(bt_mouse->ble_hid_profile);
+        ble_profile_hid_mouse_release_all(bt_mouse->hid);
     } else {
         bt_mouse_process(bt_mouse, event);
         consumed = true;
@@ -204,18 +205,18 @@ static int32_t bt_mouse_thread_callback(void* context) {
 
             if(bt_mouse->connected && send_buttons) {
                 if(event.state) {
-                    ble_profile_hid_mouse_press(bt_mouse->ble_hid_profile, event.button);
+                    ble_profile_hid_mouse_press(bt_mouse->hid, event.button);
                 } else {
-                    ble_profile_hid_mouse_release(bt_mouse->ble_hid_profile, event.button);
+                    ble_profile_hid_mouse_release(bt_mouse->hid, event.button);
                 }
             }
 
             if(bt_mouse->connected && (dx != 0 || dy != 0)) {
-                ble_profile_hid_mouse_move(bt_mouse->ble_hid_profile, dx, dy);
+                ble_profile_hid_mouse_move(bt_mouse->hid, dx, dy);
             }
 
             if(bt_mouse->connected && wheel != 0) {
-                ble_profile_hid_mouse_scroll(bt_mouse->ble_hid_profile, wheel);
+                ble_profile_hid_mouse_scroll(bt_mouse->hid, wheel);
             }
         }
     }
@@ -254,8 +255,8 @@ void bt_mouse_enter_callback(void* context) {
     bt_mouse->notifications = furi_record_open(RECORD_NOTIFICATION);
     bt_set_status_changed_callback(
         bt_mouse->bt, bt_mouse_connection_status_changed_callback, bt_mouse);
-    bt_mouse->ble_hid_profile = bt_profile_start(bt_mouse->bt, ble_profile_hid, NULL);
-    furi_check(bt_mouse->ble_hid_profile);
+    bt_mouse->hid = bt_profile_start(bt_mouse->bt, ble_profile_hid, NULL);
+    furi_assert(bt_mouse->hid);
     furi_hal_bt_start_advertising();
     bt_mouse_thread_start(bt_mouse);
 }
@@ -280,8 +281,8 @@ void bt_mouse_exit_callback(void* context) {
     tracking_end();
     notification_internal_message(bt_mouse->notifications, &sequence_reset_blue);
 
-    bt_set_status_changed_callback(bt_mouse->bt, NULL, NULL);
-    furi_check(bt_profile_restore_default(bt_mouse->bt));
+    furi_hal_bt_stop_advertising();
+    bt_profile_restore_default(bt_mouse->bt);
 
     furi_record_close(RECORD_NOTIFICATION);
     bt_mouse->notifications = NULL;

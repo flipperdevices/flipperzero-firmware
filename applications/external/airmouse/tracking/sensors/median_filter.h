@@ -17,6 +17,7 @@
 #define CARDBOARD_SDK_SENSORS_MEDIAN_FILTER_H_
 
 #include <deque>
+#include <cstddef>
 
 #include "../util/vector.h"
 
