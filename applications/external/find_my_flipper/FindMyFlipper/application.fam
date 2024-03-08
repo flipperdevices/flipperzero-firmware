@@ -1,0 +1,14 @@
+App(
+    appid="findmy",
+    name="FindMy Flipper",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="findmy_main",
+    requires=["gui"],
+    stack_size=1 * 1024,
+    order=35,
+    fap_icon="location_icon.png",
+    fap_category="Bluetooth",
+    fap_author="@MatthewKuKanich",
+    fap_version="1.0",
+    fap_description="BLE FindMy Location Beacon",
+)
