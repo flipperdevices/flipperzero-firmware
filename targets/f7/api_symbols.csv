@@ -2955,6 +2955,7 @@ Function,-,rename,int,"const char*, const char*"
 Function,-,renameat,int,"int, const char*, int, const char*"
 Function,-,rewind,void,FILE*
 Function,+,rgb2hsv,void,"const RgbColor*, HsvColor*"
+Function,+,rgb565cmp,int,"const Rgb565Color*, const Rgb565Color*"
 Function,+,rgb_backlight_get_color,void,"uint8_t, RgbColor*"
 Function,+,rgb_backlight_get_rainbow_interval,uint32_t,
 Function,+,rgb_backlight_get_rainbow_mode,RGBBacklightRainbowMode,

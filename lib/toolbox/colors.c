@@ -86,3 +86,7 @@ void rgb2hsv(const RgbColor* rgb, HsvColor* hsv) {
         hsv->h = 171 + 43 * (rgb->r - rgb->g) / (rgbMax - rgbMin);
     }
 }
+
+inline int rgb565cmp(const Rgb565Color* a, const Rgb565Color* b) {
+    return memcmp(a, b, sizeof(Rgb565Color));
+}
