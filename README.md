@@ -17,7 +17,7 @@
 ## Table of Contents <a name="index"></a>
 
 - [Introduction](#intro)
-- [YouTube](#youtube)
+- [Videos](#videos)
 - [Hardware Requirements](#hardware-requirements)
 - [Hardware Installation](#hardware-installation)
 - [Firmware Installation](#firmware-installation)
@@ -46,9 +46,11 @@ There will be many more features added in the future! If you have any ideas or s
 
 <p align="right">[ <a href="#index">Back to top</a> ]</p>
 
-## YouTube <a name="youtube"></a>
+## Videos <a name="videos"></a>
 
-This section is dedicated to all the fans that have made videos of this project! Thank you! If you have a video you'd like to share, please let me know by opening an issue [here][issues-link].
+This section is dedicated to all the fans that have made videos of this project! Thank you! 
+
+If you have a video you'd like to share, please let me know by opening an issue [here][issues-link].
 
 <details>
 
@@ -58,7 +60,15 @@ This section is dedicated to all the fans that have made videos of this project!
 
 **Flipper Zero ESP32 CAM Camera Module** - by TAKEAPART
 
+[https://www.youtube.com/watch?v=cEl5UnWH_Ok](https://www.youtube.com/watch?v=cEl5UnWH_Ok)
+
 [![Flipper Zero ESP32 CAM Camera Module - TAKEAPART](https://img.youtube.com/vi/cEl5UnWH_Ok/0.jpg)](https://www.youtube.com/watch?v=cEl5UnWH_Ok)
+
+**Tech With Kids - Flipper Zero ESP32 Kamera** - by @rechtsanwalt.okan.dogan
+
+[https://www.instagram.com/reel/C4DrufKoKrb/](https://www.instagram.com/reel/C4DrufKoKrb/)
+
+[![Flipper Zero ESP32 CAM Camera Module - @rechtsanwalt.okan.dogan](.github/images/video_rechtsanwalt_okan_dogan.png)](https://www.instagram.com/reel/C4DrufKoKrb/)
 
 </details>
 
