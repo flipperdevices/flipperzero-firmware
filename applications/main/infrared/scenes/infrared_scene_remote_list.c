@@ -2,15 +2,15 @@
 
 #include <toolbox/concurrent_runner.h>
 
-#define REMOTE_LOADER_STACK_SIZE (2048UL)
+#define TASK_STACK_SIZE (2048UL)
 
-static void infrared_scene_remote_list_load_callback(void* context) {
+static void infrared_scene_remote_list_task_callback(void* context) {
     InfraredApp* infrared = context;
     infrared->app_state.is_task_success =
         infrared_remote_load(infrared->remote, furi_string_get_cstr(infrared->file_path));
 }
 
-static void infrared_scene_remote_list_load_finished_callback(void* context) {
+static void infrared_scene_remote_list_task_finished_callback(void* context) {
     InfraredApp* infrared = context;
     view_dispatcher_send_custom_event(
         infrared->view_dispatcher, InfraredCustomEventTypeTaskFinished);
@@ -28,9 +28,9 @@ static void infrared_scene_remote_list_select_and_load(InfraredApp* infrared) {
         view_dispatcher_switch_to_view(infrared->view_dispatcher, InfraredViewStack);
         // Load remote in background
         concurrent_runner_start(
-            REMOTE_LOADER_STACK_SIZE,
-            infrared_scene_remote_list_load_callback,
-            infrared_scene_remote_list_load_finished_callback,
+            TASK_STACK_SIZE,
+            infrared_scene_remote_list_task_callback,
+            infrared_scene_remote_list_task_finished_callback,
             infrared);
     } else {
         scene_manager_previous_scene(infrared->scene_manager);

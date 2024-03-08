@@ -2,7 +2,7 @@
 
 #include <toolbox/concurrent_runner.h>
 
-#define BUTTON_MOVE_STACK_SIZE (2048UL)
+#define TASK_STACK_SIZE (2048UL)
 
 static void infrared_scene_edit_move_task_callback(void* context) {
     InfraredApp* infrared = context;
@@ -12,7 +12,7 @@ static void infrared_scene_edit_move_task_callback(void* context) {
         infrared->app_state.current_button_index);
 }
 
-static void infrared_scene_edit_move_finished_callback(void* context) {
+static void infrared_scene_edit_move_task_finished_callback(void* context) {
     InfraredApp* infrared = context;
     view_dispatcher_send_custom_event(
         infrared->view_dispatcher, InfraredCustomEventTypeTaskFinished);
@@ -59,9 +59,9 @@ bool infrared_scene_edit_move_on_event(void* context, SceneManagerEvent event) {
             view_stack_add_view(infrared->view_stack, loading_get_view(infrared->loading));
             // Move button in a separate thread
             concurrent_runner_start(
-                BUTTON_MOVE_STACK_SIZE,
+                TASK_STACK_SIZE,
                 infrared_scene_edit_move_task_callback,
-                infrared_scene_edit_move_finished_callback,
+                infrared_scene_edit_move_task_finished_callback,
                 infrared);
 
         } else if(event.event == InfraredCustomEventTypeTaskFinished) {

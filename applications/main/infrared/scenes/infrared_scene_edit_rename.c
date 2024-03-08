@@ -5,21 +5,26 @@
 #include <toolbox/path.h>
 #include <toolbox/concurrent_runner.h>
 
-#define REMOTE_RENAME_STACK_SIZE (2048UL)
+#define TASK_STACK_SIZE (2048UL)
 
-static void infrared_scene_edit_rename_button_callback(void* context) {
+static void infrared_scene_edit_rename_task_callback(void* context) {
     InfraredApp* infrared = context;
-    infrared->app_state.is_task_success = infrared_remote_rename_signal(
-        infrared->remote, infrared->app_state.current_button_index, infrared->text_store[0]);
+    InfraredAppState* app_state = &infrared->app_state;
+    const InfraredEditTarget edit_target = app_state->edit_target;
+
+    if(edit_target == InfraredEditTargetButton) {
+        furi_assert(app_state->current_button_index != InfraredButtonIndexNone);
+        app_state->is_task_success = infrared_remote_rename_signal(
+            infrared->remote, app_state->current_button_index, infrared->text_store[0]);
+    } else if(edit_target == InfraredEditTargetRemote) {
+        app_state->is_task_success =
+            infrared_rename_current_remote(infrared, infrared->text_store[0]);
+    } else {
+        furi_crash();
+    }
 }
 
-static void infrared_scene_edit_rename_remote_callback(void* context) {
-    InfraredApp* infrared = context;
-    infrared->app_state.is_task_success =
-        infrared_rename_current_remote(infrared, infrared->text_store[0]);
-}
-
-static void infrared_scene_edit_rename_finished_callback(void* context) {
+static void infrared_scene_edit_rename_task_finished_callback(void* context) {
     InfraredApp* infrared = context;
     view_dispatcher_send_custom_event(
         infrared->view_dispatcher, InfraredCustomEventTypeTaskFinished);
@@ -87,41 +92,26 @@ bool infrared_scene_edit_rename_on_event(void* context, SceneManagerEvent event)
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        InfraredAppState* app_state = &infrared->app_state;
-        const InfraredEditTarget edit_target = app_state->edit_target;
-
         if(event.event == InfraredCustomEventTypeTextEditDone) {
             view_stack_add_view(infrared->view_stack, loading_get_view(infrared->loading));
-
-            if(edit_target == InfraredEditTargetButton) {
-                furi_assert(app_state->current_button_index != InfraredButtonIndexNone);
-                // Rename button in a separate thread
-                concurrent_runner_start(
-                    REMOTE_RENAME_STACK_SIZE,
-                    infrared_scene_edit_rename_button_callback,
-                    infrared_scene_edit_rename_finished_callback,
-                    infrared);
-            } else if(edit_target == InfraredEditTargetRemote) {
-                // Rename remote in a separate thread (for consistency)
-                concurrent_runner_start(
-                    REMOTE_RENAME_STACK_SIZE,
-                    infrared_scene_edit_rename_remote_callback,
-                    infrared_scene_edit_rename_finished_callback,
-                    infrared);
-            } else {
-                furi_crash();
-            }
+            // Rename a button or a remote in a separate thread
+            concurrent_runner_start(
+                TASK_STACK_SIZE,
+                infrared_scene_edit_rename_task_callback,
+                infrared_scene_edit_rename_task_finished_callback,
+                infrared);
 
         } else if(event.event == InfraredCustomEventTypeTaskFinished) {
             view_stack_remove_view(infrared->view_stack, loading_get_view(infrared->loading));
 
+            InfraredAppState* app_state = &infrared->app_state;
+
             if(app_state->is_task_success) {
                 scene_manager_next_scene(scene_manager, InfraredSceneEditRenameDone);
             } else {
-                infrared_show_error_message(
-                    infrared,
-                    "Failed to\nrename %s",
-                    edit_target == InfraredEditTargetButton ? "button" : "file");
+                const char* edit_target_text =
+                    app_state->edit_target == InfraredEditTargetButton ? "button" : "file";
+                infrared_show_error_message(infrared, "Failed to\nrename %s", edit_target_text);
                 scene_manager_search_and_switch_to_previous_scene(
                     scene_manager, InfraredSceneRemoteList);
             }
