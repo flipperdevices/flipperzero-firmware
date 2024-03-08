@@ -62,9 +62,6 @@ echo Checking and setting arduino-cli configs...
 arduino-cli %ARDUINO_CLI_CONFIG_FILE% config set directories.data %CLI_TEMP%\data
 arduino-cli %ARDUINO_CLI_CONFIG_FILE% config set directories.downloads %CLI_TEMP%\downloads
 arduino-cli %ARDUINO_CLI_CONFIG_FILE% config set directories.user %CLI_TEMP%\user %*
-rem Enable for Git installations (ie `arduino-cli lib install --git-url`).
-rem @See "https://arduino.github.io/arduino-cli/0.35/configuration/#configuration-keys"
-arduino-cli %ARDUINO_CLI_CONFIG_FILE% config set library.enable_unsafe_install true
 
 echo Fetching assets...
 
@@ -81,9 +78,6 @@ if not exist "%CLI_TEMP%\user" (
 if %DATA_FLAG% gtr 0 (
     arduino-cli %ARDUINO_CLI_CONFIG_FILE% core update-index
     arduino-cli %ARDUINO_CLI_CONFIG_FILE% core install esp32:esp32
-    arduino-cli %ARDUINO_CLI_CONFIG_FILE% lib install --git-url https://github.com/me-no-dev/ESPAsyncWebServer.git
-    arduino-cli %ARDUINO_CLI_CONFIG_FILE% lib install --git-url https://github.com/me-no-dev/AsyncTCP.git
-    arduino-cli %ARDUINO_CLI_CONFIG_FILE% lib install --git-url https://github.com/me-no-dev/ESPAsyncTCP.git
 ) else (
     echo Assets already installed. Skipping...
 )
@@ -164,7 +158,6 @@ echo Resetting arduino-cli config back to defaults...
 arduino-cli %ARDUINO_CLI_CONFIG_FILE% config set directories.data C:\temp\arduino-cli\data
 arduino-cli %ARDUINO_CLI_CONFIG_FILE% config set directories.downloads C:\temp\arduino-cli\staging
 arduino-cli %ARDUINO_CLI_CONFIG_FILE% config set directories.user C:\temp\arduino-cli\user
-arduino-cli %ARDUINO_CLI_CONFIG_FILE% config set library.enable_unsafe_install false
 set /p DELETE_TEMP="Would you like to delete the temporary files? (Y/N): "
 if /i "!DELETE_TEMP!"=="Y" (
     rmdir /s /q %CLI_TEMP%
