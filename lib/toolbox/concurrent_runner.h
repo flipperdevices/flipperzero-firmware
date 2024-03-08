@@ -13,6 +13,10 @@
  * Input and output parameters are handled through the context parameter.
  * ConcurrentRunner does not provide any error handling of the user-supplied
  * code, so it must be taken care of on the application side.
+ *
+ * @warning The application code MUST make sure that all relevant pointers
+ * (i.e. callbacks and the context) remain valid until the full completion
+ * of the task being run.
  */
 #pragma once
 
