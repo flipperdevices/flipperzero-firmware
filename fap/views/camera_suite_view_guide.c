@@ -1,5 +1,9 @@
 #include "../camera_suite.h"
-#include "camera_suite_view_guide.h"
+#include <furi.h>
+#include <furi_hal.h>
+#include <input/input.h>
+#include <gui/elements.h>
+#include <dolphin/dolphin.h>
 
 struct CameraSuiteViewGuide {
     View* view;
@@ -39,10 +43,9 @@ static void camera_suite_view_guide_model_init(CameraSuiteViewGuideModel* const 
     model->some_value = 1;
 }
 
-bool camera_suite_view_guide_input(InputEvent* event, void* grid_view_instance) {
-    furi_assert(grid_view_instance);
-
-    CameraSuiteViewGuide* instance = grid_view_instance;
+bool camera_suite_view_guide_input(InputEvent* event, void* context) {
+    furi_assert(context);
+    CameraSuiteViewGuide* instance = context;
 
     if(event->type == InputTypeRelease) {
         switch(event->key) {
