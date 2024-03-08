@@ -12,6 +12,8 @@
 #define HEADER_LENGTH 3 // 'Y', ':', and row identifier
 #define LAST_ROW_INDEX 1008
 #define ROW_BUFFER_LENGTH 16
+#define RING_BUFFER_LENGTH 19
+#define FRAME_BUFFER_LENGTH 1024
 
 static const unsigned char bitmap_header[BITMAP_HEADER_LENGTH] = {
     0x42, 0x4D, 0x3E, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x3E, 0x00, 0x00, 0x00, 0x28, 0x00,

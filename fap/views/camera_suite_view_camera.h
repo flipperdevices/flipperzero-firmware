@@ -1,12 +1,28 @@
 #pragma once
 
-#define RING_BUFFER_LENGTH 19
-#define FRAME_BUFFER_LENGTH 1024
+#include <furi_hal_serial.h>
+#include <furi_hal_serial_control.h>
+
+#define FLIPPER_SCREEN_HEIGHT 64
+#define FLIPPER_SCREEN_WIDTH 128
+
+#define WORKER_EVENTS_MASK (WorkerEventStop | WorkerEventRx)
+#define UART_CH (FuriHalSerialIdUsart)
 
 typedef void (*CameraSuiteViewCameraCallback)(CameraSuiteCustomEvent event, void* context);
 
+typedef enum {
+    // Reserved for StreamBuffer internal event
+    WorkerEventReserved = (1 << 0),
+    WorkerEventStop = (1 << 1),
+    WorkerEventRx = (1 << 2),
+} WorkerEventFlags;
+
 typedef struct CameraSuiteViewCamera {
     CameraSuiteViewCameraCallback callback;
+    FuriHalSerialHandle* serial_handle;
+    FuriStreamBuffer* rx_stream;
+    FuriThread* worker_thread;
     View* view;
     void* context;
 } CameraSuiteViewCamera;

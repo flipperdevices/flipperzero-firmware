@@ -2,8 +2,6 @@
 
 #include <furi.h>
 #include <furi_hal.h>
-#include <furi_hal_serial.h>
-#include <furi_hal_serial_control.h>
 #include <gui/gui.h>
 #include <gui/modules/button_menu.h>
 #include <gui/modules/submenu.h>
@@ -19,26 +17,8 @@
 #include "views/camera_suite_view_camera.h"
 #include "views/camera_suite_view_guide.h"
 #include "views/camera_suite_view_start.h"
-#include "views/camera_suite_view_wifi_camera.h"
 
 #define TAG "Camera Suite"
-#include <furi.h>
-#define FLIPPER_SCREEN_HEIGHT 64
-#define FLIPPER_SCREEN_WIDTH 128
-
-#define WORKER_EVENTS_MASK (WorkerEventStop | WorkerEventRx)
-
-#ifdef xtreme_settings
-/**
- * Enable the following line for "Xtreme Firmware" & "Xtreme Apps" (Flipper-XFW).
- * 
- * @see https://github.com/Flipper-XFW/Xtreme-Firmware
- * @see https://github.com/Flipper-XFW/Xtreme-Apps
-*/
-#define UART_CH (xtreme_settings.uart_esp_channel)
-#else
-#define UART_CH (FuriHalSerialIdUsart)
-#endif
 
 typedef struct {
     Gui* gui;
@@ -49,7 +29,6 @@ typedef struct {
     VariableItemList* variable_item_list;
     CameraSuiteViewStart* camera_suite_view_start;
     CameraSuiteViewCamera* camera_suite_view_camera;
-    CameraSuiteViewWiFiCamera* camera_suite_view_wifi_camera;
     CameraSuiteViewGuide* camera_suite_view_guide;
     uint32_t orientation;
     uint32_t dither;
@@ -59,16 +38,12 @@ typedef struct {
     uint32_t speaker;
     uint32_t led;
     ButtonMenu* button_menu;
-    FuriHalSerialHandle* serial_handle;
-    FuriStreamBuffer* rx_stream;
-    FuriThread* worker_thread;
 } CameraSuite;
 
 typedef enum {
     CameraSuiteViewIdStartscreen,
     CameraSuiteViewIdMenu,
     CameraSuiteViewIdCamera,
-    CameraSuiteViewIdWiFiCamera,
     CameraSuiteViewIdGuide,
     CameraSuiteViewIdAppSettings,
     CameraSuiteViewIdCamSettings,
@@ -111,10 +86,3 @@ typedef enum {
     CameraSuiteLedOff,
     CameraSuiteLedOn,
 } CameraSuiteLedState;
-
-typedef enum {
-    // Reserved for StreamBuffer internal event
-    WorkerEventReserved = (1 << 0),
-    WorkerEventStop = (1 << 1),
-    WorkerEventRx = (1 << 2),
-} WorkerEventFlags;
