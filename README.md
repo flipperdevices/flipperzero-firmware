@@ -8,13 +8,42 @@ This app extends the functionality of the FlipperZero's bluetooth capabilities, 
 2. Customization: Users can adjust the interval between beacon broadcasts and modify the transmit power to suit their needs, optimizing for both visibility and battery life.
 3. Efficient Background Operation: The app is optimized to run in the background, ensuring that your FlipperZero can still be tracked with minimal battery usage and without stopping normal use.
 
-Usage
+## Usage Guide
 
-- Installation: Use the released/precompiled FAP for you firmware or build using fbt/ufbt.
-- Obtaining SmartTag Data (Open Haystack): To generate a tag, download the generate_keys.py file and run it in terminal. Follow the prompts, at the end you should end up with a **Private Key**, **Public Key**, **Payload**, and **MAC Address**. The **Private Key** is required to obtain the location reports from Apple. The **MAC Address** is to be entered into the FlipperZero app, open the config menu and select register tag. A MAC Address entry dialog should appear, enter your MAC here. Next a payload dialog will appear, enter the **Payload** data directly into this field. Once doe click save. You should be all set to use OpenHaystack. From here follow the OpenHaystack Steps or the MaclessHaystack steps depending on your setup.
-- Obtaining SmartTag Data (Cloning Existing Tag): Cloning an existing tag is the far easier and safer method for using your Flipper on the FindMy network. This is also easier to track and works easily with android phones as well as apple devices. First pair an AirTag or Samsung SmartTag to your device. Next have the tag enter "lost" mode, this is typically done by keeping the tag away from the device that initially registered it for ~15min. After some time has passed download and install the free **nrfConnect** app from the Apple Appstore or Google Play Store. Open the app and click on filters, then exclude everything except for the brand of tag you are cloning (Apple/Samsung). It may help to lower the RSSI to the lowest setting (-40 dBm). Finally click scan and wait until you see your smarttag, it should appear as a "FindMy" device. Click **Raw** or **View Raw** and copy or screenshot this data. This is your **payload**. Also take note of your tags **MAC Address**. Once you have this data immediently remove the battery from your tracker so that the keys/mac don't rotate/change. Now just enter the **payload** and **MAC Address** you obtained from nrfConnect into the FlipperZero app your youre set!
-- Configuration: Upon launching the app, you'll be able to select whether to clone an AirTag or SmartTag, generate a new OpenHaystack key pair, and adjust the broadcast settings.
-- Tracking: Once configured, your FlipperZero can be tracked using the respective platform's tracking service (FindMy app for Apple devices, SmartThings for Samsung, and respective web browsers).
+### Step 1: Installation
+- **Option A:** Use the released/precompiled firmware appropriate (FAP) for your device.
+- **Option B:** Build the firmware yourself using `fbt/ufbt`.
+
+### Step 2: Obtaining SmartTag Data
+
+#### Option A: Open Haystack Method
+1. **Generate a Tag:** Download the `generate_keys.py` file and execute it in your terminal.
+2. **Follow Prompts:** During execution, you'll be prompted for inputs. By the end, you'll obtain a **Private Key**, **Public Key**, **Payload**, and **MAC Address**.
+   - **Private Key** is necessary to receive location reports from Apple.
+   - **MAC Address** should be registered in the FlipperZero app:
+     1. Open the app and navigate to the config menu.
+     2. Choose "register tag" and enter the MAC Address when prompted.
+     3. A payload dialog will appear next. Enter your **Payload** here.
+     4. Click save.
+3. **Configuration Completion:** With this setup, your device is ready for Open Haystack. Proceed with the specific steps for Open Haystack or MaclessHaystack based on your setup.
+
+#### Option B: Cloning Existing Tag
+1. **Pair a Tag:** First, pair an AirTag or Samsung SmartTag with your device.
+2. **Enter 'Lost' Mode:** Keep the tag away from the device it's registered to for approximately 15 minutes.
+3. **Download nrfConnect:** Install nrfConnect from the Apple App Store or Google Play Store.
+4. **Filter and Scan:**
+   - Open the app, click on filters, and exclude all except for the brand of your tag (Apple/Samsung).
+   - Adjust the RSSI to the lowest setting (-40 dBm).
+   - Initiate a scan. Wait for your SmartTag to appear as a "FindMy" device.
+5. **Capture Data:** Click **Raw** or **View Raw** to capture your **payload** and note your tag's **MAC Address**. Immediately remove the tag's battery to prevent key/MAC rotation.
+6. **Enter Data in FlipperZero App:** Input the captured **payload** and **MAC Address** into the FlipperZero app.
+
+### Step 3: Configuration
+- Upon launching the app, choose whether to clone an AirTag or SmartTag, generate a new Open Haystack key pair, or adjust broadcast settings.
+
+### Step 4: Tracking
+- Once the app is configured, your FlipperZero can be tracked using the relevant platform's tracking service (FindMy app for Apple devices, SmartThings for Samsung devices, and respective web browsers).
+
 
 Customization
 
