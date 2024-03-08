@@ -29,6 +29,11 @@ static void ret_bad_args(struct mjs* mjs, const char* error) {
     mjs_return(mjs, MJS_UNDEFINED);
 }
 
+static void ret_int_err(struct mjs* mjs, const char* error) {
+    mjs_prepend_errorf(mjs, MJS_INTERNAL_ERROR, "%s", error);
+    mjs_return(mjs, MJS_UNDEFINED);
+}
+
 static bool check_arg_count(struct mjs* mjs, size_t count) {
     size_t num_args = mjs_nargs(mjs);
     if(num_args != count) {
@@ -46,6 +51,14 @@ static bool get_int_arg(struct mjs* mjs, size_t index, uint8_t* value, bool erro
     }
     *value = mjs_get_int(mjs, int_obj);
     return true;
+}
+
+static void js_blebeacon_is_active(struct mjs* mjs) {
+    JsBlebeaconInst* blebeacon = get_this_ctx(mjs);
+    if(!check_arg_count(mjs, 0)) return;
+    UNUSED(blebeacon);
+
+    mjs_return(mjs, mjs_mk_boolean(mjs, furi_hal_bt_extra_beacon_is_active()));
 }
 
 static void js_blebeacon_set_config(struct mjs* mjs) {
@@ -100,7 +113,12 @@ static void js_blebeacon_set_config(struct mjs* mjs) {
             blebeacon->prev_cfg_set = false;
         }
     }
-    furi_check(furi_hal_bt_extra_beacon_set_config(&config));
+    if(!furi_hal_bt_extra_beacon_set_config(&config)) {
+        ret_int_err(mjs, "Failed setting beacon config");
+        return;
+    }
+
+    mjs_return(mjs, MJS_UNDEFINED);
 }
 
 static void js_blebeacon_set_data(struct mjs* mjs) {
@@ -125,7 +143,10 @@ static void js_blebeacon_set_data(struct mjs* mjs) {
         blebeacon->saved_prev_data = true;
         blebeacon->prev_data_len = furi_hal_bt_extra_beacon_get_data(blebeacon->prev_data);
     }
-    furi_check(furi_hal_bt_extra_beacon_set_data((uint8_t*)data, data_len));
+    if(!furi_hal_bt_extra_beacon_set_data((uint8_t*)data, data_len)) {
+        ret_int_err(mjs, "Failed setting beacon data");
+        return;
+    }
 
     mjs_return(mjs, MJS_UNDEFINED);
 }
@@ -138,7 +159,10 @@ static void js_blebeacon_start(struct mjs* mjs) {
         blebeacon->saved_prev_active = true;
         blebeacon->prev_active = furi_hal_bt_extra_beacon_is_active();
     }
-    furi_check(furi_hal_bt_extra_beacon_start());
+    if(!furi_hal_bt_extra_beacon_start()) {
+        ret_int_err(mjs, "Failed starting beacon");
+        return;
+    }
 
     mjs_return(mjs, MJS_UNDEFINED);
 }
@@ -148,6 +172,10 @@ static void js_blebeacon_stop(struct mjs* mjs) {
     if(!check_arg_count(mjs, 0)) return;
     UNUSED(blebeacon);
 
+    if(!blebeacon->saved_prev_active) {
+        blebeacon->saved_prev_active = true;
+        blebeacon->prev_active = furi_hal_bt_extra_beacon_is_active();
+    }
     furi_hal_bt_extra_beacon_stop();
 
     mjs_return(mjs, MJS_UNDEFINED);
@@ -167,6 +195,7 @@ static void* js_blebeacon_create(struct mjs* mjs, mjs_val_t* object) {
     JsBlebeaconInst* blebeacon = malloc(sizeof(JsBlebeaconInst));
     mjs_val_t blebeacon_obj = mjs_mk_object(mjs);
     mjs_set(mjs, blebeacon_obj, INST_PROP_NAME, ~0, mjs_mk_foreign(mjs, blebeacon));
+    mjs_set(mjs, blebeacon_obj, "isActive", ~0, MJS_MK_FN(js_blebeacon_is_active));
     mjs_set(mjs, blebeacon_obj, "setConfig", ~0, MJS_MK_FN(js_blebeacon_set_config));
     mjs_set(mjs, blebeacon_obj, "setData", ~0, MJS_MK_FN(js_blebeacon_set_data));
     mjs_set(mjs, blebeacon_obj, "start", ~0, MJS_MK_FN(js_blebeacon_start));

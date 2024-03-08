@@ -1,4 +1,15 @@
 let blebeacon = require("blebeacon");
+
+// Stop if previous background beacon is active
+if (blebeacon.isActive()) {
+    blebeacon.stop();
+}
+
+// Make sure it resets at script exit, true will keep advertising in background
+// This is false by default, can be omitted
+blebeacon.keepAlive(false);
+
+
 let math = require("math");
 
 let currentIndex = 0;
@@ -42,9 +53,6 @@ function sendRandomModelAdvertisement() {
 
     blebeacon.stop();
 }
-
-// Make sure it resets at script exit, true will keep advertising in background
-blebeacon.keepAlive(true);
 
 while (true) {
     sendRandomModelAdvertisement();

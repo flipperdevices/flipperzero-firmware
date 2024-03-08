@@ -38,12 +38,12 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [Auto-generated firmware documentation take two #2944 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/2944)
 - OFW: PR: [Fix Troika 4K parser keys #3499 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3499)
 - [Air Arkanoid & Air Labyrinth: Use PYTHON3 var (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/7eb47a5993e49a95903faad8b01bae63e872603c)
-- Updated: [JS Runner v1.0 (By nminaylov & DrZlo13)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/3286) [Added ble beacon, math and keyboard to JavaScript API (By Spooks4576)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/41bb09492400026be66ef5f8b78f506f21361f1d) [Many improvements (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/9b00d0e37b304784cf8e0ac0bdabe6aa543a780e)
 - Updated: [BLE Spam v6.0 (By Willy-JL & ECTO-1A & Spooks4576 with research from xMasterX; OFW API thanks to noproto)](https://github.com/noproto/apple_ble_spam_ofw) [Added NameFlood option (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/f2a6af257c8ce8e47181329c59a8a4e44e927c58) [Bug Fixes (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/74d69fb623378395ed8407261c95453d12e59cd5)
 - Updated: [Pokemon Trading v1.8 (By EstebanFuentealba & kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
 - Updated: [NFC Seader v2.5 (By bettse)](https://github.com/bettse/seader)
 - Updated: [BMI Air Mouse v0.91(By ginkage)](https://github.com/ginkage/FlippAirMouse/) `Req: BMI160`
 - Added: [FindMy Flipper v1.0 (By MatthewKuKanich)](https://github.com/MatthewKuKanich/FindMyFlipper)
+- Updated: [JS Runner v1.0 (By nminaylov & DrZlo13)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/3286) [Added ble beacon, math and keyboard to JavaScript API (By Spooks4576)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/41bb09492400026be66ef5f8b78f506f21361f1d) [Many improvements (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/9b00d0e37b304784cf8e0ac0bdabe6aa543a780e) [Some SubGHz support and Radio Device Loader module (By Sil333033)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/9b00d0e37b304784cf8e0ac0bdabe6aa543a780e)
 
 <a name="release">
 
