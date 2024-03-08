@@ -26,6 +26,8 @@ This app extends the functionality of the FlipperZero's bluetooth capabilities, 
      3. A payload dialog will appear next. Enter your **Payload** here.
      4. Click save.
 3. **Configuration Completion:** With this setup, your device is ready for Open Haystack. Proceed with the specific steps for Open Haystack or MaclessHaystack based on your setup.
+   - Don't Own a Mac: https://github.com/dchristl/macless-haystack
+   - Own a Mac: https://github.com/seemoo-lab/openhaystack
 
 #### Option B: Cloning Existing Tag
 1. **Pair a Tag:** First, pair an AirTag or Samsung SmartTag with your device.
