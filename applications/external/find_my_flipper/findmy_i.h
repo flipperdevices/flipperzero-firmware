@@ -3,7 +3,7 @@
 #include "findmy.h"
 #include <furi_hal_bt.h>
 #include <extra_beacon.h>
-#include <assets_icons.h>
+#include <findmy_icons.h>
 #include <gui/gui.h>
 #include <gui/scene_manager.h>
 #include <gui/view_dispatcher.h>
