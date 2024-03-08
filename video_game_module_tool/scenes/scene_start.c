@@ -4,6 +4,7 @@
 
 typedef enum {
     SceneStartIndexInstallDefault,
+    SceneStartIndexInstallRGB,
     SceneStartIndexInstallCustom,
 } SceneStartIndex;
 
@@ -24,6 +25,12 @@ void scene_start_on_enter(void* context) {
         app);
     submenu_add_item(
         app->submenu,
+        "Install RGB Firmware",
+        SceneStartIndexInstallRGB,
+        submenu_item_common_callback,
+        app);
+    submenu_add_item(
+        app->submenu,
         "Install Firmware from File",
         SceneStartIndexInstallCustom,
         submenu_item_common_callback,
@@ -40,6 +47,9 @@ bool scene_start_on_event(void* context, SceneManagerEvent event) {
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SceneStartIndexInstallDefault) {
             furi_string_set(app->file_path, VGM_DEFAULT_FW_FILE);
+            scene_manager_next_scene(app->scene_manager, SceneConfirm);
+        } else if(event.event == SceneStartIndexInstallRGB) {
+            furi_string_set(app->file_path, APP_ASSETS_PATH("vgm-fw-rgb.uf2"));
             scene_manager_next_scene(app->scene_manager, SceneConfirm);
         } else if(event.event == SceneStartIndexInstallCustom) {
             scene_manager_next_scene(app->scene_manager, SceneFileSelect);

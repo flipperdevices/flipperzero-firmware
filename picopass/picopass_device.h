@@ -99,6 +99,7 @@ typedef struct {
 
 typedef struct {
     uint8_t data[PICOPASS_BLOCK_LEN];
+    bool valid;
 } PicopassBlock;
 
 typedef struct {

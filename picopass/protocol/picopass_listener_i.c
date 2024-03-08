@@ -23,14 +23,14 @@ void picopass_listener_init_cipher_state_key(PicopassListener* instance, const u
     memcpy(
         cc,
         instance->data->card_data[PICOPASS_SECURE_EPURSE_BLOCK_INDEX].data,
-        sizeof(PicopassBlock));
+        PICOPASS_BLOCK_LEN);
 
     instance->cipher_state = loclass_opt_doTagMAC_1(cc, key);
 }
 
 void picopass_listener_init_cipher_state(PicopassListener* instance) {
     uint8_t key[PICOPASS_BLOCK_LEN] = {};
-    memcpy(key, instance->data->card_data[instance->key_block_num].data, sizeof(PicopassBlock));
+    memcpy(key, instance->data->card_data[instance->key_block_num].data, PICOPASS_BLOCK_LEN);
 
     picopass_listener_init_cipher_state_key(instance, key);
 }

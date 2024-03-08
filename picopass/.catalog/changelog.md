@@ -1,3 +1,5 @@
+## 1.13
+ - Rework loclass writer with datetime lib
 ## 1.12
  - Add support for non-secure Picopass
  - Change Read to use all dictionaries

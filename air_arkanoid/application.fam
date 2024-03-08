@@ -12,8 +12,7 @@ App(
     fap_extbuild=(
         ExtFile(
             path="${FAP_SRC_DIR}/assets",
-            command=("python" if __import__("sys").platform == "win32" else "python3")
-            + " ${FAP_SRC_DIR}/engine/scripts/sprite_builder.py ${FAP_SRC_DIR.abspath}/sprites ${TARGET.abspath}/sprites",
+            command="${PYTHON3} ${FAP_SRC_DIR}/engine/scripts/sprite_builder.py ${FAP_SRC_DIR.abspath}/sprites ${TARGET.abspath}/sprites",
         ),
     ),
 )
