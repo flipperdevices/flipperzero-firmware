@@ -16,7 +16,6 @@
 #include "views/camera_suite_view_guide.h"
 #include "views/camera_suite_view_start.h"
 #include "views/camera_suite_view_camera.h"
-#include "views/camera_suite_view_wifi_camera.h"
 
 #include "helpers/camera_suite_storage.h"
 
