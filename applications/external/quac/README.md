@@ -56,9 +56,11 @@ When the action files and folders are rendered for display, any `XX_` prefix wil
 ## Signal playback
 The signal files are played back as recorded. During playback/transmit, the LED light will flash green until the action is complete. For RFID signals, they are continuously played back for 3 seconds.
 
-## Features on deck... maybe?
+## On deck... maybe?
+- Playlist support: Thinking a `.qpl` file (Quac playlist file - just a text file), that lists the full path of every command you wish to play back. Playlists would be rendered as buttons. Support a `pause [ms]` command so you can space out the actions inside of a playlist.
+- Hidden file/folder support: Hide files and folders if they start with a `.`. This allows you to place/organize the files used by a playlist in your current directory structure, without them appearing as buttons/groups in the app.
 - Horizontal layout
-- Customize length of RFID playback
+- Customize length of RFID playback. (Per file? hmm...)
 - Improved UI
 
 ## Building / Install
