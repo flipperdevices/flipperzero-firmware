@@ -9,8 +9,8 @@ struct FindMyMain {
 
 typedef struct {
     bool active;
-    bool apple;
     uint8_t interval;
+    FindMyType type;
 } FindMyMainModel;
 
 static void findmy_main_draw_callback(Canvas* canvas, void* _model) {
@@ -34,12 +34,17 @@ static void findmy_main_draw_callback(Canvas* canvas, void* _model) {
     snprintf(interval_str, sizeof(interval_str), "Ping Interval: %ds", model->interval);
     canvas_draw_str(canvas, 4, 62, interval_str);
     canvas_set_font(canvas, FontPrimary);
-    if(model->apple){
+    switch(model->type) {
+    case FindMyTypeApple:
         canvas_draw_str(canvas, 4, 32, "Apple Network");
         canvas_draw_icon(canvas, 80, 24, &I_Lock_7x8);
-    } else {
+        break;
+    case FindMyTypeSamsung:
         canvas_draw_str(canvas, 4, 32, "Samsung Network");
         canvas_draw_icon(canvas, 97, 24, &I_Lock_7x8);
+        break;
+    default:
+        break;
     }
     canvas_set_font(canvas, FontSecondary);
     canvas_draw_str(canvas, 100, 61, "Config");
@@ -56,30 +61,32 @@ static bool findmy_main_input_callback(InputEvent* event, void* context) {
 
     if(event->type == InputTypePress) {
         consumed = true;
-        // FIXME: finish implementing handlers in scene side
+        FindMyMainEvent cb_event;
+
         switch(event->key) {
         case InputKeyBack:
-            findmy_main->callback(FindMyMainEventQuit, findmy_main->context);
-            // furi_hal_bt_extra_beacon_stop();
+            cb_event = FindMyMainEventQuit;
             break;
         case InputKeyOk:
-            findmy_main->callback(FindMyMainEventToggle, findmy_main->context);
+            cb_event = FindMyMainEventToggle;
             break;
         case InputKeyLeft:
-            findmy_main->callback(FindMyMainEventBackground, findmy_main->context);
+            cb_event = FindMyMainEventBackground;
             break;
         case InputKeyRight:
-            findmy_main->callback(FindMyMainEventConfig, findmy_main->context);
+            cb_event = FindMyMainEventConfig;
             break;
         case InputKeyUp:
-            findmy_main->callback(FindMyMainEventIntervalUp, findmy_main->context);
+            cb_event = FindMyMainEventIntervalUp;
             break;
         case InputKeyDown:
-            findmy_main->callback(FindMyMainEventIntervalDown, findmy_main->context);
+            cb_event = FindMyMainEventIntervalDown;
             break;
         default:
-            break;
+            return consumed;
         }
+
+        findmy_main->callback(cb_event, findmy_main->context);
     }
 
     return consumed;
@@ -94,9 +101,9 @@ FindMyMain* findmy_main_alloc(FindMy* app) {
         findmy_main->view,
         FindMyMainModel * model,
         {
-            model->active = app->beacon_active;
-            model->apple = app->apple;
-            model->interval = app->broadcast_interval;
+            model->active = app->state.beacon_active;
+            model->interval = app->state.broadcast_interval;
+            model->type = findmy_data_get_type(app->state.data);
         },
         false);
     view_set_context(findmy_main->view, findmy_main);
@@ -136,8 +143,8 @@ void findmy_main_update_interval(FindMyMain* findmy_main, uint8_t interval) {
         findmy_main->view, FindMyMainModel * model, { model->interval = interval; }, true);
 }
 
-void findmy_main_update_apple(FindMyMain* findmy_main, bool apple) {
+void findmy_main_update_type(FindMyMain* findmy_main, FindMyType type) {
     furi_assert(findmy_main);
     with_view_model(
-        findmy_main->view, FindMyMainModel * model, { model->apple = apple; }, true);
+        findmy_main->view, FindMyMainModel * model, { model->type = type; }, true);
 }

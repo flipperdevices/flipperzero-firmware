@@ -16,8 +16,7 @@ void findmy_scene_config_packet_on_enter(void* context) {
 
     byte_input_set_header_text(byte_input, "Enter Bluetooth Payload:");
 
-    memset(app->packet_buf, 0, sizeof(app->packet_buf));
-    furi_hal_bt_extra_beacon_get_data(app->packet_buf);
+    memcpy(app->packet_buf, app->state.data, sizeof(app->packet_buf));
 
     byte_input_set_result_callback(
         byte_input,
@@ -40,13 +39,11 @@ bool findmy_scene_config_packet_on_event(void* context, SceneManagerEvent event)
         case ByteInputResultOk:
             scene_manager_search_and_switch_to_previous_scene(
                 app->scene_manager, FindMySceneConfig);
-            furi_check(furi_hal_bt_extra_beacon_set_data(app->packet_buf, sizeof(app->packet_buf)));
-            if (app->packet_buf[0] == 0x1E && app->packet_buf[3] == 0x00) {
-                app->apple = true; // Checks payload data for Apple identifier
-            } else {
-                app->apple = false;
-            }
-            findmy_main_update_apple(app->findmy_main, app->apple);
+            memcpy(app->state.data, app->packet_buf, sizeof(app->state.data));
+            findmy_state_save(&app->state);
+            furi_check(
+                furi_hal_bt_extra_beacon_set_data(app->state.data, sizeof(app->state.data)));
+            findmy_main_update_type(app->findmy_main, findmy_data_get_type(app->state.data));
             break;
         default:
             break;

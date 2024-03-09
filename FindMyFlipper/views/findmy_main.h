@@ -26,4 +26,4 @@ void findmy_main_set_callback(FindMyMain* findmy_main, FindMyMainCallback callba
 // To redraw when info changes
 void findmy_main_update_active(FindMyMain* findmy_main, bool active);
 void findmy_main_update_interval(FindMyMain* findmy_main, uint8_t interval);
-void findmy_main_update_apple(FindMyMain* findmy_main, bool apple);
+void findmy_main_update_type(FindMyMain* findmy_main, FindMyType type);

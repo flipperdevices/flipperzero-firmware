@@ -16,7 +16,7 @@ void findmy_scene_config_mac_on_enter(void* context) {
 
     byte_input_set_header_text(byte_input, "Enter Bluetooth MAC:");
 
-    memcpy(app->mac_buf, &app->config.address, sizeof(app->mac_buf));
+    memcpy(app->mac_buf, app->state.mac, sizeof(app->mac_buf));
     furi_hal_bt_reverse_mac_addr(app->mac_buf);
 
     byte_input_set_result_callback(
@@ -39,8 +39,16 @@ bool findmy_scene_config_mac_on_event(void* context, SceneManagerEvent event) {
         switch(event.event) {
         case ByteInputResultOk:
             furi_hal_bt_reverse_mac_addr(app->mac_buf);
-            memcpy(&app->config.address, app->mac_buf, sizeof(app->config.address));
-            furi_hal_bt_extra_beacon_set_config(&app->config);
+            memcpy(&app->state.mac, app->mac_buf, sizeof(app->state.mac));
+            findmy_state_sync_config(&app->state);
+            findmy_state_save(&app->state);
+            if(furi_hal_bt_extra_beacon_is_active()) {
+                furi_check(furi_hal_bt_extra_beacon_stop());
+            }
+            furi_check(furi_hal_bt_extra_beacon_set_config(&app->state.config));
+            if(app->state.beacon_active) {
+                furi_check(furi_hal_bt_extra_beacon_start());
+            }
             scene_manager_next_scene(app->scene_manager, FindMySceneConfigPacket);
             break;
         default:
@@ -56,5 +64,4 @@ void findmy_scene_config_mac_on_exit(void* context) {
 
     byte_input_set_result_callback(app->byte_input, NULL, NULL, NULL, NULL, 0);
     byte_input_set_header_text(app->byte_input, "");
-
 }

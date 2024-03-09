@@ -1,6 +1,7 @@
 #pragma once
 
 #include "findmy.h"
+#include "findmy_state.h"
 #include <furi_hal_bt.h>
 #include <extra_beacon.h>
 #include <assets_icons.h>
@@ -24,11 +25,7 @@ struct FindMy {
     uint8_t mac_buf[EXTRA_BEACON_MAC_ADDR_SIZE];
     uint8_t packet_buf[EXTRA_BEACON_MAX_DATA_SIZE];
 
-    GapExtraBeaconConfig config;
-    bool apple;
-    bool beacon_active;
-    uint8_t broadcast_interval;
-    uint8_t transmit_power;
+    FindMyState state;
 };
 
 typedef enum {
@@ -37,6 +34,12 @@ typedef enum {
     FindMyViewVarItemList,
 } FindMyView;
 
+enum FindMyType {
+    FindMyTypeApple,
+    FindMyTypeSamsung,
+};
+
 void findmy_change_broadcast_interval(FindMy* app, uint8_t value);
 void findmy_change_transmit_power(FindMy* app, uint8_t value);
 void findmy_toggle_beacon(FindMy* app);
+FindMyType findmy_data_get_type(uint8_t data[EXTRA_BEACON_MAX_DATA_SIZE]);
