@@ -17,7 +17,7 @@ This app extends the functionality of the FlipperZero's bluetooth capabilities, 
 ### Step 2: Obtaining SmartTag Data
 
 #### Option A: Open Haystack Method
-1. **Generate a Tag:** Download the `generate_keys.py` file and execute it in your terminal.
+1. **Generate a Tag:** Download the `generate_keys.py` file and execute it in your terminal. (You will need cryptography ```python3 -m pip install cryptography```)
 2. **Follow Prompts:** During execution, you'll be prompted for inputs. By the end, you'll obtain a **Private Key**, **Public Key**, **Payload**, and **MAC Address**.
    - **Private Key** is necessary to receive location reports from Apple.
    - **MAC Address** should be registered in the FlipperZero app:
