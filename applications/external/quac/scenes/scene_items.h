@@ -1,6 +1,6 @@
 #pragma once
 
-#include "flipper.h"
+#include <gui/scene_manager.h>
 
 void scene_items_item_callback(void* context, int32_t index, InputType type);
 // For each scene, implement handler callbacks

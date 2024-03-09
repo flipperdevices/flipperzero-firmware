@@ -7,7 +7,10 @@
 #include <lib/subghz/protocols/raw.h>
 #include <lib/subghz/subghz_protocol_registry.h>
 
+#include <flipper_format/flipper_format.h>
+
 #include "action_i.h"
+#include "quac.h"
 
 static FuriHalSubGhzPreset action_subghz_get_preset_name(const char* preset_name) {
     FuriHalSubGhzPreset preset = FuriHalSubGhzPresetIDLE;
@@ -22,16 +25,16 @@ static FuriHalSubGhzPreset action_subghz_get_preset_name(const char* preset_name
     } else if(!strcmp(preset_name, "FuriHalSubGhzPresetCustom")) {
         preset = FuriHalSubGhzPresetCustom;
     } else {
-        FURI_LOG_E(TAG, "Unknown preset!");
+        FURI_LOG_E(TAG, "SUBGHZ: Unknown preset!");
     }
     return preset;
 }
 
 // Lifted from flipperzero-firmware/applications/main/subghz/subghz_cli.c
-void action_subghz_tx(void* context, Item* item) {
+void action_subghz_tx(void* context, FuriString* action_path, FuriString* error) {
     App* app = context;
-    FuriString* file_name = item->path;
-    uint32_t repeat = 1; // 10?
+    FuriString* file_name = action_path;
+    uint32_t repeat = 1; //
     // uint32_t device_ind = 0; // 0 - CC1101_INT, 1 - CC1101_EXT
 
     FlipperFormat* fff_data_file = flipper_format_file_alloc(app->storage);
@@ -45,7 +48,7 @@ void action_subghz_tx(void* context, Item* item) {
     uint32_t frequency = 0;
     SubGhzTransmitter* transmitter = NULL;
 
-    FURI_LOG_I(TAG, "action_run_tx starting...");
+    FURI_LOG_I(TAG, "SUBGHZ: Action starting...");
 
     subghz_devices_init();
     SubGhzEnvironment* environment = subghz_environment_alloc();
@@ -75,11 +78,13 @@ void action_subghz_tx(void* context, Item* item) {
 
         if(!flipper_format_file_open_existing(fff_data_file, furi_string_get_cstr(file_name))) {
             FURI_LOG_E(TAG, "Error opening %s", furi_string_get_cstr(file_name));
+            ACTION_SET_ERROR("SUBGHZ: Error opening %s", furi_string_get_cstr(file_name));
             break;
         }
 
         if(!flipper_format_read_header(fff_data_file, temp_str, &temp_data32)) {
             FURI_LOG_E(TAG, "Missing or incorrect header");
+            ACTION_SET_ERROR("SUBGHZ: Missing or incorrect header");
             break;
         }
 
@@ -88,21 +93,31 @@ void action_subghz_tx(void* context, Item* item) {
            temp_data32 == SUBGHZ_KEY_FILE_VERSION) {
         } else {
             FURI_LOG_E(TAG, "Type or version mismatch");
+            ACTION_SET_ERROR("SUBGHZ: Type or version mismatch");
             break;
         }
 
         if(!flipper_format_read_uint32(fff_data_file, "Frequency", &frequency, 1)) {
             FURI_LOG_E(TAG, "Missing Frequency");
+            ACTION_SET_ERROR("SUBGHZ: Missing frequency");
             break;
         }
 
         if(!subghz_devices_is_frequency_valid(device, frequency)) {
             FURI_LOG_E(TAG, "Frequency not supported");
+            ACTION_SET_ERROR("SUBGHZ: Frequency not supported");
             break;
         }
 
         if(!flipper_format_read_string(fff_data_file, "Preset", temp_str)) {
             FURI_LOG_E(TAG, "Missing Preset");
+            ACTION_SET_ERROR("SUBGHZ: Missing preset");
+            break;
+        }
+
+        if(action_subghz_get_preset_name(furi_string_get_cstr(temp_str)) ==
+           FuriHalSubGhzPresetIDLE) {
+            ACTION_SET_ERROR("SUBGHZ: Unknown preset");
             break;
         }
 
@@ -116,6 +131,7 @@ void action_subghz_tx(void* context, Item* item) {
                 break;
             if(!temp_data32 || (temp_data32 % 2)) {
                 FURI_LOG_E(TAG, "Custom_preset_data size error");
+                ACTION_SET_ERROR("SUBGHZ: Custom_preset_data size error");
                 break;
             }
             custom_preset_data_size = sizeof(uint8_t) * temp_data32;
@@ -126,6 +142,7 @@ void action_subghz_tx(void* context, Item* item) {
                    custom_preset_data,
                    custom_preset_data_size)) {
                 FURI_LOG_E(TAG, "Custom_preset_data read error");
+                ACTION_SET_ERROR("SUBGHZ: Custom_preset_data read error");
                 break;
             }
             subghz_devices_load_preset(
@@ -143,6 +160,7 @@ void action_subghz_tx(void* context, Item* item) {
         // Load Protocol
         if(!flipper_format_read_string(fff_data_file, "Protocol", temp_str)) {
             FURI_LOG_E(TAG, "Missing protocol");
+            ACTION_SET_ERROR("SUBGHZ: Missing protocol");
             break;
         }
 
@@ -231,9 +249,10 @@ void action_subghz_tx(void* context, Item* item) {
         if(furi_hal_power_is_otg_enabled()) furi_hal_power_disable_otg();
 
         furi_hal_power_suppress_charge_exit();
-
         subghz_transmitter_free(transmitter);
     }
+
+    FURI_LOG_I(TAG, "SUBGHZ: Action complete.");
 
     flipper_format_free(fff_data_raw);
     furi_string_free(temp_str);

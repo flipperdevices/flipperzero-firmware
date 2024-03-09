@@ -1,14 +1,12 @@
 #pragma once
 
-#include "flipper.h"
-
 typedef enum { SR_Scene_Items, SR_Scene_count } appScenes;
 
 typedef enum {
-    SR_ButtonMenu, // used on selected device, to show buttons
-    SR_Dialog,
-    SR_FileBrowser, // to find the recorded Sub-GHz data!
-    SR_TextInput
+    SR_ButtonMenu, // used on selected device, to show buttons/groups
+    SR_Dialog, // shows errors
+    SR_FileBrowser, // TODO: UNUSED!
+    SR_TextInput // TODO: UNUSED
 } appView;
 
 typedef enum { Event_DeviceSelected, Event_ButtonPressed } AppCustomEvents;

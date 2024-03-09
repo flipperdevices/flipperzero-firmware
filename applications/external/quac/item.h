@@ -4,6 +4,11 @@
 
 #define MAX_EXT_LEN 6
 
+/** Defines an individual item action or item group. Each object contains
+ * the relevant file and type information needed to both render correctly
+ * on-screen as well as to perform that action.
+*/
+
 typedef enum { Item_Action, Item_Group } ItemType;
 
 typedef struct Item {
@@ -22,7 +27,8 @@ typedef struct ItemsView {
 } ItemsView;
 
 /** Allocates and returns an ItemsView* which contains the list of
- * items to display for the given path.
+ * items to display for the given path. Contains everything needed
+ * to render a scene_items.
  * 
  * @param   context App*
  * @param   path    FuriString*

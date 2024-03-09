@@ -47,6 +47,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - [VGM: Custom color options (By HaxSam & Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/93b532b4ebac931862369b286429b83a2c55d1bf)
 - Updated: [NFC Maker v1.2 (by Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/343cb39d08f60b75b537e1a31100707935cf6e9d) NfcMaker: Fix timeout on error screen (By Willy-JL)
 - Updated: [FindMy Flipper v1.0 (By MatthewKuKanich)](https://github.com/MatthewKuKanich/FindMyFlipper)
+- Updated: [Quac! v0.2 (By rdefeo)](https://github.com/rdefeo/quac)
 
 <a name="release">
 
@@ -477,7 +478,7 @@ $ ./fbt dolphin_ext
 - [Protocol Visualizer v1.1 (By antirez)](https://github.com/antirez/protoview)
 - [UHF RFID WIP v1.1 (By frux-c)](https://github.com/frux-c/uhf_rfid) `Req: M100 or QM100`
 - [QR Code v2.0 (By bmatcuk)](https://github.com/bmatcuk/flipperzero-qrcode)
-- [Quac! v0.1 (By rdefeo)](https://github.com/rdefeo/quac)
+- [Quac! v0.2 (By rdefeo)](https://github.com/rdefeo/quac)
 - [Radar Scanner v2.0 (By MatthewKuKanich)](https://github.com/MatthewKuKanich/flipper-radar) `Req: RCWL-0516`
 - [Radiation Sensor (By sionyx)](https://github.com/sionyx/flipper_radsens) `Req: RadSens`
 - [RC2014 ColecoVision (By ezod)](https://github.com/ezod/flipperzero-rc2014-coleco)

@@ -7,12 +7,17 @@
 #include <lfrfid/lfrfid_raw_file.h>
 #include <lib/toolbox/args.h>
 
+#include <flipper_format/flipper_format.h>
+
 #include "action_i.h"
+#include "quac.h"
 
 // lifted from flipperzero-firmware/applications/main/lfrfid/lfrfid_cli.c
-void action_rfid_tx(void* context, Item* item) {
+void action_rfid_tx(void* context, FuriString* action_path, FuriString* error) {
+    UNUSED(error);
+
     App* app = context;
-    FuriString* file_name = item->path;
+    FuriString* file_name = action_path;
 
     FlipperFormat* fff_data_file = flipper_format_file_alloc(app->storage);
     FuriString* temp_str;
@@ -33,39 +38,39 @@ void action_rfid_tx(void* context, Item* item) {
     bool successful_read = false;
     do {
         if(!flipper_format_file_open_existing(fff_data_file, furi_string_get_cstr(file_name))) {
-            FURI_LOG_E(TAG, "Error opening %s", furi_string_get_cstr(file_name));
+            ACTION_SET_ERROR("RFID: Error opening %s", furi_string_get_cstr(file_name));
             break;
         }
         FURI_LOG_I(TAG, "Opened file");
         if(!flipper_format_read_header(fff_data_file, temp_str, &temp_data32)) {
-            FURI_LOG_E(TAG, "Missing or incorrect header");
+            ACTION_SET_ERROR("RFID: Missing or incorrect header");
             break;
         }
         FURI_LOG_I(TAG, "Read file headers");
         // TODO: add better header checks here...
         if(!strcmp(furi_string_get_cstr(temp_str), "Flipper RFID key")) {
         } else {
-            FURI_LOG_E(TAG, "Type or version mismatch");
+            ACTION_SET_ERROR("RFID: Type or version mismatch");
             break;
         }
 
         // read and check the protocol field
         if(!flipper_format_read_string(fff_data_file, "Key type", protocol_name)) {
-            FURI_LOG_E(TAG, "Error reading protocol");
+            ACTION_SET_ERROR("RFID: Error reading protocol");
             break;
         }
         protocol = protocol_dict_get_protocol_by_name(dict, furi_string_get_cstr(protocol_name));
         if(protocol == PROTOCOL_NO) {
-            FURI_LOG_E(TAG, "Unknown protocol: %s", furi_string_get_cstr(protocol_name));
+            ACTION_SET_ERROR("RFID: Unknown protocol: %s", furi_string_get_cstr(protocol_name));
             break;
         }
-        FURI_LOG_I(TAG, "Protocol OK");
 
         // read and check data field
         size_t required_size = protocol_dict_get_data_size(dict, protocol);
         FURI_LOG_I(TAG, "Protocol req data size is %d", required_size);
         if(!flipper_format_read_hex(fff_data_file, "Data", data, required_size)) {
             FURI_LOG_E(TAG, "Error reading data");
+            ACTION_SET_ERROR("RFID: Error reading data");
             break;
         }
         // FURI_LOG_I(TAG, "Data: %s", furi_string_get_cstr(data_text));
@@ -90,14 +95,14 @@ void action_rfid_tx(void* context, Item* item) {
         lfrfid_worker_start_thread(worker);
         lfrfid_worker_emulate_start(worker, protocol);
 
-        printf("Emulating RFID...\r\nPress Ctrl+C to abort\r\n");
+        FURI_LOG_I(TAG, "Emulating RFID...");
         int16_t time_ms = 3000;
         int16_t interval_ms = 200;
         while(time_ms > 0) {
             furi_delay_ms(interval_ms);
             time_ms -= interval_ms;
         }
-        printf("Emulation stopped\r\n");
+        FURI_LOG_I(TAG, "Emulation stopped");
 
         lfrfid_worker_stop(worker);
         lfrfid_worker_stop_thread(worker);
