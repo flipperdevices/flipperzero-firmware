@@ -12,9 +12,9 @@ void findmy_scene_config_broadcast_interval_changed(VariableItem* item) {
     uint8_t index = variable_item_get_current_value_index(item);
     findmy_change_broadcast_interval(app, index + 1);
     char str[5];
-    snprintf(str, sizeof(str), "%ds", app->broadcast_interval);
+    snprintf(str, sizeof(str), "%ds", app->state.broadcast_interval);
     variable_item_set_current_value_text(item, str);
-    variable_item_set_current_value_index(item, app->broadcast_interval - 1);
+    variable_item_set_current_value_index(item, app->state.broadcast_interval - 1);
 }
 
 void findmy_scene_config_transmit_power_changed(VariableItem* item) {
@@ -22,9 +22,9 @@ void findmy_scene_config_transmit_power_changed(VariableItem* item) {
     uint8_t index = variable_item_get_current_value_index(item);
     findmy_change_transmit_power(app, index);
     char str[7];
-    snprintf(str, sizeof(str), "%ddBm", app->transmit_power);
+    snprintf(str, sizeof(str), "%ddBm", app->state.transmit_power);
     variable_item_set_current_value_text(item, str);
-    variable_item_set_current_value_index(item, app->transmit_power);
+    variable_item_set_current_value_index(item, app->state.transmit_power);
 }
 
 void findmy_scene_config_callback(void* context, uint32_t index) {
@@ -45,17 +45,17 @@ void findmy_scene_config_on_enter(void* context) {
         findmy_scene_config_broadcast_interval_changed,
         app);
     // Broadcast Interval is 1-10, so use 0-9 and offset indexes by 1
-    variable_item_set_current_value_index(item, app->broadcast_interval - 1);
-    char broadcast_interval_s[5];
-    snprintf(broadcast_interval_s, sizeof(broadcast_interval_s), "%ds", app->broadcast_interval);
-    variable_item_set_current_value_text(item, broadcast_interval_s);
+    variable_item_set_current_value_index(item, app->state.broadcast_interval - 1);
+    char interval_str[5];
+    snprintf(interval_str, sizeof(interval_str), "%ds", app->state.broadcast_interval);
+    variable_item_set_current_value_text(item, interval_str);
 
     item = variable_item_list_add(
         var_item_list, "Transmit Power", 7, findmy_scene_config_transmit_power_changed, app);
-    variable_item_set_current_value_index(item, app->transmit_power);
-    char transmit_power_s[7];
-    snprintf(transmit_power_s, sizeof(transmit_power_s), "%ddBm", app->transmit_power);
-    variable_item_set_current_value_text(item, transmit_power_s);
+    variable_item_set_current_value_index(item, app->state.transmit_power);
+    char power_str[7];
+    snprintf(power_str, sizeof(power_str), "%ddBm", app->state.transmit_power);
+    variable_item_set_current_value_text(item, power_str);
 
     item = variable_item_list_add(var_item_list, "Register Tag", 0, NULL, NULL);
     item = variable_item_list_add(

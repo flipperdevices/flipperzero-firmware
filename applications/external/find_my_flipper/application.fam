@@ -3,7 +3,7 @@ App(
     name="FindMy Flipper",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="findmy_main",
-    stack_size=1 * 1024,
+    stack_size=2 * 1024,
     fap_icon="location_icon.png",
     fap_icon_assets="icons",
     fap_category="Bluetooth",

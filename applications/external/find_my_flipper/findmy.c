@@ -43,13 +43,12 @@ static FindMy* findmy_app_alloc() {
 
     view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
 
-    app->beacon_active = false;
-    findmy_main_update_active(app->findmy_main, app->beacon_active);
-    app->broadcast_interval = 5;
-    findmy_main_update_interval(app->findmy_main, app->broadcast_interval);
-    app->transmit_power = 6;
-    app->apple = true;
-    findmy_main_update_apple(app->findmy_main, app->apple);
+    findmy_state_load(&app->state);
+    findmy_state_apply(&app->state);
+
+    findmy_main_update_active(app->findmy_main, furi_hal_bt_extra_beacon_is_active());
+    findmy_main_update_interval(app->findmy_main, app->state.broadcast_interval);
+    findmy_main_update_type(app->findmy_main, findmy_data_get_type(app->state.data));
 
     return app;
 }
@@ -74,64 +73,9 @@ static void findmy_app_free(FindMy* app) {
     free(app);
 }
 
-static void findmy_start(FindMy* app) {
-    furi_hal_bt_extra_beacon_stop(); // Stop any running beacon
-
-    app->config.min_adv_interval_ms = app->broadcast_interval * 1000; // Converting s to ms
-    app->config.max_adv_interval_ms = (app->broadcast_interval * 1000) + 150;
-    app->config.adv_channel_map = GapAdvChannelMapAll;
-    app->config.adv_power_level = GapAdvPowerLevel_0dBm + app->transmit_power;
-    app->config.address_type = GapAddressTypePublic;
-
-    uint8_t mac[EXTRA_BEACON_MAC_ADDR_SIZE] = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66};
-    furi_hal_bt_reverse_mac_addr(mac);
-    memcpy(&app->config.address, mac, sizeof(app->config.address));
-    furi_check(furi_hal_bt_extra_beacon_set_config(&app->config));
-
-    uint8_t data[EXTRA_BEACON_MAX_DATA_SIZE];
-    uint8_t* it = data;
-
-    // For Apple AirTags
-    *it++ = 0x1E, // Length
-        *it++ = 0xFF; // Manufacturer Specific Data
-    *it++ = 0x4C; // Company ID (Apple, Inc.)
-    *it++ = 0x00; // State
-    *it++ = 0x12; // Data - Public Key without the MAC address
-    *it++ = 0x19;
-    *it++ = 0x00;
-    *it++ = 0x00;
-    *it++ = 0x00;
-    *it++ = 0x00;
-    *it++ = 0x00;
-    *it++ = 0x00;
-    *it++ = 0x00;
-    *it++ = 0x00;
-    *it++ = 0x00;
-    *it++ = 0x00;
-    *it++ = 0x00;
-    *it++ = 0x00;
-    *it++ = 0x00;
-    *it++ = 0x00;
-    *it++ = 0x00;
-    *it++ = 0x00;
-    *it++ = 0x00;
-    *it++ = 0x00;
-    *it++ = 0x00;
-    *it++ = 0x00;
-    *it++ = 0x00;
-    *it++ = 0x00;
-    *it++ = 0x00;
-    *it++ = 0x00; // First 2 bits are the version, the rest is the battery level
-    *it++ = 0x00; // Hint (0x00)
-
-    furi_check(furi_hal_bt_extra_beacon_set_data(data, it - data));
-}
-
 int32_t findmy_main(void* p) {
     UNUSED(p);
     FindMy* app = findmy_app_alloc();
-
-    findmy_start(app);
 
     scene_manager_next_scene(app->scene_manager, FindMySceneMain);
 
@@ -145,16 +89,16 @@ void findmy_change_broadcast_interval(FindMy* app, uint8_t value) {
     if(value > 10 || value < 1) {
         return;
     }
-    app->broadcast_interval = value;
-    findmy_main_update_interval(app->findmy_main, app->broadcast_interval);
-    if(app->beacon_active) {
+    app->state.broadcast_interval = value;
+    findmy_state_sync_config(&app->state);
+    findmy_state_save(&app->state);
+    findmy_main_update_interval(app->findmy_main, app->state.broadcast_interval);
+    if(furi_hal_bt_extra_beacon_is_active()) {
         // Always check if beacon is active before changing config
         furi_check(furi_hal_bt_extra_beacon_stop());
     }
-    app->config.min_adv_interval_ms = app->broadcast_interval * 1000;
-    app->config.max_adv_interval_ms = app->config.min_adv_interval_ms + 150;
-    furi_check(furi_hal_bt_extra_beacon_set_config(&app->config));
-    if(app->beacon_active) {
+    furi_check(furi_hal_bt_extra_beacon_set_config(&app->state.config));
+    if(app->state.beacon_active) {
         furi_check(furi_hal_bt_extra_beacon_start());
     }
 }
@@ -163,24 +107,40 @@ void findmy_change_transmit_power(FindMy* app, uint8_t value) {
     if(value > 6) {
         return;
     }
-    app->transmit_power = value;
-    if(app->beacon_active) {
+    app->state.transmit_power = value;
+    findmy_state_sync_config(&app->state);
+    findmy_state_save(&app->state);
+    if(furi_hal_bt_extra_beacon_is_active()) {
         furi_check(furi_hal_bt_extra_beacon_stop());
     }
-    app->config.adv_power_level = GapAdvPowerLevel_0dBm + app->transmit_power;
-    furi_check(furi_hal_bt_extra_beacon_set_config(&app->config));
-    if(app->beacon_active) {
+    furi_check(furi_hal_bt_extra_beacon_set_config(&app->state.config));
+    if(app->state.beacon_active) {
         furi_check(furi_hal_bt_extra_beacon_start());
     }
 }
 
 void findmy_toggle_beacon(FindMy* app) {
-    app->beacon_active = !app->beacon_active;
-    findmy_main_update_active(app->findmy_main, app->beacon_active);
-    findmy_main_update_apple(app->findmy_main, app->apple);
-    if(app->beacon_active) {
-        furi_hal_bt_extra_beacon_start();
+    app->state.beacon_active = !app->state.beacon_active;
+    findmy_state_save(&app->state);
+    if(furi_hal_bt_extra_beacon_is_active()) {
+        furi_check(furi_hal_bt_extra_beacon_stop());
+    }
+    if(app->state.beacon_active) {
+        furi_check(furi_hal_bt_extra_beacon_start());
+    }
+    findmy_main_update_active(app->findmy_main, furi_hal_bt_extra_beacon_is_active());
+}
+
+FindMyType findmy_data_get_type(uint8_t data[EXTRA_BEACON_MAX_DATA_SIZE]) {
+    if(data[0] == 0x1E && // Length
+       data[1] == 0xFF && // Manufacturer Specific Data
+       data[2] == 0x4C && // Company ID (Apple, Inc.)
+       data[3] == 0x00 && // ...
+       data[4] == 0x12 && // Type (FindMy)
+       data[5] == 0x19 // Length
+    ) {
+        return FindMyTypeApple;
     } else {
-        furi_hal_bt_extra_beacon_stop();
+        return FindMyTypeSamsung;
     }
 }

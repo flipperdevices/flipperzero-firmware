@@ -37,15 +37,8 @@ def generate_mac_and_payload(public_key):
 
 def main():
     nkeys = int(input("Enter the number of keys to generate: "))
-    prefix = input("Enter a prefix for the keyfiles (optional, press enter to skip): ")
-    txt_filename = input(
-        "Enter a .txt file name where to write the list of generated keys (optional, press enter to skip): "
-    )
+    prefix = input("Enter a name for the keyfiles (optional, press enter to skip): ")
     print()
-
-    if txt_filename:
-        with open(txt_filename + ".txt", "w") as txt:
-            txt.write("Generated Keys:\n")
 
     if not os.path.exists("keys"):
         os.makedirs("keys")
@@ -81,6 +74,25 @@ def main():
                     else f"{s256_b64[:7]}.keys"
                 )
 
+                print(f"{i + 1})")
+                print("Private key (Base64):", private_key_b64)
+                print("Public key (Base64):", public_key_b64)
+                print("Hashed adv key (Base64):", s256_b64)
+                print(
+                    "---------------------------------------------------------------------------------"
+                )
+                print("Private key (Hex):", private_key_hex)
+                print("Public key (Hex):", public_key_hex)
+                print(
+                    "---------------------------------------------------------------------------------"
+                )
+                print("MAC:", mac)
+                print("Payload:", payload)
+                print()
+                print(
+                    "Place the .keys file onto your Flipper or input the MAC and Payload manually."
+                )
+
                 with open(f"keys/{fname}", "w") as f:
                     f.write(f"Private key: {private_key_b64}\n")
                     f.write(f"Public key: {public_key_b64}\n")
@@ -89,16 +101,6 @@ def main():
                     f.write(f"Public key (Hex): {public_key_hex}\n")
                     f.write(f"MAC: {mac}\n")
                     f.write(f"Payload: {payload}\n")
-
-                if txt_filename:
-                    with open(txt_filename + ".txt", "a") as txt:
-                        txt.write(f"Private key: {private_key_b64}\n")
-                        txt.write(f"Public key: {public_key_b64}\n")
-                        txt.write(f"Hashed adv key: {s256_b64}\n")
-                        txt.write(f"Private key (Hex): {private_key_hex}\n")
-                        txt.write(f"Public key (Hex): {public_key_hex}\n")
-                        txt.write(f"MAC: {mac}\n")
-                        txt.write(f"Payload: {payload}\n")
                 break
 
 
