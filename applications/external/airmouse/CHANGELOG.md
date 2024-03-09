@@ -1,6 +1,10 @@
 # Changelog
 
-## v0.0.5 (2023-08-09)
+## v1.0 (2024-03-09)
+
+**Update for SDK 0.99**
+
+## v0.0.6 (2023-08-09)
 
 **Fix firmware 0.88 issues**
 
