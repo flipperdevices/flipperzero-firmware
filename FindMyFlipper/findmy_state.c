@@ -96,10 +96,10 @@ void findmy_state_apply(FindMyState* state) {
 }
 
 void findmy_state_sync_config(FindMyState* state) {
-    state.config.min_adv_interval_ms = state.broadcast_interval * 1000; // Converting s to ms
-    state.config.max_adv_interval_ms = (state.broadcast_interval * 1000) + 150;
-    state.config.adv_power_level = GapAdvPowerLevel_0dBm + state.transmit_power;
-    memcpy(state.config.address, state.mac, sizeof(state.config.address));
+    state->config.min_adv_interval_ms = state->broadcast_interval * 1000; // Converting s to ms
+    state->config.max_adv_interval_ms = (state->broadcast_interval * 1000) + 150;
+    state->config.adv_power_level = GapAdvPowerLevel_0dBm + state->transmit_power;
+    memcpy(state->config.address, state->mac, sizeof(state->config.address));
 }
 
 void findmy_state_save(FindMyState* state) {

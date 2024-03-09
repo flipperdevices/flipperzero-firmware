@@ -23,4 +23,6 @@ bool findmy_state_load(FindMyState* out_state);
 
 void findmy_state_apply(FindMyState* state);
 
+void findmy_state_sync_config(FindMyState* state);
+
 void findmy_state_save(FindMyState* state);
