@@ -9,11 +9,11 @@ The app does not provide any recording functionality - you must use the existing
 ```
 
 ## Features
-* Playback of rfid, sub-ghz, (and soon IR) signals
+* [Playback of rfid, sub-ghz, (and soon IR) signals](README.md#signal-playback)
 * [Easy navigation](README.md#navigation--controls)
 * [Flexible signal organization](README.md#signal-organization) - utilizing the SDcard filesystem
-* Playlist support
-* Hidden file/folder support
+* [Playlist support](README.md#playlists)
+* [Flexible naming/sorting, hidden file/folder support](README.md#sorting-and-naming)
 
 ## Screenshots
 <table align="center">
@@ -32,6 +32,9 @@ The app does not provide any recording functionality - you must use the existing
 - Pressing `OK` on an action (indicated as a label surrounded by a border) will transmit that signal.
 - Pressing `Back` will take you up one folder
 - Pressing `Up` and `Down` will, you know, select things up and down...
+
+## Signal playback
+The signal files are played back as recorded. During playback/transmit, the LED light will flash blue until the action is complete. For RFID signals, they are continuously played back for 3 seconds.
 
 ## Signal Organization
 The key to organizing your Quac interface is to organize your `/ext/apps_data/quac` folder structure. The UI is derived directly from the filesystem structure. Every individual file/signal is assigned a button. This is an "action". And every folder/directory is a logical group of more files/folders. Selecting a group in the UI will show you the contents of that folder. There is no limit on the number of actions or folders - nest as deep as you want!
@@ -74,9 +77,6 @@ The first two `.sub` files live in the `/ext/apps_data/quac` folder, which is wh
 
 ## Sorting and Naming
 The list view UI is based on the sorted file and folder order. This is enforced by sorting the actual filenames. When there are cases where you need to force a specific order, you can prepend the file and folder names with `XX_` where `X` is a digit between 0-9. This will let you place an action called `On` before `Off`, even though when sorted alphabeticaly, `Off` would come before `On`. Therefore, you would name your files `00_On.rfid` and `01_Off.rfid`. When the files and folders are rendered for display, any `XX_` prefix will be stripped. All underscores will be replaced with spaces. Extensions will be stripped. Casing is preserved. Additionally, all files and folders that begin with a `.` will be ignored when drawing the UI. However, they can still be referenced in playlists. This keeps the UI unclutterd.
-
-## Signal playback
-The signal files are played back as recorded. During playback/transmit, the LED light will flash blue until the action is complete. For RFID signals, they are continuously played back for 3 seconds.
 
 ## On deck... maybe?
 - Horizontal layout
