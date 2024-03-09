@@ -28,11 +28,16 @@ def convert_key_to_hex(private_key, public_key):
 
 
 def generate_mac_and_payload(public_key):
-    public_key_bytes = public_key.public_numbers().x.to_bytes(28, byteorder="big")
-    mac = public_key_bytes[:6].hex()
-    payload = advertisement_template()
-    payload[7:29] = public_key_bytes[6:22]
-    return mac, payload.hex()
+    key = public_key.public_numbers().x.to_bytes(28, byteorder="big")
+
+    addr = bytearray(key[:6])
+    addr[0] |= 0b11000000
+
+    adv = advertisement_template()
+    adv[7:29] = key[6:28]
+    adv[29] = key[0] >> 6
+
+    return addr.hex(), adv.hex()
 
 
 def main():
