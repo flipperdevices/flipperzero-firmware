@@ -23,6 +23,9 @@ CfwSettings cfw_settings = {
     .uart_nmea_channel = FuriHalSerialIdUsart, // pin 13,14
     .rgb_backlight = false, // OFF
     .lcd_style = 0, // Static
+    .vgm_color_mode = VgmColorModeDefault, // Default
+    .vgm_color_fg.value = 0x0000, // Default Black
+    .vgm_color_bg.value = 0xFC00, // Default Orange
 };
 
 void CFW_SETTINGS_LOAD() {
@@ -63,6 +66,14 @@ void CFW_SETTINGS_LOAD() {
         flipper_format_read_uint32(file, "uart_esp_channel", (uint32_t*)&x->uart_esp_channel, 1);
         flipper_format_rewind(file);
         flipper_format_read_uint32(file, "uart_nmea_channel", (uint32_t*)&x->uart_nmea_channel, 1);
+        flipper_format_rewind(file);
+        flipper_format_read_uint32(file, "vgm_color_mode", (uint32_t*)&x->vgm_color_mode, 1);
+        flipper_format_rewind(file);
+        flipper_format_read_uint32(
+            file, "vgm_color_fg.value", (uint32_t*)&x->vgm_color_fg.value, 1);
+        flipper_format_rewind(file);
+        flipper_format_read_uint32(
+            file, "vgm_color_bg.value", (uint32_t*)&x->vgm_color_bg.value, 1);
         flipper_format_rewind(file);
         flipper_format_read_bool(file, "rgb_backlight", &x->rgb_backlight, 1);
         flipper_format_rewind(file);

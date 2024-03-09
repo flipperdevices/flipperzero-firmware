@@ -58,6 +58,10 @@ static void cfw_app_scene_misc_screen_lcd_style_changed(VariableItem* item) {
     }
     app->save_backlight = true;
     app->save_settings = true;
+    if(cfw_settings.vgm_color_mode == VgmColorModeRgbBacklight) {
+        expansion_disable(app->expansion);
+        expansion_enable(app->expansion);
+    }
 }
 
 void cfw_app_scene_misc_screen_on_enter(void* context) {

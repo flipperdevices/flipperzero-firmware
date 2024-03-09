@@ -9,6 +9,12 @@
 #include <furi.h>
 #include <protobuf_version.h>
 
+#include <cfw/cfw.h>
+#include <rgb_backlight.h>
+#include <SK6805.h>
+#include <colors.h>
+#include <stdint.h>
+
 FURI_WEAK void furi_hal_info_get_api_version(uint16_t* major, uint16_t* minor) {
     *major = 0;
     *minor = 0;
@@ -63,6 +69,50 @@ void furi_hal_info_get(PropertyValueCallback out, char sep, void* context) {
     // Board Personification
     property_value_out(
         &property_context, "%d", 2, "hardware", "color", furi_hal_version_get_hw_color());
+
+    // RGB Settings
+    property_value_out(
+        &property_context,
+        "%d",
+        4,
+        "hardware",
+        "screen",
+        "rgb",
+        "enabled",
+        cfw_settings.rgb_backlight);
+    for(int i = 0; i < SK6805_get_led_count(); i++) {
+        RgbColor rgb;
+        rgb_backlight_get_color(i, &rgb);
+
+        uint32_t led_value = 0;
+        memcpy(((void*)&led_value) + 1, &rgb, sizeof(RgbColor));
+
+        char led_string[5] = {'l', 'e', 'd', '0' + i, '\0'};
+        property_value_out(
+            &property_context, "%06X", 4, "hardware", "screen", "rgb", led_string, __REV(led_value));
+    }
+
+    // VGM Settings
+    property_value_out(
+        &property_context, "%d", 4, "hardware", "vgm", "color", "mode", cfw_settings.vgm_color_mode);
+    property_value_out(
+        &property_context,
+        "%04X",
+        4,
+        "hardware",
+        "vgm",
+        "color",
+        "fg",
+        cfw_settings.vgm_color_fg.value);
+    property_value_out(
+        &property_context,
+        "%04X",
+        4,
+        "hardware",
+        "vgm",
+        "color",
+        "bg",
+        cfw_settings.vgm_color_bg.value);
 
     if(sep == '.') {
         property_value_out(

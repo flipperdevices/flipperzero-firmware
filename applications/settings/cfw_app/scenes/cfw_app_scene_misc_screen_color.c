@@ -47,6 +47,10 @@ bool cfw_app_scene_misc_screen_color_on_event(void* context, SceneManagerEvent e
                 rgb_backlight_set_color(2, &app->lcd_color);
                 notification_message(app->notification, &sequence_display_backlight_on);
                 app->save_backlight = true;
+                if(cfw_settings.vgm_color_mode == VgmColorModeRgbBacklight) {
+                    expansion_disable(app->expansion);
+                    expansion_enable(app->expansion);
+                }
                 break;
             case 1:
                 notification_message(app->notification, &sequence_display_backlight_off);
@@ -55,6 +59,10 @@ bool cfw_app_scene_misc_screen_color_on_event(void* context, SceneManagerEvent e
                     &app->lcd_color);
                 notification_message(app->notification, &sequence_display_backlight_on);
                 app->save_backlight = true;
+                if(cfw_settings.vgm_color_mode == VgmColorModeRgbBacklight) {
+                    expansion_disable(app->expansion);
+                    expansion_enable(app->expansion);
+                }
                 break;
             }
             scene_manager_previous_scene(app->scene_manager);

@@ -28,6 +28,7 @@
 #include <loader/loader_mainmenu.h>
 #include <notification/notification_app.h>
 #include <power/power_service/power.h>
+#include <expansion/expansion.h>
 #include <rgb_backlight.h>
 #include <m-array.h>
 #include <cfw/cfw.h>
@@ -62,6 +63,7 @@ static const struct {
 typedef struct {
     Gui* gui;
     DialogsApp* dialogs;
+    Expansion* expansion;
     NotificationApp* notification;
     SceneManager* scene_manager;
     ViewDispatcher* view_dispatcher;
@@ -95,6 +97,7 @@ typedef struct {
     bool subghz_extend;
     bool subghz_bypass;
     RgbColor lcd_color;
+    Rgb565Color vgm_color;
     char device_name[FURI_HAL_VERSION_ARRAY_NAME_LENGTH];
     FuriString* version_tag;
 

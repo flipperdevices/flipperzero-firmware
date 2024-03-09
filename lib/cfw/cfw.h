@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <furi_hal_serial_types.h>
+#include <toolbox/colors.h>
 // #include <gui/icon_i.h>
 // #include <power/power_service/power.h>
 
@@ -37,6 +38,13 @@ typedef enum {
     SpiCount,
 } SpiHandle;
 
+typedef enum {
+    VgmColorModeDefault,
+    VgmColorModeCustom,
+    VgmColorModeRgbBacklight,
+    VgmColorModeCount,
+} VgmColorMode;
+
 typedef struct {
     char* manifest_name;
     MenuStyle menu_style;
@@ -52,6 +60,9 @@ typedef struct {
     SpiHandle spi_nrf24_handle;
     FuriHalSerialId uart_esp_channel;
     FuriHalSerialId uart_nmea_channel;
+    VgmColorMode vgm_color_mode;
+    Rgb565Color vgm_color_fg;
+    Rgb565Color vgm_color_bg;
     bool rgb_backlight;
     uint32_t lcd_style;
 } CfwSettings;

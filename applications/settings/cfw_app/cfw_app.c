@@ -170,6 +170,7 @@ CfwApp* cfw_app_alloc() {
     CfwApp* app = malloc(sizeof(CfwApp));
     app->gui = furi_record_open(RECORD_GUI);
     app->dialogs = furi_record_open(RECORD_DIALOGS);
+    app->expansion = furi_record_open(RECORD_EXPANSION);
     app->notification = furi_record_open(RECORD_NOTIFICATION);
 
     // View Dispatcher and Scene Manager
@@ -334,6 +335,7 @@ void cfw_app_free(CfwApp* app) {
 
     // Records
     furi_record_close(RECORD_NOTIFICATION);
+    furi_record_close(RECORD_EXPANSION);
     furi_record_close(RECORD_DIALOGS);
     furi_record_close(RECORD_GUI);
     free(app);
