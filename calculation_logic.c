@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include "calculator.h"
 
+
 // global constant lookup table
 static const char* HEX_TO_BINARY_TABLE[16] = {
     "0000", 
