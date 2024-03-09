@@ -16,13 +16,8 @@ void generate_calculator_layout(Canvas* canvas) {
 
     // display
     canvas_draw_frame(canvas, 0, 0, 64, 62);  // display frame
-<<<<<<< Updated upstream
     canvas_draw_frame(canvas, 2, 2, 60, 38);  // output  frame
     canvas_draw_frame(canvas, 2, 41, 60, 19); // input   frame
-=======
-    canvas_draw_frame(canvas, 2, 2, 60, 31);  // output  frame
-    canvas_draw_frame(canvas, 2, 34, 60, 26); // input   frame
->>>>>>> Stashed changes
 
     // Horizonal and Vertical lines
     // drawElement(canvas, NULL, 0, 48, 64, 2, 0);  // H line 1
@@ -41,13 +36,8 @@ void generate_calculator_layout(Canvas* canvas) {
     drawElement(canvas, NULL, 62, 61, 2, 65, 0); // V line 6
 
     // MODE key and display
-<<<<<<< Updated upstream
     // row 1
     drawElement(canvas, "M", 4, 72, 0, 0, FontSecondary);
-=======
-    // row 1 and 2
-    drawElement(canvas, "", 4, 72, 0, 0, FontSecondary);
->>>>>>> Stashed changes
 
     // Keys
     // row 2
@@ -82,7 +72,6 @@ void draw_highlighted_cell(Canvas* canvas, short x, short y, short width, short 
     canvas_draw_box(canvas, x, y, width, height);
 }
 
-<<<<<<< Updated upstream
 void displayInput(Canvas* canvas, const char* input, int x, int y) {
     const int maxLength = 18; // Maximum length for splitting into lines
     const int lineLength = 9; // Length of each line
@@ -113,20 +102,11 @@ void displayInput(Canvas* canvas, const char* input, int x, int y) {
 
 void displayResult(Canvas* canvas, const char* result, int x, int y) {
     const int lineLength = 9; // Length of each line
-=======
-void displayResult(Canvas* canvas, char* result, int x, int y) {
-    const int maxLength = 24; // Maximum length for splitting into lines
-    const int lineLength = 12; // Length of each line
->>>>>>> Stashed changes
     const int lineSpacing = 9; // Reduced line spacing
 
     int length = strlen(result);
 
-<<<<<<< Updated upstream
     if(length > 3 * lineLength) {  // More than 3 lines
-=======
-    if(length > maxLength) {
->>>>>>> Stashed changes
         char line1[lineLength + 1];
         strncpy(line1, result, lineLength);
         line1[lineLength] = '\0';
@@ -135,7 +115,6 @@ void displayResult(Canvas* canvas, char* result, int x, int y) {
         strncpy(line2, result + lineLength, lineLength);
         line2[lineLength] = '\0';
 
-<<<<<<< Updated upstream
         char line3[lineLength + 1];
         strncpy(line3, result + 2 * lineLength, lineLength);
         line3[lineLength] = '\0';
@@ -147,19 +126,10 @@ void displayResult(Canvas* canvas, char* result, int x, int y) {
         canvas_draw_str(canvas, x, y + 2 * lineSpacing, line3);
         canvas_draw_str(canvas, x, y + 3 * lineSpacing, line4);
     } else if(length > 2 * lineLength) {  // More than 2 lines
-=======
-        const char* line3 = result + (2 * lineLength);
-
-        canvas_draw_str(canvas, x, y, line1);
-        canvas_draw_str(canvas, x, y + lineSpacing, line2);
-        canvas_draw_str(canvas, x, y + (2 * lineSpacing), line3);
-    } else if(length > lineLength) {
->>>>>>> Stashed changes
         char line1[lineLength + 1];
         strncpy(line1, result, lineLength);
         line1[lineLength] = '\0';
 
-<<<<<<< Updated upstream
         char line2[lineLength + 1];
         strncpy(line2, result + lineLength, lineLength);
         line2[lineLength] = '\0';
@@ -174,8 +144,6 @@ void displayResult(Canvas* canvas, char* result, int x, int y) {
         strncpy(line1, result, lineLength);
         line1[lineLength] = '\0';
 
-=======
->>>>>>> Stashed changes
         const char* line2 = result + lineLength;
 
         canvas_draw_str(canvas, x, y, line1);
@@ -196,18 +164,12 @@ void calculator_draw_callback(Canvas* canvas, void* ctx) {
     // Draw the static UI layout
     generate_calculator_layout(canvas);
 
-<<<<<<< Updated upstream
     char resultLabel[2 * MAX_TEXT_LENGTH_RESULT]; // Buffer to hold the result label
     // char modeNumber[3]; // Buffer to hold the mode number
-=======
-    char resultLabel[2 * MAX_TEXT_LENGTH]; // Buffer to hold the result label
-    char modeNumber[3]; // Buffer to hold the mode number
->>>>>>> Stashed changes
 
     // Check which mode is selected and prepare the label accordingly
     switch(calculator_state->mode) {
     case ModeDecToBin:
-<<<<<<< Updated upstream
         snprintf(resultLabel, sizeof(resultLabel), "%s", calculator_state->decToBinResult);
         // strcpy(modeNumber, "M");
         break;
@@ -239,39 +201,6 @@ void calculator_draw_callback(Canvas* canvas, void* ctx) {
         // If no mode is selected, you can display a default message or leave it empty
         strncpy(resultLabel, "         -> [M]ODE_________<P Calc v0.9>", sizeof(resultLabel));
         // strcpy(modeNumber, "M");
-=======
-        snprintf(resultLabel, sizeof(resultLabel), "> %s", calculator_state->binaryResult);
-        strcpy(modeNumber, "1");
-        break;
-    case ModeDecToHex:
-        snprintf(resultLabel, sizeof(resultLabel), "> %s", calculator_state->hexResult);
-        strcpy(modeNumber, "2");
-        break;
-    case ModeDecToChar:
-        snprintf(resultLabel, sizeof(resultLabel), "> %s", calculator_state->charResult);
-        strcpy(modeNumber, "3");
-        break;
-    case ModeHexToBin:
-        snprintf(resultLabel, sizeof(resultLabel), "> %s", calculator_state->binaryResult);
-        strcpy(modeNumber, "4");
-        break;
-    case ModeHexToDec:
-        snprintf(resultLabel, sizeof(resultLabel), "> %s", calculator_state->decResult);
-        strcpy(modeNumber, "5");
-        break;
-    case ModeBinToDec:
-        snprintf(resultLabel, sizeof(resultLabel), "> %s", calculator_state->decResult);
-        strcpy(modeNumber, "6");
-        break;
-    case ModeBinToHex:
-        snprintf(resultLabel, sizeof(resultLabel), "> %s", calculator_state->hexResult);
-        strcpy(modeNumber, "7");
-        break;
-    default:
-        // If no mode is selected, you can display a default message or leave it empty
-        strncpy(resultLabel, "Click [M]ODE_________   <PCalc v0.8>", sizeof(resultLabel));
-        strcpy(modeNumber, "M");
->>>>>>> Stashed changes
         break;
     }
 
@@ -279,21 +208,12 @@ void calculator_draw_callback(Canvas* canvas, void* ctx) {
     displayResult(canvas, resultLabel, 4, 11);
 
     // Draw new input with ">" label or mode selection prompt
-<<<<<<< Updated upstream
     char inputLabel[MAX_TEXT_LENGTH_INPUT + 2]; // Adjusted size for "> "
     snprintf(inputLabel, sizeof(inputLabel), "%s", calculator_state->text);
     displayInput(canvas, inputLabel, 4, 50);
 
     // Replace "M" with the current mode number
     // canvas_draw_str(canvas, 5, 72, modeNumber); // Position where "M" was originally drawn
-=======
-    char inputLabel[MAX_TEXT_LENGTH + 1]; // Adjusted size for "> "
-    snprintf(inputLabel, sizeof(inputLabel), ">%s", calculator_state->text);
-    canvas_draw_str(canvas, 5, 44, inputLabel);
-
-    // Replace "M" with the current mode number
-    canvas_draw_str(canvas, 5, 72, modeNumber); // Position where "M" was originally drawn
->>>>>>> Stashed changes
 
     // Define the cell dimensions for each row and column
     const short cellDimensions[5][5][2] = {
@@ -332,12 +252,8 @@ void calculator_draw_callback(Canvas* canvas, void* ctx) {
         modeStr = " waiting ...";
         break;
     }
-<<<<<<< Updated upstream
     
     canvas_draw_str(canvas, 16, 71, modeStr);
-=======
-    canvas_draw_str(canvas, 15, 72, modeStr);
->>>>>>> Stashed changes
     short cursorX = 2;
     short cursorY = 61; // Starting Y position
 
