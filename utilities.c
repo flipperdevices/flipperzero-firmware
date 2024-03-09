@@ -7,7 +7,7 @@ char getKeyAtPosition(short x, short y) {
         {'7', '8', '9', 'A', 'B'}, // Row 2
         {'4', '5', '6', 'C', 'D'}, // Row 3
         {'1', '2', '3', 'E', 'F'}, // Row 4
-        {'<', '0', '=', 'R', ' '}  // Row 5
+        {'<', '0', '=', 'R', ' '} // Row 5
     };
 
     return (y < 6 && x < 5) ? keys[y][x] : ' ';
@@ -16,7 +16,7 @@ char getKeyAtPosition(short x, short y) {
 short calculateStringWidth(const char* str, short length) {
     short width = 0;
     for(short i = 0; i < length; i++) {
-        switch (str[i]) {
+        switch(str[i]) {
         case 'M':
             width += 5;
             break;

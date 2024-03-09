@@ -34,9 +34,9 @@ Gui* initialize_gui(ViewPort* view_port) {
 }
 
 void cleanup_resources(
-    Calculator* calculator_state, 
-    ViewPort* view_port, 
-    Gui* gui, 
+    Calculator* calculator_state,
+    ViewPort* view_port,
+    Gui* gui,
     FuriMessageQueue* event_queue) {
     gui_remove_view_port(gui, view_port);
     view_port_free(view_port);

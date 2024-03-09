@@ -13,22 +13,21 @@ void drawElement(Canvas* canvas, const char* str, int x, int y, int width, int h
 }
 
 void generate_calculator_layout(Canvas* canvas) {
-
     // display
-    canvas_draw_frame(canvas, 0, 0, 64, 62);  // display frame
-    canvas_draw_frame(canvas, 2, 2, 60, 38);  // output  frame
+    canvas_draw_frame(canvas, 0, 0, 64, 62); // display frame
+    canvas_draw_frame(canvas, 2, 2, 60, 38); // output  frame
     canvas_draw_frame(canvas, 2, 41, 60, 19); // input   frame
 
     // Horizonal and Vertical lines
     // drawElement(canvas, NULL, 0, 48, 64, 2, 0);  // H line 1
-    drawElement(canvas, NULL, 0, 61, 64, 2, 0);  // H line 2
-    drawElement(canvas, NULL, 0, 73, 64, 2, 0);  // H line 3
-    drawElement(canvas, NULL, 0, 87, 64, 1, 0);  // H line 4
+    drawElement(canvas, NULL, 0, 61, 64, 2, 0); // H line 2
+    drawElement(canvas, NULL, 0, 73, 64, 2, 0); // H line 3
+    drawElement(canvas, NULL, 0, 87, 64, 1, 0); // H line 4
     drawElement(canvas, NULL, 0, 100, 64, 1, 0); // H line 5
     drawElement(canvas, NULL, 0, 113, 64, 1, 0); // H line 6
     drawElement(canvas, NULL, 0, 126, 64, 2, 0); // H line 7
-    
-    drawElement(canvas, NULL, 0, 61, 2, 65, 0);  // V line 1
+
+    drawElement(canvas, NULL, 0, 61, 2, 65, 0); // V line 1
     drawElement(canvas, NULL, 13, 61, 1, 65, 0); // V line 2
     drawElement(canvas, NULL, 25, 73, 1, 55, 0); // V line 3
     drawElement(canvas, NULL, 37, 73, 2, 55, 0); // V line 4
@@ -63,12 +62,11 @@ void generate_calculator_layout(Canvas* canvas) {
     drawElement(canvas, "0", 17, 124, 0, 0, FontSecondary);
     drawElement(canvas, "=", 29, 124, 0, 0, FontSecondary);
     drawElement(canvas, "CLR", 42, 124, 0, 0, FontSecondary);
-
 }
 
 // highlighting when cursor moves
 void draw_highlighted_cell(Canvas* canvas, short x, short y, short width, short height) {
-    canvas_set_color(canvas, ColorBlack);  
+    canvas_set_color(canvas, ColorBlack);
     canvas_draw_box(canvas, x, y, width, height);
 }
 
@@ -87,7 +85,7 @@ void displayInput(Canvas* canvas, const char* input, int x, int y) {
         const char* line2 = input + lineLength;
 
         canvas_draw_str(canvas, x, y, line1);
-        if (length > maxLength) {
+        if(length > maxLength) {
             char trimmedLine2[maxLength - lineLength + 1];
             strncpy(trimmedLine2, line2, maxLength - lineLength);
             trimmedLine2[maxLength - lineLength] = '\0';
@@ -106,7 +104,7 @@ void displayResult(Canvas* canvas, const char* result, int x, int y) {
 
     int length = strlen(result);
 
-    if(length > 3 * lineLength) {  // More than 3 lines
+    if(length > 3 * lineLength) { // More than 3 lines
         char line1[lineLength + 1];
         strncpy(line1, result, lineLength);
         line1[lineLength] = '\0';
@@ -125,7 +123,7 @@ void displayResult(Canvas* canvas, const char* result, int x, int y) {
         canvas_draw_str(canvas, x, y + lineSpacing, line2);
         canvas_draw_str(canvas, x, y + 2 * lineSpacing, line3);
         canvas_draw_str(canvas, x, y + 3 * lineSpacing, line4);
-    } else if(length > 2 * lineLength) {  // More than 2 lines
+    } else if(length > 2 * lineLength) { // More than 2 lines
         char line1[lineLength + 1];
         strncpy(line1, result, lineLength);
         line1[lineLength] = '\0';
@@ -139,7 +137,7 @@ void displayResult(Canvas* canvas, const char* result, int x, int y) {
         canvas_draw_str(canvas, x, y, line1);
         canvas_draw_str(canvas, x, y + lineSpacing, line2);
         canvas_draw_str(canvas, x, y + 2 * lineSpacing, line3);
-    } else if(length > lineLength) {  // More than 1 line
+    } else if(length > lineLength) { // More than 1 line
         char line1[lineLength + 1];
         strncpy(line1, result, lineLength);
         line1[lineLength] = '\0';
@@ -252,7 +250,7 @@ void calculator_draw_callback(Canvas* canvas, void* ctx) {
         modeStr = " waiting ...";
         break;
     }
-    
+
     canvas_draw_str(canvas, 16, 71, modeStr);
     short cursorX = 2;
     short cursorY = 61; // Starting Y position
@@ -262,18 +260,25 @@ void calculator_draw_callback(Canvas* canvas, void* ctx) {
     }
 
     for(int i = 0; i < calculator_state->position.x; i++) {
-        cursorX += cellDimensions[calculator_state->position.y][i][0]; // Add the width of each previous column
+        cursorX += cellDimensions[calculator_state->position.y][i]
+                                 [0]; // Add the width of each previous column
     }
 
-    short cellWidth = cellDimensions[calculator_state->position.y][calculator_state->position.x][0];
-    short cellHeight = cellDimensions[calculator_state->position.y][calculator_state->position.x][1];
+    short cellWidth =
+        cellDimensions[calculator_state->position.y][calculator_state->position.x][0];
+    short cellHeight =
+        cellDimensions[calculator_state->position.y][calculator_state->position.x][1];
 
     // Draw the highlighted cell
     draw_highlighted_cell(canvas, cursorX, cursorY, cellWidth, cellHeight);
 
     // Determine the content to display in the cell
     char cellContent[2]; // Buffer to hold the cell content
-    snprintf(cellContent, sizeof(cellContent), "%c", getKeyAtPosition(calculator_state->position.x, calculator_state->position.y));
+    snprintf(
+        cellContent,
+        sizeof(cellContent),
+        "%c",
+        getKeyAtPosition(calculator_state->position.x, calculator_state->position.y));
 
     // Calculate center position for the text
     short textX = cursorX + (cellWidth - calculateStringWidth(cellContent, 2)) / 1;

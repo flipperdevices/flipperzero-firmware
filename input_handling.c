@@ -18,7 +18,6 @@ void calculator_input_callback(InputEvent* input_event, void* ctx) {
     furi_message_queue_put(event_queue, input_event, FuriWaitForever);
 }
 
-
 void handle_short_press(Calculator* calculator_state, ViewPort* view_port, InputEvent* event) {
     switch(event->key) {
     case InputKeyUp:
@@ -30,12 +29,12 @@ void handle_short_press(Calculator* calculator_state, ViewPort* view_port, Input
             // if(calculator_state->position.y == 1) { // If cursor moves to row 2, skip it
             //     calculator_state->position.y--;
             // }
-        }   
+        }
         break;
     case InputKeyDown:
         if(calculator_state->position.y < 5 - 1) {
-            if(calculator_state->position.y == 5 - 2 && 
-                (calculator_state->position.x == 3 || calculator_state->position.x == 4)) {
+            if(calculator_state->position.y == 5 - 2 &&
+               (calculator_state->position.x == 3 || calculator_state->position.x == 4)) {
                 calculator_state->position.y = 5 - 1;
                 calculator_state->position.x = 3;
             } else {
@@ -68,7 +67,8 @@ void handle_short_press(Calculator* calculator_state, ViewPort* view_port, Input
         if(calculator_state->position.y == 0) {
             toggle_mode(calculator_state);
         } else {
-            char key = getKeyAtPosition(calculator_state->position.x, calculator_state->position.y);
+            char key =
+                getKeyAtPosition(calculator_state->position.x, calculator_state->position.y);
             handle_key_press(calculator_state, key);
         }
         break;
@@ -82,16 +82,16 @@ void handle_short_press(Calculator* calculator_state, ViewPort* view_port, Input
 
 void handle_long_press(Calculator* calculator_state, ViewPort* view_port, InputEvent* event) {
     switch(event->key) {
-        case InputKeyOk:
-            if(calculator_state->position.x == 0 && calculator_state->position.y == 4) {
-                if(calculator_state->textLength < MAX_TEXT_LENGTH_INPUT) {
-                    calculator_state->text[calculator_state->textLength++] = ')';
-                    calculator_state->text[calculator_state->textLength] = '\0';
-                }
+    case InputKeyOk:
+        if(calculator_state->position.x == 0 && calculator_state->position.y == 4) {
+            if(calculator_state->textLength < MAX_TEXT_LENGTH_INPUT) {
+                calculator_state->text[calculator_state->textLength++] = ')';
+                calculator_state->text[calculator_state->textLength] = '\0';
             }
-            break;
-        default:
-            break;
+        }
+        break;
+    default:
+        break;
     }
 
     view_port_update(view_port);

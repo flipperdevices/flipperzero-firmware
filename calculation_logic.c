@@ -4,24 +4,23 @@
 #include <stdbool.h>
 #include "calculator.h"
 
-
 // global constant lookup table
 static const char* HEX_TO_BINARY_TABLE[16] = {
-    "0000", 
-    "0001", 
-    "0010", 
+    "0000",
+    "0001",
+    "0010",
     "0011",
-    "0100", 
-    "0101", 
-    "0110", 
+    "0100",
+    "0101",
+    "0110",
     "0111",
-    "1000", 
-    "1001", 
-    "1010", 
+    "1000",
+    "1001",
+    "1010",
     "1011",
-    "1100", 
-    "1101", 
-    "1110", 
+    "1100",
+    "1101",
+    "1110",
     "1111"};
 
 bool decToBin(const char* decString, char* decToBinResult, size_t resultSize) {
@@ -97,9 +96,10 @@ bool decToHex(const char* decString, char* decToHexResult, size_t resultSize) {
     decToHexResult[requiredSize] = '\0';
 
     // convert to hexadecimal in reverse order
-    do{
+    do {
         int remainder = num % 16;
-        decToHexResult[--requiredSize] = (remainder < 10) ? ('0' + remainder) : ('A' + (remainder - 10));
+        decToHexResult[--requiredSize] = (remainder < 10) ? ('0' + remainder) :
+                                                            ('A' + (remainder - 10));
         num /= 16;
     } while(num > 0);
 
@@ -196,7 +196,8 @@ bool hexToDec(const char* hexString, int* hexToDecResult) {
             return false;
         }
 
-        if(*hexToDecResult > INT_MAX / 16 || (*hexToDecResult == INT_MAX / 16 && value > INT_MAX % 16)) {
+        if(*hexToDecResult > INT_MAX / 16 ||
+           (*hexToDecResult == INT_MAX / 16 && value > INT_MAX % 16)) {
             return false; // check overflow
         }
 
@@ -288,14 +289,26 @@ void calculate(Calculator* calculator_state) {
 
     switch(calculator_state->mode) {
     case ModeDecToBin:
-        if(!decToBin(calculator_state->text, calculator_state->decToBinResult, sizeof(calculator_state->decToBinResult))) {
-            snprintf(calculator_state->decToBinResult, sizeof(calculator_state->decToBinResult), "INVALID D");
+        if(!decToBin(
+               calculator_state->text,
+               calculator_state->decToBinResult,
+               sizeof(calculator_state->decToBinResult))) {
+            snprintf(
+                calculator_state->decToBinResult,
+                sizeof(calculator_state->decToBinResult),
+                "INVALID D");
         }
         break;
 
     case ModeDecToHex:
-        if(!decToHex(calculator_state->text, calculator_state->decToHexResult, sizeof(calculator_state->decToHexResult))) {
-            snprintf(calculator_state->decToHexResult, sizeof(calculator_state->decToHexResult), "INVALID D");
+        if(!decToHex(
+               calculator_state->text,
+               calculator_state->decToHexResult,
+               sizeof(calculator_state->decToHexResult))) {
+            snprintf(
+                calculator_state->decToHexResult,
+                sizeof(calculator_state->decToHexResult),
+                "INVALID D");
         }
         break;
 
@@ -304,35 +317,64 @@ void calculate(Calculator* calculator_state) {
             calculator_state->decToCharResult[0] = result;
             calculator_state->decToCharResult[1] = '\0';
         } else {
-            snprintf(calculator_state->decToCharResult, sizeof(calculator_state->decToCharResult), "INVALID D");
+            snprintf(
+                calculator_state->decToCharResult,
+                sizeof(calculator_state->decToCharResult),
+                "INVALID D");
         }
         break;
 
     case ModeHexToBin:
-        if(!hexToBin(calculator_state->text, calculator_state->hexToBinResult, sizeof(calculator_state->hexToBinResult))) {
-            snprintf(calculator_state->hexToBinResult, sizeof(calculator_state->hexToBinResult), "INVALID H");
+        if(!hexToBin(
+               calculator_state->text,
+               calculator_state->hexToBinResult,
+               sizeof(calculator_state->hexToBinResult))) {
+            snprintf(
+                calculator_state->hexToBinResult,
+                sizeof(calculator_state->hexToBinResult),
+                "INVALID H");
         }
         break;
 
     case ModeHexToDec:
         if(hexToDec(calculator_state->text, &num)) {
-            snprintf(calculator_state->hexToDecResult, sizeof(calculator_state->hexToDecResult), "%d", num);
+            snprintf(
+                calculator_state->hexToDecResult,
+                sizeof(calculator_state->hexToDecResult),
+                "%d",
+                num);
         } else {
-            snprintf(calculator_state->hexToDecResult, sizeof(calculator_state->hexToDecResult), "INVALID H");
+            snprintf(
+                calculator_state->hexToDecResult,
+                sizeof(calculator_state->hexToDecResult),
+                "INVALID H");
         }
         break;
 
     case ModeBinToDec:
         if(binToDec(calculator_state->text, &num)) {
-            snprintf(calculator_state->binToDecResult, sizeof(calculator_state->binToDecResult), "%d", num);
+            snprintf(
+                calculator_state->binToDecResult,
+                sizeof(calculator_state->binToDecResult),
+                "%d",
+                num);
         } else {
-            snprintf(calculator_state->binToDecResult, sizeof(calculator_state->binToDecResult), "INVALID B");
+            snprintf(
+                calculator_state->binToDecResult,
+                sizeof(calculator_state->binToDecResult),
+                "INVALID B");
         }
         break;
 
     case ModeBinToHex:
-        if(!binToHex(calculator_state->text, calculator_state->binToHexResult, sizeof(calculator_state->binToHexResult))) {
-            snprintf(calculator_state->binToHexResult, sizeof(calculator_state->binToHexResult), "INVALID B");
+        if(!binToHex(
+               calculator_state->text,
+               calculator_state->binToHexResult,
+               sizeof(calculator_state->binToHexResult))) {
+            snprintf(
+                calculator_state->binToHexResult,
+                sizeof(calculator_state->binToHexResult),
+                "INVALID B");
         }
         break;
 
