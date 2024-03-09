@@ -23,21 +23,35 @@ static const char* HEX_TO_BINARY_TABLE[16] = {
     "1110", 
     "1111"};
 
+<<<<<<< Updated upstream
 bool decToBin(const char* decString, char* decToBinResult, size_t resultSize) {
     if(decString == NULL || decToBinResult == NULL || resultSize < 2) {
         return false; // INVALID pointers or insufficient result size
+=======
+bool decToBin(const char* decString, char* binaryResult, size_t resultSize) {
+    if(decString == NULL || binaryResult == NULL || resultSize < 2) {
+        return false; // Invalid pointers or insufficient result size
+>>>>>>> Stashed changes
     }
 
     char* end;
     unsigned long long num = strtoull(decString, &end, 10);
 
     if(*end != '\0' || *decString == '\0') {
+<<<<<<< Updated upstream
         return false; // INVALID decimal
+=======
+        return false; // Invalid decimal
+>>>>>>> Stashed changes
     }
 
     // Calculate the number of bits
     size_t bitsNeeded = 0;
+<<<<<<< Updated upstream
     unsigned long long tempNum = num;
+=======
+    unsigned long tempNum = num;
+>>>>>>> Stashed changes
     while(tempNum > 0) {
         bitsNeeded++;
         tempNum >>= 1;
@@ -61,15 +75,24 @@ bool decToBin(const char* decString, char* decToBinResult, size_t resultSize) {
 
     // fill the binary string from the end
     for(int i = bitsNeeded - 1; i >= 0; i--) {
+<<<<<<< Updated upstream
         decToBinResult[i] = (num & 1) + '0'; // the least significant bit
+=======
+        binaryResult[i] = (num & 1) + '0'; // the least significant bit
+>>>>>>> Stashed changes
         num >>= 1;
     }
 
     return true;
 }
 
+<<<<<<< Updated upstream
 bool decToHex(const char* decString, char* decToHexResult, size_t resultSize) {
     if(decString == NULL || decToHexResult == NULL || resultSize == 0) {
+=======
+bool decToHex(const char* decString, char* hexResult, size_t resultSize) {
+    if(decString == NULL || hexResult == NULL || resultSize == 0) {
+>>>>>>> Stashed changes
         return false;
     }
 
@@ -105,8 +128,13 @@ bool decToHex(const char* decString, char* decToHexResult, size_t resultSize) {
     return true;
 }
 
+<<<<<<< Updated upstream
 bool decToChar(const char* decString, char* decToCharResult) {
     if(decString == NULL || decToCharResult == NULL || *decString == '\0') {
+=======
+bool decToChar(const char* decString, char* outChar) {
+    if(decString == NULL || outChar == NULL || *decString == '\0') {
+>>>>>>> Stashed changes
         return false;
     }
 
@@ -140,8 +168,13 @@ bool hexDigitToBinary(char hexDigit, char* binary) {
     }
 }
 
+<<<<<<< Updated upstream
 bool hexToBin(const char* hexString, char* hexToBinResult, size_t resultSize) {
     if(hexString == NULL || hexToBinResult == NULL || resultSize == 0) {
+=======
+bool hexToBin(const char* hexString, char* binaryResult, size_t resultSize) {
+    if(hexString == NULL || binaryResult == NULL || resultSize == 0) {
+>>>>>>> Stashed changes
         return false;
     }
 
@@ -175,12 +208,21 @@ bool hexToBin(const char* hexString, char* hexToBinResult, size_t resultSize) {
     return true;
 }
 
+<<<<<<< Updated upstream
 bool hexToDec(const char* hexString, int* hexToDecResult) {
     if(hexString == NULL || hexToDecResult == NULL) {
         return false;
     }
 
     *hexToDecResult = 0;
+=======
+bool hexToDec(const char* hexString, int* outNum) {
+    if(hexString == NULL || outNum == NULL) {
+        return false;
+    }
+
+    *outNum = 0;
+>>>>>>> Stashed changes
     while(*hexString) {
         char digit = *hexString;
         int value;
@@ -195,7 +237,11 @@ bool hexToDec(const char* hexString, int* hexToDecResult) {
             return false;
         }
 
+<<<<<<< Updated upstream
         if(*hexToDecResult > INT_MAX / 16 || (*hexToDecResult == INT_MAX / 16 && value > INT_MAX % 16)) {
+=======
+        if(*outNum > INT_MAX / 16 || (*outNum == INT_MAX / 16 && value > INT_MAX % 16)) {
+>>>>>>> Stashed changes
             return false; // check overflow
         }
 
@@ -206,17 +252,30 @@ bool hexToDec(const char* hexString, int* hexToDecResult) {
     return true;
 }
 
+<<<<<<< Updated upstream
 bool binToDec(const char* binaryString, int* binToDecResult) {
     if(binaryString == NULL || binToDecResult == NULL) {
         return false;
     }
 
     *binToDecResult = 0;
+=======
+bool binToDec(const char* binaryString, int* decResult) {
+    if(binaryString == NULL || decResult == NULL) {
+        return false;
+    }
+
+    *decResult = 0;
+>>>>>>> Stashed changes
     for(const char* p = binaryString; *p; ++p) {
         if(*p != '0' && *p != '1') {
             return false;
         }
+<<<<<<< Updated upstream
         if(*binToDecResult > INT_MAX / 2) {
+=======
+        if(*decResult > INT_MAX / 2) {
+>>>>>>> Stashed changes
             return false; // check overflow
         }
         *binToDecResult = (*binToDecResult << 1) | (*p - '0');
@@ -234,8 +293,13 @@ char binaryToHexDigit(const char* bin) {
     return (value < 10) ? ('0' + value) : ('A' + (value - 10));
 }
 
+<<<<<<< Updated upstream
 bool binToHex(const char* binaryString, char* binToHexResult, size_t resultSize) {
     if(binaryString == NULL || binToHexResult == NULL || resultSize == 0) {
+=======
+bool binToHex(const char* binaryString, char* hexResult, size_t resultSize) {
+    if(binaryString == NULL || hexResult == NULL || resultSize == 0) {
+>>>>>>> Stashed changes
         return false;
     }
 
@@ -243,7 +307,11 @@ bool binToHex(const char* binaryString, char* binToHexResult, size_t resultSize)
 
     for(size_t i = 0; i < binLength; ++i) {
         if(binaryString[i] != '0' && binaryString[i] != '1') {
+<<<<<<< Updated upstream
             snprintf(binToHexResult, resultSize, "INVALID Binary");
+=======
+            snprintf(hexResult, resultSize, "Invalid Binary");
+>>>>>>> Stashed changes
             return false;
         }
     }
@@ -268,7 +336,11 @@ bool binToHex(const char* binaryString, char* binToHexResult, size_t resultSize)
         }
 
         if(tempIndex == 4) {
+<<<<<<< Updated upstream
             binToHexResult[hexIndex++] = binaryToHexDigit(tempBin);
+=======
+            hexResult[hexIndex++] = binaryToHexDigit(tempBin);
+>>>>>>> Stashed changes
             tempIndex = 0;
         }
     }
@@ -287,51 +359,90 @@ void calculate(Calculator* calculator_state) {
 
     switch(calculator_state->mode) {
     case ModeDecToBin:
+<<<<<<< Updated upstream
         if(!decToBin(calculator_state->text, calculator_state->decToBinResult, sizeof(calculator_state->decToBinResult))) {
             snprintf(calculator_state->decToBinResult, sizeof(calculator_state->decToBinResult), "INVALID D");
+=======
+        if(!decToBin(calculator_state->text, calculator_state->binaryResult, sizeof(calculator_state->binaryResult))) {
+            snprintf(calculator_state->binaryResult, sizeof(calculator_state->binaryResult), "Invalid Dec");
+>>>>>>> Stashed changes
         }
         break;
 
     case ModeDecToHex:
+<<<<<<< Updated upstream
         if(!decToHex(calculator_state->text, calculator_state->decToHexResult, sizeof(calculator_state->decToHexResult))) {
             snprintf(calculator_state->decToHexResult, sizeof(calculator_state->decToHexResult), "INVALID D");
+=======
+        if(!decToHex(calculator_state->text, calculator_state->hexResult, sizeof(calculator_state->hexResult))) {
+            snprintf(calculator_state->hexResult, sizeof(calculator_state->hexResult), "Invalid Dec");
+>>>>>>> Stashed changes
         }
         break;
 
     case ModeDecToChar:
         if(decToChar(calculator_state->text, &result)) {
+<<<<<<< Updated upstream
             calculator_state->decToCharResult[0] = result;
             calculator_state->decToCharResult[1] = '\0';
         } else {
             snprintf(calculator_state->decToCharResult, sizeof(calculator_state->decToCharResult), "INVALID D");
+=======
+            calculator_state->charResult[0] = result;
+            calculator_state->charResult[1] = '\0';
+        } else {
+            snprintf(calculator_state->charResult, sizeof(calculator_state->charResult), "Invalid Dec");
+>>>>>>> Stashed changes
         }
         break;
 
     case ModeHexToBin:
+<<<<<<< Updated upstream
         if(!hexToBin(calculator_state->text, calculator_state->hexToBinResult, sizeof(calculator_state->hexToBinResult))) {
             snprintf(calculator_state->hexToBinResult, sizeof(calculator_state->hexToBinResult), "INVALID H");
+=======
+        if(!hexToBin(calculator_state->text, calculator_state->binaryResult, sizeof(calculator_state->binaryResult))) {
+            snprintf(calculator_state->binaryResult, sizeof(calculator_state->binaryResult), "Invalid Hex");
+>>>>>>> Stashed changes
         }
         break;
 
     case ModeHexToDec:
         if(hexToDec(calculator_state->text, &num)) {
+<<<<<<< Updated upstream
             snprintf(calculator_state->hexToDecResult, sizeof(calculator_state->hexToDecResult), "%d", num);
         } else {
             snprintf(calculator_state->hexToDecResult, sizeof(calculator_state->hexToDecResult), "INVALID H");
+=======
+            snprintf(calculator_state->decResult, sizeof(calculator_state->decResult), "%d", num);
+        } else {
+            snprintf(calculator_state->decResult, sizeof(calculator_state->decResult), "Invalid Hex");
+>>>>>>> Stashed changes
         }
         break;
 
     case ModeBinToDec:
         if(binToDec(calculator_state->text, &num)) {
+<<<<<<< Updated upstream
             snprintf(calculator_state->binToDecResult, sizeof(calculator_state->binToDecResult), "%d", num);
         } else {
             snprintf(calculator_state->binToDecResult, sizeof(calculator_state->binToDecResult), "INVALID B");
+=======
+            snprintf(calculator_state->decResult, sizeof(calculator_state->decResult), "%d", num);
+        } else {
+            snprintf(calculator_state->decResult, sizeof(calculator_state->decResult), "Invalid Binary");
+>>>>>>> Stashed changes
         }
         break;
 
     case ModeBinToHex:
+<<<<<<< Updated upstream
         if(!binToHex(calculator_state->text, calculator_state->binToHexResult, sizeof(calculator_state->binToHexResult))) {
             snprintf(calculator_state->binToHexResult, sizeof(calculator_state->binToHexResult), "INVALID B");
+=======
+        if(!binToHex(calculator_state->text, calculator_state->hexResult, sizeof(calculator_state->hexResult))) {
+            snprintf(calculator_state->hexResult, sizeof(calculator_state->hexResult), "Invalid Binary");
+>>>>>>> Stashed changes
         }
         break;
 
