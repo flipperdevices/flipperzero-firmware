@@ -16,6 +16,8 @@ static FindMy* findmy_app_alloc() {
     FindMy* app = malloc(sizeof(FindMy));
 
     app->gui = furi_record_open(RECORD_GUI);
+    app->storage = furi_record_open(RECORD_STORAGE);
+    app->dialogs = furi_record_open(RECORD_DIALOGS);
 
     app->view_dispatcher = view_dispatcher_alloc();
     view_dispatcher_enable_queue(app->view_dispatcher);
@@ -41,6 +43,9 @@ static FindMy* findmy_app_alloc() {
         FindMyViewVarItemList,
         variable_item_list_get_view(app->var_item_list));
 
+    app->popup = popup_alloc();
+    view_dispatcher_add_view(app->view_dispatcher, FindMyViewPopup, popup_get_view(app->popup));
+
     view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
 
     findmy_state_load(&app->state);
@@ -56,6 +61,9 @@ static FindMy* findmy_app_alloc() {
 static void findmy_app_free(FindMy* app) {
     furi_assert(app);
 
+    view_dispatcher_remove_view(app->view_dispatcher, FindMyViewPopup);
+    popup_free(app->popup);
+
     view_dispatcher_remove_view(app->view_dispatcher, FindMyViewVarItemList);
     variable_item_list_free(app->var_item_list);
 
@@ -68,6 +76,8 @@ static void findmy_app_free(FindMy* app) {
     view_dispatcher_free(app->view_dispatcher);
     scene_manager_free(app->scene_manager);
 
+    furi_record_close(RECORD_DIALOGS);
+    furi_record_close(RECORD_STORAGE);
     furi_record_close(RECORD_GUI);
 
     free(app);

@@ -5,22 +5,33 @@
 #include <furi_hal_bt.h>
 #include <extra_beacon.h>
 #include <assets_icons.h>
+#include "findmy_icons.h"
+#include <toolbox/stream/file_stream.h>
+#include <toolbox/hex.h>
+#include <toolbox/path.h>
 #include <gui/gui.h>
+#include <storage/storage.h>
+#include <dialogs/dialogs.h>
 #include <gui/scene_manager.h>
 #include <gui/view_dispatcher.h>
 #include "views/findmy_main.h"
 #include <gui/modules/byte_input.h>
 #include <gui/modules/variable_item_list.h>
+#include <gui/modules/popup.h>
 #include "scenes/findmy_scene.h"
+#include "helpers/base64.h"
 
 struct FindMy {
     Gui* gui;
+    Storage* storage;
+    DialogsApp* dialogs;
     SceneManager* scene_manager;
     ViewDispatcher* view_dispatcher;
 
     FindMyMain* findmy_main;
     ByteInput* byte_input;
     VariableItemList* var_item_list;
+    Popup* popup;
 
     uint8_t mac_buf[EXTRA_BEACON_MAC_ADDR_SIZE];
     uint8_t packet_buf[EXTRA_BEACON_MAX_DATA_SIZE];
@@ -32,6 +43,7 @@ typedef enum {
     FindMyViewMain,
     FindMyViewByteInput,
     FindMyViewVarItemList,
+    FindMyViewPopup,
 } FindMyView;
 
 enum FindMyType {
