@@ -22,6 +22,12 @@ The app does not provide any recording functionality - you must use the existing
   </tr>
 </table>
 
+## Navigation / Controls
+- Pressing `OK` on a folder label will open/navigate to that folder and display it's contents.
+- Pressing `OK` on an action (indicated as a label surrounded by a border) will transmit that signal.
+- Pressing `Back` will take you up one folder
+- Pressing `Up` and `Down` will, you know, select things up and down...
+
 ## File System Layout
 The key to organizing your Quac interface is to organize your `/ext/apps_data/quac` folder structure. Every individual file is assigned a button, and every folder/directory is a "group". Selecting a group will show you the contents of that folder/directory, whether they are individual files or more folders. There is no limit on the number of actions or folders - nest as deep as you want!
 
@@ -45,15 +51,17 @@ Here's an example file layout for the screenshots above:
      -01_Power_Off.ir
 ```
 
-When the action files and folders are rendered for display, any `XX_` prefix will be stripped. Additionally, all underscores will be replaced with spaces. Casing is preserved.
+When the action files and folders are rendered for display, any `XX_` prefix will be stripped. All underscores will be replaced with spaces. Extensions will be stripped. Casing is preserved.
 
 ## Signal playback
 The signal files are played back as recorded. During playback/transmit, the LED light will flash green until the action is complete. For RFID signals, they are continuously played back for 3 seconds.
 
-## Features on deck... maybe?
+## On deck... maybe?
+- Playlist support: Thinking a `.qpl` file (Quac playlist file - just a text file), that lists the full path of every command you wish to play back. Playlists would be rendered as buttons. Support a `pause [ms]` command so you can space out the actions inside of a playlist.
+- Hidden file/folder support: Hide files and folders if they start with a `.`. This allows you to place/organize the files used by a playlist in your current directory structure, without them appearing as buttons/groups in the app.
 - Horizontal layout
-- Customize length of RFID playback
+- Customize length of RFID playback. (Per file? hmm...)
 - Improved UI
 
 ## Building / Install
-This app is currently built with `ufbt`, intended for the stock firmware. I have not tested this on other firmwares. I will post the `.fap` shortly.
+This app is currently built with `ufbt`, intended for the stock firmware. I have not tested this on other firmwares. The `.fap` file can be found in the Releases section on the right.
