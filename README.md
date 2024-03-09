@@ -6,7 +6,7 @@ This repository contains a calculator application designed to run on Flipper Zer
 <!-- ![Calculator App Screenshot](https://raw.githubusercontent.com/armixz/Flipper-Zero-Programmer-Calculator/main/app.png) -->
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/armixz/Flipper-Zero-Programmer-Calculator/main/1.png">
+  <img src="https://raw.githubusercontent.com/armixz/Flipper-Zero-Programmer-Calculator/main/img/1.png">
 </p>
 
 ## Features ✨
