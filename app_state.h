@@ -9,6 +9,7 @@ typedef struct App {
     SceneManager* scene_manager;
     ViewDispatcher* view_dispatcher;
     ButtonMenu* btn_menu;
+    DialogEx* dialog;
 
     Storage* storage;
     NotificationApp* notifications;

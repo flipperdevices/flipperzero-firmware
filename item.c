@@ -2,22 +2,18 @@
 #include <furi.h>
 #include <storage/storage.h>
 #include <toolbox/dir_walk.h>
-#include <lib/toolbox/path.h>
+#include <toolbox/path.h>
 
-#include "app_state.h"
+#include "quac.h"
 #include "item.h"
 #include <m-array.h>
-
-// Location of our actions and folders
-#define QUAC_PATH "apps_data/quac"
-// Full path to actions
-#define QUAC_DATA_PATH EXT_PATH(QUAC_PATH)
 
 ARRAY_DEF(FileArray, FuriString*, FURI_STRING_OPLIST);
 
 ItemsView* item_get_items_view_from_path(void* context, FuriString* input_path) {
     App* app = context;
 
+    // Handle the app start condition
     if(input_path == NULL) {
         input_path = furi_string_alloc_set_str(QUAC_DATA_PATH);
     }
@@ -44,11 +40,22 @@ ItemsView* item_get_items_view_from_path(void* context, FuriString* input_path) 
     FileArray_t flist;
     FileArray_init(flist);
 
+    FuriString* filename_tmp;
+    filename_tmp = furi_string_alloc();
+
     // FURI_LOG_I(TAG, "About to walk the dir");
     if(dir_walk_open(dir_walk, cpath)) {
         while(dir_walk_read(dir_walk, path, NULL) == DirWalkOK) {
-            // FURI_LOG_I(TAG, "> dir_walk: %s", furi_string_get_cstr(path));
+            FURI_LOG_I(TAG, "> dir_walk: %s", furi_string_get_cstr(path));
             const char* cpath = furi_string_get_cstr(path);
+
+            // Skip "hidden" files
+            path_extract_filename(path, filename_tmp, false);
+            char first_char = furi_string_get_char(filename_tmp, 0);
+            if(first_char == '.') {
+                FURI_LOG_I(TAG, ">> skipping hidden file: %s", furi_string_get_cstr(filename_tmp));
+                continue;
+            }
 
             // Insert the new file path in sorted order to flist
             uint32_t i = 0;
@@ -67,6 +74,8 @@ ItemsView* item_get_items_view_from_path(void* context, FuriString* input_path) 
             }
         }
     }
+
+    furi_string_free(filename_tmp);
     furi_string_free(path);
 
     // DEBUG: Now print our array in original order

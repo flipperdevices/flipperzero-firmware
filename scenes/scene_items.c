@@ -1,5 +1,13 @@
-#include "flipper.h"
-#include "app_state.h"
+#include <furi.h>
+
+#include <gui/view_dispatcher.h>
+#include <gui/scene_manager.h>
+#include <gui/modules/button_menu.h>
+#include <gui/modules/dialog_ex.h>
+
+#include <notification/notification_messages.h>
+
+#include "quac.h"
 #include "scenes.h"
 #include "scene_items.h"
 #include "../actions/action.h"
@@ -21,6 +29,8 @@ void scene_items_on_enter(void* context) {
     App* app = context;
     ButtonMenu* menu = app->btn_menu;
     button_menu_reset(menu);
+    DialogEx* dialog = app->dialog;
+    dialog_ex_reset(dialog);
 
     ItemsView* items_view = app->items_view;
     FURI_LOG_I(TAG, "items on_enter: [%d] %s", app->depth, furi_string_get_cstr(items_view->path));
@@ -61,7 +71,6 @@ bool scene_items_on_event(void* context, SceneManagerEvent event) {
             if(item->type == Item_Group) {
                 app->depth++;
                 ItemsView* new_items = item_get_items_view_from_path(app, item->path);
-                FURI_LOG_I(TAG, "calling item_items_view_free");
                 item_items_view_free(app->items_view);
                 app->items_view = new_items;
                 scene_manager_next_scene(app->scene_manager, SR_Scene_Items);
@@ -70,9 +79,23 @@ bool scene_items_on_event(void* context, SceneManagerEvent event) {
 
                 // LED goes blinky blinky
                 App* app = context;
-                notification_message(app->notifications, &sequence_blink_start_green);
+                notification_message(app->notifications, &sequence_blink_start_blue);
 
-                action_tx(app, item);
+                // Prepare error string for action calls
+                FuriString* error;
+                error = furi_string_alloc();
+
+                action_tx(app, item, error);
+
+                if(furi_string_size(error)) {
+                    FURI_LOG_E(TAG, furi_string_get_cstr(error));
+                    // Change LED to Red and Vibrate!
+                    notification_message(app->notifications, &sequence_error);
+
+                    // Display DialogEx popup or something?
+                }
+
+                furi_string_free(error);
 
                 // Turn off LED light
                 notification_message(app->notifications, &sequence_blink_stop);
@@ -81,22 +104,22 @@ bool scene_items_on_event(void* context, SceneManagerEvent event) {
         break;
     case SceneManagerEventTypeBack:
         FURI_LOG_I(TAG, "Back button pressed!");
-        if(app->depth) {
-            // take our current ItemsView path, and back it up a level
-            FuriString* new_path;
-            new_path = furi_string_alloc();
-            path_extract_dirname(furi_string_get_cstr(app->items_view->path), new_path);
+        consumed = false; // Ensure Back event continues to propagate
+        if(app->depth >= 0) {
+            // take our current ItemsView path, and go back up a level
+            FuriString* parent_path;
+            parent_path = furi_string_alloc();
+            path_extract_dirname(furi_string_get_cstr(app->items_view->path), parent_path);
 
             app->depth--;
-            ItemsView* new_items = item_get_items_view_from_path(app, new_path);
+            ItemsView* new_items = item_get_items_view_from_path(app, parent_path);
             item_items_view_free(app->items_view);
             app->items_view = new_items;
 
-            furi_string_free(new_path);
+            furi_string_free(parent_path);
         } else {
             FURI_LOG_W(TAG, "At the root level!");
         }
-
         break;
     default:
         break;
@@ -108,5 +131,8 @@ void scene_items_on_exit(void* context) {
     App* app = context;
     ButtonMenu* menu = app->btn_menu;
     button_menu_reset(menu);
+    DialogEx* dialog = app->dialog;
+    dialog_ex_reset(dialog);
+
     FURI_LOG_I(TAG, "on_exit. depth = %d", app->depth);
 }
