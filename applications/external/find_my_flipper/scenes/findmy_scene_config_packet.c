@@ -40,8 +40,9 @@ bool findmy_scene_config_packet_on_event(void* context, SceneManagerEvent event)
         case ByteInputResultOk:
             scene_manager_search_and_switch_to_previous_scene(
                 app->scene_manager, FindMySceneConfig);
-            furi_check(furi_hal_bt_extra_beacon_set_data(app->packet_buf, sizeof(app->packet_buf)));
-            if (app->packet_buf[0] == 0x1E && app->packet_buf[3] == 0x00) {
+            furi_check(
+                furi_hal_bt_extra_beacon_set_data(app->packet_buf, sizeof(app->packet_buf)));
+            if(app->packet_buf[0] == 0x1E && app->packet_buf[3] == 0x00) {
                 app->apple = true; // Checks payload data for Apple identifier
             } else {
                 app->apple = false;

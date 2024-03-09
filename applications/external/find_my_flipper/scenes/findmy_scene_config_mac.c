@@ -56,5 +56,4 @@ void findmy_scene_config_mac_on_exit(void* context) {
 
     byte_input_set_result_callback(app->byte_input, NULL, NULL, NULL, NULL, 0);
     byte_input_set_header_text(app->byte_input, "");
-
 }

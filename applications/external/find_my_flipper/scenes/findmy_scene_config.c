@@ -58,7 +58,12 @@ void findmy_scene_config_on_enter(void* context) {
     variable_item_set_current_value_text(item, transmit_power_s);
 
     item = variable_item_list_add(var_item_list, "Register Tag", 0, NULL, NULL);
-    item = variable_item_list_add(var_item_list, "Matthew KuKanich, Thanks to Chapoly1305, WillyJL, OpenHaystack, Testers", 1, NULL, NULL);
+    item = variable_item_list_add(
+        var_item_list,
+        "Matthew KuKanich, Thanks to Chapoly1305, WillyJL, OpenHaystack, Testers",
+        1,
+        NULL,
+        NULL);
     variable_item_set_current_value_text(item, "Credits");
 
     variable_item_list_set_enter_callback(var_item_list, findmy_scene_config_callback, app);

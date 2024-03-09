@@ -34,7 +34,7 @@ static void findmy_main_draw_callback(Canvas* canvas, void* _model) {
     snprintf(interval_str, sizeof(interval_str), "Ping Interval: %ds", model->interval);
     canvas_draw_str(canvas, 4, 62, interval_str);
     canvas_set_font(canvas, FontPrimary);
-    if(model->apple){
+    if(model->apple) {
         canvas_draw_str(canvas, 4, 32, "Apple Network");
         canvas_draw_icon(canvas, 80, 24, &I_Lock_7x8);
     } else {
