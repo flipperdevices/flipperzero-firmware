@@ -1,4 +1,4 @@
-# <img src="quac.png" alt="logo" width="30" style="image-rendering: pixelated;"/> Quac! Remote
+# <img src="quac.png" alt="logo" width="30" style="image-rendering: pixelated; image-rendering -moz-crisp-edges; image-rendering: crisp-edges;"/> Quac! Remote
 ## QUick ACtion Remote Control for Flipperzero
 This app allows you to organize previously recorded signals, of any type*, so that you can quickly and easily play them back. No more needing to recall whether that door is Sub-GHz or RFID! Just navigate to that action in **Quac** and press OK to send!
 
