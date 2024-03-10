@@ -13,5 +13,5 @@ Long press Back to rotate counter-clockwise.
 
 #### License
 [MIT](LICENSE)
-Copyright 2023 Alexander Taran
-Connect_wires_2 modified by Andrew Diamond
+Copyright 2023 Alexander Taran https://github.com/AlexTaran/flipperzero/tree/master/games/connect_wires
+Connect_wires_2 modified by Andrew Diamond https://github.com/HappyAmos/Flipper_FAPS
