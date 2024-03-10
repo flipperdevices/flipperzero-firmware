@@ -14,6 +14,10 @@ App(
     #     "!helpers/subghz_chat.c",
     #     "!subghz_extended_freq.c",
     # ],
+    provides=[
+        "subghz_start",
+        "subghz_load_extended_settings",
+    ],
     resources="resources",
     fap_libs=["hwdrivers"],
     fap_icon="icon.png",
@@ -31,7 +35,6 @@ App(
     fap_icon="icon.png",
     fap_category="Sub-GHz",
 )
-
 
 App(
     appid="subghz_start",
