@@ -25,7 +25,7 @@ Long press Back to rotate counter-clockwise. (LED blinks briefly red and vibrate
 
 #### License
 [MIT](LICENSE)
-Copyright 2023 Alexander Taran 
+Copyright 2023 Alexander Taran  
 https://github.com/AlexTaran/flipperzero/tree/master/games/connect_wires  
 Copyright 2024 Andrew Diamond  
 Connect_wires_2 modified by Andrew Diamond still under the same MIT issued license  
