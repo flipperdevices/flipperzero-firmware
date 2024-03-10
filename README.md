@@ -14,7 +14,7 @@ This app extends the functionality of the FlipperZero's bluetooth capabilities, 
 - **Option A:** Use the released/precompiled firmware appropriate (FAP) for your device.
 - **Option B:** Build the firmware yourself using `fbt/ufbt`.
 - Both Installation options require you to be running a dev build of firmware. When release gets access to the extra BLE beacon this will change, thank you!
-- If building for UL, RM, or OFW you will need to remove the two icons used in the main menu view. Alternatively build using the OFW branch of this repo as I've done this for you already :)
+- If building OFW use the OFW branch of this repo as I've made the required changes (remove icons and add custom reverse_mac script)
   
 ### Step 2: Obtaining SmartTag Data
 
