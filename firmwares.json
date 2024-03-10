@@ -51,21 +51,16 @@
     {
       "alias": ["ms", "momentum-stable", "mts"],
       "description": "Momentum stable",
-      "type": "git-release",
-      "git_repo": "Next-Flip/Momentum-Firmware",
-      "git_release": "latest",
-      "sdk_filename_pattern": "-sdk\\.zip$"
+      "type": "index",
+      "index_url": "https://up.momentum-fw.dev/firmware/directory.json",
+      "channel": "release"
     },
     {
       "alias": ["md", "momentum-dev", "mtd"],
       "description": "Momentum dev build",
-      "type": "git-action",
-      "git_repo": "Next-Flip/Momentum-Firmware",
-      "git_action": "build.yml",
-      "git_artifact": "dist",
-      "git_branch": "dev",
-      "git_event": "push",
-      "sdk_filename_pattern": "-sdk-.+\\.zip$"
+      "type": "index",
+      "index_url": "https://up.momentum-fw.dev/firmware/directory.json",
+      "channel": "dev"
     }
   ]
 }
