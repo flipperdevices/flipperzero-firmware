@@ -41,6 +41,7 @@ typedef enum {
 typedef enum {
     VgmColorModeDefault,
     VgmColorModeCustom,
+    VgmColorModeRainbow,
     VgmColorModeRgbBacklight,
     VgmColorModeCount,
 } VgmColorMode;
