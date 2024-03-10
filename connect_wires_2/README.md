@@ -5,6 +5,7 @@
 ![Easy mode](screenshots/1.png)
 ![Hard mode](screenshots/2.png)
 ![Mode selection screen](screenshots/3.png)
+![Winning screen](screenshots/4.png)
 
 Press Ok to rotate the selection.
 Long press Ok to rotate clockwise.
