@@ -42,6 +42,11 @@ This app extends the functionality of the FlipperZero's bluetooth capabilities, 
    - Don't Own a Mac: https://github.com/dchristl/macless-haystack or https://github.com/Chapoly1305/FindMy
    - Own a Mac: https://github.com/seemoo-lab/openhaystack
 
+To use OpenHayStack for tracking, you must use MacOS lower than version 14 (Mail Plug-in Incompetiablity of MacOS 14+ seemoo-lab/openhaystack#224). If you do own a device, I believe a convertor script can be provided without much of effort. If you do not own a Mac device or the system has been upgraded to 14 and beyond. The alternative solution includes,
+
+    https://github.com/dchristl/macless-haystack (recommended in README)
+    https://github.com/Chapoly1305/FindMy (a project uses python and docker to provide location lookup as a backend service)
+
 ## Setting Up on Mac with OpenHayStack (OHS) App -- If you own a Mac instructions
 
 Follow these steps to get everything working on a Mac using the latest version of the OpenHayStack app.
