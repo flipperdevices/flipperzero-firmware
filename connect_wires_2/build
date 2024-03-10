@@ -1,0 +1,6 @@
+clear
+cp -r ~/Programming/Flipper/firmware/applications_user/ ~/Programming/Flipper/firmware/HappyFlip-Firmware
+cd ~/Programming/Flipper/firmware/HappyFlip-Firmware
+./fbt -c fap_connect_wires_2
+./fbt fap_connect_wires_2
+./fbt launch_app APPSRC=connect_wires_2
