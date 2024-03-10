@@ -122,11 +122,11 @@ PicopassError
             instance, instance->tx_buffer, instance->rx_buffer, PICOPASS_POLLER_FWT_FC);
         if(ret != PicopassErrorNone) break;
 
-        if(bit_buffer_get_size_bytes(instance->rx_buffer) != sizeof(PicopassBlock)) {
+        if(bit_buffer_get_size_bytes(instance->rx_buffer) != PICOPASS_BLOCK_LEN) {
             ret = PicopassErrorProtocol;
             break;
         }
-        bit_buffer_write_bytes(instance->rx_buffer, block->data, sizeof(PicopassBlock));
+        bit_buffer_write_bytes(instance->rx_buffer, block->data, PICOPASS_BLOCK_LEN);
     } while(false);
 
     return ret;
@@ -206,7 +206,7 @@ PicopassError picopass_poller_write_block(
         bit_buffer_reset(instance->tx_buffer);
         bit_buffer_append_byte(instance->tx_buffer, RFAL_PICOPASS_CMD_UPDATE);
         bit_buffer_append_byte(instance->tx_buffer, block_num);
-        bit_buffer_append_bytes(instance->tx_buffer, block->data, sizeof(PicopassBlock));
+        bit_buffer_append_bytes(instance->tx_buffer, block->data, PICOPASS_BLOCK_LEN);
         bit_buffer_append_bytes(instance->tx_buffer, mac->data, sizeof(PicopassMac));
 
         NfcError error = nfc_poller_trx(

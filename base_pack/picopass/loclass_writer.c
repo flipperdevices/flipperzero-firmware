@@ -5,6 +5,7 @@
 #include <storage/storage.h>
 #include <stream/stream.h>
 #include <stream/buffered_file_stream.h>
+#include <datetime/datetime.h>
 
 struct LoclassWriter {
     Stream* file_stream;

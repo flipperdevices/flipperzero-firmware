@@ -44,12 +44,15 @@ void picopass_scene_loclass_on_enter(void* context) {
     const uint8_t config_block[PICOPASS_BLOCK_LEN] = {
         0x12, 0xFF, 0xFF, 0xFF, 0x7F, 0x1F, 0xFF, 0x3C};
     memcpy(data->card_data[PICOPASS_CONFIG_BLOCK_INDEX].data, config_block, sizeof(config_block));
+    data->card_data[PICOPASS_CONFIG_BLOCK_INDEX].valid = true;
 
     const uint8_t epurse[PICOPASS_BLOCK_LEN] = {0xFE, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
     memcpy(data->card_data[PICOPASS_SECURE_EPURSE_BLOCK_INDEX].data, epurse, sizeof(epurse));
+    data->card_data[PICOPASS_SECURE_EPURSE_BLOCK_INDEX].valid = true;
 
     const uint8_t aia[PICOPASS_BLOCK_LEN] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
     memcpy(data->card_data[PICOPASS_SECURE_AIA_BLOCK_INDEX].data, aia, sizeof(aia));
+    data->card_data[PICOPASS_SECURE_AIA_BLOCK_INDEX].valid = true;
 
     picopass->listener = picopass_listener_alloc(picopass->nfc, data);
     free(data);
