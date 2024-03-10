@@ -1,3 +1,10 @@
+/*
+implementation of the Print/Stream classes
+
+but the underlying I/O is to two flipper stream buffers
+instead of an arduino serial interface.
+
+*/
 #include "arduino.h"
 
 #define DEC 10

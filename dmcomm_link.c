@@ -5,19 +5,7 @@
  * dmcomm thread, runs the dmcomm loop. call init first.
  * exits when the app dmcomm_run var is set to false.
  * App runs this constantly on startup until app close.
-*
-int32_t dmcomm_reader(void* context) {
-    FURI_LOG_I(TAG, "dmcomm_reader start");
-    App* app = context;
-    setup();
-    while(app->dmcomm_run) {
-        loop();
-    }
-
-    FURI_LOG_I(TAG, "dmcomm_reader end");
-    return 0;
-}*/
-
+*/
 int32_t fcom_thread(void* context) {
     FURI_LOG_I(TAG, "fcom_thread start");
     App* app = context;
@@ -37,7 +25,7 @@ Used for comms by app (non USB)
 */
 void dmcomm_sendcommand(void* context, const char* cmd)
 {
-    FURI_LOG_I(TAG, "dmcomm_sendcommand");
+    FURI_LOG_I(TAG, "dmcomm_sendcommand: %s", cmd);
     App* app = context;
 
     size_t sent = furi_stream_buffer_send(

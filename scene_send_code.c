@@ -4,6 +4,33 @@ Sends the code to the DMComm and initiates sending
 Displays current code we are sending in bold
 Waits for and displays last recieved code in thin text
 Right will go to the save code dialog for the new code (if there is one)
+
+TODO:
+
+Switch to a state machine like:
+
+idle:
+ r -> pending r code
+ s -> pending s code
+ t -> reset
+ newline -> save validate
+ anything else -> reset
+
+pending code:
+ : -> read code
+ anything else -> reset
+
+read code:
+ A-Z,0-9 -> populate code
+ space -> end code -> idle
+ anything else -> reset
+
+save validate:
+ if code valid -> done
+ if not valid -> reset
+
+reset:
+ clear code then -> idle
 */
 
 #include "flipper.h"
@@ -100,8 +127,9 @@ void processInput(void* context)
                     }
                     furi_string_push_back(app->state->r_code, '-');
                 }
-                else if(('A' <= out[i] && out[i] <= 'Z') || ('0' <= out[i] && out[i] <= '9'))
+                else if(curcode != 0 && (('A' <= out[i] && out[i] <= 'Z') || ('0' <= out[i] && out[i] <= '9')))
                 { // If we're reading a code, read alphanum into the code
+                    //FURI_LOG_I(TAG, "read char %c", out[i]);
                     if(curcode == 's')
                         furi_string_push_back(app->state->s_code, out[i]);
                     if(curcode == 'r')
@@ -109,6 +137,7 @@ void processInput(void* context)
                 }
                 else if(curcode != 0 && (out[i] == ' ' || out[i] == '\n'))
                 { // If we're reading a code, a space ends it
+                    //FURI_LOG_I(TAG, "code done");
                     if(curcode == 's')
                         app->state->spackets++;
                     if(curcode == 'r')

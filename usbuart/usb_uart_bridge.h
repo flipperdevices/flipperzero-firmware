@@ -9,6 +9,10 @@ some buffer streams
 #include "flipper.h"
 #include <stdint.h>
 #include <stdbool.h>
+#include <furi_hal.h>
+#include <furi_hal_usb_cdc.h>
+
+extern FuriHalUsbInterface usb_cdc_fcom;
 
 typedef void (*UsbUartCallback)();
 typedef struct UsbUartBridge UsbUartBridge;

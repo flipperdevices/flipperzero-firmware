@@ -5,23 +5,55 @@
 
 A Flipper Zero app that allows the flipper to communicate with Digimon V-Pets.
 
-Currently tested:
-- DM20
-- DMX
-- PenZ
-- DMC
-- PenOG
-- PenProg
-- PenX
+Currently tested devices:
+Classic:
+- 1997 Digital Monster
+- 1998 Digimon Pendulum
+- 1999 Digivice
+- 2000 D-3
+- 2000 D-Terminal
+- 2002 D-Scanner
+- 2002 Digimon Pendulum Progress
+- 2003 Digimon Pendulum X
+- 2005 Digimon Accel
+- 2005 Digimon Mini
+- 2006 Digivice iC
+
+Modern:
+- 2017 Digital Monster Ver.20th
+- 2018 Digimon Pendulum Ver.20th
+- 2019 Digital Monster X
+- 2020 Digimon Pendulum Z
+- 2021 Digivice Ver.Complete
+
+Color:
+- 2023 Digital Monster COLOR
+
+Currently tested apps:
+- W0rld (via Chrome web browser serial)
+- Alpha Terminal and Alpha Serial (Android)
+- Alpha Terminal (Windows)
+- ACom Wiki (Android)
+
+Unsupported Apps:
+- Alpha Serial (Windows) still doesn't seem to detect it
 
 Untested:
-- All other pets (Pen20, Original Pets, etc)
+- PenC
+- All other pets
 - Listen Mode
+
+Thanks to [Joushiikuta](https://www.youtube.com/@joushiikuta) for testing the classic devices which I do not have.
 
 Based on:
 - The DMComm project by BladeSabre: https://github.com/dmcomm/dmcomm-project
+- The updated DMComm Arduino library by BladeSabre: https://github.com/dmcomm/dmcomm-arduino-lib
 - The Flipper Zero Boilerplate App: https://github.com/leedave/flipper-zero-fap-boilerplate
 - The Flipper Zero Firmware: https://github.com/flipperdevices/flipperzero-firmware
+
+### Known Issues
+
+Occasionally when using the USB A-Com mode, the flipper zero USB driver will crash the flipper due to the way I'm overwriting the USB VID/PID. I'm not sure why yet and am still debugging this. Subsequent attempts seem to work and this is uncommon (although not rare).
 
 ### Youtube Example
 
@@ -33,11 +65,17 @@ You will need to construct a circuit similar to the A-Com circuit described in t
 
 ![Schematic](screenshots/flipper_vpet_circuit.png)
 
-Pin C3 - 2k resistor - Pin B2 - 10k resistor - Pin GND
+Pin C3 - 4k resistor - Pin B2 - 20k resistor - Pin GND
 
 Pin B2 - VPet+
 
 Pin GND - VPet-
+
+The 4k/20k resistor pairing is confirmed to work with the older devices. If you only need modern device support 2k/10k is also compatible, though it will not work with older devices.
+
+[Joushiikuta](https://www.youtube.com/@joushiikuta) has created an awesome gerber file for a compatible PCB located [here](pcb/20240225_FlipperZero_F-Com_PCB_Thickness_1.6mm_Gerber.zip) (included with permission)
+
+You will also need compatible right angle header pins and SMD resistors.
 
 ## Installation
 
@@ -54,7 +92,7 @@ flipper to make them accessible under the "Saved" menu option.
 
 ### Listen
 
-Listen is currently untested, as I have not created a jig to make it function!!
+Listen mode is now partially functional. It is difficult to get a good read at the moment although it is possible. I need to re-work the code to use rising/falling edge detection instead of looping though so the flipper GUI does not hang, and we don't have to spend the whole time looping on a GPIO read.
 
 Listen allows you to connect 2 vpets to each other and eavesdrop on the data they send. Both codes will show up on the flipper after communication completes, and you can save either code to the flipper for later use. Leaving this screen will pause dmcomm.
 
@@ -75,7 +113,5 @@ The flipper will change the USB port from CLI mode into Serial mode and behave a
 ## Other Notes / Future stuff
 
 Dmcomm supports a voltage test. However, the flipper zero firmware does not yet have ADC support implemented. This is still possible as demonstrated by the flipper zero oscilloscope project. At some point I may implement this. A-Com's themselves use analog input in order to support a wider range of devices logic levels. This may limit the flipper app's compatibility for now.
-
-DMC support isn't included in the dmcomm-project ino, but has been added to the updated https://github.com/dmcomm/dmcomm-arduino-lib project. At some point I may update this to port the CPP code onto the flipper.
 
 Debug mode support could be added at some point.
