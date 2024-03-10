@@ -29,8 +29,38 @@ This app extends the functionality of the FlipperZero's bluetooth capabilities, 
      4. Click save.
 3. **Configuration Completion:** With this setup, your device is ready for Open Haystack. Proceed with the specific steps for Open Haystack or MaclessHaystack based on your setup.
    - Don't Own a Mac: https://github.com/dchristl/macless-haystack or https://github.com/Chapoly1305/FindMy
-   - Own a Mac: https://github.com/seemoo-lab/openhaystack or https://github.com/Chapoly1305/FindMy
+   - Own a Mac: https://github.com/seemoo-lab/openhaystack
 
+## Setting Up on Mac with OpenHayStack (OHS) App -- If you own a Mac instructions
+
+Follow these steps to get everything working on a Mac using the latest version of the OpenHayStack app.
+
+### Step 1: Create a New Device
+- Start by creating a new device in the OpenHayStack app, but **do not deploy** it immediately after creation.
+
+### Step 2: Export Configuration
+- Choose to **EXPORT** the configuration by selecting "all accessories as file." To simplify, ensure you only have one entry in the list before exporting.
+- It is crucial that the export format is in JSON.
+
+### Step 3: Modify the JSON File
+Open the exported JSON file in a text editor and make the following changes:
+- **Left OHS, Right keys from my ```generate_keys.py``` script:**
+    - `symmetricKey` should be set to the `Hashed adv key`.
+    - `privateKey` should be replaced with your `Private Key`.
+    - `oldestRelevantSymmetricKey` should also use the `Hashed adv key`.
+- Additionally, update the following attributes to `true`:
+    - `"isDeployed": true`
+    - `"isActive": true`
+
+### Step 4: Re-import the Configuration
+- After saving your changes to the JSON file, re-import it back into OpenHayStack.
+
+### Step 5: Adjust Settings in OHS App
+- In the OpenHayStack Mac App, navigate to the top bar and change the time setting from `1 Day` to `30min`.
+- Give it some time to process and apply the new settings.
+
+By following these steps, you should have your device set up and ready to go with OpenHayStack on a Mac.
+****
 #### Option B: Cloning Existing Tag
 1. **Pair a Tag:** First, pair an AirTag or Samsung SmartTag with your device.
 2. **Enter 'Lost' Mode:** Keep the tag away from the device it's registered to for approximately 15 minutes.
