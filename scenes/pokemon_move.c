@@ -2,6 +2,8 @@
 #include <gui/scene_manager.h>
 #include <stdio.h>
 
+#include <named_list.h>
+
 #include "../pokemon_app.h"
 #include "../pokemon_data.h"
 #include "pokemon_menu.h"
@@ -18,7 +20,7 @@ static void select_move_selected_callback(void* context, uint32_t index) {
     FURI_LOG_D(
         TAG,
         "[move] Set move %s to %d",
-        namelist_name_get_index(pokemon_fap->pdata->move_list, pokemon_stat_get(pokemon_fap->pdata, STAT_MOVE, move)),
+        namedlist_name_get_index(pokemon_fap->pdata->move_list, pokemon_stat_get(pokemon_fap->pdata, STAT_MOVE, move)),
         (int)move);
 
     /* Move back to move menu */
@@ -57,7 +59,7 @@ void select_move_scene_on_enter(void* context) {
             sizeof(buf),
             "Move %d:         %s",
             i + 1,
-            namelist_name_get_index(pokemon_fap->pdata->move_list, pokemon_stat_get(pokemon_fap->pdata, STAT_MOVE, i)));
+            namedlist_name_get_index(pokemon_fap->pdata->move_list, pokemon_stat_get(pokemon_fap->pdata, STAT_MOVE, i)));
         submenu_add_item(pokemon_fap->submenu, buf, i, select_move_number_callback, pokemon_fap);
     }
 
@@ -85,7 +87,7 @@ void select_move_index_scene_on_enter(void* context) {
      */
     submenu_add_item(
         pokemon_fap->submenu,
-        namelist_name_get_index(pokemon_fap->pdata->move_list, 0),
+        namedlist_name_get_index(pokemon_fap->pdata->move_list, 0),
         0,
         select_move_selected_callback,
         pokemon_fap);
@@ -95,14 +97,14 @@ void select_move_index_scene_on_enter(void* context) {
         buf,
         sizeof(buf),
         "Default [%s]",
-        namelist_name_get_index(
+        namedlist_name_get_index(
             pokemon_fap->pdata->move_list, pokemon_stat_get(pokemon_fap->pdata, STAT_MOVE, move_num)));
     submenu_add_item(
         pokemon_fap->submenu, buf, UINT32_MAX, select_move_selected_callback, pokemon_fap);
 
     /* Now, walk through the list and make a submenu item for each move's starting letter */
     for(i = 1;; i++) {
-        name = namelist_name_get_pos(pokemon_fap->pdata->move_list, i);
+        name = namedlist_name_get_pos(pokemon_fap->pdata->move_list, i);
         if(name == NULL) break;
 	/* TODO: Add check here for generation match. Currently, this will populate
 	 * the letters that have any move associated with them, even if not for the
@@ -131,13 +133,13 @@ void select_move_set_scene_on_enter(void* context) {
     /* NOTE! Start with index of 1 in the move list since 0 should always be no move! */
     submenu_reset(pokemon_fap->submenu);
     for(i = 1;; i++) {
-        name = namelist_name_get_pos(pokemon_fap->pdata->move_list, i);
+        name = namedlist_name_get_pos(pokemon_fap->pdata->move_list, i);
         if(name == NULL) break;
-        if(name[0] == letter && (pokemon_fap->pdata->gen & namelist_gen_get_pos(pokemon_fap->pdata->move_list, i))) {
+        if(name[0] == letter && (pokemon_fap->pdata->gen & namedlist_gen_get_pos(pokemon_fap->pdata->move_list, i))) {
             submenu_add_item(
                 pokemon_fap->submenu,
 		name,
-		namelist_index_get(pokemon_fap->pdata->move_list, i),
+		namedlist_index_get(pokemon_fap->pdata->move_list, i),
                 select_move_selected_callback,
                 pokemon_fap);
         }

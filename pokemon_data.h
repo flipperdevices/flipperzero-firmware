@@ -8,6 +8,11 @@
 #include <math.h>
 #include <stdint.h>
 
+#include <named_list.h>
+#include <stat_nl.h>
+#include <pokemon_table.h>
+
+
 /* Generation defines */
 #define GEN_I 0x01
 #define GEN_II 0x02
@@ -106,22 +111,11 @@ typedef enum {
     NONE = 0, // Just a filler value
 } DataStatSub;
 
-typedef enum {
-    RANDIV_ZEROEV,
-    RANDIV_LEVELEV,
-    RANDIV_MAXEV,
-    MAXIV_ZEROEV,
-    MAXIV_LEVELEV,
-    MAXIV_MAXEV,
-} EvIv;
-
 typedef struct pokemon_party_data_gen_i PokemonPartyGenI;
 typedef struct trade_block_gen_i TradeBlockGenI;
 typedef struct pokemon_party_data_gen_ii PokemonPartyGenII;
 typedef struct trade_block_gen_ii TradeBlockGenII;
 
-typedef struct named_list NamedList;
-typedef struct pokemon_data_table PokemonTable;
 
 struct pokemon_data {
     const NamedList* move_list;
@@ -149,13 +143,6 @@ typedef struct pokemon_data PokemonData;
 
 PokemonData* pokemon_data_alloc(uint8_t gen);
 void pokemon_data_free(PokemonData* pdata);
-
-int namelist_pos_get(const NamedList* list, uint8_t index);
-int namelist_index_get(const NamedList* list, uint8_t pos);
-const char* namelist_name_get_index(const NamedList* list, uint8_t index);
-const char* namelist_name_get_pos(const NamedList* list, uint8_t pos);
-uint8_t namelist_gen_get_pos(const NamedList* list, uint8_t pos);
-int namelist_cnt(const NamedList* list);
 
 uint8_t table_stat_base_get(PokemonData *pdata, DataStat stat, DataStatSub num);
 const char* table_stat_name_get(const PokemonTable* table, int num);

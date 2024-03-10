@@ -2,6 +2,8 @@
 #include "../pokemon_data.h"
 #include "../pokemon_char_encode.h"
 
+#include <named_list.h>
+
 #include "../views/trade.h"
 #include "../views/select_pokemon.h"
 
@@ -133,7 +135,7 @@ void gen_scene_on_enter(void* context) {
         pokemon_fap->submenu, buf, SelectLevelScene, scene_change_from_main_cb, pokemon_fap);
 
     if (pokemon_fap->pdata->gen == GEN_II) {
-        snprintf(buf, sizeof(buf), "Held Item:   %s", namelist_name_get_index(pokemon_fap->pdata->item_list, pokemon_stat_get(pokemon_fap->pdata, STAT_HELD_ITEM, NONE)));
+        snprintf(buf, sizeof(buf), "Held Item:   %s", namedlist_name_get_index(pokemon_fap->pdata->item_list, pokemon_stat_get(pokemon_fap->pdata, STAT_HELD_ITEM, NONE)));
         submenu_add_item(
             pokemon_fap->submenu, buf, SelectItemScene, scene_change_from_main_cb, pokemon_fap);
     }
@@ -156,7 +158,7 @@ void gen_scene_on_enter(void* context) {
 
     submenu_add_item(
         pokemon_fap->submenu,
-        namelist_name_get_index(pokemon_fap->pdata->stat_list, pokemon_stat_get(pokemon_fap->pdata, STAT_SEL, NONE)),
+        namedlist_name_get_index(pokemon_fap->pdata->stat_list, pokemon_stat_get(pokemon_fap->pdata, STAT_SEL, NONE)),
         SelectStatsScene,
         scene_change_from_main_cb,
         pokemon_fap);
