@@ -7,5 +7,6 @@ App(
         "storage_move_to_sd",
         "js_app",
         # "archive",
+        "findmy_startup",
     ],
 )

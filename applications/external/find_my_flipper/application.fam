@@ -12,3 +12,12 @@ App(
     fap_version="1.0",
     fap_description="BLE FindMy Location Beacon",
 )
+
+App(
+    appid="findmy_startup",
+    targets=["f7"],
+    apptype=FlipperAppType.STARTUP,
+    entry_point="findmy_startup",
+    sources=["findmy_startup.c", "findmy_state.c"],
+    order=1000,
+)
