@@ -1,6 +1,0 @@
-clear
-cp -r ~/Programming/Flipper/firmware/applications_user/ ~/Programming/Flipper/firmware/HappyFlip-Firmware
-cd ~/Programming/Flipper/firmware/HappyFlip-Firmware
-./fbt -c fap_voltcalc_app
-./fbt fap_voltcalc_app
-./fbt launch_app APPSRC=voltcalc_app
