@@ -64,7 +64,7 @@ By following these steps, you should have your device set up and ready to go wit
 #### Option B: Cloning Existing Tag
 1. **Pair a Tag:** First, pair an AirTag or Samsung SmartTag with your device.
 2. **Enter 'Lost' Mode:** Keep the tag away from the device it's registered to for approximately 15 minutes.
-3. **Download nrfConnect:** Install nrfConnect from the Apple App Store or Google Play Store.
+3. **Download nrfConnect:** Install nrfConnect from the Google Play Store. (Apple version doesn't reveal the needed Raw data, looking for a workaround)
 4. **Filter and Scan:**
    - Open the app, click on filters, and exclude all except for the brand of your tag (Apple/Samsung).
    - Adjust the RSSI to the lowest setting (-40 dBm).
