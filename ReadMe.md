@@ -90,6 +90,7 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 | Morse Code | ![Media Badge] | [by wh00hw](https://github.com/wh00hw/MorseCodeFAP) |  | [![UFW Badge]](https://lab.flipper.net/apps/morse_code) |
 | **BadKB** plugin | ![Tools Badge] | [by Willy-JL, ClaraCrazy, XFW contributors](https://github.com/Flipper-XFW/Xtreme-Firmware/tree/dev/applications/main/bad_kb) | BadKB (aka BadUSB via Bluetooth) | ![None Badge] |
 | BLE Spam | ![BT Badge] | [by @Willy-JL & @ECTO-1A & @Spooks4576](https://github.com/Next-Flip/Momentum-Apps/tree/dev/ble_spam) |  | ![None Badge] |
+| FindMy Flipper | ![BT Badge] | [by @MatthewKuKanich](https://github.com/MatthewKuKanich/FindMyFlipper) | Please Read [how to add keys here](https://github.com/MatthewKuKanich/FindMyFlipper) | ![None Badge] |
 
 ### Games
 
@@ -158,6 +159,7 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 | Tarot spread | ![Games Badge] | [by pionaiki](https://github.com/pionaiki/fz-tarot) |  | ![None Badge] |
 | Vexed | ![Games Badge] | [by dlvoy](https://github.com/dlvoy/flipper-zero-vexed) |  | ![None Badge] |
 | Paper Plane | ![Games Badge] | [by Larry-the-Pig](https://github.com/Larry-the-Pig/flipper-plane) |  | ![None Badge] |
+| Air Labyrinth (VGM) | ![Games Badge] | [by jamisonderek](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/vgm/apps/air_labyrinth) |  | [![Author Badge]](https://lab.flipper.net/apps/air_labyrinth) |
 | Air Mouse | ![GPIO Badge] | [by ginkage](https://github.com/ginkage/FlippAirMouse/) |  | [![Author Badge]](https://lab.flipper.net/apps/air_mouse) |
 | Plantower PMSx003 sensor reader | ![GPIO Badge] | [by 3cky](https://github.com/3cky/flipperzero-airmon) |  | [![UFW Badge]](https://lab.flipper.net/apps/airmon) |
 | Bar code scanner emulator via COM port | ![GPIO Badge] | [by polarikus](https://github.com/polarikus/flipper-zero_bc_scanner_emulator) |  | ![None Badge] |
@@ -256,6 +258,7 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 | Simple calendar app | ![Tools Badge] | [by Adiras](https://github.com/Adiras/flipperzero-calendar) |  | ![None Badge] |
 | Programmer Calculator | ![Tools Badge] | [by armixz](https://github.com/armixz/Flipper-Zero-Programmer-Calculator) |  | ![None Badge] |
 | Tone Generator | ![Tools Badge] | [by GEMISIS](https://github.com/GEMISIS/tone_gen/) |  | ![None Badge] |
+| DCF77 Clock Sync | ![Tools Badge] | [by mdaskalov](https://github.com/mdaskalov/dcf77-clock-sync) |  | ![None Badge] |
 | USB HID Autofire | ![USB Badge] | [by pbek](https://github.com/pbek/usb_hid_autofire) |  | ![None Badge] |
 | USB Consumer Control | ![USB Badge] | [by WithSecureLabs](https://github.com/WithSecureLabs/usb-consumer-control/tree/main) |  | ![None Badge] |
 | HID File Transfer | ![USB Badge] | [by Kavakuo](https://github.com/Kavakuo/HID-File-Transfer) | Get client app in [original repo](https://github.com/Kavakuo/HID-File-Transfer) | ![None Badge] |

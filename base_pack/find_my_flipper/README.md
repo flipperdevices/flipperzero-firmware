@@ -14,9 +14,22 @@ This app extends the functionality of the FlipperZero's bluetooth capabilities, 
 - **Option A:** Use the released/precompiled firmware appropriate (FAP) for your device.
 - **Option B:** Build the firmware yourself using `fbt/ufbt`.
 - Both Installation options require you to be running a dev build of firmware. When release gets access to the extra BLE beacon this will change, thank you!
+- All firmware should now work with main branch, including icons
+  
 ### Step 2: Obtaining SmartTag Data
 
-#### Option A: Open Haystack Method
+#### Option A: Cloning Existing Tag (Preferred and allows you to track without additional setup)
+1. **Pair a Tag:** First, pair an AirTag or Samsung SmartTag with your device.
+2. **Enter 'Lost' Mode:** Keep the tag away from the device it's registered to for approximately 15 minutes.
+3. **Download nrfConnect:** Install nrfConnect from the Google Play Store. (Apple version doesn't reveal the needed Raw data, looking for a workaround)
+4. **Filter and Scan:**
+   - Open the app, click on filters, and exclude all except for the brand of your tag (Apple/Samsung).
+   - Adjust the RSSI to the lowest setting (-40 dBm).
+   - Initiate a scan. Wait for your SmartTag to appear as a "FindMy" device.
+5. **Capture Data:** Click **Raw** or **View Raw** to capture your **payload** and note your tag's **MAC Address**. Immediately remove the tag's battery to prevent key/MAC rotation.
+6. **Enter Data in FlipperZero App:** Input the captured **payload** and **MAC Address** into the FlipperZero app.
+
+#### Option B: Open Haystack Method
 1. **Generate a Tag:** Download the `generate_keys.py` file and execute it in your terminal. (You will need cryptography ```python3 -m pip install cryptography```)
 2. **Follow Prompts:** During execution, you'll be prompted for inputs. By the end, you'll obtain a **Private Key**, **Public Key**, **Payload**, and **MAC Address**.
    - **Private Key** is necessary to receive location reports from Apple.
@@ -26,25 +39,46 @@ This app extends the functionality of the FlipperZero's bluetooth capabilities, 
      3. A payload dialog will appear next. Enter your **Payload** here.
      4. Click save.
 3. **Configuration Completion:** With this setup, your device is ready for Open Haystack. Proceed with the specific steps for Open Haystack or MaclessHaystack based on your setup.
-   - Don't Own a Mac: https://github.com/dchristl/macless-haystack
+   - Don't Own a Mac: https://github.com/dchristl/macless-haystack or https://github.com/Chapoly1305/FindMy
    - Own a Mac: https://github.com/seemoo-lab/openhaystack
 
-#### Option B: Cloning Existing Tag
-1. **Pair a Tag:** First, pair an AirTag or Samsung SmartTag with your device.
-2. **Enter 'Lost' Mode:** Keep the tag away from the device it's registered to for approximately 15 minutes.
-3. **Download nrfConnect:** Install nrfConnect from the Apple App Store or Google Play Store.
-4. **Filter and Scan:**
-   - Open the app, click on filters, and exclude all except for the brand of your tag (Apple/Samsung).
-   - Adjust the RSSI to the lowest setting (-40 dBm).
-   - Initiate a scan. Wait for your SmartTag to appear as a "FindMy" device.
-5. **Capture Data:** Click **Raw** or **View Raw** to capture your **payload** and note your tag's **MAC Address**. Immediately remove the tag's battery to prevent key/MAC rotation.
-6. **Enter Data in FlipperZero App:** Input the captured **payload** and **MAC Address** into the FlipperZero app.
+## Setting Up on Mac with OpenHayStack (OHS) App -- If you own a Mac instructions
 
-### Step 3: Configuration
-- Upon launching the app, choose whether to clone an AirTag or SmartTag, generate a new Open Haystack key pair, or adjust broadcast settings.
+Follow these steps to get everything working on a Mac using the latest version of the OpenHayStack app.
+Thanks to Wr3nch for the help
+
+### Step 1: Create a New Device
+- Start by creating a new device in the OpenHayStack app, but **do not deploy** it immediately after creation.
+
+### Step 2: Export Configuration
+- Choose to **EXPORT** the configuration by selecting "all accessories as file." To simplify, ensure you only have one entry in the list before exporting.
+- It is crucial that the export format is in JSON.
+
+### Step 3: Modify the JSON File
+Open the exported JSON file in a text editor and make the following changes:
+- **Left OHS, Right keys from my ```generate_keys.py``` script:**
+    - `symmetricKey` should be set to the `Hashed adv key`.
+    - `privateKey` should be replaced with your `Private Key`.
+    - `oldestRelevantSymmetricKey` should also use the `Hashed adv key`.
+- Additionally, update the following attributes to `true`:
+    - `"isDeployed": true`
+    - `"isActive": true`
+
+### Step 4: Re-import the Configuration
+- After saving your changes to the JSON file, re-import it back into OpenHayStack.
+
+### Step 5: Adjust Settings in OHS App
+- In the OpenHayStack Mac App, navigate to the top bar and change the time setting from `1 Day` to `30min`.
+- Give it some time to process and apply the new settings.
+
+By following these steps, you should have your device set up and ready to go with OpenHayStack on a Mac.
+****
+
+### Step 3: Configuration on the FlipperZero
+- Upon launching the app, open the config menu and either click ```Import Tag From File``` or ```Register Tag Manually```. Put your generated .keys file onto the FlipperZero SD card inside the AppsData/FindMyFlipper folder to import from file. Or you can manually enter the tag information. When using the cloning method, you can export a .txt file from nrfConnect (click save button) amd place that in the same folder in order to import.
 
 ### Step 4: Tracking
-- Once the app is configured, your FlipperZero can be tracked using the relevant platform's tracking service (FindMy app for Apple devices, SmartThings for Samsung devices, and respective web browsers).
+- Once the app is configured, your FlipperZero can be tracked using the relevant platform's tracking service (FindMy app for Apple devices, SmartThings for Samsung devices, and respective web browsers). If using generated keys and OpenHaystack then you can track on the OHS app or via the Macless Haystack setup. Links to both are above
 
 
 Customization
@@ -63,7 +97,7 @@ Compatibility
 
 Thanks
 
-- Huge thanks to all the people that contributed to the OpenHaystack project, supporting projects, and guides on the subject. This wouldn't be a thing without any of you!
+- Huge thanks to all the people that contributed to the OpenHaystack project, supporting projects, and guides on the subject. This wouldn't be a thing without any of you! Special thanks to WillyJL for helping get the app input working and overall overhaul of the apps functions!
 
 Legal and Privacy
 
