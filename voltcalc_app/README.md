@@ -2,6 +2,10 @@
 
 VoltCalc is a simple voltage calculator to calculate values using Ohms Law V = R * I.
 
+
+![short descriptor](1.png)
+![short descriptor](2.png)
+
 Yes, a calculator or your phone could probably do this much faster, but it seemed like a good first app 
 to write on my own from scratch!
 
