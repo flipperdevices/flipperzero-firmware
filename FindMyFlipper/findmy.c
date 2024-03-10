@@ -154,3 +154,12 @@ FindMyType findmy_data_get_type(uint8_t data[EXTRA_BEACON_MAX_DATA_SIZE]) {
         return FindMyTypeSamsung;
     }
 }
+
+void furi_hal_bt_reverse_mac_addr(uint8_t mac_addr[GAP_MAC_ADDR_SIZE]) {
+    uint8_t tmp;
+    for(size_t i = 0; i < GAP_MAC_ADDR_SIZE / 2; i++) {
+        tmp = mac_addr[i];
+        mac_addr[i] = mac_addr[GAP_MAC_ADDR_SIZE - 1 - i];
+        mac_addr[GAP_MAC_ADDR_SIZE - 1 - i] = tmp;
+    }
+}
