@@ -23,7 +23,7 @@ static void findmy_main_draw_callback(Canvas* canvas, void* _model) {
     canvas_set_font(canvas, FontSecondary);
     if(model->active) {
         canvas_draw_str(canvas, 4, 49, "Broadcast Active");
-        canvas_draw_icon(canvas, 78, 42, &I_Ok_btn_9x9);
+        //canvas_draw_icon(canvas, 78, 42, &I_Ok_btn_9x9);
     } else {
         canvas_draw_str(canvas, 4, 49, "Broadcast Inactive");
     }
@@ -37,11 +37,11 @@ static void findmy_main_draw_callback(Canvas* canvas, void* _model) {
     switch(model->type) {
     case FindMyTypeApple:
         canvas_draw_str(canvas, 4, 32, "Apple Network");
-        canvas_draw_icon(canvas, 80, 24, &I_Lock_7x8);
+        //canvas_draw_icon(canvas, 80, 24, &I_Lock_7x8);
         break;
     case FindMyTypeSamsung:
         canvas_draw_str(canvas, 4, 32, "Samsung Network");
-        canvas_draw_icon(canvas, 97, 24, &I_Lock_7x8);
+        //canvas_draw_icon(canvas, 97, 24, &I_Lock_7x8);
         break;
     default:
         break;
