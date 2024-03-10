@@ -92,7 +92,7 @@ enum UsbDevDescStr {
     UsbDevSerial = 3,
 };
 
-static const struct usb_device_descriptor cdc_device_desc = {
+static const struct usb_device_descriptor cdc_device_desc_fcom = {
     .bLength = sizeof(struct usb_device_descriptor),
     .bDescriptorType = USB_DTYPE_DEVICE,
     .bcdUSB = VERSION_BCD(2, 0, 0),
@@ -101,7 +101,7 @@ static const struct usb_device_descriptor cdc_device_desc = {
     .bDeviceProtocol = USB_PROTO_IAD,
     .bMaxPacketSize0 = USB_EP0_SIZE,
     .idVendor = 0x2341,
-    .idProduct = 0x0,
+    .idProduct = 0x0000,
     .bcdDevice = VERSION_BCD(1, 0, 0),
     .iManufacturer = UsbDevManuf,
     .iProduct = UsbDevProduct,
@@ -112,7 +112,7 @@ static const struct usb_device_descriptor cdc_device_desc = {
 static const struct usb_string_descriptor dev_manuf_desc = USB_STRING_DESC("Flipper Devices Inc.");
 
 FuriHalUsbInterface usb_cdc_fcom = {
-    .dev_descr = (struct usb_device_descriptor*)&cdc_device_desc,
+    .dev_descr = (struct usb_device_descriptor*)&cdc_device_desc_fcom,
     .str_manuf_descr = (void*)&dev_manuf_desc,
     .str_prod_descr = NULL,
     .str_serial_descr = NULL,
