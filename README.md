@@ -45,7 +45,7 @@ This app extends the functionality of the FlipperZero's bluetooth capabilities, 
 ## Setting Up on Mac with OpenHayStack (OHS) App -- If you own a Mac instructions
 
 Follow these steps to get everything working on a Mac using the latest version of the OpenHayStack app.
-Thanks to github.com/wrenchathome for the help
+Thanks to Wr3nch for the help
 
 ### Step 1: Create a New Device
 - Start by creating a new device in the OpenHayStack app, but **do not deploy** it immediately after creation.
@@ -97,7 +97,7 @@ Compatibility
 
 Thanks
 
-- Huge thanks to all the people that contributed to the OpenHaystack project, supporting projects, and guides on the subject. This wouldn't be a thing without any of you!
+- Huge thanks to all the people that contributed to the OpenHaystack project, supporting projects, and guides on the subject. This wouldn't be a thing without any of you! Special thanks to WillyJL for helping get the app input working and overall overhaul of the apps functions!
 
 Legal and Privacy
 
