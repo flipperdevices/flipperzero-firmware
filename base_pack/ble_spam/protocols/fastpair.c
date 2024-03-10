@@ -3,6 +3,7 @@
 
 // Hacked together by @Willy-JL and @Spooks4576
 // Documentation at https://developers.google.com/nearby/fast-pair/specifications/introduction
+// https://bluetoothdb.com
 
 static const struct {
     uint32_t value;
@@ -538,8 +539,6 @@ static const struct {
     {0x87B25F, "Animated Rickroll"},
     {0xF38C02, "Boykisser"},
     {0x1448C9, "BLM"},
-    {0xD5AB33, "Xtreme"},
-    {0x0C0B67, "Xtreme Cta"},
     {0x13B39D, "Talking Sasquach"},
     {0xAA1FE1, "ClownMaster"},
     {0x7C6CDB, "Obama"},
@@ -600,6 +599,7 @@ enum {
     _ConfigExtraStart = ConfigExtraStart,
     ConfigModel,
     ConfigInfoRequire,
+    ConfigInfoPatched,
     ConfigCOUNT,
 };
 static void config_callback(void* _ctx, uint32_t index) {
@@ -610,6 +610,8 @@ static void config_callback(void* _ctx, uint32_t index) {
         scene_manager_next_scene(ctx->scene_manager, SceneFastpairModel);
         break;
     case ConfigInfoRequire:
+        break;
+    case ConfigInfoPatched:
         break;
     default:
         ctx->fallback_config_enter(ctx, index);
@@ -697,6 +699,8 @@ static void extra_config(Ctx* ctx) {
     variable_item_set_current_value_text(item, model_name);
 
     variable_item_list_add(list, "Requires Google services", 0, NULL, NULL);
+
+    variable_item_list_add(list, "Patched on new Android", 0, NULL, NULL);
 
     variable_item_list_set_enter_callback(list, config_callback, ctx);
 }

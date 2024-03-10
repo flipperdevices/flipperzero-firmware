@@ -89,7 +89,7 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 | Metronome | ![Media Badge] | [by panki27](https://github.com/panki27/Metronome) |  | [![UFW Badge]](https://lab.flipper.net/apps/metronome) |
 | Morse Code | ![Media Badge] | [by wh00hw](https://github.com/wh00hw/MorseCodeFAP) |  | [![UFW Badge]](https://lab.flipper.net/apps/morse_code) |
 | **BadKB** plugin | ![Tools Badge] | [by Willy-JL, ClaraCrazy, XFW contributors](https://github.com/Flipper-XFW/Xtreme-Firmware/tree/dev/applications/main/bad_kb) | BadKB (aka BadUSB via Bluetooth) | ![None Badge] |
-| BLE Spam | ![BT Badge] | [by @Willy-JL & @ECTO-1A & @Spooks4576](https://github.com/Flipper-XFW/Xtreme-Firmware/tree/dev/applications/external/ble_spam) |  | ![None Badge] |
+| BLE Spam | ![BT Badge] | [by @Willy-JL & @ECTO-1A & @Spooks4576](https://github.com/Next-Flip/Momentum-Apps/tree/dev/ble_spam) |  | ![None Badge] |
 
 ### Games
 
