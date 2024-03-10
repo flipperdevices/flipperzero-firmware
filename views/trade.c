@@ -149,6 +149,7 @@ typedef enum {
     TRADE_PATCH_HEADER,
     TRADE_PATCH_DATA,
     TRADE_SELECT,
+    TRADE_MAIL,
     TRADE_PENDING,
     TRADE_CONFIRMATION,
     TRADE_DONE
@@ -637,9 +638,28 @@ static uint8_t getTradeCentreResponse(struct trade_ctx* trade) {
 	 * preamble bytes, 7x 0x00, then 189 bytes for the patch list. A
 	 * total of 199 bytes transmitted.
 	 */
-        if(counter == 196) trade->trade_centre_state = TRADE_SELECT;
+	/* Gen I and II patch lists seem to be the same length */
+        if(counter == 196) {
+            if(trade->pdata->gen == GEN_I)
+                trade->trade_centre_state = TRADE_SELECT;
+	    else if(trade->pdata->gen == GEN_II)
+                trade->trade_centre_state = TRADE_MAIL;
+
+            counter = 0;
+        }
 
         break;
+
+    /* Preambled with 6x 0x20 bytes; 33*6 == 198 bytes of Mail, for each pokemon,
+     * even if they have no mail set; 14*6 == 84 bytes, for each pokemon's mail,
+     * the OT Name and ID; a 0xff; 100 zero bytes (unsure if they are always 0).
+     * This is 6 + 198 + 84 + 1 + 100 == 389.
+     */
+    case TRADE_MAIL:
+        counter++;
+	if (counter == 389)
+            trade->trade_centre_state = TRADE_SELECT;
+    break;
 
     /* Resets the incoming Pokemon index, and once a BLANK byte is received,
      * moves to the pending state.
@@ -655,8 +675,6 @@ static uint8_t getTradeCentreResponse(struct trade_ctx* trade) {
     /* Handle the Game Boy selecting a Pokemon to trade, or leaving the table */
     case TRADE_PENDING:
         /* If the player leaves the trade menu and returns to the room */
-	if (in == 0x20) break; // HACK TODO this is mail header. This should fix flipper getting ahead
-	if (in == 0xFF) break; // HACK TODO this is mail header. This should fix flipper getting ahead
         if (trade->pdata->gen == GEN_I && in == PKMN_TABLE_LEAVE_GEN_I) {
             trade->trade_centre_state = TRADE_RESET;
             send = PKMN_TABLE_LEAVE_GEN_I;
