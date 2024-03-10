@@ -75,7 +75,7 @@ By following these steps, you should have your device set up and ready to go wit
 ****
 
 ### Step 3: Configuration on the FlipperZero
-- Upon launching the app, open the config menu and either click ```Import Tag From File``` or ```Register Tag Manually```. Put your generated .keys file onto the FlipperZero SD card inside the AppsData/FindMyFlipper folder to import from file. Or you can manually enter the tag information. When trying to clone a tag, you can create a .keys file and paste the Raw data from nrfConnect in order to import. First create a .keys file with ```generate_keys.py``` then replace the payload with the Raw data and the MAC with the MAC of your tag.
+- Upon launching the app, open the config menu and either click ```Import Tag From File``` or ```Register Tag Manually```. Put your generated .keys file onto the FlipperZero SD card inside the AppsData/FindMyFlipper folder to import from file. Or you can manually enter the tag information. When using the cloning method, you can export a .txt file from nrfConnect (click save button) amd place that in the same folder in order to import.
 
 ### Step 4: Tracking
 - Once the app is configured, your FlipperZero can be tracked using the relevant platform's tracking service (FindMy app for Apple devices, SmartThings for Samsung devices, and respective web browsers). If using generated keys and OpenHaystack then you can track on the OHS app or via the Macless Haystack setup. Links to both are above
