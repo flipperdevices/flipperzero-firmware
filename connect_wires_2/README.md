@@ -24,7 +24,7 @@ See if you can beat a score of 70 in hard mode!
 - Long press Back to rotate counter-clockwise. (LED blinks briefly red and vibrates).  
 
 #### License
-[MIT](https://github.com/AlexTaran/flipperzero/tree/master/games/connect_wires/LICENSE)
+[MIT](https://github.com/AlexTaran/flipperzero/blob/master/games/connect_wires/LICENSE)
 Copyright 2023 Alexander Taran  
 https://github.com/AlexTaran/flipperzero/tree/master/games/connect_wires  
 Copyright 2024 Andrew Diamond  
