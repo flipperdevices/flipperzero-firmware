@@ -42,7 +42,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
             name: ${{ env.COMMIT_MESSAGE }}
-            token: ${{ secrets.RELEASE_TOKEN }}
+            token: ${{ secrets.GITHUB_TOKEN }}
             files: ${{ steps.build-app.outputs.fap-artifacts }}
             generate_release_notes: true
             tag_name: ${{steps.tag_version.outputs.new_tag}}
