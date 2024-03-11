@@ -73,11 +73,7 @@ def main():
             s256_b64 = base64.b64encode(public_key_hash.finalize()).decode("ascii")
 
             if "/" not in s256_b64[:7]:
-                fname = (
-                    f"{prefix}_{s256_b64[:7]}.keys"
-                    if prefix
-                    else f"{s256_b64[:7]}.keys"
-                )
+                fname = f"{prefix}_{mac}.keys" if prefix else f"{mac}.keys"
 
                 print(f"{i + 1})")
                 print("Private key (Base64):", private_key_b64)
@@ -95,8 +91,9 @@ def main():
                 print("Payload:", payload)
                 print()
                 print(
-                    "Place the .keys file onto your Flipper or input the MAC and Payload manually."
+                    "Place the .keys file onto your Flipper in the Apps_Data->FindMyFlipper folder or input the MAC and Payload manually."
                 )
+                print()
 
                 with open(f"keys/{fname}", "w") as f:
                     f.write(f"Private key: {private_key_b64}\n")
@@ -106,6 +103,8 @@ def main():
                     f.write(f"Public key (Hex): {public_key_hex}\n")
                     f.write(f"MAC: {mac}\n")
                     f.write(f"Payload: {payload}\n")
+                print("Keys file saved to:", os.path.abspath(f"keys/{fname}"))
+                print()
                 break
 
 
