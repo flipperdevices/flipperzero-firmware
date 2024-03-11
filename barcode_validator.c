@@ -273,8 +273,16 @@ void code_128_loader(BarcodeData* barcode_data) {
             char barcode_char = furi_string_get_char(barcode_data->raw_data, i);
 
             //convert a char into a string so it used in flipper_format_read_string
-            char current_character[2];
-            snprintf(current_character, 2, "%c", barcode_char);
+            char current_character[3];
+            snprintf(current_character, 3, "%c", barcode_char);
+
+            /* 
+            Checks if the character is a hashtag, if it is change the character from # to H#
+            Github Issue: #10
+            */
+            if(strcmp("#", current_character) == 0) {
+                strcpy(current_character, "H#");
+            }
 
             //get the value of the character
             if(!flipper_format_read_string(ff, current_character, value)) {
