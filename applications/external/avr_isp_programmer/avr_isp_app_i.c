@@ -12,7 +12,7 @@ bool avr_isp_load_from_file(AvrIspApp* app) {
 
     DialogsFileBrowserOptions browser_options;
     dialog_file_browser_set_basic_options(
-        &browser_options, AVR_ISP_APP_EXTENSION, &I_avr_app_icon_10x10);
+        &browser_options, AVR_ISP_APP_EXTENSION, &I_avr_app_icon_10px);
     browser_options.base_path = STORAGE_APP_DATA_PATH_PREFIX;
 
     // Input events and views are managed by file_select
