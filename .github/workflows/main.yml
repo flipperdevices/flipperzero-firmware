@@ -18,7 +18,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: FindMyFlipper
+          ref: main
           sparse-checkout: FindMyFlipper
 
       - name: Build with ufbt
