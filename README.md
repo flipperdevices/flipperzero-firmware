@@ -198,6 +198,9 @@ Here are some nice ideas to improve this app:
 
 ## Changelog
 
+* 2024-03-11
+  * Bug fix
+
 * 2024-02-22
   * Bug fix
 
