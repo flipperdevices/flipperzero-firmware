@@ -9,4 +9,5 @@ App(
     fap_icon="images/barcode_10.png",
     fap_icon_assets="images",
     fap_icon_assets_symbol="barcode_app",
+    fap_file_assets="barcode_encoding_files",
 )
