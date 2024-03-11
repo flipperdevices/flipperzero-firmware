@@ -63,6 +63,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Added: [JS Script: Windows_Exfil-GSHD.js (By Gas Station Hot Dog)](https://github.com/User84User/User84PublicUser/blob/main/Windows_Exfil-GSHD.js)
 - [Fix JS Load (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/9b320df8800d9773bc2ee6cedf8946c71a1b9a7f)
 - Updated: [Authenticator/TOTP v5.13.0 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
+- Updated: [GPS v1.4 (By ezod)](https://github.com/ezod/flipperzero-gps) `Req: NMEA 0183`
 
 <a name="release">
 

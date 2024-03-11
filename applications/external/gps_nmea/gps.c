@@ -196,7 +196,6 @@ int32_t gps_app(void* p) {
                         gps_uart->changing_baudrate = true;
                         furi_mutex_release(gps_uart->mutex);
                         view_port_update(view_port);
-                        furi_delay_ms(1000);
                         break;
                     case InputKeyRight:
                         gps_uart->speed_units++;

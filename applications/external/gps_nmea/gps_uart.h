@@ -40,7 +40,6 @@ typedef struct {
     FuriThread* thread;
     FuriStreamBuffer* rx_stream;
     uint8_t rx_buf[RX_BUF_SIZE];
-    FuriHalSerialHandle* serial_handle;
 
     NotificationApp* notifications;
     uint32_t baudrate;
@@ -48,6 +47,8 @@ typedef struct {
     bool changing_baudrate;
     bool deep_sleep_enabled;
     SpeedUnit speed_units;
+
+    FuriHalSerialHandle* serial_handle;
 
     GpsStatus status;
 } GpsUart;
