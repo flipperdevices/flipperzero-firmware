@@ -51,27 +51,39 @@ static bool malveke_gb_emulator_view_input_callback(InputEvent* event, void* con
     if (event->type == InputTypePress){
         if (event->key == InputKeyUp){
             const char gbemulator_command_up[] = "U\n";
-            furi_hal_uart_tx(FuriHalUartIdUSART1, (uint8_t*)gbemulator_command_up, strlen(gbemulator_command_up));
+            furi_hal_serial_tx(instance->serial_handle_uart, 
+                            (uint8_t*)gbemulator_command_up, 
+                            strlen(gbemulator_command_up));
+
         }
         else if (event->key == InputKeyDown){
             const char gbemulator_command_down[] = "D\n";
-            furi_hal_uart_tx(FuriHalUartIdUSART1, (uint8_t*)gbemulator_command_down, strlen(gbemulator_command_down));
+            furi_hal_serial_tx(instance->serial_handle_uart, 
+                            (uint8_t*)gbemulator_command_down, 
+                            strlen(gbemulator_command_down));
         }
         else if (event->key == InputKeyRight){
             const char gbemulator_command_right[] = ">\n";
-            furi_hal_uart_tx(FuriHalUartIdUSART1, (uint8_t*)gbemulator_command_right, strlen(gbemulator_command_right));
+            furi_hal_serial_tx(instance->serial_handle_uart, 
+                            (uint8_t*)gbemulator_command_right, 
+                            strlen(gbemulator_command_right));
         }
         else if (event->key == InputKeyLeft){
             const char gbemulator_command_left[] = "<\n";
-            furi_hal_uart_tx(FuriHalUartIdUSART1, (uint8_t*)gbemulator_command_left, strlen(gbemulator_command_left));
+            furi_hal_serial_tx(instance->serial_handle_uart, 
+                            (uint8_t*)gbemulator_command_left, 
+                            strlen(gbemulator_command_left));
         }
         else if (event->key == InputKeyOk){
             with_view_model(
                 instance->view,
                 UartDumpModel * model,
                 {
+                    UNUSED(model);
                     const char gbemulator_command_OK[] = "S\n";
-                    furi_hal_uart_tx(FuriHalUartIdUSART1, (uint8_t*)gbemulator_command_OK, strlen(gbemulator_command_OK));  
+                    furi_hal_serial_tx(instance->serial_handle_uart, 
+                            (uint8_t*)gbemulator_command_OK, 
+                            strlen(gbemulator_command_OK)); 
                 },
                 false);
 
@@ -82,17 +94,20 @@ static bool malveke_gb_emulator_view_input_callback(InputEvent* event, void* con
 }
 
 static uint32_t malveke_gb_emulator_exit(void* context) {
-    UNUSED(context);
+    UartEchoApp* instance = context;
     const char stop_command[] = "stopgblivecamera\n";
-    furi_hal_uart_tx(FuriHalUartIdUSART1, (uint8_t*)stop_command, strlen(stop_command));
+    furi_hal_serial_tx(instance->serial_handle_uart, 
+                            (uint8_t*)stop_command, 
+                            strlen(stop_command));
     return VIEW_NONE;
 }
 
-static void malveke_gb_emulator_on_irq_cb(UartIrqEvent ev, uint8_t data, void* context) {
+static void malveke_gb_emulator_on_irq_cb(FuriHalSerialHandle* handle, FuriHalSerialRxEvent event, void* context) {
     furi_assert(context);
     UartEchoApp* app = context;
 
-    if(ev == UartIrqEventRXNE) {
+    if(event == FuriHalSerialRxEventData) {
+        uint8_t data = furi_hal_serial_async_rx(handle);
         furi_stream_buffer_send(app->rx_stream, &data, 1, 0);
         furi_thread_flags_set(furi_thread_get_id(app->worker_thread), WorkerEventRx);
     }
@@ -208,12 +223,24 @@ static UartEchoApp* malveke_gb_emulator_app_alloc() {
     furi_thread_start(app->worker_thread);
 
     // Enable uart listener (UART & UART1)
-    // furi_hal_console_disable();
-    furi_hal_uart_set_br(FuriHalUartIdUSART1, 115200);
-    furi_hal_uart_init(FuriHalUartIdLPUART1, 250000);
-    furi_hal_uart_set_br(FuriHalUartIdLPUART1, 250000);
-    furi_hal_uart_set_irq_cb(FuriHalUartIdLPUART1, malveke_gb_emulator_on_irq_cb, app);
-    // furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, malveke_gb_emulator_on_irq_cb, app);
+    app->serial_handle_uart = furi_hal_serial_control_acquire(FuriHalSerialIdUsart);
+    if(!app->serial_handle_uart) {
+        furi_delay_ms(5000);
+    }
+    furi_check(app->serial_handle_uart);
+    furi_hal_serial_init(app->serial_handle_uart,  115200);
+
+
+    app->serial_handle_lp_uart = furi_hal_serial_control_acquire(FuriHalSerialIdLpuart);
+    if(!app->serial_handle_lp_uart) {
+        furi_delay_ms(5000);
+    }
+    furi_check(app->serial_handle_lp_uart);
+    furi_hal_serial_init(app->serial_handle_lp_uart,  250000);
+    furi_hal_serial_async_rx_start(app->serial_handle_lp_uart, malveke_gb_emulator_on_irq_cb, app, false);
+
+
+
     furi_hal_power_enable_otg();
     furi_delay_ms(1); 
     return app;
@@ -226,9 +253,11 @@ static void malveke_gb_emulator_app_free(UartEchoApp* app) {
     furi_thread_join(app->worker_thread);
     furi_thread_free(app->worker_thread);
 
-    // furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, NULL, NULL);
-    furi_hal_uart_set_irq_cb(FuriHalUartIdLPUART1, NULL, NULL);
-    furi_hal_uart_deinit(FuriHalUartIdLPUART1);
+    furi_hal_serial_deinit(app->serial_handle_uart);
+    furi_hal_serial_control_release(app->serial_handle_uart);
+
+    furi_hal_serial_deinit(app->serial_handle_lp_uart);
+    furi_hal_serial_control_release(app->serial_handle_lp_uart);
 
     // Free views
     view_dispatcher_remove_view(app->view_dispatcher, 0);
@@ -249,6 +278,9 @@ static void malveke_gb_emulator_app_free(UartEchoApp* app) {
 
 int32_t malveke_gb_emulator_app(void* p) {
     UNUSED(p);
+    // Disable expansion protocol to avoid interference with UART Handle
+    Expansion* expansion = furi_record_open(RECORD_EXPANSION);
+    expansion_disable(expansion);
 
     UartEchoApp* app = malveke_gb_emulator_app_alloc();
     view_dispatcher_run(app->view_dispatcher);
@@ -256,5 +288,9 @@ int32_t malveke_gb_emulator_app(void* p) {
     
     furi_hal_power_disable_otg();
 
+    // Return previous state of expansion
+    expansion_enable(expansion);
+    furi_record_close(RECORD_EXPANSION);
+    
     return 0;
 }
