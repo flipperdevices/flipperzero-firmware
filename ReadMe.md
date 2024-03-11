@@ -29,8 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0310-0116-0.99.1-61dc2ad](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-03-10 15:55 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-03-10 15:55 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-03-11 01:30 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-03-11 01:30 EST`
 - [Quick fix for rgb (By HaxSam)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/5bb4ab3a021a24406f7d3a996a119c3e2ea5dd87)
 - [Add is_connected api for expansion (By HaxSam)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/2f4186322bcd1899703fa22daeda29d554c3be2b)
 - [JS: Added Submenu support (By Spooks4576)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/6335d14c7498ab4b2e4b28fa707fe7f68d3843b5)
@@ -50,6 +50,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [FindMy Flipper v1.0 (By MatthewKuKanich)](https://github.com/MatthewKuKanich/FindMyFlipper) [With Startup Service (By Willy-JL & MatthewKuKanich)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/133b4a0ae2956b679dfcb69c242da8cc4aba0e10)
 - [For Patreon Memnbers](https://www.patreon.com/RogueMaster/membership): Added: [SCIFI / Corp Logos Build (Using Looped Versions) (By Kuronons)](https://github.com/Kuronons/FZ_graphics/tree/main/Animations/SF_Corporations_Logos/Animation_ZIP_files_%5BSF_Corporations_Logos_Looped%5D) [Also updated Manifest Switcher Build to Include These](https://github.com/RogueMaster/awesome-flipperzero-withModules/tree/rogue_main/graphics/dolphin-ManifestSwitcher)
 - Updated: [Barcode App v1.2 (By Kingal1337)](https://github.com/Kingal1337/flipper-barcode-generator)
+- NFC: [Bip Parser refactoring (By Leptopt1los)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/5432d10a5e15fd75a6c72ff0164f75c96d5bb1a3)
 
 <a name="release">
 
