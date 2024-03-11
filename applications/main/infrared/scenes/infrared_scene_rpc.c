@@ -47,7 +47,16 @@ bool infrared_scene_rpc_on_event(void* context, SceneManagerEvent event) {
         InfraredRpcState rpc_state =
             scene_manager_get_scene_state(infrared->scene_manager, InfraredSceneRpc);
 
-        if(event.event == InfraredCustomEventTypeTaskFinished) {
+        if(event.event == InfraredCustomEventTypeRpcLoadFile) {
+            if(rpc_state == InfraredRpcStateIdle) {
+                view_stack_add_view(infrared->view_stack, loading_get_view(infrared->loading));
+
+                // Load the remote in a separate thread
+                furi_thread_set_callback(infrared->task_thread, infrared_scene_rpc_task_callback);
+                furi_thread_start(infrared->task_thread);
+            }
+
+        } else if(event.event == InfraredCustomEventTypeTaskFinished) {
             view_stack_remove_view(infrared->view_stack, loading_get_view(infrared->loading));
 
             if(app_state->is_task_success) {
@@ -65,15 +74,6 @@ bool infrared_scene_rpc_on_event(void* context, SceneManagerEvent event) {
                 infrared->popup, infrared->text_store[0], 89, 44, AlignCenter, AlignTop);
 
             rpc_system_app_confirm(infrared->rpc_ctx, app_state->is_task_success);
-
-        } else if(event.event == InfraredCustomEventTypeRpcLoadFile) {
-            if(rpc_state == InfraredRpcStateIdle) {
-                view_stack_add_view(infrared->view_stack, loading_get_view(infrared->loading));
-
-                // Load the remote in a separate thread
-                furi_thread_set_callback(infrared->task_thread, infrared_scene_rpc_task_callback);
-                furi_thread_start(infrared->task_thread);
-            }
 
         } else if(
             event.event == InfraredCustomEventTypeRpcButtonPressName ||
