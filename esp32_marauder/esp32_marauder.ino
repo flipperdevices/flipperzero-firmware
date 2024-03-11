@@ -4,6 +4,7 @@ Flash Frequency: 80MHz
 Partition Scheme: Minimal SPIFFS
 https://www.online-utility.org/image/convert/to/XBM
 */
+
 #include "configs.h"
 
 #ifndef HAS_SCREEN
@@ -12,10 +13,6 @@ https://www.online-utility.org/image/convert/to/XBM
 #endif
 
 #include <WiFi.h>
-//#include "Web.h"
-#include "GameBoyCartridge.h"
-#include "GameBoyAdvanceCartridge.h"
-#include "GameboyLiveCamera.h"
 #include "EvilPortal.h"
 #include <Wire.h>
 #include "esp_wifi.h"
@@ -43,11 +40,10 @@ https://www.online-utility.org/image/convert/to/XBM
   #include "xiaoLED.h"
 #elif defined(MARAUDER_M5STICKC)
   #include "stickcLED.h"
-#else
+#elif defined(HAS_NEOPIXEL_LED)
   #include "LedInterface.h"
 #endif
 
-//#include "esp_interface.h"
 #include "settings.h"
 #include "CommandLine.h"
 #include "lang_var.h"
@@ -56,42 +52,43 @@ https://www.online-utility.org/image/convert/to/XBM
   #include "BatteryInterface.h"
 #endif
 
-//#ifdef HAS_TEMP_SENSOR
-//  #include "TemperatureInterface.h"
-//#endif
-
 #ifdef HAS_SCREEN
   #include "Display.h"
   #include "MenuFunctions.h"
-  //#include "a32u4_interface.h"
 #endif
 
 #ifdef HAS_BUTTONS
-  #include <SwitchLib.h>
+  #include "Switches.h"
   
   #if (U_BTN >= 0)
-    SwitchLib u_btn = SwitchLib(U_BTN, 1000, true);
+    Switches u_btn = Switches(U_BTN, 1000, U_PULL);
   #endif
   #if (D_BTN >= 0)
-    SwitchLib d_btn = SwitchLib(D_BTN, 1000, true);
+    Switches d_btn = Switches(D_BTN, 1000, D_PULL);
   #endif
   #if (L_BTN >= 0)
-    SwitchLib l_btn = SwitchLib(L_BTN, 1000, true);
+    Switches l_btn = Switches(L_BTN, 1000, L_PULL);
   #endif
   #if (R_BTN >= 0)
-    SwitchLib r_btn = SwitchLib(R_BTN, 1000, true);
+    Switches r_btn = Switches(R_BTN, 1000, R_PULL);
   #endif
   #if (C_BTN >= 0)
-    SwitchLib c_btn = SwitchLib(C_BTN, 1000, true);
+    Switches c_btn = Switches(C_BTN, 1000, C_PULL);
   #endif
 
 #endif
 
+//  MALVEKE
+#include "GameBoyCartridge.h"
+#include "GameBoyAdvanceCartridge.h"
+#include "GameboyLiveCamera.h"
+// #include "GameBoyPhoto.h"
+// #include "GameBoyPrinter.h"
+#include "uart.h"
+
 WiFiScan wifi_scan_obj;
 EvilPortal evil_portal_obj;
-//Web web_obj;
 Buffer buffer_obj;
-//EspInterface esp_obj;
 Settings settings_obj;
 CommandLine cli_obj;
 
@@ -103,14 +100,9 @@ CommandLine cli_obj;
   BatteryInterface battery_obj;
 #endif
 
-//#ifdef HAS_TEMP_SENSOR
-//  TemperatureInterface temp_obj;
-//#endif
-
 #ifdef HAS_SCREEN
   Display display_obj;
   MenuFunctions menu_function_obj;
-  //A32u4Interface a32u4_obj;
 #endif
 
 #ifdef HAS_SD
@@ -139,10 +131,15 @@ const String PROGMEM version_number = MARAUDER_VERSION;
 
 uint32_t currentTime  = 0;
 
+
+//  MALVEKE
 GameBoyCartridge gameboy_cartridge;
 GameBoyAdvanceCartridge gameboy_advance_cartridge;
 GameboyLiveCamera gameboy_live_camera;
 GameBoyTestPin gameboy_test_pin;
+// GameBoyPhoto gameboy_photo;
+// GameBoyPrinter gameboy_printer;
+
 
 void backlightOn() {
   #ifdef HAS_SCREEN
@@ -173,31 +170,28 @@ void setup()
 {
   Serial.begin(115200);
   Serial1.begin(115200, SERIAL_8N1, 17, 18);
+  
   unsigned long waitForStreamMode = millis() + 1000;
- while (waitForStreamMode > millis()) {
-    if (Serial.available())  // if we receive anything, just switch to another mode
-    {
-      switch (Serial.read()) {
-        /*
-        case 'c':
-          gb_camera_setup();
-          for (;;)
-            gb_camera_loop();
-        case '3':
-          gb_camera_export_setup();
-          for (;;)
-            gb_camera_export_loop();
-        */
+  while (waitForStreamMode > millis()) {
+      if (Serial.available())  // if we receive anything, just switch to another mode
+      {
+        switch (Serial.read()) {
+          #ifdef MALVEKE_VERSION
+            case 'c':
+              gb_camera_setup();
+              for (;;)
+                gb_camera_loop();
+                break;
+          #endif
+        }
       }
-    }
- }
-  // continue_to_marauder:;
+  }  
+  uart_protocol_init();
+
   #ifdef MARAUDER_M5STICKC
     axp192_obj.begin();
   #endif
   
-  //pinMode(FLASH_BUTTON, INPUT);
-
   #ifdef HAS_SCREEN
     pinMode(TFT_BL, OUTPUT);
   #endif
@@ -223,34 +217,9 @@ void setup()
     delay(10);
   #endif
 
-  // Serial.begin(115200);
-
-  // Starts a second serial channel to stream the captured packets
-  #ifdef WRITE_PACKETS_SERIAL
-    
-    #ifdef XIAO_ESP32_S3
-      Serial1.begin(115200, SERIAL_8N1, XIAO_RX1, XIAO_TX1);
-    #else
-      // Serial1.begin(115200);
-    #endif
-    
-  #endif
-  settings_obj.begin(); 
-
-  //  MALVEKE
-  gameboy_cartridge.begin();
-  gameboy_advance_cartridge.begin();
-  gameboy_live_camera.begin();
-  gameboy_test_pin.begin();
-  //Serial.println("\n\nHello, World!\n");
+  
 
   Serial.println("ESP-IDF version is: " + String(esp_get_idf_version()));
-
-  //#ifdef HAS_SCREEN
-  //  Serial.println("Has Screen");
-  //#else
-  //  Serial.println("Does not have screen");
-  //#endif
 
   #ifdef HAS_SCREEN
     display_obj.RunSetup();
@@ -269,7 +238,6 @@ void setup()
   #endif
 
   #ifdef HAS_SCREEN
-    //showCenterText(version_number, 250);
     #ifndef MARAUDER_MINI
       display_obj.tft.drawCentreString(display_obj.version_number, 120, 250, 2);
     #endif
@@ -284,6 +252,17 @@ void setup()
   #ifdef HAS_SCREEN
     delay(2000);
 
+    // Do some stealth mode stuff
+    #ifdef HAS_BUTTONS
+      if (c_btn.justPressed()) {
+        display_obj.headless_mode = true;
+
+        backlightOff();
+
+        Serial.println("Headless Mode enabled");
+      }
+    #endif
+
     display_obj.clearScreen();
   
     display_obj.tft.setTextColor(TFT_CYAN, TFT_BLACK);
@@ -297,27 +276,25 @@ void setup()
     display_obj.tft.println(text_table0[1]);
   #endif
 
-  //Serial.println("Internal Temp: " + (String)((temprature_sens_read() - 32) / 1.8));
+  settings_obj.begin();
 
-  // settings_obj.begin();
+  //  MALVEKE
+  gameboy_cartridge.begin();
+  gameboy_advance_cartridge.begin();
+  gameboy_live_camera.begin();
+  gameboy_test_pin.begin();
+  // gameboy_photo.begin();
+  // gameboy_printer.begin();
 
-  //Serial.println("This is a test Channel: " + (String)settings_obj.loadSetting<uint8_t>("Channel"));
-  //if (settings_obj.loadSetting<bool>( "Force PMKID"))
-  //  Serial.println("This is a test Force PMKID: true");
-  //else
-  //  Serial.println("This is a test Force PMKID: false");
 
   wifi_scan_obj.RunSetup();
-
-  //Serial.println(wifi_scan_obj.freeRAM());
 
   #ifdef HAS_SCREEN
     display_obj.tft.println(F(text_table0[2]));
   #endif
 
-  #ifdef WRITE_PACKETS_SERIAL
-    buffer_obj = Buffer();
-  #elif defined(HAS_SD)
+  buffer_obj = Buffer();
+  #if defined(HAS_SD)
     // Do some SD stuff
     if(sd_obj.initSD()) {
       #ifdef HAS_SCREEN
@@ -331,9 +308,8 @@ void setup()
         display_obj.tft.setTextColor(TFT_CYAN, TFT_BLACK);
       #endif
     }
-  #else
-    return;
   #endif
+
   evil_portal_obj.setup();
 
   #ifdef HAS_BATTERY
@@ -344,23 +320,12 @@ void setup()
     display_obj.tft.println(F(text_table0[5]));
   #endif
 
-  // Temperature stuff
-  //#ifdef HAS_TEMP_SENSOR
-  //  temp_obj.RunSetup();
-  //#endif
-
   #ifdef HAS_SCREEN
     display_obj.tft.println(F(text_table0[6]));
   #endif
 
   #ifdef HAS_BATTERY
     battery_obj.battery_level = battery_obj.getBatteryLevel();
-  
-//    if (battery_obj.i2c_supported) {
-//      Serial.println(F("IP5306 I2C Supported: true"));
-//    }
-//    else
-//      Serial.println(F("IP5306 I2C Supported: false"));
   #endif
 
   // Do some LED stuff
@@ -368,6 +333,8 @@ void setup()
     flipper_led.RunSetup();
   #elif defined(XIAO_ESP32_S3)
     xiao_led.RunSetup();
+  #elif defined(MARAUDER_M5STICKC)
+    stickc_led.RunSetup();
   #else
     led_obj.RunSetup();
   #endif
@@ -399,12 +366,6 @@ void setup()
   #ifdef HAS_SCREEN
     menu_function_obj.RunSetup();
   #endif
-
-  //Serial.println(F("\n\n--------------------------------\n"));
-  //Serial.println(F("         ESP32 Marauder      \n"));
-  //Serial.println("            " + version_number + "\n");
-  //Serial.println(F("       By: justcallmekoko\n"));
-  //Serial.println(F("--------------------------------\n\n"));
   
   Serial.println(F("CLI Ready"));
   cli_obj.RunSetup();
@@ -416,8 +377,24 @@ void loop()
   currentTime = millis();
   bool mini = false;
 
-  #ifdef MARAUDER_MINI
+  #ifdef SCREEN_BUFFER
     mini = true;
+  #endif
+
+  #ifdef HAS_ILI9341
+    #ifdef HAS_BUTTONS
+      if (c_btn.isHeld()) {
+        if (menu_function_obj.disable_touch)
+          menu_function_obj.disable_touch = false;
+        else
+          menu_function_obj.disable_touch = true;
+
+        menu_function_obj.updateStatusBar();
+
+        while (!c_btn.justReleased())
+          delay(1);
+      }
+    #endif
   #endif
 
   // Update all of our objects
@@ -438,6 +415,7 @@ void loop()
   gameboy_live_camera.main();
   gameboy_test_pin.main();
   if(!gameboy_live_camera.isRunning() && !gameboy_cartridge.isWrittingRAM() && !gameboy_cartridge.isWrittingROM() && !gameboy_cartridge.isRestoringRAM()) {
+
   #ifdef HAS_SCREEN
     display_obj.main(wifi_scan_obj.currentScanMode);
   #endif
@@ -448,13 +426,13 @@ void loop()
     gps_obj.main();
   #endif
   
-  #ifdef WRITE_PACKETS_SERIAL
-    buffer_obj.forceSaveSerial();
-  #elif defined(HAS_SD)
+  // Detect SD card
+  #if defined(HAS_SD)
     sd_obj.main();
-  #else
-    return;
   #endif
+
+  // Save buffer to SD and/or serial
+  buffer_obj.save();
 
   #ifdef HAS_BATTERY
     battery_obj.main(currentTime);

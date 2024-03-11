@@ -7,9 +7,7 @@
 #include <esp32-hal-ledc.h>
 #include <ArduinoJson.h>
 #include "Gameboy.h"
-
 #include "Buffer.h"
-#include "GameboyServer.h"
 
 
 #ifndef MAX
@@ -26,7 +24,7 @@ extern Buffer buffer_obj;
 
 class GameBoyCartridge {
 
-  private:
+  public:
     uint8_t startRomBuffer[385];
     char gameTitle[17];
     uint8_t sdBuffer[64];
@@ -36,15 +34,10 @@ class GameBoyCartridge {
     uint16_t romBanks;
     uint16_t ramSize;
     uint16_t ramBanks;
-    uint16_t ramEndAddress;
     unsigned long sramSize = 0;
     word romEndAddress;
-    word sramBanks;
     int romType;
     word romAddress = 0;
-    uint8_t currentBank = 0;
-    uint32_t processedProgressBar = 0;
-    uint32_t totalProgressBar = 0;
     word romStartBank = 1;
     unsigned long totalRamBytesReceived = 0;
     unsigned long totalRamBytes;
@@ -57,15 +50,11 @@ class GameBoyCartridge {
     bool writtingRAM;
     bool restoringRAM;
     bool writtingROM;
-    void setup();
     
     byte read_byte_GB(uint16_t address);
-    void write_byte_GB(int address, byte data);
     void set_address_GB(uint16_t address);
     void gb_mode(void);
    
-    byte readByteSRAM_GB(uint16_t myAddress);
-    void rd_wr_mreq_off(void);
     void rd_wr_mreq_reset(void);
     void rd_wr_csmreq_cs2_reset(void);
     void dataBusAsOutput();
@@ -86,8 +75,15 @@ class GameBoyCartridge {
     void read_serial_bytes(uint32_t startOffset, size_t chunkSize, uint8_t* buffer);
     String getSerialInput();
 
-  public:
+
+
+    uint8_t currentBank = 0;
+    uint16_t ramEndAddress;
+    word sramBanks;
+    uint32_t processedProgressBar = 0;
+    uint32_t totalProgressBar = 0;
     GameBoyCartridge();
+    void setup();
     void main();
     void begin();
     void start();
@@ -95,10 +91,13 @@ class GameBoyCartridge {
     void headerROM_GB(bool printInfo);
     void readROM_GB();
     void readSRAM_GB();
-    void printSRAM_GB(AsyncResponseStream *response);
+    // void printSRAM_GB(AsyncResponseStream *response);
     void writeByteSRAM_GB(uint16_t address, uint8_t myData);
     void writeROM_GB();
     void writeRAM_GB();
+    byte readByteSRAM_GB(uint16_t myAddress);
+    void write_byte_GB(int address, byte data);
+    void rd_wr_mreq_off(void);
     // void startWriteRAM_GB();
     // void endWriteRAM_GB();
     // void startReadRAM_GB();

@@ -32,9 +32,9 @@ bool SDInterface::initSD() {
                         -   CS (jumper to SD Card GND Pin)
       */
       enum { SPI_SCK = 0, SPI_MISO = 36, SPI_MOSI = 26 };
-      SPIClass SPI_EXT;
-      SPI_EXT.begin(SPI_SCK, SPI_MISO, SPI_MOSI, SD_CS);
-      if (!SD.begin(SD_CS, SPI_EXT)) {
+      this->spiExt = new SPIClass();
+      this->spiExt->begin(SPI_SCK, SPI_MISO, SPI_MOSI, SD_CS);
+      if (!SD.begin(SD_CS, *(this->spiExt))) {
     #else
       if (!SD.begin(SD_CS)) {
     #endif
@@ -73,14 +73,16 @@ bool SDInterface::initSD() {
         this->card_sz = sz;
       }
 
-      buffer_obj = Buffer();
-    
       if (!SD.exists("/SCRIPTS")) {
         Serial.println("/SCRIPTS does not exist. Creating...");
 
         SD.mkdir("/SCRIPTS");
         Serial.println("/SCRIPTS created");
       }
+
+      this->sd_files = new LinkedList<String>();
+
+      this->sd_files->add("Back");
     
       return true;
   }
@@ -100,12 +102,45 @@ File SDInterface::getFile(String path) {
   }
 }
 
+bool SDInterface::removeFile(String file_path) {
+  if (SD.remove(file_path))
+    return true;
+  else
+    return false;
+}
+
+void SDInterface::listDirToLinkedList(LinkedList<String>* file_names, String str_dir, String ext) {
+  if (this->supported) {
+    File dir = SD.open(str_dir);
+    while (true)
+    {
+      File entry = dir.openNextFile();
+      if (!entry)
+      {
+        break;
+      }
+
+      if (entry.isDirectory())
+        continue;
+
+      String file_name = entry.name();
+      if (ext != "") {
+        if (file_name.endsWith(ext)) {
+          file_names->add(file_name);
+        }
+      }
+      else
+        file_names->add(file_name);
+    }
+  }
+}
+
 void SDInterface::listDir(String str_dir){
   if (this->supported) {
     File dir = SD.open(str_dir);
     while (true)
     {
-      File entry =  dir.openNextFile();
+      File entry = dir.openNextFile();
       if (! entry)
       {
         break;
@@ -122,33 +157,11 @@ void SDInterface::listDir(String str_dir){
   }
 }
 
-void SDInterface::addPacket(uint8_t* buf, uint32_t len, bool log) {
-  if ((this->supported) && (this->do_save)) {
-    buffer_obj.addPacket(buf, len, log);
-  }
-}
-
-void SDInterface::openCapture(String file_name) {
-  bool save_pcap = settings_obj.loadSetting<bool>("SavePCAP");
-  if ((this->supported) && (save_pcap)) {
-    buffer_obj.createPcapFile(&SD, file_name);
-    buffer_obj.open();
-  }
-}
-
-void SDInterface::openLog(String file_name) {
-  bool save_pcap = settings_obj.loadSetting<bool>("SavePCAP");
-  if ((this->supported) && (save_pcap)) {
-    buffer_obj.createPcapFile(&SD, file_name, true);
-    buffer_obj.open(true);
-  }
-}
-
 void SDInterface::runUpdate() {
   #ifdef HAS_SCREEN
     display_obj.tft.setTextWrap(false);
     display_obj.tft.setFreeFont(NULL);
-    display_obj.tft.setCursor(0, 100);
+    display_obj.tft.setCursor(0, TFT_HEIGHT / 3);
     display_obj.tft.setTextSize(1);
     display_obj.tft.setTextColor(TFT_WHITE);
   
@@ -280,11 +293,7 @@ bool SDInterface::checkDetectPin() {
 }
 
 void SDInterface::main() {
-  if ((this->supported) && (this->do_save)) {
-    //Serial.println("Saving packet...");
-    buffer_obj.forceSave(&SD);
-  }
-  else if (!this->supported) {
+  if (!this->supported) {
     if (checkDetectPin()) {
       delay(100);
       this->initSD();

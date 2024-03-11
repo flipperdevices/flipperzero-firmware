@@ -1,7 +1,4 @@
 #include "GameBoyAdvanceCartridge.h"
-#include "save.h"
-// #include "soc/rtc_wdt.h"
-
 
 GameBoyAdvanceCartridge::GameBoyAdvanceCartridge()
 {

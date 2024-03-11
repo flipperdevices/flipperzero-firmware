@@ -284,7 +284,7 @@ bool Settings::createDefaultSettings(fs::FS &fs) {
 
   jsonBuffer["Settings"][3]["name"] = "EnableLED";
   jsonBuffer["Settings"][3]["type"] = "bool";
-  jsonBuffer["Settings"][3]["value"] = true;
+  jsonBuffer["Settings"][3]["value"] = false;
   jsonBuffer["Settings"][3]["range"]["min"] = false;
   jsonBuffer["Settings"][3]["range"]["max"] = true;
 

@@ -25,7 +25,11 @@ void Display::RunSetup()
   #endif
 
   #ifdef MARAUDER_M5STICKC
-    tft.setRotation(3);
+    tft.setRotation(1);
+  #endif
+
+  #ifdef MARAUDER_REV_FEATHER
+    tft.setRotation(1);
   #endif
 
   tft.setCursor(0, 0);
@@ -52,6 +56,14 @@ void Display::RunSetup()
 
   #ifdef KIT
     pinMode(KIT_LED_BUILTIN, OUTPUT);
+  #endif
+
+  #ifdef MARAUDER_REV_FEATHER
+    pinMode(7, OUTPUT);
+
+    delay(10);
+
+    digitalWrite(7, HIGH);
   #endif
 }
 

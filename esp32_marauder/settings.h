@@ -1,3 +1,5 @@
+#pragma once
+
 #ifndef Settings_h
 #define Settings_h
 

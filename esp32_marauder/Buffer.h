@@ -1,10 +1,12 @@
+#pragma once
+
 #ifndef Buffer_h
 #define Buffer_h
 
 #include "Arduino.h"
 #include "FS.h"
 #include "settings.h"
-//#include "SD_MMC.h"
+#include "esp_wifi_types.h"
 
 #define BUF_SIZE 3 * 1024 // Had to reduce buffer size to save RAM. GG @spacehuhn
 #define SNAP_LEN 2324 // max len of each recieved packet
@@ -16,18 +18,22 @@ extern Settings settings_obj;
 class Buffer {
   public:
     Buffer();
-    void createPcapFile(fs::FS* fs, String fn = "", bool log = false);
-    void open(bool log = false);
-    void close(fs::FS* fs);
-    void addPacket(uint8_t* buf, uint32_t len, bool log = false);
-    void save(fs::FS* fs);
-    void forceSave(fs::FS* fs);
-    void forceSaveSerial();
+    void pcapOpen(String file_name, fs::FS* fs, bool serial);
+    void logOpen(String file_name, fs::FS* fs, bool serial);
+    void append(wifi_promiscuous_pkt_t *packet, int len);
+    void append(String log);
+    void save();
+    void openFile(String file_name, fs::FS* fs, bool serial, bool is_pcap);
+    void write(const uint8_t* buf, uint32_t len);
   private:
+    void createFile(String name, bool is_pcap);
+    void open(bool is_pcap);
+    void add(const uint8_t* buf, uint32_t len, bool is_pcap);
     void write(int32_t n);
     void write(uint32_t n);
     void write(uint16_t n);
-    void write(uint8_t* buf, uint32_t len);
+    void saveFs();
+    void saveSerial();
     
     uint8_t* bufA;
     uint8_t* bufB;
@@ -41,6 +47,8 @@ class Buffer {
 
     String fileName = "/0.pcap";
     File file;
+    fs::FS* fs;
+    bool serial;
 };
 
 #endif

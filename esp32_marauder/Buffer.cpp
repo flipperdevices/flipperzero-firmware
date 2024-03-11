@@ -6,17 +6,17 @@ Buffer::Buffer(){
   bufB = (uint8_t*)malloc(BUF_SIZE);
 }
 
-void Buffer::createPcapFile(fs::FS* fs, String fn, bool log){
+void Buffer::createFile(String name, bool is_pcap){
   int i=0;
-  if (!log) {
+  if (is_pcap) {
     do{
-      fileName = "/"+fn+"_"+(String)i+".pcap";
+      fileName = "/"+name+"_"+(String)i+".pcap";
       i++;
     } while(fs->exists(fileName));
   }
   else {
     do{
-      fileName = "/"+fn+"_"+(String)i+".log";
+      fileName = "/"+name+"_"+(String)i+".log";
       i++;
     } while(fs->exists(fileName));
   }
@@ -27,7 +27,7 @@ void Buffer::createPcapFile(fs::FS* fs, String fn, bool log){
   file.close();
 }
 
-void Buffer::open(bool log){
+void Buffer::open(bool is_pcap){
   bufSizeA = 0;
   bufSizeB = 0;
 
@@ -35,7 +35,7 @@ void Buffer::open(bool log){
 
   writing = true;
 
-  if (!log) {
+  if (is_pcap) {
     write(uint32_t(0xa1b2c3d4)); // magic number
     write(uint16_t(2)); // major version number
     write(uint16_t(4)); // minor version number
@@ -46,14 +46,35 @@ void Buffer::open(bool log){
   }
 }
 
-void Buffer::close(fs::FS* fs){
-  if(!writing) return;
-  forceSave(fs);
-  writing = false;
-  Serial.println(text01);
+void Buffer::openFile(String file_name, fs::FS* fs, bool serial, bool is_pcap) {
+  bool save_pcap = settings_obj.loadSetting<bool>("SavePCAP");
+  if (!save_pcap) {
+    this->fs = NULL;
+    this->serial = false;
+    writing = false;
+    return;
+  }
+  this->fs = fs;
+  this->serial = serial;
+  if (this->fs) {
+    createFile(file_name, is_pcap);
+  }
+  if (this->fs || this->serial) {
+    open(is_pcap);
+  } else {
+    writing = false;
+  }
 }
 
-void Buffer::addPacket(uint8_t* buf, uint32_t len, bool log){
+void Buffer::pcapOpen(String file_name, fs::FS* fs, bool serial) {
+  openFile(file_name, fs, serial, true);
+}
+
+void Buffer::logOpen(String file_name, fs::FS* fs, bool serial) {
+  openFile(file_name, fs, serial, false);
+}
+
+void Buffer::add(const uint8_t* buf, uint32_t len, bool is_pcap){
   // buffer is full -> drop packet
   if((useA && bufSizeA + len >= BUF_SIZE && bufSizeB > 0) || (!useA && bufSizeB + len >= BUF_SIZE && bufSizeA > 0)){
     //Serial.print(";"); 
@@ -74,7 +95,7 @@ void Buffer::addPacket(uint8_t* buf, uint32_t len, bool log){
 
   microSeconds -= seconds*1000*1000; // e.g. 45200400 - 45*1000*1000 = 45200400 - 45000000 = 400us (because we only need the offset)
   
-  if (!log) {
+  if (is_pcap) {
     write(seconds); // ts_sec
     write(microSeconds); // ts_usec
     write(len); // incl_len
@@ -82,6 +103,20 @@ void Buffer::addPacket(uint8_t* buf, uint32_t len, bool log){
   }
   
   write(buf, len); // packet payload
+}
+
+void Buffer::append(wifi_promiscuous_pkt_t *packet, int len) {
+  bool save_packet = settings_obj.loadSetting<bool>(text_table4[7]);
+  if (save_packet) {
+    add(packet->payload, len, true);
+  }
+}
+
+void Buffer::append(String log) {
+  bool save_packet = settings_obj.loadSetting<bool>(text_table4[7]);
+  if (save_packet) {
+    add((const uint8_t*)log.c_str(), log.length(), false);
+  }
 }
 
 void Buffer::write(int32_t n){
@@ -109,8 +144,9 @@ void Buffer::write(uint16_t n){
   write(buf,2);
 }
 
-void Buffer::write(uint8_t* buf, uint32_t len){
+void Buffer::write(const uint8_t* buf, uint32_t len){
   if(!writing) return;
+  while(saving) delay(10);
   
   if(useA){
     memcpy(&bufA[bufSizeA], buf, len);
@@ -121,127 +157,86 @@ void Buffer::write(uint8_t* buf, uint32_t len){
   }
 }
 
-void Buffer::save(fs::FS* fs){
-  if(saving) return; // makes sure the function isn't called simultaneously on different cores
-
-  // buffers are already emptied, therefor saving is unecessary
-  if((useA && bufSizeB == 0) || (!useA && bufSizeA == 0)){
-    //Serial.printf("useA: %s, bufA %u, bufB %u\n",useA ? "true" : "false",bufSizeA,bufSizeB); // for debug porpuses
-    return;
-  }
-  
-  //Serial.println("saving file");
-  
-  uint32_t startTime = millis();
-  uint32_t finishTime;
-
-  file = fs->open(fileName, FILE_APPEND);
-  if (!file) {
-    Serial.println(text02 + fileName+"'");
-    //useSD = false;
-    return;
-  }
-  
-  saving = true;
-  
-  uint32_t len;
-  
-  if(useA){
-    file.write(bufB, bufSizeB);
-    len = bufSizeB;
-    bufSizeB = 0;
-  }
-  else{
-    file.write(bufA, bufSizeA);
-    len = bufSizeA;
-    bufSizeA = 0;
-  }
-
-  file.close();
-  
-  finishTime = millis() - startTime;
-
-  //Serial.printf("\n%u bytes written for %u ms\n", len, finishTime);
-  
-  saving = false;
-  
-}
-
-void Buffer::forceSave(fs::FS* fs){
-  uint32_t len = bufSizeA + bufSizeB;
-  if(len == 0) return;
-  
+void Buffer::saveFs(){
   file = fs->open(fileName, FILE_APPEND);
   if (!file) {
     Serial.println(text02+fileName+"'");
-    //useSD = false;
     return;
   }
 
-  saving = true;
-  writing = false;
-  
   if(useA){
-
     if(bufSizeB > 0){
       file.write(bufB, bufSizeB);
-      bufSizeB = 0;
     }
-
     if(bufSizeA > 0){
       file.write(bufA, bufSizeA);
-      bufSizeA = 0;
     }
-    
   } else {
-
     if(bufSizeA > 0){
       file.write(bufA, bufSizeA);
-      bufSizeA = 0;
     }
-    
     if(bufSizeB > 0){
       file.write(bufB, bufSizeB);
-      bufSizeB = 0;
     }
-    
   }
 
   file.close();
-
-  //Serial.printf("saved %u bytes\n",len);
-
-  saving = false;
-  writing = true;
 }
 
-void Buffer::forceSaveSerial() {
-  uint32_t len = bufSizeA + bufSizeB;
-  if(len == 0) return;
+void Buffer::saveSerial() {
+  // Saves to main console UART, user-facing app will ignore these markers
+  // Uses / and ] in markers as they are illegal characters for SSIDs
+  const char* mark_begin = "[BUF/BEGIN]";
+  const size_t mark_begin_len = strlen(mark_begin);
+  const char* mark_close = "[BUF/CLOSE]";
+  const size_t mark_close_len = strlen(mark_close);
 
-  saving = true;
-  writing = false;
+  // Additional buffer and memcpy's so that a single Serial.write() is called
+  // This is necessary so that other console output isn't mixed into buffer stream
+  uint8_t* buf = (uint8_t*)malloc(mark_begin_len + bufSizeA + bufSizeB + mark_close_len);
+  uint8_t* it = buf;
+  memcpy(it, mark_begin, mark_begin_len);
+  it += mark_begin_len;
 
   if(useA){
     if(bufSizeB > 0){
-      Serial1.write(bufB, bufSizeB);
-      bufSizeB = 0;
+      memcpy(it, bufB, bufSizeB);
+      it += bufSizeB;
     }
     if(bufSizeA > 0){
-      Serial1.write(bufA, bufSizeA);
-      bufSizeA = 0;
+      memcpy(it, bufA, bufSizeA);
+      it += bufSizeA;
     }
   } else {
     if(bufSizeA > 0){
-      Serial1.write(bufA, bufSizeA);
-      bufSizeA = 0;
+      memcpy(it, bufA, bufSizeA);
+      it += bufSizeA;
     }
     if(bufSizeB > 0){
-      Serial1.write(bufB, bufSizeB);
-      bufSizeB = 0;
+      memcpy(it, bufB, bufSizeB);
+      it += bufSizeB;
     }
   }
 
+  memcpy(it, mark_close, mark_close_len);
+  it += mark_close_len;
+  Serial.write(buf, it - buf);
+  free(buf);
+}
+
+void Buffer::save() {
+  saving = true;
+
+  if((bufSizeA + bufSizeB) == 0){
+    saving = false;
+    return;
+  }
+
+  if(this->fs) saveFs();
+  if(this->serial) saveSerial();
+
+  bufSizeA = 0;
+  bufSizeB = 0;
+
   saving = false;
-  writing = true;
 }

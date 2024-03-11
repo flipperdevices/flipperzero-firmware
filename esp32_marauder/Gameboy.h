@@ -4,13 +4,6 @@
 #include <Arduino.h>
 #include <ArduinoJson.h>
 #include "config.h"
-// #include "SerialTransfer.h"
-// #include "MemoryFile.h"
-// #include <iostream>
-// #include <string>
-// #include <vector>
-// #include <iomanip>  // Para std::setw y std::setfill
-
 
 
 /*

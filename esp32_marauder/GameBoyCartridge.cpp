@@ -1,6 +1,4 @@
 #include "GameBoyCartridge.h"
-// #include "soc/rtc_wdt.h"
-#include "GameboyServer.h"
 #include <FS.h>
 
 
@@ -68,9 +66,6 @@ void GameBoyCartridge::start()
 
     transferJSON.clear();
     this->lastByte = 0;
-    // #ifdef WRITE_PACKETS_SERIAL
-    // buffer_obj.open();
-    // #endif
     this->runGameBoyCartridge = true;
 }
 void GameBoyCartridge::stop()
@@ -244,6 +239,9 @@ byte GameBoyCartridge::read_byte_GB(uint16_t address)
 }
 void GameBoyCartridge::headerROM_GB(bool printInfo = true)
 {
+    // buffer_obj = Buffer();
+    // buffer_obj.openFile("header", NULL, true, false);
+
     transferJSON.clear();
     this->lastByte = 0;
 
@@ -684,6 +682,14 @@ void GameBoyCartridge::headerROM_GB(bool printInfo = true)
         Serial.print("JSON:");
         serializeJson(transferJSON, Serial);
         Serial.println();
+
+        
+        // Serializar los datos JSON en una cadena
+        // String jsonString;
+        // serializeJson(transferJSON, jsonString);
+        // String prefixedJsonString = "JSON:" + jsonString;
+        // buffer_obj.write(reinterpret_cast<const uint8_t*>(prefixedJsonString.c_str()), prefixedJsonString.length());
+        
     }
 }
 void GameBoyCartridge::write_byte_GB(int address, byte data)
@@ -764,7 +770,6 @@ void GameBoyCartridge::rd_wr_mreq_off(void)
 
 void GameBoyCartridge::readROM_GB()
 {
-    // buffer_obj = Buffer();
     this->writtingRAM = false;
     this->writtingROM = false;
     this->lastByte = 0;
@@ -1076,70 +1081,71 @@ byte GameBoyCartridge::readByteSRAM_GB(uint16_t myAddress)
             "nop\n\t");
     return tempByte;
 }
-void GameBoyCartridge::printSRAM_GB(AsyncResponseStream *response) 
-{
-    this->writtingRAM = false;
-    this->writtingROM = false;
-    this->lastByte = 0;
-    this->cartridgeType = 0;
-    this->romSize = 0;
-    this->romBanks = 0;
-    this->ramSize = 0;
-    this->ramBanks = 0;
-    this->sramSize = 0;
-    this->romEndAddress = 0x7FFF;
-    this->sramBanks = 0;
-    this->romType = 0;
-    this->currentBank = 0;
+// void GameBoyCartridge::printSRAM_GB(AsyncResponseStream *response) 
+// {
+//     this->writtingRAM = false;
+//     this->writtingROM = false;
+//     this->lastByte = 0;
+//     this->cartridgeType = 0;
+//     this->romSize = 0;
+//     this->romBanks = 0;
+//     this->ramSize = 0;
+//     this->ramBanks = 0;
+//     this->sramSize = 0;
+//     this->romEndAddress = 0x7FFF;
+//     this->sramBanks = 0;
+//     this->romType = 0;
+//     this->currentBank = 0;
 
 
-    this->headerROM_GB(false);
+//     this->headerROM_GB(false);
 
-    this->processedProgressBar = 0;
-    this->totalProgressBar  = (uint32_t)(this->sramBanks) * 8192;
+//     this->processedProgressBar = 0;
+//     this->totalProgressBar  = (uint32_t)(this->sramBanks) * 8192;
 
-    delay(200);
-    this->rd_wr_mreq_reset();
+//     delay(200);
+//     this->rd_wr_mreq_reset();
 
-    // MBC2 Fix (unknown why this fixes reading the ram, maybe has to read ROM before RAM?)
-    this->read_byte_GB(0x0134);
-    if(this->ramEndAddress > 0) {
-        if (this->cartridgeType <= 4)
-        {                                   // MBC1
-            this->write_byte_GB(0x6000, 1); // Set RAM Mode
-        }
-        this->dataBusAsOutput();
-        // Initialise MBC
-        this->write_byte_GB(0x0000, 0x0A);
-        delayMicroseconds(50);
-        this->dataBusAsInput();
+//     // MBC2 Fix (unknown why this fixes reading the ram, maybe has to read ROM before RAM?)
+//     this->read_byte_GB(0x0134);
+//     if(this->ramEndAddress > 0) {
+//         if (this->cartridgeType <= 4)
+//         {                                   // MBC1
+//             this->write_byte_GB(0x6000, 1); // Set RAM Mode
+//         }
+//         this->dataBusAsOutput();
+//         // Initialise MBC
+//         this->write_byte_GB(0x0000, 0x0A);
+//         delayMicroseconds(50);
+//         this->dataBusAsInput();
 
-        //  loop
-        for(int current = this->currentBank; current < this->sramBanks; current++) {
-            this->write_byte_GB(0x4000, current);
-            // Read RAM
-            for (word ramAddress = 0xA000; ramAddress <= this->ramEndAddress; ramAddress += 64)
-            {
-                uint8_t readData[64];
-                for (uint8_t i = 0; i < 64; i++)
-                {
-                    readData[i] = this->readByteSRAM_GB(ramAddress + i);
-                    response->print(readData[i]);
-                }
-                this->processedProgressBar += 64;
-            }
-        }
-        // Disable RAM
-        this->write_byte_GB(0x0000, 0x00);
-        delay(50);
-        this->totalProgressBar = (uint32_t)(this->sramBanks) * 8192;
-        this->rd_wr_mreq_off();
+//         //  loop
+//         for(int current = this->currentBank; current < this->sramBanks; current++) {
+//             this->write_byte_GB(0x4000, current);
+//             // Read RAM
+//             for (word ramAddress = 0xA000; ramAddress <= this->ramEndAddress; ramAddress += 64)
+//             {
+//                 uint8_t readData[64];
+//                 for (uint8_t i = 0; i < 64; i++)
+//                 {
+//                     readData[i] = this->readByteSRAM_GB(ramAddress + i);
+//                     response->print(readData[i]);
+//                 }
+//                 this->processedProgressBar += 64;
+//             }
+//         }
+//         // Disable RAM
+//         this->write_byte_GB(0x0000, 0x00);
+//         delay(50);
+//         this->totalProgressBar = (uint32_t)(this->sramBanks) * 8192;
+//         this->rd_wr_mreq_off();
         
-    }
-}
+//     }
+// }
 void GameBoyCartridge::readSRAM_GB()
 {
-    // buffer_obj = Buffer();
+    
+
     this->writtingRAM = false;
     this->writtingROM = false;
     this->lastByte = 0;
@@ -1156,6 +1162,9 @@ void GameBoyCartridge::readSRAM_GB()
 
 
     this->headerROM_GB(false);
+    // buffer_obj = Buffer();
+    // buffer_obj.openFile("ram", NULL, true, false);
+
     transferJSON.clear();
     // Initialize progress bar
     this->processedProgressBar = 0;
@@ -1171,7 +1180,11 @@ void GameBoyCartridge::readSRAM_GB()
     Serial.print("JSON:");
     serializeJson(transferJSON, Serial);
     Serial.println();
-    
+    // String jsonString;
+    // serializeJson(transferJSON, jsonString);
+    // String prefixedJsonString = "JSON:" + jsonString;
+    // buffer_obj.write(reinterpret_cast<const uint8_t*>(prefixedJsonString.c_str()), prefixedJsonString.length());
+    // buffer_obj.save();
     this->rd_wr_mreq_reset();
 
     // MBC2 Fix (unknown why this fixes reading the ram, maybe has to read ROM before RAM?)
@@ -1555,7 +1568,6 @@ bool GameBoyCartridge::isRestoringRAM()
 void GameBoyCartridge::setup()
 {
     disableCore0WDT();  
-    // buffer_obj = Buffer();
     this->writtingRAM = false;
     this->writtingROM = false;
     this->lastByte = 0;
@@ -1603,6 +1615,11 @@ void GameBoyCartridge::main()
             Serial.print("JSON:");
             serializeJson(transferJSON, Serial);
             Serial.println();
+            // String jsonString;
+            // serializeJson(transferJSON, jsonString);
+            // String prefixedJsonString = "JSON:" + jsonString;
+            // buffer_obj.write(reinterpret_cast<const uint8_t*>(prefixedJsonString.c_str()), prefixedJsonString.length());
+            
             this->writtingRAM = false;
 
             this->rd_wr_mreq_off();
