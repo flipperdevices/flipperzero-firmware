@@ -84,5 +84,7 @@ jobs:
         if: ${{ steps.pvs-warn.outputs.warnings != 0 }}
         run: |
           echo "Please fix all PVS warnings before merge"
+          echo "https://pvs.flipp.dev/${{steps.names.outputs.branch_name}}/${{steps.names.outputs.default_target}}-${{steps.names.outputs.suffix}}/index.html"
+          echo "[PVS report](https://pvs.flipp.dev/${{steps.names.outputs.branch_name}}/${{steps.names.outputs.default_target}}-${{steps.names.outputs.suffix}}/index.html)" >> $GITHUB_STEP_SUMMARY
           exit 1
 
