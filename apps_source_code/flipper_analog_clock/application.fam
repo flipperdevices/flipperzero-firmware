@@ -12,6 +12,6 @@ App(
     fap_icon="analog_clock.png",  # 10x10 1-bit PNG
     fap_author="@scrolltex",
     fap_weburl="https://github.com/scrolltex/flipper_analog_clock",
-    fap_version="1.1",
+    fap_version="1.2",
     fap_description="Shows analog clock on Flipper screen",
 )

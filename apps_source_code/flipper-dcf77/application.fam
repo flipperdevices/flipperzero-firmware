@@ -11,6 +11,6 @@ App(
     fap_category="Tools",
     fap_author="@arha & @xMasterX",
     fap_weburl="https://github.com/arha/flipper-dcf77",
-    fap_version="1.1",
+    fap_version="1.2",
     fap_description="Sends the DCF77 time signal (badly) on the 125khz LFRFID antenna and on GPIO C3 pin",
 )
