@@ -14,6 +14,7 @@
 #include <gui/modules/variable_item_list.h>
 #include <gui/modules/button_menu.h>
 #include <gui/modules/dialog_ex.h>
+#include <expansion/expansion.h>
 #include "scenes/gba_cartridge_scene.h"
 #include "views/gba_cartridge_startscreen.h"
 #include "views/gba_cartridge_scene_1.h"

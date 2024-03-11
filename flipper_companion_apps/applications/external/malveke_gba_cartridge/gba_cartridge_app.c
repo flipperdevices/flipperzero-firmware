@@ -91,6 +91,10 @@ void gba_cartridge_app_app_free(GBACartridge* app) {
 
 int32_t gba_cartridge_app(void* p) {
     UNUSED(p);
+    // Disable expansion protocol to avoid interference with UART Handle
+    Expansion* expansion = furi_record_open(RECORD_EXPANSION);
+    expansion_disable(expansion);
+
     GBACartridge* app = gba_cartridge_app_app_alloc();
     
     view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
@@ -103,6 +107,10 @@ int32_t gba_cartridge_app(void* p) {
     
     furi_hal_power_suppress_charge_exit();
     gba_cartridge_app_app_free(app);
+
+    // Return previous state of expansion
+    expansion_enable(expansion);
+    furi_record_close(RECORD_EXPANSION);
     
     return 0;
 }
