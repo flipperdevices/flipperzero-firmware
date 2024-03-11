@@ -5,6 +5,7 @@ const Protocol* protocols[] = {
     &protocol_easysetup,
     &protocol_fastpair,
     &protocol_lovespouse,
+    &protocol_nameflood,
     &protocol_swiftpair,
 };
 
