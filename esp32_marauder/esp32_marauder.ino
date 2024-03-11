@@ -169,7 +169,6 @@ void backlightOff() {
 void setup()
 {
   Serial.begin(115200);
-  Serial1.begin(115200, SERIAL_8N1, 17, 18);
   
   unsigned long waitForStreamMode = millis() + 1000;
   while (waitForStreamMode > millis()) {
@@ -218,7 +217,8 @@ void setup()
   #endif
 
   
-
+  Serial.begin(115200);
+  Serial1.begin(115200, SERIAL_8N1, 17, 18);
   Serial.println("ESP-IDF version is: " + String(esp_get_idf_version()));
 
   #ifdef HAS_SCREEN

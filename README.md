@@ -9,7 +9,6 @@
 
 **Firmware**: [Install Firmware MALVEKE](./webinstaller/README.md)
 
-**WARNING ⚠️: Due to changes in Flipper Zero's [Serial API](https://github.com/flipperdevices/flipperzero-firmware/pull/3211), it currently only works with versions <= [0.97 of the Flipper Zero Oficial Firmware or Custom Firmware's](https://github.com/flipperdevices/flipperzero-firmware/releases/tag/0.97.1). We are working to support the newer versions.**
 
 
 <picture>
@@ -61,7 +60,7 @@
 - Extra modules
     - Slot for `NRF24`/`CC1101`.
     - Slot for `GPS NEO-XM` Module (wardrive)
-- Includes Marauder ESP32 (v0.13.0).
+- Includes Marauder ESP32 (v0.13.9).
 
 
 ## Flipper faps (WIP)

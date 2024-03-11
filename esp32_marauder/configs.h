@@ -8,7 +8,7 @@
   #define PCB_2_5 1
   #define PCB_2_5_1 2
 
-  #define MALVEKE_VERSION PCB_2_5_1
+  #define MALVEKE_VERSION PCB_2_5
 
   #define POLISH_POTATO
 
