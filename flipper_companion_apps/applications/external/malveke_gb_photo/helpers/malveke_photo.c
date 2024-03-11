@@ -1,7 +1,7 @@
 #include "malveke_photo.h"
 
 void get_timefilename(FuriString* name, int index) {
-    DateTime datetime = {0};
+    FuriHalRtcDateTime datetime = {0};
     furi_hal_rtc_get_datetime(&datetime);
     furi_string_printf(
         name,
