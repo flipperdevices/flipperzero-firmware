@@ -1,5 +1,6 @@
 import multiprocessing
 import os
+from pathlib import Path, PurePosixPath
 
 from fbt.util import (
     FORWARDED_ENV_VARIABLES,
@@ -27,6 +28,17 @@ for env_value_name in variables_to_forward:
         forward_os_env[env_value_name] = environ_value
 
 
+class PosixPathWrapper:
+    def __init__(self, pathobj):
+        self.pathobj = pathobj
+
+    def __call__(self, target, source, env, for_signature):
+        if for_signature:
+            return self.pathobj
+
+        return PurePosixPath(Path(env.subst(self.pathobj)))
+
+
 coreenv = VAR_ENV.Clone(
     tools=[
         "fbt_tweaks",
@@ -43,6 +55,7 @@ coreenv = VAR_ENV.Clone(
         "ccache",
     ],
     TEMPFILE=TempFileMunge,
+    POSIXPATH=PosixPathWrapper,
     MAXLINELENGTH=2048,
     PROGSUFFIX=".elf",
     ENV=forward_os_env,
