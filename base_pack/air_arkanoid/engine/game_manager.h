@@ -13,7 +13,26 @@ Level* game_manager_add_level(GameManager* manager, const LevelBehaviour* behavi
 
 void game_manager_next_level_set(GameManager* manager, Level* level);
 
+/**
+ * @brief Get the current level
+ * @warning This function returns current level, but in entity start or stop callbacks, the level may be different from entity's level.
+ * For example, if an entity is added to a level_game and you currently are in level_pause, this function will return level_pause.
+ * Use game_manager_entity_level_get to get the entity's level, or save the level pointer somewhere.
+ * 
+ * @param manager game manager instance
+ * @return Level* level instance
+ */
 Level* game_manager_current_level_get(GameManager* manager);
+
+/**
+ * @brief Get the level of an entity
+ * @warning This function is kinda slow, use it only when other methods are not possible
+ * 
+ * @param manager 
+ * @param entity 
+ * @return Level* 
+ */
+Level* game_manager_entity_level_get(GameManager* manager, Entity* entity);
 
 GameEngine* game_manager_engine_get(GameManager* manager);
 

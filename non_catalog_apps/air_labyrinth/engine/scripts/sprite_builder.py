@@ -14,7 +14,6 @@ from PIL import Image, ImageOps
 #   uint32 height in px
 #   uint8[] pixel data, every row is padded to 8 bits (like XBM)
 
-
 def image2xbm(input_file_path):
     with Image.open(input_file_path) as im:
         with io.BytesIO() as output:
@@ -22,7 +21,6 @@ def image2xbm(input_file_path):
             bw = ImageOps.invert(bw)
             bw.save(output, format="XBM")
             return output.getvalue()
-
 
 def xbm2fxbm(data):
     # hell as it is, but it works
@@ -38,13 +36,12 @@ def xbm2fxbm(data):
     output += image_bin
     return output
 
-
 def process_sprites(input_dir, output_dir):
     for root, dirs, files in os.walk(input_dir):
         for file in files:
-            if file.startswith("."):
+            if file.startswith('.'):
                 continue
-
+            
             try:
                 input_file_path = os.path.join(root, file)
                 rel_path = os.path.relpath(input_file_path, input_dir)
@@ -61,14 +58,12 @@ def process_sprites(input_dir, output_dir):
             except Exception as e:
                 print(f"Cannot convert '{rel_path}': {e}")
 
-
 def clear_directory(directory):
     for root, dirs, files in os.walk(directory, topdown=False):
         for name in files:
             os.remove(os.path.join(root, name))
         for name in dirs:
             os.rmdir(os.path.join(root, name))
-
 
 def main():
     parser = argparse.ArgumentParser()
@@ -84,7 +79,6 @@ def main():
     process_sprites(args.source, args.target)
 
     return 0
-
 
 if __name__ == "__main__":
     main()

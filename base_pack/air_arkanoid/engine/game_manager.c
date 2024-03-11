@@ -160,3 +160,15 @@ Sprite* game_manager_sprite_load(GameManager* manager, const char* path) {
 
     return sprite;
 }
+
+Level* game_manager_entity_level_get(GameManager* manager, Entity* entity) {
+    LevelList_it_t it;
+    LevelList_it(it, manager->levels);
+    while(!LevelList_end_p(it)) {
+        if(level_contains_entity(*LevelList_cref(it), entity)) {
+            return *LevelList_cref(it);
+        }
+        LevelList_next(it);
+    }
+    return NULL;
+}

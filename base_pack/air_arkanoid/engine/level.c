@@ -10,6 +10,7 @@ LIST_DEF(EntityList, Entity*, M_POD_OPLIST);
     M_EACH(name, list, EntityList_t)
 
 #define LEVEL_DEBUG(...) FURI_LOG_D("Level", __VA_ARGS__)
+#define LEVEL_INFO(...) FURI_LOG_I("Level", __VA_ARGS__)
 #define LEVEL_ERROR(...) FURI_LOG_E("Level", __VA_ARGS__)
 
 struct Level {
@@ -19,11 +20,16 @@ struct Level {
     const LevelBehaviour* behaviour;
     void* context;
     GameManager* manager;
+
+    bool clear;
+    LevelClearCallback clear_callback;
+    void* clear_context;
 };
 
 Level* level_alloc(const LevelBehaviour* behaviour, GameManager* manager) {
     Level* level = malloc(sizeof(Level));
     level->manager = manager;
+    level->clear = false;
     EntityList_init(level->entities);
     EntityList_init(level->to_add);
     EntityList_init(level->to_remove);
@@ -62,7 +68,7 @@ static void level_process_remove(Level* level) {
     EntityList_clear(level->to_remove);
 }
 
-static bool level_entity_in_list_p(EntityList_t list, Entity* entity) {
+static bool level_entity_in_list_p(const EntityList_t list, Entity* entity) {
     FOREACH(item, list) {
         if(*item == entity) {
             return true;
@@ -71,22 +77,7 @@ static bool level_entity_in_list_p(EntityList_t list, Entity* entity) {
     return false;
 }
 
-void level_free(Level* level) {
-    level_clear(level);
-
-    EntityList_clear(level->entities);
-    EntityList_clear(level->to_add);
-    EntityList_clear(level->to_remove);
-
-    if(level->behaviour->context_size > 0) {
-        free(level->context);
-    }
-
-    LEVEL_DEBUG("Freeing level at %p", level);
-    free(level);
-}
-
-void level_clear(Level* level) {
+static void level_clear_entities(Level* level) {
     size_t iterations = 0;
 
     do {
@@ -109,7 +100,23 @@ void level_clear(Level* level) {
 
         // entity_call_stop can call level_remove_entity or level_add_entity
         // so we need to process to_add and to_remove again
-    } while(!EntityList_empty_p(level->to_add) || !EntityList_empty_p(level->to_remove));
+    } while(!EntityList_empty_p(level->to_add) || !EntityList_empty_p(level->to_remove) ||
+            !EntityList_empty_p(level->entities));
+}
+
+void level_free(Level* level) {
+    level_clear_entities(level);
+
+    EntityList_clear(level->entities);
+    EntityList_clear(level->to_add);
+    EntityList_clear(level->to_remove);
+
+    if(level->behaviour->context_size > 0) {
+        free(level->context);
+    }
+
+    LEVEL_DEBUG("Freeing level at %p", level);
+    free(level);
 }
 
 Entity* level_add_entity(Level* level, const EntityDescription* description) {
@@ -182,7 +189,19 @@ static void level_process_collision(Level* level, GameManager* manager) {
     }
 }
 
+void level_clear(Level* level, LevelClearCallback callback, void* context) {
+    level->clear_callback = callback;
+    level->clear_context = context;
+    level->clear = true;
+}
+
 void level_update(Level* level, GameManager* manager) {
+    if(level->clear) {
+        level_clear_entities(level);
+        level->clear_callback(level, level->clear_context);
+        level->clear = false;
+    }
+
     level_process_add(level);
     level_process_remove(level);
     level_process_update(level, manager);
@@ -244,6 +263,47 @@ size_t level_entity_count(const Level* level, const EntityDescription* descripti
     return count;
 }
 
+Entity* level_entity_get(const Level* level, const EntityDescription* description, size_t index) {
+    size_t count = 0;
+    FOREACH(item, level->entities) {
+        if(description == NULL || description == entity_description_get(*item)) {
+            if(!level_entity_in_list_p(level->to_remove, *item)) {
+                if(count == index) {
+                    return *item;
+                }
+                count++;
+            }
+        }
+    }
+
+    FOREACH(item, level->to_add) {
+        if(description == NULL || description == entity_description_get(*item)) {
+            if(!level_entity_in_list_p(level->to_remove, *item)) {
+                if(count == index) {
+                    return *item;
+                }
+                count++;
+            }
+        }
+    }
+
+    return NULL;
+}
+
 void* level_context_get(Level* level) {
     return level->context;
+}
+
+bool level_contains_entity(const Level* level, const Entity* entity) {
+    FOREACH(item, level->entities) {
+        if(*item == entity) {
+            return true;
+        }
+    }
+    FOREACH(item, level->to_add) {
+        if(*item == entity) {
+            return true;
+        }
+    }
+    return false;
 }
