@@ -51,6 +51,9 @@ Build has been made with official toolchain, **API Mismatch** error may appear i
 
 ## Changelog
 
+* 2024-03-11
+  * Bug fix
+
 * 2024-02-22
   * Bug fix
 
