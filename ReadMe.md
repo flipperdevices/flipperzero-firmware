@@ -60,6 +60,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [MALVEKE PIN Test v1.0 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external/malveke_pin_test) `Req: Malveke`
 - [Several apps updated to ensure DateTime library inclusion (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/3fc2ec344f601f64b29e92573bc4898df38647a6)
 - Updated: [Digimon F-Com v1.1 (By TylerWilley)](https://github.com/TylerWilley/flipper-f-com)
+- Added: [JS Script: Windows_Exfil-GSHD.js (By Gas Station Hot Dog)](https://github.com/User84User/User84PublicUser/blob/main/Windows_Exfil-GSHD.js)
+- [Fix JS Load (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/7034b4ded5db7d7436f064ef031f652d8682b942)
 
 <a name="release">
 

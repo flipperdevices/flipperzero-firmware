@@ -3191,9 +3191,9 @@ Function,+,storage_simply_remove,_Bool,"Storage*, const char*"
 Function,+,storage_simply_remove_recursive,_Bool,"Storage*, const char*"
 Function,+,storage_virtual_format,FS_Error,Storage*
 Function,+,storage_virtual_init,FS_Error,"Storage*, File*"
-Function,-,storage_virtual_mount,FS_Error,Storage*
+Function,+,storage_virtual_mount,FS_Error,Storage*
 Function,+,storage_virtual_quit,FS_Error,Storage*
-Function,-,storage_virtual_unmount,FS_Error,Storage*
+Function,+,storage_virtual_unmount,FS_Error,Storage*
 Function,-,stpcpy,char*,"char*, const char*"
 Function,-,stpncpy,char*,"char*, const char*, size_t"
 Function,+,strcasecmp,int,"const char*, const char*"
