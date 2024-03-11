@@ -1,32 +1,45 @@
-name: "FAP: Build"
+name: Build
+
 on:
   push:
     branches: [main]
+
 jobs:
   ufbt-build-action:
     runs-on: ubuntu-latest
-    name: 'ufbt: Build for Dev branch'
+    name: "ufbt: Build for dev channel"
+
+    strategy:
+      matrix:
+        include:
+          - name: dev channel
+            sdk-channel: dev
+
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
-          ref: master
-          sparse_checkout: FindMyFlipper
+          ref: FindMyFlipper
+          sparse-checkout: FindMyFlipper
+
       - name: Build with ufbt
-        uses: flipperdevices/flipperzero-ufbt-action@v0.1
+        uses: flipperdevices/flipperzero-ufbt-action@v0.1.2
         id: build-app
         with:
           # Set to 'release' to build for latest published release version
-          sdk-channel: dev
+          sdk-channel: ${{ matrix.sdk-channel }}
           app-dir: FindMyFlipper
-      - name: Upload app artifacts
-        uses: actions/upload-artifact@v3
+
+      - name: Get commit message
+        run: echo "COMMIT_MESSAGE=$(git log --format=%B -n 1 ${{ github.event.after }})" >> $GITHUB_ENV
+
+      - name: Bump version and push tag
+        id: tag_version
+        uses: mathieudutour/github-tag-action@v6.1
         with:
-          name: ${{ github.event.repository.name }}-${{ steps.build-app.outputs.suffix }}
-          path: ${{ steps.build-app.outputs.fap-artifacts }}
-      
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Create Release
-        uses: softprops/actions-gh-release@v2
+        uses: softprops/action-gh-release@v2
         with:
           name: ${{ env.COMMIT_MESSAGE }}
           token: ${{ secrets.RELEASE_TOKEN }}
