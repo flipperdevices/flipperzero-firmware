@@ -1,5 +1,6 @@
 #pragma once
 
+#include <datetime/datetime.h>
 #include <gui/view.h>
 #include <furi.h>
 #include <furi_hal.h>

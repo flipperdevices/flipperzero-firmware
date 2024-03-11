@@ -1,3 +1,4 @@
+#include <datetime/datetime.h>
 #include <furi.h>
 #include <furi_hal.h>
 #include <locale/locale.h>

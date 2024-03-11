@@ -1,5 +1,6 @@
 #include "camera.h"
 #include <expansion/expansion.h>
+#include <datetime/datetime.h>
 
 static void camera_view_draw_callback(Canvas* canvas, void* _model) {
     UartDumpModel* model = _model;

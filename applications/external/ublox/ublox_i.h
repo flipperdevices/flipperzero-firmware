@@ -6,6 +6,7 @@
 
 #include "helpers/ublox_types.h"
 
+#include <datetime/datetime.h>
 #include <furi.h>
 #include <furi_hal.h>
 

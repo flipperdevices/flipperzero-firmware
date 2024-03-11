@@ -5,6 +5,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 
+#include <datetime/datetime.h>
 #include <furi.h>
 #include <furi_hal.h>
 #include <furi_hal_speaker.h>

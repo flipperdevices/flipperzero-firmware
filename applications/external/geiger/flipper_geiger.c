@@ -2,6 +2,7 @@
 // Public Domain Dedication
 // https://github.com/nmrr
 
+#include <datetime/datetime.h>
 #include <stdio.h>
 #include <furi.h>
 #include <gui/gui.h>

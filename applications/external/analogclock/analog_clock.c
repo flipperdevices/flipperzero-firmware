@@ -4,6 +4,7 @@
 #include <gui/gui.h>
 #include <input/input.h>
 #include <locale/locale.h>
+#include <datetime/datetime.h>
 
 #define PI 3.14
 

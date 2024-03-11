@@ -5,6 +5,7 @@
 #include <core/log.h>
 #include <core/log.h>
 #include <furi_hal_rtc.h>
+#include <datetime/datetime.h>
 
 static bool calendar_app_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);

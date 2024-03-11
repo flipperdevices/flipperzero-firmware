@@ -1,6 +1,7 @@
 #pragma once
 
 #include "rock_paper_scissors_icons.h"
+#include <datetime/datetime.h>
 #include <furi.h>
 #include <furi_hal.h>
 #include <furi_hal_resources.h>

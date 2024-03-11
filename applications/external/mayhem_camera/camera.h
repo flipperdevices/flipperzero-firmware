@@ -7,6 +7,7 @@
 // 6. Emulate grayscale
 // 7. Photo browser app
 
+#include <datetime/datetime.h>
 #include <furi.h>
 #include <furi_hal.h>
 #include <gui/gui.h>
