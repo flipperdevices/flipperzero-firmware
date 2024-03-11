@@ -48,6 +48,9 @@ jobs:
           WARNINGS=0
           ./fbt COMPACT=1 PVSNOBROWSER=1 firmware_pvs || WARNINGS=1
           echo "warnings=${WARNINGS}" >> $GITHUB_OUTPUT
+          if [[ $WARNINGS -ne 0 ]]; then
+            echo "report-url=https://pvs.flipp.dev/${{steps.names.outputs.branch_name}}/${{steps.names.outputs.default_target}}-${{steps.names.outputs.suffix}}/index.html" >> $GITHUB_OUTPUT
+          fi
 
       - name: 'Upload report'
         if: ${{ !github.event.pull_request.head.repo.fork && (steps.pvs-warn.outputs.warnings != 0) }}
@@ -77,14 +80,13 @@ jobs:
           issue-number: ${{ github.event.pull_request.number }}
           body: |
             **PVS-Studio report for commit `${{steps.names.outputs.commit_sha}}`:**
-            - [Report](https://pvs.flipp.dev/${{steps.names.outputs.branch_name}}/${{steps.names.outputs.default_target}}-${{steps.names.outputs.suffix}}/index.html)
+            - [Report](${{ steps.pvs-warn.outputs.report-url }})
           edit-mode: replace
 
       - name: 'Raise exception'
         if: ${{ steps.pvs-warn.outputs.warnings != 0 }}
         run: |
           echo "Please fix all PVS warnings before merge"
-          echo "https://pvs.flipp.dev/${{steps.names.outputs.branch_name}}/${{steps.names.outputs.default_target}}-${{steps.names.outputs.suffix}}/index.html"
-          echo "[PVS report](https://pvs.flipp.dev/${{steps.names.outputs.branch_name}}/${{steps.names.outputs.default_target}}-${{steps.names.outputs.suffix}}/index.html)" >> $GITHUB_STEP_SUMMARY
+          echo "Report: ${{ steps.pvs-warn.outputs.report-url }}"
+          echo "[PVS report](${{ steps.pvs-warn.outputs.report-url }})" >> $GITHUB_STEP_SUMMARY
           exit 1
-
