@@ -1,0 +1,15 @@
+App(
+    appid="yapinvaders",
+    name="Yappy Invaders",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="yapinvaders_app",
+    requires=["gui"],
+    stack_size=1 * 1024,
+    order=90,
+    fap_icon="yapinvader.png",
+    fap_category="Games",
+    fap_icon_assets="assets",
+    fap_author="@dagnazty",
+    fap_version="1.0",
+    fap_description="Yappy version of Space Invaders.",
+)
