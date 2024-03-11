@@ -39,10 +39,12 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create Release
+        id: create_release
         uses: softprops/action-gh-release@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
         with:
-          name: ${{ env.COMMIT_MESSAGE }}
-          token: ${{ secrets.RELEASE_TOKEN }}
-          files: ${{ steps.build-app.outputs.fap-artifacts }}
-          generate_release_notes: true
-          tag_name: ${{steps.tag_version.outputs.new_tag}}
+            tag_name: ${{ github.ref }}
+            release_name: Release ${{ github.ref }}
+            draft: false
+            prerelease: false
