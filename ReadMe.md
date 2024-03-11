@@ -49,6 +49,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Pokemon Trading v1.8 (By EstebanFuentealba & kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
 - Updated: [FindMy Flipper v1.0 (By MatthewKuKanich)](https://github.com/MatthewKuKanich/FindMyFlipper) [With Startup Service (By Willy-JL & MatthewKuKanich)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/133b4a0ae2956b679dfcb69c242da8cc4aba0e10)
 - [For Patreon Memnbers](https://www.patreon.com/RogueMaster/membership): Added: [SCIFI / Corp Logos Build (Using Looped Versions) (By Kuronons)](https://github.com/Kuronons/FZ_graphics/tree/main/Animations/SF_Corporations_Logos/Animation_ZIP_files_%5BSF_Corporations_Logos_Looped%5D) [Also updated Manifest Switcher Build to Include These](https://github.com/RogueMaster/awesome-flipperzero-withModules/tree/rogue_main/graphics/dolphin-ManifestSwitcher)
+- Updated: [Barcode App v1.2 (By Kingal1337)](https://github.com/Kingal1337/flipper-barcode-generator)
 
 <a name="release">
 
@@ -335,7 +336,7 @@ $ ./fbt dolphin_ext
 - [AVR Flasher v1.2 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/2475)
 - [AZERTY Mouse Jacker (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/mousejacker) `Req: NRF24` (Uses AZERTY keyboard - Source Unknown)
 - [Bad KB (Modified PR#738 from pengu1ndev - Original from Willy-JL) #739 (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/739)
-- [Barcode App (By Kingal1337)](https://github.com/Kingal1337/flipper-barcode-generator)
+- [Barcode App v1.2 (By Kingal1337)](https://github.com/Kingal1337/flipper-barcode-generator)
 - [BarCode Scanner Emulator (By polarikus)](https://github.com/polarikus/flipper-zero_bc_scanner_emulator) `Uses: COM-port`
 - [Battery Checker (By Programistich)](https://github.com/Programistich/battery_checker)
 - [BG Loader (By twisted-pear)](https://github.com/twisted-pear/bgloader)
