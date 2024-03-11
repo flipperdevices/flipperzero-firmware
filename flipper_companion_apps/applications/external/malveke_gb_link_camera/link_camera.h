@@ -4,6 +4,7 @@
 #include <gui/icon_i.h>
 #include <storage/storage.h>
 #include <gui/view_dispatcher.h>
+#include <expansion/expansion.h>
 #include "cJSON.h"
 #include "qrcode.h"
 #include "uart.h"
