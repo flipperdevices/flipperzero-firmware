@@ -157,7 +157,6 @@ int32_t flipper_geiger_app()
     EventApp event;
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(EventApp));
 
-    furi_hal_gpio_init(&gpio_ext_pa7, GpioModeInterruptFall, GpioPullUp, GpioSpeedVeryHigh);
     furi_hal_pwm_start(FuriHalPwmOutputIdLptim2PA4, 5, 50);
 
     mutexStruct mutexVal;
@@ -183,6 +182,8 @@ int32_t flipper_geiger_app()
     view_port_input_callback_set(view_port, input_callback, event_queue);
 
     furi_hal_gpio_add_int_callback(&gpio_ext_pa7, gpiocallback, event_queue);
+    furi_hal_gpio_enable_int_callback(&gpio_ext_pa7);
+    furi_hal_gpio_init(&gpio_ext_pa7, GpioModeInterruptFall, GpioPullUp, GpioSpeedVeryHigh);
 
     Gui* gui = furi_record_open(RECORD_GUI);
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
