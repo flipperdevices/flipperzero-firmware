@@ -111,7 +111,7 @@ int dcf77_clock_sync_app_main(void* p) {
     set_dcf77_time(&app_data.dcf_dt, app_data.is_dst);
 
     ViewPort* view_port = view_port_alloc();
-    FuriMessageQueue* event_queue = furi_messa ge_queue_alloc(8, sizeof(InputEvent));
+    FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(InputEvent));
 
     view_port_draw_callback_set(view_port, app_draw_callback, &app_data);
     view_port_input_callback_set(view_port, app_input_callback, event_queue);
