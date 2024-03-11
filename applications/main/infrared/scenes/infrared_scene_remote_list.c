@@ -2,11 +2,11 @@
 
 static int32_t infrared_scene_remote_list_task_callback(void* context) {
     InfraredApp* infrared = context;
-    infrared->app_state.is_task_success =
+    const bool success =
         infrared_remote_load(infrared->remote, furi_string_get_cstr(infrared->file_path));
     view_dispatcher_send_custom_event(
         infrared->view_dispatcher, InfraredCustomEventTypeTaskFinished);
-    return 0;
+    return success;
 }
 
 static void infrared_scene_remote_list_select_and_load(InfraredApp* infrared) {
@@ -19,11 +19,10 @@ static void infrared_scene_remote_list_select_and_load(InfraredApp* infrared) {
 
     if(file_selected) {
         view_set_orientation(view_stack_get_view(infrared->view_stack), ViewOrientationVertical);
-        view_stack_add_view(infrared->view_stack, loading_get_view(infrared->loading));
         view_dispatcher_switch_to_view(infrared->view_dispatcher, InfraredViewStack);
+
         // Load the remote in a separate thread
-        furi_thread_set_callback(infrared->task_thread, infrared_scene_remote_list_task_callback);
-        furi_thread_start(infrared->task_thread);
+        infrared_blocking_task_start(infrared, infrared_scene_remote_list_task_callback);
 
     } else {
         scene_manager_previous_scene(infrared->scene_manager);
@@ -42,9 +41,9 @@ bool infrared_scene_remote_list_on_event(void* context, SceneManagerEvent event)
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == InfraredCustomEventTypeTaskFinished) {
-            view_stack_remove_view(infrared->view_stack, loading_get_view(infrared->loading));
+            const bool task_success = infrared_blocking_task_finalize(infrared);
 
-            if(infrared->app_state.is_task_success) {
+            if(task_success) {
                 scene_manager_next_scene(infrared->scene_manager, InfraredSceneRemote);
             } else {
                 infrared_show_error_message(

@@ -2,14 +2,14 @@
 
 static int32_t infrared_scene_edit_move_task_callback(void* context) {
     InfraredApp* infrared = context;
-    infrared->app_state.is_task_success = infrared_remote_move_signal(
+    const bool success = infrared_remote_move_signal(
         infrared->remote,
         infrared->app_state.prev_button_index,
         infrared->app_state.current_button_index);
     view_dispatcher_send_custom_event(
         infrared->view_dispatcher, InfraredCustomEventTypeTaskFinished);
 
-    return 0;
+    return success;
 }
 
 static void infrared_scene_edit_move_button_callback(
@@ -50,16 +50,13 @@ bool infrared_scene_edit_move_on_event(void* context, SceneManagerEvent event) {
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == InfraredCustomEventTypeButtonSelected) {
-            view_stack_add_view(infrared->view_stack, loading_get_view(infrared->loading));
             // Move the button in a separate thread
-            furi_thread_set_callback(
-                infrared->task_thread, infrared_scene_edit_move_task_callback);
-            furi_thread_start(infrared->task_thread);
+            infrared_blocking_task_start(infrared, infrared_scene_edit_move_task_callback);
 
         } else if(event.event == InfraredCustomEventTypeTaskFinished) {
-            view_stack_remove_view(infrared->view_stack, loading_get_view(infrared->loading));
+            const bool task_success = infrared_blocking_task_finalize(infrared);
 
-            if(!infrared->app_state.is_task_success) {
+            if(task_success) {
                 const char* signal_name = infrared_remote_get_signal_name(
                     infrared->remote, infrared->app_state.current_button_index);
                 infrared_show_error_message(infrared, "Failed to move\n\"%s\"", signal_name);

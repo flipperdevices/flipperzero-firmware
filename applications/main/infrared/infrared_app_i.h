@@ -82,7 +82,6 @@ typedef struct {
     bool is_learning_new_remote; /**< Learning new remote or adding to an existing one. */
     bool is_debug_enabled; /**< Whether to enable or disable debugging features. */
     bool is_transmitting; /**< Whether a signal is currently being transmitted. */
-    bool is_task_success; /**< Whether the last concurrent operation was successful. */
     InfraredEditTarget edit_target : 8; /**< Selected editing target (a remote or a button). */
     InfraredEditMode edit_mode : 8; /**< Selected editing operation (rename or delete). */
     int32_t current_button_index; /**< Selected button index (move destination). */
@@ -210,6 +209,27 @@ void infrared_tx_start_button_index(InfraredApp* infrared, size_t button_index);
  * @param[in,out] infrared pointer to the application instance.
  */
 void infrared_tx_stop(InfraredApp* infrared);
+
+/**
+ * @brief Start a blocking task in a separate thread.
+ *
+ * If a ViewStack is currently on screen, a busy "Hourglass" animation
+ * will be shown and no input will be accepted until completion.
+ *
+ * @param[in,out] infrared pointer to the application instance.
+ * @param[in] callback pointer to the function to be run in the thread.
+ */
+void infrared_blocking_task_start(InfraredApp* infrared, FuriThreadCallback callback);
+
+/**
+ * @brief Wait for a blocking task to finish.
+ *
+ * The busy animation will be hidden and input will be accepted again.
+ *
+ * @param[in,out] infrared pointer to the application instance.
+ * @return true if the blocking task finished successfully, false otherwise.
+ */
+bool infrared_blocking_task_finalize(InfraredApp* infrared);
 
 /**
  * @brief Set the internal text store with formatted text.

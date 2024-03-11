@@ -11,11 +11,11 @@ typedef enum {
 
 static int32_t infrared_scene_rpc_task_callback(void* context) {
     InfraredApp* infrared = context;
-    infrared->app_state.is_task_success =
+    const bool success =
         infrared_remote_load(infrared->remote, furi_string_get_cstr(infrared->file_path));
     view_dispatcher_send_custom_event(
         infrared->view_dispatcher, InfraredCustomEventTypeTaskFinished);
-    return 0;
+    return success;
 }
 
 void infrared_scene_rpc_on_enter(void* context) {
@@ -49,17 +49,14 @@ bool infrared_scene_rpc_on_event(void* context, SceneManagerEvent event) {
 
         if(event.event == InfraredCustomEventTypeRpcLoadFile) {
             if(rpc_state == InfraredRpcStateIdle) {
-                view_stack_add_view(infrared->view_stack, loading_get_view(infrared->loading));
-
                 // Load the remote in a separate thread
-                furi_thread_set_callback(infrared->task_thread, infrared_scene_rpc_task_callback);
-                furi_thread_start(infrared->task_thread);
+                infrared_blocking_task_start(infrared, infrared_scene_rpc_task_callback);
             }
 
         } else if(event.event == InfraredCustomEventTypeTaskFinished) {
-            view_stack_remove_view(infrared->view_stack, loading_get_view(infrared->loading));
+            const bool task_success = infrared_blocking_task_finalize(infrared);
 
-            if(app_state->is_task_success) {
+            if(task_success) {
                 const char* remote_name = infrared_remote_get_name(infrared->remote);
                 infrared_text_store_set(infrared, 0, "loaded\n%s", remote_name);
                 scene_manager_set_scene_state(
@@ -73,7 +70,7 @@ bool infrared_scene_rpc_on_event(void* context, SceneManagerEvent event) {
             popup_set_text(
                 infrared->popup, infrared->text_store[0], 89, 44, AlignCenter, AlignTop);
 
-            rpc_system_app_confirm(infrared->rpc_ctx, app_state->is_task_success);
+            rpc_system_app_confirm(infrared->rpc_ctx, task_success);
 
         } else if(
             event.event == InfraredCustomEventTypeRpcButtonPressName ||

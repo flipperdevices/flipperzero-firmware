@@ -8,13 +8,13 @@ static int32_t infrared_scene_edit_rename_task_callback(void* context) {
     InfraredAppState* app_state = &infrared->app_state;
     const InfraredEditTarget edit_target = app_state->edit_target;
 
+    bool success;
     if(edit_target == InfraredEditTargetButton) {
         furi_assert(app_state->current_button_index != InfraredButtonIndexNone);
-        app_state->is_task_success = infrared_remote_rename_signal(
+        success = infrared_remote_rename_signal(
             infrared->remote, app_state->current_button_index, infrared->text_store[0]);
     } else if(edit_target == InfraredEditTargetRemote) {
-        app_state->is_task_success =
-            infrared_rename_current_remote(infrared, infrared->text_store[0]);
+        success = infrared_rename_current_remote(infrared, infrared->text_store[0]);
     } else {
         furi_crash();
     }
@@ -22,7 +22,7 @@ static int32_t infrared_scene_edit_rename_task_callback(void* context) {
     view_dispatcher_send_custom_event(
         infrared->view_dispatcher, InfraredCustomEventTypeTaskFinished);
 
-    return 0;
+    return success;
 }
 
 void infrared_scene_edit_rename_on_enter(void* context) {
@@ -88,18 +88,14 @@ bool infrared_scene_edit_rename_on_event(void* context, SceneManagerEvent event)
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == InfraredCustomEventTypeTextEditDone) {
-            view_stack_add_view(infrared->view_stack, loading_get_view(infrared->loading));
             // Rename a button or a remote in a separate thread
-            furi_thread_set_callback(
-                infrared->task_thread, infrared_scene_edit_rename_task_callback);
-            furi_thread_start(infrared->task_thread);
+            infrared_blocking_task_start(infrared, infrared_scene_edit_rename_task_callback);
 
         } else if(event.event == InfraredCustomEventTypeTaskFinished) {
-            view_stack_remove_view(infrared->view_stack, loading_get_view(infrared->loading));
-
+            const bool task_success = infrared_blocking_task_finalize(infrared);
             InfraredAppState* app_state = &infrared->app_state;
 
-            if(app_state->is_task_success) {
+            if(task_success) {
                 scene_manager_next_scene(scene_manager, InfraredSceneEditRenameDone);
             } else {
                 const char* edit_target_text =

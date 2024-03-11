@@ -34,27 +34,22 @@ static void infrared_scene_universal_common_hide_popup(InfraredApp* infrared) {
 
 static int32_t infrared_scene_universal_common_task_callback(void* context) {
     InfraredApp* infrared = context;
-    infrared->app_state.is_task_success =
-        infrared_brute_force_calculate_messages(infrared->brute_force);
+    const bool success = infrared_brute_force_calculate_messages(infrared->brute_force);
     view_dispatcher_send_custom_event(
         infrared->view_dispatcher,
         infrared_custom_event_pack(InfraredCustomEventTypeTaskFinished, 0));
 
-    return 0;
+    return success;
 }
 
 void infrared_scene_universal_common_on_enter(void* context) {
     InfraredApp* infrared = context;
     view_set_orientation(view_stack_get_view(infrared->view_stack), ViewOrientationVertical);
-
     view_stack_add_view(infrared->view_stack, button_panel_get_view(infrared->button_panel));
-    view_stack_add_view(infrared->view_stack, loading_get_view(infrared->loading));
-
     view_dispatcher_switch_to_view(infrared->view_dispatcher, InfraredViewStack);
 
     // Load universal remote data in background
-    furi_thread_set_callback(infrared->task_thread, infrared_scene_universal_common_task_callback);
-    furi_thread_start(infrared->task_thread);
+    infrared_blocking_task_start(infrared, infrared_scene_universal_common_task_callback);
 }
 
 bool infrared_scene_universal_common_on_event(void* context, SceneManagerEvent event) {
@@ -99,9 +94,9 @@ bool infrared_scene_universal_common_on_event(void* context, SceneManagerEvent e
                     scene_manager_next_scene(scene_manager, InfraredSceneErrorDatabases);
                 }
             } else if(event_type == InfraredCustomEventTypeTaskFinished) {
-                view_stack_remove_view(infrared->view_stack, loading_get_view(infrared->loading));
+                const bool task_success = infrared_blocking_task_finalize(infrared);
 
-                if(!infrared->app_state.is_task_success) {
+                if(!task_success) {
                     scene_manager_next_scene(infrared->scene_manager, InfraredSceneErrorDatabases);
                 }
             }
