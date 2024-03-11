@@ -39,6 +39,7 @@
     ((!app->modbus->slave && FUNCTION <= 0x06) || (app->modbus->slave && FUNCTION >= 0x0F))
 #define SLAVE buf[0]
 #define FUNCTION buf[1]
+#define EXCEPTION buf[2] - 1
 #define CRCH buf[len - 2]
 #define CRCL buf[len - 1]
 //////////////////////////   Defining Structs  //////////////////////////
@@ -216,12 +217,12 @@ static const char* exceptionCodes[] = {
     "ILLEGAL DATA VALUE ",
     "SLAVE DEVICE FAILURE",
     "ACKNOWLEDGE",
-    "SLAVE DEVICE BUSY ",
+    "SLAVE DEVICE BUSY",
     "",
-    "MEMORY PARITY ERROR ",
+    "MEMORY PARITY ERROR",
     "",
-    "GATEWAY PATH UNAVAILABLE"
-    "GATEWAY TARGET DEVICE FAILED TO RESPOND"};
+    "GATEWAY PATH\nUNAVAILABLE"
+    "GATEWAY TARGET DEVICE\nFAILED TO RESPOND"};
 LL_USART_InitTypeDef buildUartSettings(Config* cfg) {
     LL_USART_InitTypeDef USART_InitStruct;
     USART_InitStruct.PrescalerValue = LL_USART_PRESCALER_DIV1;
@@ -311,7 +312,7 @@ void discreteValuesParser(void* context, uint8_t* buff, size_t len, FuriString* 
                 furi_string_cat_printf(
                     data,
                     "%s%s",
-                    value >> i && 0x01 ? "ON" : "OFF",
+                    value >> i & 0x01 ? "ON" : "OFF",
                     i == 3 ? "\n->" :
                     i == 7 ? "" :
                              ",");
@@ -397,7 +398,7 @@ void pduParser(void* context, bool slave, uint8_t* buf, size_t len, FuriString* 
 }
 void ErrParser(uint8_t* buf, size_t len, FuriString* data) {
     furi_string_cat_printf(
-        data, "\nException code (%02X): %s\n", FUNCTION, exceptionCodes[FUNCTION - 0x09]);
+        data, "\nException code (%02X):\n%s\n", FUNCTION, exceptionCodes[EXCEPTION]);
     for(size_t i = 0; i < len; i++) furi_string_cat_printf(data, "%02X", buf[i]);
 }
 void ModbusParser(uint8_t* buf, size_t len, App* app, FuriString* data) {
@@ -420,7 +421,7 @@ void handle_rx_data_cb(uint8_t* buf, size_t len, void* context) {
     furi_assert(context);
     App* app = context;
     buf[len] = '\0';
-
+    // /*
     FuriString* data = furi_string_alloc();
     furi_string_reset(data);
     furi_string_cat_printf(data, "\n------%s-------", app->modbus->slave ? "-SLAVE" : "MASTER");
@@ -430,13 +431,14 @@ void handle_rx_data_cb(uint8_t* buf, size_t len, void* context) {
         furi_string_cat_str(data, "\nCRC check Failed:\n");
         for(size_t i = 0; i < len; i++) furi_string_cat_printf(data, "%02X", buf[i]);
     }
-
+    // */
+    //for(size_t i = 0; i < len; i++) furi_string_cat_printf(data, "%02X", buf[i]);
+    //furi_string_cat_str(data, "\n");
     app->textLen += furi_string_size(data);
     if(app->textLen >= 3500 - 1) {
         furi_string_right(app->text, app->textLen / 2);
         app->textLen = furi_string_size(app->text) + furi_string_size(data);
     }
-
     furi_string_cat_str(app->text, furi_string_get_cstr(data));
 
     if(app->LOGfileReady)
