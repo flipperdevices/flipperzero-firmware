@@ -65,6 +65,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Authenticator/TOTP v5.13.0 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
 - Updated: [GPS v1.4 (By ezod)](https://github.com/ezod/flipperzero-gps) `Req: NMEA 0183`
 - OFW: [DateTime: fix missing weekday in datetime_timestamp_to_datetime #3508 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3508)
+- [Patreon Builds Update](https://www.patreon.com/RogueMaster/membership): Added: [One Piece x Flipper animation (By RogueMaster)](https://github.com/RogueMaster/awesome-flipperzero-withModules/tree/rogue_main/graphics/WIP%2BUncompiled%20animations/RM_OPxFlipper_128x64) Builds updated: ManifestSwitcher, Minimal, One Pice & SJUMP.
 
 <a name="release">
 
