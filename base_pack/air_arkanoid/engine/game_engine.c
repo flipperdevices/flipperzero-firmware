@@ -1,17 +1,11 @@
 #include "game_engine.h"
 #include <furi.h>
-#include <furi_hal_rtc.h>
 #include <gui/gui.h>
 #include <input/input.h>
 #include <notification/notification_messages.h>
 #include "clock_timer.h"
 
 typedef _Atomic uint32_t AtomicUint32;
-
-typedef struct {
-    bool lefty;
-    AtomicUint32 state;
-} InputHolder;
 
 GameEngineSettings game_engine_settings_init() {
     GameEngineSettings settings;
@@ -67,7 +61,7 @@ static void clock_timer_callback(void* context) {
     furi_thread_flags_set(engine->thread_id, GameThreadFlagUpdate);
 }
 
-static const GameKey keys_right_hand[] = {
+static const GameKey keys[] = {
     [InputKeyUp] = GameKeyUp,
     [InputKeyDown] = GameKeyDown,
     [InputKeyRight] = GameKeyRight,
@@ -76,32 +70,19 @@ static const GameKey keys_right_hand[] = {
     [InputKeyBack] = GameKeyBack,
 };
 
-static const GameKey keys_left_hand[] = {
-    [InputKeyUp] = GameKeyDown,
-    [InputKeyDown] = GameKeyUp,
-    [InputKeyRight] = GameKeyLeft,
-    [InputKeyLeft] = GameKeyRight,
-    [InputKeyOk] = GameKeyOk,
-    [InputKeyBack] = GameKeyBack,
-};
-static_assert(
-    sizeof(keys_right_hand) == sizeof(keys_left_hand),
-    "keys_right_hand and keys_left_hand do not match!");
-
-static const size_t keys_count = sizeof(keys_right_hand) / sizeof(keys_right_hand[0]);
+static const size_t keys_count = sizeof(keys) / sizeof(keys[0]);
 
 static void input_events_callback(const void* value, void* context) {
-    InputHolder* holder = context;
+    AtomicUint32* input_state = context;
     const InputEvent* event = value;
-    const GameKey* keys = holder->lefty ? keys_left_hand : keys_right_hand;
 
     if(event->key < keys_count) {
         switch(event->type) {
         case InputTypePress:
-            holder->state |= (keys[event->key]);
+            *input_state |= (keys[event->key]);
             break;
         case InputTypeRelease:
-            holder->state &= ~(keys[event->key]);
+            *input_state &= ~(keys[event->key]);
             break;
         default:
             break;
@@ -111,10 +92,7 @@ static void input_events_callback(const void* value, void* context) {
 
 void game_engine_run(GameEngine* engine) {
     // input state
-    InputHolder input_state = {
-        .lefty = furi_hal_rtc_is_flag_set(FuriHalRtcFlagHandOrient),
-        .state = 0,
-    };
+    AtomicUint32 input_state = 0;
     uint32_t input_prev_state = 0;
 
     // set backlight if needed
@@ -152,7 +130,7 @@ void game_engine_run(GameEngine* engine) {
             time_start = time_end;
 
             // update input state
-            uint32_t input_current_state = input_state.state;
+            uint32_t input_current_state = input_state;
             InputState input = {
                 .held = input_current_state,
                 .pressed = input_current_state & ~input_prev_state,
@@ -172,7 +150,7 @@ void game_engine_run(GameEngine* engine) {
             // show fps if needed
             if(engine->settings.show_fps) {
                 canvas_set_color(canvas, ColorXOR);
-                canvas_printf(canvas, 0, 7, "%lu", (uint32_t)roundf(engine->fps));
+                canvas_printf(canvas, 0, 7, "%u", (uint32_t)roundf(engine->fps));
             }
 
             // and output screen buffer

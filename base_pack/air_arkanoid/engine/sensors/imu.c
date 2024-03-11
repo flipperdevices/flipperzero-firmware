@@ -37,7 +37,6 @@ typedef struct {
     FuriThread* thread;
     ICM42688P* icm42688p;
     ImuProcessedData processed_data;
-    bool lefty;
 } ImuThread;
 
 static void imu_madgwick_filter(
@@ -169,7 +168,7 @@ ImuThread* imu_start(ICM42688P* icm42688p) {
     ImuThread* imu = malloc(sizeof(ImuThread));
     imu->icm42688p = icm42688p;
     imu->thread = furi_thread_alloc_ex("ImuThread", 4096, imu_thread, imu);
-    imu->lefty = furi_hal_rtc_is_flag_set(FuriHalRtcFlagHandOrient);
+
     furi_thread_start(imu->thread);
 
     return imu;
@@ -313,8 +312,7 @@ bool imu_present(Imu* imu) {
 
 float imu_pitch_get(Imu* imu) {
     // we pretend that reading a float is an atomic operation
-    return imu->thread->lefty ? -imu->thread->processed_data.pitch :
-                                imu->thread->processed_data.pitch;
+    return imu->thread->processed_data.pitch;
 }
 
 float imu_roll_get(Imu* imu) {
@@ -324,5 +322,5 @@ float imu_roll_get(Imu* imu) {
 
 float imu_yaw_get(Imu* imu) {
     // we pretend that reading a float is an atomic operation
-    return imu->thread->lefty ? -imu->thread->processed_data.yaw : imu->thread->processed_data.yaw;
+    return imu->thread->processed_data.yaw;
 }
