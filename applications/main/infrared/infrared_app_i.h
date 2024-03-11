@@ -222,9 +222,10 @@ void infrared_tx_stop(InfraredApp* infrared);
 void infrared_blocking_task_start(InfraredApp* infrared, FuriThreadCallback callback);
 
 /**
- * @brief Wait for a blocking task to finish.
+ * @brief Wait for a blocking task to finish and receive the result.
  *
- * The busy animation will be hidden and input will be accepted again.
+ * Upon the completion of a blocking task, the busy animation will be hidden
+ * and input will be accepted again.
  *
  * @param[in,out] infrared pointer to the application instance.
  * @return true if the blocking task finished successfully, false otherwise.
