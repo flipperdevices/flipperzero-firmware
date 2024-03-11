@@ -4,7 +4,7 @@
 #include <stdbool.h>
 #include "uhf_buffer.h"
 
-#define UHF_UART_RX_BUFFER_SIZE 100
+#define UHF_UART_RX_BUFFER_SIZE 250
 #define UHF_UART_WORKER_STACK_SIZE 1 * 1024
 #define UHF_UART_DEFAULT_BAUDRATE 115200
 #define UHF_UART_FRAME_START 0xBB
@@ -16,10 +16,8 @@ typedef void (*CallbackFunction)(uint8_t *data, void *ctx);
 
 typedef enum{
     UHFUartWorkerWaitingDataFlag = 1 << 0,
-    UHFUartWorkerExitingFlag = 1 << 1,
+    UHFUartWorkerExitingFlag = 1 << 2,
 }UHFUartWorkerEventFlag;
-
-// static void uhf_uart_received_byte_callback(FuriHalSerialHandle* handle, FuriHalSerialRxEvent event, void *ctx);
 
 typedef struct{
     FuriHalBus bus;
@@ -42,4 +40,6 @@ void uhf_uart_send(UHFUart* uart, uint8_t* data, size_t size);
 void uhf_uart_send_wait(UHFUart* uart, uint8_t* data, size_t size);
 void uhf_uart_set_receive_byte_callback(UHFUart* uart, FuriHalSerialAsyncRxCallback callback, void *ctx, bool report_errors);
 void uhf_uart_set_baudrate(UHFUart* uart, uint32_t baudrate);
+bool uhf_uart_tick(UHFUart* uart);
+void uhf_uart_tick_reset(UHFUart* uart);
 

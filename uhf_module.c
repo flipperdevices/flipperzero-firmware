@@ -2,7 +2,7 @@
 #include "uhf_module_cmd.h"
 
 #define DELAY_MS 100
-#define WAIT_TICK 8000 // max wait time in between each byte
+#define WAIT_TICK 4000 // max wait time in between each byte
 
 volatile uint16_t tick = 0;
 
@@ -16,11 +16,19 @@ volatile uint16_t tick = 0;
 // }
 
 static M100ResponseType setup_and_send_rx(M100Module* module, uint8_t* cmd, size_t cmd_length) {
-    uhf_uart_send(module->uart, cmd, cmd_length);
-    buffer_close(module->uart->buffer);
+    UHFUart* uart = module->uart;
+    Buffer* buffer = uart->buffer;
+    // clear buffer
+    uhf_buffer_reset(buffer);
+    // send cmd
+    uhf_uart_send_wait(uart, cmd, cmd_length);
+    // wait for response
+    while(!uhf_is_buffer_closed(buffer) && !uhf_uart_tick(uart)) {}
+    // reset tick
+    uhf_uart_tick_reset(uart);
     // Validation Checks
-    uint8_t* data = buffer_get_data(module->uart->buffer);
-    size_t length = buffer_get_size(module->uart->buffer);
+    uint8_t* data = uhf_buffer_get_data(buffer);
+    size_t length = uhf_buffer_get_size(buffer);
     // check if size > 0
     if(!length) return M100EmptyResponse;
     // check if data is valid
@@ -86,8 +94,8 @@ uint16_t crc16_genibus(const uint8_t* data, size_t length) {
 }
 
 char* _m100_info_helper(M100Module* module, char** info) {
-    if(!buffer_get_size(module->uart->buffer)) return NULL;
-    uint8_t* data = buffer_get_data(module->uart->buffer);
+    if(!uhf_buffer_get_size(module->uart->buffer)) return NULL;
+    uint8_t* data = uhf_buffer_get_data(module->uart->buffer);
     uint16_t payload_len = data[3];
     payload_len = (payload_len << 8) + data[4];
     FuriString* temp_str = furi_string_alloc();
@@ -123,8 +131,8 @@ M100ResponseType m100_single_poll(M100Module* module, UHFTag* uhf_tag) {
     M100ResponseType rp_type =
         setup_and_send_rx(module, (uint8_t*)&CMD_SINGLE_POLLING.cmd[0], CMD_SINGLE_POLLING.length);
     if(rp_type != M100SuccessResponse) return rp_type;
-    uint8_t* data = buffer_get_data(module->uart->buffer);
-    size_t length = buffer_get_size(module->uart->buffer);
+    uint8_t* data = uhf_buffer_get_data(module->uart->buffer);
+    size_t length = uhf_buffer_get_size(module->uart->buffer);
     uint16_t pc = data[6];
     uint16_t crc = 0;
     // mask out epc length from protocol control
@@ -180,7 +188,7 @@ M100ResponseType m100_set_select(M100Module* module, UHFTag* uhf_tag) {
 
     setup_and_send_rx(module, cmd, 12 + mask_length_bytes + 3);
 
-    uint8_t* data = buffer_get_data(module->uart->buffer);
+    uint8_t* data = uhf_buffer_get_data(module->uart->buffer);
     if(checksum(data + 1, 5) != data[6]) return M100ValidationFail; // error in rx
     if(data[5] != 0x00) return M100ValidationFail; // error if not 0
 
@@ -188,7 +196,7 @@ M100ResponseType m100_set_select(M100Module* module, UHFTag* uhf_tag) {
 }
 
 UHFTag* m100_get_select_param(M100Module* module) {
-    buffer_reset(module->uart->buffer);
+    uhf_buffer_reset(module->uart->buffer);
     // furi_hal_uart_set_irq_cb(FuriHalUartIdLPUART1, rx_callback, module->uart->buffer);
     // furi_hal_uart_tx(
     //     FuriHalUartIdUSART1,
@@ -232,7 +240,7 @@ M100ResponseType m100_read_label_data_storage(
     M100ResponseType rp_type = setup_and_send_rx(module, cmd, cmd_length);
     if(rp_type != M100SuccessResponse) return rp_type;
 
-    uint8_t* data = buffer_get_data(module->uart->buffer);
+    uint8_t* data = uhf_buffer_get_data(module->uart->buffer);
 
     uint8_t rtn_command = data[2];
     uint16_t payload_len = data[3];
@@ -321,8 +329,8 @@ M100ResponseType m100_write_label_data_storage(
     //     if(!timeout--) break;
     // }
     setup_and_send_rx(module, cmd, cmd_length);
-    uint8_t* buff_data = buffer_get_data(module->uart->buffer);
-    size_t buff_length = buffer_get_size(module->uart->buffer);
+    uint8_t* buff_data = uhf_buffer_get_data(module->uart->buffer);
+    size_t buff_length = uhf_buffer_get_size(module->uart->buffer);
     if(buff_data[2] == 0xFF && buff_length == 8)
         return M100NoTagResponse;
     else if(buff_data[2] == 0xFF)
