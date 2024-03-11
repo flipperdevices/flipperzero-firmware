@@ -34,7 +34,7 @@ static void gb_live_camera_view_draw_callback(Canvas* canvas, void* _model) {
 }
 
 void get_timefilename(FuriString* name) {
-    FuriHalRtcDateTime datetime = {0};
+    DateTime datetime = {0}; 
     furi_hal_rtc_get_datetime(&datetime);
     furi_string_printf(
         name,
@@ -113,26 +113,23 @@ static bool gb_live_camera_view_input_callback(InputEvent* event, void* context)
     if(event->type == InputTypePress) {
         if(event->key == InputKeyUp) {
             const char gblivecamera_command_enable_dithering[] = "gblivecamera -D\n";
-            furi_hal_uart_tx(
-                FuriHalUartIdUSART1,
-                (uint8_t*)gblivecamera_command_enable_dithering,
+            furi_hal_serial_tx(instance->serial_handle_uart, 
+                (uint8_t*)gblivecamera_command_enable_dithering, 
                 strlen(gblivecamera_command_enable_dithering));
         } else if(event->key == InputKeyDown) {
             const char gblivecamera_command_disable_dithering[] = "gblivecamera -d\n";
-            furi_hal_uart_tx(
-                FuriHalUartIdUSART1,
+            furi_hal_serial_tx(instance->serial_handle_uart, 
                 (uint8_t*)gblivecamera_command_disable_dithering,
                 strlen(gblivecamera_command_disable_dithering));
         } else if(event->key == InputKeyRight) {
             const char gblivecamera_command_increase_exposure[] = "gblivecamera -E\n";
-            furi_hal_uart_tx(
-                FuriHalUartIdUSART1,
+            furi_hal_serial_tx(instance->serial_handle_uart, 
                 (uint8_t*)gblivecamera_command_increase_exposure,
                 strlen(gblivecamera_command_increase_exposure));
+            
         } else if(event->key == InputKeyLeft) {
             const char gblivecamera_command_decrease_exposure[] = "gblivecamera -e\n";
-            furi_hal_uart_tx(
-                FuriHalUartIdUSART1,
+            furi_hal_serial_tx(instance->serial_handle_uart, 
                 (uint8_t*)gblivecamera_command_decrease_exposure,
                 strlen(gblivecamera_command_decrease_exposure));
         } else if(event->key == InputKeyOk) {
@@ -141,11 +138,12 @@ static bool gb_live_camera_view_input_callback(InputEvent* event, void* context)
                 UartDumpModel * model,
                 {
                     if(!model->initialized) {
+                        // model->initialized = true; // We've successfully established the connection
                         const char gblivecamera_command[] = "gblivecamera\n\n";
-                        furi_hal_uart_tx(
-                            FuriHalUartIdUSART1,
+                        furi_hal_serial_tx(instance->serial_handle_uart, 
                             (uint8_t*)gblivecamera_command,
                             strlen(gblivecamera_command));
+                        
                     } else {
                         save_image(context);
                     }
@@ -157,17 +155,19 @@ static bool gb_live_camera_view_input_callback(InputEvent* event, void* context)
 }
 
 static uint32_t gb_live_camera_exit(void* context) {
-    UNUSED(context);
+    UartEchoApp* app = context;
     const char stop_command[] = "stopgblivecamera\n";
-    furi_hal_uart_tx(FuriHalUartIdUSART1, (uint8_t*)stop_command, strlen(stop_command));
+    // furi_hal_uart_tx(FuriHalUartIdUSART1, (uint8_t*)stop_command, strlen(stop_command));
+    furi_hal_serial_tx(app->serial_handle_uart, (uint8_t*)stop_command, strlen(stop_command));
     return VIEW_NONE;
 }
 
-static void gb_live_camera_on_irq_cb(UartIrqEvent ev, uint8_t data, void* context) {
+static void gb_live_camera_on_irq_cb(FuriHalSerialHandle* handle, FuriHalSerialRxEvent event, void* context) {
     furi_assert(context);
     UartEchoApp* app = context;
 
-    if(ev == UartIrqEventRXNE) {
+    if(event == FuriHalSerialRxEventData) {
+        uint8_t data = furi_hal_serial_async_rx(handle);
         furi_stream_buffer_send(app->rx_stream, &data, 1, 0);
         furi_thread_flags_set(furi_thread_get_id(app->worker_thread), WorkerEventRx);
     }
@@ -291,11 +291,31 @@ static UartEchoApp* gb_live_camera_app_alloc() {
     furi_thread_start(app->worker_thread);
 
     // Enable uart listener (UART & UART1)
+    app->serial_handle_uart = furi_hal_serial_control_acquire(FuriHalSerialIdUsart);
+    if(!app->serial_handle_uart) {
+        furi_delay_ms(5000);
+    }
+    furi_check(app->serial_handle_uart);
+    furi_hal_serial_init(app->serial_handle_uart,  BAUDRATE);
+
+    app->serial_handle_lp_uart = furi_hal_serial_control_acquire(FuriHalSerialIdLpuart);
+    if(!app->serial_handle_lp_uart) {
+        furi_delay_ms(5000);
+    }
+    furi_check(app->serial_handle_lp_uart);
+    furi_hal_serial_init(app->serial_handle_lp_uart,  BAUDRATE);
+    furi_hal_serial_async_rx_start(app->serial_handle_lp_uart, gb_live_camera_on_irq_cb, app, false);
+
+    
+
+
+
+
     // furi_hal_console_disable();
-    furi_hal_uart_set_br(FuriHalUartIdUSART1, 115200);
-    furi_hal_uart_init(FuriHalUartIdLPUART1, 115200);
-    furi_hal_uart_set_br(FuriHalUartIdLPUART1, 115200);
-    furi_hal_uart_set_irq_cb(FuriHalUartIdLPUART1, gb_live_camera_on_irq_cb, app);
+    // furi_hal_uart_set_br(FuriHalUartIdUSART1, 115200);
+    // furi_hal_uart_init(FuriHalUartIdLPUART1, 115200);
+    // furi_hal_uart_set_br(FuriHalUartIdLPUART1, 115200);
+    // furi_hal_uart_set_irq_cb(FuriHalUartIdLPUART1, gb_live_camera_on_irq_cb, app);
     // furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, gb_live_camera_on_irq_cb, app);
     furi_hal_power_enable_otg();
     furi_delay_ms(1);
@@ -309,9 +329,12 @@ static void gb_live_camera_app_free(UartEchoApp* app) {
     furi_thread_join(app->worker_thread);
     furi_thread_free(app->worker_thread);
 
-    // furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, NULL, NULL);
-    furi_hal_uart_set_irq_cb(FuriHalUartIdLPUART1, NULL, NULL);
-    furi_hal_uart_deinit(FuriHalUartIdLPUART1);
+    furi_hal_serial_deinit(app->serial_handle_uart);
+    furi_hal_serial_control_release(app->serial_handle_uart);
+
+    furi_hal_serial_deinit(app->serial_handle_lp_uart);
+    furi_hal_serial_control_release(app->serial_handle_lp_uart);
+
 
     notification_message(app->notification, &sequence_display_backlight_enforce_auto);
     // Free views
@@ -333,12 +356,19 @@ static void gb_live_camera_app_free(UartEchoApp* app) {
 
 int32_t gb_live_camera_app(void* p) {
     UNUSED(p);
+    // Disable expansion protocol to avoid interference with UART Handle
+    Expansion* expansion = furi_record_open(RECORD_EXPANSION);
+    expansion_disable(expansion);
 
     UartEchoApp* app = gb_live_camera_app_alloc();
     view_dispatcher_run(app->view_dispatcher);
     gb_live_camera_app_free(app);
 
     furi_hal_power_disable_otg();
+
+    // Return previous state of expansion
+    expansion_enable(expansion);
+    furi_record_close(RECORD_EXPANSION);
 
     return 0;
 }

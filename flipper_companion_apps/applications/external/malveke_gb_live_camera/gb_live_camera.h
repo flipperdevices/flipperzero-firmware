@@ -14,14 +14,14 @@
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
 #include <gui/elements.h>
-#include <furi_hal_uart.h>
-#include <furi_hal_console.h>
 #include <gui/view_dispatcher.h>
 #include <gui/modules/dialog_ex.h>
 #include <storage/filesystem_api_defines.h>
 #include <storage/storage.h>
+#include <expansion/expansion.h>
 
 #define THREAD_ALLOC 2048
+#define BAUDRATE (115200UL)
 
 #define FRAME_WIDTH 128
 #define FRAME_HEIGTH 64
@@ -85,6 +85,8 @@ typedef struct {
     View* view;
     FuriThread* worker_thread;
     FuriStreamBuffer* rx_stream;
+    FuriHalSerialHandle* serial_handle_uart;
+    FuriHalSerialHandle* serial_handle_lp_uart;
 } UartEchoApp;
 
 struct UartDumpModel {
