@@ -1,21 +1,15 @@
 #include "../infrared_app_i.h"
 
-#include <toolbox/concurrent_runner.h>
-
-#define TASK_STACK_SIZE (2048UL)
-
-static void infrared_scene_edit_move_task_callback(void* context) {
+static int32_t infrared_scene_edit_move_task_callback(void* context) {
     InfraredApp* infrared = context;
     infrared->app_state.is_task_success = infrared_remote_move_signal(
         infrared->remote,
         infrared->app_state.prev_button_index,
         infrared->app_state.current_button_index);
-}
-
-static void infrared_scene_edit_move_task_finished_callback(void* context) {
-    InfraredApp* infrared = context;
     view_dispatcher_send_custom_event(
         infrared->view_dispatcher, InfraredCustomEventTypeTaskFinished);
+
+    return 0;
 }
 
 static void infrared_scene_edit_move_button_callback(
@@ -58,11 +52,9 @@ bool infrared_scene_edit_move_on_event(void* context, SceneManagerEvent event) {
         if(event.event == InfraredCustomEventTypeButtonSelected) {
             view_stack_add_view(infrared->view_stack, loading_get_view(infrared->loading));
             // Move button in a separate thread
-            concurrent_runner_start(
-                TASK_STACK_SIZE,
-                infrared_scene_edit_move_task_callback,
-                infrared_scene_edit_move_task_finished_callback,
-                infrared);
+            furi_thread_set_callback(
+                infrared->task_thread, infrared_scene_edit_move_task_callback);
+            furi_thread_start(infrared->task_thread);
 
         } else if(event.event == InfraredCustomEventTypeTaskFinished) {
             view_stack_remove_view(infrared->view_stack, loading_get_view(infrared->loading));

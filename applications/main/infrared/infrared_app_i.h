@@ -120,6 +120,7 @@ struct InfraredApp {
     Loading* loading; /**< Standard view for informing about long operations. */
     InfraredProgressView* progress; /**< Custom view for showing brute force progress. */
 
+    FuriThread* task_thread; /**< Pointer to a FuriThread instance for concurrent tasks. */
     FuriString* file_path; /**< Full path to the currently loaded file. */
     FuriString* button_name; /**< Name of the button requested in RPC mode. */
     /** Arbitrary text storage for various inputs. */

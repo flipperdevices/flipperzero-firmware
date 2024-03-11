@@ -6,7 +6,8 @@
 
 #define TAG "InfraredApp"
 
-#define INFRARED_TX_MIN_INTERVAL_MS 50U
+#define INFRARED_TX_MIN_INTERVAL_MS (50U)
+#define INFRARED_TASK_STACK_SIZE (2048UL)
 
 static const NotificationSequence*
     infrared_notification_sequences[InfraredNotificationMessageCount] = {
@@ -128,6 +129,8 @@ static void infrared_find_vacant_remote_name(FuriString* name, const char* path)
 static InfraredApp* infrared_alloc() {
     InfraredApp* infrared = malloc(sizeof(InfraredApp));
 
+    infrared->task_thread =
+        furi_thread_alloc_ex("InfraredTask", INFRARED_TASK_STACK_SIZE, NULL, infrared);
     infrared->file_path = furi_string_alloc();
     infrared->button_name = furi_string_alloc();
 
@@ -203,6 +206,10 @@ static InfraredApp* infrared_alloc() {
 
 static void infrared_free(InfraredApp* infrared) {
     furi_assert(infrared);
+
+    furi_thread_join(infrared->task_thread);
+    furi_thread_free(infrared->task_thread);
+
     ViewDispatcher* view_dispatcher = infrared->view_dispatcher;
     InfraredAppState* app_state = &infrared->app_state;
 

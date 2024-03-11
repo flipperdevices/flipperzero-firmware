@@ -1,9 +1,6 @@
 #include "../../infrared_app_i.h"
 
 #include <dolphin/dolphin.h>
-#include <toolbox/concurrent_runner.h>
-
-#define TASK_STACK_SIZE (2048UL)
 
 void infrared_scene_universal_common_item_callback(void* context, uint32_t index) {
     InfraredApp* infrared = context;
@@ -35,17 +32,15 @@ static void infrared_scene_universal_common_hide_popup(InfraredApp* infrared) {
     infrared_play_notification_message(infrared, InfraredNotificationMessageBlinkStop);
 }
 
-static void infrared_scene_universal_common_task_callback(void* context) {
+static int32_t infrared_scene_universal_common_task_callback(void* context) {
     InfraredApp* infrared = context;
     infrared->app_state.is_task_success =
         infrared_brute_force_calculate_messages(infrared->brute_force);
-}
-
-static void infrared_scene_universal_common_task_finished_callback(void* context) {
-    InfraredApp* infrared = context;
     view_dispatcher_send_custom_event(
         infrared->view_dispatcher,
         infrared_custom_event_pack(InfraredCustomEventTypeTaskFinished, 0));
+
+    return 0;
 }
 
 void infrared_scene_universal_common_on_enter(void* context) {
@@ -58,11 +53,8 @@ void infrared_scene_universal_common_on_enter(void* context) {
     view_dispatcher_switch_to_view(infrared->view_dispatcher, InfraredViewStack);
 
     // Load universal remote data in background
-    concurrent_runner_start(
-        TASK_STACK_SIZE,
-        infrared_scene_universal_common_task_callback,
-        infrared_scene_universal_common_task_finished_callback,
-        context);
+    furi_thread_set_callback(infrared->task_thread, infrared_scene_universal_common_task_callback);
+    furi_thread_start(infrared->task_thread);
 }
 
 bool infrared_scene_universal_common_on_event(void* context, SceneManagerEvent event) {

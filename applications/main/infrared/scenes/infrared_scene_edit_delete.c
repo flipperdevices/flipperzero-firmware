@@ -1,16 +1,12 @@
 #include "../infrared_app_i.h"
 
-#include <toolbox/concurrent_runner.h>
-
-#define TASK_STACK_SIZE (2048UL)
-
 static void
     infrared_scene_edit_delete_dialog_result_callback(DialogExResult result, void* context) {
     InfraredApp* infrared = context;
     view_dispatcher_send_custom_event(infrared->view_dispatcher, result);
 }
 
-static void infrared_scene_edit_delete_task_callback(void* context) {
+static int32_t infrared_scene_edit_delete_task_callback(void* context) {
     InfraredApp* infrared = context;
     InfraredAppState* app_state = &infrared->app_state;
     const InfraredEditTarget edit_target = app_state->edit_target;
@@ -24,12 +20,11 @@ static void infrared_scene_edit_delete_task_callback(void* context) {
     } else {
         furi_crash();
     }
-}
 
-static void infrared_scene_edit_delete_task_finished_callback(void* context) {
-    InfraredApp* infrared = context;
     view_dispatcher_send_custom_event(
         infrared->view_dispatcher, InfraredCustomEventTypeTaskFinished);
+
+    return 0;
 }
 
 void infrared_scene_edit_delete_on_enter(void* context) {
@@ -113,11 +108,9 @@ bool infrared_scene_edit_delete_on_event(void* context, SceneManagerEvent event)
         } else if(event.event == DialogExResultRight) {
             view_stack_add_view(infrared->view_stack, loading_get_view(infrared->loading));
             // Delete a button or a remote in a separate thread
-            concurrent_runner_start(
-                TASK_STACK_SIZE,
-                infrared_scene_edit_delete_task_callback,
-                infrared_scene_edit_delete_task_finished_callback,
-                infrared);
+            furi_thread_set_callback(
+                infrared->task_thread, infrared_scene_edit_delete_task_callback);
+            furi_thread_start(infrared->task_thread);
 
         } else if(event.event == InfraredCustomEventTypeTaskFinished) {
             view_stack_remove_view(infrared->view_stack, loading_get_view(infrared->loading));
