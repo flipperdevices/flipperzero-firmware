@@ -775,7 +775,7 @@ Function,+,byte_input_alloc,ByteInput*,
 Function,+,byte_input_free,void,ByteInput*
 Function,+,byte_input_get_view,View*,ByteInput*
 Function,+,byte_input_set_header_text,void,"ByteInput*, const char*"
-Function,+,byte_input_set_result_callback,void,"ByteInput*, ByteInputCallback, ByteChangedCallback, void*, uint8_t*, uint8_t"
+Function,+,byte_input_set_result_callback,void,"ByteInput*, ByteInputCallback, ByteChangedCallback, void*, uint8_t*, uint16_t"
 Function,-,bzero,void,"void*, size_t"
 Function,+,calloc,void*,"size_t, size_t"
 Function,+,canvas_clear,void,Canvas*
@@ -1449,6 +1449,12 @@ Function,-,furi_hal_rfid_init,void,
 Function,+,furi_hal_rfid_pin_pull_pulldown,void,
 Function,+,furi_hal_rfid_pin_pull_release,void,
 Function,+,furi_hal_rfid_pins_reset,void,
+Function,+,furi_hal_rfid_rtf_carrier_in_ETR_mode,void,uint8_t
+Function,+,furi_hal_rfid_rtf_carrier_in_start,void,"void*, uint8_t, uint32_t*, uint32_t*, size_t, FuriHalRfidReadCaptureCallback"
+Function,+,furi_hal_rfid_rtf_carrier_in_stop,void,
+Function,+,furi_hal_rfid_rtf_carrier_out_start,void,
+Function,+,furi_hal_rfid_rtf_carrier_out_stop,void,
+Function,+,furi_hal_rfid_rtf_pull_out_dma_start,void,size_t
 Function,+,furi_hal_rfid_set_read_period,void,uint32_t
 Function,+,furi_hal_rfid_set_read_pulse,void,uint32_t
 Function,+,furi_hal_rfid_tim_emulate_dma_start,void,"uint32_t*, uint32_t*, size_t, FuriHalRfidDMACallback, void*"
