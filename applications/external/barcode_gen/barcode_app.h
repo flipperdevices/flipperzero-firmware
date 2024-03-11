@@ -3,10 +3,12 @@
 #include <furi_hal.h>
 
 #include <gui/gui.h>
+#include <gui/elements.h>
 #include <input/input.h>
 #include <dialogs/dialogs.h>
 #include <gui/view_dispatcher.h>
 #include <gui/modules/submenu.h>
+#include <gui/modules/widget.h>
 #include <gui/modules/text_input.h>
 #include <gui/modules/text_input.h>
 
@@ -59,6 +61,8 @@ struct BarcodeApp {
     CreateView* create_view;
     Barcode* barcode_view;
 
+    Widget* about_widget;
+    Widget* error_codes_widget;
     MessageView* message_view;
     TextInput* text_input;
 };
@@ -66,16 +70,18 @@ struct BarcodeApp {
 enum SubmenuItems {
     SelectBarcodeItem,
     EditBarcodeItem,
-
-    CreateBarcodeItem
+    CreateBarcodeItem,
+    ErrorCodesWidgetItem,
+    AboutWidgetItem
 };
 
 enum Views {
     TextInputView,
+    AboutWidgetView,
+    ErrorCodesWidgetView,
     MessageErrorView,
     MainMenuView,
     CreateBarcodeView,
-
     BarcodeView
 };
 
