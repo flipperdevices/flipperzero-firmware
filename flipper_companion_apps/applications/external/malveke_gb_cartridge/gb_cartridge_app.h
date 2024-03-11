@@ -6,6 +6,7 @@
 #include <input/input.h>
 #include <stdlib.h>
 #include <dialogs/dialogs.h>
+#include <expansion/expansion.h>
 #include <notification/notification_messages.h>
 #include <gui/view_dispatcher.h>
 #include <gui/modules/submenu.h>
