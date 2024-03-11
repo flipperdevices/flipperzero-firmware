@@ -1,5 +1,7 @@
 #include <pokemon_icons.h>
 
+#include <storage/storage.h>
+
 #include "pokemon_data.h"
 #include "pokemon_data_i.h"
 #include "pokemon_app.h"
@@ -11,6 +13,8 @@
 #include <type_nl.h>
 #include <move_nl.h>
 
+#include <missingno_i.h>
+
 #define RECALC_NONE 0x00
 #define RECALC_EXP 0x01
 #define RECALC_EVS 0x02
@@ -20,6 +24,8 @@
 #define RECALC_MOVES 0x20
 #define RECALC_TYPES 0x40
 #define RECALC_ALL 0xFF
+
+#define FXBM_SPRITE_SIZE 362 // Each 50x50 sprite
 
 /* These line up with the DataStat enum */
 const char *stat_text[] = {
@@ -71,6 +77,10 @@ PokemonData* pokemon_data_alloc(uint8_t gen) {
     pdata->stat_list = stat_list;
     pdata->item_list = item_list;
     pdata->pokemon_table = pokemon_table;
+
+    pdata->storage = furi_record_open(RECORD_STORAGE);
+    pdata->asset_path = furi_string_alloc_set(APP_ASSETS_PATH());
+    storage_common_resolve_path_and_ensure_app_directory(pdata->storage, pdata->asset_path);
 
     switch (gen) {
     case GEN_I:
@@ -135,7 +145,10 @@ PokemonData* pokemon_data_alloc(uint8_t gen) {
 }
 
 void pokemon_data_free(PokemonData* pdata) {
+    furi_record_close(RECORD_STORAGE);
     free(pdata->trade_block);
+    if (pdata->bitmap && pdata->bitmap_num != 0) free(pdata->bitmap);
+    furi_string_free(pdata->asset_path);
     free(pdata);
 }
 
@@ -337,9 +350,51 @@ uint8_t table_stat_base_get(PokemonData* pdata, DataStat stat, DataStatSub num) 
     return 0;
 }
 
-const Icon *table_icon_get(const PokemonTable* table, int num)
+/* Each sprite 50x50 is 362 bytes long */
+uint8_t *pokemon_icon_get(PokemonData* pdata, int num)
 {
-	return table[num].icon;
+	furi_assert(pdata);
+	File *file;
+	FuriString *path;
+	uint32_t size;
+	bool is_error = true;
+
+	if (pdata->bitmap_num != num) {
+		if (pdata->bitmap) {
+                    free(pdata->bitmap);
+                    pdata->bitmap = NULL;
+                }
+
+        	file = storage_file_alloc(pdata->storage);
+		path = furi_string_alloc_set(pdata->asset_path);
+		furi_string_cat_printf(path, "all_sprites.fxbm");
+
+        	if (storage_file_open(file, furi_string_get_cstr(path), FSAM_READ, FSOM_OPEN_EXISTING)) {
+                    storage_file_seek(file, (num-1)*FXBM_SPRITE_SIZE, true);
+        	    if (storage_file_read(file, &size, sizeof(size)) == sizeof(size)) {
+		        pdata->bitmap = malloc(size);
+		        if (storage_file_read(file, pdata->bitmap, size) == FXBM_SPRITE_SIZE-sizeof(size)) {
+            	            FURI_LOG_D(TAG, "Opened file \'%s\'", furi_string_get_cstr(path));
+			    is_error = false;
+			} else {
+			    free(pdata->bitmap);
+			}
+		    }
+		}
+
+		if (is_error) {
+        	    FURI_LOG_E(TAG, "Failed to open \'%s\' or access sprite data", furi_string_get_cstr(path));
+		    pdata->bitmap = (struct fxbm_sprite*)((uint8_t*)(__000_fxbm)+sizeof(size));
+		    num = 0;
+        	}
+
+        	storage_file_free(file);
+		furi_string_free(path);
+
+		pdata->bitmap_num = num;
+	}
+
+	return (uint8_t*)pdata->bitmap;
 }
 
 uint16_t pokemon_stat_get(PokemonData* pdata, DataStat stat, DataStatSub which) {

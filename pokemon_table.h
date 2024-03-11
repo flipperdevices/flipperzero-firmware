@@ -3,8 +3,6 @@
 
 #include <stdint.h>
 
-#include <gui/icon.h>
-
 typedef enum {
     GROWTH_MEDIUM_FAST = 0,
     GROWTH_MEDIUM_SLOW = 3,
@@ -30,7 +28,6 @@ typedef enum {
  */
 struct __attribute__((__packed__)) pokemon_data_table {
     const char* name;
-    const Icon* icon;
     const uint8_t index;
     const uint8_t base_hp;
     const uint8_t base_atk;

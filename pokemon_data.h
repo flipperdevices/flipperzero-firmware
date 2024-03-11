@@ -5,6 +5,10 @@
 
 #include <furi.h>
 #include <gui/icon.h>
+#include <storage/storage.h>
+#include <toolbox/stream/stream.h>
+#include <toolbox/stream/file_stream.h>
+
 #include <math.h>
 #include <stdint.h>
 
@@ -116,6 +120,12 @@ typedef struct trade_block_gen_i TradeBlockGenI;
 typedef struct pokemon_party_data_gen_ii PokemonPartyGenII;
 typedef struct trade_block_gen_ii TradeBlockGenII;
 
+/* Based on the flipperzero-game-engine sprite structure */
+struct fxbm_sprite {
+    uint32_t width;
+    uint32_t height;
+    uint8_t data[];
+};
 
 struct pokemon_data {
     const NamedList* move_list;
@@ -136,8 +146,15 @@ struct pokemon_data {
 
     /* Current generation */
     uint8_t gen;
+
     /* 0 indexed max pokedex number */
     uint8_t dex_max;
+
+    /* These are private to pokemon_data */
+    Storage* storage;
+    struct fxbm_sprite *bitmap;
+    uint8_t bitmap_num;
+    FuriString* asset_path;
 };
 typedef struct pokemon_data PokemonData;
 
@@ -146,7 +163,7 @@ void pokemon_data_free(PokemonData* pdata);
 
 uint8_t table_stat_base_get(PokemonData *pdata, DataStat stat, DataStatSub num);
 const char* table_stat_name_get(const PokemonTable* table, int num);
-const Icon *table_icon_get(const PokemonTable* table, int num);
+uint8_t *pokemon_icon_get(PokemonData* pdata, int num);
 
 void pokemon_stat_memcpy(PokemonData* dst, PokemonData* src, uint8_t which);
 uint16_t pokemon_stat_get(PokemonData *pdata, DataStat stat, DataStatSub num);

@@ -9,6 +9,7 @@ App(
     fap_category="GPIO",
     fap_icon="pokemon_10px.png",
     fap_icon_assets="assets",
+    fap_file_assets="files",
     fap_author="Esteban Fuentealba, Kris Bahnsen, Darryn Cull",
     fap_weburl="https://github.com/EstebanFuentealba",
     fap_description="Pokemon exchange from Flipper Zero to Game Boy for Generation I (Pokemon Red, Blue, Yellow)",
