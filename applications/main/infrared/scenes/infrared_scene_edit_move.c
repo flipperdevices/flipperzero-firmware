@@ -51,7 +51,7 @@ bool infrared_scene_edit_move_on_event(void* context, SceneManagerEvent event) {
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == InfraredCustomEventTypeButtonSelected) {
             view_stack_add_view(infrared->view_stack, loading_get_view(infrared->loading));
-            // Move button in a separate thread
+            // Move the button in a separate thread
             furi_thread_set_callback(
                 infrared->task_thread, infrared_scene_edit_move_task_callback);
             furi_thread_start(infrared->task_thread);

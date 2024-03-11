@@ -14,14 +14,17 @@ static void infrared_scene_remote_list_select_and_load(InfraredApp* infrared) {
     dialog_file_browser_set_basic_options(&browser_options, INFRARED_APP_EXTENSION, &I_ir_10px);
     browser_options.base_path = INFRARED_APP_FOLDER;
 
-    if(dialog_file_browser_show(
-           infrared->dialogs, infrared->file_path, infrared->file_path, &browser_options)) {
+    const bool file_selected = dialog_file_browser_show(
+        infrared->dialogs, infrared->file_path, infrared->file_path, &browser_options);
+
+    if(file_selected) {
         view_set_orientation(view_stack_get_view(infrared->view_stack), ViewOrientationVertical);
         view_stack_add_view(infrared->view_stack, loading_get_view(infrared->loading));
         view_dispatcher_switch_to_view(infrared->view_dispatcher, InfraredViewStack);
-        // Load remote in background
+        // Load the remote in a separate thread
         furi_thread_set_callback(infrared->task_thread, infrared_scene_remote_list_task_callback);
         furi_thread_start(infrared->task_thread);
+
     } else {
         scene_manager_previous_scene(infrared->scene_manager);
     }
