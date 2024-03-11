@@ -128,13 +128,12 @@ GBCartridge* gb_cartridge_app_app_alloc() {
     //  Enable 5v
     furi_hal_power_enable_otg();
     furi_delay_ms(1);
+    furi_hal_power_insomnia_enter();
     return app;
 }
 
 void gb_cartridge_app_app_free(GBCartridge* app) {
     furi_assert(app);
-    // Scene manager
-    scene_manager_free(app->scene_manager);
 
     // View Dispatcher
     view_dispatcher_remove_view(app->view_dispatcher, GBCartridgeViewIdMenu);
@@ -143,9 +142,12 @@ void gb_cartridge_app_app_free(GBCartridge* app) {
     view_dispatcher_remove_view(app->view_dispatcher, GBCartridgeViewIdSettings);
     variable_item_list_free(app->submenu);
 
+    // storage_file_free(app->file_path);
+
+
     view_dispatcher_free(app->view_dispatcher);
-    furi_record_close(RECORD_GUI);
-    furi_record_close(RECORD_STORAGE);
+    scene_manager_free(app->scene_manager);
+    
 
     app->gui = NULL;
     app->notification = NULL;
@@ -156,7 +158,9 @@ void gb_cartridge_app_app_free(GBCartridge* app) {
     uart_free(app->lp_uart);
     // Close File Browser
     furi_record_close(RECORD_DIALOGS);
-    furi_string_free(app->file_path);
+    furi_record_close(RECORD_GUI);
+    furi_record_close(RECORD_STORAGE);
+    // furi_string_free(app->file_path);
 
     //Remove whatever is left
     free(app);
@@ -164,6 +168,9 @@ void gb_cartridge_app_app_free(GBCartridge* app) {
 
 int32_t gb_cartridge_app(void* p) {
     UNUSED(p);
+    // Disable expansion protocol to avoid interference with UART Handle
+    Expansion* expansion = furi_record_open(RECORD_EXPANSION);
+    expansion_disable(expansion);
     // uint8_t attempts = 0;
     // while(!furi_hal_power_is_otg_enabled() && attempts++ < 5) {
     //     furi_hal_power_enable_otg();
@@ -195,8 +202,14 @@ int32_t gb_cartridge_app(void* p) {
 
     furi_hal_power_suppress_charge_exit();
     gb_cartridge_app_app_free(app);
-    // if(furi_hal_power_is_otg_enabled()) {
-    //     furi_hal_power_disable_otg();
-    // }
+
+    if(furi_hal_power_is_otg_enabled()) {
+        furi_hal_power_disable_otg();
+    }
+
+    // Return previous state of expansion
+    expansion_enable(expansion);
+    furi_record_close(RECORD_EXPANSION);
+   
     return 0;
 }

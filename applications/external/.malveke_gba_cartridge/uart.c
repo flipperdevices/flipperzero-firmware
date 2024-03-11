@@ -1,13 +1,15 @@
 #include "uart.h"
 
-#define UART_CH (FuriHalUartIdUSART1)
-#define LP_UART_CH (FuriHalUartIdLPUART1)
-#define BAUDRATE (115200)
+#define UART_CH (FuriHalSerialIdUsart)
+#define LP_UART_CH (FuriHalSerialIdLpuart)
+#define BAUDRATE (115200UL)
 
 struct Uart {
     void* app;
-    FuriHalUartId channel;
     FuriThread* rx_thread;
+    FuriHalSerialHandle* serial_handle;
+    FuriHalSerialId channel;
+    FuriThread* worker_thread;
     FuriStreamBuffer* rx_stream;
     uint8_t rx_buf[RX_BUF_SIZE + 1];
     void (*handle_rx_data_cb)(uint8_t* buf, size_t len, void* context);
@@ -16,7 +18,11 @@ struct Uart {
 typedef enum {
     WorkerEvtStop = (1 << 0),
     WorkerEvtRxDone = (1 << 1),
-} WorkerEvtFlags;
+} WorkerEventFlags;
+
+#define WORKER_ALL_RX_EVENTS (WorkerEvtStop | WorkerEvtRxDone)
+
+
 
 void uart_set_handle_rx_data_cb(
     Uart* uart,
@@ -25,12 +31,25 @@ void uart_set_handle_rx_data_cb(
     uart->handle_rx_data_cb = handle_rx_data_cb;
 }
 
-#define WORKER_ALL_RX_EVENTS (WorkerEvtStop | WorkerEvtRxDone)
-
-void uart_on_irq_cb(UartIrqEvent ev, uint8_t data, void* context) {
+static void wifi_marauder_uart_on_irq_cb(
+    FuriHalSerialHandle* handle,
+    FuriHalSerialRxEvent event,
+    void* context) {
     Uart* uart = (Uart*)context;
 
-    if(ev == UartIrqEventRXNE) {
+    if(event == FuriHalSerialRxEventData) {
+        uint8_t data = furi_hal_serial_async_rx(handle);
+        furi_stream_buffer_send(uart->rx_stream, &data, 1, 0);
+        furi_thread_flags_set(furi_thread_get_id(uart->rx_thread), WorkerEvtRxDone);
+    }
+}
+
+static void uart_on_irq_cb(FuriHalSerialHandle* handle, FuriHalSerialRxEvent event, void* context) {
+    Uart* uart = (Uart*)context;
+    UNUSED(handle);
+
+    if(event & (FuriHalSerialRxEventData | FuriHalSerialRxEventIdle)) {
+        uint8_t data = furi_hal_serial_async_rx(handle);
         furi_stream_buffer_send(uart->rx_stream, &data, 1, 0);
         furi_thread_flags_set(furi_thread_get_id(uart->rx_thread), WorkerEvtRxDone);
     }
@@ -90,7 +109,7 @@ static int32_t uart_worker(void* context) {
     Uart* uart = (Uart*)context;
 
     while(1) {
-        uint32_t events =
+       uint32_t events =
             furi_thread_flags_wait(WORKER_ALL_RX_EVENTS, FuriFlagWaitAny, FuriWaitForever);
         furi_check((events & FuriFlagError) == 0);
 
@@ -101,10 +120,11 @@ static int32_t uart_worker(void* context) {
                 do {
                     uint8_t data[64];
                     length = furi_stream_buffer_receive(uart->rx_stream, data, 64, 0);
-                    // FURI_LOG_I("UART", "[in]: %s", (char*)data);
+
                     if(length > 0) {
                         for(size_t i = 0; i < length; i++) {
                             uart_echo_push_to_list(uart, data[i]);
+                            // FURI_LOG_I("UART", "[in]: %c - %d", (const char)data[i], data[i]);
                         }
                     }
                 } while(length > 0);
@@ -122,18 +142,13 @@ static int32_t uart_worker(void* context) {
 
     return 0;
 }
-
-void uart_tx(uint8_t* data, size_t len) {
-    furi_hal_uart_tx(UART_CH, data, len);
+void uart_tx(void* app, uint8_t* data, size_t len) {
+    Uart* uart = (Uart*)app;
+    furi_hal_serial_tx(uart->serial_handle, data, len);
 }
 
-void lp_uart_tx(uint8_t* data, size_t len) {
-    furi_hal_uart_tx(LP_UART_CH, data, len);
-}
-
-Uart* _uart_init(void* app, FuriHalUartId channel, const char* thread_name) {
+Uart* _uart_init(void* app, FuriHalSerialId channel, const char* thread_name) {
     Uart* uart = (Uart*)malloc(sizeof(Uart));
-
     uart->app = app;
     uart->channel = channel;
     uart->rx_stream = furi_stream_buffer_alloc(RX_BUF_SIZE, 1);
@@ -143,13 +158,18 @@ Uart* _uart_init(void* app, FuriHalUartId channel, const char* thread_name) {
     furi_thread_set_context(uart->rx_thread, uart);
     furi_thread_set_callback(uart->rx_thread, uart_worker);
     furi_thread_start(uart->rx_thread);
-    if(channel == FuriHalUartIdUSART1) {
-        furi_hal_console_disable();
-    } else if(channel == FuriHalUartIdLPUART1) {
-        furi_hal_uart_init(channel, BAUDRATE);
+    uart->serial_handle = furi_hal_serial_control_acquire(channel);
+    if(!uart->serial_handle) {
+        furi_delay_ms(5000);
     }
-    furi_hal_uart_set_br(channel, BAUDRATE);
-    furi_hal_uart_set_irq_cb(channel, uart_on_irq_cb, uart);
+    furi_check(uart->serial_handle);
+    furi_hal_serial_init(uart->serial_handle,  BAUDRATE);
+    furi_hal_serial_async_rx_start(
+        uart->serial_handle,
+        channel == FuriHalSerialIdUsart ? uart_on_irq_cb : wifi_marauder_uart_on_irq_cb,
+        uart,
+        false);
+
 
     return uart;
 }
@@ -165,15 +185,12 @@ Uart* lp_uart_init(void* app) {
 void uart_free(Uart* uart) {
     furi_assert(uart);
 
-    furi_thread_flags_set(furi_thread_get_id(uart->rx_thread), WorkerEvtStop);
+   furi_thread_flags_set(furi_thread_get_id(uart->rx_thread), WorkerEvtStop);
     furi_thread_join(uart->rx_thread);
     furi_thread_free(uart->rx_thread);
 
-    furi_hal_uart_set_irq_cb(uart->channel, NULL, NULL);
-    if(uart->channel == FuriHalUartIdLPUART1) {
-        furi_hal_uart_deinit(uart->channel);
-    }
-    furi_hal_console_enable();
+    furi_hal_serial_deinit(uart->serial_handle);
+    furi_hal_serial_control_release(uart->serial_handle);
 
     free(uart);
 }

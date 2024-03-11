@@ -276,7 +276,7 @@ bool gb_cartridge_scene_2_input(InputEvent* event, void* context) {
                            FSAM_WRITE,
                            FSOM_CREATE_ALWAYS)) {
                         const char gbcartridge_command[] = "gbcartridge -d -o\n";
-                        uart_tx((uint8_t*)gbcartridge_command, strlen(gbcartridge_command));
+                        uart_tx(app->uart, (uint8_t*)gbcartridge_command, strlen(gbcartridge_command));
                     } else {
                         dialog_message_show_storage_error(app->dialogs, "Cannot open dump file");
                     }
@@ -295,10 +295,6 @@ bool gb_cartridge_scene_2_input(InputEvent* event, void* context) {
 void gb_cartridge_scene_2_exit(void* context) {
     furi_assert(context);
     GBCartridge* app = context;
-    // furi_hal_power_enable_otg();
-    // Automatically stop the scan when exiting view
-    // uart_tx((uint8_t*)("stopscan\n"), strlen("stopscan\n"));
-    // furi_delay_ms(50);
     gb_cartridge_stop_all_sound(app);
 }
 
@@ -327,11 +323,8 @@ void gb_cartridge_scene_2_enter(void* context) {
                 model->cart_dump_rom_extension);
             model->cart_dump_rom_filename_sequential = filename;
             // Register callbacks to receive data
-            uart_set_handle_rx_data_cb(
-                app->uart,
-                gameboy_rom_backup_handle_rx_data_cb); // setup callback for general log rx thread
-            uart_set_handle_rx_data_cb(
-                app->lp_uart, dump_handle_rx_data_cb); // setup callback for general log rx thread
+            uart_set_handle_rx_data_cb( app->uart, gameboy_rom_backup_handle_rx_data_cb); // setup callback for general log rx thread
+            uart_set_handle_rx_data_cb( app->lp_uart, dump_handle_rx_data_cb); // setup callback for general log rx thread
             app->is_writing_rom = true;
         },
         false);

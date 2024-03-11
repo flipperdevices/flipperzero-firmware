@@ -1,9 +1,6 @@
 #include "../gb_cartridge_app.h"
 #include <furi.h>
 #include <furi_hal.h>
-#include <furi_hal_uart.h>
-#include <stm32wbxx_ll_lpuart.h>
-#include <stm32wbxx_ll_usart.h>
 #include <input/input.h>
 #include <gui/elements.h>
 #include <dolphin/dolphin.h>
@@ -93,14 +90,10 @@ static int32_t cartridge_writting_worker_thread(void* thread_context) {
             true);
 
         char gbcartridge_start_command[80]; // A reasonably sized buffer.
-        snprintf(
-            gbcartridge_start_command,
-            sizeof(gbcartridge_start_command),
-            "gbcartridge -w -a %d\n",
-            fileSize);
-
-        uart_tx((uint8_t*)gbcartridge_start_command, strlen(gbcartridge_start_command));
-
+        snprintf(gbcartridge_start_command, sizeof(gbcartridge_start_command), "gbcartridge -w -a %d\n", fileSize);
+   
+        uart_tx(app->uart, (uint8_t *)gbcartridge_start_command, strlen(gbcartridge_start_command));
+        
         furi_delay_ms(500); // wait
         uint8_t* the_savefile = NULL;
         size_t savefile_size = 0;
@@ -124,8 +117,8 @@ static int32_t cartridge_writting_worker_thread(void* thread_context) {
             buf_ptr += now_read;
         }
         savefile_size = read;
-        uart_tx((uint8_t*)the_savefile, savefile_size);
-        uart_tx((uint8_t*)("\n"), 1);
+        uart_tx(app->uart, (uint8_t*)the_savefile, savefile_size);
+        uart_tx(app->uart, (uint8_t*)("\n"), 1);
         with_view_model(
             app->gb_cartridge_scene_5->view,
             GameBoyCartridgeRAMWriteModel * model,

@@ -190,7 +190,6 @@ bool gb_cartridge_scene_4_input(InputEvent* event, void* context) {
                     GBCartridge* app = (GBCartridge*)instance->context;
                     // Unregister rx callback
                     uart_set_handle_rx_data_cb(app->uart, NULL);
-                    // uart_set_handle_rx_data_cb(app->lp_uart, NULL);
                     instance->callback(GBCartridgeCustomEventScene4Back, instance->context);
                 },
                 true);
@@ -214,16 +213,16 @@ bool gb_cartridge_scene_4_input(InputEvent* event, void* context) {
 
                     // if(select_rom_file(app, file_stream)) {
                     //     const char gbcartridge_start_command[] = "gbcartridge -w -o -s\n";
-                    //     uart_tx((uint8_t*)gbcartridge_start_command, strlen(gbcartridge_start_command));
+                    //     uart_tx(app->uart, (uint8_t*)gbcartridge_start_command, strlen(gbcartridge_start_command));
                     //     furi_delay_ms(500);
 
                     //     while (file_stream_read(file_stream, buffer, sizeof(buffer), &bytesRead) && bytesRead > 0) {
                     //         // Send 64 bytes at a time
-                    //         lp_uart_tx((uint8_t*)buffer, bytesRead);
+                    //         uart_tx(app->lp_uart, (uint8_t*)buffer, bytesRead);
                     //     }
 
                     //     const char gbcartridge_end_command[] = "gbcartridge -w -o -e\n";
-                    //     uart_tx((uint8_t*)gbcartridge_end_command, strlen(gbcartridge_end_command));
+                    //     uart_tx(app->uart, (uint8_t*)gbcartridge_end_command, strlen(gbcartridge_end_command));
 
                     //     file_stream_close(file_stream);
                     // }
