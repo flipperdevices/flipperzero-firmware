@@ -1,5 +1,7 @@
-name: "FAP: Build and lint"
-on: [push, pull_request]
+name: "FAP: Build"
+on:
+  push:
+    branches: [master]
 jobs:
   ufbt-build-action:
     runs-on: ubuntu-latest
@@ -7,21 +9,27 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: master
+          sparse_checkout: FindMyFlipper
       - name: Build with ufbt
         uses: flipperdevices/flipperzero-ufbt-action@v0.1
         id: build-app
         with:
           # Set to 'release' to build for latest published release version
           sdk-channel: dev
+          app-dir: FindMyFlipper
       - name: Upload app artifacts
         uses: actions/upload-artifact@v3
         with:
           name: ${{ github.event.repository.name }}-${{ steps.build-app.outputs.suffix }}
           path: ${{ steps.build-app.outputs.fap-artifacts }}
-      # You can remove this step if you don't want to check source code formatting
-      - name: Lint sources
-        uses: flipperdevices/flipperzero-ufbt-action@v0.1
+      
+      - name: Create Release
+        uses: softprops/actions-gh-release@v2
         with:
-          # skip SDK setup, we already did it in previous step
-          skip-setup: true
-          task: lint
+          name: ${{ env.COMMIT_MESSAGE }}
+          token: ${{ secrets.RELEASE_TOKEN }}
+          files: ${{ steps.build-app.outputs.fap-artifacts }}
+          generate_release_notes: true
+          tag_name: ${{steps.tag_version.outputs.new_tag}}
