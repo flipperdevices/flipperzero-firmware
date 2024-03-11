@@ -611,7 +611,7 @@ void subghz_protocol_decoder_secplus_v1_get_string(void* context, FuriString* ou
             furi_string_cat_printf(output, " Btn:left\r\n");
         } else if(instance->generic.btn == 0) {
             furi_string_cat_printf(output, " Btn:middle\r\n");
-        } else if(instance->generic.btn == 2) {
+        } else if(instance->generic.btn == 2) { //-V547
             furi_string_cat_printf(output, " Btn:right\r\n");
         }
 
