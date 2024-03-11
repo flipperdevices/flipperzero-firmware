@@ -291,6 +291,7 @@ void code_128_loader(BarcodeData* barcode_data) {
                 barcode_data->valid = false;
                 break;
             }
+
             //using the value of the character, get the characters bits
             if(!flipper_format_read_string(ff, furi_string_get_cstr(value), char_bits)) {
                 FURI_LOG_E(TAG, "Could not read \"%c\" string", barcode_char);
@@ -321,12 +322,13 @@ void code_128_loader(BarcodeData* barcode_data) {
 
         //calculate the check digit and convert it into a c string for lookup in the encoding table
         final_check_digit = checksum_adder % 103;
-        int length = snprintf(NULL, 0, "%d", final_check_digit);
-        char* final_check_digit_string = malloc(length + 1);
-        snprintf(final_check_digit_string, length + 1, "%d", final_check_digit);
+        // int length = snprintf(NULL, 0, "%d", final_check_digit);
+        char* final_check_digit_string = malloc(5);
+        snprintf(final_check_digit_string, 5, "%03d", final_check_digit);
 
         //after the checksum has been calculated, add the bits to the full barcode
-        if(!flipper_format_read_string(ff, final_check_digit_string, char_bits)) {
+        if(!flipper_format_read_string(ff, "ENCODINGS", char_bits) ||
+           !flipper_format_read_string(ff, final_check_digit_string, char_bits)) {
             FURI_LOG_E(TAG, "Could not read \"%s\" string", final_check_digit_string);
             barcode_data->reason = EncodingTableError;
             barcode_data->valid = false;
