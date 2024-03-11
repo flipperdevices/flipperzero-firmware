@@ -56,7 +56,7 @@ bool infrared_scene_edit_move_on_event(void* context, SceneManagerEvent event) {
         } else if(event.event == InfraredCustomEventTypeTaskFinished) {
             const bool task_success = infrared_blocking_task_finalize(infrared);
 
-            if(task_success) {
+            if(!task_success) {
                 const char* signal_name = infrared_remote_get_signal_name(
                     infrared->remote, infrared->app_state.current_button_index);
                 infrared_show_error_message(infrared, "Failed to move\n\"%s\"", signal_name);
