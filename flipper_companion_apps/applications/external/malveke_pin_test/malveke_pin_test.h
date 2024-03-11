@@ -14,8 +14,6 @@
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
 #include <gui/elements.h>
-#include <furi_hal_uart.h>
-#include <furi_hal_console.h>
 #include <gui/view_dispatcher.h>
 #include <gui/modules/dialog_ex.h>
 #include <storage/filesystem_api_defines.h>
@@ -58,6 +56,7 @@ typedef struct {
     Gui* gui;
     ViewDispatcher* view_dispatcher;
     View* view;
+    FuriHalSerialHandle* serial_handle;
     FuriThread* worker_thread;
     FuriStreamBuffer* rx_stream;
 } UartEchoApp;

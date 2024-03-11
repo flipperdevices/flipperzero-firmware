@@ -35,6 +35,10 @@ static void gb_live_camera_app_free(UartEchoApp* app) {
     // furi_hal_uart_set_irq_cb(FuriHalUartIdLPUART1, NULL, NULL);
     // furi_hal_uart_deinit(FuriHalUartIdLPUART1);
 
+    furi_hal_serial_deinit(app->serial_handle);
+    furi_hal_serial_control_release(app->serial_handle);
+
+
     // Free views
     view_dispatcher_remove_view(app->view_dispatcher, 0);
 
@@ -64,7 +68,10 @@ static bool gb_live_camera_view_input_callback(InputEvent* event, void* context)
                         model->pin += 1;
                         char gbpin_start_command[80]; // A reasonably sized buffer.
                         snprintf(gbpin_start_command, sizeof(gbpin_start_command), "gbpin -p %d\n", model->pin);
-                        furi_hal_uart_tx(FuriHalUartIdUSART1, (uint8_t*)gbpin_start_command, strlen(gbpin_start_command));
+                        furi_hal_serial_tx(app->serial_handle, 
+                            (uint8_t*)gbpin_start_command,
+                            strlen(gbpin_start_command));
+
                     }
                     
                 },
@@ -80,7 +87,9 @@ static bool gb_live_camera_view_input_callback(InputEvent* event, void* context)
                         model->pin -= 1;
                         char gbpin_start_command[80]; // A reasonably sized buffer.
                         snprintf(gbpin_start_command, sizeof(gbpin_start_command), "gbpin -p %d\n", model->pin);
-                        furi_hal_uart_tx(FuriHalUartIdUSART1, (uint8_t*)gbpin_start_command, strlen(gbpin_start_command));
+                        furi_hal_serial_tx(app->serial_handle, 
+                            (uint8_t*)gbpin_start_command, 
+                            strlen(gbpin_start_command));
                     }
                 },
                 true);
@@ -93,7 +102,9 @@ static bool gb_live_camera_view_input_callback(InputEvent* event, void* context)
                         model->pin = i;
                         char gbpin_start_command[80]; // A reasonably sized buffer.
                         snprintf(gbpin_start_command, sizeof(gbpin_start_command), "gbpin -p %d\n", model->pin);
-                        furi_hal_uart_tx(FuriHalUartIdUSART1, (uint8_t*)gbpin_start_command, strlen(gbpin_start_command));
+                        furi_hal_serial_tx(app->serial_handle, 
+                            (uint8_t*)gbpin_start_command, 
+                            strlen(gbpin_start_command));
 
                     }, true);
                 furi_delay_ms(600);
@@ -136,14 +147,20 @@ static UartEchoApp* gb_live_camera_app_alloc() {
     view_dispatcher_add_view(app->view_dispatcher, 0, app->view);
     view_dispatcher_switch_to_view(app->view_dispatcher, 0);
 
-    // app->worker_thread = furi_thread_alloc_ex("UsbUartWorker", 2048, gb_live_camera_worker, app);
-    // furi_thread_start(app->worker_thread);
+    // Enable uart listener (UART)
+    app->serial_handle = furi_hal_serial_control_acquire(FuriHalSerialIdUsart);
+    if(!app->serial_handle) {
+        furi_delay_ms(5000);
+    }
+    furi_check(app->serial_handle);
+    furi_hal_serial_init(app->serial_handle,  115200);
 
-    // Enable uart listener (UART & UART1)
-    // furi_hal_console_disable();
-    furi_hal_uart_set_br(FuriHalUartIdUSART1, 115200);
-    // furi_hal_uart_set_irq_cb(FuriHalUartIdLPUART1, gb_live_camera_on_irq_cb, app);
+
     furi_hal_power_disable_otg();
+
+    
+
+
     // furi_hal_power_suppress_charge_enter();
     furi_delay_ms(1); 
     return app;
