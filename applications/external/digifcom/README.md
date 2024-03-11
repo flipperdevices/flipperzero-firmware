@@ -39,6 +39,7 @@ Unsupported Apps:
 - Alpha Serial (Windows) still doesn't seem to detect it
 
 Untested:
+- PenC
 - All other pets
 - Listen Mode
 
@@ -49,6 +50,10 @@ Based on:
 - The updated DMComm Arduino library by BladeSabre: https://github.com/dmcomm/dmcomm-arduino-lib
 - The Flipper Zero Boilerplate App: https://github.com/leedave/flipper-zero-fap-boilerplate
 - The Flipper Zero Firmware: https://github.com/flipperdevices/flipperzero-firmware
+
+### Known Issues
+
+Occasionally when using the USB A-Com mode, the flipper zero USB driver will crash the flipper due to the way I'm overwriting the USB VID/PID. I'm not sure why yet and am still debugging this. Subsequent attempts seem to work and this is uncommon (although not rare).
 
 ### Youtube Example
 
@@ -87,7 +92,7 @@ flipper to make them accessible under the "Saved" menu option.
 
 ### Listen
 
-Listen is currently untested, as I have not created a jig to make it function!!
+Listen mode is now partially functional. It is difficult to get a good read at the moment although it is possible. I need to re-work the code to use rising/falling edge detection instead of looping though so the flipper GUI does not hang, and we don't have to spend the whole time looping on a GPIO read.
 
 Listen allows you to connect 2 vpets to each other and eavesdrop on the data they send. Both codes will show up on the flipper after communication completes, and you can save either code to the flipper for later use. Leaving this screen will pause dmcomm.
 
@@ -108,7 +113,5 @@ The flipper will change the USB port from CLI mode into Serial mode and behave a
 ## Other Notes / Future stuff
 
 Dmcomm supports a voltage test. However, the flipper zero firmware does not yet have ADC support implemented. This is still possible as demonstrated by the flipper zero oscilloscope project. At some point I may implement this. A-Com's themselves use analog input in order to support a wider range of devices logic levels. This may limit the flipper app's compatibility for now.
-
-DMC support isn't included in the dmcomm-project ino, but has been added to the updated https://github.com/dmcomm/dmcomm-arduino-lib project. At some point I may update this to port the CPP code onto the flipper.
 
 Debug mode support could be added at some point.

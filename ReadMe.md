@@ -58,6 +58,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [MALVEKE GAME BOY Live Camera v2.0 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external/malveke_gb_live_camera) `Req: Malveke`
 - Updated: [MALVEKE GB Photo v1.0 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external/malveke_gb_photo) `Req: Malveke`
 - Updated: [MALVEKE PIN Test v1.0 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external/malveke_pin_test) `Req: Malveke`
+- [Several apps updated to ensure DateTime library inclusion (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/3fc2ec344f601f64b29e92573bc4898df38647a6)
+- Updated: [Digimon F-Com v1.1 (By TylerWilley)](https://github.com/TylerWilley/flipper-f-com)
 
 <a name="release">
 
