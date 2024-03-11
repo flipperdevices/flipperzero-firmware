@@ -85,18 +85,19 @@ St25tbData* st25tb_alloc() {
 }
 
 void st25tb_free(St25tbData* data) {
-    furi_assert(data);
+    furi_check(data);
 
     free(data);
 }
 
 void st25tb_reset(St25tbData* data) {
+    furi_check(data);
     memset(data, 0, sizeof(St25tbData));
 }
 
 void st25tb_copy(St25tbData* data, const St25tbData* other) {
-    furi_assert(data);
-    furi_assert(other);
+    furi_check(data);
+    furi_check(other);
 
     *data = *other;
 }
@@ -107,7 +108,7 @@ bool st25tb_verify(St25tbData* data, const FuriString* device_type) {
 }
 
 bool st25tb_load(St25tbData* data, FlipperFormat* ff, uint32_t version) {
-    furi_assert(data);
+    furi_check(data);
 
     bool parsed = false;
 
@@ -150,7 +151,7 @@ bool st25tb_load(St25tbData* data, FlipperFormat* ff, uint32_t version) {
 }
 
 bool st25tb_save(const St25tbData* data, FlipperFormat* ff) {
-    furi_assert(data);
+    furi_check(data);
 
     FuriString* temp_str = furi_string_alloc();
     bool saved = false;
@@ -184,8 +185,8 @@ bool st25tb_save(const St25tbData* data, FlipperFormat* ff) {
 }
 
 bool st25tb_is_equal(const St25tbData* data, const St25tbData* other) {
-    furi_assert(data);
-    furi_assert(other);
+    furi_check(data);
+    furi_check(other);
 
     return memcmp(data, other, sizeof(St25tbData)) == 0;
 }
@@ -195,8 +196,8 @@ uint8_t st25tb_get_block_count(St25tbType type) {
 }
 
 const char* st25tb_get_device_name(const St25tbData* data, NfcDeviceNameType name_type) {
-    furi_assert(data);
-    furi_assert(data->type < St25tbTypeNum);
+    furi_check(data);
+    furi_check(data->type < St25tbTypeNum);
 
     if(name_type == NfcDeviceNameTypeFull) {
         return st25tb_features[data->type].full_name;
@@ -206,7 +207,7 @@ const char* st25tb_get_device_name(const St25tbData* data, NfcDeviceNameType nam
 }
 
 const uint8_t* st25tb_get_uid(const St25tbData* data, size_t* uid_len) {
-    furi_assert(data);
+    furi_check(data);
 
     if(uid_len) {
         *uid_len = ST25TB_UID_SIZE;
@@ -216,7 +217,7 @@ const uint8_t* st25tb_get_uid(const St25tbData* data, size_t* uid_len) {
 }
 
 bool st25tb_set_uid(St25tbData* data, const uint8_t* uid, size_t uid_len) {
-    furi_assert(data);
+    furi_check(data);
 
     const bool uid_valid = uid_len == ST25TB_UID_SIZE;
 
@@ -233,6 +234,8 @@ St25tbData* st25tb_get_base_data(const St25tbData* data) {
 }
 
 St25tbType st25tb_get_type_from_uid(const uint8_t* uid) {
+    furi_check(uid);
+
     switch(uid[2] >> 2) {
     case 0x0:
     case 0x3:

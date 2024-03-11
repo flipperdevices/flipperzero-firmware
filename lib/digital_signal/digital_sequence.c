@@ -115,17 +115,17 @@ void digital_sequence_register_signal(
     DigitalSequence* sequence,
     uint8_t signal_index,
     const DigitalSignal* signal) {
-    furi_assert(sequence);
-    furi_assert(signal);
-    furi_assert(signal_index < DIGITAL_SEQUENCE_BANK_SIZE);
+    furi_check(sequence);
+    furi_check(signal);
+    furi_check(signal_index < DIGITAL_SEQUENCE_BANK_SIZE);
 
     sequence->signals[signal_index] = signal;
 }
 
 void digital_sequence_add_signal(DigitalSequence* sequence, uint8_t signal_index) {
-    furi_assert(sequence);
-    furi_assert(signal_index < DIGITAL_SEQUENCE_BANK_SIZE);
-    furi_assert(sequence->size < sequence->max_size);
+    furi_check(sequence);
+    furi_check(signal_index < DIGITAL_SEQUENCE_BANK_SIZE);
+    furi_check(sequence->size < sequence->max_size);
 
     sequence->data[sequence->size++] = signal_index;
 }
@@ -280,9 +280,9 @@ static inline void digital_sequence_timer_buffer_reset(DigitalSequence* sequence
 }
 
 void digital_sequence_transmit(DigitalSequence* sequence) {
-    furi_assert(sequence);
-    furi_assert(sequence->size);
-    furi_assert(sequence->state == DigitalSequenceStateIdle);
+    furi_check(sequence);
+    furi_check(sequence->size);
+    furi_check(sequence->state == DigitalSequenceStateIdle);
 
     FURI_CRITICAL_ENTER();
 

@@ -8,6 +8,7 @@ void dialog_file_browser_set_basic_options(
     DialogsFileBrowserOptions* options,
     const char* extension,
     const Icon* icon) {
+    furi_check(options);
     options->extension = extension;
     options->base_path = NULL;
     options->skip_assets = true;

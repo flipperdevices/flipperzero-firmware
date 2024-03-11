@@ -152,16 +152,18 @@ Menu* menu_alloc() {
 }
 
 void menu_free(Menu* menu) {
-    furi_assert(menu);
+    furi_check(menu);
+
     menu_reset(menu);
     with_view_model(
         menu->view, MenuModel * model, { MenuItemArray_clear(model->items); }, false);
     view_free(menu->view);
+
     free(menu);
 }
 
 View* menu_get_view(Menu* menu) {
-    furi_assert(menu);
+    furi_check(menu);
     return (menu->view);
 }
 
@@ -172,8 +174,8 @@ void menu_add_item(
     uint32_t index,
     MenuItemCallback callback,
     void* context) {
-    furi_assert(menu);
-    furi_assert(label);
+    furi_check(menu);
+    furi_check(label);
 
     MenuItem* item = NULL;
     with_view_model(
@@ -192,7 +194,7 @@ void menu_add_item(
 }
 
 void menu_reset(Menu* menu) {
-    furi_assert(menu);
+    furi_check(menu);
     with_view_model(
         menu->view,
         MenuModel * model,
@@ -210,6 +212,8 @@ void menu_reset(Menu* menu) {
 }
 
 void menu_set_selected_item(Menu* menu, uint32_t index) {
+    furi_check(menu);
+
     with_view_model(
         menu->view,
         MenuModel * model,

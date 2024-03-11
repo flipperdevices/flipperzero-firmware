@@ -26,12 +26,12 @@ EmptyScreen* empty_screen_alloc() {
 }
 
 void empty_screen_free(EmptyScreen* empty_screen) {
-    furi_assert(empty_screen);
+    furi_check(empty_screen);
     view_free(empty_screen->view);
     free(empty_screen);
 }
 
 View* empty_screen_get_view(EmptyScreen* empty_screen) {
-    furi_assert(empty_screen);
+    furi_check(empty_screen);
     return empty_screen->view;
 }
