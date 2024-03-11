@@ -19,7 +19,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: master
-          sparse-checkout: findmy
+          sparse-checkout: FindMyFlipper
 
       - name: Build with ufbt
         uses: flipperdevices/flipperzero-ufbt-action@v0.1.2
@@ -27,7 +27,7 @@ jobs:
         with:
           # Set to 'release' to build for latest published release version
           sdk-channel: ${{ matrix.sdk-channel }}
-          app-dir: findmy
+          app-dir: FindMyFlipper
 
       - name: Get commit message
         run: echo "COMMIT_MESSAGE=$(git log --format=%B -n 1 ${{ github.event.after }})" >> $GITHUB_ENV
