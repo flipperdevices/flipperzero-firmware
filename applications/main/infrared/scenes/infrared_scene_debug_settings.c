@@ -1,4 +1,5 @@
 #include "../infrared_app_i.h"
+#include <furi_hal_infrared.h>
 
 uint8_t value_index_ir;
 

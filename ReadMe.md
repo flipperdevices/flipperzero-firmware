@@ -29,8 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0311-1239-0.99.1-a5bbc7e](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-03-11 12:39 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-03-11 12:39 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-03-11 15:39 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-03-11 15:39 EST`
 - [Quick fix for rgb (By HaxSam)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/5bb4ab3a021a24406f7d3a996a119c3e2ea5dd87)
 - [Add is_connected api for expansion (By HaxSam)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/2f4186322bcd1899703fa22daeda29d554c3be2b)
 - [JS: Added Submenu support (By Spooks4576)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/6335d14c7498ab4b2e4b28fa707fe7f68d3843b5)
@@ -66,6 +66,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [GPS v1.4 (By ezod)](https://github.com/ezod/flipperzero-gps) `Req: NMEA 0183`
 - OFW: [DateTime: fix missing weekday in datetime_timestamp_to_datetime #3508 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3508)
 - [Patreon Builds Update](https://www.patreon.com/RogueMaster/membership): Added: [One Piece x Flipper animation (By RogueMaster)](https://github.com/RogueMaster/awesome-flipperzero-withModules/tree/rogue_main/graphics/WIP%2BUncompiled%20animations/RM_OPxFlipper_128x64) Builds updated: ManifestSwitcher, Minimal, One Pice & SJUMP.
+- OFW: [Asynchronous Infrared remote manipulation #3503 (By gsurkov)](https://github.com/flipperdevices/flipperzero-firmware/pull/3503)
 
 <a name="release">
 
