@@ -38,6 +38,10 @@ jobs:
 
       - name: 'Generate documentation'
         uses: mattnotmitt/doxygen-action@v1.9.8
+        env:
+          DOXY_SRC_ROOT: "${{ github.workspace }}"
+          DOXY_CONFIG_DIR: "${{ github.workspace }}/documentation/doxygen"
+          DOXY_OUTPUT_DIR: "${{ github.workspace }}/documentation/doxygen/build"
         with:
           working-directory: 'documentation/'
           doxyfile-path: './doxygen/Doxyfile-awesome.cfg'
