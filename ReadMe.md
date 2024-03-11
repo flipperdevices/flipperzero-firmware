@@ -4,7 +4,7 @@
 &nbsp;<a href='https://shop.rogue-master.net/' target='_blank'><img src='https://rogue-master.net/img/Merch.png' alt='RM Merch'' title='RM Merch'></a>
 &nbsp;<a href='https://github.com/RogueMaster/awesome-flipperzero-withModules' target='_blank'><img src='https://rogue-master.net/img/Resources.png' alt='More Research / Assets' title='More Research / Assets'></a></h1>
 
-# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0305-1134-0.99.1-46c6775.tgz&channel=RM0305-1134-0.99.1-46c6775&version=0.99.1)
+# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0311-1616-0.99.2-dab7695.tgz&channel=RM0311-1616-0.99.2-dab7695&version=0.99.2)
 
 ## Thank you so much to our RM Pro/SUPER Patreon supporters! Because of people like you, we are able to offer the best and most up-to-date Flipper Zero Firmware!
 
@@ -31,43 +31,6 @@ This software is for experimental purposes only and is not meant for any illegal
 
 - Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-03-11 16:04 EST`
 - Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-03-11 16:04 EST`
-- [Quick fix for rgb (By HaxSam)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/5bb4ab3a021a24406f7d3a996a119c3e2ea5dd87)
-- [Add is_connected api for expansion (By HaxSam)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/2f4186322bcd1899703fa22daeda29d554c3be2b)
-- [JS: Added Submenu support (By Spooks4576)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/6335d14c7498ab4b2e4b28fa707fe7f68d3843b5)
-- Added: [Quac! v0.1 (By rdefeo)](https://github.com/rdefeo/quac)
-- OFW: [Auto-generated firmware documentation take two #2944 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/2944)
-- OFW: PR: [Fix Troika 4K parser keys #3499 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3499)
-- [Air Arkanoid & Air Labyrinth: Use PYTHON3 var (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/7eb47a5993e49a95903faad8b01bae63e872603c)
-- Updated: [NFC Seader v2.5 (By bettse)](https://github.com/bettse/seader)
-- Updated: [BMI Air Mouse v1.0 (By ginkage)](https://github.com/ginkage/FlippAirMouse/) `Req: BMI160`
-- Updated: [JS Runner v1.0 (By nminaylov & DrZlo13)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/3286) [Added ble beacon, math and keyboard to JavaScript API (By Spooks4576)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/41bb09492400026be66ef5f8b78f506f21361f1d) [Many improvements (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/9b00d0e37b304784cf8e0ac0bdabe6aa543a780e) [Some SubGHz support and Radio Device Loader module (By Sil333033) + Also BLE Beacon Improvements (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/ed2716fb48f37a62cc3baf5c7fc8ee9a2864badc)
-- Added: [FindMy Flipper v1.0 (By MatthewKuKanich)](https://github.com/MatthewKuKanich/FindMyFlipper)
-- Updated: [BLE Spam v6.0 (By Willy-JL & ECTO-1A & Spooks4576 with research from xMasterX; OFW API thanks to noproto)](https://github.com/noproto/apple_ble_spam_ofw) [Added NameFlood option (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/f2a6af257c8ce8e47181329c59a8a4e44e927c58) [Bug Fixes (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/74d69fb623378395ed8407261c95453d12e59cd5)
-- Updated: [NFC Maker v1.2 (by Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/343cb39d08f60b75b537e1a31100707935cf6e9d) [NfcMaker: Fix timeout on error screen (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/f01a1ba3dcb4b51c44acebdd7434cb84ae93473a)
-- Updated: [Quac! v0.2 (By rdefeo)](https://github.com/rdefeo/quac)
-- Updated: [VGM: Custom color options (By HaxSam & Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/93b532b4ebac931862369b286429b83a2c55d1bf) [Added Rainbow Mode (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/d5ecfb56d1425c174e188776eb22901e1dcc121f)
-- Updated: [Pokemon Trading v1.8 (By EstebanFuentealba & kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
-- Updated: [FindMy Flipper v1.0 (By MatthewKuKanich)](https://github.com/MatthewKuKanich/FindMyFlipper) [With Startup Service (By Willy-JL & MatthewKuKanich)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/133b4a0ae2956b679dfcb69c242da8cc4aba0e10)
-- [For Patreon Memnbers](https://www.patreon.com/RogueMaster/membership): Added: [SCIFI / Corp Logos Build (Using Looped Versions) (By Kuronons)](https://github.com/Kuronons/FZ_graphics/tree/main/Animations/SF_Corporations_Logos/Animation_ZIP_files_%5BSF_Corporations_Logos_Looped%5D) [Also updated Manifest Switcher Build to Include These](https://github.com/RogueMaster/awesome-flipperzero-withModules/tree/rogue_main/graphics/dolphin-ManifestSwitcher)
-- Updated: [Barcode App v1.2 (By Kingal1337)](https://github.com/Kingal1337/flipper-barcode-generator)
-- NFC: [Bip Parser refactoring (By Leptopt1los)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/5432d10a5e15fd75a6c72ff0164f75c96d5bb1a3)
-- Updated: [MALVEKE GAME BOY ADVANCE Cartridge v2.0 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external/malveke_gba_cartridge) `Req: Malveke`
-- Updated: [MALVEKE GAME BOY Cartridge (GB/GBC) v2.0 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external/malveke_gb_cartridge) `Req: Malveke`
-- Updated: [MALVEKE GAME BOY Emulator v2.0 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external/malveke_gb_emulator) `Req: Malveke`
-- Updated: [MALVEKE GAME BOY Link-Camera v2.0 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external/malveke_gb_link_camera) `Req: Malveke`
-- Updated: [MALVEKE GAME BOY Live Camera v2.0 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external/malveke_gb_live_camera) `Req: Malveke`
-- Updated: [MALVEKE GB Photo v1.0 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external/malveke_gb_photo) `Req: Malveke`
-- Updated: [MALVEKE PIN Test v1.0 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external/malveke_pin_test) `Req: Malveke`
-- [Several apps updated to ensure DateTime library inclusion (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/3fc2ec344f601f64b29e92573bc4898df38647a6)
-- Updated: [Digimon F-Com v1.1 (By TylerWilley)](https://github.com/TylerWilley/flipper-f-com)
-- Added: [JS Script: Windows_Exfil-GSHD.js (By Gas Station Hot Dog)](https://github.com/User84User/User84PublicUser/blob/main/Windows_Exfil-GSHD.js)
-- [Fix JS Load (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/9b320df8800d9773bc2ee6cedf8946c71a1b9a7f)
-- Updated: [Authenticator/TOTP v5.13.0 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
-- Updated: [GPS v1.4 (By ezod)](https://github.com/ezod/flipperzero-gps) `Req: NMEA 0183`
-- OFW: [DateTime: fix missing weekday in datetime_timestamp_to_datetime #3508 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3508)
-- [Patreon Builds Update](https://www.patreon.com/RogueMaster/membership): Added: [One Piece x Flipper animation (By RogueMaster)](https://github.com/RogueMaster/awesome-flipperzero-withModules/tree/rogue_main/graphics/WIP%2BUncompiled%20animations/RM_OPxFlipper_128x64) Builds updated: ManifestSwitcher, Minimal, One Pice & SJUMP.
-- OFW: [Asynchronous Infrared remote manipulation #3503 (By gsurkov)](https://github.com/flipperdevices/flipperzero-firmware/pull/3503)
-- Updated: [J305 Geiger Counter v1.2 (By nmrr)](https://github.com/nmrr/flipperzero-geigercounter)
 
 <a name="release">
 
@@ -594,4 +557,4 @@ $ ./fbt dolphin_ext
 - [Desktop Favorite Binds To Allow Opening Custom Game Menu. Whomever can complete this gets 3 months of subscriber builds. Patrons can DM me to add their monthly towards this bounty.](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/756)
 - `Bluetooth Audio` APP to allow flipper to pair to external speaker or headphones for wav/mp3 playback ($200 USD in ETH or BTC) (Don't think this is possible)
 
-# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0305-1134-0.99.1-46c6775.tgz&channel=RM0305-1134-0.99.1-46c6775&version=0.99.1)
+# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0311-1616-0.99.2-dab7695.tgz&channel=RM0311-1616-0.99.2-dab7695&version=0.99.2)
