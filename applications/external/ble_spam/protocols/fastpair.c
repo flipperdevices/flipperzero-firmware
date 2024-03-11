@@ -3,6 +3,7 @@
 
 // Hacked together by @Willy-JL and @Spooks4576
 // Documentation at https://developers.google.com/nearby/fast-pair/specifications/introduction
+// https://bluetoothdb.com
 
 static const struct {
     uint32_t value;
