@@ -67,6 +67,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [DateTime: fix missing weekday in datetime_timestamp_to_datetime #3508 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3508)
 - [Patreon Builds Update](https://www.patreon.com/RogueMaster/membership): Added: [One Piece x Flipper animation (By RogueMaster)](https://github.com/RogueMaster/awesome-flipperzero-withModules/tree/rogue_main/graphics/WIP%2BUncompiled%20animations/RM_OPxFlipper_128x64) Builds updated: ManifestSwitcher, Minimal, One Pice & SJUMP.
 - OFW: [Asynchronous Infrared remote manipulation #3503 (By gsurkov)](https://github.com/flipperdevices/flipperzero-firmware/pull/3503)
+- Updated: [J305 Geiger Counter v1.2 (By nmrr)](https://github.com/nmrr/flipperzero-geigercounter)
 
 <a name="release">
 
