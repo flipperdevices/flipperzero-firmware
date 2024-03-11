@@ -111,13 +111,13 @@ jobs:
     runs-on: ubuntu-latest
     needs: ["create-release", "build"]
     steps:
-      - name: Download release artifacts
+      - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
           pattern: release-*
           path: release
 
-      - name: Upload build artifacts
+      - name: Upload release artifacts
         uses: shogo82148/actions-upload-release-asset@v1
         with:
           upload_url: ${{ needs.create-release.outputs.upload_url }}
@@ -126,13 +126,7 @@ jobs:
       - name: Generate checksum
         run: |
           cd release
-          find . -type f -mindepth 1 -maxdepth 1 -name 'checksum.txt' | xargs cat > checksum.txt
-
-      - name: Upload build artifacts
-        uses: shogo82148/actions-upload-release-asset@v1
-        with:
-          upload_url: ${{ needs.create-release.outputs.upload_url }}
-          asset_path: release/**/*.zip
+          find . -type f -mindepth 1 -maxdepth 2 -name '*.zip' | xargs cat > checksum.txt
 
       - name: Upload checksum
         uses: shogo82148/actions-upload-release-asset@v1
