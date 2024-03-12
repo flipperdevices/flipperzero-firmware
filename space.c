@@ -5,7 +5,7 @@
 #include <gui/elements.h>
 #include <furi_hal.h>
 #include <math.h>
-#include <yapinvaders_icons.h> 
+#include <yapinvaders_icons.h>
 
 #define PROJECTILES_MAX 10
 #define ENEMIES_MAX 10
@@ -25,7 +25,6 @@ typedef struct {
     Point position; 
     bool active; 
 } Projectile;
-
 
 typedef struct {
     Point position;
@@ -93,12 +92,11 @@ void initialize_enemies(GameState* state) {
     int rows = 2;
     int cols = ENEMIES_MAX / rows;
 
-
-    int horizontalSpacing = 128 / cols;
-    int verticalSpacing = 10;
+    int horizontalSpacing = 128 / cols; 
+    int verticalSpacing = 10; 
 
     for(int i = 0; i < ENEMIES_MAX; ++i) {
-        state->enemies[i].position.x = (i % cols) * horizontalSpacing + (horizontalSpacing / 2); 
+        state->enemies[i].position.x = (i % cols) * horizontalSpacing + (horizontalSpacing / 2);
         state->enemies[i].position.y = (i / cols) * verticalSpacing + 10;
         state->enemies[i].active = true;
     }
@@ -118,7 +116,7 @@ void update_enemy_positions(GameState* state) {
                     (state->enemies[i].position.x >= 124 && enemy_movement_direction > 0)) {
                     changeDirection = true;
                     newDirection *= -1; 
-                    break; 
+                    break;
                 }
             }
         }
@@ -155,8 +153,8 @@ void handle_collisions(GameState* state) {
                         state->projectiles[p].active = false;
                         state->enemies[e].active = false;
                         state->projectiles_count--;
-                        state->score += 10; 
-                        break; 
+                        state->score += 10;
+                        break;
                     }
                 }
             }
@@ -173,10 +171,15 @@ bool all_enemies_destroyed(GameState* state) {
     return true;
 }
 
-void render_game_over_screen(Canvas* canvas) {
+void render_game_over_screen(Canvas* canvas, GameState* state) {
+    char score_msg[30];
     canvas_clear(canvas);
     canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str_aligned(canvas, 64, 24, AlignCenter, AlignCenter, "Game Over!");
+    canvas_draw_str_aligned(canvas, 64, 8, AlignCenter, AlignCenter, "Game Over!");
+
+    snprintf(score_msg, sizeof(score_msg), "Score: %d", state->score);
+    canvas_draw_str_aligned(canvas, 64, 24, AlignCenter, AlignCenter, score_msg);
+
     canvas_draw_str_aligned(canvas, 64, 40, AlignCenter, AlignCenter, "Press OK to restart");
 }
 
@@ -193,7 +196,7 @@ void update_game_state(GameState* state) {
 
     for(int i = 0; i < ENEMIES_MAX; ++i) {
         if(state->enemies[i].active && state->enemies[i].position.y >= state->player.position.y) {
-            state->game_over = true; 
+            state->game_over = true;
             break;
         }
     }
@@ -210,7 +213,7 @@ void render_callback(Canvas* const canvas, void* ctx) {
     GameState* state = (GameState*)ctx;
     if (!canvas || !state) return; 
     if(state->game_over) {
-        render_game_over_screen(canvas); 
+        render_game_over_screen(canvas, state); 
     } else {
     canvas_clear(canvas);
     char score_text[30];
@@ -242,8 +245,8 @@ static void input_callback(InputEvent* input_event, void* ctx) {
     
     if (state->game_over) {
         if (input_event->key == InputKeyOk && input_event->type == InputTypeShort) {
-            game_state_init(state);  
-            initialize_enemies(state); 
+            game_state_init(state);
+            initialize_enemies(state);
             state->game_over = false; 
         }
     } else {
@@ -273,7 +276,7 @@ int32_t yapinvaders_app(void) {
             view_port_update(view_port);
         }
 
-        furi_delay_ms(30); 
+        furi_delay_ms(30);
     }
 
     gui_remove_view_port(gui, view_port);
