@@ -3,7 +3,7 @@
 /** The camera configuration model. */
 camera_config_t camera_config;
 
-void set_camera_config_defaults(CameraFunction camera_function) {
+void set_camera_config_defaults() {
   camera_config.ledc_channel = LEDC_CHANNEL_0;
   camera_config.ledc_timer = LEDC_TIMER_0;
   camera_config.pin_d0 = Y2_GPIO_NUM;
@@ -24,16 +24,9 @@ void set_camera_config_defaults(CameraFunction camera_function) {
   camera_config.pin_reset = RESET_GPIO_NUM;
   camera_config.xclk_freq_hz = 20000000;
 
-  if (camera_function == CAMERA_FUNCTION_SERIAL) {
-    camera_config.pixel_format = PIXFORMAT_GRAYSCALE;
-    camera_config.grab_mode = CAMERA_GRAB_WHEN_EMPTY;
-    camera_config.fb_count = 1;
-    camera_config.frame_size = FRAMESIZE_QQVGA;
-  } else if (camera_function == CAMERA_FUNCTION_WIFI) {
-    camera_config.pixel_format = PIXFORMAT_JPEG;
-    camera_config.jpeg_quality = 8;
-    camera_config.fb_count = 1;
-    camera_config.grab_mode = CAMERA_GRAB_WHEN_EMPTY;
-    camera_config.frame_size = FRAMESIZE_SVGA;
-  }
+  camera_config.pixel_format = PIXFORMAT_JPEG;
+  camera_config.jpeg_quality = 8;
+  camera_config.fb_count = 1;
+  camera_config.grab_mode = CAMERA_GRAB_WHEN_EMPTY;
+  camera_config.frame_size = FRAMESIZE_SVGA;
 }

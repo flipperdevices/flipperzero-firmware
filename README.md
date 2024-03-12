@@ -17,7 +17,7 @@
 ## Table of Contents <a name="index"></a>
 
 - [Introduction](#intro)
-- [YouTube](#youtube)
+- [Videos](#videos)
 - [Hardware Requirements](#hardware-requirements)
 - [Hardware Installation](#hardware-installation)
 - [Firmware Installation](#firmware-installation)
@@ -46,9 +46,11 @@ There will be many more features added in the future! If you have any ideas or s
 
 <p align="right">[ <a href="#index">Back to top</a> ]</p>
 
-## YouTube <a name="youtube"></a>
+## Videos <a name="videos"></a>
 
-This section is dedicated to all the fans that have made videos of this project! Thank you! If you have a video you'd like to share, please let me know by opening an issue [here][issues-link].
+This section is dedicated to all the fans that have made videos of this project! Thank you! 
+
+If you have a video you'd like to share, please let me know by opening an issue [here][issues-link].
 
 <details>
 
@@ -58,7 +60,15 @@ This section is dedicated to all the fans that have made videos of this project!
 
 **Flipper Zero ESP32 CAM Camera Module** - by TAKEAPART
 
+[https://www.youtube.com/watch?v=cEl5UnWH_Ok](https://www.youtube.com/watch?v=cEl5UnWH_Ok)
+
 [![Flipper Zero ESP32 CAM Camera Module - TAKEAPART](https://img.youtube.com/vi/cEl5UnWH_Ok/0.jpg)](https://www.youtube.com/watch?v=cEl5UnWH_Ok)
+
+**Tech With Kids - Flipper Zero ESP32 Kamera** - by @rechtsanwalt.okan.dogan
+
+[https://www.instagram.com/reel/C4DrufKoKrb/](https://www.instagram.com/reel/C4DrufKoKrb/)
+
+[![Flipper Zero ESP32 CAM Camera Module - @rechtsanwalt.okan.dogan](.github/images/video_rechtsanwalt_okan_dogan.png)](https://www.instagram.com/reel/C4DrufKoKrb/)
 
 </details>
 
@@ -228,6 +238,8 @@ A huge thanks to the following people and projects for making this possible:
 
 - This project is based on & forked from the [Flipper Zero Camera Application][flipperzero-camera] by [Z4urce][github-profile-z4urce]. Thanks Z4urce for the inspiration and the great work!
 - I based this projects application structure on the [Flipper Zero Boilerplate Application][flipper-zero-fap-boilerplate] by [leedave][github-profile-leedave]. Thanks leedave for the great boilerplate application that helped me learn how to structure a Flipper Zero application properly!
+- [WillyJL][github-profile-willyjl] for your guidance and wisdom.
+- [TalkingSasquach][github-profile-talkingsasquach] for all of your helpful [YouTube videos][youtube-talkingsasquach] and [Discord community][discord-squachtopia].
 - The project images were drawn using the a application called "[lopaka][lopaka]" by [sbrin][github-profile-sbrin]. Thanks sbrin for your help in creating the images for this project!
 - The Flipper Zero community for all your support and feedback!
 
@@ -243,14 +255,14 @@ To contribute to this project, please follow the steps below:
 4. Request PR [here][pull-request-link], introduce work via your branch.
 5. Wait for review and merge.
 
-When developing the firmware, be sure to download the dependencies by running the `firmware-flash.bat` batch script at the root of this directory. This will download the ESP32-CAM firmware dependencies to the directories defined in the `arduino-cli.yaml` file post-run. Add these dependencies and their directories to your "Include path" in your IDE of choice. I prefer Visual Studio Code, there's a guide on how to get started with that workflow here:
+When developing the firmware, be sure to download the dependencies by running the `firmware-assets.bat` batch script at the root of this directory. This will download the ESP32-CAM firmware dependencies (Arduino Build & Git Assets) to your Windows TEMP folder. You can run the same script over again later to remove the temporary files when you're done using them. Once installed, add these dependencies and their directories to your "Include path" in your IDE of choice. I prefer Visual Studio Code; there's a guide on how to get started with that workflow here:
 
 https://github.com/CodyTolene/Flipper-Zero-Development-Toolkit
 
 Example include path:
 
 ```markdown
-C:/Users/<username>/AppData/Local/Temp/arduino-cli/**
+C:/Users/<username>/AppData/Local/Temp/arduino-cli/**/**
 ```
 
 Thank you for any and all contributions to this project, I'm looking forward to seeing what you come up with! If you have any questions, please let me know by opening an issue [here][issues-link].
@@ -283,13 +295,17 @@ Cody Tolene
 
 [arduino-ide]: https://www.arduino.cc/en/software
 [btc-address-link]: https://explorer.btc.com/btc/address/bc1qfx3lvspkj0q077u3gnrnxqkqwyvcku2nml86wmudy7yf2u8edmqq0a5vnt
+[discord-squachtopia]: https://discord.gg/squachtopia
 [flipper-zero-apps]: https://docs.flipper.net/apps
 [flipper-zero-fap-boilerplate]: https://github.com/leedave/flipper-zero-fap-boilerplate
 [flipperzero-camera]: https://github.com/Z4urce/flipperzero-camera
 [github-actions-link]: https://github.com/CodyTolene/Flipper-Zero-Camera-Suite/actions?query=workflow%3A%22Build+%2B+upload.%22
 [github-profile-leedave]: https://github.com/leedave
 [github-profile-sbrin]: https://github.com/sbrin
+[github-profile-talkingsasquach]: https://github.com/skizzophrenic
+[github-profile-willyjl]: https://github.com/Willy-JL
 [github-profile-z4urce]: https://github.com/Z4urce
 [issues-link]: https://github.com/CodyTolene/Flipper-Zero-Camera-Suite/issues
 [lopaka]: https://github.com/sbrin/lopaka
 [pull-request-link]: https://github.com/CodyTolene/Flipper-Zero-Camera-Suite/pulls
+[youtube-talkingsasquach]: https://www.youtube.com/@TalkingSasquach
