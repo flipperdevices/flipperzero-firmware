@@ -614,7 +614,7 @@ CameraSuiteViewCamera* camera_suite_view_camera_alloc() {
     furi_hal_serial_init(instance->serial_handle, 230400);
 
     // Enable UART1 and set the IRQ callback.
-    furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, camera_on_irq_cb, instance);
+    furi_hal_serial_async_rx_start(instance->serial_handle, camera_on_irq_cb, instance, false);
 
     return instance;
 }
@@ -622,10 +622,9 @@ CameraSuiteViewCamera* camera_suite_view_camera_alloc() {
 void camera_suite_view_camera_free(CameraSuiteViewCamera* instance) {
     furi_assert(instance);
 
-    // Remove the IRQ callback.
-    furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, NULL, NULL);
-
     // Free the worker thread.
+    furi_thread_flags_set(furi_thread_get_id(instance->camera_worker_thread), WorkerEventStop);
+    furi_thread_join(instance->camera_worker_thread);
     furi_thread_free(instance->camera_worker_thread);
 
     // Free the allocated stream buffer.
