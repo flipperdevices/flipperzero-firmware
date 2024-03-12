@@ -22,8 +22,6 @@ typedef enum {
 
 #define WORKER_ALL_RX_EVENTS (WorkerEvtStop | WorkerEvtRxDone)
 
-
-
 void uart_set_handle_rx_data_cb(
     Uart* uart,
     void (*handle_rx_data_cb)(uint8_t* buf, size_t len, void* context)) {
@@ -44,7 +42,8 @@ static void wifi_marauder_uart_on_irq_cb(
     }
 }
 
-static void uart_on_irq_cb(FuriHalSerialHandle* handle, FuriHalSerialRxEvent event, void* context) {
+static void
+    uart_on_irq_cb(FuriHalSerialHandle* handle, FuriHalSerialRxEvent event, void* context) {
     Uart* uart = (Uart*)context;
     UNUSED(handle);
 
@@ -109,7 +108,7 @@ static int32_t uart_worker(void* context) {
     Uart* uart = (Uart*)context;
 
     while(1) {
-       uint32_t events =
+        uint32_t events =
             furi_thread_flags_wait(WORKER_ALL_RX_EVENTS, FuriFlagWaitAny, FuriWaitForever);
         furi_check((events & FuriFlagError) == 0);
 
@@ -163,13 +162,12 @@ Uart* _uart_init(void* app, FuriHalSerialId channel, const char* thread_name) {
         furi_delay_ms(5000);
     }
     furi_check(uart->serial_handle);
-    furi_hal_serial_init(uart->serial_handle,  BAUDRATE);
+    furi_hal_serial_init(uart->serial_handle, BAUDRATE);
     furi_hal_serial_async_rx_start(
         uart->serial_handle,
         channel == FuriHalSerialIdUsart ? uart_on_irq_cb : wifi_marauder_uart_on_irq_cb,
         uart,
         false);
-
 
     return uart;
 }
@@ -185,7 +183,7 @@ Uart* lp_uart_init(void* app) {
 void uart_free(Uart* uart) {
     furi_assert(uart);
 
-   furi_thread_flags_set(furi_thread_get_id(uart->rx_thread), WorkerEvtStop);
+    furi_thread_flags_set(furi_thread_get_id(uart->rx_thread), WorkerEvtStop);
     furi_thread_join(uart->rx_thread);
     furi_thread_free(uart->rx_thread);
 

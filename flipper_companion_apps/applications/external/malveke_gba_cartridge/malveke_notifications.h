@@ -16,5 +16,5 @@
 // extern const NotificationMessage message_note_1047;
 // extern const NotificationMessage message_note_1109;
 
-void notification_success(NotificationApp *notification);
+void notification_success(NotificationApp* notification);
 #endif // MALVEKE_NOTIFICATIONS_H

@@ -1,6 +1,5 @@
 #include "malveke_notifications.h"
 
-
 const NotificationMessage message_delay_note_325 = {
     .type = NotificationMessageTypeDelay,
     .data.delay.length = 325,
@@ -13,7 +12,6 @@ const NotificationMessage message_delay_note_216 = {
     .type = NotificationMessageTypeDelay,
     .data.delay.length = 216,
 };
-
 
 const NotificationMessage message_delay_note_1302 = {
     .type = NotificationMessageTypeDelay,
@@ -49,13 +47,12 @@ static const NotificationSequence sequence_get_item = {
 
     &message_vibro_on,
 
-
     &message_note_1047,
     &message_delay_note_325,
     &message_sound_off,
 
     &message_vibro_off,
-    
+
     &message_note_1047,
     &message_delay_note_108,
     &message_sound_off,
@@ -87,6 +84,6 @@ static const NotificationSequence sequence_get_item = {
     NULL,
 };
 
-void notification_success(NotificationApp *notification) {
+void notification_success(NotificationApp* notification) {
     notification_message(notification, &sequence_get_item);
 }

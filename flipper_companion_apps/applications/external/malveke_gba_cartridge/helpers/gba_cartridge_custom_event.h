@@ -36,7 +36,8 @@ static inline uint32_t gba_cartridge_custom_menu_event_pack(uint16_t type, int16
     GBACartridgeCustomEventMenu event = {.content = {.type = type, .value = value}};
     return event.packed_value;
 }
-static inline void gba_cartridge_custom_menu_event_unpack(uint32_t packed_value, uint16_t* type, int16_t* value) {
+static inline void
+    gba_cartridge_custom_menu_event_unpack(uint32_t packed_value, uint16_t* type, int16_t* value) {
     GBACartridgeCustomEventMenu event = {.packed_value = packed_value};
     if(type) *type = event.content.type;
     if(value) *value = event.content.value;

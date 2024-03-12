@@ -144,10 +144,8 @@ void gb_cartridge_app_app_free(GBCartridge* app) {
 
     // storage_file_free(app->file_path);
 
-
     view_dispatcher_free(app->view_dispatcher);
     scene_manager_free(app->scene_manager);
-    
 
     app->gui = NULL;
     app->notification = NULL;
@@ -210,6 +208,6 @@ int32_t gb_cartridge_app(void* p) {
     // Return previous state of expansion
     expansion_enable(expansion);
     furi_record_close(RECORD_EXPANSION);
-   
+
     return 0;
 }

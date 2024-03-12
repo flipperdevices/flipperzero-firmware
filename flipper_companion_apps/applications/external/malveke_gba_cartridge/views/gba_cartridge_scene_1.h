@@ -3,12 +3,9 @@
 #include <gui/view.h>
 #include "../helpers/gba_cartridge_custom_event.h"
 
-
 typedef struct GBACartridgeScene1 GBACartridgeScene1;
 
 typedef void (*GBACartridgeScene1Callback)(GBACartridgeCustomEvent event, void* context);
-
-
 
 void gba_cartridge_scene_1_set_callback(
     GBACartridgeScene1* gba_cartridge_scene_1,
