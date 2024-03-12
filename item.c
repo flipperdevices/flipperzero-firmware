@@ -78,14 +78,7 @@ ItemsView* item_get_items_view_from_path(void* context, FuriString* input_path) 
     furi_string_free(filename_tmp);
     furi_string_free(path);
 
-    // DEBUG: Now print our array in original order
     FileArray_it_t iter;
-    for(FileArray_it(iter, flist); !FileArray_end_p(iter); FileArray_next(iter)) {
-        const char* f = furi_string_get_cstr(*FileArray_cref(iter));
-        FURI_LOG_I(TAG, "Found: %s", f);
-    }
-
-    FURI_LOG_I(TAG, "Creating our ItemsArray");
     ItemArray_init(iview->items);
     for(FileArray_it(iter, flist); !FileArray_end_p(iter); FileArray_next(iter)) {
         path = *FileArray_ref(iter);
@@ -93,19 +86,32 @@ ItemsView* item_get_items_view_from_path(void* context, FuriString* input_path) 
 
         Item* item = ItemArray_push_new(iview->items);
 
-        // Action files have extensions, so item->ext starts with '.' - ehhhh
+        // Action files have extensions, so item->ext starts with '.'
         item->ext[0] = 0;
         path_extract_extension(path, item->ext, MAX_EXT_LEN);
-        item->type = (item->ext[0] == '.') ? Item_Action : Item_Group;
+        // FURI_LOG_I(TAG, ". EXT = %s", item->ext);
+        if(item->ext[0] == '.') {
+            // TODO: hack alert - make a helper fn here, or something
+            if(item->ext[1] == 's')
+                item->type = Item_SubGhz;
+            else if(item->ext[1] == 'r')
+                item->type = Item_RFID;
+            else if(item->ext[1] == 'q')
+                item->type = Item_Playlist;
+            else if(item->ext[1] == 'i')
+                item->type = Item_IR;
+        } else {
+            item->type = Item_Group;
+        }
 
         item->name = furi_string_alloc();
         path_extract_filename_no_ext(found_path, item->name);
-        FURI_LOG_I(TAG, "Basename: %s", furi_string_get_cstr(item->name));
+        // FURI_LOG_I(TAG, "Basename: %s", furi_string_get_cstr(item->name));
         item_prettify_name(item->name);
 
         item->path = furi_string_alloc();
         furi_string_set(item->path, path);
-        FURI_LOG_I(TAG, "Path: %s", furi_string_get_cstr(item->path));
+        // FURI_LOG_I(TAG, "Path: %s", furi_string_get_cstr(item->path));
     }
 
     FileArray_clear(flist);

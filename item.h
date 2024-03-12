@@ -9,7 +9,14 @@
  * on-screen as well as to perform that action.
 */
 
-typedef enum { Item_Action, Item_Group } ItemType;
+typedef enum {
+    Item_SubGhz,
+    Item_RFID,
+    Item_IR,
+    Item_Playlist,
+    Item_Group,
+    Item_Settings
+} ItemType;
 
 typedef struct Item {
     ItemType type;

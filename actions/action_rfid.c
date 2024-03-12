@@ -34,19 +34,18 @@ void action_rfid_tx(void* context, FuriString* action_path, FuriString* error) {
     size_t data_size = protocol_dict_get_max_data_size(dict);
     uint8_t* data = malloc(data_size);
 
-    FURI_LOG_I(TAG, "Max dict data size is %d", data_size);
+    // FURI_LOG_I(TAG, "Max dict data size is %d", data_size);
     bool successful_read = false;
     do {
         if(!flipper_format_file_open_existing(fff_data_file, furi_string_get_cstr(file_name))) {
             ACTION_SET_ERROR("RFID: Error opening %s", furi_string_get_cstr(file_name));
             break;
         }
-        FURI_LOG_I(TAG, "Opened file");
         if(!flipper_format_read_header(fff_data_file, temp_str, &temp_data32)) {
             ACTION_SET_ERROR("RFID: Missing or incorrect header");
             break;
         }
-        FURI_LOG_I(TAG, "Read file headers");
+        // FURI_LOG_I(TAG, "Read file headers");
         // TODO: add better header checks here...
         if(!strcmp(furi_string_get_cstr(temp_str), "Flipper RFID key")) {
         } else {
@@ -67,9 +66,9 @@ void action_rfid_tx(void* context, FuriString* action_path, FuriString* error) {
 
         // read and check data field
         size_t required_size = protocol_dict_get_data_size(dict, protocol);
-        FURI_LOG_I(TAG, "Protocol req data size is %d", required_size);
+        // FURI_LOG_I(TAG, "Protocol req data size is %d", required_size);
         if(!flipper_format_read_hex(fff_data_file, "Data", data, required_size)) {
-            FURI_LOG_E(TAG, "Error reading data");
+            FURI_LOG_E(TAG, "RFID: Error reading data");
             ACTION_SET_ERROR("RFID: Error reading data");
             break;
         }
@@ -86,7 +85,7 @@ void action_rfid_tx(void* context, FuriString* action_path, FuriString* error) {
 
         protocol_dict_set_data(dict, protocol, data, data_size);
         successful_read = true;
-        FURI_LOG_I(TAG, "protocol dict setup complete!");
+        // FURI_LOG_I(TAG, "protocol dict setup complete!");
     } while(false);
 
     if(successful_read) {
@@ -95,14 +94,15 @@ void action_rfid_tx(void* context, FuriString* action_path, FuriString* error) {
         lfrfid_worker_start_thread(worker);
         lfrfid_worker_emulate_start(worker, protocol);
 
-        FURI_LOG_I(TAG, "Emulating RFID...");
-        int16_t time_ms = 3000;
-        int16_t interval_ms = 200;
+        int16_t time_ms = app->settings.rfid_duration;
+        FURI_LOG_I(
+            TAG, "RFID: Emulating RFID (%s) for %d ms", furi_string_get_cstr(file_name), time_ms);
+        int16_t interval_ms = 100;
         while(time_ms > 0) {
             furi_delay_ms(interval_ms);
             time_ms -= interval_ms;
         }
-        FURI_LOG_I(TAG, "Emulation stopped");
+        FURI_LOG_I(TAG, "RFID: Emulation stopped");
 
         lfrfid_worker_stop(worker);
         lfrfid_worker_stop_thread(worker);

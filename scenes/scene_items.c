@@ -11,6 +11,8 @@
 #include "scenes.h"
 #include "scene_items.h"
 #include "../actions/action.h"
+#include "../views/action_menu.h"
+
 #include <lib/toolbox/path.h>
 
 void scene_items_item_callback(void* context, int32_t index, InputType type) {
@@ -27,35 +29,70 @@ void scene_items_item_callback(void* context, int32_t index, InputType type) {
 // For each scene, implement handler callbacks
 void scene_items_on_enter(void* context) {
     App* app = context;
-    ButtonMenu* menu = app->btn_menu;
-    button_menu_reset(menu);
-    DialogEx* dialog = app->dialog;
-    dialog_ex_reset(dialog);
+
+    ActionMenu* menu = app->action_menu;
+    action_menu_reset(menu);
+    if(app->settings.layout == QUAC_APP_LANDSCAPE)
+        action_menu_set_layout(menu, ActionMenuLayoutLandscape);
+    else
+        action_menu_set_layout(menu, ActionMenuLayoutPortrait);
+    action_menu_set_show_icons(menu, app->settings.show_icons);
+    action_menu_set_show_headers(menu, app->settings.show_headers);
 
     ItemsView* items_view = app->items_view;
     FURI_LOG_I(TAG, "items on_enter: [%d] %s", app->depth, furi_string_get_cstr(items_view->path));
+    furi_delay_ms(500);
 
     const char* header = furi_string_get_cstr(items_view->name);
-    button_menu_set_header(menu, header);
+    action_menu_set_header(menu, header);
 
-    if(ItemArray_size(items_view->items)) {
+    size_t item_view_size = ItemArray_size(items_view->items);
+    if(item_view_size > 0) {
         ItemArray_it_t iter;
         int32_t index = 0;
         for(ItemArray_it(iter, items_view->items); !ItemArray_end_p(iter);
             ItemArray_next(iter), ++index) {
             const char* label = furi_string_get_cstr(ItemArray_cref(iter)->name);
-            ButtonMenuItemType type = ItemArray_cref(iter)->type == Item_Action ?
-                                          ButtonMenuItemTypeCommon :
-                                          ButtonMenuItemTypeControl;
-            button_menu_add_item(menu, label, index, scene_items_item_callback, type, app);
+            ActionMenuItemType type;
+            // TODO: Fix this with an array/map
+            switch(ItemArray_cref(iter)->type) {
+            case Item_Group:
+                type = ActionMenuItemTypeGroup;
+                break;
+            case Item_Playlist:
+                type = ActionMenuItemTypePlaylist;
+                break;
+            case Item_SubGhz:
+                type = ActionMenuItemTypeSubGHz;
+                break;
+            case Item_RFID:
+                type = ActionMenuItemTypeRFID;
+                break;
+            case Item_IR:
+                type = ActionMenuItemTypeIR;
+                break;
+            default:
+                type = ActionMenuItemTypeGroup; // TODO: Does this ever get hit?
+            }
+            action_menu_add_item(menu, label, index, scene_items_item_callback, type, app);
         }
     } else {
         FURI_LOG_W(TAG, "No items for: %s", furi_string_get_cstr(items_view->path));
         // TODO: Display Error popup? Empty folder?
     }
-    // ...
 
-    view_dispatcher_switch_to_view(app->view_dispatcher, SR_ButtonMenu);
+    // Always add the "Settings" item at the end of our list - but only at top level!
+    if(app->depth == 0) {
+        action_menu_add_item(
+            menu,
+            "Settings",
+            item_view_size, // last item!
+            scene_items_item_callback,
+            ActionMenuItemTypeSettings,
+            app);
+    }
+
+    view_dispatcher_switch_to_view(app->view_dispatcher, Q_ActionMenu);
 }
 bool scene_items_on_event(void* context, SceneManagerEvent event) {
     App* app = context;
@@ -66,39 +103,47 @@ bool scene_items_on_event(void* context, SceneManagerEvent event) {
     case SceneManagerEventTypeCustom:
         if(event.event == Event_ButtonPressed) {
             consumed = true;
+            furi_delay_ms(100);
             FURI_LOG_I(TAG, "button pressed is %d", app->selected_item);
-            Item* item = ItemArray_get(app->items_view->items, app->selected_item);
-            if(item->type == Item_Group) {
-                app->depth++;
-                ItemsView* new_items = item_get_items_view_from_path(app, item->path);
-                item_items_view_free(app->items_view);
-                app->items_view = new_items;
-                scene_manager_next_scene(app->scene_manager, SR_Scene_Items);
-            } else {
-                FURI_LOG_I(TAG, "Initiating item action: %s", furi_string_get_cstr(item->name));
+            if(app->selected_item < (int)ItemArray_size(app->items_view->items)) {
+                Item* item = ItemArray_get(app->items_view->items, app->selected_item);
+                if(item->type == Item_Group) {
+                    app->depth++;
+                    ItemsView* new_items = item_get_items_view_from_path(app, item->path);
+                    item_items_view_free(app->items_view);
+                    app->items_view = new_items;
+                    scene_manager_next_scene(app->scene_manager, Q_Scene_Items);
+                } else {
+                    FURI_LOG_I(
+                        TAG, "Initiating item action: %s", furi_string_get_cstr(item->name));
 
-                // LED goes blinky blinky
-                App* app = context;
-                notification_message(app->notifications, &sequence_blink_start_blue);
+                    // LED goes blinky blinky
+                    App* app = context;
+                    notification_message(app->notifications, &sequence_blink_start_blue);
 
-                // Prepare error string for action calls
-                FuriString* error;
-                error = furi_string_alloc();
+                    // Prepare error string for action calls
+                    FuriString* error;
+                    error = furi_string_alloc();
 
-                action_tx(app, item, error);
+                    action_tx(app, item, error);
 
-                if(furi_string_size(error)) {
-                    FURI_LOG_E(TAG, furi_string_get_cstr(error));
-                    // Change LED to Red and Vibrate!
-                    notification_message(app->notifications, &sequence_error);
+                    if(furi_string_size(error)) {
+                        FURI_LOG_E(TAG, furi_string_get_cstr(error));
+                        // Change LED to Red and Vibrate!
+                        notification_message(app->notifications, &sequence_error);
 
-                    // Display DialogEx popup or something?
+                        // Display DialogEx popup or something?
+                    }
+
+                    furi_string_free(error);
+
+                    // Turn off LED light
+                    notification_message(app->notifications, &sequence_blink_stop);
                 }
-
-                furi_string_free(error);
-
-                // Turn off LED light
-                notification_message(app->notifications, &sequence_blink_stop);
+            } else {
+                FURI_LOG_I(TAG, "Selected Settings!");
+                // TODO: Do we need to free this current items_view??
+                scene_manager_next_scene(app->scene_manager, Q_Scene_Settings);
             }
         }
         break;
@@ -122,17 +167,18 @@ bool scene_items_on_event(void* context, SceneManagerEvent event) {
         }
         break;
     default:
+        FURI_LOG_I(TAG, "Custom event not handled");
         break;
     }
+    FURI_LOG_I(TAG, "Generic event not handled");
     return consumed;
 }
 
 void scene_items_on_exit(void* context) {
     App* app = context;
-    ButtonMenu* menu = app->btn_menu;
-    button_menu_reset(menu);
-    DialogEx* dialog = app->dialog;
-    dialog_ex_reset(dialog);
+
+    ActionMenu* menu = app->action_menu;
+    action_menu_reset(menu);
 
     FURI_LOG_I(TAG, "on_exit. depth = %d", app->depth);
 }
