@@ -108,6 +108,35 @@ static void js_storage_write(struct mjs* mjs) {
     storage_file_free(file);
 }
 
+static void js_storage_append(struct mjs* mjs) {
+    JsStorageInst* storage = get_this_ctx(mjs);
+    if(!check_arg_count(mjs, 2)) return;
+
+    const char* path;
+    if(!get_path_arg(mjs, &path)) return;
+
+    mjs_val_t data_obj = mjs_arg(mjs, 1);
+    if(!mjs_is_string(data_obj)) {
+        ret_bad_args(mjs, "Data must be a string");
+        return;
+    }
+    size_t data_len = 0;
+    const char* data = mjs_get_string(mjs, &data_obj, &data_len);
+    if((data_len == 0) || (data == NULL)) {
+        ret_bad_args(mjs, "Bad data argument");
+        return;
+    }
+
+    File* file = storage_file_alloc(storage->api);
+    if(!storage_file_open(file, path, FSAM_WRITE, FSOM_OPEN_APPEND)) {
+        ret_int_err(mjs, storage_file_get_error_desc(file));
+    } else {
+        size_t write = storage_file_write(file, data, data_len);
+        mjs_return(mjs, mjs_mk_boolean(mjs, write == data_len));
+    }
+    storage_file_free(file);
+}
+
 static void js_storage_exists(struct mjs* mjs) {
     JsStorageInst* storage = get_this_ctx(mjs);
     if(!check_arg_count(mjs, 1)) return;
@@ -194,6 +223,7 @@ static void* js_storage_create(struct mjs* mjs, mjs_val_t* object) {
     mjs_set(mjs, storage_obj, INST_PROP_NAME, ~0, mjs_mk_foreign(mjs, storage));
     mjs_set(mjs, storage_obj, "read", ~0, MJS_MK_FN(js_storage_read));
     mjs_set(mjs, storage_obj, "write", ~0, MJS_MK_FN(js_storage_write));
+    mjs_set(mjs, storage_obj, "append", ~0, MJS_MK_FN(js_storage_append));
     mjs_set(mjs, storage_obj, "exists", ~0, MJS_MK_FN(js_storage_exists));
     mjs_set(mjs, storage_obj, "remove", ~0, MJS_MK_FN(js_storage_remove));
     mjs_set(mjs, storage_obj, "virtualInit", ~0, MJS_MK_FN(js_storage_virtual_init));

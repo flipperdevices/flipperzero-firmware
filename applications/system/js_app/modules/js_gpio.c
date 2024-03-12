@@ -1,6 +1,7 @@
 #include "../js_modules.h"
 #include <furi_hal_gpio.h>
 #include <furi_hal_resources.h>
+#include <expansion/expansion.h>
 
 typedef struct {
     const GpioPin* pin;
@@ -23,50 +24,67 @@ static const GpioPinCtx js_gpio_pins[] = {
     {.pin = &gpio_ibutton, .name = "PB14"}, // 17
 };
 
-GpioPull js_gpio_get_gpio_pull(const char* pull) {
+bool js_gpio_get_gpio_pull(const char* pull, GpioPull* value) {
     if(strcmp(pull, "no") == 0) {
-        return GpioPullNo;
+        *value = GpioPullNo;
+        return true;
     } else if(strcmp(pull, "up") == 0) {
-        return GpioPullUp;
+        *value = GpioPullUp;
+        return true;
     } else if(strcmp(pull, "down") == 0) {
-        return GpioPullDown;
+        *value = GpioPullDown;
+        return true;
     } else {
-        return GpioPullNo;
+        *value = GpioPullNo;
+        return true;
     }
+    return false;
 }
 
-GpioMode js_gpio_get_gpio_mode(const char* mode) {
+bool js_gpio_get_gpio_mode(const char* mode, GpioMode* value) {
     if(strcmp(mode, "input") == 0) {
-        return GpioModeInput;
+        *value = GpioModeInput;
+        return true;
     } else if(strcmp(mode, "outputPushPull") == 0) {
-        return GpioModeOutputPushPull;
+        *value = GpioModeOutputPushPull;
+        return true;
     } else if(strcmp(mode, "outputOpenDrain") == 0) {
-        return GpioModeOutputOpenDrain;
+        *value = GpioModeOutputOpenDrain;
+        return true;
     } else if(strcmp(mode, "altFunctionPushPull") == 0) {
-        return GpioModeAltFunctionPushPull;
+        *value = GpioModeAltFunctionPushPull;
+        return true;
     } else if(strcmp(mode, "altFunctionOpenDrain") == 0) {
-        return GpioModeAltFunctionOpenDrain;
+        *value = GpioModeAltFunctionOpenDrain;
+        return true;
     } else if(strcmp(mode, "analog") == 0) {
-        return GpioModeAnalog;
+        *value = GpioModeAnalog;
+        return true;
     } else if(strcmp(mode, "interruptRise") == 0) {
-        return GpioModeInterruptRise;
+        *value = GpioModeInterruptRise;
+        return true;
     } else if(strcmp(mode, "interruptFall") == 0) {
-        return GpioModeInterruptFall;
+        *value = GpioModeInterruptFall;
+        return true;
     } else if(strcmp(mode, "interruptRiseFall") == 0) {
-        return GpioModeInterruptRiseFall;
+        *value = GpioModeInterruptRiseFall;
+        return true;
     } else if(strcmp(mode, "eventRise") == 0) {
-        return GpioModeEventRise;
+        *value = GpioModeEventRise;
+        return true;
     } else if(strcmp(mode, "eventFall") == 0) {
-        return GpioModeEventFall;
+        *value = GpioModeEventFall;
+        return true;
     } else if(strcmp(mode, "eventRiseFall") == 0) {
-        return GpioModeEventRiseFall;
+        *value = GpioModeEventRiseFall;
+        return true;
     } else {
-        return GpioModeInput;
+        return false;
     }
 }
 
 const GpioPin* js_gpio_get_gpio_pin(const char* name) {
-    for(int i = 0; i < 12; i++) {
+    for(size_t i = 0; i < COUNT_OF(js_gpio_pins); i++) {
         if(strcmp(js_gpio_pins[i].name, name) == 0) {
             return js_gpio_pins[i].pin;
         }
@@ -119,14 +137,28 @@ static void js_gpio_init(struct mjs* mjs) {
     }
 
     const GpioPin* gpio_pin = js_gpio_get_gpio_pin(pin_name);
-    const GpioMode gpio_mode = js_gpio_get_gpio_mode(mode_name);
-    const GpioPull gpio_pull = js_gpio_get_gpio_pull(pull_name);
-
     if(gpio_pin == NULL) {
         mjs_prepend_errorf(mjs, MJS_BAD_ARGS_ERROR, "Invalid pin name");
         mjs_return(mjs, MJS_UNDEFINED);
         return;
     }
+
+    GpioMode gpio_mode;
+    if(!js_gpio_get_gpio_mode(mode_name, &gpio_mode)) {
+        mjs_prepend_errorf(mjs, MJS_BAD_ARGS_ERROR, "Invalid mode name");
+        mjs_return(mjs, MJS_UNDEFINED);
+        return;
+    }
+
+    GpioPull gpio_pull;
+    if(!js_gpio_get_gpio_pull(pull_name, &gpio_pull)) {
+        mjs_prepend_errorf(mjs, MJS_BAD_ARGS_ERROR, "Invalid pull name");
+        mjs_return(mjs, MJS_UNDEFINED);
+        return;
+    }
+
+    expansion_disable(furi_record_open(RECORD_EXPANSION));
+    furi_record_close(RECORD_EXPANSION);
 
     furi_hal_gpio_init(gpio_pin, gpio_mode, gpio_pull, GpioSpeedVeryHigh);
 
@@ -214,10 +246,13 @@ static void js_gpio_destroy(void* inst) {
     UNUSED(inst);
 
     // loop through all pins and reset them to analog mode
-    for(int i = 0; i < 12; i++) {
+    for(size_t i = 0; i < COUNT_OF(js_gpio_pins); i++) {
         furi_hal_gpio_write(js_gpio_pins[i].pin, false);
         furi_hal_gpio_init(js_gpio_pins[i].pin, GpioModeAnalog, GpioPullNo, GpioSpeedVeryHigh);
     }
+
+    expansion_enable(furi_record_open(RECORD_EXPANSION));
+    furi_record_close(RECORD_EXPANSION);
 }
 
 static const JsModuleDescriptor js_gpio_desc = {
