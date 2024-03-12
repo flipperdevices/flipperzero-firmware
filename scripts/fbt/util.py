@@ -1,5 +1,6 @@
 import os
 import re
+from pathlib import Path, PurePosixPath
 
 import SCons
 from SCons.Errors import StopError
@@ -79,7 +80,22 @@ def resolve_real_dir_node(node):
     raise StopError(f"Can't find absolute path for {node.name} ({node})")
 
 
-def path_as_posix(path):
-    if SCons.Platform.platform_default() == "win32":
-        return path.replace(os.path.sep, os.path.altsep)
-    return path
+class PosixPathWrapper:
+    def __init__(self, pathobj):
+        self.pathobj = pathobj
+
+    @staticmethod
+    def fixup_separators(path):
+        if SCons.Platform.platform_default() == "win32":
+            return path.replace(os.path.sep, os.path.altsep)
+        return path
+
+    @staticmethod
+    def fix_path(path):
+        return PurePosixPath(Path(path).as_posix())
+
+    def __call__(self, target, source, env, for_signature):
+        if for_signature:
+            return self.pathobj
+
+        return self.fix_path(env.subst(self.pathobj))

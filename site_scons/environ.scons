@@ -1,9 +1,9 @@
 import multiprocessing
 import os
-from pathlib import Path, PurePosixPath
 
 from fbt.util import (
     FORWARDED_ENV_VARIABLES,
+    PosixPathWrapper,
     resolve_real_dir_node,
     single_quote,
     tempfile_arg_esc_func,
@@ -26,18 +26,6 @@ if proxy_env := GetOption("proxy_env"):
 for env_value_name in variables_to_forward:
     if environ_value := os.environ.get(env_value_name, None):
         forward_os_env[env_value_name] = environ_value
-
-
-class PosixPathWrapper:
-    def __init__(self, pathobj):
-        self.pathobj = pathobj
-
-    def __call__(self, target, source, env, for_signature):
-        if for_signature:
-            return self.pathobj
-
-        return PurePosixPath(Path(env.subst(self.pathobj)))
-
 
 coreenv = VAR_ENV.Clone(
     tools=[
