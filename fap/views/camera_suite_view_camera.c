@@ -179,19 +179,33 @@ static void save_image_to_flipper_sd_card(void* model) {
     FuriString* file_name = furi_string_alloc();
 
     // Get the current date and time.
-    DateTime datetime = {0};
-    furi_hal_rtc_get_datetime(&datetime);
 
-    // Create the file name.
-    furi_string_printf(
-        file_name,
-        EXT_PATH("DCIM/%.4d%.2d%.2d-%.2d%.2d%.2d.bmp"),
-        datetime.year,
-        datetime.month,
-        datetime.day,
-        datetime.hour,
-        datetime.minute,
-        datetime.second);
+    // Not supported in "Release" F0 build.
+    // TODO: Remove when DateTime is supported in "Release" F0 build.
+    // FuriHalRtcDateTime datetime = {0};
+
+    // Only supported in "RC" & "Dev" builds.
+    // TODO: Uncomment when DateTime is supported in "Release" F0 build.
+    // DateTime datetime = {0};
+
+    // TODO: Uncomment when DateTime is supported in "Release" F0 build.
+    // furi_hal_rtc_get_datetime(&datetime);
+
+    // Create the file name using DateTime.
+    // TODO: Uncomment when DateTime is supported in "Release" F0 build.
+    // furi_string_printf(
+    //     file_name,
+    //     EXT_PATH("DCIM/%.4d%.2d%.2d-%.2d%.2d%.2d.bmp"),
+    //     datetime.year,
+    //     datetime.month,
+    //     datetime.day,
+    //     datetime.hour,
+    //     datetime.minute,
+    //     datetime.second);
+
+    // Just use a random number for now instead of DateTime.
+    int random_number = rand();
+    furi_string_printf(file_name, EXT_PATH("DCIM/%d.bmp"), random_number);
 
     // Open the file for writing. If the file does not exist (it shouldn't),
     // create it.
