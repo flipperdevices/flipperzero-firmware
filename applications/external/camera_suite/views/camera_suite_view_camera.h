@@ -17,23 +17,14 @@
 
 #include "../helpers/camera_suite_custom_event.h"
 
-#ifdef xtreme_settings
+#ifdef FW_ORIGIN_RM
 /**
- * Enable the following line for "Xtreme Firmware" & "Xtreme Apps" (Flipper-XFW).
+ * Enable the following line for "RogueMaster Firmware"
  * 
- * @see https://github.com/Flipper-XFW/Xtreme-Firmware
- * @see https://github.com/Flipper-XFW/Xtreme-Apps
+ * @see https://github.com/RogueMaster/flipperzero-firmware-wPlugins
 */
-#define UART_CH (xtreme_settings.uart_esp_channel)
-#elif defined momentum_settings
-/**
- * Enable the following line for "Momentum Firmware" & "Momentum Apps".
- * 
- * @see https://github.com/Next-Flip/Momentum-Firmware
- * @see https://github.com/Next-Flip/Momentum-Apps
-*/
-#include <momentum/momentum.h>
-#define UART_CH (momentum_settings.uart_esp_channel)
+#include <cfw/cfw.h>
+#define UART_CH (cfw_settings.uart_esp_channel)
 #else
 #define UART_CH (FuriHalSerialIdUsart)
 #endif
