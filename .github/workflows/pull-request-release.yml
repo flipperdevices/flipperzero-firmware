@@ -16,9 +16,8 @@ jobs:
           - name: "rc"
             sdk-channel: rc
 
-          # Skip release build until stable.
-          # - name: "release"
-          #   sdk-channel: release
+          - name: "release"
+            sdk-channel: release
 
     name: "PR Build: ${{ matrix.name }}"
     steps:
