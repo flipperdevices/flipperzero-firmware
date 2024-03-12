@@ -17,9 +17,26 @@
 
 #include "../helpers/camera_suite_custom_event.h"
 
-#include <cfw/cfw.h>
-
-#define UART_CH (cfw_settings.uart_esp_channel)
+#ifdef xtreme_settings
+/**
+ * Enable the following line for "Xtreme Firmware" & "Xtreme Apps" (Flipper-XFW).
+ * 
+ * @see https://github.com/Flipper-XFW/Xtreme-Firmware
+ * @see https://github.com/Flipper-XFW/Xtreme-Apps
+*/
+#define UART_CH (xtreme_settings.uart_esp_channel)
+#elif defined momentum_settings
+/**
+ * Enable the following line for "Momentum Firmware" & "Momentum Apps".
+ * 
+ * @see https://github.com/Next-Flip/Momentum-Firmware
+ * @see https://github.com/Next-Flip/Momentum-Apps
+*/
+#include <momentum/momentum.h>
+#define UART_CH (momentum_settings.uart_esp_channel)
+#else
+#define UART_CH (FuriHalSerialIdUsart)
+#endif
 
 #define BITMAP_HEADER_LENGTH 62
 #define FRAME_BIT_DEPTH 1

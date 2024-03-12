@@ -9,7 +9,7 @@
 /** The camera configuration model. */
 extern camera_config_t camera_config;
 
-/** Set the camera configuration defaults based on camera function. */
-void set_camera_config_defaults(CameraFunction camera_function);
+/** Set the camera configuration defaults. */
+void set_camera_config_defaults();
 
 #endif
