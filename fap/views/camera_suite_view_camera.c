@@ -613,7 +613,7 @@ CameraSuiteViewCamera* camera_suite_view_camera_alloc() {
     // 115200 is the default baud rate for the ESP32-CAM.
     furi_hal_serial_init(instance->serial_handle, 230400);
 
-    // Enable UART1 and set the IRQ callback.
+    // Start the asynchronous receive.
     furi_hal_serial_async_rx_start(instance->serial_handle, camera_on_irq_cb, instance, false);
 
     return instance;
