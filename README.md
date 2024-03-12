@@ -20,7 +20,7 @@ To install Yappy Invaders on your Flipper Zero, follow these steps:
 5. To install the application onto your Flipper Zero, use the ufbt tool with the following command: ```ufbt install```
 6. Look for Yappy Invaders in Apps/Games.
 
-[1p](https://raw.githubusercontent.com/dagnazty/Yappy_Invaders/main/images/1.png)
+![1p](https://raw.githubusercontent.com/dagnazty/Yappy_Invaders/main/images/1.png)
 
 ## Controls
 Left/Right Buttons: Move your ship left or right.
@@ -30,9 +30,9 @@ Back Button: Quit the game.
 ## Gameplay
 You control a spaceship at the bottom of the screen, moving left and right to dodge enemy fire and shooting projectiles to destroy enemies. Each hit on an enemy increases your score. The game's difficulty increases as you destroy all enemies and progress to the next wave. The game ends when an enemy ship reaches the bottom of the screen, displaying a game over message and a prompt to restart the game.
 
-[2p](https://raw.githubusercontent.com/dagnazty/Yappy_Invaders/main/images/2.png)
+![2p](https://raw.githubusercontent.com/dagnazty/Yappy_Invaders/main/images/2.png)
 
-[3p](https://raw.githubusercontent.com/dagnazty/Yappy_Invaders/main/images/3.png)
+![3p](https://raw.githubusercontent.com/dagnazty/Yappy_Invaders/main/images/3.png)
 
 ## Contributing
 Contributions to Yappy Invaders are welcome! If you have suggestions for improvements or encounter any issues, please open an issue or submit a pull request.
