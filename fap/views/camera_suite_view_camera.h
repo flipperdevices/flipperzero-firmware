@@ -2,8 +2,8 @@
 
 #include <furi.h>
 #include <furi_hal.h>
-#include <furi_hal_serial.h>
 #include <furi_hal_serial_control.h>
+#include <furi_hal_serial.h>
 #include <gui/elements.h>
 #include <gui/gui.h>
 #include <gui/icon_i.h>

@@ -609,8 +609,6 @@ CameraSuiteViewCamera* camera_suite_view_camera_alloc() {
     // Allocate the serial handle for the camera.
     instance->serial_handle = furi_hal_serial_control_acquire(UART_CH);
     furi_check(instance->serial_handle);
-
-    // 115200 is the default baud rate for the ESP32-CAM.
     furi_hal_serial_init(instance->serial_handle, 230400);
 
     // Start the asynchronous receive.
