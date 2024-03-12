@@ -8,17 +8,11 @@
 #define QUAC_SETTINGS_FILE_TYPE "Quac Settings File"
 #define QUAC_SETTINGS_FILE_VERSION 1
 
-// Quac Settings Defaults
-#define QUAC_SETTINGS_DEFAULT_RFID_DURATION 2500
-#define QUAC_SETTINGS_DEFAULT_LAYOUT QUAC_APP_LANDSCAPE // QUAC_APP_PORTRAIT
-#define QUAC_SETTINGS_DEFAULT_SHOW_ICONS true
-#define QUAC_SETTINGS_DEFAULT_SHOW_HEADERS true
-
 void quac_set_default_settings(App* app) {
-    app->settings.rfid_duration = QUAC_SETTINGS_DEFAULT_RFID_DURATION;
-    app->settings.layout = QUAC_SETTINGS_DEFAULT_LAYOUT;
-    app->settings.show_icons = QUAC_SETTINGS_DEFAULT_SHOW_ICONS;
-    app->settings.show_headers = QUAC_SETTINGS_DEFAULT_SHOW_HEADERS;
+    app->settings.rfid_duration = 2500;
+    app->settings.layout = QUAC_APP_LANDSCAPE;
+    app->settings.show_icons = true;
+    app->settings.show_headers = true;
 }
 
 void quac_load_settings(App* app) {

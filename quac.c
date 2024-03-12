@@ -55,16 +55,6 @@ App* app_alloc() {
     app->depth = 0;
     app->selected_item = -1;
 
-    // Default settings
-    // TODO: Store settings in apps_data/quac/.quac.conf as a Flipper Format File!
-    // Create Settings Scene, save settings _on_exit
-    // Always use settings in _on_enter of other scenes
-
-    app->settings.rfid_duration = 3000;
-    app->settings.layout = QUAC_APP_LANDSCAPE;
-    // app->settings.layout = QUAC_APP_PORTRAIT;
-    app->settings.show_icons = true;
-
     app->items_view = item_get_items_view_from_path(app, NULL);
 
     return app;
