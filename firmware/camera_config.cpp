@@ -24,9 +24,8 @@ void set_camera_config_defaults() {
   camera_config.pin_reset = RESET_GPIO_NUM;
   camera_config.xclk_freq_hz = 20000000;
 
-  camera_config.pixel_format = PIXFORMAT_JPEG;
-  camera_config.jpeg_quality = 8;
-  camera_config.fb_count = 1;
+  camera_config.pixel_format = PIXFORMAT_GRAYSCALE;
   camera_config.grab_mode = CAMERA_GRAB_WHEN_EMPTY;
-  camera_config.frame_size = FRAMESIZE_SVGA;
+  camera_config.fb_count = 1;
+  camera_config.frame_size = FRAMESIZE_QQVGA;
 }

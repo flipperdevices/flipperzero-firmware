@@ -1,6 +1,8 @@
 #include "firmware.h"
 
 void setup() {
+  camera_model.isStreamToSerialEnabled = false;
+  
   // Begin serial communication.
   Serial.begin(230400);
 
