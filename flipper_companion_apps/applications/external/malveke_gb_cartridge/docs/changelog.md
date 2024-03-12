@@ -1,5 +1,8 @@
 # Changelog - Patch Notes
 
+## Version 2.0
+Implement new serial API with new module expansion protocol.
+
 ## Version 1.0
 The initial version of the application encompasses functionalities to view cartridge information, back up ROM and RAM of both GAME BOY & GAME BOY Color cartridges, and enables RAM restoration as well.
 
