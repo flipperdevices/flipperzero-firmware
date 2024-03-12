@@ -18,8 +18,6 @@
 #include "views/camera_suite_view_camera.h"
 #include "helpers/camera_suite_storage.h"
 
-#include <assets_icons.h>
-
 #define TAG "Camera Suite"
 
 #ifdef xtreme_settings
