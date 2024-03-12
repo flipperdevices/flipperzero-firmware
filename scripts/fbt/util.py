@@ -92,7 +92,7 @@ class PosixPathWrapper:
 
     @staticmethod
     def fix_path(path):
-        return PurePosixPath(Path(path).as_posix())
+        return str(PurePosixPath(Path(path).as_posix()))
 
     def __call__(self, target, source, env, for_signature):
         if for_signature:
