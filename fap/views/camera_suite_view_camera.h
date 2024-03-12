@@ -25,13 +25,14 @@
  * @see https://github.com/Flipper-XFW/Xtreme-Apps
 */
 #define UART_CH (xtreme_settings.uart_esp_channel)
-#elif momentum_settings
+#elif defined momentum_settings
 /**
  * Enable the following line for "Momentum Firmware" & "Momentum Apps".
  * 
  * @see https://github.com/Next-Flip/Momentum-Firmware
  * @see https://github.com/Next-Flip/Momentum-Apps
 */
+#include <momentum/momentum.h>
 #define UART_CH (momentum_settings.uart_esp_channel)
 #else
 #define UART_CH (FuriHalSerialIdUsart)
