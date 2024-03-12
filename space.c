@@ -201,8 +201,10 @@ void handle_collisions(GameState* state) {
         if(state->projectiles[p].active) {
             for(int e = 0; e < ENEMIES_MAX; ++e) {
                 if(state->enemies[e].active) {
-                    if(abs(state->projectiles[p].position.x - state->enemies[e].position.x) < 10 / 2 + 1 &&
-                       abs(state->projectiles[p].position.y - state->enemies[e].position.y) < 10 / 2 + 1) {
+                    int shiftedEnemyX = state->enemies[e].position.x + 2;
+
+                    if(abs(state->projectiles[p].position.x - shiftedEnemyX) < 5 &&
+                       abs(state->projectiles[p].position.y - state->enemies[e].position.y) < 5) {
                         state->projectiles[p].active = false;
                         state->enemies[e].active = false;
                         state->projectiles_count--;
