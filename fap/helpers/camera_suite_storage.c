@@ -93,9 +93,9 @@ void camera_suite_read_settings(void* context) {
         FURI_LOG_E(TAG, "Missing Header Data");
         camera_suite_close_config_file(fff_file);
         camera_suite_close_storage();
+        furi_string_free(temp_str);
         return;
     }
-
     furi_string_free(temp_str);
 
     if(file_version < BOILERPLATE_SETTINGS_FILE_VERSION) {

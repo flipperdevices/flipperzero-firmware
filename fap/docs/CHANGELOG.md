@@ -5,6 +5,11 @@
 - Full screen 90 degree and 270 degree fill (#6).
 - WiFi streaming/connection support (#35).
 
+## v1.7
+
+- Add support for new Flipper Zero Firmware UART updates.
+- Remove staged WiFi streaming/connection support for now. Until I can fully test.
+
 ## v1.6
 
 - Add new splash/start screen.

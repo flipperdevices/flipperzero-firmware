@@ -2,7 +2,8 @@
 
 #include <furi.h>
 #include <furi_hal.h>
-#include <furi_hal_uart.h>
+#include <furi_hal_serial_control.h>
+#include <furi_hal_serial.h>
 #include <gui/elements.h>
 #include <gui/gui.h>
 #include <gui/icon_i.h>
@@ -15,6 +16,27 @@
 #include <storage/storage.h>
 
 #include "../helpers/camera_suite_custom_event.h"
+
+#ifdef xtreme_settings
+/**
+ * Enable the following line for "Xtreme Firmware" & "Xtreme Apps" (Flipper-XFW).
+ * 
+ * @see https://github.com/Flipper-XFW/Xtreme-Firmware
+ * @see https://github.com/Flipper-XFW/Xtreme-Apps
+*/
+#define UART_CH (xtreme_settings.uart_esp_channel)
+#elif defined momentum_settings
+/**
+ * Enable the following line for "Momentum Firmware" & "Momentum Apps".
+ * 
+ * @see https://github.com/Next-Flip/Momentum-Firmware
+ * @see https://github.com/Next-Flip/Momentum-Apps
+*/
+#include <momentum/momentum.h>
+#define UART_CH (momentum_settings.uart_esp_channel)
+#else
+#define UART_CH (FuriHalSerialIdUsart)
+#endif
 
 #define BITMAP_HEADER_LENGTH 62
 #define FRAME_BIT_DEPTH 1
@@ -46,6 +68,7 @@ typedef void (*CameraSuiteViewCameraCallback)(CameraSuiteCustomEvent event, void
 typedef struct CameraSuiteViewCamera {
     CameraSuiteViewCameraCallback callback;
     FuriStreamBuffer* camera_rx_stream;
+    FuriHalSerialHandle* serial_handle;
     FuriThread* camera_worker_thread;
     NotificationApp* notification;
     View* view;

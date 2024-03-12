@@ -3,8 +3,6 @@
 enum SubmenuIndex {
     /** Camera. */
     SubmenuIndexSceneCamera = 10,
-    /** WiFi Camera */
-    SubmenuIndexSceneWiFiCamera,
     /** Cam settings menu. */
     SubmenuIndexCamSettings,
     /** App settings menu. */
@@ -25,13 +23,6 @@ void camera_suite_scene_menu_on_enter(void* context) {
         app->submenu,
         "Stream Camera to Screen",
         SubmenuIndexSceneCamera,
-        camera_suite_scene_menu_submenu_callback,
-        app);
-
-    submenu_add_item(
-        app->submenu,
-        "Stream Camera to WiFi",
-        SubmenuIndexSceneWiFiCamera,
         camera_suite_scene_menu_submenu_callback,
         app);
 
@@ -75,11 +66,6 @@ bool camera_suite_scene_menu_on_event(void* context, SceneManagerEvent event) {
             scene_manager_set_scene_state(
                 app->scene_manager, CameraSuiteSceneMenu, SubmenuIndexSceneCamera);
             scene_manager_next_scene(app->scene_manager, CameraSuiteSceneCamera);
-            return true;
-        } else if(event.event == SubmenuIndexSceneWiFiCamera) {
-            scene_manager_set_scene_state(
-                app->scene_manager, CameraSuiteSceneMenu, SubmenuIndexSceneWiFiCamera);
-            scene_manager_next_scene(app->scene_manager, CameraSuiteSceneWiFiCamera);
             return true;
         } else if(event.event == SubmenuIndexAppSettings) {
             scene_manager_set_scene_state(

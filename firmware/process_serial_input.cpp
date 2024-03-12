@@ -36,23 +36,11 @@ void process_serial_input() {
     case 'I':
       set_inverted(true);
       break;
-    case 'P':
-      // @todo
-      // save_picture_to_sd_card(); 
-      break;
     case 's':
       stop_serial_stream();
       break;
     case 'S':
       start_serial_stream();
-      break;
-    case 'w':
-      // @todo
-      // stop_wifi_stream();
-      break;
-    case 'W':
-      // @todo
-      // start_wifi_stream();
       break;
     case '0':
       set_dithering_algorithm(FLOYD_STEINBERG);
