@@ -24,7 +24,9 @@ To install Yappy Invaders on your Flipper Zero, follow these steps:
 
 ## Controls
 Left/Right Buttons: Move your ship left or right.
+
 OK Button: Shoot projectiles at enemies.
+
 Back Button: Quit the game.
 
 ## Gameplay
