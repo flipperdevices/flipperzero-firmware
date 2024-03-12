@@ -46,9 +46,9 @@ typedef void (*CameraSuiteViewCameraCallback)(CameraSuiteCustomEvent event, void
 
 typedef struct CameraSuiteViewCamera {
     CameraSuiteViewCameraCallback callback;
+    FuriStreamBuffer* camera_rx_stream;
     FuriHalSerialHandle* serial_handle;
-    FuriStreamBuffer* rx_stream;
-    FuriThread* worker_thread;
+    FuriThread* camera_worker_thread;
     NotificationApp* notification;
     View* view;
     void* context;
