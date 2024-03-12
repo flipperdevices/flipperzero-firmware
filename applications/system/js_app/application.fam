@@ -20,7 +20,11 @@ App(
     fap_description="JS scripting engine based on MJS lib",
     #  [Added ble beacon, math and keyboard to JavaScript API (By Spooks4576)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/41bb09492400026be66ef5f8b78f506f21361f1d)
     #  [Many improvements (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/9b00d0e37b304784cf8e0ac0bdabe6aa543a780e)
+    #  [Added Submenu support (By Spooks4576)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/6335d14c7498ab4b2e4b28fa707fe7f68d3843b5)
     #  [Some SubGHz support and Radio Device Loader module (By Sil333033) + Also BLE Beacon Improvements (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/ed2716fb48f37a62cc3baf5c7fc8ee9a2864badc)
+    #  [JS Script: BadUSB_Win_Exfil-GSHD.js (By Gas Station Hot Dog)](https://github.com/User84User/User84PublicUser/blob/main/Windows_Exfil-GSHD.js)
+    #  [JS: added GPIO module (By Sil333033)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/46a761605f0f7466551e8baa127dcc1b1a359a37)
+    #  [Updates to GPIO & Storage Append (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/0cb1a859e7c67fc0ca0afa35320c2c823c164f4f)
 )
 
 App(

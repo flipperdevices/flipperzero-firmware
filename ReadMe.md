@@ -29,11 +29,12 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0311-1604-0.99.2-1289018](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-03-11 17:30 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-03-11 17:30 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-03-12 17:15 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-03-11 12:15 EST`
 - Updated: [J305 Geiger Counter v1.2 (By nmrr)](https://github.com/nmrr/flipperzero-geigercounter)
-- Updated: [JS Runner v1.0 (By nminaylov & DrZlo13)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/3286) [JS: added GPIO module (By Sil333033)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/db087e1c7b8bf6aae157bd1738801742614b6d36)
 - Updated: [ESP32 Camera Suite v1.7 (By CodyTolene)](https://github.com/CodyTolene/Flipper-Zero-Camera-Suite)
+- Updated: [JS Runner v1.0 (By nminaylov & DrZlo13)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/3286) [JS: added GPIO module (By Sil333033)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/46a761605f0f7466551e8baa127dcc1b1a359a37) [Updates to GPIO & Storage Append (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/0cb1a859e7c67fc0ca0afa35320c2c823c164f4f)
+- Updated naming/organization of JS scripts assets (By RogueMaster)
 
 <a name="release">
 
@@ -168,6 +169,9 @@ $ ./fbt dolphin_ext
 - Icon Decode/Encode [(Thanks to PixlEmly)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/55/files)
 - Infrared: [allow disabling automatic signal decoding #273 (By Darmiel)](https://github.com/DarkFlippers/unleashed-firmware/pull/273)
 - Infrared: Universal AC, Audio, Fans & Projectors from [amec0e / Unleashed](https://github.com/DarkFlippers/unleashed-firmware)
+- JS: [Added ble beacon, math and keyboard to JavaScript API (By Spooks4576)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/41bb09492400026be66ef5f8b78f506f21361f1d) & [Submenu support (By Spooks4576)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/6335d14c7498ab4b2e4b28fa707fe7f68d3843b5)
+- JS: Added support for and improvements on BadUSB, BLE Beacon, GPIO, Storage & Sub-GHz (By Willy-JL & Sil333033)
+- JS: Script Asset for RogueMaster Home & [JS Script: BadUSB_Win_Exfil-GSHD.js (By Gas Station Hot Dog)](https://github.com/User84User/User84PublicUser/blob/main/Windows_Exfil-GSHD.js)
 - NFC: [Added additional aid GeldKarte (for emv) (thanks to haisenteck) (From Korai-Labs / ankris812)](https://github.com/Korai-Labs/Korai)
 - NFC: [Extra NFC Mifare Keys (By Korai-Labs / ankris812)](https://github.com/Korai-Labs/Korai)
 - NFC: [Parser / KDF for mizip and mykey updated & addition of hi and microel (By zProAle)](https://github.com/zProAle/my_flipper_kdf)
@@ -232,7 +236,7 @@ $ ./fbt dolphin_ext
 - SubGHz: [Transmit Indicator before Out of Region Frequency Use (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/e24d4a0689db555ae083fec23a471e878adb6cd4)
 - SubGHz: USE CFW Settings to use unlock from SD flag from [(cloudbreakdaniel)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/97db0dc91ee3dff812b4dec0618e3f198de14405).  Update `subghz/assets/extend_range.txt` with [this file](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/assets/resources/subghz/assets/extend_range.txt) on SD.  **UPDATE IGNORE FLAG TO TRUE TO UNLEASH YOUR FLIPPER!!**
 - SubGHz: [X10 Protocol Decoder (By CodeAllNight/jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/subghz/protocols/x10)
-- [VGM: Custom color options (By HaxSam & Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/93b532b4ebac931862369b286429b83a2c55d1bf)
+- VGM: [Custom color options (By HaxSam & Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/93b532b4ebac931862369b286429b83a2c55d1bf)
 
 ## Games
 
