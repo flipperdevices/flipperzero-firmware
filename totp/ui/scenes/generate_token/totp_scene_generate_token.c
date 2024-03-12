@@ -373,7 +373,9 @@ bool totp_scene_generate_token_handle_event(
                 scene_state->notification_app,
                 get_notification_sequence_automation(plugin_state, scene_state));
             return true;
-        } else if(event->input.key == InputKeyOk) {
+        }
+#endif
+        else if(event->input.key == InputKeyOk) {
             TokenInfoIteratorContext* iterator_context =
                 totp_config_get_token_iterator_context(plugin_state);
             const TokenInfo* token_info =
@@ -389,7 +391,6 @@ bool totp_scene_generate_token_handle_event(
                     get_notification_sequence_new_token(plugin_state, scene_state));
             }
         }
-#endif
     } else if(event->input.type == InputTypePress || event->input.type == InputTypeRepeat) {
         switch(event->input.key) {
         case InputKeyUp:
@@ -427,13 +428,14 @@ bool totp_scene_generate_token_handle_event(
             break;
         }
         case InputKeyOk:
-            totp_scene_director_activate_scene(plugin_state, TotpSceneTokenMenu);
             break;
         case InputKeyBack:
             break;
         default:
             break;
         }
+    } else if(event->input.type == InputTypeShort && event->input.key == InputKeyOk) {
+        totp_scene_director_activate_scene(plugin_state, TotpSceneTokenMenu);
     }
 
     return true;

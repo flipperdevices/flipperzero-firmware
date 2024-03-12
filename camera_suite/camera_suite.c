@@ -72,12 +72,6 @@ CameraSuite* camera_suite_app_alloc() {
         CameraSuiteViewIdCamera,
         camera_suite_view_camera_get_view(app->camera_suite_view_camera));
 
-    app->camera_suite_view_wifi_camera = camera_suite_view_wifi_camera_alloc();
-    view_dispatcher_add_view(
-        app->view_dispatcher,
-        CameraSuiteViewIdWiFiCamera,
-        camera_suite_view_wifi_camera_get_view(app->camera_suite_view_wifi_camera));
-
     app->camera_suite_view_guide = camera_suite_view_guide_alloc();
     view_dispatcher_add_view(
         app->view_dispatcher,
@@ -111,7 +105,6 @@ void camera_suite_app_free(CameraSuite* app) {
     view_dispatcher_remove_view(app->view_dispatcher, CameraSuiteViewIdStartscreen);
     view_dispatcher_remove_view(app->view_dispatcher, CameraSuiteViewIdMenu);
     view_dispatcher_remove_view(app->view_dispatcher, CameraSuiteViewIdCamera);
-    view_dispatcher_remove_view(app->view_dispatcher, CameraSuiteViewIdWiFiCamera);
     view_dispatcher_remove_view(app->view_dispatcher, CameraSuiteViewIdGuide);
     view_dispatcher_remove_view(app->view_dispatcher, CameraSuiteViewIdAppSettings);
     view_dispatcher_remove_view(app->view_dispatcher, CameraSuiteViewIdCamSettings);
@@ -123,7 +116,6 @@ void camera_suite_app_free(CameraSuite* app) {
     // Free remaining resources
     camera_suite_view_start_free(app->camera_suite_view_start);
     camera_suite_view_camera_free(app->camera_suite_view_camera);
-    camera_suite_view_wifi_camera_free(app->camera_suite_view_wifi_camera);
     camera_suite_view_guide_free(app->camera_suite_view_guide);
 
     button_menu_free(app->button_menu);
