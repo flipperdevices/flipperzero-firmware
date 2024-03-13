@@ -180,8 +180,6 @@ FelicaError felica_poller_write_blocks(
 FelicaError felica_poller_activate(FelicaPoller* instance, FelicaData* data) {
     furi_assert(instance);
 
-    felica_reset(data);
-
     FelicaError ret;
 
     do {

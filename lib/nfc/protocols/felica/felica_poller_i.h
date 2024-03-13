@@ -1,8 +1,6 @@
 #pragma once
 
 #include "felica_poller.h"
-
-#include <mbedtls/include/mbedtls/des.h>
 #include <toolbox/bit_buffer.h>
 
 #ifdef __cplusplus
@@ -19,8 +17,8 @@ extern "C" {
 typedef enum {
     FelicaPollerStateIdle,
     FelicaPollerStateActivated,
-    FelicaPollerStateAuthenticate,
-    FelicaPollerStateReadBlockAndMAC,
+    FelicaPollerStateAuthenticateInternal,
+    FelicaPollerStateAuthenticateExternal,
     FelicaPollerStateReadBlocks,
     FelicaPollerStateReadMAC,
 
@@ -34,12 +32,18 @@ typedef struct {
     uint8_t data[16];
 } FelicaSessionKey;
 
+typedef struct {
+    bool internal : 1;
+    bool external : 1;
+} FelicaAuthenticationStatus;
+
 struct FelicaPoller {
     Nfc* nfc;
     FelicaPollerState state;
 
     mbedtls_des3_context des_context;
     FelicaSessionKey session_key;
+    FelicaAuthenticationStatus auth_status;
 
     FelicaData* data;
     BitBuffer* tx_buffer;
