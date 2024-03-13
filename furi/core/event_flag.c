@@ -8,7 +8,7 @@
 #define FURI_EVENT_FLAG_MAX_BITS_EVENT_GROUPS 24U
 #define FURI_EVENT_FLAG_INVALID_BITS (~((1UL << FURI_EVENT_FLAG_MAX_BITS_EVENT_GROUPS) - 1U))
 
-FuriEventFlag* furi_event_flag_alloc() {
+FuriEventFlag* furi_event_flag_alloc(void) {
     furi_check(!FURI_IS_IRQ_MODE());
 
     EventGroupHandle_t handle = xEventGroupCreate();

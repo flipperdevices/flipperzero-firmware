@@ -150,7 +150,7 @@ static bool submenu_view_input_callback(InputEvent* event, void* context) {
     return consumed;
 }
 
-Submenu* submenu_alloc() {
+Submenu* submenu_alloc(void) {
     Submenu* submenu = malloc(sizeof(Submenu));
     submenu->view = view_alloc();
     view_set_context(submenu->view, submenu);

@@ -2,7 +2,7 @@
 
 #define TAG "ViewDispatcher"
 
-ViewDispatcher* view_dispatcher_alloc() {
+ViewDispatcher* view_dispatcher_alloc(void) {
     ViewDispatcher* view_dispatcher = malloc(sizeof(ViewDispatcher));
 
     view_dispatcher->view_port = view_port_alloc();

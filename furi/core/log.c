@@ -31,7 +31,7 @@ static const FuriLogLevelDescription FURI_LOG_LEVEL_DESCRIPTIONS[] = {
     {"trace", FuriLogLevelTrace},
 };
 
-void furi_log_init() {
+void furi_log_init(void) {
     // Set default logging parameters
     furi_log.log_level = FURI_LOG_LEVEL_DEFAULT;
     furi_log.mutex = furi_mutex_alloc(FuriMutexTypeRecursive);

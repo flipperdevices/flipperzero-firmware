@@ -9,15 +9,15 @@
 
 #define TAG "FuriHalI2c"
 
-void furi_hal_i2c_init_early() {
+void furi_hal_i2c_init_early(void) {
     furi_hal_i2c_bus_power.callback(&furi_hal_i2c_bus_power, FuriHalI2cBusEventInit);
 }
 
-void furi_hal_i2c_deinit_early() {
+void furi_hal_i2c_deinit_early(void) {
     furi_hal_i2c_bus_power.callback(&furi_hal_i2c_bus_power, FuriHalI2cBusEventDeinit);
 }
 
-void furi_hal_i2c_init() {
+void furi_hal_i2c_init(void) {
     furi_hal_i2c_bus_external.callback(&furi_hal_i2c_bus_external, FuriHalI2cBusEventInit);
     FURI_LOG_I(TAG, "Init OK");
 }

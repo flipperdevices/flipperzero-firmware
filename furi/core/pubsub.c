@@ -17,7 +17,7 @@ struct FuriPubSub {
     FuriMutex* mutex;
 };
 
-FuriPubSub* furi_pubsub_alloc() {
+FuriPubSub* furi_pubsub_alloc(void) {
     FuriPubSub* pubsub = malloc(sizeof(FuriPubSub));
 
     pubsub->mutex = furi_mutex_alloc(FuriMutexTypeNormal);

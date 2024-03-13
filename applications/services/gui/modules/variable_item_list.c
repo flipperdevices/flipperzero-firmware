@@ -288,7 +288,7 @@ void variable_item_list_process_ok(VariableItemList* variable_item_list) {
         false);
 }
 
-VariableItemList* variable_item_list_alloc() {
+VariableItemList* variable_item_list_alloc(void) {
     VariableItemList* variable_item_list = malloc(sizeof(VariableItemList));
     variable_item_list->view = view_alloc();
     view_set_context(variable_item_list->view, variable_item_list);

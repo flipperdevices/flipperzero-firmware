@@ -203,7 +203,7 @@ static int32_t subghz_tx_rx_worker_thread(void* context) {
     return 0;
 }
 
-SubGhzTxRxWorker* subghz_tx_rx_worker_alloc() {
+SubGhzTxRxWorker* subghz_tx_rx_worker_alloc(void) {
     SubGhzTxRxWorker* instance = malloc(sizeof(SubGhzTxRxWorker));
 
     instance->thread =

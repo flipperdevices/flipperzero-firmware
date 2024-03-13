@@ -89,7 +89,7 @@ static void slix_password_set_defaults(SlixPassword* passwords) {
     }
 }
 
-SlixData* slix_alloc() {
+SlixData* slix_alloc(void) {
     SlixData* data = malloc(sizeof(SlixData));
 
     data->iso15693_3_data = iso15693_3_alloc();

@@ -140,14 +140,14 @@ static inline void digital_sequence_start_dma(DigitalSequence* sequence) {
     LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_2);
 }
 
-static inline void digital_sequence_stop_dma() {
+static inline void digital_sequence_stop_dma(void) {
     LL_DMA_DisableChannel(DMA1, LL_DMA_CHANNEL_1);
     LL_DMA_DisableChannel(DMA1, LL_DMA_CHANNEL_2);
     LL_DMA_ClearFlag_TC1(DMA1);
     LL_DMA_ClearFlag_TC2(DMA1);
 }
 
-static inline void digital_sequence_start_timer() {
+static inline void digital_sequence_start_timer(void) {
     furi_hal_bus_enable(FuriHalBusTIM2);
 
     LL_TIM_SetCounterMode(TIM2, LL_TIM_COUNTERMODE_UP);
@@ -162,7 +162,7 @@ static inline void digital_sequence_start_timer() {
     LL_TIM_GenerateEvent_UPDATE(TIM2);
 }
 
-static void digital_sequence_stop_timer() {
+static void digital_sequence_stop_timer(void) {
     LL_TIM_DisableCounter(TIM2);
     LL_TIM_DisableUpdateEvent(TIM2);
     LL_TIM_DisableDMAReq_UPDATE(TIM2);

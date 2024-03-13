@@ -523,7 +523,7 @@ void gui_direct_draw_release(Gui* gui) {
     gui_update(gui);
 }
 
-Gui* gui_alloc() {
+Gui* gui_alloc(void) {
     Gui* gui = malloc(sizeof(Gui));
     // Thread ID
     gui->thread_id = furi_thread_get_current_id();

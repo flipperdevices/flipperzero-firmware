@@ -56,7 +56,7 @@ const NfcDeviceBase nfc_device_mf_classic = {
     .get_base_data = (NfcDeviceGetBaseData)mf_classic_get_base_data,
 };
 
-MfClassicData* mf_classic_alloc() {
+MfClassicData* mf_classic_alloc(void) {
     MfClassicData* data = malloc(sizeof(MfClassicData));
     data->iso14443_3a_data = iso14443_3a_alloc();
     return data;

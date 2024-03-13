@@ -90,7 +90,7 @@ static void view_port_setup_canvas_orientation(const ViewPort* view_port, Canvas
     canvas_set_orientation(canvas, orientation);
 }
 
-ViewPort* view_port_alloc() {
+ViewPort* view_port_alloc(void) {
     ViewPort* view_port = malloc(sizeof(ViewPort));
     view_port->orientation = ViewPortOrientationHorizontal;
     view_port->is_enabled = true;

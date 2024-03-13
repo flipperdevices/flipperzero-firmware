@@ -54,7 +54,7 @@ static bool gui_widget_view_input_callback(InputEvent* event, void* context) {
     return consumed;
 }
 
-Widget* widget_alloc() {
+Widget* widget_alloc(void) {
     Widget* widget = malloc(sizeof(Widget));
     widget->view = view_alloc();
     view_set_context(widget->view, widget);

@@ -51,7 +51,7 @@ static void ibutton_protocols_get_group_by_id(
     furi_crash();
 }
 
-iButtonProtocols* ibutton_protocols_alloc() {
+iButtonProtocols* ibutton_protocols_alloc(void) {
     iButtonProtocols* protocols = malloc(sizeof(iButtonProtocols*));
 
     protocols->group_datas = malloc(sizeof(iButtonProtocolGroupData*) * iButtonProtocolGroupMax);
@@ -74,7 +74,7 @@ void ibutton_protocols_free(iButtonProtocols* protocols) {
     free(protocols);
 }
 
-uint32_t ibutton_protocols_get_protocol_count() {
+uint32_t ibutton_protocols_get_protocol_count(void) {
     uint32_t count = 0;
 
     for(iButtonProtocolGroupId i = 0; i < iButtonProtocolGroupMax; ++i) {

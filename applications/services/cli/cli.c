@@ -8,7 +8,7 @@
 
 #define CLI_INPUT_LEN_LIMIT 256
 
-Cli* cli_alloc() {
+Cli* cli_alloc(void) {
     Cli* cli = malloc(sizeof(Cli));
 
     CliCommandTree_init(cli->commands);
@@ -102,7 +102,7 @@ void cli_print_usage(const char* cmd, const char* usage, const char* arg) {
     printf("%s: illegal option -- %s\r\nusage: %s %s", cmd, arg, cmd, usage);
 }
 
-void cli_motd() {
+void cli_motd(void) {
     printf("\r\n"
            "              _.-------.._                    -,\r\n"
            "          .-\"```\"--..,,_/ /`-,               -,  \\ \r\n"

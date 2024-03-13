@@ -13,7 +13,7 @@ const CanvasFontParameters canvas_font_params[FontTotalNumber] = {
     [FontBigNumbers] = {.leading_default = 18, .leading_min = 16, .height = 15, .descender = 0},
 };
 
-Canvas* canvas_init() {
+Canvas* canvas_init(void) {
     Canvas* canvas = malloc(sizeof(Canvas));
     canvas->compress_icon = compress_icon_alloc();
 

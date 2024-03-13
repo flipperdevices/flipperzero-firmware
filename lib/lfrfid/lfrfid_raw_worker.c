@@ -58,7 +58,7 @@ typedef enum {
 static int32_t lfrfid_raw_read_worker_thread(void* thread_context);
 static int32_t lfrfid_raw_emulate_worker_thread(void* thread_context);
 
-LFRFIDRawWorker* lfrfid_raw_worker_alloc() {
+LFRFIDRawWorker* lfrfid_raw_worker_alloc(void) {
     LFRFIDRawWorker* worker = malloc(sizeof(LFRFIDRawWorker));
 
     worker->thread = furi_thread_alloc_ex("LfrfidRawWorker", 2048, NULL, worker);

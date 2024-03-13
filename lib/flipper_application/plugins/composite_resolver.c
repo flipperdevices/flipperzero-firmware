@@ -26,7 +26,7 @@ static bool composite_api_resolver_callback(
     return false;
 }
 
-CompositeApiResolver* composite_api_resolver_alloc() {
+CompositeApiResolver* composite_api_resolver_alloc(void) {
     CompositeApiResolver* resolver = malloc(sizeof(CompositeApiResolver));
 
     resolver->api_interface.api_version_major = 0;

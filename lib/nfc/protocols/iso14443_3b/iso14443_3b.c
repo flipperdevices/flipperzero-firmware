@@ -30,7 +30,7 @@ const NfcDeviceBase nfc_device_iso14443_3b = {
     .get_base_data = (NfcDeviceGetBaseData)iso14443_3b_get_base_data,
 };
 
-Iso14443_3bData* iso14443_3b_alloc() {
+Iso14443_3bData* iso14443_3b_alloc(void) {
     Iso14443_3bData* data = malloc(sizeof(Iso14443_3bData));
     return data;
 }

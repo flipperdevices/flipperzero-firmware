@@ -168,7 +168,7 @@ const NfcDeviceBase nfc_device_mf_ultralight = {
     .get_base_data = (NfcDeviceGetBaseData)mf_ultralight_get_base_data,
 };
 
-MfUltralightData* mf_ultralight_alloc() {
+MfUltralightData* mf_ultralight_alloc(void) {
     MfUltralightData* data = malloc(sizeof(MfUltralightData));
     data->iso14443_3a_data = iso14443_3a_alloc();
     return data;

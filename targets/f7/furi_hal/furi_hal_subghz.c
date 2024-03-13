@@ -62,11 +62,11 @@ void furi_hal_subghz_set_async_mirror_pin(const GpioPin* pin) {
     furi_hal_subghz.async_mirror_pin = pin;
 }
 
-const GpioPin* furi_hal_subghz_get_data_gpio() {
+const GpioPin* furi_hal_subghz_get_data_gpio(void) {
     return &gpio_cc1101_g0;
 }
 
-void furi_hal_subghz_init() {
+void furi_hal_subghz_init(void) {
     furi_check(furi_hal_subghz.state == SubGhzStateInit);
     furi_hal_subghz.state = SubGhzStateBroken;
 
@@ -135,7 +135,7 @@ void furi_hal_subghz_init() {
     }
 }
 
-void furi_hal_subghz_sleep() {
+void furi_hal_subghz_sleep(void) {
     furi_check(furi_hal_subghz.state == SubGhzStateIdle);
 
     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
@@ -150,7 +150,7 @@ void furi_hal_subghz_sleep() {
     furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
 }
 
-void furi_hal_subghz_dump_state() {
+void furi_hal_subghz_dump_state(void) {
     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
     printf(
         "[furi_hal_subghz] cc1101 chip %d, version %d\r\n",
@@ -223,19 +223,19 @@ void furi_hal_subghz_write_packet(const uint8_t* data, uint8_t size) {
     furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
 }
 
-void furi_hal_subghz_flush_rx() {
+void furi_hal_subghz_flush_rx(void) {
     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
     cc1101_flush_rx(&furi_hal_spi_bus_handle_subghz);
     furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
 }
 
-void furi_hal_subghz_flush_tx() {
+void furi_hal_subghz_flush_tx(void) {
     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
     cc1101_flush_tx(&furi_hal_spi_bus_handle_subghz);
     furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
 }
 
-bool furi_hal_subghz_rx_pipe_not_empty() {
+bool furi_hal_subghz_rx_pipe_not_empty(void) {
     CC1101RxBytes status[1];
     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
     cc1101_read_reg(
@@ -248,7 +248,7 @@ bool furi_hal_subghz_rx_pipe_not_empty() {
     }
 }
 
-bool furi_hal_subghz_is_rx_data_crc_valid() {
+bool furi_hal_subghz_is_rx_data_crc_valid(void) {
     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
     uint8_t data[1];
     cc1101_read_reg(&furi_hal_spi_bus_handle_subghz, CC1101_STATUS_LQI | CC1101_BURST, data);
@@ -269,14 +269,14 @@ void furi_hal_subghz_read_packet(uint8_t* data, uint8_t* size) {
     furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
 }
 
-void furi_hal_subghz_shutdown() {
+void furi_hal_subghz_shutdown(void) {
     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
     // Reset and shutdown
     cc1101_shutdown(&furi_hal_spi_bus_handle_subghz);
     furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
 }
 
-void furi_hal_subghz_reset() {
+void furi_hal_subghz_reset(void) {
     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
     furi_hal_gpio_init(&gpio_cc1101_g0, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
     cc1101_switch_to_idle(&furi_hal_spi_bus_handle_subghz);
@@ -286,7 +286,7 @@ void furi_hal_subghz_reset() {
     furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
 }
 
-void furi_hal_subghz_idle() {
+void furi_hal_subghz_idle(void) {
     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
     cc1101_switch_to_idle(&furi_hal_spi_bus_handle_subghz);
     //waiting for the chip to switch to IDLE mode
@@ -294,7 +294,7 @@ void furi_hal_subghz_idle() {
     furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
 }
 
-void furi_hal_subghz_rx() {
+void furi_hal_subghz_rx(void) {
     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
     cc1101_switch_to_rx(&furi_hal_spi_bus_handle_subghz);
     //waiting for the chip to switch to Rx mode
@@ -302,7 +302,7 @@ void furi_hal_subghz_rx() {
     furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
 }
 
-bool furi_hal_subghz_tx() {
+bool furi_hal_subghz_tx(void) {
     if(furi_hal_subghz.regulation != SubGhzRegulationTxRx) return false;
     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
     cc1101_switch_to_tx(&furi_hal_spi_bus_handle_subghz);
@@ -312,7 +312,7 @@ bool furi_hal_subghz_tx() {
     return true;
 }
 
-float furi_hal_subghz_get_rssi() {
+float furi_hal_subghz_get_rssi(void) {
     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
     int32_t rssi_dec = cc1101_get_rssi(&furi_hal_spi_bus_handle_subghz);
     furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
@@ -327,7 +327,7 @@ float furi_hal_subghz_get_rssi() {
     return rssi;
 }
 
-uint8_t furi_hal_subghz_get_lqi() {
+uint8_t furi_hal_subghz_get_lqi(void) {
     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
     uint8_t data[1];
     cc1101_read_reg(&furi_hal_spi_bus_handle_subghz, CC1101_STATUS_LQI | CC1101_BURST, data);
@@ -398,7 +398,7 @@ void furi_hal_subghz_set_path(FuriHalSubGhzPath path) {
     furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
 }
 
-static bool furi_hal_subghz_start_debug() {
+static bool furi_hal_subghz_start_debug(void) {
     bool ret = false;
     if(furi_hal_subghz.async_mirror_pin != NULL) {
         furi_hal_gpio_write(furi_hal_subghz.async_mirror_pin, false);
@@ -412,7 +412,7 @@ static bool furi_hal_subghz_start_debug() {
     return ret;
 }
 
-static bool furi_hal_subghz_stop_debug() {
+static bool furi_hal_subghz_stop_debug(void) {
     bool ret = false;
     if(furi_hal_subghz.async_mirror_pin != NULL) {
         furi_hal_gpio_init(
@@ -526,7 +526,7 @@ void furi_hal_subghz_start_async_rx(FuriHalSubGhzCaptureCallback callback, void*
     furi_hal_subghz_capture_delta_duration = 0;
 }
 
-void furi_hal_subghz_stop_async_rx() {
+void furi_hal_subghz_stop_async_rx(void) {
     furi_check(furi_hal_subghz.state == SubGhzStateAsyncRx);
     furi_hal_subghz.state = SubGhzStateIdle;
 
@@ -788,11 +788,11 @@ bool furi_hal_subghz_start_async_tx(FuriHalSubGhzAsyncTxCallback callback, void*
     return true;
 }
 
-bool furi_hal_subghz_is_async_tx_complete() {
+bool furi_hal_subghz_is_async_tx_complete(void) {
     return (furi_hal_subghz.state == SubGhzStateAsyncTx) && (LL_TIM_GetAutoReload(TIM2) == 0);
 }
 
-void furi_hal_subghz_stop_async_tx() {
+void furi_hal_subghz_stop_async_tx(void) {
     furi_check(furi_hal_subghz.state == SubGhzStateAsyncTx);
 
     // Shutdown radio

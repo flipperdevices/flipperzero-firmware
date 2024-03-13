@@ -36,7 +36,7 @@ const NfcDeviceBase nfc_device_iso15693_3 = {
     .get_base_data = (NfcDeviceGetBaseData)iso15693_3_get_base_data,
 };
 
-Iso15693_3Data* iso15693_3_alloc() {
+Iso15693_3Data* iso15693_3_alloc(void) {
     Iso15693_3Data* data = malloc(sizeof(Iso15693_3Data));
 
     data->block_data = simple_array_alloc(&simple_array_config_uint8_t);

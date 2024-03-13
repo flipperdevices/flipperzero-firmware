@@ -27,7 +27,7 @@ struct CompressIcon {
     uint8_t decoded_buff[COMPRESS_ICON_DECODED_BUFF_SIZE];
 };
 
-CompressIcon* compress_icon_alloc() {
+CompressIcon* compress_icon_alloc(void) {
     CompressIcon* instance = malloc(sizeof(CompressIcon));
     instance->decoder = heatshrink_decoder_alloc(
         COMPRESS_ICON_ENCODED_BUFF_SIZE,

@@ -16,7 +16,7 @@ static bool empty_screen_view_input_callback(InputEvent* event, void* context) {
     return false;
 }
 
-EmptyScreen* empty_screen_alloc() {
+EmptyScreen* empty_screen_alloc(void) {
     EmptyScreen* empty_screen = malloc(sizeof(EmptyScreen));
     empty_screen->view = view_alloc();
     view_set_context(empty_screen->view, empty_screen);

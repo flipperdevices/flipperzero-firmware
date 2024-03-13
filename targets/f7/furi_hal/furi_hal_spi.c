@@ -23,7 +23,7 @@
 static FuriSemaphore* spi_dma_lock = NULL;
 static FuriSemaphore* spi_dma_completed = NULL;
 
-void furi_hal_spi_dma_init() {
+void furi_hal_spi_dma_init(void) {
     spi_dma_lock = furi_semaphore_alloc(1, 1);
     spi_dma_completed = furi_semaphore_alloc(1, 1);
 }

@@ -439,7 +439,7 @@ void text_input_timer_callback(void* context) {
         true);
 }
 
-TextInput* text_input_alloc() {
+TextInput* text_input_alloc(void) {
     TextInput* text_input = malloc(sizeof(TextInput));
     text_input->view = view_alloc();
     view_set_context(text_input->view, text_input);

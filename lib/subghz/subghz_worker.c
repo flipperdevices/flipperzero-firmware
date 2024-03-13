@@ -79,7 +79,7 @@ static int32_t subghz_worker_thread_callback(void* context) {
     return 0;
 }
 
-SubGhzWorker* subghz_worker_alloc() {
+SubGhzWorker* subghz_worker_alloc(void) {
     SubGhzWorker* instance = malloc(sizeof(SubGhzWorker));
 
     instance->thread =

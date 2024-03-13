@@ -57,7 +57,7 @@ static size_t __furi_thread_stdout_write(FuriThread* thread, const char* data, s
 static int32_t __furi_thread_stdout_flush(FuriThread* thread);
 
 /** Catch threads that are trying to exit wrong way */
-__attribute__((__noreturn__)) void furi_thread_catch() { //-V1082
+__attribute__((__noreturn__)) void furi_thread_catch(void) { //-V1082
     // If you're here it means you're probably doing something wrong
     // with critical sections or with scheduler state
     asm volatile("nop"); // extra magic
@@ -121,7 +121,7 @@ static void furi_thread_body(void* context) {
     furi_thread_catch();
 }
 
-FuriThread* furi_thread_alloc() {
+FuriThread* furi_thread_alloc(void) {
     FuriThread* thread = malloc(sizeof(FuriThread));
     thread->output.buffer = furi_string_alloc();
     thread->is_service = false;
@@ -239,7 +239,7 @@ void furi_thread_set_current_priority(FuriThreadPriority priority) {
     vTaskPrioritySet(NULL, new_priority);
 }
 
-FuriThreadPriority furi_thread_get_current_priority() {
+FuriThreadPriority furi_thread_get_current_priority(void) {
     return (FuriThreadPriority)uxTaskPriorityGet(NULL);
 }
 
@@ -343,16 +343,16 @@ int32_t furi_thread_get_return_code(FuriThread* thread) {
     return thread->ret;
 }
 
-FuriThreadId furi_thread_get_current_id() {
+FuriThreadId furi_thread_get_current_id(void) {
     return xTaskGetCurrentTaskHandle();
 }
 
-FuriThread* furi_thread_get_current() {
+FuriThread* furi_thread_get_current(void) {
     FuriThread* thread = pvTaskGetThreadLocalStoragePointer(NULL, 0);
     return thread;
 }
 
-void furi_thread_yield() {
+void furi_thread_yield(void) {
     furi_check(!FURI_IS_IRQ_MODE());
     taskYIELD();
 }
@@ -603,7 +603,7 @@ void furi_thread_set_stdout_callback(FuriThreadStdoutWriteCallback callback) {
     thread->output.write_callback = callback;
 }
 
-FuriThreadStdoutWriteCallback furi_thread_get_stdout_callback() {
+FuriThreadStdoutWriteCallback furi_thread_get_stdout_callback(void) {
     FuriThread* thread = furi_thread_get_current();
     furi_check(thread);
     return thread->output.write_callback;
@@ -634,7 +634,7 @@ size_t furi_thread_stdout_write(const char* data, size_t size) {
     return size;
 }
 
-int32_t furi_thread_stdout_flush() {
+int32_t furi_thread_stdout_flush(void) {
     FuriThread* thread = furi_thread_get_current();
     furi_check(thread);
 

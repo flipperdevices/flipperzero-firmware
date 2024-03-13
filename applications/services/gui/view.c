@@ -1,6 +1,6 @@
 #include "view_i.h"
 
-View* view_alloc() {
+View* view_alloc(void) {
     View* view = malloc(sizeof(View));
     view->orientation = ViewOrientationHorizontal;
     return view;

@@ -43,7 +43,7 @@ typedef struct {
 static FuriHalNfcIso15693Listener* furi_hal_nfc_iso15693_listener = NULL;
 static FuriHalNfcIso15693Poller* furi_hal_nfc_iso15693_poller = NULL;
 
-static FuriHalNfcIso15693Listener* furi_hal_nfc_iso15693_listener_alloc() {
+static FuriHalNfcIso15693Listener* furi_hal_nfc_iso15693_listener_alloc(void) {
     FuriHalNfcIso15693Listener* instance = malloc(sizeof(FuriHalNfcIso15693Listener));
 
     instance->signal = iso15693_signal_alloc(&gpio_spi_r_mosi);
@@ -62,7 +62,7 @@ static void furi_hal_nfc_iso15693_listener_free(FuriHalNfcIso15693Listener* inst
     free(instance);
 }
 
-static FuriHalNfcIso15693Poller* furi_hal_nfc_iso15693_poller_alloc() {
+static FuriHalNfcIso15693Poller* furi_hal_nfc_iso15693_poller_alloc(void) {
     FuriHalNfcIso15693Poller* instance = malloc(sizeof(FuriHalNfcIso15693Poller));
 
     return instance;
@@ -400,7 +400,7 @@ static FuriHalNfcError furi_hal_nfc_iso15693_listener_tx(
     return error;
 }
 
-FuriHalNfcError furi_hal_nfc_iso15693_listener_tx_sof() {
+FuriHalNfcError furi_hal_nfc_iso15693_listener_tx_sof(void) {
     iso15693_signal_tx_sof(furi_hal_nfc_iso15693_listener->signal, Iso15693SignalDataRateHi);
 
     return FuriHalNfcErrorNone;

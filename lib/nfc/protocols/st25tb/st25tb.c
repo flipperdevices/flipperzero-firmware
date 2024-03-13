@@ -79,7 +79,7 @@ const NfcDeviceBase nfc_device_st25tb = {
     .get_base_data = (NfcDeviceGetBaseData)st25tb_get_base_data,
 };
 
-St25tbData* st25tb_alloc() {
+St25tbData* st25tb_alloc(void) {
     St25tbData* data = malloc(sizeof(St25tbData));
     return data;
 }

@@ -19,7 +19,7 @@ void dialog_file_browser_set_basic_options(
     options->item_loader_context = NULL;
 }
 
-static DialogsApp* dialogs_app_alloc() {
+static DialogsApp* dialogs_app_alloc(void) {
     DialogsApp* app = malloc(sizeof(DialogsApp));
     app->message_queue = furi_message_queue_alloc(8, sizeof(DialogsAppMessage));
 

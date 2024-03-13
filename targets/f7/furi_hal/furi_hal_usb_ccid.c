@@ -381,11 +381,11 @@ void CALLBACK_CCID_XfrBlock(
     }
 }
 
-void furi_hal_ccid_ccid_insert_smartcard() {
+void furi_hal_ccid_ccid_insert_smartcard(void) {
     smartcard_inserted = true;
 }
 
-void furi_hal_ccid_ccid_remove_smartcard() {
+void furi_hal_ccid_ccid_remove_smartcard(void) {
     smartcard_inserted = false;
 }
 

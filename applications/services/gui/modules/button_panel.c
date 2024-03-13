@@ -67,7 +67,7 @@ static void button_panel_process_ok(ButtonPanel* button_panel);
 static void button_panel_view_draw_callback(Canvas* canvas, void* _model);
 static bool button_panel_view_input_callback(InputEvent* event, void* context);
 
-ButtonPanel* button_panel_alloc() {
+ButtonPanel* button_panel_alloc(void) {
     ButtonPanel* button_panel = malloc(sizeof(ButtonPanel));
     button_panel->view = view_alloc();
     view_set_orientation(button_panel->view, ViewOrientationVertical);

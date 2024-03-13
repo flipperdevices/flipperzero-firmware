@@ -37,7 +37,7 @@ static void furi_record_erase(const char* name, FuriRecordData* record_data) {
     FuriRecordDataDict_erase(furi_record->records, name);
 }
 
-void furi_record_init() {
+void furi_record_init(void) {
     furi_record = malloc(sizeof(FuriRecord));
     furi_record->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
     furi_check(furi_record->mutex);
@@ -58,11 +58,11 @@ static FuriRecordData* furi_record_data_get_or_create(const char* name) {
     return record_data;
 }
 
-static void furi_record_lock() {
+static void furi_record_lock(void) {
     furi_check(furi_mutex_acquire(furi_record->mutex, FuriWaitForever) == FuriStatusOk);
 }
 
-static void furi_record_unlock() {
+static void furi_record_unlock(void) {
     furi_check(furi_mutex_release(furi_record->mutex) == FuriStatusOk);
 }
 

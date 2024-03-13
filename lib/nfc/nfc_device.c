@@ -14,7 +14,7 @@
 
 #define NFC_DEVICE_UID_MAX_LEN (10U)
 
-NfcDevice* nfc_device_alloc() {
+NfcDevice* nfc_device_alloc(void) {
     NfcDevice* instance = malloc(sizeof(NfcDevice));
     instance->protocol = NfcProtocolInvalid;
 

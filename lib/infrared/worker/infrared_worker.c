@@ -223,7 +223,7 @@ void infrared_worker_rx_set_received_signal_callback(
     instance->rx.received_signal_context = context;
 }
 
-InfraredWorker* infrared_worker_alloc() {
+InfraredWorker* infrared_worker_alloc(void) {
     InfraredWorker* instance = malloc(sizeof(InfraredWorker));
 
     instance->thread = furi_thread_alloc_ex("InfraredWorker", 2048, NULL, instance);

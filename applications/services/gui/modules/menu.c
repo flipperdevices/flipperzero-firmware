@@ -129,7 +129,7 @@ static void menu_exit(void* context) {
         false);
 }
 
-Menu* menu_alloc() {
+Menu* menu_alloc(void) {
     Menu* menu = malloc(sizeof(Menu));
     menu->view = view_alloc(menu->view);
     view_set_context(menu->view, menu);

@@ -9,7 +9,7 @@ struct SubGhzEnvironment {
     const char* alutech_at_4n_rainbow_table_file_name;
 };
 
-SubGhzEnvironment* subghz_environment_alloc() {
+SubGhzEnvironment* subghz_environment_alloc(void) {
     SubGhzEnvironment* instance = malloc(sizeof(SubGhzEnvironment));
 
     instance->keystore = subghz_keystore_alloc();

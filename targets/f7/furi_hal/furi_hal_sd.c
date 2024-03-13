@@ -206,17 +206,17 @@ typedef struct {
 /** Pointer to currently used SPI Handle */
 FuriHalSpiBusHandle* furi_hal_sd_spi_handle = NULL;
 
-static inline void sd_spi_select_card() {
+static inline void sd_spi_select_card(void) {
     furi_hal_gpio_write(furi_hal_sd_spi_handle->cs, false);
     furi_delay_us(10); // Entry guard time for some SD cards
 }
 
-static inline void sd_spi_deselect_card() {
+static inline void sd_spi_deselect_card(void) {
     furi_delay_us(10); // Exit guard time for some SD cards
     furi_hal_gpio_write(furi_hal_sd_spi_handle->cs, true);
 }
 
-static void sd_spi_bus_to_ground() {
+static void sd_spi_bus_to_ground(void) {
     furi_hal_gpio_init_ex(
         furi_hal_sd_spi_handle->miso,
         GpioModeOutputPushPull,
@@ -242,7 +242,7 @@ static void sd_spi_bus_to_ground() {
     furi_hal_gpio_write(furi_hal_sd_spi_handle->sck, false);
 }
 
-static void sd_spi_bus_rise_up() {
+static void sd_spi_bus_rise_up(void) {
     sd_spi_deselect_card();
 
     furi_hal_gpio_init_ex(
@@ -329,12 +329,12 @@ static FuriStatus sd_spi_wait_for_data(uint8_t data, uint32_t timeout_ms) {
     return FuriStatusOk;
 }
 
-static inline void sd_spi_deselect_card_and_purge() {
+static inline void sd_spi_deselect_card_and_purge(void) {
     sd_spi_deselect_card();
     sd_spi_read_byte();
 }
 
-static inline void sd_spi_purge_crc() {
+static inline void sd_spi_purge_crc(void) {
     sd_spi_read_byte();
     sd_spi_read_byte();
 }
@@ -833,7 +833,7 @@ static inline void sd_cache_invalidate_range(uint32_t start_sector, uint32_t end
     sector_cache_invalidate_range(start_sector, end_sector);
 }
 
-static inline void sd_cache_invalidate_all() {
+static inline void sd_cache_invalidate_all(void) {
     sector_cache_init();
 }
 
@@ -907,7 +907,7 @@ bool furi_hal_sd_is_present(void) {
     return result;
 }
 
-uint8_t furi_hal_sd_max_mount_retry_count() {
+uint8_t furi_hal_sd_max_mount_retry_count(void) {
     return 10;
 }
 

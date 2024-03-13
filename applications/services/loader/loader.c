@@ -179,7 +179,7 @@ static void loader_thread_state_callback(FuriThreadState thread_state, void* con
 
 // implementation
 
-static Loader* loader_alloc() {
+static Loader* loader_alloc(void) {
     Loader* loader = malloc(sizeof(Loader));
     loader->pubsub = furi_pubsub_alloc();
     loader->queue = furi_message_queue_alloc(1, sizeof(LoaderMessage));

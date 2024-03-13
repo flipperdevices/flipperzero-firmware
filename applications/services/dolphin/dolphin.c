@@ -73,7 +73,7 @@ void dolphin_clear_limits_timer_callback(void* context) {
     dolphin_event_send_async(dolphin, &event);
 }
 
-Dolphin* dolphin_alloc() {
+Dolphin* dolphin_alloc(void) {
     Dolphin* dolphin = malloc(sizeof(Dolphin));
 
     dolphin->state = dolphin_state_alloc();

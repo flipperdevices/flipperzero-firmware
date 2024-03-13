@@ -10,7 +10,7 @@
 
 #include CMSIS_device_header
 
-bool furi_kernel_is_irq_or_masked() {
+bool furi_kernel_is_irq_or_masked(void) {
     bool irq = false;
     BaseType_t state;
 
@@ -34,11 +34,11 @@ bool furi_kernel_is_irq_or_masked() {
     return (irq);
 }
 
-bool furi_kernel_is_running() {
+bool furi_kernel_is_running(void) {
     return xTaskGetSchedulerState() != taskSCHEDULER_RUNNING;
 }
 
-int32_t furi_kernel_lock() {
+int32_t furi_kernel_lock(void) {
     furi_check(!furi_kernel_is_irq_or_masked());
 
     int32_t lock;
@@ -63,7 +63,7 @@ int32_t furi_kernel_lock() {
     return (lock);
 }
 
-int32_t furi_kernel_unlock() {
+int32_t furi_kernel_unlock(void) {
     furi_check(!furi_kernel_is_irq_or_masked());
 
     int32_t lock;
@@ -124,7 +124,7 @@ int32_t furi_kernel_restore_lock(int32_t lock) {
     return (lock);
 }
 
-uint32_t furi_kernel_get_tick_frequency() {
+uint32_t furi_kernel_get_tick_frequency(void) {
     /* Return frequency in hertz */
     return (configTICK_RATE_HZ_RAW);
 }
@@ -165,7 +165,7 @@ FuriStatus furi_delay_until_tick(uint32_t tick) {
     return (stat);
 }
 
-uint32_t furi_get_tick() {
+uint32_t furi_get_tick(void) {
     TickType_t ticks;
 
     if(furi_kernel_is_irq_or_masked() != 0U) {

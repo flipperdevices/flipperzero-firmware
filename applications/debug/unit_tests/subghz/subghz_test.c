@@ -904,7 +904,7 @@ MU_TEST_SUITE(subghz) {
     subghz_test_deinit();
 }
 
-int run_minunit_test_subghz() {
+int run_minunit_test_subghz(void) {
     MU_RUN_SUITE(subghz);
     return MU_EXIT_CODE;
 }

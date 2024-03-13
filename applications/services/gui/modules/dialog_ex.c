@@ -143,7 +143,7 @@ static bool dialog_ex_view_input_callback(InputEvent* event, void* context) {
     return consumed;
 }
 
-DialogEx* dialog_ex_alloc() {
+DialogEx* dialog_ex_alloc(void) {
     DialogEx* dialog_ex = malloc(sizeof(DialogEx));
     dialog_ex->view = view_alloc();
     view_set_context(dialog_ex->view, dialog_ex);

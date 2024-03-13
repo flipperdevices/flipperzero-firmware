@@ -272,7 +272,7 @@ void cli_command_sysctl_heap_track(Cli* cli, FuriString* args, void* context) {
     }
 }
 
-void cli_command_sysctl_print_usage() {
+void cli_command_sysctl_print_usage(void) {
     printf("Usage:\r\n");
     printf("sysctl <cmd> <args>\r\n");
     printf("Cmd list:\r\n");
