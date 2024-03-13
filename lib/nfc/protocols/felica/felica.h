@@ -138,7 +138,6 @@ bool felica_calculate_mac(
 
 bool felica_check_mac(
     mbedtls_des3_context* ctx,
-    FelicaMACType operation_type,
     const uint8_t* session_key,
     const uint8_t* rc,
     const uint8_t* blocks,

@@ -237,7 +237,6 @@ void felica_prepare_first_block(
 
 bool felica_check_mac(
     mbedtls_des3_context* ctx,
-    FelicaMACType operation_type,
     const uint8_t* session_key,
     const uint8_t* rc,
     const uint8_t* blocks,
@@ -245,7 +244,7 @@ bool felica_check_mac(
     uint8_t* data) {
     uint8_t first_block[8];
     uint8_t mac[8];
-    felica_prepare_first_block(operation_type, blocks, block_count, first_block);
+    felica_prepare_first_block(FelicaMACTypeRead, blocks, block_count, first_block);
 
     uint8_t data_size_without_mac = 16 * (block_count - 1);
     felica_calculate_mac(ctx, session_key, rc, first_block, data, data_size_without_mac, mac);
