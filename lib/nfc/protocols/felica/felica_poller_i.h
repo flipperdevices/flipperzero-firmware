@@ -37,13 +37,18 @@ typedef struct {
     bool external : 1;
 } FelicaAuthenticationStatus;
 
+typedef struct {
+    bool skip_auth;
+    mbedtls_des3_context des_context;
+    FelicaSessionKey session_key;
+    FelicaAuthenticationStatus auth_status;
+} FelicaAuthenticationContext;
+
 struct FelicaPoller {
     Nfc* nfc;
     FelicaPollerState state;
 
-    mbedtls_des3_context des_context;
-    FelicaSessionKey session_key;
-    FelicaAuthenticationStatus auth_status;
+    FelicaAuthenticationContext auth_context;
 
     FelicaData* data;
     BitBuffer* tx_buffer;
