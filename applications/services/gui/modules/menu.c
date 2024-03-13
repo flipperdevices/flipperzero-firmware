@@ -131,7 +131,7 @@ static void menu_exit(void* context) {
 
 Menu* menu_alloc(void) {
     Menu* menu = malloc(sizeof(Menu));
-    menu->view = view_alloc(menu->view);
+    menu->view = view_alloc();
     view_set_context(menu->view, menu);
     view_allocate_model(menu->view, ViewModelTypeLocking, sizeof(MenuModel));
     view_set_draw_callback(menu->view, menu_draw_callback);

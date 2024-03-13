@@ -25,10 +25,10 @@ extern "C" {
 #define __FURI_CHECK_MESSAGE_FLAG (0x02)
 
 /** Crash system */
-FURI_NORETURN void __furi_crash_implementation();
+FURI_NORETURN void __furi_crash_implementation(void);
 
 /** Halt system */
-FURI_NORETURN void __furi_halt_implementation();
+FURI_NORETURN void __furi_halt_implementation(void);
 
 /** Crash system with message. Show message after reboot. */
 #define __furi_crash(message)                                 \
