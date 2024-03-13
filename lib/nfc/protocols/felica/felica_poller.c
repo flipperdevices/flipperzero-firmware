@@ -134,6 +134,8 @@ NfcCommand felica_poller_state_handler_auth_internal(FelicaPoller* instance) {
         instance, 1, blocks, instance->data->data.fs.rc.data, &response);
     ///TODO: Think of reworking this part into do{}while in order to reduce nesting
     if(error == FelicaErrorNone && response->SF1 == 0 && response->SF2 == 0) {
+        ///TODO: replace all block numbers to defines
+        ///and place them in felica.h
         blocks[0] = 0x82;
         blocks[1] = 0x90;
         blocks[2] = 0x91;
@@ -220,7 +222,6 @@ NfcCommand felica_poller_state_handler_read_blocks(FelicaPoller* instance) {
 
     uint8_t block_count = 1;
     uint8_t block_list[4] = {0, 0, 0, 0};
-    //for(uint8_t i = 0; i < 1; i++) {
     block_list[0] = instance->block_index;
 
     instance->block_index++;
@@ -232,37 +233,31 @@ NfcCommand felica_poller_state_handler_read_blocks(FelicaPoller* instance) {
         //instance->block_index++;
     } else if(instance->block_index == 0x93) {
         instance->block_index = 0xA0;
-    } else if(instance->block_index == 0xA1) {
-        block_count = 3;
-        //break;
-    }
-    //}
+    } /* else if(instance->block_index == 0xA1) {
+        //block_count = 3;
+    } */
 
     FelicaPollerReadCommandResponse* response;
     FelicaError error = felica_poller_read_blocks(instance, block_count, block_list, &response);
     if(error == FelicaErrorNone) {
         block_count = (response->SF1 == 0) ? response->block_count : block_count;
-        //for(uint8_t i = 0; i < block_count; i++) {
-        uint8_t* data_ptr = instance->data->data.dump +
-                            instance->data->blocks_total * sizeof(FelicaBlock); //18; /* 16 */
+        uint8_t* data_ptr =
+            instance->data->data.dump + instance->data->blocks_total * sizeof(FelicaBlock);
 
         *data_ptr++ = response->SF1;
         *data_ptr++ = response->SF2;
 
         if(response->SF1 == 0) {
-            uint8_t* response_data_ptr = response->data; // + i * FELICA_DATA_BLOCK_SIZE;
+            uint8_t* response_data_ptr = response->data;
             memcpy(data_ptr, response_data_ptr, FELICA_DATA_BLOCK_SIZE);
         } else {
             memset(data_ptr, 0, FELICA_DATA_BLOCK_SIZE);
         }
-        instance->data->blocks_total += 1; //response->block_count;
+        instance->data->blocks_total += 1;
 
         if(instance->data->blocks_total == 27) {
             instance->state = FelicaPollerStateReadSuccess;
-            //instance->state = FelicaPollerStateReadMAC;
-            // break;
         }
-        // }
     } else {
         instance->felica_event.type = FelicaPollerEventTypeError;
         instance->felica_event_data.error = error;
