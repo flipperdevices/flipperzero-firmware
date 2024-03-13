@@ -14,7 +14,7 @@
 #define BARRIER_HEIGHT 3
 #define PROJECTILE_WIDTH 4
 #define PROJECTILE_HEIGHT 8
-#define ENEMY_PROJECTILE_SPEED .5 
+#define ENEMY_PROJECTILE_SPEED .5
 #define ENEMY_PROJECTILES_MAX 10
 
 int enemy_movement_direction = 1;
@@ -24,15 +24,17 @@ int enemy_move_threshold = 20;
 bool leftKeyPressed = false;
 bool rightKeyPressed = false;
 
-typedef struct { int x, y; } Point;
+typedef struct {
+    int x, y;
+} Point;
 
-typedef struct { 
-    Point position; 
+typedef struct {
+    Point position;
 } Player;
 
-typedef struct { 
-    Point position; 
-    bool active; 
+typedef struct {
+    Point position;
+    bool active;
 } Projectile;
 
 typedef struct {
@@ -54,7 +56,7 @@ typedef struct {
     int current_wave;
     bool waiting_for_restart;
     bool running;
-    int score; 
+    int score;
     Barrier barriers[BARRIERS_MAX];
     Projectile enemy_projectiles[ENEMY_PROJECTILES_MAX];
     int enemy_projectiles_count;
@@ -69,7 +71,7 @@ void game_state_init(GameState* state) {
     for(int i = 0; i < PROJECTILES_MAX; ++i) {
         state->projectiles[i].active = false;
     }
-        for(int i = 0; i < BARRIERS_MAX; ++i) {
+    for(int i = 0; i < BARRIERS_MAX; ++i) {
         state->barriers[i].position.x = 7 + i * (128 / BARRIERS_MAX);
         state->barriers[i].position.y = 50;
         state->barriers[i].active = true;
@@ -77,7 +79,7 @@ void game_state_init(GameState* state) {
     for(int p = 0; p < ENEMY_PROJECTILES_MAX; ++p) {
         if(state->enemy_projectiles[p].active) {
             state->enemy_projectiles[p].position.y += ENEMY_PROJECTILE_SPEED;
-            if(state->enemy_projectiles[p].position.y > 128) { 
+            if(state->enemy_projectiles[p].position.y > 128) {
                 state->enemy_projectiles[p].active = false;
                 state->enemy_projectiles_count--;
             }
@@ -93,29 +95,32 @@ void game_state_init(GameState* state) {
 void handle_input(GameState* state, InputEvent* input_event) {
     if(input_event->type == InputTypeShort) {
         switch(input_event->key) {
-            case InputKeyLeft:
-                state->player.position.x = (state->player.position.x - 1) < 0 ? 0 : state->player.position.x - 1;
-                break;
-            case InputKeyRight:
-                state->player.position.x = (state->player.position.x + 1) > 124 ? 124 : state->player.position.x + 1;
-                break;
-            case InputKeyOk:
-                if(state->projectiles_count < PROJECTILES_MAX) {
-                    for(int i = 0; i < PROJECTILES_MAX; ++i) {
-                        if(!state->projectiles[i].active) {
-                            state->projectiles[i].position = (Point){state->player.position.x, state->player.position.y};
-                            state->projectiles[i].active = true;
-                            state->projectiles_count++;
-                            break;
-                        }
+        case InputKeyLeft:
+            state->player.position.x =
+                (state->player.position.x - 1) < 0 ? 0 : state->player.position.x - 1;
+            break;
+        case InputKeyRight:
+            state->player.position.x =
+                (state->player.position.x + 1) > 124 ? 124 : state->player.position.x + 1;
+            break;
+        case InputKeyOk:
+            if(state->projectiles_count < PROJECTILES_MAX) {
+                for(int i = 0; i < PROJECTILES_MAX; ++i) {
+                    if(!state->projectiles[i].active) {
+                        state->projectiles[i].position =
+                            (Point){state->player.position.x, state->player.position.y};
+                        state->projectiles[i].active = true;
+                        state->projectiles_count++;
+                        break;
                     }
                 }
-                break;
-            case InputKeyBack:
-                state->game_over = true;
-                break;
-            default:
-                break;
+            }
+            break;
+        case InputKeyBack:
+            state->game_over = true;
+            break;
+        default:
+            break;
         }
     }
 }
@@ -143,8 +148,8 @@ void update_enemy_positions(GameState* state) {
 
         for(int i = 0; i < ENEMIES_MAX; ++i) {
             if(state->enemies[i].active) {
-                if ((state->enemies[i].position.x <= 0 && enemy_movement_direction < 0) ||
-                    (state->enemies[i].position.x >= 124 && enemy_movement_direction > 0)) {
+                if((state->enemies[i].position.x <= 0 && enemy_movement_direction < 0) ||
+                   (state->enemies[i].position.x >= 124 && enemy_movement_direction > 0)) {
                     changeDirection = true;
                     newDirection *= -1;
                     break;
@@ -154,13 +159,13 @@ void update_enemy_positions(GameState* state) {
 
         for(int i = 0; i < ENEMIES_MAX; ++i) {
             if(state->enemies[i].active) {
-                if (!changeDirection) {
+                if(!changeDirection) {
                     state->enemies[i].position.x += enemy_movement_direction;
                 }
             }
         }
 
-        if (changeDirection) {
+        if(changeDirection) {
             for(int i = 0; i < ENEMIES_MAX; ++i) {
                 if(state->enemies[i].active) {
                     state->enemies[i].position.x += newDirection;
@@ -186,7 +191,10 @@ void enemy_shoot(GameState* state) {
         int chosenOne = activeEnemies[rand() % activeCount];
         for(int p = 0; p < ENEMY_PROJECTILES_MAX; ++p) {
             if(!state->enemy_projectiles[p].active) {
-                state->enemy_projectiles[p].position = (Point){state->enemies[chosenOne].position.x + 5, state->enemies[chosenOne].position.y + 10}; // Assuming enemy size for adjustment
+                state->enemy_projectiles[p].position = (Point){
+                    state->enemies[chosenOne].position.x + 5,
+                    state->enemies[chosenOne].position.y +
+                        10}; // Assuming enemy size for adjustment
                 state->enemy_projectiles[p].active = true;
                 state->enemy_projectiles_count++;
                 break;
@@ -218,7 +226,7 @@ void handle_collisions(GameState* state) {
     for(int p = 0; p < PROJECTILES_MAX; ++p) {
         if(state->projectiles[p].active) {
             for(int b = 0; b < BARRIERS_MAX; ++b) {
-                if(state->barriers[b].active && 
+                if(state->barriers[b].active &&
                    abs(state->projectiles[p].position.x - state->barriers[b].position.x) < 3 &&
                    abs(state->projectiles[p].position.y - state->barriers[b].position.y) < 3) {
                     state->projectiles[p].active = false;
@@ -247,9 +255,9 @@ void handle_collisions(GameState* state) {
             int projectileCenterY = state->enemy_projectiles[p].position.y + 4;
             int playerCenterX = state->player.position.x + 5;
             int playerCenterY = state->player.position.y + 5;
-            
-            if(abs(projectileCenterX - playerCenterX) < (5 - playerHitboxMargin) && 
-            abs(projectileCenterY - playerCenterY) < (5 - playerHitboxMargin)) {
+
+            if(abs(projectileCenterX - playerCenterX) < (5 - playerHitboxMargin) &&
+               abs(projectileCenterY - playerCenterY) < (5 - playerHitboxMargin)) {
                 deactivate_all_enemies(&game_state);
                 state->game_over = true;
                 state->enemy_projectiles[p].active = false;
@@ -260,16 +268,19 @@ void handle_collisions(GameState* state) {
         if(state->enemy_projectiles[p].active) {
             for(int b = 0; b < BARRIERS_MAX; ++b) {
                 if(state->barriers[b].active &&
-                abs(state->enemy_projectiles[p].position.x - state->barriers[b].position.x) < (BARRIER_WIDTH / 2 + PROJECTILE_WIDTH / 2) &&
-                (state->enemy_projectiles[p].position.y + PROJECTILE_HEIGHT >= state->barriers[b].position.y) &&
-                (state->enemy_projectiles[p].position.y <= state->barriers[b].position.y + BARRIER_HEIGHT)) {
+                   abs(state->enemy_projectiles[p].position.x - state->barriers[b].position.x) <
+                       (BARRIER_WIDTH / 2 + PROJECTILE_WIDTH / 2) &&
+                   (state->enemy_projectiles[p].position.y + PROJECTILE_HEIGHT >=
+                    state->barriers[b].position.y) &&
+                   (state->enemy_projectiles[p].position.y <=
+                    state->barriers[b].position.y + BARRIER_HEIGHT)) {
                     state->enemy_projectiles[p].active = false;
                     break;
                 }
             }
         }
     }
-}    
+}
 
 bool all_enemies_destroyed(GameState* state) {
     for(int i = 0; i < ENEMIES_MAX; ++i) {
@@ -299,7 +310,7 @@ void deactivate_all_enemies(GameState* state) {
 }
 
 void update_game_state(GameState* state) {
-    static int shoot_counter = 0; 
+    static int shoot_counter = 0;
     for(int i = 0; i < PROJECTILES_MAX; ++i) {
         if(state->projectiles[i].active) {
             state->projectiles[i].position.y -= 2;
@@ -317,7 +328,7 @@ void update_game_state(GameState* state) {
 
     for(int i = 0; i < ENEMIES_MAX; ++i) {
         if(state->enemies[i].active) {
-            if(abs(state->enemies[i].position.x - state->player.position.x) < 10 && 
+            if(abs(state->enemies[i].position.x - state->player.position.x) < 10 &&
                abs(state->enemies[i].position.y - state->player.position.y) < 10) {
                 deactivate_all_enemies(state);
                 state->game_over = true;
@@ -327,15 +338,15 @@ void update_game_state(GameState* state) {
     }
 
     for(int p = 0; p < ENEMY_PROJECTILES_MAX; ++p) {
-    if(state->enemy_projectiles[p].active) {
-        state->enemy_projectiles[p].position.y += 2;
-        if(state->enemy_projectiles[p].position.y > 128) { 
-            state->enemy_projectiles[p].active = false;
-            state->enemy_projectiles_count--;
+        if(state->enemy_projectiles[p].active) {
+            state->enemy_projectiles[p].position.y += 2;
+            if(state->enemy_projectiles[p].position.y > 128) {
+                state->enemy_projectiles[p].active = false;
+                state->enemy_projectiles_count--;
             }
         }
     }
-    
+
     if(all_enemies_destroyed(state)) {
         initialize_enemies(state);
     }
@@ -346,50 +357,60 @@ void update_game_state(GameState* state) {
 
 void render_callback(Canvas* const canvas, void* ctx) {
     GameState* state = (GameState*)ctx;
-    if (!canvas || !state) return; 
+    if(!canvas || !state) return;
     if(state->game_over) {
         render_game_over_screen(canvas, state);
     } else {
-    canvas_clear(canvas);
-    char score_text[30];
-    snprintf(score_text, sizeof(score_text), "Score: %d", state->score);
-    canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str_aligned(canvas, 64, 0, AlignCenter, AlignTop, score_text);
-    canvas_draw_icon(canvas, state->player.position.x, state->player.position.y, &I_yapinvader);
-    for(int i = 0; i < PROJECTILES_MAX; ++i) {
-        if(state->projectiles[i].active) {
-            canvas_draw_circle(canvas, state->projectiles[i].position.x, state->projectiles[i].position.y, 1);
+        canvas_clear(canvas);
+        char score_text[30];
+        snprintf(score_text, sizeof(score_text), "Score: %d", state->score);
+        canvas_set_font(canvas, FontSecondary);
+        canvas_draw_str_aligned(canvas, 64, 0, AlignCenter, AlignTop, score_text);
+        canvas_draw_icon(
+            canvas, state->player.position.x, state->player.position.y, &I_yapinvader);
+        for(int i = 0; i < PROJECTILES_MAX; ++i) {
+            if(state->projectiles[i].active) {
+                canvas_draw_circle(
+                    canvas, state->projectiles[i].position.x, state->projectiles[i].position.y, 1);
             }
         }
     }
     for(int i = 0; i < ENEMIES_MAX; ++i) {
         if(state->enemies[i].active) {
-            canvas_draw_icon(canvas, state->enemies[i].position.x, state->enemies[i].position.y, &I_yap);
+            canvas_draw_icon(
+                canvas, state->enemies[i].position.x, state->enemies[i].position.y, &I_yap);
         }
     }
     for(int i = 0; i < BARRIERS_MAX; ++i) {
         if(state->barriers[i].active) {
-            canvas_draw_rbox(canvas, state->barriers[i].position.x, state->barriers[i].position.y, 10, 3, 1);
+            canvas_draw_rbox(
+                canvas, state->barriers[i].position.x, state->barriers[i].position.y, 10, 3, 1);
         }
     }
     for(int p = 0; p < ENEMY_PROJECTILES_MAX; ++p) {
         if(state->enemy_projectiles[p].active) {
-            canvas_draw_rbox(canvas, state->enemy_projectiles[p].position.x - 1, state->enemy_projectiles[p].position.y - 4, 4, 8, 1);
+            canvas_draw_rbox(
+                canvas,
+                state->enemy_projectiles[p].position.x - 1,
+                state->enemy_projectiles[p].position.y - 4,
+                4,
+                8,
+                1);
         }
     }
-} 
+}
 
 static void input_callback(InputEvent* input_event, void* ctx) {
     GameState* state = (GameState*)ctx;
-    if (!state) return;
+    if(!state) return;
 
-    if (input_event->key == InputKeyBack && input_event->type == InputTypeShort) {
+    if(input_event->key == InputKeyBack && input_event->type == InputTypeShort) {
         state->running = false;
         return;
     }
-    
-    if (state->game_over) {
-        if (input_event->key == InputKeyOk && input_event->type == InputTypeShort) {
+
+    if(state->game_over) {
+        if(input_event->key == InputKeyOk && input_event->type == InputTypeShort) {
             game_state_init(state);
             initialize_enemies(state);
             state->game_over = false;
@@ -397,39 +418,41 @@ static void input_callback(InputEvent* input_event, void* ctx) {
     } else {
         handle_input(state, input_event);
     }
-    if (input_event->type == InputTypePress) {
+    if(input_event->type == InputTypePress) {
         switch(input_event->key) {
-            case InputKeyLeft:
-                leftKeyPressed = true;
-                break;
-            case InputKeyRight:
-                rightKeyPressed = true;
-                break;
-            default:
-                break;
+        case InputKeyLeft:
+            leftKeyPressed = true;
+            break;
+        case InputKeyRight:
+            rightKeyPressed = true;
+            break;
+        default:
+            break;
         }
     }
 
-    if (input_event->type == InputTypeRelease) {
+    if(input_event->type == InputTypeRelease) {
         switch(input_event->key) {
-            case InputKeyLeft:
-                leftKeyPressed = false;
-                break;
-            case InputKeyRight:
-                rightKeyPressed = false;
-                break;
-            default:
-                break;
+        case InputKeyLeft:
+            leftKeyPressed = false;
+            break;
+        case InputKeyRight:
+            rightKeyPressed = false;
+            break;
+        default:
+            break;
         }
     }
 }
 
 void update_player_position(GameState* state) {
     if(leftKeyPressed) {
-        state->player.position.x = (state->player.position.x - 1) > 0 ? state->player.position.x - 1 : 0;
+        state->player.position.x =
+            (state->player.position.x - 1) > 0 ? state->player.position.x - 1 : 0;
     }
     if(rightKeyPressed) {
-        state->player.position.x = (state->player.position.x + 1) < 124 ? state->player.position.x + 1 : 124;
+        state->player.position.x =
+            (state->player.position.x + 1) < 124 ? state->player.position.x + 1 : 124;
     }
 }
 
@@ -443,9 +466,9 @@ int32_t yapinvaders_app(void) {
     game_state_init(&game_state);
     initialize_enemies(&game_state);
 
-    while (game_state.running) {
-        if (game_state.game_over) {
-            if (game_state.waiting_for_restart) {
+    while(game_state.running) {
+        if(game_state.game_over) {
+            if(game_state.waiting_for_restart) {
                 game_state_init(&game_state);
                 initialize_enemies(&game_state);
                 game_state.waiting_for_restart = false;
