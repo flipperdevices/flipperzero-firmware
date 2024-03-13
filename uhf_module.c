@@ -29,6 +29,10 @@ static M100ResponseType setup_and_send_rx(M100Module* module, uint8_t* cmd, size
     // Validation Checks
     uint8_t* data = uhf_buffer_get_data(buffer);
     size_t length = uhf_buffer_get_size(buffer);
+    // DEBUG
+    // for(size_t i = 0; i < length; i++) {
+    //     FURI_LOG_E("UHF_MODULE_TX", "%02X ", data[i]);
+    // }
     // check if size > 0
     if(!length) return M100EmptyResponse;
     // check if data is valid

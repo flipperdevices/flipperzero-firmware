@@ -79,7 +79,6 @@ UHFUart* uhf_uart_alloc(){
 void uhf_uart_free(UHFUart* uart){
     furi_assert(uart);
     // furi_assert(uart->thread);
-
     // furi_thread_flags_set(furi_thread_get_id(uart->thread), UHFUartWorkerExitingFlag);
     // furi_thread_join(uart->thread);
     // furi_thread_free(uart->thread);
