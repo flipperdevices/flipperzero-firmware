@@ -2,6 +2,7 @@
 
 #include <toolbox/bit_buffer.h>
 #include <nfc/protocols/nfc_device_base_i.h>
+#include <mbedtls/include/mbedtls/des.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -35,6 +36,11 @@ typedef enum {
     FelicaErrorProtocol,
     FelicaErrorTimeout,
 } FelicaError;
+
+typedef enum {
+    FelicaMACTypeRead,
+    FelicaMACTypeWrite,
+} FelicaMACType;
 
 typedef struct {
     uint8_t data[FELICA_IDM_SIZE];
@@ -107,6 +113,37 @@ bool felica_set_uid(FelicaData* data, const uint8_t* uid, size_t uid_len);
 
 FelicaData* felica_get_base_data(const FelicaData* data);
 
+void felica_reverse_copy_block(const uint8_t* array, uint8_t* reverse_array);
+
+void felica_calculate_session_key(
+    mbedtls_des3_context* ctx,
+    const uint8_t* ck,
+    const uint8_t* rc,
+    uint8_t* out);
+
+void felica_prepare_first_block(
+    FelicaMACType operation_type,
+    const uint8_t* blocks,
+    const uint8_t block_count,
+    uint8_t* out);
+
+bool felica_calculate_mac(
+    mbedtls_des3_context* ctx,
+    const uint8_t* session_key,
+    const uint8_t* rc,
+    const uint8_t* first_block,
+    const uint8_t* data,
+    const size_t length,
+    uint8_t* mac);
+
+bool felica_check_mac(
+    mbedtls_des3_context* ctx,
+    FelicaMACType operation_type,
+    const uint8_t* session_key,
+    const uint8_t* rc,
+    const uint8_t* blocks,
+    const uint8_t block_count,
+    uint8_t* data);
 #ifdef __cplusplus
 }
 #endif

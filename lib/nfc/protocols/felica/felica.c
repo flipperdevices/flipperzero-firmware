@@ -36,7 +36,6 @@ FelicaData* felica_alloc() {
 
 void felica_free(FelicaData* data) {
     furi_assert(data);
-
     free(data);
 }
 
@@ -144,4 +143,113 @@ bool felica_set_uid(FelicaData* data, const uint8_t* uid, size_t uid_len) {
 FelicaData* felica_get_base_data(const FelicaData* data) {
     UNUSED(data);
     furi_crash("No base data");
+}
+
+void felica_reverse_copy_block(const uint8_t* array, uint8_t* reverse_array) {
+    for(int i = 0; i < 8; i++) {
+        reverse_array[i] = array[7 - i];
+    }
+}
+
+void felica_calculate_session_key(
+    mbedtls_des3_context* ctx,
+    const uint8_t* ck,
+    const uint8_t* rc,
+    uint8_t* out) {
+    furi_assert(ctx);
+    furi_assert(ck);
+    furi_assert(rc);
+    furi_assert(out);
+
+    uint8_t iv[8];
+    memset(iv, 0, 8);
+
+    uint8_t ck_reversed[16];
+    felica_reverse_copy_block(ck, ck_reversed);
+    felica_reverse_copy_block(ck + 8, ck_reversed + 8);
+
+    uint8_t rc_reversed[16];
+    felica_reverse_copy_block(rc, rc_reversed);
+    felica_reverse_copy_block(rc + 8, rc_reversed + 8);
+
+    mbedtls_des3_set2key_enc(ctx, ck_reversed);
+    mbedtls_des3_crypt_cbc(ctx, MBEDTLS_DES_ENCRYPT, 16, iv, rc_reversed, out);
+}
+
+bool felica_calculate_mac(
+    mbedtls_des3_context* ctx,
+    const uint8_t* session_key,
+    const uint8_t* rc,
+    const uint8_t* first_block,
+    const uint8_t* data,
+    const size_t length,
+    uint8_t* mac) {
+    furi_assert(data);
+    furi_assert(length % 8);
+
+    uint8_t reverse_data[8];
+    uint8_t iv[8];
+    uint8_t out[8];
+    mbedtls_des3_set2key_enc(ctx, session_key);
+
+    felica_reverse_copy_block(rc, iv);
+    felica_reverse_copy_block(first_block, reverse_data);
+    uint8_t i = 0;
+    bool error = false;
+    do {
+        if(mbedtls_des3_crypt_cbc(ctx, MBEDTLS_DES_ENCRYPT, 8, iv, reverse_data, out) == 0) {
+            memcpy(iv, out, sizeof(iv));
+            felica_reverse_copy_block(data + i, reverse_data);
+            i += 8;
+        } else {
+            error = true;
+            break;
+        }
+    } while(i <= length);
+
+    if(!error) {
+        felica_reverse_copy_block(out, mac);
+    }
+    return !error;
+}
+
+void felica_prepare_first_block(
+    FelicaMACType operation_type,
+    const uint8_t* blocks,
+    const uint8_t block_count,
+    uint8_t* out) {
+    if(operation_type == FelicaMACTypeRead) {
+        memset(out, 0xFF, 8);
+        for(uint8_t i = 0, j = 0; i < block_count; i++, j += 2) {
+            out[j] = blocks[i];
+            out[j + 1] = 0;
+        }
+    } else {
+        furi_assert(block_count == 4);
+        memset(out, 0, 8);
+        out[0] = blocks[0];
+        out[1] = blocks[1];
+        out[2] = blocks[2];
+        out[4] = blocks[3];
+        out[6] = 0x91;
+    }
+}
+
+bool felica_check_mac(
+    mbedtls_des3_context* ctx,
+    FelicaMACType operation_type,
+    const uint8_t* session_key,
+    const uint8_t* rc,
+    const uint8_t* blocks,
+    const uint8_t block_count,
+    uint8_t* data) {
+    uint8_t first_block[8];
+    uint8_t mac[8];
+    felica_prepare_first_block(operation_type, blocks, block_count, first_block);
+
+    uint8_t data_size_without_mac = 16 * (block_count - 1);
+    felica_calculate_mac(ctx, session_key, rc, first_block, data, data_size_without_mac, mac);
+
+    uint8_t* mac_ptr = data + data_size_without_mac;
+    return !memcmp(mac, mac_ptr, 8);
 }
