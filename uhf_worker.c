@@ -14,14 +14,14 @@ UHFWorkerEvent verify_module_connected(UHFWorker* uhf_worker) {
 UHFTag* send_polling_command(UHFWorker* uhf_worker) {
     // read epc bank
     UHFTag* uhf_tag = uhf_tag_alloc();
-    while(true) {
-        M100ResponseType status = m100_single_poll(uhf_worker->module, uhf_tag);
+    M100ResponseType status;
+    do{
         if(uhf_worker->state == UHFWorkerStateStop) {
             uhf_tag_free(uhf_tag);
             return NULL;
         }
-        if(status == M100SuccessResponse) break;
-    }
+        status = m100_single_poll(uhf_worker->module, uhf_tag);
+    }while(status != M100SuccessResponse);
     return uhf_tag;
 }
 
@@ -48,8 +48,7 @@ UHFWorkerEvent read_single_card(UHFWorker* uhf_worker) {
     if(uhf_tag == NULL) return UHFWorkerEventAborted;
     uhf_tag_wrapper_set_tag(uhf_worker->uhf_tag_wrapper, uhf_tag);
     // set select
-    if(m100_set_select(uhf_worker->module, uhf_tag) != M100SuccessResponse)
-        return UHFWorkerEventFail;
+    while(m100_set_select(uhf_worker->module, uhf_tag) != M100SuccessResponse){}
     // read tid
     UHFWorkerEvent event;
     event = read_bank_till_max_length(uhf_worker, uhf_tag, TIDBank);
@@ -64,8 +63,7 @@ UHFWorkerEvent write_single_card(UHFWorker* uhf_worker) {
     UHFTag* uhf_tag_des = send_polling_command(uhf_worker);
     if(uhf_tag_des == NULL) return UHFWorkerEventAborted;
     UHFTag* uhf_tag_from = uhf_worker->uhf_tag_wrapper->uhf_tag;
-    if(m100_set_select(uhf_worker->module, uhf_tag_des) != M100SuccessResponse)
-        return UHFWorkerEventFail;
+    while(m100_set_select(uhf_worker->module, uhf_tag_des) != M100SuccessResponse){}
     do {
         M100ResponseType rp_type = m100_write_label_data_storage(
             uhf_worker->module, uhf_tag_from, uhf_tag_des, UserBank, 0, 0);

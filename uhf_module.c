@@ -4,17 +4,6 @@
 #define DELAY_MS 100
 #define WAIT_TICK 4000 // max wait time in between each byte
 
-volatile uint16_t tick = 0;
-
-// void rx_callback(UartIrqEvent event, uint8_t data, void* ctx) {
-//     UNUSED(event);
-//     Buffer* buffer = ctx;
-//     if(buffer->closed) return; // buffer closed
-//     buffer_append_single(buffer, data); // append data
-//     if(data == FRAME_END) buffer_close(buffer); // end of frame
-//     tick = WAIT_TICK; // reset tick
-// }
-
 static M100ResponseType setup_and_send_rx(M100Module* module, uint8_t* cmd, size_t cmd_length) {
     UHFUart* uart = module->uart;
     Buffer* buffer = uart->buffer;
@@ -22,17 +11,13 @@ static M100ResponseType setup_and_send_rx(M100Module* module, uint8_t* cmd, size
     uhf_buffer_reset(buffer);
     // send cmd
     uhf_uart_send_wait(uart, cmd, cmd_length);
-    // wait for response
+    // wait for response by polling
     while(!uhf_is_buffer_closed(buffer) && !uhf_uart_tick(uart)) {}
     // reset tick
     uhf_uart_tick_reset(uart);
     // Validation Checks
     uint8_t* data = uhf_buffer_get_data(buffer);
     size_t length = uhf_buffer_get_size(buffer);
-    // DEBUG
-    // for(size_t i = 0; i < length; i++) {
-    //     FURI_LOG_E("UHF_MODULE_TX", "%02X ", data[i]);
-    // }
     // check if size > 0
     if(!length) return M100EmptyResponse;
     // check if data is valid
@@ -136,7 +121,6 @@ M100ResponseType m100_single_poll(M100Module* module, UHFTag* uhf_tag) {
         setup_and_send_rx(module, (uint8_t*)&CMD_SINGLE_POLLING.cmd[0], CMD_SINGLE_POLLING.length);
     if(rp_type != M100SuccessResponse) return rp_type;
     uint8_t* data = uhf_buffer_get_data(module->uart->buffer);
-    size_t length = uhf_buffer_get_size(module->uart->buffer);
     uint16_t pc = data[6];
     uint16_t crc = 0;
     // mask out epc length from protocol control
@@ -150,8 +134,6 @@ M100ResponseType m100_single_poll(M100Module* module, UHFTag* uhf_tag) {
     crc = data[8 + epc_len];
     crc <<= 8;
     crc += data[8 + epc_len + 1];
-    // validate checksum
-    if(checksum(data + 1, length - 3) != data[length - 2]) return M100ValidationFail;
     // validate crc
     if(crc16_genibus(data + 6, epc_len + 2) != crc) return M100ValidationFail;
     uhf_tag_set_epc_pc(uhf_tag, pc);
@@ -190,10 +172,11 @@ M100ResponseType m100_set_select(M100Module* module, UHFTag* uhf_tag) {
     // end frame
     cmd[cmd_length - 1] = FRAME_END;
 
-    setup_and_send_rx(module, cmd, 12 + mask_length_bytes + 3);
+    M100ResponseType rp_type = setup_and_send_rx(module, cmd, 12 + mask_length_bytes + 3);
+
+    if(rp_type != M100SuccessResponse) return rp_type;
 
     uint8_t* data = uhf_buffer_get_data(module->uart->buffer);
-    if(checksum(data + 1, 5) != data[6]) return M100ValidationFail; // error in rx
     if(data[5] != 0x00) return M100ValidationFail; // error if not 0
 
     return M100SuccessResponse;
