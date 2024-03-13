@@ -238,8 +238,9 @@ A huge thanks to the following people and projects for making this possible:
 
 - This project is based on & forked from the [Flipper Zero Camera Application][flipperzero-camera] by [Z4urce][github-profile-z4urce]. Thanks Z4urce for the inspiration and the great work!
 - I based this projects application structure on the [Flipper Zero Boilerplate Application][flipper-zero-fap-boilerplate] by [leedave][github-profile-leedave]. Thanks leedave for the great boilerplate application that helped me learn how to structure a Flipper Zero application properly!
-- [WillyJL][github-profile-willyjl] for your guidance and wisdom.
-- [TalkingSasquach][github-profile-talkingsasquach] for all of your helpful [YouTube videos][youtube-talkingsasquach] and [Discord community][discord-squachtopia].
+- [WillyJL][github-profile-willyjl] for your guidance and wisdom, contributions to the F0 community, and the amazing [Momentum Firmware][flipper-zero-momentum-firmware]!
+- [TalkingSasquach][github-profile-talkingsasquach] for your contributions to the F0 community, for all of your helpful [YouTube videos][youtube-talkingsasquach], and the [Discord community][discord-squachtopia]!
+- [RogueMaster][github-profile-roguemaster] for your contributions to the F0 community, and the amazing [RogueMaster Firmware][flipper-zero-roguemaster-firmware]!
 - The project images were drawn using the a application called "[lopaka][lopaka]" by [sbrin][github-profile-sbrin]. Thanks sbrin for your help in creating the images for this project!
 - The Flipper Zero community for all your support and feedback!
 
@@ -298,9 +299,12 @@ Cody Tolene
 [discord-squachtopia]: https://discord.gg/squachtopia
 [flipper-zero-apps]: https://docs.flipper.net/apps
 [flipper-zero-fap-boilerplate]: https://github.com/leedave/flipper-zero-fap-boilerplate
+[flipper-zero-momentum-firmware]: https://github.com/Next-Flip/Momentum-Firmware
+[flipper-zero-roguemaster-firmware]: https://github.com/RogueMaster/flipperzero-firmware-wPlugins
 [flipperzero-camera]: https://github.com/Z4urce/flipperzero-camera
 [github-actions-link]: https://github.com/CodyTolene/Flipper-Zero-Camera-Suite/actions?query=workflow%3A%22Build+%2B+upload.%22
 [github-profile-leedave]: https://github.com/leedave
+[github-profile-roguemaster]: https://github.com/RogueMaster
 [github-profile-sbrin]: https://github.com/sbrin
 [github-profile-talkingsasquach]: https://github.com/skizzophrenic
 [github-profile-willyjl]: https://github.com/Willy-JL
