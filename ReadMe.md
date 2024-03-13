@@ -36,6 +36,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [JS Runner v1.0 (By nminaylov & DrZlo13)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/3286) [JS: added GPIO module (By Sil333033)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/46a761605f0f7466551e8baa127dcc1b1a359a37) [Updates to GPIO & Storage Append (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/0cb1a859e7c67fc0ca0afa35320c2c823c164f4f)
 - Updated: [Naming/organization of JS scripts assets (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/78faa7cdda8b596887b519e2b49e4d99779b320e)
 - Added: [Yappy Invaders (By dagnazty)](https://github.com/dagnazty/Yappy_Invaders)
+- Updated: [Digimon F-Com v1.1 (By TylerWilley)](https://github.com/TylerWilley/flipper-f-com) Code Assets Updated
 
 <a name="release">
 
