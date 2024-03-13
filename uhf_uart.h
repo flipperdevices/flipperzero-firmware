@@ -1,5 +1,6 @@
 #pragma once
 #include <furi_hal.h>
+// #include <expansion/expansion.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include "uhf_buffer.h"
@@ -22,8 +23,8 @@ typedef enum{
 typedef struct{
     FuriHalBus bus;
     FuriHalSerialHandle *handle;
-    FuriStreamBuffer *rx_buff_stream;
-    FuriThread *thread;
+    // FuriStreamBuffer *rx_buff_stream;
+    // FuriThread *thread;
     CallbackFunction callback;
     Buffer *buffer;
     uint32_t baudrate;
