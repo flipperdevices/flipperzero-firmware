@@ -188,7 +188,7 @@ bool st25tb_is_equal(const St25tbData* data, const St25tbData* other) {
     furi_check(data);
     furi_check(other);
 
-    return memcmp(data, other, sizeof(St25tbData)) == 0;
+    return memcmp(data, other, sizeof(St25tbData)) == 0; //-V1103
 }
 
 uint8_t st25tb_get_block_count(St25tbType type) {

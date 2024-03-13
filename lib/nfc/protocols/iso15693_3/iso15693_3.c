@@ -288,7 +288,7 @@ bool iso15693_3_is_equal(const Iso15693_3Data* data, const Iso15693_3Data* other
 
     return memcmp(data->uid, other->uid, ISO15693_3_UID_SIZE) == 0 &&
            memcmp(&data->settings, &other->settings, sizeof(Iso15693_3Settings)) == 0 &&
-           memcmp(&data->system_info, &other->system_info, sizeof(Iso15693_3SystemInfo)) == 0 &&
+           memcmp(&data->system_info, &other->system_info, sizeof(Iso15693_3SystemInfo)) == 0 && //-V1103
            simple_array_is_equal(data->block_data, other->block_data) &&
            simple_array_is_equal(data->block_security, other->block_security);
 }
