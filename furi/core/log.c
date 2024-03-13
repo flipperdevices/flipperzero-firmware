@@ -178,6 +178,8 @@ void furi_log_print_raw_format(FuriLogLevel level, const char* format, ...) {
 }
 
 void furi_log_set_level(FuriLogLevel level) {
+    furi_check(level <= FuriLogLevelTrace);
+
     if(level == FuriLogLevelDefault) {
         level = FURI_LOG_LEVEL_DEFAULT;
     }

@@ -91,7 +91,7 @@ MfClassicError mf_classic_poller_get_nt(
     MfClassicKeyType key_type,
     MfClassicNt* nt) {
     furi_check(instance);
-    furi_check(nt);
+
     return mf_classic_poller_get_nt_common(instance, block_num, key_type, nt, false);
 }
 

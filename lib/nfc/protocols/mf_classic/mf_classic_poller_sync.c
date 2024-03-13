@@ -226,7 +226,6 @@ MfClassicError mf_classic_poller_sync_collect_nt(
     MfClassicKeyType key_type,
     MfClassicNt* nt) {
     furi_check(nfc);
-    furi_check(nt);
 
     MfClassicPollerContext poller_context = {
         .cmd_type = MfClassicPollerCmdTypeCollectNt,

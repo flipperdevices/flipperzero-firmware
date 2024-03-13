@@ -14,13 +14,10 @@
 #pragma once
 
 #include <m-core.h>
+#include "common_defines.h"
 
 #ifdef __cplusplus
 extern "C" {
-#define FURI_NORETURN [[noreturn]]
-#else
-#include <stdnoreturn.h>
-#define FURI_NORETURN noreturn
 #endif
 
 // Flags instead of pointers will save ~4 bytes on furi_assert and furi_check calls.

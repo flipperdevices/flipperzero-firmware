@@ -50,7 +50,7 @@ static void crash_test_submenu_callback(void* context, uint32_t index) {
         furi_halt("Crash test: furi_halt");
         break;
     default:
-        furi_crash("Programming error");
+        furi_crash();
     }
 }
 

@@ -314,7 +314,7 @@ static LevelDuration subghz_hal_async_tx_test_yield(void* context) {
             furi_crash("Yield after reset");
         }
     } else {
-        furi_crash("Programming error");
+        furi_crash();
     }
 }
 

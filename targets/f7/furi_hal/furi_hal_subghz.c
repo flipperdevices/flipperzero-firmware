@@ -67,7 +67,7 @@ const GpioPin* furi_hal_subghz_get_data_gpio() {
 }
 
 void furi_hal_subghz_init() {
-    furi_assert(furi_hal_subghz.state == SubGhzStateInit);
+    furi_check(furi_hal_subghz.state == SubGhzStateInit);
     furi_hal_subghz.state = SubGhzStateBroken;
 
     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
@@ -136,7 +136,8 @@ void furi_hal_subghz_init() {
 }
 
 void furi_hal_subghz_sleep() {
-    furi_assert(furi_hal_subghz.state == SubGhzStateIdle);
+    furi_check(furi_hal_subghz.state == SubGhzStateIdle);
+
     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
 
     cc1101_switch_to_idle(&furi_hal_spi_bus_handle_subghz);
@@ -159,6 +160,8 @@ void furi_hal_subghz_dump_state() {
 }
 
 void furi_hal_subghz_load_custom_preset(const uint8_t* preset_data) {
+    furi_check(preset_data);
+
     //load config
     furi_hal_subghz_reset();
     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
@@ -189,6 +192,8 @@ void furi_hal_subghz_load_custom_preset(const uint8_t* preset_data) {
 }
 
 void furi_hal_subghz_load_registers(const uint8_t* data) {
+    furi_check(data);
+
     furi_hal_subghz_reset();
     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
     uint32_t i = 0;
@@ -200,12 +205,17 @@ void furi_hal_subghz_load_registers(const uint8_t* data) {
 }
 
 void furi_hal_subghz_load_patable(const uint8_t data[8]) {
+    furi_check(data);
+
     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
     cc1101_set_pa_table(&furi_hal_spi_bus_handle_subghz, data);
     furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
 }
 
 void furi_hal_subghz_write_packet(const uint8_t* data, uint8_t size) {
+    furi_check(data);
+    furi_check(size);
+
     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
     cc1101_flush_tx(&furi_hal_spi_bus_handle_subghz);
     cc1101_write_reg(&furi_hal_spi_bus_handle_subghz, CC1101_FIFO, size);
@@ -251,6 +261,9 @@ bool furi_hal_subghz_is_rx_data_crc_valid() {
 }
 
 void furi_hal_subghz_read_packet(uint8_t* data, uint8_t* size) {
+    furi_check(data);
+    furi_check(size);
+
     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
     cc1101_read_fifo(&furi_hal_spi_bus_handle_subghz, data, size);
     furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
@@ -445,7 +458,9 @@ static void furi_hal_subghz_capture_ISR(void* context) {
 }
 
 void furi_hal_subghz_start_async_rx(FuriHalSubGhzCaptureCallback callback, void* context) {
-    furi_assert(furi_hal_subghz.state == SubGhzStateIdle);
+    furi_check(furi_hal_subghz.state == SubGhzStateIdle);
+    furi_check(callback);
+
     furi_hal_subghz.state = SubGhzStateAsyncRx;
 
     furi_hal_subghz_capture_callback = callback;
@@ -512,7 +527,7 @@ void furi_hal_subghz_start_async_rx(FuriHalSubGhzCaptureCallback callback, void*
 }
 
 void furi_hal_subghz_stop_async_rx() {
-    furi_assert(furi_hal_subghz.state == SubGhzStateAsyncRx);
+    furi_check(furi_hal_subghz.state == SubGhzStateAsyncRx);
     furi_hal_subghz.state = SubGhzStateIdle;
 
     // Shutdown radio
@@ -610,7 +625,7 @@ static inline uint32_t furi_hal_subghz_async_tx_middleware_get_duration(
 }
 
 static void furi_hal_subghz_async_tx_refill(uint32_t* buffer, size_t samples) {
-    furi_assert(furi_hal_subghz.state == SubGhzStateAsyncTx);
+    furi_check(furi_hal_subghz.state == SubGhzStateAsyncTx);
 
     while(samples > 0) {
         volatile uint32_t duration = furi_hal_subghz_async_tx_middleware_get_duration(
@@ -650,7 +665,7 @@ static void furi_hal_subghz_async_tx_refill(uint32_t* buffer, size_t samples) {
 
 static void furi_hal_subghz_async_tx_dma_isr(void* context) {
     UNUSED(context);
-    furi_assert(furi_hal_subghz.state == SubGhzStateAsyncTx);
+    furi_check(furi_hal_subghz.state == SubGhzStateAsyncTx);
 
 #if SUBGHZ_DMA_CH1_CHANNEL == LL_DMA_CHANNEL_1
     if(LL_DMA_IsActiveFlag_HT1(SUBGHZ_DMA)) {
@@ -670,8 +685,8 @@ static void furi_hal_subghz_async_tx_dma_isr(void* context) {
 }
 
 bool furi_hal_subghz_start_async_tx(FuriHalSubGhzAsyncTxCallback callback, void* context) {
-    furi_assert(furi_hal_subghz.state == SubGhzStateIdle);
-    furi_assert(callback);
+    furi_check(furi_hal_subghz.state == SubGhzStateIdle);
+    furi_check(callback);
 
     //If transmission is prohibited by regional settings
     if(furi_hal_subghz.regulation != SubGhzRegulationTxRx) return false;
@@ -778,7 +793,7 @@ bool furi_hal_subghz_is_async_tx_complete() {
 }
 
 void furi_hal_subghz_stop_async_tx() {
-    furi_assert(furi_hal_subghz.state == SubGhzStateAsyncTx);
+    furi_check(furi_hal_subghz.state == SubGhzStateAsyncTx);
 
     // Shutdown radio
     furi_hal_subghz_idle();

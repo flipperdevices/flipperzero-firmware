@@ -5,16 +5,16 @@
 #include <queue.h>
 
 void furi_init() {
-    furi_assert(!furi_kernel_is_irq_or_masked());
-    furi_assert(xTaskGetSchedulerState() == taskSCHEDULER_NOT_STARTED);
+    furi_check(!furi_kernel_is_irq_or_masked());
+    furi_check(xTaskGetSchedulerState() == taskSCHEDULER_NOT_STARTED);
 
     furi_log_init();
     furi_record_init();
 }
 
 void furi_run() {
-    furi_assert(!furi_kernel_is_irq_or_masked());
-    furi_assert(xTaskGetSchedulerState() == taskSCHEDULER_NOT_STARTED);
+    furi_check(!furi_kernel_is_irq_or_masked());
+    furi_check(xTaskGetSchedulerState() == taskSCHEDULER_NOT_STARTED);
 
 #if(__ARM_ARCH_7A__ == 0U)
     /* Service Call interrupt might be configured before kernel start      */

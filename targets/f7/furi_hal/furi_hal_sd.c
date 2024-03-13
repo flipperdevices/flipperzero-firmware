@@ -972,6 +972,8 @@ FuriStatus furi_hal_sd_get_card_state(void) {
 }
 
 FuriStatus furi_hal_sd_read_blocks(uint32_t* buff, uint32_t sector, uint32_t count) {
+    furi_check(buff);
+
     FuriStatus status;
     bool single_sector = count == 1;
 
@@ -1009,6 +1011,8 @@ FuriStatus furi_hal_sd_read_blocks(uint32_t* buff, uint32_t sector, uint32_t cou
 }
 
 FuriStatus furi_hal_sd_write_blocks(const uint32_t* buff, uint32_t sector, uint32_t count) {
+    furi_check(buff);
+
     FuriStatus status;
 
     sd_cache_invalidate_range(sector, sector + count);
@@ -1037,6 +1041,8 @@ FuriStatus furi_hal_sd_write_blocks(const uint32_t* buff, uint32_t sector, uint3
 }
 
 FuriStatus furi_hal_sd_info(FuriHalSdInfo* info) {
+    furi_check(info);
+
     FuriStatus status;
     SD_CSD csd;
     SD_CID cid;

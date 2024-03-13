@@ -19,7 +19,6 @@ const SubGhzDevice* subghz_devices_get_by_name(const char* device_name) {
 }
 
 const char* subghz_devices_get_name(const SubGhzDevice* device) {
-    furi_check(device);
     const char* ret = NULL;
     if(device) {
         ret = device->name;
