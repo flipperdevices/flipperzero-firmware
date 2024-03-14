@@ -25,6 +25,7 @@ App(
     #  [JS Script: BadUSB_Win_Exfil-GSHD.js (By Gas Station Hot Dog)](https://github.com/User84User/User84PublicUser/blob/main/Windows_Exfil-GSHD.js)
     #  [JS: added GPIO module (By Sil333033)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/46a761605f0f7466551e8baa127dcc1b1a359a37)
     #  [Updates to GPIO & Storage Append (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/0cb1a859e7c67fc0ca0afa35320c2c823c164f4f)
+    #  [JS: Add dialog.pickFile() (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/13cd004bf67e2a447b91f808dc2bbe64e246cd12)
 )
 
 App(
@@ -33,6 +34,7 @@ App(
     entry_point="js_dialog_ep",
     requires=["js_app"],
     sources=["modules/js_dialog.c"],
+    fap_libs=["assets"],
 )
 
 App(

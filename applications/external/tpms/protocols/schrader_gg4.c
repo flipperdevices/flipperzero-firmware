@@ -82,7 +82,8 @@ const SubGhzProtocolDecoder tpms_protocol_schrader_gg4_decoder = {
     .feed = tpms_protocol_decoder_schrader_gg4_feed,
     .reset = tpms_protocol_decoder_schrader_gg4_reset,
 
-    .get_hash_data = tpms_protocol_decoder_schrader_gg4_get_hash_data,
+    .get_hash_data = NULL,
+    .get_hash_data_long = tpms_protocol_decoder_schrader_gg4_get_hash_data,
     .serialize = tpms_protocol_decoder_schrader_gg4_serialize,
     .deserialize = tpms_protocol_decoder_schrader_gg4_deserialize,
     .get_string = tpms_protocol_decoder_schrader_gg4_get_string,

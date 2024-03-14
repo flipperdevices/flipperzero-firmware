@@ -57,7 +57,8 @@ const SubGhzProtocolDecoder ws_protocol_acurite_986_decoder = {
     .feed = ws_protocol_decoder_acurite_986_feed,
     .reset = ws_protocol_decoder_acurite_986_reset,
 
-    .get_hash_data = ws_protocol_decoder_acurite_986_get_hash_data,
+    .get_hash_data = NULL,
+    .get_hash_data_long = ws_protocol_decoder_acurite_986_get_hash_data,
     .serialize = ws_protocol_decoder_acurite_986_serialize,
     .deserialize = ws_protocol_decoder_acurite_986_deserialize,
     .get_string = ws_protocol_decoder_acurite_986_get_string,

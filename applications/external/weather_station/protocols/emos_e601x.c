@@ -62,7 +62,8 @@ const SubGhzProtocolDecoder ws_protocol_emose601x_decoder = {
     .feed = ws_protocol_decoder_emose601x_feed,
     .reset = ws_protocol_decoder_emose601x_reset,
 
-    .get_hash_data = ws_protocol_decoder_emose601x_get_hash_data,
+    .get_hash_data = NULL,
+    .get_hash_data_long = ws_protocol_decoder_emose601x_get_hash_data,
     .serialize = ws_protocol_decoder_emose601x_serialize,
     .deserialize = ws_protocol_decoder_emose601x_deserialize,
     .get_string = ws_protocol_decoder_emose601x_get_string,

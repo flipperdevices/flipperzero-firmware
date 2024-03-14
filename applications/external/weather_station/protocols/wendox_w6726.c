@@ -65,7 +65,8 @@ const SubGhzProtocolDecoder ws_protocol_wendox_w6726_decoder = {
     .feed = ws_protocol_decoder_wendox_w6726_feed,
     .reset = ws_protocol_decoder_wendox_w6726_reset,
 
-    .get_hash_data = ws_protocol_decoder_wendox_w6726_get_hash_data,
+    .get_hash_data = NULL,
+    .get_hash_data_long = ws_protocol_decoder_wendox_w6726_get_hash_data,
     .serialize = ws_protocol_decoder_wendox_w6726_serialize,
     .deserialize = ws_protocol_decoder_wendox_w6726_deserialize,
     .get_string = ws_protocol_decoder_wendox_w6726_get_string,
