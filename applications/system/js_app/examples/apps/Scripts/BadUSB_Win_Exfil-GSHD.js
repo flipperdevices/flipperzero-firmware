@@ -1,3 +1,5 @@
+// Original: [JS Script: BadUSB_Win_Exfil-GSHD.js (By Gas Station Hot Dog)](https://github.com/User84User/User84PublicUser/blob/main/Windows_Exfil-GSHD.js)
+// Updated BadUSB Win Exfil JS Script (By Gas Station Hot Dog & b0r0xZ & mistura.) (Comments added along with more commands)
 //MassStorage Name
 let image = "/ext/apps_assets/mass_storage/test.img";
 //MassStorage Size

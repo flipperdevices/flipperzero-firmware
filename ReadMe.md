@@ -29,8 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0314-1523-0.99.2-18e367c](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-03-14 17:23 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-03-14 17:23 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-03-14 17:56 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-03-14 17:56 EST`
 - Updated: [J305 Geiger Counter v1.2 (By nmrr)](https://github.com/nmrr/flipperzero-geigercounter)
 - Updated: [ESP32 Camera Suite v1.7 (By CodyTolene)](https://github.com/CodyTolene/Flipper-Zero-Camera-Suite)
 - Updated: [JS Runner v1.0 (By nminaylov & DrZlo13)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/3286) [JS: added GPIO module (By Sil333033)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/46a761605f0f7466551e8baa127dcc1b1a359a37) [Updates to GPIO & Storage Append (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/0cb1a859e7c67fc0ca0afa35320c2c823c164f4f)
@@ -47,6 +47,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [MALVEKE GAME BOY all apps to version 2.1 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external) `Req: Malveke` (Version Increment With No Further Changes)
 - Updated: [Restaurant Pager Trigger v1.4 (By leedave)](https://github.com/leedave/flipper-zero-meal-pager)
 - Updated: [Authenticator/TOTP v5.13.0 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
+- JS Script: [BadUSB_Win_Exfil-GSHD.js Updated (By Gas Station Hot Dog & b0r0xZ & mistura.)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/48db90e2dd54162c3667f4a9ae74cf2921a3c159)
 
 <a name="release">
 
