@@ -8,7 +8,6 @@ from SCons.Script import GetBuildFailures
 def bf_to_str(bf):
     """Convert an element of GetBuildFailures() to a string
     in a useful way."""
-
     if bf is None:  # unknown targets product None in list
         return "(unknown tgt)"
     elif isinstance(bf, SCons.Errors.StopError):
@@ -21,7 +20,7 @@ def bf_to_str(bf):
 
 
 def display_build_status():
-    """Display the build status.  Called by atexit.
+    """Display the build status. Called by atexit.
     Here you could do all kinds of complicated things."""
     bf = GetBuildFailures()
     if bf:
