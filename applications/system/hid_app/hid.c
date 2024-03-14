@@ -30,7 +30,8 @@ bool hid_back_event_callback(void* context) {
     furi_assert(context);
     Hid* app = context;
     FURI_LOG_D("HID", "Back event");
-    scene_manager_next_scene(app->scene_manager, HidSceneExitConfirm);
+    scene_manager_search_and_switch_to_previous_scene(app->scene_manager, HidSceneMain);
+    view_dispatcher_switch_to_view(app->view_dispatcher, HidViewSubmenu);
     return true;
 }
 
