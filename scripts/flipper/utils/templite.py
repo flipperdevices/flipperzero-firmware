@@ -96,34 +96,35 @@ class TempliteCompiler:
         # Process template source
         while self.cursor < len(self.source):
             # Process plain text till first token occurance
-            if state == self.State.TEXT:
-                if self.source[self.cursor :].startswith("{%"):
-                    state = self.State.CONTROL
-                    self.cursor += 1
-                elif self.source[self.cursor :].startswith("{{"):
-                    state = self.State.VARIABLE
-                    self.cursor += 1
-                else:
-                    self.block += self.source[self.cursor]
-                # Commit self.block if token was found
-                if state != self.State.TEXT:
-                    self.processText()
-            elif state == self.State.CONTROL:
-                if self.source[self.cursor :].startswith("%}"):
-                    self.cursor += 1
-                    state = self.State.TEXT
-                    self.processControl()
-                else:
-                    self.block += self.source[self.cursor]
-            elif state == self.State.VARIABLE:
-                if self.source[self.cursor :].startswith("}}"):
-                    self.cursor += 1
-                    state = self.State.TEXT
-                    self.processVariable()
-                else:
-                    self.block += self.source[self.cursor]
-            else:
-                raise Exception("Unknown State")
+            match state:
+                case self.State.TEXT:
+                    if self.source[self.cursor :].startswith("{%"):
+                        state = self.State.CONTROL
+                        self.cursor += 1
+                    elif self.source[self.cursor :].startswith("{{"):
+                        state = self.State.VARIABLE
+                        self.cursor += 1
+                    else:
+                        self.block += self.source[self.cursor]
+                    # Commit self.block if token was found
+                    if state != self.State.TEXT:
+                        self.processText()
+                case self.State.CONTROL:
+                    if self.source[self.cursor :].startswith("%}"):
+                        self.cursor += 1
+                        state = self.State.TEXT
+                        self.processControl()
+                    else:
+                        self.block += self.source[self.cursor]
+                case self.State.VARIABLE:
+                    if self.source[self.cursor :].startswith("}}"):
+                        self.cursor += 1
+                        state = self.State.TEXT
+                        self.processVariable()
+                    else:
+                        self.block += self.source[self.cursor]
+                case _:
+                    raise Exception("Unknown State")
 
             self.cursor += 1
 

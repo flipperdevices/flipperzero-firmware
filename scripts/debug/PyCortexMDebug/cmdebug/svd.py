@@ -301,10 +301,11 @@ class SVDPeripheral:
                     if r.tag in ["cluster", "register"]
                 ]
                 for r in registers:
-                    if r.tag == "cluster":
-                        add_cluster(self, r)
-                    elif r.tag == "register":
-                        add_register(self, r)
+                    match r.tag:
+                        case "cluster":
+                            add_cluster(self, r)
+                        case "register":
+                            add_register(self, r)
 
     def refactor_parent(self, parent):
         self.parent_base_address = parent.base_address

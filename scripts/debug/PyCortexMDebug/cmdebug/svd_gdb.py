@@ -85,18 +85,19 @@ class LoadSVD(gdb.Command):
     def invoke(args, from_tty):
         args = gdb.string_to_argv(args)
         argc = len(args)
-        if argc == 1:
-            gdb.write("Loading SVD file {}...\n".format(args[0]))
-            f = args[0]
-        elif argc == 2:
-            gdb.write("Loading SVD file {}/{}...\n".format(args[0], args[1]))
-            f = pkg_resources.resource_filename(
-                "cmsis_svd", "data/{}/{}".format(args[0], args[1])
-            )
-        else:
-            raise gdb.GdbError(
-                "Usage: svd_load <vendor> <device.svd> or svd_load <path/to/filename.svd>\n"
-            )
+        match argc:
+            case 1:
+                gdb.write("Loading SVD file {}...\n".format(args[0]))
+                f = args[0]
+            case 2:
+                gdb.write("Loading SVD file {}/{}...\n".format(args[0], args[1]))
+                f = pkg_resources.resource_filename(
+                    "cmsis_svd", "data/{}/{}".format(args[0], args[1])
+                )
+            case _:
+                raise gdb.GdbError(
+                    "Usage: svd_load <vendor> <device.svd> or svd_load <path/to/filename.svd>\n"
+                )
         try:
             SVD(SVDFile(f))
         except Exception as e:
@@ -468,12 +469,13 @@ class SVD(gdb.Command):
         )
 
         # override it if asked to
-        if form == "x" or form == "a":
-            radix = 16
-        elif form == "o":
-            radix = 8
-        elif form == "b" or form == "t":
-            radix = 2
+        match form:
+            case "x" | "a":
+                radix = 16
+            case "o":
+                radix = 8
+            case "b" | "t":
+                radix = 2
 
         # format the output
         if radix == 16:

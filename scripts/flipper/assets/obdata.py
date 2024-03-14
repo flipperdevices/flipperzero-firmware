@@ -91,12 +91,13 @@ class OptionByte:
 
         @classmethod
         def from_str(cls, value):
-            if value == "r":
-                return cls.READ
-            elif value == "rw":
-                return cls.READ_WRITE
-            else:
-                raise OBException(f"Unknown OB check mode '{value}'")
+            match value:
+                case "r":
+                    return cls.READ
+                case "rw":
+                    return cls.READ_WRITE
+                case _:
+                    raise OBException(f"Unknown OB check mode '{value}'")
 
     def __init__(self, obstr):
         parts = obstr.split(":")

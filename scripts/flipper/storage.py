@@ -168,18 +168,19 @@ class FlipperStorage:
                 continue
 
             type, info = line.split(" ", 1)
-            if type == "[D]":
-                # Print directory name
-                print((path + "/" + info).replace("//", "/"))
-                # And recursively go inside
-                self.list_tree(path + "/" + info, level + 1)
-            elif type == "[F]":
-                name, size = info.rsplit(" ", 1)
-                # Print file name and size
-                print((path + "/" + name).replace("//", "/") + ", size " + size)
-            else:
-                # Something wrong, pass
-                pass
+            match type:
+                case "[D]":
+                    # Print directory name
+                    print((path + "/" + info).replace("//", "/"))
+                    # And recursively go inside
+                    self.list_tree(path + "/" + info, level + 1)
+                case "[F]":
+                    name, size = info.rsplit(" ", 1)
+                    # Print file name and size
+                    print((path + "/" + name).replace("//", "/") + ", size " + size)
+                case _:
+                    # Something wrong, pass
+                    pass
 
     def walk(self, path: str = "/"):
         dirs = []
@@ -210,18 +211,18 @@ class FlipperStorage:
                 continue
 
             type, info = line.split(" ", 1)
-            if type == "[D]":
-                # Print directory name
-                dirs.append(info)
-                walk_dirs.append((path + "/" + info).replace("//", "/"))
-
-            elif type == "[F]":
-                name, size = info.rsplit(" ", 1)
-                # Print file name and size
-                nondirs.append(name)
-            else:
-                # Something wrong, pass
-                pass
+            match type:
+                case "[D]":
+                    # Print directory name
+                    dirs.append(info)
+                    walk_dirs.append((path + "/" + info).replace("//", "/"))
+                case "[F]":
+                    name, size = info.rsplit(" ", 1)
+                    # Print file name and size
+                    nondirs.append(name)
+                case _:
+                    # Something wrong, pass
+                    pass
 
         # topdown walk, yield before recursing
         yield path, dirs, nondirs

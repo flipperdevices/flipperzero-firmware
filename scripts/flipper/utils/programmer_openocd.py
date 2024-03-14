@@ -45,12 +45,13 @@ class OpenOCDProgrammer(Programmer):
 
     def reset(self, mode: Programmer.RunMode = Programmer.RunMode.Run) -> bool:
         stm32 = STM32WB55(self.openocd)
-        if mode == Programmer.RunMode.Run:
-            stm32.reset(stm32.RunMode.Run)
-        elif mode == Programmer.RunMode.Stop:
-            stm32.reset(stm32.RunMode.Init)
-        else:
-            raise Exception("Unknown mode")
+        match mode:
+            case Programmer.RunMode.Run:
+                stm32.reset(stm32.RunMode.Run)
+            case Programmer.RunMode.Stop:
+                stm32.reset(stm32.RunMode.Init)
+            case _:
+                raise Exception("Unknown mode")
 
         return True
 

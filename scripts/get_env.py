@@ -42,21 +42,22 @@ def get_commit_json(event):
 def get_details(event, args):
     data = {}
     current_time = datetime.datetime.utcnow().date()
-    if args.type == "pull":
-        commit_json = get_commit_json(event)
-        data["commit_comment"] = shlex.quote(commit_json["commit"]["message"])
-        data["commit_hash"] = commit_json["sha"]
-        ref = event["pull_request"]["head"]["ref"]
-        data["pull_id"] = event["pull_request"]["number"]
-        data["pull_name"] = shlex.quote(event["pull_request"]["title"])
-    elif args.type == "tag":
-        data["commit_comment"] = shlex.quote(event["head_commit"]["message"])
-        data["commit_hash"] = event["head_commit"]["id"]
-        ref = event["ref"]
-    else:
-        data["commit_comment"] = shlex.quote(event["commits"][-1]["message"])
-        data["commit_hash"] = event["commits"][-1]["id"]
-        ref = event["ref"]
+    match args.type:
+        case "pull":
+            commit_json = get_commit_json(event)
+            data["commit_comment"] = shlex.quote(commit_json["commit"]["message"])
+            data["commit_hash"] = commit_json["sha"]
+            ref = event["pull_request"]["head"]["ref"]
+            data["pull_id"] = event["pull_request"]["number"]
+            data["pull_name"] = shlex.quote(event["pull_request"]["title"])
+        case "tag":
+            data["commit_comment"] = shlex.quote(event["head_commit"]["message"])
+            data["commit_hash"] = event["head_commit"]["id"]
+            ref = event["ref"]
+        case _:
+            data["commit_comment"] = shlex.quote(event["commits"][-1]["message"])
+            data["commit_hash"] = event["commits"][-1]["id"]
+            ref = event["ref"]
     data["commit_sha"] = data["commit_hash"][:8]
     data["branch_name"] = re.sub("refs/\w+/", "", ref)
     data["suffix"] = (

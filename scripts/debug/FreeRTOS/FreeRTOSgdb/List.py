@@ -58,13 +58,14 @@ class ListInspector:
         if self._list != None:
             CastType = None
             if CastTypeStr != None:
-                if type(CastTypeStr) == str:
-                    try:
-                        CastType = gdb.lookup_type(CastTypeStr).pointer()
-                    except:
-                        print("Failed to find type: %s" % CastTypeStr)
-                elif type(CastTypeStr) == gdb.Type:
-                    CastType = CastTypeStr.pointer()
+                match type(CastTypeStr):
+                    case str:
+                        try:
+                            CastType = gdb.lookup_type(CastTypeStr).pointer()
+                        except:
+                            print("Failed to find type: %s" % CastTypeStr)
+                    case gdb.Type:
+                        CastType = CastTypeStr.pointer()
 
             resp = []
             numElems = self._list["uxNumberOfItems"]

@@ -118,10 +118,11 @@ class SdkCache:
         if self._load_version_only:
             raise Exception("Only SDK version was loaded, cannot save")
 
-        if self.version_action == VersionBump.MINOR:
-            self.version = SdkVersion(self.version.major, self.version.minor + 1)
-        elif self.version_action == VersionBump.MAJOR:
-            self.version = SdkVersion(self.version.major + 1, 0)
+        match self.version_action:
+            case VersionBump.MINOR:
+                self.version = SdkVersion(self.version.major, self.version.minor + 1)
+            case VersionBump.MAJOR:
+                self.version = SdkVersion(self.version.major + 1, 0)
 
         if self._have_pending_entries():
             self.new_entries.add(self.version)
@@ -173,35 +174,37 @@ class SdkCache:
         entry_name = entry_dict["name"]
 
         entry = None
-        if entry_class == SdkVersion.csv_type:
-            self.version = SdkVersion.from_str(entry_name)
-            if entry_status == ApiEntryState.VERSION_PENDING.value:
-                self.loaded_dirty_version = True
-        elif entry_class == ApiHeader.csv_type:
-            self.sdk.headers.add(entry := ApiHeader(entry_name))
-        elif entry_class == ApiEntryFunction.csv_type:
-            self.sdk.functions.add(
-                entry := ApiEntryFunction(
-                    entry_name,
-                    entry_dict["type"],
-                    entry_dict["params"],
+        match entry_class:
+            case SdkVersion.csv_type:
+                self.version = SdkVersion.from_str(entry_name)
+                if entry_status == ApiEntryState.VERSION_PENDING.value:
+                    self.loaded_dirty_version = True
+            case ApiHeader.csv_type:
+                self.sdk.headers.add(entry := ApiHeader(entry_name))
+            case ApiEntryFunction.csv_type:
+                self.sdk.functions.add(
+                    entry := ApiEntryFunction(
+                        entry_name,
+                        entry_dict["type"],
+                        entry_dict["params"],
+                    )
                 )
-            )
-        elif entry_class == ApiEntryVariable.csv_type:
-            self.sdk.variables.add(
-                entry := ApiEntryVariable(entry_name, entry_dict["type"])
-            )
-        else:
-            print(entry_dict)
-            raise Exception("Unknown entry type: %s" % entry_class)
+            case ApiEntryVariable.csv_type:
+                self.sdk.variables.add(
+                    entry := ApiEntryVariable(entry_name, entry_dict["type"])
+                )
+            case _:
+                print(entry_dict)
+                raise Exception("Unknown entry type: %s" % entry_class)
 
         if entry is None:
             return
 
-        if entry_status == ApiEntryState.DISABLED.value:
-            self.disabled_entries.add(entry)
-        elif entry_status == ApiEntryState.PENDING.value:
-            self.new_entries.add(entry)
+        match entry_status:
+            case ApiEntryState.DISABLED.value:
+                self.disabled_entries.add(entry)
+            case ApiEntryState.PENDING.value:
+                self.new_entries.add(entry)
 
     def load_cache(self) -> None:
         if not os.path.exists(self.cache_file_name):
