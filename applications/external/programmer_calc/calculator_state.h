@@ -4,8 +4,8 @@
 #include <furi.h>
 #include <stdbool.h>
 
-#define MAX_TEXT_LENGTH_INPUT 19
-#define MAX_TEXT_LENGTH_RESULT 37
+#define MAX_TEXT_LENGTH_INPUT 17
+#define MAX_TEXT_LENGTH_RESULT 36
 
 typedef enum {
     ModeNone,

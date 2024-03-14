@@ -176,7 +176,7 @@ bool hexToBin(const char* hexString, char* hexToBinResult, size_t resultSize) {
     return true;
 }
 
-bool hexToDec(const char* hexString, int* hexToDecResult) {
+bool hexToDec(const char* hexString, unsigned long long* hexToDecResult) {
     if(hexString == NULL || hexToDecResult == NULL) {
         return false;
     }
@@ -184,7 +184,7 @@ bool hexToDec(const char* hexString, int* hexToDecResult) {
     *hexToDecResult = 0;
     while(*hexString) {
         char digit = *hexString;
-        int value;
+        unsigned int value;
 
         if(digit >= '0' && digit <= '9') {
             value = digit - '0';
@@ -196,8 +196,7 @@ bool hexToDec(const char* hexString, int* hexToDecResult) {
             return false;
         }
 
-        if(*hexToDecResult > INT_MAX / 16 ||
-           (*hexToDecResult == INT_MAX / 16 && value > INT_MAX % 16)) {
+        if(*hexToDecResult > ULLONG_MAX / 16) {
             return false; // check overflow
         }
 
@@ -286,6 +285,7 @@ void calculate(Calculator* calculator_state) {
 
     int num = 0;
     char result = '\0';
+    unsigned long long hexToDecResult = 0;
 
     switch(calculator_state->mode) {
     case ModeDecToBin:
@@ -296,7 +296,7 @@ void calculate(Calculator* calculator_state) {
             snprintf(
                 calculator_state->decToBinResult,
                 sizeof(calculator_state->decToBinResult),
-                "INVALID D");
+                "Error    ---------Input:   2^35 - 1");
         }
         break;
 
@@ -308,7 +308,7 @@ void calculate(Calculator* calculator_state) {
             snprintf(
                 calculator_state->decToHexResult,
                 sizeof(calculator_state->decToHexResult),
-                "INVALID D");
+                "Error    ---------Input:   2^64 - 1");
         }
         break;
 
@@ -320,7 +320,7 @@ void calculate(Calculator* calculator_state) {
             snprintf(
                 calculator_state->decToCharResult,
                 sizeof(calculator_state->decToCharResult),
-                "INVALID D");
+                "Error    ---------Input:   0 - 255");
         }
         break;
 
@@ -332,22 +332,22 @@ void calculate(Calculator* calculator_state) {
             snprintf(
                 calculator_state->hexToBinResult,
                 sizeof(calculator_state->hexToBinResult),
-                "INVALID H");
+                "Error    ---------");
         }
         break;
 
     case ModeHexToDec:
-        if(hexToDec(calculator_state->text, &num)) {
+        if(hexToDec(calculator_state->text, &hexToDecResult)) {
             snprintf(
                 calculator_state->hexToDecResult,
                 sizeof(calculator_state->hexToDecResult),
-                "%d",
-                num);
+                "%llu",
+                hexToDecResult);
         } else {
             snprintf(
                 calculator_state->hexToDecResult,
                 sizeof(calculator_state->hexToDecResult),
-                "INVALID H");
+                "Error    ---------");
         }
         break;
 
@@ -362,7 +362,7 @@ void calculate(Calculator* calculator_state) {
             snprintf(
                 calculator_state->binToDecResult,
                 sizeof(calculator_state->binToDecResult),
-                "INVALID B");
+                "Error    ---------Input:   2^64 - 1");
         }
         break;
 
@@ -374,7 +374,7 @@ void calculate(Calculator* calculator_state) {
             snprintf(
                 calculator_state->binToHexResult,
                 sizeof(calculator_state->binToHexResult),
-                "INVALID B");
+                "Error    ---------");
         }
         break;
 

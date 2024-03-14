@@ -12,7 +12,8 @@ static M100ResponseType setup_and_send_rx(M100Module* module, uint8_t* cmd, size
     // send cmd
     uhf_uart_send_wait(uart, cmd, cmd_length);
     // wait for response by polling
-    while(!uhf_is_buffer_closed(buffer) && !uhf_uart_tick(uart)) {}
+    while(!uhf_is_buffer_closed(buffer) && !uhf_uart_tick(uart)) {
+    }
     // reset tick
     uhf_uart_tick_reset(uart);
     // Validation Checks
