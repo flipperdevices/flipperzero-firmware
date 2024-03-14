@@ -45,6 +45,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - BadKB: [Improve Settings Loading Logic (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/c43ff85159f1e5f162caf48b58e697c5ef4958b6)
 - JS: [Add dialog.pickFile() (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/13cd004bf67e2a447b91f808dc2bbe64e246cd12)
 - Updated: [MALVEKE GAME BOY all apps to version 2.1 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external) `Req: Malveke` (Version Increment With No Further Changes)
+- Updated: [Restaurant Pager Trigger v1.4 (By leedave)](https://github.com/leedave/flipper-zero-meal-pager)
 
 <a name="release">
 
@@ -494,7 +495,7 @@ $ ./fbt dolphin_ext
 - [RCWL-516 Motion Sensor (By ahmedafe1)](https://github.com/ahmedafe1/rcwl_0516-Flipperzero)
 - [Remote Maker (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/487)
 - [Resistance Calculator v1.2 (By instantiator)](https://github.com/instantiator/flipper-zero-experimental-apps)
-- [Restaurant Pager Trigger v1.3 (By leedave)](https://github.com/leedave/flipper-zero-meal-pager)
+- [Restaurant Pager Trigger v1.4 (By leedave)](https://github.com/leedave/flipper-zero-meal-pager)
 - [RFID Beacon (By nmrr)](https://github.com/nmrr/flipperzero-rfidbeacon)
 - [RFID Detector v1.2 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/2795)
 - [RFID Fuzzer v1.3 (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/507) [(Original By Ganapati)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/245)
