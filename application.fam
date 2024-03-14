@@ -8,7 +8,7 @@ App(
         "storage",
         "gui",
     ],
-    stack_size=8 * 1024,
+    stack_size=10 * 1024,
     order=30,
     fap_icon="icons/uhf_10px.png",
     fap_category="RFID",
