@@ -3,8 +3,8 @@
 
 void hid_scene_main_on_enter(void* context) {
     Hid* app = context;
-
-    view_dispatcher_switch_to_view(app->view_dispatcher, app->view_id);
+    view_dispatcher_switch_to_view(
+        app->view_dispatcher, scene_manager_get_scene_state(app->scene_manager, HidSceneMain));
 }
 
 bool hid_scene_main_on_event(void* context, SceneManagerEvent event) {
@@ -18,5 +18,5 @@ bool hid_scene_main_on_event(void* context, SceneManagerEvent event) {
 
 void hid_scene_main_on_exit(void* context) {
     Hid* app = context;
-    app->view_id = HidViewSubmenu;
+    UNUSED(app);
 }

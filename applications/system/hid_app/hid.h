@@ -39,7 +39,7 @@ struct Hid {
     NotificationApp* notifications;
     ViewDispatcher* view_dispatcher;
     SceneManager* scene_manager;
-    Submenu* device_type_submenu;
+    Submenu* submenu;
     DialogEx* dialog;
     Popup* popup;
     HidKeynote* hid_keynote;
@@ -49,8 +49,8 @@ struct Hid {
     HidMouseClicker* hid_mouse_clicker;
     HidMouseJiggler* hid_mouse_jiggler;
     HidTikTok* hid_tiktok;
-    uint32_t view_id;
 };
+
 void bt_hid_remove_pairing(Hid* app);
 
 void hid_hal_keyboard_press(Hid* instance, uint16_t event);
