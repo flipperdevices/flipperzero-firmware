@@ -7,8 +7,6 @@
 
 static const char* uhf_file_header = "Flipper UHF RFID device";
 static const uint32_t uhf_file_version = 1;
-// static const uint8_t bank_data_start = 20;
-// static const uint8_t bank_data_length = 16;
 
 UHFDevice* uhf_device_alloc() {
     UHFDevice* uhf_device = malloc(sizeof(UHFDevice));
@@ -178,15 +176,6 @@ static bool uhf_device_load_data(UHFDevice* dev, FuriString* path, bool show_dia
     return parsed;
 }
 
-// void picopass_device_clear(UHFDevice* dev) {
-//     furi_assert(dev);
-
-//     picopass_device_data_clear(&dev->dev_data);
-//     memset(&dev->dev_data, 0, sizeof(dev->dev_data));
-//     dev->format = PicopassDeviceSaveFormatHF;
-//     furi_string_reset(dev->load_path);
-// }
-
 void uhf_device_free(UHFDevice* uhf_dev) {
     furi_assert(uhf_dev);
     furi_record_close(RECORD_STORAGE);
@@ -224,16 +213,6 @@ bool uhf_file_select(UHFDevice* dev) {
     return res;
 }
 
-// void uhf_device_data_clear(UHFDevice* dev_data) {
-//     for(size_t i = 0; i < PICOPASS_MAX_APP_LIMIT; i++) {
-//         memset(dev_data->AA1[i].data, 0, sizeof(dev_data->AA1[i].data));
-//     }
-//     dev_data->pacs.legacy = false;
-//     dev_data->pacs.se_enabled = false;
-//     dev_data->pacs.elite_kdf = false;
-//     dev_data->pacs.pin_length = 0;
-// }
-
 bool uhf_device_delete(UHFDevice* dev, bool use_load_path) {
     furi_assert(dev);
 
@@ -266,83 +245,3 @@ void uhf_device_set_loading_callback(UHFDevice* dev, UHFLoadingCallback callback
     dev->loading_cb = callback;
     dev->loading_cb_ctx = context;
 }
-
-// ReturnCode picopass_device_decrypt(uint8_t* enc_data, uint8_t* dec_data) {
-//     uint8_t key[32] = {0};
-//     memcpy(key, picopass_iclass_decryptionkey, sizeof(picopass_iclass_decryptionkey));
-//     mbedtls_des3_context ctx;
-//     mbedtls_des3_init(&ctx);
-//     mbedtls_des3_set2key_dec(&ctx, key);
-//     mbedtls_des3_crypt_ecb(&ctx, enc_data, dec_data);
-//     mbedtls_des3_free(&ctx);
-//     return ERR_NONE;
-// }
-
-// ReturnCode picopass_device_parse_credential(PicopassBlock* AA1, PicopassPacs* pacs) {
-//     ReturnCode err;
-
-//     pacs->biometrics = AA1[6].data[4];
-//     pacs->pin_length = AA1[6].data[6] & 0x0F;
-//     pacs->encryption = AA1[6].data[7];
-
-//     if(pacs->encryption == PicopassDeviceEncryption3DES) {
-//         FURI_LOG_D(TAG, "3DES Encrypted");
-//         err = picopass_device_decrypt(AA1[7].data, pacs->credential);
-//         if(err != ERR_NONE) {
-//             FURI_LOG_E(TAG, "decrypt error %d", err);
-//             return err;
-//         }
-
-//         err = picopass_device_decrypt(AA1[8].data, pacs->pin0);
-//         if(err != ERR_NONE) {
-//             FURI_LOG_E(TAG, "decrypt error %d", err);
-//             return err;
-//         }
-
-//         err = picopass_device_decrypt(AA1[9].data, pacs->pin1);
-//         if(err != ERR_NONE) {
-//             FURI_LOG_E(TAG, "decrypt error %d", err);
-//             return err;
-//         }
-//     } else if(pacs->encryption == PicopassDeviceEncryptionNone) {
-//         FURI_LOG_D(TAG, "No Encryption");
-//         memcpy(pacs->credential, AA1[7].data, PICOPASS_BLOCK_LEN);
-//         memcpy(pacs->pin0, AA1[8].data, PICOPASS_BLOCK_LEN);
-//         memcpy(pacs->pin1, AA1[9].data, PICOPASS_BLOCK_LEN);
-//     } else if(pacs->encryption == PicopassDeviceEncryptionDES) {
-//         FURI_LOG_D(TAG, "DES Encrypted");
-//     } else {
-//         FURI_LOG_D(TAG, "Unknown encryption");
-//     }
-
-//     pacs->sio = (AA1[10].data[0] == 0x30); // rough check
-
-//     return ERR_NONE;
-// }
-
-// ReturnCode picopass_device_parse_wiegand(uint8_t* data, PicopassWiegandRecord* record) {
-//     uint32_t* halves = (uint32_t*)data;
-//     if(halves[0] == 0) {
-//         uint8_t leading0s = __builtin_clz(REVERSE_BYTES_U32(halves[1]));
-//         record->bitLength = 31 - leading0s;
-//     } else {
-//         uint8_t leading0s = __builtin_clz(REVERSE_BYTES_U32(halves[0]));
-//         record->bitLength = 63 - leading0s;
-//     }
-//     FURI_LOG_D(TAG, "bitLength: %d", record->bitLength);
-
-//     if(record->bitLength == 26) {
-//         uint8_t* v4 = data + 4;
-//         uint32_t bot = v4[3] | (v4[2] << 8) | (v4[1] << 16) | (v4[0] << 24);
-
-//         record->CardNumber = (bot >> 1) & 0xFFFF;
-//         record->FacilityCode = (bot >> 17) & 0xFF;
-//         FURI_LOG_D(TAG, "FC: %u CN: %u", record->FacilityCode, record->CardNumber);
-//         record->valid = true;
-//     } else {
-//         record->CardNumber = 0;
-//         record->FacilityCode = 0;
-//         record->valid = false;
-//     }
-//     return ERR_NONE;
-// }
