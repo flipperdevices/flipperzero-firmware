@@ -60,7 +60,7 @@ static void meal_pager_retekess_td174_generate_pager(
     customConcat(fullId, pagerId);
     char* manchester = encManchester(fullId, 0);
     char* rawSignal = genRawDataTd174(300, 900, manchester);
-    for(u_int32_t i = 1; app->repeats >= i; i++) {
+    for(uint32_t i = 1; app->repeats >= i; i++) {
         flipper_format_write_string_cstr(ff, "RAW_Data", rawSignal);
     }
     free(manchester);
@@ -82,7 +82,7 @@ static void
     uint32ToBinaray(station, stationId, 13);
     reverse(stationId);
     meal_pager_transmit_model_set_station(app->meal_pager_transmit, app->current_station);
-    for(u_int32_t i = app->current_pager; i <= app->last_pager; i++) {
+    for(uint32_t i = app->current_pager; i <= app->last_pager; i++) {
         meal_pager_retekess_td174_generate_pager(app, stationId, i, ff);
         if(app->stop_transmit) {
             break;
@@ -108,7 +108,7 @@ bool meal_pager_retekess_td174_generate_all(void* context) {
         return success;
     }
 
-    for(u_int32_t i = app->current_station; i <= app->last_station; i++) {
+    for(uint32_t i = app->current_station; i <= app->last_station; i++) {
         meal_pager_retekess_td174_generate_station(app, i, ff);
         //furi_thread_flags_wait(0, FuriFlagWaitAny, 100);
         if(app->stop_transmit) {
