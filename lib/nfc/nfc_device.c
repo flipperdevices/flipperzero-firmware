@@ -76,6 +76,7 @@ const char* nfc_device_get_name(const NfcDevice* instance, NfcDeviceNameType nam
 
 const uint8_t* nfc_device_get_uid(const NfcDevice* instance, size_t* uid_len) {
     furi_check(instance);
+    furi_check(uid_len);
     furi_check(instance->protocol < NfcProtocolNum);
 
     return nfc_devices[instance->protocol]->get_uid(instance->protocol_data, uid_len);
@@ -83,6 +84,7 @@ const uint8_t* nfc_device_get_uid(const NfcDevice* instance, size_t* uid_len) {
 
 bool nfc_device_set_uid(NfcDevice* instance, const uint8_t* uid, size_t uid_len) {
     furi_check(instance);
+    furi_check(uid);
     furi_check(instance->protocol < NfcProtocolNum);
 
     return nfc_devices[instance->protocol]->set_uid(instance->protocol_data, uid, uid_len);
@@ -93,6 +95,7 @@ void nfc_device_set_data(
     NfcProtocol protocol,
     const NfcDeviceData* protocol_data) {
     furi_check(instance);
+    furi_check(protocol_data);
     furi_check(protocol < NfcProtocolNum);
 
     nfc_device_clear(instance);

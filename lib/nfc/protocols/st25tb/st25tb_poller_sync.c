@@ -109,6 +109,7 @@ static St25tbError st25tb_poller_cmd_execute(Nfc* nfc, St25tbPollerSyncContext* 
 }
 
 St25tbError st25tb_poller_sync_read_block(Nfc* nfc, uint8_t block_num, uint32_t* block) {
+    furi_check(nfc);
     furi_check(block);
     St25tbPollerSyncContext poller_context = {
         .cmd_type = St25tbPollerCmdTypeReadBlock,
@@ -141,6 +142,7 @@ St25tbError st25tb_poller_sync_write_block(Nfc* nfc, uint8_t block_num, uint32_t
 }
 
 St25tbError st25tb_poller_sync_detect_type(Nfc* nfc, St25tbType* type) {
+    furi_check(nfc);
     furi_check(type);
     St25tbPollerSyncContext poller_context = {
         .cmd_type = St25tbPollerCmdTypeDetectType,

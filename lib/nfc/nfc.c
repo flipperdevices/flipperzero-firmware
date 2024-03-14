@@ -653,8 +653,6 @@ NfcError nfc_felica_listener_set_sensf_res_data(
     const uint8_t* pmm,
     const uint8_t pmm_len) {
     furi_check(instance);
-    furi_check(idm);
-    furi_check(pmm);
 
     FuriHalNfcError error =
         furi_hal_nfc_felica_listener_set_sensf_res_data(idm, idm_len, pmm, pmm_len);

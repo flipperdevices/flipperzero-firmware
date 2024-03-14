@@ -211,6 +211,7 @@ bool iso15693_3_load(Iso15693_3Data* data, FlipperFormat* ff, uint32_t version) 
 
 bool iso15693_3_save(const Iso15693_3Data* data, FlipperFormat* ff) {
     furi_check(data);
+    furi_check(ff);
 
     bool saved = false;
 

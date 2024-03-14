@@ -103,12 +103,15 @@ void st25tb_copy(St25tbData* data, const St25tbData* other) {
 }
 
 bool st25tb_verify(St25tbData* data, const FuriString* device_type) {
+    furi_check(device_type);
     UNUSED(data);
+
     return furi_string_equal_str(device_type, ST25TB_PROTOCOL_NAME);
 }
 
 bool st25tb_load(St25tbData* data, FlipperFormat* ff, uint32_t version) {
     furi_check(data);
+    furi_check(ff);
 
     bool parsed = false;
 
@@ -152,6 +155,7 @@ bool st25tb_load(St25tbData* data, FlipperFormat* ff, uint32_t version) {
 
 bool st25tb_save(const St25tbData* data, FlipperFormat* ff) {
     furi_check(data);
+    furi_check(ff);
 
     FuriString* temp_str = furi_string_alloc();
     bool saved = false;
@@ -192,6 +196,8 @@ bool st25tb_is_equal(const St25tbData* data, const St25tbData* other) {
 }
 
 uint8_t st25tb_get_block_count(St25tbType type) {
+    furi_check(type < St25tbTypeNum);
+
     return st25tb_features[type].blocks_total;
 }
 
@@ -218,6 +224,7 @@ const uint8_t* st25tb_get_uid(const St25tbData* data, size_t* uid_len) {
 
 bool st25tb_set_uid(St25tbData* data, const uint8_t* uid, size_t uid_len) {
     furi_check(data);
+    furi_check(uid);
 
     const bool uid_valid = uid_len == ST25TB_UID_SIZE;
 

@@ -228,6 +228,7 @@ NfcScanner* nfc_scanner_alloc(Nfc* nfc) {
 
 void nfc_scanner_free(NfcScanner* instance) {
     furi_check(instance);
+    furi_check(instance->state == NfcScannerStateIdle);
 
     free(instance);
 }
@@ -235,7 +236,7 @@ void nfc_scanner_free(NfcScanner* instance) {
 void nfc_scanner_start(NfcScanner* instance, NfcScannerCallback callback, void* context) {
     furi_check(instance);
     furi_check(callback);
-    furi_check(instance->session_state == NfcScannerSessionStateIdle);
+    furi_check(instance->state == NfcScannerStateIdle);
     furi_check(instance->scan_worker == NULL);
 
     instance->callback = callback;

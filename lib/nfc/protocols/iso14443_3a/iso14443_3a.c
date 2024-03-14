@@ -127,6 +127,7 @@ const uint8_t* iso14443_3a_get_uid(const Iso14443_3aData* data, size_t* uid_len)
 
 bool iso14443_3a_set_uid(Iso14443_3aData* data, const uint8_t* uid, size_t uid_len) {
     furi_check(data);
+    furi_check(uid);
 
     const bool uid_valid = uid_len == ISO14443_3A_UID_4_BYTES ||
                            uid_len == ISO14443_3A_UID_7_BYTES ||

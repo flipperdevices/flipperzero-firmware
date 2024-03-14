@@ -217,8 +217,7 @@ FuriHalNfcError furi_hal_nfc_iso14443a_listener_set_col_res_data(
     uint8_t sak) {
     furi_check(uid);
     furi_check(atqa);
-    UNUSED(uid_len);
-    UNUSED(sak);
+
     FuriHalNfcError error = FuriHalNfcErrorNone;
 
     FuriHalSpiBusHandle* handle = &furi_hal_spi_bus_handle_nfc;

@@ -21,6 +21,8 @@ St25tbError st25tb_poller_send_frame(
     BitBuffer* rx_buffer,
     uint32_t fwt) {
     furi_check(instance);
+    furi_check(tx_buffer);
+    furi_check(rx_buffer);
 
     const size_t tx_bytes = bit_buffer_get_size_bytes(tx_buffer);
     furi_assert(
@@ -171,6 +173,7 @@ St25tbError st25tb_poller_read(St25tbPoller* instance, St25tbData* data) {
 St25tbError st25tb_poller_get_uid(St25tbPoller* instance, uint8_t* uid) {
     furi_check(instance);
     furi_check(instance->nfc);
+    furi_check(uid);
 
     St25tbError ret;
 

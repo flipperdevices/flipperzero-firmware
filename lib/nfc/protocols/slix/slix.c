@@ -161,6 +161,7 @@ static bool slix_load_passwords(SlixPassword* passwords, SlixType slix_type, Fli
 
 bool slix_load(SlixData* data, FlipperFormat* ff, uint32_t version) {
     furi_check(data);
+    furi_check(ff);
 
     bool loaded = false;
 
@@ -239,6 +240,7 @@ static bool
 
 bool slix_save(const SlixData* data, FlipperFormat* ff) {
     furi_check(data);
+    furi_check(ff);
 
     bool saved = false;
 

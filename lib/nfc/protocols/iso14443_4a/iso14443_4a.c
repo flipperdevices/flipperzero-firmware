@@ -147,6 +147,7 @@ bool iso14443_4a_load(Iso14443_4aData* data, FlipperFormat* ff, uint32_t version
 
 bool iso14443_4a_save(const Iso14443_4aData* data, FlipperFormat* ff) {
     furi_check(data);
+    furi_check(ff);
 
     bool saved = false;
 

@@ -92,7 +92,9 @@ void mf_classic_copy(MfClassicData* data, const MfClassicData* other) {
 }
 
 bool mf_classic_verify(MfClassicData* data, const FuriString* device_type) {
+    furi_check(device_type);
     UNUSED(data);
+
     return furi_string_equal_str(device_type, "Mifare Classic");
 }
 
@@ -444,6 +446,7 @@ uint8_t mf_classic_get_sector_by_block(uint8_t block) {
 
 bool mf_classic_block_to_value(const MfClassicBlock* block, int32_t* value, uint8_t* addr) {
     furi_check(block);
+    furi_check(value);
 
     uint32_t v = *(uint32_t*)&block->data[0];
     uint32_t v_inv = *(uint32_t*)&block->data[sizeof(uint32_t)];
@@ -452,9 +455,7 @@ bool mf_classic_block_to_value(const MfClassicBlock* block, int32_t* value, uint
     bool val_checks =
         ((v == v1) && (v == ~v_inv) && (block->data[12] == (~block->data[13] & 0xFF)) &&
          (block->data[14] == (~block->data[15] & 0xFF)) && (block->data[12] == block->data[14]));
-    if(value) {
-        *value = (int32_t)v;
-    }
+    *value = (int32_t)v;
     if(addr) {
         *addr = block->data[12];
     }

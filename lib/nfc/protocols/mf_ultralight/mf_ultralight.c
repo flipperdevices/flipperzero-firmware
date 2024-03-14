@@ -223,6 +223,7 @@ static const char*
 
 bool mf_ultralight_verify(MfUltralightData* data, const FuriString* device_type) {
     furi_check(data);
+    furi_check(device_type);
 
     bool verified = false;
 
@@ -340,6 +341,7 @@ bool mf_ultralight_load(MfUltralightData* data, FlipperFormat* ff, uint32_t vers
 
 bool mf_ultralight_save(const MfUltralightData* data, FlipperFormat* ff) {
     furi_check(data);
+    furi_check(ff);
 
     FuriString* temp_str = furi_string_alloc();
     bool saved = false;
