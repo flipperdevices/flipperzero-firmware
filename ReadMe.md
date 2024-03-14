@@ -37,6 +37,9 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Naming/organization of JS scripts assets (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/78faa7cdda8b596887b519e2b49e4d99779b320e)
 - Added: [Yappy Invaders (By dagnazty)](https://github.com/dagnazty/Yappy_Invaders)
 - Updated: [Digimon F-Com v1.1 (By TylerWilley)](https://github.com/TylerWilley/flipper-f-com) Code Assets Updated
+- Updated: [UHF RFID WIP v1.1 (By frux-c)](https://github.com/frux-c/uhf_rfid) `Req: M100 or QM100`
+- Updated: [Programmer Calculator v0.9.2 (By armixz)](https://github.com/armixz/Flipper-Zero-Programmer-Calculator)
+- Updated: [Pokemon Trading v1.8 (By EstebanFuentealba & kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
 
 <a name="release">
 
@@ -476,9 +479,8 @@ $ ./fbt dolphin_ext
 - [Pokemon Trading v1.8 (By EstebanFuentealba & kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
 - [Pomodoro Timer v1.2 (By sbrin)](https://github.com/sbrin/flipperzero_pomodoro)
 - [Pomodoro 2 v1.3 (By Th3Un1q3)](https://github.com/Th3Un1q3/flipp_pomodoro)
-- [Programmer Calculator v0.9 (By armixz)](https://github.com/armixz/Flipper-Zero-Programmer-Calculator)
+- [Programmer Calculator v0.9.2 (By armixz)](https://github.com/armixz/Flipper-Zero-Programmer-Calculator)
 - [Protocol Visualizer v1.1 (By antirez)](https://github.com/antirez/protoview)
-- [UHF RFID WIP v1.1 (By frux-c)](https://github.com/frux-c/uhf_rfid) `Req: M100 or QM100`
 - [QR Code v2.0 (By bmatcuk)](https://github.com/bmatcuk/flipperzero-qrcode)
 - [Quac! v0.2 (By rdefeo)](https://github.com/rdefeo/quac)
 - [Radar Scanner v2.0 (By MatthewKuKanich)](https://github.com/MatthewKuKanich/flipper-radar) `Req: RCWL-0516`
@@ -519,9 +521,10 @@ $ ./fbt dolphin_ext
 - [TPMS Reader (By wosk)](https://github.com/wosk/flipperzero-tpms)
 - [TuLlave v1.0 (By zqu4rtz)](https://github.com/zqu4rtz/FlipperApp-TuLlave)
 - [Tuning Fork v1.1 (By besya)](https://github.com/besya/flipperzero-tuning-fork)
+- [u-blox GPS v0.4 (By liamhays)](https://github.com/liamhays/ublox)
 - [UART Echo (By DrZlo13)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/831)
 - [UART Terminal v1.4 (By cool4uma)](https://github.com/cool4uma/UART_Terminal)
-- [u-blox GPS v0.4 (By liamhays)](https://github.com/liamhays/ublox)
+- [UHF RFID WIP v1.1 (By frux-c)](https://github.com/frux-c/uhf_rfid) `Req: M100 or QM100`
 - [USB Consumer Control (By WithSecureLabs)](https://github.com/WithSecureLabs/usb-consumer-control)
 - [USB HID Autofire (By pbek)](https://github.com/pbek/usb_hid_autofire)
 - [USB Mass Storage v1.3 (By nminaylov)](https://github.com/flipperdevices/flipperzero-good-faps/tree/nm/usb_mass_storage_app/mass_storage) [Based on OFW#1060 (By kevinwallace)](https://github.com/flipperdevices/flipperzero-firmware/pull/1060)
