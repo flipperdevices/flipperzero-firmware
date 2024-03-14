@@ -29,6 +29,7 @@
 #define SAVE_LOG_VALUES 2
 
 #define RX_BUF_SIZE 255
+#define TX_BUF_SIZE 255
 #define UART_CH FuriHalSerialIdUsart
 #define TEXT_BOX_LEN 4096
 #define FURI_HAL_SERIAL_USART_OVERSAMPLING 0x00000000U
@@ -45,7 +46,7 @@
 //////////////////////////   Defining Structs  //////////////////////////
 typedef enum { Main_Scene, Settings_Scene, ConsoleOutput_Scene, Scene_Num } Scenes;
 typedef enum { Submenu_View, VarList_View, TextBox_View } Views;
-typedef enum { Settings_Option, Sniffer_Option, Read_LOG_Option } Main_options;
+typedef enum { Settings_Option, Sniffer_Option, Send_MSG_Option, Read_LOG_Option } Main_options;
 
 typedef struct {
     uint8_t baudrate;
@@ -63,6 +64,7 @@ typedef struct {
     FuriStreamBuffer* rxStream;
     FuriHalSerialHandle* serial_handle;
     uint8_t rxBuff[RX_BUF_SIZE + 1];
+    uint8_t txBuff[TX_BUF_SIZE + 1];
 } Uart;
 typedef struct {
     bool slave;
@@ -421,9 +423,9 @@ void handle_rx_data_cb(uint8_t* buf, size_t len, void* context) {
     furi_assert(context);
     App* app = context;
     buf[len] = '\0';
-    // /*
     FuriString* data = furi_string_alloc();
     furi_string_reset(data);
+    // /*
     furi_string_cat_printf(data, "\n------%s-------", app->modbus->slave ? "-SLAVE" : "MASTER");
     if((CRCH | CRCL << 8) == getCRC(buf, len - 2)) {
         ModbusParser(buf, len, app, data);
@@ -492,11 +494,24 @@ void timerDone(void* context) {
     App* app = context;
     app->modbus->slave = false;
 }
+void ModbusSender(uint8_t* buf, App* app) {
+    serial_init(app->uart, UART_CH);
+    // 02 | 0F | 00 00 | 00 04 | 01 | 03 | 3E 82
+    Uart* uart = app->uart;
+    uint8_t msg[] = {0x02, 0x0F, 0x00, 0x00, 0x00, 0x04, 0x01, 0x03, 0x3E, 0X82};
+    size_t len = sizeof(msg);
+    for(int i = 0; i < 10; i++) buf[i] = msg[i];
+    furi_hal_gpio_write(&gpio_ext_pc0, true);
+    furi_hal_gpio_write(&gpio_ext_pc1, true);
+    furi_hal_serial_tx(uart->serial_handle, buf, len);
+    furi_hal_serial_tx_wait_complete(uart->serial_handle);
+    furi_hal_gpio_write(&gpio_ext_pc0, false);
+    furi_hal_gpio_write(&gpio_ext_pc1, false);
+    serial_deinit(app->uart);
+}
 static int32_t uart_worker(void* context) {
     App* app = context;
     while(1) {
-        furi_hal_gpio_write(&gpio_ext_pc0, false);
-        furi_hal_gpio_write(&gpio_ext_pc1, false);
         uint32_t events =
             furi_thread_flags_wait(WORKER_ALL_RX_EVENTS, FuriFlagWaitAny, FuriWaitForever);
         furi_check((events & FuriFlagError) == 0);
@@ -531,6 +546,9 @@ void mainOptionsCB(void* context, uint32_t index) {
         scene_manager_set_scene_state(app->sceneManager, ConsoleOutput_Scene, Sniffer_Option);
         scene_manager_next_scene(app->sceneManager, ConsoleOutput_Scene);
         break;
+    case Send_MSG_Option:
+        ModbusSender(app->uart->txBuff, app);
+        break;
     case Read_LOG_Option:
         scene_manager_set_scene_state(app->sceneManager, ConsoleOutput_Scene, Read_LOG_Option);
         scene_manager_next_scene(app->sceneManager, ConsoleOutput_Scene);
@@ -545,6 +563,7 @@ void Main_Scene_OnEnter(void* context) {
     submenu_set_header(app->subMenu, "Main");
     submenu_add_item(app->subMenu, "Settings", Settings_Option, mainOptionsCB, app);
     submenu_add_item(app->subMenu, "Sniffer", Sniffer_Option, mainOptionsCB, app);
+    submenu_add_item(app->subMenu, "Send MSG", Send_MSG_Option, mainOptionsCB, app);
     submenu_add_item(app->subMenu, "Read LOG", Read_LOG_Option, mainOptionsCB, app);
     view_dispatcher_switch_to_view(app->viewDispatcher, Submenu_View);
 }
@@ -659,8 +678,8 @@ void CFG_Scene_OnExit(void* context) {
 //////////////////////////   Sniffer Scene  //////////////////////////
 void Sniffer_Scene_OnEnter(void* context) {
     App* app = context;
+    serial_init(app->uart, UART_CH);
     if(scene_manager_get_scene_state(app->sceneManager, ConsoleOutput_Scene) == Sniffer_Option) {
-        text_box_reset(app->textBox);
         text_box_set_font(app->textBox, TextBoxFontText);
         text_box_set_focus(app->textBox, TextBoxFocusEnd);
         furi_string_cat_printf(
@@ -685,7 +704,6 @@ bool Sniffer_Scene_OnEvent(void* context, SceneManagerEvent event) {
     bool consumed = false;
     if(event.type == SceneManagerEventTypeCustom) {
         consumed = true;
-        FURI_LOG_W("HOLA", "%d", furi_string_size(app->text));
         text_box_set_text(app->textBox, furi_string_get_cstr(app->text));
     }
     //  else if(event.type == SceneManagerEventTypeTick) {
@@ -697,6 +715,7 @@ void Sniffer_Scene_OnExit(void* context) {
     App* app = context;
     text_box_reset(app->textBox);
     furi_string_reset(app->text);
+    serial_deinit(app->uart);
 }
 
 //////////////////////////   Scene Handlers  //////////////////////////
@@ -750,8 +769,8 @@ Uart* Uart_Alloc(void* context) {
     uart->rxStream = furi_stream_buffer_alloc(RX_BUF_SIZE, 1);
     uart->rxThread = furi_thread_alloc_ex("RxThread", 1024, uart_worker, app);
 
+    //serial_init(uart, UART_CH);
     furi_thread_start(uart->rxThread);
-    serial_init(uart, UART_CH);
 
     return uart;
 }
@@ -804,7 +823,7 @@ void uartFree(void* context) {
         storage_file_close(app->LOGfile);
     }
 
-    serial_deinit(app->uart);
+    //serial_deinit(app->uart);
     free(app->uart->cfg);
     free(app->uart);
     free(app->modbus);

@@ -1,10 +1,10 @@
 App(
-    appid="test1",
-    name="Test 1",
-    apptype=FlipperAppType.EXTERNAL,
-    entry_point="test_app",
-    requires=["gui"],
-    stack_size=2 * 1024,
-    fap_icon="test.png",
-    fap_category="Misc",
+    appid="test1",  ## ID unico de la app
+    name="Test 1",  ## Nombre a mostrar para el usuario final
+    apptype=FlipperAppType.EXTERNAL,  ## Tipo de app (aplicacion.fap)
+    entry_point="test_app",  ## Funcion C a ejecutar cuando se inicia la app
+    requires=["gui"],  ## Lista de apps necesarias
+    stack_size= 25 * 1024,  ## Tamaño en bytes de la memoria a reservar para la app
+    fap_icon="test.png",  ## Icono a usar para la aplicacion
+    fap_category="Misc",  ## Subcategoria para guardar la app en su carpeta
 )
