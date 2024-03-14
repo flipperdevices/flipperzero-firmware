@@ -84,8 +84,7 @@ class LoadSVD(gdb.Command):
     @staticmethod
     def invoke(args, from_tty):
         args = gdb.string_to_argv(args)
-        argc = len(args)
-        match argc:
+        match len(args):
             case 1:
                 gdb.write("Loading SVD file {}...\n".format(args[0]))
                 f = args[0]
