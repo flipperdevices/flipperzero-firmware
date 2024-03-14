@@ -81,20 +81,20 @@ void handle_short_press(Calculator* calculator_state, ViewPort* view_port, Input
 }
 
 void handle_long_press(Calculator* calculator_state, ViewPort* view_port, InputEvent* event) {
+    // Handling a long press event
     switch(event->key) {
-    case InputKeyOk:
-        if(calculator_state->position.x == 0 && calculator_state->position.y == 4) {
-            if(calculator_state->textLength < MAX_TEXT_LENGTH_INPUT) {
-                calculator_state->text[calculator_state->textLength++] = ')';
-                calculator_state->text[calculator_state->textLength] = '\0';
-            }
-        }
-        break;
+    case InputKeyOk: {
+        const char* inputMessage = "  github  armixz";
+        strncpy(calculator_state->text, inputMessage, MAX_TEXT_LENGTH_INPUT - 1);
+        calculator_state->text[MAX_TEXT_LENGTH_INPUT - 1] = '\0';
+        calculator_state->textLength = strlen(calculator_state->text);
+        calculator_state->newInputStarted = true;
+        view_port_update(view_port);
+    } break;
+
     default:
         break;
     }
-
-    view_port_update(view_port);
 }
 
 void handle_key_press(Calculator* calculator_state, char key) {
