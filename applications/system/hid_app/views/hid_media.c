@@ -55,7 +55,7 @@ static void hid_media_draw_callback(Canvas* canvas, void* context) {
     canvas_set_font(canvas, FontSecondary);
 
     // Keypad circles
-    canvas_draw_icon(canvas, 76, 8, &I_Circles_47x47);
+    canvas_draw_icon(canvas, 75, 8, &I_Dpad_49x46);
 
     // Up
     if(model->up_pressed) {
