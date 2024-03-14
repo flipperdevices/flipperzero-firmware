@@ -50,7 +50,8 @@ const SubGhzProtocolDecoder subghz_protocol_kinggates_stylo_4k_decoder = {
     .feed = subghz_protocol_decoder_kinggates_stylo_4k_feed,
     .reset = subghz_protocol_decoder_kinggates_stylo_4k_reset,
 
-    .get_hash_data = subghz_protocol_decoder_kinggates_stylo_4k_get_hash_data,
+    .get_hash_data = NULL,
+    .get_hash_data_long = subghz_protocol_decoder_kinggates_stylo_4k_get_hash_data,
     .serialize = subghz_protocol_decoder_kinggates_stylo_4k_serialize,
     .deserialize = subghz_protocol_decoder_kinggates_stylo_4k_deserialize,
     .get_string = subghz_protocol_decoder_kinggates_stylo_4k_get_string,

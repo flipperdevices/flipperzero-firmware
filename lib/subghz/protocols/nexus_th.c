@@ -340,7 +340,8 @@ const SubGhzProtocolDecoder ws_protocol_nexus_th_decoder = {
     .feed = ws_protocol_decoder_nexus_th_feed,
     .reset = ws_protocol_decoder_nexus_th_reset,
 
-    .get_hash_data = ws_protocol_decoder_nexus_th_get_hash_data,
+    .get_hash_data = NULL,
+    .get_hash_data_long = ws_protocol_decoder_nexus_th_get_hash_data,
     .serialize = ws_protocol_decoder_nexus_th_serialize,
     .deserialize = ws_protocol_decoder_nexus_th_deserialize,
     .get_string = ws_protocol_decoder_nexus_th_get_string,

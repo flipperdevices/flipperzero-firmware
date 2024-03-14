@@ -44,7 +44,8 @@ const SubGhzProtocolDecoder subghz_protocol_dooya_decoder = {
     .feed = subghz_protocol_decoder_dooya_feed,
     .reset = subghz_protocol_decoder_dooya_reset,
 
-    .get_hash_data = subghz_protocol_decoder_dooya_get_hash_data,
+    .get_hash_data = NULL,
+    .get_hash_data_long = subghz_protocol_decoder_dooya_get_hash_data,
     .serialize = subghz_protocol_decoder_dooya_serialize,
     .deserialize = subghz_protocol_decoder_dooya_deserialize,
     .get_string = subghz_protocol_decoder_dooya_get_string,

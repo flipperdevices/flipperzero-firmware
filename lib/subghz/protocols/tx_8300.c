@@ -71,7 +71,8 @@ const SubGhzProtocolDecoder ws_protocol_tx_8300_decoder = {
     .feed = ws_protocol_decoder_tx_8300_feed,
     .reset = ws_protocol_decoder_tx_8300_reset,
 
-    .get_hash_data = ws_protocol_decoder_tx_8300_get_hash_data,
+    .get_hash_data = NULL,
+    .get_hash_data_long = ws_protocol_decoder_tx_8300_get_hash_data,
     .serialize = ws_protocol_decoder_tx_8300_serialize,
     .deserialize = ws_protocol_decoder_tx_8300_deserialize,
     .get_string = ws_protocol_decoder_tx_8300_get_string,

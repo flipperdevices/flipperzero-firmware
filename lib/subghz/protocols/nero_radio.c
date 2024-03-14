@@ -45,7 +45,8 @@ const SubGhzProtocolDecoder subghz_protocol_nero_radio_decoder = {
     .feed = subghz_protocol_decoder_nero_radio_feed,
     .reset = subghz_protocol_decoder_nero_radio_reset,
 
-    .get_hash_data = subghz_protocol_decoder_nero_radio_get_hash_data,
+    .get_hash_data = NULL,
+    .get_hash_data_long = subghz_protocol_decoder_nero_radio_get_hash_data,
     .serialize = subghz_protocol_decoder_nero_radio_serialize,
     .deserialize = subghz_protocol_decoder_nero_radio_deserialize,
     .get_string = subghz_protocol_decoder_nero_radio_get_string,

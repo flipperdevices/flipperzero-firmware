@@ -54,7 +54,8 @@ const SubGhzProtocolDecoder subghz_protocol_alutech_at_4n_decoder = {
     .feed = subghz_protocol_decoder_alutech_at_4n_feed,
     .reset = subghz_protocol_decoder_alutech_at_4n_reset,
 
-    .get_hash_data = subghz_protocol_decoder_alutech_at_4n_get_hash_data,
+    .get_hash_data = NULL,
+    .get_hash_data_long = subghz_protocol_decoder_alutech_at_4n_get_hash_data,
     .serialize = subghz_protocol_decoder_alutech_at_4n_serialize,
     .deserialize = subghz_protocol_decoder_alutech_at_4n_deserialize,
     .get_string = subghz_protocol_decoder_alutech_at_4n_get_string,

@@ -52,12 +52,14 @@ SubGhzProtocolStatus subghz_protocol_decoder_base_deserialize(
 
 uint8_t subghz_protocol_decoder_base_get_hash_data(SubGhzProtocolDecoderBase* decoder_base) {
     uint8_t hash = 0;
+    if(!decoder_base->protocol || !decoder_base->protocol->decoder) return hash;
 
-    if(decoder_base->protocol && decoder_base->protocol->decoder &&
-       decoder_base->protocol->decoder->get_hash_data) {
-        uint32_t full = decoder_base->protocol->decoder->get_hash_data(decoder_base);
-        uint8_t* p = (uint8_t*)&full;
-        for(size_t i = 0; i < sizeof(full); i++) {
+    if(decoder_base->protocol->decoder->get_hash_data) {
+        hash = decoder_base->protocol->decoder->get_hash_data(decoder_base);
+    } else if(decoder_base->protocol->decoder->get_hash_data_long) {
+        uint32_t long_hash = decoder_base->protocol->decoder->get_hash_data_long(decoder_base);
+        uint8_t* p = (uint8_t*)&long_hash;
+        for(size_t i = 0; i < sizeof(long_hash); i++) {
             hash ^= p[i];
         }
     }
@@ -67,10 +69,12 @@ uint8_t subghz_protocol_decoder_base_get_hash_data(SubGhzProtocolDecoderBase* de
 
 uint32_t subghz_protocol_decoder_base_get_hash_data_long(SubGhzProtocolDecoderBase* decoder_base) {
     uint32_t hash = 0;
+    if(!decoder_base->protocol || !decoder_base->protocol->decoder) return hash;
 
-    if(decoder_base->protocol && decoder_base->protocol->decoder &&
-       decoder_base->protocol->decoder->get_hash_data) {
+    if(decoder_base->protocol->decoder->get_hash_data) {
         hash = decoder_base->protocol->decoder->get_hash_data(decoder_base);
+    } else if(decoder_base->protocol->decoder->get_hash_data_long) {
+        hash = decoder_base->protocol->decoder->get_hash_data_long(decoder_base);
     }
 
     return hash;

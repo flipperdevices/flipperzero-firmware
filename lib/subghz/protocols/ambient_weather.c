@@ -65,7 +65,8 @@ const SubGhzProtocolDecoder ws_protocol_ambient_weather_decoder = {
     .feed = ws_protocol_decoder_ambient_weather_feed,
     .reset = ws_protocol_decoder_ambient_weather_reset,
 
-    .get_hash_data = ws_protocol_decoder_ambient_weather_get_hash_data,
+    .get_hash_data = NULL,
+    .get_hash_data_long = ws_protocol_decoder_ambient_weather_get_hash_data,
     .serialize = ws_protocol_decoder_ambient_weather_serialize,
     .deserialize = ws_protocol_decoder_ambient_weather_deserialize,
     .get_string = ws_protocol_decoder_ambient_weather_get_string,
