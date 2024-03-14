@@ -10,6 +10,7 @@
 #include <gui/elements.h>
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
+#include <storage/storage.h>
 
 typedef struct ButtonEvent {
     int8_t button;
@@ -42,11 +43,18 @@ struct BtMouse {
     ButtonEvent queue[BTN_EVT_QUEUE_SIZE];
 };
 
+static const BleProfileHidParams ble_hid_params = {
+    .device_name_prefix = "AirMouse",
+    .mac_xor = 0x0001,
+};
+
 #define BT_MOUSE_FLAG_INPUT_EVENT (1UL << 0)
 #define BT_MOUSE_FLAG_KILL_THREAD (1UL << 1)
 #define BT_MOUSE_FLAG_ALL (BT_MOUSE_FLAG_INPUT_EVENT | BT_MOUSE_FLAG_KILL_THREAD)
 
 #define MOUSE_SCROLL 2
+
+#define HID_BT_KEYS_STORAGE_NAME ".bt_hid.keys"
 
 static void bt_mouse_notify_event(BtMouse* bt_mouse) {
     FuriThreadId thread_id = furi_thread_get_id(bt_mouse->thread);
@@ -252,13 +260,35 @@ void bt_mouse_enter_callback(void* context) {
     BtMouse* bt_mouse = context;
 
     bt_mouse->bt = furi_record_open(RECORD_BT);
+    bt_disconnect(bt_mouse->bt);
+
+    furi_delay_ms(200);
+    bt_keys_storage_set_storage_path(bt_mouse->bt, APP_DATA_PATH(HID_BT_KEYS_STORAGE_NAME));
+
     bt_mouse->notifications = furi_record_open(RECORD_NOTIFICATION);
     bt_set_status_changed_callback(
         bt_mouse->bt, bt_mouse_connection_status_changed_callback, bt_mouse);
-    bt_mouse->hid = bt_profile_start(bt_mouse->bt, ble_profile_hid, NULL);
+    bt_mouse->hid = bt_profile_start(bt_mouse->bt, ble_profile_hid, (void*)&ble_hid_params);
     furi_assert(bt_mouse->hid);
     furi_hal_bt_start_advertising();
     bt_mouse_thread_start(bt_mouse);
+}
+
+void bt_mouse_remove_pairing(void) {
+    Bt* bt = furi_record_open(RECORD_BT);
+    bt_disconnect(bt);
+
+    furi_delay_ms(200);
+    furi_hal_bt_stop_advertising();
+
+    bt_keys_storage_set_storage_path(bt, APP_DATA_PATH(HID_BT_KEYS_STORAGE_NAME));
+    bt_forget_bonded_devices(bt);
+
+    furi_delay_ms(200);
+    bt_keys_storage_set_default_path(bt);
+
+    furi_check(bt_profile_restore_default(bt));
+    furi_record_close(RECORD_BT);
 }
 
 bool bt_mouse_custom_callback(uint32_t event, void* context) {
@@ -280,6 +310,12 @@ void bt_mouse_exit_callback(void* context) {
     bt_mouse_thread_stop(bt_mouse);
     tracking_end();
     notification_internal_message(bt_mouse->notifications, &sequence_reset_blue);
+
+    bt_set_status_changed_callback(bt_mouse->bt, NULL, NULL);
+    bt_disconnect(bt_mouse->bt);
+
+    furi_delay_ms(200);
+    bt_keys_storage_set_default_path(bt_mouse->bt);
 
     furi_hal_bt_stop_advertising();
     bt_profile_restore_default(bt_mouse->bt);

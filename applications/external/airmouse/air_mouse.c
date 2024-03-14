@@ -10,6 +10,7 @@ enum AirMouseSubmenuIndex {
     AirMouseSubmenuIndexBtMouse,
     AirMouseSubmenuIndexUsbMouse,
     AirMouseSubmenuIndexCalibration,
+    AirMouseSubmenuIndexRemovePairing,
 };
 
 void air_mouse_submenu_callback(void* context, uint32_t index) {
@@ -24,6 +25,8 @@ void air_mouse_submenu_callback(void* context, uint32_t index) {
     } else if(index == AirMouseSubmenuIndexCalibration) {
         app->view_id = AirMouseViewCalibration;
         view_dispatcher_switch_to_view(app->view_dispatcher, AirMouseViewCalibration);
+    } else if(index == AirMouseSubmenuIndexRemovePairing) {
+        bt_mouse_remove_pairing();
     }
 }
 
@@ -76,6 +79,12 @@ AirMouse* air_mouse_app_alloc() {
         app->submenu,
         "Calibration",
         AirMouseSubmenuIndexCalibration,
+        air_mouse_submenu_callback,
+        app);
+    submenu_add_item(
+        app->submenu,
+        "Clear Bluetooth Pairings",
+        AirMouseSubmenuIndexRemovePairing,
         air_mouse_submenu_callback,
         app);
     view_set_previous_callback(submenu_get_view(app->submenu), air_mouse_exit);
