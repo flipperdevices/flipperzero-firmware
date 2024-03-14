@@ -70,84 +70,83 @@ void draw_highlighted_cell(Canvas* canvas, short x, short y, short width, short 
     canvas_draw_box(canvas, x, y, width, height);
 }
 
-void displayInput(Canvas* canvas, const char* input, int x, int y) {
-    const int maxLength = 18; // Maximum length for splitting into lines
-    const int lineLength = 9; // Length of each line
-    const int lineSpacing = 8; // Reduced line spacing
+void displayInput(Canvas* canvas, const char* input, int x, int startY) {
+    const int maxWidth = 56; // Maximum width for each line
+    const int lineSpacing = 8; // Vertical spacing between lines
+    const int symbolWidth = 3; // ">" symbol takes 3px
+    int currentWidth = symbolWidth; // Start with ">" symbol
+    int initialX = x; // Save the initial x position
 
-    int length = strlen(input);
+    // Buffer to store a line of input, including extra space for ">" and null terminator
+    char lineBuffer[MAX_TEXT_LENGTH_INPUT + 2];
+    int bufferIndex = 0;
 
-    if(length > lineLength) {
-        char line1[lineLength + 1];
-        strncpy(line1, input, lineLength);
-        line1[lineLength] = '\0';
+    // Add ">" at the beginning of the first line
+    lineBuffer[bufferIndex++] = '>';
+    lineBuffer[bufferIndex] = '\0';
 
-        const char* line2 = input + lineLength;
+    int y = startY; // Current y position, starting from startY
 
-        canvas_draw_str(canvas, x, y, line1);
-        if(length > maxLength) {
-            char trimmedLine2[maxLength - lineLength + 1];
-            strncpy(trimmedLine2, line2, maxLength - lineLength);
-            trimmedLine2[maxLength - lineLength] = '\0';
-            canvas_draw_str(canvas, x, y + lineSpacing, trimmedLine2);
-        } else {
-            canvas_draw_str(canvas, x, y + lineSpacing, line2); // lineSpacing used here
+    for(int i = 0; input[i] != '\0'; ++i) {
+        // Calculate width of the current character ('1' takes 3 px, others take 6 px)
+        int charWidth = (input[i] == '1') ? 3 : 6;
+
+        if(currentWidth + charWidth > maxWidth) {
+            // If adding this character exceeds the maxWidth, draw the current line
+            canvas_draw_str(canvas, x, y, lineBuffer);
+
+            // Reset for the next line
+            y += lineSpacing;
+            currentWidth = symbolWidth; // Reset current width to include ">" width for alignment
+            bufferIndex = 0; // Reset buffer index for the new line
+            x = initialX + 4;
+
+            // lineBuffer[bufferIndex++] = '>'; // Add ">" at the beginning of the new line
+            // lineBuffer[bufferIndex] = '\0'; // Ensure the buffer is null-terminated
         }
-    } else {
-        canvas_draw_str(canvas, x, y, input); // Single line if lineLength characters or less
+
+        // Add current character to the buffer and update the current width
+        lineBuffer[bufferIndex++] = input[i];
+        lineBuffer[bufferIndex] = '\0'; // Ensure the buffer is null-terminated
+        currentWidth += charWidth;
     }
+
+    canvas_draw_str(canvas, x, y, lineBuffer);
 }
 
 void displayResult(Canvas* canvas, const char* result, int x, int y) {
-    const int lineLength = 9; // Length of each line
-    const int lineSpacing = 9; // Reduced line spacing
+    const int maxWidth = 56; // Maximum width for each line
+    const int lineSpacing = 9; // Vertical spacing between lines
+    char lines[4][MAX_TEXT_LENGTH_RESULT + 1] = {
+        {0}}; // Ensure enough space for the result + NULL terminator
+    int lineIndex = 0;
+    int lineWidth = 0;
 
-    int length = strlen(result);
+    for(int i = 0; result[i] != '\0' && lineIndex < 4; ++i) { // max 4 lines
+        int charWidth = (result[i] == '1') ? 3 : 6; // '1' has width 3, others have width 6
 
-    if(length > 3 * lineLength) { // More than 3 lines
-        char line1[lineLength + 1];
-        strncpy(line1, result, lineLength);
-        line1[lineLength] = '\0';
+        // Check if adding another character exceeds maxWidth
+        if(lineWidth + charWidth > maxWidth) {
+            if(lineIndex < 3) { // Move to the next line if not yet at the 4th line
+                lineWidth = 0; // Reset line width for the new line
+                lineIndex++; // Move to the next line
+            } else {
+                break;
+            }
+        }
 
-        char line2[lineLength + 1];
-        strncpy(line2, result + lineLength, lineLength);
-        line2[lineLength] = '\0';
+        // Add current character to the current line
+        int len = strlen(lines[lineIndex]);
+        lines[lineIndex][len] = result[i];
+        lines[lineIndex][len + 1] = '\0';
 
-        char line3[lineLength + 1];
-        strncpy(line3, result + 2 * lineLength, lineLength);
-        line3[lineLength] = '\0';
+        // Update current line width
+        lineWidth += charWidth;
+    }
 
-        const char* line4 = result + 3 * lineLength; // Remainder of the text
-
-        canvas_draw_str(canvas, x, y, line1);
-        canvas_draw_str(canvas, x, y + lineSpacing, line2);
-        canvas_draw_str(canvas, x, y + 2 * lineSpacing, line3);
-        canvas_draw_str(canvas, x, y + 3 * lineSpacing, line4);
-    } else if(length > 2 * lineLength) { // More than 2 lines
-        char line1[lineLength + 1];
-        strncpy(line1, result, lineLength);
-        line1[lineLength] = '\0';
-
-        char line2[lineLength + 1];
-        strncpy(line2, result + lineLength, lineLength);
-        line2[lineLength] = '\0';
-
-        const char* line3 = result + 2 * lineLength;
-
-        canvas_draw_str(canvas, x, y, line1);
-        canvas_draw_str(canvas, x, y + lineSpacing, line2);
-        canvas_draw_str(canvas, x, y + 2 * lineSpacing, line3);
-    } else if(length > lineLength) { // More than 1 line
-        char line1[lineLength + 1];
-        strncpy(line1, result, lineLength);
-        line1[lineLength] = '\0';
-
-        const char* line2 = result + lineLength;
-
-        canvas_draw_str(canvas, x, y, line1);
-        canvas_draw_str(canvas, x, y + lineSpacing, line2);
-    } else {
-        canvas_draw_str(canvas, x, y, result); // Single line if lineLength characters or less
+    // Display the lines
+    for(int i = 0; i <= lineIndex && i < 4; i++) {
+        canvas_draw_str(canvas, x, y + (i * lineSpacing), lines[i]);
     }
 }
 
@@ -163,42 +162,31 @@ void calculator_draw_callback(Canvas* canvas, void* ctx) {
     generate_calculator_layout(canvas);
 
     char resultLabel[2 * MAX_TEXT_LENGTH_RESULT]; // Buffer to hold the result label
-    // char modeNumber[3]; // Buffer to hold the mode number
 
-    // Check which mode is selected and prepare the label accordingly
     switch(calculator_state->mode) {
     case ModeDecToBin:
         snprintf(resultLabel, sizeof(resultLabel), "%s", calculator_state->decToBinResult);
-        // strcpy(modeNumber, "M");
         break;
     case ModeDecToHex:
         snprintf(resultLabel, sizeof(resultLabel), "%s", calculator_state->decToHexResult);
-        // strcpy(modeNumber, "M");
         break;
     case ModeDecToChar:
         snprintf(resultLabel, sizeof(resultLabel), "%s", calculator_state->decToCharResult);
-        // strcpy(modeNumber, "M");
         break;
     case ModeHexToBin:
         snprintf(resultLabel, sizeof(resultLabel), "%s", calculator_state->hexToBinResult);
-        // strcpy(modeNumber, "M");
         break;
     case ModeHexToDec:
         snprintf(resultLabel, sizeof(resultLabel), "%s", calculator_state->hexToDecResult);
-        // strcpy(modeNumber, "M");
         break;
     case ModeBinToDec:
         snprintf(resultLabel, sizeof(resultLabel), "%s", calculator_state->binToDecResult);
-        // strcpy(modeNumber, "M");
         break;
     case ModeBinToHex:
         snprintf(resultLabel, sizeof(resultLabel), "%s", calculator_state->binToHexResult);
-        // strcpy(modeNumber, "M");
         break;
     default:
-        // If no mode is selected, you can display a default message or leave it empty
-        strncpy(resultLabel, "         -> [M]ODE_________<P Calc v0.9>", sizeof(resultLabel));
-        // strcpy(modeNumber, "M");
+        strncpy(resultLabel, "         -> [M]ODE -------- v0.9.2", sizeof(resultLabel));
         break;
     }
 
@@ -209,9 +197,6 @@ void calculator_draw_callback(Canvas* canvas, void* ctx) {
     char inputLabel[MAX_TEXT_LENGTH_INPUT + 2]; // Adjusted size for "> "
     snprintf(inputLabel, sizeof(inputLabel), "%s", calculator_state->text);
     displayInput(canvas, inputLabel, 4, 50);
-
-    // Replace "M" with the current mode number
-    // canvas_draw_str(canvas, 5, 72, modeNumber); // Position where "M" was originally drawn
 
     // Define the cell dimensions for each row and column
     const short cellDimensions[5][5][2] = {
@@ -226,25 +211,25 @@ void calculator_draw_callback(Canvas* canvas, void* ctx) {
     const char* modeStr = "";
     switch(calculator_state->mode) {
     case ModeDecToBin:
-        modeStr = "Dec > Bin";
+        modeStr = "dec >> bin";
         break;
     case ModeDecToHex:
-        modeStr = "Dec > Hex";
+        modeStr = "dec >> hex";
         break;
     case ModeDecToChar:
-        modeStr = "Dec > Char";
+        modeStr = "dec >> char";
         break;
     case ModeHexToBin:
-        modeStr = "Hex > Bin";
+        modeStr = "hex >> bin";
         break;
     case ModeHexToDec:
-        modeStr = "Hex > Dec";
+        modeStr = "hex >> dec";
         break;
     case ModeBinToDec:
-        modeStr = "Bin > Dec";
+        modeStr = "bin >> dec";
         break;
     case ModeBinToHex:
-        modeStr = "Bin > Hex";
+        modeStr = "bin >> hex";
         break;
     default:
         modeStr = " waiting ...";
@@ -260,8 +245,7 @@ void calculator_draw_callback(Canvas* canvas, void* ctx) {
     }
 
     for(int i = 0; i < calculator_state->position.x; i++) {
-        cursorX += cellDimensions[calculator_state->position.y][i]
-                                 [0]; // Add the width of each previous column
+        cursorX += cellDimensions[calculator_state->position.y][i][0];
     }
 
     short cellWidth =
