@@ -228,11 +228,12 @@ NfcCommand felica_poller_state_handler_read_blocks(FelicaPoller* instance) {
 
         if(response->SF1 == 0) {
             uint8_t* response_data_ptr = response->data;
+            instance->data->blocks_read++;
             memcpy(data_ptr, response_data_ptr, FELICA_DATA_BLOCK_SIZE);
         } else {
             memset(data_ptr, 0, FELICA_DATA_BLOCK_SIZE);
         }
-        instance->data->blocks_total += 1;
+        instance->data->blocks_total++;
 
         if(instance->data->blocks_total == 27) {
             instance->state = FelicaPollerStateReadSuccess;

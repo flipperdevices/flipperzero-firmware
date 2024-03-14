@@ -83,8 +83,8 @@ typedef struct {
     FelicaIDm idm;
     FelicaPMm pmm;
     uint8_t blocks_total;
+    uint8_t blocks_read;
     FelicaFSUnion data;
-    //uint8_t* dump;
 } FelicaData;
 
 extern const NfcDeviceBase nfc_device_felica;
