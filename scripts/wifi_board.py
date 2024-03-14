@@ -14,9 +14,7 @@ from serial.tools.list_ports_common import ListPortInfo
 
 
 class UpdateDownloader:
-    UPDATE_SERVER = "https://update.flipperzero.one"
-    UPDATE_PROJECT = "/blackmagic-firmware"
-    UPDATE_INDEX = UPDATE_SERVER + UPDATE_PROJECT + "/directory.json"
+    UPDATE_INDEX = "https://update.flipperzero.one/blackmagic-firmware/directory.json"
     UPDATE_TYPE = "full_tgz"
 
     CHANNEL_ID_ALIAS = {
