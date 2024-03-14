@@ -18,5 +18,5 @@ bool hid_scene_main_on_event(void* context, SceneManagerEvent event) {
 
 void hid_scene_main_on_exit(void* context) {
     Hid* app = context;
-    UNUSED(app);
+    app->view_id = HidViewSubmenu;
 }
