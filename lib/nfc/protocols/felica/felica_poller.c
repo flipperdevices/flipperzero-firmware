@@ -208,13 +208,9 @@ NfcCommand felica_poller_state_handler_read_blocks(FelicaPoller* instance) {
         instance->block_index = 0x80;
     } else if(instance->block_index == 0x89) {
         instance->block_index = 0x90;
-    } else if(instance->block_index == 0x91) {
-        //instance->block_index++;
     } else if(instance->block_index == 0x93) {
         instance->block_index = 0xA0;
-    } /* else if(instance->block_index == 0xA1) {
-        //block_count = 3;
-    } */
+    }
 
     FelicaPollerReadCommandResponse* response;
     FelicaError error = felica_poller_read_blocks(instance, block_count, block_list, &response);
