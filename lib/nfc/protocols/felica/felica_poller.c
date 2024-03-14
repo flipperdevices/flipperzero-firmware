@@ -3,7 +3,7 @@
 #include <nfc/protocols/nfc_poller_base.h>
 
 #include <furi.h>
-//#include <furi_hal.h> //Use this when you need furi_hal_random_fill_buf
+#include <furi_hal.h>
 
 #define TAG "FelicaPoller"
 
@@ -78,28 +78,7 @@ NfcCommand felica_poller_state_handler_activate(FelicaPoller* instance) {
 
     FelicaError error = felica_poller_activate(instance, instance->data);
     if(error == FelicaErrorNone) {
-        ///TODO: replace predefined RC to random generated one
-        const uint8_t RC[16] = {
-            0xF1,
-            0x87,
-            0x5A,
-            0x01,
-            0xF9,
-            0xB2,
-            0x9E,
-            0x4C,
-
-            0x06,
-            0xA1,
-            0xCE,
-            0xC4,
-            0x16,
-            0x55,
-            0x85,
-            0xCF,
-        };
-
-        memcpy(instance->data->data.fs.rc.data, RC, 16);
+        furi_hal_random_fill_buf(instance->data->data.fs.rc.data, 16);
 
         ///TODO: need to determine that we have CK and then go to Auth steps, otherwise skip them
         instance->state = FelicaPollerStateAuthenticateInternal;
