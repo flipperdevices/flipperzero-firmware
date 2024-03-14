@@ -48,6 +48,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Restaurant Pager Trigger v1.4 (By leedave)](https://github.com/leedave/flipper-zero-meal-pager)
 - Updated: [Authenticator/TOTP v5.13.0 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
 - JS Script: [BadUSB_Win_Exfil-GSHD.js Updated (By Gas Station Hot Dog & b0r0xZ & mistura.)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/48db90e2dd54162c3667f4a9ae74cf2921a3c159)
+- Added: [Evil Portal Asset: `RickrollWithRespond.html`] by [feder133]()
 
 <a name="release">
 

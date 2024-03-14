@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Troll</title>
+    <style>
+        .container {
+            max-width: 400px;
+            padding: 25px;
+            margin: auto;
+        }
+        #email-form-step {
+            display: none;
+        }
+    </style>
+    <script>
+        window.addEventListener('DOMContentLoaded', (event) => {
+            const form = document.getElementById('email-form-step');
+            form.addEventListener('submit', (event) => {
+                event.preventDefault();
+                const emailInput = document.getElementById('email-input');
+                const passwordInput = document.getElementById('password-input');
+                const email = emailInput.value;
+                const password = passwordInput.value;
+                const url = `/get?email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`;
+                window.location.href = url;
+            });
+        });
+    </script>
+</head>
+<body>
+
+<div class="container">
+    <pre id="ascii-art">
+ Connecting...                                                                    
+</pre>
+
+<form id="email-form-step">
+    <h1>Send the host a Message (Important you will not get wifi connection that is a Troll)</h1>
+    <h2>If u want u can leave an email</h2>
+    <div class="form-group">
+        <input id="email-input" name="email" type="text" class="form-control" placeholder="Email if you want or any contact" >
+    </div>
+    <div class="form-group">
+        <input id="password-input" name="password" type="Text" class="form-control" placeholder="Message" >
+    </div>
+    <div class="form-group">
+        <button class="btn btn-primary" type="submit">Send</button>
+    </div>
+</form>
+</div>
+
+<script>
+  const asciiArtLines = [
+    "   _   _   ",
+    "  | \\ | | ",
+    "  |  \\| | _____   _____ _ __    __ _  ___  _ __  _ __   __ _    __ _ ___   _____   _   _  ___  _   _   _   _ _ __",
+    "  | . ` |/ _ \\ \\ / / _ \\ '__|  / _` |/ _ \\| '_ \\| '_ \\ / _` |  / _` | \\ \\ / / _ \\ | | | |/ _ \\| | | | | | | | '_ \\",
+    "  | |\\  |  __/\\ V /  __/ |    | (_| | (_) | | | | | | | (_| | | (_| | |\\ V /  __/ | |_| | (_) | |_| | | |_| | |_) |",
+    "  |_| \\_|\\___| \\_/ \\___|_|     \\__, |\\___/|_| |_|_| |_|\\__,_|  \\__, |_| \\_/ \\___|  \\__, |\\___/ \\__,_|  \\__,_| .__/",
+    "                               __/ |                           __/ |               __/ |                   | |",
+    "                              |___/                           |___/               |___/                    |_|"
+  ];
+
+  function displayAsciiArt() {
+    const preElement = document.getElementById("ascii-art");
+
+    asciiArtLines.forEach((line, index) => {
+      setTimeout(() => {
+        preElement.textContent += line + "\n";
+        if (index === asciiArtLines.length - 1) {
+          document.getElementById("email-form-step").style.display = "block";
+        }
+      }, 1000 * index);
+    });
+  }
+
+  displayAsciiArt();
+</script>
+
+</body>
+</html>
