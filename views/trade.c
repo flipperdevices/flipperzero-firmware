@@ -152,7 +152,8 @@ typedef enum {
     TRADE_MAIL,
     TRADE_PENDING,
     TRADE_CONFIRMATION,
-    TRADE_DONE
+    TRADE_DONE,
+    TRADE_CANCEL
 } trade_centre_state_t;
 
 /* Global states for the trade logic. These are used to dictate what gets drawn
@@ -168,6 +169,7 @@ typedef enum {
     GAMEBOY_WAITING,
     GAMEBOY_TRADE_PENDING,
     GAMEBOY_TRADING,
+    GAMEBOY_TRADE_CANCEL,
     GAMEBOY_COLOSSEUM,
     GAMEBOY_STATE_COUNT
 } render_gameboy_state_t;
@@ -195,25 +197,25 @@ struct trade_model {
     const void* table;
 };
 
-/* A callback function that must be called outside of an interrupt context,
- * This will completely destroy the current patch list, and then rebuild it from
- * the current trade_block state. This is used mostly after a trade to rebuild
- * the list with the new data we just copied in.
+/* Input callback, used to handle the user trying to back out of the trade
+ * screen.
+ * Normally, when trade_centre_state is <= READY, pressing back would just go
+ * back without issue. However, when WAITING, we need to tell the gameboy that
+ * the flipper wants to exit the trade menu. Anything beyond WAITING should not
+ * go back nor try to tell the gameboy to cancel; instead, by holding back in
+ * these states, we can forcefully go back one menu.
+ *
+ * Returning false here then ends up calling the view_dispatcher nav callback
+ * if the button pressed/held is Back. Returning true tells the OS that we
+ * dealt with the button press and no further action is needed.
  */
-static void pokemon_plist_recreate_callback(void* context, uint32_t arg) {
-    furi_assert(context);
-    UNUSED(arg);
-    struct trade_ctx* trade = context;
-
-    plist_create(&(trade->patch_list), trade->pdata);
-}
-
-#ifdef GRAPHICS_TESTING
-static bool trade_input_callback(InputEvent *event, void *context)
+static bool trade_input_callback(InputEvent* event, void* context)
 {
-    struct trade_ctx* trade = context;
-    bool consumed = false;
-
+	furi_assert(context);
+	struct trade_ctx* trade = context;
+	render_gameboy_state_t gameboy_status;
+	
+#ifdef GRAPHICS_TESTING
     if (event->type == InputTypePress) {
         with_view_model(
             trade->view,
@@ -230,15 +232,57 @@ static bool trade_input_callback(InputEvent *event, void *context)
                 }
             },
             true);
-        consumed = true;
     }
-
-    return consumed;
-}
 #endif
 
-/* Draws a whole screen image with Flipper mascot, Game Boy, etc. */
-static void trade_draw_connect(Canvas* const canvas) {
+	/* Only handling back button */
+	if (event->key != InputKeyBack) return false;
+
+        with_view_model(
+            trade->view,
+            struct trade_model * model,
+            { gameboy_status = model->gameboy_status; },
+            false);
+
+	/* States READY or lower can be exited without issue, let the view_dispatcher
+	 * nav callback handle it.
+	 */
+	if (gameboy_status <= GAMEBOY_READY) return false;
+
+	/* Long presses we want the view_dispatcher nav callback to handle */
+	/* XXX: Maybe make this a repeat? */
+	if (event->type == InputTypeLong) return false;
+
+	/* In the waiting state, we need to move to cancelled. This locks us up
+	 * until the gameboy side gets the hint and cancels as well.
+	 */
+	if (gameboy_status == GAMEBOY_WAITING && event->type == InputTypeRelease) {
+        	with_view_model(
+	            trade->view,
+        	    struct trade_model * model,
+        	    { model->gameboy_status = GAMEBOY_TRADE_CANCEL; },
+        	    false);
+		trade->trade_centre_state = TRADE_CANCEL;
+	}
+
+	/* Anything here, we should consider handled */
+	return true;
+}
+
+/* A callback function that must be called outside of an interrupt context,
+ * This will completely destroy the current patch list, and then rebuild it from
+ * the current trade_block state. This is used mostly after a trade to rebuild
+ * the list with the new data we just copied in.
+ */
+static void pokemon_plist_recreate_callback(void* context, uint32_t arg) {
+    furi_assert(context);
+    UNUSED(arg);
+    struct trade_ctx* trade = context;
+
+    plist_create(&(trade->patch_list), trade->pdata);
+}
+
+static void trade_draw_bottom_bar(Canvas* const canvas) {
     furi_assert(canvas);
 
     //canvas_draw_frame(canvas, 0, 0, 128, 64);
@@ -356,6 +400,9 @@ static void trade_draw_callback(Canvas* canvas, void* view_model) {
             canvas_draw_icon(canvas, 0, 5, &I_gb_step_2);
         }
         trade_draw_frame(canvas, "TRADING");
+        break;
+    case GAMEBOY_TRADE_CANCEL:
+        trade_draw_frame(canvas, "CANCEL");
         break;
     case GAMEBOY_COLOSSEUM:
         trade_draw_frame(canvas, "FIGHT!");
@@ -479,7 +526,6 @@ static uint8_t getTradeCentreResponse(struct trade_ctx* trade) {
     static bool patch_pt_2;
     static size_t counter;
     static uint8_t in_pkmn_idx;
-    static bool startup_test;
 
     /* TODO: Figure out how we should respond to a no_data_byte and/or how to
      * send one and what response to expect.
@@ -511,48 +557,14 @@ static uint8_t getTradeCentreResponse(struct trade_ctx* trade) {
         break;
 
     /* This state runs through the end of the random preamble */
-    /* XXX: This whole state is now a mess of hacks thanks to gen II.
-     * The correct way to implement this, at some point, would be to
-     * enforce synchronization of canceling by waiting until the GB
-     * starts to issue clocks. But, I'm actually not sure that would
-     * work and would probably behave the same way as it does after this
-     * fixup.
-     */
     case TRADE_INIT:
         if(in == SERIAL_PREAMBLE_BYTE) {
             counter++;
             model->gameboy_status = GAMEBOY_WAITING;
-        /* XXX: Unsure exactly how this sequence works or what it does */
-        /* The next couple of conditionals only apply to gen ii */
-        } else if (in == 0x75) {
-            startup_test = true;
-        /* This is a convoluted statement to catch if the GB tries to send anything
-	 * than 0x76 after 0x75. No clue what these values are, but anything outside
-	 * of that is going to be part of the trade confirmatino most likely.
-	 */
-        } else if (in == 0x76) {
-          ;
-        } else if ((startup_test) && ((in & 0x70) == 0x70) && (in != 0x76)) {
-	    send = PKMN_TABLE_LEAVE_GEN_II;
-        /* XXX: This I think was originally a hack. I think this is checking to see if 0x60 is being sent
-	 * at init, which means we exited trade screen, and re-entered trade screen while GB was still at the table.
-	 * If the GB tries to do anything other than start giving the random preamble, then indicate that we
-	 * wand to leave the table.
-	 * The hack is how we check to see if the GB is sending a trade request
-	 * This needs to be tested for gen ii, and then probably documented a bit better for future sake
-	 */
-        } else if(trade->pdata->gen == GEN_I && (in & PKMN_SEL_NUM_MASK_GEN_I) == PKMN_SEL_NUM_MASK_GEN_I) {
-            send = PKMN_TABLE_LEAVE_GEN_I;
-        } else if(trade->pdata->gen == GEN_II && (in & PKMN_SEL_NUM_MASK_GEN_II) == PKMN_SEL_NUM_MASK_GEN_II) {
-            send = PKMN_TABLE_LEAVE_GEN_II;
-	}
-        if (in == PKMN_TABLE_LEAVE_GEN_II) {
-            startup_test = false;
         }
         if(counter == SERIAL_RNS_LENGTH) {
             trade->trade_centre_state = TRADE_RANDOM;
             counter = 0;
-	    startup_test = false;
         }
         break;
 
@@ -678,6 +690,9 @@ static uint8_t getTradeCentreResponse(struct trade_ctx* trade) {
         }
         [[fallthrough]];
     /* Handle the Game Boy selecting a Pokemon to trade, or leaving the table */
+    /* XXX: TODO: Clean this up. Easiest is probably to use vars rather than
+     * macros to check against and set output to.
+     */
     case TRADE_PENDING:
         /* If the player leaves the trade menu and returns to the room */
         if (trade->pdata->gen == GEN_I && in == PKMN_TABLE_LEAVE_GEN_I) {
@@ -737,6 +752,16 @@ static uint8_t getTradeCentreResponse(struct trade_ctx* trade) {
             furi_timer_pending_callback(pokemon_plist_recreate_callback, trade, 0);
         }
         break;
+
+    case TRADE_CANCEL:
+	if ((trade->pdata->gen == GEN_I && in == PKMN_TABLE_LEAVE_GEN_I) ||
+	    (trade->pdata->gen == GEN_II && in == PKMN_TABLE_LEAVE_GEN_II)) {
+		trade->trade_centre_state = TRADE_RESET;
+		model->gameboy_status = GAMEBOY_READY;
+	}
+	if (trade->pdata->gen == GEN_I) send = PKMN_TABLE_LEAVE_GEN_I;
+	if (trade->pdata->gen == GEN_II) send = PKMN_TABLE_LEAVE_GEN_II;
+	break;
 
     default:
         // Do Nothing
@@ -812,6 +837,7 @@ void trade_enter_callback(void* context) {
 
     /* Create a trade patch list from the current trade block */
     plist_create(&(trade->patch_list), trade->pdata);
+
 }
 
 void disconnect_pin(const GpioPin* pin) {
@@ -862,11 +888,9 @@ void* trade_alloc(
         trade->view, struct trade_model * model, { model->table = pdata->pokemon_table; }, false);
 
     view_set_draw_callback(trade->view, trade_draw_callback);
+    view_set_input_callback(trade->view, trade_input_callback);
     view_set_enter_callback(trade->view, trade_enter_callback);
     view_set_exit_callback(trade->view, trade_exit_callback);
-#ifdef GRAPHICS_TESTING
-    view_set_input_callback(trade->view, trade_input_callback);
-#endif
 
     view_dispatcher_add_view(view_dispatcher, view_id, trade->view);
 
