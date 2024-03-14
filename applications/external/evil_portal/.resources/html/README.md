@@ -40,7 +40,7 @@ Thank you so much to the following contributors for providing awesome portals.
 - `Microsoft.html` by [roshanravan](https://github.com/roshanravan)
 - `PornHub.html` by [roshanravan](https://github.com/roshanravan)
 - `Prank_Game.html` by [roshanravan](https://github.com/roshanravan)
-- `RickrollWithRespond.html` by [feder133]()
+- `RickrollWithRespond.html` by [feder133](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/12121e1c0fcf7c5377c6b84f24784270020232d3)
 - `sas_lounge.html` by [PontusMadsen](https://github.com/bigbrodude6119/flipper-zero-evil-portal/pull/79)
 - `Southwest_Airlines.html` by [roshanravan](https://github.com/roshanravan)
 - `Spectrum.html` by [roshanravan](https://github.com/roshanravan)
