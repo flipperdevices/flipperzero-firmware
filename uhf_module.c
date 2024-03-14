@@ -307,15 +307,8 @@ M100ResponseType m100_write_label_data_storage(
     cmd[cmd_length - 2] = checksum(cmd + 1, cmd_length - 3);
     cmd[cmd_length - 1] = FRAME_END;
     // send cmd
-    // furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, rx_callback, module->uart->buffer);
-    // furi_hal_uart_tx(FuriHalUartIdUSART1, cmd, cmd_length);
-    // unsigned int delay = DELAY_MS / 2;
-    // unsigned int timeout = 15;
-    // while(!buffer_get_size(module->uart->buffer)) {
-    //     furi_delay_ms(delay);
-    //     if(!timeout--) break;
-    // }
-    setup_and_send_rx(module, cmd, cmd_length);
+    M100ResponseType rp_type = setup_and_send_rx(module, cmd, cmd_length);
+    if(rp_type != M100SuccessResponse) return rp_type;
     uint8_t* buff_data = uhf_buffer_get_data(module->uart->buffer);
     size_t buff_length = uhf_buffer_get_size(module->uart->buffer);
     if(buff_data[2] == 0xFF && buff_length == 8)

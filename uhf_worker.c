@@ -63,15 +63,20 @@ UHFWorkerEvent write_single_card(UHFWorker* uhf_worker) {
     UHFTag* uhf_tag_des = send_polling_command(uhf_worker);
     if(uhf_tag_des == NULL) return UHFWorkerEventAborted;
     UHFTag* uhf_tag_from = uhf_worker->uhf_tag_wrapper->uhf_tag;
-    while(m100_set_select(uhf_worker->module, uhf_tag_des) != M100SuccessResponse){}
+    M100ResponseType rp_type;
+    do{
+        rp_type = m100_set_select(uhf_worker->module, uhf_tag_des);
+        if(uhf_worker->state == UHFWorkerStateStop) return UHFWorkerEventAborted;
+        if(rp_type == M100SuccessResponse) break;
+    }while(true);
     do {
-        M100ResponseType rp_type = m100_write_label_data_storage(
+        rp_type = m100_write_label_data_storage(
             uhf_worker->module, uhf_tag_from, uhf_tag_des, UserBank, 0, 0);
         if(uhf_worker->state == UHFWorkerStateStop) return UHFWorkerEventAborted;
         if(rp_type == M100SuccessResponse) break;
     } while(true);
     do {
-        M100ResponseType rp_type = m100_write_label_data_storage(
+        rp_type = m100_write_label_data_storage(
             uhf_worker->module, uhf_tag_from, uhf_tag_des, EPCBank, 0, 0);
         if(uhf_worker->state == UHFWorkerStateStop) return UHFWorkerEventAborted;
         if(rp_type == M100SuccessResponse) break;
