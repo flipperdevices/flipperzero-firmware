@@ -254,7 +254,8 @@ LL_USART_InitTypeDef buildUartSettings(Config* cfg) {
 void uart_set_config(void* context) {
     furi_assert(context);
     App* app = context;
-    furi_thread_flags_set(furi_thread_get_id(app->uart->rxThread), WorkerEvtCfgChange);
+    UNUSED(app);
+    //furi_thread_flags_set(furi_thread_get_id(app->uart->rxThread), WorkerEvtCfgChange);
 }
 static void Serial_Begin(FuriHalSerialHandle* handle, LL_USART_InitTypeDef USART_InitStruct) {
     furi_hal_bus_enable(FuriHalBusUSART1);
@@ -352,7 +353,7 @@ void pduParser(void* context, bool slave, uint8_t* buf, size_t len, FuriString* 
     furi_string_cat_printf(
         data, "\n%s", functionNames[FUNCTION < 6 ? FUNCTION - 1 : FUNCTION - 9]);
     furi_string_cat_printf(
-        data, app->uart->cfg->hexOutput ? "\nSlave: 0x%02X" : "\nSlave: %d", SLAVE);
+        data, app->uart->cfg->hexOutput ? "\nPeripheral: 0x%02X" : "\nPeripheral: %d", SLAVE);
     memcpy(
         slave && FUNCTION <= 4 ? &bCount : &address, buf + offset, slave && FUNCTION <= 4 ? 1 : 2);
 
@@ -396,7 +397,7 @@ void pduParser(void* context, bool slave, uint8_t* buf, size_t len, FuriString* 
         else
             analogValuesParser(app, buf + offset, bCount / 2, data);
     }
-    furi_string_cat_printf(data, "\nDRC: 0x%02X", CRCL | CRCH << 8);
+    furi_string_cat_printf(data, "\nCRC: 0x%02X", CRCL | CRCH << 8);
 }
 void ErrParser(uint8_t* buf, size_t len, FuriString* data) {
     furi_string_cat_printf(
@@ -426,7 +427,7 @@ void handle_rx_data_cb(uint8_t* buf, size_t len, void* context) {
     FuriString* data = furi_string_alloc();
     furi_string_reset(data);
     // /*
-    furi_string_cat_printf(data, "\n------%s-------", app->modbus->slave ? "-SLAVE" : "MASTER");
+    furi_string_cat_printf(data, "\n-----%s----", app->modbus->slave ? "PERIPHERAL-" : "---HUB----");
     if((CRCH | CRCL << 8) == getCRC(buf, len - 2)) {
         ModbusParser(buf, len, app, data);
     } else {

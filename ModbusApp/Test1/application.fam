@@ -1,6 +1,6 @@
 App(
     appid="test1",  ## ID unico de la app
-    name="Test 1",  ## Nombre a mostrar para el usuario final
+    name="MODBUS",  ## Nombre a mostrar para el usuario final
     apptype=FlipperAppType.EXTERNAL,  ## Tipo de app (aplicacion.fap)
     entry_point="test_app",  ## Funcion C a ejecutar cuando se inicia la app
     requires=["gui"],  ## Lista de apps necesarias
