@@ -12,3 +12,5 @@ void bt_mouse_free(BtMouse* bt_mouse);
 View* bt_mouse_get_view(BtMouse* bt_mouse);
 
 void bt_mouse_set_connected_status(BtMouse* bt_mouse, bool connected);
+
+void bt_mouse_remove_pairing(void);
