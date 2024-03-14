@@ -18,7 +18,7 @@ def DoxyBuild(env, target, source, doxy_env_variables=None):
 def generate(env):
     if not env["VERBOSE"]:
         env.SetDefault(
-            DOXYCOMSTR="\tDOXY\t${TARGET}",
+            DOXYGENCOMSTR="\tDOXY\t${TARGET}",
         )
 
     env.SetDefault(
@@ -32,7 +32,7 @@ def generate(env):
                 action=[
                     Action(
                         [["$DOXYGEN", "$SOURCE"]],
-                        "$DOXYCOMSTR",
+                        "$DOXYGENCOMSTR",
                     ),
                 ],
             )
