@@ -85,14 +85,9 @@ static void hid_submenu_callback(void* context, uint32_t index) {
 static void bt_hid_connection_status_changed_callback(BtStatus status, void* context) {
     furi_assert(context);
     Hid* hid = context;
-    bool connected = (status == BtStatusConnected);
-#ifdef HID_TRANSPORT_BLE
-    if(connected) {
-        notification_internal_message(hid->notifications, &sequence_set_blue_255);
-    } else {
-        notification_internal_message(hid->notifications, &sequence_reset_blue);
-    }
-#endif
+    const bool connected = (status == BtStatusConnected);
+    notification_internal_message(
+        hid->notifications, connected ? &sequence_set_blue_255 : &sequence_reset_blue);
     hid_keynote_set_connected_status(hid->hid_keynote, connected);
     hid_keyboard_set_connected_status(hid->hid_keyboard, connected);
     hid_media_set_connected_status(hid->hid_media, connected);
@@ -286,8 +281,6 @@ int32_t hid_usb_app(void* p) {
     FuriHalUsbInterface* usb_mode_prev = furi_hal_usb_get_config();
     furi_hal_usb_unlock();
     furi_check(furi_hal_usb_set_config(&usb_hid, NULL) == true);
-
-    bt_hid_connection_status_changed_callback(BtStatusConnected, app);
 
     dolphin_deed(DolphinDeedPluginStart);
 

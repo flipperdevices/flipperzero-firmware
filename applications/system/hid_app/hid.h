@@ -30,11 +30,6 @@
 
 #define HID_BT_KEYS_STORAGE_NAME ".bt_hid.keys"
 
-typedef enum {
-    HidTransportUsb,
-    HidTransportBle,
-} HidTransport;
-
 typedef struct Hid Hid;
 
 struct Hid {
@@ -54,8 +49,6 @@ struct Hid {
     HidMouseClicker* hid_mouse_clicker;
     HidMouseJiggler* hid_mouse_jiggler;
     HidTikTok* hid_tiktok;
-
-    HidTransport transport;
     uint32_t view_id;
 };
 void bt_hid_remove_pairing(Hid* app);
