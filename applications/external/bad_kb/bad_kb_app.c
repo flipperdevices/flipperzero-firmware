@@ -36,8 +36,10 @@ static void bad_kb_load_settings(BadKbApp* app) {
     FlipperFormat* file = flipper_format_file_alloc(storage);
     if(flipper_format_file_open_existing(file, BAD_KB_SETTINGS_PATH)) {
         FuriString* tmp_str = furi_string_alloc();
+
         if(!flipper_format_read_string(file, "Keyboard_Layout", app->keyboard_layout)) {
             furi_string_reset(app->keyboard_layout);
+            flipper_format_rewind(file);
         }
         if(!flipper_format_read_bool(file, "Is_BT", &(app->is_bt), 1)) {
             app->is_bt = false;
@@ -48,29 +50,40 @@ static void bad_kb_load_settings(BadKbApp* app) {
         if(flipper_format_read_string(file, "Bt_Name", tmp_str) && !furi_string_empty(tmp_str)) {
             strlcpy(cfg->ble.name, furi_string_get_cstr(tmp_str), sizeof(cfg->ble.name));
         } else {
-            strcpy(cfg->ble.name, "");
+            cfg->ble.name[0] = '\0';
+            flipper_format_rewind(file);
         }
+
         if(!flipper_format_read_hex(
                file, "Bt_Mac", (uint8_t*)&cfg->ble.mac, sizeof(cfg->ble.mac))) {
             memset(cfg->ble.mac, 0, sizeof(cfg->ble.mac));
+            flipper_format_rewind(file);
         }
-        if(flipper_format_read_string(file, "Usb_Manuf", tmp_str) && !furi_string_empty(tmp_str)) {
+
+        if(flipper_format_read_string(file, "Usb_Manuf", tmp_str)) {
             strlcpy(cfg->usb.manuf, furi_string_get_cstr(tmp_str), sizeof(cfg->usb.manuf));
         } else {
-            strcpy(cfg->usb.manuf, "");
+            cfg->usb.manuf[0] = '\0';
+            flipper_format_rewind(file);
         }
-        if(flipper_format_read_string(file, "Usb_Product", tmp_str) &&
-           !furi_string_empty(tmp_str)) {
+
+        if(flipper_format_read_string(file, "Usb_Product", tmp_str)) {
             strlcpy(cfg->usb.product, furi_string_get_cstr(tmp_str), sizeof(cfg->usb.product));
         } else {
-            strcpy(cfg->usb.product, "");
+            cfg->usb.product[0] = '\0';
+            flipper_format_rewind(file);
         }
+
         if(!flipper_format_read_uint32(file, "Usb_Vid", &cfg->usb.vid, 1)) {
             cfg->usb.vid = 0;
+            flipper_format_rewind(file);
         }
+
         if(!flipper_format_read_uint32(file, "Usb_Pid", &cfg->usb.pid, 1)) {
             cfg->usb.pid = 0;
+            flipper_format_rewind(file);
         }
+
         furi_string_free(tmp_str);
         flipper_format_file_close(file);
     }
