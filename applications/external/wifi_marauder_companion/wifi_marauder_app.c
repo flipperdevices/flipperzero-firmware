@@ -96,7 +96,7 @@ void wifi_marauder_make_app_folder(WifiMarauderApp* app) {
     furi_assert(app);
 
     if(!storage_simply_mkdir(app->storage, MARAUDER_APP_FOLDER)) {
-        dialog_message_show_storage_error(app->dialogs, "Cannot create\napp folder");
+        // dialog_message_show_storage_error(app->dialogs, "Cannot create\napp folder");
     }
 
     if(!storage_simply_mkdir(app->storage, MARAUDER_APP_FOLDER_PCAPS)) {
