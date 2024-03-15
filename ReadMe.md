@@ -255,7 +255,7 @@ $ ./fbt dolphin_ext
 - SubGHz: [Transmit Indicator before Out of Region Frequency Use (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/e24d4a0689db555ae083fec23a471e878adb6cd4)
 - SubGHz: USE CFW Settings to use unlock from SD flag from [(cloudbreakdaniel)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/97db0dc91ee3dff812b4dec0618e3f198de14405).  Update `subghz/assets/extend_range.txt` with [this file](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/assets/resources/subghz/assets/extend_range.txt) on SD.  **UPDATE IGNORE FLAG TO TRUE TO UNLEASH YOUR FLIPPER!!**
 - SubGHz: [X10 Protocol Decoder (By CodeAllNight/jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/subghz/protocols/x10)
-- VGM: [Custom color options (By HaxSam & Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/93b532b4ebac931862369b286429b83a2c55d1bf)
+- VGM: [Custom color options (By HaxSam & Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/93b532b4ebac931862369b286429b83a2c55d1bf) [Added Rainbow Mode (By HaxSam & Eclipse)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/d5ecfb56d1425c174e188776eb22901e1dcc121f)
 
 ## Games
 
