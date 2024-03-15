@@ -10,7 +10,10 @@ void bad_kb_scene_config_bt_mac_on_enter(void* context) {
     BadKbApp* bad_kb = context;
     ByteInput* byte_input = bad_kb->byte_input;
 
-    memcpy(bad_kb->bt_mac_buf, bad_kb->config.ble.mac, sizeof(bad_kb->bt_mac_buf));
+    memcpy(
+        bad_kb->bt_mac_buf,
+        bad_kb->set_bt_id ? bad_kb->id_config.ble.mac : bad_kb->config.ble.mac,
+        sizeof(bad_kb->bt_mac_buf));
     furi_hal_bt_reverse_mac_addr(bad_kb->bt_mac_buf);
     byte_input_set_header_text(byte_input, "Set BT MAC address");
 
@@ -33,7 +36,15 @@ bool bad_kb_scene_config_bt_mac_on_event(void* context, SceneManagerEvent event)
         consumed = true;
         if(event.event == BadKbAppCustomEventByteInputDone) {
             furi_hal_bt_reverse_mac_addr(bad_kb->bt_mac_buf);
+            // Set user config and remember
             memcpy(bad_kb->config.ble.mac, bad_kb->bt_mac_buf, sizeof(bad_kb->config.ble.mac));
+            // Apply to ID config so its temporarily overridden
+            if(bad_kb->set_bt_id) {
+                memcpy(
+                    bad_kb->id_config.ble.mac,
+                    bad_kb->bt_mac_buf,
+                    sizeof(bad_kb->id_config.ble.mac));
+            }
             bad_kb_config_refresh(bad_kb);
         }
         scene_manager_previous_scene(bad_kb->scene_manager);

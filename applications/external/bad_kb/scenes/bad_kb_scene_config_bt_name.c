@@ -10,7 +10,10 @@ void bad_kb_scene_config_bt_name_on_enter(void* context) {
     BadKbApp* bad_kb = context;
     TextInput* text_input = bad_kb->text_input;
 
-    strlcpy(bad_kb->bt_name_buf, bad_kb->config.ble.name, sizeof(bad_kb->bt_name_buf));
+    strlcpy(
+        bad_kb->bt_name_buf,
+        bad_kb->set_bt_id ? bad_kb->id_config.ble.name : bad_kb->config.ble.name,
+        sizeof(bad_kb->bt_name_buf));
     text_input_set_header_text(text_input, "Set BT device name");
 
     text_input_set_result_callback(
@@ -31,7 +34,15 @@ bool bad_kb_scene_config_bt_name_on_event(void* context, SceneManagerEvent event
     if(event.type == SceneManagerEventTypeCustom) {
         consumed = true;
         if(event.event == BadKbAppCustomEventTextInputDone) {
+            // Set user config and remember
             strlcpy(bad_kb->config.ble.name, bad_kb->bt_name_buf, sizeof(bad_kb->config.ble.name));
+            // Apply to ID config so its temporarily overridden
+            if(bad_kb->set_bt_id) {
+                strlcpy(
+                    bad_kb->id_config.ble.name,
+                    bad_kb->bt_name_buf,
+                    sizeof(bad_kb->id_config.ble.name));
+            }
             bad_kb_config_refresh(bad_kb);
         }
         scene_manager_previous_scene(bad_kb->scene_manager);

@@ -51,11 +51,6 @@ void bad_kb_scene_config_on_enter(void* context) {
         var_item_list, "Connection", 2, bad_kb_scene_config_connection_callback, bad_kb);
     variable_item_set_current_value_index(item, bad_kb->is_bt);
     variable_item_set_current_value_text(item, bad_kb->is_bt ? "BT" : "USB");
-    /*if(bad_kb->has_usb_id) {
-        variable_item_set_locked(item, true, "Script has\nID cmd!\nLocked to\nUSB Mode!");
-    } else if(bad_kb->has_bt_id) {
-        variable_item_set_locked(item, true, "Script has\nBT_ID cmd!\nLocked to\nBT Mode!");
-    }*/
 
     if(bad_kb->is_bt) {
         item = variable_item_list_add(
@@ -64,43 +59,24 @@ void bad_kb_scene_config_on_enter(void* context) {
         variable_item_set_current_value_text(item, bad_kb->bt_remember ? "ON" : "OFF");
 
         item = variable_item_list_add(var_item_list, "BT Device Name", 0, NULL, bad_kb);
-        if(bad_kb->set_bt_id) {
-            variable_item_set_locked(item, true, "Script has\nBT_ID cmd!\nLocked to\nset Name!");
-        }
 
         item = variable_item_list_add(var_item_list, "BT MAC Address", 0, NULL, bad_kb);
         if(bad_kb->bt_remember) {
             variable_item_set_locked(item, true, "Remember\nmust be Off!");
-        } else if(bad_kb->set_bt_id) {
-            variable_item_set_locked(item, true, "Script has\nBT_ID cmd!\nLocked to\nset MAC!");
         }
 
         item = variable_item_list_add(var_item_list, "Randomize BT MAC", 0, NULL, bad_kb);
         if(bad_kb->bt_remember) {
             variable_item_set_locked(item, true, "Remember\nmust be Off!");
-        } else if(bad_kb->set_bt_id) {
-            variable_item_set_locked(item, true, "Script has\nBT_ID cmd!\nLocked to\nset MAC!");
         }
     } else {
         item = variable_item_list_add(var_item_list, "USB Manufacturer", 0, NULL, bad_kb);
-        if(bad_kb->set_usb_id) {
-            variable_item_set_locked(item, true, "Script has\nID cmd!\nLocked to\nset Mname!");
-        }
 
         item = variable_item_list_add(var_item_list, "USB Product Name", 0, NULL, bad_kb);
-        if(bad_kb->set_usb_id) {
-            variable_item_set_locked(item, true, "Script has\nID cmd!\nLocked to\nset Pname!");
-        }
 
         item = variable_item_list_add(var_item_list, "USB VID and PID", 0, NULL, bad_kb);
-        if(bad_kb->set_usb_id) {
-            variable_item_set_locked(item, true, "Script has\nID cmd!\nLocked to\nset IDs!");
-        }
 
         item = variable_item_list_add(var_item_list, "Randomize USB VID:PID", 0, NULL, bad_kb);
-        if(bad_kb->set_usb_id) {
-            variable_item_set_locked(item, true, "Script has\nID cmd!\nLocked to\nset IDs!");
-        }
     }
 
     variable_item_list_set_enter_callback(
@@ -141,7 +117,15 @@ bool bad_kb_scene_config_on_event(void* context, SceneManagerEvent event) {
                 scene_manager_next_scene(bad_kb->scene_manager, BadKbSceneConfigBtMac);
                 break;
             case VarItemListIndexBtRandomizeMac:
+                // Set user config and remember
                 furi_hal_random_fill_buf(bad_kb->config.ble.mac, sizeof(bad_kb->config.ble.mac));
+                // Apply to ID config so its temporarily overridden
+                if(bad_kb->set_bt_id) {
+                    memcpy(
+                        bad_kb->id_config.ble.mac,
+                        bad_kb->config.ble.mac,
+                        sizeof(bad_kb->id_config.ble.mac));
+                }
                 bad_kb_config_refresh(bad_kb);
                 break;
             default:
@@ -165,8 +149,14 @@ bool bad_kb_scene_config_on_event(void* context, SceneManagerEvent event) {
             case VarItemListIndexUsbRandomizeVidPid:
                 furi_hal_random_fill_buf(
                     (void*)bad_kb->usb_vidpid_buf, sizeof(bad_kb->usb_vidpid_buf));
+                // Set user config and remember
                 bad_kb->config.usb.vid = bad_kb->usb_vidpid_buf[0];
                 bad_kb->config.usb.pid = bad_kb->usb_vidpid_buf[1];
+                // Apply to ID config so its temporarily overridden
+                if(bad_kb->set_usb_id) {
+                    bad_kb->id_config.usb.vid = bad_kb->config.usb.vid;
+                    bad_kb->id_config.usb.pid = bad_kb->config.usb.pid;
+                }
                 bad_kb_config_refresh(bad_kb);
                 break;
             default:

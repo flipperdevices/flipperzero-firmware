@@ -28,7 +28,7 @@ static void bad_kb_app_tick_event_callback(void* context) {
     scene_manager_handle_tick_event(app->scene_manager);
 }
 
-static void bad_kb_load_settings(BadKbApp* app) {
+void bad_kb_load_settings(BadKbApp* app) {
     furi_string_reset(app->keyboard_layout);
     BadKbConfig* cfg = &app->config;
 
@@ -41,13 +41,18 @@ static void bad_kb_load_settings(BadKbApp* app) {
             furi_string_reset(app->keyboard_layout);
             flipper_format_rewind(file);
         }
-        if(!flipper_format_read_bool(file, "Is_BT", &(app->is_bt), 1)) {
+
+        if(!flipper_format_read_bool(file, "Is_BT", &app->is_bt, 1)) {
             app->is_bt = false;
+            flipper_format_rewind(file);
         }
-        if(!flipper_format_read_bool(file, "BT_Remember", &(app->bt_remember), 1)) {
+
+        if(!flipper_format_read_bool(file, "BT_Remember", &app->bt_remember, 1)) {
             app->bt_remember = false;
+            flipper_format_rewind(file);
         }
-        if(flipper_format_read_string(file, "Bt_Name", tmp_str) && !furi_string_empty(tmp_str)) {
+
+        if(flipper_format_read_string(file, "Bt_Name", tmp_str)) {
             strlcpy(cfg->ble.name, furi_string_get_cstr(tmp_str), sizeof(cfg->ble.name));
         } else {
             cfg->ble.name[0] = '\0';
@@ -111,8 +116,8 @@ static void bad_kb_save_settings(BadKbApp* app) {
     FlipperFormat* file = flipper_format_file_alloc(storage);
     if(flipper_format_file_open_always(file, BAD_KB_SETTINGS_PATH)) {
         flipper_format_write_string(file, "Keyboard_Layout", app->keyboard_layout);
-        flipper_format_write_bool(file, "Is_BT", &(app->is_bt), 1);
-        flipper_format_write_bool(file, "BT_Remember", &(app->bt_remember), 1);
+        flipper_format_write_bool(file, "Is_BT", &app->is_bt, 1);
+        flipper_format_write_bool(file, "BT_Remember", &app->bt_remember, 1);
         flipper_format_write_string_cstr(file, "Bt_Name", cfg->ble.name);
         flipper_format_write_hex(file, "Bt_Mac", (uint8_t*)&cfg->ble.mac, sizeof(cfg->ble.mac));
         flipper_format_write_string_cstr(file, "Usb_Manuf", cfg->usb.manuf);
@@ -217,8 +222,8 @@ void bad_kb_config_adjust(BadKbConfig* cfg) {
     }
 
     // Use defaults if vid or pid are unset
-    if(cfg->usb.vid == 0) cfg->usb.vid = HID_VID_DEFAULT;
-    if(cfg->usb.pid == 0) cfg->usb.pid = HID_PID_DEFAULT;
+    if(cfg->usb.vid == 0) cfg->usb.vid = 0x046D;
+    if(cfg->usb.pid == 0) cfg->usb.pid = 0xC529;
 }
 
 void bad_kb_config_refresh(BadKbApp* app) {
@@ -371,7 +376,7 @@ BadKbApp* bad_kb_app_alloc(char* arg) {
         bad_kb_script_set_keyboard_layout(app->bad_kb_script, app->keyboard_layout);
         scene_manager_next_scene(app->scene_manager, BadKbSceneWork);
     } else {
-        furi_string_set(app->file_path, BAD_KB_APP_BASE_FOLDER);
+        furi_string_set(app->file_path, BAD_USB_APP_BASE_FOLDER);
         scene_manager_next_scene(app->scene_manager, BadKbSceneFileSelect);
     }
 
