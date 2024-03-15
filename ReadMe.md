@@ -50,6 +50,9 @@ This software is for experimental purposes only and is not meant for any illegal
 - JS Script: [BadUSB_Win_Exfil-GSHD.js Updated (By Gas Station Hot Dog & b0r0xZ & mistura.)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/48db90e2dd54162c3667f4a9ae74cf2921a3c159)
 - Added: [Evil Portal Asset: `RickrollWithRespond.html` (By feder133)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/12121e1c0fcf7c5377c6b84f24784270020232d3)
 - Updated: [BLE Spam v6.1 (By Willy-JL & ECTO-1A & Spooks4576 with research from xMasterX; OFW API thanks to noproto)](https://github.com/Next-Flip/Momentum-Apps/tree/dev/ble_spam)
+- OFW: PR: [Infrared: Add Fujitsu ASYG24KMTB #3513 (By aprosvetova)](https://github.com/flipperdevices/flipperzero-firmware/pull/3513)
+- OFW: PR: [NFC: Slix privacy password reveal and Desfire detect fix #3504 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3504)
+- OFW: PR: [Infrared fixes and more #3515 (By gsurkov)](https://github.com/flipperdevices/flipperzero-firmware/pull/3515)
 
 <a name="release">
 
