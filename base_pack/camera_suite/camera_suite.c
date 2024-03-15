@@ -43,16 +43,18 @@ CameraSuite* camera_suite_app_alloc() {
         app->view_dispatcher, camera_suite_custom_event_callback);
     app->submenu = submenu_alloc();
 
-    // Set defaults, in case no config loaded
-    app->orientation = 0; // Orientation is "portrait", zero degrees by default.
-    app->dither = 0; // Dither algorithm is "Floyd Steinberg" by default.
-    app->flash = 1; // Flash is enabled by default.
+    // Set app default settings values.
     app->haptic = 1; // Haptic is enabled by default
     app->jpeg = 0; // Save JPEG to ESP32-CAM sd-card is disabled by default.
     app->speaker = 1; // Speaker is enabled by default
     app->led = 1; // LED is enabled by default
 
-    // Load configs
+    // Set cam default settings values.
+    app->orientation = 0; // Orientation is "portrait", zero degrees by default.
+    app->dither = 0; // Dither algorithm is "Floyd Steinberg" by default.
+    app->flash = 1; // Flash is enabled by default.
+
+    // Load configs if available (overrides defaults).
     camera_suite_read_settings(app);
 
     view_dispatcher_add_view(
@@ -81,7 +83,11 @@ CameraSuite* camera_suite_app_alloc() {
     app->variable_item_list = variable_item_list_alloc();
     view_dispatcher_add_view(
         app->view_dispatcher,
-        CameraSuiteViewIdSettings,
+        CameraSuiteViewIdAppSettings,
+        variable_item_list_get_view(app->variable_item_list));
+    view_dispatcher_add_view(
+        app->view_dispatcher,
+        CameraSuiteViewIdCamSettings,
         variable_item_list_get_view(app->variable_item_list));
 
     //End Scene Additions
@@ -100,7 +106,8 @@ void camera_suite_app_free(CameraSuite* app) {
     view_dispatcher_remove_view(app->view_dispatcher, CameraSuiteViewIdMenu);
     view_dispatcher_remove_view(app->view_dispatcher, CameraSuiteViewIdCamera);
     view_dispatcher_remove_view(app->view_dispatcher, CameraSuiteViewIdGuide);
-    view_dispatcher_remove_view(app->view_dispatcher, CameraSuiteViewIdSettings);
+    view_dispatcher_remove_view(app->view_dispatcher, CameraSuiteViewIdAppSettings);
+    view_dispatcher_remove_view(app->view_dispatcher, CameraSuiteViewIdCamSettings);
     submenu_free(app->submenu);
 
     view_dispatcher_free(app->view_dispatcher);
@@ -110,6 +117,7 @@ void camera_suite_app_free(CameraSuite* app) {
     camera_suite_view_start_free(app->camera_suite_view_start);
     camera_suite_view_camera_free(app->camera_suite_view_camera);
     camera_suite_view_guide_free(app->camera_suite_view_guide);
+
     button_menu_free(app->button_menu);
     variable_item_list_free(app->variable_item_list);
 
