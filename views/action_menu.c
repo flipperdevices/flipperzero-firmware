@@ -119,73 +119,6 @@ static void action_menu_draw_landscape(Canvas* canvas, ActionMenuModel* model) {
     elements_scrollbar(canvas, model->position, ActionMenuItemArray_size(model->items));
 }
 
-// static void action_menu_draw_portrait(Canvas* canvas, ActionMenuModel* model) {
-//     const bool have_header = furi_string_size(model->header) && model->show_headers;
-//     const size_t items_per_screen = have_header ? ITEMS_PER_SCREEN_PORTRAIT :
-//                                                   ITEMS_PER_SCREEN_PORTRAIT + 1;
-//     const size_t active_screen = model->position / items_per_screen;
-//     const size_t items_size = ActionMenuItemArray_size(model->items);
-//     const size_t max_screen = items_size ? (items_size - 1) / items_per_screen : 0;
-
-//     canvas_clear(canvas);
-
-//     // Draw up/down arrows, as needed
-//     if(active_screen > 0) {
-//         canvas_draw_icon(canvas, 28, 1, &I_ArrowUp_8x4);
-//     }
-//     if(max_screen > active_screen) {
-//         canvas_draw_icon(canvas, 28, 123, &I_ArrowDown_8x4);
-//     }
-
-//     if(have_header) {
-//         canvas_set_font(canvas, FontPrimary);
-//         elements_string_fit_width(canvas, model->header, ITEM_WIDTH - 6);
-//         canvas_draw_str_aligned(
-//             canvas, 32, 10, AlignCenter, AlignCenter, furi_string_get_cstr(model->header));
-//     }
-//     canvas_set_font(canvas, FontSecondary);
-
-//     size_t item_position = 0;
-//     size_t item_first_offset = have_header ? ITEM_FIRST_OFFSET : 6;
-//     size_t item_next_offset = have_header ? ITEM_NEXT_OFFSET : ITEM_NEXT_OFFSET - 1;
-//     ActionMenuItemArray_it_t it;
-//     for(ActionMenuItemArray_it(it, model->items); !ActionMenuItemArray_end_p(it);
-//         ActionMenuItemArray_next(it), ++item_position) {
-//         if(active_screen == (item_position / items_per_screen)) {
-//             uint8_t position_offset = item_position % items_per_screen;
-//             bool selected = item_position == model->position;
-
-//             // draw the item
-//             uint8_t item_x = 0;
-//             uint8_t item_y =
-//                 item_first_offset + (position_offset * (ITEM_HEIGHT + item_next_offset));
-
-//             canvas_set_color(canvas, ColorBlack);
-
-//             if(selected) {
-//                 // Same as elements_slightly_rounded_box with radius of 5
-//                 canvas_draw_rbox(canvas, item_x, item_y, ITEM_WIDTH, ITEM_HEIGHT, 1);
-//                 canvas_set_color(canvas, ColorWhite);
-//             } else {
-//                 canvas_draw_rframe(canvas, item_x, item_y, ITEM_WIDTH, ITEM_HEIGHT, 1);
-//             }
-
-//             FuriString* disp_str;
-//             disp_str = furi_string_alloc_set(ActionMenuItemArray_cref(it)->label);
-//             elements_string_fit_width(canvas, disp_str, ITEM_WIDTH - 6);
-
-//             canvas_draw_str_aligned(
-//                 canvas,
-//                 item_x + (ITEM_WIDTH / 2),
-//                 item_y + (ITEM_HEIGHT / 2),
-//                 AlignCenter,
-//                 AlignCenter,
-//                 furi_string_get_cstr(disp_str));
-//             furi_string_free(disp_str);
-//         }
-//     }
-// }
-
 static void action_menu_draw_portrait(Canvas* canvas, ActionMenuModel* model) {
     const bool have_header = furi_string_size(model->header) && model->show_headers;
     const size_t items_per_screen = have_header ? ITEMS_PER_SCREEN_PORTRAIT :
@@ -300,7 +233,6 @@ static void action_menu_process_up(ActionMenu* action_menu) {
         true);
 }
 
-// TODO: Up/Down keys are obeyed in the correct orientation!
 static void action_menu_process_down(ActionMenu* action_menu) {
     furi_assert(action_menu);
 

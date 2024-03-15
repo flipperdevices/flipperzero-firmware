@@ -84,6 +84,8 @@ int32_t quac_app(void* p) {
     UNUSED(p);
     FURI_LOG_I(TAG, "QUAC! QUAC!");
 
+    size_t free_start = memmgr_get_free_heap();
+
     App* app = app_alloc();
     quac_load_settings(app);
 
@@ -94,5 +96,9 @@ int32_t quac_app(void* p) {
 
     furi_record_close(RECORD_GUI);
     app_free(app);
+
+    size_t free_end = memmgr_get_free_heap();
+    FURI_LOG_W(TAG, "Heap: Start = %d, End = %d", free_start, free_end);
+
     return 0;
 }
