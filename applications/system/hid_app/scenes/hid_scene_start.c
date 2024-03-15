@@ -58,7 +58,7 @@ void hid_scene_start_on_enter(void* context) {
 #ifdef HID_TRANSPORT_BLE
     submenu_add_item(
         app->submenu,
-        "Remove Pairing",
+        "Bluetooth Unpairing",
         HidSubmenuIndexRemovePairing,
         hid_scene_start_submenu_callback,
         app);

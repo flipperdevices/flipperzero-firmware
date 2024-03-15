@@ -54,7 +54,7 @@ static void hid_mouse_jiggler_draw_callback(Canvas* canvas, void* context) {
 
     // Back
     canvas_draw_icon(canvas, 74, 49, &I_Pin_back_arrow_10x8);
-    elements_multiline_text_aligned(canvas, 91, 57, AlignLeft, AlignBottom, "Quit");
+    elements_multiline_text_aligned(canvas, 91, 57, AlignLeft, AlignBottom, "Exit");
 }
 
 static void hid_mouse_jiggler_timer_callback(void* context) {
