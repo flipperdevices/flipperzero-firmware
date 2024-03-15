@@ -7,7 +7,6 @@ App(
     fap_category="GPIO",
     fap_icon="mouse_10px.png",
     fap_version="1.0",
-    fap_libs=["ble_profile"],
     sources=["*.c", "*.cc"],
     fap_libs=["ble_profile"],
 )
