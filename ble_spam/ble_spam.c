@@ -724,6 +724,9 @@ int32_t ble_spam(void* p) {
     furi_thread_free(state->thread);
     free(state);
 
+    if(furi_hal_bt_extra_beacon_is_active()) {
+        furi_check(furi_hal_bt_extra_beacon_stop());
+    }
     if(prev_cfg_ptr) {
         furi_check(furi_hal_bt_extra_beacon_set_config(&prev_cfg));
     }

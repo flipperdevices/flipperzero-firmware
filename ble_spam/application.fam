@@ -6,6 +6,7 @@ App(
     stack_size=2 * 1024,
     fap_icon="ble_spam_10px.png",
     fap_category="Bluetooth",
+    fap_file_assets="assets",
     fap_author="@Willy-JL @ECTO-1A @Spooks4576",
     fap_weburl="https://github.com/Next-Flip/Momentum-Apps/tree/dev/ble_spam",
     fap_version="6.0",
