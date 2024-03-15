@@ -332,7 +332,7 @@ void calculate(Calculator* calculator_state) {
             snprintf(
                 calculator_state->hexToBinResult,
                 sizeof(calculator_state->hexToBinResult),
-                "Error    ---------");
+                "Error    ---------Input:   64-bit");
         }
         break;
 
@@ -347,7 +347,7 @@ void calculate(Calculator* calculator_state) {
             snprintf(
                 calculator_state->hexToDecResult,
                 sizeof(calculator_state->hexToDecResult),
-                "Error    ---------");
+                "Error    ---------Input:   2^64 - 1");
         }
         break;
 
@@ -374,7 +374,7 @@ void calculate(Calculator* calculator_state) {
             snprintf(
                 calculator_state->binToHexResult,
                 sizeof(calculator_state->binToHexResult),
-                "Error    ---------");
+                "Error    ---------Input:   64-bit");
         }
         break;
 

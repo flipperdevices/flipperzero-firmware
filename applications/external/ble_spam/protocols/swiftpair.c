@@ -1,18 +1,48 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include "swiftpair.h"
 #include "_protocols.h"
+#include <storage/storage.h>
 
 // Hacked together by @Willy-JL and @Spooks4576
 // Documentation at https://learn.microsoft.com/en-us/windows-hardware/design/component-guidelines/bluetooth-swift-pair
 
-static const char* names[] = {
-    "Assquach💦",
-    "Flipper 🐬",
-    "iOS 17 🍎",
-    "Kink💦",
-    "👉👌",
-    "🔵🦷",
-};
-static const uint8_t names_count = COUNT_OF(names);
+static const char* make_name(const Payload* payload) {
+    UNUSED(payload);
+    static const char* names[256];
+    static uint8_t names_count = 0;
+
+    if(names_count == 0) {
+        Storage* storage = furi_record_open(RECORD_STORAGE);
+        if(storage) {
+            File* file = storage_file_alloc(storage);
+            if(storage_file_open(
+                   file, "/ext/apps_assets/ble_spam/winlist.txt", FSAM_READ, FSOM_OPEN_EXISTING)) {
+                char line[256];
+                uint64_t bytes_read = storage_file_read(file, line, sizeof(line));
+                if(bytes_read > 0) {
+                    line[bytes_read] = '\0';
+
+                    char* name = strtok(line, ",");
+                    while(name && names_count < 255) {
+                        names[names_count++] = strdup(name);
+                        name = strtok(NULL, ",");
+                    }
+                }
+                storage_file_close(file);
+            }
+            storage_file_free(file);
+            furi_record_close(RECORD_STORAGE);
+        }
+    }
+
+    if(names_count == 0) {
+        return "NameFlood";
+    } else {
+        return names[rand() % names_count];
+    }
+}
 
 static const char* get_name(const Payload* payload) {
     UNUSED(payload);
@@ -26,7 +56,7 @@ static void make_packet(uint8_t* _size, uint8_t** _packet, Payload* payload) {
     switch(cfg ? payload->mode : PayloadModeRandom) {
     case PayloadModeRandom:
     default:
-        name = names[rand() % names_count];
+        name = make_name(payload);
         break;
     case PayloadModeValue:
         name = cfg->name;
