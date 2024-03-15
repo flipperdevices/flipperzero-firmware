@@ -9,5 +9,4 @@ App(
     fap_version="1.0",
     fap_libs=["ble_profile"],
     sources=["*.c", "*.cc"],
-    fap_libs=["ble_profile"],
 )
