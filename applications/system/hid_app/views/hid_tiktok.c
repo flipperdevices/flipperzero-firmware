@@ -83,7 +83,9 @@ static void hid_tiktok_draw_callback(Canvas* canvas, void* context) {
 
     // Ok
     if(model->ok_pressed) {
+        canvas_set_bitmap_mode(canvas, true);
         canvas_draw_icon(canvas, 91, 23, &I_Like_pressed_17x17);
+        canvas_set_bitmap_mode(canvas, false);
     } else {
         canvas_draw_icon(canvas, 93, 27, &I_Like_def_13x11);
     }

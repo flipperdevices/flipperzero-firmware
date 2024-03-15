@@ -92,7 +92,9 @@ static void hid_mouse_draw_callback(Canvas* canvas, void* context) {
 
     // Ok
     if(model->left_mouse_pressed) {
+        canvas_set_bitmap_mode(canvas, true);
         canvas_draw_icon(canvas, 81, 25, &I_Ok_btn_pressed_13x13);
+        canvas_set_bitmap_mode(canvas, false);
     } else {
         canvas_draw_icon(canvas, 83, 27, &I_Left_mouse_icon_9x9);
     }
