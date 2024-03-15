@@ -39,33 +39,33 @@ static void hid_tiktok_draw_callback(Canvas* canvas, void* context) {
     canvas_set_font(canvas, FontSecondary);
 
     // Keypad circles
-    canvas_draw_icon(canvas, 75, 8, &I_Dpad_49x46);
+    canvas_draw_icon(canvas, 75, 9, &I_Dpad_49x46);
 
     // Up
     if(model->up_pressed) {
-        canvas_set_bitmap_mode(canvas, 1);
-        canvas_draw_icon(canvas, 93, 9, &I_Pressed_Button_13x13);
-        canvas_set_bitmap_mode(canvas, 0);
+        canvas_set_bitmap_mode(canvas, true);
+        canvas_draw_icon(canvas, 93, 10, &I_Pressed_Button_13x13);
+        canvas_set_bitmap_mode(canvas, false);
         canvas_set_color(canvas, ColorWhite);
     }
-    canvas_draw_icon(canvas, 96, 11, &I_Arr_up_7x9);
+    canvas_draw_icon(canvas, 96, 12, &I_Arr_up_7x9);
     canvas_set_color(canvas, ColorBlack);
 
     // Down
     if(model->down_pressed) {
-        canvas_set_bitmap_mode(canvas, 1);
+        canvas_set_bitmap_mode(canvas, true);
         canvas_draw_icon(canvas, 93, 41, &I_Pressed_Button_13x13);
-        canvas_set_bitmap_mode(canvas, 0);
+        canvas_set_bitmap_mode(canvas, false);
         canvas_set_color(canvas, ColorWhite);
     }
-    canvas_draw_icon(canvas, 96, 44, &I_Arr_dwn_7x9);
+    canvas_draw_icon(canvas, 96, 43, &I_Arr_dwn_7x9);
     canvas_set_color(canvas, ColorBlack);
 
     // Left
     if(model->left_pressed) {
-        canvas_set_bitmap_mode(canvas, 1);
+        canvas_set_bitmap_mode(canvas, true);
         canvas_draw_icon(canvas, 77, 25, &I_Pressed_Button_13x13);
-        canvas_set_bitmap_mode(canvas, 0);
+        canvas_set_bitmap_mode(canvas, false);
         canvas_set_color(canvas, ColorWhite);
     }
     canvas_draw_icon(canvas, 81, 29, &I_Voldwn_6x6);
@@ -73,19 +73,19 @@ static void hid_tiktok_draw_callback(Canvas* canvas, void* context) {
 
     // Right
     if(model->right_pressed) {
-        canvas_set_bitmap_mode(canvas, 1);
-        canvas_draw_icon(canvas, 109, 25, &I_Pressed_Button_13x13);
-        canvas_set_bitmap_mode(canvas, 0);
+        canvas_set_bitmap_mode(canvas, true);
+        canvas_draw_icon(canvas, 110, 25, &I_Pressed_Button_13x13);
+        canvas_set_bitmap_mode(canvas, false);
         canvas_set_color(canvas, ColorWhite);
     }
-    canvas_draw_icon(canvas, 111, 29, &I_Volup_8x6);
+    canvas_draw_icon(canvas, 112, 29, &I_Volup_8x6);
     canvas_set_color(canvas, ColorBlack);
 
     // Ok
     if(model->ok_pressed) {
         canvas_draw_icon(canvas, 91, 23, &I_Like_pressed_17x17);
     } else {
-        canvas_draw_icon(canvas, 94, 27, &I_Like_def_11x9);
+        canvas_draw_icon(canvas, 93, 27, &I_Like_def_13x11);
     }
     // Exit
     canvas_draw_icon(canvas, 0, 54, &I_Pin_back_arrow_10x8);
