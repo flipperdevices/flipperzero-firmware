@@ -6,9 +6,10 @@ App(
     apptype=FlipperAppType.EXTERNAL,
     # Main function (entry point) of the application
     entry_point="voltcalc_app_main",
-    stack_size=2* 1024,
+    stack_size=2 * 1024,
     # Where the application will be stored into the Flip.x0
     fap_category="Electronics",
+    requires=["gui"],
     # Directory of applications image assets
     # If you want to insert images in your application, you have to specify the
     # directory of your image in the fap_icon_assets of your application.fam.
@@ -21,7 +22,7 @@ App(
     fap_icon_assets="icons",
     # Optional values
     fap_version=(1, 1),
-    fap_description="Voltage calculations",
+    fap_description="Voltage (VRI) calculations",
     fap_author="HappyAmos",
     fap_weburl="https://github.com/HappyAmos/",
 )
