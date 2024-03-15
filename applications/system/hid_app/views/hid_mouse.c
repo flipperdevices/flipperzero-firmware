@@ -94,14 +94,14 @@ static void hid_mouse_draw_callback(Canvas* canvas, void* context) {
     if(model->left_mouse_pressed) {
         canvas_draw_icon(canvas, 81, 26, &I_Ok_btn_pressed_13x12);
     } else {
-        canvas_draw_icon(canvas, 83, 27, &I_Left_mouse_icon_9x9);
+        canvas_draw_icon(canvas, 83, 27, &I_Left_mouse_icon_9x10);
     }
 
     // Back
     if(model->right_mouse_pressed) {
-        canvas_draw_icon(canvas, 108, 48, &I_Ok_btn_pressed_13x12);
+        canvas_draw_icon(canvas, 108, 49, &I_Ok_btn_pressed_13x12);
     } else {
-        canvas_draw_icon(canvas, 110, 50, &I_Right_mouse_icon_9x9);
+        canvas_draw_icon(canvas, 110, 50, &I_Right_mouse_icon_9x10);
     }
 }
 
