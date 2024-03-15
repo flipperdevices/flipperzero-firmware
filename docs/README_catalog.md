@@ -3,18 +3,18 @@
 ## Introduction
 A Calculator for Programmers!
 
-## Instructions for use.
 
-### Basic Controls
+## Basic Controls
+
 - "**<**" (Backspace) : Press the < button to delete the last digit from the input field. This can be used to correct mistakes or modify your input before conversion.
 - "**=**" (Convert): Press the = button to convert the input digits according to the selected mode. Ensure your input is within the mode's threshold for a successful conversion.
 - "**CLR**" (Clear): Use the CLR button to clear both the input and output fields, resetting them for a new conversion.
 
-### Selecting Modes
+## Selecting Modes
+
 Press "**M**" to cycle through and select the conversion mode you need. 
 - Each mode has its specific use and threshold limits:
 
-#### Conversion Capabilities
 
 | Conversion Mode       | Description              | Threshold             |
 |-----------------------|--------------------------|-----------------------|
@@ -27,8 +27,8 @@ Press "**M**" to cycle through and select the conversion mode you need.
 | **bin >> hex**        | Binary to Hexadecimal    | up to 64-bit inputs   |
 
 
-### Confirming Selections
-OK: After choosing your desired mode with M, press the OK button to confirm your selection and proceed with the conversion.
+## Confirming Selections
+"**OK**": After choosing your desired mode with "**M**", press the OK button to confirm your selection and proceed with the conversion.
 
 ## TODO
 - Refactor Code
