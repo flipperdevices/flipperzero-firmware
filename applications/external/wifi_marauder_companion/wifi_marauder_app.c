@@ -95,13 +95,11 @@ WifiMarauderApp* wifi_marauder_app_alloc() {
 void wifi_marauder_make_app_folder(WifiMarauderApp* app) {
     furi_assert(app);
 
-    // Maybe app asset path gets created elsewhere?
-    // if(!storage_common_exists(app->storage, MARAUDER_APP_FOLDER) && !storage_simply_mkdir(app->storage, MARAUDER_APP_FOLDER)) {
-    // dialog_message_show_storage_error(app->dialogs, "Cannot create\napp folder");
-    // }
+    if(!storage_simply_mkdir(app->storage, MARAUDER_APP_FOLDER)) {
+        dialog_message_show_storage_error(app->dialogs, "Cannot create\napp folder");
+    }
 
-    if(!storage_common_exists(app->storage, MARAUDER_APP_FOLDER_PCAPS) &&
-       !storage_simply_mkdir(app->storage, MARAUDER_APP_FOLDER_PCAPS)) {
+    if(!storage_simply_mkdir(app->storage, MARAUDER_APP_FOLDER_PCAPS)) {
         dialog_message_show_storage_error(app->dialogs, "Cannot create\npcaps folder");
     }
 
@@ -109,23 +107,19 @@ void wifi_marauder_make_app_folder(WifiMarauderApp* app) {
         dialog_message_show_storage_error(app->dialogs, "Cannot create\ndumps folder");
     }
 
-    if(!storage_common_exists(app->storage, MARAUDER_APP_FOLDER_LOGS) &&
-       !storage_simply_mkdir(app->storage, MARAUDER_APP_FOLDER_LOGS)) {
-        dialog_message_show_storage_error(app->dialogs, "Cannot create\npcaps folder");
+    if(!storage_simply_mkdir(app->storage, MARAUDER_APP_FOLDER_LOGS)) {
+        dialog_message_show_storage_error(app->dialogs, "Cannot create\nlogs folder");
     }
 
-    if(!storage_common_exists(app->storage, MARAUDER_APP_FOLDER_SCRIPTS) &&
-       !storage_simply_mkdir(app->storage, MARAUDER_APP_FOLDER_SCRIPTS)) {
+    if(!storage_simply_mkdir(app->storage, MARAUDER_APP_FOLDER_SCRIPTS)) {
         dialog_message_show_storage_error(app->dialogs, "Cannot create\nscripts folder");
     }
 
-    if(!storage_common_exists(app->storage, MARAUDER_APP_FOLDER_EVILPORTAL) &&
-       !storage_simply_mkdir(app->storage, MARAUDER_APP_FOLDER_EVILPORTAL)) {
+    if(!storage_simply_mkdir(app->storage, MARAUDER_APP_FOLDER_EVILPORTAL)) {
         dialog_message_show_storage_error(app->dialogs, "Cannot create\nevil portal\nfolder");
     }
 
-    if(!storage_common_exists(app->storage, MARAUDER_APP_FOLDER_HTML) &&
-       !storage_simply_mkdir(app->storage, MARAUDER_APP_FOLDER_HTML)) {
+    if(!storage_simply_mkdir(app->storage, MARAUDER_APP_FOLDER_HTML)) {
         dialog_message_show_storage_error(app->dialogs, "Cannot create\nhtml folder");
     }
 }
