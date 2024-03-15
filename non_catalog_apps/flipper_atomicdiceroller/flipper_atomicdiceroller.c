@@ -33,10 +33,12 @@ typedef struct {
 typedef struct {
     FuriMutex* mutex;
     uint32_t cps;
-    uint32_t diceAvailiable;
+    uint8_t diceAvailiable;
     uint8_t dice;
     uint8_t method;
     uint8_t pause;
+    uint8_t tickCounter;
+    uint8_t range;
 } mutexStruct;
 
 static void draw_callback(Canvas* canvas, void* ctx) {
@@ -51,18 +53,70 @@ static void draw_callback(Canvas* canvas, void* ctx) {
     snprintf(buffer, sizeof(buffer), "%ld cps", mutexDraw.cps);
     canvas_draw_str_aligned(canvas, 0, 10, AlignLeft, AlignBottom, buffer);
 
-    snprintf(buffer, sizeof(buffer), "%lu/64", mutexDraw.diceAvailiable);
+    snprintf(buffer, sizeof(buffer), "%u/64", mutexDraw.diceAvailiable);
     canvas_draw_str_aligned(canvas, SCREEN_SIZE_X, 10, AlignRight, AlignBottom, buffer);
 
-    if(mutexDraw.method == 0)
-        canvas_draw_str_aligned(canvas, 0, 20, AlignLeft, AlignBottom, "Hash: CRC32");
-    else
-        canvas_draw_str_aligned(canvas, 0, 20, AlignLeft, AlignBottom, "Hash: MD5");
+    if(mutexDraw.method == 0) {
+        if(mutexDraw.tickCounter < 2) {
+            buffer[0] = '-';
+            buffer[1] = '-';
+            buffer[2] = '-';
+            buffer[3] = '\0';
+        } else if(mutexDraw.tickCounter < 4) {
+            buffer[0] = '+';
+            buffer[1] = '-';
+            buffer[2] = '-';
+            buffer[3] = '\0';
+        } else if(mutexDraw.tickCounter < 6) {
+            buffer[0] = '+';
+            buffer[1] = '+';
+            buffer[2] = '-';
+            buffer[3] = '\0';
+        } else {
+            buffer[0] = '+';
+            buffer[1] = '+';
+            buffer[2] = '+';
+            buffer[3] = '\0';
+        }
+    } else {
+        if(mutexDraw.tickCounter < 8) {
+            buffer[0] = '-';
+            buffer[1] = '-';
+            buffer[2] = '-';
+            buffer[3] = '\0';
+        } else if(mutexDraw.tickCounter < 16) {
+            buffer[0] = '+';
+            buffer[1] = '-';
+            buffer[2] = '-';
+            buffer[3] = '\0';
+        } else if(mutexDraw.tickCounter < 24) {
+            buffer[0] = '+';
+            buffer[1] = '+';
+            buffer[2] = '-';
+            buffer[3] = '\0';
+        } else {
+            buffer[0] = '+';
+            buffer[1] = '+';
+            buffer[2] = '+';
+            buffer[3] = '\0';
+        }
+    }
+    canvas_draw_str_aligned(canvas, SCREEN_SIZE_X - 5, 20, AlignRight, AlignBottom, buffer);
 
-    if(mutexDraw.dice != 0 && mutexDraw.pause == 0) {
+    if(mutexDraw.method == 0)
+        canvas_draw_str_aligned(canvas, 0, 22, AlignLeft, AlignBottom, "Hash: CRC32");
+    else
+        canvas_draw_str_aligned(canvas, 0, 22, AlignLeft, AlignBottom, "Hash: MD5");
+
+    if(mutexDraw.range == 0)
+        canvas_draw_str_aligned(canvas, 0, 34, AlignLeft, AlignBottom, "Range: 0-1");
+    else
+        canvas_draw_str_aligned(canvas, 0, 34, AlignLeft, AlignBottom, "Range: 1-6");
+
+    if(mutexDraw.pause == 0) {
         canvas_set_font(canvas, FontBigNumbers);
         snprintf(buffer, sizeof(buffer), "%u", mutexDraw.dice);
-        canvas_draw_str_aligned(canvas, SCREEN_SIZE_X / 2, 50, AlignCenter, AlignBottom, buffer);
+        canvas_draw_str_aligned(canvas, SCREEN_SIZE_X / 2, 54, AlignCenter, AlignBottom, buffer);
     }
 }
 
@@ -99,7 +153,7 @@ static void gpiocallback(void* ctx) {
 int32_t flipper_atomicdiceroller_app() {
     Expansion* expansion = furi_record_open(RECORD_EXPANSION);
     expansion_disable(expansion);
-    
+
     furi_hal_bus_enable(FuriHalBusTIM2);
     LL_TIM_SetCounterMode(TIM2, LL_TIM_COUNTERMODE_UP);
     LL_TIM_SetClockDivision(TIM2, LL_TIM_CLOCKDIVISION_DIV1);
@@ -111,13 +165,13 @@ int32_t flipper_atomicdiceroller_app() {
     EventApp event;
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(EventApp));
 
-    furi_hal_gpio_init(&gpio_ext_pa7, GpioModeInterruptFall, GpioPullUp, GpioSpeedVeryHigh);
-
     mutexStruct mutexVal;
     mutexVal.cps = 0;
     mutexVal.dice = 0;
     mutexVal.diceAvailiable = 0;
     mutexVal.method = 0;
+    mutexVal.tickCounter = 0;
+    mutexVal.range = 0;
     uint32_t counter = 0;
 
     mutexVal.mutex = furi_mutex_alloc(FuriMutexTypeNormal);
@@ -133,6 +187,8 @@ int32_t flipper_atomicdiceroller_app() {
     view_port_input_callback_set(view_port, input_callback, event_queue);
 
     furi_hal_gpio_add_int_callback(&gpio_ext_pa7, gpiocallback, event_queue);
+    furi_hal_gpio_enable_int_callback(&gpio_ext_pa7);
+    furi_hal_gpio_init(&gpio_ext_pa7, GpioModeInterruptFall, GpioPullUp, GpioSpeedVeryHigh);
 
     Gui* gui = furi_record_open(RECORD_GUI);
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
@@ -159,6 +215,7 @@ int32_t flipper_atomicdiceroller_app() {
     uint8_t tickCounter = 0;
     uint32_t CRC32 = 0;
     uint8_t method = 0;
+    uint8_t range = 0;
 
     // MD5
     mbedtls_md5_context md5_ctx;
@@ -206,8 +263,9 @@ int32_t flipper_atomicdiceroller_app() {
                             tickCounter = 0;
                             furi_mutex_acquire(mutexVal.mutex, FuriWaitForever);
                             mutexVal.method = 0;
-                            mutexVal.dice = 0;
+                            mutexVal.pause = 1;
                             mutexVal.diceAvailiable = 0;
+                            mutexVal.tickCounter = 0;
                             furi_mutex_release(mutexVal.mutex);
                             screenRefresh = 1;
                         }
@@ -221,8 +279,41 @@ int32_t flipper_atomicdiceroller_app() {
                             tickCounter = 0;
                             furi_mutex_acquire(mutexVal.mutex, FuriWaitForever);
                             mutexVal.method = 1;
-                            mutexVal.dice = 0;
+                            mutexVal.pause = 1;
                             mutexVal.diceAvailiable = 0;
+                            mutexVal.tickCounter = 0;
+                            furi_mutex_release(mutexVal.mutex);
+                            screenRefresh = 1;
+                        }
+                    } else if(event.input.key == InputKeyUp && event.input.type == InputTypeLong) {
+                        if(range > 0) {
+                            range--;
+                            diceBufferPositionWrite = 0;
+                            diceBufferPositionRead = 0;
+                            diceBufferCounter = 0;
+                            mbedtls_md5_starts(&md5_ctx);
+                            tickCounter = 0;
+                            furi_mutex_acquire(mutexVal.mutex, FuriWaitForever);
+                            mutexVal.pause = 1;
+                            mutexVal.diceAvailiable = 0;
+                            mutexVal.tickCounter = 0;
+                            mutexVal.range = range;
+                            furi_mutex_release(mutexVal.mutex);
+                            screenRefresh = 1;
+                        }
+                    } else if(event.input.key == InputKeyDown && event.input.type == InputTypeLong) {
+                        if(range < 1) {
+                            range++;
+                            diceBufferPositionWrite = 0;
+                            diceBufferPositionRead = 0;
+                            diceBufferCounter = 0;
+                            mbedtls_md5_starts(&md5_ctx);
+                            tickCounter = 0;
+                            furi_mutex_acquire(mutexVal.mutex, FuriWaitForever);
+                            mutexVal.pause = 1;
+                            mutexVal.diceAvailiable = 0;
+                            mutexVal.tickCounter = 0;
+                            mutexVal.range = range;
                             furi_mutex_release(mutexVal.mutex);
                             screenRefresh = 1;
                         }
@@ -231,6 +322,7 @@ int32_t flipper_atomicdiceroller_app() {
             } else if(event.type == ClockEventTypeTick) {
                 furi_mutex_acquire(mutexVal.mutex, FuriWaitForever);
                 mutexVal.cps = counter;
+                mutexVal.tickCounter = tickCounter;
                 furi_mutex_release(mutexVal.mutex);
 
                 counter = 0;
@@ -257,13 +349,9 @@ int32_t flipper_atomicdiceroller_app() {
                         tickCounter++;
 
                         if(tickCounter == 8) {
-                            uint8_t localDice = CRC32 & 0b111;
+                            if(range == 0) {
+                                uint8_t localDice = CRC32 & 0b1;
 
-                            if(localDice == 0 || localDice == 7) {
-                                localDice = (diceBuffer[diceBufferPositionRead] >> 3) & 0b111;
-                            }
-
-                            if(localDice >= 1 && localDice <= 6) {
                                 diceBuffer[diceBufferPositionWrite] = localDice;
                                 diceBufferCounter++;
                                 if(diceBufferPositionWrite != 63)
@@ -276,6 +364,27 @@ int32_t flipper_atomicdiceroller_app() {
                                 furi_mutex_release(mutexVal.mutex);
 
                                 screenRefresh = 1;
+                            } else if(range == 1) {
+                                uint8_t localDice = CRC32 & 0b111;
+
+                                if(localDice == 0 || localDice == 7) {
+                                    localDice = (diceBuffer[diceBufferPositionRead] >> 3) & 0b111;
+                                }
+
+                                if(localDice >= 1 && localDice <= 6) {
+                                    diceBuffer[diceBufferPositionWrite] = localDice;
+                                    diceBufferCounter++;
+                                    if(diceBufferPositionWrite != 63)
+                                        diceBufferPositionWrite++;
+                                    else
+                                        diceBufferPositionWrite = 0;
+
+                                    furi_mutex_acquire(mutexVal.mutex, FuriWaitForever);
+                                    mutexVal.diceAvailiable = diceBufferCounter;
+                                    furi_mutex_release(mutexVal.mutex);
+
+                                    screenRefresh = 1;
+                                }
                             }
 
                             CRC32 = 0;
@@ -298,8 +407,8 @@ int32_t flipper_atomicdiceroller_app() {
                             uint8_t localDice = 0;
 
                             for(uint8_t i = 0; i < 16; i++) {
-                                localDice = hash[i] & 0b111;
-                                if(localDice >= 1 && localDice <= 6) {
+                                if(range == 0) {
+                                    localDice = hash[i] & 0b1;
                                     diceBuffer[diceBufferPositionWrite] = localDice;
                                     diceBufferCounter++;
                                     if(diceBufferPositionWrite != 63)
@@ -313,6 +422,23 @@ int32_t flipper_atomicdiceroller_app() {
 
                                     screenRefresh = 1;
                                     break;
+                                } else if(range == 1) {
+                                    localDice = hash[i] & 0b111;
+                                    if(localDice >= 1 && localDice <= 6) {
+                                        diceBuffer[diceBufferPositionWrite] = localDice;
+                                        diceBufferCounter++;
+                                        if(diceBufferPositionWrite != 63)
+                                            diceBufferPositionWrite++;
+                                        else
+                                            diceBufferPositionWrite = 0;
+
+                                        furi_mutex_acquire(mutexVal.mutex, FuriWaitForever);
+                                        mutexVal.diceAvailiable = diceBufferCounter;
+                                        furi_mutex_release(mutexVal.mutex);
+
+                                        screenRefresh = 1;
+                                        break;
+                                    }
                                 }
                             }
 
