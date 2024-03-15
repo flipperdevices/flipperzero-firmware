@@ -29,8 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0314-2303-0.99.2-9df70f1](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-03-15 11:45 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-03-15 11:45 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-03-15 12:30 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-03-15 12:30 EST`
 - Updated: [J305 Geiger Counter v1.2 (By nmrr)](https://github.com/nmrr/flipperzero-geigercounter)
 - Updated: [ESP32 Camera Suite v1.7 (By CodyTolene)](https://github.com/CodyTolene/Flipper-Zero-Camera-Suite)
 - Updated: [JS Runner v1.0 (By nminaylov & DrZlo13)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/3286) [JS: added GPIO module (By Sil333033)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/46a761605f0f7466551e8baa127dcc1b1a359a37) [Updates to GPIO & Storage Append (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/0cb1a859e7c67fc0ca0afa35320c2c823c164f4f)
@@ -56,6 +56,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - [Marauder: Save Wardrive and EvilPortal dumps to Flipper SD (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/f9b14fca2292f62aa6367c606eee61060d49dd29)
 - UL: [Name Generator Improvements (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/89abfe02665e63929a000a3f1d9b6e29ed0cb834)
 - UL: [test swap em4100 t5577 blocks (issue 3463 ofw) (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/89abfe02665e63929a000a3f1d9b6e29ed0cb834)
+- Updated: [Bad KB and a few other minor updates (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/1f43af08a0fa3f2a368108cc7a39cfe782097b93)
 
 <a name="release">
 

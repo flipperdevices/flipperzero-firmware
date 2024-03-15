@@ -376,7 +376,7 @@ BadKbApp* bad_kb_app_alloc(char* arg) {
         bad_kb_script_set_keyboard_layout(app->bad_kb_script, app->keyboard_layout);
         scene_manager_next_scene(app->scene_manager, BadKbSceneWork);
     } else {
-        furi_string_set(app->file_path, BAD_USB_APP_BASE_FOLDER);
+        furi_string_set(app->file_path, BAD_KB_APP_BASE_FOLDER);
         scene_manager_next_scene(app->scene_manager, BadKbSceneFileSelect);
     }
 
