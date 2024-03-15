@@ -29,8 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0314-1523-0.99.2-18e367c](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-03-14 18:02 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-03-14 18:02 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-03-14 22:50 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-03-14 22:50 EST`
 - Updated: [J305 Geiger Counter v1.2 (By nmrr)](https://github.com/nmrr/flipperzero-geigercounter)
 - Updated: [ESP32 Camera Suite v1.7 (By CodyTolene)](https://github.com/CodyTolene/Flipper-Zero-Camera-Suite)
 - Updated: [JS Runner v1.0 (By nminaylov & DrZlo13)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/3286) [JS: added GPIO module (By Sil333033)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/46a761605f0f7466551e8baa127dcc1b1a359a37) [Updates to GPIO & Storage Append (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/0cb1a859e7c67fc0ca0afa35320c2c823c164f4f)
@@ -49,10 +49,11 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Authenticator/TOTP v5.13.0 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
 - JS Script: [BadUSB_Win_Exfil-GSHD.js Updated (By Gas Station Hot Dog & b0r0xZ & mistura.)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/48db90e2dd54162c3667f4a9ae74cf2921a3c159)
 - Added: [Evil Portal Asset: `RickrollWithRespond.html` (By feder133)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/12121e1c0fcf7c5377c6b84f24784270020232d3)
-- Updated: [BLE Spam v6.1 (By Willy-JL & ECTO-1A & Spooks4576 with research from xMasterX; OFW API thanks to noproto)](https://github.com/Next-Flip/Momentum-Apps/tree/dev/ble_spam)
 - OFW: PR: [Infrared: Add Fujitsu ASYG24KMTB #3513 (By aprosvetova)](https://github.com/flipperdevices/flipperzero-firmware/pull/3513)
 - OFW: PR: [NFC: Slix privacy password reveal and Desfire detect fix #3504 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3504)
 - OFW: PR: [Infrared fixes and more #3515 (By gsurkov)](https://github.com/flipperdevices/flipperzero-firmware/pull/3515)
+- Updated: [BLE Spam v6.1 (By Willy-JL & ECTO-1A & Spooks4576 with research from xMasterX; OFW API thanks to noproto)](https://github.com/Next-Flip/Momentum-Apps/tree/dev/ble_spam) [Name Flood Customization (By AbeNaws)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/c0f3b50096a76da7286577b24fed02de5c94be42)
+- [Marauder: Save Wardrive and EvilPortal dumps to Flipper SD (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/f9b14fca2292f62aa6367c606eee61060d49dd29)
 
 <a name="release">
 
