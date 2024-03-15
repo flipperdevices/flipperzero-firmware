@@ -10,8 +10,13 @@ void bad_kb_scene_config_usb_vidpid_on_enter(void* context) {
     BadKbApp* bad_kb = context;
     ByteInput* byte_input = bad_kb->byte_input;
 
-    bad_kb->usb_vidpid_buf[0] = __REVSH(bad_kb->config.usb.vid);
-    bad_kb->usb_vidpid_buf[1] = __REVSH(bad_kb->config.usb.pid);
+    if(bad_kb->set_usb_id) {
+        bad_kb->usb_vidpid_buf[0] = __REVSH(bad_kb->id_config.usb.vid);
+        bad_kb->usb_vidpid_buf[1] = __REVSH(bad_kb->id_config.usb.pid);
+    } else {
+        bad_kb->usb_vidpid_buf[0] = __REVSH(bad_kb->config.usb.vid);
+        bad_kb->usb_vidpid_buf[1] = __REVSH(bad_kb->config.usb.pid);
+    }
     byte_input_set_header_text(byte_input, "Set USB VID:PID");
 
     byte_input_set_result_callback(
@@ -32,8 +37,14 @@ bool bad_kb_scene_config_usb_vidpid_on_event(void* context, SceneManagerEvent ev
     if(event.type == SceneManagerEventTypeCustom) {
         consumed = true;
         if(event.event == BadKbAppCustomEventByteInputDone) {
+            // Set user config and remember
             bad_kb->config.usb.vid = __REVSH(bad_kb->usb_vidpid_buf[0]);
             bad_kb->config.usb.pid = __REVSH(bad_kb->usb_vidpid_buf[1]);
+            // Apply to ID config so its temporarily overridden
+            if(bad_kb->set_usb_id) {
+                bad_kb->id_config.usb.vid = bad_kb->config.usb.vid;
+                bad_kb->id_config.usb.pid = bad_kb->config.usb.pid;
+            }
             bad_kb_config_refresh(bad_kb);
         }
         scene_manager_previous_scene(bad_kb->scene_manager);
