@@ -60,7 +60,7 @@ static void hid_media_draw_callback(Canvas* canvas, void* context) {
     if(model->up_pressed) {
         canvas_set_bitmap_mode(canvas, true);
         canvas_draw_icon(canvas, 93, 10, &I_Pressed_Button_13x13);
-        canvas_set_bitmap_mode(canvas, 0);
+        canvas_set_bitmap_mode(canvas, false);
         canvas_set_color(canvas, ColorWhite);
     }
     canvas_draw_icon(canvas, 96, 13, &I_Volup_8x6);
@@ -68,9 +68,9 @@ static void hid_media_draw_callback(Canvas* canvas, void* context) {
 
     // Down
     if(model->down_pressed) {
-        canvas_set_bitmap_mode(canvas, 1);
+        canvas_set_bitmap_mode(canvas, true);
         canvas_draw_icon(canvas, 93, 41, &I_Pressed_Button_13x13);
-        canvas_set_bitmap_mode(canvas, 0);
+        canvas_set_bitmap_mode(canvas, false);
         canvas_set_color(canvas, ColorWhite);
     }
     canvas_draw_icon(canvas, 96, 44, &I_Voldwn_6x6);
@@ -78,9 +78,9 @@ static void hid_media_draw_callback(Canvas* canvas, void* context) {
 
     // Left
     if(model->left_pressed) {
-        canvas_set_bitmap_mode(canvas, 1);
+        canvas_set_bitmap_mode(canvas, true);
         canvas_draw_icon(canvas, 77, 25, &I_Pressed_Button_13x13);
-        canvas_set_bitmap_mode(canvas, 0);
+        canvas_set_bitmap_mode(canvas, false);
         canvas_set_color(canvas, ColorWhite);
     }
     hid_media_draw_arrow(canvas, 82, 31, CanvasDirectionRightToLeft);
@@ -89,9 +89,9 @@ static void hid_media_draw_callback(Canvas* canvas, void* context) {
 
     // Right
     if(model->right_pressed) {
-        canvas_set_bitmap_mode(canvas, 1);
+        canvas_set_bitmap_mode(canvas, true);
         canvas_draw_icon(canvas, 109, 25, &I_Pressed_Button_13x13);
-        canvas_set_bitmap_mode(canvas, 0);
+        canvas_set_bitmap_mode(canvas, false);
         canvas_set_color(canvas, ColorWhite);
     }
     hid_media_draw_arrow(canvas, 112, 31, CanvasDirectionLeftToRight);
