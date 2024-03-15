@@ -167,7 +167,7 @@ static void js_dialog_pick_file(struct mjs* mjs) {
     DialogsApp* dialogs = furi_record_open(RECORD_DIALOGS);
     const DialogsFileBrowserOptions browser_options = {
         .extension = extension,
-        .icon = &I_file_10px,
+        .icon = &I_Apps_10px,
         .base_path = base_path,
     };
     FuriString* path = furi_string_alloc_set(base_path);

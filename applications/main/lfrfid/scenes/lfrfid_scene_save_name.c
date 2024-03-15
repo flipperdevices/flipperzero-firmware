@@ -12,14 +12,8 @@ void lfrfid_scene_save_name_on_enter(void* context) {
     if(key_name_is_empty) {
         furi_string_set(app->file_path, LFRFID_APP_FOLDER);
 
-        FuriString* prefix =
-            furi_string_alloc_set(protocol_dict_get_name(app->dict, app->protocol_id));
-        furi_string_replace_all(prefix, "/", "_");
-        furi_string_replace_all(prefix, " ", "_");
-        furi_string_left(prefix, 11);
-        name_generator_make_auto(
-            app->text_store, LFRFID_TEXT_STORE_SIZE, furi_string_get_cstr(prefix));
-        furi_string_free(prefix);
+        name_generator_make_auto_basic(
+            app->text_store, LFRFID_TEXT_STORE_SIZE, LFRFID_APP_FILENAME_PREFIX);
 
         furi_string_set(folder_path, LFRFID_APP_FOLDER);
     } else {
