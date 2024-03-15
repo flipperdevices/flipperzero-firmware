@@ -147,7 +147,8 @@ void wifi_marauder_scene_console_output_on_enter(void* context) {
         if(_wifi_marauder_is_saving_enabled(app)) {
             const char* folder = NULL;
             const char* extension = NULL;
-            if(strncmp("sniff", app->selected_tx_string, strlen("sniff")) == 0) {
+            if(app->script || // Scripts only support sniff functions, but selected_tx_string is empty
+               strncmp("sniff", app->selected_tx_string, strlen("sniff")) == 0) {
                 folder = MARAUDER_APP_FOLDER_PCAPS;
                 extension = "pcap";
             } else {
