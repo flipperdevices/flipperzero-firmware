@@ -11,6 +11,6 @@ App(
     fap_file_assets="barcode_encoding_files",
     fap_author="@Kingal1337",
     fap_weburl="https://github.com/Kingal1337/flipper-barcode-generator",
-    fap_version="1.1",
+    fap_version="1.2",
     fap_description="App allows you to display various barcodes on flipper screen",
 )

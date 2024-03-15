@@ -242,6 +242,10 @@ void submenu_callback(void* context, uint32_t index) {
         edit_barcode_item(app);
     } else if(index == CreateBarcodeItem) {
         create_barcode_item(app);
+    } else if(index == AboutWidgetItem) {
+        view_dispatcher_switch_to_view(app->view_dispatcher, AboutWidgetView);
+    } else if(index == ErrorCodesWidgetItem) {
+        view_dispatcher_switch_to_view(app->view_dispatcher, ErrorCodesWidgetView);
     }
 }
 
@@ -268,6 +272,12 @@ void free_app(BarcodeApp* app) {
 
     view_dispatcher_remove_view(app->view_dispatcher, TextInputView);
     text_input_free(app->text_input);
+
+    view_dispatcher_remove_view(app->view_dispatcher, AboutWidgetView);
+    widget_free(app->about_widget);
+
+    view_dispatcher_remove_view(app->view_dispatcher, ErrorCodesWidgetView);
+    widget_free(app->error_codes_widget);
 
     view_dispatcher_remove_view(app->view_dispatcher, MessageErrorView);
     message_view_free(app->message_view);
@@ -348,6 +358,74 @@ int32_t barcode_main(void* p) {
     view_set_previous_callback(create_get_view(app->create_view), main_menu_callback);
     view_dispatcher_add_view(
         app->view_dispatcher, CreateBarcodeView, create_get_view(app->create_view));
+
+    /*****************************
+     * Creating Error Codes View
+     ******************************/
+    app->error_codes_widget = widget_alloc();
+    widget_add_text_scroll_element(
+        app->error_codes_widget,
+        0,
+        0,
+        128,
+        64,
+        "\e#Error Codes\n"
+        "\e#Wrong # Of Characters\n"
+        "The barcode data has too \nmany or too few characters\n"
+        "UPC-A: 11-12 characters\n"
+        "EAN-8: 7-8 characters\n"
+        "EAN-13: 12-13 characters\n"
+        "Code128C - even # of \ncharacters\n"
+        "\n"
+        "\e#Invalid Characters\n"
+        "The barcode data has invalid \ncharacters.\n"
+        "Ex: UPC-A, EAN-8, EAN-13 barcodes can only have \nnumbers while Code128 can \nhave almost any character\n"
+        "\n"
+        "\e#Unsupported Type\n"
+        "The barcode type is not \nsupported by this application\n"
+        "\n"
+        "\e#File Opening Error\n"
+        "The barcode file could not be opened. One reason could be \nthat the file no longer exists\n"
+        "\n"
+        "\e#Invalid File Data\n"
+        "The barcode file could not find the keys \"Type\" or \"Data\". \nThis usually occurs when you edit the file manually and \naccidently change the keys\n"
+        "\n"
+        "\e#Missing Encoding Table\n"
+        "The encoding table files are \nmissing. This only occurs \nwhen you need to handle the \nencoding files manually. If you \ndownload the files from the \napp store this should not \noccur\n"
+        "\n"
+        "\e#Encoding Table Error\n"
+        "This occurs when the \nprogram cannot find a \ncharacter in the encoding \ntable, meaning that either the\ncharacter isn't supported \nor the character is missing \nfrom the encoding table\n"
+        "");
+    view_set_previous_callback(widget_get_view(app->error_codes_widget), main_menu_callback);
+    view_dispatcher_add_view(
+        app->view_dispatcher, ErrorCodesWidgetView, widget_get_view(app->error_codes_widget));
+    submenu_add_item(
+        app->main_menu, "Error Codes Info", ErrorCodesWidgetItem, submenu_callback, app);
+
+    /*****************************
+     * Creating About View
+     ******************************/
+    app->about_widget = widget_alloc();
+    widget_add_text_scroll_element(
+        app->about_widget,
+        0,
+        0,
+        128,
+        64,
+        "This is a barcode generator\n"
+        "capable of generating UPC-A,\n"
+        "EAN-8, EAN-13, Code-39,\n"
+        "Codabar, and Code-128\n"
+        "\n"
+        "author: @Kingal1337\n"
+        "\n"
+        "For more information or\n"
+        "issues, go to\n"
+        "https://github.com/Kingal1337/flipper-barcode-generator");
+    view_set_previous_callback(widget_get_view(app->about_widget), main_menu_callback);
+    view_dispatcher_add_view(
+        app->view_dispatcher, AboutWidgetView, widget_get_view(app->about_widget));
+    submenu_add_item(app->main_menu, "About", AboutWidgetItem, submenu_callback, app);
 
     /*****************************
      * Creating Barcode View
