@@ -57,6 +57,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: [Name Generator Improvements (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/89abfe02665e63929a000a3f1d9b6e29ed0cb834)
 - UL: [test swap em4100 t5577 blocks (issue 3463 ofw) (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/89abfe02665e63929a000a3f1d9b6e29ed0cb834)
 - Updated: [Bad KB and a few other minor updates (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/1f43af08a0fa3f2a368108cc7a39cfe782097b93)
+- Updated: [WiFi (Marauder) v0.7.1 (By 0xchocolate & tcpassos)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) `Req: ESP32 WITH MARAUDER FLASHED`
+- Updated: [Mfkey32 With Nested v1.0 (By noproto)](https://github.com/noproto/FlipperMfkey)
 
 <a name="release">
 
@@ -555,7 +557,7 @@ $ ./fbt dolphin_ext
 - [Weather Station v1.5 (By Skorpionm)-OFW](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/weather_station)
 - [Wiegand Reader v1.3 (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/gpio)
 - [WiFi (Deauther) V2 (By Timmotools)](https://github.com/Timmotools/flipperzero_esp8266_deautherv2) `Req: ESP8266`
-- [WiFi (Marauder) v7.0 (By 0xchocolate & tcpassos)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) `Req: ESP32 WITH MARAUDER FLASHED` [ESP32 MARAUDER Firmware](https://github.com/justcallmekoko/ESP32Marauder/releases/latest)
+- [WiFi (Marauder) v0.7.1 (By 0xchocolate & tcpassos)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) `Req: ESP32 WITH MARAUDER FLASHED` [ESP32 MARAUDER Firmware](https://github.com/justcallmekoko/ESP32Marauder/releases/latest)
 - [Wifi Mapping (By carvilsi)](https://github.com/carvilsi/flipper0-wifi-map/tree/main) `Req: ESP32`
 - [Wii EC Analyzer v1.1 (By csBlueChip)](https://github.com/csBlueChip/FlipperZero_WiiEC)
 - [Wire Tester v1.1 (By unixispower)](https://gitlab.com/unixispower/flipper-wire-tester)

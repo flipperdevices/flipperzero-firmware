@@ -6,7 +6,7 @@
 //       (a cache for napi_key_already_found_for_nonce)
 // TODO: Remove icon from application to save 1.5 KB
 // TODO: Selectively unroll loops to reduce binary size
-// TODO: Optimize assembly of filter, state_loop, and/or evenparity32
+// TODO: Optimize assembly of filter and/or state_loop
 // TODO: Investigate collecting the parity during Mfkey32 attacks to further optimize the attack
 // TODO: Why different sscanf between Mfkey32 and Nested?
 // TODO: "Read tag again with NFC app" message upon completion, "Complete. Keys added: <n>"
@@ -158,16 +158,6 @@ typedef struct {
     uint32_t total_keys;
 } MfClassicDict;
 
-static const uint8_t table[256] = {
-    0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4, 1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3,
-    4, 4, 5, 1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5, 2, 3, 3, 4, 3, 4, 4, 5, 3, 4,
-    4, 5, 4, 5, 5, 6, 1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5, 2, 3, 3, 4, 3, 4, 4,
-    5, 3, 4, 4, 5, 4, 5, 5, 6, 2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6, 3, 4, 4, 5,
-    4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7, 1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5, 2,
-    3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6, 2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5,
-    5, 6, 3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7, 2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4,
-    5, 4, 5, 5, 6, 3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7, 3, 4, 4, 5, 4, 5, 5, 6,
-    4, 5, 5, 6, 5, 6, 6, 7, 4, 5, 5, 6, 5, 6, 6, 7, 5, 6, 6, 7, 6, 7, 7, 8};
 static const uint8_t lookup1[256] = {
     0, 0,  16, 16, 0,  16, 0,  0,  0, 16, 0,  0,  16, 16, 16, 16, 0, 0,  16, 16, 0,  16, 0,  0,
     0, 16, 0,  0,  16, 16, 16, 16, 0, 0,  16, 16, 0,  16, 0,  0,  0, 16, 0,  0,  16, 16, 16, 16,
@@ -204,15 +194,27 @@ static inline int filter(uint32_t const x) {
     return BIT(0xEC57E80A, f);
 }
 
+#ifndef __ARM_ARCH_7EM__
 static inline uint8_t evenparity32(uint32_t x) {
-    if((table[x & 0xff] + table[(x >> 8) & 0xff] + table[(x >> 16) & 0xff] + table[x >> 24]) % 2 ==
-       0) {
-        return 0;
-    } else {
-        return 1;
-    }
-    //return ((table[x & 0xff] + table[(x >> 8) & 0xff] + table[(x >> 16) & 0xff] + table[x >> 24]) % 2) & 0xFF;
+    return __builtin_parity(x);
 }
+#endif
+
+#ifdef __ARM_ARCH_7EM__
+static inline uint8_t evenparity32(uint32_t x) {
+    uint32_t result;
+    __asm__ volatile("eor r1, %[x], %[x], lsr #16  \n\t" // r1 = x ^ (x >> 16)
+                     "eor r1, r1, r1, lsr #8       \n\t" // r1 = r1 ^ (r1 >> 8)
+                     "eor r1, r1, r1, lsr #4       \n\t" // r1 = r1 ^ (r1 >> 4)
+                     "eor r1, r1, r1, lsr #2       \n\t" // r1 = r1 ^ (r1 >> 2)
+                     "eor r1, r1, r1, lsr #1       \n\t" // r1 = r1 ^ (r1 >> 1)
+                     "and %[result], r1, #1        \n\t" // result = r1 & 1
+                     : [result] "=r"(result)
+                     : [x] "r"(x)
+                     : "r1");
+    return result;
+}
+#endif
 
 static inline void update_contribution(unsigned int data[], int item, int mask1, int mask2) {
     int p = data[item] >> 25;
