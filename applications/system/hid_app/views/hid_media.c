@@ -54,16 +54,16 @@ static void hid_media_draw_callback(Canvas* canvas, void* context) {
     canvas_set_font(canvas, FontSecondary);
 
     // Keypad circles
-    canvas_draw_icon(canvas, 75, 8, &I_Dpad_49x46);
+    canvas_draw_icon(canvas, 75, 9, &I_Dpad_49x46);
 
     // Up
     if(model->up_pressed) {
-        canvas_set_bitmap_mode(canvas, 1);
-        canvas_draw_icon(canvas, 93, 9, &I_Pressed_Button_13x13);
+        canvas_set_bitmap_mode(canvas, true);
+        canvas_draw_icon(canvas, 93, 10, &I_Pressed_Button_13x13);
         canvas_set_bitmap_mode(canvas, 0);
         canvas_set_color(canvas, ColorWhite);
     }
-    canvas_draw_icon(canvas, 96, 12, &I_Volup_8x6);
+    canvas_draw_icon(canvas, 96, 13, &I_Volup_8x6);
     canvas_set_color(canvas, ColorBlack);
 
     // Down
@@ -73,7 +73,7 @@ static void hid_media_draw_callback(Canvas* canvas, void* context) {
         canvas_set_bitmap_mode(canvas, 0);
         canvas_set_color(canvas, ColorWhite);
     }
-    canvas_draw_icon(canvas, 96, 45, &I_Voldwn_6x6);
+    canvas_draw_icon(canvas, 96, 44, &I_Voldwn_6x6);
     canvas_set_color(canvas, ColorBlack);
 
     // Left
