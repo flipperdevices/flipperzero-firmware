@@ -83,6 +83,7 @@ void set_time(AppData* app, int offset) {
     uint32_t timestamp = datetime_datetime_to_timestamp(&app->dt) + offset;
     datetime_timestamp_to_datetime(timestamp, &dcf_dt);
     set_dcf77_time(&dcf_dt, app->is_dst);
+    set_dcf77_time(&dcf_dt, app_data->is_dst);
 }
 
 int dcf77_clock_sync_app_main(void* p) {
