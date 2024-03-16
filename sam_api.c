@@ -14,7 +14,6 @@ const uint8_t picopass_iclass_key[] = {0xaf, 0xa7, 0x85, 0xa7, 0xda, 0xb3, 0x33,
 
 static char display[SEADER_UART_RX_BUF_SIZE * 2 + 1] = {0};
 char asn1_log[SEADER_UART_RX_BUF_SIZE] = {0};
-bool requestPacs = true;
 
 uint8_t read4Block6[] = {RFAL_PICOPASS_CMD_READ4, 0x06, 0x45, 0x56};
 uint8_t read4Block9[] = {RFAL_PICOPASS_CMD_READ4, 0x09, 0xB2, 0xAE};
