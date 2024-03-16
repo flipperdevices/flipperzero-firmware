@@ -212,6 +212,10 @@ void subghz_protocol_decoder_bin_raw_data_input_rssi(
  */
 bool subghz_protocol_secplus_v1_check_fixed(uint32_t fixed);
 
+// Reset prog mode vars
+// TODO: Remake in proper way
+void faac_slh_reset_prog_mode();
+
 #ifdef __cplusplus
 }
 #endif

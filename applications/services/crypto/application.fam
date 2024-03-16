@@ -1,6 +1,16 @@
 App(
+    appid="crypto_cli",
+    targets=["f7"],
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="crypto_cli_plugin_ep",
+    requires=["cli"],
+    sources=["crypto_cli.c"],
+)
+
+App(
     appid="crypto_start",
     apptype=FlipperAppType.STARTUP,
     entry_point="crypto_on_system_start",
+    sources=["crypto_start.c"],
     order=10,
 )

@@ -8,3 +8,12 @@ App(
     order=80,
     sdk_headers=["input.h"],
 )
+
+App(
+    appid="input_cli",
+    targets=["f7"],
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="input_cli_plugin_ep",
+    requires=["cli"],
+    sources=["input_cli.c"],
+)

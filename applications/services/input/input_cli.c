@@ -123,3 +123,15 @@ void input_cli(Cli* cli, FuriString* args, void* context) {
 
     furi_string_free(cmd);
 }
+
+#include <flipper_application/flipper_application.h>
+
+static const FlipperAppPluginDescriptor plugin_descriptor = {
+    .appid = "input_cli",
+    .ep_api_version = 1,
+    .entry_point = &input_cli,
+};
+
+const FlipperAppPluginDescriptor* input_cli_plugin_ep() {
+    return &plugin_descriptor;
+}

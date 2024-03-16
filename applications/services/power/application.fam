@@ -18,6 +18,15 @@ App(
 )
 
 App(
+    appid="power_cli",
+    targets=["f7"],
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="power_cli_plugin_ep",
+    requires=["cli"],
+    sources=["power_cli.c"],
+)
+
+App(
     appid="power_start",
     apptype=FlipperAppType.STARTUP,
     entry_point="power_on_system_start",

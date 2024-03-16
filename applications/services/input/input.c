@@ -54,6 +54,12 @@ const char* input_get_type_name(InputType type) {
     }
 }
 
+#include <cli/cli_i.h>
+
+static void input_cli_wrapper(Cli* cli, FuriString* args, void* context) {
+    cli_plugin_wrapper("input_cli", 1, cli, args, context);
+}
+
 int32_t input_srv(void* p) {
     UNUSED(p);
     input = malloc(sizeof(Input));
@@ -67,7 +73,9 @@ int32_t input_srv(void* p) {
 
 #ifdef SRV_CLI
     input->cli = furi_record_open(RECORD_CLI);
-    cli_add_command(input->cli, "input", CliCommandFlagParallelSafe, input_cli, input);
+    cli_add_command(input->cli, "input", CliCommandFlagParallelSafe, input_cli_wrapper, input);
+#else
+    UNUSED(input_cli_wrapper);
 #endif
 
     input->pin_states = malloc(input_pins_count * sizeof(InputPinState));

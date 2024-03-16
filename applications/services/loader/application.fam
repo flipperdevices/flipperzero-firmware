@@ -15,6 +15,15 @@ App(
 )
 
 App(
+    appid="loader_cli",
+    targets=["f7"],
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="loader_cli_plugin_ep",
+    requires=["cli"],
+    sources=["loader_cli.c"],
+)
+
+App(
     appid="loader_start",
     apptype=FlipperAppType.STARTUP,
     entry_point="loader_on_system_start",

@@ -63,12 +63,14 @@ static void nfc_cli(Cli* cli, FuriString* args, void* context) {
     furi_string_free(cmd);
 }
 
-void nfc_on_system_start(void) {
-#ifdef SRV_CLI
-    Cli* cli = furi_record_open(RECORD_CLI);
-    cli_add_command(cli, "nfc", CliCommandFlagDefault, nfc_cli, NULL);
-    furi_record_close(RECORD_CLI);
-#else
-    UNUSED(nfc_cli);
-#endif
+#include <flipper_application/flipper_application.h>
+
+static const FlipperAppPluginDescriptor plugin_descriptor = {
+    .appid = "nfc_cli",
+    .ep_api_version = 1,
+    .entry_point = &nfc_cli,
+};
+
+const FlipperAppPluginDescriptor* nfc_cli_plugin_ep() {
+    return &plugin_descriptor;
 }

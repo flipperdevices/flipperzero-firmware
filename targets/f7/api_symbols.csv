@@ -1042,6 +1042,7 @@ Function,-,explicit_bzero,void,"void*, size_t"
 Function,-,expm1,double,double
 Function,-,expm1f,float,float
 Function,-,expm1l,long double,long double
+Function,+,faac_slh_reset_prog_mode,void,
 Function,-,fabs,double,double
 Function,-,fabsf,float,float
 Function,-,fabsl,long double,long double
@@ -3349,14 +3350,14 @@ Function,+,subghz_file_encoder_worker_get_text_progress,void,"SubGhzFileEncoderW
 Function,+,subghz_file_encoder_worker_is_running,_Bool,SubGhzFileEncoderWorker*
 Function,+,subghz_file_encoder_worker_start,_Bool,"SubGhzFileEncoderWorker*, const char*, const char*"
 Function,+,subghz_file_encoder_worker_stop,void,SubGhzFileEncoderWorker*
-Function,-,subghz_keystore_alloc,SubGhzKeystore*,
-Function,-,subghz_keystore_free,void,SubGhzKeystore*
+Function,+,subghz_keystore_alloc,SubGhzKeystore*,
+Function,+,subghz_keystore_free,void,SubGhzKeystore*
 Function,-,subghz_keystore_get_data,SubGhzKeyArray_t*,SubGhzKeystore*
-Function,-,subghz_keystore_load,_Bool,"SubGhzKeystore*, const char*"
-Function,-,subghz_keystore_raw_encrypted_save,_Bool,"const char*, const char*, uint8_t*"
+Function,+,subghz_keystore_load,_Bool,"SubGhzKeystore*, const char*"
+Function,+,subghz_keystore_raw_encrypted_save,_Bool,"const char*, const char*, uint8_t*"
 Function,-,subghz_keystore_raw_get_data,_Bool,"const char*, size_t, uint8_t*, size_t"
 Function,-,subghz_keystore_reset_kl,void,SubGhzKeystore*
-Function,-,subghz_keystore_save,_Bool,"SubGhzKeystore*, const char*, uint8_t*"
+Function,+,subghz_keystore_save,_Bool,"SubGhzKeystore*, const char*, uint8_t*"
 Function,+,subghz_protocol_alutech_at_4n_create_data,_Bool,"void*, FlipperFormat*, uint32_t, uint8_t, uint16_t, SubGhzRadioPreset*"
 Function,+,subghz_protocol_blocks_add_bit,void,"SubGhzBlockDecoder*, uint8_t"
 Function,+,subghz_protocol_blocks_add_bytes,uint8_t,"const uint8_t[], size_t"
