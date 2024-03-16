@@ -520,7 +520,9 @@ bool seader_parse_sam_response(Seader* seader, SamResponse_t* samResponse) {
         }
     } else if(seader_parse_version(seader_worker, samResponse->buf, samResponse->size)) {
         seader_worker_send_serial_number(seader_worker);
-    } else if(seader_parse_serial_number(seader, samResponse->buf, samResponse->size)) {
+        // checking requestPacs to make sure we ignore messages at the end of the crednetial request.
+        //TODO: refactor this to track what request was sent to better know what request to expect back
+    } else if(requestPacs && seader_parse_serial_number(seader, samResponse->buf, samResponse->size)) {
         // no-op
     } else if(seader_unpack_pacs(seader, samResponse->buf, samResponse->size)) {
         view_dispatcher_send_custom_event(seader->view_dispatcher, SeaderCustomEventPollerSuccess);
