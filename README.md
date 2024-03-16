@@ -2,7 +2,7 @@
 
 基于 flipper zero的蓝牙扩展板（ble ext），实现周围低功耗蓝牙设备的扫描以及集成的蓝牙设备控制器（当前自带oklok ble蓝牙挂锁的控制方式），flipper zero和扩展板之间使用串口通信。
 
-立创开源项目地址：xx
+立创开源项目地址：https://oshwhub.com/h4lo/flipper-zero-ble-ext
 
 ## 编译 && 安装
 
