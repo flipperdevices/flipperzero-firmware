@@ -1,0 +1,14 @@
+App(
+  appid="ble_killer",
+  name="[BLE] BLE Killer",
+  apptype=FlipperAppType.EXTERNAL,
+  entry_point="main_entry",
+  stack_size=1 * 2048,
+  requires=[
+      "gui",
+  ],
+  order=1,
+  fap_category="Bluetooth",
+  fap_icon="icon.png",
+)
+
