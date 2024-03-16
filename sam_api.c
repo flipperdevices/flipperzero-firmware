@@ -232,7 +232,10 @@ void seader_send_response(
     ASN_STRUCT_FREE(asn_DEF_Payload, payload);
 }
 
-void sendRequestPacs(SeaderUartBridge* seader_uart) {
+void seader_send_request_pacs(Seader* seader) {
+    SeaderWorker* seader_worker = seader->worker;
+    SeaderUartBridge* seader_uart = seader_worker->uart;
+
     RequestPacs_t* requestPacs = 0;
     requestPacs = calloc(1, sizeof *requestPacs);
     assert(requestPacs);
@@ -244,6 +247,8 @@ void sendRequestPacs(SeaderUartBridge* seader_uart) {
     assert(samCommand);
 
     samCommand->present = SamCommand_PR_requestPacs;
+    seader->samCommand = samCommand->present;
+
     samCommand->choice.requestPacs = *requestPacs;
 
     Payload_t* payload = 0;
@@ -260,13 +265,16 @@ void sendRequestPacs(SeaderUartBridge* seader_uart) {
     ASN_STRUCT_FREE(asn_DEF_Payload, payload);
 }
 
-void seader_worker_send_serial_number(SeaderWorker* seader_worker) {
+void seader_worker_send_serial_number(Seader* seader) {
+    SeaderWorker* seader_worker = seader->worker;
     SeaderUartBridge* seader_uart = seader_worker->uart;
+
     SamCommand_t* samCommand = 0;
     samCommand = calloc(1, sizeof *samCommand);
     assert(samCommand);
 
     samCommand->present = SamCommand_PR_serialNumber;
+    seader->samCommand = samCommand->present;
 
     Payload_t* payload = 0;
     payload = calloc(1, sizeof *payload);
@@ -281,13 +289,16 @@ void seader_worker_send_serial_number(SeaderWorker* seader_worker) {
     ASN_STRUCT_FREE(asn_DEF_Payload, payload);
 }
 
-void seader_worker_send_version(SeaderWorker* seader_worker) {
+void seader_worker_send_version(Seader* seader) {
+    SeaderWorker* seader_worker = seader->worker;
+
     SeaderUartBridge* seader_uart = seader_worker->uart;
     SamCommand_t* samCommand = 0;
     samCommand = calloc(1, sizeof *samCommand);
     assert(samCommand);
 
     samCommand->present = SamCommand_PR_version;
+    seader->samCommand = samCommand->present;
 
     Payload_t* payload = 0;
     payload = calloc(1, sizeof *payload);
@@ -302,7 +313,9 @@ void seader_worker_send_version(SeaderWorker* seader_worker) {
     ASN_STRUCT_FREE(asn_DEF_Payload, payload);
 }
 
-void seader_send_card_detected(SeaderUartBridge* seader_uart, CardDetails_t* cardDetails) {
+void seader_send_card_detected(Seader* seader, CardDetails_t* cardDetails) {
+    SeaderWorker* seader_worker = seader->worker;
+    SeaderUartBridge* seader_uart = seader_worker->uart;
     CardDetected_t* cardDetected = 0;
     cardDetected = calloc(1, sizeof *cardDetected);
     assert(cardDetected);
@@ -314,6 +327,7 @@ void seader_send_card_detected(SeaderUartBridge* seader_uart, CardDetails_t* car
     assert(samCommand);
 
     samCommand->present = SamCommand_PR_cardDetected;
+    seader->samCommand = samCommand->present;
     samCommand->choice.cardDetected = *cardDetected;
 
     Payload_t* payload = 0;
@@ -505,33 +519,37 @@ bool seader_parse_serial_number(Seader* seader, uint8_t* buf, size_t size) {
 
 bool seader_parse_sam_response(Seader* seader, SamResponse_t* samResponse) {
     SeaderWorker* seader_worker = seader->worker;
-    SeaderUartBridge* seader_uart = seader_worker->uart;
 
-    if(samResponse->size == 0) {
-        if(requestPacs) {
-            FURI_LOG_D(TAG, "samResponse %d => requesting PACS", samResponse->size);
-            sendRequestPacs(seader_uart);
-            requestPacs = false;
-        } else {
-            FURI_LOG_D(
-                TAG, "samResponse %d, PACS already requested, pushing view", samResponse->size);
-            view_dispatcher_send_custom_event(
-                seader->view_dispatcher, SeaderCustomEventWorkerExit);
-        }
-    } else if(seader_parse_version(seader_worker, samResponse->buf, samResponse->size)) {
-        seader_worker_send_serial_number(seader_worker);
-        // checking requestPacs to make sure we ignore messages at the end of the crednetial request.
-        //TODO: refactor this to track what request was sent to better know what request to expect back
-    } else if(requestPacs && seader_parse_serial_number(seader, samResponse->buf, samResponse->size)) {
-        // no-op
-    } else if(seader_unpack_pacs(seader, samResponse->buf, samResponse->size)) {
+    switch (seader->samCommand) {
+      case SamCommand_PR_requestPacs:
+        FURI_LOG_I(TAG, "samResponse SamCommand_PR_requestPacs");
+        seader_unpack_pacs(seader, samResponse->buf, samResponse->size);
         view_dispatcher_send_custom_event(seader->view_dispatcher, SeaderCustomEventPollerSuccess);
-    } else {
+        seader->samCommand = SamCommand_PR_NOTHING;
+        break;
+      case SamCommand_PR_version:
+        FURI_LOG_I(TAG, "samResponse SamCommand_PR_version");
+        seader_parse_version(seader_worker, samResponse->buf, samResponse->size);
+        seader_worker_send_serial_number(seader);
+        break;
+      case SamCommand_PR_serialNumber:
+        FURI_LOG_I(TAG, "samResponse SamCommand_PR_serialNumber");
+        seader_parse_serial_number(seader, samResponse->buf, samResponse->size);
+        seader->samCommand = SamCommand_PR_NOTHING;
+        break;
+      case SamCommand_PR_cardDetected:
+        FURI_LOG_I(TAG, "samResponse SamCommand_PR_cardDetected");
+        seader_send_request_pacs(seader);
+        break;
+      case SamCommand_PR_NOTHING:
+        FURI_LOG_I(TAG, "samResponse SamCommand_PR_NOTHING");
         memset(display, 0, sizeof(display));
         for(uint8_t i = 0; i < samResponse->size; i++) {
             snprintf(display + (i * 2), sizeof(display), "%02x", samResponse->buf[i]);
         }
-        FURI_LOG_D(TAG, "Unknown samResponse %d: %s", samResponse->size, display);
+        FURI_LOG_I(TAG, "Unknown samResponse %d: %s", samResponse->size, display);
+        view_dispatcher_send_custom_event(seader->view_dispatcher, SeaderCustomEventWorkerExit);
+        break;
     }
 
     return false;
@@ -875,11 +893,6 @@ NfcCommand seader_worker_card_detect(
     UNUSED(ats);
     UNUSED(ats_len);
 
-    // We're telling the SAM we've seen a new card, so reset out requestPacs check
-    requestPacs = true;
-
-    SeaderWorker* seader_worker = seader->worker;
-    SeaderUartBridge* seader_uart = seader_worker->uart;
     SeaderCredential* credential = seader->credential;
 
     CardDetails_t* cardDetails = 0;
@@ -912,7 +925,7 @@ NfcCommand seader_worker_card_detect(
         }
     }
 
-    seader_send_card_detected(seader_uart, cardDetails);
+    seader_send_card_detected(seader, cardDetails);
 
     ASN_STRUCT_FREE(asn_DEF_CardDetails, cardDetails);
     return NfcCommandContinue;
