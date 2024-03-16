@@ -73,8 +73,6 @@ void set_time(AppData* app_data, int offset) {
     DateTime dcf_dt;
     uint32_t timestamp = datetime_datetime_to_timestamp(&app_data->dt) + offset;
     datetime_timestamp_to_datetime(timestamp, &dcf_dt);
-    uint32_t days = timestamp / SECONDS_PER_DAY;
-    dcf_dt.weekday = ((days + 4) % 7) + 1;
     set_dcf77_time(&dcf_dt, app_data->is_dst);
 }
 
