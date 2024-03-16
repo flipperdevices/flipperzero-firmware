@@ -520,28 +520,28 @@ bool seader_parse_serial_number(Seader* seader, uint8_t* buf, size_t size) {
 bool seader_parse_sam_response(Seader* seader, SamResponse_t* samResponse) {
     SeaderWorker* seader_worker = seader->worker;
 
-    switch (seader->samCommand) {
-      case SamCommand_PR_requestPacs:
+    switch(seader->samCommand) {
+    case SamCommand_PR_requestPacs:
         FURI_LOG_I(TAG, "samResponse SamCommand_PR_requestPacs");
         seader_unpack_pacs(seader, samResponse->buf, samResponse->size);
         view_dispatcher_send_custom_event(seader->view_dispatcher, SeaderCustomEventPollerSuccess);
         seader->samCommand = SamCommand_PR_NOTHING;
         break;
-      case SamCommand_PR_version:
+    case SamCommand_PR_version:
         FURI_LOG_I(TAG, "samResponse SamCommand_PR_version");
         seader_parse_version(seader_worker, samResponse->buf, samResponse->size);
         seader_worker_send_serial_number(seader);
         break;
-      case SamCommand_PR_serialNumber:
+    case SamCommand_PR_serialNumber:
         FURI_LOG_I(TAG, "samResponse SamCommand_PR_serialNumber");
         seader_parse_serial_number(seader, samResponse->buf, samResponse->size);
         seader->samCommand = SamCommand_PR_NOTHING;
         break;
-      case SamCommand_PR_cardDetected:
+    case SamCommand_PR_cardDetected:
         FURI_LOG_I(TAG, "samResponse SamCommand_PR_cardDetected");
         seader_send_request_pacs(seader);
         break;
-      case SamCommand_PR_NOTHING:
+    case SamCommand_PR_NOTHING:
         FURI_LOG_I(TAG, "samResponse SamCommand_PR_NOTHING");
         memset(display, 0, sizeof(display));
         for(uint8_t i = 0; i < samResponse->size; i++) {
