@@ -5,10 +5,10 @@ App(
     name="Voltage Calculator",
     apptype=FlipperAppType.EXTERNAL,
     # Main function (entry point) of the application
-    entry_point="voltcalc_app_main",
+    entry_point="voltcalc_app",
     stack_size=2 * 1024,
     # Where the application will be stored into the Flip.x0
-    fap_category="Electronics",
+    fap_category="Tools",
     requires=["gui"],
     # Directory of applications image assets
     # If you want to insert images in your application, you have to specify the
