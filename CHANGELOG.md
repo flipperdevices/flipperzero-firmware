@@ -1,3 +1,6 @@
+## 0.3
+- Updated to firmware SDK 0.99.1
+
 ## 0.2
 - Playlist support
 - Hidden file/folder support
