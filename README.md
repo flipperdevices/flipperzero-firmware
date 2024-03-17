@@ -1,4 +1,4 @@
-# <img src="quac.png" alt="logo" width="30" style="image-rendering: pixelated; image-rendering -moz-crisp-edges; image-rendering: crisp-edges;"/> Quac! Remote
+# Quac! Remote
 ## QUick ACtion Remote Control for Flipperzero
 This app allows you to organize previously recorded signals, of any type*, so that you can quickly and easily play them back. No more needing to recall whether that door is Sub-GHz or RFID! Just navigate to that action in **Quac** and press OK to send!
 
@@ -17,15 +17,10 @@ The app does not provide any recording functionality - you must use the existing
 * [Customizable UI](README.md#settings)
 
 ## Screenshots
-<table>
-  <tr>
-    <td><img src="screenshots/screenshot_1.png" width="256px"/></td>
-    <td rowspan="2"><img src="screenshots/screenshot_4_90.png" width="128px"/></td>
-  </tr>
-  <tr>
-    <td><img src="screenshots/screenshot_3.png" width="256px"/></td>
-  </tr>
-</table>
+
+![](screenshots/screenshot_1.png)
+![](screenshots/screenshot_3.png)
+![](screenshots/screenshot_4_90.png)
 
 ## Navigation / Controls
 - Pressing `OK` on a folder label will open/navigate to that folder and display it's contents.
@@ -80,7 +75,7 @@ The first two `.sub` files live in the `/ext/apps_data/quac` folder, which is wh
 The list view UI is based on the sorted file and folder order. This is enforced by sorting the actual filenames. When there are cases where you need to force a specific order, you can prepend the file and folder names with `XX_` where `X` is a digit between 0-9. This will let you place an action called `On` before `Off`, even though when sorted alphabeticaly, `Off` would come before `On`. Therefore, you would name your files `00_On.rfid` and `01_Off.rfid`. When the files and folders are rendered for display, any `XX_` prefix will be stripped. All underscores will be replaced with spaces. Extensions will be stripped. Casing is preserved. Additionally, all files and folders that begin with a `.` will be ignored when drawing the UI. However, they can still be referenced in playlists. This keeps the UI unclutterd.
 
 ## Settings
-<img src="screenshots/screenshot_2.png" width="256px"/>
+![Settings menu](screenshots/screenshot_2.png)
 
 The settings menu will appear as the last item when you are viewing the "root" directory. Within the settings you can control:
 - Layout: Switch between Horizontal and Vertical layout
