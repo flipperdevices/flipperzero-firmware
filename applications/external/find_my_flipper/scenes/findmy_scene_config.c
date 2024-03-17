@@ -3,8 +3,7 @@
 enum VarItemListIndex {
     VarItemListIndexBroadcastInterval,
     VarItemListIndexTransmitPower,
-    VarItemListIndexImportTagFromFile,
-    VarItemListIndexRegisterTagManually,
+    VarItemListIndexRegisterTag,
     VarItemListIndexAbout,
 };
 
@@ -58,9 +57,7 @@ void findmy_scene_config_on_enter(void* context) {
     snprintf(power_str, sizeof(power_str), "%ddBm", app->state.transmit_power);
     variable_item_set_current_value_text(item, power_str);
 
-    item = variable_item_list_add(var_item_list, "Import Tag From File", 0, NULL, NULL);
-
-    item = variable_item_list_add(var_item_list, "Register Tag Manually", 0, NULL, NULL);
+    item = variable_item_list_add(var_item_list, "Register Tag", 0, NULL, NULL);
 
     item = variable_item_list_add(
         var_item_list,
@@ -86,11 +83,8 @@ bool findmy_scene_config_on_event(void* context, SceneManagerEvent event) {
         scene_manager_set_scene_state(app->scene_manager, FindMySceneConfig, event.event);
         consumed = true;
         switch(event.event) {
-        case VarItemListIndexImportTagFromFile:
-            scene_manager_next_scene(app->scene_manager, FindMySceneConfigImport);
-            break;
-        case VarItemListIndexRegisterTagManually:
-            scene_manager_next_scene(app->scene_manager, FindMySceneConfigMac);
+        case VarItemListIndexRegisterTag:
+            scene_manager_next_scene(app->scene_manager, FindMySceneConfigTagtype);
             break;
         case VarItemListIndexAbout:
             break;
