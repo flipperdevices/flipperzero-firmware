@@ -58,6 +58,46 @@ Button name | Description
 `Stop`      | Stop
 
 
+## Alternative button names
+In addition to the predefined names, `XRemote` uses alternative button names to make it as easy as possible to interact with different types of IR dumps. This means that if a button is not found in the file with the appropriate name, the application will try to find the same button with alternative names. Ensure this feature is enabled in the application settings before you use it.
+
+Alternate names are case insensitive and defined in the file:
+```
+SD Card/apps_data/flipper_xremote/alt_names.cfg
+```
+
+If this file does not exist, it will be created automatically with default values when the application is launched. You are free to remove, edit or add any values you want to this file. Here is the alt_names.cfg file with default contents:
+
+```
+Filetype: XRemote Alt-Names
+Version: 1
+# 
+Power: shutdown,off,on,standby
+Setup: settings,config,cfg
+Input: source,select
+Menu: osd,gui
+List: guide
+Info: display
+Mode: aspect,format
+Back: return,exit
+Ok: enter,select
+Up: uparrow
+Down: downarrow
+Left: leftarrow
+Right: rightarrow
+Mute: silence,silent,unmute
+Vol_up: vol+,volume+,volup,+
+Vol_dn: vol-,volume-,voldown,-
+Ch_next: ch+,channel+,chup
+Ch_prev: ch-,channel-,chdown
+Next: next,skip,ffwd
+Prev: prev,back,rewind,rew
+Fast_fo: fastfwd,fastforward,ff
+Fast_ba: fastback,fastrewind,fb
+Play_pa: playpause,play,pause
+
+```
+
 ## Installation options
 
 1. Install the latest stable version directly from the official [application catalog](https://lab.flipper.net/apps/flipper_xremote).
@@ -73,7 +113,7 @@ Button name | Description
    - Use deploy script from this repository to build and run the application on the device:
 
     ```bash
-    ./deploy.sh --fw=/path/to/the/firmware
+    ./deploy.sh -b --fw=/path/to/the/firmware
     ```
 2. If you don't have the firmware or the Linux please refer to the [official documentation](https://github.com/flipperdevices/flipperzero-firmware/blob/dev/documentation/AppsOnSDCard.md) for build instructions.
 
@@ -89,6 +129,7 @@ Button name | Description
   - [x] Player buttons page
   - [x] Custom buttons page
   - [x] Edit custom layout
+  - [x] Alternative button names
   - [ ] Add or remove button
   - [ ] All buttons page
 - [x] Application settings
@@ -98,6 +139,7 @@ Button name | Description
   - [x] Vertical/horizontal views
   - [x] IR command repeat count
   - [x] Exit button behavior
+  - [x] Enable/disable alt names
 
 ## Screens
 

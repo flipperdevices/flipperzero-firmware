@@ -81,6 +81,7 @@ int32_t xremote_main(void* p) {
     /* Allocate context and main application */
     XRemoteAppContext* context = xremote_app_context_alloc(p);
     XRemoteApp* app = xremote_app_alloc(context);
+    xremote_app_alt_names_check_and_store();
 
     /* Allocate and build the menu */
     xremote_app_submenu_alloc(app, XRemoteViewSubmenu, xremote_exit_callback);
