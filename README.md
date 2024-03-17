@@ -19,12 +19,11 @@ The app does not provide any recording functionality - you must use the existing
 ## Screenshots
 <table align="center">
   <tr>
-    <td align="center">Main View</td>
-    <td align="center">"Work" Actions</td>
+    <td><img src="screenshots/screenshot_1.png" width="256px"/></td>
+    <td rowspan="2"><img src="screenshots/screenshot_4_90.png" width="128px"/></td>
   </tr>
   <tr>
-    <td><img src="screenshots/screenshot_1.png" width="100px"/></td>
-    <td><img src="screenshots/screenshot_2.png" width="100px"/></td>
+    <td><img src="screenshots/screenshot_3.png" width="256px"/></td>
   </tr>
 </table>
 
