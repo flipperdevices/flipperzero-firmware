@@ -253,7 +253,7 @@ XRemoteAppSettings* xremote_app_settings_alloc() {
     settings->orientation = ViewOrientationHorizontal;
     settings->exit_behavior = XRemoteAppExitPress;
     settings->repeat_count = 2;
-    settings->alt_names = 0;
+    settings->alt_names = 1;
     return settings;
 }
 

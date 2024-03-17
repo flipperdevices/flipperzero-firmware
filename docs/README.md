@@ -48,3 +48,12 @@ Play_pa     | Play/Pause
 Pause       | Pause
 Play        | Play
 Stop        | Stop
+
+## Alternative button names
+
+In addition to the predefined names, XRemote uses alternative button names to make it as easy as possible to interact with different types of IR dumps. This means that if a button is not found in the file with the appropriate name, the application will try to find the same button with alternative names. Ensure this feature is enabled in the application settings before you use it.
+
+Alternate names are case insensitive and defined in the file:
+SD_Card/apps_data/flipper_xremote/alt_names.cfg
+
+If this file does not exist, it will be created automatically with default values when the application is launched. You are free to remove, edit or add any values you want to this file.

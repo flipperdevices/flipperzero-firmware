@@ -31,6 +31,7 @@ The application is compatible with standard `.ir` files. However, to ensure func
 Button name | Description
 ------------|-------------------
 `Power`     | Power
+`Eject`     | Eject
 `Setup`     | Setup/Settings
 `Input`     | Input/Source
 `Menu`      | Menu
