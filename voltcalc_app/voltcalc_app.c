@@ -8,7 +8,7 @@
 #include <gui/modules/text_input.h>
 
 #define TAG "voltcalc_app"
-#define TEXT_INPUT_SIZE 6
+#define TEXT_INPUT_SIZE 11
 
 typedef enum {
 	VoltcalcScenesMainMenuScene,
@@ -66,6 +66,74 @@ typedef enum {
 typedef enum {
 	VoltcalcScenesCurrentSceneSaveEvent,
 } VoltcalcScenesCurrentEvent;
+
+/* Substitute "_" characters with a "." since
+ * the F0 keyboard doesn't include a decimal key. */
+void decimal_substitute(char *old) {
+	size_t l = strlen(old);
+	char *buffer = malloc(l+1);
+	strncpy(buffer, old, l);
+	for (size_t i = 0; i < l; i++) {
+		if (buffer[i] == '_') {
+			buffer[i] = '.';
+			FURI_LOG_D(TAG, "Found a decimal point substitution character '_'");
+			FURI_LOG_D(TAG, "Substitute '.' for '_' %s = %s", old , buffer);
+		}
+	}
+	strncpy(old, buffer, l);
+	free(buffer);
+}
+
+/* Convert our VRI values to doubles for math purposes, math with them,
+ * then convert back to a string. */
+void calculate_values(void* context) {
+	App* app = context;
+
+	decimal_substitute(app->V);
+	decimal_substitute(app->R);
+	decimal_substitute(app->I);
+
+	/* Convert the VRI strings to doubles so we can math them */	
+	char *ptr1, *ptr2, *ptr3;
+	double V, R, I;
+	V = strtod(app->V, &ptr1);
+	R = strtod(app->R, &ptr2);
+	I = strtod(app->I, &ptr3);
+	free(ptr1); free(ptr2); free(ptr3); // TODO I don't think this is strictly necessary
+
+	if (V == 0) {
+		if (R != 0 && I != 0) {
+			V = R * I;
+		}
+	}
+	
+	if (R == 0) {
+		if (V != 0 && I != 0) {
+			R = V / I;
+		}
+	}
+
+	if (I == 0) {
+		if (V != 0 && R != 0) {
+			I = V / R;
+		}
+	}
+
+	// Convert the double values to a string.
+	size_t s;
+	s = snprintf(NULL, 0, "%lf", V);
+	snprintf(app->V, s, "%lf", V);
+	s = snprintf(NULL, 0, "%lf", R);
+	snprintf(app->R, s, "%lf", R);
+	s = snprintf(NULL, 0, "%lf", I);
+	snprintf(app->I, s, "%lf", I);
+
+	FURI_LOG_D(TAG, "Voltage double to string: %s", app->V);
+	FURI_LOG_D(TAG, "Resistance double to string: %s", app->R);
+	FURI_LOG_D(TAG, "Current double to string: %s", app->I);
+
+}
+
 
 /* Menu stubs */
 void voltcalc_scenes_menu_callback(void* context, uint32_t index) {
@@ -176,7 +244,7 @@ void voltcalc_scenes_current_callback(void* context) {
 void voltcalc_scenes_voltage_scene_on_enter(void* context) {
 	App* app = context;
 	bool clear_text = true;
-	strcpy(app->buffer, app->V);
+	strcpy(app->buffer, app->V); // Copy the result from the keyboard into our context
 	text_input_reset(app->text_input);
 	text_input_set_header_text(app->text_input, "Enter voltage:");
 	text_input_set_result_callback(
@@ -197,6 +265,7 @@ bool voltcalc_scenes_voltage_scene_on_event(void* context, SceneManagerEvent eve
 			//scene_manager_next_scene(app->scene_manager, VoltcalcScenesCalculateScene);
 			FURI_LOG_D(TAG, "Clicked save");
 			strcpy(app->V, app->buffer);
+			calculate_values(app);
 			consumed = true;
 			scene_manager_previous_scene(app->scene_manager);
 		}
@@ -212,7 +281,7 @@ void voltcalc_scenes_voltage_scene_on_exit(void* context) {
 void voltcalc_scenes_resistance_scene_on_enter(void* context) {
 	App* app = context;
 	bool clear_text = true;
-	strcpy(app->buffer, app->R);
+	strcpy(app->buffer, app->R); // Copy the value from the keyboard into our context
 	text_input_reset(app->text_input);
 	text_input_set_header_text(app->text_input, "Enter resistance:");
 	text_input_set_result_callback(
@@ -233,6 +302,7 @@ bool voltcalc_scenes_resistance_scene_on_event(void* context, SceneManagerEvent 
 			//scene_manager_next_scene(app->scene_manager, VoltcalcScenesCalculateScene);
 			FURI_LOG_D(TAG, "Clicked save");
 			strcpy(app->R, app->buffer);
+			calculate_values(app);
 			consumed = true;
 			scene_manager_previous_scene(app->scene_manager);
 		}
@@ -249,7 +319,7 @@ void voltcalc_scenes_resistance_scene_on_exit(void* context) {
 void voltcalc_scenes_current_scene_on_enter(void* context) {
 	App* app = context;
 	bool clear_text = true;
-	strcpy(app->buffer, app->I);
+	strcpy(app->buffer, app->I); // Copy the value from the keyboard into our context.
 	text_input_reset(app->text_input);
 	text_input_set_header_text(app->text_input, "Enter current:");
 	text_input_set_result_callback(
@@ -270,6 +340,7 @@ bool voltcalc_scenes_current_scene_on_event(void* context, SceneManagerEvent eve
 			//scene_manager_next_scene(app->scene_manager, VoltcalcScenesCalculateScene);
 			FURI_LOG_D(TAG, "Clicked save");
 			strcpy(app->I, app->buffer);
+			calculate_values(app);
 			consumed = true;
 			scene_manager_previous_scene(app->scene_manager);
 		}
@@ -288,50 +359,21 @@ void voltcalc_scenes_calculate_scene_on_enter(void* context) {
 	widget_reset(app->widget);
 	FuriString* message = furi_string_alloc(); // for concat?
 
-	/* Convert the VRI strings to doubles so we can math them */	
-	char *ptr1, *ptr2, *ptr3;
-	double V, R, I;
-	V = strtod(app->V, &ptr1);
-	R = strtod(app->R, &ptr2);
-	I = strtod(app->I, &ptr3);
-	// FURI_LOG_D(TAG, "\nV=%lf, \nR=%lf, \nI=%lf", V, R, I);
-	free(ptr1); free(ptr2); free(ptr3);
-
-	if (V == 0) {
-		if (R != 0 && I != 0) {
-			V = R * I;
-		}
-	}
-	
-	if (R == 0) {
-		if (V != 0 && I != 0) {
-			R = V / I;
-		}
-	}
-
-	if (I == 0) {
-		if (V != 0 && R != 0) {
-			I = V / R;
-		}
-	}
-
-	FURI_LOG_D(TAG, "\nV=%lf, \nR=%lf, \nI=%lf", V, R, I);
-
-	furi_string_printf(message, "Voltage: %lf", V);
+	furi_string_printf(message, "Voltage: %s", app->V);
 	widget_add_string_element(
 		app->widget, 
 		5, 5, 
 		AlignLeft, AlignCenter, 
 		FontPrimary,
 		furi_string_get_cstr(message));
-	furi_string_printf(message, "Resistance: %lf", R);
+	furi_string_printf(message, "Resistance: %s", app->R);
 	widget_add_string_element(
 		app->widget, 
 		5, 15, 
 		AlignLeft, AlignCenter, 
 		FontPrimary,
 		furi_string_get_cstr(message));
-	furi_string_printf(message, "Current: %lf", I);
+	furi_string_printf(message, "Current: %s", app->I);
 	widget_add_string_element(
 		app->widget, 
 		5, 25, 
@@ -363,7 +405,7 @@ void voltcalc_scenes_about_scene_on_enter(void* context) {
 	widget_reset(app->widget);
 	widget_add_text_scroll_element(
 		app->widget, 1, 1, 128, 64,
-		"\e#About\n\n(c)Andrew Diamond\n\nSpecial thanks to Derek Jamison for his flipper tutorials. https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/ui/basic_scenes");
+		"\e#About\n\nVRI Calculator\n\nEnter at least two values\nand the app will solve the\nthird. Use '_' for a\ndecimal.\n\n(c) Andrew Diamond\n\nSpecial thanks to Derek\nJamison for his flipper\ntutorials.\n https://github.com/jamisonderek\n\nA large thank you to the\nrest of the F0 developer\ncommunity that have taken\nthe time to help others\nwith their knowledge.\n");
 	view_dispatcher_switch_to_view(app->view_dispatcher, VoltcalcScenesWidgetView);
 }
 
@@ -450,12 +492,6 @@ static App* app_alloc() {
     App* app = malloc(sizeof(App));
     app->buffer_size = TEXT_INPUT_SIZE;
     app->buffer = malloc(app->buffer_size);
-    /*app->voltage_size = TEXT_INPUT_SIZE;
-    app->voltage = malloc(app->voltage_size);
-    app->resistance_size = TEXT_INPUT_SIZE;
-    app->resistance = malloc(app->resistance_size);
-    app->current_size = TEXT_INPUT_SIZE;
-    app->current = malloc(app->current_size);*/
     app->scene_manager = scene_manager_alloc(
       &voltcalc_scenes_scene_manager_handlers,
       app);
@@ -494,22 +530,16 @@ static void app_free(App* app) {
     submenu_free(app->submenu);
     widget_free(app->widget);
     text_input_free(app->text_input);
-    /*free(app->voltage);
-    free(app->resistance);
-    free(app->current);*/
     free(app->buffer);
     free(app);
 }
 
+/* Give our VRI variables a starting value of zero. */
 static void app_initialize(App* app) {
-    /*
-     *  Can't assign arrays in C, use strcpy instead.
-     * 	app->V = "0.00";
-     *  app->I = "0.00";
-     *  app->R = "0.00";	*/
-    strcpy(app->V, "0.00");
-    strcpy(app->R, "0.00");
-    strcpy(app->I, "0.00");
+    strcpy(app->V, "0");
+    strcpy(app->R, "0");
+    strcpy(app->I, "0");
+    calculate_values(app);
 }
 
 int32_t voltcalc_app(void* p) {
