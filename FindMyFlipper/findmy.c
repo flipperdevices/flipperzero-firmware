@@ -53,7 +53,7 @@ static FindMy* findmy_app_alloc() {
 
     findmy_main_update_active(app->findmy_main, furi_hal_bt_extra_beacon_is_active());
     findmy_main_update_interval(app->findmy_main, app->state.broadcast_interval);
-    findmy_main_update_type(app->findmy_main, findmy_data_get_type(app->state.data));
+    findmy_main_update_type(app->findmy_main, app->state.tag_type);
 
     return app;
 }
@@ -141,18 +141,12 @@ void findmy_toggle_beacon(FindMy* app) {
     findmy_main_update_active(app->findmy_main, furi_hal_bt_extra_beacon_is_active());
 }
 
-FindMyType findmy_data_get_type(uint8_t data[EXTRA_BEACON_MAX_DATA_SIZE]) {
-    if(data[0] == 0x1E && // Length
-       data[1] == 0xFF && // Manufacturer Specific Data
-       data[2] == 0x4C && // Company ID (Apple, Inc.)
-       data[3] == 0x00 && // ...
-       data[4] == 0x12 && // Type (FindMy)
-       data[5] == 0x19 // Length
-    ) {
-        return FindMyTypeApple;
-    } else {
-        return FindMyTypeSamsung;
-    }
+void findmy_set_tag_type(FindMy* app, FindMyType type) {
+    app->state.tag_type = type;
+    findmy_state_sync_config(&app->state);
+    findmy_state_save(&app->state);
+    findmy_main_update_type(app->findmy_main, type);
+    FURI_LOG_I("TagType2", "Tag Type: %d", type);
 }
 
 void furi_hal_bt_reverse_mac_addr(uint8_t mac_addr[GAP_MAC_ADDR_SIZE]) {

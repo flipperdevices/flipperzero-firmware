@@ -29,9 +29,18 @@ bool findmy_state_load(FindMyState* out_state) {
             if(!flipper_format_read_uint32(file, "transmit_power", &tmp, 1)) break;
             state.transmit_power = tmp;
 
+            if(!flipper_format_read_uint32(file, "tag_type", &tmp, 1)) {
+                // Support migrating from old config
+                tmp = FindMyTypeApple;
+                flipper_format_rewind(file);
+            }
+            state.tag_type = tmp;
+
             if(!flipper_format_read_hex(file, "mac", state.mac, sizeof(state.mac))) break;
 
-            if(!flipper_format_read_hex(file, "data", state.data, sizeof(state.data))) break;
+            if(!flipper_format_read_hex(
+                   file, "data", state.data, findmy_state_data_size(state.tag_type)))
+                break;
 
             loaded_from_file = true;
         } while(0);
@@ -44,6 +53,8 @@ bool findmy_state_load(FindMyState* out_state) {
         state.beacon_active = false;
         state.broadcast_interval = 5;
         state.transmit_power = 6;
+
+        state.tag_type = FindMyTypeApple;
 
         // Set default mac
         uint8_t default_mac[EXTRA_BEACON_MAC_ADDR_SIZE] = {0x66, 0x55, 0x44, 0x33, 0x22, 0x11};
@@ -88,7 +99,8 @@ void findmy_state_apply(FindMyState* state) {
 
     furi_check(furi_hal_bt_extra_beacon_set_config(&state->config));
 
-    furi_check(furi_hal_bt_extra_beacon_set_data(state->data, sizeof(state->data)));
+    furi_check(
+        furi_hal_bt_extra_beacon_set_data(state->data, findmy_state_data_size(state->tag_type)));
 
     if(state->beacon_active) {
         furi_check(furi_hal_bt_extra_beacon_start());
@@ -120,11 +132,28 @@ void findmy_state_save(FindMyState* state) {
         tmp = state->transmit_power;
         if(!flipper_format_write_uint32(file, "transmit_power", &tmp, 1)) break;
 
+        tmp = state->tag_type;
+        if(!flipper_format_write_uint32(file, "tag_type", &tmp, 1)) break;
+
         if(!flipper_format_write_hex(file, "mac", state->mac, sizeof(state->mac))) break;
 
-        if(!flipper_format_write_hex(file, "data", state->data, sizeof(state->data))) break;
+        if(!flipper_format_write_hex(
+               file, "data", state->data, findmy_state_data_size(state->tag_type)))
+            break;
     } while(0);
 
     flipper_format_free(file);
     furi_record_close(RECORD_STORAGE);
+}
+
+uint8_t findmy_state_data_size(FindMyType type) {
+    switch(type) {
+    case FindMyTypeApple:
+    case FindMyTypeSamsung:
+        return 31;
+    case FindMyTypeTile:
+        return 21;
+    default:
+        return 0;
+    }
 }

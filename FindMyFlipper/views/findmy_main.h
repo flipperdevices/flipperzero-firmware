@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../findmy.h"
+#include "../findmy_state.h"
 #include <gui/view.h>
 
 typedef enum {

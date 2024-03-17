@@ -16,7 +16,7 @@ void findmy_scene_config_packet_on_enter(void* context) {
 
     byte_input_set_header_text(byte_input, "Enter Bluetooth Payload:");
 
-    memcpy(app->packet_buf, app->state.data, sizeof(app->packet_buf));
+    memcpy(app->packet_buf, app->state.data, findmy_state_data_size(app->state.tag_type));
 
     byte_input_set_result_callback(
         byte_input,
@@ -24,7 +24,7 @@ void findmy_scene_config_packet_on_enter(void* context) {
         NULL,
         app,
         app->packet_buf,
-        sizeof(app->packet_buf));
+        findmy_state_data_size(app->state.tag_type));
 
     view_dispatcher_switch_to_view(app->view_dispatcher, FindMyViewByteInput);
 }
@@ -39,11 +39,10 @@ bool findmy_scene_config_packet_on_event(void* context, SceneManagerEvent event)
         case ByteInputResultOk:
             scene_manager_search_and_switch_to_previous_scene(
                 app->scene_manager, FindMySceneConfig);
-            memcpy(app->state.data, app->packet_buf, sizeof(app->state.data));
+            memcpy(app->state.data, app->packet_buf, findmy_state_data_size(app->state.tag_type));
             findmy_state_save(&app->state);
-            furi_check(
-                furi_hal_bt_extra_beacon_set_data(app->state.data, sizeof(app->state.data)));
-            findmy_main_update_type(app->findmy_main, findmy_data_get_type(app->state.data));
+            furi_check(furi_hal_bt_extra_beacon_set_data(
+                app->state.data, findmy_state_data_size(app->state.tag_type)));
             break;
         default:
             break;
