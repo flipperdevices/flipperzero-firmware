@@ -22,6 +22,9 @@ typedef struct {
 #define XREMOTE_REPEAT_TEXT "IR Msg Repeat"
 #define XREMOTE_REPEAT_MAX 128
 
+#define XREMOTE_ALT_NAMES_TEXT "Alt Names"
+#define XREMOTE_ALT_NAMES_MAX 2
+
 static uint32_t xremote_settings_view_exit_callback(void* context) {
     UNUSED(context);
     return XRemoteViewSubmenu;
@@ -60,6 +63,18 @@ static void infrared_settings_exit_changed(VariableItem* item) {
     const char* exit_str = xremote_app_get_exit_str(settings->exit_behavior);
 
     variable_item_set_current_value_text(item, exit_str);
+    xremote_app_settings_store(settings);
+}
+
+static void infrared_settings_alt_names_changed(VariableItem* item) {
+    XRemoteSettingsContext* ctx = variable_item_get_context(item);
+    XRemoteAppSettings* settings = ctx->app_ctx->app_settings;
+
+    settings->alt_names = variable_item_get_current_value_index(item);
+    const char* alt_names_str = xremote_app_get_alt_names_str(settings->alt_names);
+
+    if(settings->alt_names) xremote_app_alt_names_check_and_init();
+    variable_item_set_current_value_text(item, alt_names_str);
     xremote_app_settings_store(settings);
 }
 
@@ -120,6 +135,18 @@ static XRemoteSettingsContext* xremote_settings_context_alloc(XRemoteAppContext*
     /* Set exit behavior item index and string */
     variable_item_set_current_value_index(item, exit_index);
     variable_item_set_current_value_text(item, exit_str);
+
+    /* Add exit behavior to variable item list */
+    item = variable_item_list_add(
+        context->item_list,
+        XREMOTE_ALT_NAMES_TEXT,
+        XREMOTE_ALT_NAMES_MAX,
+        infrared_settings_alt_names_changed,
+        context);
+
+    /* Set exit behavior item index and string */
+    variable_item_set_current_value_index(item, settings->alt_names);
+    variable_item_set_current_value_text(item, xremote_app_get_alt_names_str(settings->alt_names));
 
     return context;
 }

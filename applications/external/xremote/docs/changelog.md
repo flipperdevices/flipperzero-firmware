@@ -1,3 +1,20 @@
+## v1.3
+
+Alternative names
+
+- Implemented alternative names functionality
+- Implemented case-insensitive button search
+- Added Eject button support
+- Fixed bugs and refactored code
+
+## v1.2
+
+Bug fixing and performance improvements
+
+- Fixed build issues with new Flipper Zero SDK
+- Fixed several crashes and refactored code
+- Improved button search performance
+
 ## v1.1
 
 Custom layout and bug fixing
