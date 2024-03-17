@@ -16,10 +16,10 @@ The app does not provide any recording functionality - you must use the existing
 * Customizable UI
 
 ## Signal playback
-The signal files are played back as recorded. During playback/transmit, the LED light will flash blue until the action is complete. For RFID signals, they are continuously played back for 3 seconds.
+The signal files are played back as recorded. During playback/transmit, the LED light will flash blue until the action is complete. For RFID signals, they are continuously played back for the duration specified in the Settings.
 
 ## Signal Organization
-The key to organizing your Quac interface is to organize your */ext/apps_data/quac* folder structure. The UI is derived directly from the filesystem structure. Every individual file/signal is assigned a button. This is an "action". And every folder/directory is a logical group of more files/folders. Selecting a group in the UI will show you the contents of that folder. There is no limit on the number of actions or folders - nest as deep as you want!
+The key to organizing your Quac interface is to organize your **/ext/apps_data/quac** folder structure. The UI is derived directly from the filesystem structure. Every individual file/signal is assigned a button. This is an "action". And every folder/directory is a logical group of more files/folders. Selecting a group in the UI will show you the contents of that folder. There is no limit on the number of actions or folders - nest as deep as you want!
 
 You can organize your files by device type, or by function. For example, you may have a folder of "TV" actions, which correspond to Channel Up, Channel Down, Volume Up, Volume Down, etc. Or you may have a "Work Access" folder, which contains files/actions that correspond to Parking Gate, Garage Door, Lobby Entrance. 
 
@@ -27,8 +27,8 @@ The files in a folder can be of mixed types. **This is Quac's main strength!** S
 
 ## Playlists
 You can chain multiple signal playback actions together by creating a playlist. Simply create a text file which contains a list of paths to the signals you wish to transmit - they will be played sequentially. Playlist names show up as clickable button, like all other individual signals/actions. Playlist files feature the following:
-* Comments: lines that start with a *#* are ignored
-* *pause <ms>* on a line will pause the playback by the specified millisecond duration
+* Comments: lines that start with a **#** are ignored
+* **pause \<ms\>** on a line will pause the playback by the specified millisecond duration
 * Signal file names can be fully specified or local to the current directory
 
 Errors found in the playlist will halt playback and vibrate the F0. Blank lines are ignored.
@@ -39,6 +39,6 @@ The settings menu will appear as the last item when you are viewing the "root" d
 - Layout: Switch between Horizontal and Vertical layout
 - Show Icons: Toggles display of all icons
 - Show Headers: Toggles display of header/folder text at the top, giving you room for one more item on screen!
-- RFID Duration: Changes the length of time a RFID signal is transmitted. Can be overridden, per `.rfid` file in a Playlist
+- RFID Duration: Changes the length of time a RFID signal is transmitted. Can be overridden, per RFID file in a Playlist
 
-More information can be found in the Git repository
+***More information can be found in the Git repository***
