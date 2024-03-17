@@ -95,7 +95,6 @@ Prev: prev,back,rewind,rew
 Fast_fo: fastfwd,fastforward,ff
 Fast_ba: fastback,fastrewind,fb
 Play_pa: playpause,play,pause
-
 ```
 
 ## Installation options
