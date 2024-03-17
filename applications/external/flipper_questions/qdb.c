@@ -2,10 +2,11 @@
 #include <furi_hal.h>
 
 q_char** q_shuffle(const uint8_t group_number) {
-    const uint32_t current_timestamp = furi_hal_rtc_get_timestamp();
-    srand(current_timestamp);
+    srand(furi_hal_rtc_get_timestamp());
+
     const uint32_t group_size = Q_GROUPS[group_number].size;
     q_char** res_arr = malloc(group_size * sizeof(q_char*));
+
     // copy first
     if(group_number < NUMBER_OF_GROUPS - 1) { // not "ALL"
         q_char** group_arr = Q_GROUPS[group_number].questions;
@@ -21,6 +22,7 @@ q_char** q_shuffle(const uint8_t group_number) {
             }
         }
     }
+
     // then shuffle
     for(uint16_t i = 0; i < group_size; i++) {
         uint16_t j = i + rand() / (RAND_MAX / (group_size - i) + 1);
