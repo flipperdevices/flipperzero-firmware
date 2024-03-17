@@ -26,10 +26,7 @@ You can organize your files by device type, or by function. For example, you may
 The files in a folder can be of mixed types. **This is Quac's main strength!** So continuing with the "Work Access" example, the Parking Gate can be Sub-Ghz and the Garage Door can be RFID.
 
 ## Playlists
-You can chain multiple signal playback actions together by creating a playlist. Simply create a text file which contains a list of paths to the signals you wish to transmit - they will be played sequentially. Playlist names show up as clickable button, like all other individual signals/actions. Playlist files feature the following:
-* Comments: lines that start with a **#** are ignored
-* **pause \<ms\>** on a line will pause the playback by the specified millisecond duration
-* Signal file names can be fully specified or local to the current directory
+You can chain multiple signal playback actions together by creating a playlist. Simply create a text file which contains a list of paths to the signals you wish to transmit - they will be played sequentially. Playlist names show up as clickable button, like all other individual signals/actions.
 
 Errors found in the playlist will halt playback and vibrate the F0. Blank lines are ignored.
 
@@ -41,4 +38,4 @@ The settings menu will appear as the last item when you are viewing the "root" d
 - Show Headers: Toggles display of header/folder text at the top, giving you room for one more item on screen!
 - RFID Duration: Changes the length of time a RFID signal is transmitted. Can be overridden, per RFID file in a Playlist
 
-***More information can be found in the Git repository***
+**More information can be found in the Git repository**
