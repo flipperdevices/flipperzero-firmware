@@ -3,8 +3,9 @@
 Alternative names
 
 - Implemented alternative names functionality
+- Implemented case-insensitive button search
 - Added Eject button support
-- Fixed bugs
+- Fixed bugs and refactored code
 
 ## v1.2
 

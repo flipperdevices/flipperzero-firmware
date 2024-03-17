@@ -121,7 +121,7 @@ XRemoteAppButtons* xremote_app_buttons_load(XRemoteAppContext* app_ctx);
 
 bool xremote_app_extension_store(XRemoteAppButtons* buttons, FuriString* path);
 bool xremote_app_extension_load(XRemoteAppButtons* buttons, FuriString* path);
-bool xremote_app_alt_names_check_and_store();
+bool xremote_app_alt_names_check_and_init();
 
 //////////////////////////////////////////////////////////////////////////////
 // XRemote application factory

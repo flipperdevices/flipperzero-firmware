@@ -1,4 +1,9 @@
 <p align="center">Advanced IR Remote App for Flipper Device</p>
+
+<p align="center">
+  Version 1.3 - <a href="https://github.com/kala13x/flipper-xremote/blob/main/docs/changelog.md">Changelog</a>
+</p>
+
 <p align="center">
     <img src="https://github.com/kala13x/flipper-xremote/blob/main/.flipcorg/banner.png" alt="XRemote">
 </p>
@@ -58,16 +63,17 @@ Button name | Description
 `Play`      | Play
 `Stop`      | Stop
 
-
 ## Alternative button names
-In addition to the predefined names, `XRemote` uses alternative button names to make it as easy as possible to interact with different types of IR dumps. This means that if a button is not found in the file with the appropriate name, the application will try to find the same button with alternative names. Ensure this feature is enabled in the application settings before you use it.
+In addition to the predefined names, `XRemote` uses alternative button names to make it as easy as possible to interact with different types of IR dumps. That means if a button with the appropriate name is not found in the file, the application will try to find the same button with alternative names. Ensure this feature is enabled in the application settings before you use it.
 
-Alternate names are case insensitive and defined in the file:
+The application stores and reads alternate names from the following file:
 ```
 SD Card/apps_data/flipper_xremote/alt_names.cfg
 ```
 
-If this file does not exist, it will be created automatically with default values when the application is launched. You are free to remove, edit or add any values you want to this file. Here is the alt_names.cfg file with default contents:
+If the `Alt-Names` option is enabled in the config and the file does not exist, it will be created automatically with default values during the application's startup. You can edit, add, or remove any button or alternate name values from this file. Button names must either have only the first uppercase or be entirely lowercase. As for alternate names, they are case-insensitive. The button can have one or several comma-separated alternate names.
+
+This is the default `alt_names.cfg` file:
 
 ```
 Filetype: XRemote Alt-Names
@@ -113,8 +119,10 @@ Play_pa: playpause,play,pause
    - Use deploy script from this repository to build and run the application on the device:
 
     ```bash
-    ./deploy.sh -b --fw=/path/to/the/firmware
+    ./deploy.sh --fw=/path/to/the/firmware -b -l
     ```
+
+    Do not use `-l` (link) option of you are building the project directly from the `applications_user` directory of the firmware.
 2. If you don't have the firmware or the Linux please refer to the [official documentation](https://github.com/flipperdevices/flipperzero-firmware/blob/dev/documentation/AppsOnSDCard.md) for build instructions.
 
 ## Progress

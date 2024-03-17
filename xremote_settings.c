@@ -73,6 +73,7 @@ static void infrared_settings_alt_names_changed(VariableItem* item) {
     settings->alt_names = variable_item_get_current_value_index(item);
     const char* alt_names_str = xremote_app_get_alt_names_str(settings->alt_names);
 
+    if(settings->alt_names) xremote_app_alt_names_check_and_init();
     variable_item_set_current_value_text(item, alt_names_str);
     xremote_app_settings_store(settings);
 }

@@ -148,7 +148,7 @@ bool xremote_app_extension_store(XRemoteAppButtons* buttons, FuriString* path) {
     return success;
 }
 
-bool xremote_app_alt_names_check_and_store() {
+bool xremote_app_alt_names_check_and_init() {
     Storage* storage = furi_record_open(RECORD_STORAGE);
     FlipperFormat* ff = flipper_format_file_alloc(storage);
     bool success = false;
@@ -352,6 +352,9 @@ XRemoteAppContext* xremote_app_context_alloc(void* arg) {
     /* Allocate and load global app settings */
     ctx->app_settings = xremote_app_settings_alloc();
     xremote_app_settings_load(ctx->app_settings);
+
+    /* Initialize alternative names */
+    if(ctx->app_settings->alt_names) xremote_app_alt_names_check_and_init();
 
     /* Allocate and setup view dispatcher */
     ctx->view_dispatcher = view_dispatcher_alloc();

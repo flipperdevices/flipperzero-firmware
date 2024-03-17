@@ -91,9 +91,9 @@ InfraredRemoteButton* infrared_remote_get_button(InfraredRemote* remote, size_t 
 bool infrared_remote_find_button_by_name(InfraredRemote* remote, const char* name, size_t* index) {
     for(size_t i = 0; i < InfraredButtonArray_size(remote->buttons); i++) {
         InfraredRemoteButton* button = *InfraredButtonArray_get(remote->buttons, i);
-        FuriString* firi_name = infrared_remote_button_get_furi_name(button);
+        FuriString* furi_name = infrared_remote_button_get_furi_name(button);
 
-        if(button && !furi_string_cmpi_str(firi_name, name)) {
+        if(button && !furi_string_cmpi_str(furi_name, name)) {
             *index = i;
             return true;
         }
@@ -105,8 +105,8 @@ InfraredRemoteButton*
     infrared_remote_get_button_by_name(InfraredRemote* remote, const char* name) {
     for(size_t i = 0; i < InfraredButtonArray_size(remote->buttons); i++) {
         InfraredRemoteButton* button = *InfraredButtonArray_get(remote->buttons, i);
-        FuriString* firi_name = infrared_remote_button_get_furi_name(button);
-        if(button && !furi_string_cmpi_str(firi_name, name)) return button;
+        FuriString* furi_name = infrared_remote_button_get_furi_name(button);
+        if(button && !furi_string_cmpi_str(furi_name, name)) return button;
     }
     return NULL;
 }

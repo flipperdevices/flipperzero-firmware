@@ -133,8 +133,8 @@ View* xremote_view_get_view(XRemoteView* rview) {
     return rview->view;
 }
 
-InfraredRemoteButton*
-    infrared_remote_get_button_by_alt_name(InfraredRemote* remote, const char* name) {
+static InfraredRemoteButton*
+    infrared_remote_get_button_by_alt_name(InfraredRemote* remote, const char* name, bool try_low) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
     FlipperFormat* ff = flipper_format_buffered_file_alloc(storage);
     FuriString* header = furi_string_alloc();
@@ -142,6 +142,8 @@ InfraredRemoteButton*
     FURI_LOG_I(XREMOTE_APP_TAG, "loading alt_names file: \'%s\'", XREMOTE_ALT_NAMES);
 
     InfraredRemoteButton* button = NULL;
+    char key[XREMOTE_NAME_MAX] = {0};
+    bool key_found = false;
     uint32_t version = 0;
 
     do {
@@ -151,7 +153,20 @@ InfraredRemoteButton*
         if(!furi_string_equal(header, "XRemote Alt-Names") || (version != 1)) break;
 
         FuriString* value = furi_string_alloc();
-        if(!flipper_format_read_string(ff, name, value)) break;
+        key_found = flipper_format_read_string(ff, name, value);
+
+        if(!key_found) {
+            if(!try_low) break;
+            size_t i;
+
+            /* Convert name to lowercase and try again */
+            for(i = 0; name[i] != '\0' && i < sizeof(key) - 1; i++) {
+                key[i] = tolower(name[i]);
+            }
+
+            key[i] = '\0';
+            break;
+        }
 
         size_t start = 0;
         size_t posit = furi_string_search_str(value, ",", start);
@@ -190,6 +205,8 @@ InfraredRemoteButton*
     furi_string_free(header);
     flipper_format_free(ff);
 
+    if(!key_found && try_low) return infrared_remote_get_button_by_alt_name(remote, key, false);
+
     return button;
 }
 
@@ -202,7 +219,7 @@ InfraredRemoteButton* xremote_view_get_button_by_name(XRemoteView* rview, const 
     InfraredRemoteButton* button = infrared_remote_get_button_by_name(buttons->remote, name);
 
     if(button == NULL && settings->alt_names)
-        button = infrared_remote_get_button_by_alt_name(buttons->remote, name);
+        button = infrared_remote_get_button_by_alt_name(buttons->remote, name, true);
 
     return button;
 }

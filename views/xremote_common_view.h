@@ -21,7 +21,7 @@
 #include "../infrared/infrared_remote.h"
 
 #define XREMOTE_BUTTON_COUNT 27
-#define XREMOTE_NAME_MAX 16
+#define XREMOTE_NAME_MAX 32
 
 #define XREMOTE_COMMAND_POWER "Power"
 #define XREMOTE_COMMAND_EJECT "Eject"
