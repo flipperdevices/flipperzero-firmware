@@ -1,4 +1,4 @@
-# <img src="quac.png" alt="logo" width="30" style="image-rendering: pixelated; image-rendering -moz-crisp-edges; image-rendering: crisp-edges;"/> Quac! Remote
+# Quac! Remote
 ## QUick ACtion Remote Control for Flipperzero
 This app allows you to organize previously recorded signals, of any type*, so that you can quickly and easily play them back. No more needing to recall whether that door is Sub-GHz or RFID! Just navigate to that action in **Quac** and press OK to send!
 
@@ -14,18 +14,13 @@ The app does not provide any recording functionality - you must use the existing
 * [Flexible signal organization](README.md#signal-organization) - utilizing the SDcard filesystem
 * [Playlist support](README.md#playlists)
 * [Flexible naming/sorting, hidden file/folder support](README.md#sorting-and-naming)
+* [Customizable UI](README.md#settings)
 
 ## Screenshots
-<table align="center">
-  <tr>
-    <td align="center">Main View</td>
-    <td align="center">"Work" Actions</td>
-  </tr>
-  <tr>
-    <td><img src="screenshots/screenshot_1.png" width="100px"/></td>
-    <td><img src="screenshots/screenshot_2.png" width="100px"/></td>
-  </tr>
-</table>
+
+![](screenshots/screenshot_1.png)
+![](screenshots/screenshot_3.png)
+![](screenshots/screenshot_4_90.png)
 
 ## Navigation / Controls
 - Pressing `OK` on a folder label will open/navigate to that folder and display it's contents.
@@ -51,9 +46,10 @@ Here's an example file layout for the screenshots above:
     01_Garage_door.rfid
     02_Office.rfid
   01_Front_Door.rfid
-  /02_Home_Theater
-     00_Power_On.ir
-     01_Power_Off.ir
+  /02_Jam_Lists
+     00_Gate_Spam.qpl
+     01_TVs_OFF.qpl
+     02_my_Playlist.qpl
 ```
 
 ## Playlists
@@ -78,10 +74,17 @@ The first two `.sub` files live in the `/ext/apps_data/quac` folder, which is wh
 ## Sorting and Naming
 The list view UI is based on the sorted file and folder order. This is enforced by sorting the actual filenames. When there are cases where you need to force a specific order, you can prepend the file and folder names with `XX_` where `X` is a digit between 0-9. This will let you place an action called `On` before `Off`, even though when sorted alphabeticaly, `Off` would come before `On`. Therefore, you would name your files `00_On.rfid` and `01_Off.rfid`. When the files and folders are rendered for display, any `XX_` prefix will be stripped. All underscores will be replaced with spaces. Extensions will be stripped. Casing is preserved. Additionally, all files and folders that begin with a `.` will be ignored when drawing the UI. However, they can still be referenced in playlists. This keeps the UI unclutterd.
 
-## On deck... maybe?
-- Horizontal layout
-- Customize length of RFID playback. (Per file? hmm...)
-- Improved UI
+## Settings
+![Settings menu](screenshots/screenshot_2.png)
+
+The settings menu will appear as the last item when you are viewing the "root" directory. Within the settings you can control:
+- Layout: Switch between Horizontal and Vertical layout
+- Show Icons: Toggles display of all icons
+- Show Headers: Toggles display of header/folder text at the top, giving you room for one more item on screen!
+- RFID Duration: Changes the length of time a RFID signal is transmitted. Can be overridden, per `.rfid` file in a Playlist
+
+## On deck...
+- IR Signal support
 
 ## Building / Install
 This app is currently built with `ufbt`, intended for the stock firmware. I have not tested this on other firmwares. The `.fap` file can be found in the Releases section on the right.

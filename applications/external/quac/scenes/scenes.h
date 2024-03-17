@@ -1,12 +1,11 @@
 #pragma once
 
-typedef enum { SR_Scene_Items, SR_Scene_count } appScenes;
+typedef enum { Q_Scene_Items, Q_Scene_Settings, Q_Scene_count } appScenes;
 
 typedef enum {
-    SR_ButtonMenu, // used on selected device, to show buttons/groups
-    SR_Dialog, // shows errors
-    SR_FileBrowser, // TODO: UNUSED!
-    SR_TextInput // TODO: UNUSED
+    Q_ActionMenu, // new UI,
+    Q_Settings, // Variable Item List for settings
+    Q_Dialog, // TODO: shows errors
 } appView;
 
 typedef enum { Event_DeviceSelected, Event_ButtonPressed } AppCustomEvents;

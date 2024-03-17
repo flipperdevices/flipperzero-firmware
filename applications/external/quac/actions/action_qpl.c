@@ -11,21 +11,27 @@
 #include "quac.h"
 
 /** Open the Playlist file and then transmit each action
+ * 
  * Each line of the playlist file is one of:
  *   <file_path>
  *      Full SD card path, or relative path to action to be transmitted. Must be
  *      one of the supported filetypes (.sub, .rfid, [.ir coming soon])
- *   pause <ms> - NOT IMPLEMENTED
+ * 
+ *      If an .rfid file has a space followed by a number, that will be the
+ *      duration for that RFID transmission. All other .rfid files will use
+ *      the value specified in the Settings
+ * 
+ *   pause <ms>
  *      Pauses the playback for 'ms' milliseconds.
  * 
  * Blank lines, and comments (start with '#') are ignored. Whitespace is trimmed.
  * 
- * Not yet Implemented:
- * - For RFID files, if they have a space followed by a number after their name,
- *   that number will be the duration of that RFID tx
 */
-void action_qpl_tx(void* context, FuriString* action_path, FuriString* error) {
+void action_qpl_tx(void* context, const FuriString* action_path, FuriString* error) {
     App* app = context;
+
+    // Save the current RFID Duration, in case it is changed during playback
+    uint32_t orig_rfid_duration = app->settings.rfid_duration;
 
     FuriString* buffer;
     buffer = furi_string_alloc();
@@ -34,7 +40,7 @@ void action_qpl_tx(void* context, FuriString* action_path, FuriString* error) {
     if(file_stream_open(file, furi_string_get_cstr(action_path), FSAM_READ, FSOM_OPEN_EXISTING)) {
         while(stream_read_line(file, buffer)) {
             furi_string_trim(buffer); // remove '\n\r' line endings, cleanup spaces
-            FURI_LOG_I(TAG, "line: %s", furi_string_get_cstr(buffer));
+            // FURI_LOG_I(TAG, "line: %s", furi_string_get_cstr(buffer));
 
             // Skip blank lines
             if(furi_string_size(buffer) == 0) {
@@ -100,7 +106,7 @@ void action_qpl_tx(void* context, FuriString* action_path, FuriString* error) {
                     // FURI_LOG_I(TAG, "RFID file with duration");
                     if(sscanf(furi_string_get_cstr(buffer), "%lu", &rfid_duration) == 1) {
                         FURI_LOG_I(TAG, "RFID duration = %lu", rfid_duration);
-                        // TODO: Need to get the duration to the action_rfid_tx command...
+                        app->settings.rfid_duration = rfid_duration;
                     }
                 }
 
@@ -128,10 +134,12 @@ void action_qpl_tx(void* context, FuriString* action_path, FuriString* error) {
             path_extract_extension(buffer, ext, MAX_EXT_LEN);
             if(!strcmp(ext, ".sub")) {
                 action_subghz_tx(context, buffer, error);
-            } else if(!strcmp(ext, ".ir")) {
-                action_ir_tx(context, buffer, error);
             } else if(!strcmp(ext, ".rfid")) {
                 action_rfid_tx(context, buffer, error);
+                // Reset our default duration back - in case it was changed during playback
+                app->settings.rfid_duration = orig_rfid_duration;
+            } else if(!strcmp(ext, ".ir")) {
+                action_ir_tx(context, buffer, error);
             } else if(!strcmp(ext, ".qpl")) {
                 ACTION_SET_ERROR("Playlist: Can't call playlist from playlist");
             } else {

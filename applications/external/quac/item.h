@@ -9,7 +9,15 @@
  * on-screen as well as to perform that action.
 */
 
-typedef enum { Item_Action, Item_Group } ItemType;
+typedef enum {
+    Item_SubGhz,
+    Item_RFID,
+    Item_IR,
+    Item_Playlist,
+    Item_Group,
+    Item_Settings,
+    Item_count
+} ItemType;
 
 typedef struct Item {
     ItemType type;
@@ -34,7 +42,7 @@ typedef struct ItemsView {
  * @param   path    FuriString*
  * @return  ItemsView*
 */
-ItemsView* item_get_items_view_from_path(void* context, FuriString* path);
+ItemsView* item_get_items_view_from_path(void* context, const FuriString* path);
 
 /** Free ItemsView
  * @param   items_view
@@ -46,3 +54,8 @@ void item_items_view_free(ItemsView* items_view);
  * @param   name    FuriString*
 */
 void item_prettify_name(FuriString* name);
+
+/** Return the ItemType enum for the given extension
+ * @param   ext     File extension
+*/
+ItemType item_get_item_type_from_extension(const char* ext);
