@@ -3,8 +3,8 @@
 Bug fixes and improvements!
 
 - Back to working on latest official firmware ( @GeorgeBotsev )
-- Now the Evil Portal and wardrive dumps will be saved to a new directory `apps_data/marauder/dumps`, and the "-serial" argument for all commands will respect your "save pcaps" app setting ( @Willy-JL )
-- You'll also notice an `apps_data/marauder/html` directory, to support migrating from the standalone Evil Portal ( @RogueMaster )
+- Now the Evil Portal and wardrive dumps will be saved to a new directory apps_data/marauder/dumps, and the "-serial" argument for all commands will respect your "save pcaps" app setting ( @Willy-JL )
+- You'll also notice an apps_data/marauder/html directory, to support migrating from the standalone Evil Portal ( @RogueMaster )
 - Fixes an issue with loading scripts due to upstream toolchain changes ( @Willy-JL , @vollukas )
 
 As always, make sure you're running the latest version of Marauder FW on your wifi board: https://github.com/justcallmekoko/ESP32Marauder/releases/latest
