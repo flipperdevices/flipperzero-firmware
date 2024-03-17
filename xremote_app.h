@@ -38,7 +38,7 @@
 
 #define XREMOTE_APP_FOLDER ANY_PATH("infrared")
 #define XREMOTE_APP_SETTINGS APP_DATA_PATH("xremote.cfg")
-#define XREMOTE_ALT_NAMES APP_DATA_PATH("alt_names.cfg")
+#define XREMOTE_ALT_NAMES APP_DATA_PATH("alt_names.txt")
 
 #define xremote_app_assert_void(cond) \
     if(!cond) return
