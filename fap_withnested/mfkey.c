@@ -3,15 +3,14 @@
 
 // TODO: Add keys to top of the user dictionary, not the bottom
 // TODO: More efficient dictionary bruteforce by scanning through hardcoded very common keys and previously found dictionary keys first?
-//       (a cache for napi_key_already_found_for_nonce)
+//       (a cache for key_already_found_for_nonce_in_dict)
 // TODO: Selectively unroll loops to reduce binary size
-// TODO: Optimize assembly of filter and/or state_loop
-// TODO: Investigate collecting the parity during Mfkey32 attacks to further optimize the attack
+// TODO: Collect parity during Mfkey32 attacks to further optimize the attack
 // TODO: Why different sscanf between Mfkey32 and Nested?
 // TODO: "Read tag again with NFC app" message upon completion, "Complete. Keys added: <n>"
 // TODO: Separate Mfkey32 and Nested functions where possible to reduce branch statements
 // TODO: More accurate timing for Nested
-// TODO: Eliminate OOM crashes (updated application is larger)
+// TODO: Unload and load specific attacks from memory
 
 #include <furi_hal.h>
 #include <gui/gui.h>
@@ -32,7 +31,8 @@
 #define MAX_NAME_LEN 32
 #define MAX_PATH_LEN 64
 
-#define MIN_RAM 114000
+//#define MIN_RAM 114700
+#define MIN_RAM 117500
 #define LF_POLY_ODD (0x29CE5C)
 #define LF_POLY_EVEN (0x870804)
 #define CONST_M1_1 (LF_POLY_EVEN << 1 | 1)
@@ -108,7 +108,7 @@ typedef enum { mfkey32, static_nested } AttackType;
 
 typedef struct {
     AttackType attack;
-    uint64_t key; // key
+    MfClassicKey key; // key
     uint32_t uid; // serial number
     uint32_t nt0; // tag challenge first
     uint32_t nt1; // tag challenge second
@@ -209,11 +209,17 @@ static inline void update_contribution(unsigned int data[], int item, int mask1,
     data[item] = p << 24 | (data[item] & 0xffffff);
 }
 
-void crypto1_get_lfsr(struct Crypto1State* state, uint64_t* lfsr) {
+void crypto1_get_lfsr(struct Crypto1State* state, MfClassicKey* lfsr) {
     int i;
-    for(*lfsr = 0, i = 23; i >= 0; --i) {
-        *lfsr = *lfsr << 1 | BIT(state->odd, i ^ 3);
-        *lfsr = *lfsr << 1 | BIT(state->even, i ^ 3);
+    uint64_t lfsr_value = 0;
+    for(i = 23; i >= 0; --i) {
+        lfsr_value = lfsr_value << 1 | BIT(state->odd, i ^ 3);
+        lfsr_value = lfsr_value << 1 | BIT(state->even, i ^ 3);
+    }
+
+    // Assign the key value to the MfClassicKey struct
+    for(i = 0; i < 6; ++i) {
+        lfsr->data[i] = (lfsr_value >> ((5 - i) * 8)) & 0xFF;
     }
 }
 
@@ -283,25 +289,68 @@ static inline void rollback_word_noret(struct Crypto1State* s, uint32_t in, int 
     return;
 }
 
-bool key_already_found_for_nonce(uint64_t* keyarray, int keyarray_size, MfClassicNonce* nonce) {
-    for(int k = 0; k < keyarray_size; k++) {
+#pragma GCC push_options
+#pragma GCC optimize("Os")
+uint64_t napi_nfc_util_bytes2num(const uint8_t* src, uint8_t len) {
+    furi_assert(src);
+    furi_assert(len <= 8);
+
+    uint64_t res = 0;
+    while(len--) {
+        res = (res << 8) | (*src);
+        src++;
+    }
+    return res;
+}
+
+bool key_already_found_for_nonce_in_dict(KeysDict* dict, MfClassicNonce* nonce) {
+    bool found = false;
+    uint8_t key_bytes[sizeof(MfClassicKey)];
+    keys_dict_rewind(dict);
+    while(keys_dict_get_next_key(dict, key_bytes, sizeof(MfClassicKey))) {
+        uint64_t k = napi_nfc_util_bytes2num(key_bytes, sizeof(MfClassicKey));
         struct Crypto1State temp = {0, 0};
-
         for(int i = 0; i < 24; i++) {
-            (&temp)->odd |= (BIT(keyarray[k], 2 * i + 1) << (i ^ 3));
-            (&temp)->even |= (BIT(keyarray[k], 2 * i) << (i ^ 3));
+            (&temp)->odd |= (BIT(k, 2 * i + 1) << (i ^ 3));
+            (&temp)->even |= (BIT(k, 2 * i) << (i ^ 3));
         }
-
         if(nonce->attack == mfkey32) {
             crypt_word_noret(&temp, nonce->uid_xor_nt1, 0);
             crypt_word_noret(&temp, nonce->nr1_enc, 1);
+            if(nonce->ar1_enc == (crypt_word(&temp) ^ nonce->p64b)) {
+                found = true;
+                break;
+            }
+        } else if(nonce->attack == static_nested) {
+            uint32_t expected_ks1 = crypt_word_ret(&temp, nonce->uid_xor_nt0, 0);
+            if(nonce->ks1_1_enc == expected_ks1) {
+                found = true;
+                break;
+            }
+        }
+    }
+    return found;
+}
 
+bool key_already_found_for_nonce_in_solved(
+    MfClassicKey* keyarray,
+    int keyarray_size,
+    MfClassicNonce* nonce) {
+    for(int k = 0; k < keyarray_size; k++) {
+        uint64_t key_as_int = napi_nfc_util_bytes2num(keyarray[k].data, sizeof(MfClassicKey));
+        struct Crypto1State temp = {0, 0};
+        for(int i = 0; i < 24; i++) {
+            (&temp)->odd |= (BIT(key_as_int, 2 * i + 1) << (i ^ 3));
+            (&temp)->even |= (BIT(key_as_int, 2 * i) << (i ^ 3));
+        }
+        if(nonce->attack == mfkey32) {
+            crypt_word_noret(&temp, nonce->uid_xor_nt1, 0);
+            crypt_word_noret(&temp, nonce->nr1_enc, 1);
             if(nonce->ar1_enc == (crypt_word(&temp) ^ nonce->p64b)) {
                 return true;
             }
         } else if(nonce->attack == static_nested) {
             uint32_t expected_ks1 = crypt_word_ret(&temp, nonce->uid_xor_nt0, 0);
-
             if(nonce->ks1_1_enc == expected_ks1) {
                 return true;
             }
@@ -309,6 +358,7 @@ bool key_already_found_for_nonce(uint64_t* keyarray, int keyarray_size, MfClassi
     }
     return false;
 }
+#pragma GCC pop_options
 
 int check_state(struct Crypto1State* t, MfClassicNonce* n) {
     if(!(t->odd | t->even)) return 0;
@@ -667,8 +717,8 @@ bool recover(MfClassicNonce* n, int ks2, unsigned int in, ProgramState* program_
                temp_states_even,
                in,
                program_state)) {
-            int bench_stop = furi_hal_rtc_get_timestamp();
-            FURI_LOG_I(TAG, "Cracked in %i seconds", bench_stop - bench_start);
+            //int bench_stop = furi_hal_rtc_get_timestamp();
+            //FURI_LOG_I(TAG, "Cracked in %i seconds", bench_stop - bench_start);
             found = true;
             break;
         }
@@ -684,70 +734,8 @@ bool recover(MfClassicNonce* n, int ks2, unsigned int in, ProgramState* program_
     return found;
 }
 
-static bool napi_keys_dict_add_key_str(KeysDict* instance, FuriString* key) {
-    furi_assert(instance);
-    furi_assert(instance->stream);
-    furi_assert(key);
-
-    furi_string_cat_str(key, "\n");
-
-    bool key_added = false;
-
-    uint32_t actual_pos = stream_tell(instance->stream);
-
-    if(stream_seek(instance->stream, 0, StreamOffsetFromEnd) &&
-       stream_insert_string(instance->stream, key)) {
-        instance->total_keys++;
-        key_added = true;
-    }
-
-    stream_seek(instance->stream, actual_pos, StreamOffsetFromStart);
-
-    return key_added;
-}
-
-uint64_t napi_nfc_util_bytes2num(const uint8_t* src, uint8_t len) {
-    furi_assert(src);
-    furi_assert(len <= 8);
-
-    uint64_t res = 0;
-    while(len--) {
-        res = (res << 8) | (*src);
-        src++;
-    }
-    return res;
-}
-
-bool napi_key_already_found_for_nonce(KeysDict* dict, MfClassicNonce* nonce) {
-    bool found = false;
-    uint8_t key_bytes[sizeof(MfClassicKey)];
-    keys_dict_rewind(dict);
-    while(keys_dict_get_next_key(dict, key_bytes, sizeof(MfClassicKey))) {
-        uint64_t k = napi_nfc_util_bytes2num(key_bytes, sizeof(MfClassicKey));
-        struct Crypto1State temp = {0, 0};
-        int i;
-        for(i = 0; i < 24; i++) {
-            (&temp)->odd |= (BIT(k, 2 * i + 1) << (i ^ 3));
-            (&temp)->even |= (BIT(k, 2 * i) << (i ^ 3));
-        }
-        if(nonce->attack == mfkey32) {
-            crypt_word_noret(&temp, nonce->uid_xor_nt1, 0);
-            crypt_word_noret(&temp, nonce->nr1_enc, 1);
-            if(nonce->ar1_enc == (crypt_word(&temp) ^ nonce->p64b)) {
-                found = true;
-                break;
-            }
-        } else if(nonce->attack == static_nested) {
-            uint32_t expected_ks1 = crypt_word_ret(&temp, nonce->uid_xor_nt0, 0);
-            if(nonce->ks1_1_enc == expected_ks1) {
-                found = true;
-                break;
-            }
-        }
-    }
-    return found;
-}
-
+#pragma GCC push_options
+#pragma GCC optimize("Os")
 bool napi_mf_classic_nonces_check_presence() {
     Storage* storage = furi_record_open(RECORD_STORAGE);
 
@@ -816,6 +804,18 @@ bool napi_mf_classic_nested_nonces_check_presence() {
     return nonces_present;
 }
 
+int binaryStringToInt(const char* binStr) {
+    int result = 0;
+    while(*binStr) {
+        result <<= 1;
+        if(*binStr == '1') {
+            result |= 1;
+        }
+        binStr++;
+    }
+    return result;
+}
+
 bool load_mfkey32_nonces(
     MfClassicNonceArray* nonce_array,
     ProgramState* program_state,
@@ -838,7 +838,7 @@ bool load_mfkey32_nonces(
             uint8_t last_char = 0;
             if(stream_read(nonce_array->stream, &last_char, 1) != 1) break;
             if(last_char != '\n') {
-                FURI_LOG_D(TAG, "Adding new line ending");
+                //FURI_LOG_D(TAG, "Adding new line ending");
                 if(stream_write_char(nonce_array->stream, '\n') != 1) break;
             }
             if(!stream_rewind(nonce_array->stream)) break;
@@ -849,14 +849,16 @@ bool load_mfkey32_nonces(
         next_line = furi_string_alloc();
         while(!(program_state->close_thread_please)) {
             if(!stream_read_line(nonce_array->stream, next_line)) {
-                FURI_LOG_T(TAG, "No nonces left");
+                //FURI_LOG_T(TAG, "No nonces left");
                 break;
             }
+            /*
             FURI_LOG_T(
                 TAG,
                 "Read line: %s, len: %zu",
                 furi_string_get_cstr(next_line),
                 furi_string_size(next_line));
+            */
             if(!furi_string_start_with_str(next_line, "Sec")) continue;
             const char* next_line_cstr = furi_string_get_cstr(next_line);
             MfClassicNonce res = {0};
@@ -906,13 +908,13 @@ bool load_mfkey32_nonces(
             res.uid_xor_nt1 = res.uid ^ res.nt1;
 
             (program_state->total)++;
-            if((system_dict_exists && napi_key_already_found_for_nonce(system_dict, &res)) ||
-               (napi_key_already_found_for_nonce(user_dict, &res))) {
+            if((system_dict_exists && key_already_found_for_nonce_in_dict(system_dict, &res)) ||
+               (key_already_found_for_nonce_in_dict(user_dict, &res))) {
                 (program_state->cracked)++;
                 (program_state->num_completed)++;
                 continue;
             }
-            FURI_LOG_I(TAG, "No key found for %8lx %8lx", res.uid, res.ar1_enc);
+            //FURI_LOG_I(TAG, "No key found for %8lx %8lx", res.uid, res.ar1_enc);
             // TODO: Refactor
             nonce_array->remaining_nonce_array = realloc( //-V701
                 nonce_array->remaining_nonce_array,
@@ -926,22 +928,10 @@ bool load_mfkey32_nonces(
         //stream_free(nonce_array->stream);
 
         array_loaded = true;
-        FURI_LOG_I(TAG, "Loaded %lu Mfkey32 nonces", nonce_array->total_nonces);
+        //FURI_LOG_I(TAG, "Loaded %lu Mfkey32 nonces", nonce_array->total_nonces);
     } while(false);
 
     return array_loaded;
-}
-
-int binaryStringToInt(const char* binStr) {
-    int result = 0;
-    while(*binStr) {
-        result <<= 1;
-        if(*binStr == '1') {
-            result |= 1;
-        }
-        binStr++;
-    }
-    return result;
 }
 
 bool load_nested_nonces(
@@ -1006,8 +996,8 @@ bool load_nested_nonces(
 
                     (program_state->total)++;
                     if((system_dict_exists &&
-                        napi_key_already_found_for_nonce(system_dict, &res)) ||
-                       (napi_key_already_found_for_nonce(user_dict, &res))) {
+                        key_already_found_for_nonce_in_dict(system_dict, &res)) ||
+                       (key_already_found_for_nonce_in_dict(user_dict, &res))) {
                         (program_state->cracked)++;
                         (program_state->num_completed)++;
                         continue;
@@ -1031,7 +1021,7 @@ bool load_nested_nonces(
     furi_record_close(RECORD_STORAGE);
     furi_string_free(next_line);
 
-    FURI_LOG_I(TAG, "Loaded %lu Static Nested nonces", nonce_array->total_nonces);
+    //FURI_LOG_I(TAG, "Loaded %lu Static Nested nonces", nonce_array->total_nonces);
     return true;
 }
 
@@ -1086,9 +1076,9 @@ static void finished_beep() {
 }
 
 void mfkey(ProgramState* program_state) {
-    uint64_t found_key; // recovered key
+    MfClassicKey found_key; // recovered key
     size_t keyarray_size = 0;
-    uint64_t* keyarray = malloc(sizeof(uint64_t) * 1);
+    MfClassicKey* keyarray = malloc(sizeof(MfClassicKey) * 1);
     uint32_t i = 0, j = 0;
     // Check for nonces
     program_state->mfkey32_present = napi_mf_classic_nonces_check_presence();
@@ -1143,13 +1133,13 @@ void mfkey(ProgramState* program_state) {
     // TODO: Work backwards on this array and free memory
     for(i = 0; i < nonce_arr->total_nonces; i++) {
         MfClassicNonce next_nonce = nonce_arr->remaining_nonce_array[i];
-        if(key_already_found_for_nonce(keyarray, keyarray_size, &next_nonce)) {
+        if(key_already_found_for_nonce_in_solved(keyarray, keyarray_size, &next_nonce)) {
             nonce_arr->remaining_nonces--;
             (program_state->cracked)++;
             (program_state->num_completed)++;
             continue;
         }
-        FURI_LOG_I(TAG, "Beginning recovery for %8lx", next_nonce.uid);
+        //FURI_LOG_I(TAG, "Beginning recovery for %8lx", next_nonce.uid);
         if(next_nonce.attack == mfkey32) {
             if(!recover(&next_nonce, next_nonce.ar0_enc ^ next_nonce.p64, 0, program_state)) {
                 if(program_state->close_thread_please) {
@@ -1178,14 +1168,14 @@ void mfkey(ProgramState* program_state) {
         found_key = next_nonce.key;
         bool already_found = false;
         for(j = 0; j < keyarray_size; j++) {
-            if(keyarray[j] == found_key) {
+            if(memcmp(keyarray[j].data, found_key.data, MF_CLASSIC_KEY_SIZE) == 0) {
                 already_found = true;
                 break;
             }
         }
         if(already_found == false) {
             // New key
-            keyarray = realloc(keyarray, sizeof(uint64_t) * (keyarray_size + 1)); //-V701
+            keyarray = realloc(keyarray, sizeof(MfClassicKey) * (keyarray_size + 1)); //-V701
             keyarray_size += 1;
             keyarray[keyarray_size - 1] = found_key;
             (program_state->unique_cracked)++;
@@ -1196,13 +1186,9 @@ void mfkey(ProgramState* program_state) {
     //FURI_LOG_I(TAG, "Unique keys found:");
     for(i = 0; i < keyarray_size; i++) {
         //FURI_LOG_I(TAG, "%012" PRIx64, keyarray[i]);
-        FuriString* temp_key = furi_string_alloc();
-        furi_string_cat_printf(temp_key, "%012" PRIX64, keyarray[i]);
-        napi_keys_dict_add_key_str(user_dict, temp_key);
-        furi_string_free(temp_key);
+        keys_dict_add_key(user_dict, keyarray[i].data, sizeof(MfClassicKey));
     }
     if(keyarray_size > 0) {
-        // TODO: Should we use DolphinDeedNfcMfcAdd?
         dolphin_deed(DolphinDeedNfcMfcAdd);
     }
     napi_mf_classic_nonce_array_free(nonce_arr);
@@ -1228,6 +1214,9 @@ static void render_callback(Canvas* const canvas, void* ctx) {
     canvas_draw_frame(canvas, 0, 15, 128, 64);
     canvas_set_font(canvas, FontPrimary);
     canvas_draw_str_aligned(canvas, 5, 4, AlignLeft, AlignTop, "MFKey");
+    snprintf(draw_str, sizeof(draw_str), "RAM: %zub", memmgr_get_free_heap());
+    canvas_set_font(canvas, FontSecondary);
+    canvas_draw_str_aligned(canvas, 48, 5, AlignLeft, AlignTop, draw_str);
     canvas_draw_icon(canvas, 114, 4, &I_mfkey);
     if(program_state->is_thread_running && program_state->mfkey_state == MFKeyAttack) {
         float eta_round = (float)1 - ((float)program_state->eta_round / (float)eta_round_time);
@@ -1350,7 +1339,7 @@ int32_t mfkey_main() {
 
     program_state->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
     if(!program_state->mutex) {
-        FURI_LOG_E(TAG, "cannot create mutex\r\n");
+        //FURI_LOG_E(TAG, "cannot create mutex\r\n");
         free(program_state);
         return 255;
     }
@@ -1438,3 +1427,4 @@ int32_t mfkey_main() {
 
     return 0;
 }
+#pragma GCC pop_options
