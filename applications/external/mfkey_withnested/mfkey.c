@@ -3,47 +3,36 @@
 
 // TODO: Add keys to top of the user dictionary, not the bottom
 // TODO: More efficient dictionary bruteforce by scanning through hardcoded very common keys and previously found dictionary keys first?
-//       (a cache for napi_key_already_found_for_nonce)
-// TODO: Remove icon from application to save 1.5 KB
+//       (a cache for key_already_found_for_nonce_in_dict)
 // TODO: Selectively unroll loops to reduce binary size
-// TODO: Optimize assembly of filter and/or state_loop
-// TODO: Investigate collecting the parity during Mfkey32 attacks to further optimize the attack
+// TODO: Collect parity during Mfkey32 attacks to further optimize the attack
 // TODO: Why different sscanf between Mfkey32 and Nested?
 // TODO: "Read tag again with NFC app" message upon completion, "Complete. Keys added: <n>"
 // TODO: Separate Mfkey32 and Nested functions where possible to reduce branch statements
 // TODO: More accurate timing for Nested
-// TODO: Eliminate OOM crashes (updated application is larger)
+// TODO: Unload and load specific attacks from memory
 
-#include <furi.h>
 #include <furi_hal.h>
-#include "time.h"
 #include <gui/gui.h>
 #include <gui/elements.h>
-#include <input/input.h>
-#include <stdlib.h>
 #include "mfkey32_wnested_icons.h"
 #include <inttypes.h>
-#include <stdio.h>
-#include <string.h>
-#include <stdint.h>
-#include <unistd.h>
-#include <storage/storage.h>
+#include <toolbox/keys_dict.h>
 #include <toolbox/stream/buffered_file_stream.h>
-#include <lib/toolbox/args.h>
-#include <lib/flipper_format/flipper_format.h>
 #include <dolphin/dolphin.h>
 #include <notification/notification_messages.h>
+#include <nfc/protocols/mf_classic/mf_classic.h>
 
-#define MF_CLASSIC_DICT_FLIPPER_PATH EXT_PATH("nfc/assets/mf_classic_dict.nfc")
-#define MF_CLASSIC_DICT_USER_PATH EXT_PATH("nfc/assets/mf_classic_dict_user.nfc")
+#define KEYS_DICT_SYSTEM_PATH EXT_PATH("nfc/assets/mf_classic_dict.nfc")
+#define KEYS_DICT_USER_PATH EXT_PATH("nfc/assets/mf_classic_dict_user.nfc")
 #define MF_CLASSIC_NONCE_PATH EXT_PATH("nfc/.mfkey32.log")
 #define MF_CLASSIC_NESTED_NONCE_PATH EXT_PATH("nfc/.nested")
 #define TAG "MFKey"
-#define NFC_MF_CLASSIC_KEY_LEN (13)
 #define MAX_NAME_LEN 32
 #define MAX_PATH_LEN 64
 
-#define MIN_RAM 115632 // TODO: May no longer be accurate, crashes are getting frequent
+//#define MIN_RAM 114700
+#define MIN_RAM 117500
 #define LF_POLY_ODD (0x29CE5C)
 #define LF_POLY_EVEN (0x870804)
 #define CONST_M1_1 (LF_POLY_EVEN << 1 | 1)
@@ -119,7 +108,7 @@ typedef enum { mfkey32, static_nested } AttackType;
 
 typedef struct {
     AttackType attack;
-    uint64_t key; // key
+    MfClassicKey key; // key
     uint32_t uid; // serial number
     uint32_t nt0; // tag challenge first
     uint32_t nt1; // tag challenge second
@@ -148,15 +137,12 @@ typedef struct {
     size_t remaining_nonces;
 } MfClassicNonceArray;
 
-typedef enum {
-    MfClassicDictTypeSystem,
-    MfClassicDictTypeUser,
-} MfClassicDictType;
-
-typedef struct {
+struct KeysDict {
     Stream* stream;
-    uint32_t total_keys;
-} MfClassicDict;
+    size_t key_size;
+    size_t key_size_symbols;
+    size_t total_keys;
+};
 
 static const uint8_t lookup1[256] = {
     0, 0,  16, 16, 0,  16, 0,  0,  0, 16, 0,  0,  16, 16, 16, 16, 0, 0,  16, 16, 0,  16, 0,  0,
@@ -223,11 +209,17 @@ static inline void update_contribution(unsigned int data[], int item, int mask1,
     data[item] = p << 24 | (data[item] & 0xffffff);
 }
 
-void crypto1_get_lfsr(struct Crypto1State* state, uint64_t* lfsr) {
+void crypto1_get_lfsr(struct Crypto1State* state, MfClassicKey* lfsr) {
     int i;
-    for(*lfsr = 0, i = 23; i >= 0; --i) {
-        *lfsr = *lfsr << 1 | BIT(state->odd, i ^ 3);
-        *lfsr = *lfsr << 1 | BIT(state->even, i ^ 3);
+    uint64_t lfsr_value = 0;
+    for(i = 23; i >= 0; --i) {
+        lfsr_value = lfsr_value << 1 | BIT(state->odd, i ^ 3);
+        lfsr_value = lfsr_value << 1 | BIT(state->even, i ^ 3);
+    }
+
+    // Assign the key value to the MfClassicKey struct
+    for(i = 0; i < 6; ++i) {
+        lfsr->data[i] = (lfsr_value >> ((5 - i) * 8)) & 0xFF;
     }
 }
 
@@ -297,25 +289,68 @@ static inline void rollback_word_noret(struct Crypto1State* s, uint32_t in, int 
     return;
 }
 
-bool key_already_found_for_nonce(uint64_t* keyarray, int keyarray_size, MfClassicNonce* nonce) {
-    for(int k = 0; k < keyarray_size; k++) {
+#pragma GCC push_options
+#pragma GCC optimize("Os")
+uint64_t napi_nfc_util_bytes2num(const uint8_t* src, uint8_t len) {
+    furi_assert(src);
+    furi_assert(len <= 8);
+
+    uint64_t res = 0;
+    while(len--) {
+        res = (res << 8) | (*src);
+        src++;
+    }
+    return res;
+}
+
+bool key_already_found_for_nonce_in_dict(KeysDict* dict, MfClassicNonce* nonce) {
+    bool found = false;
+    uint8_t key_bytes[sizeof(MfClassicKey)];
+    keys_dict_rewind(dict);
+    while(keys_dict_get_next_key(dict, key_bytes, sizeof(MfClassicKey))) {
+        uint64_t k = napi_nfc_util_bytes2num(key_bytes, sizeof(MfClassicKey));
         struct Crypto1State temp = {0, 0};
-
         for(int i = 0; i < 24; i++) {
-            (&temp)->odd |= (BIT(keyarray[k], 2 * i + 1) << (i ^ 3));
-            (&temp)->even |= (BIT(keyarray[k], 2 * i) << (i ^ 3));
+            (&temp)->odd |= (BIT(k, 2 * i + 1) << (i ^ 3));
+            (&temp)->even |= (BIT(k, 2 * i) << (i ^ 3));
         }
-
         if(nonce->attack == mfkey32) {
             crypt_word_noret(&temp, nonce->uid_xor_nt1, 0);
             crypt_word_noret(&temp, nonce->nr1_enc, 1);
+            if(nonce->ar1_enc == (crypt_word(&temp) ^ nonce->p64b)) {
+                found = true;
+                break;
+            }
+        } else if(nonce->attack == static_nested) {
+            uint32_t expected_ks1 = crypt_word_ret(&temp, nonce->uid_xor_nt0, 0);
+            if(nonce->ks1_1_enc == expected_ks1) {
+                found = true;
+                break;
+            }
+        }
+    }
+    return found;
+}
 
+bool key_already_found_for_nonce_in_solved(
+    MfClassicKey* keyarray,
+    int keyarray_size,
+    MfClassicNonce* nonce) {
+    for(int k = 0; k < keyarray_size; k++) {
+        uint64_t key_as_int = napi_nfc_util_bytes2num(keyarray[k].data, sizeof(MfClassicKey));
+        struct Crypto1State temp = {0, 0};
+        for(int i = 0; i < 24; i++) {
+            (&temp)->odd |= (BIT(key_as_int, 2 * i + 1) << (i ^ 3));
+            (&temp)->even |= (BIT(key_as_int, 2 * i) << (i ^ 3));
+        }
+        if(nonce->attack == mfkey32) {
+            crypt_word_noret(&temp, nonce->uid_xor_nt1, 0);
+            crypt_word_noret(&temp, nonce->nr1_enc, 1);
             if(nonce->ar1_enc == (crypt_word(&temp) ^ nonce->p64b)) {
                 return true;
             }
         } else if(nonce->attack == static_nested) {
             uint32_t expected_ks1 = crypt_word_ret(&temp, nonce->uid_xor_nt0, 0);
-
             if(nonce->ks1_1_enc == expected_ks1) {
                 return true;
             }
@@ -323,6 +358,7 @@ bool key_already_found_for_nonce(uint64_t* keyarray, int keyarray_size, MfClassi
     }
     return false;
 }
+#pragma GCC pop_options
 
 int check_state(struct Crypto1State* t, MfClassicNonce* n) {
     if(!(t->odd | t->even)) return 0;
@@ -681,8 +717,8 @@ bool recover(MfClassicNonce* n, int ks2, unsigned int in, ProgramState* program_
                temp_states_even,
                in,
                program_state)) {
-            int bench_stop = furi_hal_rtc_get_timestamp();
-            FURI_LOG_I(TAG, "Cracked in %i seconds", bench_stop - bench_start);
+            //int bench_stop = furi_hal_rtc_get_timestamp();
+            //FURI_LOG_I(TAG, "Cracked in %i seconds", bench_stop - bench_start);
             found = true;
             break;
         }
@@ -698,245 +734,8 @@ bool recover(MfClassicNonce* n, int ks2, unsigned int in, ProgramState* program_
     return found;
 }
 
-bool napi_mf_classic_dict_check_presence(MfClassicDictType dict_type) {
-    Storage* storage = furi_record_open(RECORD_STORAGE);
-
-    bool dict_present = false;
-    if(dict_type == MfClassicDictTypeSystem) {
-        dict_present = storage_common_stat(storage, MF_CLASSIC_DICT_FLIPPER_PATH, NULL) == FSE_OK;
-    } else if(dict_type == MfClassicDictTypeUser) {
-        dict_present = storage_common_stat(storage, MF_CLASSIC_DICT_USER_PATH, NULL) == FSE_OK;
-    }
-
-    furi_record_close(RECORD_STORAGE);
-
-    return dict_present;
-}
-
-MfClassicDict* napi_mf_classic_dict_alloc(MfClassicDictType dict_type) {
-    MfClassicDict* dict = malloc(sizeof(MfClassicDict));
-    Storage* storage = furi_record_open(RECORD_STORAGE);
-    dict->stream = buffered_file_stream_alloc(storage);
-    furi_record_close(RECORD_STORAGE);
-
-    bool dict_loaded = false;
-    do {
-        if(dict_type == MfClassicDictTypeSystem) {
-            if(!buffered_file_stream_open(
-                   dict->stream,
-                   MF_CLASSIC_DICT_FLIPPER_PATH,
-                   FSAM_READ_WRITE,
-                   FSOM_OPEN_EXISTING)) {
-                buffered_file_stream_close(dict->stream);
-                break;
-            }
-        } else if(dict_type == MfClassicDictTypeUser) {
-            if(!buffered_file_stream_open(
-                   dict->stream, MF_CLASSIC_DICT_USER_PATH, FSAM_READ_WRITE, FSOM_OPEN_ALWAYS)) {
-                buffered_file_stream_close(dict->stream);
-                break;
-            }
-        }
-
-        // Check for newline ending
-        if(!stream_eof(dict->stream)) {
-            if(!stream_seek(dict->stream, -1, StreamOffsetFromEnd)) break;
-            uint8_t last_char = 0;
-            if(stream_read(dict->stream, &last_char, 1) != 1) break;
-            if(last_char != '\n') {
-                FURI_LOG_D(TAG, "Adding new line ending");
-                if(stream_write_char(dict->stream, '\n') != 1) break;
-            }
-            if(!stream_rewind(dict->stream)) break;
-        }
-
-        // Read total amount of keys
-        FuriString* next_line;
-        next_line = furi_string_alloc();
-        while(true) {
-            if(!stream_read_line(dict->stream, next_line)) {
-                FURI_LOG_T(TAG, "No keys left in dict");
-                break;
-            }
-            FURI_LOG_T(
-                TAG,
-                "Read line: %s, len: %zu",
-                furi_string_get_cstr(next_line),
-                furi_string_size(next_line));
-            if(furi_string_get_char(next_line, 0) == '#') continue;
-            if(furi_string_size(next_line) != NFC_MF_CLASSIC_KEY_LEN) continue;
-            dict->total_keys++;
-        }
-        furi_string_free(next_line);
-        stream_rewind(dict->stream);
-
-        dict_loaded = true;
-        FURI_LOG_I(TAG, "Loaded dictionary with %lu keys", dict->total_keys);
-    } while(false);
-
-    if(!dict_loaded) {
-        // TODO: Does this close twice?
-        buffered_file_stream_close(dict->stream);
-        //stream_free(dict->stream);
-        free(dict);
-        dict = NULL;
-    }
-
-    return dict;
-}
-
-bool napi_mf_classic_dict_add_key_str(MfClassicDict* dict, FuriString* key) {
-    furi_assert(dict);
-    furi_assert(dict->stream);
-    FURI_LOG_I(TAG, "Saving key: %s", furi_string_get_cstr(key));
-
-    furi_string_cat_printf(key, "\n");
-
-    bool key_added = false;
-    do {
-        if(!stream_seek(dict->stream, 0, StreamOffsetFromEnd)) break;
-        if(!stream_insert_string(dict->stream, key)) break;
-        dict->total_keys++;
-        key_added = true;
-    } while(false);
-
-    furi_string_left(key, 12);
-    return key_added;
-}
-
-void napi_mf_classic_dict_free(MfClassicDict* dict) {
-    // TODO: Track free state at the time this is called to ensure double free does not happen
-    furi_assert(dict);
-    furi_assert(dict->stream);
-
-    buffered_file_stream_close(dict->stream);
-    stream_free(dict->stream);
-    free(dict);
-}
-
-static void napi_mf_classic_dict_int_to_str(uint8_t* key_int, FuriString* key_str) {
-    furi_string_reset(key_str);
-    for(size_t i = 0; i < 6; i++) {
-        furi_string_cat_printf(key_str, "%02X", key_int[i]);
-    }
-}
-
-static void napi_mf_classic_dict_str_to_int(FuriString* key_str, uint64_t* key_int) {
-    uint8_t key_byte_tmp;
-
-    *key_int = 0ULL;
-    for(uint8_t i = 0; i < 12; i += 2) {
-        args_char_to_hex(
-            furi_string_get_char(key_str, i), furi_string_get_char(key_str, i + 1), &key_byte_tmp);
-        *key_int |= (uint64_t)key_byte_tmp << (8 * (5 - i / 2));
-    }
-}
-
-uint32_t napi_mf_classic_dict_get_total_keys(MfClassicDict* dict) {
-    furi_assert(dict);
-
-    return dict->total_keys;
-}
-
-bool napi_mf_classic_dict_rewind(MfClassicDict* dict) {
-    furi_assert(dict);
-    furi_assert(dict->stream);
-
-    return stream_rewind(dict->stream);
-}
-
-bool napi_mf_classic_dict_get_next_key_str(MfClassicDict* dict, FuriString* key) {
-    furi_assert(dict);
-    furi_assert(dict->stream);
-
-    bool key_read = false;
-    furi_string_reset(key);
-    while(!key_read) {
-        if(!stream_read_line(dict->stream, key)) break;
-        if(furi_string_get_char(key, 0) == '#') continue;
-        if(furi_string_size(key) != NFC_MF_CLASSIC_KEY_LEN) continue;
-        furi_string_left(key, 12);
-        key_read = true;
-    }
-
-    return key_read;
-}
-
-bool napi_mf_classic_dict_get_next_key(MfClassicDict* dict, uint64_t* key) {
-    furi_assert(dict);
-    furi_assert(dict->stream);
-
-    FuriString* temp_key;
-    temp_key = furi_string_alloc();
-    bool key_read = napi_mf_classic_dict_get_next_key_str(dict, temp_key);
-    if(key_read) {
-        napi_mf_classic_dict_str_to_int(temp_key, key);
-    }
-    furi_string_free(temp_key);
-    return key_read;
-}
-
-bool napi_mf_classic_dict_is_key_present_str(MfClassicDict* dict, FuriString* key) {
-    furi_assert(dict);
-    furi_assert(dict->stream);
-
-    FuriString* next_line;
-    next_line = furi_string_alloc();
-
-    bool key_found = false;
-    stream_rewind(dict->stream);
-    while(!key_found) { //-V654
-        if(!stream_read_line(dict->stream, next_line)) break;
-        if(furi_string_get_char(next_line, 0) == '#') continue;
-        if(furi_string_size(next_line) != NFC_MF_CLASSIC_KEY_LEN) continue;
-        furi_string_left(next_line, 12);
-        if(!furi_string_equal(key, next_line)) continue;
-        key_found = true;
-    }
-
-    furi_string_free(next_line);
-    return key_found;
-}
-
-bool napi_mf_classic_dict_is_key_present(MfClassicDict* dict, uint8_t* key) {
-    FuriString* temp_key;
-
-    temp_key = furi_string_alloc();
-    napi_mf_classic_dict_int_to_str(key, temp_key);
-    bool key_found = napi_mf_classic_dict_is_key_present_str(dict, temp_key);
-    furi_string_free(temp_key);
-    return key_found;
-}
-
-bool napi_key_already_found_for_nonce(MfClassicDict* dict, MfClassicNonce* nonce) {
-    bool found = false;
-    uint64_t k = 0;
-    napi_mf_classic_dict_rewind(dict);
-    while(napi_mf_classic_dict_get_next_key(dict, &k)) {
-        struct Crypto1State temp = {0, 0};
-        int i;
-        for(i = 0; i < 24; i++) {
-            (&temp)->odd |= (BIT(k, 2 * i + 1) << (i ^ 3));
-            (&temp)->even |= (BIT(k, 2 * i) << (i ^ 3));
-        }
-        if(nonce->attack == mfkey32) {
-            crypt_word_noret(&temp, nonce->uid_xor_nt1, 0);
-            crypt_word_noret(&temp, nonce->nr1_enc, 1);
-            if(nonce->ar1_enc == (crypt_word(&temp) ^ nonce->p64b)) {
-                found = true;
-                break;
-            }
-        } else if(nonce->attack == static_nested) {
-            uint32_t expected_ks1 = crypt_word_ret(&temp, nonce->uid_xor_nt0, 0);
-            if(nonce->ks1_1_enc == expected_ks1) {
-                found = true;
-                break;
-            }
-        }
-    }
-    return found;
-}
-
+#pragma GCC push_options
+#pragma GCC optimize("Os")
 bool napi_mf_classic_nonces_check_presence() {
     Storage* storage = furi_record_open(RECORD_STORAGE);
 
@@ -1005,12 +804,24 @@ bool napi_mf_classic_nested_nonces_check_presence() {
     return nonces_present;
 }
 
+int binaryStringToInt(const char* binStr) {
+    int result = 0;
+    while(*binStr) {
+        result <<= 1;
+        if(*binStr == '1') {
+            result |= 1;
+        }
+        binStr++;
+    }
+    return result;
+}
+
 bool load_mfkey32_nonces(
     MfClassicNonceArray* nonce_array,
     ProgramState* program_state,
-    MfClassicDict* system_dict,
+    KeysDict* system_dict,
     bool system_dict_exists,
-    MfClassicDict* user_dict) {
+    KeysDict* user_dict) {
     bool array_loaded = false;
 
     do {
@@ -1027,7 +838,7 @@ bool load_mfkey32_nonces(
             uint8_t last_char = 0;
             if(stream_read(nonce_array->stream, &last_char, 1) != 1) break;
             if(last_char != '\n') {
-                FURI_LOG_D(TAG, "Adding new line ending");
+                //FURI_LOG_D(TAG, "Adding new line ending");
                 if(stream_write_char(nonce_array->stream, '\n') != 1) break;
             }
             if(!stream_rewind(nonce_array->stream)) break;
@@ -1038,14 +849,16 @@ bool load_mfkey32_nonces(
         next_line = furi_string_alloc();
         while(!(program_state->close_thread_please)) {
             if(!stream_read_line(nonce_array->stream, next_line)) {
-                FURI_LOG_T(TAG, "No nonces left");
+                //FURI_LOG_T(TAG, "No nonces left");
                 break;
             }
+            /*
             FURI_LOG_T(
                 TAG,
                 "Read line: %s, len: %zu",
                 furi_string_get_cstr(next_line),
                 furi_string_size(next_line));
+            */
             if(!furi_string_start_with_str(next_line, "Sec")) continue;
             const char* next_line_cstr = furi_string_get_cstr(next_line);
             MfClassicNonce res = {0};
@@ -1095,13 +908,13 @@ bool load_mfkey32_nonces(
             res.uid_xor_nt1 = res.uid ^ res.nt1;
 
             (program_state->total)++;
-            if((system_dict_exists && napi_key_already_found_for_nonce(system_dict, &res)) ||
-               (napi_key_already_found_for_nonce(user_dict, &res))) {
+            if((system_dict_exists && key_already_found_for_nonce_in_dict(system_dict, &res)) ||
+               (key_already_found_for_nonce_in_dict(user_dict, &res))) {
                 (program_state->cracked)++;
                 (program_state->num_completed)++;
                 continue;
             }
-            FURI_LOG_I(TAG, "No key found for %8lx %8lx", res.uid, res.ar1_enc);
+            //FURI_LOG_I(TAG, "No key found for %8lx %8lx", res.uid, res.ar1_enc);
             // TODO: Refactor
             nonce_array->remaining_nonce_array = realloc( //-V701
                 nonce_array->remaining_nonce_array,
@@ -1115,30 +928,18 @@ bool load_mfkey32_nonces(
         //stream_free(nonce_array->stream);
 
         array_loaded = true;
-        FURI_LOG_I(TAG, "Loaded %lu Mfkey32 nonces", nonce_array->total_nonces);
+        //FURI_LOG_I(TAG, "Loaded %lu Mfkey32 nonces", nonce_array->total_nonces);
     } while(false);
 
     return array_loaded;
 }
 
-int binaryStringToInt(const char* binStr) {
-    int result = 0;
-    while(*binStr) {
-        result <<= 1;
-        if(*binStr == '1') {
-            result |= 1;
-        }
-        binStr++;
-    }
-    return result;
-}
-
 bool load_nested_nonces(
     MfClassicNonceArray* nonce_array,
     ProgramState* program_state,
-    MfClassicDict* system_dict,
+    KeysDict* system_dict,
     bool system_dict_exists,
-    MfClassicDict* user_dict) {
+    KeysDict* user_dict) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
     File* dir = storage_file_alloc(storage);
     char filename_buffer[MAX_NAME_LEN];
@@ -1195,8 +996,8 @@ bool load_nested_nonces(
 
                     (program_state->total)++;
                     if((system_dict_exists &&
-                        napi_key_already_found_for_nonce(system_dict, &res)) ||
-                       (napi_key_already_found_for_nonce(user_dict, &res))) {
+                        key_already_found_for_nonce_in_dict(system_dict, &res)) ||
+                       (key_already_found_for_nonce_in_dict(user_dict, &res))) {
                         (program_state->cracked)++;
                         (program_state->num_completed)++;
                         continue;
@@ -1220,14 +1021,14 @@ bool load_nested_nonces(
     furi_record_close(RECORD_STORAGE);
     furi_string_free(next_line);
 
-    FURI_LOG_I(TAG, "Loaded %lu Static Nested nonces", nonce_array->total_nonces);
+    //FURI_LOG_I(TAG, "Loaded %lu Static Nested nonces", nonce_array->total_nonces);
     return true;
 }
 
 MfClassicNonceArray* napi_mf_classic_nonce_array_alloc(
-    MfClassicDict* system_dict,
+    KeysDict* system_dict,
     bool system_dict_exists,
-    MfClassicDict* user_dict,
+    KeysDict* user_dict,
     ProgramState* program_state) {
     MfClassicNonceArray* nonce_array = malloc(sizeof(MfClassicNonceArray));
     MfClassicNonce* remaining_nonce_array_init = malloc(sizeof(MfClassicNonce) * 1);
@@ -1275,9 +1076,9 @@ static void finished_beep() {
 }
 
 void mfkey(ProgramState* program_state) {
-    uint64_t found_key; // recovered key
+    MfClassicKey found_key; // recovered key
     size_t keyarray_size = 0;
-    uint64_t* keyarray = malloc(sizeof(uint64_t) * 1);
+    MfClassicKey* keyarray = malloc(sizeof(MfClassicKey) * 1);
     uint32_t i = 0, j = 0;
     // Check for nonces
     program_state->mfkey32_present = napi_mf_classic_nonces_check_presence();
@@ -1289,18 +1090,19 @@ void mfkey(ProgramState* program_state) {
         return;
     }
     // Read dictionaries (optional)
-    MfClassicDict* system_dict = {0};
-    bool system_dict_exists = napi_mf_classic_dict_check_presence(MfClassicDictTypeSystem);
-    MfClassicDict* user_dict = {0};
-    bool user_dict_exists = napi_mf_classic_dict_check_presence(MfClassicDictTypeUser);
+    KeysDict* system_dict = {0};
+    bool system_dict_exists = keys_dict_check_presence(KEYS_DICT_SYSTEM_PATH);
+    KeysDict* user_dict = {0};
+    bool user_dict_exists = keys_dict_check_presence(KEYS_DICT_USER_PATH);
     uint32_t total_dict_keys = 0;
     if(system_dict_exists) {
-        system_dict = napi_mf_classic_dict_alloc(MfClassicDictTypeSystem);
-        total_dict_keys += napi_mf_classic_dict_get_total_keys(system_dict);
+        system_dict =
+            keys_dict_alloc(KEYS_DICT_SYSTEM_PATH, KeysDictModeOpenExisting, sizeof(MfClassicKey));
+        total_dict_keys += keys_dict_get_total_keys(system_dict);
     }
-    user_dict = napi_mf_classic_dict_alloc(MfClassicDictTypeUser);
+    user_dict = keys_dict_alloc(KEYS_DICT_USER_PATH, KeysDictModeOpenAlways, sizeof(MfClassicKey));
     if(user_dict_exists) {
-        total_dict_keys += napi_mf_classic_dict_get_total_keys(user_dict);
+        total_dict_keys += keys_dict_get_total_keys(user_dict);
     }
     user_dict_exists = true;
     program_state->dict_count = total_dict_keys;
@@ -1310,14 +1112,14 @@ void mfkey(ProgramState* program_state) {
     nonce_arr = napi_mf_classic_nonce_array_alloc(
         system_dict, system_dict_exists, user_dict, program_state);
     if(system_dict_exists) {
-        napi_mf_classic_dict_free(system_dict);
+        keys_dict_free(system_dict);
     }
     if(nonce_arr->total_nonces == 0) {
         // Nothing to crack
         program_state->err = ZeroNonces;
         program_state->mfkey_state = Error;
         napi_mf_classic_nonce_array_free(nonce_arr);
-        napi_mf_classic_dict_free(user_dict);
+        keys_dict_free(user_dict);
         free(keyarray);
         return;
     }
@@ -1331,13 +1133,13 @@ void mfkey(ProgramState* program_state) {
     // TODO: Work backwards on this array and free memory
     for(i = 0; i < nonce_arr->total_nonces; i++) {
         MfClassicNonce next_nonce = nonce_arr->remaining_nonce_array[i];
-        if(key_already_found_for_nonce(keyarray, keyarray_size, &next_nonce)) {
+        if(key_already_found_for_nonce_in_solved(keyarray, keyarray_size, &next_nonce)) {
             nonce_arr->remaining_nonces--;
             (program_state->cracked)++;
             (program_state->num_completed)++;
             continue;
         }
-        FURI_LOG_I(TAG, "Beginning recovery for %8lx", next_nonce.uid);
+        //FURI_LOG_I(TAG, "Beginning recovery for %8lx", next_nonce.uid);
         if(next_nonce.attack == mfkey32) {
             if(!recover(&next_nonce, next_nonce.ar0_enc ^ next_nonce.p64, 0, program_state)) {
                 if(program_state->close_thread_please) {
@@ -1366,14 +1168,14 @@ void mfkey(ProgramState* program_state) {
         found_key = next_nonce.key;
         bool already_found = false;
         for(j = 0; j < keyarray_size; j++) {
-            if(keyarray[j] == found_key) {
+            if(memcmp(keyarray[j].data, found_key.data, MF_CLASSIC_KEY_SIZE) == 0) {
                 already_found = true;
                 break;
             }
         }
         if(already_found == false) {
             // New key
-            keyarray = realloc(keyarray, sizeof(uint64_t) * (keyarray_size + 1)); //-V701
+            keyarray = realloc(keyarray, sizeof(MfClassicKey) * (keyarray_size + 1)); //-V701
             keyarray_size += 1;
             keyarray[keyarray_size - 1] = found_key;
             (program_state->unique_cracked)++;
@@ -1384,17 +1186,13 @@ void mfkey(ProgramState* program_state) {
     //FURI_LOG_I(TAG, "Unique keys found:");
     for(i = 0; i < keyarray_size; i++) {
         //FURI_LOG_I(TAG, "%012" PRIx64, keyarray[i]);
-        FuriString* temp_key = furi_string_alloc();
-        furi_string_cat_printf(temp_key, "%012" PRIX64, keyarray[i]);
-        napi_mf_classic_dict_add_key_str(user_dict, temp_key);
-        furi_string_free(temp_key);
+        keys_dict_add_key(user_dict, keyarray[i].data, sizeof(MfClassicKey));
     }
     if(keyarray_size > 0) {
-        // TODO: Should we use DolphinDeedNfcMfcAdd?
         dolphin_deed(DolphinDeedNfcMfcAdd);
     }
     napi_mf_classic_nonce_array_free(nonce_arr);
-    napi_mf_classic_dict_free(user_dict);
+    keys_dict_free(user_dict);
     free(keyarray);
     //FURI_LOG_I(TAG, "mfkey function completed normally"); // DEBUG
     program_state->mfkey_state = Complete;
@@ -1416,6 +1214,9 @@ static void render_callback(Canvas* const canvas, void* ctx) {
     canvas_draw_frame(canvas, 0, 15, 128, 64);
     canvas_set_font(canvas, FontPrimary);
     canvas_draw_str_aligned(canvas, 5, 4, AlignLeft, AlignTop, "MFKey");
+    snprintf(draw_str, sizeof(draw_str), "RAM: %zub", memmgr_get_free_heap());
+    canvas_set_font(canvas, FontSecondary);
+    canvas_draw_str_aligned(canvas, 48, 5, AlignLeft, AlignTop, draw_str);
     canvas_draw_icon(canvas, 114, 4, &I_mfkey);
     if(program_state->is_thread_running && program_state->mfkey_state == MFKeyAttack) {
         float eta_round = (float)1 - ((float)program_state->eta_round / (float)eta_round_time);
@@ -1538,7 +1339,7 @@ int32_t mfkey_main() {
 
     program_state->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
     if(!program_state->mutex) {
-        FURI_LOG_E(TAG, "cannot create mutex\r\n");
+        //FURI_LOG_E(TAG, "cannot create mutex\r\n");
         free(program_state);
         return 255;
     }
@@ -1626,3 +1427,4 @@ int32_t mfkey_main() {
 
     return 0;
 }
+#pragma GCC pop_options
