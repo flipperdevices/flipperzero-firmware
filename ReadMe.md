@@ -62,6 +62,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [FindMy Flipper v2.0 (By MatthewKuKanich)](https://github.com/MatthewKuKanich/FindMyFlipper)
 - Updated: [NFC Seader v2.6 (By bettse)](https://github.com/bettse/seader)
 - Updated: [Mfkey32 With Nested v1.0 (By noproto)](https://github.com/noproto/FlipperMfkey)
+- Updated: [XRemote v1.3 (By kala13x)](https://github.com/kala13x/flipper-xremote)
 
 <a name="release">
 
@@ -565,7 +566,7 @@ $ ./fbt dolphin_ext
 - [Wii EC Analyzer v1.1 (By csBlueChip)](https://github.com/csBlueChip/FlipperZero_WiiEC)
 - [Wire Tester v1.1 (By unixispower)](https://gitlab.com/unixispower/flipper-wire-tester)
 - [WS2812B LED Tester v1.9 (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/gpio/ws2812b_tester)
-- [XRemote v1.2 (By kala13x)](https://github.com/kala13x/flipper-xremote)
+- [XRemote v1.3 (By kala13x)](https://github.com/kala13x/flipper-xremote)
 - [YuriCable Pro Max v0.3 (By arag0re)](https://github.com/arag0re/fz-yuricable-pro-max)
 
 ## COMMENTED OUT / NOT COMPILED DUE TO ISSUES
