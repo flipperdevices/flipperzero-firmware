@@ -59,6 +59,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Bad KB and a few other minor updates (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/1f43af08a0fa3f2a368108cc7a39cfe782097b93)
 - Updated: [WiFi (Marauder) v0.7.1 (By 0xchocolate & tcpassos)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) `Req: ESP32 WITH MARAUDER FLASHED`
 - Updated: [Mfkey32 With Nested v1.0 (By noproto)](https://github.com/noproto/FlipperMfkey)
+- UL: [Name Generator Changes (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/7e9ecdf394c34ab55f33ef164fed98b270618ee1)
 
 <a name="release">
 
