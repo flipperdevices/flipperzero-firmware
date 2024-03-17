@@ -14,7 +14,7 @@ void uhf_scene_save_name_on_enter(void* context) {
 
     // Setup view
     TextInput* text_input = uhf_app->text_input;
-    name_generator_make_random(uhf_app->text_store, sizeof(uhf_app->text_store));
+    name_generator_make_auto(uhf_app->text_store, sizeof(uhf_app->text_store), "UHF");
     text_input_set_header_text(text_input, "Name the tag");
     text_input_set_result_callback(
         text_input,

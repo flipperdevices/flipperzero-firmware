@@ -195,9 +195,11 @@ void uhf_show_loading_popup(void* ctx, bool show) {
 
 int32_t uhf_app_main(void* ctx) {
     UNUSED(ctx);
+
     // Disable expansion protocol to avoid interference with UART Handle
     Expansion* expansion = furi_record_open(RECORD_EXPANSION);
     expansion_disable(expansion);
+
     UHFApp* uhf_app = uhf_alloc();
     // enable 5v pin
     uint8_t attempts = 0;
@@ -206,7 +208,6 @@ int32_t uhf_app_main(void* ctx) {
         furi_hal_power_enable_otg();
         furi_delay_ms(10);
     }
-    furi_delay_ms(200);
     // enter app
     scene_manager_next_scene(uhf_app->scene_manager, UHFSceneModuleInfo);
     view_dispatcher_run(uhf_app->view_dispatcher);
@@ -216,8 +217,10 @@ int32_t uhf_app_main(void* ctx) {
     }
     // exit app
     uhf_free(uhf_app);
+
     // Return previous state of expansion
     expansion_enable(expansion);
     furi_record_close(RECORD_EXPANSION);
+
     return 0;
 }
