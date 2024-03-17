@@ -1,4 +1,4 @@
-#include <furi_hal.h>
+#include "dcf77.h"
 
 #define DST_BIT 17
 #define MIN_BIT 21
