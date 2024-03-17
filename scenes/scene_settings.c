@@ -48,7 +48,6 @@ static const uint32_t rfid_duration_value[V_RFID_DURATION_COUNT] = {
 static void scene_settings_layout_changed(VariableItem* item) {
     App* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
-
     variable_item_set_current_value_text(item, layout_text[index]);
     app->settings.layout = layout_value[index];
 }
@@ -78,33 +77,28 @@ static void scene_settings_rfid_duration_changed(VariableItem* item) {
 void scene_settings_on_enter(void* context) {
     App* app = context;
 
-    FURI_LOG_I(TAG, "Settings _on_enter");
     VariableItemList* vil = app->vil_settings;
     variable_item_list_reset(vil);
 
     VariableItem* item;
     uint8_t value_index;
 
-    FURI_LOG_I(TAG, "setting up Layout");
     item = variable_item_list_add(vil, "Layout", 2, scene_settings_layout_changed, app);
     value_index = value_index_uint32(app->settings.layout, layout_value, 2);
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, layout_text[value_index]);
 
-    FURI_LOG_I(TAG, "setting up Show Icons");
     item = variable_item_list_add(vil, "Show Icons", 2, scene_settings_show_icons_changed, app);
     value_index = value_index_uint32(app->settings.show_icons, show_icons_value, 2);
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, show_icons_text[value_index]);
 
-    FURI_LOG_I(TAG, "setting up Show Headers");
     item =
         variable_item_list_add(vil, "Show Headers", 2, scene_settings_show_headers_changed, app);
     value_index = value_index_uint32(app->settings.show_headers, show_headers_value, 2);
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, show_headers_text[value_index]);
 
-    FURI_LOG_I(TAG, "setting up RFID Duration");
     item = variable_item_list_add(
         vil, "RFID Duration", V_RFID_DURATION_COUNT, scene_settings_rfid_duration_changed, app);
     value_index = value_index_uint32(

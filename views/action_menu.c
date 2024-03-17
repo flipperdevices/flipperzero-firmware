@@ -31,7 +31,6 @@ static const Icon* ActionMenuIcons[] = {
 
 struct ActionMenuItem {
     const char* label;
-    IconAnimation* icon;
     uint32_t index;
     ActionMenuItemCallback callback;
     ActionMenuItemType type;
@@ -266,9 +265,8 @@ static void action_menu_process_down(ActionMenu* action_menu) {
 
 static void action_menu_process_ok(ActionMenu* action_menu, InputType type) {
     furi_assert(action_menu);
-    // UNUSED(type);
 
-    FURI_LOG_I("AM", "OK pressed! %d: %s", type, input_get_type_name(type));
+    // FURI_LOG_I("AM", "OK pressed! %d: %s", type, input_get_type_name(type));
     ActionMenuItem* item = NULL;
 
     with_view_model(

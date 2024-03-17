@@ -3,12 +3,9 @@
 typedef enum { Q_Scene_Items, Q_Scene_Settings, Q_Scene_count } appScenes;
 
 typedef enum {
-    Q_ButtonMenu, // used on selected device, to show buttons/groups
-    Q_Dialog, // shows errors
     Q_ActionMenu, // new UI,
     Q_Settings, // Variable Item List for settings
-    Q_FileBrowser, // TODO: UNUSED!
-    Q_TextInput // TODO: UNUSED
+    Q_Dialog, // TODO: shows errors
 } appView;
 
 typedef enum { Event_DeviceSelected, Event_ButtonPressed } AppCustomEvents;

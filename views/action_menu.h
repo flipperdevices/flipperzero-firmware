@@ -16,7 +16,7 @@ typedef struct ActionMenuItem ActionMenuItem;
 /** Callback for any button menu actions */
 typedef void (*ActionMenuItemCallback)(void* context, int32_t index, InputType type);
 
-/** Type of button. Difference in drawing buttons. */
+/** Type of UI element */
 typedef enum {
     ActionMenuItemTypeSubGHz,
     ActionMenuItemTypeRFID,
@@ -24,6 +24,7 @@ typedef enum {
     ActionMenuItemTypePlaylist,
     ActionMenuItemTypeGroup,
     ActionMenuItemTypeSettings,
+    ActionMenuItemType_count
 } ActionMenuItemType;
 
 typedef enum {

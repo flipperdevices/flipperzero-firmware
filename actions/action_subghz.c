@@ -31,9 +31,9 @@ static FuriHalSubGhzPreset action_subghz_get_preset_name(const char* preset_name
 }
 
 // Lifted from flipperzero-firmware/applications/main/subghz/subghz_cli.c
-void action_subghz_tx(void* context, FuriString* action_path, FuriString* error) {
+void action_subghz_tx(void* context, const FuriString* action_path, FuriString* error) {
     App* app = context;
-    FuriString* file_name = action_path;
+    const char* file_name = furi_string_get_cstr(action_path);
     uint32_t repeat = 1; //
     // uint32_t device_ind = 0; // 0 - CC1101_INT, 1 - CC1101_EXT
 
@@ -76,9 +76,9 @@ void action_subghz_tx(void* context, FuriString* action_path, FuriString* error)
             // device_ind = 0;
         }
 
-        if(!flipper_format_file_open_existing(fff_data_file, furi_string_get_cstr(file_name))) {
-            FURI_LOG_E(TAG, "Error opening %s", furi_string_get_cstr(file_name));
-            ACTION_SET_ERROR("SUBGHZ: Error opening %s", furi_string_get_cstr(file_name));
+        if(!flipper_format_file_open_existing(fff_data_file, file_name)) {
+            FURI_LOG_E(TAG, "Error opening %s", file_name);
+            ACTION_SET_ERROR("SUBGHZ: Error opening %s", file_name);
             break;
         }
 
@@ -169,7 +169,7 @@ void action_subghz_tx(void* context, FuriString* action_path, FuriString* error)
         if(!strcmp(furi_string_get_cstr(temp_str), "RAW")) {
             FURI_LOG_I(TAG, "Protocol = RAW");
             subghz_protocol_raw_gen_fff_data(
-                fff_data_raw, furi_string_get_cstr(file_name), subghz_devices_get_name(device));
+                fff_data_raw, file_name, subghz_devices_get_name(device));
             transmitter =
                 subghz_transmitter_alloc_init(environment, furi_string_get_cstr(temp_str));
             if(transmitter == NULL) {
@@ -219,7 +219,7 @@ void action_subghz_tx(void* context, FuriString* action_path, FuriString* error)
         FURI_LOG_I(
             TAG,
             "Listening at %s. Frequency=%lu, Protocol=%s",
-            furi_string_get_cstr(file_name),
+            file_name,
             frequency,
             furi_string_get_cstr(temp_str));
         do {

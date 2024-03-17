@@ -13,21 +13,16 @@
 #include "quac.h"
 
 // lifted from flipperzero-firmware/applications/main/lfrfid/lfrfid_cli.c
-void action_rfid_tx(void* context, FuriString* action_path, FuriString* error) {
+void action_rfid_tx(void* context, const FuriString* action_path, FuriString* error) {
     UNUSED(error);
 
     App* app = context;
-    FuriString* file_name = action_path;
+    const FuriString* file_name = action_path;
 
     FlipperFormat* fff_data_file = flipper_format_file_alloc(app->storage);
     FuriString* temp_str;
     temp_str = furi_string_alloc();
     uint32_t temp_data32;
-
-    FuriString* protocol_name;
-    FuriString* data_text;
-    protocol_name = furi_string_alloc();
-    data_text = furi_string_alloc();
 
     ProtocolDict* dict = protocol_dict_alloc(lfrfid_protocols, LFRFIDProtocolMax);
     ProtocolId protocol;
@@ -54,13 +49,13 @@ void action_rfid_tx(void* context, FuriString* action_path, FuriString* error) {
         }
 
         // read and check the protocol field
-        if(!flipper_format_read_string(fff_data_file, "Key type", protocol_name)) {
+        if(!flipper_format_read_string(fff_data_file, "Key type", temp_str)) {
             ACTION_SET_ERROR("RFID: Error reading protocol");
             break;
         }
-        protocol = protocol_dict_get_protocol_by_name(dict, furi_string_get_cstr(protocol_name));
+        protocol = protocol_dict_get_protocol_by_name(dict, furi_string_get_cstr(temp_str));
         if(protocol == PROTOCOL_NO) {
-            ACTION_SET_ERROR("RFID: Unknown protocol: %s", furi_string_get_cstr(protocol_name));
+            ACTION_SET_ERROR("RFID: Unknown protocol: %s", furi_string_get_cstr(temp_str));
             break;
         }
 
@@ -110,11 +105,7 @@ void action_rfid_tx(void* context, FuriString* action_path, FuriString* error) {
     }
 
     furi_string_free(temp_str);
-    furi_string_free(protocol_name);
-    furi_string_free(data_text);
     free(data);
-
     protocol_dict_free(dict);
-
     flipper_format_free(fff_data_file);
 }

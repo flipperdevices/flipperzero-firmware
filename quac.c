@@ -3,7 +3,6 @@
 #include <gui/gui.h>
 #include <gui/view_dispatcher.h>
 #include <gui/scene_manager.h>
-#include <gui/modules/button_menu.h>
 #include <gui/modules/dialog_ex.h>
 #include <gui/modules/variable_item_list.h>
 
@@ -30,14 +29,12 @@ App* app_alloc() {
     view_dispatcher_set_navigation_event_callback(app->view_dispatcher, app_back_event_callback);
 
     // Create our UI elements
-    app->btn_menu = button_menu_alloc();
-    view_dispatcher_add_view(
-        app->view_dispatcher, Q_ButtonMenu, button_menu_get_view(app->btn_menu));
-
+    // Main interface
     app->action_menu = action_menu_alloc();
     view_dispatcher_add_view(
         app->view_dispatcher, Q_ActionMenu, action_menu_get_view(app->action_menu));
 
+    // App settings
     app->vil_settings = variable_item_list_alloc();
     view_dispatcher_add_view(
         app->view_dispatcher, Q_Settings, variable_item_list_get_view(app->vil_settings));
@@ -51,11 +48,9 @@ App* app_alloc() {
     // Notifications - for LED light access
     app->notifications = furi_record_open(RECORD_NOTIFICATION);
 
-    // initialize device items list
+    // data member initialize
     app->depth = 0;
     app->selected_item = -1;
-
-    app->items_view = item_get_items_view_from_path(app, NULL);
 
     return app;
 }
@@ -65,10 +60,13 @@ void app_free(App* app) {
 
     item_items_view_free(app->items_view);
 
-    view_dispatcher_remove_view(app->view_dispatcher, Q_ButtonMenu);
+    view_dispatcher_remove_view(app->view_dispatcher, Q_ActionMenu);
+    view_dispatcher_remove_view(app->view_dispatcher, Q_Settings);
+    view_dispatcher_remove_view(app->view_dispatcher, Q_Dialog);
 
-    button_menu_free(app->btn_menu);
     action_menu_free(app->action_menu);
+    variable_item_list_free(app->vil_settings);
+    dialog_ex_free(app->dialog);
 
     scene_manager_free(app->scene_manager);
     view_dispatcher_free(app->view_dispatcher);
@@ -88,6 +86,9 @@ int32_t quac_app(void* p) {
 
     App* app = app_alloc();
     quac_load_settings(app);
+
+    // Read items at our root
+    app->items_view = item_get_items_view_from_path(app, NULL);
 
     Gui* gui = furi_record_open(RECORD_GUI);
     view_dispatcher_attach_to_gui(app->view_dispatcher, gui, ViewDispatcherTypeFullscreen);

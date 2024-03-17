@@ -29,7 +29,7 @@ InfraredSignal* infrared_signal_alloc() {
     return signal;
 }
 
-void action_ir_tx(void* context, FuriString* action_path, FuriString* error) {
+void action_ir_tx(void* context, const FuriString* action_path, FuriString* error) {
     UNUSED(action_path);
     UNUSED(error);
     UNUSED(context);

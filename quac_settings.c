@@ -3,8 +3,8 @@
 #include <flipper_format/flipper_format.h>
 
 // Quac Settings File Info
-// TODO: Fix this path to use existing #defs for /ext, etc
-#define QUAC_SETTINGS_FILENAME "/ext/apps_data/quac/.quac.conf"
+// "/ext/apps_data/quac/.quac.conf"
+#define QUAC_SETTINGS_FILENAME QUAC_DATA_PATH "/.quac.conf"
 #define QUAC_SETTINGS_FILE_TYPE "Quac Settings File"
 #define QUAC_SETTINGS_FILE_VERSION 1
 
@@ -21,7 +21,7 @@ void quac_load_settings(App* app) {
     temp_str = furi_string_alloc();
     uint32_t temp_data32 = 0;
 
-    FURI_LOG_I(TAG, "SETTINGS: Reading settings file");
+    FURI_LOG_I(TAG, "SETTINGS: Reading: %s", QUAC_SETTINGS_FILENAME);
     bool successful = false;
     do {
         if(!flipper_format_file_open_existing(fff_settings, QUAC_SETTINGS_FILENAME)) {
@@ -88,6 +88,7 @@ void quac_save_settings(App* app) {
     FlipperFormat* fff_settings = flipper_format_file_alloc(app->storage);
     uint32_t temp_data32;
 
+    FURI_LOG_I(TAG, "SETTINGS: Saving");
     bool successful = false;
     do {
         if(!flipper_format_file_open_always(fff_settings, QUAC_SETTINGS_FILENAME)) {

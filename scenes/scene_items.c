@@ -2,7 +2,6 @@
 
 #include <gui/view_dispatcher.h>
 #include <gui/scene_manager.h>
-#include <gui/modules/button_menu.h>
 #include <gui/modules/dialog_ex.h>
 
 #include <notification/notification_messages.h>
@@ -14,6 +13,15 @@
 #include "../views/action_menu.h"
 
 #include <lib/toolbox/path.h>
+
+static const ActionMenuItemType ItemToMenuItem[] = {
+    [Item_SubGhz] = ActionMenuItemTypeSubGHz,
+    [Item_RFID] = ActionMenuItemTypeRFID,
+    [Item_IR] = ActionMenuItemTypeIR,
+    [Item_Playlist] = ActionMenuItemTypePlaylist,
+    [Item_Group] = ActionMenuItemTypeGroup,
+    [Item_Settings] = ActionMenuItemTypeSettings,
+};
 
 void scene_items_item_callback(void* context, int32_t index, InputType type) {
     App* app = context;
@@ -40,11 +48,10 @@ void scene_items_on_enter(void* context) {
     action_menu_set_show_headers(menu, app->settings.show_headers);
 
     ItemsView* items_view = app->items_view;
-    FURI_LOG_I(TAG, "items on_enter: [%d] %s", app->depth, furi_string_get_cstr(items_view->path));
-    furi_delay_ms(500);
+    FURI_LOG_I(
+        TAG, "Generating scene: [depth=%d] %s", app->depth, furi_string_get_cstr(items_view->path));
 
-    const char* header = furi_string_get_cstr(items_view->name);
-    action_menu_set_header(menu, header);
+    action_menu_set_header(menu, furi_string_get_cstr(items_view->name));
 
     size_t item_view_size = ItemArray_size(items_view->items);
     if(item_view_size > 0) {
@@ -53,27 +60,7 @@ void scene_items_on_enter(void* context) {
         for(ItemArray_it(iter, items_view->items); !ItemArray_end_p(iter);
             ItemArray_next(iter), ++index) {
             const char* label = furi_string_get_cstr(ItemArray_cref(iter)->name);
-            ActionMenuItemType type;
-            // TODO: Fix this with an array/map
-            switch(ItemArray_cref(iter)->type) {
-            case Item_Group:
-                type = ActionMenuItemTypeGroup;
-                break;
-            case Item_Playlist:
-                type = ActionMenuItemTypePlaylist;
-                break;
-            case Item_SubGhz:
-                type = ActionMenuItemTypeSubGHz;
-                break;
-            case Item_RFID:
-                type = ActionMenuItemTypeRFID;
-                break;
-            case Item_IR:
-                type = ActionMenuItemTypeIR;
-                break;
-            default:
-                type = ActionMenuItemTypeGroup; // TODO: Does this ever get hit?
-            }
+            ActionMenuItemType type = ItemToMenuItem[ItemArray_cref(iter)->type];
             action_menu_add_item(menu, label, index, scene_items_item_callback, type, app);
         }
     } else {
@@ -98,13 +85,12 @@ bool scene_items_on_event(void* context, SceneManagerEvent event) {
     App* app = context;
     bool consumed = false;
 
-    FURI_LOG_I(TAG, "device on_event");
     switch(event.type) {
     case SceneManagerEventTypeCustom:
         if(event.event == Event_ButtonPressed) {
             consumed = true;
-            furi_delay_ms(100);
-            FURI_LOG_I(TAG, "button pressed is %d", app->selected_item);
+            // furi_delay_ms(100);
+            // FURI_LOG_I(TAG, "button pressed is %d", app->selected_item);
             if(app->selected_item < (int)ItemArray_size(app->items_view->items)) {
                 Item* item = ItemArray_get(app->items_view->items, app->selected_item);
                 if(item->type == Item_Group) {
@@ -141,16 +127,16 @@ bool scene_items_on_event(void* context, SceneManagerEvent event) {
                     notification_message(app->notifications, &sequence_blink_stop);
                 }
             } else {
-                FURI_LOG_I(TAG, "Selected Settings!");
+                // FURI_LOG_I(TAG, "Selected Settings!");
                 // TODO: Do we need to free this current items_view??
                 scene_manager_next_scene(app->scene_manager, Q_Scene_Settings);
             }
         }
         break;
     case SceneManagerEventTypeBack:
-        FURI_LOG_I(TAG, "Back button pressed!");
+        // FURI_LOG_I(TAG, "Back button pressed!");
         consumed = false; // Ensure Back event continues to propagate
-        if(app->depth >= 0) {
+        if(app->depth > 0) {
             // take our current ItemsView path, and go back up a level
             FuriString* parent_path;
             parent_path = furi_string_alloc();
@@ -163,22 +149,19 @@ bool scene_items_on_event(void* context, SceneManagerEvent event) {
 
             furi_string_free(parent_path);
         } else {
-            FURI_LOG_W(TAG, "At the root level!");
+            // FURI_LOG_I(TAG, "At the root level!");
         }
         break;
     default:
         FURI_LOG_I(TAG, "Custom event not handled");
         break;
     }
-    FURI_LOG_I(TAG, "Generic event not handled");
+    // FURI_LOG_I(TAG, "Generic event not handled");
     return consumed;
 }
 
 void scene_items_on_exit(void* context) {
     App* app = context;
-
     ActionMenu* menu = app->action_menu;
     action_menu_reset(menu);
-
-    FURI_LOG_I(TAG, "on_exit. depth = %d", app->depth);
 }
