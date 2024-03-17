@@ -2,15 +2,15 @@
 #include "../uhf_module.h"
 
 void uhf_settings_set_module_baudrate(VariableItem* item) {
-    M100Module* uhf_module = variable_item_get_context(item);
+    M100Module* module = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
     if(index >= BAUD_RATES_COUNT) {
         return;
     }
     uint32_t baudrate = BAUD_RATES[index];
-    m100_set_baudrate(uhf_module, baudrate);
+    m100_set_baudrate(module, baudrate);
     char text_buf[10];
-    snprintf(text_buf, sizeof(text_buf), "%lu", uhf_module->baudrate);
+    snprintf(text_buf, sizeof(text_buf), "%lu", module->uart->baudrate);
     variable_item_set_current_value_text(item, text_buf);
 }
 
@@ -40,7 +40,7 @@ void uhf_settings_set_module_working_region(VariableItem* item) {
 
 uint8_t uhf_settings_get_module_baudrate_index(M100Module* module) {
     for(uint8_t i = 0; i < BAUD_RATES_COUNT; i++) {
-        if(BAUD_RATES[i] == module->baudrate) {
+        if(BAUD_RATES[i] == module->uart->baudrate) {
             return i;
         }
     }
@@ -73,7 +73,7 @@ void uhf_scene_settings_on_enter(void* ctx) {
 
     uint8_t value_index = uhf_settings_get_module_baudrate_index(uhf_module);
     char text_buf[10];
-    snprintf(text_buf, sizeof(text_buf), "%lu", uhf_module->baudrate);
+    snprintf(text_buf, sizeof(text_buf), "%lu", uhf_module->uart->baudrate);
     item = variable_item_list_add(
         variable_item_list,
         "Baudrate:",

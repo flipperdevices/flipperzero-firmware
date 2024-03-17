@@ -1,5 +1,5 @@
 #include "../uhf_app_i.h"
-#include <toolbox/name_generator.h>
+#include <lib/toolbox/name_generator.h>
 #include <gui/modules/validators.h>
 #include <toolbox/path.h>
 
@@ -14,9 +14,7 @@ void uhf_scene_save_name_on_enter(void* context) {
 
     // Setup view
     TextInput* text_input = uhf_app->text_input;
-
     name_generator_make_auto(uhf_app->text_store, sizeof(uhf_app->text_store), "UHF");
-
     text_input_set_header_text(text_input, "Name the tag");
     text_input_set_result_callback(
         text_input,

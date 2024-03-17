@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.1 (2024-03-14)
+
+**BLE updates/fixes**
+
 ## v1.0 (2024-03-09)
 
 **Update for SDK 0.99**

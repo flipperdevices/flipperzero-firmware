@@ -6,7 +6,7 @@ App(
     stack_size=10 * 1024,
     fap_category="GPIO",
     fap_icon="mouse_10px.png",
-    fap_version="1.0",
+    fap_version="1.1",
     fap_libs=["ble_profile"],
     sources=["*.c", "*.cc"],
 )
