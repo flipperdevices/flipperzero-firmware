@@ -61,6 +61,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: [Name Generator Changes (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/7e9ecdf394c34ab55f33ef164fed98b270618ee1)
 - Updated: [UHF RFID WIP v1.1 (By frux-c)](https://github.com/frux-c/uhf_rfid) `Req: M100 or QM100` Minor changes (From Willy-JL)
 - Updated: [FindMy Flipper v2.0 (By MatthewKuKanich)](https://github.com/MatthewKuKanich/FindMyFlipper)
+- Updated: [NFC Seader v2.6 (By bettse)](https://github.com/bettse/seader)
 
 <a name="release">
 
@@ -479,7 +480,7 @@ $ ./fbt dolphin_ext
 - [NFC Magic v1.6 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966)
 - [NFC Maker v1.2 (by Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/343cb39d08f60b75b537e1a31100707935cf6e9d)
 - [NFC Playlist v1.4 (By acegoal07)](https://github.com/acegoal07/FlipperZero_NFC_Playlist/tree/main)
-- [NFC Seader v2.5 (By bettse)](https://github.com/bettse/seader)
+- [NFC Seader v2.6 (By bettse)](https://github.com/bettse/seader)
 - [Nightstand Clock v1.1 (By nymda)](https://github.com/nymda/FlipperNightStand)
 - [Notes for FZ WIP (By AdrianN001)](https://github.com/AdrianN001/Flipper-Zero-Note-Application)
 - [NRF Sniff v1.1 (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/nrfsniff) ([Pin Out](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/tree/420/applications/nrfsniff) from nocomp/Frog/UberGuidoZ) `Req: NRF24`
