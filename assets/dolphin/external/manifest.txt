@@ -182,3 +182,10 @@ Max butthurt: 12
 Min level: 2
 Max level: 3
 Weight: 4
+
+Name: L3_Freedom_2_dolphins_128x64
+Min butthurt: 0
+Max butthurt: 12
+Min level: 3
+Max level: 3
+Weight: 4
