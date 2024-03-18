@@ -62,10 +62,10 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [FindMy Flipper v2.0 (By MatthewKuKanich)](https://github.com/MatthewKuKanich/FindMyFlipper)
 - Updated: [NFC Seader v2.6 (By bettse)](https://github.com/bettse/seader)
 - Updated: [Mfkey32 With Nested v1.0 (By noproto)](https://github.com/noproto/FlipperMfkey)
-- Updated: [XRemote v1.3 (By kala13x)](https://github.com/kala13x/flipper-xremote)
 - Updated: [DCF77 Clock Sync v1.3 (By mdaskalov)](https://github.com/mdaskalov/dcf77-clock-sync)
 - Updated: [Questions v1.0 (By nikilark)](https://github.com/nikilark/flipper_questions)
 - Updated: [Quac! v0.4 (By rdefeo)](https://github.com/rdefeo/quac)
+- Updated: [XRemote v1.3 (By kala13x)](https://github.com/kala13x/flipper-xremote)
 
 <a name="release">
 

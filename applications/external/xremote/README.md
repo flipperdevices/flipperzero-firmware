@@ -68,12 +68,12 @@ In addition to the predefined names, `XRemote` uses alternative button names to 
 
 The application stores and reads alternate names from the following file:
 ```
-SD Card/apps_data/flipper_xremote/alt_names.cfg
+SD Card/apps_data/flipper_xremote/alt_names.txt
 ```
 
 If the `Alt-Names` option is enabled in the config and the file does not exist, it will be created automatically with default values during the application's startup. You can edit, add, or remove any button or alternate name values from this file. Button names must either have only the first uppercase or be entirely lowercase. As for alternate names, they are case-insensitive. The button can have one or several comma-separated alternate names.
 
-This is the default `alt_names.cfg` file:
+This is the default `alt_names.txt` file:
 
 ```
 Filetype: XRemote Alt-Names
