@@ -71,11 +71,6 @@ typedef struct {
 
 typedef uint8_t MfDesfireKeyVersion;
 
-typedef struct {
-    MfDesfireKeySettings key_settings;
-    SimpleArray* key_versions;
-} MfDesfireKeyConfiguration;
-
 typedef enum {
     MfDesfireFileTypeStandard = 0,
     MfDesfireFileTypeBackup = 1,
