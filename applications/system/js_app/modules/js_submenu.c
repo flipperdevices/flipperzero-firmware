@@ -7,6 +7,7 @@ typedef struct {
     Submenu* submenu;
     ViewDispatcher* view_dispatcher;
     uint32_t result;
+    bool accepted;
 } JsSubmenuInst;
 
 typedef enum {
@@ -34,47 +35,38 @@ static bool check_arg_count(struct mjs* mjs, size_t count) {
     return true;
 }
 
-static bool get_str_arg(struct mjs* mjs, size_t index, const char** value) {
-    mjs_val_t str_obj = mjs_arg(mjs, index);
-    if(!mjs_is_string(str_obj)) {
-        ret_bad_args(mjs, "Argument must be a string");
-        return false;
-    }
-    size_t str_len = 0;
-    *value = mjs_get_string(mjs, &str_obj, &str_len);
-    if((str_len == 0) || (*value == NULL)) {
-        ret_bad_args(mjs, "Bad string argument");
-        return false;
-    }
-    return true;
-}
-
-static int32_t get_int_arg(struct mjs* mjs, size_t index, int32_t* value) {
-    mjs_val_t int_obj = mjs_arg(mjs, index);
-    if(!mjs_is_number(int_obj)) {
-        ret_bad_args(mjs, "Argument must be a number");
-        return false;
-    }
-    *value = mjs_get_int32(mjs, int_obj);
-    return true;
-}
-
 static void submenu_callback(void* context, uint32_t id) {
-    UNUSED(id);
     JsSubmenuInst* submenu = context;
     submenu->result = id;
+    submenu->accepted = true;
     view_dispatcher_stop(submenu->view_dispatcher);
+}
+
+static bool submenu_exit(void* context) {
+    JsSubmenuInst* submenu = context;
+    submenu->result = 0;
+    submenu->accepted = false;
+    view_dispatcher_stop(submenu->view_dispatcher);
+    return true;
 }
 
 static void js_submenu_add_item(struct mjs* mjs) {
     JsSubmenuInst* submenu = get_this_ctx(mjs);
     if(!check_arg_count(mjs, 2)) return;
 
-    const char* label;
-    if(!get_str_arg(mjs, 0, &label)) return;
+    mjs_val_t label_arg = mjs_arg(mjs, 0);
+    const char* label = mjs_get_string(mjs, &label_arg, NULL);
+    if(!label) {
+        ret_bad_args(mjs, "Label must be a string");
+        return;
+    }
 
-    int32_t id;
-    if(!get_int_arg(mjs, 1, &id)) return;
+    mjs_val_t id_arg = mjs_arg(mjs, 1);
+    if(!mjs_is_number(id_arg)) {
+        ret_bad_args(mjs, "Id must be a number");
+        return;
+    }
+    int32_t id = mjs_get_int32(mjs, id_arg);
 
     submenu_add_item(submenu->submenu, label, id, submenu_callback, submenu);
 
@@ -85,8 +77,12 @@ static void js_submenu_set_header(struct mjs* mjs) {
     JsSubmenuInst* submenu = get_this_ctx(mjs);
     if(!check_arg_count(mjs, 1)) return;
 
-    const char* header;
-    if(!get_str_arg(mjs, 0, &header)) return;
+    mjs_val_t header_arg = mjs_arg(mjs, 0);
+    const char* header = mjs_get_string(mjs, &header_arg, NULL);
+    if(!header) {
+        ret_bad_args(mjs, "Header must be a string");
+        return;
+    }
 
     submenu_set_header(submenu->submenu, header);
 
@@ -108,7 +104,11 @@ static void js_submenu_show(struct mjs* mjs) {
 
     submenu_reset(submenu->submenu);
 
-    mjs_return(mjs, mjs_mk_number(mjs, submenu->result));
+    if(submenu->accepted) {
+        mjs_return(mjs, mjs_mk_number(mjs, submenu->result));
+    } else {
+        mjs_return(mjs, MJS_UNDEFINED);
+    }
 }
 
 static void* js_submenu_create(struct mjs* mjs, mjs_val_t* object) {
@@ -123,6 +123,8 @@ static void* js_submenu_create(struct mjs* mjs, mjs_val_t* object) {
     view_dispatcher_enable_queue(submenu->view_dispatcher);
     view_dispatcher_add_view(
         submenu->view_dispatcher, JsSubmenuViewSubmenu, submenu_get_view(submenu->submenu));
+    view_dispatcher_set_event_callback_context(submenu->view_dispatcher, submenu);
+    view_dispatcher_set_navigation_event_callback(submenu->view_dispatcher, submenu_exit);
     *object = submenu_obj;
     return submenu;
 }

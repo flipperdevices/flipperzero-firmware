@@ -66,6 +66,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Questions v1.0 (By nikilark)](https://github.com/nikilark/flipper_questions)
 - Updated: [Quac! v0.4 (By rdefeo)](https://github.com/rdefeo/quac)
 - Updated: [XRemote v1.3 (By kala13x)](https://github.com/kala13x/flipper-xremote)
+- Updated: [JS Runner v1.0 (By nminaylov & DrZlo13)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/3286)
 
 <a name="release">
 
