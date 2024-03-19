@@ -38,7 +38,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - Added: [Yappy Invaders (By dagnazty)](https://github.com/dagnazty/Yappy_Invaders)
 - Updated: [Digimon F-Com v1.1 (By TylerWilley)](https://github.com/TylerWilley/flipper-f-com) Code Assets Updated
 - Updated: [Programmer Calculator v0.9.2 (By armixz)](https://github.com/armixz/Flipper-Zero-Programmer-Calculator)
-- Updated: [Pokemon Trading v1.8 (By EstebanFuentealba & kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
 - Updated: [BMI Air Mouse v1.1 (By ginkage)](https://github.com/ginkage/FlippAirMouse/) `Req: BMI160`
 - Sub-GHz: [Protocol changes for  more compatability (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/9a5fd4e4dfb5b913b7b9a36264f9f28e038d6bdf)
 - BadKB: [Improve Settings Loading Logic (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/c43ff85159f1e5f162caf48b58e697c5ef4958b6)
@@ -68,6 +67,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [XRemote v1.3 (By kala13x)](https://github.com/kala13x/flipper-xremote)
 - Updated: [JS Runner v1.0 (By nminaylov & DrZlo13)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/3286) [Documentation, Improvements and Revisions (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/8c2ad63485663846565a51e57c791c8ce5e29bdd)
 -OFW: [Infrared: Add Fujitsu ASYG24KMTB #3513 (By aprosvetova)](https://github.com/flipperdevices/flipperzero-firmware/pull/3513)
+- Updated: [Pokemon Trading v1.8 (By EstebanFuentealba & kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons) Changes By kbembedded
 
 <a name="release">
 
