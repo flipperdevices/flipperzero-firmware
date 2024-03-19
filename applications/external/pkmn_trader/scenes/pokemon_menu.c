@@ -13,6 +13,7 @@
 #include "pokemon_stats.h"
 #include "pokemon_shiny.h"
 #include "pokemon_gender.h"
+#include "pokemon_pokerus.h"
 #include "pokemon_trade.h"
 #include "pokemon_pins.h"
 #include "pokemon_exit_confirm.h"
@@ -111,6 +112,7 @@ void (*const pokemon_scene_on_enter_handlers[])(void*) = {
     select_stats_scene_on_enter, //SelectStatsScene,
     select_shiny_scene_on_enter, //SelectShinyScene,
     select_gender_scene_on_enter, //SelectGenderScene,
+    select_pokerus_scene_on_enter, //SelectPokerusScene,
     select_name_scene_on_enter, //SelectUnownFormScene,
     select_number_scene_on_enter, //SelectOTIDScene,
     select_name_scene_on_enter, //SelectOTNameScene,
@@ -135,6 +137,7 @@ void (*const pokemon_scene_on_exit_handlers[])(void*) = {
     null_scene_on_exit, //SelectStatsScene,
     null_scene_on_exit, //SelectShinyScene,
     null_scene_on_exit, //SelectGenderScene,
+    generic_scene_on_exit, //SelectPokerusScene,
     generic_scene_on_exit, //SelectUnownFormScene,
     generic_scene_on_exit, //SelectOTIDScene,
     generic_scene_on_exit, //SelectOTNameScene,
@@ -159,6 +162,7 @@ bool (*const pokemon_scene_on_event_handlers[])(void*, SceneManagerEvent) = {
     null_scene_on_event, //SelectStatsScene,
     null_scene_on_event, //SelectShinyScene,
     null_scene_on_event, //SelectGenderScene,
+    null_scene_on_event, //SelectPokerusScene,
     null_scene_on_event, //SelectUnownFormScene,
     null_scene_on_event, //SelectOTIDScene,
     null_scene_on_event, //SelectOTNameScene,

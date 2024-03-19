@@ -2,6 +2,8 @@
 #include <gui/scene_manager.h>
 #include <stdio.h>
 
+#include <named_list.h>
+
 #include "../pokemon_app.h"
 #include "../pokemon_data.h"
 #include "pokemon_menu.h"
@@ -15,7 +17,7 @@ static void select_item_selected_callback(void* context, uint32_t index) {
     FURI_LOG_D(
         TAG,
         "[item] Set item %s",
-        namelist_name_get_index(
+        namedlist_name_get_index(
             pokemon_fap->pdata->item_list,
             pokemon_stat_get(pokemon_fap->pdata, STAT_HELD_ITEM, item)));
 
@@ -45,13 +47,13 @@ void select_item_scene_on_enter(void* context) {
      */
     submenu_add_item(
         pokemon_fap->submenu,
-        namelist_name_get_index(pokemon_fap->pdata->item_list, 0),
+        namedlist_name_get_index(pokemon_fap->pdata->item_list, 0),
         0,
         select_item_selected_callback,
         pokemon_fap);
 
     for(i = 1;; i++) {
-        name = namelist_name_get_pos(pokemon_fap->pdata->item_list, i);
+        name = namedlist_name_get_pos(pokemon_fap->pdata->item_list, i);
         if(name == NULL) break;
         if(name[0] != letter[0]) {
             letter[0] = name[0];
@@ -77,14 +79,14 @@ void select_item_set_scene_on_enter(void* context) {
     /* NOTE! Start with pos of 1 in the item list since 0 should always be no item! */
     submenu_reset(pokemon_fap->submenu);
     for(i = 1;; i++) {
-        name = namelist_name_get_pos(pokemon_fap->pdata->item_list, i);
+        name = namedlist_name_get_pos(pokemon_fap->pdata->item_list, i);
         if(name == NULL) break;
         if(name[0] == letter &&
-           (pokemon_fap->pdata->gen & namelist_gen_get_pos(pokemon_fap->pdata->item_list, i))) {
+           (pokemon_fap->pdata->gen & namedlist_gen_get_pos(pokemon_fap->pdata->item_list, i))) {
             submenu_add_item(
                 pokemon_fap->submenu,
                 name,
-                namelist_index_get(pokemon_fap->pdata->item_list, i),
+                namedlist_index_get(pokemon_fap->pdata->item_list, i),
                 select_item_selected_callback,
                 pokemon_fap);
         }

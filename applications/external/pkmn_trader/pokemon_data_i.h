@@ -1,60 +1,10 @@
 #ifndef __POKEMON_DATA_I_H__
 #define __POKEMON_DATA_I_H__
 
-#include <pokemon_icons.h>
-
 #include "pokemon_data.h"
 
 //#include "pokemon_app.h"
 //#include "pokemon_char_encode.h"
-
-typedef enum {
-    GROWTH_MEDIUM_FAST = 0,
-    GROWTH_MEDIUM_SLOW = 3,
-    GROWTH_FAST = 4,
-    GROWTH_SLOW = 5,
-} Growth;
-
-typedef enum {
-    GENDER_F0 = 0x00,
-    GENDER_F12_5 = 0x1F,
-    GENDER_F25 = 0x3F,
-    GENDER_F50 = 0x7F,
-    GENDER_F75 = 0xBF,
-    GENDER_F100 = 0xFE,
-    GENDER_UNKNOWN = 0xFF,
-} Gender;
-
-struct __attribute__((__packed__)) named_list {
-    const char* name;
-    const uint8_t index;
-    const uint8_t gen;
-};
-
-/* NOTE: It seems like gen ii index is national pokedex order? */
-/* Gen i and Gen ii are _almost_ the same with all stats. The big difference
- * is that while most gen i pokemon's spc matches the same gen ii spc_atk,
- * some of them do differ. Therefore, we track spc for gen i, and then spc_atk
- * and spc_def for gen ii.
- */
-struct __attribute__((__packed__)) pokemon_data_table {
-    const char* name;
-    const Icon* icon;
-    const uint8_t index;
-    const uint8_t base_hp;
-    const uint8_t base_atk;
-    const uint8_t base_def;
-    const uint8_t base_spd;
-    const uint8_t base_spc;
-    const uint8_t base_spc_atk;
-    const uint8_t base_spc_def;
-    const uint8_t type[2];
-    const uint8_t move[4];
-    const Growth growth;
-    const Gender gender_ratio;
-    /* XXX: Unsure if I want to implement this or not */
-    //const uint8_t egg_cycles;
-};
 
 static void pokemon_stat_ev_calc(PokemonData* pdata, EvIv val);
 static void pokemon_stat_iv_calc(PokemonData* pdata, EvIv val);
@@ -129,7 +79,7 @@ struct __attribute__((__packed__)) trade_block_gen_i {
  * GB/Z80. e.g. a uint16_t value of 0x2c01 translates to 0x012c.
  * Need to use __builtin_bswap16(val) to switch between Flipper and Pokemon.
  */
-/* This is 44 bytes in memory */
+/* This is 48 bytes in memory */
 struct __attribute__((__packed__)) pokemon_party_data_gen_ii {
     uint8_t index;
     uint8_t held_item;
@@ -161,6 +111,17 @@ struct __attribute__((__packed__)) pokemon_party_data_gen_ii {
     uint16_t spc_atk;
     uint16_t spc_def;
 };
+
+/* NOTE:
+ * For eggs in gen ii, the handling is a bit clever. The party structure is set
+ * up as normal for the pokemon that will hatch. The only difference is the
+ * friendship vairable is used to denote number of egg cycles remaining.
+ * Then, in the party_members array, that pokemon's index is set to 0xFD which
+ * is the index for an egg. Once traded, its now an egg.
+ * Creating an egg is not implemented at this time because I don't really see
+ * a reason to. But, knowing some of these details makes it really easy to
+ * implement later on.
+ */
 
 struct __attribute__((__packed__)) trade_block_gen_ii {
     Name trainer_name;

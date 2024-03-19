@@ -194,7 +194,7 @@ struct trade_model {
     render_gameboy_state_t gameboy_status;
     bool ledon; // Controls the blue LED during trade
     uint8_t curr_pokemon;
-    const void* table;
+    PokemonData* pdata;
 };
 
 /* Input callback, used to handle the user trying to back out of the trade
@@ -338,11 +338,15 @@ static void trade_draw_frame(Canvas* canvas, const char* str) {
 }
 
 /* Draws the Pokemon's image in the middle of the screen */
-static void trade_draw_pkmn_avatar(Canvas* canvas, const Icon* icon) {
+static void trade_draw_pkmn_avatar(Canvas* canvas, PokemonData* pdata) {
     furi_assert(canvas);
-    furi_assert(icon);
+    furi_assert(pdata);
 
-    canvas_draw_icon(canvas, 2, 0, icon);
+    /* First, ensure the icon we want is already loaded in to pdata->bitmap */
+    pokemon_icon_get(pdata, pokemon_stat_get(pdata, STAT_NUM, NONE) + 1);
+    canvas_draw_xbm(
+        canvas, 0, 0, pdata->bitmap->width, pdata->bitmap->height, pdata->bitmap->data);
+
     furi_hal_light_set(LightBlue, 0x00);
     furi_hal_light_set(LightGreen, 0x00);
 }
@@ -365,7 +369,6 @@ static void trade_draw_timer_callback(void* context) {
 static void trade_draw_callback(Canvas* canvas, void* view_model) {
     furi_assert(view_model);
     struct trade_model* model = view_model;
-    const Icon* icon = table_icon_get(model->table, model->curr_pokemon);
 
     canvas_clear(canvas);
     switch(model->gameboy_status) {
@@ -380,15 +383,15 @@ static void trade_draw_callback(Canvas* canvas, void* view_model) {
         trade_draw_connection(canvas, true);
         break;
     case GAMEBOY_READY:
-        trade_draw_pkmn_avatar(canvas, icon);
+        trade_draw_pkmn_avatar(canvas, model->pdata);
         trade_draw_frame(canvas, "READY");
         break;
     case GAMEBOY_WAITING:
-        trade_draw_pkmn_avatar(canvas, icon);
+        trade_draw_pkmn_avatar(canvas, model->pdata);
         trade_draw_frame(canvas, "WAITING");
         break;
     case GAMEBOY_TRADE_PENDING:
-        trade_draw_pkmn_avatar(canvas, icon);
+        trade_draw_pkmn_avatar(canvas, model->pdata);
         trade_draw_frame(canvas, "DEAL?");
         break;
     case GAMEBOY_TRADING:
@@ -478,8 +481,13 @@ static uint8_t getMenuResponse(struct trade_ctx* trade) {
     case PKMN_CONNECTED_II:
         response = trade->in_data;
         break;
-    case PKMN_TRADE_CENTRE:
     case ITEM_2_HIGHLIGHTED:
+        if(trade->pdata->gen == GEN_I) {
+            response = trade->in_data;
+            break;
+        }
+        [[fallthrough]];
+    case PKMN_TRADE_CENTRE:
         with_view_model(
             trade->view,
             struct trade_model * model,
@@ -883,7 +891,7 @@ void* trade_alloc(
     view_set_context(trade->view, trade);
     view_allocate_model(trade->view, ViewModelTypeLockFree, sizeof(struct trade_model));
     with_view_model(
-        trade->view, struct trade_model * model, { model->table = pdata->pokemon_table; }, false);
+        trade->view, struct trade_model * model, { model->pdata = pdata; }, false);
 
     view_set_draw_callback(trade->view, trade_draw_callback);
     view_set_input_callback(trade->view, trade_input_callback);

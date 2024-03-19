@@ -1,5 +1,7 @@
 #include <gui/modules/variable_item_list.h>
 
+#include <named_list.h>
+
 #include "../pokemon_app.h"
 #include "../pokemon_data.h"
 #include "pokemon_menu.h"
@@ -29,12 +31,12 @@ static void select_type_callback(VariableItem* item) {
     uint8_t pos = variable_item_get_current_value_index(item);
 
     variable_item_set_current_value_text(
-        item, namelist_name_get_pos(context->pokemon_fap->pdata->type_list, pos));
+        item, namedlist_name_get_pos(context->pokemon_fap->pdata->type_list, pos));
     pokemon_stat_set(
         context->pokemon_fap->pdata,
         STAT_TYPE,
         context->type,
-        namelist_index_get(context->pokemon_fap->pdata->type_list, pos));
+        namedlist_index_get(context->pokemon_fap->pdata->type_list, pos));
 }
 
 void select_type_scene_on_enter(void* context) {
@@ -42,7 +44,7 @@ void select_type_scene_on_enter(void* context) {
     VariableItem* vitype[2];
     char* strings[2] = {"Type 1:", "Type 2:"};
     int type;
-    int num_types = namelist_cnt(pokemon_fap->pdata->type_list);
+    int num_types = namedlist_cnt(pokemon_fap->pdata->type_list);
     int pos;
     int i;
 
@@ -52,7 +54,7 @@ void select_type_scene_on_enter(void* context) {
     for(i = 0; i < 2; i++) {
         type_cb[i].pokemon_fap = pokemon_fap;
         type = pokemon_stat_get(pokemon_fap->pdata, STAT_TYPE, i);
-        pos = namelist_pos_get(pokemon_fap->pdata->type_list, type);
+        pos = namedlist_pos_get(pokemon_fap->pdata->type_list, type);
 
         vitype[i] = variable_item_list_add(
             pokemon_fap->variable_item_list,
@@ -63,7 +65,7 @@ void select_type_scene_on_enter(void* context) {
 
         variable_item_set_current_value_index(vitype[i], pos);
         variable_item_set_current_value_text(
-            vitype[i], namelist_name_get_pos(pokemon_fap->pdata->type_list, pos));
+            vitype[i], namedlist_name_get_pos(pokemon_fap->pdata->type_list, pos));
     }
 
     view_dispatcher_add_view(
