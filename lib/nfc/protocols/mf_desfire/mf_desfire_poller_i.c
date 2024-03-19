@@ -110,7 +110,7 @@ MfDesfireError
         if(error != MfDesfireErrorNone) break;
 
         if(!mf_desfire_free_memory_parse(data, instance->result_buffer)) {
-            error = MfDesfireErrorProtocol;
+            error = MfDesfireErrorNotPresent;
         }
     } while(false);
 
