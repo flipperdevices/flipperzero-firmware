@@ -14,6 +14,9 @@ Feel free to reach out to me at Discord with any questions or leave them in the 
 
 NOTE: This game uses the game `engine`, so you must recursively clone the `flipper-zero-tutorials` repository to get the `engine` submodule, or download the [https://github.com/flipperdevices/flipperzero-game-engine](https://github.com/flipperdevices/flipperzero-game-engine) into a folder called `./vmg/apps/air_labyrinth/engine`.
 
+## RFID
+### [spreadsheet](./rfid/README.md) - This is a spreadsheet that can be used to convert RFID data from one format to another, and to create new credentials with a shared facility code.  It can also be used to create RFID data for the T5577 chip.
+
 ## YouTube
 ### videos
 [video index](./youtube/README.md) - This is a list of my various YouTube video tutorials.
