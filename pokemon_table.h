@@ -40,8 +40,6 @@ struct __attribute__((__packed__)) pokemon_data_table {
     const uint8_t move[4];
     const Growth growth;
     const Gender gender_ratio;
-    /* XXX: Unsure if I want to implement this or not */
-    //const uint8_t egg_cycles;
 };
 
 typedef struct pokemon_data_table PokemonTable;
