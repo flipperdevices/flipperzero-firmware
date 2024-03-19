@@ -29,7 +29,7 @@ typedef struct {
 
 void elements_progress_bar(Canvas* canvas, uint8_t x, uint8_t y, uint8_t width, float progress) {
     furi_check(canvas);
-    furi_check((progress >= 0) && (progress <= 1.0));
+    furi_check((progress >= 0.0f) && (progress <= 1.0f));
     uint8_t height = 9;
 
     uint8_t progress_length = roundf(progress * (width - 2));

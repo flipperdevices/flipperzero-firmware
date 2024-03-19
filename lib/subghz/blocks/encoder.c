@@ -2,8 +2,6 @@
 #include "math.h"
 #include <core/check.h>
 
-#include "furi.h"
-
 #define TAG "SubGhzBlockEncoder"
 
 void subghz_protocol_blocks_set_bit_array(

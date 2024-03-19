@@ -4,7 +4,6 @@
 #include "memmgr_heap.h"
 #include "check.h"
 #include "common_defines.h"
-#include "mutex.h"
 #include "string.h"
 
 #include "log.h"

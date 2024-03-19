@@ -356,10 +356,6 @@ void canvas_draw_u8g2_bitmap(
     u8g2_uint_t h,
     const uint8_t* bitmap,
     IconRotation rotation) {
-    u8g2_uint_t blen;
-    blen = w;
-    blen += 7;
-    blen >>= 3;
 #ifdef U8G2_WITH_INTERSECTION
     if(u8g2_IsIntersection(u8g2, x, y, x + w, y + h) == 0) return;
 #endif /* U8G2_WITH_INTERSECTION */
