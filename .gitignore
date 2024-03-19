@@ -61,6 +61,14 @@ openocd.log
 PVS-Studio.log
 *.PVS-Studio.*
 
+# Test framework
+flipperzero-firmware/scripts/flippigator/flipperzero_protobuf_py
+scripts/flippigator/img/failed.bmp
+scripts/flippigator/img/recognitionFailPic.bmp
+scripts/flippigator/img/saved1.jpg
+scripts/flippigator/img/saved2.png
+scripts/flippigator/img/saved3.bmp
+
 .gdbinit
 
 /fbt_options_local.py
