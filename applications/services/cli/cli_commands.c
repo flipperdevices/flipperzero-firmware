@@ -481,6 +481,7 @@ static void cli_command_js_callback(JsThreadEvent event, const char* msg, void* 
             CLI_WRITE_STR("[T] Error trace:\r\n", 18);
             CLI_WRITE_STR(msg, strlen(msg));
             CLI_WRITE_STR("\r\n", 2);
+            ctx->done = true; // Exit when an error occurs
             break;
         case JsThreadEventPrint:
             CLI_WRITE_STR("[I] ", 4);
