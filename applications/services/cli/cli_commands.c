@@ -85,7 +85,7 @@ void cli_command_help(Cli* cli, FuriString* args, void* context) {
     };
 
     if(furi_string_size(args) > 0) {
-        cli_nl();
+        cli_nl(cli);
         printf("`");
         printf("%s", furi_string_get_cstr(args));
         printf("` command not found");
@@ -274,7 +274,7 @@ void cli_command_sysctl_heap_track(Cli* cli, FuriString* args, void* context) {
     }
 }
 
-void cli_command_sysctl_print_usage() {
+void cli_command_sysctl_print_usage(void) {
     printf("Usage:\r\n");
     printf("sysctl <cmd> <args>\r\n");
     printf("Cmd list:\r\n");
