@@ -67,7 +67,6 @@ void plist_create(struct patch_list** pplist, PokemonData* pdata) {
      * 0x01 - 0xc. A 0xFF byte is added to signify the end of the second part.
      */
     for(i = 0; i < pdata->party_sz; i++) {
-        FURI_LOG_D(TAG, "%02X", trade_party_flat[i]);
         if(i == 0xFC) {
             FURI_LOG_D(TAG, "[plist] part 1 end");
             plist_append(*pplist, 0xFF);
