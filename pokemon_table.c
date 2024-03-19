@@ -1,9 +1,92 @@
+#include <stdint.h>
+
 #include <pokemon_table.h>
+#include "stats.h"
 
 #include <gui/icon.h>
 #include <pokemon_icons.h>
 
-const PokemonTable pokemon_table[] = {
+#include <furi.h>
+
+/* NOTE: It seems like gen ii index is national pokedex order? */
+/* Gen i and Gen ii are _almost_ the same with all stats. The big difference
+ * is that while most gen i pokemon's spc matches the same gen ii spc_atk,
+ * some of them do differ. Therefore, we track spc for gen i, and then spc_atk
+ * and spc_def for gen ii.
+ */
+struct __attribute__((__packed__)) pokemon_data_table {
+    const char* name;
+    const uint8_t index;
+    const uint8_t base_hp;
+    const uint8_t base_atk;
+    const uint8_t base_def;
+    const uint8_t base_spd;
+    const uint8_t base_spc;
+    const uint8_t base_spc_atk;
+    const uint8_t base_spc_def;
+    const uint8_t type[2];
+    const uint8_t move[4];
+    const Growth growth;
+    const Gender gender_ratio;
+};
+
+
+int table_pokemon_pos_get(const PokemonTable* table, uint8_t index) {
+    int i;
+
+    for(i = 0;; i++) {
+        if(table[i].index == index) return i;
+        if(table[i].name == NULL) break;
+    }
+
+    /* This will return the first entry in case index is not matched.
+     * Could be surprising at runtime.
+     */
+    return 0;
+}
+
+const char* table_stat_name_get(const PokemonTable* table, int num) {
+    return table[num].name;
+}
+
+uint8_t table_stat_base_get(const PokemonTable* table, uint8_t num, DataStat stat, DataStatSub which) {
+    furi_assert(table);
+
+    switch(stat) {
+    case STAT_BASE_INDEX:
+        return table[num].index;
+    case STAT_BASE_ATK:
+        return table[num].base_hp;
+    case STAT_BASE_DEF:
+        return table[num].base_def;
+    case STAT_BASE_SPD:
+        return table[num].base_spd;
+    case STAT_BASE_SPC:
+        return table[num].base_spc;
+    case STAT_BASE_SPC_ATK:
+        return table[num].base_spc_atk;
+    case STAT_BASE_SPC_DEF:
+        return table[num].base_spc_def;
+    case STAT_BASE_HP:
+        return table[num].base_hp;
+    case STAT_BASE_TYPE:
+        return table[num].type[which];
+    case STAT_BASE_MOVE:
+        return table[num].move[which];
+    case STAT_BASE_GROWTH:
+        return table[num].growth;
+    case STAT_BASE_GENDER_RATIO:
+        return table[num].gender_ratio;
+    default:
+        furi_crash("BASE_GET: invalid stat");
+        break;
+    }
+
+    return 0;
+}
+
+
+static const PokemonTable pokemon_table[] = {
 	/* Values for base_*, moves, etc., pulled directly from a copy of Pokemon Blue */
 	/* Note that, comparison between blue and gold show the same base stats for pokemon, with spc stk/def added in gold. spc atk is the same as spc between blue and gold for the first 151 pokemon. Movesets are different in gen ii for the first 151 pokeon, but, they are left with gen i movesets below. */
 {"Bulbasaur",	0x99,	0x2D,	0x31,	0x31,	0x2D,	0x41,	0x41,	0x41,	{0x16, 0x03},	{0x21, 0x2D, 0x00, 0x00},	GROWTH_MEDIUM_SLOW,	GENDER_F12_5  },
@@ -261,3 +344,8 @@ const PokemonTable pokemon_table[] = {
 {"Celebi",	0x00,	0x64,	0x64,	0x64,	0x64,	0x00,	0x64,	0x64,	{0x00, 0x00},	{0x49, 0x5D, 0x69, 0xD7},	GROWTH_MEDIUM_SLOW,	GENDER_UNKNOWN},
 { },
 };
+
+const PokemonTable *table_pointer_get()
+{
+    return pokemon_table;
+}

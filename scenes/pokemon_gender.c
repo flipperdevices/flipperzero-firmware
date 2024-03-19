@@ -33,7 +33,7 @@ const char* select_gender_is_static(PokemonData* pdata, uint8_t ratio)
 }
 
 const char* select_gender_get(PokemonData* pdata) {
-    uint8_t ratio = table_stat_base_get(pdata, STAT_BASE_GENDER_RATIO, NONE);
+    uint8_t ratio = table_stat_base_get(pdata->pokemon_table, pokemon_stat_get(pdata, STAT_NUM, NONE),  STAT_BASE_GENDER_RATIO, NONE);
     uint8_t atk_iv;
     const char* rc;
 
@@ -52,7 +52,7 @@ const char* select_gender_get(PokemonData* pdata) {
 static void select_gender_selected_callback(void* context, uint32_t index) {
     PokemonFap* pokemon_fap = (PokemonFap*)context;
     PokemonData* pdata = pokemon_fap->pdata;
-    uint8_t ratio = table_stat_base_get(pdata, STAT_BASE_GENDER_RATIO, NONE);
+    uint8_t ratio = table_stat_base_get(pdata->pokemon_table, pokemon_stat_get(pdata, STAT_NUM, NONE),  STAT_BASE_GENDER_RATIO, NONE);
     uint8_t atk_iv = pokemon_stat_get(pdata, STAT_ATK_IV, NONE);
     
     /* If we need to make the pokemon a male, increase atk IV until it exceeds

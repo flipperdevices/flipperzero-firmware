@@ -43,7 +43,7 @@ static void scene_change_from_main_cb(void* context, uint32_t index) {
             pokemon_fap->scene_manager, SelectLevelScene, SelectOTIDScene);
         break;
     case SelectGenderScene:
-        if (select_gender_is_static(pokemon_fap->pdata, table_stat_base_get(pokemon_fap->pdata, STAT_BASE_GENDER_RATIO, NONE))) return;
+        if (select_gender_is_static(pokemon_fap->pdata, table_stat_base_get(pokemon_fap->pdata->pokemon_table, pokemon_stat_get(pokemon_fap->pdata, STAT_NUM, NONE), STAT_BASE_GENDER_RATIO, NONE))) return;
         break;
     }
 

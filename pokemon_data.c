@@ -7,6 +7,8 @@
 #include "pokemon_app.h"
 #include "pokemon_char_encode.h"
 
+#include "pokemon_table.h"
+
 #include <named_list.h>
 #include <item_nl.h>
 #include <stat_nl.h>
@@ -27,40 +29,49 @@
 
 #define FXBM_SPRITE_SIZE 362 // Each 50x50 sprite
 
-/* These line up with the DataStat enum */
-const char *stat_text[] = {
-    "ATK",
-    "DEF",
-    "SPD",
-    "SPC_ATK",
-    "SPC_DEF",
-    "HP",
-    "Type",
-    "Move",
-    "Growth",
-    "Gender Ratio",
-    "ATK_EV",
-    "DEF_EV",
-    "SPD_EV",
-    "SPC_EV",
-    "HP_EV",
-    "IV",
-    "ATK_IV",
-    "DEF_IV",
-    "SPD_IV",
-    "SPC_IV",
-    "HP_IV",
-    "Lvl.",
-    "Idx.",
-    "Num.",
-    "Cond.",
-    "Nick.",
-    "OT Name",
-    "OT ID",
-    "Trainer Name",
-    "EV/IV Sel.",
-    "Exp.",
-};
+/* Text lookups to make debug output cleaner and easier to parse as a human */
+static char *stat_text_get(DataStat stat)
+{
+    switch (stat) {
+    case STAT_ATK: return "ATK";
+    case STAT_DEF: return "DEF";
+    case STAT_SPD: return "SPD";
+    case STAT_SPC: return "SPC";
+    case STAT_SPC_ATK: return "SPC_ATK";
+    case STAT_SPC_DEF: return "SPC_DEF";
+    case STAT_HP: return "HP";
+    case STAT_TYPE: return "Type";
+    case STAT_MOVE: return "Move";
+    case STAT_ATK_EV: return "ATK_EV";
+    case STAT_DEF_EV: return "DEF_EV";
+    case STAT_SPD_EV: return "SPD_EV";
+    case STAT_SPC_ATK_EV:
+    case STAT_SPC_DEF_EV:
+    case STAT_SPC_EV: return "SPC_EV";
+    case STAT_HP_EV: return "HP_EV";
+    case STAT_IV: return "IV";
+    case STAT_ATK_IV: return "ATK_IV";
+    case STAT_DEF_IV: return "DEF_IV";
+    case STAT_SPD_IV: return "SPD_IV";
+    case STAT_SPC_ATK_IV:
+    case STAT_SPC_DEF_IV:
+    case STAT_SPC_IV: return "SPC_IV";
+    case STAT_HP_IV: return "HP_IV";
+    case STAT_LEVEL: return "Lvl.";
+    case STAT_INDEX: return "Idx.";
+    case STAT_NUM: return "Num.";
+    case STAT_CONDITION: return "Cond.";
+    case STAT_NICKNAME: return "Nick.";
+    case STAT_OT_NAME: return "OT Name";
+    case STAT_OT_ID: return "OT ID";
+    case STAT_TRAINER_NAME: return "Trainer Name";
+    case STAT_SEL: return "EV/IV Sel."; // which EV/IV calc to use
+    case STAT_EXP: return "Exp.";
+    case STAT_HELD_ITEM: return "Held Item";
+    case STAT_POKERUS: return "Pokerus";
+    default: return "UNKNOWN STAT";
+    }
+}
 
 /* Allocates a chunk of memory for the trade data block and sets up some
  * default values.
@@ -76,7 +87,7 @@ PokemonData* pokemon_data_alloc(uint8_t gen) {
     pdata->type_list = type_list;
     pdata->stat_list = stat_list;
     pdata->item_list = item_list;
-    pdata->pokemon_table = pokemon_table;
+    pdata->pokemon_table = table_pointer_get();
 
     pdata->storage = furi_record_open(RECORD_STORAGE);
     pdata->asset_path = furi_string_alloc_set(APP_ASSETS_PATH());
@@ -139,7 +150,6 @@ PokemonData* pokemon_data_alloc(uint8_t gen) {
     /* This causes all other stats to be recalculated */
     pokemon_stat_set(pdata, STAT_NUM, NONE, 0); // First Pokemon
     pokemon_stat_set(pdata, STAT_LEVEL, NONE, 2); // Minimum level of 2
-    pokemon_stat_set(pdata, STAT_CONDITION, NONE, 0); // No status conditions
 
     return pdata;
 }
@@ -181,13 +191,13 @@ void pokemon_recalculate(PokemonData* pdata, uint8_t recalc) {
 
     if(recalc & RECALC_MOVES) {
         for(i = MOVE_0; i <= MOVE_3; i++) {
-            pokemon_stat_set(pdata, STAT_MOVE, i, table_stat_base_get(pdata, STAT_BASE_MOVE, i));
+            pokemon_stat_set(pdata, STAT_MOVE, i, table_stat_base_get(pdata->pokemon_table, pokemon_stat_get(pdata, STAT_NUM, NONE), STAT_BASE_MOVE, i));
         }
     }
 
     if(recalc & RECALC_TYPES) {
         for(i = TYPE_0; i <= TYPE_1; i++) {
-            pokemon_stat_set(pdata, STAT_TYPE, i, table_stat_base_get(pdata, STAT_BASE_TYPE, i));
+            pokemon_stat_set(pdata, STAT_TYPE, i, table_stat_base_get(pdata->pokemon_table, pokemon_stat_get(pdata, STAT_NUM, NONE), STAT_BASE_TYPE, i));
         }
     }
 
@@ -211,23 +221,6 @@ void pokemon_recalculate(PokemonData* pdata, uint8_t recalc) {
     }
 }
 
-int table_pokemon_pos_get(const PokemonTable* table, uint8_t index) {
-    int i;
-
-    for(i = 0;; i++) {
-        if(table[i].index == index) return i;
-        if(table[i].name == NULL) break;
-    }
-
-    /* This will return the first entry in case index is not matched.
-     * Could be surprising at runtime.
-     */
-    return 0;
-}
-
-const char* table_stat_name_get(const PokemonTable* table, int num) {
-    return table[num].name;
-}
 
 /* This needs to convert to encoded characters */
 void pokemon_name_set(PokemonData* pdata, DataStat stat, char* name) {
@@ -262,7 +255,7 @@ void pokemon_name_set(PokemonData* pdata, DataStat stat, char* name) {
 
     /* Set the encoded name in the buffer */
     pokemon_str_to_encoded_array(ptr, name, len);
-    FURI_LOG_D(TAG, "[data] %s name set to %s", stat_text[stat], name);
+    FURI_LOG_D(TAG, "[data] %s name set to %s", stat_text_get(stat), name);
 }
 
 void pokemon_name_get(PokemonData* pdata, DataStat stat, char* dest, size_t len) {
@@ -307,47 +300,6 @@ void pokemon_default_nickname_set(char* dest, PokemonData* pdata, size_t n) {
     if(dest != NULL) {
         strncpy(dest, buf, n);
     }
-}
-
-uint8_t table_stat_base_get(PokemonData* pdata, DataStat stat, DataStatSub num) {
-    furi_assert(pdata);
-    int pkmnnum = pokemon_stat_get(pdata, STAT_NUM, NONE);
-    const PokemonTable* table = pdata->pokemon_table;
-
-    switch(stat) {
-    case STAT_BASE_ATK:
-        return table[pkmnnum].base_hp;
-    case STAT_BASE_DEF:
-        return table[pkmnnum].base_def;
-    case STAT_BASE_SPD:
-        return table[pkmnnum].base_spd;
-    /*case STAT_BASE_SPC:*/
-    case STAT_BASE_SPC_ATK:
-        if (pdata->gen == GEN_I) return table[pkmnnum].base_spc;
-        if (pdata->gen == GEN_II) return table[pkmnnum].base_spc_atk;
-        break;
-    case STAT_BASE_SPC_DEF:
-        return table[pkmnnum].base_spc_def;
-    case STAT_BASE_HP:
-        return table[pkmnnum].base_hp;
-    case STAT_BASE_TYPE:
-        return table[pkmnnum].type[num];
-    case STAT_BASE_MOVE:
-        return table[pkmnnum].move[num];
-    case STAT_BASE_GROWTH:
-        return table[pkmnnum].growth;
-    case STAT_BASE_GENDER_RATIO:
-        return table[pkmnnum].gender_ratio;
-/* XXX: Unsure if I want to implement this
-    case STAT_BASE_EGG_CYCLES:
-        return table[pkmnnum].egg_cycles;
-*/
-    default:
-        furi_crash("BASE_GET: invalid stat");
-        break;
-    }
-
-    return 0;
 }
 
 /* Each sprite 50x50 is 362 bytes long */
@@ -417,9 +369,10 @@ uint16_t pokemon_stat_get(PokemonData* pdata, DataStat stat, DataStatSub which) 
         if(gen == GEN_I) val = ((PokemonPartyGenI*)party)->spd;
         if(gen == GEN_II) val = ((PokemonPartyGenII*)party)->spd;
         break;
-    /*case STAT_SPC:*/
-    case STAT_SPC_ATK:
+    case STAT_SPC:
         if(gen == GEN_I) val = ((PokemonPartyGenI*)party)->spc;
+	break;
+    case STAT_SPC_ATK:
         if(gen == GEN_II) val = ((PokemonPartyGenII*)party)->spc_atk;
         break;
     case STAT_SPC_DEF:
@@ -442,6 +395,8 @@ uint16_t pokemon_stat_get(PokemonData* pdata, DataStat stat, DataStatSub which) 
         if(gen == GEN_II) val = ((PokemonPartyGenII*)party)->spd_ev;
         break;
     case STAT_SPC_EV:
+    case STAT_SPC_ATK_EV:
+    case STAT_SPC_DEF_EV:
         if(gen == GEN_I) val = ((PokemonPartyGenI*)party)->spc_ev;
         if(gen == GEN_II) val = ((PokemonPartyGenII*)party)->spc_ev;
         break;
@@ -461,6 +416,8 @@ uint16_t pokemon_stat_get(PokemonData* pdata, DataStat stat, DataStatSub which) 
         if(gen == GEN_II) return (((PokemonPartyGenII*)party)->iv >> 12) & 0x0F;
 	break;
     case STAT_SPC_IV:
+    case STAT_SPC_ATK_IV:
+    case STAT_SPC_DEF_IV:
         if(gen == GEN_I) return (((PokemonPartyGenI*)party)->iv >> 8) & 0x0F;
         if(gen == GEN_II) return (((PokemonPartyGenII*)party)->iv >> 8) & 0x0F;
 	break;
@@ -560,9 +517,10 @@ void pokemon_stat_set(PokemonData* pdata, DataStat stat, DataStatSub which, uint
         if(gen == GEN_I) ((PokemonPartyGenI*)party)->spd = val_swap;
         if(gen == GEN_II) ((PokemonPartyGenII*)party)->spd = val_swap;
         break;
-    /*case STAT_SPC:*/
-    case STAT_SPC_ATK:
+    case STAT_SPC:
         if(gen == GEN_I) ((PokemonPartyGenI*)party)->spc = val_swap;
+	break;
+    case STAT_SPC_ATK:
         if(gen == GEN_II) ((PokemonPartyGenII*)party)->spc_atk = val_swap;
         break;
     case STAT_SPC_DEF:
@@ -590,7 +548,10 @@ void pokemon_stat_set(PokemonData* pdata, DataStat stat, DataStatSub which, uint
         if(gen == GEN_I) ((PokemonPartyGenI*)party)->spd_ev = val_swap;
         if(gen == GEN_II) ((PokemonPartyGenII*)party)->spd_ev = val_swap;
         break;
+    /* The SPC ATK/DEF EVs are not real values, we just pretend they are */
     case STAT_SPC_EV:
+    case STAT_SPC_ATK_EV:
+    case STAT_SPC_DEF_EV:
         if(gen == GEN_I) ((PokemonPartyGenI*)party)->spc_ev = val_swap;
         if(gen == GEN_II) ((PokemonPartyGenII*)party)->spc_ev = val_swap;
         break;
@@ -620,7 +581,10 @@ void pokemon_stat_set(PokemonData* pdata, DataStat stat, DataStatSub which, uint
             ((PokemonPartyGenII*)party)->iv |= ((val & 0x0F) << 12);
         }
 	break;
+    /* The SPC ATK/DEF IVs are not real values, we just pretend they are */
     case STAT_SPC_IV:
+    case STAT_SPC_ATK_IV:
+    case STAT_SPC_DEF_IV:
         if(gen == GEN_I) {
             ((PokemonPartyGenI*)party)->iv &= ~(0x0F << 8);
             ((PokemonPartyGenI*)party)->iv |= ((val & 0x0F) << 8);
@@ -681,7 +645,7 @@ void pokemon_stat_set(PokemonData* pdata, DataStat stat, DataStatSub which, uint
         recalc = RECALC_ALL; // Always recalculate everything if we selected a different pokemon
         break;
     case STAT_NUM:
-        if (gen == GEN_I) pokemon_stat_set(pdata, STAT_INDEX, NONE, pdata->pokemon_table[val].index);
+        if (gen == GEN_I) pokemon_stat_set(pdata, STAT_INDEX, NONE, table_stat_base_get(pdata->pokemon_table, val, STAT_BASE_INDEX, NONE));
 	if (gen == GEN_II) pokemon_stat_set(pdata, STAT_INDEX, NONE, val);
         break;
     case STAT_OT_ID:
@@ -710,37 +674,8 @@ void pokemon_stat_set(PokemonData* pdata, DataStat stat, DataStatSub which, uint
         furi_crash("STAT_SET: invalid stat");
         break;
     }
-    FURI_LOG_D(TAG, "[data] stat %s:%d set to %d", stat_text[stat], which, val);
+    FURI_LOG_D(TAG, "[data] stat %s:%d set to 0x%X", stat_text_get(stat), which, val);
     pokemon_recalculate(pdata, recalc);
-}
-
-uint16_t pokemon_stat_ev_get(PokemonData* pdata, DataStat stat) {
-    furi_assert(pdata);
-    DataStat next;
-
-    switch(stat) {
-    case STAT_ATK:
-        next = STAT_ATK_EV;
-        break;
-    case STAT_DEF:
-        next = STAT_DEF_EV;
-        break;
-    case STAT_SPD:
-        next = STAT_SPD_EV;
-        break;
-    /*case STAT_SPC:*/
-    case STAT_SPC_ATK:
-    case STAT_SPC_DEF:
-        next = STAT_SPC_EV;
-        break;
-    case STAT_HP:
-        next = STAT_HP_EV;
-        break;
-    default:
-        furi_crash("EV_GET: invalid stat");
-        return 0;
-    }
-    return pokemon_stat_get(pdata, next, NONE);
 }
 
 static void pokemon_stat_ev_calc(PokemonData* pdata, EvIv val) {
@@ -769,35 +704,6 @@ static void pokemon_stat_ev_calc(PokemonData* pdata, EvIv val) {
     for(i = STAT_EV; i < STAT_EV_END; i++) {
         pokemon_stat_set(pdata, i, NONE, ev);
     }
-}
-
-uint8_t pokemon_stat_iv_get(PokemonData* pdata, DataStat stat) {
-    furi_assert(pdata);
-    DataStat next;
-
-    switch(stat) {
-    case STAT_ATK:
-        next = STAT_ATK_IV;
-        break;
-    case STAT_DEF:
-        next = STAT_DEF_IV;
-        break;
-    case STAT_SPD:
-        next = STAT_SPD_IV;
-        break;
-    /*case STAT_SPC:*/
-    case STAT_SPC_ATK:
-    case STAT_SPC_DEF:
-        next = STAT_SPC_IV;
-        break;
-    case STAT_HP:
-        next = STAT_HP_IV;
-        break;
-    default:
-        furi_crash("IV_GET: invalid stat");
-        return 0;
-    }
-    return pokemon_stat_get(pdata, next, NONE);
 }
 
 static void pokemon_stat_iv_calc(PokemonData* pdata, EvIv val) {
@@ -859,7 +765,7 @@ void pokemon_exp_calc(PokemonData* pdata) {
     furi_assert(pdata);
     int level;
     uint32_t exp;
-    uint8_t growth = table_stat_base_get(pdata, STAT_BASE_GROWTH, NONE);
+    uint8_t growth = table_stat_base_get(pdata->pokemon_table, pokemon_stat_get(pdata, STAT_NUM, NONE), STAT_BASE_GROWTH, NONE);
 
     level = (int)pokemon_stat_get(pdata, STAT_LEVEL, NONE);
     /* Calculate exp */
@@ -899,9 +805,9 @@ void pokemon_stat_calc(PokemonData* pdata, DataStat stat) {
     uint8_t level;
 
     level = pokemon_stat_get(pdata, STAT_LEVEL, NONE);
-    stat_base = table_stat_base_get(pdata, stat, NONE);
-    stat_ev = pokemon_stat_ev_get(pdata, stat);
-    stat_iv = pokemon_stat_iv_get(pdata, stat);
+    stat_base = table_stat_base_get(pdata->pokemon_table, pokemon_stat_get(pdata, STAT_NUM, NONE), stat, NONE);
+    stat_ev = pokemon_stat_get(pdata, stat+STAT_EV_OFFS, NONE);
+    stat_iv = pokemon_stat_get(pdata, stat+STAT_IV_OFFS, NONE);
     stat_tmp = stat_calc(stat_base, stat_iv, stat_ev, level, stat);
 
     pokemon_stat_set(pdata, stat, NONE, stat_tmp);

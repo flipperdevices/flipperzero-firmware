@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 
+#include "stats.h"
+
 typedef enum {
     GROWTH_MEDIUM_FAST = 0,
     GROWTH_MEDIUM_SLOW = 3,
@@ -20,29 +22,11 @@ typedef enum {
     GENDER_UNKNOWN = 0xFF,
 } Gender;
 
-/* NOTE: It seems like gen ii index is national pokedex order? */
-/* Gen i and Gen ii are _almost_ the same with all stats. The big difference
- * is that while most gen i pokemon's spc matches the same gen ii spc_atk,
- * some of them do differ. Therefore, we track spc for gen i, and then spc_atk
- * and spc_def for gen ii.
- */
-struct __attribute__((__packed__)) pokemon_data_table {
-    const char* name;
-    const uint8_t index;
-    const uint8_t base_hp;
-    const uint8_t base_atk;
-    const uint8_t base_def;
-    const uint8_t base_spd;
-    const uint8_t base_spc;
-    const uint8_t base_spc_atk;
-    const uint8_t base_spc_def;
-    const uint8_t type[2];
-    const uint8_t move[4];
-    const Growth growth;
-    const Gender gender_ratio;
-};
-
 typedef struct pokemon_data_table PokemonTable;
-extern const PokemonTable pokemon_table[];
+
+int table_pokemon_pos_get(const PokemonTable* table, uint8_t index);
+uint8_t table_stat_base_get(const PokemonTable* table, uint8_t num, DataStat stat, DataStatSub which);
+const char* table_stat_name_get(const PokemonTable* table, int num);
+const PokemonTable *table_pointer_get();
 
 #endif // __POKEMON_TABLE_H__
