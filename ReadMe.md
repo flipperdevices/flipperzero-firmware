@@ -67,6 +67,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Quac! v0.4 (By rdefeo)](https://github.com/rdefeo/quac)
 - Updated: [XRemote v1.3 (By kala13x)](https://github.com/kala13x/flipper-xremote)
 - Updated: [JS Runner v1.0 (By nminaylov & DrZlo13)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/3286) [Documentation, Improvements and Revisions (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/8c2ad63485663846565a51e57c791c8ce5e29bdd)
+-OFW: [Infrared: Add Fujitsu ASYG24KMTB #3513 (By aprosvetova)](https://github.com/flipperdevices/flipperzero-firmware/pull/3513)
 
 <a name="release">
 
