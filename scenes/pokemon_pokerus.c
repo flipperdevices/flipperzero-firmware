@@ -56,6 +56,7 @@ static void select_strain_callback(VariableItem* item) {
     else if (index == 0x01) index = 0x04; // Map this back to the A strain
     else index--;
     pokerus |= (index << 4);
+    if ((pokerus & 0xf0) == 0x00) pokerus = 0;
     pokemon_stat_set(pokemon_fap->pdata, STAT_POKERUS, NONE, pokerus);
 
     select_pokerus_rebuild_list(pokemon_fap);
