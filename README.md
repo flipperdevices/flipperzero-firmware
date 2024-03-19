@@ -61,7 +61,7 @@ Occasionally when using the USB A-Com mode, the flipper zero USB driver will cra
 
 ## Flipper Hat Module
 
-You will need to construct a circuit similar to the A-Com circuit described in teh dmcomm-project github.
+You will need to construct a circuit similar to the A-Com circuit described in the dmcomm-project github.
 
 ![Schematic](screenshots/flipper_vpet_circuit.png)
 
@@ -81,7 +81,15 @@ You will also need compatible right angle header pins and SMD resistors.
 
 The F-Com app is compiled and installed with [ufbt](https://github.com/flipperdevices/flipperzero-ufbt)
 
-After installing ufbt, checkout the F-Com git repository, connect your flipper, and run "ufbt launch" to install.
+After installing ufbt, checkout the F-Com git repository, connect your flipper (and make sure that qFlipper is not running), and run "ufbt launch" to install.
+
+On windows: 
+1. Navigate to the checked out copy of the F-Com git repository.
+Note: Path should look similar to `C:\Users\user\[...]\flipper-f-com`
+2. Open command line in the flipper-f-com folder
+3. Run `py -m ufbt`
+4. Run `py -m ufbt launch`
+For macOS and Linux, use `python3` in place of `py`.
 
 It will be installed under the GPIO section.
 
