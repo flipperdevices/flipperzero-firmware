@@ -19,6 +19,17 @@ MfDesfireError mf_desfire_process_error(Iso14443_4aError error) {
     }
 }
 
+MfDesfireError mf_desfire_process_status_code(uint8_t status_code) {
+    switch(status_code) {
+    case MF_DESFIRE_STATUS_OPERATION_OK:
+        return MfDesfireErrorNone;
+    case MF_DESFIRE_STATUS_AUTHENTICATION_ERROR:
+        return MfDesfireErrorAuthentication;
+    default:
+        return MfDesfireErrorProtocol;
+    }
+}
+
 MfDesfireError mf_desfire_send_chunks(
     MfDesfirePoller* instance,
     const BitBuffer* tx_buffer,
@@ -42,7 +53,7 @@ MfDesfireError mf_desfire_send_chunks(
         }
 
         bit_buffer_reset(instance->tx_buffer);
-        bit_buffer_append_byte(instance->tx_buffer, MF_DESFIRE_FLAG_HAS_NEXT);
+        bit_buffer_append_byte(instance->tx_buffer, MF_DESFIRE_STATUS_ADDITIONAL_FRAME);
 
         if(bit_buffer_get_size_bytes(instance->rx_buffer) > sizeof(uint8_t)) {
             bit_buffer_copy_right(rx_buffer, instance->rx_buffer, sizeof(uint8_t));
@@ -50,7 +61,8 @@ MfDesfireError mf_desfire_send_chunks(
             bit_buffer_reset(rx_buffer);
         }
 
-        while(bit_buffer_starts_with_byte(instance->rx_buffer, MF_DESFIRE_FLAG_HAS_NEXT)) {
+        while(
+            bit_buffer_starts_with_byte(instance->rx_buffer, MF_DESFIRE_STATUS_ADDITIONAL_FRAME)) {
             Iso14443_4aError iso14443_4a_error = iso14443_4a_poller_send_block(
                 instance->iso14443_4a_poller, instance->tx_buffer, instance->rx_buffer);
 
@@ -70,6 +82,11 @@ MfDesfireError mf_desfire_send_chunks(
             }
         }
     } while(false);
+
+    if(error == MfDesfireErrorNone) {
+        uint8_t err_code = bit_buffer_get_byte(instance->rx_buffer, 0);
+        error = mf_desfire_process_status_code(err_code);
+    }
 
     return error;
 }
@@ -128,6 +145,13 @@ MfDesfireError
 
     do {
         error = mf_desfire_send_chunks(instance, instance->input_buffer, instance->result_buffer);
+
+        if(error == MfDesfireErrorAuthentication) {
+            FURI_LOG_D(TAG, "Reading key settings impossible without authentication");
+            data->is_free_directory_list = false;
+            error = MfDesfireErrorNone;
+            break;
+        }
 
         if(error != MfDesfireErrorNone) break;
 

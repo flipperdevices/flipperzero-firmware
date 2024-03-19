@@ -21,8 +21,6 @@ extern "C" {
 #define MF_DESFIRE_CMD_GET_VALUE (0x6C)
 #define MF_DESFIRE_CMD_READ_RECORDS (0xBB)
 
-#define MF_DESFIRE_FLAG_HAS_NEXT (0xAF)
-
 #define MF_DESFIRE_MAX_KEYS (14)
 #define MF_DESFIRE_MAX_FILES (32)
 
@@ -131,6 +129,7 @@ typedef enum {
     MfDesfireErrorNotPresent,
     MfDesfireErrorProtocol,
     MfDesfireErrorTimeout,
+    MfDesfireErrorAuthentication,
 } MfDesfireError;
 
 typedef struct {
