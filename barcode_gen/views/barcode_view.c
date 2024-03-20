@@ -21,11 +21,12 @@ static void draw_bit(Canvas* canvas, int bit, int x, int y, int width, int heigh
 }
 
 /**
- * 
+ * Draws the error name and message on the screen
 */
-static void draw_error_str(Canvas* canvas, const char* error) {
+static void draw_error_str(Canvas* canvas, const char* title, const char* error) {
     canvas_clear(canvas);
-    canvas_draw_str_aligned(canvas, 62, 30, AlignCenter, AlignCenter, error);
+    elements_multiline_text_aligned(canvas, 0, 0, AlignLeft, AlignTop, title);
+    elements_multiline_text_aligned(canvas, 0, 12, AlignLeft, AlignTop, error);
 }
 
 /**
@@ -417,32 +418,8 @@ static void barcode_draw_callback(Canvas* canvas, void* ctx) {
             break;
         }
     } else {
-        switch(data->reason) {
-        case WrongNumberOfDigits:
-            draw_error_str(canvas, "Wrong # of characters");
-            break;
-        case InvalidCharacters:
-            draw_error_str(canvas, "Invalid characters");
-            break;
-        case UnsupportedType:
-            draw_error_str(canvas, "Unsupported barcode type");
-            break;
-        case FileOpening:
-            draw_error_str(canvas, "Could not open file");
-            break;
-        case InvalidFileData:
-            draw_error_str(canvas, "Invalid file data");
-            break;
-        case MissingEncodingTable:
-            draw_error_str(canvas, "Missing encoding table");
-            break;
-        case EncodingTableError:
-            draw_error_str(canvas, "Encoding table error");
-            break;
-        default:
-            draw_error_str(canvas, "Could not read barcode data");
-            break;
-        }
+        draw_error_str(
+            canvas, get_error_code_name(data->reason), get_error_code_message(data->reason));
     }
 }
 

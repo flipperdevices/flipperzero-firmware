@@ -103,7 +103,7 @@ BarcodeTypeObj* get_type(FuriString* type_string) {
 const char* get_error_code_name(ErrorCode error_code) {
     switch(error_code) {
     case WrongNumberOfDigits:
-        return "Wrong Number Of Digits";
+        return "Wrong # Of Characters";
     case InvalidCharacters:
         return "Invalid Characters";
     case UnsupportedType:
@@ -126,19 +126,19 @@ const char* get_error_code_name(ErrorCode error_code) {
 const char* get_error_code_message(ErrorCode error_code) {
     switch(error_code) {
     case WrongNumberOfDigits:
-        return "Wrong # of characters";
+        return "The barcode has too many or\ntoo few characters.";
     case InvalidCharacters:
-        return "Invalid characters";
+        return "The barcode data has invalid\ncharacters";
     case UnsupportedType:
-        return "Unsupported barcode type";
+        return "This barcode type is not\nsupported by this application";
     case FileOpening:
-        return "Could not open file";
+        return "The barcode file could not\nbe opened";
     case InvalidFileData:
-        return "Invalid file data";
+        return "File data contains incorrect\ninformation";
     case MissingEncodingTable:
-        return "Missing encoding table";
+        return "The encoding table files are\nmissing. Please redownload \nthis app, or consult the \ngithub readme";
     case EncodingTableError:
-        return "Encoding table error";
+        return "Either the characters you\nentered are incorrect or there\nis a problem with the\nencoding table";
     case OKCode:
         return "OK";
     default:

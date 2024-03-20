@@ -179,10 +179,20 @@ static void save_image_to_flipper_sd_card(void* model) {
     FuriString* file_name = furi_string_alloc();
 
     // Get the current date and time.
+
+    // Not supported in "Release" F0 build.
+    // TODO: Remove when DateTime is supported in "Release" F0 build.
+    // FuriHalRtcDateTime datetime = {0};
+
+    // Only supported in "RC" & "Dev" builds.
+    // TODO: Uncomment when DateTime is supported in "Release" F0 build.
     DateTime datetime = {0};
+
+    // TODO: Uncomment when DateTime is supported in "Release" F0 build.
     furi_hal_rtc_get_datetime(&datetime);
 
-    // Create the file name.
+    // Create the file name using DateTime.
+    // TODO: Uncomment when DateTime is supported in "Release" F0 build.
     furi_string_printf(
         file_name,
         EXT_PATH("DCIM/%.4d%.2d%.2d-%.2d%.2d%.2d.bmp"),
@@ -192,6 +202,10 @@ static void save_image_to_flipper_sd_card(void* model) {
         datetime.hour,
         datetime.minute,
         datetime.second);
+
+    // Just use a random number for now instead of DateTime.
+    // int random_number = rand();
+    // furi_string_printf(file_name, EXT_PATH("DCIM/%d.bmp"), random_number);
 
     // Open the file for writing. If the file does not exist (it shouldn't),
     // create it.
@@ -468,8 +482,6 @@ static void
     // Cast `context` to `CameraSuiteViewCamera*` and store it in `instance`.
     CameraSuiteViewCamera* instance = context;
 
-    // If `uartIrqEvent` is `UartIrqEventRXNE`, send the data to the
-    // `camera_rx_stream` and set the `WorkerEventRx` flag.
     if(event == FuriHalSerialRxEventData) {
         uint8_t data = furi_hal_serial_async_rx(handle);
         furi_stream_buffer_send(instance->camera_rx_stream, &data, 1, 0);
@@ -608,12 +620,12 @@ CameraSuiteViewCamera* camera_suite_view_camera_alloc() {
     instance->camera_worker_thread = thread;
     furi_thread_start(instance->camera_worker_thread);
 
-    // 115200 is the default baud rate for the ESP32-CAM.
+    // Allocate the serial handle for the camera.
     instance->serial_handle = furi_hal_serial_control_acquire(UART_CH);
     furi_check(instance->serial_handle);
     furi_hal_serial_init(instance->serial_handle, 230400);
 
-    // Enable UART1 and set the IRQ callback.
+    // Start the asynchronous receive.
     furi_hal_serial_async_rx_start(instance->serial_handle, camera_on_irq_cb, instance, false);
 
     return instance;
@@ -630,7 +642,7 @@ void camera_suite_view_camera_free(CameraSuiteViewCamera* instance) {
     // Free the allocated stream buffer.
     furi_stream_buffer_free(instance->camera_rx_stream);
 
-    // Re-enable the console.
+    // Deinitialize the serial handle and release the control.
     furi_hal_serial_deinit(instance->serial_handle);
     furi_hal_serial_control_release(instance->serial_handle);
 

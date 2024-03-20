@@ -34,12 +34,8 @@ Note: Barcode save locations have been moved from `/barcodes` to `/apps_data/bar
 ## Building
 1) Clone the [flipperzero-firmware](https://github.com/flipperdevices/flipperzero-firmware) repository or a firmware of your choice
 2) Clone this repository and put it in the `applications_user` folder
-3) Build this app by using the command `./fbt fap_Barcode_App`
-4) Copy the `.fap` from `build\f7-firmware-D\.extapps\Barcode_App.fap` to `apps\Misc` using the qFlipper app
-5) While still in the qFlipper app, navigate to the root folder of the SD card and create the folder `apps_data`, if not already there
-6) Navigate into `apps_data` and create another folder called `barcode_data`
-7) Navigate into `barcode_data`
-8) Drag & drop the encoding txts (`code39_encodings.txt`, `code128_encodings.txt` & `codabar_encodings.txt`) from the `encoding_tables` folder in this repository into the `barcode_data` folder
+3) Build this app by using the command `./fbt fap_barcode_App`
+4) Copy the `.fap` from `build\f7-firmware-D\.extapps\Barcode_App.fap` to `apps\Tools` using the qFlipper app
 
 ## Usage
 

@@ -1,13 +1,11 @@
 #pragma once
-
+#include <furi_hal.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include <furi_hal.h>
+#include "uhf_uart.h"
 #include "uhf_tag.h"
 #include "uhf_buffer.h"
-#include "uhf_tag.h"
-#include <furi_hal.h>
 #include "uhf_module_settings.h"
 
 #define FRAME_START 0xBB
@@ -33,13 +31,12 @@ typedef enum {
 
 typedef struct {
     M100ModuleInfo* info;
-    uint32_t baudrate;
     WorkingRegion region;
     uint16_t region_frequency;
     uint16_t transmitting_power;
+    uint16_t max_transmitting_power;
     bool freq_hopping;
-    Buffer* buf;
-    FuriHalSerialHandle* serial_handle;
+    UHFUart* uart;
 } M100Module;
 
 M100ModuleInfo* m100_module_info_alloc();

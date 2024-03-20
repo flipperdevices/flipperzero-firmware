@@ -165,8 +165,6 @@ int32_t flipper_atomicdiceroller_app() {
     EventApp event;
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(EventApp));
 
-    furi_hal_gpio_init(&gpio_ext_pa7, GpioModeInterruptFall, GpioPullUp, GpioSpeedVeryHigh);
-
     mutexStruct mutexVal;
     mutexVal.cps = 0;
     mutexVal.dice = 0;
@@ -190,6 +188,7 @@ int32_t flipper_atomicdiceroller_app() {
 
     furi_hal_gpio_add_int_callback(&gpio_ext_pa7, gpiocallback, event_queue);
     furi_hal_gpio_enable_int_callback(&gpio_ext_pa7);
+    furi_hal_gpio_init(&gpio_ext_pa7, GpioModeInterruptFall, GpioPullUp, GpioSpeedVeryHigh);
 
     Gui* gui = furi_record_open(RECORD_GUI);
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);

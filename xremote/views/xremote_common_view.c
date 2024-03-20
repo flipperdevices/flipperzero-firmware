@@ -18,29 +18,30 @@ static const XRemoteButton g_buttons[XREMOTE_BUTTON_COUNT + 1] = {
     {0, XREMOTE_COMMAND_POWER},
     {1, XREMOTE_COMMAND_SETUP},
     {2, XREMOTE_COMMAND_INPUT},
-    {3, XREMOTE_COMMAND_MENU},
-    {4, XREMOTE_COMMAND_LIST},
-    {5, XREMOTE_COMMAND_INFO},
-    {6, XREMOTE_COMMAND_BACK},
-    {7, XREMOTE_COMMAND_OK},
-    {8, XREMOTE_COMMAND_UP},
-    {9, XREMOTE_COMMAND_DOWN},
-    {10, XREMOTE_COMMAND_LEFT},
-    {11, XREMOTE_COMMAND_RIGHT},
-    {12, XREMOTE_COMMAND_JUMP_FORWARD},
-    {13, XREMOTE_COMMAND_JUMP_BACKWARD},
-    {14, XREMOTE_COMMAND_FAST_FORWARD},
-    {15, XREMOTE_COMMAND_FAST_BACKWARD},
-    {16, XREMOTE_COMMAND_PLAY_PAUSE},
-    {17, XREMOTE_COMMAND_PAUSE},
-    {18, XREMOTE_COMMAND_PLAY},
-    {19, XREMOTE_COMMAND_STOP},
-    {20, XREMOTE_COMMAND_MUTE},
-    {21, XREMOTE_COMMAND_MODE},
-    {22, XREMOTE_COMMAND_VOL_UP},
-    {23, XREMOTE_COMMAND_VOL_DOWN},
-    {24, XREMOTE_COMMAND_NEXT_CHAN},
-    {25, XREMOTE_COMMAND_PREV_CHAN},
+    {3, XREMOTE_COMMAND_EJECT},
+    {4, XREMOTE_COMMAND_MENU},
+    {5, XREMOTE_COMMAND_LIST},
+    {6, XREMOTE_COMMAND_INFO},
+    {7, XREMOTE_COMMAND_BACK},
+    {8, XREMOTE_COMMAND_OK},
+    {9, XREMOTE_COMMAND_UP},
+    {10, XREMOTE_COMMAND_DOWN},
+    {11, XREMOTE_COMMAND_LEFT},
+    {12, XREMOTE_COMMAND_RIGHT},
+    {13, XREMOTE_COMMAND_JUMP_FORWARD},
+    {14, XREMOTE_COMMAND_JUMP_BACKWARD},
+    {15, XREMOTE_COMMAND_FAST_FORWARD},
+    {16, XREMOTE_COMMAND_FAST_BACKWARD},
+    {17, XREMOTE_COMMAND_PLAY_PAUSE},
+    {18, XREMOTE_COMMAND_PAUSE},
+    {19, XREMOTE_COMMAND_PLAY},
+    {20, XREMOTE_COMMAND_STOP},
+    {21, XREMOTE_COMMAND_MUTE},
+    {22, XREMOTE_COMMAND_MODE},
+    {23, XREMOTE_COMMAND_VOL_UP},
+    {24, XREMOTE_COMMAND_VOL_DOWN},
+    {25, XREMOTE_COMMAND_NEXT_CHAN},
+    {26, XREMOTE_COMMAND_PREV_CHAN},
     {-1, NULL}};
 
 const char* xremote_button_get_name(int index) {
@@ -90,9 +91,7 @@ XRemoteView*
 
 void xremote_view_clear_context(XRemoteView* rview) {
     furi_assert(rview);
-
     if(rview->context && rview->on_clear) rview->on_clear(rview->context);
-
     rview->context = NULL;
 }
 
@@ -134,16 +133,101 @@ View* xremote_view_get_view(XRemoteView* rview) {
     return rview->view;
 }
 
+static InfraredRemoteButton*
+    infrared_remote_get_button_by_alt_name(InfraredRemote* remote, const char* name, bool try_low) {
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    FlipperFormat* ff = flipper_format_buffered_file_alloc(storage);
+    FuriString* header = furi_string_alloc();
+
+    FURI_LOG_I(XREMOTE_APP_TAG, "loading alt_names file: \'%s\'", XREMOTE_ALT_NAMES);
+
+    InfraredRemoteButton* button = NULL;
+    char key[XREMOTE_NAME_MAX] = {0};
+    bool key_found = false;
+    uint32_t version = 0;
+
+    do {
+        /* Open file and read the header */
+        if(!flipper_format_buffered_file_open_existing(ff, XREMOTE_ALT_NAMES)) break;
+        if(!flipper_format_read_header(ff, header, &version)) break;
+        if(!furi_string_equal(header, "XRemote Alt-Names") || (version != 1)) break;
+
+        FuriString* value = furi_string_alloc();
+        key_found = flipper_format_read_string(ff, name, value);
+
+        if(!key_found) {
+            if(!try_low) break;
+            size_t i;
+
+            /* Convert name to lowercase and try again */
+            for(i = 0; name[i] != '\0' && i < sizeof(key) - 1; i++) {
+                key[i] = tolower(name[i]);
+            }
+
+            key[i] = '\0';
+            break;
+        }
+
+        size_t start = 0;
+        size_t posit = furi_string_search_str(value, ",", start);
+
+        if(posit == FURI_STRING_FAILURE) {
+            const char* alt_name_cstr = furi_string_get_cstr(value);
+            button = infrared_remote_get_button_by_name(remote, alt_name_cstr);
+        } else {
+            FuriString* alt_name = furi_string_alloc();
+
+            while(posit != FURI_STRING_FAILURE) {
+                furi_string_set_n(alt_name, value, start, posit - start);
+                const char* alt_name_cstr = furi_string_get_cstr(alt_name);
+                button = infrared_remote_get_button_by_name(remote, alt_name_cstr);
+
+                furi_string_reset(alt_name);
+                if(button != NULL) break;
+
+                start = posit + 1; // Move to the next position
+                posit = furi_string_search_str(value, ",", start);
+            }
+
+            if(posit == FURI_STRING_FAILURE && button == NULL) {
+                size_t str_len = furi_string_utf8_length(value);
+                furi_string_set_n(alt_name, value, start, str_len - start);
+                const char* alt_name_cstr = furi_string_get_cstr(alt_name);
+                button = infrared_remote_get_button_by_name(remote, alt_name_cstr);
+            }
+
+            furi_string_free(alt_name);
+        }
+
+    } while(false);
+
+    furi_record_close(RECORD_STORAGE);
+    furi_string_free(header);
+    flipper_format_free(ff);
+
+    if(!key_found && try_low) return infrared_remote_get_button_by_alt_name(remote, key, false);
+
+    return button;
+}
+
 InfraredRemoteButton* xremote_view_get_button_by_name(XRemoteView* rview, const char* name) {
     xremote_app_assert(rview->context, NULL);
+    xremote_app_assert(rview->app_ctx, NULL);
+
+    XRemoteAppSettings* settings = rview->app_ctx->app_settings;
     XRemoteAppButtons* buttons = (XRemoteAppButtons*)rview->context;
-    return infrared_remote_get_button_by_name(buttons->remote, name);
+    InfraredRemoteButton* button = infrared_remote_get_button_by_name(buttons->remote, name);
+
+    if(button == NULL && settings->alt_names)
+        button = infrared_remote_get_button_by_alt_name(buttons->remote, name, true);
+
+    return button;
 }
 
 bool xremote_view_press_button(XRemoteView* rview, InfraredRemoteButton* button) {
     xremote_app_assert(button, false);
-    XRemoteAppSettings* settings = rview->app_ctx->app_settings;
 
+    XRemoteAppSettings* settings = rview->app_ctx->app_settings;
     InfraredSignal* signal = infrared_remote_button_get_signal(button);
     xremote_app_assert(signal, false);
 

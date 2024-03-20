@@ -98,8 +98,6 @@ void camera_suite_read_settings(void* context) {
     }
     furi_string_free(temp_str);
 
-    furi_string_free(temp_str);
-
     if(file_version < BOILERPLATE_SETTINGS_FILE_VERSION) {
         FURI_LOG_I(TAG, "old config version, will be removed.");
         camera_suite_close_config_file(fff_file);

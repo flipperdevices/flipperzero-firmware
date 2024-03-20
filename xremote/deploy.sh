@@ -9,10 +9,38 @@ XCLR_DIM="\x1B[2m"
 XCLR_RED="\x1B[31m"
 XCLR_RESET="\x1B[0m\n"
 
-# Parse firmware path from arguments if present
+FBT_CMD="./fbt"
+FBT_DBG="DEBUG=0"
+FBT_ARGS="COMPACT=1 launch"
+
+BUILD_PROJECT=0
+LINK_PROJECT=0
+RUN_QFLIPPER=0
+BUILD_DONE=0
+
 for arg in "$@"; do
     if [[ $arg == --firmware=* || $arg == --fw=* ]]; then
         FLIPPER_FIRMWARE="${arg#*=}"
+    fi
+
+    if [[ $arg == "--build" || $arg == "-b" ]]; then
+        BUILD_PROJECT=1
+    fi
+
+    if [[ $arg == "--run" || $arg == "-r" ]]; then
+        RUN_PROJECT=1
+    fi
+
+    if [[ $arg == "--link" || $arg == "-l" ]]; then
+        LINK_PROJECT=1
+    fi
+
+    if [[ $arg == "--debug" || $arg == "-d" ]]; then
+        FBT_DBG="DEBUG=1"
+    fi
+
+    if [[ $arg == "--sudo" || $arg == "-s" ]]; then
+        FBT_CMD="sudo ./fbt"
     fi
 done
 
@@ -41,21 +69,25 @@ XREMOTE_PROJ_NAME=$(basename "$XREMOTE_PROJ_PATH")
 FLIPPER_APPSRC="applications_user/$XREMOTE_PROJ_NAME"
 FLIPPER_USER_APP="$FLIPPER_FIRMWARE/$FLIPPER_APPSRC"
 
-# Unlink existing user application first
-[ -s $FLIPPER_USER_APP ] && rm -f $FLIPPER_USER_APP
-ln -s $XREMOTE_PROJ_PATH $FLIPPER_FIRMWARE/applications_user
+link_project() {
+    [ -s $FLIPPER_USER_APP ] && rm -f $FLIPPER_USER_APP
+    ln -s $XREMOTE_PROJ_PATH $FLIPPER_FIRMWARE/applications_user
+}
 
-# Build and deploy the project
-cd $FLIPPER_FIRMWARE
-DEPLOY_DONE=0
-sudo ./fbt COMPACT=1 DEBUG=0 launch APPSRC=$FLIPPER_APPSRC && DEPLOY_DONE=1
+build_project() {
+    cd $FLIPPER_FIRMWARE
+    $FBT_CMD $FBT_ARGS $FBT_DBG APPSRC=$FLIPPER_APPSRC && BUILD_DONE=1
+}
 
-# Run qflipper command if asked
-for arg in "$@"; do
-    if [[ $arg == "--run" || $arg == "-r" ]]; then
-        [ $DEPLOY_DONE -eq 1 ] && sudo qflipper
+run_project() {
+    if [[ $BUILD_PROJECT -eq 0 || $BUILD_DONE -eq 1  ]]; then
+        qFlipper
     fi
-done
+}
+
+[ $LINK_PROJECT -eq 1 ] && link_project
+[ $BUILD_PROJECT -eq 1 ] && build_project
+[ $RUN_PROJECT -eq 1 ] && run_project
 
 # Return with success
 exit 0

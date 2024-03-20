@@ -13,7 +13,6 @@
 //////////////////////////////////////////////////////////////////////////////
 
 #define XREMOTE_APP_SETTINGS APP_DATA_PATH("xremote.cfg")
-#define TAG "XRemoteApp"
 
 #define XREMOTE_ORIENTATION_TEXT_HORIZONTAL "Horizontal"
 #define XREMOTE_ORIENTATION_TEXT_VERTICAL "Vertical"
@@ -42,6 +41,10 @@ ViewOrientation xremote_app_get_orientation(uint8_t orientation_index) {
 
 const char* xremote_app_get_exit_str(XRemoteAppExit exit_behavior) {
     return exit_behavior == XRemoteAppExitPress ? "Press" : "Hold";
+}
+
+const char* xremote_app_get_alt_names_str(uint8_t alt_names_index) {
+    return alt_names_index ? "On" : "Off";
 }
 
 const char* xremote_app_get_orientation_str(ViewOrientation view_orientation) {
@@ -145,6 +148,49 @@ bool xremote_app_extension_store(XRemoteAppButtons* buttons, FuriString* path) {
     return success;
 }
 
+bool xremote_app_alt_names_check_and_init() {
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    FlipperFormat* ff = flipper_format_file_alloc(storage);
+    bool success = false;
+
+    do {
+        if(!flipper_format_file_open_new(ff, XREMOTE_ALT_NAMES)) break;
+        if(!flipper_format_write_header_cstr(ff, "XRemote Alt-Names", 1)) break;
+        if(!flipper_format_write_comment_cstr(ff, "")) break;
+
+        if(!flipper_format_write_string_cstr(ff, "Power", "shutdown,off,on,standby")) break;
+        if(!flipper_format_write_string_cstr(ff, "Setup", "settings,config,cfg")) break;
+        if(!flipper_format_write_string_cstr(ff, "Input", "source,select")) break;
+        if(!flipper_format_write_string_cstr(ff, "Menu", "osd,gui")) break;
+        if(!flipper_format_write_string_cstr(ff, "List", "guide")) break;
+        if(!flipper_format_write_string_cstr(ff, "Info", "display")) break;
+        if(!flipper_format_write_string_cstr(ff, "Mode", "aspect,format")) break;
+        if(!flipper_format_write_string_cstr(ff, "Back", "return,exit")) break;
+        if(!flipper_format_write_string_cstr(ff, "Ok", "enter,select")) break;
+        if(!flipper_format_write_string_cstr(ff, "Up", "uparrow")) break;
+        if(!flipper_format_write_string_cstr(ff, "Down", "downarrow")) break;
+        if(!flipper_format_write_string_cstr(ff, "Left", "leftarrow")) break;
+        if(!flipper_format_write_string_cstr(ff, "Right", "rightarrow")) break;
+        if(!flipper_format_write_string_cstr(ff, "Mute", "silence,silent,unmute")) break;
+        if(!flipper_format_write_string_cstr(ff, "Vol_up", "vol+,volume+,volup,+")) break;
+        if(!flipper_format_write_string_cstr(ff, "Vol_dn", "vol-,volume-,voldown,-")) break;
+        if(!flipper_format_write_string_cstr(ff, "Ch_next", "ch+,channel+,chup")) break;
+        if(!flipper_format_write_string_cstr(ff, "Ch_prev", "ch-,channel-,chdown")) break;
+        if(!flipper_format_write_string_cstr(ff, "Next", "next,skip,ffwd")) break;
+        if(!flipper_format_write_string_cstr(ff, "Prev", "prev,back,rewind,rew")) break;
+        if(!flipper_format_write_string_cstr(ff, "Fast_fo", "fastfwd,fastforward,ff")) break;
+        if(!flipper_format_write_string_cstr(ff, "Fast_ba", "fastback,fastrewind,fb")) break;
+        if(!flipper_format_write_string_cstr(ff, "Play_pa", "playpause,play,pause")) break;
+
+        success = true;
+    } while(false);
+
+    furi_record_close(RECORD_STORAGE);
+    flipper_format_free(ff);
+
+    return success;
+}
+
 void xremote_app_buttons_free(XRemoteAppButtons* buttons) {
     xremote_app_assert_void(buttons);
     infrared_remote_free(buttons->remote);
@@ -183,7 +229,7 @@ XRemoteAppButtons* xremote_app_buttons_alloc() {
 
 XRemoteAppButtons* xremote_app_buttons_load(XRemoteAppContext* app_ctx) {
     /* Show file selection dialog (returns selected file path with app_ctx->file_path) */
-    if(!xremote_app_browser_select_file(app_ctx, XREMOTE_APP_EXTENSION)) return NULL;
+    if(!xremote_app_context_select_file(app_ctx, XREMOTE_APP_EXTENSION)) return NULL;
     XRemoteAppButtons* buttons = xremote_app_buttons_alloc();
     buttons->app_ctx = app_ctx;
 
@@ -207,6 +253,7 @@ XRemoteAppSettings* xremote_app_settings_alloc() {
     settings->orientation = ViewOrientationHorizontal;
     settings->exit_behavior = XRemoteAppExitPress;
     settings->repeat_count = 2;
+    settings->alt_names = 1;
     return settings;
 }
 
@@ -219,7 +266,7 @@ bool xremote_app_settings_store(XRemoteAppSettings* settings) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
     FlipperFormat* ff = flipper_format_file_alloc(storage);
 
-    FURI_LOG_I(TAG, "store config file: \'%s\'", XREMOTE_APP_SETTINGS);
+    FURI_LOG_I(XREMOTE_APP_TAG, "store config file: \'%s\'", XREMOTE_APP_SETTINGS);
     bool success = false;
 
     do {
@@ -238,6 +285,9 @@ bool xremote_app_settings_store(XRemoteAppSettings* settings) {
         value = settings->repeat_count;
         if(!flipper_format_write_uint32(ff, "repeat", &value, 1)) break;
 
+        value = settings->alt_names;
+        if(!flipper_format_write_uint32(ff, "altNames", &value, 1)) break;
+
         success = true;
     } while(false);
 
@@ -252,7 +302,7 @@ bool xremote_app_settings_load(XRemoteAppSettings* settings) {
     FlipperFormat* ff = flipper_format_buffered_file_alloc(storage);
     FuriString* header = furi_string_alloc();
 
-    FURI_LOG_I(TAG, "load config file: \'%s\'", XREMOTE_APP_SETTINGS);
+    FURI_LOG_I(XREMOTE_APP_TAG, "load config file: \'%s\'", XREMOTE_APP_SETTINGS);
     uint32_t version = 0;
     uint32_t value = 0;
     bool success = false;
@@ -272,6 +322,9 @@ bool xremote_app_settings_load(XRemoteAppSettings* settings) {
 
         if(!flipper_format_read_uint32(ff, "repeat", &value, 1)) break;
         settings->repeat_count = value;
+
+        if(!flipper_format_read_uint32(ff, "altNames", &value, 1)) break;
+        settings->alt_names = value;
 
         success = true;
     } while(false);
@@ -300,6 +353,9 @@ XRemoteAppContext* xremote_app_context_alloc(void* arg) {
     ctx->app_settings = xremote_app_settings_alloc();
     xremote_app_settings_load(ctx->app_settings);
 
+    /* Initialize alternative names */
+    if(ctx->app_settings->alt_names) xremote_app_alt_names_check_and_init();
+
     /* Allocate and setup view dispatcher */
     ctx->view_dispatcher = view_dispatcher_alloc();
     view_dispatcher_enable_queue(ctx->view_dispatcher);
@@ -326,30 +382,34 @@ void xremote_app_context_free(XRemoteAppContext* ctx) {
     free(ctx);
 }
 
-bool xremote_app_browser_select_file(XRemoteAppContext* app_ctx, const char* extension) {
+bool xremote_app_browser_select_file(FuriString** file_path, const char* extension) {
     DialogsApp* dialogs = furi_record_open(RECORD_DIALOGS);
     Storage* storage = furi_record_open(RECORD_STORAGE);
     storage_simply_mkdir(storage, XREMOTE_APP_FOLDER);
 
-    if(app_ctx->file_path == NULL) {
-        app_ctx->file_path = furi_string_alloc();
-        furi_string_set(app_ctx->file_path, XREMOTE_APP_FOLDER);
+    if(*file_path == NULL) {
+        *file_path = furi_string_alloc();
+        furi_string_set(*file_path, XREMOTE_APP_FOLDER);
     }
 
     /* Open file browser (view and dialogs are managed by the browser itself) */
     DialogsFileBrowserOptions browser;
     dialog_file_browser_set_basic_options(&browser, extension, &I_IR_Icon_10x10);
     browser.base_path = XREMOTE_APP_FOLDER;
-    FuriString* path = app_ctx->file_path;
 
     /* Show file selection dialog (returns selected file path with file_path) */
-    bool status = dialog_file_browser_show(dialogs, path, path, &browser);
+    bool status = dialog_file_browser_show(dialogs, *file_path, *file_path, &browser);
 
     /* Cleanup file loading context */
     furi_record_close(RECORD_STORAGE);
     furi_record_close(RECORD_DIALOGS);
 
     return status;
+}
+
+bool xremote_app_context_select_file(XRemoteAppContext* app_ctx, const char* extension) {
+    if(app_ctx == NULL) return false;
+    return xremote_app_browser_select_file(&app_ctx->file_path, extension);
 }
 
 const char* xremote_app_context_get_exit_str(XRemoteAppContext* app_ctx) {
