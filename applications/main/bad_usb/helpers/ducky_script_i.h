@@ -7,6 +7,7 @@ extern "C" {
 #include <furi.h>
 #include <furi_hal.h>
 #include "ducky_script.h"
+#include "keyboard.h"
 
 #define SCRIPT_STATE_ERROR (-1)
 #define SCRIPT_STATE_END (-2)
@@ -30,7 +31,7 @@ struct BadUsbScript {
 
     uint32_t defdelay;
     uint32_t stringdelay;
-    uint16_t layout[128];
+    BadUsbKeyboard* layout;
 
     FuriString* line;
     FuriString* line_prev;
