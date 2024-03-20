@@ -12,7 +12,6 @@
 // TODO: More accurate timing for Nested
 // TODO: Unload and load specific attacks from memory, plugin_manager_free
 
-// TODO: Remove includes that are not needed
 #include <furi.h>
 #include <furi_hal.h>
 #include <gui/gui.h>
