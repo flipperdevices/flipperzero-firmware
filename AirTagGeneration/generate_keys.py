@@ -93,14 +93,15 @@ def main():
                 print(
                     "Place the .keys file onto your Flipper in the Apps_Data->FindMyFlipper folder or input the MAC and Payload manually."
                 )
+                print("To get location reports follow the steps in the LocationReports folder of my repo!")
                 print()
 
                 with open(f"keys/{fname}", "w") as f:
                     f.write(f"Private key: {private_key_b64}\n")
-                    f.write(f"Public key: {public_key_b64}\n")
+                    f.write(f"Advertisement key: {public_key_b64}\n")
                     f.write(f"Hashed adv key: {s256_b64}\n")
                     f.write(f"Private key (Hex): {private_key_hex}\n")
-                    f.write(f"Public key (Hex): {public_key_hex}\n")
+                    f.write(f"Advertisement key (Hex): {public_key_hex}\n")
                     f.write(f"MAC: {mac}\n")
                     f.write(f"Payload: {payload}\n")
                 print("Keys file saved to:", os.path.abspath(f"keys/{fname}"))

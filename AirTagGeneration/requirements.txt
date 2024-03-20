@@ -1,0 +1,11 @@
+requests~=2.31.0
+urllib3~=2.1.0
+cryptography~=41.0.7
+pbkdf2~=1.3
+srp~=1.0.20
+fastapi~=0.104.1
+uvicorn~=0.24.0.post1
+certifi
+paho-mqtt
+pycryptodome
+python-multipart
