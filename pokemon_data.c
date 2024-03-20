@@ -162,23 +162,18 @@ void pokemon_data_free(PokemonData* pdata) {
     free(pdata);
 }
 
-/* XXX: EV/IV don't depend on anything other than what they are set to
- * by the ev/iv selection. Therefore, there is no reason to calculate
- * them here.
- * exp and stats are set from level.
- * stats are set from ev/iv.
- * ev requires level
+/* Recalculate values and stats based on their dependencies.
+ * The order of the if statements are in order of dependence from
+ * depending on no other value, to dpeneding on multiple other values.
  *
- * atk/def/spd/spc/hp require level, exp
- *
- * level: depends on: none
- * exp: depends on: level, index
- * iv: depends on: none
- * ev: depends on: level (sometimes)
- * atk/def/spd/spc/hp: depends on: level, ivs, evs, index
- * move: depends on: index
- * type: depends on: index
- * nickname: depends on: index
+ * level:	depends on:	none
+ * iv: 		depends on: 	none (only what the EV/IV general setting is, which recalculates EV/IV at time of set)
+ * ev:		depends on: 	level (sometimes)
+ * exp:		depends on:	level, index
+ * moves:	depends on:	index
+ * types:	depends on:	index
+ * nickname:	depends on:	index
+ * atk/def/etc:	depends on:	level, iv, ev, index
  */
 void pokemon_recalculate(PokemonData* pdata, uint8_t recalc) {
     furi_assert(pdata);
@@ -741,21 +736,6 @@ static void pokemon_stat_iv_calc(PokemonData* pdata, EvIv val) {
     pokemon_stat_set(pdata, STAT_IV, NONE, iv);
 }
 
-/* XXX: Could offload these args and use the different *_get() functions in here instead */
-static uint16_t stat_calc(uint8_t base, uint8_t iv, uint16_t ev, uint8_t level, DataStat stat) {
-    uint16_t tmp;
-    /* Gen I calculation */
-    // https://bulbapedia.bulbagarden.net/wiki/Stat#Generations_I_and_II
-    tmp = floor((((2 * (base + iv)) + floor(sqrt(ev) / 4)) * level) / 100);
-    /* HP */
-    if(stat == STAT_HP) tmp += (level + 10);
-    /* All other stats */
-    else
-        tmp += 5;
-
-    return tmp;
-}
-
 #define UINT32_TO_EXP(input, output_array)                     \
     do {                                                       \
         (output_array)[2] = (uint8_t)((input)&0xFF);           \
@@ -811,22 +791,29 @@ void pokemon_exp_calc(PokemonData* pdata) {
 }
 
 /* Calculates stat from current level */
-/* XXX: Would it make sense instead to have a single function get the right bases and stats? */
 void pokemon_stat_calc(PokemonData* pdata, DataStat stat) {
     furi_assert(pdata);
-    uint8_t stat_iv;
-    uint16_t stat_ev;
-    uint16_t stat_tmp;
-    uint8_t stat_base;
+    uint8_t iv;
+    uint16_t ev;
+    uint8_t base;
     uint8_t level;
+    uint16_t calc;
 
     level = pokemon_stat_get(pdata, STAT_LEVEL, NONE);
-    stat_base = table_stat_base_get(pdata->pokemon_table, pokemon_stat_get(pdata, STAT_NUM, NONE), stat, NONE);
-    stat_ev = pokemon_stat_get(pdata, stat+STAT_EV_OFFS, NONE);
-    stat_iv = pokemon_stat_get(pdata, stat+STAT_IV_OFFS, NONE);
-    stat_tmp = stat_calc(stat_base, stat_iv, stat_ev, level, stat);
+    base = table_stat_base_get(pdata->pokemon_table, pokemon_stat_get(pdata, STAT_NUM, NONE), stat, NONE);
+    ev = pokemon_stat_get(pdata, stat+STAT_EV_OFFS, NONE);
+    iv = pokemon_stat_get(pdata, stat+STAT_IV_OFFS, NONE);
 
-    pokemon_stat_set(pdata, stat, NONE, stat_tmp);
+    /* Gen I and II calculation */
+    // https://bulbapedia.bulbagarden.net/wiki/Stat#Generations_I_and_II
+    calc = floor((((2 * (base + iv)) + floor(sqrt(ev) / 4)) * level) / 100);
+
+    if(stat == STAT_HP)
+        calc += (level + 10);
+    else
+        calc += 5;
+
+    pokemon_stat_set(pdata, stat, NONE, calc);
 }
 
 /* XXX: FIXME: TODO: This needs addressing ASAP for gen ii */
