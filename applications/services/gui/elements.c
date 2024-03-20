@@ -27,7 +27,7 @@ typedef struct {
     const char* text;
 } ElementTextBoxLine;
 
-void elements_progress_bar(Canvas* canvas, uint8_t x, uint8_t y, uint8_t width, float progress) {
+void elements_progress_bar(Canvas* canvas, int32_t x, int32_t y, size_t width, float progress) {
     furi_check(canvas);
     furi_check((progress >= 0.0f) && (progress <= 1.0f));
     uint8_t height = 9;
@@ -44,9 +44,9 @@ void elements_progress_bar(Canvas* canvas, uint8_t x, uint8_t y, uint8_t width, 
 
 void elements_progress_bar_with_text(
     Canvas* canvas,
-    uint8_t x,
-    uint8_t y,
-    uint8_t width,
+    int32_t x,
+    int32_t y,
+    size_t width,
     float progress,
     const char* text) {
     furi_check(canvas);
@@ -69,9 +69,9 @@ void elements_progress_bar_with_text(
 
 void elements_scrollbar_pos(
     Canvas* canvas,
-    uint8_t x,
-    uint8_t y,
-    uint8_t height,
+    int32_t x,
+    int32_t y,
+    size_t height,
     uint16_t pos,
     uint16_t total) {
     furi_check(canvas);
@@ -110,7 +110,7 @@ void elements_scrollbar(Canvas* canvas, uint16_t pos, uint16_t total) {
     }
 }
 
-void elements_frame(Canvas* canvas, uint8_t x, uint8_t y, uint8_t width, uint8_t height) {
+void elements_frame(Canvas* canvas, int32_t x, int32_t y, size_t width, size_t height) {
     furi_check(canvas);
 
     canvas_draw_line(canvas, x + 2, y, x + width - 2, y);
@@ -261,8 +261,8 @@ static size_t
 
 void elements_multiline_text_aligned(
     Canvas* canvas,
-    uint8_t x,
-    uint8_t y,
+    int32_t x,
+    int32_t y,
     Align horizontal,
     Align vertical,
     const char* text) {
@@ -293,7 +293,7 @@ void elements_multiline_text_aligned(
 
         if((start[chars_fit] == '\n') || (start[chars_fit] == 0)) {
             line = furi_string_alloc_printf("%.*s", chars_fit, start);
-        } else if((y + font_height) > canvas_height(canvas)) {
+        } else if((y + font_height) > (int32_t)canvas_height(canvas)) {
             line = furi_string_alloc_printf("%.*s...\n", chars_fit, start);
         } else {
             chars_fit -= 1; // account for the dash
@@ -302,7 +302,7 @@ void elements_multiline_text_aligned(
         canvas_draw_str_aligned(canvas, x, y, horizontal, vertical, furi_string_get_cstr(line));
         furi_string_free(line);
         y += font_height;
-        if(y > canvas_height(canvas)) {
+        if(y > (int32_t)canvas_height(canvas)) {
             break;
         }
 
@@ -311,7 +311,7 @@ void elements_multiline_text_aligned(
     }
 }
 
-void elements_multiline_text(Canvas* canvas, uint8_t x, uint8_t y, const char* text) {
+void elements_multiline_text(Canvas* canvas, int32_t x, int32_t y, const char* text) {
     furi_check(canvas);
     furi_check(text);
 
@@ -334,7 +334,7 @@ void elements_multiline_text(Canvas* canvas, uint8_t x, uint8_t y, const char* t
     furi_string_free(str);
 }
 
-void elements_multiline_text_framed(Canvas* canvas, uint8_t x, uint8_t y, const char* text) {
+void elements_multiline_text_framed(Canvas* canvas, int32_t x, int32_t y, const char* text) {
     furi_check(canvas);
     furi_check(text);
 
@@ -361,30 +361,25 @@ void elements_multiline_text_framed(Canvas* canvas, uint8_t x, uint8_t y, const 
 
 void elements_slightly_rounded_frame(
     Canvas* canvas,
-    uint8_t x,
-    uint8_t y,
-    uint8_t width,
-    uint8_t height) {
+    int32_t x,
+    int32_t y,
+    size_t width,
+    size_t height) {
     furi_check(canvas);
     canvas_draw_rframe(canvas, x, y, width, height, 1);
 }
 
 void elements_slightly_rounded_box(
     Canvas* canvas,
-    uint8_t x,
-    uint8_t y,
-    uint8_t width,
-    uint8_t height) {
+    int32_t x,
+    int32_t y,
+    size_t width,
+    size_t height) {
     furi_check(canvas);
     canvas_draw_rbox(canvas, x, y, width, height, 1);
 }
 
-void elements_bold_rounded_frame(
-    Canvas* canvas,
-    uint8_t x,
-    uint8_t y,
-    uint8_t width,
-    uint8_t height) {
+void elements_bold_rounded_frame(Canvas* canvas, int32_t x, int32_t y, size_t width, size_t height) {
     furi_check(canvas);
 
     canvas_set_color(canvas, ColorWhite);
@@ -433,8 +428,8 @@ void elements_bubble(Canvas* canvas, uint8_t x, uint8_t y, uint8_t width, uint8_
 
 void elements_bubble_str(
     Canvas* canvas,
-    uint8_t x,
-    uint8_t y,
+    int32_t x,
+    int32_t y,
     const char* text,
     Align horizontal,
     Align vertical) {
@@ -582,10 +577,10 @@ void elements_string_fit_width(Canvas* canvas, FuriString* string, uint8_t width
 
 void elements_scrollable_text_line(
     Canvas* canvas,
-    uint8_t x,
-    uint8_t y,
-    uint8_t width,
-    FuriString* string,
+    int32_t x,
+    int32_t y,
+    size_t width,
+    const char* string,
     size_t scroll,
     bool ellipsis) {
     furi_check(canvas);
@@ -632,10 +627,10 @@ void elements_scrollable_text_line(
 
 void elements_text_box(
     Canvas* canvas,
-    uint8_t x,
-    uint8_t y,
-    uint8_t width,
-    uint8_t height,
+    int32_t x,
+    int32_t y,
+    size_t width,
+    size_t height,
     Align horizontal,
     Align vertical,
     const char* text,
@@ -645,8 +640,8 @@ void elements_text_box(
     ElementTextBoxLine line[ELEMENTS_MAX_LINES_NUM];
     bool bold = false;
     bool mono = false;
-    bool inversed = false;
-    bool inversed_present = false;
+    bool inverse = false;
+    bool inverse_present = false;
     Font current_font = FontSecondary;
     Font prev_font = FontSecondary;
     const CanvasFontParameters* font_params = canvas_get_font_params(canvas, current_font);
@@ -702,8 +697,8 @@ void elements_text_box(
                 canvas_set_font(canvas, FontKeyboard);
                 mono = !mono;
             }
-            if(text[i] == ELEMENTS_INVERSED_MARKER) {
-                inversed_present = true;
+            if(text[i] == ELEMENTS_INVERSE_MARKER) {
+                inverse_present = true;
             }
             continue;
         }
@@ -719,10 +714,10 @@ void elements_text_box(
             if(text[i] == '\0') {
                 full_text_processed = true;
             }
-            if(inversed_present) {
+            if(inverse_present) {
                 line_leading_min += 1;
                 line_leading_default += 1;
-                inversed_present = false;
+                inverse_present = false;
             }
             line[line_num].leading_min = line_leading_min;
             line[line_num].leading_default = line_leading_default;
@@ -785,7 +780,7 @@ void elements_text_box(
     canvas_set_font(canvas, FontSecondary);
     bold = false;
     mono = false;
-    inversed = false;
+    inverse = false;
     for(uint8_t i = 0; i < line_num; i++) {
         for(uint8_t j = 0; j < line[i].len; j++) {
             // Process format symbols
@@ -809,11 +804,11 @@ void elements_text_box(
                 mono = !mono;
                 continue;
             }
-            if(line[i].text[j] == ELEMENTS_INVERSED_MARKER) {
-                inversed = !inversed;
+            if(line[i].text[j] == ELEMENTS_INVERSE_MARKER) {
+                inverse = !inverse;
                 continue;
             }
-            if(inversed) {
+            if(inverse) {
                 canvas_draw_box(
                     canvas,
                     line[i].x - 1,
@@ -826,7 +821,7 @@ void elements_text_box(
             } else {
                 if((i == line_num - 1) && strip_to_dots) {
                     uint8_t next_symbol_width = canvas_glyph_width(canvas, line[i].text[j]);
-                    if(line[i].x + next_symbol_width + dots_width > x + width) {
+                    if(line[i].x + next_symbol_width + dots_width > x + (int32_t)width) {
                         canvas_draw_str(canvas, line[i].x, line[i].y, "...");
                         break;
                     }
