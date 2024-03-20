@@ -47,11 +47,9 @@ static void select_pokemon_render_callback(Canvas* canvas, void* model) {
     canvas_set_font(canvas, FontSecondary);
     canvas_draw_str_aligned(canvas, 58, 38, AlignLeft, AlignTop, pokedex_num);
     elements_frame(canvas, 55, 0, 71, 18);
-    //canvas_draw_icon(canvas, 128 - 80, 0, &I_Space_80x18);
     canvas_draw_str_aligned(canvas, 90, 5, AlignCenter, AlignTop, "Select Pokemon");
 
     canvas_set_font(canvas, FontPrimary);
-    /* XXX: Need to remake this and have it more on the right side */
     elements_button_center(canvas, "OK");
 }
 
