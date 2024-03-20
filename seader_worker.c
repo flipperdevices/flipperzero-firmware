@@ -286,6 +286,22 @@ NfcCommand seader_worker_poller_callback_iso14443_4a(NfcGenericEvent event, void
         } else if(seader_worker->stage == SeaderPollerEventTypeComplete) {
             ret = NfcCommandStop;
         }
+    } else if(iso14443_4a_event->type == Iso14443_4aPollerEventTypeError) {
+        Iso14443_4aPollerEventData* data = iso14443_4a_event->data;
+        Iso14443_4aError error = data->error;
+        FURI_LOG_W(TAG, "Iso14443_4aError %i", error);
+        // I was hoping to catch MFC here, but it seems to be treated the same (None) as no card being present.
+        switch(error) {
+        case Iso14443_4aErrorNone:
+            break;
+        case Iso14443_4aErrorNotPresent:
+            break;
+        case Iso14443_4aErrorProtocol:
+            ret = NfcCommandStop;
+            break;
+        case Iso14443_4aErrorTimeout:
+            break;
+        }
     }
 
     return ret;
