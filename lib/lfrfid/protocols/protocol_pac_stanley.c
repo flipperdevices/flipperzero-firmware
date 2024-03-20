@@ -203,7 +203,8 @@ bool protocol_pac_stanley_write_data(ProtocolPACStanley* protocol, void* data) {
 
 void protocol_pac_stanley_render_data(ProtocolPACStanley* protocol, FuriString* result) {
     uint8_t* data = protocol->data;
-    furi_string_printf(result, "CIN: %02X%02X%02X%02X", data[0], data[1], data[2], data[3]);
+    furi_string_printf(
+        result, "CIN: %02hhX %02hhX %02hhX %02hhX", data[0], data[1], data[2], data[3]);
 }
 
 const ProtocolBase protocol_pac_stanley = {
