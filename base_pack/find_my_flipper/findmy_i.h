@@ -48,12 +48,7 @@ typedef enum {
     FindMyViewPopup,
 } FindMyView;
 
-enum FindMyType {
-    FindMyTypeApple,
-    FindMyTypeSamsung,
-};
-
 void findmy_change_broadcast_interval(FindMy* app, uint8_t value);
 void findmy_change_transmit_power(FindMy* app, uint8_t value);
+void findmy_set_tag_type(FindMy* app, FindMyType type);
 void findmy_toggle_beacon(FindMy* app);
-FindMyType findmy_data_get_type(uint8_t data[EXTRA_BEACON_MAX_DATA_SIZE]);

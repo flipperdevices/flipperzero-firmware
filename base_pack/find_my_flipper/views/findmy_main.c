@@ -34,18 +34,22 @@ static void findmy_main_draw_callback(Canvas* canvas, void* _model) {
     snprintf(interval_str, sizeof(interval_str), "Ping Interval: %ds", model->interval);
     canvas_draw_str(canvas, 4, 62, interval_str);
     canvas_set_font(canvas, FontPrimary);
+    const char* network_text = "";
     switch(model->type) {
     case FindMyTypeApple:
-        canvas_draw_str(canvas, 4, 32, "Apple Network");
-        canvas_draw_icon(canvas, 80, 24, &I_Lock_7x8);
+        network_text = "Apple Network";
         break;
     case FindMyTypeSamsung:
-        canvas_draw_str(canvas, 4, 32, "Samsung Network");
-        canvas_draw_icon(canvas, 97, 24, &I_Lock_7x8);
+        network_text = "Samsung Network";
+        break;
+    case FindMyTypeTile:
+        network_text = "Tile Network";
         break;
     default:
         break;
     }
+    canvas_draw_str(canvas, 4, 32, network_text);
+    canvas_draw_icon(canvas, 6 + canvas_string_width(canvas, network_text), 24, &I_Lock_7x8);
     canvas_set_font(canvas, FontSecondary);
     canvas_draw_str(canvas, 100, 61, "Config");
     canvas_draw_line(canvas, 100, 51, 127, 51);
@@ -103,7 +107,7 @@ FindMyMain* findmy_main_alloc(FindMy* app) {
         {
             model->active = app->state.beacon_active;
             model->interval = app->state.broadcast_interval;
-            model->type = findmy_data_get_type(app->state.data);
+            model->type = app->state.tag_type;
         },
         false);
     view_set_context(findmy_main->view, findmy_main);
