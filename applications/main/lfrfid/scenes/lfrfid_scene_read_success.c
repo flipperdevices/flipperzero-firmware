@@ -15,7 +15,8 @@ void lfrfid_scene_read_success_on_enter(void* context) {
         furi_string_set(display_text, protocol);
     }
 
-    widget_add_string_element(widget, 0, 0, AlignLeft, AlignTop, FontPrimary, furi_string_get_cstr(display_text));
+    widget_add_string_element(
+        widget, 0, 0, AlignLeft, AlignTop, FontPrimary, furi_string_get_cstr(display_text));
 
     furi_string_set(display_text, "Hex: ");
 
@@ -30,7 +31,8 @@ void lfrfid_scene_read_success_on_enter(void* context) {
 
     free(data);
 
-    widget_add_text_box_element(widget, 0, 12, 128, 12, AlignLeft, AlignTop, furi_string_get_cstr(display_text), true);
+    widget_add_text_box_element(
+        widget, 0, 12, 128, 12, AlignLeft, AlignTop, furi_string_get_cstr(display_text), true);
 
     protocol_dict_render_brief_data(app->dict, display_text, app->protocol_id);
 
