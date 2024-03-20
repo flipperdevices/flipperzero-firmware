@@ -9,7 +9,7 @@ void lfrfid_scene_read_success_on_enter(void* context) {
     const char* protocol = protocol_dict_get_name(app->dict, app->protocol_id);
     const char* manufacturer = protocol_dict_get_manufacturer(app->dict, app->protocol_id);
 
-    if(strcmp(protocol, manufacturer) != 0) {
+    if(strcasecmp(protocol, manufacturer) != 0 && strcasecmp(manufacturer, "N/A") != 0) {
         furi_string_cat_printf(display_text, "\e#%s %s\e#", manufacturer, protocol);
     } else {
         furi_string_cat_printf(display_text, "\e#%s\e#", protocol);
