@@ -1,3 +1,9 @@
+/**
+ * @file view_holder.h
+ * @brief GUI: ViewHolder API
+ *
+ * @warning View added to a ViewHolder MUST NOT be in a ViewStack at the same time.
+ */
 #pragma once
 
 #include <gui/view.h>
@@ -24,7 +30,7 @@ typedef void (*BackCallback)(void* back_context);
  * @brief Allocate ViewHolder
  * @return pointer to ViewHolder instance
  */
-ViewHolder* view_holder_alloc();
+ViewHolder* view_holder_alloc(void);
 
 /**
  * @brief Free ViewHolder and call Free callback
