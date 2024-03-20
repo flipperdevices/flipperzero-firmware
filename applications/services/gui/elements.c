@@ -628,7 +628,6 @@ void elements_scrollable_text_line(
                 offset++;
             } while(state != FuriStringUTF8StateStarting);
 
-
             right_width += canvas_glyph_width(canvas, value);
             if(right_width > width) break;
             scroll_size--;
@@ -673,7 +672,6 @@ void elements_scrollable_text_line(
     canvas_draw_str(canvas, x, y, furi_string_get_cstr(line));
     furi_string_free(line);
 }
-
 
 void elements_text_box(
     Canvas* canvas,
