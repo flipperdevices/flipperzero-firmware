@@ -23,7 +23,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "core/core_defines.h"
 #include "nfc_supported_card_plugin.h"
 
 #include "protocols/mf_classic/mf_classic.h"
@@ -149,6 +148,6 @@ static const FlipperAppPluginDescriptor umarsh_plugin_descriptor = {
 };
 
 /* Plugin entry point - must return a pointer to const descriptor  */
-const FlipperAppPluginDescriptor* umarsh_plugin_ep() {
+const FlipperAppPluginDescriptor* umarsh_plugin_ep(void) {
     return &umarsh_plugin_descriptor;
 }
