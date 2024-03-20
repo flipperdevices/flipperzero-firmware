@@ -25,7 +25,7 @@ extern const void __sram2a_start__;
 extern const void __sram2a_free__;
 extern const void __sram2b_start__;
 
-void furi_hal_memory_init() {
+void furi_hal_memory_init(void) {
     if(furi_hal_rtc_get_boot_mode() != FuriHalRtcBootModeNormal) {
         return;
     }
@@ -46,8 +46,8 @@ void furi_hal_memory_init() {
     }
 
     uint32_t sram2a_busy_size = (uint32_t)&__sram2a_free__ - (uint32_t)&__sram2a_start__;
-    uint32_t sram2a_unprotected_size = (sbrsa)*1024;
-    uint32_t sram2b_unprotected_size = (snbrsa)*1024;
+    uint32_t sram2a_unprotected_size = (sbrsa) * 1024;
+    uint32_t sram2b_unprotected_size = (snbrsa) * 1024;
 
     memory->region[SRAM_A].start = (uint8_t*)&__sram2a_free__;
     memory->region[SRAM_B].start = (uint8_t*)&__sram2b_start__;
@@ -106,7 +106,7 @@ void* furi_hal_memory_alloc(size_t size) {
     return allocated_memory;
 }
 
-size_t furi_hal_memory_get_free() {
+size_t furi_hal_memory_get_free(void) {
     if(furi_hal_memory == NULL) return 0;
 
     size_t free = 0;
@@ -116,7 +116,7 @@ size_t furi_hal_memory_get_free() {
     return free;
 }
 
-size_t furi_hal_memory_max_pool_block() {
+size_t furi_hal_memory_max_pool_block(void) {
     if(furi_hal_memory == NULL) return 0;
 
     size_t max = 0;

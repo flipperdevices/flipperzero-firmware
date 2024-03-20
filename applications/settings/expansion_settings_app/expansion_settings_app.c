@@ -13,7 +13,7 @@ static void expansion_settings_app_uart_changed(VariableItem* item) {
     app->settings.uart_index = index;
 
     if(index < FuriHalSerialIdMax) {
-        expansion_enable(app->expansion, index);
+        expansion_set_listen_serial(app->expansion, index);
     } else {
         expansion_disable(app->expansion);
     }
@@ -24,7 +24,7 @@ static uint32_t expansion_settings_app_exit(void* context) {
     return VIEW_NONE;
 }
 
-static ExpansionSettingsApp* expansion_settings_app_alloc() {
+static ExpansionSettingsApp* expansion_settings_app_alloc(void) {
     ExpansionSettingsApp* app = malloc(sizeof(ExpansionSettingsApp));
 
     if(!expansion_settings_load(&app->settings)) {
