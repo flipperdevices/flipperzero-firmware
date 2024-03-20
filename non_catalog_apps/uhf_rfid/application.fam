@@ -1,6 +1,6 @@
 App(
     appid="uhf_rfid",
-    name="[(Q)M100] UHF RFID",
+    name="[YRM100] UHF RFID",
     apptype=FlipperAppType.EXTERNAL,
     targets=["f7"],
     entry_point="uhf_app_main",
@@ -8,10 +8,10 @@ App(
         "storage",
         "gui",
     ],
-    stack_size=8 * 1024,
+    stack_size=10 * 1024,
     order=30,
     fap_icon="icons/uhf_10px.png",
-    fap_category="RFID",
+    fap_category="GPIO",
     fap_icon_assets="icons",
     fap_icon_assets_symbol="uhf_rfid",
 )

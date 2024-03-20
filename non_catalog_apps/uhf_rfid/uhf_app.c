@@ -201,25 +201,20 @@ int32_t uhf_app_main(void* ctx) {
     expansion_disable(expansion);
 
     UHFApp* uhf_app = uhf_alloc();
-
     // enable 5v pin
-     uint8_t attempts = 0;
+    uint8_t attempts = 0;
     bool otg_was_enabled = furi_hal_power_is_otg_enabled();
     while(!furi_hal_power_is_otg_enabled() && attempts++ < 5) {
         furi_hal_power_enable_otg();
         furi_delay_ms(10);
     }
-    furi_delay_ms(200);
-    // init pin a2
-    // furi_hal_gpio_init_simple(&gpio_ext_pa7, GpioModeOutputPushPull);
+    // enter app
     scene_manager_next_scene(uhf_app->scene_manager, UHFSceneModuleInfo);
     view_dispatcher_run(uhf_app->view_dispatcher);
-
     // disable 5v pin
-     if(furi_hal_power_is_otg_enabled() && !otg_was_enabled) {
+    if(furi_hal_power_is_otg_enabled() && !otg_was_enabled) {
         furi_hal_power_disable_otg();
     }
-    // furi_hal_gpio_disable_int_callback()
     // exit app
     uhf_free(uhf_app);
 
