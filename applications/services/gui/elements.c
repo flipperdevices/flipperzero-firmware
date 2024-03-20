@@ -580,7 +580,7 @@ void elements_scrollable_text_line(
     int32_t x,
     int32_t y,
     size_t width,
-    const char* string,
+    FuriString* string,
     size_t scroll,
     bool ellipsis) {
     furi_check(canvas);
