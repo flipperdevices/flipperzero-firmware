@@ -3,6 +3,7 @@
 #include "gen4_poller.h"
 #include <nfc/nfc_poller.h>
 #include <nfc/protocols/iso14443_3a/iso14443_3a_poller.h>
+#include <bit_lib.h>
 
 #define TAG "Gen4Poller"
 
@@ -61,9 +62,8 @@ typedef enum {
     Gen4PollerStateWipe,
     Gen4PollerStateChangePassword,
 
+    Gen4PollerStateGetInfo,
     Gen4PollerStateSetDefaultConfig,
-    Gen4PollerStateGetCurrentConfig,
-    Gen4PollerStateGetRevision,
     Gen4PollerStateSetShadowMode,
     Gen4PollerStateSetDirectWriteBlock0,
 

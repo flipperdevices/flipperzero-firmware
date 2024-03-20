@@ -169,12 +169,10 @@ NfcCommand gen4_poller_request_mode_handler(Gen4Poller* instance) {
         instance->state = Gen4PollerStateRequestWriteData;
     } else if(instance->gen4_event_data.request_mode.mode == Gen4PollerModeSetPassword) {
         instance->state = Gen4PollerStateChangePassword;
+    } else if(instance->gen4_event_data.request_mode.mode == Gen4PollerModeGetInfo) {
+        instance->state = Gen4PollerStateGetInfo;
     } else if(instance->gen4_event_data.request_mode.mode == Gen4PollerModeSetDefaultCfg) {
         instance->state = Gen4PollerStateSetDefaultConfig;
-    } else if(instance->gen4_event_data.request_mode.mode == Gen4PollerModeGetCfg) {
-        instance->state = Gen4PollerStateGetCurrentConfig;
-    } else if(instance->gen4_event_data.request_mode.mode == Gen4PollerModeGetRevision) {
-        instance->state = Gen4PollerStateGetRevision;
     } else if(instance->gen4_event_data.request_mode.mode == Gen4PollerModeSetShadowMode) {
         instance->state = Gen4PollerStateSetShadowMode;
     } else if(instance->gen4_event_data.request_mode.mode == Gen4PollerModeSetDirectWriteBlock0Mode) {
@@ -498,16 +496,16 @@ NfcCommand gen4_poller_get_current_cfg_handler(Gen4Poller* instance) {
     NfcCommand command = NfcCommandContinue;
 
     do {
-        uint8_t the_config[32] = {};
+        uint8_t config[32] = {};
 
-        Gen4PollerError error = gen4_poller_get_config(instance, instance->password, the_config);
+        Gen4PollerError error = gen4_poller_get_config(instance, instance->password, config);
         if(error != Gen4PollerErrorNone) {
             FURI_LOG_E(TAG, "Failed to get current config: %d", error);
             instance->state = Gen4PollerStateFail;
             break;
         }
         // Copy config data to event data buffer
-        memcpy(instance->gen4_event_data.display_config, the_config, sizeof(the_config));
+        memcpy(instance->gen4_event_data.config_data, config, sizeof(config));
 
         instance->state = Gen4PollerStateSuccess;
     } while(false);
@@ -519,16 +517,47 @@ NfcCommand gen4_poller_get_revision_handler(Gen4Poller* instance) {
     NfcCommand command = NfcCommandContinue;
 
     do {
-        uint8_t the_revision[5] = {0};
-        Gen4PollerError error =
-            gen4_poller_get_revision(instance, instance->password, the_revision);
+        uint8_t revision[5] = {0};
+        Gen4PollerError error = gen4_poller_get_revision(instance, instance->password, revision);
         if(error != Gen4PollerErrorNone) {
             FURI_LOG_E(TAG, "Failed to get revision: %d", error);
             instance->state = Gen4PollerStateFail;
             break;
         }
         // Copy revision data to event data buffer
-        memcpy(instance->gen4_event_data.revision_data, the_revision, sizeof(the_revision));
+        memcpy(instance->gen4_event_data.revision_data, revision, sizeof(revision));
+
+        instance->state = Gen4PollerStateSuccess;
+    } while(false);
+
+    return command;
+}
+
+NfcCommand gen4_poller_get_info_handler(Gen4Poller* instance) {
+    NfcCommand command = NfcCommandContinue;
+
+    do {
+        uint8_t revision[5] = {0};
+        uint8_t config[32] = {0};
+
+        Gen4PollerError error = gen4_poller_get_revision(instance, instance->password, revision);
+        if(error != Gen4PollerErrorNone) {
+            FURI_LOG_E(TAG, "Failed to get revision: %d", error);
+            instance->state = Gen4PollerStateFail;
+            break;
+        }
+
+        error = gen4_poller_get_config(instance, instance->password, config);
+        if(error != Gen4PollerErrorNone) {
+            FURI_LOG_E(TAG, "Failed to get current config: %d", error);
+            instance->state = Gen4PollerStateFail;
+            break;
+        }
+
+        // Copy config data to event data buffer
+        memcpy(instance->gen4_event_data.config_data, config, sizeof(config));
+        // Copy revision data to event data buffer
+        memcpy(instance->gen4_event_data.revision_data, revision, sizeof(revision));
 
         instance->state = Gen4PollerStateSuccess;
     } while(false);
@@ -605,9 +634,8 @@ static const Gen4PollerStateHandler gen4_poller_state_handlers[Gen4PollerStateNu
     [Gen4PollerStateWrite] = gen4_poller_write_handler,
     [Gen4PollerStateWipe] = gen4_poller_wipe_handler,
     [Gen4PollerStateChangePassword] = gen4_poller_change_password_handler,
+    [Gen4PollerStateGetInfo] = gen4_poller_get_info_handler,
     [Gen4PollerStateSetDefaultConfig] = gen4_poller_set_default_cfg_handler,
-    [Gen4PollerStateGetCurrentConfig] = gen4_poller_get_current_cfg_handler,
-    [Gen4PollerStateGetRevision] = gen4_poller_get_revision_handler,
     [Gen4PollerStateSetShadowMode] = gen4_poller_set_shadow_mode_handler,
     [Gen4PollerStateSetDirectWriteBlock0] = gen4_poller_set_direct_write_block_0_mode_handler,
     [Gen4PollerStateSuccess] = gen4_poller_success_handler,
