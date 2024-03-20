@@ -1,4 +1,12 @@
 /*
+ * NOTE: 
+ * The documentation below is slightly out of date but mostly still correct,
+ * and only for gen i trades. Gen ii trades are very similar but have a few
+ * different patterns. I'm currently lazy and working on features, so better
+ * documentation on the trade protocol to follow, and potentially will push
+ * it all to bulbapedia or similar for the world to benefit from.
+ *
+ *
  * This setup always forces the flipper to the follower/slave role in the link.
  * This just makes our logic consistent and since we're going to be gobs faster
  * than a real Game Boy, we can be guaranteed to always be ready to respond.
@@ -76,9 +84,6 @@
  *     trade_blocks will re-sync between them with the new data. If the Game Boy
  *     leave the trade menu while the Flipper is in the WAITING state, the
  *     Flipper will go back to the READY state.
- *
- *    TODO: Set up requiring a long back press to go back to the main menu
- *     from the TRADING state or from the main menu to exit the application.
  */
 
 #include <furi.h>
@@ -250,13 +255,12 @@ static bool trade_input_callback(InputEvent* event, void* context)
 	if (gameboy_status <= GAMEBOY_READY) return false;
 
 	/* Long presses we want the view_dispatcher nav callback to handle */
-	/* XXX: Maybe make this a repeat? */
 	if (event->type == InputTypeLong) return false;
 
 	/* In the waiting state, we need to move to cancelled. This locks us up
 	 * until the gameboy side gets the hint and cancels as well.
 	 */
-	if (gameboy_status == GAMEBOY_WAITING && event->type == InputTypeRelease) {
+	if (gameboy_status == GAMEBOY_WAITING && event->type == InputTypeShort) {
         	with_view_model(
 	            trade->view,
         	    struct trade_model * model,
