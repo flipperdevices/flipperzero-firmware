@@ -157,7 +157,6 @@ int dcf77_clock_sync_app_main(void* p) {
     if(running) {
         furi_hal_rfid_tim_read_stop();
         furi_hal_pwm_stop(FuriHalPwmOutputIdLptim2PA4);
-        notification_message(notification, &sequence_reset_rgb);
     }
 
     notification_message_block(notification, &sequence_display_backlight_enforce_auto);
