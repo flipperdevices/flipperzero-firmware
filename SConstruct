@@ -7,7 +7,7 @@
 # construction of certain targets behind command-line options.
 
 import os
-from fbt.util import path_as_posix
+from fbt.util import path_as_posix, open_browser_action
 
 DefaultEnvironment(tools=[])
 
@@ -432,3 +432,6 @@ doxy_build = distenv.DoxyBuild(
 )
 distenv.Alias("doxygen", doxy_build)
 distenv.AlwaysBuild(doxy_build)
+
+# Open generated documentation in browser
+distenv.PhonyTarget("doxy", open_browser_action, source=doxy_build)

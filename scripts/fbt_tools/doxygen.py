@@ -1,4 +1,4 @@
-from SCons.Script import Builder, Action
+from SCons.Script import Action, Builder
 
 
 def exists(env):
