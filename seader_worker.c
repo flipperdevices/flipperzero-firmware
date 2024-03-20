@@ -307,6 +307,37 @@ NfcCommand seader_worker_poller_callback_iso14443_4a(NfcGenericEvent event, void
     return ret;
 }
 
+NfcCommand seader_worker_poller_callback_mfc(NfcGenericEvent event, void* context) {
+    furi_assert(event.protocol == NfcProtocolMfClassic);
+    NfcCommand ret = NfcCommandContinue;
+
+    Seader* seader = context;
+    SeaderWorker* seader_worker = seader->worker;
+
+    MfClassicPollerEvent* mfc_event = event.event_data;
+    SeaderPollerContainer spc = {.mfc_poller = event.instance};
+
+    if(mfc_event->type == MfClassicPollerEventTypeSuccess) {
+        if(seader_worker->stage == SeaderPollerEventTypeCardDetect) {
+            const MfClassicData* mfc_data = nfc_poller_get_data(seader->poller);
+            uint8_t sak = iso14443_3a_get_sak(mfc_data->iso14443_3a_data);
+            size_t uid_len = 0;
+            const uint8_t* uid = mf_classic_get_uid(mfc_data, &uid_len);
+            seader_worker_card_detect(seader, sak, NULL, uid, uid_len, NULL, 0);
+            furi_thread_set_current_priority(FuriThreadPriorityLowest);
+            seader_worker->stage = SeaderPollerEventTypeConversation;
+        } else if(seader_worker->stage == SeaderPollerEventTypeConversation) {
+            seader_worker_poller_conversation(seader, &spc);
+        } else if(seader_worker->stage == SeaderPollerEventTypeComplete) {
+            ret = NfcCommandStop;
+        }
+    } else if(mfc_event->type == MfClassicPollerEventTypeFail) {
+        ret = NfcCommandStop;
+    }
+
+    return ret;
+}
+
 NfcCommand seader_worker_poller_callback_picopass(PicopassPollerEvent event, void* context) {
     furi_assert(context);
     NfcCommand ret = NfcCommandContinue;

@@ -728,6 +728,56 @@ void seader_iso14443a_transmit(
     bit_buffer_free(rx_buffer);
 }
 
+/* Assumes this is called in the context of the NFC API callback */
+#define MF_CLASSIC_FWT_FC (60000)
+void seader_mfc_transmit(
+    Seader* seader,
+    MfClassicPoller* mfc_poller,
+    uint8_t* buffer,
+    size_t len,
+    uint16_t timeout,
+    uint8_t format[3]) {
+    UNUSED(timeout);
+
+    furi_assert(seader);
+    furi_assert(buffer);
+    furi_assert(mfc_poller);
+    SeaderWorker* seader_worker = seader->worker;
+    SeaderUartBridge* seader_uart = seader_worker->uart;
+
+    BitBuffer* tx_buffer = bit_buffer_alloc(len);
+    BitBuffer* rx_buffer = bit_buffer_alloc(SEADER_POLLER_MAX_BUFFER_SIZE);
+
+    do {
+        bit_buffer_append_bytes(tx_buffer, buffer, len);
+        if(format[0] == 0x00 && format[1] == 0xC0 && format[2] == 0x00) {
+            //iso14443_3a_poller_standard_frame_exchange
+        } else if(
+            (format[0] == 0x00 && format[1] == 0x00 && format[2] == 0x40) ||
+            (format[0] == 0x00 && format[1] == 0x00 && format[2] == 0x24) ||
+            (format[0] == 0x00 && format[1] == 0x00 && format[2] == 0x44)) {
+            /*
+            Iso14443_3aPoller* iso14443_3a_poller = (MfClassicPoller)mfc_poller->iso14443_3a_poller;
+            Iso14443_3aError error = iso14443_3a_poller_txrx_custom_parity(iso14443_3a_poller,tx_buffer, rx_buffer, MF_CLASSIC_FWT_FC);
+              if(error == Iso14443_3aErrorWrongCrc) {
+                  if(bit_buffer_get_size_bytes(rx_buffer) != sizeof(MfClassicNt)) {
+                      FURI_LOG_W(TAG, "iso14443_3a_poller_txrx_custom_parity error %d", error);
+                      seader_worker->stage = SeaderPollerEventTypeFail;
+                  }
+              }
+          */
+        }
+
+        seader_send_nfc_rx(
+            seader_uart,
+            (uint8_t*)bit_buffer_get_data(rx_buffer),
+            bit_buffer_get_size_bytes(rx_buffer));
+
+    } while(false);
+    bit_buffer_free(tx_buffer);
+    bit_buffer_free(rx_buffer);
+}
+
 void seader_parse_nfc_command_transmit(
     Seader* seader,
     NFCSend_t* nfcSend,
@@ -757,13 +807,23 @@ void seader_parse_nfc_command_transmit(
         seader_iso15693_transmit(
             seader, spc->picopass_poller, nfcSend->data.buf, nfcSend->data.size);
     } else if(frameProtocol == FrameProtocol_nfc) {
-        seader_iso14443a_transmit(
-            seader,
-            spc->iso14443_4a_poller,
-            nfcSend->data.buf,
-            nfcSend->data.size,
-            (uint16_t)timeOut,
-            nfcSend->format->buf);
+        if(spc->iso14443_4a_poller) {
+            seader_iso14443a_transmit(
+                seader,
+                spc->iso14443_4a_poller,
+                nfcSend->data.buf,
+                nfcSend->data.size,
+                (uint16_t)timeOut,
+                nfcSend->format->buf);
+        } else if(spc->mfc_poller) {
+            seader_mfc_transmit(
+                seader,
+                spc->mfc_poller,
+                nfcSend->data.buf,
+                nfcSend->data.size,
+                (uint16_t)timeOut,
+                nfcSend->format->buf);
+        }
     } else {
         FURI_LOG_W(TAG, "unknown frame protocol %lx", frameProtocol);
     }
@@ -911,18 +971,22 @@ NfcCommand seader_worker_card_detect(
     OCTET_STRING_t atqa_string = {.buf = atqa, .size = 2};
     uint8_t protocol_bytes[] = {0x00, 0x00};
 
-    if(sak == 0 && atqa == NULL) {
+    if(sak == 0 && atqa == NULL) { // picopass
         protocol_bytes[1] = FrameProtocol_iclass;
         OCTET_STRING_fromBuf(
             &cardDetails->protocol, (const char*)protocol_bytes, sizeof(protocol_bytes));
         memcpy(credential->diversifier, uid, uid_len);
         credential->diversifier_len = uid_len;
         credential->isDesfire = false;
-    } else {
+    } else if(atqa == 0) { // MFC
         protocol_bytes[1] = FrameProtocol_nfc;
         OCTET_STRING_fromBuf(
             &cardDetails->protocol, (const char*)protocol_bytes, sizeof(protocol_bytes));
-
+        cardDetails->sak = &sak_string;
+    } else { // type 4
+        protocol_bytes[1] = FrameProtocol_nfc;
+        OCTET_STRING_fromBuf(
+            &cardDetails->protocol, (const char*)protocol_bytes, sizeof(protocol_bytes));
         cardDetails->sak = &sak_string;
         cardDetails->atqa = &atqa_string;
         credential->isDesfire = seader_mf_df_check_card_type(atqa[0], atqa[1], sak);
