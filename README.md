@@ -29,24 +29,27 @@ This app extends the functionality of the FlipperZero's bluetooth capabilities, 
 5. **Capture Data:** Click **Raw** or **View Raw** to capture your **payload** and note your tag's **MAC Address**. Immediately remove the tag's battery to prevent key/MAC rotation.
 6. **Enter Data in FlipperZero App:** Input the captured **payload** and **MAC Address** into the FlipperZero app.
 
-#### Option B: Open Haystack Method
+#### Option B: AirTag Key Generation
 Video Tutorial: https://youtu.be/XGwHmwvQoqo?si=CAsKWEqGP5VFi9p9
 
 1. **Generate a Tag:** Download the `generate_keys.py` file and execute it in your terminal. (You will need cryptography ```python3 -m pip install cryptography```)
 2. **Follow Prompts:** During execution, you'll be prompted for inputs. By the end, you'll obtain a **Private Key**, **Public Key**, **Payload**, and **MAC Address**.
    - **Private Key** is necessary to receive location reports from Apple.
    - **MAC Address** should be registered in the FlipperZero app:
+   - For ease of use, drag your `.keys` file onto your FlipperZero's SD card in the apps_data->findmy folder. You can import it directly from the app!
      1. Open the app and navigate to the config menu.
-     2. Choose "register tag" and enter the MAC Address when prompted.
-     3. A payload dialog will appear next. Enter your **Payload** here.
-     4. Click save.
-3. **Configuration Completion:** With this setup, your device is ready for Open Haystack. Proceed with the specific steps for Open Haystack or MaclessHaystack based on your setup.
-   - Don't Own a Mac: Head over to the AirTagGeneration folder in the repo and follow the steps in that Readme!
-     
-To use OpenHayStack for tracking, you must use MacOS lower than version 14 (Mail Plug-in Incompetiablity of MacOS 14+ seemoo-lab/openhaystack#224). If you do own a device, I believe a convertor script can be provided without much of effort. If you do not own a Mac device or the system has been upgraded to 14 and beyond. The alternative solution includes,
+     2. Choose "register tag" and select the tag type.
+     3. Either click import `.keys`, `.txt`, or enter Manually.
+     4. If entering manually then a MAC and payload dialog will appear next. Enter your **MAC** then **Payload** here.
+     5. Click save.
+3. **Configuration Completion:** With this setup, your device is ready for use. Head over to the AirTagGeneration folder in the repo and follow the steps in that Readme! This will go over how to request location reports from any device as well as how to setup a webserver for decrypting location data.
+
+If you want to use OpenHaystack or Macless instead, then you can follow the steps below. I don't recommend these methods due to reliability issues and setup complexity.
+To use OpenHayStack for tracking, you must use MacOS lower than version 14 (Mail Plug-in Incompetiablity of MacOS 14+ seemoo-lab/openhaystack#224). If you do own a device, I believe a convertor script can be provided without much of effort. If you do not own a Mac device or the system has been upgraded to 14 and beyond. The alternative solutions includes,
 
     https://github.com/dchristl/macless-haystack (recommended in README)
     https://github.com/Chapoly1305/FindMy (a project uses python and docker to provide location lookup as a backend service)
+If using either of these solutions, be sure to only use the `generate_keys.py` script from this repo in the AirTagGeneration folder. Not the ones included in those repos.
 
 ## Setting Up on Mac with OpenHayStack (OHS) App -- If you own a Mac instructions
 
@@ -80,7 +83,7 @@ Open the exported JSON file in a text editor and make the following changes:
 By following these steps, you should have your device set up and ready to go with OpenHayStack on a Mac.
 ****
 
-### Step 3: Configuration on the FlipperZero
+### Step 3: Configuration on the FlipperZero (if not completed yet)
 - Upon launching the app, open the config menu and either click ```Import Tag From File``` or ```Register Tag Manually```. Put your generated .keys file onto the FlipperZero SD card inside the AppsData/FindMyFlipper folder to import from file. Or you can manually enter the tag information. When using the cloning method, you can export a .txt file from nrfConnect (click save button) amd place that in the same folder in order to import.
 
 ### Step 4: Tracking
