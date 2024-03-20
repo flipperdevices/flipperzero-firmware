@@ -1,6 +1,11 @@
 <p align="center">Advanced IR Remote App for Flipper Device</p>
+
 <p align="center">
-    <img src="https://github.com/kala13x/flipper-xremote/blob/main/screens/flipperzero.png" alt="XRemote">
+  Version 1.3 - <a href="https://github.com/kala13x/flipper-xremote/blob/main/docs/changelog.md">Changelog</a>
+</p>
+
+<p align="center">
+    <img src="https://github.com/kala13x/flipper-xremote/blob/main/.flipcorg/banner.png" alt="XRemote">
 </p>
 
 ## Idea
@@ -31,6 +36,7 @@ The application is compatible with standard `.ir` files. However, to ensure func
 Button name | Description
 ------------|-------------------
 `Power`     | Power
+`Eject`     | Eject
 `Setup`     | Setup/Settings
 `Input`     | Input/Source
 `Menu`      | Menu
@@ -57,12 +63,52 @@ Button name | Description
 `Play`      | Play
 `Stop`      | Stop
 
+## Alternative button names
+In addition to the predefined names, `XRemote` uses alternative button names to make it as easy as possible to interact with different types of IR dumps. That means if a button with the appropriate name is not found in the file, the application will try to find the same button with alternative names. Ensure this feature is enabled in the application settings before you use it.
+
+The application stores and reads alternate names from the following file:
+```
+SD Card/apps_data/flipper_xremote/alt_names.txt
+```
+
+If the `Alt-Names` option is enabled in the config and the file does not exist, it will be created automatically with default values during the application's startup. You can edit, add, or remove any button or alternate name values from this file. Button names must either have only the first uppercase or be entirely lowercase. As for alternate names, they are case-insensitive. The button can have one or several comma-separated alternate names.
+
+This is the default `alt_names.txt` file:
+
+```
+Filetype: XRemote Alt-Names
+Version: 1
+# 
+Power: shutdown,off,on,standby
+Setup: settings,config,cfg
+Input: source,select
+Menu: osd,gui
+List: guide
+Info: display
+Mode: aspect,format
+Back: return,exit
+Ok: enter,select
+Up: uparrow
+Down: downarrow
+Left: leftarrow
+Right: rightarrow
+Mute: silence,silent,unmute
+Vol_up: vol+,volume+,volup,+
+Vol_dn: vol-,volume-,voldown,-
+Ch_next: ch+,channel+,chup
+Ch_prev: ch-,channel-,chdown
+Next: next,skip,ffwd
+Prev: prev,back,rewind,rew
+Fast_fo: fastfwd,fastforward,ff
+Fast_ba: fastback,fastrewind,fb
+Play_pa: playpause,play,pause
+```
 
 ## Installation options
 
-1. Install the latest stable version directly from the [application catalog](https://lab.flipper.net/apps/flipper_xremote).
-
-2. Manually install using `.fap` file:  
+1. Install the latest stable version directly from the official [application catalog](https://lab.flipper.net/apps/flipper_xremote).
+2. Install on any firmware from the community driven application catalog [FlipC](https://flipc.org/kala13x/flipper-xremote).
+3. Manually install using `.fap` file:  
    - Download the `.fap` file from the [Releases](https://github.com/kala13x/flipper-xremote/releases) section of this repository.
    - Write the `.fap` file to an SD card using [qFlipper](https://docs.flipper.net/qflipper) or any your preferred SD card writer.
 
@@ -73,8 +119,10 @@ Button name | Description
    - Use deploy script from this repository to build and run the application on the device:
 
     ```bash
-    ./deploy.sh --fw=/path/to/the/firmware
+    ./deploy.sh --fw=/path/to/the/firmware -b -l
     ```
+
+    Do not use `-l` (link) option of you are building the project directly from the `applications_user` directory of the firmware.
 2. If you don't have the firmware or the Linux please refer to the [official documentation](https://github.com/flipperdevices/flipperzero-firmware/blob/dev/documentation/AppsOnSDCard.md) for build instructions.
 
 ## Progress
@@ -89,6 +137,7 @@ Button name | Description
   - [x] Player buttons page
   - [x] Custom buttons page
   - [x] Edit custom layout
+  - [x] Alternative button names
   - [ ] Add or remove button
   - [ ] All buttons page
 - [x] Application settings
@@ -98,6 +147,7 @@ Button name | Description
   - [x] Vertical/horizontal views
   - [x] IR command repeat count
   - [x] Exit button behavior
+  - [x] Enable/disable alt names
 
 ## Screens
 

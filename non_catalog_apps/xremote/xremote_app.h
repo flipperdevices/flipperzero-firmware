@@ -32,9 +32,13 @@
 // XRemote generic functions and definitions
 //////////////////////////////////////////////////////////////////////////////
 
-#define XREMOTE_APP_EXTENSION ".ir"
-#define XREMOTE_APP_FOLDER ANY_PATH("infrared")
 #define XREMOTE_APP_TEXT_MAX 128
+#define XREMOTE_APP_EXTENSION ".ir"
+#define XREMOTE_APP_TAG "XRemoteApp"
+
+#define XREMOTE_APP_FOLDER ANY_PATH("infrared")
+#define XREMOTE_APP_SETTINGS APP_DATA_PATH("xremote.cfg")
+#define XREMOTE_ALT_NAMES APP_DATA_PATH("alt_names.txt")
 
 #define xremote_app_assert_void(cond) \
     if(!cond) return
@@ -49,6 +53,7 @@ uint32_t xremote_app_get_exit_index(XRemoteAppExit exit_behavior);
 
 ViewOrientation xremote_app_get_orientation(uint8_t orientation_index);
 const char* xremote_app_get_orientation_str(ViewOrientation view_orientation);
+const char* xremote_app_get_alt_names_str(uint8_t alt_names_index);
 uint32_t xremote_app_get_orientation_index(ViewOrientation view_orientation);
 
 //////////////////////////////////////////////////////////////////////////////
@@ -59,6 +64,7 @@ typedef struct {
     ViewOrientation orientation;
     XRemoteAppExit exit_behavior;
     uint32_t repeat_count;
+    uint32_t alt_names;
 } XRemoteAppSettings;
 
 XRemoteAppSettings* xremote_app_settings_alloc();
@@ -87,7 +93,8 @@ const char* xremote_app_context_get_exit_str(XRemoteAppContext* app_ctx);
 void xremote_app_context_notify_led(XRemoteAppContext* app_ctx);
 void xremote_app_notification_blink(NotificationApp* notifications);
 bool xremote_app_send_signal(XRemoteAppContext* app_ctx, InfraredSignal* signal);
-bool xremote_app_browser_select_file(XRemoteAppContext* app_ctx, const char* extension);
+bool xremote_app_context_select_file(XRemoteAppContext* app_ctx, const char* extension);
+bool xremote_app_browser_select_file(FuriString** file_path, const char* extension);
 
 //////////////////////////////////////////////////////////////////////////////
 // XRemote buttons and custom button pairs
@@ -114,6 +121,7 @@ XRemoteAppButtons* xremote_app_buttons_load(XRemoteAppContext* app_ctx);
 
 bool xremote_app_extension_store(XRemoteAppButtons* buttons, FuriString* path);
 bool xremote_app_extension_load(XRemoteAppButtons* buttons, FuriString* path);
+bool xremote_app_alt_names_check_and_init();
 
 //////////////////////////////////////////////////////////////////////////////
 // XRemote application factory

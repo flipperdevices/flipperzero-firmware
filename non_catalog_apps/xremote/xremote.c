@@ -19,7 +19,13 @@
 #define TAG "XRemote"
 
 void xremote_get_version(char* version, size_t length) {
-    snprintf(version, length, "%.1f.%d", (double)1.1, XREMOTE_BUILD_NUMBER);
+    snprintf(
+        version,
+        length,
+        "%d.%d.%d",
+        XREMOTE_VERSION_MAJ,
+        XREMOTE_VERSION_MIN,
+        XREMOTE_BUILD_NUMBER);
 }
 
 static uint32_t xremote_view_exit_callback(void* context) {

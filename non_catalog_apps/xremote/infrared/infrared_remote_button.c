@@ -3,7 +3,9 @@
    https://github.com/DarkFlippers/unleashed-firmware
 
    The original project is licensed under the GNU GPLv3
-   No modifications were made to this file.
+
+   Modifications made:
+   - Added function infrared_remote_button_get_furi_name()
 */
 
 #include "infrared_remote_button.h"
@@ -34,6 +36,10 @@ void infrared_remote_button_set_name(InfraredRemoteButton* button, const char* n
 
 const char* infrared_remote_button_get_name(InfraredRemoteButton* button) {
     return furi_string_get_cstr(button->name);
+}
+
+FuriString* infrared_remote_button_get_furi_name(InfraredRemoteButton* button) {
+    return button->name;
 }
 
 void infrared_remote_button_set_signal(InfraredRemoteButton* button, InfraredSignal* signal) {
