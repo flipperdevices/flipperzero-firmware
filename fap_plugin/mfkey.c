@@ -10,7 +10,6 @@
 // TODO: "Read tag again with NFC app" message upon completion, "Complete. Keys added: <n>"
 // TODO: Separate Mfkey32 and Nested functions where possible to reduce branch statements
 // TODO: More accurate timing for Nested
-// TODO: Unload and load specific attacks from memory, plugin_manager_free
 
 #include <furi.h>
 #include <furi_hal.h>
