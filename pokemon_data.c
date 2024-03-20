@@ -404,17 +404,28 @@ uint16_t pokemon_stat_get(PokemonData* pdata, DataStat stat, DataStatSub which) 
         if(gen == GEN_I) val = ((PokemonPartyGenI*)party)->hp_ev;
         if(gen == GEN_II) val = ((PokemonPartyGenII*)party)->hp_ev;
         break;
-    /* NOTE:
-     * IVs are stored in a 16 bit value, split between the 4 nibbles. Multiple
-     * sources agree that most significant to least is attack, defense, speed,
-     * and special. However, there are byte order differences so that puts the
-     * order as speed, special, attack, defense. The following cases are adjusted
-     * for that.
+    case STAT_IV:
+        if(gen == GEN_I) val = ((PokemonPartyGenI*)party)->iv;
+        if(gen == GEN_II) val = ((PokemonPartyGenII*)party)->iv;
+        break;
+    /* The IVs in GB byte order, are always:
+     * atk, def, spd, spc
+     * Like every other 16 bit quantity that the Flipper acts on, we need to
+     * bytw swap them normally. However, the below accessors for individual
+     * IV nibbles directly pull from the data structures which will always
+     * be in GB endianness.
      */
     case STAT_SPD_IV:
         if(gen == GEN_I) return (((PokemonPartyGenI*)party)->iv >> 12) & 0x0F;
         if(gen == GEN_II) return (((PokemonPartyGenII*)party)->iv >> 12) & 0x0F;
 	break;
+    /* In order to line up all of the dynamic stat accessors used as part of the
+     * stat calculation loop, we need to overload the SPC IV accessor to allow
+     * accessing SPC, SPC_ATK, and SPC_DEF. Note that only SPC exists, the ATK
+     * and DEF are the overloaded values. This is so when, for example, gen i
+     * calculates its SPC value, or gen ii calculates is SPC_DEF value, it will
+     * always grab the same IV nibble.
+     */
     case STAT_SPC_IV:
     case STAT_SPC_ATK_IV:
     case STAT_SPC_DEF_IV:
@@ -560,17 +571,16 @@ void pokemon_stat_set(PokemonData* pdata, DataStat stat, DataStatSub which, uint
         if(gen == GEN_II) ((PokemonPartyGenII*)party)->hp_ev = val_swap;
         break;
     case STAT_IV:
-        /* This is assumed to always be:
-	 * atk, def, spd, spc
-	 * each taking up 4 bits of 16.
-	 */
-        /* This does NOT need to be swapped as the individual IV nibble
-	 * manipulation puts things in gameboy order when in the Party
-	 * data structure.
-	 */
-        if(gen == GEN_I) ((PokemonPartyGenI*)party)->iv = val;
-        if(gen == GEN_II) ((PokemonPartyGenII*)party)->iv = val;
+        if(gen == GEN_I) ((PokemonPartyGenI*)party)->iv = val_swap;
+        if(gen == GEN_II) ((PokemonPartyGenII*)party)->iv = val_swap;
         break;
+    /* The IVs in GB byte order, are always:
+     * atk, def, spd, spc
+     * Like every other 16 bit quantity that the Flipper acts on, we need to
+     * bytw swap them normally. However, the below accessors for individual
+     * IV nibbles directly manipulate the data structures which will always
+     * be in GB endianness.
+     */
     case STAT_SPD_IV:
         if(gen == GEN_I) {
             ((PokemonPartyGenI*)party)->iv &= ~(0x0F << 12);
@@ -581,7 +591,13 @@ void pokemon_stat_set(PokemonData* pdata, DataStat stat, DataStatSub which, uint
             ((PokemonPartyGenII*)party)->iv |= ((val & 0x0F) << 12);
         }
 	break;
-    /* The SPC ATK/DEF IVs are not real values, we just pretend they are */
+    /* In order to line up all of the dynamic stat accessors used as part of the
+     * stat calculation loop, we need to overload the SPC IV accessor to allow
+     * accessing SPC, SPC_ATK, and SPC_DEF. Note that only SPC exists, the ATK
+     * and DEF are the overloaded values. This is so when, for example, gen i
+     * calculates its SPC value, or gen ii calculates is SPC_DEF value, it will
+     * always grab the same IV nibble.
+     */
     case STAT_SPC_IV:
     case STAT_SPC_ATK_IV:
     case STAT_SPC_DEF_IV:
