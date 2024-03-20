@@ -41,9 +41,8 @@ Video Tutorial: https://youtu.be/XGwHmwvQoqo?si=CAsKWEqGP5VFi9p9
      3. A payload dialog will appear next. Enter your **Payload** here.
      4. Click save.
 3. **Configuration Completion:** With this setup, your device is ready for Open Haystack. Proceed with the specific steps for Open Haystack or MaclessHaystack based on your setup.
-   - Don't Own a Mac: https://github.com/dchristl/macless-haystack or https://github.com/Chapoly1305/FindMy
-   - Own a Mac: https://github.com/seemoo-lab/openhaystack
-
+   - Don't Own a Mac: Head over to the AirTagGeneration folder in the repo and follow the steps in that Readme!
+     
 To use OpenHayStack for tracking, you must use MacOS lower than version 14 (Mail Plug-in Incompetiablity of MacOS 14+ seemoo-lab/openhaystack#224). If you do own a device, I believe a convertor script can be provided without much of effort. If you do not own a Mac device or the system has been upgraded to 14 and beyond. The alternative solution includes,
 
     https://github.com/dchristl/macless-haystack (recommended in README)
