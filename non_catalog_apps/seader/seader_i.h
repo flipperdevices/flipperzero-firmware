@@ -93,6 +93,7 @@ struct Seader {
     SceneManager* scene_manager;
     SeaderUartBridge* uart;
     SeaderCredential* credential;
+    SamCommand_PR samCommand;
 
     char text_store[SEADER_TEXT_STORE_SIZE + 1];
     FuriString* text_box_store;
