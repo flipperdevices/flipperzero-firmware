@@ -1,14 +1,12 @@
 #ifndef MFKEY_H
 #define MFKEY_H
 
-// TODO: Remove includes that are not needed
 #include <furi_hal.h>
 #include <gui/gui.h>
 #include <gui/elements.h>
 #include <inttypes.h>
 #include <toolbox/keys_dict.h>
 #include <toolbox/stream/buffered_file_stream.h>
-#include <notification/notification_messages.h>
 #include <nfc/protocols/mf_classic/mf_classic.h>
 
 struct Crypto1State {

@@ -1,11 +1,7 @@
-// TODO: Remove includes that are not needed
 #include <furi_hal.h>
-#include <gui/gui.h>
-#include <gui/elements.h>
 #include <inttypes.h>
 #include <toolbox/keys_dict.h>
 #include <toolbox/stream/buffered_file_stream.h>
-#include <notification/notification_messages.h>
 #include <nfc/protocols/mf_classic/mf_classic.h>
 #include "mfkey.h"
 #include "common.h"
@@ -33,7 +29,6 @@
 #define SWAPENDIAN(x) \
     ((x) = ((x) >> 8 & 0xff00ff) | ((x) & 0xff00ff) << 8, (x) = (x) >> 16 | (x) << 16)
 
-/* Main methods */
 bool key_already_found_for_nonce_in_dict(KeysDict* dict, MfClassicNonce* nonce) {
     bool found = false;
     uint8_t key_bytes[sizeof(MfClassicKey)];
@@ -393,7 +388,6 @@ void napi_mf_classic_nonce_array_free(MfClassicNonceArray* nonce_array) {
     stream_free(nonce_array->stream);
     free(nonce_array);
 }
-/* End main methods */
 
 /* Actual implementation of app<>plugin interface */
 static const MfkeyPlugin init_plugin = {
