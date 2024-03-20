@@ -132,6 +132,9 @@ static NfcCommand mf_desfire_poller_handler_read_application_ids(MfDesfirePoller
     if(instance->error == MfDesfireErrorNone) {
         FURI_LOG_D(TAG, "Read application ids success");
         instance->state = MfDesfirePollerStateReadApplications;
+    } else if(instance->error == MfDesfireErrorAuthentication) {
+        FURI_LOG_D(TAG, "Read application ids impossible without authentication");
+        instance->state = MfDesfirePollerStateReadSuccess;
     } else {
         FURI_LOG_E(TAG, "Failed to read application ids");
         iso14443_4a_poller_halt(instance->iso14443_4a_poller);

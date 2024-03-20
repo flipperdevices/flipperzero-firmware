@@ -149,6 +149,7 @@ MfDesfireError
         if(error == MfDesfireErrorAuthentication) {
             FURI_LOG_D(TAG, "Reading key settings impossible without authentication");
             data->is_free_directory_list = false;
+            data->max_keys = 1;
             error = MfDesfireErrorNone;
             break;
         }
