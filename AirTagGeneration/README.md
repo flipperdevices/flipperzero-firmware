@@ -1,6 +1,7 @@
 # FindMy
 
 Query Apple's Find My network, allowing none Apple devices to retrieve the location reports.
+Video Tutorial: https://www.youtube.com/watch?v=XGwHmwvQoqo
 
 This was made possible thanks to Chapoly1305 and his work bringing airtag tracking to non Apple devices:
 1. https://github.com/Chapoly1305/FindMy
@@ -53,7 +54,8 @@ Apple ID for experimental purpose.**  If you ran into issue of "KeyError service
 
 
 📺 Installation and Walkthrough Video: https://youtu.be/yC2HIPDSxlM
-
+This walkthrough is in-depth but differs slightly from the FindMy Flipper version.
+Regardless this video is well made and deserves a watch!
 
 ### Steps
 
