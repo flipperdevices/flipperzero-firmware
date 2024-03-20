@@ -1,4 +1,4 @@
-# Flipper Build Tool
+# Flipper Build Tool {#fbt}
 
 FBT is the entry point for firmware-related commands and utilities.
 It is invoked by `./fbt` in the firmware project root directory. Internally, it is a wrapper around [scons](https://scons.org/) build system.
@@ -58,7 +58,7 @@ To use language servers other than the default VS Code C/C++ language server, us
 
 ## FBT targets
 
-**`fbt`** keeps track of internal dependencies, so you only need to build the highest-level target you need, and **`fbt`** will make sure everything they depend on is up-to-date.
+`fbt` keeps track of internal dependencies, so you only need to build the highest-level target you need, and `fbt` will make sure everything they depend on is up-to-date.
 
 ### High-level (what you most likely need)
 
@@ -79,12 +79,13 @@ To use language servers other than the default VS Code C/C++ language server, us
 - `lint`, `format` - run clang-format on the C source code to check and reformat it according to the `.clang-format` specs. Supports `ARGS="..."` to pass extra arguments to clang-format.
 - `lint_py`, `format_py` - run [black](https://black.readthedocs.io/en/stable/index.html) on the Python source code, build system files & application manifests. Supports `ARGS="..."` to pass extra arguments to black.
 - `firmware_pvs` - generate a PVS Studio report for the firmware. Requires PVS Studio to be available on your system's `PATH`.
+- `doxygen` - generate Doxygen documentation for the firmware. `doxy` target also opens web browser to view the generated documentation.
 - `cli` - start a Flipper CLI session over USB.
 
 ### Firmware targets
 
-- `faps` - build all external & plugin apps as [`.faps`](./AppsOnSDCard.md#fap-flipper-application-package).
-- **`fbt`** also defines per-app targets. For example, for an app with `appid=snake_game` target names are:
+- `faps` - build all external & plugin apps as [`.faps`](AppsOnSDCard.md).
+- `fbt` also defines per-app targets. For example, for an app with `appid=snake_game` target names are:
   - `fap_snake_game`, etc. - build single app as `.fap` by its application ID.
   - Check out [`--extra-ext-apps`](#command-line-parameters) for force adding extra apps to external build.
   - `fap_snake_game_list`, etc - generate source + assembler listing for app's `.fap`.
@@ -103,7 +104,7 @@ To use language servers other than the default VS Code C/C++ language server, us
 - `proto_ver` - generate `.h` with a protobuf version
 - `dolphin_internal`, `dolphin_blocking` - generate `.c+.h` for corresponding dolphin assets
 
-## Command-line parameters
+## Command-line parameters {#command-line-parameters}
 
 - `--options optionfile.py` (default value `fbt_options.py`) - load a file with multiple configuration values
 - `--extra-int-apps=app1,app2,appN` - force listed apps to be built as internal with the `firmware` target
