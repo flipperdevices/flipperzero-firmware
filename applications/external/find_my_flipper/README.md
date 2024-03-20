@@ -30,6 +30,8 @@ This app extends the functionality of the FlipperZero's bluetooth capabilities, 
 6. **Enter Data in FlipperZero App:** Input the captured **payload** and **MAC Address** into the FlipperZero app.
 
 #### Option B: Open Haystack Method
+Video Tutorial: https://youtu.be/XGwHmwvQoqo?si=CAsKWEqGP5VFi9p9
+
 1. **Generate a Tag:** Download the `generate_keys.py` file and execute it in your terminal. (You will need cryptography ```python3 -m pip install cryptography```)
 2. **Follow Prompts:** During execution, you'll be prompted for inputs. By the end, you'll obtain a **Private Key**, **Public Key**, **Payload**, and **MAC Address**.
    - **Private Key** is necessary to receive location reports from Apple.
