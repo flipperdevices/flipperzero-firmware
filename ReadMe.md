@@ -58,7 +58,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [WiFi (Marauder) v0.7.1 (By 0xchocolate & tcpassos)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) `Req: ESP32 WITH MARAUDER FLASHED`
 - UL: [Name Generator Changes (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/7e9ecdf394c34ab55f33ef164fed98b270618ee1)
 - Updated: [UHF RFID WIP v1.1 (By frux-c)](https://github.com/frux-c/uhf_rfid) `Req: M100 or QM100` Minor changes (From Willy-JL)
-- Updated: [FindMy Flipper v2.0 (By MatthewKuKanich)](https://github.com/MatthewKuKanich/FindMyFlipper)
 - Updated: [NFC Seader v2.6 (By bettse)](https://github.com/bettse/seader)
 - Updated: [Mfkey32 With Nested v1.0 (By noproto)](https://github.com/noproto/FlipperMfkey)
 - Updated: [DCF77 Clock Sync v1.3 (By mdaskalov)](https://github.com/mdaskalov/dcf77-clock-sync)
@@ -68,6 +67,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [JS Runner v1.0 (By nminaylov & DrZlo13)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/3286) [Documentation, Improvements and Revisions (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/8c2ad63485663846565a51e57c791c8ce5e29bdd)
 -OFW: [Infrared: Add Fujitsu ASYG24KMTB #3513 (By aprosvetova)](https://github.com/flipperdevices/flipperzero-firmware/pull/3513)
 - Updated: [Pokemon Trading v1.8 (By EstebanFuentealba & kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons) Changes By kbembedded
+- Updated: [FindMy Flipper v2.0 (By MatthewKuKanich)](https://github.com/MatthewKuKanich/FindMyFlipper)
 
 <a name="release">
 
