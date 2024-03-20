@@ -21,13 +21,8 @@
 static void scene_change_from_main_cb(void* context, uint32_t index) {
     PokemonFap* pokemon_fap = (PokemonFap*)context;
 
-    /* XXX: This is wrong? */
-    /* Bit of a hack, encode the generation in the upper 16 bits of the Gen
-     * scene state. This gets cleared on first entry by the gen scene and
-     * shouldn't be an issue. It's the easiest way to communicat what generation
-     * to use without making another variable somewhere else.
-     * No matter the gen, we write it to GenI scene as any further Gen scene numbers
-     * are just used as markers
+    /* The same trade scene is used for both gen i and ii. Set the real index to
+     * scene's state.
      */
     scene_manager_set_scene_state(pokemon_fap->scene_manager, GenITradeScene, index);
 
