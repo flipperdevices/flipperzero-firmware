@@ -11,7 +11,11 @@ static void nfc_render_mf_ultralight_pages_count(const MfUltralightData* data, F
 
 void nfc_render_mf_ultralight_pwd_pack(const MfUltralightData* data, FuriString* str) {
     bool all_pages = mf_ultralight_is_all_data_read(data);
-    furi_string_cat_printf(str, "\e#%s pages unlocked!", all_pages ? "All" : "Not all");
+    if(all_pages) {
+        furi_string_cat_printf(str, "\e#All Pages Are Unlocked!");
+    } else {
+        furi_string_cat_printf(str, "\e#Some Pages Are Locked!");
+    }
 
     MfUltralightConfigPages* config;
     mf_ultralight_get_config_page(data, &config);
@@ -36,10 +40,11 @@ void nfc_render_mf_ultralight_info(
 }
 
 void nfc_render_mf_ultralight_dump(const MfUltralightData* data, FuriString* str) {
+    furi_string_cat_printf(str, "\e*");
     for(size_t i = 0; i < data->pages_read; i++) {
         const uint8_t* page_data = data->page[i].data;
         for(size_t j = 0; j < MF_ULTRALIGHT_PAGE_SIZE; j += 2) {
-            furi_string_cat_printf(str, "%02X%02X ", page_data[j], page_data[j + 1]);
+            furi_string_cat_printf(str, " %02X%02X", page_data[j], page_data[j + 1]);
         }
     }
 }
