@@ -120,7 +120,7 @@ int dcf77_clock_sync_app_main(void* p) {
 
         if(app->dt.second < 59) {
             if(running) {
-                furi_hal_light_set(LightRed | LightGreen | LightBlue, 0);
+                notification_message(notification, &sequence_reset_rgb);
                 furi_hal_rfid_tim_read_stop();
                 furi_hal_pwm_stop(FuriHalPwmOutputIdLptim2PA4);
                 furi_hal_gpio_init(
@@ -130,7 +130,7 @@ int dcf77_clock_sync_app_main(void* p) {
             furi_delay_ms(silence_ms);
             furi_hal_rfid_tim_read_start(DCF77_FREQ, 0.5);
             furi_hal_pwm_start(FuriHalPwmOutputIdLptim2PA4, DCF77_FREQ, 50);
-            furi_hal_light_set(LightBlue, 0xFF);
+            notification_message(notification, &sequence_set_only_blue_255);
             running = true;
         } else
             set_time(app, DCF77_OFFSET + 1);
@@ -157,10 +157,11 @@ int dcf77_clock_sync_app_main(void* p) {
     if(running) {
         furi_hal_rfid_tim_read_stop();
         furi_hal_pwm_stop(FuriHalPwmOutputIdLptim2PA4);
-        furi_hal_light_set(LightRed | LightGreen | LightBlue, 0);
+        notification_message(notification, &sequence_reset_rgb);
     }
 
     notification_message_block(notification, &sequence_display_backlight_enforce_auto);
+    notification_message(notification, &sequence_reset_rgb);
 
     view_port_enabled_set(view_port, false);
     gui_remove_view_port(gui, view_port);
