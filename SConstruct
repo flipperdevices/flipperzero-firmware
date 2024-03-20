@@ -7,7 +7,7 @@
 # construction of certain targets behind command-line options.
 
 import os
-from fbt.util import path_as_posix
+from fbt.util import path_as_posix, open_browser_action
 
 DefaultEnvironment(tools=[])
 
@@ -42,6 +42,7 @@ distenv = coreenv.Clone(
         "openocd",
         "blackmagic",
         "jflash",
+        "doxygen",
     ],
     ENV=os.environ,
     UPDATE_BUNDLE_DIR="dist/${DIST_DIR}/f${TARGET_HW}-update-${DIST_SUFFIX}",
@@ -229,7 +230,6 @@ firmware_debug = distenv.PhonyTarget(
     source=firmware_env["FW_ELF"],
     GDBOPTS="${GDBOPTS_BASE}",
     GDBREMOTE="${OPENOCD_GDB_PIPE}",
-    FBT_FAP_DEBUG_ELF_ROOT=path_as_posix(firmware_env.subst("$FBT_FAP_DEBUG_ELF_ROOT")),
 )
 distenv.Depends(firmware_debug, firmware_flash)
 
@@ -239,7 +239,6 @@ distenv.PhonyTarget(
     source=firmware_env["FW_ELF"],
     GDBOPTS="${GDBOPTS_BASE} ${GDBOPTS_BLACKMAGIC}",
     GDBREMOTE="${BLACKMAGIC_ADDR}",
-    FBT_FAP_DEBUG_ELF_ROOT=path_as_posix(firmware_env.subst("$FBT_FAP_DEBUG_ELF_ROOT")),
 )
 
 # Debug alien elf
@@ -419,3 +418,18 @@ distenv.PhonyTarget(
     "env",
     "@echo $( ${FBT_SCRIPT_DIR.abspath}/toolchain/fbtenv.sh $)",
 )
+
+doxy_build = distenv.DoxyBuild(
+    "documentation/doxygen/build/html/index.html",
+    "documentation/doxygen/Doxyfile-awesome.cfg",
+    doxy_env_variables={
+        "DOXY_SRC_ROOT": Dir(".").abspath,
+        "DOXY_BUILD_DIR": Dir("documentation/doxygen/build").abspath,
+        "DOXY_CONFIG_DIR": "documentation/doxygen",
+    },
+)
+distenv.Alias("doxygen", doxy_build)
+distenv.AlwaysBuild(doxy_build)
+
+# Open generated documentation in browser
+distenv.PhonyTarget("doxy", open_browser_action, source=doxy_build)
