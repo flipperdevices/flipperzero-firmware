@@ -18,8 +18,7 @@ He wrote these instructions and provided an in-depth tutorial on how to use it. 
 Use the `generate_keys.py` script to generate the required keys. The script will generate a `.keys`
 or multiple files for each device you want to use. Each `.keys` file will contain the private key, the public key
 (also called advertisement key) and the hashed advertisement key. As the name suggests, the private key is a secret
-and should not be shared. The public key (advertisement key) is used for broadcasting the BLE message, this is also
-being asked by the `hci.py` script in openhaystack project. The hashed advertisement key is for requesting location
+and should not be shared. The public key (advertisement key) is used for broadcasting the BLE message, the hashed advertisement key is for requesting location
 reports from Apple.
 
 ### request_reports.py
