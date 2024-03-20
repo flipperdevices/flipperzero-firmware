@@ -84,7 +84,7 @@ ArgParser* arg_parser_alloc(
 }
 
 void arg_parser_free(ArgParser* instance) {
-    furi_assert(instance);
+    furi_check(instance);
 
     arg_parser_argument_array_free(instance);
 }
@@ -349,7 +349,7 @@ static int arg_parser_find_next(ArgParser* instance) {
 }
 
 bool arg_parser_fetch(ArgParser* instance) {
-    furi_assert(instance);
+    furi_check(instance);
 
     const char* c;
     FuriString* arg;
@@ -409,20 +409,20 @@ bool arg_parser_fetch(ArgParser* instance) {
 }
 
 char arg_parser_get_identifier(ArgParser* instance) {
-    furi_assert(instance);
+    furi_check(instance);
 
     return instance->identifier;
 }
 
 const char* arg_parser_get_value(ArgParser* instance) {
-    furi_assert(instance);
+    furi_check(instance);
 
     return instance->value;
 }
 
 void arg_parser_get_error_message(ArgParser* instance, FuriString* error_str) {
-    furi_assert(instance);
-    furi_assert(error_str);
+    furi_check(instance);
+    furi_check(error_str);
 
     int error_index;
     char error_letter;
@@ -519,8 +519,8 @@ static size_t arg_parser_get_print_indention(ArgParser* instance) {
 }
 
 void arg_parser_get_help_message(ArgParser* instance, FuriString* help_str) {
-    furi_assert(instance);
-    furi_assert(help_str);
+    furi_check(instance);
+    furi_check(help_str);
 
     size_t option_index, indention, i, accessor_length;
     const ArgParserOptions* option;
@@ -549,7 +549,7 @@ void arg_parser_get_help_message(ArgParser* instance, FuriString* help_str) {
 }
 
 const char* arg_parser_get_next_argument(ArgParser* instance) {
-    furi_assert(instance);
+    furi_check(instance);
 
     const char* next_arg = NULL;
     if(instance->index < instance->argc) {
