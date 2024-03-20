@@ -1,6 +1,7 @@
-# FindMy
+# FindMy Network - Location Reports with Generated AirTags
 
-Query Apple's Find My network, allowing none Apple devices to retrieve the location reports.
+Query Apple's Find My network, allowing non-Apple devices to retrieve the location reports.
+
 Video Tutorial: https://www.youtube.com/watch?v=XGwHmwvQoqo
 
 This was made possible thanks to Chapoly1305 and his work bringing airtag tracking to non Apple devices:
