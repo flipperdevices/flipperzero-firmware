@@ -217,14 +217,14 @@ void protocol_fdx_a_render_data(ProtocolFDXA* protocol, FuriString* result) {
 
     furi_string_printf(
         result,
-        "ID: %02X%02X%02X%02X%02X\r\n"
-        "Parity: %s",
+        "ID: %02hhX %02hhX %02hhX %02hhX %02hhX\n"
+        "Parity: %c",
         data[0],
         data[1],
         data[2],
         data[3],
         data[4],
-        parity_sum == 0 ? "+" : "-");
+        parity_sum == 0 ? '+' : '-');
 };
 
 const ProtocolBase protocol_fdx_a = {
