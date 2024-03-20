@@ -35,18 +35,20 @@ FelicaData* felica_alloc(void) {
 }
 
 void felica_free(FelicaData* data) {
-    furi_assert(data);
+    furi_check(data);
 
     free(data);
 }
 
 void felica_reset(FelicaData* data) {
+    furi_check(data);
+
     memset(data, 0, sizeof(FelicaData));
 }
 
 void felica_copy(FelicaData* data, const FelicaData* other) {
-    furi_assert(data);
-    furi_assert(other);
+    furi_check(data);
+    furi_check(other);
 
     *data = *other;
 }
@@ -59,7 +61,8 @@ bool felica_verify(FelicaData* data, const FuriString* device_type) {
 }
 
 bool felica_load(FelicaData* data, FlipperFormat* ff, uint32_t version) {
-    furi_assert(data);
+    furi_check(data);
+    furi_check(ff);
 
     bool parsed = false;
 
@@ -83,7 +86,8 @@ bool felica_load(FelicaData* data, FlipperFormat* ff, uint32_t version) {
 }
 
 bool felica_save(const FelicaData* data, FlipperFormat* ff) {
-    furi_assert(data);
+    furi_check(data);
+    furi_check(ff);
 
     bool saved = false;
 
@@ -105,8 +109,8 @@ bool felica_save(const FelicaData* data, FlipperFormat* ff) {
 }
 
 bool felica_is_equal(const FelicaData* data, const FelicaData* other) {
-    furi_assert(data);
-    furi_assert(other);
+    furi_check(data);
+    furi_check(other);
 
     return memcmp(data, other, sizeof(FelicaData)) == 0;
 }
@@ -119,7 +123,7 @@ const char* felica_get_device_name(const FelicaData* data, NfcDeviceNameType nam
 }
 
 const uint8_t* felica_get_uid(const FelicaData* data, size_t* uid_len) {
-    furi_assert(data);
+    furi_check(data);
 
     // Consider Manufacturer ID as UID
     if(uid_len) {
@@ -130,7 +134,8 @@ const uint8_t* felica_get_uid(const FelicaData* data, size_t* uid_len) {
 }
 
 bool felica_set_uid(FelicaData* data, const uint8_t* uid, size_t uid_len) {
-    furi_assert(data);
+    furi_check(data);
+    furi_check(uid);
 
     // Consider Manufacturer ID as UID
     const bool uid_valid = uid_len == FELICA_IDM_SIZE;

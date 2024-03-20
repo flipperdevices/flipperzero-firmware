@@ -20,10 +20,10 @@ FelicaError felica_poller_frame_exchange(
     const BitBuffer* tx_buffer,
     BitBuffer* rx_buffer,
     uint32_t fwt) {
-    furi_assert(instance);
+    furi_check(instance);
 
     const size_t tx_bytes = bit_buffer_get_size_bytes(tx_buffer);
-    furi_assert(tx_bytes <= bit_buffer_get_capacity_bytes(instance->tx_buffer) - FELICA_CRC_SIZE);
+    furi_check(tx_bytes <= bit_buffer_get_capacity_bytes(instance->tx_buffer) - FELICA_CRC_SIZE);
 
     felica_crc_append(instance->tx_buffer);
 
@@ -53,9 +53,9 @@ FelicaError felica_poller_polling(
     FelicaPoller* instance,
     const FelicaPollerPollingCommand* cmd,
     FelicaPollerPollingResponse* resp) {
-    furi_assert(instance);
-    furi_assert(cmd);
-    furi_assert(resp);
+    furi_check(instance);
+    furi_check(cmd);
+    furi_check(resp);
 
     FelicaError error = FelicaErrorNone;
 
@@ -94,7 +94,7 @@ FelicaError felica_poller_polling(
 }
 
 FelicaError felica_poller_activate(FelicaPoller* instance, FelicaData* data) {
-    furi_assert(instance);
+    furi_check(instance);
 
     felica_reset(data);
 
