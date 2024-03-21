@@ -246,6 +246,16 @@ NfcCommand felica_poller_state_handler_read_blocks(FelicaPoller* instance) {
 NfcCommand felica_poller_state_handler_read_success(FelicaPoller* instance) {
     FURI_LOG_D(TAG, "Read Success");
 
+    if(!instance->auth_context.auth_status.internal ||
+       !instance->auth_context.auth_status.external) {
+        instance->data->blocks_read--;
+    } else {
+        memcpy(
+            instance->data->data.fs.ck.data,
+            instance->auth_context.card_key.data,
+            FELICA_DATA_BLOCK_SIZE);
+    }
+
     instance->felica_event.type = FelicaPollerEventTypeReady;
     instance->felica_event_data.error = FelicaErrorNone;
     return instance->callback(instance->general_event, instance->context);
