@@ -10,6 +10,7 @@
 // TODO: "Read tag again with NFC app" message upon completion, "Complete. Keys added: <n>"
 // TODO: Separate Mfkey32 and Nested functions where possible to reduce branch statements
 // TODO: More accurate timing for Nested
+// TODO: Find ~1 KB memory leak
 
 #include <furi.h>
 #include <furi_hal.h>
@@ -39,7 +40,6 @@
 #define MAX_NAME_LEN 32
 #define MAX_PATH_LEN 64
 
-#define MIN_RAM 121000
 #define LF_POLY_ODD (0x29CE5C)
 #define LF_POLY_EVEN (0x870804)
 #define CONST_M1_1 (LF_POLY_EVEN << 1 | 1)
@@ -380,13 +380,60 @@ int calculate_msb_tables(
     return 0;
 }
 
+void** allocate_blocks(const size_t* block_sizes, int num_blocks) {
+    void** block_pointers = malloc(num_blocks * sizeof(void*));
+    if(block_pointers == NULL) {
+        return NULL;
+    }
+
+    for(int i = 0; i < num_blocks; i++) {
+        if(memmgr_heap_get_max_free_block() < block_sizes[i]) {
+            // Not enough memory, free previously allocated blocks
+            for(int j = 0; j < i; j++) {
+                free(block_pointers[j]);
+            }
+            free(block_pointers);
+            return NULL;
+        }
+
+        block_pointers[i] = malloc(block_sizes[i]);
+        if(block_pointers[i] == NULL) {
+            // Allocation failed, free previously allocated blocks
+            for(int j = 0; j < i; j++) {
+                free(block_pointers[j]);
+            }
+            free(block_pointers);
+            return NULL;
+        }
+    }
+
+    return block_pointers;
+}
+
 bool recover(MfClassicNonce* n, int ks2, unsigned int in, ProgramState* program_state) {
     bool found = false;
-    unsigned int* states_buffer = malloc(sizeof(unsigned int) * (2 << 9));
-    struct Msb* odd_msbs = (struct Msb*)malloc(MSB_LIMIT * sizeof(struct Msb));
-    struct Msb* even_msbs = (struct Msb*)malloc(MSB_LIMIT * sizeof(struct Msb));
-    unsigned int* temp_states_odd = malloc(sizeof(unsigned int) * (1280));
-    unsigned int* temp_states_even = malloc(sizeof(unsigned int) * (1280));
+    const size_t block_sizes[] = {49216, 49216, 5120, 5120, 4096};
+    const size_t reduced_block_sizes[] = {24608, 24608, 5120, 5120, 4096};
+    const int num_blocks = sizeof(block_sizes) / sizeof(block_sizes[0]);
+    void** block_pointers = allocate_blocks(block_sizes, num_blocks);
+    if(block_pointers == NULL) {
+        // System has less than the guaranteed amount of RAM (140 KB) - adjust some parameters to run anyway at half speed
+        eta_round_time *= 2;
+        eta_total_time *= 2;
+        MSB_LIMIT /= 2;
+        block_pointers = allocate_blocks(reduced_block_sizes, num_blocks);
+        if(block_pointers == NULL) {
+            // System has less than 70 KB of RAM - should never happen so we don't reduce speed further
+            program_state->err = InsufficientRAM;
+            program_state->mfkey_state = Error;
+            return false;
+        }
+    }
+    struct Msb* odd_msbs = block_pointers[0];
+    struct Msb* even_msbs = block_pointers[1];
+    unsigned int* temp_states_odd = block_pointers[2];
+    unsigned int* temp_states_even = block_pointers[3];
+    unsigned int* states_buffer = block_pointers[4];
     int oks = 0, eks = 0;
     int i = 0, msb = 0;
     for(i = 31; i >= 0; i -= 2) {
@@ -423,11 +470,11 @@ bool recover(MfClassicNonce* n, int ks2, unsigned int in, ProgramState* program_
             break;
         }
     }
-    free(states_buffer);
-    free(odd_msbs);
-    free(even_msbs);
-    free(temp_states_odd);
-    free(temp_states_even);
+    // Free the allocated blocks
+    for(int i = 0; i < num_blocks; i++) {
+        free(block_pointers[i]);
+    }
+    free(block_pointers);
     return found;
 }
 
@@ -532,12 +579,6 @@ void mfkey(ProgramState* program_state) {
     buffered_file_stream_close(nonce_arr->stream);
     stream_free(nonce_arr->stream);
     //FURI_LOG_I(TAG, "Free heap after free(): %zub", memmgr_get_free_heap());
-    if(memmgr_get_free_heap() < MIN_RAM) {
-        // System has less than the guaranteed amount of RAM (140 KB) - adjust some parameters to run anyway at half speed
-        eta_round_time *= 2;
-        eta_total_time *= 2;
-        MSB_LIMIT /= 2;
-    }
     program_state->mfkey_state = MFKeyAttack;
     // TODO: Work backwards on this array and free memory
     for(i = 0; i < nonce_arr->total_nonces; i++) {
@@ -696,6 +737,8 @@ static void render_callback(Canvas* const canvas, void* ctx) {
             canvas_draw_str_aligned(canvas, 25, 36, AlignLeft, AlignTop, "No nonces found");
         } else if(program_state->err == ZeroNonces) {
             canvas_draw_str_aligned(canvas, 15, 36, AlignLeft, AlignTop, "Nonces already cracked");
+        } else if(program_state->err == InsufficientRAM) {
+            canvas_draw_str_aligned(canvas, 30, 36, AlignLeft, AlignTop, "No free RAM");
         } else {
             // Unhandled error
         }
