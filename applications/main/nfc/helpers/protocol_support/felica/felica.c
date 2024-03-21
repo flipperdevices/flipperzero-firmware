@@ -39,6 +39,10 @@ static NfcCommand nfc_scene_read_poller_callback_felica(NfcGenericEvent event, v
             instance->nfc_device, NfcProtocolFelica, nfc_poller_get_data(instance->poller));
         view_dispatcher_send_custom_event(instance->view_dispatcher, NfcCustomEventPollerSuccess);
         return NfcCommandStop;
+    } else if(felica_event->type == FelicaPollerEventTypeRequestAuthContext) {
+        FelicaAuthenticationContext* ctx = felica_event->data->auth_context;
+        ctx->skip_auth = instance->felica_auth->skip_auth;
+        memcpy(ctx->card_key.data, instance->felica_auth->card_key.data, FELICA_DATA_BLOCK_SIZE);
     }
 
     return NfcCommandContinue;
