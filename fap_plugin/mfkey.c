@@ -644,6 +644,9 @@ void mfkey(ProgramState* program_state) {
     free(nonce_arr);
     keys_dict_free(user_dict);
     free(keyarray);
+    if(program_state->mfkey_state == Error) {
+        return;
+    }
     //FURI_LOG_I(TAG, "mfkey function completed normally"); // DEBUG
     program_state->mfkey_state = Complete;
     // No need to alert the user if they asked it to stop
@@ -738,7 +741,7 @@ static void render_callback(Canvas* const canvas, void* ctx) {
         } else if(program_state->err == ZeroNonces) {
             canvas_draw_str_aligned(canvas, 15, 36, AlignLeft, AlignTop, "Nonces already cracked");
         } else if(program_state->err == InsufficientRAM) {
-            canvas_draw_str_aligned(canvas, 30, 36, AlignLeft, AlignTop, "No free RAM");
+            canvas_draw_str_aligned(canvas, 35, 36, AlignLeft, AlignTop, "No free RAM");
         } else {
             // Unhandled error
         }
