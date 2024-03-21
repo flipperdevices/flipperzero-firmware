@@ -309,10 +309,7 @@ static void protocol_metakom_render_uid(ProtocolMetakom* proto, FuriString* resu
 }
 
 static void protocol_metakom_render_brief_data(ProtocolMetakom* proto, FuriString* result) {
-    furi_string_cat_printf(result, "ID: ");
-    for(size_t i = 0; i < METAKOM_DATA_SIZE; ++i) {
-        furi_string_cat_printf(result, "%02X ", ((uint8_t*)&proto->data)[i]);
-    }
+    protocol_metakom_render_uid(proto, result);
 }
 
 const ProtocolBase ibutton_protocol_misc_metakom = {
