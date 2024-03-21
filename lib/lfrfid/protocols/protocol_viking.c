@@ -176,13 +176,7 @@ bool protocol_viking_write_data(ProtocolViking* protocol, void* data) {
 };
 
 void protocol_viking_render_data(ProtocolViking* protocol, FuriString* result) {
-    furi_string_printf(
-        result,
-        "ID: %02hhX %02hhX %02hhX %02hhX",
-        protocol->data[0],
-        protocol->data[1],
-        protocol->data[2],
-        protocol->data[3]);
+    furi_string_printf(result, "ID: %08lX", bit_lib_get_bits_32(protocol->data, 0, 32));
 };
 
 const ProtocolBase protocol_viking = {

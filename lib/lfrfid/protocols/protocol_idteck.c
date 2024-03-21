@@ -212,7 +212,7 @@ void protocol_idteck_render_data(ProtocolIdteck* protocol, FuriString* result) {
     furi_string_printf(
         result,
         "FC: %08lX\n"
-        "Card: %08lX\n",
+        "Card: %08lX",
         fc,
         card);
 }

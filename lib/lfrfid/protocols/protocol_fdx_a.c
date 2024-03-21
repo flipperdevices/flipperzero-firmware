@@ -217,13 +217,9 @@ void protocol_fdx_a_render_data(ProtocolFDXA* protocol, FuriString* result) {
 
     furi_string_printf(
         result,
-        "ID: %02hhX %02hhX %02hhX %02hhX %02hhX\n"
+        "ID: %010llX\n"
         "Parity: %c",
-        data[0],
-        data[1],
-        data[2],
-        data[3],
-        data[4],
+        bit_lib_get_bits_64(data, 0, 40),
         parity_sum == 0 ? '+' : '-');
 };
 

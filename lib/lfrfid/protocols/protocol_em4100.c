@@ -331,9 +331,10 @@ void protocol_em4100_render_data(ProtocolEM4100* protocol, FuriString* result) {
     furi_string_printf(
         result,
         "FC: %03u\n"
-        "Card: %05hu\n",
+        "Card: %05hu (RF/%hhu)",
         data[2],
-        (uint16_t)((data[3] << 8) | (data[4])));
+        (uint16_t)((data[3] << 8) | (data[4])),
+        protocol->clock_per_bit);
 };
 
 const ProtocolBase protocol_em4100 = {

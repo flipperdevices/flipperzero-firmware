@@ -292,12 +292,10 @@ void protocol_fdx_b_render_data(ProtocolFDXB* protocol, FuriString* result) {
         result,
         "ID: %03hu-%012llu\n"
         "Country Code: %hu\n"
-        "Animal: %s\n"
         "Temperature: ",
         country_code,
         national_code,
-        country_code,
-        animal_flag ? "Yes" : "No");
+        country_code);
 
     float temperature;
     if(protocol_fdx_b_get_temp(protocol->data, &temperature)) {
@@ -313,7 +311,10 @@ void protocol_fdx_b_render_data(ProtocolFDXB* protocol, FuriString* result) {
 
     furi_string_cat_printf(
         result,
-        "\nBits: %hhX-%hhX-%hhX-%hhX-%hhX",
+        "\n"
+        "Animal: %s\n"
+        "Bits: %hhX-%hhX-%hhX-%hhX-%hhX",
+        animal_flag ? "Yes" : "No",
         block_status,
         rudi_bit,
         reserved,
