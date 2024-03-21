@@ -101,7 +101,7 @@ NfcCommand felica_poller_state_handler_auth_internal(FelicaPoller* instance) {
 
     felica_calculate_session_key(
         &instance->auth_context.des_context,
-        instance->data->data.fs.ck.data,
+        instance->auth_context.card_key.data,
         instance->data->data.fs.rc.data,
         instance->auth_context.session_key.data);
 
