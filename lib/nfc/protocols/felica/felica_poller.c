@@ -147,44 +147,36 @@ NfcCommand felica_poller_state_handler_auth_internal(FelicaPoller* instance) {
 NfcCommand felica_poller_state_handler_auth_external(FelicaPoller* instance) {
     FURI_LOG_D(TAG, "Auth External");
     instance->state = FelicaPollerStateReadSuccess;
-    uint8_t WCNT_data[4];
-    uint8_t first_block[8];
-    ///TODO: Think of moving all the code below to a separate function
-    ///called felica_calculate_mac_write() where all the logic written below
-    ///will be placed. In such case felica_calculate_mac can be possibly made static
-    memcpy(WCNT_data, instance->data->data.fs.wcnt.data, 3);
-    WCNT_data[3] = FELICA_BLOCK_INDEX_STATE;
-    felica_prepare_first_block(FelicaMACTypeWrite, WCNT_data, 3, first_block);
+    uint8_t blocks[2];
 
     instance->data->data.fs.state.data[0] = 1;
-    uint8_t session_swapped[FELICA_DATA_BLOCK_SIZE];
-    memcpy(session_swapped, instance->auth.session_key.data + 8, 8);
-    memcpy(session_swapped + 8, instance->auth.session_key.data, 8);
-    felica_calculate_mac(
-        &instance->auth.des_context,
-        session_swapped, //instance->session_key.data,
+    FelicaAuthentication* auth = &instance->auth;
+    felica_calculate_mac_write(
+        &auth->des_context,
+        auth->session_key.data,
         instance->data->data.fs.rc.data,
-        first_block,
+        instance->data->data.fs.wcnt.data,
         instance->data->data.fs.state.data,
-        16,
         instance->data->data.fs.mac_a.data);
-    ///All logic above will be moved
 
     memcpy(instance->data->data.fs.mac_a.data + 8, instance->data->data.fs.wcnt.data, 3);
 
-    uint8_t tx_data[32];
-    memcpy(tx_data, instance->data->data.fs.state.data, 16);
-    memcpy(tx_data + 16, instance->data->data.fs.mac_a.data, 16);
+    uint8_t tx_data[FELICA_DATA_BLOCK_SIZE * 2];
+    memcpy(tx_data, instance->data->data.fs.state.data, FELICA_DATA_BLOCK_SIZE);
+    memcpy(
+        tx_data + FELICA_DATA_BLOCK_SIZE,
+        instance->data->data.fs.mac_a.data,
+        FELICA_DATA_BLOCK_SIZE);
 
-    WCNT_data[0] = FELICA_BLOCK_INDEX_STATE;
-    WCNT_data[1] = FELICA_BLOCK_INDEX_MAC_A;
+    blocks[0] = FELICA_BLOCK_INDEX_STATE;
+    blocks[1] = FELICA_BLOCK_INDEX_MAC_A;
     FelicaPollerWriteCommandResponse* response;
-    FelicaError error = felica_poller_write_blocks(instance, 2, WCNT_data, tx_data, &response);
+    FelicaError error = felica_poller_write_blocks(instance, 2, blocks, tx_data, &response);
 
     if(error == FelicaErrorNone && response->SF1 == 0 && response->SF2 == 0) {
-        WCNT_data[0] = FELICA_BLOCK_INDEX_STATE;
+        blocks[0] = FELICA_BLOCK_INDEX_STATE;
         FelicaPollerReadCommandResponse* resp;
-        error = felica_poller_read_blocks(instance, 1, WCNT_data, &resp);
+        error = felica_poller_read_blocks(instance, 1, blocks, &resp);
         if(error == FelicaErrorNone && resp->SF1 == 0 && resp->SF2 == 0) {
             instance->data->data.fs.state.SF1 = 0;
             instance->data->data.fs.state.SF2 = 0;

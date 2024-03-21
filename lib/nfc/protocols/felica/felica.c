@@ -289,3 +289,24 @@ bool felica_check_mac(
     uint8_t* mac_ptr = data + data_size_without_mac;
     return !memcmp(mac, mac_ptr, 8);
 }
+
+void felica_calculate_mac_write(
+    mbedtls_des3_context* ctx,
+    const uint8_t* session_key,
+    const uint8_t* rc,
+    const uint8_t* wcnt,
+    const uint8_t* data,
+    uint8_t* mac) {
+    const uint8_t WCNT_length = 3;
+    uint8_t block_data[WCNT_length + 1];
+    uint8_t first_block[8];
+
+    memcpy(block_data, wcnt, WCNT_length);
+    block_data[3] = FELICA_BLOCK_INDEX_STATE;
+    felica_prepare_first_block(FelicaMACTypeWrite, block_data, WCNT_length, first_block);
+
+    uint8_t session_swapped[FELICA_DATA_BLOCK_SIZE];
+    memcpy(session_swapped, session_key + 8, 8);
+    memcpy(session_swapped + 8, session_key, 8);
+    felica_calculate_mac(ctx, session_swapped, rc, first_block, data, FELICA_DATA_BLOCK_SIZE, mac);
+}
