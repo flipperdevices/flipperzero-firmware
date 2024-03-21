@@ -8,6 +8,10 @@
 #include "../nfc_protocol_support_common.h"
 #include "../nfc_protocol_support_gui_common.h"
 
+enum {
+    SubmenuIndexUnlock = SubmenuIndexCommonMax,
+};
+
 static void nfc_scene_info_on_enter_felica(NfcApp* instance) {
     const NfcDevice* device = instance->nfc_device;
     const FelicaData* data = nfc_device_get_data(device, NfcProtocolFelica);
@@ -74,6 +78,28 @@ static void nfc_scene_emulate_on_enter_felica(NfcApp* instance) {
     nfc_listener_start(instance->listener, NULL, NULL);
 }
 
+static void nfc_scene_read_menu_on_enter_felica(NfcApp* instance) {
+    const FelicaData* data = nfc_device_get_data(instance->nfc_device, NfcProtocolFelica);
+    if(data->blocks_read != data->blocks_total) {
+        submenu_add_item(
+            instance->submenu,
+            "Unlock",
+            SubmenuIndexUnlock,
+            nfc_protocol_support_common_submenu_callback,
+            instance);
+    }
+}
+
+static bool nfc_scene_read_menu_on_event_felica(NfcApp* instance, SceneManagerEvent event) {
+    if(event.type == SceneManagerEventTypeCustom) {
+        if(event.event == SubmenuIndexUnlock) {
+            scene_manager_next_scene(instance->scene_manager, NfcSceneFelicaKeyInput);
+            return true;
+        }
+    }
+    return false;
+}
+
 const NfcProtocolSupportBase nfc_protocol_support_felica = {
     .features = NfcProtocolFeatureEmulateUid,
 
@@ -89,8 +115,8 @@ const NfcProtocolSupportBase nfc_protocol_support_felica = {
         },
     .scene_read_menu =
         {
-            .on_enter = nfc_protocol_support_common_on_enter_empty,
-            .on_event = nfc_protocol_support_common_on_event_empty,
+            .on_enter = nfc_scene_read_menu_on_enter_felica,
+            .on_event = nfc_scene_read_menu_on_event_felica,
         },
     .scene_read_success =
         {
