@@ -60,7 +60,7 @@ static void gap_advertise_start(GapState new_state);
 static int32_t gap_app(void* context);
 
 static void gap_verify_connection_parameters(Gap* gap) {
-    furi_assert(gap);
+    furi_check(gap);
 
     FURI_LOG_I(
         TAG,
