@@ -34,7 +34,7 @@ Manual: Copy the fap/ directory to applications_user/mfkey32/ and build it with 
 This was the only function of the Flipper Zero that was [thought to be impossible on the hardware](https://old.reddit.com/r/flipperzero/comments/is31re/comment/g72077x/). You can still use other methods if you prefer them.
 
 ## Misc Stats
-1. RAM used: **135 KB**, RAM free: 5 KB (original was ~53,000 KB, 99.75% RAM usage eliminated)
+1. RAM used: **127 KB**, RAM free: 13 KB (original was ~53,000 KB, 99.75% RAM usage eliminated)
 2. Disk used: (None)
 3. Time per unsolved key:
 
