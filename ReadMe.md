@@ -4,7 +4,7 @@
 &nbsp;<a href='https://shop.rogue-master.net/' target='_blank'><img src='https://rogue-master.net/img/Merch.png' alt='RM Merch'' title='RM Merch'></a>
 &nbsp;<a href='https://github.com/RogueMaster/awesome-flipperzero-withModules' target='_blank'><img src='https://rogue-master.net/img/Resources.png' alt='More Research / Assets' title='More Research / Assets'></a></h1>
 
-# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0311-1616-0.99.2-dab7695.tgz&channel=RM0311-1616-0.99.2-dab7695&version=0.99.2)
+# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0321-1526-0.99.2-e78d0d7.tgz&channel=RM0321-1526-0.99.2-e78d0d7&version=0.99.2)
 
 ## Thank you so much to our RM Pro/SUPER Patreon supporters! Because of people like you, we are able to offer the best and most up-to-date Flipper Zero Firmware!
 
@@ -31,44 +31,6 @@ This software is for experimental purposes only and is not meant for any illegal
 
 - Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-03-18 16:00 EST`
 - Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-03-18 16:00 EST`
-- Updated: [J305 Geiger Counter v1.2 (By nmrr)](https://github.com/nmrr/flipperzero-geigercounter)
-- Updated: [ESP32 Camera Suite v1.7 (By CodyTolene)](https://github.com/CodyTolene/Flipper-Zero-Camera-Suite)
-- Updated: [JS Runner v1.0 (By nminaylov & DrZlo13)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/3286) [JS: added GPIO module (By Sil333033)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/46a761605f0f7466551e8baa127dcc1b1a359a37) [Updates to GPIO & Storage Append (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/0cb1a859e7c67fc0ca0afa35320c2c823c164f4f)
-- Updated: [Naming/organization of JS scripts assets (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/78faa7cdda8b596887b519e2b49e4d99779b320e)
-- Added: [Yappy Invaders (By dagnazty)](https://github.com/dagnazty/Yappy_Invaders)
-- Updated: [Digimon F-Com v1.1 (By TylerWilley)](https://github.com/TylerWilley/flipper-f-com) Code Assets Updated
-- Updated: [Programmer Calculator v0.9.2 (By armixz)](https://github.com/armixz/Flipper-Zero-Programmer-Calculator)
-- Updated: [BMI Air Mouse v1.1 (By ginkage)](https://github.com/ginkage/FlippAirMouse/) `Req: BMI160`
-- Sub-GHz: [Protocol changes for  more compatability (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/9a5fd4e4dfb5b913b7b9a36264f9f28e038d6bdf)
-- BadKB: [Improve Settings Loading Logic (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/c43ff85159f1e5f162caf48b58e697c5ef4958b6)
-- JS: [Add dialog.pickFile() (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/13cd004bf67e2a447b91f808dc2bbe64e246cd12)
-- Updated: [MALVEKE GAME BOY all apps to version 2.1 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/tree/main/flipper_companion_apps/applications/external) `Req: Malveke` (Version Increment With No Further Changes)
-- Updated: [Restaurant Pager Trigger v1.4 (By leedave)](https://github.com/leedave/flipper-zero-meal-pager)
-- JS Script: [BadUSB_Win_Exfil-GSHD.js Updated (By Gas Station Hot Dog & b0r0xZ & mistura.)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/48db90e2dd54162c3667f4a9ae74cf2921a3c159)
-- Added: [Evil Portal Asset: `RickrollWithRespond.html` (By feder133)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/12121e1c0fcf7c5377c6b84f24784270020232d3)
-- OFW: PR: [Infrared: Add Fujitsu ASYG24KMTB #3513 (By aprosvetova)](https://github.com/flipperdevices/flipperzero-firmware/pull/3513)
-- OFW: PR: [NFC: Slix privacy password reveal and Desfire detect fix #3504 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3504)
-- OFW: PR: [Infrared fixes and more #3515 (By gsurkov)](https://github.com/flipperdevices/flipperzero-firmware/pull/3515)
-- Updated: [BLE Spam v6.1 (By Willy-JL & ECTO-1A & Spooks4576 with research from xMasterX; OFW API thanks to noproto)](https://github.com/Next-Flip/Momentum-Apps/tree/dev/ble_spam) [Name Flood Customization (By AbeNaws)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/c0f3b50096a76da7286577b24fed02de5c94be42)
-- [Marauder: Save Wardrive and EvilPortal dumps to Flipper SD (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/f9b14fca2292f62aa6367c606eee61060d49dd29)
-- UL: [Name Generator Improvements (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/89abfe02665e63929a000a3f1d9b6e29ed0cb834)
-- UL: [test swap em4100 t5577 blocks (issue 3463 ofw) (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/89abfe02665e63929a000a3f1d9b6e29ed0cb834)
-- Updated: [Bad KB and a few other minor updates (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/1f43af08a0fa3f2a368108cc7a39cfe782097b93)
-- Updated: [WiFi (Marauder) v0.7.1 (By 0xchocolate & tcpassos)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) `Req: ESP32 WITH MARAUDER FLASHED`
-- UL: [Name Generator Changes (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/7e9ecdf394c34ab55f33ef164fed98b270618ee1)
-- Updated: [UHF RFID WIP v1.1 (By frux-c)](https://github.com/frux-c/uhf_rfid) `Req: M100 or QM100` Minor changes (From Willy-JL)
-- Updated: [NFC Seader v2.6 (By bettse)](https://github.com/bettse/seader)
-- Updated: [Mfkey32 With Nested v1.0 (By noproto)](https://github.com/noproto/FlipperMfkey)
-- Updated: [DCF77 Clock Sync v1.3 (By mdaskalov)](https://github.com/mdaskalov/dcf77-clock-sync)
-- Updated: [Questions v1.0 (By nikilark)](https://github.com/nikilark/flipper_questions)
-- Updated: [Quac! v0.4 (By rdefeo)](https://github.com/rdefeo/quac)
-- Updated: [XRemote v1.3 (By kala13x)](https://github.com/kala13x/flipper-xremote)
-- Updated: [JS Runner v1.0 (By nminaylov & DrZlo13)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/3286) [Documentation, Improvements and Revisions (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/8c2ad63485663846565a51e57c791c8ce5e29bdd)
-- OFW: [Infrared: Add Fujitsu ASYG24KMTB #3513 (By aprosvetova)](https://github.com/flipperdevices/flipperzero-firmware/pull/3513)
-- Updated: [FindMy Flipper v2.0 (By MatthewKuKanich)](https://github.com/MatthewKuKanich/FindMyFlipper)
-- Updated: [Authenticator/TOTP v5.13.0 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
-- Updated: [Pokemon Trading v1.8 (By EstebanFuentealba & kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons) Changes By kbembedded
-- Updated: [Mfkey v2.0 (By noproto)](https://github.com/noproto/FlipperMfkey)
 
 <a name="release">
 
@@ -599,4 +561,4 @@ $ ./fbt dolphin_ext
 - [Desktop Favorite Binds To Allow Opening Custom Game Menu. Whomever can complete this gets 3 months of subscriber builds. Patrons can DM me to add their monthly towards this bounty.](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/756)
 - `Bluetooth Audio` APP to allow flipper to pair to external speaker or headphones for wav/mp3 playback ($200 USD in ETH or BTC) (Don't think this is possible)
 
-# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0311-1616-0.99.2-dab7695.tgz&channel=RM0311-1616-0.99.2-dab7695&version=0.99.2)
+# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0321-1526-0.99.2-e78d0d7.tgz&channel=RM0321-1526-0.99.2-e78d0d7&version=0.99.2)
