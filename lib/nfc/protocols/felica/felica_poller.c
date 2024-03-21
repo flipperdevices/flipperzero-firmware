@@ -168,22 +168,23 @@ NfcCommand felica_poller_state_handler_auth_external(FelicaPoller* instance) {
         instance->data->data.fs.mac_a.data,
         FELICA_DATA_BLOCK_SIZE);
 
-    blocks[0] = FELICA_BLOCK_INDEX_STATE;
-    blocks[1] = FELICA_BLOCK_INDEX_MAC_A;
-    FelicaPollerWriteCommandResponse* response;
-    FelicaError error = felica_poller_write_blocks(instance, 2, blocks, tx_data, &response);
+    do {
+        blocks[0] = FELICA_BLOCK_INDEX_STATE;
+        blocks[1] = FELICA_BLOCK_INDEX_MAC_A;
+        FelicaPollerWriteCommandResponse* response;
+        FelicaError error = felica_poller_write_blocks(instance, 2, blocks, tx_data, &response);
+        if(error != FelicaErrorNone || response->SF1 != 0 || response->SF2 != 0) break;
 
-    if(error == FelicaErrorNone && response->SF1 == 0 && response->SF2 == 0) {
         blocks[0] = FELICA_BLOCK_INDEX_STATE;
         FelicaPollerReadCommandResponse* resp;
         error = felica_poller_read_blocks(instance, 1, blocks, &resp);
-        if(error == FelicaErrorNone && resp->SF1 == 0 && resp->SF2 == 0) {
-            instance->data->data.fs.state.SF1 = 0;
-            instance->data->data.fs.state.SF2 = 0;
-            memcpy(instance->data->data.fs.state.data, resp->data, FELICA_DATA_BLOCK_SIZE);
-            instance->auth.context.auth_status.external = instance->data->data.fs.state.data[0];
-        }
-    }
+        if(error != FelicaErrorNone || response->SF1 != 0 || response->SF2 != 0) break;
+
+        instance->data->data.fs.state.SF1 = 0;
+        instance->data->data.fs.state.SF2 = 0;
+        memcpy(instance->data->data.fs.state.data, resp->data, FELICA_DATA_BLOCK_SIZE);
+        instance->auth.context.auth_status.external = instance->data->data.fs.state.data[0];
+    } while(false);
     instance->state = FelicaPollerStateReadBlocks;
     return NfcCommandContinue;
 }
