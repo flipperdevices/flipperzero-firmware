@@ -115,8 +115,6 @@ NfcCommand felica_poller_state_handler_auth_internal(FelicaPoller* instance) {
         instance, 1, blocks, instance->data->data.fs.rc.data, &response);
     ///TODO: Think of reworking this part into do{}while in order to reduce nesting
     if(error == FelicaErrorNone && response->SF1 == 0 && response->SF2 == 0) {
-        ///TODO: replace all block numbers to defines
-        ///and place them in felica.h
         blocks[0] = FELICA_BLOCK_INDEX_ID;
         blocks[1] = FELICA_BLOCK_INDEX_WCNT;
         blocks[2] = FELICA_BLOCK_INDEX_MAC_A;
@@ -134,7 +132,10 @@ NfcCommand felica_poller_state_handler_auth_internal(FelicaPoller* instance) {
                 instance->auth.context.auth_status.internal = true;
                 instance->data->data.fs.wcnt.SF1 = 0;
                 instance->data->data.fs.wcnt.SF2 = 0;
-                memcpy(instance->data->data.fs.wcnt.data, new_resp->data + 16, 16);
+                memcpy(
+                    instance->data->data.fs.wcnt.data,
+                    new_resp->data + FELICA_DATA_BLOCK_SIZE,
+                    FELICA_DATA_BLOCK_SIZE);
                 instance->state = FelicaPollerStateAuthenticateExternal;
             } else {
                 ///TODO: Replace with simple read step
@@ -159,7 +160,7 @@ NfcCommand felica_poller_state_handler_auth_external(FelicaPoller* instance) {
     felica_prepare_first_block(FelicaMACTypeWrite, WCNT_data, 3, first_block);
 
     instance->data->data.fs.state.data[0] = 1;
-    uint8_t session_swapped[16];
+    uint8_t session_swapped[FELICA_DATA_BLOCK_SIZE];
     memcpy(session_swapped, instance->auth.session_key.data + 8, 8);
     memcpy(session_swapped + 8, instance->auth.session_key.data, 8);
     felica_calculate_mac(
@@ -190,7 +191,7 @@ NfcCommand felica_poller_state_handler_auth_external(FelicaPoller* instance) {
         if(error == FelicaErrorNone && resp->SF1 == 0 && resp->SF2 == 0) {
             instance->data->data.fs.state.SF1 = 0;
             instance->data->data.fs.state.SF2 = 0;
-            memcpy(instance->data->data.fs.state.data, resp->data, 16);
+            memcpy(instance->data->data.fs.state.data, resp->data, FELICA_DATA_BLOCK_SIZE);
             instance->auth.context.auth_status.external = instance->data->data.fs.state.data[0];
         }
     }
@@ -233,7 +234,7 @@ NfcCommand felica_poller_state_handler_read_blocks(FelicaPoller* instance) {
         }
         instance->data->blocks_total++;
 
-        if(instance->data->blocks_total == 27) {
+        if(instance->data->blocks_total == FELICA_BLOCKS_TOTAL_COUNT) {
             instance->state = FelicaPollerStateReadSuccess;
         }
     } else {
