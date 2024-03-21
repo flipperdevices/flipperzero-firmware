@@ -25,6 +25,10 @@ have a Qwiic GPS and a cable, these are the colors:
 | Blue        | C1 (SDA)    |
 | Yellow      | C0 (SCL)    |
 
+## Tested GPS models
+- SparkFun SAM-M8Q
+- SparkFun MAX-M10S (thanks to @awol96)
+
 # Features
 ## Handheld data display
 This app offers two forms of data display: handheld and car. The
