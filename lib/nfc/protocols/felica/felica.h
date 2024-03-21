@@ -37,6 +37,15 @@ typedef enum {
     FelicaErrorTimeout,
 } FelicaError;
 
+typedef struct {
+    uint8_t data[FELICA_DATA_BLOCK_SIZE];
+} FelicaCardKey;
+
+typedef struct {
+    bool internal : 1;
+    bool external : 1;
+} FelicaAuthenticationStatus;
+
 typedef enum {
     FelicaMACTypeRead,
     FelicaMACTypeWrite,

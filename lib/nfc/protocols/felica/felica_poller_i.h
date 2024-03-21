@@ -28,22 +28,6 @@ typedef enum {
     FelicaPollerStateNum
 } FelicaPollerState;
 
-typedef struct {
-    uint8_t data[16];
-} FelicaSessionKey;
-
-typedef struct {
-    bool internal : 1;
-    bool external : 1;
-} FelicaAuthenticationStatus;
-
-typedef struct {
-    bool skip_auth;
-    mbedtls_des3_context des_context;
-    FelicaSessionKey session_key;
-    FelicaAuthenticationStatus auth_status;
-} FelicaAuthenticationContext;
-
 struct FelicaPoller {
     Nfc* nfc;
     FelicaPollerState state;
