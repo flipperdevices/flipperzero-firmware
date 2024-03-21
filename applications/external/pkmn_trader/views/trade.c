@@ -126,6 +126,7 @@
 
 #define PKMN_MASTER 0x01
 #define PKMN_SLAVE 0x02
+
 #define PKMN_CONNECTED 0x60
 #define PKMN_CONNECTED_II 0x61
 #define PKMN_TRADE_ACCEPT_GEN_I 0x62
@@ -144,6 +145,33 @@
 #define PKMN_TRADE_CENTRE ITEM_1_SELECTED
 #define PKMN_COLOSSEUM ITEM_2_SELECTED
 #define PKMN_BREAK_LINK ITEM_3_SELECTED
+
+struct important_bytes {
+    const uint8_t connected;
+    const uint8_t trade_accept;
+    const uint8_t trade_reject;
+    const uint8_t table_leave;
+    const uint8_t sel_num_mask;
+    const uint8_t sel_num_one;
+};
+
+static const struct important_bytes gen_i = {
+    PKMN_CONNECTED,
+    PKMN_TRADE_ACCEPT_GEN_I,
+    PKMN_TRADE_REJECT_GEN_I,
+    PKMN_TABLE_LEAVE_GEN_I,
+    PKMN_SEL_NUM_MASK_GEN_I,
+    PKMN_SEL_NUM_ONE_GEN_I,
+};
+
+static const struct important_bytes gen_ii = {
+    PKMN_CONNECTED_II,
+    PKMN_TRADE_ACCEPT_GEN_II,
+    PKMN_TRADE_REJECT_GEN_II,
+    PKMN_TABLE_LEAVE_GEN_II,
+    PKMN_SEL_NUM_MASK_GEN_II,
+    PKMN_SEL_NUM_ONE_GEN_II,
+};
 
 /* States specific to the trade process. */
 typedef enum {
@@ -534,6 +562,10 @@ static uint8_t getTradeCentreResponse(struct trade_ctx* trade) {
     static bool patch_pt_2;
     static size_t counter;
     static uint8_t in_pkmn_idx;
+    const struct important_bytes* bytes = NULL;
+
+    if(trade->pdata->gen == GEN_I) bytes = &gen_i;
+    if(trade->pdata->gen == GEN_II) bytes = &gen_ii;
 
     /* TODO: Figure out how we should respond to a no_data_byte and/or how to
      * send one and what response to expect.
@@ -702,30 +734,18 @@ static uint8_t getTradeCentreResponse(struct trade_ctx* trade) {
      */
     case TRADE_PENDING:
         /* If the player leaves the trade menu and returns to the room */
-        if(trade->pdata->gen == GEN_I && in == PKMN_TABLE_LEAVE_GEN_I) {
+        if(in == bytes->table_leave) {
             trade->trade_centre_state = TRADE_RESET;
-            send = PKMN_TABLE_LEAVE_GEN_I;
-            model->gameboy_status = GAMEBOY_READY;
-        } else if(trade->pdata->gen == GEN_II && in == PKMN_TABLE_LEAVE_GEN_II) {
-            trade->trade_centre_state = TRADE_RESET;
-            send = PKMN_TABLE_LEAVE_GEN_II;
+            send = bytes->table_leave;
             model->gameboy_status = GAMEBOY_READY;
             /* If the player selected a Pokemon to send from the Game Boy */
-        } else if(
-            trade->pdata->gen == GEN_I &&
-            (in & PKMN_SEL_NUM_MASK_GEN_I) == PKMN_SEL_NUM_MASK_GEN_I) {
+        } else if((in & bytes->sel_num_mask) == bytes->sel_num_mask) {
             in_pkmn_idx = in;
-            send = PKMN_SEL_NUM_ONE_GEN_I; // We always send the first Pokemon
+            send = bytes->sel_num_one; // We always send the first pokemon
             model->gameboy_status = GAMEBOY_TRADE_PENDING;
             /* BLANKs are sent in a few places, we want to do nothing about them
 	 * unless the Game Boy already sent us an index they want to trade.
 	 */
-        } else if(
-            trade->pdata->gen == GEN_II &&
-            (in & PKMN_SEL_NUM_MASK_GEN_II) == PKMN_SEL_NUM_MASK_GEN_II) {
-            in_pkmn_idx = in;
-            send = PKMN_SEL_NUM_ONE_GEN_II; // We always send the first Pokemon
-            model->gameboy_status = GAMEBOY_TRADE_PENDING;
         } else if(in == PKMN_BLANK) {
             if(in_pkmn_idx != 0) {
                 send = 0;
@@ -737,10 +757,10 @@ static uint8_t getTradeCentreResponse(struct trade_ctx* trade) {
 
     /* Handle the Game Boy accepting or rejecting a trade deal */
     case TRADE_CONFIRMATION:
-        if(in == PKMN_TRADE_REJECT_GEN_I || in == PKMN_TRADE_REJECT_GEN_II) {
+        if(in == bytes->trade_reject) {
             trade->trade_centre_state = TRADE_SELECT;
             model->gameboy_status = GAMEBOY_WAITING;
-        } else if(in == PKMN_TRADE_ACCEPT_GEN_I || in == PKMN_TRADE_ACCEPT_GEN_II) {
+        } else if(in == bytes->trade_accept) {
             trade->trade_centre_state = TRADE_DONE;
         }
         break;
@@ -765,13 +785,11 @@ static uint8_t getTradeCentreResponse(struct trade_ctx* trade) {
         break;
 
     case TRADE_CANCEL:
-        if((trade->pdata->gen == GEN_I && in == PKMN_TABLE_LEAVE_GEN_I) ||
-           (trade->pdata->gen == GEN_II && in == PKMN_TABLE_LEAVE_GEN_II)) {
+        if(in == bytes->table_leave) {
             trade->trade_centre_state = TRADE_RESET;
             model->gameboy_status = GAMEBOY_READY;
         }
-        if(trade->pdata->gen == GEN_I) send = PKMN_TABLE_LEAVE_GEN_I;
-        if(trade->pdata->gen == GEN_II) send = PKMN_TABLE_LEAVE_GEN_II;
+        send = bytes->table_leave;
         break;
 
     default:
