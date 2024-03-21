@@ -816,13 +816,8 @@ void pokemon_stat_calc(PokemonData* pdata, DataStat stat) {
     pokemon_stat_set(pdata, stat, NONE, calc);
 }
 
-/* XXX: FIXME: TODO: This needs addressing ASAP for gen ii */
+/* Copy the traded-in Pokemon's main data to our struct */
 void pokemon_stat_memcpy(PokemonData* dst, PokemonData* src, uint8_t which) {
-   /* Copy the traded-in Pokemon's main data to our struct */
-   /* XXX: Can use pokemon_stat_set */
-   /* XXX: TODO: While slower, want to implement this as a handful of functions to
-    * get from the traded struct and set the main struct.
-    */
 
     if (dst->gen == GEN_I){
         ((TradeBlockGenI*)dst->trade_block)->party_members[0] = ((TradeBlockGenI*)src->trade_block)->party_members[which];
