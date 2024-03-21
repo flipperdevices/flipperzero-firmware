@@ -18,6 +18,8 @@ Building:
         Build all FAP apps
     fap_{APPID}, launch APPSRC={APPID}:
         Build FAP app with appid={APPID}; upload & start it over USB
+    cdb:
+        regenerate "compile_commands.json" file (for IDE integration)
 
 Flashing & debugging:
     flash, *jflash:
@@ -27,7 +29,8 @@ Flashing & debugging:
     debug, debug_other, blackmagic:
         Start GDB
     devboard_flash:
-        Update WiFi dev board with the latest firmware
+        Update WiFi dev board. 
+        Supports ARGS="..." to pass extra arguments to the update script, e.g. ARGS="-c dev"
 
 Other:
     cli:

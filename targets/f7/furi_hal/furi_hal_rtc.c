@@ -1,6 +1,7 @@
 #include <furi_hal_rtc.h>
 #include <furi_hal_light.h>
 #include <furi_hal_debug.h>
+#include <furi_hal_serial_control.h>
 
 #include <stm32wbxx_ll_pwr.h>
 #include <stm32wbxx_ll_bus.h>
@@ -34,29 +35,37 @@ typedef struct {
     FuriHalRtcLocaleUnits locale_units : 1;
     FuriHalRtcLocaleTimeFormat locale_timeformat : 1;
     FuriHalRtcLocaleDateFormat locale_dateformat : 2;
-    uint8_t reserved : 6;
+    FuriHalRtcLogDevice log_device : 2;
+    FuriHalRtcLogBaudRate log_baud_rate : 3;
+    uint8_t reserved : 1;
 } SystemReg;
 
 _Static_assert(sizeof(SystemReg) == 4, "SystemReg size mismatch");
 
-#define FURI_HAL_RTC_SECONDS_PER_MINUTE 60
-#define FURI_HAL_RTC_SECONDS_PER_HOUR (FURI_HAL_RTC_SECONDS_PER_MINUTE * 60)
-#define FURI_HAL_RTC_SECONDS_PER_DAY (FURI_HAL_RTC_SECONDS_PER_HOUR * 24)
-#define FURI_HAL_RTC_MONTHS_COUNT 12
-#define FURI_HAL_RTC_EPOCH_START_YEAR 1970
+static const FuriHalSerialId furi_hal_rtc_log_devices[] = {
+    [FuriHalRtcLogDeviceUsart] = FuriHalSerialIdUsart,
+    [FuriHalRtcLogDeviceLpuart] = FuriHalSerialIdLpuart,
+    [FuriHalRtcLogDeviceReserved] = FuriHalSerialIdMax,
+    [FuriHalRtcLogDeviceNone] = FuriHalSerialIdMax,
+};
 
-static const uint8_t furi_hal_rtc_days_per_month[2][FURI_HAL_RTC_MONTHS_COUNT] = {
-    {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31},
-    {31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}};
+static const uint32_t furi_hal_rtc_log_baud_rates[] = {
+    [FuriHalRtcLogBaudRate230400] = 230400,
+    [FuriHalRtcLogBaudRate9600] = 9600,
+    [FuriHalRtcLogBaudRate38400] = 38400,
+    [FuriHalRtcLogBaudRate57600] = 57600,
+    [FuriHalRtcLogBaudRate115200] = 115200,
+    [FuriHalRtcLogBaudRate460800] = 460800,
+    [FuriHalRtcLogBaudRate921600] = 921600,
+    [FuriHalRtcLogBaudRate1843200] = 1843200,
+};
 
-static const uint16_t furi_hal_rtc_days_per_year[] = {365, 366};
-
-static void furi_hal_rtc_reset() {
+static void furi_hal_rtc_reset(void) {
     LL_RCC_ForceBackupDomainReset();
     LL_RCC_ReleaseBackupDomainReset();
 }
 
-static bool furi_hal_rtc_start_clock_and_switch() {
+static bool furi_hal_rtc_start_clock_and_switch(void) {
     // Clock operation require access to Backup Domain
     LL_PWR_EnableBkUpAccess();
 
@@ -81,8 +90,8 @@ static bool furi_hal_rtc_start_clock_and_switch() {
     }
 }
 
-static void furi_hal_rtc_recover() {
-    FuriHalRtcDateTime datetime = {0};
+static void furi_hal_rtc_recover(void) {
+    DateTime datetime = {0};
 
     // Handle fixable LSE failure
     if(LL_RCC_LSE_IsCSSDetected()) {
@@ -118,7 +127,7 @@ static void furi_hal_rtc_recover() {
     }
 }
 
-void furi_hal_rtc_init_early() {
+void furi_hal_rtc_init_early(void) {
     // Enable RTCAPB clock
     LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_RTCAPB);
 
@@ -142,10 +151,10 @@ void furi_hal_rtc_init_early() {
     }
 }
 
-void furi_hal_rtc_deinit_early() {
+void furi_hal_rtc_deinit_early(void) {
 }
 
-void furi_hal_rtc_init() {
+void furi_hal_rtc_init(void) {
     LL_RTC_InitTypeDef RTC_InitStruct;
     RTC_InitStruct.HourFormat = LL_RTC_HOURFORMAT_24HOUR;
     RTC_InitStruct.AsynchPrescaler = 127;
@@ -153,11 +162,14 @@ void furi_hal_rtc_init() {
     LL_RTC_Init(RTC, &RTC_InitStruct);
 
     furi_log_set_level(furi_hal_rtc_get_log_level());
+    furi_hal_serial_control_set_logging_config(
+        furi_hal_rtc_log_devices[furi_hal_rtc_get_log_device()],
+        furi_hal_rtc_log_baud_rates[furi_hal_rtc_get_log_baud_rate()]);
 
     FURI_LOG_I(TAG, "Init OK");
 }
 
-void furi_hal_rtc_sync_shadow() {
+void furi_hal_rtc_sync_shadow(void) {
     if(!LL_RTC_IsShadowRegBypassEnabled(RTC)) {
         LL_RTC_ClearFlag_RS(RTC);
         while(!LL_RTC_IsActiveFlag_RS(RTC)) {
@@ -165,7 +177,7 @@ void furi_hal_rtc_sync_shadow() {
     }
 }
 
-void furi_hal_rtc_reset_registers() {
+void furi_hal_rtc_reset_registers(void) {
     for(size_t i = 0; i < RTC_BKP_NUMBER; i++) {
         furi_hal_rtc_set_register(i, 0);
     }
@@ -193,10 +205,44 @@ void furi_hal_rtc_set_log_level(uint8_t level) {
     furi_log_set_level(level);
 }
 
-uint8_t furi_hal_rtc_get_log_level() {
+uint8_t furi_hal_rtc_get_log_level(void) {
     uint32_t data_reg = furi_hal_rtc_get_register(FuriHalRtcRegisterSystem);
     SystemReg* data = (SystemReg*)&data_reg;
     return data->log_level;
+}
+
+void furi_hal_rtc_set_log_device(FuriHalRtcLogDevice device) {
+    uint32_t data_reg = furi_hal_rtc_get_register(FuriHalRtcRegisterSystem);
+    SystemReg* data = (SystemReg*)&data_reg;
+    data->log_device = device;
+    furi_hal_rtc_set_register(FuriHalRtcRegisterSystem, data_reg);
+
+    furi_hal_serial_control_set_logging_config(
+        furi_hal_rtc_log_devices[furi_hal_rtc_get_log_device()],
+        furi_hal_rtc_log_baud_rates[furi_hal_rtc_get_log_baud_rate()]);
+}
+
+FuriHalRtcLogDevice furi_hal_rtc_get_log_device(void) {
+    uint32_t data_reg = furi_hal_rtc_get_register(FuriHalRtcRegisterSystem);
+    SystemReg* data = (SystemReg*)&data_reg;
+    return data->log_device;
+}
+
+void furi_hal_rtc_set_log_baud_rate(FuriHalRtcLogBaudRate baud_rate) {
+    uint32_t data_reg = furi_hal_rtc_get_register(FuriHalRtcRegisterSystem);
+    SystemReg* data = (SystemReg*)&data_reg;
+    data->log_baud_rate = baud_rate;
+    furi_hal_rtc_set_register(FuriHalRtcRegisterSystem, data_reg);
+
+    furi_hal_serial_control_set_logging_config(
+        furi_hal_rtc_log_devices[furi_hal_rtc_get_log_device()],
+        furi_hal_rtc_log_baud_rates[furi_hal_rtc_get_log_baud_rate()]);
+}
+
+FuriHalRtcLogBaudRate furi_hal_rtc_get_log_baud_rate(void) {
+    uint32_t data_reg = furi_hal_rtc_get_register(FuriHalRtcRegisterSystem);
+    SystemReg* data = (SystemReg*)&data_reg;
+    return data->log_baud_rate;
 }
 
 void furi_hal_rtc_set_flag(FuriHalRtcFlag flag) {
@@ -234,7 +280,7 @@ void furi_hal_rtc_set_boot_mode(FuriHalRtcBootMode mode) {
     furi_hal_rtc_set_register(FuriHalRtcRegisterSystem, data_reg);
 }
 
-FuriHalRtcBootMode furi_hal_rtc_get_boot_mode() {
+FuriHalRtcBootMode furi_hal_rtc_get_boot_mode(void) {
     uint32_t data_reg = furi_hal_rtc_get_register(FuriHalRtcRegisterSystem);
     SystemReg* data = (SystemReg*)&data_reg;
     return data->boot_mode;
@@ -247,7 +293,7 @@ void furi_hal_rtc_set_heap_track_mode(FuriHalRtcHeapTrackMode mode) {
     furi_hal_rtc_set_register(FuriHalRtcRegisterSystem, data_reg);
 }
 
-FuriHalRtcHeapTrackMode furi_hal_rtc_get_heap_track_mode() {
+FuriHalRtcHeapTrackMode furi_hal_rtc_get_heap_track_mode(void) {
     uint32_t data_reg = furi_hal_rtc_get_register(FuriHalRtcRegisterSystem);
     SystemReg* data = (SystemReg*)&data_reg;
     return data->heap_track_mode;
@@ -260,7 +306,7 @@ void furi_hal_rtc_set_locale_units(FuriHalRtcLocaleUnits value) {
     furi_hal_rtc_set_register(FuriHalRtcRegisterSystem, data_reg);
 }
 
-FuriHalRtcLocaleUnits furi_hal_rtc_get_locale_units() {
+FuriHalRtcLocaleUnits furi_hal_rtc_get_locale_units(void) {
     uint32_t data_reg = furi_hal_rtc_get_register(FuriHalRtcRegisterSystem);
     SystemReg* data = (SystemReg*)&data_reg;
     return data->locale_units;
@@ -273,7 +319,7 @@ void furi_hal_rtc_set_locale_timeformat(FuriHalRtcLocaleTimeFormat value) {
     furi_hal_rtc_set_register(FuriHalRtcRegisterSystem, data_reg);
 }
 
-FuriHalRtcLocaleTimeFormat furi_hal_rtc_get_locale_timeformat() {
+FuriHalRtcLocaleTimeFormat furi_hal_rtc_get_locale_timeformat(void) {
     uint32_t data_reg = furi_hal_rtc_get_register(FuriHalRtcRegisterSystem);
     SystemReg* data = (SystemReg*)&data_reg;
     return data->locale_timeformat;
@@ -286,15 +332,15 @@ void furi_hal_rtc_set_locale_dateformat(FuriHalRtcLocaleDateFormat value) {
     furi_hal_rtc_set_register(FuriHalRtcRegisterSystem, data_reg);
 }
 
-FuriHalRtcLocaleDateFormat furi_hal_rtc_get_locale_dateformat() {
+FuriHalRtcLocaleDateFormat furi_hal_rtc_get_locale_dateformat(void) {
     uint32_t data_reg = furi_hal_rtc_get_register(FuriHalRtcRegisterSystem);
     SystemReg* data = (SystemReg*)&data_reg;
     return data->locale_dateformat;
 }
 
-void furi_hal_rtc_set_datetime(FuriHalRtcDateTime* datetime) {
+void furi_hal_rtc_set_datetime(DateTime* datetime) {
     furi_check(!FURI_IS_IRQ_MODE());
-    furi_assert(datetime);
+    furi_check(datetime);
 
     FURI_CRITICAL_ENTER();
     /* Disable write protection */
@@ -331,9 +377,9 @@ void furi_hal_rtc_set_datetime(FuriHalRtcDateTime* datetime) {
     FURI_CRITICAL_EXIT();
 }
 
-void furi_hal_rtc_get_datetime(FuriHalRtcDateTime* datetime) {
+void furi_hal_rtc_get_datetime(DateTime* datetime) {
     furi_check(!FURI_IS_IRQ_MODE());
-    furi_assert(datetime);
+    furi_check(datetime);
 
     FURI_CRITICAL_ENTER();
     uint32_t time = LL_RTC_TIME_Get(RTC); // 0x00HHMMSS
@@ -349,33 +395,11 @@ void furi_hal_rtc_get_datetime(FuriHalRtcDateTime* datetime) {
     datetime->weekday = __LL_RTC_CONVERT_BCD2BIN((date >> 24) & 0xFF);
 }
 
-bool furi_hal_rtc_validate_datetime(FuriHalRtcDateTime* datetime) {
-    bool invalid = false;
-
-    invalid |= (datetime->second > 59);
-    invalid |= (datetime->minute > 59);
-    invalid |= (datetime->hour > 23);
-
-    invalid |= (datetime->year < 2000);
-    invalid |= (datetime->year > 2099);
-
-    invalid |= (datetime->month == 0);
-    invalid |= (datetime->month > 12);
-
-    invalid |= (datetime->day == 0);
-    invalid |= (datetime->day > 31);
-
-    invalid |= (datetime->weekday == 0);
-    invalid |= (datetime->weekday > 7);
-
-    return !invalid;
-}
-
 void furi_hal_rtc_set_fault_data(uint32_t value) {
     furi_hal_rtc_set_register(FuriHalRtcRegisterFaultData, value);
 }
 
-uint32_t furi_hal_rtc_get_fault_data() {
+uint32_t furi_hal_rtc_get_fault_data(void) {
     return furi_hal_rtc_get_register(FuriHalRtcRegisterFaultData);
 }
 
@@ -383,55 +407,12 @@ void furi_hal_rtc_set_pin_fails(uint32_t value) {
     furi_hal_rtc_set_register(FuriHalRtcRegisterPinFails, value);
 }
 
-uint32_t furi_hal_rtc_get_pin_fails() {
+uint32_t furi_hal_rtc_get_pin_fails(void) {
     return furi_hal_rtc_get_register(FuriHalRtcRegisterPinFails);
 }
 
-uint32_t furi_hal_rtc_get_timestamp() {
-    FuriHalRtcDateTime datetime = {0};
+uint32_t furi_hal_rtc_get_timestamp(void) {
+    DateTime datetime = {0};
     furi_hal_rtc_get_datetime(&datetime);
-    return furi_hal_rtc_datetime_to_timestamp(&datetime);
-}
-
-uint32_t furi_hal_rtc_datetime_to_timestamp(FuriHalRtcDateTime* datetime) {
-    uint32_t timestamp = 0;
-    uint8_t years = 0;
-    uint8_t leap_years = 0;
-
-    for(uint16_t y = FURI_HAL_RTC_EPOCH_START_YEAR; y < datetime->year; y++) {
-        if(furi_hal_rtc_is_leap_year(y)) {
-            leap_years++;
-        } else {
-            years++;
-        }
-    }
-
-    timestamp +=
-        ((years * furi_hal_rtc_days_per_year[0]) + (leap_years * furi_hal_rtc_days_per_year[1])) *
-        FURI_HAL_RTC_SECONDS_PER_DAY;
-
-    bool leap_year = furi_hal_rtc_is_leap_year(datetime->year);
-
-    for(uint8_t m = 1; m < datetime->month; m++) {
-        timestamp += furi_hal_rtc_get_days_per_month(leap_year, m) * FURI_HAL_RTC_SECONDS_PER_DAY;
-    }
-
-    timestamp += (datetime->day - 1) * FURI_HAL_RTC_SECONDS_PER_DAY;
-    timestamp += datetime->hour * FURI_HAL_RTC_SECONDS_PER_HOUR;
-    timestamp += datetime->minute * FURI_HAL_RTC_SECONDS_PER_MINUTE;
-    timestamp += datetime->second;
-
-    return timestamp;
-}
-
-uint16_t furi_hal_rtc_get_days_per_year(uint16_t year) {
-    return furi_hal_rtc_days_per_year[furi_hal_rtc_is_leap_year(year) ? 1 : 0];
-}
-
-bool furi_hal_rtc_is_leap_year(uint16_t year) {
-    return (((year) % 4 == 0) && ((year) % 100 != 0)) || ((year) % 400 == 0);
-}
-
-uint8_t furi_hal_rtc_get_days_per_month(bool leap_year, uint8_t month) {
-    return furi_hal_rtc_days_per_month[leap_year ? 1 : 0][month - 1];
+    return datetime_datetime_to_timestamp(&datetime);
 }

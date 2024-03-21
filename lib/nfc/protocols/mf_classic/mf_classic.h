@@ -39,6 +39,7 @@ typedef enum {
     MfClassicErrorNotPresent,
     MfClassicErrorProtocol,
     MfClassicErrorAuth,
+    MfClassicErrorPartialRead,
     MfClassicErrorTimeout,
 } MfClassicError;
 
@@ -142,7 +143,7 @@ typedef struct {
 
 extern const NfcDeviceBase nfc_device_mf_classic;
 
-MfClassicData* mf_classic_alloc();
+MfClassicData* mf_classic_alloc(void);
 
 void mf_classic_free(MfClassicData* data);
 

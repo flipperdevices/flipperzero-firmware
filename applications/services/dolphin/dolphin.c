@@ -8,7 +8,7 @@
 #define DOLPHIN_LOCK_EVENT_FLAG (0x1)
 
 #define TAG "Dolphin"
-#define HOURS_IN_TICKS(x) ((x)*60 * 60 * 1000)
+#define HOURS_IN_TICKS(x) ((x) * 60 * 60 * 1000)
 
 static void dolphin_update_clear_limits_timer_period(Dolphin* dolphin);
 
@@ -22,7 +22,7 @@ void dolphin_deed(DolphinDeed deed) {
 }
 
 DolphinStats dolphin_stats(Dolphin* dolphin) {
-    furi_assert(dolphin);
+    furi_check(dolphin);
 
     DolphinStats stats;
     DolphinEvent event;
@@ -36,7 +36,7 @@ DolphinStats dolphin_stats(Dolphin* dolphin) {
 }
 
 void dolphin_flush(Dolphin* dolphin) {
-    furi_assert(dolphin);
+    furi_check(dolphin);
 
     DolphinEvent event;
     event.type = DolphinEventTypeFlush;
@@ -73,7 +73,7 @@ void dolphin_clear_limits_timer_callback(void* context) {
     dolphin_event_send_async(dolphin, &event);
 }
 
-Dolphin* dolphin_alloc() {
+Dolphin* dolphin_alloc(void) {
     Dolphin* dolphin = malloc(sizeof(Dolphin));
 
     dolphin->state = dolphin_state_alloc();
@@ -119,6 +119,7 @@ void dolphin_event_release(Dolphin* dolphin, DolphinEvent* event) {
 }
 
 FuriPubSub* dolphin_get_pubsub(Dolphin* dolphin) {
+    furi_check(dolphin);
     return dolphin->pubsub;
 }
 
@@ -128,7 +129,7 @@ static void dolphin_update_clear_limits_timer_period(Dolphin* dolphin) {
     uint32_t timer_expires_at = furi_timer_get_expire_time(dolphin->clear_limits_timer);
 
     if((timer_expires_at - now_ticks) > HOURS_IN_TICKS(0.1)) {
-        FuriHalRtcDateTime date;
+        DateTime date;
         furi_hal_rtc_get_datetime(&date);
         uint32_t now_time_in_ms = ((date.hour * 60 + date.minute) * 60 + date.second) * 1000;
         uint32_t time_to_clear_limits = 0;
@@ -201,6 +202,8 @@ int32_t dolphin_srv(void* p) {
 }
 
 void dolphin_upgrade_level(Dolphin* dolphin) {
+    furi_check(dolphin);
+
     dolphin_state_increase_level(dolphin->state);
     dolphin_flush(dolphin);
 }
