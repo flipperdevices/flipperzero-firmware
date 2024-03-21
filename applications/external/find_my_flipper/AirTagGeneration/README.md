@@ -1,6 +1,8 @@
-# FindMy
+# FindMy Network - Location Reports with Generated AirTags
 
-Query Apple's Find My network, allowing none Apple devices to retrieve the location reports.
+Query Apple's Find My network, allowing non-Apple devices to retrieve the location reports.
+
+Video Tutorial: https://www.youtube.com/watch?v=XGwHmwvQoqo
 
 This was made possible thanks to Chapoly1305 and his work bringing airtag tracking to non Apple devices:
 1. https://github.com/Chapoly1305/FindMy
@@ -18,9 +20,7 @@ He wrote these instructions and provided an in-depth tutorial on how to use it. 
 Use the `generate_keys.py` script to generate the required keys. The script will generate a `.keys`
 or multiple files for each device you want to use. Each `.keys` file will contain the private key, the public key
 (also called advertisement key) and the hashed advertisement key. As the name suggests, the private key is a secret
-and should not be shared. The public key (advertisement key) is used for broadcasting the BLE message, this is also
-being asked by the `hci.py` script in openhaystack project. The hashed advertisement key is for requesting location
-reports from Apple.
+and should not be shared. The public key (advertisement key) is used for broadcasting the BLE message, the hashed advertisement key is for requesting location reports from Apple. The name of the `.keys` file is the MAC address for that generated tag.
 
 ### request_reports.py
 Use the `request_reports.py` script to request location reports from Apple. The script will read the `.keys` files and
@@ -55,7 +55,8 @@ Apple ID for experimental purpose.**  If you ran into issue of "KeyError service
 
 
 📺 Installation and Walkthrough Video: https://youtu.be/yC2HIPDSxlM
-
+This walkthrough is in-depth but differs slightly from the FindMy Flipper version.
+Regardless this video is well made and deserves a watch!
 
 ### Steps
 
