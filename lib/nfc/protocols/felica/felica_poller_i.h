@@ -31,8 +31,7 @@ typedef enum {
 struct FelicaPoller {
     Nfc* nfc;
     FelicaPollerState state;
-
-    FelicaAuthenticationContext auth_context;
+    FelicaAuthentication auth;
 
     FelicaData* data;
     BitBuffer* tx_buffer;

@@ -29,7 +29,7 @@ static FelicaPoller* felica_poller_alloc(Nfc* nfc) {
     nfc_set_fdt_poll_fc(instance->nfc, FELICA_FDT_POLL_FC);
     nfc_set_fdt_poll_poll_us(instance->nfc, FELICA_POLL_POLL_MIN_US);
 
-    mbedtls_des3_init(&instance->auth_context.des_context);
+    mbedtls_des3_init(&instance->auth.des_context);
     instance->data = felica_alloc();
 
     instance->felica_event.data = &instance->felica_event_data;
@@ -47,7 +47,7 @@ static void felica_poller_free(FelicaPoller* instance) {
     furi_assert(instance->rx_buffer);
     furi_assert(instance->data);
 
-    mbedtls_des3_free(&instance->auth_context.des_context);
+    mbedtls_des3_free(&instance->auth.des_context);
     bit_buffer_free(instance->tx_buffer);
     bit_buffer_free(instance->rx_buffer);
     felica_free(instance->data);
@@ -80,16 +80,18 @@ NfcCommand felica_poller_state_handler_activate(FelicaPoller* instance) {
     if(error == FelicaErrorNone) {
         furi_hal_random_fill_buf(instance->data->data.fs.rc.data, 16);
 
-        ///TODO: need to determine that we have CK and then go to Auth steps, otherwise skip them
-        instance->state = FelicaPollerStateAuthenticateInternal;
-        //instance->state = FelicaPollerStateReadBlocks;
-        memset(instance->data->data.fs.ck.data, 0xFF, 16); //for now set CK to all 0xFF's
-    } else {
+        instance->felica_event.type = FelicaPollerEventTypeRequestAuthContext;
+        instance->felica_event_data.auth_context = &instance->auth.context;
+
+        instance->callback(instance->general_event, instance->context);
+
+        bool skip_auth = instance->auth.context.skip_auth;
+        instance->state = skip_auth ? FelicaPollerStateReadBlocks :
+                                      FelicaPollerStateAuthenticateInternal;
+    } else if(error != FelicaErrorTimeout) {
         instance->felica_event.type = FelicaPollerEventTypeError;
         instance->felica_event_data.error = error;
         instance->state = FelicaPollerStateReadFailed;
-        // Add delay to switch context
-        furi_delay_ms(100);
     }
     return command;
 }
@@ -100,10 +102,10 @@ NfcCommand felica_poller_state_handler_auth_internal(FelicaPoller* instance) {
     instance->state = FelicaPollerStateReadFailed;
 
     felica_calculate_session_key(
-        &instance->auth_context.des_context,
-        instance->auth_context.card_key.data,
+        &instance->auth.des_context,
+        instance->auth.context.card_key.data,
         instance->data->data.fs.rc.data,
-        instance->auth_context.session_key.data);
+        instance->auth.session_key.data);
 
     instance->state = FelicaPollerStateReadBlocks;
 
@@ -122,14 +124,14 @@ NfcCommand felica_poller_state_handler_auth_internal(FelicaPoller* instance) {
         error = felica_poller_read_blocks(instance, sizeof(blocks), blocks, &new_resp);
         if(error == FelicaErrorNone && new_resp->SF1 == 0 && new_resp->SF2 == 0) {
             if(felica_check_mac(
-                   &instance->auth_context.des_context,
+                   &instance->auth.des_context,
                    // FelicaMACTypeRead,
-                   instance->auth_context.session_key.data,
+                   instance->auth.session_key.data,
                    instance->data->data.fs.rc.data,
                    blocks,
                    new_resp->block_count,
                    new_resp->data)) {
-                instance->auth_context.auth_status.internal = true;
+                instance->auth.context.auth_status.internal = true;
                 instance->data->data.fs.wcnt.SF1 = 0;
                 instance->data->data.fs.wcnt.SF2 = 0;
                 memcpy(instance->data->data.fs.wcnt.data, new_resp->data + 16, 16);
@@ -158,10 +160,10 @@ NfcCommand felica_poller_state_handler_auth_external(FelicaPoller* instance) {
 
     instance->data->data.fs.state.data[0] = 1;
     uint8_t session_swapped[16];
-    memcpy(session_swapped, instance->auth_context.session_key.data + 8, 8);
-    memcpy(session_swapped + 8, instance->auth_context.session_key.data, 8);
+    memcpy(session_swapped, instance->auth.session_key.data + 8, 8);
+    memcpy(session_swapped + 8, instance->auth.session_key.data, 8);
     felica_calculate_mac(
-        &instance->auth_context.des_context,
+        &instance->auth.des_context,
         session_swapped, //instance->session_key.data,
         instance->data->data.fs.rc.data,
         first_block,
@@ -189,7 +191,7 @@ NfcCommand felica_poller_state_handler_auth_external(FelicaPoller* instance) {
             instance->data->data.fs.state.SF1 = 0;
             instance->data->data.fs.state.SF2 = 0;
             memcpy(instance->data->data.fs.state.data, resp->data, 16);
-            instance->auth_context.auth_status.external = instance->data->data.fs.state.data[0];
+            instance->auth.context.auth_status.external = instance->data->data.fs.state.data[0];
         }
     }
     instance->state = FelicaPollerStateReadBlocks;
@@ -246,13 +248,13 @@ NfcCommand felica_poller_state_handler_read_blocks(FelicaPoller* instance) {
 NfcCommand felica_poller_state_handler_read_success(FelicaPoller* instance) {
     FURI_LOG_D(TAG, "Read Success");
 
-    if(!instance->auth_context.auth_status.internal ||
-       !instance->auth_context.auth_status.external) {
+    if(!instance->auth.context.auth_status.internal ||
+       !instance->auth.context.auth_status.external) {
         instance->data->blocks_read--;
     } else {
         memcpy(
             instance->data->data.fs.ck.data,
-            instance->auth_context.card_key.data,
+            instance->auth.context.card_key.data,
             FELICA_DATA_BLOCK_SIZE);
     }
 

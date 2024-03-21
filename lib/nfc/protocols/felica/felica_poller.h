@@ -23,11 +23,22 @@ typedef enum {
     FelicaPollerEventTypeRequestAuthContext,
 } FelicaPollerEventType;
 
+typedef struct {
+    uint8_t data[FELICA_DATA_BLOCK_SIZE];
+} FelicaSessionKey;
+
+typedef struct {
+    mbedtls_des3_context des_context;
+    FelicaSessionKey session_key;
+    FelicaAuthenticationContext context;
+} FelicaAuthentication;
+
 /**
  * @brief Felica poller event data.
  */
 typedef union {
     FelicaError error; /**< Error code indicating card activation fail reason. */
+    FelicaAuthenticationContext* auth_context;
 } FelicaPollerEventData;
 
 /**
