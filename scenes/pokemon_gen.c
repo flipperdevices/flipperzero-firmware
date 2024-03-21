@@ -18,29 +18,17 @@ static void scene_change_from_main_cb(void* context, uint32_t index) {
     PokemonFap* pokemon_fap = (PokemonFap*)context;
 
     /* Reuse of scenes to allow for using the same functions to set names */
-    /* XXX: I think I did this a stupid way and it should be able to be
-     * refactored with just assigning index to the scene state.
-     */
     switch(index) {
     case SelectNicknameScene:
-        scene_manager_set_scene_state(
-            pokemon_fap->scene_manager, SelectNicknameScene, SelectNicknameScene);
-        break;
     case SelectOTNameScene:
-        scene_manager_set_scene_state(
-            pokemon_fap->scene_manager, SelectNicknameScene, SelectOTNameScene);
-        break;
     case SelectUnownFormScene:
         scene_manager_set_scene_state(
-            pokemon_fap->scene_manager, SelectNicknameScene, SelectUnownFormScene);
+            pokemon_fap->scene_manager, SelectNicknameScene, index);
         break;
     case SelectLevelScene:
-        scene_manager_set_scene_state(
-            pokemon_fap->scene_manager, SelectLevelScene, SelectLevelScene);
-        break;
     case SelectOTIDScene:
         scene_manager_set_scene_state(
-            pokemon_fap->scene_manager, SelectLevelScene, SelectOTIDScene);
+            pokemon_fap->scene_manager, SelectLevelScene, index);
         break;
     case SelectGenderScene:
         if (select_gender_is_static(pokemon_fap->pdata, table_stat_base_get(pokemon_fap->pdata->pokemon_table, pokemon_stat_get(pokemon_fap->pdata, STAT_NUM, NONE), STAT_BASE_GENDER_RATIO, NONE))) return;
@@ -69,7 +57,6 @@ bool gen_back_event_callback(void* context) {
     return true;
 }
 
-/* XXX: Does flipper have a monospace font available? */
 void gen_scene_on_enter(void* context) {
     char buf[32];
     char name_buf[11]; // All name buffers are 11 bytes at most, including term
@@ -164,20 +151,20 @@ void gen_scene_on_enter(void* context) {
         pokemon_fap);
 
     if (pokemon_fap->pdata->gen == GEN_II) {
-        snprintf(buf, sizeof(buf), "Shiny:   %s", select_shiny_is_shiny(pokemon_fap->pdata) ? "Yes" : "No");
+        snprintf(buf, sizeof(buf), "Shiny:             %s", select_shiny_is_shiny(pokemon_fap->pdata) ? "Yes" : "No");
         submenu_add_item(
             pokemon_fap->submenu, buf, SelectShinyScene, scene_change_from_main_cb, pokemon_fap);
 
-        snprintf(buf, sizeof(buf), "Gender:   %s", select_gender_get(pokemon_fap->pdata));
+        snprintf(buf, sizeof(buf), "Gender:         %s", select_gender_get(pokemon_fap->pdata));
         submenu_add_item(
             pokemon_fap->submenu, buf, SelectGenderScene, scene_change_from_main_cb, pokemon_fap);
 
-        snprintf(buf, sizeof(buf), "Pokerus:  %s", select_pokerus_status(pokemon_fap));
+        snprintf(buf, sizeof(buf), "Pokerus:       %s", select_pokerus_status(pokemon_fap));
         submenu_add_item(
             pokemon_fap->submenu, buf, SelectPokerusScene, scene_change_from_main_cb, pokemon_fap);
 
 	if(pokemon_stat_get(pokemon_fap->pdata, STAT_NUM, NONE) == 0xC8) { // Unown
-            snprintf(buf, sizeof(buf), "Unown Form:   %c", unown_form_get(pokemon_fap->pdata));
+            snprintf(buf, sizeof(buf), "Unown Form: %c", unown_form_get(pokemon_fap->pdata));
             submenu_add_item(
                 pokemon_fap->submenu, buf, SelectUnownFormScene, scene_change_from_main_cb, pokemon_fap);
         }
