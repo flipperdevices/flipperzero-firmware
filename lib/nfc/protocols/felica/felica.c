@@ -76,6 +76,25 @@ bool felica_load(FelicaData* data, FlipperFormat* ff, uint32_t version) {
             break;
 
         parsed = true;
+        uint32_t blocks_total = 0;
+        uint32_t blocks_read = 0;
+        if(!flipper_format_read_uint32(ff, "Blocks total", &blocks_total, 1)) break;
+        if(!flipper_format_read_uint32(ff, "Blocks read", &blocks_read, 1)) break;
+        data->blocks_total = (uint8_t)blocks_total;
+        data->blocks_read = (uint8_t)blocks_read;
+
+        FuriString* temp_str = furi_string_alloc();
+        for(uint8_t i = 0; i < data->blocks_total; i++) {
+            furi_string_printf(temp_str, "Block %d", i);
+            if(!flipper_format_read_hex(
+                   ff,
+                   furi_string_get_cstr(temp_str),
+                   (&data->data.dump[i * sizeof(FelicaBlock)]),
+                   sizeof(FelicaBlock))) {
+                parsed = false;
+                break;
+            }
+        }
     } while(false);
 
     return parsed;
@@ -97,7 +116,25 @@ bool felica_save(const FelicaData* data, FlipperFormat* ff) {
                ff, FELICA_MANUFACTURE_PARAMETER, data->pmm.data, FELICA_PMM_SIZE))
             break;
 
+        uint32_t blocks_total = data->blocks_total;
+        uint32_t blocks_read = data->blocks_read;
+        if(!flipper_format_write_uint32(ff, "Blocks total", &blocks_total, 1)) break;
+        if(!flipper_format_write_uint32(ff, "Blocks read", &blocks_read, 1)) break;
+
         saved = true;
+        FuriString* temp_str = furi_string_alloc();
+        for(uint8_t i = 0; i < blocks_total; i++) {
+            furi_string_printf(temp_str, "Block %d", i);
+            if(!flipper_format_write_hex(
+                   ff,
+                   furi_string_get_cstr(temp_str),
+                   (&data->data.dump[i * sizeof(FelicaBlock)]),
+                   sizeof(FelicaBlock))) {
+                saved = false;
+                break;
+            }
+        }
+        furi_string_free(temp_str);
     } while(false);
 
     return saved;
