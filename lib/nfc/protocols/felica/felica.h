@@ -46,6 +46,12 @@ typedef struct {
     bool external : 1;
 } FelicaAuthenticationStatus;
 
+typedef struct {
+    bool skip_auth;
+    FelicaCardKey card_key;
+    FelicaAuthenticationStatus auth_status;
+} FelicaAuthenticationContext;
+
 typedef enum {
     FelicaMACTypeRead,
     FelicaMACTypeWrite,
