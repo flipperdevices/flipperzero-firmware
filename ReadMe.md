@@ -31,6 +31,7 @@ This software is for experimental purposes only and is not meant for any illegal
 
 - Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-03-18 16:00 EST`
 - Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-03-18 16:00 EST`
+- Removed: [Mfkey32 With Nested v1.0 (By noproto)](https://github.com/noproto/FlipperMfkey), it's functionality is now built into [Mfkey v2.0 (By noproto)](https://github.com/noproto/FlipperMfkey)
 
 <a name="release">
 
@@ -431,7 +432,6 @@ $ ./fbt dolphin_ext
 - [Metronome v1.1 (By panki27)](https://github.com/panki27/Metronome)
 - [MFC Editor v1.0 (By TollyH)](https://github.com/TollyH/flipper-apps)
 - [Mfkey v2.0 (By noproto)](https://github.com/noproto/FlipperMfkey)
-- [Mfkey32 With Nested v1.0 (By noproto)](https://github.com/noproto/FlipperMfkey)
 - [MH-Z19 CO2 Sensor v0.2 (By meshchaninov)](https://github.com/meshchaninov/flipper-zero-mh-z19)
 - [MH-Z19 UART (By skotopes)](https://github.com/skotopes/flipperzero_mhz19_uart)
 - [Mifare Fuzzer v1.3 (By spheeere98)](https://github.com/spheeere98/mifare_fuzzer)
