@@ -30,6 +30,7 @@ InfraredMessage* infrared_decoder_pioneer_decode(void* decoder, bool level, uint
 void* infrared_encoder_pioneer_alloc(void);
 void infrared_encoder_pioneer_reset(void* encoder_ptr, const InfraredMessage* message);
 void infrared_encoder_pioneer_free(void* decoder);
-InfraredStatus infrared_encoder_pioneer_encode(void* encoder_ptr, uint32_t* duration, bool* polarity);
+InfraredStatus
+    infrared_encoder_pioneer_encode(void* encoder_ptr, uint32_t* duration, bool* polarity);
 
 const InfraredProtocolVariant* infrared_protocol_pioneer_get_variant(InfraredProtocol protocol);

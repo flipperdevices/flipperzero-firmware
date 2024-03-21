@@ -426,6 +426,7 @@ MU_TEST(infrared_test_decoder_mixed) {
     infrared_test_run_decoder(InfraredProtocolSIRC, 3);
     infrared_test_run_decoder(InfraredProtocolKaseikyo, 1);
     infrared_test_run_decoder(InfraredProtocolRCA, 1);
+    infrared_test_run_decoder(InfraredProtocolPioneer, 6);
 }
 
 MU_TEST(infrared_test_decoder_nec) {
@@ -509,6 +510,12 @@ MU_TEST(infrared_test_decoder_rca) {
     infrared_test_run_decoder(InfraredProtocolRCA, 6);
 }
 
+MU_TEST(infrared_test_decoder_pioneer) {
+    for(uint32_t i = 1; i <= 11; ++i) {
+        infrared_test_run_decoder(InfraredProtocolPioneer, i);
+    }
+}
+
 MU_TEST(infrared_test_encoder_decoder_all) {
     infrared_test_run_encoder_decoder(InfraredProtocolNEC, 1);
     infrared_test_run_encoder_decoder(InfraredProtocolNECext, 1);
@@ -539,6 +546,7 @@ MU_TEST_SUITE(infrared_test) {
     MU_RUN_TEST(infrared_test_decoder_necext1);
     MU_RUN_TEST(infrared_test_decoder_kaseikyo);
     MU_RUN_TEST(infrared_test_decoder_rca);
+    MU_RUN_TEST(infrared_test_decoder_pioneer);
     MU_RUN_TEST(infrared_test_decoder_mixed);
     MU_RUN_TEST(infrared_test_encoder_decoder_all);
 }

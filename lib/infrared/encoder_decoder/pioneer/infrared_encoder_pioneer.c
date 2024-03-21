@@ -47,7 +47,8 @@ InfraredStatus infrared_encoder_pioneer_encode_repeat(
     return InfraredStatusOk;
 }
 
-InfraredStatus infrared_encoder_pioneer_encode(void* encoder_ptr, uint32_t* duration, bool* level) {
+InfraredStatus
+    infrared_encoder_pioneer_encode(void* encoder_ptr, uint32_t* duration, bool* level) {
     InfraredCommonEncoder* encoder = encoder_ptr;
 
     InfraredStatus status = infrared_common_encode(encoder, duration, level);
