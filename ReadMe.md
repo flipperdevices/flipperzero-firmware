@@ -66,8 +66,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [JS Runner v1.0 (By nminaylov & DrZlo13)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/3286) [Documentation, Improvements and Revisions (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/8c2ad63485663846565a51e57c791c8ce5e29bdd)
 - OFW: [Infrared: Add Fujitsu ASYG24KMTB #3513 (By aprosvetova)](https://github.com/flipperdevices/flipperzero-firmware/pull/3513)
 - Updated: [FindMy Flipper v2.0 (By MatthewKuKanich)](https://github.com/MatthewKuKanich/FindMyFlipper)
-- Updated: [Pokemon Trading v1.8 (By EstebanFuentealba & kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons) Changes By kbembedded
 - Updated: [Authenticator/TOTP v5.13.0 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
+- Updated: [Pokemon Trading v1.8 (By EstebanFuentealba & kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons) Changes By kbembedded
 - Updated: [Mfkey v2.0 (By noproto)](https://github.com/noproto/FlipperMfkey)
 
 <a name="release">

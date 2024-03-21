@@ -30,6 +30,7 @@ typedef struct {
 typedef enum {
     MissingNonces,
     ZeroNonces,
+    InsufficientRAM,
 } MFKeyError;
 
 typedef enum {
