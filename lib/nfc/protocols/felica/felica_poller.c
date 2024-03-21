@@ -111,39 +111,36 @@ NfcCommand felica_poller_state_handler_auth_internal(FelicaPoller* instance) {
 
     uint8_t blocks[3] = {FELICA_BLOCK_INDEX_RC};
     FelicaPollerWriteCommandResponse* response;
-    FelicaError error = felica_poller_write_blocks(
-        instance, 1, blocks, instance->data->data.fs.rc.data, &response);
-    ///TODO: Think of reworking this part into do{}while in order to reduce nesting
-    if(error == FelicaErrorNone && response->SF1 == 0 && response->SF2 == 0) {
+    do {
+        FelicaError error = felica_poller_write_blocks(
+            instance, 1, blocks, instance->data->data.fs.rc.data, &response);
+        if(error != FelicaErrorNone || response->SF1 != 0 || response->SF2 != 0) break;
+
         blocks[0] = FELICA_BLOCK_INDEX_ID;
         blocks[1] = FELICA_BLOCK_INDEX_WCNT;
         blocks[2] = FELICA_BLOCK_INDEX_MAC_A;
         FelicaPollerReadCommandResponse* new_resp;
         error = felica_poller_read_blocks(instance, sizeof(blocks), blocks, &new_resp);
-        if(error == FelicaErrorNone && new_resp->SF1 == 0 && new_resp->SF2 == 0) {
-            if(felica_check_mac(
-                   &instance->auth.des_context,
-                   // FelicaMACTypeRead,
-                   instance->auth.session_key.data,
-                   instance->data->data.fs.rc.data,
-                   blocks,
-                   new_resp->block_count,
-                   new_resp->data)) {
-                instance->auth.context.auth_status.internal = true;
-                instance->data->data.fs.wcnt.SF1 = 0;
-                instance->data->data.fs.wcnt.SF2 = 0;
-                memcpy(
-                    instance->data->data.fs.wcnt.data,
-                    new_resp->data + FELICA_DATA_BLOCK_SIZE,
-                    FELICA_DATA_BLOCK_SIZE);
-                instance->state = FelicaPollerStateAuthenticateExternal;
-            } else {
-                ///TODO: Replace with simple read step
-                instance->state = FelicaPollerStateReadBlocks;
-                //instance->state = FelicaPollerStateReadSuccess;
-            }
+        if(error != FelicaErrorNone || response->SF1 != 0 || response->SF2 != 0) break;
+
+        if(felica_check_mac(
+               &instance->auth.des_context,
+               instance->auth.session_key.data,
+               instance->data->data.fs.rc.data,
+               blocks,
+               new_resp->block_count,
+               new_resp->data)) {
+            instance->auth.context.auth_status.internal = true;
+            instance->data->data.fs.wcnt.SF1 = 0;
+            instance->data->data.fs.wcnt.SF2 = 0;
+            memcpy(
+                instance->data->data.fs.wcnt.data,
+                new_resp->data + FELICA_DATA_BLOCK_SIZE,
+                FELICA_DATA_BLOCK_SIZE);
+            instance->state = FelicaPollerStateAuthenticateExternal;
         }
-    }
+    } while(false);
+
     return NfcCommandContinue;
 }
 
