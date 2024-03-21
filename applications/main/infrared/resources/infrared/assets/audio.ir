@@ -434,13 +434,25 @@ protocol: NEC
 address: 00 00 00 00
 command: 07 00 00 00
 #
-name: Change_Input
+name: Next
 type: parsed
 protocol: NEC
 address: 00 00 00 00
 command: 15 00 00 00
 #
-name: Play/Pause
+name: Prev
+type: parsed
+protocol: NEC
+address: 00 00 00 00
+command: 15 00 00 00
+#
+name: Play
+type: parsed
+protocol: NEC
+address: 00 00 00 00
+command: 6A 00 00 00
+#
+name: Pause
 type: parsed
 protocol: NEC
 address: 00 00 00 00
