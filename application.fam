@@ -1,0 +1,9 @@
+App(
+    appid="flipperzero_analog_clock",
+    name="Analog Clock",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="analog_clock_main",
+    requires=["gui", "core"],
+    stack_size=1 * 1024,
+    fap_category="Examples",
+)
