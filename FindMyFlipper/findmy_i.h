@@ -22,6 +22,7 @@
 #if FW_ORIGIN_Official
 void furi_hal_bt_reverse_mac_addr(uint8_t mac_addr[GAP_MAC_ADDR_SIZE]);
 #endif
+// Testing GH Actions Build for all FW
 
 struct FindMy {
     Gui* gui;
