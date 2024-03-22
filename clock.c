@@ -83,15 +83,6 @@ void draw_wide_line(Canvas* c, float ax, float ay, float bx, float by, float wd)
     }
 }
 
-void draw_line(Canvas* c, float x1, float y1, float x2, float y2) {
-    canvas_draw_line(
-        c,
-        round(x1 + CLOCK_OFS_X),
-        round(y1 + CLOCK_OFS_Y),
-        round(x2 + CLOCK_OFS_X),
-        round(y2 + CLOCK_OFS_Y));
-}
-
 char* clock_number_str(uint8_t number) {
     // itoa(number % 100, str, 10);
     static char str[3];
@@ -107,27 +98,27 @@ char* clock_number_str(uint8_t number) {
     return str;
 }
 
-void draw_number(Canvas* c, int x, int y, int number) {
-    canvas_draw_str_aligned(
-        c,
-        round(x + CLOCK_OFS_X),
-        round(y + CLOCK_OFS_Y + 1),
-        AlignCenter,
-        AlignCenter,
-        clock_number_str(number));
-}
-
 void draw_hand(Canvas* canvas, float ang, float width, int radius, int ofs) {
     float s = sin(ang);
     float c = -cos(ang);
-    draw_line(canvas, 0, 0, s * ofs, c * ofs);
+    canvas_draw_line(
+        canvas,
+        CLOCK_OFS_X,
+        CLOCK_OFS_Y,
+        round(s * ofs + CLOCK_OFS_X),
+        round(c * ofs + CLOCK_OFS_Y));
     draw_wide_line(canvas, s * ofs, c * ofs, s * radius, c * radius, width);
 }
 
 void draw_sec_hand(Canvas* canvas, float ang, float radius, float ext) {
     float s = sin(ang);
     float c = -cos(ang);
-    draw_line(canvas, s * -ext, c * -ext, s * radius, c * radius);
+    canvas_draw_line(
+        canvas,
+        round(s * -ext + CLOCK_OFS_X),
+        round(c * -ext + CLOCK_OFS_Y),
+        round(s * radius + CLOCK_OFS_X),
+        round(c * radius + CLOCK_OFS_Y));
 }
 
 float intersect_x(float tan, float width, float height) {
@@ -138,70 +129,6 @@ float intersect_x(float tan, float width, float height) {
 float intersect_y(float tan, float width, float height) {
     float y = width * tan;
     return y > height ? height : y;
-}
-
-void draw_face(Canvas* c, float width, bool round_face) {
-    float horOfs = round_face ? FACE_RADIUS : FACE_HEIGHT;
-    float verOfs = round_face ? FACE_RADIUS : width;
-
-    float shortLineLen = round_face ? 1.0 : 2.0;
-    float longLineLen = round_face ? 3.5 : 6.5;
-    float digitsOfs = round_face ? 10.0 : 13.0;
-
-    draw_line(c, 0, -horOfs, 0, longLineLen - horOfs);
-    draw_line(c, 0, horOfs, 0, horOfs - longLineLen);
-    draw_line(c, verOfs, 0, verOfs - longLineLen, 0);
-    draw_line(c, -verOfs, 0, longLineLen - verOfs, 0);
-
-    draw_number(c, 0, digitsOfs - horOfs, 12);
-    draw_number(c, 0, horOfs - digitsOfs, 6);
-    draw_number(c, verOfs - digitsOfs, 0, 3);
-    draw_number(c, digitsOfs - verOfs, 0, 9);
-
-    float inc = M_PI / 30;
-    float ang = inc;
-    for(int i = 1; i < 15; i++) { // 1/4 circle
-        bool atHour = (i % 5 == 0);
-
-        float lineLen = atHour ? longLineLen : shortLineLen;
-
-        float startPtX, startPtY;
-        float endPtX, endPtY;
-        float digitPosX, digitPosY;
-
-        if(round_face) {
-            float c = cos(ang);
-            float s = sin(ang);
-            startPtX = c * FACE_RADIUS;
-            startPtY = s * FACE_RADIUS;
-            endPtX = c * (FACE_RADIUS - lineLen);
-            endPtY = s * (FACE_RADIUS - lineLen);
-            digitPosX = c * (FACE_RADIUS - digitsOfs);
-            digitPosY = s * (FACE_RADIUS - digitsOfs);
-        } else {
-            float t = tan(ang);
-            startPtX = intersect_x(t, width, FACE_HEIGHT);
-            startPtY = intersect_y(t, width, FACE_HEIGHT);
-            endPtX = intersect_x(t, width - lineLen, FACE_HEIGHT - lineLen);
-            endPtY = intersect_y(t, width - lineLen, FACE_HEIGHT - lineLen);
-            digitPosX = intersect_x(t, width - digitsOfs, FACE_HEIGHT - digitsOfs);
-            digitPosY = intersect_y(t, width - digitsOfs, FACE_HEIGHT - digitsOfs);
-        }
-
-        draw_line(c, startPtX, startPtY, endPtX, endPtY);
-        draw_line(c, -startPtX, startPtY, -endPtX, endPtY);
-        draw_line(c, startPtX, -startPtY, endPtX, -endPtY);
-        draw_line(c, -startPtX, -startPtY, -endPtX, -endPtY);
-
-        if(atHour) {
-            int hour = i / 5;
-            draw_number(c, digitPosX, digitPosY, hour + 3);
-            draw_number(c, -digitPosX, digitPosY, 9 - hour);
-            draw_number(c, digitPosX, -digitPosY, 3 - hour);
-            draw_number(c, -digitPosX, -digitPosY, hour + 9);
-        }
-        ang += inc; // minute
-    }
 }
 
 inline void set_clock_minute_line(
