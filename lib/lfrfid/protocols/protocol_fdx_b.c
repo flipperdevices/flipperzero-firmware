@@ -329,17 +329,13 @@ void protocol_fdx_b_render_brief_data(ProtocolFDXB* protocol, FuriString* result
     // 10 bit of country code
     uint16_t country_code = protocol_fdx_b_get_country_code(protocol->data);
 
-    bool animal_flag = bit_lib_get_bit(protocol->data, 63);
-
     furi_string_printf(
         result,
         "ID: %03hu-%012llu\n"
-        "Country Code: %hu\n"
-        "Animal: %s, Temp.: ",
+        "Country: %hu; Temp.: ",
         country_code,
         national_code,
-        country_code,
-        animal_flag ? "Yes" : "No");
+        country_code);
 
     float temperature;
     if(protocol_fdx_b_get_temp(protocol->data, &temperature)) {

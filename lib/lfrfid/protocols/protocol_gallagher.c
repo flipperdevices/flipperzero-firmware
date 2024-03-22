@@ -280,11 +280,8 @@ static void protocol_gallagher_render_data_internal(
     if(brief) {
         furi_string_printf(
             result,
-            "Region: %u, Issue Level: %u\n"
             "FC: %lu\n"
             "Card: %lu",
-            region,
-            issue_level,
             fc,
             card_id);
     } else {

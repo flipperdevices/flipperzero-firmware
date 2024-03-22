@@ -288,8 +288,8 @@ static void protocol_nexwatch_render_data_internal(
     if(brief) {
         furi_string_printf(
             result,
-            "ID: %lu, Mode: %hhu\n"
-            "Type: %s",
+            "ID: %lu\n"
+            "Mode: %hhu; Type: %s",
             id,
             mode,
             type);

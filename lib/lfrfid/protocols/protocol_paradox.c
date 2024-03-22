@@ -197,15 +197,12 @@ void protocol_paradox_render_brief_data(ProtocolParadox* protocol, FuriString* r
 
     furi_string_printf(
         result,
-        "FC: %hhu\n"
-        "Card: %hu\n"
-        "CRC: %hhu",
+        "FC: %hhu; Card: %hu",
         fc,
-        card_id,
-        card_crc);
+        card_id);
 
     if(calc_crc != card_crc) {
-        furi_string_cat(result, " (Mismatch)");
+        furi_string_cat(result, "\nCRC Mismatch, Invalid Card!");
     }
 };
 

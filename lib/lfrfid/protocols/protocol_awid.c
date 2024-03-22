@@ -192,7 +192,7 @@ void protocol_awid_render_brief_data(ProtocolAwid* protocol, FuriString* result)
     uint8_t* decoded_data = protocol->data;
     uint8_t format_length = decoded_data[0];
 
-    furi_string_printf(result, "Format: %hhu\n", format_length);
+    furi_string_printf(result, "Format: %hhu", format_length);
 
     if(format_length == 26) {
         uint8_t facility;
@@ -203,12 +203,12 @@ void protocol_awid_render_brief_data(ProtocolAwid* protocol, FuriString* result)
         bit_lib_copy_bits((uint8_t*)&card_id, 0, 8, decoded_data, 25);
         furi_string_cat_printf(
             result,
-            "FC: %hhu\n"
+            "; FC: %hhu\n"
             "Card: %hu",
             facility,
             card_id);
     } else {
-        furi_string_cat(result, "Data: Unknown");
+        furi_string_cat(result, "\nData: Unknown");
     }
 };
 

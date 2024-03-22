@@ -290,11 +290,9 @@ void protocol_indala26_render_data_internal(
         furi_string_printf(
             result,
             "FC: %u\n"
-            "Card: %u\n"
-            "Parity: %c",
+            "Card: %u",
             fc,
-            card,
-            (wiegand_correct ? '+' : '-'));
+            card);
     } else {
         furi_string_printf(
             result,
