@@ -1,8 +1,8 @@
 name: Build
 
-# on:
-#   push:
-#     branches: [main]
+ on:
+   push:
+     branches: [main]
 
 jobs:
   ufbt-build-action:
@@ -11,9 +11,13 @@ jobs:
 
     strategy:
       matrix:
-        include:
-          - name: dev channel
-            sdk-channel: dev
+        sdk-channel:
+          - dev
+          - release
+        sdk-url:
+          - "https://up.momentum-fw.dev/firmware/directory.json"
+          - "https://up.unleashedflip.com/directory.json"
+          - "https://update.flipperzero.one/firmware/directory.json"
 
     steps:
       - uses: actions/checkout@v4
@@ -41,6 +45,8 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
+            sdk-channel: ${{ matrix.sdk-channel }}
+            indexer-url:  ${{ matrix.sdk-url }}
             name: ${{ env.COMMIT_MESSAGE }}
             token: ${{ secrets.GITHUB_TOKEN }}
             files: ${{ steps.build-app.outputs.fap-artifacts }}
