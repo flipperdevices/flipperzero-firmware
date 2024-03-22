@@ -4,6 +4,7 @@ name: "FAP: Build for multiple SDK sources"
 # See https://github.com/marketplace/actions/build-flipper-application-package-fap for more information
 
 on:
+  workflow_dispatch:
   push:
     # Put your main branch name under "branches"
     branches:
