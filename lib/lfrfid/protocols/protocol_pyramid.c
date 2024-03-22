@@ -251,12 +251,7 @@ void protocol_pyramid_render_data(ProtocolPyramid* protocol, FuriString* result)
         uint16_t card_id;
         bit_lib_copy_bits((uint8_t*)&card_id, 8, 8, decoded_data, 16);
         bit_lib_copy_bits((uint8_t*)&card_id, 0, 8, decoded_data, 24);
-        furi_string_cat_printf(
-            result,
-            "FC: %03hhu\n"
-            "Card: %05hu",
-            facility,
-            card_id);
+        furi_string_cat_printf(result, "FC: %03hhu; Card: %05hu", facility, card_id);
     } else {
         furi_string_cat_printf(result, "Data: Unknown");
     }
