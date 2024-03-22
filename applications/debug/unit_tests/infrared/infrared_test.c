@@ -527,6 +527,7 @@ MU_TEST(infrared_test_encoder_decoder_all) {
     infrared_test_run_encoder_decoder(InfraredProtocolSIRC, 1);
     infrared_test_run_encoder_decoder(InfraredProtocolKaseikyo, 1);
     infrared_test_run_encoder_decoder(InfraredProtocolRCA, 1);
+    infrared_test_run_encoder_decoder(InfraredProtocolPioneer, 1);
 }
 
 MU_TEST_SUITE(infrared_test) {

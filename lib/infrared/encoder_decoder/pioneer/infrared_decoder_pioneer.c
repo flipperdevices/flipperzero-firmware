@@ -13,7 +13,8 @@ bool infrared_decoder_pioneer_interpret(InfraredCommonDecoder* decoder) {
     uint8_t command = 0;
     InfraredProtocol protocol = InfraredProtocolUnknown;
 
-    if(decoder->databit_cnt == 32) {
+    if(decoder->databit_cnt == decoder->protocol->databit_len[0] ||
+       decoder->databit_cnt == decoder->protocol->databit_len[1]) {
         address = *data & 0xFF;
         uint8_t real_address_checksum = ~address;
         uint8_t address_checksum = (*data >> 8) & 0xFF;

@@ -16,7 +16,7 @@ void infrared_encoder_pioneer_reset(void* encoder_ptr, const InfraredMessage* me
         data[2] = message->command & 0xFF;
         data[3] = ~(message->command & 0xFF);
         data[4] = 0;
-        encoder->bits_to_encode = 33;
+        encoder->bits_to_encode = encoder->protocol->databit_len[0];
     } else {
         furi_crash();
     }
