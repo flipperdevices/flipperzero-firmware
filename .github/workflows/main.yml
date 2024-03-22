@@ -1,13 +1,15 @@
-name: Build
+name: Build and Release
 
 on:
   push:
     branches: [main]
-    paths:
-      - 'FindMyFlipper/**'
+    #paths:
+    #  - 'FindMyFlipper/**'
+  release:
+    types: [created]
 
 jobs:
-  ufbt-build-action:
+  build:
     runs-on: ubuntu-latest
     name: "ufbt: Build for dev channel"
 
@@ -21,3 +23,37 @@ jobs:
           - "https://up.unleashedflip.com/directory.json"
           - "https://update.flipperzero.one/firmware/directory.json"
 
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build with ufbt
+        uses: flipperdevices/flipperzero-ufbt-action@v0.1.2
+        with:
+          sdk-channel: ${{ matrix.sdk-channel }}
+          app-dir: FindMyFlipper
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-artifacts
+          path: FindMyFlipper/dist/*.fa[pl]
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.event_name == 'release' && github.event.action == 'created'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: build-artifacts
+          path: dist
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*.fa[pl]
+          token: ${{ secrets.GITHUB_TOKEN }}
