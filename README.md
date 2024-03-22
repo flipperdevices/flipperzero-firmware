@@ -162,7 +162,7 @@ These instructions assume that you are starting at the Flipper Zero desktop. Oth
 - The Pokemon's stats can also be influenced. The current settings are:
   - `Random IV, Zero EV` Mimics stats of a caught wild Pokemon.
   - `Random IV, Max EV / Level` IV is randomized, but EV is set to the maximum a trained Pokemon could be for its current level.
-  - `Randon IV, Max EV` IV is randomized, EV is set to the absolute max for a perfectly trained Pokemon.
+  - `Random IV, Max EV` IV is randomized, EV is set to the absolute max for a perfectly trained Pokemon.
   - `Max IV, Zero EV` Mimics stats of a caught wild Pokemon, but with the maximum IV possible.
   - `Max IV, Max EV / Level` IV is max, EV is set to the maximum a trained Pokemon could be for its current level.
   - `Max IV, Max EV` Absolutely perfect and overly powerful Pokemon.
