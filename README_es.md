@@ -112,7 +112,7 @@ Estas instrucciones asumen que estás comenzando desde el escritorio de Flipper 
 
   - `Random IV, Zero EV`  Imita las estadísticas de un Pokémon salvaje atrapado.
   - `Random IV, Max EV / Level` IV es aleatorio, pero EV se establece en el máximo que un Pokémon entrenado podría tener para su nivel actual.
-  - `Randon IV, Max EV` IV es aleatorio, EV se establece en el máximo absoluto para un Pokémon perfectamente entrenado.
+  - `Random IV, Max EV` IV es aleatorio, EV se establece en el máximo absoluto para un Pokémon perfectamente entrenado.
   - `Max IV, Zero EV` Imita las estadísticas de un Pokémon salvaje atrapado, pero con el IV máximo posible.
   - `Max IV, Max EV / Level` IV es máximo, EV se establece en el máximo que un Pokémon entrenado podría tener para su nivel actual.
   - `Max IV, Max EV` Máximo Pokémon absolutamente perfectos y poderosos.
