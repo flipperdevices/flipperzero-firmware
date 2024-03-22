@@ -27,7 +27,6 @@ typedef struct {
     CallbackFunction callback;
     Buffer* buffer;
     uint32_t baudrate;
-    bool init_by_app;
     void* ctx;
     volatile int tick;
 } UHFUart;

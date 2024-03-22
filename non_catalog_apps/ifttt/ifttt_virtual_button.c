@@ -220,6 +220,7 @@ void ifttt_virtual_button_app_free(VirtualButtonApp* app) {
     furi_record_close(RECORD_POWER);
     furi_record_close(RECORD_GUI);
 
+    furi_hal_serial_async_rx_stop(app->serial_handle);
     furi_hal_serial_deinit(app->serial_handle);
     furi_hal_serial_control_release(app->serial_handle);
 

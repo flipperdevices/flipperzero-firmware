@@ -62,16 +62,10 @@ UHFUart* uhf_uart_alloc() {
     uart->bus = FuriHalBusUSART1;
     uart->handle = furi_hal_serial_control_acquire(FuriHalSerialIdUsart);
     // uart->rx_buff_stream = furi_stream_buffer_alloc(UHF_UART_RX_BUFFER_SIZE, 1);
-    uart->init_by_app = !furi_hal_bus_is_enabled(uart->bus);
     uart->tick = UHF_UART_WAIT_TICK;
     uart->baudrate = UHF_UART_DEFAULT_BAUDRATE;
-    // expansion_disable();
-    if(uart->init_by_app) {
-        FURI_LOG_E("UHF_UART", "UHF UART INIT BY APP");
-        furi_hal_serial_init(uart->handle, uart->baudrate);
-    } else {
-        FURI_LOG_E("UHF_UART", "UHF UART INIT BY HAL");
-    }
+    // expansion_disable -> is done at app start already
+    furi_hal_serial_init(uart->handle, uart->baudrate);
     uart->buffer = uhf_buffer_alloc(UHF_UART_RX_BUFFER_SIZE);
     // uart->thread = furi_thread_alloc_ex("UHFUartWorker", UHF_UART_WORKER_STACK_SIZE, uhf_uart_worker_callback, uart);
     // furi_thread_start(uart->thread);
@@ -86,11 +80,11 @@ void uhf_uart_free(UHFUart* uart) {
     // furi_thread_join(uart->thread);
     // furi_thread_free(uart->thread);
     // furi_stream_buffer_free(uart->rx_buff_stream);
-    uhf_buffer_free(uart->buffer);
-    if(uart->init_by_app) {
-        furi_hal_serial_deinit(uart->handle);
-    }
+    furi_hal_serial_async_rx_stop(uart->handle);
+    furi_hal_serial_deinit(uart->handle);
     furi_hal_serial_control_release(uart->handle);
+
+    uhf_buffer_free(uart->buffer);
     free(uart);
 }
 

@@ -357,11 +357,13 @@ static void cdc_init_uart(
 static void cdc_deinit_uart(CDCProcess* app, DapUartType type) {
     switch(type) {
     case DapUartTypeUSART1:
+        furi_hal_serial_async_rx_stop(app->serial_handle);
         furi_hal_serial_deinit(app->serial_handle);
         LL_USART_SetTXRXSwap(USART1, LL_USART_TXRX_STANDARD);
         furi_hal_serial_control_release(app->serial_handle);
         break;
     case DapUartTypeLPUART1:
+        furi_hal_serial_async_rx_stop(app->serial_handle);
         furi_hal_serial_deinit(app->serial_handle);
         LL_LPUART_SetTXRXSwap(LPUART1, LL_LPUART_TXRX_STANDARD);
         furi_hal_serial_control_release(app->serial_handle);
