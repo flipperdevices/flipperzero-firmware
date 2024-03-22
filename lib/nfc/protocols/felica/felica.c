@@ -213,7 +213,7 @@ void felica_calculate_session_key(
     mbedtls_des3_crypt_cbc(ctx, MBEDTLS_DES_ENCRYPT, 16, iv, rc_reversed, out);
 }
 
-bool felica_calculate_mac(
+static bool felica_calculate_mac(
     mbedtls_des3_context* ctx,
     const uint8_t* session_key,
     const uint8_t* rc,
@@ -250,7 +250,7 @@ bool felica_calculate_mac(
     return !error;
 }
 
-void felica_prepare_first_block(
+static void felica_prepare_first_block(
     FelicaMACType operation_type,
     const uint8_t* blocks,
     const uint8_t block_count,
