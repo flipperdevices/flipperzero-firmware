@@ -49,7 +49,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: build-artifacts
-          path: dist
+          path: dist/
 
       - name: Attach artifacts to the Draft Release
         uses: softprops/action-gh-release@v2
