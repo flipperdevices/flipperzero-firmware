@@ -2,13 +2,11 @@ name: Build and Release
 
 on:
   push:
-    branches: [testing]
-    # Uncomment and adjust the paths if you want to limit the build trigger to specific directories
-    # paths:
-    #   - 'FindMyFlipper/**'
+    branches: [main]
+    #paths:
+    #  - 'FindMyFlipper/**'
   release:
     types: [created]
-    branches: [testing]
 
 jobs:
   build:
@@ -40,12 +38,12 @@ jobs:
           name: build-artifacts
           path: FindMyFlipper/dist/*.fa[pl]
 
-  attach-to-release:
+  release:
     needs: build
     runs-on: ubuntu-latest
-    if: github.event_name == 'release' && github.event.action == 'created'
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Download build artifacts
         uses: actions/download-artifact@v3
@@ -53,8 +51,9 @@ jobs:
           name: build-artifacts
           path: dist
 
-      - name: Attach artifacts to the Release
+      - name: Attach artifacts to the Draft Release
         uses: softprops/action-gh-release@v2
         with:
           files: dist/*.fa[pl]
+          draft: true
           token: ${{ secrets.GITHUB_TOKEN }}
