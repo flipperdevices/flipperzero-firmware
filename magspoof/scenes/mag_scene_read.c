@@ -169,6 +169,10 @@ void mag_scene_read_on_exit(void* context) {
     widget_reset(mag->widget);
     // view_dispatcher_remove_view(mag->view_dispatcher, MagViewWidget);
 
+    furi_hal_serial_async_rx_stop(mag->serial_handle);
+    furi_hal_serial_deinit(mag->serial_handle);
+    furi_hal_serial_control_release(mag->serial_handle);
+
     // Stop UART worker
     FURI_LOG_D(TAG, "Stopping UART worker");
     furi_thread_flags_set(furi_thread_get_id(mag->uart_rx_thread), WorkerEvtStop);
@@ -177,9 +181,6 @@ void mag_scene_read_on_exit(void* context) {
     FURI_LOG_D(TAG, "UART worker stopped");
 
     furi_string_free(mag->uart_text_box_store);
-
-    furi_hal_serial_deinit(mag->serial_handle);
-    furi_hal_serial_control_release(mag->serial_handle);
 
     notification_message(mag->notifications, &sequence_blink_stop);
 }
