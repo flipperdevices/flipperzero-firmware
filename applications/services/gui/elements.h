@@ -62,8 +62,8 @@ void elements_scrollbar_pos(
     int32_t x,
     int32_t y,
     size_t height,
-    uint16_t pos,
-    uint16_t total);
+    size_t pos,
+    size_t total);
 
 /** Draw scrollbar on canvas.
  * @note    width 3px, height equal to canvas height
@@ -72,7 +72,7 @@ void elements_scrollbar_pos(
  * @param   pos     current element of total elements
  * @param   total   total elements
  */
-void elements_scrollbar(Canvas* canvas, uint16_t pos, uint16_t total);
+void elements_scrollbar(Canvas* canvas, size_t pos, size_t total);
 
 /** Draw rounded frame
  *
@@ -176,7 +176,7 @@ void elements_bold_rounded_frame(Canvas* canvas, int32_t x, int32_t y, size_t wi
  * @param   width   bubble width
  * @param   height  bubble height
  */
-void elements_bubble(Canvas* canvas, uint8_t x, uint8_t y, uint8_t width, uint8_t height);
+void elements_bubble(Canvas* canvas, int32_t x, int32_t y, size_t width, size_t height);
 
 /** Draw bubble frame for text with corner
  *
@@ -201,7 +201,7 @@ void elements_bubble_str(
  * @param   string  string to trim
  * @param   width   max width
  */
-void elements_string_fit_width(Canvas* canvas, FuriString* string, uint8_t width);
+void elements_string_fit_width(Canvas* canvas, FuriString* string, size_t width);
 
 /** Draw scrollable text line
  *
