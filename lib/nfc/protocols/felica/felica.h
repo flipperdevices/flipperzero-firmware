@@ -41,6 +41,7 @@ extern "C" {
 #define FELICA_TIME_SLOT_8 (0x07U)
 #define FELICA_TIME_SLOT_16 (0x0FU)
 
+/** @brief Type of possible Felica errors */
 typedef enum {
     FelicaErrorNone,
     FelicaErrorNotPresent,
@@ -53,40 +54,47 @@ typedef enum {
     FelicaErrorTimeout,
 } FelicaError;
 
+/** @brief Separate type for card key block. Used in authentication process */
 typedef struct {
     uint8_t data[FELICA_DATA_BLOCK_SIZE];
 } FelicaCardKey;
 
+/** @brief In Felica there two types of auth. Internal is the first one, after
+  * which external became possible. Here are two flags representing which one
+  * was passed */
 typedef struct {
     bool internal : 1;
     bool external : 1;
 } FelicaAuthenticationStatus;
 
+/** @brief Struct which controls the process of authentication and can be passed as
+  * a parameter to the application level. In order to force user to fill card key block data. */
 typedef struct {
-    bool skip_auth;
-    FelicaCardKey card_key;
-    FelicaAuthenticationStatus auth_status;
+    bool skip_auth; /**< By default it is true, so auth is skipped. By setting this to false several auth steps will be performed in order to pass auth*/
+    FelicaCardKey
+        card_key; /**< User must fill this field with known card key in order to pass auth*/
+    FelicaAuthenticationStatus auth_status; /**< Authentication status*/
 } FelicaAuthenticationContext;
 
-typedef enum {
-    FelicaMACTypeRead,
-    FelicaMACTypeWrite,
-} FelicaMACType;
-
+/** @brief Felica ID block */
 typedef struct {
     uint8_t data[FELICA_IDM_SIZE];
 } FelicaIDm;
 
+/** @brief Felica PMm block */
 typedef struct {
     uint8_t data[FELICA_PMM_SIZE];
 } FelicaPMm;
 
+/** @brief Felica block with status flags indicating last operation with it.
+  * See Felica manual for more details on status codes. */
 typedef struct {
-    uint8_t SF1;
-    uint8_t SF2;
-    uint8_t data[FELICA_DATA_BLOCK_SIZE];
+    uint8_t SF1; /**< Status flag 1, equals to 0 when success*/
+    uint8_t SF2; /**< Status flag 2, equals to 0 when success*/
+    uint8_t data[FELICA_DATA_BLOCK_SIZE]; /**< Block data */
 } FelicaBlock;
 
+/** @brief Felica filesystem structure */
 typedef struct {
     FelicaBlock spad[14];
     FelicaBlock reg;
@@ -105,11 +113,13 @@ typedef struct {
     FelicaBlock crc_check;
 } FelicaFileSystem;
 
+/** @brief Union which represents filesystem in junction with plain data dump */
 typedef union {
     FelicaFileSystem fs;
     uint8_t dump[sizeof(FelicaFileSystem)];
 } FelicaFSUnion;
 
+/** @brief Structure used to store Felica data and additional values about reading */
 typedef struct {
     FelicaIDm idm;
     FelicaPMm pmm;

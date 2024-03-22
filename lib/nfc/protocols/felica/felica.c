@@ -13,6 +13,14 @@
 
 static const uint32_t felica_data_format_version = 1;
 
+/** @brief This is used in felica_prepare_first_block to define which 
+ * type of block needs to be prepared.
+*/
+typedef enum {
+    FelicaMACTypeRead,
+    FelicaMACTypeWrite,
+} FelicaMACType;
+
 const NfcDeviceBase nfc_device_felica = {
     .protocol_name = FELICA_PROTOCOL_NAME,
     .alloc = (NfcDeviceAlloc)felica_alloc,

@@ -23,14 +23,20 @@ typedef enum {
     FelicaPollerEventTypeRequestAuthContext,
 } FelicaPollerEventType;
 
+/**
+ * @brief Stucture for holding Felica session key which is calculated from rc and ck
+*/
 typedef struct {
     uint8_t data[FELICA_DATA_BLOCK_SIZE];
 } FelicaSessionKey;
 
+/**
+ * @brief Structure used to hold authentication related fields
+*/
 typedef struct {
-    mbedtls_des3_context des_context;
-    FelicaSessionKey session_key;
-    FelicaAuthenticationContext context;
+    mbedtls_des3_context des_context; /**< Context for mbedtls des functions */
+    FelicaSessionKey session_key; /**< Calculated session key */
+    FelicaAuthenticationContext context; /**< Public auth context provided to upper levels*/
 } FelicaAuthentication;
 
 /**
@@ -38,7 +44,7 @@ typedef struct {
  */
 typedef union {
     FelicaError error; /**< Error code indicating card activation fail reason. */
-    FelicaAuthenticationContext* auth_context;
+    FelicaAuthenticationContext* auth_context; /**< Authentication context to be filled by user*/
 } FelicaPollerEventData;
 
 /**
