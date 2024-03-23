@@ -46,7 +46,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [JS Runner v1.0 (By nminaylov & DrZlo13)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/3286) [Module BugFixes & TextBox Module (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/61e5c69a6b983a3a9894546d6c2734ade3649a67)
 - Updated: [FindMy Flipper v2.0 (By MatthewKuKanich)](https://github.com/MatthewKuKanich/FindMyFlipper) (Updated Scripts) [Fix FindMy crash on boot when core2 is broken (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/e8be709d756756630caf5c52dc97e1c2d7c08110)
 - Updated: [USB Mass Storage v1.3 (By nminaylov)](https://github.com/flipperdevices/flipperzero-good-faps/tree/nm/usb_mass_storage_app/mass_storage) [Unlock USB when starting mass storage (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/7e215f64d210529aa1c2f0ea641df3ad87e26453)
-- Updated: [BLE Spam v6.2 (By Willy-JL & ECTO-1A & Spooks4576 with research from xMasterX; OFW API thanks to noproto)](https://github.com/Next-Flip/Momentum-Apps/tree/dev/ble_spam) [BLE Spam: Fix icon shift + bump versions (By Willy-JL)]()
+- Updated: [BLE Spam v6.2 (By Willy-JL & ECTO-1A & Spooks4576 with research from xMasterX; OFW API thanks to noproto)](https://github.com/Next-Flip/Momentum-Apps/tree/dev/ble_spam) [BLE Spam: Fix icon shift + bump versions (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/82479362b9e66a5ec6fd0ca6972c6260dd767fcb)
 
 <a name="release">
 
