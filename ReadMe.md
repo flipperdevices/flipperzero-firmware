@@ -32,7 +32,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-03-18 16:00 EST`
 - Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-03-18 16:00 EST`
 - Removed: [Mfkey32 With Nested v1.0 (By noproto)](https://github.com/noproto/FlipperMfkey), it's functionality is now built into [Mfkey v2.0 (By noproto)](https://github.com/noproto/FlipperMfkey)
-- [FindMy Flipper v2.0 (By MatthewKuKanich)](https://github.com/MatthewKuKanich/FindMyFlipper) (Updated Scripts)
 - OFW: [Add the Freedom_2_dolphins animation #3521 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3521)
 - OFW: [NFC wording fixes #3512 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3512)
 - OFW: [NFC Parsers cosmetic fixes #3511 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3511)
@@ -45,6 +44,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [UHF RFID WIP v1.1 (By frux-c)](https://github.com/frux-c/uhf_rfid) `Req: M100 or QM100`
 - Updated: [Digimon F-Com v1.2 (By TylerWilley)](https://github.com/TylerWilley/flipper-f-com)
 - Updated: [JS Runner v1.0 (By nminaylov & DrZlo13)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/3286) [Module BugFixes & TextBox Module (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/61e5c69a6b983a3a9894546d6c2734ade3649a67)
+- Updated: [FindMy Flipper v2.0 (By MatthewKuKanich)](https://github.com/MatthewKuKanich/FindMyFlipper) (Updated Scripts) [Fix FindMy crash on boot when core2 is broken (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/e8be709d756756630caf5c52dc97e1c2d7c08110)
+- Updated: [USB Mass Storage v1.3 (By nminaylov)](https://github.com/flipperdevices/flipperzero-good-faps/tree/nm/usb_mass_storage_app/mass_storage) [Unlock USB when starting mass storage (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/)
 
 <a name="release">
 
