@@ -45,15 +45,15 @@ void nfc_magic_scene_magic_info_on_enter(void* context) {
             instance->gen4_data->revision.data[4]);
 
         widget_add_string_element(
-            widget, 3, 27, AlignLeft, AlignTop, FontSecondary, furi_string_get_cstr(message));
+            widget, 55, 17, AlignLeft, AlignTop, FontSecondary, furi_string_get_cstr(message));
 
         furi_string_printf(
             message,
-            "Configured As %s",
+            "Configured As:\n%s",
             gen4_get_configuration_name(&instance->gen4_data->config));
 
         widget_add_string_multiline_element(
-            widget, 3, 37, AlignLeft, AlignTop, FontSecondary, furi_string_get_cstr(message));
+            widget, 3, 27, AlignLeft, AlignTop, FontSecondary, furi_string_get_cstr(message));
         furi_string_free(message);
     }
     widget_add_button_element(
