@@ -49,6 +49,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Wardriver GPS v1.0 (By Sil333033)](https://github.com/Next-Flip/Momentum-Apps/tree/dev/wardriver) [Fix Wardriver crash at exit (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/3da843ee0f20c791c2fcafb3326b53511b1a1b77)
 - Updated: [NFC Magic v1.6 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966) [Removed Gen2 changes till they are ready (By xMasterX)](https://github.com/xMasterX/all-the-plugins/commit/2a3013841837aaed4d2482c42da53755f1a7489f) & [Write NTAG password and PACK to gen4 special pages #190 (By Astrrra)](https://github.com/flipperdevices/flipperzero-good-faps/pull/190)
 - [Several apps updated with Fix UART deinit issues in multiple apps (By Willy-JL & xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/7c4b479dabaf073a3d30d57d7ef8a4fdc658a7bd)
+- Misc: Fixes for text box and uart echo demo app, remove duplicated emv parser plugin (By Willy-JL)
 
 <a name="release">
 
