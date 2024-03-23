@@ -8,6 +8,7 @@ let tmp_number = 0;
 
 let result = "Run JavaScript Code";
 while (dialog.message("Interactive Console", result)) {
+    keyboard.setHeader("Type JavaScript Code");
     let input = keyboard.text(256);
     if (!input) break;
 

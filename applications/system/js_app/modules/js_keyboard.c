@@ -20,9 +20,9 @@ static void ret_bad_args(struct mjs* mjs, const char* error) {
 
 static JsKeyboardInst* get_this_ctx(struct mjs* mjs) {
     mjs_val_t obj_inst = mjs_get(mjs, mjs_get_this(mjs), INST_PROP_NAME, ~0);
-    JsKeyboardInst* storage = mjs_get_ptr(mjs, obj_inst);
-    furi_assert(storage);
-    return storage;
+    JsKeyboardInst* keyboard = mjs_get_ptr(mjs, obj_inst);
+    furi_assert(keyboard);
+    return keyboard;
 }
 
 static void keyboard_callback(void* context) {
@@ -81,7 +81,7 @@ static void js_keyboard_text(struct mjs* mjs) {
     }
     text_input_set_result_callback(
         keyboard->text_input, keyboard_callback, keyboard, buffer, input_length, clear_default);
-
+    text_input_add_illegal_symbols(keyboard->text_input);
     text_input_set_minimum_length(keyboard->text_input, 0);
 
     Gui* gui = furi_record_open(RECORD_GUI);
