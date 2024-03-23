@@ -81,7 +81,6 @@ static void js_keyboard_text(struct mjs* mjs) {
     }
     text_input_set_result_callback(
         keyboard->text_input, keyboard_callback, keyboard, buffer, input_length, clear_default);
-    text_input_add_illegal_symbols(keyboard->text_input);
     text_input_set_minimum_length(keyboard->text_input, 0);
 
     Gui* gui = furi_record_open(RECORD_GUI);
