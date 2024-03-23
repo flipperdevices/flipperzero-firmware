@@ -27,10 +27,10 @@ This software is for experimental purposes only and is not meant for any illegal
 
 <a name="latest">
 
-## Latest Updates - [PATREON: Latest Release RM0321-1502-0.99.2-5d4268a](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
+## Latest Updates - [PATREON: Latest Release RM0323-1807-0.99.2-dcb0bf5](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
 - Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-03-18 16:00 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-03-18 16:00 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-03-23 18:07 EST`
 - Removed: [Mfkey32 With Nested v1.0 (By noproto)](https://github.com/noproto/FlipperMfkey), it's functionality is now built into [Mfkey v2.0 (By noproto)](https://github.com/noproto/FlipperMfkey)
 - OFW: [Add the Freedom_2_dolphins animation #3521 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3521)
 - OFW: [NFC wording fixes #3512 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3512)
