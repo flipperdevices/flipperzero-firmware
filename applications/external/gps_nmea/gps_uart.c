@@ -31,7 +31,8 @@ static void gps_uart_serial_init(GpsUart* gps_uart) {
 }
 
 static void gps_uart_serial_deinit(GpsUart* gps_uart) {
-    furi_assert(gps_uart->serial_handle);
+    UNUSED(gps_uart);
+    furi_hal_serial_async_rx_stop(gps_uart->serial_handle);
     furi_hal_serial_deinit(gps_uart->serial_handle);
     furi_hal_serial_control_release(gps_uart->serial_handle);
     gps_uart->serial_handle = NULL;

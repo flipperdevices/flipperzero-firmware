@@ -50,6 +50,7 @@ static void airmon_pms_serial_init(AirmonPmsContext* pms_context) {
 }
 
 static void airmon_pms_serial_deinit(AirmonPmsContext* pms_context) {
+    furi_hal_serial_async_rx_stop(pms_context->serial_handle);
     furi_hal_serial_deinit(pms_context->serial_handle);
     furi_hal_serial_control_release(pms_context->serial_handle);
 }

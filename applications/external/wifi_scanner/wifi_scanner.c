@@ -1028,6 +1028,9 @@ int32_t wifi_scanner_app(void* p) {
     }
 
     WIFI_APP_LOG_I("Start exit app");
+    furi_hal_serial_async_rx_stop(app->serial_handle);
+    furi_hal_serial_deinit(app->serial_handle);
+    furi_hal_serial_control_release(app->serial_handle);
 
     furi_thread_flags_set(furi_thread_get_id(app->m_worker_thread), WorkerEventStop);
     furi_thread_join(app->m_worker_thread);
@@ -1037,9 +1040,6 @@ int32_t wifi_scanner_app(void* p) {
 
     // Reset GPIO pins to default state
     furi_hal_gpio_init(&gpio_ext_pc0, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
-
-    furi_hal_serial_deinit(app->serial_handle);
-    furi_hal_serial_control_release(app->serial_handle);
 
     view_port_enabled_set(view_port, false);
 

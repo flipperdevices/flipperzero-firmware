@@ -92,12 +92,13 @@ UART_TerminalUart* uart_terminal_uart_init(UART_TerminalApp* app) {
 void uart_terminal_uart_free(UART_TerminalUart* uart) {
     furi_assert(uart);
 
+    furi_hal_serial_async_rx_stop(uart->serial_handle);
+    furi_hal_serial_deinit(uart->serial_handle);
+    furi_hal_serial_control_release(uart->serial_handle);
+
     furi_thread_flags_set(furi_thread_get_id(uart->rx_thread), WorkerEvtStop);
     furi_thread_join(uart->rx_thread);
     furi_thread_free(uart->rx_thread);
-
-    furi_hal_serial_deinit(uart->serial_handle);
-    furi_hal_serial_control_release(uart->serial_handle);
 
     free(uart);
 }

@@ -315,12 +315,13 @@ static FlipagotchiApp* flipagotchi_app_alloc() {
 static void flipagotchi_app_free(FlipagotchiApp* app) {
     furi_assert(app);
 
+    furi_hal_serial_async_rx_stop(app->serial_handle);
+    furi_hal_serial_deinit(app->serial_handle);
+    furi_hal_serial_control_release(app->serial_handle);
+
     furi_thread_flags_set(furi_thread_get_id(app->worker_thread), WorkerEventStop);
     furi_thread_join(app->worker_thread);
     furi_thread_free(app->worker_thread);
-
-    furi_hal_serial_deinit(app->serial_handle);
-    furi_hal_serial_control_release(app->serial_handle);
 
     // Free views
     view_dispatcher_remove_view(app->view_dispatcher, 0);
