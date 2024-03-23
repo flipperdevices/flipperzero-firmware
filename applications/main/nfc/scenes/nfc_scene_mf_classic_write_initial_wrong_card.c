@@ -1,7 +1,7 @@
 #include "../nfc_app_i.h"
 #include <nfc_icons.h>
 
-void nfc_scene_mf_classic_wrong_card_widget_callback(
+void nfc_scene_mf_classic_write_initial_wrong_card_widget_callback(
     GuiButtonType result,
     InputType type,
     void* context) {
@@ -11,7 +11,7 @@ void nfc_scene_mf_classic_wrong_card_widget_callback(
     }
 }
 
-void nfc_scene_mf_classic_wrong_card_on_enter(void* context) {
+void nfc_scene_mf_classic_write_initial_wrong_card_on_enter(void* context) {
     NfcApp* instance = context;
     Widget* widget = instance->widget;
 
@@ -19,7 +19,7 @@ void nfc_scene_mf_classic_wrong_card_on_enter(void* context) {
 
     widget_add_icon_element(widget, 83, 22, &I_WarningDolphinFlip_45x42);
     widget_add_string_element(
-        widget, 3, 4, AlignLeft, AlignTop, FontPrimary, "This is wrong card");
+        widget, 3, 4, AlignLeft, AlignTop, FontPrimary, "Use The Source Card!");
     widget_add_string_multiline_element(
         widget,
         4,
@@ -27,19 +27,19 @@ void nfc_scene_mf_classic_wrong_card_on_enter(void* context) {
         AlignLeft,
         AlignTop,
         FontSecondary,
-        "Data management\nis only possible\nwith initial card");
+        "Go to NFC Magic\napp if you want to\nwrite blanks");
     widget_add_button_element(
         widget,
         GuiButtonTypeLeft,
         "Retry",
-        nfc_scene_mf_classic_wrong_card_widget_callback,
+        nfc_scene_mf_classic_write_initial_wrong_card_widget_callback,
         instance);
 
     // Setup and start worker
     view_dispatcher_switch_to_view(instance->view_dispatcher, NfcViewWidget);
 }
 
-bool nfc_scene_mf_classic_wrong_card_on_event(void* context, SceneManagerEvent event) {
+bool nfc_scene_mf_classic_write_initial_wrong_card_on_event(void* context, SceneManagerEvent event) {
     NfcApp* instance = context;
     bool consumed = false;
 
@@ -51,7 +51,7 @@ bool nfc_scene_mf_classic_wrong_card_on_event(void* context, SceneManagerEvent e
     return consumed;
 }
 
-void nfc_scene_mf_classic_wrong_card_on_exit(void* context) {
+void nfc_scene_mf_classic_write_initial_wrong_card_on_exit(void* context) {
     NfcApp* instance = context;
 
     widget_reset(instance->widget);

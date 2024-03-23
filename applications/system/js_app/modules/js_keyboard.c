@@ -9,13 +9,9 @@ typedef struct {
     TextInput* text_input;
     ByteInput* byte_input;
     ViewDispatcher* view_dispatcher;
+    char* header;
     bool accepted;
 } JsKeyboardInst;
-
-typedef enum {
-    JsKeyboardViewTextInput,
-    JsKeyboardViewByteInput,
-} JsKeyboardView;
 
 static void ret_bad_args(struct mjs* mjs, const char* error) {
     mjs_prepend_errorf(mjs, MJS_BAD_ARGS_ERROR, "%s", error);
@@ -52,8 +48,10 @@ static void js_keyboard_set_header(struct mjs* mjs) {
         return;
     }
 
-    text_input_set_header_text(keyboard->text_input, header);
-    byte_input_set_header_text(keyboard->byte_input, header);
+    if(keyboard->header) {
+        free(keyboard->header);
+    }
+    keyboard->header = strdup(header);
 
     mjs_return(mjs, MJS_UNDEFINED);
 }
@@ -78,20 +76,36 @@ static void js_keyboard_text(struct mjs* mjs) {
         clear_default = mjs_get_bool(mjs, bool_obj);
     }
 
-    view_dispatcher_attach_to_gui(
-        keyboard->view_dispatcher, furi_record_open(RECORD_GUI), ViewDispatcherTypeFullscreen);
-    furi_record_close(RECORD_GUI);
-
+    if(keyboard->header) {
+        text_input_set_header_text(keyboard->text_input, keyboard->header);
+    }
     text_input_set_result_callback(
         keyboard->text_input, keyboard_callback, keyboard, buffer, input_length, clear_default);
+
     text_input_set_minimum_length(keyboard->text_input, 0);
 
-    view_dispatcher_switch_to_view(keyboard->view_dispatcher, JsKeyboardViewTextInput);
+    Gui* gui = furi_record_open(RECORD_GUI);
+    keyboard->view_dispatcher = view_dispatcher_alloc();
+    view_dispatcher_enable_queue(keyboard->view_dispatcher);
+    view_dispatcher_add_view(
+        keyboard->view_dispatcher, 0, text_input_get_view(keyboard->text_input));
+    view_dispatcher_set_event_callback_context(keyboard->view_dispatcher, keyboard);
+    view_dispatcher_set_navigation_event_callback(keyboard->view_dispatcher, keyboard_exit);
+    view_dispatcher_attach_to_gui(keyboard->view_dispatcher, gui, ViewDispatcherTypeFullscreen);
+    view_dispatcher_switch_to_view(keyboard->view_dispatcher, 0);
 
     view_dispatcher_run(keyboard->view_dispatcher);
 
-    text_input_reset(keyboard->text_input);
+    view_dispatcher_remove_view(keyboard->view_dispatcher, 0);
+    view_dispatcher_free(keyboard->view_dispatcher);
+    keyboard->view_dispatcher = NULL;
+    furi_record_close(RECORD_GUI);
 
+    text_input_reset(keyboard->text_input);
+    if(keyboard->header) {
+        free(keyboard->header);
+        keyboard->header = NULL;
+    }
     if(keyboard->accepted) {
         mjs_return(mjs, mjs_mk_string(mjs, buffer, ~0, true));
     } else {
@@ -121,20 +135,35 @@ static void js_keyboard_byte(struct mjs* mjs) {
         memcpy(buffer, (uint8_t*)default_data, MIN((size_t)input_length, default_data_len));
     }
 
-    view_dispatcher_attach_to_gui(
-        keyboard->view_dispatcher, furi_record_open(RECORD_GUI), ViewDispatcherTypeFullscreen);
-    furi_record_close(RECORD_GUI);
-
+    if(keyboard->header) {
+        byte_input_set_header_text(keyboard->byte_input, keyboard->header);
+    }
     byte_input_set_result_callback(
         keyboard->byte_input, keyboard_callback, NULL, keyboard, buffer, input_length);
 
-    view_dispatcher_switch_to_view(keyboard->view_dispatcher, JsKeyboardViewByteInput);
+    Gui* gui = furi_record_open(RECORD_GUI);
+    keyboard->view_dispatcher = view_dispatcher_alloc();
+    view_dispatcher_enable_queue(keyboard->view_dispatcher);
+    view_dispatcher_add_view(
+        keyboard->view_dispatcher, 0, byte_input_get_view(keyboard->byte_input));
+    view_dispatcher_set_event_callback_context(keyboard->view_dispatcher, keyboard);
+    view_dispatcher_set_navigation_event_callback(keyboard->view_dispatcher, keyboard_exit);
+    view_dispatcher_attach_to_gui(keyboard->view_dispatcher, gui, ViewDispatcherTypeFullscreen);
+    view_dispatcher_switch_to_view(keyboard->view_dispatcher, 0);
 
     view_dispatcher_run(keyboard->view_dispatcher);
 
+    view_dispatcher_remove_view(keyboard->view_dispatcher, 0);
+    view_dispatcher_free(keyboard->view_dispatcher);
+    keyboard->view_dispatcher = NULL;
+    furi_record_close(RECORD_GUI);
+
+    if(keyboard->header) {
+        free(keyboard->header);
+        keyboard->header = NULL;
+    }
     byte_input_set_result_callback(keyboard->byte_input, NULL, NULL, NULL, NULL, 0);
     byte_input_set_header_text(keyboard->byte_input, "");
-
     if(keyboard->accepted) {
         mjs_return(mjs, mjs_mk_array_buf(mjs, (char*)buffer, input_length));
     } else {
@@ -152,29 +181,14 @@ static void* js_keyboard_create(struct mjs* mjs, mjs_val_t* object) {
     mjs_set(mjs, keyboard_obj, "byte", ~0, MJS_MK_FN(js_keyboard_byte));
     keyboard->byte_input = byte_input_alloc();
     keyboard->text_input = text_input_alloc();
-    keyboard->view_dispatcher = view_dispatcher_alloc();
-    view_dispatcher_enable_queue(keyboard->view_dispatcher);
-    view_dispatcher_add_view(
-        keyboard->view_dispatcher,
-        JsKeyboardViewTextInput,
-        text_input_get_view(keyboard->text_input));
-    view_dispatcher_add_view(
-        keyboard->view_dispatcher,
-        JsKeyboardViewByteInput,
-        byte_input_get_view(keyboard->byte_input));
-    view_dispatcher_set_event_callback_context(keyboard->view_dispatcher, keyboard);
-    view_dispatcher_set_navigation_event_callback(keyboard->view_dispatcher, keyboard_exit);
     *object = keyboard_obj;
     return keyboard;
 }
 
 static void js_keyboard_destroy(void* inst) {
     JsKeyboardInst* keyboard = inst;
-    view_dispatcher_remove_view(keyboard->view_dispatcher, JsKeyboardViewByteInput);
     byte_input_free(keyboard->byte_input);
-    view_dispatcher_remove_view(keyboard->view_dispatcher, JsKeyboardViewTextInput);
     text_input_free(keyboard->text_input);
-    view_dispatcher_free(keyboard->view_dispatcher);
     free(keyboard);
 }
 
