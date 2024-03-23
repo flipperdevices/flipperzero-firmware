@@ -47,7 +47,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [FindMy Flipper v2.0 (By MatthewKuKanich)](https://github.com/MatthewKuKanich/FindMyFlipper) (Updated Scripts) [Fix FindMy crash on boot when core2 is broken (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/e8be709d756756630caf5c52dc97e1c2d7c08110)
 - Updated: [USB Mass Storage v1.3 (By nminaylov)](https://github.com/flipperdevices/flipperzero-good-faps/tree/nm/usb_mass_storage_app/mass_storage) [Unlock USB when starting mass storage (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/7e215f64d210529aa1c2f0ea641df3ad87e26453)
 - Updated: [BLE Spam v6.2 (By Willy-JL & ECTO-1A & Spooks4576 with research from xMasterX; OFW API thanks to noproto)](https://github.com/Next-Flip/Momentum-Apps/tree/dev/ble_spam) [BLE Spam: Fix icon shift + bump versions (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/82479362b9e66a5ec6fd0ca6972c6260dd767fcb)
-- Updated: [Wardriver GPS v1.0 (By Sil333033)](https://github.com/Next-Flip/Momentum-Apps/tree/dev/wardriver)
+- Updated: [Wardriver GPS v1.0 (By Sil333033)](https://github.com/Next-Flip/Momentum-Apps/tree/dev/wardriver) [Fix Wardriver crash at exit (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/3da843ee0f20c791c2fcafb3326b53511b1a1b77)
 
 <a name="release">
 
