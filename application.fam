@@ -6,7 +6,6 @@ App(
     cdefines=["APP_FLIPPER_HERO"],
     requires=[
         "gui",
-        "dialogs",
     ],
     stack_size=1 * 1024,
     order=10,

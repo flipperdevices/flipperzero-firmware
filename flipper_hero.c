@@ -1,11 +1,6 @@
 #include <furi.h>
 #include <gui/gui.h>
-#include <input/input.h>
-#include <stdlib.h>
-#include <furi.h>
-#include <input/input.h>
 #include <gui/elements.h>
-#include <dolphin/dolphin.h>
 #include "data/data.h"
 #include "view/arrows.h"
 #include "helpers/storage.h"
