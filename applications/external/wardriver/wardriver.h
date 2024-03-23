@@ -62,7 +62,6 @@ typedef struct {
 typedef struct {
     FuriMessageQueue* queue;
     FuriMutex* mutex;
-    FuriString* buffer;
 
     FuriThread* thread_esp;
     FuriStreamBuffer* rx_stream_esp;
