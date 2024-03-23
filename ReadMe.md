@@ -41,6 +41,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - [PATREON Build Update: New animation for Freedom 2 Dolphins added to ALL, Dolphin, ManifestSwitcher and Stock Builds](https://www.patreon.com/RogueMaster/membership)
 - Updated: [NFC Magic v1.6 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966) Gen4 improvements (By Leptopt1los)
 - Updated: [DCF77 Clock Sync v1.3 (By mdaskalov)](https://github.com/mdaskalov/dcf77-clock-sync) Use status led properly via notifications (By xMasterX)
+- Updated: [Mouse Jacker v1.2 (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/mousejacker) File path fix for all Mouse Jackers.
 
 <a name="release">
 

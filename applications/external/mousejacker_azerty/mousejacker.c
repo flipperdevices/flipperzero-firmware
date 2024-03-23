@@ -18,7 +18,7 @@
 #define NRFSNIFF_APP_PATH_FOLDER "/ext/apps_data/nrfsniff"
 #define NRFSNIFF_APP_PATH_EXTENSION ".txt"
 #define NRFSNIFF_APP_FILENAME "addresses.txt"
-#define LOCAL_BADUSB_FOLDER "/ext/bad_usb"
+#define LOCAL_BADUSB_FOLDER EXT_PATH("badusb")
 #define MOUSEJACKER_APP_PATH_EXTENSION ".txt"
 #define MAX_ADDRS 100
 
