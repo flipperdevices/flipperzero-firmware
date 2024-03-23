@@ -1,0 +1,19 @@
+App(
+    appid="flipper_hero",
+    name="Flipper Hero",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="flipper_hero_app",
+    cdefines=["APP_FLIPPER_HERO"],
+    requires=[
+        "gui",
+        "dialogs",
+    ],
+    stack_size=1 * 1024,
+    order=10,
+    fap_version="1.1",
+    fap_icon="icons/hex_10px.png",
+    fap_icon_assets="icons",
+    fap_category="Games",
+    fap_author="Mentoster",
+    fap_description="Arrow Speed Game",
+)
