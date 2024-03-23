@@ -38,6 +38,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [NFC Parsers cosmetic fixes #3511 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3511)
 - UL: Misc: Use non prefixed names for regular files with random name (By xMasterX)
 - UL: JS Dialog fix to include file icon (By xMasterX)
+- [PATREON Build Update: New animation for Freedom 2 Dolphins added to ALL, Dolphin, ManifestSwitcher and Stock Builds](https://www.patreon.com/RogueMaster/membership)
 
 <a name="release">
 
