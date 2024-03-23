@@ -1,30 +1,18 @@
 # [UHF]RFID App for FlipperZero
 
 <div style="
-display: grid;
-grid-template-columns: repeat(2, 1fr);
-grid-template-rows: repeat(2, 1fr);
-gap: 2px;
-justify-items: center;
+display: flex;
+flex-direction: row;
+justify-content: space-evenly;
 align-items: center;
-width: 100vw;
 ">
   <img style="
-    width: 280px;
-    height: auto;"
+    width: 350px;"
     src="assets/img/uhf_demo_app2.jpg">
   <img style="
-    width: 280px;
-    height: auto;"
-    src="assets/img/uhf_demo_app.jpg">
-  <img style="
-    width: 280px;
-    height: auto;"
-  src="assets/img/P_20231205_154700.jpg">
-  <img style="
-    width: 280px;
-    height: auto;"
-  src="assets/img/P_20231205_154717.jpg">
+    border-radius: 10px;
+    width: 400px;"
+  src="assets/img/uhf_demo_app.jpg">
 </div>
 
 ## Overview
@@ -33,7 +21,8 @@ This repository contains a UHF RFID application developed for FlipperZero, a ver
 
 ## What's Ongoing
 
-Adding features to the app to make it more usable and stable. Currently, also addressing the issue page to fix bugs and improve the app. And also add the planned and requested features. For example, UI Change to show all info from initial scan; feature to identify the tag type and show the info accordingly; and more.
+Working on the settings page to allow for changing of the module's settings.
+Adding options like settings the access password, baud rate, rf power, channel, etc.
 
 ## What's Changed
 

@@ -42,6 +42,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [NFC Magic v1.6 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966) Gen4 improvements (By Leptopt1los)
 - Updated: [DCF77 Clock Sync v1.3 (By mdaskalov)](https://github.com/mdaskalov/dcf77-clock-sync) Use status led properly via notifications (By xMasterX)
 - Updated: [Mouse Jacker v1.2 (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/mousejacker) File path fix for all Mouse Jackers.
+- Updated: [UHF RFID WIP v1.1 (By frux-c)](https://github.com/frux-c/uhf_rfid) `Req: M100 or QM100`
 
 <a name="release">
 
