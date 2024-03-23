@@ -1,5 +1,6 @@
 #pragma once
 
+#include "protocols/gen4/gen4.h"
 #include <nfc/nfc.h>
 #include "protocols/nfc_magic_protocols.h"
 
@@ -30,7 +31,7 @@ NfcMagicScanner* nfc_magic_scanner_alloc(Nfc* nfc);
 
 void nfc_magic_scanner_free(NfcMagicScanner* instance);
 
-void nfc_magic_scanner_set_gen4_password(NfcMagicScanner* instance, uint32_t password);
+void nfc_magic_scanner_set_gen4_password(NfcMagicScanner* instance, Gen4Password password);
 
 void nfc_magic_scanner_start(
     NfcMagicScanner* instance,
@@ -38,6 +39,8 @@ void nfc_magic_scanner_start(
     void* context);
 
 void nfc_magic_scanner_stop(NfcMagicScanner* instance);
+
+Gen4* nfc_magic_scanner_get_gen4_data(NfcMagicScanner* instance);
 
 #ifdef __cplusplus
 }
