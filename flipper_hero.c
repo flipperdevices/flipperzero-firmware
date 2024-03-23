@@ -203,14 +203,14 @@ void handle_arrow_input(PluginState* plugin_state, InputEvent input_event) {
 // init data
 void init_data(PluginState* plugin_state) {
     plugin_state->score = 0;
-    plugin_state->round = 0;
+    plugin_state->round = 1;
     plugin_state->timer = 1000;
     plugin_state->isGameStarted = false;
     plugin_state->isGameOver = false;
 }
 void clear_game_data(PluginState* plugin_state) {
     plugin_state->score = 0;
-    plugin_state->round = 0;
+    plugin_state->round = 1;
     plugin_state->timer = 1000;
     plugin_state->isGameOver = false;
 }
@@ -218,6 +218,7 @@ void start_game(PluginState* plugin_state, FuriTimer* timer) {
     plugin_state->isGameStarted = true;
     furi_timer_start(timer, 10);
     generate_arrows(plugin_state);
+    clear_game_data(plugin_state);
 }
 
 void restart_game(PluginState* plugin_state) {
@@ -230,9 +231,6 @@ int32_t flipper_hero_app() {
 
     PluginState* plugin_state = malloc(sizeof(PluginState));
 
-    init_data(plugin_state);
-    load_game_records(plugin_state);
-
     FuriTimer* timer =
         furi_timer_alloc(timer_callback, FuriTimerTypePeriodic, (void*)plugin_state);
     plugin_state->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
@@ -242,6 +240,10 @@ int32_t flipper_hero_app() {
         free(plugin_state);
         return 255;
     }
+
+    init_data(plugin_state);
+    // load_game_records(plugin_state);
+
     // Set system callbacks
     ViewPort* view_port = view_port_alloc();
     view_port_draw_callback_set(view_port, render_callback, plugin_state);
