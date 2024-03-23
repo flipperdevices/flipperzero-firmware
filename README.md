@@ -4,6 +4,7 @@
 
 Welcome to **Flipper Hero**, an engaging typing practice game ported for the Flipper Zero device!
 
+[video](https://www.reddit.com/r/flipperzero/comments/1blydyo/i_recreated_the_stratagem_hero_from_helldivers_2/)
 ## Screensots 
 ![1](https://github.com/mentoster/Flipper-hero/assets/50594730/102f0913-812d-4964-ac1b-a5a56d3e81e2)
 ![2](https://github.com/mentoster/Flipper-hero/assets/50594730/a79980a0-476e-4bfd-8fb9-0f3f478ced78)
