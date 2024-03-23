@@ -110,11 +110,11 @@ void draw_game_over_screen(Canvas* const canvas, int score, int round) {
 
 void draw_game_ui(Canvas* const canvas, int score, int round) {
     char roundText[32], scoreText[32];
+    canvas_set_font(canvas, FontPrimary);
     snprintf(roundText, sizeof(roundText), "Round %d", round);
     snprintf(scoreText, sizeof(scoreText), "%d score", score);
-    canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str_aligned(canvas, 44, 12, AlignRight, AlignBottom, roundText);
-    canvas_draw_str_aligned(canvas, 120, 12, AlignRight, AlignBottom, scoreText);
+    canvas_draw_str_aligned(canvas, 4, 12, AlignLeft, AlignBottom, roundText);
+    canvas_draw_str_aligned(canvas, 124, 12, AlignRight, AlignBottom, scoreText);
     canvas_draw_frame(canvas, 0, 0, 128, 64);
 }
 
@@ -135,7 +135,7 @@ void draw_arrows(Canvas* const canvas, PluginState* plugin_state) {
 void draw_progress_box(Canvas* const canvas, int timer) {
     canvas_draw_frame(canvas, 0, 52, 128, 12);
     canvas_draw_box(
-        canvas, 0, 52, timer * 0.128, 12); // Assuming max timer value scales to full width
+        canvas, 0, 52, timer * 0.110, 12); // Assuming max timer value scales to full width
 }
 
 static void render_callback(Canvas* const canvas, void* ctx) {
@@ -216,8 +216,8 @@ void clear_game_data(PluginState* plugin_state) {
 }
 void start_game(PluginState* plugin_state, FuriTimer* timer) {
     plugin_state->isGameStarted = true;
-    clear_game_data(plugin_state);
     furi_timer_start(timer, 10);
+    generate_arrows(plugin_state);
 }
 
 void restart_game(PluginState* plugin_state) {
@@ -232,7 +232,6 @@ int32_t flipper_hero_app() {
 
     init_data(plugin_state);
     load_game_records(plugin_state);
-    generate_arrows(plugin_state);
 
     FuriTimer* timer =
         furi_timer_alloc(timer_callback, FuriTimerTypePeriodic, (void*)plugin_state);
@@ -263,7 +262,6 @@ int32_t flipper_hero_app() {
             handle_arrow_input(plugin_state, event.input);
         } else {
             FURI_LOG_D("flipper_hero", "FuriMessageQueue: event timeout");
-            // Handle timeouts or other statuses as needed
         }
 
         // Check if all arrows are filled, then regenerate
@@ -282,8 +280,7 @@ int32_t flipper_hero_app() {
         } else if(event.input.key == InputKeyOk) {
             if(!plugin_state->isGameStarted) {
                 start_game(plugin_state, timer);
-            }
-            if(plugin_state->isGameOver) {
+            } else if(plugin_state->isGameOver) {
                 restart_game(plugin_state);
             }
         }

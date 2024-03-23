@@ -16,4 +16,5 @@ App(
     fap_category="Games",
     fap_author="Mentoster",
     fap_description="Arrow Speed Game",
+    fap_weburl="https://github.com/mentoster/Flipper-hero",
 )
