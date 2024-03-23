@@ -3,57 +3,51 @@ name: Build and Release
 on:
   push:
     branches: [main]
-    #paths:
-    #  - 'FindMyFlipper/**'
+    paths:
+      - 'FindMyFlipper/**'
   release:
     types: [created]
 
 jobs:
   build:
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
-    name: "ufbt: Build for dev channel"
+    name: "ufbt: Build"
 
     strategy:
       matrix:
-        sdk-channel:
+        channel:
           - dev
           - release
-        sdk-url:
-          - "https://up.momentum-fw.dev/firmware/directory.json"
-          - "https://up.unleashedflip.com/directory.json"
-          - "https://update.flipperzero.one/firmware/directory.json"
+        "config":
+          - { name: "mntm", url: "https://up.momentum-fw.dev/firmware/directory.json" }
+          - { name: "ul", url: "https://up.unleashedflip.com/directory.json" }
+          - { name: "ofw", url: "https://update.flipperzero.one/firmware/directory.json" }
 
     steps:
       - uses: actions/checkout@v4
 
       - name: Build with ufbt
         uses: flipperdevices/flipperzero-ufbt-action@v0.1.2
+        id: build-app
         with:
-          sdk-channel: ${{ matrix.sdk-channel }}
+          indexer-url: ${{ matrix.config.url }}
+          sdk-channel: ${{ matrix.channel }}
           app-dir: FindMyFlipper
 
       - name: Upload build artifacts
+        if: "github.event_name != 'release'"
         uses: actions/upload-artifact@v3
         with:
-          name: build-artifacts
-          path: dist/
-
-  release:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Download build artifacts
-        uses: actions/download-artifact@v3
-        with:
-          name: build-artifacts
-          path: dist/
+          name: ${{ matrix.config.name }}-${{ matrix.channel }}
+          path: ${{ steps.build-app.outputs.fap-artifacts }}
 
       - name: Attach artifacts to the Draft Release
+        if: "github.event_name == 'release'"
         uses: softprops/action-gh-release@v2
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
         with:
-          path: dist/
-          draft: true
-          token: ${{ secrets.GITHUB_TOKEN }}
+          files:
+            FindMyFlipper-${{ matrix.config.name }}-${{ matrix.channel }}.fap
