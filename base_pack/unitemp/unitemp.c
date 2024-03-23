@@ -220,6 +220,18 @@ bool unitemp_loadSettings(void) {
     return true;
 }
 
+static void unitemp_sensors_update_callback(void* context) {
+    Unitemp* app = context;
+    if(!app->processing) {
+        view_dispatcher_stop(app->view_dispatcher);
+        return;
+    }
+    if(app->sensors_ready) {
+        unitemp_sensors_updateValues();
+    }
+    view_port_update(app->view_port);
+}
+
 /**
  * @brief Выделение места под переменные плагина
  * 
@@ -247,6 +259,12 @@ static bool unitemp_alloc(void) {
     app->gui = furi_record_open(RECORD_GUI);
     //Диспетчер окон
     app->view_dispatcher = view_dispatcher_alloc();
+    view_dispatcher_enable_queue(app->view_dispatcher);
+    view_dispatcher_set_event_callback_context(app->view_dispatcher, app);
+    view_dispatcher_set_tick_event_callback(
+        app->view_dispatcher, unitemp_sensors_update_callback, 100);
+
+    app->view_port = view_port_alloc();
 
     app->sensors = NULL;
 
@@ -264,6 +282,9 @@ static bool unitemp_alloc(void) {
 
     //Всплывающее окно
     app->popup = popup_alloc();
+
+    gui_add_view_port(app->gui, app->view_port, GuiLayerFullscreen);
+
     view_dispatcher_add_view(app->view_dispatcher, UnitempViewPopup, popup_get_view(app->popup));
 
     view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
@@ -291,6 +312,11 @@ static void unitemp_free(void) {
     free(app->buff);
 
     view_dispatcher_free(app->view_dispatcher);
+
+    view_port_enabled_set(app->view_port, false);
+    gui_remove_view_port(app->gui, app->view_port);
+    view_port_free(app->view_port);
+
     furi_record_close(RECORD_GUI);
     //Очистка датчиков
     //Высвыбождение данных датчиков
@@ -335,10 +361,7 @@ int32_t unitemp_app() {
 
     unitemp_General_switch();
 
-    while(app->processing) {
-        if(app->sensors_ready) unitemp_sensors_updateValues();
-        furi_delay_ms(100);
-    }
+    view_dispatcher_run(app->view_dispatcher);
 
     //Деинициализация датчиков
     unitemp_sensors_deInit();

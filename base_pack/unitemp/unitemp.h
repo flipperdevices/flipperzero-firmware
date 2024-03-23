@@ -103,6 +103,7 @@ typedef struct {
 
     //Экран
     Gui* gui;
+    ViewPort* view_port;
     ViewDispatcher* view_dispatcher;
     NotificationApp* notifications;
     Widget* widget;
