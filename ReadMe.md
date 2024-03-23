@@ -44,7 +44,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Mouse Jacker v1.2 (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/mousejacker) File path fix for all Mouse Jackers.
 - Updated: [UHF RFID WIP v1.1 (By frux-c)](https://github.com/frux-c/uhf_rfid) `Req: M100 or QM100`
 - Updated: [Digimon F-Com v1.2 (By TylerWilley)](https://github.com/TylerWilley/flipper-f-com)
-- Updated: [JS Runner v1.0 (By nminaylov & DrZlo13)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/3286) [Module BugFixes & TextBox Module (By Willy-JL)]()
+- Updated: [JS Runner v1.0 (By nminaylov & DrZlo13)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/3286) [Module BugFixes & TextBox Module (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/61e5c69a6b983a3a9894546d6c2734ade3649a67)
 
 <a name="release">
 

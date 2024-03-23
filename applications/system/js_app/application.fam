@@ -27,7 +27,7 @@ App(
     #  [Updates to GPIO & Storage Append (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/0cb1a859e7c67fc0ca0afa35320c2c823c164f4f)
     #  [JS: Add dialog.pickFile() (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/13cd004bf67e2a447b91f808dc2bbe64e246cd12)
     #  [UL: JS Dialog fix to include file icon (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/71f1f3ef2ace90d7b22425ef688ee292bde035ff)
-    #  [Module BugFixes & TextBox Module (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/71f1f3ef2ace90d7b22425ef688ee292bde035ff)
+    #  [Module BugFixes & TextBox Module (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/61e5c69a6b983a3a9894546d6c2734ade3649a67)
 )
 
 App(
