@@ -1,6 +1,7 @@
 # Flipboard
 <img src="./images/banner.png">
 
+## Starting out
 - [Overview](#overview)
 - [Applications](#applications)
   - [FlipKeyboard](./flipkeyboard/README.md)
