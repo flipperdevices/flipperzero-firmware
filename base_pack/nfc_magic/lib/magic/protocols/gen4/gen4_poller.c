@@ -473,6 +473,47 @@ static NfcCommand gen4_poller_write_mf_ultralight(Gen4Poller* instance) {
                 break;
             }
 
+            // Password
+            MfUltralightConfigPages* config_pages = malloc(sizeof(MfUltralightConfigPages));
+            mf_ultralight_get_config_page(mfu_data, &config_pages);
+
+            block[0] = config_pages->password.data[0];
+            block[1] = config_pages->password.data[1];
+            block[2] = config_pages->password.data[2];
+            block[3] = config_pages->password.data[3];
+            error = gen4_poller_write_block(instance, instance->password, 0xE5, block);
+            if(error != Gen4PollerErrorNone) {
+                FURI_LOG_E(TAG, "Failed to write Password to sector E5");
+                instance->state = Gen4PollerStateFail;
+                break;
+            }
+            error = gen4_poller_write_block(instance, instance->password, 0xF0, block);
+            if(error != Gen4PollerErrorNone) {
+                FURI_LOG_E(TAG, "Failed to write Password to sector F0");
+                instance->state = Gen4PollerStateFail;
+                break;
+            }
+
+            // PACK
+            block[0] = config_pages->pack.data[0];
+            block[1] = config_pages->pack.data[1];
+            block[2] = 0x00;
+            block[3] = 0x00;
+            error = gen4_poller_write_block(instance, instance->password, 0xE6, block);
+            if(error != Gen4PollerErrorNone) {
+                FURI_LOG_E(TAG, "Failed to write PACK to sector E6");
+                instance->state = Gen4PollerStateFail;
+                break;
+            }
+            error = gen4_poller_write_block(instance, instance->password, 0xF1, block);
+            if(error != Gen4PollerErrorNone) {
+                FURI_LOG_E(TAG, "Failed to write PACK to sector F1");
+                instance->state = Gen4PollerStateFail;
+                break;
+            }
+
+            free(config_pages);
+
             instance->state = Gen4PollerStateSuccess;
         }
     } while(false);
