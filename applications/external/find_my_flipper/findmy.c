@@ -149,7 +149,6 @@ void findmy_set_tag_type(FindMy* app, FindMyType type) {
     FURI_LOG_I("TagType2", "Tag Type: %d", type);
 }
 
-#if FW_ORIGIN_Official
 void furi_hal_bt_reverse_mac_addr(uint8_t mac_addr[GAP_MAC_ADDR_SIZE]) {
     uint8_t tmp;
     for(size_t i = 0; i < GAP_MAC_ADDR_SIZE / 2; i++) {
@@ -158,4 +157,3 @@ void furi_hal_bt_reverse_mac_addr(uint8_t mac_addr[GAP_MAC_ADDR_SIZE]) {
         mac_addr[GAP_MAC_ADDR_SIZE - 1 - i] = tmp;
     }
 }
-#endif
