@@ -5,7 +5,8 @@ enum {
     NfcMagicSceneGen4SetDefCfgStateCardFound,
 };
 
-NfcCommand nfc_mafic_scene_gen4_set_default_cfg_poller_callback(Gen4PollerEvent event, void* context) {
+NfcCommand
+    nfc_mafic_scene_gen4_set_default_cfg_poller_callback(Gen4PollerEvent event, void* context) {
     NfcMagicApp* instance = context;
     furi_assert(event.data);
 
@@ -41,7 +42,7 @@ static void nfc_magic_scene_gen4_set_default_cfg_setup_view(NfcMagicApp* instanc
             instance->popup, "Apply the\ncard\nto the back", 128, 32, AlignRight, AlignCenter);
     } else {
         popup_set_icon(popup, 12, 23, &I_Loading_24);
-        popup_set_header(popup, "Writing\nDon't move...", 52, 32, AlignLeft, AlignCenter);
+        popup_set_header(popup, "Configuring\nDon't move...", 52, 32, AlignLeft, AlignCenter);
     }
 
     view_dispatcher_switch_to_view(instance->view_dispatcher, NfcMagicAppViewPopup);

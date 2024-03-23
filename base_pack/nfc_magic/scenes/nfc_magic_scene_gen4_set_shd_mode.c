@@ -42,7 +42,7 @@ static void nfc_magic_scene_gen4_set_shd_mode_setup_view(NfcMagicApp* instance) 
             instance->popup, "Apply the\ncard\nto the back", 128, 32, AlignRight, AlignCenter);
     } else {
         popup_set_icon(popup, 12, 23, &I_Loading_24);
-        popup_set_header(popup, "Writing\nDon't move...", 52, 32, AlignLeft, AlignCenter);
+        popup_set_header(popup, "Configuring\nDon't move...", 52, 32, AlignLeft, AlignCenter);
     }
 
     view_dispatcher_switch_to_view(instance->view_dispatcher, NfcMagicAppViewPopup);

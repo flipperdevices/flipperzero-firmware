@@ -63,33 +63,29 @@ bool nfc_magic_scene_gen4_select_shd_mode_on_event(void* context, SceneManagerEv
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SubmenuIndexPreWriteMode) {
             scene_manager_set_scene_state(
-                instance->scene_manager,
-                NfcMagicSceneGen4SetShdMode,
-                Gen4PollerShadowModePreWrite);
+                instance->scene_manager, NfcMagicSceneGen4SetShdMode, Gen4ShadowModePreWrite);
             scene_manager_next_scene(instance->scene_manager, NfcMagicSceneGen4SetShdMode);
             consumed = true;
         } else if(event.event == SubmenuIndexRestoreMode) {
             scene_manager_set_scene_state(
-                instance->scene_manager, NfcMagicSceneGen4SetShdMode, Gen4PollerShadowModeRestore);
+                instance->scene_manager, NfcMagicSceneGen4SetShdMode, Gen4ShadowModeRestore);
             scene_manager_next_scene(instance->scene_manager, NfcMagicSceneGen4SetShdMode);
             consumed = true;
         } else if(event.event == SubmenuIndexDisable) {
             scene_manager_set_scene_state(
-                instance->scene_manager,
-                NfcMagicSceneGen4SetShdMode,
-                Gen4PollerShadowModeDisabled);
+                instance->scene_manager, NfcMagicSceneGen4SetShdMode, Gen4ShadowModeDisabled);
             scene_manager_next_scene(instance->scene_manager, NfcMagicSceneGen4SetShdMode);
             consumed = true;
         } else if(event.event == SubmenuIndexDisableHighSpeed) {
             scene_manager_set_scene_state(
                 instance->scene_manager,
                 NfcMagicSceneGen4SetShdMode,
-                Gen4PollerShadowModeHighSpeedDisabled);
+                Gen4ShadowModeHighSpeedDisabled);
             scene_manager_next_scene(instance->scene_manager, NfcMagicSceneGen4SetShdMode);
             consumed = true;
         } else if(event.event == SubmenuIndexSplitMode) {
             scene_manager_set_scene_state(
-                instance->scene_manager, NfcMagicSceneGen4SetShdMode, Gen4PollerShadowModeSplit);
+                instance->scene_manager, NfcMagicSceneGen4SetShdMode, Gen4ShadowModeSplit);
             scene_manager_next_scene(instance->scene_manager, NfcMagicSceneGen4SetShdMode);
             consumed = true;
         }

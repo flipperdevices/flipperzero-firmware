@@ -1,7 +1,8 @@
 #include "nfc_magic_scanner.h"
 
+#include "core/check.h"
 #include "protocols/gen1a/gen1a_poller.h"
-#include "protocols/gen2/gen2_poller.h"
+#include "protocols/gen4/gen4.h"
 #include "protocols/gen4/gen4_poller.h"
 #include <nfc/nfc_poller.h>
 
@@ -18,7 +19,8 @@ struct NfcMagicScanner {
     NfcMagicScannerSessionState session_state;
     NfcMagicProtocol current_protocol;
 
-    uint32_t gen4_password;
+    Gen4Password gen4_password;
+    Gen4* gen4_data;
     bool magic_protocol_detected;
 
     NfcMagicScannerCallback callback;
@@ -43,6 +45,7 @@ NfcMagicScanner* nfc_magic_scanner_alloc(Nfc* nfc) {
 
     NfcMagicScanner* instance = malloc(sizeof(NfcMagicScanner));
     instance->nfc = nfc;
+    instance->gen4_data = gen4_alloc();
 
     return instance;
 }
@@ -50,10 +53,11 @@ NfcMagicScanner* nfc_magic_scanner_alloc(Nfc* nfc) {
 void nfc_magic_scanner_free(NfcMagicScanner* instance) {
     furi_assert(instance);
 
+    gen4_free(instance->gen4_data);
     free(instance);
 }
 
-void nfc_magic_scanner_set_gen4_password(NfcMagicScanner* instance, uint32_t password) {
+void nfc_magic_scanner_set_gen4_password(NfcMagicScanner* instance, Gen4Password password) {
     furi_assert(instance);
 
     instance->gen4_password = password;
@@ -66,33 +70,24 @@ static int32_t nfc_magic_scanner_worker(void* context) {
     furi_assert(instance->session_state == NfcMagicScannerSessionStateActive);
 
     while(instance->session_state == NfcMagicScannerSessionStateActive) {
-        do {
-            if(instance->current_protocol == NfcMagicProtocolGen1) {
-                instance->magic_protocol_detected = gen1a_poller_detect(instance->nfc);
-                if(instance->magic_protocol_detected) {
-                    break;
-                }
-            } else if(instance->current_protocol == NfcMagicProtocolGen4) {
-                Gen4PollerError error = gen4_poller_detect(instance->nfc, instance->gen4_password);
+        if(instance->current_protocol == NfcMagicProtocolGen1) {
+            instance->magic_protocol_detected = gen1a_poller_detect(instance->nfc);
+        } else if(instance->current_protocol == NfcMagicProtocolGen4) {
+            gen4_reset(instance->gen4_data);
+            Gen4 gen4_data;
+            Gen4PollerError error =
+                gen4_poller_detect(instance->nfc, instance->gen4_password, &gen4_data);
+            if(error == Gen4PollerErrorProtocol) {
+                NfcMagicScannerEvent event = {
+                    .type = NfcMagicScannerEventTypeDetectedNotMagic,
+                };
+                instance->callback(event, instance->context);
+                break;
+            } else {
                 instance->magic_protocol_detected = (error == Gen4PollerErrorNone);
-                if(instance->magic_protocol_detected) {
-                    break;
-                }
-            } else if(instance->current_protocol == NfcMagicProtocolGen2) {
-                Gen2PollerError error = gen2_poller_detect(instance->nfc);
-                instance->magic_protocol_detected = (error == Gen2PollerErrorNone);
-                if(instance->magic_protocol_detected) {
-                    break;
-                }
-            } else if(instance->current_protocol == NfcMagicProtocolClassic) {
-                NfcPoller* poller = nfc_poller_alloc(instance->nfc, NfcProtocolMfClassic);
-                instance->magic_protocol_detected = nfc_poller_detect(poller);
-                nfc_poller_free(poller);
-                if(instance->magic_protocol_detected) {
-                    break;
-                }
+                gen4_copy(instance->gen4_data, &gen4_data);
             }
-        } while(false);
+        }
 
         if(instance->magic_protocol_detected) {
             NfcMagicScannerEvent event = {
@@ -161,4 +156,10 @@ void nfc_magic_scanner_stop(NfcMagicScanner* instance) {
     instance->scan_worker = NULL;
     instance->callback = NULL;
     instance->context = NULL;
+}
+
+Gen4* nfc_magic_scanner_get_gen4_data(NfcMagicScanner* instance) {
+    furi_assert(instance);
+
+    return instance->gen4_data;
 }

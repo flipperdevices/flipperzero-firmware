@@ -1,6 +1,6 @@
 #include "../nfc_magic_app_i.h"
-
-#define CONFIG_SIZE (32)
+#include "protocols/gen4/gen4.h"
+#include "protocols/gen4/gen4_poller_i.h"
 
 void nfc_magic_scene_gen4_show_cfg_widget_callback(
     GuiButtonType result,
@@ -19,10 +19,11 @@ void nfc_magic_scene_gen4_show_cfg_on_enter(void* context) {
 
     FuriString* output = furi_string_alloc();
 
-    for(size_t i = 0; i < CONFIG_SIZE; i += 2) {
+    Gen4Config* config = &instance->gen4_data->config;
+
+    for(size_t i = 0; i < GEN4_CONFIG_SIZE; i += 2) {
         if(i && !(i % 8)) furi_string_cat_printf(output, "\n");
-        furi_string_cat_printf(
-            output, "%02X%02X ", instance->gen4_config[i], instance->gen4_config[i + 1]);
+        furi_string_cat_printf(output, "%02X%02X ", config->data_raw[i], config->data_raw[i + 1]);
     }
 
     widget_add_string_element(widget, 3, 4, AlignLeft, AlignTop, FontPrimary, "Gen4 Config");
@@ -39,7 +40,7 @@ bool nfc_magic_scene_gen4_show_cfg_on_event(void* context, SceneManagerEvent eve
 
     if(event.type == SceneManagerEventTypeBack) {
         consumed = scene_manager_search_and_switch_to_previous_scene(
-            instance->scene_manager, NfcMagicSceneGen4GetInfo);
+            instance->scene_manager, NfcMagicSceneGen4ShowInfo);
     }
     return consumed;
 }
