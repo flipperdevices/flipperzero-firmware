@@ -4,10 +4,14 @@
 
 Welcome to **Flipper Hero**, an engaging typing practice game ported for the Flipper Zero device!
 
+## Screensots 
+![1](https://github.com/mentoster/Flipper-hero/assets/50594730/102f0913-812d-4964-ac1b-a5a56d3e81e2)
+![2](https://github.com/mentoster/Flipper-hero/assets/50594730/a79980a0-476e-4bfd-8fb9-0f3f478ced78)
+![3](https://github.com/mentoster/Flipper-hero/assets/50594730/771ec2ed-ef6c-4e79-aa9a-e6e82dba694d)
+
 ## Introduction
 
 **Flipper Hero** is inspired by the beloved minigame "Stratagem Hero," found in the "Helldivers 2" universe. Situated on your Ship, this game becomes a crucial part of your journey, allowing you to practice typing Stratagem Codes flawlessly. The better you perform, the higher your score!
-.
 
 ## Features
 
@@ -23,7 +27,7 @@ Welcome to **Flipper Hero**, an engaging typing practice game ported for the Fli
 
 ## Installation
 
-1. Download the latest release of Flipper Hero from releases.
+1. Download the [latest release](https://github.com/mentoster/Flipper-hero/releases) of Flipper Hero from releases.
 2. Place ``.fap`` file to games folder.
 3. Play.
 
