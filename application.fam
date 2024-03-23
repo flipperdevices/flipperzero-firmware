@@ -2,7 +2,7 @@
 
 App(
     appid="spotify_remote",  # Must be unique
-    name="App spotify_remote",  # Displayed in menus
+    name="Spotify Remote",  # Displayed in menus
     apptype=FlipperAppType.EXTERNAL,
     entry_point="spotify_remote_app",
     stack_size=2 * 1024,
@@ -10,8 +10,8 @@ App(
     # Optional values
     # fap_version="0.1",
     fap_icon="spotify_remote.png",  # 10x10 1-bit PNG
-    # fap_description="A simple app",
-    # fap_author="J. Doe",
-    # fap_weburl="https://github.com/user/spotify_remote",
+    fap_description="Allows user to control spotify playback from flipper zero",
+    fap_author="Ben Russell",
+    fap_weburl="https://github.com/benjamindrussell/flipper-spotify-remote",
     fap_icon_assets="images",  # Image assets to compile for this application
 )

@@ -1,6 +1,11 @@
 #include "button_panel_scene.h"
 
-// called when selection is made in button panel
+/**
+ * Called when an item on the remote is selected
+ * 
+ * @param context the app object
+ * @param index the index of the item selected
+*/
 void button_panel_on_select_callback(void* context, uint32_t index) {
     SpotifyRemoteApp* app = context;
     switch(index) {
@@ -27,7 +32,11 @@ void button_panel_on_select_callback(void* context, uint32_t index) {
     }
 }
 
-// button panel callbacks
+/**
+ * On enter handler for the button panel scene
+ * 
+ * @param context the app object
+*/
 void spotify_remote_button_panel_scene_on_enter(void* context) {
     SpotifyRemoteApp* app = context;
 
@@ -112,12 +121,22 @@ void spotify_remote_button_panel_scene_on_enter(void* context) {
     view_dispatcher_switch_to_view(app->view_dispatcher, SPOTIFY_REMOTE_BUTTON_PANEL_VIEW);
 }
 
+/**
+ * On event handler for the button panel scene
+ * 
+ * @param context the app object
+*/
 bool spotify_remote_button_panel_scene_on_event(void* context, SceneManagerEvent event) {
     UNUSED(context);
     UNUSED(event);
     return false;
 }
 
+/**
+ * On exit handler for the button panel scene
+ * 
+ * @param context the app object
+*/
 void spotify_remote_button_panel_scene_on_exit(void* context) {
     SpotifyRemoteApp* app = context;
     button_panel_reset(app->button_panel);
