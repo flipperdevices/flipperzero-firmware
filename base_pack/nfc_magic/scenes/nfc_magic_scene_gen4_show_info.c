@@ -58,7 +58,7 @@ void nfc_magic_scene_gen4_show_info_on_enter(void* context) {
     /////////////////////////////////////////////////////////////////////////////////////////////////////
 
     // Configuration type:
-    furi_string_cat_printf(output, "%s", gen4_get_configuration_name(&gen4->config));
+    furi_string_cat_printf(output, "%s\n", gen4_get_configuration_name(&gen4->config));
 
     // UID len
     furi_string_cat_printf(
