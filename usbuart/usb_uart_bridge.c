@@ -75,8 +75,7 @@ static const CdcCallbacks cdc_cb = {
 
 static int32_t usb_uart_tx_thread(void* context);
 
-void usb_uart_send(UsbUartBridge* usb_uart, const uint8_t* data, size_t len)
-{
+void usb_uart_send(UsbUartBridge* usb_uart, const uint8_t* data, size_t len) {
     furi_stream_buffer_send(usb_uart->rx_stream, data, len, 0);
     furi_thread_flags_set(furi_thread_get_id(usb_uart->thread), WorkerEvtRxDone);
 }
@@ -150,7 +149,7 @@ static int32_t usb_uart_worker(void* context) {
     memcpy(&usb_uart->cfg, &usb_uart->cfg_new, sizeof(UsbUartConfig));
 
     usb_uart->rx_stream = furi_stream_buffer_alloc(USB_UART_RX_BUF_SIZE, 1);
-    
+
     usb_uart->tx_sem = furi_semaphore_alloc(1, 1);
     usb_uart->usb_mutex = furi_mutex_alloc(FuriMutexTypeNormal);
 
@@ -212,7 +211,7 @@ static int32_t usb_uart_worker(void* context) {
     furi_semaphore_free(usb_uart->tx_sem);
 
     furi_hal_usb_unlock();
-    furi_check(furi_hal_usb_set_config(&usb_cdc_fcom, NULL) == true);
+    furi_check(furi_hal_usb_set_config(&usb_cdc_single, NULL) == true);
     Cli* cli = furi_record_open(RECORD_CLI);
     cli_session_open(cli, &cli_vcp);
     furi_record_close(RECORD_CLI);
