@@ -1,0 +1,15 @@
+# For details & more options, see documentation/AppManifests.md in firmware repo
+
+App(
+    appid="midiocarina",  # Must be unique
+    name="MIDI_Ocarina",  # Displayed in menus
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="test_midi_main",
+    stack_size=8 * 1024,
+    fap_category="Media",
+    # Optional values
+    # fap_version="0.1",
+    fap_icon="midi_ocarina.png",
+    # fap_author="@there_is_q,
+    # fap_weburl="https://github.com/user/test_midi",
+)
