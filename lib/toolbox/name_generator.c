@@ -8,15 +8,16 @@
 #include <furi.h>
 
 const char* const name_generator_left[] = {
-    "super",  "big",   "little", "liquid", "unknown", "cheeky",  "tricky",
-    "sneaky", "silly", "oh_my",  "quick",  "oh_no",   "quantum", "kurwa",
-    "great",  "smart", "mini",   "ultra",  "small",   "random",  "strange",
+    "big",    "cheeky",      "feral",   "great", "liquid", "little", "mini",    "oh_my",
+    "oh_no",  "promiscuous", "quantum", "quick", "random", "silly",  "small",   "smart",
+    "sneaky", "strange",     "super",   "thick", "tricky", "ultra",  "unknown", "whois",
 };
 
 const char* const name_generator_right[] = {
-    "maslina",  "sus",  "anomalija", "artefact", "bobr",   "chomik",  "sidorovich",
-    "stalker",  "kit",  "habar",     "jezyk",    "borov",  "juzyk",   "konserva",
-    "aptechka", "door", "zalaz",     "breeky",   "bunker", "pingwin", "kot",
+    "abyss",      "alarm",   "artefact", "basement", "bidet",    "bunker",   "cellar",  "crawlway",
+    "den",        "door",    "fed",      "fortress", "foxhole",  "gate",     "gateway", "grotto",
+    "hatch",      "kit",     "lair",     "lattice",  "network",  "overlook", "pingwin", "portal",
+    "portcullis", "shelter", "stalker",  "sus",      "trapdoor", "tunnel",   "vault",   "yapper",
 };
 
 void name_generator_make_auto_datetime(
