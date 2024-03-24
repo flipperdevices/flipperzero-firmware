@@ -52,7 +52,9 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: [Misc: Fixes for text box and uart echo demo app, remove duplicated emv parser plugin (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/cf1170cab9701dd7c696e2aa89bbf6dbf5f87518)
 - [Added more random names for name generation (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/e85dc1368393f4eba51e09e273539402c8c065a0)
 - Removed: SubGHz: [Added custom radio presets for AM_Q (By Korai-Labs / ankris812)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/f43c22e01d3b857fb418c0c9114daf01b14563bd) [Documented (By user890104)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/995)
-- CLI Plugin Wrapper & SubGHz tweaks (By Willy-JL)
+- [CLI Plugin Wrapper & SubGHz tweaks (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/7c83002de941659478a33eda427c48baf393ce85)
+- [A few app fixes (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/365ac2b26a3ccd33675f760106cac254b39077f5)
+- [Merge/Refactor Fixes for RM apps (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/)
 
 <a name="release">
 
@@ -564,7 +566,6 @@ $ ./fbt dolphin_ext
 - [BT Serial (By maybe-hello-world)](https://github.com/maybe-hello-world/fbs)
 - [BT Toy Serial (By maybe-hello-world)](https://github.com/maybe-hello-world/flipper-bp)
 - [Cookie Clicker v1.0 (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/hid/hid_cookie)
-- [Mifare Nested v1.5.2 (By AloneLiberty)](https://github.com/AloneLiberty/FlipperNested)
 - [NFC Relay WIP (By leommxj)](https://github.com/leommxj/nfc_relay)
 - [SCD30 Carbon Dioxide Sensor (By heimskr)](https://github.com/heimskr/flipperzero-scd30)
 - [TAS Playback (By rcombs)](https://github.com/rcombs/tas-playback)

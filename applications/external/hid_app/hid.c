@@ -132,6 +132,11 @@ static uint32_t hid_exit(void* context) {
     return VIEW_NONE;
 }
 
+static uint32_t hid_ptt_menu_view(void* context) {
+    UNUSED(context);
+    return HidViewPushToTalkMenu;
+}
+
 Hid* hid_alloc(void) {
     Hid* app = malloc(sizeof(Hid));
 

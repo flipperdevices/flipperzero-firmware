@@ -25,7 +25,7 @@ void ensure_dir_exists(Storage* storage) {
 
 void wiegand_save(void* context) {
     App* app = context;
-    FuriString* buffer = furi_string_alloc(1024);
+    FuriString* buffer = furi_string_alloc();
     FuriString* file_path = furi_string_alloc();
     furi_string_printf(
         file_path, "%s/%s%s", WIEGAND_SAVE_FOLDER, app->file_name, WIEGAND_SAVE_EXTENSION);

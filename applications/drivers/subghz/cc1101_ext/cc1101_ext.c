@@ -204,7 +204,7 @@ static bool subghz_device_cc1101_ext_check_init(void) {
     return ret;
 }
 
-bool subghz_device_cc1101_ext_alloc(void) {
+bool subghz_device_cc1101_ext_alloc(SubGhzDeviceConf* conf) {
     furi_assert(subghz_device_cc1101_ext == NULL);
     subghz_device_cc1101_ext = malloc(sizeof(SubGhzDeviceCC1101Ext));
     subghz_device_cc1101_ext->state = SubGhzDeviceCC1101ExtStateInit;

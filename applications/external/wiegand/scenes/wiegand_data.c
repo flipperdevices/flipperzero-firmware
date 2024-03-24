@@ -223,7 +223,7 @@ void wiegand_data_scene_on_enter(void* context) {
     App* app = context;
     widget_reset(app->widget);
     widget_add_string_element(app->widget, 0, 0, AlignLeft, AlignTop, FontPrimary, "Wiegand Data");
-    FuriString* buffer = furi_string_alloc(1024);
+    FuriString* buffer = furi_string_alloc();
     furi_string_printf(buffer, "Bits: %d\n", bit_count);
     for(int i = 0; i < bit_count; i++) {
         furi_string_push_back(buffer, data[i] ? '1' : '0');

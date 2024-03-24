@@ -36,7 +36,7 @@ const GpioPin* subghz_device_cc1101_ext_get_data_gpio(void);
  *
  * @return     true if success
  */
-bool subghz_device_cc1101_ext_alloc(void);
+bool subghz_device_cc1101_ext_alloc(SubGhzDeviceConf* conf);
 
 /** Deinitialize device
  */
