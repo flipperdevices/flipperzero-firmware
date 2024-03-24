@@ -29,8 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0324-1439-0.99.2-6e05297](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-03-24 18:18 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-03-24 18:18 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-03-24 18:30 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-03-24 18:30 EST`
 - Removed: [Mfkey32 With Nested v1.0 (By noproto)](https://github.com/noproto/FlipperMfkey), it's functionality is now built into [Mfkey v2.0 (By noproto)](https://github.com/noproto/FlipperMfkey)
 - OFW: [Add the Freedom_2_dolphins animation #3521 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3521)
 - OFW: [NFC wording fixes #3512 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3512)
@@ -70,10 +70,10 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [HEX Viewer v2.0 (By QtRoS)](https://github.com/QtRoS/flipperzero-firmware) [Fix (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/0380f7fcae4381851408883c52a78be492c2f0ed)
 - Added: [Flippy Road v1.0 (By rkilpadi)](https://github.com/rkilpadi/flippy-road)
 - Added: [Flipper Hero v1.1 (By mentoster)](https://github.com/mentoster/Flipper-hero)
-- Updated: [Quac! v0.4 (By rdefeo)](https://github.com/rdefeo/quac)
 - Updated: [Marauder flash assets updated to 0.13.9 (By justcallmekoko)](https://github.com/justcallmekoko/ESP32Marauder/releases/tag/v0.13.9)
 - Updated: [NFC Magic v1.6 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966) [Removed Gen2 changes till they are ready (By xMasterX)](https://github.com/xMasterX/all-the-plugins/commit/2a3013841837aaed4d2482c42da53755f1a7489f) & [Write NTAG password and PACK to gen4 special pages #190 (By Astrrra)](https://github.com/flipperdevices/flipperzero-good-faps/pull/190) & Small Tweaks (By xMasterX)
 - UL: [RFID: Fix RAW read crash (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/81a16e5a2804445cf2edf553b680c42bf5e33bb1)
+- Updated: [Quac! v0.4 (By rdefeo)](https://github.com/rdefeo/quac)
 
 <a name="release">
 
