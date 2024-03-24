@@ -106,6 +106,31 @@ In your main application entry point, free the controller when the application i
     imu_controller_free(imu_controller);
 ```
 
+## Fine Tuning
+
+The default configuration is a good starting point, but you may need to fine-tune the values to match your application.  For example, if you find that the d-pad buttons are being triggered too easily, you can increase the `roll_up`, `roll_down`, `pitch_left` or `pitch_right` values.  If you find that the d-pad buttons are not being triggered easily enough, you can decrease the values.  The `hysteresis` values are used to prevent the d-pad buttons from being released too quickly.  If you find that the d-pad buttons are being released to quickly, you can increase the `hysteresis` values.  If you find that the d-pad buttons are being released too slowly, you can decrease the `hysteresis` values.
+
+Put the following code below your #include statements to create a custom configuration:
+```c
+const ImuControllerConfig my_configuration = {
+    .roll_up = 8.0f, // 8 degrees triggers an Up button press
+    .roll_down = -8.0f, // -8 degrees triggers a Down button press
+    .roll_hysteresis = 3.0f, // 3 degrees of movement is required to release the Up or Down button press
+    .pitch_left = 20.0f, // 20 degrees triggers a Left button press
+    .pitch_right = -20.0f, // -20 degrees triggers a Right button press
+    .pitch_hysteresis = 5.0f, // 5 degrees of movement is required to release the Left or Right button press
+    .button_state_long_ms = 300, // 300ms is the time required to trigger a long press event
+    .button_state_repeat_ms = 150, // 150ms is the time required to trigger a repeat press event
+    .vibro_duration = 25, // 25ms is the duration of the vibration when a button is pressed or released (set to 0 for no vibration)
+};
+```
+
+and then change the second parameter to `imu_controller_alloc` to use your custom configuration:
+```c
+    ImuController* imu_controller =
+        imu_controller_alloc(event_queue, &my_configuration, doom_imu_queue);
+```
+
 ## Support
 
 The best way to get support is to join the Flipper Zero Tutorials (Unofficial) Discord community. Here is a [Discord invite](https://discord.com/invite/NsjCvqwPAd) to join my `Flipper Zero Tutorials (Unofficial)` community.
