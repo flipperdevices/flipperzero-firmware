@@ -196,13 +196,15 @@ const GPIO*
             return NULL;
         }
     }
-    if(interface == &SPI) {
+
+    // This check is incorrect and not working anymore
+    /*if(interface == &SPI) {
         if(!((gpio_interfaces_list[0] == NULL || gpio_interfaces_list[0] == &SPI) &&
              (gpio_interfaces_list[1] == NULL || gpio_interfaces_list[1] == &SPI) &&
              (gpio_interfaces_list[3] == NULL || gpio_interfaces_list[3] == &SPI))) {
             return NULL;
         }
-    }
+    }*/
 
     uint8_t aviable_index = 0;
     for(uint8_t i = 0; i < GPIO_ITEMS; i++) {

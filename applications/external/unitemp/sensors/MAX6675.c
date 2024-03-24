@@ -43,12 +43,12 @@ bool unitemp_MAX6675_free(Sensor* sensor) {
 bool unitemp_MAX6675_init(Sensor* sensor) {
     SPISensor* instance = sensor->instance;
     furi_hal_spi_bus_handle_init(instance->spi);
-    UNUSED(instance);
     return true;
 }
 
 bool unitemp_MAX6675_deinit(Sensor* sensor) {
-    UNUSED(sensor);
+    SPISensor* instance = sensor->instance;
+    furi_hal_spi_bus_handle_deinit(instance->spi);
     return true;
 }
 
