@@ -1,0 +1,38 @@
+name: "FAP: Build and lint"
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  ufbt-build-action:
+    runs-on: ubuntu-latest
+    name: 'ufbt: Build for Master branch'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build with ufbt
+        uses: flipperdevices/flipperzero-ufbt-action@v0.1
+        id: build-app
+        with:
+          # Set to 'release' to build for latest published release version
+          sdk-channel: dev
+
+      # You can remove this step if you don't want to check source code formatting
+      - name: Lint sources
+        uses: flipperdevices/flipperzero-ufbt-action@v0.1
+        with:
+          # skip SDK setup, we already did it in previous step
+          skip-setup: true
+          task: lint
+
+      - name: Upload Release Asset
+        uses: softprops/action-gh-release@v1
+        with:
+          files: ${{ steps.build-app.outputs.fap-artifacts }}
+          draft: false # Set to false if you don't want to create a draft release
+          prerelease: true # Mark the release as a prerelease
+        env:
+          GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}

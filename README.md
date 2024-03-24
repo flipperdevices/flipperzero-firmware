@@ -5,7 +5,7 @@
 Welcome to **Flipper Hero**, an engaging typing practice game ported for the Flipper Zero device!
 
 [video](https://www.reddit.com/r/flipperzero/comments/1blydyo/i_recreated_the_stratagem_hero_from_helldivers_2/)
-## Screensots 
+## Screenshots
 ![1](https://github.com/mentoster/Flipper-hero/assets/50594730/102f0913-812d-4964-ac1b-a5a56d3e81e2)
 ![2](https://github.com/mentoster/Flipper-hero/assets/50594730/a79980a0-476e-4bfd-8fb9-0f3f478ced78)
 ![3](https://github.com/mentoster/Flipper-hero/assets/50594730/771ec2ed-ef6c-4e79-aa9a-e6e82dba694d)
@@ -13,6 +13,7 @@ Welcome to **Flipper Hero**, an engaging typing practice game ported for the Fli
 ## Introduction
 
 **Flipper Hero** is inspired by the beloved minigame "Stratagem Hero," found in the "Helldivers 2" universe. Situated on your Ship, this game becomes a crucial part of your journey, allowing you to practice typing Stratagem Codes flawlessly. The better you perform, the higher your score!
+
 
 ## Features
 
@@ -22,10 +23,11 @@ Welcome to **Flipper Hero**, an engaging typing practice game ported for the Fli
 
 ## Getting Started
 
-1. **Installation:** To get started with Flipper Hero, follow the installation guide below.
-2. **Play:** Launch the game on your Flipper Zero device and begin practicing your codes.
-3. **Score High:** Aim for accuracy and speed to achieve high scores.
-
+1. Clone the repository to your local machine.
+```bash
+https://github.com/mentoster/Flipper-hero.git
+```
+2. Setup environment for development from [this guide](SetupEnv.md)
 ## Installation
 
 1. Download the [latest release](https://github.com/mentoster/Flipper-hero/releases) of Flipper Hero from releases.
@@ -46,4 +48,5 @@ Flipper Hero is released under the ``MIT license``, which allows for personal us
 
 ## Acknowledgements
 
-A special thanks to Arrowhead for creating "Helldivers 2" and inspiring this project. Flipper Hero is a fan-made project intended for practice and entertainment purposes only.
+- A special thanks to Arrowhead for creating "Helldivers 2" and inspiring this project. Flipper Hero is a fan-made project intended for practice and entertainment purposes only.
+- Huge thanks to [u/theblackhole08](https://www.reddit.com/user/theblackhole08/) for tips to fix api mismatch.
