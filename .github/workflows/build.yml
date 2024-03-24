@@ -19,9 +19,10 @@ jobs:
         with:
           sdk-channel: release
 
-      - name: Rename standard a artifact
+      - name: Rename standard artifact
         run: |
-          mv "${{ steps.build-unleashed.outputs.fap-artifacts }}" flipper_hero.fap
+          mv "${{ steps.build-standard.outputs.fap-artifacts }}" flipper_hero.fap
+
       - name: Build with ufbt for Flipper Unleashed
         uses: flipperdevices/flipperzero-ufbt-action@v0.1
         id: build-unleashed
