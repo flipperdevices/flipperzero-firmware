@@ -11,7 +11,17 @@ The license for this FAP shall be WTFPL.
 
 
 # Requirements
-Basically, just go to the directory, set up ufbt, and type ufbt.
+Basically, just go to the directory, set up ufbt, and type 
+
+```
+ufbt
+
+or
+
+ufbt launch
+
+```
+
 For more information, please see Flipper Zero's FAP build instructions.
 It is very detailed.
 
