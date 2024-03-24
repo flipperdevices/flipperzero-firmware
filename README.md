@@ -11,6 +11,13 @@ The license for this FAP shall be WTFPL.
 
 
 # Requirements
+
+Python and ufbt.
+
+```
+pip install ufbt
+```
+
 Basically, just go to the directory, set up ufbt, and type 
 
 ```
