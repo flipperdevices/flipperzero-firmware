@@ -169,10 +169,6 @@ void mag_scene_read_on_exit(void* context) {
     widget_reset(mag->widget);
     // view_dispatcher_remove_view(mag->view_dispatcher, MagViewWidget);
 
-    furi_hal_serial_async_rx_stop(mag->serial_handle);
-    furi_hal_serial_deinit(mag->serial_handle);
-    furi_hal_serial_control_release(mag->serial_handle);
-
     // Stop UART worker
     FURI_LOG_D(TAG, "Stopping UART worker");
     furi_hal_serial_async_rx_stop(mag->serial_handle);
