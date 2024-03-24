@@ -8,5 +8,5 @@ https://github.com/benjamindrussell/flipper-spotify-remote/assets/46113261/9d0cc
 ### Installation
 Unfortunately since flipc.org is down you will have to build from source using [ufbt](https://github.com/flipperdevices/flipperzero-ufbt) or [fbt](https://github.com/flipperdevices/flipperzero-firmware/blob/dev/documentation/fbt.md)
 
-You will also need to install my [ESP32 Spotify Remote] on the WiFi Devboard
+You will also need to install my [ESP32 Spotify Remote](https://github.com/benjamindrussell/esp32-spotify-remote) on the WiFi Devboard
 
