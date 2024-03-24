@@ -30,14 +30,17 @@ jobs:
       - name: Create a new tag
         id: create_tag
         run: |
-          TAG_NAME=my-app-$(date +'%Y%m%d%H%M%S')
+          TAG_NAME=flipper-hero-$(date +'%Y%m%d%H%M%S')
+          git config --global user.name 'tag-bot'
+          git config --global user.email 'tag-bot@mail'
           git tag $TAG_NAME
-          git push origin $TAG_NAME
-          echo "::set-output name=TAG_NAME::$TAG_NAME"
+          git push https://github.com/mentoster/Flipper-hero.git $TAG_NAME
+          echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
       - name: Upload Release Asset
         uses: softprops/action-gh-release@v1
         with:
           files: ${{ steps.build-app.outputs.fap-artifacts }}
+          tag_name: ${{ env.TAG_NAME }}
           draft: false # Set to false if you don't want to create a draft release
           prerelease: true # Mark the release as a prerelease
         env:
