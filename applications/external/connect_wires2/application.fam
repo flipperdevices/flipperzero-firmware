@@ -3,9 +3,11 @@ App(
     name="Connect Wires 2",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="connect_wires_2_main",
-    requires=["gui"],
     stack_size=8 * 1024,
-    fap_version="1.0",
     fap_category="Games",
     fap_icon="connect_wires_2_10x.png",
+    fap_author="HappyAmos",
+    fap_weburl="https://github.com/HappyAmos/Flipper_FAPS",
+    fap_version="1.0",
+    fap_description="Connect Wires By AlexTaran with extra features",
 )

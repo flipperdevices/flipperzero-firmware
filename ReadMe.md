@@ -75,6 +75,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: [RFID: Fix RAW read crash (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/81a16e5a2804445cf2edf553b680c42bf5e33bb1)
 - Updated: [Quac! v0.4 (By rdefeo)](https://github.com/rdefeo/quac)
 - Added: [Spotify Remote v0.1 (By benjamindrussell)](https://github.com/benjamindrussell/flipper-spotify-remote) `Req: ESP32` with [ESP32 Spotify Remote](https://github.com/benjamindrussell/esp32-spotify-remote)
+- Added: [Connect Wires 2 v1.0 (By HappyAmos)](https://github.com/HappyAmos/Flipper_FAPS)
+- Added: [Voltage Calculator v1.0 (By HappyAmos)](https://github.com/HappyAmos/Flipper_FAPS)
 
 <a name="release">
 
@@ -295,6 +297,7 @@ $ ./fbt dolphin_ext
 - [City Bloxx (By Milk-Cool)](https://github.com/Milk-Cool/fz-citybloxx)
 - [Color Guess v1.4 (By leedave)](https://github.com/leedave/Leeds-Flipper-Zero-Applications)
 - [Connect Wires v1.0 (By AlexTaran)](https://github.com/AlexTaran/flipperzero)
+- [Connect Wires 2 v1.0 (By HappyAmos)](https://github.com/HappyAmos/Flipper_FAPS)
 - [Crossy Road v1.0 (By Mikael098)](https://github.com/Mikael098/CrossyRoad-FlipperZero-)
 - [Dice (RM) Including SEX/WAR/8BALL/WEED/DRINK DICE v2.3 (By RogueMaster)](https://github.com/RogueMaster/flipperzero-dice)
 - [DnD Dice v1.3 (By Ka3u6y6a)](https://github.com/Ka3u6y6a/flipper-zero-dice)
@@ -567,6 +570,7 @@ $ ./fbt dolphin_ext
 - [USB Midi (By DrZlo13)](https://github.com/DrZlo13/flipper-zero-usb-midi) [Instructions by ESurge](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/applications/plugins/usb_midi/ReadMe.md)
 - [VGM Air Mouse v1.2 (By nminaylov)](https://github.com/flipperdevices/flipperzero-good-faps/tree/nm/motion_mouse_app) `Req: ICM42688, or Video Game Module By Flipper Devices`
 - [Video Player v0.3 (By LTVA1)](https://github.com/LTVA1/flipper-zero-video-player)
+- [Voltage Calculator v1.0 (By HappyAmos)](https://github.com/HappyAmos/Flipper_FAPS)
 - [Wardriver GPS v1.0 (By Sil333033)](https://github.com/Next-Flip/Momentum-Apps/tree/dev/wardriver)
 - [WAV Player v1.1 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/tree/zlo/wav-player) Updated by Atmanos & RogueMaster To Work.  [Updated by xMasterX](https://github.com/DarkFlippers/unleashed-firmware/commit/76d3f84a5eb069b749e3ad20df6fdbbc785eb253)
 - [WAV Recorder (By scrolltex)](https://github.com/scrolltex/flipper-wav-recorder)

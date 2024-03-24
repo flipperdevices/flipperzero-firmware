@@ -1,0 +1,14 @@
+App(
+    appid="voltcalc_app",
+    name="Voltage Calculator",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="voltcalc_app",
+    stack_size=2 * 1024,
+    fap_category="Tools",
+    fap_icon="icons/voltcalc_app.png",
+    fap_icon_assets="icons",
+    fap_author="HappyAmos",
+    fap_weburl="https://github.com/HappyAmos/Flipper_FAPS",
+    fap_version="1.0",
+    fap_description="Voltage (VRI) calculations",
+)
