@@ -27,7 +27,13 @@ jobs:
           # skip SDK setup, we already did it in previous step
           skip-setup: true
           task: lint
-
+      - name: Create a new tag
+        id: create_tag
+        run: |
+          TAG_NAME=my-app-$(date +'%Y%m%d%H%M%S')
+          git tag $TAG_NAME
+          git push origin $TAG_NAME
+          echo "::set-output name=TAG_NAME::$TAG_NAME"
       - name: Upload Release Asset
         uses: softprops/action-gh-release@v1
         with:
