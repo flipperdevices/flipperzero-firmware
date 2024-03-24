@@ -1,0 +1,17 @@
+# For details & more options, see documentation/AppManifests.md in firmware repo
+
+App(
+    appid="spotify_remote",  # Must be unique
+    name="Spotify Remote",  # Displayed in menus
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="spotify_remote_app",
+    stack_size=2 * 1024,
+    fap_category="Examples",
+    # Optional values
+    # fap_version="0.1",
+    fap_icon="spotify_remote.png",  # 10x10 1-bit PNG
+    fap_description="Allows user to control spotify playback from flipper zero",
+    fap_author="Ben Russell",
+    fap_weburl="https://github.com/benjamindrussell/flipper-spotify-remote",
+    fap_icon_assets="images",  # Image assets to compile for this application
+)
