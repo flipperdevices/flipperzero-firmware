@@ -3,7 +3,7 @@ push button to play midi note.
 I made this to check if the MIDI library TX works.
 It works perfectly. That's all.
 
-This application is not fun to play around with. 
+This application is not fun to play around with TOTALLY. 
 Guaranteed.
 
 # Requirements
