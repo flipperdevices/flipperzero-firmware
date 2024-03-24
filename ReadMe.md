@@ -74,6 +74,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [NFC Magic v1.6 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966) [Removed Gen2 changes till they are ready (By xMasterX)](https://github.com/xMasterX/all-the-plugins/commit/2a3013841837aaed4d2482c42da53755f1a7489f) & [Write NTAG password and PACK to gen4 special pages #190 (By Astrrra)](https://github.com/flipperdevices/flipperzero-good-faps/pull/190) & Small Tweaks (By xMasterX)
 - UL: [RFID: Fix RAW read crash (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/81a16e5a2804445cf2edf553b680c42bf5e33bb1)
 - Updated: [Quac! v0.4 (By rdefeo)](https://github.com/rdefeo/quac)
+- Added: [Spotify Remote v0.1 (By benjamindrussell)](https://github.com/benjamindrussell/flipper-spotify-remote) `Req: ESP32` with [ESP32 Spotify Remote](https://github.com/benjamindrussell/esp32-spotify-remote)
 
 <a name="release">
 
@@ -540,6 +541,7 @@ $ ./fbt dolphin_ext
 - [Skeleton App v1.1 (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/ui/skeleton_app)
 - [Smack My Dolphin Up! (By siberianbot)](https://github.com/siberianbot/smack-my-dolphin-up)
 - [Spectrum Analyzer v1.2 (By jolcese)](https://github.com/jolcese/flipperzero-firmware/tree/spectrum/applications/spectrum_analyzer) [Updates (for testing) Thanks to theY4Kman](https://github.com/theY4Kman/flipperzero-firmware)
+- [Spotify Remote v0.1 (By benjamindrussell)](https://github.com/benjamindrussell/flipper-spotify-remote) `Req: ESP32` with [ESP32 Spotify Remote](https://github.com/benjamindrussell/esp32-spotify-remote)
 - [SPI Mem Manager v1.3 (By drunkbatya)-OFW](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/spi_mem_manager)
 - [Sub-GHz Bruteforcer v3.11.1 (By Ganapati/xMasterX/derskythe)](https://github.com/derskythe/flipperzero-subbrute/tree/master)
 - [Sub-GHz Playlist (By darmiel)](https://github.com/darmiel/flipper-playlist)
