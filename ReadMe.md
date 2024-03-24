@@ -71,6 +71,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [HEX Viewer v2.0 (By QtRoS)](https://github.com/QtRoS/flipperzero-firmware) [Fix (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/0380f7fcae4381851408883c52a78be492c2f0ed)
 - Added: [Flippy Road v1.0 (By rkilpadi)](https://github.com/rkilpadi/flippy-road)
 - Added: [Flipper Hero v1.1 (By mentoster)](https://github.com/mentoster/Flipper-hero)
+- Updated: [Quac! v0.4 (By rdefeo)](https://github.com/rdefeo/quac)
 
 <a name="release">
 
