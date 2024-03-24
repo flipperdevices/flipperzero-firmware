@@ -29,8 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0323-1807-0.99.2-dcb0bf5](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-03-24 05:28 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-03-24 05:28 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-03-24 05:50 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-03-24 05:50 EST`
 - Removed: [Mfkey32 With Nested v1.0 (By noproto)](https://github.com/noproto/FlipperMfkey), it's functionality is now built into [Mfkey v2.0 (By noproto)](https://github.com/noproto/FlipperMfkey)
 - OFW: [Add the Freedom_2_dolphins animation #3521 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3521)
 - OFW: [NFC wording fixes #3512 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3512)
@@ -42,7 +42,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Mouse Jacker v1.2 (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/mousejacker) File path fix for all Mouse Jackers.
 - Updated: [UHF RFID WIP v1.1 (By frux-c)](https://github.com/frux-c/uhf_rfid) `Req: M100 or QM100`
 - Updated: [Digimon F-Com v1.2 (By TylerWilley)](https://github.com/TylerWilley/flipper-f-com)
-- Updated: [JS Runner v1.0 (By nminaylov & DrZlo13)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/3286) [Module BugFixes & TextBox Module (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/61e5c69a6b983a3a9894546d6c2734ade3649a67)
+- Updated: [JS Runner v1.0 (By nminaylov & DrZlo13)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/3286) [Module BugFixes & TextBox Module (By oldip & Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/61e5c69a6b983a3a9894546d6c2734ade3649a67)
 - Updated: [FindMy Flipper v2.0 (By MatthewKuKanich)](https://github.com/MatthewKuKanich/FindMyFlipper) (Updated Scripts) [Fix FindMy crash on boot when core2 is broken (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/e8be709d756756630caf5c52dc97e1c2d7c08110)
 - Updated: [USB Mass Storage v1.3 (By nminaylov)](https://github.com/flipperdevices/flipperzero-good-faps/tree/nm/usb_mass_storage_app/mass_storage) [Unlock USB when starting mass storage (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/7e215f64d210529aa1c2f0ea641df3ad87e26453)
 - Updated: [BLE Spam v6.2 (By Willy-JL & ECTO-1A & Spooks4576 with research from xMasterX; OFW API thanks to noproto)](https://github.com/Next-Flip/Momentum-Apps/tree/dev/ble_spam) [BLE Spam: Fix icon shift + bump versions (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/82479362b9e66a5ec6fd0ca6972c6260dd767fcb)
@@ -66,6 +66,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - [A few app fixes (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/365ac2b26a3ccd33675f760106cac254b39077f5)
 - [Merge/Refactor Fixes for RM apps (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/9007dcf9b0a6bbf395d035950015cb52fb3b32ca)
 - [External CLI Plugins (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/b19b495729f07e5cac2b83d7d1d0e189bb4924e8)
+- Updated: [JavaScript Documentation (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/ae891442a2836d51432200282adff8976c834b7a)
 
 <a name="release">
 

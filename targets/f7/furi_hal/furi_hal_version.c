@@ -263,11 +263,11 @@ FuriHalVersionRegion furi_hal_version_get_hw_region(void) {
 }
 
 FuriHalVersionRegion furi_hal_version_get_hw_region_otp() {
-    return furi_hal_version.board_region;
+    return furi_hal_version_get_hw_region();
 }
 
 const char* furi_hal_version_get_hw_region_name(void) {
-    switch(furi_hal_version_get_hw_region_otp()) {
+    switch(furi_hal_version_get_hw_region()) {
     case FuriHalVersionRegionUnknown:
         return "R00";
     case FuriHalVersionRegionEuRu:
@@ -322,5 +322,5 @@ const uint8_t* furi_hal_version_uid(void) {
     if(version_get_custom_name(NULL) != NULL) {
         return (const uint8_t*)&(*((uint32_t*)version_get_custom_name(NULL)));
     }
-    return (const uint8_t*)UID64_BASE;
+    return furi_hal_version_uid_default();
 }
