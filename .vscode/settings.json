@@ -1,9 +1,24 @@
+// This file is autogeneated by the ufbt.
+// You can modify it, and it will not be overwritten if exists.
+// Some paths are absolute, and will need to be updated if you move the project.
+// To regenerate the file, delete it and run `ufbt vscode_dist` again.
 {
+    "cortex-debug.enableTelemetry": false,
+    "cortex-debug.variableUseNaturalFormat": false,
+    "cortex-debug.showRTOS": true,
+    "cortex-debug.armToolchainPath": "C:/Users/DimaM/.ufbt/toolchain/x86_64-windows/bin",
+    "cortex-debug.openocdPath": "C:/Users/DimaM/.ufbt/toolchain/x86_64-windows/bin/openocd.EXE",
+    "cortex-debug.gdbPath": "C:/Users/DimaM/.ufbt/toolchain/x86_64-windows/bin/arm-none-eabi-gdb-py3.EXE",
+    "editor.formatOnSave": true,
     "files.associations": {
-        "*.html": "html",
-        "stdlib.h": "c",
-        "data.h": "c",
-        "storage.h": "c",
-        "arrows.h": "c"
+        "*.scons": "python",
+        "SConscript": "python",
+        "SConstruct": "python",
+        "*.fam": "python"
+    },
+    "cortex-debug.registerUseNaturalFormat": false,
+    "python.analysis.typeCheckingMode": "off",
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.black-formatter"
     }
 }
