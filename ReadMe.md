@@ -68,6 +68,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - [External CLI Plugins (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/b19b495729f07e5cac2b83d7d1d0e189bb4924e8)
 - Updated: [JavaScript Documentation (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/ae891442a2836d51432200282adff8976c834b7a)
 - Updated: [Flipper Application Library (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/266841b1f565ef51b3fa225f7d138d0ac75285db)
+- Updated: [HEX Viewer v2.0 (By QtRoS)](https://github.com/QtRoS/flipperzero-firmware) [Fix (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/0380f7fcae4381851408883c52a78be492c2f0ed)
 
 <a name="release">
 
