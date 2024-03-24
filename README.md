@@ -49,4 +49,4 @@ Flipper Hero is released under the ``MIT license``, which allows for personal us
 ## Acknowledgements
 
 - A special thanks to Arrowhead for creating "Helldivers 2" and inspiring this project. Flipper Hero is a fan-made project intended for practice and entertainment purposes only.
-- Huge thanks to [u/theblackhole08](https://www.reddit.com/user/theblackhole08/) for tips to fix api mismatch.
+- Huge thanks to [u/theblackhole08](https://www.reddit.com/user/theblackhole08/) ([@theblackhole](https://github.com/theblackhole/) on github)  for tips to fix api mismatch.
