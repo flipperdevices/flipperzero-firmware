@@ -4,5 +4,3 @@ dist/*
 .editorconfig
 .env
 .ufbt
-/.vscode/c_cpp_properties.json
-/.vscode/launch.json

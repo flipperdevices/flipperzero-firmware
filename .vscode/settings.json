@@ -7,8 +7,8 @@
     "cortex-debug.variableUseNaturalFormat": false,
     "cortex-debug.showRTOS": true,
     "cortex-debug.armToolchainPath": "C:/Users/DimaM/.ufbt/toolchain/x86_64-windows/bin",
-    "cortex-debug.openocdPath": "C:/Users/DimaM/.ufbt/toolchain/x86_64-windows/bin/openocd.EXE",
-    "cortex-debug.gdbPath": "C:/Users/DimaM/.ufbt/toolchain/x86_64-windows/bin/arm-none-eabi-gdb-py3.EXE",
+    "cortex-debug.openocdPath": "C:/Users/DimaM/.ufbt/toolchain/x86_64-windows/openocd/bin/openocd.EXE",
+    "cortex-debug.gdbPath": "C:/Users/DimaM/.ufbt/toolchain/x86_64-windows/bin/arm-none-eabi-gdb-py.BAT",
     "editor.formatOnSave": true,
     "files.associations": {
         "*.scons": "python",

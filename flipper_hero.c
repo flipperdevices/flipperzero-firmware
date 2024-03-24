@@ -209,13 +209,13 @@ void clear_game_data(PluginState* plugin_state) {
     plugin_state->timer = 1000;
     plugin_state->isGameOver = false;
 }
+
 void start_game(PluginState* plugin_state, FuriTimer* timer) {
     plugin_state->isGameStarted = true;
-    furi_timer_start(timer, 10);
-    generate_arrows(plugin_state);
-    clear_game_data(plugin_state);
+    clear_game_data(plugin_state); // Reset game data to initial state first
+    generate_arrows(plugin_state); // Then generate new arrows
+    furi_timer_start(timer, 10); // Start the timer after initializing the game state
 }
-
 void restart_game(PluginState* plugin_state) {
     clear_game_data(plugin_state);
     generate_arrows(plugin_state);
