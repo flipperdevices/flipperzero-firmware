@@ -5,16 +5,17 @@ This app allows you to organize previously recorded signals, of any type*, so th
 The app does not provide any recording functionality - you must use the existing Flipperzero apps to create the saved files for your action/device. Additionally, you must manage the folder structure manually on your SD card.
 
 ```
-* Only Sub-Ghz (.sub) and RFID (.rfid) files are supported at this time, IR is coming soon!
+* Only Sub-Ghz (.sub), RFID (.rfid), and Infrared (.ir) files are supported at this time. NFC support coming soon.
 ```
 
 ## Features
 * [Playback of rfid, sub-ghz, (and soon IR) signals](README.md#signal-playback)
 * [Easy navigation](README.md#navigation--controls)
 * [Flexible signal organization](README.md#signal-organization) - utilizing the SDcard filesystem
+* [In-app file operations](README.md#action-settings)
 * [Playlist support](README.md#playlists)
 * [Flexible naming/sorting, hidden file/folder support](README.md#sorting-and-naming)
-* [Customizable UI](README.md#settings)
+* [Customizable UI](README.md#application-settings)
 
 ## Screenshots
 
@@ -27,6 +28,7 @@ The app does not provide any recording functionality - you must use the existing
 - Pressing `OK` on an action (indicated as a label surrounded by a border) will transmit that signal.
 - Pressing `Back` will take you up one folder
 - Pressing `Up` and `Down` will, you know, select things up and down...
+- Long pressing `Right` will open that item's settings: Rename, Delete, Import Here, Create Group
 
 ## Signal playback
 The signal files are played back as recorded. During playback/transmit, the LED light will flash blue until the action is complete. For RFID signals, they are continuously played back for 3 seconds.
@@ -52,6 +54,13 @@ Here's an example file layout for the screenshots above:
      02_my_Playlist.qpl
 ```
 
+## Action Settings
+Long pressing the `Right` button will launch a settings menu for the currently selected action. This provides the following options:
+- Rename: Allows you to rename the selected item. Useful for changing sorting order. The file extension is preserved on signal files. **Note: folder renaming is broken right now**
+- Delete: Deletes files and folders - folders must be empty
+- Import Here: Launches file browser to let you select a signal file from anywhere on the SDcard and then copies it to the current folder.
+- Create Group: Prompts for the name of a new folder that will be created at that point in the folder structure.
+
 ## Playlists
 You can chain multiple signal playback actions together by creating a playlist. Simply create a text file which contains a list of paths to the signals you wish to transmit - they will be played sequentially. Playlist names show up as clickable button, like all other individual signals/actions. Playlist files feature the following:
 * Comments: lines that start with a `#` are ignored
@@ -74,7 +83,7 @@ The first two `.sub` files live in the `/ext/apps_data/quac` folder, which is wh
 ## Sorting and Naming
 The list view UI is based on the sorted file and folder order. This is enforced by sorting the actual filenames. When there are cases where you need to force a specific order, you can prepend the file and folder names with `XX_` where `X` is a digit between 0-9. This will let you place an action called `On` before `Off`, even though when sorted alphabeticaly, `Off` would come before `On`. Therefore, you would name your files `00_On.rfid` and `01_Off.rfid`. When the files and folders are rendered for display, any `XX_` prefix will be stripped. All underscores will be replaced with spaces. Extensions will be stripped. Casing is preserved. Additionally, all files and folders that begin with a `.` will be ignored when drawing the UI. However, they can still be referenced in playlists. This keeps the UI unclutterd.
 
-## Settings
+## Application Settings
 ![Settings menu](screenshots/screenshot_2.png)
 
 The settings menu will appear as the last item when you are viewing the "root" directory. Within the settings you can control:
@@ -84,7 +93,7 @@ The settings menu will appear as the last item when you are viewing the "root" d
 - RFID Duration: Changes the length of time a RFID signal is transmitted. Can be overridden, per `.rfid` file in a Playlist
 
 ## On deck...
-- IR Signal support
+- Sub-GHz External Antenna support
 
 ## Building / Install
 This app is currently built with `ufbt`, intended for the stock firmware. I have not tested this on other firmwares. The `.fap` file can be found in the Releases section on the right.
