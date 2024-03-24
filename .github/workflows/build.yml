@@ -19,20 +19,18 @@ jobs:
         with:
           sdk-channel: release
 
-
+      - name: Rename standard a artifact
+        run: |
+          mv "${{ steps.build-unleashed.outputs.fap-artifacts }}" flipper_hero.fap
       - name: Build with ufbt for Flipper Unleashed
         uses: flipperdevices/flipperzero-ufbt-action@v0.1
         id: build-unleashed
         with:
           sdk-index-url: https://up.unleashedflip.com/directory.json
           sdk-channel: release
-      - name: Lint sources
-        uses: flipperdevices/flipperzero-ufbt-action@v0.1
-        with:
-          skip-setup: true
-          task: lint
-
-
+      - name: Rename unleashed artifact
+        run: |
+          mv "${{ steps.build-unleashed.outputs.fap-artifacts }}" flipper_hero_unleashed.fap
       - name: Create a new tag
         run: |
           TAG_NAME=${{ github.event.repository.name }}-$(date +'%Y%m%d%H%M%S')
@@ -46,8 +44,8 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            ${{ steps.build-standard.outputs.fap-artifacts }}
-            ${{ steps.build-unleashed.outputs.fap-artifacts }}
+            flipper_hero.fap
+            flipper_hero_unleashed.fap
           tag_name: ${{ env.TAG_NAME }}
           draft: false
           prerelease: false
