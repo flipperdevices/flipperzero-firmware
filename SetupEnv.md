@@ -11,7 +11,7 @@
 ### Installation
 Install `ufbt` using pip:
 ```bash
-pip install ufbt
+> pip install ufbt
 ```
 
 ### Configuration
@@ -19,19 +19,19 @@ pip install ufbt
 **Official Firmware:**
 Set `ufbt` to target a specific firmware version, e.g., 0.99.1:
 ```bash
-ufbt update --branch=0.99.1
+> ufbt update --branch=0.99.1
 ```
 
 **Unleashed Firmware:**
 Set `ufbt` for the unleashed firmware, specifying the custom repository URL:
 ```bash
-ufbt update --index-url=https://up.unleashedflip.com/directory.json
+> ufbt update --index-url=https://up.unleashedflip.com/directory.json
 ```
 
 ### Build Your App
 Build your application:
 ```bash
-ufbt build
+> ufbt build
 ```
 
 
