@@ -29,8 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0323-1807-0.99.2-dcb0bf5](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-03-18 16:00 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-03-23 18:07 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-03-24 05:28 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-03-24 05:28 EST`
 - Removed: [Mfkey32 With Nested v1.0 (By noproto)](https://github.com/noproto/FlipperMfkey), it's functionality is now built into [Mfkey v2.0 (By noproto)](https://github.com/noproto/FlipperMfkey)
 - OFW: [Add the Freedom_2_dolphins animation #3521 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3521)
 - OFW: [NFC wording fixes #3512 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3512)
@@ -50,11 +50,22 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [NFC Magic v1.6 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966) [Removed Gen2 changes till they are ready (By xMasterX)](https://github.com/xMasterX/all-the-plugins/commit/2a3013841837aaed4d2482c42da53755f1a7489f) & [Write NTAG password and PACK to gen4 special pages #190 (By Astrrra)](https://github.com/flipperdevices/flipperzero-good-faps/pull/190)
 - [Several apps updated with Fix UART deinit issues in multiple apps (By Willy-JL & xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/7c4b479dabaf073a3d30d57d7ef8a4fdc658a7bd)
 - UL: [Misc: Fixes for text box and uart echo demo app, remove duplicated emv parser plugin (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/cf1170cab9701dd7c696e2aa89bbf6dbf5f87518)
+- OFW: [Api Symbols: replace asserts with checks #3507 (By skoktopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3507)
+- OFW: [Gui: unicode support, new canvas API #3322 (By skoktopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3322)
+- OFW: [Update the WiFi devboard developer documentation #3520 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3520)
+- OFW: [Fix iButton emulation regression #3519 (By gsurkov)](https://github.com/flipperdevices/flipperzero-firmware/pull/3519)
+- OFW: [Infrared fixes and more #3515 (By gsurkov)](https://github.com/flipperdevices/flipperzero-firmware/pull/3515)
+- OFW: [Added new IR commands #3480 (By zhiyan114)](https://github.com/flipperdevices/flipperzero-firmware/pull/3480)
+- OFW: [fbt/ufbt: Ensure POSIX paths are passed to GDB on all platforms #3360 (By CookiePLMonster)](https://github.com/flipperdevices/flipperzero-firmware/pull/3360)
+- OFW: [Add support for Pioneer SR IR remotes #3308 (By radioegor146)](https://github.com/flipperdevices/flipperzero-firmware/pull/3308)
+- OFW: [BLE/GAP fixes #3533 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/3533)
+- OFW: [GUI: Fix elements module for new canvas API #3527 (By Willy-JL)](https://github.com/flipperdevices/flipperzero-firmware/pull/3527)
 - [Added more random names for name generation (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/e85dc1368393f4eba51e09e273539402c8c065a0)
 - Removed: SubGHz: [Added custom radio presets for AM_Q (By Korai-Labs / ankris812)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/f43c22e01d3b857fb418c0c9114daf01b14563bd) [Documented (By user890104)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/995)
 - [CLI Plugin Wrapper & SubGHz tweaks (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/7c83002de941659478a33eda427c48baf393ce85)
 - [A few app fixes (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/365ac2b26a3ccd33675f760106cac254b39077f5)
-- [Merge/Refactor Fixes for RM apps (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/)
+- [Merge/Refactor Fixes for RM apps (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/9007dcf9b0a6bbf395d035950015cb52fb3b32ca)
+- [External CLI Plugins (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/b19b495729f07e5cac2b83d7d1d0e189bb4924e8)
 
 <a name="release">
 
