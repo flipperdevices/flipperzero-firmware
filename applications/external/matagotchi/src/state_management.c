@@ -1,3 +1,4 @@
+#include <datetime/datetime.h> // For RTC handling
 #include <furi.h> // For FURI_LOG_D
 #include <furi_hal.h> // For RTC handling
 
@@ -15,7 +16,9 @@
 static struct Feat features[NUM_FEAT];
 
 static uint32_t get_current_timestamp() {
-    return furi_hal_rtc_get_timestamp();
+    DateTime current_time;
+    furi_hal_rtc_get_datetime(&current_time);
+    return datetime_datetime_to_timestamp(&current_time);
 }
 
 static void fast_forward_state(struct GameState* game_state) {
