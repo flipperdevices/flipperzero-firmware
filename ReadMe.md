@@ -67,6 +67,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - [Merge/Refactor Fixes for RM apps (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/9007dcf9b0a6bbf395d035950015cb52fb3b32ca)
 - [External CLI Plugins (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/b19b495729f07e5cac2b83d7d1d0e189bb4924e8)
 - Updated: [JavaScript Documentation (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/ae891442a2836d51432200282adff8976c834b7a)
+- Updated: [Flipper Application Library (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/266841b1f565ef51b3fa225f7d138d0ac75285db)
 
 <a name="release">
 
