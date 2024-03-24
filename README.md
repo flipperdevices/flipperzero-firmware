@@ -35,4 +35,3 @@ It is very detailed.
 If you see me in a chat room somewhere, feel free to throw me about $3.
 Of course, you can also give me the middle finger.
 
-Builds were checked with v50.1 to v54.0 SDK
