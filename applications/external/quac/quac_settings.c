@@ -13,6 +13,7 @@ void quac_set_default_settings(App* app) {
     app->settings.layout = QUAC_APP_LANDSCAPE;
     app->settings.show_icons = true;
     app->settings.show_headers = true;
+    app->settings.subghz_use_ext_antenna = false;
 }
 
 void quac_load_settings(App* app) {
@@ -73,6 +74,12 @@ void quac_load_settings(App* app) {
         }
         app->settings.rfid_duration = temp_data32;
 
+        if(!flipper_format_read_uint32(fff_settings, "SubGHz Ext Antenna", &temp_data32, 1)) {
+            FURI_LOG_E(TAG, "SETTINGS: Missing 'SubGHz Ext Antenna'");
+            break;
+        }
+        app->settings.subghz_use_ext_antenna = (temp_data32 == 1) ? true : false;
+
         successful = true;
     } while(false);
 
@@ -123,6 +130,11 @@ void quac_save_settings(App* app) {
         if(!flipper_format_write_uint32(
                fff_settings, "RFID Duration", &app->settings.rfid_duration, 1)) {
             FURI_LOG_E(TAG, "SETTINGS: Failed to write 'RFID Duration'");
+            break;
+        }
+        temp_data32 = app->settings.subghz_use_ext_antenna ? 1 : 0;
+        if(!flipper_format_write_uint32(fff_settings, "SubGHz Ext Antenna", &temp_data32, 1)) {
+            FURI_LOG_E(TAG, "SETTINGS: Failed to write 'SubGHz Ext Antenna'");
             break;
         }
         successful = true;

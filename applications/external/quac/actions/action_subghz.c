@@ -12,6 +12,9 @@
 #include "action_i.h"
 #include "quac.h"
 
+#define SUBGHZ_DEVICE_CC1101_EXT_NAME "cc1101_ext"
+#define SUBGHZ_DEVICE_CC1101_INT_NAME "cc1101_int"
+
 static FuriHalSubGhzPreset action_subghz_get_preset_name(const char* preset_name) {
     FuriHalSubGhzPreset preset = FuriHalSubGhzPresetIDLE;
     if(!strcmp(preset_name, "FuriHalSubGhzPresetOok270Async")) {
@@ -30,12 +33,49 @@ static FuriHalSubGhzPreset action_subghz_get_preset_name(const char* preset_name
     return preset;
 }
 
+static const SubGhzDevice* action_subghz_get_device(uint32_t* device_ind) {
+    const SubGhzDevice* device = NULL;
+    switch(*device_ind) {
+    case 1:
+        // Power on the external antenna
+        uint8_t attempts = 5;
+        while(--attempts > 0) {
+            if(furi_hal_power_enable_otg()) break;
+        }
+        if(attempts == 0) {
+            if(furi_hal_power_get_usb_voltage() < 4.5f) {
+                FURI_LOG_E(
+                    TAG,
+                    "Error power otg enable. BQ2589 check otg fault = %d",
+                    furi_hal_power_check_otg_fault() ? 1 : 0);
+            }
+        }
+        device = subghz_devices_get_by_name(SUBGHZ_DEVICE_CC1101_EXT_NAME);
+        break;
+    default:
+        device = subghz_devices_get_by_name(SUBGHZ_DEVICE_CC1101_INT_NAME);
+        break;
+    }
+    if(!subghz_devices_is_connect(device)) {
+        // Power off
+        if(furi_hal_power_is_otg_enabled()) {
+            furi_hal_power_disable_otg();
+        }
+        if(*device_ind == 1) {
+            FURI_LOG_W(TAG, "Can't connect to External antenna, using Internal");
+        }
+        device = subghz_devices_get_by_name(SUBGHZ_DEVICE_CC1101_INT_NAME);
+        *device_ind = 0;
+    }
+    return device;
+}
+
 // Lifted from flipperzero-firmware/applications/main/subghz/subghz_cli.c
 void action_subghz_tx(void* context, const FuriString* action_path, FuriString* error) {
     App* app = context;
     const char* file_name = furi_string_get_cstr(action_path);
     uint32_t repeat = 1; //
-    // uint32_t device_ind = 0; // 0 - CC1101_INT, 1 - CC1101_EXT
+    uint32_t device_ind = app->settings.subghz_use_ext_antenna ? 1 : 0;
 
     FlipperFormat* fff_data_file = flipper_format_file_alloc(app->storage);
     FlipperFormat* fff_data_raw = flipper_format_string_alloc();
@@ -67,14 +107,21 @@ void action_subghz_tx(void* context, const FuriString* action_path, FuriString* 
     subghz_environment_set_protocol_registry(environment, (void*)&subghz_protocol_registry);
 
     do {
-        // SUBGHZ_DEVICE_CC1101_INT_NAME = "cc1101_int"
-        device = subghz_devices_get_by_name("cc1101_int");
-        if(!subghz_devices_is_connect(device)) {
-            // power off
-            if(furi_hal_power_is_otg_enabled()) furi_hal_power_disable_otg();
-            device = subghz_devices_get_by_name("cc1101_int");
-            // device_ind = 0;
+        device = action_subghz_get_device(&device_ind);
+        if(device == NULL) {
+            FURI_LOG_E(TAG, "Error device not found");
+            ACTION_SET_ERROR("SUBGHZ: Device not found");
+            break;
         }
+
+        // // SUBGHZ_DEVICE_CC1101_INT_NAME = "cc1101_int"
+        // device = subghz_devices_get_by_name("cc1101_int");
+        // if(!subghz_devices_is_connect(device)) {
+        //     // power off
+        //     if(furi_hal_power_is_otg_enabled()) furi_hal_power_disable_otg();
+        //     device = subghz_devices_get_by_name("cc1101_int");
+        //     // device_ind = 0;
+        // }
 
         if(!flipper_format_file_open_existing(fff_data_file, file_name)) {
             FURI_LOG_E(TAG, "Error opening %s", file_name);
@@ -218,7 +265,7 @@ void action_subghz_tx(void* context, const FuriString* action_path, FuriString* 
         furi_hal_power_suppress_charge_enter();
         FURI_LOG_I(
             TAG,
-            "Listening at %s. Frequency=%lu, Protocol=%s",
+            "Transmitting at %s. Frequency=%lu, Protocol=%s",
             file_name,
             frequency,
             furi_string_get_cstr(temp_str));
