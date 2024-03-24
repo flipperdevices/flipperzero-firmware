@@ -35,7 +35,7 @@ jobs:
 
       - name: Create a new tag
         run: |
-          TAG_NAME=${{ github.event.repository.name }}  -$(date +'%Y%m%d%H%M%S')
+          TAG_NAME=${{ github.event.repository.name }}-$(date +'%Y%m%d%H%M%S')
           git config --global user.name 'tag-bot'
           git config --global user.email 'tag-bot@mail'
           git tag $TAG_NAME
