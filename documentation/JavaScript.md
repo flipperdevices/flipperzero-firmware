@@ -1,148 +1,150 @@
 
 # JavaScript scripting API (WIP)
-## Note: This documentation is still work in progress! 
+## Note: This documentation is still work in progress!
 Todo:
-- Add missing parameters
-- Add missing returns
-- Add examples
+- Add missing parameters & returns (Dialog and lower)
 
 ## Description
 Flipper supports JavaScript scripting using [mjs](https://github.com/cesanta/mjs). 
 **Note: Read about mjs's limitations in the link above! You will experience alot of missing js features (e.g. createTimeout).**
 
+## Examples
+Make sure to check out the [included examples](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/tree/420/applications/system/js_app/examples/apps/Scripts)! They cover basically everything that is possible with Flipper JS.
+
 ## API
+
+### Global
+- `print(...args: any): undefined`
+- `delay(...args: any): undefined | error`
+- `to_string(num: number): string`
+- `to_hex_string(num: number): string`
+- `ffi_address(symbol: string): foreign`
+- `require(module: string): object | error`
+- `parse_int(text: string): number`
+- `to_upper_case(text: string): string | error`
+- `to_lower_case(text: string): string | error`
+
 ### SubGHZ
 `const subghz = require("subghz");`
-#### Methods
-- setup(): void
-- setRx(): void
-- setIdle(): void
-- getRssi(): number
-- getState(): string
-- getFrequency(): number
-- setFrequency(freq: number): number | undefined
-- isExternal(): bool
-- transmitFile(file: string): bool | undefined
+- `subghz.setup(): undefined`
+- `subghz.setRx(): undefined`
+- `subghz.setIdle(): undefined`
+- `subghz.getRssi(): number`
+- `subghz.getState(): string`
+- `subghz.getFrequency(): number`
+- `subghz.setFrequency(freq: number): number | error`
+- `subghz.isExternal(): bool`
+- `subghz.transmitFile(file: string): bool | error`
 
 ### Usbdisk
 `const usbdisk = require("usbdisk");`
-#### Methods
-- createImage(file: string, size: number): undefined
-- start(file: string): undefined
-- stop(): undefined
-- wasEjected(): bool | undefined
+- `createImage(file: string, size: number): undefined | error`
+- `start(file: string): undefined | error`
+- `stop(): undefined | error`
+- `wasEjected(): bool | error`
 
 ### BadUsb
 `const badusb = require("badusb");`
-#### Methods
-- setup
-- quit
-- isConnected
-- press
-- hold
-- release
-- print
-- println
-- 
+- `setup({ vid: number, pid: number, mfr_name: string, prod_name: string }): undefined | error`
+- `quit(): undefined | error`
+- `isConnected(): bool | error`
+- `press(...keyAndModifiers: string | number): undefined | error`
+- `hold(...keyAndModifiers: string | number): undefined | error`
+- `release(...keyAndModifiers: string | number | undefined): undefined | error`
+- `print(text: string, delay: number | undefined): undefined | error`
+- `println(text: string, delay: number | undefined): undefined | error`
+- `altPrint(text: string, delay: number | undefined): undefined | error`
+- `altPrintln(text: string, delay: number | undefined): undefined | error`
+
 ### BleBeacon
 `const blebeacon = require("blebeacon");`
-#### Methods
-- isActive
-- setConfig
-- setData
-- start
-- stop
-- keepAlive
+- `isActive(): bool | error`
+- `setConfig(mac: Uint8Array, power: number | undefined, intvMin: number | undefined, intvMax: number | undefined): undefined | error`
+- `setData(data: Uint8Array): undefined | error`
+- `start(): undefined | error`
+- `stop(): undefined | error`
+- `keepAlive(keep: boolean): undefined | error`
 
 ### Dialog
 `const dialog = require("dialog");`
-#### Methods
-- message
-- custom
-- pickFile
+- `message()`
+- `custom()`
+- `pickFile()`
 
 ### Flipper
 `const flipper= require("flipper");`
-#### Methods
-- getModel
-- getName
-- getBatteryCharge
+- `getModel()`
+- `getName()`
+- `getBatteryCharge()`
 
 ### Gpio
 `const gpio = require("gpio");`
-#### Methods
-- init
-- write
-- read
+- `init()`
+- `write()`
+- `read()`
 
 ### Keyboard
 `const keyboard = require("keyboard");`
-#### Methods
-- setHeader
-- text
-- byte
+- `setHeader()`
+- `text()`
+- `byte()`
 
 ### Math
 `const math = require("math");`
-#### Methods
-- abs
-- acos
-- acosh
-- asin
-- asinh
-- atan
-- atan2
-- atanh
-- cbrt
-- ceil
-- clz32
-- cos
-- exp
-- floor
-- log
-- max
-- min
-- pow
-- random
-- sign
-- sin
-- sqrt
-- trunc
-- PI
-- E
+- `abs()`
+- `acos()`
+- `acosh()`
+- `asin()`
+- `asinh()`
+- `atan()`
+- `atan2()`
+- `atanh()`
+- `cbrt()`
+- `ceil()`
+- `clz32()`
+- `cos()`
+- `exp()`
+- `floor()`
+- `log()`
+- `max()`
+- `min()`
+- `pow()`
+- `random()`
+- `sign()`
+- `sin()`
+- `sqrt()`
+- `trunc()`
+- `PI`
+- `E`
 
 ### Notification
 `const notify = require("notification");`
-#### Methods
-- success
-- error
-- blink
+- `success()`
+- `error()`
+- `blink()`
 
 ### Serial
 `const serial = require("serial");`
-#### Methods
-- setup
-- write
-- read
-- readln
-- readBytes
-- expect
+- `setup()`
+- `write()`
+- `read()`
+- `readln()`
+- `readBytes()`
+- `expect()`
 
 ### Storage
 `const storage = require("storage");`
-#### Methods
-- read
-- write
-- append
-- exists
-- remove
-- virtualInit
-- virtualMount
-- virtualQuit
+- `read()`
+- `write()`
+- `append()`
+- `exists()`
+- `remove()`
+- `virtualInit()`
+- `virtualMount()`
+- `virtualQuit()`
 
 ### Submenu
 `const submenu = require("submenu");`
-#### Methods
-- addItem
-- setHeader
-- show
+- `addItem()`
+- `setHeader()`
+- `show()`
