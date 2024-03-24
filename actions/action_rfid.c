@@ -12,12 +12,15 @@
 #include "action_i.h"
 #include "quac.h"
 
+#define RFID_FILE_TYPE "Flipper RFID key"
+#define RFID_FILE_VERSION 1
+
 // lifted from flipperzero-firmware/applications/main/lfrfid/lfrfid_cli.c
 void action_rfid_tx(void* context, const FuriString* action_path, FuriString* error) {
     UNUSED(error);
 
     App* app = context;
-    const FuriString* file_name = action_path;
+    const char* file_name = furi_string_get_cstr(action_path);
 
     FlipperFormat* fff_data_file = flipper_format_file_alloc(app->storage);
     FuriString* temp_str;
@@ -32,22 +35,20 @@ void action_rfid_tx(void* context, const FuriString* action_path, FuriString* er
     // FURI_LOG_I(TAG, "Max dict data size is %d", data_size);
     bool successful_read = false;
     do {
-        if(!flipper_format_file_open_existing(fff_data_file, furi_string_get_cstr(file_name))) {
-            ACTION_SET_ERROR("RFID: Error opening %s", furi_string_get_cstr(file_name));
+        if(!flipper_format_file_open_existing(fff_data_file, file_name)) {
+            ACTION_SET_ERROR("RFID: Error opening %s", file_name);
             break;
         }
         if(!flipper_format_read_header(fff_data_file, temp_str, &temp_data32)) {
             ACTION_SET_ERROR("RFID: Missing or incorrect header");
             break;
         }
-        // FURI_LOG_I(TAG, "Read file headers");
-        // TODO: add better header checks here...
-        if(!strcmp(furi_string_get_cstr(temp_str), "Flipper RFID key")) {
+        if(!strcmp(furi_string_get_cstr(temp_str), RFID_FILE_TYPE) &&
+           temp_data32 == RFID_FILE_VERSION) {
         } else {
             ACTION_SET_ERROR("RFID: Type or version mismatch");
             break;
         }
-
         // read and check the protocol field
         if(!flipper_format_read_string(fff_data_file, "Key type", temp_str)) {
             ACTION_SET_ERROR("RFID: Error reading protocol");
@@ -90,8 +91,7 @@ void action_rfid_tx(void* context, const FuriString* action_path, FuriString* er
         lfrfid_worker_emulate_start(worker, protocol);
 
         int16_t time_ms = app->settings.rfid_duration;
-        FURI_LOG_I(
-            TAG, "RFID: Emulating RFID (%s) for %d ms", furi_string_get_cstr(file_name), time_ms);
+        FURI_LOG_I(TAG, "RFID: Emulating RFID (%s) for %d ms", file_name, time_ms);
         int16_t interval_ms = 100;
         while(time_ms > 0) {
             furi_delay_ms(interval_ms);
