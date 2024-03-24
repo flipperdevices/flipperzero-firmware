@@ -138,9 +138,6 @@ size_t canvas_current_font_width(const Canvas* canvas) {
 const CanvasFontParameters* canvas_get_font_params(const Canvas* canvas, Font font) {
     furi_check(canvas);
     furi_check(font < FontTotalNumber);
-    if(asset_packs.font_params[font]) {
-        return asset_packs.font_params[font];
-    }
     return &canvas_font_params[font];
 }
 
@@ -177,10 +174,6 @@ void canvas_invert_color(Canvas* canvas) {
 void canvas_set_font(Canvas* canvas, Font font) {
     furi_check(canvas);
     u8g2_SetFontMode(&canvas->fb, 1);
-    if(asset_packs.fonts[font]) {
-        u8g2_SetFont(&canvas->fb, asset_packs.fonts[font]);
-        return;
-    }
     switch(font) {
     case FontPrimary:
         u8g2_SetFont(&canvas->fb, u8g2_font_helvB08_tr);
@@ -196,6 +189,9 @@ void canvas_set_font(Canvas* canvas, Font font) {
         break;
     case FontBatteryPercent:
         u8g2_SetFont(&canvas->fb, u8g2_font_5x7_tr); //u8g2_font_micro_tr);
+        break;
+    case FontEurocorp:
+        u8g2_SetFont(&canvas->fb, u8g2_font_eurocorp_tr);
         break;
     default:
         furi_crash();

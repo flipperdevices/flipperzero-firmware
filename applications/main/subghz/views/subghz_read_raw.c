@@ -618,7 +618,7 @@ void subghz_read_raw_exit(void* context) {
         true);
 }
 
-SubGhzReadRAW* subghz_read_raw_alloc(void) {
+SubGhzReadRAW* subghz_read_raw_alloc(bool raw_send_only) {
     SubGhzReadRAW* instance = malloc(sizeof(SubGhzReadRAW));
 
     // View allocation and configuration

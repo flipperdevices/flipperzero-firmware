@@ -147,6 +147,7 @@ SubGhzGPS* subghz_gps_init() {
 void subghz_gps_deinit(SubGhzGPS* subghz_gps) {
     furi_assert(subghz_gps);
 
+    furi_hal_serial_async_rx_stop(subghz_gps->serial_handle);
     furi_hal_serial_deinit(subghz_gps->serial_handle);
     furi_hal_serial_control_release(subghz_gps->serial_handle);
 

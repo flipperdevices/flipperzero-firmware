@@ -4,6 +4,10 @@
 #include <furi_hal_version.h>
 #include <loader/loader.h>
 
+#include <flipper_application/flipper_application.h>
+#include <loader/firmware_api/firmware_api.h>
+#include <inttypes.h>
+
 #define TAG "CliSrv"
 
 #define CLI_INPUT_LEN_LIMIT 256
@@ -482,4 +486,59 @@ int32_t cli_srv(void* p) {
     }
 
     return 0;
+}
+
+void cli_plugin_wrapper(
+    const char* handler_name,
+    uint32_t handler_version,
+    Cli* cli,
+    FuriString* args,
+    void* context) {
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    FlipperApplication* plugin_app = flipper_application_alloc(storage, firmware_api_interface);
+    do {
+        FuriString* full_handler_path =
+            furi_string_alloc_printf(EXT_PATH("apps_data/cli/plugins/%s.fal"), handler_name);
+        FlipperApplicationPreloadStatus preload_res =
+            flipper_application_preload(plugin_app, furi_string_get_cstr(full_handler_path));
+        furi_string_free(full_handler_path);
+
+        if(preload_res != FlipperApplicationPreloadStatusSuccess) {
+            printf("Failed to preload CLI plugin. Code: %d\r\n", preload_res);
+            break;
+        }
+
+        if(!flipper_application_is_plugin(plugin_app)) {
+            printf("CLI plugin file is not a library\r\n");
+            break;
+        }
+
+        FlipperApplicationLoadStatus load_status = flipper_application_map_to_memory(plugin_app);
+        if(load_status != FlipperApplicationLoadStatusSuccess) {
+            printf("Failed to load CLI plugin file. Code %d\r\n", load_status);
+            break;
+        }
+
+        const FlipperAppPluginDescriptor* app_descriptor =
+            flipper_application_plugin_get_descriptor(plugin_app);
+
+        if(strcmp(app_descriptor->appid, handler_name) != 0) {
+            printf("CLI plugin type doesn't match\r\n");
+            break;
+        }
+
+        if(app_descriptor->ep_api_version != handler_version) {
+            printf(
+                "CLI plugin version %" PRIu32 " doesn't match\r\n",
+                app_descriptor->ep_api_version);
+            break;
+        }
+
+        const CliCallback handler = app_descriptor->entry_point;
+
+        handler(cli, args, context);
+
+    } while(false);
+    flipper_application_free(plugin_app);
+    furi_record_close(RECORD_STORAGE);
 }

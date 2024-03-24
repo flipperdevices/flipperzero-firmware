@@ -284,6 +284,16 @@ bool subghz_txrx_protocol_is_transmittable(SubGhzTxRx* instance, bool check_type
 void subghz_txrx_receiver_set_filter(SubGhzTxRx* instance, SubGhzProtocolFlag filter);
 
 /**
+ * Set ignore filter, what types of decoder to skip 
+ * 
+ * @param instance Pointer to a SubGhzTxRx
+ * @param ignore_filter Ignore filter
+ */
+void subghz_txrx_receiver_set_ignore_filter(
+    SubGhzTxRx* instance,
+    SubGhzProtocolFilter ignore_filter);
+
+/**
  * Set callback for receive data
  * 
  * @param instance Pointer to a SubGhzTxRx

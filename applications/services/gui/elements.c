@@ -674,18 +674,6 @@ void elements_scrollable_text_line(
     size_t width,
     FuriString* string,
     size_t scroll,
-    bool ellipsis) {
-    elements_scrollable_text_line_str(
-        canvas, x, y, width, furi_string_get_cstr(string), scroll, ellipsis, false);
-}
-
-void elements_scrollable_text_line_centered(
-    Canvas* canvas,
-    int32_t x,
-    int32_t y,
-    size_t width,
-    FuriString* string,
-    size_t scroll,
     bool ellipsis,
     bool centered) {
     elements_scrollable_text_line_str(

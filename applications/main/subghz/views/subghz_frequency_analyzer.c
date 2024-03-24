@@ -595,7 +595,7 @@ void subghz_frequency_analyzer_exit(void* context) {
     furi_record_close(RECORD_NOTIFICATION);
 }
 
-SubGhzFrequencyAnalyzer* subghz_frequency_analyzer_alloc(void) {
+SubGhzFrequencyAnalyzer* subghz_frequency_analyzer_alloc(SubGhzTxRx* txrx) {
     SubGhzFrequencyAnalyzer* instance = malloc(sizeof(SubGhzFrequencyAnalyzer));
 
     instance->feedback_level = 2;

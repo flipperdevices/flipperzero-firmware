@@ -63,8 +63,6 @@ static SubGhzEnvironment* subghz_cli_environment_init(void) {
     } else {
         printf("Load_keystore keeloq_mfcodes_user \033[0;33mAbsent\033[0m\r\n");
     }
-    subghz_environment_set_came_atomo_rainbow_table_file_name(
-        environment, SUBGHZ_CAME_ATOMO_DIR_NAME);
     subghz_environment_set_alutech_at_4n_rainbow_table_file_name(
         environment, SUBGHZ_ALUTECH_AT_4N_DIR_NAME);
     subghz_environment_set_nice_flor_s_rainbow_table_file_name(
@@ -108,7 +106,7 @@ void subghz_cli_command_tx_carrier(Cli* cli, FuriString* args, void* context) {
             furi_delay_ms(250);
         }
     } else {
-        printf("This frequency can only be used for RX in your settings\r\n");
+        printf("This frequency can only be used for RX in your settings/region\r\n");
     }
 
     furi_hal_subghz_set_path(FuriHalSubGhzPathIsolate);
@@ -266,7 +264,7 @@ void subghz_cli_command_tx(Cli* cli, FuriString* args, void* context) {
         subghz_devices_stop_async_tx(device);
 
     } else {
-        printf("Frequency is outside of default range. Check docs.\r\n");
+        printf("Transmission on this frequency is restricted by your settings/region\r\n");
     }
 
     subghz_devices_sleep(device);
@@ -802,7 +800,7 @@ void subghz_cli_command_tx_from_file(Cli* cli, FuriString* args, void* context) 
                 subghz_devices_stop_async_tx(device);
 
             } else {
-                printf("Transmission on this frequency is restricted in your settings\r\n");
+                printf("Transmission on this frequency is restricted in your settings/region\r\n");
             }
 
             if(!strcmp(furi_string_get_cstr(temp_str), "RAW")) {
@@ -938,8 +936,7 @@ static void subghz_cli_command_encrypt_raw(Cli* cli, FuriString* args) {
     furi_string_free(source);
 }
 
-static void subghz_cli_command_chat(Cli* cli, FuriString* args, void* context) {
-    UNUSED(context);
+static void subghz_cli_command_chat(Cli* cli, FuriString* args) {
     uint32_t frequency = 433920000;
     uint32_t device_ind = 0; // 0 - CC1101_INT, 1 - CC1101_EXT
 
@@ -968,7 +965,7 @@ static void subghz_cli_command_chat(Cli* cli, FuriString* args, void* context) {
     // TODO
     if(!furi_hal_subghz_is_tx_allowed(frequency)) {
         printf(
-            "In your settings, only reception on this frequency (%lu) is allowed,\r\n"
+            "In your settings/region, only reception on this frequency (%lu) is allowed,\r\n"
             "the actual operation of the application is not possible\r\n ",
             frequency);
         return;
@@ -1138,7 +1135,7 @@ static void subghz_cli_command(Cli* cli, FuriString* args, void* context) {
         }
 
         if(furi_string_cmp_str(cmd, "chat") == 0) {
-            subghz_cli_command_chat(cli, args, NULL);
+            subghz_cli_command_chat(cli, args);
             break;
         }
 
@@ -1195,57 +1192,14 @@ static void subghz_cli_command(Cli* cli, FuriString* args, void* context) {
     furi_string_free(cmd);
 }
 
-static bool
-    subghz_on_system_start_istream_read(pb_istream_t* istream, pb_byte_t* buf, size_t count) {
-    File* file = istream->state;
-    size_t ret = storage_file_read(file, buf, count);
-    return (count == ret);
-}
+#include <flipper_application/flipper_application.h>
 
-static bool subghz_on_system_start_istream_decode_band(
-    pb_istream_t* stream,
-    const pb_field_t* field,
-    void** arg) {
-    (void)field;
-    FuriHalRegion* region = *arg;
+static const FlipperAppPluginDescriptor plugin_descriptor = {
+    .appid = "subghz_cli",
+    .ep_api_version = 1,
+    .entry_point = &subghz_cli_command,
+};
 
-    PB_Region_Band band = {0};
-    if(!pb_decode(stream, PB_Region_Band_fields, &band)) {
-        FURI_LOG_E("SubGhzOnStart", "PB Region band decode error: %s", PB_GET_ERROR(stream));
-        return false;
-    }
-
-    region->bands_count += 1;
-    region = realloc( //-V701
-        region,
-        sizeof(FuriHalRegion) + sizeof(FuriHalRegionBand) * region->bands_count);
-    size_t pos = region->bands_count - 1;
-    region->bands[pos].start = band.start;
-    region->bands[pos].end = band.end;
-    region->bands[pos].power_limit = band.power_limit;
-    region->bands[pos].duty_cycle = band.duty_cycle;
-    *arg = region;
-
-    FURI_LOG_I(
-        "SubGhzOnStart",
-        "Add allowed band: start %luHz, stop %luHz, power_limit %ddBm, duty_cycle %u%%",
-        band.start,
-        band.end,
-        band.power_limit,
-        band.duty_cycle);
-    return true;
-}
-
-void subghz_on_system_start(void) {
-#ifdef SRV_CLI
-    Cli* cli = furi_record_open(RECORD_CLI);
-
-    cli_add_command(cli, "subghz", CliCommandFlagDefault, subghz_cli_command, NULL);
-
-    cli_add_command(cli, "chat", CliCommandFlagDefault, subghz_cli_command_chat, NULL);
-
-    furi_record_close(RECORD_CLI);
-#else
-    UNUSED(subghz_cli_command);
-#endif
+const FlipperAppPluginDescriptor* subghz_cli_plugin_ep(void) {
+    return &plugin_descriptor;
 }

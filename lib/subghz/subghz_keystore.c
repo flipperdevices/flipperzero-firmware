@@ -27,10 +27,6 @@ typedef enum {
     SubGhzKeystoreEncryptionAES256,
 } SubGhzKeystoreEncryption;
 
-struct SubGhzKeystore {
-    SubGhzKeyArray_t data;
-};
-
 SubGhzKeystore* subghz_keystore_alloc(void) {
     SubGhzKeystore* instance = malloc(sizeof(SubGhzKeystore));
 

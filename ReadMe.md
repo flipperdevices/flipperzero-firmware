@@ -50,6 +50,9 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [NFC Magic v1.6 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966) [Removed Gen2 changes till they are ready (By xMasterX)](https://github.com/xMasterX/all-the-plugins/commit/2a3013841837aaed4d2482c42da53755f1a7489f) & [Write NTAG password and PACK to gen4 special pages #190 (By Astrrra)](https://github.com/flipperdevices/flipperzero-good-faps/pull/190)
 - [Several apps updated with Fix UART deinit issues in multiple apps (By Willy-JL & xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/7c4b479dabaf073a3d30d57d7ef8a4fdc658a7bd)
 - UL: [Misc: Fixes for text box and uart echo demo app, remove duplicated emv parser plugin (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/cf1170cab9701dd7c696e2aa89bbf6dbf5f87518)
+- [Added more random names for name generation (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/e85dc1368393f4eba51e09e273539402c8c065a0)
+- Removed: SubGHz: [Added custom radio presets for AM_Q (By Korai-Labs / ankris812)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/f43c22e01d3b857fb418c0c9114daf01b14563bd) [Documented (By user890104)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/995)
+- CLI Plugin Wrapper & SubGHz tweaks (By Willy-JL)
 
 <a name="release">
 
@@ -236,7 +239,6 @@ $ ./fbt dolphin_ext
 - Settings: Updated HOLD DOWN to go to Quaternary Favorite [(By RogueMaster)]
 - SubGHz: [Add Kia Encoder #691 (By letvinov28)](https://github.com/DarkFlippers/unleashed-firmware/pull/691)
 - SubGHz: [Add settings to subghz read functionality to allow setting RSSI threshold (raw only) (By PolymerPrints)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/184)
-- SubGHz: [Added custom radio presets for AM_Q (By Korai-Labs / ankris812)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/f43c22e01d3b857fb418c0c9114daf01b14563bd) [Documented (By user890104)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/995)
 - SubGHz: Auto Detect Raw in READ action (Needs To Be Enabled In Read Settings) [from perspecdev](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/152)
 - SubGHz: [Beep on TX for SubGHz & Remote (By LeeroysHub)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/ad0a273a71d7701af30df75c9174f3bdc3fd6e4a)
 - SubGhz: [GPS support (By Sil333033) & SubGHz Repeater (By LeeroysHub) & Optimizations (By Willy-JL) & Merge Fixes (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/3e5e1870621b52caad8fd1287e116c542703984a)

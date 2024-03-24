@@ -185,8 +185,6 @@ static void subghz_setting_load_default_region(SubGhzSetting* instance) {
         instance, "FM238", subghz_device_cc1101_preset_2fsk_dev2_38khz_async_regs);
     subghz_setting_load_default_preset(
         instance, "FM476", subghz_device_cc1101_preset_2fsk_dev47_6khz_async_regs);
-    subghz_setting_load_default_preset(
-        instance, "AM_Q", subghz_device_cc1101_preset_ook_650khz_async_regs_better_q);
 }
 
 // Region check removed

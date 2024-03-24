@@ -62,6 +62,16 @@ void cli_putc(Cli* cli, char c);
 
 void cli_stdout_callback(void* _cookie, const char* data, size_t size);
 
+// Wraps CLI commands to load from plugin file
+// Must call from CLI context, like dummy CLI command callback
+// You need to setup the plugin to compile correctly separately
+void cli_plugin_wrapper(
+    const char* handler_name,
+    uint32_t handler_version,
+    Cli* cli,
+    FuriString* args,
+    void* context);
+
 #ifdef __cplusplus
 }
 #endif

@@ -76,11 +76,11 @@ void elements_scrollbar_pos(
  */
 void elements_scrollbar_horizontal(
     Canvas* canvas,
-    uint8_t x,
-    uint8_t y,
-    uint8_t width,
-    uint16_t pos,
-    uint16_t total);
+    int32_t x,
+    int32_t y,
+    size_t width,
+    size_t pos,
+    size_t total);
 
 /** Draw scrollbar on canvas.
  * @note    width 3px, height equal to canvas height
@@ -233,9 +233,9 @@ void elements_string_fit_width(Canvas* canvas, FuriString* string, size_t width)
  */
 void elements_scrollable_text_line_str(
     Canvas* canvas,
-    uint8_t x,
-    uint8_t y,
-    uint8_t width,
+    int32_t x,
+    int32_t y,
+    size_t width,
     const char* string,
     size_t scroll,
     bool ellipsis,

@@ -49,16 +49,17 @@ SubGhzKeystore* subghz_environment_get_keystore(SubGhzEnvironment* instance) {
 void subghz_environment_set_came_atomo_rainbow_table_file_name(
     SubGhzEnvironment* instance,
     const char* filename) {
-    furi_check(instance);
-
-    instance->came_atomo_rainbow_table_file_name = filename;
+    UNUSED(instance);
+    UNUSED(filename);
+    // Do nothing :)
+    return;
 }
 
 const char*
     subghz_environment_get_came_atomo_rainbow_table_file_name(SubGhzEnvironment* instance) {
-    furi_check(instance);
-
-    return instance->came_atomo_rainbow_table_file_name;
+    UNUSED(instance);
+    // No table, sorry
+    return "";
 }
 
 void subghz_environment_set_alutech_at_4n_rainbow_table_file_name(

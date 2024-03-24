@@ -106,6 +106,7 @@ static void subghz_scene_receiver_config_set_ignore_filter(
     }
 
     subghz->last_settings->ignore_filter = subghz->ignore_filter;
+    subghz_txrx_receiver_set_ignore_filter(subghz->txrx, subghz->ignore_filter);
 }
 
 uint8_t subghz_scene_receiver_config_next_frequency(const uint32_t value, void* context) {
@@ -431,6 +432,7 @@ static void subghz_scene_receiver_config_var_list_enter_callback(void* context, 
         subghz->ignore_filter = 0x00;
         subghz->remove_duplicates = false;
         subghz_txrx_receiver_set_filter(subghz->txrx, subghz->filter);
+        subghz_txrx_receiver_set_ignore_filter(subghz->txrx, subghz->ignore_filter);
         subghz->last_settings->remove_duplicates = subghz->remove_duplicates;
         subghz->last_settings->ignore_filter = subghz->ignore_filter;
         subghz->last_settings->filter = subghz->filter;

@@ -12,7 +12,13 @@ static bool archive_back_event_callback(void* context) {
     return scene_manager_handle_back_event(archive->scene_manager);
 }
 
-ArchiveApp* archive_alloc(void) {
+static void archive_tick_event_callback(void* context) {
+    furi_assert(context);
+    ArchiveApp* archive = context;
+    scene_manager_handle_tick_event(archive->scene_manager);
+}
+
+static ArchiveApp* archive_alloc(void) {
     ArchiveApp* archive = malloc(sizeof(ArchiveApp));
 
     archive->fav_move_str = furi_string_alloc();

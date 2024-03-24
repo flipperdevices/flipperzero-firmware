@@ -569,6 +569,13 @@ void subghz_txrx_receiver_set_filter(SubGhzTxRx* instance, SubGhzProtocolFlag fi
     subghz_receiver_set_filter(instance->receiver, filter);
 }
 
+void subghz_txrx_receiver_set_ignore_filter(
+    SubGhzTxRx* instance,
+    SubGhzProtocolFilter ignore_filter) {
+    furi_assert(instance);
+    subghz_receiver_set_ignore_filter(instance->receiver, ignore_filter);
+}
+
 void subghz_txrx_set_rx_callback(
     SubGhzTxRx* instance,
     SubGhzReceiverCallback callback,

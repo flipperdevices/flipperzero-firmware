@@ -171,7 +171,7 @@ LFRFIDHitagWorker* lfrfid_hitag_worker_alloc(ProtocolDict* dict) {
 
     worker->thread = furi_thread_alloc_ex("LFRFIDHitagWorker", 2048, NULL, worker);
 
-    worker->events = furi_event_flag_alloc(NULL);
+    worker->events = furi_event_flag_alloc();
     worker->DMAeventCount = 0;
 
     worker->carrierPrescaler = 2;
