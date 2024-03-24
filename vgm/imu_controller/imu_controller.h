@@ -40,21 +40,21 @@ extern const ImuControllerConfig IMU_CONTROLLER_DEFAULT_CONFIG;
 
 /**
  * @brief      A callback to queue input messages from the IMU controller to the event queue
- * @param      event_queue  The event queue
+ * @param      context      The context for the callback
  * @param      type         The input type
  * @param      key          The input key
 */
-typedef void (*ImuControllerQueue)(FuriMessageQueue* event_queue, InputType type, InputKey key);
+typedef void (*ImuControllerQueue)(void* context, InputType type, InputKey key);
 
 /**
  * @brief      Allocate a new IMU controller
- * @param      event_queue     The event queue
+ * @param      context         The context for callbacks
  * @param      config          The configuration for pitch and roll
  * @param      queue_message   A callback to queue input messages
  * @return     The new IMU controller
  */
 ImuController* imu_controller_alloc(
-    FuriMessageQueue* event_queue,
+    void* context,
     const ImuControllerConfig* config,
     ImuControllerQueue queue_message);
 

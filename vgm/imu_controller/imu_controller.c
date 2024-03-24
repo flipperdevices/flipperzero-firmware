@@ -35,7 +35,7 @@ struct ImuController {
     ImuControllerQueue queue_message;
     FuriMutex* mutex;
     Imu* imu;
-    FuriMessageQueue* event_queue;
+    void* context;
     FuriTimer* timer;
     uint32_t button_press_tick[InputKeyMAX];
     ButtonState button_state[InputKeyMAX];
@@ -59,11 +59,11 @@ static void imu_controller_release(ImuController* controller, InputKey key) {
     // If the button was pressed, send a InputTypeShort event
     // (otherwise we already sent a InputTypeLong event).
     if(controller->button_state[key] == ButtonStatePressed) {
-        controller->queue_message(controller->event_queue, InputTypeShort, key);
+        controller->queue_message(controller->context, InputTypeShort, key);
     }
 
     // Send a InputTypeRelease event
-    controller->queue_message(controller->event_queue, InputTypeRelease, key);
+    controller->queue_message(controller->context, InputTypeRelease, key);
     // Reset the button state
     controller->button_press_tick[key] = 0;
     controller->button_state[key] = ButtonStateReleased;
@@ -89,7 +89,7 @@ static void imu_controller_press(ImuController* controller, InputKey key) {
            (controller->button_state[key] == ButtonStatePressed &&
             duration >= controller->config->button_state_long_ms)) {
             // Send a InputTypeLong event
-            controller->queue_message(controller->event_queue, InputTypeLong, key);
+            controller->queue_message(controller->context, InputTypeLong, key);
             // Update the button state
             controller->button_press_tick[key] = furi_get_tick();
             controller->button_state[key] = ButtonStateLongPressed;
@@ -100,7 +100,7 @@ static void imu_controller_press(ImuController* controller, InputKey key) {
             (controller->button_state[key] >= ButtonStateLongPressed &&
              duration > controller->config->button_state_repeat_ms)) {
             // Send a InputTypeRepeat event
-            controller->queue_message(controller->event_queue, InputTypeRepeat, key);
+            controller->queue_message(controller->context, InputTypeRepeat, key);
             // Update the button state
             controller->button_press_tick[key] = furi_get_tick();
             controller->button_state[key] = ButtonStateRepeatPressed;
@@ -132,7 +132,7 @@ static void imu_controller_press(ImuController* controller, InputKey key) {
     }
 
     // Send a InputTypePress event
-    controller->queue_message(controller->event_queue, InputTypePress, key);
+    controller->queue_message(controller->context, InputTypePress, key);
 
     // Update the button state
     controller->button_press_tick[key] = furi_get_tick();
@@ -155,34 +155,36 @@ static void imu_controller_callback(void* context) {
     // Acquire the mutex to access the IMU
     furi_mutex_acquire(imu_controller->mutex, FuriWaitForever);
 
-    // Get the roll (up/down)
-    float roll = imu_roll_get(imu_controller->imu);
-    if(roll > imu_controller->config->roll_up) {
-        imu_controller_press(imu_controller, InputKeyUp);
-    } else if(roll < imu_controller->config->roll_down) {
-        imu_controller_press(imu_controller, InputKeyDown);
-    }
-    // If the roll is outside the hysteresis range, release the up and down buttons
-    else if(
-        roll < imu_controller->config->roll_up - imu_controller->config->roll_hysteresis &&
-        roll > imu_controller->config->roll_down + imu_controller->config->roll_hysteresis) {
-        imu_controller_release(imu_controller, InputKeyUp);
-        imu_controller_release(imu_controller, InputKeyDown);
-    }
+    if(imu_present(imu_controller->imu)) {
+        // Get the roll (up/down)
+        float roll = imu_roll_get(imu_controller->imu);
+        if(roll > imu_controller->config->roll_up) {
+            imu_controller_press(imu_controller, InputKeyUp);
+        } else if(roll < imu_controller->config->roll_down) {
+            imu_controller_press(imu_controller, InputKeyDown);
+        }
+        // If the roll is outside the hysteresis range, release the up and down buttons
+        else if(
+            roll < imu_controller->config->roll_up - imu_controller->config->roll_hysteresis &&
+            roll > imu_controller->config->roll_down + imu_controller->config->roll_hysteresis) {
+            imu_controller_release(imu_controller, InputKeyUp);
+            imu_controller_release(imu_controller, InputKeyDown);
+        }
 
-    // Get the pitch (left/right)
-    float pitch = imu_pitch_get(imu_controller->imu);
-    if(pitch > imu_controller->config->pitch_left) {
-        imu_controller_press(imu_controller, InputKeyLeft);
-    } else if(pitch < imu_controller->config->pitch_right) {
-        imu_controller_press(imu_controller, InputKeyRight);
-    }
-    // If the pitch is outside the hysteresis range, release the left and right buttons
-    else if(
-        pitch < imu_controller->config->pitch_left - imu_controller->config->pitch_hysteresis &&
-        pitch > imu_controller->config->pitch_right + imu_controller->config->pitch_hysteresis) {
-        imu_controller_release(imu_controller, InputKeyLeft);
-        imu_controller_release(imu_controller, InputKeyRight);
+        // Get the pitch (left/right)
+        float pitch = imu_pitch_get(imu_controller->imu);
+        if(pitch > imu_controller->config->pitch_left) {
+            imu_controller_press(imu_controller, InputKeyLeft);
+        } else if(pitch < imu_controller->config->pitch_right) {
+            imu_controller_press(imu_controller, InputKeyRight);
+        }
+        // If the pitch is outside the hysteresis range, release the left and right buttons
+        else if(
+            pitch < imu_controller->config->pitch_left - imu_controller->config->pitch_hysteresis &&
+            pitch > imu_controller->config->pitch_right + imu_controller->config->pitch_hysteresis) {
+            imu_controller_release(imu_controller, InputKeyLeft);
+            imu_controller_release(imu_controller, InputKeyRight);
+        }
     }
 
     // Release the mutex, so other threads can access the IMU
@@ -203,20 +205,20 @@ static void imu_controller_release_buttons(void* context) {
 
 /**
  * @brief      Allocate a new IMU controller
- * @param      event_queue     The event queue
+ * @param      context     The context for callbacks
  * @param      config          The configuration for pitch and roll
  * @param      queue_message   A callback to queue input messages
  * @return     The new IMU controller
  */
 ImuController* imu_controller_alloc(
-    FuriMessageQueue* event_queue,
+    void* context,
     const ImuControllerConfig* config,
     ImuControllerQueue queue_message) {
     ImuController* imu_controller = malloc(sizeof(ImuController));
     imu_controller->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
     imu_controller->queue_message = queue_message;
     imu_controller->imu = imu_alloc();
-    imu_controller->event_queue = event_queue;
+    imu_controller->context = context;
     imu_controller->config = config;
     imu_controller->timer =
         furi_timer_alloc(imu_controller_callback, FuriTimerTypePeriodic, imu_controller);
