@@ -47,7 +47,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [USB Mass Storage v1.3 (By nminaylov)](https://github.com/flipperdevices/flipperzero-good-faps/tree/nm/usb_mass_storage_app/mass_storage) [Unlock USB when starting mass storage (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/7e215f64d210529aa1c2f0ea641df3ad87e26453)
 - Updated: [BLE Spam v6.2 (By Willy-JL & ECTO-1A & Spooks4576 with research from xMasterX; OFW API thanks to noproto)](https://github.com/Next-Flip/Momentum-Apps/tree/dev/ble_spam) [BLE Spam: Fix icon shift + bump versions (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/82479362b9e66a5ec6fd0ca6972c6260dd767fcb)
 - Updated: [Wardriver GPS v1.0 (By Sil333033)](https://github.com/Next-Flip/Momentum-Apps/tree/dev/wardriver) [Fix Wardriver crash at exit (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/3da843ee0f20c791c2fcafb3326b53511b1a1b77)
-- Updated: [NFC Magic v1.6 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966) [Removed Gen2 changes till they are ready (By xMasterX)](https://github.com/xMasterX/all-the-plugins/commit/2a3013841837aaed4d2482c42da53755f1a7489f) & [Write NTAG password and PACK to gen4 special pages #190 (By Astrrra)](https://github.com/flipperdevices/flipperzero-good-faps/pull/190)
 - [Several apps updated with Fix UART deinit issues in multiple apps (By Willy-JL & xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/7c4b479dabaf073a3d30d57d7ef8a4fdc658a7bd)
 - UL: [Misc: Fixes for text box and uart echo demo app, remove duplicated emv parser plugin (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/cf1170cab9701dd7c696e2aa89bbf6dbf5f87518)
 - OFW: [Api Symbols: replace asserts with checks #3507 (By skoktopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3507)
@@ -73,6 +72,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Added: [Flipper Hero v1.1 (By mentoster)](https://github.com/mentoster/Flipper-hero)
 - Updated: [Quac! v0.4 (By rdefeo)](https://github.com/rdefeo/quac)
 - Updated: [Marauder flash assets updated to 0.13.9 (By justcallmekoko)](https://github.com/justcallmekoko/ESP32Marauder/releases/tag/v0.13.9)
+- Updated: [NFC Magic v1.6 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966) [Removed Gen2 changes till they are ready (By xMasterX)](https://github.com/xMasterX/all-the-plugins/commit/2a3013841837aaed4d2482c42da53755f1a7489f) & [Write NTAG password and PACK to gen4 special pages #190 (By Astrrra)](https://github.com/flipperdevices/flipperzero-good-faps/pull/190) & Small Tweaks (By xMasterX)
 
 <a name="release">
 
