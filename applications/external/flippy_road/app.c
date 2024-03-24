@@ -17,8 +17,8 @@
 #define WIDTH 128
 #define HEIGHT 64
 #define GRID_UNIT 8
-#define ROWS (HEIGHT/GRID_UNIT)
-#define COLS (WIDTH/GRID_UNIT)
+#define ROWS (HEIGHT / GRID_UNIT)
+#define COLS (WIDTH / GRID_UNIT)
 #define MAX_OBSTACLES 3
 #define LOG_LENGTH 3
 
@@ -87,7 +87,7 @@ static bool storage_load() {
     File* file = storage_file_alloc(storage);
 
     uint16_t bytes_read = 0;
-    if (storage_file_open(file, SAVE_FILE, FSAM_READ, FSOM_OPEN_EXISTING)) {
+    if(storage_file_open(file, SAVE_FILE, FSAM_READ, FSOM_OPEN_EXISTING)) {
         bytes_read = storage_file_read(file, &high_score, sizeof(high_score));
     }
 
@@ -101,7 +101,7 @@ static void storage_save() {
     Storage* storage = furi_record_open(RECORD_STORAGE);
 
     File* file = storage_file_alloc(storage);
-    if (storage_file_open(file, SAVE_FILE, FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
+    if(storage_file_open(file, SAVE_FILE, FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
         storage_file_write(file, &high_score, sizeof(high_score));
     }
     storage_file_close(file);
@@ -112,14 +112,20 @@ static void storage_save() {
 static void draw_road(Canvas* canvas, Terrain* road) {
     // Draw road
     canvas_draw_line(canvas, 0, road->y, WIDTH, road->y);
-    for (float i = 0.5; i < 10; i += 2) {
-        canvas_draw_line(canvas, WIDTH*i/10, road->y+GRID_UNIT/2, WIDTH*(i+1)/10, road->y+GRID_UNIT/2);
+    for(float i = 0.5; i < 10; i += 2) {
+        canvas_draw_line(
+            canvas,
+            WIDTH * i / 10,
+            road->y + GRID_UNIT / 2,
+            WIDTH * (i + 1) / 10,
+            road->y + GRID_UNIT / 2);
     }
-    canvas_draw_line(canvas, 0, road->y+GRID_UNIT, WIDTH, road->y+GRID_UNIT);
+    canvas_draw_line(canvas, 0, road->y + GRID_UNIT, WIDTH, road->y + GRID_UNIT);
 
     // Draw cars
-    for (uint8_t i = 0; i < MAX_OBSTACLES; i++) {
-        canvas_draw_box(canvas, road->obstacles[i]*GRID_UNIT, road->y+2, GRID_UNIT, GRID_UNIT-3);
+    for(uint8_t i = 0; i < MAX_OBSTACLES; i++) {
+        canvas_draw_box(
+            canvas, road->obstacles[i] * GRID_UNIT, road->y + 2, GRID_UNIT, GRID_UNIT - 3);
     }
 }
 
@@ -127,43 +133,54 @@ static void draw_river(Canvas* canvas, Terrain* river) {
     // Draw river
     uint8_t river_tiles[COLS];
     memset(river_tiles, true, COLS);
-    for (uint8_t i = 0; i < MAX_OBSTACLES; i++) {
-        for (uint8_t j = 0; j < LOG_LENGTH; j++) {
-            if (river->obstacles[i] == COLS-1) {
+    for(uint8_t i = 0; i < MAX_OBSTACLES; i++) {
+        for(uint8_t j = 0; j < LOG_LENGTH; j++) {
+            if(river->obstacles[i] == COLS - 1) {
                 river_tiles[0] = false;
             }
             river_tiles[(river->obstacles[i] + j) % COLS] = false;
         }
     }
 
-    for (uint8_t i = 0; i < COLS; i++) {
-        if (river_tiles[i]) {
-            canvas_draw_line(canvas, i*GRID_UNIT+2, river->y+GRID_UNIT/2, i*GRID_UNIT+6, river->y+GRID_UNIT/2-1);
+    for(uint8_t i = 0; i < COLS; i++) {
+        if(river_tiles[i]) {
+            canvas_draw_line(
+                canvas,
+                i * GRID_UNIT + 2,
+                river->y + GRID_UNIT / 2,
+                i * GRID_UNIT + 6,
+                river->y + GRID_UNIT / 2 - 1);
         }
     }
 
     // Draw logs
-    for (uint8_t i = 0; i < MAX_OBSTACLES; i++) {
-        canvas_draw_frame(canvas, river->obstacles[i]*GRID_UNIT, river->y, GRID_UNIT*LOG_LENGTH, GRID_UNIT);
-        if (river->obstacles[i] > COLS - LOG_LENGTH) {
-            canvas_draw_frame(canvas, 0, river->y, GRID_UNIT*(LOG_LENGTH-(COLS-river->obstacles[i])), GRID_UNIT);
+    for(uint8_t i = 0; i < MAX_OBSTACLES; i++) {
+        canvas_draw_frame(
+            canvas, river->obstacles[i] * GRID_UNIT, river->y, GRID_UNIT * LOG_LENGTH, GRID_UNIT);
+        if(river->obstacles[i] > COLS - LOG_LENGTH) {
+            canvas_draw_frame(
+                canvas,
+                0,
+                river->y,
+                GRID_UNIT * (LOG_LENGTH - (COLS - river->obstacles[i])),
+                GRID_UNIT);
         }
     }
 }
 
 static void draw_callback(Canvas* canvas, void* model) {
     furi_assert(model);
-    GameState* state = (GameState*) model;
+    GameState* state = (GameState*)model;
 
     furi_mutex_acquire(state->mutex, FuriWaitForever);
 
-    canvas_draw_icon(canvas, state->x*GRID_UNIT, state->currTerrain->y, &I_frog);
+    canvas_draw_icon(canvas, state->x * GRID_UNIT, state->currTerrain->y, &I_frog);
     canvas_draw_frame(canvas, 0, 0, WIDTH, HEIGHT);
-    
+
     // Draw terrain
-    for (uint8_t i = 0; i < ROWS; i++) {
+    for(uint8_t i = 0; i < ROWS; i++) {
         Terrain* terrain = &(state->terrains[i]);
-        switch (terrain->type) {
+        switch(terrain->type) {
         case Road:
             draw_road(canvas, terrain);
             break;
@@ -176,7 +193,7 @@ static void draw_callback(Canvas* canvas, void* model) {
     }
 
     // Game over screen
-    if (state->gameOver) {
+    if(state->gameOver) {
         canvas_set_color(canvas, ColorWhite);
         canvas_draw_box(canvas, 34, 14, 62, 36);
         canvas_set_color(canvas, ColorBlack);
@@ -188,9 +205,11 @@ static void draw_callback(Canvas* canvas, void* model) {
         canvas_set_font(canvas, FontSecondary);
         FuriString* score_str = furi_string_alloc();
         furi_string_printf(score_str, "Score: %u", state->score);
-        canvas_draw_str_aligned(canvas, 64, 35, AlignCenter, AlignBottom, furi_string_get_cstr(score_str));
+        canvas_draw_str_aligned(
+            canvas, 64, 35, AlignCenter, AlignBottom, furi_string_get_cstr(score_str));
         furi_string_printf(score_str, " Best: %u", high_score);
-        canvas_draw_str_aligned(canvas, 64, 45, AlignCenter, AlignBottom, furi_string_get_cstr(score_str));
+        canvas_draw_str_aligned(
+            canvas, 64, 45, AlignCenter, AlignBottom, furi_string_get_cstr(score_str));
         furi_string_free(score_str);
     }
 
@@ -211,25 +230,25 @@ static void timer_callback(FuriMessageQueue* event_queue) {
 
 static void generate_terrain(GameState* state, Terrain* terrain, uint8_t new_y, bool starter) {
     terrain->y = new_y;
-    terrain->speed = (uint8_t) furi_hal_random_get() % 2 ? 1 : -1;
+    terrain->speed = (uint8_t)furi_hal_random_get() % 2 ? 1 : -1;
 
-    if (starter) {
+    if(starter) {
         terrain->type = Road;
     } else {
-        uint8_t seed = (uint8_t) furi_hal_random_get() % 100;
-        if (state->lastTerrain->type == River) {
-            if (seed > 30) {
+        uint8_t seed = (uint8_t)furi_hal_random_get() % 100;
+        if(state->lastTerrain->type == River) {
+            if(seed > 30) {
                 terrain->speed = -(state->lastTerrain->speed);
                 terrain->type = River;
-            } else if (seed > 0) {
+            } else if(seed > 0) {
                 terrain->type = Road;
             } else {
                 terrain->type = Grass;
             }
         } else {
-            if (seed > 30) {
+            if(seed > 30) {
                 terrain->type = Road;
-            } else if (seed > 5) {
+            } else if(seed > 5) {
                 terrain->type = River;
             } else {
                 terrain->type = Grass;
@@ -237,17 +256,18 @@ static void generate_terrain(GameState* state, Terrain* terrain, uint8_t new_y, 
         }
     }
 
-    if (terrain->type == Road) {
-        for (uint8_t i = 0; i < MAX_OBSTACLES; i++) {
-            terrain->obstacles[i] = (uint8_t) furi_hal_random_get() % COLS;
+    if(terrain->type == Road) {
+        for(uint8_t i = 0; i < MAX_OBSTACLES; i++) {
+            terrain->obstacles[i] = (uint8_t)furi_hal_random_get() % COLS;
         }
     }
 
-    if (terrain->type == River) {
-        uint8_t x = (uint8_t) furi_hal_random_get() % COLS;
-        for (uint8_t i = 0; i < MAX_OBSTACLES; i++) {
+    if(terrain->type == River) {
+        uint8_t x = (uint8_t)furi_hal_random_get() % COLS;
+        for(uint8_t i = 0; i < MAX_OBSTACLES; i++) {
             terrain->obstacles[i] = x;
-            x += (uint8_t) furi_hal_random_get() % (COLS/MAX_OBSTACLES-(i+1))+LOG_LENGTH-1 + 1;
+            x += (uint8_t)furi_hal_random_get() % (COLS / MAX_OBSTACLES - (i + 1)) + LOG_LENGTH -
+                 1 + 1;
         }
     }
 
@@ -255,11 +275,11 @@ static void generate_terrain(GameState* state, Terrain* terrain, uint8_t new_y, 
 }
 
 static void scroll(GameState* state, uint8_t scroll_pixels) {
-    for (uint8_t i = 0; i < ROWS; i++) {
+    for(uint8_t i = 0; i < ROWS; i++) {
         Terrain* terrain = &(state->terrains[i]);
         terrain->y += scroll_pixels;
-        if (terrain->y >= HEIGHT) {
-            if (state->currTerrain->y == terrain->y) {
+        if(terrain->y >= HEIGHT) {
+            if(state->currTerrain->y == terrain->y) {
                 state->gameOver = true;
             } else {
                 generate_terrain(state, terrain, 0, false);
@@ -269,25 +289,25 @@ static void scroll(GameState* state, uint8_t scroll_pixels) {
 }
 
 static bool check_collision(GameState* state) {
-    if (state->gameOver) {
+    if(state->gameOver) {
         return true;
     }
 
-    switch (state->currTerrain->type) {
+    switch(state->currTerrain->type) {
     case Road:
-        for (uint8_t i = 0; i < MAX_OBSTACLES; i++) {
-            if (state->currTerrain->obstacles[i] == state->x) {
+        for(uint8_t i = 0; i < MAX_OBSTACLES; i++) {
+            if(state->currTerrain->obstacles[i] == state->x) {
                 return true;
             }
         }
         return false;
     case River:
-        for (uint8_t i = 0; i < MAX_OBSTACLES; i++) {
+        for(uint8_t i = 0; i < MAX_OBSTACLES; i++) {
             uint8_t obstacle_x = state->currTerrain->obstacles[i];
-            if (state->x >= obstacle_x && (state->x - obstacle_x) < LOG_LENGTH) {
+            if(state->x >= obstacle_x && (state->x - obstacle_x) < LOG_LENGTH) {
                 return false;
             }
-            if (obstacle_x > COLS - LOG_LENGTH && state->x < (obstacle_x + LOG_LENGTH) % COLS) {
+            if(obstacle_x > COLS - LOG_LENGTH && state->x < (obstacle_x + LOG_LENGTH) % COLS) {
                 return false;
             }
         }
@@ -298,25 +318,25 @@ static bool check_collision(GameState* state) {
 }
 
 static void process_tick(GameState* state) {
-    if (state->gameOver) {
+    if(state->gameOver) {
         return;
     }
 
     scroll(state, 1);
 
-    for (uint8_t i = 0; i < ROWS; i++) {
+    for(uint8_t i = 0; i < ROWS; i++) {
         Terrain* terrain = &(state->terrains[i]);
-        if (terrain->type == Road || terrain->type == River) {
-            for (uint8_t j = 0; j < MAX_OBSTACLES; j++) {
+        if(terrain->type == Road || terrain->type == River) {
+            for(uint8_t j = 0; j < MAX_OBSTACLES; j++) {
                 terrain->obstacles[j] += terrain->speed;
                 terrain->obstacles[j] %= COLS;
             }
         }
     }
 
-    if (state->currTerrain->type == River) {
+    if(state->currTerrain->type == River) {
         state->x += state->currTerrain->speed;
-        if (state->x >= COLS) {
+        if(state->x >= COLS) {
             state->gameOver = true;
         }
     }
@@ -325,37 +345,39 @@ static void process_tick(GameState* state) {
 }
 
 static void move_player(GameState* state, InputKey input) {
-    if (state->gameOver) {
+    if(state->gameOver) {
         return;
     }
 
-    switch (input) {
+    switch(input) {
     case InputKeyRight:
-        if (state->x + 1 < COLS) {
+        if(state->x + 1 < COLS) {
             state->x++;
         }
         break;
     case InputKeyLeft:
-        if (state->x - 1 >= 0) {
+        if(state->x - 1 >= 0) {
             state->x--;
         }
         break;
     case InputKeyUp:
-        if (state->currTerrain->y < ROWS/2 * GRID_UNIT) {
-            scroll(state, GRID_UNIT-(state->currTerrain->y)%GRID_UNIT);
+        if(state->currTerrain->y < ROWS / 2 * GRID_UNIT) {
+            scroll(state, GRID_UNIT - (state->currTerrain->y) % GRID_UNIT);
         }
         state->currTerrain--;
-        if (state->currTerrain < state->terrains) {
-            state->currTerrain = state->terrains + ((state->currTerrain - state->terrains + ROWS) % ROWS);
+        if(state->currTerrain < state->terrains) {
+            state->currTerrain =
+                state->terrains + ((state->currTerrain - state->terrains + ROWS) % ROWS);
         }
         state->pos++;
-        if (state->pos > state->score) {
+        if(state->pos > state->score) {
             state->score = state->pos;
         }
         break;
     case InputKeyDown:
-        if (state->currTerrain->y + GRID_UNIT < HEIGHT) {
-            state->currTerrain = state->terrains + ((state->currTerrain + 1 - state->terrains) % ROWS);
+        if(state->currTerrain->y + GRID_UNIT < HEIGHT) {
+            state->currTerrain =
+                state->terrains + ((state->currTerrain + 1 - state->terrains) % ROWS);
             state->pos--;
         }
         break;
@@ -367,7 +389,7 @@ static void move_player(GameState* state, InputKey input) {
 }
 
 static void frogger_init(GameState* state) {
-    state->x = COLS/2;
+    state->x = COLS / 2;
     state->pos = 0;
     state->score = 0;
     state->gameOver = false;
@@ -375,17 +397,17 @@ static void frogger_init(GameState* state) {
     state->deathNotification = false;
 
     const uint8_t num_start_rows = 3;
-    for (uint8_t i = 0; i < ROWS-num_start_rows; i++) {
+    for(uint8_t i = 0; i < ROWS - num_start_rows; i++) {
         generate_terrain(state, &(state->terrains[i]), i * GRID_UNIT, true);
     }
-    for (uint8_t i = 1; i <= num_start_rows; i++) {
-        state->terrains[ROWS-i] = (Terrain) {.type = Grass, .y = HEIGHT-GRID_UNIT*i};
+    for(uint8_t i = 1; i <= num_start_rows; i++) {
+        state->terrains[ROWS - i] = (Terrain){.type = Grass, .y = HEIGHT - GRID_UNIT * i};
     }
-    state->currTerrain = &(state->terrains[ROWS-num_start_rows+1]);
+    state->currTerrain = &(state->terrains[ROWS - num_start_rows + 1]);
 }
 
 int32_t flippy_road_app() {
-    if (!storage_load()) {
+    if(!storage_load()) {
         high_score = 0;
     }
 
@@ -394,7 +416,7 @@ int32_t flippy_road_app() {
     frogger_init(state);
 
     state->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
-    if (!state->mutex) {
+    if(!state->mutex) {
         FURI_LOG_E(TAG, "cannot create mutex\r\n");
         free(state);
         return 255;
@@ -416,19 +438,19 @@ int32_t flippy_road_app() {
     dolphin_deed(DolphinDeedPluginGameStart);
 
     Event event;
-    for (bool processing = true; processing;) {
+    for(bool processing = true; processing;) {
         FuriStatus event_status = furi_message_queue_get(event_queue, &event, FuriWaitForever);
         furi_mutex_acquire(state->mutex, FuriWaitForever);
 
-        if (event_status == FuriStatusOk) {
-            if (event.type == KeyEvent) {
-                if (event.input.type == InputTypePress) {
-                    switch (event.input.key) {
+        if(event_status == FuriStatusOk) {
+            if(event.type == KeyEvent) {
+                if(event.input.type == InputTypePress) {
+                    switch(event.input.key) {
                     case InputKeyBack:
                         processing = false;
                         break;
                     case InputKeyOk:
-                        if (state->gameOver) {
+                        if(state->gameOver) {
                             frogger_init(state);
                             furi_timer_start(timer, furi_kernel_get_tick_frequency());
                         }
@@ -438,17 +460,17 @@ int32_t flippy_road_app() {
                         break;
                     }
                 }
-            } else if (event.type == TickEvent) {
+            } else if(event.type == TickEvent) {
                 process_tick(state);
             }
 
-            if (state->gameOver && !state->deathNotification) {
+            if(state->gameOver && !state->deathNotification) {
                 notification_message_block(notification, &sequence_fail);
                 furi_timer_stop(timer);
-                if (state->score > high_score) {
+                if(state->score > high_score) {
                     high_score = state->score;
                     storage_save();
-                } 
+                }
                 state->deathNotification = true;
             }
         }
@@ -471,4 +493,3 @@ int32_t flippy_road_app() {
 
     return 0;
 }
-
