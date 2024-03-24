@@ -1,0 +1,16 @@
+#!/bin/bash 
+#------------------------
+APPID=voltcalc_app
+FIRMWARE_DIR=~/Programming/Flipper/firmware/f0ReleaseFirmware
+SOURCE_DIR=~/Programming/Flipper/firmware/applications_user/$APPID/
+#------------------------
+clear
+set -x
+cp -r $SOURCE_DIR $FIRMWARE_DIR/applications_user/
+cd $FIRMWARE_DIR
+./fbt -c fap_$APPID
+./fbt fap_$APPID
+./fbt launch_app APPSRC=$APPID
+echo manifest.yml ~/Programming/Flipper/firmware/flipper-application-catalog/applications/Tools/voltcalc_app
+echo Don't forget to update the commit_sha in the manifest for release, as well as the version info in application.fam
+set +x
