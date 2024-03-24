@@ -61,6 +61,7 @@ UHFUart* uhf_uart_alloc() {
     UHFUart* uart = (UHFUart*)malloc(sizeof(UHFUart));
     uart->bus = FuriHalBusUSART1;
     uart->handle = furi_hal_serial_control_acquire(FuriHalSerialIdUsart);
+    furi_check(uart->handle);
     // uart->rx_buff_stream = furi_stream_buffer_alloc(UHF_UART_RX_BUFFER_SIZE, 1);
     uart->tick = UHF_UART_WAIT_TICK;
     uart->baudrate = UHF_UART_DEFAULT_BAUDRATE;

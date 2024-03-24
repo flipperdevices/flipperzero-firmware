@@ -534,6 +534,8 @@ void mfkey(ProgramState* program_state) {
     if(!(program_state->mfkey32_present) && !(program_state->nested_present)) {
         program_state->err = MissingNonces;
         program_state->mfkey_state = Error;
+        flipper_application_free(app);
+        furi_record_close(RECORD_STORAGE);
         free(keyarray);
         return;
     }
@@ -567,6 +569,8 @@ void mfkey(ProgramState* program_state) {
         program_state->err = ZeroNonces;
         program_state->mfkey_state = Error;
         init_plugin->napi_mf_classic_nonce_array_free(nonce_arr);
+        flipper_application_free(app);
+        furi_record_close(RECORD_STORAGE);
         keys_dict_free(user_dict);
         free(keyarray);
         return;
