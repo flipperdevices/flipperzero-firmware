@@ -1,0 +1,54 @@
+name: "FAP: Build and lint"
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  ufbt-build-action:
+    runs-on: ubuntu-latest
+    name: 'ufbt: Build for Master branch'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build with ufbt for standard firmware
+        uses: flipperdevices/flipperzero-ufbt-action@v0.1
+        id: build-standard
+        with:
+          sdk-channel: release
+
+      - name: Rename standard artifact
+        run: |
+          mv "${{ steps.build-standard.outputs.fap-artifacts }}" flipper_hero.fap
+
+      - name: Build with ufbt for Flipper Unleashed
+        uses: flipperdevices/flipperzero-ufbt-action@v0.1
+        id: build-unleashed
+        with:
+          sdk-index-url: https://up.unleashedflip.com/directory.json
+          sdk-channel: release
+      - name: Rename unleashed artifact
+        run: |
+          mv "${{ steps.build-unleashed.outputs.fap-artifacts }}" flipper_hero_unleashed.fap
+      - name: Create a new tag
+        run: |
+          TAG_NAME=${{ github.event.repository.name }}-$(date +'%Y%m%d%H%M%S')
+          git config --global user.name 'tag-bot'
+          git config --global user.email 'tag-bot@mail'
+          git tag $TAG_NAME
+          git push https://github.com/mentoster/Flipper-hero.git $TAG_NAME
+          echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
+
+      - name: Upload Release Assets
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            flipper_hero.fap
+            flipper_hero_unleashed.fap
+          tag_name: ${{ env.TAG_NAME }}
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
