@@ -72,6 +72,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Added: [Flippy Road v1.0 (By rkilpadi)](https://github.com/rkilpadi/flippy-road)
 - Added: [Flipper Hero v1.1 (By mentoster)](https://github.com/mentoster/Flipper-hero)
 - Updated: [Quac! v0.4 (By rdefeo)](https://github.com/rdefeo/quac)
+- Updated: [Marauder flash assets updated to 0.13.9 (By justcallmekoko)](https://github.com/justcallmekoko/ESP32Marauder/releases/tag/v0.13.9)
 
 <a name="release">
 
