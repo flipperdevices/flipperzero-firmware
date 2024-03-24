@@ -1,6 +1,7 @@
 # Flipper Zero Spotify Remote
 
 ## An app for the Flipper Zero that lets you control Spotify playback using the Flipper Zero and WiFi Devboard
+Thank you to [Derek Jamison](https://github.com/jamisonderek) for debugging help!
 
 ### Demo
 https://github.com/benjamindrussell/flipper-spotify-remote/assets/46113261/9d0cc41b-262d-4086-8f4b-a16d3f9a65fe
