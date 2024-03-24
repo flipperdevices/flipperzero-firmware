@@ -26,9 +26,14 @@ static const ActionMenuItemType ItemToMenuItem[] = {
 void scene_items_item_callback(void* context, int32_t index, InputType type) {
     App* app = context;
 
-    if(type == InputTypeShort || type == InputTypeRelease) {
+    // FURI_LOG_I(TAG, "scene_items callback, type == %s", input_get_type_name(type));
+
+    if(type == InputTypeShort) {
         app->selected_item = index;
         view_dispatcher_send_custom_event(app->view_dispatcher, Event_ButtonPressed);
+    } else if(type == InputTypeLong) {
+        app->selected_item = index;
+        view_dispatcher_send_custom_event(app->view_dispatcher, Event_ButtonPressedLong);
     } else {
         // do nothing
     }
@@ -65,7 +70,14 @@ void scene_items_on_enter(void* context) {
         }
     } else {
         FURI_LOG_W(TAG, "No items for: %s", furi_string_get_cstr(items_view->path));
-        // TODO: Display Error popup? Empty folder?
+        // Add a bogus item - this lets the user still access the Action menu to import, etc
+        action_menu_add_item(
+            menu,
+            "<Empty>",
+            EMPTY_ACTION_INDEX,
+            scene_items_item_callback,
+            ActionMenuItemTypeGroup,
+            app);
     }
 
     // Always add the "Settings" item at the end of our list - but only at top level!
@@ -79,7 +91,7 @@ void scene_items_on_enter(void* context) {
             app);
     }
 
-    view_dispatcher_switch_to_view(app->view_dispatcher, Q_ActionMenu);
+    view_dispatcher_switch_to_view(app->view_dispatcher, QView_ActionMenu);
 }
 bool scene_items_on_event(void* context, SceneManagerEvent event) {
     App* app = context;
@@ -87,9 +99,8 @@ bool scene_items_on_event(void* context, SceneManagerEvent event) {
 
     switch(event.type) {
     case SceneManagerEventTypeCustom:
-        if(event.event == Event_ButtonPressed) {
+        if(event.event == Event_ButtonPressed && app->selected_item != EMPTY_ACTION_INDEX) {
             consumed = true;
-            // furi_delay_ms(100);
             // FURI_LOG_I(TAG, "button pressed is %d", app->selected_item);
             if(app->selected_item < (int)ItemArray_size(app->items_view->items)) {
                 Item* item = ItemArray_get(app->items_view->items, app->selected_item);
@@ -98,7 +109,7 @@ bool scene_items_on_event(void* context, SceneManagerEvent event) {
                     ItemsView* new_items = item_get_items_view_from_path(app, item->path);
                     item_items_view_free(app->items_view);
                     app->items_view = new_items;
-                    scene_manager_next_scene(app->scene_manager, Q_Scene_Items);
+                    scene_manager_next_scene(app->scene_manager, QScene_Items);
                 } else {
                     FURI_LOG_I(
                         TAG, "Initiating item action: %s", furi_string_get_cstr(item->name));
@@ -129,7 +140,12 @@ bool scene_items_on_event(void* context, SceneManagerEvent event) {
             } else {
                 // FURI_LOG_I(TAG, "Selected Settings!");
                 // TODO: Do we need to free this current items_view??
-                scene_manager_next_scene(app->scene_manager, Q_Scene_Settings);
+                scene_manager_next_scene(app->scene_manager, QScene_Settings);
+            }
+        } else if(event.event == Event_ButtonPressedLong) {
+            if(app->selected_item < (int)ItemArray_size(app->items_view->items)) {
+                consumed = true;
+                scene_manager_next_scene(app->scene_manager, QScene_ActionSettings);
             }
         }
         break;

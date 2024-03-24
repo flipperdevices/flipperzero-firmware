@@ -1,9 +1,13 @@
 #pragma once
 
+#include <gui/gui.h>
 #include <gui/scene_manager.h>
 #include <gui/view_dispatcher.h>
-#include <gui/modules/dialog_ex.h>
+#include <gui/scene_manager.h>
 #include <gui/modules/variable_item_list.h>
+#include <gui/modules/submenu.h>
+#include <gui/modules/text_input.h>
+#include <dialogs/dialogs.h>
 
 #include <storage/storage.h>
 #include <notification/notification_messages.h>
@@ -11,6 +15,9 @@
 #include "views/action_menu.h"
 
 #include "item.h"
+
+// #pragma GCC push_options
+// #pragma GCC optimize("O0")
 
 #define QUAC_NAME "Quac!"
 #define TAG "Quac" // log statement id
@@ -28,7 +35,9 @@ typedef struct App {
 
     ActionMenu* action_menu;
     VariableItemList* vil_settings;
-    DialogEx* dialog;
+    DialogsApp* dialog;
+    Submenu* sub_menu;
+    TextInput* text_input;
 
     Storage* storage;
     NotificationApp* notifications;
@@ -36,6 +45,9 @@ typedef struct App {
     ItemsView* items_view;
     int depth;
     int selected_item;
+
+    FuriString* temp_str; // used for renames/etc
+    char temp_cstr[MAX_NAME_LEN]; // used for renames/etc
 
     struct {
         QuacAppLayout layout; // Defaults to Portrait

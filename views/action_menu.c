@@ -42,7 +42,6 @@ ARRAY_DEF(ActionMenuItemArray, ActionMenuItem, M_POD_OPLIST);
 
 struct ActionMenu {
     View* view;
-    bool freeze_input;
 };
 
 typedef struct {
@@ -263,6 +262,7 @@ static void action_menu_process_down(ActionMenu* action_menu) {
         true);
 }
 
+// Used for both the Short and Long presses of OK
 static void action_menu_process_ok(ActionMenu* action_menu, InputType type) {
     furi_assert(action_menu);
 
@@ -275,16 +275,12 @@ static void action_menu_process_ok(ActionMenu* action_menu, InputType type) {
         {
             if(model->position < (ActionMenuItemArray_size(model->items))) {
                 item = ActionMenuItemArray_get(model->items, model->position);
+                if(item->callback) {
+                    item->callback(item->callback_context, item->index, type);
+                }
             }
         },
         false);
-
-    // Landscape: Press, Short, Release
-
-    if(item) {
-        if(type == InputTypeRelease && item->callback)
-            item->callback(item->callback_context, item->index, type);
-    }
 }
 
 static bool action_menu_view_input_callback(InputEvent* event, void* context) {
@@ -293,22 +289,12 @@ static bool action_menu_view_input_callback(InputEvent* event, void* context) {
     ActionMenu* action_menu = context;
     bool consumed = false;
 
-    // Item selection
-    if(event->key == InputKeyOk) {
-        if((event->type == InputTypeRelease) || (event->type == InputTypePress)) {
-            consumed = true;
-            action_menu->freeze_input = (event->type == InputTypePress);
-            action_menu_process_ok(action_menu, event->type);
-        } else if(event->type == InputTypeShort) {
-            consumed = true;
-            action_menu_process_ok(action_menu, event->type);
-        }
-    }
-
-    if(!action_menu->freeze_input &&
-       ((event->type == InputTypeRepeat) || (event->type == InputTypeShort))) {
-        // FURI_LOG_I("AM", "Directional key: %d", event->key);
+    if(event->type == InputTypeShort) {
         switch(event->key) {
+        case InputKeyOk:
+            consumed = true;
+            action_menu_process_ok(action_menu, event->type);
+            break;
         case InputKeyUp:
             consumed = true;
             action_menu_process_up(action_menu);
@@ -317,18 +303,17 @@ static bool action_menu_view_input_callback(InputEvent* event, void* context) {
             consumed = true;
             action_menu_process_down(action_menu);
             break;
-        case InputKeyRight:
-            FURI_LOG_W("AM", "InputKeyRight ignored");
-            // consumed = true;
-            // action_menu_process_right(action_menu);
-            break;
         case InputKeyLeft:
-            FURI_LOG_W("AM", "InputKeyLeft ignored");
-            // consumed = true;
-            // action_menu_process_left(action_menu);
+            break;
+        case InputKeyRight:
             break;
         default:
-            break;
+            FURI_LOG_E("AM", "Unknown key!");
+        }
+    } else if(event->type == InputTypeLong) {
+        if(event->key == InputKeyRight) {
+            consumed = true;
+            action_menu_process_ok(action_menu, event->type);
         }
     }
 
@@ -454,7 +439,6 @@ ActionMenu* action_menu_alloc(void) {
         },
         true);
 
-    action_menu->freeze_input = false;
     return action_menu;
 }
 

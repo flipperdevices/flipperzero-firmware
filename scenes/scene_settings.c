@@ -109,7 +109,7 @@ void scene_settings_on_enter(void* context) {
     // TODO: Set Enter callback here - why?? All settings have custom callbacks
     // variable_item_list_set_enter_callback(vil, my_cb, app);
 
-    view_dispatcher_switch_to_view(app->view_dispatcher, Q_Settings);
+    view_dispatcher_switch_to_view(app->view_dispatcher, QView_Settings);
 }
 bool scene_settings_on_event(void* context, SceneManagerEvent event) {
     UNUSED(context);
