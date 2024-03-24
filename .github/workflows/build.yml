@@ -17,28 +17,25 @@ jobs:
         uses: flipperdevices/flipperzero-ufbt-action@v0.1
         id: build-standard
         with:
-          sdk-channel: dev
+          sdk-channel: release
 
+
+      - name: Build with ufbt for Flipper Unleashed
+        uses: flipperdevices/flipperzero-ufbt-action@v0.1
+        id: build-unleashed
+        with:
+          sdk-index-url: https://up.unleashedflip.com/directory.json
+          sdk-channel: release
       - name: Lint sources
         uses: flipperdevices/flipperzero-ufbt-action@v0.1
         with:
           skip-setup: true
           task: lint
 
-      - name: Setup for Unleashed firmware build
-        run: |
-          ufbt update --index-url=https://up.unleashedflip.com/directory.json
-
-      - name: Build with ufbt for Flipper Unleashed
-        uses: flipperdevices/flipperzero-ufbt-action@v0.1
-        id: build-unleashed
-        with:
-          sdk-channel: unleashed
-          custom-url: https://up.unleashedflip.com/directory.json
 
       - name: Create a new tag
         run: |
-          TAG_NAME=flipper-hero-$(date +'%Y%m%d%H%M%S')
+          TAG_NAME=${{ github.event.repository.name }}  -$(date +'%Y%m%d%H%M%S')
           git config --global user.name 'tag-bot'
           git config --global user.email 'tag-bot@mail'
           git tag $TAG_NAME
