@@ -1,6 +1,6 @@
 # Flipper_Zero_FMF2USBMIDI
 
-Convert Flipper Zero Music Player file to USB-MIDI Signal.
+Convert Flipper Zero Music Player file to MIDI Signal and transfer it via USB Port.
 
 this code was tested in Flipper Zero SDK v50.1 to v54.0
 
