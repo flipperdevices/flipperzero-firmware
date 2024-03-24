@@ -29,6 +29,7 @@ Seader* seader_alloc() {
         furi_hal_power_enable_otg();
     }
     seader->is_debug_enabled = furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug);
+    seader->samCommand = SamCommand_PR_NOTHING;
 
     seader->worker = seader_worker_alloc();
     seader->view_dispatcher = view_dispatcher_alloc();

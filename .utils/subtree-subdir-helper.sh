@@ -25,7 +25,7 @@ cache="${path}/.subtree-cache/${split}"
 hash="$(git rev-parse ${fetch})"
 skip=false
 if [ -f "${cache}" ]; then
-    if [ "$(<${cache})" = "${hash}" ]; then
+    if git diff --quiet "$(<${cache})" "${hash}" -- "${subdir}"; then
         skip=true
     fi
 fi

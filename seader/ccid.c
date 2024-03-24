@@ -309,7 +309,7 @@ size_t seader_ccid_process(Seader* seader, uint8_t* cmd, size_t cmd_len) {
                     FURI_LOG_I(TAG, "SAM ATR!");
                     hasSAM = true;
                     sam_slot = message.bSlot;
-                    seader_worker_send_version(seader_worker);
+                    seader_worker_send_version(seader);
                     if(seader_worker->callback) {
                         seader_worker->callback(
                             SeaderWorkerEventSamPresent, seader_worker->context);
@@ -318,7 +318,7 @@ size_t seader_ccid_process(Seader* seader, uint8_t* cmd, size_t cmd_len) {
                     FURI_LOG_I(TAG, "SAM ATR2!");
                     hasSAM = true;
                     sam_slot = message.bSlot;
-                    seader_worker_send_version(seader_worker);
+                    seader_worker_send_version(seader);
                     if(seader_worker->callback) {
                         seader_worker->callback(
                             SeaderWorkerEventSamPresent, seader_worker->context);

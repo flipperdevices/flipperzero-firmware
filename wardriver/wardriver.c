@@ -39,11 +39,11 @@ void save_file(Context* ctx) {
         return;
     }
 
-    furi_string_reset(ctx->buffer);
+    FuriString* string = furi_string_alloc();
 
     // WIGLE HEADERS DONT CHANGE THIS ITS IMPORTANT!
     furi_string_printf(
-        ctx->buffer,
+        string,
         "%s,%s,%s,%s,%s,%s,%s,%s\r\n",
         "WigleWifi-1.4",
         "appRelease=v2.0",
@@ -55,7 +55,7 @@ void save_file(Context* ctx) {
         "S33");
 
     furi_string_cat_printf(
-        ctx->buffer,
+        string,
         "%s,%s,%s,%s,%s,%s,%s\r\n",
         "MAC",
         "SSID",
@@ -65,14 +65,14 @@ void save_file(Context* ctx) {
         "CurrentLatitude",
         "CurrentLongitude");
     if(!storage_file_write(
-           file, furi_string_get_cstr(ctx->buffer), strlen(furi_string_get_cstr(ctx->buffer)))) {
+           file, furi_string_get_cstr(string), strlen(furi_string_get_cstr(string)))) {
         FURI_LOG_I(appname, "Failed to write header to file");
     }
 
     for(int i = 0; i < ctx->access_points_count; i++) {
         AccessPoint ap = ctx->access_points[i];
         furi_string_printf(
-            ctx->buffer,
+            string,
             "%s,%s,%04d-%02d-%02d %02d:%02d:%02d,%d,%d,%f,%f\r\n",
             ap.bssid,
             ap.ssid,
@@ -88,15 +88,15 @@ void save_file(Context* ctx) {
             (double)ap.longitude);
 
         if(!storage_file_write(
-               file,
-               furi_string_get_cstr(ctx->buffer),
-               strlen(furi_string_get_cstr(ctx->buffer)))) {
+               file, furi_string_get_cstr(string), strlen(furi_string_get_cstr(string)))) {
             FURI_LOG_I(appname, "Failed to write AP to file");
         }
 
         free(ap.ssid);
         free(ap.bssid);
     }
+
+    furi_string_free(string);
 
     storage_file_close(file);
     storage_file_free(file);
@@ -121,6 +121,7 @@ static void input_callback(InputEvent* input_event, FuriMessageQueue* queue) {
 
 static void draw_access_point(Canvas* canvas, Context* context) {
     Context* ctx = context;
+    FuriString* string = furi_string_alloc();
 
     AccessPoint ap = ctx->active_access_point;
 
@@ -130,37 +131,35 @@ static void draw_access_point(Canvas* canvas, Context* context) {
 
     canvas_draw_str_aligned(canvas, 38, 12, AlignLeft, AlignBottom, ap.bssid);
 
-    furi_string_printf(ctx->buffer, "Signal strength: %ddBm", ap.rssi);
-    canvas_draw_str_aligned(
-        canvas, 3, 35, AlignLeft, AlignBottom, furi_string_get_cstr(ctx->buffer));
+    furi_string_printf(string, "Signal strength: %ddBm", ap.rssi);
+    canvas_draw_str_aligned(canvas, 3, 35, AlignLeft, AlignBottom, furi_string_get_cstr(string));
 
-    furi_string_printf(ctx->buffer, "CH: %d", ap.channel);
-    canvas_draw_str_aligned(
-        canvas, 3, 47, AlignLeft, AlignBottom, furi_string_get_cstr(ctx->buffer));
+    furi_string_printf(string, "CH: %d", ap.channel);
+    canvas_draw_str_aligned(canvas, 3, 47, AlignLeft, AlignBottom, furi_string_get_cstr(string));
 
-    furi_string_printf(ctx->buffer, "%d", ap.packetRxCount);
+    furi_string_printf(string, "%d", ap.packetRxCount);
     canvas_draw_icon(canvas, 35, 39, &I_down);
-    canvas_draw_str_aligned(
-        canvas, 45, 47, AlignLeft, AlignBottom, furi_string_get_cstr(ctx->buffer));
+    canvas_draw_str_aligned(canvas, 45, 47, AlignLeft, AlignBottom, furi_string_get_cstr(string));
 
-    furi_string_printf(ctx->buffer, "%d", ap.packetTxCount);
+    furi_string_printf(string, "%d", ap.packetTxCount);
     canvas_draw_icon(canvas, 85, 38, &I_up);
-    canvas_draw_str_aligned(
-        canvas, 95, 47, AlignLeft, AlignBottom, furi_string_get_cstr(ctx->buffer));
+    canvas_draw_str_aligned(canvas, 95, 47, AlignLeft, AlignBottom, furi_string_get_cstr(string));
 
     furi_string_printf(
-        ctx->buffer,
+        string,
         "Seen: %02d:%02d:%02d (%lds ago)",
         ap.datetime.hour,
         ap.datetime.minute,
         ap.datetime.second,
         furi_hal_rtc_get_timestamp() - datetime_datetime_to_timestamp(&ap.datetime));
-    canvas_draw_str_aligned(
-        canvas, 3, 59, AlignLeft, AlignBottom, furi_string_get_cstr(ctx->buffer));
+    canvas_draw_str_aligned(canvas, 3, 59, AlignLeft, AlignBottom, furi_string_get_cstr(string));
+
+    furi_string_free(string);
 }
 
 static void render_callback(Canvas* canvas, void* context) {
     Context* ctx = context;
+    FuriString* string = furi_string_alloc();
 
     canvas_set_font(canvas, FontPrimary);
 
@@ -179,27 +178,25 @@ static void render_callback(Canvas* canvas, void* context) {
             canvas_draw_str(canvas, 0, 50, "app");
         } else {
             furi_string_printf(
-                ctx->buffer,
-                "%f",
-                isnan(ctx->gps_data.latitude) ? 0 : (double)ctx->gps_data.latitude);
-            canvas_draw_str(canvas, 0, 10, furi_string_get_cstr(ctx->buffer));
+                string, "%f", isnan(ctx->gps_data.latitude) ? 0 : (double)ctx->gps_data.latitude);
+            canvas_draw_str(canvas, 0, 10, furi_string_get_cstr(string));
 
             furi_string_printf(
-                ctx->buffer,
+                string,
                 "%f",
                 isnan(ctx->gps_data.longitude) ? 0 : (double)ctx->gps_data.longitude);
-            canvas_draw_str(canvas, 0, 20, furi_string_get_cstr(ctx->buffer));
+            canvas_draw_str(canvas, 0, 20, furi_string_get_cstr(string));
 
-            furi_string_printf(ctx->buffer, "%d sats", ctx->gps_data.satelites);
-            canvas_draw_str(canvas, 0, 30, furi_string_get_cstr(ctx->buffer));
+            furi_string_printf(string, "%d sats", ctx->gps_data.satelites);
+            canvas_draw_str(canvas, 0, 30, furi_string_get_cstr(string));
 
             furi_string_printf(
-                ctx->buffer,
+                string,
                 "%02d:%02d:%02dZ",
                 ctx->gps_data.hour,
                 ctx->gps_data.minute,
                 ctx->gps_data.second);
-            canvas_draw_str(canvas, 0, 40, furi_string_get_cstr(ctx->buffer));
+            canvas_draw_str(canvas, 0, 40, furi_string_get_cstr(string));
             canvas_draw_str(canvas, 70, 10, "GPS DATA");
         }
 
@@ -217,14 +214,16 @@ static void render_callback(Canvas* canvas, void* context) {
         canvas_draw_frame(canvas, 0, 0, 128, 64);
 
         furi_string_printf(
-            ctx->buffer, "%d/%d", ctx->access_points_index + 1, ctx->access_points_count);
+            string, "%d/%d", ctx->access_points_index + 1, ctx->access_points_count);
 
-        canvas_draw_str(canvas, 3, 12, furi_string_get_cstr(ctx->buffer));
+        canvas_draw_str(canvas, 3, 12, furi_string_get_cstr(string));
 
         draw_access_point(canvas, ctx);
         break;
     }
     furi_mutex_release(ctx->mutex);
+
+    furi_string_free(string);
 }
 
 int32_t wardriver_app() {
@@ -248,7 +247,6 @@ int32_t wardriver_app() {
     Context* ctx = malloc(sizeof(Context));
     ctx->queue = furi_message_queue_alloc(8, sizeof(Event));
     ctx->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
-    ctx->buffer = furi_string_alloc();
 
     ctx->access_points_count = 0;
     ctx->access_points_index = 0;
@@ -337,7 +335,6 @@ int32_t wardriver_app() {
 
     furi_message_queue_free(ctx->queue);
     furi_mutex_free(ctx->mutex);
-    furi_string_free(ctx->buffer);
 
     wardriver_uart_deinit(ctx);
 

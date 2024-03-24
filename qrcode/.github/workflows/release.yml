@@ -6,7 +6,7 @@ on:
       - 'v[0-9]+.[0-9]+.[0-9]+'
 
 env:
-  firmware_version: '0.98.3'
+  firmware_version: '0.99.1'
 
 jobs:
   build:

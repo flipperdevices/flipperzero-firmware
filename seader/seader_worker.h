@@ -62,7 +62,7 @@ void seader_worker_start(
 
 void seader_worker_stop(SeaderWorker* seader_worker);
 bool seader_worker_process_sam_message(Seader* seader, CCID_Message* message);
-void seader_worker_send_version(SeaderWorker* seader_worker);
+void seader_worker_send_version(Seader* seader);
 
 NfcCommand seader_worker_poller_callback_iso14443_4a(NfcGenericEvent event, void* context);
 

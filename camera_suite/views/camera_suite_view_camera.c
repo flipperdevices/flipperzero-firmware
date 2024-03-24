@@ -634,6 +634,11 @@ CameraSuiteViewCamera* camera_suite_view_camera_alloc() {
 void camera_suite_view_camera_free(CameraSuiteViewCamera* instance) {
     furi_assert(instance);
 
+    // Deinitialize the serial handle and release the control.
+    furi_hal_serial_async_rx_stop(instance->serial_handle);
+    furi_hal_serial_deinit(instance->serial_handle);
+    furi_hal_serial_control_release(instance->serial_handle);
+
     // Free the worker thread.
     furi_thread_flags_set(furi_thread_get_id(instance->camera_worker_thread), WorkerEventStop);
     furi_thread_join(instance->camera_worker_thread);
@@ -641,10 +646,6 @@ void camera_suite_view_camera_free(CameraSuiteViewCamera* instance) {
 
     // Free the allocated stream buffer.
     furi_stream_buffer_free(instance->camera_rx_stream);
-
-    // Deinitialize the serial handle and release the control.
-    furi_hal_serial_deinit(instance->serial_handle);
-    furi_hal_serial_control_release(instance->serial_handle);
 
     with_view_model(
         instance->view, UartDumpModel * model, { UNUSED(model); }, true);

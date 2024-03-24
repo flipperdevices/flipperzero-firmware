@@ -41,7 +41,7 @@ FlipperI32HexFile* flipper_i32hex_file_open_write(const char* name, uint32_t sta
         FURI_LOG_E(TAG, "Failed to open file %s", name);
         instance->file_open = FlipperI32HexFileStatusErrorNoOpenFile;
     }
-    instance->str_data = furi_string_alloc(instance->storage);
+    instance->str_data = furi_string_alloc();
 
     return instance;
 }
@@ -62,7 +62,7 @@ FlipperI32HexFile* flipper_i32hex_file_open_read(const char* name) {
         FURI_LOG_E(TAG, "Failed to open file %s", name);
         instance->file_open = FlipperI32HexFileStatusErrorNoOpenFile;
     }
-    instance->str_data = furi_string_alloc(instance->storage);
+    instance->str_data = furi_string_alloc();
 
     return instance;
 }

@@ -98,7 +98,7 @@ bool seader_process_success_response(Seader* seader, uint8_t* apdu, size_t len) 
     if(seader_process_success_response_i(seader, apdu, len, false, NULL)) {
         // no-op, message was processed
     } else {
-        FURI_LOG_I(TAG, "Queue New SAM Message, %d bytes", len);
+        FURI_LOG_I(TAG, "Enqueue SAM message, %d bytes", len);
         uint32_t space = furi_message_queue_get_space(seader_worker->messages);
         if(space > 0) {
             SeaderAPDU seaderApdu = {};
@@ -166,7 +166,7 @@ void seader_worker_virtual_credential(Seader* seader) {
         if(furi_mutex_acquire(seader_worker->mq_mutex, 0) == FuriStatusOk) {
             uint32_t count = furi_message_queue_get_count(seader_worker->messages);
             if(count > 0) {
-                FURI_LOG_D(TAG, "MessageQueue: %ld messages", count);
+                FURI_LOG_I(TAG, "Dequeue SAM message [%ld messages]", count);
 
                 SeaderAPDU seaderApdu = {};
                 FuriStatus status =
@@ -225,7 +225,7 @@ void seader_worker_poller_conversation(Seader* seader, SeaderPollerContainer* sp
         furi_thread_set_current_priority(FuriThreadPriorityHighest);
         uint32_t count = furi_message_queue_get_count(seader_worker->messages);
         if(count > 0) {
-            FURI_LOG_D(TAG, "MessageQueue: %ld messages", count);
+            FURI_LOG_I(TAG, "Dequeue SAM message [%ld messages]", count);
 
             SeaderAPDU seaderApdu = {};
             FuriStatus status =

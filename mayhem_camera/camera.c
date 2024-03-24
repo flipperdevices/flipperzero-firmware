@@ -280,6 +280,7 @@ static UartEchoApp* camera_app_alloc() {
 static void camera_app_free(UartEchoApp* app) {
     furi_assert(app);
 
+    furi_hal_serial_async_rx_stop(app->serial_handle);
     furi_hal_serial_deinit(app->serial_handle);
     furi_hal_serial_control_release(app->serial_handle);
 

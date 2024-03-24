@@ -122,6 +122,7 @@ static void usb_uart_serial_init(UsbUartBridge* usb_uart, uint8_t uart_ch) {
 
 static void usb_uart_serial_deinit(UsbUartBridge* usb_uart, uint8_t uart_ch) {
     UNUSED(uart_ch);
+    furi_hal_serial_async_rx_stop(usb_uart->serial_handle);
     furi_hal_serial_deinit(usb_uart->serial_handle);
     furi_hal_serial_control_release(usb_uart->serial_handle);
 }

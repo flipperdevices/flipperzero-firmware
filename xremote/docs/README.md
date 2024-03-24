@@ -48,3 +48,40 @@ Play_pa     | Play/Pause
 Pause       | Pause
 Play        | Play
 Stop        | Stop
+
+## Alternative button names
+
+In addition to the predefined names, XRemote uses alternative button names to make it as easy as possible to interact with different types of IR dumps. That means if a button with the appropriate name is not found in the file, the application will try to find the same button with alternative names. Ensure this feature is enabled in the application settings before you use it.
+
+The application stores and reads alternate names from the following file:
+SD_Card/apps_data/flipper_xremote/alt_names.txt
+
+If the Alt-Names option is enabled in the config and the file does not exist, it will be created automatically with default values during the application's startup. You can edit, add, or remove any button or alternate name values from this file. Button names must either have only the first uppercase or be entirely lowercase. As for alternate names, they are case-insensitive. The button can have one or several comma-separated alternate names.
+
+## Default alternative names
+
+Button name | Alternative names
+------------|-------------------
+Power       | shutdown,off,on,standby
+Setup       | settings,config,cfg
+Input       | source,select
+Menu        | osd,gui
+List        | guide
+Info        | display
+Mode        | aspect,format
+Back        | return,exit
+Ok          | enter,select
+Up          | uparrow
+Down        | downarrow
+Left        | leftarrow
+Right       | rightarrow
+Mute        | silence,silent,unmute
+Vol_up      | vol+,volume+,volup,+
+Vol_dn      | vol-,volume-,voldown,-
+Ch_next     | ch+,channel+,chup
+Ch_prev     | ch-,channel-,chdown
+Next        | next,skip,ffwd
+Prev        | prev,back,rewind,rew
+Fast_fo     | fastfwd,fastforward,ff
+Fast_ba     | fastback,fastrewind,fb
+Play_pa     | playpause,play,pause

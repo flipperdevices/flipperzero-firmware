@@ -16,6 +16,8 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <m-array.h>
+#include <string.h>
+#include <ctype.h>
 #include <toolbox/path.h>
 #include <storage/storage.h>
 #include <core/common_defines.h>
@@ -89,7 +91,9 @@ InfraredRemoteButton* infrared_remote_get_button(InfraredRemote* remote, size_t 
 bool infrared_remote_find_button_by_name(InfraredRemote* remote, const char* name, size_t* index) {
     for(size_t i = 0; i < InfraredButtonArray_size(remote->buttons); i++) {
         InfraredRemoteButton* button = *InfraredButtonArray_get(remote->buttons, i);
-        if(!strcmp(infrared_remote_button_get_name(button), name)) {
+        FuriString* furi_name = infrared_remote_button_get_furi_name(button);
+
+        if(button && !furi_string_cmpi_str(furi_name, name)) {
             *index = i;
             return true;
         }
@@ -101,9 +105,8 @@ InfraredRemoteButton*
     infrared_remote_get_button_by_name(InfraredRemote* remote, const char* name) {
     for(size_t i = 0; i < InfraredButtonArray_size(remote->buttons); i++) {
         InfraredRemoteButton* button = *InfraredButtonArray_get(remote->buttons, i);
-        if(!strcmp(infrared_remote_button_get_name(button), name)) {
-            return button;
-        }
+        FuriString* furi_name = infrared_remote_button_get_furi_name(button);
+        if(button && !furi_string_cmpi_str(furi_name, name)) return button;
     }
     return NULL;
 }

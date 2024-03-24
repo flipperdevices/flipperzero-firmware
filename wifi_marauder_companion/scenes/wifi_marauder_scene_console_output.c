@@ -143,7 +143,7 @@ void wifi_marauder_scene_console_output_on_enter(void* context) {
                     dialog_message_show_storage_error(app->dialogs, "Cannot open log file");
                 }
             } else {
-                dialog_message_show_storage_error(app->dialogs, "Cannot open log file");
+                dialog_message_show_storage_error(app->dialogs, "Cannot resolve log path");
             }
         }
 
