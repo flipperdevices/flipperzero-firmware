@@ -42,6 +42,6 @@ jobs:
           files: ${{ steps.build-app.outputs.fap-artifacts }}
           tag_name: ${{ env.TAG_NAME }}
           draft: false # Set to false if you don't want to create a draft release
-          prerelease: true # Mark the release as a prerelease
+          prerelease: false # Mark the release as a prerelease
         env:
           GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
