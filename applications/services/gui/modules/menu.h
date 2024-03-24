@@ -19,7 +19,7 @@ typedef void (*MenuItemCallback)(void* context, uint32_t index);
 
 /** Menu allocation and initialization
  */
-Menu* menu_alloc();
+Menu* menu_alloc(void);
 
 /** Menu allocation and initialization with positioning
  *

@@ -156,7 +156,7 @@ static bool battery_info_input_callback(InputEvent* event, void* context) {
     return false;
 }
 
-BatteryInfo* battery_info_alloc() {
+BatteryInfo* battery_info_alloc(void) {
     BatteryInfo* battery_info = malloc(sizeof(BatteryInfo));
     battery_info->view = view_alloc();
     view_set_context(battery_info->view, battery_info);

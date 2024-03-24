@@ -35,7 +35,7 @@ static void TimerCallback(TimerHandle_t hTimer) {
 }
 
 FuriTimer* furi_timer_alloc(FuriTimerCallback func, FuriTimerType type, void* context) {
-    furi_assert((furi_kernel_is_irq_or_masked() == 0U) && (func != NULL));
+    furi_check((furi_kernel_is_irq_or_masked() == 0U) && (func != NULL));
 
     TimerHandle_t hTimer;
     TimerCallback_t* callb;
@@ -71,8 +71,8 @@ FuriTimer* furi_timer_alloc(FuriTimerCallback func, FuriTimerType type, void* co
 }
 
 void furi_timer_free(FuriTimer* instance) {
-    furi_assert(!furi_kernel_is_irq_or_masked());
-    furi_assert(instance);
+    furi_check(!furi_kernel_is_irq_or_masked());
+    furi_check(instance);
 
     TimerHandle_t hTimer = (TimerHandle_t)instance;
     TimerCallback_t* callb;
@@ -98,9 +98,9 @@ void furi_timer_free(FuriTimer* instance) {
 }
 
 FuriStatus furi_timer_start(FuriTimer* instance, uint32_t ticks) {
-    furi_assert(!furi_kernel_is_irq_or_masked());
-    furi_assert(instance);
-    furi_assert(ticks < portMAX_DELAY);
+    furi_check(!furi_kernel_is_irq_or_masked());
+    furi_check(instance);
+    furi_check(ticks < portMAX_DELAY);
 
     TimerHandle_t hTimer = (TimerHandle_t)instance;
     FuriStatus stat;
@@ -116,9 +116,9 @@ FuriStatus furi_timer_start(FuriTimer* instance, uint32_t ticks) {
 }
 
 FuriStatus furi_timer_restart(FuriTimer* instance, uint32_t ticks) {
-    furi_assert(!furi_kernel_is_irq_or_masked());
-    furi_assert(instance);
-    furi_assert(ticks < portMAX_DELAY);
+    furi_check(!furi_kernel_is_irq_or_masked());
+    furi_check(instance);
+    furi_check(ticks < portMAX_DELAY);
 
     TimerHandle_t hTimer = (TimerHandle_t)instance;
     FuriStatus stat;
@@ -135,8 +135,8 @@ FuriStatus furi_timer_restart(FuriTimer* instance, uint32_t ticks) {
 }
 
 FuriStatus furi_timer_stop(FuriTimer* instance) {
-    furi_assert(!furi_kernel_is_irq_or_masked());
-    furi_assert(instance);
+    furi_check(!furi_kernel_is_irq_or_masked());
+    furi_check(instance);
 
     TimerHandle_t hTimer = (TimerHandle_t)instance;
 
@@ -146,8 +146,8 @@ FuriStatus furi_timer_stop(FuriTimer* instance) {
 }
 
 uint32_t furi_timer_is_running(FuriTimer* instance) {
-    furi_assert(!furi_kernel_is_irq_or_masked());
-    furi_assert(instance);
+    furi_check(!furi_kernel_is_irq_or_masked());
+    furi_check(instance);
 
     TimerHandle_t hTimer = (TimerHandle_t)instance;
 
@@ -156,8 +156,8 @@ uint32_t furi_timer_is_running(FuriTimer* instance) {
 }
 
 uint32_t furi_timer_get_expire_time(FuriTimer* instance) {
-    furi_assert(!furi_kernel_is_irq_or_masked());
-    furi_assert(instance);
+    furi_check(!furi_kernel_is_irq_or_masked());
+    furi_check(instance);
 
     TimerHandle_t hTimer = (TimerHandle_t)instance;
 
@@ -165,17 +165,20 @@ uint32_t furi_timer_get_expire_time(FuriTimer* instance) {
 }
 
 void furi_timer_pending_callback(FuriTimerPendigCallback callback, void* context, uint32_t arg) {
+    furi_check(callback);
+
     BaseType_t ret = pdFAIL;
     if(furi_kernel_is_irq_or_masked()) {
         ret = xTimerPendFunctionCallFromISR(callback, context, arg, NULL);
     } else {
         ret = xTimerPendFunctionCall(callback, context, arg, FuriWaitForever);
     }
+
     furi_check(ret == pdPASS);
 }
 
 void furi_timer_set_thread_priority(FuriTimerThreadPriority priority) {
-    furi_assert(!furi_kernel_is_irq_or_masked());
+    furi_check(!furi_kernel_is_irq_or_masked());
 
     TaskHandle_t task_handle = xTimerGetTimerDaemonTaskHandle();
     furi_check(task_handle); // Don't call this method before timer task start

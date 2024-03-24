@@ -3,7 +3,7 @@
 #include <string.h>
 #include <stdbool.h>
 
-void test_furi_memmgr() {
+void test_furi_memmgr(void) {
     void* ptr;
 
     // allocate memory case

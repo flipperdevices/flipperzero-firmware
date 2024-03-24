@@ -514,7 +514,7 @@ bool desktop_lock_menu_input_callback(InputEvent* event, void* context) {
     }
 }
 
-DesktopLockMenuView* desktop_lock_menu_alloc() {
+DesktopLockMenuView* desktop_lock_menu_alloc(void) {
     DesktopLockMenuView* lock_menu = malloc(sizeof(DesktopLockMenuView));
     lock_menu->bt = furi_record_open(RECORD_BT);
     lock_menu->notification = furi_record_open(RECORD_NOTIFICATION);

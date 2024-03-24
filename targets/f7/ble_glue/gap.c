@@ -64,7 +64,7 @@ static int32_t gap_app(void* context);
 /** function for updating rssi informations in global Gap object
  * 
 */
-static inline void fetch_rssi() {
+static inline void fetch_rssi(void) {
     uint8_t ret_rssi = 127;
     if(hci_read_rssi(gap->service.connection_handle, &ret_rssi) == BLE_STATUS_SUCCESS) {
         gap->conn_rssi = (int8_t)ret_rssi;

@@ -95,7 +95,7 @@ static void subghz_load_custom_presets(SubGhzSetting* setting) {
 #endif
 }
 
-SubGhz* subghz_alloc(bool alloc_for_tx_only) {
+SubGhz* subghz_alloc(void) {
     SubGhz* subghz = malloc(sizeof(SubGhz));
 
     subghz->file_path = furi_string_alloc();

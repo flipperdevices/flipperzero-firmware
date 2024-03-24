@@ -149,7 +149,7 @@ bool desktop_main_input_callback(InputEvent* event, void* context) {
     return true;
 }
 
-DesktopMainView* desktop_main_alloc() {
+DesktopMainView* desktop_main_alloc(void) {
     DesktopMainView* main_view = malloc(sizeof(DesktopMainView));
     main_view->is_gamemode = false;
     DesktopSettings* desktop_settings = malloc(sizeof(DesktopSettings));

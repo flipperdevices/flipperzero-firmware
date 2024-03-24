@@ -44,7 +44,7 @@ void flipper_start_service(const FlipperInternalApplication* service) {
     furi_thread_start(thread);
 }
 
-void flipper_init() {
+void flipper_init(void) {
     flipper_print_version("Firmware", furi_hal_version_get_firmware_version());
     FURI_LOG_I(TAG, "Boot mode %d, starting services", furi_hal_rtc_get_boot_mode());
 

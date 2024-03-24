@@ -468,9 +468,10 @@ void gui_unlock(Gui* gui) {
 }
 
 void gui_add_view_port(Gui* gui, ViewPort* view_port, GuiLayer layer) {
-    furi_assert(gui);
-    furi_assert(view_port);
+    furi_check(gui);
+    furi_check(view_port);
     furi_check(layer < GuiLayerMAX);
+
     // Only fullscreen supports Vertical orientation for now
     ViewPortOrientation view_port_orientation = view_port_get_orientation(view_port);
     furi_check(
@@ -498,8 +499,8 @@ void gui_add_view_port(Gui* gui, ViewPort* view_port, GuiLayer layer) {
 }
 
 void gui_remove_view_port(Gui* gui, ViewPort* view_port) {
-    furi_assert(gui);
-    furi_assert(view_port);
+    furi_check(gui);
+    furi_check(view_port);
 
     gui_lock(gui);
     view_port_gui_set(view_port, NULL);
@@ -524,8 +525,8 @@ void gui_remove_view_port(Gui* gui, ViewPort* view_port) {
 }
 
 void gui_view_port_send_to_front(Gui* gui, ViewPort* view_port) {
-    furi_assert(gui);
-    furi_assert(view_port);
+    furi_check(gui);
+    furi_check(view_port);
 
     gui_lock(gui);
     // Remove
@@ -536,14 +537,14 @@ void gui_view_port_send_to_front(Gui* gui, ViewPort* view_port) {
         while(!ViewPortArray_end_p(it)) {
             if(*ViewPortArray_ref(it) == view_port) {
                 ViewPortArray_remove(gui->layers[i], it);
-                furi_assert(layer == GuiLayerMAX);
+                furi_check(layer == GuiLayerMAX);
                 layer = i;
             } else {
                 ViewPortArray_next(it);
             }
         }
     }
-    furi_assert(layer != GuiLayerMAX);
+    furi_check(layer != GuiLayerMAX);
     // Return to the top
     ViewPortArray_push_back(gui->layers[layer], view_port);
     gui_unlock(gui);
@@ -582,7 +583,7 @@ void gui_view_port_send_to_back(Gui* gui, ViewPort* view_port) {
 }
 
 void gui_add_framebuffer_callback(Gui* gui, GuiCanvasCommitCallback callback, void* context) {
-    furi_assert(gui);
+    furi_check(gui);
 
     canvas_add_framebuffer_callback(gui->canvas, callback, context);
 
@@ -591,13 +592,14 @@ void gui_add_framebuffer_callback(Gui* gui, GuiCanvasCommitCallback callback, vo
 }
 
 void gui_remove_framebuffer_callback(Gui* gui, GuiCanvasCommitCallback callback, void* context) {
-    furi_assert(gui);
+    furi_check(gui);
 
     canvas_remove_framebuffer_callback(gui->canvas, callback, context);
 }
 
 size_t gui_get_framebuffer_size(const Gui* gui) {
-    furi_assert(gui);
+    furi_check(gui);
+
     return canvas_get_buffer_size(gui->canvas);
 }
 
@@ -617,7 +619,7 @@ void gui_set_hide_statusbar(Gui* gui, bool hidden) {
 }
 
 void gui_set_lockdown(Gui* gui, bool lockdown) {
-    furi_assert(gui);
+    furi_check(gui);
 
     gui_lock(gui);
     gui->lockdown = lockdown;
@@ -628,7 +630,8 @@ void gui_set_lockdown(Gui* gui, bool lockdown) {
 }
 
 Canvas* gui_direct_draw_acquire(Gui* gui) {
-    furi_assert(gui);
+    furi_check(gui);
+
     gui_lock(gui);
     gui->direct_draw = true;
     gui_unlock(gui);
@@ -647,7 +650,7 @@ Canvas* gui_direct_draw_acquire(Gui* gui) {
 }
 
 void gui_direct_draw_release(Gui* gui) {
-    furi_assert(gui);
+    furi_check(gui);
 
     canvas_reset(gui->canvas);
     canvas_commit(gui->canvas);
@@ -659,7 +662,7 @@ void gui_direct_draw_release(Gui* gui) {
     gui_update(gui);
 }
 
-Gui* gui_alloc() {
+Gui* gui_alloc(void) {
     Gui* gui = malloc(sizeof(Gui));
     // Thread ID
     gui->thread_id = furi_thread_get_current_id();

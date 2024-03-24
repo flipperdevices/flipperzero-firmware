@@ -98,6 +98,6 @@ void uart_terminal_uart_free(UART_TerminalUart* uart) {
     furi_thread_flags_set(furi_thread_get_id(uart->rx_thread), WorkerEvtStop);
     furi_thread_join(uart->rx_thread);
     furi_thread_free(uart->rx_thread);
-    
+
     free(uart);
 }

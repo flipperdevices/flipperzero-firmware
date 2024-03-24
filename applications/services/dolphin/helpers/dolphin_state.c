@@ -1,6 +1,7 @@
 #include "dolphin_state.h"
 #include "dolphin/helpers/dolphin_deed.h"
 
+#include <datetime/datetime.h>
 #include <stdint.h>
 #include <storage/storage.h>
 #include <furi.h>
@@ -49,7 +50,7 @@ This calculates the size of an array. This is good as it's used for dynamic for 
 #define BUTTHURT_MAX 14
 #define BUTTHURT_MIN 0
 
-DolphinState* dolphin_state_alloc() {
+DolphinState* dolphin_state_alloc(void) {
     return malloc(sizeof(DolphinState));
 }
 
@@ -107,8 +108,10 @@ bool dolphin_state_load(DolphinState* dolphin_state) {
     return success;
 }
 
-uint64_t dolphin_state_timestamp() {
-    return furi_hal_rtc_get_timestamp();
+uint64_t dolphin_state_timestamp(void) {
+    DateTime datetime;
+    furi_hal_rtc_get_datetime(&datetime);
+    return datetime_datetime_to_timestamp(&datetime);
 }
 
 bool dolphin_state_is_levelup(int icounter) {

@@ -35,7 +35,7 @@ DolphinDeed getRandomDeed() {
 }
 
 DolphinStats dolphin_stats(Dolphin* dolphin) {
-    furi_assert(dolphin);
+    furi_check(dolphin);
 
     DolphinStats stats;
     DolphinEvent event;
@@ -49,7 +49,7 @@ DolphinStats dolphin_stats(Dolphin* dolphin) {
 }
 
 void dolphin_flush(Dolphin* dolphin) {
-    furi_assert(dolphin);
+    furi_check(dolphin);
 
     DolphinEvent event;
     event.type = DolphinEventTypeFlush;
@@ -86,7 +86,7 @@ void dolphin_clear_limits_timer_callback(void* context) {
     dolphin_event_send_async(dolphin, &event);
 }
 
-Dolphin* dolphin_alloc() {
+Dolphin* dolphin_alloc(void) {
     Dolphin* dolphin = malloc(sizeof(Dolphin));
 
     dolphin->state = dolphin_state_alloc();
@@ -132,6 +132,7 @@ void dolphin_event_release(Dolphin* dolphin, DolphinEvent* event) {
 }
 
 FuriPubSub* dolphin_get_pubsub(Dolphin* dolphin) {
+    furi_check(dolphin);
     return dolphin->pubsub;
 }
 
@@ -214,6 +215,8 @@ int32_t dolphin_srv(void* p) {
 }
 
 void dolphin_upgrade_level(Dolphin* dolphin) {
+    furi_check(dolphin);
+
     dolphin_state_increase_level(dolphin->state);
     dolphin_flush(dolphin);
 }
