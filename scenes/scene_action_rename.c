@@ -55,7 +55,7 @@ bool scene_action_rename_on_event(void* context, SceneManagerEvent event) {
             path_extract_filename(item->path, file_name, true);
             // FURI_LOG_I(TAG, "Original name is %s", furi_string_get_cstr(file_name));
             if(!furi_string_cmp_str(file_name, app->temp_cstr)) {
-                // FURI_LOG_W(TAG, "Rename: File names are the same!");
+                FURI_LOG_W(TAG, "Rename: File names are the same!");
                 furi_string_free(file_name);
                 return false;
             }

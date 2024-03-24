@@ -45,6 +45,9 @@ static const uint32_t rfid_duration_value[V_RFID_DURATION_COUNT] = {
     10000,
 };
 
+static const char* const subghz_ext_text[2] = {"Disabled", "Enabled"};
+static const uint32_t subghz_ext_value[2] = {false, true};
+
 static void scene_settings_layout_changed(VariableItem* item) {
     App* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
@@ -71,6 +74,13 @@ static void scene_settings_rfid_duration_changed(VariableItem* item) {
     uint8_t index = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, rfid_duration_text[index]);
     app->settings.rfid_duration = rfid_duration_value[index];
+}
+
+static void scene_settings_subghz_ext_changed(VariableItem* item) {
+    App* app = variable_item_get_context(item);
+    uint8_t index = variable_item_get_current_value_index(item);
+    variable_item_set_current_value_text(item, subghz_ext_text[index]);
+    app->settings.subghz_use_ext_antenna = subghz_ext_value[index];
 }
 
 // For each scene, implement handler callbacks
@@ -105,6 +115,12 @@ void scene_settings_on_enter(void* context) {
         app->settings.rfid_duration, rfid_duration_value, V_RFID_DURATION_COUNT);
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, rfid_duration_text[value_index]);
+
+    item =
+        variable_item_list_add(vil, "SubGHz Ext Ant", 2, scene_settings_subghz_ext_changed, app);
+    value_index = value_index_uint32(app->settings.subghz_use_ext_antenna, subghz_ext_value, 2);
+    variable_item_set_current_value_index(item, value_index);
+    variable_item_set_current_value_text(item, subghz_ext_text[value_index]);
 
     // TODO: Set Enter callback here - why?? All settings have custom callbacks
     // variable_item_list_set_enter_callback(vil, my_cb, app);
