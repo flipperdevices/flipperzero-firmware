@@ -5,7 +5,7 @@ Convert Flipper Zero Music Player file to MIDI Signal and transfer it via USB Po
 this code was tested in Flipper Zero SDK v50.1 to v54.0
 
 It is still under development.
-I would like to add various functions when we feel like it.
+I would like to add various functions when I feel like it.
 It's unstable sometimes, so please tolerate it.
 The license for this FAP shall be WTFPL.
 
