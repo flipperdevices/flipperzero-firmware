@@ -474,7 +474,7 @@ static NfcCommand gen4_poller_write_mf_ultralight(Gen4Poller* instance) {
             }
 
             // Password
-            MfUltralightConfigPages* config_pages = malloc(sizeof(MfUltralightConfigPages));
+            MfUltralightConfigPages* config_pages = NULL;
             mf_ultralight_get_config_page(mfu_data, &config_pages);
 
             block[0] = config_pages->password.data[0];
@@ -511,8 +511,6 @@ static NfcCommand gen4_poller_write_mf_ultralight(Gen4Poller* instance) {
                 instance->state = Gen4PollerStateFail;
                 break;
             }
-
-            free(config_pages);
 
             instance->state = Gen4PollerStateSuccess;
         }
