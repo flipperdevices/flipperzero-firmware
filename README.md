@@ -10,5 +10,13 @@ Unfortunately since flipc.org is down you will have to build from source using [
 
 I am working on getting the [Build Flipper Application Package](https://github.com/marketplace/actions/build-flipper-application-package-fap) GitHub workflow working so you can get the .fap directly from this repo
 
-You will also need to install my [ESP32 Spotify Remote](https://github.com/benjamindrussell/esp32-spotify-remote) on the WiFi Devboard
+You will also need to install my [ESP32 Spotify Remote]([https://github.com/benjamindrussell/esp32-spotify-remote]) on the WiFi Devboard
+
+### Setup 
+1. Go to the [Spotify Developer Site](https://developer.spotify.com/) and make an account
+2. Go to your dashboard and make a new app
+3. Copy your Client ID and Client Secret into the [ESP32 Code]([https://github.com/benjamindrussell/esp32-spotify-remote])
+4. You will have to add http://IP_ADDRESS/callback as a reirect uri, where IP_ADDRESS is the ip that appears on the Flipper Screen for each new ip since I wasn't able to have it work with a static ip on the ESP32
+<img width="536" alt="image" src="https://github.com/benjamindrussell/flipper-spotify-remote/assets/46113261/7116d5d3-048f-4c29-b4f5-e02061d8fe7a">
+
 
