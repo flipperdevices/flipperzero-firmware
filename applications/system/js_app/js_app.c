@@ -186,9 +186,12 @@ void js_cli_execute(Cli* cli, FuriString* args, void* context) {
     JsCliContext ctx = {.cli = cli};
     ctx.exit_sem = furi_semaphore_alloc(1, 0);
 
-    printf("Running script %s\r\n", path);
+    printf("Running script %s, press CTRL+C to stop\r\n", path);
     JsThread* js_thread = js_thread_run(path, js_cli_callback, &ctx);
-    furi_check(furi_semaphore_acquire(ctx.exit_sem, FuriWaitForever) == FuriStatusOk);
+
+    while(furi_semaphore_acquire(ctx.exit_sem, 100) != FuriStatusOk) {
+        if(cli_cmd_interrupt_received(cli)) break;
+    }
 
     js_thread_stop(js_thread);
     furi_semaphore_free(ctx.exit_sem);
