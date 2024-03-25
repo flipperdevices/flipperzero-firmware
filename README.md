@@ -21,13 +21,14 @@ This app extends the functionality of the FlipperZero's bluetooth capabilities, 
 #### Option A: Cloning Existing Tag (Preferred and allows you to track without additional setup)
 1. **Pair a Tag:** First, pair an AirTag or Samsung SmartTag with your device.
 2. **Enter 'Lost' Mode:** Keep the tag away from the device it's registered to for approximately 15 minutes.
-3. **Download nrfConnect:** Install nrfConnect from the Google Play Store. (Apple version doesn't reveal the needed Raw data, looking for a workaround)
-4. **Filter and Scan:**
+3. **Download nrfConnect or use an ESP32** Install nrfConnect from the Google Play Store. (Apple version doesn't reveal the needed Raw data, looking for a workaround)
+4. OR **Use an ESP32-WROOM / ESP32-S3** Don't have an android? No problem! You can get all the data you need from an ESP32: https://github.com/MatthewKuKanich/ESP32-AirTag-Scanner (Skip to step 7 if using an ESP32)
+5. **Filter and Scan:**
    - Open the app, click on filters, and exclude all except for the brand of your tag (Apple/Samsung).
    - Adjust the RSSI to the lowest setting (-40 dBm).
    - Initiate a scan. Wait for your SmartTag to appear as a "FindMy" device.
-5. **Capture Data:** Click **Raw** or **View Raw** to capture your **payload** and note your tag's **MAC Address**. Immediately remove the tag's battery to prevent key/MAC rotation.
-6. **Enter Data in FlipperZero App:** Input the captured **payload** and **MAC Address** into the FlipperZero app.
+6. **Capture Data:** Click **Raw** or **View Raw** to capture your **payload** and note your tag's **MAC Address**. Immediately remove the tag's battery to prevent key/MAC rotation.
+7. **Enter Data in FlipperZero App:** Input the captured **payload** and **MAC Address** into the FlipperZero app.
 
 #### Option B: AirTag Key Generation
 Video Tutorial: https://youtu.be/XGwHmwvQoqo?si=CAsKWEqGP5VFi9p9
@@ -52,6 +53,7 @@ To use OpenHayStack for tracking, you must use MacOS lower than version 14 (Mail
 If using either of these solutions, be sure to only use the `generate_keys.py` script from this repo in the AirTagGeneration folder. Not the ones included in those repos.
 
 ## Setting Up on Mac with OpenHayStack (OHS) App -- If you own a Mac instructions
+Don't own a Mac? Try this: https://youtu.be/XGwHmwvQoqo?si=CAsKWEqGP5VFi9p9
 
 Follow these steps to get everything working on a Mac using the latest version of the OpenHayStack app.
 Thanks to Wr3nch for the help
