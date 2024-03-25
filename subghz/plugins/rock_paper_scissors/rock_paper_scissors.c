@@ -1665,7 +1665,7 @@ static void save_result(GameContext* game_context) {
         return;
     }
 
-    FuriHalRtcDateTime datetime;
+    DateTime datetime;
     furi_hal_rtc_get_datetime(&datetime);
 
     furi_string_printf(
