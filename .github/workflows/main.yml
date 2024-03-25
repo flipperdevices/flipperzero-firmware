@@ -1,53 +1,61 @@
-name: Build and Release
+name: Build
 
 on:
   push:
     branches: [main]
-    #paths:
-    #  - 'FindMyFlipper/**'
-  release:
-    types: [created]
 
 jobs:
-  build:
-    permissions:
-      contents: write
+  ufbt-build-action:
     runs-on: ubuntu-latest
-    name: "ufbt: Build"
+    name: "ufbt: Build for dev channel"
 
     strategy:
       matrix:
-        channel:
-          - dev
-          - release
-        "config":
-          - { name: "mntm", url: "https://up.momentum-fw.dev/firmware/directory.json" }
-          - { name: "ul", url: "https://up.unleashedflip.com/directory.json" }
-          - { name: "ofw", url: "https://update.flipperzero.one/firmware/directory.json" }
+        include:
+          - name: dev channel
+            sdk-channel: dev
+          - name: Unleashed dev
+            sdk-index-url: https://up.unleashedflip.com/directory.json
+            sdk-channel: dev
+          - name: Momentum dev
+            sdk-index-url: https://up.momentum-fw.dev/firmware/directory.json
+            sdk-channel: dev
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: main
+          sparse-checkout: FindMyFlipper
 
-      - name: Build with ufbt
+      - name: 'ufbt: Build for ${{ matrix.name }}'
         uses: flipperdevices/flipperzero-ufbt-action@v0.1.2
         id: build-app
         with:
-          indexer-url: ${{ matrix.config.url }}
-          sdk-channel: ${{ matrix.channel }}
+          # Set to 'release' to build for latest published release version
+          sdk-channel: ${{ matrix.sdk-channel }}
+          sdk-index-url: ${{ matrix.sdk-index-url }}
           app-dir: FindMyFlipper
 
-      - name: Upload build artifacts
-        if: "github.event_name != 'release'"
-        uses: actions/upload-artifact@v3
-        with:
-          name: ${{ matrix.config.name }}-${{ matrix.channel }}
-          path: ${{ steps.build-app.outputs.fap-artifacts }}
+      - name: Get commit message
+        run: echo "COMMIT_MESSAGE=$(git log --format=%B -n 1 ${{ github.event.after }})" >> $GITHUB_ENV
 
-      - name: Attach artifacts to the Draft Release
-        if: "github.event_name == 'release'"
-        uses: softprops/action-gh-release@v2
-        env:
-          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+      - name: Bump version and push tag
+        id: tag_version
+        uses: mathieudutour/github-tag-action@v6.1
         with:
-          files:
-            FindMyFlipper-${{ matrix.config.name }}-${{ matrix.channel }}.fap
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Upload app artifacts
+        uses: actions/upload-artifacts@v3
+        with:
+          name: ${{ github.event.repository.name }}-${{ steps.build-app.outputs.suffix }}
+          path: ${{ steps.build-app.outputs.fap-artifacts }}
+          
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+            name: ${{ env.COMMIT_MESSAGE }}
+            token: ${{ secrets.GITHUB_TOKEN }}
+            files: ${{ steps.build-app.outputs.fap-artifacts }}
+            generate_release_notes: true
+            tag_name: ${{steps.tag_version.outputs.new_tag}}
