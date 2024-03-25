@@ -9,7 +9,7 @@ void wiegand_load_scene_on_enter(void* context) {
 
     furi_string_set(app->file_path, browser_options.base_path);
 
-    FuriString* buffer = furi_string_alloc(1024);
+    FuriString* buffer = furi_string_alloc();
 
     if(dialog_file_browser_show(app->dialogs, app->file_path, app->file_path, &browser_options)) {
         Storage* storage = furi_record_open(RECORD_STORAGE);
