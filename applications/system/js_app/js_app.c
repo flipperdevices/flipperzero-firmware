@@ -175,26 +175,34 @@ void js_cli_execute(Cli* cli, FuriString* args, void* context) {
     UNUSED(context);
 
     const char* path = furi_string_get_cstr(args);
-
     Storage* storage = furi_record_open(RECORD_STORAGE);
-    if(furi_string_size(args) == 0 || !storage_file_exists(storage, path)) {
-        printf("Usage:\r\njs <path>\r\n");
-        return;
-    }
+
+    do {
+        if(furi_string_size(args) == 0) {
+            printf("Usage:\r\njs <path>\r\n");
+            break;
+        }
+
+        if(!storage_file_exists(storage, path)) {
+            printf("Can not open file %s\r\n", path);
+            break;
+        }
+
+        JsCliContext ctx = {.cli = cli};
+        ctx.exit_sem = furi_semaphore_alloc(1, 0);
+
+        printf("Running script %s, press CTRL+C to stop\r\n", path);
+        JsThread* js_thread = js_thread_run(path, js_cli_callback, &ctx);
+
+        while(furi_semaphore_acquire(ctx.exit_sem, 100) != FuriStatusOk) {
+            if(cli_cmd_interrupt_received(cli)) break;
+        }
+
+        js_thread_stop(js_thread);
+        furi_semaphore_free(ctx.exit_sem);
+    } while(false);
+
     furi_record_close(RECORD_STORAGE);
-
-    JsCliContext ctx = {.cli = cli};
-    ctx.exit_sem = furi_semaphore_alloc(1, 0);
-
-    printf("Running script %s, press CTRL+C to stop\r\n", path);
-    JsThread* js_thread = js_thread_run(path, js_cli_callback, &ctx);
-
-    while(furi_semaphore_acquire(ctx.exit_sem, 100) != FuriStatusOk) {
-        if(cli_cmd_interrupt_received(cli)) break;
-    }
-
-    js_thread_stop(js_thread);
-    furi_semaphore_free(ctx.exit_sem);
 }
 
 void js_app_on_system_start(void) {
