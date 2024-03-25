@@ -28,9 +28,9 @@ void lfrfid_scene_raw_info_on_enter(void* context) {
             AlignLeft,
             AlignTop,
             "\e#RAW RFID Data Reader\e#\n"
-            "1) Hold card next to Flipper\n"
-            "2) Press OK\n"
-            "3) Wait until data is read",
+            "1. Hold card next to Flipper\n"
+            "2. Press OK\n"
+            "3. Wait until data is read",
             false);
 
         widget_add_button_element(widget, GuiButtonTypeCenter, "OK", lfrfid_widget_callback, app);
