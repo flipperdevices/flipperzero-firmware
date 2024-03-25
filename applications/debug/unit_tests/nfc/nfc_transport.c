@@ -134,6 +134,10 @@ void nfc_config(Nfc* instance, NfcMode mode, NfcTech tech) {
     instance->mode = mode;
 }
 
+void nfc_reset(Nfc* instance) {
+    UNUSED(instance);
+}
+
 void nfc_set_fdt_poll_fc(Nfc* instance, uint32_t fdt_poll_fc) {
     UNUSED(instance);
     UNUSED(fdt_poll_fc);

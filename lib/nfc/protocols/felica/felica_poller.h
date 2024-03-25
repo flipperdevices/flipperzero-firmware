@@ -53,6 +53,26 @@ typedef struct {
  */
 FelicaError felica_poller_activate(FelicaPoller* instance, FelicaData* data);
 
+/**
+ * @brief Transmit and receive Felica frames in poller mode.
+ *
+ * Must ONLY be used inside the callback function.
+ *
+ * The rx_buffer will be filled with any data received as a response to data
+ * sent from tx_buffer, with a timeout defined by the fwt parameter.
+ *
+ * @param[in, out] instance pointer to the instance to be used in the transaction.
+ * @param[in] tx_buffer pointer to the buffer containing the data to be transmitted.
+ * @param[out] rx_buffer pointer to the buffer to be filled with received data.
+ * @param[in] fwt frame wait time (response timeout), in carrier cycles.
+ * @return FelicaErrorNone on success, an error code on failure.
+ */
+FelicaError felica_poller_frame_exchange(
+    FelicaPoller* instance,
+    const BitBuffer* tx_buffer,
+    BitBuffer* rx_buffer,
+    uint32_t fwt);
+
 #ifdef __cplusplus
 }
 #endif

@@ -1,0 +1,14 @@
+App(
+    appid="nfc_cli",
+    name="NFC CLI",
+    apptype=FlipperAppType.EXTERNAL,
+    targets=["f7"],
+    entry_point="nfc_cli_app",
+    requires=["gui"],
+    stack_size=1 * 1024,
+    fap_version="1.0",
+    fap_description="NFC CLI application",
+    fap_icon="assets/125_10px.png",
+    fap_icon_assets="assets",
+    fap_category="NFC",
+)

@@ -37,7 +37,7 @@ Iso15693_3Error iso15693_3_poller_send_frame(
     const BitBuffer* tx_buffer,
     BitBuffer* rx_buffer,
     uint32_t fwt) {
-    furi_assert(instance);
+    furi_check(instance);
     furi_check(tx_buffer);
     furi_check(rx_buffer);
 
@@ -73,8 +73,8 @@ Iso15693_3Error iso15693_3_poller_send_frame(
 }
 
 Iso15693_3Error iso15693_3_poller_activate(Iso15693_3Poller* instance, Iso15693_3Data* data) {
-    furi_assert(instance);
-    furi_assert(instance->nfc);
+    furi_check(instance);
+    furi_check(instance->nfc);
 
     iso15693_3_reset(data);
 
@@ -130,9 +130,9 @@ Iso15693_3Error iso15693_3_poller_activate(Iso15693_3Poller* instance, Iso15693_
 }
 
 Iso15693_3Error iso15693_3_poller_inventory(Iso15693_3Poller* instance, uint8_t* uid) {
-    furi_assert(instance);
-    furi_assert(instance->nfc);
-    furi_assert(uid);
+    furi_check(instance);
+    furi_check(instance->nfc);
+    furi_check(uid);
 
     bit_buffer_reset(instance->tx_buffer);
     bit_buffer_reset(instance->rx_buffer);
@@ -160,8 +160,8 @@ Iso15693_3Error iso15693_3_poller_inventory(Iso15693_3Poller* instance, uint8_t*
 
 Iso15693_3Error
     iso15693_3_poller_get_system_info(Iso15693_3Poller* instance, Iso15693_3SystemInfo* data) {
-    furi_assert(instance);
-    furi_assert(data);
+    furi_check(instance);
+    furi_check(data);
 
     bit_buffer_reset(instance->tx_buffer);
     bit_buffer_reset(instance->rx_buffer);
@@ -190,8 +190,8 @@ Iso15693_3Error iso15693_3_poller_read_block(
     uint8_t* data,
     uint8_t block_number,
     uint8_t block_size) {
-    furi_assert(instance);
-    furi_assert(data);
+    furi_check(instance);
+    furi_check(data);
 
     bit_buffer_reset(instance->tx_buffer);
     bit_buffer_reset(instance->rx_buffer);
@@ -219,10 +219,10 @@ Iso15693_3Error iso15693_3_poller_read_blocks(
     uint8_t* data,
     uint16_t block_count,
     uint8_t block_size) {
-    furi_assert(instance);
-    furi_assert(data);
-    furi_assert(block_count);
-    furi_assert(block_size);
+    furi_check(instance);
+    furi_check(data);
+    furi_check(block_count);
+    furi_check(block_size);
 
     Iso15693_3Error ret = Iso15693_3ErrorNone;
 
@@ -238,8 +238,8 @@ Iso15693_3Error iso15693_3_poller_get_blocks_security(
     Iso15693_3Poller* instance,
     uint8_t* data,
     uint16_t block_count) {
-    furi_assert(instance);
-    furi_assert(data);
+    furi_check(instance);
+    furi_check(data);
 
     // Limit the number of blocks to 32 in a single query
     const uint32_t num_queries = block_count / ISO15693_3_POLLER_NUM_BLOCKS_PER_QUERY +

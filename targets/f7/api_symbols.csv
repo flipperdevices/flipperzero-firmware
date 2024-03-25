@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,60.1,,
+Version,+,60.2,,
 Header,+,applications/drivers/subghz/cc1101_ext/cc1101_ext_interconnect.h,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
@@ -132,6 +132,8 @@ Header,+,lib/nfc/nfc_device.h,,
 Header,+,lib/nfc/nfc_listener.h,,
 Header,+,lib/nfc/nfc_poller.h,,
 Header,+,lib/nfc/nfc_scanner.h,,
+Header,+,lib/nfc/protocols/felica/felica.h,,
+Header,+,lib/nfc/protocols/felica/felica_poller.h,,
 Header,+,lib/nfc/protocols/iso14443_3a/iso14443_3a.h,,
 Header,+,lib/nfc/protocols/iso14443_3a/iso14443_3a_listener.h,,
 Header,+,lib/nfc/protocols/iso14443_3a/iso14443_3a_poller.h,,
@@ -143,6 +145,8 @@ Header,+,lib/nfc/protocols/iso14443_4a/iso14443_4a_listener.h,,
 Header,+,lib/nfc/protocols/iso14443_4a/iso14443_4a_poller.h,,
 Header,+,lib/nfc/protocols/iso14443_4b/iso14443_4b.h,,
 Header,+,lib/nfc/protocols/iso14443_4b/iso14443_4b_poller.h,,
+Header,+,lib/nfc/protocols/iso15693_3/iso15693_3.h,,
+Header,+,lib/nfc/protocols/iso15693_3/iso15693_3_poller.h,,
 Header,+,lib/nfc/protocols/mf_classic/mf_classic.h,,
 Header,+,lib/nfc/protocols/mf_classic/mf_classic_listener.h,,
 Header,+,lib/nfc/protocols/mf_classic/mf_classic_poller.h,,
@@ -208,6 +212,7 @@ Header,+,lib/subghz/subghz_tx_rx_worker.h,,
 Header,+,lib/subghz/subghz_worker.h,,
 Header,+,lib/subghz/transmitter.h,,
 Header,+,lib/toolbox/api_lock.h,,
+Header,+,lib/toolbox/arg_parser.h,,
 Header,+,lib/toolbox/args.h,,
 Header,+,lib/toolbox/bit_buffer.h,,
 Header,+,lib/toolbox/compress.h,,
@@ -588,6 +593,14 @@ Function,+,aligned_malloc,void*,"size_t, size_t"
 Function,-,arc4random,__uint32_t,
 Function,-,arc4random_buf,void,"void*, size_t"
 Function,-,arc4random_uniform,__uint32_t,__uint32_t
+Function,+,arg_parser_alloc,ArgParser*,"const ArgParserOptions*, size_t, const FuriString*"
+Function,+,arg_parser_fetch,_Bool,ArgParser*
+Function,+,arg_parser_free,void,ArgParser*
+Function,+,arg_parser_get_error_message,void,"ArgParser*, FuriString*"
+Function,+,arg_parser_get_help_message,void,"ArgParser*, FuriString*"
+Function,+,arg_parser_get_identifier,char,ArgParser*
+Function,+,arg_parser_get_next_argument,const char*,ArgParser*
+Function,+,arg_parser_get_value,const char*,ArgParser*
 Function,+,args_char_to_hex,_Bool,"char, char, uint8_t*"
 Function,+,args_get_first_word_length,size_t,FuriString*
 Function,+,args_length,size_t,FuriString*
@@ -976,6 +989,20 @@ Function,-,fdim,double,"double, double"
 Function,-,fdimf,float,"float, float"
 Function,-,fdiml,long double,"long double, long double"
 Function,-,fdopen,FILE*,"int, const char*"
+Function,+,felica_alloc,FelicaData*,
+Function,+,felica_copy,void,"FelicaData*, const FelicaData*"
+Function,+,felica_free,void,FelicaData*
+Function,+,felica_get_base_data,FelicaData*,const FelicaData*
+Function,+,felica_get_device_name,const char*,"const FelicaData*, NfcDeviceNameType"
+Function,+,felica_get_uid,const uint8_t*,"const FelicaData*, size_t*"
+Function,+,felica_is_equal,_Bool,"const FelicaData*, const FelicaData*"
+Function,+,felica_load,_Bool,"FelicaData*, FlipperFormat*, uint32_t"
+Function,+,felica_poller_activate,FelicaError,"FelicaPoller*, FelicaData*"
+Function,+,felica_poller_frame_exchange,FelicaError,"FelicaPoller*, const BitBuffer*, BitBuffer*, uint32_t"
+Function,+,felica_reset,void,FelicaData*
+Function,+,felica_save,_Bool,"const FelicaData*, FlipperFormat*"
+Function,+,felica_set_uid,_Bool,"FelicaData*, const uint8_t*, size_t"
+Function,+,felica_verify,_Bool,"FelicaData*, const FuriString*"
 Function,-,feof,int,FILE*
 Function,-,feof_unlocked,int,FILE*
 Function,-,ferror,int,FILE*
@@ -2044,6 +2071,13 @@ Function,+,iso15693_3_get_uid,const uint8_t*,"const Iso15693_3Data*, size_t*"
 Function,+,iso15693_3_is_block_locked,_Bool,"const Iso15693_3Data*, uint8_t"
 Function,+,iso15693_3_is_equal,_Bool,"const Iso15693_3Data*, const Iso15693_3Data*"
 Function,+,iso15693_3_load,_Bool,"Iso15693_3Data*, FlipperFormat*, uint32_t"
+Function,+,iso15693_3_poller_activate,Iso15693_3Error,"Iso15693_3Poller*, Iso15693_3Data*"
+Function,+,iso15693_3_poller_get_blocks_security,Iso15693_3Error,"Iso15693_3Poller*, uint8_t*, uint16_t"
+Function,+,iso15693_3_poller_get_system_info,Iso15693_3Error,"Iso15693_3Poller*, Iso15693_3SystemInfo*"
+Function,+,iso15693_3_poller_inventory,Iso15693_3Error,"Iso15693_3Poller*, uint8_t*"
+Function,+,iso15693_3_poller_read_block,Iso15693_3Error,"Iso15693_3Poller*, uint8_t*, uint8_t, uint8_t"
+Function,+,iso15693_3_poller_read_blocks,Iso15693_3Error,"Iso15693_3Poller*, uint8_t*, uint16_t, uint8_t"
+Function,+,iso15693_3_poller_send_frame,Iso15693_3Error,"Iso15693_3Poller*, const BitBuffer*, BitBuffer*, uint32_t"
 Function,+,iso15693_3_reset,void,Iso15693_3Data*
 Function,+,iso15693_3_save,_Bool,"const Iso15693_3Data*, FlipperFormat*"
 Function,+,iso15693_3_set_uid,_Bool,"Iso15693_3Data*, const uint8_t*, size_t"
@@ -2658,6 +2692,7 @@ Function,+,nfc_poller_stop,void,NfcPoller*
 Function,+,nfc_poller_trx,NfcError,"Nfc*, const BitBuffer*, BitBuffer*, uint32_t"
 Function,+,nfc_protocol_get_parent,NfcProtocol,NfcProtocol
 Function,+,nfc_protocol_has_parent,_Bool,"NfcProtocol, NfcProtocol"
+Function,+,nfc_reset,void,Nfc*
 Function,+,nfc_scanner_alloc,NfcScanner*,Nfc*
 Function,+,nfc_scanner_free,void,NfcScanner*
 Function,+,nfc_scanner_start,void,"NfcScanner*, NfcScannerCallback, void*"
@@ -3723,6 +3758,7 @@ Variable,+,message_red_255,const NotificationMessage,
 Variable,+,message_sound_off,const NotificationMessage,
 Variable,+,message_vibro_off,const NotificationMessage,
 Variable,+,message_vibro_on,const NotificationMessage,
+Variable,-,nfc_device_felica,const NfcDeviceBase,
 Variable,-,nfc_device_mf_classic,const NfcDeviceBase,
 Variable,-,nfc_device_mf_desfire,const NfcDeviceBase,
 Variable,-,nfc_device_mf_ultralight,const NfcDeviceBase,
