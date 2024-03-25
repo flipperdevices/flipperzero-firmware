@@ -22,6 +22,11 @@ or multiple files for each device you want to use. Each `.keys` file will contai
 (also called advertisement key) and the hashed advertisement key. As the name suggests, the private key is a secret
 and should not be shared. The public key (advertisement key) is used for broadcasting the BLE message, the hashed advertisement key is for requesting location reports from Apple. The name of the `.keys` file is the MAC address for that generated tag.
 
+### RequestReport&Map.py
+Use the `RequestReport&Map.py` script to request location reports from Apple. The script will read the `.keys` files and
+request location reports for each device. The script will also attempt to log in and provided Apple account and save
+the session cookies in `auth.json` file. After grabbing the report it then decrypts the location information using the private key in your `.keys` file. It will then automatically launch the `advanced_map_loc.py` which create a detailed map of all location points with timestamps, history trail, detailed movement data, and a breakdown of the data. This is saved to an html file which is automatically opened in a web browser. 
+
 ### request_reports.py
 Use the `request_reports.py` script to request location reports from Apple. The script will read the `.keys` files and
 request location reports for each device. The script will also attempt to log in and provided Apple account and save
