@@ -81,8 +81,8 @@ static void app_draw_callback(Canvas* canvas, void* ctx) {
     canvas_draw_str(canvas, 0, height * 1, "This is a tiny custom font");
     canvas_draw_str(canvas, 0, height * 2, "012345.?! ,:;\"\'@#$%");
 
-    FuriString* cutted_str = furi_string_alloc_set("Scrollable text, Юникод...");
-    uint16_t str_width = canvas_string_width(canvas, furi_string_get_cstr(cutted_str));
+    FuriString* cutted_str = furi_string_alloc_set("Скроллящийся текст с юникодом, немного длинный...");
+    size_t str_width = canvas_string_width(canvas, furi_string_get_cstr(cutted_str));
 
     FuriString* str = furi_string_alloc_set("This is ");
     furi_string_cat(str, cutted_str);

@@ -205,7 +205,7 @@ void canvas_draw_str_aligned(
  *
  * @return     width in pixels.
  */
-uint16_t canvas_string_width(Canvas* canvas, const char* str);
+size_t canvas_string_width(Canvas* canvas, const char* str);
 
 /** Get glyph width
  *

@@ -225,7 +225,7 @@ void canvas_draw_str_aligned(
     u8g2_DrawUTF8(&canvas->fb, x, y, str);
 }
 
-uint16_t canvas_string_width(Canvas* canvas, const char* str) {
+size_t canvas_string_width(Canvas* canvas, const char* str) {
     furi_check(canvas);
     if(!str) return 0;
     return u8g2_GetUTF8Width(&canvas->fb, str);

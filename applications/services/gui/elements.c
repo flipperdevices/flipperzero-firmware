@@ -574,7 +574,7 @@ void elements_string_fit_width(Canvas* canvas, FuriString* string, size_t width)
 
     size_t len_px = canvas_string_width(canvas, furi_string_get_cstr(string));
     if(len_px > width) {
-        uint16_t ellipsis_width = canvas_string_width(canvas, "...");
+        size_t ellipsis_width = canvas_string_width(canvas, "...");
         if(width < ellipsis_width) {
             furi_string_reset(string);
         } else {

@@ -76,7 +76,7 @@ static void subghz_view_transmitter_button_right(Canvas* canvas, const char* str
     const uint8_t button_height = 12;
     const uint8_t vertical_offset = 3;
     const uint8_t horizontal_offset = 1;
-    const uint8_t string_width = canvas_string_width(canvas, str);
+    const size_t string_width = canvas_string_width(canvas, str);
     const Icon* icon = &I_ButtonCenter_7x7;
     const uint8_t icon_offset = 3;
     const uint8_t icon_width_with_offset = icon_get_width(icon) + icon_offset;

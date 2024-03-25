@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,60.3,,
+Version,+,61.0,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
 Header,+,applications/services/cli/cli_vcp.h,,
@@ -740,7 +740,7 @@ Function,+,canvas_set_color,void,"Canvas*, Color"
 Function,+,canvas_set_custom_u8g2_font,void,"Canvas*, const uint8_t*"
 Function,+,canvas_set_font,void,"Canvas*, Font"
 Function,+,canvas_set_font_direction,void,"Canvas*, CanvasDirection"
-Function,+,canvas_string_width,uint16_t,"Canvas*, const char*"
+Function,+,canvas_string_width,size_t,"Canvas*, const char*"
 Function,+,canvas_width,size_t,const Canvas*
 Function,-,cbrt,double,double
 Function,-,cbrtf,float,float
