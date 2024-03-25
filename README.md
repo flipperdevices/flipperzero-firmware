@@ -17,8 +17,12 @@ This app extends the functionality of the FlipperZero's bluetooth capabilities, 
 - All firmware should now work with main branch, including icons
   
 ### Step 2: Obtaining SmartTag Data
+###### There are 2 methods to get SmartTag data depending on the type of tag you wish to emulate. Option A allows you to use Apple, Samsung, and Tile tags through the use of cloning the MAC Address and Payload of an actual tag. This also allows you to use the native app for tracking (Apple FindMy, Samsung SmartThing, Tile App). Option B allows you to emulate an Apple AirTag without needing to own an Apple device or airtag. This is done through key generation and requires a computer to download the location data.
 
-#### Option A: Cloning Existing Tag (Preferred and allows you to track without additional setup)
+<details>
+  <summary>Option A: Cloning Existing Tag (Preferred and allows you to track without additional setup)</summary>
+
+
 1. **Pair a Tag:** First, pair an AirTag or Samsung SmartTag with your device.
 2. **Enter 'Lost' Mode:** Keep the tag away from the device it's registered to for approximately 15 minutes.
 3. **Download nrfConnect or use an ESP32** Install nrfConnect from the Google Play Store. (Apple version doesn't reveal the needed Raw data, looking for a workaround)
@@ -29,68 +33,101 @@ This app extends the functionality of the FlipperZero's bluetooth capabilities, 
    - Initiate a scan. Wait for your SmartTag to appear as a "FindMy" device.
 6. **Capture Data:** Click **Raw** or **View Raw** to capture your **payload** and note your tag's **MAC Address**. Immediately remove the tag's battery to prevent key/MAC rotation.
 7. **Enter Data in FlipperZero App:** Input the captured **payload** and **MAC Address** into the FlipperZero app.
-
-#### Option B: AirTag Key Generation
+</details>
+<details>
+  <summary>Option B: AirTag Key Generation</summary>
+  
 Video Tutorial: https://youtu.be/XGwHmwvQoqo?si=CAsKWEqGP5VFi9p9
 
-1. **Generate a Tag:** Download the `generate_keys.py` file and execute it in your terminal. (You will need cryptography ```python3 -m pip install cryptography```)
-2. **Follow Prompts:** During execution, you'll be prompted for inputs. By the end, you'll obtain a **Private Key**, **Public Key**, **Payload**, and **MAC Address**.
-   - **Private Key** is necessary to receive location reports from Apple.
-   - **MAC Address** should be registered in the FlipperZero app:
+## Prerequisites
+
+Before you begin, ensure you have the following installed on your system:
+
+- Docker Desktop
+- Python (likely already installed)
+- Git
+
+## Step-by-Step Instructions
+
+### 1. Clone the Repository
+
+Navigate to Matthew KuKanich's GitHub repository, copy the repository URL, and clone it to your desired location using the terminal.
+```
+git clone https://github.com/MatthewKuKanich/FindMyFlipper.git
+```
+### 2. Set Up the AirTag Generation Folder
+
+Inside the cloned repository, locate the 'air tag generation' folder which contains all necessary files for creating AirTags.
+
+### 3. Start Docker Desktop
+
+Ensure Docker Desktop is running on your computer, as it is required for the server setup.
+
+### 4. Set Up a Server Using Docker
+
+Run the following Docker command to set up the server. This server emulates an environment that tricks Apple's authentication servers.
+```
+docker run -d --restart always --name anisette-v3 -p 6969:6969 dadoum/anisette-v3-server:latest
+```
+### 5. Create a Python Virtual Environment
+
+Navigate to the AirTag generation directory, then create and activate a Python virtual environment.
+```
+cd AirTagGeneration
+```
+```
+python3 -m venv venv
+```
+(or `python -m venv venv`)
+
+Activate the environment:
+ - Windows:
+```
+.\venv\Scripts\activate.bat
+```
+ - Mac/Linux:
+```
+source venv/bin/activate
+```
+### 6. Install the Required Python Packages
+```
+pip3 install -r requirements.txt
+```
+### 7. Generate Keys for AirTags
+
+Run the ```generate_keys.py``` script to generate the keys needed for AirTags, which will be saved in a new folder called 'keys'.
+
+
+### 8. Transfer the Generated Keys to Flipper Zero
+
+Move the '.Keys' file to your Flipper device by connecting it to your computer and using the Flipper's file management system.
    - For ease of use, drag your `.keys` file onto your FlipperZero's SD card in the apps_data->findmy folder. You can import it directly from the app!
      1. Open the app and navigate to the config menu.
      2. Choose "register tag" and select the tag type.
      3. Either click import `.keys`, `.txt`, or enter Manually.
      4. If entering manually then a MAC and payload dialog will appear next. Enter your **MAC** then **Payload** here.
      5. Click save.
-3. **Configuration Completion:** With this setup, your device is ready for use. Head over to the AirTagGeneration folder in the repo and follow the steps in that Readme! This will go over how to request location reports from any device as well as how to setup a webserver for decrypting location data.
 
-If you want to use OpenHaystack or Macless instead, then you can follow the steps below. I don't recommend these methods due to reliability issues and setup complexity.
+### 9. Request Location Reports
+
+Use the ```request_reports.py``` script to request real-time location data, requiring your Apple ID and password for authentication. This will save your Apple login information to a auth file so you won't need to re-enter your Apple credentials. 
+
+### 10. Generate an Advanced Location Map
+
+Finally, run the ```RequestReport&Map.py``` script to generate an interactive map of all location data in the past 24 hours. This script automates the process by requesting the location report using the hashed adv key in your ```keys``` folder, then decrypting that data from your private key located in the same `.keys` file. After the data is decrypted it will be displayed in the terminal. It then launches a mapping script that maps all the coordinates, connects them to show movement, displays a plethora of location metadata, and saves to an html file named by the date of the report.
+
+You're done!
+
+ - If you want to use OpenHaystack or Macless instead, then you can follow the steps below. I don't recommend these methods due to reliability issues and setup complexity.
 To use OpenHayStack for tracking, you must use MacOS lower than version 14 (Mail Plug-in Incompetiablity of MacOS 14+ seemoo-lab/openhaystack#224). If you do own a device, I believe a convertor script can be provided without much of effort. If you do not own a Mac device or the system has been upgraded to 14 and beyond. The alternative solutions includes,
 
-    https://github.com/dchristl/macless-haystack (recommended in README)
-    https://github.com/Chapoly1305/FindMy (a project uses python and docker to provide location lookup as a backend service)
-If using either of these solutions, be sure to only use the `generate_keys.py` script from this repo in the AirTagGeneration folder. Not the ones included in those repos.
+    https://github.com/dchristl/macless-haystack
+    
+If using this solution, be sure to only use the `generate_keys.py` script from this repo in the AirTagGeneration folder. Not the ones included in that repo as the formatting of the key file changes. (Mine includes data that the FlipperZero needs for proper importing)
+</details>
 
-## Setting Up on Mac with OpenHayStack (OHS) App -- If you own a Mac instructions
-Don't own a Mac? Try this: https://youtu.be/XGwHmwvQoqo?si=CAsKWEqGP5VFi9p9
-
-Follow these steps to get everything working on a Mac using the latest version of the OpenHayStack app.
-Thanks to Wr3nch for the help
-
-### Step 1: Create a New Device
-- Start by creating a new device in the OpenHayStack app, but **do not deploy** it immediately after creation.
-
-### Step 2: Export Configuration
-- Choose to **EXPORT** the configuration by selecting "all accessories as file." To simplify, ensure you only have one entry in the list before exporting.
-- It is crucial that the export format is in JSON.
-
-### Step 3: Modify the JSON File
-Open the exported JSON file in a text editor and make the following changes:
-- **Left OHS, Right keys from my ```generate_keys.py``` script:**
-    - `symmetricKey` should be set to the `Hashed adv key`.
-    - `privateKey` should be replaced with your `Private Key`.
-    - `oldestRelevantSymmetricKey` should also use the `Hashed adv key`.
-- Additionally, update the following attributes to `true`:
-    - `"isDeployed": true`
-    - `"isActive": true`
-
-### Step 4: Re-import the Configuration
-- After saving your changes to the JSON file, re-import it back into OpenHayStack.
-
-### Step 5: Adjust Settings in OHS App
-- In the OpenHayStack Mac App, navigate to the top bar and change the time setting from `1 Day` to `30min`.
-- Give it some time to process and apply the new settings.
-
-By following these steps, you should have your device set up and ready to go with OpenHayStack on a Mac.
-****
-
-### Step 3: Configuration on the FlipperZero (if not completed yet)
+### On The Flipper: Configuration on the FlipperZero (if not completed yet)
 - Upon launching the app, open the config menu and either click ```Import Tag From File``` or ```Register Tag Manually```. Put your generated .keys file onto the FlipperZero SD card inside the AppsData/FindMyFlipper folder to import from file. Or you can manually enter the tag information. When using the cloning method, you can export a .txt file from nrfConnect (click save button) amd place that in the same folder in order to import.
-
-### Step 4: Tracking
-- Once the app is configured, your FlipperZero can be tracked using the relevant platform's tracking service (FindMy app for Apple devices, SmartThings for Samsung devices, and respective web browsers). If using generated keys and OpenHaystack then you can track on the OHS app or via the Macless Haystack setup. Links to both are above
-
 
 Customization
 
@@ -105,6 +142,7 @@ Compatibility
 
 - Apple devices for AirTag tracking via the FindMy network.
 - Any device that supports Samsung SmartTag tracking, including web browsers (previously FindMyMobile).
+- Tile Trackers via the Tile App
 
 Thanks
 
