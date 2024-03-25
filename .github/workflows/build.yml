@@ -17,9 +17,9 @@ jobs:
           - name: Unleashed release
             sdk-index-url: https://up.unleashedflip.com/directory.json
             sdk-channel: release
-          - name: Momentum release
+          - name: Momentum dev
             sdk-index-url: https://up.momentum-fw.dev/firmware/directory.json
-            sdk-channel: release
+            sdk-channel: dev
        
 
     steps:
