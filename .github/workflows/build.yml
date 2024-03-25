@@ -1,54 +1,53 @@
-name: "FAP: Build and lint"
+name: Build
 
 on:
   push:
-    branches:
-      - master
+    branches: master
 
 jobs:
   ufbt-build-action:
     runs-on: ubuntu-latest
-    name: 'ufbt: Build for Master branch'
+    name: "ufbt: Build for dev channel"
+
+    strategy:
+      matrix:
+        include:
+          - name: OFW release
+            sdk-channel: release
+          - name: Unleashed release
+            sdk-index-url: https://up.unleashedflip.com/directory.json
+            sdk-channel: release
+          - name: Momentum release
+            sdk-index-url: https://up.momentum-fw.dev/firmware/directory.json
+            sdk-channel: release
+       
+
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
 
-      - name: Build with ufbt for standard firmware
-        uses: flipperdevices/flipperzero-ufbt-action@v0.1
-        id: build-standard
+      - name: 'ufbt: Build for ${{ matrix.name }}'
+        uses: flipperdevices/flipperzero-ufbt-action@v0.1.2
+        id: build-app
         with:
-          sdk-channel: release
+          # Set to 'release' to build for latest published release version
+          sdk-channel: ${{ matrix.sdk-channel }}
+          sdk-index-url: ${{ matrix.sdk-index-url }}
+          app-dir: flipper-hero
 
-      - name: Rename standard artifact
-        run: |
-          mv "${{ steps.build-standard.outputs.fap-artifacts }}" flipper_hero.fap
-
-      - name: Build with ufbt for Flipper Unleashed
-        uses: flipperdevices/flipperzero-ufbt-action@v0.1
-        id: build-unleashed
+      - name: Get commit message
+        run: echo "COMMIT_MESSAGE=$(git log --format=%B -n 1 ${{ github.event.after }})" >> $GITHUB_ENV
+          
+      - name: Upload app artifacts
+        uses: actions/upload-artifact@v3
         with:
-          sdk-index-url: https://up.unleashedflip.com/directory.json
-          sdk-channel: release
-      - name: Rename unleashed artifact
-        run: |
-          mv "${{ steps.build-unleashed.outputs.fap-artifacts }}" flipper_hero_unleashed.fap
-      - name: Create a new tag
-        run: |
-          TAG_NAME=${{ github.event.repository.name }}-$(date +'%Y%m%d%H%M%S')
-          git config --global user.name 'tag-bot'
-          git config --global user.email 'tag-bot@mail'
-          git tag $TAG_NAME
-          git push https://github.com/mentoster/Flipper-hero.git $TAG_NAME
-          echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
-
-      - name: Upload Release Assets
-        uses: softprops/action-gh-release@v1
+          name: ${{ matrix.name }}
+          path: ${{ steps.build-app.outputs.fap-artifacts }}
+          
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
         with:
-          files: |
-            flipper_hero.fap
-            flipper_hero_unleashed.fap
-          tag_name: ${{ env.TAG_NAME }}
-          draft: false
-          prerelease: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
+            draft: true
+            name: ${{ env.COMMIT_MESSAGE }}
+            token: ${{ secrets.MY_GITHUB_TOKEN  }}
+            files: ${{ steps.build-app.outputs.fap-artifacts }}
+            generate_release_notes: true
+            
