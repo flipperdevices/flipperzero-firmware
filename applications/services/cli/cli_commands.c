@@ -9,8 +9,6 @@
 #include <notification/notification_messages.h>
 #include <loader/loader.h>
 #include <lib/toolbox/args.h>
-#include <applications/system/js_app/js_thread.h>
-#include <storage/storage.h>
 
 // Close to ISO, `date +'%Y-%m-%d %H:%M:%S %u'`
 #define CLI_DATE_FORMAT "%.4d-%.2d-%.2d %.2d:%.2d:%.2d %d"
@@ -462,61 +460,6 @@ void cli_command_i2c(Cli* cli, FuriString* args, void* context) {
     furi_hal_i2c_release(&furi_hal_i2c_handle_external);
 }
 
-typedef struct {
-    bool done;
-    Cli* cli;
-} JsCommandContext;
-
-#define CLI_WRITE_STR(str, len) cli_write(ctx->cli, (const uint8_t*)str, len)
-
-static void cli_command_js_callback(JsThreadEvent event, const char* msg, void* context) {
-    JsCommandContext* ctx = context;
-    switch(event) {
-        case JsThreadEventError:
-            CLI_WRITE_STR("[E] ", 4);
-            CLI_WRITE_STR(msg, strlen(msg));
-            CLI_WRITE_STR("\r\n", 2);
-            break;
-        case JsThreadEventErrorTrace:
-            CLI_WRITE_STR("[T] Error trace:\r\n", 18);
-            CLI_WRITE_STR(msg, strlen(msg));
-            CLI_WRITE_STR("\r\n", 2);
-            ctx->done = true; // Exit when an error occurs
-            break;
-        case JsThreadEventPrint:
-            CLI_WRITE_STR("[I] ", 4);
-            CLI_WRITE_STR(msg, strlen(msg));
-            CLI_WRITE_STR("\r\n", 2);
-            break;
-        case JsThreadEventDone:
-            CLI_WRITE_STR("[D] Script done!\r\n", 18);
-            ctx->done = true;
-            break;
-    }
-
-}
-
-void cli_command_js(Cli* cli, FuriString* args, void* context) {
-    UNUSED(cli);
-    UNUSED(args);
-    UNUSED(context);
-
-    const char* path = furi_string_get_cstr(args);
-
-    Storage* storage = furi_record_open(RECORD_STORAGE);
-    if(furi_string_size(args) == 0 || !storage_file_exists(storage, path)) {
-        cli_print_usage("js", "<path>", furi_string_get_cstr(args));
-        return;
-    }
-    furi_record_close(RECORD_STORAGE);
-
-    printf("Running script %s\r\n", path);
-    JsCommandContext ctx = { .done = false, .cli = cli };
-    JsThread* js_thread = js_thread_run(path, cli_command_js_callback, &ctx);
-    while(!ctx.done) furi_delay_ms(1);
-    js_thread_stop(js_thread);
-}
-
 void cli_commands_init(Cli* cli) {
     cli_add_command(cli, "!", CliCommandFlagParallelSafe, cli_command_info, (void*)true);
     cli_add_command(cli, "info", CliCommandFlagParallelSafe, cli_command_info, NULL);
@@ -537,6 +480,4 @@ void cli_commands_init(Cli* cli) {
     cli_add_command(cli, "led", CliCommandFlagDefault, cli_command_led, NULL);
     cli_add_command(cli, "gpio", CliCommandFlagDefault, cli_command_gpio, NULL);
     cli_add_command(cli, "i2c", CliCommandFlagDefault, cli_command_i2c, NULL);
-
-    cli_add_command(cli, "js", CliCommandFlagDefault, cli_command_js, NULL);
 }
