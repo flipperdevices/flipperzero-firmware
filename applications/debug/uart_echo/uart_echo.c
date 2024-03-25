@@ -75,8 +75,7 @@ static void uart_echo_view_draw_callback(Canvas* canvas, void* _model) {
             furi_string_get_cstr(model->list[i]->text));
 
         if(i == model->line) {
-            size_t width =
-                canvas_string_width(canvas, furi_string_get_cstr(model->list[i]->text));
+            size_t width = canvas_string_width(canvas, furi_string_get_cstr(model->list[i]->text));
 
             canvas_draw_box(
                 canvas,
