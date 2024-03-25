@@ -3,8 +3,8 @@ name: Build and Release
 on:
   push:
     branches: [main]
-    paths:
-      - 'FindMyFlipper/**'
+    #paths:
+    #  - 'FindMyFlipper/**'
   release:
     types: [created]
 
