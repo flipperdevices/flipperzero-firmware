@@ -23,6 +23,8 @@ jobs:
        
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: 'ufbt: Build for ${{ matrix.name }}'
         uses: flipperdevices/flipperzero-ufbt-action@v0.1.2
