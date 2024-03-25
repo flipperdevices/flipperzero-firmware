@@ -131,7 +131,7 @@ static void handle(PluginState* plugin_state, FuriString* args, Cli* cli) {
                 print_initial_delay(
                     plugin_state->automation_initial_delay, TOTP_CLI_COLOR_SUCCESS);
                 TOTP_CLI_PRINTF_SUCCESS(" sec.]");
-                cli_nl();
+                cli_nl(cli);
             } else {
                 TOTP_CLI_PRINT_ERROR_UPDATING_CONFIG_FILE();
             }
@@ -154,7 +154,7 @@ static void handle(PluginState* plugin_state, FuriString* args, Cli* cli) {
             TOTP_CLI_PRINTF_INFO(" [");
             print_initial_delay(plugin_state->automation_initial_delay, TOTP_CLI_COLOR_INFO);
             TOTP_CLI_PRINTF_INFO(" sec.]");
-            cli_nl();
+            cli_nl(cli);
         }
     } while(false);
 

@@ -237,7 +237,7 @@ void rolling_flaws_receive_sync_draw_callback(Canvas* canvas, void* model) {
 void rolling_flaws_receive_signal_draw_callback(Canvas* canvas, void* model) {
     RollingFlawsModel* my_model = ((RollingFlawsRefModel*)model)->model;
 
-    FuriString* str = furi_string_alloc(32);
+    FuriString* str = furi_string_alloc();
 
     canvas_set_bitmap_mode(canvas, 1);
     canvas_set_font(canvas, FontPrimary);

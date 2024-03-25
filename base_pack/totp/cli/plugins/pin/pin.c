@@ -66,7 +66,7 @@ static bool totp_cli_read_pin(Cli* cli, uint8_t* pin, uint8_t* pin_length) {
                 TOTP_CLI_DELETE_LAST_CHAR();
             }
         } else if(c == CliSymbolAsciiCR) {
-            cli_nl();
+            cli_nl(cli);
             break;
         }
     }
