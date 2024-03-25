@@ -1,10 +1,10 @@
 #include <furi_hal.h>
 #include <inttypes.h>
 #include <toolbox/keys_dict.h>
+#include <bit_lib/bit_lib.h>
 #include <toolbox/stream/buffered_file_stream.h>
 #include <nfc/protocols/mf_classic/mf_classic.h>
 #include "mfkey.h"
-#include "common.h"
 #include "crypto1.h"
 #include "plugin_interface.h"
 #include <flipper_application/flipper_application.h>
@@ -34,7 +34,7 @@ bool key_already_found_for_nonce_in_dict(KeysDict* dict, MfClassicNonce* nonce) 
     uint8_t key_bytes[sizeof(MfClassicKey)];
     keys_dict_rewind(dict);
     while(keys_dict_get_next_key(dict, key_bytes, sizeof(MfClassicKey))) {
-        uint64_t k = napi_nfc_util_bytes2num(key_bytes, sizeof(MfClassicKey));
+        uint64_t k = bit_lib_bytes_to_num_be(key_bytes, sizeof(MfClassicKey));
         struct Crypto1State temp = {0, 0};
         for(int i = 0; i < 24; i++) {
             (&temp)->odd |= (BIT(k, 2 * i + 1) << (i ^ 3));
