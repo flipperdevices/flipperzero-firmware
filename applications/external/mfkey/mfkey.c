@@ -19,12 +19,12 @@
 #include "mfkey_icons.h"
 #include <inttypes.h>
 #include <toolbox/keys_dict.h>
+#include <bit_lib/bit_lib.h>
 #include <toolbox/stream/buffered_file_stream.h>
 #include <dolphin/dolphin.h>
 #include <notification/notification_messages.h>
 #include <nfc/protocols/mf_classic/mf_classic.h>
 #include "mfkey.h"
-#include "common.h"
 #include "crypto1.h"
 #include "plugin_interface.h"
 #include <flipper_application/flipper_application.h>
@@ -483,7 +483,7 @@ bool key_already_found_for_nonce_in_solved(
     int keyarray_size,
     MfClassicNonce* nonce) {
     for(int k = 0; k < keyarray_size; k++) {
-        uint64_t key_as_int = napi_nfc_util_bytes2num(keyarray[k].data, sizeof(MfClassicKey));
+        uint64_t key_as_int = bit_lib_bytes_to_num_be(keyarray[k].data, sizeof(MfClassicKey));
         struct Crypto1State temp = {0, 0};
         for(int i = 0; i < 24; i++) {
             (&temp)->odd |= (BIT(key_as_int, 2 * i + 1) << (i ^ 3));
