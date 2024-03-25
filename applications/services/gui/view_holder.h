@@ -1,3 +1,9 @@
+/**
+ * @file view_holder.h
+ * @brief GUI: ViewHolder API
+ *
+ * @warning View added to a ViewHolder MUST NOT be in a ViewStack at the same time.
+ */
 #pragma once
 
 #include <gui/view.h>
@@ -88,8 +94,9 @@ void view_holder_start(ViewHolder* view_holder);
 void view_holder_stop(ViewHolder* view_holder);
 
 /** View Update Handler
- * @param view, View Instance
- * @param context, ViewHolder instance
+ *
+ * @param      view     View Instance
+ * @param      context  ViewHolder instance
  */
 void view_holder_update(View* view, void* context);
 
