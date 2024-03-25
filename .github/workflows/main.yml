@@ -3,6 +3,8 @@ name: Build
 on:
   push:
     branches: [main]
+    paths:
+     - 'FindMyFlipper/**'
 
 jobs:
   ufbt-build-action:
