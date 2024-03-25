@@ -1,4 +1,6 @@
 #include "../nfc_magic_app_i.h"
+#include "gui/scene_manager.h"
+#include "protocols/gen4/gen4.h"
 
 enum SubmenuIndex {
     SubmenuIndexWrite,
@@ -33,12 +35,31 @@ void nfc_magic_scene_gen4_menu_on_enter(void* context) {
         SubmenuIndexSetShadowMode,
         nfc_magic_scene_gen4_menu_submenu_callback,
         instance);
-    submenu_add_item(
-        submenu,
-        "Set Gen2 Mode",
-        SubmenuIndexSetDirectWriteBlock0Mode,
-        nfc_magic_scene_gen4_menu_submenu_callback,
-        instance);
+    if(instance->gen4_data->config.data_parsed.direct_write_mode ==
+       Gen4DirectWriteBlock0ModeEnabled) {
+        submenu_add_item(
+            submenu,
+            "Disable Direct Write Mode",
+            SubmenuIndexSetDirectWriteBlock0Mode,
+            nfc_magic_scene_gen4_menu_submenu_callback,
+            instance);
+        scene_manager_set_scene_state(
+            instance->scene_manager,
+            NfcMagicSceneGen4SetDirectWriteBlock0Mode,
+            Gen4DirectWriteBlock0ModeDisabled);
+    } else {
+        submenu_add_item(
+            submenu,
+            "Enable Direct Write Mode",
+            SubmenuIndexSetDirectWriteBlock0Mode,
+            nfc_magic_scene_gen4_menu_submenu_callback,
+            instance);
+        scene_manager_set_scene_state(
+            instance->scene_manager,
+            NfcMagicSceneGen4SetDirectWriteBlock0Mode,
+            Gen4DirectWriteBlock0ModeEnabled);
+    }
+
     submenu_add_item(
         submenu, "Wipe", SubmenuIndexWipe, nfc_magic_scene_gen4_menu_submenu_callback, instance);
     submenu_add_item(
@@ -71,13 +92,13 @@ bool nfc_magic_scene_gen4_menu_on_event(void* context, SceneManagerEvent event) 
             consumed = true;
         } else if(event.event == SubmenuIndexSetDirectWriteBlock0Mode) {
             scene_manager_next_scene(
-                instance->scene_manager, NfcMagicSceneGen4SelectDirectWriteBlock0Mode);
+                instance->scene_manager, NfcMagicSceneGen4SetDirectWriteBlock0Mode);
             consumed = true;
         }
 
         scene_manager_set_scene_state(instance->scene_manager, NfcMagicSceneGen4Menu, event.event);
     } else if(event.type == SceneManagerEventTypeBack) {
-        if(instance->gen4_password != 0) {
+        if(instance->gen4_password.value != 0) {
             consumed = scene_manager_search_and_switch_to_previous_scene(
                 instance->scene_manager, NfcMagicSceneGen4ActionsMenu);
         } else {
