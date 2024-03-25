@@ -12,7 +12,7 @@ jobs:
     strategy:
       matrix:
         include:
-          - name: dev channel
+          - name: OFW dev
             sdk-channel: dev
           - name: Unleashed dev
             sdk-index-url: https://up.unleashedflip.com/directory.json
@@ -42,7 +42,7 @@ jobs:
       - name: Upload app artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: ${{ github.event.repository.name }}-${{ steps.build-app.outputs.suffix }}
+          name: ${{ matrix.name }}
           path: ${{ steps.build-app.outputs.fap-artifacts }}
           
       - name: Create Release
