@@ -314,7 +314,7 @@ size_t furi_hal_version_uid_size(void) {
     return 64 / 8;
 }
 
-const uint8_t* furi_hal_version_uid_default() {
+const uint8_t* furi_hal_version_uid_default(void) {
     return (const uint8_t*)UID64_BASE;
 }
 

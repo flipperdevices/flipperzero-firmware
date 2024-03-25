@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,60.0,,
+Version,+,60.3,,
 Header,+,applications/drivers/subghz/cc1101_ext/cc1101_ext_interconnect.h,,
 Header,+,applications/main/archive/helpers/archive_helpers_ext.h,,
 Header,+,applications/main/subghz/subghz_fap.h,,
@@ -824,6 +824,7 @@ Function,+,canvas_draw_frame,void,"Canvas*, int32_t, int32_t, size_t, size_t"
 Function,+,canvas_draw_glyph,void,"Canvas*, int32_t, int32_t, uint16_t"
 Function,+,canvas_draw_icon,void,"Canvas*, int32_t, int32_t, const Icon*"
 Function,+,canvas_draw_icon_animation,void,"Canvas*, int32_t, int32_t, IconAnimation*"
+Function,+,canvas_draw_icon_bitmap,void,"Canvas*, uint8_t, uint8_t, int16_t, int16_t, const Icon*"
 Function,+,canvas_draw_icon_ex,void,"Canvas*, int32_t, int32_t, const Icon*, IconRotation"
 Function,+,canvas_draw_line,void,"Canvas*, int32_t, int32_t, int32_t, int32_t"
 Function,+,canvas_draw_rbox,void,"Canvas*, int32_t, int32_t, size_t, size_t, size_t"
@@ -1405,12 +1406,9 @@ Function,+,furi_hal_infrared_async_tx_set_signal_sent_isr_callback,void,"FuriHal
 Function,+,furi_hal_infrared_async_tx_start,void,"uint32_t, float"
 Function,+,furi_hal_infrared_async_tx_stop,void,
 Function,+,furi_hal_infrared_async_tx_wait_termination,void,
-Function,+,furi_hal_infrared_get_debug_out_status,_Bool,
-Function,+,furi_hal_infrared_is_auto_detect_enabled,_Bool,
+Function,+,furi_hal_infrared_detect_tx_output,FuriHalInfraredTxPin,
 Function,+,furi_hal_infrared_is_busy,_Bool,
-Function,+,furi_hal_infrared_is_external_connected,_Bool,
-Function,+,furi_hal_infrared_set_auto_detect,void,_Bool
-Function,+,furi_hal_infrared_set_debug_out,void,_Bool
+Function,+,furi_hal_infrared_set_tx_output,void,FuriHalInfraredTxPin
 Function,-,furi_hal_init,void,
 Function,-,furi_hal_init_early,void,
 Function,-,furi_hal_interrupt_init,void,
@@ -3000,9 +2998,9 @@ Function,+,rpc_system_app_set_callback,void,"RpcAppSystem*, RpcAppSystemCallback
 Function,+,rpc_system_app_set_error_code,void,"RpcAppSystem*, uint32_t"
 Function,+,rpc_system_app_set_error_text,void,"RpcAppSystem*, const char*"
 Function,-,rpmatch,int,const char*
-Function,+,saved_struct_get_payload_size,_Bool,"const char*, uint8_t, uint8_t, size_t*"
+Function,+,saved_struct_get_metadata,_Bool,"const char*, uint8_t*, uint8_t*, size_t*"
 Function,+,saved_struct_load,_Bool,"const char*, void*, size_t, uint8_t, uint8_t"
-Function,+,saved_struct_save,_Bool,"const char*, void*, size_t, uint8_t, uint8_t"
+Function,+,saved_struct_save,_Bool,"const char*, const void*, size_t, uint8_t, uint8_t"
 Function,-,scalbln,double,"double, long int"
 Function,-,scalblnf,float,"float, long int"
 Function,-,scalblnl,long double,"long double, long"

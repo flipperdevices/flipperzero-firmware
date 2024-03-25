@@ -81,6 +81,18 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Temp Sensors Reader 1.6 (By quen0n)](https://github.com/quen0n/Unitemp-Flipper-Zero-Plugin) `Req: BMP180/BMP280/BME280/BME680/DHT11/DHT22(AM2302)/AM2301/AM2320/HTU2XD/HTU21x/HDC1080/MAX31855/MAX6675/SCD30` [Changes (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/5bf09a27a8210d5f4018aa30c31ab139541468f9)
 - Updated: [YuriCable Pro Max v0.4 (By arag0re)](https://github.com/arag0re/fz-yuricable-pro-max)
 - Updated: [Mfkey v2.1 (By noproto)](https://github.com/noproto/FlipperMfkey)
+- OFW: [GUI: Fix textbox overflow/crash/hang with 256+ lines #3536 (By Willy-JL)](https://github.com/flipperdevices/flipperzero-firmware/pull/3536)
+- OFW: [NFC UI fixes #3532 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3532)
+- OFW: [Add Dutch Originals Sound Bar IR codes to infrared app #3529 (By protik09)](https://github.com/flipperdevices/flipperzero-firmware/pull/3529)
+- OFW: [HID App improvements and little extra #3518 (By gsurkov)](https://github.com/flipperdevices/flipperzero-firmware/pull/3518)
+- OFW: [NFC: Slix privacy password reveal and Desfire detect fix #3504 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3504)
+- OFW: [BadUSB: BLE, media keys, Fn/Globe key commands #3403 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/3403)
+- OFW: [Configurable Infrared TX output #3484 (By gsurkov)](https://github.com/flipperdevices/flipperzero-firmware/pull/3484)
+- OFW: [Add ChromeOS Bad USB demo #3486 (By kowalski7cc)](https://github.com/flipperdevices/flipperzero-firmware/pull/3486)
+- OFW: [Fix DIP decoding for Linear Delta-3 #3528 (By brandonweeks)](https://github.com/flipperdevices/flipperzero-firmware/pull/3528)
+- OFW: [JS CLI command #3539 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/3539)
+- OFW: [SavedStruct: Introduce saved_struct_get_metadata #3392 (By CookiePLMonster)](https://github.com/flipperdevices/flipperzero-firmware/pull/3392)
+- UL: [A few post merge fixes (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/01f3192957e4bf84ad27b38cac75f7de671113c7)
 
 <a name="release">
 

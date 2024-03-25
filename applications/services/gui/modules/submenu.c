@@ -300,9 +300,6 @@ void submenu_add_lockable_item(
     SubmenuItem* item = NULL;
     furi_check(label);
     furi_check(submenu);
-    if(locked) {
-        furi_assert(locked_message);
-    }
 
     with_view_model(
         submenu->view,

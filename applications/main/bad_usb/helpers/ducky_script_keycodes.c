@@ -1,5 +1,4 @@
 #include <furi_hal.h>
-#include <furi_hal_usb_hid.h>
 #include "ducky_script_i.h"
 
 typedef struct {
