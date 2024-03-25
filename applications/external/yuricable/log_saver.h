@@ -1,5 +1,4 @@
 #pragma once
-
 #include <storage/storage.h>
 
 #ifdef __cplusplus

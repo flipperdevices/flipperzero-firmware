@@ -11,10 +11,14 @@
 extern "C" {
 #endif
 
+#define RESPONSE_BUFFER_SIZE 8
+
 enum TRISTAR_REQUESTS {
-    TRISTAR_POLL = 0x74,
     TRISTAR_POWER = 0x70,
+    TRISTAR_POWER_ANSWER = 0x72,
+    TRISTAR_POLL = 0x74,
     TRISTAR_UNKNOWN_76 = 0x76,
+    TRISTAR_SERVICEMODE_ANSWER = 0x7E
 };
 
 typedef struct {
@@ -25,6 +29,9 @@ typedef struct {
     uint8_t USB_UART[7];
     uint8_t USB_A_CHARGING_CABLE[7];
     uint8_t POWER_ANSWER[2];
+    uint8_t SN[7];
+    uint8_t KEYSET[10];
+    uint8_t UNKNOWN_76_ANSWER[12];
 } TRISTART_RESPONSES;
 
 typedef enum {
@@ -33,6 +40,7 @@ typedef enum {
     SDQDeviceCommand_RESET,
     SDQDeviceCommand_DFU,
     SDQDeviceCommand_CHARGING,
+    SDQDeviceCommand_SN,
     SDQDeviceCommand_JTAG,
     SDQDeviceCommand_RECOVERY,
 } SDQDeviceCommand;
@@ -64,6 +72,7 @@ typedef enum {
     SDQDeviceErrorInvalidCommand,
     SDQDeviceErrorBitReadTiming,
     SDQDeviceErrorTimeout,
+    SDQDeviceErrorInvalidCRC,
 } SDQDeviceError;
 
 typedef struct SDQDevice SDQDevice;

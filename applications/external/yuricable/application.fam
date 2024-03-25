@@ -9,6 +9,6 @@ App(
     fap_icon_assets="assets",
     fap_author="arag0re.eth && PooruTorie",
     fap_weburl="https://github.com/arag0re/fz-iphone-dcsd",
-    fap_version="0.3",
+    fap_version="0.4",
     fap_description="SWD/DCSD-Cable App implemented for the Flipper Zero",
 )
