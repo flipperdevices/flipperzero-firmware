@@ -53,6 +53,7 @@ To use OpenHayStack for tracking, you must use MacOS lower than version 14 (Mail
 If using either of these solutions, be sure to only use the `generate_keys.py` script from this repo in the AirTagGeneration folder. Not the ones included in those repos.
 
 ## Setting Up on Mac with OpenHayStack (OHS) App -- If you own a Mac instructions
+Don't own a Mac? Try this: https://youtu.be/XGwHmwvQoqo?si=CAsKWEqGP5VFi9p9
 
 Follow these steps to get everything working on a Mac using the latest version of the OpenHayStack app.
 Thanks to Wr3nch for the help
