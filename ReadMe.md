@@ -331,7 +331,7 @@ $ ./fbt dolphin_ext
 - [Reaction Test (By Milk-Cool)](https://github.com/Milk-Cool/fz-reaction-game)
 - [Reaction Time (By ihatecsv)](https://github.com/ihatecsv/flipper_reaction_time)
 - [Reversi v1.2 (By dimat)](https://github.com/dimat/flipperzero-reversi)
-- [Rock Paper Scissors v1.4 (By CodeAllNight/jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/subghz/plugins/rock_paper_scissors)
+- [Rock Paper Scissors v1.5 (By CodeAllNight/jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/subghz/plugins/rock_paper_scissors)
 - [Rock Paper Scissors 2 v1.0 (By benwoo1110)](https://github.com/benwoo1110/rps-FlipperZero)
 - [Root of Life v1.1 (By Xorboo)](https://github.com/Xorboo/root-of-life)
 - [Rubiks Cube Scrambler v1.3 (By RaZeSloth)](https://github.com/RaZeSloth/flipperzero-rubiks-cube-scrambler)

@@ -4,7 +4,7 @@ App(
     apptype=FlipperAppType.EXTERNAL,
     entry_point="rock_paper_scissors_app",
     stack_size=2 * 1024,
-    fap_version=(1, 4),
+    fap_version=(1, 5),
     fap_icon="rock_paper_scissors.png",
     fap_icon_assets="images",
     fap_icon_assets_symbol="rock_paper_scissors",
