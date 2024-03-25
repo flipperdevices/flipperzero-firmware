@@ -6,8 +6,7 @@ void lfrfid_scene_retry_confirm_on_enter(void* context) {
 
     widget_add_button_element(widget, GuiButtonTypeLeft, "Retry", lfrfid_widget_callback, app);
     widget_add_button_element(widget, GuiButtonTypeRight, "Stay", lfrfid_widget_callback, app);
-    widget_add_string_element(
-        widget, 64, 0, AlignCenter, AlignTop, FontPrimary, "Retry Reading?");
+    widget_add_string_element(widget, 64, 0, AlignCenter, AlignTop, FontPrimary, "Retry Reading?");
     widget_add_string_element(
         widget, 64, 13, AlignCenter, AlignTop, FontSecondary, "All unsaved data will be lost");
 
