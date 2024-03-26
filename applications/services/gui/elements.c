@@ -746,10 +746,9 @@ void elements_text_box(
             }
             line[line_num].y = total_height_min;
             line_num++;
-            if(text[i + 1]) {
+            if(!full_text_processed) {
                 line[line_num].text = &text[i + 1];
             }
-
             line_leading_min = font_params->leading_min;
             line_height = font_params->height;
             line_descender = font_params->descender;
