@@ -1,4 +1,5 @@
 #include "canvas_i.h"
+#include "gui/icon.h"
 #include "icon_animation_i.h"
 
 #include <furi.h>
@@ -248,7 +249,8 @@ void canvas_draw_bitmap(
     x += canvas->offset_x;
     y += canvas->offset_y;
     uint8_t* bitmap_data = NULL;
-    compress_icon_decode(canvas->compress_icon, compressed_bitmap_data, &bitmap_data);
+    compress_icon_decode(
+        canvas->compress_icon, compressed_bitmap_data, &bitmap_data, (width + 7) / 8 * height);
     canvas_draw_u8g2_bitmap(&canvas->fb, x, y, width, height, bitmap_data, IconRotation0);
 }
 
@@ -264,7 +266,10 @@ void canvas_draw_icon_animation(
     y += canvas->offset_y;
     uint8_t* icon_data = NULL;
     compress_icon_decode(
-        canvas->compress_icon, icon_animation_get_data(icon_animation), &icon_data);
+        canvas->compress_icon,
+        icon_animation_get_data(icon_animation),
+        &icon_data,
+        icon_animation_get_decode_size(icon_animation));
     canvas_draw_u8g2_bitmap(
         &canvas->fb,
         x,
@@ -390,7 +395,11 @@ void canvas_draw_icon_ex(
     x += canvas->offset_x;
     y += canvas->offset_y;
     uint8_t* icon_data = NULL;
-    compress_icon_decode(canvas->compress_icon, icon_get_data(icon), &icon_data);
+    compress_icon_decode(
+        canvas->compress_icon,
+        icon_get_frame_data(icon, 0),
+        &icon_data,
+        icon_get_decode_size(icon));
     canvas_draw_u8g2_bitmap(
         &canvas->fb, x, y, icon_get_width(icon), icon_get_height(icon), icon_data, rotation);
 }
@@ -402,7 +411,11 @@ void canvas_draw_icon(Canvas* canvas, int32_t x, int32_t y, const Icon* icon) {
     x += canvas->offset_x;
     y += canvas->offset_y;
     uint8_t* icon_data = NULL;
-    compress_icon_decode(canvas->compress_icon, icon_get_data(icon), &icon_data);
+    compress_icon_decode(
+        canvas->compress_icon,
+        icon_get_frame_data(icon, 0),
+        &icon_data,
+        icon_get_decode_size(icon));
     canvas_draw_u8g2_bitmap(
         &canvas->fb, x, y, icon_get_width(icon), icon_get_height(icon), icon_data, IconRotation0);
 }

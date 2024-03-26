@@ -35,8 +35,13 @@ void compress_icon_free(CompressIcon* instance);
  * @param      instance      The Compress Icon instance
  * @param      icon_data     pointer to icon data
  * @param[in]  decoded_buff  pointer to decoded buffer pointer
+ * @param[in]  size_hint     size hint for decoded buffer. If 0, internal buffer is used
  */
-void compress_icon_decode(CompressIcon* instance, const uint8_t* icon_data, uint8_t** decoded_buff);
+void compress_icon_decode(
+    CompressIcon* instance,
+    const uint8_t* icon_data,
+    uint8_t** decoded_buff,
+    size_t size_hint);
 
 /** Compress control structure */
 typedef struct Compress Compress;
