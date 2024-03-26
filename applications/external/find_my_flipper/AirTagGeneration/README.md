@@ -12,142 +12,101 @@ This was made possible thanks to Chapoly1305 and his work bringing airtag tracki
 5. https://github.com/mrmay-dev/owntags
 
 Please give Chapoly1305 a star for his work, thanks!
-He wrote these instructions and provided an in-depth tutorial on how to use it. I just adapted this for the FLipperZero
 
-## Schematic and Usage
+## Prerequisites
 
-### generate_keys.py
-Use the `generate_keys.py` script to generate the required keys. The script will generate a `.keys`
-or multiple files for each device you want to use. Each `.keys` file will contain the private key, the public key
-(also called advertisement key) and the hashed advertisement key. As the name suggests, the private key is a secret
-and should not be shared. The public key (advertisement key) is used for broadcasting the BLE message, the hashed advertisement key is for requesting location reports from Apple. The name of the `.keys` file is the MAC address for that generated tag.
+Before you begin, ensure you have the following installed on your system:
 
-### RequestReport&Map.py
-Use the `RequestReport&Map.py` script to request location reports from Apple. The script will read the `.keys` files and
-request location reports for each device. The script will also attempt to log in and provided Apple account and save
-the session cookies in `auth.json` file. After grabbing the report it then decrypts the location information using the private key in your `.keys` file. It will then automatically launch the `advanced_map_loc.py` which create a detailed map of all location points with timestamps, history trail, detailed movement data, and a breakdown of the data. This is saved to an html file which is automatically opened in a web browser. 
+- Docker Desktop
+- Python (likely already installed)
+- Git
 
-### request_reports.py
-Use the `request_reports.py` script to request location reports from Apple. The script will read the `.keys` files and
-request location reports for each device. The script will also attempt to log in and provided Apple account and save
-the session cookies in `auth.json` file. The reports are stored in the `reports` database.
+## Step-by-Step Instructions
 
-### web_service.py
-Use the `web_service.py` script to start a web service that will serve the location reports via its API.
+### 1. Clone the Repository
 
-### anisette-v3-server
+Navigate to Matthew KuKanich's GitHub repository, copy the repository URL, and clone it to your desired location using the terminal.
+```
+git clone https://github.com/MatthewKuKanich/FindMyFlipper.git
+```
+### 2. Set Up the AirTag Generation Folder
 
-Q: What does this external project do? The SMS code is only asked once, in where and how is the information stored?
+Inside the cloned repository, locate the 'air tag generation' folder which contains all necessary files for creating AirTags.
 
-A: Anisette is similar to a device fingerprint. It is intended to be stored on an Apple device once it becomes trusted. 
-Subsequent requests made by this "device" using this fingerprint and same Apple account will not trigger the 2FA again. 
-The first call (icloud_login_mobileme) is used to obtain the search party token. The subsequent calls 
-(generate_anisette_headers) use the cached search party token from the first call as the password and the dsid as the 
-username. I (@biemster) have observed that the search party tokens change when using different sources for anisette data,
-possibly due to various reasons. If it's deployed as a docker container, the storage location is $HOME/.config/anisette-v3/
-adi.pb and device.json. These numbers together generate a validation code like OTP, which then undergoes a process of 
-Mixed Boolean Arithmetic to produce two anisette headers for the request. One header represents a relatively static 
-machine serial, while the other header contains a frequently changing OTP. 
-If you switch to https://github.com/Dadoum/pyprovision, you will obtain the ADI data in the anisette folder. 
-(Answer revised and organized from https://github.com/biemster/FindMy/issues/37#issuecomment-1840277808)
+### 3. Start Docker Desktop
 
-## Installation and initial setup
-This project only need a free Apple ID with SMS 2FA properly setup. If you don't have any, follow one of the many 
-guides found on the internet. 
+Ensure Docker Desktop is running on your computer, as it is required for the server setup.
 
-**Using your personal Apple ID is strongly discouraged, I recommended to create a blank 
-Apple ID for experimental purpose.**  If you ran into issue of "KeyError service-data", especially you are using an existing account rather than a new account, you may want to refer to https://github.com/Chapoly1305/FindMy/issues/9 .
+### 4. Set Up a Server Using Docker
 
-
-📺 Installation and Walkthrough Video: https://youtu.be/yC2HIPDSxlM
-This walkthrough is in-depth but differs slightly from the FindMy Flipper version.
-Regardless this video is well made and deserves a watch!
-
-### Steps
-
-1. Install docker and Python3-pip. [How to Install Docker on Ubuntu](https://docs.docker.com/engine/install/ubuntu/). Python3-venv is also strongly recommended.
-
-2. The anisetter service shall run on the same device of this project. For Linux system, deploy with docker is recommended.
-If the system rebooted, this docker service will automatically start after reboot.
-
-```bash
+Run the following Docker command to set up the server. This server emulates an environment that tricks Apple's authentication servers.
+```
 docker run -d --restart always --name anisette-v3 -p 6969:6969 dadoum/anisette-v3-server:latest
 ```
-If docker method didn't work, see the end of this section for manual setup.
+### 5. Create a Python Virtual Environment
 
-3. After deployed `anisette-v3-server`, you may validate the service is running by sending a `curl` request:
-
-```bash
-curl -I http://localhost:6969
+Navigate to the AirTag generation directory, then create and activate a Python virtual environment.
 ```
-4. Clone this repository, Navigate to `FindMy` directory, and install the required python packages:
+cd AirTagGeneration
+```
+```
+python3 -m venv venv
+```
+(or `python -m venv venv`)
 
-```bash
-git clone https://github.com/Chapoly1305/FindMy.git
-cd FindMy
+Activate the environment:
+ - Windows:
+```
+.\venv\Scripts\activate.bat
+```
+ - Mac/Linux:
+```
+source venv/bin/activate
+```
+### 6. Install the Required Python Packages
+```
 pip3 install -r requirements.txt
 ```
+### 7. Generate Keys for AirTags
+
+Run the ```generate_keys.py``` script to generate the keys needed for AirTags, which will be saved in a new folder called 'keys'.
 
 
-<br>
+### 8. Transfer the Generated Keys to Flipper Zero
 
-The [anisette-v3 docker image](https://hub.docker.com/r/dadoum/anisette-v3-server/tags) shall be available 
-for x86, x86-64, arm, and arm64. In case of the docker container is not available, you may start it by setup 
-anisette-v3-server manually.
-Follow the installation instructions for [anisette-v3-server](https://github.com/Dadoum/anisette-v3-server
-) project. 
+Move the '.Keys' file to your Flipper device by connecting it to your computer and using the Flipper's file management system.
+   - For ease of use, drag your `.keys` file onto your FlipperZero's SD card in the apps_data->findmy folder. You can import it directly from the app!
+     1. Open the app and navigate to the config menu.
+     2. Choose "register tag" and select the tag type.
+     3. Either click import `.keys`, `.txt`, or enter Manually.
+     4. If entering manually then a MAC and payload dialog will appear next. Enter your **MAC** then **Payload** here.
+     5. Click save.
 
+### 9. Request Location Reports
 
-## Run 
-You may run this project as a local service, a web service, or both. 
+Use the ```request_reports.py``` script to request real-time location data, requiring your Apple ID and password for authentication. This will save your Apple login information to a auth file so you won't need to re-enter your Apple credentials. 
 
-### Key generation
-```bash
-./generate_keys.py # Without any arguments, it will generate a single key file and save under current directory.
-```
+### 10. Generate an Advanced Location Map
 
-Deploy your advertisement keys on devices supported by OpenHaystack. The ESP32 firmware is a mirror of the 
-OpenHaystack binary, the Lenze 17H66 is found in many 1$ tags obtained from Ali. 
-An nRF51 firmware can be found here: https://github.com/dakhnod/FakeTag
+Finally, run the ```RequestReport&Map.py``` script to generate an interactive map of all location data in the past 24 hours. This script automates the process by requesting the location report using the hashed adv key in your ```keys``` folder, then decrypting that data from your private key located in the same `.keys` file. After the data is decrypted it will be displayed in the terminal. It then launches a mapping script that maps all the coordinates, connects them to show movement, displays a plethora of location metadata, and saves to an html file named by the date of the report.
 
-### as a local service and write to database
+You're done!
 
-The anisetter docker service shall run on the same device of this project. 
-If the anisetter has started, then run:
+ - If you want to use OpenHaystack or Macless instead, then you can follow the steps below. I don't recommend these methods due to reliability issues and setup complexity.
+To use OpenHayStack for tracking, you must use MacOS lower than version 14 (Mail Plug-in Incompetiablity of MacOS 14+ seemoo-lab/openhaystack#224). If you do own a device, I believe a convertor script can be provided without much of effort. If you do not own a Mac device or the system has been upgraded to 14 and beyond. The alternative solutions includes,
 
-```bash
-./request_reports.py # Without any arguments, it will read all the .keys files under current directory.
-```
+    https://github.com/dchristl/macless-haystack
+    
+If using this solution, be sure to only use the `generate_keys.py` script from this repo in the AirTagGeneration folder. Not the ones included in that repo as the formatting of the key file changes. (Mine includes data that the FlipperZero needs for proper importing)
 
-### as a web service
-**You are advised to configure adequate firewall rules to protect the web service.**
+### On The Flipper: Configuration on the FlipperZero (if not completed yet)
+- Upon launching the app, open the config menu and either click ```Import Tag From File``` or ```Register Tag Manually```. Put your generated .keys file onto the FlipperZero SD card inside the AppsData/FindMyFlipper folder to import from file. Or you can manually enter the tag information. When using the cloning method, you can export a .txt file from nrfConnect (click save button) amd place that in the same folder in order to import.
 
-To run as a web service, firstly install uvicorn by 
-```
-pip3 install uvicorn
-```
+Customization
 
-then run 
-```bash
-uvicorn web_service:app --reload
-```
+- Beacon Interval: Adjust how frequently your FlipperZero broadcasts its presence.
+- Transmit Power: Increase or decrease the signal strength to balance between tracking range and battery life.
 
-or 
-```bash
-./web_service.py
-```
-The difference between the two commands is that the first one will reload the web service when the source code is changed. 
-Each time the web_service.py is modified and saved, the web service will auto reload. Quite useful for development.
+Background Use
 
-This web service will die if the shell exited or system reboot. You could use `nohup`, `screen`, or set up a systemd service to keep it alive.
-```bash
-nohup uvicorn web_service:app --reload &
-```
----
-
-<br>
-
-## API Usage
-The APIs are created with FastAPI, the documentations are written inline and can be accessed on website 
-path http://127.0.0.1:8000/docs or http://127.0.0.1:8000/redoc. 
-The project is currently under development, which may lead to frequent changes of the APIs. Please use with cautious.
+The app is designed to have a negligible impact on battery life, even when running in the background. This allows for continuous tracking without the need for frequent recharging.
