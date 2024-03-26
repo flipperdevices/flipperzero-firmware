@@ -14,6 +14,7 @@ typedef enum {
     LFRFIDProtocolH10301,
     LFRFIDProtocolIdteck,
     LFRFIDProtocolIndala26,
+    LFRFIDProtocolIndala224,
     LFRFIDProtocolIOProxXSF,
     LFRFIDProtocolAwid,
     LFRFIDProtocolFDXA,
