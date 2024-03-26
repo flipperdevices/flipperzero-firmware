@@ -43,10 +43,18 @@
 #define EXCEPTION buf[2] - 1
 #define CRCH buf[len - 2]
 #define CRCL buf[len - 1]
+#define STARTADDRESS buf[2] << 8 | buf[3]
+
 //////////////////////////   Defining Structs  //////////////////////////
-typedef enum { Main_Scene, Settings_Scene, ConsoleOutput_Scene, Scene_Num } Scenes;
+typedef enum { Main_Scene, Settings_Scene, ConsoleOutput_Scene, Sender_Scene, Scene_Num } Scenes;
 typedef enum { Submenu_View, VarList_View, TextBox_View } Views;
-typedef enum { Settings_Option, Sniffer_Option, Send_MSG_Option, Read_LOG_Option } Main_options;
+typedef enum {
+    Settings_Option,
+    Sniffer_Option,
+    Sender_Option,
+    Read_LOG_Option,
+    About_Option
+} Main_options;
 
 typedef struct {
     uint8_t baudrate;
@@ -90,6 +98,9 @@ typedef struct {
     FuriTimer* timer;
     TextBox* textBox;
     FuriString* text;
+
+    uint8_t msgBuf[TX_BUF_SIZE + 1];
+    size_t msgLen;
 } App;
 
 typedef enum {
@@ -103,6 +114,8 @@ typedef enum {
 } Settings_Options;
 
 typedef enum { Refresh = 0 } UartEvents;
+
+void BuildSender(App* app, uint8_t* buf);
 
 ///////////////////////////////   Storage   ///////////////////////////////////////
 
@@ -417,8 +430,14 @@ void ModbusParser(uint8_t* buf, size_t len, App* app, FuriString* data) {
             data,
             "\nCheck Reponse TimeOut!!!\nCurrent: %dms",
             app->uart->cfg->timeout * TIMEOUT_SCALER);
-    } else
+    } else {
+        if(!app->modbus->slave) {
+            furi_stream_buffer_free(app->msgBuf);
+            for(size_t i = 0; i < len; i++) app->msgBuf[i] = buf[i];
+            app->msgLen = len;
+        }
         pduParser(app, app->modbus->slave, buf, len, data);
+    }
 }
 void handle_rx_data_cb(uint8_t* buf, size_t len, void* context) {
     furi_assert(context);
@@ -427,7 +446,8 @@ void handle_rx_data_cb(uint8_t* buf, size_t len, void* context) {
     FuriString* data = furi_string_alloc();
     furi_string_reset(data);
     // /*
-    furi_string_cat_printf(data, "\n-----%s----", app->modbus->slave ? "PERIPHERAL-" : "---HUB----");
+    furi_string_cat_printf(
+        data, "\n-----%s----", app->modbus->slave ? "PERIPHERAL-" : "---HUB----");
     if((CRCH | CRCL << 8) == getCRC(buf, len - 2)) {
         ModbusParser(buf, len, app, data);
     } else {
@@ -495,16 +515,21 @@ void timerDone(void* context) {
     App* app = context;
     app->modbus->slave = false;
 }
-void ModbusSender(uint8_t* buf, App* app) {
+void ModbusSender(void* context) {
+    App* app = context;
     serial_init(app->uart, UART_CH);
-    // 02 | 0F | 00 00 | 00 04 | 01 | 03 | 3E 82
+    // 02 | 0F | 00 00 | 00 04 | 01 | 0C | 7E 86
     Uart* uart = app->uart;
-    uint8_t msg[] = {0x02, 0x0F, 0x00, 0x00, 0x00, 0x04, 0x01, 0x03, 0x3E, 0X82};
-    size_t len = sizeof(msg);
-    for(int i = 0; i < 10; i++) buf[i] = msg[i];
+    uint16_t crc = getCRC(app->msgBuf, app->msgLen - 2);
+    //for(uint8_t i = 0; i < app->msgLen; i++) FURI_LOG_D("ORIGINAL", "0x%02X", app->msgBuf[i]);
+    UNUSED(crc);
+    //86 7E
+    app->msgBuf[app->msgLen - 2] = crc & 0x00FF;
+    app->msgBuf[app->msgLen - 1] = (crc & 0xFF00) >> 8;
+    //for(uint8_t i = 0; i < app->msgLen; i++) FURI_LOG_D("FALSO", "0x%02X", app->msgBuf[i]);
     furi_hal_gpio_write(&gpio_ext_pc0, true);
     furi_hal_gpio_write(&gpio_ext_pc1, true);
-    furi_hal_serial_tx(uart->serial_handle, buf, len);
+    furi_hal_serial_tx(uart->serial_handle, app->msgBuf, app->msgLen);
     furi_hal_serial_tx_wait_complete(uart->serial_handle);
     furi_hal_gpio_write(&gpio_ext_pc0, false);
     furi_hal_gpio_write(&gpio_ext_pc1, false);
@@ -539,19 +564,29 @@ static int32_t uart_worker(void* context) {
 //////////////////////////   Main Scene  //////////////////////////
 void mainOptionsCB(void* context, uint32_t index) {
     App* app = context;
+
     switch(index) {
     case Settings_Option:
+        scene_manager_set_scene_state(app->sceneManager, Main_Scene, Settings_Option);
         scene_manager_next_scene(app->sceneManager, Settings_Scene);
         break;
     case Sniffer_Option:
+        scene_manager_set_scene_state(app->sceneManager, Main_Scene, Sniffer_Option);
         scene_manager_set_scene_state(app->sceneManager, ConsoleOutput_Scene, Sniffer_Option);
         scene_manager_next_scene(app->sceneManager, ConsoleOutput_Scene);
         break;
-    case Send_MSG_Option:
-        ModbusSender(app->uart->txBuff, app);
+    case Sender_Option:
+        scene_manager_set_scene_state(app->sceneManager, Main_Scene, Sender_Option);
+        scene_manager_next_scene(app->sceneManager, Sender_Scene);
         break;
     case Read_LOG_Option:
+        scene_manager_set_scene_state(app->sceneManager, Main_Scene, Read_LOG_Option);
         scene_manager_set_scene_state(app->sceneManager, ConsoleOutput_Scene, Read_LOG_Option);
+        scene_manager_next_scene(app->sceneManager, ConsoleOutput_Scene);
+        break;
+    case About_Option:
+        scene_manager_set_scene_state(app->sceneManager, Main_Scene, About_Option);
+        scene_manager_set_scene_state(app->sceneManager, ConsoleOutput_Scene, About_Option);
         scene_manager_next_scene(app->sceneManager, ConsoleOutput_Scene);
         break;
     default:
@@ -564,8 +599,11 @@ void Main_Scene_OnEnter(void* context) {
     submenu_set_header(app->subMenu, "Main");
     submenu_add_item(app->subMenu, "Settings", Settings_Option, mainOptionsCB, app);
     submenu_add_item(app->subMenu, "Sniffer", Sniffer_Option, mainOptionsCB, app);
-    submenu_add_item(app->subMenu, "Send MSG", Send_MSG_Option, mainOptionsCB, app);
+    submenu_add_item(app->subMenu, "Sender", Sender_Option, mainOptionsCB, app);
     submenu_add_item(app->subMenu, "Read LOG", Read_LOG_Option, mainOptionsCB, app);
+    submenu_add_item(app->subMenu, "About", About_Option, mainOptionsCB, app);
+    submenu_set_selected_item(
+        app->subMenu, scene_manager_get_scene_state(app->sceneManager, Main_Scene));
     view_dispatcher_switch_to_view(app->viewDispatcher, Submenu_View);
 }
 bool Main_Scene_OnEvent(void* context, SceneManagerEvent event) {
@@ -695,6 +733,15 @@ void Sniffer_Scene_OnEnter(void* context) {
     } else if(
         scene_manager_get_scene_state(app->sceneManager, ConsoleOutput_Scene) == Read_LOG_Option) {
         OpenLogFile(app);
+    } else if(scene_manager_get_scene_state(app->sceneManager, ConsoleOutput_Scene) == About_Option) {
+        text_box_set_font(app->textBox, TextBoxFontText);
+        text_box_set_focus(app->textBox, TextBoxFocusStart);
+        furi_string_cat_printf(app->text, "MODBUS APP\n");
+        furi_string_cat_printf(app->text, "BY: ROBERTO ARELLANO\n");
+        furi_string_cat_printf(app->text, "ELECTRONIC CATS\n");
+        furi_string_cat_printf(
+            app->text,
+            "https://github.com/ElectronicCats/flipper-rs485modbus/tree/main/ModbusApp/Test1");
     }
     view_dispatcher_switch_to_view(app->viewDispatcher, TextBox_View);
     text_box_set_text(app->textBox, furi_string_get_cstr(app->text));
@@ -718,15 +765,171 @@ void Sniffer_Scene_OnExit(void* context) {
     furi_string_reset(app->text);
     serial_deinit(app->uart);
 }
+//////////////////////////   Sender Scene  //////////////////////////
+const char* fns[] = {"0x01", "0x02", "0x03", "0x04", "0x05", "0x06", "0x0F", "0x10"};
+
+void itemChangeCB(VariableItem* item) {
+    App* app = variable_item_get_context(item);
+    uint8_t* buf = app->msgBuf;
+    uint8_t index = variable_item_get_current_value_index(item);
+    uint8_t selectedIndex = variable_item_list_get_selected_item_index(app->varList);
+    uint16_t Value;
+    char str[10];
+    //FURI_LOG_D("Idx: ","%d",index);
+    switch(selectedIndex) {
+    case 0:
+        snprintf(str, sizeof(str), "%d", index + 1);
+        variable_item_set_current_value_text(item, strdup(str));
+        buf[0] = index + 1;
+        break;
+    case 1:
+        variable_item_set_current_value_text(item, fns[index]);
+        FUNCTION = index <= 0x05 ? index + 1 : index + 9;
+        BuildSender(app, buf);
+        break;
+    case 2:
+        snprintf(str, sizeof(str), "%d", index);
+        variable_item_set_current_value_text(item, strdup(str));
+        buf[2] = index >> 8 & 0x00FF;
+        buf[3] = index & 0x00FF;
+        break;
+    case 3:
+        if(FUNCTION != 0x05 && FUNCTION != 0x06) {
+            index++;
+            snprintf(str, sizeof(str), "%d", index);
+            variable_item_set_current_value_text(item, strdup(str));
+            buf[4] = index >> 8 & 0x00FF;
+            buf[5] = index & 0x00FF;
+            if(FUNCTION >= 0x0F) {
+                Value = (buf[4] << 8 | buf[5]);
+                if(FUNCTION == 0x0F)
+                    Value = Value % 8 ? Value / 8 + 1 : Value / 8;
+                else
+                    Value = Value * 2;
+                item = variable_item_list_get(app->varList, 4);
+                snprintf(str, sizeof(str), "%d", Value);
+                variable_item_set_current_value_text(item, strdup(str));
+                if(buf[6] != Value) {
+                    buf[6] = Value;
+                    BuildSender(app, buf);
+                }
+            }
+        } else {
+            Value = FUNCTION == 5 ? index ? 0xFF00 : 0x0000 : index;
+            snprintf(str, sizeof(str), "0x%04X", Value);
+            variable_item_set_current_value_text(
+                item, FUNCTION == 0x05 ? index ? "ON" : "OFF" : str);
+            buf[4] = Value >> 8 & 0x00FF;
+            buf[5] = Value & 0x00FF;
+        }
+        break;
+    default:
+        Value = index;
+        FURI_LOG_W("SIDX: ","%d",selectedIndex);
+        selectedIndex = selectedIndex+2; 
+        snprintf(str, sizeof(str), FUNCTION == 0x10?"0x%04X":"0x%02X", Value);
+        variable_item_set_current_value_text(item, str);
+        FURI_LOG_W("SIDX: ","%d",selectedIndex);
+        buf[selectedIndex] = Value;
+        if(FUNCTION == 0x10)buf[selectedIndex+1] = Value & 0x00FF;
+        break;
+    }
+}
+void itemEnterCB(void* context, uint32_t index) {
+    App* app = context;
+    UNUSED(index);
+    uint8_t* buf = app->msgBuf;
+    UNUSED(buf);
+    ModbusSender(app);
+}
+void BuildValues(App* app, uint16_t byteCount, uint8_t* buf, bool one) {
+    VariableItem* item;
+    char lbl[20];
+    char val[10];
+    for(uint16_t i = 0; i < byteCount; i += one ? 1 : 2) {
+        snprintf(lbl, sizeof(lbl), one ? "Byte %d" : "Value %d", one ? i + 1 : i / 2 + 1);
+        snprintf(
+            val, sizeof(val), one ? "0x%02X" : "0x%04X", one ? buf[i] : buf[i] << 8 | buf[i + 1]);
+        item = variable_item_list_add(app->varList, strdup(lbl), 255, itemChangeCB, app);
+        variable_item_set_current_value_text(item, strdup(val));
+        variable_item_set_current_value_index(item, MIN(255,one ? buf[i] : buf[i] << 8 | buf[i + 1]));
+    }
+}
+void BuildSender(App* app, uint8_t* buf) {
+    variable_item_list_reset(app->varList);
+    VariableItem* item;
+    uint16_t Value;
+    char val[10];
+    snprintf(val, sizeof(val), "%d", SLAVE);
+    item = variable_item_list_add(app->varList, "Slave ID", 32, itemChangeCB, app);
+    variable_item_set_current_value_text(item, strdup(val));
+    variable_item_set_current_value_index(item, SLAVE - 1);
+    item = variable_item_list_add(app->varList, "Function", 8, itemChangeCB, app);
+    variable_item_set_current_value_text(item, fns[FUNCTION <= 6 ? FUNCTION - 1 : FUNCTION - 9]);
+    variable_item_set_current_value_index(item, FUNCTION <= 6 ? FUNCTION - 1 : FUNCTION - 9);
+    Value = STARTADDRESS;
+    snprintf(val, sizeof(val), "%d", MIN(Value, 255));
+    item = variable_item_list_add(app->varList, "Start Address", 255, itemChangeCB, app);
+    variable_item_set_current_value_text(item, strdup(val));
+    variable_item_set_current_value_index(item, STARTADDRESS);
+    if(FUNCTION != 0x05 && FUNCTION != 0x06) {
+        Value = buf[4] << 8 | buf[5];
+        snprintf(val, sizeof(val), "%d", Value);
+        item = variable_item_list_add(app->varList, "Quantity", 255, itemChangeCB, app);
+        variable_item_set_current_value_text(item, strdup(val));
+        variable_item_set_current_value_index(item, MIN(Value - 1, 255));
+    } else {
+        Value = buf[4] << 8 | buf[5];
+        snprintf(val, sizeof(val), "0x%04X", Value);
+        item = variable_item_list_add(
+            app->varList, "Value", FUNCTION == 0x05 ? 2 : 255, itemChangeCB, app);
+        variable_item_set_current_value_text(
+            item, FUNCTION == 0x05 ? Value ? "ON" : "OFF" : strdup(val));
+        variable_item_set_current_value_index(
+            item, FUNCTION == 0x05 ? Value ? 1 : 0 : MIN(Value, 255));
+    }
+    if(FUNCTION >= 0x0F) {
+        Value = (buf[4] << 8 | buf[5]);
+        if(FUNCTION == 0x0F)
+            Value = Value % 8 ? Value / 8 + 1 : Value / 8;
+        else
+            Value = Value * 2;
+        snprintf(val, sizeof(val), "%d", Value);
+        item = variable_item_list_add(app->varList, "ByteCount", 1, NULL, app);
+        variable_item_set_current_value_text(item, strdup(val));
+        variable_item_set_current_value_index(item, 0);
+        buf[6] = Value;
+        BuildValues(app, Value, buf + 7, FUNCTION == 0x0F ? true : false);
+    }
+
+    item = variable_item_list_add(app->varList, "Send Packet", 1, NULL, app);
+    variable_item_list_set_enter_callback(app->varList, itemEnterCB, app);
+    variable_item_set_current_value_text(item, "");
+    variable_item_set_current_value_index(item, 0);
+}
+void Sender_Scene_OnEnter(void* context) {
+    App* app = context;
+    BuildSender(app, app->msgBuf);
+    variable_item_list_set_selected_item(app->varList, 0);
+    view_dispatcher_switch_to_view(app->viewDispatcher, VarList_View);
+}
+bool Sender_Scene_OnEvent(void* context, SceneManagerEvent event) {
+    UNUSED(context);
+    UNUSED(event);
+    return false;
+}
+void Sender_Scene_OnExit(void* context) {
+    App* app = context;
+    variable_item_list_reset(app->varList);
+}
 
 //////////////////////////   Scene Handlers  //////////////////////////
 void (*const OnEnterHandlers[])(
-    void*) = {Main_Scene_OnEnter, CFG_Scene_OnEnter, Sniffer_Scene_OnEnter};
-bool (*const OnEventHandlers[])(void*, SceneManagerEvent) = {
-    Main_Scene_OnEvent,
-    CFG_Scene_OnEvent,
-    Sniffer_Scene_OnEvent};
-void (*const OnExitHandlers[])(void*) = {Main_Scene_OnExit, CFG_Scene_OnExit, Sniffer_Scene_OnExit};
+    void*) = {Main_Scene_OnEnter, CFG_Scene_OnEnter, Sniffer_Scene_OnEnter, Sender_Scene_OnEnter};
+bool (*const OnEventHandlers[])(void*, SceneManagerEvent) =
+    {Main_Scene_OnEvent, CFG_Scene_OnEvent, Sniffer_Scene_OnEvent, Sender_Scene_OnEvent};
+void (*const OnExitHandlers[])(
+    void*) = {Main_Scene_OnExit, CFG_Scene_OnExit, Sniffer_Scene_OnExit, Sender_Scene_OnExit};
 static const SceneManagerHandlers SceneHandlers = {
     .on_enter_handlers = OnEnterHandlers,
     .on_event_handlers = OnEventHandlers,
@@ -858,6 +1061,8 @@ int32_t test_app(void* p) {
     UNUSED(p);
     furi_hal_gpio_init_simple(&gpio_ext_pc0, GpioModeOutputPushPull);
     furi_hal_gpio_init_simple(&gpio_ext_pc1, GpioModeOutputPushPull);
+    furi_hal_gpio_write(&gpio_ext_pc0, 0);
+    furi_hal_gpio_write(&gpio_ext_pc1, 0);
     App* app = modbus_app_alloc();
     Gui* gui = furi_record_open(RECORD_GUI);
     view_dispatcher_attach_to_gui(app->viewDispatcher, gui, ViewDispatcherTypeFullscreen);
