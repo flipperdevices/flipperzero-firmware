@@ -97,6 +97,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Added: [FMF2USBMIDI v0.1 (By crackerjacques)](https://github.com/crackerjacques/Flipper_Zero_FMF2USBMIDI)
 - Added: [MIDI Ocarina v0.1 (By crackerjacques)](https://github.com/crackerjacques/Flipper_Zero_MIDI_Ocarina)
 - Updated: [JS Script: BadUSB_Win_Exfil-GSHD.js (By Gas Station Hot Dog)](https://github.com/User84User/User84PublicUser/blob/main/Windows_Exfil-GSHD.js)
+- OFW: [Show the wrong PIN Attempt count on the login screen #3495 (By FireFly7386)](https://github.com/flipperdevices/flipperzero-firmware/pull/3495)
 
 <a name="release">
 
