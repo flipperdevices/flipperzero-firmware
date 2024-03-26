@@ -1,0 +1,13 @@
+App(
+    appid="fmf2usb_midi",  # Must be unique
+    name="FMF2USBMIDI",  # Displayed in menus
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="fmf2usb_midi_app",
+    stack_size=8 * 1024,
+    fap_category="Media",
+    # Optional values
+    # fap_version="0.1",
+    fap_icon="fmf2usb_midi.png",
+    # fap_author="@there_is_q",
+    # fap_weburl="https://github.com/crackerjacques/Flipper_Zero_FMF2USBMIDI.git,
+)
