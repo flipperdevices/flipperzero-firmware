@@ -71,7 +71,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - Added: [Flippy Road v1.0 (By rkilpadi)](https://github.com/rkilpadi/flippy-road)
 - Added: [Flipper Hero v1.1 (By mentoster)](https://github.com/mentoster/Flipper-hero)
 - Updated: [Marauder flash assets updated to 0.13.9 (By justcallmekoko)](https://github.com/justcallmekoko/ESP32Marauder/releases/tag/v0.13.9)
-- Updated: [NFC Magic v1.6 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966) [Removed Gen2 changes till they are ready (By xMasterX)](https://github.com/xMasterX/all-the-plugins/commit/2a3013841837aaed4d2482c42da53755f1a7489f) & [Write NTAG password and PACK to gen4 special pages #190 (By Astrrra)](https://github.com/flipperdevices/flipperzero-good-faps/pull/190) & Small Tweaks (By xMasterX)
 - UL: [RFID: Fix RAW read crash (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/81a16e5a2804445cf2edf553b680c42bf5e33bb1)
 - Updated: [Quac! v0.4 (By rdefeo)](https://github.com/rdefeo/quac)
 - Added: [Spotify Remote v0.1 (By benjamindrussell)](https://github.com/benjamindrussell/flipper-spotify-remote) `Req: ESP32` with [ESP32 Spotify Remote](https://github.com/benjamindrussell/esp32-spotify-remote)
@@ -99,6 +98,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [JS Script: BadUSB_Win_Exfil-GSHD.js (By Gas Station Hot Dog)](https://github.com/User84User/User84PublicUser/blob/main/Windows_Exfil-GSHD.js)
 - OFW: [Show the wrong PIN Attempt count on the login screen #3495 (By FireFly7386)](https://github.com/flipperdevices/flipperzero-firmware/pull/3495)
 - OFW: [infrared_transmit.h was missing #pragma once #3541 (By superKoder)](https://github.com/flipperdevices/flipperzero-firmware/pull/3541)
+- Updated: [AVR Flasher v1.3 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/2475)
+- Updated: [NFC Magic v1.6 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966) [Removed Gen2 changes till they are ready (By xMasterX)](https://github.com/xMasterX/all-the-plugins/commit/2a3013841837aaed4d2482c42da53755f1a7489f) & [Write NTAG password and PACK to gen4 special pages #190 (By Astrrra)](https://github.com/flipperdevices/flipperzero-good-faps/pull/190) & Small Tweaks (By xMasterX)
 
 <a name="release">
 
@@ -388,7 +389,7 @@ $ ./fbt dolphin_ext
 - [Analog Clock v1.2 (By scrolltex)](https://github.com/scrolltex/flipper_analog_clock)
 - [Atomic Dice Roller v1.1 (By nmrr)](https://github.com/nmrr/flipperzero-atomicdiceroller)
 - [Authenticator/TOTP v5.13.0 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
-- [AVR Flasher v1.2 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/2475)
+- [AVR Flasher v1.3 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/2475)
 - [AZERTY Mouse Jacker (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/mousejacker) `Req: NRF24` (Uses AZERTY keyboard - Source Unknown)
 - [Bad KB (Modified PR#738 from pengu1ndev - Original from Willy-JL) #739 (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/739)
 - [Barcode App v1.2 (By Kingal1337)](https://github.com/Kingal1337/flipper-barcode-generator)
