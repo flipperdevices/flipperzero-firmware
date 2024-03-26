@@ -364,7 +364,7 @@ static bool validate_board(SudokuState* state) {
     // check vertical lines for duplicates
     state->vertivalFlags = 0;
     for(int i = 0; i != BOARD_SIZE; ++i) {
-        uint flags = 0;
+        uint16_t flags = 0;
         bool ok = true;
         for(int j = 0; j != BOARD_SIZE; ++j) {
             int value = state->board[i][j] & VALUE_MASK;
@@ -386,7 +386,7 @@ static bool validate_board(SudokuState* state) {
     state->horizontalFlags = 0;
     for(int i = 0; i != BOARD_SIZE; ++i) {
         bool ok = true;
-        uint flags = 0;
+        uint16_t flags = 0;
         for(int j = 0; j != BOARD_SIZE; ++j) {
             int value = state->board[j][i] & VALUE_MASK;
             if(value == 0) {
@@ -409,7 +409,7 @@ static bool validate_board(SudokuState* state) {
     // check 3x3 squares for duplicates
     for(int i = 0; i != BOARD_SIZE_3; ++i) {
         for(int j = 0; j != BOARD_SIZE_3; ++j) {
-            uint flags = 0;
+            uint16_t flags = 0;
             for(int k = 0; k != BOARD_SIZE_3; ++k) {
                 for(int l = 0; l != BOARD_SIZE_3; ++l) {
                     int value = state->board[i * BOARD_SIZE_3 + k][j * BOARD_SIZE_3 + l] &
@@ -429,7 +429,7 @@ static bool validate_board(SudokuState* state) {
 static bool board_cell_is_valid(SudokuState* state, int x, int y) {
     // check vertical lines for duplicates
     {
-        uint flags = 0;
+        uint16_t flags = 0;
         for(int j = 0; j != BOARD_SIZE; ++j) {
             int value = state->board[x][j];
             if(value == 0) {
@@ -443,7 +443,7 @@ static bool board_cell_is_valid(SudokuState* state, int x, int y) {
     }
     // check horizontal lines for duplicates
     {
-        uint flags = 0;
+        uint16_t flags = 0;
         for(int j = 0; j != BOARD_SIZE; ++j) {
             int value = state->board[j][y];
             if(value == 0) {
@@ -460,7 +460,7 @@ static bool board_cell_is_valid(SudokuState* state, int x, int y) {
         {
             int p = x - x % BOARD_SIZE_3;
             int q = y - y % BOARD_SIZE_3;
-            uint flags = 0;
+            uint16_t flags = 0;
             for(int k = 0; k != BOARD_SIZE_3; ++k) {
                 for(int l = 0; l != BOARD_SIZE_3; ++l) {
                     int value = state->board[p + k][q + l];
