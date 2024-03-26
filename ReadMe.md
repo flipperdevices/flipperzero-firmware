@@ -93,6 +93,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [JS CLI command #3539 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/3539)
 - OFW: [SavedStruct: Introduce saved_struct_get_metadata #3392 (By CookiePLMonster)](https://github.com/flipperdevices/flipperzero-firmware/pull/3392)
 - UL: [A few post merge fixes (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/01f3192957e4bf84ad27b38cac75f7de671113c7)
+- Temp Reverted: OFW: [Configurable Infrared TX output #3484 (By gsurkov)](https://github.com/flipperdevices/flipperzero-firmware/pull/3484)
 
 <a name="release">
 

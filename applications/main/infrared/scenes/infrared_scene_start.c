@@ -4,7 +4,7 @@ enum SubmenuIndex {
     SubmenuIndexUniversalRemotes,
     SubmenuIndexLearnNewRemote,
     SubmenuIndexSavedRemotes,
-    SubmenuIndexGpioSettings,
+    SubmenuIndexDebugSettings,
     SubmenuIndexLearnNewRemoteRaw,
     SubmenuIndexDebug
 };
@@ -40,7 +40,7 @@ void infrared_scene_start_on_enter(void* context) {
     submenu_add_item(
         submenu,
         "GPIO Settings",
-        SubmenuIndexGpioSettings,
+        SubmenuIndexDebugSettings,
         infrared_scene_start_submenu_callback,
         infrared);
     submenu_add_item(
@@ -71,6 +71,7 @@ bool infrared_scene_start_on_event(void* context, SceneManagerEvent event) {
         scene_manager_set_scene_state(scene_manager, InfraredSceneStart, submenu_index);
         if(submenu_index == SubmenuIndexUniversalRemotes) {
             scene_manager_next_scene(scene_manager, InfraredSceneUniversal);
+            consumed = true;
         } else if(
             submenu_index == SubmenuIndexLearnNewRemote ||
             submenu_index == SubmenuIndexLearnNewRemoteRaw) {
@@ -81,16 +82,18 @@ bool infrared_scene_start_on_event(void* context, SceneManagerEvent event) {
 
             infrared->app_state.is_learning_new_remote = true;
             scene_manager_next_scene(scene_manager, InfraredSceneLearn);
+            consumed = true;
         } else if(submenu_index == SubmenuIndexSavedRemotes) {
             furi_string_set(infrared->file_path, INFRARED_APP_FOLDER);
             scene_manager_next_scene(scene_manager, InfraredSceneRemoteList);
-        } else if(submenu_index == SubmenuIndexGpioSettings) {
-            scene_manager_next_scene(scene_manager, InfraredSceneGpioSettings);
+            consumed = true;
         } else if(submenu_index == SubmenuIndexDebug) {
             scene_manager_next_scene(scene_manager, InfraredSceneDebug);
+            consumed = true;
+        } else if(submenu_index == SubmenuIndexDebugSettings) {
+            scene_manager_next_scene(scene_manager, InfraredSceneDebugSettings);
+            consumed = true;
         }
-
-        consumed = true;
     }
 
     return consumed;
