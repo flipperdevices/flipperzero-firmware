@@ -30,7 +30,7 @@ Be care, SWIO is driven as open-drain bus with pull-up with high clock freqency 
 Main SWIO magic. Mostly written in ARM Assembler, not realy nice code and definitely not portable to other platform without huge rework.
 
 See: [RISC-V QingKeV2 Microprocessor Debug Manual](https://github.com/openwch/ch32v003/blob/main/RISC-V%20QingKeV2%20Microprocessor%20Debug%20Manual.pdf) and
-[RISC-V Debug Specification](https://github.com/riscv/riscv-debug-spec/blob/master/riscv-debug-stable.pdf)
+[RISC-V Debug Specification](https://github.com/riscv/riscv-debug-spec?tab=readme-ov-file#risc-v-debug-specification)
 
     - src/helpers/swio.c
     - src/helpers/swio_pin_magic.c
