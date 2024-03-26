@@ -3,11 +3,9 @@ import pandas as pd
 import folium
 from folium.plugins import AntPath
 from datetime import datetime
-import webbrowser
 import os
 
 
-# just converting seconds to a more readable format lol
 def format_time(seconds):
     hours = seconds // 3600
     minutes = (seconds % 3600) // 60
@@ -17,12 +15,9 @@ def format_time(seconds):
 with open("data.json", "r") as file:
     data = json.load(file)
 
-# this is mostly unchanged from your code
 
 sorted_data = sorted(data, key=lambda x: x["timestamp"])
 
-# instead of making a list we can use a dataframe to make it easier to work with
-# pandas has a bit of a learning curve but it's worth it
 df = pd.DataFrame(sorted_data)
 
 df['datetime'] = pd.to_datetime(df['isodatetime'])
@@ -30,7 +25,6 @@ df['time_diff'] = df['datetime'].diff().dt.total_seconds()
 average_time_diff = df['time_diff'][1:].mean()
 time_diff_total = (df.iloc[-1]['datetime'] - df.iloc[0]['datetime']).total_seconds()
 
-# we use the function we created here
 formatted_total_time = format_time(time_diff_total)
 formatted_avg_time = format_time(average_time_diff)
 
@@ -43,7 +37,6 @@ if not df.empty:
     map_center = [df.iloc[0]['lat'], df.iloc[0]['lon']]
     m = folium.Map(location=map_center, zoom_start=13)
 
-    # Plotting path, idk how I feel about the animation so might change
     latlon_pairs = list(zip(df['lat'], df['lon']))
     ant_path = AntPath(locations=latlon_pairs, dash_array=[10, 20], delay=1000, color='red', weight=5, pulse_color='black')
     m.add_child(ant_path)
@@ -52,8 +45,6 @@ if not df.empty:
     for index, row in df.iterrows():
         folium.Marker([row['lat'], row['lon']], popup=f"Timestamp: {row['isodatetime']}", tooltip=f"Point {index+1}").add_to(m)
 
-    # this is just some basic html to make a persistant title as
-    # well as some useful(ish) info about the data points
     title_and_info_html = f'''
      <h3 align="center" style="font-size:20px; margin-top:10px;"><b>FindMy Flipper Location Mapper</b></h3>
      <div style="position: fixed; bottom: 50px; left: 50px; width: 300px; height: 150px; z-index:9999; font-size:14px; background-color: white; padding: 10px; border-radius: 10px; box-shadow: 0 0 5px rgba(0,0,0,0.5);">
@@ -66,10 +57,18 @@ if not df.empty:
      </div>
      '''
     m.get_root().html.add_child(folium.Element(title_and_info_html))
-    m.save(f'LocationMap_{simple_start_timestamp}.html')
-    print("map info generated! Open 'advanced_map.html' in a web browser to view.")
-    html_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), f'LocationMap_{simple_start_timestamp}.html')
-    webbrowser.open(f'file:///{html_file_path}', new=2)
+    
+    base_filename = f'LocationMap_{simple_start_timestamp}'
+    extension = 'html'
+    counter = 1
+    filename = f'{base_filename}.{extension}'
+    while os.path.exists(filename):
+        filename = f'{base_filename}_{counter}.{extension}'
+        counter += 1
+        
+    m.save(filename)
+    print(f"map info generated! Open '{filename}' in a web browser to view.")
+
 else:
     print("No data available to plot.")
     
