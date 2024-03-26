@@ -143,7 +143,15 @@ if __name__ == "__main__":
         for rep in ordered: print(rep)
         print(f'found:   {list(found)}')
         print(f'missing: {[key for key in names.values() if key not in found]}')
-
+        
+        res = json.loads(r.content.decode())['results']
+        if r.status_code == 200 and len(res) == 0:
+            print()
+            print("No reports have been uploaded yet. Bring your Flipper to a more populated area and try again.")
+            print("For best results, lower the interval to 1 second and increase power to 6 dBm.")
+            print("This is not an error! Just be patient or check to make sure the correct .key file is being used.")
+            print()
+                          
         sq3.close()
         sq3db.commit()
         sq3db.close()

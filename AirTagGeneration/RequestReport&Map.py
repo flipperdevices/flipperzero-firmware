@@ -86,6 +86,7 @@ if __name__ == "__main__":
                           json=data)
         res = json.loads(r.content.decode())['results']
         print(f'{r.status_code}: {len(res)} reports received.')
+        res = json.loads(r.content.decode())['results']
 
         ordered = []
         found = set()
@@ -130,24 +131,34 @@ if __name__ == "__main__":
         print(f'found:   {list(found)}')
         print(f'missing: {[key for key in names.values() if key not in found]}')
 
-        # Exporting the processed data to a JSON file
-        with open("data.json", "w") as json_file:
-            json.dump(ordered, json_file, indent=4)
-        
-        print("Data has been successfully exported to 'data.json'.")
+        res = json.loads(r.content.decode())['results']
+        if r.status_code == 200 and len(res) == 0:
+            print()
+            print("No reports have been uploaded yet. Bring your Flipper to a more populated area and try again.")
+            print("For best results, lower the interval to 1 second and increase power to 6 dBm.")
+            print("This is not an error! Just be patient or check to make sure the correct .key file is being used.")
+            print()
+        else:
+            print("Reports have been successfully retrieved.")
+            # Exporting the processed data to a JSON file
+            with open("data.json", "w") as json_file:
+                json.dump(ordered, json_file, indent=4)
+            
+            print("Data has been successfully exported to 'data.json'.")
 
+            result = subprocess.run(['python', script_name], capture_output=True, text=True)
+            if result.returncode == 0:
+                print("Script ran successfully!")
+                print("Output:", result.stdout)
+            else:
+                print("Script encountered an error.")
+                print("Error:", result.stderr)
+                
         sq3db.commit()
         sq3db.close()
-
+        
     except Exception as e:
         if str(e) == "AuthenticationError":
             print("Authentication failed. Please check your Apple ID credentials.")
         else:
             print(e)
-    result = subprocess.run(['python', script_name], capture_output=True, text=True)
-    if result.returncode == 0:
-        print("Script ran successfully!")
-        print("Output:", result.stdout)
-    else:
-        print("Script encountered an error.")
-        print("Error:", result.stderr)
