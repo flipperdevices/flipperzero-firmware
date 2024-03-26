@@ -5,6 +5,8 @@
 #include "../sound_engine/sound_engine_filter.h"
 #include "tracker_engine.h"
 
+#include "../flizzer_tracker_hal.h"
+
 void do_command(
     uint16_t opcode,
     TrackerEngine* tracker_engine,
@@ -422,6 +424,14 @@ void do_command(
             te_channel->program_loop = 0;
             te_channel->program_period = 0;
             te_channel->program_tick = 0;
+        }
+
+        break;
+    }
+
+    case TE_EFFECT_SET_RATE: {
+        if(tick == 0 && (opcode & 0xff) > 0) {
+            tracker_engine_set_rate(opcode & 0xff);
         }
 
         break;
