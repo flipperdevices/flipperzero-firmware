@@ -19,18 +19,18 @@ WCH SWIO debugger and flasher emulated on Flipper Zero tool - tool for flashing 
 
 In emulation mode, Flipper Zero act just as NCH Link042 programmer HW. All commands towards chip are driven from your computer via USB, even reset and debug session init.
 
-In programmer mode, Flipper Zero act as all-in-one device and initiate debug session with chip at his own. This allows some usable hacks with chip. Most important one is hard reset before any operation towards CH32Vxx chip. It is helpful when you using sleepmodes or low clock mode (in sleep mode or low clock freqcency is not possible to establish debug session so, you can't simply program chip).
+In programmer mode, Flipper Zero act as all-in-one device and initiate debug session with chip at his own. This allows some usable hacks with chip. Most important one is hard reset before any operation towards CH32Vxx chip. It is helpful when you using sleepmodes or low clock mode (in sleep mode or low clock frequency is not possible to establish debug session, so you can't simply program chip).
 
-Be care, SWIO is driven as open-drain bus with pull-up with high clock freqency (around 8MHz). It means, SWIO pin is sensitive to wire/pcb line capacity. In case of bad designs, Flipper Zero can not be available 'catch' all bits from chip and communication will fail. But it is not that bad, with 1k - 5k resistor as external pull-up it work well even with dupont wires. Just be aware about that.
+Be care, SWIO is driven as open-drain bus with pull-up with high clock freqency (around 8MHz). It means, SWIO pin is sensitive to wire/pcb line capacity. In case of bad designs, Flipper Zero can not be able to 'catch' all bits from chip and communication will fail. But it is not that bad, with 1k - 5k resistor as external pull-up it work well even with dupont wires. Just be aware about that.
 
 ### Components
 
 #### SWIO bit bang emulation
 
-Main SWIO magic. Mostly written in ARM Assembler, not relay nice code and definitely is not portable to other platform without huge rework.
+Main SWIO magic. Mostly written in ARM Assembler, not realy nice code and definitely not portable to other platform without huge rework.
 
 See: [RISC-V QingKeV2 Microprocessor Debug Manual](https://github.com/openwch/ch32v003/blob/main/RISC-V%20QingKeV2%20Microprocessor%20Debug%20Manual.pdf) and
-[RISC-V Debug Specification](https://github.com/riscv/riscv-debug-spec/blob/master/riscv-debug-stable.pdf)
+[RISC-V Debug Specification](https://github.com/riscv/riscv-debug-spec?tab=readme-ov-file#risc-v-debug-specification)
 
     - src/helpers/swio.c
     - src/helpers/swio_pin_magic.c
