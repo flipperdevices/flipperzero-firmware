@@ -102,6 +102,12 @@ def pytest_addoption(parser):
 
 def pytest_configure(config):
     # here you can add setup before launching session!
+    if config.getoption("--port"):
+        reboot_flipper(config.getoption("--port"))
+    if config.getoption("--bench-ibutton-ir"):
+        reboot_flipper(config.getoption("--flipper-r-port"))
+        reboot_flipper(config.getoption("--flipper-k-port"))
+
     if config.getoption("--update-flippers"):
         chan = config.getoption("--update-flippers")
         update_firmware(config.getoption("--port"), chan)
@@ -114,6 +120,37 @@ def pytest_unconfigure(config):
     # here you can add teardown after session!
     pass
 
+def reboot_flipper(port):
+    try:
+        flipper_serial = serial.Serial(port, timeout=1)
+        flipper_serial.write("power reboot\n\r".encode())
+        flipper_serial.close()
+    except serial.serialutil.SerialException:
+        raise Exception('NoFlipper', 'There are no flipper on defined port, or it is unavailable')
+    start_time = time.time()
+    time.sleep(1)
+    while time.time() - start_time < 80:
+        try:
+            flipper_serial = serial.Serial(port, timeout=1)
+            flipper_serial.close()
+        except serial.serialutil.SerialException:
+            time.sleep(1)
+            print(
+                "Waiting for flipper boot after reboot"
+                + str(int(time.time() - start_time))
+                + "s"
+            )
+            logging.debug(
+                "Waiting for flipper boot after reboot"
+                + str(int(time.time() - start_time))
+                + "s"
+            )
+            if time.time() - start_time > 60:
+                logging.error("can not open serial port")
+                raise Exception('FlipperDisapear', 'Can\'t connect to flipper after reboot')
+        else:
+            break
+    return 0
 
 def update_firmware(port, channel):
     #check flipper on defined adress and it availability
@@ -121,6 +158,11 @@ def update_firmware(port, channel):
         flipper_serial = serial.Serial(port, timeout=1)
     except serial.serialutil.SerialException:
         raise Exception('NoFlipper', 'There are no flipper on defined port, or it is unavailable')
+    proto = FlipperProto(serial_port=flipper_serial, debug=True)
+    proto.start_rpc_session()
+    nav = Navigator(proto, gui = False)
+    nav.update_screen()
+    nav.go_to_main_screen()
     flipper_serial.close()
 
     #update flipper's firmware via ufbt
@@ -133,6 +175,7 @@ def update_firmware(port, channel):
     while time.time() - start_time < 120:
         try:
             flipper_serial = serial.Serial(port, timeout=1)
+            flipper_serial.close()
         except serial.serialutil.SerialException:
             time.sleep(1)
             print(
@@ -189,9 +232,9 @@ def pytest_runtest_makereport(item, call):
             nav = item.funcargs.get("nav")
 
             if nav:
-                nav.save_screen("failed.bmp")
+                nav.save_screen("failed_"+report.nodeid+".bmp")
                 allure.attach.file(
-                    "img/failed.bmp",
+                    "img/failed"+report.nodeid+".bmp",
                     name="last_screenshot",
                     attachment_type=allure.attachment_type.BMP,
                 )

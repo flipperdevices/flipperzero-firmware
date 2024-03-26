@@ -129,6 +129,7 @@ class TestNfc(BaseCase):
                 "Read Specific Card Type",
                 "MIFARE Classic Keys",
                 "Unlock NTAG/Ultralight",
+                "Unlock SLIX-L",
             ]
             assert (
                 nav.get_menu_list(

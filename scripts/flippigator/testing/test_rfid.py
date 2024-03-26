@@ -119,6 +119,8 @@ class TestRfid(BaseCase):
         nav.press_ok()
         menu_ref = [
             "EM-Micro EM4100",
+            "EM-Micro EM4100/32",
+            "EM-Micro EM4100/16",
             "HID H10301",
             "IDTECK Idteck",
             "Motorola Indala26",
@@ -154,6 +156,8 @@ class TestRfid(BaseCase):
         nav.press_ok()
         menu_ref = [
             "EM-Micro EM4100",
+            "EM-Micro EM4100/32",
+            "EM-Micro EM4100/16",
             "HID H10301",
             "IDTECK Idteck",
             "Motorola Indala26",

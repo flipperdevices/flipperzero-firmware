@@ -44,6 +44,7 @@ class TestInfraredBench(BaseCase):
             nav_key.press_back()
             nav_key.go_to("Audio Players")
             nav_key.press_ok()
+            time.sleep(2)
             nav_key.press_ok()
             assert (
                 nav_reader.wait_for_state("SaveRight") == 0
@@ -66,6 +67,7 @@ class TestInfraredBench(BaseCase):
             nav_key.press_back()
             nav_key.go_to("Projectors")
             nav_key.press_ok()
+            time.sleep(2)
             nav_key.press_ok()
             assert (
                 nav_reader.wait_for_state("SaveRight") == 0
@@ -88,6 +90,7 @@ class TestInfraredBench(BaseCase):
             nav_key.press_back()
             nav_key.go_to("Air Conditioners")
             nav_key.press_ok()
+            time.sleep(5)
             nav_key.press_ok()
             assert (
                 nav_reader.wait_for_state("SaveRight") == 0

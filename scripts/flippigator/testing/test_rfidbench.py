@@ -111,8 +111,22 @@ class TestRfidBench(BaseCase):
                 state = nav.get_current_state()
                 if time.time() - start_time > 10:
                     break
-        state = nav.get_current_state()
-        assert "card_EM4100_bench" in state, "Result of reading reference card is fail"
+        state = nav.get_current_state(
+            ref=nav.get_ref_from_string("EM4100[EM-Micro]", nav.font_helvB08, 0)
+        )
+        assert len(state) > 0, "Result of reading reference card is fail"
+        state = nav.get_current_state(
+            ref=nav.get_ref_from_string(
+                "DC 69 66 0F 12", nav.font_haxrcorp_4089, 0
+            )
+        )
+        assert len(state) > 0, "Result of reading reference card is fail"
+        state = nav.get_current_state(
+            ref=nav.get_ref_from_string(
+                "(RF/64)", nav.font_haxrcorp_4089, 0
+            )
+        )
+        assert len(state) > 0, "Result of reading reference card is fail"
         nav.press_right()
         menu_ref = [
             "Save",

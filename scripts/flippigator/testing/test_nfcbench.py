@@ -61,6 +61,7 @@ class TestNfcBench(BaseCase):
             "Save",
             "Emulate",
             "Detect Reader",
+            "Unlock with Dictionary",
             "Info",
         ]
         assert (
@@ -144,6 +145,7 @@ class TestNfcBench(BaseCase):
             "Save",
             "Emulate",
             "Detect Reader",
+            "Unlock with Dictionary",
             "Info",
         ]
         assert (
@@ -288,17 +290,13 @@ class TestNfcBench(BaseCase):
                 nav.logger.debug("ReadingCardNFC")
                 state = nav.get_current_state()
         state = nav.get_current_state(
-            ref=nav.get_ref_from_string("Troika", nav.font_helvB08, 0)
+            ref=nav.get_ref_from_string("Troyka card", nav.font_helvB08, 0)
         )
-        assert len(state) > 0, "Result of reading reference card is fail"
+        assert len(state) > 0, "Result of reading reference card is fail (Name)"
         state = nav.get_current_state(
-            ref=nav.get_ref_from_string("Num: 41202868", nav.font_haxrcorp_4089, 0)
+            ref=nav.get_ref_from_string("Transport departament:", nav.font_haxrcorp_4089, 0, no_space=1)
         )
-        assert len(state) > 0, "Result of reading reference card is fail"
-        state = nav.get_current_state(
-            ref=nav.get_ref_from_string("Balance: 1 RUR", nav.font_haxrcorp_4089, 0)
-        )
-        assert len(state) > 0, "Result of reading reference card is fail"
+        assert len(state) > 0, "Result of reading reference card is fail (Data)"
         nav.press_right()
         menu_ref = [
             "Save",

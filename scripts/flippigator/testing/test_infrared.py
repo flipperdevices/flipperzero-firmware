@@ -17,6 +17,7 @@ class TestInfrared(BaseCase):
             "Universal Remotes",
             "Learn New Remote",
             "Saved Remotes",
+            "GPIO Settings",
             "Debug",
         ]
         assert (
