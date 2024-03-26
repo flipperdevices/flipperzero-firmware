@@ -101,6 +101,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [AVR Flasher v1.3 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/2475)
 - Updated: [NFC Magic v1.6 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966) [Removed Gen2 changes till they are ready (By xMasterX)](https://github.com/xMasterX/all-the-plugins/commit/2a3013841837aaed4d2482c42da53755f1a7489f) & [Write NTAG password and PACK to gen4 special pages #190 (By Astrrra)](https://github.com/flipperdevices/flipperzero-good-faps/pull/190) & Small Tweaks (By xMasterX)
 - Updated: [Flizzer Tracker v0.6 (By LTVA1)](https://github.com/LTVA1/flizzer_tracker)
+- Updated: [Sudoku v1.2 (By profelis)](https://github.com/profelis/fz-sudoku)
 
 <a name="release">
 
@@ -366,7 +367,7 @@ $ ./fbt dolphin_ext
 - [Solitaire v1.1.4 (By teeebor)](https://github.com/teeebor/flipper_games)
 - [Sokoban v1.2 (By Racso)](https://github.com/Racso/fzero-apps)
 - [Space Impact WIP v0.2 (By Ka3u6y6a)](https://github.com/Ka3u6y6a/flipper-zero-space-impact)
-- [Sudoku v1.1 (By profelis)](https://github.com/profelis/fz-sudoku)
+- [Sudoku v1.2 (By profelis)](https://github.com/profelis/fz-sudoku)
 - [SUPER-CHIP Emulator (By Milk-Cool)](https://github.com/Milk-Cool/fz-schip)
 - [T-Rex Runner v1.3 (By Rrycbarm)](https://github.com/Rrycbarm/t-rex-runner)
 - [TAMA P1: Save State & Layout Update (By DroomOne)](https://github.com/DroomOne/flipperzero-tamagotch-p1) [Original TAMA P1 (By GMMan)](https://github.com/GMMan/flipperzero-firmware/tree/tama-p1) [Mute & Settings (By Round-Pi)](https://github.com/Round-Pi/flipperzero-tamagotch-p1)

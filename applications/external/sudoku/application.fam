@@ -8,6 +8,6 @@ App(
     fap_icon="sudoku.png",
     fap_author="profelis",
     fap_weburl="https://github.com/profelis/fz-sudoku",
-    fap_version="1.1",
+    fap_version="1.2",
     fap_description="Sudoku game",
 )
