@@ -1,15 +1,14 @@
-# For details & more options, see documentation/AppManifests.md in firmware repo
-
 App(
     appid="flipperdoc",
     name="Flipper Doctor",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="doc_app",
     stack_size=1 * 1024,
-    fap_category="Tools",
-    fap_version="0.1",
     fap_icon="images/flipperdoc.png",
+    fap_icon_assets="images",
+    fap_category="Tools",
     fap_author="JulanDeAlb",
     fap_weburl="https://github.com/julandealb/flipperdoc",
-    fap_icon_assets="images",
+    fap_version="0.1",
+    fap_description="Lets you view all information's regarding your flippers experience and butthurt.",
 )

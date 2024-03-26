@@ -7,11 +7,13 @@
 
 bool doc_get_backup_path(Doc* app) {
     DialogsFileBrowserOptions browser_options;
-    dialog_file_browser_set_basic_options(&browser_options, DOC_BACKUP_FILE_EXTENSION, &I_flipperdoc);
+    dialog_file_browser_set_basic_options(
+        &browser_options, DOC_BACKUP_FILE_EXTENSION, &I_flipperdoc);
     browser_options.base_path = "/data";
     furi_string_set(app->file_path, "/data");
 
-    return dialog_file_browser_show(app->dialogs, app->file_path, app->file_path, &browser_options);
+    return dialog_file_browser_show(
+        app->dialogs, app->file_path, app->file_path, &browser_options);
 }
 
 bool internal_doc_dolphin_state_load_from_path(DolphinState* dolphin_state, const char* path) {
@@ -69,7 +71,10 @@ bool doc_internal_dolphin_state_save_to_path(DolphinState* dolphin_state, const 
         DOLPHIN_STATE_HEADER_VERSION);
 }
 
-bool doc_dolphin_state_save_to_path(DolphinState* dolphin_state, const char* path, const char* file_name) {
+bool doc_dolphin_state_save_to_path(
+    DolphinState* dolphin_state,
+    const char* path,
+    const char* file_name) {
     doc_dolphin_state_load(dolphin_state);
 
     FuriString* complete_path = furi_string_alloc_set(path);
@@ -79,7 +84,8 @@ bool doc_dolphin_state_save_to_path(DolphinState* dolphin_state, const char* pat
         furi_string_cat_str(complete_path, DOC_BACKUP_FILE_EXTENSION);
     }
 
-    bool result = doc_internal_dolphin_state_save_to_path(dolphin_state, furi_string_get_cstr(complete_path));
+    bool result = doc_internal_dolphin_state_save_to_path(
+        dolphin_state, furi_string_get_cstr(complete_path));
 
     if(result) {
         FURI_LOG_I(TAG, "Backup state saved: %s", file_name);

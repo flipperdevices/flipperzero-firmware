@@ -70,27 +70,29 @@ Doc* doc_alloc() {
     app->notification = furi_record_open(RECORD_NOTIFICATION);
     notification_message(app->notification, &sequence_display_backlight_on);
     //! ------------ DEBUG END ------------
-    
+
     //? -------------- Views --------------
     app->selection = doc_selection_alloc();
-    view_dispatcher_add_view(app->view_dispatcher, DocSelectionView, doc_selection_get_view(app->selection));
+    view_dispatcher_add_view(
+        app->view_dispatcher, DocSelectionView, doc_selection_get_view(app->selection));
     app->description = doc_description_alloc();
-    view_dispatcher_add_view(app->view_dispatcher, DocDescriptionView, doc_description_get_view(app->description));
+    view_dispatcher_add_view(
+        app->view_dispatcher, DocDescriptionView, doc_description_get_view(app->description));
     app->text_input = text_input_alloc();
-    view_dispatcher_add_view(app->view_dispatcher, DocTextInputView, text_input_get_view(app->text_input));
+    view_dispatcher_add_view(
+        app->view_dispatcher, DocTextInputView, text_input_get_view(app->text_input));
     //? ------------ Views End ------------
-    
+
     view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
     return app;
 }
 
 void doc_free(Doc* app) {
-
     //! -------------- DEBUG --------------
     furi_record_close(RECORD_NOTIFICATION);
     app->notification = NULL;
     //! ------------ DEBUG END ------------
-    
+
     //? -------------- Views --------------
     view_dispatcher_remove_view(app->view_dispatcher, DocSelectionView);
     doc_selection_free(app->selection);
@@ -114,7 +116,7 @@ void doc_free(Doc* app) {
     furi_string_free(app->file_path);
     furi_timer_free(app->dolphin_timer);
     free(app->dolphin);
-    
+
     free(app);
 }
 

@@ -60,12 +60,13 @@ static bool doc_selection_input_callback(InputEvent* event, void* ctx) {
         case InputKeyUp:
             with_view_model(
                 instance->view,
-                DocSelectionViewModel* model,
+                DocSelectionViewModel * model,
                 {
                     if(model->position > 0) {
                         model->position--;
 
-                        if(model->position == model->window_position && model->window_position > 0) {
+                        if(model->position == model->window_position &&
+                           model->window_position > 0) {
                             model->window_position--;
                         }
                     } else {
@@ -82,12 +83,13 @@ static bool doc_selection_input_callback(InputEvent* event, void* ctx) {
         case InputKeyDown:
             with_view_model(
                 instance->view,
-                DocSelectionViewModel* model,
+                DocSelectionViewModel * model,
                 {
                     if(model->position < model->size - 1) {
                         model->position++;
 
-                        if(model->position - model->window_position > 1 && model->window_position < model->size - 3) {
+                        if(model->position - model->window_position > 1 &&
+                           model->window_position < model->size - 3) {
                             model->window_position++;
                         }
                     } else {
@@ -101,7 +103,7 @@ static bool doc_selection_input_callback(InputEvent* event, void* ctx) {
         case InputKeyOk:
             with_view_model(
                 instance->view,
-                DocSelectionViewModel* model,
+                DocSelectionViewModel * model,
                 {
                     if(instance->callback) {
                         instance->callback(instance->ctx, model->position);
@@ -141,11 +143,7 @@ DocSelection* doc_selection_alloc() {
     view_set_context(instance->view, instance);
 
     with_view_model(
-        instance->view,
-        DocSelectionViewModel* vm,
-        {
-            vm->text = furi_string_alloc();
-        }, false);
+        instance->view, DocSelectionViewModel * vm, { vm->text = furi_string_alloc(); }, false);
 
     return instance;
 }
@@ -154,11 +152,7 @@ void doc_selection_free(DocSelection* instance) {
     furi_assert(instance);
 
     with_view_model(
-        instance->view,
-        DocSelectionViewModel* vm,
-        {
-            furi_string_free(vm->text);
-        }, false);
+        instance->view, DocSelectionViewModel * vm, { furi_string_free(vm->text); }, false);
 
     view_free(instance->view);
     free(instance);
@@ -170,11 +164,7 @@ void doc_selection_set_title(DocSelection* instance, const char* title) {
     furi_assert(instance);
 
     with_view_model(
-        instance->view,
-        DocSelectionViewModel* vm,
-        {
-            vm->title = title;
-        }, true);
+        instance->view, DocSelectionViewModel * vm, { vm->title = title; }, true);
 }
 
 FuriString* doc_selection_get_string(DocSelection* instance) {
@@ -182,11 +172,7 @@ FuriString* doc_selection_get_string(DocSelection* instance) {
 
     FuriString* text;
     with_view_model(
-        instance->view,
-        DocSelectionViewModel* vm,
-        {
-            text = vm->text;
-        }, true);
+        instance->view, DocSelectionViewModel * vm, { text = vm->text; }, true);
 
     return text;
 }
@@ -195,11 +181,7 @@ void doc_selection_set_footer(DocSelection* instance, const char* footer) {
     furi_assert(instance);
 
     with_view_model(
-        instance->view,
-        DocSelectionViewModel* vm,
-        {
-            vm->footer = footer;
-        }, true);
+        instance->view, DocSelectionViewModel * vm, { vm->footer = footer; }, true);
 }
 
 void doc_selection_set_index(DocSelection* instance, uint8_t index) {
@@ -207,7 +189,7 @@ void doc_selection_set_index(DocSelection* instance, uint8_t index) {
 
     with_view_model(
         instance->view,
-        DocSelectionViewModel* model,
+        DocSelectionViewModel * model,
         {
             uint8_t position = index;
             if(position >= model->size) {
@@ -236,22 +218,19 @@ void doc_selection_set_size(DocSelection* instance, uint8_t size) {
     furi_assert(instance);
 
     with_view_model(
-        instance->view,
-        DocSelectionViewModel* vm,
-        {
-            vm->size = size;
-        }, true);
+        instance->view, DocSelectionViewModel * vm, { vm->size = size; }, true);
 }
 
 void doc_selection_request_redraw(DocSelection* instance) {
     furi_assert(instance);
     if(instance->callback != NULL) {
-        instance->callback(instance->ctx, (uint8_t) - 1);
+        instance->callback(instance->ctx, (uint8_t)-1);
     }
 }
 
 void doc_selection_force_redraw(DocSelection* instance) {
     furi_assert(instance);
-    with_view_model(instance->view, DocSelectionViewModel* vm, { UNUSED(vm); }, true);
+    with_view_model(
+        instance->view, DocSelectionViewModel * vm, { UNUSED(vm); }, true);
 }
 //? Custom Functions End

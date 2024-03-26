@@ -16,15 +16,11 @@ void doc_scene_butthurt_on_exit(void* ctx) {
 //! ------------------ Main ------------------
 
 #define MAX_CATEGORY 3
-const char* selection_butthurt_category[MAX_CATEGORY] = {
-    "Deeds:",
-    "Next:",
-    "Total:"
-};
+const char* selection_butthurt_category[MAX_CATEGORY] = {"Deeds:", "Next:", "Total:"};
 
 void doc_scene_selection_butthurt_change_text(Doc* app) {
     const uint8_t butthurt = app->dolphin->data.butthurt_daily_limit / 15 +
-        (app->dolphin->data.butthurt_daily_limit % 15 != 0);
+                             (app->dolphin->data.butthurt_daily_limit % 15 != 0);
 
     char* next;
     switch(butthurt) {
@@ -48,7 +44,11 @@ void doc_scene_selection_butthurt_change_text(Doc* app) {
     FuriString* text = doc_selection_get_string(app->selection);
     furi_string_reset(text);
 
-    furi_string_cat_printf(text, "%s\t%hhu\n", selection_butthurt_category[0], app->dolphin->data.butthurt_daily_limit);
+    furi_string_cat_printf(
+        text,
+        "%s\t%hhu\n",
+        selection_butthurt_category[0],
+        app->dolphin->data.butthurt_daily_limit);
     furi_string_cat_printf(text, "%s\t%s\n", selection_butthurt_category[1], next);
     furi_string_cat_printf(text, "%s\t-%hhu | -4\n", selection_butthurt_category[2], butthurt);
 
@@ -60,7 +60,8 @@ void doc_scene_selection_butthurt_on_enter(Doc* app) {
 
     doc_selection_set_title(app->selection, "Daily Butthurt");
     doc_scene_selection_butthurt_change_text(app);
-    doc_selection_set_index(app->selection, scene_manager_get_scene_state(app->scene_manager, DocSceneButthurt));
+    doc_selection_set_index(
+        app->selection, scene_manager_get_scene_state(app->scene_manager, DocSceneButthurt));
 
     view_dispatcher_switch_to_view(app->view_dispatcher, DocSelectionView);
 }
@@ -73,10 +74,10 @@ bool doc_scene_selection_butthurt_on_event(Doc* app, SceneManagerEvent event) {
         doc_description_set_category(app->description, event.event);
         scene_manager_next_scene(app->scene_manager, DocSceneButthurtDesc);
         consumed = true;
-    } else if(event.type == SceneManagerEventTypeCustom && event.event == (uint8_t) - 1) {
+    } else if(event.type == SceneManagerEventTypeCustom && event.event == (uint8_t)-1) {
         doc_scene_selection_butthurt_change_text(app);
         doc_selection_force_redraw(app->selection);
-    }  else if(event.type == SceneManagerEventTypeBack) {
+    } else if(event.type == SceneManagerEventTypeBack) {
         scene_manager_set_scene_state(app->scene_manager, DocSceneButthurt, 0);
     }
 

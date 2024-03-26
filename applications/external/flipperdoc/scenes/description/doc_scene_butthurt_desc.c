@@ -27,8 +27,7 @@ const char* doc_butthurt_next_category[5][2] = {
     {"+1....+15 deeds:", "-1"},
     {"+16....+30 deeds:", "-1"},
     {"+31....+45 deeds:", "-1"},
-    {"+46 deeds:", "-1"}
-};
+    {"+46 deeds:", "-1"}};
 
 const uint8_t doc_description_size_category[2] = {3, 5};
 
@@ -46,10 +45,12 @@ void doc_scene_description_butthurt_change_text(Doc* app, uint8_t size, const ch
 void doc_scene_butthurt_desc_select_category(Doc* app) {
     switch(doc_description_get_category(app->description)) {
     case ButthurtCategoryDeeds:
-        doc_scene_description_butthurt_change_text(app, doc_description_size_category[0], doc_butthurt_deeds_category);
+        doc_scene_description_butthurt_change_text(
+            app, doc_description_size_category[0], doc_butthurt_deeds_category);
         break;
     case ButthurtCategoryNext:
-        doc_scene_description_butthurt_change_text(app, doc_description_size_category[1], doc_butthurt_next_category);
+        doc_scene_description_butthurt_change_text(
+            app, doc_description_size_category[1], doc_butthurt_next_category);
         break;
     default:
         break;

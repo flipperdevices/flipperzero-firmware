@@ -7,7 +7,10 @@ typedef void (*DocDescriptionCallback)(void* ctx, uint8_t index);
 
 //? Basic Functions
 View* doc_description_get_view(DocDescription* instance);
-void doc_description_set_callback(DocDescription* instance, DocDescriptionCallback callback, void* ctx);
+void doc_description_set_callback(
+    DocDescription* instance,
+    DocDescriptionCallback callback,
+    void* ctx);
 DocDescription* doc_description_alloc();
 void doc_description_free(DocDescription* instance);
 //? Basic Functions End

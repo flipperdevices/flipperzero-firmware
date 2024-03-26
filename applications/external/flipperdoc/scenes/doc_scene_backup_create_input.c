@@ -4,12 +4,13 @@
 
 void doc_backup_text_input_done_callback(void* ctx);
 
-void doc_scene_backup_create_input_on_enter( void* ctx) {
+void doc_scene_backup_create_input_on_enter(void* ctx) {
     furi_assert(ctx);
     Doc* app = ctx;
 
     text_input_set_header_text(app->text_input, "Enter backup name");
-    text_input_set_result_callback(app->text_input, doc_backup_text_input_done_callback, app, app->text_input_array, 50, true);
+    text_input_set_result_callback(
+        app->text_input, doc_backup_text_input_done_callback, app, app->text_input_array, 50, true);
 
     view_dispatcher_switch_to_view(app->view_dispatcher, DocTextInputView);
 }

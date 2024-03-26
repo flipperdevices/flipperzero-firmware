@@ -40,19 +40,22 @@ void doc_scene_description_on_exit(DocDescriptionScene scene, void* ctx) {
 }
 
 static const DocDescriptionCommonSceneBase doc_description_scenes[DescriptionSceneCount] = {
-    [DescriptionSceneCurrent] = {
-        .on_enter = doc_scene_description_current_on_enter,
-        .on_event = doc_scene_description_current_on_event,
-        .on_exit = doc_scene_description_current_on_exit,
-    },
-    [DescriptionSceneXP] = {
-        .on_enter = doc_scene_description_xp_on_enter,
-        .on_event = doc_scene_description_xp_on_event,
-        .on_exit = doc_scene_description_xp_on_exit,
-    },
-    [DescriptionSceneButthurt] = {
-        .on_enter = doc_scene_description_butthurt_on_enter,
-        .on_event = doc_scene_description_butthurt_on_event,
-        .on_exit = doc_scene_description_butthurt_on_exit,
-    },
+    [DescriptionSceneCurrent] =
+        {
+            .on_enter = doc_scene_description_current_on_enter,
+            .on_event = doc_scene_description_current_on_event,
+            .on_exit = doc_scene_description_current_on_exit,
+        },
+    [DescriptionSceneXP] =
+        {
+            .on_enter = doc_scene_description_xp_on_enter,
+            .on_event = doc_scene_description_xp_on_event,
+            .on_exit = doc_scene_description_xp_on_exit,
+        },
+    [DescriptionSceneButthurt] =
+        {
+            .on_enter = doc_scene_description_butthurt_on_enter,
+            .on_event = doc_scene_description_butthurt_on_event,
+            .on_exit = doc_scene_description_butthurt_on_exit,
+        },
 };

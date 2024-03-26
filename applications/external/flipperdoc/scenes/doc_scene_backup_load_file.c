@@ -2,7 +2,7 @@
 
 #include <helpers/doc_storage_helper.h>
 
-void doc_scene_backup_load_file_on_enter( void* ctx) {
+void doc_scene_backup_load_file_on_enter(void* ctx) {
     furi_assert(ctx);
     Doc* app = ctx;
 

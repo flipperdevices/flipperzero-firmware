@@ -24,12 +24,8 @@ enum {
     MaxCountMenu,
 };
 
-const char* menu_items[MaxCountMenu] = {
-    "General\t\n",
-    "Daily XP\t\n",
-    "Daily Butthurt\t\n",
-    "Backup\t\n"
-};
+const char* menu_items[MaxCountMenu] =
+    {"General\t\n", "Daily XP\t\n", "Daily Butthurt\t\n", "Backup\t\n"};
 
 void doc_scene_selection_menu_change_text(Doc* app) {
     FuriString* text = doc_selection_get_string(app->selection);
@@ -47,7 +43,8 @@ void doc_scene_selection_menu_on_enter(Doc* app) {
 
     doc_selection_set_title(app->selection, "Flipper Doc");
     doc_scene_selection_menu_change_text(app);
-    doc_selection_set_index(app->selection, scene_manager_get_scene_state(app->scene_manager, DocSceneMenu));
+    doc_selection_set_index(
+        app->selection, scene_manager_get_scene_state(app->scene_manager, DocSceneMenu));
 
     view_dispatcher_switch_to_view(app->view_dispatcher, DocSelectionView);
 }

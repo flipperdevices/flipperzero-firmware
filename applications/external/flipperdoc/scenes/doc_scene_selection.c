@@ -40,24 +40,28 @@ void doc_scene_selection_on_exit(DocSelectionScene scene, void* ctx) {
 }
 
 static const DocSelectionCommonSceneBase doc_selection_scenes[SelectionSceneCount] = {
-    [SelectionSceneXP] = {
-        .on_enter = doc_scene_selection_xp_on_enter,
-        .on_event = doc_scene_selection_xp_on_event,
-        .on_exit = doc_scene_selection_xp_on_exit,
-    },
-    [SelectionSceneButthurt] = {
-        .on_enter = doc_scene_selection_butthurt_on_enter,
-        .on_event = doc_scene_selection_butthurt_on_event,
-        .on_exit = doc_scene_selection_butthurt_on_exit,
-    },
-    [SelectionSceneMenu] = {
-        .on_enter = doc_scene_selection_menu_on_enter,
-        .on_event = doc_scene_selection_menu_on_event,
-        .on_exit = doc_scene_selection_menu_on_exit,
-    },
-    [SelectionSceneBackup] = {
-        .on_enter = doc_scene_selection_backup_on_enter,
-        .on_event = doc_scene_selection_backup_on_event,
-        .on_exit = doc_scene_selection_backup_on_exit,
-    },
+    [SelectionSceneXP] =
+        {
+            .on_enter = doc_scene_selection_xp_on_enter,
+            .on_event = doc_scene_selection_xp_on_event,
+            .on_exit = doc_scene_selection_xp_on_exit,
+        },
+    [SelectionSceneButthurt] =
+        {
+            .on_enter = doc_scene_selection_butthurt_on_enter,
+            .on_event = doc_scene_selection_butthurt_on_event,
+            .on_exit = doc_scene_selection_butthurt_on_exit,
+        },
+    [SelectionSceneMenu] =
+        {
+            .on_enter = doc_scene_selection_menu_on_enter,
+            .on_event = doc_scene_selection_menu_on_event,
+            .on_exit = doc_scene_selection_menu_on_exit,
+        },
+    [SelectionSceneBackup] =
+        {
+            .on_enter = doc_scene_selection_backup_on_enter,
+            .on_event = doc_scene_selection_backup_on_event,
+            .on_exit = doc_scene_selection_backup_on_exit,
+        },
 };

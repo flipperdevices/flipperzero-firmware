@@ -32,7 +32,8 @@ void doc_scene_selection_backup_on_enter(Doc* app) {
 
     doc_selection_set_title(app->selection, "Backup");
     doc_scene_selection_backup_change_text(app);
-    doc_selection_set_index(app->selection, scene_manager_get_scene_state(app->scene_manager, DocSceneBackup));
+    doc_selection_set_index(
+        app->selection, scene_manager_get_scene_state(app->scene_manager, DocSceneBackup));
 
     view_dispatcher_switch_to_view(app->view_dispatcher, DocSelectionView);
 }

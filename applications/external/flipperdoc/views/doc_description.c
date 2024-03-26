@@ -29,8 +29,7 @@ static void doc_description_draw_callback(Canvas* canvas, void* ctx) {
     if(vm->index > 0) {
         canvas_draw_icon(canvas, 113, 13, &I_doc_button_up);
     }
-    if(vm->size > 4 &&
-        vm->index < vm->size - 4) {
+    if(vm->size > 4 && vm->index < vm->size - 4) {
         canvas_draw_icon(canvas, 113, 39, &I_doc_button_down);
     }
 
@@ -48,7 +47,7 @@ static bool doc_description_input_callback(InputEvent* event, void* ctx) {
         case InputKeyUp:
             with_view_model(
                 instance->view,
-                DocDescriptionViewModel* model,
+                DocDescriptionViewModel * model,
                 {
                     if(model->index > 0) {
                         model->index--;
@@ -60,7 +59,7 @@ static bool doc_description_input_callback(InputEvent* event, void* ctx) {
         case InputKeyDown:
             with_view_model(
                 instance->view,
-                DocDescriptionViewModel* model,
+                DocDescriptionViewModel * model,
                 {
                     if(model->index < model->size - 4) {
                         model->index++;
@@ -71,12 +70,7 @@ static bool doc_description_input_callback(InputEvent* event, void* ctx) {
             break;
         case InputKeyBack:
             with_view_model(
-                instance->view,
-                DocDescriptionViewModel* model,
-                {
-                    model->index = 0;
-                },
-                false);
+                instance->view, DocDescriptionViewModel * model, { model->index = 0; }, false);
             break;
         default:
             break;
@@ -92,7 +86,10 @@ View* doc_description_get_view(DocDescription* instance) {
     return instance->view;
 }
 
-void doc_description_set_callback(DocDescription* instance, DocDescriptionCallback callback, void* ctx) {
+void doc_description_set_callback(
+    DocDescription* instance,
+    DocDescriptionCallback callback,
+    void* ctx) {
     furi_assert(instance);
     furi_assert(callback);
 
@@ -110,11 +107,7 @@ DocDescription* doc_description_alloc() {
     view_set_context(instance->view, instance);
 
     with_view_model(
-        instance->view,
-        DocDescriptionViewModel* vm,
-        {
-            vm->text = furi_string_alloc();
-        }, false);
+        instance->view, DocDescriptionViewModel * vm, { vm->text = furi_string_alloc(); }, false);
 
     return instance;
 }
@@ -123,11 +116,7 @@ void doc_description_free(DocDescription* instance) {
     furi_assert(instance);
 
     with_view_model(
-        instance->view,
-        DocDescriptionViewModel* vm,
-        {
-            furi_string_free(vm->text);
-        }, false);
+        instance->view, DocDescriptionViewModel * vm, { furi_string_free(vm->text); }, false);
 
     view_free(instance->view);
     free(instance);
@@ -140,11 +129,7 @@ FuriString* doc_description_get_string(DocDescription* instance) {
 
     FuriString* text;
     with_view_model(
-        instance->view,
-        DocDescriptionViewModel* vm,
-        {
-            text = vm->text;
-        }, true);
+        instance->view, DocDescriptionViewModel * vm, { text = vm->text; }, true);
 
     return text;
 }
@@ -154,11 +139,7 @@ uint8_t doc_description_get_category(DocDescription* instance) {
 
     uint8_t category;
     with_view_model(
-        instance->view,
-        DocDescriptionViewModel* vm,
-        {
-            category = vm->category;
-        }, false);
+        instance->view, DocDescriptionViewModel * vm, { category = vm->category; }, false);
 
     return category;
 }
@@ -167,33 +148,26 @@ void doc_description_set_category(DocDescription* instance, uint8_t category) {
     furi_assert(instance);
 
     with_view_model(
-        instance->view,
-        DocDescriptionViewModel* vm,
-        {
-            vm->category = category;
-        }, true);
+        instance->view, DocDescriptionViewModel * vm, { vm->category = category; }, true);
 }
 
 void doc_description_set_size(DocDescription* instance, uint8_t size) {
     furi_assert(instance);
 
     with_view_model(
-        instance->view,
-        DocDescriptionViewModel* vm,
-        {
-            vm->size = size;
-        }, true);
+        instance->view, DocDescriptionViewModel * vm, { vm->size = size; }, true);
 }
 
 void doc_description_request_redraw(DocDescription* instance) {
     furi_assert(instance);
     if(instance->callback != NULL) {
-        instance->callback(instance->ctx, (uint8_t) - 1);
+        instance->callback(instance->ctx, (uint8_t)-1);
     }
 }
 
 void doc_description_force_redraw(DocDescription* instance) {
     furi_assert(instance);
-    with_view_model(instance->view, DocDescriptionViewModel* vm, { UNUSED(vm); }, true);
+    with_view_model(
+        instance->view, DocDescriptionViewModel * vm, { UNUSED(vm); }, true);
 }
 //? Custom Functions End
