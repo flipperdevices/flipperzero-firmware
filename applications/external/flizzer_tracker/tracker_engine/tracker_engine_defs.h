@@ -90,7 +90,7 @@ typedef enum {
     TE_EFFECT_SET_SUSTAIN = 0x1700, // Nxx
     TE_EFFECT_SET_RELEASE = 0x1800, // Oxx
     TE_EFFECT_PROGRAM_RESTART = 0x1900, // Pxx
-    
+
     TE_EFFECT_SET_RATE = 0x1a00, //Qxx
 
     TE_EFFECT_SET_RING_MOD_SRC = 0x1b00, // Rxx
