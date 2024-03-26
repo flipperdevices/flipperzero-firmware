@@ -32,6 +32,8 @@ start_timestamp = df.iloc[0]['datetime'].strftime('%Y-%m-%d %H:%M:%S')
 simple_start_timestamp = df.iloc[0]['datetime'].strftime('%m-%d-%y')
 end_timestamp = df.iloc[-1]['datetime'].strftime('%Y-%m-%d %H:%M:%S')
 
+ping_count = df.shape[0]
+
 # sanity check before plotting
 if not df.empty:
     map_center = [df.iloc[0]['lat'], df.iloc[0]['lon']]
@@ -43,14 +45,20 @@ if not df.empty:
 
     # Location markers look good, click to see timestamp
     for index, row in df.iterrows():
-        folium.Marker([row['lat'], row['lon']], popup=f"Timestamp: {row['isodatetime']}", tooltip=f"Point {index+1}").add_to(m)
+        if index == 0: # First marker
+            folium.Marker([row['lat'], row['lon']], popup=f"Timestamp: {row['isodatetime']} Start Point", tooltip=f"Start Point", icon=folium.Icon(color='green')).add_to(m)
+        elif index == len(df) - 1: # Last marker
+            folium.Marker([row['lat'], row['lon']], popup=f"Timestamp: {row['isodatetime']} End Point", tooltip=f"End Point", icon=folium.Icon(color='red')).add_to(m)
+        else: # Other markers
+            folium.Marker([row['lat'], row['lon']], popup=f"Timestamp: {row['isodatetime']}", tooltip=f"Point {index+1}").add_to(m)
 
     title_and_info_html = f'''
      <h3 align="center" style="font-size:20px; margin-top:10px;"><b>FindMy Flipper Location Mapper</b></h3>
-     <div style="position: fixed; bottom: 50px; left: 50px; width: 300px; height: 150px; z-index:9999; font-size:14px; background-color: white; padding: 10px; border-radius: 10px; box-shadow: 0 0 5px rgba(0,0,0,0.5);">
+     <div style="position: fixed; bottom: 50px; left: 50px; width: 300px; height: 160px; z-index:9999; font-size:14px; background-color: white; padding: 10px; border-radius: 10px; box-shadow: 0 0 5px rgba(0,0,0,0.5);">
      <b>Location Summary</b><br>
      Start: {start_timestamp}<br>
      End: {end_timestamp}<br>
+     Number of Location Pings: {ping_count}<br>
      Total Time: {formatted_total_time}<br>
      Average Time Between Pings: {formatted_avg_time}<br>
      Created by Matthew KuKanich and luu176<br>
