@@ -87,7 +87,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [HID App improvements and little extra #3518 (By gsurkov)](https://github.com/flipperdevices/flipperzero-firmware/pull/3518)
 - OFW: [NFC: Slix privacy password reveal and Desfire detect fix #3504 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3504)
 - OFW: [BadUSB: BLE, media keys, Fn/Globe key commands #3403 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/3403)
-- OFW: [Configurable Infrared TX output #3484 (By gsurkov)](https://github.com/flipperdevices/flipperzero-firmware/pull/3484)
 - OFW: [Add ChromeOS Bad USB demo #3486 (By kowalski7cc)](https://github.com/flipperdevices/flipperzero-firmware/pull/3486)
 - OFW: [Fix DIP decoding for Linear Delta-3 #3528 (By brandonweeks)](https://github.com/flipperdevices/flipperzero-firmware/pull/3528)
 - OFW: [JS CLI command #3539 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/3539)
