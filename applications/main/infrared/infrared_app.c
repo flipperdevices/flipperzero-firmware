@@ -1,13 +1,24 @@
 #include "infrared_app_i.h"
 
+#include <furi_hal_power.h>
+
 #include <string.h>
 #include <toolbox/path.h>
+#include <toolbox/saved_struct.h>
 #include <dolphin/dolphin.h>
 
 #define TAG "InfraredApp"
 
 #define INFRARED_TX_MIN_INTERVAL_MS (50U)
 #define INFRARED_TASK_STACK_SIZE (2048UL)
+
+#define INFRARED_SETTINGS_PATH INT_PATH(".infrared.settings")
+#define INFRARED_SETTINGS_VERSION (0)
+#define INFRARED_SETTINGS_MAGIC (0x1F)
+
+typedef struct {
+    uint8_t tx_pin;
+} InfraredSettings;
 
 static const NotificationSequence*
     infrared_notification_sequences[InfraredNotificationMessageCount] = {
@@ -126,7 +137,7 @@ static void infrared_find_vacant_remote_name(FuriString* name, const char* path)
     furi_record_close(RECORD_STORAGE);
 }
 
-static InfraredApp* infrared_alloc() {
+static InfraredApp* infrared_alloc(void) {
     InfraredApp* infrared = malloc(sizeof(InfraredApp));
 
     infrared->task_thread =
@@ -181,6 +192,12 @@ static InfraredApp* infrared_alloc() {
     infrared->popup = popup_alloc();
     view_dispatcher_add_view(view_dispatcher, InfraredViewPopup, popup_get_view(infrared->popup));
 
+    infrared->var_item_list = variable_item_list_alloc();
+    view_dispatcher_add_view(
+        view_dispatcher,
+        InfraredViewVariableList,
+        variable_item_list_get_view(infrared->var_item_list));
+
     infrared->view_stack = view_stack_alloc();
     view_dispatcher_add_view(
         view_dispatcher, InfraredViewStack, view_stack_get_view(infrared->view_stack));
@@ -188,6 +205,10 @@ static InfraredApp* infrared_alloc() {
     infrared->move_view = infrared_move_view_alloc();
     view_dispatcher_add_view(
         view_dispatcher, InfraredViewMove, infrared_move_view_get_view(infrared->move_view));
+
+    infrared->loading = loading_alloc();
+    view_dispatcher_add_view(
+        view_dispatcher, InfraredViewLoading, loading_get_view(infrared->loading));
 
     if(app_state->is_debug_enabled) {
         infrared->debug_view = infrared_debug_view_alloc();
@@ -198,7 +219,6 @@ static InfraredApp* infrared_alloc() {
     }
 
     infrared->button_panel = button_panel_alloc();
-    infrared->loading = loading_alloc();
     infrared->progress = infrared_progress_view_alloc();
 
     return infrared;
@@ -234,11 +254,17 @@ static void infrared_free(InfraredApp* infrared) {
     view_dispatcher_remove_view(view_dispatcher, InfraredViewPopup);
     popup_free(infrared->popup);
 
+    view_dispatcher_remove_view(view_dispatcher, InfraredViewVariableList);
+    variable_item_list_free(infrared->var_item_list);
+
     view_dispatcher_remove_view(view_dispatcher, InfraredViewStack);
     view_stack_free(infrared->view_stack);
 
     view_dispatcher_remove_view(view_dispatcher, InfraredViewMove);
     infrared_move_view_free(infrared->move_view);
+
+    view_dispatcher_remove_view(view_dispatcher, InfraredViewLoading);
+    loading_free(infrared->loading);
 
     if(app_state->is_debug_enabled) {
         view_dispatcher_remove_view(view_dispatcher, InfraredViewDebugView);
@@ -246,7 +272,6 @@ static void infrared_free(InfraredApp* infrared) {
     }
 
     button_panel_free(infrared->button_panel);
-    loading_free(infrared->loading);
     infrared_progress_view_free(infrared->progress);
 
     view_dispatcher_free(view_dispatcher);
@@ -385,14 +410,13 @@ void infrared_tx_stop(InfraredApp* infrared) {
 }
 
 void infrared_blocking_task_start(InfraredApp* infrared, FuriThreadCallback callback) {
-    view_stack_add_view(infrared->view_stack, loading_get_view(infrared->loading));
+    view_dispatcher_switch_to_view(infrared->view_dispatcher, InfraredViewLoading);
     furi_thread_set_callback(infrared->task_thread, callback);
     furi_thread_start(infrared->task_thread);
 }
 
 bool infrared_blocking_task_finalize(InfraredApp* infrared) {
     furi_thread_join(infrared->task_thread);
-    view_stack_remove_view(infrared->view_stack, loading_get_view(infrared->loading));
     return furi_thread_get_return_code(infrared->task_thread);
 }
 
@@ -425,6 +449,60 @@ void infrared_show_error_message(const InfraredApp* infrared, const char* fmt, .
 
     furi_string_free(message);
     va_end(args);
+}
+
+void infrared_set_tx_pin(InfraredApp* infrared, FuriHalInfraredTxPin tx_pin) {
+    if(tx_pin < FuriHalInfraredTxPinMax) {
+        furi_hal_infrared_set_tx_output(tx_pin);
+    } else {
+        FuriHalInfraredTxPin tx_pin_detected = furi_hal_infrared_detect_tx_output();
+        furi_hal_infrared_set_tx_output(tx_pin_detected);
+        if(tx_pin_detected != FuriHalInfraredTxPinInternal) {
+            infrared_enable_otg(infrared, true);
+        }
+    }
+
+    infrared->app_state.tx_pin = tx_pin;
+}
+
+void infrared_enable_otg(InfraredApp* infrared, bool enable) {
+    if(enable) {
+        furi_hal_power_enable_otg();
+    } else {
+        furi_hal_power_disable_otg();
+    }
+    infrared->app_state.is_otg_enabled = enable;
+}
+
+static void infrared_load_settings(InfraredApp* infrared) {
+    InfraredSettings settings = {0};
+
+    if(!saved_struct_load(
+           INFRARED_SETTINGS_PATH,
+           &settings,
+           sizeof(InfraredSettings),
+           INFRARED_SETTINGS_MAGIC,
+           INFRARED_SETTINGS_VERSION)) {
+        FURI_LOG_D(TAG, "Failed to load settings, using defaults");
+        infrared_save_settings(infrared);
+    }
+
+    infrared_set_tx_pin(infrared, settings.tx_pin);
+}
+
+void infrared_save_settings(InfraredApp* infrared) {
+    InfraredSettings settings = {
+        .tx_pin = infrared->app_state.tx_pin,
+    };
+
+    if(!saved_struct_save(
+           INFRARED_SETTINGS_PATH,
+           &settings,
+           sizeof(InfraredSettings),
+           INFRARED_SETTINGS_MAGIC,
+           INFRARED_SETTINGS_VERSION)) {
+        FURI_LOG_E(TAG, "Failed to save settings");
+    }
 }
 
 void infrared_signal_received_callback(void* context, InfraredWorkerSignal* received_signal) {
@@ -467,6 +545,7 @@ void infrared_popup_closed_callback(void* context) {
 int32_t infrared_app(void* p) {
     InfraredApp* infrared = infrared_alloc();
 
+    infrared_load_settings(infrared);
     infrared_make_app_folder(infrared);
 
     bool is_remote_loaded = false;
@@ -509,6 +588,9 @@ int32_t infrared_app(void* p) {
 
     view_dispatcher_run(infrared->view_dispatcher);
 
+    infrared_set_tx_pin(infrared, FuriHalInfraredTxPinInternal);
+    infrared_enable_otg(infrared, false);
     infrared_free(infrared);
+
     return 0;
 }
