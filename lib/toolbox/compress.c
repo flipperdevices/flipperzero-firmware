@@ -75,7 +75,6 @@ void compress_icon_decode(
 
     uint8_t* decoded_data_output_ptr = NULL;
     if(size_hint > COMPRESS_ICON_DECODED_BUFF_SIZE) {
-        FURI_LOG_I("compress", "Allocating large buffer for decoded icon data");
         compress_icon_release_large_buffer(instance);
         instance->large_decoded_buff = malloc(size_hint);
         decoded_data_output_ptr = instance->large_decoded_buff;
