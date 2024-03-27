@@ -10,12 +10,12 @@
 #define SCORE_MULTIPLIER 5
 #define TIMER_INCREMENT_PER_ARROW 25
 
-void generate_arrows(PluginState* plugin_state) {
-    // Increment timer and score based on the number of arrows
+void add_scores(PluginState* plugin_state) {
     plugin_state->timer += TIMER_INCREMENT_PER_ARROW * plugin_state->numArrows;
     plugin_state->score += plugin_state->numArrows * SCORE_MULTIPLIER;
     plugin_state->round++;
-
+}
+void generate_arrows(PluginState* plugin_state) {
     // Generate a new set of arrows, 3 to 8
     plugin_state->numArrows = rand() % (MAX_ARROWS - MIN_ARROWS + 1) + MIN_ARROWS;
 
@@ -263,6 +263,7 @@ int32_t flipper_hero_app() {
 
         // Check if all arrows are filled, then regenerate
         if(plugin_state->nextArrowToFill >= plugin_state->numArrows) {
+            add_scores(plugin_state);
             generate_arrows(plugin_state); // Re-initialize arrow states
         }
 
