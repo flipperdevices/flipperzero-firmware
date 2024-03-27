@@ -30,7 +30,7 @@ App(
     #  [Module BugFixes & TextBox Module (By oldip & Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/61e5c69a6b983a3a9894546d6c2734ade3649a67)
     #  [JS CLI command #3539 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/3539)
     #  [Add __filepath and __dirpath globals (By jamisonderek)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/463f50281a1536492cf9ee46c5e0ac6b30f72a7f)
-    #  [Add widget module (By jamisonderek)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/)
+    #  [Add widget module (By jamisonderek)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/e6fe5e0b52ab3dfa9a3a4d5325ab63ba4789f7e3)
 )
 
 App(
