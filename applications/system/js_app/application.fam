@@ -29,6 +29,7 @@ App(
     #  [UL: JS Dialog fix to include file icon (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/71f1f3ef2ace90d7b22425ef688ee292bde035ff)
     #  [Module BugFixes & TextBox Module (By oldip & Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/61e5c69a6b983a3a9894546d6c2734ade3649a67)
     #  [JS CLI command #3539 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/3539)
+    #  [Add __filepath and __dirpath globals (By HaxSam)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/463f50281a1536492cf9ee46c5e0ac6b30f72a7f)
 )
 
 App(
