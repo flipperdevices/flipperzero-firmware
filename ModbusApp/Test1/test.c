@@ -7,6 +7,7 @@
 #include <gui/modules/submenu.h>
 #include <gui/modules/variable_item_list.h>
 #include <gui/modules/text_box.h>
+#include <gui/modules/byte_input.h>
 #include <assets_icons.h>
 
 #include <stm32wbxx_ll_lpuart.h>
@@ -43,10 +44,18 @@
 #define CRCH buf[len - 2]
 #define CRCL buf[len - 1]
 #define STARTADDRESS buf[2] << 8 | buf[3]
+#define QUANTITY buf[4] << 8 | buf[5]
 
 //////////////////////////   Defining Structs  //////////////////////////
-typedef enum { Main_Scene, Settings_Scene, ConsoleOutput_Scene, Sender_Scene, Scene_Num } Scenes;
-typedef enum { Submenu_View, VarList_View, TextBox_View } Views;
+typedef enum {
+    Main_Scene,
+    Settings_Scene,
+    ConsoleOutput_Scene,
+    ByteInput_Scene,
+    Sender_Scene,
+    Scene_Num
+} Scenes;
+typedef enum { Submenu_View, VarList_View, TextBox_View, ByteInput_View } Views;
 typedef enum {
     Settings_Option,
     Sniffer_Option,
@@ -82,6 +91,7 @@ typedef struct {
     ViewDispatcher* viewDispatcher;
     Submenu* subMenu;
     VariableItemList* varList;
+    ByteInput* byteInput;
     Uart* uart;
     Modbus* modbus;
     DialogsApp* dialogs;
@@ -763,6 +773,55 @@ void Sniffer_Scene_OnExit(void* context) {
     furi_string_reset(app->text);
     serial_deinit(app->uart);
 }
+//////////////////////////   ByteInput Scene  ////////////////////////
+void SetValue(void* context) {
+    App* app = context;
+    scene_manager_handle_back_event(app->sceneManager);
+}
+void ByteInput_Scene_OnEnter(void* context) {
+    App* app = context;
+    uint8_t* buf = app->msgBuf;
+    uint8_t offset = scene_manager_get_scene_state(app->sceneManager, ByteInput_Scene);
+    switch(scene_manager_get_scene_state(app->sceneManager, ByteInput_Scene)) {
+    case 0:
+        byte_input_set_header_text(app->byteInput, "Set Slave");
+        byte_input_set_result_callback(app->byteInput, SetValue, NULL, app, &SLAVE, 1);
+        view_dispatcher_switch_to_view(app->viewDispatcher, ByteInput_View);
+        break;
+    case 1:
+        byte_input_set_header_text(app->byteInput, "Set Function");
+        byte_input_set_result_callback(app->byteInput, SetValue, NULL, app, &FUNCTION, 1);
+        view_dispatcher_switch_to_view(app->viewDispatcher, ByteInput_View);
+        break;
+    case 2:
+        byte_input_set_header_text(app->byteInput, "Set Address");
+        byte_input_set_result_callback(app->byteInput, SetValue, NULL, app, &buf[2], 2);
+        view_dispatcher_switch_to_view(app->viewDispatcher, ByteInput_View);
+        break;
+    case 3:
+        byte_input_set_header_text(app->byteInput, "Set value or quantity");
+        byte_input_set_result_callback(app->byteInput, SetValue, NULL, app, &buf[4], 2);
+        view_dispatcher_switch_to_view(app->viewDispatcher, ByteInput_View);
+        break;
+    default:
+        if(FUNCTION==0x0F) offset += 2;
+        else offset += offset-3;
+        byte_input_set_header_text(app->byteInput, "Set x value");
+        if(FUNCTION==0x05)byte_input_set_result_callback(app->byteInput, SetValue, NULL, app, &buf[offset], 1);
+        else byte_input_set_result_callback(app->byteInput, SetValue, NULL, app, &buf[offset], 2);
+        view_dispatcher_switch_to_view(app->viewDispatcher, ByteInput_View);
+        break;
+    }
+}
+bool ByteInput_Scene_OnEvent(void* context, SceneManagerEvent event) {
+    UNUSED(context);
+    UNUSED(event);
+    return false;
+}
+void ByteInput_Scene_OnExit(void* context) {
+    App* app = context;
+    UNUSED(app);
+}
 //////////////////////////   Sender Scene  //////////////////////////
 const char* fns[] = {"0x01", "0x02", "0x03", "0x04", "0x05", "0x06", "0x0F", "0x10"};
 
@@ -839,11 +898,24 @@ void itemChangeCB(VariableItem* item) {
         break;
     }
 }
+
 void itemEnterCB(void* context, uint32_t index) {
     App* app = context;
-    UNUSED(index);
-    scene_manager_set_scene_state(app->sceneManager, ConsoleOutput_Scene, Sender_Option);
-    scene_manager_next_scene(app->sceneManager, ConsoleOutput_Scene);
+    uint8_t* buf = app->msgBuf;
+    uint8_t SendButton = FUNCTION >= 0x0F ? (QUANTITY) + 5 : 4;
+    if(index == SendButton) {
+        scene_manager_set_scene_state(app->sceneManager, ConsoleOutput_Scene, Sender_Option);
+        scene_manager_next_scene(app->sceneManager, ConsoleOutput_Scene);
+    } 
+    else if(index == 1||(FUNCTION>=0x0F&&index==4)){
+        
+    }
+    else {
+        if(!(FUNCTION == 0x05 && index == 3)) {
+            scene_manager_set_scene_state(app->sceneManager, ByteInput_Scene, index);
+            scene_manager_next_scene(app->sceneManager, ByteInput_Scene);
+        }
+    }
 }
 void BuildValues(App* app, uint16_t byteCount, uint8_t* buf, bool one) {
     VariableItem* item;
@@ -864,6 +936,7 @@ void BuildSender(App* app, uint8_t* buf) {
     VariableItem* item;
     uint16_t Value = 0;
     char val[10];
+    SLAVE = MIN(SLAVE, 32);
     snprintf(val, sizeof(val), "%d", SLAVE);
     item = variable_item_list_add(app->varList, "Peripheral ID", 32, itemChangeCB, app);
     variable_item_set_current_value_text(item, strdup(val));
@@ -872,16 +945,22 @@ void BuildSender(App* app, uint8_t* buf) {
     variable_item_set_current_value_text(item, fns[FUNCTION <= 6 ? FUNCTION - 1 : FUNCTION - 9]);
     variable_item_set_current_value_index(item, FUNCTION <= 6 ? FUNCTION - 1 : FUNCTION - 9);
     Value = STARTADDRESS;
-    snprintf(val, sizeof(val), "%d", MIN(Value, 255));
+    snprintf(val, sizeof(val), "%d", Value);
     item = variable_item_list_add(app->varList, "Start Address", 255, itemChangeCB, app);
     variable_item_set_current_value_text(item, strdup(val));
-    variable_item_set_current_value_index(item, STARTADDRESS);
+    variable_item_set_current_value_index(item, MIN(255, STARTADDRESS));
     if(FUNCTION != 0x05 && FUNCTION != 0x06) {
-        Value = buf[4] << 8 | buf[5];
+        uint16_t max = FUNCTION == 0x10 ? 0x0A :
+                       FUNCTION == 0x0F ? 0x50 :
+                       FUNCTION <= 0x02 ? 0x7D0 :
+                                          0x7D;
+        Value = MIN(buf[4] << 8 | buf[5], max);
         snprintf(val, sizeof(val), "%d", Value);
-        item = variable_item_list_add(app->varList, "Quantity", 255, itemChangeCB, app);
+        item = variable_item_list_add(app->varList, "Quantity", max, itemChangeCB, app);
         variable_item_set_current_value_text(item, strdup(val));
         variable_item_set_current_value_index(item, MIN(Value - 1, 255));
+        buf[4] = Value >> 8 & 0x00FF;
+        buf[5] = Value & 0x00FF;
     } else {
         Value = buf[4] << 8 | buf[5];
         snprintf(val, sizeof(val), "0x%04X", Value);
@@ -932,12 +1011,24 @@ void Sender_Scene_OnExit(void* context) {
 }
 
 //////////////////////////   Scene Handlers  //////////////////////////
-void (*const OnEnterHandlers[])(
-    void*) = {Main_Scene_OnEnter, CFG_Scene_OnEnter, Sniffer_Scene_OnEnter, Sender_Scene_OnEnter};
-bool (*const OnEventHandlers[])(void*, SceneManagerEvent) =
-    {Main_Scene_OnEvent, CFG_Scene_OnEvent, Sniffer_Scene_OnEvent, Sender_Scene_OnEvent};
-void (*const OnExitHandlers[])(
-    void*) = {Main_Scene_OnExit, CFG_Scene_OnExit, Sniffer_Scene_OnExit, Sender_Scene_OnExit};
+void (*const OnEnterHandlers[])(void*) = {
+    Main_Scene_OnEnter,
+    CFG_Scene_OnEnter,
+    Sniffer_Scene_OnEnter,
+    ByteInput_Scene_OnEnter,
+    Sender_Scene_OnEnter};
+bool (*const OnEventHandlers[])(void*, SceneManagerEvent) = {
+    Main_Scene_OnEvent,
+    CFG_Scene_OnEvent,
+    Sniffer_Scene_OnEvent,
+    ByteInput_Scene_OnEvent,
+    Sender_Scene_OnEvent};
+void (*const OnExitHandlers[])(void*) = {
+    Main_Scene_OnExit,
+    CFG_Scene_OnExit,
+    Sniffer_Scene_OnExit,
+    ByteInput_Scene_OnExit,
+    Sender_Scene_OnExit};
 static const SceneManagerHandlers SceneHandlers = {
     .on_enter_handlers = OnEnterHandlers,
     .on_event_handlers = OnEventHandlers,
@@ -1024,6 +1115,10 @@ static App* modbus_app_alloc() {
         app->viewDispatcher, VarList_View, variable_item_list_get_view(app->varList));
     app->textBox = text_box_alloc();
     view_dispatcher_add_view(app->viewDispatcher, TextBox_View, text_box_get_view(app->textBox));
+    app->byteInput = byte_input_alloc();
+    view_dispatcher_add_view(
+        app->viewDispatcher, ByteInput_View, byte_input_get_view(app->byteInput));
+
     app->text = furi_string_alloc();
     furi_string_reserve(app->text, 1024);
     makePaths(app);
@@ -1058,6 +1153,7 @@ void ModbusFree(void* context) {
 }
 void modbus_app_free(App* app) {
     furi_assert(app);
+    view_dispatcher_remove_view(app->viewDispatcher, ByteInput_View);
     view_dispatcher_remove_view(app->viewDispatcher, TextBox_View);
     furi_string_free(app->text);
     text_box_free(app->textBox);
