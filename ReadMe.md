@@ -106,6 +106,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - JS: [Add __filepath and __dirpath globals (By jamisonderek)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/463f50281a1536492cf9ee46c5e0ac6b30f72a7f)
 - Updated: [Flipper Hero v1.1 (By mentoster)](https://github.com/mentoster/Flipper-hero)
 - Updated: [Questions v1.1 (By nikilark)](https://github.com/nikilark/flipper_questions)
+- JS: [Add widget module (By jamisonderek)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/)
 
 <a name="release">
 
