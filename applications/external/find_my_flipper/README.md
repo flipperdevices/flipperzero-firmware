@@ -32,7 +32,8 @@ This app extends the functionality of the FlipperZero's bluetooth capabilities, 
    - Adjust the RSSI to the lowest setting (-40 dBm).
    - Initiate a scan. Wait for your SmartTag to appear as a "FindMy" device.
 6. **Capture Data:** Click **Raw** or **View Raw** to capture your **payload** and note your tag's **MAC Address**. Immediately remove the tag's battery to prevent key/MAC rotation.
-7. **Enter Data in FlipperZero App:** Input the captured **payload** and **MAC Address** into the FlipperZero app.
+   - The AirTag has now been cloned, if you put the battery back into the AirTag it will eventually rotate its keys with the Apple servers. This will invalidate the current keys on the Flipper. To prevent this you must keep the AirTag powered off / battery removed. You can always repeat these steps to return functionality to the Flipper. No need to get rid of the AirTag, you can always return to it if you desire, you just can't use both at the same time.
+8. **Enter Data in FlipperZero App:** Input the captured **payload** and **MAC Address** into the FlipperZero app.
 </details>
 <details>
   <summary>Option B: AirTag Key Generation</summary>
@@ -71,7 +72,7 @@ docker run -d --restart always --name anisette-v3 -p 6969:6969 dadoum/anisette-v
 ```
 ### 5. Create a Python Virtual Environment
 
-Navigate to the AirTag generation directory, then create and activate a Python virtual environment.
+Navigate to the AirTag generation directory, then create and activate a Python virtual environment. You will run all scripts in this terminal.
 ```
 cd AirTagGeneration
 ```
@@ -95,7 +96,7 @@ pip3 install -r requirements.txt
 ```
 ### 7. Generate Keys for AirTags
 
-Run the ```generate_keys.py``` script to generate the keys needed for AirTags, which will be saved in a new folder called 'keys'.
+Run the ```generate_keys.py``` script in the current terminal to generate the keys needed for AirTags, which will be saved in a new folder called 'keys'.
 
 
 ### 8. Transfer the Generated Keys to Flipper Zero
