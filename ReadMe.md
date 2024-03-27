@@ -103,6 +103,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Flizzer Tracker v0.6 (By LTVA1)](https://github.com/LTVA1/flizzer_tracker)
 - Updated: [Sudoku v1.2 (By profelis)](https://github.com/profelis/fz-sudoku)
 - Updated: [Flipper Doctor v0.1 (By julandealb)](https://github.com/julandealb/flipperdoc)
+- JS: [Add __filepath and __dirpath globals (By HaxSam)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/)
 
 <a name="release">
 
