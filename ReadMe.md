@@ -105,6 +105,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Flipper Doctor v0.1 (By julandealb)](https://github.com/julandealb/flipperdoc)
 - JS: [Add __filepath and __dirpath globals (By jamisonderek)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/463f50281a1536492cf9ee46c5e0ac6b30f72a7f)
 - Updated: [Flipper Hero v1.1 (By mentoster)](https://github.com/mentoster/Flipper-hero)
+- Updated: [Questions v1.1 (By nikilark)](https://github.com/nikilark/flipper_questions)
 
 <a name="release">
 
@@ -352,7 +353,7 @@ $ ./fbt dolphin_ext
 - [Paper Plane v1.3 (By Larry-the-Pig)](https://github.com/Larry-the-Pig/flipper-plane)
 - [Paint v1.1 (By n-o-T-I-n-s-a-n-e)](https://github.com/n-o-T-I-n-s-a-n-e)
 - [Pong v1.2 (By nmrr)](https://github.com/nmrr/flipperzero-pong) [(Patched By SimplyMinimal)](https://github.com/nmrr/flipperzero-pong/pull/2)
-- [Questions v1.0 (By nikilark)](https://github.com/nikilark/flipper_questions)
+- [Questions v1.1 (By nikilark)](https://github.com/nikilark/flipper_questions)
 - [Race v1.1 (By zyuhel)](https://github.com/zyuhel/flipperzero-racegame)
 - [Reaction Test (By Milk-Cool)](https://github.com/Milk-Cool/fz-reaction-game)
 - [Reaction Time (By ihatecsv)](https://github.com/ihatecsv/flipper_reaction_time)
