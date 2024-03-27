@@ -104,6 +104,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Sudoku v1.2 (By profelis)](https://github.com/profelis/fz-sudoku)
 - Updated: [Flipper Doctor v0.1 (By julandealb)](https://github.com/julandealb/flipperdoc)
 - JS: [Add __filepath and __dirpath globals (By jamisonderek)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/463f50281a1536492cf9ee46c5e0ac6b30f72a7f)
+- Updated: [Flipper Hero v1.1 (By mentoster)](https://github.com/mentoster/Flipper-hero)
 
 <a name="release">
 

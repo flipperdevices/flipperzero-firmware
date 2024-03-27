@@ -130,7 +130,7 @@ void draw_arrows(Canvas* const canvas, PluginState* plugin_state) {
 void draw_progress_box(Canvas* const canvas, int timer) {
     canvas_draw_frame(canvas, 0, 52, 128, 12);
     canvas_draw_box(
-        canvas, 0, 52, timer * 0.110, 12); // Assuming max timer value scales to full width
+        canvas, 0, 52, timer * 0.128, 12); // Assuming max timer value scales to full width
 }
 
 static void render_callback(Canvas* const canvas, void* ctx) {
@@ -212,13 +212,13 @@ void clear_game_data(PluginState* plugin_state) {
 
 void start_game(PluginState* plugin_state, FuriTimer* timer) {
     plugin_state->isGameStarted = true;
-    clear_game_data(plugin_state); // Reset game data to initial state first
     generate_arrows(plugin_state); // Then generate new arrows
+    clear_game_data(plugin_state); // Reset game data to initial state first
     furi_timer_start(timer, 10); // Start the timer after initializing the game state
 }
 void restart_game(PluginState* plugin_state) {
-    clear_game_data(plugin_state);
     generate_arrows(plugin_state);
+    clear_game_data(plugin_state);
 }
 
 int32_t flipper_hero_app() {
