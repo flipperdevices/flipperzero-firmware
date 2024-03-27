@@ -1,24 +1,25 @@
 #include "dolphin_state.h"
 
+const uint32_t DOLPHIN_LEVELS[DOLPHIN_LEVEL_COUNT] = {500,    1250,   2250,   3500,   5000,  6750,
+                                                      8750,   11000,  13500,  16250,  19250, 22500,
+                                                      26000,  29750,  33750,  38000,  42500, 47250,
+                                                      52250,  58250,  65250,  73250,  82250, 92250,
+                                                      103250, 115250, 128250, 142250, 157250};
+
 uint8_t doc_dolphin_get_level(uint32_t icounter) {
-    if(icounter <= LEVEL2_THRESHOLD) {
-        return 1;
-    } else if(icounter <= LEVEL3_THRESHOLD) {
-        return 2;
-    } else {
-        return 3;
+    for(int i = 0; i < DOLPHIN_LEVEL_COUNT; ++i) {
+        if(icounter <= DOLPHIN_LEVELS[i]) {
+            return i + 1;
+        }
     }
+    return DOLPHIN_LEVEL_COUNT + 1;
 }
 
 uint32_t doc_dolphin_state_xp_to_levelup(uint32_t icounter) {
-    uint32_t threshold = 0;
-    if(icounter <= LEVEL2_THRESHOLD) {
-        threshold = LEVEL2_THRESHOLD;
-    } else if(icounter <= LEVEL3_THRESHOLD) {
-        threshold = LEVEL3_THRESHOLD;
-    } else {
-        threshold = (uint32_t)-1;
-        return threshold;
+    for(int i = 0; i < DOLPHIN_LEVEL_COUNT; ++i) {
+        if(icounter <= DOLPHIN_LEVELS[i]) {
+            return DOLPHIN_LEVELS[i] - icounter;
+        }
     }
-    return threshold - icounter;
+    return (uint32_t)-1;
 }

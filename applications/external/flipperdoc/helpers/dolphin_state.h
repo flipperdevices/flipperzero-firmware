@@ -3,15 +3,12 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#define MAX_LEVEL 3
+#define MAX_LEVEL 30
 #define MAX_BUTTHURT 14
 
-#define DOLPHIN_STATE_PATH INT_PATH(".dolphin.state")
+#define DOLPHIN_STATE_PATH CFG_PATH("dolphin.state")
 #define DOLPHIN_STATE_HEADER_MAGIC 0xD0
 #define DOLPHIN_STATE_HEADER_VERSION 0x01
-
-#define LEVEL2_THRESHOLD 300
-#define LEVEL3_THRESHOLD 1800
 
 #define BUTTHURT_MIN 0
 #define BUTTHURT_MAX 14
@@ -32,6 +29,8 @@ enum {
     ButthurtCategoryNext,
     ButthurtCategoryMax,
 };
+
+#define DOLPHIN_LEVEL_COUNT 29
 
 typedef struct DolphinState DolphinState;
 typedef struct {

@@ -24,11 +24,19 @@ void doc_scene_selection_xp_change_text(Doc* app) {
     furi_string_reset(text);
 
     for(int i = 0; i < MAX_CATEGORY; ++i) {
-        furi_string_cat_printf(
-            text,
-            "%s\t%hhu | 20xp\n",
-            selection_xp_category[i],
-            app->dolphin->data.icounter_daily_limit[i]);
+        if(selection_xp_category[i] == (char*)"Plugin:") {
+            furi_string_cat_printf(
+                text,
+                "%s\t%hhu | 200xp\n",
+                selection_xp_category[i],
+                app->dolphin->data.icounter_daily_limit[i]);
+        } else {
+            furi_string_cat_printf(
+                text,
+                "%s\t%hhu | 100xp\n",
+                selection_xp_category[i],
+                app->dolphin->data.icounter_daily_limit[i]);
+        }
     }
 
     doc_selection_set_size(app->selection, MAX_CATEGORY);
