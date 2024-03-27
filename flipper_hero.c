@@ -5,73 +5,105 @@
 #include "view/arrows.h"
 #include "helpers/storage.h"
 #include "flipper_hero_icons.h"
+
 #define MIN_ARROWS 3
 #define MAX_ARROWS 8
 #define SCORE_MULTIPLIER 5
 #define TIMER_INCREMENT_PER_ARROW 25
+#define TIMER_MAX 1000
 
-void add_scores(PluginState* plugin_state) {
-    plugin_state->timer += TIMER_INCREMENT_PER_ARROW * plugin_state->numArrows;
-    plugin_state->score += plugin_state->numArrows * SCORE_MULTIPLIER;
-    plugin_state->round++;
+int generate_numArrows() {
+    return MIN_ARROWS + rand() % (MAX_ARROWS - MIN_ARROWS + 1);
 }
 void generate_arrows(PluginState* plugin_state) {
     // Generate a new set of arrows, 3 to 8
-    plugin_state->numArrows = rand() % (MAX_ARROWS - MIN_ARROWS + 1) + MIN_ARROWS;
+    plugin_state->numArrows = generate_numArrows();
 
-    // Initialize arrows with random directions and set them as unfilled
     for(int i = 0; i < plugin_state->numArrows; i++) {
-        plugin_state->arrowDirections[i] = "UDLR"[rand() % 4]; // Random direction
-        plugin_state->arrowFilled[i] = false; // Mark as unfilled
+        plugin_state->arrowDirections[i] = "UDLR"[rand() % 4];
+        plugin_state->arrowFilled[i] = false;
     }
-    plugin_state->nextArrowToFill = 0; // Reset to the first arrow
+    plugin_state->nextArrowToFill = 0;
 }
+
+void update_score_and_timer(PluginState* plugin_state) {
+    plugin_state->timer += TIMER_INCREMENT_PER_ARROW * plugin_state->numArrows;
+    plugin_state->score += SCORE_MULTIPLIER * plugin_state->numArrows;
+    plugin_state->round++;
+}
+
 void end_game(PluginState* plugin_state) {
     bool shouldSave = false;
-
-    // Update record score if the current score surpasses it
     if(plugin_state->score > plugin_state->record_score) {
         plugin_state->record_score = plugin_state->score;
         shouldSave = true;
     }
-
-    // Update record round if the current round surpasses it
     if(plugin_state->round > plugin_state->record_round) {
         plugin_state->record_round = plugin_state->round;
         shouldSave = true;
     }
-
-    // Save game records only if there was an update to the records
-    if(shouldSave) {
-        save_game_records(plugin_state);
-    }
+    if(shouldSave) save_game_records(plugin_state);
     plugin_state->isGameOver = true;
 }
 
 static void input_callback(InputEvent* input_event, FuriMessageQueue* event_queue) {
-    // Assert the validity of the event queue
     furi_assert(event_queue);
-
-    // Wrap the received input event into a PluginEvent and enqueue it for processing
     PluginEvent event = {.type = EventTypeKey, .input = *input_event};
     furi_message_queue_put(event_queue, &event, FuriWaitForever);
 }
 
 static void timer_callback(void* context) {
     PluginState* plugin_state = (PluginState*)context;
-    // Early exit if context is NULL, game hasn't started, or game is over
-    if(!plugin_state || !plugin_state->isGameStarted || plugin_state->isGameOver) {
-        return;
-    }
+    if(!plugin_state || plugin_state->isGameOver) return;
 
-    // Decrement the timer and check for game over condition
-    if(--plugin_state->timer <= 0) {
-        end_game(plugin_state);
-        // Trigger any game over logic here, e.g., notifying other parts of your program
-    }
+    // Decrement the timer
+    plugin_state->timer--;
 
-    // Optional: Trigger updates or checks that need to happen every tick
-    // This could be a good place for update functions that check game state, handle animations, etc.
+    // Check if the game should end
+    if(plugin_state->timer <= 0) end_game(plugin_state);
+}
+
+void handle_arrow_input(PluginState* plugin_state, InputEvent input_event) {
+    if(input_event.type != InputTypePress) return;
+    char expectedDirection = plugin_state->arrowDirections[plugin_state->nextArrowToFill];
+    bool isCorrect = false;
+    switch(input_event.key) {
+    case InputKeyUp:
+        isCorrect = expectedDirection == 'U';
+        break;
+    case InputKeyDown:
+        isCorrect = expectedDirection == 'D';
+        break;
+    case InputKeyLeft:
+        isCorrect = expectedDirection == 'L';
+        break;
+    case InputKeyRight:
+        isCorrect = expectedDirection == 'R';
+        break;
+    default:
+        break;
+    }
+    if(isCorrect) {
+        plugin_state->arrowFilled[plugin_state->nextArrowToFill++] = true;
+    } else if(input_event.key != InputKeyOk) {
+        memset(plugin_state->arrowFilled, false, sizeof(plugin_state->arrowFilled));
+        plugin_state->nextArrowToFill = 0;
+    }
+}
+
+void init_game_state(PluginState* plugin_state) {
+    plugin_state->isGameStarted = false;
+    plugin_state->isGameOver = false;
+    plugin_state->score = 0;
+    plugin_state->round = 1;
+    plugin_state->timer = TIMER_MAX;
+}
+
+void start_game(PluginState* plugin_state, FuriTimer* timer) {
+    init_game_state(plugin_state);
+    plugin_state->isGameStarted = true;
+    generate_arrows(plugin_state);
+    furi_timer_start(timer, 10);
 }
 
 void draw_start_screen(Canvas* const canvas) {
@@ -90,15 +122,6 @@ void draw_game_over_screen(Canvas* const canvas, int score, int round) {
     snprintf(roundText, sizeof(roundText), "Round: %d", round);
     canvas_draw_str_aligned(canvas, 64, 35, AlignCenter, AlignCenter, roundText);
 
-    // print record
-    // char recordText[32];
-    //  snprintf(recordText, sizeof(recordText), "max: %d", record_score);
-    //  canvas_draw_str_aligned(canvas, 120, 25, AlignRight, AlignCenter, recordText);
-
-    // print record round
-    // char recordRoundText[32];
-    // snprintf(recordRoundText, sizeof(recordRoundText), "max:  %d", record_round);
-    // canvas_draw_str_aligned(canvas, 120, 35, AlignRight, AlignCenter, recordRoundText);
     elements_button_center(canvas, "Restart");
     canvas_draw_frame(canvas, 0, 0, 128, 64);
 }
@@ -151,76 +174,6 @@ static void render_callback(Canvas* const canvas, void* ctx) {
 
     furi_mutex_release(plugin_state->mutex);
 }
-
-void reset_arrows(PluginState* plugin_state) {
-    for(int i = 0; i < plugin_state->numArrows; i++) {
-        plugin_state->arrowFilled[i] = false;
-    }
-    plugin_state->nextArrowToFill = 0;
-}
-
-bool check_arrow_direction(PluginState* plugin_state, InputEvent input_event) {
-    char expectedDirection = plugin_state->arrowDirections[plugin_state->nextArrowToFill];
-    switch(input_event.key) {
-    case InputKeyUp:
-        return expectedDirection == 'U';
-    case InputKeyDown:
-        return expectedDirection == 'D';
-    case InputKeyLeft:
-        return expectedDirection == 'L';
-    case InputKeyRight:
-        return expectedDirection == 'R';
-    default:
-        return false;
-    }
-}
-
-void handle_arrow_input(PluginState* plugin_state, InputEvent input_event) {
-    if(input_event.type != InputTypePress) {
-        return;
-    }
-
-    if(check_arrow_direction(plugin_state, input_event)) {
-        // Correct input: mark the arrow as filled and advance to the next
-        plugin_state->arrowFilled[plugin_state->nextArrowToFill++] = true;
-
-        // Optionally, add code to handle completion of all arrows, if necessary
-        if(plugin_state->nextArrowToFill >= plugin_state->numArrows) {
-            // Handle all arrows filled (e.g., advance to next round or increase score)
-        }
-    } else if(
-        input_event.key != InputKeyOk && plugin_state->nextArrowToFill < plugin_state->numArrows) {
-        // Incorrect input: reset the progress
-        reset_arrows(plugin_state);
-    }
-}
-
-// init data
-void init_data(PluginState* plugin_state) {
-    plugin_state->score = 0;
-    plugin_state->round = 1;
-    plugin_state->timer = 1000;
-    plugin_state->isGameStarted = false;
-    plugin_state->isGameOver = false;
-}
-void clear_game_data(PluginState* plugin_state) {
-    plugin_state->score = 0;
-    plugin_state->round = 1;
-    plugin_state->timer = 1000;
-    plugin_state->isGameOver = false;
-}
-
-void start_game(PluginState* plugin_state, FuriTimer* timer) {
-    plugin_state->isGameStarted = true;
-    generate_arrows(plugin_state); // Then generate new arrows
-    clear_game_data(plugin_state); // Reset game data to initial state first
-    furi_timer_start(timer, 10); // Start the timer after initializing the game state
-}
-void restart_game(PluginState* plugin_state) {
-    generate_arrows(plugin_state);
-    clear_game_data(plugin_state);
-}
-
 int32_t flipper_hero_app() {
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(PluginEvent));
 
@@ -236,7 +189,7 @@ int32_t flipper_hero_app() {
         return 255;
     }
 
-    init_data(plugin_state);
+    init_game_state(plugin_state);
     // load_game_records(plugin_state);
 
     // Set system callbacks
@@ -263,7 +216,7 @@ int32_t flipper_hero_app() {
 
         // Check if all arrows are filled, then regenerate
         if(plugin_state->nextArrowToFill >= plugin_state->numArrows) {
-            add_scores(plugin_state);
+            update_score_and_timer(plugin_state);
             generate_arrows(plugin_state); // Re-initialize arrow states
         }
 
@@ -279,11 +232,10 @@ int32_t flipper_hero_app() {
             if(!plugin_state->isGameStarted) {
                 start_game(plugin_state, timer);
             } else if(plugin_state->isGameOver) {
-                restart_game(plugin_state);
+                start_game(plugin_state, timer);
             }
         }
     }
-
     view_port_enabled_set(view_port, false);
     gui_remove_view_port(gui, view_port);
     furi_record_close("gui");

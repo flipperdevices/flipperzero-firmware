@@ -11,10 +11,12 @@
     "cortex-debug.gdbPath": "C:/Users/DimaM/.ufbt/toolchain/x86_64-windows/bin/arm-none-eabi-gdb-py.BAT",
     "editor.formatOnSave": true,
     "files.associations": {
+        "*.html": "html",
         "*.scons": "python",
         "SConscript": "python",
         "SConstruct": "python",
-        "*.fam": "python"
+        "*.fam": "python",
+        "compare": "c"
     },
     "cortex-debug.registerUseNaturalFormat": false,
     "python.analysis.typeCheckingMode": "off",
