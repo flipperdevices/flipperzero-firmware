@@ -1,10 +1,10 @@
-# FindMy Flipper - FindMy SmartTag Emulator
+# FindMy Flipper - AirTag and SmartTag Emulator
 
-This app extends the functionality of the FlipperZero's bluetooth capabilities, enabling it to act as an Apple AirTag or Samsung SmartTag, or even both simultaneously. It utilizes the FlipperZero's BLE beacon to broadcast a SmartTag signal to be picked up by the FindMy Network. I made this to serve as a versatile tool for tracking purposes, offering the ability to clone existing tags, generate OpenHaystack key pairs for integration with Apple's FindMy network, and tune the device's beacon broadcast settings.
+This app extends the functionality of the FlipperZero's bluetooth capabilities, enabling it to act as an Apple AirTag, Samsung SmartTag, or a Tile Tracker. It utilizes the FlipperZero's BLE beacon to broadcast a SmartTag signal to be picked up by the FindMy Network. I made this to serve as a versatile tool for tracking purposes, offering the ability to clone existing tags, generate OpenHaystack key pairs for integration with Apple's FindMy network, and always know where your FlipperZero is.
 
 ## Features
 
-1. Tag Emulation: Clone your existing Apple AirTag or Samsung SmartTag to the FlipperZero, or generate a key pair for use with the FindMy network without owning an actual AirTag.
+1. Tag Emulation: Clone your existing Apple AirTag, Samsung SmartTag, or Tile Tracker to the FlipperZero, or generate a key pair for use with the FindMy network without owning an actual AirTag.
 2. Customization: Users can adjust the interval between beacon broadcasts and modify the transmit power to suit their needs, optimizing for both visibility and battery life.
 3. Efficient Background Operation: The app is optimized to run in the background, ensuring that your FlipperZero can still be tracked with minimal battery usage and without stopping normal use.
 
@@ -20,10 +20,9 @@ This app extends the functionality of the FlipperZero's bluetooth capabilities, 
 ###### There are 2 methods to get SmartTag data depending on the type of tag you wish to emulate. Option A allows you to use Apple, Samsung, and Tile tags through the use of cloning the MAC Address and Payload of an actual tag. This also allows you to use the native app for tracking (Apple FindMy, Samsung SmartThing, Tile App). Option B allows you to emulate an Apple AirTag without needing to own an Apple device or airtag. This is done through key generation and requires a computer to download the location data.
 
 <details>
-  <summary>Option A: Cloning Existing Tag (Preferred and allows you to track without additional setup)</summary>
+  <summary><b>Option A: Cloning Existing Tag (Preferred and allows you to track without additional setup)</b></summary>
 
-
-1. **Pair a Tag:** First, pair an AirTag or Samsung SmartTag with your device.
+1. **Pair a Tag:** First, pair an AirTag, Samsung SmartTag or Tile Tracker with your device.
 2. **Enter 'Lost' Mode:** Keep the tag away from the device it's registered to for approximately 15 minutes.
 3. **Download nrfConnect or use an ESP32** Install nrfConnect from the Google Play Store. (Apple version doesn't reveal the needed Raw data, looking for a workaround)
 4. OR **Use an ESP32-WROOM / ESP32-S3** Don't have an android? No problem! You can get all the data you need from an ESP32: https://github.com/MatthewKuKanich/ESP32-AirTag-Scanner (Skip to step 7 if using an ESP32)
@@ -35,17 +34,19 @@ This app extends the functionality of the FlipperZero's bluetooth capabilities, 
    - The AirTag has now been cloned, if you put the battery back into the AirTag it will eventually rotate its keys with the Apple servers. This will invalidate the current keys on the Flipper. To prevent this you must keep the AirTag powered off / battery removed. You can always repeat these steps to return functionality to the Flipper. No need to get rid of the AirTag, you can always return to it if you desire, you just can't use both at the same time.
 8. **Enter Data in FlipperZero App:** Input the captured **payload** and **MAC Address** into the FlipperZero app.
 </details>
+
 <details>
-  <summary>Option B: AirTag Key Generation</summary>
-  
+<summary><b>Option B: AirTag Key Generation</b></summary>
+  <br>
+
 Video Tutorial: https://youtu.be/XGwHmwvQoqo?si=CAsKWEqGP5VFi9p9
 
-## Prerequisites
+### Prerequisites
 
 Before you begin, ensure you have the following installed on your system:
 
 - Docker Desktop
-- Python (likely already installed)
+- Python
 - Git
 
 ## Step-by-Step Instructions
@@ -147,7 +148,7 @@ Compatibility
 
 Thanks
 
-- Huge thanks to all the people that contributed to the OpenHaystack project, supporting projects, and guides on the subject. This wouldn't be a thing without any of you! Special thanks to WillyJL for helping get the app input working and overall overhaul of the apps functions!
+- Huge thanks to all the people that contributed to the OpenHaystack project, supporting projects, and guides on the subject. This wouldn't be a thing without any of you! Special thanks to Chapoly1305 for introducing me to the FindMy network and WillyJL for helping get the app input working and overall overhaul of the apps functions!
 
 Legal and Privacy
 
