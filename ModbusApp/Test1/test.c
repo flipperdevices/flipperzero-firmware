@@ -54,6 +54,7 @@ typedef enum {
     ConsoleOutput_Scene,
     ByteInput_Scene,
     Sender_Scene,
+    MSGsBuffer_Scene,
     Scene_Num
 } Scenes;
 typedef enum { Submenu_View, VarList_View, TextBox_View, ByteInput_View } Views;
@@ -61,6 +62,7 @@ typedef enum {
     Settings_Option,
     Sniffer_Option,
     Sender_Option,
+    MSGBuf_Option,
     Read_LOG_Option,
     About_Option
 } Main_options;
@@ -86,6 +88,14 @@ typedef struct {
     bool slave;
     FuriString* timeout;
 } Modbus;
+#define Ring_Buf_Size 255
+typedef struct {
+    uint8_t delimiters[32];
+    uint8_t ringBuffer[Ring_Buf_Size];
+    uint16_t writeIdx;
+    uint8_t delimiterIdx;
+    uint8_t readIdx;
+} RingBuffer;
 
 typedef struct {
     SceneManager* sceneManager;
@@ -110,6 +120,7 @@ typedef struct {
 
     uint8_t msgBuf[RX_BUF_SIZE + 1];
     size_t msgLen;
+    RingBuffer* ringBuffer;
 } App;
 
 typedef enum {
@@ -179,8 +190,10 @@ bool OpenLogFile(App* app) {
         storage_file_read(app->LOGfile, buf, sizeof(buf));
         buf[sizeof(buf)] = '\0';
         furi_string_cat_str(app->text, buf);
-    } else
+    } else {
         dialog_message_show_storage_error(app->dialogs, "Cannot open File");
+        return false;
+    }
     storage_file_close(app->LOGfile);
     furi_string_free(selected_filepath);
     furi_string_free(predefined_filepath);
@@ -297,6 +310,41 @@ static void Serial_Begin(FuriHalSerialHandle* handle, LL_USART_InitTypeDef USART
     furi_hal_serial_set_br(handle, USART_InitStruct.BaudRate);
     LL_USART_DisableIT_ERROR(USART1);
 }
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//                                              RING BUFFER
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+RingBuffer* ring_buffer_alloc() {
+    RingBuffer* buffer = malloc(sizeof(RingBuffer));
+    buffer->writeIdx = 0;
+    buffer->delimiterIdx = 0;
+    for(uint8_t i = 0; i < 32; i++) buffer->delimiters[i] = 255;
+    return buffer;
+}
+void ring_buffer_free(RingBuffer* buffer) {
+    free(buffer);
+}
+void writeRingBuffer(RingBuffer* rb, uint8_t* buf, size_t len) {
+    for(size_t i = 0; i < len; i++) {
+        rb->ringBuffer[rb->writeIdx] = buf[i];
+        if(i == len - 1) rb->delimiters[rb->delimiterIdx] = rb->writeIdx;
+        if(++rb->writeIdx > 255) {
+            rb->delimiterIdx = 0;
+            rb->writeIdx = 0;
+        }
+    }
+    rb->delimiterIdx++;
+}
+/*        if(rb->writeIdx > 254){
+            rb->writeIdx = 0;
+            FURI_LOG_W("","Reset!!");
+            
+        }
+        else rb->writeIdx++;
+*/
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 uint16_t getCRC(uint8_t* buf, uint8_t len) {
     uint16_t crc = 0xFFFF;
 
@@ -435,6 +483,7 @@ void ModbusParser(uint8_t* buf, size_t len, App* app, FuriString* data) {
     } else {
         if(!app->modbus->slave) {
             for(size_t i = 0; i < len; i++) app->msgBuf[i] = buf[i];
+            writeRingBuffer(app->ringBuffer, buf, len);
             app->msgLen = len;
         }
         pduParser(app, app->modbus->slave, buf, len, data);
@@ -454,6 +503,7 @@ void handle_rx_data_cb(uint8_t* buf, size_t len, void* context) {
     } else {
         furi_string_cat_str(data, "\nCRC check Failed:\n");
         for(size_t i = 0; i < len; i++) furi_string_cat_printf(data, "%02X", buf[i]);
+        furi_string_cat_str(data, "\nPlease check UART Settings!!!");
     }
     //*/
     //for(size_t i = 0; i < len; i++) furi_string_cat_printf(data, "%02X", buf[i]);
@@ -584,10 +634,16 @@ void mainOptionsCB(void* context, uint32_t index) {
         scene_manager_set_scene_state(app->sceneManager, Main_Scene, Sender_Option);
         scene_manager_next_scene(app->sceneManager, Sender_Scene);
         break;
+    case MSGBuf_Option:
+        scene_manager_set_scene_state(app->sceneManager, Main_Scene, MSGBuf_Option);
+        scene_manager_next_scene(app->sceneManager, MSGsBuffer_Scene);
+        break;
     case Read_LOG_Option:
         scene_manager_set_scene_state(app->sceneManager, Main_Scene, Read_LOG_Option);
-        scene_manager_set_scene_state(app->sceneManager, ConsoleOutput_Scene, Read_LOG_Option);
-        scene_manager_next_scene(app->sceneManager, ConsoleOutput_Scene);
+        if(OpenLogFile(app)) {
+            scene_manager_set_scene_state(app->sceneManager, ConsoleOutput_Scene, Read_LOG_Option);
+            scene_manager_next_scene(app->sceneManager, ConsoleOutput_Scene);
+        }
         break;
     case About_Option:
         scene_manager_set_scene_state(app->sceneManager, Main_Scene, About_Option);
@@ -605,6 +661,7 @@ void Main_Scene_OnEnter(void* context) {
     submenu_add_item(app->subMenu, "Settings", Settings_Option, mainOptionsCB, app);
     submenu_add_item(app->subMenu, "Sniffer", Sniffer_Option, mainOptionsCB, app);
     submenu_add_item(app->subMenu, "Sender", Sender_Option, mainOptionsCB, app);
+    submenu_add_item(app->subMenu, "MSGBuf", MSGBuf_Option, mainOptionsCB, app);
     submenu_add_item(app->subMenu, "Read LOG", Read_LOG_Option, mainOptionsCB, app);
     submenu_add_item(app->subMenu, "About", About_Option, mainOptionsCB, app);
     submenu_set_selected_item(
@@ -736,9 +793,6 @@ void Sniffer_Scene_OnEnter(void* context) {
         furi_string_cat_printf(app->text, "\nParity: %s", parityValues[app->uart->cfg->parity]);
         furi_string_cat_printf(
             app->text, "\nResponse TimeOut: %dms", app->uart->cfg->timeout * TIMEOUT_SCALER);
-    } else if(
-        scene_manager_get_scene_state(app->sceneManager, ConsoleOutput_Scene) == Read_LOG_Option) {
-        OpenLogFile(app);
     } else if(scene_manager_get_scene_state(app->sceneManager, ConsoleOutput_Scene) == About_Option) {
         text_box_set_font(app->textBox, TextBoxFontText);
         text_box_set_focus(app->textBox, TextBoxFocusStart);
@@ -1013,26 +1067,65 @@ void Sender_Scene_OnExit(void* context) {
     App* app = context;
     variable_item_list_reset(app->varList);
 }
-
+//////////////////////////   MSGsBuffer Scene  ////////////////////////
+void BuildCMDList(App* app) {
+    submenu_set_header(app->subMenu, "Select CMD");
+    RingBuffer* rb = app->ringBuffer;
+    rb->readIdx = 0;
+    uint8_t buf[255];
+    uint8_t i = 0;
+    uint8_t delimiterIdx = 0;
+    uint8_t len = 0;
+    do {
+        len = 0;
+        FuriString* str = furi_string_alloc();
+        do {
+            furi_string_cat_printf(str, "%02X", rb->ringBuffer[i]);
+            buf[len] = rb->ringBuffer[i];
+            len++;
+            i++;
+        } while(i <= rb->delimiters[delimiterIdx] && i < 255);
+        delimiterIdx++;
+        if((CRCH | CRCL << 8) == getCRC(buf, len - 2))
+            submenu_add_item(app->subMenu, furi_string_get_cstr(str), 0, NULL, app);
+    } while(i < 255);
+}
+void MSGsBuffer_Scene_OnEnter(void* context) {
+    App* app = context;
+    submenu_reset(app->subMenu);
+    BuildCMDList(app);
+}
+bool MSGsBuffer_Scene_OnEvent(void* context, SceneManagerEvent event) {
+    UNUSED(context);
+    UNUSED(event);
+    return false;
+}
+void MSGsBuffer_Scene_OnExit(void* context) {
+    App* app = context;
+    submenu_reset(app->subMenu);
+}
 //////////////////////////   Scene Handlers  //////////////////////////
 void (*const OnEnterHandlers[])(void*) = {
     Main_Scene_OnEnter,
     CFG_Scene_OnEnter,
     Sniffer_Scene_OnEnter,
     ByteInput_Scene_OnEnter,
-    Sender_Scene_OnEnter};
+    Sender_Scene_OnEnter,
+    MSGsBuffer_Scene_OnEnter};
 bool (*const OnEventHandlers[])(void*, SceneManagerEvent) = {
     Main_Scene_OnEvent,
     CFG_Scene_OnEvent,
     Sniffer_Scene_OnEvent,
     ByteInput_Scene_OnEvent,
-    Sender_Scene_OnEvent};
+    Sender_Scene_OnEvent,
+    MSGsBuffer_Scene_OnEvent};
 void (*const OnExitHandlers[])(void*) = {
     Main_Scene_OnExit,
     CFG_Scene_OnExit,
     Sniffer_Scene_OnExit,
     ByteInput_Scene_OnExit,
-    Sender_Scene_OnExit};
+    Sender_Scene_OnExit,
+    MSGsBuffer_Scene_OnExit};
 static const SceneManagerHandlers SceneHandlers = {
     .on_enter_handlers = OnEnterHandlers,
     .on_event_handlers = OnEventHandlers,
@@ -1131,6 +1224,7 @@ static App* modbus_app_alloc() {
     furi_timer_set_thread_priority(FuriTimerThreadPriorityElevated);
     app->modbus = Modbus_alloc(app);
     app->uart = Uart_Alloc(app);
+    app->ringBuffer = ring_buffer_alloc();
     msgBuf_alloc(app);
     return app;
 }
@@ -1167,6 +1261,7 @@ void modbus_app_free(App* app) {
     submenu_free(app->subMenu);
     view_dispatcher_free(app->viewDispatcher);
     scene_manager_free(app->sceneManager);
+    ring_buffer_free(app->ringBuffer);
     ModbusFree(app);
     uartFree(app);
     storage_file_free(app->LOGfile);
