@@ -29,8 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0326-2110-0.99.2-013555d](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-03-26 21:10 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-03-26 21:10 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-03-27 20:42 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-03-27 20:42 EST`
 - Removed: [Mfkey32 With Nested v1.0 (By noproto)](https://github.com/noproto/FlipperMfkey), it's functionality is now built into [Mfkey v2.0 (By noproto)](https://github.com/noproto/FlipperMfkey)
 - OFW: [Add the Freedom_2_dolphins animation #3521 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3521)
 - OFW: [NFC wording fixes #3512 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3512)
@@ -107,6 +107,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Flipper Hero v1.1 (By mentoster)](https://github.com/mentoster/Flipper-hero)
 - Updated: [Questions v1.1 (By nikilark)](https://github.com/nikilark/flipper_questions)
 - JS: [Add widget module (By jamisonderek)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/e6fe5e0b52ab3dfa9a3a4d5325ab63ba4789f7e3)
+- Updated: [Flipper Hero v1.2 (By mentoster)](https://github.com/mentoster/Flipper-hero)
 
 <a name="release">
 
@@ -336,7 +337,7 @@ $ ./fbt dolphin_ext
 - [Etch-A-Sketch (By SimplyMinimal)](https://github.com/SimplyMinimal/FlipperZero-Etch-A-Sketch)
 - [Five Nights at Flipper's v1.2 (By sillygir1)](https://github.com/sillygir1/flipperzero-fnaf)
 - [Flappy Bird v1.1 (By DroomOne)](https://github.com/DroomOne/flipperzero-firmware/tree/dev/applications/flappy_bird) [Flappy: Border hitboxes, bigger Pilars (By TQMatvey)](https://github.com/DarkFlippers/unleashed-firmware/pull/114) [Increase pilars line width to improve visibility (By ahumeniy)](https://github.com/DarkFlippers/unleashed-firmware/pull/140)
-- [Flipper Hero v1.1 (By mentoster)](https://github.com/mentoster/Flipper-hero)
+- [Flipper Hero v1.2 (By mentoster)](https://github.com/mentoster/Flipper-hero)
 - [Flippy Road v1.0 (By rkilpadi)](https://github.com/rkilpadi/flippy-road)
 - [Game of Life v1.1 (Updated to work by tgxn) (By itsyourbedtime)](https://github.com/tgxn/flipperzero-firmware/blob/dev/applications/game_of_life/game_of_life.c)
 - [Guess The Number v1.2 (By kWAYTV)](https://github.com/kWAYTV/guess-the-number-fz)
