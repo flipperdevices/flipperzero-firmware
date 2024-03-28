@@ -41,10 +41,11 @@
 #define SLAVE buf[0]
 #define FUNCTION buf[1]
 #define EXCEPTION buf[2] - 1
+#define STARTADDRESS (buf[2] << 8 | buf[3])
+#define QUANTITY (buf[4] << 8 | buf[5])
+#define BYTECOUNT buf[6]
 #define CRCH buf[len - 2]
 #define CRCL buf[len - 1]
-#define STARTADDRESS buf[2] << 8 | buf[3]
-#define QUANTITY buf[4] << 8 | buf[5]
 
 //////////////////////////   Defining Structs  //////////////////////////
 typedef enum {
@@ -804,11 +805,13 @@ void ByteInput_Scene_OnEnter(void* context) {
         view_dispatcher_switch_to_view(app->viewDispatcher, ByteInput_View);
         break;
     default:
-        if(FUNCTION==0x0F) offset += 2;
-        else offset += offset-3;
+        if(FUNCTION == 0x0F)
+            offset += 2;
+        else
+            offset += offset - 3;
         byte_input_set_header_text(app->byteInput, "Set x value");
-        if(FUNCTION==0x05)byte_input_set_result_callback(app->byteInput, SetValue, NULL, app, &buf[offset], 1);
-        else byte_input_set_result_callback(app->byteInput, SetValue, NULL, app, &buf[offset], 2);
+        byte_input_set_result_callback(
+            app->byteInput, SetValue, NULL, app, &buf[offset], FUNCTION == 0x0F ? 1 : 2);
         view_dispatcher_switch_to_view(app->viewDispatcher, ByteInput_View);
         break;
     }
@@ -868,8 +871,8 @@ void itemChangeCB(VariableItem* item) {
                 item = variable_item_list_get(app->varList, 4);
                 snprintf(str, sizeof(str), "[ %d ]", Value);
                 variable_item_set_current_value_text(item, strdup(str));
-                if(buf[6] != Value) {
-                    buf[6] = Value;
+                if(BYTECOUNT != Value) {
+                    BYTECOUNT = Value;
                     BuildSender(app, buf);
                 }
             }
@@ -902,15 +905,15 @@ void itemChangeCB(VariableItem* item) {
 void itemEnterCB(void* context, uint32_t index) {
     App* app = context;
     uint8_t* buf = app->msgBuf;
-    uint8_t SendButton = FUNCTION >= 0x0F ? (QUANTITY) + 5 : 4;
+    uint8_t SendButton = FUNCTION >= 0x0F ? (FUNCTION == 0x0F ? BYTECOUNT : QUANTITY) + 5 : 4;
+    scene_manager_set_scene_state(app->sceneManager, Sender_Scene, index);
     if(index == SendButton) {
         scene_manager_set_scene_state(app->sceneManager, ConsoleOutput_Scene, Sender_Option);
         scene_manager_next_scene(app->sceneManager, ConsoleOutput_Scene);
-    } 
-    else if(index == 1||(FUNCTION>=0x0F&&index==4)){
-        
     }
-    else {
+
+    else if(index == 1 || (FUNCTION >= 0x0F && index == 4)) {
+    } else {
         if(!(FUNCTION == 0x05 && index == 3)) {
             scene_manager_set_scene_state(app->sceneManager, ByteInput_Scene, index);
             scene_manager_next_scene(app->sceneManager, ByteInput_Scene);
@@ -922,7 +925,7 @@ void BuildValues(App* app, uint16_t byteCount, uint8_t* buf, bool one) {
     char lbl[20];
     char val[10];
     for(uint16_t i = 0; i < byteCount; i += one ? 1 : 2) {
-        snprintf(lbl, sizeof(lbl), one ? "Byte %d" : "Value %d", one ? i + 1 : i / 2 + 1);
+        snprintf(lbl, sizeof(lbl), one ? "Byte %d" : "Register %d", one ? i + 1 : i / 2 + 1);
         snprintf(
             val, sizeof(val), one ? "0x%02X" : "0x%04X", one ? buf[i] : buf[i] << 8 | buf[i + 1]);
         item = variable_item_list_add(app->varList, strdup(lbl), 255, itemChangeCB, app);
@@ -958,7 +961,7 @@ void BuildSender(App* app, uint8_t* buf) {
         snprintf(val, sizeof(val), "%d", Value);
         item = variable_item_list_add(app->varList, "Quantity", max, itemChangeCB, app);
         variable_item_set_current_value_text(item, strdup(val));
-        variable_item_set_current_value_index(item, MIN(Value - 1, 255));
+        variable_item_set_current_value_index(item, MIN(Value - 1, MIN(max, 255)));
         buf[4] = Value >> 8 & 0x00FF;
         buf[5] = Value & 0x00FF;
     } else {
@@ -984,7 +987,7 @@ void BuildSender(App* app, uint8_t* buf) {
         item = variable_item_list_add(app->varList, "ByteCount", 1, NULL, app);
         variable_item_set_current_value_text(item, strdup(val));
         variable_item_set_current_value_index(item, 0);
-        buf[6] = Value;
+        BYTECOUNT = Value;
         app->msgLen = Value + 9;
         BuildValues(app, Value, buf + 7, FUNCTION == 0x0F ? true : false);
     }
@@ -997,7 +1000,8 @@ void BuildSender(App* app, uint8_t* buf) {
 void Sender_Scene_OnEnter(void* context) {
     App* app = context;
     BuildSender(app, app->msgBuf);
-    variable_item_list_set_selected_item(app->varList, 0);
+    variable_item_list_set_selected_item(
+        app->varList, scene_manager_get_scene_state(app->sceneManager, Sender_Scene));
     view_dispatcher_switch_to_view(app->viewDispatcher, VarList_View);
 }
 bool Sender_Scene_OnEvent(void* context, SceneManagerEvent event) {
