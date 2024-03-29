@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,60.3,,
+Version,+,60.4,,
 Header,+,applications/drivers/subghz/cc1101_ext/cc1101_ext_interconnect.h,,
 Header,+,applications/main/archive/helpers/archive_helpers_ext.h,,
 Header,+,applications/main/subghz/subghz_fap.h,,
