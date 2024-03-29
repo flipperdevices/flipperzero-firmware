@@ -29,8 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0328-2112-0.99.2-30d8e0b](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-03-29 01:10 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-03-29 01:10 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-03-29 01:25 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-03-29 01:25 EST`
 - OFW: [NFC: Fix mf desfire detect #3548 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3548)
 - OFW: [Fixed plugins and UI #3543 (By RebornedBrain)](https://github.com/flipperdevices/flipperzero-firmware/pull/3543)
 - OFW: [ufbt: fixes for generated vscode project #3547 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/3547)
@@ -38,7 +38,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [L1_Mods animation update : adding VGM visual #3502 (By Kuronons)](https://github.com/flipperdevices/flipperzero-firmware/pull/3502)
 - [IR Changes & Other Fixes (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/b551c6303b78b4ccaf2d7a8ea427d675d607ab33)
 - OFW: [Configurable Infrared TX output #3484 (By gsurkov)](https://github.com/flipperdevices/flipperzero-firmware/pull/3484)
-- IR: [Support new settings from OFW (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/a5233ddf9cd408ab6e4c9e3618aaefbb9aed3d63)
+- IR: [Support new settings from OFW (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/73e1777816cdc87ec2eaf9b6081303b628d7f425)
 
 <a name="release">
 

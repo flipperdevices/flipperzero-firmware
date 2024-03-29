@@ -507,14 +507,14 @@ static void js_widget_add_icon(struct mjs* mjs) {
 
     const Icon* icon = NULL;
     // for(size_t i = 0; i < ICON_PATHS_COUNT; i++) {
-        // if(ICON_PATHS[i].path == NULL) continue;
-        // const char* iter_name = strrchr(ICON_PATHS[i].path, '/');
-        // if(iter_name++ == NULL) continue;
-        // if(strnlen(iter_name, icon_len + 1) == icon_len &&
-           // strncmp(iter_name, icon_name, icon_len) == 0) {
-            // icon = ICON_PATHS[i].icon;
-            // break;
-        // }
+    // if(ICON_PATHS[i].path == NULL) continue;
+    // const char* iter_name = strrchr(ICON_PATHS[i].path, '/');
+    // if(iter_name++ == NULL) continue;
+    // if(strnlen(iter_name, icon_len + 1) == icon_len &&
+    // strncmp(iter_name, icon_name, icon_len) == 0) {
+    // icon = ICON_PATHS[i].icon;
+    // break;
+    // }
     // }
 
     if(icon == NULL) {

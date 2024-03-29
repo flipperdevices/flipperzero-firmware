@@ -8,6 +8,9 @@
 #include <dialogs/dialogs.h>
 #include <ir_remote_icons.h>
 
+#include <infrared/infrared_app.h>
+#include <toolbox/saved_struct.h>
+
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
 
@@ -208,10 +211,9 @@ int32_t infrared_remote_app(void* p) {
     DialogsFileBrowserOptions browser_options;
     dialog_file_browser_set_basic_options(&browser_options, ".txt", &I_sub1_10px);
     FuriString* map_file = furi_string_alloc();
-    furi_string_set(map_file, EXT_PATH("infrared/ir_remote"));
-    if(!storage_file_exists(storage, EXT_PATH("infrared/ir_remote"))) {
-        storage_common_mkdir(
-            storage, EXT_PATH("infrared/ir_remote")); //Make Folder If dir not exist
+    furi_string_set(map_file, IR_REMOTE_PATH);
+    if(!storage_file_exists(storage, IR_REMOTE_PATH)) {
+        storage_common_mkdir(storage, IR_REMOTE_PATH); //Make Folder If dir not exist
     }
 
     bool res = dialog_file_browser_show(dialogs, map_file, map_file, &browser_options);

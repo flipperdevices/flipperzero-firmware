@@ -4,6 +4,8 @@
 
 #include "infrared_remote_button.h"
 
+#define IR_REMOTE_PATH EXT_PATH("infrared/ir_remote")
+
 typedef struct InfraredRemote InfraredRemote;
 
 InfraredRemote* infrared_remote_alloc();
