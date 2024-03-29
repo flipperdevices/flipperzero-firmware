@@ -1,6 +1,8 @@
+## 1.3
+ - Update API v60.3
 ## 1.2
- - Updade icon
+ - Update icon
 ## 1.1
- - Updade API v58.0
+ - Update API v58.0
 ## 1.0
  - Initial release
