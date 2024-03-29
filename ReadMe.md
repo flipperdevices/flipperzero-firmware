@@ -4,7 +4,7 @@
 &nbsp;<a href='https://shop.rogue-master.net/' target='_blank'><img src='https://rogue-master.net/img/Merch.png' alt='RM Merch'' title='RM Merch'></a>
 &nbsp;<a href='https://github.com/RogueMaster/awesome-flipperzero-withModules' target='_blank'><img src='https://rogue-master.net/img/Resources.png' alt='More Research / Assets' title='More Research / Assets'></a></h1>
 
-# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0328-2125-0.99.2-5475fdf.tgz&channel=RM0328-2125-0.99.2-5475fdf&version=0.99.2)
+# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0329-0318-0.100.2-f601860.tgz&channel=RM0329-0318-0.100.2-f601860&version=0.100.2)
 
 ## Thank you so much to our RM Pro/SUPER Patreon supporters! Because of people like you, we are able to offer the best and most up-to-date Flipper Zero Firmware!
 
@@ -31,14 +31,6 @@ This software is for experimental purposes only and is not meant for any illegal
 
 - Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-03-29 03:18 EST`
 - Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-03-29 03:18 EST`
-- OFW: [NFC: Fix mf desfire detect #3548 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3548)
-- OFW: [Fixed plugins and UI #3543 (By RebornedBrain)](https://github.com/flipperdevices/flipperzero-firmware/pull/3543)
-- OFW: [ufbt: fixes for generated vscode project #3547 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/3547)
-- OFW: [RFID Improvements #3524 (By gsurkov)](https://github.com/flipperdevices/flipperzero-firmware/pull/3524)
-- OFW: [L1_Mods animation update : adding VGM visual #3502 (By Kuronons)](https://github.com/flipperdevices/flipperzero-firmware/pull/3502)
-- [IR Changes & Other Fixes (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/b551c6303b78b4ccaf2d7a8ea427d675d607ab33)
-- OFW: [Configurable Infrared TX output #3484 (By gsurkov)](https://github.com/flipperdevices/flipperzero-firmware/pull/3484)
-- IR: [Support new settings from OFW (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/73e1777816cdc87ec2eaf9b6081303b628d7f425)
 
 <a name="release">
 
@@ -574,4 +566,4 @@ $ ./fbt dolphin_ext
 - [Desktop Favorite Binds To Allow Opening Custom Game Menu. Whomever can complete this gets 3 months of subscriber builds. Patrons can DM me to add their monthly towards this bounty.](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/756)
 - `Bluetooth Audio` APP to allow flipper to pair to external speaker or headphones for wav/mp3 playback ($200 USD in ETH or BTC) (Don't think this is possible)
 
-# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0328-2125-0.99.2-5475fdf.tgz&channel=RM0328-2125-0.99.2-5475fdf&version=0.99.2)
+# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0329-0318-0.100.2-f601860.tgz&channel=RM0329-0318-0.100.2-f601860&version=0.100.2)
