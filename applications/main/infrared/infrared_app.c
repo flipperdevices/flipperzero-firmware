@@ -12,14 +12,6 @@
 #define INFRARED_TX_MIN_INTERVAL_MS (50U)
 #define INFRARED_TASK_STACK_SIZE (2048UL)
 
-#define INFRARED_SETTINGS_PATH EXT_PATH("infrared/.infrared.settings")
-#define INFRARED_SETTINGS_VERSION (0)
-#define INFRARED_SETTINGS_MAGIC (0x1F)
-
-typedef struct {
-    uint8_t tx_pin;
-} InfraredSettings;
-
 static const NotificationSequence*
     infrared_notification_sequences[InfraredNotificationMessageCount] = {
         &sequence_success,
@@ -210,18 +202,16 @@ static InfraredApp* infrared_alloc(void) {
     view_dispatcher_add_view(
         view_dispatcher, InfraredViewLoading, loading_get_view(infrared->loading));
 
-    infrared->debug_view = infrared_debug_view_alloc();
-    view_dispatcher_add_view(
-        view_dispatcher,
-        InfraredViewDebugView,
-        infrared_debug_view_get_view(infrared->debug_view));
+    if(app_state->is_debug_enabled) {
+        infrared->debug_view = infrared_debug_view_alloc();
+        view_dispatcher_add_view(
+            view_dispatcher,
+            InfraredViewDebugView,
+            infrared_debug_view_get_view(infrared->debug_view));
+    }
 
     infrared->button_panel = button_panel_alloc();
     infrared->progress = infrared_progress_view_alloc();
-
-    infrared->last_settings = infrared_last_settings_alloc();
-    infrared_last_settings_load(infrared->last_settings);
-    infrared_last_settings_apply(infrared->last_settings);
 
     return infrared;
 }
@@ -268,8 +258,10 @@ static void infrared_free(InfraredApp* infrared) {
     view_dispatcher_remove_view(view_dispatcher, InfraredViewLoading);
     loading_free(infrared->loading);
 
-    view_dispatcher_remove_view(view_dispatcher, InfraredViewDebugView);
-    infrared_debug_view_free(infrared->debug_view);
+    if(app_state->is_debug_enabled) {
+        view_dispatcher_remove_view(view_dispatcher, InfraredViewDebugView);
+        infrared_debug_view_free(infrared->debug_view);
+    }
 
     button_panel_free(infrared->button_panel);
     infrared_progress_view_free(infrared->progress);
@@ -294,10 +286,6 @@ static void infrared_free(InfraredApp* infrared) {
     furi_string_free(infrared->file_path);
     furi_string_free(infrared->button_name);
 
-    infrared_last_settings_reset(infrared->last_settings);
-    infrared_last_settings_free(infrared->last_settings);
-
-    UNUSED(app_state);
     free(infrared);
 }
 
@@ -488,15 +476,18 @@ static void infrared_load_settings(InfraredApp* infrared) {
            INFRARED_SETTINGS_MAGIC,
            INFRARED_SETTINGS_VERSION)) {
         FURI_LOG_D(TAG, "Failed to load settings, using defaults");
-        infrared_save_settings(infrared);
     }
 
     infrared_set_tx_pin(infrared, settings.tx_pin);
+    if(settings.tx_pin < FuriHalInfraredTxPinMax) {
+        infrared_enable_otg(infrared, settings.otg_enabled);
+    }
 }
 
 void infrared_save_settings(InfraredApp* infrared) {
     InfraredSettings settings = {
         .tx_pin = infrared->app_state.tx_pin,
+        .otg_enabled = infrared->app_state.is_otg_enabled,
     };
 
     if(!saved_struct_save(
@@ -546,7 +537,7 @@ void infrared_popup_closed_callback(void* context) {
         infrared->view_dispatcher, InfraredCustomEventTypePopupClosed);
 }
 
-int32_t infrared_app(char* p) {
+int32_t infrared_app(void* p) {
     InfraredApp* infrared = infrared_alloc();
 
     infrared_load_settings(infrared);

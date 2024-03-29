@@ -7,7 +7,6 @@
 #include <input/input.h>
 #include <dialogs/dialogs.h>
 #include <ir_remote_icons.h>
-#include <infrared/infrared_last_settings.h>
 
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
@@ -484,9 +483,30 @@ int32_t infrared_remote_app(void* p) {
     flipper_format_free(ff);
     furi_record_close(RECORD_STORAGE);
 
-    InfraredLastSettings* last_settings = infrared_last_settings_alloc();
-    infrared_last_settings_load(last_settings);
-    infrared_last_settings_apply(last_settings);
+    bool otg_was_enabled = furi_hal_power_is_otg_enabled();
+    InfraredSettings settings = {0};
+    saved_struct_load(
+        INFRARED_SETTINGS_PATH,
+        &settings,
+        sizeof(InfraredSettings),
+        INFRARED_SETTINGS_MAGIC,
+        INFRARED_SETTINGS_VERSION);
+    if(settings.tx_pin < FuriHalInfraredTxPinMax) {
+        furi_hal_infrared_set_tx_output(settings.tx_pin);
+        if(settings.otg_enabled != otg_was_enabled) {
+            if(settings.otg_enabled) {
+                furi_hal_power_enable_otg();
+            } else {
+                furi_hal_power_disable_otg();
+            }
+        }
+    } else {
+        FuriHalInfraredTxPin tx_pin_detected = furi_hal_infrared_detect_tx_output();
+        furi_hal_infrared_set_tx_output(tx_pin_detected);
+        if(tx_pin_detected != FuriHalInfraredTxPinInternal) {
+            furi_hal_power_enable_otg();
+        }
+    }
 
     bool running = true;
     NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
@@ -731,9 +751,6 @@ int32_t infrared_remote_app(void* p) {
             }
         }
     }
-
-    infrared_last_settings_reset(last_settings);
-    infrared_last_settings_free(last_settings);
 
     // Free all things
     furi_string_free(app->up_button);

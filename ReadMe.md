@@ -38,6 +38,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [L1_Mods animation update : adding VGM visual #3502 (By Kuronons)](https://github.com/flipperdevices/flipperzero-firmware/pull/3502)
 - [IR Changes & Other Fixes (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/b551c6303b78b4ccaf2d7a8ea427d675d607ab33)
 - OFW: [Configurable Infrared TX output #3484 (By gsurkov)](https://github.com/flipperdevices/flipperzero-firmware/pull/3484)
+- IR: [Support new settings from OFW (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/a5233ddf9cd408ab6e4c9e3618aaefbb9aed3d63)
 
 <a name="release">
 

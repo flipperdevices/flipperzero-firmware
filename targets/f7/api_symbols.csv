@@ -782,7 +782,7 @@ Function,+,bt_profile_start,FuriHalBleProfileBase*,"Bt*, const FuriHalBleProfile
 Function,+,bt_remote_rssi,_Bool,"Bt*, uint8_t*"
 Function,+,bt_set_status_changed_callback,void,"Bt*, BtStatusChangedCallback, void*"
 Function,+,bt_settings_load,_Bool,BtSettings*
-Function,+,bt_settings_save,_Bool,BtSettings*
+Function,+,bt_settings_save,_Bool,const BtSettings*
 Function,+,buffered_file_stream_alloc,Stream*,Storage*
 Function,+,buffered_file_stream_close,_Bool,Stream*
 Function,+,buffered_file_stream_get_error,FS_Error,Stream*
@@ -824,7 +824,6 @@ Function,+,canvas_draw_frame,void,"Canvas*, int32_t, int32_t, size_t, size_t"
 Function,+,canvas_draw_glyph,void,"Canvas*, int32_t, int32_t, uint16_t"
 Function,+,canvas_draw_icon,void,"Canvas*, int32_t, int32_t, const Icon*"
 Function,+,canvas_draw_icon_animation,void,"Canvas*, int32_t, int32_t, IconAnimation*"
-Function,+,canvas_draw_icon_bitmap,void,"Canvas*, uint8_t, uint8_t, int16_t, int16_t, const Icon*"
 Function,+,canvas_draw_icon_ex,void,"Canvas*, int32_t, int32_t, const Icon*, IconRotation"
 Function,+,canvas_draw_line,void,"Canvas*, int32_t, int32_t, int32_t, int32_t"
 Function,+,canvas_draw_rbox,void,"Canvas*, int32_t, int32_t, size_t, size_t, size_t"
@@ -1036,7 +1035,7 @@ Function,+,expansion_get_settings,ExpansionSettings*,Expansion*
 Function,+,expansion_is_connected,_Bool,Expansion*
 Function,+,expansion_set_listen_serial,void,"Expansion*, FuriHalSerialId"
 Function,-,expansion_settings_load,_Bool,ExpansionSettings*
-Function,+,expansion_settings_save,_Bool,ExpansionSettings*
+Function,+,expansion_settings_save,_Bool,const ExpansionSettings*
 Function,-,expf,float,float
 Function,-,expl,long double,long double
 Function,-,explicit_bzero,void,"void*, size_t"
