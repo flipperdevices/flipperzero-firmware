@@ -31,6 +31,7 @@ This software is for experimental purposes only and is not meant for any illegal
 
 - Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-03-28 21:12 EST`
 - Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-03-28 21:12 EST`
+- OFW: [NFC: Fix mf desfire detect #3548 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3548)
 
 <a name="release">
 
