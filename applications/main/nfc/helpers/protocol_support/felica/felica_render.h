@@ -8,3 +8,5 @@ void nfc_render_felica_info(
     const FelicaData* data,
     NfcProtocolFormatType format_type,
     FuriString* str);
+
+void nfc_render_felica_dump(const FelicaData* data, FuriString* str);
