@@ -21,8 +21,8 @@ widget.addCircle(12, 52, 10);
 widget.addDisc(12, 52, 5);
 
 // add a frame/box (x, y, width, height)
-widget.addFrame(25, 45, 10, 10);
-widget.addBox(27, 47, 6, 6);
+widget.addFrame(30, 45, 10, 10);
+widget.addBox(32, 47, 6, 6);
 
 // add a rounded frame/box (x, y, width, height, radius)
 widget.addRframe(50, 45, 15, 15, 3);
@@ -34,11 +34,11 @@ widget.addDot(102, 44);
 widget.addDot(104, 43);
 
 // add an icon (x, y, icon)
-widget.addIcon(100, 55, "Common/ButtonUp_7x4");
-widget.addIcon(100, 60, "Common/ButtonDown_7x4");
+// widget.addIcon(100, 50, "ButtonUp_7x4");
+// widget.addIcon(100, 55, "ButtonDown_7x4");
 
 // add a glyph (x, y, glyph)
-widget.addGlyph(120, 50, 0x23);
+widget.addGlyph(115, 50, "#".charCodeAt(0));
 
 // Show the widget (drawing the layers in the orderer they were added)
 widget.show();
@@ -52,7 +52,7 @@ while (widget.isOpen() && i <= demo_seconds) {
     // You can call remove on any added item, it does not impact the other ids.
     if (bitmap) { widget.remove(bitmap); bitmap = undefined; }
     // All of the addXXX functions return an id that can be used to remove the item.
-    else { bitmap = widget.addXbm(80, 45, logo); }
+    else { bitmap = widget.addXbm(77, 45, logo); }
 
     delay(1000);
 }

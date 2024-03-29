@@ -3,6 +3,7 @@
 #include <gui/view.h>
 #include <m-array.h>
 #include <m-list.h>
+#include <string.h>
 #include "../js_modules.h"
 
 typedef struct WidgetComponent WidgetComponent;
@@ -177,6 +178,7 @@ static void js_widget_load_image_xbm(struct mjs* mjs) {
     } while(false);
 
     storage_file_free(file);
+    furi_record_close(RECORD_STORAGE);
 
     if(xbm == NULL) {
         mjs_return(mjs, MJS_UNDEFINED);
@@ -504,13 +506,16 @@ static void js_widget_add_icon(struct mjs* mjs) {
     }
 
     const Icon* icon = NULL;
-    for(size_t i = 0; i < ICON_PATHS_COUNT; i++) {
-        if(ICON_PATHS[i].path != NULL && strnlen(ICON_PATHS[i].path, icon_len + 2) == icon_len &&
-           strncmp(icon_name, ICON_PATHS[i].path, icon_len) == 0) {
-            icon = ICON_PATHS[i].icon;
-            break;
-        }
-    }
+    // for(size_t i = 0; i < ICON_PATHS_COUNT; i++) {
+        // if(ICON_PATHS[i].path == NULL) continue;
+        // const char* iter_name = strrchr(ICON_PATHS[i].path, '/');
+        // if(iter_name++ == NULL) continue;
+        // if(strnlen(iter_name, icon_len + 1) == icon_len &&
+           // strncmp(iter_name, icon_name, icon_len) == 0) {
+            // icon = ICON_PATHS[i].icon;
+            // break;
+        // }
+    // }
 
     if(icon == NULL) {
         ret_bad_args(mjs, "Unknown icon name");

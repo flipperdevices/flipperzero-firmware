@@ -105,9 +105,9 @@ This software is for experimental purposes only and is not meant for any illegal
 - JS: [Add __filepath and __dirpath globals (By jamisonderek)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/463f50281a1536492cf9ee46c5e0ac6b30f72a7f)
 - Updated: [Flipper Hero v1.1 (By mentoster)](https://github.com/mentoster/Flipper-hero)
 - Updated: [Questions v1.1 (By nikilark)](https://github.com/nikilark/flipper_questions)
-- JS: [Add widget module (By jamisonderek)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/e6fe5e0b52ab3dfa9a3a4d5325ab63ba4789f7e3)
 - Updated: [Flipper Hero v1.2 (By mentoster)](https://github.com/mentoster/Flipper-hero)
 - Updated: [FindMy Flipper v2.0 (By MatthewKuKanich)](https://github.com/MatthewKuKanich/FindMyFlipper).com/RogueMaster/flipperzero-firmware-wPlugins/commit/e8be709d756756630caf5c52dc97e1c2d7c08110)
+- JS: [Add widget module (By jamisonderek)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/e6fe5e0b52ab3dfa9a3a4d5325ab63ba4789f7e3) (With Updates By Willy-JL)
 
 <a name="release">
 
