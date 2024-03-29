@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,60.3,,
+Version,+,61.0,,
 Header,+,applications/drivers/subghz/cc1101_ext/cc1101_ext_interconnect.h,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
@@ -1882,8 +1882,8 @@ Function,+,icon_get_data,const uint8_t*,const Icon*
 Function,+,icon_get_decode_size,uint32_t,const Icon*
 Function,+,icon_get_frame_count,uint32_t,const Icon*
 Function,+,icon_get_frame_data,const uint8_t*,"const Icon*, uint32_t"
-Function,+,icon_get_height,uint8_t,const Icon*
-Function,+,icon_get_width,uint8_t,const Icon*
+Function,+,icon_get_height,uint16_t,const Icon*
+Function,+,icon_get_width,uint16_t,const Icon*
 Function,-,ilogb,int,double
 Function,-,ilogbf,int,float
 Function,-,ilogbl,int,long double

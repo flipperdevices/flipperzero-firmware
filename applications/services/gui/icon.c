@@ -3,13 +3,13 @@
 
 #include <furi.h>
 
-uint8_t icon_get_width(const Icon* instance) {
+uint16_t icon_get_width(const Icon* instance) {
     furi_check(instance);
 
     return instance->width;
 }
 
-uint8_t icon_get_height(const Icon* instance) {
+uint16_t icon_get_height(const Icon* instance) {
     furi_check(instance);
 
     return instance->height;

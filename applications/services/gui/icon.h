@@ -20,7 +20,7 @@ typedef struct Icon Icon;
  *
  * @return     width in pixels
  */
-uint8_t icon_get_width(const Icon* instance);
+uint16_t icon_get_width(const Icon* instance);
 
 /** Get icon height
  *
@@ -28,7 +28,7 @@ uint8_t icon_get_width(const Icon* instance);
  *
  * @return     height in pixels
  */
-uint8_t icon_get_height(const Icon* instance);
+uint16_t icon_get_height(const Icon* instance);
 
 /** Get Icon XBM bitmap data
  *
