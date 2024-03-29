@@ -27,10 +27,10 @@ This software is for experimental purposes only and is not meant for any illegal
 
 <a name="latest">
 
-## Latest Updates - [PATREON: Latest Release RM0328-2112-0.99.2-30d8e0b](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
+## Latest Updates - [PATREON: Latest Release RM0329-0318-0.100.2-f601860](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-03-29 01:25 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-03-29 01:25 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-03-29 03:18 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-03-29 03:18 EST`
 - OFW: [NFC: Fix mf desfire detect #3548 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3548)
 - OFW: [Fixed plugins and UI #3543 (By RebornedBrain)](https://github.com/flipperdevices/flipperzero-firmware/pull/3543)
 - OFW: [ufbt: fixes for generated vscode project #3547 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/3547)
