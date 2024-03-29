@@ -239,7 +239,7 @@ void rolling_flaws_receive_signal_draw_callback(Canvas* canvas, void* model) {
 
     FuriString* str = furi_string_alloc();
 
-    canvas_set_bitmap_mode(canvas, 1);
+    canvas_set_bitmap_mode(canvas, true);
     canvas_set_font(canvas, FontPrimary);
     canvas_draw_str(canvas, 13, 8, "Rolling code receiver");
     canvas_set_font(canvas, FontSecondary);

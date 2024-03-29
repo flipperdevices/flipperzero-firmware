@@ -38,27 +38,27 @@ static void air_mouse_view_draw_callback(Canvas* canvas, void* context) {
     canvas_draw_icon(canvas, 78, 8, &I_Circles_47x47);
 
     if(model->ok_pressed) {
-        canvas_set_bitmap_mode(canvas, 1);
+        canvas_set_bitmap_mode(canvas, true);
         canvas_draw_icon(canvas, 95, 25, &I_Pressed_Button_13x13);
-        canvas_set_bitmap_mode(canvas, 0);
+        canvas_set_bitmap_mode(canvas, false);
         canvas_set_color(canvas, ColorWhite);
     }
     canvas_draw_icon(canvas, 97, 27, &I_Left_mouse_icon_9x9);
     canvas_set_color(canvas, ColorBlack);
 
     if(model->up_pressed) {
-        canvas_set_bitmap_mode(canvas, 1);
+        canvas_set_bitmap_mode(canvas, true);
         canvas_draw_icon(canvas, 95, 9, &I_Pressed_Button_13x13);
-        canvas_set_bitmap_mode(canvas, 0);
+        canvas_set_bitmap_mode(canvas, false);
         canvas_set_color(canvas, ColorWhite);
     }
     canvas_draw_icon(canvas, 97, 11, &I_Right_mouse_icon_9x9);
     canvas_set_color(canvas, ColorBlack);
 
     if(model->left_pressed) {
-        canvas_set_bitmap_mode(canvas, 1);
+        canvas_set_bitmap_mode(canvas, true);
         canvas_draw_icon(canvas, 79, 25, &I_Pressed_Button_13x13);
-        canvas_set_bitmap_mode(canvas, 0);
+        canvas_set_bitmap_mode(canvas, false);
         canvas_set_color(canvas, ColorWhite);
     }
     canvas_draw_icon(canvas, 81, 27, &I_Scroll_icon_9x9);

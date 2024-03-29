@@ -42,7 +42,7 @@ static void draw_callback(Canvas* canvas, void* ctx) {
     UNUSED(ctx);
 
     canvas_clear(canvas);
-    canvas_set_bitmap_mode(canvas, 1);
+    canvas_set_bitmap_mode(canvas, true);
     canvas_draw_icon(canvas, 100, 0, &I_Pin_back_arrow_10x8);
     canvas_set_font(canvas, FontSecondary);
     canvas_draw_str(canvas, 112, 8, "Exit");
