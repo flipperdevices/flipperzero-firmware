@@ -34,6 +34,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [NFC: Fix mf desfire detect #3548 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3548)
 - OFW: [Fixed plugins and UI #3543 (By RebornedBrain)](https://github.com/flipperdevices/flipperzero-firmware/pull/3543)
 - OFW: [ufbt: fixes for generated vscode project #3547 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/3547)
+- OFW: [RFID Improvements #3524 (By gsurkov)](https://github.com/flipperdevices/flipperzero-firmware/pull/3524)
+- OFW: [L1_Mods animation update : adding VGM visual #3502 (By Kuronons)](https://github.com/flipperdevices/flipperzero-firmware/pull/3502)
 
 <a name="release">
 

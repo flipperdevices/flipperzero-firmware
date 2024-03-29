@@ -3,6 +3,8 @@
 
 #define LFRFID_SCENE_READ_SUCCESS_MAX_HEX_WIDTH (7UL)
 
+#define LFRFID_SCENE_READ_SUCCESS_MAX_HEX_WIDTH (7UL)
+
 void lfrfid_scene_read_success_on_enter(void* context) {
     LfRfid* app = context;
     Widget* widget = app->widget;
