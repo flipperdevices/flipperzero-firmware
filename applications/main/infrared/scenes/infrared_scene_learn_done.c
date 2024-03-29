@@ -6,7 +6,8 @@ void infrared_scene_learn_done_on_enter(void* context) {
 
     popup_set_icon(popup, 32, 5, &I_DolphinNice_96x59);
     if(infrared->app_state.is_learning_new_remote) {
-        popup_set_header(popup, "New remote\ncreated!", 0, 0, AlignLeft, AlignTop);
+        popup_set_icon(popup, 48, 6, &I_DolphinDone_80x58);
+        popup_set_header(popup, "Success!", 10, 12, AlignLeft, AlignTop);
     } else {
         popup_set_header(popup, "Saved!", 5, 7, AlignLeft, AlignTop);
     }
