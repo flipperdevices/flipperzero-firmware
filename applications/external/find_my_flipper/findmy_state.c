@@ -29,6 +29,12 @@ bool findmy_state_load(FindMyState* out_state) {
             if(!flipper_format_read_uint32(file, "transmit_power", &tmp, 1)) break;
             state.transmit_power = tmp;
 
+            if(!flipper_format_read_bool(file, "show_mac", &state.show_mac, 1)) {
+                // Support migrating from old config
+                state.show_mac = false;
+                flipper_format_rewind(file);
+            }
+
             if(!flipper_format_read_uint32(file, "tag_type", &tmp, 1)) {
                 // Support migrating from old config
                 tmp = FindMyTypeApple;
@@ -53,7 +59,7 @@ bool findmy_state_load(FindMyState* out_state) {
         state.beacon_active = false;
         state.broadcast_interval = 5;
         state.transmit_power = 6;
-
+        state.show_mac = false;
         state.tag_type = FindMyTypeApple;
 
         // Set default mac
@@ -134,6 +140,8 @@ void findmy_state_save(FindMyState* state) {
 
         tmp = state->tag_type;
         if(!flipper_format_write_uint32(file, "tag_type", &tmp, 1)) break;
+
+        if(!flipper_format_write_bool(file, "show_mac", &state->show_mac, 1)) break;
 
         if(!flipper_format_write_hex(file, "mac", state->mac, sizeof(state->mac))) break;
 
