@@ -8,9 +8,9 @@ on my Github page.
 Directions are pretty simple, use OK button to pause, left and right to
 navigate the player, back to exit.
 
-[Easy at beginning](screenshots/screenshot_1.png)
-[Died](screenshots/screenshot_2.png)
-[Harder as score higher](screenshots/screenshot_3.png)
+![Easy at beginning](screenshots/screenshot_1.png)
+![Died](screenshots/screenshot_2.png)
+![Harder as score higher](screenshots/screenshot_3.png)
 
 2024 Andrew Diamond
 Distributed under the MIT license.
