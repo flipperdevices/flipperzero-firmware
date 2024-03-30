@@ -6,6 +6,7 @@ typedef enum {
     QScene_ActionSettings,
     QScene_ActionRename,
     QScene_ActionCreateGroup,
+    QScene_About,
     QScene_count
 } appScenes;
 
@@ -14,6 +15,7 @@ typedef enum {
     QView_Settings, // Variable Item List for settings
     QView_ActionSettings, // [SubMenu] Action: Rename, Delete, Import (copies from elsewhere)
     QView_ActionTextInput, // Action: Rename, Create Group
+    QView_Popup, // About screen
 } appView;
 
 typedef enum {

@@ -16,9 +16,12 @@ ItemsView* item_get_items_view_from_path(void* context, const FuriString* input_
     // Handle the app start condition
     FuriString* in_path;
     if(input_path == NULL) {
-        in_path = furi_string_alloc_set_str(QUAC_DATA_PATH);
+        in_path = furi_string_alloc_set_str(APP_DATA_PATH(""));
     } else {
         in_path = furi_string_alloc_set(input_path);
+    }
+    if(furi_string_get_char(in_path, furi_string_size(in_path) - 1) == '/') {
+        furi_string_left(in_path, furi_string_size(in_path) - 1);
     }
     const char* cpath = furi_string_get_cstr(in_path);
 
@@ -50,10 +53,15 @@ ItemsView* item_get_items_view_from_path(void* context, const FuriString* input_
             // FURI_LOG_I(TAG, "> dir_walk: %s", furi_string_get_cstr(path));
             const char* cpath = furi_string_get_cstr(path);
 
-            // Skip "hidden" files
             path_extract_filename(path, filename_tmp, false);
+            // Always skip our .quac.conf file!
+            if(!furi_string_cmp_str(filename_tmp, QUAC_SETTINGS_FILENAME)) {
+                continue;
+            }
+
+            // Skip "hidden" files
             char first_char = furi_string_get_char(filename_tmp, 0);
-            if(first_char == '.') {
+            if(first_char == '.' && !app->settings.show_hidden) {
                 // FURI_LOG_I(TAG, ">> skipping hidden file: %s", furi_string_get_cstr(filename_tmp));
                 continue;
             }

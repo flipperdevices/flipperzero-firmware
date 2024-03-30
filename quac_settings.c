@@ -3,8 +3,6 @@
 #include <flipper_format/flipper_format.h>
 
 // Quac Settings File Info
-// "/ext/apps_data/quac/.quac.conf"
-#define QUAC_SETTINGS_FILENAME QUAC_DATA_PATH "/.quac.conf"
 #define QUAC_SETTINGS_FILE_TYPE "Quac Settings File"
 #define QUAC_SETTINGS_FILE_VERSION 1
 
@@ -14,6 +12,7 @@ void quac_set_default_settings(App* app) {
     app->settings.show_icons = true;
     app->settings.show_headers = true;
     app->settings.subghz_use_ext_antenna = false;
+    app->settings.show_hidden = false;
 }
 
 void quac_load_settings(App* app) {
@@ -22,10 +21,10 @@ void quac_load_settings(App* app) {
     temp_str = furi_string_alloc();
     uint32_t temp_data32 = 0;
 
-    FURI_LOG_I(TAG, "SETTINGS: Reading: %s", QUAC_SETTINGS_FILENAME);
+    FURI_LOG_I(TAG, "SETTINGS: Reading: %s", QUAC_SETTINGS_PATH);
     bool successful = false;
     do {
-        if(!flipper_format_file_open_existing(fff_settings, QUAC_SETTINGS_FILENAME)) {
+        if(!flipper_format_file_open_existing(fff_settings, QUAC_SETTINGS_PATH)) {
             FURI_LOG_I(TAG, "SETTINGS: File not found, loading defaults");
             break;
         }
@@ -66,7 +65,7 @@ void quac_load_settings(App* app) {
             FURI_LOG_E(TAG, "SETTINGS: Missing 'Show Headers'");
             break;
         }
-        app->settings.show_headers = (temp_data32 == 0) ? false : true;
+        app->settings.show_headers = (temp_data32 == 1) ? true : false;
 
         if(!flipper_format_read_uint32(fff_settings, "RFID Duration", &temp_data32, 1)) {
             FURI_LOG_E(TAG, "SETTINGS: Missing 'RFID Duration'");
@@ -79,6 +78,12 @@ void quac_load_settings(App* app) {
             break;
         }
         app->settings.subghz_use_ext_antenna = (temp_data32 == 1) ? true : false;
+
+        if(!flipper_format_read_uint32(fff_settings, "Show Hidden", &temp_data32, 1)) {
+            FURI_LOG_E(TAG, "SETTINGS: Missing 'Show Hidden'");
+            break;
+        }
+        app->settings.show_hidden = (temp_data32 == 1) ? true : false;
 
         successful = true;
     } while(false);
@@ -98,7 +103,7 @@ void quac_save_settings(App* app) {
     FURI_LOG_I(TAG, "SETTINGS: Saving");
     bool successful = false;
     do {
-        if(!flipper_format_file_open_always(fff_settings, QUAC_SETTINGS_FILENAME)) {
+        if(!flipper_format_file_open_always(fff_settings, QUAC_SETTINGS_PATH)) {
             FURI_LOG_E(TAG, "SETTINGS: Unable to open file for save!!");
             break;
         }
@@ -137,6 +142,12 @@ void quac_save_settings(App* app) {
             FURI_LOG_E(TAG, "SETTINGS: Failed to write 'SubGHz Ext Antenna'");
             break;
         }
+        temp_data32 = app->settings.show_hidden ? 1 : 0;
+        if(!flipper_format_write_uint32(fff_settings, "Show Hidden", &temp_data32, 1)) {
+            FURI_LOG_E(TAG, "SETTINGS: Failed to write 'Show Hidden'");
+            break;
+        }
+
         successful = true;
     } while(false);
 

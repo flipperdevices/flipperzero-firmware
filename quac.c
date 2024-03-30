@@ -39,6 +39,9 @@ App* app_alloc() {
     view_dispatcher_add_view(
         app->view_dispatcher, QView_ActionTextInput, text_input_get_view(app->text_input));
 
+    app->popup = popup_alloc();
+    view_dispatcher_add_view(app->view_dispatcher, QView_Popup, popup_get_view(app->popup));
+
     // Storage
     app->storage = furi_record_open(RECORD_STORAGE);
 
@@ -65,6 +68,7 @@ void app_free(App* app) {
     view_dispatcher_remove_view(app->view_dispatcher, QView_Settings);
     view_dispatcher_remove_view(app->view_dispatcher, QView_ActionSettings);
     view_dispatcher_remove_view(app->view_dispatcher, QView_ActionTextInput);
+    view_dispatcher_remove_view(app->view_dispatcher, QView_Popup);
 
     action_menu_free(app->action_menu);
     variable_item_list_free(app->vil_settings);

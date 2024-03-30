@@ -7,6 +7,7 @@
 #include "scene_action_settings.h"
 #include "scene_action_rename.h"
 #include "scene_action_create_group.h"
+#include "scene_about.h"
 
 // define handler callbacks - order must match appScenes enum!
 void (*const app_on_enter_handlers[])(void* context) = {
@@ -15,6 +16,7 @@ void (*const app_on_enter_handlers[])(void* context) = {
     scene_action_settings_on_enter,
     scene_action_rename_on_enter,
     scene_action_create_group_on_enter,
+    scene_about_on_enter,
 };
 bool (*const app_on_event_handlers[])(void* context, SceneManagerEvent event) = {
     scene_items_on_event,
@@ -22,7 +24,7 @@ bool (*const app_on_event_handlers[])(void* context, SceneManagerEvent event) = 
     scene_action_settings_on_event,
     scene_action_rename_on_event,
     scene_action_create_group_on_event,
-
+    scene_about_on_event,
 };
 void (*const app_on_exit_handlers[])(void* context) = {
     scene_items_on_exit,
@@ -30,6 +32,7 @@ void (*const app_on_exit_handlers[])(void* context) = {
     scene_action_settings_on_exit,
     scene_action_rename_on_exit,
     scene_action_create_group_on_exit,
+    scene_about_on_exit,
 };
 
 const SceneManagerHandlers app_scene_handlers = {
