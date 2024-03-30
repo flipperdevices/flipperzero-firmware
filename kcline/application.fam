@@ -1,14 +1,14 @@
 App(
     # Foldername of the application
-    appid="voltcalc_app",
+    appid="kcline",
     # name will be show on the Flip.x0 browser
-    name="Voltage Calculator",
+    name="KC Line",
     apptype=FlipperAppType.EXTERNAL,
     # Main function (entry point) of the application
-    entry_point="voltcalc_app",
-    stack_size=2 * 1024,
+    entry_point="kcline_main",
+    stack_size=4 * 1024,
     # Where the application will be stored into the Flip.x0
-    fap_category="Tools",
+    fap_category="Games",
     requires=["gui"],
     # Directory of applications image assets
     # If you want to insert images in your application, you have to specify the
@@ -18,11 +18,11 @@ App(
     # put this in your code:
     #
     # include "example_icons.h"
-    fap_icon="icons/voltcalc_app.png",
+    fap_icon="icons/kcline.png",
     fap_icon_assets="icons",
     # Optional values
     fap_version=(1, 0),
-    fap_description="Voltage (VRI) calculations",
+    fap_description="One line dot munching game!",
     fap_author="Andrew Diamond",
     fap_weburl="https://github.com/HappyAmos/",
 )

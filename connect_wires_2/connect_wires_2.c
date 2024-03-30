@@ -740,6 +740,7 @@ int32_t connect_wires_2_main(void* p) {
         }
 
         furi_mutex_release(appState->mutex);
+		view_port_update(view_port);
     }
 
     free(appState);

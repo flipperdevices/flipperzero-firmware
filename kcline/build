@@ -1,17 +1,22 @@
 #!/bin/bash 
 #------------------------
-APPID=voltcalc_app
+SERIAL_ID=ttyACM0
+APPID=kcline
 FIRMWARE_DIR=~/Programming/Flipper/firmware/f0ReleaseFirmware
 SOURCE_DIR=~/Programming/Flipper/firmware/applications_user/$APPID/
 #------------------------
+# Reboot the device in case another application is running.
 clear
+echo "Rebooting Flipper..."
+# Send command directly to the Flipper over serial connection
+echo -en 'power reboot\r\n' >> /dev/$SERIAL_ID
 set -x
 cp -r $SOURCE_DIR $FIRMWARE_DIR/applications_user/
 cd $FIRMWARE_DIR
 ./fbt -c fap_$APPID
 ./fbt fap_$APPID
 ./fbt launch_app APPSRC=$APPID
-echo "~/Programming/Flipper/firmware/flipper-application-catalog/applications/Tools/voltcalc_app/manifest.yml"
+set +x
+echo "~/Programming/Flipper/firmware/flipper-application-catalog/applications/Tools/$APPID/manifest.yml"
 echo "1. Don't forget to update the commit_sha in the manifest for release, as well as the version info in application.fam"
 echo "2. Don't forget to create a new branch for the release."
-set +x
