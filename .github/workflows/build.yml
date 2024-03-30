@@ -18,10 +18,9 @@ jobs:
               - name: Unleashed dev
                 sdk-index-url: https://up.unleashedflip.com/directory.json
                 sdk-channel: dev
-# Disabling until it is synchronized with the official release
-#              - name: Unleashed release
-#                sdk-index-url: https://up.unleashedflip.com/directory.json
-#                sdk-channel: release
+              - name: Unleashed release
+                sdk-index-url: https://up.unleashedflip.com/directory.json
+                sdk-channel: release
         name: 'Build for ${{ matrix.name }}'
         steps:
           - name: Checkout
