@@ -1,3 +1,9 @@
+## 0.5
+- Basic infrared support
+- Action settings: Rename, Delete, Import, Create Group
+- Support for Sub-GHz external antenna in Settings
+- About screen
+
 ## 0.4
 - New UI with horizontal/vertical layout support
 - Added icons, better header font
