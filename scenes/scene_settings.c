@@ -161,7 +161,6 @@ bool scene_settings_on_event(void* context, SceneManagerEvent event) {
         switch(event.event) {
         case SceneSettingsAbout:
             consumed = true;
-            FURI_LOG_I(TAG, "About popup");
             scene_manager_next_scene(app->scene_manager, QScene_About);
             break;
         default:
