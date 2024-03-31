@@ -89,7 +89,7 @@ void set_default_instrument(Instrument* inst) {
     inst->adsr.volume = 0x80;
 
     inst->filter_type = FIL_OUTPUT_LOWPASS;
-    inst->filter_cutoff = 0xff;
+    inst->filter_cutoff = 0xd0;
 
     inst->program_period = 1;
 
