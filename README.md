@@ -3,22 +3,30 @@
 
 Привет народ! Это мое первое приложение для Flipper Zero.   Надо с чего-то начинать писать вот и решить написать лазер для кошки довольно простое приложение которое зажигает лазер. 
 
-
-Схема сборки лазера: 
-
-(Выложу позже как нирисую)
-
+Скриншоты приложения:
+![Скриншот]([image_url](https://github.com/DroWez/LaserCat/blob/main/img_readme/Screenshot1.png)) ![Cкриншот приложения]([image_url](https://github.com/DroWez/LaserCat/blob/main/img_readme/Screenshot2.png))
 
 Как компилировать приложение надеюсь разберетесь :)  Или в дальнейшем может выложу релизы по известные прошивки F0
 
+Схема сборки лазера: 
+<p style="text-align: center;">![Схема сборки]([image_url](https://github.com/DroWez/LaserCat/blob/main/img_readme/shema.jpg))</p>
+
+
+
 
 ---------------------------------------------
-Hello everyone! This is my first application for Flipper Zero.
+Hello folks! This is my first application for Flipper Zero.
 
-You have to start writing something, so I decided to write a fairly simple application for a cat laser that turns on the laser.
+You have to start writing something, so I decided to write a fairly simple cat laser application that turns on the laser.
 
-Assembly scheme for the laser:
+Application screenshots:
+![Screenshot]([image_url](https://github.com/DroWez/LaserCat/blob/main/img_readme/Screenshot1.png)) ![Screenshot APP]([image_url](https://github.com/DroWez/LaserCat/blob/main/img_readme/Screenshot2.png))
 
-(I'll post it later when I draw it)
+How to compile the application, I hope you'll figure it out :) Or maybe later I'll release builds for well-known F0 firmware versions.
 
-I hope you'll figure out how to compile the application :) Or maybe in the future, I'll release builds for well-known F0 firmware versions.
+Laser assembly scheme:
+<p style="text-align: center;">![Sheme]([image_url](https://github.com/DroWez/LaserCat/blob/main/img_readme/shema.jpg))</p>
+
+
+---------------------------
+<p style="text-align: center;">![Схема сборки]([image_url](https://github.com/DroWez/LaserCat/blob/main/img_readme/foto.jpg))</p>
