@@ -1,8 +1,8 @@
 #!/bin/bash 
 #------------------------
 APPID=voltcalc_app
-FIRMWARE_DIR=~/Programming/Flipper/firmware/f0ReleaseFirmware
-SOURCE_DIR=~/Programming/Flipper/firmware/applications_user/$APPID/
+FIRMWARE_DIR=~/Programming/Flipper/f0ReleaseFirmware
+SOURCE_DIR=~/Programming/Flipper/applications_user/$APPID/
 #------------------------
 clear
 set -x
@@ -11,7 +11,7 @@ cd $FIRMWARE_DIR
 ./fbt -c fap_$APPID
 ./fbt fap_$APPID
 ./fbt launch_app APPSRC=$APPID
-echo "~/Programming/Flipper/firmware/flipper-application-catalog/applications/Tools/voltcalc_app/manifest.yml"
+echo "~/Programming/Flipper/flipper-application-catalog/applications/Tools/voltcalc_app/manifest.yml"
 echo "1. Don't forget to update the commit_sha in the manifest for release, as well as the version info in application.fam"
 echo "2. Don't forget to create a new branch for the release."
 set +x

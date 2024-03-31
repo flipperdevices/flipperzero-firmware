@@ -2,8 +2,8 @@
 #------------------------
 SERIAL_ID=ttyACM0
 APPID=connect_wires_2
-FIRMWARE_DIR=~/Programming/Flipper/firmware/f0ReleaseFirmware
-SOURCE_DIR=~/Programming/Flipper/firmware/applications_user/$APPID/
+FIRMWARE_DIR=~/Programming/Flipper/f0ReleaseFirmware
+SOURCE_DIR=~/Programming/Flipper/applications_user/$APPID/
 #------------------------
 # Reboot the device in case another application is running.
 clear
@@ -17,6 +17,6 @@ cd $FIRMWARE_DIR
 ./fbt fap_$APPID
 ./fbt launch_app APPSRC=$APPID
 set +x
-echo "~/Programming/Flipper/firmware/flipper-application-catalog/applications/Tools/$APPID/manifest.yml"
+echo "~/Programming/Flipper/flipper-application-catalog/applications/Tools/$APPID/manifest.yml"
 echo "1. Don't forget to update the commit_sha in the manifest for release, as well as the version info in application.fam"
 echo "2. Don't forget to create a new branch for the release."
