@@ -742,7 +742,7 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
         //remaining_trips
         furi_string_cat_printf(result, "Trips left: %d", data_block.remaining_trips);
         //trip_from
-        if(data_block.start_trip_date) { // TODO: unused
+        if(data_block.start_trip_date) { // TODO: (-nofl) unused
             DateTime card_start_trip_minutes_s = {0};
             from_minutes_to_datetime(
                 data_block.start_trip_date * 24 * 60 + data_block.start_trip_time,
@@ -790,7 +790,7 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
             card_valid_to_date_s.month,
             card_valid_to_date_s.year);
         //trip_from
-        if(data_block.start_trip_date) { // TODO: unused
+        if(data_block.start_trip_date) { // TODO: (-nofl) unused
             DateTime card_start_trip_minutes_s = {0};
             from_minutes_to_datetime(
                 data_block.start_trip_date * 24 * 60 + data_block.start_trip_time,
@@ -798,7 +798,7 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
                 1992);
         }
         //trip_switch
-        if(data_block.passage_5_minutes) { // TODO: unused
+        if(data_block.passage_5_minutes) { // TODO: (-nofl) unused
             DateTime card_start_switch_trip_minutes_s = {0};
             from_minutes_to_datetime(
                 data_block.start_trip_date * 24 * 60 + data_block.start_trip_time +
@@ -965,7 +965,7 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
         }
         //transport
         FuriString* transport = furi_string_alloc();
-        switch(data_block.transport_type) { // TODO: unused
+        switch(data_block.transport_type) { // TODO: (-nofl) unused
         case 1:
             furi_string_cat(transport, "Metro");
             break;
@@ -1094,7 +1094,7 @@ bool mosgortrans_parse_transport_block(const MfClassicBlock* block, FuriString* 
             data_block.valid_from_date * 24 * 60 + data_block.valid_for_minutes -
                 data_block.start_trip_neg_minutes,
             &card_start_trip_minutes_s,
-            2016); // TODO: unused
+            2016); // TODO: (-nofl) unused
         //transport
         FuriString* transport = furi_string_alloc();
         parse_transport_type(&data_block, transport);
