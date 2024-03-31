@@ -36,7 +36,7 @@ static FuriHalSubGhzPreset action_subghz_get_preset_name(const char* preset_name
 static const SubGhzDevice* action_subghz_get_device(uint32_t* device_ind) {
     const SubGhzDevice* device = NULL;
     switch(*device_ind) {
-    case 1:
+    case 1: {
         // Power on the external antenna
         uint8_t attempts = 5;
         while(--attempts > 0) {
@@ -52,6 +52,7 @@ static const SubGhzDevice* action_subghz_get_device(uint32_t* device_ind) {
         }
         device = subghz_devices_get_by_name(SUBGHZ_DEVICE_CC1101_EXT_NAME);
         break;
+    }
     default:
         device = subghz_devices_get_by_name(SUBGHZ_DEVICE_CC1101_INT_NAME);
         break;
