@@ -5,7 +5,6 @@
 #include <gui/gui.h>
 #include <input/input.h>
 #include <stdlib.h>
-#include <assets_icons.h>
 #include <dialogs/dialogs.h>
 #include <notification/notification_messages.h>
 #include <gui/view_dispatcher.h>
@@ -19,6 +18,7 @@
 #include "views/boilerplate_scene_1.h"
 #include "views/boilerplate_scene_2.h"
 #include "helpers/boilerplate_storage.h"
+#include "boilerplate_icons.h"
 
 #define TAG "Boilerplate"
 
@@ -37,7 +37,7 @@ typedef struct {
     BoilerplateScene2* boilerplate_scene_2;
     DialogsApp* dialogs; // File Browser
     FuriString* file_path; // File Browser
-    uint32_t haptic; 
+    uint32_t haptic;
     uint32_t speaker;
     uint32_t led;
     uint32_t save_settings;

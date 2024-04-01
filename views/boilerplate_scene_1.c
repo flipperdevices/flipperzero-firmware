@@ -11,7 +11,6 @@ struct BoilerplateScene1 {
     void* context;
 };
 
-
 typedef struct {
     int some_value;
 } BoilerplateScene1Model;
@@ -31,10 +30,10 @@ void boilerplate_scene_1_draw(Canvas* canvas, BoilerplateScene1Model* model) {
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
     canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str_aligned(canvas, 0, 10, AlignLeft, AlignTop, "This is Scene 1"); 
+    canvas_draw_str_aligned(canvas, 0, 10, AlignLeft, AlignTop, "This is Scene 1");
     canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str_aligned(canvas, 0, 22, AlignLeft, AlignTop, "An empty scene to be"); 
-    canvas_draw_str_aligned(canvas, 0, 32, AlignLeft, AlignTop, "used as boilerplate"); 
+    canvas_draw_str_aligned(canvas, 0, 22, AlignLeft, AlignTop, "An empty scene to be");
+    canvas_draw_str_aligned(canvas, 0, 32, AlignLeft, AlignTop, "used as boilerplate");
 }
 
 static void boilerplate_scene_1_model_init(BoilerplateScene1Model* const model) {
@@ -42,35 +41,30 @@ static void boilerplate_scene_1_model_init(BoilerplateScene1Model* const model) 
 }
 
 bool boilerplate_scene_1_input(InputEvent* event, void* context) {
-    furi_assert(context); 
+    furi_assert(context);
     BoilerplateScene1* instance = context;
-    if (event->type == InputTypeRelease) {
+    if(event->type == InputTypeRelease) {
         switch(event->key) {
-            case InputKeyBack:
-                with_view_model(
-                    instance->view,
-                    BoilerplateScene1Model * model,
-                    {
-                        UNUSED(model);
-                        instance->callback(BoilerplateCustomEventScene1Back, instance->context);
-                    },
-                    true);
-                break;
-            case InputKeyLeft:
-            case InputKeyRight:
-            case InputKeyUp:
-            case InputKeyDown:
-            case InputKeyOk:
-                with_view_model(
-                    instance->view,
-                    BoilerplateScene1Model* model,
-                    {
-                        UNUSED(model);
-                    },
-                    true);
-                break;
-            case InputKeyMAX:
-                break;
+        case InputKeyBack:
+            with_view_model(
+                instance->view,
+                BoilerplateScene1Model * model,
+                {
+                    UNUSED(model);
+                    instance->callback(BoilerplateCustomEventScene1Back, instance->context);
+                },
+                true);
+            break;
+        case InputKeyLeft:
+        case InputKeyRight:
+        case InputKeyUp:
+        case InputKeyDown:
+        case InputKeyOk:
+            with_view_model(
+                instance->view, BoilerplateScene1Model * model, { UNUSED(model); }, true);
+            break;
+        case InputKeyMAX:
+            break;
         }
     }
     return true;
@@ -86,11 +80,8 @@ void boilerplate_scene_1_enter(void* context) {
     with_view_model(
         instance->view,
         BoilerplateScene1Model * model,
-        {
-            boilerplate_scene_1_model_init(model);
-        },
-        true
-    );
+        { boilerplate_scene_1_model_init(model); },
+        true);
 }
 
 BoilerplateScene1* boilerplate_scene_1_alloc() {
@@ -106,12 +97,9 @@ BoilerplateScene1* boilerplate_scene_1_alloc() {
     with_view_model(
         instance->view,
         BoilerplateScene1Model * model,
-        {
-            boilerplate_scene_1_model_init(model);
-        },
-        true
-    );
-    
+        { boilerplate_scene_1_model_init(model); },
+        true);
+
     return instance;
 }
 
@@ -119,12 +107,7 @@ void boilerplate_scene_1_free(BoilerplateScene1* instance) {
     furi_assert(instance);
 
     with_view_model(
-        instance->view,
-        BoilerplateScene1Model * model,
-        {
-            UNUSED(model);
-        },
-        true);
+        instance->view, BoilerplateScene1Model * model, { UNUSED(model); }, true);
     view_free(instance->view);
     free(instance);
 }
@@ -133,4 +116,3 @@ View* boilerplate_scene_1_get_view(BoilerplateScene1* instance) {
     furi_assert(instance);
     return instance->view;
 }
-
