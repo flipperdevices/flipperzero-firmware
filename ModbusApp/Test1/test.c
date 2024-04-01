@@ -1068,32 +1068,42 @@ void Sender_Scene_OnExit(void* context) {
     variable_item_list_reset(app->varList);
 }
 //////////////////////////   MSGsBuffer Scene  ////////////////////////
+void OnItemEnterCB(void* context, uint32_t index) {
+    App* app = context;
+    uint8_t start = index ? app->ringBuffer->delimiters[index - 1] + 1 : 0;
+    for(uint8_t i = start; i <= app->ringBuffer->delimiters[index]; i++) {
+        app->msgBuf[i - start] = app->ringBuffer->ringBuffer[i];
+        if(i == app->ringBuffer->delimiters[index]) app->msgLen = i - start + 1;
+    }
+    scene_manager_next_scene(app->sceneManager, Sender_Scene);
+}
 void BuildCMDList(App* app) {
-    submenu_set_header(app->subMenu, "Select CMD");
+    submenu_set_header(app->subMenu, " ID | FN |Adss");
     RingBuffer* rb = app->ringBuffer;
     rb->readIdx = 0;
     uint8_t buf[255];
     uint8_t i = 0;
     uint8_t delimiterIdx = 0;
     uint8_t len = 0;
+    char lbl[30];
     do {
         len = 0;
-        FuriString* str = furi_string_alloc();
         do {
-            furi_string_cat_printf(str, "%02X", rb->ringBuffer[i]);
+            snprintf(lbl, sizeof(lbl), " %d | %d | %d |", SLAVE, FUNCTION, STARTADDRESS);
             buf[len] = rb->ringBuffer[i];
             len++;
             i++;
         } while(i <= rb->delimiters[delimiterIdx] && i < 255);
         delimiterIdx++;
         if((CRCH | CRCL << 8) == getCRC(buf, len - 2))
-            submenu_add_item(app->subMenu, furi_string_get_cstr(str), 0, NULL, app);
+            submenu_add_item(app->subMenu, lbl, delimiterIdx - 1, OnItemEnterCB, app);
     } while(i < 255);
 }
 void MSGsBuffer_Scene_OnEnter(void* context) {
     App* app = context;
     submenu_reset(app->subMenu);
     BuildCMDList(app);
+    view_dispatcher_switch_to_view(app->viewDispatcher, Submenu_View);
 }
 bool MSGsBuffer_Scene_OnEvent(void* context, SceneManagerEvent event) {
     UNUSED(context);
