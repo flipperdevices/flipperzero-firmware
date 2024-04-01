@@ -70,27 +70,29 @@ GBACartridge* gba_cartridge_app_app_alloc() {
 
 void gba_cartridge_app_app_free(GBACartridge* app) {
     furi_assert(app);
-    // Scene manager
-    scene_manager_free(app->scene_manager);
-
-    // View Dispatcher
+    // Views
     view_dispatcher_remove_view(app->view_dispatcher, GBACartridgeViewIdMenu);
     view_dispatcher_remove_view(app->view_dispatcher, GBACartridgeViewIdScene1);
+    view_dispatcher_remove_view(app->view_dispatcher, GBACartridgeViewIdStartscreen);
     variable_item_list_free(app->submenu);
 
+    // View Dispatcher
     view_dispatcher_free(app->view_dispatcher);
+     // Scene manager
+    scene_manager_free(app->scene_manager);
+
+     //
+    uart_free(app->uart);
+    uart_free(app->lp_uart);
+
     furi_record_close(RECORD_GUI);
     furi_record_close(RECORD_STORAGE);
+    furi_record_close(RECORD_DIALOGS);
 
     app->gui = NULL;
     app->notification = NULL;
     app->storage = NULL;
 
-    //
-    uart_free(app->uart);
-    uart_free(app->lp_uart);
-    // Close File Browser
-    furi_record_close(RECORD_DIALOGS);
     furi_string_free(app->file_path);
 
     //Remove whatever is left
