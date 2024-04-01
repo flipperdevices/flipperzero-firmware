@@ -420,7 +420,7 @@ static void gap_advertise_start(GapState new_state) {
 }
 
 static void gap_advertise_stop(void) {
-    FURI_LOG_I(TAG, "Stop");
+    FURI_LOG_D(TAG, "Stop");
     tBleStatus ret;
     if(gap->state > GapStateIdle) {
         if(gap->state == GapStateConnected) {
