@@ -337,13 +337,7 @@ void writeRingBuffer(RingBuffer* rb, uint8_t* buf, size_t len) {
     }
     rb->delimiterIdx++;
 }
-/*        if(rb->writeIdx > 254){
-            rb->writeIdx = 0;
-            FURI_LOG_W("","Reset!!");
-            
-        }
-        else rb->writeIdx++;
-*/
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -352,14 +346,14 @@ uint16_t getCRC(uint8_t* buf, uint8_t len) {
     uint16_t crc = 0xFFFF;
 
     for(int pos = 0; pos < len; pos++) {
-        crc ^= (uint16_t)buf[pos]; // XOR byte into least sig. byte of crc
+        crc ^= (uint16_t)buf[pos];
 
-        for(int i = 8; i != 0; i--) { // Loop over each bit
-            if((crc & 0x0001) != 0) { // If the LSB is set
-                crc >>= 1; // Shift right and XOR 0xA001
+        for(int i = 8; i != 0; i--) {
+            if((crc & 0x0001) != 0) {
+                crc >>= 1;
                 crc ^= 0xA001;
-            } else // Else LSB is not set
-                crc >>= 1; // Just shift right
+            } else
+                crc >>= 1;
         }
     }
     return crc;
@@ -412,7 +406,6 @@ void pduParser(void* context, bool slave, uint8_t* buf, size_t len, FuriString* 
     uint16_t bCount = 0;
     uint16_t value = 0;
     UNUSED(len);
-    //TODO: Handle error codes, unsupported codes & detect type-length missmatch
     furi_string_cat_printf(
         data, "\n%s", functionNames[FUNCTION <= 6 ? FUNCTION - 1 : FUNCTION - 9]);
     furi_string_cat_printf(
@@ -571,14 +564,11 @@ void timerDone(void* context) {
 }
 void ModbusSender(void* context) {
     App* app = context;
-    //serial_init(app->uart, UART_CH);
     // 02 | 0F | 00 00 | 00 04 | 01 | 0C | 7E 86
     Uart* uart = app->uart;
     uint16_t crc = getCRC(app->msgBuf, app->msgLen - 2);
-    //for(uint8_t i = 0; i < app->msgLen; i++) FURI_LOG_D("ORIGINAL", "0x%02X", app->msgBuf[i]);
     app->msgBuf[app->msgLen - 2] = crc & 0x00FF;
     app->msgBuf[app->msgLen - 1] = (crc & 0xFF00) >> 8;
-    //for(uint8_t i = 0; i < app->msgLen; i++) FURI_LOG_D("FALSO", "0x%02X", app->msgBuf[i]);
     furi_hal_gpio_write(&gpio_ext_pc0, true);
     furi_hal_gpio_write(&gpio_ext_pc1, true);
     furi_hal_serial_tx(uart->serial_handle, app->msgBuf, app->msgLen);
@@ -587,7 +577,6 @@ void ModbusSender(void* context) {
     furi_hal_gpio_write(&gpio_ext_pc1, false);
     app->modbus->slave = true;
     furi_timer_start(app->timer, app->uart->cfg->timeout * TIMEOUT_SCALER);
-    //serial_deinit(app->uart);
 }
 static int32_t uart_worker(void* context) {
     App* app = context;
@@ -610,7 +599,6 @@ static int32_t uart_worker(void* context) {
         if(events & WorkerEvtTxStart) {
             ModbusSender(app);
         }
-        //TODO: Serial Write & enable DE/RE pins
     }
 
     furi_stream_buffer_free(app->uart->rxBuff);
@@ -637,11 +625,6 @@ void mainOptionsCB(void* context, uint32_t index) {
         scene_manager_set_scene_state(app->sceneManager, Main_Scene, Sender_Option);
         scene_manager_next_scene(app->sceneManager, Sender_Scene);
         break;
-    /*case MSGBuf_Option:
-        scene_manager_set_scene_state(app->sceneManager, Main_Scene, MSGBuf_Option);
-        scene_manager_next_scene(app->sceneManager, MSGsBuffer_Scene);
-        break;
-        */
     case Read_LOG_Option:
         scene_manager_set_scene_state(app->sceneManager, Main_Scene, Read_LOG_Option);
         if(OpenLogFile(app)) {
@@ -721,11 +704,9 @@ void itemChangedCB(VariableItem* item) {
         break;
     }
 }
-//TODO: itemEneterCB(void*,uint32_t)
 void CFG_Scene_OnEnter(void* context) {
     App* app = context;
     VariableItem* item;
-    //TODO: variable_item_list_set_enter_callback(app->varList,itemEnterCB,app);
     item = variable_item_list_add(app->varList, "Buadrate", BR_VALUES, itemChangedCB, app);
     variable_item_set_current_value_index(item, app->uart->cfg->baudrate);
     variable_item_set_current_value_text(item, baudrateValues[app->uart->cfg->baudrate]);
@@ -820,9 +801,6 @@ bool Sniffer_Scene_OnEvent(void* context, SceneManagerEvent event) {
         consumed = true;
         text_box_set_text(app->textBox, furi_string_get_cstr(app->text));
     }
-    //  else if(event.type == SceneManagerEventTypeTick) {
-    //     consumed = true;
-    //}
     return consumed;
 }
 void Sniffer_Scene_OnExit(void* context) {
@@ -845,7 +823,7 @@ void SenderOptionsCB(void* context, uint32_t index) {
 void Sender_Scene_OnEnter(void* context) {
     App* app = context;
     submenu_reset(app->subMenu);
-    submenu_set_header(app->subMenu, "Main");
+    submenu_set_header(app->subMenu, "Sender");
     submenu_add_item(app->subMenu, "Manual Sender", Manual_Sender_Option, SenderOptionsCB, app);
     submenu_add_item(app->subMenu, "Buffer Sender", Buffer_Sender_Option, SenderOptionsCB, app);
     submenu_set_selected_item(
@@ -923,7 +901,6 @@ void itemChangeCB(VariableItem* item) {
     uint8_t selectedIndex = variable_item_list_get_selected_item_index(app->varList);
     uint16_t Value;
     char str[10];
-    //FURI_LOG_D("Idx: ","%d",index);
     switch(selectedIndex) {
     case 0:
         snprintf(str, sizeof(str), "%d", index + 1);
@@ -1285,8 +1262,6 @@ void uartFree(void* context) {
     if(app->LOGfile && storage_file_is_open(app->LOGfile)) {
         storage_file_close(app->LOGfile);
     }
-
-    //serial_deinit(app->uart);
     free(app->uart->cfg);
     free(app->uart);
     free(app->modbus);
@@ -1318,7 +1293,7 @@ void modbus_app_free(App* app) {
 }
 
 //////////////////////////   Entry Point   //////////////////////////
-int32_t test_app(void* p) {
+int32_t Modbus_app(void* p) {
     UNUSED(p);
     furi_hal_gpio_init_simple(&gpio_ext_pc0, GpioModeOutputPushPull);
     furi_hal_gpio_init_simple(&gpio_ext_pc1, GpioModeOutputPushPull);
