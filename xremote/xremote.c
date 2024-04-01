@@ -122,6 +122,7 @@ int32_t xremote_main(void* p) {
     xremote_app_switch_to_view(app, XRemoteViewSubmenu);
     view_dispatcher_run(app->app_ctx->view_dispatcher);
 
+    furi_hal_infrared_set_tx_output(FuriHalInfraredTxPinInternal);
     if(furi_hal_power_is_otg_enabled() != otg_was_enabled) {
         if(otg_was_enabled) {
             furi_hal_power_enable_otg();
