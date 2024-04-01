@@ -52,8 +52,9 @@ typedef enum {
     Main_Scene,
     Settings_Scene,
     ConsoleOutput_Scene,
-    ByteInput_Scene,
     Sender_Scene,
+    ByteInput_Scene,
+    Manual_Sender_Scene,
     MSGsBuffer_Scene,
     Scene_Num
 } Scenes;
@@ -62,9 +63,11 @@ typedef enum {
     Settings_Option,
     Sniffer_Option,
     Sender_Option,
-    MSGBuf_Option,
     Read_LOG_Option,
-    About_Option
+    About_Option,
+
+    Manual_Sender_Option,
+    Buffer_Sender_Option
 } Main_options;
 
 typedef struct {
@@ -634,10 +637,11 @@ void mainOptionsCB(void* context, uint32_t index) {
         scene_manager_set_scene_state(app->sceneManager, Main_Scene, Sender_Option);
         scene_manager_next_scene(app->sceneManager, Sender_Scene);
         break;
-    case MSGBuf_Option:
+    /*case MSGBuf_Option:
         scene_manager_set_scene_state(app->sceneManager, Main_Scene, MSGBuf_Option);
         scene_manager_next_scene(app->sceneManager, MSGsBuffer_Scene);
         break;
+        */
     case Read_LOG_Option:
         scene_manager_set_scene_state(app->sceneManager, Main_Scene, Read_LOG_Option);
         if(OpenLogFile(app)) {
@@ -661,7 +665,6 @@ void Main_Scene_OnEnter(void* context) {
     submenu_add_item(app->subMenu, "Settings", Settings_Option, mainOptionsCB, app);
     submenu_add_item(app->subMenu, "Sniffer", Sniffer_Option, mainOptionsCB, app);
     submenu_add_item(app->subMenu, "Sender", Sender_Option, mainOptionsCB, app);
-    submenu_add_item(app->subMenu, "MSGBuf", MSGBuf_Option, mainOptionsCB, app);
     submenu_add_item(app->subMenu, "Read LOG", Read_LOG_Option, mainOptionsCB, app);
     submenu_add_item(app->subMenu, "About", About_Option, mainOptionsCB, app);
     submenu_set_selected_item(
@@ -828,6 +831,37 @@ void Sniffer_Scene_OnExit(void* context) {
     furi_string_reset(app->text);
     serial_deinit(app->uart);
 }
+//////////////////////////   Sender Scene  ////////////////////////
+void SenderOptionsCB(void* context, uint32_t index) {
+    App* app = context;
+    if(index == Manual_Sender_Option) {
+        scene_manager_set_scene_state(app->sceneManager, Sender_Scene, Manual_Sender_Option);
+        scene_manager_next_scene(app->sceneManager, Manual_Sender_Scene);
+    } else if(index == Buffer_Sender_Option) {
+        scene_manager_set_scene_state(app->sceneManager, Sender_Scene, Buffer_Sender_Option);
+        scene_manager_next_scene(app->sceneManager, MSGsBuffer_Scene);
+    }
+}
+void Sender_Scene_OnEnter(void* context) {
+    App* app = context;
+    submenu_reset(app->subMenu);
+    submenu_set_header(app->subMenu, "Main");
+    submenu_add_item(app->subMenu, "Manual Sender", Manual_Sender_Option, SenderOptionsCB, app);
+    submenu_add_item(app->subMenu, "Buffer Sender", Buffer_Sender_Option, SenderOptionsCB, app);
+    submenu_set_selected_item(
+        app->subMenu, scene_manager_get_scene_state(app->sceneManager, Main_Scene));
+    view_dispatcher_switch_to_view(app->viewDispatcher, Submenu_View);
+}
+bool Sender_Scene_OnEvent(void* context, SceneManagerEvent event) {
+    UNUSED(context);
+    UNUSED(event);
+    return false;
+}
+void Sender_Scene_OnExit(void* context) {
+    App* app = context;
+    submenu_reset(app->subMenu);
+}
+
 //////////////////////////   ByteInput Scene  ////////////////////////
 void SetValue(void* context) {
     App* app = context;
@@ -879,7 +913,7 @@ void ByteInput_Scene_OnExit(void* context) {
     App* app = context;
     UNUSED(app);
 }
-//////////////////////////   Sender Scene  //////////////////////////
+//////////////////////////   Manual Sender Scene  //////////////////////////
 const char* fns[] = {"0x01", "0x02", "0x03", "0x04", "0x05", "0x06", "0x0F", "0x10"};
 
 void itemChangeCB(VariableItem* item) {
@@ -960,7 +994,7 @@ void itemEnterCB(void* context, uint32_t index) {
     App* app = context;
     uint8_t* buf = app->msgBuf;
     uint8_t SendButton = FUNCTION >= 0x0F ? (FUNCTION == 0x0F ? BYTECOUNT : QUANTITY) + 5 : 4;
-    scene_manager_set_scene_state(app->sceneManager, Sender_Scene, index);
+    scene_manager_set_scene_state(app->sceneManager, Manual_Sender_Scene, index);
     if(index == SendButton) {
         scene_manager_set_scene_state(app->sceneManager, ConsoleOutput_Scene, Sender_Option);
         scene_manager_next_scene(app->sceneManager, ConsoleOutput_Scene);
@@ -1051,19 +1085,19 @@ void BuildSender(App* app, uint8_t* buf) {
     variable_item_set_current_value_text(item, "");
     variable_item_set_current_value_index(item, 0);
 }
-void Sender_Scene_OnEnter(void* context) {
+void Manual_Sender_Scene_OnEnter(void* context) {
     App* app = context;
     BuildSender(app, app->msgBuf);
     variable_item_list_set_selected_item(
-        app->varList, scene_manager_get_scene_state(app->sceneManager, Sender_Scene));
+        app->varList, scene_manager_get_scene_state(app->sceneManager, Manual_Sender_Scene));
     view_dispatcher_switch_to_view(app->viewDispatcher, VarList_View);
 }
-bool Sender_Scene_OnEvent(void* context, SceneManagerEvent event) {
+bool Manual_Sender_Scene_OnEvent(void* context, SceneManagerEvent event) {
     UNUSED(context);
     UNUSED(event);
     return false;
 }
-void Sender_Scene_OnExit(void* context) {
+void Manual_Sender_Scene_OnExit(void* context) {
     App* app = context;
     variable_item_list_reset(app->varList);
 }
@@ -1075,7 +1109,7 @@ void OnItemEnterCB(void* context, uint32_t index) {
         app->msgBuf[i - start] = app->ringBuffer->ringBuffer[i];
         if(i == app->ringBuffer->delimiters[index]) app->msgLen = i - start + 1;
     }
-    scene_manager_next_scene(app->sceneManager, Sender_Scene);
+    scene_manager_next_scene(app->sceneManager, Manual_Sender_Scene);
 }
 void BuildCMDList(App* app) {
     submenu_set_header(app->subMenu, " ID | FN |Adss");
@@ -1119,22 +1153,25 @@ void (*const OnEnterHandlers[])(void*) = {
     Main_Scene_OnEnter,
     CFG_Scene_OnEnter,
     Sniffer_Scene_OnEnter,
-    ByteInput_Scene_OnEnter,
     Sender_Scene_OnEnter,
+    ByteInput_Scene_OnEnter,
+    Manual_Sender_Scene_OnEnter,
     MSGsBuffer_Scene_OnEnter};
 bool (*const OnEventHandlers[])(void*, SceneManagerEvent) = {
     Main_Scene_OnEvent,
     CFG_Scene_OnEvent,
     Sniffer_Scene_OnEvent,
-    ByteInput_Scene_OnEvent,
     Sender_Scene_OnEvent,
+    ByteInput_Scene_OnEvent,
+    Manual_Sender_Scene_OnEvent,
     MSGsBuffer_Scene_OnEvent};
 void (*const OnExitHandlers[])(void*) = {
     Main_Scene_OnExit,
     CFG_Scene_OnExit,
     Sniffer_Scene_OnExit,
-    ByteInput_Scene_OnExit,
     Sender_Scene_OnExit,
+    ByteInput_Scene_OnExit,
+    Manual_Sender_Scene_OnExit,
     MSGsBuffer_Scene_OnExit};
 static const SceneManagerHandlers SceneHandlers = {
     .on_enter_handlers = OnEnterHandlers,
