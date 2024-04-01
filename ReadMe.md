@@ -31,6 +31,9 @@ This software is for experimental purposes only and is not meant for any illegal
 
 - Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-03-29 03:18 EST`
 - Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-03-29 03:18 EST`
+- OFW: [Bad USB: fix crash when selecting a keyboard layout #3555 (By vanguacamolie)](https://github.com/flipperdevices/flipperzero-firmware/pull/3555)
+- OFW: [IR: Remember OTG state #3549 (By Willie-JL)](https://github.com/flipperdevices/flipperzero-firmware/pull/3549)
+- OFW: [Mifare Ultralight naming fix #3551 (By RebornedBrain)](https://github.com/flipperdevices/flipperzero-firmware/pull/3551)
 
 <a name="release">
 
