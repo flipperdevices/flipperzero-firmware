@@ -2,7 +2,7 @@
 #include "../hid.h"
 #include <gui/elements.h>
 
-#include "hid_icons.h"
+#include <hid_icons.h>
 
 #define TAG "HidCC"
 
@@ -40,7 +40,7 @@ static void hid_cc_draw_callback(Canvas* canvas, void* context) {
     canvas_set_font(canvas, FontPrimary);
     elements_multiline_text_aligned(canvas, 17, 3, AlignLeft, AlignTop, "Cookie\nClicker");
     canvas_set_font(canvas, FontSecondary);
-    FuriString* buffer = furi_string_alloc(32);
+    FuriString* buffer = furi_string_alloc();
     furi_string_printf(buffer, "%0.1f ms\r\n", (double)model->timer_duration);
     if(model->timer_click_enabled) {
         furi_string_cat(buffer, "Clicking");

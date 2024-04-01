@@ -2,9 +2,9 @@
 
 #include <furi.h>
 #include <furi_hal_bt.h>
-#include <furi_hal_bt_hid.h>
 #include <furi_hal_usb.h>
 #include <furi_hal_usb_hid.h>
+#include <extra_profiles/hid_profile.h>
 
 #include <bt/bt_service/bt.h>
 #include <gui/gui.h>
@@ -26,6 +26,7 @@ typedef struct Hid Hid;
 
 struct Hid {
     Bt* bt;
+    FuriHalBleProfileBase* ble;
     Gui* gui;
     NotificationApp* notifications;
     ViewDispatcher* view_dispatcher;
