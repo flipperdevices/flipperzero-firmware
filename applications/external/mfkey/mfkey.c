@@ -679,12 +679,12 @@ static void render_callback(Canvas* const canvas, void* ctx) {
         float eta_round = (float)1 - ((float)program_state->eta_round / (float)eta_round_time);
         float eta_total = (float)1 - ((float)program_state->eta_total / (float)eta_total_time);
         float progress = (float)program_state->num_completed / (float)program_state->total;
-        if(eta_round < 0) {
+        if(eta_round < 0 || eta_round > 1) {
             // Round ETA miscalculated
             eta_round = 1;
             program_state->eta_round = 0;
         }
-        if(eta_total < 0) {
+        if(eta_total < 0 || eta_total > 1) {
             // Total ETA miscalculated
             eta_total = 1;
             program_state->eta_total = 0;

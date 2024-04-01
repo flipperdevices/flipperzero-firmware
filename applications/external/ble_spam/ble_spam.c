@@ -185,12 +185,14 @@ const NotificationSequence blink_sequence = {
     NULL,
 };
 static void start_blink(State* state) {
+    if(!state->ctx.led_indicator) return;
     uint16_t period = delays[state->delay];
     if(period <= 100) period += 30;
     blink_message.data.led_blink.period = period;
     notification_message_block(state->ctx.notification, &blink_sequence);
 }
 static void stop_blink(State* state) {
+    if(!state->ctx.led_indicator) return;
     notification_message_block(state->ctx.notification, &sequence_blink_stop);
 }
 
@@ -227,7 +229,7 @@ static int32_t adv_thread(void* _ctx) {
     Payload* payload = &attacks[state->index].payload;
     const Protocol* protocol = attacks[state->index].protocol;
     if(!payload->random_mac) randomize_mac(state);
-    if(state->ctx.led_indicator) start_blink(state);
+    start_blink(state);
     if(furi_hal_bt_extra_beacon_is_active()) {
         furi_check(furi_hal_bt_extra_beacon_stop());
     }
@@ -246,7 +248,7 @@ static int32_t adv_thread(void* _ctx) {
         furi_check(furi_hal_bt_extra_beacon_stop());
     }
 
-    if(state->ctx.led_indicator) stop_blink(state);
+    stop_blink(state);
     return 0;
 }
 
