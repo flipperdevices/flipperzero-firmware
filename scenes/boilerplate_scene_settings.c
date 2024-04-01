@@ -43,7 +43,6 @@ const uint32_t settings_value[2] = {
     BoilerplateSettingsOn,
 };
 
-
 static void boilerplate_scene_settings_set_haptic(VariableItem* item) {
     Boilerplate* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
@@ -85,33 +84,21 @@ void boilerplate_scene_settings_on_enter(void* context) {
 
     // Vibro on/off
     item = variable_item_list_add(
-        app->variable_item_list,
-        "Vibro/Haptic:",
-        2,
-        boilerplate_scene_settings_set_haptic,
-        app);
+        app->variable_item_list, "Vibro/Haptic:", 2, boilerplate_scene_settings_set_haptic, app);
     value_index = value_index_uint32(app->haptic, haptic_value, 2);
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, haptic_text[value_index]);
 
     // Sound on/off
     item = variable_item_list_add(
-        app->variable_item_list,
-        "Sound:",
-        2,
-        boilerplate_scene_settings_set_speaker,
-        app);
+        app->variable_item_list, "Sound:", 2, boilerplate_scene_settings_set_speaker, app);
     value_index = value_index_uint32(app->speaker, speaker_value, 2);
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, speaker_text[value_index]);
 
     // LED Effects on/off
     item = variable_item_list_add(
-        app->variable_item_list,
-        "LED FX:",
-        2,
-        boilerplate_scene_settings_set_led,
-        app);
+        app->variable_item_list, "LED FX:", 2, boilerplate_scene_settings_set_led, app);
     value_index = value_index_uint32(app->led, led_value, 2);
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, led_text[value_index]);
@@ -126,7 +113,7 @@ void boilerplate_scene_settings_on_enter(void* context) {
     value_index = value_index_uint32(app->save_settings, settings_value, 2);
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, settings_text[value_index]);
-    
+
     view_dispatcher_switch_to_view(app->view_dispatcher, BoilerplateViewIdSettings);
 }
 
@@ -135,7 +122,6 @@ bool boilerplate_scene_settings_on_event(void* context, SceneManagerEvent event)
     UNUSED(app);
     bool consumed = false;
     if(event.type == SceneManagerEventTypeCustom) {
-        
     }
     return consumed;
 }
