@@ -98,8 +98,8 @@ typedef enum {
 
     TE_EFFECT_PORTA_UP_SEMITONE = 0x1d00, // Txx
     TE_EFFECT_PORTA_DOWN_SEMITONE = 0x1e00, // Uxx
+    TE_EFFECT_PITCH = 0x1f00, //Vxx
     /*
-    TE_EFFECT_ = 0x1f00, //Vxx
     TE_EFFECT_ = 0x2000, //Wxx
     */
 
@@ -155,6 +155,7 @@ typedef struct {
     uint8_t channel_flags;
 
     uint16_t note, target_note, last_note, fixed_note;
+    int16_t finetune_note;
     int16_t arpeggio_note;
 
     uint8_t volume;
