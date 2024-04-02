@@ -38,10 +38,6 @@ FlipboardModel*
 void flipboard_model_free(FlipboardModel* model) {
     flipboard_model_save(model, model->action_model_fields);
 
-    if(model->resources) {
-        resources_free(model->resources);
-    }
-
     if(model->speaker) {
         speaker_free(model->speaker);
     }
@@ -64,6 +60,10 @@ void flipboard_model_free(FlipboardModel* model) {
 
     if(model->gui_refresh_timer) {
         furi_timer_free(model->gui_refresh_timer);
+    }
+
+    if(model->resources) {
+        resources_free(model->resources);
     }
 
     free(model);
