@@ -263,12 +263,12 @@ int32_t flipboard_signal_app(void* p) {
 
     ActionModelFields fields = ActionModelFieldColorDown | ActionModelFieldColorUp |
                                ActionModelFieldFrequency;
-    bool single_mode_button = true;
+    bool single_mode_button = false;
     bool attach_keyboard = false;
 
     Flipboard* app = flipboard_alloc(
         FLIPBOARD_APP_NAME,
-        FLIPBOARD_PRIMARY_ITEM_NAME,
+        &I_qr_github,
         ABOUT_TEXT,
         fields,
         single_mode_button,
