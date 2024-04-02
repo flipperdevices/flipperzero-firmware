@@ -93,7 +93,7 @@ static void ir_received_callback(void* ctx, InfraredWorkerSignal* signal) {
     furi_mutex_acquire(state->mutex, FuriWaitForever);
 
     const InfraredMessage* decodedSignal = infrared_worker_get_decoded_signal(signal);
-    if (state->decoded_signal) {
+    if(state->decoded_signal) {
         free((InfraredMessage*)state->decoded_signal);
     }
     state->decoded_signal = decodedSignal;
@@ -113,8 +113,7 @@ int32_t ir_decoder_app(void* p) {
         return -1;
     }
 
-    IRDecoderState state = {
-        .mutex = NULL};
+    IRDecoderState state = {.mutex = NULL};
     state.mutex = furi_mutex_alloc(FuriMutexTypeNormal);
     if(!state.mutex) {
         FURI_LOG_E(TAG, "Cannot create mutex.");
