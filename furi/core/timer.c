@@ -14,7 +14,7 @@ typedef struct {
     void* context;
 } TimerCallback_t;
 
-const char* furi_timer_get_current_name() {
+const char* furi_timer_get_current_name(void) {
     return current_timer_name;
 }
 

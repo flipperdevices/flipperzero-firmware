@@ -13,7 +13,7 @@ void subrem_view_edit_menu_set_callback(
     SubRemViewEditMenuCallback callback,
     void* context);
 
-SubRemViewEditMenu* subrem_view_edit_menu_alloc();
+SubRemViewEditMenu* subrem_view_edit_menu_alloc(void);
 
 void subrem_view_edit_menu_free(SubRemViewEditMenu* subrem_view_edit_menu);
 

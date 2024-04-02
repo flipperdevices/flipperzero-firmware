@@ -214,7 +214,7 @@ bool subghz_protocol_secplus_v1_check_fixed(uint32_t fixed);
 
 // Reset prog mode vars
 // TODO: Remake in proper way
-void faac_slh_reset_prog_mode();
+void faac_slh_reset_prog_mode(void);
 
 #ifdef __cplusplus
 }

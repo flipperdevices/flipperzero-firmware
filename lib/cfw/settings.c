@@ -28,7 +28,7 @@ CfwSettings cfw_settings = {
     .vgm_color_bg.value = 0xFC00, // Default Orange
 };
 
-void CFW_SETTINGS_LOAD() {
+void CFW_SETTINGS_LOAD(void) {
     if(!furi_hal_is_normal_boot()) return;
 
     CfwSettings* x = &cfw_settings;

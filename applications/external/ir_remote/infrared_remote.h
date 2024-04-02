@@ -8,7 +8,7 @@
 
 typedef struct InfraredRemote InfraredRemote;
 
-InfraredRemote* infrared_remote_alloc();
+InfraredRemote* infrared_remote_alloc(void);
 void infrared_remote_free(InfraredRemote* remote);
 void infrared_remote_reset(InfraredRemote* remote);
 

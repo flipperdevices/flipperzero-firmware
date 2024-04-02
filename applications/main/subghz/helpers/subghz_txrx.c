@@ -705,7 +705,7 @@ void subghz_txrx_set_default_preset(SubGhzTxRx* instance, uint32_t frequency) {
     if(frequency == 0) {
         frequency = subghz_setting_get_default_frequency(subghz_txrx_get_setting(instance));
     }
-    subghz_txrx_set_preset(instance, default_modulation, frequency, 0, 0, NULL, 0);
+    subghz_txrx_set_preset(instance, default_modulation, frequency, NAN, NAN, NULL, 0);
 }
 
 const char*
@@ -720,8 +720,8 @@ const char*
         instance,
         preset_name,
         frequency,
-        0,
-        0,
+        NAN,
+        NAN,
         subghz_setting_get_preset_data(setting, index),
         subghz_setting_get_preset_data_size(setting, index));
 

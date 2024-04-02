@@ -291,7 +291,7 @@ void furi_hal_subghz_set_ext_power_amp(bool enabled);
 /** Get external amplifier power state
  * @return     true if amplifier is enabled
  */
-bool furi_hal_subghz_get_ext_power_amp();
+bool furi_hal_subghz_get_ext_power_amp(void);
 
 #ifdef __cplusplus
 }

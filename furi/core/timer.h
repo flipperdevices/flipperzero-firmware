@@ -105,7 +105,7 @@ void furi_timer_set_thread_priority(FuriTimerThreadPriority priority);
  *
  * @return     The pointer to the timer name, or NULL
  */
-const char* furi_timer_get_current_name();
+const char* furi_timer_get_current_name(void);
 
 #ifdef __cplusplus
 }

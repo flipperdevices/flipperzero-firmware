@@ -68,7 +68,7 @@ typedef struct {
     uint32_t lcd_style;
 } CfwSettings;
 
-void CFW_SETTINGS_SAVE();
+void CFW_SETTINGS_SAVE(void);
 extern CfwSettings cfw_settings;
 
 #ifdef __cplusplus

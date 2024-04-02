@@ -61,7 +61,7 @@ FuriHalUsbInterface* furi_hal_usb_get_config(void);
  *
  * @return    current USB device context
  */
-void* furi_hal_usb_get_config_context();
+void* furi_hal_usb_get_config_context(void);
 
 /** Lock USB device mode switch
  */

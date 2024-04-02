@@ -35,7 +35,7 @@ typedef struct {
  * 
  * @return SubGhzGPS* SubGhzGPS object
 */
-SubGhzGPS* subghz_gps_init();
+SubGhzGPS* subghz_gps_init(void);
 
 /**
  * Deinitialize SubGhzGPS object

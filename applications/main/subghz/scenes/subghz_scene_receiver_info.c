@@ -42,8 +42,8 @@ static bool subghz_scene_receiver_info_update_parser(void* context) {
             subghz->txrx,
             furi_string_get_cstr(preset->name),
             preset->frequency,
-            0,
-            0,
+            NAN,
+            NAN,
             preset->data,
             preset->data_size);
 

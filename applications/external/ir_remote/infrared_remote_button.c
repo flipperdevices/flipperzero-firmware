@@ -7,7 +7,7 @@ struct InfraredRemoteButton {
     InfraredSignal* signal;
 };
 
-InfraredRemoteButton* infrared_remote_button_alloc() {
+InfraredRemoteButton* infrared_remote_button_alloc(void) {
     InfraredRemoteButton* button = malloc(sizeof(InfraredRemoteButton));
     button->name = furi_string_alloc();
     button->signal = infrared_signal_alloc();

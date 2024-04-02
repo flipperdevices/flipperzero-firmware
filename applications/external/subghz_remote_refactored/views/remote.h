@@ -20,7 +20,7 @@ void subrem_view_remote_set_callback(
     SubRemViewRemoteCallback callback,
     void* context);
 
-SubRemViewRemote* subrem_view_remote_alloc();
+SubRemViewRemote* subrem_view_remote_alloc(void);
 
 void subrem_view_remote_free(SubRemViewRemote* subrem_view_remote);
 

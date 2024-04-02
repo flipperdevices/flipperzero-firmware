@@ -2,7 +2,7 @@
 
 #define TAG "SubRemPresets"
 
-SubRemSubFilePreset* subrem_sub_file_preset_alloc() {
+SubRemSubFilePreset* subrem_sub_file_preset_alloc(void) {
     SubRemSubFilePreset* sub_preset = malloc(sizeof(SubRemSubFilePreset));
 
     sub_preset->fff_data = flipper_format_string_alloc();

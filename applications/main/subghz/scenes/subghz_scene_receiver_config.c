@@ -178,8 +178,8 @@ static void subghz_scene_receiver_config_set_frequency(VariableItem* item) {
             subghz->txrx,
             furi_string_get_cstr(preset.name),
             frequency,
-            0,
-            0,
+            NAN,
+            NAN,
             preset.data,
             preset.data_size);
 
@@ -206,8 +206,8 @@ static void subghz_scene_receiver_config_set_preset(VariableItem* item) {
         subghz->txrx,
         preset_name,
         preset.frequency,
-        0,
-        0,
+        NAN,
+        NAN,
         subghz_setting_get_preset_data(setting, index),
         subghz_setting_get_preset_data_size(setting, index));
     subghz->last_settings->preset_index = index;
@@ -240,8 +240,8 @@ static void subghz_scene_receiver_config_set_hopping_running(VariableItem* item)
             subghz->txrx,
             furi_string_get_cstr(preset.name),
             frequency,
-            0,
-            0,
+            NAN,
+            NAN,
             preset.data,
             preset.data_size);
         variable_item_set_current_value_index(

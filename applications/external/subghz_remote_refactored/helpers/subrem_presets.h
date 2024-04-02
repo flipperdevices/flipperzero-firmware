@@ -27,7 +27,7 @@ typedef struct {
     SubRemSubFilePreset* subs_preset[SubRemSubKeyNameMaxCount];
 } SubRemMapPreset;
 
-SubRemSubFilePreset* subrem_sub_file_preset_alloc();
+SubRemSubFilePreset* subrem_sub_file_preset_alloc(void);
 
 void subrem_sub_file_preset_free(SubRemSubFilePreset* sub_preset);
 

@@ -83,7 +83,7 @@ void rgb_backlight_load_settings(bool enabled) {
     rgb_backlight_reconfigure(rgb_state.enabled);
 }
 
-void rgb_backlight_save_settings() {
+void rgb_backlight_save_settings(void) {
     if(!rgb_state.settings_loaded) return;
     furi_check(furi_mutex_acquire(rgb_state.mutex, FuriWaitForever) == FuriStatusOk);
 
@@ -132,7 +132,7 @@ void rgb_backlight_set_rainbow_mode(RGBBacklightRainbowMode rainbow_mode) {
     furi_check(furi_mutex_release(rgb_state.mutex) == FuriStatusOk);
 }
 
-RGBBacklightRainbowMode rgb_backlight_get_rainbow_mode() {
+RGBBacklightRainbowMode rgb_backlight_get_rainbow_mode(void) {
     if(!rgb_state.settings_loaded) return 0;
     furi_check(furi_mutex_acquire(rgb_state.mutex, FuriWaitForever) == FuriStatusOk);
 
@@ -151,7 +151,7 @@ void rgb_backlight_set_rainbow_speed(uint8_t rainbow_speed) {
     furi_check(furi_mutex_release(rgb_state.mutex) == FuriStatusOk);
 }
 
-uint8_t rgb_backlight_get_rainbow_speed() {
+uint8_t rgb_backlight_get_rainbow_speed(void) {
     if(!rgb_state.settings_loaded) return 0;
     furi_check(furi_mutex_acquire(rgb_state.mutex, FuriWaitForever) == FuriStatusOk);
 
@@ -173,7 +173,7 @@ void rgb_backlight_set_rainbow_interval(uint32_t rainbow_interval) {
     furi_check(furi_mutex_release(rgb_state.mutex) == FuriStatusOk);
 }
 
-uint32_t rgb_backlight_get_rainbow_interval() {
+uint32_t rgb_backlight_get_rainbow_interval(void) {
     if(!rgb_state.settings_loaded) return 0;
     furi_check(furi_mutex_acquire(rgb_state.mutex, FuriWaitForever) == FuriStatusOk);
 
@@ -193,7 +193,7 @@ void rgb_backlight_set_rainbow_saturation(uint8_t rainbow_saturation) {
     furi_check(furi_mutex_release(rgb_state.mutex) == FuriStatusOk);
 }
 
-uint8_t rgb_backlight_get_rainbow_saturation() {
+uint8_t rgb_backlight_get_rainbow_saturation(void) {
     if(!rgb_state.settings_loaded) return 0;
     furi_check(furi_mutex_acquire(rgb_state.mutex, FuriWaitForever) == FuriStatusOk);
 

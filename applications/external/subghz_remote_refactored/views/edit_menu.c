@@ -242,7 +242,7 @@ void subrem_view_edit_menu_exit(void* context) {
     furi_assert(context);
 }
 
-SubRemViewEditMenu* subrem_view_edit_menu_alloc() {
+SubRemViewEditMenu* subrem_view_edit_menu_alloc(void) {
     SubRemViewEditMenu* subrem_view_edit_menu = malloc(sizeof(SubRemViewEditMenu));
 
     // View allocation and configuration
