@@ -1,3 +1,4 @@
+#include "icon.h"
 #include "icon_i.h"
 #include <furi.h>
 

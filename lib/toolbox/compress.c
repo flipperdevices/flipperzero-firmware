@@ -88,10 +88,10 @@ void compress_icon_decode(
     CompressHeader* header = (CompressHeader*)icon_data;
     if(header->is_compressed) {
         size_t decoded_size = 0;
-        // memset(decoded_data_output_ptr, 0, size_hint);
         compress_decode_internal(
             instance->decoder,
             icon_data,
+            /* Decoder will check/process headers again - need to pass them */
             sizeof(CompressHeader) + header->compressed_buff_size,
             decoded_data_output_ptr,
             decoded_data_output_size,

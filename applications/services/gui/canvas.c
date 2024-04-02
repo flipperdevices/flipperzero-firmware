@@ -1,5 +1,4 @@
 #include "canvas_i.h"
-#include "gui/icon.h"
 #include "icon_animation_i.h"
 
 #include <furi.h>

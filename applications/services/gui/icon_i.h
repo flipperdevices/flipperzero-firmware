@@ -4,7 +4,7 @@
  */
 
 #pragma once
-#include "icon.h"
+#include <stdint.h>
 
 struct Icon {
     const uint16_t width;
