@@ -74,11 +74,14 @@ void compress_icon_decode(
     furi_assert(decoded_buff);
 
     uint8_t* decoded_data_output_ptr = NULL;
+    size_t decoded_data_output_size = 0;
     if(size_hint > COMPRESS_ICON_DECODED_BUFF_SIZE) {
         compress_icon_release_large_buffer(instance);
         instance->large_decoded_buff = malloc(size_hint);
+        decoded_data_output_size = size_hint;
         decoded_data_output_ptr = instance->large_decoded_buff;
     } else {
+        decoded_data_output_size = COMPRESS_ICON_DECODED_BUFF_SIZE;
         decoded_data_output_ptr = instance->decoded_buff;
     }
 
@@ -91,7 +94,7 @@ void compress_icon_decode(
             icon_data,
             sizeof(CompressHeader) + header->compressed_buff_size,
             decoded_data_output_ptr,
-            size_hint,
+            decoded_data_output_size,
             &decoded_size);
         furi_check(!size_hint || (decoded_size == size_hint));
         *decoded_buff = decoded_data_output_ptr;
