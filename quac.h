@@ -59,6 +59,7 @@ typedef struct App {
         bool show_icons; // Defaults to True
         bool show_headers; // Defaults to True
         uint32_t rfid_duration; // Defaults to 2500 ms
+        uint32_t nfc_duration; // Defaults to 1000 ms
         bool subghz_use_ext_antenna; // Defaults to False
         bool show_hidden; // Defaults to False
     } settings;

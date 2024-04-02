@@ -155,6 +155,8 @@ ItemType item_get_item_type_from_extension(const char* ext) {
         type = Item_RFID;
     } else if(!strcmp(ext, ".ir")) {
         type = Item_IR;
+    } else if(!strcmp(ext, ".nfc")) {
+        type = Item_NFC;
     } else if(!strcmp(ext, ".qpl")) {
         type = Item_Playlist;
     }

@@ -12,6 +12,8 @@ void action_tx(void* context, Item* item, FuriString* error) {
         action_ir_tx(context, item->path, error);
     } else if(!strcmp(item->ext, ".rfid")) {
         action_rfid_tx(context, item->path, error);
+    } else if(!strcmp(item->ext, ".nfc")) {
+        action_nfc_tx(context, item->path, error);
     } else if(!strcmp(item->ext, ".qpl")) {
         action_qpl_tx(context, item->path, error);
     } else {
