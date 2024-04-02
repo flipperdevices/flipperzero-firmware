@@ -3,8 +3,7 @@
 
 typedef enum {
    NfcPlaylistMenuSelection_DeletePlaylist,
-   NfcPlaylistMenuSelection_RenamePlaylist,
-   NfcPlaylistMenuSelection_EditList
+   NfcPlaylistMenuSelection_RenamePlaylist
 } NfcPlaylistMenuSelection;
 
 void nfc_playlist_file_edit_menu_callback(void* context, uint32_t index) {
@@ -23,11 +22,9 @@ void nfc_playlist_file_edit_menu_callback(void* context, uint32_t index) {
          scene_manager_next_scene(nfc_playlist->scene_manager, NfcPlaylistScene_TextInput);
          break;
       }
-      case NfcPlaylistMenuSelection_EditList: {
+      default: {
          break;
       }
-      default:
-         break;
    }
    furi_record_close(RECORD_STORAGE);
 }

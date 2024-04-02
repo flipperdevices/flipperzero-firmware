@@ -78,6 +78,13 @@ static NfcPlaylist* nfc_playlist_alloc() {
    view_dispatcher_add_view(nfc_playlist->view_dispatcher, NfcPlaylistView_FileSelect, file_browser_get_view(nfc_playlist->file_browser));
    view_dispatcher_add_view(nfc_playlist->view_dispatcher, NfcPlaylistView_FileEdit, submenu_get_view(nfc_playlist->submenu));
    view_dispatcher_add_view(nfc_playlist->view_dispatcher, NfcPlaylistView_TextInput, text_input_get_view(nfc_playlist->text_input));
+
+   Storage* storage = furi_record_open(RECORD_STORAGE);
+   if (!storage_common_exists(storage, "/ext/apps_data/nfc_playlist")) {
+      storage_common_mkdir(storage, "/ext/apps_data/nfc_playlist");
+   }
+   furi_record_close(RECORD_STORAGE);
+
    return nfc_playlist;
 }
 
@@ -103,10 +110,20 @@ static void nfc_playlist_free(NfcPlaylist* nfc_playlist) {
    free(nfc_playlist);
 }
 
+void nfc_playlist_set_log_level() {
+#ifdef FURI_DEBUG
+   furi_log_set_level(FuriLogLevelTrace);
+#else
+   furi_log_set_level(FuriLogLevelInfo);
+#endif
+}
+
 int32_t nfc_playlist_main(void* p) {
    UNUSED(p);
 
    NfcPlaylist* nfc_playlist = nfc_playlist_alloc();
+
+   nfc_playlist_set_log_level();
 
    Gui* gui = furi_record_open(RECORD_GUI);
    view_dispatcher_attach_to_gui(nfc_playlist->view_dispatcher, gui, ViewDispatcherTypeFullscreen);
