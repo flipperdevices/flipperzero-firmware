@@ -257,8 +257,17 @@ int old_recover(
 
 static inline int sync_state(ProgramState* program_state) {
     int ts = furi_hal_rtc_get_timestamp();
-    program_state->eta_round = program_state->eta_round - (ts - program_state->eta_timestamp);
-    program_state->eta_total = program_state->eta_total - (ts - program_state->eta_timestamp);
+    int elapsed_time = ts - program_state->eta_timestamp;
+    if(elapsed_time < program_state->eta_round) {
+        program_state->eta_round -= elapsed_time;
+    } else {
+        program_state->eta_round = 0;
+    }
+    if(elapsed_time < program_state->eta_total) {
+        program_state->eta_total -= elapsed_time;
+    } else {
+        program_state->eta_total = 0;
+    }
     program_state->eta_timestamp = ts;
     if(program_state->close_thread_please) {
         return 1;
