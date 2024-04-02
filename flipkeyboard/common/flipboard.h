@@ -29,7 +29,7 @@ typedef View* (*GetPrimaryView)(void* context);
 /**
  * @brief Allocates a new Flipboard application.
  * @param app_name The name of the application.
- * @param primary_item_name The name of the primary action (the purpose of your app).
+ * @param qr_icon The icon to display in the qr view.
  * @param about_text The text to display in the about view.
  * @param fields The fields to display in the button model.
  * @param single_mode_button Whether to display the button model in single mode.
@@ -42,7 +42,7 @@ typedef View* (*GetPrimaryView)(void* context);
 */
 Flipboard* flipboard_alloc(
     char* app_name,
-    char* primary_item_name,
+    Icon* qr_icon,
     char* about_text,
     ActionModelFields fields,
     bool single_mode_button,

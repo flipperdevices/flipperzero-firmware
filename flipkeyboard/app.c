@@ -184,7 +184,7 @@ int32_t flipboard_keyboard_app(void* p) {
 
     Flipboard* app = flipboard_alloc(
         FLIPBOARD_APP_NAME,
-        FLIPBOARD_PRIMARY_ITEM_NAME,
+        &I_qr_github,
         ABOUT_TEXT,
         fields,
         single_mode_button,

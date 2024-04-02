@@ -22,6 +22,7 @@ struct Flipboard {
     ActionConfig* action_config;
     View* view_primary;
     Widget* widget_about;
+    Widget* widget_qr;
 
     FlipboardModel* model;
 };
@@ -39,4 +40,5 @@ typedef enum {
 
     FlipboardViewAboutId,
     FlipboardViewPrimaryId,
+    FlipboardViewQRId,
 } FlipboardViewId;
