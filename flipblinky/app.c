@@ -265,7 +265,7 @@ void flipboard_enter_callback(void* context) {
     flipboard_reset_effect(fm);
     flipboard_model_set_button_monitor(fm, flipboard_debounced_switch, (Flipboard*)context);
     furi_timer_start(fbm->timer, furi_ms_to_ticks(fbm->period_ms));
-    flipboard_model_set_gui_refresh_speed_ms(fm, 500);
+    // flipboard_model_set_gui_refresh_speed_ms(fm, 500);
 }
 
 /**
@@ -401,7 +401,7 @@ int32_t flipboard_blinky_app(void* _p) {
 
     Flipboard* app = flipboard_alloc(
         FLIPBOARD_APP_NAME,
-        FLIPBOARD_PRIMARY_ITEM_NAME,
+        &I_qr_github,
         ABOUT_TEXT,
         fields,
         single_mode_button,

@@ -9,9 +9,10 @@ App(
     stack_size=4 * 1024,
     requires=["gui"],
     order=10,
-    fap_version=(2, 1),
+    resources="resources",
+    fap_version=(2, 2),
     fap_icon="flipblinky.png",
-    fap_category="GPIO",
+    fap_category="GPIO/FlipBoard",
     fap_icon_assets="assets",
     fap_description="FlipBoard Blinky turns your FlipBoard into a blinky badge.",
 )
