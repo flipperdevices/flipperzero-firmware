@@ -13,6 +13,7 @@ typedef struct {
     ViewPort* view_port;
 } IRDecoderState;
 
+// https://stackoverflow.com/questions/746171/efficient-algorithm-for-bit-reversal-from-msb-lsb-to-lsb-msb-in-c/746382#746382
 static int bit_reversal(uint32_t input) {
     int s = sizeof(input) * 2;
     int i, x, y, p;
