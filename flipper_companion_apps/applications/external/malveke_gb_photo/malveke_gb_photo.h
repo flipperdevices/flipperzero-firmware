@@ -70,9 +70,6 @@ typedef enum {
     BoilerplateViewIdMenu,
     BoilerplateViewIdScene1,
     BoilerplateViewIdScene2,
-    // BoilerplateViewIdScene3,
-    // BoilerplateViewIdScene4,
-    // BoilerplateViewIdScene5,
     BoilerplateViewIdSettings,
 } BoilerplateViewId;
 
