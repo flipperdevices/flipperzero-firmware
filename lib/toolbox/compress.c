@@ -93,7 +93,7 @@ void compress_icon_decode(
             decoded_data_output_ptr,
             size_hint,
             &decoded_size);
-        furi_check(!size_hint || (size_hint && (decoded_size == size_hint)));
+        furi_check(!size_hint || (decoded_size == size_hint));
         *decoded_buff = decoded_data_output_ptr;
     } else {
         *decoded_buff = (uint8_t*)&icon_data[1];

@@ -347,7 +347,7 @@ static LoaderStatus loader_start_external_app(
             FURI_LOG_W(TAG, "Triggering BP for debugger");
             /* After hitting this, you can set breakpoints in your .fap's code
              * Note that you have to toggle breakpoints that were set before */
-             __asm volatile("bkpt 0");
+            __asm volatile("bkpt 0");
         }
 
         loader_start_app_thread(loader, FlipperInternalApplicationFlagDefault);

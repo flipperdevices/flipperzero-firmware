@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,60.4,,
+Version,+,61.0,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
 Header,+,applications/services/cli/cli_vcp.h,,
@@ -772,7 +772,7 @@ Function,+,compress_decode,_Bool,"Compress*, uint8_t*, size_t, uint8_t*, size_t,
 Function,+,compress_encode,_Bool,"Compress*, uint8_t*, size_t, uint8_t*, size_t, size_t*"
 Function,+,compress_free,void,Compress*
 Function,+,compress_icon_alloc,CompressIcon*,
-Function,+,compress_icon_decode,void,"CompressIcon*, const uint8_t*, uint8_t**"
+Function,+,compress_icon_decode,void,"CompressIcon*, const uint8_t*, uint8_t**, size_t"
 Function,+,compress_icon_free,void,CompressIcon*
 Function,-,copysign,double,"double, double"
 Function,-,copysignf,float,"float, float"
@@ -1656,6 +1656,7 @@ Function,-,hypotf,float,"float, float"
 Function,-,hypotl,long double,"long double, long double"
 Function,+,icon_animation_alloc,IconAnimation*,const Icon*
 Function,+,icon_animation_free,void,IconAnimation*
+Function,+,icon_animation_get_decode_size,uint32_t,const IconAnimation*
 Function,+,icon_animation_get_height,uint8_t,const IconAnimation*
 Function,+,icon_animation_get_width,uint8_t,const IconAnimation*
 Function,+,icon_animation_is_last_frame,_Bool,const IconAnimation*
@@ -1663,8 +1664,11 @@ Function,+,icon_animation_set_update_callback,void,"IconAnimation*, IconAnimatio
 Function,+,icon_animation_start,void,IconAnimation*
 Function,+,icon_animation_stop,void,IconAnimation*
 Function,+,icon_get_data,const uint8_t*,const Icon*
-Function,+,icon_get_height,uint8_t,const Icon*
-Function,+,icon_get_width,uint8_t,const Icon*
+Function,+,icon_get_decode_size,uint32_t,const Icon*
+Function,+,icon_get_frame_count,uint32_t,const Icon*
+Function,+,icon_get_frame_data,const uint8_t*,"const Icon*, uint32_t"
+Function,+,icon_get_height,uint16_t,const Icon*
+Function,+,icon_get_width,uint16_t,const Icon*
 Function,-,ilogb,int,double
 Function,-,ilogbf,int,float
 Function,-,ilogbl,int,long double
