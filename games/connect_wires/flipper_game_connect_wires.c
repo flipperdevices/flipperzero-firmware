@@ -664,6 +664,7 @@ int32_t flipper_game_connect_wires(void* p) {
           appState->currentMenuSelection = 0;
         }
 
+		view_port_update(view_port);
         furi_mutex_release(appState->mutex);
     }
 
