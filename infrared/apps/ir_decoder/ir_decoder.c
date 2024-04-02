@@ -27,9 +27,6 @@ static void render_callback(Canvas* canvas, void* ctx) {
     canvas_set_font(canvas, FontPrimary);
     canvas_draw_str(canvas, 2, 10, "IR Decoder");
 
-    // PROBLEM 1 is somewhere around here...
-    // We can update the view once with the address,
-    // but subsequent attempts crash the Flipper Zero.
     canvas_set_font(canvas, FontSecondary);
     if(state->decoded_signal) {
         uint8_t addr_digits =
@@ -38,8 +35,6 @@ static void render_callback(Canvas* canvas, void* ctx) {
         FURI_LOG_D(TAG, "Addr Digits: %d", addr_digits);
         furi_string_printf(temp_str, "A: 0x%0*lX", addr_digits, state->decoded_signal->address);
         canvas_draw_str(canvas, 2, 20, furi_string_get_cstr(temp_str));
-        // PROBLEM 2
-        // The following code crashes the Flipper Zero at first attempt unlike Problem 1.
         uint8_t command_digits =
             ROUND_UP_TO(infrared_get_protocol_command_length(state->decoded_signal->protocol), 4);
         FURI_LOG_D(TAG, "Command Digits: %d", command_digits);
