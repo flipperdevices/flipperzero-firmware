@@ -42,7 +42,7 @@ typedef View* (*GetPrimaryView)(void* context);
 */
 Flipboard* flipboard_alloc(
     char* app_name,
-    Icon* qr_icon,
+    const Icon* qr_icon,
     char* about_text,
     ActionModelFields fields,
     bool single_mode_button,
