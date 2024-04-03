@@ -14,6 +14,7 @@ App(
     fap_icon="flipsimon.png",
     fap_category="GPIO/FlipBoard",
     fap_description="Simon memory game for the FlipBoard.",
+    fap_icon_assets="assets",
     fap_author="codeallnight",
     fap_weburl="https://youtube.com/@MrDerekJamison",
 )
