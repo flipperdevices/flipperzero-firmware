@@ -7,7 +7,7 @@
 
 #define ABOUT_TEXT                             \
     "Welcome to the Flipboard\n"               \
-    "Simon v1.2!\n\n"                          \
+    "Simon v1.3!\n\n"                          \
     "Optimized for FlipBoard \n"               \
     "hardware --\n"                            \
     "see link below to order!\n"               \

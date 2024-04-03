@@ -1,0 +1,23 @@
+Filetype: Flipper Flipboard File
+Version: 2
+# Buy your Flipboard at https://tindie.com/stores/MakeItHackin
+# 
+ActionId: 1
+Fields: 6
+ColorDown: 65280
+Frequency: 164.813995
+# 
+ActionId: 2
+Fields: 6
+ColorDown: 16711680
+Frequency: 220.000000
+# 
+ActionId: 4
+Fields: 6
+ColorDown: 16744192
+Frequency: 277.183014
+# 
+ActionId: 8
+Fields: 6
+ColorDown: 255
+Frequency: 329.627991
