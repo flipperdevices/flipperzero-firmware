@@ -30,7 +30,7 @@ bool nfc_scene_felica_key_input_on_event(void* context, SceneManagerEvent event)
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == NfcCustomEventByteInputDone) {
             nfc->felica_auth->skip_auth = false;
-            scene_manager_next_scene(nfc->scene_manager, NfcSceneRead);
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneFelicaUnlockWarn);
             consumed = true;
         }
     }
