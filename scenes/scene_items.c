@@ -22,6 +22,7 @@ static const ActionMenuItemType ItemToMenuItem[] = {
     [Item_Playlist] = ActionMenuItemTypePlaylist,
     [Item_Group] = ActionMenuItemTypeGroup,
     [Item_Settings] = ActionMenuItemTypeSettings,
+    [Item_Unknown] = ActionMenuItemTypeUnknown,
 };
 
 void scene_items_item_callback(void* context, int32_t index, InputType type) {

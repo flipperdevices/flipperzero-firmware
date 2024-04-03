@@ -81,8 +81,12 @@ static bool scene_action_settings_import_file_browser_callback(
         memcpy(*icon, icon_get_data(&I_RFID_10px), 32);
     } else if(!strcmp(ext, ".ir")) {
         memcpy(*icon, icon_get_data(&I_IR_10px), 32);
+    } else if(!strcmp(ext, ".nfc")) {
+        memcpy(*icon, icon_get_data(&I_NFC_10px), 32);
     } else if(!strcmp(ext, ".qpl")) {
         memcpy(*icon, icon_get_data(&I_Playlist_10px), 32);
+    } else {
+        return false;
     }
     return true;
 }

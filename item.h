@@ -19,6 +19,7 @@ typedef enum {
     Item_Playlist,
     Item_Group,
     Item_Settings,
+    Item_Unknown,
     Item_count
 } ItemType;
 

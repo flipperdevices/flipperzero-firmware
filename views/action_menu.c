@@ -28,6 +28,7 @@ static const Icon* ActionMenuIcons[] = {
     [ActionMenuItemTypePlaylist] = &I_Playlist_10px,
     [ActionMenuItemTypeGroup] = &I_Directory_10px,
     [ActionMenuItemTypeSettings] = &I_Settings_10px,
+    [ActionMenuItemTypeUnknown] = &I_Unknown_10px,
 };
 
 struct ActionMenuItem {

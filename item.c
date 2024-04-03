@@ -96,10 +96,16 @@ ItemsView* item_get_items_view_from_path(void* context, const FuriString* input_
 
         Item* item = ItemArray_push_new(iview->items);
 
-        // Action files have extensions, so item->ext starts with '.'
-        item->ext[0] = 0;
-        path_extract_extension(path, item->ext, MAX_EXT_LEN);
-        item->type = item_get_item_type_from_extension(item->ext);
+        FileInfo fileinfo;
+        if(storage_common_stat(app->storage, found_path, &fileinfo) == FSE_OK &&
+           file_info_is_dir(&fileinfo)) {
+            item->type = Item_Group;
+        } else {
+            // Action files have extensions, so item->ext starts with '.'
+            item->ext[0] = 0;
+            path_extract_extension(path, item->ext, MAX_EXT_LEN);
+            item->type = item_get_item_type_from_extension(item->ext);
+        }
 
         item->name = furi_string_alloc();
         path_extract_filename_no_ext(found_path, item->name);
@@ -147,7 +153,7 @@ void item_prettify_name(FuriString* name) {
 }
 
 ItemType item_get_item_type_from_extension(const char* ext) {
-    ItemType type = Item_Group;
+    ItemType type = Item_Unknown;
 
     if(!strcmp(ext, ".sub")) {
         type = Item_SubGhz;

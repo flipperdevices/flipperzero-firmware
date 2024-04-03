@@ -25,6 +25,7 @@ typedef enum {
     ActionMenuItemTypePlaylist,
     ActionMenuItemTypeGroup,
     ActionMenuItemTypeSettings,
+    ActionMenuItemTypeUnknown,
     ActionMenuItemType_count
 } ActionMenuItemType;
 

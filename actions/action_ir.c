@@ -117,14 +117,17 @@ void action_ir_tx(void* context, const FuriString* action_path, FuriString* erro
                 break;
             }
 
-            // FURI_LOG_I(
-            //     TAG,
-            //     "IR: Sending parsed => %s %lu %lu",
-            //     infrared_get_protocol_name(signal->payload.message.protocol),
-            //     signal->payload.message.address,
-            //     signal->payload.message.command);
+            FURI_LOG_I(
+                TAG,
+                "IR: Sending (%s) type=parsed => %s %lu %lu",
+                file_name,
+                infrared_get_protocol_name(signal->payload.message.protocol),
+                signal->payload.message.address,
+                signal->payload.message.command);
 
             infrared_send(&signal->payload.message, 1);
+
+            FURI_LOG_I(TAG, "IR: Send complete");
 
         } else if(!furi_string_cmp_str(temp_str, "raw")) {
             // FURI_LOG_I(TAG, "IR File is RAW");
@@ -158,12 +161,13 @@ void action_ir_tx(void* context, const FuriString* action_path, FuriString* erro
                 break;
             }
 
-            // FURI_LOG_I(
-            //     TAG,
-            //     "IR: Sending raw => %d timings, %lu Hz, %f",
-            //     signal->payload.raw.timings_size,
-            //     signal->payload.raw.frequency,
-            //     (double)signal->payload.raw.duty_cycle);
+            FURI_LOG_I(
+                TAG,
+                "IR: Sending (%s) type=raw => %d timings, %lu Hz, %f",
+                file_name,
+                signal->payload.raw.timings_size,
+                signal->payload.raw.frequency,
+                (double)signal->payload.raw.duty_cycle);
 
             infrared_send_raw_ext(
                 signal->payload.raw.timings,
@@ -171,6 +175,8 @@ void action_ir_tx(void* context, const FuriString* action_path, FuriString* erro
                 true,
                 signal->payload.raw.frequency,
                 signal->payload.raw.duty_cycle);
+
+            FURI_LOG_I(TAG, "IR: Send complete");
         } else {
             ACTION_SET_ERROR("IR: Unknown type: %s", furi_string_get_cstr(temp_str));
             break;

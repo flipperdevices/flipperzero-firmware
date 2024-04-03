@@ -8,7 +8,7 @@ App(
     stack_size=2 * 1024,
     fap_category="Tools",
     # Optional values
-    fap_version="0.5.1",
+    fap_version="0.6",
     fap_icon="quac.png",  # 10x10 1-bit PNG
     fap_description="Quick Action remote control app",
     fap_author="Roberto De Feo",
