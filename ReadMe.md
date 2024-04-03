@@ -34,7 +34,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [Bad USB: fix crash when selecting a keyboard layout #3555 (By vanguacamolie)](https://github.com/flipperdevices/flipperzero-firmware/pull/3555)
 - OFW: [IR: Remember OTG state #3549 (By Willie-JL)](https://github.com/flipperdevices/flipperzero-firmware/pull/3549)
 - OFW: [Mifare Ultralight naming fix #3551 (By RebornedBrain)](https://github.com/flipperdevices/flipperzero-firmware/pull/3551)
-- [A few app tweaks (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/ca59a11a7b22c6882447987dbc2774bb2b1020f8)
+- [A few app tweaks (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/7d5de48526455e4644306d9e44d2c66d93660f9e)
 
 <a name="release">
 
