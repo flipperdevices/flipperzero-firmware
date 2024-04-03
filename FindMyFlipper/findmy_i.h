@@ -4,6 +4,7 @@
 #include "findmy_state.h"
 #include <furi_hal_bt.h>
 #include <extra_beacon.h>
+#include <assets_icons.h>
 #include "findmy_icons.h"
 #include <toolbox/stream/file_stream.h>
 #include <toolbox/hex.h>
@@ -50,5 +51,6 @@ typedef enum {
 
 void findmy_change_broadcast_interval(FindMy* app, uint8_t value);
 void findmy_change_transmit_power(FindMy* app, uint8_t value);
+void findmy_toggle_show_mac(FindMy* app, bool show_mac);
 void findmy_set_tag_type(FindMy* app, FindMyType type);
 void findmy_toggle_beacon(FindMy* app);

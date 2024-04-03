@@ -9,7 +9,9 @@ struct FindMyMain {
 
 typedef struct {
     bool active;
+    bool show_mac;
     uint8_t interval;
+    uint8_t mac[6];
     FindMyType type;
 } FindMyMainModel;
 
@@ -20,20 +22,7 @@ static void findmy_main_draw_callback(Canvas* canvas, void* _model) {
     canvas_set_font(canvas, FontPrimary);
 
     canvas_draw_str(canvas, 4, 11, "FindMy Flipper");
-    canvas_set_font(canvas, FontSecondary);
-    if(model->active) {
-        canvas_draw_str(canvas, 4, 49, "Broadcast Active");
-        canvas_draw_icon(canvas, 78, 42, &I_Ok_btn_9x9);
-    } else {
-        canvas_draw_str(canvas, 4, 49, "Broadcast Inactive");
-    }
-    canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str(canvas, 4, 21, "Press <- to run in background");
-    canvas_set_font(canvas, FontSecondary);
-    char interval_str[20];
-    snprintf(interval_str, sizeof(interval_str), "Ping Interval: %ds", model->interval);
-    canvas_draw_str(canvas, 4, 62, interval_str);
-    canvas_set_font(canvas, FontPrimary);
+
     const char* network_text = "";
     switch(model->type) {
     case FindMyTypeApple:
@@ -48,8 +37,42 @@ static void findmy_main_draw_callback(Canvas* canvas, void* _model) {
     default:
         break;
     }
-    canvas_draw_str(canvas, 4, 32, network_text);
-    canvas_draw_icon(canvas, 6 + canvas_string_width(canvas, network_text), 24, &I_Lock_7x8);
+
+    if(model->show_mac == false) {
+        canvas_set_font(canvas, FontPrimary);
+        canvas_draw_str(canvas, 4, 31, network_text);
+        canvas_draw_icon(canvas, 6 + canvas_string_width(canvas, network_text), 24, &I_Lock_7x8);
+    } else if(model->show_mac == true) {
+        canvas_set_font(canvas, FontSecondary);
+        char mac_str[23];
+        snprintf(
+            mac_str,
+            sizeof(mac_str),
+            "MAC: %02X:%02X:%02X:%02X:%02X:%02X",
+            model->mac[0],
+            model->mac[1],
+            model->mac[2],
+            model->mac[3],
+            model->mac[4],
+            model->mac[5]);
+        canvas_draw_str(canvas, 4, 40, mac_str);
+        canvas_draw_str(canvas, 4, 30, network_text);
+        canvas_draw_icon(canvas, 6 + canvas_string_width(canvas, network_text), 23, &I_Lock_7x8);
+    }
+    canvas_set_font(canvas, FontSecondary);
+    if(model->active) {
+        canvas_draw_str(canvas, 4, 49, "Broadcast Active");
+        canvas_draw_icon(canvas, 78, 41, &I_Ok_btn_9x9);
+    } else {
+        canvas_draw_str(canvas, 4, 49, "Broadcast Inactive");
+    }
+    canvas_set_font(canvas, FontSecondary);
+    canvas_draw_str(canvas, 4, 21, "Press <- to run in background");
+    canvas_set_font(canvas, FontSecondary);
+    char interval_str[20];
+    snprintf(interval_str, sizeof(interval_str), "Ping Interval: %ds", model->interval);
+    canvas_draw_str(canvas, 4, 62, interval_str);
+
     canvas_set_font(canvas, FontSecondary);
     canvas_draw_str(canvas, 100, 61, "Config");
     canvas_draw_line(canvas, 100, 51, 127, 51);
@@ -107,6 +130,8 @@ FindMyMain* findmy_main_alloc(FindMy* app) {
         {
             model->active = app->state.beacon_active;
             model->interval = app->state.broadcast_interval;
+            model->show_mac = app->state.show_mac;
+            memcpy(model->mac, app->state.mac, sizeof(model->mac));
             model->type = app->state.tag_type;
         },
         false);
@@ -141,6 +166,22 @@ void findmy_main_update_active(FindMyMain* findmy_main, bool active) {
         findmy_main->view, FindMyMainModel * model, { model->active = active; }, true);
 }
 
+void findmy_main_toggle_mac(FindMyMain* findmy_main, bool show_mac) {
+    furi_assert(findmy_main);
+    with_view_model(
+        findmy_main->view, FindMyMainModel * model, { model->show_mac = show_mac; }, true);
+}
+
+void findmy_main_update_mac(FindMyMain* findmy_main, uint8_t* mac) {
+    with_view_model(
+        findmy_main->view,
+        FindMyMainModel * model,
+        {
+            memcpy(model->mac, mac, sizeof(model->mac));
+            furi_hal_bt_reverse_mac_addr(model->mac);
+        },
+        true);
+}
 void findmy_main_update_interval(FindMyMain* findmy_main, uint8_t interval) {
     furi_assert(findmy_main);
     with_view_model(

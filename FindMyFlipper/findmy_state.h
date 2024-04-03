@@ -17,7 +17,7 @@ typedef struct {
     bool beacon_active;
     uint8_t broadcast_interval;
     uint8_t transmit_power;
-
+    bool show_mac;
     uint8_t mac[EXTRA_BEACON_MAC_ADDR_SIZE];
     uint8_t data[EXTRA_BEACON_MAX_DATA_SIZE];
     FindMyType tag_type;

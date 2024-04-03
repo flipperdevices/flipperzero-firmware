@@ -49,6 +49,7 @@ bool findmy_scene_config_mac_on_event(void* context, SceneManagerEvent event) {
             if(app->state.beacon_active) {
                 furi_check(furi_hal_bt_extra_beacon_start());
             }
+            findmy_main_update_mac(app->findmy_main, app->state.mac);
             scene_manager_next_scene(app->scene_manager, FindMySceneConfigPacket);
             break;
         default:

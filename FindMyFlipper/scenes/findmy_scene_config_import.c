@@ -151,7 +151,7 @@ void findmy_scene_config_import_on_enter(void* context) {
     VariableItemList* var_item_list = app->var_item_list;
     VariableItem* item;
 
-    //variable_item_list_set_header(var_item_list, "Choose file type");
+    variable_item_list_set_header(var_item_list, "Choose file type");
 
     item = variable_item_list_add(var_item_list, "nRF Connect (.txt)", 0, NULL, NULL);
 
