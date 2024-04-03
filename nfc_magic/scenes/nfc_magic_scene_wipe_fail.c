@@ -14,8 +14,11 @@ void nfc_magic_scene_wipe_fail_on_enter(void* context) {
     Widget* widget = instance->widget;
     notification_message(instance->notifications, &sequence_error);
 
-    widget_add_icon_element(widget, 73, 17, &I_DolphinCommon_56x48);
-    widget_add_string_element(widget, 3, 4, AlignLeft, AlignTop, FontPrimary, "Wipe failed");
+    widget_add_icon_element(widget, 83, 22, &I_WarningDolphinFlip_45x42);
+    widget_add_string_element(widget, 64, 0, AlignCenter, AlignTop, FontPrimary, "Failed to Wipe");
+    widget_add_string_multiline_element(
+        widget, 0, 13, AlignLeft, AlignTop, FontSecondary, "Something went\nwrong while wiping");
+
     widget_add_button_element(
         widget, GuiButtonTypeLeft, "Retry", nfc_magic_scene_wipe_fail_widget_callback, instance);
 
