@@ -1,5 +1,8 @@
 # Changelog - Patch Notes
 
+## Version 2.2
+Fix "Parse Error" (gcc optimization)
+
 ## Version 2.1
 Fix FuriHalRtc: new datetime lib.
 
