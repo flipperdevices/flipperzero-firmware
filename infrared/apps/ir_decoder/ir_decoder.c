@@ -8,7 +8,7 @@
 #define TAG "IR Decoder"
 
 typedef struct {
-    const InfraredMessage* decoded_signal;
+    InfraredMessage* decoded_signal;
     FuriMutex* mutex;
     ViewPort* view_port;
 } IRDecoderState;
@@ -36,7 +36,8 @@ static int bit_reversal(uint32_t input) {
 }
 
 static void render_callback(Canvas* canvas, void* ctx) {
-    const IRDecoderState* state = (IRDecoderState*)ctx;
+    FURI_LOG_T(TAG, "Render callback");
+    IRDecoderState* state = (IRDecoderState*)ctx;
     FuriString* temp_str = furi_string_alloc();
 
     furi_mutex_acquire(state->mutex, FuriWaitForever);
@@ -50,27 +51,26 @@ static void render_callback(Canvas* canvas, void* ctx) {
 
     canvas_set_font(canvas, FontSecondary);
     if(state->decoded_signal) {
-        uint8_t addr_digits =
-            ROUND_UP_TO(infrared_get_protocol_address_length(state->decoded_signal->protocol), 4);
+        FURI_LOG_T(TAG, "Writing signal data to display...");
+        uint8_t addr_digits = 4;
+            // ROUND_UP_TO(infrared_get_protocol_address_length(state->decoded_signal->protocol), 4);
 
-        FURI_LOG_D(TAG, "Addr Digits: %d", addr_digits);
         furi_string_printf(temp_str, "0x%0*lX", addr_digits, state->decoded_signal->address);
         canvas_draw_str(canvas, 2, 20, "Address:");
         canvas_draw_str(canvas, 50, 20, furi_string_get_cstr(temp_str));
-        uint8_t command_digits =
-            ROUND_UP_TO(infrared_get_protocol_command_length(state->decoded_signal->protocol), 4);
-        FURI_LOG_D(TAG, "Command Digits: %d", command_digits);
+        uint8_t command_digits =4;
+            // ROUND_UP_TO(infrared_get_protocol_command_length(state->decoded_signal->protocol), 4);
         furi_string_printf(temp_str, "0x%0*lX", command_digits, state->decoded_signal->command);
         canvas_draw_str(canvas, 2, 30, "Command:");
         canvas_draw_str(canvas, 50, 30, furi_string_get_cstr(temp_str));
 
         furi_string_printf(
             temp_str,
-            "0x%X%X%X%X",
-            bit_reversal(state->decoded_signal->address),
-            bit_reversal(~state->decoded_signal->address),
-            bit_reversal(state->decoded_signal->command),
-            bit_reversal(~state->decoded_signal->command));
+            "0x%0*X%0*X%0*X%0*X",
+            2, bit_reversal(state->decoded_signal->address),
+            2, bit_reversal(~state->decoded_signal->address),
+            2, bit_reversal(state->decoded_signal->command),
+            2, bit_reversal(~state->decoded_signal->command));
         canvas_draw_str(canvas, 2, 40, "LIRC HEX:");
         canvas_draw_str(canvas, 50, 40, furi_string_get_cstr(temp_str));
     }
@@ -89,14 +89,15 @@ static void ir_received_callback(void* ctx, InfraredWorkerSignal* signal) {
     FURI_LOG_D(TAG, "Signal callback");
     furi_check(signal);
     IRDecoderState* state = (IRDecoderState*)ctx;
-
     furi_mutex_acquire(state->mutex, FuriWaitForever);
 
-    const InfraredMessage* decodedSignal = infrared_worker_get_decoded_signal(signal);
-    if(state->decoded_signal) {
-        free((InfraredMessage*)state->decoded_signal);
+    if (infrared_worker_signal_is_decoded(signal)) {
+        InfraredMessage* decodedSignal = (InfraredMessage*)infrared_worker_get_decoded_signal(signal);
+        if(state->decoded_signal) {
+            free((InfraredMessage*)state->decoded_signal);
+        }
+        state->decoded_signal = (InfraredMessage*)decodedSignal;
     }
-    state->decoded_signal = decodedSignal;
 
     furi_mutex_release(state->mutex);
     view_port_update(state->view_port);
@@ -113,7 +114,7 @@ int32_t ir_decoder_app(void* p) {
         return -1;
     }
 
-    IRDecoderState state = {.mutex = NULL};
+    IRDecoderState state = {.mutex = NULL, .decoded_signal = NULL};
     state.mutex = furi_mutex_alloc(FuriMutexTypeNormal);
     if(!state.mutex) {
         FURI_LOG_E(TAG, "Cannot create mutex.");
