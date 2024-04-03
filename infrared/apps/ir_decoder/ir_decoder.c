@@ -91,8 +91,9 @@ static void ir_received_callback(void* ctx, InfraredWorkerSignal* signal) {
     IRDecoderState* state = (IRDecoderState*)ctx;
     furi_mutex_acquire(state->mutex, FuriWaitForever);
 
-    if (infrared_worker_signal_is_decoded(signal)) {
-        InfraredMessage* decodedSignal = (InfraredMessage*)infrared_worker_get_decoded_signal(signal);
+    if(infrared_worker_signal_is_decoded(signal)) {
+        InfraredMessage* decodedSignal =
+            (InfraredMessage*)infrared_worker_get_decoded_signal(signal);
         if(state->decoded_signal) {
             free((InfraredMessage*)state->decoded_signal);
         }
