@@ -2,7 +2,7 @@
 
 FelicaAuthenticationContext* felica_auth_alloc() {
     FelicaAuthenticationContext* instance = malloc(sizeof(FelicaAuthenticationContext));
-    memset(instance->card_key.data, 0xFF, 16);
+    memset(instance->card_key.data, 0, FELICA_DATA_BLOCK_SIZE);
     instance->skip_auth = true;
     return instance;
 }
