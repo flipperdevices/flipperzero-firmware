@@ -7,6 +7,7 @@
 
 #include "../nfc_protocol_support_common.h"
 #include "../nfc_protocol_support_gui_common.h"
+#include "../nfc_protocol_support_unlock_helper.h"
 
 enum {
     SubmenuIndexUnlock = SubmenuIndexCommonMax,
