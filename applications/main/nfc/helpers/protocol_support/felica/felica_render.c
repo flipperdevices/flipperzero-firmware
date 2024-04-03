@@ -1,9 +1,26 @@
 #include "felica_render.h"
 
-static void nfc_render_felica_blocks_count(const FelicaData* data, FuriString* str) {
+void nfc_render_felica_blocks_count(
+    const FelicaData* data,
+    FuriString* str,
+    bool render_auth_notification) {
     furi_string_cat_printf(str, "\nBlocks Read: %u/%u", data->blocks_read, data->blocks_total);
-    if(data->blocks_read != data->blocks_total) {
+    if(render_auth_notification && data->blocks_read != data->blocks_total) {
         furi_string_cat_printf(str, "\nAuth-protected blocks!");
+    }
+}
+
+void nfc_render_felica_idm(
+    const FelicaData* data,
+    NfcProtocolFormatType format_type,
+    FuriString* str) {
+    furi_string_cat_printf(str, (format_type == NfcProtocolFormatTypeFull) ? "IDm:\n" : "IDm:");
+
+    for(size_t i = 0; i < FELICA_IDM_SIZE; i++) {
+        furi_string_cat_printf(
+            str,
+            (format_type == NfcProtocolFormatTypeFull) ? "%02X " : " %02X",
+            data->idm.data[i]);
     }
 }
 
@@ -13,26 +30,17 @@ void nfc_render_felica_info(
     FuriString* str) {
     if(format_type == NfcProtocolFormatTypeFull) {
         furi_string_cat_printf(str, "Tech: JIS X 6319-4,\nISO 18092 [NFC-F]\n");
-        furi_string_cat_printf(str, "IDm:\n");
-    } else {
-        furi_string_cat_printf(str, "IDm:");
     }
 
-    for(size_t i = 0; i < FELICA_IDM_SIZE; i++) {
-        furi_string_cat_printf(
-            str,
-            (format_type == NfcProtocolFormatTypeFull) ? "%02X " : " %02X",
-            data->idm.data[i]);
-    }
+    nfc_render_felica_idm(data, format_type, str);
 
     if(format_type == NfcProtocolFormatTypeFull) {
         furi_string_cat_printf(str, "\nPMm:\n");
         for(size_t i = 0; i < FELICA_PMM_SIZE; ++i) {
             furi_string_cat_printf(str, "%02X ", data->pmm.data[i]);
         }
-
-        nfc_render_felica_blocks_count(data, str);
     }
+    nfc_render_felica_blocks_count(data, str, true);
 }
 
 static void nfc_render_felica_block_name(
