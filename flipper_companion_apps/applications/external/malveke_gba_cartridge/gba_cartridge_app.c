@@ -78,10 +78,10 @@ void gba_cartridge_app_app_free(GBACartridge* app) {
 
     // View Dispatcher
     view_dispatcher_free(app->view_dispatcher);
-     // Scene manager
+    // Scene manager
     scene_manager_free(app->scene_manager);
 
-     //
+    //
     uart_free(app->uart);
     uart_free(app->lp_uart);
 
