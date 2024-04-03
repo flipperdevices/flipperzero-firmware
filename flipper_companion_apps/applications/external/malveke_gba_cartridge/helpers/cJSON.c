@@ -84,6 +84,8 @@
 #endif
 #endif
 
+#pragma GCC optimize("O1")
+
 typedef struct {
     const unsigned char* json;
     size_t position;
