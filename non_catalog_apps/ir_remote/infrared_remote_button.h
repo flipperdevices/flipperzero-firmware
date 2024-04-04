@@ -4,7 +4,7 @@
 
 typedef struct InfraredRemoteButton InfraredRemoteButton;
 
-InfraredRemoteButton* infrared_remote_button_alloc();
+InfraredRemoteButton* infrared_remote_button_alloc(void);
 void infrared_remote_button_free(InfraredRemoteButton* button);
 
 void infrared_remote_button_set_name(InfraredRemoteButton* button, const char* name);

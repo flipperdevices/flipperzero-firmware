@@ -27,7 +27,7 @@ static void infrared_remote_clear_buttons(InfraredRemote* remote) {
     InfraredButtonArray_reset(remote->buttons);
 }
 
-InfraredRemote* infrared_remote_alloc() {
+InfraredRemote* infrared_remote_alloc(void) {
     InfraredRemote* remote = malloc(sizeof(InfraredRemote));
     InfraredButtonArray_init(remote->buttons);
     remote->name = furi_string_alloc();

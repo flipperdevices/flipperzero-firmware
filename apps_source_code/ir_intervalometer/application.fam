@@ -1,6 +1,6 @@
 App(
     appid="ir_intervalometer",
-    name="[IR] Intervalometer",
+    name="IR Intervalometer",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="flipvalo_app",
     requires=["gui"],
@@ -8,9 +8,9 @@ App(
     order=20,
     fap_icon="intervalometer_10x.png",
     fap_icon_assets="icons",
-    fap_category="Infrared",
     fap_author="@Nitepone",
+    fap_category="Infrared",
+    fap_description="Intervalometer for Canon, Nikon, and Sony cameras. Uses IR shutter release.",
+    fap_version="1.2",
     fap_weburl="https://github.com/Nitepone/flipper-intervalometer",
-    fap_version="1.1",
-    fap_description="This is a simple configurable valometer app for DSLR cameras. Works via Infrared port.",
 )

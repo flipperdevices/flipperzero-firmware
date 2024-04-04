@@ -16,7 +16,7 @@ typedef struct {
     float duty_cycle;
 } InfraredRawSignal;
 
-InfraredSignal* infrared_signal_alloc();
+InfraredSignal* infrared_signal_alloc(void);
 void infrared_signal_free(InfraredSignal* signal);
 
 bool infrared_signal_is_raw(InfraredSignal* signal);
