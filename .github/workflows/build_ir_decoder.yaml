@@ -21,7 +21,7 @@ jobs:
       - name: Upload app artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: "ir_decoder-${{ steps.build-app.outputs.suffix }}"
+          name: "ir_decoder-${{ matrix.sdk-version }}-${{ steps.build-app.outputs.suffix }}"
           path: ${{ steps.build-app.outputs.fap-artifacts }}
       - name: Lint sources
         uses: flipperdevices/flipperzero-ufbt-action@v0.1
