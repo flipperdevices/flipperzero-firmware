@@ -14,6 +14,7 @@
 #include "oregon2.h"
 #include "oregon3.h"
 #include "acurite_592txr.h"
+#include "acurite_5n1.h"
 #include "ambient_weather.h"
 #include "auriol_hg0601a.h"
 #include "oregon_v1.h"

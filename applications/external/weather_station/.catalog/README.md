@@ -9,6 +9,7 @@ ThermoPRO-TX4
 Nexus-TH
 GT-WT02
 GT-WT03
+Acurite 5n1
 Acurite 592TXR
 Acurite-606TX
 Acurite-609TXC

@@ -9,7 +9,7 @@ App(
     fap_icon_assets="images",
     fap_author="noproto",
     fap_weburl="https://github.com/noproto/FlipperMfkey",
-    fap_version="2.1",
+    fap_version="2.2",
     fap_description="MIFARE Classic key recovery tool",
 )
 

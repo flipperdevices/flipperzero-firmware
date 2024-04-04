@@ -257,8 +257,17 @@ int old_recover(
 
 static inline int sync_state(ProgramState* program_state) {
     int ts = furi_hal_rtc_get_timestamp();
-    program_state->eta_round = program_state->eta_round - (ts - program_state->eta_timestamp);
-    program_state->eta_total = program_state->eta_total - (ts - program_state->eta_timestamp);
+    int elapsed_time = ts - program_state->eta_timestamp;
+    if(elapsed_time < program_state->eta_round) {
+        program_state->eta_round -= elapsed_time;
+    } else {
+        program_state->eta_round = 0;
+    }
+    if(elapsed_time < program_state->eta_total) {
+        program_state->eta_total -= elapsed_time;
+    } else {
+        program_state->eta_total = 0;
+    }
     program_state->eta_timestamp = ts;
     if(program_state->close_thread_please) {
         return 1;
@@ -679,12 +688,12 @@ static void render_callback(Canvas* const canvas, void* ctx) {
         float eta_round = (float)1 - ((float)program_state->eta_round / (float)eta_round_time);
         float eta_total = (float)1 - ((float)program_state->eta_total / (float)eta_total_time);
         float progress = (float)program_state->num_completed / (float)program_state->total;
-        if(eta_round < 0 || eta_round > 1) {
+        if(eta_round < 0) {
             // Round ETA miscalculated
             eta_round = 1;
             program_state->eta_round = 0;
         }
-        if(eta_total < 0 || eta_total > 1) {
+        if(eta_total < 0) {
             // Total ETA miscalculated
             eta_total = 1;
             program_state->eta_total = 0;
