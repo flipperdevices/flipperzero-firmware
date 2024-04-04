@@ -90,17 +90,16 @@ typedef enum {
     TE_EFFECT_SET_SUSTAIN = 0x1700, // Nxx
     TE_EFFECT_SET_RELEASE = 0x1800, // Oxx
     TE_EFFECT_PROGRAM_RESTART = 0x1900, // Pxx
-    /*
-    TE_EFFECT_ = 0x1a00, //Qxx
-    */
+
+    TE_EFFECT_SET_RATE = 0x1a00, //Qxx
 
     TE_EFFECT_SET_RING_MOD_SRC = 0x1b00, // Rxx
     TE_EFFECT_SET_HARD_SYNC_SRC = 0x1c00, // Sxx
 
     TE_EFFECT_PORTA_UP_SEMITONE = 0x1d00, // Txx
     TE_EFFECT_PORTA_DOWN_SEMITONE = 0x1e00, // Uxx
+    TE_EFFECT_PITCH = 0x1f00, //Vxx
     /*
-    TE_EFFECT_ = 0x1f00, //Vxx
     TE_EFFECT_ = 0x2000, //Wxx
     */
 
@@ -156,6 +155,7 @@ typedef struct {
     uint8_t channel_flags;
 
     uint16_t note, target_note, last_note, fixed_note;
+    int16_t finetune_note;
     int16_t arpeggio_note;
 
     uint8_t volume;

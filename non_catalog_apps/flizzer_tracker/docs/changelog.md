@@ -1,3 +1,13 @@
+# Flizzer Tracker v0.4 #
+
+## Added ##
+- Vxx effect (detune)
+
+# Flizzer Tracker v0.3 #
+
+## Added ##
+- Qxx effect (set tracker engine rate)
+
 # Flizzer Tracker v0.2 #
 
 ## Added ##
