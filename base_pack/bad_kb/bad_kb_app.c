@@ -345,9 +345,9 @@ BadKbApp* bad_kb_app_alloc(char* arg) {
         BadKbAppViewVarItemList,
         variable_item_list_get_view(app->var_item_list));
 
-    app->bad_kb_view = bad_kb_alloc();
+    app->bad_kb_view = bad_kb_view_alloc();
     view_dispatcher_add_view(
-        app->view_dispatcher, BadKbAppViewWork, bad_kb_get_view(app->bad_kb_view));
+        app->view_dispatcher, BadKbAppViewWork, bad_kb_view_get_view(app->bad_kb_view));
 
     app->text_input = text_input_alloc();
     view_dispatcher_add_view(
@@ -389,7 +389,7 @@ void bad_kb_app_free(BadKbApp* app) {
 
     // Views
     view_dispatcher_remove_view(app->view_dispatcher, BadKbAppViewWork);
-    bad_kb_free(app->bad_kb_view);
+    bad_kb_view_free(app->bad_kb_view);
 
     // Custom Widget
     view_dispatcher_remove_view(app->view_dispatcher, BadKbAppViewWidget);

@@ -75,8 +75,8 @@ static void bad_kb_draw_callback(Canvas* canvas, void* _model) {
     if(state == BadKbStateNotConnected) {
         canvas_draw_icon(canvas, 4, 26, &I_Clock_18x18);
         canvas_set_font(canvas, FontPrimary);
-        canvas_draw_str_aligned(canvas, 127, 31, AlignRight, AlignBottom, "Connect to");
-        canvas_draw_str_aligned(canvas, 127, 43, AlignRight, AlignBottom, "a device");
+        canvas_draw_str_aligned(canvas, 127, 31, AlignRight, AlignBottom, "Connect");
+        canvas_draw_str_aligned(canvas, 127, 43, AlignRight, AlignBottom, "to device");
     } else if(state == BadKbStateWillRun) {
         canvas_draw_icon(canvas, 4, 26, &I_Clock_18x18);
         canvas_set_font(canvas, FontPrimary);
@@ -211,7 +211,7 @@ static bool bad_kb_input_callback(InputEvent* event, void* context) {
     return consumed;
 }
 
-BadKb* bad_kb_alloc() {
+BadKb* bad_kb_view_alloc(void) {
     BadKb* bad_kb = malloc(sizeof(BadKb));
 
     bad_kb->view = view_alloc();
@@ -223,18 +223,18 @@ BadKb* bad_kb_alloc() {
     return bad_kb;
 }
 
-void bad_kb_free(BadKb* bad_kb) {
+void bad_kb_view_free(BadKb* bad_kb) {
     furi_assert(bad_kb);
     view_free(bad_kb->view);
     free(bad_kb);
 }
 
-View* bad_kb_get_view(BadKb* bad_kb) {
+View* bad_kb_view_get_view(BadKb* bad_kb) {
     furi_assert(bad_kb);
     return bad_kb->view;
 }
 
-void bad_kb_set_button_callback(BadKb* bad_kb, BadKbButtonCallback callback, void* context) {
+void bad_kb_view_set_button_callback(BadKb* bad_kb, BadKbButtonCallback callback, void* context) {
     furi_assert(bad_kb);
     furi_assert(callback);
     with_view_model(
@@ -248,19 +248,19 @@ void bad_kb_set_button_callback(BadKb* bad_kb, BadKbButtonCallback callback, voi
         true);
 }
 
-void bad_kb_set_file_name(BadKb* bad_kb, const char* name) {
+void bad_kb_view_set_file_name(BadKb* bad_kb, const char* name) {
     furi_assert(name);
     with_view_model(
         bad_kb->view, BadKbModel * model, { strlcpy(model->file_name, name, MAX_NAME_LEN); }, true);
 }
 
-void bad_kb_set_layout(BadKb* bad_kb, const char* layout) {
+void bad_kb_view_set_layout(BadKb* bad_kb, const char* layout) {
     furi_assert(layout);
     with_view_model(
         bad_kb->view, BadKbModel * model, { strlcpy(model->layout, layout, MAX_NAME_LEN); }, true);
 }
 
-void bad_kb_set_state(BadKb* bad_kb, BadKbState* st) {
+void bad_kb_view_set_state(BadKb* bad_kb, BadKbState* st) {
     furi_assert(st);
     uint32_t pin = 0;
     if(bad_kb->context != NULL) {
@@ -283,7 +283,7 @@ void bad_kb_set_state(BadKb* bad_kb, BadKbState* st) {
         true);
 }
 
-bool bad_kb_is_idle_state(BadKb* bad_kb) {
+bool bad_kb_view_is_idle_state(BadKb* bad_kb) {
     bool is_idle = false;
     with_view_model(
         bad_kb->view,

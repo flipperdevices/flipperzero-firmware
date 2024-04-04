@@ -30,6 +30,7 @@ struct BadKbScript {
 
     uint32_t defdelay;
     uint32_t stringdelay;
+    uint32_t defstringdelay;
     uint16_t layout[128];
 
     FuriString* line;
@@ -51,6 +52,8 @@ uint32_t ducky_get_command_len(const char* line);
 bool ducky_is_line_end(const char chr);
 
 uint16_t ducky_get_keycode_by_name(const char* param);
+
+uint16_t ducky_get_media_keycode_by_name(const char* param);
 
 bool ducky_get_number(const char* param, uint32_t* val);
 
