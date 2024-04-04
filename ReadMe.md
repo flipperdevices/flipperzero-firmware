@@ -37,6 +37,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - [A few app tweaks (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/7d5de48526455e4644306d9e44d2c66d93660f9e)
 - OFW: [fbt: added -Wstrict-prototypes for main firmware #3557 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/3557)
 - OFW: [fbt: fixed missing FBT_FAP_DEBUG_ELF_ROOT to dist env #3563 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/3563)
+- OFW: [Hide unlock with reader for MFU-C #3553 (By bettse)](https://github.com/flipperdevices/flipperzero-firmware/pull/3553)
 
 <a name="release">
 
