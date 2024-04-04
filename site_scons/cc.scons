@@ -4,7 +4,6 @@ Import("ENV")
 ENV.AppendUnique(
     CFLAGS=[
         "-std=gnu2x",
-        "-Wstrict-prototypes",
     ],
     CXXFLAGS=[
         "-std=c++20",

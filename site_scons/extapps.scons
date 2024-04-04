@@ -48,9 +48,6 @@ appenv.AppendUnique(
         "stdc++",
         "supc++",
     ],
-    CFLAGS=[
-        "-Wno-strict-prototypes",
-    ],
 )
 
 
