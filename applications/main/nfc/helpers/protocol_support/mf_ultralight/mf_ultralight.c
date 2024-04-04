@@ -30,6 +30,8 @@ static void nfc_scene_info_on_enter_mf_ultralight(NfcApp* instance) {
 
     furi_string_cat_printf(
         temp_str, "\e#%s\n", nfc_device_get_name(device, NfcDeviceNameTypeFull));
+    furi_string_replace(temp_str, "Mifare", "MIFARE");
+
     nfc_render_mf_ultralight_info(data, NfcProtocolFormatTypeFull, temp_str);
 
     widget_add_text_scroll_element(
@@ -169,7 +171,7 @@ static void nfc_scene_read_setup_view(NfcApp* instance) {
         popup_set_icon(instance->popup, 0, 8, &I_NFC_manual_60x50);
         popup_set_header(instance->popup, "Unlocking", 97, 15, AlignCenter, AlignTop);
         popup_set_text(
-            instance->popup, "Apply card to\nFlipper's back", 97, 27, AlignCenter, AlignTop);
+            instance->popup, "Hold card next\nto Flipper's back", 94, 27, AlignCenter, AlignTop);
     } else {
         popup_set_header(instance->popup, "Don't move", 85, 27, AlignCenter, AlignTop);
         popup_set_icon(instance->popup, 12, 20, &A_Loading_24);
@@ -244,6 +246,8 @@ static void nfc_scene_read_success_on_enter_mf_ultralight(NfcApp* instance) {
     } else {
         furi_string_cat_printf(
             temp_str, "\e#%s\n", nfc_device_get_name(device, NfcDeviceNameTypeFull));
+
+        furi_string_replace(temp_str, "Mifare", "MIFARE");
 
         nfc_render_mf_ultralight_info(data, NfcProtocolFormatTypeShort, temp_str);
     }
