@@ -1,3 +1,5 @@
+## 1.6
+ - Add protocol Acurite 5n1 Weather Station
 ## 1.5
  - Update API
 ## 1.4
