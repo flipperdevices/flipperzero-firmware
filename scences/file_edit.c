@@ -17,14 +17,14 @@ void nfc_playlist_file_edit_menu_callback(void* context, uint32_t index) {
          scene_manager_next_scene(nfc_playlist->scene_manager, NfcPlaylistScene_FileRename);
          break;
       }
-      default: 
+      default:
          break;
    }
 }
 
 void nfc_playlist_file_edit_scene_on_enter(void* context) {
    NfcPlaylist* nfc_playlist = context;
-   
+
    submenu_set_header(nfc_playlist->submenu, "Edit Playlist");
 
    submenu_add_lockable_item(

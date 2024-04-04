@@ -95,7 +95,7 @@ static NfcPlaylist* nfc_playlist_alloc() {
 
 static void nfc_playlist_free(NfcPlaylist* nfc_playlist) {
    furi_assert(nfc_playlist);
-   
+
    view_dispatcher_remove_view(nfc_playlist->view_dispatcher, NfcPlaylistView_Menu);
    view_dispatcher_remove_view(nfc_playlist->view_dispatcher, NfcPlaylistView_Settings);
    view_dispatcher_remove_view(nfc_playlist->view_dispatcher, NfcPlaylistView_Popup);
@@ -114,7 +114,7 @@ static void nfc_playlist_free(NfcPlaylist* nfc_playlist) {
    file_browser_free(nfc_playlist->file_browser);
    text_input_free(nfc_playlist->text_input);
    popup_free(nfc_playlist->popup);
-   
+
    furi_string_free(nfc_playlist->settings.base_file_path);
    furi_string_free(nfc_playlist->settings.file_path);
    free(nfc_playlist->playlist_name);

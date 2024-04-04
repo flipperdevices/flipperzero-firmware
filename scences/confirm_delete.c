@@ -37,7 +37,7 @@ bool nfc_playlist_confirm_delete_scene_on_event(void* context, SceneManagerEvent
             nfc_playlist->settings.file_path = nfc_playlist->settings.base_file_path;
             break;
          }
-         default: 
+         default:
             break;
       }
       scene_manager_previous_scene(nfc_playlist->scene_manager);
