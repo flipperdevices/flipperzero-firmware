@@ -3,7 +3,7 @@
 
 ***GAME BOY*** Tools for Flipper Zero
 
-**Get one:** [Tindie Store](https://www.tindie.com/products/efuentealba/malveke-game-boy-tools-for-flipper-zero/)
+**Get one:** [Tindie Store](https://www.tindie.com/products/efuentealba/malveke-game-boy-tools-for-flipper-zero/) &nbsp;&nbsp;or&nbsp;&nbsp; [Etsy Store](https://malveke.etsy.com/es/listing/1619028229/malveke-game-boy-tools-for-flipper-zero)
 
 **User Manual:** [Instruction Booklet](./MALVEKE_Instruction_Booklet.pdf)
 
