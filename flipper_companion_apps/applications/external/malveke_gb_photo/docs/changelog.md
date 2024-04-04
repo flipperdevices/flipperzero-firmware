@@ -1,5 +1,8 @@
 # Changelog - Patch Notes
 
+## Version 2.2
+Fix Frozen upon exiting the gb photo.
+
 ## Version 2.1
 Fix FuriHalRtc: new datetime lib.
 

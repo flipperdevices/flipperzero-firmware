@@ -93,7 +93,7 @@ Boilerplate* boilerplate_app_alloc() {
 void boilerplate_app_free(Boilerplate* app) {
     furi_assert(app);
 
-   // Views
+    // Views
     view_dispatcher_remove_view(app->view_dispatcher, BoilerplateViewIdStartscreen);
     view_dispatcher_remove_view(app->view_dispatcher, BoilerplateViewIdMenu);
     view_dispatcher_remove_view(app->view_dispatcher, BoilerplateViewIdScene1);
@@ -107,7 +107,6 @@ void boilerplate_app_free(Boilerplate* app) {
 
     // Scene manager
     scene_manager_free(app->scene_manager);
-
 
     if(app->camera_ram_sav && storage_file_is_open(app->camera_ram_sav)) {
         storage_file_close(app->camera_ram_sav);
