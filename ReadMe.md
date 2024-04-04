@@ -32,7 +32,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2024-04-04 05:54 EST`
 - Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2024-04-04 05:54 EST`
 - OFW: [Bad USB: fix crash when selecting a keyboard layout #3555 (By vanguacamolie)](https://github.com/flipperdevices/flipperzero-firmware/pull/3555)
-- OFW: [IR: Remember OTG state #3549 (By Willie-JL)](https://github.com/flipperdevices/flipperzero-firmware/pull/3549)
+- OFW: [IR: Remember OTG state #3549 (By Willy-JL)](https://github.com/flipperdevices/flipperzero-firmware/pull/3549)
 - OFW: [Mifare Ultralight naming fix #3551 (By RebornedBrain)](https://github.com/flipperdevices/flipperzero-firmware/pull/3551)
 - [A few app tweaks (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/7d5de48526455e4644306d9e44d2c66d93660f9e)
 - OFW: [fbt: added -Wstrict-prototypes for main firmware #3557 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/3557)
@@ -41,6 +41,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - [Fix function prototypes after merge (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/125626b28505e7586828f436186efe6ed8cce18d)
 - [IR: Fix crash on duty_cycle=1 (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/92b4f4cb9b69caa15aae05e128dcebe0f8e6a7d4)
 - [Explain RNG differences, Fix JS Math.random() (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/c79e356e0ff610eeef974afa28f97f5d4734d4da)
+- OFW: [Desktop: ensure that animation is unloaded before app start #3569 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/3569)
 
 <a name="release">
 

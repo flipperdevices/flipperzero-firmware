@@ -97,6 +97,8 @@ struct Desktop {
     bool clock_type : 1; // true - 24h false - 12h
 
     bool in_transition : 1;
+
+    FuriSemaphore* animation_semaphore;
 };
 
 Desktop* desktop_alloc(void);
