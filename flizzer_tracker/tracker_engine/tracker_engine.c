@@ -444,7 +444,8 @@ void tracker_engine_advance_channel(TrackerEngine* tracker_engine, uint8_t chan)
 
         int32_t chn_note = (int16_t)(te_channel->fixed_note != 0xffff ? te_channel->fixed_note :
                                                                         te_channel->note) +
-                           vib + ((int16_t)te_channel->arpeggio_note << 8);
+                           vib + ((int16_t)te_channel->arpeggio_note << 8) +
+                           te_channel->finetune_note;
 
         if(chn_note < 0) {
             chn_note = 0;

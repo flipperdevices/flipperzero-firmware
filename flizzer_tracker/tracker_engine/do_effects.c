@@ -457,6 +457,11 @@ void do_command(
         break;
     }
 
+    case TE_EFFECT_PITCH: {
+        te_channel->finetune_note = ((int16_t)(opcode & 0xff) - 0x80) * 2;
+        break;
+    }
+
     case TE_EFFECT_ARPEGGIO_ABS: {
         te_channel->arpeggio_note = 0;
         te_channel->fixed_note = ((opcode & 0xff) << 8);
