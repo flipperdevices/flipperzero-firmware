@@ -86,7 +86,7 @@ size_t memmgr_heap_get_thread_memory(FuriThreadId thread_id) {
                 if(data->key != 0) {
                     block_header_t* block = block_from_ptr((uint8_t*)data->key);
                     if(!block_is_free(block)) {
-                        // TODO: with tlsf we know the size of the block, so we don't need to store it on the dict
+                        // with tlsf we know the size of the block, so we don't need to store it on the dict
                         leftovers += data->value;
                     }
                 }
