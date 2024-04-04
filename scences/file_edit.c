@@ -8,30 +8,23 @@ typedef enum {
 
 void nfc_playlist_file_edit_menu_callback(void* context, uint32_t index) {
    NfcPlaylist* nfc_playlist = context;
-   Storage* storage = furi_record_open(RECORD_STORAGE);
    switch(index) {
       case NfcPlaylistMenuSelection_DeletePlaylist: {
-         storage_simply_remove(storage, furi_string_get_cstr(nfc_playlist->settings.file_path));
-         nfc_playlist->settings.file_selected = false;
-         nfc_playlist->settings.file_selected_check = false;
-         nfc_playlist->settings.file_path = nfc_playlist->settings.base_file_path;
-         scene_manager_previous_scene(nfc_playlist->scene_manager);
+         scene_manager_next_scene(nfc_playlist->scene_manager, NfcPlaylistScene_ConfirmDelete);
          break;
       }
       case NfcPlaylistMenuSelection_RenamePlaylist: {
-         scene_manager_next_scene(nfc_playlist->scene_manager, NfcPlaylistScene_TextInput);
+         scene_manager_next_scene(nfc_playlist->scene_manager, NfcPlaylistScene_FileRename);
          break;
       }
-      default: {
+      default: 
          break;
-      }
    }
-   furi_record_close(RECORD_STORAGE);
 }
 
 void nfc_playlist_file_edit_scene_on_enter(void* context) {
    NfcPlaylist* nfc_playlist = context;
-
+   
    submenu_set_header(nfc_playlist->submenu, "Edit Playlist");
 
    submenu_add_lockable_item(
