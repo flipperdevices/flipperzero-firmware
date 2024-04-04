@@ -1,6 +1,16 @@
 name: "ir_decoder: Build and lint"
 
 on:
+  push:
+    branches: [ master ]
+    paths:
+      - ".github/workflows/build_ir_decoder.yaml"
+      - "infrared/apps/ir_decoder/**"
+  pull_request:
+    branches: [ master ]
+    paths:
+      - ".github/workflows/build_ir_decoder.yaml"
+      - "infrared/apps/ir_decoder/**"
   workflow_dispatch:
 
 jobs:
