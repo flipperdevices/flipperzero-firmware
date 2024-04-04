@@ -5,15 +5,18 @@ on:
 
 jobs:
   build:
+    strategy:
+      matrix:
+        sdk-version: ["release", "dev", "rc"]
     runs-on: ubuntu-latest
-    name: 'ufbt: Build for Dev Branch'
+    name: 'ufbt: Build for ${{ matrix.sdk-version }} Branch'
     steps:
       - uses: actions/checkout@v4
       - name: Build with ufbt
         uses: flipperdevices/flipperzero-ufbt-action@v0.1
         id: build-app
         with:
-          sdk-channel: dev
+          sdk-channel: ${{ matrix.sdk-version }}
           app-dir: infrared/apps/ir_decoder
       - name: Upload app artifacts
         uses: actions/upload-artifact@v3
