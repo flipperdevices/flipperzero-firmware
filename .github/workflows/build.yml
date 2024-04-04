@@ -21,14 +21,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 2
           submodules: recursive
 
 
       - name: Set up ufbt
-        uses: flipperdevices/flipperzero-ufbt-action@v0.1.2
+        uses: flipperdevices/flipperzero-ufbt-action@v0.1
         with:
           sdk-channel: ${{ github.event.inputs.sdk-channel || 'rc'}}
           task: setup
@@ -48,8 +48,12 @@ jobs:
         run: |
           BUILD_FAILED=0
           for appdir in ${{ steps.changed-files.outputs.all_changed_and_modified_files }} ; do
+            if [ ! -f "$appdir/application.fam" ] ; then
+              echo "Skipping $appdir, no application.fam. File may have been deleted."
+              continue
+            fi
             echo "Building in $appdir"
-            pushd $appdir
+            pushd "$appdir"
             if ! ufbt build faps ; then
               echo "::error::Failed to build $appdir"
               BUILD_FAILED=1
@@ -66,8 +70,12 @@ jobs:
         run: |
           BUILD_FAILED=0
           for appdir in $( dirname $( find . -name application.fam ) ) ; do
+            if [ ! -f "$appdir/application.fam" ] ; then
+              echo "Skipping $appdir, no application.fam. File may have been deleted."
+              continue
+            fi
             echo "Building in $appdir"
-            pushd $appdir
+            pushd "$appdir"
             if ! ufbt build faps ; then
               BUILD_FAILED=1
               echo "::error::Failed to build $appdir"
@@ -85,7 +93,7 @@ jobs:
           cp -v $( find . -name '*.fap' ) dist/
 
       - name: Upload all .fap files
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: faps
           path: dist/*.fap
