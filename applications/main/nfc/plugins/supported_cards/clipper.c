@@ -22,9 +22,9 @@
 
 #include <flipper_application/flipper_application.h>
 #include <lib/nfc/protocols/mf_desfire/mf_desfire.h>
-#include <lib/nfc/helpers/nfc_util.h>
+#include <bit_lib/bit_lib.h>
 #include <applications/services/locale/locale.h>
-#include <furi_hal_rtc.h>
+#include <datetime/datetime.h>
 #include <inttypes.h>
 
 //
@@ -172,7 +172,7 @@ static void furi_string_cat_timestamp(
     const char* date_hdr,
     const char* time_hdr,
     uint32_t tmst_1900);
-static void epoch_1900_datetime_to_furi(uint32_t seconds, FuriHalRtcDateTime* out);
+static void epoch_1900_datetime_to_furi(uint32_t seconds, DateTime* out);
 static bool get_file_contents(
     const MfDesfireApplication* app,
     const MfDesfireFileId* id,
@@ -194,12 +194,12 @@ static bool dump_ride_event(const uint8_t* record, FuriString* parsed_data);
 
 // Unmarshal a 32-bit integer, big endian, unsigned
 static inline uint32_t get_u32be(const uint8_t* field) {
-    return nfc_util_bytes2num(field, 4);
+    return bit_lib_bytes_to_num_be(field, 4);
 }
 
 // Unmarshal a 16-bit integer, big endian, unsigned
 static uint16_t get_u16be(const uint8_t* field) {
-    return nfc_util_bytes2num(field, 2);
+    return bit_lib_bytes_to_num_be(field, 2);
 }
 
 // Unmarshal a 16-bit integer, big endian, signed, two's-complement
@@ -330,7 +330,7 @@ static bool decode_id_file(const uint8_t* ef8_data, ClipperCardInfo* info) {
     // uk             ?8??       Unknown, 8-bit byte
     // card_id        U32BE      Card identifier
     //
-    info->serial_number = nfc_util_bytes2num(&ef8_data[1], 4);
+    info->serial_number = bit_lib_bytes_to_num_be(&ef8_data[1], 4);
     return true;
 }
 
@@ -527,7 +527,7 @@ static void furi_string_cat_timestamp(
     const char* date_hdr,
     const char* time_hdr,
     uint32_t tmst_1900) {
-    FuriHalRtcDateTime tm;
+    DateTime tm;
 
     epoch_1900_datetime_to_furi(tmst_1900, &tm);
 
@@ -550,7 +550,7 @@ static void furi_string_cat_timestamp(
 }
 
 // Convert a "1900"-based timestamp to Furi time, assuming a UTC/GMT timezone.
-static void epoch_1900_datetime_to_furi(uint32_t seconds, FuriHalRtcDateTime* out) {
+static void epoch_1900_datetime_to_furi(uint32_t seconds, DateTime* out) {
     uint16_t year, month, day, hour, minute, second;
 
     // Calculate absolute number of days elapsed since the 1900 epoch
@@ -568,17 +568,17 @@ static void epoch_1900_datetime_to_furi(uint32_t seconds, FuriHalRtcDateTime* ou
     //
 
     for(year = 1900;; year++) {
-        uint16_t year_days = furi_hal_rtc_get_days_per_year(year);
+        uint16_t year_days = datetime_get_days_per_year(year);
         if(absolute_days >= year_days)
             absolute_days -= year_days;
         else
             break;
     }
 
-    bool is_leap = furi_hal_rtc_is_leap_year(year);
+    bool is_leap = datetime_is_leap_year(year);
 
     for(month = 1;; month++) {
-        uint8_t days_in_month = furi_hal_rtc_get_days_per_month(is_leap, month);
+        uint8_t days_in_month = datetime_get_days_per_month(is_leap, month);
         if(absolute_days >= days_in_month)
             absolute_days -= days_in_month;
         else
@@ -616,6 +616,6 @@ static const FlipperAppPluginDescriptor clipper_plugin_descriptor = {
 };
 
 /* Plugin entry point - must return a pointer to const descriptor  */
-const FlipperAppPluginDescriptor* clipper_plugin_ep() {
+const FlipperAppPluginDescriptor* clipper_plugin_ep(void) {
     return &clipper_plugin_descriptor;
 }

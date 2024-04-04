@@ -1,6 +1,6 @@
 #include <furi.h>
 #include <toolbox/protocols/protocol.h>
-#include <lfrfid/tools/bit_lib.h>
+#include <bit_lib/bit_lib.h>
 #include "lfrfid_protocols.h"
 
 #define INDALA26_PREAMBLE_BIT_SIZE (33)
@@ -289,22 +289,21 @@ void protocol_indala26_render_data_internal(
     if(brief) {
         furi_string_printf(
             result,
-            "FC: %u\r\nCard: %u, Parity:%s%s",
+            "FC: %u\n"
+            "Card: %u",
             fc,
-            card,
-            (checksum_correct ? "+" : "-"),
-            (wiegand_correct ? "+" : "-"));
+            card);
     } else {
         furi_string_printf(
             result,
-            "FC: %u\r\n"
-            "Card: %u\r\n"
-            "Checksum: %s\r\n"
-            "W26 Parity: %s",
+            "FC: %u\n"
+            "Card: %u\n"
+            "Parity: %c\n"
+            "Checksum: %c",
             fc,
             card,
-            (checksum_correct ? "+" : "-"),
-            (wiegand_correct ? "+" : "-"));
+            (wiegand_correct ? '+' : '-'),
+            (checksum_correct ? '+' : '-'));
     }
 }
 void protocol_indala26_render_data(ProtocolIndala* protocol, FuriString* result) {

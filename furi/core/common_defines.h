@@ -5,12 +5,20 @@
 
 #ifdef __cplusplus
 extern "C" {
+#define FURI_NORETURN [[noreturn]]
+#else
+#include <stdnoreturn.h>
+#define FURI_NORETURN noreturn
 #endif
 
 #include <cmsis_compiler.h>
 
 #ifndef FURI_WARN_UNUSED
 #define FURI_WARN_UNUSED __attribute__((warn_unused_result))
+#endif
+
+#ifndef FURI_DEPRECATED
+#define FURI_DEPRECATED __attribute__((deprecated))
 #endif
 
 #ifndef FURI_WEAK

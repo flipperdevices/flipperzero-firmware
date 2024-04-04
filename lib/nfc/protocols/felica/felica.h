@@ -130,7 +130,7 @@ typedef struct {
 
 extern const NfcDeviceBase nfc_device_felica;
 
-FelicaData* felica_alloc();
+FelicaData* felica_alloc(void);
 
 void felica_free(FelicaData* data);
 

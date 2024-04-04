@@ -5,7 +5,7 @@
 #include <stm32wbxx_ll_comp.h>
 #include <stm32wbxx_ll_pwr.h>
 
-static uint32_t furi_hal_gpio_invalid_argument_crash() {
+static uint32_t furi_hal_gpio_invalid_argument_crash(void) {
     furi_crash("Invalid argument");
     return 0;
 }
@@ -194,8 +194,8 @@ void furi_hal_gpio_init_ex(
 }
 
 void furi_hal_gpio_add_int_callback(const GpioPin* gpio, GpioExtiCallback cb, void* ctx) {
-    furi_assert(gpio);
-    furi_assert(cb);
+    furi_check(gpio);
+    furi_check(cb);
 
     FURI_CRITICAL_ENTER();
 
@@ -211,21 +211,18 @@ void furi_hal_gpio_add_int_callback(const GpioPin* gpio, GpioExtiCallback cb, vo
 }
 
 void furi_hal_gpio_enable_int_callback(const GpioPin* gpio) {
-    furi_assert(gpio);
+    furi_check(gpio);
 
     FURI_CRITICAL_ENTER();
 
-    uint8_t pin_num = furi_hal_gpio_get_pin_num(gpio);
-    if(gpio_interrupt[pin_num].callback) {
-        const uint32_t exti_line = GET_EXTI_LINE(gpio->pin);
-        LL_EXTI_EnableIT_0_31(exti_line);
-    }
+    const uint32_t exti_line = GET_EXTI_LINE(gpio->pin);
+    LL_EXTI_EnableIT_0_31(exti_line);
 
     FURI_CRITICAL_EXIT();
 }
 
 void furi_hal_gpio_disable_int_callback(const GpioPin* gpio) {
-    furi_assert(gpio);
+    furi_check(gpio);
 
     FURI_CRITICAL_ENTER();
 
@@ -237,7 +234,7 @@ void furi_hal_gpio_disable_int_callback(const GpioPin* gpio) {
 }
 
 void furi_hal_gpio_remove_int_callback(const GpioPin* gpio) {
-    furi_assert(gpio);
+    furi_check(gpio);
 
     FURI_CRITICAL_ENTER();
 

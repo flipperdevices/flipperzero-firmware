@@ -34,6 +34,8 @@ static const Icon* ArchiveItemIcons[] = {
     [ArchiveFileTypeUnknown] = &I_unknown_10px,
     [ArchiveFileTypeLoading] = &I_loading_10px,
     [ArchiveFileTypeApplication] = &I_unknown_10px,
+    [ArchiveFileTypeJS] = &I_js_script_10px,
+    [ArchiveFileTypeAppOrJs] = &I_unknown_10px,
 };
 
 void archive_browser_set_callback(
@@ -434,7 +436,7 @@ static void browser_view_exit(void* context) {
     furi_timer_stop(browser->scroll_timer);
 }
 
-ArchiveBrowserView* browser_alloc() {
+ArchiveBrowserView* browser_alloc(void) {
     ArchiveBrowserView* browser = malloc(sizeof(ArchiveBrowserView));
     browser->view = view_alloc();
     view_allocate_model(browser->view, ViewModelTypeLocking, sizeof(ArchiveBrowserViewModel));

@@ -3,7 +3,7 @@
 #include <lfrfid/tools/fsk_demod.h>
 #include <lfrfid/tools/fsk_osc.h>
 #include "lfrfid_protocols.h"
-#include <lfrfid/tools/bit_lib.h>
+#include <bit_lib/bit_lib.h>
 
 #define JITTER_TIME (20)
 #define MIN_TIME (64 - JITTER_TIME)
@@ -217,14 +217,10 @@ void protocol_fdx_a_render_data(ProtocolFDXA* protocol, FuriString* result) {
 
     furi_string_printf(
         result,
-        "ID: %02X%02X%02X%02X%02X\r\n"
-        "Parity: %s",
-        data[0],
-        data[1],
-        data[2],
-        data[3],
-        data[4],
-        parity_sum == 0 ? "+" : "-");
+        "ID: %010llX\n"
+        "Parity: %c",
+        bit_lib_get_bits_64(data, 0, 40),
+        parity_sum == 0 ? '+' : '-');
 };
 
 const ProtocolBase protocol_fdx_a = {

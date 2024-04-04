@@ -2,7 +2,7 @@
 #include <math.h>
 #include <toolbox/protocols/protocol.h>
 #include <toolbox/hex.h>
-#include <lfrfid/tools/bit_lib.h>
+#include <bit_lib/bit_lib.h>
 #include "lfrfid_protocols.h"
 
 #define PAC_STANLEY_ENCODED_BIT_SIZE (128)
@@ -202,8 +202,7 @@ bool protocol_pac_stanley_write_data(ProtocolPACStanley* protocol, void* data) {
 }
 
 void protocol_pac_stanley_render_data(ProtocolPACStanley* protocol, FuriString* result) {
-    uint8_t* data = protocol->data;
-    furi_string_printf(result, "CIN: %02X%02X%02X%02X", data[0], data[1], data[2], data[3]);
+    furi_string_printf(result, "CIN: %08lX", bit_lib_get_bits_32(protocol->data, 0, 32));
 }
 
 const ProtocolBase protocol_pac_stanley = {
