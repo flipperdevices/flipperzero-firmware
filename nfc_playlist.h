@@ -11,6 +11,8 @@
 #include <gui/modules/submenu.h>
 #include <gui/modules/file_browser.h>
 #include <gui/modules/text_input.h>
+#include <gui/modules/widget.h>
+#include <gui/modules/widget_elements/widget_element.h>
 #include <notification/notification_messages.h>
 #include <nfc_playlist_worker.h>
 
@@ -20,7 +22,8 @@ typedef enum {
    NfcPlaylistView_Popup,
    NfcPlaylistView_FileSelect,
    NfcPlaylistView_FileEdit,
-   NfcPlaylistView_TextInput
+   NfcPlaylistView_FileRename,
+   NfcPlaylistView_ConfirmDelete
 } NfcPlayScenesView;
 
 typedef enum {
@@ -29,7 +32,8 @@ typedef enum {
    NfcPlaylistScene_EmulatingPopup,
    NfcPlaylistScene_FileSelect,
    NfcPlaylistScene_FileEdit,
-   NfcPlaylistScene_TextInput,
+   NfcPlaylistScene_FileRename,
+   NfcPlaylistScene_ConfirmDelete,
    NfcPlaylistScene_count
 } NfcPlaylistScene;
 
@@ -51,6 +55,7 @@ typedef struct {
    TextInput* text_input;
    Submenu* submenu;
    Popup* popup;
+   Widget* widget;
    NotificationApp* notification;
    FuriThread* thread;
    NfcPlaylistWorker* nfc_playlist_worker;
