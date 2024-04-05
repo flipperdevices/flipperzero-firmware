@@ -18,7 +18,7 @@ void nfc_scene_felica_unlock_warn_on_enter(void* context) {
 
     FuriString* str = furi_string_alloc();
     furi_string_cat_printf(str, "Unlock with key: ");
-    for(uint8_t i = 0; i < 16; i++)
+    for(uint8_t i = 0; i < FELICA_DATA_BLOCK_SIZE; i++)
         furi_string_cat_printf(str, "%02X ", nfc->felica_auth->card_key.data[i]);
     furi_string_cat_printf(str, "?");
 

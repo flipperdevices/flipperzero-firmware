@@ -218,7 +218,7 @@ void felica_calculate_session_key(
     felica_reverse_copy_block(rc + 8, rc_reversed + 8);
 
     mbedtls_des3_set2key_enc(ctx, ck_reversed);
-    mbedtls_des3_crypt_cbc(ctx, MBEDTLS_DES_ENCRYPT, 16, iv, rc_reversed, out);
+    mbedtls_des3_crypt_cbc(ctx, MBEDTLS_DES_ENCRYPT, FELICA_DATA_BLOCK_SIZE, iv, rc_reversed, out);
 }
 
 static bool felica_calculate_mac(
@@ -276,7 +276,7 @@ static void felica_prepare_first_block(
         out[1] = blocks[1];
         out[2] = blocks[2];
         out[4] = blocks[3];
-        out[6] = 0x91;
+        out[6] = FELICA_BLOCK_INDEX_MAC_A;
     }
 }
 
@@ -291,7 +291,7 @@ bool felica_check_mac(
     uint8_t mac[8];
     felica_prepare_first_block(FelicaMACTypeRead, blocks, block_count, first_block);
 
-    uint8_t data_size_without_mac = 16 * (block_count - 1);
+    uint8_t data_size_without_mac = FELICA_DATA_BLOCK_SIZE * (block_count - 1);
     felica_calculate_mac(ctx, session_key, rc, first_block, data, data_size_without_mac, mac);
 
     uint8_t* mac_ptr = data + data_size_without_mac;

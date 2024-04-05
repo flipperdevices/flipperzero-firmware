@@ -3,6 +3,11 @@
 #include <nfc/helpers/felica_crc.h>
 
 #define TAG "FelicaPoller"
+#define FELICA_CMD_READ_WITHOUT_ENCRYPTION (0x06U)
+#define FELICA_CMD_WRITE_WITHOUT_ENCRYPTION (0x08U)
+
+#define FELICA_SERVICE_RW_ACCESS (0x0009U)
+#define FELICA_SERVICE_RO_ACCESS (0x000BU)
 
 static FelicaError felica_poller_process_error(NfcError error) {
     switch(error) {
@@ -116,19 +121,17 @@ static void felica_poller_prepare_tx_buffer(
     }
 
     uint8_t block_list_count = block_count;
-    //if(block_count < 2) {
-    //    block_list_count = 2;
-    //}
-
     uint8_t block_list_size = block_list_count * sizeof(FelicaBlockListElement);
-    uint8_t total_size = sizeof(FelicaCommandHeader) + 1 + block_list_size + data_block_count * 16;
+    uint8_t total_size = sizeof(FelicaCommandHeader) + 1 + block_list_size +
+                         data_block_count * FELICA_DATA_BLOCK_SIZE;
     bit_buffer_reset(instance->tx_buffer);
     bit_buffer_append_byte(instance->tx_buffer, total_size);
     bit_buffer_append_bytes(instance->tx_buffer, (uint8_t*)&cmd, sizeof(FelicaCommandHeader));
     bit_buffer_append_bytes(instance->tx_buffer, (uint8_t*)&block_list, block_list_size);
 
     if(data_block_count != 0) {
-        bit_buffer_append_bytes(instance->tx_buffer, data, data_block_count * 16);
+        bit_buffer_append_bytes(
+            instance->tx_buffer, data, data_block_count * FELICA_DATA_BLOCK_SIZE);
     }
 }
 
@@ -142,7 +145,14 @@ FelicaError felica_poller_read_blocks(
     furi_assert(block_numbers);
     furi_assert(response_ptr);
 
-    felica_poller_prepare_tx_buffer(instance, 0x06, 0x000B, block_count, block_numbers, 0, NULL);
+    felica_poller_prepare_tx_buffer(
+        instance,
+        FELICA_CMD_READ_WITHOUT_ENCRYPTION,
+        FELICA_SERVICE_RO_ACCESS,
+        block_count,
+        block_numbers,
+        0,
+        NULL);
     bit_buffer_reset(instance->rx_buffer);
 
     FelicaError error = felica_poller_frame_exchange(
@@ -162,10 +172,17 @@ FelicaError felica_poller_write_blocks(
     furi_assert(instance);
     furi_assert(block_count <= 2);
     furi_assert(block_numbers);
+    furi_assert(data);
     furi_assert(response_ptr);
 
     felica_poller_prepare_tx_buffer(
-        instance, 0x08, 0x0009, block_count, block_numbers, block_count, data);
+        instance,
+        FELICA_CMD_WRITE_WITHOUT_ENCRYPTION,
+        FELICA_SERVICE_RW_ACCESS,
+        block_count,
+        block_numbers,
+        block_count,
+        data);
     bit_buffer_reset(instance->rx_buffer);
 
     FelicaError error = felica_poller_frame_exchange(

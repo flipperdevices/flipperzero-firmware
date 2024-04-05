@@ -78,7 +78,7 @@ NfcCommand felica_poller_state_handler_activate(FelicaPoller* instance) {
 
     FelicaError error = felica_poller_activate(instance, instance->data);
     if(error == FelicaErrorNone) {
-        furi_hal_random_fill_buf(instance->data->data.fs.rc.data, 16);
+        furi_hal_random_fill_buf(instance->data->data.fs.rc.data, FELICA_DATA_BLOCK_SIZE);
 
         instance->felica_event.type = FelicaPollerEventTypeRequestAuthContext;
         instance->felica_event_data.auth_context = &instance->auth.context;
@@ -98,8 +98,6 @@ NfcCommand felica_poller_state_handler_activate(FelicaPoller* instance) {
 
 NfcCommand felica_poller_state_handler_auth_internal(FelicaPoller* instance) {
     FURI_LOG_D(TAG, "Auth Internal");
-
-    instance->state = FelicaPollerStateReadFailed;
 
     felica_calculate_session_key(
         &instance->auth.des_context,
@@ -146,7 +144,7 @@ NfcCommand felica_poller_state_handler_auth_internal(FelicaPoller* instance) {
 
 NfcCommand felica_poller_state_handler_auth_external(FelicaPoller* instance) {
     FURI_LOG_D(TAG, "Auth External");
-    instance->state = FelicaPollerStateReadSuccess;
+    instance->state = FelicaPollerStateReadBlocks;
     uint8_t blocks[2];
 
     instance->data->data.fs.state.data[0] = 1;
@@ -282,24 +280,6 @@ static NfcCommand felica_poller_run(NfcGenericEvent event, void* context) {
 
     if(nfc_event->type == NfcEventTypePollerReady) {
         command = felica_poller_handler[instance->state](instance);
-        /*if(instance->state != FelicaPollerStateActivated) {
-            FelicaError error = felica_poller_activate(instance, instance->data);
-            if(error == FelicaErrorNone) {
-                instance->felica_event.type = FelicaPollerEventTypeReady;
-                instance->felica_event_data.error = error;
-                command = instance->callback(instance->general_event, instance->context);
-            } else {
-                instance->felica_event.type = FelicaPollerEventTypeError;
-                instance->felica_event_data.error = error;
-                command = instance->callback(instance->general_event, instance->context);
-                // Add delay to switch context
-                furi_delay_ms(100);
-            }
-        } else {
-            instance->felica_event.type = FelicaPollerEventTypeReady;
-            instance->felica_event_data.error = FelicaErrorNone;
-            command = instance->callback(instance->general_event, instance->context);
-        }*/
     }
 
     return command;
