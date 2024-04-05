@@ -1,33 +1,30 @@
-#include "bit_buffer.h"
+#include "core/log.h"
 #include "gen4_poller_i.h"
-#include "protocols/gen4/gen4.h"
-#include "protocols/gen4/gen4_poller.h"
 #include <nfc/protocols/iso14443_3a/iso14443_3a.h>
 #include <nfc/protocols/iso14443_3a/iso14443_3a_poller.h>
+#include <nfc/helpers/nfc_util.h>
+#include <bit_lib/bit_lib.h>
 #include <nfc/nfc_poller.h>
-#include <bit_lib.h>
-#include <string.h>
+
+#include <furi/furi.h>
 
 #define GEN4_POLLER_THREAD_FLAG_DETECTED (1U << 0)
-#define GEN4_POLLER_DEFAULT_CONFIG_SIZE (28)
 
 typedef NfcCommand (*Gen4PollerStateHandler)(Gen4Poller* instance);
 
 typedef struct {
     NfcPoller* poller;
-    Gen4Password password;
-    Gen4 gen4_data;
+    uint32_t password;
     BitBuffer* tx_buffer;
     BitBuffer* rx_buffer;
     FuriThreadId thread_id;
     Gen4PollerError error;
 } Gen4PollerDetectContext;
 
-static const Gen4Config gen4_poller_default_config = {
-    .data_raw = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x09, 0x78,
-                 0x00, 0x91, 0x02, 0xDA, 0xBC, 0x19, 0x10, 0x10, 0x11, 0x12,
-                 0x13, 0x14, 0x15, 0x16, 0x04, 0x00, 0x08, 0x00}};
-
+static const uint8_t gen4_poller_default_config[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02,
+                                                     0x00, 0x09, 0x78, 0x00, 0x91, 0x02, 0xDA,
+                                                     0xBC, 0x19, 0x10, 0x10, 0x11, 0x12, 0x13,
+                                                     0x14, 0x15, 0x16, 0x04, 0x00, 0x08, 0x00};
 static const uint8_t gen4_poller_default_block_0[GEN4_POLLER_BLOCK_SIZE] =
     {0x00, 0x01, 0x02, 0x03, 0x04, 0x04, 0x08, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 
@@ -59,8 +56,6 @@ Gen4Poller* gen4_poller_alloc(Nfc* nfc) {
     instance->tx_buffer = bit_buffer_alloc(GEN4_POLLER_MAX_BUFFER_SIZE);
     instance->rx_buffer = bit_buffer_alloc(GEN4_POLLER_MAX_BUFFER_SIZE);
 
-    instance->gen4_data = gen4_alloc();
-
     return instance;
 }
 
@@ -72,12 +67,10 @@ void gen4_poller_free(Gen4Poller* instance) {
     bit_buffer_free(instance->tx_buffer);
     bit_buffer_free(instance->rx_buffer);
 
-    gen4_free(instance->gen4_data);
-
     free(instance);
 }
 
-void gen4_poller_set_password(Gen4Poller* instance, Gen4Password password) {
+void gen4_poller_set_password(Gen4Poller* instance, uint32_t password) {
     furi_assert(instance);
 
     instance->password = password;
@@ -97,12 +90,10 @@ NfcCommand gen4_poller_detect_callback(NfcGenericEvent event, void* context) {
 
     if(iso3_event->type == Iso14443_3aPollerEventTypeReady) {
         do {
-            // check config
             bit_buffer_append_byte(gen4_poller_detect_ctx->tx_buffer, GEN4_CMD_PREFIX);
-            bit_buffer_append_bytes(
-                gen4_poller_detect_ctx->tx_buffer,
-                gen4_poller_detect_ctx->password.bytes,
-                GEN4_PASSWORD_LEN);
+            uint8_t pwd_arr[4] = {};
+            bit_lib_num_to_bytes_be(gen4_poller_detect_ctx->password, COUNT_OF(pwd_arr), pwd_arr);
+            bit_buffer_append_bytes(gen4_poller_detect_ctx->tx_buffer, pwd_arr, COUNT_OF(pwd_arr));
             bit_buffer_append_byte(gen4_poller_detect_ctx->tx_buffer, GEN4_CMD_GET_CFG);
 
             Iso14443_3aError error = iso14443_3a_poller_send_standard_frame(
@@ -116,47 +107,10 @@ NfcCommand gen4_poller_detect_callback(NfcGenericEvent event, void* context) {
                 break;
             }
             size_t rx_bytes = bit_buffer_get_size_bytes(gen4_poller_detect_ctx->rx_buffer);
-            if(rx_bytes != GEN4_CONFIG_SIZE) {
+            if((rx_bytes != 30) && (rx_bytes != 32)) {
                 gen4_poller_detect_ctx->error = Gen4PollerErrorProtocol;
                 break;
             }
-
-            memcpy(
-                gen4_poller_detect_ctx->gen4_data.config.data_raw,
-                bit_buffer_get_data(gen4_poller_detect_ctx->rx_buffer),
-                GEN4_CONFIG_SIZE);
-
-            // check revision
-            bit_buffer_reset(gen4_poller_detect_ctx->tx_buffer);
-            bit_buffer_reset(gen4_poller_detect_ctx->rx_buffer);
-
-            bit_buffer_append_byte(gen4_poller_detect_ctx->tx_buffer, GEN4_CMD_PREFIX);
-            bit_buffer_append_bytes(
-                gen4_poller_detect_ctx->tx_buffer,
-                gen4_poller_detect_ctx->password.bytes,
-                GEN4_PASSWORD_LEN);
-            bit_buffer_append_byte(gen4_poller_detect_ctx->tx_buffer, GEN4_CMD_GET_REVISION);
-
-            error = iso14443_3a_poller_send_standard_frame(
-                iso3_poller,
-                gen4_poller_detect_ctx->tx_buffer,
-                gen4_poller_detect_ctx->rx_buffer,
-                GEN4_POLLER_MAX_FWT);
-
-            if(error != Iso14443_3aErrorNone) {
-                gen4_poller_detect_ctx->error = Gen4PollerErrorProtocol;
-                break;
-            }
-            rx_bytes = bit_buffer_get_size_bytes(gen4_poller_detect_ctx->rx_buffer);
-            if(rx_bytes != GEN4_REVISION_SIZE) {
-                gen4_poller_detect_ctx->error = Gen4PollerErrorProtocol;
-                break;
-            }
-
-            memcpy(
-                gen4_poller_detect_ctx->gen4_data.revision.data,
-                bit_buffer_get_data(gen4_poller_detect_ctx->rx_buffer),
-                GEN4_REVISION_SIZE);
 
             gen4_poller_detect_ctx->error = Gen4PollerErrorNone;
         } while(false);
@@ -168,7 +122,7 @@ NfcCommand gen4_poller_detect_callback(NfcGenericEvent event, void* context) {
     return command;
 }
 
-Gen4PollerError gen4_poller_detect(Nfc* nfc, Gen4Password password, Gen4* gen4_data) {
+Gen4PollerError gen4_poller_detect(Nfc* nfc, uint32_t password) {
     furi_assert(nfc);
 
     Gen4PollerDetectContext gen4_poller_detect_ctx = {};
@@ -192,9 +146,6 @@ Gen4PollerError gen4_poller_detect(Nfc* nfc, Gen4Password password, Gen4* gen4_d
     bit_buffer_free(gen4_poller_detect_ctx.tx_buffer);
     bit_buffer_free(gen4_poller_detect_ctx.rx_buffer);
 
-    if(gen4_poller_detect_ctx.error == Gen4PollerErrorNone)
-        gen4_copy(gen4_data, &gen4_poller_detect_ctx.gen4_data);
-
     return gen4_poller_detect_ctx.error;
 }
 
@@ -202,8 +153,7 @@ NfcCommand gen4_poller_idle_handler(Gen4Poller* instance) {
     NfcCommand command = NfcCommandContinue;
 
     instance->current_block = 0;
-    //TODO: FOR WHAT?
-    //memset(instance->config, 0, sizeof(instance->config));
+    memset(instance->config, 0, sizeof(instance->config));
     instance->gen4_event.type = Gen4PollerEventTypeCardDetected;
     command = instance->callback(instance->gen4_event, instance->context);
     instance->state = Gen4PollerStateRequestMode;
@@ -222,14 +172,12 @@ NfcCommand gen4_poller_request_mode_handler(Gen4Poller* instance) {
         instance->state = Gen4PollerStateRequestWriteData;
     } else if(instance->gen4_event_data.request_mode.mode == Gen4PollerModeSetPassword) {
         instance->state = Gen4PollerStateChangePassword;
-    } else if(instance->gen4_event_data.request_mode.mode == Gen4PollerModeGetInfo) {
-        instance->state = Gen4PollerStateGetInfo;
-    } else if(instance->gen4_event_data.request_mode.mode == Gen4PollerModeSetDefaultCfg) {
+    } else if(instance->gen4_event_data.request_mode.mode == Gen4PollerModeSetDefaultCFG) {
         instance->state = Gen4PollerStateSetDefaultConfig;
-    } else if(instance->gen4_event_data.request_mode.mode == Gen4PollerModeSetShadowMode) {
-        instance->state = Gen4PollerStateSetShadowMode;
-    } else if(instance->gen4_event_data.request_mode.mode == Gen4PollerModeSetDirectWriteBlock0Mode) {
-        instance->state = Gen4PollerStateSetDirectWriteBlock0;
+    } else if(instance->gen4_event_data.request_mode.mode == Gen4PollerModeGetCFG) {
+        instance->state = Gen4PollerStateGetCurrentConfig;
+    } else if(instance->gen4_event_data.request_mode.mode == Gen4PollerModeGetRevision) {
+        instance->state = Gen4PollerStateGetRevision;
     } else {
         instance->state = Gen4PollerStateFail;
     }
@@ -246,15 +194,15 @@ NfcCommand gen4_poller_wipe_handler(Gen4Poller* instance) {
             error = gen4_poller_set_config(
                 instance,
                 instance->password,
-                &gen4_poller_default_config,
-                GEN4_POLLER_DEFAULT_CONFIG_SIZE,
+                gen4_poller_default_config,
+                sizeof(gen4_poller_default_config),
                 false);
             if(error != Gen4PollerErrorNone) {
                 FURI_LOG_D(TAG, "Failed to set default config: %d", error);
                 instance->state = Gen4PollerStateFail;
                 break;
             }
-            instance->password.value = 0;
+            instance->password = 0;
             error = gen4_poller_write_block(
                 instance, instance->password, instance->current_block, gen4_poller_default_block_0);
             if(error != Gen4PollerErrorNone) {
@@ -309,29 +257,29 @@ static NfcCommand gen4_poller_write_mf_classic(Gen4Poller* instance) {
         const MfClassicData* mfc_data = instance->data;
         const Iso14443_3aData* iso3_data = mfc_data->iso14443_3a_data;
         if(instance->current_block == 0) {
-            instance->config.data_parsed.protocol = Gen4ProtocolMfClassic;
+            instance->config[0] = 0x00;
             instance->total_blocks = mf_classic_get_total_block_num(mfc_data->type);
 
             if(iso3_data->uid_len == 4) {
-                instance->config.data_parsed.uid_len_code = Gen4UIDLengthSingle;
+                instance->config[1] = Gen4PollerUIDLengthSingle;
             } else if(iso3_data->uid_len == 7) {
-                instance->config.data_parsed.uid_len_code = Gen4UIDLengthDouble;
+                instance->config[1] = Gen4PollerUIDLengthDouble;
             } else {
                 FURI_LOG_E(TAG, "Unsupported UID len: %d", iso3_data->uid_len);
                 instance->state = Gen4PollerStateFail;
                 break;
             }
 
-            instance->config.data_parsed.gtu_mode = Gen4ShadowModeDisabled;
-            instance->config.data_parsed.atqa[0] = iso3_data->atqa[0];
-            instance->config.data_parsed.atqa[1] = iso3_data->atqa[1];
-            instance->config.data_parsed.sak = iso3_data->sak;
-            instance->config.data_parsed.mfu_mode = Gen4UltralightModeUL_EV1;
-            instance->config.data_parsed.total_blocks = instance->total_blocks - 1;
-            instance->config.data_parsed.direct_write_mode = Gen4DirectWriteBlock0ModeDisabled;
+            instance->config[6] = Gen4PollerShadowModeIgnore;
+            instance->config[24] = iso3_data->atqa[0];
+            instance->config[25] = iso3_data->atqa[1];
+            instance->config[26] = iso3_data->sak;
+            instance->config[27] = 0x00;
+            instance->config[28] = instance->total_blocks - 1;
+            instance->config[29] = 0x01;
 
             Gen4PollerError error = gen4_poller_set_config(
-                instance, instance->password, &instance->config, GEN4_CONFIG_SIZE, false);
+                instance, instance->password, instance->config, sizeof(instance->config), false);
             if(error != Gen4PollerErrorNone) {
                 FURI_LOG_D(TAG, "Failed to write config: %d", error);
                 instance->state = Gen4PollerStateFail;
@@ -368,7 +316,7 @@ static NfcCommand gen4_poller_write_mf_ultralight(Gen4Poller* instance) {
         const Iso14443_3aData* iso3_data = mfu_data->iso14443_3a_data;
         if(instance->current_block == 0) {
             instance->total_blocks = 64;
-            instance->config.data_parsed.protocol = Gen4ProtocolMfUltralight;
+            instance->config[0] = 0x01;
             switch(mfu_data->type) {
             case MfUltralightTypeNTAG203:
             case MfUltralightTypeNTAG213:
@@ -378,7 +326,7 @@ static NfcCommand gen4_poller_write_mf_ultralight(Gen4Poller* instance) {
             case MfUltralightTypeNTAGI2C2K:
             case MfUltralightTypeNTAGI2CPlus1K:
             case MfUltralightTypeNTAGI2CPlus2K:
-                instance->config.data_parsed.mfu_mode = Gen4UltralightModeNTAG;
+                instance->config[27] = Gen4PollerUltralightModeNTAG;
                 instance->total_blocks = 64 * 2;
                 break;
 
@@ -387,30 +335,30 @@ static NfcCommand gen4_poller_write_mf_ultralight(Gen4Poller* instance) {
                 // UL-C?
                 // UL?
             default:
-                instance->config.data_parsed.mfu_mode = Gen4UltralightModeUL_EV1;
+                instance->config[27] = Gen4PollerUltralightModeUL_EV1;
                 break;
             }
 
             if(iso3_data->uid_len == 4) {
-                instance->config.data_parsed.uid_len_code = Gen4UIDLengthSingle;
+                instance->config[1] = Gen4PollerUIDLengthSingle;
             } else if(iso3_data->uid_len == 7) {
-                instance->config.data_parsed.uid_len_code = Gen4UIDLengthDouble;
+                instance->config[1] = Gen4PollerUIDLengthDouble;
             } else {
                 FURI_LOG_E(TAG, "Unsupported UID len: %d", iso3_data->uid_len);
                 instance->state = Gen4PollerStateFail;
                 break;
             }
 
-            instance->config.data_parsed.gtu_mode = Gen4ShadowModeHighSpeedDisabled;
-            instance->config.data_parsed.atqa[0] = iso3_data->atqa[0];
-            instance->config.data_parsed.atqa[1] = iso3_data->atqa[1];
-            instance->config.data_parsed.sak = iso3_data->sak;
-            //instance->config.data_parsed.mfu_mode = Gen4UltralightModeUL_EV1;
-            instance->config.data_parsed.total_blocks = instance->total_blocks - 1;
-            instance->config.data_parsed.direct_write_mode = Gen4DirectWriteBlock0ModeDisabled;
+            instance->config[6] = Gen4PollerShadowModeHighSpeedIgnore;
+            instance->config[24] = iso3_data->atqa[0];
+            instance->config[25] = iso3_data->atqa[1];
+            instance->config[26] = iso3_data->sak;
+            instance->config[27] = 0x00;
+            instance->config[28] = instance->total_blocks - 1;
+            instance->config[29] = 0x01;
 
             Gen4PollerError error = gen4_poller_set_config(
-                instance, instance->password, &instance->config, GEN4_CONFIG_SIZE, false);
+                instance, instance->password, instance->config, sizeof(instance->config), false);
             if(error != Gen4PollerErrorNone) {
                 FURI_LOG_D(TAG, "Failed to write config: %d", error);
                 instance->state = Gen4PollerStateFail;
@@ -473,45 +421,6 @@ static NfcCommand gen4_poller_write_mf_ultralight(Gen4Poller* instance) {
                 break;
             }
 
-            // Password
-            MfUltralightConfigPages* config_pages = NULL;
-            mf_ultralight_get_config_page(mfu_data, &config_pages);
-
-            block[0] = config_pages->password.data[0];
-            block[1] = config_pages->password.data[1];
-            block[2] = config_pages->password.data[2];
-            block[3] = config_pages->password.data[3];
-            error = gen4_poller_write_block(instance, instance->password, 0xE5, block);
-            if(error != Gen4PollerErrorNone) {
-                FURI_LOG_E(TAG, "Failed to write Password to sector E5");
-                instance->state = Gen4PollerStateFail;
-                break;
-            }
-            error = gen4_poller_write_block(instance, instance->password, 0xF0, block);
-            if(error != Gen4PollerErrorNone) {
-                FURI_LOG_E(TAG, "Failed to write Password to sector F0");
-                instance->state = Gen4PollerStateFail;
-                break;
-            }
-
-            // PACK
-            block[0] = config_pages->pack.data[0];
-            block[1] = config_pages->pack.data[1];
-            block[2] = 0x00;
-            block[3] = 0x00;
-            error = gen4_poller_write_block(instance, instance->password, 0xE6, block);
-            if(error != Gen4PollerErrorNone) {
-                FURI_LOG_E(TAG, "Failed to write PACK to sector E6");
-                instance->state = Gen4PollerStateFail;
-                break;
-            }
-            error = gen4_poller_write_block(instance, instance->password, 0xF1, block);
-            if(error != Gen4PollerErrorNone) {
-                FURI_LOG_E(TAG, "Failed to write PACK to sector F1");
-                instance->state = Gen4PollerStateFail;
-                break;
-            }
-
             instance->state = Gen4PollerStateSuccess;
         }
     } while(false);
@@ -522,14 +431,11 @@ static NfcCommand gen4_poller_write_mf_ultralight(Gen4Poller* instance) {
 NfcCommand gen4_poller_write_handler(Gen4Poller* instance) {
     NfcCommand command = NfcCommandContinue;
 
-    memcpy(
-        instance->config.data_raw,
-        gen4_poller_default_config.data_raw,
-        GEN4_POLLER_DEFAULT_CONFIG_SIZE);
-
-    memcpy(
-        instance->config.data_parsed.password.bytes, instance->password.bytes, GEN4_PASSWORD_LEN);
-    memset(&instance->config.data_raw[7], 0, 17);
+    memcpy(instance->config, gen4_poller_default_config, sizeof(gen4_poller_default_config));
+    uint8_t password_arr[4] = {};
+    bit_lib_num_to_bytes_be(instance->password, sizeof(password_arr), password_arr);
+    memcpy(&instance->config[2], password_arr, sizeof(password_arr));
+    memset(&instance->config[7], 0, 17);
     if(instance->protocol == NfcProtocolMfClassic) {
         command = gen4_poller_write_mf_classic(instance);
     } else if(instance->protocol == NfcProtocolMfUltralight) {
@@ -549,7 +455,7 @@ NfcCommand gen4_poller_change_password_handler(Gen4Poller* instance) {
         command = instance->callback(instance->gen4_event, instance->context);
         if(command != NfcCommandContinue) break;
 
-        Gen4Password new_password = instance->gen4_event_data.request_password.password;
+        uint32_t new_password = instance->gen4_event_data.request_password.password;
         Gen4PollerError error =
             gen4_poller_change_password(instance, instance->password, new_password);
         if(error != Gen4PollerErrorNone) {
@@ -572,8 +478,8 @@ NfcCommand gen4_poller_set_default_cfg_handler(Gen4Poller* instance) {
         Gen4PollerError error = gen4_poller_set_config(
             instance,
             instance->password,
-            &gen4_poller_default_config,
-            GEN4_POLLER_DEFAULT_CONFIG_SIZE,
+            gen4_poller_default_config,
+            sizeof(gen4_poller_default_config),
             false);
         if(error != Gen4PollerErrorNone) {
             FURI_LOG_E(TAG, "Failed to set default config: %d", error);
@@ -591,16 +497,16 @@ NfcCommand gen4_poller_get_current_cfg_handler(Gen4Poller* instance) {
     NfcCommand command = NfcCommandContinue;
 
     do {
-        Gen4Config config;
+        uint8_t the_config[32] = {};
 
-        Gen4PollerError error = gen4_poller_get_config(instance, instance->password, &config);
+        Gen4PollerError error = gen4_poller_get_config(instance, instance->password, the_config);
         if(error != Gen4PollerErrorNone) {
             FURI_LOG_E(TAG, "Failed to get current config: %d", error);
             instance->state = Gen4PollerStateFail;
             break;
         }
         // Copy config data to event data buffer
-        memcpy(instance->gen4_data->config.data_raw, config.data_raw, sizeof(config));
+        memcpy(instance->gen4_event_data.display_config, the_config, sizeof(the_config));
 
         instance->state = Gen4PollerStateSuccess;
     } while(false);
@@ -612,83 +518,16 @@ NfcCommand gen4_poller_get_revision_handler(Gen4Poller* instance) {
     NfcCommand command = NfcCommandContinue;
 
     do {
-        Gen4Revision revision;
-        Gen4PollerError error = gen4_poller_get_revision(instance, instance->password, &revision);
+        uint8_t the_revision[5] = {0};
+        Gen4PollerError error =
+            gen4_poller_get_revision(instance, instance->password, the_revision);
         if(error != Gen4PollerErrorNone) {
             FURI_LOG_E(TAG, "Failed to get revision: %d", error);
             instance->state = Gen4PollerStateFail;
             break;
         }
         // Copy revision data to event data buffer
-        memcpy(instance->gen4_data->revision.data, revision.data, sizeof(revision));
-
-        instance->state = Gen4PollerStateSuccess;
-    } while(false);
-
-    return command;
-}
-
-NfcCommand gen4_poller_get_info_handler(Gen4Poller* instance) {
-    NfcCommand command = NfcCommandContinue;
-
-    do {
-        Gen4 gen4_data;
-
-        Gen4PollerError error =
-            gen4_poller_get_revision(instance, instance->password, &gen4_data.revision);
-        if(error != Gen4PollerErrorNone) {
-            FURI_LOG_E(TAG, "Failed to get revision: %d", error);
-            instance->state = Gen4PollerStateFail;
-            break;
-        }
-
-        error = gen4_poller_get_config(instance, instance->password, &gen4_data.config);
-        if(error != Gen4PollerErrorNone) {
-            FURI_LOG_E(TAG, "Failed to get current config: %d", error);
-            instance->state = Gen4PollerStateFail;
-            break;
-        }
-
-        // Copy config&&revision data to event data buffer
-        gen4_copy(instance->gen4_data, &gen4_data);
-
-        instance->state = Gen4PollerStateSuccess;
-    } while(false);
-
-    return command;
-}
-
-NfcCommand gen4_poller_set_shadow_mode_handler(Gen4Poller* instance) {
-    NfcCommand command = NfcCommandContinue;
-
-    do {
-        Gen4PollerError error =
-            gen4_poller_set_shadow_mode(instance, instance->password, instance->shadow_mode);
-
-        if(error != Gen4PollerErrorNone) {
-            FURI_LOG_E(TAG, "Failed to set shadow mode: %d", error);
-            instance->state = Gen4PollerStateFail;
-            break;
-        }
-
-        instance->state = Gen4PollerStateSuccess;
-    } while(false);
-
-    return command;
-}
-
-NfcCommand gen4_poller_set_direct_write_block_0_mode_handler(Gen4Poller* instance) {
-    NfcCommand command = NfcCommandContinue;
-
-    do {
-        Gen4PollerError error = gen4_poller_set_direct_write_block_0_mode(
-            instance, instance->password, instance->direct_write_block_0_mode);
-
-        if(error != Gen4PollerErrorNone) {
-            FURI_LOG_E(TAG, "Failed to set direct write to block 0 mode: %d", error);
-            instance->state = Gen4PollerStateFail;
-            break;
-        }
+        memcpy(instance->gen4_event_data.revision_data, the_revision, sizeof(the_revision));
 
         instance->state = Gen4PollerStateSuccess;
     } while(false);
@@ -727,10 +566,9 @@ static const Gen4PollerStateHandler gen4_poller_state_handlers[Gen4PollerStateNu
     [Gen4PollerStateWrite] = gen4_poller_write_handler,
     [Gen4PollerStateWipe] = gen4_poller_wipe_handler,
     [Gen4PollerStateChangePassword] = gen4_poller_change_password_handler,
-    [Gen4PollerStateGetInfo] = gen4_poller_get_info_handler,
     [Gen4PollerStateSetDefaultConfig] = gen4_poller_set_default_cfg_handler,
-    [Gen4PollerStateSetShadowMode] = gen4_poller_set_shadow_mode_handler,
-    [Gen4PollerStateSetDirectWriteBlock0] = gen4_poller_set_direct_write_block_0_mode_handler,
+    [Gen4PollerStateGetCurrentConfig] = gen4_poller_get_current_cfg_handler,
+    [Gen4PollerStateGetRevision] = gen4_poller_get_revision_handler,
     [Gen4PollerStateSuccess] = gen4_poller_success_handler,
     [Gen4PollerStateFail] = gen4_poller_fail_handler,
 
