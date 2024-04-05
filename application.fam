@@ -13,5 +13,5 @@ App(
     fap_icon="icons/boilerplate_10px.png",
     fap_icon_assets="icons",
     fap_category="Misc",
-    fap_version="1.0",
+    fap_version="1.1",
 )
