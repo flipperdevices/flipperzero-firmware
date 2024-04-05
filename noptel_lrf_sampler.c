@@ -60,7 +60,7 @@ static char *about_text =
 	"\n"
         "GPIO pin connections:\n"
 	"---------------\n"
-        "+5V (pin #1):  LRF Vcc\n"
+        "+5V (pin #1):  LRF Vdc\n"
         "GND (pin #11): LRF ground\n"
         "TX  (pin #13): LRF serial Rx\n"
         "RX  (pin #14): LRF serial Tx";
