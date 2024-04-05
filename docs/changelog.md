@@ -1,3 +1,7 @@
+## 2.5
+- Back button on info screen now reacts the same as ok button
+- Fixed crash on exit in fw 0.100.3
+
 ## 2.4
 - Added support for encoded SubGhz files
 - Added timer for SubGhz transmission (not needed in RAW files)

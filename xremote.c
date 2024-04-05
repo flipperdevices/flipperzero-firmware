@@ -140,14 +140,18 @@ void xremote_app_free(XRemote* app) {
 
     // View Dispatcher
     view_dispatcher_remove_view(app->view_dispatcher, XRemoteViewIdMenu);
+    view_dispatcher_remove_view(app->view_dispatcher, XRemoteViewIdEditItem);
+    view_dispatcher_remove_view(app->view_dispatcher, XRemoteViewIdInfoscreen);
     view_dispatcher_remove_view(app->view_dispatcher, XRemoteViewIdCreate);
     view_dispatcher_remove_view(app->view_dispatcher, XRemoteViewIdCreateAdd);
     view_dispatcher_remove_view(app->view_dispatcher, XRemoteViewIdSettings);
     view_dispatcher_remove_view(app->view_dispatcher, XRemoteViewIdWip);
     view_dispatcher_remove_view(app->view_dispatcher, XRemoteViewIdStack);
     view_dispatcher_remove_view(app->view_dispatcher, XRemoteViewIdTextInput);
+    view_dispatcher_remove_view(app->view_dispatcher, XRemoteViewIdIntInput);
     view_dispatcher_remove_view(app->view_dispatcher, XRemoteViewIdTransmit);
     view_dispatcher_remove_view(app->view_dispatcher, XRemoteViewIdPauseSet);
+    view_dispatcher_remove_view(app->view_dispatcher, XRemoteViewIdIrRemote);
     text_input_free(app->text_input);
     int_input_free(app->int_input);
     button_menu_free(app->button_menu_create);
@@ -156,6 +160,9 @@ void xremote_app_free(XRemote* app) {
     view_stack_free(app->view_stack);
     popup_free(app->popup);
     submenu_free(app->submenu);
+    xremote_infoscreen_free(app->xremote_infoscreen);
+    xremote_pause_set_free(app->xremote_pause_set);
+    xremote_transmit_free(app->xremote_transmit);
 
     view_dispatcher_free(app->view_dispatcher);
     furi_record_close(RECORD_GUI);

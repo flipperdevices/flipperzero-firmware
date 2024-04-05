@@ -47,19 +47,6 @@ bool xremote_infoscreen_input(InputEvent* event, void* context) {
     if(event->type == InputTypeRelease) {
         switch(event->key) {
         case InputKeyBack:
-            with_view_model(
-                instance->view,
-                XRemoteInfoscreenModel * model,
-                {
-                    UNUSED(model);
-                    instance->callback(XRemoteCustomEventInfoscreenBack, instance->context);
-                },
-                true);
-            break;
-        case InputKeyLeft:
-        case InputKeyRight:
-        case InputKeyUp:
-        case InputKeyDown:
         case InputKeyOk:
             with_view_model(
                 instance->view,
@@ -70,7 +57,7 @@ bool xremote_infoscreen_input(InputEvent* event, void* context) {
                 },
                 true);
             break;
-        case InputKeyMAX:
+        default:
             break;
         }
     }

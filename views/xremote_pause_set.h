@@ -17,6 +17,7 @@ void xremote_pause_set_set_callback(
     void* context);
 
 XRemotePauseSet* xremote_pause_set_alloc();
+void xremote_pause_set_free(XRemotePauseSet* instance);
 
 void xremote_pause_set_enter(void* context);
 
