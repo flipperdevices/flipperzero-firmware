@@ -18,6 +18,8 @@ typedef enum {
 } LoaderStatus;
 
 typedef enum {
+    LoaderEventTypeApplicationBeforeLoad,
+    LoaderEventTypeApplicationLoadFailed,
     LoaderEventTypeApplicationStarted,
     LoaderEventTypeApplicationStopped
 } LoaderEventType;
