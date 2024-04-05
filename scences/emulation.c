@@ -8,9 +8,6 @@ int32_t nfc_playlist_emulation_task(void* context) {
 
    Storage* storage = furi_record_open(RECORD_STORAGE);
    Stream* stream = file_stream_alloc(storage);
-   FuriString* line = furi_string_alloc();
-   FuriString* tmp_header_str = furi_string_alloc();
-   FuriString* tmp_counter_str = furi_string_alloc();
 
    popup_reset(nfc_playlist->popup);
    popup_set_context(nfc_playlist->popup, nfc_playlist);
@@ -19,6 +16,11 @@ int32_t nfc_playlist_emulation_task(void* context) {
    if (file_stream_open(stream, furi_string_get_cstr(nfc_playlist->settings.file_path), FSAM_READ, FSOM_OPEN_EXISTING) && nfc_playlist->settings.file_selected_check) {
       EmulationState = NfcPlaylistEmulationState_Emulating;
       int file_position = 0;
+
+      FuriString* line = furi_string_alloc();
+      FuriString* tmp_header_str = furi_string_alloc();
+      FuriString* tmp_counter_str = furi_string_alloc();
+      
       while(stream_read_line(stream, line) && EmulationState == NfcPlaylistEmulationState_Emulating) {
 
          char* file_path = (char*)furi_string_get_cstr(line);
@@ -86,15 +88,17 @@ int32_t nfc_playlist_emulation_task(void* context) {
       popup_set_header(nfc_playlist->popup, EmulationState == NfcPlaylistEmulationState_Canceled ? "Emulation stopped" : "Emulation finished", 64, 10, AlignCenter, AlignTop);
       popup_set_text(nfc_playlist->popup, "Press back", 64, 50, AlignCenter, AlignTop);
       stop_blink(nfc_playlist);
+
       EmulationState = NfcPlaylistEmulationState_Stopped;
+      furi_string_free(line);
+      furi_string_free(tmp_header_str);
+      furi_string_free(tmp_counter_str);
+
    } else {
       popup_set_header(nfc_playlist->popup, "Failed to open playlist", 64, 10, AlignCenter, AlignTop);
       popup_set_text(nfc_playlist->popup, "Press back", 64, 50, AlignCenter, AlignTop);
    }
 
-   furi_string_free(line);
-   furi_string_free(tmp_header_str);
-   furi_string_free(tmp_counter_str);
    file_stream_close(stream);
    furi_record_close(RECORD_STORAGE);
    stream_free(stream);
