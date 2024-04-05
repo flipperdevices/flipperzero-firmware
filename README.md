@@ -84,7 +84,7 @@ Gives information about the app and the GPIO pin connections needed to connect a
 - Clone this repository
 - Install [uFBT](https://github.com/flipperdevices/flipperzero-ufbt)
 - Connect your Flipper Zero to the computer with a USB cable
-- cd into the repository
+- cd into the `app` directory inside the repository
 - Invoke `ufbt launch` to install the app in the **Apps ▶ GPIO** menu and run it for the first time
 
 
