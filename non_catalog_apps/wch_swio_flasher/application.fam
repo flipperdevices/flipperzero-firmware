@@ -7,7 +7,7 @@ App(
     fap_libs=["assets"],
     fap_category="GPIO",
     # Optional values
-    fap_version="1.0",
+    fap_version="1.1",
     fap_icon="wch_swio_flasher.png",  # 10x10 1-bit PNG
     fap_description="A WHC CH32V003 debugger/flasher tool",
     fap_author="Vojtech Suk",
