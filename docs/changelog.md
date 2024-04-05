@@ -1,3 +1,6 @@
+## v1.6
+- Fix crashes on exit on fw 0.100.3
+
 ## v1.5
 - Support for ufbt compilation (assets fixed)
 
