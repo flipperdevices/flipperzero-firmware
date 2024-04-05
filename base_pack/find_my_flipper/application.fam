@@ -10,6 +10,6 @@ App(
     fap_category="Bluetooth",
     fap_author="@MatthewKuKanich",
     fap_weburl="https://github.com/MatthewKuKanich/FindMyFlipper",
-    fap_version="2.0",
+    fap_version="3.0",
     fap_description="BLE FindMy Location Beacon",
 )

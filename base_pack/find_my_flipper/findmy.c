@@ -53,6 +53,8 @@ static FindMy* findmy_app_alloc() {
 
     findmy_main_update_active(app->findmy_main, furi_hal_bt_extra_beacon_is_active());
     findmy_main_update_interval(app->findmy_main, app->state.broadcast_interval);
+    findmy_main_toggle_mac(app->findmy_main, app->state.show_mac);
+    findmy_main_update_mac(app->findmy_main, app->state.mac);
     findmy_main_update_type(app->findmy_main, app->state.tag_type);
 
     return app;
@@ -127,6 +129,13 @@ void findmy_change_transmit_power(FindMy* app, uint8_t value) {
     if(app->state.beacon_active) {
         furi_check(furi_hal_bt_extra_beacon_start());
     }
+}
+
+void findmy_toggle_show_mac(FindMy* app, bool show_mac) {
+    app->state.show_mac = show_mac;
+    findmy_state_sync_config(&app->state);
+    findmy_state_save(&app->state);
+    findmy_main_toggle_mac(app->findmy_main, app->state.show_mac);
 }
 
 void findmy_toggle_beacon(FindMy* app) {
