@@ -103,7 +103,7 @@ void boilerplate_app_free(Boilerplate* app) {
     variable_item_list_free(app->variable_item_list);
     boilerplate_scene_1_free(app->boilerplate_scene_1);
     boilerplate_scene_2_free(app->boilerplate_scene_2);
-    boilerplate_startscreen_free(app->boilerplate_startscreen);    
+    boilerplate_startscreen_free(app->boilerplate_startscreen);
 
     view_dispatcher_free(app->view_dispatcher);
 
