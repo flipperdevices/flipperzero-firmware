@@ -117,7 +117,6 @@ static void nfc_playlist_free(NfcPlaylist* nfc_playlist) {
 
    furi_string_free(nfc_playlist->settings.base_file_path);
    furi_string_free(nfc_playlist->settings.file_path);
-   free(nfc_playlist->playlist_name);
    free(nfc_playlist);
 }
 

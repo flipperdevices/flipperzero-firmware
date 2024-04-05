@@ -7,3 +7,17 @@
 void nfc_playlist_main_menu_scene_on_enter(void* context);
 bool nfc_playlist_main_menu_scene_on_event(void* context, SceneManagerEvent event);
 void nfc_playlist_main_menu_scene_on_exit(void* context);
+
+typedef enum {
+   NfcPlaylistEvent_ShowEmulatingPopup,
+   NfcPlaylistEvent_ShowFileSelect,
+   NfcPlaylistEvent_ShowFileEdit,
+   NfcPlaylistEvent_ShowSettings
+} NfcPlaylistMainMenuEvent;
+
+typedef enum {
+   NfcPlaylistMenuSelection_Start,
+   NfcPlaylistMenuSelection_FileSelect,
+   NfcPlaylistMenuSelection_FileEdit,
+   NfcPlaylistMenuSelection_Settings
+} NfcPlaylistMainMenuMenuSelection;

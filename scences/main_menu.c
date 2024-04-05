@@ -1,38 +1,9 @@
 #include "nfc_playlist.h"
 #include "scences/main_menu.h"
 
-typedef enum {
-   NfcPlaylistEvent_ShowEmulatingPopup,
-   NfcPlaylistEvent_ShowFileSelect,
-   NfcPlaylistEvent_ShowFileEdit,
-   NfcPlaylistEvent_ShowSettings
-} NfcPlaylistMainMenuEvent;
-
-typedef enum {
-   NfcPlaylistMenuSelection_Start,
-   NfcPlaylistMenuSelection_FileSelect,
-   NfcPlaylistMenuSelection_FileEdit,
-   NfcPlaylistMenuSelection_Settings
-} NfcPlaylistMenuSelection;
-
 void nfc_playlist_main_menu_menu_callback(void* context, uint32_t index) {
    NfcPlaylist* nfc_playlist = context;
-   switch(index) {
-      case NfcPlaylistMenuSelection_Start:
-         scene_manager_handle_custom_event(nfc_playlist->scene_manager, NfcPlaylistEvent_ShowEmulatingPopup);
-         break;
-      case NfcPlaylistMenuSelection_FileSelect:
-         scene_manager_handle_custom_event(nfc_playlist->scene_manager, NfcPlaylistEvent_ShowFileSelect);
-         break;
-      case NfcPlaylistMenuSelection_FileEdit:
-         scene_manager_handle_custom_event(nfc_playlist->scene_manager, NfcPlaylistEvent_ShowFileEdit);
-         break;
-      case NfcPlaylistMenuSelection_Settings:
-         scene_manager_handle_custom_event(nfc_playlist->scene_manager, NfcPlaylistEvent_ShowSettings);
-         break;
-      default:
-         break;
-   }
+   scene_manager_handle_custom_event(nfc_playlist->scene_manager, index);
 }
 
 void nfc_playlist_main_menu_scene_on_enter(void* context) {

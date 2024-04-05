@@ -1,25 +1,9 @@
 #include "nfc_playlist.h"
 #include "scences/file_edit.h"
 
-typedef enum {
-   NfcPlaylistMenuSelection_DeletePlaylist,
-   NfcPlaylistMenuSelection_RenamePlaylist
-} NfcPlaylistMenuSelection;
-
 void nfc_playlist_file_edit_menu_callback(void* context, uint32_t index) {
    NfcPlaylist* nfc_playlist = context;
-   switch(index) {
-      case NfcPlaylistMenuSelection_DeletePlaylist: {
-         scene_manager_next_scene(nfc_playlist->scene_manager, NfcPlaylistScene_ConfirmDelete);
-         break;
-      }
-      case NfcPlaylistMenuSelection_RenamePlaylist: {
-         scene_manager_next_scene(nfc_playlist->scene_manager, NfcPlaylistScene_FileRename);
-         break;
-      }
-      default:
-         break;
-   }
+   scene_manager_handle_custom_event(nfc_playlist->scene_manager, index);
 }
 
 void nfc_playlist_file_edit_scene_on_enter(void* context) {
@@ -49,9 +33,23 @@ void nfc_playlist_file_edit_scene_on_enter(void* context) {
 }
 
 bool nfc_playlist_file_edit_scene_on_event(void* context, SceneManagerEvent event) {
-   UNUSED(event);
-   UNUSED(context);
-   return false;
+   NfcPlaylist* nfc_playlist = context;
+   bool consumed = false;
+   if(event.type == SceneManagerEventTypeCustom) {
+      switch(event.event) {
+         case NfcPlaylistMenuSelection_DeletePlaylist:
+            scene_manager_next_scene(nfc_playlist->scene_manager, NfcPlaylistScene_ConfirmDelete);
+            consumed = true;
+            break;
+         case NfcPlaylistMenuSelection_RenamePlaylist:
+            scene_manager_next_scene(nfc_playlist->scene_manager, NfcPlaylistScene_FileRename);
+            consumed = true;
+            break;
+         default:
+            break;
+      }
+   }
+   return consumed;
 }
 
 void nfc_playlist_file_edit_scene_on_exit(void* context) {
