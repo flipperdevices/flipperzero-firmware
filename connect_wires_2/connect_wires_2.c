@@ -1,9 +1,6 @@
 /*
  * Copyright 2023 Alexander Taran
  *
- * Modified by Andrew Diamond to be able change the rotation
- * direction and track score.
- *
  * Use of this source code is governed by an MIT-style
  * license that can be found in the LICENSE file or at
  * https://opensource.org/licenses/MIT
@@ -70,7 +67,6 @@ const char* AboutStrings[] = {
   "all lamps to the power source.",
   "",
   "Alexander Taran, 2023",
-  "Modified by Andrew Diamond",
   "",
   "Press any key",
   0
@@ -623,30 +619,28 @@ int32_t connect_wires_2_main(void* p) {
     UNUSED(p);
     furi_assert((uint16_t)MAX_FIELD_WIDTH * MAX_FIELD_HEIGHT < 256);
 
-    dolphin_deed(DolphinDeedPluginGameStart);
-
     InputEvent event;
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(InputEvent));
 
-    // Configure view port
-    ViewPort* view_port = view_port_alloc();
-
-    AppState* appState = malloc(sizeof(AppState));
+	AppState* appState = malloc(sizeof(AppState));
     appState->gameState.fieldSize = createCoord(0, 0);
     appState->status = ST_MAIN_MENU;
 
-    // temp
-    //appState->status = ST_MAIN_MENU;
-    //appState->currentMenuSelection = 0;
-    // temp end
+	appState->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
 
+    // Configure view port
+    ViewPort* view_port = view_port_alloc();
     view_port_draw_callback_set(view_port, game_draw_callback, appState);
     view_port_input_callback_set(view_port, game_input_callback, event_queue);
 
     // Register view port in GUI
     Gui* gui = furi_record_open(RECORD_GUI);
-    gui_add_view_port(gui, view_port, GuiLayerFullscreen);
+	gui_add_view_port(gui, view_port, GuiLayerFullscreen);
+
     NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
+
+    dolphin_deed(DolphinDeedPluginGameStart);
+
 
     while(1) {
         furi_check(furi_message_queue_get(event_queue, &event, FuriWaitForever) == FuriStatusOk);
