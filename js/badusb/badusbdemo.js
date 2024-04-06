@@ -2,11 +2,16 @@
 // demo is based on lots of the previous scripts that were shared
 // in the Momentum Discord channel.
 
-// Improvements are:
+// Parts of this script were demonstrated in Talking Sasquach's video 
+// https://youtu.be/8USI98_5GeU?t=447
+// The improvements are:
 // - Populating the USB drive with payloads.
 // - PowerShell polling for the USB drive to be attached.
-// - altPrint function to handle special characters (non-US keyboard).
-// - PowerShell ejects the USB drive when done.
+// - Badusb using keyboard layouts (handling non-US keyboards).
+// - Copying a file from USB to local drive.
+// - Playing an MP3 file.
+// - PowerShell ejecting the USB drive when done.
+// - Displaying the results on the Flipper screen.
 
 let badusb = require("badusb");
 let usbdisk = require("usbdisk");
