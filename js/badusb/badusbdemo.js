@@ -2,8 +2,9 @@
 // demo is based on lots of the previous scripts that were shared
 // in the Momentum Discord channel.
 
-// Parts of this script were demonstrated in Talking Sasquach's video 
-// https://youtu.be/8USI98_5GeU?t=447
+// The payloads in this script were demonstrated in 
+// Talking Sasquach's video https://youtu.be/8USI98_5GeU?t=447
+//
 // The improvements are:
 // - Populating the USB drive with payloads.
 // - PowerShell polling for the USB drive to be attached.
@@ -13,11 +14,16 @@
 // - PowerShell ejecting the USB drive when done.
 // - Displaying the results on the Flipper screen.
 
+// For documentation on configuration see:
+// https://github.com/jamisonderek/flipper-zero-tutorials/blob/main/js/badusb/README.md
+
 let badusb = require("badusb");
 let usbdisk = require("usbdisk");
 let storage = require("storage");
 let textbox = require("textbox");
 
+// ************
+// IMPORTANT: Be sure this matches your computer keyboard layout!!!
 // See /ext/badusb/assets/layouts/ for list of supported keyboard layouts.
 let layout = "en-US";
 
