@@ -1,19 +1,4 @@
-#include <furi.h>
-#include <furi_hal.h>
-#include <infrared.h>
-#include <infrared_worker.h>
-#include <furi_hal_infrared.h>
-#include <gui/gui.h>
-
-#include "bit_ops.h"
-
-#define TAG "IR Decoder"
-
-typedef struct {
-    InfraredMessage* decoded_signal;
-    FuriMutex* mutex;
-    ViewPort* view_port;
-} IRDecoderState;
+#include "ir_decoder.h"
 
 static void render_callback(Canvas* canvas, void* ctx) {
     FURI_LOG_T(TAG, "Render callback");
